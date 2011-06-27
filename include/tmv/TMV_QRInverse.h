@@ -59,6 +59,8 @@ namespace tmv {
         const Permutation* P, int N1, MatrixView<T2> ata);
 
 
+
+    // Note: cs,rs refer to M1, not M2 (which is reverse of M1)
     template <int algo, int cs, int rs, class M1, class V1, class M2>
     struct QR_Inverse_Helper;
 
@@ -75,8 +77,7 @@ namespace tmv {
     struct QR_Inverse_Helper<11,cs,rs,M1,V1,M2>
     {
         static void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1,
-            M2& minv)
+            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& minv)
         {
 #ifdef PRINTALGO_QR
             std::cout<<"QRInverse algo 11: cs,rs = "<<cs<<','<<rs<<std::endl;
@@ -84,31 +85,77 @@ namespace tmv {
             // m2 = (QRP)^-1
             //    = Pt R^-1 Qt
 #ifdef XDEBUG_QR
-            std::cout<<"Start QR_Inverse\n";
             typedef typename M1::value_type T;
-            Matrix<T> Q = QR;
-            UnpackQ(Q,beta);
-            Matrix<T> R = QR.upperTri();
-            Matrix<T> A = Q*R;
-            if (P) P->applyOnRight(A);
+            Matrix<T> Q1 = QR;
+            UnpackQ(Q1,beta);
+            Matrix<T> R1 = QR.upperTri();
+            Matrix<T> A1 = Q1*R1;
+            if (P) P->applyOnRight(A1);
 #endif
-            const int N = rs == UNKNOWN ? QR.rowsize() : rs;
             minv.setZero();
+            const int N = rs == UNKNOWN ? QR.rowsize() : rs;
             typename M2::colrange_type::uppertri_type R = 
                 minv.colRange(0,N1).upperTri();
             R = QR.upperTri().subTriMatrix(0,N1);
             R.invertSelf();
             if (P) minv.colRange(0,N) /= *P;
             minv %= PackedQ<M1,V1>(QR,beta);
+
 #ifdef XDEBUG_QR
-            if (Norm(minv*A-T(1)) > 1.e-3*Norm(A)) {
+            if (Norm(minv*A1-T(1)) > 1.e-3*Norm(A1)) {
                 std::cout<<"QR = "<<QR<<std::endl;
-                std::cout<<"Q = "<<Q<<std::endl;
-                std::cout<<"R = "<<R<<std::endl;
+                std::cout<<"Q = "<<Q1<<std::endl;
+                std::cout<<"R = "<<R1<<std::endl;
                 if (P) std::cout<<"P = "<<*P<<std::endl;
-                std::cout<<"A = QRP = "<<A<<std::endl;
-                std::cout<<"minv * A = "<<(minv*A)<<std::endl;
-                std::cout<<"A * minv = "<<(A*minv)<<std::endl;
+                std::cout<<"A = QRP = "<<A1<<std::endl;
+                std::cout<<"minv = "<<minv<<std::endl;
+                std::cout<<"minv * A = "<<(minv*A1)<<std::endl;
+                std::cout<<"A * minv = "<<(A1*minv)<<std::endl;
+                abort();
+            }
+#endif
+        }
+    };
+
+    // algo 12: Alternate method: Unpack Q first.
+    template <int cs, int rs, class M1, class V1, class M2>
+    struct QR_Inverse_Helper<12,cs,rs,M1,V1,M2>
+    {
+        static void call(
+            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& minv)
+        {
+#ifdef PRINTALGO_QR
+            std::cout<<"QRInverse algo 12: cs,rs = "<<cs<<','<<rs<<std::endl;
+#endif
+            // m2 = (QRP)^-1
+            //    = Pt R^-1 Qt
+            // m2T = Q* RT^-1 P
+#ifdef XDEBUG_QR
+            typedef typename M1::value_type T;
+            Matrix<T> Q1 = QR;
+            UnpackQ(Q1,beta);
+            Matrix<T> R1 = QR.upperTri();
+            Matrix<T> A1 = Q1*R1;
+            if (P) P->applyOnRight(A1);
+#endif
+            const int N = rs == UNKNOWN ? QR.rowsize() : rs;
+            typename M2::transpose_type m2t = minv.transpose();
+            m2t = QR.conjugate();
+            UnpackQ(m2t,beta);
+            m2t.colRange(0,N1) %= QR.upperTri().subTriMatrix(0,N1).transpose();
+            m2t.colRange(N1,N).setZero();
+            if (P) m2t *= *P;
+
+#ifdef XDEBUG_QR
+            if (Norm(minv*A1-T(1)) > 1.e-3*Norm(A1)) {
+                std::cout<<"QR = "<<QR<<std::endl;
+                std::cout<<"Q = "<<Q1<<std::endl;
+                std::cout<<"R = "<<R1<<std::endl;
+                if (P) std::cout<<"P = "<<*P<<std::endl;
+                std::cout<<"A = QRP = "<<A1<<std::endl;
+                std::cout<<"minv = "<<minv<<std::endl;
+                std::cout<<"minv * A = "<<(minv*A1)<<std::endl;
+                std::cout<<"A * minv = "<<(A1*minv)<<std::endl;
                 abort();
             }
 #endif
@@ -120,8 +167,7 @@ namespace tmv {
     struct QR_Inverse_Helper<90,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1,
-            M2& minv)
+            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& minv)
         { InstQR_Inverse(QR.xView(),beta.xView(),P,N1,minv.xView()); }
     };
 
@@ -130,8 +176,7 @@ namespace tmv {
     struct QR_Inverse_Helper<97,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1,
-            M2& minv)
+            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& minv)
         {
             typedef typename M1::const_conjugate_type M1c;
             typedef typename M2::conjugate_type M2c;
@@ -146,15 +191,23 @@ namespace tmv {
     struct QR_Inverse_Helper<-3,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1,
-            M2& minv)
+            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& minv)
         {
             const int algo = 
                 cs == 0 || rs == 0 ? 0 : 
-                11;
+                // algo 11 is a bit better for smaller matrices.
+                // Not a big enough difference to warrant a runtime 
+                // check if rs == UNKNOWN though.
+                (rs != UNKNOWN && rs < 16) ? 11 :
+                12;
 #ifdef PRINTALGO_QR
             std::cout<<"Inline QRInverse\n";
             std::cout<<"cs,rs = "<<cs<<','<<rs<<std::endl;
+            std::cout<<"QR = "<<TMV_Text(QR)<<std::endl;
+            std::cout<<"beta = "<<TMV_Text(beta)<<std::endl;
+            std::cout<<"minv = "<<TMV_Text(minv)<<std::endl;
+            std::cout<<"P = "<<bool(P)<<std::endl;
+            std::cout<<"N1 = "<<N1<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
 #endif
             QR_Inverse_Helper<algo,cs,rs,M1,V1,M2>::call(QR,beta,P,N1,minv);
@@ -166,8 +219,7 @@ namespace tmv {
     struct QR_Inverse_Helper<-2,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1,
-            M2& minv)
+            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& minv)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
@@ -193,8 +245,7 @@ namespace tmv {
     struct QR_Inverse_Helper<-1,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1,
-            M2& minv)
+            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& minv)
         { QR_Inverse_Helper<-2,cs,rs,M1,V1,M2>::call(QR,beta,P,N1,minv); }
     };
 
@@ -212,8 +263,8 @@ namespace tmv {
         if (P) TMVAssert(QR.rowsize() == P->size());
         TMVAssert(N1 <= int(QR.rowsize()));
 
-        const int cs = Sizes<M2::_colsize,M1::_rowsize>::size;
-        const int rs = Sizes<M2::_rowsize,M1::_colsize>::size;
+        const int cs = Sizes<M2::_rowsize,M1::_colsize>::size;
+        const int rs = Sizes<M2::_colsize,M1::_rowsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::cview_type M2v;
@@ -237,8 +288,8 @@ namespace tmv {
         if (P) TMVAssert(QR.rowsize() == P->size());
         TMVAssert(N1 <= int(QR.rowsize()));
 
-        const int cs = Sizes<M2::_colsize,M1::_rowsize>::size;
-        const int rs = Sizes<M2::_rowsize,M1::_colsize>::size;
+        const int cs = Sizes<M2::_rowsize,M1::_colsize>::size;
+        const int rs = Sizes<M2::_colsize,M1::_rowsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::cview_type M2v;
@@ -264,8 +315,7 @@ namespace tmv {
     struct QR_InverseATA_Helper<11,cs,rs,M1,V1,M2>
     {
         static void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1,
-            M2& ata)
+            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& ata)
         {
 #ifdef PRINTALGO_QR
             std::cout<<"QRInverseATA algo 11: cs,rs = "<<cs<<','<<rs<<std::endl;
@@ -292,8 +342,7 @@ namespace tmv {
     struct QR_InverseATA_Helper<90,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1,
-            M2& ata)
+            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& ata)
         { InstQR_InverseATA(QR.xView(),beta.xView(),P,N1,ata.xView()); }
     };
 
@@ -302,8 +351,7 @@ namespace tmv {
     struct QR_InverseATA_Helper<97,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1,
-            M2& ata)
+            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& ata)
         {
             typedef typename M1::const_conjugate_type M1c;
             typedef typename M2::conjugate_type M2c;
@@ -318,8 +366,7 @@ namespace tmv {
     struct QR_InverseATA_Helper<-3,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1,
-            M2& ata)
+            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& ata)
         {
             const int algo = 
                 cs == 0 || rs == 0 ? 0 : 
@@ -338,8 +385,7 @@ namespace tmv {
     struct QR_InverseATA_Helper<-2,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1,
-            M2& ata)
+            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& ata)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
@@ -365,8 +411,7 @@ namespace tmv {
     struct QR_InverseATA_Helper<-1,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1,
-            M2& ata)
+            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& ata)
         { QR_InverseATA_Helper<-2,cs,rs,M1,V1,M2>::call(QR,beta,P,N1,ata); }
     }; 
 
@@ -384,8 +429,9 @@ namespace tmv {
         if (P) TMVAssert(QR.rowsize() == P->size());
         TMVAssert(N1 <= int(QR.rowsize()));
 
-        const int cs = Sizes<M2::_colsize,M1::_rowsize>::size;
-        const int rs = Sizes<M2::_rowsize,M1::_rowsize>::size;
+        const int cs = M1::_colsize;
+        const int rs = Sizes<M2::_colsize,
+              Sizes<M2::_rowsize,M1::_rowsize>::size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::cview_type M2v;
@@ -409,8 +455,9 @@ namespace tmv {
         if (P) TMVAssert(QR.rowsize() == P->size());
         TMVAssert(N1 <= int(QR.rowsize()));
 
-        const int cs = Sizes<M2::_colsize,M1::_rowsize>::size;
-        const int rs = Sizes<M2::_rowsize,M1::_rowsize>::size;
+        const int cs = M1::_colsize;
+        const int rs = Sizes<M2::_colsize,
+              Sizes<M2::_rowsize,M1::_rowsize>::size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::cview_type M2v;

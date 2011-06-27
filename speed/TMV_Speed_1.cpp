@@ -87,9 +87,8 @@ typedef RT T;
 const int nloops1 = 1;
 const int nloops2 = 1;
 #else
-const int nloops2 = (
-    (N * sizeof(T) > targetmem) ? 1 : targetmem / N / (sizeof(T)));
-const int nloops1 = targetnflops / (N * nloops2) / XTWO;
+const int nloops2 = targetmem / (N * sizeof(T)) + 1;
+const int nloops1 = targetnflops / (N * nloops2 * XTWO) + 1;
 #endif
 
 #ifdef DOBLAS

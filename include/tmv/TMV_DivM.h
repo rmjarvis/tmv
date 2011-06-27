@@ -38,6 +38,7 @@
 #include "TMV_MultMM_Funcs.h"
 #include "TMV_DivMM_Funcs.h"
 #include "TMV_DivVM_Funcs.h" 
+#include "TMV_Det.h"
 
 #ifdef PRINTALGO_DIVM
 #include <iostream>
@@ -163,8 +164,7 @@ namespace tmv {
 #ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq algo 3: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
-            Scaling<1,typename M1::real_type> one;
-            NoAliasMultMM<false>(one,m2.inverse().calc(),m1.copy(),m1);
+            m1 = m2.inverse().calc() * m1.copy();
         }
     };
 
@@ -465,7 +465,7 @@ namespace tmv {
                     vec1 ? 33 :
                     (!up1 && !lo1) ? 35 :
                     31 ) : 
-                (!lo2 || !up2) ? 41 : // m2 is triangular
+                (!lo2 || !up2) ? 5 : // m2 is triangular
                 (s != UNKNOWN && s <= 4) ? 5 :
                 M2::_hasdivider ? 21 :
                 22;
@@ -961,22 +961,7 @@ namespace tmv {
             std::cout<<"LDiv algo 3: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
-            NoAliasMultMM<false>(x,m2.inverse().calc(),m1,m3);
-        }
-    };
-
-    // algo 4: invert directly with alias check
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<4,cs,rs,xs,ix,T,M1,M2,M3>
-    {
-        static inline void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-#ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 4: cs,rs,xs = "<<
-                cs<<','<<rs<<','<<xs<<std::endl;
-#endif
-            AliasMultMM<false>(x,m2.inverse().calc(),m1,m3);
+            m3 = x * m2.inverse().calc() * m1;
         }
     };
 
@@ -1408,7 +1393,7 @@ namespace tmv {
                     32 ) :
                 (!lo2 || !up2) ? 42 : // m1 is triangular
                 cs == 2 && rs == 2 ? 2 :
-                cs == rs && cs != UNKNOWN && cs <= 4 ? 4 :
+                cs == rs && cs != UNKNOWN && cs <= 4 ? 3 :
                 M2::_hasdivider ? 11 :
                 cs == UNKNOWN || rs == UNKNOWN ? 14 :
                 cs == rs ? 12 :

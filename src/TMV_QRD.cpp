@@ -33,6 +33,7 @@
 
 #include "tmv/TMV_QRD.h"
 #include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_SmallMatrix.h"
 #include "tmv/TMV_TriMatrix.h"
 #include "tmv/TMV_SmallTriMatrix.h"
 #include "tmv/TMV_Vector.h"
@@ -62,6 +63,9 @@
 #include "tmv/TMV_PermuteM.h"
 #include "tmv/TMV_TransposeM.h"
 #include "tmv/TMV_CopyU.h"
+#include "tmv/TMV_DivM.h"
+#include "tmv/TMV_DivMU.h"
+#include "tmv/TMV_MultXU.h"
 
 namespace tmv {
 

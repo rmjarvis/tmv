@@ -14,11 +14,11 @@ EIGEN= -I/Users/Mike/Astro/eigen-3.0.1
 #LIB= -L../lib -ltmv -L/usr/local/intel/mkl/10.0.1.014/lib/32 -lmkl_ia32 -lguide -lpthread
 
 #INCLUDE= -I../../tags/v0.63/include $(EIGEN) -DTMV_V063
-INCLUDE= -I../include $(EIGEN)
+INCLUDE= -I../include $(EIGEN) 
+#INCLUDE= -I../include $(EIGEN) -I/sw64/include
 CC= g++-4
 #CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -DTMV_NO_LIB -DTMV_OPT=3
-CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -DTMV_OPT=3 -fno-var-tracking-assignments -fopenmp
-#CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -DTMV_NO_LIB -DTMV_OPT=3 -fopenmp
+CFLAGS= $(INCLUDE) -DNDEBUG -O2 -g3 -DTMV_OPT=3 -fno-var-tracking-assignments
 #CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -DTMV_OPT=3 -fopenmp
 #CFLAGS= $(INCLUDE) -g3 -O -DTMV_NO_LIB -DTMV_OPT=3 -fopenmp -DTMV_MEM_TEST
 #CFLAGS= $(INCLUDE) -ggdb -DNDEBUG -O2 -DTMV_OPT=3 -fopenmp
@@ -26,7 +26,11 @@ CFLAGS= $(INCLUDE) -DNDEBUG -g3 -O2 -DTMV_OPT=3 -fno-var-tracking-assignments -f
 
 #LIB= 
 #LIB= -L../../tags/v0.63/lib -ltmv_symband -ltmv -llapack -lblas -lgfortran -lpthread -fopenmp
-LIB= -L../lib -ltmv /usr/lib/liblapack.dylib /usr/lib/libblas.dylib -lgfortran -lpthread -fopenmp
+#LIB= -L../lib -ltmv /usr/lib/liblapack.dylib /usr/lib/libblas.dylib -lgfortran -lpthread -fopenmp
+#LIB= -L../lib -ltmv -L/usr/lib -llapack -lblas -lgfortran -lpthread -fopenmp
+LIB= -L/usr/lib -llapack -lblas -lgfortran -lpthread
+#LIB= -L/sw64/lib -llapack -lcblas -latlas -lpthread -fopenmp
+#LIB= -L/usr/lib -L/usr/local/lib -llapack -lgoto2 -lpthread -fopenmp
 #LIB= -fopenmp
 #LIB= -L../lib -ltmv -lpthread -fopenmp
 #LIB= -L../lib -ltmv_3 -llapack -lblas -lgfortran

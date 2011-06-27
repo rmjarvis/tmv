@@ -7,3 +7,4 @@ TMV_QRDecompose.cpp
 TMV_UnpackQ.cpp 
 TMV_QRDiv.cpp 
 TMV_QRInverse.cpp 
+TMV_PackedQ.cpp

@@ -398,7 +398,7 @@ namespace tmv
 #ifdef TMV_END_PADDING
         enum { NN = N + (16/sizeof(T)) };
 #else 
-        enum { NN = N };
+        enum { NN = N==0 ? 1 : N };
 #endif
 #ifdef __GNUC__
         T p[NN] __attribute__ ((aligned (16)));
@@ -420,7 +420,7 @@ namespace tmv
 #ifdef TMV_END_PADDING
         enum { NN = N + 4 };
 #else 
-        enum { NN = N };
+        enum { NN = N==0 ? 1 : N };
 #endif
         T p[NN];
     };
@@ -440,7 +440,7 @@ namespace tmv
 #ifdef TMV_END_PADDING
         enum { NN = N + 4 };
 #else 
-        enum { NN = N };
+        enum { NN = N==0 ? 1 : N };
 #endif
         union { float p[NN]; __m128 x; } xp;
     };
@@ -458,7 +458,7 @@ namespace tmv
 #ifdef TMV_END_PADDING
         enum { NN = N + 4 };
 #else 
-        enum { NN = N };
+        enum { NN = N==0 ? 1 : N };
 #endif
         float p[NN];
     };
@@ -478,7 +478,7 @@ namespace tmv
 #ifdef TMV_END_PADDING
         enum { NN = N + 2 };
 #else 
-        enum { NN = N };
+        enum { NN = N==0 ? 1 : N };
 #endif
         union { double p[NN]; __m128d x; } xp;
     };
@@ -496,7 +496,7 @@ namespace tmv
 #ifdef TMV_END_PADDING
         enum { NN = N + 2 };
 #else 
-        enum { NN = N };
+        enum { NN = N==0 ? 1 : N };
 #endif
         double p[NN];
     };

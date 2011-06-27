@@ -457,15 +457,32 @@ namespace tmv {
     template <class T, int s, bool fort>
     struct VCopyHelper
     {
-        enum { A2 = fort ? FortranStyle : CStyle };
+        enum { A2 = (fort ? FortranStyle : CStyle) | NoAlias };
         typedef SmallVector<T,s,A2> type; 
     };
     template <class T, bool fort>
     struct VCopyHelper<T,UNKNOWN,fort>
     {
-        enum { A2 = fort ? FortranStyle : CStyle };
+        enum { A2 = (fort ? FortranStyle : CStyle) | NoAlias };
         typedef Vector<T,A2> type; 
     };
+
+    // This is similar - it defines the right view type when the
+    // size or step might be known.
+    template <class T, int N, int S, int C=NonConj>
+    struct VViewHelper
+    { 
+        typedef SmallVectorView<T,N,S,C> type; 
+        typedef ConstSmallVectorView<T,N,S,C> ctype; 
+    };
+    template <class T, int S, int C>
+    struct VViewHelper<T,UNKNOWN,S,C>
+    {
+        enum { A = C | (S == 1 ? Unit : NonUnit) };
+        typedef VectorView<T,A> type; 
+        typedef ConstVectorView<T,A> ctype; 
+    };
+
 
     // This helper function checks for aliasis in the memory storage of
     // two objects.  We overload it for specific objects that can be 
@@ -1428,6 +1445,24 @@ namespace tmv {
     }; // BaseVector_Mutable
 
     template <class T>
+    class VectorSizer;
+
+    template <class T>
+    struct Traits<VectorSizer<T> >
+    {
+        typedef T value_type;
+        typedef VectorSizer<T> type;
+        typedef InvalidType calc_type;
+        typedef InvalidType eval_type;
+        typedef InvalidType copy_type;
+
+        enum { _size = UNKNOWN };
+        enum { _shape = Vec };
+        enum { _fort = false };
+        enum { _calc = false };
+    };
+
+    template <class T>
     class VectorSizer : 
         public BaseVector<VectorSizer<T> >
     {
@@ -1445,7 +1480,6 @@ namespace tmv {
 
     private :
         const int s;
-
     }; // VectorSizer
 
 

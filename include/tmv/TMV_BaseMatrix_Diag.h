@@ -793,16 +793,31 @@ namespace tmv {
     // This helper class helps decide calc_type for composite classes:
     template <class T, int cs, int rs, bool rm, bool fort>
     struct MCopyHelper<T,Diag,cs,rs,rm,fort>
-    { typedef SmallDiagMatrix<T,cs,fort?FortranStyle:CStyle> type; };
+    { typedef SmallDiagMatrix<T,cs,(fort?FortranStyle:CStyle)|NoAlias> type; };
     template <class T, int rs, bool rm, bool fort>
     struct MCopyHelper<T,Diag,UNKNOWN,rs,rm,fort>
-    { typedef SmallDiagMatrix<T,rs,fort?FortranStyle:CStyle> type; };
+    { typedef SmallDiagMatrix<T,rs,(fort?FortranStyle:CStyle)|NoAlias> type; };
     template <class T, int cs, bool rm, bool fort>
     struct MCopyHelper<T,Diag,cs,UNKNOWN,rm,fort>
-    { typedef SmallDiagMatrix<T,cs,fort?FortranStyle:CStyle> type; };
+    { typedef SmallDiagMatrix<T,cs,(fort?FortranStyle:CStyle)|NoAlias> type; };
     template <class T, bool rm, bool fort>
     struct MCopyHelper<T,Diag,UNKNOWN,UNKNOWN,rm,fort>
-    { typedef DiagMatrix<T,fort?FortranStyle:CStyle> type; };
+    { typedef DiagMatrix<T,(fort?FortranStyle:CStyle)|NoAlias> type; };
+
+    template <class T, int cs, int rs, int si, int sj, int c>
+    struct MViewHelper<T,Diag,cs,rs,si,sj,c>
+    { 
+        typedef SmallDiagMatrixView<T,cs,si,c> type; 
+        typedef ConstSmallDiagMatrixView<T,cs,si,c> ctype; 
+    };
+    template <class T, int si, int sj, int c>
+    struct MViewHelper<T,Diag,UNKNOWN,UNKNOWN,si,sj,c>
+    {
+        enum { A2 = c | (si == 1 ? Unit : NonUnit) };
+        typedef DiagMatrixView<T,A2> type; 
+        typedef ConstDiagMatrixView<T,A2> ctype; 
+    };
+
 
     //
     // Copy Matrices

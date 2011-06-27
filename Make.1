@@ -168,7 +168,7 @@ $(LIBDIR)/$(SBLIBFILE): $(SBLIB_O)
 	$(RANLIB) $@
 
 install: $(PREFIX)/share/$(LINKFILE)
-        share/tmv-link-msg share/tmv-link $(PREFIX)/share/$(LINKFILE)
+	share/tmv-link-msg share/tmv-link $(PREFIX)/share/$(LINKFILE)
 
 $(PREFIX)/share/$(LINKFILE): $(PREFIX)/lib/$(LIBFILE) $(PREFIX)/lib/$(SBLIBFILE)
 	- $(MKDIR) $(PREFIX)/include

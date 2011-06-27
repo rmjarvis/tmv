@@ -674,6 +674,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int A2>
@@ -682,6 +683,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int M2, int N2, int Si2, int Sj2, int A2>
@@ -691,6 +693,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int M2, int N2, int Si2, int Sj2, int A2>
@@ -700,6 +703,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         ~ConstSmallMatrixView() {
@@ -1013,6 +1017,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         template <int M2, int N2, int Si2, int Sj2, int A2>
@@ -1021,6 +1026,7 @@ namespace tmv {
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
         ~SmallMatrixView() {
@@ -1083,25 +1089,6 @@ namespace tmv {
     // Special Creators: 
     //   RowVectorViewOf(v) = 1xn Matrix with v in only row - Same Storage
     //   ColVectorViewOf(v) = nx1 Matrix with v in only col - Same Storage
-
-    // A quick helper class to get the return types correct
-    template <class V>
-    struct VVO
-    {
-        typedef typename V::value_type T;
-        enum { N = V::_size };
-        enum { S = V::_step };
-        enum { vecA = (
-                ( V::_conj ? Conj : NonConj ) |
-                ( V::_fort ? FortranStyle : CStyle ) |
-                ( Traits<V>::A & AllAliasStatus ) )};
-        enum { colA = vecA | (S == 1 ? ColMajor : 0 ) };
-        enum { rowA = vecA | (S == 1 ? RowMajor : 0 ) };
-        typedef ConstSmallMatrixView<T,1,N,N,S,rowA> crv;
-        typedef SmallMatrixView<T,1,N,N,S,rowA> rv;
-        typedef ConstSmallMatrixView<T,N,1,S,N,colA> ccv;
-        typedef SmallMatrixView<T,N,1,S,N,colA> cv;
-    };
 
     template <class V>
     static TMV_INLINE typename VVO<V>::crv RowVectorViewOf(

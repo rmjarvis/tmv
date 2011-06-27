@@ -32,6 +32,7 @@
 
 #include "TMV_Blas.h"
 #include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_SmallMatrix.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_MatrixIO.h"
 #include "tmv/TMV_CopyM.h"
@@ -43,7 +44,6 @@
 #include "tmv/TMV_ScaleM.h"
 #include "tmv/TMV_LUD.h"
 #include "tmv/TMV_QRD.h"
-#include "tmv/TMV_SmallMatrix.h"
 
 namespace tmv {
 

@@ -35,7 +35,7 @@
 namespace tmv {
 
     enum Shape {
-        InvalidShape, Vec,
+        InvalidShape, Vec, Null,
         Rec, Diag, UpperTri, LowerTri, UnitUpperTri, UnitLowerTri,
         Band, UpperBand, LowerBand, UnitUpperBand, UnitLowerBand,
         RealSym, Sym, Herm, RealSymBand, SymBand, HermBand };
@@ -56,6 +56,21 @@ namespace tmv {
         enum { inverse_shape = Vec };
         enum { nonunit_shape = Vec };
         enum { unit_shape = Vec };
+    };
+
+    template <>
+    struct ShapeTraits<Null>
+    {
+        enum { vector = false };
+        enum { sym = false };
+        enum { herm = false };
+        enum { upper = false };
+        enum { lower = false };
+        enum { band = false };
+        enum { unit = false };
+        enum { inverse_shape = Null };
+        enum { nonunit_shape = Null };
+        enum { unit_shape = Null };
     };
 
     template <>
@@ -324,6 +339,8 @@ namespace tmv {
         enum { bothherm = ShapeTraits<S1>::herm && ShapeTraits<S2>::herm };
 
         enum { prod = (
+                ( S1 == Null ) ? S2 :
+                ( S2 == Null ) ? S1 :
                 noupper ? (
                     nolower ? Diag : 
                     bothband ? bothunit ? UnitLowerBand : LowerBand :
@@ -334,6 +351,8 @@ namespace tmv {
                 bothband ? Band  :
                 Rec ) };
         enum { sum = (
+                ( S1 == Null ) ? S2 :
+                ( S2 == Null ) ? S1 :
                 noupper && nolower ? Diag :
                 noupper ? ( bothband ? LowerBand : LowerTri ) :
                 nolower ? ( bothband ? UpperBand : UpperTri ) :
@@ -342,6 +361,8 @@ namespace tmv {
                 bothband ? Band :
                 Rec ) };
         enum { assignable = (
+                ( S1 == Null ) ? true :
+                ( S2 == Null ) ? false :
                 ( ShapeTraits<S1>::upper && !ShapeTraits<S2>::upper ) ? false :
                 ( ShapeTraits<S1>::lower && !ShapeTraits<S2>::lower ) ? false :
                 ( !ShapeTraits<S1>::unit && ShapeTraits<S2>::unit ) ? false :

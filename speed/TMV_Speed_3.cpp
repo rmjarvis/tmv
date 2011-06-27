@@ -11,8 +11,8 @@
 //#define XDEBUG_PRODMV
 //#undef NDEBUG
 
-#define XDEBUG_PRODMM
-#define XDEBUG_QUOTMM
+//#define XDEBUG_PRODMM
+//#define XDEBUG_QUOTMM
 
 //#define TMV_INLINE
 #include "TMV.h"
@@ -51,11 +51,11 @@ const int K = 637;
 #define ERRORCHECK
 
 // Define which versions you want to test:
-//#define DOREG
+#define DOREG
 #define DOSMALL
-//#define DOBLAS
-//#define DOEIGEN
-//#define DOEIGENSMALL
+#define DOBLAS
+#define DOEIGEN
+#define DOEIGENSMALL
 
 // Define which batches of functions you want to test:
 #define DOMULTMM_CCC
@@ -126,11 +126,8 @@ typedef RT T;
 const int nloops1 = 1;
 const int nloops2 = 1;
 #else
-const int nloops2 = (
-    (M*N*K*int(sizeof(T)) > targetmem ? 1 : targetmem / (M*N*K) / int(sizeof(T))));
-const int nloops1 = (
-    (M*N*K*nloops2*XFOUR > targetnflops ? 1 :
-     targetnflops / (M*N*K*nloops2) / XFOUR ));
+const int nloops2 = targetmem / (M*N*K * sizeof(T)) + 1;
+const int nloops1 = targetnflops / (M*N*K * nloops2 * XFOUR) + 1;
 #endif
 
 #if (PART1 == 1) // Full rectangle
@@ -150,8 +147,8 @@ const int nloops1 = (
 #define INPART1(i,j) (i<=j)
 #define UNITPART1(i,j) false
 #define MPART1(m) m.upperTri()
-#define EPART1(m) m.part<Eigen::UpperTriangular>()
-#define EPART1t(m) m.part<Eigen::LowerTriangular>()
+#define EPART1(m) m.triangularView<Eigen::Upper>()
+#define EPART1t(m) m.triangularView<Eigen::Lower>()
 #define COL_LEN1(j) j+1
 #define COL_START1(j) 0
 #define COL_END1(j) j+1
@@ -163,8 +160,8 @@ const int nloops1 = (
 #define INPART1(i,j) (i<j)
 #define UNITPART1(i,j) (i==j)
 #define MPART1(m) m.unitUpperTri()
-#define EPART1(m) m.part<Eigen::UnitUpperTriangular>()
-#define EPART1t(m) m.part<Eigen::UnitLowerTriangular>()
+#define EPART1(m) m.triangularView<Eigen::UnitUpper>()
+#define EPART1t(m) m.triangularView<Eigen::UnitLower>()
 #define COL_LEN1(j) j
 #define COL_START1(j) 0
 #define COL_END1(j) j
@@ -176,8 +173,8 @@ const int nloops1 = (
 #define INPART1(i,j) (i>=j)
 #define UNITPART1(i,j) false
 #define MPART1(m) m.lowerTri()
-#define EPART1(m) m.part<Eigen::LowerTriangular>()
-#define EPART1t(m) m.part<Eigen::UpperTriangular>()
+#define EPART1(m) m.triangularView<Eigen::Lower>()
+#define EPART1t(m) m.triangularView<Eigen::Upper>()
 #define COL_LEN1(j) N-j
 #define COL_START1(j) j
 #define COL_END1(j) N
@@ -189,8 +186,8 @@ const int nloops1 = (
 #define INPART1(i,j) (i>j)
 #define UNITPART1(i,j) (i==j)
 #define MPART1(m) m.unitLowerTri()
-#define EPART1(m) m.part<Eigen::UnitLowerTriangular>()
-#define EPART1t(m) m.part<Eigen::UnitUpperTriangular>()
+#define EPART1(m) m.triangularView<Eigen::UnitLower>()
+#define EPART1t(m) m.triangularView<Eigen::UnitUpper>()
 #define COL_LEN1(j) N-j-1
 #define COL_START1(j) j+1
 #define COL_END1(j) N
@@ -217,8 +214,8 @@ const int nloops1 = (
 #define INPART2(i,j) (i<=j)
 #define UNITPART2(i,j) false
 #define MPART2(m) m.upperTri()
-#define EPART2(m) m.part<Eigen::UpperTriangular>()
-#define EPART2t(m) m.part<Eigen::LowerTriangular>()
+#define EPART2(m) m.triangularView<Eigen::Upper>()
+#define EPART2t(m) m.triangularView<Eigen::Lower>()
 #define COL_LEN2(j) j+1
 #define COL_START2(j) 0
 #define COL_END2(j) j+1
@@ -230,8 +227,8 @@ const int nloops1 = (
 #define INPART2(i,j) (i<j)
 #define UNITPART2(i,j) (i==j)
 #define MPART2(m) m.unitUpperTri()
-#define EPART2(m) m.part<Eigen::UnitUpperTriangular>()
-#define EPART2t(m) m.part<Eigen::UnitLowerTriangular>()
+#define EPART2(m) m.triangularView<Eigen::UnitUpper>()
+#define EPART2t(m) m.triangularView<Eigen::UnitLower>()
 #define COL_LEN2(j) j
 #define COL_START2(j) 0
 #define COL_END2(j) j
@@ -243,8 +240,8 @@ const int nloops1 = (
 #define INPART2(i,j) (i>=j)
 #define UNITPART2(i,j) false
 #define MPART2(m) m.lowerTri()
-#define EPART2(m) m.part<Eigen::LowerTriangular>()
-#define EPART2t(m) m.part<Eigen::UpperTriangular>()
+#define EPART2(m) m.triangularView<Eigen::Lower>()
+#define EPART2t(m) m.triangularView<Eigen::Upper>()
 #define COL_LEN2(j) N-j
 #define COL_START2(j) j
 #define COL_END2(j) N
@@ -256,8 +253,8 @@ const int nloops1 = (
 #define INPART2(i,j) (i>j)
 #define UNITPART2(i,j) (i==j)
 #define MPART2(m) m.unitLowerTri()
-#define EPART2(m) m.part<Eigen::UnitLowerTriangular>()
-#define EPART2t(m) m.part<Eigen::UnitUpperTriangular>()
+#define EPART2(m) m.triangularView<Eigen::UnitLower>()
+#define EPART2t(m) m.triangularView<Eigen::UnitUpper>()
 #define COL_LEN2(j) N-j-1
 #define COL_START2(j) j+1
 #define COL_END2(j) N
@@ -283,7 +280,7 @@ const int nloops1 = (
 #define INPART3(i,j) (i<=j)
 #define UNITPART3(i,j) false
 #define MPART3(m) m.upperTri()
-#define EPART3(m) m.part<Eigen::UpperTriangular>()
+#define EPART3(m) m.triangularView<Eigen::Upper>()
 #define COL_LEN3(j) j+1
 #define COL_START3(j) 0
 #define COL_END3(j) j+1
@@ -295,7 +292,7 @@ const int nloops1 = (
 #define INPART3(i,j) (i<j)
 #define UNITPART3(i,j) (i==j)
 #define MPART3(m) m.unitUpperTri()
-#define EPART3(m) m.part<Eigen::StrictlyUpperTriangular>()
+#define EPART3(m) m.triangularView<Eigen::StrictlyUpper>()
 #define COL_LEN3(j) j
 #define COL_START3(j) 0
 #define COL_END3(j) j
@@ -310,7 +307,7 @@ const int nloops1 = (
 #define INPART3(i,j) (i>=j)
 #define UNITPART3(i,j) false
 #define MPART3(m) m.lowerTri()
-#define EPART3(m) m.part<Eigen::LowerTriangular>()
+#define EPART3(m) m.triangularView<Eigen::Lower>()
 #define COL_LEN3(j) N-j
 #define COL_START3(j) j
 #define COL_END3(j) N
@@ -322,7 +319,7 @@ const int nloops1 = (
 #define INPART3(i,j) (i>j)
 #define UNITPART3(i,j) (i==j)
 #define MPART3(m) m.unitLowerTri()
-#define EPART3(m) m.part<Eigen::StrictlyLowerTriangular>()
+#define EPART3(m) m.triangularView<Eigen::StrictlyLower>()
 #define COL_LEN3(j) N-j-1
 #define COL_START3(j) j+1
 #define COL_END3(j) N

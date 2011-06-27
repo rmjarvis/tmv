@@ -712,7 +712,6 @@ namespace tmv {
     template <int algo, int s, class V>
     struct LogProdElementsV_Helper;
 
-    // TODO: Write SSE algo's.
     template <int algo, int s, class V>
     struct ProdElementsV_Helper;
 
@@ -1158,7 +1157,7 @@ namespace tmv {
         {
             const int algo = 
                 TMV_OPT <= 1 ? -4 :
-                // 20 here is a bit arbitrary.  
+                // 20 here is just arbitrary.  
                 // For N <= 20, the product is not very likely to overflow.
                 (!Traits<T>::isinteger && (s == UNKNOWN || s > 20)) ? 42 :
                 -4;

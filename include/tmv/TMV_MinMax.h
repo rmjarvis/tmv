@@ -705,11 +705,13 @@ L2:
         typedef typename V::value_type ret;
         static TMV_INLINE ret call(const V& v, int* ibest)
         {
+            const int maxunroll = 
+                TMV_OPT == 0 ? 0 : TMV_OPT == 1 ? 4 : TMV_OPT == 2 ? 12 : 40;
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
                 V::_size != UNKNOWN ? (
-                    V::_size <= 160 ? 15 :
+                    V::_size <= maxunroll ? 15 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 12 : 24 ) ) :
                     11 ) :
@@ -720,8 +722,8 @@ L2:
                 V::_size == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
                 V::_size != UNKNOWN ? (
-                    V::_size <= 12 ? 15 :
-                    V::_size <= 40 ? 16 :
+                    V::_size <= maxunroll && V::_size <= 12 ? 15 :
+                    V::_size <= maxunroll ? 16 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 11 : 24 ) ) :
                     11 ) :
@@ -747,13 +749,16 @@ L2:
         typedef typename V::float_type ret;
         static TMV_INLINE ret call(const V& v, int* ibest)
         {
+            const int maxunroll = 
+                TMV_OPT == 0 ? 0 : TMV_OPT == 1 ? 4 : TMV_OPT == 2 ? 12 : 40;
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
                 V::_size != UNKNOWN ? (
                     V::iscomplex ? (
-                        ( V::_size <= 16 ? 15 : V::_step == 1 ? 21 : 11 ) ) :
-                    V::_size <= 160 ? 15 :
+                        V::_size <= maxunroll && V::_size <= 12 ? 15 :
+                        V::_step == 1 ? 21 : 11 ) :
+                    V::_size <= maxunroll ? 15 :
                     (V::_step == 1 && V::_size > 250) ?  24 : 11 ) :
                 V::_step == 1 ? ( V::iscomplex ? 21 : 35 ) :
                 11;
@@ -764,8 +769,8 @@ L2:
                 V::_size != UNKNOWN ? (
                     V::iscomplex ? (
                         ( V::_step == 1 ? 21 : 11 ) ) :
-                    V::_size <= 12 ? 15 :
-                    V::_size <= 40 ? 16 :
+                    V::_size <= maxunroll && V::_size <= 12 ? 15 :
+                    V::_size <= maxunroll ? 16 :
                     (V::_step == 1 && V::_size > 250) ? 24 : 11 ) :
                 V::_step == 1 ? ( V::iscomplex ? 21 : 35 ) :
                 11;
@@ -790,11 +795,13 @@ L2:
         typedef typename V::real_type ret;
         static TMV_INLINE ret call(const V& v, int* ibest)
         {
+            const int maxunroll = 
+                TMV_OPT == 0 ? 0 : TMV_OPT == 1 ? 4 : TMV_OPT == 2 ? 12 : 40;
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
                 V::_size != UNKNOWN ? (
-                    V::_size <= 160 ? 15 :
+                    V::_size <= maxunroll ? 15 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 12 : 24 ) ) :
                     11 ) :
@@ -805,8 +812,8 @@ L2:
                 V::_size == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
                 V::_size != UNKNOWN ? (
-                    V::_size <= 12 ? 15 :
-                    V::_size <= 40 ? 16 :
+                    V::_size <= maxunroll && V::_size <= 12 ? 15 :
+                    V::_size <= maxunroll ? 16 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 11 : 24 ) ) :
                     11 ) :
@@ -833,11 +840,13 @@ L2:
         typedef typename V::value_type ret;
         static TMV_INLINE ret call(const V& v, int* ibest)
         {
+            const int maxunroll = 
+                TMV_OPT == 0 ? 0 : TMV_OPT == 1 ? 4 : TMV_OPT == 2 ? 12 : 40;
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
                 V::_size != UNKNOWN ? (
-                    V::_size <= 160 ? 15 :
+                    V::_size <= maxunroll ? 15 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 12 : 24 ) ) :
                     11 ) :
@@ -848,8 +857,8 @@ L2:
                 V::_size == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
                 V::_size != UNKNOWN ? (
-                    V::_size <= 12 ? 15 :
-                    V::_size <= 40 ? 16 :
+                    V::_size <= maxunroll && V::_size <= 12 ? 15 :
+                    V::_size <= maxunroll ? 16 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 11 : 24 ) ) :
                     11 ) :
@@ -876,13 +885,16 @@ L2:
         static TMV_INLINE ret call(const V& v, int* ibest)
         
         {
+            const int maxunroll = 
+                TMV_OPT == 0 ? 0 : TMV_OPT == 1 ? 4 : TMV_OPT == 2 ? 12 : 40;
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
                 V::_size != UNKNOWN ? (
                     V::iscomplex ? (
-                        ( V::_size <= 40 ? 15 : V::_step == 1 ? 21 : 11 ) ) :
-                    V::_size <= 160 ? 15 :
+                        V::_size <= maxunroll && V::_size <= 12 ? 15 :
+                        V::_step == 1 ? 21 : 11 ) :
+                    V::_size <= maxunroll ? 15 :
                     (V::_step == 1 && V::_size > 250) ?  24 : 11 ) :
                 V::_step == 1 ? ( V::iscomplex ? 21 : 35 ) :
                 11;
@@ -895,8 +907,8 @@ L2:
                         ( V::_step == 1 ? 
                           ( V::_size <= 20 ? 12 : 21 ) : 
                           11 ) ) :
-                    V::_size <= 12 ? 15 :
-                    V::_size <= 40 ? 16 :
+                    V::_size <= maxunroll && V::_size <= 12 ? 15 :
+                    V::_size <= maxunroll ? 16 :
                     (V::_step == 1 && V::_size > 250) ? 24 : 11 ) :
                 V::_step == 1 ? ( V::iscomplex ? 21 : 35 ) :
                 11;
@@ -921,11 +933,13 @@ L2:
         typedef typename V::real_type ret;
         static TMV_INLINE ret call(const V& v, int* ibest)
         {
+            const int maxunroll = 
+                TMV_OPT == 0 ? 0 : TMV_OPT == 1 ? 4 : TMV_OPT == 2 ? 12 : 40;
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
                 V::_size != UNKNOWN ? (
-                    V::_size <= 160 ? 15 :
+                    V::_size <= maxunroll ? 15 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 12 : 24 ) ) :
                     11 ) :
@@ -936,8 +950,8 @@ L2:
                 V::_size == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
                 V::_size != UNKNOWN ? (
-                    V::_size <= 12 ? 15 :
-                    V::_size <= 40 ? 16 :
+                    V::_size <= maxunroll && V::_size <= 12 ? 15 :
+                    V::_size <= maxunroll ? 16 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 11 : 24 ) ) :
                     11 ) :

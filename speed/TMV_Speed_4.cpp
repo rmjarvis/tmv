@@ -27,7 +27,7 @@ const int N = 6;
 const int K = 11;
 
 // Define the type to use:
-#define TISFLOAT
+//#define TISFLOAT
 //#define TISCOMPLEX
 
 // Define the parts of the matrices to use
@@ -118,12 +118,8 @@ typedef RT T;
 const long long nloops1 = 1;
 const long long nloops2 = 1;
 #else
-const long long nloops2 = (
-    (((long long)(sizeof(T)))*(2*N*N+4*N*K)/1000 > targetmem ? 1 :
-     targetmem*1000 / (((long long)(sizeof(T)))*(2*N*N+4*N*K))));
-const long long nloops1 = (
-    (nloops2*N*N*(N+K)*XFOUR/1000000 > targetnmegaflops ? 1 :
-     targetnmegaflops*1000000 / (nloops2*N*N*(N+K)) / XFOUR ));
+const long long nloops2 = targetmem*1000 / ((2*N*N+4*N*K) * sizeof(T)) + 1;
+const long long nloops1 = targetnmegaflops*1000000 / (N*N*(N+K)*nloops2*XFOUR) + 1;
 #endif
 
 #include <sys/time.h>
@@ -2464,8 +2460,24 @@ static void LU_C(
 #endif
 #endif
 #endif
+
 #ifdef SHOW_DOTS
         std::cout<<"."; std::cout.flush();
+#endif
+
+#ifdef DOREG
+#ifdef TMV_NO_LIB
+        for(int i=0;i<nloops2;++i) if (LU1[i]) delete LU1[i];
+#endif
+#endif
+#ifdef DOSMALL
+        for(int i=0;i<nloops2;++i) if (LU2[i]) delete LU2[i];
+#endif
+#ifdef DOEIGEN
+        for(int i=0;i<nloops2;++i) if (LU4[i]) delete LU4[i];
+#endif
+#ifdef DOEIGENSMALL
+        for(int i=0;i<nloops2x;++i) if (LU5[i]) delete LU5[i];
 #endif
     }
     std::cout<<"\n";
@@ -2528,20 +2540,6 @@ static void LU_C(
     std::cout<<"d = A.det()            "<<e12_reg<<"  "<<e12_small<<"  "<<e12_blas;
     std::cout<<"  "<<e12_eigen<<"  "<<e12_smalleigen<<std::endl;
     std::cout<<"\n\n";
-#endif
-#ifdef DOREG
-#ifdef TMV_NO_LIB
-    for(int i=0;i<nloops2;++i) if (LU1[i]) delete LU1[i];
-#endif
-#endif
-#ifdef DOSMALL
-    for(int i=0;i<nloops2;++i) if (LU2[i]) delete LU2[i];
-#endif
-#ifdef DOEIGEN
-    for(int i=0;i<nloops2;++i) if (LU4[i]) delete LU4[i];
-#endif
-#ifdef DOEIGENSMALL
-    for(int i=0;i<nloops2x;++i) if (LU5[i]) delete LU5[i];
 #endif
 }
 #endif
@@ -4741,7 +4739,7 @@ int main() try
     std::cout<<"N,K = "<<N<<" , "<<K<<std::endl;
     std::cout<<"nloops = "<<nloops1<<" x "<<nloops2;
     std::cout<<" = "<<nloops1*nloops2<<std::endl;
-#ifdef DOIGENSMALL
+#ifdef DOEIGENSMALL
     if (nloops2x == 0)
         std::cout<<"Matrix is too big for the stack, so no \"Eigen Known\" tests.\n";
 #endif

@@ -52,6 +52,7 @@
 #include "tmv/TMV_MultMM_OpenMP.h"
 #include "tmv/TMV_Det.h"
 #include "tmv/TMV_ScaleM.h"
+#include "tmv/TMV_MultXU.h"
 
 
 namespace tmv {
