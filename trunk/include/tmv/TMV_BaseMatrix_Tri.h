@@ -803,43 +803,43 @@ namespace tmv {
         // Views
         //
 
-        TMV_MAYBE_CREF(type,const_view_type) view() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_view_type) view() const
         { return MakeTriView<type,const_view_type>::call(mat()); }
 
-        TMV_MAYBE_CREF(type,const_cview_type) cView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_cview_type) cView() const
         { return MakeTriView<type,const_cview_type>::call(mat()); }
 
-        TMV_MAYBE_CREF(type,const_fview_type) fView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_fview_type) fView() const
         { return MakeTriView<type,const_fview_type>::call(mat()); }
 
-        TMV_MAYBE_CREF(type,const_xview_type) xView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_xview_type) xView() const
         { return MakeTriView<type,const_xview_type>::call(mat()); }
 
-        TMV_MAYBE_CREF(type,const_cmview_type) cmView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_cmview_type) cmView() const
         {
             TMVAssert(iscm() && "Called cmView on non-ColMajor matrix");
             return MakeTriView<type,const_cmview_type>::call(mat());
         }
 
-        TMV_MAYBE_CREF(type,const_rmview_type) rmView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_rmview_type) rmView() const
         {
             TMVAssert(isrm() && "Called rmView on non-RowMajor matrix");
             return MakeTriView<type,const_rmview_type>::call(mat());
         }
 
-        const_view_type constView() const
+        TMV_INLINE const_view_type constView() const
         { return const_view_type(cptr(),size(),stepi(),stepj(),dt()); }
 
-        const_transpose_type transpose() const
+        TMV_INLINE const_transpose_type transpose() const
         { return const_transpose_type(cptr(),size(),stepj(),stepi(),dt()); }
 
-        TMV_MAYBE_CREF(type,const_conjugate_type) conjugate() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_conjugate_type) conjugate() const
         { return MakeTriView<type,const_conjugate_type>::call(mat()); }
 
-        const_adjoint_type adjoint() const
+        TMV_INLINE const_adjoint_type adjoint() const
         { return const_adjoint_type(cptr(),size(),stepj(),stepi(),dt()); }
 
-        const_offdiag_type offDiag(int noff) const
+        TMV_INLINE const_offdiag_type offDiag(int noff) const
         {
             CheckOffDiag(noff,size());
             return const_offdiag_type(
@@ -847,7 +847,7 @@ namespace tmv {
                 size()-noff,stepi(),stepj()); 
         }
 
-        const_offdiag_type offDiag() const
+        TMV_INLINE const_offdiag_type offDiag() const
         {
             CheckOffDiag(size());
             return const_offdiag_type(
@@ -855,19 +855,19 @@ namespace tmv {
                 size()-1,stepi(),stepj()); 
         }
 
-        const_unitdiag_type viewAsUnitDiag() const
+        TMV_INLINE const_unitdiag_type viewAsUnitDiag() const
         { return const_unitdiag_type(cptr(),size(),stepi(),stepj()); }
 
-        const_nonunitdiag_type viewAsNonUnitDiag() const
+        TMV_INLINE const_nonunitdiag_type viewAsNonUnitDiag() const
         {
             TMVAssert(!isunit());
             return const_nonunitdiag_type(cptr(),size(),stepi(),stepj()); 
         }
 
-        const_unknowndiag_type viewAsUnknownDiag(DiagType newdt=dt()) const
+        TMV_INLINE const_unknowndiag_type viewAsUnknownDiag(DiagType newdt=dt()) const
         { return const_unknowndiag_type(cptr(),size(),stepi(),stepj(),newdt); }
 
-        const_realpart_type realPart() const
+        TMV_INLINE const_realpart_type realPart() const
         {
             return const_realpart_type(
                 reinterpret_cast<const real_type*>(cptr()), size(), 
@@ -875,7 +875,7 @@ namespace tmv {
                 M::isreal ? stepj() : 2*stepj(), dt());
         }
 
-        const_imagpart_type imagPart() const
+        TMV_INLINE const_imagpart_type imagPart() const
         {
             TMVStaticAssert(M::iscomplex);
             TMVAssert(!isunit());
@@ -884,10 +884,10 @@ namespace tmv {
                 2*stepi(), 2*stepj(), dt());
         }
 
-        TMV_MAYBE_CREF(type,const_nonconj_type) nonConj() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_nonconj_type) nonConj() const
         { return MakeTriView<type,const_nonconj_type>::call(mat()); }
 
-        nonconst_type nonConst() const
+        TMV_INLINE nonconst_type nonConst() const
         {
             return nonconst_type(
                 const_cast<value_type*>(cptr()),
@@ -1386,40 +1386,40 @@ namespace tmv {
         // Views
         //
 
-        TMV_MAYBE_REF(type,view_type) view() 
+        TMV_INLINE TMV_MAYBE_REF(type,view_type) view() 
         { return MakeTriView<type,view_type>::call(mat()); }
 
-        TMV_MAYBE_REF(type,cview_type) cView() 
+        TMV_INLINE TMV_MAYBE_REF(type,cview_type) cView() 
         { return MakeTriView<type,cview_type>::call(mat()); }
 
-        TMV_MAYBE_REF(type,fview_type) fView() 
+        TMV_INLINE TMV_MAYBE_REF(type,fview_type) fView() 
         { return MakeTriView<type,fview_type>::call(mat()); }
 
-        TMV_MAYBE_REF(type,xview_type) xView() 
+        TMV_INLINE TMV_MAYBE_REF(type,xview_type) xView() 
         { return MakeTriView<type,xview_type>::call(mat()); }
 
-        TMV_MAYBE_REF(type,cmview_type) cmView() 
+        TMV_INLINE TMV_MAYBE_REF(type,cmview_type) cmView() 
         {
             TMVAssert(iscm() && "Called cmView on non-ColMajor matrix");
             return MakeTriView<type,cmview_type>::call(mat());
         }
 
-        TMV_MAYBE_REF(type,rmview_type) rmView() 
+        TMV_INLINE TMV_MAYBE_REF(type,rmview_type) rmView() 
         {
             TMVAssert(isrm() && "Called rmView on non-RowMajor matrix");
             return MakeTriView<type,rmview_type>::call(mat());
         }
 
-        transpose_type transpose() 
+        TMV_INLINE transpose_type transpose() 
         { return transpose_type(ptr(),size(),stepj(),stepi(),dt()); }
 
-        TMV_MAYBE_REF(type,conjugate_type) conjugate() 
+        TMV_INLINE TMV_MAYBE_REF(type,conjugate_type) conjugate() 
         { return MakeTriView<type,conjugate_type>::call(mat()); }
 
-        adjoint_type adjoint() 
+        TMV_INLINE adjoint_type adjoint() 
         { return adjoint_type(ptr(),size(),stepj(),stepi(),dt()); }
 
-        offdiag_type offDiag(int noff) 
+        TMV_INLINE offdiag_type offDiag(int noff) 
         {
             CheckOffDiag(noff,size());
             return offdiag_type(
@@ -1427,7 +1427,7 @@ namespace tmv {
                 size()-noff,stepi(),stepj()); 
         }
 
-        offdiag_type offDiag()
+        TMV_INLINE offdiag_type offDiag()
         {
             CheckOffDiag(size());
             return offdiag_type(
@@ -1435,19 +1435,19 @@ namespace tmv {
                 size()-1,stepi(),stepj()); 
         }
 
-        unitdiag_type viewAsUnitDiag()
+        TMV_INLINE unitdiag_type viewAsUnitDiag()
         { return unitdiag_type(ptr(),size(),stepi(),stepj()); }
 
-        nonunitdiag_type viewAsNonUnitDiag()
+        TMV_INLINE nonunitdiag_type viewAsNonUnitDiag()
         {
             TMVAssert(!isunit());
             return nonunitdiag_type(ptr(),size(),stepi(),stepj()); 
         }
 
-        unknowndiag_type viewAsUnknownDiag(DiagType newdt=dt()) 
+        TMV_INLINE unknowndiag_type viewAsUnknownDiag(DiagType newdt=dt()) 
         { return unknowndiag_type(ptr(),size(),stepi(),stepj(),newdt); }
 
-        realpart_type realPart() 
+        TMV_INLINE realpart_type realPart() 
         {
             return realpart_type(
                 reinterpret_cast<real_type*>(ptr()), size(), 
@@ -1455,7 +1455,7 @@ namespace tmv {
                 M::isreal ? stepj() : 2*stepj(), dt());
         }
 
-        imagpart_type imagPart() 
+        TMV_INLINE imagpart_type imagPart() 
         {
             TMVStaticAssert(M::iscomplex);
             TMVAssert(!isunit());
@@ -1464,7 +1464,7 @@ namespace tmv {
                 2*stepi(), 2*stepj(), dt());
         }
 
-        TMV_MAYBE_REF(type,nonconj_type) nonConj()
+        TMV_INLINE TMV_MAYBE_REF(type,nonconj_type) nonConj()
         { return MakeTriView<type,const_nonconj_type>::call(mat()); }
 
 

@@ -309,16 +309,14 @@ void TestMatrixDecomp()
             std::cout<<"."; std::cout.flush();
         } while (false);
 
-#if 0
         // QRP Decomposition
         for (int istrict = 0; istrict <= 1; istrict++) {
             if (showstartdone) {
                 std::cout<<"QRP"<<std::endl;
             }
             bool strict = istrict == 1;
-            tmv::QRPDiv<T>::StrictQRP = strict;
-            tmv::QRPDiv<CT>::StrictQRP = strict;
-            if (istrict == 1) { m.unsetDiv(); c.unsetDiv(); }
+            tmv::UseStrictQRP(strict);
+            m.unsetDiv(); c.unsetDiv(); 
 
             tmv::Matrix<T,stor> Q = m.qrpd().getQ();
             tmv::UpperTriMatrix<T> R = m.qrpd().getR();
@@ -438,6 +436,7 @@ void TestMatrixDecomp()
             std::cout<<"."; std::cout.flush();
         }
 
+#if 0
         // SV Decomposition
         do {
             if (showstartdone) {

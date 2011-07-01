@@ -1541,13 +1541,18 @@ namespace tmv {
             const bool ccc = M1::_colmajor && M2::_colmajor && M3::_colmajor;
             const bool rcc = M1::_rowmajor && M2::_colmajor && M3::_colmajor;
             const bool crc = M1::_colmajor && M2::_rowmajor && M3::_colmajor;
+            
             const int algo2 = 
-                ccc ? ( M3::iscomplex ? 11 : 12 ) :
-                rcc ? ( M3::iscomplex ? 21 : 22 ) :
-                crc ? ( M3::iscomplex ? 31 : 32 ) : 
-                21;
-            // Strange -- 31,32 are faster than copying to new storage.
-            // At least for the sizes I tested on.
+                ccc ? ( M3::iscomplex ? 11 : 
+                        cs != UNKNOWN && xs != UNKNOWN ? 11 :
+                        12 ) :
+                rcc ? ( M3::iscomplex ? 21 :
+                        cs != UNKNOWN && xs != UNKNOWN ? 21 :
+                        22 ) :
+                crc ? ( M3::iscomplex ? 31 :
+                        cs != UNKNOWN && rs != UNKNOWN ? 31 :
+                        32 ) : 
+                11;
 
             // Put the small matrix option first, so it doesn't have to 
             // go through a bunch of if/else statements.  For large matrices,
@@ -1771,7 +1776,7 @@ namespace tmv {
 #endif
             typedef typename M1::value_type T1;
             const bool rm = M2::_colmajor || M3::_rowmajor; 
-            typedef typename MCopyHelper<T1,Rec,cs,xs,rm,false>::type M1c;
+            typedef typename MCopyHelper<T1,Rec,cs,xs,rm>::type M1c;
             NoAliasMultMM<add>(x,M1c(m1),m2,m3);
         }
     };
@@ -1795,7 +1800,7 @@ namespace tmv {
             const Scaling<1,RT> one;
             typedef typename Traits2<T,T1>::type PT1;
             const bool rm = M2::_colmajor || M3::_rowmajor; 
-            typedef typename MCopyHelper<PT1,Rec,cs,xs,rm,false>::type M1c;
+            typedef typename MCopyHelper<PT1,Rec,cs,xs,rm>::type M1c;
             NoAliasMultMM<add>(one,M1c(x*m1),m2,m3);
         }
     };
@@ -1845,7 +1850,7 @@ namespace tmv {
 #endif
             typedef typename M2::value_type T2;
             const bool rm = M1::_colmajor && M3::_rowmajor;
-            typedef typename MCopyHelper<T2,Rec,xs,rs,rm,false>::type M2c;
+            typedef typename MCopyHelper<T2,Rec,xs,rs,rm>::type M2c;
             NoAliasMultMM<add>(x,m1,M2c(m2),m3);
         }
     };
@@ -1869,7 +1874,7 @@ namespace tmv {
             const Scaling<1,RT> one;
             typedef typename Traits2<T,T2>::type PT2;
             const bool rm = M1::_colmajor && M3::_rowmajor;
-            typedef typename MCopyHelper<PT2,Rec,xs,rs,rm,false>::type M2c;
+            typedef typename MCopyHelper<PT2,Rec,xs,rs,rm>::type M2c;
             NoAliasMultMM<add>(one,m1,M2c(x*m2),m3);
         }
     };
@@ -1925,14 +1930,14 @@ namespace tmv {
                 typedef typename M2::value_type T2;
                 typedef typename Traits2<T1,T2>::type PT3;
                 const bool rm = M1::_rowmajor && M2::_rowmajor;
-                typedef typename MCopyHelper<PT3,Rec,cs,rs,rm,false>::type M3c;
+                typedef typename MCopyHelper<PT3,Rec,cs,rs,rm>::type M3c;
                 NoAliasMultXM<add>(x,M3c(m1*m2),m3);
             } else {
                 typedef typename M3::value_type T3;
                 typedef typename Traits<T>::real_type RT;
                 const Scaling<1,RT> one;
                 const bool rm = M1::_rowmajor && M2::_rowmajor;
-                typedef typename MCopyHelper<T3,Rec,cs,rs,rm,false>::type M3c;
+                typedef typename MCopyHelper<T3,Rec,cs,rs,rm>::type M3c;
                 NoAliasMultXM<add>(one,M3c(x*m1*m2),m3);
             }
         }
@@ -1956,7 +1961,7 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type PT3;
             const bool rm = M1::_rowmajor && M2::_rowmajor;
-            typedef typename MCopyHelper<PT3,Rec,cs,rs,rm,false>::type M3c;
+            typedef typename MCopyHelper<PT3,Rec,cs,rs,rm>::type M3c;
             NoAliasMultXM<add>(x,M3c(m1*m2),m3);
         }
     };
@@ -2154,10 +2159,6 @@ namespace tmv {
             //  3 = rs == 1: reduces to trivial MultMV function
             //  4 = xs == 1: reduces to trivial Rank1Update function
             //  5 = transpose
-            //  6 = transpose, and go back to -4, not -3
-            //  7 = cs == 1 -> -4
-            //  8 = rs == 1 -> -4
-            //  9 = xs == 1 -> -4
             //
             // CCC: 
             // 11 = CCC, loop over n

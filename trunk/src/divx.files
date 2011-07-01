@@ -8,3 +8,4 @@ TMV_UnpackQ.cpp
 TMV_QRDiv.cpp 
 TMV_QRInverse.cpp 
 TMV_PackedQ.cpp
+TMV_QRPD.cpp 

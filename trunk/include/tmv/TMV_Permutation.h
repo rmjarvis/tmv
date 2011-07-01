@@ -493,31 +493,13 @@ namespace tmv {
         template <class M>
         friend void LU_Decompose(BaseMatrix_Rec_Mutable<M>& m, Permutation& P);
 
-#if 0
-        template <class M1, class M2>
-        friend void QRP_Decompose(
-            BaseMatrix_Rec_Mutable<M1>& Q, BaseMatrix_Tri_Mutable<M2>& R,
-            Permutation& P, bool strict=false)
-        {
-            TMVAssert(P.size() == Q.rowsize());
-            P.allocateMem();
-            QRP_Decompose(Q,R,P.getMem(),strict);
-            P.isinv = false;
-            P.calcDet();
-        }
-
+        // In TMV_QRPDecompose.h
         template <class M, class V>
         friend void QRP_Decompose(
-            BaseMatrix_Rec_Mutable<M>& QRx, BaseVector_Mutable<V>& beta,
-            Permutation& P, T& signdet, bool strict=false)
-        {
-            TMVAssert(P.size() == QRx.rowsize());
-            P.allocateMem();
-            QRP_Decompose(QRx,beta,P.getMem(),signdet,strict);
-            P.isinv = false;
-            P.calcDet();
-        }
+            BaseMatrix_Rec_Mutable<M>& m, BaseVector_Mutable<V>& beta,
+            Permutation& P, bool strict=false);
 
+#if 0
         template <class T>
         friend void LU_Decompose(
             const GenBandMatrix<T>& A, const LowerTriMatrixView<T>& L,

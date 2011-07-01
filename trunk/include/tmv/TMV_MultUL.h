@@ -351,8 +351,6 @@ namespace tmv {
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 14: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-            TMVAssert(SameStorage(m2,m3));
-            TMVAssert(OppositeStorage(m2,m3));
             const bool u1 = M1::_unit;
             const bool u2 = M2::_unit;
             typedef typename M1::value_type T1;
@@ -1125,7 +1123,7 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type PT3;
             const bool rm = M1::_rowmajor && M2::_rowmajor;
-            typedef typename MCopyHelper<PT3,Rec,s,s,rm,false>::type M3c;
+            typedef typename MCopyHelper<PT3,Rec,s,s,rm>::type M3c;
             NoAliasMultXM<add>(x,M3c(m1*m2),m3);
         }
     };

@@ -92,24 +92,39 @@ namespace tmv {
             typedef typename M1::col_sub_type M1c;
             typedef typename M1::row_sub_type M1r;
             typedef typename M1::submatrix_type M1s;
-            typedef typename VCopyHelper<T,rs,false>::type V2;
+            typedef typename VCopyHelper<T,rs>::type V2;
             typedef typename V2::subvector_type V2s;
             V2 tempBase = VectorSizer<T>(N);
 
+#if 1
             IT bj = beta.begin();
             for (int j=0;j<N;++j,++bj) {
                 // Work on the lower part of column j
-                M1c Acolj = A.col(j,j,M);
+                M1c u = A.col(j,j+1,M);
                 // Compute the Householder reflection of this column
                 // (and perform the reflection on this column).
-                HouseholderReflect(Acolj,*bj);
+                HouseholderReflect(A.ref(j,j),u,*bj);
                 // Reflect the rest of the matrix to the right of this column.
-                M1c u = A.col(j,j+1,M);
                 M1r A1a = A.row(j,j+1,N);
                 M1s A1b = A.subMatrix(j+1,M,j+1,N);
                 V2s temp = tempBase.subVector(0,N-j-1);
                 HouseholderMultEq(u,*bj,A1a,A1b,temp);
             }
+#else
+            IT bj = beta.begin();
+            for (int j=0;j<N;++j,++bj) {
+                // Work on the lower part of column j
+                M1c u = A.col(j,j+1,M);
+                // Compute the Householder reflection of this column
+                // (and perform the reflection on this column).
+                HouseholderReflect(A.ref(j,j),u,*bj);
+                // Reflect the rest of the matrix to the right of this column.
+                M1c v = A.col(j,j,M);
+                M1s A1 = A.subMatrix(j,M,j+1,N);
+                V2s temp = tempBase.subVector(0,N-j-1);
+                HouseholderMultEq(v,*bj,A1,temp);
+            }
+#endif
         }
     };
 
@@ -217,44 +232,34 @@ namespace tmv {
             typedef typename M1::submatrix_type M1s;
             typedef typename V::subvector_type Vs;
 
-            //std::cout<<"Start algo 21\n";
-            //std::cout<<"A = "<<A<<std::endl;
-            //std::cout<<"beta = "<<beta<<std::endl;
-            const int Nx = TMV_QR_BLOCKSIZE;
-            const int s1 = IntTraits2<Nx,rs>::min;
-            const int N1 = TMV_MIN(Nx,N);
-            typedef typename MCopyHelper<T,UpperTri,s1,s1,false,false>::type Ztype;
+            const int NB = 4;
+            typedef typename MCopyHelper<T,UpperTri,NB,NB>::type Ztype;
             typedef typename Ztype::subtrimatrix_type Zs;
-            Ztype BaseZ = MatrixSizer<T>(N1,N1);
+            Ztype BaseZ = MatrixSizer<T>(NB,NB);
             typename Ztype::view_type Z = BaseZ.view();
 
-            typedef typename Ztype::diag_type::iterator Zit;
-            typedef typename V::iterator bit;
+            typedef typename V::iterator IT;
 
-            const int s2 = IntTraits2<rs,s1>::diff;
-            const int s3 = IntTraits2<s2,1>::max;
-            typedef typename MCopyHelper<T,Rec,s1,s3,false,false>::type M3;
+            typedef typename MCopyHelper<T,Rec,NB,UNKNOWN>::type M3;
             typedef typename M3::col_sub_type M3c;
-            typedef typename M3::colrange_type M3cr;
+            typedef typename MViewHelper<T,Rec,NB,UNKNOWN,M3::_stepi,M3::_stepj>::type M3cr;
 
-            M3 tempBase = MatrixSizer<T>(N1,TMV_MAX(1,N-N1));
+            M3 tempBase = MatrixSizer<T>(NB,TMV_MAX(1,N-NB));
             //std::cout<<"tempBase = "<<tempBase<<std::endl;
 
+            IT bj = beta.begin();
             int j1=0;
-            for(int j2=j1+Nx; j2<N; j1=j2,j2+=Nx) {
+            for(int j2=j1+NB; j2<N; j1=j2,j2+=NB) {
                 //std::cout<<"j1,j2 = "<<j1<<','<<j2<<std::endl;
                 M1s A1 = A.subMatrix(j1,M,j1,j2);
                 //std::cout<<"A1 = "<<A1<<std::endl;
                 //std::cout<<"Z = "<<Z<<std::endl;
-                Zit bj = Z.diag().realPart().begin();
                 for(int j=j1;j<j2;++j,++bj) {
                     //std::cout<<"j = "<<j<<std::endl;
-                    M1c Acolj = A.col(j,j,M);
-                    //std::cout<<"Acolj = "<<Acolj<<std::endl;
-                    HouseholderReflect(Acolj,*bj);
-                    //std::cout<<"Acolj => "<<Acolj<<std::endl;
                     M1c u = A.col(j,j+1,M);
                     //std::cout<<"u = "<<u<<std::endl;
+                    HouseholderReflect(A.ref(j,j),u,*bj);
+                    //std::cout<<"u => "<<u<<std::endl;
                     M1r A2a = A.row(j,j+1,j2);
                     //std::cout<<"A2a = "<<A2a<<std::endl;
                     M1s A2b = A.subMatrix(j+1,M,j+1,j2);
@@ -277,11 +282,9 @@ namespace tmv {
                 //std::cout<<"tempBase = "<<tempBase<<std::endl;
                 BlockHouseholderLDiv(A1,Z,A4,temp);
                 //std::cout<<"A4 => "<<A4<<std::endl;
-                beta.subVector(j1,j2) = Z.diag().realPart();
             }
             M1s A1 = A.subMatrix(j1,M,j1,N);
             //std::cout<<"A1 = "<<A1<<std::endl;
-            bit bj = beta.subVector(j1,N).begin();
             for(int j=j1;j<N;++j,++bj) {
                 //std::cout<<"j = "<<j<<std::endl;
                 M1c Acolj = A.col(j,j,M);
@@ -430,37 +433,37 @@ namespace tmv {
             const int C = M1::_conj;
             typedef typename V::subvector_type Vs;
 
-            const int Nx = TMV_QR_BLOCKSIZE;
+            const int NB = TMV_QR_BLOCKSIZE;
 
-            const int s1 = IntTraits2<Nx,rs>::min;
-            const int N1 = TMV_MIN(Nx,N);
-            typedef typename MCopyHelper<T,UpperTri,s1,s1,false,false>::type Ztype;
+            const int s1 = IntTraits2<NB,rs>::min;
+            const int N1 = TMV_MIN(NB,N);
+            typedef typename MCopyHelper<T,UpperTri,s1,s1>::type Ztype;
             typedef typename Ztype::subtrimatrix_type Zs;
             Ztype BaseZ = MatrixSizer<T>(N1,N1);
             typename Ztype::view_type Z = BaseZ.view();
 
-            const int s2 = IntTraits2<rs,Nx>::diff;
+            const int s2 = IntTraits2<rs,NB>::diff;
             const int s3 = IntTraits2<s1,s2>::max;
-            const int N3 = TMV_MAX(N1,N-Nx);
-            typedef typename MCopyHelper<T,Rec,s1,s3,false,false>::type M3;
+            const int N3 = TMV_MAX(N1,N-NB);
+            typedef typename MCopyHelper<T,Rec,s1,s3>::type M3;
             typedef typename M3::col_sub_type M3c;
             typedef typename M3::colrange_type M3cr;
             typedef typename M3::submatrix_type M3s;
             M3 tempBase = MatrixSizer<T>(N1,N3);
 
-            typedef typename MViewHelper<T1,Rec,UNKNOWN,Nx,Si1,Sj1,C>::type M1sa;
+            typedef typename MViewHelper<T1,Rec,UNKNOWN,NB,Si1,Sj1,C>::type M1sa;
             const int s4 = (
                 rs == UNKNOWN ? UNKNOWN : 
-                rs - Nx*(rs/Nx) );
+                rs - NB*(rs/NB) );
             const int s5 = (
                 (cs == UNKNOWN || rs == UNKNOWN) ? UNKNOWN :
-                cs - Nx*(rs/Nx) );
+                cs - NB*(rs/NB) );
             typedef typename MViewHelper<T1,Rec,s5,s4,Si1,Sj1,C>::type M1sb;
 
-            typedef typename V::iterator bit;
+            typedef typename V::iterator IT;
 
             int j1=0;
-            for(int j2=j1+Nx; j2<N; j1=j2,j2+=Nx) {
+            for(int j2=j1+NB; j2<N; j1=j2,j2+=NB) {
                 M1sa A1 = A.subMatrix(j1,M,j1,j2);
 
                 RecursiveQRDecompose(A1,Z,true,tempBase);
@@ -472,7 +475,7 @@ namespace tmv {
             }
 
             M1sb A1 = A.subMatrix(j1,M,j1,N);
-            bit bj = beta.subVector(j1,N).begin();
+            IT bj = beta.subVector(j1,N).begin();
             for(int j=j1;j<N;++j,++bj) {
                 M1c Acolj = A.col(j,j,M);
                 HouseholderReflect(Acolj,*bj);
@@ -491,7 +494,7 @@ namespace tmv {
     {
         typedef typename M1::value_type T;
         typedef typename M1::real_type RT;
-        typedef typename MCopyHelper<T,UpperTri,rs,rs,false,false>::type M2;
+        typedef typename MCopyHelper<T,UpperTri,rs,rs>::type M2;
         enum { ZS1 = 1 };
         enum { ZS2 = rs };
         enum { ZA = ColMajor };
@@ -502,7 +505,7 @@ namespace tmv {
         enum { AS1 = M1::_stepi };
         enum { AS2 = M1::_stepj };
         enum { C = M1::_conj };
-        typedef typename MCopyHelper<T,Rec,rs/2,(rs+1)/2,false,false>::type M3;
+        typedef typename MCopyHelper<T,Rec,rs/2,(rs+1)/2>::type M3;
         enum { TS1 = M3::_stepi };
         enum { TS2 = M3::_stepj };
 
@@ -725,13 +728,13 @@ namespace tmv {
             std::cout<<"QRDecompose algo 27: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            typedef typename MCopyHelper<T,UpperTri,rs,rs,false,false>::type Ztype;
+            typedef typename MCopyHelper<T,UpperTri,rs,rs>::type Ztype;
             Ztype Z = MatrixSizer<T>(N,N);
             typename Ztype::view_type Zv = Z.view();
 
             const int s1 = IntTraits<rs>::halfS;
             const int s2 = IntTraits<IntTraits2<rs,1>::sum>::halfS;
-            typedef typename MCopyHelper<T,Rec,s1,s2,false,false>::type M3;
+            typedef typename MCopyHelper<T,Rec,s1,s2>::type M3;
             M3 tempBase = MatrixSizer<T>(N/2,(N+1)/2);
 
             RecursiveQRDecompose(A,Zv,false,tempBase);
@@ -839,7 +842,7 @@ namespace tmv {
             std::cout<<"QRDecompose algo 81: cs,rs = "<<cs<<','<<rs<<std::endl;
 #endif
             typedef typename M::value_type T;
-            typedef typename MCopyHelper<T,Rec,cs,rs,false,false>::type Mcm;
+            typedef typename MCopyHelper<T,Rec,cs,rs>::type Mcm;
             Mcm mcm = m;
             QRDecompose_Helper<-2,cs,rs,Mcm,V>::call(mcm,beta);
             NoAliasCopy(mcm,m);
@@ -903,10 +906,10 @@ namespace tmv {
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
             std::cout<<"cs = "<<cs<<"  rs = "<<rs<<std::endl;
             std::cout<<"sizes = "<<m.colsize()<<"  "<<m.rowsize()<<std::endl;
-            std::cout<<"maxunroll = "<<maxunroll<<std::endl;
-            std::cout<<"csrs = "<<csrs<<std::endl;
-            std::cout<<"l1cache = "<<l1cache<<std::endl;
-            std::cout<<"l2cache = "<<l2cache<<std::endl;
+            //std::cout<<"maxunroll = "<<maxunroll<<std::endl;
+            //std::cout<<"csrs = "<<csrs<<std::endl;
+            //std::cout<<"l1cache = "<<l1cache<<std::endl;
+            //std::cout<<"l2cache = "<<l2cache<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
             //std::cout<<"m = "<<m<<std::endl;
 #endif
@@ -936,6 +939,9 @@ namespace tmv {
             std::cout<<"algo = "<<algo<<std::endl;
 #endif
             QRDecompose_Helper<algo,cs,rs,M1,V>::call(m,beta);
+#ifdef PRINTALGO_QR
+            std::cout<<"Done QRDecompose\n";
+#endif
         }
     };
 

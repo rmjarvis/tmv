@@ -174,9 +174,11 @@
 #define TMV_INST_COMPLEX
 #endif
 
-// These next three are not instantiated by default:
+#ifndef TMV_NO_INST_MIX
+#define TMV_INST_MIX
+#endif
 
-//#define TMV_INST_MIX
+// These next two are not instantiated by default:
 
 //#define TMV_INST_LONGDOUBLE
 
@@ -1233,9 +1235,10 @@ namespace tmv {
 
         // x or y
         template <class T1, class T2>
-        static TMV_INLINE const T1& select(const T1& x, const T2& /*y*/) { return x; }
+        static TMV_INLINE const T1& select(const T1& x, const T2& ) 
+        { return x; }
         template <class T1, class T2>
-        static TMV_INLINE T1& select_ref(T1& x, const T2& /*y*/) { return x; }
+        static TMV_INLINE T1& select_ref(T1& x, const T2& ) { return x; }
 
         // abs(x) or x
         template <class T>
@@ -1359,6 +1362,13 @@ namespace tmv {
         static TMV_INLINE void set(ConjRef<T1> x, const T2& y) { x = y; }
         template <class T1, bool C, class T2>
         static TMV_INLINE void set(TriRef<T1,C> x, const T2& y) { x = y; }
+
+        // x.assignTo(y) or nothing
+        template <class T1, class T2>
+        static TMV_INLINE void assignTo(const T1& x, T2& y) { x.assignTo(y); }
+        template <class T1, class T2>
+        static TMV_INLINE void newAssignTo(const T1& x, T2& y) 
+        { x.newAssignTo(y); }
 
         // m.ref(i,i) = x or nothing
         template <class M, class T>
@@ -1614,10 +1624,10 @@ namespace tmv {
         struct ProdType { typedef T2 type; };
 
         template <class T1, class T2>
-        static TMV_INLINE const T2& select(const T1& /*x*/, const T2& y) 
+        static TMV_INLINE const T2& select(const T1& , const T2& y) 
         { return y; }
         template <class T1, class T2>
-        static TMV_INLINE const T2& select_ref(T1& /*x*/, const T2& y) 
+        static TMV_INLINE const T2& select_ref(T1& , const T2& y) 
         { return y; }
 
         template <class T>
@@ -1642,10 +1652,10 @@ namespace tmv {
         static TMV_INLINE T twox(const T& x) { return x; }
 
         template <class T>
-        static TMV_INLINE void increment(const T& /*x*/) { }
+        static TMV_INLINE void increment(const T& ) { }
 
         template <class T>
-        static TMV_INLINE void decrement(const T& /*x*/) { }
+        static TMV_INLINE void decrement(const T& ) { }
 
         template <class T>
         static TMV_INLINE const T& multby2(const T& x) { return x; }
@@ -1660,71 +1670,74 @@ namespace tmv {
         static TMV_INLINE void add(TriRef<T1,C> x, const T2& y) { x = y; }
 
         template <class T1, class T2>
-        static TMV_INLINE void scale(T1& /*x*/, const T2& /*y*/) { }
+        static TMV_INLINE void scale(T1& , const T2& ) { }
         template <class T1, class T2>
-        static TMV_INLINE void scale(ConjRef<T1> /*x*/, const T2& /*y*/) { }
+        static TMV_INLINE void scale(ConjRef<T1> , const T2& ) { }
         template <class T1, bool C, class T2>
-        static TMV_INLINE void scale(TriRef<T1,C> /*x*/, const T2& /*y*/) { }
+        static TMV_INLINE void scale(TriRef<T1,C> , const T2& ) { }
 
         template <class T1, class T2>
-        static TMV_INLINE void invscale(T1& /*x*/, const T2& /*y*/) { }
+        static TMV_INLINE void invscale(T1& , const T2& ) { }
         template <class T1, class T2>
-        static TMV_INLINE void invscale(ConjRef<T1> /*x*/, const T2& /*y*/) { }
+        static TMV_INLINE void invscale(ConjRef<T1> , const T2& ) { }
         template <class T1, bool C, class T2>
-        static TMV_INLINE void invscale(TriRef<T1,C> /*x*/, const T2& /*y*/) { }
+        static TMV_INLINE void invscale(TriRef<T1,C> , const T2& ) { }
 
         template <class T1, class T2>
-        static TMV_INLINE T2 sum(const T1& /*x*/, const T2& y) { return y; }
+        static TMV_INLINE T2 sum(const T1& , const T2& y) { return y; }
 
         template <class T1, class T2>
-        static TMV_INLINE T2 prod(const T1& /*x*/, const T2& y) { return y; }
+        static TMV_INLINE T2 prod(const T1& , const T2& y) { return y; }
 
         template <class T1, int ix2, class T2>
         static TMV_INLINE Scaling<ix2,T2> prod(
-            const T1& /*x*/, const Scaling<ix2,T2>& y) 
-        { return y; }
+            const T1& , const Scaling<ix2,T2>& y) { return y; }
 
         template <class T1, class T2>
-        static TMV_INLINE T2 invprod(const T1& /*x*/, const T2& y)  
-        { return y; }
+        static TMV_INLINE T2 invprod(const T1& , const T2& y)  { return y; }
 
         template <class T1, int ix2, class T2>
         static TMV_INLINE Scaling<ix2,T2> invprod(
-            const T1& /*x*/, const Scaling<ix2,T2>& y) { return y; }
+            const T1& , const Scaling<ix2,T2>& y) { return y; }
 
         template <bool c1, bool c2, class T1, class T2>
-        static TMV_INLINE T2 zprod(const T1& /*x*/, const T2& y)
+        static TMV_INLINE T2 zprod(const T1& , const T2& y)
         { return Maybe<c2>::conj(y); }
 
         template <class T>
         static TMV_INLINE T diff(const T& x, const T& y) { return x + y; }
 
         template <class T1, class T2>
-        static TMV_INLINE void set(T1& /*x*/, const T2& /*y*/) { }
+        static TMV_INLINE void set(T1& , const T2& ) { }
         template <class T1, class T2>
-        static TMV_INLINE void set(ConjRef<T1> /*x*/, const T2& /*y*/) { }
+        static TMV_INLINE void set(ConjRef<T1> , const T2& ) { }
         template <class T1, bool C, class T2>
-        static TMV_INLINE void set(TriRef<T1,C> /*x*/, const T2& /*y*/) { }
+        static TMV_INLINE void set(TriRef<T1,C> , const T2& ) { }
+
+        template <class T1, class T2>
+        static TMV_INLINE void assignTo(const T1& , T2& ) { }
+        template <class T1, class T2>
+        static TMV_INLINE void newAssignTo(const T1& , T2& )  { }
 
         template <class M, class T>
-        static TMV_INLINE void setdiag(M& /*m*/, int /*i*/, const T& /*x*/) { }
+        static TMV_INLINE void setdiag(M& , int , const T& ) { }
         template <class M, class T>
-        static TMV_INLINE void setdiag2(M /*m*/, int /*i*/, const T& /*x*/) { }
+        static TMV_INLINE void setdiag2(M , int , const T& ) { }
 
         template <class M, class T>
-        static TMV_INLINE void setdiag(M& /*m*/, const T& /*x*/) { }
+        static TMV_INLINE void setdiag(M& , const T& ) { }
         template <class M, class T>
-        static TMV_INLINE void setdiag2(M /*m*/, const T& /*x*/) { }
+        static TMV_INLINE void setdiag2(M , const T& ) { }
 
         template <class M>
-        static TMV_INLINE void zero(M& /*m*/) { }
+        static TMV_INLINE void zero(M& ) { }
         template <class M>
-        static TMV_INLINE void zero2(M /*m*/) { }
+        static TMV_INLINE void zero2(M ) { }
 
         template <class M>
-        static TMV_INLINE void conjself(M& /*m*/) { }
+        static TMV_INLINE void conjself(M& ) { }
         template <class M>
-        static TMV_INLINE void conjself2(M /*m*/) { }
+        static TMV_INLINE void conjself2(M ) { }
 
         template <class M>
         static TMV_INLINE const M& conjugate(const M& m) { return m; }
@@ -1749,9 +1762,9 @@ namespace tmv {
         static TMV_INLINE void addtoall2(V v, const T& x) { v.setAllTo(x); }
 
         template <class M>
-        static TMV_INLINE void makeunitdiag(M& /*m*/) { }
+        static TMV_INLINE void makeunitdiag(M& ) { }
         template <class M>
-        static TMV_INLINE void makeunitdiag2(M /*m*/) { }
+        static TMV_INLINE void makeunitdiag2(M ) { }
 
         template <class M1, class M2>
         static TMV_INLINE void offdiag_copy(const M1& m1, M2& m2) { m2 = m1; }
@@ -1759,9 +1772,9 @@ namespace tmv {
         static TMV_INLINE void offdiag_copy2(const M1 m1, M2& m2) { m2 = m1; }
 
         template <class M>
-        static TMV_INLINE void zero_offdiag(M& /*m*/) { }
+        static TMV_INLINE void zero_offdiag(M& ) { }
         template <class M>
-        static TMV_INLINE void zero_offdiag2(M /*m*/) { }
+        static TMV_INLINE void zero_offdiag2(M ) { }
 
         template <class M>
         static TMV_INLINE typename M::view_type offdiag(M& m) 

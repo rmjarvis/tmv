@@ -29,7 +29,6 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-
 #include "TMV_Blas.h"
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_SmallMatrix.h"
@@ -44,6 +43,7 @@
 #include "tmv/TMV_ScaleM.h"
 #include "tmv/TMV_LUD.h"
 #include "tmv/TMV_QRD.h"
+#include "tmv/TMV_QRPD.h"
 
 namespace tmv {
 
@@ -703,9 +703,9 @@ namespace tmv {
         TMVStaticAssert(!Traits<T>::isinteger);
         if (!this->divIsSet()) {
             DivType dt = this->getDivType();
-            TMVAssert(dt == tmv::LU || dt == tmv::QR 
-                      /*|| dt == tmv::QRP
-                       *|| dt == tmv::SV */
+            TMVAssert(dt == tmv::LU || dt == tmv::QR || 
+                      dt == tmv::QRP
+                      /*|| dt == tmv::SV */
             );
             switch (dt) {
               case tmv::LU : 
@@ -716,6 +716,11 @@ namespace tmv {
               case tmv::QR : 
                    this->divider.reset(
                        new InstQRD<T>(
+                           this->getConstView(),this->divIsInPlace()));
+                   break;
+              case tmv::QRP : 
+                   this->divider.reset(
+                       new InstQRPD<T>(
                            this->getConstView(),this->divIsInPlace()));
                    break;
               default :
@@ -745,13 +750,6 @@ namespace tmv {
     }
 
     template <class T>
-    void MatrixDivHelper2<T>::qrpd() const {}
-    template <class T>
-    void MatrixDivHelper2<T>::svd() const {}
-
-#if 0
-
-    template <class T>
     const InstQRPD<T>& MatrixDivHelper2<T>::qrpd() const
     {
         this->divideUsing(QRP);
@@ -760,6 +758,9 @@ namespace tmv {
         return static_cast<const InstQRPD<T>&>(*this->getDiv());
     }
 
+    template <class T>
+    void MatrixDivHelper2<T>::svd() const {}
+#if 0
     template <class T>
     const InstSVD<T>& MatrixDivHelper2<T>::svd() const
     {

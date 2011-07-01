@@ -1258,7 +1258,7 @@ namespace tmv {
             if (m2.isSingular()) ThrowSingular("DiagMatrix");
             typedef typename M3::value_type T3;
             const int s = Sizes<cs,rs>::size;
-            typedef typename VCopyHelper<T3,s,false>::type V;
+            typedef typename VCopyHelper<T3,s>::type V;
             V v(m2.size());
             NoAliasElemDivVV(x,m1.diag(),m2.diag(),v);
             m3.setZero();

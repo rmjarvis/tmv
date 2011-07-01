@@ -14,11 +14,12 @@
 //#undef NDEBUG
 
 #include <iostream>
+#define TMV_NO_LIB
 #include "TMV.h"
 
 // How big do you want the matrices to be?
-const int M = 303;
-const int N = 103;
+const int M = 31;
+const int N = 834;
 //#define AISSQUARE
 
 // Define the type to use:
@@ -38,24 +39,28 @@ const int N = 103;
 
 // Define which versions you want to test:
 #define DOREG
-//#define DOSMALL
-//#define DOBLAS
-//#define DOEIGEN
-//#define DOEIGENSMALL
+#define DOSMALL
+#define DOBLAS
+#define DOEIGEN
+#define DOEIGENSMALL
 
 // Define which batches of functions you want to test:
 //#define DOMULTXM
 //#define DOADDMM
 //#define DONORM
 //#define DOMULTMV
-//#define DORANK1
-#define DOMULTMD
+#define DORANK1
+//#define DOMULTMD
 //#define DOMULTDM
 //#define DOSWAP
 
 // Set this if you only want to do a single loop.
 // Not so useful for timing, but useful for debugging.
 //#define ONELOOP
+
+// Set this to just do the basic C = A * D multiplication (and similar), 
+// rather than incluing all the various conjugates, +=, and scalings.
+#define BASIC_ONLY
 
 // Normally I fill the matrices and vectors with random values, but 
 // that can make it difficult to debug the arithmetic.
@@ -110,6 +115,15 @@ const int nloops2 = 1;
 #else
 const int nloops2 = targetmem / (M*N * sizeof(T)) + 1;
 const int nloops1 = targetnflops / (M*N * nloops2 * XFOUR) + 1;
+#endif
+
+#include <sys/time.h>
+#include <algorithm>
+#include <numeric>
+#include <iostream>
+
+#if (defined(DOEIGEN) || defined(DOEIGENSMALL))
+#include "Eigen/Core"
 #endif
 
 #if (PART == 1) // Full rectangle
@@ -404,21 +418,11 @@ const int nloops2x = (
      N!=Eigen::Dynamic && M!=Eigen::Dynamic) ?  nloops2 : 0 );
 #endif
 
-#include <sys/time.h>
-#include <algorithm>
-#include <numeric>
-#include <iostream>
-
-#if (defined(DOEIGEN) || defined(DOEIGENSMALL))
-#include "Eigen/Core"
-#include "Eigen/Array"
-#endif
-
 static void ClearCache()
 {
-    tmv::Vector<double> X(1000000,8.);
-    tmv::Vector<double> Y(1000000,8.);
-    tmv::Vector<double> Z(1000000);
+    static tmv::Vector<double> X(1000000,8.);
+    static tmv::Vector<double> Y(1000000,8.);
+    static tmv::Vector<double> Z(1000000);
     Z = X + Y;
     if (Norm(Z) < 5.) exit(1);
 }
@@ -1448,6 +1452,7 @@ static void MultXM(
 #endif
 #endif
 
+#ifndef BASIC_ONLY
 #if 1 // C = complex(8,9) * A*
 #ifdef ERRORCHECK
         if (n == 0) {
@@ -1584,6 +1589,7 @@ static void MultXM(
             e8_smalleigen = sqrt(e8_smalleigen/nloops2);
             e8_smalleigen /= RT(12)*Norm(A0[0]);
         }
+#endif
 #endif
 #endif
 #endif
@@ -2122,6 +2128,7 @@ static void MultXM(
 #endif
 #endif
 
+#ifndef BASIC_ONLY
 #if 1 // C = complex(8,9) * B*
 #ifdef ERRORCHECK
         if (n == 0) {
@@ -2262,6 +2269,7 @@ static void MultXM(
 #endif
 #endif
 #endif
+#endif
     }
 
     std::cout<<"C = A                   "<<t1_reg<<"  "<<t1_small<<"  "<<t1_blas;
@@ -2279,8 +2287,10 @@ static void MultXM(
     std::cout<<"  "<<t6_eigen<<"  "<<t6_smalleigen<<std::endl;
     std::cout<<"C = (8,9) * A           "<<t7_reg<<"  "<<t7_small<<"  "<<t7_blas;
     std::cout<<"  "<<t7_eigen<<"  "<<t7_smalleigen<<std::endl;
+#ifndef BASIC_ONLY
     std::cout<<"C = (8,9) * A*          "<<t8_reg<<"  "<<t8_small<<"  "<<t8_blas;
     std::cout<<"  "<<t8_eigen<<"  "<<t8_smalleigen<<std::endl;
+#endif
 #endif
     std::cout<<"C = B                   "<<t9_reg<<"  "<<t9_small<<"  "<<t9_blas;
     std::cout<<"  "<<t9_eigen<<"  "<<t9_smalleigen<<std::endl;
@@ -2291,8 +2301,10 @@ static void MultXM(
 #ifdef TISCOMPLEX
     std::cout<<"C = (8,9) * B           "<<t12_reg<<"  "<<t12_small<<"  "<<t12_blas;
     std::cout<<"  "<<t12_eigen<<"  "<<t12_smalleigen<<std::endl;
+#ifndef BASIC_ONLY
     std::cout<<"C = (8,9) * B*          "<<t13_reg<<"  "<<t13_small<<"  "<<t13_blas;
     std::cout<<"  "<<t13_eigen<<"  "<<t13_smalleigen<<std::endl;
+#endif
 #endif
 
 #ifdef ERRORCHECK
@@ -6712,6 +6724,7 @@ static void SwapM(
 #endif
 #endif
 
+#ifndef BASIC_ONLY
 #if 1 // Swap(A,Ax.conjugate);
 #ifdef ERRORCHECK
         if (n == 0) 
@@ -6863,6 +6876,7 @@ static void SwapM(
             e6_smalleigen = sqrt(e6_smalleigen/nloops2);
             e6_smalleigen /= Norm(A0[0]) + Norm(A0x[0]);
         }
+#endif
 #endif
 #endif
 #endif
@@ -7398,8 +7412,10 @@ static void SwapM(
 #ifdef TISCOMPLEX
     std::cout<<"A.conjugateSelf()       "<<t5_reg<<"  "<<t5_small<<"  "<<t5_blas;
     std::cout<<"  "<<t5_eigen<<"  "<<t5_smalleigen<<std::endl;
+#ifndef BASIC_ONLY
     std::cout<<"Swap(A,Ax.conjugate())  "<<t6_reg<<"  "<<t6_small<<"  "<<t6_blas;
     std::cout<<"  "<<t6_eigen<<"  "<<t6_smalleigen<<std::endl;
+#endif
 #endif
 #ifdef DOPERMUTE
     std::cout<<"A.permuteRows(P)        "<<t7_reg<<"  "<<t7_small<<"  "<<t7_blas;
@@ -7429,8 +7445,10 @@ static void SwapM(
 #ifdef TISCOMPLEX
     std::cout<<"A.conjugateSelf()       "<<e5_reg<<"  "<<e5_small<<"  "<<e5_blas;
     std::cout<<"  "<<e5_eigen<<"  "<<e5_smalleigen<<std::endl;
+#ifndef BASIC_ONLY
     std::cout<<"Swap(A,Ax.conjugate())  "<<e6_reg<<"  "<<e6_small<<"  "<<e6_blas;
     std::cout<<"  "<<e6_eigen<<"  "<<e6_smalleigen<<std::endl;
+#endif
 #endif
 #ifdef DOPERMUTE
     std::cout<<"A.permuteRows(P)        "<<e7_reg<<"  "<<e7_small<<"  "<<e7_blas;
@@ -7845,6 +7863,7 @@ static void MultMV(
 #endif
 #endif
 
+#ifndef BASIC_ONLY
 #if 1 // D = -A * C
 #ifdef ERRORCHECK
         if (n == 0) {
@@ -11022,6 +11041,7 @@ static void MultMV(
 #endif
 #endif
 #endif
+#endif
 
 #ifdef AISSQUARE
 #if 1 // D *= A
@@ -11306,6 +11326,7 @@ static void MultMV(
 #endif
 #endif
 
+#ifndef BASIC_ONLY
 #if 1 // D *= 7 * A
 #ifdef ERRORCHECK
         if (n == 0) {
@@ -12164,6 +12185,7 @@ static void MultMV(
 #endif
 #endif
 #endif
+#endif
 
     }
 
@@ -12171,6 +12193,7 @@ static void MultMV(
     std::cout<<"  "<<t1_eigen<<"  "<<t1_smalleigen<<std::endl;
     std::cout<<"D = B * C               "<<t2_reg<<"  "<<t2_small<<"  "<<t2_blas;
     std::cout<<"  "<<t2_eigen<<"  "<<t2_smalleigen<<std::endl;
+#ifndef BASIC_ONLY
     std::cout<<"D = -A * C              "<<t3_reg<<"  "<<t3_small<<"  "<<t3_blas;
     std::cout<<"  "<<t3_eigen<<"  "<<t3_smalleigen<<std::endl;
     std::cout<<"D = -B * C              "<<t4_reg<<"  "<<t4_small<<"  "<<t4_blas;
@@ -12221,11 +12244,13 @@ static void MultMV(
     std::cout<<"D += (8,9) * B* * C*    "<<t26_reg<<"  "<<t26_small<<"  "<<t26_blas;
     std::cout<<"  "<<t26_eigen<<"  "<<t26_smalleigen<<std::endl;
 #endif
+#endif
 #ifdef AISSQUARE
     std::cout<<"D *= A                  "<<t27_reg<<"  "<<t27_small<<"  "<<t27_blas;
     std::cout<<"  "<<t27_eigen<<"  "<<t27_smalleigen<<std::endl;
     std::cout<<"D *= B                  "<<t28_reg<<"  "<<t28_small<<"  "<<t28_blas;
     std::cout<<"  "<<t28_eigen<<"  "<<t28_smalleigen<<std::endl;
+#ifndef BASIC_ONLY
     std::cout<<"D *= 7 * A              "<<t29_reg<<"  "<<t29_small<<"  "<<t29_blas;
     std::cout<<"  "<<t29_eigen<<"  "<<t29_smalleigen<<std::endl;
     std::cout<<"D *= 7 * B              "<<t30_reg<<"  "<<t30_small<<"  "<<t30_blas;
@@ -12241,6 +12266,7 @@ static void MultMV(
     std::cout<<"  "<<t34_eigen<<"  "<<t34_smalleigen<<std::endl;
 #endif
 #endif
+#endif
 
 #ifdef ERRORCHECK
     std::cout<<"errors:\n";
@@ -12248,6 +12274,7 @@ static void MultMV(
     std::cout<<"  "<<e1_eigen<<"  "<<e1_smalleigen<<std::endl;
     std::cout<<"D = B * C               "<<e2_reg<<"  "<<e2_small<<"  "<<e2_blas;
     std::cout<<"  "<<e2_eigen<<"  "<<e2_smalleigen<<std::endl;
+#ifndef BASIC_ONLY
     std::cout<<"D = -A * C              "<<e3_reg<<"  "<<e3_small<<"  "<<e3_blas;
     std::cout<<"  "<<e3_eigen<<"  "<<e3_smalleigen<<std::endl;
     std::cout<<"D = -B * C              "<<e4_reg<<"  "<<e4_small<<"  "<<e4_blas;
@@ -12298,11 +12325,13 @@ static void MultMV(
     std::cout<<"D += (8,9) * B* * C*    "<<e26_reg<<"  "<<e26_small<<"  "<<e26_blas;
     std::cout<<"  "<<e26_eigen<<"  "<<e26_smalleigen<<std::endl;
 #endif
+#endif
 #ifdef AISSQUARE
     std::cout<<"D *= A                  "<<e27_reg<<"  "<<e27_small<<"  "<<e27_blas;
     std::cout<<"  "<<e27_eigen<<"  "<<e27_smalleigen<<std::endl;
     std::cout<<"D *= B                  "<<e28_reg<<"  "<<e28_small<<"  "<<e28_blas;
     std::cout<<"  "<<e28_eigen<<"  "<<e28_smalleigen<<std::endl;
+#ifndef BASIC_ONLY
     std::cout<<"D *= 7 * A              "<<e29_reg<<"  "<<e29_small<<"  "<<e29_blas;
     std::cout<<"  "<<e29_eigen<<"  "<<e29_smalleigen<<std::endl;
     std::cout<<"D *= 7 * B              "<<e30_reg<<"  "<<e30_small<<"  "<<e30_blas;
@@ -12316,6 +12345,7 @@ static void MultMV(
     std::cout<<"  "<<e33_eigen<<"  "<<e33_smalleigen<<std::endl;
     std::cout<<"D *= (7,1) * B*         "<<e34_reg<<"  "<<e34_small<<"  "<<e34_blas;
     std::cout<<"  "<<e34_eigen<<"  "<<e34_smalleigen<<std::endl;
+#endif
 #endif
 #endif
     std::cout<<"\n\n";
@@ -12698,6 +12728,7 @@ static void Rank1Update(
 #endif
 #endif
 
+#ifndef BASIC_ONLY
 #if 1 // A = -D ^ C
 #ifdef ERRORCHECK
         if (n == 0) {
@@ -15230,6 +15261,7 @@ static void Rank1Update(
 #endif
 #endif
 #endif
+#endif
 
     }
 
@@ -15237,6 +15269,7 @@ static void Rank1Update(
     std::cout<<"  "<<t1_eigen<<"  "<<t1_smalleigen<<std::endl;
     std::cout<<"B = D ^ C               "<<t2_reg<<"  "<<t2_small<<"  "<<t2_blas;
     std::cout<<"  "<<t2_eigen<<"  "<<t2_smalleigen<<std::endl;
+#ifndef BASIC_ONLY
     std::cout<<"A = -A ^ C              "<<t3_reg<<"  "<<t3_small<<"  "<<t3_blas;
     std::cout<<"  "<<t3_eigen<<"  "<<t3_smalleigen<<std::endl;
     std::cout<<"B = -D ^ C              "<<t4_reg<<"  "<<t4_small<<"  "<<t4_blas;
@@ -15279,6 +15312,7 @@ static void Rank1Update(
     std::cout<<"B += (8,9) * D* ^ C*    "<<t18_reg<<"  "<<t18_small<<"  "<<t18_blas;
     std::cout<<"  "<<t18_eigen<<"  "<<t18_smalleigen<<std::endl;
 #endif
+#endif
 
 #ifdef ERRORCHECK
     std::cout<<"errors:\n";
@@ -15286,6 +15320,7 @@ static void Rank1Update(
     std::cout<<"  "<<e1_eigen<<"  "<<e1_smalleigen<<std::endl;
     std::cout<<"B = D ^ C               "<<e2_reg<<"  "<<e2_small<<"  "<<e2_blas;
     std::cout<<"  "<<e2_eigen<<"  "<<e2_smalleigen<<std::endl;
+#ifndef BASIC_ONLY
     std::cout<<"A = -D ^ C              "<<e3_reg<<"  "<<e3_small<<"  "<<e3_blas;
     std::cout<<"  "<<e3_eigen<<"  "<<e3_smalleigen<<std::endl;
     std::cout<<"B = -D ^ C              "<<e4_reg<<"  "<<e4_small<<"  "<<e4_blas;
@@ -15327,6 +15362,7 @@ static void Rank1Update(
     std::cout<<"  "<<e17_eigen<<"  "<<e17_smalleigen<<std::endl;
     std::cout<<"B += (8,9) * D* ^ C*    "<<e18_reg<<"  "<<e18_small<<"  "<<e18_blas;
     std::cout<<"  "<<e18_eigen<<"  "<<e18_smalleigen<<std::endl;
+#endif
 #endif
     std::cout<<"\n\n";
 #endif
@@ -15735,6 +15771,7 @@ static void MultMD(
 #endif
 #endif
 
+#ifndef BASIC_ONLY
 #if 1 // D = -A * diag(C)
 #ifdef ERRORCHECK
         if (n == 0) {
@@ -19112,6 +19149,7 @@ static void MultMD(
 #endif
 #endif
 #endif
+#endif
 
     }
 
@@ -19119,6 +19157,7 @@ static void MultMD(
     std::cout<<"  "<<t1_eigen<<"  "<<t1_smalleigen<<std::endl;
     std::cout<<"D = B * diag(C)         "<<t2_reg<<"  "<<t2_small<<"  "<<t2_blas;
     std::cout<<"  "<<t2_eigen<<"  "<<t2_smalleigen<<std::endl;
+#ifndef BASIC_ONLY
     std::cout<<"D = -A * diag(C)        "<<t3_reg<<"  "<<t3_small<<"  "<<t3_blas;
     std::cout<<"  "<<t3_eigen<<"  "<<t3_smalleigen<<std::endl;
     std::cout<<"D = -B * diag(C)        "<<t4_reg<<"  "<<t4_small<<"  "<<t4_blas;
@@ -19169,6 +19208,7 @@ static void MultMD(
     std::cout<<"D += (8,9)*B* *diag(C*) "<<t26_reg<<"  "<<t26_small<<"  "<<t26_blas;
     std::cout<<"  "<<t26_eigen<<"  "<<t26_smalleigen<<std::endl;
 #endif
+#endif
 
 #ifdef ERRORCHECK
     std::cout<<"errors:\n";
@@ -19176,6 +19216,7 @@ static void MultMD(
     std::cout<<"  "<<e1_eigen<<"  "<<e1_smalleigen<<std::endl;
     std::cout<<"D = B * diag(C)         "<<e2_reg<<"  "<<e2_small<<"  "<<e2_blas;
     std::cout<<"  "<<e2_eigen<<"  "<<e2_smalleigen<<std::endl;
+#ifndef BASIC_ONLY
     std::cout<<"D = -A * diag(C)        "<<e3_reg<<"  "<<e3_small<<"  "<<e3_blas;
     std::cout<<"  "<<e3_eigen<<"  "<<e3_smalleigen<<std::endl;
     std::cout<<"D = -B * diag(C)        "<<e4_reg<<"  "<<e4_small<<"  "<<e4_blas;
@@ -19225,6 +19266,7 @@ static void MultMD(
     std::cout<<"  "<<e25_eigen<<"  "<<e25_smalleigen<<std::endl;
     std::cout<<"D += (8,9)*B* *diag(C*) "<<e26_reg<<"  "<<e26_small<<"  "<<e26_blas;
     std::cout<<"  "<<e26_eigen<<"  "<<e26_smalleigen<<std::endl;
+#endif
 #endif
     std::cout<<"\n\n";
 #endif
@@ -19634,6 +19676,7 @@ static void MultDM(
 #endif
 #endif
 
+#ifndef BASIC_ONLY
 #if 1 // D = -diag(C) * A
 #ifdef ERRORCHECK
         if (n == 0) {
@@ -23031,6 +23074,7 @@ static void MultDM(
 #endif
 #endif
 #endif
+#endif
 
     }
 
@@ -23038,6 +23082,7 @@ static void MultDM(
     std::cout<<"  "<<t1_eigen<<"  "<<t1_smalleigen<<std::endl;
     std::cout<<"D = diag(C) * B         "<<t2_reg<<"  "<<t2_small<<"  "<<t2_blas;
     std::cout<<"  "<<t2_eigen<<"  "<<t2_smalleigen<<std::endl;
+#ifndef BASIC_ONLY
     std::cout<<"D = -diag(C) * A        "<<t3_reg<<"  "<<t3_small<<"  "<<t3_blas;
     std::cout<<"  "<<t3_eigen<<"  "<<t3_smalleigen<<std::endl;
     std::cout<<"D = -diag(C) * B        "<<t4_reg<<"  "<<t4_small<<"  "<<t4_blas;
@@ -23088,6 +23133,7 @@ static void MultDM(
     std::cout<<"D += (8,9)*diag(C*)*B*  "<<t26_reg<<"  "<<t26_small<<"  "<<t26_blas;
     std::cout<<"  "<<t26_eigen<<"  "<<t26_smalleigen<<std::endl;
 #endif
+#endif
 
 #ifdef ERRORCHECK
     std::cout<<"errors:\n";
@@ -23095,6 +23141,7 @@ static void MultDM(
     std::cout<<"  "<<e1_eigen<<"  "<<e1_smalleigen<<std::endl;
     std::cout<<"D = diag(C) * B         "<<e2_reg<<"  "<<e2_small<<"  "<<e2_blas;
     std::cout<<"  "<<e2_eigen<<"  "<<e2_smalleigen<<std::endl;
+#ifndef BASIC_ONLY
     std::cout<<"D = -diag(C) * A        "<<e3_reg<<"  "<<e3_small<<"  "<<e3_blas;
     std::cout<<"  "<<e3_eigen<<"  "<<e3_smalleigen<<std::endl;
     std::cout<<"D = -diag(C) * B        "<<e4_reg<<"  "<<e4_small<<"  "<<e4_blas;
@@ -23144,6 +23191,7 @@ static void MultDM(
     std::cout<<"  "<<e25_eigen<<"  "<<e25_smalleigen<<std::endl;
     std::cout<<"D += (8,9)*diag(C*)*B*  "<<e26_reg<<"  "<<e26_small<<"  "<<e26_blas;
     std::cout<<"  "<<e26_eigen<<"  "<<e26_smalleigen<<std::endl;
+#endif
 #endif
     std::cout<<"\n\n";
 #endif

@@ -458,14 +458,11 @@ int dlaswp_(const int& n, double* a, const int& lda,
     const int& k1, const int& k2, const int* ipiv, const int& incx);
 int slaswp_(const int& n, float* a, const int& lda, 
     const int& k1, const int& k2, const int* ipiv, const int& incx);
-int zlaswp_(const int& n, void* a, const int& lda, 
+int zlaswp_(const int& n, cdouble* a, const int& lda, 
     const int& k1, const int& k2, const int* ipiv, const int& incx);
 int claswp_(const int& n, cfloat* a, const int& lda, 
     const int& k1, const int& k2, const int* ipiv, const int& incx);
 
-int cgels_(const char& trans, const int& m, const int& n, const int& nrhs,
-           void* a, const int& lda, void* b, const int& ldb, 
-           void* work, const int& lwork, int* info);
 int dgels_(const char& trans, const int& m, const int& n, const int& nrhs,
            double* a, const int& lda, double* b, const int& ldb, 
            double* work, const int& lwork, int* info);
@@ -473,8 +470,28 @@ int sgels_(const char& trans, const int& m, const int& n, const int& nrhs,
            float* a, const int& lda, float* b, const int& ldb,
            float* work, const int& lwork, int* info);
 int zgels_(const char& trans, const int& m, const int& n, const int& nrhs,
-           void* a, const int& lda, void* b, const int& ldb, 
-           void* work, const int& lwork, int* info);
+           cdouble* a, const int& lda, cdouble* b, const int& ldb, 
+           cdouble* work, const int& lwork, int* info);
+int cgels_(const char& trans, const int& m, const int& n, const int& nrhs,
+           cfloat* a, const int& lda, cfloat* b, const int& ldb, 
+           cfloat* work, const int& lwork, int* info);
+
+int dgelsy_(const int& m, const int& n, const int& nrhs, 
+            double* a, const int& lda, double* b, const int& ldb,
+            int* jpvt, const double& rcond, int* rank, 
+            double* work, const int& lwork, int* info);
+int sgelsy_(const int& m, const int& n, const int& nrhs, 
+            float* a, const int& lda, float* b, const int& ldb,
+            int* jpvt, const float& rcond, int* rank, 
+            float* work, const int& lwork, int* info);
+int zgelsy_(const int& m, const int& n, const int& nrhs, 
+            cdouble* a, const int& lda, cdouble* b, const int& ldb,
+            int* jpvt, const double& rcond, int* rank, 
+            cdouble* work, const int& lwork, double* rwork, int* info);
+int cgelsy_(const int& m, const int& n, const int& nrhs, 
+            cfloat* a, const int& lda, cfloat* b, const int& ldb,
+            int* jpvt, const float& rcond, int* rank, 
+            cfloat* work, const int& lwork, float* rwork, int* info);
 
 // The rest are not used by TMV, so I haven't bothered to convert them
 // to the correct const-ness and such.
@@ -572,10 +589,6 @@ int cgelsx_(int *m, int *n, int *nrhs, void *
     a, int *lda, void *b, int *ldb, int *jpvt, float *rcond,
     int *rank, void *work, float *rwork, int *info);
 
-int cgelsy_(int *m, int *n, int *nrhs, void *
-    a, int *lda, void *b, int *ldb, int *jpvt, float *rcond,
-    int *rank, void *work, int *lwork, float *rwork, int *
-    info);
 
 int cgeql2_(int *m, int *n, void *a, int *lda,
     void *tau, void *work, int *info);
@@ -1615,10 +1628,6 @@ int dgelsx_(int *m, int *n, int *nrhs,
     jpvt, double *rcond, int *rank, double *work, int *
     info);
 
-int dgelsy_(int *m, int *n, int *nrhs, 
-    double *a, int *lda, double *b, int *ldb, int *
-    jpvt, double *rcond, int *rank, double *work, int *
-    lwork, int *info);
 
 int dgeql2_(int *m, int *n, double *a, int *
     lda, double *tau, double *work, int *info);
@@ -2901,9 +2910,6 @@ int sgelsx_(int *m, int *n, int *nrhs, float *a,
     int *lda, float *b, int *ldb, int *jpvt, float *rcond, 
     int *rank, float *work, int *info);
 
-int sgelsy_(int *m, int *n, int *nrhs, float *a, 
-    int *lda, float *b, int *ldb, int *jpvt, float *rcond, 
-    int *rank, float *work, int *lwork, int *info);
 
 int sgeql2_(int *m, int *n, float *a, int *lda, 
     float *tau, float *work, int *info);
@@ -4055,10 +4061,6 @@ int zgelsx_(int *m, int *n, int *nrhs,
     int *jpvt, double *rcond, int *rank, void *work, 
     double *rwork, int *info);
 
-int zgelsy_(int *m, int *n, int *nrhs, 
-    void *a, int *lda, void *b, int *ldb, 
-    int *jpvt, double *rcond, int *rank, void *work, 
-    int *lwork, double *rwork, int *info);
 
 int zgeql2_(int *m, int *n, void *a, 
     int *lda, void *tau, void *work, int *info);
