@@ -165,6 +165,8 @@
 
 #include "tmv/TMV_BaseVector.h"
 #include "tmv/TMV_BaseMatrix_Rec.h"
+#include "tmv/TMV_MultMV.h"
+#include "tmv/TMV_Rank1VVM.h"
 
 // TODO: Put functions with arithmetic into .cpp file with Inst, etc.
 // so don't need these:
@@ -422,12 +424,12 @@ namespace tmv {
             //std::cout<<"temp = "<<temp<<std::endl;
             temp += m0.vec();
             //std::cout<<"temp => "<<temp<<std::endl;
-            temp *= beta;
+            temp *= -beta;
             //std::cout<<"temp => "<<temp<<std::endl;
 
-            m0.vec() -= temp;
+            m0.vec() += temp;
             //std::cout<<"m0 => "<<m0<<std::endl;
-            mx.mat() -= u^temp;
+            mx.mat() += u^temp;
             //std::cout<<"m0 => "<<mx<<std::endl;
         }
 #ifdef XDEBUG_HOUSE
@@ -453,18 +455,129 @@ namespace tmv {
 #endif
     }
 
-#if 0
-    template <class V, class M>
+    template <class V, class M, class V2>
+    static inline void HouseholderMultEq(
+        V& v, const typename V::real_type beta,
+        BaseMatrix_Rec_Mutable<M>& m,
+        BaseVector_Mutable<V2>& temp)
+    {
+        // This routine takes 
+        // m <- H m = m - beta v vt m
+        // Where v is the full (1 u) vector including a spot for the 1.
+        // However, the actual value of that location is not used.
+
+        TMVAssert(v.size() == m.colsize());
+        TMVAssert(temp.size() == m.rowsize());
+#ifdef XDEBUG_HOUSE
+        //std::cout<<"Start Householder::multEq"<<std::endl;
+        //std::cout<<"v = "<<v<<std::endl;
+        //std::cout<<"beta = "<<beta<<std::endl;
+        //std::cout<<"m = "<<m.mat()<<std::endl;
+        typedef typename V::value_type T;
+        typedef typename Mx::value_type T2;
+        Matrix<T2> mm = m;
+#endif
+        typedef typename V::value_type T;
+        typedef typename V::real_type RT;
+        typedef typename M::transpose_type Mt;
+        typedef typename V::const_conjugate_type Vc;
+        const int cs = Sizes<M::_colsize,V::_size>::size;
+        const int rs = Sizes<M::_rowsize,V2::_size>::size;
+
+        if (m.rowsize() > 0 && beta != RT(0)) {
+            T v0 = v.cref(0);
+            v.ref(0) = 1.;
+
+            //temp = -beta * v.conjugate() * m.mat();
+            const Scaling<0,RT> x(-beta);
+            Mt mt = m.mat().transpose();
+            Vc vc = v.conjugate();
+            MultMV_Helper<-4,rs,cs,false,0,RT,Mt,Vc,V2>::call(x,mt,vc,temp.vec());
+
+            //m.mat() += v^temp;
+            const Scaling<1,RT> one;
+            Rank1VVM_Helper<-4,cs,rs,true,1,RT,V,V2,M>::call(one,v.vec(),temp.vec(),m.mat());
+
+            v.ref(0) = v0;
+        }
+#ifdef XDEBUG_HOUSE
+        Matrix<T> H = T(1) - beta*(v^v.conjugate());
+        Matrix<T2> Hm = H * mm;
+        if (Norm(Hm-m) > 0.001*Norm(Hm)) {
+            cerr<<"Householder::multEq\n";
+            cerr<<"Input: m = "<<mm<<endl;
+            cerr<<"v = "<<v<<endl;
+            cerr<<"beta = "<<beta<<endl;
+            cerr<<"H = "<<H<<endl;
+            cerr<<"Hm = "<<Hm<<endl;
+            cerr<<"Output: m = "<<m<<endl;
+            abort();
+        }
+        //std::cout<<"mx => "<<mx.mat()<<std::endl;
+#endif
+    }
+
+    template <class V, class Vx>
     static inline void HouseholderMultEq(
         const V& u, const typename V::real_type beta,
-        BaseMatrix_Rec_Mutable<M>& m)
+        typename Vx::reference v0, BaseVector_Mutable<Vx>& vx)
     {
-        typename M::row_type m0 = m.row(0);
-        typename M::rowrange_type mx = m.rowRange(1,m.colsize());
-        HouseholderMultEq(u,beta,m0,mx);
-    }
-#endif
+        // This routine takes 
+        // ( m0 ) <- H ( m0 ) = [ ( m0 ) - beta ( 1 ) ( 1 ut ) ( m0 ) ]
+        // ( mx )      ( mx )   [ ( mx )        ( u )          ( mx ) ]
+        // 
+        // ( m0 ) -= beta (   m0 + ut mx   )
+        // ( mx )         ( u (m0 + ut mx) )
 
+        TMVAssert(u.size() == vx.size());
+        typedef typename V::value_type T;
+#ifdef XDEBUG_HOUSE
+        //std::cout<<"Start Householder::multEq"<<std::endl;
+        //std::cout<<"u = "<<u<<std::endl;
+        //std::cout<<"beta = "<<beta<<std::endl;
+        //std::cout<<"v0 = "<<v0<<std::endl;
+        //std::cout<<"vx = "<<vx.vec()<<std::endl;
+        typedef typename Vx::value_type T2;
+        Vector<T2> vv(vx.size()+1);
+        vv.ref(0) = v0;
+        vv.subVector(1,vv.size()) = vx.vec();
+#endif
+        typedef typename V::real_type RT;
+
+        if (beta != RT(0)) {
+            //std::cout<<"Not trivial.\n";
+            T temp = -beta * (v0 + u.conjugate() * vx.vec());
+            //std::cout<<"temp = "<<temp<<std::endl;
+
+            v0 += temp;
+            //std::cout<<"m0 => "<<m0<<std::endl;
+            vx.vec() += u*temp;
+            //std::cout<<"m0 => "<<mx<<std::endl;
+        }
+#ifdef XDEBUG_HOUSE
+        Vector<T> uu(u.size()+1);
+        uu(0) = T(1);
+        uu.subVector(1,uu.size()) = u;
+        Matrix<T> H = T(1) - beta*(uu^uu.conjugate());
+        Matrix<T2> Hv = H * vv;
+        Matrix<T2> Hv2(vx.size()+1);
+        Hv2(0) = v0;
+        Hv2.subVector(1,Hv2.size()) = vx.vec();
+        if (Norm(Hv-Hv2) > 0.001*Norm(Hv)) {
+            cerr<<"Householder::multEq\n";
+            cerr<<"Input: v = "<<vv<<endl;
+            cerr<<"uu = "<<uu<<endl;
+            cerr<<"beta = "<<beta<<endl;
+            cerr<<"H = "<<H<<endl;
+            cerr<<"Hv = "<<Hv<<endl;
+            cerr<<"Output: v = "<<Hv2<<endl;
+            abort();
+        }
+        //std::cout<<"vx => "<<vx.vec()<<std::endl;
+#endif
+    }
+
+#if 0
     template <class V, class M1, class M2>
     static inline void HouseholderMult(
         const V& u, const typename V::real_type beta,
@@ -524,35 +637,6 @@ namespace tmv {
 #endif
     }
 
-#if 0
-    template <class V, class V1x>
-    static inline void HouseholderMultEq(
-        const V& u, const typename V::real_type beta,
-        typename V1x::reference& v0, BaseVector_Mutable<V1x>& vx)
-    {
-        typedef typename V::real_type RT;
-        // ( v0 ) -= beta (   v0 + ut vx   )
-        // ( vx )         ( u (v0 + ut vx) )
-        TMVAssert(u.size() == vx.size());
-        if (beta != RT(0)) {
-            typename V1x::value_type temp = u.conjugate() * vx.vec();
-            temp += v0;
-            temp *= beta;
-            v0 -= temp;
-            vx.vec() -= temp*u;
-        }
-    }
-
-    template <class V, class V1>
-    static inline void HouseholderMultEq(
-        const V& u, const typename V::real_type beta, BaseVector_Mutable<V1>& v)
-    {
-        typename V1::reference v0 = v.ref(0);
-        typename V1::subvector_type vx = v.subVector(1,v.size());
-        HouseholderMultEq(u,beta,v0,vx);
-    }
-#endif
-
     template <class V, class V1, class V2>
     static inline void HouseholderMult(
         const V& u, const typename V::real_type beta,
@@ -570,6 +654,7 @@ namespace tmv {
             v2.subVector(1,N) = v1.subVector(1,N) - temp*u;
         }
     }
+#endif
 
     template <class V>
     static inline void HouseholderUnpack(
@@ -851,9 +936,9 @@ namespace tmv {
         // temp = ZYtm
         temp = Ya.unitLowerTri().adjoint() * ma;
         temp += Yb.adjoint() * mb;
-        temp = Z * temp;
-        ma -= Ya.unitLowerTri() * temp;
-        mb -= Yb * temp;
+        temp = -Z * temp;
+        ma += Ya.unitLowerTri() * temp;
+        mb += Yb * temp;
 
 #ifdef XDEBUG_HOUSE
         if (Norm(Hm-m) > 0.001*Norm(m0)*Norm(H)) {
@@ -924,9 +1009,9 @@ namespace tmv {
         // temp = ZtYtm
         temp = Ya.unitLowerTri().adjoint() * ma;
         temp += Yb.adjoint() * mb;
-        temp = Z.adjoint() * temp;
-        ma -= Ya.unitLowerTri() * temp;
-        mb -= Yb * temp;
+        temp = -Z.adjoint() * temp;
+        ma += Ya.unitLowerTri() * temp;
+        mb += Yb * temp;
 
 #ifdef XDEBUG_HOUSE
         if (Norm(Hm-m) > 0.001*Norm(m0)*Norm(Hinv)) {

@@ -321,13 +321,17 @@ namespace tmv {
         TMVAssert(div);
         typedef typename M2::lud_type lud_type1;
         typedef typename M2::qrd_type qrd_type1;
+        typedef typename M2::qrpd_type qrpd_type1;
         // Traits<>::type removes any reference that is part of lud_type1, etc.
         typedef typename Traits<lud_type1>::type lud_type;
         typedef typename Traits<qrd_type1>::type qrd_type;
+        typedef typename Traits<qrpd_type1>::type qrpd_type;
         if (dynamic_cast<const lud_type*>(div)) {
             return CheckDecomp(static_cast<const lud_type&>(*div),m,fout);
         } else if (dynamic_cast<const qrd_type*>(div)) {
             return CheckDecomp(static_cast<const qrd_type&>(*div),m,fout);
+        } else if (dynamic_cast<const qrpd_type*>(div)) {
+            return CheckDecomp(static_cast<const qrpd_type&>(*div),m,fout);
         } else {
             *fout << "Couldn't cast divider to a known type.\n";
             return false;

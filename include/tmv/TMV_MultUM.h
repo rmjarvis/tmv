@@ -1637,7 +1637,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             const bool rm = M2::_colmajor || M3::_rowmajor; 
             const int s1 = M1::_shape;
-            typedef typename MCopyHelper<T1,s1,cs,cs,rm,false>::type M1c;
+            typedef typename MCopyHelper<T1,s1,cs,cs,rm>::type M1c;
             NoAliasMultMM<add>(x,M1c(m1),m2,m3);
         }
     };
@@ -1661,7 +1661,7 @@ namespace tmv {
             typedef typename Traits2<T,T1>::type PT1;
             const bool rm = M2::_colmajor || M3::_rowmajor; 
             const int s1 = ShapeTraits<M1::_shape>::nonunit_shape;
-            typedef typename MCopyHelper<PT1,s1,cs,cs,rm,false>::type M1c;
+            typedef typename MCopyHelper<PT1,s1,cs,cs,rm>::type M1c;
             NoAliasMultMM<add>(one,M1c(x*m1),m2,m3);
         }
     };
@@ -1706,7 +1706,7 @@ namespace tmv {
 #endif
             typedef typename M2::value_type T2;
             const bool rm = M1::_colmajor && M3::_rowmajor;
-            typedef typename MCopyHelper<T2,Rec,cs,rs,rm,false>::type M2c;
+            typedef typename MCopyHelper<T2,Rec,cs,rs,rm>::type M2c;
             NoAliasMultMM<add>(x,m1,M2c(m2),m3);
         }
     };
@@ -1729,7 +1729,7 @@ namespace tmv {
             const Scaling<1,RT> one;
             typedef typename Traits2<T,T2>::type PT2;
             const bool rm = M1::_colmajor && M3::_rowmajor;
-            typedef typename MCopyHelper<PT2,Rec,cs,rs,rm,false>::type M2c;
+            typedef typename MCopyHelper<PT2,Rec,cs,rs,rm>::type M2c;
             NoAliasMultMM<add>(one,m1,M2c(x*m2),m3);
         }
     };
@@ -1777,14 +1777,14 @@ namespace tmv {
                 typedef typename M2::value_type T2;
                 typedef typename Traits2<T1,T2>::type PT3;
                 const bool rm = M1::_rowmajor && M2::_rowmajor;
-                typedef typename MCopyHelper<PT3,Rec,cs,rs,rm,false>::type M3c;
+                typedef typename MCopyHelper<PT3,Rec,cs,rs,rm>::type M3c;
                 NoAliasMultXM<add>(x,M3c(m1*m2),m3);
             } else {
                 typedef typename M3::value_type T3;
                 typedef typename Traits<T>::real_type RT;
                 const Scaling<1,RT> one;
                 const bool rm = M1::_rowmajor && M2::_rowmajor;
-                typedef typename MCopyHelper<T3,Rec,cs,rs,rm,false>::type M3c;
+                typedef typename MCopyHelper<T3,Rec,cs,rs,rm>::type M3c;
                 NoAliasMultXM<add>(one,M3c(x*m1*m2),m3);
             }
         }
@@ -1806,7 +1806,7 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type PT3;
             const bool rm = M1::_rowmajor && M2::_rowmajor;
-            typedef typename MCopyHelper<PT3,Rec,cs,rs,rm,false>::type M3c;
+            typedef typename MCopyHelper<PT3,Rec,cs,rs,rm>::type M3c;
             NoAliasMultXM<add>(x,M3c(m1*m2),m3);
         }
     };

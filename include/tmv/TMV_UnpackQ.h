@@ -131,7 +131,7 @@ namespace tmv {
             const int Nx = TMV_QR_BLOCKSIZE;
             const int s1 = IntTraits2<Nx,rs>::min;
             const int N1 = TMV_MIN(Nx,N);
-            typedef typename MCopyHelper<T,UpperTri,s1,s1,false,false>::type Ztype;
+            typedef typename MCopyHelper<T,UpperTri,s1,s1>::type Ztype;
             Ztype BaseZ = MatrixSizer<T>(N1,N1);
 
             typedef typename Ztype::subtrimatrix_type Zs;
@@ -175,13 +175,13 @@ namespace tmv {
             std::cout<<"UnpackQ algo 27: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            typedef typename MCopyHelper<T,UpperTri,rs,rs,false,false>::type Ztype;
+            typedef typename MCopyHelper<T,UpperTri,rs,rs>::type Ztype;
             Ztype Z = MatrixSizer<T>(N,N);
 
             typedef typename M1::colrange_type M1c;
 
             const int xx = UNKNOWN;
-            typedef typename MCopyHelper<T,Rec,rs,xx,false,false>::type M2;
+            typedef typename MCopyHelper<T,Rec,rs,xx>::type M2;
             typedef typename M2::colrange_type M2c;
             typedef typename M2c::uppertri_type M2t;
             M2 tempBase(N,TMV_MAX(K-N,N));
@@ -238,7 +238,7 @@ namespace tmv {
             std::cout<<"UnpackQ algo 81: cs,rs = "<<cs<<','<<rs<<std::endl;
 #endif
             typedef typename M::value_type T;
-            typedef typename MCopyHelper<T,Rec,cs,rs,false,false>::type Mcm;
+            typedef typename MCopyHelper<T,Rec,cs,rs>::type Mcm;
             Mcm Qcm = Q;
             UnpackQ_Helper<-2,cs,rs,Mcm,V>::call(Qcm,beta);
             NoAliasCopy(Qcm,Q);
@@ -313,6 +313,9 @@ namespace tmv {
                 ','<<cs<<','<<rs<<std::endl;
 #endif
             UnpackQ_Helper<algo,cs,rs,M1,V>::call(Q,beta);
+#ifdef PRINTALGO_QR
+            std::cout<<"Done UnpackQ\n";
+#endif
         }
     };
 

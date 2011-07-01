@@ -454,7 +454,7 @@ namespace tmv {
     };
 
     // This helper class helps decide calc_type for composite classes:
-    template <class T, int s, bool fort>
+    template <class T, int s, bool fort=false>
     struct VCopyHelper
     {
         enum { A2 = (fort ? FortranStyle : CStyle) | NoAlias };

@@ -65,12 +65,12 @@ namespace tmv {
     struct QRDivHelper // trans == false here
     {
         template <class M1, class V1, class M2>
-        static void callInPlace(
+        static TMV_INLINE void callInPlace(
             const M1& QR, const V1& beta, 
             const Permutation* P, int N1, M2& m2)
         { InlineQR_SolveInPlace(QR,beta,P,N1,m2); }
         template <class M1, class V1, class M2, class M3>
-        static void call(
+        static TMV_INLINE void call(
             const M1& QR, const V1& beta, 
             const Permutation* P, int N1, const M2& m2, M3& m3)
         { InlineQR_Solve(QR,beta,P,N1,m2,m3); }
@@ -79,12 +79,12 @@ namespace tmv {
     struct QRDivHelper<true>
     {
         template <class M1, class V1, class M2>
-        static void callInPlace(
+        static TMV_INLINE void callInPlace(
             const M1& QR, const V1& beta, 
             const Permutation* P, int N1, M2& m2)
         { InlineQR_SolveTransposeInPlace(QR,beta,P,N1,m2); }
         template <class M1, class V1, class M2, class M3>
-        static void call(
+        static TMV_INLINE void call(
             const M1& QR, const V1& beta, 
             const Permutation* P, int N1, const M2& m2, M3& m3)
         { InlineQR_SolveTranspose(QR,beta,P,N1,m2,m3); }

@@ -1,0 +1,14 @@
+
+#define CT std::complex<T>
+
+#define Def1(T1,RT)\
+  template void InstQRP_Decompose( \
+      MatrixView<T1> A, VectorView<RT> beta, int* P, bool strict); \
+
+Def1(T,T)
+#ifdef TMV_INST_COMPLEX
+Def1(CT,T)
+#endif
+
+#undef Def1
+#undef CT

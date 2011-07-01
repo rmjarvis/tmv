@@ -82,6 +82,7 @@ namespace tmv
         TMV_INLINE AlignedMemory() : p(0) {}
         TMV_INLINE void allocate(const size_t n) 
         {
+            //std::cout<<"AlignedMemory allocate "<<n<<std::endl;
 #ifdef TMV_END_PADDING
             const size_t nn = n + 16/sizeof(T);
             p = new T[nn];
@@ -113,6 +114,7 @@ namespace tmv
         TMV_INLINE AlignedMemory() : p(0) {}
         TMV_INLINE void allocate(const size_t n) 
         {
+            //std::cout<<"AlignedMemory float allocate "<<n<<std::endl;
 #ifdef TMV_END_PADDING
             const size_t nn = (n<<2)+15 + 16;
             p = new char[nn];
@@ -151,6 +153,7 @@ namespace tmv
         TMV_INLINE AlignedMemory() : p(0) {}
         TMV_INLINE void allocate(const size_t n) 
         {
+            //std::cout<<"AlignedMemory double allocate "<<n<<std::endl;
 #ifdef TMV_END_PADDING
             const size_t nn = (n<<3)+15 + 16;
             p = new char[nn];

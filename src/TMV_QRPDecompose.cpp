@@ -29,63 +29,85 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
+//#define PRINTALGO_QR
+//#define XDEBUG_QR
 
-#ifndef TMV_Mat_H
-#define TMV_Mat_H
+#ifdef NOGEQP3
+#ifdef LAP
+#undef LAP
+#endif
+#endif
 
+#include "tmv/TMV_Vector.h"
+#include "tmv/TMV_UnpackQ.h"
+#include "tmv/TMV_AddVV.h"
+#include "tmv/TMV_AddMM.h"
+#include "tmv/TMV_Norm.h"
+
+#include "TMV_Blas.h"
+#include "tmv/TMV_QRPDecompose.h"
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_SmallMatrix.h"
-
-#include "tmv/TMV_MatrixIO.h"
+#include "tmv/TMV_TriMatrix.h"
+#include "tmv/TMV_SmallTriMatrix.h"
+#include "tmv/TMV_Vector.h"
+#include "tmv/TMV_SmallVector.h"
+#include "tmv/TMV_CopyV.h"
+#include "tmv/TMV_SwapV.h"
+#include "tmv/TMV_MinMax.h"
 #include "tmv/TMV_CopyM.h"
-#include "tmv/TMV_SwapM.h"
-#include "tmv/TMV_TransposeM.h"
-#include "tmv/TMV_PermuteM.h"
-#include "tmv/TMV_NormM.h"
-
-#include "tmv/TMV_ScaleM.h"
-#include "tmv/TMV_MultXM.h"
-#include "tmv/TMV_AddMM.h"
 #include "tmv/TMV_Rank1VVM.h"
 #include "tmv/TMV_MultMV.h"
+#include "tmv/TMV_NormM.h"
 #include "tmv/TMV_MultMM.h"
-#include "tmv/TMV_MultMM_Block.h"
-#include "tmv/TMV_MultMM_OpenMP.h"
-#include "tmv/TMV_MultMM_Winograd.h"
+#include "tmv/TMV_CopyU.h"
+#include "tmv/TMV_MultUM.h"
 
-#include "tmv/TMV_Det.h"
-#include "tmv/TMV_InvertM.h"
-#include "tmv/TMV_DivM.h"
+namespace tmv {
 
-#include "tmv/TMV_Permutation.h"
-#include "tmv/TMV_MultPM.h"
+#ifdef LAP
+    template <class T, int S, class RT> 
+    static inline void LapQRP_Decompose(
+        MatrixView<T,S> A, VectorView<RT,Unit> beta, int* P, bool strict)
+    { InlineQRP_Decompose(A,beta,P,strict); }
+#endif // LAP
 
-#include "tmv/TMV_LUD.h"
-#include "tmv/TMV_LUDecompose.h"
-#include "tmv/TMV_LUDiv.h"
-#include "tmv/TMV_LUInverse.h"
-
-#include "tmv/TMV_QRD.h"
-#include "tmv/TMV_QRDecompose.h"
-#include "tmv/TMV_QRDiv.h"
-#include "tmv/TMV_QRInverse.h"
-#include "tmv/TMV_PackedQ.h"
-#include "tmv/TMV_UnpackQ.h"
-
-#include "tmv/TMV_QRPD.h"
-#include "tmv/TMV_QRPDecompose.h"
-
-#if 0
-#include "tmv/TMV_SVD.h"
+    template <class T, class RT> 
+    void InstQRP_Decompose(
+        MatrixView<T> A, VectorView<RT> beta, int* P, bool strict)
+    {
+        if (A.rowsize() > 0) {
+            if (beta.step() == 1) {
+                VectorView<RT,Unit> beta1 = beta;
+                if (A.iscm()) {
+                    MatrixView<T,ColMajor> Acm = A;
+#ifdef LAP
+                    LapQRP_Decompose(Acm,beta1,P,strict);
+#else
+                    InlineQRP_Decompose(Acm,beta1,P,strict);
 #endif
-
-#ifndef TMV_H
-#include "tmv/TMV_ProdXM.h"
-#include "tmv/TMV_SumMM.h"
-#include "tmv/TMV_SumMX.h"
-#include "tmv/TMV_OProdVV.h"
-#include "tmv/TMV_ProdMV.h"
-#include "tmv/TMV_ProdMM.h"
+#ifndef LAP
+                } else if (A.isrm()) {
+                    MatrixView<T,RowMajor> Arm = A;
+                    InlineQRP_Decompose(Arm,beta1,P,strict);
 #endif
+                } else {
+                    Matrix<T,ColMajor|NoDivider> Ac = A;
+                    InstQRP_Decompose(Ac.xView(),beta,P,strict);
+                    InstCopy(Ac.constView().xView(),A);
+                }
+            } else {
+                Vector<RT> betac = beta;
+                InstQRP_Decompose(A,betac.xView(),P,strict);
+                InstCopy(betac.constView().xView(),beta);
+            }
+        }
+    }
 
-#endif
+#define InstFile "TMV_QRPDecompose.inst"
+#include "TMV_Inst.h"
+#undef InstFile
+
+} // namespace tmv
+
+

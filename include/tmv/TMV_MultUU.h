@@ -432,7 +432,7 @@ namespace tmv {
                 unroll ? 16 : 
                 // For known s, always recurse down to unroll size
                 s != UNKNOWN ? 0 :
-                (TMV_UU_RECURSE == 1) ? ( M2::_unit ? 0 : 1) :
+                (TMV_UU_RECURSE == 1) ? ( M3::_unit ? 0 : 1) :
                 rxr ? 12 : crx ? 13 : xcc ? 11 : 13;
             const int algo3 =  // The algorithm for N > UU_RECURSE
                 unroll || s == 1 ? 0 : 17;
@@ -787,7 +787,7 @@ namespace tmv {
                 unroll ? 26 : 
                 // For known s, always recurse down to unroll size
                 s != UNKNOWN ? 0 :
-                (TMV_UU_RECURSE == 1) ? ( M2::_unit ? 0 : 1) :
+                (TMV_UU_RECURSE == 1) ? ( M3::_unit ? 0 : 1) :
                 rxr ? 22 : crx ? 23 : xcc ? 21 : 23;
             const int algo3 =  // The algorithm for N > UU_RECURSE
                 unroll || s == 1 ? 0 : 27;
@@ -899,7 +899,7 @@ namespace tmv {
             typedef typename Traits2<T1,T2>::type PT3;
             const bool rm = M1::_rowmajor && M2::_rowmajor;
             const int s3 = M3::_shape;
-            typedef typename MCopyHelper<PT3,s3,s,s,rm,false>::type M3c;
+            typedef typename MCopyHelper<PT3,s3,s,s,rm>::type M3c;
             // can't be unitdiag unless x == 1 and !add and m1,m2 are unit
             const bool unknowndiag = 
                 M3::_unknowndiag && ix != -1 && !add &&

@@ -863,6 +863,14 @@ static void TestSingularDiv(tmv::DivType dt)
     tmv::Vector<T> b = m * x;
     tmv::Vector<T> x2 = b/m;
     tmv::Vector<T> b2 = m*x2;
+    if (showacc) {
+        std::cout<<"m = "<<m<<std::endl;
+        std::cout<<"x = "<<x<<std::endl;
+        std::cout<<"b = mx "<<b<<std::endl;
+        std::cout<<"x2 = b/m = "<<x2<<std::endl;
+        std::cout<<"b2 = m*x2 "<<b2<<std::endl;
+        std::cout<<"Norm(b-b2) = "<<Norm(b-b2)<<std::endl;
+    }
     Assert(Norm(b2-b) < eps*Norm(b),"Singular exact b/m");
 
     b = x * m;
@@ -908,18 +916,18 @@ static void TestSingularDiv(tmv::DivType dt)
         std::cout<<"minv*m*minv = "<<minv*m*minv<<std::endl;
         std::cout<<"Norm(minv*m*minv-minv) = "<<Norm(minv*m*minv-minv)<<std::endl;
         std::cout<<"m*minv-(m*minv)T = "<<m*minv-Transpose(m*minv)<<std::endl;
-        std::cout<<"Norm(m*minv-(m*minv)T) = "<<Norm(m*minv-(m*minv).transpose())<<std::endl;
+        std::cout<<"Norm(m*minv-(m*minv)T) = "<<Norm(m*minv-Transpose(m*minv))<<std::endl;
         std::cout<<"minv*m-(minv*m)T = "<<minv*m-Transpose(minv*m)<<std::endl;
-        std::cout<<"Norm(minv*m-(minv*m)T) = "<<Norm(minv*m-(minv*m).transpose())<<std::endl;
+        std::cout<<"Norm(minv*m-(minv*m)T) = "<<Norm(minv*m-Transpose(minv*m))<<std::endl;
     }
 
     Assert(Norm(m*minv*m - m) < eps*Norm(m),"Singular inverse M*X*M != M");
     Assert(Norm(minv*m*minv - minv) < eps*Norm(minv),
            "Singular inverse X*M*X != X");
-    Assert(Norm((m*minv)-(m*minv).transpose()) < eps,
+    Assert(Norm((m*minv)-Transpose(m*minv)) < eps,
            "Singular inverse M*X != (M*X)T");
     if (dt != tmv::QRP) { // QRP doesn't get this right.
-        Assert(Norm((minv*m)-(minv*m).transpose()) < eps,
+        Assert(Norm((minv*m)-Transpose(minv*m)) < eps,
                "Singular inverse X*M != (X*M)T");
     }
 
@@ -1011,13 +1019,13 @@ template <class T> void TestMatrixDiv()
 #endif
     TestSquareDiv<T,tmv::ColMajor>(tmv::LU);
     TestSquareDiv<T,tmv::ColMajor>(tmv::QR);
-    TestNonSquareDiv<T,tmv::ColMajor>(tmv::QR);
-#if 0
     TestSquareDiv<T,tmv::ColMajor>(tmv::QRP);
-    TestSquareDiv<T,tmv::ColMajor>(tmv::SV);
+    TestNonSquareDiv<T,tmv::ColMajor>(tmv::QR);
     TestNonSquareDiv<T,tmv::ColMajor>(tmv::QRP);
-    TestNonSquareDiv<T,tmv::ColMajor>(tmv::SV);
     TestSingularDiv<T,tmv::ColMajor>(tmv::QRP);
+#if 0
+    TestSquareDiv<T,tmv::ColMajor>(tmv::SV);
+    TestNonSquareDiv<T,tmv::ColMajor>(tmv::SV);
     TestSingularDiv<T,tmv::ColMajor>(tmv::SV);
 #endif
 }

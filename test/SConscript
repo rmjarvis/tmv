@@ -47,8 +47,8 @@ if env['INST_INT']:
     env1.Append(CPPDEFINES=['TMV_INST_INT'])
 if not env['INST_COMPLEX']:
     env1.Append(CPPDEFINES=['TMV_NO_INST_COMPLEX'])
-if env['INST_MIX']:
-    env1.Append(CPPDEFINES=['TMV_INST_MIX'])
+if not env['INST_MIX']:
+    env1.Append(CPPDEFINES=['TMV_NO_INST_MIX'])
 if not env['TEST_FLOAT']:
     env1.Append(CPPDEFINES=['NO_TEST_FLOAT'])
 if not env['TEST_DOUBLE']:

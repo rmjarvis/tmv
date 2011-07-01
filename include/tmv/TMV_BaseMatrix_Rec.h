@@ -360,28 +360,6 @@ namespace tmv {
         typedef ConstMatrixView<T,A2> ctype; 
     };
 
-    // A quick helper class to get the return types correct for
-    // RowVectorView and ColVectorView.
-    // These are in SmallMatrix.h, but since they are used elsewhere
-    // we put the VVO helper here.
-    template <class V>
-    struct VVO
-    {
-        typedef typename V::value_type T;
-        enum { N = V::_size };
-        enum { S = V::_step };
-        enum { vecA = (
-                ( V::_conj ? Conj : NonConj ) |
-                ( V::_fort ? FortranStyle : CStyle ) |
-                ( Traits<V>::A & AllAliasStatus ) )};
-        enum { colA = vecA | (S == 1 ? ColMajor : 0 ) };
-        enum { rowA = vecA | (S == 1 ? RowMajor : 0 ) };
-        typedef ConstSmallMatrixView<T,1,N,N,S,rowA> crv;
-        typedef SmallMatrixView<T,1,N,N,S,rowA> rv;
-        typedef ConstSmallMatrixView<T,N,1,S,N,colA> ccv;
-        typedef SmallMatrixView<T,N,1,S,N,colA> cv;
-    };
-
 
     // A quick auxilliary function for canLinearize.
     // (It only accesses the steps that are unknown at compile time.)
@@ -815,14 +793,15 @@ namespace tmv {
 
         // These check the indices according the the indexing style being
         // used, and then calls the above CStyle versions.
-        const_submatrix_type subMatrix(int i1, int i2, int j1, int j2) const
+        TMV_INLINE const_submatrix_type subMatrix(
+            int i1, int i2, int j1, int j2) const
         {
             CheckRowRange<_fort>(i1,i2,colsize());
             CheckColRange<_fort>(j1,j2,rowsize());
             return cSubMatrix(i1,i2,j1,j2);
         }
 
-        const_submatrix_step_type subMatrix(
+        TMV_INLINE const_submatrix_step_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
             CheckRowRange<_fort>(i1,i2,istep,colsize());
@@ -830,34 +809,34 @@ namespace tmv {
             return cSubMatrix(i1,i2,j1,j2,istep,jstep);
         }
 
-        const_subvector_type subVector(
+        TMV_INLINE const_subvector_type subVector(
             int i, int j, int istep, int jstep, int s) const
         {
             CheckMatSubVector<_fort>(i,j,istep,jstep,s,colsize(),rowsize());
             return cSubVector(i,j,istep,jstep,s); 
         }
 
-        const_colpair_type colPair(int j1, int j2) const
+        TMV_INLINE const_colpair_type colPair(int j1, int j2) const
         {
             CheckColIndex<_fort>(j1,rowsize());
             CheckColIndex<_fort>(j2,rowsize());
             return cColPair(j1,j2);
         }
 
-        const_rowpair_type rowPair(int i1, int i2) const
+        TMV_INLINE const_rowpair_type rowPair(int i1, int i2) const
         {
             CheckRowIndex<_fort>(i1,colsize());
             CheckRowIndex<_fort>(i2,colsize());
             return cRowPair(i1,i2);
         }
 
-        const_colrange_type colRange(int j1, int j2) const
+        TMV_INLINE const_colrange_type colRange(int j1, int j2) const
         {
             CheckColRange<_fort>(j1,j2,rowsize());
             return cColRange(j1,j2);
         }
 
-        const_rowrange_type rowRange(int i1, int i2) const
+        TMV_INLINE const_rowrange_type rowRange(int i1, int i2) const
         {
             CheckRowRange<_fort>(i1,i2,colsize());
             return cRowRange(i1,i2);
@@ -868,81 +847,81 @@ namespace tmv {
         // Views
         //
 
-        TMV_MAYBE_CREF(type,const_view_type) view() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_view_type) view() const
         { return MakeRecView<type,const_view_type>::call(mat()); }
 
-        TMV_MAYBE_CREF(type,const_cview_type) cView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_cview_type) cView() const
         { return MakeRecView<type,const_cview_type>::call(mat()); }
 
-        TMV_MAYBE_CREF(type,const_fview_type) fView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_fview_type) fView() const
         { return MakeRecView<type,const_fview_type>::call(mat()); }
 
-        TMV_MAYBE_CREF(type,const_xview_type) xView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_xview_type) xView() const
         { return MakeRecView<type,const_xview_type>::call(mat()); }
 
-        TMV_MAYBE_CREF(type,const_cmview_type) cmView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_cmview_type) cmView() const
         { return MakeRecView<type,const_cmview_type>::call(mat()); }
 
-        TMV_MAYBE_CREF(type,const_rmview_type) rmView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_rmview_type) rmView() const
         { return MakeRecView<type,const_rmview_type>::call(mat()); }
 
-        TMV_MAYBE_CREF(type,const_view_type) constView() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_view_type) constView() const
         { return MakeRecView<type,const_view_type>::call(mat()); }
 
-        const_transpose_type transpose() const
+        TMV_INLINE const_transpose_type transpose() const
         {
             return const_transpose_type(
                 cptr(),rowsize(),colsize(),stepj(),stepi()); 
         }
 
-        TMV_MAYBE_CREF(type,const_conjugate_type) conjugate() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_conjugate_type) conjugate() const
         { return MakeRecView<type,const_conjugate_type>::call(mat()); }
 
-        const_adjoint_type adjoint() const
+        TMV_INLINE const_adjoint_type adjoint() const
         {
             return const_adjoint_type(
                 cptr(),rowsize(),colsize(),stepj(),stepi()); 
         }
 
-        const_uppertri_type upperTri() const
+        TMV_INLINE const_uppertri_type upperTri() const
         {
             return const_uppertri_type(
                 cptr(),rowsize(),stepi(),stepj(),NonUnitDiag); 
         }
 
-        const_unit_uppertri_type unitUpperTri() const
+        TMV_INLINE const_unit_uppertri_type unitUpperTri() const
         {
             return const_unit_uppertri_type(
                 cptr(),rowsize(),stepi(),stepj(),UnitDiag); 
         }
 
-        const_unknown_uppertri_type upperTri(DiagType dt) const
+        TMV_INLINE const_unknown_uppertri_type upperTri(DiagType dt) const
         {
             TMVAssert(dt == NonUnitDiag || dt == UnitDiag);
             return const_unknown_uppertri_type(
                 cptr(),rowsize(),stepi(),stepj(),dt); 
         }
 
-        const_lowertri_type lowerTri() const
+        TMV_INLINE const_lowertri_type lowerTri() const
         {
             return const_lowertri_type(
                 cptr(),colsize(),stepi(),stepj(),NonUnitDiag); 
         }
 
-        const_unit_lowertri_type unitLowerTri() const
+        TMV_INLINE const_unit_lowertri_type unitLowerTri() const
         {
             return const_unit_lowertri_type(
                 cptr(),colsize(),stepi(),stepj(),UnitDiag); 
         }
 
-        const_unknown_lowertri_type lowerTri(DiagType dt) const
+        TMV_INLINE const_unknown_lowertri_type lowerTri(DiagType dt) const
         {
             TMVAssert(dt == NonUnitDiag || dt == UnitDiag);
             return const_unknown_lowertri_type(
                 cptr(),colsize(),stepi(),stepj(),dt); 
         }
 
-        const_linearview_type linearView() const
+        TMV_INLINE const_linearview_type linearView() const
         {
             TMVAssert(
                 (stepi() == 1 && stepj() == int(colsize())) ||
@@ -950,7 +929,7 @@ namespace tmv {
             return const_linearview_type(cptr(),ls(),1);
         }
 
-        const_realpart_type realPart() const
+        TMV_INLINE const_realpart_type realPart() const
         {
             const bool isreal = Traits<value_type>::isreal;
             return const_realpart_type(
@@ -959,7 +938,7 @@ namespace tmv {
                 isreal ? stepi() : 2*stepi(), isreal ? stepj() : 2*stepj());
         }
 
-        const_imagpart_type imagPart() const
+        TMV_INLINE const_imagpart_type imagPart() const
         {
             const bool isreal = Traits<value_type>::isreal;
             TMVStaticAssert(Traits<value_type>::iscomplex);
@@ -969,10 +948,10 @@ namespace tmv {
                 isreal ? stepi() : 2*stepi(), isreal ? stepj() : 2*stepj());
         }
 
-        TMV_MAYBE_CREF(type,const_nonconj_type) nonConj() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_nonconj_type) nonConj() const
         { return MakeRecView<type,const_nonconj_type>::call(mat()); }
 
-        nonconst_type nonConst() const
+        TMV_INLINE nonconst_type nonConst() const
         {
             return nonconst_type(
                 const_cast<value_type*>(cptr()),
@@ -1474,7 +1453,7 @@ namespace tmv {
 
         // These check the indices according the the indexing style being
         // used, and then calls the above CStyle versions.
-        submatrix_type subMatrix(
+        TMV_INLINE submatrix_type subMatrix(
             int i1, int i2, int j1, int j2) 
         {
             CheckRowRange<_fort>(i1,i2,colsize());
@@ -1482,7 +1461,7 @@ namespace tmv {
             return cSubMatrix(i1,i2,j1,j2);
         }
 
-        submatrix_step_type subMatrix(
+        TMV_INLINE submatrix_step_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) 
         {
             CheckRowRange<_fort>(i1,i2,istep,colsize());
@@ -1490,34 +1469,34 @@ namespace tmv {
             return cSubMatrix(i1,i2,j1,j2,istep,jstep);
         }
 
-        subvector_type subVector(
+        TMV_INLINE subvector_type subVector(
             int i, int j, int istep, int jstep, int s) 
         {
             CheckMatSubVector<_fort>(i,j,istep,jstep,s,colsize(),rowsize());
             return cSubVector(i,j,istep,jstep,s); 
         }
 
-        colpair_type colPair(int j1, int j2) 
+        TMV_INLINE colpair_type colPair(int j1, int j2) 
         {
             CheckColIndex<_fort>(j1,rowsize());
             CheckColIndex<_fort>(j2,rowsize());
             return cColPair(j1,j2);
         }
 
-        rowpair_type rowPair(int i1, int i2) 
+        TMV_INLINE rowpair_type rowPair(int i1, int i2) 
         {
             CheckRowIndex<_fort>(i1,colsize());
             CheckRowIndex<_fort>(i2,colsize());
             return cRowPair(i1,i2);
         }
 
-        colrange_type colRange(int j1, int j2) 
+        TMV_INLINE colrange_type colRange(int j1, int j2) 
         {
             CheckColRange<_fort>(j1,j2,rowsize());
             return cColRange(j1,j2);
         }
 
-        rowrange_type rowRange(int i1, int i2) 
+        TMV_INLINE rowrange_type rowRange(int i1, int i2) 
         {
             CheckRowRange<_fort>(i1,i2,colsize());
             return cRowRange(i1,i2);
@@ -1566,78 +1545,78 @@ namespace tmv {
         // Views
         //
 
-        TMV_MAYBE_REF(type,view_type) view() 
+        TMV_INLINE TMV_MAYBE_REF(type,view_type) view() 
         { return MakeRecView<type,view_type>::call(mat()); }
 
-        TMV_MAYBE_REF(type,cview_type) cView() 
+        TMV_INLINE TMV_MAYBE_REF(type,cview_type) cView() 
         { return MakeRecView<type,cview_type>::call(mat()); }
 
-        TMV_MAYBE_REF(type,fview_type) fView() 
+        TMV_INLINE TMV_MAYBE_REF(type,fview_type) fView() 
         { return MakeRecView<type,fview_type>::call(mat()); }
 
-        TMV_MAYBE_REF(type,xview_type) xView() 
+        TMV_INLINE TMV_MAYBE_REF(type,xview_type) xView() 
         { return MakeRecView<type,xview_type>::call(mat()); }
 
-        TMV_MAYBE_REF(type,cmview_type) cmView() 
+        TMV_INLINE TMV_MAYBE_REF(type,cmview_type) cmView() 
         {
             TMVAssert(iscm() && "Called cmView on non-ColMajor matrix");
             return MakeRecView<type,cmview_type>::call(mat()); 
         }
 
-        TMV_MAYBE_REF(type,rmview_type) rmView() 
+        TMV_INLINE TMV_MAYBE_REF(type,rmview_type) rmView() 
         {
             TMVAssert(isrm() && "Called rmView on non-RowMajor matrix");
             return MakeRecView<type,rmview_type>::call(mat()); 
         }
 
-        transpose_type transpose() 
+        TMV_INLINE transpose_type transpose() 
         { return transpose_type(ptr(),rowsize(),colsize(),stepj(),stepi()); }
 
-        TMV_MAYBE_REF(type,conjugate_type) conjugate() 
+        TMV_INLINE TMV_MAYBE_REF(type,conjugate_type) conjugate() 
         { return MakeRecView<type,conjugate_type>::call(mat()); }
 
-        adjoint_type adjoint() 
+        TMV_INLINE adjoint_type adjoint() 
         { return adjoint_type(ptr(),rowsize(),colsize(),stepj(),stepi()); }
 
-        uppertri_type upperTri() 
+        TMV_INLINE uppertri_type upperTri() 
         { return uppertri_type(ptr(),rowsize(),stepi(),stepj(),NonUnitDiag); }
 
-        unit_uppertri_type unitUpperTri() 
+        TMV_INLINE unit_uppertri_type unitUpperTri() 
         {
             return unit_uppertri_type(
                 ptr(),rowsize(),stepi(),stepj(),UnitDiag); 
         }
 
-        unknown_uppertri_type upperTri(DiagType dt)
+        TMV_INLINE unknown_uppertri_type upperTri(DiagType dt)
         {
             TMVAssert(dt == NonUnitDiag || dt == UnitDiag);
             return unknown_uppertri_type(
                 ptr(),rowsize(),stepi(),stepj(),dt); 
         }
 
-        lowertri_type lowerTri() 
+        TMV_INLINE lowertri_type lowerTri() 
         { return lowertri_type(ptr(),colsize(),stepi(),stepj(),NonUnitDiag); }
 
-        unit_lowertri_type unitLowerTri() 
+        TMV_INLINE unit_lowertri_type unitLowerTri() 
         {
             return unit_lowertri_type(
                 ptr(),colsize(),stepi(),stepj(),UnitDiag); 
         }
 
-        unknown_lowertri_type lowerTri(DiagType dt)
+        TMV_INLINE unknown_lowertri_type lowerTri(DiagType dt)
         {
             TMVAssert(dt == NonUnitDiag || dt == UnitDiag);
             return unknown_lowertri_type(
                 ptr(),rowsize(),stepi(),stepj(),dt); 
         }
 
-        linearview_type linearView() 
+        TMV_INLINE linearview_type linearView() 
         {
             TMVAssert(this->canLinearize());
             return linearview_type(ptr(),ls(),1);
         }
 
-        realpart_type realPart() 
+        TMV_INLINE realpart_type realPart() 
         {
             const bool isreal = Traits<value_type>::isreal;
             return realpart_type(
@@ -1645,7 +1624,7 @@ namespace tmv {
                 isreal ? stepi() : 2*stepi(), isreal ? stepj() : 2*stepj());
         }
 
-        imagpart_type imagPart() 
+        TMV_INLINE imagpart_type imagPart() 
         {
             const bool isreal = Traits<value_type>::isreal;
             TMVStaticAssert(Traits<value_type>::iscomplex);
@@ -1654,7 +1633,7 @@ namespace tmv {
                 isreal ? stepi() : 2*stepi(), isreal ? stepj() : 2*stepj());
         }
 
-        TMV_MAYBE_REF(type,nonconj_type) nonConj()
+        TMV_INLINE TMV_MAYBE_REF(type,nonconj_type) nonConj()
         { return MakeRecView<type,nonconj_type>::call(mat()); }
 
 

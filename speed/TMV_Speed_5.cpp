@@ -24,14 +24,14 @@
 // How big do you want the matrices to be?
 // (The matrix being inverted is MxN.  
 //  K is the other dimension of the matrix being solved.)
-const int M = 3346;
-const int N = 3346;
-const int K = 1492;
-#define AISSQUARE
+const int M = 8;
+const int N = 3;
+const int K = 5;
+//#define AISSQUARE
 
 // Define the type to use:
-#define TISFLOAT
-#define TISCOMPLEX
+//#define TISFLOAT
+//#define TISCOMPLEX
 
 // Define the parts of the matrices to use
 // 1 = all (rectangle matrix)
@@ -41,10 +41,11 @@ const int K = 1492;
 // 1 = QR
 // 2 = QRP
 // 3 = SV
-#define ALGO 1
+#define ALGO 2
+//#define STRICTQRP
 
 // Define whether you want to include the error checks.
-#define ERRORCHECK
+//#define ERRORCHECK
 
 // Define which versions you want to test:
 #define DOREG
@@ -67,7 +68,7 @@ const int K = 1492;
 // Set this if you only want to do a single loop.
 // Not so useful for timing, but useful for debugging.
 // Also useful if M,N,K are very large to avoid overflow in product
-#define ONELOOP
+//#define ONELOOP
 
 // Normally I fill the matrices and vectors with random values, but 
 // that can make it difficult to debug the arithmetic.
@@ -119,22 +120,24 @@ typedef float RT;
 typedef double RT;
 #endif
 
-#ifdef TMV_NOLIB
-#define DIVIDEUSING(A)
-#elif ALGO == 1
-#define DIVIDEUSING(A) A.divideUsing(tmv::QR);
-#elif ALGO == 2
-#define DIVIDEUSING(A) A.divideUsing(tmv::QRP);
-#elif ALGO == 3
-#define DIVIDEUSING(A) A.divideUsing(tmv::SV);
-#endif
-
 #if ALGO == 1
 #define GETDIV(A) A.qrd()
+#define TMV_QR tmv::QR
+#define TMV_QRD tmv::QRD
 #elif ALGO == 2
 #define GETDIV(A) A.qrpd()
+#define TMV_QR tmv::QRP
+#define TMV_QRD tmv::QRPD
 #elif ALGO == 3
 #define GETDIV(A) A.svd()
+#define TMV_QR tmv::SV
+#define TMV_QRD tmv::SVD
+#endif
+
+#ifdef TMV_NOLIB
+#define DIVIDEUSING(A)
+#else
+#define DIVIDEUSING(A) A.divideUsing(TMV_QR)
 #endif
 
 #ifdef TISCOMPLEX
@@ -176,6 +179,17 @@ const long long nloops1 = targetnmegaflops*1000000 / (MN*(N+K)*nloops2*XFOUR) + 
 #include "Eigen/LU"
 #include "Eigen/QR"
 #include "Eigen/SVD"
+
+#if ALGO == 1
+#define EIGENDIV .householderQr()
+#define EIGENQR Eigen::HouseholderQR
+#elif ALGO == 2
+#define EIGENDIV .colPivHouseholderQr()
+#define EIGENQR Eigen::ColPivHouseholderQR
+#elif ALGO == 3
+#define EIGENDIV .jacobiSvd()
+#define EIGENQR Eigen::JacobiSVD
+#endif
 
 #endif
 
@@ -362,6 +376,32 @@ int lapinfo;
 #define LAPNAME2(c,x) LAPNAME1(c,x)
 #define LAPNAME(x) LAPNAME2(BLAS_LETTER,x)
 
+static void ConvertIndexToPermute(int n, const int* newIndex, int* P)
+{
+    // newIndex[i]=j means value at original j location needs to go to i.
+    // Although newIndex is in FortranStyle, not CStyle, so use newIndex[i]-1.
+    std::vector<int> currIndex(n);
+    std::vector<int> origIndex(n);
+    for(int i=0;i<n;++i) {
+        currIndex[i] = i;
+        origIndex[i] = i;
+    }
+    // currIndex[i]=j means value at original i location is currently at j.
+    // origIndex[j]=i means value at original i location is currently at j.
+    for(int i=0;i<n;++i) {
+        int ip = currIndex[newIndex[i]-1];
+        P[i] = ip;
+        if (i != ip) {
+            int origi = origIndex[i];
+            int origip = origIndex[ip];
+            currIndex[origi] = ip;
+            currIndex[origip] = i;
+            origIndex[i] = origip;
+            origIndex[ip] = origi;
+        }
+    }
+}
+                    
 #endif // DOLAP
 
 #if defined(DOEIGEN) || defined(DOEIGENSMALL)
@@ -403,9 +443,9 @@ const int nloops2x = (
 
 static void ClearCache()
 {
-    tmv::Vector<double> X(1000000,8.);
-    tmv::Vector<double> Y(1000000,8.);
-    tmv::Vector<double> Z(1000000);
+    static tmv::Vector<double> X(1000000,8.);
+    static tmv::Vector<double> Y(1000000,8.);
+    static tmv::Vector<double> Z(1000000);
     Z = X + Y;
     if (Norm(Z) < 5.) exit(1);
 }
@@ -422,7 +462,7 @@ static void QR_C(
     //std::cout<<"Start QR_C.\n";
     //std::cout<<"A1.size = "<<A1.size()<<std::endl;
 #ifdef TMV_NO_LIB
-    std::vector<tmv::QRD<tmv::Matrix<T> >*> QR1(nloops2,0);
+    std::vector<TMV_QRD<tmv::Matrix<T> >*> QR1(nloops2,0);
 #endif
     std::vector<T> d1(nloops2);
 
@@ -444,7 +484,7 @@ static void QR_C(
     std::vector<tmv::SmallMatrix<T,K,M> > E2(nloops2);
     std::vector<tmv::SmallMatrix<T,K,N> > F2(nloops2);
     std::vector<T> d2(nloops2);
-    std::vector<tmv::QRD<tmv::SmallMatrix<T,M,N> >*> QR2(nloops2,0);
+    std::vector<TMV_QRD<tmv::SmallMatrix<T,M,N> >*> QR2(nloops2,0);
     //std::cout<<"Made A2, etc."<<std::endl;
 
     for(int k=0; k<nloops2; ++k) {
@@ -464,10 +504,14 @@ static void QR_C(
     std::vector<tmv::Matrix<T> > QR3 = A1;
     std::vector<tmv::Vector<T> > Beta3(nloops2);
     std::vector<std::vector<int> > P3(nloops2);
+    std::vector<int> P3i(N);
     tmv::Matrix<T> G3(M,K);
     tmv::Matrix<T> Q3(M,N);
     int lwork = M*N;
-    tmv::Vector<RT> Work3(lwork);
+    tmv::Vector<T> Work3(lwork);
+#ifdef TISCOMPLEX
+    tmv::Vector<RT> RWork3(lwork);
+#endif
     for(int k=0;k<nloops2;++k) {
         P3[k].resize(N);
         Beta3[k].resize(N);
@@ -484,7 +528,7 @@ static void QR_C(
     std::vector<EIGENM,ALLOC(EIGENM) > F4(nloops2,EIGENM(K,N));
     EIGENM Q4(M,N);
     std::vector<T> d4(nloops2);
-    std::vector<Eigen::HouseholderQR<EIGENM>*,ALLOC(Eigen::HouseholderQR<EIGENM>*) > QR4(nloops2);
+    std::vector<EIGENQR<EIGENM>*,ALLOC(EIGENQR<EIGENM>*) > QR4(nloops2);
     for(int k=0;k<nloops2;++k) {
         for(int j=0;j<N;++j) for(int i=0;i<M;++i) A4[k](i,j) = A1[k](i,j);
         for(int j=0;j<K;++j) for(int i=0;i<M;++i) C4[k](i,j) = C1[k](i,j);
@@ -502,7 +546,7 @@ static void QR_C(
     std::vector<EIGENSMF,ALLOC(EIGENSMF) > F5;
     std::vector<EIGENSMA,ALLOC(EIGENSMA) > Q5;
     std::vector<T> d5(nloops2x);
-    std::vector<Eigen::HouseholderQR<EIGENSMA>*,ALLOC(Eigen::HouseholderQR<EIGENSMA>*) > QR5;
+    std::vector<EIGENQR<EIGENSMA>*,ALLOC(EIGENQR<EIGENSMA>*) > QR5;
     //std::cout<<"Made vectors of A5, etc."<<std::endl;
     if (nloops2x) { 
         A5.resize(nloops2x); 
@@ -577,7 +621,7 @@ static void QR_C(
         for (int k=0; k<nloops2; ++k) {
 #ifdef TMV_NO_LIB
             //std::cout<<"A1[k] = "<<A1[k]<<std::endl;
-            QR1[k] = new tmv::QRD<tmv::Matrix<T> >(A1[k]);
+            QR1[k] = new TMV_QRD<tmv::Matrix<T> >(A1[k]);
 #else
             //std::cout<<"A1[k] = "<<A1[k]<<std::endl;
             A1[k].saveDiv();
@@ -597,17 +641,22 @@ static void QR_C(
             e1_reg = 0.;
             for (int k=0; k<nloops2; ++k) {
 #ifdef TMV_NO_LIB
-                //std::cout<<"A1 = "<<A1[k]<<std::endl;
-                //std::cout<<"Q = "<<QR1[k]->getQ()<<std::endl;
-                //std::cout<<"R = "<<QR1[k]->getR()<<std::endl;
+#if ALGO == 1
                 tmv::Matrix<T> temp = QR1[k]->getQ() * QR1[k]->getR();
-                //std::cout<<"temp = "<<temp<<std::endl;
+#elif ALGO == 2
+                tmv::Matrix<T> temp = QR1[k]->getQ() * QR1[k]->getR() * QR1[k]->getP();
+#else
+#endif
                 if (QR1[k]->isTrans()) A0[k] = temp.transpose();
                 else A0[k] = temp;
-                //std::cout<<"A0 = "<<A0[k]<<std::endl;
-#else
+#else // !NO_LIB
+#if ALGO == 1
                 tmv::Matrix<T> temp = A1[k].qrd().getQ() * A1[k].qrd().getR();
-                if (A1[k].qrd().isTrans()) A0[k] = temp.transpose();
+#elif ALGO == 2
+                tmv::Matrix<T> temp = A1[k].qrpd().getQ() * A1[k].qrpd().getR() * A1[k].qrpd().getP();
+#else 
+#endif
+                if (GETDIV(A1[k]).isTrans()) A0[k] = temp.transpose();
                 else A0[k] = temp;
 #endif
                 //std::cout<<"A0[k] => "<<A0[k]<<std::endl;
@@ -628,7 +677,7 @@ static void QR_C(
 
         for (int k=0; k<nloops2; ++k) {
             //std::cout<<"k = "<<k<<std::endl;
-            QR2[k] = new tmv::QRD<tmv::SmallMatrix<T,M,N> >(A2[k]);
+            QR2[k] = new TMV_QRD<tmv::SmallMatrix<T,M,N> >(A2[k]);
         }
 
         gettimeofday(&tp,0);
@@ -638,7 +687,12 @@ static void QR_C(
         if (n == 0) {
             e1_small = 0.;
             for (int k=0; k<nloops2; ++k) {
+#if ALGO == 1
                 tmv::Matrix<T> temp = QR2[k]->getQ() * QR2[k]->getR();
+#elif ALGO == 2
+                tmv::Matrix<T> temp = QR2[k]->getQ() * QR2[k]->getR() * QR2[k]->getP();
+#else
+#endif
                 if (QR2[k]->isTrans()) A0[k] = temp.transpose();
                 else A0[k] = temp;
                 e1_small += NormSq(A2[k]-A0[k]);
@@ -657,9 +711,21 @@ static void QR_C(
 
         for (int k=0; k<nloops2; ++k) {
             QR3[k] = A3[k];
+#if ALGO == 1
             LAPNAME(geqrf) (
                 LAPCM M,N,LP(QR3[k].ptr()),M,LP(Beta3[k].ptr()),
                 LP(Work3.ptr()),lwork,&lapinfo);
+#elif ALGO == 2
+            for(int i=0;i<N;++i) P3i[i] = 0;
+            LAPNAME(geqp3) (
+                LAPCM M,N,LP(QR3[k].ptr()),M,&(P3i[0]),LP(Beta3[k].ptr()),
+                LP(Work3.ptr()),lwork,
+#ifdef TISCOMPLEX
+                RWork3.ptr(),
+#endif
+                &lapinfo);
+            ConvertIndexToPermute(N,&(P3i[0]),&(P3[k][0]));
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -669,7 +735,6 @@ static void QR_C(
         if (n == 0) {
             e1_blas = 0.;
             for (int k=0; k<nloops2; ++k) {
-                //for(int i=0;i<N;++i) --P3[k][i];
                 A0[k] = QR3[k];
 #ifdef TISCOMPLEX
                 LAPNAME(ungqr) (
@@ -681,8 +746,9 @@ static void QR_C(
                     LP(Work3.ptr()),lwork,&lapinfo);
 #endif
                 A0[k] *= QR3[k].upperTri();
-                //A0[k].reversePermuteRows(&P3[k][0]);
-                //for(int i=0;i<N;++i) ++P3[k][i];
+#if ALGO == 2
+                A0[k].reversePermuteCols(&P3[k][0]);
+#endif
                 e1_blas += NormSq(A3[k]-A0[k]);
             }
             e1_blas = sqrt(e1_blas/nloops2);
@@ -697,7 +763,7 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
-            QR4[k] = new Eigen::HouseholderQR<EIGENM>(A4[k]);
+            QR4[k] = new EIGENQR<EIGENM>(A4[k]);
         }
 
         gettimeofday(&tp,0);
@@ -707,9 +773,14 @@ static void QR_C(
         if (n == 0) {
             e1_eigen = 0.;
             for (int k=0; k<nloops2; ++k) {
+#if (ALGO == 1) || (ALGO == 2)
                 EIGENM temp1 = 
                     EIGENM(QR4[k]->householderQ()) *
                     EIGENM(QR4[k]->matrixQR().triangularView<Eigen::Upper>());
+#endif
+#if ALGO == 2
+                temp1.applyOnTheRight(QR4[k]->colsPermutation().inverse());
+#endif
                 e1_eigen += (A4[k]-temp1).squaredNorm();
             }
             e1_eigen = sqrt(e1_eigen/nloops2);
@@ -725,7 +796,7 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k) {
-            QR5[k] = new Eigen::HouseholderQR<EIGENSMA>(A5[k]);
+            QR5[k] = new EIGENQR<EIGENSMA>(A5[k]);
         }
 
         gettimeofday(&tp,0);
@@ -735,14 +806,19 @@ static void QR_C(
         if (n == 0 && nloops2x) {
             e1_smalleigen = 0.;
             for (int k=0; k<nloops2x; ++k) {
+#if (ALGO == 1) || (ALGO == 2)
                 EIGENM temp1 = 
                     EIGENM(QR5[k]->householderQ()) *
                     EIGENM(QR5[k]->matrixQR().triangularView<Eigen::Upper>());
+#endif
+#if ALGO == 2
+                temp1.applyOnTheRight(QR5[k]->colsPermutation().inverse());
+#endif
                 e1_smalleigen += (A5[k]-temp1).squaredNorm();
             }
             e1_smalleigen = sqrt(e1_smalleigen/nloops2);
             e1_smalleigen /= Norm(A1[0]);
-            std::cout<<"e1_smalleigen = "<<e1_smalleigen<<std::endl;
+            //std::cout<<"e1_smalleigen = "<<e1_smalleigen<<std::endl;
         }
 #endif
 #endif
@@ -780,14 +856,6 @@ static void QR_C(
         if (n == 0) {
             e2_reg = 0.;
             for (int k=0; k<nloops2; ++k) {
-                //double normsq = NormSq(D0[k]-D1[k]);
-                //std::cout<<k<<"  "<<normsq<<std::endl;
-                //if (normsq > 1.e-4) {
-                    //std::cout<<"C1 = "<<C1[k]<<std::endl;
-                    //std::cout<<"D1 = "<<D1[k]<<std::endl;
-                    //std::cout<<"D0 = "<<D0[k]<<std::endl;
-                    //std::cout<<"normsq = "<<normsq<<std::endl;
-                //}
                 e2_reg += NormSq(D0[k]-D1[k]);
             }
             e2_reg = sqrt(e2_reg/nloops2);
@@ -813,14 +881,6 @@ static void QR_C(
         if (n == 0) {
             e2_small = 0.;
             for (int k=0; k<nloops2; ++k) {
-                //double normsq = NormSq(D0[k]-D2[k]);
-                //std::cout<<k<<"  "<<normsq<<std::endl;
-                //if (normsq > 1.e-4) {
-                    //std::cout<<"C2 = "<<C2[k]<<std::endl;
-                    //std::cout<<"D2 = "<<D2[k]<<std::endl;
-                    //std::cout<<"D0 = "<<D0[k]<<std::endl;
-                    //std::cout<<"normsq = "<<normsq<<std::endl;
-                //}
                 e2_small += NormSq(D0[k]-D2[k]);
             }
             e2_small = sqrt(e2_small/nloops2);
@@ -851,6 +911,9 @@ static void QR_C(
                 BLASCM BLASLeft, BLASUpper, BLASNT, BLASNonUnit,
                 N,K,one,BP(QR3[k].cptr()),N,BP(D3[k].ptr()),N
                 BLAS1 BLAS1 BLAS1 BLAS1);
+#if ALGO == 2
+            D3[k].reversePermuteRows(&P3[k][0]);
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -1018,6 +1081,9 @@ static void QR_C(
                 BLASCM BLASLeft, BLASUpper, BLASNT, BLASNonUnit,
                 N,K,one,BP(QR3[k].cptr()),M,BP(D3[k].ptr()),N
                 BLAS1 BLAS1 BLAS1 BLAS1);
+#if ALGO == 2
+            D3[k].reversePermuteRows(&P3[k][0]);
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -1169,6 +1235,9 @@ static void QR_C(
                 M,N,one,BP(QR3[k].cptr()),M,BP(Q3.ptr()),M
                 BLAS1 BLAS1 BLAS1 BLAS1);
             B3[k] = Q3.transpose();
+#if ALGO == 2
+            B3[k].reversePermuteRows(&P3[k][0]);
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -1196,6 +1265,7 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
+#if (ALGO == 1) || (ALGO == 2)
             // A = QR
             // A^-1 = R^-1 Q^-1
             // B = R^-1 Qt
@@ -1204,7 +1274,11 @@ static void QR_C(
             QR4[k]->matrixQR().block(0,0,N,N).triangularView<Eigen::Upper>().adjoint().solveInPlace(Q4.block(0,0,N,N));
             Q4.block(N,0,M-N,N).setZero();
             Q4.applyOnTheLeft(QR4[k]->householderQ());
+#if ALGO == 2
+            Q4.applyOnTheRight(QR4[k]->colsPermutation().inverse());
+#endif
             B4[k] = Q4.adjoint();
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -1232,11 +1306,16 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k) {
+#if (ALGO == 1) || (ALGO == 2)
             Q5[0].block(0,0,N,N).setIdentity();
             QR5[k]->matrixQR().block(0,0,N,N).triangularView<Eigen::Upper>().adjoint().solveInPlace(Q5[0].block(0,0,N,N));
             Q5[0].block(N,0,M-N,N).setZero();
             Q5[0].applyOnTheLeft(QR5[k]->householderQ());
+#if ALGO == 2
+            Q5[0].applyOnTheRight(QR5[k]->colsPermutation().inverse());
+#endif
             B5[k] = Q5[0].adjoint();
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -1329,13 +1408,16 @@ static void QR_C(
         for (int k=0; k<nloops2; ++k) {
             d3[k] = T(1);
             for(int i=0;i<N;++i) d3[k] *= QR3[k](i,i);
-#ifdef TISCOMPLEX
             for(int i=0;i<N;++i) if (Beta3[k][i] != T(0)) {
+#ifdef TISCOMPLEX
                 T b = Beta3[k][i];
-                d3[k] *= -std::conj(b*b)/std::norm(b);
-            }
+                d3[k] *= -(b*b)/std::norm(b);
 #else
-            for(int i=0;i<N;++i) if (Beta3[k][i] != T(0)) d3[k] = -d3[k];
+                d3[k] = -d3[k];
+#endif
+            }
+#if ALGO == 2
+            for(int i=0;i<N;++i) if (P3[k][i] != i) d3[k] = -d3[k];
 #endif
         }
         //if (n==0) std::cout<<"LAP det = "<<d3[0]<<std::endl;
@@ -1496,9 +1578,22 @@ static void QR_C(
 
         for (int k=0; k<nloops2; ++k) {
             QR3[k] = A3[k];
+#if ALGO == 1
             LAPNAME(gels) (
                 LAPCM LAPNT,M,N,K,LP(QR3[k].ptr()),M,LP(D3[k].ptr()),N,
                 LP(Work3.ptr()),lwork,&lapinfo);
+#elif ALGO == 2
+            RT rcond = 1.e-6;
+            int rank;
+            for(int i=0;i<N;++i) P3i[i] = 0;
+            LAPNAME(gelsy) (
+                LAPCM M,N,K,LP(QR3[k].ptr()),M,LP(D3[k].ptr()),N,&(P3i[0]),
+                rcond,&rank,LP(Work3.ptr()),lwork,
+#ifdef TISCOMPLEX
+                RWork3.ptr(),
+#endif
+                &lapinfo);
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -1523,7 +1618,7 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
-            D4[k] = A4[k].householderQr().solve(D4[k]);
+            D4[k] = A4[k] EIGENDIV .solve(D4[k]);
         }
 
         gettimeofday(&tp,0);
@@ -1550,7 +1645,7 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k) {
-            D5[k] = A5[k].householderQr().solve(D5[k]);
+            D5[k] = A5[k] EIGENDIV .solve(D5[k]);
         }
 
         gettimeofday(&tp,0);
@@ -1652,9 +1747,22 @@ static void QR_C(
         for (int k=0; k<nloops2; ++k) {
             QR3[k] = A3[k];
             G3 = C3[k];
+#if ALGO == 1
             LAPNAME(gels) (
                 LAPCM LAPNT,M,N,K,LP(QR3[k].ptr()),M,LP(G3.ptr()),M,
                 LP(Work3.ptr()),lwork,&lapinfo);
+#elif ALGO == 2
+            RT rcond = 1.e-6;
+            int rank;
+            for(int i=0;i<N;++i) P3i[i] = 0;
+            LAPNAME(gelsy) (
+                LAPCM M,N,K,LP(QR3[k].ptr()),M,LP(G3.ptr()),M,&(P3i[0]),
+                rcond,&rank,LP(Work3.ptr()),lwork,
+#ifdef TISCOMPLEX
+                RWork3.ptr(),
+#endif
+                &lapinfo);
+#endif
             D3[k] = G3.rowRange(0,N);
         }
 
@@ -1679,7 +1787,7 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
-            D4[k] = A4[k].householderQr().solve(C4[k]);
+            D4[k] = A4[k] EIGENDIV .solve(C4[k]);
         }
 
         gettimeofday(&tp,0);
@@ -1705,7 +1813,7 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k) {
-            D5[k] = A5[k].householderQr().solve(C5[k]);
+            D5[k] = A5[k] EIGENDIV .solve(C5[k]);
         }
 
         gettimeofday(&tp,0);
@@ -1797,9 +1905,21 @@ static void QR_C(
 
         for (int k=0; k<nloops2; ++k) {
             QR3[k] = A3[k];
+#if ALGO == 1
             LAPNAME(geqrf) (
                 LAPCM M,N,LP(QR3[k].ptr()),M,LP(Beta3[k].ptr()),
                 LP(Work3.ptr()),lwork,&lapinfo);
+#elif ALGO == 2
+            for(int i=0;i<N;++i) P3i[i] = 0;
+            LAPNAME(geqp3) (
+                LAPCM M,N,LP(QR3[k].ptr()),M,&(P3i[0]),LP(Beta3[k].ptr()),
+                LP(Work3.ptr()),lwork,
+#ifdef TISCOMPLEX
+                RWork3.ptr(),
+#endif
+                &lapinfo);
+            ConvertIndexToPermute(N,&(P3i[0]),&(P3[k][0]));
+#endif
             Q3 = QR3[k];
 #ifdef TISCOMPLEX
             LAPNAME(ungqr) (
@@ -1816,6 +1936,9 @@ static void QR_C(
                 M,N,one,BP(QR3[k].cptr()),M,BP(Q3.ptr()),M
                 BLAS1 BLAS1 BLAS1 BLAS1);
             B3[k] = Q3.transpose();
+#if ALGO == 2
+            B3[k].reversePermuteRows(&P3[k][0]);
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -1840,12 +1963,17 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
-            Eigen::HouseholderQR<EIGENM> qr(A4[k]);
+#if (ALGO == 1) || (ALGO == 2)
+            EIGENQR<EIGENM> qr(A4[k]);
             Q4.block(0,0,N,N).setIdentity();
             qr.matrixQR().block(0,0,N,N).triangularView<Eigen::Upper>().adjoint().solveInPlace(Q4.block(0,0,N,N));
             Q4.block(N,0,M-N,N).setZero();
             Q4.applyOnTheLeft(qr.householderQ());
+#if ALGO == 2
+            Q4.applyOnTheRight(qr.colsPermutation().inverse());
+#endif
             B4[k] = Q4.adjoint();
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -1871,12 +1999,17 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k) {
-            Eigen::HouseholderQR<EIGENSMA> qr(A5[k]);
+#if (ALGO == 1) || (ALGO == 2)
+            EIGENQR<EIGENSMA> qr(A5[k]);
             Q5[0].block(0,0,N,N).setIdentity();
             qr.matrixQR().block(0,0,N,N).triangularView<Eigen::Upper>().adjoint().solveInPlace(Q5[0].block(0,0,N,N));
             Q5[0].block(N,0,M-N,N).setZero();
             Q5[0].applyOnTheLeft(qr.householderQ());
+#if ALGO == 2
+            Q5[0].applyOnTheRight(qr.colsPermutation().inverse());
+#endif
             B5[k] = Q5[0].adjoint();
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -1972,9 +2105,21 @@ static void QR_C(
 
         for (int k=0; k<nloops2; ++k) {
             QR3[k] = B3[k];
+#if ALGO == 1
             LAPNAME(geqrf) (
                 LAPCM M,N,LP(QR3[k].ptr()),M,LP(Beta3[k].ptr()),
                 LP(Work3.ptr()),lwork,&lapinfo);
+#elif ALGO == 2
+            for(int i=0;i<N;++i) P3i[i] = 0;
+            LAPNAME(geqp3) (
+                LAPCM M,N,LP(QR3[k].ptr()),M,&(P3i[0]),LP(Beta3[k].ptr()),
+                LP(Work3.ptr()),lwork,
+#ifdef TISCOMPLEX
+                RWork3.ptr(),
+#endif
+                &lapinfo);
+            ConvertIndexToPermute(N,&(P3i[0]),&(P3[k][0]));
+#endif
             Q3 = QR3[k];
 #ifdef TISCOMPLEX
             LAPNAME(ungqr) (
@@ -1991,6 +2136,9 @@ static void QR_C(
                 M,N,one,BP(QR3[k].cptr()),M,BP(Q3.ptr()),M
                 BLAS1 BLAS1 BLAS1 BLAS1);
             B3[k] = Q3.transpose();
+#if ALGO == 2
+            B3[k].reversePermuteRows(&P3[k][0]);
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -2016,12 +2164,17 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
-            Eigen::HouseholderQR<EIGENM> qr(B4[k]);
+#if (ALGO == 1) || (ALGO == 2)
+            EIGENQR<EIGENM> qr(B4[k]);
             Q4.block(0,0,N,N).setIdentity();
             qr.matrixQR().block(0,0,N,N).triangularView<Eigen::Upper>().adjoint().solveInPlace(Q4.block(0,0,N,N));
             Q4.block(N,0,M-N,N).setZero();
             Q4.applyOnTheLeft(qr.householderQ());
+#if ALGO == 2
+            Q4.applyOnTheRight(qr.colsPermutation().inverse());
+#endif
             B4[k] = Q4.adjoint();
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -2048,12 +2201,17 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k) {
-            Eigen::HouseholderQR<EIGENSMA> qr(B5[k]);
+#if (ALGO == 1) || (ALGO == 2)
+            EIGENQR<EIGENSMA> qr(B5[k]);
             Q5[0].block(0,0,N,N).setIdentity();
             qr.matrixQR().block(0,0,N,N).triangularView<Eigen::Upper>().adjoint().solveInPlace(Q5[0].block(0,0,N,N));
             Q5[0].block(N,0,M-N,N).setZero();
             Q5[0].applyOnTheLeft(qr.householderQ());
+#if ALGO == 2
+            Q5[0].applyOnTheRight(qr.colsPermutation().inverse());
+#endif
             B5[k] = Q5[0].adjoint();
+#endif
         }
 
         gettimeofday(&tp,0);
@@ -2157,16 +2315,30 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
-            QR3[k] = A3[k];
             G3 = F3[k].adjoint();
+#if ALGO == 1
+            QR3[k] = A3[k];
+            LAPNAME(gels) (
+                LAPCM 
 #ifdef TISCOMPLEX
-            LAPNAME(gels) (
-                LAPCM LAPCT,M,N,K,LP(QR3[k].ptr()),M,LP(G3.ptr()),M,
-                LP(Work3.ptr()),lwork,&lapinfo);
+                LAPCT,
 #else
-            LAPNAME(gels) (
-                LAPCM LAPNT,M,N,K,LP(QR3[k].ptr()),M,LP(G3.ptr()),M,
+                LAPT,
+#endif
+                M,N,K,LP(QR3[k].ptr()),M,LP(G3.ptr()),M,
                 LP(Work3.ptr()),lwork,&lapinfo);
+#elif ALGO == 2
+            QR3[k] = A3[k].adjoint();
+            RT rcond = 1.e-6;
+            int rank;
+            for(int i=0;i<N;++i) P3i[i] = 0;
+            LAPNAME(gelsy) (
+                LAPCM M,N,K,LP(QR3[k].ptr()),M,LP(G3.ptr()),M,&(P3i[0]),
+                rcond,&rank,LP(Work3.ptr()),lwork,
+#ifdef TISCOMPLEX
+                RWork3.ptr(),
+#endif
+                &lapinfo);
 #endif
             F3[k].adjoint() = G3.rowRange(0,N);
         }
@@ -2193,7 +2365,7 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
-            F4[k].transpose() = A4[k].transpose().householderQr().solve(F4[k].transpose());
+            F4[k].transpose() = A4[k].transpose() EIGENDIV .solve(F4[k].transpose());
         }
 
         gettimeofday(&tp,0);
@@ -2220,7 +2392,7 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k) {
-            F5[k].transpose() = A5[k].transpose().householderQr().solve(F5[k].transpose());
+            F5[k].transpose() = A5[k].transpose() EIGENDIV .solve(F5[k].transpose());
         }
 
         gettimeofday(&tp,0);
@@ -2328,9 +2500,22 @@ static void QR_C(
         for (int k=0; k<nloops2; ++k) {
             QR3[k] = A3[k];
             G3 = E3[k].adjoint();
+#if ALGO == 1
             LAPNAME(gels) (
                 LAPCM LAPNT,M,N,K,LP(QR3[k].ptr()),M,LP(G3.ptr()),M,
                 LP(Work3.ptr()),lwork,&lapinfo);
+#elif ALGO == 2
+            RT rcond = 1.e-6;
+            int rank;
+            for(int i=0;i<N;++i) P3i[i] = 0;
+            LAPNAME(gelsy) (
+                LAPCM M,N,K,LP(QR3[k].ptr()),M,LP(G3.ptr()),M,&(P3i[0]),
+                rcond,&rank,LP(Work3.ptr()),lwork,
+#ifdef TISCOMPLEX
+                RWork3.ptr(),
+#endif
+                &lapinfo);
+#endif
             F3[k].adjoint() = G3.rowRange(0,N);
         }
 
@@ -2359,7 +2544,7 @@ static void QR_C(
             // F = E * At^-1
             // F At = E
             // A Ft = Et
-            F4[k].transpose() = A4[k].householderQr().solve(E4[k].adjoint());
+            F4[k].transpose() = A4[k] EIGENDIV .solve(E4[k].adjoint());
             F4[k] = F4[k].conjugate();
         }
 
@@ -2390,7 +2575,7 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k) {
-            F5[k].transpose() = A5[k].householderQr().solve(E5[k].adjoint());
+            F5[k].transpose() = A5[k] EIGENDIV .solve(E5[k].adjoint());
             F5[k] = F5[k].conjugate();
         }
 
@@ -2487,18 +2672,33 @@ static void QR_C(
 
         for (int k=0; k<nloops2; ++k) {
             QR3[k] = A3[k];
+#if ALGO == 1
             LAPNAME(geqrf) (
                 LAPCM M,N,LP(QR3[k].ptr()),M,LP(Beta3[k].ptr()),
                 LP(Work3.ptr()),lwork,&lapinfo);
+#elif ALGO == 2
+            for(int i=0;i<N;++i) P3i[i] = 0;
+            LAPNAME(geqp3) (
+                LAPCM M,N,LP(QR3[k].ptr()),M,&(P3i[0]),LP(Beta3[k].ptr()),
+                LP(Work3.ptr()),lwork,
+#ifdef TISCOMPLEX
+                RWork3.ptr(),
+#endif
+                &lapinfo);
+            ConvertIndexToPermute(N,&(P3i[0]),&(P3[k][0]));
+#endif
             d3[k] = T(1);
             for(int i=0;i<N;++i) d3[k] *= QR3[k](i,i);
-#ifdef TISCOMPLEX
             for(int i=0;i<N;++i) if (Beta3[k][i] != T(0)) {
+#ifdef TISCOMPLEX
                 T b = Beta3[k][i];
-                d3[k] *= -std::conj(b*b)/std::norm(b);
-            }
+                d3[k] *= -(b*b)/std::norm(b);
 #else
-            for(int i=0;i<N;++i) if (Beta3[k][i] != T(0)) d3[k] = -d3[k];
+                d3[k] = -d3[k];
+#endif
+            }
+#if ALGO == 2
+            for(int i=0;i<N;++i) if (P3[k][i] != i) d3[k] = -d3[k];
 #endif
         }
 
@@ -2523,7 +2723,7 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2; ++k) {
-            d4[k] = A4[k].householderQr().absDeterminant();
+            d4[k] = A4[k] EIGENDIV .absDeterminant();
         }
 
         gettimeofday(&tp,0);
@@ -2548,7 +2748,7 @@ static void QR_C(
         ta = tp.tv_sec + tp.tv_usec/1.e6;
 
         for (int k=0; k<nloops2x; ++k) {
-            d5[k] = A5[k].householderQr().absDeterminant();
+            d5[k] = A5[k] EIGENDIV .absDeterminant();
         }
 
         gettimeofday(&tp,0);
@@ -2733,6 +2933,9 @@ int main() try
         D[k].setZero();
         F[k].setZero();
         AR[k] = AC[k];
+        //AC[k].col(0).setZero();
+        //AC[k](0,0) = 1.e-20;
+        //AC[k](0,1) = 3.e-20;
     }
 
     std::cout<<"M,N,K = "<<M<<" , "<<N<<" , "<<K<<std::endl;
@@ -2744,6 +2947,10 @@ int main() try
 #endif
     std::cout<<"\nTime for:               ";
     std::cout<<" TMV    TMV Small  LAPACK   Eigen Eigen Known"<<std::endl;
+
+#ifdef STRICTQRP
+    tmv::UseStrictQRP();
+#endif
 
 #ifdef DO_C
     QR_C(AC,B,C,D,E,F);

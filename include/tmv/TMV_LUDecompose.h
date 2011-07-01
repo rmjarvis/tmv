@@ -663,7 +663,7 @@ namespace tmv {
             std::cout<<"LUDecompose algo 81: cs,rs = "<<cs<<','<<rs<<std::endl;
 #endif
             typedef typename M::value_type T;
-            typedef typename MCopyHelper<T,Rec,cs,rs,false,false>::type Mcm;
+            typedef typename MCopyHelper<T,Rec,cs,rs>::type Mcm;
             Mcm mcm = m;
             LUDecompose_Helper<-2,cs,rs,Mcm>::call(mcm,P);
             NoAliasCopy(mcm,m);

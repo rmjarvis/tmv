@@ -109,10 +109,11 @@ const int nloops2x = (
 
 static void ClearCache()
 {
-    tmv::Vector<double> X(10000,8.);
-    tmv::Vector<double> Y(10000,8.);
-    tmv::Vector<double> Z(10000);
+    static tmv::Vector<double> X(10000,8.);
+    static tmv::Vector<double> Y(10000,8.);
+    static tmv::Vector<double> Z(10000);
     Z = X + Y;
+    if (Norm(Z) < 5.) exit(1);
 }
 
 #ifdef SIMPLEVALUES

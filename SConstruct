@@ -58,7 +58,7 @@ opts.Add(BoolVariable('INST_INT',
 opts.Add(BoolVariable('INST_COMPLEX',
         'Instantiate complex<T> templates in compiled library', True))
 opts.Add(BoolVariable('INST_MIX',
-        'Instantiate functions that mix real with complex', False))
+        'Instantiate functions that mix real with complex', True))
 
 opts.Add(EnumVariable('TEST_OPT',
         'Set the optimization level for TMV test suite', '1',
@@ -1126,8 +1126,8 @@ def DoConfig(env):
         env.Append(CPPDEFINES=['TMV_INST_INT'])
     if env['INST_LONGDOUBLE']:
         env.Append(CPPDEFINES=['TMV_INST_LONGDOUBLE'])
-    if env['INST_MIX']:
-        env.Append(CPPDEFINES=['TMV_INST_MIX'])
+    if not env['INST_MIX']:
+        env.Append(CPPDEFINES=['TMV_NO_INST_MIX'])
     if not env['INST_COMPLEX']:
         env.Append(CPPDEFINES=['TMV_NO_INST_COMPLEX'])
 

@@ -14,22 +14,22 @@
 //#define XDEBUG_PRODMM
 //#define XDEBUG_QUOTMM
 
-//#define TMV_INLINE
+#define TMV_NO_LIB
 #include "TMV.h"
 
 // How big do you want the matrices to be?
-#if 1
+#if 0
 const int M = 40;
 const int N = M;
 const int K = M;
-#elif 1
+#elif 0
 const int M = 973;
 const int N = 988;
 const int K = 979;
 #else
-const int M = 256;
-const int N = 1;
-const int K = 637;
+const int M = 829;
+const int N = 57;
+const int K = 4;
 #endif
 
 // Define the type to use:
@@ -59,14 +59,14 @@ const int K = 637;
 
 // Define which batches of functions you want to test:
 #define DOMULTMM_CCC
-//#define DOMULTMM_RCC
-//#define DOMULTMM_CRC
-//#define DOMULTMM_RRC
+#define DOMULTMM_RCC
+#define DOMULTMM_CRC
+#define DOMULTMM_RRC
 
 // Set this if you only want to do a single loop.
 // Not so useful for timing, but useful for debugging.
 // Also useful if M,N,K are very large to avoid overflow in product
-#define ONELOOP
+//#define ONELOOP
 
 // Set this to just do the basic C = A * B multiplication, rather than
 // incluing all the various conjugates, +=, and scalings.
@@ -128,6 +128,24 @@ const int nloops2 = 1;
 #else
 const int nloops2 = targetmem / (M*N*K * sizeof(T)) + 1;
 const int nloops1 = targetnflops / (M*N*K * nloops2 * XFOUR) + 1;
+#endif
+
+#include <sys/time.h>
+#include <algorithm>
+#include <numeric>
+#include <iostream>
+
+#if (defined(DOEIGEN) || defined(DOEIGENSMALL))
+
+#define ALLOC(X) Eigen::aligned_allocator< X >
+
+// Supposedly, these are required when using vector's of Eigen types,
+// but they don't seem to work.  
+// And leaving them out does seem to work.
+//#define EIGEN_USE_NEW_STDVECTOR
+//#include "Eigen/StdVector"
+#include "Eigen/Core"
+
 #endif
 
 #if (PART1 == 1) // Full rectangle
@@ -568,30 +586,11 @@ const int nloops2x = (
 
 #endif
 
-#include <sys/time.h>
-#include <algorithm>
-#include <numeric>
-#include <iostream>
-
-#if (defined(DOEIGEN) || defined(DOEIGENSMALL))
-
-#define ALLOC(X) Eigen::aligned_allocator< X >
-
-// Supposedly, these are required when using vector's of Eigen types,
-// but they don't seem to work.  
-// And leaving them out does seem to work.
-//#define EIGEN_USE_NEW_STDVECTOR
-//#include "Eigen/StdVector"
-#include "Eigen/Core"
-#include "Eigen/Array"
-
-#endif
-
 static void ClearCache()
 {
-    tmv::Vector<double> X(1000000,8.);
-    tmv::Vector<double> Y(1000000,8.);
-    tmv::Vector<double> Z(1000000);
+    static tmv::Vector<double> X(1000000,8.);
+    static tmv::Vector<double> Y(1000000,8.);
+    static tmv::Vector<double> Z(1000000);
     Z = X + Y;
     if (Norm(Z) < 5.) exit(1);
 }

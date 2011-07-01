@@ -105,8 +105,18 @@
 #include "TMV_BaseMatrix_Tri.h"
 #include "TMV_VIt.h"
 #include "TMV_Array.h"
+#include "TMV_Matrix.h"
 
 namespace tmv {
+
+    template <class M> class LUD;
+    template <class T> class InstLUD;
+    template <class M> class QRD;
+    template <class T> class InstQRD;
+    template <class M> class QRPD;
+    template <class T> class InstQRPD;
+    template <class M> class SVD;
+    template <class T> class InstSVD;
 
     //
     // SmallMatrix
@@ -163,9 +173,12 @@ namespace tmv {
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
 
-        typedef LUD<copy_type> lud_type;
-        typedef QRD<copy_type> qrd_type;
-        typedef InvalidType qrpd_type;
+        typedef typename TypeSelect<_hasdivider ,
+                const InstLUD<value_type>& , LUD<copy_type> >::type lud_type;
+        typedef typename TypeSelect<_hasdivider ,
+                const InstQRD<value_type>& , QRD<copy_type> >::type qrd_type;
+        typedef typename TypeSelect<_hasdivider ,
+                const InstQRPD<value_type>& , QRPD<copy_type> >::type qrpd_type;
         typedef InvalidType svd_type;
 
         enum { vecA = (
@@ -327,7 +340,7 @@ namespace tmv {
         // Constructors
         //
 
-        TMV_INLINE_ND SmallMatrix() 
+        SmallMatrix() 
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(M>=0);
@@ -398,7 +411,7 @@ namespace tmv {
             m2.newAssignTo(*this);
         }
 
-        TMV_INLINE_ND ~SmallMatrix()
+        ~SmallMatrix()
         {
 #ifdef TMV_DEBUG
             this->linearView().flatten().setAllTo(
@@ -508,9 +521,12 @@ namespace tmv {
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
 
-        typedef LUD<copy_type> lud_type;
-        typedef QRD<copy_type> qrd_type;
-        typedef InvalidType qrpd_type;
+        typedef typename TypeSelect<_hasdivider ,
+                const InstLUD<value_type>& , LUD<copy_type> >::type lud_type;
+        typedef typename TypeSelect<_hasdivider ,
+                const InstQRD<value_type>& , QRD<copy_type> >::type qrd_type;
+        typedef typename TypeSelect<_hasdivider ,
+                const InstQRPD<value_type>& , QRPD<copy_type> >::type qrpd_type;
         typedef InvalidType svd_type;
 
         enum { vecA = (
@@ -627,25 +643,26 @@ namespace tmv {
         // Constructors
         //
 
-        ConstSmallMatrixView(
+        TMV_INLINE ConstSmallMatrixView(
             const T* m, size_t cs, size_t rs, int si, int sj) :
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(sj) 
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstSmallMatrixView(const T* m, size_t cs, size_t rs, int si) :
+        TMV_INLINE ConstSmallMatrixView(
+            const T* m, size_t cs, size_t rs, int si) :
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(Sj != UNKNOWN); 
         }
 
-        ConstSmallMatrixView(const T* m, size_t cs, size_t rs) :
+        TMV_INLINE ConstSmallMatrixView(const T* m, size_t cs, size_t rs) :
             itsm(m), itscs(cs), itsrs(rs), itssi(Si), itssj(Sj)
         { TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); }
 
-        ConstSmallMatrixView(const T* m, size_t cs) :
+        TMV_INLINE ConstSmallMatrixView(const T* m, size_t cs) :
             itsm(m), itscs(cs), itsrs(N), itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -653,7 +670,7 @@ namespace tmv {
             TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
         }
 
-        ConstSmallMatrixView(const T* m) :
+        TMV_INLINE ConstSmallMatrixView(const T* m) :
             itsm(m), itscs(M), itsrs(N), itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -661,7 +678,7 @@ namespace tmv {
             TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
         }
 
-        ConstSmallMatrixView(const type& m2) :
+        TMV_INLINE ConstSmallMatrixView(const type& m2) :
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {
@@ -669,7 +686,7 @@ namespace tmv {
         }
 
         template <int A2>
-        ConstSmallMatrixView(const ConstMatrixView<T,A2>& m2) :
+        TMV_INLINE ConstSmallMatrixView(const ConstMatrixView<T,A2>& m2) :
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {
@@ -678,7 +695,7 @@ namespace tmv {
         }
 
         template <int A2>
-        ConstSmallMatrixView(const MatrixView<T,A2>& m2) :
+        TMV_INLINE ConstSmallMatrixView(const MatrixView<T,A2>& m2) :
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {
@@ -687,7 +704,7 @@ namespace tmv {
         }
 
         template <int M2, int N2, int Si2, int Sj2, int A2>
-        ConstSmallMatrixView(
+        TMV_INLINE ConstSmallMatrixView(
             const ConstSmallMatrixView<T,M2,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
@@ -697,7 +714,7 @@ namespace tmv {
         }
 
         template <int M2, int N2, int Si2, int Sj2, int A2>
-        ConstSmallMatrixView(
+        TMV_INLINE ConstSmallMatrixView(
             const SmallMatrixView<T,M2,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
@@ -706,7 +723,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        ~ConstSmallMatrixView() {
+        TMV_INLINE ~ConstSmallMatrixView() {
 #ifdef TMV_DEBUG
             itsm = 0; 
 #endif
@@ -804,9 +821,12 @@ namespace tmv {
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
 
-        typedef LUD<copy_type> lud_type;
-        typedef QRD<copy_type> qrd_type;
-        typedef InvalidType qrpd_type;
+        typedef typename TypeSelect<_hasdivider ,
+                const InstLUD<value_type>& , LUD<copy_type> >::type lud_type;
+        typedef typename TypeSelect<_hasdivider ,
+                const InstQRD<value_type>& , QRD<copy_type> >::type qrd_type;
+        typedef typename TypeSelect<_hasdivider ,
+                const InstQRPD<value_type>& , QRPD<copy_type> >::type qrpd_type;
         typedef InvalidType svd_type;
 
         enum { vecA = (
@@ -968,27 +988,27 @@ namespace tmv {
         // Constructors
         //
 
-        SmallMatrixView(T* m, size_t cs, size_t rs, int si, int sj) :
+        TMV_INLINE SmallMatrixView(T* m, size_t cs, size_t rs, int si, int sj) :
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(sj) 
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        SmallMatrixView(T* m, size_t cs, size_t rs, int si) :
+        TMV_INLINE SmallMatrixView(T* m, size_t cs, size_t rs, int si) :
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(Sj != UNKNOWN); 
         }
 
-        SmallMatrixView(T* m, size_t cs, size_t rs) :
+        TMV_INLINE SmallMatrixView(T* m, size_t cs, size_t rs) :
             itsm(m), itscs(cs), itsrs(rs), itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
         }
 
-        SmallMatrixView(T* m, size_t cs) :
+        TMV_INLINE SmallMatrixView(T* m, size_t cs) :
             itsm(m), itscs(cs), itsrs(N), itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -996,7 +1016,7 @@ namespace tmv {
             TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
         }
 
-        SmallMatrixView(T* m) :
+        TMV_INLINE SmallMatrixView(T* m) :
             itsm(m), itscs(M), itsrs(N), itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1004,7 +1024,7 @@ namespace tmv {
             TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
         }
 
-        SmallMatrixView(const type& m2) :
+        TMV_INLINE SmallMatrixView(const type& m2) :
             itsm(m2.itsm), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {
@@ -1012,7 +1032,7 @@ namespace tmv {
         }
 
         template <int A2>
-        SmallMatrixView(MatrixView<T,A2> m2) :
+        TMV_INLINE SmallMatrixView(MatrixView<T,A2> m2) :
             itsm(m2.ptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {
@@ -1021,7 +1041,7 @@ namespace tmv {
         }
 
         template <int M2, int N2, int Si2, int Sj2, int A2>
-        SmallMatrixView(SmallMatrixView<T,M2,N2,Si2,Sj2,A2> m2) :
+        TMV_INLINE SmallMatrixView(SmallMatrixView<T,M2,N2,Si2,Sj2,A2> m2) :
             itsm(m2.ptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj()) 
         {
@@ -1029,7 +1049,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        ~SmallMatrixView() {
+        TMV_INLINE ~SmallMatrixView() {
 #ifdef TMV_DEBUG
             itsm = 0; 
 #endif
@@ -1089,6 +1109,26 @@ namespace tmv {
     // Special Creators: 
     //   RowVectorViewOf(v) = 1xn Matrix with v in only row - Same Storage
     //   ColVectorViewOf(v) = nx1 Matrix with v in only col - Same Storage
+
+    // A quick helper class to get the return types correct for
+    // RowVectorView and ColVectorView.
+    template <class V>
+    struct VVO
+    {
+        typedef typename V::value_type T;
+        enum { N = V::_size };
+        enum { S = V::_step };
+        enum { vecA = (
+                ( V::_conj ? Conj : NonConj ) |
+                ( V::_fort ? FortranStyle : CStyle ) |
+                ( Traits<V>::A & AllAliasStatus ) )};
+        enum { colA = vecA | (S == 1 ? ColMajor : 0 ) };
+        enum { rowA = vecA | (S == 1 ? RowMajor : 0 ) };
+        typedef ConstSmallMatrixView<T,1,N,N,S,rowA> crv;
+        typedef SmallMatrixView<T,1,N,N,S,rowA> rv;
+        typedef ConstSmallMatrixView<T,N,1,S,N,colA> ccv;
+        typedef SmallMatrixView<T,N,1,S,N,colA> cv;
+    };
 
     template <class V>
     static TMV_INLINE typename VVO<V>::crv RowVectorViewOf(

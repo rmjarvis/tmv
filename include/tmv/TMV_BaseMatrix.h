@@ -290,7 +290,7 @@ namespace tmv {
     // This helper class helps decide calc_type for composite classes:
     // We don't define anything, since it needs to be specialized
     // differently for each shape.
-    template <class T, int shape, int cs, int rs, bool rm, bool fort>
+    template <class T, int shape, int cs, int rs, bool rm=false, bool fort=false>
     struct MCopyHelper;
 
     // This is similar - it defines the right view type when some
@@ -1041,6 +1041,20 @@ namespace tmv {
     template <class M>
     static TMV_INLINE typename M::inverse_type Inverse(const BaseMatrix<M>& m)
     { return m.inverse(); }
+
+    // These next few allow expressions like c = Transpose(a*b)
+    template <class M>
+    static TMV_INLINE typename M::calc_type::const_conjugate_type::copy_type Conjugate(
+        const BaseMatrix<M>& m)
+    { return m.calc().conjugate(); }
+    template <class M>
+    static TMV_INLINE typename M::calc_type::const_transpose_type::copy_type Transpose(
+        const BaseMatrix<M>& m)
+    { return m.calc().transpose(); }
+    template <class M>
+    static TMV_INLINE typename M::calc_type::const_adjoint_type::copy_type Adjoint(
+        const BaseMatrix<M>& m)
+    { return m.calc().adjoint(); }
 
 
     //

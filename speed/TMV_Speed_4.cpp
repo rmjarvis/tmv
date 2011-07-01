@@ -414,9 +414,9 @@ const int nloops2x = (
 
 static void ClearCache()
 {
-    tmv::Vector<double> X(1000000,8.);
-    tmv::Vector<double> Y(1000000,8.);
-    tmv::Vector<double> Z(1000000);
+    static tmv::Vector<double> X(1000000,8.);
+    static tmv::Vector<double> Y(1000000,8.);
+    static tmv::Vector<double> Z(1000000);
     Z = X + Y;
     if (Norm(Z) < 5.) exit(1);
 }
