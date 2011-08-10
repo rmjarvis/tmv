@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_LUDecompose_H
@@ -93,7 +63,7 @@ namespace tmv {
     {
         static void call(M1& A, int* P)
         {
-            const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
             TMVAssert(A.rowsize() == 1);
 #ifdef PRINTALGO_LU
             std::cout<<"LUDecompose algo 1: M,N,cs,rs = "<<M<<','<<1<<
@@ -126,7 +96,7 @@ namespace tmv {
     {
         static void call(M1& A, int* P)
         {
-            const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
             TMVAssert(A.rowsize() == 2);
 #ifdef PRINTALGO_LU
             std::cout<<"LUDecompose algo 2: M,N,cs,rs = "<<M<<','<<2<<
@@ -196,7 +166,7 @@ namespace tmv {
     {
         static void call(M1& A, int* P)
         {
-            const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
             TMVAssert(A.colsize() == 2);
 #ifdef PRINTALGO_LU
             std::cout<<"LUDecompose algo 3: M,N,cs,rs = "<<2<<','<<N<<
@@ -319,10 +289,10 @@ namespace tmv {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
-            const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
             const int R = TMV_MIN(N,M);
-            const int xx = UNKNOWN;
+            const int xx = TMV_UNKNOWN;
 #ifdef PRINTALGO_LU
             std::cout<<"LUDecompose algo 11: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -437,11 +407,11 @@ namespace tmv {
 
             typedef typename M1::real_type RT;
 
-            const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
-            const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
             const int Nx = TMV_LU_BLOCKSIZE;
             const int R = TMV_MIN(N,M);
-            const int xx = UNKNOWN;
+            const int xx = TMV_UNKNOWN;
 #ifdef PRINTALGO_LU
             std::cout<<"LUDecompose algo 21: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -529,8 +499,8 @@ namespace tmv {
             // get down to an Mx2 or Mx1 matrix.
             typedef typename M1::real_type RT;
 
-            const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
-            const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
             const int R = TMV_MIN(N,M);
 #ifdef PRINTALGO_LU
             std::cout<<"LUDecompose algo 27: M,N,cs,rs = "<<M<<','<<N<<
@@ -538,31 +508,31 @@ namespace tmv {
 #endif
             const int rx = IntTraits2<rs,cs>::min;
             const int algo2a = 
-                (rs==UNKNOWN || rs==1) ? 1 : 0;
+                (rs==TMV_UNKNOWN || rs==1) ? 1 : 0;
 #if TMV_LU_RECURSE > 1
             const int algo2b = 
-                (rs==UNKNOWN || rs==2) && (cs==UNKNOWN || cs>2) ? 2 : 0;
+                (rs==TMV_UNKNOWN || rs==2) && (cs==TMV_UNKNOWN || cs>2) ? 2 : 0;
             const int algo2c = 
-                (cs==UNKNOWN || cs==2) ? 3 : 0;
+                (cs==TMV_UNKNOWN || cs==2) ? 3 : 0;
 #endif
 #if TMV_LU_RECURSE > 2
             const int algo2d = 
-                (rx != UNKNOWN && rx > TMV_LU_RECURSE) ? 0 :
+                (rx != TMV_UNKNOWN && rx > TMV_LU_RECURSE) ? 0 :
                 11;
 #endif
 
             const int algo3 =  // The algorithm for R > 32
-                (rx == UNKNOWN || rx > 32) ? 27 : 0;
+                (rx == TMV_UNKNOWN || rx > 32) ? 27 : 0;
             const int algo4 =  // The algorithm for MultMM, LDivEqMU
-                rx == UNKNOWN ? -2 : rx > 32 ? -3 : 0;
+                rx == TMV_UNKNOWN ? -2 : rx > 32 ? -3 : 0;
 #if TMV_LU_RECURSE < 32
             const int algo3b =  // The algorithm for R > LU_RECURSE
-                (rx == UNKNOWN || rx > TMV_LU_RECURSE) ? 27 : 0;
+                (rx == TMV_UNKNOWN || rx > TMV_LU_RECURSE) ? 27 : 0;
             const int algo4b =  // The algorithm for R<32 MultMM, LDivEqMU
 #ifdef TMV_LU_INLINE_MM
-                rx == UNKNOWN ? -4 :
+                rx == TMV_UNKNOWN ? -4 :
 #else
-                rx == UNKNOWN ? -402 :
+                rx == TMV_UNKNOWN ? -402 :
 #endif
                 rx > TMV_LU_RECURSE ? -4 : 0;
 #endif
@@ -739,13 +709,13 @@ namespace tmv {
         static TMV_INLINE void call(M1& m, int* P)
         {
             const int algo = (
-                ( cs != UNKNOWN && rs != UNKNOWN &&
+                ( cs != TMV_UNKNOWN && rs != TMV_UNKNOWN &&
                   cs <= 16 && rs <= 16 ) ? -4 :
                 !M1::_colmajor ? 81 :
                 -4 );
 #ifdef PRINTALGO_LU
-            const int M = cs==UNKNOWN ? int(m.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(m.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m.rowsize()) : rs;
             std::cout<<"LUDecompose algo -3: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -761,8 +731,8 @@ namespace tmv {
         {
             typedef typename M::value_type T;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 cs == 0 || rs == 0 || cs == 1 ? 0 :

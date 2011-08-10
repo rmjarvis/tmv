@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_MultVV_H
@@ -114,7 +84,7 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static PT call(const V1& v1, const V2& v2)
         {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
             if (n == 0) return PT(0);
             else {
                 PT sum(0);
@@ -144,7 +114,7 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline PT call(const V1& v1, const V2& v2)
         {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static PT call2(const int n, IT1 it1, IT2 it2)
@@ -179,7 +149,7 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline PT call(const V1& v1, const V2& v2)
         {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static PT call2(const int n, IT1 it1, IT2 it2)
@@ -216,7 +186,7 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline PT call(const V1& v1, const V2& v2)
         {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static PT call2(const int n, IT1 it1, IT2 it2)
@@ -297,16 +267,203 @@ namespace tmv {
         { return Unroller<0,s>::unroll2(it1,it2); }
     };
 
-#ifdef __SSE__
-    // algo 21: single precision SSE: all real
+#ifdef __SSE2__
+    // algo 31: double precision SSE2: all real
     template <int s, class V1, class V2>
-    struct MultVV_Helper<21,s,V1,V2>
+    struct MultVV_Helper<31,s,V1,V2>
+    {
+        typedef typename V1::const_nonconj_type::const_iterator IT1;
+        typedef typename V2::const_nonconj_type::const_iterator IT2;
+        static inline double call(const V1& v1, const V2& v2)
+        {
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
+        }
+        static double call2(int n, IT1 A, IT2 B)
+        {
+            const bool unit1 = V1::_step == 1;
+            const bool unit2 = V2::_step == 1;
+
+            double sum0(0), sum1;
+
+            if (unit2) {
+                while (n && !TMV_Aligned(B.get()) ) {
+                    sum0 += *A++ * *B++;
+                    --n;
+                }
+            } else if (unit1) {
+                while (n && !TMV_Aligned(A.get()) ) {
+                    sum0 += *A++ * *B++;
+                    --n;
+                }
+            }
+
+            int n_2 = (n>>1);
+            int nb = n-(n_2<<1);
+
+            if (n_2) {
+                IT1 A1 = A+1;
+                IT2 B1 = B+1;
+
+                union { __m128d xm; double xd[2]; } xsum;
+                xsum.xm = _mm_set1_pd(0.);
+                __m128d xA,xB,x0;
+                do {
+                    Maybe2<!unit2,unit1>::sse_load(xA,A.get(),A1.get());
+                    A+=2; A1+=2;
+                    Maybe<unit2>::sse_load(xB,B.get(),B1.get());
+                    B+=2; B1+=2;
+                    x0 = _mm_mul_pd(xA,xB);
+                    xsum.xm = _mm_add_pd(xsum.xm,x0);
+                } while (--n_2);
+                sum1 = xsum.xd[0] + xsum.xd[1];
+            } else { sum1 = 0.; }
+
+            if (nb) sum0 += *A * *B;
+            return sum0 + sum1;
+        }
+    };
+
+    // algo 32: double precision SSE2: v1 real v2 complex
+    template <int s, class V1, class V2>
+    struct MultVV_Helper<32,s,V1,V2>
+    {
+        typedef typename V1::const_nonconj_type::const_iterator IT1;
+        typedef typename V2::const_nonconj_type::const_iterator IT2;
+        static inline std::complex<double> call(const V1& v1, const V2& v2)
+        {
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
+        }
+        static std::complex<double> call2(int n, IT1 A, IT2 B)
+        {
+            TMVStaticAssert(!V2::_conj);
+            const bool unit1 = V1::_step == 1;
+            const bool unit2 = V2::_step == 1;
+
+            std::complex<double> sum0(0), sum1;
+
+            if (unit2) {
+                while (n && !TMV_Aligned(B.get()) ) {
+                    sum0 += ZProd<false,false>::prod(*A++ , *B++);
+                    --n;
+                }
+            } else if (unit1) {
+                while (n && !TMV_Aligned(A.get()) ) {
+                    sum0 += ZProd<false,false>::prod(*A++ , *B++);
+                    --n;
+                }
+            }
+
+            int n_2 = (n>>1);
+            int nb = n-(n_2<<1);
+
+            if (n_2) {
+                IT1 A1 = A+1;
+                IT2 B1 = B+1;
+
+                union { __m128d xm; double xd[2]; } xsum;
+                xsum.xm = _mm_set1_pd(0.);
+                __m128d xsum2 = _mm_set1_pd(0.);
+                __m128d xA,xA1,xA2,xB1,xB2,x1,x2;
+                do {
+                    Maybe2<!unit2,unit1>::sse_load(xA,A.get(),A1.get());
+                    A+=2; A1+=2;
+                    Maybe<unit2>::sse_load(xB1,B.get());
+                    B+=2; 
+                    Maybe<unit2>::sse_load(xB2,B1.get());
+                    B1+=2;
+                    xA1 = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(0,0));
+                    xA2 = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(1,1));
+                    x1 = _mm_mul_pd(xA1,xB1);
+                    x2 = _mm_mul_pd(xA2,xB2);
+                    xsum.xm = _mm_add_pd(xsum.xm,x1);
+                    xsum2 = _mm_add_pd(xsum2,x2);
+                } while (--n_2);
+                xsum.xm = _mm_add_pd(xsum.xm,xsum2);
+                sum1 = std::complex<double>(xsum.xd[0],xsum.xd[1]);
+            } else { sum1 = 0.; }
+            if (nb) do {
+                sum0 += ZProd<false,false>::prod(*A++ , *B++);
+            } while (--nb);
+            return sum0 + sum1;
+        }
+    };
+
+    // algo 33: double precision SSE2: all complex
+    template <int s, class V1, class V2>
+    struct MultVV_Helper<33,s,V1,V2>
+    {
+        typedef typename V1::const_nonconj_type::const_iterator IT1;
+        typedef typename V2::const_nonconj_type::const_iterator IT2;
+        static inline std::complex<double> call(const V1& v1, const V2& v2)
+        {
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
+        }
+        static std::complex<double> call2(int n, IT1 A, IT2 B)
+        {
+            TMVStaticAssert(!V2::_conj);
+            const bool c1 = V1::_conj;
+
+            std::complex<double> sum(0);
+
+            if (n) {
+
+                // A*B = ( Ar Br - Ai Bi , Ar Bi + Ai Br )
+                // xsum1 = sum ( Ar Br , Ar Bi )
+                // xsum2 = sum ( Ai Br , Ai Bi )
+                // We combine these appropriately at the end.
+                __m128d xsum1 = _mm_set1_pd(0.);
+                __m128d xsum2 = _mm_set1_pd(0.);
+                __m128d xA,xB,xAr,xAi,x1,x2;
+                if ( TMV_Aligned(A.get()) && TMV_Aligned(B.get()) ) {
+                    do {
+                        Maybe<true>::sse_load(xA,A.get()); ++A;
+                        Maybe<true>::sse_load(xB,B.get()); ++B;
+                        xAr = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(0,0));
+                        xAi = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(1,1));
+                        x1 = _mm_mul_pd(xAr,xB);
+                        x2 = _mm_mul_pd(xAi,xB);
+                        xsum1 = _mm_add_pd(xsum1,x1);
+                        xsum2 = _mm_add_pd(xsum2,x2);
+                    } while (--n);
+                } else {
+                    do {
+                        Maybe<true>::sse_loadu(xA,A.get()); ++A;
+                        Maybe<true>::sse_loadu(xB,B.get()); ++B;
+                        xAr = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(0,0));
+                        xAi = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(1,1));
+                        x1 = _mm_mul_pd(xAr,xB);
+                        x2 = _mm_mul_pd(xAi,xB);
+                        xsum1 = _mm_add_pd(xsum1,x1);
+                        xsum2 = _mm_add_pd(xsum2,x2);
+                    } while (--n);
+                }
+                xsum2 = _mm_shuffle_pd(xsum2,xsum2,_MM_SHUFFLE2(0,1));
+                const double mone = Maybe<c1>::select(1. , -1.);
+                const double one = Maybe<c1>::select(-1. , 1.);
+                __m128d xmone = _mm_set_pd(one,mone);
+                xsum2 = _mm_mul_pd(xmone,xsum2);
+                union { __m128d xm; double xd[2]; } xsum;
+                xsum.xm = _mm_add_pd(xsum1,xsum2);
+                sum += std::complex<double>(xsum.xd[0],xsum.xd[1]);
+            } 
+            return sum;
+        }
+    };
+#endif
+
+#ifdef __SSE__
+    // algo 41: single precision SSE: all real
+    template <int s, class V1, class V2>
+    struct MultVV_Helper<41,s,V1,V2>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline float call(const V1& v1, const V2& v2)
         {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static float call2(int n, IT1 A, IT2 B)
@@ -363,15 +520,15 @@ namespace tmv {
         }
     };
 
-    // algo 22: single precision SSE: v1 real v2 complex
+    // algo 42: single precision SSE: v1 real v2 complex
     template <int s, class V1, class V2>
-    struct MultVV_Helper<22,s,V1,V2>
+    struct MultVV_Helper<42,s,V1,V2>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline std::complex<float> call(const V1& v1, const V2& v2)
         {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static std::complex<float> call2(int n, IT1 A, IT2 B)
@@ -437,15 +594,15 @@ namespace tmv {
         }
     };
 
-    // algo 23: single precision SSE: all complex
+    // algo 43: single precision SSE: all complex
     template <int s, class V1, class V2>
-    struct MultVV_Helper<23,s,V1,V2>
+    struct MultVV_Helper<43,s,V1,V2>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline std::complex<float> call(const V1& v1, const V2& v2)
         {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static std::complex<float> call2(int n, IT1 A, IT2 B)
@@ -514,201 +671,14 @@ namespace tmv {
     };
 #endif
 
-#ifdef __SSE2__
-    // algo 31: double precision SSE2: all real
-    template <int s, class V1, class V2>
-    struct MultVV_Helper<31,s,V1,V2>
-    {
-        typedef typename V1::const_nonconj_type::const_iterator IT1;
-        typedef typename V2::const_nonconj_type::const_iterator IT2;
-        static inline double call(const V1& v1, const V2& v2)
-        {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
-            return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
-        }
-        static double call2(int n, IT1 A, IT2 B)
-        {
-            const bool unit1 = V1::_step == 1;
-            const bool unit2 = V2::_step == 1;
-
-            double sum0(0), sum1;
-
-            if (unit2) {
-                while (n && !TMV_Aligned(B.get()) ) {
-                    sum0 += *A++ * *B++;
-                    --n;
-                }
-            } else if (unit1) {
-                while (n && !TMV_Aligned(A.get()) ) {
-                    sum0 += *A++ * *B++;
-                    --n;
-                }
-            }
-
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
-
-            if (n_2) {
-                IT1 A1 = A+1;
-                IT2 B1 = B+1;
-
-                union { __m128d xm; double xd[2]; } xsum;
-                xsum.xm = _mm_set1_pd(0.);
-                __m128d xA,xB,x0;
-                do {
-                    Maybe2<!unit2,unit1>::sse_load(xA,A.get(),A1.get());
-                    A+=2; A1+=2;
-                    Maybe<unit2>::sse_load(xB,B.get(),B1.get());
-                    B+=2; B1+=2;
-                    x0 = _mm_mul_pd(xA,xB);
-                    xsum.xm = _mm_add_pd(xsum.xm,x0);
-                } while (--n_2);
-                sum1 = xsum.xd[0] + xsum.xd[1];
-            } else { sum1 = 0.; }
-
-            if (nb) sum0 += *A * *B;
-            return sum0 + sum1;
-        }
-    };
-
-    // algo 32: double precision SSE2: v1 real v2 complex
-    template <int s, class V1, class V2>
-    struct MultVV_Helper<32,s,V1,V2>
-    {
-        typedef typename V1::const_nonconj_type::const_iterator IT1;
-        typedef typename V2::const_nonconj_type::const_iterator IT2;
-        static inline std::complex<double> call(const V1& v1, const V2& v2)
-        {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
-            return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
-        }
-        static std::complex<double> call2(int n, IT1 A, IT2 B)
-        {
-            TMVStaticAssert(!V2::_conj);
-            const bool unit1 = V1::_step == 1;
-            const bool unit2 = V2::_step == 1;
-
-            std::complex<double> sum0(0), sum1;
-
-            if (unit2) {
-                while (n && !TMV_Aligned(B.get()) ) {
-                    sum0 += ZProd<false,false>::prod(*A++ , *B++);
-                    --n;
-                }
-            } else if (unit1) {
-                while (n && !TMV_Aligned(A.get()) ) {
-                    sum0 += ZProd<false,false>::prod(*A++ , *B++);
-                    --n;
-                }
-            }
-
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
-
-            if (n_2) {
-                IT1 A1 = A+1;
-                IT2 B1 = B+1;
-
-                union { __m128d xm; double xd[2]; } xsum;
-                xsum.xm = _mm_set1_pd(0.);
-                __m128d xsum2 = _mm_set1_pd(0.);
-                __m128d xA,xA1,xA2,xB1,xB2,x1,x2;
-                do {
-                    Maybe2<!unit2,unit1>::sse_load(xA,A.get(),A1.get());
-                    A+=2; A1+=2;
-                    Maybe<unit2>::sse_load(xB1,B.get());
-                    B+=2; 
-                    Maybe<unit2>::sse_load(xB2,B1.get());
-                    B1+=2;
-                    xA1 = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(0,0));
-                    xA2 = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(1,1));
-                    x1 = _mm_mul_pd(xA1,xB1);
-                    x2 = _mm_mul_pd(xA2,xB2);
-                    xsum.xm = _mm_add_pd(xsum.xm,x1);
-                    xsum2 = _mm_add_pd(xsum2,x2);
-                } while (--n_2);
-                xsum.xm = _mm_add_pd(xsum.xm,xsum2);
-                sum1 = std::complex<double>(xsum.xd[0],xsum.xd[1]);
-            } else { sum1 = 0.; }
-            if (nb) do {
-                sum0 += ZProd<false,false>::prod(*A++ , *B++);
-            } while (--nb);
-            return sum0 + sum1;
-        }
-    };
-
-    // algo 33: double precision SSE2: all complex
-    template <int s, class V1, class V2>
-    struct MultVV_Helper<33,s,V1,V2>
-    {
-        typedef typename V1::const_nonconj_type::const_iterator IT1;
-        typedef typename V2::const_nonconj_type::const_iterator IT2;
-        static inline std::complex<double> call(const V1& v1, const V2& v2)
-        {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
-            return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
-        }
-        static std::complex<double> call2(int n, IT1 A, IT2 B)
-        {
-            TMVStaticAssert(!V2::_conj);
-            const bool c1 = V1::_conj;
-
-            std::complex<double> sum(0);
-
-            if (n) {
-
-                // A*B = ( Ar Br - Ai Bi , Ar Bi + Ai Br )
-                // xsum1 = sum ( Ar Br , Ar Bi )
-                // xsum2 = sum ( Ai Br , Ai Bi )
-                // We combine these appropriately at the end.
-                __m128d xsum1 = _mm_set1_pd(0.);
-                __m128d xsum2 = _mm_set1_pd(0.);
-                __m128d xA,xB,xAr,xAi,x1,x2;
-                if ( TMV_Aligned(A.get()) && TMV_Aligned(B.get()) ) {
-                    do {
-                        Maybe<true>::sse_load(xA,A.get()); ++A;
-                        Maybe<true>::sse_load(xB,B.get()); ++B;
-                        xAr = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(0,0));
-                        xAi = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(1,1));
-                        x1 = _mm_mul_pd(xAr,xB);
-                        x2 = _mm_mul_pd(xAi,xB);
-                        xsum1 = _mm_add_pd(xsum1,x1);
-                        xsum2 = _mm_add_pd(xsum2,x2);
-                    } while (--n);
-                } else {
-                    do {
-                        Maybe<true>::sse_loadu(xA,A.get()); ++A;
-                        Maybe<true>::sse_loadu(xB,B.get()); ++B;
-                        xAr = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(0,0));
-                        xAi = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(1,1));
-                        x1 = _mm_mul_pd(xAr,xB);
-                        x2 = _mm_mul_pd(xAi,xB);
-                        xsum1 = _mm_add_pd(xsum1,x1);
-                        xsum2 = _mm_add_pd(xsum2,x2);
-                    } while (--n);
-                }
-                xsum2 = _mm_shuffle_pd(xsum2,xsum2,_MM_SHUFFLE2(0,1));
-                const double mone = Maybe<c1>::select(1. , -1.);
-                const double one = Maybe<c1>::select(-1. , 1.);
-                __m128d xmone = _mm_set_pd(one,mone);
-                xsum2 = _mm_mul_pd(xmone,xsum2);
-                union { __m128d xm; double xd[2]; } xsum;
-                xsum.xm = _mm_add_pd(xsum1,xsum2);
-                sum += std::complex<double>(xsum.xd[0],xsum.xd[1]);
-            } 
-            return sum;
-        }
-    };
-#endif
-
-    // algo 41: recurse very large vector product
+    // algo 71: recurse very large vector product
     // This isn't for speed reasons - it's for increased accuracy.
     // For large vectors, the incremental additions can be much smaller
     // than the running sum, so the relative errors can be huge.
     // With the recursive algorithm, the relative error is generally
     // closer to the expected few * epsilon.
     template <int s, class V1, class V2>
-    struct MultVV_Helper<41,s,V1,V2>
+    struct MultVV_Helper<71,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -716,7 +686,7 @@ namespace tmv {
         typedef typename Traits<PT>::real_type RT;
         static inline PT call(const V1& v1, const V2& v2)
         {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static PT call2(const int n, const IT1& it1, const IT2& it2)
@@ -728,8 +698,8 @@ namespace tmv {
             else if (n > TMV_MultVV_RecurseSize) {
                 const int no2 = n/2;
                 return (
-                    MultVV_Helper<41,s1,V1,V2>::call2(no2,it1,it2) + 
-                    MultVV_Helper<41,s2,V1,V2>::call2(
+                    MultVV_Helper<71,s1,V1,V2>::call2(no2,it1,it2) + 
+                    MultVV_Helper<71,s2,V1,V2>::call2(
                         n-no2,it1+no2,it2+no2));
             } else {
                 return MultVV_Helper<-4,s,V1,V2>::call2(n,it1,it2);
@@ -795,12 +765,12 @@ namespace tmv {
                 v1complex && v2real ? 1 :
                 V2::_conj ? 2 :
                 TMV_OPT == 0 ? 11 :
-                s != UNKNOWN ? 11 :
-                ( s != UNKNOWN && s <= int(128/sizeof(PT)) ) ? 15 :
+                s != TMV_UNKNOWN ? 11 :
+                ( s != TMV_UNKNOWN && s <= int(128/sizeof(PT)) ) ? 15 :
 #ifdef __SSE__
-                ( allfloat && v1real && v2real && allunit ) ? 21 :
-                ( allfloat && v1real && v2complex ) ? 22 :
-                ( allfloat && v1complex && v2complex && unit ) ? 23 :
+                ( allfloat && v1real && v2real && allunit ) ? 41 :
+                ( allfloat && v1real && v2complex ) ? 42 :
+                ( allfloat && v1complex && v2complex && unit ) ? 43 :
 #endif
 #ifdef __SSE2__
                 ( alldouble && v1real && v2real && unit ) ? 31 :
@@ -826,7 +796,7 @@ namespace tmv {
         {
             const int algo = 
 #ifdef TMV_VV_RECURSE
-                (s == UNKNOWN || s > TMV_MultVV_RecurseSize) ? 41 : 
+                (s == TMV_UNKNOWN || s > TMV_MultVV_RecurseSize) ? 71 : 
 #endif
                 -4;
             return MultVV_Helper<algo,s,V1,V2>::call(v1,v2); 
@@ -845,7 +815,7 @@ namespace tmv {
             const bool conj = V2::_conj;
             const bool swap = V1::iscomplex && V2::isreal;
             const bool inst = 
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

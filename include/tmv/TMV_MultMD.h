@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02320-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_MultMD_H
@@ -208,9 +178,9 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = (rs == UNKNOWN ? m3.rowsize() : rs);
+            const int N = (rs == TMV_UNKNOWN ? m3.rowsize() : rs);
 #ifdef PRINTALGO_MD
-            const int M = (cs == UNKNOWN ? m3.colsize() : cs);
+            const int M = (cs == TMV_UNKNOWN ? m3.colsize() : cs);
             std::cout<<"MD algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -236,8 +206,8 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = (cs == UNKNOWN ? m3.colsize() : cs);
-            int N = (rs == UNKNOWN ? m3.rowsize() : rs);
+            const int M = (cs == TMV_UNKNOWN ? m3.colsize() : cs);
+            int N = (rs == TMV_UNKNOWN ? m3.rowsize() : rs);
 #ifdef PRINTALGO_MD
             std::cout<<"MD algo 12: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -270,7 +240,7 @@ namespace tmv {
 
             if (N) do {
                 dj = ZProd<false,c2>::prod(x , *D++);
-                MultXV_Helper<-4,UNKNOWN,add,0,PT2,M1c,M3c>::call2(
+                MultXV_Helper<-4,TMV_UNKNOWN,add,0,PT2,M1c,M3c>::call2(
                     M,dj,A,B);
                 A.shiftP(Astepj);
                 B.shiftP(Bstepj);
@@ -289,9 +259,9 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = (cs == UNKNOWN ? m3.colsize() : cs);
+            const int M = (cs == TMV_UNKNOWN ? m3.colsize() : cs);
 #ifdef PRINTALGO_MD
-            const int N = (rs == UNKNOWN ? m3.rowsize() : rs);
+            const int N = (rs == TMV_UNKNOWN ? m3.rowsize() : rs);
             std::cout<<"MD algo 14: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -317,8 +287,8 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            int M = (cs == UNKNOWN ? m3.colsize() : cs);
-            const int N = (rs == UNKNOWN ? m3.rowsize() : rs);
+            int M = (cs == TMV_UNKNOWN ? m3.colsize() : cs);
+            const int N = (rs == TMV_UNKNOWN ? m3.rowsize() : rs);
 #ifdef PRINTALGO_MD
             std::cout<<"MD algo 15: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -345,7 +315,7 @@ namespace tmv {
             Prefetch_Write(B.get());
 
             if (M) do {
-                ElemMultVV_Helper<-4,UNKNOWN,add,ix,T,M1r,M2d,M3r>::call2(
+                ElemMultVV_Helper<-4,TMV_UNKNOWN,add,ix,T,M1r,M2d,M3r>::call2(
                     N,x,A,D,B);
                 A.shiftP(Astepi);
                 B.shiftP(Bstepi);
@@ -365,8 +335,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MD
-            const int N = (rs == UNKNOWN ? m3.rowsize() : rs);
-            const int M = (cs == UNKNOWN ? m3.colsize() : cs);
+            const int N = (rs == TMV_UNKNOWN ? m3.rowsize() : rs);
+            const int M = (cs == TMV_UNKNOWN ? m3.colsize() : cs);
             std::cout<<"MD algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -515,8 +485,8 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -548,11 +518,11 @@ namespace tmv {
                 ( cs == 1 ) ? 1 :
                 ( rs == 1 ) ? 2 :
                 bothrm ? ( 
-                    ( rs != UNKNOWN && rs <= 5 && cs > rs ) ? 11 : 
-                    ( rs != UNKNOWN && rs <= 10 ) ? 14 : 15 ) :
+                    ( rs != TMV_UNKNOWN && rs <= 5 && cs > rs ) ? 11 : 
+                    ( rs != TMV_UNKNOWN && rs <= 10 ) ? 14 : 15 ) :
                 bothcm ? ( 
-                    ( cs != UNKNOWN && cs <= 10 ) ? 11 : 12 ) :
-                ( cs != UNKNOWN && cs <= 10 ) ? 11 : 12;
+                    ( cs != TMV_UNKNOWN && cs <= 10 ) ? 11 : 12 ) :
+                ( cs != TMV_UNKNOWN && cs <= 10 ) ? 11 : 12;
             MultMD_Helper<algo,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
@@ -587,12 +557,12 @@ namespace tmv {
                 ( cs == 1 ) ? 1 :
                 ( rs == 1 ) ? 2 :
                 bothrm ? ( 
-                    ( rs != UNKNOWN && rs <= 5 && cs > rs ) ? 11 : 
+                    ( rs != TMV_UNKNOWN && rs <= 5 && cs > rs ) ? 11 : 
                     docopy ? 82 : 
-                    ( rs != UNKNOWN && rs <= 10 ) ? 14 : 15 ) :
+                    ( rs != TMV_UNKNOWN && rs <= 10 ) ? 14 : 15 ) :
                 bothcm ? ( 
-                    ( cs != UNKNOWN && cs <= 10 ) ? 11 : 12 ) :
-                ( cs != UNKNOWN && cs <= 10 ) ? 11 : 12;
+                    ( cs != TMV_UNKNOWN && cs <= 10 ) ? 11 : 12 ) :
+                ( cs != TMV_UNKNOWN && cs <= 10 ) ? 11 : 12;
 #ifdef PRINTALGO_MD
             std::cout<<"InlineMultMD: \n";
             std::cout<<"x = "<<ix<<"  "<<T(x)<<"  add = "<<add<<std::endl;
@@ -635,8 +605,8 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&

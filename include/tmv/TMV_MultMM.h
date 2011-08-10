@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_MultMM_H
@@ -249,8 +219,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 2: M,N,K,cs,rs,xs,x = "<<1<<','<<N<<','<<K<<
                 ','<<1<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -272,8 +242,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 102: M,N,K,cs,rs,xs,x = "<<1<<','<<N<<','<<K<<
                 ','<<1<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -295,8 +265,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 202: M,N,K,cs,rs,xs,x = "<<1<<','<<N<<','<<K<<
                 ','<<1<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -318,8 +288,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 3: M,N,K,cs,rs,xs,x = "<<M<<','<<1<<','<<K<<
                 ','<<cs<<','<<1<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -339,8 +309,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 103: M,N,K,cs,rs,xs,x = "<<M<<','<<1<<','<<K<<
                 ','<<cs<<','<<1<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -360,8 +330,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 203: M,N,K,cs,rs,xs,x = "<<M<<','<<1<<','<<K<<
                 ','<<cs<<','<<1<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -381,8 +351,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"MM algo 4: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<1<<
                 ','<<cs<<','<<rs<<','<<1<<','<<T(x)<<std::endl;
 #endif
@@ -402,8 +372,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"MM algo 104: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<1<<
                 ','<<cs<<','<<rs<<','<<1<<','<<T(x)<<std::endl;
 #endif
@@ -423,8 +393,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"MM algo 204: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<1<<
                 ','<<cs<<','<<rs<<','<<1<<','<<T(x)<<std::endl;
 #endif
@@ -444,9 +414,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 5: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -469,9 +439,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 405: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -648,11 +618,11 @@ namespace tmv {
             static inline void call(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
-                TMVStaticAssert(rs != UNKNOWN);
+                TMVStaticAssert(rs != TMV_UNKNOWN);
                 TMVStaticAssert(rs != 0);
                 TMVStaticAssert(rs%2 == 0);
-                const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-                const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+                const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+                const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
                 if (M && K) loop_42(M,rs,K,x,m1,m2,m3); 
             }
         };
@@ -662,9 +632,9 @@ namespace tmv {
             static void call(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
-                const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-                const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-                const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+                const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+                const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+                const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
                 typedef typename M1::const_col_type M1c;
                 typedef typename M2::const_col_type M2c;
                 typedef typename M2::const_row_sub_type M2r;
@@ -691,12 +661,12 @@ namespace tmv {
         {
             const int algo2 = 
                 ( cs == 0 || rs == 0 || xs == 0 ) ? 0 :
-                ( rs == UNKNOWN ) ? 3 :
+                ( rs == TMV_UNKNOWN ) ? 3 :
                 ( rs%2 == 0 ) ? 2 : 3;
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 12: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
             std::cout<<"add = "<<add<<", algo2 = "<<algo2<<std::endl;
@@ -714,10 +684,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 21: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -880,13 +850,13 @@ namespace tmv {
             static inline void call(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
-                TMVStaticAssert(cs != UNKNOWN);
-                TMVStaticAssert(rs != UNKNOWN);
+                TMVStaticAssert(cs != TMV_UNKNOWN);
+                TMVStaticAssert(rs != TMV_UNKNOWN);
                 TMVStaticAssert(cs != 0);
                 TMVStaticAssert(rs != 0);
                 TMVStaticAssert(cs%2 == 0);
                 TMVStaticAssert(rs%2 == 0);
-                const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+                const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
                 if (K) loop_22(cs,rs,K,x,m1,m2,m3); 
                 else if (!add) m3.setZero();
             }
@@ -897,9 +867,9 @@ namespace tmv {
             static void call(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
-                const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-                const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-                const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+                const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+                const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+                const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
                 typedef typename M1::const_row_type M1r;
                 typedef typename M2::const_col_type M2c;
                 typedef typename M2::const_colrange_type::const_transpose_type M2t;
@@ -924,7 +894,7 @@ namespace tmv {
                         M1r m1ma = m1.get_row(ma);
                         M2t m2t = m2.cColRange(0,na).transpose();
                         M3r m3ma = m3.get_row(ma,0,na);
-                        const int rsx = rs == UNKNOWN ? UNKNOWN : ((rs>>1)<<1);
+                        const int rsx = rs == TMV_UNKNOWN ? TMV_UNKNOWN : ((rs>>1)<<1);
                         MultMV_Helper<-4,rsx,xs,add,ix,T,M2t,M1r,M3r>::call(
                             x,m2t,m1ma,m3ma);
                     }
@@ -939,12 +909,12 @@ namespace tmv {
             const int algo2 = 
                 ( cs == 0 || rs == 0 ) ? 0 :
                 ( xs == 0 ) ? ( add ? 0 : 1 ) :
-                ( cs == UNKNOWN || rs == UNKNOWN ) ? 3 :
+                ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? 3 :
                 ( cs%2 == 0 && rs%2 == 0 ) ? 2 : 3;
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 22: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
             std::cout<<"add = "<<add<<", algo2 = "<<algo2<<std::endl;
@@ -960,10 +930,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"MM algo 31: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1127,11 +1097,11 @@ namespace tmv {
             static TMV_INLINE void call(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
-                TMVStaticAssert(xs != UNKNOWN);
+                TMVStaticAssert(xs != TMV_UNKNOWN);
                 TMVStaticAssert(xs != 0);
                 TMVStaticAssert(xs%4 == 0);
-                const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-                const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+                const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+                const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
                 if (M && N) loop_42(M,N,xs,x,m1,m2,m3); 
             }
         };
@@ -1141,9 +1111,9 @@ namespace tmv {
             static void call(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
-                const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-                const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-                const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+                const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+                const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+                const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
                 typedef typename M1::const_colrange_type M1c;
                 typedef typename M2::const_rowrange_type M2r;
 
@@ -1157,7 +1127,7 @@ namespace tmv {
                         M1c m1c = m1.cColRange(ka,K);
                         M2r m2r = m2.cRowRange(ka,K);
                         const int xsx = 
-                            xs == UNKNOWN ? UNKNOWN : (xs - ((xs>>2)<<2));
+                            xs == TMV_UNKNOWN ? TMV_UNKNOWN : (xs - ((xs>>2)<<2));
                         MultMM_Helper<31,cs,rs,xsx,true,ix,T,M1c,M2r,M3>::call(
                             x,m1c,m2r,m3);
                     }
@@ -1169,12 +1139,12 @@ namespace tmv {
         {
             const int algo2 = 
                 ( cs == 0 || rs == 0 || xs == 0 ) ? 0 :
-                ( xs == UNKNOWN ) ? 3 :
+                ( xs == TMV_UNKNOWN ) ? 3 :
                 ( xs%4 == 0 ) ? 2 : 3;
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 32: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
             std::cout<<"add = "<<add<<", algo2 = "<<algo2<<std::endl;
@@ -1310,9 +1280,9 @@ namespace tmv {
             TMVAssert(i2 > i1);
             TMVAssert(j2 > j1);
             TMVAssert(k2 > k1);
-            TMVAssert(csx == UNKNOWN || csx == i2-i1);
-            TMVAssert(rsx == UNKNOWN || rsx == j2-j1);
-            TMVAssert(xsx == UNKNOWN || xsx == k2-k1);
+            TMVAssert(csx == TMV_UNKNOWN || csx == i2-i1);
+            TMVAssert(rsx == TMV_UNKNOWN || rsx == j2-j1);
+            TMVAssert(xsx == TMV_UNKNOWN || xsx == k2-k1);
 
             M1s m1s = m1.cSubMatrix(i1,i2,k1,k2);
             M2s m2s = m2.cSubMatrix(k1,k2,j1,j2);
@@ -1324,18 +1294,18 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
 #ifdef PRINTALGO_MM
             std::cout<<"MM algo 61: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
             TMVStaticAssert(ccc || rcc || crc);
             // These will be the correct value for the final non-block calls.
-            const int csx = cs == UNKNOWN ? UNKNOWN : (cs-((cs>>lnMB)<<lnMB));
-            const int rsx = rs == UNKNOWN ? UNKNOWN : (rs-((rs>>lnNB)<<lnNB));
-            const int xsx = xs == UNKNOWN ? UNKNOWN : (xs-((xs>>lnKB)<<lnKB));
+            const int csx = cs == TMV_UNKNOWN ? TMV_UNKNOWN : (cs-((cs>>lnMB)<<lnMB));
+            const int rsx = rs == TMV_UNKNOWN ? TMV_UNKNOWN : (rs-((rs>>lnNB)<<lnNB));
+            const int xsx = xs == TMV_UNKNOWN ? TMV_UNKNOWN : (xs-((xs>>lnKB)<<lnKB));
             if (M > MB || N > NB || K > KB) {
                 const int Mb = (M>>lnMB)+1; // = M/MB + 1
                 const int Nb = (N>>lnNB)+1; // = N/NB + 1
@@ -1357,9 +1327,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 63: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1379,9 +1349,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 64: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1402,10 +1372,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
 #ifdef PRINTALGO_MM
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 66: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1433,7 +1403,7 @@ namespace tmv {
                 M3s m3ba = m3.cSubMatrix(Mx,M,0,Nx);
                 M3s m3ab = m3.cSubMatrix(0,Mx,Nx,N);
                 M3s m3bb = m3.cSubMatrix(Mx,M,Nx,N);
-                const int xx = UNKNOWN;
+                const int xx = TMV_UNKNOWN;
 
                 MultMM_Helper<-2,xx,xx,xs,add,ix,T,M1r,M2c,M3s>::call(
                     x,m1a,m2a,m3aa);
@@ -1466,9 +1436,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 68: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1503,9 +1473,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 69: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1522,9 +1492,9 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
 #ifdef PRINTALGO_MM
             std::cout<<"MM algo 71: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
@@ -1544,13 +1514,13 @@ namespace tmv {
             
             const int algo2 = 
                 ccc ? ( M3::iscomplex ? 11 : 
-                        cs != UNKNOWN && xs != UNKNOWN ? 11 :
+                        cs != TMV_UNKNOWN && xs != TMV_UNKNOWN ? 11 :
                         12 ) :
                 rcc ? ( M3::iscomplex ? 21 :
-                        cs != UNKNOWN && xs != UNKNOWN ? 21 :
+                        cs != TMV_UNKNOWN && xs != TMV_UNKNOWN ? 21 :
                         22 ) :
                 crc ? ( M3::iscomplex ? 31 :
-                        cs != UNKNOWN && rs != UNKNOWN ? 31 :
+                        cs != TMV_UNKNOWN && rs != TMV_UNKNOWN ? 31 :
                         32 ) : 
                 11;
 
@@ -1589,9 +1559,9 @@ namespace tmv {
 #endif
 
 #ifdef TMV_MM_USE_WINOGRAD
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
 #endif
 
 #ifdef TMV_MM_USE_WINOGRAD
@@ -1618,9 +1588,9 @@ namespace tmv {
 #endif
 
 #ifdef TMV_MM_USE_RECURSIVE_BLOCK
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             const int Mb = (M>>6); // = M/64
             const int Nb = (N>>6); // = N/64
             const int Kb = (K>>6); // = K/64
@@ -1645,11 +1615,11 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef TMV_MM_OPT_SMALL
-            TMVStaticAssert(cs == UNKNOWN);
+            TMVStaticAssert(cs == TMV_UNKNOWN);
             const int M = m3.colsize();
 #ifdef PRINTALGO_MM
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 75: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1686,11 +1656,11 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef TMV_MM_OPT_SMALL
-            TMVStaticAssert(rs == UNKNOWN);
+            TMVStaticAssert(rs == TMV_UNKNOWN);
             const int N = m3.rowsize();
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"MM algo 76: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1727,11 +1697,11 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef TMV_MM_OPT_SMALL
-            TMVStaticAssert(xs == UNKNOWN);
+            TMVStaticAssert(xs == TMV_UNKNOWN);
             const int K = m1.rowsize();
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"MM algo 77: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1768,9 +1738,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MV_MM
-            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
-            const int K = xs == UNKNOWN ? int(m1.rowsize()) : xs;
-            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int K = xs == TMV_UNKNOWN ? int(m1.rowsize()) : xs;
+            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"MM algo 81: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1789,9 +1759,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
-            const int K = xs == UNKNOWN ? int(m1.rowsize()) : xs;
-            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int K = xs == TMV_UNKNOWN ? int(m1.rowsize()) : xs;
+            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"MM algo 82: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1812,9 +1782,9 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs == UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs == TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             const int size1 = M*K;
             const int size2 = K*N;
             const int size3 = M*N;
@@ -1842,9 +1812,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs == UNKNOWN ? int(m1.rowsize()) : rs;
-            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
             std::cout<<"MM algo 84: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1863,9 +1833,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs == UNKNOWN ? int(m1.rowsize()) : rs;
-            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
             std::cout<<"MM algo 85: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1886,9 +1856,9 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
             const int size1 = M*K;
             const int size2 = K*N;
             const int size3 = M*N;
@@ -1915,9 +1885,9 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MM
             std::cout<<"MM algo 87: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
@@ -1950,9 +1920,9 @@ namespace tmv {
             const Scaling<1,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
-            const int M = cs == UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"algo 87: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -2086,9 +2056,9 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
-                (xs == UNKNOWN || xs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
+                (xs == TMV_UNKNOWN || xs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -2132,7 +2102,7 @@ namespace tmv {
                 ccc ? 11 :
                 rcc ? 21 :
                 crc ? 31 :
-                ( M2::_stepi != UNKNOWN && M3::_stepi != UNKNOWN ) ? 21 :
+                ( M2::_stepi != TMV_UNKNOWN && M3::_stepi != TMV_UNKNOWN ) ? 21 :
                 rrc ? 31 : 
                 21;
             MultMM_Helper<algo,cs,rs,xs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
@@ -2215,12 +2185,12 @@ namespace tmv {
             const bool crc = M1::_colmajor && M2::_rowmajor && M3::_colmajor;
             const bool rrc = M1::_rowmajor && M2::_rowmajor && M3::_colmajor;
 
-            const int Mb = cs == UNKNOWN ? UNKNOWN : (cs >> 6);
-            const int Nb = rs == UNKNOWN ? UNKNOWN : (rs >> 6);
-            const int Kb = xs == UNKNOWN ? UNKNOWN : (xs >> 6);
-            const int Mc = cs == UNKNOWN ? UNKNOWN : (cs < 16) ? 1 : (cs>>4);
-            const int Nc = rs == UNKNOWN ? UNKNOWN : (rs < 16) ? 1 : (rs>>4);
-            const int Kc = xs == UNKNOWN ? UNKNOWN : (xs < 16) ? 1 : (xs>>4);
+            const int Mb = cs == TMV_UNKNOWN ? TMV_UNKNOWN : (cs >> 6);
+            const int Nb = rs == TMV_UNKNOWN ? TMV_UNKNOWN : (rs >> 6);
+            const int Kb = xs == TMV_UNKNOWN ? TMV_UNKNOWN : (xs >> 6);
+            const int Mc = cs == TMV_UNKNOWN ? TMV_UNKNOWN : (cs < 16) ? 1 : (cs>>4);
+            const int Nc = rs == TMV_UNKNOWN ? TMV_UNKNOWN : (rs < 16) ? 1 : (rs>>4);
+            const int Kc = xs == TMV_UNKNOWN ? TMV_UNKNOWN : (xs < 16) ? 1 : (xs>>4);
             const int McNcKc = IntTraits2<IntTraits2<Mc,Nc>::prod,Kc>::prod;
             const bool twobig = (Mb && Kb) || (Mb && Nb) || (Nb && Kb);
 
@@ -2276,10 +2246,10 @@ namespace tmv {
                 // trouble, so just do the simple naive loops.
                 !(Traits2<T1,T2>::samebase && Traits2<T1,T3>::samebase) ?
                 ( ccc ? 11 : rcc ? 21 : crc ? 31 : 21 ) :
-                (cs == UNKNOWN || rs == UNKNOWN || xs == UNKNOWN ) ? (
-                    ccc ? ( cs == UNKNOWN ? 75 : cs <= 3 ? 11 : 71 ) :
-                    rcc ? ( xs == UNKNOWN ? 77 : xs <= 3 ? 21 : 71 ) :
-                    crc ? ( cs == UNKNOWN ? 75 : cs <= 3 ? 31 : 71 ) :
+                (cs == TMV_UNKNOWN || rs == TMV_UNKNOWN || xs == TMV_UNKNOWN ) ? (
+                    ccc ? ( cs == TMV_UNKNOWN ? 75 : cs <= 3 ? 11 : 71 ) :
+                    rcc ? ( xs == TMV_UNKNOWN ? 77 : xs <= 3 ? 21 : 71 ) :
+                    crc ? ( cs == TMV_UNKNOWN ? 75 : cs <= 3 ? 31 : 71 ) :
                     71 ) :
                 do_openmp ? 69 :
                 do_winograd ? 68 :
@@ -2296,7 +2266,7 @@ namespace tmv {
                 // Basically, the non-unit step vectors for MultMV are ok, 
                 // since the non-unit step is known and the lengths of the 
                 // vectors are not too large.
-                ( M2::_stepi != UNKNOWN && M3::_stepi != UNKNOWN )  ? 21 :
+                ( M2::_stepi != TMV_UNKNOWN && M3::_stepi != TMV_UNKNOWN )  ? 21 :
                 // For rrc, 31 seems to be faster than copying for small
                 // matrices (which is what we have here).
                 rrc ? 31 : 
@@ -2320,9 +2290,9 @@ namespace tmv {
 #endif
 #endif
 #ifdef PRINTALGO_MM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
             std::cout<<"InlineMultMM: x = "<<ix<<"  "<<T(x)<<std::endl;
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
@@ -2388,9 +2358,9 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
-                (xs == UNKNOWN || xs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
+                (xs == TMV_UNKNOWN || xs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -2422,9 +2392,9 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
-                (xs == UNKNOWN || xs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
+                (xs == TMV_UNKNOWN || xs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&

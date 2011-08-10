@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 #ifndef TMV_CopyV_H
 #define TMV_CopyV_H
@@ -68,7 +38,7 @@ namespace tmv {
         typedef typename V2::iterator IT2;
         static void call(const V1& v1, V2& v2)
         {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
             for(int i=0;i<n;++i) v2.ref(i) = v1.cref(i); 
         }
         static void call2(int n, IT1 it1, IT2 it2)
@@ -107,7 +77,7 @@ namespace tmv {
     {
         static inline void call(const V1& v1, V2& v2)
         {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
             memmove(v2.ptr(),v1.cptr(),n*sizeof(typename V2::value_type));
         }
         static inline void call2(
@@ -202,7 +172,7 @@ namespace tmv {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
             const bool inst = 
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -231,7 +201,7 @@ namespace tmv {
             const int algo = 
                 s == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                ( s != UNKNOWN && s <= 8 ) ? 15 :
+                ( s != TMV_UNKNOWN && s <= 8 ) ? 15 :
                 ( Traits2<T1,T2>::sametype && 
                   V1::_conj == int(V2::_conj) &&
                   V1::_step == 1 && V2::_step == 1 ) ? 21 :
@@ -262,7 +232,7 @@ namespace tmv {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
             const bool inst = 
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 //#define PRINTALGO_DIVVU
 
@@ -51,12 +21,12 @@ namespace tmv {
             const int N = m2.size();
             if (m2.isunit()) {
                 const int s = ShapeTraits<M2::_shape>::unit_shape;
-                typename MCopyHelper<T,s,UNKNOWN,UNKNOWN,false,false>::type mc(N);
+                typename MCopyHelper<T,s,TMV_UNKNOWN,TMV_UNKNOWN,false,false>::type mc(N);
                 InstCopy(m2,mc.xView());
                 InlineTriLDivEq(v1,mc.xView().constView().cmView());
             } else  {
                 const int s = ShapeTraits<M2::_shape>::nonunit_shape;
-                typename MCopyHelper<T,s,UNKNOWN,UNKNOWN,false,false>::type mc(N);
+                typename MCopyHelper<T,s,TMV_UNKNOWN,TMV_UNKNOWN,false,false>::type mc(N);
                 InstCopy(m2,mc.xView());
                 InlineTriLDivEq(v1,mc.xView().constView().cmView());
             }
@@ -250,18 +220,6 @@ namespace tmv {
         VectorView<T1> v1, const ConstLowerTriMatrixView<T2,C2>& m2)
     { InlineAliasTriLDivEq(v1,m2); }
 
-#if 0
-    template <class T1, int C1, class T2, int C2, class T3>
-    void InstAliasLDivVM(
-        const T3 x, const ConstVectorView<T1,C1>& v1,
-        const ConstUpperTriMatrixView<T2,C2>& m2, VectorView<T3> v3)
-    { InlineAliasLDivVM(x,v1,m2,v3); }
-    template <class T1, int C1, class T2, int C2, class T3>
-    void InstAliasLDivVM(
-        const T3 x, const ConstVectorView<T1,C1>& v1,
-        const ConstLowerTriMatrixView<T2,C2>& m2, VectorView<T3> v3);
-    { InlineAliasLDivVM(x,v1,m2,v3); }
-#endif
 
 #define InstFile "TMV_DivVU.inst"
 #include "TMV_Inst.h"

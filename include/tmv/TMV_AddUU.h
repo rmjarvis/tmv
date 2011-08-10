@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_AddUU_H
@@ -141,7 +111,7 @@ namespace tmv {
 #ifdef PRINTALGO_AddUU
             std::cout<<"AddUU algo 11: N,s = "<<m3.size()<<','<<s<<std::endl;
 #endif
-            int N = (s == UNKNOWN ? m2.size() : s);
+            int N = (s == TMV_UNKNOWN ? m2.size() : s);
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::const_col_sub_type M2c;
             typedef typename M3::col_sub_type M3c;
@@ -156,7 +126,7 @@ namespace tmv {
             IT3 it3 = m3.get_col(0,0,1).begin();
             int M=1;
             for(;N;--N) {
-                AddVV_Helper<-4,UNKNOWN,ix1,T1,M1c,ix2,T2,M2c,M3c>::call2(
+                AddVV_Helper<-4,TMV_UNKNOWN,ix1,T1,M1c,ix2,T2,M2c,M3c>::call2(
                     M++,x1,it1,x2,it2,it3);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
@@ -176,7 +146,7 @@ namespace tmv {
 #ifdef PRINTALGO_AddUU
             std::cout<<"AddUU algo 12: N,s = "<<m3.size()<<','<<s<<std::endl;
 #endif
-            int N = (s == UNKNOWN ? m2.size() : s);
+            int N = (s == TMV_UNKNOWN ? m2.size() : s);
             typedef typename M1::const_row_sub_type M1r;
             typedef typename M2::const_row_sub_type M2r;
             typedef typename M3::row_sub_type M3r;
@@ -190,7 +160,7 @@ namespace tmv {
             IT2 it2 = m2.get_row(0,0,N).begin().nonConj();
             IT3 it3 = m3.get_row(0,0,N).begin();
             for(;N;--N) {
-                AddVV_Helper<-4,UNKNOWN,ix1,T1,M1r,ix2,T2,M2r,M3r>::call2(
+                AddVV_Helper<-4,TMV_UNKNOWN,ix1,T1,M1r,ix2,T2,M2r,M3r>::call2(
                     N,x1,it1,x2,it2,it3);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
@@ -480,7 +450,7 @@ namespace tmv {
             typedef typename M2::value_type TM2;
             typedef typename M3::value_type TM3;
             const bool inst =
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<TM1,TM2>::samebase &&
                 Traits2<TM1,TM3>::samebase &&
@@ -517,13 +487,13 @@ namespace tmv {
             TMVAssert(!m2.isunit());
             TMVAssert(!m3.isunit());
             typedef typename M3::value_type T3;
-            const int s2 = s > 20 ? UNKNOWN : s;
+            const int s2 = s > 20 ? TMV_UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)
             const int nops = IntTraits2<s2,s2p1>::safeprod;
             const bool unroll = 
                 s > 10 ? false :
-                s == UNKNOWN ? false :
+                s == TMV_UNKNOWN ? false :
                 nops <= TMV_ADDUU_UNROLL;
             const int algo = 
                 unroll ? (
@@ -558,13 +528,13 @@ namespace tmv {
             TMVStaticAssert(!M3::_conj);
             TMVStaticAssert(M3::_upper);
             typedef typename M3::value_type T3;
-            const int s2 = s > 20 ? UNKNOWN : s;
+            const int s2 = s > 20 ? TMV_UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)
             const int nops = IntTraits2<s2,s2p1>::safeprod;
             const bool unroll = 
                 s > 10 ? false :
-                s == UNKNOWN ? false :
+                s == TMV_UNKNOWN ? false :
                 nops <= TMV_ADDUU_UNROLL;
             const int algo = 
                 ( M1::_unit || M2::_unit ) ? 2 :
@@ -605,7 +575,7 @@ namespace tmv {
             typedef typename M2::value_type TM2;
             typedef typename M3::value_type TM3;
             const bool inst =
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<TM1,TM2>::samebase &&
                 Traits2<TM1,TM3>::samebase &&
@@ -757,7 +727,7 @@ namespace tmv {
         typedef typename M2::value_type TM2;
         typedef typename M3::value_type TM3;
         const bool inst =
-            (s == UNKNOWN || s > 16) &&
+            (s == TMV_UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
             Traits2<TM1,TM2>::samebase &&
             Traits2<TM1,TM3>::samebase &&

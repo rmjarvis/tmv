@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_AddVV_H
@@ -58,8 +28,8 @@ namespace tmv {
     struct AddVV_Helper;
 
     // algo 0: size = 0, nothing to do
-    template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
-    struct AddVV_Helper<0,0,ix1,T1,V1,ix2,T2,V2,V3>
+    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    struct AddVV_Helper<0,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -87,7 +57,7 @@ namespace tmv {
         typedef typename V1f::const_nonconj_type::const_iterator IT1f;
         typedef typename V2f::const_nonconj_type::const_iterator IT2f;
         typedef typename V3f::iterator IT3f;
-        enum { size2 = size == UNKNOWN ? UNKNOWN : (size<<1) };
+        enum { size2 = size == TMV_UNKNOWN ? TMV_UNKNOWN : (size<<1) };
         static inline void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
@@ -122,7 +92,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            const int n = size == UNKNOWN ? int(v3.size()) : size;
+            const int n = size == TMV_UNKNOWN ? int(v3.size()) : size;
             for(int i=0;i<n;++i) 
                 v3.ref(i) = ZSum::sum(
                     ZProd<false,false>::prod(x1 , v1.cref(i)),
@@ -152,7 +122,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            const int n = size == UNKNOWN ? int(v3.size()) : size;
+            const int n = size == TMV_UNKNOWN ? int(v3.size()) : size;
             call2(n,x1,v1.begin().nonConj(),x2,v2.begin().nonConj(),v3.begin());
         }
         static void call2(
@@ -192,7 +162,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            const int n = size == UNKNOWN ? int(v3.size()) : size;
+            const int n = size == TMV_UNKNOWN ? int(v3.size()) : size;
             call2(n,x1,v1.begin().nonConj(),x2,v2.begin().nonConj(),v3.begin());
         }
         static void call2(
@@ -238,7 +208,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            const int n = size == UNKNOWN ? int(v3.size()) : size;
+            const int n = size == TMV_UNKNOWN ? int(v3.size()) : size;
             call2(n,x1,v1.begin().nonConj(),x2,v2.begin().nonConj(),v3.begin());
         }
         static void call2(
@@ -437,7 +407,7 @@ namespace tmv {
             typedef typename V2::value_type TV2;
             typedef typename V3::value_type TV3;
             const bool inst =
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<TV1,TV2>::samebase &&
                 Traits2<TV1,TV3>::samebase &&
@@ -472,6 +442,9 @@ namespace tmv {
                 allunit && allcomplex &&
                 Traits<T1>::isreal && Traits<T2>::isreal &&
                 V1::_conj == int(V3::_conj) && V2::_conj == int(V3::_conj) ) };
+#if 0
+        enum { algo = 0 };
+#else
         enum { algo =  (
                 size == 0 ? 0 : 
                 TMV_OPT == 0 ? 11 :
@@ -479,13 +452,14 @@ namespace tmv {
                 (sizeof(RT) == 8 && allunit && allreal) ? 12 :
                 (sizeof(RT) == 4 && allunit && allreal) ? 13 :
                 11 ) };
+#endif
         static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
             TMVStaticAssert(!V3::_conj);
             const int algo1 = 
-                (size != UNKNOWN && size <= int(128/sizeof(T3))) ? 15 :
+                (size != TMV_UNKNOWN && size <= int(128/sizeof(T3))) ? 15 :
                 algo;
             AddVV_Helper<algo1,size,ix1,T1,V1,ix2,T2,V2,V3>::call(
                 x1,v1,x2,v2,v3);
@@ -525,7 +499,7 @@ namespace tmv {
             typedef typename V2::value_type TV2;
             typedef typename V3::value_type TV3;
             const bool inst =
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<TV1,TV2>::samebase &&
                 Traits2<TV1,TV3>::samebase &&

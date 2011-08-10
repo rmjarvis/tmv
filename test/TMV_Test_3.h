@@ -1,6 +1,4 @@
 
-#define NOSV
-
 #include "tmv/TMV_Base.h"
 
 template <class T> void TestAllSmallVector();

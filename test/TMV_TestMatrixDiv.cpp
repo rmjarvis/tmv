@@ -599,7 +599,6 @@ static void TestNonSquareDiv(tmv::DivType dt)
     s2 = t2*a;
     Assert(Norm(s2-s) < eps*Norm(s),"NonSquare t%a");
 
-#if 0
     // Test QR Update/Downdate:
 
     tmv::Matrix<std::complex<T>,stor> q30 = a;
@@ -610,52 +609,51 @@ static void TestNonSquareDiv(tmv::DivType dt)
            "QR_Decompose (RtR)");
 
     tmv::Matrix<std::complex<T>,stor> q10 = a.rowRange(0,10);
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag,stor> r10(10);
+    tmv::UpperTriMatrix<std::complex<T>,stor> r10(10);
     QR_Decompose(q10.view(),r10.view());
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag,stor> r = r10;
+    tmv::UpperTriMatrix<std::complex<T>,stor> rx = r10;
     tmv::Matrix<std::complex<T>,stor> a1030 = a.rowRange(10,30);
-    QR_Update(r.view(),a1030.view());
-    Assert(Norm(r.adjoint()*r-r30.adjoint()*r30) < eps*r.normSq(),
+    QR_Update(rx.view(),a1030.view());
+    Assert(Norm(rx.adjoint()*rx-r30.adjoint()*r30) < eps*rx.normSq(),
            "QR_Update");
-    r = r30;
+    rx = r30;
 
     a1030 = a.rowRange(10,30);
-    QR_Downdate(r.view(),a1030.view());
-    Assert(Norm(r.adjoint()*r-r10.adjoint()*r10) < eps*r.normSq(),
+    QR_Downdate(rx.view(),a1030.view());
+    Assert(Norm(rx.adjoint()*rx-r10.adjoint()*r10) < eps*rx.normSq(),
            "QR_Downdate");
-    r = r10;
+    rx = r10;
 
     tmv::Matrix<std::complex<T>,stor> a1020 = a.rowRange(10,20);
     tmv::Matrix<std::complex<T>,stor> a2030 = a.rowRange(20,30);
-    QR_Update(r.view(),a1020.view());
-    QR_Update(r.view(),a2030.view());
-    Assert(Norm(r.adjoint()*r-r30.adjoint()*r30) < eps*r.normSq(),
+    QR_Update(rx.view(),a1020.view());
+    QR_Update(rx.view(),a2030.view());
+    Assert(Norm(rx.adjoint()*rx-r30.adjoint()*r30) < eps*rx.normSq(),
            "QR_Update (double)");
-    r = r30;
+    rx = r30;
 
     a1020 = a.rowRange(10,20);
     a2030 = a.rowRange(20,30);
-    QR_Downdate(r.view(),a1020.view());
-    QR_Downdate(r.view(),a2030.view());
-    Assert(Norm(r.adjoint()*r-r10.adjoint()*r10) < eps*r.normSq(),
+    QR_Downdate(rx.view(),a1020.view());
+    QR_Downdate(rx.view(),a2030.view());
+    Assert(Norm(rx.adjoint()*rx-r10.adjoint()*r10) < eps*rx.normSq(),
            "QR_Downdate (double)");
-    r = r10;
+    rx = r10;
 
     tmv::Matrix<std::complex<T>,stor> q29 = a.rowRange(0,29);
     tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag,stor> r29(10,10);
     QR_Decompose(q29.view(),r29.view());
-    r = r30;
     tmv::Vector<std::complex<T> > a29 = a.row(29);
-    QR_Downdate(r.view(),a29.view());
-    Assert(Norm(r.adjoint()*r-r29.adjoint()*r29) < eps*r.normSq(),
+    rx = r30;
+    QR_Downdate(rx.view(),a29.view());
+    Assert(Norm(rx.adjoint()*rx-r29.adjoint()*r29) < eps*rx.normSq(),
            "QR_Downdate (single row)");
-    r = r29;
+    rx = r29;
 
     a29 = a.row(29);
-    QR_Update(r.view(),a29.view());
-    Assert(Norm(r.adjoint()*r-r30.adjoint()*r30) < eps*r.normSq(),
-           "QR_Downdate (single row)");
-#endif
+    QR_Update(rx.view(),a29.view());
+    Assert(Norm(rx.adjoint()*rx-r30.adjoint()*r30) < eps*rx.normSq(),
+           "QR_Update (single row)");
 
     // Test with some identical eigenvalues.
     // First make an arbitrary unitary matrix:
@@ -1023,11 +1021,9 @@ template <class T> void TestMatrixDiv()
     TestNonSquareDiv<T,tmv::ColMajor>(tmv::QR);
     TestNonSquareDiv<T,tmv::ColMajor>(tmv::QRP);
     TestSingularDiv<T,tmv::ColMajor>(tmv::QRP);
-#if 0
     TestSquareDiv<T,tmv::ColMajor>(tmv::SV);
     TestNonSquareDiv<T,tmv::ColMajor>(tmv::SV);
     TestSingularDiv<T,tmv::ColMajor>(tmv::SV);
-#endif
 }
 
 #ifdef TEST_DOUBLE

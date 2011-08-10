@@ -1,11 +1,6 @@
 
 #include "TMV_Test.h"
 #include "TMV_Test_3.h"
-
-//#define PRINTALGO_R1
-//#define PRINTALGO_XV
-//#define XDEBUG_OPRODVV
-
 #include "TMV.h"
 #include <fstream>
 

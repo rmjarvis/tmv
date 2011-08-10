@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
 //
@@ -111,7 +81,7 @@ namespace tmv {
     //
     //  _colsize = column size of matrix (aka number of rows)
     //  _rowsize = row size of matrix (aka number of columns)
-    //  (Use UNKNOWN if unknown at compile time)
+    //  (Use TMV_UNKNOWN if unknown at compile time)
     //
     //  _shape = The shape of the non-zero elements of the matrix
     //
@@ -271,10 +241,10 @@ namespace tmv {
         typedef typename M1::value_type T1;
         typedef typename M2::value_type T2;
         enum { known = (
-                M1::_stepi != UNKNOWN &&
-                M1::_stepj != UNKNOWN &&
-                M2::_stepi != UNKNOWN &&
-                M2::_stepj != UNKNOWN ) };
+                M1::_stepi != TMV_UNKNOWN &&
+                M1::_stepj != TMV_UNKNOWN &&
+                M2::_stepi != TMV_UNKNOWN &&
+                M2::_stepj != TMV_UNKNOWN ) };
         enum { same = (
                 Traits2<T1,T2>::sametype &&
                 known &&
@@ -422,6 +392,12 @@ namespace tmv {
 
         TMV_INLINE float_type normInf() const 
         { return calc().normInf(); }
+
+        TMV_INLINE real_type norm2() const
+        { return calc().norm2(); }
+
+        TMV_INLINE real_type condition() const
+        { return calc().condition(); }
 
         template <class ret_type, class F>
         TMV_INLINE ret_type sumElements(const F& f) const
@@ -613,13 +589,11 @@ namespace tmv {
         TMV_INLINE void makeInverseATA(BaseMatrix_Mutable<M2>& mata) const
         { tmv::MakeInverseATA(*this,mata); }
 
-#if 0
         TMV_INLINE real_type norm2() const
-        { return svd().norm2(); }
+        { return mat().norm2(); }
 
         TMV_INLINE real_type condition() const
-        { return svd().condition(); }
-#endif
+        { return mat().condition(); }
 
         //
         // Auxilliary routines
@@ -853,8 +827,8 @@ namespace tmv {
         typedef InvalidType copy_type;
         typedef InvalidType inverse_type;
 
-        enum { _colsize = UNKNOWN };
-        enum { _rowsize = UNKNOWN };
+        enum { _colsize = TMV_UNKNOWN };
+        enum { _rowsize = TMV_UNKNOWN };
         enum { _shape = Null };
         enum { _fort = false };
         enum { _calc = false };
@@ -899,7 +873,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<M::_rowsize,M::_colsize>::same));
         TMVAssert(m.colsize() == m.rowsize());
         const int size = Sizes<M::_rowsize,M::_colsize>::size;
-        const int n = size == UNKNOWN ? m.colsize() : size;
+        const int n = size == TMV_UNKNOWN ? m.colsize() : size;
         typename M::value_type sum(0);
         for (int i=0;i<n;++i) sum += m.cref(i,i);
         return sum;
@@ -927,8 +901,8 @@ namespace tmv {
     {
         static bool eq(const M1& m1, const M2& m2)
         {
-            const int M = cs == UNKNOWN ? m1.colsize() : cs;
-            const int N = rs == UNKNOWN ? m1.rowsize() : rs;
+            const int M = cs == TMV_UNKNOWN ? m1.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m1.rowsize() : rs;
             for(int i=0;i<M;++i) {
                 for(int j=0;j<N;++j) {
                     if (m1.cref(i,j) != m2.cref(i,j)) return false;
@@ -943,8 +917,8 @@ namespace tmv {
     {
         static bool eq(const M1& m1, const M2& m2)
         {
-            const int M = cs == UNKNOWN ? m1.colsize() : cs;
-            const int N = rs == UNKNOWN ? m1.rowsize() : rs;
+            const int M = cs == TMV_UNKNOWN ? m1.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m1.rowsize() : rs;
             for(int j=0;j<N;++j) {
                 for(int i=0;i<M;++i) {
                     if (m1.cref(i,j) != m2.cref(i,j)) return false;
@@ -1007,6 +981,12 @@ namespace tmv {
     template <class M>
     static TMV_INLINE typename M::float_type NormInf(const BaseMatrix<M>& m)
     { return m.normInf(); }
+    template <class M>
+    static TMV_INLINE typename M::float_type Norm2(const BaseMatrix<M>& m)
+    { return m.norm2(); }
+    template <class M>
+    static TMV_INLINE typename M::float_type Condition(const BaseMatrix<M>& m)
+    { return m.condition(); }
 
     template <class M>
     static TMV_INLINE typename M::float_type MaxAbsElement(const BaseMatrix<M>& m)

@@ -29,10 +29,22 @@ void TestMatrixDecomp()
         // mattype = 5  is Singular and nearly zero
         // mattype = 6  is Singular and nearly overflow
 
+#if 1
         const int N = 200;
         int M = N;
         if (mattype == 1) M = 211;
         else if (mattype == 2) M = 545;
+#elif 1
+        const int N = 8;
+        int M = N;
+        if (mattype == 1) M = 10;
+        else if (mattype == 2) M = 15;
+#else
+        const int N = 20;
+        int M = N;
+        if (mattype == 1) M = 24;
+        else if (mattype == 2) M = 32;
+#endif
 
         const bool singular = mattype >= 3;
         const bool baddefect = mattype == 4;
@@ -309,6 +321,9 @@ void TestMatrixDecomp()
             std::cout<<"."; std::cout.flush();
         } while (false);
 
+        // TODO: Add QR_Update, QR_Downdate here to test their 
+        // algorithms for large matrices.
+
         // QRP Decomposition
         for (int istrict = 0; istrict <= 1; istrict++) {
             if (showstartdone) {
@@ -335,7 +350,6 @@ void TestMatrixDecomp()
                 Assert(std::abs(R(i,i))<=std::abs(R(i-1,i-1)),"QRP - strict"); 
             }
 #endif
-
             tmv::Matrix<CT,stor> cQ = c.qrpd().getQ();
             tmv::UpperTriMatrix<CT> cR = c.qrpd().getR();
             tmv::Permutation cP = c.qrpd().getP();
@@ -436,7 +450,6 @@ void TestMatrixDecomp()
             std::cout<<"."; std::cout.flush();
         }
 
-#if 0
         // SV Decomposition
         do {
             if (showstartdone) {
@@ -604,7 +617,6 @@ void TestMatrixDecomp()
 #endif
             std::cout<<"."; std::cout.flush();
         } while (false);
-#endif
     }
 }
 

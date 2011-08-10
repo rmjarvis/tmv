@@ -21,7 +21,6 @@ static TMV_INLINE_ND void CopyBack(
 #define NOADDEQX
 #define NOMULTEQX
 #define BASIC_MULTMM_ONLY
-#define NOSV
 #include "TMV_TestMatrixArith.h"
 
 template <class T> void TestTriMatrixArith_A1b()
@@ -50,6 +49,7 @@ template <class T> void TestTriMatrixArith_A1b()
     tmv::Matrix<CT,tmv::ColMajor> ca2x = ca1x;
     ca2x -= a2x;
     ca2x *= CT(1,-2);
+    ca2x(0,0) = CT(7,12);
 
     tmv::UpperTriMatrixView<T> u4 = a1x.unitUpperTri();
     tmv::UpperTriMatrixView<CT> cu4 = ca1x.unitUpperTri();

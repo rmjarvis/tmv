@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 //---------------------------------------------------------------------------
 //
@@ -120,6 +90,8 @@
 #include "TMV_Householder.h"
 #include "TMV_SmallMatrix.h"
 
+//#define PRINTALGO_QR
+
 #ifdef PRINTALGO_QR
 #include <iostream>
 #include "TMV_MatrixIO.h"
@@ -175,11 +147,15 @@ namespace tmv {
             //std::cout<<"Q = "<<Q<<std::endl;
             //std::cout<<"beta = "<<beta<<std::endl;
             //std::cout<<"m2 = "<<m2<<std::endl;
+            //typename M1::copy_type QQ = Q;
+            //UnpackQ(QQ,beta);
+            //std::cout<<"QQ = "<<QQ<<std::endl;
+            //std::cout<<"QQ * m2 = "<<QQ*m2<<std::endl;
 #endif
             typedef typename M1::real_type RT;
 
-            const int M = cs==UNKNOWN ? Q.colsize() : cs;
-            const int N = rs==UNKNOWN ? Q.rowsize() : rs;
+            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? Q.rowsize() : rs;
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::row_type M2r;
             typedef typename M2::rowrange_type M2rr;
@@ -192,7 +168,16 @@ namespace tmv {
                 M1c u = Q.col(j,j+1,M);
                 M2r m2a = m2.row(j);
                 M2rr m2b = m2.rowRange(j+1,M);
+#ifdef PRINTALGO_QR
+                //std::cout<<"u = "<<u<<std::endl;
+                //std::cout<<"beta = "<<beta(j)<<std::endl;
+                //std::cout<<"m2a = "<<m2a<<std::endl;
+                //std::cout<<"m2b = "<<m2b<<std::endl;
+#endif
                 HouseholderMultEq(u,beta(j),m2a,m2b,temp);
+#ifdef PRINTALGO_QR
+                //std::cout<<"m2 => "<<m2<<std::endl;
+#endif
             }
         }
     };
@@ -207,11 +192,15 @@ namespace tmv {
             //std::cout<<"Q = "<<Q<<std::endl;
             //std::cout<<"beta = "<<beta<<std::endl;
             //std::cout<<"m2 = "<<m2<<std::endl;
+            //typename M1::copy_type QQ = Q;
+            //UnpackQ(QQ,beta);
+            //std::cout<<"QQ = "<<QQ<<std::endl;
+            //std::cout<<"QQt * m2 = "<<QQ.transpose()*m2<<std::endl;
 #endif
             typedef typename M1::real_type RT;
 
-            const int M = cs==UNKNOWN ? Q.colsize() : cs;
-            const int N = rs==UNKNOWN ? Q.rowsize() : rs;
+            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? Q.rowsize() : rs;
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::row_type M2r;
             typedef typename M2::rowrange_type M2rr;
@@ -224,7 +213,16 @@ namespace tmv {
                 M1c u = Q.col(j,j+1,M);
                 M2r m2a = m2.row(j);
                 M2rr m2b = m2.rowRange(j+1,M);
+#ifdef PRINTALGO_QR
+                //std::cout<<"u = "<<u<<std::endl;
+                //std::cout<<"beta = "<<beta(j)<<std::endl;
+                //std::cout<<"m2a = "<<m2a<<std::endl;
+                //std::cout<<"m2b = "<<m2b<<std::endl;
+#endif
                 HouseholderMultEq(u,beta(j),m2a,m2b,temp);
+#ifdef PRINTALGO_QR
+                //std::cout<<"m2 => "<<m2<<std::endl;
+#endif
             }
         }
     };
@@ -235,8 +233,8 @@ namespace tmv {
     {
         static void call(const M1& Q, const V1& beta, M2& m2)
         {
-            const int M = cs==UNKNOWN ? Q.colsize() : cs;
-            const int N = rs==UNKNOWN ? Q.rowsize() : rs;
+            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? Q.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"PackedQ_MultEq algo 13: div,cs,rs,xs = "<<
                 true<<','<<cs<<','<<rs<<','<<xs<<std::endl;
@@ -277,8 +275,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
 
-            const int M = cs==UNKNOWN ? Q.colsize() : cs;
-            const int N = rs==UNKNOWN ? Q.rowsize() : rs;
+            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? Q.rowsize() : rs;
             const int Nb = TMV_QR_BLOCKSIZE;
             const int s1 = IntTraits2<Nb,rs>::min;
             const int N1 = TMV_MIN(Nb,N);
@@ -329,8 +327,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
 
-            const int M = cs==UNKNOWN ? Q.colsize() : cs;
-            const int N = rs==UNKNOWN ? Q.rowsize() : rs;
+            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? Q.rowsize() : rs;
             const int Nb = TMV_QR_BLOCKSIZE;
             const int s1 = IntTraits2<Nb,rs>::min;
             const int N1 = TMV_MIN(Nb,N);
@@ -377,7 +375,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
 
-            const int N = rs==UNKNOWN ? Q.rowsize() : rs;
+            const int N = rs==TMV_UNKNOWN ? Q.rowsize() : rs;
 
             typedef typename MCopyHelper<T1,UpperTri,rs,rs>::type Ztype;
             Ztype Z(MatrixSizer<T1>(N,N));
@@ -404,7 +402,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
 
-            const int N = rs==UNKNOWN ? Q.rowsize() : rs;
+            const int N = rs==TMV_UNKNOWN ? Q.rowsize() : rs;
 
             typedef typename MCopyHelper<T1,UpperTri,rs,rs>::type Ztype;
             Ztype Z(MatrixSizer<T1>(N,N));
@@ -423,18 +421,18 @@ namespace tmv {
     {
         static void call(const M1& Q, const V1& beta, M2& m2)
         {
-            const int M = cs==UNKNOWN ? int(Q.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(Q.rowsize()) : rs;
-            const int K = xs==UNKNOWN ? int(m2.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? int(Q.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(Q.rowsize()) : rs;
+            const int K = xs==TMV_UNKNOWN ? int(m2.rowsize()) : xs;
             typedef typename M1::value_type T;
             const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
             const int csrs = IntTraits2<cs,rs>::prod;
             const int algo27 =
-                csrs != UNKNOWN && csrs <= l2cache ? 0 :
-                (rs == UNKNOWN || rs <= 128) ? 27 : 0;
+                csrs != TMV_UNKNOWN && csrs <= l2cache ? 0 :
+                (rs == TMV_UNKNOWN || rs <= 128) ? 27 : 0;
             const int algo21 =
-                csrs != UNKNOWN && csrs <= l2cache ? 0 :
-                (rs == UNKNOWN || rs > 128) ? 21 : 0;
+                csrs != TMV_UNKNOWN && csrs <= l2cache ? 0 :
+                (rs == TMV_UNKNOWN || rs > 128) ? 21 : 0;
 #ifdef PRINTALGO_QR
             std::cout<<"PackedQ_MultEq algo 31: div,cs,rs,xs = "<<
                 div<<','<<cs<<','<<rs<<','<<xs<<std::endl;
@@ -451,7 +449,7 @@ namespace tmv {
 
             // algo 13 uses more floating point operations than algo 11.
             // However, algo 11 is all Level 2 calculations, while algo 13
-            // ens with a direct matrix-matrix product, so can use Level 3
+            // ends with a direct matrix-matrix product, so can use Level 3
             // operations.  This can make it faster for some matrix sizes.
             // We calculate the total ops for algo 11 and 13, but we discount
             // the level 3 ops by 25% when M is < 32 and 50% for higher M's.
@@ -492,9 +490,9 @@ namespace tmv {
     {
         static void call(const M1& Q, const V1& beta, M2& m2)
         {
-            TMVStaticAssert(cs != UNKNOWN);
-            TMVStaticAssert(rs != UNKNOWN);
-            TMVStaticAssert(xs != UNKNOWN);
+            TMVStaticAssert(cs != TMV_UNKNOWN);
+            TMVStaticAssert(rs != TMV_UNKNOWN);
+            TMVStaticAssert(xs != TMV_UNKNOWN);
             TMVStaticAssert(cs >= 16);
 
 #ifdef PRINTALGO_QR
@@ -567,10 +565,10 @@ namespace tmv {
             const int algo =
                 cs == 0 || rs == 0 || cs == 1 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                rs == UNKNOWN ? 31 :
-                cs == UNKNOWN ? 31 :
+                rs == TMV_UNKNOWN ? 31 :
+                cs == TMV_UNKNOWN ? 31 :
                 csrs <= l2cache ? (
-                    cs < 16 ? 11 : xs == UNKNOWN ? 31 : 
+                    cs < 16 ? 11 : xs == TMV_UNKNOWN ? 31 : 
                     32 ) :
                 rs <= 128 ? 27 : 21;
 #endif
@@ -601,10 +599,9 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
-                (xs == UNKNOWN || xs > 16 || 
-                 (xs == 1 && ShapeTraits<M2::_shape>::vector) ) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
+                (xs == TMV_UNKNOWN || xs > 16 || xs == 1) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -616,6 +613,12 @@ namespace tmv {
                 M2::_conj ? 97 :
                 inst ? (xs == 1 ? 91 : 90) :
                 -3;
+#ifdef PRINTALGO_QR
+            std::cout<<"PackedQ_MultEq algo 32: div,cs,rs,xs = "<<
+                div<<','<<cs<<','<<rs<<','<<xs<<std::endl;
+            std::cout<<"inst = "<<inst<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             PackedQ_MultEq_Helper<algo,div,cs,rs,xs,M1,V1,M2>::call(Q,beta,m2);
         }
     };
@@ -634,6 +637,9 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<M2::_colsize,M1::_colsize>::same));
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(Q.rowsize() == beta.size());
+        TMVAssert(Q.colsize() == m2.colsize());
         const int cs = Sizes<M2::_colsize,M1::_colsize>::size;
         const int rs = Sizes<M1::_rowsize,V1::_size>::size;
         const int xs = M2::_rowsize;
@@ -653,6 +659,9 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<M2::_colsize,M1::_colsize>::same));
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(Q.rowsize() == beta.size());
+        TMVAssert(Q.colsize() == m2.colsize());
         const int cs = Sizes<M2::_colsize,M1::_colsize>::size;
         const int rs = Sizes<M1::_rowsize,V1::_size>::size;
         const int xs = M2::_rowsize;
@@ -672,6 +681,9 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<V2::_size,M1::_colsize>::same));
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(Q.rowsize() == beta.size());
+        TMVAssert(Q.colsize() == v2.size());
         const int cs = Sizes<V2::_size,M1::_colsize>::size;
         const int rs = Sizes<M1::_rowsize,V1::_size>::size;
         typedef typename M1::const_cview_type M1v;
@@ -679,9 +691,9 @@ namespace tmv {
         typedef typename V2::value_type T2;
         const int xs = 1;
         const int s2 = V2::_step;
-        const int xx = UNKNOWN;
+        const int xx = TMV_UNKNOWN;
         const int c = V2::_conj ? Conj : NonConj;
-        typedef typename MViewHelper<T2,Rec,rs,xs,s2,xx,c>::type V2v;
+        typedef typename MViewHelper<T2,Rec,cs,xs,s2,xx,c>::type V2v;
         TMV_MAYBE_CREF(M1,M1v) Qv = Q.cView();
         TMV_MAYBE_CREF(V1,V1v) betav = beta.cView();
         V2v v2v = ColVectorViewOf(v2);
@@ -695,6 +707,9 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<V2::_size,M1::_colsize>::same));
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(Q.rowsize() == beta.size());
+        TMVAssert(Q.colsize() == v2.size());
         const int cs = Sizes<V2::_size,M1::_colsize>::size;
         const int rs = Sizes<M1::_rowsize,V1::_size>::size;
         typedef typename M1::const_cview_type M1v;
@@ -702,9 +717,9 @@ namespace tmv {
         typedef typename V2::value_type T2;
         const int xs = 1;
         const int s2 = V2::_step;
-        const int xx = UNKNOWN;
+        const int xx = TMV_UNKNOWN;
         const int c = V2::_conj ? Conj : NonConj;
-        typedef typename MViewHelper<T2,Rec,rs,xs,s2,xx,c>::type V2v;
+        typedef typename MViewHelper<T2,Rec,cs,xs,s2,xx,c>::type V2v;
         TMV_MAYBE_CREF(M1,M1v) Qv = Q.cView();
         TMV_MAYBE_CREF(V1,V1v) betav = beta.cView();
         V2v v2v = ColVectorViewOf(v2);
@@ -718,6 +733,9 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<M2::_colsize,M1::_colsize>::same));
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(Q.rowsize() == beta.size());
+        TMVAssert(Q.colsize() == m2.colsize());
         const int cs = Sizes<M2::_colsize,M1::_colsize>::size;
         const int rs = Sizes<M1::_rowsize,V1::_size>::size;
         const int xs = M2::_rowsize;
@@ -737,6 +755,9 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<M2::_colsize,M1::_colsize>::same));
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(Q.rowsize() == beta.size());
+        TMVAssert(Q.colsize() == m2.colsize());
         const int cs = Sizes<M2::_colsize,M1::_colsize>::size;
         const int rs = Sizes<M1::_rowsize,V1::_size>::size;
         const int xs = M2::_rowsize;
@@ -756,6 +777,9 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<V2::_size,M1::_colsize>::same));
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(Q.rowsize() == beta.size());
+        TMVAssert(Q.colsize() == v2.size());
         const int cs = Sizes<V2::_size,M1::_colsize>::size;
         const int rs = Sizes<M1::_rowsize,V1::_size>::size;
         typedef typename M1::const_cview_type M1v;
@@ -763,9 +787,9 @@ namespace tmv {
         typedef typename V2::value_type T2;
         const int xs = 1;
         const int s2 = V2::_step;
-        const int xx = UNKNOWN;
+        const int xx = TMV_UNKNOWN;
         const int c = V2::_conj ? Conj : NonConj;
-        typedef typename MViewHelper<T2,Rec,rs,xs,s2,xx,c>::type V2v;
+        typedef typename MViewHelper<T2,Rec,cs,xs,s2,xx,c>::type V2v;
         TMV_MAYBE_CREF(M1,M1v) Qv = Q.cView();
         TMV_MAYBE_CREF(V1,V1v) betav = beta.cView();
         V2v v2v = ColVectorViewOf(v2);
@@ -779,6 +803,9 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<V2::_size,M1::_colsize>::same));
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(Q.rowsize() == beta.size());
+        TMVAssert(Q.colsize() == v2.size());
         const int cs = Sizes<V2::_size,M1::_colsize>::size;
         const int rs = Sizes<M1::_rowsize,V1::_size>::size;
         typedef typename M1::const_cview_type M1v;
@@ -786,9 +813,9 @@ namespace tmv {
         typedef typename V2::value_type T2;
         const int xs = 1;
         const int s2 = V2::_step;
-        const int xx = UNKNOWN;
+        const int xx = TMV_UNKNOWN;
         const int c = V2::_conj ? Conj : NonConj;
-        typedef typename MViewHelper<T2,Rec,rs,xs,s2,xx,c>::type V2v;
+        typedef typename MViewHelper<T2,Rec,cs,xs,s2,xx,c>::type V2v;
         TMV_MAYBE_CREF(M1,M1v) Qv = Q.cView();
         TMV_MAYBE_CREF(V1,V1v) betav = beta.cView();
         V2v v2v = ColVectorViewOf(v2);

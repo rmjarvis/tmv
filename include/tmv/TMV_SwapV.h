@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 #ifndef TMV_SwapV_H
 #define TMV_SwapV_H
@@ -72,7 +42,7 @@ namespace tmv {
         typedef typename V2::iterator IT2;
         static void call(V1& v1, V2& v2)
         {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
             for(int i=0;i<n;++i) TMV_SWAP(v1.ref(i),v2.ref(i));
         }
         static void call2(int n, IT1 it1, IT2 it2)
@@ -87,7 +57,7 @@ namespace tmv {
         typedef typename V2::iterator IT2;
         static inline void call(V1& v1, V2& v2)
         {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
             call2(n,v1.begin(),v2.begin());
         }
         static void call2(const int n, IT1 it1, IT2 it2)
@@ -121,7 +91,7 @@ namespace tmv {
         typedef typename V2::iterator IT2;
         static inline void call(V1& v1, V2& v2)
         {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
             call2(n,v1.begin(),v2.begin());
         }
         static void call2(const int n, IT1 it1, IT2 it2)
@@ -188,7 +158,7 @@ namespace tmv {
         typedef typename V2::iterator IT2;
         static inline void call(V1& v1, V2& v2)
         {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
             call2(n,v1.begin(),v2.begin());
         }
         static void call2(int n, IT1 it1, IT2 it2)
@@ -214,7 +184,7 @@ namespace tmv {
         typedef typename V2::iterator IT2;
         static inline void call(V1& v1, V2& v2)
         {
-            const int n = s == UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
             call2(n,v1.begin(),v2.begin());
         }
         static void call2(int n, IT1 it1, IT2 it2)
@@ -309,7 +279,7 @@ namespace tmv {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
             const bool inst = 
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
                 Traits2<T1,T2>::sametype &&
                 Traits<T1>::isinst;
             const int algo = 
@@ -342,7 +312,7 @@ namespace tmv {
         {
             TMVStaticAssert(!V2::_conj);
             const int algo1 = 
-                s != UNKNOWN && s <= int(128/sizeof(RT)) ? 15 :
+                s != TMV_UNKNOWN && s <= int(128/sizeof(RT)) ? 15 :
                 algo;
             SwapV_Helper<algo1,s,V1,V2>::call(v1,v2); 
         }
@@ -362,7 +332,7 @@ namespace tmv {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
             const bool inst = 
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
                 Traits2<T1,T2>::sametype &&
                 Traits<T1>::isinst;
             const int algo = 

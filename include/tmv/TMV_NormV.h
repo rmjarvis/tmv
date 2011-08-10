@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 #ifndef TMV_NormV_H
 #define TMV_NormV_H
@@ -92,7 +62,7 @@ namespace tmv {
             typedef typename TypeSelect<
                 V::isreal || Traits<ret>::iscomplex , ret ,
                 std::complex<ret> >::type BT;
-            const int n = s == UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
             ret sum(0);
             for(int i=0;i<n;++i) 
                 sum += Component<comp,BT>::f(
@@ -112,7 +82,7 @@ namespace tmv {
             typedef typename TypeSelect<
                 V::isreal || Traits<ret>::iscomplex , ret ,
                 std::complex<ret> >::type BT;
-            const int n = s == UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
             ret sum0(0), sum1(0);
             BT v0, v1;
             typedef typename V::const_iterator IT;
@@ -151,7 +121,7 @@ namespace tmv {
             typedef typename TypeSelect<
                 V::isreal || Traits<ret>::iscomplex , ret ,
                 std::complex<ret> >::type BT;
-            const int n = s == UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
             ret sum0(0), sum1(0);
             BT v0, v1;
             typedef typename V::const_iterator IT;
@@ -198,7 +168,7 @@ namespace tmv {
             typedef typename TypeSelect<
                 V::isreal || Traits<ret>::iscomplex , ret ,
                 std::complex<ret> >::type BT;
-            const int n = s == UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
             ret sum0(0), sum1(0);
             BT v0, v1;
             typedef typename V::const_iterator IT;
@@ -360,7 +330,7 @@ namespace tmv {
             const int maxunroll = 80;
             const int algo = 
                 TMV_OPT == 0 ? 11 :
-                ( s != UNKNOWN && s <= int(maxunroll) ) ? 15 :
+                ( s != TMV_UNKNOWN && s <= int(maxunroll) ) ? 15 :
                 (sizeof(RT) == 8 && V::_step == 1) ? (V::iscomplex ? 12 : 13) :
                 (sizeof(RT) == 4 && V::_step == 1) ? (V::iscomplex ? 13 : 14) :
                 11;
@@ -377,7 +347,7 @@ namespace tmv {
         {
             typedef typename V::value_type VT;
             const bool inst = 
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
                 Traits<VT>::isinst;
             const int algo = 
                 V::_conj ? 97 :

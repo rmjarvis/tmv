@@ -157,8 +157,8 @@ namespace tmv {
         typedef copy_type eval_type;
         typedef Permutation inverse_type;
 
-        enum { _colsize = UNKNOWN };
-        enum { _rowsize = UNKNOWN };
+        enum { _colsize = TMV_UNKNOWN };
+        enum { _rowsize = TMV_UNKNOWN };
         enum { _shape = Rec };
         enum { _fort = false };
         enum { _calc = false };
@@ -311,16 +311,10 @@ namespace tmv {
         TMV_INLINE int norm2() const
         { return 1; }
 
-        TMV_INLINE int doNorm2() const
-        { return 1; }
-
         TMV_INLINE int normInf() const
         { return 1; }
 
         TMV_INLINE int condition() const
-        { return 1; }
-
-        TMV_INLINE int doCondition() const
         { return 1; }
 
         TMV_INLINE bool isSinular() const
@@ -564,8 +558,11 @@ namespace tmv {
 
         void resize(size_t n)
         {
+            if (n > itsn) {
+                itsmem.resize(n);
+                itsp = itsmem.get();
+            }
             itsn = n;
-            allocateMem();
             isinv = false;
             itsdet = 1;
         }
@@ -682,7 +679,7 @@ namespace tmv {
     { p.write(os); return os; }
 
 
-#ifndef NOTHROW
+#ifndef TMV_NO_THROWW
     class PermutationReadError : 
         public ReadError
     {
@@ -762,7 +759,7 @@ namespace tmv {
         int _inv;
         is >> _inv;
         if (!is) {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROWW
             std::cerr<<"Permutation Read Error !is \n";
             exit(1);
 #else
@@ -773,7 +770,7 @@ namespace tmv {
         char paren;
         is >> paren;
         if (!is || paren != '(') {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROWW
             std::cerr<<"Permutation ReadError: "<<paren<<" != (\n";
             exit(1);
 #else
@@ -783,7 +780,7 @@ namespace tmv {
         for(int i=0;i<itsn;++i) {
             is >> itsmem[i];
             if (!is) {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROWW
                 std::cerr<<"Permutation ReadError: !is \n";
                 exit(1);
 #else
@@ -793,7 +790,7 @@ namespace tmv {
         }
         is >> paren;
         if (!is || paren != ')') {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROWW
             std::cerr<<"Permutation ReadError: "<<paren<<" != )\n";
             exit(1);
 #else
@@ -808,7 +805,7 @@ namespace tmv {
         char p;
         is >> p;
         if (!is) {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROWW
             std::cerr<<"Permutation Read Error !is \n";
             exit(1);
 #else
@@ -816,7 +813,7 @@ namespace tmv {
 #endif
         }
         if (p != 'P') {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROWW
             std::cerr<<"Permutation Read Error "<<p<<" != P\n";
             exit(1);
 #else
@@ -826,7 +823,7 @@ namespace tmv {
         size_t n;
         is >> n;
         if (!is) {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROWW
             std::cerr<<"Permutation Read Error !is \n";
             exit(1);
 #else
@@ -834,7 +831,7 @@ namespace tmv {
 #endif
         }
         if (n != m.size()) {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROWW
             std::cerr<<"Band Matrix Read Error wrong size \n";
             exit(1);
 #else
@@ -851,7 +848,7 @@ namespace tmv {
         char p;
         is >> p;
         if (!is) {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROWW
             std::cerr<<"Permutation Read Error !is \n";
             exit(1);
 #else
@@ -859,7 +856,7 @@ namespace tmv {
 #endif
         }
         if (p != 'P') {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROWW
             std::cerr<<"Permutation Read Error "<<p<<" != P\n";
             exit(1);
 #else
@@ -869,7 +866,7 @@ namespace tmv {
         size_t n;
         is >> n;
         if (!is) {
-#ifdef NOTHROW
+#ifdef TMV_NO_THROWW
             std::cerr<<"Permutation Read Error !is \n";
             exit(1);
 #else

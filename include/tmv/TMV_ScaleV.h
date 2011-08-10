@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 #ifndef TMV_ScaleV_H
 #define TMV_ScaleV_H
@@ -82,7 +52,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
             call2(n,x,v.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT it)
@@ -100,7 +70,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
             call2(n,x,v.begin());
         }
         static void call2(const int n, const Scaling<ix,T>& x, IT it)
@@ -123,7 +93,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
             call2(n,x,v.begin());
         }
         static void call2(const int n, const Scaling<ix,T>& x, IT it)
@@ -170,139 +140,6 @@ namespace tmv {
         { Unroller<0,s>::unroll(x,v); }
     };
 
-#ifdef __SSE__
-    // algo 21: single precision SSE: all real
-    template <int s, int ix, class T, class V>
-    struct ScaleV_Helper<21,s,ix,T,V>
-    {
-        typedef typename V::iterator IT;
-        static inline void call(const Scaling<ix,T>& x, V& v)
-        {
-            const int n = s == UNKNOWN ? int(v.size()) : s;
-            call2(n,x,v.begin());
-        }
-        static void call2(int n, const Scaling<ix,T>& x, IT A)
-        {
-            const bool unit = V::_step == 1;
-            if (unit ) {
-                while (n && !TMV_Aligned(A.get()) ) {
-                    *A++ *= x; 
-                    --n;
-                }
-            }
-
-            int n_4 = (n>>2);
-            int nb = n-(n_4<<2);
-
-            if (n_4) {
-                IT A1 = A+1;
-                IT A2 = A+2;
-                IT A3 = A+3;
-                float x1 = x;
-                __m128 xx = _mm_set1_ps(x1);
-                __m128 xA;
-                do {
-                    Maybe<unit>::sse_load(
-                        xA,A.get(),A1.get(),A2.get(),A3.get());
-                    xA = _mm_mul_ps(xA,xx);
-                    Maybe<unit>::sse_store(
-                        A.get(),A1.get(),A2.get(),A3.get(),xA);
-                    A+=4; A1+=4; A2+=4; A3+=4;
-                } while (--n_4);
-            }
-            if (nb) do { *A++ *= x; } while (--nb);
-        }
-    };
-
-    // algo 22: single precision SSE: x real, v complex
-    template <int s, int ix, class T, class V>
-    struct ScaleV_Helper<22,s,ix,T,V>
-    {
-        typedef typename V::iterator IT;
-        static inline void call(const Scaling<ix,T>& x, V& v)
-        {
-            const int n = s == UNKNOWN ? int(v.size()) : s;
-            call2(n,x,v.begin());
-        }
-        static void call2(int n, const Scaling<ix,T>& x, IT A)
-        {
-            const bool unit = V::_step == 1;
-            if (unit ) {
-                while (n && !TMV_Aligned(A.get()) ) {
-                    *A++ *= x; 
-                    --n;
-                }
-            }
-
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
-
-            if (n_2) {
-                IT A1 = A+1;
-                float x1 = x;
-                __m128 xx = _mm_set1_ps(x1);
-                __m128 xA;
-                do {
-                    Maybe<unit>::sse_load(xA,A.get(),A1.get());
-                    xA = _mm_mul_ps(xA,xx);
-                    Maybe<unit>::sse_store(A.get(),A1.get(),xA);
-                    A+=2; A1+=2;
-                } while (--n_2);
-            }
-            if (nb) *A++ *= x; 
-        }
-    };
-
-    // algo 23: single precision SSE: all complex
-    template <int s, int ix, class T, class V>
-    struct ScaleV_Helper<23,s,ix,T,V>
-    {
-        typedef typename V::iterator IT;
-        static inline void call(const Scaling<ix,T>& x, V& v)
-        {
-            const int n = s == UNKNOWN ? int(v.size()) : s;
-            call2(n,x,v.begin());
-        }
-        static void call2(int n, const Scaling<ix,T>& x, IT A)
-        {
-            const bool unit = V::_step == 1;
-
-            if (unit) {
-                while (n && !TMV_Aligned(A.get()) ) {
-                    *A = ZProd<false,false>::prod(x,*A); ++A;
-                    --n;
-                }
-            }
-
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
-
-            if (n_2) {
-                IT A1 = A+1;
-                std::complex<float> xx(x);
-                float xr = real(xx);
-                float xi = imag(xx);
-                __m128 xxr = _mm_set1_ps(xr);
-                __m128 xxi = _mm_set_ps(xi , -xi , xi , -xi);
-                __m128 xA;
-                __m128 x0, x1, x2; // temp vars
-                do {
-                    // r = xr * Ar - xi * Ai
-                    // i = xr * Ai + xi * Ar
-                    Maybe<unit>::sse_load(xA,A.get(),A1.get());
-                    x0 = _mm_shuffle_ps(xA,xA,_MM_SHUFFLE(2,3,0,1));
-                    x1 = _mm_mul_ps(xxr,xA); // xr*Ar, xr*Ai
-                    x2 = _mm_mul_ps(xxi,x0); // -xi*Ai, xi*Ar
-                    xA = _mm_add_ps(x1,x2);
-                    Maybe<unit>::sse_store(A.get(),A1.get(),xA);
-                    A += 2; A1 += 2;
-                } while (--n_2);
-            }
-            if (nb) *A = ZProd<false,false>::prod(x,*A);
-        }
-    };
-#endif
-
 #ifdef __SSE2__
     // algo 31: double precision SSE2: all real
     template <int s, int ix, class T, class V>
@@ -311,7 +148,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
             call2(n,x,v.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT A)
@@ -350,7 +187,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
             call2(n,x,v.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT A)
@@ -376,7 +213,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
             call2(n,x,v.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT A)
@@ -413,6 +250,139 @@ namespace tmv {
                     } while (--n);
                 }
             }
+        }
+    };
+#endif
+
+#ifdef __SSE__
+    // algo 41: single precision SSE: all real
+    template <int s, int ix, class T, class V>
+    struct ScaleV_Helper<41,s,ix,T,V>
+    {
+        typedef typename V::iterator IT;
+        static inline void call(const Scaling<ix,T>& x, V& v)
+        {
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
+            call2(n,x,v.begin());
+        }
+        static void call2(int n, const Scaling<ix,T>& x, IT A)
+        {
+            const bool unit = V::_step == 1;
+            if (unit ) {
+                while (n && !TMV_Aligned(A.get()) ) {
+                    *A++ *= x; 
+                    --n;
+                }
+            }
+
+            int n_4 = (n>>2);
+            int nb = n-(n_4<<2);
+
+            if (n_4) {
+                IT A1 = A+1;
+                IT A2 = A+2;
+                IT A3 = A+3;
+                float x1 = x;
+                __m128 xx = _mm_set1_ps(x1);
+                __m128 xA;
+                do {
+                    Maybe<unit>::sse_load(
+                        xA,A.get(),A1.get(),A2.get(),A3.get());
+                    xA = _mm_mul_ps(xA,xx);
+                    Maybe<unit>::sse_store(
+                        A.get(),A1.get(),A2.get(),A3.get(),xA);
+                    A+=4; A1+=4; A2+=4; A3+=4;
+                } while (--n_4);
+            }
+            if (nb) do { *A++ *= x; } while (--nb);
+        }
+    };
+
+    // algo 42: single precision SSE: x real, v complex
+    template <int s, int ix, class T, class V>
+    struct ScaleV_Helper<42,s,ix,T,V>
+    {
+        typedef typename V::iterator IT;
+        static inline void call(const Scaling<ix,T>& x, V& v)
+        {
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
+            call2(n,x,v.begin());
+        }
+        static void call2(int n, const Scaling<ix,T>& x, IT A)
+        {
+            const bool unit = V::_step == 1;
+            if (unit ) {
+                while (n && !TMV_Aligned(A.get()) ) {
+                    *A++ *= x; 
+                    --n;
+                }
+            }
+
+            int n_2 = (n>>1);
+            int nb = n-(n_2<<1);
+
+            if (n_2) {
+                IT A1 = A+1;
+                float x1 = x;
+                __m128 xx = _mm_set1_ps(x1);
+                __m128 xA;
+                do {
+                    Maybe<unit>::sse_load(xA,A.get(),A1.get());
+                    xA = _mm_mul_ps(xA,xx);
+                    Maybe<unit>::sse_store(A.get(),A1.get(),xA);
+                    A+=2; A1+=2;
+                } while (--n_2);
+            }
+            if (nb) *A++ *= x; 
+        }
+    };
+
+    // algo 43: single precision SSE: all complex
+    template <int s, int ix, class T, class V>
+    struct ScaleV_Helper<43,s,ix,T,V>
+    {
+        typedef typename V::iterator IT;
+        static inline void call(const Scaling<ix,T>& x, V& v)
+        {
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
+            call2(n,x,v.begin());
+        }
+        static void call2(int n, const Scaling<ix,T>& x, IT A)
+        {
+            const bool unit = V::_step == 1;
+
+            if (unit) {
+                while (n && !TMV_Aligned(A.get()) ) {
+                    *A = ZProd<false,false>::prod(x,*A); ++A;
+                    --n;
+                }
+            }
+
+            int n_2 = (n>>1);
+            int nb = n-(n_2<<1);
+
+            if (n_2) {
+                IT A1 = A+1;
+                std::complex<float> xx(x);
+                float xr = real(xx);
+                float xi = imag(xx);
+                __m128 xxr = _mm_set1_ps(xr);
+                __m128 xxi = _mm_set_ps(xi , -xi , xi , -xi);
+                __m128 xA;
+                __m128 x0, x1, x2; // temp vars
+                do {
+                    // r = xr * Ar - xi * Ai
+                    // i = xr * Ai + xi * Ar
+                    Maybe<unit>::sse_load(xA,A.get(),A1.get());
+                    x0 = _mm_shuffle_ps(xA,xA,_MM_SHUFFLE(2,3,0,1));
+                    x1 = _mm_mul_ps(xxr,xA); // xr*Ar, xr*Ai
+                    x2 = _mm_mul_ps(xxi,x0); // -xi*Ai, xi*Ar
+                    xA = _mm_add_ps(x1,x2);
+                    Maybe<unit>::sse_store(A.get(),A1.get(),xA);
+                    A += 2; A1 += 2;
+                } while (--n_2);
+            }
+            if (nb) *A = ZProd<false,false>::prod(x,*A);
         }
     };
 #endif
@@ -463,9 +433,9 @@ namespace tmv {
                 (unit && xreal && vcomplex) ? 1 :
                 TMV_OPT == 0 ? 11 :
 #ifdef __SSE__
-                (vfloat && xreal && vreal) ? 21 :
-                (vfloat && xreal && vcomplex) ? 22 :
-                (vfloat && xcomplex && vcomplex) ? 23 :
+                (vfloat && xreal && vreal) ? 41 :
+                (vfloat && xreal && vcomplex) ? 42 :
+                (vfloat && xcomplex && vcomplex) ? 43 :
 #endif
 #ifdef __SSE2__
                 (vdouble && xreal && vreal) ? 31 :
@@ -497,7 +467,7 @@ namespace tmv {
         {
             typedef typename V::value_type T1;
             const bool inst =
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
                 Traits<T1>::isinst;
             const bool conj = V::_conj;
             const int algo = 

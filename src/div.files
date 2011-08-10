@@ -13,9 +13,9 @@ TMV_UnpackQ.cpp
 TMV_QRUpdate.cpp 
 TMV_QRDowndate.cpp 
 TMV_QRPD.cpp 
-TMV_QRPDecompose.cpp 
 TMV_SVD.cpp 
 TMV_SVDecompose.cpp 
 TMV_SVDecompose_Bidiag.cpp 
 TMV_SVDecompose_QR.cpp 
 TMV_SVDiv.cpp
+TMV_SVInverse.cpp 

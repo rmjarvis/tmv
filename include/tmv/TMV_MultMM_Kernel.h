@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 // This file has the kernel routines for doing a single block matrix product.
@@ -288,7 +258,7 @@ namespace tmv {
         const int M1, const Scaling<ix,T>& x,
         const T* A0, const T* B0, T* C0)
     {
-        const int M = (M2 == UNKNOWN ? M1 : M2);
+        const int M = (M2 == TMV_UNKNOWN ? M1 : M2);
         const int M_4 = M>>2; // M_4 = M/4
         const int Mc = M-(M_4<<2); // Mc = M%4
         const int Mx16 = M<<4; // = M*16
@@ -612,7 +582,7 @@ namespace tmv {
         const int N1,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     {
-        const int N = (N2 == UNKNOWN ? N1 : N2);
+        const int N = (N2 == TMV_UNKNOWN ? N1 : N2);
         const int N_2 = N>>1; // N_2 = N/2
         const int Nc = N-(N_2<<1); // Nc = N%2
 
@@ -1018,7 +988,7 @@ namespace tmv {
         const int K1,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     {
-        const int K = (K2 == UNKNOWN ? K1 : K2);
+        const int K = (K2 == TMV_UNKNOWN ? K1 : K2);
         TMVAssert(K > 0);
         const int K_4 = (K-1)>>2; // K_4 = (K-1)/4 
         // The K-1 here  ^^^ is to make sure Kc > 0, since the regular
@@ -1264,7 +1234,7 @@ namespace tmv {
     static TMV_INLINE void multmm_M_16_16(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
-    { generic_multmm_M_16_16<UNKNOWN>(M,x,A0,B0,C0); }
+    { generic_multmm_M_16_16<TMV_UNKNOWN>(M,x,A0,B0,C0); }
 
     template <int M2, int ix, class T>
     static TMV_INLINE void multmm_M_16_16_known(
@@ -1276,7 +1246,7 @@ namespace tmv {
     static TMV_INLINE void multmm_16_N_16(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
-    { generic_multmm_16_N_16<UNKNOWN>(N,x,A0,B0,C0); }
+    { generic_multmm_16_N_16<TMV_UNKNOWN>(N,x,A0,B0,C0); }
 
     template <int N2, int ix, class T>
     static TMV_INLINE void multmm_16_N_16_known(
@@ -1288,7 +1258,7 @@ namespace tmv {
     static TMV_INLINE void multmm_16_16_K(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
-    { generic_multmm_16_16_K<UNKNOWN>(K,x,A0,B0,C0); }
+    { generic_multmm_16_16_K<TMV_UNKNOWN>(K,x,A0,B0,C0); }
 
     template <int K2, int ix, class T>
     static TMV_INLINE void multmm_16_16_K_known(
@@ -1719,7 +1689,7 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const int M = (M2 == UNKNOWN ? M1 : M2);
+        const int M = (M2 == TMV_UNKNOWN ? M1 : M2);
         const int Mx4 = (M<<2);       // = M*4
         const int M_4 = M>>2;        // = M/4
         const int Mc = (M-(M_4<<2)); // = M%4
@@ -1851,7 +1821,7 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const int M = (M2 == UNKNOWN ? M1 : M2);
+        const int M = (M2 == TMV_UNKNOWN ? M1 : M2);
         const int Mx8 = (M<<3);       // = M*8
         const int M_4 = M>>2;        // = M/4
         const int Mc = (M-(M_4<<2)); // = M%4
@@ -2055,7 +2025,7 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const int M = (M2 == UNKNOWN ? M1 : M2);
+        const int M = (M2 == TMV_UNKNOWN ? M1 : M2);
         const int Mx16 = (M<<4);      // = M*16
         const int M_4 = M>>2;        // = M/4
         const int Mc = (M-(M_4<<2)); // = M%4
@@ -2403,7 +2373,7 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const int N = (N2 == UNKNOWN ? N1 : N2);
+        const int N = (N2 == TMV_UNKNOWN ? N1 : N2);
         const int N_2 = N>>1;        // = N/2
         const int Nc = (N-(N_2<<1)); // = N%2
 
@@ -2518,7 +2488,7 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const int N = (N2 == UNKNOWN ? N1 : N2);
+        const int N = (N2 == TMV_UNKNOWN ? N1 : N2);
         const int N_2 = N>>1;        // = N/2
         const int Nc = (N-(N_2<<1)); // = N%2
 
@@ -2697,7 +2667,7 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const int N = (N2 == UNKNOWN ? N1 : N2);
+        const int N = (N2 == TMV_UNKNOWN ? N1 : N2);
         const int N_2 = N>>1;        // = N/2
         const int Nc = (N-(N_2<<1)); // = N%2
 
@@ -3004,7 +2974,7 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const int K = (K2 == UNKNOWN ? K1 : K2);
+        const int K = (K2 == TMV_UNKNOWN ? K1 : K2);
         TMVAssert(K > 0);
         const int K_4 = K>>2; // K_4 = K/4 
         const int K_4m2 = K_4-2; 
@@ -3246,21 +3216,21 @@ namespace tmv {
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
-    { sse_multmm_M_16_16<UNKNOWN>(M,x,A0,B0,C0); }
+    { sse_multmm_M_16_16<TMV_UNKNOWN>(M,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_16_N_16(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
-    { sse_multmm_16_N_16<UNKNOWN>(N,x,A0,B0,C0); }
+    { sse_multmm_16_N_16<TMV_UNKNOWN>(N,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_16_16_K(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
-    { sse_multmm_16_16_K<UNKNOWN>(K,x,A0,B0,C0); }
+    { sse_multmm_16_16_K<TMV_UNKNOWN>(K,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_M_N_K(
@@ -3284,14 +3254,14 @@ namespace tmv {
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
-    { sse_multmm_M_16_32<UNKNOWN>(M,x,A0,B0,C0); }
+    { sse_multmm_M_16_32<TMV_UNKNOWN>(M,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_16_N_32(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
-    { sse_multmm_16_N_32<UNKNOWN>(N,x,A0,B0,C0); }
+    { sse_multmm_16_N_32<TMV_UNKNOWN>(N,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_16_16_64(
@@ -3305,14 +3275,14 @@ namespace tmv {
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
-    { sse_multmm_M_16_64<UNKNOWN>(M,x,A0,B0,C0); }
+    { sse_multmm_M_16_64<TMV_UNKNOWN>(M,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_16_N_64(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
-    { sse_multmm_16_N_64<UNKNOWN>(N,x,A0,B0,C0); }
+    { sse_multmm_16_N_64<TMV_UNKNOWN>(N,x,A0,B0,C0); }
 
 #else
     // If no SSE, then repeat the 16 block version to call generic.
@@ -3328,21 +3298,21 @@ namespace tmv {
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
-    { generic_multmm_M_16_16<UNKNOWN>(M,x,A0,B0,C0); }
+    { generic_multmm_M_16_16<TMV_UNKNOWN>(M,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_16_N_16(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
-    { generic_multmm_16_N_16<UNKNOWN>(N,x,A0,B0,C0); }
+    { generic_multmm_16_N_16<TMV_UNKNOWN>(N,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_16_16_K(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
-    { generic_multmm_16_16_K<UNKNOWN>(K,x,A0,B0,C0); }
+    { generic_multmm_16_16_K<TMV_UNKNOWN>(K,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_M_N_K(
@@ -3759,7 +3729,7 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const int M = (M2 == UNKNOWN ? M1 : M2);
+        const int M = (M2 == TMV_UNKNOWN ? M1 : M2);
         const int Mx8 = (M<<3);       // = M*8
         const int M_4 = M>>2;        // = M/4
         const int Mc = (M-(M_4<<2)); // = M%4
@@ -3966,7 +3936,7 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const int M = (M2 == UNKNOWN ? M1 : M2);
+        const int M = (M2 == TMV_UNKNOWN ? M1 : M2);
         const int Mx16 = (M<<4);      // = M*16
         const int M_4 = M>>2;        // = M/4
         const int Mc = (M-(M_4<<2)); // = M%4
@@ -4317,7 +4287,7 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const int N = (N2 == UNKNOWN ? N1 : N2);
+        const int N = (N2 == TMV_UNKNOWN ? N1 : N2);
         const int N_2 = N>>1;        // = N/2
         const int Nc = (N-(N_2<<1)); // = N%2
 
@@ -4497,7 +4467,7 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const int N = (N2 == UNKNOWN ? N1 : N2);
+        const int N = (N2 == TMV_UNKNOWN ? N1 : N2);
         const int N_2 = N>>1;        // = N/2
         const int Nc = (N-(N_2<<1)); // = N%2
 
@@ -4805,7 +4775,7 @@ namespace tmv {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const int K = (K2 == UNKNOWN ? K1 : K2);
+        const int K = (K2 == TMV_UNKNOWN ? K1 : K2);
         TMVAssert(K > 0);
         const int K_2 = K>>1; // K_2 = K/2 
         const int K_2m2 = K_2-2; 
@@ -5012,35 +4982,35 @@ namespace tmv {
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
-    { sse2_multmm_M_16_16<UNKNOWN>(M,x,A0,B0,C0); }
+    { sse2_multmm_M_16_16<TMV_UNKNOWN>(M,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_M_16_32(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
-    { sse2_multmm_M_16_32<UNKNOWN>(M,x,A0,B0,C0); }
+    { sse2_multmm_M_16_32<TMV_UNKNOWN>(M,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_16_N_16(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
-    { sse2_multmm_16_N_16<UNKNOWN>(N,x,A0,B0,C0); }
+    { sse2_multmm_16_N_16<TMV_UNKNOWN>(N,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_16_N_32(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
-    { sse2_multmm_16_N_32<UNKNOWN>(N,x,A0,B0,C0); }
+    { sse2_multmm_16_N_32<TMV_UNKNOWN>(N,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_16_16_K(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
-    { sse2_multmm_16_16_K<UNKNOWN>(K,x,A0,B0,C0); }
+    { sse2_multmm_16_16_K<TMV_UNKNOWN>(K,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_M_N_K(
@@ -5066,21 +5036,21 @@ namespace tmv {
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
-    { generic_multmm_M_16_16<UNKNOWN>(M,x,A0,B0,C0); }
+    { generic_multmm_M_16_16<TMV_UNKNOWN>(M,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_16_N_16(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
-    { generic_multmm_16_N_16<UNKNOWN>(N,x,A0,B0,C0); }
+    { generic_multmm_16_N_16<TMV_UNKNOWN>(N,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_16_16_K(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
-    { generic_multmm_16_16_K<UNKNOWN>(K,x,A0,B0,C0); }
+    { generic_multmm_16_16_K<TMV_UNKNOWN>(K,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_M_N_K(
@@ -5201,21 +5171,21 @@ namespace tmv {
         const int M, const int N, const int K,
         const Scaling<ix,int>& x,
         const int* A0, const int* B0, int* C0)
-    { generic_multmm_M_16_16<UNKNOWN>(M,x,A0,B0,C0); }
+    { generic_multmm_M_16_16<TMV_UNKNOWN>(M,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_16_N_16(
         const int M, const int N, const int K,
         const Scaling<ix,int>& x,
         const int* A0, const int* B0, int* C0)
-    { generic_multmm_16_N_16<UNKNOWN>(N,x,A0,B0,C0); }
+    { generic_multmm_16_N_16<TMV_UNKNOWN>(N,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_16_16_K(
         const int M, const int N, const int K,
         const Scaling<ix,int>& x,
         const int* A0, const int* B0, int* C0)
-    { generic_multmm_16_16_K<UNKNOWN>(K,x,A0,B0,C0); }
+    { generic_multmm_16_16_K<TMV_UNKNOWN>(K,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_M_N_K(
@@ -5297,21 +5267,21 @@ namespace tmv {
         const int M, const int N, const int K,
         const Scaling<ix,long double>& x,
         const long double* A0, const long double* B0, long double* C0)
-    { generic_multmm_M_16_16<UNKNOWN>(M,x,A0,B0,C0); }
+    { generic_multmm_M_16_16<TMV_UNKNOWN>(M,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_16_N_16(
         const int M, const int N, const int K,
         const Scaling<ix,long double>& x,
         const long double* A0, const long double* B0, long double* C0)
-    { generic_multmm_16_N_16<UNKNOWN>(N,x,A0,B0,C0); }
+    { generic_multmm_16_N_16<TMV_UNKNOWN>(N,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_16_16_K(
         const int M, const int N, const int K,
         const Scaling<ix,long double>& x,
         const long double* A0, const long double* B0, long double* C0)
-    { generic_multmm_16_16_K<UNKNOWN>(K,x,A0,B0,C0); }
+    { generic_multmm_16_16_K<TMV_UNKNOWN>(K,x,A0,B0,C0); }
 
     template <int ix>
     TMV_STATIC void multmm_M_N_K(

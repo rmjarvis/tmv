@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 #ifndef TMV_MatrixIO_H
 #define TMV_MatrixIO_H
@@ -117,8 +87,8 @@ namespace tmv {
     {
         typedef typename M::value_type T;
         enum { inst = (
-                (M::_colsize == UNKNOWN || M::_colsize > 16) &&
-                (M::_rowsize == UNKNOWN || M::_rowsize > 16) &&
+                (M::_colsize == TMV_UNKNOWN || M::_colsize > 16) &&
+                (M::_rowsize == TMV_UNKNOWN || M::_rowsize > 16) &&
                 Shape(M::_shape) == Rec &&
                 Traits<T>::isinst ) };
         enum { algo = (
@@ -219,11 +189,11 @@ namespace tmv {
         template <class M>
         MatrixReadError(
             const BaseMatrix<M>& _m,
-            std::istream& _is, size_t _cs, size_t _rs) :
+            std::istream& _is, size_t _cs, size_t _rs) throw() :
             ReadError("Matrix"),
             m(_m), i(0), exp(0), got(0), cs(_cs), rs(_rs),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        MatrixReadError(const MatrixReadError<T>& rhs) :
+        MatrixReadError(const MatrixReadError<T>& rhs) throw() :
             ReadError("Matrix"),
             m(rhs.m), i(rhs.i), j(rhs.j), exp(rhs.exp), got(rhs.got), 
             cs(rhs.cs), rs(rhs.rs),
@@ -357,8 +327,8 @@ namespace tmv {
         {
             typedef typename M::value_type T;
             const int inst = 
-                (M::_colsize == UNKNOWN || M::_colsize > 16) &&
-                (M::_rowsize == UNKNOWN || M::_rowsize > 16) &&
+                (M::_colsize == TMV_UNKNOWN || M::_colsize > 16) &&
+                (M::_rowsize == TMV_UNKNOWN || M::_rowsize > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 M::_conj ? 97 :

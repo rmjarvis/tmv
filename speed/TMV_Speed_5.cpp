@@ -1,4 +1,4 @@
-//#define PRINTALGO_QR
+#define PRINTALGO_QR
 //#define PRINTALGO_DIVM
 //#define PRINTALGO_DIVU
 //#define PRINTALGO_DIVU_OMP
@@ -11,11 +11,11 @@
 //#define PRINTALGO_MV
 //#define PRINTALGO_DET
 
-//#define XDEBUG_PRODMM
-//#define XDEBUG_QUOTMM
-//#define XDEBUG_HOUSE
+#define XDEBUG_PRODMM
+#define XDEBUG_QUOTMM
+#define XDEBUG_HOUSE
 
-//#undef NDEBUG
+#undef NDEBUG
 #include <iostream>
 
 #define TMV_NO_LIB
@@ -24,10 +24,10 @@
 // How big do you want the matrices to be?
 // (The matrix being inverted is MxN.  
 //  K is the other dimension of the matrix being solved.)
-const int M = 8;
+const int M = 3;
 const int N = 3;
-const int K = 5;
-//#define AISSQUARE
+const int K = 1;
+#define AISSQUARE
 
 // Define the type to use:
 //#define TISFLOAT
@@ -41,18 +41,18 @@ const int K = 5;
 // 1 = QR
 // 2 = QRP
 // 3 = SV
-#define ALGO 2
+#define ALGO 1
 //#define STRICTQRP
 
 // Define whether you want to include the error checks.
-//#define ERRORCHECK
+#define ERRORCHECK
 
 // Define which versions you want to test:
 #define DOREG
-#define DOSMALL
-#define DOLAP
-#define DOEIGEN
-#define DOEIGENSMALL
+//#define DOSMALL
+//#define DOLAP
+//#define DOEIGEN
+//#define DOEIGENSMALL
 
 // Skip the separate decomposition and solution steps?
 //#define NO_SEPARATE_DECOMP
@@ -68,7 +68,7 @@ const int K = 5;
 // Set this if you only want to do a single loop.
 // Not so useful for timing, but useful for debugging.
 // Also useful if M,N,K are very large to avoid overflow in product
-//#define ONELOOP
+#define ONELOOP
 
 // Normally I fill the matrices and vectors with random values, but 
 // that can make it difficult to debug the arithmetic.
@@ -80,7 +80,7 @@ const int K = 5;
 //#define SHOW_DOTS
 
 // Set up the target number of operations and memory to use for testing
-const long long targetnmegaflops(1000); // in 10^6 real ops
+const long long targetnmegaflops(100000); // in 10^6 real ops
 const long long targetmem(10000); // in Kbytes
 
 // Include the LAPACK library you want to test TMV against:

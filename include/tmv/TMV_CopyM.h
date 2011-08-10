@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 #ifndef TMV_CopyM_H
 #define TMV_CopyM_H
@@ -70,14 +40,98 @@ namespace tmv {
         }
     };
 
+    // algo 2: Only one column
+    template <int cs, int rs, class M1, class M2>
+    struct CopyM_Helper<2,cs,rs,M1,M2>
+    {
+        static inline void call(const M1& m1, M2& m2)
+        {
+            typedef typename M1::const_col_type M1c;
+            typedef typename M2::col_type M2c;
+            M1c m1c = m1.col(0);
+            M2c m2c = m2.col(0);
+            CopyV_Helper<-3,cs,M1c,M2c>::call(m1c,m2c);
+        }
+    };
+
+    // algo 102: Only one column, use algo -1
+    template <int cs, int rs, class M1, class M2>
+    struct CopyM_Helper<102,cs,rs,M1,M2>
+    {
+        static inline void call(const M1& m1, M2& m2)
+        {
+            typedef typename M1::const_col_type M1c;
+            typedef typename M2::col_type M2c;
+            M1c m1c = m1.col(0);
+            M2c m2c = m2.col(0);
+            CopyV_Helper<-1,cs,M1c,M2c>::call(m1c,m2c);
+        }
+    };
+
+    // algo 202: Only one column, use algo -2
+    template <int cs, int rs, class M1, class M2>
+    struct CopyM_Helper<202,cs,rs,M1,M2>
+    {
+        static inline void call(const M1& m1, M2& m2)
+        {
+            typedef typename M1::const_col_type M1c;
+            typedef typename M2::col_type M2c;
+            M1c m1c = m1.col(0);
+            M2c m2c = m2.col(0);
+            CopyV_Helper<-2,cs,M1c,M2c>::call(m1c,m2c);
+        }
+    };
+
+    // algo 3: Only one row
+    template <int cs, int rs, class M1, class M2>
+    struct CopyM_Helper<3,cs,rs,M1,M2>
+    {
+        static inline void call(const M1& m1, M2& m2)
+        {
+            typedef typename M1::const_row_type M1r;
+            typedef typename M2::row_type M2r;
+            M1r m1r = m1.row(0);
+            M2r m2r = m2.row(0);
+            CopyV_Helper<-3,rs,M1r,M2r>::call(m1r,m2r);
+        }
+    };
+
+    // algo 103: Only one row, use algo -1
+    template <int cs, int rs, class M1, class M2>
+    struct CopyM_Helper<103,cs,rs,M1,M2>
+    {
+        static inline void call(const M1& m1, M2& m2)
+        {
+            typedef typename M1::const_row_type M1r;
+            typedef typename M2::row_type M2r;
+            M1r m1r = m1.row(0);
+            M2r m2r = m2.row(0);
+            CopyV_Helper<-1,rs,M1r,M2r>::call(m1r,m2r);
+        }
+    };
+
+    // algo 203: Only one row, use algo -2
+    template <int cs, int rs, class M1, class M2>
+    struct CopyM_Helper<203,cs,rs,M1,M2>
+    {
+        static inline void call(const M1& m1, M2& m2)
+        {
+            typedef typename M1::const_row_type M1r;
+            typedef typename M2::row_type M2r;
+            M1r m1r = m1.row(0);
+            M2r m2r = m2.row(0);
+            CopyV_Helper<-2,rs,M1r,M2r>::call(m1r,m2r);
+        }
+    };
+
     // algo 11: Loop over columns
     template <int cs, int rs, class M1, class M2>
     struct CopyM_Helper<11,cs,rs,M1,M2>
     {
         static void call(const M1& m1, M2& m2)
         {
-            const int M = cs == UNKNOWN ? int(m2.colsize()) : cs;
-            int N = rs == UNKNOWN ? int(m2.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
+            int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
             typedef typename M1::const_col_type M1c;
             typedef typename M2::col_type M2c;
             typedef typename M1c::const_iterator IT1;
@@ -139,8 +193,8 @@ namespace tmv {
     {
         static inline void call(const M1& m1, M2& m2)
         {
-            int M = cs == UNKNOWN ? int(m2.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m2.rowsize()) : rs;
+            int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
             typedef typename M1::const_row_type M1r;
             typedef typename M2::row_type M2r;
             typedef typename M1r::const_iterator IT1;
@@ -292,8 +346,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -322,8 +376,10 @@ namespace tmv {
             const int algo = 
                 (cs == 0 || rs == 0) ? 0 :
                 canlin ? 1 :
+                rs == 1 ? 2 : 
+                cs == 1 ? 3 :
                 TMV_OPT == 0 ? (allrm ? 21 : 11) :
-                ( cs != UNKNOWN && rs != UNKNOWN ) ? (
+                ( cs != TMV_UNKNOWN && rs != TMV_UNKNOWN ) ? (
                     ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T2)) ) ? (
                         ( M1::_rowmajor && M2::_rowmajor ) ? 25 : 15 ) :
                     allrm ? 21 : 
@@ -341,8 +397,10 @@ namespace tmv {
         static TMV_INLINE void call(const M1& m1, M2& m2)
         {
             const int algo = 
+                rs == 1 ? 2 : 
+                cs == 1 ? 3 :
                 TMV_OPT <= 1 ? -4 : 
-                cs == UNKNOWN || rs == UNKNOWN ? 31 :
+                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 31 :
                 -4;
             CopyM_Helper<algo,cs,rs,M1,M2>::call(m1,m2); 
         }
@@ -357,8 +415,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -366,6 +424,8 @@ namespace tmv {
 #endif
                 Traits<T1>::isinst;
             const int algo = 
+                rs == 1 ? 202 : 
+                cs == 1 ? 203 :
                 M2::_conj ? 97 :
                 inst ? 90 :
                 -3;
@@ -382,6 +442,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const int algo = 
+                rs == 1 ? 102 : 
+                cs == 1 ? 103 :
                 M2::_checkalias ? 99 : 
                 -2;
             CopyM_Helper<algo,cs,rs,M1,M2>::call(m1,m2);

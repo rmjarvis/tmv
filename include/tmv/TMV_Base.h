@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 //-----------------------------------------------------------------------------
@@ -349,11 +319,11 @@ namespace tmv {
         }
     };
 
-    // UNKNOWN is the value of _size, _step, etc. whenever it
+    // TMV_UNKNOWN is the value of _size, _step, etc. whenever it
     // is not known at compile time.
     // We use for this value the maximally negative int.
     // In binary, this is a 1 followed by all zeros.
-    const int UNKNOWN = (1<<(sizeof(int)*8-1));
+    const int TMV_UNKNOWN = (1<<(sizeof(int)*8-1));
 
     enum DivType {
         XX=0, LU=1, CH=2, QR=4, QRP=8, SV=16,
@@ -650,29 +620,29 @@ namespace tmv {
                 // Probably this is high enough for any conceivable use.
                 // I only use up to 64 right now, but I provided a few
                 // extra values to be safe.
-                UNKNOWN ) 
+                TMV_UNKNOWN ) 
         };
         enum { half_roundup = (
-                // For very large S, just call it UNKNOWN to keep from 
+                // For very large S, just call it TMV_UNKNOWN to keep from 
                 // having big complicated recursive structures.
-                S > 128 ? UNKNOWN :
+                S > 128 ? TMV_UNKNOWN :
                 S > 16 ? ((((S-1)>>5)+1)<<4) :
                 (S>>1)  )
         };
         static inline int text() { return S; }
     };
     template <>
-    struct IntTraits<UNKNOWN>
+    struct IntTraits<TMV_UNKNOWN>
     {
-        enum { negS = UNKNOWN };
-        enum { twoS = UNKNOWN };
-        enum { halfS = UNKNOWN };
-        enum { Sm1 = UNKNOWN };
-        enum { Sp1 = UNKNOWN };
-        enum { Sp2 = UNKNOWN };
+        enum { negS = TMV_UNKNOWN };
+        enum { twoS = TMV_UNKNOWN };
+        enum { halfS = TMV_UNKNOWN };
+        enum { Sm1 = TMV_UNKNOWN };
+        enum { Sp1 = TMV_UNKNOWN };
+        enum { Sp2 = TMV_UNKNOWN };
         enum { ispowerof2 = false };
-        enum { log = UNKNOWN };
-        enum { half_roundup = UNKNOWN };
+        enum { log = TMV_UNKNOWN };
+        enum { half_roundup = TMV_UNKNOWN };
         static inline const char* text() { return "UNKNOWN"; }
     };
 
@@ -683,7 +653,7 @@ namespace tmv {
         enum { diff = S1 - S2 };
         enum { prod = S1 * S2 };
         enum { safeprod = IntTraits2<
-            (S1<300 ? S1 : UNKNOWN), (S2<300 ? S2 : UNKNOWN)>::prod };
+            (S1<300 ? S1 : TMV_UNKNOWN), (S2<300 ? S2 : TMV_UNKNOWN)>::prod };
         //enum { quot = S2 == 0 ? 0 : S1 / S2 };
         enum { quot = S1 / S2 };
         enum { min = S1 < S2 ? S1 : S2 };
@@ -701,48 +671,48 @@ namespace tmv {
         enum { max = S1 > 0 ? S1 : 0 };
     };
     template <int S1>
-    struct IntTraits2<S1,UNKNOWN>
+    struct IntTraits2<S1,TMV_UNKNOWN>
     {
-        enum { sum = UNKNOWN };
-        enum { diff = UNKNOWN };
-        enum { prod = UNKNOWN };
-        enum { safeprod = UNKNOWN };
-        enum { quot = UNKNOWN };
-        enum { min = UNKNOWN };
-        enum { max = UNKNOWN };
+        enum { sum = TMV_UNKNOWN };
+        enum { diff = TMV_UNKNOWN };
+        enum { prod = TMV_UNKNOWN };
+        enum { safeprod = TMV_UNKNOWN };
+        enum { quot = TMV_UNKNOWN };
+        enum { min = TMV_UNKNOWN };
+        enum { max = TMV_UNKNOWN };
     };
     template <int S2>
-    struct IntTraits2<UNKNOWN,S2>
+    struct IntTraits2<TMV_UNKNOWN,S2>
     {
-        enum { sum = UNKNOWN };
-        enum { diff = UNKNOWN };
-        enum { prod = UNKNOWN };
-        enum { safeprod = UNKNOWN };
-        enum { quot = UNKNOWN };
-        enum { min = UNKNOWN };
-        enum { max = UNKNOWN };
+        enum { sum = TMV_UNKNOWN };
+        enum { diff = TMV_UNKNOWN };
+        enum { prod = TMV_UNKNOWN };
+        enum { safeprod = TMV_UNKNOWN };
+        enum { quot = TMV_UNKNOWN };
+        enum { min = TMV_UNKNOWN };
+        enum { max = TMV_UNKNOWN };
     };
     template <>
-    struct IntTraits2<UNKNOWN,UNKNOWN>
+    struct IntTraits2<TMV_UNKNOWN,TMV_UNKNOWN>
     {
-        enum { sum = UNKNOWN };
-        enum { diff = UNKNOWN };
-        enum { prod = UNKNOWN };
-        enum { safeprod = UNKNOWN };
-        enum { quot = UNKNOWN };
-        enum { min = UNKNOWN };
-        enum { max = UNKNOWN };
+        enum { sum = TMV_UNKNOWN };
+        enum { diff = TMV_UNKNOWN };
+        enum { prod = TMV_UNKNOWN };
+        enum { safeprod = TMV_UNKNOWN };
+        enum { quot = TMV_UNKNOWN };
+        enum { min = TMV_UNKNOWN };
+        enum { max = TMV_UNKNOWN };
     };
     template <>
-    struct IntTraits2<UNKNOWN,0>
+    struct IntTraits2<TMV_UNKNOWN,0>
     {
-        enum { sum = UNKNOWN };
-        enum { diff = UNKNOWN };
-        enum { prod = UNKNOWN };
-        enum { safeprod = UNKNOWN };
-        enum { quot = UNKNOWN };
-        enum { min = UNKNOWN };
-        enum { max = UNKNOWN };
+        enum { sum = TMV_UNKNOWN };
+        enum { diff = TMV_UNKNOWN };
+        enum { prod = TMV_UNKNOWN };
+        enum { safeprod = TMV_UNKNOWN };
+        enum { quot = TMV_UNKNOWN };
+        enum { min = TMV_UNKNOWN };
+        enum { max = TMV_UNKNOWN };
     };
 
     template <class T>
@@ -2298,8 +2268,8 @@ namespace tmv {
 #endif
 
     // A helper structure that acts like an int,
-    // but only bothers to make the integer if S == UNKNOWN.
-    // It also checks the constructor if S != UNKNOWN
+    // but only bothers to make the integer if S == TMV_UNKNOWN.
+    // It also checks the constructor if S != TMV_UNKNOWN
     template <int S>
     struct CheckedInt
     {
@@ -2307,7 +2277,7 @@ namespace tmv {
         TMV_INLINE operator int() const { return S; }
     };
     template <>
-    struct CheckedInt<UNKNOWN>
+    struct CheckedInt<TMV_UNKNOWN>
     {
         int step;
         TMV_INLINE CheckedInt(int s) : step(s) {}

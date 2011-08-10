@@ -5,9 +5,6 @@
 #include "TMV.h"
 #include <fstream>
 
-// TODO: Remove this when norm2 is implemented.
-#define NOSV
-
 #include "TMV_TestMatrixArith.h"
 #define CT std::complex<T>
 

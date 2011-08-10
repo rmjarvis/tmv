@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_DivM_H
@@ -134,7 +104,7 @@ namespace tmv {
                 // m2.transpose() *= m1inv.transpose() results in a temporary.
                 // Likewise with a 3x3 matrix.
                 // For now, just write a simple loop.
-                const int K = xs == UNKNOWN ? m1.rowsize() : xs;
+                const int K = xs == TMV_UNKNOWN ? m1.rowsize() : xs;
                 for(int k=0;k<K;++k) {
                     T1 a = (m1.cref(0,k) * m2inv.cref(0,0) + 
                             m1.cref(1,k) * m2inv.cref(0,1));
@@ -399,7 +369,7 @@ namespace tmv {
                     (!up1 && !lo1) ? 36 :
                     32 ) : 
                 (!lo2 || !up2) ? 6 : // m2 is triangular
-                (s != UNKNOWN && s <= 4) ? 6 :
+                (s != TMV_UNKNOWN && s <= 4) ? 6 :
                 M2::_hasdivider ? 21 :
                 22;
 #ifdef PRINTALGO_DIVM
@@ -433,7 +403,7 @@ namespace tmv {
                     32 ) : 
                 (!lo2 || !up2) ? 42 : // m2 is triangular
                 s == 2 ? 2 :
-                (s != UNKNOWN && s <= 4) ? 3 :
+                (s != TMV_UNKNOWN && s <= 4) ? 3 :
                 M2::_hasdivider ? 11 :
                 12;
 #ifdef PRINTALGO_DIVM
@@ -466,7 +436,7 @@ namespace tmv {
                     (!up1 && !lo1) ? 35 :
                     31 ) : 
                 (!lo2 || !up2) ? 5 : // m2 is triangular
-                (s != UNKNOWN && s <= 4) ? 5 :
+                (s != TMV_UNKNOWN && s <= 4) ? 5 :
                 M2::_hasdivider ? 21 :
                 22;
 #ifdef PRINTALGO_DIVM
@@ -528,7 +498,7 @@ namespace tmv {
                     31 ) : 
                 (!lo2 || !up2) ? 41 : // m2 is triangular
                 s == 2 ? 2 :
-                (s != UNKNOWN && s <= 4) ? 3 :
+                (s != TMV_UNKNOWN && s <= 4) ? 3 :
                 M2::_hasdivider ? 11 :
                 12;
 #ifdef PRINTALGO_DIVM
@@ -1351,9 +1321,9 @@ namespace tmv {
                     (!up1 && !lo1) ? 37 : // m1 diag
                     32 ) :
                 !up2 || !lo2 ? 6 : // m2 is triangular
-                cs == rs && cs != UNKNOWN && cs <= 4 ? 6 :
+                cs == rs && cs != TMV_UNKNOWN && cs <= 4 ? 6 :
                 M2::_hasdivider ? 21 :
-                cs == UNKNOWN || rs == UNKNOWN ? 24 :
+                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 24 :
                 cs == rs ? 22 :
                 23;
 #ifdef PRINTALGO_DIVM
@@ -1393,9 +1363,9 @@ namespace tmv {
                     32 ) :
                 (!lo2 || !up2) ? 42 : // m1 is triangular
                 cs == 2 && rs == 2 ? 2 :
-                cs == rs && cs != UNKNOWN && cs <= 4 ? 3 :
+                cs == rs && cs != TMV_UNKNOWN && cs <= 4 ? 3 :
                 M2::_hasdivider ? 11 :
-                cs == UNKNOWN || rs == UNKNOWN ? 14 :
+                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 14 :
                 cs == rs ? 12 :
                 13;
 #ifdef PRINTALGO_DIVM
@@ -1434,9 +1404,9 @@ namespace tmv {
                     (!up1 && !lo1) ? 37 : // m1 diag
                     31 ) :
                 !up2 || !lo2 ? 5 : // m2 is triangular
-                cs == rs && cs != UNKNOWN && cs <= 4 ? 5 :
+                cs == rs && cs != TMV_UNKNOWN && cs <= 4 ? 5 :
                 M2::_hasdivider ? 21 :
-                cs == UNKNOWN || rs == UNKNOWN ? 24 :
+                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 24 :
                 cs == rs ? 22 :
                 23;
 #ifdef PRINTALGO_DIVM
@@ -1514,9 +1484,9 @@ namespace tmv {
                     31 ) :
                 (!lo2 || !up2) ? 41 : // m2 is triangular
                 cs == 2 && rs == 2 ? 2 :
-                cs == rs && cs != UNKNOWN && cs <= 4 ? 3 :
+                cs == rs && cs != TMV_UNKNOWN && cs <= 4 ? 3 :
                 M2::_hasdivider ? 11 :
-                cs == UNKNOWN || rs == UNKNOWN ? 14 :
+                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 14 :
                 cs == rs ? 12 :
                 13;
 #ifdef PRINTALGO_DIVM

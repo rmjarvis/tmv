@@ -14,7 +14,7 @@ tri = ReadFileList('tri.files')
 tri_noint = ReadFileList('tri_noint.files')
 tri_omp = ReadFileList('tri_omp.files')
 tri_omp_noint = ReadFileList('tri_omp_noint.files')
-div = ReadFileList('divx.files')
+div = ReadFileList('div.files')
 div_omp = ReadFileList('div_omp.files')
 div_geqp3 = ReadFileList('div_geqp3.files')
 
@@ -30,7 +30,7 @@ symband_noint = ReadFileList('symband_noint.files')
 lib_files= basic + diag + tri 
 lib_noint_files= tri_noint + div
 lib_omp_files= basic_omp+ tri_omp 
-lib_omp_noint_files = tri_omp_noint #+ div_omp
+lib_omp_noint_files = tri_omp_noint + div_omp
 lib_geqp3_files= div_geqp3
 sblib_files= band + sym + symband
 sblib_noint_files= band_noint + sym_noint + symband_noint

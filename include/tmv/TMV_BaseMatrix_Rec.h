@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
 //
@@ -58,9 +28,9 @@ namespace tmv {
 
     // BaseMatrix_Rec adds the following requirements to Traits<M>:
     //
-    //  _stepi = the step size along column if known (else UNKNOWN)
-    //  _stepj = the step size along row if known (else UNKNOWN)
-    //  _diagstep = the step size along row if known (else UNKNOWN)
+    //  _stepi = the step size along column if known (else TMV_UNKNOWN)
+    //  _stepj = the step size along row if known (else TMV_UNKNOWN)
+    //  _diagstep = the step size along row if known (else TMV_UNKNOWN)
     //
     //  const_row_type = return type from row(i) const
     //  const_col_type = return type from col(j) const
@@ -134,14 +104,18 @@ namespace tmv {
     class MatrixView;
     template <class T, int M, int N, int A=0, int A2=0> 
     class SmallMatrix;
-    template <class T, int M, int N, int Si=UNKNOWN, int Sj=UNKNOWN, int A=0>
+    template <class T, int M, int N, int Si=TMV_UNKNOWN, int Sj=TMV_UNKNOWN, int A=0>
     class ConstSmallMatrixView;
-    template <class T, int M, int N, int Si=UNKNOWN, int Sj=UNKNOWN, int A=0>
+    template <class T, int M, int N, int Si=TMV_UNKNOWN, int Sj=TMV_UNKNOWN, int A=0>
     class SmallMatrixView;
 
     // In TMV_Norm.h
     template <class M>
     static inline typename M::float_type DoNormF(const BaseMatrix_Rec<M>& m);
+    template <class M>
+    static inline typename M::float_type DoNorm2(const BaseMatrix<M>& m);
+    template <class M>
+    static inline typename M::float_type DoCondition(const BaseMatrix<M>& m);
 
     //
     // Helper functions and values:
@@ -318,7 +292,7 @@ namespace tmv {
         typedef SmallMatrix<T,cs,rs,A2> type;
     };
     template <class T, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,Rec,UNKNOWN,rs,rm,fort>
+    struct MCopyHelper<T,Rec,TMV_UNKNOWN,rs,rm,fort>
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
@@ -327,7 +301,7 @@ namespace tmv {
         typedef Matrix<T,A2> type; 
     };
     template <class T, int cs, bool rm, bool fort>
-    struct MCopyHelper<T,Rec,cs,UNKNOWN,rm,fort>
+    struct MCopyHelper<T,Rec,cs,TMV_UNKNOWN,rm,fort>
     { 
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
@@ -336,7 +310,7 @@ namespace tmv {
         typedef Matrix<T,A2> type; 
     };
     template <class T, bool rm, bool fort>
-    struct MCopyHelper<T,Rec,UNKNOWN,UNKNOWN,rm,fort>
+    struct MCopyHelper<T,Rec,TMV_UNKNOWN,TMV_UNKNOWN,rm,fort>
     { 
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
@@ -353,7 +327,7 @@ namespace tmv {
         typedef ConstSmallMatrixView<T,cs,rs,si,sj,c> ctype; 
     };
     template <class T, int si, int sj, int c>
-    struct MViewHelper<T,Rec,UNKNOWN,UNKNOWN,si,sj,c>
+    struct MViewHelper<T,Rec,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,c>
     {
         enum { A2 = c | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
         typedef MatrixView<T,A2> type; 
@@ -463,14 +437,6 @@ namespace tmv {
     template <class M, class F>
     static inline void ApplyToAll(BaseMatrix_Rec_Mutable<M>& m, const F& f);
 
-
-#if 0
-    // Defined in TMV_MatrixDiv.h
-    template <class M>
-    static inline typename M::float_type DoNorm2(const BaseMatrix_Rec<M>& m);
-    template <class M>
-    static inline typename M::float_type DoCondition(const BaseMatrix_Rec<M>& m);
-#endif
 
     // A helper class for returning views without necessarily
     // making a new object.
@@ -737,6 +703,12 @@ namespace tmv {
         TMV_INLINE float_type normInf() const
         { return tmv::DoNormInf(mat()); }
 
+        TMV_INLINE float_type norm2() const
+        { return tmv::DoNorm2(mat()); }
+
+        TMV_INLINE float_type condition() const
+        { return tmv::DoCondition(mat()); }
+
 
 
         //
@@ -982,7 +954,7 @@ namespace tmv {
         { return static_cast<const type&>(*this); }
 
         TMV_INLINE int diagstep() const 
-        { return _diagstep == UNKNOWN ? stepi() + stepj() : _diagstep; }
+        { return _diagstep == TMV_UNKNOWN ? stepi() + stepj() : _diagstep; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE bool canLinearize() const 
         { return (AuxCanLinearize<_canlin,_colmajor,_rowmajor,M>::ok(mat())); }
@@ -1323,7 +1295,6 @@ namespace tmv {
 
         type& setToIdentity(const value_type x=value_type(1))
         {
-            TMVStaticAssert((Sizes<_rowsize,_colsize>::same));
             TMVAssert(colsize() == rowsize());
             this->setZero(); diag().setAllTo(x);
             return mat();
@@ -1697,7 +1668,7 @@ namespace tmv {
 
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE int diagstep() const 
-        { return _diagstep == UNKNOWN ? stepi() + stepj() : _diagstep; }
+        { return _diagstep == TMV_UNKNOWN ? stepi() + stepj() : _diagstep; }
         TMV_INLINE bool canLinearize() const 
         { return (AuxCanLinearize<_canlin,_colmajor,_rowmajor,M>::ok(mat())); }
 
@@ -1759,7 +1730,7 @@ namespace tmv {
     template <class M>
     static TMV_INLINE void SetZero(BaseMatrix_Rec_Mutable<M>& m)
     {
-        const int algo = M::_canlin ? 1 : M::_colmajor ? 3 : 2;
+        const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
         SetZeroM_Helper<algo,M>::call(m.mat());
     }
 
@@ -1803,7 +1774,7 @@ namespace tmv {
     template <class M, class T>
     static TMV_INLINE void SetAllTo(BaseMatrix_Rec_Mutable<M>& m, const T& val)
     {
-        const int algo = M::_canlin ? 1 : M::_colmajor ? 3 : 2;
+        const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
         SetAllToM_Helper<algo,M,T>::call(m.mat(),val);
     }
 
@@ -1847,7 +1818,7 @@ namespace tmv {
     template <class M, class T>
     static TMV_INLINE void AddToAll(BaseMatrix_Rec_Mutable<M>& m, const T& val)
     {
-        const int algo = M::_canlin ? 1 : M::_colmajor ? 3 : 2;
+        const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
         AddToAllM_Helper<algo,M,T>::call(m.mat(),val);
     }
 
@@ -1891,7 +1862,7 @@ namespace tmv {
     template <class M, class RT>
     static TMV_INLINE void Clip(BaseMatrix_Rec_Mutable<M>& m, const RT& thresh)
     {
-        const int algo = M::_canlin ? 1 : M::_colmajor ? 3 : 2;
+        const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
         ClipM_Helper<algo,M,RT>::call(m.mat(),thresh);
     }
 
@@ -1935,7 +1906,7 @@ namespace tmv {
     template <class M, class F>
     static TMV_INLINE void ApplyToAll(BaseMatrix_Mutable<M>& m, const F& f)
     {
-        const int algo = M::_canlin ? 1 : M::_colmajor ? 3 : 2;
+        const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
         ApplyToAllM_Helper<algo,M,F>::call(m.mat(),f);
     }
 
