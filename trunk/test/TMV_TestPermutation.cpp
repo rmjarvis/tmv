@@ -5,7 +5,6 @@
 
 #define NO_COMPLEX_ARITH // FIXME: Not sure if this can be made to work.
 #define NOASSIGN
-#define NOSV // FIXME: Until Norm2 functions are written...
 
 #include "TMV_TestMatrixArith.h"
 #include <fstream>
@@ -347,9 +346,7 @@ void TestPermutation()
     Assert(Equal2(NormF(p3),NormF(m3),eps),"Permutation NormF");
     Assert(Equal2(NormSq(p3),NormSq(m3),eps),"Permutation NormSq");
     Assert(Equal2(Norm1(p3),Norm1(m3),eps),"Permutation Norm1");
-#ifndef NOSV
     Assert(Equal2(Norm2(p3),Norm2(m3),eps),"Permutation Norm2");
-#endif
     Assert(Equal2(NormInf(p3),NormInf(m3),eps),"Permutation NormInf");
     Assert(Equal2(MaxAbsElement(p3),MaxAbsElement(m3),eps),
            "Permutation MaxAbsElement");

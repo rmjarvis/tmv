@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_InvertU_H
@@ -103,7 +73,7 @@ namespace tmv {
         static TMV_INLINE void call(M& m)
         {
 #ifdef PRINTALGO_InvU
-            int N = (s == UNKNOWN ? m.size() : s);
+            int N = (s == TMV_UNKNOWN ? m.size() : s);
             std::cout<<"InvU algo 2: N,s,x = "<<N<<','<<s<<std::endl;
 #endif
             typedef typename M::transpose_type Mt;
@@ -118,7 +88,7 @@ namespace tmv {
     {
         static void call(M& m)
         {
-            int N = (s == UNKNOWN ? m.size() : s);
+            int N = (s == TMV_UNKNOWN ? m.size() : s);
 #ifdef PRINTALGO_InvU
             std::cout<<"InvU algo 11: N,s,x = "<<N<<','<<s<<std::endl;
 #endif
@@ -130,7 +100,7 @@ namespace tmv {
             typedef typename M::value_type T;
             typedef typename M::real_type RT;
             typedef typename TypeSelect<u,RT,T>::type XT;
-            const int xx = UNKNOWN;
+            const int xx = TMV_UNKNOWN;
 #ifdef TMV_INVU_INLINE_MV
             const int algo2 = -4;
 #else
@@ -155,7 +125,7 @@ namespace tmv {
     {
         static void call(M& m)
         {
-            int N = (s == UNKNOWN ? m.size() : s);
+            int N = (s == TMV_UNKNOWN ? m.size() : s);
 #ifdef PRINTALGO_InvU
             std::cout<<"InvU algo 11: N,s,x = "<<N<<','<<s<<std::endl;
 #endif
@@ -168,7 +138,7 @@ namespace tmv {
             typedef typename M::value_type T;
             typedef typename M::real_type RT;
             typedef typename TypeSelect<u,RT,T>::type XT;
-            const int xx = UNKNOWN;
+            const int xx = TMV_UNKNOWN;
 #ifdef TMV_INVU_INLINE_MV
             const int algo2 = -4;
 #else
@@ -276,14 +246,14 @@ namespace tmv {
                 IntTraits2<IntTraits2<s,sp1>::safeprod,sp2>::safeprod/6;
             const bool unroll =
                 s > 10 ? false :
-                s == UNKNOWN ? false :
+                s == TMV_UNKNOWN ? false :
                 nops <= TMV_INVU_UNROLL;
             const int algo2 =
                 s == 0 ? 0 :
                 s == 1 ? ( M::_unit ? 0 : 1 ) :
                 unroll ? 16 :
                 // For known s, always recurse down to unroll size
-                s != UNKNOWN ? 0 :
+                s != TMV_UNKNOWN ? 0 :
                 (TMV_INVU_RECURSE == 1) ? ( M::_unit ? 0 : 1 ) :
                 M::_rowmajor ? 12 : 11;
             const int algo3 =  // The algorithm for N > INVU_RECURSE
@@ -294,7 +264,7 @@ namespace tmv {
             std::cout<<"algo2,3,4 = "<<algo2<<"  "<<algo3<<"  "<<algo4<<std::endl;
 #endif
 
-            if (s==UNKNOWN ? N > TMV_INVU_RECURSE : (s > 1 && !unroll)) {
+            if (s==TMV_UNKNOWN ? N > TMV_INVU_RECURSE : (s > 1 && !unroll)) {
                 // [ B00 B01 ] * [ A00 A01 ] = [ 1 0 ]
                 // [  0  B11 ]   [  0  A11 ]   [ 0 1 ]
                 // B00 A00 = 1
@@ -406,7 +376,7 @@ namespace tmv {
         static TMV_INLINE void call(M& m)
         {
             TMVStaticAssert(M::_upper);
-            const int s2 = s > 20 ? UNKNOWN : s;
+            const int s2 = s > 20 ? TMV_UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             const int s2p2 = IntTraits<s2p1>::Sp1;
             // nops = 1/6 n(n+1)(n+2)
@@ -414,7 +384,7 @@ namespace tmv {
                 IntTraits2<IntTraits2<s2,s2p1>::safeprod,s2p2>::safeprod / 6;
             const bool unroll = 
                 s > 10 ? false :
-                s == UNKNOWN ? false :
+                s == TMV_UNKNOWN ? false :
                 nops <= TMV_INVU_UNROLL;
             const int algo1 = 
                 M::_unit ? 0 : M::_unknowndiag ? 51 : 50;
@@ -475,7 +445,7 @@ namespace tmv {
         {
             typedef typename M::value_type T;
             const bool inst = 
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 ( s == 0 ) ? 0 :

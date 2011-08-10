@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_MultUD_H
@@ -141,7 +111,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            int N = (s == UNKNOWN ? m3.size() : s);
+            int N = (s == TMV_UNKNOWN ? m3.size() : s);
 #ifdef PRINTALGO_UD
             std::cout<<"UD algo 11: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -157,7 +127,7 @@ namespace tmv {
                 PT2 dj = x * m2.cref(j);
                 M1c m1j = m1.get_col(j,0,jj);
                 M3c m3j = m3.get_col(j,0,jj);
-                MultXV_Helper<-4,UNKNOWN,add,0,PT2,M1c,M3c>::call(
+                MultXV_Helper<-4,TMV_UNKNOWN,add,0,PT2,M1c,M3c>::call(
                     dj,m1j,m3j);
             }
             if (unit) {
@@ -175,7 +145,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            int N = (s == UNKNOWN ? m3.size() : s);
+            int N = (s == TMV_UNKNOWN ? m3.size() : s);
 #ifdef PRINTALGO_UD
             std::cout<<"UD algo 12: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -202,7 +172,7 @@ namespace tmv {
             int len = unit?0:1;
             if (N) do {
                 dj = ZProd<false,c2>::prod(x , *D++);
-                MultXV_Helper<-4,UNKNOWN,add,0,PT2,M1c,M3c>::call2(
+                MultXV_Helper<-4,TMV_UNKNOWN,add,0,PT2,M1c,M3c>::call2(
                     len,dj,A,B);
                 if (unit) Maybe<add>::add(B[len], dj);
                 ++len;
@@ -219,7 +189,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            int N = (s == UNKNOWN ? m3.size() : s);
+            int N = (s == TMV_UNKNOWN ? m3.size() : s);
 #ifdef PRINTALGO_UD
             std::cout<<"UD algo 14: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -235,7 +205,7 @@ namespace tmv {
                 M1r m1i = m1.row(i,ii,N);
                 M2ds m2di = m2d.cSubVector(ii,N);
                 M3r m3i = m3.row(i,ii,N);
-                ElemMultVV_Helper<-4,UNKNOWN,add,ix,T,M1r,M2ds,M3r>::call(
+                ElemMultVV_Helper<-4,TMV_UNKNOWN,add,ix,T,M1r,M2ds,M3r>::call(
                     x,m1i,m2di,m3i);
             } 
             if (unit) {
@@ -252,7 +222,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            int N = (s == UNKNOWN ? m3.size() : s);
+            int N = (s == TMV_UNKNOWN ? m3.size() : s);
 #ifdef PRINTALGO_UD
             std::cout<<"UD algo 15: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -278,7 +248,7 @@ namespace tmv {
             if (N) do {
                 if (unit) Maybe<add>::add(
                     *(B-1), ZProd<false,c2>::prod(x , *(D-1)));
-                ElemMultVV_Helper<-4,UNKNOWN,add,ix,T,M1r,M2d,M3r>::call2(
+                ElemMultVV_Helper<-4,TMV_UNKNOWN,add,ix,T,M1r,M2d,M3r>::call2(
                     len--,x,A,D++,B);
                 A.shiftP(Adiagstep);
                 B.shiftP(Bdiagstep);
@@ -343,7 +313,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = (s == UNKNOWN ? m3.size() : s);
+            const int N = (s == TMV_UNKNOWN ? m3.size() : s);
             TMVStaticAssert(M1::_unit);
 #ifdef PRINTALGO_UD
             std::cout<<"UD algo 19: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
@@ -373,7 +343,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            int N = (s == UNKNOWN ? m3.size() : s);
+            int N = (s == TMV_UNKNOWN ? m3.size() : s);
 #ifdef PRINTALGO_UD
             std::cout<<"UD algo 21: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -389,7 +359,7 @@ namespace tmv {
                 PT2 dj = x * m2.cref(j);
                 M1c m1j = m1.get_col(j,jj,N);
                 M3c m3j = m3.get_col(j,jj,N);
-                MultXV_Helper<-4,UNKNOWN,add,0,PT2,M1c,M3c>::call(
+                MultXV_Helper<-4,TMV_UNKNOWN,add,0,PT2,M1c,M3c>::call(
                     dj,m1j,m3j);
             }
             if (unit) {
@@ -407,7 +377,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            int N = (s == UNKNOWN ? m3.size() : s);
+            int N = (s == TMV_UNKNOWN ? m3.size() : s);
 #ifdef PRINTALGO_UD
             std::cout<<"UD algo 22: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -435,7 +405,7 @@ namespace tmv {
             if (N) do {
                 dj = ZProd<false,c2>::prod(x , *D++);
                 if (unit) Maybe<add>::add(*(B-1),dj);
-                MultXV_Helper<-4,UNKNOWN,add,0,PT2,M1c,M3c>::call2(
+                MultXV_Helper<-4,TMV_UNKNOWN,add,0,PT2,M1c,M3c>::call2(
                     len--,dj,A,B);
                 A.shiftP(Adiagstep);
                 B.shiftP(Bdiagstep);
@@ -450,7 +420,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            int N = (s == UNKNOWN ? m3.size() : s);
+            int N = (s == TMV_UNKNOWN ? m3.size() : s);
 #ifdef PRINTALGO_UD
             std::cout<<"UD algo 24: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -466,7 +436,7 @@ namespace tmv {
                 M1r m1i = m1.row(i,0,ii);
                 M2ds m2di = m2d.cSubVector(0,ii);
                 M3r m3i = m3.row(i,0,ii);
-                ElemMultVV_Helper<-4,UNKNOWN,add,ix,T,M1r,M2ds,M3r>::call(
+                ElemMultVV_Helper<-4,TMV_UNKNOWN,add,ix,T,M1r,M2ds,M3r>::call(
                     x,m1i,m2di,m3i);
             } 
             if (unit) {
@@ -483,7 +453,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            int N = (s == UNKNOWN ? m3.size() : s);
+            int N = (s == TMV_UNKNOWN ? m3.size() : s);
 #ifdef PRINTALGO_UD
             std::cout<<"UD algo 25: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -506,7 +476,7 @@ namespace tmv {
 
             int len = unit?0:1;
             if (N) do {
-                ElemMultVV_Helper<-4,UNKNOWN,add,ix,T,M1r,M2d,M3r>::call2(
+                ElemMultVV_Helper<-4,TMV_UNKNOWN,add,ix,T,M1r,M2d,M3r>::call2(
                     len,x,A,D,B);
                 if (unit) Maybe<add>::add(
                     B[len], ZProd<false,c2>::prod(x , D[len]));
@@ -576,7 +546,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = (s == UNKNOWN ? m3.size() : s);
+            const int N = (s == TMV_UNKNOWN ? m3.size() : s);
             TMVStaticAssert(M1::_unit);
 #ifdef PRINTALGO_UD
             std::cout<<"UD algo 29: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
@@ -607,7 +577,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UD
-            const int N = (s == UNKNOWN ? m3.size() : s);
+            const int N = (s == TMV_UNKNOWN ? m3.size() : s);
             std::cout<<"UD algo 82: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             typedef typename M3::real_type RT;
@@ -624,7 +594,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UD
-            const int N = (s == UNKNOWN ? m3.size() : s);
+            const int N = (s == TMV_UNKNOWN ? m3.size() : s);
             std::cout<<"UD algo 88: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             CopyU_Helper<-2,s,M1,M3>::call(m1,m3);
@@ -776,7 +746,7 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -807,13 +777,13 @@ namespace tmv {
             typedef typename M3::value_type T3;
             const bool bothrm = M1::_rowmajor && M3::_rowmajor;
             const bool bothcm = M1::_colmajor && M3::_colmajor;
-            const int s2 = s > 20 ? UNKNOWN : s;
+            const int s2 = s > 20 ? TMV_UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
             const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s > 10 ? false :
-                s == UNKNOWN ? false :
+                s == TMV_UNKNOWN ? false :
                 nops <= TMV_UD_UNROLL;
             const bool docopy =
                 TMV_OPT == 0 ? false :
@@ -825,16 +795,16 @@ namespace tmv {
                 ( M3::_upper ? bothrm ? 14 : 11 : bothrm ? 24 : 21 ) :
                 M3::_upper ? ( // UpperTri
                     unroll ? 16 :
-                    bothrm ? ( ( s != UNKNOWN && s <= 10 ) ? 14 : 15 ) :
-                    bothcm ? ( ( s != UNKNOWN && s <= 10 ) ? 11 : 12 ) :
-                    ( s != UNKNOWN && s <= 10 ) ? 11 : 12 ) :
+                    bothrm ? ( ( s != TMV_UNKNOWN && s <= 10 ) ? 14 : 15 ) :
+                    bothcm ? ( ( s != TMV_UNKNOWN && s <= 10 ) ? 11 : 12 ) :
+                    ( s != TMV_UNKNOWN && s <= 10 ) ? 11 : 12 ) :
                 ( // LowerTri
                     unroll ? 26 :
-                    bothrm ? ( ( s != UNKNOWN && s <= 10 ) ? 24 : 25 ) :
-                    bothcm ? ( ( s != UNKNOWN && s <= 10 ) ? 21 : 22 ) :
+                    bothrm ? ( ( s != TMV_UNKNOWN && s <= 10 ) ? 24 : 25 ) :
+                    bothcm ? ( ( s != TMV_UNKNOWN && s <= 10 ) ? 21 : 22 ) :
                     ( M1::_rowmajor && !docopy ) ? ( 
-                        ( s != UNKNOWN && s <= 10 ) ? 24 : 25 ) :
-                    ( s != UNKNOWN && s <= 10 ) ? 21 : 22 ); 
+                        ( s != TMV_UNKNOWN && s <= 10 ) ? 24 : 25 ) :
+                    ( s != TMV_UNKNOWN && s <= 10 ) ? 21 : 22 ); 
             MultUD_Helper<algo,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
@@ -879,13 +849,13 @@ namespace tmv {
             const bool docopy = 
                 TMV_OPT == 0 ? false :
                 TMV_ZeroIX || M2::_diagstep != 1;
-            const int s2 = s > 20 ? UNKNOWN : s;
+            const int s2 = s > 20 ? TMV_UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
             const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s > 10 ? false :
-                s == UNKNOWN ? false :
+                s == TMV_UNKNOWN ? false :
                 nops <= TMV_UD_UNROLL;
             const int algo = 
                 ( s == 0 ) ? 0 :
@@ -896,22 +866,22 @@ namespace tmv {
                     unroll ? 16 :
                     bothrm ? (
                         docopy ? 82 :
-                        ( s != UNKNOWN && s <= 10 ) ? 14 : 15 ) :
+                        ( s != TMV_UNKNOWN && s <= 10 ) ? 14 : 15 ) :
                     bothcm ? (
-                        ( s != UNKNOWN && s <= 10 ) ? 11 : 12 ) :
-                    ( s != UNKNOWN && s <= 10 ) ? 11 : 12 ) :
+                        ( s != TMV_UNKNOWN && s <= 10 ) ? 11 : 12 ) :
+                    ( s != TMV_UNKNOWN && s <= 10 ) ? 11 : 12 ) :
                 ( // LowerTri
                     unroll ? 26 :
                     bothrm ? (
                         docopy ? 82 :
-                        ( s != UNKNOWN && s <= 10 ) ? 24 : 25 ) :
+                        ( s != TMV_UNKNOWN && s <= 10 ) ? 24 : 25 ) :
                     bothcm ? (
-                        ( s != UNKNOWN && s <= 10 ) ? 21 : 22 ) :
+                        ( s != TMV_UNKNOWN && s <= 10 ) ? 21 : 22 ) :
                     // For some reason, this seems to be faster than 22:
                     M1::_rowmajor ? ( 
                         docopy ? 82 :
-                        ( s != UNKNOWN && s <= 10 ) ? 24 : 25 ) :
-                    ( s != UNKNOWN && s <= 10 ) ? 21 : 22 ); 
+                        ( s != TMV_UNKNOWN && s <= 10 ) ? 24 : 25 ) :
+                    ( s != TMV_UNKNOWN && s <= 10 ) ? 21 : 22 ); 
 #ifdef PRINTALGO_UD
             std::cout<<"InlineMultUD: \n";
             std::cout<<"x = "<<ix<<"  "<<T(x)<<"  add = "<<add<<std::endl;
@@ -954,7 +924,7 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&

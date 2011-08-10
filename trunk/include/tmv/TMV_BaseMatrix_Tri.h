@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 //---------------------------------------------------------------------------
@@ -42,6 +12,7 @@
 
 #include "TMV_BaseMatrix.h"
 #include "TMV_BaseMatrix_Rec.h"
+#include "TMV_SVD.h"
 
 namespace tmv {
 
@@ -58,9 +29,9 @@ namespace tmv {
     class UpperTriMatrixView;
     template <class T, int N, int A=0, int A1=0, int A2=0>
     class SmallUpperTriMatrix;
-    template <class T, int N, int Si=UNKNOWN, int Sj=UNKNOWN, int A=0>
+    template <class T, int N, int Si=TMV_UNKNOWN, int Sj=TMV_UNKNOWN, int A=0>
     class ConstSmallUpperTriMatrixView;
-    template <class T, int N, int Si=UNKNOWN, int Sj=UNKNOWN, int A=0>
+    template <class T, int N, int Si=TMV_UNKNOWN, int Sj=TMV_UNKNOWN, int A=0>
     class SmallUpperTriMatrixView;
 
     template <class T, int A=0, int A1=0, int A2=0>
@@ -71,9 +42,9 @@ namespace tmv {
     class LowerTriMatrixView;
     template <class T, int N, int A=0, int A1=0, int A2=0>
     class SmallLowerTriMatrix;
-    template <class T, int N, int Si=UNKNOWN, int Sj=UNKNOWN, int A=0>
+    template <class T, int N, int Si=TMV_UNKNOWN, int Sj=TMV_UNKNOWN, int A=0>
     class ConstSmallLowerTriMatrixView;
-    template <class T, int N, int Si=UNKNOWN, int Sj=UNKNOWN, int A=0>
+    template <class T, int N, int Si=TMV_UNKNOWN, int Sj=TMV_UNKNOWN, int A=0>
     class SmallLowerTriMatrixView;
 
     // Specify ExactSameStorage for triangle matrices:
@@ -203,7 +174,7 @@ namespace tmv {
         typedef SmallUpperTriMatrix<T,cs,A2> type;
     };
     template <class T, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,UpperTri,UNKNOWN,rs,rm,fort>
+    struct MCopyHelper<T,UpperTri,TMV_UNKNOWN,rs,rm,fort>
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
@@ -212,7 +183,7 @@ namespace tmv {
         typedef SmallUpperTriMatrix<T,rs,A2> type;
     };
     template <class T, int cs, bool rm, bool fort>
-    struct MCopyHelper<T,UpperTri,cs,UNKNOWN,rm,fort>
+    struct MCopyHelper<T,UpperTri,cs,TMV_UNKNOWN,rm,fort>
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
@@ -221,7 +192,7 @@ namespace tmv {
         typedef SmallUpperTriMatrix<T,cs,A2> type;
     };
     template <class T, bool rm, bool fort>
-    struct MCopyHelper<T,UpperTri,UNKNOWN,UNKNOWN,rm,fort>
+    struct MCopyHelper<T,UpperTri,TMV_UNKNOWN,TMV_UNKNOWN,rm,fort>
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
@@ -240,7 +211,7 @@ namespace tmv {
         typedef SmallLowerTriMatrix<T,cs,A2> type;
     };
     template <class T, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,LowerTri,UNKNOWN,rs,rm,fort>
+    struct MCopyHelper<T,LowerTri,TMV_UNKNOWN,rs,rm,fort>
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
@@ -249,7 +220,7 @@ namespace tmv {
         typedef SmallLowerTriMatrix<T,rs,A2> type;
     };
     template <class T, int cs, bool rm, bool fort>
-    struct MCopyHelper<T,LowerTri,cs,UNKNOWN,rm,fort>
+    struct MCopyHelper<T,LowerTri,cs,TMV_UNKNOWN,rm,fort>
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
@@ -258,7 +229,7 @@ namespace tmv {
         typedef SmallLowerTriMatrix<T,cs,A2> type;
     };
     template <class T, bool rm, bool fort>
-    struct MCopyHelper<T,LowerTri,UNKNOWN,UNKNOWN,rm,fort>
+    struct MCopyHelper<T,LowerTri,TMV_UNKNOWN,TMV_UNKNOWN,rm,fort>
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
@@ -277,7 +248,7 @@ namespace tmv {
         typedef SmallUpperTriMatrix<T,cs,A2> type;
     };
     template <class T, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,UnitUpperTri,UNKNOWN,rs,rm,fort>
+    struct MCopyHelper<T,UnitUpperTri,TMV_UNKNOWN,rs,rm,fort>
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
@@ -286,7 +257,7 @@ namespace tmv {
         typedef SmallUpperTriMatrix<T,rs,A2> type;
     };
     template <class T, int cs, bool rm, bool fort>
-    struct MCopyHelper<T,UnitUpperTri,cs,UNKNOWN,rm,fort>
+    struct MCopyHelper<T,UnitUpperTri,cs,TMV_UNKNOWN,rm,fort>
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
@@ -295,7 +266,7 @@ namespace tmv {
         typedef SmallUpperTriMatrix<T,cs,A2> type;
     };
     template <class T, bool rm, bool fort>
-    struct MCopyHelper<T,UnitUpperTri,UNKNOWN,UNKNOWN,rm,fort>
+    struct MCopyHelper<T,UnitUpperTri,TMV_UNKNOWN,TMV_UNKNOWN,rm,fort>
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
@@ -314,7 +285,7 @@ namespace tmv {
         typedef SmallLowerTriMatrix<T,cs,A2> type;
     };
     template <class T, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,UnitLowerTri,UNKNOWN,rs,rm,fort>
+    struct MCopyHelper<T,UnitLowerTri,TMV_UNKNOWN,rs,rm,fort>
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
@@ -323,7 +294,7 @@ namespace tmv {
         typedef SmallLowerTriMatrix<T,rs,A2> type;
     };
     template <class T, int cs, bool rm, bool fort>
-    struct MCopyHelper<T,UnitLowerTri,cs,UNKNOWN,rm,fort>
+    struct MCopyHelper<T,UnitLowerTri,cs,TMV_UNKNOWN,rm,fort>
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
@@ -332,7 +303,7 @@ namespace tmv {
         typedef SmallLowerTriMatrix<T,cs,A2> type;
     };
     template <class T, bool rm, bool fort>
-    struct MCopyHelper<T,UnitLowerTri,UNKNOWN,UNKNOWN,rm,fort>
+    struct MCopyHelper<T,UnitLowerTri,TMV_UNKNOWN,TMV_UNKNOWN,rm,fort>
     {
         enum { A2 = (
                 (rm ? RowMajor : ColMajor) |
@@ -349,7 +320,7 @@ namespace tmv {
         typedef ConstSmallUpperTriMatrixView<T,cs,si,sj,c> ctype; 
     };
     template <class T, int si, int sj, int c>
-    struct MViewHelper<T,UpperTri,UNKNOWN,UNKNOWN,si,sj,c>
+    struct MViewHelper<T,UpperTri,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,c>
     {
         enum { A2 = c | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
         typedef UpperTriMatrixView<T,A2> type; 
@@ -362,7 +333,7 @@ namespace tmv {
         typedef ConstSmallUpperTriMatrixView<T,cs,si,sj,c|UnitDiag> ctype; 
     };
     template <class T, int si, int sj, int c>
-    struct MViewHelper<T,UnitUpperTri,UNKNOWN,UNKNOWN,si,sj,c>
+    struct MViewHelper<T,UnitUpperTri,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,c>
     {
         enum { A2 = c | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
         typedef UpperTriMatrixView<T,A2|UnitDiag> type; 
@@ -375,7 +346,7 @@ namespace tmv {
         typedef ConstSmallLowerTriMatrixView<T,cs,si,sj,c> ctype; 
     };
     template <class T, int si, int sj, int c>
-    struct MViewHelper<T,LowerTri,UNKNOWN,UNKNOWN,si,sj,c>
+    struct MViewHelper<T,LowerTri,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,c>
     {
         enum { A2 = c | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
         typedef LowerTriMatrixView<T,A2> type; 
@@ -388,7 +359,7 @@ namespace tmv {
         typedef ConstSmallLowerTriMatrixView<T,cs,si,sj,c|UnitDiag> ctype; 
     };
     template <class T, int si, int sj, int c>
-    struct MViewHelper<T,UnitLowerTri,UNKNOWN,UNKNOWN,si,sj,c>
+    struct MViewHelper<T,UnitLowerTri,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,c>
     {
         enum { A2 = c | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
         typedef LowerTriMatrixView<T,A2|UnitDiag> type; 
@@ -420,6 +391,10 @@ namespace tmv {
     // Defined in TMV_Norm.h
     template <class M>
     static inline typename M::float_type DoNormF(const BaseMatrix_Tri<M>& m);
+    template <class M>
+    static inline typename M::float_type DoNorm2(const BaseMatrix<M>& m);
+    template <class M>
+    static inline typename M::float_type DoCondition(const BaseMatrix<M>& m);
 
     // Defined in TMV_NormU.h
     template <class M>
@@ -703,6 +678,12 @@ namespace tmv {
         TMV_INLINE float_type normInf() const
         { return tmv::DoNormInf(mat()); }
 
+        TMV_INLINE float_type norm2() const
+        { return tmv::DoNorm2(mat()); }
+
+        TMV_INLINE float_type condition() const
+        { return tmv::DoCondition(mat()); }
+
 
 
         //
@@ -855,13 +836,13 @@ namespace tmv {
                 size()-1,stepi(),stepj()); 
         }
 
-        TMV_INLINE const_unitdiag_type viewAsUnitDiag() const
-        { return const_unitdiag_type(cptr(),size(),stepi(),stepj()); }
+        TMV_INLINE TMV_MAYBE_CREF(type,const_unitdiag_type) viewAsUnitDiag() const
+        { return MakeTriView<type,const_unitdiag_type>::call(mat()); }
 
-        TMV_INLINE const_nonunitdiag_type viewAsNonUnitDiag() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_nonunitdiag_type) viewAsNonUnitDiag() const
         {
             TMVAssert(!isunit());
-            return const_nonunitdiag_type(cptr(),size(),stepi(),stepj()); 
+            return MakeTriView<type,const_nonunitdiag_type>::call(mat()); 
         }
 
         TMV_INLINE const_unknowndiag_type viewAsUnknownDiag(DiagType newdt=dt()) const
@@ -948,7 +929,7 @@ namespace tmv {
         { return static_cast<const type&>(*this); }
 
         TMV_INLINE int diagstep() const 
-        { return _diagstep == UNKNOWN ? stepi() + stepj() : _diagstep; }
+        { return _diagstep == TMV_UNKNOWN ? stepi() + stepj() : _diagstep; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE DiagType dt() const { return mat().dt(); }
         TMV_INLINE bool isunit() const { return mat().isunit(); }
@@ -1435,13 +1416,13 @@ namespace tmv {
                 size()-1,stepi(),stepj()); 
         }
 
-        TMV_INLINE unitdiag_type viewAsUnitDiag()
-        { return unitdiag_type(ptr(),size(),stepi(),stepj()); }
+        TMV_INLINE TMV_MAYBE_REF(type,unitdiag_type) viewAsUnitDiag()
+        { return MakeTriView<type,unitdiag_type>::call(mat()); }
 
-        TMV_INLINE nonunitdiag_type viewAsNonUnitDiag()
+        TMV_INLINE TMV_MAYBE_REF(type,nonunitdiag_type) viewAsNonUnitDiag()
         {
             TMVAssert(!isunit());
-            return nonunitdiag_type(ptr(),size(),stepi(),stepj()); 
+            return MakeTriView<type,nonunitdiag_type>::call(mat());
         }
 
         TMV_INLINE unknowndiag_type viewAsUnknownDiag(DiagType newdt=dt()) 
@@ -1465,7 +1446,7 @@ namespace tmv {
         }
 
         TMV_INLINE TMV_MAYBE_REF(type,nonconj_type) nonConj()
-        { return MakeTriView<type,const_nonconj_type>::call(mat()); }
+        { return MakeTriView<type,nonconj_type>::call(mat()); }
 
 
         // Repeat the const versions:
@@ -1491,9 +1472,9 @@ namespace tmv {
         { return base::offDiag(noff); }
         TMV_INLINE const_offdiag_type offDiag() const
         { return base::offDiag(); }
-        TMV_INLINE const_unitdiag_type viewAsUnitDiag() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_unitdiag_type) viewAsUnitDiag() const
         { return base::viewAsUnitDiag(); }
-        TMV_INLINE const_nonunitdiag_type viewAsNonUnitDiag() const
+        TMV_INLINE TMV_MAYBE_CREF(type,const_nonunitdiag_type) viewAsNonUnitDiag() const
         { return base::viewAsNonUnitDiag(); }
         TMV_INLINE const_unknowndiag_type viewAsUnknownDiag(DiagType newdt=dt()) const
         { return base::viewAsUnknownDiag(newdt); }
@@ -1523,7 +1504,7 @@ namespace tmv {
         { return static_cast<type&>(*this); }
 
         TMV_INLINE int diagstep() const
-        { return _diagstep == UNKNOWN ? stepi() + stepj() : _diagstep; }
+        { return _diagstep == TMV_UNKNOWN ? stepi() + stepj() : _diagstep; }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.

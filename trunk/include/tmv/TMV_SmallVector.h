@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 //-----------------------------------------------------------------------------
@@ -324,7 +294,7 @@ namespace tmv {
         enum { twoS = isreal ? S : IntTraits<S>::twoS };
         enum { twoN = isreal ? N : IntTraits<N>::twoS };
 
-        // Use VCopyHelper for copy_type in case N == UNKNOWN
+        // Use VCopyHelper for copy_type in case N == TMV_UNKNOWN
         typedef typename VCopyHelper<T,N,_fort>::type copy_type;
 
         enum { unitA = A | Unit };
@@ -396,14 +366,14 @@ namespace tmv {
             itsv(v), itssize(n), itsstep(S) 
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(S != UNKNOWN); 
+            TMVStaticAssert(S != TMV_UNKNOWN); 
         }
 
         ConstSmallVectorView(const T* v) :
             itsv(v), itssize(N), itsstep(S) 
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(N != UNKNOWN); TMVStaticAssert(S != UNKNOWN); 
+            TMVStaticAssert(N != TMV_UNKNOWN); TMVStaticAssert(S != TMV_UNKNOWN); 
         }
 
         ConstSmallVectorView(const type& v2) : 
@@ -609,13 +579,13 @@ namespace tmv {
             itsv(v), itssize(n), itsstep(S) 
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(S != UNKNOWN); 
+            TMVStaticAssert(S != TMV_UNKNOWN); 
         }
 
         SmallVectorView(T* v) : itsv(v), itssize(N), itsstep(S) 
         { 
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(N != UNKNOWN);  TMVStaticAssert(S != UNKNOWN); 
+            TMVStaticAssert(N != TMV_UNKNOWN);  TMVStaticAssert(S != TMV_UNKNOWN); 
         }
 
         SmallVectorView(const type& v2) : 

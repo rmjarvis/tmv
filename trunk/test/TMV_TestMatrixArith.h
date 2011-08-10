@@ -231,6 +231,29 @@ static TMV_INLINE_ND void CopyBack(
     m1 = m0; 
 }
 
+template <bool isint>
+struct GetKappaHelper // isint = false
+{
+    template <class M>
+    static inline typename M::real_type call(const tmv::BaseMatrix<M>& m)
+    { return Norm(m) * Norm(m.mat().inverse()); }
+};
+
+template <>
+struct GetKappaHelper<true> // isint = true
+{
+    template <class M>
+    static inline typename M::real_type call(const tmv::BaseMatrix<M>& m)
+    { return typename M::real_type(1); }
+};
+
+template <class M>
+static inline typename M::real_type GetKappa(const tmv::BaseMatrix<M>& m)
+{
+    const bool isint = std::numeric_limits<typename M::real_type>::is_integer;
+    return GetKappaHelper<isint>::call(m);
+}
+
 // Every one of these inner routines has a _Basic and a _Full version.
 // The _Basic is used to test all the various views of the matrices
 // and vectors.  
@@ -241,9 +264,10 @@ static TMV_INLINE_ND void CopyBack(
 // call them on the regular view, with everything complex.  The other
 // views and real types just get the _Basic calls.
 
-template <class RT, class MM> 
-static void DoTestMa_Basic(RT , const MM& a, std::string label)
+template <class MM> 
+static void DoTestMa_Basic(const MM& a, std::string label)
 {
+    typedef typename MM::real_type RT;
     typedef typename MM::value_type T;
     typedef typename MM::float_type FT;
 #ifdef XXD
@@ -255,6 +279,7 @@ static void DoTestMa_Basic(RT , const MM& a, std::string label)
 
     tmv::Matrix<T> m = a;
     FT eps = EPS * FT(m.colsize()+m.rowsize());
+    FT kappa = GetKappa(m);
 
 #ifdef XXD
     if (XXDEBUG1) {
@@ -268,10 +293,10 @@ static void DoTestMa_Basic(RT , const MM& a, std::string label)
 #ifndef NODIV
             std::cout<<"Det(a) = "<<Det(a)<<"  "<<Det(m)<<std::endl;
             std::cout<<"diff = "<<tmv::TMV_ABS2(Det(a)-Det(m))<<"  "<<
-                eps*Norm(m)*Norm(m.inverse())*tmv::TMV_ABS2(Det(m))<<std::endl;
+                eps*GetKappa(m)*tmv::TMV_ABS2(Det(m))<<std::endl;
             std::cout<<"LogDet(a) = "<<LogDet(a)<<"  "<<LogDet(m)<<std::endl;
             std::cout<<"diff = "<<tmv::TMV_ABS2(LogDet(a)-LogDet(m))<<"  "<<
-                eps*Norm(m)*Norm(m.inverse())<<std::endl;
+                eps*GetKappa(m)<<std::endl;
 #endif
         }
 #endif
@@ -298,14 +323,14 @@ static void DoTestMa_Basic(RT , const MM& a, std::string label)
         T d = Det(m);
         if (tmv::TMV_ABS2(d) > 0.5) {
             FT eps1 = eps;
-            if (!std::numeric_limits<RT>::is_integer) 
-                eps1 *= Norm(m) * Norm(m.inverse());
+            if (!std::numeric_limits<RT>::is_integer) eps1 *= GetKappa(m);
             Assert(Equal2(Det(a),d,eps1*tmv::TMV_ABS2(d)),label+" Det");
-            Assert(Equal2(LogDet(a),LogDet(m),eps1),label+" LogDet");
+            if (!std::numeric_limits<RT>::is_integer) {
+                Assert(Equal2(LogDet(a),LogDet(m),eps1),label+" LogDet");
+            }
         } else if (tmv::TMV_ABS2(d) != 0.0) {
             FT eps1 = eps;
-            if (!std::numeric_limits<RT>::is_integer) 
-                eps1 *= Norm(m) * Norm(m.inverse());
+            if (!std::numeric_limits<RT>::is_integer) eps1 *= GetKappa(m);
             Assert(Equal2(Det(a),d,eps1*(1+tmv::TMV_ABS2(d))),label+" Det");
         } else {
             Assert(Equal2(Det(a),d,eps),label+" Det");
@@ -314,13 +339,17 @@ static void DoTestMa_Basic(RT , const MM& a, std::string label)
     }
 #endif
 
-    Assert(Equal2(NormF(a),NormF(m),eps*NormF(m)),label+" NormF");
-    Assert(Equal2(Norm(a),Norm(m),eps*Norm(m)),label+" Norm");
+    if (!std::numeric_limits<RT>::is_integer) {
+        Assert(Equal2(NormF(a),NormF(m),eps*NormF(m)),label+" NormF");
+        Assert(Equal2(Norm(a),Norm(m),eps*Norm(m)),label+" Norm");
+    }
     Assert(Equal2(NormSq(a),NormSq(m),eps*NormSq(m)),label+" NormSq");
-    Assert(Equal2(Norm1(a),Norm1(m),eps*Norm1(m)),label+" Norm1");
-    Assert(Equal2(NormInf(a),NormInf(m),eps*NormInf(m)),label+" NormInf");
-    Assert(Equal2(MaxAbsElement(a),MaxAbsElement(m),eps*MaxAbsElement(m)),
-           label+" MaxAbsElement");
+    if (!std::numeric_limits<RT>::is_integer || tmv::Traits<T>::isreal) {
+        Assert(Equal2(Norm1(a),Norm1(m),eps*Norm1(m)),label+" Norm1");
+        Assert(Equal2(NormInf(a),NormInf(m),eps*NormInf(m)),label+" NormInf");
+        Assert(Equal2(MaxAbsElement(a),MaxAbsElement(m),eps*MaxAbsElement(m)),
+               label+" MaxAbsElement");
+    }
     Assert(Equal2(MaxAbs2Element(a),MaxAbs2Element(m),eps*MaxAbs2Element(m)),
            label+" MaxAbs2Element");
 #ifndef NODIV
@@ -328,14 +357,14 @@ static void DoTestMa_Basic(RT , const MM& a, std::string label)
     if (donorm2 && !std::numeric_limits<RT>::is_integer) {
 #ifdef XXD
         if (XXDEBUG1) {
-            std::cout<<"Norm2(a) = "<<a.doNorm2()<<"  "<<m.doNorm2()<<std::endl;
-            std::cout<<"abs(diff) = "<<tmv::TMV_ABS2(a.doNorm2()-m.doNorm2())<<std::endl;
-            std::cout<<"eps*kappa = "<<eps*m.doCondition()<<std::endl;
+            std::cout<<"Norm2(a) = "<<a.norm2()<<"  "<<m.norm2()<<std::endl;
+            std::cout<<"abs(diff) = "<<tmv::TMV_ABS2(a.norm2()-m.norm2())<<std::endl;
+            std::cout<<"eps*kappa = "<<eps*m.condition()<<std::endl;
         }
 #endif
-        Assert(Equal2(a.doNorm2(),m.doNorm2(),eps*m.doCondition()*m.doNorm2()),
+        Assert(Equal2(a.norm2(),m.norm2(),eps*m.condition()*m.norm2()),
                label+" DoNorm2");
-        Assert(Equal2(Norm2(a),Norm2(m),eps*m.condition()*m.doNorm2()),
+        Assert(Equal2(Norm2(a),Norm2(m),eps*m.condition()*m.norm2()),
                label+" Norm2");
     }
 #endif
@@ -361,109 +390,12 @@ static void DoTestMa_Basic(RT , const MM& a, std::string label)
 }
 
 template <class MM> 
-static void DoTestMa_Basic(int , const MM& a, std::string label)
+static void DoTestMa_Full(const MM& a, std::string label)
 {
-    typedef typename MM::value_type T;
     typedef typename MM::real_type RT;
-    typedef typename MM::float_type FT;
-#ifdef XXD
-    if (showstartdone) {
-        std::cout<<"Start Ma "<<label<<std::endl;
-        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
-    }
-#endif
-
-    tmv::Matrix<T> m = a;
-    FT eps = EPS * FT(m.colsize()+m.rowsize());
-
-#ifdef XXD
-    if (XXDEBUG1) {
-        std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
-        std::cout<<"m = "<<tmv::TMV_Text(m)<<" = "<<m<<std::endl;
-        std::cout<<"a-m = "<<a-m<<std::endl;
-        std::cout<<"Norm(a-m) = "<<Norm(a-m)<<std::endl;
-#ifndef NONSQUARE
-        if (m.isSquare()) {
-            std::cout<<"Trace(a) = "<<Trace(a)<<"  "<<Trace(m)<<std::endl;
-#ifndef NODIV
-            std::cout<<"Det(a) = "<<Det(a)<<"  "<<Det(m)<<std::endl;
-            std::cout<<"diff = "<<tmv::TMV_ABS2(Det(a)-Det(m))<<"  "<<
-                eps*tmv::TMV_ABS2(Det(m))<<std::endl;
-            std::cout<<"LogDet(a) = "<<LogDet(a)<<"  "<<LogDet(m)<<std::endl;
-            std::cout<<"diff = "<<tmv::TMV_ABS2(LogDet(a)-LogDet(m))<<"  "<<
-                eps<<std::endl;
-#endif
-        }
-#endif
-        std::cout<<"NormF(a) = "<<NormF(a)<<"  "<<NormF(m)<<std::endl;
-        std::cout<<"Norm(a) = "<<Norm(a)<<"  "<<Norm(m)<<std::endl;
-        std::cout<<"NormSq(a) = "<<NormSq(a)<<"  "<<NormSq(m)<<std::endl;
-        std::cout<<"abs(diff) = "<<tmv::TMV_ABS2(NormSq(a)-NormSq(m))<<std::endl;
-        std::cout<<"eps*normsq = "<<eps*NormSq(m)<<std::endl;
-        std::cout<<"Norm1(a) = "<<Norm1(a)<<"  "<<Norm1(m)<<std::endl;
-        std::cout<<"NormInf(a) = "<<NormInf(a)<<"  "<<NormInf(m)<<std::endl;
-        std::cout<<"abs(diff) = "<<tmv::TMV_ABS2(NormInf(a)-NormInf(m))<<std::endl;
-        std::cout<<"eps*norminf = "<<eps*NormInf(m)<<std::endl;
-        std::cout<<"MaxAbsElement(a) = "<<MaxAbsElement(a)<<"  "<<
-            MaxAbsElement(m)<<std::endl;
-    }
-#endif
-
-    Assert(Equal(a,m,eps),label+" a != m");
-#ifndef NONSQUARE
-    if (m.isSquare()) {
-        Assert(Equal2(Trace(a),Trace(m),eps*tmv::TMV_ABS2(Trace(m))),
-               label+" Trace");
-#ifndef NODIV
-        T d = Det(m);
-        if (tmv::TMV_ABS2(d) > 0.5) {
-            FT eps1 = eps;
-            Assert(Equal2(Det(a),d,eps1*tmv::TMV_ABS2(d)),label+" Det");
-            Assert(Equal2(LogDet(a),LogDet(m),eps1),label+" LogDet");
-        } else if (tmv::TMV_ABS2(d) != 0.0) {
-            FT eps1 = eps;
-            Assert(Equal2(Det(a),d,eps1*(1+tmv::TMV_ABS2(d))),label+" Det");
-        } else {
-            Assert(Equal2(Det(a),d,eps),label+" Det");
-        }
-#endif
-    }
-#endif
-
-    Assert(Equal2(NormF(a),NormF(m),eps*NormF(m)),label+" NormF");
-    Assert(Equal2(Norm(a),Norm(m),eps*Norm(m)),label+" Norm");
-    Assert(Equal2(NormSq(a),NormSq(m),eps*NormSq(m)),label+" NormSq");
-    Assert(Equal2(Norm1(a),Norm1(m),eps*Norm1(m)),label+" Norm1");
-    Assert(Equal2(NormInf(a),NormInf(m),eps*NormInf(m)),label+" NormInf");
-    Assert(Equal2(MaxAbsElement(a),MaxAbsElement(m),eps*MaxAbsElement(m)),
-           label+" MaxAbsElement");
-    Assert(Equal2(MaxAbs2Element(a),MaxAbs2Element(m),eps*MaxAbs2Element(m)),
-           label+" MaxAbs2Element");
-#ifdef XXD
-    if (XXDEBUG1) {
-        std::cout<<"Norm(aT-mT) = "<<Norm(Transpose(a)-Transpose(m))<<std::endl;
-        std::cout<<"Conjugate(a) = "<<Conjugate(a)<<std::endl;
-        std::cout<<"Conjugate(m) = "<<Conjugate(m)<<std::endl;
-        std::cout<<"a*-m* = "<<Conjugate(a)-Conjugate(m)<<std::endl;
-        std::cout<<"Norm(a*-m*) = "<<Norm(Conjugate(a)-Conjugate(m))<<std::endl;
-        std::cout<<"Adjoint(a) = "<<Adjoint(a)<<std::endl;
-        std::cout<<"Adjoint(m) = "<<Adjoint(m)<<std::endl;
-        std::cout<<"Norm(at-mt) = "<<Norm(Adjoint(a)-Adjoint(m))<<std::endl;
-    }
-#endif
-    Assert(Equal(Transpose(a),Transpose(m),eps),label+" Transpose");
-    Assert(Equal(Conjugate(a),Conjugate(m),eps),label+" Conjugate");
-    Assert(Equal(Adjoint(a),Adjoint(m),eps),label+" Adjoint");
-
-    if (showstartdone) std::cout<<"Done Ma"<<std::endl;
-}
-
-template <class RT, class MM> 
-static void DoTestMa_Full(RT rt, const MM& a, std::string label)
-{
     typedef typename MM::value_type T;
     typedef typename MM::float_type FT;
-    DoTestMa_Basic(rt,a,label);
+    DoTestMa_Basic(a,label);
 
 #if (XTEST & 16)
 
@@ -486,22 +418,26 @@ static void DoTestMa_Full(RT rt, const MM& a, std::string label)
         std::cout<<"a.sumAbs2Elements() = "<<a.sumAbs2Elements()<<"  "<<SumAbs2Elements(m)<<std::endl;
     }
 #endif
-    Assert(Equal2(a.normF(),NormF(m),eps*NormF(m)),label+" NormF");
-    Assert(Equal2(a.norm(),Norm(m),eps*Norm(m)),label+" Norm");
+    if (!std::numeric_limits<RT>::is_integer) {
+        Assert(Equal2(a.normF(),NormF(m),eps*NormF(m)),label+" NormF");
+        Assert(Equal2(a.norm(),Norm(m),eps*Norm(m)),label+" Norm");
+    }
     Assert(Equal2(a.sumElements(),SumElements(m),
                   eps*tmv::TMV_ABS2(SumElements(m))),
            label+" SumElements");
     Assert(Equal2(a.normSq(),NormSq(m),eps*NormSq(m)),label+" NormSq");
     Assert(Equal2(a.normSq(FT(1.e3)),NormSq(m*FT(1.e3)),
-                  eps*FT(1.e6)*NormSq(m)), label+" NormSq,scale");
+                  eps*FT(1.e6)*NormSq(m)), label+" NormSq,scale up");
     Assert(Equal2(a.normSq(FT(1.e-3)),NormSq(m*FT(1.e-3)),
-                  eps*FT(1.e-6)*NormSq(m)), label+" NormSq,scale");
-    Assert(Equal2(a.sumAbsElements(),SumAbsElements(m),
-                  eps*SumAbsElements(m)), label+" SumAbsElements");
-    Assert(Equal2(a.norm1(),Norm1(m),eps*Norm1(m)),label+" Norm1");
-    Assert(Equal2(a.normInf(),NormInf(m),eps*NormInf(m)),label+" NormInf");
-    Assert(Equal2(a.maxAbsElement(),MaxAbsElement(m),eps*MaxAbsElement(m)),
-           label+" MaxAbsElement");
+                  eps*FT(1.e-6)*NormSq(m)), label+" NormSq,scale down");
+    if (!std::numeric_limits<RT>::is_integer || tmv::Traits<T>::isreal) {
+        Assert(Equal2(a.sumAbsElements(),SumAbsElements(m),
+                      eps*SumAbsElements(m)), label+" SumAbsElements");
+        Assert(Equal2(a.norm1(),Norm1(m),eps*Norm1(m)),label+" Norm1");
+        Assert(Equal2(a.normInf(),NormInf(m),eps*NormInf(m)),label+" NormInf");
+        Assert(Equal2(a.maxAbsElement(),MaxAbsElement(m),eps*MaxAbsElement(m)),
+               label+" MaxAbsElement");
+    }
     Assert(Equal2(a.sumAbs2Elements(),SumAbs2Elements(m),eps*SumAbs2Elements(m)),
            label+" SumAbs2Elements");
     Assert(Equal2(a.maxAbs2Element(),MaxAbs2Element(m),eps*MaxAbs2Element(m)),
@@ -509,7 +445,7 @@ static void DoTestMa_Full(RT rt, const MM& a, std::string label)
 #ifndef NODIV
 #ifndef NOSV
     if (donorm2 && !std::numeric_limits<RT>::is_integer) {
-        Assert(Equal2(a.norm2(),m.doNorm2(),eps*m.condition()*m.doNorm2()),
+        Assert(Equal2(a.norm2(),m.norm2(),eps*m.condition()*m.norm2()),
                label+" Norm2");
     }
 #endif
@@ -520,75 +456,19 @@ static void DoTestMa_Full(RT rt, const MM& a, std::string label)
 }
 
 template <class MM> 
-static void DoTestMa_Full(int rt, const MM& a, std::string label)
-{
-    typedef typename MM::value_type T;
-    typedef typename MM::float_type FT;
-    DoTestMa_Basic(rt,a,label);
-
-#if (XTEST & 16)
-
-    tmv::Matrix<T> m = a;
-    FT eps = EPS * (a.colsize() + a.rowsize());
-
-#ifdef XXD
-    if (XXDEBUG1) {
-        std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
-        std::cout<<"m = "<<tmv::TMV_Text(m)<<" = "<<m<<std::endl;
-        std::cout<<"a.normF() = "<<a.normF()<<"  "<<NormF(m)<<std::endl;
-        std::cout<<"a.norm() = "<<a.norm()<<"  "<<Norm(m)<<std::endl;
-        std::cout<<"a.normSq() = "<<a.normSq()<<"  "<<NormSq(m)<<std::endl;
-        std::cout<<"a.normSq(1.e-3) = "<<a.normSq(FT(1.e-3))<<"  "<<NormSq(m*FT(1.e-3))<<std::endl;
-        std::cout<<"abs(diff) = "<<tmv::TMV_ABS2(a.normSq(FT(1.e-3))-NormSq(m*FT(1.e-3)))<<std::endl;
-        std::cout<<"eps*1.e-6*normsq = "<<eps*1.e-6*NormSq(m)<<std::endl;
-        std::cout<<"a.norm1() = "<<a.norm1()<<"  "<<Norm1(m)<<std::endl;
-        std::cout<<"a.normInf() = "<<a.normInf()<<"  "<<NormInf(m)<<std::endl;
-        std::cout<<"a.sumAbsElements() = "<<a.sumAbsElements()<<"  "<<SumAbsElements(m)<<std::endl;
-        std::cout<<"a.sumAbs2Elements() = "<<a.sumAbs2Elements()<<"  "<<SumAbs2Elements(m)<<std::endl;
-    }
-#endif
-    Assert(Equal2(a.normF(),NormF(m),eps*NormF(m)),label+" NormF");
-    Assert(Equal2(a.norm(),Norm(m),eps*Norm(m)),label+" Norm");
-    Assert(Equal2(a.sumElements(),SumElements(m),
-                  eps*tmv::TMV_ABS2(SumElements(m))),
-           label+" SumElements");
-    Assert(Equal2(a.normSq(),NormSq(m),eps*NormSq(m)),label+" NormSq");
-    Assert(Equal2(a.normSq(FT(1.e3)),NormSq(m*FT(1.e3)),
-                  eps*FT(1.e6)*NormSq(m)), label+" NormSq,scale");
-    Assert(Equal2(a.normSq(FT(1.e-3)),NormSq(m*FT(1.e-3)),
-                  eps*FT(1.e-6)*NormSq(m)), label+" NormSq,scale");
-    Assert(Equal2(a.sumAbsElements(),SumAbsElements(m),
-                  eps*SumAbsElements(m)),
-           label+" SumAbsElements");
-    Assert(Equal2(a.norm1(),Norm1(m),eps*Norm1(m)),label+" Norm1");
-    Assert(Equal2(a.normInf(),NormInf(m),eps*NormInf(m)),label+" NormInf");
-    Assert(Equal2(a.maxAbsElement(),MaxAbsElement(m),eps*MaxAbsElement(m)),
-           label+" MaxAbsElement");
-    Assert(Equal2(a.sumAbs2Elements(),SumAbs2Elements(m),eps*SumAbs2Elements(m)),
-           label+" SumAbs2Elements");
-    Assert(Equal2(a.maxAbs2Element(),MaxAbs2Element(m),eps*MaxAbs2Element(m)),
-           label+" MaxAbs2Element");
-
-    if (showstartdone) std::cout<<"Done Ma_Full"<<std::endl;
-#endif
-}
-
-template <class MM> 
 static void DoTestMR(const MM& a, std::string label)
 {
-    typename MM::real_type rt(0);
-    DoTestMa_Basic(rt,a,label);
-    DoTestMa_Basic(rt,Transpose(a),label+" Trans");
+    DoTestMa_Basic(a,label);
+    DoTestMa_Basic(Transpose(a),label+" Trans");
 }
 
 template <class MM> 
 static void DoTestMC(const MM& a, std::string label)
 {
-    typename MM::real_type rt(0);
-    DoTestMa_Full(rt,a,label);
-    DoTestMa_Basic(rt,Transpose(a),label+" Trans");
-    DoTestMa_Basic(rt,Conjugate(a),label+" Conj");
-    DoTestMa_Basic(rt,Adjoint(a),label+" Adj");
+    DoTestMa_Full(a,label);
+    DoTestMa_Basic(Transpose(a),label+" Trans");
+    DoTestMa_Basic(Conjugate(a),label+" Conj");
+    DoTestMa_Basic(Adjoint(a),label+" Adj");
 }
 
 template <class MM, class T2> 

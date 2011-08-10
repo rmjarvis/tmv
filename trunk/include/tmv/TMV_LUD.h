@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 //---------------------------------------------------------------------------
@@ -141,7 +111,7 @@ namespace tmv {
         enum { rs = M::_rowsize };
 
         enum { small = (
-                M::_colsize != UNKNOWN && M::_rowsize != UNKNOWN &&
+                M::_colsize != TMV_UNKNOWN && M::_rowsize != TMV_UNKNOWN &&
                 M::_colsize <= 8 && M::_rowsize <= 8 ) };
 
         typedef typename LUD_Impl<small,M>::lux_type lux_type;
@@ -448,8 +418,8 @@ namespace tmv {
             LUx( Maybe<istrans>::transposeview(SmallLUx) ),
             P(size)
         {
-            TMVStaticAssert(M::_colsize != UNKNOWN);
-            TMVStaticAssert(M::_rowsize != UNKNOWN);
+            TMVStaticAssert(M::_colsize != TMV_UNKNOWN);
+            TMVStaticAssert(M::_rowsize != TMV_UNKNOWN);
             TMVStaticAssert(M::_colsize == int(M::_rowsize));
             TMVStaticAssert(M::_colsize == int(M2::_colsize));
             TMVStaticAssert(M::_rowsize == int(M2::_rowsize));

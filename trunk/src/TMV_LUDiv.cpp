@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 //#define PRINTALGO_LU
 
@@ -47,42 +17,16 @@ namespace tmv {
     template <bool trans>
     struct NonLapLUSolve // trans == false here
     {
-        template <class M1, class T2>
-        static void call(
-            const M1& m1, const Permutation& P, MatrixView<T2>& m2)
-        {
-            if (m2.iscm()) {
-                MatrixView<T2,ColMajor> m2cm = m2.cmView();
-                InlineLU_SolveInPlace(m1,P,m2cm);
-            } else {
-                MatrixView<T2,RowMajor> m2rm = m2.rmView();
-                InlineLU_SolveInPlace(m1,P,m2rm);
-            }
-        }
-        template <class M1, class T2>
-        static void call(
-            const M1& m1, const Permutation& P, VectorView<T2,Unit>& v2)
-        { InlineLU_SolveInPlace(m1,P,v2); }
+        template <class M1, class M2>
+        static void call(const M1& m1, const Permutation& P, M2& m2)
+        { InlineLU_SolveInPlace(m1,P,m2); }
     };
     template <>
     struct NonLapLUSolve<true>
     {
-        template <class M1, class T2>
-        static void call(
-            const M1& m1, const Permutation& P, MatrixView<T2>& m2)
-        {
-            if (m2.iscm()) {
-                MatrixView<T2,ColMajor> m2cm = m2.cmView();
-                InlineLU_SolveTransposeInPlace(m1,P,m2cm);
-            } else {
-                MatrixView<T2,RowMajor> m2rm = m2.rmView();
-                InlineLU_SolveTransposeInPlace(m1,P,m2rm);
-            }
-        }
-        template <class M1, class T2>
-        static void call(
-            const M1& m1, const Permutation& P, VectorView<T2,Unit>& v2)
-        { InlineLU_SolveTransposeInPlace(m1,P,v2); }
+        template <class M1, class M2>
+        static void call(const M1& m1, const Permutation& P, M2& m2)
+        { InlineLU_SolveTransposeInPlace(m1,P,m2); }
     };
 
 #ifdef ALAP
@@ -268,14 +212,7 @@ namespace tmv {
             DoLUSolve(m1c.xView(),P,m2);
         }
 #else
-        if (m2.iscm() || m2.isrm()) {
-            NonLapLUSolve<trans>::call(m1,P,m2);
-        } else {
-            Matrix<T2,ColMajor|NoDivider> m2c(m2);
-            MatrixView<T2> m2cv = m2c.xView();
-            NonLapLUSolve<trans>::call(m1,P,m2cv);
-            InstCopy(m2cv.constView(),m2);
-        }
+        NonLapLUSolve<trans>::call(m1,P,m2);
 #endif
     }
 
@@ -298,15 +235,7 @@ namespace tmv {
             DoLUSolve(m1c.xView(),P,v2);
         }
 #else
-        if ( v2.step() == 1 ) {
-            VectorView<T2,Unit> v2v = v2.unitView();
-            NonLapLUSolve<trans>::call(m1,P,v2v);
-        } else {
-            Vector<T2> v2c(v2);
-            VectorView<T2,Unit> v2cv = v2c.unitView();
-            NonLapLUSolve<trans>::call(m1,P,v2cv);
-            InstCopy(v2c.constView().xView(),v2);
-        }
+        NonLapLUSolve<trans>::call(m1,P,v2);
 #endif
     }
 

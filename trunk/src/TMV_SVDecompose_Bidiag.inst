@@ -1,0 +1,15 @@
+
+#define CT std::complex<T>
+
+#define Def1(T,RT)\
+    template void InstBidiagonalize( \
+        MatrixView<T> A, VectorView<RT> Ubeta, VectorView<RT> Vbeta, \
+        VectorView<T> D, VectorView<T> E); \
+
+Def1(T,T)
+#ifdef TMV_INST_COMPLEX
+Def1(CT,T)
+#endif
+
+#undef Def1
+#undef CT

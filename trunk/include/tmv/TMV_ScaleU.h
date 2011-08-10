@@ -1,33 +1,3 @@
-//////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 #ifndef TMV_ScaleU_H
 #define TMV_ScaleU_H
@@ -82,14 +52,14 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
-            int N = (s == UNKNOWN ? m.size() : s);
+            int N = (s == TMV_UNKNOWN ? m.size() : s);
             typedef typename M1::col_sub_type Mc;
             typedef typename Mc::iterator IT;
             const int step = m.stepj();
             IT it = m.get_col(0,0,1).begin();
             int M=1;
             for(;N;--N) {
-                ScaleV_Helper<-3,UNKNOWN,ix,T,Mc>::call2(M++,x,it);
+                ScaleV_Helper<-3,TMV_UNKNOWN,ix,T,Mc>::call2(M++,x,it);
                 it.shiftP(step);
             }
         }
@@ -154,13 +124,13 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
-            int N = (s == UNKNOWN ? m.size() : s);
+            int N = (s == TMV_UNKNOWN ? m.size() : s);
             typedef typename M1::row_sub_type Mr;
             typedef typename Mr::iterator IT;
             const int step = m.diagstep();
             IT it = m.get_row(0,0,N).begin();
             for(;N;--N) {
-                ScaleV_Helper<-3,UNKNOWN,ix,T,Mr>::call2(N,x,it);
+                ScaleV_Helper<-3,TMV_UNKNOWN,ix,T,Mr>::call2(N,x,it);
                 it.shiftP(step);
             }
         }
@@ -264,13 +234,13 @@ namespace tmv {
         {
             TMVStaticAssert(!M1::_unit || ix == 1);
             typedef typename M1::value_type T1;
-            const int s2 = s > 20 ? UNKNOWN : s;
+            const int s2 = s > 20 ? TMV_UNKNOWN : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
             const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s > 10 ? false :
-                s == UNKNOWN ? false :
+                s == TMV_UNKNOWN ? false :
                 nops <= TMV_SCALEU_UNROLL;
             const int algo = 
                 (s == 0 || ix == 1) ? 0 :
@@ -289,7 +259,7 @@ namespace tmv {
         {
             typedef typename M1::value_type T1;
             const bool inst =
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
                 Traits<T1>::isinst;
             const int algo =
                 ix == 1 ? 0 :

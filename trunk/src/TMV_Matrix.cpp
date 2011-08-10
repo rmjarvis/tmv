@@ -1,38 +1,10 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
+//#define PRINTALGO_NormM
 
 #include "TMV_Blas.h"
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_SmallMatrix.h"
 #include "tmv/TMV_Vector.h"
+#include "tmv/TMV_DiagMatrix.h"
 #include "tmv/TMV_MatrixIO.h"
 #include "tmv/TMV_CopyM.h"
 #include "tmv/TMV_SwapM.h"
@@ -44,6 +16,7 @@
 #include "tmv/TMV_LUD.h"
 #include "tmv/TMV_QRD.h"
 #include "tmv/TMV_QRPD.h"
+#include "tmv/TMV_SVD.h"
 
 namespace tmv {
 
@@ -615,34 +588,6 @@ namespace tmv {
         const ConstMatrixView<T>& m)
     { return DoInstNorm1(m); }
 
-#if 0
-    template <class T> 
-    RT GenMatrix<T>::doNorm2() const
-    {
-        if (this->colsize() < this->rowsize()) return transpose().doNorm2();
-        if (this->rowsize() == 0) return RT(0);
-        Matrix<T> m = *this;
-        DiagMatrix<RT> S(this->rowsize());
-        SV_Decompose(m.view(),S.view(),false);
-        return S(0);
-    }
-
-    template <class T> 
-    RT GenMatrix<T>::DoCondition() const
-    {
-        if (this->colsize() < this->rowsize()) return transpose().doNorm2();
-        if (this->rowsize() == 0) return RT(1);
-        Matrix<T> m = *this;
-        DiagMatrix<RT> S(this->rowsize());
-        SV_Decompose(m.view(),S.view(),false);
-        return S(0)/S(S.size()-1);
-    }
-
-    template <class T> 
-    QuotXM<T,T> GenMatrix<T>::QInverse() const
-    { return QuotXM<T,T>(T(1),*this); }
-#endif
-
     //
     // I/O
     //
@@ -704,9 +649,7 @@ namespace tmv {
         if (!this->divIsSet()) {
             DivType dt = this->getDivType();
             TMVAssert(dt == tmv::LU || dt == tmv::QR || 
-                      dt == tmv::QRP
-                      /*|| dt == tmv::SV */
-            );
+                      dt == tmv::QRP || dt == tmv::SV);
             switch (dt) {
               case tmv::LU : 
                    this->divider.reset(
@@ -721,6 +664,11 @@ namespace tmv {
               case tmv::QRP : 
                    this->divider.reset(
                        new InstQRPD<T>(
+                           this->getConstView(),this->divIsInPlace()));
+                   break;
+              case tmv::SV : 
+                   this->divider.reset(
+                       new InstSVD<T>(
                            this->getConstView(),this->divIsInPlace()));
                    break;
               default :
@@ -759,9 +707,6 @@ namespace tmv {
     }
 
     template <class T>
-    void MatrixDivHelper2<T>::svd() const {}
-#if 0
-    template <class T>
     const InstSVD<T>& MatrixDivHelper2<T>::svd() const
     {
         this->divideUsing(SV);
@@ -769,7 +714,6 @@ namespace tmv {
         TMVAssert(dynamic_cast<const InstSVD<T>*>(this->getDiv()));
         return static_cast<const InstSVD<T>&>(*this->getDiv());
     }
-#endif
 
 #define InstFile "TMV_Matrix.inst"
 #include "TMV_Inst.h"

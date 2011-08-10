@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_InvertD_H
@@ -66,7 +36,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(V& v)
         {
-            const int n = s == UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
             call2(n,v.begin());
         }
         static void call2(int n, IT A)
@@ -78,105 +48,6 @@ namespace tmv {
         }
     };
 
-#ifdef __SSE__
-    // algo 21: single precision SSE: v real
-    // SSE also has a _mm_rcp_ps command that takes a reciprocal.
-    // However, it is only 12 bit accurate, which is not acceptable,
-    // so unfortunately we can't use it.
-    // Instead, we do the reciprocal as 1 / x with _mm_div_ps.
-    template <int s, class V>
-    struct ElemInvert_Helper<21,s,V>
-    {
-        typedef typename V::iterator IT;
-        static inline void call(V& v)
-        {
-            const int n = s == UNKNOWN ? int(v.size()) : s;
-            call2(n,v.begin());
-        }
-        static void call2(int n, IT A)
-        {
-            const bool unit = V::_step == 1;
-            const typename V::real_type one(1);
-
-            if (unit) {
-                while (n && !TMV_Aligned(A.get()) ) {
-                    *A = one / *A;
-                    ++A; --n;
-                }
-            }
-
-            int n_4 = (n>>2);
-            int nb = n-(n_4<<2);
-            
-            if (n_4) {
-                IT A1 = A+1;
-                IT A2 = A+2;
-                IT A3 = A+3;
-
-                __m128 xone = _mm_set1_ps(1.F);
-                __m128 xA,xB;
-                do {
-                    Maybe<unit>::sse_load(
-                        xA,A.get(),A1.get(),A2.get(),A3.get());
-                    xB = _mm_div_ps(xone,xA);
-                    Maybe<unit>::sse_store(
-                        A.get(),A1.get(),A2.get(),A3.get(),xB);
-                    A+=4; A1+=4; A2+=4; A3+=4;
-                } while (--n_4);
-            }
-
-            if (nb) do { *A = one / *A; ++A; } while (--nb);
-        }
-    };
-
-    // algo 23: single precision SSE: v complex
-    template <int s, class V>
-    struct ElemInvert_Helper<23,s,V>
-    {
-        typedef typename V::iterator IT;
-        static inline void call(V& v)
-        {
-            const int n = s == UNKNOWN ? int(v.size()) : s;
-            call2(n,v.begin());
-        }
-        static void call2(int n, IT A)
-        {
-            const bool unit = V::_step == 1;
-            const typename V::real_type one(1);
-
-            if (unit) {
-                while (n && !TMV_Aligned(A.get()) ) {
-                    *A = ZProd<false,false>::quot(one , *A);
-                    ++A; --n;
-                }
-            }
-
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
-            
-            if (n_2) {
-                IT A1 = A+1;
-
-                // These look backwards, but order is from hi to lo values.
-                __m128 xmone = _mm_set_ps(-1, 1, -1, 1);
-                __m128 xA, xB;
-                __m128 xAc, xnorm, x1, x2; // temp values
-                do {
-                    Maybe<unit>::sse_load(xA,A.get(),A1.get());
-                    xAc = _mm_mul_ps(xmone,xA); // conj(xA)
-                    x1 = _mm_mul_ps(xA,xA);
-                    x2 = _mm_shuffle_ps(x1,x1,_MM_SHUFFLE(2,3,0,1));
-                    xnorm = _mm_add_ps(x1,x2); // = norm(xA)
-                    xB = _mm_div_ps(xAc,xnorm);  // = 1/xA
-                    Maybe<unit>::sse_store(A.get(),A1.get(),xB);
-                    A+=2; A1+=2;
-                } while (--n_2);
-            }
-
-            if (nb) *A = ZProd<false,false>::quot(one , *A);
-        }
-    };
-#endif
 
 #ifdef __SSE2__
     // algo 31: double precision SSE2: v real
@@ -186,7 +57,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(V& v)
         {
-            const int n = s == UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
             call2(n,v.begin());
         }
         static void call2(int n, IT A)
@@ -228,7 +99,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(V& v)
         {
-            const int n = s == UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
             call2(n,v.begin());
         }
         static void call2(int n, IT A)
@@ -260,6 +131,106 @@ namespace tmv {
                     } while (--n);
                 }
             }
+        }
+    };
+#endif
+
+#ifdef __SSE__
+    // algo 41: single precision SSE: v real
+    // SSE also has a _mm_rcp_ps command that takes a reciprocal.
+    // However, it is only 12 bit accurate, which is not acceptable,
+    // so unfortunately we can't use it.
+    // Instead, we do the reciprocal as 1 / x with _mm_div_ps.
+    template <int s, class V>
+    struct ElemInvert_Helper<41,s,V>
+    {
+        typedef typename V::iterator IT;
+        static inline void call(V& v)
+        {
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
+            call2(n,v.begin());
+        }
+        static void call2(int n, IT A)
+        {
+            const bool unit = V::_step == 1;
+            const typename V::real_type one(1);
+
+            if (unit) {
+                while (n && !TMV_Aligned(A.get()) ) {
+                    *A = one / *A;
+                    ++A; --n;
+                }
+            }
+
+            int n_4 = (n>>2);
+            int nb = n-(n_4<<2);
+            
+            if (n_4) {
+                IT A1 = A+1;
+                IT A2 = A+2;
+                IT A3 = A+3;
+
+                __m128 xone = _mm_set1_ps(1.F);
+                __m128 xA,xB;
+                do {
+                    Maybe<unit>::sse_load(
+                        xA,A.get(),A1.get(),A2.get(),A3.get());
+                    xB = _mm_div_ps(xone,xA);
+                    Maybe<unit>::sse_store(
+                        A.get(),A1.get(),A2.get(),A3.get(),xB);
+                    A+=4; A1+=4; A2+=4; A3+=4;
+                } while (--n_4);
+            }
+
+            if (nb) do { *A = one / *A; ++A; } while (--nb);
+        }
+    };
+
+    // algo 43: single precision SSE: v complex
+    template <int s, class V>
+    struct ElemInvert_Helper<43,s,V>
+    {
+        typedef typename V::iterator IT;
+        static inline void call(V& v)
+        {
+            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
+            call2(n,v.begin());
+        }
+        static void call2(int n, IT A)
+        {
+            const bool unit = V::_step == 1;
+            const typename V::real_type one(1);
+
+            if (unit) {
+                while (n && !TMV_Aligned(A.get()) ) {
+                    *A = ZProd<false,false>::quot(one , *A);
+                    ++A; --n;
+                }
+            }
+
+            int n_2 = (n>>1);
+            int nb = n-(n_2<<1);
+            
+            if (n_2) {
+                IT A1 = A+1;
+
+                // These look backwards, but order is from hi to lo values.
+                __m128 xmone = _mm_set_ps(-1, 1, -1, 1);
+                __m128 xA, xB;
+                __m128 xAc, xnorm, x1, x2; // temp values
+                do {
+                    Maybe<unit>::sse_load(xA,A.get(),A1.get());
+                    xAc = _mm_mul_ps(xmone,xA); // conj(xA)
+                    x1 = _mm_mul_ps(xA,xA);
+                    x2 = _mm_shuffle_ps(x1,x1,_MM_SHUFFLE(2,3,0,1));
+                    xnorm = _mm_add_ps(x1,x2); // = norm(xA)
+                    xB = _mm_div_ps(xAc,xnorm);  // = 1/xA
+                    Maybe<unit>::sse_store(A.get(),A1.get(),xB);
+                    A+=2; A1+=2;
+                } while (--n_2);
+            }
+
+            if (nb) *A = ZProd<false,false>::quot(one , *A);
         }
     };
 #endif
@@ -303,8 +274,8 @@ namespace tmv {
                 s == 0 ? 0 : 
                 TMV_OPT == 0? 11 :
 #ifdef __SSE__
-                ( vfloat && vreal && unit ) ? 21 :
-                ( vfloat && vcomplex ) ? 23 :
+                ( vfloat && vreal && unit ) ? 41 :
+                ( vfloat && vcomplex ) ? 43 :
 #endif
 #ifdef __SSE2__
                 ( vdouble && vreal && unit ) ? 31 :
@@ -350,7 +321,7 @@ namespace tmv {
         {
             typedef typename V::value_type T;
             const bool inst = 
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 s == 0 ? 0 : 

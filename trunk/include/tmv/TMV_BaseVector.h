@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
 //
@@ -118,7 +88,7 @@ namespace tmv {
     // Use this type when you need elements in the original vector
     // after overwriting those elements.
     //
-    // _size = size of vector (Use UNKNOWN if unknown at compile time)
+    // _size = size of vector (Use TMV_UNKNOWN if unknown at compile time)
     //
     // _fort = does the indexing use fortran style?
     //
@@ -134,7 +104,7 @@ namespace tmv {
 
     // BaseVector_Calc adds some more requirements to the Traits<V> class:
     //
-    //  _step = the step size if known (else UNKNOWN)
+    //  _step = the step size if known (else TMV_UNKNOWN)
     //  _conj = is the vector the conjugate of the underlying data?
     //  _checkalias = do we need to check this vector for aliases?
     //
@@ -194,9 +164,9 @@ namespace tmv {
     class VectorView;
     template <class T, int N, int A=0>
     class SmallVector;
-    template <class T, int N, int S=UNKNOWN, int A=0>
+    template <class T, int N, int S=TMV_UNKNOWN, int A=0>
     class ConstSmallVectorView;
-    template <class T, int N, int S=UNKNOWN, int A=0>
+    template <class T, int N, int S=TMV_UNKNOWN, int A=0>
     class SmallVectorView;
 
     // Used by sort(p)
@@ -448,9 +418,9 @@ namespace tmv {
     template <int S1, int S2>
     struct Sizes
     {
-        enum { same = (S1==UNKNOWN || S2==UNKNOWN || S1==S2) };
-        enum { equal = (S1!=UNKNOWN && S2!=UNKNOWN && S1==S2) };
-        enum { size = (S1==UNKNOWN ? S2 : S1) };
+        enum { same = (S1==TMV_UNKNOWN || S2==TMV_UNKNOWN || S1==S2) };
+        enum { equal = (S1!=TMV_UNKNOWN && S2!=TMV_UNKNOWN && S1==S2) };
+        enum { size = (S1==TMV_UNKNOWN ? S2 : S1) };
     };
 
     // This helper class helps decide calc_type for composite classes:
@@ -461,7 +431,7 @@ namespace tmv {
         typedef SmallVector<T,s,A2> type; 
     };
     template <class T, bool fort>
-    struct VCopyHelper<T,UNKNOWN,fort>
+    struct VCopyHelper<T,TMV_UNKNOWN,fort>
     {
         enum { A2 = (fort ? FortranStyle : CStyle) | NoAlias };
         typedef Vector<T,A2> type; 
@@ -476,7 +446,7 @@ namespace tmv {
         typedef ConstSmallVectorView<T,N,S,C> ctype; 
     };
     template <class T, int S, int C>
-    struct VViewHelper<T,UNKNOWN,S,C>
+    struct VViewHelper<T,TMV_UNKNOWN,S,C>
     {
         enum { A = C | (S == 1 ? Unit : NonUnit) };
         typedef VectorView<T,A> type; 
@@ -525,8 +495,8 @@ namespace tmv {
     struct VStepHelper
     {
         enum { known = (
-                V1::_step != UNKNOWN &&
-                V2::_step != UNKNOWN ) };
+                V1::_step != TMV_UNKNOWN &&
+                V2::_step != TMV_UNKNOWN ) };
         enum { same = (
                 known &&
                 V1::_step == int(V2::_step) ) };
@@ -973,7 +943,7 @@ namespace tmv {
 
         const_flatten_type flatten() const
         {
-            TMVStaticAssert(_step == UNKNOWN || _step == 1);
+            TMVStaticAssert(_step == TMV_UNKNOWN || _step == 1);
             TMVAssert(step() == 1);
             return const_flatten_type(
                 reinterpret_cast<const real_type*>(cptr()),
@@ -1329,7 +1299,7 @@ namespace tmv {
 
         flatten_type flatten() 
         {
-            TMVStaticAssert(_step == UNKNOWN || _step == 1);
+            TMVStaticAssert(_step == TMV_UNKNOWN || _step == 1);
             TMVAssert(step() == 1);
             return flatten_type(
                 reinterpret_cast<real_type*>(ptr()),
@@ -1456,7 +1426,7 @@ namespace tmv {
         typedef InvalidType eval_type;
         typedef InvalidType copy_type;
 
-        enum { _size = UNKNOWN };
+        enum { _size = TMV_UNKNOWN };
         enum { _shape = Vec };
         enum { _fort = false };
         enum { _calc = false };
@@ -1494,7 +1464,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
         const int size = Sizes<V1::_size,V2::_size>::size;
-        const int n = (size == UNKNOWN ? int(v1.size()) : size);
+        const int n = (size == TMV_UNKNOWN ? int(v1.size()) : size);
         for(int i=0;i<n;++i) if (v1.cref(i) != v2.cref(i)) return false;
         return true;
     }

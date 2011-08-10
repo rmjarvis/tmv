@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 //---------------------------------------------------------------------------
@@ -172,9 +142,9 @@ namespace tmv {
         typedef const type& eval_type;
         typedef type copy_type;
 
-        enum { _colsize = UNKNOWN };
-        enum { _rowsize = UNKNOWN };
-        enum { _size = UNKNOWN };
+        enum { _colsize = TMV_UNKNOWN };
+        enum { _rowsize = TMV_UNKNOWN };
+        enum { _size = TMV_UNKNOWN };
         enum { _fort = Attrib<A>::fort };
         enum { _shape = Diag };
         enum { _rowmajor = false };
@@ -213,7 +183,7 @@ namespace tmv {
         typedef ConstDiagMatrixView<T,A> const_transpose_type;
         typedef ConstDiagMatrixView<T,conjA> const_adjoint_type;
         typedef typename TypeSelect< iscomplex ,
-                ConstSmallDiagMatrixView<real_type,UNKNOWN,twoS,twosAc> ,
+                ConstSmallDiagMatrixView<real_type,TMV_UNKNOWN,twoS,twosAc> ,
                 ConstDiagMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstDiagMatrixView<T,nonconjA> const_nonconj_type;
@@ -233,7 +203,7 @@ namespace tmv {
         typedef DiagMatrixView<T,A> transpose_type;
         typedef DiagMatrixView<T,conjA> adjoint_type;
         typedef typename TypeSelect< iscomplex ,
-                SmallDiagMatrixView<real_type,UNKNOWN,twoS,twosAc> ,
+                SmallDiagMatrixView<real_type,TMV_UNKNOWN,twoS,twosAc> ,
                 DiagMatrixView<real_type,twosA> >::type realpart_type;
         typedef realpart_type imagpart_type;
         typedef DiagMatrixView<T,nonconjA> nonconj_type;
@@ -434,15 +404,15 @@ namespace tmv {
         enum { copyA = Attrib<A>::fort ? FortranStyle : CStyle };
         typedef DiagMatrix<T,copyA> copy_type;
 
-        enum { _colsize = UNKNOWN };
-        enum { _rowsize = UNKNOWN };
-        enum { _size = UNKNOWN };
+        enum { _colsize = TMV_UNKNOWN };
+        enum { _rowsize = TMV_UNKNOWN };
+        enum { _size = TMV_UNKNOWN };
         enum { _fort = Attrib<A>::fort };
         enum { _shape = Diag };
         enum { _rowmajor = false };
         enum { _colmajor = false };
         enum { _calc = true };
-        enum { _step = Attrib<A>::unit ? 1 : UNKNOWN };
+        enum { _step = Attrib<A>::unit ? 1 : TMV_UNKNOWN };
         enum { _diagstep = _step };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
@@ -476,7 +446,7 @@ namespace tmv {
         typedef ConstDiagMatrixView<T,A> const_transpose_type;
         typedef ConstDiagMatrixView<T,conjA> const_adjoint_type;
         typedef typename TypeSelect< iscomplex ,
-                ConstSmallDiagMatrixView<real_type,UNKNOWN,twoS,twosAc> ,
+                ConstSmallDiagMatrixView<real_type,TMV_UNKNOWN,twoS,twosAc> ,
                 ConstDiagMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstDiagMatrixView<T,nonconjA> const_nonconj_type;
@@ -519,7 +489,7 @@ namespace tmv {
             itsm(m), itssize(n), itsstep(_step)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_step != UNKNOWN); 
+            TMVStaticAssert(_step != TMV_UNKNOWN); 
         }
 
         ConstDiagMatrixView(const type& m2) :
@@ -618,15 +588,15 @@ namespace tmv {
         enum { copyA = Attrib<A>::fort ? FortranStyle : CStyle };
         typedef DiagMatrix<T,copyA> copy_type;
 
-        enum { _colsize = UNKNOWN };
-        enum { _rowsize = UNKNOWN };
-        enum { _size = UNKNOWN };
+        enum { _colsize = TMV_UNKNOWN };
+        enum { _rowsize = TMV_UNKNOWN };
+        enum { _size = TMV_UNKNOWN };
         enum { _fort = Attrib<A>::fort };
         enum { _shape = Diag };
         enum { _rowmajor = false };
         enum { _colmajor = false };
         enum { _calc = true };
-        enum { _step = Attrib<A>::unit ? 1 : UNKNOWN };
+        enum { _step = Attrib<A>::unit ? 1 : TMV_UNKNOWN };
         enum { _diagstep = _step };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
@@ -660,7 +630,7 @@ namespace tmv {
         typedef ConstDiagMatrixView<T,A> const_transpose_type;
         typedef ConstDiagMatrixView<T,conjA> const_adjoint_type;
         typedef typename TypeSelect< iscomplex ,
-                ConstSmallDiagMatrixView<real_type,UNKNOWN,twoS,twosAc> ,
+                ConstSmallDiagMatrixView<real_type,TMV_UNKNOWN,twoS,twosAc> ,
                 ConstDiagMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstDiagMatrixView<T,nonconjA> const_nonconj_type;
@@ -680,7 +650,7 @@ namespace tmv {
         typedef DiagMatrixView<T,A> transpose_type;
         typedef DiagMatrixView<T,conjA> adjoint_type;
         typedef typename TypeSelect< iscomplex ,
-                SmallDiagMatrixView<real_type,UNKNOWN,twoS,twosAc> ,
+                SmallDiagMatrixView<real_type,TMV_UNKNOWN,twoS,twosAc> ,
                 DiagMatrixView<real_type,twosA> >::type realpart_type;
         typedef realpart_type imagpart_type;
         typedef DiagMatrixView<T,nonconjA> nonconj_type;
@@ -724,7 +694,7 @@ namespace tmv {
             itsm(m), itssize(n), itsstep(_step)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_step != UNKNOWN); 
+            TMVStaticAssert(_step != TMV_UNKNOWN); 
         }
 
         DiagMatrixView(const type& m2) :

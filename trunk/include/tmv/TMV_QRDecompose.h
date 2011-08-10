@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_QRDecompose_H
@@ -82,8 +52,8 @@ namespace tmv {
             
             typedef typename M1::value_type T;
 
-            const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRDecompose algo 11: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -96,7 +66,6 @@ namespace tmv {
             typedef typename V2::subvector_type V2s;
             V2 tempBase = VectorSizer<T>(N);
 
-#if 1
             IT bj = beta.begin();
             for (int j=0;j<N;++j,++bj) {
                 // Work on the lower part of column j
@@ -110,21 +79,6 @@ namespace tmv {
                 V2s temp = tempBase.subVector(0,N-j-1);
                 HouseholderMultEq(u,*bj,A1a,A1b,temp);
             }
-#else
-            IT bj = beta.begin();
-            for (int j=0;j<N;++j,++bj) {
-                // Work on the lower part of column j
-                M1c u = A.col(j,j+1,M);
-                // Compute the Householder reflection of this column
-                // (and perform the reflection on this column).
-                HouseholderReflect(A.ref(j,j),u,*bj);
-                // Reflect the rest of the matrix to the right of this column.
-                M1c v = A.col(j,j,M);
-                M1s A1 = A.subMatrix(j,M,j+1,N);
-                V2s temp = tempBase.subVector(0,N-j-1);
-                HouseholderMultEq(v,*bj,A1,temp);
-            }
-#endif
         }
     };
 
@@ -144,7 +98,7 @@ namespace tmv {
 
         // This prevents large matrices from unrolling a lot of 
         // intermediate MultMM, etc. calls.
-        enum { csx = cs == UNKNOWN || cs > 64 ? UNKNOWN : cs };
+        enum { csx = cs == TMV_UNKNOWN || cs > 64 ? TMV_UNKNOWN : cs };
 
 
         template <int j1, int j2, int N1>
@@ -167,7 +121,7 @@ namespace tmv {
             {
                 TMVStaticAssert(j2 == j1+1);
                 const int Mx = IntTraits2<csx,j2>::diff;
-                const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
+                const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
                 typename VViewHelper<T,Mx,AS1,C>::type u = A.col(j1,j2,M);
                 RT b0;
                 HouseholderReflect(A.ref(j1,j1),u,b0);
@@ -184,10 +138,10 @@ namespace tmv {
 
         static void call(M1& A, V& beta)
         {
-            TMVStaticAssert(rs != UNKNOWN);
+            TMVStaticAssert(rs != TMV_UNKNOWN);
 #ifdef PRINTALGO_QR
-            const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
             std::cout<<"QRDecompose algo 16: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
             //typedef typename M1::copy_type M1x;
@@ -216,8 +170,8 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
 
-            const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRDecompose algo 21: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -240,68 +194,41 @@ namespace tmv {
 
             typedef typename V::iterator IT;
 
-            typedef typename MCopyHelper<T,Rec,NB,UNKNOWN>::type M3;
+            typedef typename MCopyHelper<T,Rec,NB,TMV_UNKNOWN>::type M3;
             typedef typename M3::col_sub_type M3c;
-            typedef typename MViewHelper<T,Rec,NB,UNKNOWN,M3::_stepi,M3::_stepj>::type M3cr;
+            const int Si = M3::_stepi;
+            const int Sj = M3::_stepj;
+            typedef typename MViewHelper<T,Rec,NB,TMV_UNKNOWN,Si,Sj>::type M3cr;
 
             M3 tempBase = MatrixSizer<T>(NB,TMV_MAX(1,N-NB));
-            //std::cout<<"tempBase = "<<tempBase<<std::endl;
 
             IT bj = beta.begin();
             int j1=0;
             for(int j2=j1+NB; j2<N; j1=j2,j2+=NB) {
-                //std::cout<<"j1,j2 = "<<j1<<','<<j2<<std::endl;
                 M1s A1 = A.subMatrix(j1,M,j1,j2);
-                //std::cout<<"A1 = "<<A1<<std::endl;
-                //std::cout<<"Z = "<<Z<<std::endl;
                 for(int j=j1;j<j2;++j,++bj) {
-                    //std::cout<<"j = "<<j<<std::endl;
                     M1c u = A.col(j,j+1,M);
-                    //std::cout<<"u = "<<u<<std::endl;
                     HouseholderReflect(A.ref(j,j),u,*bj);
-                    //std::cout<<"u => "<<u<<std::endl;
                     M1r A2a = A.row(j,j+1,j2);
-                    //std::cout<<"A2a = "<<A2a<<std::endl;
                     M1s A2b = A.subMatrix(j+1,M,j+1,j2);
-                    //std::cout<<"A2b = "<<A2b<<std::endl;
                     M3c temp = tempBase.col(0,0,j2-j-1);
-                    //std::cout<<"temp = "<<temp<<std::endl;
                     HouseholderMultEq(u,*bj,A2a,A2b,temp);
-                    //std::cout<<"A2a => "<<A2a<<std::endl;
-                    //std::cout<<"A2b => "<<A2b<<std::endl;
                     M1s A3 = A.subMatrix(j1,M,j1,j+1);
-                    //std::cout<<"A3 = "<<A3<<std::endl;
                     Zs Z1 = Z.subTriMatrix(0,j-j1+1);
-                    //std::cout<<"Z1 = "<<Z1<<std::endl;
                     BlockHouseholderAugment(A3,Z1,*bj);
-                    //std::cout<<"Z1 => "<<Z1<<std::endl;
                 }
                 M1s A4 = A.subMatrix(j1,M,j2,N);
-                //std::cout<<"A4 = "<<A4<<std::endl;
                 M3cr temp = tempBase.colRange(0,N-j2);
-                //std::cout<<"tempBase = "<<tempBase<<std::endl;
                 BlockHouseholderLDiv(A1,Z,A4,temp);
-                //std::cout<<"A4 => "<<A4<<std::endl;
             }
             M1s A1 = A.subMatrix(j1,M,j1,N);
-            //std::cout<<"A1 = "<<A1<<std::endl;
             for(int j=j1;j<N;++j,++bj) {
-                //std::cout<<"j = "<<j<<std::endl;
-                M1c Acolj = A.col(j,j,M);
-                //std::cout<<"Acolj = "<<Acolj<<std::endl;
-                HouseholderReflect(Acolj,*bj);
-                //std::cout<<"Acolj => "<<Acolj<<std::endl;
                 M1c u = A.col(j,j+1,M);
-                //std::cout<<"u = "<<u<<std::endl;
+                HouseholderReflect(A.ref(j,j),u,*bj);
                 M1r A2a = A.row(j,j+1,N);
-                //std::cout<<"A2a = "<<A2a<<std::endl;
                 M1s A2b = A.subMatrix(j+1,M,j+1,N);
-                //std::cout<<"A2b = "<<A2b<<std::endl;
                 M3c temp = tempBase.col(0,0,N-j-1);
-                //std::cout<<"temp = "<<temp<<std::endl;
                 HouseholderMultEq(u,*bj,A2a,A2b,temp);
-                //std::cout<<"A2a = "<<A2a<<std::endl;
-                //std::cout<<"A2b = "<<A2b<<std::endl;
             }
 #ifdef PRINTALGO_QR
             //std::cout<<"A -> "<<A<<std::endl;
@@ -316,9 +243,8 @@ namespace tmv {
     };
 
     // Used by both algo 22 and 27.
-    template <class M1, class M2, class M3>
-    static inline void RecursiveQRDecompose(
-        M1& A, M2& Z, bool makeZ, M3& tempBase)
+    template <class M1, class M2>
+    static inline void RecursiveQRDecompose(M1& A, M2& Z, bool makeZ)
     {
         // This is very similar to the BlockHouseholder_MakeZ function
         // in Householder.cpp.  The difference is the addition of the 
@@ -328,16 +254,10 @@ namespace tmv {
         // after this call, setting makeZ to false will speed it up slightly.
         // (In either case, the diagonal of Z is correctly set to beta.)
 
-        TMVAssert(A.colsize() >= A.rowsize());
-        TMVAssert(A.rowsize() == Z.size());
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(tempBase.colsize() >= A.rowsize()/2);
-        TMVAssert(tempBase.rowsize() >= (A.rowsize()+1)/2);
-
         const int cs = M1::_colsize;
         const int rs = Sizes<M1::_rowsize,M2::_size>::size;
-        const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
-        const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
+        const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
+        const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
 
         typedef typename M1::value_type T;
         typedef typename M1::real_type RT;
@@ -345,67 +265,54 @@ namespace tmv {
         typedef typename M1::row_sub_type M1r;
         typedef typename M1::submatrix_type M1s;
         typedef typename M2::subtrimatrix_type M2s;
-        typedef typename M3::submatrix_type M3s;
-        typedef typename M3::col_sub_type M3c;
+        typedef typename M2::submatrix_type M2sm;
+        typedef typename M2::col_sub_type M2c;
 
         if (N > 2) {
             int j1 = N/2;
             M1s A1 = A.colRange(0,j1);
             M2s Z1 = Z.subTriMatrix(0,j1);
-            RecursiveQRDecompose(A1,Z1,true,tempBase);
+            RecursiveQRDecompose(A1,Z1,true);
 
             M1s A2x = A.colRange(j1,N);
-            M3s temp = tempBase.subMatrix(0,j1,0,N-j1);
-            BlockHouseholderLDiv(A1,Z1,A2x,temp);
+            M2sm Z3 = Z.subMatrix(0,j1,j1,N);
+            // Use Z3 as the temporary, since it happens to be the right
+            // shape and we don't need to write to it yet.
+            BlockHouseholderLDiv(A1,Z1,A2x,Z3);
 
             M1s A2 = A.subMatrix(j1,M,j1,N);
             M2s Z2 = Z.subTriMatrix(j1,N);
-            RecursiveQRDecompose(A2,Z2,makeZ,tempBase);
+            RecursiveQRDecompose(A2,Z2,makeZ);
 
             if (makeZ) {
-                typename M2::submatrix_type Z3 = Z.subMatrix(0,j1,j1,N);
-                //std::cout<<"MakeZ:\n";
-                //std::cout<<"Z = "<<Z<<std::endl;
                 Z3 = A1.rowRange(j1,N).adjoint() *
                     A.subMatrix(j1,N,j1,N).unitLowerTri();
-                //std::cout<<"Z3 = "<<Z3<<std::endl;
                 Z3 += A1.rowRange(N,M).adjoint() * A.subMatrix(N,M,j1,N);
-                //std::cout<<"Z3 => "<<Z3<<std::endl;
                 Z3 = -Z1*Z3;
-                //std::cout<<"Z3 => "<<Z3<<std::endl;
-                //std::cout<<"Z2 = "<<Z2<<std::endl;
                 Z3 *= Z2;
-                //std::cout<<"Z3 => "<<Z3<<std::endl;
             }
         } else if (N==2) {
-            typename M1::col_type A0 = A.col(0);
+            M1c u0 = A.col(0,1,M);
             RT b0;
-            HouseholderReflect(A0,b0);
+            HouseholderReflect(A.ref(0,0),u0,b0);
             Z.ref(0,0) = b0;
-            M1c u = A.col(0,1,M);
             M1r A1a = A.row(0,1,N);
             M1s A1b = A.subMatrix(1,M,1,N);
-            M3c temp = tempBase.col(0,0,1);
-            HouseholderMultEq(u,b0,A1a,A1b,temp);
-            M1c A1 = A.col(1,1,M);
+            M2c temp = Z.col(1,0,1);
+            HouseholderMultEq(u0,b0,A1a,A1b,temp);
+            M1c u1 = A.col(1,2,M);
             RT b1;
-            HouseholderReflect(A1,b1);
+            HouseholderReflect(A.ref(1,1),u1,b1);
             Z.ref(1,1) = b1;
             if (makeZ) {
-                //std::cout<<"N==2 MakeZ:\n";
-                //std::cout<<"A1b = "<<A.col(0,2,M)<<std::endl;
-                //std::cout<<"A2b = "<<A.col(1,2,M)<<std::endl;
-                T temp = A.col(0,2,M).conjugate()*A.col(1,2,M);
-                //std::cout<<"temp = "<<temp<<std::endl;
+                T temp = A.col(0,2,M).conjugate()*u1;
                 temp += TMV_CONJ(A.cref(1,0));
-                //std::cout<<"temp => "<<temp<<std::endl;
                 Z.ref(0,1) = -b0*b1*temp;
-                //std::cout<<"Z3 -> "<<Z.cref(0,1)<<std::endl;
             }
         } else { // N == 1
-            typename M1::col_type A0 = A.col(0);
+            M1c u = A.col(0,1,M);
             RT b0;
-            HouseholderReflect(A0,b0);
+            HouseholderReflect(A.ref(0,0),u,b0);
             Z.ref(0,0) = b0;
         }
     }
@@ -418,8 +325,8 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
 
-            const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRDecompose algo 22: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -451,12 +358,12 @@ namespace tmv {
             typedef typename M3::submatrix_type M3s;
             M3 tempBase = MatrixSizer<T>(N1,N3);
 
-            typedef typename MViewHelper<T1,Rec,UNKNOWN,NB,Si1,Sj1,C>::type M1sa;
+            typedef typename MViewHelper<T1,Rec,TMV_UNKNOWN,NB,Si1,Sj1,C>::type M1sa;
             const int s4 = (
-                rs == UNKNOWN ? UNKNOWN : 
+                rs == TMV_UNKNOWN ? TMV_UNKNOWN : 
                 rs - NB*(rs/NB) );
             const int s5 = (
-                (cs == UNKNOWN || rs == UNKNOWN) ? UNKNOWN :
+                (cs == TMV_UNKNOWN || rs == TMV_UNKNOWN) ? TMV_UNKNOWN :
                 cs - NB*(rs/NB) );
             typedef typename MViewHelper<T1,Rec,s5,s4,Si1,Sj1,C>::type M1sb;
 
@@ -466,7 +373,7 @@ namespace tmv {
             for(int j2=j1+NB; j2<N; j1=j2,j2+=NB) {
                 M1sa A1 = A.subMatrix(j1,M,j1,j2);
 
-                RecursiveQRDecompose(A1,Z,true,tempBase);
+                RecursiveQRDecompose(A1,Z,true);
 
                 M1s A2 = A.subMatrix(j1,M,j2,N);
                 M3cr temp = tempBase.colRange(0,N-j2);
@@ -477,9 +384,8 @@ namespace tmv {
             M1sb A1 = A.subMatrix(j1,M,j1,N);
             IT bj = beta.subVector(j1,N).begin();
             for(int j=j1;j<N;++j,++bj) {
-                M1c Acolj = A.col(j,j,M);
-                HouseholderReflect(Acolj,*bj);
                 M1c u = A.col(j,j+1,M);
+                HouseholderReflect(A.ref(j,j),u,*bj);
                 M1r A2a = A.row(j,j+1,N);
                 M1s A2b = A.subMatrix(j+1,M,j+1,N);
                 M3c temp = tempBase.col(0,0,N-j-1);
@@ -511,7 +417,7 @@ namespace tmv {
 
         // This prevents large matrices from unrolling a lot of 
         // intermediate MultMM, etc. calls.
-        enum { csx = cs == UNKNOWN || cs > 64 ? UNKNOWN : cs };
+        enum { csx = cs == TMV_UNKNOWN || cs > 64 ? TMV_UNKNOWN : cs };
 
         template <bool makeZ, int j1, int j2, int N1>
         struct MakeZ_Helper  // makeZ = false, any N1
@@ -527,7 +433,7 @@ namespace tmv {
                 const int jmid = IntTraits<IntTraits2<j1,j2>::sum>::halfS;
                 const int Na = jmid-j1;
                 const int Nb = j2-jmid;
-                const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
+                const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
                 const int Mx = IntTraits2<csx,j2>::diff;
 
                 typename MViewHelper<T,UpperTri,Na,Na,ZS1,ZS2>::type Z1 = 
@@ -572,7 +478,7 @@ namespace tmv {
             {
                 TMVStaticAssert(j2 == j1+2);
                 //std::cout<<"N==2 MakeZ:\n";
-                const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
+                const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
                 const int Mx = IntTraits2<csx,j2>::diff;
                 typename VViewHelper<T,Mx,AS1,C>::ctype A1b = A.col(j1,j2,M);
                 //std::cout<<"A1b = "<<A1b<<std::endl;
@@ -597,7 +503,7 @@ namespace tmv {
             static inline void unroll(M1& A, M2& Z, M3& tempBase) 
             {
                 TMVStaticAssert(j2 == j1+N1);
-                const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
+                const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
                 //std::cout<<"Start unroll: N = "<<N1<<"  "<<j1<<','<<j2<<std::endl;
                 const int jmid = IntTraits<IntTraits2<j1,j2>::sum>::halfS;
                 const int Na = jmid-j1;
@@ -637,7 +543,7 @@ namespace tmv {
             static inline void unroll(M1& A, M2& Z, M3& tempBase) 
             {
                 TMVStaticAssert(j2 == j1+2);
-                const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
+                const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
                 //std::cout<<"Start unroll: N = "<<2<<"  "<<j1<<','<<j2<<std::endl;
                 const int Mx1 = IntTraits2<csx,j1+1>::diff;
                 const int Mx2 = IntTraits2<csx,j2>::diff;
@@ -676,7 +582,7 @@ namespace tmv {
             static inline void unroll(M1& A, M2& Z, M3& tempBase) 
             {
                 TMVStaticAssert(j2 == j1+1);
-                const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
+                const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
                 //std::cout<<"Start unroll: N = "<<1<<"  "<<j1<<','<<j2<<std::endl;
                 const int Mx = IntTraits2<csx,j2>::diff;
                 typename VViewHelper<T,Mx,AS1,C>::type u0 = A.col(j1,j1+1,M);
@@ -689,10 +595,10 @@ namespace tmv {
         };
         static void call(M1& A, V& beta)
         {
-            TMVStaticAssert(rs != UNKNOWN);
+            TMVStaticAssert(rs != TMV_UNKNOWN);
 #ifdef PRINTALGO_QR
-            const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
             std::cout<<"QRDecompose algo 26: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
             //typedef typename M1::copy_type M1x;
@@ -722,9 +628,9 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
 
-            const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
 #ifdef PRINTALGO_QR
-            const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
             std::cout<<"QRDecompose algo 27: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -732,12 +638,7 @@ namespace tmv {
             Ztype Z = MatrixSizer<T>(N,N);
             typename Ztype::view_type Zv = Z.view();
 
-            const int s1 = IntTraits<rs>::halfS;
-            const int s2 = IntTraits<IntTraits2<rs,1>::sum>::halfS;
-            typedef typename MCopyHelper<T,Rec,s1,s2>::type M3;
-            M3 tempBase = MatrixSizer<T>(N/2,(N+1)/2);
-
-            RecursiveQRDecompose(A,Zv,false,tempBase);
+            RecursiveQRDecompose(A,Zv,false);
             beta = Z.diag().realPart();
         }
     };
@@ -750,16 +651,16 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
 
-            const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
-            const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRDecompose algo 31: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
             const int algo27 = 
-                (rs == UNKNOWN || rs <= 128) ? 27 : 0;
+                (rs == TMV_UNKNOWN || rs <= 128) ? 27 : 0;
             const int algo22 = 
-                (rs == UNKNOWN || rs > 128) ? 22 : 0;
+                (rs == TMV_UNKNOWN || rs > 128) ? 22 : 0;
             const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
 
             // I'm assuming that this first transition is primarily 
@@ -789,11 +690,11 @@ namespace tmv {
     {
         static void call(M1& A, V& beta)
         {
-            TMVStaticAssert(rs != UNKNOWN);
+            TMVStaticAssert(rs != TMV_UNKNOWN);
             typedef typename M1::value_type T;
 
-            const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRDecompose algo 32: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -814,12 +715,12 @@ namespace tmv {
     {
         static void call(M1& A, V& beta)
         {
-            TMVStaticAssert(rs != UNKNOWN);
+            TMVStaticAssert(rs != TMV_UNKNOWN);
             typedef typename M1::value_type T;
 
-            const int M = cs==UNKNOWN ? int(A.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
 #ifdef PRINTALGO_QR
-            const int N = rs==UNKNOWN ? int(A.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
             std::cout<<"QRDecompose algo 33: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -885,19 +786,21 @@ namespace tmv {
                 TMV_OPT==2 ? 16 : 
                 100;
             const int csrs = IntTraits2<cs,rs>::prod;
+            const int rsrs = IntTraits2<rs,rs>::prod;
             const int l1cache = TMV_L1_CACHE*1024/sizeof(T);
             const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
             const int algo = 
-                cs == 0 || rs == 0 || cs == 1 ? 0 :
+                cs == 0 || rs == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                rs == UNKNOWN ? 31 :
+                rs == TMV_UNKNOWN ? 31 :
                 rs <= maxunroll ? (
                     rs <= 32 ? (
-                        cs == UNKNOWN ? 32 :
+                        cs == TMV_UNKNOWN ? 32 :
                         (csrs <= l1cache ? 16 : 26) ) :
-                    cs == UNKNOWN ? 33 : 
+                    cs == TMV_UNKNOWN ? 33 : 
                     cs <= 128 ? 11 : 26) :
-                cs == UNKNOWN ? 31 : 
+                rsrs > l2cache ? (rs <= 128 ? 27 : 22) :
+                cs == TMV_UNKNOWN ? 31 : 
                 csrs <= l2cache ? 11 :
                 rs <= 128 ? 27 : 22;
 #endif
@@ -926,13 +829,13 @@ namespace tmv {
         static TMV_INLINE void call(M1& m, V& beta)
         {
             const int algo = (
-                ( cs != UNKNOWN && rs != UNKNOWN &&
+                ( cs != TMV_UNKNOWN && rs != TMV_UNKNOWN &&
                   cs <= 16 && rs <= 16 ) ? -4 :
                 ( TMV_OPT >= 2 && !M1::_colmajor ) ? 81 :
                 -4 );
 #ifdef PRINTALGO_QR
-            const int M = cs==UNKNOWN ? int(m.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(m.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m.rowsize()) : rs;
             std::cout<<"QRDecompose algo -3: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
@@ -953,8 +856,8 @@ namespace tmv {
         {
             typedef typename M::value_type T;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 cs == 0 || rs == 0 || cs == 1 ? 0 :
@@ -1062,6 +965,30 @@ namespace tmv {
             static_cast<BaseMatrix_Tri_Mutable<M2>&>(R));
     }
 
+    template <class T, int N, int A, int Si2, int Sj2, int A2>
+    static inline void QR_Decompose(
+        MatrixView<T,A> Q,
+        SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> R)
+    {
+        typedef MatrixView<T,A> M1;
+        typedef SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> M2;
+        QR_Decompose(
+            static_cast<BaseMatrix_Rec_Mutable<M1>&>(Q),
+            static_cast<BaseMatrix_Tri_Mutable<M2>&>(R));
+    }
+
+    template <class T, int M, int N, int Si, int Sj, int A, int A2>
+    static inline void QR_Decompose(
+        SmallMatrixView<T,M,N,Si,Sj,A> Q,
+        UpperTriMatrixView<T,A2> R)
+    {
+        typedef SmallMatrixView<T,M,N,Si,Sj,A> M1;
+        typedef UpperTriMatrixView<T,A2> M2;
+        QR_Decompose(
+            static_cast<BaseMatrix_Rec_Mutable<M1>&>(Q),
+            static_cast<BaseMatrix_Tri_Mutable<M2>&>(R));
+    }
+
     template <class T, int A>
     static inline void QR_Decompose(MatrixView<T,A> m)
     {
@@ -1074,6 +1001,43 @@ namespace tmv {
     {
         typedef SmallMatrixView<T,M,N,Si,Sj,A> M1;
         QR_Decompose(static_cast<BaseMatrix_Rec_Mutable<M1>&>(m));
+    }
+
+    // Don't forget the ones that mix *MatrixView with BaseMatrix_*_Mutable
+    template <class T, int A, class M2>
+    static inline void QR_Decompose(
+        MatrixView<T,A> Q, BaseMatrix_Tri_Mutable<M2>& R)
+    {
+        typedef MatrixView<T,A> M1;
+        QR_Decompose(
+            static_cast<BaseMatrix_Rec_Mutable<M1>&>(Q),R);
+    }
+
+    template <class M1, class T, int A2>
+    static inline void QR_Decompose(
+        BaseMatrix_Rec_Mutable<M1> Q, UpperTriMatrixView<T,A2> R)
+    {
+        typedef UpperTriMatrixView<T,A2> M2;
+        QR_Decompose(
+            Q,static_cast<BaseMatrix_Tri_Mutable<M2>&>(R)); 
+    }
+
+    template <class T, int M, int N, int Si, int Sj, int A, class M2>
+    static inline void QR_Decompose(
+        SmallMatrixView<T,M,N,Si,Sj,A> Q, BaseMatrix_Tri_Mutable<M2>& R)
+    {
+        typedef SmallMatrixView<T,M,N,Si,Sj,A> M1;
+        QR_Decompose(
+            static_cast<BaseMatrix_Rec_Mutable<M1>&>(Q),R);
+    }
+
+    template <class M1, class T, int N, int Si2, int Sj2, int A2>
+    static inline void QR_Decompose(
+        BaseMatrix_Rec_Mutable<M1> Q, SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> R)
+    {
+        typedef SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> M2;
+        QR_Decompose(
+            Q,static_cast<BaseMatrix_Tri_Mutable<M2>&>(R));
     }
 
 } // namespace tmv

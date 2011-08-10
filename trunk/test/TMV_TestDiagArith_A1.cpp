@@ -5,7 +5,6 @@
 #include "TMV.h"
 #include <fstream>
 
-#define NOSV
 #include "TMV_TestMatrixArith.h"
 
 template <class T> void TestDiagMatrixArith_A1()

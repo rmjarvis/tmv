@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 //---------------------------------------------------------------------------
@@ -319,19 +289,19 @@ namespace tmv {
         std::ostream* fout=0)
     {
         TMVAssert(div);
-        typedef typename M2::lud_type lud_type1;
-        typedef typename M2::qrd_type qrd_type1;
-        typedef typename M2::qrpd_type qrpd_type1;
         // Traits<>::type removes any reference that is part of lud_type1, etc.
-        typedef typename Traits<lud_type1>::type lud_type;
-        typedef typename Traits<qrd_type1>::type qrd_type;
-        typedef typename Traits<qrpd_type1>::type qrpd_type;
+        typedef typename Traits<typename M2::lud_type>::type lud_type;
+        typedef typename Traits<typename M2::qrd_type>::type qrd_type;
+        typedef typename Traits<typename M2::qrpd_type>::type qrpd_type;
+        typedef typename Traits<typename M2::svd_type>::type svd_type;
         if (dynamic_cast<const lud_type*>(div)) {
             return CheckDecomp(static_cast<const lud_type&>(*div),m,fout);
         } else if (dynamic_cast<const qrd_type*>(div)) {
             return CheckDecomp(static_cast<const qrd_type&>(*div),m,fout);
         } else if (dynamic_cast<const qrpd_type*>(div)) {
             return CheckDecomp(static_cast<const qrpd_type&>(*div),m,fout);
+        } else if (dynamic_cast<const svd_type*>(div)) {
+            return CheckDecomp(static_cast<const svd_type&>(*div),m,fout);
         } else {
             *fout << "Couldn't cast divider to a known type.\n";
             return false;

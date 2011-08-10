@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_QRInverse_H
@@ -93,7 +63,7 @@ namespace tmv {
             if (P) P->applyOnRight(A1);
 #endif
             minv.setZero();
-            const int N = rs == UNKNOWN ? QR.rowsize() : rs;
+            const int N = rs == TMV_UNKNOWN ? QR.rowsize() : rs;
             typename M2::colrange_type::uppertri_type R = 
                 minv.colRange(0,N1).upperTri();
             R = QR.upperTri().subTriMatrix(0,N1);
@@ -138,7 +108,7 @@ namespace tmv {
             Matrix<T> A1 = Q1*R1;
             if (P) P->applyOnRight(A1);
 #endif
-            const int N = rs == UNKNOWN ? QR.rowsize() : rs;
+            const int N = rs == TMV_UNKNOWN ? QR.rowsize() : rs;
             typename M2::transpose_type m2t = minv.transpose();
             m2t = QR.conjugate();
             UnpackQ(m2t,beta);
@@ -197,8 +167,8 @@ namespace tmv {
                 cs == 0 || rs == 0 ? 0 : 
                 // algo 11 is a bit better for smaller matrices.
                 // Not a big enough difference to warrant a runtime 
-                // check if rs == UNKNOWN though.
-                (rs != UNKNOWN && rs < 16) ? 11 :
+                // check if rs == TMV_UNKNOWN though.
+                (rs != TMV_UNKNOWN && rs < 16) ? 11 :
                 12;
 #ifdef PRINTALGO_QR
             std::cout<<"Inline QRInverse\n";
@@ -224,8 +194,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -390,8 +360,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

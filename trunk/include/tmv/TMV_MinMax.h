@@ -1,36 +1,10 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 #ifndef TMV_MinMax_H
 #define TMV_MinMax_H
+
+#ifdef PRINTALGO_MinMax
+#include <iostream>
+#endif
 
 namespace tmv {
 
@@ -93,7 +67,7 @@ namespace tmv {
                     typename V::zfloat_type , typename V::value_type >::type ZT;
             ZT value;
             ret best;
-            int n = V::_size == UNKNOWN ? v.size() : V::_size;
+            int n = V::_size == TMV_UNKNOWN ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             IT it = v.begin();
@@ -140,7 +114,7 @@ namespace tmv {
             ret best;
             ZT value, value1;
             IT it = v.begin();
-            int n = V::_size == UNKNOWN ? v.size() : V::_size;
+            int n = V::_size == TMV_UNKNOWN ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             best = Component<comp,VT>::f(*it);
@@ -190,7 +164,7 @@ namespace tmv {
             ret best;
             ZT value, value1, value2;
             IT it = v.begin();
-            int n = V::_size == UNKNOWN ? v.size() : V::_size;
+            int n = V::_size == TMV_UNKNOWN ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             const IT end = it + n;
@@ -254,7 +228,7 @@ namespace tmv {
             ret best;
             ZT value, value1, value2, value3;
             IT it = v.begin();
-            int n = V::_size == UNKNOWN ? v.size() : V::_size;
+            int n = V::_size == TMV_UNKNOWN ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             int n_4 = ((n-1)>>2);
@@ -430,7 +404,7 @@ namespace tmv {
             typedef typename V::zfloat_type ZT;
             ZT value;
             ret best;
-            int n = V::_size == UNKNOWN ? v.size() : V::_size;
+            int n = V::_size == TMV_UNKNOWN ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,AbsComp,true,V>::call(v,ibest);
             IT it = v.begin();
@@ -465,7 +439,7 @@ namespace tmv {
             typedef typename V::zfloat_type ZT;
             ZT value;
             ret best;
-            int n = V::_size == UNKNOWN ? v.size() : V::_size;
+            int n = V::_size == TMV_UNKNOWN ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,AbsComp,false,V>::call(v,ibest);
             IT it = v.begin();
@@ -504,7 +478,7 @@ namespace tmv {
             ret best;
             ZT value, value1;
             IT it = v.begin();
-            int n = V::_size == UNKNOWN ? v.size() : V::_size;
+            int n = V::_size == TMV_UNKNOWN ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             int n_4 = ((n-1)>>2);
@@ -710,7 +684,7 @@ L2:
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
-                V::_size != UNKNOWN ? (
+                V::_size != TMV_UNKNOWN ? (
                     V::_size <= maxunroll ? 15 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 12 : 24 ) ) :
@@ -721,7 +695,7 @@ L2:
             const int algo2 = 
                 V::_size == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                V::_size != UNKNOWN ? (
+                V::_size != TMV_UNKNOWN ? (
                     V::_size <= maxunroll && V::_size <= 12 ? 15 :
                     V::_size <= maxunroll ? 16 :
                     (V::_step == 1 && V::_size > 250) ? (
@@ -729,8 +703,11 @@ L2:
                     11 ) :
                 V::_step == 1 ? ( V::iscomplex ? 11 : 34 ) :
                 11;
-#ifdef PRINTALGO
-            std::cout<<"InlineMaxElement: algo = "<<algo1<<" "<<algo2<<std::endl;
+#ifdef PRINTALGO_MinMax
+            std::cout<<"InlineMaxElement: \n";
+            std::cout<<"v = "<<TMV_Text(v)<<std::endl;
+            std::cout<<"ibest = "<<ibest<<std::endl;
+            std::cout<<"algo = "<<algo1<<" "<<algo2<<std::endl;
 #endif
 
 #if TMV_OPT >= 2
@@ -754,7 +731,7 @@ L2:
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
-                V::_size != UNKNOWN ? (
+                V::_size != TMV_UNKNOWN ? (
                     V::iscomplex ? (
                         V::_size <= maxunroll && V::_size <= 12 ? 15 :
                         V::_step == 1 ? 21 : 11 ) :
@@ -766,7 +743,7 @@ L2:
             const int algo2 = 
                 V::_size == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                V::_size != UNKNOWN ? (
+                V::_size != TMV_UNKNOWN ? (
                     V::iscomplex ? (
                         ( V::_step == 1 ? 21 : 11 ) ) :
                     V::_size <= maxunroll && V::_size <= 12 ? 15 :
@@ -774,9 +751,11 @@ L2:
                     (V::_step == 1 && V::_size > 250) ? 24 : 11 ) :
                 V::_step == 1 ? ( V::iscomplex ? 21 : 35 ) :
                 11;
-#ifdef PRINTALGO
-            std::cout<<"InlineMaxAbsElement: algo = "<<algo1<<
-                " "<<algo2<<std::endl;
+#ifdef PRINTALGO_MinMax
+            std::cout<<"InlineMaxAbsElement: \n";
+            std::cout<<"v = "<<TMV_Text(v)<<std::endl;
+            std::cout<<"ibest = "<<ibest<<std::endl;
+            std::cout<<"algo = "<<algo1<<" "<<algo2<<std::endl;
 #endif
 
 #if TMV_OPT >= 2
@@ -800,7 +779,7 @@ L2:
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
-                V::_size != UNKNOWN ? (
+                V::_size != TMV_UNKNOWN ? (
                     V::_size <= maxunroll ? 15 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 12 : 24 ) ) :
@@ -811,7 +790,7 @@ L2:
             const int algo2 = 
                 V::_size == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                V::_size != UNKNOWN ? (
+                V::_size != TMV_UNKNOWN ? (
                     V::_size <= maxunroll && V::_size <= 12 ? 15 :
                     V::_size <= maxunroll ? 16 :
                     (V::_step == 1 && V::_size > 250) ? (
@@ -819,9 +798,11 @@ L2:
                     11 ) :
                 V::_step == 1 ? ( V::iscomplex ? 11 : 35 ) :
                 11;
-#ifdef PRINTALGO
-            std::cout<<"InlineMaxAbs2Element: algo = "<<algo1<<
-                " "<<algo2<<std::endl;
+#ifdef PRINTALGO_MinMax
+            std::cout<<"InlineMaxAbs2Element: \n";
+            std::cout<<"v = "<<TMV_Text(v)<<std::endl;
+            std::cout<<"ibest = "<<ibest<<std::endl;
+            std::cout<<"algo = "<<algo1<<" "<<algo2<<std::endl;
 #endif
 
 #if TMV_OPT >= 2
@@ -845,7 +826,7 @@ L2:
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
-                V::_size != UNKNOWN ? (
+                V::_size != TMV_UNKNOWN ? (
                     V::_size <= maxunroll ? 15 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 12 : 24 ) ) :
@@ -856,7 +837,7 @@ L2:
             const int algo2 = 
                 V::_size == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                V::_size != UNKNOWN ? (
+                V::_size != TMV_UNKNOWN ? (
                     V::_size <= maxunroll && V::_size <= 12 ? 15 :
                     V::_size <= maxunroll ? 16 :
                     (V::_step == 1 && V::_size > 250) ? (
@@ -864,8 +845,11 @@ L2:
                     11 ) :
                 V::_step == 1 ? ( V::iscomplex ? 11 : 34 ) :
                 11;
-#ifdef PRINTALGO
-            std::cout<<"InlineMinElement: algo = "<<algo1<<" "<<algo2<<std::endl;
+#ifdef PRINTALGO_MinMax
+            std::cout<<"InlineMinElement: \n";
+            std::cout<<"v = "<<TMV_Text(v)<<std::endl;
+            std::cout<<"ibest = "<<ibest<<std::endl;
+            std::cout<<"algo = "<<algo1<<" "<<algo2<<std::endl;
 #endif
 
 #if TMV_OPT >= 2
@@ -890,7 +874,7 @@ L2:
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
-                V::_size != UNKNOWN ? (
+                V::_size != TMV_UNKNOWN ? (
                     V::iscomplex ? (
                         V::_size <= maxunroll && V::_size <= 12 ? 15 :
                         V::_step == 1 ? 21 : 11 ) :
@@ -902,7 +886,7 @@ L2:
             const int algo2 = 
                 V::_size == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                V::_size != UNKNOWN ? (
+                V::_size != TMV_UNKNOWN ? (
                     V::iscomplex ? (
                         ( V::_step == 1 ? 
                           ( V::_size <= 20 ? 12 : 21 ) : 
@@ -912,9 +896,11 @@ L2:
                     (V::_step == 1 && V::_size > 250) ? 24 : 11 ) :
                 V::_step == 1 ? ( V::iscomplex ? 21 : 35 ) :
                 11;
-#ifdef PRINTALGO
-            std::cout<<"InlineMinAbsElement: algo = "<<algo1<<
-                " "<<algo2<<std::endl;
+#ifdef PRINTALGO_MinMax
+            std::cout<<"InlineMinAbsElement: \n";
+            std::cout<<"v = "<<TMV_Text(v)<<std::endl;
+            std::cout<<"ibest = "<<ibest<<std::endl;
+            std::cout<<"algo = "<<algo1<<" "<<algo2<<std::endl;
 #endif
 
 #if TMV_OPT >= 2
@@ -938,7 +924,7 @@ L2:
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
-                V::_size != UNKNOWN ? (
+                V::_size != TMV_UNKNOWN ? (
                     V::_size <= maxunroll ? 15 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 12 : 24 ) ) :
@@ -949,7 +935,7 @@ L2:
             const int algo2 = 
                 V::_size == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                V::_size != UNKNOWN ? (
+                V::_size != TMV_UNKNOWN ? (
                     V::_size <= maxunroll && V::_size <= 12 ? 15 :
                     V::_size <= maxunroll ? 16 :
                     (V::_step == 1 && V::_size > 250) ? (
@@ -957,9 +943,11 @@ L2:
                     11 ) :
                 V::_step == 1 ? ( V::iscomplex ? 11 : 35 ) :
                 11;
-#ifdef PRINTALGO
-            std::cout<<"InlineMinAbs2Element: algo = "<<algo1<<
-                " "<<algo2<<std::endl;
+#ifdef PRINTALGO_MinMax
+            std::cout<<"InlineMinAbs2Element: \n";
+            std::cout<<"v = "<<TMV_Text(v)<<std::endl;
+            std::cout<<"ibest = "<<ibest<<std::endl;
+            std::cout<<"algo = "<<algo1<<" "<<algo2<<std::endl;
 #endif
 
 #if TMV_OPT >= 2
@@ -982,7 +970,7 @@ L2:
         {
             typedef typename V::value_type VT;
             const bool inst = 
-                (V::_size == UNKNOWN || V::_size > 16) &&
+                (V::_size == TMV_UNKNOWN || V::_size > 16) &&
                 Traits<VT>::isinst;
             const int algo =
                 V::_conj ? 97 :

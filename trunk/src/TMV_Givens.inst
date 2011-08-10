@@ -1,0 +1,42 @@
+
+#define CT std::complex<T>
+
+#define Def1(T,RT)\
+
+Def1(T,T)
+#ifdef TMV_INST_COMPLEX
+Def1(CT,T)
+#endif
+
+#undef Def1
+    
+#define Def2(T1,C1,RT1,T2)\
+
+Def2(T,NonConj,T,T)
+#ifdef TMV_INST_COMPLEX
+#ifdef TMV_INST_MIX
+Def2(T,NonConj,T,CT)
+#endif
+Def2(CT,Conj,T,CT)
+Def2(CT,NonConj,T,CT)
+#endif
+
+#undef Def2
+
+#define Def3(T1,C1,RT1,T2,C2)\
+
+Def3(T,NonConj,T,T,NonConj)
+#ifdef TMV_INST_COMPLEX
+#ifdef TMV_INST_MIX
+Def3(T,NonConj,T,CT,NonConj)
+Def3(T,NonConj,T,CT,Conj)
+#endif
+Def3(CT,Conj,T,CT,NonConj)
+Def3(CT,NonConj,T,CT,NonConj)
+Def3(CT,Conj,T,CT,Conj)
+Def3(CT,NonConj,T,CT,Conj)
+#endif
+
+#undef Def2
+    
+#undef CT

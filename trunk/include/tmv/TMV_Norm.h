@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 #ifndef TMV_Norm_H
 #define TMV_Norm_H
@@ -35,6 +5,7 @@
 #include "TMV_BaseVector.h"
 #include "TMV_BaseMatrix_Rec.h"
 #include "TMV_BaseMatrix_Tri.h"
+#include "TMV_SVD.h"
 
 namespace tmv {
 
@@ -264,8 +235,8 @@ namespace tmv {
         {
             typedef typename M::value_type VT;
             const bool inst = 
-                (M::_colsize == UNKNOWN || M::_colsize > 16) &&
-                (M::_rowsize == UNKNOWN || M::_rowsize > 16) &&
+                (M::_colsize == TMV_UNKNOWN || M::_colsize > 16) &&
+                (M::_rowsize == TMV_UNKNOWN || M::_rowsize > 16) &&
                 Traits<VT>::isinst;
             const bool up = ShapeTraits<M::_shape>::upper;
             const bool lo = ShapeTraits<M::_shape>::lower;
@@ -287,7 +258,7 @@ namespace tmv {
         {
             typedef typename V::value_type VT;
             const bool inst = 
-                (V::_size == UNKNOWN || V::_size > 16) &&
+                (V::_size == TMV_UNKNOWN || V::_size > 16) &&
                 Traits<VT>::isinst;
             const int algo = 
                 V::_conj ? 97 :
@@ -348,6 +319,316 @@ namespace tmv {
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
         return Norm_Helper<-2,Mv>::call(mv);
     }
+
+
+    //
+    // Norm2
+    //
+
+    template <int algo, class M>
+    struct Norm2M_Helper;
+
+    // algo 1: Transpose m
+    template <class M>
+    struct Norm2M_Helper<1,M>
+    {
+        typedef typename M::float_type FT;
+        static inline FT call(const M& m)
+        {
+#ifdef PRINTALGO_NormM
+            const int N = m.rowsize();
+            std::cout<<"Norm2 algo 1: N = "<<N<<std::endl;
+#endif
+            typedef typename M::const_transpose_type Mt;
+            Mt mt = m.transpose();
+            return Norm2M_Helper<-4,Mt>::call(mt);
+        }
+    };
+
+    // algo 11: Calculate SV decomposition on the spot.
+    template <class M>
+    struct Norm2M_Helper<11,M>
+    {
+        typedef typename M::float_type FT;
+        static inline FT call(const M& m)
+        {
+#ifdef PRINTALGO_NormM
+            const int N = m.rowsize();
+            std::cout<<"Norm2 algo 11: N = "<<N<<std::endl;
+#endif
+            typedef typename M::zfloat_type ZFT;
+            const int cs = M::_colsize;
+            const int rs = M::_rowsize;
+            const bool rm = M::_rowmajor;
+            typedef typename MCopyHelper<ZFT,Rec,cs,rs,rm>::type Mc;
+            Mc mc = m;
+            DiagMatrix<FT> S(m.rowsize());
+            SV_Decompose(mc,S,false);
+            return S.cref(0);
+        }
+    };
+
+    // algo 12: Use Divider
+    template <class M>
+    struct Norm2M_Helper<12,M>
+    {
+        typedef typename M::float_type FT;
+        static FT call(const M& m)
+        {
+#ifdef PRINTALGO_NormM
+            const int N = m.rowsize();
+            std::cout<<"Norm2 algo 12: N = "<<N<<std::endl;
+#endif
+            m.setDiv();
+            // The Traits<> thing is to get rid of any reference.
+            typedef typename Traits<typename M::svd_type>::type svd_type;
+            TMVAssert(dynamic_cast<const svd_type*>(m.getDiv()));
+            const svd_type* div = static_cast<const svd_type*>(m.getDiv());
+            FT norm2 = div->norm2();
+            m.doneDiv();
+            return norm2;
+        }
+    };
+
+    // algo 31: Use Divider if it is SV
+    template <class M>
+    struct Norm2M_Helper<31,M>
+    {
+        typedef typename M::float_type FT;
+        static FT call(const M& m)
+        {
+#ifdef PRINTALGO_NormM
+            const int N = m.rowsize();
+            std::cout<<"Norm2 algo 31: N = "<<N<<std::endl;
+#endif
+            if (m.getDivType() == tmv::SV) 
+                return Norm2M_Helper<12,M>::call(m);
+            else 
+                return Norm2M_Helper<-4,M>::call(m);
+        }
+    };
+
+    // algo 32: Check if we need to transpose
+    template <class M>
+    struct Norm2M_Helper<32,M>
+    {
+        typedef typename M::float_type FT;
+        static FT call(const M& m)
+        {
+#ifdef PRINTALGO_NormM
+            const int N = m.rowsize();
+            std::cout<<"Norm2 algo 32: N = "<<N<<std::endl;
+#endif
+            if (m.colsize() < m.rowsize()) 
+                return Norm2M_Helper<1,M>::call(m);
+            else
+                return Norm2M_Helper<11,M>::call(m);
+        }
+    };
+
+    // algo -4: Don't use a divider object
+    template <class M>
+    struct Norm2M_Helper<-4,M>
+    {
+        typedef typename M::float_type FT;
+        static TMV_INLINE FT call(const M& m)
+        {
+            typedef typename M::real_type RT;
+            const bool up = ShapeTraits<M::_shape>::upper;
+            const bool lo = ShapeTraits<M::_shape>::lower;
+            const int cs = M::_colsize;
+            const int rs = M::_rowsize;
+            const int algo = 
+                cs != TMV_UNKNOWN && rs != TMV_UNKNOWN ? (
+                    cs < rs ? 1 : 11 ) :
+                ShapeTraits<M::_shape>::square ? 11 :
+                32;
+#ifdef PRINTALGO_NormM
+            std::cout<<"Inline Norm2 (Non-divider) \n";
+            std::cout<<"m = "<<TMV_Text(m)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
+            return Norm2M_Helper<algo,M>::call(m);
+        }
+    };
+
+    // algo -3: Determine which algorithm to use
+    template <class M>
+    struct Norm2M_Helper<-3,M>
+    {
+        typedef typename M::float_type FT;
+        static TMV_INLINE FT call(const M& m)
+        {
+            typedef typename M::real_type RT;
+            const bool up = ShapeTraits<M::_shape>::upper;
+            const bool lo = ShapeTraits<M::_shape>::lower;
+            const int algo = 
+                M::_hasdivider ? 31 :
+                -4;
+#ifdef PRINTALGO_NormM
+            const int N = m.rowsize();
+            std::cout<<"Inline Norm2 \n";
+            std::cout<<"m = "<<TMV_Text(m)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
+            return Norm2M_Helper<algo,M>::call(m);
+        }
+    };
+
+    template <class M>
+    static inline typename M::float_type DoNorm2(const BaseMatrix<M>& m)
+    {
+        // Don't make a view, since we want to make sure we keep 
+        // a divider object if one is present.
+        return Norm2M_Helper<-3,M>::call(m.mat());
+    }
+
+
+
+    //
+    // Condition
+    //
+
+    template <int algo, class M>
+    struct ConditionM_Helper;
+
+    // algo 1: Transpose m
+    template <class M>
+    struct ConditionM_Helper<1,M>
+    {
+        typedef typename M::float_type FT;
+        static inline FT call(const M& m)
+        {
+#ifdef PRINTALGO_NormM
+            const int N = m.rowsize();
+            std::cout<<"Condition algo 1: N = "<<N<<std::endl;
+#endif
+            typedef typename M::const_transpose_type Mt;
+            Mt mt = m.transpose();
+            return ConditionM_Helper<-4,Mt>::call(mt);
+        }
+    };
+
+    // TODO: Is the 2-condition really the one we want as the default?
+    // algo 11: Calculate SV decomposition on the spot.
+    template <class M>
+    struct ConditionM_Helper<11,M>
+    {
+        typedef typename M::float_type FT;
+        static inline FT call(const M& m)
+        {
+#ifdef PRINTALGO_NormM
+            const int N = m.rowsize();
+            std::cout<<"Condition algo 11: N = "<<N<<std::endl;
+#endif
+            typedef typename M::zfloat_type ZFT;
+            const int cs = M::_colsize;
+            const int rs = M::_rowsize;
+            const bool rm = M::_rowmajor;
+            typedef typename MCopyHelper<ZFT,Rec,cs,rs,rm>::type Mc;
+            Mc mc = m;
+            DiagMatrix<FT> S(m.rowsize());
+            SV_Decompose(mc,S,false);
+            return S.cref(0) / S.cref(S.size()-1);
+        }
+    };
+
+    // algo 12: Use Divider
+    template <class M>
+    struct ConditionM_Helper<12,M>
+    {
+        typedef typename M::float_type FT;
+        static FT call(const M& m)
+        {
+#ifdef PRINTALGO_NormM
+            const int N = m.rowsize();
+            std::cout<<"Condition algo 12: N = "<<N<<std::endl;
+#endif
+            m.setDiv();
+            // SV doesn't use the norminf argument, so don't calculate it.
+            FT norminf = m.getDivType() == tmv::SV ? FT(0) : m.normInf();
+            FT cond = m.getDiv()->condition(norminf);
+            m.doneDiv();
+            return cond;
+        }
+    };
+
+    // algo 32: Check if we need to transpose
+    template <class M>
+    struct ConditionM_Helper<32,M>
+    {
+        typedef typename M::float_type FT;
+        static FT call(const M& m)
+        {
+#ifdef PRINTALGO_NormM
+            const int N = m.rowsize();
+            std::cout<<"Condition algo 32: N = "<<N<<std::endl;
+#endif
+            if (m.colsize() < m.rowsize()) 
+                return ConditionM_Helper<1,M>::call(m);
+            else
+                return ConditionM_Helper<11,M>::call(m);
+        }
+    };
+
+    // algo -4: Don't use a divider object
+    template <class M>
+    struct ConditionM_Helper<-4,M>
+    {
+        typedef typename M::float_type FT;
+        static TMV_INLINE FT call(const M& m)
+        {
+            typedef typename M::real_type RT;
+            const bool up = ShapeTraits<M::_shape>::upper;
+            const bool lo = ShapeTraits<M::_shape>::lower;
+            const int cs = M::_colsize;
+            const int rs = M::_rowsize;
+            const int algo = 
+                cs != TMV_UNKNOWN && rs != TMV_UNKNOWN ? (
+                    cs < rs ? 1 : 11 ) :
+                ShapeTraits<M::_shape>::square ? 11 :
+                32;
+#ifdef PRINTALGO_NormM
+            std::cout<<"Inline Condition (Non-divider) \n";
+            std::cout<<"m = "<<TMV_Text(m)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
+            return ConditionM_Helper<algo,M>::call(m);
+        }
+    };
+
+    // algo -3: Determine which algorithm to use
+    template <class M>
+    struct ConditionM_Helper<-3,M>
+    {
+        typedef typename M::float_type FT;
+        static TMV_INLINE FT call(const M& m)
+        {
+            typedef typename M::real_type RT;
+            const bool up = ShapeTraits<M::_shape>::upper;
+            const bool lo = ShapeTraits<M::_shape>::lower;
+            const int algo = 
+                M::_hasdivider ? 12 :
+                -4;
+#ifdef PRINTALGO_NormM
+            const int N = m.rowsize();
+            std::cout<<"Inline Condition \n";
+            std::cout<<"m = "<<TMV_Text(m)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
+            return ConditionM_Helper<algo,M>::call(m);
+        }
+    };
+
+    template <class M>
+    static inline typename M::float_type DoCondition(const BaseMatrix<M>& m)
+    {
+        // Don't make a view, since we want to make sure we keep 
+        // a divider object if one is present.
+        return ConditionM_Helper<-3,M>::call(m.mat());
+    }
+
+
 
 } // namespace tmv
 

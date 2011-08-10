@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 //---------------------------------------------------------------------------
@@ -237,24 +207,19 @@ namespace tmv {
         TMV_INLINE float_type norm1() const
         { return diag().maxAbsElement(); }
 
+        TMV_INLINE float_type norm2() const
+        { return diag().maxAbsElement(); }
+
         TMV_INLINE float_type normInf() const
         { return diag().maxAbsElement(); }
+
+        TMV_INLINE float_type condition() const
+        { return diag().maxAbsElement() / diag().minAbsElement(); }
 
         template <class ret_type, class F>
         TMV_INLINE ret_type sumElements(const F& f) const
         { return diag().sumElements(f); }
 
-
-
-        //
-        // Division Functions
-        //
-
-        float_type norm2() const
-        { return diag().maxAbsElement(); }
-
-        float_type condition() const
-        { return diag().maxAbsElement() / diag().minAbsElement(); }
 
 
         //
@@ -785,9 +750,9 @@ namespace tmv {
     class DiagMatrixView;
     template <class T, int N, int A=0>
     class SmallDiagMatrix;
-    template <class T, int N, int S=UNKNOWN, int A=0>
+    template <class T, int N, int S=TMV_UNKNOWN, int A=0>
     class ConstSmallDiagMatrixView;
-    template <class T, int N, int S=UNKNOWN, int A=0>
+    template <class T, int N, int S=TMV_UNKNOWN, int A=0>
     class SmallDiagMatrixView;
 
     // This helper class helps decide calc_type for composite classes:
@@ -795,13 +760,13 @@ namespace tmv {
     struct MCopyHelper<T,Diag,cs,rs,rm,fort>
     { typedef SmallDiagMatrix<T,cs,(fort?FortranStyle:CStyle)|NoAlias> type; };
     template <class T, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,Diag,UNKNOWN,rs,rm,fort>
+    struct MCopyHelper<T,Diag,TMV_UNKNOWN,rs,rm,fort>
     { typedef SmallDiagMatrix<T,rs,(fort?FortranStyle:CStyle)|NoAlias> type; };
     template <class T, int cs, bool rm, bool fort>
-    struct MCopyHelper<T,Diag,cs,UNKNOWN,rm,fort>
+    struct MCopyHelper<T,Diag,cs,TMV_UNKNOWN,rm,fort>
     { typedef SmallDiagMatrix<T,cs,(fort?FortranStyle:CStyle)|NoAlias> type; };
     template <class T, bool rm, bool fort>
-    struct MCopyHelper<T,Diag,UNKNOWN,UNKNOWN,rm,fort>
+    struct MCopyHelper<T,Diag,TMV_UNKNOWN,TMV_UNKNOWN,rm,fort>
     { typedef DiagMatrix<T,(fort?FortranStyle:CStyle)|NoAlias> type; };
 
     template <class T, int cs, int rs, int si, int sj, int c>
@@ -811,7 +776,7 @@ namespace tmv {
         typedef ConstSmallDiagMatrixView<T,cs,si,c> ctype; 
     };
     template <class T, int si, int sj, int c>
-    struct MViewHelper<T,Diag,UNKNOWN,UNKNOWN,si,sj,c>
+    struct MViewHelper<T,Diag,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,c>
     {
         enum { A2 = c | (si == 1 ? Unit : NonUnit) };
         typedef DiagMatrixView<T,A2> type; 

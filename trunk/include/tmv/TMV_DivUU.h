@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_DivUU_H
@@ -113,7 +83,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s==UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"UU algo 11: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -126,7 +96,7 @@ namespace tmv {
             typedef typename M2::const_subtrimatrix_type M2s;
             typedef typename M2::const_col_sub_type M2c;
             const int ix1 = u1 ? -1 : 0;
-            const int xx = UNKNOWN;
+            const int xx = TMV_UNKNOWN;
 #ifdef TMV_DivU_INLINE_MV
             const int algo2 = -4;
 #else
@@ -159,7 +129,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s==UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqUU algo 12: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -171,7 +141,7 @@ namespace tmv {
             typedef typename M1::row_sub_type M1r;
             typedef typename M1::subtrimatrix_type::const_transpose_type M1st;
             const int ix2 = u2 ? 1 : 0;
-            const int xx = UNKNOWN;
+            const int xx = TMV_UNKNOWN;
             const Scaling<-1,RT> mone;
 #ifdef TMV_DivU_INLINE_MV
             const int algo2 = -4;
@@ -201,7 +171,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s==UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqUU algo 13: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -214,7 +184,7 @@ namespace tmv {
             typedef typename M1::const_row_sub_type M1rc;
             typedef typename M2::const_col_sub_type M2c;
             const int ix2 = u2 ? 1 : 0;
-            const int xx = UNKNOWN;
+            const int xx = TMV_UNKNOWN;
             const Scaling<-1,RT> mone;
 #ifdef TMV_DivU_INLINE_MV
             const int algo2 = -4;
@@ -254,7 +224,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s==UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqUU algo 17: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -265,18 +235,18 @@ namespace tmv {
             const int algo2 = 
                 s == 0 ? 0 :
                 s == 1 ? 1 :
-                (s != UNKNOWN && s > TMV_DIVUU_RECURSE) ? 0 :
+                (s != TMV_UNKNOWN && s > TMV_DIVUU_RECURSE) ? 0 :
                 TMV_DIVUU_RECURSE == 1 ? 1 :
                 rr ? 12 : rc ? 13 : cx ? 11 : 13;
             const int algo3 =  // The algorithm for N > 32
-                s == UNKNOWN || s > 32 ? 17 : 0;
+                s == TMV_UNKNOWN || s > 32 ? 17 : 0;
             const int algo4 =  // The algorithm for MultMM
-                s == UNKNOWN ? -2 : s > 32 ? -3 : 0;
+                s == TMV_UNKNOWN ? -2 : s > 32 ? -3 : 0;
 #if TMV_DIVUU_RECURSE < 32
             const int algo3b =  // The algorithm for N > RECURSE
-                s == UNKNOWN || s > TMV_DIVUU_RECURSE ? 17 : 0;
+                s == TMV_UNKNOWN || s > TMV_DIVUU_RECURSE ? 17 : 0;
             const int algo4b =  // The algorithm for MultMM
-                s == UNKNOWN || s > TMV_DIVUU_RECURSE ? -4 : 0;
+                s == TMV_UNKNOWN || s > TMV_DIVUU_RECURSE ? -4 : 0;
 #endif
 #ifdef PRINTALGO_DivU
             std::cout<<"algo2,3,4 = "<<algo2<<"  "<<algo3<<"  "<<algo4<<std::endl;
@@ -341,7 +311,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s==UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"UU algo 11: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -354,7 +324,7 @@ namespace tmv {
             typedef typename M2::const_subtrimatrix_type M2s;
             typedef typename M2::const_col_sub_type M2c;
             const int ix1 = u1 ? -1 : 0;
-            const int xx = UNKNOWN;
+            const int xx = TMV_UNKNOWN;
 #ifdef TMV_DivU_INLINE_MV
             const int algo2 = -4;
 #else
@@ -387,7 +357,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s==UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqUU algo 22: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -399,7 +369,7 @@ namespace tmv {
             typedef typename M1::subtrimatrix_type::const_transpose_type M1st;
             typedef typename M1::row_sub_type M1r;
             const int ix2 = u2 ? 1 : 0;
-            const int xx = UNKNOWN;
+            const int xx = TMV_UNKNOWN;
             const Scaling<-1,RT> mone;
 #ifdef TMV_DivU_INLINE_MV
             const int algo2 = -4;
@@ -429,7 +399,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s==UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqUU algo 23: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -442,7 +412,7 @@ namespace tmv {
             typedef typename M1::submatrix_type M1s;
             typedef typename M2::const_col_sub_type M2c;
             const int ix2 = u2 ? 1 : 0;
-            const int xx = UNKNOWN;
+            const int xx = TMV_UNKNOWN;
             const Scaling<-1,RT> mone;
 #ifdef TMV_DivU_INLINE_MV
             const int algo2 = -4;
@@ -482,7 +452,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s==UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqUU algo 27: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -493,18 +463,18 @@ namespace tmv {
             const int algo2 = 
                 s == 0 ? 0 :
                 s == 1 ? 1 :
-                (s != UNKNOWN && s > TMV_DIVUU_RECURSE) ? 0 :
+                (s != TMV_UNKNOWN && s > TMV_DIVUU_RECURSE) ? 0 :
                 TMV_DIVUU_RECURSE == 1 ? 1 :
                 rr ? 22 : rc ? 23 : cx ? 21 : 23;
             const int algo3 =  // The algorithm for N > 32
-                s == UNKNOWN || s > 32 ? 27 : 0;
+                s == TMV_UNKNOWN || s > 32 ? 27 : 0;
             const int algo4 =  // The algorithm for MultMM
-                s == UNKNOWN ? -2 : s > 32 ? -3 : 0;
+                s == TMV_UNKNOWN ? -2 : s > 32 ? -3 : 0;
 #if TMV_DIVUU_RECURSE < 32
             const int algo3b =  // The algorithm for N > RECURSE
-                s == UNKNOWN || s > TMV_DIVUU_RECURSE ? 27 : 0;
+                s == TMV_UNKNOWN || s > TMV_DIVUU_RECURSE ? 27 : 0;
             const int algo4b =  // The algorithm for MultMM
-                s == UNKNOWN || s > TMV_DIVUU_RECURSE ? -4 : 0;
+                s == TMV_UNKNOWN || s > TMV_DIVUU_RECURSE ? -4 : 0;
 #endif
 #ifdef PRINTALGO_DivU
             std::cout<<"algo2,3,4 = "<<algo2<<"  "<<algo3<<"  "<<algo4<<std::endl;
@@ -588,7 +558,7 @@ namespace tmv {
         static void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int N = s == UNKNOWN ? int(m1.size()) : s;
+            const int N = s == TMV_UNKNOWN ? int(m1.size()) : s;
             std::cout<<"LDivEqUU algo 87: N,s = "<<N<<','<<s<<std::endl;
 #endif
             typename M1::copy_type m1c = m1;
@@ -668,7 +638,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -695,7 +665,7 @@ namespace tmv {
             const int algo = 
                 ( s == 0 ) ? 0 :
                 s == 1 ? 1 :
-                //( s != UNKNOWN ) ? (
+                //( s != TMV_UNKNOWN ) ? (
                     //upper2 ? (s <= 5 ? 16 : 17 ) :
                     //(s <= 5 ? 26 : 27 ) ) :
                 upper2 ? 17 : 27;
@@ -752,7 +722,7 @@ namespace tmv {
                 27;
 #endif
 #ifdef PRINTALGO_DivU
-            const int N = s==UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
             std::cout<<"InlineLDivEqUU: \n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
@@ -774,7 +744,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

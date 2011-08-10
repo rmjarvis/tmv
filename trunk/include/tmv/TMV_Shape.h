@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 #ifndef TMV_Shape_H
 #define TMV_Shape_H
@@ -53,6 +23,7 @@ namespace tmv {
         enum { lower = false };
         enum { band = false };
         enum { unit = false };
+        enum { square = false };
         enum { inverse_shape = Vec };
         enum { nonunit_shape = Vec };
         enum { unit_shape = Vec };
@@ -68,6 +39,7 @@ namespace tmv {
         enum { lower = false };
         enum { band = false };
         enum { unit = false };
+        enum { square = false };
         enum { inverse_shape = Null };
         enum { nonunit_shape = Null };
         enum { unit_shape = Null };
@@ -83,6 +55,7 @@ namespace tmv {
         enum { lower = true };
         enum { band = false };
         enum { unit = false };
+        enum { square = false };
         enum { inverse_shape = Rec };
         enum { nonunit_shape = Rec };
         enum { unit_shape = InvalidShape };
@@ -98,6 +71,7 @@ namespace tmv {
         enum { lower = false };
         enum { band = true };
         enum { unit = false };
+        enum { square = true };
         enum { inverse_shape = Diag };
         enum { nonunit_shape = Diag };
         enum { unit_shape = InvalidShape };
@@ -113,6 +87,7 @@ namespace tmv {
         enum { lower = false };
         enum { band = false };
         enum { unit = false };
+        enum { square = true };
         enum { inverse_shape = UpperTri };
         enum { nonunit_shape = UpperTri };
         enum { unit_shape = UnitUpperTri };
@@ -128,6 +103,7 @@ namespace tmv {
         enum { lower = true };
         enum { band = false };
         enum { unit = false };
+        enum { square = true };
         enum { inverse_shape = LowerTri };
         enum { nonunit_shape = LowerTri };
         enum { unit_shape = UnitLowerTri };
@@ -143,6 +119,7 @@ namespace tmv {
         enum { lower = false };
         enum { band = false };
         enum { unit = true };
+        enum { square = true };
         enum { inverse_shape = UnitUpperTri };
         enum { nonunit_shape = UpperTri };
         enum { unit_shape = UnitUpperTri };
@@ -158,6 +135,7 @@ namespace tmv {
         enum { lower = true };
         enum { band = false };
         enum { unit = true };
+        enum { square = true };
         enum { inverse_shape = UnitLowerTri };
         enum { nonunit_shape = LowerTri };
         enum { unit_shape = UnitLowerTri };
@@ -173,6 +151,7 @@ namespace tmv {
         enum { lower = true };
         enum { band = true };
         enum { unit = false };
+        enum { square = false };
         enum { inverse_shape = Rec };
         enum { nonunit_shape = Band };
         enum { unit_shape = InvalidShape };
@@ -188,6 +167,7 @@ namespace tmv {
         enum { lower = false };
         enum { band = true };
         enum { unit = false };
+        enum { square = true };
         enum { inverse_shape = UpperTri };
         enum { nonunit_shape = UpperBand };
         enum { unit_shape = UnitUpperBand };
@@ -203,6 +183,7 @@ namespace tmv {
         enum { lower = true };
         enum { band = true };
         enum { unit = false };
+        enum { square = true };
         enum { inverse_shape = LowerTri };
         enum { nonunit_shape = LowerBand };
         enum { unit_shape = UnitLowerBand };
@@ -218,6 +199,7 @@ namespace tmv {
         enum { lower = false };
         enum { band = true };
         enum { unit = true };
+        enum { square = true };
         enum { inverse_shape = UnitUpperTri };
         enum { nonunit_shape = UpperBand };
         enum { unit_shape = UnitUpperBand };
@@ -233,6 +215,7 @@ namespace tmv {
         enum { lower = true };
         enum { band = true };
         enum { unit = true };
+        enum { square = true };
         enum { inverse_shape = UnitLowerTri };
         enum { nonunit_shape = LowerBand };
         enum { unit_shape = UnitLowerBand };
@@ -248,6 +231,7 @@ namespace tmv {
         enum { lower = true };
         enum { band = false };
         enum { unit = false };
+        enum { square = true };
         enum { inverse_shape = RealSym };
         enum { nonunit_shape = RealSym };
         enum { unit_shape = InvalidShape };
@@ -263,6 +247,7 @@ namespace tmv {
         enum { lower = true };
         enum { band = false };
         enum { unit = false };
+        enum { square = true };
         enum { inverse_shape = Sym };
         enum { nonunit_shape = Sym };
         enum { unit_shape = InvalidShape };
@@ -278,6 +263,7 @@ namespace tmv {
         enum { lower = true };
         enum { band = false };
         enum { unit = false };
+        enum { square = true };
         enum { inverse_shape = Herm };
         enum { nonunit_shape = Herm };
         enum { unit_shape = InvalidShape };
@@ -293,6 +279,7 @@ namespace tmv {
         enum { lower = true };
         enum { band = true };
         enum { unit = false };
+        enum { square = true };
         enum { inverse_shape = RealSym };
         enum { nonunit_shape = RealSymBand };
         enum { unit_shape = InvalidShape };
@@ -308,6 +295,7 @@ namespace tmv {
         enum { lower = true };
         enum { band = true };
         enum { unit = false };
+        enum { square = true };
         enum { inverse_shape = Sym };
         enum { nonunit_shape = SymBand };
         enum { unit_shape = InvalidShape };
@@ -323,6 +311,7 @@ namespace tmv {
         enum { lower = true };
         enum { band = true };
         enum { unit = false };
+        enum { square = true };
         enum { inverse_shape = Herm };
         enum { nonunit_shape = HermBand };
         enum { unit_shape = InvalidShape };

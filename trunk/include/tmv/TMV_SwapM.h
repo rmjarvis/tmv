@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 #ifndef TMV_SwapM_H
 #define TMV_SwapM_H
@@ -71,8 +41,8 @@ namespace tmv {
     {
         static void call(M1& m1, M2& m2)
         {
-            const int M = cs == UNKNOWN ? int(m2.colsize()) : cs;
-            int N = rs == UNKNOWN ? int(m2.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
+            int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
             typedef typename M1::col_type M1c;
             typedef typename M2::col_type M2c;
             typedef typename M1c::iterator IT1;
@@ -95,8 +65,8 @@ namespace tmv {
     {
         static void call(M1& m1, M2& m2)
         {
-            int M = cs == UNKNOWN ? int(m2.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m2.rowsize()) : rs;
+            int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
             typedef typename M1::row_type M1r;
             typedef typename M2::row_type M2r;
             typedef typename M1r::iterator IT1;
@@ -289,8 +259,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
                 Traits2<T1,T2>::sametype &&
                 Traits<T1>::isinst;
             const int algo =
@@ -315,7 +285,7 @@ namespace tmv {
             const int algo = 
                 canlin ? 1 :
                 TMV_OPT == 0 ? (( M1::_rowmajor && M2::_rowmajor ) ? 2 : 11 ) :
-                ( cs != UNKNOWN && rs != UNKNOWN ) ? (
+                ( cs != TMV_UNKNOWN && rs != TMV_UNKNOWN ) ? (
                     ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T2)) ) ? (
                         ( M1::_rowmajor && M2::_rowmajor ) ? 16 : 15 ) :
                     ( M1::_rowmajor && M2::_rowmajor ) ? 12 :
@@ -324,7 +294,7 @@ namespace tmv {
                 TMV_OPT >= 2 ? 30 :
                 ( M1::_rowmajor && M2::_rowmajor ) ? 12 :
                 ( M1::_colmajor && M2::_colmajor ) ? 11 :
-                ( cs == UNKNOWN || rs == UNKNOWN ) ? 11 :
+                ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? 11 :
                 ( cs > rs ) ? 12 : 
                 11;
             SwapM_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
@@ -340,8 +310,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
                 Traits2<T1,T2>::sametype &&
                 Traits<T1>::isinst;
             const int algo =

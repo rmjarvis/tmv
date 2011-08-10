@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 //#define PRINTALGO_LU
 
@@ -47,15 +17,7 @@ namespace tmv {
 
     template <class T1>
     static inline void NonLapLUInverse(MatrixView<T1> m1, const Permutation& P)
-    {
-        if (m1.iscm()) {
-            MatrixView<T1,ColMajor> m1cm = m1.cmView();
-            InlineLU_Inverse(m1cm,P);
-        } else {
-            MatrixView<T1,RowMajor> m1rm = m1.rmView();
-            InlineLU_Inverse(m1rm,P);
-        }
-    }
+    { InlineLU_Inverse(m1,P); }
 
 #ifdef ALAP
     // ALAP, not LAP, since ATLAS has these routines
@@ -229,13 +191,7 @@ namespace tmv {
             InstCopy(m1c.xView().constView(),m1);
         }
 #else
-        if (m1.iscm() || m1.isrm()) {
-            NonLapLUInverse(m1,P);
-        } else {
-            Matrix<T1,ColMajor|NoDivider> m1c(m1);
-            NonLapLUInverse(m1c.xView(),P);
-            InstCopy(m1c.xView().constView(),m1);
-        }
+        NonLapLUInverse(m1,P);
 #endif
     }
 
@@ -244,18 +200,7 @@ namespace tmv {
         const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         const bool trans, MatrixView<T2> m2)
     {
-        if (m2.iscm()) {
-            MatrixView<T2,ColMajor> m2cm = m2.cmView();
-            InlineLU_InverseATA(m1,P,trans,m2cm);
-        } else if (m2.isrm()) {
-            MatrixView<T2,RowMajor> m2rm = m2.rmView();
-            InlineLU_InverseATA(m1,P,trans,m2rm);
-        } else {
-            Matrix<T2,ColMajor|NoDivider> m2c(m2);
-            MatrixView<T2,ColMajor> m2cm = m2c.view();
-            InlineLU_InverseATA(m1,P,trans,m2cm);
-            InstCopy(m2c.xView().constView(),m2);
-        }
+        InlineLU_InverseATA(m1,P,trans,m2);
     }
 
 #define InstFile "TMV_LUInverse.inst"

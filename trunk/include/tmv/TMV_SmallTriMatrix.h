@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 //---------------------------------------------------------------------------
@@ -435,8 +405,8 @@ namespace tmv {
                 !Attrib<A>::nodivider &&
                 !Attrib<A>::withdivider &&
                 ( Traits<T>::iscomplex || !Attrib<A>::conj ) &&
-                !( Si != UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
-                !( Sj != UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
+                !( Si != TMV_UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
+                !( Sj != TMV_UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
         enum { _attrib = A };
 
         typedef T value_type;
@@ -463,7 +433,7 @@ namespace tmv {
         enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
-        enum { _dt = _unknowndiag ? UNKNOWN : A & AllDiagType };
+        enum { _dt = _unknowndiag ? TMV_UNKNOWN : A & AllDiagType };
         enum { _shape = _unit ? UnitUpperTri : UpperTri };
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
@@ -595,32 +565,32 @@ namespace tmv {
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         ConstSmallUpperTriMatrixView(const T* m, size_t s, int si) :
             itsm(m), itss(s), itssi(si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(Sj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         ConstSmallUpperTriMatrixView(const T* m, size_t s) :
             itsm(m), itss(s), itssi(Si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(Si != TMV_UNKNOWN); TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         ConstSmallUpperTriMatrixView(const T* m) :
             itsm(m), itss(N), itssi(Si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(N != UNKNOWN);
-            TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(N != TMV_UNKNOWN);
+            TMVStaticAssert(Si != TMV_UNKNOWN); TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         ConstSmallUpperTriMatrixView(const type& m2) :
@@ -737,8 +707,8 @@ namespace tmv {
                 !Attrib<A>::nodivider &&
                 !Attrib<A>::withdivider &&
                 ( Traits<T>::iscomplex || !Attrib<A>::conj ) &&
-                !( Si != UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
-                !( Sj != UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
+                !( Si != TMV_UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
+                !( Sj != TMV_UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
         enum { _attrib = A };
 
         typedef T value_type;
@@ -765,7 +735,7 @@ namespace tmv {
         enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
-        enum { _dt = _unknowndiag ? UNKNOWN : A & AllDiagType };
+        enum { _dt = _unknowndiag ? TMV_UNKNOWN : A & AllDiagType };
         enum { _shape = _unit ? UnitUpperTri : UpperTri };
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
@@ -935,23 +905,23 @@ namespace tmv {
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         SmallUpperTriMatrixView(T* m, size_t s, int si) :
             itsm(m), itss(s), itssi(si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(Sj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         SmallUpperTriMatrixView(T* m, size_t s) :
             itsm(m), itss(s), itssi(Si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(Si != TMV_UNKNOWN); TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         SmallUpperTriMatrixView(const type& m2) :
@@ -1423,8 +1393,8 @@ namespace tmv {
                 !Attrib<A>::nodivider &&
                 !Attrib<A>::withdivider &&
                 ( Traits<T>::iscomplex || !Attrib<A>::conj ) &&
-                !( Si != UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
-                !( Sj != UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
+                !( Si != TMV_UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
+                !( Sj != TMV_UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
         enum { _attrib = A };
 
         typedef T value_type;
@@ -1451,7 +1421,7 @@ namespace tmv {
         enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
-        enum { _dt = _unknowndiag ? UNKNOWN : A & AllDiagType };
+        enum { _dt = _unknowndiag ? TMV_UNKNOWN : A & AllDiagType };
         enum { _shape = _unit ? UnitLowerTri : LowerTri };
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
@@ -1583,23 +1553,23 @@ namespace tmv {
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         ConstSmallLowerTriMatrixView(const T* m, size_t s, int si) :
             itsm(m), itss(s), itssi(si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(Sj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         ConstSmallLowerTriMatrixView(const T* m, size_t s) :
             itsm(m), itss(s), itssi(Si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(Si != TMV_UNKNOWN); TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         ConstSmallLowerTriMatrixView(const type& m2) :
@@ -1716,8 +1686,8 @@ namespace tmv {
                 !Attrib<A>::nodivider &&
                 !Attrib<A>::withdivider &&
                 ( Traits<T>::iscomplex || !Attrib<A>::conj ) &&
-                !( Si != UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
-                !( Sj != UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
+                !( Si != TMV_UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
+                !( Sj != TMV_UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
         enum { _attrib = A };
 
         typedef T value_type;
@@ -1744,7 +1714,7 @@ namespace tmv {
         enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
-        enum { _dt = _unknowndiag ? UNKNOWN : A & AllDiagType };
+        enum { _dt = _unknowndiag ? TMV_UNKNOWN : A & AllDiagType };
         enum { _shape = _unit ? UnitLowerTri : LowerTri };
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
@@ -1914,23 +1884,23 @@ namespace tmv {
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         SmallLowerTriMatrixView(T* m, size_t s, int si) :
             itsm(m), itss(s), itssi(si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(Sj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         SmallLowerTriMatrixView(T* m, size_t s) :
             itsm(m), itss(s), itssi(Si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(Si != UNKNOWN); TMVStaticAssert(Sj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(Si != TMV_UNKNOWN); TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         SmallLowerTriMatrixView(const type& m2) :

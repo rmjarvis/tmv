@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 //---------------------------------------------------------------------------
@@ -591,16 +561,16 @@ namespace tmv {
         typedef const type& eval_type;
         typedef UpperTriMatrix<T,A012> copy_type;
 
-        enum { _colsize = UNKNOWN };
-        enum { _rowsize = UNKNOWN };
-        enum { _size = UNKNOWN };
+        enum { _colsize = TMV_UNKNOWN };
+        enum { _rowsize = TMV_UNKNOWN };
+        enum { _size = TMV_UNKNOWN };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
         enum { _colmajor = Attrib<A>::colmajor };
-        enum { _stepi = (_colmajor ? 1 : UNKNOWN) };
-        enum { _stepj = (_rowmajor ? 1 : UNKNOWN) };
-        enum { _diagstep = UNKNOWN };
+        enum { _stepi = (_colmajor ? 1 : TMV_UNKNOWN) };
+        enum { _stepj = (_rowmajor ? 1 : TMV_UNKNOWN) };
+        enum { _diagstep = TMV_UNKNOWN };
         enum { _conj = false };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _unit = Attrib<A>::unitdiag };
@@ -662,7 +632,7 @@ namespace tmv {
         typedef ConstUpperTriMatrixView<T,nonunitA> const_nonunitdiag_type;
         typedef ConstUpperTriMatrixView<T,ndA> const_unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                ConstSmallUpperTriMatrixView<real_type,UNKNOWN,twoSi,twoSj,twosAc> ,
+                ConstSmallUpperTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
                 ConstUpperTriMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstUpperTriMatrixView<T,nonconjA> const_nonconj_type;
@@ -696,7 +666,7 @@ namespace tmv {
         typedef UpperTriMatrixView<T,nonunitA> nonunitdiag_type;
         typedef UpperTriMatrixView<T,ndA> unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                SmallUpperTriMatrixView<real_type,UNKNOWN,twoSi,twoSj,twosAc> ,
+                SmallUpperTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
                 UpperTriMatrixView<real_type,twosA> >::type realpart_type;
         typedef realpart_type imagpart_type;
         typedef UpperTriMatrixView<T,nonconjA> nonconj_type;
@@ -921,22 +891,22 @@ namespace tmv {
         typedef const type& calc_type;
         typedef const type& eval_type;
 
-        enum { _colsize = UNKNOWN };
-        enum { _rowsize = UNKNOWN };
-        enum { _size = UNKNOWN };
+        enum { _colsize = TMV_UNKNOWN };
+        enum { _rowsize = TMV_UNKNOWN };
+        enum { _size = TMV_UNKNOWN };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
         enum { _colmajor = Attrib<A>::colmajor };
-        enum { _stepi = (_colmajor ? 1 : UNKNOWN) };
-        enum { _stepj = (_rowmajor ? 1 : UNKNOWN) };
-        enum { _diagstep = UNKNOWN };
+        enum { _stepi = (_colmajor ? 1 : TMV_UNKNOWN) };
+        enum { _stepj = (_rowmajor ? 1 : TMV_UNKNOWN) };
+        enum { _diagstep = TMV_UNKNOWN };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
-        enum { _dt = _unknowndiag ? UNKNOWN : A & AllDiagType };
+        enum { _dt = _unknowndiag ? TMV_UNKNOWN : A & AllDiagType };
         enum { _shape = _unit ? UnitUpperTri : UpperTri };
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
@@ -1000,7 +970,7 @@ namespace tmv {
         typedef ConstUpperTriMatrixView<T,nonunitA> const_nonunitdiag_type;
         typedef ConstUpperTriMatrixView<T,ndA> const_unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                ConstSmallUpperTriMatrixView<real_type,UNKNOWN,twoSi,twoSj,twosAc> ,
+                ConstSmallUpperTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
                 ConstUpperTriMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstUpperTriMatrixView<T,nonconjA> const_nonconj_type;
@@ -1048,24 +1018,24 @@ namespace tmv {
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         ConstUpperTriMatrixView(const T* m, size_t s, int si) :
             itsm(m), itss(s), itssi(si), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_stepj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(_stepj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         ConstUpperTriMatrixView(const T* m, size_t s) :
             itsm(m), itss(s), itssi(_stepi), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_stepi != UNKNOWN);
-            TMVStaticAssert(_stepj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(_stepi != TMV_UNKNOWN);
+            TMVStaticAssert(_stepj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         ConstUpperTriMatrixView(const type& m2) :
@@ -1195,22 +1165,22 @@ namespace tmv {
         typedef ConstUpperTriMatrixView<T,A> calc_type;
         typedef const type& eval_type;
 
-        enum { _colsize = UNKNOWN };
-        enum { _rowsize = UNKNOWN };
-        enum { _size = UNKNOWN };
+        enum { _colsize = TMV_UNKNOWN };
+        enum { _rowsize = TMV_UNKNOWN };
+        enum { _size = TMV_UNKNOWN };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
         enum { _colmajor = Attrib<A>::colmajor };
-        enum { _stepi = (_colmajor ? 1 : UNKNOWN) };
-        enum { _stepj = (_rowmajor ? 1 : UNKNOWN) };
-        enum { _diagstep = UNKNOWN };
+        enum { _stepi = (_colmajor ? 1 : TMV_UNKNOWN) };
+        enum { _stepj = (_rowmajor ? 1 : TMV_UNKNOWN) };
+        enum { _diagstep = TMV_UNKNOWN };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
-        enum { _dt = _unknowndiag ? UNKNOWN : A & AllDiagType };
+        enum { _dt = _unknowndiag ? TMV_UNKNOWN : A & AllDiagType };
         enum { _shape = _unit ? UnitUpperTri : UpperTri };
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
@@ -1274,7 +1244,7 @@ namespace tmv {
         typedef ConstUpperTriMatrixView<T,nonunitA> const_nonunitdiag_type;
         typedef ConstUpperTriMatrixView<T,ndA> const_unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                ConstSmallUpperTriMatrixView<real_type,UNKNOWN,twoSi,twoSj,twosAc> ,
+                ConstSmallUpperTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
                 ConstUpperTriMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstUpperTriMatrixView<T,nonconjA> const_nonconj_type;
@@ -1308,7 +1278,7 @@ namespace tmv {
         typedef UpperTriMatrixView<T,nonunitA> nonunitdiag_type;
         typedef UpperTriMatrixView<T,ndA> unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                SmallUpperTriMatrixView<real_type,UNKNOWN,twoSi,twoSj,twosAc> ,
+                SmallUpperTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
                 UpperTriMatrixView<real_type,twosA> >::type realpart_type;
         typedef realpart_type imagpart_type;
         typedef UpperTriMatrixView<T,nonconjA> nonconj_type;
@@ -1356,24 +1326,24 @@ namespace tmv {
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         UpperTriMatrixView(T* m, size_t s, int si) :
             itsm(m), itss(s), itssi(si), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_stepj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(_stepj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         UpperTriMatrixView(T* m, size_t s) :
             itsm(m), itss(s), itssi(_stepi), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_stepi != UNKNOWN);
-            TMVStaticAssert(_stepj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(_stepi != TMV_UNKNOWN);
+            TMVStaticAssert(_stepj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         UpperTriMatrixView(const type& m2) :
@@ -1516,16 +1486,16 @@ namespace tmv {
         typedef const type& eval_type;
         typedef LowerTriMatrix<T,A012> copy_type;
 
-        enum { _colsize = UNKNOWN };
-        enum { _rowsize = UNKNOWN };
-        enum { _size = UNKNOWN };
+        enum { _colsize = TMV_UNKNOWN };
+        enum { _rowsize = TMV_UNKNOWN };
+        enum { _size = TMV_UNKNOWN };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
         enum { _colmajor = Attrib<A>::colmajor };
-        enum { _stepi = (_colmajor ? 1 : UNKNOWN) };
-        enum { _stepj = (_rowmajor ? 1 : UNKNOWN) };
-        enum { _diagstep = UNKNOWN };
+        enum { _stepi = (_colmajor ? 1 : TMV_UNKNOWN) };
+        enum { _stepj = (_rowmajor ? 1 : TMV_UNKNOWN) };
+        enum { _diagstep = TMV_UNKNOWN };
         enum { _conj = false };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _unit = Attrib<A>::unitdiag };
@@ -1587,7 +1557,7 @@ namespace tmv {
         typedef ConstLowerTriMatrixView<T,nonunitA> const_nonunitdiag_type;
         typedef ConstLowerTriMatrixView<T,ndA> const_unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                ConstSmallLowerTriMatrixView<real_type,UNKNOWN,twoSi,twoSj,twosAc> ,
+                ConstSmallLowerTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
                 ConstLowerTriMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstLowerTriMatrixView<T,nonconjA> const_nonconj_type;
@@ -1621,7 +1591,7 @@ namespace tmv {
         typedef LowerTriMatrixView<T,nonunitA> nonunitdiag_type;
         typedef LowerTriMatrixView<T,ndA> unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                SmallLowerTriMatrixView<real_type,UNKNOWN,twoSi,twoSj,twosAc> ,
+                SmallLowerTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
                 LowerTriMatrixView<real_type,twosA> >::type realpart_type;
         typedef realpart_type imagpart_type;
         typedef LowerTriMatrixView<T,nonconjA> nonconj_type;
@@ -1843,22 +1813,22 @@ namespace tmv {
         typedef const type& calc_type;
         typedef const type& eval_type;
 
-        enum { _colsize = UNKNOWN };
-        enum { _rowsize = UNKNOWN };
-        enum { _size = UNKNOWN };
+        enum { _colsize = TMV_UNKNOWN };
+        enum { _rowsize = TMV_UNKNOWN };
+        enum { _size = TMV_UNKNOWN };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
         enum { _colmajor = Attrib<A>::colmajor };
-        enum { _stepi = (_colmajor ? 1 : UNKNOWN) };
-        enum { _stepj = (_rowmajor ? 1 : UNKNOWN) };
-        enum { _diagstep = UNKNOWN };
+        enum { _stepi = (_colmajor ? 1 : TMV_UNKNOWN) };
+        enum { _stepj = (_rowmajor ? 1 : TMV_UNKNOWN) };
+        enum { _diagstep = TMV_UNKNOWN };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
-        enum { _dt = _unknowndiag ? UNKNOWN : A & AllDiagType };
+        enum { _dt = _unknowndiag ? TMV_UNKNOWN : A & AllDiagType };
         enum { _shape = _unit ? UnitLowerTri : LowerTri };
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
@@ -1922,7 +1892,7 @@ namespace tmv {
         typedef ConstLowerTriMatrixView<T,nonunitA> const_nonunitdiag_type;
         typedef ConstLowerTriMatrixView<T,ndA> const_unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                ConstSmallLowerTriMatrixView<real_type,UNKNOWN,twoSi,twoSj,twosAc> ,
+                ConstSmallLowerTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
                 ConstLowerTriMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstLowerTriMatrixView<T,nonconjA> const_nonconj_type;
@@ -1970,24 +1940,24 @@ namespace tmv {
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         ConstLowerTriMatrixView(const T* m, size_t s, int si) :
             itsm(m), itss(s), itssi(si), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_stepj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(_stepj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         ConstLowerTriMatrixView(const T* m, size_t s) :
             itsm(m), itss(s), itssi(_stepi), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_stepi != UNKNOWN);
-            TMVStaticAssert(_stepj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(_stepi != TMV_UNKNOWN);
+            TMVStaticAssert(_stepj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         ConstLowerTriMatrixView(const type& m2) :
@@ -2117,22 +2087,22 @@ namespace tmv {
         typedef ConstLowerTriMatrixView<T,A> calc_type;
         typedef const type& eval_type;
 
-        enum { _colsize = UNKNOWN };
-        enum { _rowsize = UNKNOWN };
-        enum { _size = UNKNOWN };
+        enum { _colsize = TMV_UNKNOWN };
+        enum { _rowsize = TMV_UNKNOWN };
+        enum { _size = TMV_UNKNOWN };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
         enum { _colmajor = Attrib<A>::colmajor };
-        enum { _stepi = (_colmajor ? 1 : UNKNOWN) };
-        enum { _stepj = (_rowmajor ? 1 : UNKNOWN) };
-        enum { _diagstep = UNKNOWN };
+        enum { _stepi = (_colmajor ? 1 : TMV_UNKNOWN) };
+        enum { _stepj = (_rowmajor ? 1 : TMV_UNKNOWN) };
+        enum { _diagstep = TMV_UNKNOWN };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
-        enum { _dt = _unknowndiag ? UNKNOWN : A & AllDiagType };
+        enum { _dt = _unknowndiag ? TMV_UNKNOWN : A & AllDiagType };
         enum { _shape = _unit ? UnitLowerTri : LowerTri };
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
@@ -2196,7 +2166,7 @@ namespace tmv {
         typedef ConstLowerTriMatrixView<T,nonunitA> const_nonunitdiag_type;
         typedef ConstLowerTriMatrixView<T,ndA> const_unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                ConstSmallLowerTriMatrixView<real_type,UNKNOWN,twoSi,twoSj,twosAc> ,
+                ConstSmallLowerTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
                 ConstLowerTriMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstLowerTriMatrixView<T,nonconjA> const_nonconj_type;
@@ -2230,7 +2200,7 @@ namespace tmv {
         typedef LowerTriMatrixView<T,nonunitA> nonunitdiag_type;
         typedef LowerTriMatrixView<T,ndA> unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                SmallLowerTriMatrixView<real_type,UNKNOWN,twoSi,twoSj,twosAc> ,
+                SmallLowerTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
                 LowerTriMatrixView<real_type,twosA> >::type realpart_type;
         typedef realpart_type imagpart_type;
         typedef LowerTriMatrixView<T,nonconjA> nonconj_type;
@@ -2278,24 +2248,24 @@ namespace tmv {
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         LowerTriMatrixView(T* m, size_t s, int si) :
             itsm(m), itss(s), itssi(si), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_stepj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(_stepj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         LowerTriMatrixView(T* m, size_t s) :
             itsm(m), itss(s), itssi(_stepi), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_stepi != UNKNOWN);
-            TMVStaticAssert(_stepj != UNKNOWN); 
-            TMVStaticAssert(_dt != UNKNOWN); 
+            TMVStaticAssert(_stepi != TMV_UNKNOWN);
+            TMVStaticAssert(_stepj != TMV_UNKNOWN); 
+            TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
         LowerTriMatrixView(const type& m2) :

@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 //---------------------------------------------------------------------------
@@ -168,7 +138,7 @@ namespace tmv {
         enum { rs = IntTraits2<M::_colsize,M::_rowsize>::min };
 
         enum { small = (
-                M::_colsize != UNKNOWN && M::_rowsize != UNKNOWN
+                M::_colsize != TMV_UNKNOWN && M::_rowsize != TMV_UNKNOWN
                 && M::_colsize <= 32 && M::_rowsize <= 32 ) };
 
         typedef typename QRD_Impl<small,M>::qrx_type qrx_type;
@@ -385,9 +355,6 @@ namespace tmv {
         size_t colsize() const;
         size_t rowsize() const;
 
-        // Helper function to compute the determinant of Q.
-        int calculateDetQ() const;
-
         // op= not allowed.
         QRD<M>& operator=(const QRD<M>&);
     };
@@ -501,7 +468,7 @@ namespace tmv {
 
     private :
         // op= not allowed.
-        Divider<T>& operator=(const Divider<T>&);
+        InstQRD<T>& operator=(const InstQRD<T>&);
     };
 
     template <bool isvalid, bool istrans>
@@ -586,8 +553,8 @@ namespace tmv {
         QRD_Impl(const BaseMatrix<M2>& A, bool ) : 
             QRx(Maybe<istrans>::transposeview(SmallQRx) )
         {
-            TMVStaticAssert(M::_colsize != UNKNOWN);
-            TMVStaticAssert(M::_rowsize != UNKNOWN);
+            TMVStaticAssert(M::_colsize != TMV_UNKNOWN);
+            TMVStaticAssert(M::_rowsize != TMV_UNKNOWN);
             TMVAssert(A.colsize() == istrans ? int(rs) : int(cs));
             TMVAssert(A.rowsize() == istrans ? int(cs) : int(rs));
             //std::cout<<"QRD_Impl small\n";
@@ -654,17 +621,17 @@ namespace tmv {
         typedef typename M::real_type RT;
         enum { cs1 = M::_colsize };
         enum { rs1 = M::_rowsize };
-        enum { knownsizes = cs1 != UNKNOWN && rs1 != UNKNOWN };
+        enum { knownsizes = cs1 != TMV_UNKNOWN && rs1 != TMV_UNKNOWN };
         enum { istrans1 = knownsizes && cs1 < int(rs1) };
         enum { cs = IntTraits2<cs1,rs1>::max };
         enum { rs = IntTraits2<cs1,rs1>::min };
-        typedef typename MViewHelper<T,Rec,cs,rs,1,UNKNOWN>::type qrx_type;
+        typedef typename MViewHelper<T,Rec,cs,rs,1,TMV_UNKNOWN>::type qrx_type;
         typedef Vector<RT> beta_type;
 
         template <class M2>
         QRD_Impl(const BaseMatrix_Rec<M2>& A, bool _inplace) :
             // if A is short, need to transpose
-            istrans(A.colsize() < A.rowsize()),
+            istrans(knownsizes ? istrans1 : A.colsize() < A.rowsize()),
             // inplace only if it works with a ColMajor QRx object
             inplace( _inplace && 
                      ((A.iscm() && !istrans) || (A.isrm() && istrans)) ),
@@ -721,46 +688,56 @@ namespace tmv {
         void solve(const M2& m2, M3& m3)
         {
             const bool isvalid = (M::isreal && M2::isreal) || M3::iscomplex;
+            const bool isvalid1 = isvalid && (!knownsizes || istrans1);
+            const bool isvalid2 = isvalid && (!knownsizes || !istrans1);
             if (istrans)
-                QRHelper<isvalid,true>::solve(QRx,beta,m2,m3);
+                QRHelper<isvalid1,true>::solve(QRx,beta,m2,m3);
             else
-                QRHelper<isvalid,false>::solve(QRx,beta,m2,m3);
+                QRHelper<isvalid2,false>::solve(QRx,beta,m2,m3);
         }
         template <class M2, class M3>
         void solveTranspose(const M2& m2, M3& m3)
         {
             const bool isvalid = (M::isreal && M2::isreal) || M3::iscomplex;
+            const bool isvalid1 = isvalid && (!knownsizes || istrans1);
+            const bool isvalid2 = isvalid && (!knownsizes || !istrans1);
             if (istrans)
-                QRHelper<isvalid,false>::solve(QRx,beta,m2,m3);
+                QRHelper<isvalid1,false>::solve(QRx,beta,m2,m3);
             else
-                QRHelper<isvalid,true>::solve(QRx,beta,m2,m3);
+                QRHelper<isvalid2,true>::solve(QRx,beta,m2,m3);
         }
         template <class M2>
         void solveInPlace(M2& m2)
         {
             const bool isvalid = M::isreal || M2::iscomplex;
+            const bool isvalid1 = isvalid && (!knownsizes || istrans1);
+            const bool isvalid2 = isvalid && (!knownsizes || !istrans1);
             if (istrans)
-                QRHelper<isvalid,true>::solveInPlace(QRx,beta,m2);
+                QRHelper<isvalid1,true>::solveInPlace(QRx,beta,m2);
             else
-                QRHelper<isvalid,false>::solveInPlace(QRx,beta,m2);
+                QRHelper<isvalid2,false>::solveInPlace(QRx,beta,m2);
         }
         template <class M2>
         void solveTransposeInPlace(M2& m2)
         {
             const bool isvalid = M::isreal || M2::iscomplex;
+            const bool isvalid1 = isvalid && (!knownsizes || istrans1);
+            const bool isvalid2 = isvalid && (!knownsizes || !istrans1);
             if (istrans)
-                QRHelper<isvalid,false>::solveInPlace(QRx,beta,m2);
+                QRHelper<isvalid1,false>::solveInPlace(QRx,beta,m2);
             else
-                QRHelper<isvalid,true>::solveInPlace(QRx,beta,m2);
+                QRHelper<isvalid2,true>::solveInPlace(QRx,beta,m2);
         }
         template <class M2>
         void makeInverse(M2& minv)
         {
             const bool isvalid = M::isreal || M2::iscomplex;
+            const bool isvalid1 = isvalid && (!knownsizes || istrans1);
+            const bool isvalid2 = isvalid && (!knownsizes || !istrans1);
             if (istrans)
-                QRHelper<isvalid,true>::makeInverse(QRx,beta,minv);
+                QRHelper<isvalid1,true>::makeInverse(QRx,beta,minv);
             else
-                QRHelper<isvalid,false>::makeInverse(QRx,beta,minv);
+                QRHelper<isvalid2,false>::makeInverse(QRx,beta,minv);
         }
         template <class M2>
         void makeInverseATA(M2& ata)
@@ -879,24 +856,15 @@ namespace tmv {
 
     template <class M>
     typename M::value_type QRD<M>::det() const
-    { return typename M::real_type(calculateDetQ()) * getR().det(); }
+    { return typename M::real_type(CalculateDetQ(pimpl->beta)) * getR().det(); }
 
     template <class M>
     typename M::float_type QRD<M>::logDet(typename M::zfloat_type* sign) const
     {
         typename M::float_type ret = getR().logDet(sign);
-        if (sign) *sign *= typename M::float_type(calculateDetQ());
+        if (sign) *sign *= typename M::float_type(CalculateDetQ(pimpl->beta));
         return ret;
     }                  
-
-    template <class M>
-    int QRD<M>::calculateDetQ() const 
-    {
-        int detq = 1;
-        const int n = pimpl->beta.size();
-        for(int i=0; i<n; ++i) if (pimpl->beta[i] != RT(0)) detq = -detq;
-        return detq;
-    }
 
     template <class M>
     bool QRD<M>::isSingular() const 

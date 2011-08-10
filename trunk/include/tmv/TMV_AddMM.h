@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_AddMM_H
@@ -87,8 +57,8 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddMM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"AddMM algo 1: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -110,8 +80,8 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-            const int M = cs == UNKNOWN ? int(m2.colsize()) : cs;
-            int N = rs == UNKNOWN ? int(m2.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
+            int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
 #ifdef PRINTALGO_AddMM
             std::cout<<"AddMM algo 11: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -130,7 +100,7 @@ namespace tmv {
             IT2 it2 = m2.get_col(0).begin().nonConj();
             IT3 it3 = m3.get_col(0).begin();
             for(;N;--N) {
-                AddVV_Helper<-4,UNKNOWN,ix1,T1,M1c,ix2,T2,M2c,M3c>::call2(
+                AddVV_Helper<-4,TMV_UNKNOWN,ix1,T1,M1c,ix2,T2,M2c,M3c>::call2(
                     M,x1,it1,x2,it2,it3);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
@@ -192,8 +162,8 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddMM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"AddMM algo 15: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -209,8 +179,8 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-            int M = cs == UNKNOWN ? int(m2.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m2.rowsize()) : rs;
+            int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
 #ifdef PRINTALGO_AddMM
             std::cout<<"AddMM algo 21: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -228,7 +198,7 @@ namespace tmv {
             IT2 it2 = m2.get_row(0).begin().nonConj();
             IT3 it3 = m3.get_row(0).begin();
             for(;M;--M) {
-                AddVV_Helper<-4,UNKNOWN,ix1,T1,M1r,ix2,T2,M2r,M3r>::call2(
+                AddVV_Helper<-4,TMV_UNKNOWN,ix1,T1,M1r,ix2,T2,M2r,M3r>::call2(
                     N,x1,it1,x2,it2,it3);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
@@ -290,8 +260,8 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddMM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"AddMM algo 25: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -308,8 +278,8 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddMM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"AddMM algo 41: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -462,8 +432,8 @@ namespace tmv {
             typedef typename M2::value_type TM2;
             typedef typename M3::value_type TM3;
             const bool inst =
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<TM1,TM2>::samebase &&
                 Traits2<TM1,TM3>::samebase &&
@@ -509,7 +479,7 @@ namespace tmv {
                 cs == 0 || rs == 0 ? 0 :
                 TMV_OPT == 0 ? (allrm ? 21 : 11) :
                 canlin ? 1 :
-                ( cs != UNKNOWN && rs != UNKNOWN ) ? (
+                ( cs != TMV_UNKNOWN && rs != TMV_UNKNOWN ) ? (
                     ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T2)) ) ? (
                         tworm ? 25 : 15 ) :
                     tworm ? 21 : 
@@ -517,8 +487,8 @@ namespace tmv {
                     ( cs > rs ) ? 21 : 11 ) :
                 tworm ? 21 : 11;
 #ifdef PRINTALGO_AddMM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"AddMM algo -4: M,N = "<<M<<','<<N<<std::endl;
             std::cout<<"x1 = "<<ix1<<"  "<<T1(x1)<<std::endl;
             std::cout<<"x2 = "<<ix2<<"  "<<T2(x2)<<std::endl;
@@ -550,11 +520,11 @@ namespace tmv {
                 cs == 0 || rs == 0 ? 0 :
                 canlin ? 1 :
                 TMV_OPT == 0 ? -4 :
-                ( cs == UNKNOWN || rs == UNKNOWN ) ? 41 :
+                ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? 41 :
                 -4;
 #ifdef PRINTALGO_AddMM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"AddMM algo -3: M,N = "<<M<<','<<N<<std::endl;
             std::cout<<"x1 = "<<ix1<<"  "<<T1(x1)<<std::endl;
             std::cout<<"x2 = "<<ix2<<"  "<<T2(x2)<<std::endl;
@@ -580,8 +550,8 @@ namespace tmv {
             typedef typename M2::value_type TM2;
             typedef typename M3::value_type TM3;
             const bool inst =
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<TM1,TM2>::samebase &&
                 Traits2<TM1,TM3>::samebase &&
@@ -596,8 +566,8 @@ namespace tmv {
                 inst ? 90 :
                 -3;
 #ifdef PRINTALGO_AddMM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"AddMM algo -2: M,N = "<<M<<','<<N<<std::endl;
             std::cout<<"x1 = "<<ix1<<"  "<<T1(x1)<<std::endl;
             std::cout<<"x2 = "<<ix2<<"  "<<T2(x2)<<std::endl;
@@ -629,8 +599,8 @@ namespace tmv {
                 M3::_checkalias ? 99 : 
                 -2;
 #ifdef PRINTALGO_AddMM
-            const int M = cs==UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"AddMM algo -1: M,N = "<<M<<','<<N<<std::endl;
             std::cout<<"x1 = "<<ix1<<"  "<<T1(x1)<<std::endl;
             std::cout<<"x2 = "<<ix2<<"  "<<T2(x2)<<std::endl;

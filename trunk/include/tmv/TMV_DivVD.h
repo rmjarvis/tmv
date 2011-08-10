@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_DivVD_H
@@ -80,7 +50,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == UNKNOWN ? int(v3.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v3.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
@@ -98,10 +68,10 @@ namespace tmv {
         }
     };  
 
-#ifdef __SSE__
-    // algo 21: single precision SSE: all real
+#ifdef __SSE2__
+    // algo 31: double precision SSE2: all real
     template <int s, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<21,s,ix,T,V1,V2,V3>
+    struct ElemDivVV_Helper<31,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -109,13 +79,278 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == UNKNOWN ? int(v2.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
 #ifdef PRINTALGO_DivD
-            std::cout<<"ElemDivVV algo 21: N,s = "<<n<<','<<s<<std::endl;
+            std::cout<<"ElemDivVV algo 31: N,s = "<<n<<','<<s<<std::endl;
+#endif
+            const bool unit1 = V1::_step == 1;
+            const bool unit2 = V2::_step == 1;
+
+            if (unit2) {
+                while (n && !TMV_Aligned(B.get()) ) {
+                    *B++ = x / *A++;
+                    --n;
+                }
+            } else if (unit1) {
+                while (n && !TMV_Aligned(A.get()) ) {
+                    *B++ = x / *A++;
+                    --n;
+                }
+            }
+
+            int n_2 = (n>>1);
+            int nb = n-(n_2<<1);
+            
+            if (n_2) {
+                IT1 A1 = A+1;
+                IT2 B1 = B+1;
+
+                __m128d xx = _mm_set1_pd(double(x));
+                __m128d xA,xB;
+                do {
+                    Maybe2<!unit2,unit1>::sse_load(xA,A.get(),A1.get());
+                    A+=2; A1+=2;
+                    xB = _mm_div_pd(xx,xA);
+                    Maybe<unit2>::sse_store(B.get(),B1.get(),xB);
+                    B+=2; B1+=2;
+                } while (--n_2);
+            }
+
+            if (nb) *B = x / *A;
+        }
+    };
+
+    // algo 32: double precision SSE2: x real v1 real v2 complex
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<32,s,ix,T,V1,V2,V3>
+    {
+        typedef typename V1::const_nonconj_type::const_iterator IT1;
+        typedef typename V2::const_nonconj_type::const_iterator IT2;
+        typedef typename V3::iterator IT3;
+        static void call(
+            const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
+        {
+            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
+            call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
+        }
+        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        {
+#ifdef PRINTALGO_DivD
+            std::cout<<"ElemDivVV algo 32: N,s = "<<n<<','<<s<<std::endl;
+#endif
+            const bool unit1 = V1::_step == 1;
+
+            if (unit1) {
+                while (n && !TMV_Aligned(A.get()) ) {
+                    *B++ = x / *A++;
+                    --n;
+                }
+            }
+
+            int n_2 = (n>>1);
+            int nb = n-(n_2<<1);
+            
+            if (n_2) {
+                IT1 A1 = A+1;
+                IT2 B1 = B+1;
+
+                __m128d xx = _mm_set1_pd(double(x));
+                __m128d xzero = _mm_set1_pd(0.);
+                __m128d xA,xB;
+                do {
+                    Maybe<unit1>::sse_load(xA,A.get(),A1.get());
+                    A+=2; A1+=2;
+                    xB = _mm_div_pd(xx,xA);
+                    Maybe<true>::sse_storeu(
+                        B.get(),_mm_unpacklo_pd(xB,xzero));
+                    Maybe<true>::sse_storeu(
+                        B1.get(),_mm_unpackhi_pd(xB,xzero));
+                    B+=2; B1+=2;
+                } while (--n_2);
+            }
+
+            if (nb) *B = x / *A;
+        }
+    };
+
+    // algo 33: double precision SSE2: x real v1 complex v2 complex
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<33,s,ix,T,V1,V2,V3>
+    {
+        typedef typename V1::const_nonconj_type::const_iterator IT1;
+        typedef typename V2::const_nonconj_type::const_iterator IT2;
+        typedef typename V3::iterator IT3;
+        static void call(
+            const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
+        {
+            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
+            call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
+        }
+        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        {
+#ifdef PRINTALGO_DivD
+            std::cout<<"ElemDivVV algo 33: N,s = "<<n<<','<<s<<std::endl;
+#endif
+            const bool c1 = V1::_conj;
+            if (n) {
+                const double mone = Maybe<c1>::select( double(x) , -double(x) );
+                // These look backwards, but order is from hi to lo values.
+                __m128d xconj = _mm_set_pd(mone, double(x));
+                __m128d xA,xB;
+                __m128d xAc, xnorm, x1, x2; // temp values
+                if ( TMV_Aligned(A.get()) && TMV_Aligned(B.get()) ) {
+                    do {
+                        Maybe<true>::sse_load(xA,A.get()); ++A;
+                        xAc = _mm_mul_pd(xconj,xA); // x*conj(xA)
+                        x1 = _mm_mul_pd(xA,xA);
+                        x2 = _mm_shuffle_pd(x1,x1,_MM_SHUFFLE2(0,1));
+                        xnorm = _mm_add_pd(x1,x2); // = norm(xA)
+                        xB = _mm_div_pd(xAc,xnorm);  // = x/xA
+                        Maybe<true>::sse_store(B.get(),xB); ++B;
+                    } while (--n);
+                } else {
+                    do {
+                        Maybe<true>::sse_loadu(xA,A.get()); ++A;
+                        xAc = _mm_mul_pd(xconj,xA); // x*conj(xA)
+                        x1 = _mm_mul_pd(xA,xA);
+                        x2 = _mm_shuffle_pd(x1,x1,_MM_SHUFFLE2(0,1));
+                        xnorm = _mm_add_pd(x1,x2); // = norm(xA)
+                        xB = _mm_div_pd(xAc,xnorm);  // = x/xA
+                        Maybe<true>::sse_storeu(B.get(),xB); ++B;
+                    } while (--n);
+                }
+            }
+        }
+    };
+
+    // algo 34: double precision SSE2: x complex v1 real v2 complex
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<34,s,ix,T,V1,V2,V3>
+    {
+        typedef typename V1::const_nonconj_type::const_iterator IT1;
+        typedef typename V2::const_nonconj_type::const_iterator IT2;
+        typedef typename V3::iterator IT3;
+        static void call(
+            const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
+        {
+            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
+            call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
+        }
+        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        {
+#ifdef PRINTALGO_DivD
+            std::cout<<"ElemDivVV algo 34: N,s = "<<n<<','<<s<<std::endl;
+#endif
+            TMVStaticAssert(ix == 0);
+            TMVStaticAssert((Traits2<T,std::complex<double> >::sametype));
+            const bool unit1 = V1::_step == 1;
+
+            if (unit1) {
+                while (n && !TMV_Aligned(A.get()) ) {
+                    *B++ = x / *A++;
+                    --n;
+                }
+            }
+
+            int n_2 = (n>>1);
+            int nb = n-(n_2<<1);
+            
+            if (n_2) {
+                IT1 A1 = A+1;
+                IT2 B1 = B+1;
+
+                __m128d xone = _mm_set1_pd(1.);
+                __m128d xr = _mm_set1_pd(real(x.x));
+                __m128d xi = _mm_set1_pd(imag(x.x));
+                __m128d xA,xBr,xBi,xAinv;
+                do {
+                    Maybe<unit1>::sse_load(xA,A.get(),A1.get());
+                    A+=2; A1+=2;
+                    xAinv = _mm_div_pd(xone,xA);
+                    xBr = _mm_mul_pd(xr,xAinv);
+                    xBi = _mm_mul_pd(xi,xAinv);
+                    Maybe<true>::sse_store(B.get(),_mm_unpacklo_pd(xBr,xBi));
+                    Maybe<true>::sse_store(B1.get(),_mm_unpackhi_pd(xBr,xBi));
+                    B+=2; B1+=2;
+                } while (--n_2);
+            }
+
+            if (nb) *B = x / *A;
+        }
+    };
+
+    // algo 35: double precision SSE2: all complex
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<35,s,ix,T,V1,V2,V3>
+    {
+        typedef typename V1::const_nonconj_type::const_iterator IT1;
+        typedef typename V2::const_nonconj_type::const_iterator IT2;
+        typedef typename V3::iterator IT3;
+        static void call(
+            const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
+        {
+            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
+            call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
+        }
+        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        {
+#ifdef PRINTALGO_DivD
+            std::cout<<"ElemDivVV algo 35: N,s = "<<n<<','<<s<<std::endl;
+#endif
+            TMVStaticAssert(ix == 0);
+            TMVStaticAssert((Traits2<T,std::complex<double> >::sametype));
+            const bool c1 = V1::_conj;
+            if (n) {
+                double xr = real(x.x);
+                double mxr = Maybe<c1>::select(xr,-xr);
+                double xi = imag(x.x);
+                double mxi = Maybe<c1>::select(-xi,xi);
+                // B = x * conj(A) / norm(A)
+                // Br = xr * Ar + xi * Ai / norm
+                // Bi = -xr * Ai + xi * Ar / norm
+                __m128d xxr = _mm_set_pd(mxr, xr);
+                __m128d xxi = _mm_set_pd(xi, mxi);
+                __m128d xA,xB;
+                __m128d xnorm, x0, x1, x2, x3, x4, x5; // temp values
+                do {
+                    Maybe<true>::sse_load(xA,A.get()); ++A;
+                    x0 = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(0,1));
+                    x1 = _mm_mul_pd(xA,xA);
+                    x2 = _mm_shuffle_pd(x1,x1,_MM_SHUFFLE2(0,1));
+                    xnorm = _mm_add_pd(x1,x2); // = norm(xA)
+                    x3 = _mm_mul_pd(xxr,xA);
+                    x4 = _mm_mul_pd(xxi,x0);
+                    x5 = _mm_add_pd(x3,x4);
+                    xB = _mm_div_pd(x5,xnorm);  // = x/xA
+                    Maybe<true>::sse_store(B.get(),xB); ++B;
+                } while (--n);
+            }
+        }
+    };
+#endif
+
+#ifdef __SSE__
+    // algo 41: single precision SSE: all real
+    template <int s, int ix, class T, class V1, class V2, class V3>
+    struct ElemDivVV_Helper<41,s,ix,T,V1,V2,V3>
+    {
+        typedef typename V1::const_nonconj_type::const_iterator IT1;
+        typedef typename V2::const_nonconj_type::const_iterator IT2;
+        typedef typename V3::iterator IT3;
+        static void call(
+            const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
+        {
+            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
+            call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
+        }
+        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        {
+#ifdef PRINTALGO_DivD
+            std::cout<<"ElemDivVV algo 41: N,s = "<<n<<','<<s<<std::endl;
 #endif
             const bool unit1 = V1::_step == 1;
             const bool unit2 = V2::_step == 1;
@@ -175,9 +410,9 @@ namespace tmv {
         }
     };
 
-    // algo 22: single precision SSE: x real v1 real v2 complex
+    // algo 42: single precision SSE: x real v1 real v2 complex
     template <int s, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<22,s,ix,T,V1,V2,V3>
+    struct ElemDivVV_Helper<42,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -185,13 +420,13 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == UNKNOWN ? int(v2.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
 #ifdef PRINTALGO_DivD
-            std::cout<<"ElemDivVV algo 22: N,s = "<<n<<','<<s<<std::endl;
+            std::cout<<"ElemDivVV algo 42: N,s = "<<n<<','<<s<<std::endl;
 #endif
             const bool unit1 = V1::_step == 1;
             const bool unit2 = V2::_step == 1;
@@ -235,9 +470,9 @@ namespace tmv {
         }
     };
 
-    // algo 23: single precision SSE: x real v1 complex v2 complex
+    // algo 43: single precision SSE: x real v1 complex v2 complex
     template <int s, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<23,s,ix,T,V1,V2,V3>
+    struct ElemDivVV_Helper<43,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -245,13 +480,13 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == UNKNOWN ? int(v2.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
 #ifdef PRINTALGO_DivD
-            std::cout<<"ElemDivVV algo 23: N,s = "<<n<<','<<s<<std::endl;
+            std::cout<<"ElemDivVV algo 43: N,s = "<<n<<','<<s<<std::endl;
 #endif
             const bool unit1 = V1::_step == 1;
             const bool unit2 = V2::_step == 1;
@@ -298,9 +533,9 @@ namespace tmv {
         }
     };
 
-    // algo 24: single precision SSE: x complex v1 real v2 complex
+    // algo 44: single precision SSE: x complex v1 real v2 complex
     template <int s, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<24,s,ix,T,V1,V2,V3>
+    struct ElemDivVV_Helper<44,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -308,13 +543,13 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == UNKNOWN ? int(v2.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
 #ifdef PRINTALGO_DivD
-            std::cout<<"ElemDivVV algo 24: N,s = "<<n<<','<<s<<std::endl;
+            std::cout<<"ElemDivVV algo 44: N,s = "<<n<<','<<s<<std::endl;
 #endif
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<float> >::sametype));
@@ -363,9 +598,9 @@ namespace tmv {
         }
     };
 
-    // algo 25: single precision SSE: all complex
+    // algo 45: single precision SSE: all complex
     template <int s, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<25,s,ix,T,V1,V2,V3>
+    struct ElemDivVV_Helper<45,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
@@ -373,13 +608,13 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == UNKNOWN ? int(v2.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
 #ifdef PRINTALGO_DivD
-            std::cout<<"ElemDivVV algo 25: N,s = "<<n<<','<<s<<std::endl;
+            std::cout<<"ElemDivVV algo 45: N,s = "<<n<<','<<s<<std::endl;
 #endif
             TMVStaticAssert(ix == 0);
             TMVStaticAssert((Traits2<T,std::complex<float> >::sametype));
@@ -437,271 +672,6 @@ namespace tmv {
             }
 
             if (nb) *B = ZProd<false,c1>::quot(x , *A);
-        }
-    };
-#endif
-
-#ifdef __SSE2__
-    // algo 31: double precision SSE2: all real
-    template <int s, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<31,s,ix,T,V1,V2,V3>
-    {
-        typedef typename V1::const_nonconj_type::const_iterator IT1;
-        typedef typename V2::const_nonconj_type::const_iterator IT2;
-        typedef typename V3::iterator IT3;
-        static void call(
-            const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
-        {
-            const int n = s == UNKNOWN ? int(v2.size()) : s;
-            call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
-        }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
-        {
-#ifdef PRINTALGO_DivD
-            std::cout<<"ElemDivVV algo 31: N,s = "<<n<<','<<s<<std::endl;
-#endif
-            const bool unit1 = V1::_step == 1;
-            const bool unit2 = V2::_step == 1;
-
-            if (unit2) {
-                while (n && !TMV_Aligned(B.get()) ) {
-                    *B++ = x / *A++;
-                    --n;
-                }
-            } else if (unit1) {
-                while (n && !TMV_Aligned(A.get()) ) {
-                    *B++ = x / *A++;
-                    --n;
-                }
-            }
-
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
-            
-            if (n_2) {
-                IT1 A1 = A+1;
-                IT2 B1 = B+1;
-
-                __m128d xx = _mm_set1_pd(double(x));
-                __m128d xA,xB;
-                do {
-                    Maybe2<!unit2,unit1>::sse_load(xA,A.get(),A1.get());
-                    A+=2; A1+=2;
-                    xB = _mm_div_pd(xx,xA);
-                    Maybe<unit2>::sse_store(B.get(),B1.get(),xB);
-                    B+=2; B1+=2;
-                } while (--n_2);
-            }
-
-            if (nb) *B = x / *A;
-        }
-    };
-
-    // algo 32: double precision SSE2: x real v1 real v2 complex
-    template <int s, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<32,s,ix,T,V1,V2,V3>
-    {
-        typedef typename V1::const_nonconj_type::const_iterator IT1;
-        typedef typename V2::const_nonconj_type::const_iterator IT2;
-        typedef typename V3::iterator IT3;
-        static void call(
-            const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
-        {
-            const int n = s == UNKNOWN ? int(v2.size()) : s;
-            call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
-        }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
-        {
-#ifdef PRINTALGO_DivD
-            std::cout<<"ElemDivVV algo 32: N,s = "<<n<<','<<s<<std::endl;
-#endif
-            const bool unit1 = V1::_step == 1;
-
-            if (unit1) {
-                while (n && !TMV_Aligned(A.get()) ) {
-                    *B++ = x / *A++;
-                    --n;
-                }
-            }
-
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
-            
-            if (n_2) {
-                IT1 A1 = A+1;
-                IT2 B1 = B+1;
-
-                __m128d xx = _mm_set1_pd(double(x));
-                __m128d xzero = _mm_set1_pd(0.);
-                __m128d xA,xB;
-                do {
-                    Maybe<unit1>::sse_load(xA,A.get(),A1.get());
-                    A+=2; A1+=2;
-                    xB = _mm_div_pd(xx,xA);
-                    Maybe<true>::sse_storeu(
-                        B.get(),_mm_unpacklo_pd(xB,xzero));
-                    Maybe<true>::sse_storeu(
-                        B1.get(),_mm_unpackhi_pd(xB,xzero));
-                    B+=2; B1+=2;
-                } while (--n_2);
-            }
-
-            if (nb) *B = x / *A;
-        }
-    };
-
-    // algo 33: double precision SSE2: x real v1 complex v2 complex
-    template <int s, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<33,s,ix,T,V1,V2,V3>
-    {
-        typedef typename V1::const_nonconj_type::const_iterator IT1;
-        typedef typename V2::const_nonconj_type::const_iterator IT2;
-        typedef typename V3::iterator IT3;
-        static void call(
-            const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
-        {
-            const int n = s == UNKNOWN ? int(v2.size()) : s;
-            call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
-        }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
-        {
-#ifdef PRINTALGO_DivD
-            std::cout<<"ElemDivVV algo 33: N,s = "<<n<<','<<s<<std::endl;
-#endif
-            const bool c1 = V1::_conj;
-            if (n) {
-                const double mone = Maybe<c1>::select( double(x) , -double(x) );
-                // These look backwards, but order is from hi to lo values.
-                __m128d xconj = _mm_set_pd(mone, double(x));
-                __m128d xA,xB;
-                __m128d xAc, xnorm, x1, x2; // temp values
-                if ( TMV_Aligned(A.get()) && TMV_Aligned(B.get()) ) {
-                    do {
-                        Maybe<true>::sse_load(xA,A.get()); ++A;
-                        xAc = _mm_mul_pd(xconj,xA); // x*conj(xA)
-                        x1 = _mm_mul_pd(xA,xA);
-                        x2 = _mm_shuffle_pd(x1,x1,_MM_SHUFFLE2(0,1));
-                        xnorm = _mm_add_pd(x1,x2); // = norm(xA)
-                        xB = _mm_div_pd(xAc,xnorm);  // = x/xA
-                        Maybe<true>::sse_store(B.get(),xB); ++B;
-                    } while (--n);
-                } else {
-                    do {
-                        Maybe<true>::sse_loadu(xA,A.get()); ++A;
-                        xAc = _mm_mul_pd(xconj,xA); // x*conj(xA)
-                        x1 = _mm_mul_pd(xA,xA);
-                        x2 = _mm_shuffle_pd(x1,x1,_MM_SHUFFLE2(0,1));
-                        xnorm = _mm_add_pd(x1,x2); // = norm(xA)
-                        xB = _mm_div_pd(xAc,xnorm);  // = x/xA
-                        Maybe<true>::sse_storeu(B.get(),xB); ++B;
-                    } while (--n);
-                }
-            }
-        }
-    };
-
-    // algo 34: double precision SSE2: x complex v1 real v2 complex
-    template <int s, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<34,s,ix,T,V1,V2,V3>
-    {
-        typedef typename V1::const_nonconj_type::const_iterator IT1;
-        typedef typename V2::const_nonconj_type::const_iterator IT2;
-        typedef typename V3::iterator IT3;
-        static void call(
-            const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
-        {
-            const int n = s == UNKNOWN ? int(v2.size()) : s;
-            call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
-        }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
-        {
-#ifdef PRINTALGO_DivD
-            std::cout<<"ElemDivVV algo 34: N,s = "<<n<<','<<s<<std::endl;
-#endif
-            TMVStaticAssert(ix == 0);
-            TMVStaticAssert((Traits2<T,std::complex<double> >::sametype));
-            const bool unit1 = V1::_step == 1;
-
-            if (unit1) {
-                while (n && !TMV_Aligned(A.get()) ) {
-                    *B++ = x / *A++;
-                    --n;
-                }
-            }
-
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
-            
-            if (n_2) {
-                IT1 A1 = A+1;
-                IT2 B1 = B+1;
-
-                __m128d xone = _mm_set1_pd(1.);
-                __m128d xr = _mm_set1_pd(real(x.x));
-                __m128d xi = _mm_set1_pd(imag(x.x));
-                __m128d xA,xBr,xBi,xAinv;
-                do {
-                    Maybe<unit1>::sse_load(xA,A.get(),A1.get());
-                    A+=2; A1+=2;
-                    xAinv = _mm_div_pd(xone,xA);
-                    xBr = _mm_mul_pd(xr,xAinv);
-                    xBi = _mm_mul_pd(xi,xAinv);
-                    Maybe<true>::sse_store(B.get(),_mm_unpacklo_pd(xBr,xBi));
-                    Maybe<true>::sse_store(B1.get(),_mm_unpackhi_pd(xBr,xBi));
-                    B+=2; B1+=2;
-                } while (--n_2);
-            }
-
-            if (nb) *B = x / *A;
-        }
-    };
-
-    // algo 35: double precision SSE2: all complex
-    template <int s, int ix, class T, class V1, class V2, class V3>
-    struct ElemDivVV_Helper<35,s,ix,T,V1,V2,V3>
-    {
-        typedef typename V1::const_nonconj_type::const_iterator IT1;
-        typedef typename V2::const_nonconj_type::const_iterator IT2;
-        typedef typename V3::iterator IT3;
-        static void call(
-            const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
-        {
-            const int n = s == UNKNOWN ? int(v2.size()) : s;
-            call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
-        }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
-        {
-#ifdef PRINTALGO_DivD
-            std::cout<<"ElemDivVV algo 35: N,s = "<<n<<','<<s<<std::endl;
-#endif
-            TMVStaticAssert(ix == 0);
-            TMVStaticAssert((Traits2<T,std::complex<double> >::sametype));
-            const bool c1 = V1::_conj;
-            if (n) {
-                double xr = real(x.x);
-                double mxr = Maybe<c1>::select(xr,-xr);
-                double xi = imag(x.x);
-                double mxi = Maybe<c1>::select(-xi,xi);
-                // B = x * conj(A) / norm(A)
-                // Br = xr * Ar + xi * Ai / norm
-                // Bi = -xr * Ai + xi * Ar / norm
-                __m128d xxr = _mm_set_pd(mxr, xr);
-                __m128d xxi = _mm_set_pd(xi, mxi);
-                __m128d xA,xB;
-                __m128d xnorm, x0, x1, x2, x3, x4, x5; // temp values
-                do {
-                    Maybe<true>::sse_load(xA,A.get()); ++A;
-                    x0 = _mm_shuffle_pd(xA,xA,_MM_SHUFFLE2(0,1));
-                    x1 = _mm_mul_pd(xA,xA);
-                    x2 = _mm_shuffle_pd(x1,x1,_MM_SHUFFLE2(0,1));
-                    xnorm = _mm_add_pd(x1,x2); // = norm(xA)
-                    x3 = _mm_mul_pd(xxr,xA);
-                    x4 = _mm_mul_pd(xxi,x0);
-                    x5 = _mm_add_pd(x3,x4);
-                    xB = _mm_div_pd(x5,xnorm);  // = x/xA
-                    Maybe<true>::sse_store(B.get(),xB); ++B;
-                } while (--n);
-            }
         }
     };
 #endif
@@ -818,7 +788,7 @@ namespace tmv {
             typedef typename V2::value_type T2;
             typedef typename V3::value_type T3;
             const bool inst =
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -889,7 +859,7 @@ namespace tmv {
             typedef typename V2::value_type T2;
             typedef typename V3::value_type T3;
             const bool inst =
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&

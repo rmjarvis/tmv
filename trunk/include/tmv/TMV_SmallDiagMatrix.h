@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 //---------------------------------------------------------------------------
@@ -65,6 +35,7 @@
 #include "TMV_BaseMatrix_Diag.h"
 #include "TMV_VIt.h"
 #include "TMV_Array.h"
+#include "TMV_DiagMatrix.h"
 
 namespace tmv {
 
@@ -398,15 +369,15 @@ namespace tmv {
             itsm(m), itssize(n), itsstep(S)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(S != UNKNOWN); 
+            TMVStaticAssert(S != TMV_UNKNOWN); 
         }
 
         ConstSmallDiagMatrixView(const T* m) :
             itsm(m), itssize(N), itsstep(S)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(N != UNKNOWN); 
-            TMVStaticAssert(S != UNKNOWN); 
+            TMVStaticAssert(N != TMV_UNKNOWN); 
+            TMVStaticAssert(S != TMV_UNKNOWN); 
         }
 
         ConstSmallDiagMatrixView(const type& m2) :
@@ -611,13 +582,13 @@ namespace tmv {
             itsm(m), itssize(n), itsstep(S)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(S != UNKNOWN); 
+            TMVStaticAssert(S != TMV_UNKNOWN); 
         }
 
         SmallDiagMatrixView(T* m) : itsm(m), itssize(N), itsstep(S)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(N != UNKNOWN); TMVStaticAssert(S != UNKNOWN); 
+            TMVStaticAssert(N != TMV_UNKNOWN); TMVStaticAssert(S != TMV_UNKNOWN); 
         }
 
         SmallDiagMatrixView(const type& m2) :
@@ -710,11 +681,11 @@ namespace tmv {
                 ( S == 1 ? Unit : NonUnit ) )};
 
         typedef typename TypeSelect<
-            ( N==UNKNOWN && (S==UNKNOWN || S==1) ),
+            ( N==TMV_UNKNOWN && (S==TMV_UNKNOWN || S==1) ),
             ConstDiagMatrixView<T,A> ,
             ConstSmallDiagMatrixView<T,N,S,A> >::type cv;
         typedef typename TypeSelect<
-            ( N==UNKNOWN && (S==UNKNOWN || S==1) ),
+            ( N==TMV_UNKNOWN && (S==TMV_UNKNOWN || S==1) ),
             DiagMatrixView<T,A> ,
             SmallDiagMatrixView<T,N,S,A> >::type v;
     };

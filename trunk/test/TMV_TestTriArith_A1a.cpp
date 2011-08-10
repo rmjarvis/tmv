@@ -2,7 +2,6 @@
 #include "TMV_Test_1.h"
 #include "TMV.h"
 
-#define NOSV
 #include "TMV_TestMatrixArith.h"
 
 template <class T> void TestTriMatrixArith_A1a()
@@ -31,6 +30,7 @@ template <class T> void TestTriMatrixArith_A1a()
     tmv::Matrix<CT,tmv::ColMajor> ca2x = ca1x;
     ca2x -= a2x;
     ca2x *= CT(1,-2);
+    ca2x(0,0) = CT(7,12);
 
     tmv::UpperTriMatrixView<T> u1 = a1x.upperTri();
     tmv::UpperTriMatrixView<CT> cu1 = ca1x.upperTri();

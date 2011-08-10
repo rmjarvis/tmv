@@ -1,0 +1,29 @@
+
+#define CT std::complex<T>
+
+#define Def1(T,RT)\
+    template void InstSV_Decompose( \
+        MatrixView<T> U, DiagMatrixView<RT> S, \
+        MatrixView<T> V, T& signdet, RT& logdet, bool StoreU); \
+
+Def1(T,T)
+#ifdef TMV_INST_COMPLEX
+Def1(CT,T)
+#endif
+
+#undef Def1
+
+#define Def2(Tu,RT,Tv)\
+    template void InstSV_DecomposeFromBidiagonal( \
+        MatrixView<Tu> U, VectorView<RT> D, VectorView<RT> E, \
+        MatrixView<Tv> V, bool setUV); \
+
+Def2(T,T,T)
+#ifdef TMV_INST_COMPLEX
+Def2(CT,T,T)
+Def2(T,T,CT)
+Def2(CT,T,CT)
+#endif
+
+#undef Def2
+#undef CT

@@ -1,0 +1,12 @@
+
+#define CT std::complex<T>
+
+template class InstSVD<T>; 
+template InstSVD<T>::InstSVD(const ConstMatrixView<T,false>& A, bool _inplace);
+#ifdef TMV_INST_COMPLEX
+template class InstSVD<CT>; 
+template InstSVD<CT>::InstSVD(const ConstMatrixView<CT,false>& A, bool _inplace);
+template InstSVD<CT>::InstSVD(const ConstMatrixView<CT,true>& A, bool _inplace);
+#endif
+
+#undef CT

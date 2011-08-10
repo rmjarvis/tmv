@@ -1,0 +1,14 @@
+
+#define CT std::complex<T>
+
+#define Def1(T,C)\
+  template void InstQR_Update(UpperTriMatrixView<T> R, MatrixView<T,C> A); \
+
+Def1(T,NonConj)
+#ifdef TMV_INST_COMPLEX
+Def1(CT,NonConj)
+Def1(CT,Conj)
+#endif
+
+#undef Def1
+#undef CT

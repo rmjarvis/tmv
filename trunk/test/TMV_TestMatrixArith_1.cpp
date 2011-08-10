@@ -4,9 +4,6 @@
 #include "TMV.h"
 #include <fstream>
 
-// FIXME: Remove once I do have SVD.
-#define NOSV
-
 #include "TMV_TestMatrixArith.h"
 #define CT std::complex<T>
 

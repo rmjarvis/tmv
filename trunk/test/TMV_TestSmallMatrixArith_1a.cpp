@@ -1,4 +1,9 @@
 
+//#define PRINTALGO_NormM
+//#define PRINTALGO_SVD
+//#define XDEBUG_SVD
+//#undef NDEBUG
+
 #include "TMV_TestSmallMatrixArith_1.h"
 
 template <class T> void TestSmallMatrixArith_1a()

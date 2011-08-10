@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_ElemMultVV_H
@@ -85,7 +55,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == UNKNOWN ? int(v3.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v3.size()) : s;
             call2(n,x1,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(
@@ -112,7 +82,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == UNKNOWN ? int(v3.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v3.size()) : s;
             call2(n,x1,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(
@@ -152,7 +122,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == UNKNOWN ? int(v3.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v3.size()) : s;
             call2(n,x1,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(
@@ -201,7 +171,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == UNKNOWN ? int(v3.size()) : s;
+            const int n = s == TMV_UNKNOWN ? int(v3.size()) : s;
             call2(n,x1,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(
@@ -457,7 +427,7 @@ namespace tmv {
             typedef typename V2::value_type T2;
             typedef typename V3::value_type T3;
             const bool inst =
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -489,7 +459,7 @@ namespace tmv {
                 s == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
                 // Unrolling doesn't ever seem to be faster for this function.
-                //(s != UNKNOWN && s <= int(128/sizeof(VT))) ? 15 :
+                //(s != TMV_UNKNOWN && s <= int(128/sizeof(VT))) ? 15 :
                 (allunit && sizeof(RT) == 8) ? V3::iscomplex ? 12 : 13 :
                 (allunit && sizeof(RT) == 4) ? V3::iscomplex ? 13 : 14 :
                 11 ) };
@@ -528,7 +498,7 @@ namespace tmv {
             typedef typename V2::value_type T2;
             typedef typename V3::value_type T3;
             const bool inst =
-                (s == UNKNOWN || s > 16) &&
+                (s == TMV_UNKNOWN || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&

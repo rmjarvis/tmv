@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_QRDiv_H
@@ -41,10 +11,19 @@
 #include "TMV_Permutation.h"
 #include "TMV_PackedQ.h"
 
+//#define PRINTALGO_QR
+
 #ifdef PRINTALGO_QR
 #include <iostream>
 #include "TMV_ProdMV.h"
 #include "TMV_ProdMM.h"
+#include "TMV_MatrixIO.h"
+#include "TMV_VectorIO.h"
+#include "TMV_AddMM.h"
+#include "TMV_AddVV.h"
+#include "TMV_MultMM.h"
+#include "TMV_MultMV.h"
+#include "TMV_MultUV.h"
 #endif
 
 namespace tmv {
@@ -283,7 +262,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -568,7 +547,7 @@ namespace tmv {
             // m3 = (QRP)^-1 m2
             //    = Pt R^-1 Qt m2
             const int square =
-                cs == UNKNOWN || rs == UNKNOWN ? 2 :
+                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 2 :
                 cs == rs ? 1 : 0;
             //std::cout<<"square = "<<square<<std::endl;
             Helper<square,1>::call(QR,beta,m2,m3);
@@ -639,9 +618,13 @@ namespace tmv {
             static void call(
                 const M1& QR, const V1& beta, const M2& v2, M3& v3)
             {
+                //std::cout<<"Helper 0\n";
                 M2c v2c = v2;
+                //std::cout<<"v2c = "<<v2c<<std::endl;
                 PackedQ_LDivEq(QR,beta,v2c);
+                //std::cout<<"v2c => "<<v2c<<std::endl;
                 v3 = v2c.subVector(0,v3.size());
+                //std::cout<<"v3 => "<<v3<<std::endl;
             }
         };
         template <int dummy>
@@ -650,8 +633,11 @@ namespace tmv {
             static void call(
                 const M1& QR, const V1& beta, const M2& v2, M3& v3)
             {
+                //std::cout<<"Helper 1\n";
                 v3 = v2;
+                //std::cout<<"v3 = "<<v3<<std::endl;
                 PackedQ_LDivEq(QR,beta,v3);
+                //std::cout<<"v3 => "<<v3<<std::endl;
             }
         };
         template <int dummy>
@@ -660,13 +646,19 @@ namespace tmv {
             static void call(
                 const M1& QR, const V1& beta, const M2& v2, M3& v3)
             {
+                //std::cout<<"Helper 2\n";
                 if (QR.isSquare()) {
                     v3 = v2;
+                    //std::cout<<"v3 = "<<v3<<std::endl;
                     PackedQ_LDivEq(QR,beta,v3);
+                    //std::cout<<"v3 => "<<v3<<std::endl;
                 } else {
                     M2c v2c = v2;
+                    //std::cout<<"v2c = "<<v2c<<std::endl;
                     PackedQ_LDivEq(QR,beta,v2c);
+                    //std::cout<<"v2c => "<<v2c<<std::endl;
                     v3 = v2c.subVector(0,v3.size());
+                    //std::cout<<"v3 => "<<v3<<std::endl;
                 }
             }
         };
@@ -692,17 +684,27 @@ namespace tmv {
             // v3 = (QRP)^-1 v2
             //    = Pt R^-1 Qt v2
             const int square =
-                cs == UNKNOWN || rs == UNKNOWN ? 2 :
+                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 2 :
                 cs == rs ? 1 : 0;
             //std::cout<<"square = "<<square<<std::endl;
             Helper<square,1>::call(QR,beta,v2,v3);
-            //std::cout<<"v3 => "<<v3<<std::endl;
+            //std::cout<<"After /= Q: v3 => "<<v3<<std::endl;
+            //typename M1::copy_type Q = QR;
+            //UnpackQ(Q,beta);
+            //std::cout<<"Q = "<<Q<<std::endl;
+            //std::cout<<"Q*v3 = "<<Q*v3<<std::endl;
             v3b.setZero();
             //std::cout<<"v3 => "<<v3<<std::endl;
+            //std::cout<<"Q*v3 = "<<Q*v3<<std::endl;
+            //std::cout<<"N1 = "<<N1<<std::endl;
+            //std::cout<<"v3a = "<<v3a<<std::endl;
             NoAliasTriLDivEq(v3a,QR.upperTri().subTriMatrix(0,N1));
-            //std::cout<<"v3 => "<<v3<<std::endl;
+            //std::cout<<"v3a => "<<v3a<<std::endl;
+            //std::cout<<"after /= R v3 => "<<v3<<std::endl;
+            //std::cout<<"R = "<<QR.upperTri()<<std::endl;
+            //std::cout<<"R * v3 = "<<QR.upperTri()*v3<<std::endl;
             if (P) P->inverse().applyOnLeft(v3);
-            //std::cout<<"v3 => "<<v3<<std::endl;
+            //std::cout<<"after /= P v3 => "<<v3<<std::endl;
         }
     };
     template <int cs, int rs, class M1, class V1, class M2, class M3>
@@ -733,14 +735,14 @@ namespace tmv {
             v3ax = v2;
             //std::cout<<"v3 => "<<v3<<std::endl;
             if (P) P->applyOnLeft(v3ax);
-            //std::cout<<"v3 => "<<v3<<std::endl;
+            //std::cout<<"after /= PT: v3 => "<<v3<<std::endl;
 
             v3b.setZero();
             //std::cout<<"v3 => "<<v3<<std::endl;
             NoAliasTriLDivEq(v3a,QR.upperTri().subTriMatrix(0,N1).transpose());
-            //std::cout<<"v3 => "<<v3<<std::endl;
+            //std::cout<<"After /= RT: v3 => "<<v3<<std::endl;
             PackedQ_MultEq(QR.conjugate(),beta,v3);
-            //std::cout<<"v3 => "<<v3<<std::endl;
+            //std::cout<<"After /= QT: v3 => "<<v3<<std::endl;
         }
     };
 
@@ -820,6 +822,14 @@ namespace tmv {
                 QR,beta,P,N1,m2,m3);
 #ifdef PRINTALGO_QR
             //std::cout<<"m3 => "<<m3<<std::endl;
+            //typename M1::copy_type A = QR;
+            //UnpackQ(A,beta);
+            //A *= QR.upperTri();
+            //if (P) P->applyOnRight(A);
+            //std::cout<<"A = "<<A<<std::endl;
+            //std::cout<<"A*m3 = "<<A*m3<<std::endl;
+            //std::cout<<"A*m3-m2 = "<<A*m3-m2<<std::endl;
+            //std::cout<<"AtA*m3-Atm2 = "<<A.adjoint()*A*m3-A.adjoint()*m2<<std::endl;
 #endif
         }
     };
@@ -835,8 +845,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

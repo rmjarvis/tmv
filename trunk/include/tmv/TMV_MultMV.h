@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 
 #ifndef TMV_MultMV_H
@@ -98,7 +68,7 @@
 #define TMV_MV_UNROLL 0
 #endif
 
-// The minimum size to copy a vector if its step == UNKNOWN.
+// The minimum size to copy a vector if its step == TMV_UNKNOWN.
 #define TMV_MV_COPY_SIZE 4
 
 // PREFETCH is the crossover memory size to start using prefetch commands.
@@ -155,7 +125,7 @@ namespace tmv {
             const Scaling<ix,T>& , const M1& , const V2& , V3& v3) 
         {
 #ifdef PRINTALGO_MV
-            const int M = cs == UNKNOWN ? int(v3.size()) : cs;
+            const int M = cs == TMV_UNKNOWN ? int(v3.size()) : cs;
             std::cout<<"MV algo 0: M,N,cs,rs,x = "<<M<<','<<0<<
                 ','<<cs<<','<<rs<<','<<T(0)<<std::endl;
 #endif
@@ -171,7 +141,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_MV
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"MV algo 1: M,N,cs,rs,x = "<<1<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -191,7 +161,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_MV
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"MV algo 101: M,N,cs,rs,x = "<<1<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -211,7 +181,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_MV
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"MV algo 201: M,N,cs,rs,x = "<<1<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -231,7 +201,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_MV
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
             std::cout<<"MV algo 2: M,N,cs,rs,x = "<<M<<','<<1<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -251,7 +221,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_MV
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
             std::cout<<"MV algo 102: M,N,cs,rs,x = "<<M<<','<<1<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -271,7 +241,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_MV
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
             std::cout<<"MV algo 202: M,N,cs,rs,x = "<<M<<','<<1<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -290,8 +260,8 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
             std::cout<<"MV algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -426,15 +396,15 @@ namespace tmv {
                        x,m1,v2,v3);
             }
 #else
-            MultMV_Helper<11,cs,UNKNOWN,addx,ix,T,M1x,V2x,V3>::call(
+            MultMV_Helper<11,cs,TMV_UNKNOWN,addx,ix,T,M1x,V2x,V3>::call(
                 x,m1,v2,v3);
 #endif
         }
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
             std::cout<<"MV algo 12: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -470,7 +440,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
+            int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
 #ifdef PRINTALGO_MV
             std::cout<<"MV algo 13 N==2: M,N,cs,rs,x = "<<M<<','<<2<<
                 ','<<cs<<','<<2<<','<<T(x)<<std::endl;
@@ -515,7 +485,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
+            int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
 #ifdef PRINTALGO_MV
             std::cout<<"MV algo 13 N==3: M,N,cs,rs,x = "<<M<<','<<3<<
                 ','<<cs<<','<<3<<','<<T(x)<<std::endl;
@@ -563,7 +533,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
+            int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
 #ifdef PRINTALGO_MV
             std::cout<<"MV algo 13 N==4: M,N,cs,rs,x = "<<M<<','<<4<<
                 ','<<cs<<','<<4<<','<<T(x)<<std::endl;
@@ -608,9 +578,140 @@ namespace tmv {
         }
     };
 
-    // algo 15: column major, 2 columns at a time, complex v3
+    // algo 15: fully unroll by cols, apply x to v3
     template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultMV_Helper<15,cs,rs,add,ix,T,M1,V2,V3>
+    {
+        typedef typename V2::value_type T2;
+        typedef typename V3::value_type T3;
+        template <int I, int N, bool first>
+        struct Unroller
+        {
+            static inline void loadx(const V2& v2, T2* X)
+            {
+                Unroller<I,N/2,first>::loadx(v2,X);
+                Unroller<I+N/2,N-N/2,first>::loadx(v2,X);
+            }
+            static inline void sety(
+                const Scaling<ix,T>& x, const T3* Y, V3& v3)
+            {
+                Unroller<I,N/2,first>::sety(x,Y,v3);
+                Unroller<I+N/2,N-N/2,first>::sety(x,Y,v3);
+            }
+            static inline void calcy(const M1& m1, const T2* X, T3* Y)
+            {
+                Unroller<I,N/2,first>::calcy(m1,X,Y);
+                Unroller<I+N/2,N-N/2,first>::calcy(m1,X,Y);
+            }
+            static inline void calcyj(
+                const int j, const M1& m1, const T2& Xj, T3* Y)
+            {
+                Unroller<I,N/2,first>::calcyj(j,m1,Xj,Y);
+                Unroller<I+N/2,N-N/2,first>::calcyj(j,m1,Xj,Y);
+            }
+        };
+        template <int I, bool first>
+        struct Unroller<I,1,first>
+        {
+            static inline void loadx(const V2& v2, T2* X)
+            { X[I] = v2.cref(I); }
+            static inline void sety(
+                const Scaling<ix,T>& x, const T3* Y, V3& v3)
+            { Maybe<add>::add(v3.ref(I) , ZProd<false,false>::prod(x,Y[I])); }
+            static inline void calcy(const M1& m1, const T2* X, T3* Y)
+                // Note: "I" is really j here...
+            { Unroller<0,cs,I==0>::calcyj(I,m1,X[I],Y); }
+            static inline void calcyj(
+                const int j, const M1& m1, const T2& Xj, T3* Y)
+            {
+                Maybe<!first>::add(
+                    Y[I] , ZProd<false,false>::prod(m1.cref(I,j),Xj)); 
+            }
+        };
+        static inline void call(
+            const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
+        {
+#ifdef PRINTALGO_MV
+            std::cout<<"MV algo 15: cs,rs,x = "<<cs<<','<<rs<<
+                ','<<T(x)<<std::endl;
+#endif
+            T2 X[rs];
+            T3 Y[cs];
+            Unroller<0,rs,false>::loadx(v2,X);
+            Unroller<0,rs,false>::calcy(m1,X,Y); 
+            Unroller<0,cs,false>::sety(x,Y,v3);
+        }
+    };
+
+    // algo 16: fully unroll by columnss, apply x to v2
+    template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
+    struct MultMV_Helper<16,cs,rs,add,ix,T,M1,V2,V3>
+    {
+        typedef typename V2::value_type T2;
+        typedef typename Traits2<T,T2>::type PT2;
+        typedef typename V3::value_type T3;
+        template <int I, int N, bool first>
+        struct Unroller
+        {
+            static inline void loadx(
+                const Scaling<ix,T>& x, const V2& v2, PT2* X)
+            {
+                Unroller<I,N/2,first>::loadx(x,v2,X);
+                Unroller<I+N/2,N-N/2,first>::loadx(x,v2,X);
+            }
+            static inline void sety(const T3* Y, V3& v3)
+            {
+                Unroller<I,N/2,first>::sety(Y,v3);
+                Unroller<I+N/2,N-N/2,first>::sety(Y,v3);
+            }
+            static inline void calcy(const M1& m1, const PT2* X, T3* Y)
+            {
+                Unroller<I,N/2,first>::calcy(m1,X,Y);
+                Unroller<I+N/2,N-N/2,first>::calcy(m1,X,Y);
+            }
+            static inline void calcyj(
+                const int j, const M1& m1, const PT2& Xj, T3* Y)
+            {
+                Unroller<I,N/2,first>::calcyj(j,m1,Xj,Y);
+                Unroller<I+N/2,N-N/2,first>::calcyj(j,m1,Xj,Y);
+            }
+        };
+        template <int I, bool first>
+        struct Unroller<I,1,first>
+        {
+            static inline void loadx(
+                const Scaling<ix,T>& x, const V2& v2, PT2* X)
+            { X[I] = ZProd<false,false>::prod(x , v2.cref(I)); }
+            static inline void sety(const T3* Y, V3& v3)
+            { Maybe<add>::add(v3.ref(I) , Y[I]); }
+            static inline void calcy(const M1& m1, const PT2* X, T3* Y)
+                // Note: "I" is really j here...
+            { Unroller<0,cs,I==0>::calcyj(I,m1,X[I],Y); }
+            static inline void calcyj(
+                const int j, const M1& m1, const PT2& Xj, T3* Y)
+            {
+                Maybe<!first>::add(
+                    Y[I] , ZProd<false,false>::prod(m1.cref(I,j),Xj)); 
+            }
+        };
+        static inline void call(
+            const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
+        {
+#ifdef PRINTALGO_MV
+            std::cout<<"MV algo 16: cs,rs,x = "<<cs<<','<<rs<<
+                ','<<T(x)<<std::endl;
+#endif
+            PT2 X[rs];
+            T3 Y[cs];
+            Unroller<0,rs,false>::loadx(x,v2,X);
+            Unroller<0,rs,false>::calcy(m1,X,Y); 
+            Unroller<0,cs,false>::sety(Y,v3);
+        }
+    };
+
+    // algo 17: column major, 2 columns at a time, complex v3
+    template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
+    struct MultMV_Helper<17,cs,rs,add,ix,T,M1,V2,V3>
     {
         static void loop_2_cols(
             const int M, const int N,
@@ -680,10 +781,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
-            std::cout<<"MV algo 15: M,N,cs,rs,x = "<<M<<','<<N<<
+            std::cout<<"MV algo 17: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             TMVStaticAssert(V3::iscomplex);
@@ -704,18 +805,18 @@ namespace tmv {
         }
     };
 
-    // algo 16: do all columns at once, complex v3: rs <= 4, and must be known
+    // algo 18: do all columns at once, complex v3: rs <= 4, and must be known
     // rs == 2
     template <int cs, bool add, int ix, class T, class M1, class V2, class V3>
-    struct MultMV_Helper<16,cs,2,add,ix,T,M1,V2,V3>
+    struct MultMV_Helper<18,cs,2,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             TMVStaticAssert(V3::iscomplex);
-            int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
+            int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
 #ifdef PRINTALGO_MV
-            std::cout<<"MV algo 16 N==2: M,N,cs,rs,x = "<<M<<','<<2<<
+            std::cout<<"MV algo 18 N==2: M,N,cs,rs,x = "<<M<<','<<2<<
                 ','<<cs<<','<<2<<','<<T(x)<<std::endl;
 #endif
             TMVStaticAssert(V3::iscomplex);
@@ -754,14 +855,14 @@ namespace tmv {
     };
     // rs == 3
     template <int cs, bool add, int ix, class T, class M1, class V2, class V3>
-    struct MultMV_Helper<16,cs,3,add,ix,T,M1,V2,V3>
+    struct MultMV_Helper<18,cs,3,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
+            int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
 #ifdef PRINTALGO_MV
-            std::cout<<"MV algo 16 N==3: M,N,cs,rs,x = "<<M<<','<<3<<
+            std::cout<<"MV algo 18 N==3: M,N,cs,rs,x = "<<M<<','<<3<<
                 ','<<cs<<','<<3<<','<<T(x)<<std::endl;
 #endif
             TMVStaticAssert(V3::iscomplex);
@@ -803,14 +904,14 @@ namespace tmv {
     };
     // rs == 4
     template <int cs, bool add, int ix, class T, class M1, class V2, class V3>
-    struct MultMV_Helper<16,cs,4,add,ix,T,M1,V2,V3>
+    struct MultMV_Helper<18,cs,4,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
+            int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
 #ifdef PRINTALGO_MV
-            std::cout<<"MV algo 16 N==4: M,N,cs,rs,x = "<<M<<','<<4<<
+            std::cout<<"MV algo 18 N==4: M,N,cs,rs,x = "<<M<<','<<4<<
                 ','<<cs<<','<<4<<','<<T(x)<<std::endl;
 #endif
             TMVStaticAssert(V3::iscomplex);
@@ -861,8 +962,8 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
             std::cout<<"MV algo 21: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -1018,15 +1119,15 @@ namespace tmv {
                        x,m1,v2,v3);
             }
 #else
-            MultMV_Helper<21,UNKNOWN,rs,add,ix,T,M1x,V2,V3x>::call(
+            MultMV_Helper<21,TMV_UNKNOWN,rs,add,ix,T,M1x,V2,V3x>::call(
                 x,m1,v2,v3);
 #endif
         }
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
             std::cout<<"MV algo 22: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -1061,7 +1162,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
             std::cout<<"MV algo 23 M==2: M,N,cs,rs,x = "<<2<<','<<N<<
                 ','<<2<<','<<rs<<','<<T(x)<<std::endl;
@@ -1120,7 +1221,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
             std::cout<<"MV algo 23 M==3: M,N,cs,rs,x = "<<3<<','<<N<<
                 ','<<3<<','<<rs<<','<<T(x)<<std::endl;
@@ -1188,7 +1289,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
             std::cout<<"MV algo 23 M==4: M,N,cs,rs,x = "<<4<<','<<N<<
                 ','<<4<<','<<rs<<','<<T(x)<<std::endl;
@@ -1260,9 +1361,140 @@ namespace tmv {
         }
     };
 
-    // algo 25: row major, 2 rows at a time, complex v3
+    // algo 25: fully unroll by rows, apply x to v3
     template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultMV_Helper<25,cs,rs,add,ix,T,M1,V2,V3>
+    {
+        typedef typename V2::value_type T2;
+        typedef typename V3::value_type T3;
+        template <int I, int N>
+        struct Unroller
+        {
+            static inline void loadx(const V2& v2, T2* X)
+            {
+                Unroller<I,N/2>::loadx(v2,X);
+                Unroller<I+N/2,N-N/2>::loadx(v2,X);
+            }
+            static inline void sety(
+                const Scaling<ix,T>& x, const T3* Y, V3& v3)
+            {
+                Unroller<I,N/2>::sety(x,Y,v3);
+                Unroller<I+N/2,N-N/2>::sety(x,Y,v3);
+            }
+            static inline void calcy(const M1& m1, const T2* X, T3* Y)
+            {
+                Unroller<I,N/2>::calcy(m1,X,Y);
+                Unroller<I+N/2,N-N/2>::calcy(m1,X,Y);
+            }
+            static inline void calcyi(
+                const int i, const M1& m1, const T2* X, T3& Yi)
+            {
+                Unroller<I,N/2>::calcyi(i,m1,X,Yi);
+                Unroller<I+N/2,N-N/2>::calcyi(i,m1,X,Yi);
+            }
+        };
+        template <int I>
+        struct Unroller<I,1>
+        {
+            static inline void loadx(const V2& v2, T2* X)
+            { X[I] = v2.cref(I); }
+            static inline void sety(
+                const Scaling<ix,T>& x, const T3* Y, V3& v3)
+            { Maybe<add>::add(v3.ref(I) , ZProd<false,false>::prod(x,Y[I])); }
+            static inline void calcy(const M1& m1, const T2* X, T3* Y)
+            { Unroller<0,rs>::calcyi(I,m1,X,Y[I]); }
+            static inline void calcyi(
+                const int i, const M1& m1, const T2* X, T3& Yi)
+                // Note: "I" is really j here...
+            {
+                Maybe<(I>0)>::add(
+                    Yi , ZProd<false,false>::prod(m1.cref(i,I),X[I])); 
+            }
+        };
+        static inline void call(
+            const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
+        {
+#ifdef PRINTALGO_MV
+            std::cout<<"MV algo 25: cs,rs,x = "<<cs<<','<<rs<<
+                ','<<T(x)<<std::endl;
+#endif
+            T2 X[rs];
+            T3 Y[cs];
+            Unroller<0,rs>::loadx(v2,X);
+            Unroller<0,cs>::calcy(m1,X,Y); 
+            Unroller<0,cs>::sety(x,Y,v3);
+        }
+    };
+
+    // algo 26: fully unroll by rows, apply x to v2
+    template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
+    struct MultMV_Helper<26,cs,rs,add,ix,T,M1,V2,V3>
+    {
+        typedef typename V2::value_type T2;
+        typedef typename Traits2<T,T2>::type PT2;
+        typedef typename V3::value_type T3;
+        template <int I, int N>
+        struct Unroller
+        {
+            static inline void loadx(
+                const Scaling<ix,T>& x, const V2& v2, PT2* X)
+            {
+                Unroller<I,N/2>::loadx(x,v2,X);
+                Unroller<I+N/2,N-N/2>::loadx(x,v2,X);
+            }
+            static inline void sety(const T3* Y, V3& v3)
+            {
+                Unroller<I,N/2>::sety(Y,v3);
+                Unroller<I+N/2,N-N/2>::sety(Y,v3);
+            }
+            static inline void calcy(const M1& m1, const PT2* X, T3* Y)
+            {
+                Unroller<I,N/2>::calcy(m1,X,Y);
+                Unroller<I+N/2,N-N/2>::calcy(m1,X,Y);
+            }
+            static inline void calcyi(
+                const int i, const M1& m1, const PT2* X, T3& Yi)
+            {
+                Unroller<I,N/2>::calcyi(i,m1,X,Yi);
+                Unroller<I+N/2,N-N/2>::calcyi(i,m1,X,Yi);
+            }
+        };
+        template <int I>
+        struct Unroller<I,1>
+        {
+            static inline void loadx(
+                const Scaling<ix,T>& x, const V2& v2, PT2* X)
+            { X[I] = ZProd<false,false>::prod(x , v2.cref(I)); }
+            static inline void sety(const T3* Y, V3& v3)
+            { Maybe<add>::add(v3.ref(I) , Y[I]); }
+            static inline void calcy(const M1& m1, const PT2* X, T3* Y)
+            { Unroller<0,rs>::calcyi(I,m1,X,Y[I]); }
+            static inline void calcyi(
+                const int i, const M1& m1, const PT2* X, T3& Yi)
+                // Note: "I" is really j here...
+            {
+                Maybe<(I>0)>::add(
+                    Yi , ZProd<false,false>::prod(m1.cref(i,I),X[I])); 
+            }
+        };
+        static inline void call(
+            const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
+        {
+#ifdef PRINTALGO_MV
+            std::cout<<"MV algo 26: cs,rs,x = "<<cs<<','<<rs<<
+                ','<<T(x)<<std::endl;
+#endif
+            PT2 X[rs];
+            T3 Y[cs];
+            Unroller<0,rs>::loadx(x,v2,X);
+            Unroller<0,cs>::calcy(m1,X,Y); 
+            Unroller<0,cs>::sety(Y,v3);
+        }
+    };
+
+    // algo 27: row major, 2 rows at a time, complex v3
+    template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
+    struct MultMV_Helper<27,cs,rs,add,ix,T,M1,V2,V3>
     {
         static void loop_2_rows(
             const int M, const int N,
@@ -1331,10 +1563,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
-            std::cout<<"MV algo 25: M,N,cs,rs,x = "<<M<<','<<N<<
+            std::cout<<"MV algo 27: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             TMVStaticAssert(V3::iscomplex);
@@ -1356,17 +1588,17 @@ namespace tmv {
         }
     };
 
-    // algo 26: do all rows at once, complex v3: cs <= 4, and must be known
+    // algo 28: do all rows at once, complex v3: cs <= 4, and must be known
     // cs == 2
     template <int rs, bool add, int ix, class T, class M1, class V2, class V3>
-    struct MultMV_Helper<26,2,rs,add,ix,T,M1,V2,V3>
+    struct MultMV_Helper<28,2,rs,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
-            std::cout<<"MV algo 26: M,N,cs,rs,x = "<<2<<','<<N<<
+            std::cout<<"MV algo 28: M,N,cs,rs,x = "<<2<<','<<N<<
                 ','<<2<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             TMVStaticAssert(V3::iscomplex);
@@ -1411,14 +1643,14 @@ namespace tmv {
     };
     // cs == 3
     template <int rs, bool add, int ix, class T, class M1, class V2, class V3>
-    struct MultMV_Helper<26,3,rs,add,ix,T,M1,V2,V3>
+    struct MultMV_Helper<28,3,rs,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
-            std::cout<<"MV algo 26: M,N,cs,rs,x = "<<3<<','<<N<<
+            std::cout<<"MV algo 28: M,N,cs,rs,x = "<<3<<','<<N<<
                 ','<<3<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             TMVStaticAssert(V3::iscomplex);
@@ -1468,14 +1700,14 @@ namespace tmv {
     };
     // cs == 4
     template <int rs, bool add, int ix, class T, class M1, class V2, class V3>
-    struct MultMV_Helper<26,4,rs,add,ix,T,M1,V2,V3>
+    struct MultMV_Helper<28,4,rs,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
-            std::cout<<"MV algo 26: M,N,cs,rs,x = "<<4<<','<<N<<
+            std::cout<<"MV algo 28: M,N,cs,rs,x = "<<4<<','<<N<<
                 ','<<4<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             TMVStaticAssert(V3::iscomplex);
@@ -1530,313 +1762,53 @@ namespace tmv {
         }
     };
 
-    // algo 31: fully unroll by rows, apply x to v3
-    template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
-    struct MultMV_Helper<31,cs,rs,add,ix,T,M1,V2,V3>
-    {
-        typedef typename V2::value_type T2;
-        typedef typename V3::value_type T3;
-        template <int I, int N>
-        struct Unroller
-        {
-            static inline void loadx(const V2& v2, T2* X)
-            {
-                Unroller<I,N/2>::loadx(v2,X);
-                Unroller<I+N/2,N-N/2>::loadx(v2,X);
-            }
-            static inline void sety(
-                const Scaling<ix,T>& x, const T3* Y, V3& v3)
-            {
-                Unroller<I,N/2>::sety(x,Y,v3);
-                Unroller<I+N/2,N-N/2>::sety(x,Y,v3);
-            }
-            static inline void calcy(const M1& m1, const T2* X, T3* Y)
-            {
-                Unroller<I,N/2>::calcy(m1,X,Y);
-                Unroller<I+N/2,N-N/2>::calcy(m1,X,Y);
-            }
-            static inline void calcyi(
-                const int i, const M1& m1, const T2* X, T3& Yi)
-            {
-                Unroller<I,N/2>::calcyi(i,m1,X,Yi);
-                Unroller<I+N/2,N-N/2>::calcyi(i,m1,X,Yi);
-            }
-        };
-        template <int I>
-        struct Unroller<I,1>
-        {
-            static inline void loadx(const V2& v2, T2* X)
-            { X[I] = v2.cref(I); }
-            static inline void sety(
-                const Scaling<ix,T>& x, const T3* Y, V3& v3)
-            { Maybe<add>::add(v3.ref(I) , ZProd<false,false>::prod(x,Y[I])); }
-            static inline void calcy(const M1& m1, const T2* X, T3* Y)
-            { Unroller<0,rs>::calcyi(I,m1,X,Y[I]); }
-            static inline void calcyi(
-                const int i, const M1& m1, const T2* X, T3& Yi)
-                // Note: "I" is really j here...
-            {
-                Maybe<(I>0)>::add(
-                    Yi , ZProd<false,false>::prod(m1.cref(i,I),X[I])); 
-            }
-        };
-        static inline void call(
-            const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
-        {
-#ifdef PRINTALGO_MV
-            std::cout<<"MV algo 31: cs,rs,x = "<<cs<<','<<rs<<
-                ','<<T(x)<<std::endl;
-#endif
-            T2 X[rs];
-            T3 Y[cs];
-            Unroller<0,rs>::loadx(v2,X);
-            Unroller<0,cs>::calcy(m1,X,Y); 
-            Unroller<0,cs>::sety(x,Y,v3);
-        }
-    };
-
-    // algo 32: fully unroll by rows, apply x to v2
-    template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
-    struct MultMV_Helper<32,cs,rs,add,ix,T,M1,V2,V3>
-    {
-        typedef typename V2::value_type T2;
-        typedef typename Traits2<T,T2>::type PT2;
-        typedef typename V3::value_type T3;
-        template <int I, int N>
-        struct Unroller
-        {
-            static inline void loadx(
-                const Scaling<ix,T>& x, const V2& v2, PT2* X)
-            {
-                Unroller<I,N/2>::loadx(x,v2,X);
-                Unroller<I+N/2,N-N/2>::loadx(x,v2,X);
-            }
-            static inline void sety(const T3* Y, V3& v3)
-            {
-                Unroller<I,N/2>::sety(Y,v3);
-                Unroller<I+N/2,N-N/2>::sety(Y,v3);
-            }
-            static inline void calcy(const M1& m1, const PT2* X, T3* Y)
-            {
-                Unroller<I,N/2>::calcy(m1,X,Y);
-                Unroller<I+N/2,N-N/2>::calcy(m1,X,Y);
-            }
-            static inline void calcyi(
-                const int i, const M1& m1, const PT2* X, T3& Yi)
-            {
-                Unroller<I,N/2>::calcyi(i,m1,X,Yi);
-                Unroller<I+N/2,N-N/2>::calcyi(i,m1,X,Yi);
-            }
-        };
-        template <int I>
-        struct Unroller<I,1>
-        {
-            static inline void loadx(
-                const Scaling<ix,T>& x, const V2& v2, PT2* X)
-            { X[I] = ZProd<false,false>::prod(x , v2.cref(I)); }
-            static inline void sety(const T3* Y, V3& v3)
-            { Maybe<add>::add(v3.ref(I) , Y[I]); }
-            static inline void calcy(const M1& m1, const PT2* X, T3* Y)
-            { Unroller<0,rs>::calcyi(I,m1,X,Y[I]); }
-            static inline void calcyi(
-                const int i, const M1& m1, const PT2* X, T3& Yi)
-                // Note: "I" is really j here...
-            {
-                Maybe<(I>0)>::add(
-                    Yi , ZProd<false,false>::prod(m1.cref(i,I),X[I])); 
-            }
-        };
-        static inline void call(
-            const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
-        {
-#ifdef PRINTALGO_MV
-            std::cout<<"MV algo 32: cs,rs,x = "<<cs<<','<<rs<<
-                ','<<T(x)<<std::endl;
-#endif
-            PT2 X[rs];
-            T3 Y[cs];
-            Unroller<0,rs>::loadx(x,v2,X);
-            Unroller<0,cs>::calcy(m1,X,Y); 
-            Unroller<0,cs>::sety(Y,v3);
-        }
-    };
-
-    // algo 33: fully unroll by rows, apply x to v3
-    template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
-    struct MultMV_Helper<33,cs,rs,add,ix,T,M1,V2,V3>
-    {
-        typedef typename V2::value_type T2;
-        typedef typename V3::value_type T3;
-        template <int I, int N, bool first>
-        struct Unroller
-        {
-            static inline void loadx(const V2& v2, T2* X)
-            {
-                Unroller<I,N/2,first>::loadx(v2,X);
-                Unroller<I+N/2,N-N/2,first>::loadx(v2,X);
-            }
-            static inline void sety(
-                const Scaling<ix,T>& x, const T3* Y, V3& v3)
-            {
-                Unroller<I,N/2,first>::sety(x,Y,v3);
-                Unroller<I+N/2,N-N/2,first>::sety(x,Y,v3);
-            }
-            static inline void calcy(const M1& m1, const T2* X, T3* Y)
-            {
-                Unroller<I,N/2,first>::calcy(m1,X,Y);
-                Unroller<I+N/2,N-N/2,first>::calcy(m1,X,Y);
-            }
-            static inline void calcyj(
-                const int j, const M1& m1, const T2& Xj, T3* Y)
-            {
-                Unroller<I,N/2,first>::calcyj(j,m1,Xj,Y);
-                Unroller<I+N/2,N-N/2,first>::calcyj(j,m1,Xj,Y);
-            }
-        };
-        template <int I, bool first>
-        struct Unroller<I,1,first>
-        {
-            static inline void loadx(const V2& v2, T2* X)
-            { X[I] = v2.cref(I); }
-            static inline void sety(
-                const Scaling<ix,T>& x, const T3* Y, V3& v3)
-            { Maybe<add>::add(v3.ref(I) , ZProd<false,false>::prod(x,Y[I])); }
-            static inline void calcy(const M1& m1, const T2* X, T3* Y)
-                // Note: "I" is really j here...
-            { Unroller<0,cs,I==0>::calcyj(I,m1,X[I],Y); }
-            static inline void calcyj(
-                const int j, const M1& m1, const T2& Xj, T3* Y)
-            {
-                Maybe<!first>::add(
-                    Y[I] , ZProd<false,false>::prod(m1.cref(I,j),Xj)); 
-            }
-        };
-        static inline void call(
-            const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
-        {
-#ifdef PRINTALGO_MV
-            std::cout<<"MV algo 33: cs,rs,x = "<<cs<<','<<rs<<
-                ','<<T(x)<<std::endl;
-#endif
-            T2 X[rs];
-            T3 Y[cs];
-            Unroller<0,rs,false>::loadx(v2,X);
-            Unroller<0,rs,false>::calcy(m1,X,Y); 
-            Unroller<0,cs,false>::sety(x,Y,v3);
-        }
-    };
-
-    // algo 34: fully unroll by columnss, apply x to v2
-    template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
-    struct MultMV_Helper<34,cs,rs,add,ix,T,M1,V2,V3>
-    {
-        typedef typename V2::value_type T2;
-        typedef typename Traits2<T,T2>::type PT2;
-        typedef typename V3::value_type T3;
-        template <int I, int N, bool first>
-        struct Unroller
-        {
-            static inline void loadx(
-                const Scaling<ix,T>& x, const V2& v2, PT2* X)
-            {
-                Unroller<I,N/2,first>::loadx(x,v2,X);
-                Unroller<I+N/2,N-N/2,first>::loadx(x,v2,X);
-            }
-            static inline void sety(const T3* Y, V3& v3)
-            {
-                Unroller<I,N/2,first>::sety(Y,v3);
-                Unroller<I+N/2,N-N/2,first>::sety(Y,v3);
-            }
-            static inline void calcy(const M1& m1, const PT2* X, T3* Y)
-            {
-                Unroller<I,N/2,first>::calcy(m1,X,Y);
-                Unroller<I+N/2,N-N/2,first>::calcy(m1,X,Y);
-            }
-            static inline void calcyj(
-                const int j, const M1& m1, const PT2& Xj, T3* Y)
-            {
-                Unroller<I,N/2,first>::calcyj(j,m1,Xj,Y);
-                Unroller<I+N/2,N-N/2,first>::calcyj(j,m1,Xj,Y);
-            }
-        };
-        template <int I, bool first>
-        struct Unroller<I,1,first>
-        {
-            static inline void loadx(
-                const Scaling<ix,T>& x, const V2& v2, PT2* X)
-            { X[I] = ZProd<false,false>::prod(x , v2.cref(I)); }
-            static inline void sety(const T3* Y, V3& v3)
-            { Maybe<add>::add(v3.ref(I) , Y[I]); }
-            static inline void calcy(const M1& m1, const PT2* X, T3* Y)
-                // Note: "I" is really j here...
-            { Unroller<0,cs,I==0>::calcyj(I,m1,X[I],Y); }
-            static inline void calcyj(
-                const int j, const M1& m1, const PT2& Xj, T3* Y)
-            {
-                Maybe<!first>::add(
-                    Y[I] , ZProd<false,false>::prod(m1.cref(I,j),Xj)); 
-            }
-        };
-        static inline void call(
-            const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
-        {
-#ifdef PRINTALGO_MV
-            std::cout<<"MV algo 34: cs,rs,x = "<<cs<<','<<rs<<
-                ','<<T(x)<<std::endl;
-#endif
-            PT2 X[rs];
-            T3 Y[cs];
-            Unroller<0,rs,false>::loadx(x,v2,X);
-            Unroller<0,rs,false>::calcy(m1,X,Y); 
-            Unroller<0,cs,false>::sety(Y,v3);
-        }
-    };
-
-    // algo 41: colmajor, ix == 0, !add, so might want to use algo 43
+    // TODO algo 31, etc. = SSE2, 41, etc. = SSE
+    
+    // algo 51: colmajor, ix == 0, !add, so might want to use algo 53
     // to do the scaling at the end.
     template <int cs, int rs, int ix, class T, class M1, class V2, class V3>
-    struct MultMV_Helper<41,cs,rs,false,ix,T,M1,V2,V3>
+    struct MultMV_Helper<51,cs,rs,false,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<0,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
-            std::cout<<"MV algo 41: M,N,cs,rs,x = "<<M<<','<<N<<
+            std::cout<<"MV algo 51: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const int algo2 = V3::iscomplex ? 15 : 12;
+            const int algo2 = V3::iscomplex ? 17 : 12;
             if (M >= N)
                 MultMV_Helper<algo2,cs,rs,false,ix,T,M1,V2,V3>::call(
                     x,m1,v2,v3);
             else 
-                MultMV_Helper<43,cs,rs,false,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
+                MultMV_Helper<53,cs,rs,false,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
         }
     };
 
-    // algo 42: colmajor, ix==0 && add, so might need to copy v3
+    // algo 52: colmajor, ix==0 && add, so might need to copy v3
     template <int cs, int rs, int ix, class T, class M1, class V2, class V3>
-    struct MultMV_Helper<42,cs,rs,true,ix,T,M1,V2,V3>
+    struct MultMV_Helper<52,cs,rs,true,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             TMVStaticAssert(TMV_MV_ZeroIX);
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
-            std::cout<<"MV algo 42: M,N,cs,rs,x = "<<M<<','<<N<<
+            std::cout<<"MV algo 52: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const int algo2 = V3::iscomplex ? 15 : 12;
+            const int algo2 = V3::iscomplex ? 17 : 12;
             // If we have a non-trivial scale and the size of 
             // v2 is (significantly) larger than v3 and add = true, 
             // then it is worth doing m1*v2 first and then applying x.
 
             // On the other hand, if add = false, then we can get around
             // the temporary by multiplying by x after doing m1*v2.
-            // This is done in algo 43, but I mention it here to 
+            // This is done in algo 53, but I mention it here to 
             // explain why we have the add=true requirement.
 
             if (N > TMV_MV_COPY_SCALE_RATIO * M) 
@@ -1846,28 +1818,28 @@ namespace tmv {
         }
     };
 
-    // algo 44: colmajor, unknown cs -- check if it is small
+    // algo 54: colmajor, unknown cs -- check if it is small
     template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
-    struct MultMV_Helper<44,cs,rs,add,ix,T,M1,V2,V3>
+    struct MultMV_Helper<54,cs,rs,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             const int algo1 = 
-                V3::_step == UNKNOWN ? 86 : 
+                V3::_step == TMV_UNKNOWN ? 86 : 
 #ifdef TMV_MV_SCALE
-                ( TMV_MV_ZeroIX && add ) ? 42 : 
-                ( TMV_MV_ZeroIX && !add ) ? 41 : 
+                ( TMV_MV_ZeroIX && add ) ? 52 : 
+                ( TMV_MV_ZeroIX && !add ) ? 51 : 
 #endif
-                V3::iscomplex ? 15 : 12;
+                V3::iscomplex ? 17 : 12;
             const int algo2 = 
-                V2::_step == 1 ? ( V3::iscomplex ? 26 : 23 ) : algo1;
+                V2::_step == 1 ? ( V3::iscomplex ? 28 : 23 ) : algo1;
 
-            TMVStaticAssert(cs == UNKNOWN);
+            TMVStaticAssert(cs == TMV_UNKNOWN);
             const int M = m1.colsize();
 #ifdef PRINTALGO_MV
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
-            std::cout<<"MV algo 44: M,N,cs,rs,x = "<<M<<','<<N<<
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            std::cout<<"MV algo 54: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             if (M <= 4) {
@@ -1897,20 +1869,20 @@ namespace tmv {
         }
     };
 
-    // algo 43: column major, !add, apply x at the end
+    // algo 53: column major, !add, apply x at the end
     template <int cs, int rs, class T, class M1, class V2, class V3>
-    struct MultMV_Helper<43,cs,rs,false,0,T,M1,V2,V3>
+    struct MultMV_Helper<53,cs,rs,false,0,T,M1,V2,V3>
     {
         static void call(
             const Scaling<0,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_MV
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
-            std::cout<<"MV algo 43: M,N,cs,rs,x = "<<M<<','<<N<<
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            std::cout<<"MV algo 53: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const int algo2 = V3::iscomplex ? 15 : 12;
+            const int algo2 = V3::iscomplex ? 17 : 12;
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
             MultMV_Helper<algo2,cs,rs,false,1,RT,M1,V2,V3>::call(one,m1,v2,v3);
@@ -1919,24 +1891,24 @@ namespace tmv {
     };
 
 
-    // algo 52: rowmajor, might need to copy v2
+    // algo 62: rowmajor, might need to copy v2
     // If we have a non-trivial scale and the size of 
     // v3 is (significantly) larger than v2, then it is worth
     // making x*v2 as a temporary.
     template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
-    struct MultMV_Helper<52,cs,rs,add,ix,T,M1,V2,V3>
+    struct MultMV_Helper<62,cs,rs,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             TMVStaticAssert(TMV_MV_ZeroIX);
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
 #ifdef PRINTALGO_MV
-            std::cout<<"MV algo 52: M,N,cs,rs,x = "<<M<<','<<N<<
+            std::cout<<"MV algo 62: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const int algo2 = V3::iscomplex ? 25 : 22;
+            const int algo2 = V3::iscomplex ? 27 : 22;
 
             if (M > TMV_MV_COPY_SCALE_RATIO * N) 
                 MultMV_Helper<82,cs,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
@@ -1945,25 +1917,25 @@ namespace tmv {
         }
     };
 
-    // algo 54: rowmajor, unknown rs -- see if it is small
+    // algo 64: rowmajor, unknown rs -- see if it is small
     template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
-    struct MultMV_Helper<54,cs,rs,add,ix,T,M1,V2,V3>
+    struct MultMV_Helper<64,cs,rs,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             const int algo1 = 
-                V2::_step == UNKNOWN ? 83 : 
+                V2::_step == TMV_UNKNOWN ? 83 : 
 #ifdef TMV_MV_SCALE
-                TMV_MV_ZeroIX ? 52 :
+                TMV_MV_ZeroIX ? 62 :
 #endif
-                V3::iscomplex ? 25 : 22;
-            const int algo2 = V3::iscomplex ? 16 : 13;
-            TMVStaticAssert(rs == UNKNOWN);
+                V3::iscomplex ? 27 : 22;
+            const int algo2 = V3::iscomplex ? 18 : 13;
+            TMVStaticAssert(rs == TMV_UNKNOWN);
             const int N = m1.rowsize();
 #ifdef PRINTALGO_MV
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            std::cout<<"MV algo 54: M,N,cs,rs,x = "<<M<<','<<N<<
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            std::cout<<"MV algo 64: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             if (N <= 4) {
@@ -2002,8 +1974,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_MV
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
             std::cout<<"MV algo 81: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -2019,8 +1991,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_MV
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
             std::cout<<"MV algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -2037,8 +2009,8 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
             if (N >= M) {
                 MultMV_Helper<81,cs,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
             } else {
@@ -2063,8 +2035,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_MV
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"MV algo 84: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -2080,8 +2052,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_MV
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
             std::cout<<"MV algo 85: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -2098,8 +2070,8 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int M = cs == UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
             if (N >= M) {
                 MultMV_Helper<84,cs,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
             } else {
@@ -2233,8 +2205,8 @@ namespace tmv {
             typedef typename V2::value_type T2;
             typedef typename V3::value_type T3;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -2256,7 +2228,7 @@ namespace tmv {
     struct MultMV_Unroll_Helper
     {
         enum { unroll = (
-                ( cs == UNKNOWN || rs == UNKNOWN ) ? false :
+                ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? false :
                 IntTraits2<cs,rs>::prod > TMV_MV_UNROLL ? false :
                 // These maxunroll values are empirical for my machine,
                 // comparing the speed for the fully unrolled algorithm
@@ -2314,22 +2286,22 @@ namespace tmv {
                 M1::_colmajor ? (
                     unroll ? (
                         ( cs <= TMV_MV_COL_UNROLL ? 
-                          ( (rs<cs) ? 32 : 31 ) :
-                          ( (rs<cs) ? 34 : 33 ) ) ) :
-                    ( cs != UNKNOWN && cs <= 4 && V2::_step == 1 ) ? (
-                        (V3::iscomplex ? 26 : 23) ) :
+                          ( (rs<cs) ? 26 : 25 ) :
+                          ( (rs<cs) ? 16 : 15 ) ) ) :
+                    ( cs != TMV_UNKNOWN && cs <= 4 && V2::_step == 1 ) ? (
+                        (V3::iscomplex ? 28 : 23) ) :
                     ( !add && TMV_MV_ZeroIX && 
-                      rs != UNKNOWN && cs != UNKNOWN && rs > cs ) ? 43 : 
-                    ( rs != UNKNOWN && rs <= 4 ) ? (
-                        (V3::iscomplex ? 16 : 13) ) :
-                    V3::iscomplex ? 15 : 12 ) :
+                      rs != TMV_UNKNOWN && cs != TMV_UNKNOWN && rs > cs ) ? 53 : 
+                    ( rs != TMV_UNKNOWN && rs <= 4 ) ? (
+                        (V3::iscomplex ? 18 : 13) ) :
+                    V3::iscomplex ? 17 : 12 ) :
                 M1::_rowmajor ? (
-                    unroll ? ( (rs<cs) ? 32 : 31 ) :
-                    ( rs != UNKNOWN && rs <= 4 && V3::_step == 1 ) ? (
-                        (V3::iscomplex ? 16 : 13 ) ) : 
-                    ( cs != UNKNOWN && cs <= 4 ) ? (
-                        (V3::iscomplex ? 26 : 23) ) :
-                    V3::iscomplex ? 25 : 22 ) :
+                    unroll ? ( (rs<cs) ? 26 : 25 ) :
+                    ( rs != TMV_UNKNOWN && rs <= 4 && V3::_step == 1 ) ? (
+                        (V3::iscomplex ? 18 : 13 ) ) : 
+                    ( cs != TMV_UNKNOWN && cs <= 4 ) ? (
+                        (V3::iscomplex ? 28 : 23) ) :
+                    V3::iscomplex ? 27 : 22 ) :
                 V2::_step == 1 ? 21 : V3::_step == 1 ? 11 : 21;
             MultMV_Helper<algo,cs,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
         }
@@ -2358,31 +2330,31 @@ namespace tmv {
             // 11 = column major, simple for loop
             // 12 = column major, 4 columns at a time
             // 13 = column major, rs is known and <= 4
-            // 15 = column major, complex v3, 2 columns at a time
-            // 16 = column major, complex v3, rs is known and <= 4
+            // 17 = column major, complex v3, 2 columns at a time
+            // 18 = column major, complex v3, rs is known and <= 4
             //
             // Row Major:
             // 21 = row major, simple for loop
             // 22 = row major, 4 rows at a time
             // 23 = row major, cs is known and <= 4
-            // 25 = row major, complex v3, 2 rows at a time
-            // 26 = row major, complex v3, cs is known and <= 4
+            // 27 = row major, complex v3, 2 rows at a time
+            // 28 = row major, complex v3, cs is known and <= 4
             //
             // Fully Unrolled:
-            // 31 = fully unroll by rows, apply x to v3
-            // 32 = fully unroll by rows, apply x to v2
-            // 33 = fully unroll by columns, apply x to v3
-            // 34 = fully unroll by columns, apply x to v2
+            // 25 = fully unroll by rows, apply x to v3
+            // 26 = fully unroll by rows, apply x to v2
+            // 15 = fully unroll by columns, apply x to v3
+            // 16 = fully unroll by columns, apply x to v2
             //
             // Column Major, meta algorithms
-            // 41 = column major, ix==0 && !add, so might want algo 43
-            // 42 = column major, ix==0 && add, so might need to copy v3
-            // 43 = column major, !add, apply x at the end
-            // 44 = column major, unknown cs, check if it is small
+            // 51 = column major, ix==0 && !add, so might want algo 53
+            // 52 = column major, ix==0 && add, so might need to copy v3
+            // 53 = column major, !add, apply x at the end
+            // 54 = column major, unknown cs, check if it is small
             //
             // Row Major, meta algorithms
-            // 52 = row major, ix==0, so might need to copy v2
-            // 54 = row major, unknown rs, check if it is small
+            // 62 = row major, ix==0, so might need to copy v2
+            // 64 = row major, unknown rs, check if it is small
             //
             // Copy a vector to new storage:
             // 81 = copy v2
@@ -2403,61 +2375,61 @@ namespace tmv {
                 M1::_colmajor ? 
 
 #ifdef TMV_MV_SMALL
-                cs == UNKNOWN ? 44 :
+                cs == TMV_UNKNOWN ? 54 :
 #endif
-                cs == UNKNOWN ? (
-                    V3::_step == UNKNOWN ? 86 : 
+                cs == TMV_UNKNOWN ? (
+                    V3::_step == TMV_UNKNOWN ? 86 : 
 #ifdef TMV_MV_SCALE
-                    ( TMV_MV_ZeroIX && add ) ? 42 :
-                    ( TMV_MV_ZeroIX && !add ) ? 41 : 
+                    ( TMV_MV_ZeroIX && add ) ? 52 :
+                    ( TMV_MV_ZeroIX && !add ) ? 51 : 
 #endif
-                    V3::iscomplex ? 15 : 12 ) :
-                rs == UNKNOWN ? (
-                    ( cs > TMV_MV_COPY_SIZE && V3::_step == UNKNOWN ) ? 86 :
+                    V3::iscomplex ? 17 : 12 ) :
+                rs == TMV_UNKNOWN ? (
+                    ( cs > TMV_MV_COPY_SIZE && V3::_step == TMV_UNKNOWN ) ? 86 :
 #ifdef TMV_MV_SCALE
-                    ( TMV_MV_ZeroIX && add ) ? 42 : 
-                    ( TMV_MV_ZeroIX && !add ) ? 41 : 
+                    ( TMV_MV_ZeroIX && add ) ? 52 : 
+                    ( TMV_MV_ZeroIX && !add ) ? 51 : 
 #endif
-                    V3::iscomplex ? 15 : 12 ) :
+                    V3::iscomplex ? 17 : 12 ) :
                 unroll ? (
                     ( cs <= TMV_MV_COL_UNROLL ? 
-                      ( (rs<cs) ? 32 : 31 ) :
-                      ( (rs<cs) ? 34 : 33 ) ) ) :
-                ( cs <= 4 && V2::_step == 1 ) ? V3::iscomplex ? 26 : 23 :
-                ( cs > TMV_MV_COPY_SIZE && V3::_step == UNKNOWN ) ? (
+                      ( (rs<cs) ? 26 : 25 ) :
+                      ( (rs<cs) ? 16 : 15 ) ) ) :
+                ( cs <= 4 && V2::_step == 1 ) ? V3::iscomplex ? 28 : 23 :
+                ( cs > TMV_MV_COPY_SIZE && V3::_step == TMV_UNKNOWN ) ? (
                     rs > cs ? 84 : 85 ) :
                 ( add && TMV_MV_ZeroIX &&
                   rs > IntTraits2<TMV_MV_COPY_SCALE_RATIO,cs>::prod ) ? 84 :
-                ( !add && TMV_MV_ZeroIX && rs > cs ) ? 43 : 
-                rs <= 4 ? (V3::iscomplex ? 16 : 13) :
-                V3::iscomplex ? 15 : 12 :
+                ( !add && TMV_MV_ZeroIX && rs > cs ) ? 53 : 
+                rs <= 4 ? (V3::iscomplex ? 18 : 13) :
+                V3::iscomplex ? 17 : 12 :
 
                 M1::_rowmajor ? 
 #ifdef TMV_MV_SMALL
-                rs == UNKNOWN ? 54 :
+                rs == TMV_UNKNOWN ? 64 :
 #endif
-                rs == UNKNOWN ? (
-                    V2::_step == UNKNOWN ? 83 :
+                rs == TMV_UNKNOWN ? (
+                    V2::_step == TMV_UNKNOWN ? 83 :
 #ifdef TMV_MV_SCALE
-                    TMV_MV_ZeroIX ? 52 :
+                    TMV_MV_ZeroIX ? 62 :
 #endif
-                    V3::iscomplex ? 25 : 22 ) :
-                cs == UNKNOWN ? (
-                    ( rs > TMV_MV_COPY_SIZE && V2::_step == UNKNOWN ) ? 83 :
+                    V3::iscomplex ? 27 : 22 ) :
+                cs == TMV_UNKNOWN ? (
+                    ( rs > TMV_MV_COPY_SIZE && V2::_step == TMV_UNKNOWN ) ? 83 :
 #ifdef TMV_MV_SCALE
-                    TMV_MV_ZeroIX ? 52 :
+                    TMV_MV_ZeroIX ? 62 :
 #endif
-                    V3::iscomplex ? 25 : 22 ) :
-                unroll ? ( (rs<cs) ? 32 : 31 ) :
-                ( rs <= 4 && V3::_step == 1 ) ? V3::iscomplex ? 16 : 13 : 
-                ( rs > TMV_MV_COPY_SIZE && V2::_step == UNKNOWN ) ? (
+                    V3::iscomplex ? 27 : 22 ) :
+                unroll ? ( (rs<cs) ? 26 : 25 ) :
+                ( rs <= 4 && V3::_step == 1 ) ? V3::iscomplex ? 18 : 13 : 
+                ( rs > TMV_MV_COPY_SIZE && V2::_step == TMV_UNKNOWN ) ? (
                     rs > cs ? 81 : 82 ) :
 #ifdef TMV_MV_SCALE
                 ( cs > IntTraits2<TMV_MV_COPY_SCALE_RATIO,rs>::prod && 
                   TMV_MV_ZeroIX ) ? 82 :
 #endif
-                cs <= 4 ? V3::iscomplex ? 26 : 23 :
-                V3::iscomplex ? 25 : 22 :
+                cs <= 4 ? V3::iscomplex ? 28 : 23 :
+                V3::iscomplex ? 27 : 22 :
 
                 // nomajor -- don't do anything fancy
                 V2::_step == 1 ? 21 : V3::_step == 1 ? 11 : 21;
@@ -2507,8 +2479,8 @@ namespace tmv {
             typedef typename V2::value_type T2;
             typedef typename V3::value_type T3;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&

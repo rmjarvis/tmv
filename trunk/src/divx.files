@@ -1,11 +1,14 @@
+TMV_Householder.cpp 
 TMV_LUD.cpp 
 TMV_LUDecompose.cpp 
 TMV_LUDiv.cpp 
 TMV_LUInverse.cpp
 TMV_QRD.cpp 
 TMV_QRDecompose.cpp 
-TMV_UnpackQ.cpp 
 TMV_QRDiv.cpp 
 TMV_QRInverse.cpp 
+TMV_UnpackQ.cpp 
 TMV_PackedQ.cpp
 TMV_QRPD.cpp 
+TMV_QRUpdate.cpp 
+TMV_QRDowndate.cpp 

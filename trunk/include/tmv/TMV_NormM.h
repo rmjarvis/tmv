@@ -1,33 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
-//                                                                           //
-// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
-//                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
-// where you can find the current version and current documention.           //
-//                                                                           //
-// For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
-//                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
-//                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
-//                                                                           //
-///////////////////////////////////////////////////////////////////////////////
 
 #ifndef TMV_NormM_H
 #define TMV_NormM_H
@@ -35,6 +5,11 @@
 #include "TMV_BaseMatrix_Rec.h"
 #include "TMV_NormV.h"
 #include "TMV_MinMax.h"
+
+#ifdef PRINTALGO_NormM
+#include <iostream>
+#include "TMV_MatrixIO.h"
+#endif
 
 namespace tmv {
 
@@ -118,7 +93,7 @@ namespace tmv {
 #ifdef PRINTALGO_NormM
             std::cout<<"SumElementsM algo 11: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int N = (rs == UNKNOWN ? m.rowsize() : rs);
+            const int N = (rs == TMV_UNKNOWN ? m.rowsize() : rs);
             typedef typename M1::const_col_type Mc;
             ret sum(0);
             for(int j=0;j<N;++j) {
@@ -139,7 +114,7 @@ namespace tmv {
 #ifdef PRINTALGO_NormM
             std::cout<<"SumElementsM algo 12: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int M = (cs == UNKNOWN ? m.colsize() : cs);
+            const int M = (cs == TMV_UNKNOWN ? m.colsize() : cs);
             typedef typename M1::const_row_type Mr;
             ret sum(0);
             for(int i=0;i<M;++i) {
@@ -352,14 +327,14 @@ namespace tmv {
 
         static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         {
-            const int cs2 = cs > 20 ? UNKNOWN : cs;
-            const int rs2 = rs > 20 ? UNKNOWN : rs;
+            const int cs2 = cs > 20 ? TMV_UNKNOWN : cs;
+            const int rs2 = rs > 20 ? TMV_UNKNOWN : rs;
             // nops = m*n
             const int nops = IntTraits2<cs2,rs2>::safeprod;
             const bool unroll = 
                 ( cs > 10 && rs > 10 ) ? false :
-                ( cs == UNKNOWN || rs == UNKNOWN ) ? false :
-                nops == UNKNOWN ? false :
+                ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? false :
+                nops == TMV_UNKNOWN ? false :
                 // Norm is faster with the regular algorithm except for 
                 // very small matrices.
                 (nops > 9 && comp == NormComp) ? false :
@@ -369,8 +344,8 @@ namespace tmv {
                 unroll ? ( M1::_colmajor ? 15 : 16 ) :
                 M1::_rowmajor ? 12 :
                 M1::_colmajor ? 11 :
-                rs == UNKNOWN ? 11 :
-                cs == UNKNOWN ? 12 :
+                rs == TMV_UNKNOWN ? 11 :
+                cs == TMV_UNKNOWN ? 12 :
                 ( cs < rs ) ? 11 : 12;
 #ifdef PRINTALGO_NormM
             std::cout<<"SumElementsM algo -4: "<<TMV_Text(comp)<<std::endl;
@@ -391,13 +366,11 @@ namespace tmv {
         {
             const int algo = 
                 M1::_canlin ? 1 : 
-                TMV_OPT >= 2 && (cs == UNKNOWN || rs == UNKNOWN) ? 30 :
+                TMV_OPT >= 2 && (cs == TMV_UNKNOWN || rs == TMV_UNKNOWN) ? 30 :
                 -4;
 #ifdef PRINTALGO_NormM
             std::cout<<"Inline SumElementsM: "<<TMV_Text(comp)<<std::endl;
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
-            std::cout<<"nops = "<<nops<<std::endl;
-            std::cout<<"unroll = "<<unroll<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
 #endif
             return SumElementsM_Helper<algo,cs,rs,comp,ix,ret,M1>::call(m,x);
@@ -414,8 +387,8 @@ namespace tmv {
         {
             typedef typename M1::value_type VT;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
                 Traits<VT>::isinst;
             const int algo =
                 M1::_canlin ? 201 : 
@@ -626,7 +599,7 @@ namespace tmv {
             std::cout<<"MaxAbsElementM algo 11: "<<TMV_Text(comp)<<std::endl;
 #endif
             typedef typename M1::const_col_type Mc;
-            const int N = (rs == UNKNOWN ? m.rowsize() : rs);
+            const int N = (rs == TMV_UNKNOWN ? m.rowsize() : rs);
             ret max(0);
             for(int j=0;j<N;++j) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,Mc>::call(
@@ -648,7 +621,7 @@ namespace tmv {
             std::cout<<"MaxAbsElementM algo 12: "<<TMV_Text(comp)<<std::endl;
 #endif
             typedef typename M1::const_row_type Mr;
-            const int M = (cs == UNKNOWN ? m.colsize() : cs);
+            const int M = (cs == TMV_UNKNOWN ? m.colsize() : cs);
             ret max(0);
             for(int i=0;i<M;++i) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,Mr>::call(
@@ -671,7 +644,7 @@ namespace tmv {
 #endif
             typedef typename M1::const_col_type Mc;
             typedef tmv::Vector<ret> V;
-            const int N = (rs == UNKNOWN ? m.rowsize() : rs);
+            const int N = (rs == TMV_UNKNOWN ? m.rowsize() : rs);
             if (N == 0) return ret(0);
             else {
                 V temp(N);
@@ -696,7 +669,7 @@ namespace tmv {
 #endif
             typedef typename M1::const_row_type Mr;
             typedef tmv::Vector<ret> V;
-            const int M = (cs == UNKNOWN ? m.colsize() : cs);
+            const int M = (cs == TMV_UNKNOWN ? m.colsize() : cs);
             if (M == 0) return ret(0);
             else {
                 V temp(M);
@@ -792,7 +765,7 @@ namespace tmv {
         {
             const int algo =
                 M1::_canlin ? 1 :
-                TMV_OPT >= 2 && ( cs == UNKNOWN || rs == UNKNOWN ) ? 30 :
+                TMV_OPT >= 2 && ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? 30 :
                 -4;
 #ifdef PRINTALGO_NormM
             std::cout<<"Inline MaxAbsElementM: "<<TMV_Text(comp)<<std::endl;
@@ -812,8 +785,8 @@ namespace tmv {
         {
             typedef typename M1::value_type VT;
             const bool inst = 
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
                 Traits<VT>::isinst;
             const int algo =
                 M1::_canlin ? 201 : 
@@ -900,7 +873,7 @@ namespace tmv {
 #ifdef PRINTALGO_NormM
             std::cout<<"Norm1M algo 1: "<<std::endl;
 #endif
-            const int N = (rs == UNKNOWN ? m.rowsize() : rs);
+            const int N = (rs == TMV_UNKNOWN ? m.rowsize() : rs);
             RT max(0);
             for(int j=0;j<N;++j) {
                 RT temp = InlineSumAbsElements(m.get_col(j));
@@ -920,8 +893,8 @@ namespace tmv {
 #ifdef PRINTALGO_NormM
             std::cout<<"Norm1M algo 12: "<<std::endl;
 #endif
-            int M = (cs == UNKNOWN ? m.colsize() : cs);
-            int N = (rs == UNKNOWN ? m.rowsize() : rs);
+            int M = (cs == TMV_UNKNOWN ? m.colsize() : cs);
+            int N = (rs == TMV_UNKNOWN ? m.rowsize() : rs);
             if (M == 0 || N == 0) return RT(0);
 
             if (M <= 8) return Norm1M_Helper<11,cs,rs,M1>::call(m);
@@ -985,7 +958,7 @@ namespace tmv {
             const int algo =
                 TMV_OPT == 0 ? 11 :
                 ( M1::_rowmajor &&
-                  ( cs == UNKNOWN || rs == UNKNOWN ||
+                  ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ||
                     (cs > 16 && rs < 512) || (cs > 8 && rs >= 512) ) ) ? 12 :
                 11;
 #ifdef PRINTALGO_NormM
@@ -1006,8 +979,8 @@ namespace tmv {
         {
             typedef typename M1::value_type VT;
             const bool inst =
-                (cs == UNKNOWN || cs > 16) &&
-                (rs == UNKNOWN || rs > 16) &&
+                (cs == TMV_UNKNOWN || cs > 16) &&
+                (rs == TMV_UNKNOWN || rs > 16) &&
                 Traits<VT>::isinst;
             const int algo =
                 M1::_conj ? 97 :
@@ -1054,6 +1027,7 @@ namespace tmv {
     template <class M>
     static inline typename M::float_type DoNormInf(const BaseMatrix_Rec<M>& m)
     { return Norm1(m.transpose()); }
+
 
 } // namespace tmv
 
