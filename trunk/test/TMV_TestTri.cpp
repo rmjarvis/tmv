@@ -575,7 +575,7 @@ static void TestBasicTriMatrix_2()
         cunr.offDiag() *= std::complex<T>(1,2);
     else
         cunr *= std::complex<T>(1,2);
-    tmv::UpperTriMatrix<std::complex<T>,D,S> cu = cunr;
+    tmv::UpperTriMatrix<std::complex<T>,D,S> cu(cunr);
     Assert(cunr == cu,"TriMatrix == TriMatrix<N,R>");
     Assert(cunr.view() == cu.view(),"TriMatrix View");
     Assert(cunr.transpose() == cu.transpose(),"TriMatrix transpose");

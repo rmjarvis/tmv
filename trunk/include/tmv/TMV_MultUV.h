@@ -828,7 +828,7 @@ namespace tmv {
             Vector<T3> v2c = v2;
             Vector<T3> v3i = v3;
             Vector<T3> v3c = v3;
-            NoAliasMultMV<add>(x,m1c,v2c,v3c)
+            NoAliasMultMV<add>(x,m1c,v2c,v3c);
 #endif
             MultUV_Helper<algo,s,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
 #ifdef XDEBUG_MV

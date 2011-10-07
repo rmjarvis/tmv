@@ -1,5 +1,6 @@
 
 //#define PRINTALGO_UL
+//#define XDEBUG_UL
 
 #include "tmv/TMV_MultUL.h"
 #include "tmv/TMV_CopyU.h"
@@ -11,16 +12,17 @@
 #include "tmv/TMV_SmallVector.h"
 #include "tmv/TMV_ProdXM.h"
 #include "tmv/TMV_MultXU.h"
+#include "tmv/TMV_ConjugateV.h"
 
 
 // The most common reason to do this function is to basically undo an
 // LU decomposition.  So something like:
-// m2 = m.unitLowerTri() * m.UpperTri();
+// m2 = m.unitLowerTri() * m.upperTri();
 // This operation can be done in place.  So we can copy the L and U
 // triangles into the final storage and then do the operation there.
 //
 // Thus, we would like to convert all possible calls of a MultMM(L,U,m)
-// of MultMM(U,L,m) type into this in-place version.
+// or MultMM(U,L,m) type into this in-place version.
 // The only real problem with doing that is that we could have 
 // neither L or U be UnitDiag, and they could have different data on
 // their diagonals.  In this case, it is impossible to do the in-place
@@ -74,12 +76,6 @@ namespace tmv {
                 InlineMultMM<false>(one,m1.nonConj().cmView(),m2cv,m3);
             } else {
                 // Need temporary storage for m1, and can copy m2
-                typedef typename TypeSelect<M2::_upper,
-                        UpperTriMatrixView<T,ColMajor>,
-                        LowerTriMatrixView<T,ColMajor> >::type M2x;
-                M2x m2x = Maybe<M2::_upper>::uppertri(m3,m2.dt());
-                InstCopy(m2,m2x.xView());
-
                 typedef typename TypeSelect<M1::_upper,
                         UpperTriMatrix<T,NonUnitDiag|ColMajor>,
                         LowerTriMatrix<T,NonUnitDiag|ColMajor> >::type M1c;
@@ -89,6 +85,17 @@ namespace tmv {
                         LowerTriMatrixView<T,ColMajor> >::type M1cv;
                 M1cv m1cv = m1c.viewAsUnknownDiag(m1.dt());
                 InstCopy(m1,m1cv.xView());
+
+                typedef typename TypeSelect<M2::_upper,
+                        UpperTriMatrixView<T,ColMajor>,
+                        LowerTriMatrixView<T,ColMajor> >::type M2x;
+                M2x m2x = Maybe<M2::_upper>::uppertri(m3,m2.dt());
+                if (!SameStorage(m2,m3)) {
+                    InstCopy(m2,m2x.xView());
+                } else if (m2.isconj()) {
+                    m2x.conjugateSelf();
+                }
+
                 InlineMultMM<false>(one,m1cv,m2x.cmView(),m3);
             }
         } else {
@@ -114,6 +121,15 @@ namespace tmv {
     static inline void DoInstMultMM(
         const T x, const M1& m1, const M2& m2, MatrixView<T>& m3)
     {
+#ifdef XDEBUG_LU
+        std::cout<<"Start DoInstMultMM:\n";
+        std::cout<<"x = "<<x<<std::endl;
+        std::cout<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
+        std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
+        std::cout<<"m3 = "<<TMV_Text(m3)<<"  "<<m3<<std::endl;
+        std::cout<<"ptrs = "<<m1.cptr()<<"  "<<m2.cptr()<<"  "<<m3.cptr()<<std::endl;
+        Matrix<T> m3c = x * Matrix<T>(m1) * Matrix<T>(m2);
+#endif
         if (m3.iscm()) {
             DoMultUL(m1,m2,m3.cmView());
             InstScale(x,m3);
@@ -125,6 +141,12 @@ namespace tmv {
             DoMultUL(m1,m2,m3c.cmView());
             InstMultXM(x,m3c.constView().xView(),m3.xView());
         }
+#ifdef XDEBUG_LU
+        std::cout<<"In DoInstMultMM: m3 => "<<m3<<std::endl;
+        std::cout<<"m3c = "<<m3c<<std::endl;
+        std::cout<<"Norm(diff) = "<<Norm(m3-m3c)<<std::endl;
+        if (Norm(m3-m3c) > 1.e-3 * Norm(m1)*Norm(m2)) abort();
+#endif
     }
 
     template <class T, class M1, class M2>

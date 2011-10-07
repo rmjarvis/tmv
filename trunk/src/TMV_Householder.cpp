@@ -1,5 +1,6 @@
 
 //#define XDEBUG_HOUSE
+//#define PRINTALGO_HOUSE
 
 #include "tmv/TMV_Householder.h"
 #include "tmv/TMV_Vector.h"
@@ -12,6 +13,14 @@
 #include "tmv/TMV_MultUU.h"
 #include "tmv/TMV_MultUL.h"
 #include "tmv/TMV_MultXM.h"
+
+#include "tmv/TMV_ScaleV.h"
+#include "tmv/TMV_ProdMM.h"
+#include "tmv/TMV_ProdMV.h"
+#include "tmv/TMV_ProdVV.h"
+#include "tmv/TMV_OProdVV.h"
+#include "tmv/TMV_SumVV.h"
+#include "tmv/TMV_SumMM.h"
 
 namespace tmv {
 

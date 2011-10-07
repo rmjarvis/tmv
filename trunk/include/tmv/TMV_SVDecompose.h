@@ -532,7 +532,7 @@ namespace tmv {
 #ifdef XDEBUG_SVD
             if (U.ptr() && V.ptr()) {
                 Matrix<T> AA = U * DiagMatrixViewOf(D) * V;
-                if (!(Norm(A0-AA) < THRESH*Norm(A0))) {
+                if (!(Norm(A0-AA) <= THRESH*Norm(A0))) {
                     std::cerr<<"SV_DecomposeFromBidiagonal: \n";
                     std::cerr<<"input B = "<<B<<std::endl;
                     std::cerr<<"U => "<<U<<std::endl;
@@ -954,7 +954,7 @@ namespace tmv {
                 Matrix<T> A2 = U * S * V;
                 dbgcout<<"SVDecompose: Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
                 dbgcout<<"cf "<<THRESH*Norm(U)*Norm(S)*Norm(V)<<std::endl;
-                if (!(Norm(A0-A2) < THRESH * Norm(U) * Norm(S) * Norm(V))) {
+                if (!(Norm(A0-A2) <= THRESH * Norm(U) * Norm(S) * Norm(V))) {
                     std::cerr<<"SV_Decompose:\n";
                     std::cerr<<"A = "<<A0<<std::endl;
                     std::cerr<<"U = "<<U<<std::endl;
@@ -1441,7 +1441,7 @@ namespace tmv {
     static inline void SV_Decompose(
         MatrixView<T,Au> U,
         DiagMatrixView<typename Traits<T>::real_type,As> S,
-        BaseMatrix_Rec_Mutable<Mv> V, bool StoreU=true)
+        BaseMatrix_Rec_Mutable<Mv>& V, bool StoreU=true)
     {
         typedef typename Traits<T>::real_type RT;
         typedef MatrixView<T,Au> Mu;
@@ -1455,7 +1455,7 @@ namespace tmv {
     static inline void SV_Decompose(
         MatrixView<T,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
-        BaseMatrix_Rec_Mutable<Mv> V, bool StoreU=true)
+        BaseMatrix_Rec_Mutable<Mv>& V, bool StoreU=true)
     {
         typedef typename Traits<T>::real_type RT;
         typedef MatrixView<T,Au> Mu;
@@ -1469,7 +1469,7 @@ namespace tmv {
     static inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         DiagMatrixView<typename Traits<T>::real_type,As> S,
-        BaseMatrix_Rec_Mutable<Mv> V, bool StoreU=true)
+        BaseMatrix_Rec_Mutable<Mv>& V, bool StoreU=true)
     {
         typedef typename Traits<T>::real_type RT;
         typedef SmallMatrixView<T,M,N,Siu,Sju,Au> Mu;
@@ -1483,7 +1483,7 @@ namespace tmv {
     static inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
-        BaseMatrix_Rec_Mutable<Mv> V, bool StoreU=true)
+        BaseMatrix_Rec_Mutable<Mv>& V, bool StoreU=true)
     {
         typedef typename Traits<T>::real_type RT;
         typedef SmallMatrixView<T,M,N,Siu,Sju,Au> Mu;
@@ -1554,7 +1554,7 @@ namespace tmv {
     static inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
-        BaseMatrix_Rec_Mutable<Mv> V, bool StoreU=true)
+        BaseMatrix_Rec_Mutable<Mv>& V, bool StoreU=true)
     {
         typedef typename Traits<T>::real_type RT;
         typedef SmallDiagMatrixView<RT,N,Ss,As> Ms;

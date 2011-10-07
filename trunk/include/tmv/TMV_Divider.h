@@ -51,9 +51,6 @@ namespace tmv {
         // We do need to include the destructor though to make it virtual.
         virtual ~Divider() {}
 
-        // MJ: I don't remember why I need this...
-        virtual bool isSV() const { return false; }
-
         // 
         // Perform the division in place
         //
@@ -260,7 +257,7 @@ namespace tmv {
         // Condition
         // Note: this may be either kappa_inf or kappa_2 depending on the
         // kind of decomposition we are doing.
-        // It is kappa_2 if isSV() == true, and kapp_inf if isSV() == false.
+        // It is kappa_2 if an SV decomposition, and kapp_inf if not.
         // The input value if m.normInf() of the original matrix,
         // which is ignored if we are doing a kappa_2 calculation.
         //

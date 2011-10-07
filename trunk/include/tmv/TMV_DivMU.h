@@ -21,6 +21,26 @@
 
 #ifdef PRINTALGO_DivU
 #include <iostream>
+#include "TMV_MatrixIO.h"
+#include "TMV_TriMatrixIO.h"
+#endif
+
+#ifdef XDEBUG_DivU
+#include <iostream>
+#include "TMV_MatrixIO.h"
+#include "TMV_TriMatrixIO.h"
+#include "TMV_ProdMM.h"
+#include "TMV_MultMM.h"
+#include "TMV_SumMM.h"
+#include "TMV_AddMM.h"
+#include "TMV_NormM.h"
+#include "TMV_Norm.h"
+#include "TMV_Matrix.h"
+#include "TMV_QuotXM.h"
+#include "TMV_MultXM.h"
+#include "TMV_InvertM.h"
+#include "TMV_InvertU.h"
+#include "TMV_ScaleU.h"
 #endif
 
 // Use the specialized 1,2,3,4 sized algorithms for the end of the 
@@ -1202,10 +1222,34 @@ namespace tmv {
             //std::cout<<"m1 = "<<m1<<std::endl;
             //std::cout<<"m2 = "<<m2<<std::endl;
 #endif
+#ifdef XDEBUG_DivU
+            typedef typename M1::value_type T;
+            Matrix<T> A = m1;
+            Matrix<T> Binv = m2.inverse();
+            Matrix<T> C = Binv*A;
+            std::cout<<"A = "<<A<<std::endl;
+            std::cout<<"B = "<<m2<<std::endl;
+            std::cout<<"Binv = "<<Binv<<std::endl;
+            std::cout<<"Binv * B = "<<(Binv*m2)<<std::endl;
+#endif
             if (m2.isSingular()) ThrowSingular("TriMatrix");
             LDivEqMU_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
 #ifdef PRINTALGO_DivU
             //std::cout<<"m1 => "<<m1<<std::endl;
+#endif
+#ifdef XDEBUG_DivU
+            if (Norm(m1-C) > 1.e-3*Norm(A)*Norm(Binv)) {
+                std::cout<<"A = "<<A<<std::endl;
+                std::cout<<"B = "<<m2<<std::endl;
+                std::cout<<"Binv = "<<Binv<<std::endl;
+                std::cout<<"Binv * B = "<<(Binv*m2)<<std::endl;
+                std::cout<<"B * Binv = "<<(m2*Binv)<<std::endl;
+                std::cout<<"Binv * A = "<<C<<std::endl;
+                std::cout<<"m1 => "<<m1<<std::endl;
+                std::cout<<"Norm(diff) = "<<Norm(C-m1)<<std::endl;
+                std::cout<<"cf. = "<<1.e-3*Norm(A)*Norm(Binv)<<std::endl;
+                abort();
+            }
 #endif
         }
     };

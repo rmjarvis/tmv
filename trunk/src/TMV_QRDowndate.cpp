@@ -25,8 +25,16 @@
 #include "tmv/TMV_DivMU.h"
 #include "tmv/TMV_DivVU.h"
 #include "tmv/TMV_SumMX.h"
-#include "tmv/TMV_QuotMM.h"
 #include "tmv/TMV_ScaleM.h"
+
+#include "tmv/TMV_ProdVV.h"
+#include "tmv/TMV_SumVV.h"
+#include "tmv/TMV_SumMM.h"
+#include "tmv/TMV_ProdXM.h"
+#include "tmv/TMV_ProdMM.h"
+#include "tmv/TMV_ProdMV.h"
+#include "tmv/TMV_QuotMM.h"
+#include "tmv/TMV_OProdVV.h"
 
 namespace tmv {
 

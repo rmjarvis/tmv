@@ -17,6 +17,16 @@
 #include <iostream>
 #endif
 
+#ifdef XDEBUG_MM
+#include <iostream>
+#include "tmv/TMV_VectorIO.h"
+#include "tmv/TMV_MatrixIO.h"
+#include "tmv/TMV_NormM.h"
+#include "tmv/TMV_Norm.h"
+#include "tmv/TMV_AddMM.h"
+#include "tmv/TMV_SumMM.h"
+#endif
+
 // Check for small (<=3) values of cs, rs, or xs
 // This leads to significant speed improvements for such matrices at little
 // cost to larger matrices, but the large increase in code size and the fact
@@ -2029,6 +2039,11 @@ namespace tmv {
         {
             const bool s1 = SameStorage(m1,m3);
             const bool s2 = SameStorage(m2,m3);
+#ifdef PRINTALGO_MM
+            std::cout<<"MM algo 98: \n";
+            std::cout<<"s1 = "<<s1<<std::endl;
+            std::cout<<"s2 = "<<s2<<std::endl;
+#endif
             if (!s1 && !s2) {
                 // No aliasing
                 MultMM_Helper<-2,cs,rs,xs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);

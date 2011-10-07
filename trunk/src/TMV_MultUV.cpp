@@ -27,9 +27,10 @@ namespace tmv {
     // I'll have the think about that...
     
     template <class M1, class T2>
-    static void NonBlasMultEq(const M1& m1, VectorView<T2,Unit> v2)
+    static void DoMultEq(const M1& m1, VectorView<T2,Unit> v2)
     {
         const Scaling<1,typename Traits<T2>::real_type> one;
+        const int xx = TMV_UNKNOWN;
         if (m1.iscm()) 
             InlineMultMV<false>(one,m1.cmView(),v2.constView(),v2);
         else if (m1.isrm())
@@ -39,13 +40,13 @@ namespace tmv {
             const int N = m1.size();
             if (m1.isunit()) {
                 const int s = ShapeTraits<M1::_shape>::unit_shape;
-                typename MCopyHelper<T,s,TMV_UNKNOWN,TMV_UNKNOWN,false,false>::type mc(N);
+                typename MCopyHelper<T,s,xx,xx,false,false>::type mc(N);
                 InstCopy(m1,mc.xView());
                 InlineMultMV<false>(
                     one,mc.xView().constView().cmView(),v2.constView(),v2);
             } else  {
                 const int s = ShapeTraits<M1::_shape>::nonunit_shape;
-                typename MCopyHelper<T,s,TMV_UNKNOWN,TMV_UNKNOWN,false,false>::type mc(N);
+                typename MCopyHelper<T,s,xx,xx,false,false>::type mc(N);
                 InstCopy(m1,mc.xView());
                 InlineMultMV<false>(
                     one,mc.xView().constView().cmView(),v2.constView(),v2);
@@ -56,7 +57,7 @@ namespace tmv {
 #ifdef BLAS
     template <class M1, class T2, class T1> 
     static inline void BlasMultEq(const M1& A, VectorView<T2,Unit> x, T1)
-    { NonBlasMultEq(A,x); }
+    { DoMultEq(A,x); }
 #ifdef TMV_INST_DOUBLE
     template <class M1>
     static void BlasMultEq(const M1& A, VectorView<double,Unit> x, double)
@@ -196,7 +197,7 @@ namespace tmv {
 #endif // BLAS
 
     template <class M1, class T2>
-    static inline void DoMultEq(const M1& m1, VectorView<T2,Unit> v2)
+    static inline void CallMultEq(const M1& m1, VectorView<T2,Unit> v2)
     {
 #ifdef BLAS
         const typename M1::value_type t1(0);
@@ -211,7 +212,7 @@ namespace tmv {
             }
         }
 #else
-        NonBlasMultEq(m1,v2);
+        DoMultEq(m1,v2);
 #endif
     }
 
@@ -221,11 +222,11 @@ namespace tmv {
     {
         if (v3.step() == 1) {
             InstMultXV(x,v2,v3);
-            DoMultEq(m1,v3.unitView());
+            CallMultEq(m1,v3.unitView());
         } else {
             Vector<T> v3c(v3.size());
             InstMultXV(x,v2,v3c.xView());
-            DoMultEq(m1,v3c.view());
+            CallMultEq(m1,v3c.view());
             InstCopy(v3c.xView().constView(),v3);
         }
     }
@@ -235,7 +236,7 @@ namespace tmv {
         const T x, const M1& m1, const V2& v2, VectorView<T> v3)
     {
         Vector<T> v2c = v2;
-        DoMultEq(m1,v2c.view());
+        CallMultEq(m1,v2c.view());
         InstAddMultXV(x,v2c.constView().xView(),v3);
     }
 

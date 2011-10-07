@@ -142,6 +142,7 @@ namespace tmv {
         // Constructor
         //
 
+    protected:
         TMV_INLINE BaseMatrix_Diag() {}
         TMV_INLINE BaseMatrix_Diag(const BaseMatrix_Diag<M>&) {}
         TMV_INLINE ~BaseMatrix_Diag() {}
@@ -453,9 +454,11 @@ namespace tmv {
         // Constructor
         //
 
+    protected:
         TMV_INLINE BaseMatrix_Diag_Mutable() {}
         TMV_INLINE BaseMatrix_Diag_Mutable(const BaseMatrix_Diag_Mutable<M>&) {}
         TMV_INLINE ~BaseMatrix_Diag_Mutable() {}
+    public:
 
 
         //

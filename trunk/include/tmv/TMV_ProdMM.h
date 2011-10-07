@@ -100,7 +100,7 @@ namespace tmv {
         for(size_t i=0;i<m3.colsize();++i) {
             for(size_t j=0;j<m3.rowsize();++j) {
                 for(size_t k=0;k<m1.rowsize();++k) {
-                    m3c.ref(i,j) += T(x) * m1.cref(i,k) * m2.cref(k,j);
+                    m3c.ref(i,j) += T(x) * m1i.cref(i,k) * m2i.cref(k,j);
                 }
             }
         }
@@ -153,7 +153,7 @@ namespace tmv {
         for(size_t i=0;i<m3.colsize();++i) {
             for(size_t j=0;j<m3.rowsize();++j) {
                 for(size_t k=0;k<m1.rowsize();++k) {
-                    m3.ref(i,j) += T(x) * m1.cref(i,k) * m2.cref(k,j);
+                    m3.ref(i,j) += T(x) * m1i.cref(i,k) * m2i.cref(k,j);
                 }
             }
         }

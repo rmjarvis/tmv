@@ -47,36 +47,26 @@ namespace tmv {
 #ifdef TMV_INST_DOUBLE
     static void DoScale(const double x, VectorView<double> v)
     {
+        TMVAssert(v.size() > 0);
+        TMVAssert(v.step() > 0);
         int n=v.size();
-        if (n==0) return;
-        TMVAssert(v.size()>0);
         int s=v.step();
-        if (s == 0) { v[0] *= x; return; }
         double* vp = v.ptr();
-        if (s < 0) vp += (n-1)*s;
         BLASNAME(dscal) (BLASV(n),BLASV(x),BLASP(vp),BLASV(s));
     }
     static void DoScale(
         const std::complex<double> x, VectorView<std::complex<double> > v)
     {
+        TMVAssert(v.size() > 0);
+        TMVAssert(v.step() > 0);
+        int n=v.size();
+        int s=v.step();
+        std::complex<double>* vp = v.ptr();
+
         if (imag(x) == double(0)) {
-            int n=v.size();
-            if (n==0) return;
-            TMVAssert(v.size()>0);
-            int s=v.step();
             double xr = real(x);
-            if (s == 0) { v[0] *= x; return; }
-            std::complex<double>* vp = v.ptr();
-            if (s < 0) vp += (n-1)*s;
             BLASNAME(zdscal) (BLASV(n),BLASV(xr),BLASP(vp),BLASV(s));
         } else {
-            int n=v.size();
-            if (n==0) return;
-            TMVAssert(v.size()>0);
-            int s=v.step();
-            if (s == 0) { v[0] *= x; return; }
-            std::complex<double>* vp = v.ptr();
-            if (s < 0) vp += (n-1)*s;
             BLASNAME(zscal) (BLASV(n),BLASP(&x),BLASP(vp),BLASV(s));
         }
     }
@@ -84,36 +74,26 @@ namespace tmv {
 #ifdef TMV_INST_FLOAT
     static void DoScale(const float x, VectorView<float> v)
     {
+        TMVAssert(v.size() > 0);
+        TMVAssert(v.step() > 0);
         int n=v.size();
-        if (n==0) return;
-        TMVAssert(v.size()>0);
         int s=v.step();
-        if (s == 0) { v[0] *= x; return; }
         float* vp = v.ptr();
-        if (s < 0) vp += (n-1)*s;
         BLASNAME(sscal) (BLASV(n),BLASV(x),BLASP(vp),BLASV(s));
     }
     static void DoScale(
         const std::complex<float> x, VectorView<std::complex<float> > v)
     {
+        TMVAssert(v.size() > 0);
+        TMVAssert(v.step() > 0);
+        int n=v.size();
+        int s=v.step();
+        std::complex<float>* vp = v.ptr();
+
         if (imag(x) == float(0)) {
-            int n=v.size();
-            if (n==0) return;
-            TMVAssert(v.size()>0);
-            int s=v.step();
             float xr = real(x);
-            if (s == 0) { v[0] *= x; return; }
-            std::complex<float>* vp = v.ptr();
-            if (s < 0) vp += (n-1)*s;
             BLASNAME(csscal) (BLASV(n),BLASV(xr),BLASP(vp),BLASV(s));
         } else {
-            int n=v.size();
-            if (n==0) return;
-            TMVAssert(v.size()>0);
-            int s=v.step();
-            if (s == 0) { v[0] *= x; return; }
-            std::complex<float>* vp = v.ptr();
-            if (s < 0) vp += (n-1)*s;
             BLASNAME(cscal) (BLASV(n),BLASP(&x),BLASP(vp),BLASV(s));
         }
     }
@@ -122,7 +102,13 @@ namespace tmv {
 
     template <class T> 
     void InstScale(const T x, VectorView<T> v)
-    { DoScale(x,v); }
+    { 
+        if (v.size() > 0) 
+            if (v.step() > 0) DoScale(x,v);
+            else if (v.step() == 0) v[0] *= x; 
+            else DoScale(x,v.reverse());
+        else TMVAssert(v.size() == 0);
+    }
 
 #define InstFile "TMV_ScaleV.inst"
 #include "TMV_Inst.h"

@@ -9,24 +9,82 @@
 namespace tmv {
 
     template <class T>
-    void InstInvertSelf(UpperTriMatrixView<T> m)
+    void DoInvertSelf(UpperTriMatrixView<T> m)
     {
+        TMVAssert(m.iscm() || m.isrm());
         if (m.iscm()) {
             UpperTriMatrixView<T,ColMajor> mcm = m.cmView();
             InlineInvertSelf(mcm);
-        } else if (m.isrm()) {
+        } else {
             UpperTriMatrixView<T,RowMajor> mrm = m.rmView();
             InlineInvertSelf(mrm);
-        } else if (m.isunit()) {
-            UpperTriMatrix<T,UnitDiag|ColMajor> mc = m;
-            UpperTriMatrixView<T,ColMajor> mcm = mc.cmView();
-            InlineInvertSelf(mcm);
-            InstCopy(mc.constView().xView(),m);
-        } else {
-            UpperTriMatrix<T,NonUnitDiag|ColMajor> mc = m;
-            UpperTriMatrixView<T,ColMajor> mcm = mc.cmView();
-            InlineInvertSelf(mcm);
-            InstCopy(mc.constView().xView(),m);
+        }
+    }
+
+#ifdef LAP
+#ifdef TMV_INST_DOUBLE
+    void DoInvertSelf(const UpperTriMatrixView<double>& m)
+    {
+        int n = m.size();
+        int lda = m.iscm() ? m.stepj() : m.stepi();
+        LAPNAME(dtrtri) (
+            LAPCM m.iscm()?LAPCH_UP:LAPCH_LO,
+            m.isunit()?LAPCH_U:LAPCH_NU,LAPV(n),LAPP(m.ptr()),LAPV(lda) LAPINFO
+            LAP1 LAP1);
+        LAP_Results("dtrtri");
+    }
+    void DoInvertSelf(
+        const UpperTriMatrixView<std::complex<double> >& m)
+    {
+        int n = m.size();
+        int lda = m.iscm() ? m.stepj() : m.stepi();
+        LAPNAME(ztrtri) (
+            LAPCM m.iscm()?LAPCH_UP:LAPCH_LO,
+            m.isunit()?LAPCH_U:LAPCH_NU,LAPV(n),LAPP(m.ptr()),LAPV(lda) LAPINFO
+            LAP1 LAP1);
+        LAP_Results("ztrtri");
+    }
+#endif
+#ifdef TMV_INST_FLOAT
+    void DoInvertSelf(const UpperTriMatrixView<float>& m)
+    {
+        int n = m.size();
+        int lda = m.iscm() ? m.stepj() : m.stepi();
+        LAPNAME(strtri) (
+            LAPCM m.iscm()?LAPCH_UP:LAPCH_LO,
+            m.isunit()?LAPCH_U:LAPCH_NU,LAPV(n),LAPP(m.ptr()),LAPV(lda) LAPINFO
+            LAP1 LAP1);
+        LAP_Results("strtri");
+    }
+    void DoInvertSelf(
+        const UpperTriMatrixView<std::complex<float> >& m)
+    {
+        int n = m.size();
+        int lda = m.iscm() ? m.stepj() : m.stepi();
+        LAPNAME(ctrtri) (
+            LAPCM m.iscm()?LAPCH_UP:LAPCH_LO,
+            m.isunit()?LAPCH_U:LAPCH_NU,LAPV(n),LAPP(m.ptr()),LAPV(lda) LAPINFO
+            LAP1 LAP1);
+        LAP_Results("ctrtri");
+    }
+#endif // FLOAT
+#endif // ALAP
+
+    template <class T>
+    void InstInvertSelf(UpperTriMatrixView<T> m)
+    {
+        if (m.size() > 0) {
+            if (m.iscm() || m.isrm()) {
+                DoInvertSelf(m);
+            } else if (m.isunit()) {
+                UpperTriMatrix<T,UnitDiag|ColMajor> mc = m;
+                DoInvertSelf(mc.xView());
+                InstCopy(mc.constView().xView(),m);
+            } else {
+                UpperTriMatrix<T,NonUnitDiag|ColMajor> mc = m;
+                DoInvertSelf(mc.xView());
+                InstCopy(mc.constView().xView(),m);
+            }
         }
     }
 

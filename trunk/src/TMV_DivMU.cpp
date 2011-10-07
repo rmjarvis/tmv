@@ -1,6 +1,7 @@
 
 //#define PRINTALGO_DivU
 //#define PRINTALGO_UM
+//#define XDEBUG_DivU
 
 #include "TMV_Blas.h"
 #include "tmv/TMV_DivMU.h"
@@ -17,7 +18,7 @@
 namespace tmv {
 
     template <class M1, class M2>
-    static void NonBlasTriLDivEq(M1& m1, const M2& m2)
+    static void DoTriLDivEq(M1& m1, const M2& m2)
     {
         TMVAssert(m1.isrm() || m1.iscm());
         TMVAssert(m2.isrm() || m2.iscm());
@@ -39,7 +40,7 @@ namespace tmv {
 #ifdef BLAS
     template <class T1, class M2, class T2> 
     static inline void BlasTriLDivEq(MatrixView<T1> A, const M2& B, T2)
-    { NonBlasTriLDivEq(A,B); }
+    { DoTriLDivEq(A,B); }
 #ifdef TMV_INST_DOUBLE
     template <class M2> 
     static void BlasTriLDivEq(MatrixView<double> A, const M2& B, double )
@@ -227,58 +228,60 @@ namespace tmv {
 #endif // BLAS
 
     template <class T1, class M2>
-    static void DoTriLDivEq(MatrixView<T1> m1, const M2& m2)
+    static void CallTriLDivEq(MatrixView<T1> m1, const M2& m2)
     {
         typedef typename M2::value_type T2;
+        if (m1.colsize() > 0 && m1.rowsize() > 0) {
 #ifdef BLAS
-        const T2 t2(0);
-        if ((m1.isrm() && m1.stepi()>0) || (m1.iscm() && m1.stepj()>0) ) {
-            if ((m2.isrm() && m2.stepi()>0) || (m2.iscm() && m2.stepj()>0)) {
-                BlasTriLDivEq(m1,m2,t2);
+            const T2 t2(0);
+            if ((m1.isrm() && m1.stepi()>0) || (m1.iscm() && m1.stepj()>0) ) {
+                if ((m2.isrm() && m2.stepi()>0) || (m2.iscm() && m2.stepj()>0)) {
+                    BlasTriLDivEq(m1,m2,t2);
+                } else {
+                    Matrix<T2,ColMajor|NoDivider> m2c(m2.size(),m2.size());
+                    typedef typename TypeSelect<M2::_upper,
+                            UpperTriMatrixView<T2,ColMajor>,
+                            LowerTriMatrixView<T2,ColMajor> >::type M2t;
+                    M2t m2ct = Maybe<M2::_upper>::uppertri(m2c,m2.dt());
+                    InstCopy(m2,m2ct.xView());
+                    DoTriLDivEq(m1,m2ct.constView());
+                }
             } else {
-                Matrix<T2,ColMajor|NoDivider> m2c(m2.size(),m2.size());
-                typedef typename TypeSelect<M2::_upper,
-                        UpperTriMatrixView<T2,ColMajor>,
-                        LowerTriMatrixView<T2,ColMajor> >::type M2t;
-                M2t m2ct = Maybe<M2::_upper>::uppertri(m2c,m2.dt());
-                InstCopy(m2,m2ct.xView());
-                NonBlasTriLDivEq(m1,m2ct.constView());
+                Matrix<T1,ColMajor|NoDivider> m1c(m1);
+                CallTriLDivEq(m1c.xView(),m2);
+                InstCopy(m1c.constView().xView(),m1);
             }
-        } else {
-            Matrix<T1,ColMajor|NoDivider> m1c(m1);
-            DoTriLDivEq(m1c.xView(),m2);
-            InstCopy(m1c.constView().xView(),m1);
-        }
 #else
-        if (m1.iscm() || m1.isrm()) {
-            if (m2.iscm() || m2.isrm()) {
-                NonBlasTriLDivEq(m1,m2);
+            if (m1.iscm() || m1.isrm()) {
+                if (m2.iscm() || m2.isrm()) {
+                    DoTriLDivEq(m1,m2);
+                } else {
+                    Matrix<T2,ColMajor|NoDivider> m2c(m2.size(),m2.size());
+                    typedef typename TypeSelect<M2::_upper,
+                            UpperTriMatrixView<T2,ColMajor>,
+                            LowerTriMatrixView<T2,ColMajor> >::type M2t;
+                    M2t m2ct = Maybe<M2::_upper>::uppertri(m2c,m2.dt());
+                    InstCopy(m2,m2ct.xView());
+                    DoTriLDivEq(m1,m2ct.constView());
+                }
             } else {
-                Matrix<T2,ColMajor|NoDivider> m2c(m2.size(),m2.size());
-                typedef typename TypeSelect<M2::_upper,
-                        UpperTriMatrixView<T2,ColMajor>,
-                        LowerTriMatrixView<T2,ColMajor> >::type M2t;
-                M2t m2ct = Maybe<M2::_upper>::uppertri(m2c,m2.dt());
-                InstCopy(m2,m2ct.xView());
-                NonBlasTriLDivEq(m1,m2ct.constView());
+                Matrix<T1,ColMajor|NoDivider> m1c(m1);
+                CallTriLDivEq(m1c.xView(),m2);
+                InstCopy(m1c.constView().xView(),m1);
             }
-        } else {
-            Matrix<T1,ColMajor|NoDivider> m1c(m1);
-            DoTriLDivEq(m1c.xView(),m2);
-            InstCopy(m1c.constView().xView(),m1);
-        }
 #endif
+        }
     }
 
     template <class T1, class T2, int C2>
     void InstTriLDivEq(
         MatrixView<T1> m1, const ConstUpperTriMatrixView<T2,C2>& m2)
-    { DoTriLDivEq(m1,m2); }
+    { CallTriLDivEq(m1,m2); }
 
     template <class T1, class T2, int C2>
     void InstTriLDivEq(
         MatrixView<T1> m1, const ConstLowerTriMatrixView<T2,C2>& m2)
-    { DoTriLDivEq(m1,m2); }
+    { CallTriLDivEq(m1,m2); }
 
     template <class T1, class T2, int C2>
     void InstAliasTriLDivEq(

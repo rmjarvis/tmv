@@ -87,102 +87,187 @@
 
 namespace tmv {
 
-    // TODO: Put into the normal Helper structure with Inst, etc.
     
-    template <class T> 
-    class Givens;
+    template <class T, class RT>
+    void InstGivensRotate(T& x, T& y, RT& c, T& s);
+    template <class T, class RT, class T2>
+    void InstGivensMultV(RT c, T s, VectorView<T2> v1, VectorView<T2> v2);
 
     // Use a Givens matrix G to rotate the vector so y = 0:
     // G [ x ] = [ r ]
     //   [ y ]   [ 0 ]
     // Also, return the Givens matrix used to do so.
-    template <class T> 
-    static inline Givens<T> GivensRotate(T& x, T& y)
-    {
-        // Use a Givens matrix G to rotate the vector so y = 0:
-        // G [ x ] = [ r ]
-        //   [ y ]   [ 0 ]
-        // Also, return the Givens matrix used to do so.
-        
-        //std::cout<<"Start GivensRotate: x,y = "<<x<<','<<y<<std::endl;
-        typedef typename Traits<T>::real_type RT;
-        const RT sqrteps = TMV_SQRT(TMV_Epsilon<T>());
+    template <int algo, class T>
+    struct GivensRotate_Helper;
 
-        RT absx = TMV_ABS2(x);
-        RT absy = TMV_ABS2(y);
-        if (absy == RT(0)) {
-            y = RT(0);
-            //std::cout<<"Simple1: return 1,0\n";
-            return Givens<T>(RT(1),T(0));
-        } else if (absx == RT(0)) {
-            x = RT(0);
-            RT absy = TMV_ABS(y);
-            T s = TMV_SIGN(TMV_CONJ(y),absy);
-            x = absy; y = RT(0);
-            //std::cout<<"Simple2: return 0,"<<s<<std::endl;
-            return Givens<T>(RT(0),s);
-        } else if (absx > absy) {
-            if (absy <= sqrteps*absx) {
-                // Then everything simplifies:
-                // c = 1
-                // s = (y/x)* 
-                // r = f
-                T s = TMV_CONJ(y)/TMV_CONJ(x);
+    template <class T>
+    struct GivensRotate_Helper<11,T>
+    {
+        typedef typename Traits<T>::real_type RT;
+        static void call(T& x, T& y, RT& c, T& s)
+        {
+            // Use a Givens matrix G to rotate the vector so y = 0:
+            // G [ x ] = [ r ]
+            //   [ y ]   [ 0 ]
+            // Also, return the Givens matrix used to do so.
+
+            const RT sqrteps = TMV_SQRT(TMV_Epsilon<T>());
+
+            RT absx = TMV_ABS2(x);
+            RT absy = TMV_ABS2(y);
+            if (absy == RT(0)) {
+                c = RT(1);
+                s = T(0);
                 y = RT(0);
-                //std::cout<<"Simple3: return 0,"<<s<<std::endl;
-                return Givens<T>(RT(1),s);
+#ifdef PRINTALGO_GIVENS
+                std::cout<<"Simple1: return 1,0\n";
+#endif
+            } else if (absx == RT(0)) {
+                x = RT(0);
+                RT absy = TMV_ABS(y);
+                c = RT(0);
+                s = TMV_SIGN(TMV_CONJ(y),absy);
+                x = absy; y = RT(0);
+#ifdef PRINTALGO_GIVENS
+                std::cout<<"Simple2: return 0,"<<s<<std::endl;
+#endif
+            } else if (absx > absy) {
+                if (absy <= sqrteps*absx) {
+                    // Then everything simplifies:
+                    // c = 1
+                    // s = (y/x)* 
+                    // r = f
+                    c = RT(1);
+                    s = TMV_CONJ(y)/TMV_CONJ(x);
+                    y = RT(0);
+#ifdef PRINTALGO_GIVENS
+                    std::cout<<"Simple3: return 1,"<<s<<std::endl;
+#endif
+                } else {
+                    // c = 1/sqrt(1+|y/x|^2)
+                    // s = (y/x)*/sqrt(1+|y/x|^2)
+                    // r = x sqrt(1+|y/x|^2)
+                    // We get a slightly more accurate calculation of r
+                    // if we calculate r-x and add this to x:
+                    // r-x = x (sqrt(1+|y/x|^2)-1) = x |y/x|^2 / (1 + sqrt(1+|y/x|^2))
+                    T yoverx = y/x;
+                    RT n = TMV_NORM(yoverx);
+                    RT sqrtfactor = TMV_SQRT(RT(1)+n);
+                    c = RT(1)/sqrtfactor;
+                    s = TMV_CONJ(yoverx)*c;
+                    x += x*(n/(RT(1)+sqrtfactor));
+                    y = RT(0);
+#ifdef PRINTALGO_GIVENS
+                    std::cout<<"x>y: return "<<c<<','<<s<<std::endl;
+#endif
+                }
             } else {
-                // c = 1/sqrt(1+|y/x|^2)
-                // s = (y/x)*/sqrt(1+|y/x|^2)
-                // r = x sqrt(1+|y/x|^2)
-                // We get a slightly more accurate calculation of r
-                // if we calculate r-x and add this to x:
-                // r-x = x (sqrt(1+|y/x|^2)-1) = x |y/x|^2 / (1 + sqrt(1+|y/x|^2))
-                T yoverx = y/x;
-                RT n = TMV_NORM(yoverx);
-                RT sqrtfactor = TMV_SQRT(RT(1)+n);
-                RT c = RT(1)/sqrtfactor;
-                T s = TMV_CONJ(yoverx)*c;
-                x += x*(n/(RT(1)+sqrtfactor));
-                y = RT(0);
-                //std::cout<<"x>y: return "<<c<<','<<s<<std::endl;
-                return Givens<T>(c,s);
-            }
-        } else {
-            T xovery = x/y;
-            RT n = TMV_NORM(xovery);
-            RT absxovery = TMV_SQRT(n);
-            if (n <= TMV_Epsilon<T>()) {
-                // c = |x/y|
-                // s = (x/y)/|x/y|
-                // r = x/|x/y|
-                T s = TMV_SIGN(xovery,absxovery);
-                x = s*y;
-                y = RT(0);
-                //std::cout<<"Simple4: return "<<absxovery<<','<<s<<std::endl;
-                return Givens<T>(absxovery,s);
-            } else {
-                // c = |x/y|/sqrt(1+|x/y|^2)
-                // s = (x/y)/|x/y|/sqrt(1+|x/y|^2)
-                // r = x/|x/y| sqrt(|x|^2+|y|^2)
-                RT sqrtfactor = TMV_SQRT(RT(1)+n);
-                RT invsqrtfactor = RT(1)/sqrtfactor;
-                T signxovery = TMV_SIGN(xovery,absxovery); // (x/y)/|x/y|
-                T s = signxovery*invsqrtfactor;
-                x = y * signxovery * sqrtfactor;
-                y = T(0);
-                RT c = absxovery*invsqrtfactor;
-                //std::cout<<"x<y: return "<<c<<','<<s<<std::endl;
-                return Givens<T>(c,s);
+                T xovery = x/y;
+                RT n = TMV_NORM(xovery);
+                RT absxovery = TMV_SQRT(n);
+                if (n <= TMV_Epsilon<T>()) {
+                    // c = |x/y|
+                    // s = (x/y)/|x/y|
+                    // r = x/|x/y|
+                    c = absxovery;
+                    s = TMV_SIGN(xovery,absxovery);
+                    x = s*y;
+                    y = RT(0);
+#ifdef PRINTALGO_GIVENS
+                    std::cout<<"Simple4: return "<<absxovery<<','<<s<<std::endl;
+#endif
+                } else {
+                    // c = |x/y|/sqrt(1+|x/y|^2)
+                    // s = (x/y)/|x/y|/sqrt(1+|x/y|^2)
+                    // r = x/|x/y| sqrt(|x|^2+|y|^2)
+                    RT sqrtfactor = TMV_SQRT(RT(1)+n);
+                    RT invsqrtfactor = RT(1)/sqrtfactor;
+                    T signxovery = TMV_SIGN(xovery,absxovery); // (x/y)/|x/y|
+                    c = absxovery*invsqrtfactor;
+                    s = signxovery*invsqrtfactor;
+                    x = y * signxovery * sqrtfactor;
+                    y = T(0);
+#ifdef PRINTALGO_GIVENS
+                    std::cout<<"x<y: return "<<c<<','<<s<<std::endl;
+#endif
+                }
             }
         }
-    }
+    };
 
+    // algo 90: Call inst
+    template <class T>
+    struct GivensRotate_Helper<90,T>
+    {
+        typedef typename Traits<T>::real_type RT;
+        static void call(T& x, T& y, RT& c, T& s)
+        { InstGivensRotate(x,y,c,s); }
+    };
+
+    // algo -3: Select algorithm
+    template <class T>
+    struct GivensRotate_Helper<-3,T>
+    {
+        typedef typename Traits<T>::real_type RT;
+        static void call(T& x, T& y, RT& c, T& s)
+        {
+            const int algo = 11;
+#ifdef PRINTALGO_GIVENS
+            std::cout<<"Inline GivensRotate\n";
+            std::cout<<"x,y = "<<x<<','<<y<<std::endl;
+#endif
+            GivensRotate_Helper<algo,T>::call(x,y,c,s);
+#ifdef PRINTALGO_GIVENS
+            std::cout<<"x,y => "<<x<<','<<y<<std::endl;
+            std::cout<<"c,s = "<<s<<','<<s<<std::endl;
+#endif
+        }
+    };
+
+    // algo -2: Check for inst
+    template <class T>
+    struct GivensRotate_Helper<-2,T>
+    {
+        typedef typename Traits<T>::real_type RT;
+        static void call(T& x, T& y, RT& c, T& s)
+        {
+            const bool inst = Traits<T>::isinst;
+            const int algo = 
+                inst ? 90 :
+                -3;
+            GivensRotate_Helper<algo,T>::call(x,y,c,s);
+        }
+    };
+
+    template <class T>
+    struct GivensRotate_Helper<-1,T>
+    {
+        typedef typename Traits<T>::real_type RT;
+        static void call(T& x, T& y, RT& c, T& s)
+        { GivensRotate_Helper<-2,T>::call(x,y,c,s); }
+    };
+
+    template <class T, class RT>
+    static inline void InlineGivensRotate(T& x, T& y, RT& c, T& s)
+    { GivensRotate_Helper<-3,T>::call(x,y,c,s); }
+
+    // Note: GivensRotate(x,y) without the "Do" only takes the x,y argument 
+    // and returns a Givens<T> object.  This function is found below.
+    template <class T, class RT>
+    static inline void DoGivensRotate(T& x, T& y, RT& c, T& s)
+    { GivensRotate_Helper<-2,T>::call(x,y,c,s); }
+
+
+    //
+    // GivensMult of a single element:
+    // [ x' ] = [  c  s ] [ x ] = [ cx+sy  ]
+    // [ y' ]   [ -s* c ] [ y ]   [ cy-s*x ]
+    //
+    
+    // Better to leave this one inline.  So no Helper struct here.
     template <class RTg, class Tg, class T> 
     static inline void GivensMult(RTg c, Tg s, T& x, T& y)
     {
-        // [ x' ] = [  c  s ] [ x ] = [ cx+sy  ]
-        // [ y' ]   [ -s* c ] [ y ]   [ cy-s*x ]
         T xx = c*x+s*y;
         y = c*y-TMV_CONJ(s)*x;
         x = xx;
@@ -191,24 +276,282 @@ namespace tmv {
     template <class RTg, class Tg, class T> 
     static TMV_INLINE void GivensMult(RTg c, Tg s, ConjRef<T> x, ConjRef<T> y)
     { GivensMult(c,TMV_CONJ(s),x.getRef(),y.getRef()); }
-         
-    template <class RTg, class Tg, class V1, class V2>
-    static inline void GivensMultV(
-        RTg c, Tg s, BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
+
+    //
+    // GivensMult of a pair of vectors
+    //
+    
+    template <int also, int size, class T, class V1, class V2>
+    struct GivensMultV_Helper;
+
+    // algo 0: size == 0, nothing to do
+    template <int size, class T, class V1, class V2>
+    struct GivensMultV_Helper<0,size,T,V1,V2>
     {
-        TMVAssert(v1.size() == v2.size());
+        typedef typename Traits<T>::real_type RT;
+        static TMV_INLINE void call(RT , T , V1& , V2& ) {}
+    };
+
+    // algo 11: simple for loop
+    template <int size, class T, class V1, class V2>
+    struct GivensMultV_Helper<11,size,T,V1,V2>
+    {
+        typedef typename Traits<T>::real_type RT;
+        static void call(RT c, T s, V1& v1, V2& v2)
+        {
+            TMVAssert(v1.size() == v2.size());
+            TMVAssert(!SameStorage(v1,v2));
+            TMVStaticAssert(!V1::_conj);
+            TMVStaticAssert(!V2::_conj);
+            int N = size == TMV_UNKNOWN ? int(v2.size()) : size;
+
+            typedef typename V1::iterator IT1;
+            typedef typename V2::iterator IT2;
+            typedef typename V1::value_type T2;
+
+            IT1 it1 = v1.begin();
+            IT2 it2 = v2.begin();
+
+            T2 x,y;
+
+            if (N) do {
+                x = *it1;
+                y = *it2;
+                *it1++ = c*x+s*y;
+                *it2++ = c*y-TMV_CONJ(s)*x;
+            } while (--N);
+        }
+    };
+
+    // algo 12: 2 at a time
+    template <int size, class T, class V1, class V2>
+    struct GivensMultV_Helper<12,size,T,V1,V2>
+    {
+        typedef typename Traits<T>::real_type RT;
+        static void call(RT c, T s, V1& v1, V2& v2)
+        {
+            TMVAssert(v1.size() == v2.size());
+            TMVAssert(!SameStorage(v1,v2));
+            TMVStaticAssert(!V1::_conj);
+            TMVStaticAssert(!V2::_conj);
+            const int N = size == TMV_UNKNOWN ? int(v2.size()) : size;
+            int N_2 = (N >> 1);
+            const int N_x = N - (N_2 << 1);
+
+            typedef typename V1::iterator IT1;
+            typedef typename V2::iterator IT2;
+            typedef typename V1::value_type T2;
+
+            IT1 it1 = v1.begin();
+            IT2 it2 = v2.begin();
+
+            T2 x0,y0,x1,y1;
+
+            if (N_2) do {
+                x0 = it1[0];  x1 = it1[1];
+                y0 = it2[0];  y1 = it2[1];
+                it1[0] = c*x0+s*y0;
+                it1[1] = c*x1+s*y1;
+                it2[0] = c*y0-TMV_CONJ(s)*x0;
+                it2[1] = c*y1-TMV_CONJ(s)*x1;
+                it1 += 2; it2 += 2;
+            } while (--N_2);
+            if (N_x) {
+                x0 = *it1;
+                y0 = *it2;
+                *it1 = c*x0+s*y0;
+                *it2 = c*y0-TMV_CONJ(s)*x0;
+            }
+        }
+    };
+
+    // algo 13: 4 at a time
+    template <int size, class T, class V1, class V2>
+    struct GivensMultV_Helper<13,size,T,V1,V2>
+    {
+        typedef typename Traits<T>::real_type RT;
+        static void call(RT c, T s, V1& v1, V2& v2)
+        {
+            TMVAssert(v1.size() == v2.size());
+            TMVAssert(!SameStorage(v1,v2));
+            TMVStaticAssert(!V1::_conj);
+            TMVStaticAssert(!V2::_conj);
+            const int N = size == TMV_UNKNOWN ? int(v2.size()) : size;
+            int N_4 = (N >> 2);
+            int N_x = N - (N_4 << 2);
+
+            typedef typename V1::iterator IT1;
+            typedef typename V2::iterator IT2;
+            typedef typename V1::value_type T2;
+
+            IT1 it1 = v1.begin();
+            IT2 it2 = v2.begin();
+
+            T2 x0,y0,x1,y1,x2,y2,x3,y3;
+
+            if (N_4) do {
+                x0 = it1[0];  x1 = it1[1]; x2 = it1[2];  x3 = it1[3];
+                y0 = it2[0];  y1 = it2[1]; y2 = it2[2];  y3 = it2[3];
+                it1[0] = c*x0+s*y0;
+                it1[1] = c*x1+s*y1;
+                it1[2] = c*x2+s*y2;
+                it1[3] = c*x3+s*y3;
+                it2[0] = c*y0-TMV_CONJ(s)*x0;
+                it2[1] = c*y1-TMV_CONJ(s)*x1;
+                it2[2] = c*y2-TMV_CONJ(s)*x2;
+                it2[3] = c*y3-TMV_CONJ(s)*x3;
+                it1 += 4; it2 += 4;
+            } while (--N_4);
+            if (N_x) do {
+                x0 = *it1;
+                y0 = *it2;
+                *it1++ = c*x0+s*y0;
+                *it2++ = c*y0-TMV_CONJ(s)*x0;
+            } while (--N_x);
+        }
+    };
+
+    // TODO: SSE versions
+
+    // algo 90: Call inst
+    template <int size, class T, class V1, class V2>
+    struct GivensMultV_Helper<90,size,T,V1,V2>
+    {
+        typedef typename Traits<T>::real_type RT;
+        static void call(RT c, T s, V1& v1, V2& v2)
+        { InstGivensMultV(c,s,v1.xView(),v2.xView()); }
+    };
+
+    // algo 97: Conjugate
+    template <int size, class T, class V1, class V2>
+    struct GivensMultV_Helper<97,size,T,V1,V2>
+    {
+        typedef typename Traits<T>::real_type RT;
+        static void call(RT c, T s, V1& v1, V2& v2)
+        {
+            typedef typename V1::conjugate_type V1c;
+            typedef typename V2::conjugate_type V2c;
+            V1c v1c = v1.conjugate();
+            V2c v2c = v2.conjugate();
+            GivensMultV_Helper<-2,size,T,V1c,V2c>::call(c,TMV_CONJ(s),v1c,v2c);
+        }
+    };
+
+    // algo -3: Determine which algorithm to use
+    template <int size, class T, class V1, class V2>
+    struct GivensMultV_Helper<-3,size,T,V1,V2>
+    {
+        typedef typename Traits<T>::real_type RT;
+        static void call(RT c, T s, V1& v1, V2& v2)
+        {
+            TMVAssert(v1.size() == v2.size());
+            TMVAssert(!SameStorage(v1,v2));
+            TMVStaticAssert(!V1::_conj);
+            TMVStaticAssert(!V2::_conj);
+            
+            typedef typename V1::value_type T1;
+            typedef typename V2::value_type T2;
+            TMVStaticAssert((Traits2<T1,T2>::sametype));
+
+            const int allunit = V1::_step == 1 && V2::_step == 1;
+            const bool sreal = Traits<T>::isreal;
+            const bool vreal = Traits<T1>::isreal;
+            const int algo = 
+                size == 0 ? 0 :
+                TMV_OPT == 0 ? 11 :
+                allunit && sreal && vreal && sizeof(T1) == 4 ? 13 :
+                allunit && sreal && vreal && sizeof(T1) == 8 ? 12 :
+                11;
+#ifdef PRINTALGO_GIVENS
+            std::cout<<"Inline GivensMultMV: c,s = "<<c<<','<<s<<std::endl;
+            std::cout<<"v1 = "<<TMV_Text(v1)<<std::endl;
+            std::cout<<"v2 = "<<TMV_Text(v2)<<std::endl;
+            std::cout<<"size = "<<size<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
+            GivensMultV_Helper<algo,size,T,V1,V2>::call(c,s,v1,v2);
+        }
+    };
+
+    // algo -2: Check for inst
+    template <int size, class T, class V1, class V2>
+    struct GivensMultV_Helper<-2,size,T,V1,V2>
+    {
+        typedef typename Traits<T>::real_type RT;
+        static void call(RT c, T s, V1& v1, V2& v2)
+        {
+            TMVAssert(v1.size() == v2.size());
+            TMVAssert(!SameStorage(v1,v2));
+            TMVStaticAssert(V1::_conj == V2::_conj);
+            
+            typedef typename V1::value_type T1;
+            typedef typename V2::value_type T2;
+            TMVStaticAssert((Traits2<T1,T2>::sametype));
+
+            const bool inst = 
+                (size == TMV_UNKNOWN || size > 16) &&
+                Traits<T1>::isinst;
+            const int algo = 
+                size == 0 ? 0 :
+                V2::_conj ? 97 :
+                inst ? 90 :
+                -3;
+            GivensMultV_Helper<algo,size,T,V1,V2>::call(c,s,v1,v2);
+        }
+    };
+
+    template <int size, class T, class V1, class V2>
+    struct GivensMultV_Helper<-1,size,T,V1,V2>
+    {
+        typedef typename Traits<T>::real_type RT;
+        static void call(RT c, T s, V1& v1, V2& v2)
+        { GivensMultV_Helper<-2,size,T,V1,V2>::call(c,s,v1,v2); }
+    };
+
+    template <class T, class V1, class V2>
+    static inline void InlineGivensMultV(
+        typename Traits<T>::real_type c, T s, 
+        BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
+    {
+        typedef typename V1::value_type T1;
+        typedef typename V2::value_type T2;
+        TMVStaticAssert((Traits2<T1,T2>::sametype));
+        TMVStaticAssert(V1::_conj == V2::_conj);
         TMVAssert(!SameStorage(v1,v2));
 
-        typedef typename V1::iterator IT1;
-        typedef typename V2::iterator IT2;
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
+        TMVAssert(v1.size() == v2.size());
+        const int size = Sizes<V1::_size,V2::_size>::size;
 
-        IT1 it1 = v1.begin();
-        IT2 it2 = v2.begin();
-
-        for(int i=v1.size();i>0;--i) {
-            GivensMult(c,s,*it1++,*it2++);
-        }
+        typedef typename V1::cview_type V1v;
+        typedef typename V2::cview_type V2v;
+        TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
+        GivensMultV_Helper<-3,size,T,V1v,V2v>::call(c,s,v1v,v2v);
     }
+
+    template <class T, class V1, class V2>
+    static inline void GivensMultV(
+        typename Traits<T>::real_type c, T s, 
+        BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
+    {
+        typedef typename V1::value_type T1;
+        typedef typename V2::value_type T2;
+        TMVStaticAssert((Traits2<T1,T2>::sametype));
+        TMVStaticAssert(V1::_conj == V2::_conj);
+        TMVAssert(!SameStorage(v1,v2));
+
+        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
+        TMVAssert(v1.size() == v2.size());
+        const int size = Sizes<V1::_size,V2::_size>::size;
+
+        typedef typename V1::cview_type V1v;
+        typedef typename V2::cview_type V2v;
+        TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
+        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
+        GivensMultV_Helper<-2,size,T,V1v,V2v>::call(c,s,v1v,v2v);
+    }
+
 
     //
     // Symmetric Givens Mult
@@ -258,6 +601,11 @@ namespace tmv {
             e0 += c*(s*d1-TMV_CONJ(s)*d0) - RT(2)*TMV_CONJ(s)*se0;
     }
 
+
+    //
+    // Now a convenient helper class for calling the above functions.
+    //
+    
     template <class T> 
     class Givens 
     {
@@ -267,7 +615,6 @@ namespace tmv {
 
         // Constructors
         Givens(const RT& _c, const T& _s) : c(_c), s(_s) {}
-        Givens() {} // Uninitialized
         ~Givens() {}
         // Use default copy, op=
 
@@ -332,6 +679,15 @@ namespace tmv {
         RT c;
         T s;
     };
+
+    template <class T>
+    static inline Givens<T> GivensRotate(T& x, T& y)
+    {
+        typename Traits<T>::real_type c;
+        T s;
+        DoGivensRotate(x,y,c,s);
+        return Givens<T>(c,s);
+    }
 
 } // namespace tmv
 

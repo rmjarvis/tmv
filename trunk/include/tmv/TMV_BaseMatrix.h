@@ -332,6 +332,7 @@ namespace tmv {
         // Constructor
         //
 
+    protected:
         TMV_INLINE BaseMatrix() {}
         TMV_INLINE BaseMatrix(const BaseMatrix<M>&) {}
         TMV_INLINE ~BaseMatrix() {}
@@ -501,6 +502,7 @@ namespace tmv {
         // Constructor
         //
 
+    protected:
         TMV_INLINE BaseMatrix_Calc() {}
         TMV_INLINE BaseMatrix_Calc(const BaseMatrix_Calc<M>&) {}
         TMV_INLINE ~BaseMatrix_Calc() {}
@@ -652,9 +654,11 @@ namespace tmv {
         // Constructor
         //
 
+    protected:
         TMV_INLINE BaseMatrix_Mutable() {}
         TMV_INLINE BaseMatrix_Mutable(const BaseMatrix_Mutable<M>&) {}
         TMV_INLINE ~BaseMatrix_Mutable() {}
+    public :
 
 
         //

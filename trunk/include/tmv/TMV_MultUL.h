@@ -1548,9 +1548,13 @@ namespace tmv {
             Matrix<T3> m3i = m3;
             Matrix<T3> m3c = m3;
             NoAliasMultMM<add>(x,m1c,m2c,m3c);
+            std::cout<<"m1c = "<<m1c<<std::endl;
+            std::cout<<"m2c = "<<m2c<<std::endl;
+            std::cout<<"m3c = "<<m3c<<std::endl;
 #endif
             MultUL_Helper<algo,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
 #ifdef XDEBUG_UL
+            std::cout<<"m3 => "<<m3<<std::endl;
             if (Norm(m3-m3c) > 1.e-3*(Norm(m1c)*Norm(m2c)+(add?Norm(m3i):RT(0)))) {
                 std::cout<<"m1 = "<<m1c<<std::endl;
                 std::cout<<"m2 = "<<m2c<<std::endl;

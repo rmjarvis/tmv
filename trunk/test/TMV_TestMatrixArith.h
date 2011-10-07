@@ -279,7 +279,6 @@ static void DoTestMa_Basic(const MM& a, std::string label)
 
     tmv::Matrix<T> m = a;
     FT eps = EPS * FT(m.colsize()+m.rowsize());
-    FT kappa = GetKappa(m);
 
 #ifdef XXD
     if (XXDEBUG1) {

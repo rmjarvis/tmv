@@ -28,7 +28,6 @@ namespace tmv {
         MatrixView<double,ColMajor>& A, int* P)
     {
         TMVAssert(A.iscm());
-        TMVAssert(A.ct()==NonConj);
 
         int m = A.colsize();
         int n = A.rowsize();
@@ -48,7 +47,6 @@ namespace tmv {
         MatrixView<std::complex<double>,ColMajor>& A, int* P)
     {
         TMVAssert(A.iscm());
-        TMVAssert(A.ct()==NonConj);
 
         int m = A.colsize();
         int n = A.rowsize();

@@ -405,7 +405,7 @@ namespace tmv {
             B.diag() = D;
             B.diag(1) = E;
             Matrix<T> AA = U*B*V;
-            if (!(Norm(A0-AA) < 0.001*Norm(A0))) {
+            if (!(Norm(A0-AA) <= 0.001*Norm(A0))) {
                 std::cerr<<"Bidiagonalize: A = "<<TMV_Text(A)<<"  "<<A0<<std::endl;
                 std::cerr<<"A = "<<A<<std::endl;
                 std::cerr<<"Ubeta = "<<Ubeta<<std::endl;

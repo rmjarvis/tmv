@@ -919,8 +919,12 @@ namespace tmv {
         // This produces the exact right answer, but it is way too slow!
         // The GvL algorithm is order mn.  This is order mn^2.
         Matrix<T> minv(rowsize(),colsize());
-        makeInverse(minv);
-        return normInf * minv.normInf();
+        if (isSingular()) {
+            return normInf / TMV_Epsilon<RT>();
+        } else {
+            makeInverse(minv);
+            return normInf * minv.normInf();
+        }
     }
 
     template <class M>
@@ -937,7 +941,8 @@ namespace tmv {
         const QRD<M>& qrd, const BaseMatrix_Calc<M2>& m, std::ostream* fout=0)
     {
         typedef typename M2::real_type RT;
-        bool printmat = fout && m.colsize() < 100 && m.rowsize() < 100;
+        //bool printmat = fout && m.colsize() < 100 && m.rowsize() < 100;
+        bool printmat = fout;
         if (printmat) {
             *fout << "QR:\n";
             if (qrd.isTrans()) *fout << m.transpose() << std::endl;
@@ -951,13 +956,12 @@ namespace tmv {
         }
         RT nm = qrd.isTrans() ? Norm(qr-m.transpose()) : Norm(qr-m);
         nm /= Norm(qrd.getQ())*Norm(qrd.getR());
-        RT kappa = qrd.condition(m.normInf());
         if (fout) {
             *fout << "Norm(M-QR)/Norm(QR) = "<<nm<<" <? ";
-            *fout << kappa<<"*"<<RT(m.colsize())<<"*"<<TMV_Epsilon<RT>();
-            *fout << " = "<<kappa*RT(m.colsize())*TMV_Epsilon<RT>()<<std::endl;
+            *fout << RT(m.colsize())<<"*"<<TMV_Epsilon<RT>();
+            *fout << " = "<<RT(m.colsize())*TMV_Epsilon<RT>()<<std::endl;
         }
-        return nm < kappa*RT(m.colsize())*TMV_Epsilon<RT>();
+        return nm < RT(m.colsize())*TMV_Epsilon<RT>();
     }
 
 

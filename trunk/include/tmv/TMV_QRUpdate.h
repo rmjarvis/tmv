@@ -150,9 +150,9 @@ namespace tmv {
     template <class M1, class M2, class M3>
     static inline void RecursiveQRUpdate(M1& R, M2& A, M3& Z, bool makeZ)
     {
-        const int cs = M2::_colsize;
+        //const int cs = M2::_colsize;
+        //const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
         const int rs = Sizes<M2::_rowsize,M1::_size>::size;
-        const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
         const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
 
         typedef typename M1::value_type T;

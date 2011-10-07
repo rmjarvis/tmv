@@ -16,7 +16,7 @@
 namespace tmv {
 
     template <class M1, class M2>
-    static void NonBlasMultEq(const M1& m1, M2& m2)
+    static void DoMultEq(const M1& m1, M2& m2)
     {
         TMVAssert(m1.isrm() || m1.iscm());
         TMVAssert(m2.isrm() || m2.iscm());
@@ -40,7 +40,7 @@ namespace tmv {
 #ifdef BLAS
     template <class M1, class M2, class T1>
     static void BlasMultEq(const M1& m1, M2& m2, T1)
-    { NonBlasMultEq(m1,m2); }
+    { DoMultEq(m1,m2); }
 #ifdef TMV_INST_DOUBLE
     template <class M1>
     static void BlasMultEq(const M1& A, MatrixView<double> B, double)
@@ -98,7 +98,7 @@ namespace tmv {
     }
     template <class M1>
     static void BlasMultEq(
-        const M1& A, MatrixView<std::complex<double> > B, double)
+        const M1& A, MatrixView<std::complex<double> > B, double t1)
     {
         TMVAssert(A.size() == B.colsize());
         TMVAssert(B.rowsize() > 0);
@@ -120,10 +120,10 @@ namespace tmv {
                 BLAS1 BLAS1 BLAS1 BLAS1);
         } else {
             Matrix<double,ColMajor> B1 = B.realPart();
-            BlasMultEq(A,B1.xView());
+            BlasMultEq(A,B1.xView(),t1);
             B.realPart() = B1;
             B1 = B.imagPart();
-            BlasMultEq(A,B1.xView());
+            BlasMultEq(A,B1.xView(),t1);
             B.imagPart() = B1;
         }
     }
@@ -185,7 +185,7 @@ namespace tmv {
     }
     template <class M1>
     static void BlasMultEq(
-        const M1& A, MatrixView<std::complex<float> > B, float)
+        const M1& A, MatrixView<std::complex<float> > B, float t1)
     {
         TMVAssert(A.size() == B.colsize());
         TMVAssert(B.rowsize() > 0);
@@ -207,10 +207,10 @@ namespace tmv {
                 BLAS1 BLAS1 BLAS1 BLAS1);
         } else {
             Matrix<float,ColMajor> B1 = B.realPart();
-            BlasMultEq(A,B1.xView());
+            BlasMultEq(A,B1.xView(),t1);
             B.realPart() = B1;
             B1 = B.imagPart();
-            BlasMultEq(A,B1.xView());
+            BlasMultEq(A,B1.xView(),t1);
             B.imagPart() = B1;
         }
     }
@@ -218,32 +218,34 @@ namespace tmv {
 #endif // BLAS
 
     template <class M1, class T2>
-    static void DoMultEq(const M1& m1, MatrixView<T2> m2)
+    static void CallMultEq(const M1& m1, MatrixView<T2> m2)
     {
         typedef typename M1::value_type T1;
 #ifdef BLAS
-        const T1 t1(0);
-        if ((m2.isrm() && m2.stepi()>0) || (m2.iscm() && m2.stepj()>0)) {
-            if ((m1.isrm() && m1.stepi()>0) || (m1.iscm() && m1.stepj()>0)) {
-                BlasMultEq(m1,m2,t1);
+        if (m2.colsize() > 0 && m2.rowsize() > 0) {
+            const T1 t1(0);
+            if ((m2.isrm() && m2.stepi()>0) || (m2.iscm() && m2.stepj()>0)) {
+                if ((m1.isrm() && m1.stepi()>0) || (m1.iscm() && m1.stepj()>0)) {
+                    BlasMultEq(m1,m2,t1);
+                } else {
+                    Matrix<T1,ColMajor|NoDivider> m1c(m1.size(),m1.size());
+                    typedef typename TypeSelect<M1::_upper,
+                            UpperTriMatrixView<T1,ColMajor>,
+                            LowerTriMatrixView<T1,ColMajor> >::type M1t;
+                    M1t m1ct = Maybe<M1::_upper>::uppertri(m1c,m1.dt());
+                    InstCopy(m1,m1ct.xView());
+                    BlasMultEq(m1ct.constView(),m2,t1);
+                }
             } else {
-                Matrix<T1,ColMajor|NoDivider> m1c(m1.size(),m1.size());
-                typedef typename TypeSelect<M1::_upper,
-                        UpperTriMatrixView<T1,ColMajor>,
-                        LowerTriMatrixView<T1,ColMajor> >::type M1t;
-                M1t m1ct = Maybe<M1::_upper>::uppertri(m1c,m1.dt());
-                InstCopy(m1,m1ct.xView());
-                BlasMultEq(m1ct.constView(),m2,t1);
+                Matrix<T2,ColMajor|NoDivider> m2c(m2);
+                CallMultEq(m1,m2c.xView());
+                InstCopy(m2c.constView().xView(),m2);
             }
-        } else {
-            Matrix<T2,ColMajor|NoDivider> m2c(m2);
-            DoMultEq(m1,m2c.xView());
-            InstCopy(m2c.constView().xView(),m2);
         }
 #else
         if (m2.isrm() || m2.iscm()) {
             if (m1.isrm() || m1.iscm()) {
-                NonBlasMultEq(m1,m2);
+                DoMultEq(m1,m2);
             } else {
                 Matrix<T1,ColMajor|NoDivider> m1c(m1.size(),m1.size());
                 typedef typename TypeSelect<M1::_upper,
@@ -251,11 +253,11 @@ namespace tmv {
                         LowerTriMatrixView<T1,ColMajor> >::type M1t;
                 M1t m1ct = Maybe<M1::_upper>::uppertri(m1c,m1.dt());
                 InstCopy(m1,m1ct.xView());
-                NonBlasMultEq(m1ct.constView(),m2);
+                DoMultEq(m1ct.constView(),m2);
             }
         } else {
             Matrix<T2,ColMajor|NoDivider> m2c(m2);
-            DoMultEq(m1,m2c.xView());
+            CallMultEq(m1,m2c.xView());
             InstCopy(m2c.constView().xView(),m2);
         }
 #endif
@@ -266,7 +268,7 @@ namespace tmv {
         const T x, const M1& m1, const M2& m2, MatrixView<T> m3)
     {
         InstMultXM(x,m2,m3);
-        DoMultEq(m1,m3);
+        CallMultEq(m1,m3);
     }
 
     template <class T, class M1, class M2>
@@ -275,7 +277,7 @@ namespace tmv {
     {
         Matrix<T,ColMajor|NoDivider> m3c(m3.colsize(),m3.rowsize());
         InstMultXM(x,m2,m3c.xView());
-        DoMultEq(m1,m3c.xView());
+        CallMultEq(m1,m3c.xView());
         InstAddMultXM(T(1),m3c.xView().constView(),m3);
     }
 

@@ -558,7 +558,7 @@ namespace tmv {
 
         void resize(size_t n)
         {
-            if (n > itsn) {
+            if (int(n) > itsn) {
                 itsmem.resize(n);
                 itsp = itsmem.get();
             }

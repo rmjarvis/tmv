@@ -124,6 +124,7 @@
 #ifdef TMV_DEBUG
 #include <typeinfo>
 #include <sstream>
+#include <iostream>
 #endif
 
 #include "../util/portable_platform.h"
@@ -2273,7 +2274,16 @@ namespace tmv {
     template <int S>
     struct CheckedInt
     {
-        TMV_INLINE CheckedInt(int s) { TMVAssert(s == S); }
+        TMV_INLINE CheckedInt(int s) { 
+#ifdef TMV_DEBUG
+            if (s != S) {
+                std::cerr<<"Mismatched CheckInt:\n";
+                std::cerr<<"template parameter S = "<<S<<std::endl;
+                std::cerr<<"argument s = "<<s<<std::endl;
+            }
+#endif
+            TMVAssert(s == S); 
+        }
         TMV_INLINE operator int() const { return S; }
     };
     template <>

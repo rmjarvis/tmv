@@ -1,5 +1,4 @@
 
-
 #ifndef TMV_LUInverse_H
 #define TMV_LUInverse_H
 
@@ -122,6 +121,9 @@ namespace tmv {
             std::cout<<"algo = "<<algo<<std::endl;
 #endif
 #ifdef XDEBUG_LU
+            typedef typename M1::value_type T;
+            typename M1::uppertri_type U = m1.upperTri();
+            typename M1::unit_lowertri_type L = m1.unitLowerTri();
             Matrix<T> L0 = L;
             Matrix<T> U0 = U;
             Matrix<T> A = L*U;
@@ -212,9 +214,9 @@ namespace tmv {
         {
 #ifdef PRINTALGO_LU
             std::cout<<"LUInverseATA algo 11: cs,rs = "<<cs<<','<<rs<<std::endl;
-            //std::cout<<"m1 (=LU) = "<<m1<<std::endl;
-            //std::cout<<"trans = "<<trans<<std::endl;
-            //std::cout<<"m2 = "<<m2<<std::endl;
+            std::cout<<"trans = "<<trans<<std::endl;
+            std::cout<<"m1 (=LU) = "<<m1<<std::endl;
+            std::cout<<"m2 = "<<m2<<std::endl;
 #endif
             // (At A)^-1 = A^-1 (A^-1)t
             // = (U^-1 L^-1 Pt) (P L^-1t U^-1t)
@@ -307,13 +309,18 @@ namespace tmv {
             std::cout<<"algo = "<<algo<<std::endl;
 #endif
 #ifdef XDEBUG_LU
-            typedef typename M2::value_type T;
+            typedef typename M1::value_type T;
+            typename M1::const_uppertri_type U = m1.upperTri();
+            typename M1::const_unit_lowertri_type L = m1.unitLowerTri();
             Matrix<T> L0 = L;
             Matrix<T> U0 = U;
-            Matrix<T> A = L*U;
-            P.applyOnLeft(A);
+            Matrix<T> PLU = L*U;
+            P.applyOnLeft(PLU);
+            Matrix<T> A = PLU;
+            if (trans) A.transposeSelf();
             Matrix<T> Ainv = m1;
             LU_Inverse(Ainv,P);
+            if (trans) Ainv.transposeSelf();
             Matrix<T> invAtA = Ainv * Ainv.adjoint();
 #endif
             LU_InverseATA_Helper<algo,cs,rs,M1,M2>::call(m1,P,trans,m2);
@@ -321,10 +328,18 @@ namespace tmv {
             if (Norm(m2-invAtA) > 1.e-3*Norm(invAtA)) {
                 std::cout<<"L = "<<L0<<std::endl;
                 std::cout<<"U = "<<U0<<std::endl;
-                std::cout<<"A = PLU = "<<A<<std::endl;
+                std::cout<<"PLU = "<<PLU<<std::endl;
+                std::cout<<"A = "<<A<<std::endl;
                 std::cout<<"Ainv = "<<Ainv<<std::endl;
+                std::cout<<"A*Ainv = "<<A*Ainv<<std::endl;
+                std::cout<<"Ainv*A = "<<Ainv*A<<std::endl;
                 std::cout<<"Ainv * Ainvt = "<<invAtA<<std::endl;
+                std::cout<<"At * A = "<<A.adjoint()*A<<std::endl;
                 std::cout<<"m2 = "<<m2<<std::endl;
+                std::cout<<"(At * A) * m2 = "<<A.adjoint()*A*m2<<std::endl;
+                std::cout<<"m2 * (At * A) = "<<m2*A.adjoint()*A<<std::endl;
+                std::cout<<"(At * A) * Ainv*Ainvt = "<<A.adjoint()*A*invAtA<<std::endl;
+                std::cout<<"Ainv*Ainvt * (At * A) = "<<invAtA*A.adjoint()*A<<std::endl;
                 abort();
             }
 #endif

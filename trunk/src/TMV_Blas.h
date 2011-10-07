@@ -684,6 +684,28 @@ namespace tmv {
     void LAP_Results(const int lwork_opt, const int m, const int n,
                      const int lwork, const char* fn);
 
+
+    template <class M>
+    static inline bool BlasIsRM(const M& m)
+    {
+#ifdef BLAS
+        return m.isrm() && m.stepi() >= m.rowsize() && m.stepi() >= 1;
+#else
+        return m.isrm();
+#endif
+    }
+
+    template <class M>
+    static inline bool BlasIsCM(const M& m)
+    {
+#ifdef BLAS
+        return m.iscm() && m.stepj() >= m.colsize() && m.stepj() >= 1;
+#else
+        return m.iscm();
+#endif
+    }
+
 }
+
 
 #endif // TMV_BLAS_H

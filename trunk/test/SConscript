@@ -32,7 +32,7 @@ if env['MEM_TEST']:
     env1.Append(CPPDEFINES=['TMV_MEM_TEST'])
 if env['XTEST'] > 0:
     env1.Append(CPPDEFINES=['XTEST=' + env['XTEST']])
-if (int(env['XTEST']) & 64):
+if ((int(env['XTEST']) & 64) and not env['WITH_BLAS']):
     env1.Append(CPPDEFINES=['TMV_INITIALIZE_NAN'])
 if env['DEBUG'] or env['TEST_DEBUG']:
     env1.Append(CPPDEFINES=['XXD'])
