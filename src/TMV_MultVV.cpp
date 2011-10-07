@@ -1,5 +1,4 @@
 
-
 #include "TMV_Blas.h"
 #include "tmv/TMV_MultVV.h"
 #include "tmv/TMV_Vector.h"
@@ -139,8 +138,8 @@ namespace tmv {
         return res;
     }
     std::complex<float> DoMultVV(
-        const ConstVectorView<std::complex<float>,Conj>& v2,
-        const ConstVectorView<std::complex<float> >& v1) 
+        const ConstVectorView<std::complex<float>,Conj>& v1,
+        const ConstVectorView<std::complex<float> >& v2) 
     {
         TMVAssert(v1.size()==v2.size());
         int n=v1.size();
@@ -187,7 +186,9 @@ namespace tmv {
     template <class T1, int C1, class T2>
     T2 InstMultVV(
         const ConstVectorView<T1,C1>& v1, const ConstVectorView<T2>& v2)
-    { return DoMultVV(v1,v2); }
+    {
+        return DoMultVV(v1,v2); 
+    }
 
 
 #define InstFile "TMV_MultVV.inst"

@@ -160,14 +160,19 @@ namespace tmv {
 #endif // FLOAT
 #endif // BLAS
 
+    static inline bool shouldReverse(const int step1, const int step2)
+    {
+        return ( (step2 < 0 && (step1 != 1 || step2 == -1)) ||
+                 (step1 == -1 && step2 != 1) );
+    }
+
     template <class T1, int C1, class T2> 
     void InstCopy(const ConstVectorView<T1,C1>& v1, VectorView<T2> v2)
-    {
-        TMVAssert(
-            v1.realPart().cptr() != v2.realPart().cptr() ||
-            v1.step() * v2.step() < 0 ||
-            std::abs(v2.step()) < std::abs(v1.step()));
-        DoInstCopy(v1,v2); 
+    { 
+        if (shouldReverse(v1.step(),v2.step())) 
+            DoInstCopy(v1.reverse(),v2.reverse());
+        else 
+            DoInstCopy(v1,v2); 
     }
 
     template <class T1, int C1, class T2> 
@@ -272,7 +277,12 @@ namespace tmv {
 
     template <class T, int C> 
     void InstSwap(VectorView<T,C> v1, VectorView<T> v2)
-    { DoInstSwap(v1,v2); }
+    { 
+        if (shouldReverse(v1.step(),v2.step())) 
+            DoInstSwap(v1.reverse(),v2.reverse());
+        else 
+            DoInstSwap(v1,v2); 
+    }
 
     template <class T, int C> 
     void InstAliasSwap(VectorView<T,C> v1, VectorView<T> v2)
@@ -289,6 +299,8 @@ namespace tmv {
         if (v.step() == 1) {
             VectorView<T,Unit> vu = v.unitView();
             InlineReverseSelf(vu);
+        } else if (v.step() < 0) {
+            InstReverseSelf(v.reverse());
         } else 
             InlineReverseSelf(v);
     }
@@ -315,7 +327,7 @@ namespace tmv {
         int n = v.size();
         int s = v.step();
         std::complex<double>* vp = v.ptr();
-        if (s < 0) vp += (n-1)*s;
+        //if (s < 0) vp += (n-1)*s;
         LAPNAME(zlacgv) (LAPV(n),LAPP(vp),LAPV(s)); 
     }
 #endif
@@ -325,7 +337,7 @@ namespace tmv {
         int n = v.size();
         int s = v.step();
         std::complex<float>* vp = v.ptr();
-        if (s < 0) vp += (n-1)*s;
+        //if (s < 0) vp += (n-1)*s;
         LAPNAME(clacgv) (LAPV(n),LAPP(vp),LAPV(s)); 
     }
 #endif
@@ -333,7 +345,10 @@ namespace tmv {
 
     template <class T> 
     void InstConjugateSelf(VectorView<T> v)
-    { DoInstConjugateSelf(v); }
+    {
+        if (v.step() >= 0) DoInstConjugateSelf(v); 
+        else DoInstConjugateSelf(v.reverse()); 
+    }
 
     //
     // SumElements
@@ -342,9 +357,9 @@ namespace tmv {
     template <class T> 
     T InstSumElements(const ConstVectorView<T>& v)
     {
-        return (v.step() == 1) ? 
-            InlineSumElements(v.unitView()) : 
-            InlineSumElements(v);
+        if (v.step() == 1) return InlineSumElements(v.unitView());
+        else if (v.step() < 0) return InstSumElements(v.reverse());
+        else return InlineSumElements(v);
     }
 
 
@@ -381,7 +396,7 @@ namespace tmv {
         // The non-blas version works correctly, but just do it here anyway.
         if (s == 0) return n*TMV_ABS(v[0]);
         const double* vp = v.cptr();
-        if (s < 0) vp += (n-1)*s;
+        //if (s < 0) vp += (n-1)*s;
         return BLASNAME(dasum) (BLASV(n),BLASP(vp),BLASV(s));
     }
     static double DoInstSumAbsElements(const ConstVectorView<double>& v)
@@ -394,7 +409,7 @@ namespace tmv {
         int s = v.step();
         if (s == 0) return n*TMV_ABS(v[0]);
         const std::complex<double>* vp = v.cptr();
-        if (s < 0) vp += (n-1)*s;
+        //if (s < 0) vp += (n-1)*s;
         return BLASNAME(dzasum) (BLASV(n),BLASP(vp),BLASV(s));
     }
 #endif
@@ -406,7 +421,7 @@ namespace tmv {
         int s = v.step();
         if (s == 0) return n*TMV_ABS(v[0]);
         const float* vp = v.cptr();
-        if (s < 0) vp += (n-1)*s;
+        //if (s < 0) vp += (n-1)*s;
         return BLASNAME(sasum) (BLASV(n),BLASP(vp),BLASV(s));
     }
     static float DoInstSumAbsElements(const ConstVectorView<float>& v)
@@ -419,7 +434,7 @@ namespace tmv {
         int s = v.step();
         if (s == 0) return n*TMV_ABS(v[0]);
         const std::complex<float>* vp = v.cptr();
-        if (s < 0) vp += (n-1)*s;
+        //if (s < 0) vp += (n-1)*s;
         return BLASNAME(scasum) (BLASV(n),BLASP(vp),BLASV(s));
     }
 #endif
@@ -433,7 +448,7 @@ namespace tmv {
         int s = v.step();
         if (s == 0) return n*TMV_ABS(v[0]);
         const std::complex<double>* vp = v.cptr();
-        if (s < 0) vp += (n-1)*s;
+        //if (s < 0) vp += (n-1)*s;
         return LAPNAME(dzsum1) (LAPV(n),LAPP(vp),LAPV(s)); 
     }
 #endif
@@ -446,7 +461,7 @@ namespace tmv {
         int s = v.step();
         if (s == 0) return n*TMV_ABS(v[0]);
         const std::complex<float>* vp = v.cptr();
-        if (s < 0) vp += (n-1)*s;
+        //if (s < 0) vp += (n-1)*s;
         return LAPNAME(scsum1) (LAPV(n),LAPP(vp),LAPV(s)); 
     }
 #endif
@@ -457,12 +472,18 @@ namespace tmv {
     template <class T> 
     typename ConstVectorView<T>::float_type InstSumAbsElements(
         const ConstVectorView<T>& v)
-    { return DoInstSumAbsElements(v); }
+    { 
+        if (v.step() >= 0) return DoInstSumAbsElements(v); 
+        else return DoInstSumAbsElements(v.reverse()); 
+    }
 
     template <class T> 
     typename Traits<T>::real_type InstSumAbs2Elements(
         const ConstVectorView<T>& v)
-    { return DoInstSumAbs2Elements(v); }
+    {
+        if (v.step() >= 0) return DoInstSumAbs2Elements(v); 
+        else return DoInstSumAbs2Elements(v.reverse()); 
+    }
 
     //
     // MaxElement
@@ -503,6 +524,7 @@ namespace tmv {
         const ConstVectorView<double>& v, int* imax)
     {
         int n=v.size();
+        if (n == 0) return double(0);
         int s=v.step();
         if (s == 0) {
             if (imax) *imax = 0;
@@ -527,6 +549,7 @@ namespace tmv {
         const ConstVectorView<std::complex<double> >& v, int* imax)
     {
         int n=v.size();
+        if (n == 0) return double(0);
         int s=v.step();
         if (s == 0) {
             if (imax) *imax = 0;
@@ -550,6 +573,7 @@ namespace tmv {
         const ConstVectorView<float>& v, int* imax)
     {
         int n=v.size();
+        if (n == 0) return float(0);
         int s=v.step();
         if (s == 0) {
             if (imax) *imax = 0;
@@ -574,6 +598,7 @@ namespace tmv {
         const ConstVectorView<std::complex<float> >& v, int* imax)
     {
         int n=v.size();
+        if (n == 0) return float(0);
         int s=v.step();
         if (s == 0) {
             if (imax) *imax = 0;
@@ -644,6 +669,7 @@ namespace tmv {
         const ConstVectorView<double>& v, int* imin)
     {
         int n=v.size();
+        if (n == 0) return double(0); 
         int s=v.step();
         if (s == 0) {
             if (imin) *imin = 0;
@@ -668,6 +694,7 @@ namespace tmv {
         const ConstVectorView<std::complex<double> >& v, int* imin)
     {
         int n=v.size();
+        if (n == 0) return double(0); 
         int s=v.step();
         if (s == 0) {
             if (imin) *imin = 0;
@@ -691,6 +718,7 @@ namespace tmv {
         const ConstVectorView<float>& v, int* imin)
     {
         int n=v.size();
+        if (n == 0) return float(0); 
         int s=v.step();
         if (s == 0) {
             if (imin) *imin = 0;
@@ -715,6 +743,7 @@ namespace tmv {
         const ConstVectorView<std::complex<float> >& v, int* imin)
     {
         int n=v.size();
+        if (n == 0) return float(0); 
         int s=v.step();
         if (s == 0) {
             if (imin) *imin = 0;
@@ -755,6 +784,7 @@ namespace tmv {
     typename Traits<T>::real_type InstNormSq(const ConstVectorView<T>& v)
     {
         if (v.step() == 1) return InlineNormSq(v.unitView());
+        else if (v.step() < 0) return InstNormSq(v.reverse());
         else return InlineNormSq(v);
     }
 
@@ -764,6 +794,7 @@ namespace tmv {
         const typename ConstVectorView<T>::float_type scale)
     {
         if (v.step() == 1) return InlineNormSq(v.unitView(),scale);
+        else if (v.step() < 0) return InstNormSq(v.reverse(),scale);
         else return InlineNormSq(v,scale);
     }
 
@@ -788,7 +819,7 @@ namespace tmv {
         int n=v.size();
         int s=v.step();
         const double* vp = v.cptr();
-        if (s < 0) vp += (n-1)*s;
+        //if (s < 0) vp += (n-1)*s;
         return BLASNAME(dnrm2) (BLASV(n),BLASP(vp),BLASV(s));
     }
     static double DoInstNorm2(const ConstVectorView<std::complex<double> >& v)
@@ -796,7 +827,7 @@ namespace tmv {
         int n=v.size();
         int s=v.step();
         const std::complex<double>* vp = v.cptr();
-        if (s < 0) vp += (n-1)*s;
+        //if (s < 0) vp += (n-1)*s;
         return BLASNAME(dznrm2) (BLASV(n),BLASP(vp),BLASV(s));
     }
 #endif
@@ -806,7 +837,7 @@ namespace tmv {
         int n=v.size();
         int s=v.step();
         const float* vp = v.cptr();
-        if (s < 0) vp += (n-1)*s;
+        //if (s < 0) vp += (n-1)*s;
         return BLASNAME(snrm2) (BLASV(n),BLASP(vp),BLASV(s));
     }
     static float DoInstNorm2(const ConstVectorView<std::complex<float> >& v)
@@ -814,7 +845,7 @@ namespace tmv {
         int n=v.size();
         int s=v.step();
         const std::complex<float>* vp = v.cptr();
-        if (s < 0) vp += (n-1)*s;
+        //if (s < 0) vp += (n-1)*s;
         return BLASNAME(scnrm2) (BLASV(n),BLASP(vp),BLASV(s));
     }
 #endif
@@ -824,7 +855,10 @@ namespace tmv {
     template <class T> 
     typename ConstVectorView<T>::float_type InstNorm2(
         const ConstVectorView<T>& v)
-    { return DoInstNorm2(v); }
+    { 
+        if (v.step() >= 0) return DoInstNorm2(v); 
+        else return DoInstNorm2(v.reverse()); 
+    }
 
     //
     // Sort

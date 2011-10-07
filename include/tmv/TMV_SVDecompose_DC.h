@@ -27,6 +27,7 @@
 #include "TMV_SafeWriter.h"
 
 #define TMV_DC_LIMIT 32
+#define TMV_MAXITER 100
 
 namespace tmv {
 
@@ -59,7 +60,6 @@ namespace tmv {
         // http://www.netlib.org/lapack/lawnspdf/lawn89.pdf
         //
         const T eps = TMV_Epsilon<T>();
-        const int TMV_MAXITER = 100;
 
         dbgcout<<"k = "<<k<<std::endl;
         if (k<N-1) {
@@ -227,7 +227,8 @@ namespace tmv {
         T psix=0, phix=0, dpsix=0, dphix=0;
 
         T f1 = f;
-        for(int iter = 0; iter < TMV_MAXITER; iter++) {
+        int iter = 0;
+        do {
             // Calculate psi, phi
             psi = phi = e = dpsi = dphi = T(0);
             for(int j=0;j<k1;j++) {
@@ -330,14 +331,15 @@ namespace tmv {
                 exit(1);
 #endif
             }
-        }
+        } while (++iter < TMV_MAXITER);
 
         // Use 3 poles when fk<0 for k1=k or fk>0 for k1=k+1
         bool threepoles = (((fk < T(0)) == (k1 == k)) && k1>0 && k1<N-1);
         bool fixedweight = true;
         if (threepoles) dbgcout<<"USE THREE POLES\n";
         bool last = false;
-        for(int iter = 0; iter < TMV_MAXITER; iter++) {
+        iter = 0;
+        do {
             dbgcout<<"k = "<<k<<", loop 2: iter = "<<iter<<std::endl;
             dbgcout<<"Main iter = "<<iter<<", f = "<<f<<
                 ", eps*e = "<<eps*e<<std::endl;
@@ -704,7 +706,7 @@ namespace tmv {
                 exit(1);
 #endif
             }
-        }
+        } while (++iter < TMV_MAXITER);
         dbgcout<<"Found Singularvalue S("<<k<<") = "<<s<<std::endl;
         dbgcout<<"eta = "<<-f/df<<", tau = "<<tau<<
             ", eta/tau = "<<-f/df/tau<<std::endl;
@@ -988,9 +990,11 @@ namespace tmv {
             TMVAssert(D.step()==1);
             TMVAssert(E.step()==1);
 
+            dbgcout<<"Start SVD DC: \n";
+            dbgcout<<"U: "<<U.cptr()<<"  "<<U.colsize()<<"  "<<U.rowsize()<<"  "<<U.stepi()<<"  "<<U.stepj()<<std::endl;
+            dbgcout<<"V: "<<V.cptr()<<"  "<<V.colsize()<<"  "<<V.rowsize()<<"  "<<V.stepi()<<"  "<<V.stepj()<<std::endl;
 #ifdef XDEBUG_SVD
             typedef typename Traits2<typename Mu::value_type, typename Mv::value_type>::type T;
-            dbgcout<<"Start SVD DC: \n";
             Vector<RT> D0 = D;
             dbgcout<<"D0 = "<<D0<<std::endl;
             Vector<RT> E0 = E;
@@ -1031,7 +1035,8 @@ namespace tmv {
             // and QR is certainly never very much slower than doing 
             // 1 or 2 divides, which seems to be optimal for large problems.
             // So I always use QR for the S-only calculation.
-            if (N <= TMV_DC_LIMIT || (!(U.cptr() || V.cptr()))) {
+            if (N <= TMV_DC_LIMIT || (!U.cptr() && !V.cptr())) {
+                dbgcout<<"Do small problem:\n";
                 return SVDecomposeFromBidiagonal_DC_Helper<
                     1,cs,rs,Mu,Vd,Ve,Mv>::call(U,D,E,V,UisI,VisI);
             }
@@ -1046,6 +1051,7 @@ namespace tmv {
             Ves E1 = E.subVector(0,K);
             Ves E1x = E.subVector(0,K-1);
             Mvc V1(K+1,V.cptr()?K+1:1);
+            dbgcout<<"V1: "<<V1.cptr()<<"  "<<V1.colsize()<<"  "<<V1.rowsize()<<"  "<<V1.stepi()<<"  "<<V1.stepj()<<std::endl;
             Mvcv V1v = V1.view();
             Mvcs V1x = V1.rowRange(0,K);
             if (V.cptr()) V1.setToIdentity();
@@ -1053,6 +1059,7 @@ namespace tmv {
             BidiagonalZeroLastCol(D1,E1,V1v);
             if (U.cptr()) {
                 Muc U1(K,K);
+                dbgcout<<"U1: "<<U1.cptr()<<"  "<<U1.colsize()<<"  "<<U1.rowsize()<<"  "<<U1.stepi()<<"  "<<U1.stepj()<<std::endl;
                 Mucv U1v = U1.view();
                 U1.setToIdentity();
                 SVDecomposeFromBidiagonal_DC_Helper<
@@ -1065,21 +1072,34 @@ namespace tmv {
                     11,xx,xx,Mu,Vds,Ves,Mvcv>::call(
                         U,D1,E1x,V1x,false,false);
             }
+            dbgcout<<"After left sub-problem\n";
             z.subVector(0,K+1) = DK * V1.col(V.cptr() ? K : 0);
+            dbgcout<<"After z = DK * V1.col\n";
             if (V.cptr()) {
+                dbgcout<<"VisI = "<<VisI<<std::endl;
+                dbgcout<<"K = "<<K<<std::endl;
+                dbgcout<<"V steps = "<<V.stepi()<<"  "<<V.stepj()<<std::endl;
+                dbgcout<<"V.rowRange(0,K+1) = "<<V.rowRange(0,K+1)<<std::endl;
+                dbgcout<<"steps = "<<V.rowRange(0,K+1).stepi()<<"  "<<V.rowRange(0,K+1).stepj()<<std::endl;
+                dbgcout<<"V const steps = "<<V.constView().stepi()<<"  "<<V.constView().stepj()<<std::endl;
+                dbgcout<<"V.const.rowRange(0,K+1) = "<<V.constView().rowRange(0,K+1)<<std::endl;
+                dbgcout<<"steps = "<<V.constView().rowRange(0,K+1).stepi()<<"  "<<V.constView().rowRange(0,K+1).stepj()<<std::endl;
                 if (VisI) V.subMatrix(0,K+1,0,K+1) = V1;
                 else V.rowRange(0,K+1) = V1 * V.rowRange(0,K+1);
+                dbgcout<<"After set V\n";
             }
 
             // Do the right sub-problem
             Vds D2 = D.subVector(K+1,N);
             Ves E2 = E.subVector(K+1,N-1);
             Mvc V2(N-K-1,V.cptr()?N-K-1:1);
+            dbgcout<<"V2: "<<V2.cptr()<<"  "<<V2.colsize()<<"  "<<V2.rowsize()<<"  "<<V2.stepi()<<"  "<<V2.stepj()<<std::endl;
             Mvcv V2v = V2.view();
             if (V.cptr()) V2.setToIdentity();
             else V2.col(0).makeBasis(0); // only need col(0)
             if (U.cptr()) {
                 Muc U2(N-K-1,N-K-1);
+                dbgcout<<"U2: "<<U2.cptr()<<"  "<<U2.colsize()<<"  "<<U2.rowsize()<<"  "<<U2.stepi()<<"  "<<U2.stepj()<<std::endl;
                 Mucv U2v = U2.view();
                 U2.setToIdentity();
                 SVDecomposeFromBidiagonal_DC_Helper<
@@ -1092,14 +1112,15 @@ namespace tmv {
                     11,xx,xx,Mu,Vds,Ves,Mvcv>::call(
                         U,D2,E2,V2v,false,V.cptr());
             }
+            dbgcout<<"After right sub-problem\n";
             z.subVector(K+1,N) = EK * V2.col(0);
             D(K) = RT(0);
             if (V.cptr()) {
                 if (VisI) V.subMatrix(K+1,N,K+1,N) = V2;
                 else V.rowRange(K+1,N) = V2 * V.rowRange(K+1,N);
             }
-#ifdef XDEBUG_SVD
             dbgcout<<"Done subproblems (N="<<N<<")\n";
+#ifdef XDEBUG_SVD
             dbgcout<<"D = "<<D<<std::endl;
             dbgcout<<"z = "<<z<<std::endl;
             Matrix<T> M(N,N,T(0));
@@ -1151,8 +1172,8 @@ namespace tmv {
                 }
             }
             if (TMV_ABS(z(N-1)) < tol) --N;
-#ifdef XDEBUG_SVD
             dbgcout<<"After deflation\n";
+#ifdef XDEBUG_SVD
             dbgcout<<"DN = "<<D.subVector(0,N)<<std::endl;
             dbgcout<<"zN = "<<z.subVector(0,N)<<std::endl;
             if (U.cptr() && V.cptr()) {
@@ -1176,8 +1197,8 @@ namespace tmv {
                 z.subVector(0,N) = P * z.subVector(0,N);
                 if (U.cptr()) U.colRange(0,N) = U.colRange(0,N) * P.transpose();
                 if (V.cptr()) V.rowRange(0,N) = P * V.rowRange(0,N);
-#ifdef XDEBUG_SVD
                 dbgcout<<"After sort\n";
+#ifdef XDEBUG_SVD
                 dbgcout<<"DN = "<<D.subVector(0,N)<<std::endl;
                 dbgcout<<"zN = "<<z.subVector(0,N)<<std::endl;
                 if (U.cptr() && V.cptr()) {
@@ -1210,12 +1231,16 @@ namespace tmv {
                         dbgcout<<"Deflate this pair\n";
                         Givens<RT> G = GivensRotate(z(i-1),z(i));
                         TMVAssert(z(i) == RT(0));
-                        typename Mv::rowpair_type Vrp = V.rowPair(i-1,i);
-                        if (V.cptr()) G.mult(Vrp);
+                        if (V.cptr()) {
+                            typename Mv::rowpair_type Vrp = V.rowPair(i-1,i);
+                            G.mult(Vrp);
+                        }
                         if (i > 1) {
-                            typename Mu::colpair_type::transpose_type Ucpt = 
-                                U.colPair(i-1,i).transpose();
-                            if (U.cptr()) G.mult(Ucpt);
+                            if (U.cptr()) {
+                                typename Mu::colpair_type::transpose_type Ucpt = 
+                                    U.colPair(i-1,i).transpose();
+                                G.mult(Ucpt);
+                            }
 #ifdef XDEBUG_SVD
                             MatrixView<T> Mcpt = M.colPair(i-1,i).transpose();
                             MatrixView<T> Mrp = M.rowPair(i-1,i);
@@ -1253,8 +1278,8 @@ namespace tmv {
                         --N;
                     }
                 }
-#ifdef XDEBUG_SVD
                 dbgcout<<"After second deflation\n";
+#ifdef XDEBUG_SVD
                 dbgcout<<"DN = "<<D.subVector(0,N)<<std::endl;
                 dbgcout<<"zN = "<<z.subVector(0,N)<<std::endl;
                 if (U.cptr() && V.cptr()) {
@@ -1287,8 +1312,8 @@ namespace tmv {
                     if (V.cptr()) V.rowRange(i_firstswap,N) =
                         P * V.rowRange(i_firstswap,N);
                 }
-#ifdef XDEBUG_SVD
                 dbgcout<<"After second sort\n";
+#ifdef XDEBUG_SVD
                 dbgcout<<"DN = "<<D.subVector(0,N)<<std::endl;
                 dbgcout<<"zN = "<<z.subVector(0,N)<<std::endl;
                 if (U.cptr() && V.cptr()) {
@@ -1315,11 +1340,21 @@ namespace tmv {
             // After deflation, it is possible for N to be 1, in which case,
             // the SVD is done.
             if (N > 1) {
-                VectorView<RT> DN = D.subVector(0,N);
-                VectorView<RT> zN = z.subVector(0,N);
+                typename Vd::subvector_type DN = D.subVector(0,N);
+                VectorView<RT,Unit> zN = z.subVector(0,N);
 
                 // Find the new singular values. 
                 Vector<RT> S(N);
+
+                // First rescale DN,zN by their maximum value to 
+                // avoid issues with underflow/overflow:
+                RT scale = TMV_MAX(zN.maxAbs2Element(),TMV_ABS2(DN[N-1]));
+                dbgcout<<"scale = "<<scale<<std::endl;
+                DN /= scale;
+                zN /= scale;
+                dbgcout<<"After scale: DN = "<<DN<<std::endl;
+                dbgcout<<"zN = "<<zN<<std::endl;
+
                 if (U.cptr() || V.cptr()) {
                     Matrix<RT,ColMajor> W(N,N); // W(i,j) = D(i)-S(j)
                     FindDCSingularValues(S,RT(1),DN,zN,W);
@@ -1356,7 +1391,7 @@ namespace tmv {
                     // Currently W(i,j) = di-sj
                     // First convert it to Y.transpose()
                     for(int j=0;j<N;j++) {
-                        VectorView<RT> yj = W.col(j);
+                        VectorView<RT,Unit> yj = W.col(j);
                         Vector<RT> diff_j = yj; // copy current values
                         yj(0) = -z(0)/(S(j)*S(j));
                         for(int i=1;i<N;i++)
@@ -1384,13 +1419,13 @@ namespace tmv {
                     dbgcout<<"S = "<<S<<std::endl;
                 }
 
-                // Done.  Copy S to D
-                D.subVector(0,N) = S;
+                // Done.  Copy S to D and undo scaling.
+                DN = scale * S;
 
-#ifdef XDEBUG_SVD
                 dbgcout<<"Done D = "<<D<<std::endl;
+#ifdef XDEBUG_SVD
                 if (U.cptr() && V.cptr()) {
-                    M.subMatrix(0,N,0,N) = DiagMatrixViewOf(S);
+                    M.subMatrix(0,N,0,N) = DiagMatrixViewOf(DN);
                     //dbgcout<<"M = "<<M<<std::endl;
                     //dbgcout<<"UMV = "<<U*M*V<<std::endl;
                     dbgcout<<"Norm(UMV-A0) = "<<Norm(U*M*V -A0)<<std::endl;
@@ -1424,6 +1459,7 @@ namespace tmv {
                 }
 #endif
             }
+            dbgcout<<"Done SVDecompose algo 11: D => "<<D<<std::endl;
 #ifdef XDEBUG_SVD
             if (U.cptr() && V.cptr()) {
                 M = DiagMatrixViewOf(D);
@@ -1450,14 +1486,14 @@ namespace tmv {
                 dbgcout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<std::endl;
                 dbgcout<<"Norm(VVt-1) = "<<Norm(V*V.adjoint()-T(1))<<std::endl;
                 dbgcout<<"THRESH * normA0 = "<<THRESH<<" * "<<normA0<<" = "<<THRESH*normA0<<std::endl;
-                if (!(Norm(A2-A0) < THRESH*normA0)
+                if (!(Norm(A2-A0) <= THRESH*normA0)
 #ifdef TESTUV
                     || ( V.colsize()>=V.rowsize() &&
-                         !(Norm(V.adjoint()*V-T(1)) < THRESH*normA0) )
+                         !(Norm(V.adjoint()*V-T(1)) <= THRESH*normA0) )
                     || ( V.rowsize()>=V.colsize() &&
-                         !(Norm(V*V.adjoint()-T(1)) < THRESH*normA0) )
+                         !(Norm(V*V.adjoint()-T(1)) <= THRESH*normA0) )
                     || ( U.colsize()>=U.rowsize() &&
-                         !(Norm(U.adjoint()*U-T(1)) < THRESH*normA0) )
+                         !(Norm(U.adjoint()*U-T(1)) <= THRESH*normA0) )
 #endif
                 ) {
                     std::cerr<<"SV_Decompose_DC: \n";
@@ -1576,7 +1612,7 @@ namespace tmv {
                 dbgcout<<"U = "<<U<<std::endl;
                 dbgcout<<"S = "<<D<<std::endl;
                 dbgcout<<"V = "<<V<<std::endl;
-                if (!(Norm(A0-AA) < THRESH*Norm(A0))) {
+                if (!(Norm(A0-AA) <= THRESH*Norm(A0))) {
                     std::cerr<<"SV_DecomposeFromBidiagonal DC: \n";
                     std::cerr<<"UBV = "<<A0<<std::endl;
                     std::cerr<<"USV = "<<AA<<std::endl;

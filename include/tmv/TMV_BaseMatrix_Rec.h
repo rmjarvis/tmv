@@ -566,6 +566,7 @@ namespace tmv {
         // Constructor
         //
 
+    protected:
         TMV_INLINE BaseMatrix_Rec() {}
         TMV_INLINE BaseMatrix_Rec(const BaseMatrix_Rec<M>&) {}
         TMV_INLINE ~BaseMatrix_Rec() {}
@@ -1094,9 +1095,11 @@ namespace tmv {
         // Constructor
         //
 
+    protected:
         TMV_INLINE BaseMatrix_Rec_Mutable() {}
         TMV_INLINE BaseMatrix_Rec_Mutable(const BaseMatrix_Rec_Mutable<M>&) {}
         TMV_INLINE ~BaseMatrix_Rec_Mutable() {}
+    public:
 
 
         //

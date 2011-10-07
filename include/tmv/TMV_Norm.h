@@ -39,8 +39,8 @@ namespace tmv {
     template <class V>
     struct Norm_Helper<11,V>
     {
-        typedef typename V::float_type RT;
-        static inline RT call(const V& v)
+        typedef typename V::float_type FT;
+        static inline FT call(const V& v)
         { return TMV_SQRT(v.normSq()); }
     };
 
@@ -53,39 +53,39 @@ namespace tmv {
     template <class V>
     struct Norm_Helper<12,V>
     {
-        typedef typename V::float_type RT;
-        static RT call(const V& v)
+        typedef typename V::float_type FT;
+        static FT call(const V& v)
         {
-            const RT eps = TMV_Epsilon<RT>();
+            const FT eps = TMV_Epsilon<FT>();
 
             // Start with the maximum |v(i)|.  It will tell us how (and if)
             // we need to use a scaling for NormSq().
-            RT vmax = v.maxAbs2Element();
+            FT vmax = v.maxAbs2Element();
 
-            if (vmax == RT(0)) {
+            if (vmax == FT(0)) {
                 // If vmax = 0, then norm2 = 0:
-                return RT(0);
+                return FT(0);
             } else if (TMV_Underfloat(vmax * vmax)) {
                 // If vmax^2 underflows but vmax != 0, then a naive NormSq()
                 // will produce underflow rounding errors.  Find a better 
                 // scaling.  eps is a pure power of 2, so no rounding errors 
                 // from rescaling by a power of eps.
-                const RT inveps = RT(1)/eps;
-                RT scale = inveps;
+                const FT inveps = FT(1)/eps;
+                FT scale = inveps;
                 vmax *= scale;
-                const RT eps2 = eps*eps;
+                const FT eps2 = eps*eps;
                 while (vmax < eps2) { scale *= inveps; vmax *= inveps; }
                 return TMV_SQRT(v.normSq(scale))/scale;
-            } else if (RT(1)/vmax == RT(0)) {
+            } else if (FT(1)/vmax == FT(0)) {
                 // If 1/vmax == 0, then vmax is already inf, so no hope of
                 // making it more accurate.  (And need to check, since otherwise
                 // the next section would cause an infinite loop.)
                 return vmax;
-            } else if (TMV_Underflow(RT(1)/(v.nElements()*vmax*vmax))) {
+            } else if (TMV_Underflow(FT(1)/(v.nElements()*vmax*vmax))) {
                 // If 1/(n*vmax^2) underflows, then a naive NormSq() will 
                 // produce overflow./ Find a better scaling.
-                const RT inveps = RT(1)/eps;
-                RT scale = eps;
+                const FT inveps = FT(1)/eps;
+                FT scale = eps;
                 vmax *= scale;
                 while (vmax > inveps) { scale *= eps; vmax *= eps; }
                 return TMV_SQRT(v.normSq(scale))/scale;
@@ -102,48 +102,48 @@ namespace tmv {
     template <class V>
     struct Norm_Helper<13,V>
     {
-        typedef typename V::float_type RT;
-        static RT call(const V& v)
+        typedef typename V::float_type FT;
+        static FT call(const V& v)
         {
-            const RT eps = TMV_Epsilon<RT>();
-            const RT vnormsq = v.normSq();
+            const FT eps = TMV_Epsilon<FT>();
+            const FT vnormsq = v.normSq();
 
             if (TMV_Underflow(vnormsq)) {
                 // Possible underflow errors:
 
                 // If vmax = 0, then norm2 = 0:
-                RT vmax = v.maxAbs2Element();
-                if (vmax == RT(0)) {
-                    return RT(0);
+                FT vmax = v.maxAbs2Element();
+                if (vmax == FT(0)) {
+                    return FT(0);
                 } else if (TMV_Underflow(vmax * vmax)) {
                     // If vmax^2 underflows, but vmax != 0, then vnormsq has
                     // underflow rounding errors.  Find a better scaling.
                     // eps is a pure power of 2, so no rounding errors from
                     // rescaling by a power of eps.
-                    const RT inveps = RT(1)/eps;
-                    RT scale = inveps;
+                    const FT inveps = FT(1)/eps;
+                    FT scale = inveps;
                     vmax *= scale;
-                    RT eps2 = eps*eps;
+                    FT eps2 = eps*eps;
                     while (vmax < eps2) { scale *= inveps; vmax *= inveps; }
                     return TMV_SQRT(v.normSq(scale))/scale;
                 } else {
                     return TMV_SQRT(vnormsq);
                 }
-            } else if (TMV_Underflow(RT(1)/vnormsq)) {
+            } else if (TMV_Underflow(FT(1)/vnormsq)) {
                 // Possible overflow errors:
 
                 // If 1/vmax == 0, then vmax is already inf, so no hope of
                 // making it more accurate.  (And need to check, since 
                 // otherwise the next section would cause an infinite loop.)
-                RT vmax = v.maxAbs2Element();
-                if (RT(1)/vmax == RT(0)) {
+                FT vmax = v.maxAbs2Element();
+                if (FT(1)/vmax == FT(0)) {
                     return vmax;
-                } else if (TMV_Underflow(RT(1)/(v.nElements()*vmax*vmax))) {
+                } else if (TMV_Underflow(FT(1)/(v.nElements()*vmax*vmax))) {
                     // If 1/(vmax^2) underflows, then vnormsq has overflow 
                     // errors.  Find a better scaling.
-                    RT scale = eps;
+                    FT scale = eps;
                     vmax *= scale;
-                    while (vmax > RT(1)) { scale *= eps; vmax *= eps; }
+                    while (vmax > FT(1)) { scale *= eps; vmax *= eps; }
                     return TMV_SQRT(v.normSq(scale))/scale;
                 } else {
                     return TMV_SQRT(vnormsq);
@@ -159,15 +159,15 @@ namespace tmv {
     template <class V>
     struct Norm_Helper<90,V>
     {
-        typedef typename V::float_type RT;
+        typedef typename V::float_type FT;
         template <class V2>
-        static TMV_INLINE RT call(const BaseVector<V2>& v)
+        static TMV_INLINE FT call(const BaseVector<V2>& v)
         { return InstNorm2(v.vec().xView()); }
         template <class M2>
-        static TMV_INLINE RT call(const BaseMatrix_Rec<M2>& m)
+        static TMV_INLINE FT call(const BaseMatrix_Rec<M2>& m)
         { return InstNormF(m.mat().xView()); }
         template <class M2>
-        static TMV_INLINE RT call(const BaseMatrix_Tri<M2>& m)
+        static TMV_INLINE FT call(const BaseMatrix_Tri<M2>& m)
         { return InstNormF(m.mat().xView()); }
     };
 
@@ -175,8 +175,8 @@ namespace tmv {
     template <class M>
     struct Norm_Helper<95,M>
     {
-        typedef typename M::float_type RT;
-        static TMV_INLINE RT call(const M& m)
+        typedef typename M::float_type FT;
+        static TMV_INLINE FT call(const M& m)
         {
             typedef typename M::const_nonconj_type Mnc;
             Mnc mnc = m.nonConj();
@@ -188,8 +188,8 @@ namespace tmv {
     template <class V>
     struct Norm_Helper<96,V>
     {
-        typedef typename V::float_type RT;
-        static TMV_INLINE RT call(const V& v)
+        typedef typename V::float_type FT;
+        static TMV_INLINE FT call(const V& v)
         {
             typedef typename V::const_transpose_type Vt;
             Vt vt = v.transpose();
@@ -201,8 +201,8 @@ namespace tmv {
     template <class V>
     struct Norm_Helper<97,V>
     {
-        typedef typename V::float_type RT;
-        static TMV_INLINE RT call(const V& v)
+        typedef typename V::float_type FT;
+        static TMV_INLINE FT call(const V& v)
         {
             typedef typename V::const_nonconj_type Vnc;
             Vnc vnc = v.nonConj();
@@ -214,8 +214,8 @@ namespace tmv {
     template <class V>
     struct Norm_Helper<-3,V>
     {
-        typedef typename V::float_type RT;
-        static TMV_INLINE RT call(const V& v)
+        typedef typename V::float_type FT;
+        static TMV_INLINE FT call(const V& v)
         {
             typedef typename V::value_type T;
             const int algo = 
@@ -230,8 +230,8 @@ namespace tmv {
     template <class M>
     struct Norm_Helper<-2,M>
     {
-        typedef typename M::float_type RT;
-        static TMV_INLINE RT call(const M& m)
+        typedef typename M::float_type FT;
+        static TMV_INLINE FT call(const M& m)
         {
             typedef typename M::value_type VT;
             const bool inst = 
@@ -253,8 +253,8 @@ namespace tmv {
     template <class V>
     struct Norm_Helper<-1,V>
     {
-        typedef typename V::float_type RT;
-        static TMV_INLINE RT call(const V& v)
+        typedef typename V::float_type FT;
+        static TMV_INLINE FT call(const V& v)
         {
             typedef typename V::value_type VT;
             const bool inst = 
@@ -433,9 +433,6 @@ namespace tmv {
         typedef typename M::float_type FT;
         static TMV_INLINE FT call(const M& m)
         {
-            typedef typename M::real_type RT;
-            const bool up = ShapeTraits<M::_shape>::upper;
-            const bool lo = ShapeTraits<M::_shape>::lower;
             const int cs = M::_colsize;
             const int rs = M::_rowsize;
             const int algo = 
@@ -459,9 +456,6 @@ namespace tmv {
         typedef typename M::float_type FT;
         static TMV_INLINE FT call(const M& m)
         {
-            typedef typename M::real_type RT;
-            const bool up = ShapeTraits<M::_shape>::upper;
-            const bool lo = ShapeTraits<M::_shape>::lower;
             const int algo = 
                 M::_hasdivider ? 31 :
                 -4;
@@ -578,9 +572,6 @@ namespace tmv {
         typedef typename M::float_type FT;
         static TMV_INLINE FT call(const M& m)
         {
-            typedef typename M::real_type RT;
-            const bool up = ShapeTraits<M::_shape>::upper;
-            const bool lo = ShapeTraits<M::_shape>::lower;
             const int cs = M::_colsize;
             const int rs = M::_rowsize;
             const int algo = 
@@ -604,9 +595,6 @@ namespace tmv {
         typedef typename M::float_type FT;
         static TMV_INLINE FT call(const M& m)
         {
-            typedef typename M::real_type RT;
-            const bool up = ShapeTraits<M::_shape>::upper;
-            const bool lo = ShapeTraits<M::_shape>::lower;
             const int algo = 
                 M::_hasdivider ? 12 :
                 -4;

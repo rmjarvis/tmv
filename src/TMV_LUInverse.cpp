@@ -1,5 +1,6 @@
 
 //#define PRINTALGO_LU
+//#define XDEBUG_LU
 
 #include "TMV_Blas.h"
 #include "tmv/TMV_LUInverse.h"
@@ -15,19 +16,14 @@
 
 namespace tmv {
 
-    template <class T1>
-    static inline void NonLapLUInverse(MatrixView<T1> m1, const Permutation& P)
+    template <class M1>
+    static inline void DoLUInverse(M1& m1, const Permutation& P)
     { InlineLU_Inverse(m1,P); }
 
 #ifdef ALAP
     // ALAP, not LAP, since ATLAS has these routines
-    template <class T1> 
-    static inline void LapLUInverse(
-        MatrixView<T1,ColMajor> m1, const Permutation& P)
-    { NonLapLUInverse(m1,P); }
-#ifdef INST_DOUBLE
-    template <>
-    static void LapLUInverse(
+#ifdef TMV_INST_DOUBLE
+    static void DoLUInverse(
         MatrixView<double,ColMajor> m1, const Permutation& P)
     {
         TMVAssert(P.isInverse());
@@ -36,35 +32,34 @@ namespace tmv {
 #ifdef CLAP
         const int* ipiv = P.getValues();
 #else
-        auto_array<int> ipiv1(new int[n]);
-        const int* ipiv = ipiv1.get();
+        AlignedArray<int> ipiv1(n);
         for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i]+1;
+        const int* ipiv = ipiv1.get();
 #endif
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
-        auto_array<double> work(new double[lwork]);
+        AlignedArray<double> work(lwork);
 #else
         int lwork = -1;
-        auto_array<double> work(new double[1]);
+        AlignedArray<double> work(1);
         LAPNAME(dgetri) (
             LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
-            LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+            LAPP(ipiv) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(work[0]);
-        work.reset(new double[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(dgetri) (
             LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
-            LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+            LAPP(ipiv) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
         LAP_Results("dgetri");
 #else
         LAP_Results(int(work[0]),n,n,lwork,"dgetri");
 #endif
     }
-    template <>
-    static void LapLUInverse(
+    static void DoLUInverse(
         MatrixView<std::complex<double>,ColMajor> m1, const Permutation& P)
     {
         TMVAssert(P.isInverse());
@@ -73,27 +68,27 @@ namespace tmv {
 #ifdef CLAP
         const int* ipiv = P.getValues();
 #else
-        auto_array<int> ipiv1(new int[n]);
-        const int* ipiv = ipiv1.get();
+        AlignedArray<int> ipiv1(n);
         for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i]+1;
+        const int* ipiv = ipiv1.get();
 #endif
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
-        auto_array<std::complex<double> > work(new std::complex<double>[lwork]);
+        AlignedArray<std::complex<double> > work(lwork);
 #else
         int lwork = -1;
-        auto_array<std::complex<double> > work(new std::complex<double>[1]);
+        AlignedArray<std::complex<double> > work(1);
         LAPNAME(zgetri) (
             LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
-            LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+            LAPP(ipiv) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(std::real(work[0]));
-        work.reset(new std::complex<double>[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(zgetri) (
             LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
-            LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+            LAPP(ipiv) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
         LAP_Results("zgetri");
 #else
@@ -101,9 +96,8 @@ namespace tmv {
 #endif
     }
 #endif
-#ifdef INST_FLOAT
-    template <>
-    static void LapLUInverse(
+#ifdef TMV_INST_FLOAT
+    static void DoLUInverse(
         MatrixView<float,ColMajor> m1, const Permutation& P)
     {
         TMVAssert(P.isInverse());
@@ -112,35 +106,34 @@ namespace tmv {
 #ifdef CLAP
         const int* ipiv = P.getValues();
 #else
-        auto_array<int> ipiv1(new int[n]);
-        const int* ipiv = ipiv1.get();
+        AlignedArray<int> ipiv1(n);
         for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i]+1;
+        const int* ipiv = ipiv1.get();
 #endif
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
-        auto_array<float> work(new float[lwork]);
+        AlignedArray<float> work(lwork);
 #else
         int lwork = -1;
-        auto_array<float> work(new float[1]);
+        AlignedArray<float> work(1);
         LAPNAME(sgetri) (
             LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
-            LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+            LAPP(ipiv) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(work[0]);
-        work.reset(new float[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(sgetri) (
             LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
-            LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+            LAPP(ipiv) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
         LAP_Results("sgetri");
 #else
         LAP_Results(int(work[0]),n,n,lwork,"sgetri");
 #endif
     }
-    template <>
-    static void LapLUInverse(
+    static void DoLUInverse(
         MatrixView<std::complex<float>,ColMajor> m1, const Permutation& P)
     {
         TMVAssert(P.isInverse());
@@ -149,27 +142,27 @@ namespace tmv {
 #ifdef CLAP
         const int* ipiv = P.getValues();
 #else
-        auto_array<int> ipiv1(new int[n]);
-        const int* ipiv = ipiv1.get();
+        AlignedArray<int> ipiv1(n);
         for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i]+1;
+        const int* ipiv = ipiv1.get();
 #endif
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
-        auto_array<std::complex<float> > work(new std::complex<float>[lwork]);
+        AlignedArray<std::complex<float> > work(lwork);
 #else
         int lwork = -1;
-        auto_array<std::complex<float> > work(new std::complex<float>[1]);
+        AlignedArray<std::complex<float> > work(1);
         LAPNAME(cgetri) (
             LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
-            LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+            LAPP(ipiv) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(std::real(work[0]));
-        work.reset(new std::complex<float>[lwork]);
+        work.resize(lwork);
 #endif
 #endif
         LAPNAME(cgetri) (
             LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
-            LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+            LAPP(ipiv) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
         LAP_Results("cgetri");
 #else
@@ -184,14 +177,14 @@ namespace tmv {
     {
 #ifdef ALAP
         if (m1.iscm() && m1.stepj() > 0) {
-            LapLUInverse(m1.cmView(),P);
+            DoLUInverse(m1.cmView(),P);
         } else {
             Matrix<T1,ColMajor|NoDivider> m1c(m1);
-            LapLUInverse(m1c.view(),P);
+            DoLUInverse(m1c.view(),P);
             InstCopy(m1c.xView().constView(),m1);
         }
 #else
-        NonLapLUInverse(m1,P);
+        DoLUInverse(m1,P);
 #endif
     }
 

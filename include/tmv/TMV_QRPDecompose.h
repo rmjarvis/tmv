@@ -21,6 +21,15 @@
 #include "TMV_PermuteM.h"
 #endif
 
+#ifdef XDEBUG_QR
+#include "tmv/TMV_UnpackQ.h"
+#include "tmv/TMV_AddVV.h"
+#include "tmv/TMV_AddMM.h"
+#include "tmv/TMV_Norm.h"
+#include "tmv/TMV_SumVV.h"
+#include "tmv/TMV_Vector.h"
+#endif
+
 // BLOCKSIZE is the block size to use in algo 21, etc.
 #define TMV_QR_BLOCKSIZE 48
 
@@ -59,11 +68,11 @@ namespace tmv {
 
 #ifdef XDEBUG_QR
             Matrix<T> A0(A);
-            //std::cout<<"Start NonBlock QRPD with strict = "<<strict<<std::endl;
-            //std::cout<<"A = "<<TMV_Text(A)<<"  "<<A<<std::endl;
-            //std::cout<<"beta = "<<TMV_Text(beta)<<"  "<<beta<<std::endl;
-            //std::cout<<"Norm(A) = "<<Norm(A)<<std::endl;
-            //std::cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
+            std::cout<<"Start NonBlock QRPD with strict = "<<strict<<std::endl;
+            std::cout<<"A = "<<TMV_Text(A)<<"  "<<A<<std::endl;
+            std::cout<<"beta = "<<TMV_Text(beta)<<"  "<<beta<<std::endl;
+            std::cout<<"Norm(A) = "<<Norm(A)<<std::endl;
+            std::cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
 #endif
             // Decompose A into A = Q R P
             // where Q is unitary, R is upper triangular, and P is a permutation
@@ -105,6 +114,7 @@ namespace tmv {
             for(int j=0;j<N;++j,++bj) {
                 //std::cout<<"j = "<<j<<std::endl;
                 //std::cout<<"A = "<<A<<std::endl;
+                if (!(Norm(A) >= 0.)) abort();
                 //std::cout<<"colnormsq = "<<colnormsq<<std::endl;
                 //std::cout<<"recalcthresh = "<<recalcthresh<<std::endl;
                 if (strict || j==0 || colnormsq(j) < recalcthresh) {
@@ -161,15 +171,20 @@ namespace tmv {
                 } else P[j] = j;
 
                 // Apply the Householder Reflection for this column
-
-                //std::cout<<"Before HouseholderReflect: A.col(j) = "<<A.col(j,j,M)<<std::endl;
+                //std::cout<<"Before HouseholderReflect: A.col(j) = "<<
+                    //A.col(j,j,M)<<std::endl;
+                //std::cout<<"Norm(A) = "<<Norm(A)<<std::endl;
                 M1c u = A.col(j,j+1,M);
                 HouseholderReflect(A.ref(j,j),u,*bj);
+                //std::cout<<"After HouseholderReflect\n";
                 //std::cout<<"bj = "<<*bj<<std::endl;
+                //std::cout<<"Norm(A) = "<<Norm(A)<<std::endl;
                 M1r A2a = A.row(j,j+1,N);
                 M1s A2b = A.subMatrix(j+1,M,j+1,N);
                 V2s temp = tempBase.subVector(0,N-j-1);
                 HouseholderMultEq(u,*bj,A2a,A2b,temp);
+                //std::cout<<"After HouseholderMultEq\n";
+                //std::cout<<"Norm(A) = "<<Norm(A)<<std::endl;
 
                 // And update the norms for use with the next column
                 for(int k=j+1;k<N;++k) {
@@ -177,20 +192,21 @@ namespace tmv {
                 }
             }
 #ifdef XDEBUG_QR
-            //std::cout<<"Done NonBlock QRPDecompose"<<std::endl;
-            //std::cout<<"A -> "<<A<<std::endl;
-            //std::cout<<"Norm(A) = "<<Norm(A)<<std::endl;
-            //std::cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
+            std::cout<<"Done NonBlock QRPDecompose"<<std::endl;
+            std::cout<<"A -> "<<A<<std::endl;
+            if (!(Norm(A) >= 0.)) abort();
+            std::cout<<"Norm(A) = "<<Norm(A)<<std::endl;
+            std::cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
             Matrix<T> Q(A);
             UnpackQ(Q,beta);
-            //std::cout<<"Q = "<<Q<<std::endl;
+            std::cout<<"Q = "<<Q<<std::endl;
             Matrix<T> AA = Q*A.upperTri();
-            //std::cout<<"R = "<<A.upperTri()<<std::endl;
-            //std::cout<<"QR = "<<AA<<std::endl;
+            std::cout<<"R = "<<A.upperTri()<<std::endl;
+            std::cout<<"QR = "<<AA<<std::endl;
             AA.reversePermuteCols(P);
-            //std::cout<<"QRP = "<<AA<<std::endl;
-            //std::cout<<"Norm(AA-A0) = "<<Norm(AA-A0)<<std::endl;
-            if (!(Norm(AA-A0) < 0.001*Norm(A0))) {
+            std::cout<<"QRP = "<<AA<<std::endl;
+            std::cout<<"Norm(AA-A0) = "<<Norm(AA-A0)<<std::endl;
+            if (!(Norm(AA-A0) <= 0.001*Norm(A0))) {
                 std::cerr<<"NonBlockQRPDecompose: A = "<<TMV_Text(A)<<"  "<<A0<<std::endl;
                 std::cerr<<"-> "<<A<<std::endl;
                 std::cerr<<"beta = "<<beta<<std::endl;
@@ -264,7 +280,7 @@ namespace tmv {
             // since this is the product that we need.  We update this one 
             // row at a time.
             const int cs1 = IntTraits2<cs,Nx>::min;
-            // MJ: Double check this.  Is RowMajor really better?
+            // TODO: Double check this.  Is RowMajor really better?
             typedef typename MCopyHelper<T,Rec,cs1,rs,true>::type M3;
             M3 ZYtA = MatrixSizer<T>(TMV_MIN(M,Nx),N);
             // TODO: Would this be faster for the regular QRDecomposition too?
@@ -414,7 +430,7 @@ namespace tmv {
             //std::cout<<"Done StrictBlockQRPDecompose\n";
             //std::cout<<"Norm(A) = "<<Norm(A)<<std::endl;
             //std::cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
-            if (!(Norm(AA-A0) < 0.001*Norm(A0))) {
+            if (!(Norm(AA-A0) <= 0.001*Norm(A0))) {
                 std::cerr<<"StrictBlockQRPDecompose: A = "<<TMV_Text(A)<<"  "<<A0<<std::endl;
                 std::cerr<<"-> "<<A<<std::endl;
                 std::cerr<<"beta = "<<beta<<std::endl;
@@ -780,7 +796,7 @@ namespace tmv {
             UnpackQ(Q,beta);
             Matrix<T> AA = Q*A.upperTri();
             AA.reversePermuteCols(P);
-            if (!(Norm(AA-A0) < 0.001*TMV_MAX(RT(1),Norm(A0)))) {
+            if (!(Norm(AA-A0) <= 0.001*TMV_MAX(RT(1),Norm(A0)))) {
                 std::cerr<<"LooseBlockQRPDecompose: "<<std::endl;
                 std::cerr<<"A = "<<TMV_Text(A)<<std::endl;
                 if (N < 100) {
@@ -818,6 +834,13 @@ namespace tmv {
 #endif
             const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
 
+#ifdef PRINTALGO_QR
+            std::cout<<"M*N = "<<M*N<<std::endl;
+            std::cout<<"l2cache = "<<l2cache<<std::endl;
+            std::cout<<"strict = "<<strict<<std::endl;
+            std::cout<<"algo = "<<
+                (M*N <= l2cache ? 11 : strict ? 21 : 22)<<std::endl;
+#endif
             if (M*N <= l2cache)
                 QRPDecompose_Helper<11,cs,rs,M1,V>::call(A,beta,P,strict);
             else if (strict)
@@ -1137,7 +1160,7 @@ namespace tmv {
 
     template <class M1, class T, int A2>
     static inline void QRP_Decompose(
-        BaseMatrix_Rec_Mutable<M1> Q, UpperTriMatrixView<T,A2> R,
+        BaseMatrix_Rec_Mutable<M1>& Q, UpperTriMatrixView<T,A2> R,
         Permutation& P, bool strict=false)
     {
         typedef UpperTriMatrixView<T,A2> M2;
@@ -1157,7 +1180,8 @@ namespace tmv {
 
     template <class M1, class T, int N, int Si2, int Sj2, int A2>
     static inline void QRP_Decompose(
-        BaseMatrix_Rec_Mutable<M1> Q, SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> R,
+        BaseMatrix_Rec_Mutable<M1>& Q,
+        SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> R,
         Permutation& P, bool strict=false)
     {
         typedef SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> M2;

@@ -51,12 +51,6 @@
 //
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-#ifdef TMV_MEM_TEST
-#ifdef NDEBUG
-#undef NDEBUG
-#endif
-#endif
-
 //#include "stdafx.h"
 #include <iostream>
 #include <stdio.h>

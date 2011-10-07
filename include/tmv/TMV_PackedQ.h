@@ -579,13 +579,13 @@ namespace tmv {
             std::cout<<"beta = "<<TMV_Text(beta)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
-            //std::cout<<"Q = "<<Q<<std::endl;
-            //std::cout<<"beta = "<<beta<<std::endl;
-            //std::cout<<"m2 = "<<m2<<std::endl;
+            std::cout<<"Q = "<<Q<<std::endl;
+            std::cout<<"beta = "<<beta<<std::endl;
+            std::cout<<"m2 = "<<m2<<std::endl;
 #endif
             PackedQ_MultEq_Helper<algo,div,cs,rs,xs,M1,V1,M2>::call(Q,beta,m2);
 #ifdef PRINTALGO_QR
-            //std::cout<<"m2 => "<<m2<<std::endl;
+            std::cout<<"m2 => "<<m2<<std::endl;
 #endif
         }
     };

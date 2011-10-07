@@ -1,6 +1,8 @@
 
+//#undef NDEBUG
 //#define PRINTALGO_SVD
 //#define XDEBUG_SVD
+//#include "TMV.h"
 
 #include "tmv/TMV_SVDecompose_DC.h"
 #include "tmv/TMV_Matrix.h"

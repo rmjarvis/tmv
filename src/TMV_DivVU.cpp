@@ -10,8 +10,9 @@
 namespace tmv {
 
     template <class T1, class M2>
-    static void NonBlasTriLDivEq(VectorView<T1,Unit> v1, const M2& m2)
+    static void DoTriLDivEq(VectorView<T1,Unit> v1, const M2& m2)
     {
+        const int xx = TMV_UNKNOWN;
         if (m2.iscm()) 
             InlineTriLDivEq(v1,m2.cmView());
         else if (m2.isrm())
@@ -21,12 +22,12 @@ namespace tmv {
             const int N = m2.size();
             if (m2.isunit()) {
                 const int s = ShapeTraits<M2::_shape>::unit_shape;
-                typename MCopyHelper<T,s,TMV_UNKNOWN,TMV_UNKNOWN,false,false>::type mc(N);
+                typename MCopyHelper<T,s,xx,xx,false,false>::type mc(N);
                 InstCopy(m2,mc.xView());
                 InlineTriLDivEq(v1,mc.xView().constView().cmView());
             } else  {
                 const int s = ShapeTraits<M2::_shape>::nonunit_shape;
-                typename MCopyHelper<T,s,TMV_UNKNOWN,TMV_UNKNOWN,false,false>::type mc(N);
+                typename MCopyHelper<T,s,xx,xx,false,false>::type mc(N);
                 InstCopy(m2,mc.xView());
                 InlineTriLDivEq(v1,mc.xView().constView().cmView());
             }
@@ -34,9 +35,9 @@ namespace tmv {
     }
 
 #ifdef BLAS
-    template <class T1, class M2, class T2> 
-    static inline void BlasTriLDivEq(VectorView<T1> b, const M2& A, T2)
-    { NonBlasTriLDivEq(b,A); }
+    template <class V1, class M2, class T2>
+    static void BlasTriLDivEq(const V1& b, M2& A, T2)
+    { DoTriLDivEq(b.unitView(),A); }
 #ifdef TMV_INST_DOUBLE
     template <class M2> 
     static void BlasTriLDivEq(VectorView<double> b, const M2& A, double)
@@ -176,7 +177,7 @@ namespace tmv {
 #endif // BLAS
 
     template <class T1, class M2>
-    static inline void DoInstTriLDivEq(VectorView<T1> v1, const M2& m2)
+    static inline void CallTriLDivEq(VectorView<T1> v1, const M2& m2)
     {
 #ifdef BLAS
         const typename M2::value_type t2(0);
@@ -192,11 +193,11 @@ namespace tmv {
         }
 #else
         if (v1.step() == 1) {
-            NonBlasTriLDivEq(v1.unitView(),m2);
+            DoTriLDivEq(v1.unitView(),m2);
         } else {
             Vector<T1> v1c(v1.size());
             InstCopy(v1.constView(),v1c.xView());
-            NonBlasTriLDivEq(v1c.view(),m2);
+            DoTriLDivEq(v1c.view(),m2);
             InstCopy(v1c.xView().constView(),v1);
         }
 #endif
@@ -205,11 +206,11 @@ namespace tmv {
     template <class T1, class T2, int C2>
     void InstTriLDivEq(
         VectorView<T1> v1, const ConstUpperTriMatrixView<T2,C2>& m2)
-    { DoInstTriLDivEq(v1,m2); }
+    { CallTriLDivEq(v1,m2); }
     template <class T1, class T2, int C2>
     void InstTriLDivEq(
         VectorView<T1> v1, const ConstLowerTriMatrixView<T2,C2>& m2)
-    { DoInstTriLDivEq(v1,m2); }
+    { CallTriLDivEq(v1,m2); }
 
     template <class T1, class T2, int C2>
     void InstAliasTriLDivEq(

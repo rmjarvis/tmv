@@ -11,7 +11,7 @@
 
 //#define XDEBUG_PRODMV
 
-#ifdef XDEBUG_PRODMM
+#ifdef XDEBUG_PRODMV
 #include <iostream>
 #include "TMV_MatrixIO.h"
 #include "TMV_VectorIO.h"

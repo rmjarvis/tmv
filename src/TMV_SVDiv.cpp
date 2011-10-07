@@ -19,10 +19,12 @@
 #include "tmv/TMV_DivVD.h"
 #include "tmv/TMV_InvertM.h"
 #include "tmv/TMV_InvertD.h"
-#include "tmv/TMV_QuotXM.h"
 #include "tmv/TMV_MultMD.h"
 #include "tmv/TMV_Det.h"
 
+#include "tmv/TMV_ProdMM.h"
+#include "tmv/TMV_ProdMV.h"
+#include "tmv/TMV_QuotXM.h"
 
 namespace tmv {
 

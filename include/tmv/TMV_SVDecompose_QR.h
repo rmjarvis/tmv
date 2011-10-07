@@ -183,6 +183,8 @@ namespace tmv {
                 return SVDecomposeFromBidiagonal_QR_Helper<
                     22,cs,rs,Mu,Vd,Ve,Mv>::reduce(U,D,E,V);
 #ifdef XDEBUG_SVD
+            TMVAssert(D.minAbsElement() > RT(0));
+            TMVAssert(E.minAbsElement() > RT(0));
             typedef typename Traits2<typename Mu::value_type, typename Mv::value_type>::type T;
             dbgcout<<"Start Reduce Bidiagonal QR:\n";
             dbgcout<<"U = "<<U<<std::endl;
@@ -293,7 +295,7 @@ namespace tmv {
                 B.diag() = D;
                 B.diag(1) = E;
                 Matrix<T> AA = U * B * V;
-                if (!(Norm(A0-AA) < THRESH*Norm(A0))) {
+                if (!(Norm(A0-AA) <= THRESH*Norm(A0))) {
                     std::cerr<<"ReduceBidiagonal: \n";
                     std::cerr<<"input D = "<<D0<<std::endl;
                     std::cerr<<"input E = "<<E0<<std::endl;
@@ -335,9 +337,9 @@ namespace tmv {
         static void reduce(Mu& U, Vd& D, Ve& E, Mv& V)
         {
             typedef typename Mu::real_type RT;
-            const int N = rs==TMV_UNKNOWN ? int(D.size()) : rs;
 #ifdef PRINTALGO_SVD
             const int M = cs==TMV_UNKNOWN ? int(U.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? int(D.size()) : rs;
             std::cout<<"SVDecomposeFromBidiagonal algo 22: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -657,7 +659,7 @@ namespace tmv {
                 //dbgcout<<"A2-A = "<<Matrix<T>(A2-A).clip(0.1*MaxAbsElement(A2))<<std::endl;
                 dbgcout<<"Done 22: Norm(A2-A) = "<<Norm(A2-A)<<std::endl;
                 dbgcout<<"Norm(A) = "<<Norm(A)<<std::endl;
-                if (!(Norm(A2-A) < THRESH*Norm(A))) {
+                if (!(Norm(A2-A) <= THRESH*Norm(A))) {
                     std::cerr<<"ReduceBidiagonal22\n";
                     std::cerr<<"B = "<<B<<std::endl;
                     std::cerr<<"A = "<<A<<std::endl;
@@ -711,8 +713,6 @@ namespace tmv {
 #ifdef XDEBUG_SVD
             typedef typename Traits2<typename Mu::value_type, typename Mv::value_type>::type T;
             typedef typename Mu::real_type RT;
-            TMVAssert(D.minAbsElement() > RT(0));
-            TMVAssert(E.minAbsElement() > RT(0));
 
             const int N = rs==TMV_UNKNOWN ? int(D.size()) : rs;
             dbgcout<<"Start Decompose from Bidiag:\n";
@@ -748,7 +748,7 @@ namespace tmv {
                 dbgcout<<"U = "<<U<<std::endl;
                 dbgcout<<"S = "<<D<<std::endl;
                 dbgcout<<"V = "<<V<<std::endl;
-                if (!(Norm(A0-AA) < THRESH*Norm(A0))) {
+                if (!(Norm(A0-AA) <= THRESH*Norm(A0))) {
                     std::cerr<<"SV_DecomposeFromBidiagonal QR: \n";
                     std::cerr<<"UBV = "<<A0<<std::endl;
                     std::cerr<<"USV = "<<AA<<std::endl;

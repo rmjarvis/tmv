@@ -22,6 +22,11 @@
 #include "tmv/TMV_CopyU.h"
 #include "tmv/TMV_MultUM.h"
 
+#include "tmv/TMV_ProdVV.h"
+#include "tmv/TMV_SumVV.h"
+#include "tmv/TMV_ProdXM.h"
+#include "tmv/TMV_ProdMM.h"
+
 namespace tmv {
 
     template <class T, int C>

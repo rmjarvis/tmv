@@ -960,7 +960,8 @@ namespace tmv {
         const SVD<M>& svd, const BaseMatrix_Calc<M2>& m, std::ostream* fout=0)
     {
         typedef typename M2::real_type RT;
-        bool printmat = fout && m.colsize() < 100 && m.rowsize() < 100;
+        //bool printmat = fout && m.colsize() < 100 && m.rowsize() < 100;
+        bool printmat = fout;
         if (printmat) {
             *fout << "SV:\n";
             *fout << m << std::endl;
@@ -974,13 +975,12 @@ namespace tmv {
         }
         RT nm = Norm(usv-m);
         nm /= Norm(svd.getU())*Norm(svd.getS())*Norm(svd.getV());
-        RT kappa = svd.condition();
         if (fout) {
             *fout << "Norm(M-USV)/Norm(USV) = "<<nm<<" <? ";
-            *fout << kappa<<"*"<<RT(m.colsize())<<"*"<<TMV_Epsilon<RT>();
-            *fout << " = "<<kappa*RT(m.colsize())*TMV_Epsilon<RT>()<<std::endl;
+            *fout << RT(m.colsize())<<"*"<<TMV_Epsilon<RT>();
+            *fout << " = "<<RT(m.colsize())*TMV_Epsilon<RT>()<<std::endl;
         }
-        return nm < kappa*RT(m.colsize())*TMV_Epsilon<RT>();
+        return nm < RT(m.colsize())*TMV_Epsilon<RT>();
     }
 
 

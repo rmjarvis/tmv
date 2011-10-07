@@ -453,11 +453,11 @@ namespace tmv {
 
     // A helper class for returning views without necessarily
     // making a new object.
-    template <bool ref, class type, class view_type>
+    template <bool ref, class type, class view_type, bool unit>
     struct MakeTriView_Helper;
 
-    template <class type, class view_type>
-    struct MakeTriView_Helper<true,type,view_type>
+    template <class type, class view_type, bool unit>
+    struct MakeTriView_Helper<true,type,view_type,unit>
     {
         typedef type& ret_type;
         typedef const type& const_ret_type;
@@ -466,7 +466,7 @@ namespace tmv {
     };
 
     template <class type, class view_type>
-    struct MakeTriView_Helper<false,type,view_type>
+    struct MakeTriView_Helper<false,type,view_type,false>
     {
         typedef view_type ret_type;
         typedef view_type const_ret_type;
@@ -477,10 +477,22 @@ namespace tmv {
     };
 
     template <class type, class view_type>
+    struct MakeTriView_Helper<false,type,view_type,true>
+    {
+        typedef view_type ret_type;
+        typedef view_type const_ret_type;
+        static TMV_INLINE ret_type call(type& m) 
+        { return view_type(m.ptr(),m.size(),m.stepi(),m.stepj(),UnitDiag); }
+        static TMV_INLINE const_ret_type call(const type& m) 
+        { return view_type(m.cptr(),m.size(),m.stepi(),m.stepj(),UnitDiag); }
+    };
+
+    template <class type, class view_type>
     struct MakeTriView
     {
         enum { ref = Traits2<type,view_type>::sametype };
-        typedef MakeTriView_Helper<ref,type,view_type> helper;
+        enum { unit = view_type::_unit };
+        typedef MakeTriView_Helper<ref,type,view_type,unit> helper;
 
         static TMV_INLINE typename helper::ret_type call(type& m)
         { return helper::call(m); }
@@ -565,6 +577,7 @@ namespace tmv {
         // Constructor
         //
 
+    protected:
         TMV_INLINE BaseMatrix_Tri() {}
         TMV_INLINE BaseMatrix_Tri(const BaseMatrix_Tri<M>&) {}
         TMV_INLINE ~BaseMatrix_Tri() {}
@@ -1052,9 +1065,11 @@ namespace tmv {
         // Constructor
         //
 
+    protected:
         TMV_INLINE BaseMatrix_Tri_Mutable() {}
         TMV_INLINE BaseMatrix_Tri_Mutable(const BaseMatrix_Tri_Mutable<M>&) {}
         TMV_INLINE ~BaseMatrix_Tri_Mutable() {}
+    public:
 
 
         //

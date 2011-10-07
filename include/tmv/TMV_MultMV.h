@@ -16,6 +16,16 @@
 #include "tmv/TMV_MatrixIO.h"
 #endif
 
+#ifdef XDEBUG_MV
+#include <iostream>
+#include "tmv/TMV_VectorIO.h"
+#include "tmv/TMV_MatrixIO.h"
+#include "tmv/TMV_NormV.h"
+#include "tmv/TMV_Norm.h"
+#include "tmv/TMV_AddVV.h"
+#include "tmv/TMV_SumVV.h"
+#endif
+
 //
 // Matrix * Vector
 //
@@ -2449,7 +2459,7 @@ namespace tmv {
             Vector<T3> v3i = v3;
             Vector<T3> v3c = v3;
             for(size_t i=0; i<v3.size(); ++i) {
-                Maybe<add>:add(
+                Maybe<add>::add(
                     v3c(i), ZProd<false,false>::prod(
                         x,MultVV(m1c.row(i),v2c)));
             }

@@ -139,15 +139,11 @@
 #include "tmv/TMV_MultMV.h"
 #include "tmv/TMV_Rank1VVM.h"
 
-// TODO: Put functions with arithmetic into .cpp file with Inst, etc.
-// so don't need these:
-#include "tmv/TMV_ScaleV.h"
-#include "tmv/TMV_ProdMM.h"
-#include "tmv/TMV_ProdMV.h"
-#include "tmv/TMV_ProdVV.h"
-#include "tmv/TMV_OProdVV.h"
-#include "tmv/TMV_SumVV.h"
-#include "tmv/TMV_SumMM.h"
+#ifdef PRINTALGO_HOUSE
+#include <iostream>
+#include "TMV_MatrixIO.h"
+#include "TMV_VectorIO.h"
+#endif
 
 //#define XDEBUG_HOUSE
 
@@ -250,6 +246,11 @@ namespace tmv {
             xx(0) = x0;
             xx.subVector(1,xx.size()) = u;
 #endif
+            // Check for possibility of an early exit.
+            if (u.size() == 0) {
+                beta = RT(0);
+                return;
+            }
 
             // Since this routine involves squares of elements, we risk overflow
             // and underflow problems if done naively.  The simplest (although
@@ -379,7 +380,19 @@ namespace tmv {
         static void call(T& x0, V& u, RT& beta)
         { 
             const int algo = 11;
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Inline HouseholderReflect\n";
+            std::cout<<"x0 = "<<x0<<std::endl;
+            std::cout<<"u = "<<u<<std::endl;
+            std::cout<<"beta = "<<beta<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             HouseholderReflect_Helper<algo,V>::call(x0,u,beta); 
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"x0 => "<<x0<<std::endl;
+            std::cout<<"u => "<<u<<std::endl;
+            std::cout<<"beta => "<<beta<<std::endl;
+#endif
         }
     };
 
@@ -567,7 +580,19 @@ namespace tmv {
         static bool call(T& y, V& u, RT& beta)
         { 
             const int algo = 11;
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Inline HouseholderUnReflect\n";
+            std::cout<<"y = "<<y<<std::endl;
+            std::cout<<"u = "<<u<<std::endl;
+            std::cout<<"beta = "<<beta<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             return HouseholderUnReflect_Helper<algo,V>::call(y,u,beta); 
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"y => "<<y<<std::endl;
+            std::cout<<"u => "<<u<<std::endl;
+            std::cout<<"beta => "<<beta<<std::endl;
+#endif
         }
     };
 
@@ -698,7 +723,18 @@ namespace tmv {
         static void call(V& u, RT beta, Ref u0)
         { 
             const int algo = 11;
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Inline HouseholderUnPack\n";
+            std::cout<<"u = "<<u<<std::endl;
+            std::cout<<"beta = "<<beta<<std::endl;
+            std::cout<<"u0 = "<<u0<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             HouseholderUnpack_Helper<algo,V>::call(u,beta,u0); 
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"u => "<<u<<std::endl;
+            std::cout<<"u0 = >"<<u0<<std::endl;
+#endif
         }
     };
 
@@ -781,11 +817,11 @@ namespace tmv {
             TMVAssert(m0.size() == mx.rowsize());
             TMVAssert(temp.size() == mx.rowsize());
 #ifdef XDEBUG_HOUSE
-            //std::cout<<"Start Householder::multEq"<<std::endl;
-            //std::cout<<"u = "<<u<<std::endl;
-            //std::cout<<"beta = "<<beta<<std::endl;
-            //std::cout<<"m0 = "<<m0.vec()<<std::endl;
-            //std::cout<<"mx = "<<mx.mat()<<std::endl;
+            std::cout<<"Start Householder::multEq"<<std::endl;
+            std::cout<<"u = "<<u<<std::endl;
+            std::cout<<"beta = "<<beta<<std::endl;
+            std::cout<<"m0 = "<<m0.vec()<<std::endl;
+            std::cout<<"mx = "<<mx.mat()<<std::endl;
             typedef typename V::value_type T;
             typedef typename Mx::value_type T2;
             Matrix<T2> mm(mx.colsize()+1,m0.size());
@@ -817,7 +853,7 @@ namespace tmv {
             Matrix<T2> Hm2(mx.colsize()+1,m0.size());
             Hm2.row(0) = m0.vec();
             Hm2.rowRange(1,Hm2.colsize()) = mx.mat();
-            if (Norm(Hm-Hm2) > 0.001*Norm(Hm)) {
+            if (!(Norm(Hm-Hm2) <= 0.001*Norm(Hm))) {
                 cerr<<"Householder::multEq\n";
                 cerr<<"Input: m = "<<mm<<endl;
                 cerr<<"uu = "<<uu<<endl;
@@ -890,7 +926,20 @@ namespace tmv {
         static void call(const V& u, RT beta, M0& m0, Mx& mx, Vt& temp)
         { 
             const int algo = 11;
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Inline HouseholderMultEq\n";
+            std::cout<<"u = "<<u<<std::endl;
+            std::cout<<"beta = "<<beta<<std::endl;
+            std::cout<<"m0 = "<<m0<<std::endl;
+            std::cout<<"mx = "<<mx<<std::endl;
+            std::cout<<"temp = "<<temp<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             HouseholderMultEq_Helper<algo,V,M0,Mx,Vt>::call(u,beta,m0,mx,temp);
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"m0 => "<<m0<<std::endl;
+            std::cout<<"mx => "<<mx<<std::endl;
+#endif
         }
     };
 
@@ -1050,7 +1099,7 @@ namespace tmv {
             Matrix<T> YY(Y);
             YY.upperTri().setToIdentity();
             Matrix<T> HH = T(1) - YY * Z * YY.adjoint();
-            if (Norm(HH-H2) > 0.001*Norm(H2)) {
+            if (!(Norm(HH-H2) <= 0.001*Norm(H2))) {
                 cerr<<"BlockHouseholderAugment\n";
                 cerr<<"Input: Y = "<<Y0<<endl;
                 cerr<<"beta = "<<beta<<endl;
@@ -1099,7 +1148,17 @@ namespace tmv {
         static void call(const M1& Y, M2& Z, RT beta)
         { 
             const int algo = 11;
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Inline BlockHouseholderAugment\n";
+            std::cout<<"Y = "<<Y<<std::endl;
+            std::cout<<"Z = "<<Z<<std::endl;
+            std::cout<<"beta = "<<beta<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             BlockHouseholderAugment_Helper<algo,M1,M2>::call(Y,Z,beta);
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Z => "<<Z<<std::endl;
+#endif
         }
     };
 
@@ -1193,25 +1252,25 @@ namespace tmv {
 
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
+
+            const int M = Y.colsize();
+            const int N = Y.rowsize();
+
 #ifdef XDEBUG_HOUSE
             Matrix<T> Y0(Y);
             Y0.upperTri().setToIdentity();
             Matrix<T> Z0(Z);
             Vector<T> beta0 = beta;
-            Matrix<T> Htot(Y.colsize(),Y.colsize());
+            Matrix<T> Htot(M,M);
             Htot.setToIdentity();
-            for(int i=0;i<int(Y.rowsize());i++) {
-                Matrix<T> H(Y.colsize(),Y.colsize());
+            for(int i=0;i<N;i++) {
+                Matrix<T> H(M,M);
                 H.setToIdentity();
-                H.subMatrix(i,Y.colsize(),i,Y.colsize()) -= beta(i) * 
-                    (Y0.col(i,i,Y0.colsize()) ^ 
-                     Y0.col(i,i,Y0.colsize()).conjugate());
+                H.subMatrix(i,M,i,M) -= beta(i) * 
+                    (Y0.col(i,i,M) ^ Y0.col(i,i,M).conjugate());
                 Htot *= H.adjoint();
             }
 #endif
-
-            const int M = Y.colsize();
-            const int N = Y.rowsize();
 
             if (N > 2) {
                 int j1 = (N+1)/2;
@@ -1268,7 +1327,7 @@ namespace tmv {
             Matrix<T> Y2(Y);
             Y2.upperTri().setToIdentity();
             Matrix<T> Hnet = T(1) - Y2*Z*Y2.adjoint();
-            if (Norm(Htot-Hnet) > 0.001*Norm(Htot)) {
+            if (!(Norm(Htot-Hnet) <= 0.001*Norm(Htot))) {
                 cerr<<"BlockHouseholderMakeZ\n";
                 cerr<<"Input: Y = "<<Y0<<endl;
                 cerr<<"beta = "<<beta<<endl;
@@ -1312,7 +1371,17 @@ namespace tmv {
         static void call(const M1& Y, M2& Z, const V& beta)
         { 
             const int algo = 21;
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Inline BlockHouseholderMakeZ\n";
+            std::cout<<"Y = "<<Y<<std::endl;
+            std::cout<<"Z = "<<Z<<std::endl;
+            std::cout<<"beta = "<<beta<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             BlockHouseholderMakeZ_Helper<algo,M1,M2,V>::call(Y,Z,beta);
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Z => "<<Z<<std::endl;
+#endif
         }
     };
 
@@ -1443,7 +1512,7 @@ namespace tmv {
             mb += Yb * temp;
 
 #ifdef XDEBUG_HOUSE
-            if (Norm(Hm-m) > 0.001*Norm(m0)*Norm(H)) {
+            if (!(Norm(Hm-m) <= 0.001*Norm(m0)*Norm(H))) {
                 cerr<<"BlockHouseholderLMult\n";
                 cerr<<"Input: Y = "<<Y0<<endl;
                 cerr<<"Z = "<<Z0<<endl;
@@ -1507,7 +1576,18 @@ namespace tmv {
         static void call(const M1& Y, const M2& Z, M3& m, M4& temp)
         { 
             const int algo = 11;
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Inline BlockHouseholderLMult\n";
+            std::cout<<"Y = "<<Y<<std::endl;
+            std::cout<<"Z = "<<Z<<std::endl;
+            std::cout<<"m = "<<m<<std::endl;
+            std::cout<<"temp = "<<temp<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             BlockHouseholderLMult_Helper<algo,M1,M2,M3,M4>::call(Y,Z,m,temp);
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"m => "<<m<<std::endl;
+#endif
         }
     };
 
@@ -1600,6 +1680,9 @@ namespace tmv {
     // ie. the diagonal and upper triangular portion are not referenced.
     // The routine then finds m <- (I - YZYt)^-1 m = (I - YZtYt) m
     //
+    // TODO: Split m into ma and mb in calling routing like for Block2 version.
+    // Then calling routing might be able to know one of the sizes and
+    // use a SmallMatrixView instead of MatrixView.
 
     template <int algo, class M1, class M2, class M3, class M4>
     struct BlockHouseholderLDiv_Helper;
@@ -1662,7 +1745,7 @@ namespace tmv {
             mb += Yb * temp;
 
 #ifdef XDEBUG_HOUSE
-            if (Norm(Hm-m) > 0.001*Norm(m0)*Norm(Hinv)) {
+            if (!(Norm(Hm-m) <= 0.001*Norm(m0)*Norm(Hinv))) {
                 cerr<<"BlockHouseholderLDiv\n";
                 cerr<<"Input: Y = "<<Y0<<endl;
                 cerr<<"Z = "<<Z0<<endl;
@@ -1722,7 +1805,18 @@ namespace tmv {
         static void call(const M1& Y, const M2& Z, M3& m, M4& temp)
         { 
             const int algo = 11;
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Inline BlockHouseholderLDiv\n";
+            std::cout<<"Y = "<<Y<<std::endl;
+            std::cout<<"Z = "<<Z<<std::endl;
+            std::cout<<"m = "<<m<<std::endl;
+            std::cout<<"temp = "<<temp<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             BlockHouseholderLDiv_Helper<algo,M1,M2,M3,M4>::call(Y,Z,m,temp);
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"m => "<<m<<std::endl;
+#endif
         }
     };
 
@@ -1889,7 +1983,17 @@ namespace tmv {
         static void call(M1& Y, const M2& Z, M3& temp)
         { 
             const int algo = 11;
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Inline BlockHouseholderUnPack\n";
+            std::cout<<"Y = "<<Y<<std::endl;
+            std::cout<<"Z = "<<Z<<std::endl;
+            std::cout<<"temp = "<<temp<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             BlockHouseholderUnpack_Helper<algo,M1,M2,M3>::call(Y,Z,temp);
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Y => "<<Y<<std::endl;
+#endif
         }
     };
 
@@ -1997,9 +2101,9 @@ namespace tmv {
         {
             // z = -beta Z' Y't v
 
-            int M = Y.colsize();
             int N = Y.rowsize()-1; // # of cols already computed
 #ifdef XDEBUG_HOUSE
+            int M = Y.colsize();
             typedef typename M1::value_type T;
             Matrix<T> Y0(M+N+1,N+1);
             Y0.rowRange(0,N+1).setToIdentity();
@@ -2007,7 +2111,7 @@ namespace tmv {
             Matrix<T> Z0(Z);
             Matrix<T> H0 = T(1) - 
                 Y0.colRange(0,N)*Z.subTriMatrix(0,N)*Y0.colRange(0,N).adjoint();
-            Matrix<T> H1(Y.colsize(),Y.colsize());
+            Matrix<T> H1(M,M);
             H1.setToIdentity();
             H1.subMatrix(N,M,N,M) -= beta * (Y0.col(N,N,M)^Y0.col(N,N,M).conjugate());
             Matrix<T> H2 = H0*H1;
@@ -2029,7 +2133,7 @@ namespace tmv {
             YY.rowRange(0,N+1).setToIdentity();
             YY.rowRange(N+1,M+N+1) = Y;
             Matrix<T> HH = T(1) - YY * Z * YY.adjoint();
-            if (Norm(HH-H2) > 0.001*Norm(H2)) {
+            if (!(Norm(HH-H2) <= 0.001*Norm(H2))) {
                 cerr<<"Block2HouseholderAugment\n";
                 cerr<<"Input: Y = "<<Y0<<endl;
                 cerr<<"beta = "<<beta<<endl;
@@ -2078,7 +2182,17 @@ namespace tmv {
         static void call(const M1& Y, M2& Z, RT beta)
         { 
             const int algo = 11;
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Inline Block2HouseholderAugment\n";
+            std::cout<<"Y = "<<Y<<std::endl;
+            std::cout<<"Z = "<<Z<<std::endl;
+            std::cout<<"beta = "<<beta<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             Block2HouseholderAugment_Helper<algo,M1,M2>::call(Y,Z,beta);
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Z => "<<Z<<std::endl;
+#endif
         }
     };
 
@@ -2157,22 +2271,21 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
-            const int M = Y.colsize();
             const int N = Y.rowsize();
 #ifdef XDEBUG_HOUSE
+            const int M = Y.colsize();
             Matrix<T> Y0(M+N,N);
             Y0.rowRange(0,N).setToIdentity();
             Y0.rowRange(N,M+N) = Y;
             Matrix<T> Z0(Z);
             Vector<T> beta0 = beta;
-            Matrix<T> Htot(Y0.colsize(),Y0.colsize());
+            Matrix<T> Htot(M+N,M+N);
             Htot.setToIdentity();
-            for(int i=0;i<int(Y.rowsize());i++) {
-                Matrix<T> H(Y0.colsize(),Y0.colsize());
+            for(int i=0;i<N;i++) {
+                Matrix<T> H(M+N,M+N);
                 H.setToIdentity();
-                H.subMatrix(i,Y0.colsize(),i,Y0.colsize()) -= beta(i) * 
-                    (Y0.col(i,i,Y0.colsize()) ^ 
-                     Y0.col(i,i,Y0.colsize()).conjugate());
+                H.subMatrix(i,M+N,i,M+N) -= beta(i) * 
+                    (Y0.col(i,i,M+N) ^ Y0.col(i,i,M+N).conjugate());
                 Htot *= H.adjoint();
             }
 #endif
@@ -2210,7 +2323,7 @@ namespace tmv {
             Y2.rowRange(0,N).setToIdentity();
             Y2.rowRange(N,M+N) = Y;
             Matrix<T> Hnet = T(1) - Y2*Z*Y2.adjoint();
-            if (Norm(Htot-Hnet) > 0.001*Norm(Htot)) {
+            if (!(Norm(Htot-Hnet) <= 0.001*Norm(Htot))) {
                 cerr<<"Block2HouseholderMakeZ\n";
                 cerr<<"Input: Y = "<<Y0<<endl;
                 cerr<<"beta = "<<beta<<endl;
@@ -2254,7 +2367,17 @@ namespace tmv {
         static void call(const M1& Y, M2& Z, const V& beta)
         { 
             const int algo = 21;
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Inline Block2HouseholderMakeZ\n";
+            std::cout<<"Y = "<<Y<<std::endl;
+            std::cout<<"Z = "<<Z<<std::endl;
+            std::cout<<"beta = "<<beta<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             Block2HouseholderMakeZ_Helper<algo,M1,M2,V>::call(Y,Z,beta);
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Z => "<<Z<<std::endl;
+#endif
         }
     };
 
@@ -2336,14 +2459,11 @@ namespace tmv {
     {
         static void call(const M1& Y, const M2& Z, M3& ma, M4& mb, M5& temp)
         {
-            const int cs = Sizes<M1::_colsize,M4::_colsize>::size;
-            const int rs = Sizes<M1::_rowsize,M2::_size>::size;
-            const int xs = Sizes<M3::_rowsize,M4::_rowsize>::size;
-            int M = cs == TMV_UNKNOWN ? Y.colsize() : cs;
-            int N = rs == TMV_UNKNOWN ? Y.rowsize() : rs;
-            int K = xs == TMV_UNKNOWN ? ma.rowsize() : xs;
-
 #ifdef XDEBUG_HOUSE
+            int M = Y.colsize();
+            int N = Y.rowsize();
+            int K = ma.rowsize();
+
             typedef typename M1::value_type T;
             typedef typename M3::value_type T3;
             Matrix<T> Y0(M+N,N);
@@ -2366,7 +2486,10 @@ namespace tmv {
             mb += Y * temp;
 
 #ifdef XDEBUG_HOUSE
-            if (Norm(Hm-m) > 0.001*Norm(m0)*Norm(H)) {
+            Matrix<T3> m(M+N,K);
+            m.rowRange(0,N) = ma;
+            m.rowRange(N,M+N) = ma;
+            if (!(Norm(Hm-m) <= 0.001*Norm(m0)*Norm(H))) {
                 cerr<<"Block2HouseholderLMult\n";
                 cerr<<"Input: Y = "<<Y0<<endl;
                 cerr<<"Z = "<<Z0<<endl;
@@ -2433,8 +2556,21 @@ namespace tmv {
         static void call(const M1& Y, const M2& Z, M3& ma, M4& mb, M5& temp)
         { 
             const int algo = 11;
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Inline Block2HouseholderLMult\n";
+            std::cout<<"Y = "<<Y<<std::endl;
+            std::cout<<"Z = "<<Z<<std::endl;
+            std::cout<<"ma = "<<ma<<std::endl;
+            std::cout<<"mb = "<<mb<<std::endl;
+            std::cout<<"temp = "<<temp<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             Block2HouseholderLMult_Helper<algo,M1,M2,M3,M4,M5>::call(
                 Y,Z,ma,mb,temp);
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"ma => "<<ma<<std::endl;
+            std::cout<<"mb => "<<mb<<std::endl;
+#endif
         }
     };
 
@@ -2554,14 +2690,11 @@ namespace tmv {
     {
         static void call(const M1& Y, const M2& Z, M3& ma, M4& mb, M5& temp)
         {
-            const int cs = Sizes<M1::_colsize,M4::_colsize>::size;
-            const int rs = Sizes<M1::_rowsize,M2::_size>::size;
-            const int xs = Sizes<M3::_rowsize,M4::_rowsize>::size;
-            int M = cs == TMV_UNKNOWN ? Y.colsize() : cs;
-            int N = rs == TMV_UNKNOWN ? Y.rowsize() : rs;
-            int K = xs == TMV_UNKNOWN ? ma.rowsize() : xs;
-
 #ifdef XDEBUG_HOUSE
+            int M = Y.colsize();
+            int N = Y.rowsize();
+            int K = ma.rowsize();
+
             typedef typename M1::value_type T;
             typedef typename M3::value_type T3;
             Matrix<T> Y0(M+N,N);
@@ -2584,12 +2717,15 @@ namespace tmv {
             mb += Y * temp;
 
 #ifdef XDEBUG_HOUSE
-            if (Norm(Hm-m) > 0.001*Norm(m0)*Norm(H)) {
+            Matrix<T3> m(M+N,K);
+            m.rowRange(0,N) = ma;
+            m.rowRange(N,M+N) = ma;
+            if (!(Norm(Hm-m) <= 0.001*Norm(m0)*Norm(Hinv))) {
                 cerr<<"Block2HouseholderLDiv\n";
                 cerr<<"Input: Y = "<<Y0<<endl;
                 cerr<<"Z = "<<Z0<<endl;
                 cerr<<"m = "<<m0<<endl;
-                cerr<<"H = "<<H<<endl;
+                cerr<<"Hinv = "<<Hinv<<endl;
                 cerr<<"Y = "<<Y<<endl;
                 cerr<<"temp = "<<temp<<endl;
                 cerr<<"Output: ma = "<<ma<<endl;
@@ -2651,8 +2787,21 @@ namespace tmv {
         static void call(const M1& Y, const M2& Z, M3& ma, M4& mb, M5& temp)
         { 
             const int algo = 11;
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"Inline Block2HouseholderLDiv\n";
+            std::cout<<"Y = "<<Y<<std::endl;
+            std::cout<<"Z = "<<Z<<std::endl;
+            std::cout<<"ma = "<<ma<<std::endl;
+            std::cout<<"mb = "<<mb<<std::endl;
+            std::cout<<"temp = "<<temp<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             Block2HouseholderLDiv_Helper<algo,M1,M2,M3,M4,M5>::call(
                 Y,Z,ma,mb,temp);
+#ifdef PRINTALGO_HOUSE
+            std::cout<<"ma => "<<ma<<std::endl;
+            std::cout<<"mb => "<<mb<<std::endl;
+#endif
         }
     };
 

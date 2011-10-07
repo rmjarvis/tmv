@@ -1,5 +1,6 @@
 
 //#define PRINTALGO_QR
+//#define XDEBUG_QR
 
 #include "TMV_Blas.h"
 #include "tmv/TMV_QRDiv.h"

@@ -923,7 +923,7 @@ int main()
 
         context.Result(result)
 
-    if not result and context.env['FORCE_FLAPACK']:
+        if not result and context.env['FORCE_FLAPACK']:
             print 'Warning: Forced use of FLAPACK even though link test failed.'
             result = 1
 

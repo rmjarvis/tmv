@@ -130,6 +130,13 @@ static void TestSquareDiv(tmv::DivType dt)
     tmv::Matrix<std::complex<T> > ctc = c.adjoint() * c;
     tmv::Matrix<std::complex<T> > cata(4,4);
     c.makeInverseATA(cata);
+    if (showacc) {
+        std::cout<<"ctc = "<<ctc<<std::endl;
+        std::cout<<"cata = "<<cata<<std::endl;
+        std::cout<<"ctc.inv = "<<ctc.inverse()<<std::endl;
+        std::cout<<"Norm(cata-ctc.inv) = "<<Norm(cata-ctc.inverse());
+        std::cout<<"  EPS*Norm(cata) = "<<ceps*Norm(cata)<<std::endl;
+    }
     Assert(Norm(cata-ctc.inverse()) < ceps*Norm(cata),"Square CinverseATA");
 
     tmv::Vector<std::complex<T> > e(4);
@@ -247,7 +254,7 @@ static void TestSquareDiv(tmv::DivType dt)
 
     tmv::Vector<T> S = R/M;
     tmv::Vector<T> R2 = M*S;
-    Assert(CheckDecomp(M.getDiv(),M),"CheckDecomp");
+    Assert(CheckDecomp(M.getDiv(),M,dbgout),"CheckDecomp");
 
     if (showacc) {
         std::cout<<"R/M Norm(R2-R) = "<<Norm(R2-R)<<std::endl;
@@ -263,7 +270,7 @@ static void TestSquareDiv(tmv::DivType dt)
     Assert(Norm(R2-R) < eps*Norm(R),"Square R%M");
     tmv::Vector<std::complex<T> > CS = R/CM;
     tmv::Vector<std::complex<T> > CR2 = CM*CS;
-    Assert(CheckDecomp(CM.getDiv(),CM),"CheckDecomp");
+    Assert(CheckDecomp(CM.getDiv(),CM,dbgout),"CheckDecomp");
     if (showacc) {
         std::cout<<"R/CM Norm(CR2-R) = "<<Norm(CR2-R)<<std::endl;
         std::cout<<"EPS*Norm(R) = "<<ceps*Norm(R)<<std::endl;
@@ -679,7 +686,7 @@ static void TestNonSquareDiv(tmv::DivType dt)
 
     t = q * s;
     s2 = t/q;
-    Assert(CheckDecomp(q.getDiv(),q),"CheckDecomp");
+    Assert(CheckDecomp(q.getDiv(),q,dbgout),"CheckDecomp");
     Assert(Norm(s2-s) < eps*Norm(s),"NonSquare t/q");
 
     t2 = s%q;
@@ -947,7 +954,7 @@ static void TestSingularDiv(tmv::DivType dt)
     tmv::Vector<T> bb = mm*xx;
     tmv::Vector<T> xx2 = bb/mm;
     tmv::Vector<T> bb2 = mm*xx2;
-    Assert(CheckDecomp(mm.getDiv(),mm),"CheckDecomp");
+    Assert(CheckDecomp(mm.getDiv(),mm,dbgout),"CheckDecomp");
     if (showacc) {
         std::cout<<"Norm(bb2-bb) = "<<Norm(bb2-bb);
         std::cout<<", EPS*Norm(bb) = "<<eps*Norm(bb)<<std::endl;
@@ -981,8 +988,13 @@ static void TestSingularDiv(tmv::DivType dt)
     tmv::Vector<std::complex<T> > cbb = cc*cxx;
     tmv::Vector<std::complex<T> > cxx2 = cbb/cc;
     tmv::Vector<std::complex<T> > cbb2 = cc*cxx2;
-    Assert(CheckDecomp(cc.getDiv(),cc),"CheckDecomp");
+    Assert(CheckDecomp(cc.getDiv(),cc,dbgout),"CheckDecomp");
     if (showacc) {
+        std::cout<<"cxx = "<<cxx<<std::endl;
+        std::cout<<"cbb = "<<cbb<<std::endl;
+        std::cout<<"cxx2 = "<<cxx2<<std::endl;
+        std::cout<<"cbb2 = "<<cbb2<<std::endl;
+        std::cout<<"cbb2-cbb = "<<cbb2-cbb<<std::endl;
         std::cout<<"Norm(cbb2-cbb) = "<<Norm(cbb2-cbb);
         std::cout<<", EPS*Norm(cbb) = "<<eps*Norm(cbb)<<std::endl;
     }
@@ -1009,20 +1021,19 @@ static void TestSingularDiv(tmv::DivType dt)
 
 template <class T> void TestMatrixDiv()
 {
-#if 1
     TestMatrixDecomp<T,tmv::ColMajor>();
     TestMatrixDecomp<T,tmv::RowMajor>();
     std::cout<<"Matrix<"<<Text(T())<<"> passed all ";
     std::cout<<"decomposition tests.\n";
-#endif
+
     TestSquareDiv<T,tmv::ColMajor>(tmv::LU);
     TestSquareDiv<T,tmv::ColMajor>(tmv::QR);
     TestSquareDiv<T,tmv::ColMajor>(tmv::QRP);
+    TestSquareDiv<T,tmv::ColMajor>(tmv::SV);
     TestNonSquareDiv<T,tmv::ColMajor>(tmv::QR);
     TestNonSquareDiv<T,tmv::ColMajor>(tmv::QRP);
-    TestSingularDiv<T,tmv::ColMajor>(tmv::QRP);
-    TestSquareDiv<T,tmv::ColMajor>(tmv::SV);
     TestNonSquareDiv<T,tmv::ColMajor>(tmv::SV);
+    TestSingularDiv<T,tmv::ColMajor>(tmv::QRP);
     TestSingularDiv<T,tmv::ColMajor>(tmv::SV);
 }
 

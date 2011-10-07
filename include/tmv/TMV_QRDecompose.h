@@ -922,7 +922,7 @@ namespace tmv {
                          typename M2::value_type>::sametype));
         TMVStaticAssert(M2::_upper);
         TMVAssert(Q.colsize() >= Q.rowsize());
-        TMVAssert(R.colsize() == Q.rowsize());
+        TMVAssert(R.size() == Q.rowsize());
 
         typedef typename M1::real_type RT;
         Vector<RT> beta(Q.rowsize());
@@ -1015,7 +1015,7 @@ namespace tmv {
 
     template <class M1, class T, int A2>
     static inline void QR_Decompose(
-        BaseMatrix_Rec_Mutable<M1> Q, UpperTriMatrixView<T,A2> R)
+        BaseMatrix_Rec_Mutable<M1>& Q, UpperTriMatrixView<T,A2> R)
     {
         typedef UpperTriMatrixView<T,A2> M2;
         QR_Decompose(
@@ -1033,7 +1033,8 @@ namespace tmv {
 
     template <class M1, class T, int N, int Si2, int Sj2, int A2>
     static inline void QR_Decompose(
-        BaseMatrix_Rec_Mutable<M1> Q, SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> R)
+        BaseMatrix_Rec_Mutable<M1>& Q,
+        SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> R)
     {
         typedef SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> M2;
         QR_Decompose(
