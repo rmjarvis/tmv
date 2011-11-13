@@ -749,6 +749,7 @@ static void DoTestMV1a_Basic(const MM& a, const V& b, std::string label)
     typedef typename V::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
+    typedef typename tmv::Traits2<Ta,T>::type PT;
 #ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MV1a"<<label<<std::endl;
@@ -769,39 +770,40 @@ static void DoTestMV1a_Basic(const MM& a, const V& b, std::string label)
     if (!std::numeric_limits<RT>::is_integer) eps *= Norm(m) * Norm(v);
 
     if (CanMultMV(a,b)) {
+        tmv::Vector<PT> mv = m*v;
 #ifdef XXD
         if (XXDEBUG4) {
             std::cout<<"CanMult("<<tmv::TMV_Text(m)<<","<<tmv::TMV_Text(b)<<")\n";
             std::cout<<"a*b = "<<(a*b)<<std::endl;
-            std::cout<<"m*v = "<<m*v<<std::endl;
-            std::cout<<"a*b-m*v = "<<((a*b)-(m*v))<<std::endl;
-            std::cout<<"Norm(a*b-m*v) = "<<Norm((a*b)-(m*v))<<std::endl;
+            std::cout<<"m*v = "<<mv<<std::endl;
+            std::cout<<"a*b-m*v = "<<((a*b)-(mv))<<std::endl;
+            std::cout<<"Norm(a*b-m*v) = "<<Norm((a*b)-(mv))<<std::endl;
             std::cout<<"eps = "<<eps<<std::endl;
         }
 #endif
-        Assert(Equal((a*b),(m*v),eps),label+" a*b");
+        Assert(Equal((a*b),(mv),eps),label+" a*b");
         RT x(5);
         CT z(3,4);
 #ifdef XXD
         if (XXDEBUG4) {
             std::cout<<"x*a*b = "<<(x*a*b)<<std::endl;
-            std::cout<<"x*m*v = "<<x*m*v<<std::endl;
-            std::cout<<"diff = "<<((x*a*b)-(x*m*v))<<std::endl;
-            std::cout<<"Norm(diff) = "<<Norm((x*a*b)-(x*m*v))<<std::endl;
+            std::cout<<"x*m*v = "<<x*mv<<std::endl;
+            std::cout<<"diff = "<<((x*a*b)-(x*mv))<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm((x*a*b)-(x*mv))<<std::endl;
             std::cout<<"x*eps = "<<x*eps<<std::endl;
         }
 #endif
-        Assert(Equal((x*a*b),(x*m*v),x*eps),label+" x*a*b");
+        Assert(Equal((x*a*b),(x*mv),x*eps),label+" x*a*b");
 #ifdef XXD
         if (XXDEBUG4) {
             std::cout<<"z*a*b = "<<(z*a*b)<<std::endl;
-            std::cout<<"z*m*v = "<<z*m*v<<std::endl;
-            std::cout<<"diff = "<<((z*a*b)-(z*m*v))<<std::endl;
-            std::cout<<"Norm(diff) = "<<Norm((z*a*b)-(z*m*v))<<std::endl;
+            std::cout<<"z*m*v = "<<z*mv<<std::endl;
+            std::cout<<"diff = "<<((z*a*b)-(z*mv))<<std::endl;
+            std::cout<<"Norm(diff) = "<<Norm((z*a*b)-(z*mv))<<std::endl;
             std::cout<<"x*eps = "<<x*eps<<std::endl;
         }
 #endif
-        Assert(Equal((z*a*b),(z*m*v),x*eps),label+" z*a*b");
+        Assert(Equal((z*a*b),(z*mv),x*eps),label+" z*a*b");
     }
     if (showstartdone) std::cout<<"Done MV1a"<<std::endl;
 }
@@ -814,6 +816,7 @@ static void DoTestMV1a_Full(const MM& a, const V& b, std::string label)
     typedef typename V::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
+    typedef typename tmv::Traits2<Ta,T>::type PT;
     DoTestMV1a_Basic(a,b,label);
 
 #if (XTEST & 16)
@@ -824,14 +827,15 @@ static void DoTestMV1a_Full(const MM& a, const V& b, std::string label)
     if (!std::numeric_limits<RT>::is_integer) eps *= Norm(m) * Norm(v);
 
     if (CanMultMV(a,b)) {
+        tmv::Vector<PT> mv = m*v;
         RT x(5);
         std::complex<RT> z(3,4);
-        Assert(Equal(((x*a)*b),(x*m*v),x*eps),label+" (x*a)*b");
-        Assert(Equal((x*(a*b)),(x*m*v),x*eps),label+" x*(a*b)");
-        Assert(Equal((a*(x*b)),(x*m*v),x*eps),label+" a*(x*b)");
-        Assert(Equal(((z*a)*b),(z*m*v),x*eps),label+" (z*a)*b");
-        Assert(Equal((z*(a*b)),(z*m*v),x*eps),label+" z*(a*b)");
-        Assert(Equal((a*(z*b)),(z*m*v),x*eps),label+" a*(z*b)");
+        Assert(Equal(((x*a)*b),(x*mv),x*eps),label+" (x*a)*b");
+        Assert(Equal((x*(a*b)),(x*mv),x*eps),label+" x*(a*b)");
+        Assert(Equal((a*(x*b)),(x*mv),x*eps),label+" a*(x*b)");
+        Assert(Equal(((z*a)*b),(z*mv),x*eps),label+" (z*a)*b");
+        Assert(Equal((z*(a*b)),(z*mv),x*eps),label+" z*(a*b)");
+        Assert(Equal((a*(z*b)),(z*mv),x*eps),label+" a*(z*b)");
     }
     if (showstartdone) std::cout<<"Done MV1a_Full"<<std::endl;
 #endif
@@ -2602,11 +2606,38 @@ static void DoTestMM3a_Full(const M1& a, const M2& b, std::string label)
 {
     typedef typename M1::value_type T;
     typedef typename M2::value_type Tb;
+    typedef typename M1::float_type FT;
+    typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits2<T,Tb>::type PT;
     DoTestMM3a_Basic(a,b,label);
 
-    // MJ: I haven't added anything here.  I guess I should do that
-    // at some point.  Add x*a*b type things.
 #if (XTEST & 16)
+#ifdef XXD
+    if (showstartdone) {
+        std::cout<<"Start MM3a Full"<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+    }
+#endif
+
+    if (CanMultMM(a,b)) {
+        tmv::Matrix<T> m1 = a;
+        tmv::Matrix<Tb> m2 = b;
+        tmv::Matrix<PT> mm = m1*m2;
+
+        FT eps = EPS * (a.colsize() + a.rowsize());
+        if (!std::numeric_limits<RT>::is_integer) eps *= Norm(m1) * Norm(m2);
+
+        RT x(5);
+        std::complex<RT> z(3,4);
+
+        Assert(Equal(((x*a)*b),(x*mm),x*eps),label+" (x*a)*b");
+        Assert(Equal((x*(a*b)),(x*mm),x*eps),label+" x*(a*b)");
+        Assert(Equal((a*(x*b)),(x*mm),x*eps),label+" a*(x*b)");
+        Assert(Equal(((z*a)*b),(z*mm),x*eps),label+" (z*a)*b");
+        Assert(Equal((z*(a*b)),(z*mm),x*eps),label+" z*(a*b)");
+        Assert(Equal((a*(z*b)),(z*mm),x*eps),label+" a*(z*b)");
+    }
 #endif
     if (showstartdone) std::cout<<"Done MM3a_Full"<<std::endl;
 }

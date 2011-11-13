@@ -61,9 +61,8 @@
 //        Makes a matrix with a_ij = m[i][j]
 //
 //    Matrix<T,A>(size_t colsize, size_t rowsize, const T* vv)
-//    Matrix<T,A>(size_t colsize, size_t rowsize, 
-//            const std::vector<T>& vv)
-//        Make a matrix which copies the elements of vv.
+//    Matrix<T,A>(size_t colsize, size_t rowsize, const std::vector<T>& vv)
+//        Make a matrix that copies the elements of vv.
 //        If A is tmv::RowMajor then the elements are taken in row major
 //        order (m00,m01,..m0n,m10,m11...).  If A is tmv::ColMajor
 //        then the elements are taken in column major order.
@@ -114,16 +113,16 @@
 //    row_sub_type row(int i, int j1, int j2)
 //    const_row_sub_type row(int i, int j1, int j2) const
 //        Return the ith row of the matrix as a vector
-//        If j1,j2 are given, it returns the SubVector from j1 to j2 
-//        (not including j2) within the row.
+//        If j1,j2 are given, it returns the subvector from j1 to j2 
+//        (not including j2 for CStyle) within the row.
 //
 //    col_type col(int j)
 //    const_col_type col(int j) const
 //    col_sub_type col(int j, int i1, int i2)
 //    const_col_sub_type col(int j, int j1, int j2) const
 //        Return the jth column of the matrix as a Vector
-//        If i1,i2 are given, it returns the SubVector from i1 to i2 
-//        (not including i2) within the column.
+//        If i1,i2 are given, it returns the subvector from i1 to i2 
+//        (not including i2 for CStyle) within the column.
 //
 //    diag_type diag()
 //    const_diag_type diag() const
@@ -134,111 +133,11 @@
 //    const_diag_sub_type diag(i) const
 //    const_diag_sub_type diag(i, j1, j2) const
 //        Return the super- or sub-diagonal i
-//        If i > 0 return the super diagonal starting at m_0i
-//        If i < 0 return the sub diagonal starting at m_|i|0
-//        If j1,j2 are given, it returns the diagonal SubVector 
-//        either from m_j1,i+j1 to m_j2,i+j2 (for i>0) 
-//        or from m_|i|+j1,j1 to m_|i|+j2,j2 (for i<0)
-//
-// Functions of Matrices:
-//
-//    Most of these are both member functions and functions of a matrix,
-//    so Norm(m) and m.norm(), for example, are equivalent.
-//
-//    value_type m.det() const    or Det(m)
-//        Returns the determinant of a matrix.
-//        Note: If the matrix is not square, the determinant is not
-//              well defined.  The returned value is such that
-//              conj(det) * det = Det(Adjoint(m) * m)
-//              So for real nonsquare matrices, the sign is arbitrary,
-//              and for complex nonsquare matrices, it is multiplied
-//              by an arbitrary phase.
-//
-//    real_type m.logDet(value_type* sign=0) const   or LogDet(m,sign)
-//        Returns the logarithm of the absolute value of the determinant.
-//        For many large matrices, the determinant yields to overflow.
-//        Hence, this function is provided, which stably calculates the
-//        natural logarithm of the absolute value of the determinant.
-//        The optional sign argument returns the sign of the determinant
-//        if value_type is real, or the factor exp(it) by which exp(logdet) 
-//        would have to be multiplied to get the actual determinant.
-//
-//    value_type m.trace() const    or Trace(m)
-//        Returns the trace of a matrix.
-//        = sum_i ( a_ii )
-//
-//    real_type m.norm() const    or Norm(m)
-//    real_type m.normF() const    or NormF(m)
-//        Return the Frobenius norm of a matrix.
-//        = sqrt( sum_ij |a_ij|^2 )
-//
-//    real_type m.normSq() const    or NormSq()
-//    real_type m.normSq(real_type scale) const
-//        Returns the square of Norm().
-//        In the method version, you can provide an optional scale, in
-//        which case the output is equal to NormSq(scale*m).
-//
-//    real_type m.norm1() const    or Norm1(m)
-//        Returns the 1-norm of a matrix.
-//        = max_j (sum_i |a_ij|)
-//
-//    real_type m.norm2() const    or Norm2(m)
-//        Returns the 2-norm of a matrix.
-//        = sqrt( Max Eigenvalue of (A.adjoint * A) )
-//        = Maximum singular value
-//        Note: This norm is costly to calculate if one is not 
-//              otherwise doing a singular value decomposition
-//              of the matrix.
-//
-//    real_type m.normInf() const    or NormInf(m)
-//        Returns the infinity-norm of a matrix.
-//        = max_i (sum_j |a_ij|)
-//
-//    value_type sumElements() const    or SumElements(m) 
-//        Returns the sum of all elements in the matrix.
-//
-//    real_type sumAbsElements() const    or SumAbsElements(m) 
-//        Returns the sum of absolute values of elements in the matrix.
-//
-//    real_type sumAbs2Elements() const    or SumAbs2Elements(m) 
-//        Returns the sum of absolute values of the real and imaginary
-//        components of the elements in the matrix.
-//        i.e. realPart().sumAbsElements() + imagPart().sumAbsElements()
-//
-//    value_type maxElement() const    or MaxElement(m) 
-//        Returns the maximum value of any element in the matrix.
-//        As "max" doesn't make sense for complex values, for these
-//        we use just the real components.
-//
-//    real_type maxAbsElement() const    or MaxAbsElement(m) 
-//        The same as MaxElement, except absolute values are used.
-//
-//    real_type maxAbs2Element() const    or MaxAbsElement(m) 
-//        The same as MaxElement, except abs(m.real()) + abs(m.imag()) is used.
-//
-//    void m.makeInverse(minv) const
-//        Sets minv to the inverse of m if it exists.
-//        If m is singular and square, and LU is set for dividing
-//          (LU is default for square matrices)
-//          then a run-time error will occur.
-//        If m is singular or not square and SV is set 
-//          then the returned matrix is the pseudo-inverse which satisfies:
-//          MXM = M
-//          XMX = X
-//          (MX)T = MX
-//          (XM)T = XM
-//        [If dividing using QR or QRP, all but the last of these will 
-//         be true.]
-//
-//    void m.makeInverseATA(invata) const
-//        Sets invata to the Inverse of (A.adjoint * A) for matrix m = A
-//        If Ax=b is solved for x, then (AT A)^-1 is the 
-//        covariance matrix of the least-squares solution x
-//
-//    inverse_type m.inverse() const    or Inverse(m)
-//        Returns an auxiliary object that delays the calculation of the 
-//        inverse until there is appropriate storage for it.
-//        m.Inverse(minv) is equivalent to minv = m.Inverse().
+//        If i > 0 return the super diagonal starting at (0,i)
+//        If i < 0 return the sub diagonal starting at (|i|,0)
+//        If j1,j2 are given, it returns the diagonal subvector 
+//        either from (j1,i+j1) to (j2,i+j2) (for i>0) 
+//        or from (|i|+j1,j1) to (|i|+j2,j2) (for i<0)
 //
 //
 // Modifying Functions
@@ -260,6 +159,7 @@
 //
 //    type& transposeSelf() 
 //        Transposes the elements of a square matrix
+//        The matrix must be square for this function.
 //
 //    type& setToIdentity(value_type x = 1)
 //        Set to the identity matrix, or 
@@ -290,6 +190,105 @@
 //    Swap(Matrix& m1, Matrix& m2)
 //        Swap the values of two matrices
 //        The matrices must be the same size
+//
+// Functions of Matrices:
+//
+//    Most of these are both member functions and functions of a matrix,
+//    so Norm(m) and m.norm(), for example, are equivalent.
+/
+//    value_type m.det() const    or Det(m)
+//        Returns the determinant of a matrix.
+//        Note: If the matrix is not square, the determinant is not
+//              well defined.  The returned value is such that
+//              conj(det) * det = Det(Adjoint(m) * m)
+//              So for real nonsquare matrices, the sign is arbitrary,
+//              and for complex nonsquare matrices, it is multiplied
+//              by an arbitrary phase.
+//
+//    float_type m.logDet(value_type* sign=0) const   or LogDet(m,sign)
+//        Returns the logarithm of the absolute value of the determinant.
+//        For many large matrices, the determinant yields to overflow.
+//        Hence, this function is provided, which stably calculates the
+//        natural logarithm of the absolute value of the determinant.
+//        The optional sign argument returns the sign of the determinant
+//        if value_type is real, or the factor exp(it) by which exp(logdet) 
+//        would have to be multiplied to get the actual determinant.
+//
+//    value_type m.trace() const    or Trace(m)
+//        Returns the trace of a matrix.
+//        = sum_i ( a_ii )
+//
+//    float_type m.norm() const    or Norm(m)
+//    float_type m.normF() const    or NormF(m)
+//        Return the Frobenius norm of a matrix.
+//        = sqrt( sum_ij |a_ij|^2 )
+//
+//    real_type m.normSq() const    or NormSq()
+//    float_type m.normSq(float_type scale) const
+//        Returns the square of Norm().
+//        In the method version, you can provide an optional scale, in
+//        which case the output is equal to NormSq(scale*m).
+//
+//    float_type m.norm1() const    or Norm1(m)
+//        Returns the 1-norm of a matrix.
+//        = max_j (sum_i |a_ij|)
+//
+//    float_type m.norm2() const    or Norm2(m)
+//        Returns the 2-norm of a matrix.
+//        = sqrt( Max Eigenvalue of (A.adjoint * A) )
+//        = Maximum singular value
+//        Note: This norm is costly to calculate if one is not 
+//              otherwise doing a singular value decomposition
+//              of the matrix.
+//
+//    float_type m.normInf() const    or NormInf(m)
+//        Returns the infinity-norm of a matrix.
+//        = max_i (sum_j |a_ij|)
+//
+//    value_type sumElements() const    or SumElements(m) 
+//        Returns the sum of all elements in the matrix.
+//
+//    float_type sumAbsElements() const    or SumAbsElements(m) 
+//        Returns the sum of absolute values of elements in the matrix.
+//
+//    real_type sumAbs2Elements() const    or SumAbs2Elements(m) 
+//        Returns the sum of absolute values of the real and imaginary
+//        components of the elements in the matrix.
+//        i.e. realPart().sumAbsElements() + imagPart().sumAbsElements()
+//
+//    float_type maxAbsElement() const    or MaxAbsElement(m) 
+//        Returns the element in the matrix with the maximum absolute
+//        value.
+//
+//    real_type maxAbs2Element() const    or MaxAbs2Element(m) 
+//        The same as MaxAbsElement, except 
+//        abs(m(i,j).real()) + abs(m(i,j).imag()) is used instead of 
+//        the usual abs(m(i,j)).
+//
+//    void m.makeInverse(minv) const
+//        Sets minv to the inverse of m if it exists.
+//        If m is singular and square, and LU is set for dividing
+//          (LU is default for square matrices)
+//          then a run-time error will occur.
+//        If m is singular or not square and SV is set 
+//          then the returned matrix is the pseudo-inverse, which satisfies:
+//          MXM = M
+//          XMX = X
+//          (MX)T = MX
+//          (XM)T = XM
+//        [If dividing using QR or QRP, all but the last of these will 
+//         be true.]
+//
+//    void m.makeInverseATA(invata) const
+//        Sets invata to the inverse of (A.adjoint * A) for matrix m = A
+//        If Ax=b is solved for x, then (AT A)^-1 is the 
+//        covariance matrix of the least-squares solution x
+//
+//    inverse_type m.inverse() const    or Inverse(m)
+//        Returns an auxiliary object that delays the calculation of the 
+//        inverse until there is appropriate storage for it.
+//        m.makeInverse(minv) is equivalent to minv = m.inverse().
+//
 //
 // MatrixView:
 //
@@ -331,7 +330,7 @@
 //    All of these methods return some kind of view into the matrix
 //    data.  The return types are either ConstMatrixView or MatrixView
 //    with the appropriate attributes.
-//    (Except for SubVector and LinearView, which return either 
+//    (Except for subVector and linearView, which return either 
 //    ConstVectorView or VectorView.)
 //
 //    All of these have a const and non-const version.  For the const
@@ -341,7 +340,7 @@
 //    submatrix_type subMatrix(int i1, int i2, int j1, int j2,
 //            int istep=1, int jstep=1)
 //        This member function will return a submatrix using rows i1 to i2
-//        and columns j1 to j2 (not inclusive of i2,j2) which refers
+//        and columns j1 to j2 (not inclusive of i2,j2) that refers
 //        to the same physical elements as the original.
 //        Thus, to make the matrix:
 //           ( 0 0 1 0 )
@@ -363,7 +362,7 @@
 //        starting at 1.
 //
 //    subvector_type subVector(int i, int j, int istep, int jstep, int size)
-//        Returns a subvector which starts at position (i,j) in the 
+//        Returns a subvector that starts at position (i,j) in the 
 //        matrix, moves in the directions (istep,jstep) and has a length
 //        of size.
 //        For example, the cross-diagonal from the lower left to the upper
@@ -371,7 +370,7 @@
 //        m.subVector(5,0,-1,1,6)
 //
 //    colpair_type colPair(int j1, int j2)
-//        This returns an Mx2 submatrix which consists of the 
+//        This returns an Mx2 submatrix that consists of the 
 //        columns j1 and j2.  This is useful for multiplying two 
 //        (not necessarily adjacent) columns of a matrix by a 2x2 matrix.
 //
@@ -505,7 +504,7 @@
 //       and m += 3 means m += 3*I (or equivalently, m.diag().addToAll(3)).
 //
 //    3) Division by a matrix can be from either the left or the right.
-//       ie. v/m can mean either m^-1 v or v m^-1
+//       ie. v/m might mean either m^-1 v or v m^-1
 //       The first case is the solution of mx=v, the second is of xm = v.
 //       Since the first case is the way one generally poses a problem
 //       for solving a set of equations, we take v/m to be left-division.
@@ -513,7 +512,7 @@
 //       to do so.  
 //       ie. v%m means v m^-1
 //       If you want to be more explicit, you can write:
-//       v/m as m.Inverse() * v and v%m as v * m.Inverse().
+//       v/m as m.inverse() * v and v%m as v * m.inverse().
 //       In all cases, the actual calculation is delayed until there is
 //       storage to put it.  (Unless you string too many calculations 
 //       together, in which case it will use a temporary.)
@@ -540,7 +539,7 @@
 //    std::auto_ptr<tmv::Matrix<T> > mptr;
 //    is >> mptr
 //        If you do not know the size of the matrix to be read in, you can
-//        use this form which will allocate the matrix to be the correct
+//        use this form, which will allocate the matrix to be the correct
 //        size according to the input data.
 //
 //
@@ -877,7 +876,6 @@ namespace tmv {
 
         typedef Matrix<T,A0,A1> type;
         typedef BaseMatrix_Rec_Mutable<type> base_mut;
-        typedef BaseMatrix_Rec_Mutable<type> base_div;
         typedef MatrixDivHelper<type> divhelper;
 
         typedef typename Traits<T>::real_type real_type;
@@ -913,7 +911,7 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
 #ifdef TMV_DEBUG
-            this->linearView().flatten().setAllTo(Traits<real_type>::constr_value());
+            this->setAllTo(Traits<value_type>::constr_value());
 #endif
         }
 
@@ -985,7 +983,7 @@ namespace tmv {
         ~Matrix() 
         {
 #ifdef TMV_DEBUG
-            this->linearView().flatten().setAllTo(Traits<real_type>::destr_value());
+            this->setAllTo(Traits<value_type>::destr_value());
 #endif
         }
 
@@ -1028,7 +1026,7 @@ namespace tmv {
         void resize(const size_t cs, const size_t rs)
         {
 #ifdef TMV_DEBUG
-            this->linearView().flatten().setAllTo(Traits<real_type>::destr_value());
+            this->setAllTo(Traits<value_type>::destr_value());
 #endif
             itscs = cs;
             itsrs = rs;
@@ -1036,7 +1034,7 @@ namespace tmv {
             linsize = cs*rs;
             itsm.resize(linsize);
 #ifdef TMV_DEBUG
-            this->linearView().flatten().setAllTo(Traits<real_type>::constr_value());
+            this->setAllTo(Traits<value_type>::constr_value());
 #endif
         }
 

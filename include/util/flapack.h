@@ -5094,7 +5094,7 @@ int zupmtr_(char *side, char *uplo, char *trans, int *m,
     int *n, void *ap, void *tau, void *c__,
     int *ldc, void *work, int *info);
 
-//MJ
+
 int cgelsd_(int *m, int *n, int *nrhs, void *
 	a, int *lda, void *b, int *ldb, float *s, float *rcond, 
 	int *rank, void *work, int *lwork, float *rwork, int *

@@ -131,10 +131,8 @@
 //    real_type m.normInf() const    or NormInf(m)
 //    value_type m.sumElements() const    or SumElements(m) 
 //    real_type m.sumAbsElements() const    or SumAbsElements(m) 
-//    value_type m.maxElement() const    or MaxElement(m) 
-//    value_type m.minElement() const    or MinElement(m) 
 //    real_type m.maxAbsElement() const    or MaxAbsElement(m) 
-//    real_type m.minAbsElement() const    or MinAbsElement(m) 
+//    real_type m.maxAbs2Element() const    or MaxAbs2Element(m) 
 //
 //    void m.makeInverse(minv) const
 //        This function allows minv to be either a regular Matrix
@@ -710,7 +708,8 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(Traits<T>::constr_value());
+            Maybe<_unit>::offdiag(*this).setAllTo(
+                Traits<value_type>::constr_value());
 #endif
         }
 
@@ -780,7 +779,8 @@ namespace tmv {
         ~UpperTriMatrix()
         {
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(Traits<T>::destr_value());
+            Maybe<_unit>::offdiag(*this).setAllTo(
+                Traits<value_type>::destr_value());
 #endif
         }
 
@@ -840,12 +840,14 @@ namespace tmv {
         void resize(const size_t s)
         {
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(Traits<T>::destr_value());
+            Maybe<_unit>::offdiag(*this).setAllTo(
+                Traits<value_type>::destr_value());
 #endif
             itss = s;
             itsm.resize(s*s);
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(Traits<T>::constr_value());
+            Maybe<_unit>::offdiag(*this).setAllTo(
+                Traits<value_type>::constr_value());
 #endif
         }
 
@@ -1633,7 +1635,8 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(Traits<T>::constr_value());
+            Maybe<_unit>::offdiag(*this).setAllTo(
+                Traits<value_type>::constr_value());
 #endif
         }
 
@@ -1702,7 +1705,8 @@ namespace tmv {
         ~LowerTriMatrix()
         {
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(Traits<T>::destr_value());
+            Maybe<_unit>::offdiag(*this).setAllTo(
+                Traits<value_type>::destr_value());
 #endif
         }
 
@@ -1762,12 +1766,14 @@ namespace tmv {
         void resize(const size_t s)
         {
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(Traits<T>::destr_value());
+            Maybe<_unit>::offdiag(*this).setAllTo(
+                Traits<value_type>::destr_value());
 #endif
             itss = s;
             itsm.resize(s*s);
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(Traits<T>::constr_value());
+            Maybe<_unit>::offdiag(*this).setAllTo(
+                Traits<value_type>::constr_value());
 #endif
         }
 
@@ -2383,10 +2389,14 @@ namespace tmv {
     // Special Creators: 
     //   UpperTriMatrixViewOf(T* m, n, S)
     //   UpperTriMatrixViewOf(T* m, n, si, sj)
+    //   UpperTriMatrixViewOf(T* m, n, S, dt)
+    //   UpperTriMatrixViewOf(T* m, n, si, sj, dt)
     //   UnitUpperTriMatrixViewOf(T* m, n, S)
     //   UnitUpperTriMatrixViewOf(T* m, n, si, sj)
     //   LowerTriMatrixViewOf(T* m, n, S)
     //   LowerTriMatrixViewOf(T* m, n, si, sj)
+    //   LowerTriMatrixViewOf(T* m, n, S, dt)
+    //   LowerTriMatrixViewOf(T* m, n, si, sj, dt)
     //   UnitLowerTriMatrixViewOf(T* m, n, S)
     //   UnitLowerTriMatrixViewOf(T* m, n, si, sj)
     //

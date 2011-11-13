@@ -174,7 +174,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(N >= 0);
 #ifdef TMV_DEBUG
-            this->flatten().setAllTo(Traits<real_type>::constr_value());
+            this->setAllTo(Traits<value_type>::constr_value());
 #endif
         }
 
@@ -219,7 +219,7 @@ namespace tmv {
         TMV_INLINE_ND ~SmallVector()
         {
 #ifdef TMV_DEBUG
-            this->flatten().setAllTo(Traits<real_type>::destr_value());
+            this->setAllTo(Traits<value_type>::destr_value());
 #endif
         }
 

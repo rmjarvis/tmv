@@ -1,5 +1,3 @@
-
-
 //-----------------------------------------------------------------------------
 //
 // This file defines some basic helper functions used by the TMV Matrix
@@ -227,38 +225,6 @@ namespace tmv {
         NoAlias = 0x800, CheckAlias = 0x1000, AllAliasStatus = 0x1800 };
     enum UpLoType { Upper = 0x2000, Lower = 0x4000 };
 
-    template <bool iszero>
-    struct DoNonZeroMessage;
-    template <>
-    struct DoNonZeroMessage<true>
-    { 
-        template <class Dummy>
-        static TMV_INLINE void call() {} 
-    };
-#if 1
-    template <>
-    struct DoNonZeroMessage<false>
-    { 
-        template <class Dummy>
-        static TMV_INLINE void call() 
-        {
-            // I think this might be portable.  We'll see...
-            // At the very least, if it doesn't emit the #pragma message,
-            // I think it will just ignore it, so at least I don't
-            // think this will break anything...
-//#pragma message ("Use of multiple Attributes is deprecated.\ne.g. Matrix<T,ColMajor,FortranStyle> should now be \nMatrix<T,ColMajor | FortranStyle>.")
-            TMVStaticAssert(Dummy() == 100);
-        }
-    };
-#endif
-    template <bool iszero>
-    struct NonZeroMessage
-    { 
-        static TMV_INLINE void call() 
-        { DoNonZeroMessage<iszero>::template call<int>(); } 
-    };
-
-
     template <int A>
     struct Attrib
     {
@@ -286,8 +252,6 @@ namespace tmv {
                 rowmajor ? RowMajor : colmajor ? ColMajor :
                 diagmajor ? DiagMajor : NonMajor ) };
 
-        static TMV_INLINE void checkzero() 
-        { NonZeroMessage<A==0>::call(); }
         static std::string text()
         {
             return 
@@ -1430,7 +1394,7 @@ namespace tmv {
         static TMV_INLINE typename M::unitdiag_type unitview(M& m) 
         { return m.viewAsUnitDiag(); }
 
-        // m2.UnitUpperTri() or m2.UpperTri()
+        // m2.unitUpperTri() or m2.upperTri()
         template <class M>
         static TMV_INLINE typename M::const_unit_uppertri_type unit_uppertri(
             const M& m) 
@@ -1442,7 +1406,7 @@ namespace tmv {
         static TMV_INLINE typename M::unit_uppertri_type unit_uppertri2(M m) 
         { return m.unitUpperTri(); }
 
-        // m2.UnitLowerTri() or m2.LowerTri()
+        // m2.unitLowerTri() or m2.lowerTri()
         template <class M>
         static TMV_INLINE typename M::const_unit_lowertri_type unit_lowertri(
             const M& m) 
@@ -1454,7 +1418,7 @@ namespace tmv {
         static TMV_INLINE typename M::unit_lowertri_type unit_lowertri2(M m) 
         { return m.unitLowerTri(); }
 
-        // m2.UpperTri() or m2.LowerTri()
+        // m2.upperTri() or m2.lowerTri()
         template <class M>
         static TMV_INLINE typename M::const_uppertri_type uppertri(const M& m) 
         { return m.upperTri(); }
@@ -1476,6 +1440,30 @@ namespace tmv {
         static TMV_INLINE typename M::unknown_uppertri_type uppertri2(
             M m, DiagType dt) 
         { return m.upperTri(dt); }
+
+        // m2.upperBand() or m2.lowerBand()
+        template <class M>
+        static TMV_INLINE typename M::const_upperband_type upperband(
+            const M& m) 
+        { return m.upperBand(); }
+        template <class M>
+        static TMV_INLINE typename M::upperband_type upperband(M& m) 
+        { return m.upperBand(); }
+        template <class M>
+        static TMV_INLINE typename M::upperband_type upperband2(M m) 
+        { return m.upperBand(); }
+        template <class M>
+        static TMV_INLINE typename M::const_upperband_type upperbandoff(
+            const M& m) 
+        { return m.upperBandOff(); }
+        template <class M>
+        static TMV_INLINE typename M::upperband_type upperbandoff(M& m) 
+        { return m.upperBandOff(); }
+        template <class M>
+        static TMV_INLINE typename M::upperband_type upperbandoff2(M m) 
+        { return m.upperBandOff(); }
+
+
 
 #ifdef __SSE__
         // _mm_load_ps or _mm_set_ps
@@ -1804,6 +1792,28 @@ namespace tmv {
         static TMV_INLINE typename M::unknown_lowertri_type uppertri2(
             M m, DiagType dt) 
         { return m.lowerTri(dt); }
+
+        template <class M>
+        static TMV_INLINE typename M::const_lowerband_type upperband(
+            const M& m) 
+        { return m.lowerBand(); }
+        template <class M>
+        static TMV_INLINE typename M::lowerband_type upperband(M& m) 
+        { return m.lowerBand(); }
+        template <class M>
+        static TMV_INLINE typename M::lowerband_type upperband2(M m) 
+        { return m.lowerBand(); }
+        template <class M>
+        static TMV_INLINE typename M::const_lowerband_type upperbandoff(
+            const M& m) 
+        { return m.lowerBandOff(); }
+        template <class M>
+        static TMV_INLINE typename M::lowerband_type upperbandoff(M& m) 
+        { return m.lowerBandOff(); }
+        template <class M>
+        static TMV_INLINE typename M::lowerband_type upperbandoff2(M m) 
+        { return m.lowerBandOff(); }
+
 
 #ifdef __SSE__
         static TMV_INLINE void sse_load(

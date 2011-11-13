@@ -162,7 +162,7 @@ namespace tmv {
     static TMV_INLINE_ND void CheckOffDiag(int i, int n) 
     { TMVAssert(i>0 && i<=n && "offDiag index is not valid"); } 
     static TMV_INLINE_ND void CheckOffDiag(int n) 
-    { TMVAssert(n>0 && "offDiag not possible for zero-sized TriMatrix"); } 
+    { TMVAssert(n>0 && "offDiag not possible for zero-sized matrix"); } 
 
     template <class T, int cs, int rs, bool rm, bool fort>
     struct MCopyHelper<T,UpperTri,cs,rs,rm,fort>
@@ -590,19 +590,19 @@ namespace tmv {
         // Access 
         //
 
-        const_row_sub_type get_row(int i, int j1, int j2) const
+        TMV_INLINE const_row_sub_type get_row(int i, int j1, int j2) const
         {
             return const_row_sub_type(
                 cptr()+i*stepi()+j1*stepj(),j2-j1,stepj()); 
         }
 
-        const_col_sub_type get_col(int j, int i1, int i2) const
+        TMV_INLINE const_col_sub_type get_col(int j, int i1, int i2) const
         {
             return const_col_sub_type(
                 cptr()+j*stepj()+i1*stepi(),i2-i1,stepi()); 
         }
 
-        const_diag_sub_type get_diag(int i) const
+        TMV_INLINE const_diag_sub_type get_diag(int i) const
         {
             return const_diag_sub_type(
                 cptr() + (i<0?(-i*stepi()):(i*stepj())),
@@ -610,7 +610,7 @@ namespace tmv {
                 diagstep());
         }
 
-        const_diag_sub_type get_diag(int i, int j1, int j2) const
+        TMV_INLINE const_diag_sub_type get_diag(int i, int j1, int j2) const
         {
             return const_diag_sub_type(
                 cptr() + (i<0?(-i*stepi()):(i*stepj())) + j1*diagstep(),
@@ -704,13 +704,13 @@ namespace tmv {
         //
 
         // These versions always uses CStyle
-        const_subtrimatrix_type cSubTriMatrix(int i1, int i2) const
+        TMV_INLINE const_subtrimatrix_type cSubTriMatrix(int i1, int i2) const
         {
             return const_subtrimatrix_type(
                 cptr()+i1*diagstep(), i2-i1, stepi(), stepj(), dt());
         }
 
-        const_subtrimatrix_step_type cSubTriMatrix(
+        TMV_INLINE const_subtrimatrix_step_type cSubTriMatrix(
             int i1, int i2, int istep) const
         {
             return const_subtrimatrix_step_type(
@@ -718,14 +718,14 @@ namespace tmv {
                 istep*stepi(), istep*stepj(), dt());
         }
 
-        const_submatrix_type cSubMatrix(
+        TMV_INLINE const_submatrix_type cSubMatrix(
             int i1, int i2, int j1, int j2) const
         {
             return const_submatrix_type(
                 cptr()+i1*stepi()+j1*stepj(), i2-i1, j2-j1, stepi(), stepj());
         }
 
-        const_submatrix_step_type cSubMatrix(
+        TMV_INLINE const_submatrix_step_type cSubMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
             return const_submatrix_step_type(
@@ -733,7 +733,7 @@ namespace tmv {
                 istep*stepi(), jstep*stepj());
         }
 
-        const_subvector_type cSubVector(
+        TMV_INLINE const_subvector_type cSubVector(
             int i, int j, int istep, int jstep, int s) const
         {
             return const_subvector_type(
@@ -779,13 +779,13 @@ namespace tmv {
             return cSubVector(i,j,istep,jstep,s);
         }
 
-        const_subtrimatrix_type subTriMatrix(int i1, int i2) const
+        TMV_INLINE_ND const_subtrimatrix_type subTriMatrix(int i1, int i2) const
         {
             CheckRange<_fort>(i1,i2,size());
             return cSubTriMatrix(i1,i2);
         }
 
-        const_subtrimatrix_step_type subTriMatrix(
+        TMV_INLINE_ND const_subtrimatrix_step_type subTriMatrix(
             int i1, int i2, int istep) const
         {
             CheckRange<_fort>(i1,i2,istep,size());
@@ -809,13 +809,13 @@ namespace tmv {
         TMV_INLINE TMV_MAYBE_CREF(type,const_xview_type) xView() const
         { return MakeTriView<type,const_xview_type>::call(mat()); }
 
-        TMV_INLINE TMV_MAYBE_CREF(type,const_cmview_type) cmView() const
+        TMV_INLINE_ND TMV_MAYBE_CREF(type,const_cmview_type) cmView() const
         {
             TMVAssert(iscm() && "Called cmView on non-ColMajor matrix");
             return MakeTriView<type,const_cmview_type>::call(mat());
         }
 
-        TMV_INLINE TMV_MAYBE_CREF(type,const_rmview_type) rmView() const
+        TMV_INLINE_ND TMV_MAYBE_CREF(type,const_rmview_type) rmView() const
         {
             TMVAssert(isrm() && "Called rmView on non-RowMajor matrix");
             return MakeTriView<type,const_rmview_type>::call(mat());
@@ -833,7 +833,7 @@ namespace tmv {
         TMV_INLINE const_adjoint_type adjoint() const
         { return const_adjoint_type(cptr(),size(),stepj(),stepi(),dt()); }
 
-        TMV_INLINE const_offdiag_type offDiag(int noff) const
+        TMV_INLINE_ND const_offdiag_type offDiag(int noff) const
         {
             CheckOffDiag(noff,size());
             return const_offdiag_type(
@@ -841,7 +841,7 @@ namespace tmv {
                 size()-noff,stepi(),stepj()); 
         }
 
-        TMV_INLINE const_offdiag_type offDiag() const
+        TMV_INLINE_ND const_offdiag_type offDiag() const
         {
             CheckOffDiag(size());
             return const_offdiag_type(
@@ -852,7 +852,7 @@ namespace tmv {
         TMV_INLINE TMV_MAYBE_CREF(type,const_unitdiag_type) viewAsUnitDiag() const
         { return MakeTriView<type,const_unitdiag_type>::call(mat()); }
 
-        TMV_INLINE TMV_MAYBE_CREF(type,const_nonunitdiag_type) viewAsNonUnitDiag() const
+        TMV_INLINE_ND TMV_MAYBE_CREF(type,const_nonunitdiag_type) viewAsNonUnitDiag() const
         {
             TMVAssert(!isunit());
             return MakeTriView<type,const_nonunitdiag_type>::call(mat()); 
@@ -869,7 +869,7 @@ namespace tmv {
                 M::isreal ? stepj() : 2*stepj(), dt());
         }
 
-        TMV_INLINE const_imagpart_type imagPart() const
+        TMV_INLINE_ND const_imagpart_type imagPart() const
         {
             TMVStaticAssert(M::iscomplex);
             TMVAssert(!isunit());
@@ -1083,13 +1083,13 @@ namespace tmv {
             return ref(i,j);
         }
 
-        row_sub_type get_row(int i, int j1, int j2) 
+        TMV_INLINE row_sub_type get_row(int i, int j1, int j2) 
         { return row_sub_type(ptr()+i*stepi()+j1*stepj(),j2-j1,stepj()); }
 
-        col_sub_type get_col(int j, int i1, int i2) 
+        TMV_INLINE col_sub_type get_col(int j, int i1, int i2) 
         { return col_sub_type(ptr()+j*stepj()+i1*stepi(),i2-i1,stepi()); }
 
-        diag_sub_type get_diag(int i) 
+        TMV_INLINE diag_sub_type get_diag(int i) 
         {
             return diag_sub_type(
                 ptr() + (i<0?(-i*stepi()):(i*stepj())),
@@ -1097,7 +1097,7 @@ namespace tmv {
                 diagstep());
         }
 
-        diag_sub_type get_diag(int i, int j1, int j2) 
+        TMV_INLINE diag_sub_type get_diag(int i, int j1, int j2) 
         {
             return diag_sub_type(
                 ptr() + (i<0?(-i*stepi()):(i*stepj())) + j1*diagstep(),
@@ -1106,34 +1106,34 @@ namespace tmv {
 
 
         // The regular versions respect the indexing style for i and j:
-        TMV_INLINE row_sub_type row(int i, int j1, int j2) 
+        TMV_INLINE_ND row_sub_type row(int i, int j1, int j2) 
         {
             CheckRowIndex<_fort>(i,colsize());
             CheckColRange<_fort>(j1,j2,rowsize());
             return get_row(i,j1,j2);
         }
 
-        TMV_INLINE col_sub_type col(int j, int i1, int i2) 
+        TMV_INLINE_ND col_sub_type col(int j, int i1, int i2) 
         {
             CheckColIndex<_fort>(j,rowsize());
             CheckRowRange<_fort>(i1,i2,colsize());
             return get_col(j,i1,i2);
         }
 
-        diag_type diag() 
+        TMV_INLINE_ND diag_type diag() 
         {
             CheckDiagTri<_shape>(isunit(),0);
             return diag_type(ptr(),size(),diagstep()); 
         }
 
-        TMV_INLINE diag_sub_type diag(int i) 
+        TMV_INLINE_ND diag_sub_type diag(int i) 
         {
             CheckDiagIndex<_fort>(i,colsize(),rowsize());
             CheckDiagTri<_shape>(isunit(),i);
             return get_diag(i);
         }
 
-        TMV_INLINE diag_sub_type diag(int i, int j1, int j2) 
+        TMV_INLINE_ND diag_sub_type diag(int i, int j1, int j2) 
         {
             CheckDiagIndex<_fort>(i,j1,j2,colsize(),rowsize());
             CheckDiagTri<_shape>(isunit(),i);
@@ -1170,7 +1170,7 @@ namespace tmv {
         // Op =
         //
 
-        type& operator=(BaseMatrix_Tri_Mutable<M>& m2) 
+        TMV_INLINE_ND type& operator=(const BaseMatrix_Tri_Mutable<M>& m2) 
         {
             TMVAssert(size() == m2.size());
             m2.assignTo(mat());
@@ -1178,7 +1178,7 @@ namespace tmv {
         }
 
         template <class M2>
-        type& operator=(const BaseMatrix<M2>& m2) 
+        TMV_INLINE_ND type& operator=(const BaseMatrix<M2>& m2) 
         {
             TMVStaticAssert((Sizes<_size,M2::_colsize>::same));
             TMVStaticAssert((Sizes<_size,M2::_rowsize>::same));
@@ -1190,7 +1190,7 @@ namespace tmv {
         }
 
         template <class M2>
-        type& operator=(const BaseMatrix_Tri<M2>& m2) 
+        TMV_INLINE_ND type& operator=(const BaseMatrix_Tri<M2>& m2) 
         {
             TMVStaticAssert((Sizes<_size,M2::_colsize>::same));
             TMVStaticAssert((Sizes<_size,M2::_rowsize>::same));
@@ -1261,26 +1261,27 @@ namespace tmv {
         //
 
         // These versions always uses CStyle
-        subtrimatrix_type cSubTriMatrix(int i1, int i2) 
+        TMV_INLINE subtrimatrix_type cSubTriMatrix(int i1, int i2) 
         {
             return subtrimatrix_type(
                 ptr()+i1*diagstep(), i2-i1, stepi(), stepj(), dt()); 
         }
 
-        subtrimatrix_step_type cSubTriMatrix(int i1, int i2, int istep) 
+        TMV_INLINE subtrimatrix_step_type cSubTriMatrix(
+            int i1, int i2, int istep) 
         {
             return subtrimatrix_step_type(
                 ptr()+i1*diagstep(), (i2-i1)/istep, 
                 istep*stepi(), istep*stepj(), dt());
         }
 
-        submatrix_type cSubMatrix(int i1, int i2, int j1, int j2) 
+        TMV_INLINE submatrix_type cSubMatrix(int i1, int i2, int j1, int j2) 
         {
             return submatrix_type(
                 ptr()+i1*stepi()+j1*stepj(), i2-i1, j2-j1, stepi(), stepj());
         }
 
-        submatrix_step_type cSubMatrix(
+        TMV_INLINE submatrix_step_type cSubMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) 
         {
             return submatrix_step_type(
@@ -1288,7 +1289,7 @@ namespace tmv {
                 istep*stepi(), jstep*stepj());
         }
 
-        subvector_type cSubVector(
+        TMV_INLINE subvector_type cSubVector(
             int i, int j, int istep, int jstep, int s) 
         {
             return subvector_type(
@@ -1333,13 +1334,14 @@ namespace tmv {
             return cSubVector(i,j,istep,jstep,s);
         }
 
-        subtrimatrix_type subTriMatrix(int i1, int i2) 
+        TMV_INLINE_ND subtrimatrix_type subTriMatrix(int i1, int i2) 
         {
             CheckRange<_fort>(i1,i2,size());
             return cSubTriMatrix(i1,i2);
         }
 
-        subtrimatrix_step_type subTriMatrix(int i1, int i2, int istep) 
+        TMV_INLINE_ND subtrimatrix_step_type subTriMatrix(
+            int i1, int i2, int istep) 
         {
             CheckRange<_fort>(i1,i2,istep,size());
             return cSubTriMatrix(i1,i2,istep);
@@ -1394,13 +1396,13 @@ namespace tmv {
         TMV_INLINE TMV_MAYBE_REF(type,xview_type) xView() 
         { return MakeTriView<type,xview_type>::call(mat()); }
 
-        TMV_INLINE TMV_MAYBE_REF(type,cmview_type) cmView() 
+        TMV_INLINE_ND TMV_MAYBE_REF(type,cmview_type) cmView() 
         {
             TMVAssert(iscm() && "Called cmView on non-ColMajor matrix");
             return MakeTriView<type,cmview_type>::call(mat());
         }
 
-        TMV_INLINE TMV_MAYBE_REF(type,rmview_type) rmView() 
+        TMV_INLINE_ND TMV_MAYBE_REF(type,rmview_type) rmView() 
         {
             TMVAssert(isrm() && "Called rmView on non-RowMajor matrix");
             return MakeTriView<type,rmview_type>::call(mat());
@@ -1415,7 +1417,7 @@ namespace tmv {
         TMV_INLINE adjoint_type adjoint() 
         { return adjoint_type(ptr(),size(),stepj(),stepi(),dt()); }
 
-        TMV_INLINE offdiag_type offDiag(int noff) 
+        TMV_INLINE_ND offdiag_type offDiag(int noff) 
         {
             CheckOffDiag(noff,size());
             return offdiag_type(
@@ -1423,7 +1425,7 @@ namespace tmv {
                 size()-noff,stepi(),stepj()); 
         }
 
-        TMV_INLINE offdiag_type offDiag()
+        TMV_INLINE_ND offdiag_type offDiag()
         {
             CheckOffDiag(size());
             return offdiag_type(
@@ -1434,7 +1436,7 @@ namespace tmv {
         TMV_INLINE TMV_MAYBE_REF(type,unitdiag_type) viewAsUnitDiag()
         { return MakeTriView<type,unitdiag_type>::call(mat()); }
 
-        TMV_INLINE TMV_MAYBE_REF(type,nonunitdiag_type) viewAsNonUnitDiag()
+        TMV_INLINE_ND TMV_MAYBE_REF(type,nonunitdiag_type) viewAsNonUnitDiag()
         {
             TMVAssert(!isunit());
             return MakeTriView<type,nonunitdiag_type>::call(mat());
@@ -1451,7 +1453,7 @@ namespace tmv {
                 M::isreal ? stepj() : 2*stepj(), dt());
         }
 
-        TMV_INLINE imagpart_type imagPart() 
+        TMV_INLINE_ND imagpart_type imagPart() 
         {
             TMVStaticAssert(M::iscomplex);
             TMVAssert(!isunit());
@@ -1993,17 +1995,7 @@ namespace tmv {
 
 
 
-    //
-    // Trace
-    //
-
-    // The BaseMatrix Trace call is efficient for composite types, since
-    // it avoid calculating all the elements to do the sum.
-    // But if we do have the elements calculated, this overloaded 
-    // version will be faster:
-    // Note that this TriMatrix version needs to check whether the 
-    // diagonal elements are all 1 or not.
-    
+#if 0
     template <int algo, class M>
     struct TraceU_Helper;
 
@@ -2043,6 +2035,7 @@ namespace tmv {
             11;
         return TraceU_Helper<algo,M>(m); 
     }
+#endif
 
 
     //
