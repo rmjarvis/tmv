@@ -677,7 +677,7 @@ namespace tmv {
         // Op =
         //
 
-        type& operator=(const BaseMatrix_Mutable<M>& m2) 
+        TMV_INLINE_ND type& operator=(const BaseMatrix_Mutable<M>& m2) 
         {
             TMVAssert(colsize() == m2.colsize());
             TMVAssert(rowsize() == m2.rowsize());
@@ -686,7 +686,7 @@ namespace tmv {
         }
 
         template <class M2>
-        type& operator=(const BaseMatrix<M2>& m2) 
+        TMV_INLINE_ND type& operator=(const BaseMatrix<M2>& m2) 
         {
             TMVStaticAssert((Sizes<_colsize,M2::_colsize>::same));
             TMVStaticAssert((Sizes<_rowsize,M2::_rowsize>::same));
@@ -871,16 +871,91 @@ namespace tmv {
     // This is also why we need DoTrace, rather than simply Trace, since
     // we have to make sure eval() is called.
 
+    template <int algo, int size, class M>
+    struct Trace_Helper;
+
+    // algo 0: Zero size, so trace is defined as 0.
+    template <int size, class M>
+    struct Trace_Helper<0,size,M>
+    {
+        static inline typename M::value_type call(const M& m) 
+        { return typename M::value_type(0); }
+    };
+
+    // algo 1: Values are calculated.  Call diag().sumElements().
+    template <int size, class M>
+    struct Trace_Helper<1,size,M>
+    {
+        static inline typename M::value_type call(const M& m) 
+        { return m.diag().sumElements(); }
+    };
+
+    // algo 2: Values are not calculated.  Do sum using cref(i,i).
+    template <int size, class M>
+    struct Trace_Helper<2,size,M>
+    {
+        static inline typename M::value_type call(const M& m) 
+        {
+            const int n = size == TMV_UNKNOWN ? m.colsize() : size;
+            typename M::value_type sum(0);
+            for (int i=0;i<n;++i) sum += m.cref(i,i);
+            return sum;
+        }
+    };
+
+    // algo 3: Special for triangular with unit diagonal
+    template <int size, class M>
+    struct Trace_Helper<3,size,M>
+    {
+        static inline typename M::value_type call(const M& m) 
+        {
+            const int n = size == TMV_UNKNOWN ? m.colsize() : size;
+            return typename M::value_type(n); 
+        }
+    };
+
+    // algo 4: Check for UnknownDiag
+    template <int size, class M>
+    struct Trace_Helper<4,size,M>
+    {
+        static inline typename M::value_type call(const M& m) 
+        {
+            if (m.isunit()) return Trace_Helper<3,size,M>::call(m);
+            else return Trace_Helper<1,size,M>::call(m);
+        }
+    };
+
+    // algo 11: Triangular matrix.  Check _unit and _unknowndiag.
+    // (Can't do this below, since _unit and _unknowndiag aren't 
+    //  valid members of most matrix classes.)
+    template <int size, class M>
+    struct Trace_Helper<11,size,M>
+    {
+        static inline typename M::value_type call(const M& m) 
+        {
+            const int algo =
+                M::_unit ? 3 :
+                M::_unknowndiag ? 4 :
+                1;
+            return Trace_Helper<algo,size,M>::call(m);
+        }
+    };
+
+
     template <class M>
     static typename M::value_type DoTrace(const BaseMatrix<M>& m)
     {
         TMVStaticAssert((Sizes<M::_rowsize,M::_colsize>::same));
         TMVAssert(m.colsize() == m.rowsize());
         const int size = Sizes<M::_rowsize,M::_colsize>::size;
-        const int n = size == TMV_UNKNOWN ? m.colsize() : size;
-        typename M::value_type sum(0);
-        for (int i=0;i<n;++i) sum += m.cref(i,i);
-        return sum;
+        const int algo = 
+            size == 0 ? 0 :
+            ShapeTraits<M::_shape>::unit ? 3 :
+            !M::_calc ? 2 : 
+            // Check for possible UnknownDiag
+            ShapeTraits<M::_shape>::unit_shape != int(InvalidShape) ? 11 :
+            1;
+        return Trace_Helper<algo,size,M>::call(m.mat());
     }
 
 
@@ -894,7 +969,7 @@ namespace tmv {
     // better way to do it is something like 
     // if (Norm(a-b)<=1.e-10) {...}
     //
-    // Also, using crefs as I do here, means that I don't have to 
+    // Also, using crefs as I do here means that I don't have to 
     // write different versions for each kind of matrix.
     // This will work for every possible pairing.
     template <bool rm, int cs, int rs, class M1, class M2>

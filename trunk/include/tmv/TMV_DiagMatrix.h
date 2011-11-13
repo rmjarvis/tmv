@@ -268,7 +268,7 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
 #ifdef TMV_DEBUG
-            this->diag().flatten().setAllTo(Traits<real_type>::constr_value());
+            this->diag().setAllTo(Traits<value_type>::constr_value());
 #endif
         }
 
@@ -320,7 +320,7 @@ namespace tmv {
         ~DiagMatrix() 
         {
 #ifdef TMV_DEBUG
-            this->diag().flatten().setAllTo(Traits<real_type>::destr_value());
+            this->diag().setAllTo(Traits<value_type>::destr_value());
 #endif
         }
 
@@ -360,12 +360,12 @@ namespace tmv {
         void resize(const size_t n)
         {
 #ifdef TMV_DEBUG
-            this->diag().flatten().setAllTo(Traits<real_type>::destr_value());
+            this->diag().setAllTo(Traits<value_type>::destr_value());
 #endif
             itssize = n;
             itsm.resize(n);
 #ifdef TMV_DEBUG
-            this->diag().flatten().setAllTo(Traits<real_type>::constr_value());
+            this->diag().setAllTo(Traits<value_type>::constr_value());
 #endif
         }
 

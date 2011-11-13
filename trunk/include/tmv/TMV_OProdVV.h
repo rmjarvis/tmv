@@ -141,7 +141,7 @@ namespace tmv {
         enum { _colmajor = true };
 
         typedef OProdVV<ix,T,V1,V2> type;
-        typedef typename MCopyHelper<value_type,_shape,_colsize,_rowsize,
+        typedef typename MCopyHelper<value_type,Rec,_colsize,_rowsize,
                 _rowmajor,_fort>::type copy_type;
         typedef const copy_type calc_type;
         typedef typename TypeSelect<

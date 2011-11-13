@@ -24,9 +24,9 @@ namespace tmv {
         enum { band = false };
         enum { unit = false };
         enum { square = false };
-        enum { inverse_shape = Vec };
-        enum { nonunit_shape = Vec };
-        enum { unit_shape = Vec };
+        enum { inverse_shape = InvalidShape };
+        enum { nonunit_shape = InvalidShape };
+        enum { unit_shape = InvalidShape };
     };
 
     template <>

@@ -83,7 +83,7 @@ namespace tmv {
                 return vmax;
             } else if (TMV_Underflow(FT(1)/(v.nElements()*vmax*vmax))) {
                 // If 1/(n*vmax^2) underflows, then a naive NormSq() will 
-                // produce overflow./ Find a better scaling.
+                // produce overflow.  Find a better scaling.
                 const FT inveps = FT(1)/eps;
                 FT scale = eps;
                 vmax *= scale;

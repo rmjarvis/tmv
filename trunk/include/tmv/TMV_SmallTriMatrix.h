@@ -248,7 +248,7 @@ namespace tmv {
             TMVStaticAssert(N>=0);
 #ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<T>::constr_value());
+                Traits<value_type>::constr_value());
 #endif
         }
 
@@ -322,7 +322,7 @@ namespace tmv {
         {
 #ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<T>::destr_value());
+                Traits<value_type>::destr_value());
 #endif
         }
 
@@ -372,7 +372,7 @@ namespace tmv {
         }
 
         TMV_INLINE size_t size() const { return N; }
-        TMV_INLINE int nElements() const { return N*(N+1)/2; }
+        int nElements() const { return N*(N+1)/2; }
         TMV_INLINE int stepi() const { return _stepi; }
         TMV_INLINE int stepj() const { return _stepj; }
         TMV_INLINE DiagType dt() const { return static_cast<DiagType>(_dt); }
@@ -667,7 +667,7 @@ namespace tmv {
         TMV_INLINE size_t colsize() const { return itss; }
         TMV_INLINE size_t rowsize() const { return itss; }
         TMV_INLINE size_t size() const { return itss; }
-        TMV_INLINE int nElements() const { return int(itss)*int(itss+1)/2; }
+        int nElements() const { return int(itss)*int(itss+1)/2; }
         TMV_INLINE int stepi() const { return itssi; }
         TMV_INLINE int stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
@@ -1006,7 +1006,7 @@ namespace tmv {
         TMV_INLINE size_t colsize() const { return itss; }
         TMV_INLINE size_t rowsize() const { return itss; }
         TMV_INLINE size_t size() const { return itss; }
-        TMV_INLINE int nElements() const { return int(itss)*int(itss+1)/2; }
+        int nElements() const { return int(itss)*int(itss+1)/2; }
         TMV_INLINE int stepi() const { return itssi; }
         TMV_INLINE int stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
@@ -1237,7 +1237,7 @@ namespace tmv {
             TMVStaticAssert(N>=0);
 #ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<T>::constr_value());
+                Traits<value_type>::constr_value());
 #endif
         }
 
@@ -1310,7 +1310,7 @@ namespace tmv {
         {
 #ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<T>::destr_value());
+                Traits<value_type>::destr_value());
 #endif
         }
 
@@ -1360,7 +1360,7 @@ namespace tmv {
         }
 
         TMV_INLINE size_t size() const { return N; }
-        TMV_INLINE int nElements() const { return N*(N+1)/2; }
+        int nElements() const { return N*(N+1)/2; }
         TMV_INLINE int stepi() const { return _stepi; }
         TMV_INLINE int stepj() const { return _stepj; }
         TMV_INLINE DiagType dt() const { return static_cast<DiagType>(_dt); }
@@ -1646,7 +1646,7 @@ namespace tmv {
         TMV_INLINE size_t colsize() const { return itss; }
         TMV_INLINE size_t rowsize() const { return itss; }
         TMV_INLINE size_t size() const { return itss; }
-        TMV_INLINE int nElements() const { return int(itss)*int(itss+1)/2; }
+        int nElements() const { return int(itss)*int(itss+1)/2; }
         TMV_INLINE int stepi() const { return itssi; }
         TMV_INLINE int stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
@@ -1985,7 +1985,7 @@ namespace tmv {
         TMV_INLINE size_t colsize() const { return itss; }
         TMV_INLINE size_t rowsize() const { return itss; }
         TMV_INLINE size_t size() const { return itss; }
-        TMV_INLINE int nElements() const { return int(itss)*int(itss+1)/2; }
+        int nElements() const { return int(itss)*int(itss+1)/2; }
         TMV_INLINE int stepi() const { return itssi; }
         TMV_INLINE int stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }

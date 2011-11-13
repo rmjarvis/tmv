@@ -317,8 +317,7 @@ namespace tmv {
             TMVStaticAssert(M>=0);
             TMVStaticAssert(N>=0);
 #ifdef TMV_DEBUG
-            this->linearView().flatten().setAllTo(
-                Traits<real_type>::constr_value());
+            this->setAllTo(Traits<value_type>::constr_value());
 #endif
         }
 
@@ -385,8 +384,7 @@ namespace tmv {
         ~SmallMatrix()
         {
 #ifdef TMV_DEBUG
-            this->linearView().flatten().setAllTo(
-                Traits<real_type>::destr_value());
+            this->setAllTo(Traits<value_type>::destr_value());
 #endif
         }
 
@@ -718,7 +716,7 @@ namespace tmv {
         TMV_INLINE size_t ls() const { return int(itscs)*int(itsrs); }
         TMV_INLINE size_t colsize() const { return itscs; }
         TMV_INLINE size_t rowsize() const { return itsrs; }
-        TMV_INLINE int nElements() const { return int(itscs)*int(itsrs); }
+        int nElements() const { return int(itscs)*int(itsrs); }
         TMV_INLINE int stepi() const { return itssi; }
         TMV_INLINE int stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
@@ -1059,7 +1057,7 @@ namespace tmv {
         TMV_INLINE size_t ls() const { return int(itscs)*int(itsrs); }
         TMV_INLINE size_t colsize() const { return itscs; }
         TMV_INLINE size_t rowsize() const { return itsrs; }
-        TMV_INLINE int nElements() const { return int(itscs)*int(itsrs); }
+        int nElements() const { return int(itscs)*int(itsrs); }
         TMV_INLINE int stepi() const { return itssi; }
         TMV_INLINE int stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
