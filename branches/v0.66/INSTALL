@@ -1,0 +1,95 @@
+Note: More complete installation information is contained in 
+doc/TMV_Documentation.pdf.  If the instructions there differ from these, 
+then it is probably true that the pdf is correct, rather than this file.
+
+
+First, obtain the tarball from either:
+http://code.google.com/p/tmv-cpp/ or 
+http://sourceforge.net/projects/tmv-cpp/.
+
+Unpack the tarball with:
+
+gunzip tmv0.65.tar.gz
+tar xf tmv0.65.tar
+
+This will make a directory called tmv0.65 with subdirectories:
+  doc
+  examples
+  include
+  lib
+  src
+  test
+and also the files:
+  INSTALL  (This file)
+  INSTALL_MAKE
+  INSTALL_SCONS
+  INSTALL_CMAKE
+  README
+  LICENSE
+  CHANGELOG
+  (plus others)
+
+Now you have three options for doing the rest of the installation.
+
+1) The preferred way is to use the program SCons.  This is usually
+   the easiest way to get an optimized TMV library that calls BLAS
+   and/or LAPACK, since SCons will automatically search your system
+   to figure out which flavors of BLAS and/or LAPACK you have and set
+   up the corresponding compiler flags.  
+   However, it does require that you have SCons installed on your system,
+   which is very quick if you have python installed, so that shouldn't
+   be too big a hinderance.
+
+   For instructions about how to do this, read the file INSTALL_SCONS.
+
+2) The second way is to use the command make.  This is the easiest 
+   installation method if you don't care about having a very optimized
+   TMV library that calls LAPACK and BLAS libraries.  Also, if you want
+   to do anything unusual during the installation, then this is probably
+   your best bet, since you have complete control of the compiler flags
+   and such.
+
+   For instructions about how to do this, read the file INSTALL_MAKE.
+
+3) The third way is to use the program CMake.  A lot of people like CMake,
+   and it can do a lot of the things that SCons can do.  But I haven't used
+   it much, so I'm afraid the CMake files included here don't look for 
+   BLAS and LAPACK libraries or anything like that, so you still have
+   to specify them by hand.  But if you are familiar with CMake, 
+   this might be easier for you than the above options.
+
+   For instructions about how to do this, read the file INSTALL_CMAKE.
+
+
+Once the library is installed using one of the above methods, you
+can use TMV in your own programs.  Here are a few things you should know:
+
+Each .cpp file that uses the TMV library will need to have
+
+#include "TMV.h"
+
+at the top.  Furthermore, if you are using some of the special matrix
+varieties, you will need to include their .h files as well:
+
+#include "TMV_Band.h"
+#include "TMV_Sym.h"
+#include "TMV_SymBand.h"
+
+Also, you will need to compile with -I[tmvdir]/include,
+and also link with 
+
+-L[tmvdir]/lib -ltmv -lm.
+
+where [tmvdir] is either the directory where you installed the libraries
+or this directory if you did not.  Of course, if you installed the 
+libraries to a directory in your path, then you do not need the 
+-I and -L flags.
+
+If you use and banded or symmetric/hermitian matrices, then you will
+need to link with 
+
+-L[tmvdir]/lib -ltmv_symband -ltmv -lm
+
+And remember to link with whatever BLAS and/or LAPACK libraries
+that you specified for TMV to use.
+

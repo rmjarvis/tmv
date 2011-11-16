@@ -1,0 +1,118 @@
+Note: More complete installation information is contained in 
+doc/TMV_Documentation.pdf.  If the instructions there differ from these, 
+then it is probably true that the pdf is correct, rather than this file.
+
+
+First, see INSTALL for instructions on downloading and unpacking the 
+tarball if you have not already done so.
+
+This file give the instructions for installing TMV using the program CMake.
+
+1. Download CMake from http://www.cmake.org/ if you do not already have it.
+
+
+2. In TMV directory, type one of the following commands:
+
+     cmake -i .    (For interactive text-based configuration)
+     ccmake .      (For menu-based configuration)
+     cmake .       (To use the default configuration)
+
+   for Unix, or run CMakeSetup.exe in Windows.
+
+   Answer the configuration questions and/or set the options listed.
+
+
+3. Type:
+
+     make 
+    
+   to make the libraries.
+
+   Then type:
+
+     make install
+
+   to copy the libraries into /usr/local/lib and all the header files into
+   /usr/local/include (or the lib and include subdirectories of wherever 
+   you set as your install directory when configuring).
+
+
+4. (Optional) Type:
+
+     make test
+
+   to make the test suite executables:
+
+     test/tmvtest1
+     test/tmvtest2
+     test/tmvtest3
+
+   If you want to make the smaller test executables instead, you can type:
+   
+     make smalltest
+
+   to make the executables:
+
+     test/tmvtest1a
+     test/tmvtest1b
+     test/tmvtest1c
+     test/tmvtest1d
+     test/tmvtest2a
+     test/tmvtest2b
+     test/tmvtest2c
+     test/tmvtest3a
+     test/tmvtest3b
+     test/tmvtest3c
+     test/tmvtest3d
+     test/tmvtest3e
+
+   They should each compile successfully, and when you run them, they
+   should output a bunch of lines that end with "...passed all tests" 
+   (or similar).  If not,
+   see the documantation (doc/TMV_Documentation.pdf) for how to submit
+   a bug report.
+
+5. (Optional) Type:
+
+     make examples
+
+   to make the executables:
+
+     examples/vector
+     examples/matrix
+     examples/division
+     examples/bandmatrix
+     examples/symmatrix
+
+   These programs are a good starting point for learning how to use the 
+   TMV classes.  They are not intended to be complete descriptions of 
+   what the classes can do, but are rather a selection of common things that
+   you might want to do.  For full documention, see doc/TMV_Documentation.pdf.
+
+
+6. Compile your own program:
+
+   Each .cpp file that uses the TMV library will need to have
+
+   #include "TMV.h"
+
+   at the top.  Furthermore, if you are using some of the special matrix
+   varieties, you will need to include their .h files as well:
+
+   #include "TMV_Band.h"
+   #include "TMV_Sym.h"
+   #include "TMV_SymBand.h"
+
+   Also, you will need to compile with -I[tmvdir]/include,
+   and also link with
+
+   -L[tmvdir]/lib -ltmv
+
+   where [tmvdir] is the directory where you installed the libraries
+   (/usr/local by default).
+   Of course, if you installed the libraries and header files to a directory 
+   in your path, then you do not need the -I and -L flags.
+
+   If you use and banded or symmetric/hermitian matrices, then you will
+   need to link with the flags -ltmv_symband -ltmv.
+

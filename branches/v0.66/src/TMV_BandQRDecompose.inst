@@ -1,0 +1,21 @@
+
+#define CT std::complex<T>
+
+#define DefQRD(T)\
+template void QR_Decompose(const BandMatrixView<T >& QR, \
+    const VectorView<T >& Qtau, T& det); \
+template void QR_Decompose( \
+    const GenBandMatrix<T >& A, \
+    const MatrixView<T >& Q, const BandMatrixView<T >& R); \
+template void QR_Decompose( \
+    const GenBandMatrix<T >& A, const BandMatrixView<T >& R); \
+
+DefQRD(T)
+#ifdef INST_COMPLEX
+DefQRD(CT)
+#endif
+
+#undef DefQRD
+
+#undef CT
+

@@ -1,0 +1,18 @@
+
+#ifdef TISINT
+
+#define CT std::complex<T>
+
+#define Def1(T)\
+  template T IntegerDet(const GenBandMatrix<T>& A);
+
+Def1(T)
+#ifdef INST_COMPLEX
+Def1(CT)
+#endif
+
+#undef Def1
+
+#undef CT
+
+#endif
