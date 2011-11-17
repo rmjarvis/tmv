@@ -50,15 +50,6 @@ using std::endl;
 
 namespace tmv {
 
-    // First two functions that I don't want to be inlined....
-    template <class RT, class T>
-    RT Sym2x2_CalculateHermD(RT a, RT b, T c)
-    { return a*b - TMV_NORM(c); }
-
-    template <class T>
-    T Sym2x2_CalculateSymD(T a, T b, T c)
-    { return a*b - c*c; }
-
     //
     // LDivEq
     //

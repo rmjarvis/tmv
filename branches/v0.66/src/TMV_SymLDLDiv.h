@@ -51,17 +51,6 @@ namespace tmv {
         const GenSymMatrix<T>& L, const GenVector<T>& xD,
         const int* P, const SymMatrixView<T1>& sinv);
 
-    // These two are in TMV_SymLDLDiv.cpp rather than TMV_SymLDLPseudo.cpp
-    // (or inlined here even) because of a bug in clang++ v 3.1 where it 
-    // produces the wrong answer with -O2 optimization.
-    // Putting them in a different .cpp file from where they are used
-    // works to avoid the bug.  I've filed a bug report on the clang++
-    // bugzill system.  It is Bug 11393.
-    template <class RT, class T>
-    RT Sym2x2_CalculateHermD(RT a, RT b, T c);
-    template <class T>
-    T Sym2x2_CalculateSymD(T a, T b, T c);
-
     // A quick helper class
     template <bool herm, class T>
     struct Sym2x2_Helper;
@@ -71,7 +60,7 @@ namespace tmv {
     {
         typedef typename Traits<T>::real_type d_type;
         static d_type calculateD(T a, T b, T c)
-        { return Sym2x2_CalculateHermD(TMV_REAL(a),TMV_REAL(b),c); }
+        { return TMV_REAL(a)*TMV_REAL(b) - TMV_NORM(c); }
     };
 
     template <class T>
@@ -79,7 +68,7 @@ namespace tmv {
     {
         typedef T d_type;
         static d_type calculateD(T a, T b, T c)
-        { return Sym2x2_CalculateSymD(a,b,c); }
+        { return a*b-c*c; }
     };
 
     // These are in TMV_SymLDLPseudo.cpp:
