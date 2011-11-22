@@ -565,6 +565,7 @@ int main()
             
     return result
 
+
 def CheckACML(context):
     acml_source_file = """
 #include "acml.h"
@@ -582,8 +583,10 @@ int main()
     if context.TryCompile(acml_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],acml_source_file) or
+            CheckLibs(context,['acml'],acml_source_file) or
             CheckLibs(context,['acml','pgftnrtl'],acml_source_file) or
-            CheckLibs(context,['acml'],acml_source_file) )
+            CheckLibs(context,['acml','gfortran'],acml_source_file) or
+            CheckLibs(context,['acml','gfortran','pthread'],acml_source_file))
 
         context.Result(result)
 
@@ -621,14 +624,16 @@ int main()
     if context.TryCompile(fblas_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],fblas_source_file) or
-            CheckLibs(context,['goto2','pthread'],fblas_source_file) or
             CheckLibs(context,['goto2'],fblas_source_file) or
-            CheckLibs(context,['goto2','gfortran','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto2','pthread'],fblas_source_file) or
             CheckLibs(context,['goto2','gfortran'],fblas_source_file) or
-            CheckLibs(context,['goto','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto2','gfortran','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto2','pgftnrtl'],fblas_source_file) or
             CheckLibs(context,['goto'],fblas_source_file) or
+            CheckLibs(context,['goto','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto','gfortran'],fblas_source_file) or
             CheckLibs(context,['goto','gfortran','pthread'],fblas_source_file) or
-            CheckLibs(context,['goto','gfortran'],fblas_source_file))
+            CheckLibs(context,['goto','pgftnrtl'],fblas_source_file) )
 
         context.Result(result)
 
@@ -648,7 +653,6 @@ int main()
         #context.env['END_PADDING'] = True
 
     return result
-
 
 
 def CheckATLAS(context):
