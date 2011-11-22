@@ -134,8 +134,8 @@ namespace tmv {
                                     C.col(j,jj,N));
 
 #ifdef TMVFLDEBUG
-                        TMVAssert(Cjj >= C.first);
-                        TMVAssert(Cjj < C.last);
+                        TMVAssert(Cjj >= C._first);
+                        TMVAssert(Cjj < C._last);
 #endif
                         *Cjj = newcjj;
                     }
@@ -163,8 +163,8 @@ namespace tmv {
                                     C.col(j,jj,N));
 
 #ifdef TMVFLDEBUG
-                        TMVAssert(Cjj >= C.first);
-                        TMVAssert(Cjj < C.last);
+                        TMVAssert(Cjj >= C._first);
+                        TMVAssert(Cjj < C._last);
 #endif
                         *Cjj = newcjj;
                     }
@@ -191,8 +191,8 @@ namespace tmv {
                                     C.col(j,jj,N));
 
 #ifdef TMVFLDEBUG
-                        TMVAssert(Cjj >= C.first);
-                        TMVAssert(Cjj < C.last);
+                        TMVAssert(Cjj >= C._first);
+                        TMVAssert(Cjj < C._last);
 #endif
                         *Cjj = newcjj;
                     }
@@ -220,8 +220,8 @@ namespace tmv {
                                     C.col(j,jj,N));
 
 #ifdef TMVFLDEBUG
-                        TMVAssert(Cjj >= C.first);
-                        TMVAssert(Cjj < C.last);
+                        TMVAssert(Cjj >= C._first);
+                        TMVAssert(Cjj < C._last);
 #endif
                         *Cjj = newcjj;
                     }
@@ -459,8 +459,8 @@ namespace tmv {
                                     C.col(j,0,j));
 
 #ifdef TMVFLDEBUG
-                        TMVAssert(Cjj >= C.first);
-                        TMVAssert(Cjj < C.last);
+                        TMVAssert(Cjj >= C._first);
+                        TMVAssert(Cjj < C._last);
 #endif
                         *Cjj = newcjj;
                     }
@@ -494,8 +494,8 @@ namespace tmv {
                                     C.col(j,0,j));
 
 #ifdef TMVFLDEBUG
-                        TMVAssert(Cjj >= C.first);
-                        TMVAssert(Cjj < C.last);
+                        TMVAssert(Cjj >= C._first);
+                        TMVAssert(Cjj < C._last);
 #endif
                         *Cjj = newcjj;
                     }
@@ -529,8 +529,8 @@ namespace tmv {
                                     C.col(j,0,j));
 
 #ifdef TMVFLDEBUG
-                        TMVAssert(Cjj >= C.first);
-                        TMVAssert(Cjj < C.last);
+                        TMVAssert(Cjj >= C._first);
+                        TMVAssert(Cjj < C._last);
 #endif
                         *Cjj = newcjj;
                     }
@@ -563,8 +563,8 @@ namespace tmv {
                                     C.col(j,0,j));
 
 #ifdef TMVFLDEBUG
-                        TMVAssert(Cjj >= C.first);
-                        TMVAssert(Cjj < C.last);
+                        TMVAssert(Cjj >= C._first);
+                        TMVAssert(Cjj < C._last);
 #endif
                         *Cjj = newcjj;
                     }

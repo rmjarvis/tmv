@@ -80,8 +80,8 @@ namespace tmv {
             for(int j=0;j<N;++j,++Qbj) {
                 // Apply the Householder Reflection for this column
 #ifdef TMVFLDEBUG
-                TMVAssert(Qbj >= Qbeta.first);
-                TMVAssert(Qbj < Qbeta.last);
+                TMVAssert(Qbj >= Qbeta._first);
+                TMVAssert(Qbj < Qbeta._last);
 #endif
                 *Qbj = HouseholderReflect(QRx.subMatrix(j,endcol,j,endrow),det);
                 if (endcol < M) ++endcol;

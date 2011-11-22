@@ -211,8 +211,8 @@ namespace tmv {
             T m00 = TMV_CONJ(*m.cptr());
             beta = HouseholderReflect(m00,v,det);
 #ifdef TMVFLDEBUG
-            TMVAssert(m.ptr() >= m.first);
-            TMVAssert(m.ptr() < m.last);
+            TMVAssert(m.ptr() >= m._first);
+            TMVAssert(m.ptr() < m._last);
 #endif
             *m.ptr() = TMV_CONJ(m00);
         } else {
@@ -471,8 +471,8 @@ namespace tmv {
             T m00 = TMV_CONJ(*m.cptr());
             HouseholderUnpack(m00,m.col(0,1,m.colsize()),beta);
 #ifdef TMVFLDEBUG
-            TMVAssert(m.ptr() >= m.first);
-            TMVAssert(m.ptr() < m.last);
+            TMVAssert(m.ptr() >= m._first);
+            TMVAssert(m.ptr() < m._last);
 #endif
             *m.ptr() = TMV_CONJ(m00);
         } else {
@@ -528,8 +528,8 @@ namespace tmv {
             Z.col(N,0,N+1).setZero();
         } else if (N == 0) {
 #ifdef TMVFLDEBUG
-            TMVAssert(Z.ptr() >= Z.first);
-            TMVAssert(Z.ptr() < Z.last);
+            TMVAssert(Z.ptr() >= Z._first);
+            TMVAssert(Z.ptr() < Z._last);
 #endif
             *Z.ptr() = beta;
         } else {
@@ -540,8 +540,8 @@ namespace tmv {
             z = -beta * Z.subTriMatrix(0,N) * z;
             // Z(N,N) = beta
 #ifdef TMVFLDEBUG
-            TMVAssert(Z.ptr()+N*(Z.stepi()+Z.stepj()) >= Z.first);
-            TMVAssert(Z.ptr()+N*(Z.stepi()+Z.stepj()) < Z.last);
+            TMVAssert(Z.ptr()+N*(Z.stepi()+Z.stepj()) >= Z._first);
+            TMVAssert(Z.ptr()+N*(Z.stepi()+Z.stepj()) < Z._last);
 #endif
             *(Z.ptr() + N*(Z.stepi()+Z.stepj())) = beta;
         }
@@ -613,8 +613,8 @@ namespace tmv {
             // Y.col(0) = v
             // Z(0,0) = beta*
 #ifdef TMVFLDEBUG
-            TMVAssert(Z.ptr() >= Z.first);
-            TMVAssert(Z.ptr() < Z.last);
+            TMVAssert(Z.ptr() >= Z._first);
+            TMVAssert(Z.ptr() < Z._last);
 #endif
             *Z.ptr() = TMV_CONJ(*beta.cptr());
         } else if (N==2) {
@@ -653,12 +653,12 @@ namespace tmv {
             const T cY10 = TMV_CONJ(*(Y.cptr() + Y.stepi()));
             // Z(0,0) = TMV_CONJ(beta(0))
 #ifdef TMVFLDEBUG
-            TMVAssert(Z00 >= Z.first);
-            TMVAssert(Z00 < Z.last);
-            TMVAssert(Z01 >= Z.first);
-            TMVAssert(Z01 < Z.last);
-            TMVAssert(Z11 >= Z.first);
-            TMVAssert(Z11 < Z.last);
+            TMVAssert(Z00 >= Z._first);
+            TMVAssert(Z00 < Z._last);
+            TMVAssert(Z01 >= Z._first);
+            TMVAssert(Z01 < Z._last);
+            TMVAssert(Z11 >= Z._first);
+            TMVAssert(Z11 < Z._last);
 #endif
             *Z00 = cb0;
             // Z(1,1) = TMV_CONJ(beta(1))

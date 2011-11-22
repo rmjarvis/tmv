@@ -100,19 +100,19 @@ namespace tmv {
         const std::complex<T>* cDj = xcD.cptr();
         const std::complex<T>* cEj = xcE.cptr();
 #ifdef TMVFLDEBUG
-        TMVAssert(Vj >= Vdiag.first);
-        TMVAssert(Vj < Vdiag.last);
+        TMVAssert(Vj >= Vdiag._first);
+        TMVAssert(Vj < Vdiag._last);
 #endif
         *Vj = T(1);
         std::complex<T> newcDj = *cDj;
         for(int j=0;j<N-1;++j,++Uj,++Dj,++Ej,++cEj) {
 #ifdef TMVFLDEBUG
-            TMVAssert(Dj >= D.first);
-            TMVAssert(Dj < D.last);
-            TMVAssert(Ej >= E.first);
-            TMVAssert(Ej < E.last);
-            TMVAssert(Uj >= Udiag.first);
-            TMVAssert(Uj < Udiag.last);
+            TMVAssert(Dj >= D._first);
+            TMVAssert(Dj < D._last);
+            TMVAssert(Ej >= E._first);
+            TMVAssert(Ej < E._last);
+            TMVAssert(Uj >= Udiag._first);
+            TMVAssert(Uj < Udiag._last);
 #endif
             *Dj = TMV_ABS(newcDj);
             *Uj = TMV_SIGN(newcDj,*Dj);
@@ -120,18 +120,18 @@ namespace tmv {
             *Ej = TMV_ABS(newcEj);
             ++Vj; // Now Vdiag(j+1)
 #ifdef TMVFLDEBUG
-            TMVAssert(Vj >= Vdiag.first);
-            TMVAssert(Vj < Vdiag.last);
+            TMVAssert(Vj >= Vdiag._first);
+            TMVAssert(Vj < Vdiag._last);
 #endif
             *Vj = TMV_SIGN(newcEj,*Ej);
             ++cDj; // Now cd(j+1)
             newcDj = TMV_CONJ(*Vj)* *cDj;
         }
 #ifdef TMVFLDEBUG
-        TMVAssert(Dj >= D.first);
-        TMVAssert(Dj < D.last);
-        TMVAssert(Uj >= Udiag.first);
-        TMVAssert(Uj < Udiag.last);
+        TMVAssert(Dj >= D._first);
+        TMVAssert(Dj < D._last);
+        TMVAssert(Uj >= Udiag._first);
+        TMVAssert(Uj < Udiag._last);
 #endif
         *Dj = TMV_ABS(newcDj);
         *Uj = TMV_SIGN(newcDj,*Dj);
@@ -218,8 +218,8 @@ namespace tmv {
                 int endrow = TMV_MIN(endcol+nhi,N);
                 ver[j] = endrow;
 #ifdef TMVFLDEBUG
-                TMVAssert(Ubj >= Ubeta.first);
-                TMVAssert(Ubj < Ubeta.last);
+                TMVAssert(Ubj >= Ubeta._first);
+                TMVAssert(Ubj < Ubeta._last);
 #endif
                 *Ubj = HouseholderReflect(
                     U1->subMatrix(j,endcol,j,endrow),signdet);
@@ -229,8 +229,8 @@ namespace tmv {
             }
             vec[N-1] = endcol;
 #ifdef TMVFLDEBUG
-            TMVAssert(Ubj >= Ubeta.first);
-            TMVAssert(Ubj < Ubeta.last);
+            TMVAssert(Ubj >= Ubeta._first);
+            TMVAssert(Ubj < Ubeta._last);
 #endif
             *Ubj = HouseholderReflect(U1->subMatrix(N-1,endcol,N-1,N),signdet);
 
@@ -682,14 +682,14 @@ namespace tmv {
             if (A.isconj()) {
                 for(int j=0;j<N;++j,Ajj+=Ads,Sj+=Ss) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(Sj >= S.first);
-                    TMVAssert(Sj < S.last);
+                    TMVAssert(Sj >= S.diag()._first);
+                    TMVAssert(Sj < S.diag()._last);
 #endif
                     *Sj = TMV_ABS(*Ajj);
                     if(U) {
 #ifdef TMVFLDEBUG
-                        TMVAssert(Ujj >= U->first);
-                        TMVAssert(Ujj < U->last);
+                        TMVAssert(Ujj >= U->_first);
+                        TMVAssert(Ujj < U->_last);
 #endif
                         *Ujj = TMV_SIGN(TMV_CONJ(*Ajj),*Sj); Ujj += Uds; 
                     }
@@ -697,14 +697,14 @@ namespace tmv {
             } else {
                 for(int j=0;j<N;++j,Ajj+=Ads,Sj+=Ss) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(Sj >= S.first);
-                    TMVAssert(Sj < S.last);
+                    TMVAssert(Sj >= S.diag()._first);
+                    TMVAssert(Sj < S.diag()._last);
 #endif
                     *Sj = TMV_ABS(*Ajj);
                     if(U) { 
 #ifdef TMVFLDEBUG
-                        TMVAssert(Ujj >= U->first);
-                        TMVAssert(Ujj < U->last);
+                        TMVAssert(Ujj >= U->_first);
+                        TMVAssert(Ujj < U->_last);
 #endif
                         *Ujj = TMV_SIGN(*Ajj,*Sj); Ujj += Uds; 
                     }

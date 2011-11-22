@@ -735,18 +735,20 @@ namespace tmv {
     using std::auto_ptr;
 #endif
 
-    //#define TMVFLDEBUG
+//#define TMVFLDEBUG
 
 #ifdef TMVFLDEBUG
 #define TMV_FIRSTLAST ,_first,_last
 #define TMV_PARAMFIRSTLAST(T) , const T* _first, const T* _last
 #define TMV_DEFFIRSTLAST(f,l) ,_first(f),_last(l)
+#define TMV_DEFFIRSTLAST2(f,l) :_first(f),_last(l)
 #define TMV_FIRSTLAST1(f,l) ,f,l
 #define TMV_SETFIRSTLAST(f,l) _first=(f); _last=(l);
 #else
 #define TMV_FIRSTLAST
 #define TMV_PARAMFIRSTLAST(T)
 #define TMV_DEFFIRSTLAST(f,l)
+#define TMV_DEFFIRSTLAST2(f,l)
 #define TMV_FIRSTLAST1(f,l)
 #define TMV_SETFIRSTLAST(f,l)
 #endif

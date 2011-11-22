@@ -63,14 +63,17 @@ namespace tmv {
         //std::cout<<"K,Kc,kd = "<<K<<','<<Kc<<','<<Kd<<std::endl;
 
         //std::cout<<"Cx: "<<Cp<<"..."<<Cp+size3<<std::endl;
-        VectorView<RT>(Cp,size3,1,NonConj).setZero();
+        VectorView<RT>(Cp,size3,1,NonConj 
+                       TMV_FIRSTLAST1(Cp,Cp+size3)).setZero();
 
         int k1 = 0;
         for (int k2=KB;k2<=K;k1=k2,k2+=KB,Ap+=size1,Bp+=size2) {
             //std::cout<<"Ax: "<<Ap<<"..."<<Ap+MB*KB<<std::endl;
             //std::cout<<"Bx: "<<Bp<<"..."<<Bp+NB*KB<<std::endl;
-            MatrixView<RT> Ax(Ap,MB,KB,KB,1,RowMajor,NonConj,MB*KB);
-            MatrixView<RT> Bx(Bp,KB,NB,1,KB,ColMajor,NonConj,NB*KB);
+            MatrixView<RT> Ax(Ap,MB,KB,KB,1,RowMajor,NonConj,MB*KB 
+                              TMV_FIRSTLAST1(Ap,Ap+MB*KB));
+            MatrixView<RT> Bx(Bp,KB,NB,1,KB,ColMajor,NonConj,NB*KB 
+                              TMV_FIRSTLAST1(Bp,Bp+NB*KB));
             if (firstA) Ax = A.subMatrix(i1,i2,k1,k2);
             if (firstB) Bx = B.subMatrix(k1,k2,j1,j2);
             (*myprod) (MB,NB,KB, Ap,Bp,Cp);
@@ -79,8 +82,10 @@ namespace tmv {
         if (Kc) {
             //std::cout<<"Ay: "<<Ap<<"..."<<Ap+MB*Kc<<std::endl;
             //std::cout<<"By: "<<Bp<<"..."<<Bp+NB*Kc<<std::endl;
-            MatrixView<RT> Ay(Ap,MB,Kc,Kd,1,RowMajor,NonConj,MB*Kc);
-            MatrixView<RT> By(Bp,Kc,NB,1,Kd,ColMajor,NonConj,NB*Kc);
+            MatrixView<RT> Ay(Ap,MB,Kc,Kd,1,RowMajor,NonConj,MB*Kc
+                              TMV_FIRSTLAST1(Ap,Ap+MB*Kc));
+            MatrixView<RT> By(Bp,Kc,NB,1,Kd,ColMajor,NonConj,NB*Kc
+                              TMV_FIRSTLAST1(Bp,Bp+NB*Kc));
             if (firstA) Ay = A.subMatrix(i1,i2,k1,K);
             if (firstB) By = B.subMatrix(k1,K,j1,j2);
             (*mycleanup) (MB,NB,Kc, Ap,Bp,Cp);

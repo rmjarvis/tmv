@@ -161,8 +161,8 @@ namespace tmv {
 #endif
                 }
 #ifdef TMVFLDEBUG
-                TMVAssert(Ajj >= A.realPart().first);
-                TMVAssert(Ajj < A.realPart().last);
+                TMVAssert(Ajj >= A.realPart()._first);
+                TMVAssert(Ajj < A.realPart()._last);
 #endif
                 *Ajj = TMV_SQRT(*Ajj);
                 A.col(j,j+1,N) /= *Ajj;
@@ -178,8 +178,8 @@ namespace tmv {
 #endif
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(Ajj >= A.realPart().first);
-            TMVAssert(Ajj < A.realPart().last);
+            TMVAssert(Ajj >= A.realPart()._first);
+            TMVAssert(Ajj < A.realPart()._last);
 #endif
             *Ajj = TMV_SQRT(*Ajj);
         } else {
@@ -194,16 +194,16 @@ namespace tmv {
 #endif
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(Aii >= A.realPart().first);
-            TMVAssert(Aii < A.realPart().last);
+            TMVAssert(Aii >= A.realPart()._first);
+            TMVAssert(Aii < A.realPart()._last);
 #endif
             *Aii = TMV_SQRT(*Aii);
             for(int i=1; i<N; ++i) {
                 Aii+=ds;
                 A.row(i,0,i) %= A.lowerTri().subTriMatrix(0,i).adjoint();
 #ifdef TMVFLDEBUG
-                TMVAssert(Aii >= A.realPart().first);
-                TMVAssert(Aii < A.realPart().last);
+                TMVAssert(Aii >= A.realPart()._first);
+                TMVAssert(Aii < A.realPart()._last);
 #endif
                 *Aii -= NormSq(A.row(i,0,i));
                 if (*Aii <= RT(0)) {
@@ -215,8 +215,8 @@ namespace tmv {
 #endif
                 }
 #ifdef TMVFLDEBUG
-                TMVAssert(Aii >= A.realPart().first);
-                TMVAssert(Aii < A.realPart().last);
+                TMVAssert(Aii >= A.realPart()._first);
+                TMVAssert(Aii < A.realPart()._last);
 #endif
                 *Aii = TMV_SQRT(*Aii);
             }
@@ -359,8 +359,8 @@ namespace tmv {
 #endif
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(Aptr >= A.first);
-            TMVAssert(Aptr < A.last);
+            TMVAssert(Aptr >= A._first);
+            TMVAssert(Aptr < A._last);
 #endif
             *Aptr = TMV_SQRT(A00);
 
@@ -380,8 +380,8 @@ namespace tmv {
 #endif
                     }
 #ifdef TMVFLDEBUG
-                    TMVAssert(A11ptr >= A.first);
-                    TMVAssert(A11ptr < A.last);
+                    TMVAssert(A11ptr >= A._first);
+                    TMVAssert(A11ptr < A._last);
 #endif
                     *(A11ptr) = TMV_SQRT(A11);
                 } else {
@@ -399,8 +399,8 @@ namespace tmv {
 #endif
                     }
 #ifdef TMVFLDEBUG
-                    TMVAssert(A11ptr >= A.first);
-                    TMVAssert(A11ptr < A.last);
+                    TMVAssert(A11ptr >= A._first);
+                    TMVAssert(A11ptr < A._last);
 #endif
                     *(A11ptr) = TMV_SQRT(A11);
                 }

@@ -193,8 +193,8 @@ namespace tmv {
             } else *Pj = j;
 
 #ifdef TMVFLDEBUG
-            TMVAssert(Lj >= A.first);
-            TMVAssert(Lj < A.last);
+            TMVAssert(Lj >= A._first);
+            TMVAssert(Lj < A._last);
 #endif
             if (TMV_Underflow(*Ujj)) {
                 *Ujj = *Lj = T(0);
@@ -204,8 +204,8 @@ namespace tmv {
 
             //A.row(j+1,j+1,endrow) -= *Lj * A.row(j,j+1,endrow);
 #ifdef TMVFLDEBUG
-            TMVAssert(Ujj+1 >= A.first);
-            TMVAssert(Ujj+1 < A.last);
+            TMVAssert(Ujj+1 >= A._first);
+            TMVAssert(Ujj+1 < A._last);
 #endif
             *(Ujj+1) -= *Lj * (*Uj1);
             if (pivot && j+2<N) *(Uj1+1) -= *Lj * (*Uj2); // (if !pivot, *Uj2 == 0)

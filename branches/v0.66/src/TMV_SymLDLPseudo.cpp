@@ -95,10 +95,10 @@ namespace tmv {
             T* m1 = m0 + m.stepi();
             for (int k=m.rowsize();k>0;--k,++m0,++m1) {
 #ifdef TMVFLDEBUG
-                TMVAssert(m0 >= m.first);
-                TMVAssert(m0 < m.last);
-                TMVAssert(m1 >= m.first);
-                TMVAssert(m1 < m.last);
+                TMVAssert(m0 >= m._first);
+                TMVAssert(m0 < m._last);
+                TMVAssert(m1 >= m._first);
+                TMVAssert(m1 < m._last);
 #endif
                 LMultEq_2x2(a,b,c,cc,*m0,*m1);
             }
@@ -108,10 +108,10 @@ namespace tmv {
             T* m1 = m0 + m.stepi();
             for (int k=m.rowsize();k>0;--k,m0+=sj,m1+=sj) {
 #ifdef TMVFLDEBUG
-                TMVAssert(m0 >= m.first);
-                TMVAssert(m0 < m.last);
-                TMVAssert(m1 >= m.first);
-                TMVAssert(m1 < m.last);
+                TMVAssert(m0 >= m._first);
+                TMVAssert(m0 < m._last);
+                TMVAssert(m1 >= m._first);
+                TMVAssert(m1 < m._last);
 #endif
                 LMultEq_2x2(a,b,c,cc,*m0,*m1);
             }

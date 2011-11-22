@@ -87,8 +87,6 @@ static void TestSmallVectorReal()
     // Test assignments and constructors from arrays
     std::vector<T> qv(6);
     T qvar[] = { T(8), T(6), T(4), T(2), T(0), T(-2) };
-    T qvar2[] = { T(8), T(7), T(6), T(5), T(4), T(3), T(2), T(1), T(0), T(-1), T
-        (-2) };
     for(int i=0;i<6;++i) qv[i] = qvar[i];
 
     // Construct from C array

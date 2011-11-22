@@ -49,14 +49,6 @@
       const GenVector<T >& v1, const GenVector<T >& v2); \
   template HermBandMatrix<T,Upper,DiagMajor> HermTriDiagMatrix( \
       const GenVector<T >& v1, const GenVector<T >& v2, UpLoType U); \
-  template ConstSymBandMatrixView<T > SymBandMatrixViewOf( \
-      const T* m, size_t s, int lo, UpLoType uplo, StorageType stor); \
-  template SymBandMatrixView<T > SymBandMatrixViewOf( \
-      T* m, size_t s, int lo, UpLoType uplo, StorageType stor); \
-  template ConstSymBandMatrixView<T > HermBandMatrixViewOf( \
-      const T* m, size_t s, int lo, UpLoType uplo, StorageType stor); \
-  template SymBandMatrixView<T > HermBandMatrixViewOf( \
-      T* m, size_t s, int lo, UpLoType uplo, StorageType stor); \
 
 Def1(T,T,T&)
 #ifdef INST_COMPLEX

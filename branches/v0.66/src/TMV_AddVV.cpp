@@ -78,8 +78,8 @@ namespace tmv {
                 if (x == Tx(1))        
                     for(int i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
 #ifdef TMVFLDEBUG
-                        TMVAssert(v2ptr >= v2.first);
-                        TMVAssert(v2ptr+3 < v2.last);
+                        TMVAssert(v2ptr >= v2._first);
+                        TMVAssert(v2ptr+3 < v2._last);
 #endif
                         *v2ptr += (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                         v2ptr[1] += (c1 ? TMV_CONJ(v1ptr[1]) : v1ptr[1]);
@@ -89,8 +89,8 @@ namespace tmv {
                 else if (x == Tx(-1))
                     for(int i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
 #ifdef TMVFLDEBUG
-                        TMVAssert(v2ptr >= v2.first);
-                        TMVAssert(v2ptr+3 < v2.last);
+                        TMVAssert(v2ptr >= v2._first);
+                        TMVAssert(v2ptr+3 < v2._last);
 #endif
                         *v2ptr -= (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                         v2ptr[1] -= (c1 ? TMV_CONJ(v1ptr[1]) : v1ptr[1]);
@@ -100,8 +100,8 @@ namespace tmv {
                 else
                     for(int i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
 #ifdef TMVFLDEBUG
-                        TMVAssert(v2ptr >= v2.first);
-                        TMVAssert(v2ptr+3 < v2.last);
+                        TMVAssert(v2ptr >= v2._first);
+                        TMVAssert(v2ptr+3 < v2._last);
 #endif
                         *v2ptr += x * (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                         v2ptr[1] += x * (c1 ? TMV_CONJ(v1ptr[1]) : v1ptr[1]);
@@ -113,24 +113,24 @@ namespace tmv {
                 if (x == Tx(1))        
                     for(int i=N2;i>0;--i,++v1ptr,++v2ptr) {
 #ifdef TMVFLDEBUG
-                        TMVAssert(v2ptr >= v2.first);
-                        TMVAssert(v2ptr < v2.last);
+                        TMVAssert(v2ptr >= v2._first);
+                        TMVAssert(v2ptr < v2._last);
 #endif
                         *v2ptr += (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                     }
                 else if (x == Tx(-1))
                     for(int i=N2;i>0;--i,++v1ptr,++v2ptr) {
 #ifdef TMVFLDEBUG
-                        TMVAssert(v2ptr >= v2.first);
-                        TMVAssert(v2ptr < v2.last);
+                        TMVAssert(v2ptr >= v2._first);
+                        TMVAssert(v2ptr < v2._last);
 #endif
                         *v2ptr -= (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                     }
                 else
                     for(int i=N2;i>0;--i,++v1ptr,++v2ptr) {
 #ifdef TMVFLDEBUG
-                        TMVAssert(v2ptr >= v2.first);
-                        TMVAssert(v2ptr < v2.last);
+                        TMVAssert(v2ptr >= v2._first);
+                        TMVAssert(v2ptr < v2._last);
 #endif
                         *v2ptr += x * (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                     }
@@ -139,24 +139,24 @@ namespace tmv {
             if (x == Tx(1))        
                 for(int i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(v2ptr >= v2.first);
-                    TMVAssert(v2ptr < v2.last);
+                    TMVAssert(v2ptr >= v2._first);
+                    TMVAssert(v2ptr < v2._last);
 #endif
                     *v2ptr += (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                 }
             else if (x == Tx(-1))
                 for(int i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(v2ptr >= v2.first);
-                    TMVAssert(v2ptr < v2.last);
+                    TMVAssert(v2ptr >= v2._first);
+                    TMVAssert(v2ptr < v2._last);
 #endif
                     *v2ptr -= (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                 }
             else
                 for(int i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(v2ptr >= v2.first);
-                    TMVAssert(v2ptr < v2.last);
+                    TMVAssert(v2ptr >= v2._first);
+                    TMVAssert(v2ptr < v2._last);
 #endif
                     *v2ptr += x * (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                 }

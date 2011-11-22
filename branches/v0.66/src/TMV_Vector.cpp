@@ -975,8 +975,8 @@ namespace tmv {
             reverse().setAllTo(x);
         } else if (s == 0) {
 #ifdef TMVFLDEBUG
-            TMVAssert(ptr() >= first);
-            TMVAssert(ptr() < last);
+            TMVAssert(ptr() >= _first);
+            TMVAssert(ptr() < _last);
 #endif
             *ptr() = x;
         } else if (s == 1) {
@@ -986,16 +986,16 @@ namespace tmv {
             if (this->isconj()) {
                 for(int i=size();i>0;--i,p+=s) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(p >= first);
-                    TMVAssert(p < last);
+                    TMVAssert(p >= _first);
+                    TMVAssert(p < _last);
 #endif
                     *p = TMV_CONJ(x); 
                 }
             } else {
                 for(int i=size();i>0;--i,p+=s) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(p >= first);
-                    TMVAssert(p < last);
+                    TMVAssert(p >= _first);
+                    TMVAssert(p < _last);
 #endif
                     *p = x; 
                 }
@@ -1440,8 +1440,8 @@ namespace tmv {
         } else {
             for(int i=v2.size();i>0;--i,v1ptr+=step1,v2ptr+=step2) {
 #ifdef TMVFLDEBUG
-                TMVAssert(v2ptr >= v2.first);
-                TMVAssert(v2ptr < v2.last);
+                TMVAssert(v2ptr >= v2._first);
+                TMVAssert(v2ptr < v2._last);
 #endif
                 *v2ptr = *v1ptr;
             }

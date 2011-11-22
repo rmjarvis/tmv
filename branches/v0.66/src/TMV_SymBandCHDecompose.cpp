@@ -89,8 +89,8 @@ namespace tmv {
             const int ds = Adiag.step();
             for(int j=0;j<N;++j,Ajj+=ds) {
 #ifdef TMVFLDEBUG
-                TMVAssert(Ajj >= A.realPart().first);
-                TMVAssert(Ajj < A.realPart().last);
+                TMVAssert(Ajj >= A.realPart()._first);
+                TMVAssert(Ajj < A.realPart()._last);
 #endif
                 if (*Ajj <= TMV_RealType(T)(0))  {
 #ifdef NOTHROW
@@ -108,8 +108,8 @@ namespace tmv {
             int endcol = nlo+1;
             for(int j=0;j<N-1;++j,Ajj+=ds) {
 #ifdef TMVFLDEBUG
-                TMVAssert(Ajj >= A.realPart().first);
-                TMVAssert(Ajj < A.realPart().last);
+                TMVAssert(Ajj >= A.realPart()._first);
+                TMVAssert(Ajj < A.realPart()._last);
 #endif
                 if (*Ajj <= TMV_RealType(T)(0))  {
 #ifdef NOTHROW
@@ -126,8 +126,8 @@ namespace tmv {
                 if (endcol < N) ++endcol;
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(Ajj >= A.realPart().first);
-            TMVAssert(Ajj < A.realPart().last);
+            TMVAssert(Ajj >= A.realPart()._first);
+            TMVAssert(Ajj < A.realPart()._last);
 #endif
             if (*Ajj <= TMV_RealType(T)(0))  {
 #ifdef NOTHROW
@@ -143,8 +143,8 @@ namespace tmv {
             const int ds = Adiag.step();
             int startrow = 0;
 #ifdef TMVFLDEBUG
-            TMVAssert(Aii >= A.realPart().first);
-            TMVAssert(Aii < A.realPart().last);
+            TMVAssert(Aii >= A.realPart()._first);
+            TMVAssert(Aii < A.realPart()._last);
 #endif
             if (*Aii <= TMV_RealType(T)(0)) {
 #ifdef NOTHROW
@@ -161,8 +161,8 @@ namespace tmv {
                 A.row(i,startrow,i) %= 
                     A.subSymBandMatrix(startrow,i).lowerBand().adjoint();
 #ifdef TMVFLDEBUG
-                TMVAssert(Aii >= A.realPart().first);
-                TMVAssert(Aii < A.realPart().last);
+                TMVAssert(Aii >= A.realPart()._first);
+                TMVAssert(Aii < A.realPart()._last);
 #endif
                 *Aii -= NormSq(A.row(i,startrow,i));
                 if (*Aii <= TMV_RealType(T)(0))  {
@@ -247,10 +247,10 @@ namespace tmv {
 
         for(int j=0;j<N-1;++j) {
 #ifdef TMVFLDEBUG
-            TMVAssert(Lj >= A.first);
-            TMVAssert(Lj < A.last);
-            TMVAssert(Dj >= A.realPart().first);
-            TMVAssert(Dj < A.realPart().last);
+            TMVAssert(Lj >= A._first);
+            TMVAssert(Lj < A._last);
+            TMVAssert(Dj >= A.realPart()._first);
+            TMVAssert(Dj < A.realPart()._last);
 #endif
             T Ax0 = *Lj;
             if (*Dj == TMV_RealType(T)(0))  {
@@ -265,8 +265,8 @@ namespace tmv {
             if (dm) { if (isReal(T())) ++Dj; else Dj+=2; }
             else Dj += Dstep;
 #ifdef TMVFLDEBUG
-            TMVAssert(Dj >= A.realPart().first);
-            TMVAssert(Dj < A.realPart().last);
+            TMVAssert(Dj >= A.realPart()._first);
+            TMVAssert(Dj < A.realPart()._last);
 #endif
             *Dj -= TMV_REAL(TMV_CONJ(*Lj) * Ax0);
             if (dm) ++Lj;
@@ -330,8 +330,8 @@ namespace tmv {
         for(int j=0;j<N-1;++j) {
             T Ax0 = *Lj;
 #ifdef TMVFLDEBUG
-            TMVAssert(Lj >= A.first);
-            TMVAssert(Lj < A.last);
+            TMVAssert(Lj >= A._first);
+            TMVAssert(Lj < A._last);
 #endif
             if (*Dj == T(0))  {
 #ifdef NOTHROW
@@ -345,8 +345,8 @@ namespace tmv {
             if (dm) ++Dj;
             else Dj += step;
 #ifdef TMVFLDEBUG
-            TMVAssert(Dj >= A.first);
-            TMVAssert(Dj < A.last);
+            TMVAssert(Dj >= A._first);
+            TMVAssert(Dj < A._last);
 #endif
             *Dj -= *Lj * Ax0;
             if (dm) ++Lj;

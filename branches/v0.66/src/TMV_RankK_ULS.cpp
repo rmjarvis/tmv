@@ -80,8 +80,8 @@ namespace tmv {
 
         if (N == 1) {
 #ifdef TMVFLDEBUG
-            TMVAssert(A.ptr() >= A.first);
-            TMVAssert(A.ptr() < A.last);
+            TMVAssert(A.ptr() >= A._first);
+            TMVAssert(A.ptr() < A._last);
 #endif
             if (uu)
                 *(A.ptr()) += a1 ? T(1) : alpha;
@@ -145,8 +145,8 @@ namespace tmv {
 
         if (N == 1) {
 #ifdef TMVFLDEBUG
-            TMVAssert(A.ptr() >= A.first);
-            TMVAssert(A.ptr() < A.last);
+            TMVAssert(A.ptr() >= A._first);
+            TMVAssert(A.ptr() < A._last);
 #endif
             *(A.ptr()) = sa ? TMV_SQR(*(A.cptr())) : TMV_NORM(*(A.cptr()));
         } else {

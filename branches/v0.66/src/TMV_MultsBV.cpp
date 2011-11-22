@@ -67,7 +67,7 @@ namespace tmv {
             this->assignTosB(SymBandMatrixView<T>(
                     itsm,s,lo,stepi(),stepj(),diagstep(),
                     Sym,this->uplo(),this->stor(),NonConj                   
-                    TMV_FIRSTLAST1(itsm.get(),itsm.get()+len) ));
+                    TMV_FIRSTLAST1(itsm1.get(),itsm1.get()+len) ));
         }                                     
         return itsm;
     }               

@@ -92,8 +92,8 @@ namespace tmv {
         for(int j=0;j<N;++j,++bj) {
             // Apply the Householder Reflection for this column
 #ifdef TMVFLDEBUG
-            TMVAssert(bj >= beta.first);
-            TMVAssert(bj < beta.last);
+            TMVAssert(bj >= beta._first);
+            TMVAssert(bj < beta._last);
 #endif
             *bj = HouseholderReflect(A.subMatrix(j,M,j,N),det);
         }

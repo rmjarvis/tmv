@@ -74,24 +74,24 @@ namespace tmv {
             if (*Ai == Ta(0)) {
                 for(int j=N;j>0;--j,(rm?++Bij:Bij+=stepj)) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(Bij >= B.first);
-                    TMVAssert(Bij < B.last);
+                    TMVAssert(Bij >= B._first);
+                    TMVAssert(Bij < B._last);
 #endif
                     *Bij = T(0);
                 }
             } else if (TMV_IMAG(*Ai) == TMV_RealType(Ta)(0)) {
                 for(int j=N;j>0;--j,(rm?++Bij:Bij+=stepj)) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(Bij >= B.first);
-                    TMVAssert(Bij < B.last);
+                    TMVAssert(Bij >= B._first);
+                    TMVAssert(Bij < B._last);
 #endif
                     *Bij *= TMV_REAL(*Ai);
                 }
             } else {
                 for(int j=N;j>0;--j,(rm?++Bij:Bij+=stepj)) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(Bij >= B.first);
-                    TMVAssert(Bij < B.last);
+                    TMVAssert(Bij >= B._first);
+                    TMVAssert(Bij < B._last);
 #endif
                     *Bij *= (ca?TMV_CONJ(*Ai):*Ai);
                 }
@@ -126,8 +126,8 @@ namespace tmv {
             const Ta* Ai = Aptr;
             for(int i=M;i>0;--i,++Ai,(cm?++Bij:Bij+=stepi)) {
 #ifdef TMVFLDEBUG
-                TMVAssert(Bij >= B.first);
-                TMVAssert(Bij < B.last);
+                TMVAssert(Bij >= B._first);
+                TMVAssert(Bij < B._last);
 #endif
                 *Bij *= (ca ? TMV_CONJ(*Ai) : *Ai);
             }
@@ -246,8 +246,8 @@ namespace tmv {
                     for(int j=N;j>0;--j,(rm?++Bij:Bij+=Bstepj),
                         (rm?++Cij:Cij+=Cstepj)) {
 #ifdef TMVFLDEBUG
-                        TMVAssert(Cij >= C.first);
-                        TMVAssert(Cij < C.last);
+                        TMVAssert(Cij >= C._first);
+                        TMVAssert(Cij < C._last);
 #endif
                         *Cij += TMV_REAL(*Ai)*(cb?TMV_CONJ(*Bij):*Bij);
                     }
@@ -256,8 +256,8 @@ namespace tmv {
                 for(int j=N;j>0;--j,(rm?++Bij:Bij+=Bstepj),
                     (rm?++Cij:Cij+=Cstepj)) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(Cij >= C.first);
-                    TMVAssert(Cij < C.last);
+                    TMVAssert(Cij >= C._first);
+                    TMVAssert(Cij < C._last);
 #endif
                     *Cij += (ca?TMV_CONJ(*Ai):*Ai)*(cb?TMV_CONJ(*Bij):*Bij);
                 }
@@ -307,8 +307,8 @@ namespace tmv {
             for(int i=M;i>0;--i,++Ai,(cm?++Bij:Bij+=Bstepi),
                 (cm?++Cij:Cij+=Cstepi)) {
 #ifdef TMVFLDEBUG
-                TMVAssert(Cij >= C.first);
-                TMVAssert(Cij < C.last);
+                TMVAssert(Cij >= C._first);
+                TMVAssert(Cij < C._last);
 #endif
                 *Cij += (ca ? TMV_CONJ(*Ai) : *Ai) * (cb ? TMV_CONJ(*Bij) : *Bij);
             }

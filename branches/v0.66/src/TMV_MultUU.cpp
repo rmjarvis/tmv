@@ -93,8 +93,8 @@ namespace tmv {
                 B.row(i,i+1,N) = aa * B.row(i,i+1,N) +
                     alpha * A.row(i,i+1,N) * B.subTriMatrix(i+1,N);
 #ifdef TMVFLDEBUG
-                TMVAssert(Bii >= B.first);
-                TMVAssert(Bii < B.last);
+                TMVAssert(Bii >= B._first);
+                TMVAssert(Bii < B._last);
 #endif
                 *Bii *= aa;
             }
@@ -333,8 +333,8 @@ namespace tmv {
                 B.row(i,0,i) = aa * B.row(i,0,i) +
                     alpha * A.row(i,0,i) * B.subTriMatrix(0,i);
 #ifdef TMVFLDEBUG
-                TMVAssert(Bii >= B.first);
-                TMVAssert(Bii < B.last);
+                TMVAssert(Bii >= B._first);
+                TMVAssert(Bii < B._last);
 #endif
                 *Bii *= aa;
             }
@@ -524,8 +524,8 @@ namespace tmv {
                         alpha * A.row(i,i+1,N) * B.subTriMatrix(i+1,N);
                     C.row(i,i+1,N) += alpha * B.row(i,i+1,N);
 #ifdef TMVFLDEBUG
-                    TMVAssert(Cii >= C.first);
-                    TMVAssert(Cii < C.last);
+                    TMVAssert(Cii >= C._first);
+                    TMVAssert(Cii < C._last);
 #endif
                     *Cii += alpha;
                 }
@@ -568,8 +568,8 @@ namespace tmv {
                     C.col(j,0,j) += alpha * A.col(j,0,j);
                     C.row(j,j+1,N) += alpha * B.row(j,j+1,N);
 #ifdef TMVFLDEBUG
-                    TMVAssert(Cjj >= C.first);
-                    TMVAssert(Cjj < C.last);
+                    TMVAssert(Cjj >= C._first);
+                    TMVAssert(Cjj < C._last);
 #endif
                     *Cjj += alpha;
                 }
@@ -616,8 +616,8 @@ namespace tmv {
                     C.col(j,0,j) += alpha * A.subTriMatrix(0,j) * B.col(j,0,j);
                     C.col(j,0,j) += alpha * A.col(j,0,j);
 #ifdef TMVFLDEBUG
-                    TMVAssert(Cjj >= C.first);
-                    TMVAssert(Cjj < C.last);
+                    TMVAssert(Cjj >= C._first);
+                    TMVAssert(Cjj < C._last);
 #endif
                     *Cjj += alpha;
                 }

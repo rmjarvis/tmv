@@ -217,8 +217,8 @@ namespace tmv {
         RT* Di = D.ptr();
         for(int i=0;i<N;++i,++Di) if (*Di < 0) {
 #ifdef TMVFLDEBUG
-            TMVAssert(Di >= D.first);
-            TMVAssert(Di < D.last);
+            TMVAssert(Di >= D._first);
+            TMVAssert(Di < D._last);
 #endif
             *Di = -(*Di);
             if (V) V->row(i) = -V->row(i);

@@ -1964,8 +1964,8 @@ namespace tmv {
 
 #ifdef TMVFLDEBUG
     public:
-        const T*const _first;
-        const T*const _last;
+        const T* _first;
+        const T* _last;
     protected:
 #endif
 
@@ -4557,19 +4557,99 @@ namespace tmv {
 
     template <class T> 
     ConstSymMatrixView<T> SymMatrixViewOf(
-        const T* vv, size_t size, UpLoType uplo, StorageType stor);
+        const T* m, size_t size, UpLoType uplo, StorageType stor)
+    {
+        TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(size>0);
+        const int stepi = stor == RowMajor ? size : 1;
+        const int stepj = stor == RowMajor ? 1 : size;
+        return ConstSymMatrixView<T>(
+            m,size,stepi,stepj,Sym,uplo,stor,NonConj);
+    }
 
     template <class T> 
     ConstSymMatrixView<T> HermMatrixViewOf(
-        const T* vv, size_t size, UpLoType uplo, StorageType stor);
+        const T* m, size_t size, UpLoType uplo, StorageType stor)
+    {
+        TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(size>0);
+        const int stepi = stor == RowMajor ? size : 1;
+        const int stepj = stor == RowMajor ? 1 : size;
+        return ConstSymMatrixView<T>(
+            m,size,stepi,stepj,Herm,uplo,stor,NonConj);
+    }
 
     template <class T> 
     SymMatrixView<T> SymMatrixViewOf(
-        T* vv, size_t size, UpLoType uplo, StorageType stor);
+        T* m, size_t size, UpLoType uplo, StorageType stor)
+    {
+        TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(size>0);
+        const int stepi = stor == RowMajor ? size : 1;
+        const int stepj = stor == RowMajor ? 1 : size;
+        return SymMatrixView<T>(
+            m,size,stepi,stepj,Sym,uplo,stor,NonConj
+            TMV_FIRSTLAST1(m,m+size*size));
+    }
 
     template <class T> 
     SymMatrixView<T> HermMatrixViewOf(
-        T* vv, size_t size, UpLoType uplo, StorageType stor);
+        T* m, size_t size, UpLoType uplo, StorageType stor)
+    {
+        TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(size>0);
+        const int stepi = stor == RowMajor ? size : 1;
+        const int stepj = stor == RowMajor ? 1 : size;
+        return SymMatrixView<T>(
+            m,size,stepi,stepj,Herm,uplo,stor,NonConj
+            TMV_FIRSTLAST1(m,m+size*size));
+    }
+
+    template <class T> 
+    ConstSymMatrixView<T> SymMatrixViewOf(
+        const T* m, size_t size, UpLoType uplo, int stepi, int stepj)
+    {
+        TMVAssert(size>0);
+        const StorageType stor = 
+            stepi == 1 ? ColMajor : stepj == 1 ? RowMajor : NoMajor;
+        return ConstSymMatrixView<T>(
+            m,size,stepi,stepj,Sym,uplo,stor,NonConj);
+    }
+
+    template <class T> 
+    ConstSymMatrixView<T> HermMatrixViewOf(
+        const T* m, size_t size, UpLoType uplo, int stepi, int stepj)
+    {
+        TMVAssert(size>0);
+        const StorageType stor = 
+            stepi == 1 ? ColMajor : stepj == 1 ? RowMajor : NoMajor;
+        return ConstSymMatrixView<T>(
+            m,size,stepi,stepj,Herm,uplo,stor,NonConj);
+    }
+
+    template <class T> 
+    SymMatrixView<T> SymMatrixViewOf(
+        T* m, size_t size, UpLoType uplo, int stepi, int stepj)
+    {
+        TMVAssert(size>0);
+        const StorageType stor = 
+            stepi == 1 ? ColMajor : stepj == 1 ? RowMajor : NoMajor;
+        return SymMatrixView<T>(
+            m,size,stepi,stepj,Sym,uplo,stor,NonConj
+            TMV_FIRSTLAST1(m,m+size*size));
+    }
+
+    template <class T> 
+    SymMatrixView<T> HermMatrixViewOf(
+        T* m, size_t size, UpLoType uplo, int stepi, int stepj)
+    {
+        TMVAssert(size>0);
+        const StorageType stor = 
+            stepi == 1 ? ColMajor : stepj == 1 ? RowMajor : NoMajor;
+        return SymMatrixView<T>(
+            m,size,stepi,stepj,Herm,uplo,stor,NonConj
+            TMV_FIRSTLAST1(m,m+size*size));
+    }
 
     //
     // Swap Matrices

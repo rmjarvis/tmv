@@ -79,8 +79,8 @@ namespace tmv {
                 typename std::vector<T>::const_iterator vvi = vv[i].begin();
                 for(int j=0;j<N;++j,++vi,++vvi) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(vi >= first);
-                    TMVAssert(vi < last);
+                    TMVAssert(vi >= _first);
+                    TMVAssert(vi < _last);
 #endif
                     *vi = *vvi;
                 }
@@ -92,8 +92,8 @@ namespace tmv {
                 for(int i=0;i<M;++i,++vi) {
                     TMVAssert(vv[i].size() == rowsize());
 #ifdef TMVFLDEBUG
-                    TMVAssert(vi >= first);
-                    TMVAssert(vi < last);
+                    TMVAssert(vi >= _first);
+                    TMVAssert(vi < _last);
 #endif
                     *vi = vv[i][j];
                 }

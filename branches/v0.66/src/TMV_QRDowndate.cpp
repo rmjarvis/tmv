@@ -162,8 +162,8 @@ namespace tmv {
 #endif
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(Z.ptr() >= Z.first);
-            TMVAssert(Z.ptr() < Z.last);
+            TMVAssert(Z.ptr() >= Z._first);
+            TMVAssert(Z.ptr() < Z._last);
 #endif
             *Z.ptr() = TMV_CONJ(b);
         } else if (N==2) {
@@ -183,16 +183,16 @@ namespace tmv {
 #endif
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(Z00 >= Z.first);
-            TMVAssert(Z00 < Z.last);
+            TMVAssert(Z00 >= Z._first);
+            TMVAssert(Z00 < Z._last);
 #endif
             *Z00 = TMV_CONJ(b0);
             if (b0 != T(0)) {
                 TMVAssert(b0 != T(1));
                 T vtmx = A.col(0).conjugate() * A.col(1);
 #ifdef TMVFLDEBUG
-                TMVAssert(R01 >= R.first);
-                TMVAssert(R01 < R.last);
+                TMVAssert(R01 >= R._first);
+                TMVAssert(R01 < R._last);
 #endif
                 *R01 = (*R01 + b0*vtmx)/(T(1)-b0);
                 A.col(1) -= b0*(vtmx + *R01) * A.col(0);
@@ -208,16 +208,16 @@ namespace tmv {
 #endif
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(Z11 >= Z.first);
-            TMVAssert(Z11 < Z.last);
+            TMVAssert(Z11 >= Z._first);
+            TMVAssert(Z11 < Z._last);
 #endif
             *Z11 = TMV_CONJ(b1);
 
             if (makeZ) {
                 T vtmx = A.col(0).conjugate() * A.col(1);
 #ifdef TMVFLDEBUG
-                TMVAssert(Z01 >= Z.first);
-                TMVAssert(Z01 < Z.last);
+                TMVAssert(Z01 >= Z._first);
+                TMVAssert(Z01 < Z._last);
 #endif
                 *Z01 = -TMV_CONJ(b0*b1)*vtmx;
             }

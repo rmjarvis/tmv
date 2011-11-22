@@ -134,8 +134,8 @@ namespace tmv {
 #endif
                 }
 #ifdef TMVFLDEBUG
-                TMVAssert(Uptr >= U.first);
-                TMVAssert(Uptr < U.last);
+                TMVAssert(Uptr >= U._first);
+                TMVAssert(Uptr < U._last);
 #endif
                 *Uptr = TMV_RealType(T)(1) / (*Uptr);
             }

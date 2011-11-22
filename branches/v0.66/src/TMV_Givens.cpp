@@ -187,20 +187,20 @@ namespace tmv {
         if (step0 == 1 && step1 == 1)
             for(int i=v1.size();i>0;--i,++v1ptr,++v2ptr) {
 #ifdef TMVFLDEBUG
-                TMVAssert(v1ptr >= v1.first);
-                TMVAssert(v1ptr < v1.last);
-                TMVAssert(v2ptr >= v2.first);
-                TMVAssert(v2ptr < v2.last);
+                TMVAssert(v1ptr >= v1._first);
+                TMVAssert(v1ptr < v1._last);
+                TMVAssert(v2ptr >= v2._first);
+                TMVAssert(v2ptr < v2._last);
 #endif
                 GivensMult(c,s,*v1ptr,*v2ptr); 
             }
         else
             for(int i=v1.size();i>0;--i,v1ptr+=step0,v2ptr+=step1) {
 #ifdef TMVFLDEBUG
-                TMVAssert(v1ptr >= v1.first);
-                TMVAssert(v1ptr < v1.last);
-                TMVAssert(v2ptr >= v2.first);
-                TMVAssert(v2ptr < v2.last);
+                TMVAssert(v1ptr >= v1._first);
+                TMVAssert(v1ptr < v1._last);
+                TMVAssert(v2ptr >= v2._first);
+                TMVAssert(v2ptr < v2._last);
 #endif
                 GivensMult(c,s,*v1ptr,*v2ptr); 
             }

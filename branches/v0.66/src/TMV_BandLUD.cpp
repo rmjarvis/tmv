@@ -30,6 +30,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
+//#include <iostream>
 
 #include "tmv/TMV_BandLUD.h"
 #include "TMV_BandLUDiv.h"
@@ -70,16 +71,15 @@ namespace tmv {
 #define APTR1 (inplace ? 0 : \
                BandStorageLength(ColMajor,A.colsize(),A.colsize(),NEWLO,NEWHI))
 #define TRID (A.nlo() == 1 && A.nhi() == 1)
-#define APTR (inplace ? A.nonConst().ptr() : \
-              Aptr1.get() + (TRID ? TMV_MIN(A.rowsize(),A.colsize()-1) : 0) )
+#define APTR (inplace ? A.nonConst().ptr() : Aptr1.get())
 
 #define LUX (istrans ? \
              (inplace ? \
               BandMatrixView<T>(A.nonConst().ptr(),A.colsize(),A.colsize(),\
                                 A.nhi(),NEWHI,A.stepj(),A.stepi(),A.diagstep(),\
                                 TMV_TransOf(A.stor()),A.ct() \
-                                TMV_FIRSTLAST1(A.nonConst().first,\
-                                               A.nonConst().last) ) : \
+                                TMV_FIRSTLAST1(A.nonConst()._first,\
+                                               A.nonConst()._last) ) : \
               BandMatrixViewOf(Aptr,A.colsize(),A.colsize(),A.nhi(), \
                                NEWHI, TRID ? DiagMajor : ColMajor)) : \
              (inplace ? \
@@ -87,8 +87,8 @@ namespace tmv {
                                 A.colsize(),A.nlo(),NEWHI,\
                                 A.stepi(),A.stepj(),A.diagstep(),\
                                 A.stor(),A.ct() \
-                                TMV_FIRSTLAST1(A.nonConst().first,\
-                                               A.nonConst().last) ) : \
+                                TMV_FIRSTLAST1(A.nonConst()._first,\
+                                               A.nonConst()._last) ) : \
               BandMatrixViewOf(Aptr,A.colsize(),A.colsize(),A.nlo(), \
                                NEWHI, TRID ? DiagMajor : ColMajor)))
 
@@ -102,7 +102,13 @@ namespace tmv {
                  ((A.isrm() && istrans) || (A.iscm() && !istrans) || 
                   (A.isdm() && TRID)))),
         Aptr1(APTR1), Aptr(APTR), LUx(LUX),
-        P(A.colsize()), logdet(0), signdet(1), donedet(false) {}
+        P(A.colsize()), logdet(0), signdet(1), donedet(false) 
+    {
+        //std::cout<<"BandLUDivImpl constructor\n";
+        //std::cout<<"A = "<<TMV_Text(A)<<" = "<<A<<std::endl;
+        //LUx.setZero();
+        //std::cout<<"LUx = "<<TMV_Text(LUx)<<" = "<<LUx<<std::endl;
+    }
 
 #undef LUX
 #undef APTR
@@ -144,12 +150,15 @@ namespace tmv {
                     A.transpose();
             else BandMatrixViewOf(pimpl->LUx,A.nlo(),A.nhi()) = A;
         }
+        //std::cout<<"LUx => "<<pimpl->LUx<<std::endl;
 
         if (pimpl->LUx.nlo() > 0) {
             int Anhi = pimpl->istrans ? A.nlo() : A.nhi();
             if (Anhi < pimpl->LUx.nhi())
                 pimpl->LUx.diagRange(Anhi+1,pimpl->LUx.nhi()+1).setZero();
+            //std::cout<<"LUx => "<<pimpl->LUx<<std::endl;
             LU_Decompose(pimpl->LUx,pimpl->P,Anhi);
+            //std::cout<<"LUx => "<<pimpl->LUx<<std::endl;
         }
     }
 
@@ -167,9 +176,25 @@ namespace tmv {
         const AssignableToBandMatrix<T>& A) :
         istrans(A.nhi()<A.nlo()), inplace(false),
         Aptr1(APTR1), Aptr(APTR), LUx(LUX),
-        P(A.colsize()), logdet(0), signdet(1), donedet(false) {}
+        P(A.colsize()), logdet(0), signdet(1), donedet(false) 
+    {
+        //std::cout<<"BandLUDivImpl Assignable constructor\n";
+        //std::cout<<"A = "<<TMV_Text(A)<<" = "<<BandMatrix<T>(A)<<std::endl;
+        //std::cout<<"LUx = "<<TMV_Text(LUx)<<" = "<<LUx<<std::endl;
+        //std::cout<<"Aptr1 = "<<Aptr1.get()<<std::endl;
+        //std::cout<<"Aptr = "<<Aptr<<std::endl;
+        //std::cout<<"len = "<<APTR1<<std::endl;
+        //std::cout<<"LUx.stepi = "<<LUx.stepi()<<std::endl;
+        //std::cout<<"LUx.stepj = "<<LUx.stepj()<<std::endl;
+        //std::cout<<"LUx.first = "<<LUx._first<<std::endl;
+        //std::cout<<"LUx.last = "<<LUx._last<<std::endl;
+        //std::cout<<"&LUx(0,0) = "<<LUx.cptr()<<std::endl;
+        //std::cout<<"&LUx("<<NEWLO<<",0) = "<<LUx.cptr()+NEWLO*LUx.stepi()<<std::endl;
+        //std::cout<<"&LUx(0,"<<NEWHI<<") = "<<LUx.cptr()+NEWHI*LUx.stepj()<<std::endl;
+    }
 
 #undef LUX
+#undef TRID
 #undef APTR
 #undef APTR1
 #undef NEWLO
@@ -184,12 +209,15 @@ namespace tmv {
             BandMatrixViewOf(pimpl->LUx,A.nhi(),A.nlo()).transpose() = A;
         else 
             BandMatrixViewOf(pimpl->LUx,A.nlo(),A.nhi()) = A;
+        //std::cout<<"LUx => "<<pimpl->LUx<<std::endl;
 
         if (pimpl->LUx.nlo() > 0) {
             int Anhi = pimpl->istrans ? A.nlo() : A.nhi();
             if (Anhi < pimpl->LUx.nhi())
                 pimpl->LUx.diagRange(Anhi+1,pimpl->LUx.nhi()+1).setZero();
+            //std::cout<<"LUx => "<<pimpl->LUx<<std::endl;
             LU_Decompose(pimpl->LUx,pimpl->P,Anhi);
+            //std::cout<<"LUx => "<<pimpl->LUx<<std::endl;
         }
     }
 
@@ -199,14 +227,16 @@ namespace tmv {
     template <class T> template <class T1> 
     void BandLUDiv<T>::doLDivEq(const MatrixView<T1>& m) const
     {
-        if (pimpl->istrans) LU_RDivEq(pimpl->LUx,pimpl->P.getValues(),m.transpose());
+        if (pimpl->istrans) 
+            LU_RDivEq(pimpl->LUx,pimpl->P.getValues(),m.transpose());
         else LU_LDivEq(pimpl->LUx,pimpl->P.getValues(),m);
     }
 
     template <class T> template <class T1> 
     void BandLUDiv<T>::doRDivEq(const MatrixView<T1>& m) const
     {
-        if (pimpl->istrans) LU_LDivEq(pimpl->LUx,pimpl->P.getValues(),m.transpose());
+        if (pimpl->istrans) 
+            LU_LDivEq(pimpl->LUx,pimpl->P.getValues(),m.transpose());
         else LU_RDivEq(pimpl->LUx,pimpl->P.getValues(),m);
     }
 

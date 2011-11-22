@@ -101,8 +101,8 @@ namespace tmv {
 #endif
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(bi >= b.first);
-            TMVAssert(bi < b.last);
+            TMVAssert(bi >= b._first);
+            TMVAssert(bi < b._last);
 #endif
             *bi /= (ca ? TMV_CONJ(*Aii) : *Aii);
             Aii -= ds;
@@ -119,8 +119,8 @@ namespace tmv {
             const Ta* Aij = Aii+sj;
             for(int j=len;j>0;--j,++bj,(rm?++Aij:Aij+=sj)) {
 #ifdef TMVFLDEBUG
-                TMVAssert(bi >= b.first);
-                TMVAssert(bi < b.last);
+                TMVAssert(bi >= b._first);
+                TMVAssert(bi < b._last);
 #endif
                 *bi -= *bj * (ca ? TMV_CONJ(*Aij) : *Aij);
             }
@@ -135,8 +135,8 @@ namespace tmv {
 #endif
                 }
 #ifdef TMVFLDEBUG
-                TMVAssert(bi >= b.first);
-                TMVAssert(bi < b.last);
+                TMVAssert(bi >= b._first);
+                TMVAssert(bi < b._last);
 #endif
                 *bi /= (ca ? TMV_CONJ(*Aii) : *Aii);
             }
@@ -196,8 +196,8 @@ namespace tmv {
 #endif
                     }
 #ifdef TMVFLDEBUG
-                    TMVAssert(bj >= b.first);
-                    TMVAssert(bj < b.last);
+                    TMVAssert(bj >= b._first);
+                    TMVAssert(bj < b._last);
 #endif
                     *bj /= (ca ? TMV_CONJ(*Ajj) : *Ajj);
                     Ajj -= ds;
@@ -208,8 +208,8 @@ namespace tmv {
                 const Ta* Aij = Ai1j;
                 for(int i=len;i>0;--i,++bi,(cm?++Aij:Aij+=si)) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(bi >= b.first);
-                    TMVAssert(bi < b.last);
+                    TMVAssert(bi >= b._first);
+                    TMVAssert(bi < b._last);
 #endif
                     *bi -= *bj * (ca ? TMV_CONJ(*Aij) : *Aij);
                 }
@@ -229,8 +229,8 @@ namespace tmv {
 #endif
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(bj >= b.first);
-            TMVAssert(bj < b.last);
+            TMVAssert(bj >= b._first);
+            TMVAssert(bj < b._last);
 #endif
             *bj /= (ca ? TMV_CONJ(*Ajj) : *Ajj);
         }
@@ -280,8 +280,8 @@ namespace tmv {
 #endif
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(bi >= b.first);
-            TMVAssert(bi < b.last);
+            TMVAssert(bi >= b._first);
+            TMVAssert(bi < b._last);
 #endif
             *bi /= (ca ? TMV_CONJ(*Aij1) : *Aij1);
         }
@@ -296,8 +296,8 @@ namespace tmv {
             const T* bj = bj1;
             for(int j=len;j>0;--j,++bj,(rm?++Aij:Aij+=sj)) {
 #ifdef TMVFLDEBUG
-                TMVAssert(bj >= b.first);
-                TMVAssert(bj < b.last);
+                TMVAssert(bj >= b._first);
+                TMVAssert(bj < b._last);
 #endif
                 *bi -= *bj * (ca ? TMV_CONJ(*Aij) : *Aij);
             }
@@ -312,8 +312,8 @@ namespace tmv {
 #endif
                 }
 #ifdef TMVFLDEBUG
-                TMVAssert(bi >= b.first);
-                TMVAssert(bi < b.last);
+                TMVAssert(bi >= b._first);
+                TMVAssert(bi < b._last);
 #endif
                 *bi /= (ca ? TMV_CONJ(*Aij) : *Aij);
             }
@@ -368,8 +368,8 @@ namespace tmv {
 #endif
                     }
 #ifdef TMVFLDEBUG
-                    TMVAssert(bj >= b.first);
-                    TMVAssert(bj < b.last);
+                    TMVAssert(bj >= b._first);
+                    TMVAssert(bj < b._last);
 #endif
                     *bj /= (ca ? TMV_CONJ(*Ajj) : *Ajj);
                 }
@@ -378,8 +378,8 @@ namespace tmv {
                 const Ta* Aij = Ajj+si;
                 for(int i=len;i>0;--i,++bi,(cm?++Aij:Aij+=si)) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(bi >= b.first);
-                    TMVAssert(bi < b.last);
+                    TMVAssert(bi >= b._first);
+                    TMVAssert(bi < b._last);
 #endif
                     *bi -= *bj * (ca ? TMV_CONJ(*Aij) : *Aij);
                 }
@@ -396,8 +396,8 @@ namespace tmv {
 #endif
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(bj >= b.first);
-            TMVAssert(bj < b.last);
+            TMVAssert(bj >= b._first);
+            TMVAssert(bj < b._last);
 #endif
             *bj /= (ca ? TMV_CONJ(*Ajj) : *Ajj);
         }

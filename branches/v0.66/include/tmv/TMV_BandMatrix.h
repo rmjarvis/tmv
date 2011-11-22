@@ -29,6 +29,7 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
+#define USE_VALGRIND
 
 //---------------------------------------------------------------------------
 //
@@ -4005,7 +4006,7 @@ namespace tmv {
                 1;
             itsm = S==DiagMajor ? itsm1.get()-lo*itssi : itsm1.get();
 #ifdef TMVFLDEBUG
-            _first = itsm.get();
+            _first = itsm1.get();
             _last = _first + linsize;
 #endif
 #ifdef TMVDEBUG
@@ -4071,8 +4072,8 @@ namespace tmv {
 
 #ifdef TMVFLDEBUG
     public:
-        T* _first;
-        T* _last;
+        const T* _first;
+        const T* _last;
     protected:
 #endif
 
@@ -4432,8 +4433,9 @@ namespace tmv {
             stor == RowMajor ? 1 :
             stor == ColMajor ? nlo+nhi : 
             rs >= cs ? int(cs) : int(rs)+1 );
+        T* m0 = (stor == DiagMajor) ? m - nlo*stepi : m;
         return ConstBandMatrixView<T>(
-            m,cs,rs,nlo,nhi,stepi,stepj,stor,NonConj);
+            m0,cs,rs,nlo,nhi,stepi,stepj,stor,NonConj);
     }
 
     template <class T> 
@@ -4453,8 +4455,9 @@ namespace tmv {
             stor == RowMajor ? 1 :
             stor == ColMajor ? nlo+nhi : 
             rs >= cs ? int(cs) : int(rs)+1 );
+        T* m0 = (stor == DiagMajor) ? m - nlo*stepi : m;
         return BandMatrixView<T>(
-            m,cs,rs,nlo,nhi,stepi,stepj,stepi+stepj,stor,NonConj
+            m0,cs,rs,nlo,nhi,stepi,stepj,stepi+stepj,stor,NonConj
             TMV_FIRSTLAST1(m,m+BandStorageLength(stor,cs,rs,nlo,nhi)));
     }
 
@@ -4487,7 +4490,11 @@ namespace tmv {
             stepi == 1 ? ColMajor : stepj == 1 ? RowMajor :
             stepi+stepj == 1 ? DiagMajor : NoMajor);
         return BandMatrixView<T>(
-            m,cs,rs,nlo,nhi,stepi,stepj,stepi+stepj,stor,NonConj);
+            m,cs,rs,nlo,nhi,stepi,stepj,stepi+stepj,stor,NonConj 
+            TMV_FIRSTLAST1(
+                m + (stepi < 0 ? (stepi*nlo) : stepj < 0 ? (stepj*nhi) : 0),
+                m + ((stepi < 0 ? (stepi*nlo) : stepj < 0 ? (stepj*nhi) : 0) +
+                     BandStorageLength(stor,cs,rs,nlo,nhi))));
     }
 
 

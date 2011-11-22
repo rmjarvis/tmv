@@ -1048,8 +1048,8 @@ namespace tmv {
 
         inline view_type cSubVector(int i1, int i2) const
         {
-            return view_type(ptr()+i1*step(),(i2-i1),step(),
-                        ct() TMV_FIRSTLAST );
+            return view_type(
+                ptr()+i1*step(),(i2-i1),step(),ct() TMV_FIRSTLAST );
         }
 
         inline view_type subVector(int i1, int i2) const
@@ -1060,8 +1060,9 @@ namespace tmv {
 
         inline view_type cSubVector(int i1, int i2, int istep) const
         {
-            return view_type(ptr()+i1*step(),(i2-i1)/istep,istep*step(),
-                        ct() TMV_FIRSTLAST );
+            return view_type(
+                ptr()+i1*step(),(i2-i1)/istep,istep*step(), ct() 
+                TMV_FIRSTLAST );
         }
 
         inline view_type subVector(int i1, int i2, int istep) const
@@ -1072,8 +1073,9 @@ namespace tmv {
 
         inline view_type reverse() const
         { 
-            return view_type(ptr()+(int(size())-1)*step(),size(),-step(),
-                        ct() TMV_FIRSTLAST ); 
+            return view_type(
+                ptr()+(int(size())-1)*step(),size(),-step(), ct() 
+                TMV_FIRSTLAST ); 
         }
 
         inline view_type view() const
@@ -1087,8 +1089,8 @@ namespace tmv {
 
         inline view_type conjugate() const
         {
-            return view_type(ptr(),size(),step(),
-                        TMV_ConjOf(T,ct()) TMV_FIRSTLAST ); 
+            return view_type(
+                ptr(),size(),step(), TMV_ConjOf(T,ct()) TMV_FIRSTLAST ); 
         }
 
         inline real_type realPart() const
@@ -1177,8 +1179,8 @@ namespace tmv {
 
 #ifdef TMVFLDEBUG
     public:
-        const T*const _first;
-        const T*const _last;
+        const T* _first;
+        const T* _last;
 #endif
 
     }; // VectorView
@@ -2041,6 +2043,7 @@ namespace tmv {
     public:
         const T* _first;
         const T* _last;
+    protected:
 #endif
 
         template <IndexStyle I2>

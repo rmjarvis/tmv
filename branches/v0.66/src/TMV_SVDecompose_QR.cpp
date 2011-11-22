@@ -80,8 +80,8 @@ namespace tmv {
         T* Di = D.ptr();
         T* Ei = E.ptr();
 #ifdef TMVFLDEBUG
-        TMVAssert(Di >= D.first);
-        TMVAssert(Di < D.last);
+        TMVAssert(Di >= D._first);
+        TMVAssert(Di < D._last);
 #endif
         if (TMV_Underflow(TMV_NORM(*Di))) {
             *Di = T(0);
@@ -90,16 +90,16 @@ namespace tmv {
         ++Di;
         for(int k=E.size();k>0;--k,++Di,++Ei) {
 #ifdef TMVFLDEBUG
-            TMVAssert(Di >= D.first);
-            TMVAssert(Di < D.last);
+            TMVAssert(Di >= D._first);
+            TMVAssert(Di < D._last);
 #endif
             if (TMV_Underflow(TMV_NORM(*Di))) {
                 *Di = T(0);
                 if(zd) *zd = true; 
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(Ei >= E.first);
-            TMVAssert(Ei < E.last);
+            TMVAssert(Ei >= E._first);
+            TMVAssert(Ei < E._last);
 #endif
             // Do it as !(|e| > eps (|d1| + |d2|)) to nan's will get set to 
             // zero too and not iterate forever.
@@ -151,23 +151,23 @@ namespace tmv {
         RT x = *Ei;
         if (x != RT(0)) {
 #ifdef TMVFLDEBUG
-            TMVAssert(Ei >= E.first);
-            TMVAssert(Ei < E.last);
+            TMVAssert(Ei >= E._first);
+            TMVAssert(Ei < E._last);
 #endif
             *Ei = RT(0);
             ++Ei;
             // Loop Invariant: x = B(0,i)
             for(int i=0; i<N; ++i,++Di,++Ei) {
 #ifdef TMVFLDEBUG
-                TMVAssert(Di >= D.first);
-                TMVAssert(Di < D.last);
+                TMVAssert(Di >= D._first);
+                TMVAssert(Di < D._last);
 #endif
                 Givens<RT> G = GivensRotate(*Di,x);
                 // Make new B = G B
                 if (i<N) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(Ei >= E.first);
-                    TMVAssert(Ei < E.last);
+                    TMVAssert(Ei >= E._first);
+                    TMVAssert(Ei < E._last);
 #endif
                     G.mult(*Ei,x);
                 }
@@ -201,22 +201,22 @@ namespace tmv {
         RT x = *Ei;
         if (x != RT(0)) {
 #ifdef TMVFLDEBUG
-            TMVAssert(Ei >= E.first);
-            TMVAssert(Ei < E.last);
+            TMVAssert(Ei >= E._first);
+            TMVAssert(Ei < E._last);
 #endif
             *Ei = RT(0);
             // Loop Invariant: x = B(i,N-1)
             for(int i=N-1; i>=0; --i,--Di) {
 #ifdef TMVFLDEBUG
-                TMVAssert(Di >= D.first);
-                TMVAssert(Di < D.last);
+                TMVAssert(Di >= D._first);
+                TMVAssert(Di < D._last);
 #endif
                 Givens<RT> G = GivensRotate(*Di,x);
                 // Make new B = B GT
                 if (i>0) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(Ei-1 >= E.first);
-                    TMVAssert(Ei-1 < E.last);
+                    TMVAssert(Ei-1 >= E._first);
+                    TMVAssert(Ei-1 < E._last);
 #endif
                     G.mult(*(--Ei),x);
                 }

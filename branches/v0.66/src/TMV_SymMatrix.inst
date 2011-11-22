@@ -45,14 +45,6 @@
   template Ref SymMatrixView<T,CStyle>::ref(int i, int j) const; \
   template std::istream& operator>>(std::istream& fin, \
       const SymMatrixView<T >& m); \
-  template ConstSymMatrixView<T > SymMatrixViewOf( \
-      const T* m, size_t s, UpLoType uplo, StorageType stor); \
-  template SymMatrixView<T > SymMatrixViewOf( \
-      T* m, size_t s, UpLoType uplo, StorageType stor); \
-  template ConstSymMatrixView<T > HermMatrixViewOf( \
-      const T* m, size_t s, UpLoType uplo, StorageType stor); \
-  template SymMatrixView<T > HermMatrixViewOf( \
-      T* m, size_t s, UpLoType uplo, StorageType stor); \
 
 Def1(T,T,T&)
 #ifdef INST_COMPLEX

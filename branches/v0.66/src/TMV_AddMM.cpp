@@ -81,8 +81,8 @@ namespace tmv {
             T* Bij = Browi;
             for(int j=N;j>0;--j,(rm?++Aij:Aij+=Asj),(rm?++Bij:Bij+=Bsj)) {
 #ifdef TMVFLDEBUG
-                TMVAssert(Bij >= B.first);
-                TMVAssert(Bij < B.last);
+                TMVAssert(Bij >= B._first);
+                TMVAssert(Bij < B._last);
 #endif
                 if (a1) *Bij += (ca ? TMV_CONJ(*Aij) : *Aij);
                 else *Bij += alpha * (ca ? TMV_CONJ(*Aij) : *Aij);

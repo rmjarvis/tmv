@@ -64,8 +64,8 @@ namespace tmv {
         if (A.size() == 1) {
             const Ta Ax = ca ? TMV_CONJ(*A.diag().cptr()) : *A.diag().cptr();
 #ifdef TMVFLDEBUG
-            TMVAssert(B.ptr() >= B.first);
-            TMVAssert(B.ptr() < B.last);
+            TMVAssert(B.ptr() >= B._first);
+            TMVAssert(B.ptr() < B._last);
 #endif
             if (a1) *B.ptr() *= Ax;
             else *B.ptr() *= alpha * Ax;
@@ -157,8 +157,8 @@ namespace tmv {
         if (A.size() == 1) {
             const Ta Ax = ca ? TMV_CONJ(*A.diag().cptr()) : *A.diag().cptr();
 #ifdef TMVFLDEBUG
-            TMVAssert(C.ptr() >= C.first);
-            TMVAssert(C.ptr() < C.last);
+            TMVAssert(C.ptr() >= C._first);
+            TMVAssert(C.ptr() < C._last);
 #endif
             if (a1)
                 if (ub) *C.ptr() += Ax;
@@ -337,8 +337,8 @@ namespace tmv {
         if (A.size() == 1) {
             const Ta Ax = ca ? TMV_CONJ(*A.diag().cptr()) : *A.diag().cptr();
 #ifdef TMVFLDEBUG
-            TMVAssert(B.ptr() >= B.first);
-            TMVAssert(B.ptr() < B.last);
+            TMVAssert(B.ptr() >= B._first);
+            TMVAssert(B.ptr() < B._last);
 #endif
             if (a1) *B.ptr() *= Ax;
             else *B.ptr() *= alpha * Ax;
@@ -430,8 +430,8 @@ namespace tmv {
         if (A.size() == 1) {
             const Ta Ax = ca ? TMV_CONJ(*A.diag().cptr()) : *A.diag().cptr();
 #ifdef TMVFLDEBUG
-            TMVAssert(C.ptr() >= C.first);
-            TMVAssert(C.ptr() < C.last);
+            TMVAssert(C.ptr() >= C._first);
+            TMVAssert(C.ptr() < C._last);
 #endif
             if (a1)
                 if (ub) *C.ptr() += Ax;

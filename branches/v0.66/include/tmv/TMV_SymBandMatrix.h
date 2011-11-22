@@ -2343,8 +2343,8 @@ namespace tmv {
 
 #ifdef TMVFLDEBUG
     public:
-        const T*const _first;
-        const T*const _last;
+        const T* _first;
+        const T* _last;
     protected:
 #endif
 
@@ -5940,20 +5940,158 @@ namespace tmv {
 
     // From ptr
     template <class T> 
-    ConstSymBandMatrixView<T> SymBandMatrixViewOf(
-        const T* m, size_t size, int nlo, UpLoType uplo, StorageType stor);
+    inline ConstSymBandMatrixView<T> SymBandMatrixViewOf(
+        const T* m, size_t size, int nlo, UpLoType uplo, StorageType stor)
+    {
+        TMVAssert(stor==RowMajor || stor==ColMajor || stor==DiagMajor);
+        TMVAssert(size>0);
+        TMVAssert(nlo<int(size));
+        const int stepi = 
+            stor == RowMajor ? nlo :
+            stor == ColMajor ? 1 :
+            -int(size) + 1;
+        const int stepj = 
+            stor == RowMajor ? 1 :
+            stor == ColMajor ? nlo :
+            int(size);
+        const T* m0 = (stor == DiagMajor && uplo == Lower) ? m-nlo*stepi : m;
+        return ConstSymBandMatrixView<T>(
+            m0,size,nlo,stepi,stepj,stepi+stepj,Sym,uplo,stor,NonConj);
+    }
 
     template <class T> 
-    ConstSymBandMatrixView<T> HermBandMatrixViewOf(
-        const T* m, size_t size, int nlo, UpLoType uplo, StorageType stor);
+    inline ConstSymBandMatrixView<T> HermBandMatrixViewOf(
+        const T* m, size_t size, int nlo, UpLoType uplo, StorageType stor)
+    {
+        TMVAssert(stor==RowMajor || stor==ColMajor || stor==DiagMajor);
+        TMVAssert(size>0);
+        TMVAssert(nlo<int(size));
+        const int stepi = 
+            stor == RowMajor ? nlo :
+            stor == ColMajor ? 1 :
+            -int(size) + 1;
+        const int stepj = 
+            stor == RowMajor ? 1 :
+            stor == ColMajor ? nlo :
+            int(size);
+        const T* m0 = (stor == DiagMajor && uplo == Lower) ? m-nlo*stepi : m;
+        return ConstSymBandMatrixView<T>(
+            m0,size,nlo,stepi,stepj,stepi+stepj,Herm,uplo,stor,NonConj);
+    }
 
     template <class T> 
-    SymBandMatrixView<T> SymBandMatrixViewOf(
-        T* m, size_t size, int nlo, UpLoType uplo, StorageType stor);
+    inline SymBandMatrixView<T> SymBandMatrixViewOf(
+        T* m, size_t size, int nlo, UpLoType uplo, StorageType stor)
+    {
+        TMVAssert(stor==RowMajor || stor==ColMajor || stor==DiagMajor);
+        TMVAssert(size>0);
+        TMVAssert(nlo<int(size));
+        const int stepi = 
+            stor == RowMajor ? nlo :
+            stor == ColMajor ? 1 :
+            -int(size) + 1;
+        const int stepj = 
+            stor == RowMajor ? 1 :
+            stor == ColMajor ? nlo :
+            int(size);
+        T* m0 = (stor == DiagMajor && uplo == Lower) ? m-nlo*stepi : m;
+        return SymBandMatrixView<T>(
+            m0,size,nlo,stepi,stepj,stepi+stepj,Sym,uplo,stor,NonConj
+            TMV_FIRSTLAST1(m,m+BandStorageLength(stor,size,size,nlo,0)));
+    }
 
     template <class T> 
-    SymBandMatrixView<T> HermBandMatrixViewOf(
-        T* m, size_t size, int nlo, UpLoType uplo, StorageType stor);
+    inline SymBandMatrixView<T> HermBandMatrixViewOf(
+        T* m, size_t size, int nlo, UpLoType uplo, StorageType stor)
+    {
+        TMVAssert(stor==RowMajor || stor==ColMajor || stor==DiagMajor);
+        TMVAssert(size>0);
+        TMVAssert(nlo<int(size));
+        const int stepi = 
+            stor == RowMajor ? nlo :
+            stor == ColMajor ? 1 :
+            -int(size) + 1;
+        const int stepj = 
+            stor == RowMajor ? 1 :
+            stor == ColMajor ? nlo :
+            int(size);
+        T* m0 = (stor == DiagMajor && uplo == Lower) ? m-nlo*stepi : m;
+        return SymBandMatrixView<T>(
+            m0,size,nlo,stepi,stepj,stepi+stepj,Herm,uplo,stor,NonConj
+            TMV_FIRSTLAST1(m,m+BandStorageLength(stor,size,size,nlo,0)));
+    }
+
+    template <class T> 
+    inline ConstSymBandMatrixView<T> SymBandMatrixViewOf(
+        const T* m, size_t size, int nlo, UpLoType uplo, int stepi, int stepj)
+    {
+        TMVAssert(size>0);
+        TMVAssert(nlo<int(size));
+        const StorageType stor = 
+            stepi == 1 ? ColMajor :
+            stepj == 1 ? RowMajor :
+            stepi+stepj == 1 ? DiagMajor :
+            NoMajor;
+        return ConstSymBandMatrixView<T>(
+            m,size,nlo,stepi,stepj,stepi+stepj,Sym,uplo,stor,NonConj);
+    }
+
+    template <class T> 
+    inline ConstSymBandMatrixView<T> HermBandMatrixViewOf(
+        const T* m, size_t size, int nlo, UpLoType uplo, int stepi, int stepj)
+    {
+        TMVAssert(size>0);
+        TMVAssert(nlo<int(size));
+        const StorageType stor = 
+            stepi == 1 ? ColMajor :
+            stepj == 1 ? RowMajor :
+            stepi+stepj == 1 ? DiagMajor :
+            NoMajor;
+        return SymBandMatrixView<T>(
+            m,size,nlo,stepi,stepj,stepi+stepj,Herm,uplo,stor,NonConj);
+    }
+
+    template <class T> 
+    inline SymBandMatrixView<T> SymBandMatrixViewOf(
+        T* m, size_t size, int nlo, UpLoType uplo, int stepi, int stepj)
+    {
+        TMVAssert(size>0);
+        TMVAssert(nlo<int(size));
+        const StorageType stor = 
+            stepi == 1 ? ColMajor :
+            stepj == 1 ? RowMajor :
+            stepi+stepj == 1 ? DiagMajor :
+            NoMajor;
+        return SymBandMatrixView<T>(
+            m,size,nlo,stepi,stepj,stepi+stepj,Sym,uplo,stor,NonConj
+            TMV_FIRSTLAST1(
+                m + (stepi < 0 && uplo==Lower ? (stepi*nlo) : 
+                     stepj < 0 && uplo==Upper ? (stepj*nhi) : 0),
+                m + ((stepi < 0 && uplo==Lower ? (stepi*nlo) : 
+                      stepj < 0 && uplo==Upper ? (stepj*nhi) : 0) +
+                     BandStorageLength(stor,size,size,nlo,0))));
+    }
+
+    template <class T> 
+    inline SymBandMatrixView<T> HermBandMatrixViewOf(
+        T* m, size_t size, int nlo, UpLoType uplo, int stepi, int stepj)
+    {
+        TMVAssert(size>0);
+        TMVAssert(nlo<int(size));
+        const StorageType stor = 
+            stepi == 1 ? ColMajor :
+            stepj == 1 ? RowMajor :
+            stepi+stepj == 1 ? DiagMajor :
+            NoMajor;
+        return SymBandMatrixView<T>(
+            m,size,nlo,stepi,stepj,stepi+stepj,Herm,uplo,stor,NonConj
+            TMV_FIRSTLAST1(
+                m + (stepi < 0 && uplo==Lower ? (stepi*nlo) : 
+                     stepj < 0 && uplo==Upper ? (stepj*nhi) : 0),
+                m + ((stepi < 0 && uplo==Lower ? (stepi*nlo) : 
+                      stepj < 0 && uplo==Upper ? (stepj*nhi) : 0) +
+                     BandStorageLength(stor,size,size,nlo,0))));
+    }
 
 
     //

@@ -73,13 +73,13 @@ namespace tmv {
         ++Di;
         for(int k=E.size();k>0;--k,++Di,++Ei) {
 #ifdef TMVFLDEBUG
-            TMVAssert(Di >= D.first);
-            TMVAssert(Di < D.last);
+            TMVAssert(Di >= D._first);
+            TMVAssert(Di < D._last);
 #endif
             if (TMV_Underflow(*Di)) { *Di = T(0); }
 #ifdef TMVFLDEBUG
-            TMVAssert(Ei >= E.first);
-            TMVAssert(Ei < E.last);
+            TMVAssert(Ei >= E._first);
+            TMVAssert(Ei < E._last);
 #endif
             if ( !(TMV_ABS(*Ei) > eps*(TMV_ABS(*Di)+TMV_ABS(*(Di-1)))) ||
                  TMV_Underflow(*Ei) ) {
@@ -209,12 +209,12 @@ namespace tmv {
         Givens<RT> G = GivensRotate(y,x);
         for(int i=0;;++i,++Di,++Ei) {
 #ifdef TMVFLDEBUG
-            TMVAssert(Di >= D.first);
-            TMVAssert(Di < D.last);
-            TMVAssert(Di+1 >= D.first);
-            TMVAssert(Di+1 < D.last);
-            TMVAssert(Ei >= E.first);
-            TMVAssert(Ei < E.last);
+            TMVAssert(Di >= D._first);
+            TMVAssert(Di < D._last);
+            TMVAssert(Di+1 >= D._first);
+            TMVAssert(Di+1 < D._last);
+            TMVAssert(Ei >= E._first);
+            TMVAssert(Ei < E._last);
 #endif
             G.symMult(*Di,*(Di+1),*Ei);
             //RT Ei2 = *Ei; // = T01
@@ -226,8 +226,8 @@ namespace tmv {
             if (i==N-2) break;
             TMVAssert(x==RT(0));
 #ifdef TMVFLDEBUG
-            TMVAssert(Ei+1 >= E.first);
-            TMVAssert(Ei+1 < E.last);
+            TMVAssert(Ei+1 >= E._first);
+            TMVAssert(Ei+1 < E._last);
 #endif
             G.mult(x,*(Ei+1));
             G = GivensRotate(*Ei,x);

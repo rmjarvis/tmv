@@ -119,10 +119,10 @@ namespace tmv {
             std::complex<T> xcEj = (*Uj) * (*cEj);
             ++Uj;
 #ifdef TMVFLDEBUG
-            TMVAssert(Ej >= E.first);
-            TMVAssert(Ej < E.last);
-            TMVAssert(Uj >= Udiag.first);
-            TMVAssert(Uj < Udiag.last);
+            TMVAssert(Ej >= E._first);
+            TMVAssert(Ej < E._last);
+            TMVAssert(Uj >= Udiag._first);
+            TMVAssert(Uj < Udiag._last);
 #endif
             *Ej = TMV_ABS(xcEj);
             *Uj = TMV_SIGN(xcEj,*Ej);
@@ -210,8 +210,8 @@ namespace tmv {
             // We use Householder reflections to reduce A to the tridiagonal form:
             for(int j=0;j<N-1;++j,++Ubj) {
 #ifdef TMVFLDEBUG
-                TMVAssert(Ubj >= Ubeta.first);
-                TMVAssert(Ubj < Ubeta.last);
+                TMVAssert(Ubj >= Ubeta._first);
+                TMVAssert(Ubj < Ubeta._last);
 #endif
                 *Ubj = HouseholderReflect(U1->col(j,j+1,endcol),signdet);
                 if (endcol < N) {

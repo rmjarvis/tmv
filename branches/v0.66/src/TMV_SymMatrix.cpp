@@ -962,65 +962,6 @@ namespace tmv {
     RT GenSymMatrix<T>::doCondition() const
     { return tmv::DoCondition(*this); }
 
-    template <class T> 
-    ConstSymMatrixView<T> SymMatrixViewOf(
-        const T* m, size_t size, UpLoType uplo, StorageType stor)
-    {
-        TMVAssert2(stor == RowMajor || stor == ColMajor);
-        TMVAssert2(size>0);
-        if (stor == RowMajor)
-            return ConstSymMatrixView<T>(
-                m,size,size,1,Sym,uplo,RowMajor,NonConj);
-        else
-            return ConstSymMatrixView<T>(
-                m,size,1,size,Sym,uplo,ColMajor,NonConj);
-    }
-
-    template <class T> 
-    ConstSymMatrixView<T> HermMatrixViewOf(
-        const T* m, size_t size, UpLoType uplo, StorageType stor)
-    {
-        TMVAssert(stor == RowMajor || stor == ColMajor);
-        TMVAssert2(size>0);
-        if (stor == RowMajor)
-            return ConstSymMatrixView<T>(
-                m,size,size,1,Herm,uplo,RowMajor,NonConj);
-        else
-            return ConstSymMatrixView<T>(
-                m,size,1,size,Herm,uplo,ColMajor,NonConj);
-    }
-
-
-    template <class T> 
-    SymMatrixView<T> SymMatrixViewOf(
-        T* m, size_t size, UpLoType uplo, StorageType stor)
-    {
-        TMVAssert(stor == RowMajor || stor == ColMajor);
-        if (stor == RowMajor)
-            return SymMatrixView<T>(
-                m,size,size,1,Sym,uplo,RowMajor,NonConj
-                TMV_FIRSTLAST1(m,m+size*size));
-        else
-            return SymMatrixView<T>(
-                m,size,1,size,Sym,uplo,ColMajor,NonConj
-                TMV_FIRSTLAST1(m,m+size*size));
-    }
-
-    template <class T> 
-    SymMatrixView<T> HermMatrixViewOf(
-        T* m, size_t size, UpLoType uplo, StorageType stor)
-    {
-        TMVAssert(stor == RowMajor || stor == ColMajor);
-        if (stor == RowMajor)
-            return SymMatrixView<T>(
-                m,size,size,1,Herm,uplo,RowMajor,NonConj
-                                    TMV_FIRSTLAST1(m,m+size*size));
-        else
-            return SymMatrixView<T>(
-                m,size,1,size,Herm,uplo,ColMajor,NonConj
-                                    TMV_FIRSTLAST1(m,m+size*size));
-    }
-
 
     //
     // I/O

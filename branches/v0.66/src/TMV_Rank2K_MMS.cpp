@@ -89,8 +89,8 @@ namespace tmv {
                 T temp = x.row(0) * (ha ? y.row(0).conjugate() : y.row(0));
                 if (!a1) temp *= alpha;
 #ifdef TMVFLDEBUG
-                TMVAssert(A.ptr() >= A.first);
-                TMVAssert(A.ptr() < A.last);
+                TMVAssert(A.ptr() >= A._first);
+                TMVAssert(A.ptr() < A._last);
 #endif
                 if (ha)
                     if (add) *(A.ptr()) += TMV_RealType(T)(2) * TMV_REAL(temp);
@@ -178,8 +178,8 @@ namespace tmv {
             Tx x00 = x(0,0);
             Ty y00 = y(0,0);
 #ifdef TMVFLDEBUG
-            TMVAssert(A.ptr() >= A.first);
-            TMVAssert(A.ptr() < A.last);
+            TMVAssert(A.ptr() >= A._first);
+            TMVAssert(A.ptr() < A._last);
 #endif
             if (ha) {
                 TMV_RealType(T) temp = TMV_RealType(T)(2) *

@@ -129,15 +129,15 @@ namespace tmv {
             const Ta* Aij = Aii+sj;
             for(int j=len;j>0;--j,++xj,(rm?++Aij:Aij+=sj)) {
 #ifdef TMVFLDEBUG
-                TMVAssert(xi >= x.first);
-                TMVAssert(xi < x.last);
+                TMVAssert(xi >= x._first);
+                TMVAssert(xi < x._last);
 #endif
                 *xi += (*xj) * (ca ? TMV_CONJ(*Aij) : *Aij);
             }
         }
 #ifdef TMVFLDEBUG
-        TMVAssert(xi >= x.first);
-        TMVAssert(xi < x.last);
+        TMVAssert(xi >= x._first);
+        TMVAssert(xi < x._last);
 #endif
         if (!ua) *xi *= (ca ? TMV_CONJ(*Aii) : *Aii);
     }
@@ -179,8 +179,8 @@ namespace tmv {
         const Ta* A0j = A.cptr();
 
 #ifdef TMVFLDEBUG
-        TMVAssert(x0 >= x.first);
-        TMVAssert(x0 < x.last);
+        TMVAssert(x0 >= x._first);
+        TMVAssert(x0 < x._last);
 #endif
         if (!ua) *x0 *= (ca ? TMV_CONJ(*A0j) : *A0j);
         A0j += A.stepj();
@@ -192,16 +192,16 @@ namespace tmv {
             T* xi = x0;
             for(int i=len;i>0;--i,++xi,(cm?++Aij:Aij+=si)) {
 #ifdef TMVFLDEBUG
-                TMVAssert(xi >= x.first);
-                TMVAssert(xi < x.last);
+                TMVAssert(xi >= x._first);
+                TMVAssert(xi < x._last);
 #endif
                 *xi += *xj * (ca ? TMV_CONJ(*Aij) : *Aij);
             }
             // Now Aij == Ajj, xi == xj
             // so this next statement is really *xj *= *Ajj
 #ifdef TMVFLDEBUG
-            TMVAssert(xi >= x.first);
-            TMVAssert(xi < x.last);
+            TMVAssert(xi >= x._first);
+            TMVAssert(xi < x._last);
 #endif
             if (!ua) *xi *= (ca ? TMV_CONJ(*Aij) : *Aij);
         }
@@ -256,14 +256,14 @@ namespace tmv {
             for(int j=len;j>0;--j,++xj,(rm?++Aij:Aij+=sj))
                 xx += *xj * (ca ? TMV_CONJ(*Aij) : *Aij);
 #ifdef TMVFLDEBUG
-            TMVAssert(xi >= x.first);
-            TMVAssert(xi < x.last);
+            TMVAssert(xi >= x._first);
+            TMVAssert(xi < x._last);
 #endif
             *xi = xx;
         }
 #ifdef TMVFLDEBUG
-        TMVAssert(xi >= x.first);
-        TMVAssert(xi < x.last);
+        TMVAssert(xi >= x._first);
+        TMVAssert(xi < x._last);
 #endif
         if (!ua) *xi *= (ca ? TMV_CONJ(*Aii) : *Aii);
     }
@@ -305,8 +305,8 @@ namespace tmv {
         const Ta* Ajj = A.cptr()+(N-2)*ds;
 
 #ifdef TMVFLDEBUG
-        TMVAssert(xj+1 >= x.first);
-        TMVAssert(xj+1 < x.last);
+        TMVAssert(xj+1 >= x._first);
+        TMVAssert(xj+1 < x._last);
 #endif
         if (!ua) *(xj+1) *= (ca ? TMV_CONJ(*(Ajj+ds)) : *(Ajj+ds));
         for(int jj=N-1,len=1;jj>0;--jj,++len,--xj,Ajj-=ds) if (*xj!=T(0)) {
@@ -316,14 +316,14 @@ namespace tmv {
             const Ta* Aij = Ajj+si;
             for (int i=len;i>0;--i,++xi,(cm?++Aij:Aij+=si)) {
 #ifdef TMVFLDEBUG
-                TMVAssert(xi >= x.first);
-                TMVAssert(xi < x.last);
+                TMVAssert(xi >= x._first);
+                TMVAssert(xi < x._last);
 #endif
                 *xi += *xj * (ca ? TMV_CONJ(*Aij) : *Aij);
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(xj >= x.first);
-            TMVAssert(xj < x.last);
+            TMVAssert(xj >= x._first);
+            TMVAssert(xj < x._last);
 #endif
             if (!ua) *xj *= (ca ? TMV_CONJ(*Ajj) : *Ajj);
         }

@@ -69,8 +69,8 @@ namespace tmv {
             const int N2 = N-4*N1;
             if (N1) for(int i=N1;i>0;--i,vptr+=4) {
 #ifdef TMVFLDEBUG
-                TMVAssert(vptr >= v.first);
-                TMVAssert(vptr+3 < v.last);
+                TMVAssert(vptr >= v._first);
+                TMVAssert(vptr+3 < v._last);
 #endif
                 *vptr *= x;
                 vptr[1] *= x;
@@ -79,16 +79,16 @@ namespace tmv {
             }
             if (N2) for(int i=N2;i>0;--i,++vptr) {
 #ifdef TMVFLDEBUG
-                TMVAssert(vptr >= v.first);
-                TMVAssert(vptr < v.last);
+                TMVAssert(vptr >= v._first);
+                TMVAssert(vptr < v._last);
 #endif
                 *vptr *= x;
             }
         } else {
             for(int i=N;i>0;--i,vptr+=s) {
 #ifdef TMVFLDEBUG
-                TMVAssert(vptr >= v.first);
-                TMVAssert(vptr < v.last);
+                TMVAssert(vptr >= v._first);
+                TMVAssert(vptr < v._last);
 #endif
                 *vptr *= x;
             }
@@ -236,8 +236,8 @@ namespace tmv {
             const int N2 = N-4*N1;
             if (N1) for(int i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
 #ifdef TMVFLDEBUG
-                TMVAssert(v2ptr >= v2.first);
-                TMVAssert(v2ptr+3 < v2.last);
+                TMVAssert(v2ptr >= v2._first);
+                TMVAssert(v2ptr+3 < v2._last);
 #endif
                 *v2ptr = x * (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                 v2ptr[1] = x * (c1 ? TMV_CONJ(v1ptr[1]) : v1ptr[1]);
@@ -246,8 +246,8 @@ namespace tmv {
             }
             if (N2) for(int i=N2;i>0;--i,v1ptr++,v2ptr++)  {
 #ifdef TMVFLDEBUG
-                TMVAssert(v2ptr >= v2.first);
-                TMVAssert(v2ptr < v2.last);
+                TMVAssert(v2ptr >= v2._first);
+                TMVAssert(v2ptr < v2._last);
 #endif
                 *v2ptr = x * (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
             }
@@ -255,8 +255,8 @@ namespace tmv {
         else
             for(int i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2)  {
 #ifdef TMVFLDEBUG
-                TMVAssert(v2ptr >= v2.first);
-                TMVAssert(v2ptr < v2.last);
+                TMVAssert(v2ptr >= v2._first);
+                TMVAssert(v2ptr < v2._last);
 #endif
                 *v2ptr = x * (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
             }
@@ -278,8 +278,8 @@ namespace tmv {
                 MultXV(TMV_CONJ(x),v1.conjugate(),v2.conjugate());
             } else if (v2.size() == 1) {
 #ifdef TMVFLDEBUG
-                TMVAssert(v2.ptr() >= v2.first);
-                TMVAssert(v2.ptr() < v2.last);
+                TMVAssert(v2.ptr() >= v2._first);
+                TMVAssert(v2.ptr() < v2._last);
 #endif
                 *v2.ptr() = x * 
                     ( v1.isconj() ?
@@ -366,8 +366,8 @@ namespace tmv {
                 if (alpha == Ta(1))
                     for(int i=N1;i>0;--i,xp+=4,yp+=4,zp+=4) {
 #ifdef TMVFLDEBUG
-                        TMVAssert(zp >= z.first);
-                        TMVAssert(zp+3 < z.last);
+                        TMVAssert(zp >= z._first);
+                        TMVAssert(zp+3 < z._last);
 #endif
                         *zp += (cx?TMV_CONJ(*xp):(*xp)) *
                             (cy?TMV_CONJ(*yp):(*yp));
@@ -381,8 +381,8 @@ namespace tmv {
                 else if (alpha == Ta(-1))
                     for(int i=N1;i>0;--i,xp+=4,yp+=4,zp+=4){
 #ifdef TMVFLDEBUG
-                        TMVAssert(zp >= z.first);
-                        TMVAssert(zp+3 < z.last);
+                        TMVAssert(zp >= z._first);
+                        TMVAssert(zp+3 < z._last);
 #endif
                         *zp -= (cx?TMV_CONJ(*xp):(*xp)) *
                             (cy?TMV_CONJ(*yp):(*yp));
@@ -396,8 +396,8 @@ namespace tmv {
                 else 
                     for(int i=N1;i>0;--i,xp+=4,yp+=4,zp+=4) {
 #ifdef TMVFLDEBUG
-                        TMVAssert(zp >= z.first);
-                        TMVAssert(zp+3 < z.last);
+                        TMVAssert(zp >= z._first);
+                        TMVAssert(zp+3 < z._last);
 #endif
                         *zp += alpha *
                             (cx?TMV_CONJ(*xp):(*xp)) *
@@ -417,8 +417,8 @@ namespace tmv {
                 if (alpha == Ta(1))
                     for(int i=N2;i>0;--i,++xp,++yp,++zp)  {
 #ifdef TMVFLDEBUG
-                        TMVAssert(zp >= z.first);
-                        TMVAssert(zp < z.last);
+                        TMVAssert(zp >= z._first);
+                        TMVAssert(zp < z._last);
 #endif
                         *zp += (cx?TMV_CONJ(*xp):(*xp)) *
                             (cy?TMV_CONJ(*yp):(*yp));
@@ -426,8 +426,8 @@ namespace tmv {
                 else if (alpha == Ta(-1))
                     for(int i=N2;i>0;--i,++xp,++yp,++zp) {
 #ifdef TMVFLDEBUG
-                        TMVAssert(zp >= z.first);
-                        TMVAssert(zp < z.last);
+                        TMVAssert(zp >= z._first);
+                        TMVAssert(zp < z._last);
 #endif
                         *zp -= (cx?TMV_CONJ(*xp):(*xp)) *
                             (cy?TMV_CONJ(*yp):(*yp));
@@ -435,8 +435,8 @@ namespace tmv {
                 else 
                     for(int i=N2;i>0;--i,++xp,++yp,++zp)  {
 #ifdef TMVFLDEBUG
-                        TMVAssert(zp >= z.first);
-                        TMVAssert(zp < z.last);
+                        TMVAssert(zp >= z._first);
+                        TMVAssert(zp < z._last);
 #endif
                         *zp += alpha *
                             (cx?TMV_CONJ(*xp):(*xp)) *
@@ -448,8 +448,8 @@ namespace tmv {
             if (alpha == Ta(1))
                 for(int i=N;i>0;--i,xp+=sx,yp+=sy,zp+=sz) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(zp >= z.first);
-                    TMVAssert(zp < z.last);
+                    TMVAssert(zp >= z._first);
+                    TMVAssert(zp < z._last);
 #endif
                     *zp += (cx?TMV_CONJ(*xp):(*xp)) *
                         (cy?TMV_CONJ(*yp):(*yp));
@@ -457,8 +457,8 @@ namespace tmv {
             else if (alpha == Ta(-1))
                 for(int i=N;i>0;--i,xp+=sx,yp+=sy,zp+=sz) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(zp >= z.first);
-                    TMVAssert(zp < z.last);
+                    TMVAssert(zp >= z._first);
+                    TMVAssert(zp < z._last);
 #endif
                     *zp -= (cx?TMV_CONJ(*xp):(*xp)) *
                         (cy?TMV_CONJ(*yp):(*yp));
@@ -466,8 +466,8 @@ namespace tmv {
             else 
                 for(int i=N;i>0;--i,xp+=sx,yp+=sy,zp+=sz) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(zp >= z.first);
-                    TMVAssert(zp < z.last);
+                    TMVAssert(zp >= z._first);
+                    TMVAssert(zp < z._last);
 #endif
                     *zp += alpha *
                         (cx?TMV_CONJ(*xp):(*xp)) *
@@ -569,8 +569,8 @@ namespace tmv {
                 if (alpha == Ta(1))
                     for(int i=N1;i>0;--i,xp+=4,yp+=4) {
 #ifdef TMVFLDEBUG
-                        TMVAssert(yp >= y.first);
-                        TMVAssert(yp+3 < y.last);
+                        TMVAssert(yp >= y._first);
+                        TMVAssert(yp+3 < y._last);
 #endif
                         *yp *= cx ? TMV_CONJ(*xp) : (*xp);
                         yp[1] *= cx ? TMV_CONJ(xp[1]) : xp[1];
@@ -580,8 +580,8 @@ namespace tmv {
                 else 
                     for(int i=N1;i>0;--i,xp+=4,yp+=4) {
 #ifdef TMVFLDEBUG
-                        TMVAssert(yp >= y.first);
-                        TMVAssert(yp+3 < y.last);
+                        TMVAssert(yp >= y._first);
+                        TMVAssert(yp+3 < y._last);
 #endif
                         *yp *= alpha * (cx ? TMV_CONJ(*xp) : (*xp));
                         yp[1] *= alpha * (cx ? TMV_CONJ(xp[1]) : xp[1]);
@@ -593,16 +593,16 @@ namespace tmv {
                 if (alpha == Ta(1))
                     for(int i=N2;i>0;--i,++xp,++yp) {
 #ifdef TMVFLDEBUG
-                        TMVAssert(yp >= y.first);
-                        TMVAssert(yp < y.last);
+                        TMVAssert(yp >= y._first);
+                        TMVAssert(yp < y._last);
 #endif
                         *yp *= cx ? TMV_CONJ(*xp) : (*xp);
                     }
                 else 
                     for(int i=N2;i>0;--i,++xp,++yp) {
 #ifdef TMVFLDEBUG
-                        TMVAssert(yp >= y.first);
-                        TMVAssert(yp < y.last);
+                        TMVAssert(yp >= y._first);
+                        TMVAssert(yp < y._last);
 #endif
                         *yp *= alpha * (cx ? TMV_CONJ(*xp) : (*xp));
                     }
@@ -612,16 +612,16 @@ namespace tmv {
             if (alpha == Ta(1))
                 for(int i=N;i>0;--i,xp+=sx,yp+=sy) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(yp >= y.first);
-                    TMVAssert(yp < y.last);
+                    TMVAssert(yp >= y._first);
+                    TMVAssert(yp < y._last);
 #endif
                     *yp *= cx ? TMV_CONJ(*xp) : (*xp);
                 }
             else 
                 for(int i=N;i>0;--i,xp+=sx,yp+=sy) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(yp >= y.first);
-                    TMVAssert(yp < y.last);
+                    TMVAssert(yp >= y._first);
+                    TMVAssert(yp < y._last);
 #endif
                     *yp *= alpha * (cx ? TMV_CONJ(*xp) : (*xp));
                 }
@@ -646,8 +646,8 @@ namespace tmv {
                 ElementProd(TMV_CONJ(alpha),x.conjugate(),y.conjugate());
             } else if (y.size() == 1) {
 #ifdef TMVFLDEBUG
-                TMVAssert(y.ptr() >= y.first);
-                TMVAssert(y.ptr() < y.last);
+                TMVAssert(y.ptr() >= y._first);
+                TMVAssert(y.ptr() < y._last);
 #endif
                 *y.ptr() *= alpha * 
                     ( x.isconj() ?

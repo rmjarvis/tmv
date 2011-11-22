@@ -78,8 +78,8 @@ namespace tmv {
             for(int j=len;j>0;--j,(rm?++Aij:Aij+=Astepj),
                 (rm?++Bij:Bij+=Bstepj)) {
 #ifdef TMVFLDEBUG
-                TMVAssert(Bij >= B.first);
-                TMVAssert(Bij < B.last);
+                TMVAssert(Bij >= B._first);
+                TMVAssert(Bij < B._last);
 #endif
                 if (a1) *Bij += (ca ? TMV_CONJ(*Aij) : *Aij);
                 else *Bij += alpha * (ca ? TMV_CONJ(*Aij) : *Aij);

@@ -99,10 +99,10 @@ namespace tmv {
         //cout<<"A = "<<A<<endl;
         for(int j=0;j<N-1;++j,++Uj,++Vj) {
 #ifdef TMVFLDEBUG
-            TMVAssert(Uj >= Ubeta.first);
-            TMVAssert(Uj < Ubeta.last);
-            TMVAssert(Vj >= Vbeta.first);
-            TMVAssert(Vj < Vbeta.last);
+            TMVAssert(Uj >= Ubeta._first);
+            TMVAssert(Uj < Ubeta._last);
+            TMVAssert(Vj >= Vbeta._first);
+            TMVAssert(Vj < Vbeta._last);
 #endif
             //cout<<"j = "<<j<<endl;
             *Uj = HouseholderReflect(A.subMatrix(j,M,j,N),signdet);
@@ -111,8 +111,8 @@ namespace tmv {
             //cout<<"V reflect: A("<<j<<","<<j+1<<") = "<<A.cref(j,j+1)<<endl;
         }
 #ifdef TMVFLDEBUG
-        TMVAssert(Uj >= Ubeta.first);
-        TMVAssert(Uj < Ubeta.last);
+        TMVAssert(Uj >= Ubeta._first);
+        TMVAssert(Uj < Ubeta._last);
 #endif
         //cout<<"j = "<<N-1<<endl;
         *Uj = HouseholderReflect(A.col(N-1,N-1,M),signdet);
@@ -240,12 +240,12 @@ namespace tmv {
                 T bu = HouseholderReflect(u,signdet);
                 //cout<<"bu = "<<bu<<endl;
 #ifdef TMVFLDEBUG
-                TMVAssert(Uj >= Ubeta.first);
-                TMVAssert(Uj < Ubeta.last);
-                TMVAssert(Dj >= D.first);
-                TMVAssert(Dj < D.last);
-                TMVAssert(u.ptr() >= A.first);
-                TMVAssert(u.ptr() < A.last);
+                TMVAssert(Uj >= Ubeta._first);
+                TMVAssert(Uj < Ubeta._last);
+                TMVAssert(Dj >= D._first);
+                TMVAssert(Dj < D._last);
+                TMVAssert(u.ptr() >= A._first);
+                TMVAssert(u.ptr() < A._last);
 #endif
                 *Uj = bu;
                 TMVAssert(TMV_IMAG(*u.cptr()) == RT(0)); 
@@ -318,12 +318,12 @@ namespace tmv {
                 T bv = HouseholderReflect(v,signdet);
                 //cout<<"bv = "<<bv<<endl;
 #ifdef TMVFLDEBUG
-                TMVAssert(Vj >= Vbeta.first);
-                TMVAssert(Vj < Vbeta.last);
-                TMVAssert(Ej >= E.first);
-                TMVAssert(Ej < E.last);
-                TMVAssert(v.ptr() >= A.first);
-                TMVAssert(v.ptr() < A.last);
+                TMVAssert(Vj >= Vbeta._first);
+                TMVAssert(Vj < Vbeta._last);
+                TMVAssert(Ej >= E._first);
+                TMVAssert(Ej < E._last);
+                TMVAssert(v.ptr() >= A._first);
+                TMVAssert(v.ptr() < A._last);
 #endif
                 *Vj = bv;
                 TMVAssert(TMV_IMAG(*v.cptr()) == RT(0));
@@ -376,10 +376,10 @@ namespace tmv {
 
         // Do the last U Householder vector:
 #ifdef TMVFLDEBUG
-        TMVAssert(Uj >= Ubeta.first);
-        TMVAssert(Uj < Ubeta.last);
-        TMVAssert(Dj >= D.first);
-        TMVAssert(Dj < D.last);
+        TMVAssert(Uj >= Ubeta._first);
+        TMVAssert(Uj < Ubeta._last);
+        TMVAssert(Dj >= D._first);
+        TMVAssert(Dj < D._last);
 #endif
         //cout<<"Last one: u = "<<A.col(N-1,N-1,M)<<endl;
         *Uj = HouseholderReflect(A.col(N-1,N-1,M),signdet);

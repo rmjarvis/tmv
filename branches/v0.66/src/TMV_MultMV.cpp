@@ -123,8 +123,8 @@ namespace tmv {
                     (ca ? TMV_CONJ(*Aij) : *Aij);
 
 #ifdef TMVFLDEBUG
-            TMVAssert(yi >= y.first);
-            TMVAssert(yi < y.last);
+            TMVAssert(yi >= y._first);
+            TMVAssert(yi < y._last);
 #endif
             if (add) *yi += temp;
             else *yi = temp;
@@ -165,8 +165,8 @@ namespace tmv {
                 const Tx xjval = (cx ? TMV_CONJ(*xj) : *xj);
                 for(int i=M; i>0; --i,++yi,(cm?++Aij:Aij+=si)) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(yi >= y.first);
-                    TMVAssert(yi < y.last);
+                    TMVAssert(yi >= y._first);
+                    TMVAssert(yi < y._last);
 #endif
                     *yi = xjval * (ca ? TMV_CONJ(*Aij) : *Aij);
                 }
@@ -182,8 +182,8 @@ namespace tmv {
                 const Tx xjval = (cx ? TMV_CONJ(*xj) : *xj);
                 for(int i=M; i>0; --i,++yi,(cm?++Aij:Aij+=si)) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(yi >= y.first);
-                    TMVAssert(yi < y.last);
+                    TMVAssert(yi >= y._first);
+                    TMVAssert(yi < y._last);
 #endif
                     *yi += xjval * (ca ? TMV_CONJ(*Aij) : *Aij);
                 }

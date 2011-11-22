@@ -234,8 +234,8 @@ namespace tmv {
 #endif
                 }
 #ifdef TMVFLDEBUG
-                TMVAssert(di >= itsdiag.first);
-                TMVAssert(di < itsdiag.last);
+                TMVAssert(di >= itsdiag._first);
+                TMVAssert(di < itsdiag._last);
 #endif
                 if (TMV_IMAG(*di) == RT(0))
                     *di = RT(1) / TMV_REAL(*di);
@@ -253,8 +253,8 @@ namespace tmv {
 #endif
                 }
 #ifdef TMVFLDEBUG
-                TMVAssert(di >= itsdiag.first);
-                TMVAssert(di < itsdiag.last);
+                TMVAssert(di >= itsdiag._first);
+                TMVAssert(di < itsdiag._last);
 #endif
                 if (TMV_IMAG(*di) == RT(0))
                     *di = RT(1) / TMV_REAL(*di);
@@ -321,16 +321,16 @@ namespace tmv {
         if (ds==1) {
             for(int i=size();i>0;--i,++mi) {
 #ifdef TMVFLDEBUG
-                TMVAssert(mi >= ata.diag().first);
-                TMVAssert(mi < ata.diag().last);
+                TMVAssert(mi >= ata.diag()._first);
+                TMVAssert(mi < ata.diag()._last);
 #endif
                 *mi = TMV_NORM(*mi);
             }
         } else {
             for(int i=size();i>0;--i,mi+=ds) {
 #ifdef TMVFLDEBUG
-                TMVAssert(mi >= ata.diag().first);
-                TMVAssert(mi < ata.diag().last);
+                TMVAssert(mi >= ata.diag()._first);
+                TMVAssert(mi < ata.diag()._last);
 #endif
                 *mi = TMV_NORM(*mi);
             }
@@ -387,8 +387,8 @@ namespace tmv {
         if (dstep == 1 && vstep == 1) {
             for(int i=v.size();i>0;--i,++di,++vi) {
 #ifdef TMVFLDEBUG
-                TMVAssert(vi >= v.first);
-                TMVAssert(vi < v.last);
+                TMVAssert(vi >= v._first);
+                TMVAssert(vi < v._last);
 #endif
                 if (*di == Td(0)) {
 #ifdef NOTHROW
@@ -408,8 +408,8 @@ namespace tmv {
         } else {
             for(int i=v.size();i>0;--i,di+=dstep,vi+=vstep) {
 #ifdef TMVFLDEBUG
-                TMVAssert(vi >= v.first);
-                TMVAssert(vi < v.last);
+                TMVAssert(vi >= v._first);
+                TMVAssert(vi < v._last);
 #endif
                 if (*di == Td(0)) {
 #ifdef NOTHROW
@@ -531,8 +531,8 @@ namespace tmv {
                 RT invdi = RT(1)/TMV_REAL(*di);
                 for(int j=N;j>0;--j,(rm?++mij:mij+=stepj)) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(mij >= m.first);
-                    TMVAssert(mij < m.last);
+                    TMVAssert(mij >= m._first);
+                    TMVAssert(mij < m._last);
 #endif
                     *mij *= invdi;
                 }
@@ -540,8 +540,8 @@ namespace tmv {
                 Td invdi = RT(1)/(cd?TMV_CONJ(*di):*di);
                 for(int j=N;j>0;--j,(rm?++mij:mij+=stepj)) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(mij >= m.first);
-                    TMVAssert(mij < m.last);
+                    TMVAssert(mij >= m._first);
+                    TMVAssert(mij < m._last);
 #endif
                     *mij *= invdi;
                 }
@@ -576,8 +576,8 @@ namespace tmv {
 #endif
                 }
 #ifdef TMVFLDEBUG
-                TMVAssert(invdi >= invd.diag().first);
-                TMVAssert(invdi < invd.diag().last);
+                TMVAssert(invdi >= invd.diag()._first);
+                TMVAssert(invdi < invd.diag()._last);
 #endif
                 *invdi = RT(1)/(cd?TMV_CONJ(*di):*di);
             }
@@ -592,8 +592,8 @@ namespace tmv {
 #endif
                 }
 #ifdef TMVFLDEBUG
-                TMVAssert(invdi >= invd.diag().first);
-                TMVAssert(invdi < invd.diag().last);
+                TMVAssert(invdi >= invd.diag()._first);
+                TMVAssert(invdi < invd.diag()._last);
 #endif
                 *invdi = RT(1)/(cd?TMV_CONJ(*di):*di);
             }

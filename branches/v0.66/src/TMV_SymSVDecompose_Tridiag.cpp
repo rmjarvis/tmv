@@ -88,8 +88,8 @@ namespace tmv {
         T* bj = beta.ptr() + j1;
         for(int j=j1;j<N-1;++j,++bj) {
 #ifdef TMVFLDEBUG
-            TMVAssert(bj >= beta.first);
-            TMVAssert(bj < beta.last);
+            TMVAssert(bj >= beta._first);
+            TMVAssert(bj < beta._last);
 #endif
             *bj = HouseholderReflect(A.col(j,j+1,N),signdet);
             if (*bj != T(0)) 
@@ -161,8 +161,8 @@ namespace tmv {
                     const int Nmj = Acolj.size();
                     VectorView<T> u = Acolj.subVector(1,Nmj);
 #ifdef TMVFLDEBUG
-                    TMVAssert(bj >= beta.first);
-                    TMVAssert(bj < beta.last);
+                    TMVAssert(bj >= beta._first);
+                    TMVAssert(bj < beta._last);
 #endif
                     *bj = HouseholderReflect(u,signdet);
 
@@ -172,8 +172,8 @@ namespace tmv {
                     // Set top of u to 1 explicitly.  Calculations below are easier this 
                     // way, rather than dealing with it being implicitly 1.
 #ifdef TMVFLDEBUG
-                    TMVAssert(u0 >= A.first);
-                    TMVAssert(u0 < A.last);
+                    TMVAssert(u0 >= A._first);
+                    TMVAssert(u0 < A._last);
 #endif
                     *u0 = T(1);
 

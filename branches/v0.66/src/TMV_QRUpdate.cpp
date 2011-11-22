@@ -110,8 +110,8 @@ namespace tmv {
         if (N==1) {
             T b = HouseholderReflect(*R.ptr(),A.col(0),det);
 #ifdef TMVFLDEBUG
-            TMVAssert(Z.ptr() >= Z.first);
-            TMVAssert(Z.ptr() < Z.last);
+            TMVAssert(Z.ptr() >= Z._first);
+            TMVAssert(Z.ptr() < Z._last);
 #endif
             *Z.ptr() = TMV_CONJ(b);
         } else if (N==2) {
@@ -125,17 +125,17 @@ namespace tmv {
             if (b0 != T(0)) {
                 T temp = b0*(A.col(0).conjugate()*A.col(1) + *R01);
 #ifdef TMVFLDEBUG
-                TMVAssert(R01 >= R.first);
-                TMVAssert(R01 < R.last);
+                TMVAssert(R01 >= R._first);
+                TMVAssert(R01 < R._last);
 #endif
                 *R01 -= temp;
                 A.col(1) -= temp * A.col(0);
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(Z00 >= Z.first);
-            TMVAssert(Z00 < Z.last);
-            TMVAssert(Z11 >= Z.first);
-            TMVAssert(Z11 < Z.last);
+            TMVAssert(Z00 >= Z._first);
+            TMVAssert(Z00 < Z._last);
+            TMVAssert(Z11 >= Z._first);
+            TMVAssert(Z11 < Z._last);
 #endif
             *Z00 = TMV_CONJ(b0);
             T b1 = HouseholderReflect(*R11,A.col(1),det);
@@ -144,8 +144,8 @@ namespace tmv {
             if (makeZ) {
                 T temp = A.col(0).conjugate()*A.col(1);
 #ifdef TMVFLDEBUG
-                TMVAssert(Z01 >= Z.first);
-                TMVAssert(Z01 < Z.last);
+                TMVAssert(Z01 >= Z._first);
+                TMVAssert(Z01 < Z._last);
 #endif
                 *Z01 = -(*Z00 * *Z11)*temp;
             }

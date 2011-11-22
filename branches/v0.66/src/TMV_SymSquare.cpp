@@ -44,8 +44,8 @@ namespace tmv {
         if (N == 1) {
             const T A00 = *A.ptr();
 #ifdef TMVFLDEBUG
-            TMVAssert(A.ptr() >= A.first);
-            TMVAssert(A.ptr() < A.last);
+            TMVAssert(A.ptr() >= A._first);
+            TMVAssert(A.ptr() < A._last);
 #endif
             if (herm)
                 *A.ptr() = TMV_NORM(TMV_REAL(A00));

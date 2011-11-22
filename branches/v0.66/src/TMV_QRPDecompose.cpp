@@ -188,8 +188,8 @@ namespace tmv
 
             // Apply the Householder Reflection for this column
 #ifdef TMVFLDEBUG
-            TMVAssert(bj >= beta.first);
-            TMVAssert(bj < beta.last);
+            TMVAssert(bj >= beta._first);
+            TMVAssert(bj < beta._last);
 #endif
 
             //cout<<"Before HouseholderReflect: A.col(j) = "<<A.col(j,j,M)<<std::endl;
@@ -339,8 +339,8 @@ namespace tmv
 
                     // Find Householder matrix for this column
 #ifdef TMVFLDEBUG
-                    TMVAssert(bj >= beta.first);
-                    TMVAssert(bj < beta.last);
+                    TMVAssert(bj >= beta._first);
+                    TMVAssert(bj < beta._last);
 #endif
                     *bj = HouseholderReflect(A.col(j,j,M),det);
 
@@ -627,8 +627,8 @@ namespace tmv
                     // This way, when we are done, the whole block has had the
                     // same Householder reflections applied to it.
 #ifdef TMVFLDEBUG
-                    TMVAssert(bj >= beta.first);
-                    TMVAssert(bj < beta.last);
+                    TMVAssert(bj >= beta._first);
+                    TMVAssert(bj < beta._last);
 #endif
                     *bj = HouseholderReflect(A.subMatrix(j,M,j,origj2),det);
                     //cout<<"After reflect Norm(A) = "<<Norm(A)<<std::endl;

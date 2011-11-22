@@ -45,8 +45,6 @@ namespace tmv {
         TMVAssert(minv.colsize() == QRx.rowsize());
         TMVAssert(minv.rowsize() == QRx.colsize());
 
-        const int N = QRx.rowsize();
-
         minv.setZero();
         UpperTriMatrixView<T> R = minv.colRange(0,N1).upperTri();
         R = QRx.upperTri().subTriMatrix(0,N1);

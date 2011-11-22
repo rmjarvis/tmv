@@ -89,8 +89,8 @@ namespace tmv {
                     TMVAssert(TMV_IMAG(alpha) == TMV_RealType(T)(0));
                     if (!a1) temp *= TMV_REAL(alpha);
 #ifdef TMVFLDEBUG
-                    TMVAssert(A.ptr() >= A.first);
-                    TMVAssert(A.ptr() < A.last);
+                    TMVAssert(A.ptr() >= A._first);
+                    TMVAssert(A.ptr() < A._last);
 #endif
                     if (add) *(A.ptr()) += temp;
                     else *(A.ptr()) = temp;
@@ -98,8 +98,8 @@ namespace tmv {
                     T temp = x.row(0) * x.row(0);
                     if (!a1) temp *= alpha;
 #ifdef TMVFLDEBUG
-                    TMVAssert(A.ptr() >= A.first);
-                    TMVAssert(A.ptr() < A.last);
+                    TMVAssert(A.ptr() >= A._first);
+                    TMVAssert(A.ptr() < A._last);
 #endif
                     if (add) *(A.ptr()) += temp;
                     else *(A.ptr()) = temp;
@@ -170,8 +170,8 @@ namespace tmv {
                 TMVAssert(TMV_IMAG(alpha) == TMV_RealType(T)(0));
                 if (!a1) temp *= TMV_REAL(alpha);
 #ifdef TMVFLDEBUG
-                TMVAssert(A.ptr() >= A.first);
-                TMVAssert(A.ptr() < A.last);
+                TMVAssert(A.ptr() >= A._first);
+                TMVAssert(A.ptr() < A._last);
 #endif
                 if (add) *A.ptr() += temp;
                 else *A.ptr() = temp;
@@ -179,8 +179,8 @@ namespace tmv {
                 T temp = x00 * x00;
                 if (!a1) temp *= alpha;
 #ifdef TMVFLDEBUG
-                TMVAssert(A.ptr() >= A.first);
-                TMVAssert(A.ptr() < A.last);
+                TMVAssert(A.ptr() >= A._first);
+                TMVAssert(A.ptr() < A._last);
 #endif
                 if (add) *A.ptr() += temp;
                 else *A.ptr() = temp;

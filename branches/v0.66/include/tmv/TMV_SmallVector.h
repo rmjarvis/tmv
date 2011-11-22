@@ -102,7 +102,7 @@ namespace tmv {
         // Constructors
         //
 
-        inline SmallVector() 
+        inline SmallVector() TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
 #ifdef TMVDEBUG
@@ -111,6 +111,7 @@ namespace tmv {
         }
 
         explicit inline SmallVector(const T& x) 
+            TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
             if (x == T(0)) setZero();
@@ -118,12 +119,14 @@ namespace tmv {
         }
 
         TMV_DEPRECATED(explicit inline SmallVector(const T* vv))
+            TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
             for(int i=0;i<N;++i) itsv[i] = vv[i];
         }
 
         TMV_DEPRECATED(explicit inline SmallVector(const std::vector<T>& vv))
+            TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
             TMVAssert(N == int(vv.size()));
@@ -131,6 +134,7 @@ namespace tmv {
         }
 
         inline SmallVector(const type& v2) 
+            TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
             for(int i=0;i<N;++i) itsv[i] = v2.cref(i);
@@ -138,6 +142,7 @@ namespace tmv {
 
         template <IndexStyle I2> 
         inline SmallVector(const SmallVector<T,N,I2>& v2) 
+            TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
             TMVAssert(v2.size() == N);
@@ -146,6 +151,7 @@ namespace tmv {
 
         template <class T2, IndexStyle I2> 
         inline SmallVector(const SmallVector<T2,N,I2>& v2) 
+            TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
             TMVAssert(v2.size() == N);
@@ -154,6 +160,7 @@ namespace tmv {
 
         template <IndexStyle I2> 
         inline SmallVector(const Vector<T,I2>& v2) 
+            TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
             TMVAssert(v2.size() == N);
@@ -162,6 +169,7 @@ namespace tmv {
 
         template <class T2> 
         inline SmallVector(const GenVector<T2>& v2) 
+            TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
             TMVAssert(isReal(T2()) || isComplex(T()));
@@ -170,6 +178,7 @@ namespace tmv {
         }
 
         inline SmallVector(const AssignableToVector<RT>& v2) 
+            TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
             TMVAssert(v2.size() == N);
@@ -177,6 +186,7 @@ namespace tmv {
         }
 
         inline SmallVector(const AssignableToVector<CT>& v2) 
+            TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
             TMVAssert(isComplex(T()));
@@ -185,12 +195,14 @@ namespace tmv {
         }
 
         inline SmallVector(const SmallVectorComposite<RT,N>& v2) 
+            TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
             v2.assignTov(*this);
         }
 
         inline SmallVector(const SmallVectorComposite<CT,N>& v2) 
+            TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(isComplex(T()));
             TMVAssert(N > 0);
@@ -199,6 +211,7 @@ namespace tmv {
 
         virtual inline ~SmallVector()
         {
+            TMV_SETFIRSTLAST(0,0);
 #ifdef TMVDEBUG
             setAllTo(T(999));
 #endif
@@ -684,13 +697,13 @@ namespace tmv {
         { return const_view_type(itsv,N,1,NonConj); }
 
         inline view_type view()
-        { return view_type(itsv,N,1,NonConj); }
+        { return view_type(itsv,N,1,NonConj TMV_FIRSTLAST ); }
 
         inline const_view_type conjugate() const
         { return const_view_type(itsv,N,1,isReal(T())?NonConj:Conj); }
 
         inline view_type conjugate()
-        { return view_type(itsv,N,1,isReal(T())?NonConj:Conj); }
+        { return view_type(itsv,N,1,isReal(T())?NonConj:Conj TMV_FIRSTLAST); }
 
         inline const_real_type realPart() const
         { return view().realPart(); }
@@ -778,6 +791,13 @@ namespace tmv {
     protected :
 
         StackArray<T,N> itsv;
+
+#ifdef TMVFLDEBUG
+    public:
+        const T* _first;
+        const T* _last;
+#endif
+
 
     }; // SmallVector
 

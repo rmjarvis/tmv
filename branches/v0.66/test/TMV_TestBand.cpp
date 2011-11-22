@@ -233,7 +233,8 @@ static void TestBasicBandMatrix_2()
     T* qarfull = 
         (S == tmv::RowMajor) ? qarrmfull : 
         (S == tmv::ColMajor) ? qarcmfull : 
-        qardmfull + 2;
+        qardmfull;
+    T* qarfullx = (S == tmv::DiagMajor) ? qarfull + 2 : qarfull;
     const int Si = 
         (S == tmv::RowMajor) ? 3 :
         (S == tmv::ColMajor) ? 1 : 
@@ -246,7 +247,7 @@ static void TestBasicBandMatrix_2()
     const tmv::ConstBandMatrixView<T> q12 =
         tmv::BandMatrixViewOf(qarfull,3,5,1,2,S);
     const tmv::ConstBandMatrixView<T> q13 =
-        tmv::BandMatrixViewOf(qarfull,3,5,1,2,Si,Sj);
+        tmv::BandMatrixViewOf(qarfullx,3,5,1,2,Si,Sj);
 
     if (showacc) {
         std::cout<<"q1 = "<<q1<<std::endl;

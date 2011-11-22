@@ -105,8 +105,8 @@ namespace tmv {
                     for(int j=i+1;j>0;--j,++xj,(rm?++Aij:Aij+=sj)) {
                         const T temp = axi * (ha==cx ? *xj : TMV_CONJ(*xj));
 #ifdef TMVFLDEBUG
-                        TMVAssert(Aij >= A.first);
-                        TMVAssert(Aij < A.last);
+                        TMVAssert(Aij >= A._first);
+                        TMVAssert(Aij < A._last);
 #endif
                         if (add) *Aij += temp;
                         else *Aij = temp;
@@ -116,8 +116,8 @@ namespace tmv {
                     for(int j=i+1;j>0;--j,++xj,(rm?++Aij:Aij+=sj)) {
                         const T temp = axi * (ha==cx ? *xj : TMV_CONJ(*xj));
 #ifdef TMVFLDEBUG
-                        TMVAssert(Aij >= A.first);
-                        TMVAssert(Aij < A.last);
+                        TMVAssert(Aij >= A._first);
+                        TMVAssert(Aij < A._last);
 #endif
                         if (add) *Aij += temp;
                         else *Aij = temp;
@@ -128,8 +128,8 @@ namespace tmv {
                 if (rm) std::fill_n(Aij,i+1,T(0));
                 else for(int j=i+1;j>0;--j,Aij+=sj) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(Aij >= A.first);
-                    TMVAssert(Aij < A.last);
+                    TMVAssert(Aij >= A._first);
+                    TMVAssert(Aij < A._last);
 #endif
                     *Aij = T(0);
                 }
@@ -138,8 +138,8 @@ namespace tmv {
 
         // Do this at end in case A.ptr = x.ptr, so don't mess up x
 #ifdef TMVFLDEBUG
-        TMVAssert(A.ptr() >= A.first);
-        TMVAssert(A.ptr() < A.last);
+        TMVAssert(A.ptr() >= A._first);
+        TMVAssert(A.ptr() < A._last);
 #endif
         if (add) *A.ptr() += A00; 
         else *A.ptr() = A00;
@@ -191,8 +191,8 @@ namespace tmv {
                     for(int i=Nmj;i>0;--i,++xi,(cm?++Aij:Aij+=si)) {
                         const T temp = axj * (cx ? TMV_CONJ(*xi) : *xi);
 #ifdef TMVFLDEBUG
-                        TMVAssert(Aij >= A.first);
-                        TMVAssert(Aij < A.last);
+                        TMVAssert(Aij >= A._first);
+                        TMVAssert(Aij < A._last);
 #endif
                         if (add) *Aij += temp;
                         else *Aij = temp;
@@ -202,8 +202,8 @@ namespace tmv {
                     for(int i=Nmj;i>0;--i,++xi,(cm?++Aij:Aij+=si)) {
                         const T temp = axj * (cx ? TMV_CONJ(*xi) : *xi);
 #ifdef TMVFLDEBUG
-                        TMVAssert(Aij >= A.first);
-                        TMVAssert(Aij < A.last);
+                        TMVAssert(Aij >= A._first);
+                        TMVAssert(Aij < A._last);
 #endif
                         if (add) *Aij += temp;
                         else *Aij = temp;
@@ -214,8 +214,8 @@ namespace tmv {
                 if (cm) std::fill_n(Aij,Nmj,T(0));
                 else for(int i=Nmj;i>0;--i,Aij+=si) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(Aij >= A.first);
-                    TMVAssert(Aij < A.last);
+                    TMVAssert(Aij >= A._first);
+                    TMVAssert(Aij < A._last);
 #endif
                     *Aij = T(0);
                 }

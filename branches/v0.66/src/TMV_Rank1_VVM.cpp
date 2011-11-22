@@ -94,8 +94,8 @@ namespace tmv {
                         (cx ? TMV_CONJ(*xi) : *xi) *
                         (cy ? TMV_CONJ(*yj) : *yj);
 #ifdef TMVFLDEBUG
-                    TMVAssert(Aij >= A.first);
-                    TMVAssert(Aij < A.last);
+                    TMVAssert(Aij >= A._first);
+                    TMVAssert(Aij < A._last);
 #endif
                     if (add) *Aij += temp;
                     else *Aij = temp;
@@ -105,8 +105,8 @@ namespace tmv {
                 if (cm) std::fill_n(Aij,M,T(0));
                 else for (int i=M; i>0; --i,Aij+=si) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(Aij >= A.first);
-                    TMVAssert(Aij < A.last);
+                    TMVAssert(Aij >= A._first);
+                    TMVAssert(Aij < A._last);
 #endif
                     *Aij = T(0);
                 }

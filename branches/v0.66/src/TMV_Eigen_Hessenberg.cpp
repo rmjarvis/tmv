@@ -84,8 +84,8 @@ namespace tmv {
         T det = 0; // Ignore Householder det calculations
         for(int j=0;j<N-1;++j,++Uj) {
 #ifdef TMVFLDEBUG
-            TMVAssert(Uj >= Ubeta.first);
-            TMVAssert(Uj < Ubeta.last);
+            TMVAssert(Uj >= Ubeta._first);
+            TMVAssert(Uj < Ubeta._last);
 #endif
             *Uj = Householder_Reflect(A.subMatrix(j+1,N,j,N),det);
             if (*Uj != T(0))
@@ -198,8 +198,8 @@ namespace tmv {
                 VectorView<T> u = A.col(j,j+1,N);
                 T bu = Householder_Reflect(u,det);
 #ifdef TMVFLDEBUG
-                TMVAssert(Uj >= Ubeta.first);
-                TMVAssert(Uj < Ubeta.last);
+                TMVAssert(Uj >= Ubeta._first);
+                TMVAssert(Uj < Ubeta._last);
 #endif
                 *Uj = bu;
 

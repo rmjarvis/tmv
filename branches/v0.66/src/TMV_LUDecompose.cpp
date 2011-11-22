@@ -319,10 +319,10 @@ namespace tmv {
                 T* Ai1 = A1.ptr()+1;
                 for(int i=1;i<M;++i,++Ai0,++Ai1) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(Ai0 >= A.first);
-                    TMVAssert(Ai0 < A.last);
-                    TMVAssert(Ai1 >= A.first);
-                    TMVAssert(Ai1 < A.last);
+                    TMVAssert(Ai0 >= A._first);
+                    TMVAssert(Ai0 < A._last);
+                    TMVAssert(Ai1 >= A._first);
+                    TMVAssert(Ai1 < A._last);
 #endif
                     *Ai0 *= invA00;
                     *Ai1 -= *Ai0 * A01;

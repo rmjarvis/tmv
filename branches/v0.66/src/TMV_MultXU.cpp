@@ -69,8 +69,8 @@ namespace tmv {
             T* Aij = Aii;
             for(int j=len;j>0;--j,++Aij) {
 #ifdef TMVFLDEBUG
-                TMVAssert(Aij >= A.first);
-                TMVAssert(Aij < A.last);
+                TMVAssert(Aij >= A._first);
+                TMVAssert(Aij < A._last);
 #endif
                 *Aij *= alpha;
             }
@@ -95,8 +95,8 @@ namespace tmv {
             T* Aij = A0j;
             for(int i=len;i>0;--i,++Aij) {
 #ifdef TMVFLDEBUG
-                TMVAssert(Aij >= A.first);
-                TMVAssert(Aij < A.last);
+                TMVAssert(Aij >= A._first);
+                TMVAssert(Aij < A._last);
 #endif
                 *Aij *= alpha;
             }

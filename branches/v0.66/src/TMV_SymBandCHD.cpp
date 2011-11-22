@@ -62,22 +62,24 @@ namespace tmv {
     };
 
 #define APTR1 (inplace ? 0 : \
-               BandStorageLength(ColMajor,A.size(),A.size(),A.nlo(),A.nlo()))
+               BandStorageLength(ColMajor,A.size(),A.size(),A.nlo(),0))
+#define TRID (A.nlo() == 1)
 #define APTR (inplace ? A.nonConst().ptr() : Aptr1.get())
 #define LLX \
     (inplace ? (A.uplo()==Upper ? A.nonConst().adjoint() : A.nonConst()) : \
      HermBandMatrixViewOf(Aptr,A.size(),A.nlo(),Lower, \
-                          (A.nlo() == 1 ? DiagMajor : ColMajor)))
+                          (TRID ? DiagMajor : ColMajor)))
 
     template <class T> 
     HermBandCHDiv<T>::HermBandCHDiv_Impl::HermBandCHDiv_Impl(
         const GenSymBandMatrix<T>& A, bool _inplace) :
         inplace( ( _inplace && 
                    ( ((A.iscm() || A.isrm()) && A.nlo()>1) || 
-                     (A.isdm() && A.nlo()==1)
+                     (A.isdm() && TRID)
                    ) ) || A.nlo()==0 ),
         Aptr1(APTR1), Aptr(APTR), LLx(LLX),
-        zerodet(false), logdet(1), donedet(false) {}
+        zerodet(false), logdet(1), donedet(false) 
+    {}
 
 #undef APTR
 #undef APTR1

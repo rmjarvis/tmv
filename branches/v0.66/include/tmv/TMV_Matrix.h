@@ -2195,8 +2195,8 @@ namespace tmv {
 
 #ifdef TMVFLDEBUG
     public:
-        const T*const _first;
-        const T*const _last;
+        const T* _first;
+        const T* _last;
 #endif
 
     }; // MatrixView
@@ -3318,32 +3318,28 @@ namespace tmv {
         {
             TMVAssert(rowsize() <= colsize());
             return const_uppertri_type(
-                cptr(),rowsize(), stepi(),stepj(),UnitDiag,stor(),ct() 
-                TMV_FIRSTLAST);
+                cptr(),rowsize(), stepi(),stepj(),UnitDiag,stor(),ct());
         }
 
         inline const_uppertri_type upperTri(DiagType dt=NonUnitDiag) const
         {
             TMVAssert(rowsize() <= colsize());
             return const_uppertri_type(
-                cptr(),rowsize(), stepi(),stepj(),dt,stor(),ct() 
-                TMV_FIRSTLAST);
+                cptr(),rowsize(), stepi(),stepj(),dt,stor(),ct());
         }
 
         inline const_lowertri_type unitLowerTri() const
         {
             TMVAssert(colsize() <= rowsize());
             return const_lowertri_type(
-                cptr(),colsize(), stepi(),stepj(),UnitDiag,stor(),ct() 
-                TMV_FIRSTLAST);
+                cptr(),colsize(), stepi(),stepj(),UnitDiag,stor(),ct());
         }
 
         inline const_lowertri_type lowerTri(DiagType dt=NonUnitDiag) const
         {
             TMVAssert(colsize() <= rowsize());
             return const_lowertri_type(
-                cptr(),colsize(), stepi(),stepj(),dt,stor(),ct() 
-                TMV_FIRSTLAST);
+                cptr(),colsize(), stepi(),stepj(),dt,stor(),ct());
         }
 
         inline const_view_type cColPair(int j1, int j2) const

@@ -84,8 +84,8 @@ namespace tmv {
         for(int i=0;i<N;) {
             if (i==N-1 || *xDi == T(0)) { // Then 1x1
 #ifdef TMVFLDEBUG
-                TMVAssert(Di >= sinv.first);
-                TMVAssert(Di < sinv.last);
+                TMVAssert(Di >= sinv._first);
+                TMVAssert(Di < sinv._last);
 #endif
                 if (herm)
                     *Di = TMV_RealType(T)(1)/TMV_REAL(*Di);
@@ -94,12 +94,12 @@ namespace tmv {
                 Di+=Dstep; ++xDi; ++i;
             } else { // 2x2
 #ifdef TMVFLDEBUG
-                TMVAssert(Di >= sinv.first);
-                TMVAssert(Di < sinv.last);
-                TMVAssert(Di+Dstep >= sinv.first);
-                TMVAssert(Di+Dstep < sinv.last);
-                TMVAssert(xDi >= xD.first);
-                TMVAssert(xDi < xD.last);
+                TMVAssert(Di >= sinv._first);
+                TMVAssert(Di < sinv._last);
+                TMVAssert(Di+Dstep >= sinv._first);
+                TMVAssert(Di+Dstep < sinv._last);
+                TMVAssert(xDi >= xD._first);
+                TMVAssert(xDi < xD._last);
 #endif
                 SymInvert_2x2<herm>(*Di,*(Di+Dstep),*xDi);
                 Di+=2*Dstep; xDi+=2; i+=2;

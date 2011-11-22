@@ -306,8 +306,8 @@ namespace tmv {
                 T y = *(Dj+=D.step());
                 //std::cout<<"x,y,z = "<<x<<','<<y<<','<<z<<std::endl;
 #ifdef TMVFLDEBUG
-                TMVAssert(Ax >= A.first);
-                TMVAssert(Ax< A.last);
+                TMVAssert(Ax >= A._first);
+                TMVAssert(Ax < A._last);
 #endif
                 *Ax=T(0);
                 T d = SymInvert_2x2<herm>(x,y,z);
@@ -354,10 +354,10 @@ namespace tmv {
                         A.col(q,q,N) -= A.col(j,q,N) * (herm?TMV_CONJ(Lq0):Lq0);
                         A.col(q,q,N) -= A.col(j+1,q,N) * (herm?TMV_CONJ(Lq1):Lq1);
 #ifdef TMVFLDEBUG
-                        TMVAssert(Cq0 >= A.first);
-                        TMVAssert(Cq0< A.last);
-                        TMVAssert(Cq1 >= A.first);
-                        TMVAssert(Cq1< A.last);
+                        TMVAssert(Cq0 >= A._first);
+                        TMVAssert(Cq0 < A._last);
+                        TMVAssert(Cq1 >= A._first);
+                        TMVAssert(Cq1 < A._last);
 #endif
                         *Cq0 = Lq0;
                         *Cq1 = Lq1;
@@ -380,10 +380,10 @@ namespace tmv {
                         A.row(p,j+2,p+1) -= Lp1 *
                             (herm ? A.col(j+1,j+2,p+1).conjugate() : A.col(j+1,j+2,p+1));
 #ifdef TMVFLDEBUG
-                        TMVAssert(Cp0 >= A.first);
-                        TMVAssert(Cp0< A.last);
-                        TMVAssert(Cp1 >= A.first);
-                        TMVAssert(Cp1< A.last);
+                        TMVAssert(Cp0 >= A._first);
+                        TMVAssert(Cp0 < A._last);
+                        TMVAssert(Cp1 >= A._first);
+                        TMVAssert(Cp1 < A._last);
 #endif
                         *Cp0 = Lp0;
                         *Cp1 = Lp1;
@@ -577,8 +577,8 @@ namespace tmv {
                         if (herm) {
                             if (isComplex(T())) {
 #ifdef TMVFLDEBUG
-                                TMVAssert(D.ptr() >= A.first);
-                                TMVAssert(D.ptr() < A.last);
+                                TMVAssert(D.ptr() >= A._first);
+                                TMVAssert(D.ptr() < A._last);
 #endif
                                 *Dj = TMV_REAL(*Dj);
                             }
@@ -614,8 +614,8 @@ namespace tmv {
                         //                   [ z y  ]
 
 #ifdef TMVFLDEBUG
-                        TMVAssert(Dj >= A.first);
-                        TMVAssert(Dj < A.last);
+                        TMVAssert(Dj >= A._first);
+                        TMVAssert(Dj < A._last);
 #endif
                         if (herm) *Dj = TMV_REAL(*LDjj);
                         else *Dj = *LDjj;
@@ -627,8 +627,8 @@ namespace tmv {
                         Dj += D.step(); // Now D(j+1)
                         LDjj += LD.stepj(); // Now LD(j+1,jj+1)
 #ifdef TMVFLDEBUG
-                        TMVAssert(Dj >= A.first);
-                        TMVAssert(Dj < A.last);
+                        TMVAssert(Dj >= A._first);
+                        TMVAssert(Dj < A._last);
 #endif
                         if (herm) *Dj = TMV_REAL(*LDjj);
                         else *Dj = *LDjj;
@@ -660,10 +660,10 @@ namespace tmv {
                             T* Aq1 = Aq0 + sj;
                             for(int q=j+2; q<N; ++q,++Aq0,++Aq1,++LDq0,++LDq1) {
 #ifdef TMVFLDEBUG
-                                TMVAssert(Aq0 >= A.first);
-                                TMVAssert(Aq0 < A.last);
-                                TMVAssert(Aq1 >= A.first);
-                                TMVAssert(Aq1 < A.last);
+                                TMVAssert(Aq0 >= A._first);
+                                TMVAssert(Aq0 < A._last);
+                                TMVAssert(Aq1 >= A._first);
+                                TMVAssert(Aq1 < A._last);
 #endif
                                 *Aq0 = *LDq0 * x + *LDq1 * z;
                                 *Aq1 = *LDq0 * (herm?TMV_CONJ(z):z) + *LDq1 * y;
@@ -674,10 +674,10 @@ namespace tmv {
                             T* Aq1 = Aq0 + 1;
                             for(int q=j+2; q<N; ++q,Aq0+=si,Aq1+=si,++LDq0,++LDq1) {
 #ifdef TMVFLDEBUG
-                                TMVAssert(Aq0 >= A.first);
-                                TMVAssert(Aq0 < A.last);
-                                TMVAssert(Aq1 >= A.first);
-                                TMVAssert(Aq1 < A.last);
+                                TMVAssert(Aq0 >= A._first);
+                                TMVAssert(Aq0 < A._last);
+                                TMVAssert(Aq1 >= A._first);
+                                TMVAssert(Aq1 < A._last);
 #endif
                                 *Aq0 = *LDq0 * x + *LDq1 * z;
                                 *Aq1 = *LDq0 * (herm?TMV_CONJ(z):z) + *LDq1 * y;

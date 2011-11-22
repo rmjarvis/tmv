@@ -2812,8 +2812,8 @@ namespace tmv {
 
 #ifdef TMVFLDEBUG
     public:
-        const T*const _first;
-        const T*const _last;
+        const T* _first;
+        const T* _last;
 #endif
 
     }; // UpperTriMatrixView
@@ -3284,8 +3284,8 @@ namespace tmv {
 
 #ifdef TMVFLDEBUG
     public:
-        const T*const _first;
-        const T*const _last;
+        const T* _first;
+        const T* _last;
 #endif
 
     }; // LowerTriMatrixView
