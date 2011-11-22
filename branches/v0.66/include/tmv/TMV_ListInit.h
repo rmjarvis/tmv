@@ -84,9 +84,9 @@ namespace tmv {
         {
             if (_nLeft == 0) throw ListReadError(0);
             TMVAssert( _nLeft > 0 );
-            *_ptr = x;
+            *_ptr++ = x;
             _isLast = false;
-            return ListAssigner<T,IT>(++_ptr,_nLeft-1);
+            return ListAssigner<T,IT>(_ptr,_nLeft-1);
         }
 
         ListAssigner<T,IT> operator<<(const T& x)

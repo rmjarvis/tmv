@@ -12,6 +12,15 @@ static void TestBasicSymBandMatrix_1()
     const int N = 10;
     const int noff = 3;
 
+    if (showstartdone) {
+        std::cout<<"Start TestBasicSymBandMatrix_1\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"U = "<<tmv::TMV_Text(U)<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
+        std::cout<<"noff = "<<noff<<std::endl;
+    }
+
     tmv::SymBandMatrix<std::complex<T>,U,S> s1(N,noff);
     tmv::SymBandMatrix<std::complex<T>,U,S> s2(N,noff);
     tmv::SymBandMatrix<std::complex<T>,U,S,tmv::FortranStyle> s1f(N,noff);
@@ -385,6 +394,15 @@ static void TestBasicHermBandMatrix_1()
 {
     const int N = 10;
     const int noff = 3;
+
+    if (showstartdone) {
+        std::cout<<"Start TestBasicHermBandMatrix_1\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"U = "<<tmv::TMV_Text(U)<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
+        std::cout<<"noff = "<<noff<<std::endl;
+    }
 
     tmv::HermBandMatrix<std::complex<T>,U,S> h1(N,noff);
     tmv::HermBandMatrix<std::complex<T>,U,S> h2(N,noff);
@@ -817,18 +835,16 @@ static void TestBasicSymBandMatrix_2()
     const int N = 10;
     const int noff = 3;
 
-    tmv::SymBandMatrix<std::complex<T>,U,S> s1(N,noff);
-    tmv::SymBandMatrix<std::complex<T>,U,S> s2(N,noff);
-    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
-        std::complex<T> value(T(k),T(2*k));
-        if (i <= j && j <= i + noff) {
-            s1(i,j) = value; 
-        }
-        if (j <= i && i <= j + noff) {
-            s2(i,j) = value; 
-        }
+    if (showstartdone) {
+        std::cout<<"Start TestBasicSymBandMatrix_2\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"U = "<<tmv::TMV_Text(U)<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
+        std::cout<<"noff = "<<noff<<std::endl;
     }
 
+#if 0
     std::vector<T> qv;
     if (S == tmv::DiagMajor && U == tmv::Upper) {
         const T qvar[] = { T(0),  T(1), T(2), T(3), T(4),
@@ -870,6 +886,20 @@ static void TestBasicSymBandMatrix_2()
         Assert(q1(i,j) == v,"Create SymBandMatrix from T*");
         Assert(q2(i,j) == v,"Create SymBandMatrix from vector");
         Assert(q3(i,j) == v,"Create SymBandMatrixView of T*");
+    }
+#endif
+
+    // Test Basic Arithmetic
+    tmv::SymBandMatrix<std::complex<T>,U,S> s1(N,noff);
+    tmv::SymBandMatrix<std::complex<T>,U,S> s2(N,noff);
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        if (i <= j && j <= i + noff) {
+            s1(i,j) = value; 
+        }
+        if (j <= i && i <= j + noff) {
+            s2(i,j) = value; 
+        }
     }
 
     tmv::SymBandMatrix<std::complex<T>,U,S> s3(N,noff);
@@ -965,19 +995,16 @@ static void TestBasicHermBandMatrix_2()
     const int N = 10;
     const int noff = 3;
 
-    tmv::HermBandMatrix<std::complex<T>,U,S> h1(N,noff);
-    tmv::HermBandMatrix<std::complex<T>,U,S> h2(N,noff);
-    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
-        std::complex<T> value(T(k),T(2*k));
-        std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
-        if (i <= j && j <= i + noff) {
-            h1(i,j) = hvalue; 
-        }
-        if (j <= i && i <= j + noff) {
-            h2(i,j) = hvalue; 
-        }
+    if (showstartdone) {
+        std::cout<<"Start TestBasicHermBandMatrix_2\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"U = "<<tmv::TMV_Text(U)<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
+        std::cout<<"noff = "<<noff<<std::endl;
     }
 
+#if 0
     std::vector<T> qv;
     if (S == tmv::DiagMajor && U == tmv::Upper) {
         const T qvar[] = { T(0),  T(1), T(2), T(3), T(4),
@@ -1019,6 +1046,21 @@ static void TestBasicHermBandMatrix_2()
         Assert(q4(i,j) == v,"Create HermBandMatrix from T*");
         Assert(q5(i,j) == v,"Create HermBandMatrix from vector");
         Assert(q6(i,j) == v,"Create HermBandMatrixView of T*");
+    }
+#endif
+
+    // Test Basic Arithmetic
+    tmv::HermBandMatrix<std::complex<T>,U,S> h1(N,noff);
+    tmv::HermBandMatrix<std::complex<T>,U,S> h2(N,noff);
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
+        if (i <= j && j <= i + noff) {
+            h1(i,j) = hvalue; 
+        }
+        if (j <= i && i <= j + noff) {
+            h2(i,j) = hvalue; 
+        }
     }
 
     tmv::HermBandMatrix<std::complex<T>,U,S> h3(N,noff);
@@ -1112,6 +1154,15 @@ static void TestBasicSymBandMatrix_IO()
 {
     const int N = 10;
     const int noff = 3;
+
+    if (showstartdone) {
+        std::cout<<"Start TestBasicSymBandMatrix_IO\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"U = "<<tmv::TMV_Text(U)<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
+        std::cout<<"noff = "<<noff<<std::endl;
+    }
 
     tmv::SymBandMatrix<std::complex<T>,U,S> s1(N,noff);
     tmv::SymBandMatrix<std::complex<T>,U,S> s2(N,noff);

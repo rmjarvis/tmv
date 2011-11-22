@@ -56,7 +56,8 @@ namespace tmv {
     // Reduce Matrix to Hessenberg Form (upper tri with one lower sub-diag)
     //
 
-    template <class T> static void NonBlockHessenberg(
+    template <class T> 
+    static void NonBlockHessenberg(
         const MatrixView<T>& A, const VectorView<T>& Ubeta)
     {
 #ifdef XDEBUG
@@ -114,7 +115,8 @@ namespace tmv {
 #endif
     }
 
-    template <class T> static void BlockHessenberg(
+    template <class T> 
+    static void BlockHessenberg(
         const MatrixView<T>& A, const VectorView<T>& Ubeta)
     {
         // Much like the block version of Bidiagonalize, we try to maintain
@@ -272,7 +274,8 @@ namespace tmv {
 #endif
     }
 
-    template <class T> static inline void NonLapHessenberg(
+    template <class T> 
+    static inline void NonLapHessenberg(
         const MatrixView<T>& A, const VectorView<T>& Ubeta)
     {
         TMVAssert(A.rowsize() == A.colsize());
@@ -288,7 +291,8 @@ namespace tmv {
     }
 
 #ifdef LAP
-    template <class T> static inline void LapHessenberg(
+    template <class T> 
+    static inline void LapHessenberg(
         const MatrixView<T>& A, const VectorView<T>& Ubeta)
     { NonLapHessenberg(A,Ubeta,Vbeta,D,E,det); }
 #ifdef INST_DOUBLE
@@ -405,7 +409,8 @@ namespace tmv {
 #endif 
 #endif // LAP
 
-    template <class T> static inline void Hessenberg(
+    template <class T> 
+    static inline void Hessenberg(
         const MatrixView<T>& A, const VectorView<T>& Ubeta)
     {
         TMVAssert(A.colsize() == A.rowsize());

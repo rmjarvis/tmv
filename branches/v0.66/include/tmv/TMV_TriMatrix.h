@@ -61,11 +61,6 @@
 //        Makes a Triangular Matrix with column size = row size = n
 //        with all values = x
 //
-//    TriMatrix<T,dt,stor>(size_t n, T* vv)
-//    TriMatrix<T,dt,stor>(size_t n, const std::vector<T>& vv)
-//        Makes a Triangular Matrix with column size = row size = n
-//        which copies the values from vv.
-//
 //    TriMatrix<T,dt,stor>(const Matrix<T>& m)
 //    TriMatrix<T,dt,stor>(const TriMatrix<T>& m)
 //        Makes a TriMatrix which copies the corresponding elements of m.
@@ -456,10 +451,19 @@ namespace tmv {
                 !isunit &&
                 "Trying to assign to the diagonal of a UnitDiag TriMatrix.");
         }
-        reference ref() { check(); return helper.itsref; }
+        reference ref() 
+        {
+            check();
+            return helper.itsref; 
+        }
         template <class T2>
-        void assign(T2 x) { check(x); if (!isunit) helper.itsref = x; }
-        T val() const { return isunit ? T(1) : T(helper.itsref); }
+        void assign(T2 x) 
+        {
+            check(x);
+            if (!isunit) helper.itsref = x; 
+        }
+        T val() const 
+        { return isunit ? T(1) : T(helper.itsref); }
 
         const bool isunit;
         TriRefHelper<T,C> helper;
@@ -540,6 +544,8 @@ namespace tmv {
         typedef const_lowertri_type const_adjoint_type;
         typedef ConstUpperTriMatrixView<RT> const_realpart_type;
         typedef UpperTriMatrixView<T> nonconst_type;
+        typedef CRMIt<type> const_rowmajor_iterator;
+        typedef CCMIt<type> const_colmajor_iterator;
 
         //
         // Constructors
@@ -1121,6 +1127,22 @@ namespace tmv {
 
         virtual T cref(int i, int j) const;
 
+        inline int rowstart(int i) const { return i; }
+        inline int rowend(int ) const { return size(); }
+
+        inline int colstart(int ) const { return 0; }
+        inline int colend(int j) const { return j+1; }
+
+        inline const_rowmajor_iterator rowmajor_begin() const
+        { return const_rowmajor_iterator(this,0,0); }
+        inline const_rowmajor_iterator rowmajor_end() const
+        { return const_rowmajor_iterator(this,size(),size()); }
+
+        inline const_colmajor_iterator colmajor_begin() const
+        { return const_colmajor_iterator(this,0,0); }
+        inline const_colmajor_iterator colmajor_end() const
+        { return const_colmajor_iterator(this,0,size()); }
+
     protected :
 
         inline bool okij(int i, int j) const
@@ -1192,6 +1214,8 @@ namespace tmv {
         typedef const_uppertri_type const_adjoint_type;
         typedef ConstLowerTriMatrixView<RT> const_realpart_type;
         typedef LowerTriMatrixView<T> nonconst_type;
+        typedef CRMIt<type> const_rowmajor_iterator;
+        typedef CCMIt<type> const_colmajor_iterator;
 
         //
         // Constructors
@@ -1759,6 +1783,23 @@ namespace tmv {
         }
 
         virtual T cref(int i, int j) const;
+
+        inline int rowstart(int ) const { return 0; }
+        inline int rowend(int i) const { return i+1; }
+
+        inline int colstart(int j) const { return j; }
+        inline int colend(int ) const { return size(); }
+
+        inline const_rowmajor_iterator rowmajor_begin() const
+        { return const_rowmajor_iterator(this,0,0); }
+        inline const_rowmajor_iterator rowmajor_end() const
+        { return const_rowmajor_iterator(this,size(),0); }
+
+        inline const_colmajor_iterator colmajor_begin() const
+        { return const_colmajor_iterator(this,0,0); }
+        inline const_colmajor_iterator colmajor_end() const
+        { return const_colmajor_iterator(this,size(),size()); }
+
 
     protected :
 
@@ -2330,6 +2371,8 @@ namespace tmv {
         typedef VectorView<T,I> vec_type;
         typedef UpperTriMatrixView<RT,I> realpart_type;
         typedef TriRef<T,true> reference;
+        typedef RMIt<const type> rowmajor_iterator;
+        typedef CMIt<const type> colmajor_iterator;
 
         //
         // Constructors
@@ -2442,6 +2485,14 @@ namespace tmv {
             m2.assignToU(view());
             return *this;
         }
+
+        typedef ListAssigner<T,rowmajor_iterator> MyListAssigner;
+        inline MyListAssigner operator<<(const T& x) const
+        { return MyListAssigner(rowmajor_begin(),size()*(size()+1)/2,x); }
+
+        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass) const)
+        { return MyListAssigner(rowmajor_begin(),size()*(size()+1)/2); }
+
 
         //
         // Access
@@ -2734,6 +2785,19 @@ namespace tmv {
         inline DiagType dt() const { return itsdiag; }
         inline ConjType ct() const { return itsct; }
 
+        reference ref(int i, int j) const;
+
+        inline rowmajor_iterator rowmajor_begin() const
+        { return rowmajor_iterator(this,0,0); }
+        inline rowmajor_iterator rowmajor_end() const
+        { return rowmajor_iterator(this,size(),size()); }
+
+        inline colmajor_iterator colmajor_begin() const
+        { return colmajor_iterator(this,0,0); }
+        inline colmajor_iterator colmajor_end() const
+        { return colmajor_iterator(this,0,size()); }
+
+
     protected :
 
         T*const itsm;
@@ -2744,15 +2808,13 @@ namespace tmv {
         StorageType itsstor;
         ConjType itsct;
 
+        using base::okij;
+
 #ifdef TMVFLDEBUG
     public:
         const T*const _first;
         const T*const _last;
-    protected:
 #endif
-
-        using base::okij;
-        reference ref(int i, int j) const;
 
     }; // UpperTriMatrixView
 
@@ -2775,6 +2837,8 @@ namespace tmv {
         typedef VectorView<T,I> vec_type;
         typedef LowerTriMatrixView<RT,I> realpart_type;
         typedef TriRef<T,true> reference;
+        typedef RMIt<const type> rowmajor_iterator;
+        typedef CMIt<const type> colmajor_iterator;
 
         //
         // Constructors
@@ -2887,6 +2951,14 @@ namespace tmv {
             m2.assignToL(view());
             return *this;
         }
+
+        typedef ListAssigner<T,rowmajor_iterator> MyListAssigner;
+        inline MyListAssigner operator<<(const T& x) const
+        { return MyListAssigner(rowmajor_begin(),size()*(size()+1)/2,x); }
+
+        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass) const)
+        { return MyListAssigner(rowmajor_begin(),size()*(size()+1)/2); }
+
 
         //
         // Access
@@ -3185,6 +3257,18 @@ namespace tmv {
         inline DiagType dt() const { return itsdiag; }
         inline ConjType ct() const { return itsct; }
 
+        reference ref(int i, int j) const;
+
+        inline rowmajor_iterator rowmajor_begin() const
+        { return rowmajor_iterator(this,0,0); }
+        inline rowmajor_iterator rowmajor_end() const
+        { return rowmajor_iterator(this,size(),0); }
+
+        inline colmajor_iterator colmajor_begin() const
+        { return colmajor_iterator(this,0,0); }
+        inline colmajor_iterator colmajor_end() const
+        { return colmajor_iterator(this,size(),size()); }
+
 
     protected :
 
@@ -3196,15 +3280,13 @@ namespace tmv {
         StorageType itsstor;
         ConjType itsct;
 
+        using base::okij;
+
 #ifdef TMVFLDEBUG
     public:
         const T*const _first;
         const T*const _last;
-    protected:
 #endif
-
-        using base::okij;
-        reference ref(int i, int j) const;
 
     }; // LowerTriMatrixView
 
@@ -3292,6 +3374,14 @@ namespace tmv {
         inline const type& operator=(
             const AssignableToUpperTriMatrix<CT>& m2) const
         { c_type::operator=(m2); return *this; }
+
+        typedef typename c_type::MyListAssigner MyListAssigner;
+        inline MyListAssigner operator<<(const T& x) const
+        { return c_type::operator<<(x); }
+
+        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass li) const)
+        { return c_type::operator=(li); }
+
 
         //
         // Access
@@ -3478,11 +3568,10 @@ namespace tmv {
 
 
         using c_type::size;
+        using c_type::ref;
 
     protected :
-
         using base::okij;
-        using c_type::ref;
 
     }; // FortranStyle UpperTriMatrixView
 
@@ -3570,6 +3659,14 @@ namespace tmv {
         inline const type& operator=(
             const AssignableToLowerTriMatrix<CT>& m2) const
         { c_type::operator=(m2); return *this; }
+
+        typedef typename c_type::MyListAssigner MyListAssigner;
+        inline MyListAssigner operator<<(const T& x) const
+        { return c_type::operator<<(x); }
+
+        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass li) const)
+        { return c_type::operator=(li); }
+
 
         //
         // Access
@@ -3756,11 +3853,10 @@ namespace tmv {
 
 
         using c_type::size;
+        using c_type::ref;
 
     protected :
-
         using base::okij;
-        using c_type::ref;
 
     }; // FortranStyle LowerTriMatrixView
 
@@ -3793,6 +3889,10 @@ namespace tmv {
         typedef lowertri_type adjoint_type;
         typedef UpperTriMatrixView<RT,I> realpart_type;
         typedef typename TriRefHelper2<T,D>::reference reference;
+        typedef RMIt<type> rowmajor_iterator;
+        typedef CRMIt<type> const_rowmajor_iterator;
+        typedef CMIt<type> colmajor_iterator;
+        typedef CCMIt<type> const_colmajor_iterator;
 
         //
         // Constructors
@@ -3816,13 +3916,15 @@ namespace tmv {
             setAllTo(x);
         }
 
-        inline UpperTriMatrix(size_t _size, const T* vv) : NEW_SIZE(_size)
+        TMV_DEPRECATED(inline UpperTriMatrix(size_t _size, const T* vv)) : 
+            NEW_SIZE(_size)
         {
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(vv,vv+itslen,itsm.get());
         }
 
-        inline UpperTriMatrix(size_t _size, const std::vector<T>& vv) :
+        TMV_DEPRECATED(inline UpperTriMatrix(
+                size_t _size, const std::vector<T>& vv)) :
             NEW_SIZE(_size)
         {
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -4008,6 +4110,14 @@ namespace tmv {
             return *this;
         }
 
+        typedef ListAssigner<T,rowmajor_iterator> MyListAssigner;
+        inline MyListAssigner operator<<(const T& x)
+        { return MyListAssigner(rowmajor_begin(),size()*(size()+1)/2,x); }
+
+        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass))
+        { return MyListAssigner(rowmajor_begin(),size()*(size()+1)/2); }
+
+
         //
         // Access
         //
@@ -4018,8 +4128,8 @@ namespace tmv {
                 TMVAssert(i>=0 && i<int(size()));
                 TMVAssert(j>=0 && j<int(size()));
             } else {
-                TMVAssert(i>0 && i<= int(size())); --i;
-                TMVAssert(j>0 && j<= int(size())); --j;
+                TMVAssert(i>0 && i<=int(size())); --i;
+                TMVAssert(j>0 && j<=int(size())); --j;
             }
             if (i>j) return T(0);
             else if (i==j && D == UnitDiag) return T(1);
@@ -4590,6 +4700,26 @@ namespace tmv {
 #endif
         }
 
+        inline rowmajor_iterator rowmajor_begin() 
+        { return rowmajor_iterator(this,0,0); }
+        inline rowmajor_iterator rowmajor_end()
+        { return rowmajor_iterator(this,size(),size()); }
+
+        inline const_rowmajor_iterator rowmajor_begin() const
+        { return const_rowmajor_iterator(this,0,0); }
+        inline const_rowmajor_iterator rowmajor_end() const
+        { return const_rowmajor_iterator(this,size(),size()); }
+
+        inline colmajor_iterator colmajor_begin() 
+        { return colmajor_iterator(this,0,0); }
+        inline colmajor_iterator colmajor_end() 
+        { return colmajor_iterator(this,0,size()); }
+
+        inline const_colmajor_iterator colmajor_begin() const
+        { return const_colmajor_iterator(this,0,0); }
+        inline const_colmajor_iterator colmajor_end() const
+        { return const_colmajor_iterator(this,0,size()); }
+
     protected :
 
         size_t itslen;
@@ -4652,6 +4782,10 @@ namespace tmv {
         typedef uppertri_type adjoint_type;
         typedef LowerTriMatrixView<RT,I> realpart_type;
         typedef typename TriRefHelper2<T,D>::reference reference;
+        typedef RMIt<type> rowmajor_iterator;
+        typedef CRMIt<type> const_rowmajor_iterator;
+        typedef CMIt<type> colmajor_iterator;
+        typedef CCMIt<type> const_colmajor_iterator;
 
         //
         // Constructors
@@ -4675,13 +4809,15 @@ namespace tmv {
             setAllTo(x);
         }
 
-        inline LowerTriMatrix(size_t _size, const T* vv) : NEW_SIZE(_size)
+        TMV_DEPRECATED(inline LowerTriMatrix(size_t _size, const T* vv)) : 
+            NEW_SIZE(_size)
         {
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(vv,vv+itslen,itsm.get());
         }
 
-        inline LowerTriMatrix(size_t _size, const std::vector<T>& vv) :
+        TMV_DEPRECATED(inline LowerTriMatrix(
+                size_t _size, const std::vector<T>& vv)) :
             NEW_SIZE(_size)
         {
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -4861,11 +4997,19 @@ namespace tmv {
         inline type& operator=(const AssignableToLowerTriMatrix<CT>& m2)
         { 
             TMVAssert(size() == m2.size());
-            TMVAssert(isComplex(T()));
             TMVAssert(!(m2.dt()==NonUnitDiag && D==UnitDiag));
+            TMVAssert(isComplex(T()));
             m2.assignToL(view());
             return *this;
         }
+
+        typedef ListAssigner<T,rowmajor_iterator> MyListAssigner;
+        inline MyListAssigner operator<<(const T& x)
+        { return MyListAssigner(rowmajor_begin(),size()*(size()+1)/2,x); }
+
+        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass))
+        { return MyListAssigner(rowmajor_begin(),size()*(size()+1)/2); }
+
 
         //
         // Access
@@ -5455,6 +5599,26 @@ namespace tmv {
 #endif
         }
 
+        inline rowmajor_iterator rowmajor_begin() 
+        { return rowmajor_iterator(this,0,0); }
+        inline rowmajor_iterator rowmajor_end() 
+        { return rowmajor_iterator(this,size(),0); }
+
+        inline const_rowmajor_iterator rowmajor_begin() const
+        { return const_rowmajor_iterator(this,0,0); }
+        inline const_rowmajor_iterator rowmajor_end() const
+        { return const_rowmajor_iterator(this,size(),0); }
+
+        inline colmajor_iterator colmajor_begin() 
+        { return colmajor_iterator(this,0,0); }
+        inline colmajor_iterator colmajor_end() 
+        { return colmajor_iterator(this,size(),size()); }
+
+        inline const_colmajor_iterator colmajor_begin() const
+        { return const_colmajor_iterator(this,0,0); }
+        inline const_colmajor_iterator colmajor_end() const
+        { return const_colmajor_iterator(this,size(),size()); }
+
     protected :
 
         size_t itslen;
@@ -5493,121 +5657,207 @@ namespace tmv {
 
     //
     // Special Creators: 
-    //   UpperTriMatrixViewOf(T* m, n, S)
-    //   LowerTriMatrixViewOf(m)
-    //   UnitTriMatrixViewOf(t)
+    //   UpperTriMatrixViewOf(T* m, n, S, D)
+    //   UnitUpperTriMatrixViewOf(T* m, n, S)
+    //   UpperTriMatrixViewOf(T* m, n, Si, Sj, D)
+    //   UnitUpperTriMatrixViewOf(T* m, n, Si, Sj)
     //
 
     template <class T> 
     inline ConstUpperTriMatrixView<T> UpperTriMatrixViewOf(
-        const T* vv, size_t size, StorageType stor, DiagType dt=NonUnitDiag)
+        const T* m, size_t size, StorageType stor, DiagType dt=NonUnitDiag)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         if (stor == RowMajor)
             return ConstUpperTriMatrixView<T>(
-                vv,size,size,1,dt,RowMajor,NonConj);
+                m,size,size,1,dt,RowMajor,NonConj);
         else
             return ConstUpperTriMatrixView<T>(
-                vv,size,1,size,dt,ColMajor,NonConj);
+                m,size,1,size,dt,ColMajor,NonConj);
     }
 
     template <class T> 
     inline UpperTriMatrixView<T> UpperTriMatrixViewOf(
-        T* vv, size_t size, StorageType stor, DiagType dt=NonUnitDiag)
+        T* m, size_t size, StorageType stor, DiagType dt=NonUnitDiag)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         if (stor == RowMajor)
             return UpperTriMatrixView<T>(
-                vv,size,size,1,dt,RowMajor,NonConj 
-                TMV_FIRSTLAST1(vv,vv+size*size));
+                m,size,size,1,dt,RowMajor,NonConj 
+                TMV_FIRSTLAST1(m,m+size*size));
         else
             return UpperTriMatrixView<T>(
-                vv,size,1,size,dt,ColMajor,NonConj 
-                TMV_FIRSTLAST1(vv,vv+size*size));
+                m,size,1,size,dt,ColMajor,NonConj 
+                TMV_FIRSTLAST1(m,m+size*size));
     }
 
     template <class T> 
     inline ConstLowerTriMatrixView<T> LowerTriMatrixViewOf(
-        const T* vv, size_t size, StorageType stor, DiagType dt=NonUnitDiag)
+        const T* m, size_t size, StorageType stor, DiagType dt=NonUnitDiag)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         if (stor == RowMajor)
             return ConstLowerTriMatrixView<T>(
-                vv,size,size,1,dt,RowMajor,NonConj);
+                m,size,size,1,dt,RowMajor,NonConj);
         else
             return ConstLowerTriMatrixView<T>(
-                vv,size,1,size,dt,ColMajor,NonConj);
+                m,size,1,size,dt,ColMajor,NonConj);
     }
 
     template <class T> 
     inline LowerTriMatrixView<T> LowerTriMatrixViewOf(
-        T* vv, size_t size, StorageType stor, DiagType dt=NonUnitDiag)
+        T* m, size_t size, StorageType stor, DiagType dt=NonUnitDiag)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         if (stor == RowMajor)
             return LowerTriMatrixView<T>(
-                vv,size,size,1,dt,RowMajor,NonConj 
-                TMV_FIRSTLAST1(vv,vv+size*size));
+                m,size,size,1,dt,RowMajor,NonConj 
+                TMV_FIRSTLAST1(m,m+size*size));
         else
             return LowerTriMatrixView<T>(
-                vv,size,1,size,dt,ColMajor,NonConj 
-                TMV_FIRSTLAST1(vv,vv+size*size));
+                m,size,1,size,dt,ColMajor,NonConj 
+                TMV_FIRSTLAST1(m,m+size*size));
     }
 
     template <class T> 
     inline ConstUpperTriMatrixView<T> UnitUpperTriMatrixViewOf(
-        const T* vv, size_t size, StorageType stor)
+        const T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         if (stor == RowMajor)
             return ConstUpperTriMatrixView<T>(
-                vv,size,size,1,UnitDiag,RowMajor,NonConj);
+                m,size,size,1,UnitDiag,RowMajor,NonConj);
         else
             return ConstUpperTriMatrixView<T>(
-                vv,size,1,size,UnitDiag,ColMajor,NonConj);
+                m,size,1,size,UnitDiag,ColMajor,NonConj);
     }
 
     template <class T> 
     inline UpperTriMatrixView<T> UnitUpperTriMatrixViewOf(
-        T* vv, size_t size, StorageType stor)
+        T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         if (stor == RowMajor)
             return UpperTriMatrixView<T>(
-                vv,size,size,1,UnitDiag,RowMajor,NonConj 
-                TMV_FIRSTLAST1(vv,vv+size*size));
+                m,size,size,1,UnitDiag,RowMajor,NonConj 
+                TMV_FIRSTLAST1(m,m+size*size));
         else
             return UpperTriMatrixView<T>(
-                vv,size,1,size,UnitDiag,ColMajor,NonConj 
-                TMV_FIRSTLAST1(vv,vv+size*size));
+                m,size,1,size,UnitDiag,ColMajor,NonConj 
+                TMV_FIRSTLAST1(m,m+size*size));
     }
 
     template <class T> 
     inline ConstLowerTriMatrixView<T> UnitLowerTriMatrixViewOf(
-        const T* vv, size_t size, StorageType stor)
+        const T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         if (stor == RowMajor)
             return ConstLowerTriMatrixView<T>(
-                vv,size,size,1,UnitDiag,RowMajor,NonConj);
+                m,size,size,1,UnitDiag,RowMajor,NonConj);
         else
             return ConstLowerTriMatrixView<T>(
-                vv,size,1,size,UnitDiag,ColMajor,NonConj);
+                m,size,1,size,UnitDiag,ColMajor,NonConj);
     }
 
     template <class T> 
     inline LowerTriMatrixView<T> UnitLowerTriMatrixViewOf(
-        T* vv, size_t size, StorageType stor)
+        T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         if (stor == RowMajor)
             return LowerTriMatrixView<T>(
-                vv,size,size,1,UnitDiag,RowMajor,NonConj 
-                TMV_FIRSTLAST1(vv,vv+size*size));
+                m,size,size,1,UnitDiag,RowMajor,NonConj 
+                TMV_FIRSTLAST1(m,m+size*size));
         else
             return LowerTriMatrixView<T>(
-                vv,size,1,size,UnitDiag,ColMajor,NonConj 
-                TMV_FIRSTLAST1(vv,vv+size*size));
+                m,size,1,size,UnitDiag,ColMajor,NonConj 
+                TMV_FIRSTLAST1(m,m+size*size));
+    }
+
+
+    template <class T> 
+    inline ConstUpperTriMatrixView<T> UpperTriMatrixViewOf(
+        const T* m, size_t size, int stepi, int stepj, DiagType dt=NonUnitDiag)
+    {
+        const StorageType stor = (
+            stepi==1 ? ColMajor : stepj==1 ? RowMajor : NoMajor );
+        return ConstUpperTriMatrixView<T>(
+            m,size,stepi,stepj,dt,stor,NonConj);
+    }
+
+    template <class T> 
+    inline UpperTriMatrixView<T> UpperTriMatrixViewOf(
+        T* m, size_t size, int stepi, int stepj, DiagType dt=NonUnitDiag)
+    {
+        const StorageType stor = (
+            stepi==1 ? ColMajor : stepj==1 ? RowMajor : NoMajor );
+        return UpperTriMatrixView<T>(
+            m,size,stepi,stepj,dt,stor,NonConj
+            TMV_FIRSTLAST1(m,m+size*size));
+    }
+
+    template <class T> 
+    inline ConstLowerTriMatrixView<T> LowerTriMatrixViewOf(
+        const T* m, size_t size, int stepi, int stepj, DiagType dt=NonUnitDiag)
+    {
+        const StorageType stor = (
+            stepi==1 ? ColMajor : stepj==1 ? RowMajor : NoMajor );
+        return ConstLowerTriMatrixView<T>(
+            m,size,stepi,stepj,dt,stor,NonConj);
+    }
+
+    template <class T> 
+    inline LowerTriMatrixView<T> LowerTriMatrixViewOf(
+        T* m, size_t size, int stepi, int stepj, DiagType dt=NonUnitDiag)
+    {
+        const StorageType stor = (
+            stepi==1 ? ColMajor : stepj==1 ? RowMajor : NoMajor );
+        return LowerTriMatrixView<T>(
+            m,size,stepi,stepj,dt,stor,NonConj 
+            TMV_FIRSTLAST1(m,m+size*size));
+    }
+
+    template <class T> 
+    inline ConstUpperTriMatrixView<T> UnitUpperTriMatrixViewOf(
+        const T* m, size_t size, int stepi, int stepj)
+    {
+        const StorageType stor = (
+            stepi==1 ? ColMajor : stepj==1 ? RowMajor : NoMajor );
+        return ConstUpperTriMatrixView<T>(
+            m,size,stepi,stepj,UnitDiag,stor,NonConj);
+    }
+
+    template <class T> 
+    inline UpperTriMatrixView<T> UnitUpperTriMatrixViewOf(
+        T* m, size_t size, int stepi, int stepj)
+    {
+        const StorageType stor = (
+            stepi==1 ? ColMajor : stepj==1 ? RowMajor : NoMajor );
+        return UpperTriMatrixView<T>(
+            m,size,size,1,UnitDiag,stor,NonConj 
+            TMV_FIRSTLAST1(m,m+size*size));
+    }
+
+    template <class T> 
+    inline ConstLowerTriMatrixView<T> UnitLowerTriMatrixViewOf(
+        const T* m, size_t size, int stepi, int stepj)
+    {
+        const StorageType stor = (
+            stepi==1 ? ColMajor : stepj==1 ? RowMajor : NoMajor );
+        return ConstLowerTriMatrixView<T>(
+            m,size,size,1,UnitDiag,stor,NonConj);
+    }
+
+    template <class T> 
+    inline LowerTriMatrixView<T> UnitLowerTriMatrixViewOf(
+        T* m, size_t size, int stepi, int stepj)
+    {
+        const StorageType stor = (
+            stepi==1 ? ColMajor : stepj==1 ? RowMajor : NoMajor );
+        return LowerTriMatrixView<T>(
+            m,size,size,1,UnitDiag,stor,NonConj 
+            TMV_FIRSTLAST1(m,m+size*size));
     }
 
     //
@@ -5920,6 +6170,13 @@ namespace tmv {
     inline std::istream& operator>>(
         std::istream& is, LowerTriMatrix<T,D,S,I>& m)
     { return is>>m.view(); }
+
+    template <class T, bool C>
+    inline std::string TMV_Text(const TriRef<T,C>& ref)
+    { 
+        return std::string("TriRef<") + TMV_Text(T()) + "," +
+            TMV_Text(C ? Conj : NonConj) + ">";
+    }
 
 } // namespace tmv
 

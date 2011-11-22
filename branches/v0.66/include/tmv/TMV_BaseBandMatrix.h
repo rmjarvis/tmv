@@ -69,8 +69,8 @@ namespace tmv {
             m.stor() : DiagMajor;
     }
 
-    size_t BandStorageLength(
-        StorageType s, size_t cs, size_t rs, int lo, int hi);
+    size_t BandStorageLength(StorageType s, int cs, int rs, int lo, int hi);
+    int BandNumElements(int cs, int rs, int lo, int hi);
 
     template <class T1, class T2> 
     void Copy(const GenBandMatrix<T1>& m1, const BandMatrixView<T2>& m2);

@@ -68,20 +68,6 @@
 //    Matrix<T,stor,I>(size_t colsize, size_t rowsize, T x)
 //        Makes a Matrix of size n with all values = x
 //
-//    Matrix<T,stor,I>(const vector<vector<T> >& m)
-//        Makes a Matrix with a_ij = m[i][j]
-//
-//    Matrix<T,stor,I>(size_t colsize, size_t rowsize, const T* vv)
-//    Matrix<T,stor,I>(size_t colsize, size_t rowsize, 
-//            const std::vector<T>& vv)
-//        Make a Matrix which copies the elements of vv.
-//        If stor is tmv::RowMajor then the elements are taken in row major
-//        order (m00,m01,..m0n,m10,m11...).  If stor is tmv::ColMajor
-//        then the elements are taken in column major order.
-//        If stor is omitted, then tmv::ColMajor is assumed.
-//        (stor is also an optional last parameter on the other above 
-//        constructors as well.)
-//
 //
 // Special Constructors
 //
@@ -532,6 +518,7 @@
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_Permutation.h"
 #include "tmv/TMV_Array.h"
+#include "tmv/TMV_MIt.h"
 #include <vector>
 
 namespace tmv {
@@ -555,8 +542,9 @@ namespace tmv {
     class SVDiv;
 
     template <class T> 
-    class GenMatrix : public BaseMatrix<T>,
-                      private DivHelper<T>
+    class GenMatrix : 
+        public BaseMatrix<T>,
+        private DivHelper<T>
     {
     public:
 
@@ -576,6 +564,8 @@ namespace tmv {
         typedef ConstUpperTriMatrixView<T> const_uppertri_type;
         typedef ConstLowerTriMatrixView<T> const_lowertri_type;
         typedef MatrixView<T> nonconst_type;
+        typedef CRMIt<type> const_rowmajor_iterator;
+        typedef CCMIt<type> const_colmajor_iterator;
 
         //
         // Constructors
@@ -1194,6 +1184,21 @@ namespace tmv {
 
         virtual T cref(int i, int j) const;
 
+        inline int rowstart(int ) const { return 0; }
+        inline int rowend(int ) const { return rowsize(); }
+        inline int colstart(int ) const { return 0; }
+        inline int colend(int ) const { return colsize(); }
+
+        inline const_rowmajor_iterator rowmajor_begin() const 
+        { return const_rowmajor_iterator(this,0,0); }
+        inline const_rowmajor_iterator rowmajor_end() const 
+        { return const_rowmajor_iterator(this,colsize(),0); }
+
+        inline const_colmajor_iterator colmajor_begin() const 
+        { return const_colmajor_iterator(this,0,0); }
+        inline const_colmajor_iterator colmajor_end() const 
+        { return const_colmajor_iterator(this,0,rowsize()); }
+
     protected :
 
         using DivHelper<T>::getDiv;
@@ -1230,7 +1235,8 @@ namespace tmv {
 
 
     template <class T, IndexStyle I> 
-    class ConstMatrixView : public GenMatrix<T>
+    class ConstMatrixView : 
+        public GenMatrix<T>
     {
     public :
 
@@ -1305,7 +1311,8 @@ namespace tmv {
     }; // ConstMatrixView
 
     template <class T> 
-    class ConstMatrixView<T,FortranStyle> : public ConstMatrixView<T,CStyle>
+    class ConstMatrixView<T,FortranStyle> : 
+        public ConstMatrixView<T,CStyle>
     {
     public :
 
@@ -1533,7 +1540,8 @@ namespace tmv {
     }; // FortranStyle ConstMatrixView
 
     template <class T, IndexStyle I> 
-    class MatrixView : public GenMatrix<T>
+    class MatrixView : 
+        public GenMatrix<T>
     {
     public:
 
@@ -1550,6 +1558,8 @@ namespace tmv {
         typedef UpperTriMatrixView<T,I> uppertri_type;
         typedef LowerTriMatrixView<T,I> lowertri_type;
         typedef TMV_RefType(T) reference;
+        typedef RMIt<const type> rowmajor_iterator;
+        typedef CMIt<const type> colmajor_iterator;
 
         //
         // Constructors
@@ -1681,24 +1691,12 @@ namespace tmv {
             return *this; 
         }
 
-        typedef ListAssigner<T,VIter<T> > MyListAssigner;
-        inline MyListAssigner operator<<(const T& x)
-        { 
-            TMVAssert(ls() != 1 || (rowsize() == 1 && colsize() == 1));
-            // To assure that next Assert has no effect
-            TMVAssert(canLinearize());
-            TMVAssert(ls() == colsize()*rowsize());
-            return MyListAssigner(linearView().begin(),ls(),x);
-        }
+        typedef ListAssigner<T,rowmajor_iterator> MyListAssigner;
+        inline MyListAssigner operator<<(const T& x) const
+        { return MyListAssigner(rowmajor_begin(),colsize()*rowsize(),x); }
 
-        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass))
-        { 
-            TMVAssert(ls() != 1 || (rowsize() == 1 && colsize() == 1));
-            // To assure that next Assert has no effect
-            TMVAssert(canLinearize());
-            TMVAssert(ls() == colsize()*rowsize());
-            return MyListAssigner(linearView().begin(),ls());
-        }
+        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass) const)
+        { return MyListAssigner(rowmajor_begin(),colsize()*rowsize()); }
 
 
         //
@@ -2173,6 +2171,16 @@ namespace tmv {
 
         reference ref(int i, int j) const;
 
+        inline rowmajor_iterator rowmajor_begin() const
+        { return rowmajor_iterator(this,0,0); }
+        inline rowmajor_iterator rowmajor_end() const
+        { return rowmajor_iterator(this,colsize(),0); }
+
+        inline colmajor_iterator colmajor_begin() const
+        { return colmajor_iterator(this,0,0); }
+        inline colmajor_iterator colmajor_end() const
+        { return colmajor_iterator(this,0,rowsize()); }
+
     protected:
 
         T*const itsm;
@@ -2194,7 +2202,8 @@ namespace tmv {
     }; // MatrixView
 
     template <class T> 
-    class MatrixView<T,FortranStyle> : public MatrixView<T,CStyle>
+    class MatrixView<T,FortranStyle> : 
+        public MatrixView<T,CStyle>
     {
     public:
 
@@ -2277,11 +2286,11 @@ namespace tmv {
         inline const type& operator=(const SmallMatrix<T2,M,N,S2,I2>& m2) const
         { c_type::operator=(m2); return *this; }
 
-        typedef ListAssigner<T,VIter<T> > MyListAssigner;
-        inline MyListAssigner operator<<(const T& x)
+        typedef typename c_type::MyListAssigner MyListAssigner;
+        inline MyListAssigner operator<<(const T& x) const
         { return c_type::operator<<(x); }
 
-        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass li))
+        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass li) const)
         { return c_type::operator=(li); }
 
         //
@@ -2592,17 +2601,82 @@ namespace tmv {
         TMV_DEPRECATED(vec_type LinearView() const)
         { return linearView(); }
 
-
-
     protected:
 
         using c_type::ref;
 
     }; // FortranStyle MatrixView
 
+    template <StorageType S, class M>
+    struct MatrixIterHelper;
+
+    template <class M>
+    struct MatrixIterHelper<RowMajor,M>
+    {
+        typedef typename M::value_type T;
+        typedef VIt<T,Unit,NonConj> rowmajor_iterator;
+        typedef CVIt<T,Unit,NonConj> const_rowmajor_iterator;
+
+        static rowmajor_iterator rowmajor_begin(M* m)
+        { return rowmajor_iterator(m->ptr(),1); }
+        static rowmajor_iterator rowmajor_end(M* m)
+        { return rowmajor_iterator(m->ptr()+m->ls(),1); }
+
+        static const_rowmajor_iterator rowmajor_begin(const M* m)
+        { return const_rowmajor_iterator(m->cptr(),1); }
+        static const_rowmajor_iterator rowmajor_end(const M* m)
+        { return const_rowmajor_iterator(m->cptr()+m->ls(),1); }
+
+        typedef CMIt<M> colmajor_iterator;
+        typedef CCMIt<M> const_colmajor_iterator;
+
+        static colmajor_iterator colmajor_begin(M* m)
+        { return colmajor_iterator(m,0,0); }
+        static colmajor_iterator colmajor_end(M* m)
+        { return colmajor_iterator(m,0,m->rowsize()); }
+
+        static const_colmajor_iterator colmajor_begin(const M* m)
+        { return const_colmajor_iterator(m,0,0); }
+        static const_colmajor_iterator colmajor_end(const M* m)
+        { return const_colmajor_iterator(m,0,m->rowsize()); }
+
+    };
+
+    template <class M>
+    struct MatrixIterHelper<ColMajor,M>
+    {
+        typedef RMIt<M> rowmajor_iterator;
+        typedef CRMIt<M> const_rowmajor_iterator;
+ 
+        static rowmajor_iterator rowmajor_begin(M* m)
+        { return rowmajor_iterator(m,0,0); }
+        static rowmajor_iterator rowmajor_end(M* m)
+        { return rowmajor_iterator(m,m->colsize(),0); }
+
+        static const_rowmajor_iterator rowmajor_begin(const M* m)
+        { return const_rowmajor_iterator(m,0,0); }
+        static const_rowmajor_iterator rowmajor_end(const M* m)
+        { return const_rowmajor_iterator(m,m->colsize(),0); }
+
+        typedef typename M::value_type T;
+        typedef VIt<T,Unit,NonConj> colmajor_iterator;
+        typedef CVIt<T,Unit,NonConj> const_colmajor_iterator;
+
+        static colmajor_iterator colmajor_begin(M* m)
+        { return colmajor_iterator(m->ptr(),1); }
+        static colmajor_iterator colmajor_end(M* m)
+        { return colmajor_iterator(m->ptr()+m->ls(),1); }
+
+        static const_colmajor_iterator colmajor_begin(const M* m)
+        { return const_colmajor_iterator(m->cptr(),1); }
+        static const_colmajor_iterator colmajor_end(const M* m)
+        { return const_colmajor_iterator(m->cptr()+m->ls(),1); }
+
+   };
 
     template <class T, StorageType S, IndexStyle I> 
-    class Matrix : public GenMatrix<T> 
+    class Matrix : 
+        public GenMatrix<T> 
     {
     public:
 
@@ -2626,6 +2700,14 @@ namespace tmv {
         typedef UpperTriMatrixView<T,I> uppertri_type;
         typedef LowerTriMatrixView<T,I> lowertri_type;
         typedef T& reference;
+        typedef typename MatrixIterHelper<S,type>::rowmajor_iterator 
+            rowmajor_iterator;
+        typedef typename MatrixIterHelper<S,type>::const_rowmajor_iterator 
+            const_rowmajor_iterator;
+        typedef typename MatrixIterHelper<S,type>::colmajor_iterator 
+            colmajor_iterator;
+        typedef typename MatrixIterHelper<S,type>::const_colmajor_iterator 
+            const_colmajor_iterator;
 
         //
         // Constructors
@@ -2652,15 +2734,16 @@ namespace tmv {
             setAllTo(x);
         }
 
-        inline Matrix(size_t _colsize,size_t _rowsize, const T* vv) :
+        TMV_DEPRECATED(inline Matrix(
+                size_t _colsize,size_t _rowsize, const T* vv)) :
             NEW_SIZE(_colsize,_rowsize)
         {
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(vv,vv+linsize,itsm.get());
         }
 
-        inline Matrix(
-            size_t _colsize, size_t _rowsize, const std::vector<T>& vv) : 
+        TMV_DEPRECATED(inline Matrix(
+            size_t _colsize, size_t _rowsize, const std::vector<T>& vv)) :
             NEW_SIZE(_colsize,_rowsize)
         {
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -2668,7 +2751,7 @@ namespace tmv {
             std::copy(vv.begin(),vv.end(),itsm.get());
         }
 
-        explicit Matrix(const std::vector<std::vector<T> >& vv);
+        TMV_DEPRECATED(explicit Matrix(const std::vector<std::vector<T> >& vv));
 
         inline Matrix(const type& rhs) : NEW_SIZE(rhs.colsize(),rhs.rowsize())
         {
@@ -2827,17 +2910,17 @@ namespace tmv {
             return *this; 
         }
 
-        typedef ListAssigner<T,VIt<T,Unit,NonConj> > MyListAssigner;
+        typedef ListAssigner<T,rowmajor_iterator> MyListAssigner;
         inline MyListAssigner operator<<(const T& x)
         { 
             TMVAssert(linsize == colsize() * rowsize());
-            return MyListAssigner(VIt<T,Unit,NonConj>(ptr(),1),linsize,x);
+            return MyListAssigner(rowmajor_begin(),linsize,x);
         }
 
         TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass))
         { 
             TMVAssert(linsize == colsize() * rowsize());
-            return MyListAssigner(VIt<T,Unit,NonConj>(ptr(),1),linsize);
+            return MyListAssigner(rowmajor_begin(),linsize);
         }
 
 
@@ -3750,6 +3833,27 @@ namespace tmv {
 #endif
         }
 
+        inline rowmajor_iterator rowmajor_begin() 
+        { return MatrixIterHelper<S,type>::rowmajor_begin(this); }
+        inline rowmajor_iterator rowmajor_end() 
+        { return MatrixIterHelper<S,type>::rowmajor_end(this); }
+
+        inline const_rowmajor_iterator rowmajor_begin() const 
+        { return MatrixIterHelper<S,type>::rowmajor_begin(this); }
+        inline const_rowmajor_iterator rowmajor_end() const 
+        { return MatrixIterHelper<S,type>::rowmajor_end(this); }
+
+        inline colmajor_iterator colmajor_begin()
+        { return MatrixIterHelper<S,type>::colmajor_begin(this); }
+        inline colmajor_iterator colmajor_end()
+        { return MatrixIterHelper<S,type>::colmajor_end(this); }
+
+        inline const_colmajor_iterator colmajor_begin() const 
+        { return MatrixIterHelper<S,type>::colmajor_begin(this); }
+        inline const_colmajor_iterator colmajor_end() const 
+        { return MatrixIterHelper<S,type>::colmajor_end(this); }
+
+
     protected :
 
         size_t linsize;
@@ -3761,6 +3865,7 @@ namespace tmv {
     public:
         const T* _first;
         const T* _last;
+    protected:
 #endif
 
         // If two matrices are the same size and storage, then 
@@ -3876,15 +3981,12 @@ namespace tmv {
         T* m, size_t colsize, size_t rowsize, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
-        size_t linsize = colsize * rowsize;
-        if (stor == RowMajor) 
-            return MatrixView<T>(
-                m,colsize,rowsize,rowsize,1,RowMajor,NonConj,linsize 
-                TMV_FIRSTLAST1(m,m+linsize));
-        else 
-            return MatrixView<T>(
-                m,colsize,rowsize,1,colsize,ColMajor,NonConj,linsize 
-                TMV_FIRSTLAST1(m,m+linsize));
+        const size_t linsize = colsize * rowsize;
+        const int stepi = stor == RowMajor ? rowsize : 1;
+        const int stepj = stor == RowMajor ? 1 : colsize;
+        return MatrixView<T>(
+            m,colsize,rowsize,stepi,stepj,stor,NonConj,linsize 
+            TMV_FIRSTLAST1(m,m+linsize));
     }
 
     template <class T> 
@@ -3892,13 +3994,11 @@ namespace tmv {
         const T* m, size_t colsize, size_t rowsize, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
-        size_t linsize = colsize*rowsize;
-        if (stor == RowMajor)
-            return ConstMatrixView<T>(
-                m,colsize,rowsize,rowsize,1,RowMajor,NonConj,linsize);
-        else 
-            return ConstMatrixView<T>(
-                m,colsize,rowsize,1,colsize,ColMajor,NonConj,linsize);
+        const size_t linsize = colsize*rowsize;
+        const int stepi = stor == RowMajor ? rowsize : 1;
+        const int stepj = stor == RowMajor ? 1 : colsize;
+        return ConstMatrixView<T>(
+            m,colsize,rowsize,stepi,stepj,stor,NonConj,linsize);
     }
 
     template <class T> 

@@ -12,6 +12,13 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_1()
     const int M = 15;
     const int N = 10;
 
+    if (showstartdone) {
+        std::cout<<"Start TestBasicMatrix_1\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"M,N = "<<M<<','<<N<<std::endl;
+    }
+
     tmv::Matrix<T,S> m(M,N);
     tmv::Matrix<T,S,tmv::FortranStyle> mf(M,N);
     Assert(m.colsize() == size_t(M) && m.rowsize() == size_t(N),
@@ -138,6 +145,13 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_2()
     const int M = 15;
     const int N = 10;
 
+    if (showstartdone) {
+        std::cout<<"Start TestBasicMatrix_2\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"M,N = "<<M<<','<<N<<std::endl;
+    }
+
     tmv::Matrix<T,S> m(M,N);
     tmv::Matrix<T,S,tmv::FortranStyle> mf(M,N);
 
@@ -238,6 +252,90 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_2()
     Assert(mf.colRange(3,5) == mfv.colRange(3,5),"colRangeFV");
     Assert(mf.rowRange(4,7) == mfv.rowRange(4,7),"rowRangeFV");
 
+
+    // Test assignments and constructors from arrays
+    T qarrm[] = { 
+        T(0), T(-1), T(-2), T(-3),
+        T(2), T(1), T(0), T(-1),
+        T(4), T(3), T(2), T(1) 
+    };
+    T qarcm[] = {
+        T(0), T(2), T(4),
+        T(-1), T(1), T(3),
+        T(-2), T(0), T(2),
+        T(-3), T(-1), T(1) 
+    };
+    std::vector<T> qvecrm(12);
+    for(int i=0;i<12;i++) qvecrm[i] = qarrm[i];
+    std::vector<T> qveccm(12);
+    for(int i=0;i<12;i++) qveccm[i] = qarcm[i];
+
+    tmv::Matrix<T,S> q1(3,4);
+    std::copy(qarrm, qarrm+12, q1.rowmajor_begin());
+    tmv::Matrix<T,S> q2(3,4);
+    std::copy(qarcm, qarcm+12, q2.colmajor_begin());
+
+    tmv::Matrix<T,S> q3(3,4);
+    std::copy(qvecrm.begin(), qvecrm.end(), q3.rowmajor_begin());
+    tmv::Matrix<T,S> q4(3,4);
+    std::copy(qveccm.begin(), qveccm.end(), q4.colmajor_begin());
+
+    tmv::Matrix<T,S> q5x(30,40);
+    tmv::MatrixView<T> q5 = q5x.subMatrix(3,18,5,25,5,5);
+    std::copy(qvecrm.begin(), qvecrm.end(), q5.rowmajor_begin());
+
+    tmv::Matrix<T,S> q6x(30,40);
+    tmv::MatrixView<T> q6 = q6x.subMatrix(3,18,5,25,5,5);
+    std::copy(qveccm.begin(), qveccm.end(), q6.colmajor_begin());
+
+    // Assignment using op<< is always in rowmajor order.
+    tmv::Matrix<T,S> q7(3,4);
+    tmv::Matrix<T,S> q8t(4,3);
+    tmv::MatrixView<T> q8 = q8t.transpose();
+    q7 <<
+        0, -1, -2, -3,
+        2, 1, 0, -1,
+        4, 3, 2, 1;
+    q8 <<
+        0, -1, -2, -3,
+        2, 1, 0, -1,
+        4, 3, 2, 1;
+
+    // Can also view memory directly
+    T* qarS = (S == tmv::RowMajor) ? qarrm : qarcm;
+    tmv::ConstMatrixView<T> q9 = tmv::MatrixViewOf(qarS,3,4,S);
+    const int Si = (S == tmv::RowMajor ? 4 : 1);
+    const int Sj = (S == tmv::RowMajor ? 1 : 3);
+    tmv::ConstMatrixView<T> q10 = tmv::MatrixViewOf(qarS,3,4,Si,Sj);
+
+    if (showacc) {
+        std::cout<<"q1 = "<<q1<<std::endl;
+        std::cout<<"q2 = "<<q2<<std::endl;
+        std::cout<<"q3 = "<<q3<<std::endl;
+        std::cout<<"q4 = "<<q4<<std::endl;
+        std::cout<<"q5 = "<<q5<<std::endl;
+        std::cout<<"q6 = "<<q6<<std::endl;
+        std::cout<<"q7 = "<<q7<<std::endl;
+        std::cout<<"q8 = "<<q8<<std::endl;
+        std::cout<<"q9 = "<<q9<<std::endl;
+        std::cout<<"q10 = "<<q10<<std::endl;
+    }
+
+    for(int i=0;i<3;i++) for(int j=0;j<4;j++) {
+        Assert(q1(i,j) == T(2*i-j),"Create Matrix from T* rm");
+        Assert(q2(i,j) == T(2*i-j),"Create Matrix from T* cm");
+        Assert(q3(i,j) == T(2*i-j),"Create Matrix from vector rm");
+        Assert(q4(i,j) == T(2*i-j),"Create Matrix from vector cm");
+        Assert(q5(i,j) == T(2*i-j),"Create MatrixView from vector rm");
+        Assert(q6(i,j) == T(2*i-j),"Create MatrixView from vector cm");
+        Assert(q7(i,j) == T(2*i-j),"Create Matrix from << list");
+        Assert(q8(i,j) == T(2*i-j),"Create MatrixView from << list");
+        Assert(q9(i,j) == T(2*i-j),"Create MatrixView of T* (S)");
+        Assert(q10(i,j) == T(2*i-j),"Create MatrixView of T* (Si,Sj)");
+    }
+
+
+    // Test Basic Arithmetic
     tmv::Matrix<T,S> a(M,N);
     tmv::Matrix<T,S> b(M,N);
     tmv::Matrix<T,S> c(M,N);
@@ -247,72 +345,6 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_2()
     }
     mf = a;
     Assert(a == mf,"Copy CStyle Matrix to FortranStyle");
-
-    std::vector<T> qv(12);
-    tmv::Matrix<T,S> q4(3,4);
-    tmv::Matrix<T,S> q5t(4,3);
-    tmv::MatrixView<T> q5 = q5t.transpose();
-    if (S == tmv::RowMajor) {
-        T qvar[] = { 
-            T(0), T(-1), T(-2), T(-3),
-            T(2), T(1), T(0), T(-1),
-            T(4), T(3), T(2), T(1) 
-        };
-        for(int i=0;i<12;i++) qv[i] = qvar[i];
-        q4 <<
-            0, -1, -2, -3,
-            2, 1, 0, -1,
-            4, 3, 2, 1;
-        q5 <<
-            0, 2, 4,
-            -1, 1, 3,
-            -2, 0, 2,
-            -3, -1, 1;
-    } else {
-        T qvar[] = {
-            T(0), T(2), T(4),
-            T(-1), T(1), T(3),
-            T(-2), T(0), T(2),
-            T(-3), T(-1), T(1) 
-        };
-        for(int i=0;i<12;i++) qv[i] = qvar[i];
-        q4 <<
-            0, 2, 4,
-            -1, 1, 3,
-            -2, 0, 2,
-            -3, -1, 1;
-        q5 <<
-            0, -1, -2, -3,
-            2, 1, 0, -1,
-            4, 3, 2, 1;
-    }
-    const int Si = (S == tmv::RowMajor ? 4 : 1);
-    const int Sj = (S == tmv::RowMajor ? 1 : 3);
-    T qar[12];
-    for(int i=0;i<12;i++) qar[i] = qv[i];
-    tmv::Matrix<T,S> q1(3,4,qar);
-    tmv::Matrix<T,S> q2(3,4,qv);
-
-    tmv::ConstMatrixView<T> q3 = tmv::MatrixViewOf(qar,3,4,S);
-    tmv::ConstMatrixView<T> q6 = tmv::MatrixViewOf(qar,3,4,Si,Sj);
-
-    if (showacc) {
-        std::cout<<"q1 = "<<q1<<std::endl;
-        std::cout<<"q2 = "<<q2<<std::endl;
-        std::cout<<"q3 = "<<q3<<std::endl;
-        std::cout<<"q4 = "<<q4<<std::endl;
-        std::cout<<"q5 = "<<q5<<std::endl;
-        std::cout<<"q6 = "<<q6<<std::endl;
-    }
-
-    for(int i=0;i<3;i++) for(int j=0;j<4;j++) {
-        Assert(q1(i,j) == T(2*i-j),"Create Matrix from T*");
-        Assert(q2(i,j) == T(2*i-j),"Create Matrix from vector");
-        Assert(q3(i,j) == T(2*i-j),"Create MatrixView of T* (S)");
-        Assert(q4(i,j) == T(2*i-j),"Create Matrix from << list");
-        Assert(q5(i,j) == T(2*i-j),"Create MatrixView from << list");
-        Assert(q6(i,j) == T(2*i-j),"Create MatrixView of T* (Si,Sj)");
-    }
 
     c = a+b;
     for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
@@ -359,6 +391,13 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_IO()
 {
     const int M = 15;
     const int N = 10;
+
+    if (showstartdone) {
+        std::cout<<"Start TestBasicMatrix_IO\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"M,N = "<<M<<','<<N<<std::endl;
+    }
 
     tmv::Matrix<T,S> m(M,N);
     tmv::Matrix<CT,S> cm(M,N);

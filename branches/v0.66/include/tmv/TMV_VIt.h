@@ -42,8 +42,8 @@
 // and constant vector respectively.
 //
 
-#ifndef TMV_It_H
-#define TMV_It_H
+#ifndef TMV_VIt_H
+#define TMV_VIt_H
 
 #include "tmv/TMV_Base.h"
 

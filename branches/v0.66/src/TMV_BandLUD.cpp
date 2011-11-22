@@ -69,7 +69,9 @@ namespace tmv {
 #define NEWHI TMV_MIN(A.nlo()+A.nhi(),int(A.colsize())-1)
 #define APTR1 (inplace ? 0 : \
                BandStorageLength(ColMajor,A.colsize(),A.colsize(),NEWLO,NEWHI))
-#define APTR (inplace ? A.nonConst().ptr() : Aptr1.get())
+#define TRID (A.nlo() == 1 && A.nhi() == 1)
+#define APTR (inplace ? A.nonConst().ptr() : \
+              Aptr1.get() + (TRID ? TMV_MIN(A.rowsize(),A.colsize()-1) : 0) )
 
 #define LUX (istrans ? \
              (inplace ? \
@@ -79,8 +81,7 @@ namespace tmv {
                                 TMV_FIRSTLAST1(A.nonConst().first,\
                                                A.nonConst().last) ) : \
               BandMatrixViewOf(Aptr,A.colsize(),A.colsize(),A.nhi(), \
-                               NEWHI, (A.nlo() == 1 && A.nhi() == 1) ? \
-                               DiagMajor : ColMajor)) : \
+                               NEWHI, TRID ? DiagMajor : ColMajor)) : \
              (inplace ? \
               BandMatrixView<T>(A.nonConst().ptr(),A.colsize(),\
                                 A.colsize(),A.nlo(),NEWHI,\
@@ -89,8 +90,7 @@ namespace tmv {
                                 TMV_FIRSTLAST1(A.nonConst().first,\
                                                A.nonConst().last) ) : \
               BandMatrixViewOf(Aptr,A.colsize(),A.colsize(),A.nlo(), \
-                               NEWHI, (A.nlo() == 1 && A.nhi() == 1) ?\
-                               DiagMajor : ColMajor)))
+                               NEWHI, TRID ? DiagMajor : ColMajor)))
 
     template <class T> 
     BandLUDiv<T>::BandLUDiv_Impl::BandLUDiv_Impl(
@@ -100,7 +100,7 @@ namespace tmv {
         inplace(NEWLO == 0 || 
                 (_inplace && 
                  ((A.isrm() && istrans) || (A.iscm() && !istrans) || 
-                  (A.isdm() && A.nlo()==1 && A.nhi()==1)))),
+                  (A.isdm() && TRID)))),
         Aptr1(APTR1), Aptr(APTR), LUx(LUX),
         P(A.colsize()), logdet(0), signdet(1), donedet(false) {}
 
@@ -160,7 +160,7 @@ namespace tmv {
 
 #define LUX \
     BandMatrixViewOf(Aptr,A.colsize(),A.colsize(),NEWLO,NEWHI, \
-                     (A.nlo()==1 && A.nhi()==1) ? DiagMajor : ColMajor)
+                     TRID ? DiagMajor : ColMajor)
 
     template <class T> 
     BandLUDiv<T>::BandLUDiv_Impl::BandLUDiv_Impl(

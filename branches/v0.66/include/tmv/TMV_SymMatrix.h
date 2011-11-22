@@ -76,13 +76,6 @@
 //        Makes a Symmetric Matrix with values all initialized to x
 //        For Hermitian matrixces, x must be real.
 //
-//    SymMatrix<T,uplo,stor>(size_t n, const T* m)
-//    SymMatrix<T,uplo,stor>(size_t n, const vector<T>& m)
-//        Make a Symmetric Matrix with copies the elements of m which
-//        fall in tha appropriate upper or lower triangle.
-//        The lengths of the arrays must be n*n, but only about half the 
-//        elements are used.
-//
 //    SymMatrix<T,uplo,stor>(const Matrix<T>& m)
 //        Makes a SymMatrix which copies the corresponding elements of m.
 //
@@ -2354,13 +2347,15 @@ namespace tmv {
             setAllTo(x);
         }
 
-        inline SymMatrix(size_t _size, const T* vv) : NEW_SIZE(_size)
+        TMV_DEPRECATED(inline SymMatrix(size_t _size, const T* vv)) :
+            NEW_SIZE(_size)
         {
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(vv,vv+itslen,itsm.get());
         }
 
-        inline SymMatrix(size_t _size, const std::vector<T>& vv) :
+        TMV_DEPRECATED(inline SymMatrix(
+                size_t _size, const std::vector<T>& vv)) :
             NEW_SIZE(_size)
         {
             TMVAssert(S==RowMajor || S==ColMajor);
@@ -3406,14 +3401,15 @@ namespace tmv {
             setAllTo(x);
         }
 
-        HermMatrix(size_t _size, const T* vv) : NEW_SIZE(_size)
+        TMV_DEPRECATED(HermMatrix(size_t _size, const T* vv)) : NEW_SIZE(_size)
         {
             TMVAssert(S==RowMajor || S==ColMajor);
             std::copy(vv,vv+itslen,itsm.get());
             TMVAssert(this->isHermOK());
         }
 
-        HermMatrix(size_t _size, const std::vector<T>& vv) : NEW_SIZE(_size)
+        TMV_DEPRECATED(HermMatrix(size_t _size, const std::vector<T>& vv)) : 
+            NEW_SIZE(_size)
         {
             TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(vv.size() == itslen);

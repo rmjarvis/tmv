@@ -13,6 +13,12 @@
 template <class T> 
 static void TestSmallVectorReal()
 {
+    if (showstartdone) {
+        std::cout<<"Start Test SmallVector Real"<<std::endl;
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
+    }
+
     tmv::SmallVector<T,N> v;
 
     for (int i=0; i<N; ++i) v(i) = T(i);
@@ -74,10 +80,47 @@ static void TestSmallVectorReal()
 
     tmv::SmallVector<T,N,tmv::FortranStyle> af;
     for (int i=1; i<=N; ++i) af(i) = T(3+i-1);
-    for (int i=1; i<=N; ++i) Assert(af(i) == a(i-1),
-                                    "FortranStyle SmallVector access");
+    for (int i=1; i<=N; ++i) 
+        Assert(af(i) == a(i-1),"FortranStyle SmallVector access");
     Assert(a == af,"FortransStyle SmallVector = CStyle SmallVector");
 
+    // Test assignments and constructors from arrays
+    std::vector<T> qv(6);
+    T qvar[] = { T(8), T(6), T(4), T(2), T(0), T(-2) };
+    T qvar2[] = { T(8), T(7), T(6), T(5), T(4), T(3), T(2), T(1), T(0), T(-1), T
+        (-2) };
+    for(int i=0;i<6;++i) qv[i] = qvar[i];
+
+    // Construct from C array
+    tmv::SmallVector<T,6> q1;
+    std::copy(qvar,qvar+6,q1.begin());
+    // Construct from vector
+    tmv::SmallVector<T,6> q2;
+    std::copy(qv.begin(),qv.end(),q2.begin());
+    // Assign SmallVectorView from vector
+    tmv::SmallVector<T,50> q3x;
+    tmv::VectorView<T> q3 = q3x.subVector(4,34,5);
+    std::copy(qv.begin(),qv.end(),q3.begin());
+    // Use op<< assignment
+    tmv::SmallVector<T,6> q4;
+    q4 << 8, 6, 4, 2, 0, -2;
+
+    if (showacc) {
+        std::cout<<"q1 = "<<q1<<std::endl;
+        std::cout<<"q2 = "<<q2<<std::endl;
+        std::cout<<"q3 = "<<q3<<std::endl;
+        std::cout<<"q4 = "<<q4<<std::endl;
+    }
+
+    for(int i=0;i<6;++i) {
+        Assert(q1(i) == T(8-2*i),"Create Vector from T*");
+        Assert(q2(i) == T(8-2*i),"Create Vector from std::vector");
+        Assert(q3(i) == T(8-2*i),"Create VectorView from std::vector");
+        Assert(q4(i) == T(8-2*i),"Create Vector from << list");
+    }
+
+
+    // Test Basic Arithmetic
     for (int i=0; i<N; ++i) b(i) = T(5+2*i);
 
     v = a+b;
@@ -156,6 +199,12 @@ static void TestSmallVectorReal()
 template <class T> 
 static void TestSmallVectorComplex()
 {
+    if (showstartdone) {
+        std::cout<<"Start Test SmallVector Complex"<<std::endl;
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
+    }
+
     tmv::SmallVector<std::complex<T>,N> v;
     for (int i=0; i<N; ++i) v(i) = std::complex<T>(T(i),T(i+1234));
 
@@ -335,6 +384,12 @@ static void TestSmallVectorComplex()
 template <class T> 
 static void TestSmallVectorArith()
 {
+    if (showstartdone) {
+        std::cout<<"Start Test SmallVector Arith"<<std::endl;
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
+    }
+
     tmv::SmallVector<T,NN> a;
     for(int i=0;i<NN;++i) a(i) = T(i+10);
     tmv::SmallVector<T,NN> b;
@@ -370,6 +425,12 @@ static void TestSmallVectorArith()
 template <class T> 
 static void TestSmallVectorIO()
 {
+    if (showstartdone) {
+        std::cout<<"Start Test SmallVector I/O"<<std::endl;
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"NN = "<<NN<<std::endl;
+    }
+
     tmv::SmallVector<T,NN> v;
     tmv::SmallVector<std::complex<T>,NN> cv;
     for (int i=0; i<NN; ++i) {

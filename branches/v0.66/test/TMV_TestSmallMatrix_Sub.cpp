@@ -7,6 +7,13 @@
 template <class T, size_t M, size_t N, tmv::StorageType S> 
 static void DoTestSmallMatrix_Sub()
 {
+    if (showstartdone) {
+        std::cout<<"Start TestSmallMatrix_Sub\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"M,N = "<<M<<','<<N<<std::endl;
+    }
+
     tmv::SmallMatrix<T,M,N,S> m;
     tmv::SmallMatrix<T,M,N,S,tmv::FortranStyle> mf;
     Assert(m.colsize() == size_t(M) && m.rowsize() == size_t(N),

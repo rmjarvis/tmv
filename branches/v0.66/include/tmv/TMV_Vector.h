@@ -59,10 +59,6 @@
 //    Vector<T>(size_t n, T x)
 //        Makes a Vector of size n with all values = x
 //
-//    Vector<T>(size_t n, const T* vv)
-//    Vector<T>(const vector<T>& vv)
-//        Makes a vector which copies the elements of vv
-//        For the second one, n specifies the length of the vector
 //
 // Special Constructors
 //
@@ -1532,12 +1528,14 @@ namespace tmv {
             setAllTo(val); 
         }
 
-        inline Vector(size_t n, const T* vv) : NEW_SIZE(n)
-        { 
+        TMV_DEPRECATED(inline Vector(size_t n, const T* vv)) : 
+            NEW_SIZE(n)
+        {
             std::copy(vv,vv+n,_v.get());
         }
 
-        inline explicit Vector(const std::vector<T>& vv) : NEW_SIZE(vv.size())
+        TMV_DEPRECATED(inline explicit Vector(const std::vector<T>& vv)) : 
+            NEW_SIZE(vv.size())
         {
             std::copy(vv.begin(),vv.end(),_v.get());
         }
@@ -2079,14 +2077,6 @@ namespace tmv {
     inline Vector<T,CStyle> BasisVector(size_t n, int i)
     { return DoBasisVector<T,CStyle>(n,i); }
 
-    template <IndexStyle I, class T> 
-    inline VectorView<T,I> VectorViewOf(T* v, size_t size)
-    { return VectorView<T,I>(v,size,1,NonConj TMV_FIRSTLAST1(v,v+size)); }
-
-    template <IndexStyle I, class T> 
-    inline ConstVectorView<T,I> VectorViewOf(const T* v, size_t size)
-    { return ConstVectorView<T,I>(v,size,1,NonConj); }
-
     template <class T> 
     inline VectorView<T,CStyle> VectorViewOf(T* v, size_t size)
     {
@@ -2097,6 +2087,18 @@ namespace tmv {
     template <class T> 
     inline ConstVectorView<T,CStyle> VectorViewOf(const T* v, size_t size)
     { return ConstVectorView<T,CStyle>(v,size,1,NonConj); }
+
+    template <class T> 
+    inline VectorView<T,CStyle> VectorViewOf(T* v, size_t size, int step)
+    {
+        return VectorView<T,CStyle>(
+            v,size,step,NonConj TMV_FIRSTLAST1(v,v+size)); 
+    }
+
+    template <class T> 
+    inline ConstVectorView<T,CStyle> VectorViewOf(
+        const T* v, size_t size, int step)
+    { return ConstVectorView<T,CStyle>(v,size,step,NonConj); }
 
 
     //

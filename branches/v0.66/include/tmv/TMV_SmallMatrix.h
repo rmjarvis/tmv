@@ -43,11 +43,6 @@
 //    SmallMatrix<T,M,N,stor,I>(T x)
 //        Makes a SmallMatrix of size n with all values = x
 //
-//    SmallMatrix<T,M,N,stor,I>(const vector<vector<T> >& m)
-//        Makes a SmallMatrix with a_ij = m[i][j]
-//
-//    SmallMatrix<T,M,N,stor,I>(const T* m)
-//    SmallMatrix<T,M,N,stor,I>(const vector<T>& m)
 //    SmallMatrix<T,M,N,stor,I>(const GenMatrix<T>& m)
 //        Make a SmallMatrix which copies the elements of m.
 //
@@ -130,6 +125,15 @@ namespace tmv {
         typedef LowerTriMatrixView<T,I> lowertri_type;
         typedef MatrixView<RT,I> realpart_type;
         typedef T& reference;
+        typedef typename MatrixIterHelper<S,type>::rowmajor_iterator 
+            rowmajor_iterator;
+        typedef typename MatrixIterHelper<S,type>::const_rowmajor_iterator 
+            const_rowmajor_iterator;
+        typedef typename MatrixIterHelper<S,type>::colmajor_iterator 
+            colmajor_iterator;
+        typedef typename MatrixIterHelper<S,type>::const_colmajor_iterator 
+            const_colmajor_iterator;
+
 
         //
         // Constructors
@@ -154,7 +158,7 @@ namespace tmv {
             else setAllTo(x);
         }
 
-        inline SmallMatrix(const T* vv) 
+        TMV_DEPRECATED(inline SmallMatrix(const T* vv))
         { 
             TMVAssert(M>0);
             TMVAssert(N>0);
@@ -162,7 +166,7 @@ namespace tmv {
             for(int i=0;i<M*N;++i) itsm[i] = vv[i];
         }
 
-        inline SmallMatrix(const std::vector<T>& vv) 
+        TMV_DEPRECATED(inline SmallMatrix(const std::vector<T>& vv))
         { 
             TMVAssert(M>0);
             TMVAssert(N>0);
@@ -171,11 +175,13 @@ namespace tmv {
             for(int i=0;i<M*N;++i) itsm[i] = vv[i];
         }
 
-        explicit inline SmallMatrix(const std::vector<std::vector<T> >& vv) 
+        TMV_DEPRECATED(explicit inline SmallMatrix(
+                const std::vector<std::vector<T> >& vv))
         { 
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(vv.size() == M);
             for(int i=0;i<M;++i) {
                 TMVAssert(vv[i].size() == N);
                 for(int j=0;j<N;++j) ref(i,j) = vv[i][j];
@@ -343,12 +349,12 @@ namespace tmv {
             return *this;
         }
 
-        typedef ListAssigner<T,VIt<T,Unit,NonConj> > MyListAssigner;
-        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass))
-        { return MyListAssigner(VIt<T,Unit,NonConj>(ptr(),1),M*N); }
-
+        typedef ListAssigner<T,rowmajor_iterator> MyListAssigner;
         inline MyListAssigner operator<<(const T& x)
-        { return MyListAssigner(VIt<T,Unit,NonConj>(ptr(),1),M*N,x); }
+        { return MyListAssigner(rowmajor_begin(),M*N,x); }
+
+        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass))
+        { return MyListAssigner(rowmajor_begin(),M*N); }
 
 
         //
@@ -1067,6 +1073,32 @@ namespace tmv {
 
         inline T& ref(int i, int j)
         { return S == RowMajor ? itsm[i*N+j] : itsm[j*M+i]; }
+
+        inline int rowstart(int ) const { return 0; }
+        inline int rowend(int ) const { return N; }
+        inline int colstart(int ) const { return 0; }
+        inline int colend(int ) const { return M; }
+
+        inline rowmajor_iterator rowmajor_begin()
+        { return MatrixIterHelper<S,type>::rowmajor_begin(this); }
+        inline rowmajor_iterator rowmajor_end()
+        { return MatrixIterHelper<S,type>::rowmajor_end(this); }
+
+        inline const_rowmajor_iterator rowmajor_begin() const
+        { return MatrixIterHelper<S,type>::rowmajor_begin(this); }
+        inline const_rowmajor_iterator rowmajor_end() const
+        { return MatrixIterHelper<S,type>::rowmajor_end(this); }
+
+        inline colmajor_iterator colmajor_begin()
+        { return MatrixIterHelper<S,type>::colmajor_begin(this); }
+        inline colmajor_iterator colmajor_end()
+        { return MatrixIterHelper<S,type>::colmajor_end(this); }
+
+        inline const_colmajor_iterator colmajor_begin() const
+        { return MatrixIterHelper<S,type>::colmajor_begin(this); }
+        inline const_colmajor_iterator colmajor_end() const
+        { return MatrixIterHelper<S,type>::colmajor_end(this); }
+
 
     protected :
 

@@ -77,13 +77,6 @@
 //        Makes a SymBandMatrix with values all initialized to x
 //        For Hermitian matrixces, x must be real.
 //
-//    SymBandMatrix<T,uplo,stor>(size_t n, int nlo, const T* m)
-//    SymBandMatrix<T,uplo,stor>(size_t n, int nlo, const vector<T>& m)
-//        Make a SymBandMatrix with copies the elements of m which
-//        fall in tha appropriate upper or lower triangle.
-//        The lengths of the arrays must be 
-//        BandStorageLength(stor,n,n,nlo,0).
-//
 //    SymBandMatrix<T,uplo,stor>(const Matrix<T>& m)
 //    SymBandMatrix<T,uplo,stor>(const SymMatrix<T>& m)
 //    SymBandMatrix<T,uplo,stor>(const BandMatrix<T>& m)
@@ -2788,13 +2781,15 @@ namespace tmv {
             setAllTo(x);
         }
 
-        inline SymBandMatrix(size_t s, int lo, const T* vv) : NEW_SIZE(s,lo)
+        TMV_DEPRECATED(inline SymBandMatrix(size_t s, int lo, const T* vv)) : 
+            NEW_SIZE(s,lo)
         {
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             std::copy(vv,vv+linsize,itsm1.get());
         }
 
-        inline SymBandMatrix(size_t s, int lo, const std::vector<T>& vv) : 
+        TMV_DEPRECATED(inline SymBandMatrix(
+                size_t s, int lo, const std::vector<T>& vv)) : 
             NEW_SIZE(s,lo)
         {
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
@@ -4166,14 +4161,16 @@ namespace tmv {
             setAllTo(x);
         }
 
-        inline HermBandMatrix(size_t s, int lo, const T* vv) : NEW_SIZE(s,lo)
+        TMV_DEPRECATED(inline HermBandMatrix(size_t s, int lo, const T* vv)) : 
+            NEW_SIZE(s,lo)
         {
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
             std::copy(vv,vv+linsize,itsm1.get());
             TMVAssert(this->isHermOK());
         }
 
-        inline HermBandMatrix(size_t s, int lo, const std::vector<T>& vv) : 
+        TMV_DEPRECATED(inline HermBandMatrix(
+                size_t s, int lo, const std::vector<T>& vv)) : 
             NEW_SIZE(s,lo)
         {
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);

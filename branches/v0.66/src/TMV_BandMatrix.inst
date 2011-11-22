@@ -58,16 +58,6 @@
   template BandMatrix<T,DiagMajor> TriDiagMatrix( \
       const GenVector<T >& v1, const GenVector<T >& v2, \
       const GenVector<T >& v3); \
-  template ConstBandMatrixView<T > BandMatrixViewOf( \
-      const GenDiagMatrix<T >& m); \
-  template ConstBandMatrixView<T > BandMatrixViewOf( \
-      const GenUpperTriMatrix<T >& m, int nhi); \
-  template ConstBandMatrixView<T > BandMatrixViewOf( \
-      const GenLowerTriMatrix<T >& m, int nlo); \
-  template ConstBandMatrixView<T > BandMatrixViewOf( \
-      const T* m, size_t cs, size_t rs, int nlo, int nhi, StorageType stor); \
-  template BandMatrixView<T > BandMatrixViewOf( \
-      T* m, size_t cs, size_t rs, int nlo, int nhi, StorageType stor); \
   template bool ConstBandMatrixView<T >::canLinearize() const; \
   template bool BandMatrixView<T >::canLinearize() const; \
   template void BandMatrixView<T >::read(std::istream& fin) const; \

@@ -46,7 +46,7 @@ if env['TEST_INT']:
     env1.Append(CPPDEFINES=['TEST_INT'])
 if env['TEST_DEPRECATED']:
     env1.Append(CPPDEFINES=['TMV_TEST_DEPRECATED'])
-if not env['DEBUG']:
+if not env['DEBUG'] and not env['TEST_DEBUG']:
     env1.Append(CPPDEFINES=['NDEBUG'])
 
 

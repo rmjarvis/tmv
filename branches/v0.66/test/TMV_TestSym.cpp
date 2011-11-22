@@ -11,6 +11,14 @@ static void TestBasicSymMatrix_1()
 {
     const int N = 6;
 
+    if (showstartdone) {
+        std::cout<<"Start TestBasicSymMatrix_1\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"U = "<<tmv::TMV_Text(U)<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
+    }
+
     tmv::SymMatrix<std::complex<T>,U,S> s1(N);
     tmv::SymMatrix<std::complex<T>,U,S> s2(N);
     tmv::SymMatrix<std::complex<T>,U,S,tmv::FortranStyle> s1f(N);
@@ -307,6 +315,14 @@ template <class T, tmv::UpLoType U, tmv::StorageType S>
 static void TestBasicHermMatrix_1()
 {
     const int N = 6;
+
+    if (showstartdone) {
+        std::cout<<"Start TestBasicHermMatrix_1\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"U = "<<tmv::TMV_Text(U)<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
+    }
 
     tmv::HermMatrix<std::complex<T>,U,S> h1(N);
     tmv::HermMatrix<std::complex<T>,U,S> h2(N);
@@ -636,19 +652,15 @@ static void TestBasicSymMatrix_2()
 {
     const int N = 6;
 
-    tmv::SymMatrix<std::complex<T>,U,S> s1(N);
-    tmv::SymMatrix<std::complex<T>,U,S> s2(N);
-
-    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
-        std::complex<T> value(T(k),T(2*k));
-        if (i<=j) {
-            s1(i,j) = value; 
-        }
-        if (j<=i) {
-            s2(i,j) = value; 
-        }
+    if (showstartdone) {
+        std::cout<<"Start TestBasicSymMatrix_2\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"U = "<<tmv::TMV_Text(U)<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
     }
 
+#if 0
     std::vector<T> qv(16);
     if ((U == tmv::Upper) == (S == tmv::RowMajor)) {
         const T qvar[] = { T(0), T(-1), T(-2), T(-3),
@@ -674,6 +686,21 @@ static void TestBasicSymMatrix_2()
         Assert(q1(i,j) == v,"Create SymMatrix from T*");
         Assert(q2(i,j) == v,"Create SymMatrix from vector");
         Assert(q3(i,j) == v,"Create SymMatrixView of T*");
+    }
+#endif
+
+    // Test Basic Arithmetic
+    tmv::SymMatrix<std::complex<T>,U,S> s1(N);
+    tmv::SymMatrix<std::complex<T>,U,S> s2(N);
+
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        if (i<=j) {
+            s1(i,j) = value; 
+        }
+        if (j<=i) {
+            s2(i,j) = value; 
+        }
     }
 
     tmv::SymMatrix<std::complex<T>,U,S> s3(N);
@@ -731,20 +758,15 @@ static void TestBasicHermMatrix_2()
 {
     const int N = 6;
 
-    tmv::HermMatrix<std::complex<T>,U,S> h1(N);
-    tmv::HermMatrix<std::complex<T>,U,S> h2(N);
-
-    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
-        std::complex<T> value(T(k),T(2*k));
-        std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
-        if (i<=j) {
-            h1(i,j) = hvalue; 
-        }
-        if (j<=i) {
-            h2(i,j) = hvalue; 
-        }
+    if (showstartdone) {
+        std::cout<<"Start TestBasicHermMatrix_2\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"U = "<<tmv::TMV_Text(U)<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
     }
 
+#if 0
     std::vector<T> qv(16);
     if ((U == tmv::Upper) == (S == tmv::RowMajor)) {
         const T qvar[] = { T(0), T(-1), T(-2), T(-3),
@@ -770,6 +792,22 @@ static void TestBasicHermMatrix_2()
         Assert(q4(i,j) == v,"Create HermMatrix from T*");
         Assert(q5(i,j) == v,"Create HermMatrix from vector");
         Assert(q6(i,j) == v,"Create HermMatrixView of T*");
+    }
+#endif
+
+    // Test Basic Arithmetic
+    tmv::HermMatrix<std::complex<T>,U,S> h1(N);
+    tmv::HermMatrix<std::complex<T>,U,S> h2(N);
+
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
+        std::complex<T> value(T(k),T(2*k));
+        std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
+        if (i<=j) {
+            h1(i,j) = hvalue; 
+        }
+        if (j<=i) {
+            h2(i,j) = hvalue; 
+        }
     }
 
     tmv::HermMatrix<std::complex<T>,U,S> h3(N);
@@ -824,6 +862,14 @@ template <class T, tmv::UpLoType U, tmv::StorageType S>
 static void TestBasicSymMatrix_IO()
 {
     const int N = 6;
+
+    if (showstartdone) {
+        std::cout<<"Start TestBasicSymMatrix_IO\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"U = "<<tmv::TMV_Text(U)<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
+    }
 
     tmv::SymMatrix<std::complex<T>,U,S> s1(N);
     tmv::HermMatrix<std::complex<T>,U,S> h1(N);

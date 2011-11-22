@@ -126,8 +126,7 @@ namespace tmv {
     { return false; }
 #endif
 
-    size_t BandStorageLength(
-        StorageType s, size_t cs, size_t rs, int lo, int hi)
+    size_t BandStorageLength(StorageType s, int cs, int rs, int lo, int hi)
     {
         TMVAssert(s == RowMajor || s == ColMajor || s == DiagMajor);
         if (cs == 0 || rs == 0) return 0;
@@ -154,6 +153,22 @@ namespace tmv {
                 //      = cs(lo+hi+1-rs+rs-1) + rs-lo-hi-1 + 1
                 //      = (cs-1)(lo+hi) + rs
                 return (cs-1)*(lo+hi) + rs;
+        }
+    }
+
+    int BandNumElements(int cs, int rs, int lo, int hi)
+    {
+        if (cs == 0 || rs == 0) return 0;
+        else if (cs == rs) {
+            return cs*(lo+hi+1) - (lo*(lo+1)/2) - (hi*(hi+1)/2);
+        } else if (cs > rs) {
+            // lox = number of subdiagonals that are clipped.
+            int lox = TMV_MAX(rs+lo-cs,0);
+            return rs*(lo+hi+1) - (lox*(lox+1)/2) - (hi*(hi+1)/2);
+        } else {
+            // hix = number of superdiagonals that are clipped.
+            int hix = TMV_MAX(cs+hi-rs,0);
+            return cs*(lo+hi+1) - (lo*(lo+1)/2) - (hix*(hix+1)/2);
         }
     }
 
@@ -553,8 +568,8 @@ namespace tmv {
     bool ConstBandMatrixView<T,I>::canLinearize() const
     {
         if (linsize == 1) {
-            size_t rs = this->rowsize();
-            size_t cs = this->colsize();
+            int rs = this->rowsize();
+            int cs = this->colsize();
             if (rs > cs+this->nhi()) rs = cs+this->nhi();
             if (cs > rs+this->nlo()) cs = rs+this->nlo();
             if (rs != 1 || cs != 1) {
@@ -583,8 +598,8 @@ namespace tmv {
     bool BandMatrixView<T,I>::canLinearize() const
     {
         if (linsize == 1) {
-            size_t rs = this->rowsize();
-            size_t cs = this->colsize();
+            int rs = this->rowsize();
+            int cs = this->colsize();
             if (rs > cs+this->nhi()) rs = cs+this->nhi();
             if (cs > rs+this->nlo()) cs = rs+this->nlo();
             if (rs != 1 || cs != 1) {
@@ -1472,66 +1487,6 @@ namespace tmv {
             return temp;
         }
     }
-
-    template <class T> 
-    ConstBandMatrixView<T> BandMatrixViewOf(
-        const T* m, size_t cs, size_t rs, int nlo, int nhi,
-        StorageType stor)
-    {
-        TMVAssert2(stor==RowMajor || stor==ColMajor || stor==DiagMajor);
-        TMVAssert2(cs>0);
-        TMVAssert2(rs>0);
-        TMVAssert2(nlo<int(cs));
-        TMVAssert2(nhi<int(rs));
-        if (stor == DiagMajor) {
-            int stepi = rs >= cs ? -int(cs)+1 : -int(rs);
-            int stepj = rs >= cs ? int(cs) : int(rs)+1;
-            return ConstBandMatrixView<T>(
-                m-nlo*stepi,cs,rs,nlo,nhi,stepi,stepj,1,
-                DiagMajor,NonConj);
-        } else {
-            int lohi = nlo+nhi;
-            if (stor == RowMajor)
-                return ConstBandMatrixView<T>(
-                    m,cs,rs,nlo,nhi,lohi,1,lohi+1,RowMajor,NonConj);
-            else 
-                return ConstBandMatrixView<T>(
-                    m,cs,rs,nlo,nhi,1,lohi,lohi+1,ColMajor,NonConj);
-        }
-    }
-
-    template <class T> 
-    BandMatrixView<T> BandMatrixViewOf(
-        T* m, size_t cs, size_t rs, int nlo, int nhi, StorageType stor)
-    {
-        TMVAssert2(stor==RowMajor || stor==ColMajor || stor==DiagMajor);
-        TMVAssert2(cs>0);
-        TMVAssert2(rs>0);
-        TMVAssert2(nlo<int(cs));
-        TMVAssert2(nhi<int(rs));
-        if (stor == DiagMajor) {
-            int stepi = rs >= cs ? -int(cs)+1 : -int(rs);
-            int stepj = rs >= cs ? int(cs) : int(rs)+1;
-            return BandMatrixView<T>(
-                m-nlo*stepi,cs,rs,nlo,nhi,stepi,stepj,1,
-                DiagMajor,NonConj
-                TMV_FIRSTLAST1(
-                    m,m+BandStorageLength(DiagMajor,cs,rs,nlo,nhi)));
-        } else {
-            int lohi = nlo+nhi;
-            if (stor == RowMajor)
-                return BandMatrixView<T>(
-                    m,cs,rs,nlo,nhi,lohi,1,lohi+1,RowMajor,NonConj
-                    TMV_FIRSTLAST1(
-                        m,m+BandStorageLength(RowMajor,cs,rs,nlo,nhi)));
-            else
-                return BandMatrixView<T>(
-                    m,cs,rs,nlo,nhi,1,lohi,lohi+1,ColMajor,NonConj
-                    TMV_FIRSTLAST1(
-                        m,m+BandStorageLength(ColMajor,cs,rs,nlo,nhi)));
-        }
-    }
-
 
 
     //

@@ -9,6 +9,14 @@ static void TestBasicUpperTriMatrix_1()
 {
     const int N = 10;
 
+    if (showstartdone) {
+        std::cout<<"Start TestBasicUpperTriMatrix_1\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"D = "<<tmv::TMV_Text(D)<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
+    }
+
     tmv::UpperTriMatrix<T,D,S> u(N);
 
     Assert(u.colsize() == size_t(N) && u.rowsize() == size_t(N),
@@ -201,6 +209,14 @@ template <class T, tmv::DiagType D, tmv::StorageType S>
 static void TestBasicLowerTriMatrix_1()
 {
     const int N = 10;
+
+    if (showstartdone) {
+        std::cout<<"Start TestBasicLowerTriMatrix_1\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"D = "<<tmv::TMV_Text(D)<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
+    }
 
     tmv::LowerTriMatrix<T,D,S> l(N);
 
@@ -396,6 +412,14 @@ static void TestBasicTriMatrix_2()
 {
     const int N = 10;
 
+    if (showstartdone) {
+        std::cout<<"Start TestBasicTriMatrix_2\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"D = "<<tmv::TMV_Text(D)<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
+    }
+
     tmv::UpperTriMatrix<T,D,S> u(N);
     tmv::LowerTriMatrix<T,D,S> l(N);
     const tmv::UpperTriMatrix<T,D,S>& ux = u;
@@ -429,80 +453,222 @@ static void TestBasicTriMatrix_2()
     tmv::LowerTriMatrix<T,D,S> lml(ml);
     Assert(l == lml,"TriMatrix == ");
 
-    std::vector<T> qv(9);
-    if (S == tmv::RowMajor) {
-        const T qvar[] = { T(0), T(-1), T(-2),
-            T(2), T(1),  T(0),
-            T(4), T(3),  T(2) };
-        for(int i=0;i<9;i++) qv[i] = qvar[i];
+    // Test assignments and constructors from arrays
+    const T quarrmnonunit[] = {
+        T(0),  T(-1), T(-2),
+               T(1),  T(0),
+                      T(2) 
+    };
+    const T quarrmunit[] = {
+        T(1),  T(-1), T(-2),
+               T(1),  T(0),
+                      T(1) 
+    };
+    const T* quarrm = (D == tmv::UnitDiag) ? quarrmunit : quarrmnonunit;
+
+    const T qlarrmnonunit[] = {
+        T(0),
+        T(2),  T(1),
+        T(4),  T(3),  T(2) 
+    };
+    const T qlarrmunit[] = {
+        T(1), 
+        T(2),  T(1),
+        T(4),  T(3),  T(1) 
+    };
+    const T* qlarrm = (D == tmv::UnitDiag) ? qlarrmunit : qlarrmnonunit;
+
+    const T quarcmnonunit[] = {
+        T(0),
+        T(-1), T(1),
+        T(-2), T(0),  T(2) 
+    };
+    const T quarcmunit[] = {
+        T(1), 
+        T(-1), T(1),
+        T(-2), T(0),  T(1) 
+    };
+    const T* quarcm = (D == tmv::UnitDiag) ? quarcmunit : quarcmnonunit;
+
+    const T qlarcmnonunit[] = {
+        T(0),  T(2),  T(4),
+               T(1),  T(3),
+                      T(2) 
+    };
+    const T qlarcmunit[] = {
+        T(1),  T(2),  T(4),
+               T(1),  T(3),
+                      T(1) 
+    };
+    const T* qlarcm = (D == tmv::UnitDiag) ? qlarcmunit : qlarcmnonunit;
+
+    std::vector<T> quvecrm(6);
+    for(int i=0;i<6;i++) quvecrm[i] = quarrm[i];
+    std::vector<T> qlvecrm(6);
+    for(int i=0;i<6;i++) qlvecrm[i] = qlarrm[i];
+    std::vector<T> quveccm(6);
+    for(int i=0;i<6;i++) quveccm[i] = quarcm[i];
+    std::vector<T> qlveccm(6);
+    for(int i=0;i<6;i++) qlveccm[i] = qlarcm[i];
+
+    tmv::UpperTriMatrix<T,D,S> qu1(3);
+    std::copy(quarrm, quarrm+6, qu1.rowmajor_begin());
+    tmv::UpperTriMatrix<T,D,S> qu2(3);
+    std::copy(quarcm, quarcm+6, qu2.colmajor_begin());
+
+    tmv::LowerTriMatrix<T,D,S> ql1(3);
+    std::copy(qlarrm, qlarrm+6, ql1.rowmajor_begin());
+    tmv::LowerTriMatrix<T,D,S> ql2(3);
+    std::copy(qlarcm, qlarcm+6, ql2.colmajor_begin());
+
+    tmv::UpperTriMatrix<T,D,S> qu3(3);
+    std::copy(quvecrm.begin(), quvecrm.end(), qu3.rowmajor_begin());
+    tmv::UpperTriMatrix<T,D,S> qu4(3);
+    std::copy(quveccm.begin(), quveccm.end(), qu4.colmajor_begin());
+
+    tmv::LowerTriMatrix<T,D,S> ql3(3);
+    std::copy(qlvecrm.begin(), qlvecrm.end(), ql3.rowmajor_begin());
+    tmv::LowerTriMatrix<T,D,S> ql4(3);
+    std::copy(qlveccm.begin(), qlveccm.end(), ql4.colmajor_begin());
+
+    tmv::UpperTriMatrix<T,D,S> qu5x(30);
+    tmv::UpperTriMatrixView<T> qu5 = qu5x.subTriMatrix(3,18,5);
+    std::copy(quvecrm.begin(), quvecrm.end(), qu5.rowmajor_begin());
+    tmv::UpperTriMatrix<T,D,S> qu6x(30);
+    tmv::UpperTriMatrixView<T> qu6 = qu6x.subTriMatrix(3,18,5);
+    std::copy(quveccm.begin(), quveccm.end(), qu6.colmajor_begin());
+
+    tmv::LowerTriMatrix<T,D,S> ql5x(30);
+    tmv::LowerTriMatrixView<T> ql5 = ql5x.subTriMatrix(3,18,5);
+    std::copy(qlvecrm.begin(), qlvecrm.end(), ql5.rowmajor_begin());
+    tmv::LowerTriMatrix<T,D,S> ql6x(30);
+    tmv::LowerTriMatrixView<T> ql6 = ql6x.subTriMatrix(3,18,5);
+    std::copy(qlveccm.begin(), qlveccm.end(), ql6.colmajor_begin());
+
+    // Assignment using op<< is always in rowmajor order.
+    tmv::UpperTriMatrix<T,D,S> qu7(3);
+    tmv::LowerTriMatrix<T,D,S> qu8t(3);
+    tmv::UpperTriMatrixView<T> qu8 = qu8t.transpose();
+
+    tmv::LowerTriMatrix<T,D,S> ql7(3);
+    tmv::UpperTriMatrix<T,D,S> ql8t(3);
+    tmv::LowerTriMatrixView<T> ql8 = ql8t.transpose();
+
+    if (D == tmv::UnitDiag) {
+        qu7 <<
+            1, -1, -2, 
+                1,  0,
+                    1;
+        qu8 <<
+            1, -1, -2, 
+                1,  0,
+                    1;
+
+        ql7 <<
+            1,
+            2,  1,
+            4,  3,  1;
+        ql8 <<
+            1,
+            2,  1,
+            4,  3,  1;
     } else {
-        const T qvar[] = { T(0),  T(2), T(4),
-            T(-1), T(1), T(3),
-            T(-2), T(0), T(2) };
-        for(int i=0;i<9;i++) qv[i] = qvar[i];
-    }
-    T qar[9];
-    for(int i=0;i<9;i++) qar[i] = qv[i];
+        qu7 <<
+            0, -1, -2, 
+                1,  0,
+                    2;
+        qu8 <<
+            0, -1, -2, 
+                1,  0,
+                    2;
 
-    {
-        const tmv::UpperTriMatrix<T,D,S> q1(3,qar);
-        const tmv::UpperTriMatrix<T,D,S> q2(3,qv);
-        for(int i=0;i<3;i++) for(int j=0;j<3;j++) if (j>=i) {
-            if (D == tmv::UnitDiag && i==j) {
-                Assert(q1(i,j) == T(1),"Create UpperTriMatrix from T*");
-                Assert(q2(i,j) == T(1),"Create UpperTriMatrix from vector");
-            } else {
-                Assert(q1(i,j) == T(2*i-j),"Create UpperTriMatrix from T*");
-                Assert(q2(i,j) == T(2*i-j),"Create UpperTriMatrix from vector");
-            }
-        }
-        if (D == tmv::UnitDiag) {
-            const tmv::ConstUpperTriMatrixView<T> q3 = (
-                tmv::UnitUpperTriMatrixViewOf(qar,3,S));
-            for(int i=0;i<3;i++) for(int j=0;j<3;j++) if (j>=i) {
-                if (i == j)
-                    Assert(q3(i,j) == T(1),"Create UnitUpperTriMatrixView of T*");
-                else
-                    Assert(q3(i,j) == T(2*i-j),"Create UnitUpperTriMatrixView of T*");
-            }
-        } else {
-            const tmv::ConstUpperTriMatrixView<T> q3 = (
-                tmv::UpperTriMatrixViewOf(qar,3,S));
-            for(int i=0;i<3;i++) for(int j=0;j<3;j++) if (j>=i) {
-                Assert(q3(i,j) == T(2*i-j),"Create UpperTriMatrixView of T*");
-            }
-        }
-    }
-    {
-        const tmv::LowerTriMatrix<T,D,S> q1(3,qar);
-        const tmv::LowerTriMatrix<T,D,S> q2(3,qv);
-        for(int i=0;i<3;i++) for(int j=0;j<3;j++) if (i>=j) {
-            if (D == tmv::UnitDiag && i==j) {
-                Assert(q1(i,j) == T(1),"Create LowerTriMatrix from T*");
-                Assert(q2(i,j) == T(1),"Create LowerTriMatrix from vector");
-            } else {
-                Assert(q1(i,j) == T(2*i-j),"Create LowerTriMatrix from T*");
-                Assert(q2(i,j) == T(2*i-j),"Create LowerTriMatrix from vector");
-            }
-        }
-        if (D == tmv::UnitDiag) {
-            const tmv::ConstLowerTriMatrixView<T> q3 = (
-                tmv::UnitLowerTriMatrixViewOf(qar,3,S));
-            for(int i=0;i<3;i++) for(int j=0;j<3;j++) if (i>=j) {
-                if (i == j)
-                    Assert(q3(i,j) == T(1),"Create UnitLowerTriMatrixView of T*");
-                else
-                    Assert(q3(i,j) == T(2*i-j),"Create UnitLowerTriMatrixView of T*");
-            }
-        } else {
-            const tmv::ConstLowerTriMatrixView<T> q3 = (
-                tmv::LowerTriMatrixViewOf(qar,3,S));
-            for(int i=0;i<3;i++) for(int j=0;j<3;j++) if (i>=j) {
-                Assert(q3(i,j) == T(2*i-j),"Create LowerTriMatrixView of T*");
-            }
-        }
+        ql7 <<
+            0,
+            2,  1,
+            4,  3,  2;
+        ql8 <<
+            0,
+            2,  1,
+            4,  3,  2;
     }
 
+    // Can also view memory directly 
+    // (Diagonal elements in memory do not have to be 1 if D == UnitDiag.)
+    T qarrmfull[] = {
+        T(0), T(-1), T(-2),
+        T(2), T(1), T(0),
+        T(4), T(3), T(2),
+    };
+    T qarcmfull[] = {
+        T(0), T(2),  T(4),
+        T(-1), T(1), T(3),
+        T(-2), T(0), T(2),
+    };
+    T* qarfull = (S == tmv::RowMajor) ? qarrmfull : qarcmfull;
+    const int Si = (S == tmv::RowMajor) ? 3 : 1;
+    const int Sj = (S == tmv::RowMajor) ? 1 : 3;
+    const tmv::ConstUpperTriMatrixView<T> qu9 = 
+        tmv::UpperTriMatrixViewOf(qarfull,3,S,D);
+    const tmv::ConstUpperTriMatrixView<T> qu10 = 
+        tmv::UpperTriMatrixViewOf(qarfull,3,Si,Sj,D);
+    const tmv::ConstLowerTriMatrixView<T> ql9 = 
+        tmv::LowerTriMatrixViewOf(qarfull,3,S,D);
+    const tmv::ConstLowerTriMatrixView<T> ql10 = 
+        tmv::LowerTriMatrixViewOf(qarfull,3,Si,Sj,D);
+
+    if (showacc) {
+        std::cout<<"qu1 = "<<qu1<<std::endl;
+        std::cout<<"qu2 = "<<qu2<<std::endl;
+        std::cout<<"qu3 = "<<qu3<<std::endl;
+        std::cout<<"qu4 = "<<qu4<<std::endl;
+        std::cout<<"qu5 = "<<qu5<<std::endl;
+        std::cout<<"qu6 = "<<qu6<<std::endl;
+        std::cout<<"qu7 = "<<qu7<<std::endl;
+        std::cout<<"qu8 = "<<qu8<<std::endl;
+        std::cout<<"qu9 = "<<qu9<<std::endl;
+        std::cout<<"qu10 = "<<qu10<<std::endl;
+
+        std::cout<<"ql1 = "<<ql1<<std::endl;
+        std::cout<<"ql2 = "<<ql2<<std::endl;
+        std::cout<<"ql3 = "<<ql3<<std::endl;
+        std::cout<<"ql4 = "<<ql4<<std::endl;
+        std::cout<<"ql5 = "<<ql5<<std::endl;
+        std::cout<<"ql6 = "<<ql6<<std::endl;
+        std::cout<<"ql7 = "<<ql7<<std::endl;
+        std::cout<<"ql8 = "<<ql8<<std::endl;
+        std::cout<<"ql9 = "<<ql9<<std::endl;
+        std::cout<<"ql10 = "<<ql10<<std::endl;
+    }
+
+    for(int i=0;i<3;i++) for(int j=0;j<3;j++) {
+        T val = (D == tmv::UnitDiag && i==j) ? T(1) : T(2*i-j);
+        if (j>=i) {
+            Assert(qu1(i,j) == val,"Create UpperTriMatrix from T* rm");
+            Assert(qu2(i,j) == val,"Create UpperTriMatrix from T* cm");
+            Assert(qu3(i,j) == val,"Create UpperTriMatrix from vector rm");
+            Assert(qu4(i,j) == val,"Create UpperTriMatrix from vector cm");
+            Assert(qu5(i,j) == val,"Create UpperTriMatrixView from vector rm");
+            Assert(qu6(i,j) == val,"Create UpperTriMatrixView from vector cm");
+            Assert(qu7(i,j) == val,"Create UpperTriMatrix from << list");
+            Assert(qu8(i,j) == val,"Create UpperTriMatrixView from << list");
+            Assert(qu9(i,j) == val,"Create UpperTriMatrixView of T* (S)");
+            Assert(qu10(i,j) == val,"Create UpperTriMatrixView of T* (Si,Sj)");
+        }
+        if (i>=j) {
+            Assert(ql1(i,j) == val,"Create UpperTriMatrix from T* rm");
+            Assert(ql2(i,j) == val,"Create UpperTriMatrix from T* cm");
+            Assert(ql3(i,j) == val,"Create UpperTriMatrix from vector rm");
+            Assert(ql4(i,j) == val,"Create UpperTriMatrix from vector cm");
+            Assert(ql5(i,j) == val,"Create UpperTriMatrixView from vector rm");
+            Assert(ql6(i,j) == val,"Create UpperTriMatrixView from vector cm");
+            Assert(ql7(i,j) == val,"Create UpperTriMatrix from << list");
+            Assert(ql8(i,j) == val,"Create UpperTriMatrixView from << list");
+            Assert(ql9(i,j) == val,"Create UpperTriMatrixView of T* (S)");
+            Assert(ql10(i,j) == val,"Create UpperTriMatrixView of T* (Si,Sj)");
+        }
+    }
+
+    // Test Basic Arithmetic
     tmv::Matrix<T> a(N,N);
     for(int i=0;i<N;++i) for(int j=0;j<N;++j) a(i,j) = T(12+3*i-5*j);
 
@@ -613,6 +779,14 @@ template <class T, tmv::DiagType D, tmv::StorageType S>
 static void TestBasicTriMatrix_IO()
 {
     const int N = 10;
+
+    if (showstartdone) {
+        std::cout<<"Start TestBasicTriMatrix_IO\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"D = "<<tmv::TMV_Text(D)<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
+    }
 
     tmv::UpperTriMatrix<T,D,S> u(N);
     tmv::LowerTriMatrix<T,D,S> l(N);

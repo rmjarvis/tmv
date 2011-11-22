@@ -47,10 +47,6 @@
 //    DiagMatrix<T>(size_t size, T x)
 //        Makes a DiagMatrix of size n with all values = x
 //
-//    DiagMatrix<T>(size_t size, T* vv)
-//    DiagMatrix<T>(size_t size, const std::vector<T>& vv)
-//        Makes a DiagMatrix of size n which copies the values is vv
-//
 //    DiagMatrix<T>(const Vector<T>& vv)
 //        Make a DiagMatrix which copies the elements of vv.
 //
@@ -184,6 +180,7 @@ namespace tmv {
         typedef ConstDiagMatrixView<RT> const_realpart_type;
         typedef ConstVectorView<T> const_vec_type;
         typedef DiagMatrixView<T> nonconst_type;
+        typedef typename const_vec_type::const_iterator const_iterator;
 
         //
         // Constructors
@@ -623,6 +620,11 @@ namespace tmv {
         inline int step() const
         { return cdiag().step(); }
 
+        inline const_iterator begin() const
+        { return diag().begin(); }
+        inline const_iterator end() const
+        { return diag().end(); }
+
     protected :
 
         virtual ConstVectorView<T> cdiag() const = 0;
@@ -671,7 +673,8 @@ namespace tmv {
 
 
     template <class T, IndexStyle I> 
-    class ConstDiagMatrixView : public GenDiagMatrix<T>
+    class ConstDiagMatrixView : 
+        public GenDiagMatrix<T>
     {
     public :
 
@@ -811,7 +814,8 @@ namespace tmv {
     }; // ConstDiagMatrixView - FortranStyle
 
     template <class T, IndexStyle I> 
-    class DiagMatrixView : public GenDiagMatrix<T>
+    class DiagMatrixView : 
+        public GenDiagMatrix<T>
     {
     public:
 
@@ -827,6 +831,7 @@ namespace tmv {
         typedef VectorView<T,I> vec_type;
         typedef ConstVectorView<T,I> const_vec_type;
         typedef TMV_RefType(T) reference;
+        typedef typename vec_type::iterator iterator;
 
         //
         // Constructors
@@ -875,6 +880,13 @@ namespace tmv {
             m2.assignToD(*this);
             return *this;
         }
+
+        typedef ListAssigner<T,iterator> MyListAssigner;
+        inline MyListAssigner operator<<(const T& x) const
+        { return MyListAssigner(begin(),size(),x); }
+
+        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass) const)
+        { return MyListAssigner(begin(),size()); }
 
 
         //
@@ -999,6 +1011,11 @@ namespace tmv {
 
         using GenDiagMatrix<T>::size;
 
+        inline iterator begin() const
+        { return diag().begin(); }
+        inline iterator end() const
+        { return diag().end(); }
+
     protected:
 
         VectorView<T> itsdiag;
@@ -1070,6 +1087,15 @@ namespace tmv {
 
         inline const type& operator=(const AssignableToDiagMatrix<CT>& m2) const
         { c_type::operator=(m2); return *this; }
+
+        typedef typename c_type::MyListAssigner MyListAssigner;
+        inline MyListAssigner operator<<(const T& x) const
+        { return c_type::operator<<(x); }
+
+        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass lic) const)
+        { return c_type::operator=(lic); }
+
+
 
         //
         // Access
@@ -1219,6 +1245,8 @@ namespace tmv {
         typedef ConstDiagMatrixView<RT,I> const_realpart_type;
         typedef ConstVectorView<T,I> const_vec_type;
         typedef T& reference;
+        typedef typename const_vec_type::const_iterator const_iterator;
+        typedef typename vec_type::iterator iterator;
 
         //
         // Constructors
@@ -1228,9 +1256,11 @@ namespace tmv {
 
         inline DiagMatrix(size_t _size, const T& x) : itsdiag(_size,x)  {}
 
-        inline DiagMatrix(size_t _size, const T* vv) : itsdiag(_size,vv)  {}
+        TMV_DEPRECATED(inline DiagMatrix(size_t _size, const T* vv)) : 
+            itsdiag(_size,vv)  {}
 
-        inline explicit DiagMatrix(const std::vector<T>& vv) : itsdiag(vv) {}
+        TMV_DEPRECATED(inline explicit DiagMatrix(const std::vector<T>& vv)) : 
+            itsdiag(vv) {}
 
         inline explicit DiagMatrix(const GenVector<T>& rhs) : itsdiag(rhs) {}
 
@@ -1329,6 +1359,14 @@ namespace tmv {
             m2.assignToD(view());
             return *this; 
         }
+
+        typedef ListAssigner<T,iterator> MyListAssigner;
+        inline MyListAssigner operator<<(const T& x)
+        { return MyListAssigner(begin(),size(),x); }
+
+        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass))
+        { return MyListAssigner(begin(),size()); }
+
 
 
         //
@@ -1547,6 +1585,16 @@ namespace tmv {
         inline void resize(size_t s)
         { itsdiag.resize(s); }
 
+        inline iterator begin()
+        { return diag().begin(); }
+        inline iterator end()
+        { return diag().end(); }
+
+        inline const_iterator begin() const
+        { return diag().begin(); }
+        inline const_iterator end() const
+        { return diag().end(); }
+
     protected :
 
         Vector<T> itsdiag;
@@ -1567,6 +1615,7 @@ namespace tmv {
     // Special Creators:
     //   DiagMatrixViewOf(v)
     //   DiagMatrixViewOf(T* v, n)
+    //   DiagMatrixViewOf(T* v, n, step)
     //
 
     template <class T> 
@@ -1597,6 +1646,16 @@ namespace tmv {
     template <class T> 
     inline DiagMatrixView<T> DiagMatrixViewOf(T* m, size_t size)
     { return DiagMatrixView<T>(VectorViewOf(m,size)); }
+
+    template <class T> 
+    inline ConstDiagMatrixView<T> DiagMatrixViewOf(
+        const T* m, size_t size, int step)
+    { return ConstDiagMatrixView<T>(VectorViewOf(m,size,step)); }
+
+    template <class T> 
+    inline DiagMatrixView<T> DiagMatrixViewOf(T* m, size_t size, int step)
+    { return DiagMatrixView<T>(VectorViewOf(m,size,step)); }
+
 
     //
     // Swap Matrices

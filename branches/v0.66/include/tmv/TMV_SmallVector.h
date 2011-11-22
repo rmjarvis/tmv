@@ -117,15 +117,16 @@ namespace tmv {
             else setAllTo(x); 
         }
 
-        explicit inline SmallVector(const T* vv) 
+        TMV_DEPRECATED(explicit inline SmallVector(const T* vv))
         {
             TMVAssert(N > 0);
             for(int i=0;i<N;++i) itsv[i] = vv[i];
         }
 
-        explicit inline SmallVector(const std::vector<T>& vv) 
+        TMV_DEPRECATED(explicit inline SmallVector(const std::vector<T>& vv))
         {
             TMVAssert(N > 0);
+            TMVAssert(N == int(vv.size()));
             for(int i=0;i<N;++i) itsv[i] = vv[i];
         }
 

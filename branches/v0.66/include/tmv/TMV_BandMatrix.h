@@ -106,11 +106,6 @@
 //    BandMatrix<T,stor>(const Matrix<T>& m, nlo, nhi)
 //        Makes a BandMatrix which copies the corresponding elements of m.
 //
-//    BandMatrix<T,stor>(colsize, rowsize, nlo, nhi, const T* m)
-//    BandMatrix<T,stor>(colsize, rowsize, nlo, nhi, const vector<T>& m)
-//        Makes a BandMatrix which copies the copies the elements in m
-//        according to the storage scheme (specified as stor) as 
-//        described above.
 //
 // Special Constructors
 //
@@ -331,7 +326,10 @@
 #include "tmv/TMV_TriMatrix.h"
 #include "tmv/TMV_DiagMatrix.h"
 #include "tmv/TMV_Array.h"
+
+#ifdef TMV_USE_VALGRIND
 #include <vector>
+#endif
 
 namespace tmv {
 
@@ -361,6 +359,9 @@ namespace tmv {
         typedef ConstMatrixView<T> const_rec_type;
         typedef ConstBandMatrixView<RT> const_realpart_type;
         typedef BandMatrixView<T> nonconst_type;
+        typedef CRMIt<type> const_rowmajor_iterator;
+        typedef CCMIt<type> const_colmajor_iterator;
+        typedef CDMIt<type> const_diagmajor_iterator;
 
         //
         // Constructors
@@ -1092,6 +1093,35 @@ namespace tmv {
 
         virtual T cref(int i, int j) const;
 
+        inline int rowstart(int i) const { return TMV_MAX(0,i-nlo()); }
+        inline int rowend(int i) const 
+        { return TMV_MIN(int(rowsize()),i+nhi()+1); }
+        inline int colstart(int j) const { return TMV_MAX(0,j-nhi()); }
+        inline int colend(int j) const 
+        { return TMV_MIN(int(colsize()),j+nlo()+1); }
+
+        inline const_rowmajor_iterator rowmajor_begin() const
+        { return const_rowmajor_iterator(this,0,0); }
+        inline const_rowmajor_iterator rowmajor_end() const
+        {
+            return const_rowmajor_iterator(
+                this,rowstart(TMV_MIN(colsize(),rowsize()+nlo())),0); 
+        }
+
+        inline const_colmajor_iterator colmajor_begin() const
+        { return const_colmajor_iterator(this,0,0); }
+        inline const_colmajor_iterator colmajor_end() const
+        {
+            return const_colmajor_iterator(
+                this,colstart(TMV_MIN(rowsize(),colsize()+nhi())),0); 
+        }
+
+        inline const_diagmajor_iterator diagmajor_begin() const
+        { return const_diagmajor_iterator(this,nlo(),0); }
+        inline const_diagmajor_iterator diagmajor_end() const
+        { return const_diagmajor_iterator(this,0,nhi()+1); }
+
+
     protected :
 
         inline bool okij(int i, int j) const
@@ -1533,6 +1563,9 @@ namespace tmv {
         typedef MatrixView<T,I> rec_type;
         typedef BandMatrixView<RT,I> realpart_type;
         typedef TMV_RefType(T) reference;
+        typedef RMIt<const type> rowmajor_iterator;
+        typedef CMIt<const type> colmajor_iterator;
+        typedef DMIt<const type> diagmajor_iterator;
 
         //
         // Constructors
@@ -1806,6 +1839,20 @@ namespace tmv {
             if (nhi() > 0) diagRange(1,nhi()+1).setZero();
             return *this;
         }
+
+        typedef ListAssigner<T,rowmajor_iterator> MyListAssigner;
+        inline MyListAssigner operator<<(const T& x) const
+        {
+            const int n = BandNumElements(colsize(),rowsize(),nlo(),nhi());
+            return MyListAssigner(rowmajor_begin(),n,x); 
+        }
+
+        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass) const)
+        {
+            const int n = BandNumElements(colsize(),rowsize(),nlo(),nhi());
+            return MyListAssigner(rowmajor_begin(),n); 
+        }
+
 
         //
         // Access
@@ -2240,6 +2287,29 @@ namespace tmv {
 
         bool canLinearize() const;
 
+        reference ref(int i, int j) const;
+
+        inline rowmajor_iterator rowmajor_begin() const
+        { return rowmajor_iterator(this,0,0); }
+        inline rowmajor_iterator rowmajor_end() const
+        {
+            return rowmajor_iterator(
+                this,rowstart(TMV_MIN(colsize(),rowsize()+nlo())),0); 
+        }
+
+        inline colmajor_iterator colmajor_begin() const
+        { return colmajor_iterator(this,0,0); }
+        inline colmajor_iterator colmajor_end() const
+        {
+            return colmajor_iterator(
+                this,colstart(TMV_MIN(rowsize(),colsize()+nhi())),0); 
+        }
+
+        inline diagmajor_iterator diagmajor_begin() const
+        { return diagmajor_iterator(this,nlo(),0); }
+        inline diagmajor_iterator diagmajor_end() const
+        { return diagmajor_iterator(this,0,nhi()+1); }
+
     protected:
 
         T*const itsm;
@@ -2254,8 +2324,6 @@ namespace tmv {
         const StorageType itsstor;
         const ConjType itsct;
         mutable size_t linsize;
-
-        reference ref(int i, int j) const;
 
 #ifdef TMVFLDEBUG
     public :
@@ -2371,6 +2439,13 @@ namespace tmv {
 
         inline const type& operator=(const GenLowerTriMatrix<CT>& m2) const
         { c_type::operator=(m2); return *this; }
+
+        typedef typename c_type::MyListAssigner MyListAssigner;
+        inline MyListAssigner operator<<(const T& x) const
+        { return c_type::operator<<(x); }
+
+        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass li) const)
+        { return c_type::operator=(li); }
 
         //
         // Access
@@ -2659,6 +2734,12 @@ namespace tmv {
         typedef ConstBandMatrixView<RT,I> const_realpart_type;
         typedef ConstVectorView<T> const_c_vec_type;
         typedef T& reference;
+        typedef RMIt<type> rowmajor_iterator;
+        typedef CMIt<type> colmajor_iterator;
+        typedef DMIt<type> diagmajor_iterator;
+        typedef CRMIt<type> const_rowmajor_iterator;
+        typedef CCMIt<type> const_colmajor_iterator;
+        typedef CDMIt<type> const_diagmajor_iterator;
 
         //
         // Constructors
@@ -2708,7 +2789,8 @@ namespace tmv {
             setAllTo(x);
         }
 
-        inline BandMatrix(size_t cs, size_t rs, int lo, int hi, const T* vv) :
+        TMV_DEPRECATED(inline BandMatrix(
+                size_t cs, size_t rs, int lo, int hi, const T* vv)) :
             NEW_SIZE(cs,rs,lo,hi)
         {
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
@@ -2719,8 +2801,8 @@ namespace tmv {
             std::copy(vv,vv+linsize,itsm1.get());
         }
 
-        inline BandMatrix(
-            size_t cs, size_t rs, int lo, int hi, const std::vector<T>& vv) :
+        TMV_DEPRECATED(inline BandMatrix(
+            size_t cs, size_t rs, int lo, int hi, const std::vector<T>& vv)) :
             NEW_SIZE(cs,rs,lo,hi)
         {
             TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
@@ -3049,6 +3131,19 @@ namespace tmv {
             TMVAssert(nlo() == int(rowsize())-1);
             view() = m2;
             return *this;
+        }
+
+        typedef ListAssigner<T,rowmajor_iterator> MyListAssigner;
+        inline MyListAssigner operator<<(const T& x) 
+        {
+            const int n = BandNumElements(colsize(),rowsize(),nlo(),nhi());
+            return MyListAssigner(rowmajor_begin(),n,x); 
+        }
+
+        TMV_DEPRECATED(inline MyListAssigner operator=(ListInitClass))
+        {
+            const int n = BandNumElements(colsize(),rowsize(),nlo(),nhi());
+            return MyListAssigner(rowmajor_begin(),n); 
         }
 
         //
@@ -3918,6 +4013,49 @@ namespace tmv {
 #endif
         }
 
+        inline rowmajor_iterator rowmajor_begin()
+        { return rowmajor_iterator(this,0,0); }
+        inline rowmajor_iterator rowmajor_end()
+        {
+            return rowmajor_iterator(
+                this,rowstart(TMV_MIN(colsize(),rowsize()+nlo())),0); 
+        }
+
+        inline const_rowmajor_iterator rowmajor_begin() const
+        { return const_rowmajor_iterator(this,0,0); }
+        inline const_rowmajor_iterator rowmajor_end() const
+        {
+            return const_rowmajor_iterator(
+                this,rowstart(TMV_MIN(colsize(),rowsize()+nlo())),0); 
+        }
+
+        inline colmajor_iterator colmajor_begin()
+        { return colmajor_iterator(this,0,0); }
+        inline colmajor_iterator colmajor_end()
+        {
+            return colmajor_iterator(
+                this,colstart(TMV_MIN(rowsize(),colsize()+nhi())),0); 
+        }
+
+        inline const_colmajor_iterator colmajor_begin() const
+        { return const_colmajor_iterator(this,0,0); }
+        inline const_colmajor_iterator colmajor_end() const
+        {
+            return const_colmajor_iterator(
+                this,colstart(TMV_MIN(rowsize(),colsize()+nhi())),0); 
+        }
+
+        inline diagmajor_iterator diagmajor_begin()
+        { return diagmajor_iterator(this,nlo(),0); }
+        inline diagmajor_iterator diagmajor_end()
+        { return diagmajor_iterator(this,0,nhi()+1); }
+
+        inline const_diagmajor_iterator diagmajor_begin() const
+        { return const_diagmajor_iterator(this,nlo(),0); }
+        inline const_diagmajor_iterator diagmajor_end() const
+        { return const_diagmajor_iterator(this,0,nhi()+1); }
+
+
     protected :
 
         size_t linsize;
@@ -4278,12 +4416,79 @@ namespace tmv {
     }
 
     template <class T> 
-    ConstBandMatrixView<T> BandMatrixViewOf(
-        const T* m, size_t cs, size_t rs, int nlo, int nhi, StorageType stor);
+    inline ConstBandMatrixView<T> BandMatrixViewOf(
+        const T* m, size_t cs, size_t rs, int nlo, int nhi, StorageType stor)
+    {
+        TMVAssert(stor == RowMajor || stor == ColMajor || stor == DiagMajor);
+        TMVAssert(cs > 0);
+        TMVAssert(rs > 0);
+        TMVAssert(nlo < int(cs));
+        TMVAssert(nhi < int(rs));
+        const int stepi = (
+            stor == RowMajor ? nlo+nhi : 
+            stor == ColMajor ? 1 : 
+            rs >= cs ? -int(cs)+1 : -int(rs) );
+        const int stepj = (
+            stor == RowMajor ? 1 :
+            stor == ColMajor ? nlo+nhi : 
+            rs >= cs ? int(cs) : int(rs)+1 );
+        return ConstBandMatrixView<T>(
+            m,cs,rs,nlo,nhi,stepi,stepj,stor,NonConj);
+    }
 
     template <class T> 
     BandMatrixView<T> BandMatrixViewOf(
-        T* m, size_t cs, size_t rs, int nlo, int nhi, StorageType stor);
+        T* m, size_t cs, size_t rs, int nlo, int nhi, StorageType stor)
+    {
+        TMVAssert(stor == RowMajor || stor == ColMajor || stor == DiagMajor);
+        TMVAssert(cs > 0);
+        TMVAssert(rs > 0);
+        TMVAssert(nlo < int(cs));
+        TMVAssert(nhi < int(rs));
+        const int stepi = (
+            stor == RowMajor ? nlo+nhi : 
+            stor == ColMajor ? 1 : 
+            rs >= cs ? -int(cs)+1 : -int(rs) );
+        const int stepj = (
+            stor == RowMajor ? 1 :
+            stor == ColMajor ? nlo+nhi : 
+            rs >= cs ? int(cs) : int(rs)+1 );
+        return BandMatrixView<T>(
+            m,cs,rs,nlo,nhi,stepi,stepj,stepi+stepj,stor,NonConj
+            TMV_FIRSTLAST1(m,m+BandStorageLength(stor,cs,rs,nlo,nhi)));
+    }
+
+    template <class T> 
+    inline ConstBandMatrixView<T> BandMatrixViewOf(
+        const T* m, size_t cs, size_t rs, int nlo, int nhi,
+        int stepi, int stepj)
+    {
+        TMVAssert(cs > 0);
+        TMVAssert(rs > 0);
+        TMVAssert(nlo < int(cs));
+        TMVAssert(nhi < int(rs));
+        const StorageType stor = (
+            stepi == 1 ? ColMajor : stepj == 1 ? RowMajor :
+            stepi+stepj == 1 ? DiagMajor : NoMajor);
+        return BandMatrixView<T>(
+            m,cs,rs,nlo,nhi,stepi,stepj,stepi+stepj,stor,NonConj);
+    }
+
+    template <class T> 
+    inline BandMatrixView<T> BandMatrixViewOf(
+        T* m, size_t cs, size_t rs, int nlo, int nhi,
+        int stepi, int stepj)
+    {
+        TMVAssert(cs > 0);
+        TMVAssert(rs > 0);
+        TMVAssert(nlo < int(cs));
+        TMVAssert(nhi < int(rs));
+        const StorageType stor = (
+            stepi == 1 ? ColMajor : stepj == 1 ? RowMajor :
+            stepi+stepj == 1 ? DiagMajor : NoMajor);
+        return BandMatrixView<T>(
+            m,cs,rs,nlo,nhi,stepi,stepj,stepi+stepj,stor,NonConj);
+    }
 
 
     //
