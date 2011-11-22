@@ -660,34 +660,171 @@ static void TestBasicSymMatrix_2()
         std::cout<<"N = "<<N<<std::endl;
     }
 
-#if 0
-    std::vector<T> qv(16);
-    if ((U == tmv::Upper) == (S == tmv::RowMajor)) {
-        const T qvar[] = { T(0), T(-1), T(-2), T(-3),
-            T(0), T(1),  T(0), T(-1),
-            T(0), T(0),  T(2), T(1),
-            T(0), T(0),  T(0), T(3)};
-        for(int i=0;i<16;i++) qv[i] = qvar[i];
-    } else {
-        const T qvar[] = { T(0),  T(0), T(0), T(0),
-            T(-1), T(1), T(0), T(0),
-            T(-2), T(0), T(2), T(0),
-            T(-3), T(-1), T(1), T(3) };
-        for(int i=0;i<16;i++) qv[i] = qvar[i];
-    }
-    T qar[16];
-    for(int i=0;i<16;i++) qar[i] = qv[i];
+    // Test assignments and constructors from arrays
+    const T quarrm[] = {
+        T(0), T(2), T(4),
+              T(1), T(3),
+                    T(2)
+    };
+    const T qlarrm[] = {
+        T(0),
+        T(2), T(1),
+        T(4), T(3), T(2)
+    };
+    const T quarcm[] = {
+        T(0),
+        T(2), T(1),
+        T(4), T(3), T(2)
+    };
+    const T qlarcm[] = {
+        T(0), T(2), T(4),
+              T(1), T(3),
+                    T(2)
+    };
 
-    const tmv::SymMatrix<T,U,S> q1(4,qar);
-    const tmv::SymMatrix<T,U,S> q2(4,qv);
-    const tmv::ConstSymMatrixView<T> q3 = tmv::SymMatrixViewOf(qar,4,U,S);
-    for(int i=0;i<4;i++) for(int j=0;j<4;j++) {
-        T v = T(2)*std::min(i,j)-std::max(i,j);
-        Assert(q1(i,j) == v,"Create SymMatrix from T*");
-        Assert(q2(i,j) == v,"Create SymMatrix from vector");
-        Assert(q3(i,j) == v,"Create SymMatrixView of T*");
+    std::vector<T> quvecrm(6);
+    for(int i=0;i<6;i++) quvecrm[i] = quarrm[i];
+    std::vector<T> qlvecrm(6);
+    for(int i=0;i<6;i++) qlvecrm[i] = qlarrm[i];
+    std::vector<T> quveccm(6);
+    for(int i=0;i<6;i++) quveccm[i] = quarcm[i];
+    std::vector<T> qlveccm(6);
+    for(int i=0;i<6;i++) qlveccm[i] = qlarcm[i];
+
+    tmv::SymMatrix<T,U,S> q1(3);
+    std::copy(quarrm, quarrm+6, q1.upperTri().rowmajor_begin());
+    tmv::SymMatrix<T,U,S> q2(3);
+    std::copy(quarcm, quarcm+6, q2.upperTri().colmajor_begin());
+
+    tmv::SymMatrix<T,U,S> q3(3);
+    std::copy(qlarrm, qlarrm+6, q3.lowerTri().rowmajor_begin());
+    tmv::SymMatrix<T,U,S> q4(3);
+    std::copy(qlarcm, qlarcm+6, q4.lowerTri().colmajor_begin());
+
+    tmv::SymMatrix<T,U,S> q5(3);
+    std::copy(quvecrm.begin(), quvecrm.end(), q5.upperTri().rowmajor_begin());
+    tmv::SymMatrix<T,U,S> q6(3);
+    std::copy(quveccm.begin(), quveccm.end(), q6.upperTri().colmajor_begin());
+
+    tmv::SymMatrix<T,U,S> q7(3);
+    std::copy(qlvecrm.begin(), qlvecrm.end(), q7.lowerTri().rowmajor_begin());
+    tmv::SymMatrix<T,U,S> q8(3);
+    std::copy(qlveccm.begin(), qlveccm.end(), q8.lowerTri().colmajor_begin());
+
+    tmv::SymMatrix<T,U,S> q9x(30);
+    tmv::SymMatrixView<T> q9 = q9x.subSymMatrix(3,18,5);
+    std::copy(quvecrm.begin(), quvecrm.end(), q9.upperTri().rowmajor_begin());
+    tmv::SymMatrix<T,U,S> q10x(30);
+    tmv::SymMatrixView<T> q10 = q10x.subSymMatrix(3,18,5);
+    std::copy(quveccm.begin(), quveccm.end(), q10.upperTri().colmajor_begin());
+
+    tmv::SymMatrix<T,U,S> q11x(30);
+    tmv::SymMatrixView<T> q11 = q11x.subSymMatrix(3,18,5);
+    std::copy(qlvecrm.begin(), qlvecrm.end(), q11.lowerTri().rowmajor_begin());
+    tmv::SymMatrix<T,U,S> q12x(30);
+    tmv::SymMatrixView<T> q12 = q12x.subSymMatrix(3,18,5);
+    std::copy(qlveccm.begin(), qlveccm.end(), q12.lowerTri().colmajor_begin());
+
+    // Assignment using op<< is always in rowmajor order.
+    tmv::SymMatrix<T,U,S> q13(3);
+    tmv::SymMatrix<T,U,S> q14t(3);
+    tmv::SymMatrixView<T> q14 = q14t.transpose();
+
+    tmv::SymMatrix<T,U,S> q15(3);
+    tmv::SymMatrix<T,U,S> q16t(3);
+    tmv::SymMatrixView<T> q16 = q16t.transpose();
+
+    q13.upperTri() <<
+        0, 2, 4,
+           1, 3,
+              2;
+    q14.upperTri() <<
+        0, 2, 4,
+           1, 3,
+              2;
+    q15.lowerTri() <<
+        0,
+        2,  1,
+        4,  3,  2;
+    q16.lowerTri() <<
+        0,
+        2,  1,
+        4,  3,  2;
+
+    // Can also view memory directly
+    T quarrmfull[] = {
+        T(0), T(2),  T(4),
+        T(-1), T(1), T(3),
+        T(-2), T(0), T(2)
+    };
+    T quarcmfull[] = {
+        T(0), T(-1), T(-2),
+        T(2), T(1), T(0),
+        T(4), T(3), T(2)
+    };
+    T qlarrmfull[] = {
+        T(0), T(-1), T(-2),
+        T(2), T(1), T(0),
+        T(4), T(3), T(2)
+    };
+    T qlarcmfull[] = {
+        T(0), T(2),  T(4),
+        T(-1), T(1), T(3),
+        T(-2), T(0), T(2)
+    };
+    T* qarfull = (
+        (S == tmv::RowMajor) ? 
+        ( (U == tmv::Upper) ? quarrmfull : qlarrmfull ) : 
+        ( (U == tmv::Upper) ? quarcmfull : qlarcmfull ) );
+    const int Si = (S == tmv::RowMajor) ? 3 : 1;
+    const int Sj = (S == tmv::RowMajor) ? 1 : 3;
+    const tmv::ConstSymMatrixView<T> q17 =
+        tmv::SymMatrixViewOf(qarfull,3,U,S);
+    const tmv::ConstSymMatrixView<T> q18 =
+        tmv::SymMatrixViewOf(qarfull,3,U,Si,Sj);
+
+    if (showacc) {
+        std::cout<<"q1 = "<<q1<<std::endl;
+        std::cout<<"q2 = "<<q2<<std::endl;
+        std::cout<<"q3 = "<<q3<<std::endl;
+        std::cout<<"q4 = "<<q4<<std::endl;
+        std::cout<<"q5 = "<<q5<<std::endl;
+        std::cout<<"q6 = "<<q6<<std::endl;
+        std::cout<<"q7 = "<<q7<<std::endl;
+        std::cout<<"q8 = "<<q8<<std::endl;
+        std::cout<<"q9 = "<<q9<<std::endl;
+        std::cout<<"q10 = "<<q10<<std::endl;
+        std::cout<<"q11 = "<<q11<<std::endl;
+        std::cout<<"q12 = "<<q12<<std::endl;
+        std::cout<<"q13 = "<<q13<<std::endl;
+        std::cout<<"q14 = "<<q14<<std::endl;
+        std::cout<<"q15 = "<<q15<<std::endl;
+        std::cout<<"q16 = "<<q16<<std::endl;
+        std::cout<<"q17 = "<<q17<<std::endl;
+        std::cout<<"q18 = "<<q18<<std::endl;
     }
-#endif
+
+    for(int i=0;i<3;i++) for(int j=0;j<3;j++) {
+        T val = i >= j ? T(2*i-j) : T(2*j-i);
+        Assert(q1(i,j) == val,"Create SymMatrix from T* rm upperTri");
+        Assert(q2(i,j) == val,"Create SymMatrix from T* cm upperTri");
+        Assert(q3(i,j) == val,"Create SymMatrix from T* rm lowerTri");
+        Assert(q4(i,j) == val,"Create SymMatrix from T* cm lowerTri");
+        Assert(q5(i,j) == val,"Create SymMatrix from vector rm upperTri");
+        Assert(q6(i,j) == val,"Create SymMatrix from vector cm upperTri");
+        Assert(q7(i,j) == val,"Create SymMatrix from vector rm lowerTri");
+        Assert(q8(i,j) == val,"Create SymMatrix from vector cm lowerTri");
+        Assert(q9(i,j) == val,"Create SymMatrixView from vector rm upperTri");
+        Assert(q10(i,j) == val,"Create SymMatrixView from vector cm upperTri");
+        Assert(q11(i,j) == val,"Create SymMatrixView from vector rm lowerTri");
+        Assert(q12(i,j) == val,"Create SymMatrixView from vector cm lowerTri");
+        Assert(q13(i,j) == val,"Create SymMatrix from << list upperTri");
+        Assert(q14(i,j) == val,"Create SymMatrixView from << list upperTri");
+        Assert(q15(i,j) == val,"Create SymMatrix from << list lowerTri");
+        Assert(q16(i,j) == val,"Create SymMatrixView from << list lowerTri");
+        Assert(q17(i,j) == val,"Create SymMatrixView of T* (S)");
+        Assert(q18(i,j) == val,"Create SymMatrixView of T* (Si,Sj)");
+    }
 
     // Test Basic Arithmetic
     tmv::SymMatrix<std::complex<T>,U,S> s1(N);
@@ -766,34 +903,172 @@ static void TestBasicHermMatrix_2()
         std::cout<<"N = "<<N<<std::endl;
     }
 
-#if 0
-    std::vector<T> qv(16);
-    if ((U == tmv::Upper) == (S == tmv::RowMajor)) {
-        const T qvar[] = { T(0), T(-1), T(-2), T(-3),
-            T(0), T(1),  T(0), T(-1),
-            T(0), T(0),  T(2), T(1),
-            T(0), T(0),  T(0), T(3)};
-        for(int i=0;i<16;i++) qv[i] = qvar[i];
-    } else {
-        const T qvar[] = { T(0),  T(0), T(0), T(0),
-            T(-1), T(1), T(0), T(0),
-            T(-2), T(0), T(2), T(0),
-            T(-3), T(-1), T(1), T(3) };
-        for(int i=0;i<16;i++) qv[i] = qvar[i];
-    }
-    T qar[16];
-    for(int i=0;i<16;i++) qar[i] = qv[i];
+    // Test assignments and constructors from arrays
+    typedef std::complex<T> CT;
+    const CT quarrm[] = {
+        CT(0,0), CT(2,1), CT(4,2),
+                 CT(1,0), CT(3,1),
+                          CT(2,0)
+    };
+    const CT qlarrm[] = {
+        CT(0,0),
+        CT(2,-1), CT(1,0),
+        CT(4,-2), CT(3,-1), CT(2,0)
+    };
+    const CT quarcm[] = {
+        CT(0,0),
+        CT(2,1), CT(1,0),
+        CT(4,2), CT(3,1), CT(2,0)
+    };
+    const CT qlarcm[] = {
+        CT(0,0), CT(2,-1), CT(4,-2),
+                 CT(1,0),  CT(3,-1),
+                           CT(2,0)
+    };
 
-    const tmv::HermMatrix<T,U,S> q4(4,qar);
-    const tmv::HermMatrix<T,U,S> q5(4,qv);
-    const tmv::ConstSymMatrixView<T> q6 = tmv::HermMatrixViewOf(qar,4,U,S);
-    for(int i=0;i<4;i++) for(int j=0;j<4;j++) {
-        T v = T(2)*std::min(i,j)-std::max(i,j);
-        Assert(q4(i,j) == v,"Create HermMatrix from T*");
-        Assert(q5(i,j) == v,"Create HermMatrix from vector");
-        Assert(q6(i,j) == v,"Create HermMatrixView of T*");
+    std::vector<CT> quvecrm(6);
+    for(int i=0;i<6;i++) quvecrm[i] = quarrm[i];
+    std::vector<CT> qlvecrm(6);
+    for(int i=0;i<6;i++) qlvecrm[i] = qlarrm[i];
+    std::vector<CT> quveccm(6);
+    for(int i=0;i<6;i++) quveccm[i] = quarcm[i];
+    std::vector<CT> qlveccm(6);
+    for(int i=0;i<6;i++) qlveccm[i] = qlarcm[i];
+
+    tmv::HermMatrix<CT,U,S> q1(3);
+    std::copy(quarrm, quarrm+6, q1.upperTri().rowmajor_begin());
+    tmv::HermMatrix<CT,U,S> q2(3);
+    std::copy(quarcm, quarcm+6, q2.upperTri().colmajor_begin());
+
+    tmv::HermMatrix<CT,U,S> q3(3);
+    std::copy(qlarrm, qlarrm+6, q3.lowerTri().rowmajor_begin());
+    tmv::HermMatrix<CT,U,S> q4(3);
+    std::copy(qlarcm, qlarcm+6, q4.lowerTri().colmajor_begin());
+
+    tmv::HermMatrix<CT,U,S> q5(3);
+    std::copy(quvecrm.begin(), quvecrm.end(), q5.upperTri().rowmajor_begin());
+    tmv::HermMatrix<CT,U,S> q6(3);
+    std::copy(quveccm.begin(), quveccm.end(), q6.upperTri().colmajor_begin());
+
+    tmv::HermMatrix<CT,U,S> q7(3);
+    std::copy(qlvecrm.begin(), qlvecrm.end(), q7.lowerTri().rowmajor_begin());
+    tmv::HermMatrix<CT,U,S> q8(3);
+    std::copy(qlveccm.begin(), qlveccm.end(), q8.lowerTri().colmajor_begin());
+
+    tmv::HermMatrix<CT,U,S> q9x(30);
+    tmv::SymMatrixView<CT> q9 = q9x.subSymMatrix(3,18,5);
+    std::copy(quvecrm.begin(), quvecrm.end(), q9.upperTri().rowmajor_begin());
+    tmv::HermMatrix<CT,U,S> q10x(30);
+    tmv::SymMatrixView<CT> q10 = q10x.subSymMatrix(3,18,5);
+    std::copy(quveccm.begin(), quveccm.end(), q10.upperTri().colmajor_begin());
+
+    tmv::HermMatrix<CT,U,S> q11x(30);
+    tmv::SymMatrixView<CT> q11 = q11x.subSymMatrix(3,18,5);
+    std::copy(qlvecrm.begin(), qlvecrm.end(), q11.lowerTri().rowmajor_begin());
+    tmv::HermMatrix<CT,U,S> q12x(30);
+    tmv::SymMatrixView<CT> q12 = q12x.subSymMatrix(3,18,5);
+    std::copy(qlveccm.begin(), qlveccm.end(), q12.lowerTri().colmajor_begin());
+
+    // Assignment using op<< is always in rowmajor order.
+    tmv::HermMatrix<CT,U,S> q13(3);
+    tmv::HermMatrix<CT,U,S> q14t(3);
+    tmv::SymMatrixView<CT> q14 = q14t.transpose();
+
+    tmv::HermMatrix<CT,U,S> q15(3);
+    tmv::HermMatrix<CT,U,S> q16t(3);
+    tmv::SymMatrixView<CT> q16 = q16t.transpose();
+
+    q13.upperTri() <<
+        CT(0,0), CT(2,1), CT(4,2),
+                 CT(1,0), CT(3,1),
+                          CT(2,0);
+    q14.upperTri() <<
+        CT(0,0), CT(2,1), CT(4,2),
+                 CT(1,0), CT(3,1),
+                          CT(2,0);
+    q15.lowerTri() <<
+        CT(0,0),
+        CT(2,-1), CT(1,0),
+        CT(4,-2), CT(3,-1), CT(2,0);
+    q16.lowerTri() <<
+        CT(0,0),
+        CT(2,-1), CT(1,0),
+        CT(4,-2), CT(3,-1), CT(2,0);
+
+    // Can also view memory directly
+    CT quarrmfull[] = {
+        CT(0,0),   CT(2,1),  CT(4,2),
+        CT(-1,-1), CT(1,0),  CT(3,1),
+        CT(-2,-2), CT(0,-1), CT(2,0)
+    };
+    CT quarcmfull[] = {
+        CT(0,0), CT(-1,-1), CT(-2,-1),
+        CT(2,1), CT(1,0),   CT(0,-1),
+        CT(4,2), CT(3,1),   CT(2,0)
+    };
+    CT qlarrmfull[] = {
+        CT(0,0),  CT(-1,1), CT(-2,2),
+        CT(2,-1), CT(1,0),  CT(0,1),
+        CT(4,-2), CT(3,-1), CT(2,0)
+    };
+    CT qlarcmfull[] = {
+        CT(0,0),  CT(2,-1), CT(4,-2),
+        CT(-1,1), CT(1,0),  CT(3,-1),
+        CT(-2,2), CT(0,1),  CT(2,0)
+    };
+    CT* qarfull = (
+        (S == tmv::RowMajor) ? 
+        ( (U == tmv::Upper) ? quarrmfull : qlarrmfull ) : 
+        ( (U == tmv::Upper) ? quarcmfull : qlarcmfull ) );
+    const int Si = (S == tmv::RowMajor) ? 3 : 1;
+    const int Sj = (S == tmv::RowMajor) ? 1 : 3;
+    const tmv::ConstSymMatrixView<CT> q17 =
+        tmv::HermMatrixViewOf(qarfull,3,U,S);
+    const tmv::ConstSymMatrixView<CT> q18 =
+        tmv::HermMatrixViewOf(qarfull,3,U,Si,Sj);
+
+    if (showacc) {
+        std::cout<<"q1 = "<<q1<<std::endl;
+        std::cout<<"q2 = "<<q2<<std::endl;
+        std::cout<<"q3 = "<<q3<<std::endl;
+        std::cout<<"q4 = "<<q4<<std::endl;
+        std::cout<<"q5 = "<<q5<<std::endl;
+        std::cout<<"q6 = "<<q6<<std::endl;
+        std::cout<<"q7 = "<<q7<<std::endl;
+        std::cout<<"q8 = "<<q8<<std::endl;
+        std::cout<<"q9 = "<<q9<<std::endl;
+        std::cout<<"q10 = "<<q10<<std::endl;
+        std::cout<<"q11 = "<<q11<<std::endl;
+        std::cout<<"q12 = "<<q12<<std::endl;
+        std::cout<<"q13 = "<<q13<<std::endl;
+        std::cout<<"q14 = "<<q14<<std::endl;
+        std::cout<<"q15 = "<<q15<<std::endl;
+        std::cout<<"q16 = "<<q16<<std::endl;
+        std::cout<<"q17 = "<<q17<<std::endl;
+        std::cout<<"q18 = "<<q18<<std::endl;
     }
-#endif
+
+    for(int i=0;i<3;i++) for(int j=0;j<3;j++) {
+        CT val = i >= j ? CT(2*i-j,j-i) : CT(2*j-i,j-i);
+        Assert(q1(i,j) == val,"Create HermMatrix from T* rm upperTri");
+        Assert(q2(i,j) == val,"Create HermMatrix from T* cm upperTri");
+        Assert(q3(i,j) == val,"Create HermMatrix from T* rm lowerTri");
+        Assert(q4(i,j) == val,"Create HermMatrix from T* cm lowerTri");
+        Assert(q5(i,j) == val,"Create HermMatrix from vector rm upperTri");
+        Assert(q6(i,j) == val,"Create HermMatrix from vector cm upperTri");
+        Assert(q7(i,j) == val,"Create HermMatrix from vector rm lowerTri");
+        Assert(q8(i,j) == val,"Create HermMatrix from vector cm lowerTri");
+        Assert(q9(i,j) == val,"Create HermMatrixView from vector rm upperTri");
+        Assert(q10(i,j) == val,"Create HermMatrixView from vector cm upperTri");
+        Assert(q11(i,j) == val,"Create HermMatrixView from vector rm lowerTri");
+        Assert(q12(i,j) == val,"Create HermMatrixView from vector cm lowerTri");
+        Assert(q13(i,j) == val,"Create HermMatrix from << list upperTri");
+        Assert(q14(i,j) == val,"Create HermMatrixView from << list upperTri");
+        Assert(q15(i,j) == val,"Create HermMatrix from << list lowerTri");
+        Assert(q16(i,j) == val,"Create HermMatrixView from << list lowerTri");
+        Assert(q17(i,j) == val,"Create HermMatrixView of T* (S)");
+        Assert(q18(i,j) == val,"Create HermMatrixView of T* (Si,Sj)");
+    }
 
     // Test Basic Arithmetic
     tmv::HermMatrix<std::complex<T>,U,S> h1(N);

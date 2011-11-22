@@ -844,50 +844,254 @@ static void TestBasicSymBandMatrix_2()
         std::cout<<"noff = "<<noff<<std::endl;
     }
 
-#if 0
-    std::vector<T> qv;
-    if (S == tmv::DiagMajor && U == tmv::Upper) {
-        const T qvar[] = { T(0),  T(1), T(2), T(3), T(4),
-            T(-1), T(0), T(1), T(2), T(888),
-            T(-2), T(-1), T(0) };
-        qv.resize(13);
-        for(int i=0;i<13;i++) qv[i] = qvar[i];
-    } else if (S == tmv::DiagMajor && U == tmv::Lower) {
-        const T qvar[] = {                T(-2), T(-1), T(0), 
-            T(888), T(-1), T(0),  T(1),  T(2), 
-            T(0),   T(1),  T(2),  T(3),  T(4) };
-        qv.resize(13);
-        for(int i=0;i<13;i++) qv[i] = qvar[i];
-    } else if ((S == tmv::RowMajor) == (U == tmv::Upper)) {
-        const T qvar[] = { T(0), T(-1), T(-2),
-            T(1),  T(0),  T(-1),
-            T(2),  T(1),  T(0),
-            T(3),  T(2),  T(888),
-            T(4) };
-        qv.resize(13);
-        for(int i=0;i<13;i++) qv[i] = qvar[i];
-    } else {
-        const T qvar[] = { T(0), 
-            T(888),  T(-1), T(1),
-            T(-2), T(0),  T(2),
-            T(-1), T(1), T(3),
-            T(0), T(2), T(4) };
-        qv.resize(13);
-        for(int i=0;i<13;i++) qv[i] = qvar[i];
-    }
-    T qar[13];
-    for(int i=0;i<13;i++) qar[i] = qv[i];
+    // Test assignments and constructors from arrays
+    const T quarrm[] = {
+        T(0), T(2), T(4),
+              T(1), T(3), T(5),
+                    T(2), T(4), T(6),
+                          T(3), T(5),
+                                T(4)
+    };
+    const T qlarrm[] = {
+        T(0),
+        T(2), T(1),
+        T(4), T(3), T(2),
+              T(5), T(4), T(3),
+                    T(6), T(5), T(4)
+    };
+    const T quarcm[] = {
+        T(0),
+        T(2), T(1),
+        T(4), T(3), T(2),
+              T(5), T(4), T(3),
+                    T(6), T(5), T(4)
+    };
+    const T qlarcm[] = {
+        T(0), T(2), T(4),
+              T(1), T(3), T(5),
+                    T(2), T(4), T(6),
+                          T(3), T(5),
+                                T(4)
+    };
+    const T quardm[] = {
+        T(0), T(1), T(2), T(3), T(4),
+           T(2), T(3), T(4), T(5),
+              T(4), T(5), T(6)
+    };
+    const T qlardm[] = {
+              T(4), T(5), T(6),
+           T(2), T(3), T(4), T(5),
+        T(0), T(1), T(2), T(3), T(4)
+    };
 
-    tmv::SymBandMatrix<T,U,S> q1(5,2,qar);
-    tmv::SymBandMatrix<T,U,S> q2(5,2,qv);
-    tmv::ConstSymBandMatrixView<T> q3 = tmv::SymBandMatrixViewOf(qar,5,2,U,S);
-    for(int i=0;i<5;i++) for(int j=0;j<5;j++) if (j<=i+2 && i<=j+2) {
-        T v = T(2)*std::min(i,j)-std::max(i,j);
-        Assert(q1(i,j) == v,"Create SymBandMatrix from T*");
-        Assert(q2(i,j) == v,"Create SymBandMatrix from vector");
-        Assert(q3(i,j) == v,"Create SymBandMatrixView of T*");
+    std::vector<T> quvecrm(12);
+    for(int i=0;i<12;i++) quvecrm[i] = quarrm[i];
+    std::vector<T> qlvecrm(12);
+    for(int i=0;i<12;i++) qlvecrm[i] = qlarrm[i];
+    std::vector<T> quveccm(12);
+    for(int i=0;i<12;i++) quveccm[i] = quarcm[i];
+    std::vector<T> qlveccm(12);
+    for(int i=0;i<12;i++) qlveccm[i] = qlarcm[i];
+    std::vector<T> quvecdm(12);
+    for(int i=0;i<12;i++) quvecdm[i] = quardm[i];
+    std::vector<T> qlvecdm(12);
+    for(int i=0;i<12;i++) qlvecdm[i] = qlardm[i];
+
+    tmv::SymBandMatrix<T,U,S> q1(5,2);
+    std::copy(quarrm, quarrm+12, q1.upperBand().rowmajor_begin());
+    tmv::SymBandMatrix<T,U,S> q2(5,2);
+    std::copy(quarcm, quarcm+12, q2.upperBand().colmajor_begin());
+    tmv::SymBandMatrix<T,U,S> q3(5,2);
+    std::copy(quardm, quardm+12, q3.upperBand().diagmajor_begin());
+
+    tmv::SymBandMatrix<T,U,S> q4(5,2);
+    std::copy(qlarrm, qlarrm+12, q4.lowerBand().rowmajor_begin());
+    tmv::SymBandMatrix<T,U,S> q5(5,2);
+    std::copy(qlarcm, qlarcm+12, q5.lowerBand().colmajor_begin());
+    tmv::SymBandMatrix<T,U,S> q6(5,2);
+    std::copy(qlardm, qlardm+12, q6.lowerBand().diagmajor_begin());
+
+    tmv::SymBandMatrix<T,U,S> q7(5,2);
+    std::copy(quvecrm.begin(), quvecrm.end(), q7.upperBand().rowmajor_begin());
+    tmv::SymBandMatrix<T,U,S> q8(5,2);
+    std::copy(quveccm.begin(), quveccm.end(), q8.upperBand().colmajor_begin());
+    tmv::SymBandMatrix<T,U,S> q9(5,2);
+    std::copy(quvecdm.begin(), quvecdm.end(), q9.upperBand().diagmajor_begin());
+
+    tmv::SymBandMatrix<T,U,S> q10(5,2);
+    std::copy(qlvecrm.begin(), qlvecrm.end(), q10.lowerBand().rowmajor_begin());
+    tmv::SymBandMatrix<T,U,S> q11(5,2);
+    std::copy(qlveccm.begin(), qlveccm.end(), q11.lowerBand().colmajor_begin());
+    tmv::SymBandMatrix<T,U,S> q12(5,2);
+    std::copy(qlvecdm.begin(), qlvecdm.end(), q12.lowerBand().diagmajor_begin());
+
+    tmv::SymBandMatrix<T,U,S> q13x(50,20);
+    tmv::SymBandMatrixView<T> q13 = q13x.subSymBandMatrix(3,28,2,5);
+    std::copy(quvecrm.begin(), quvecrm.end(), q13.upperBand().rowmajor_begin());
+    tmv::SymBandMatrix<T,U,S> q14x(50,20);
+    tmv::SymBandMatrixView<T> q14 = q14x.subSymBandMatrix(3,28,2,5);
+    std::copy(quveccm.begin(), quveccm.end(), q14.upperBand().colmajor_begin());
+    tmv::SymBandMatrix<T,U,S> q15x(50,20);
+    tmv::SymBandMatrixView<T> q15 = q15x.subSymBandMatrix(3,28,2,5);
+    std::copy(quvecdm.begin(), quvecdm.end(), q15.upperBand().diagmajor_begin());
+
+    tmv::SymBandMatrix<T,U,S> q16x(50,20);
+    tmv::SymBandMatrixView<T> q16 = q16x.subSymBandMatrix(3,28,2,5);
+    std::copy(qlvecrm.begin(), qlvecrm.end(), q16.lowerBand().rowmajor_begin());
+    tmv::SymBandMatrix<T,U,S> q17x(50,20);
+    tmv::SymBandMatrixView<T> q17 = q17x.subSymBandMatrix(3,28,2,5);
+    std::copy(qlveccm.begin(), qlveccm.end(), q17.lowerBand().colmajor_begin());
+    tmv::SymBandMatrix<T,U,S> q18x(50,20);
+    tmv::SymBandMatrixView<T> q18 = q18x.subSymBandMatrix(3,28,2,5);
+    std::copy(qlvecdm.begin(), qlvecdm.end(), q18.lowerBand().diagmajor_begin());
+
+    // Assignment using op<< is always in rowmajor order.
+    tmv::SymBandMatrix<T,U,S> q19(5,2);
+    tmv::SymBandMatrix<T,U,S> q20t(5,2);
+    tmv::SymBandMatrixView<T> q20 = q20t.transpose();
+
+    tmv::SymBandMatrix<T,U,S> q21(5,2);
+    tmv::SymBandMatrix<T,U,S> q22t(5,2);
+    tmv::SymBandMatrixView<T> q22 = q22t.transpose();
+
+    q19.upperBand() <<
+        0, 2, 4,
+           1, 3, 5,
+              2, 4, 6,
+                 3, 5, 
+                    4;
+    q20.upperBand() <<
+        0, 2, 4,
+           1, 3, 5,
+              2, 4, 6,
+                 3, 5, 
+                    4;
+    q21.lowerBand() <<
+        0, 
+        2, 1,
+        4, 3, 2,
+           5, 4, 3,
+              6, 5, 4;
+    q22.lowerBand() <<
+        0, 
+        2, 1,
+        4, 3, 2,
+           5, 4, 3,
+              6, 5, 4;
+
+    // Can also view memory directly
+    T quarrmfull[] = {
+        T(0), T(2), T(4),
+        T(1), T(3), T(5),
+        T(2), T(4), T(6),
+        T(3), T(5), T(7),
+        T(4)
+    };
+    T quarcmfull[] = {
+                    T(0),
+        T(3), T(2), T(1),
+        T(4), T(3), T(2),
+        T(5), T(4), T(3),
+        T(6), T(5), T(4)
+    };
+    T quardmfull[] = {
+        T(0), T(1), T(2), T(3), T(4),
+        T(2), T(3), T(4), T(5), T(6),
+        T(4), T(5), T(6)
+    };
+    T qlarrmfull[] = {
+                    T(0),
+        T(3), T(2), T(1),
+        T(4), T(3), T(2),
+        T(5), T(4), T(3),
+        T(6), T(5), T(4)
+    };
+    T qlarcmfull[] = {
+        T(0), T(2), T(4),
+        T(1), T(3), T(5),
+        T(2), T(4), T(6),
+        T(3), T(5), T(7),
+        T(4)
+    };
+    T qlardmfull[] = {
+                    T(4), T(5), T(6),
+        T(1), T(2), T(3), T(4), T(5),
+        T(0), T(1), T(2), T(3), T(4)
+    };
+    T* qarfull = (
+        (S == tmv::RowMajor) ?
+        ( (U == tmv::Upper) ? quarrmfull : qlarrmfull ) :
+        (S == tmv::ColMajor) ?
+        ( (U == tmv::Upper) ? quarcmfull : qlarcmfull ) :
+        ( (U == tmv::Upper) ? quardmfull : qlardmfull ) );
+    T* qarfullx = qarfull + (S == tmv::DiagMajor && U == tmv::Lower ? 8 : 0);
+    const int Si = 
+        (S == tmv::RowMajor) ? 2 :
+        (S == tmv::ColMajor) ? 1 :
+        -4;
+    const int Sj = 
+        (S == tmv::RowMajor) ? 1 :
+        (S == tmv::ColMajor) ? 2 :
+        5;
+    const tmv::ConstSymBandMatrixView<T> q23 =
+        tmv::SymBandMatrixViewOf(qarfull,5,2,U,S);
+    const tmv::ConstSymBandMatrixView<T> q24 =
+        tmv::SymBandMatrixViewOf(qarfullx,5,2,U,Si,Sj);
+
+    if (showacc) {
+        std::cout<<"q1 = "<<q1<<std::endl;
+        std::cout<<"q2 = "<<q2<<std::endl;
+        std::cout<<"q3 = "<<q3<<std::endl;
+        std::cout<<"q4 = "<<q4<<std::endl;
+        std::cout<<"q5 = "<<q5<<std::endl;
+        std::cout<<"q6 = "<<q6<<std::endl;
+        std::cout<<"q7 = "<<q7<<std::endl;
+        std::cout<<"q8 = "<<q8<<std::endl;
+        std::cout<<"q9 = "<<q9<<std::endl;
+        std::cout<<"q10 = "<<q10<<std::endl;
+        std::cout<<"q11 = "<<q11<<std::endl;
+        std::cout<<"q12 = "<<q12<<std::endl;
+        std::cout<<"q13 = "<<q13<<std::endl;
+        std::cout<<"q14 = "<<q14<<std::endl;
+        std::cout<<"q15 = "<<q15<<std::endl;
+        std::cout<<"q16 = "<<q16<<std::endl;
+        std::cout<<"q17 = "<<q17<<std::endl;
+        std::cout<<"q18 = "<<q18<<std::endl;
+        std::cout<<"q19 = "<<q19<<std::endl;
+        std::cout<<"q20 = "<<q20<<std::endl;
+        std::cout<<"q21 = "<<q21<<std::endl;
+        std::cout<<"q22 = "<<q22<<std::endl;
+        std::cout<<"q23 = "<<q23<<std::endl;
+        std::cout<<"q24 = "<<q24<<std::endl;
     }
-#endif
+
+    for(int i=0;i<5;i++) for(int j=0;j<5;j++) if (std::abs(i-j) <= 2) {
+        T val = i >= j ? T(2*i-j) : T(2*j-i);
+        Assert(q1(i,j) == val,"Create SymBandMatrix from T* rm upper");
+        Assert(q2(i,j) == val,"Create SymBandMatrix from T* cm upper");
+        Assert(q3(i,j) == val,"Create SymBandMatrix from T* dm upper");
+        Assert(q4(i,j) == val,"Create SymBandMatrix from T* rm lower");
+        Assert(q5(i,j) == val,"Create SymBandMatrix from T* cm lower");
+        Assert(q6(i,j) == val,"Create SymBandMatrix from T* dm lower");
+        Assert(q7(i,j) == val,"Create SymBandMatrix from vector rm upper");
+        Assert(q8(i,j) == val,"Create SymBandMatrix from vector cm upper");
+        Assert(q9(i,j) == val,"Create SymBandMatrix from vector dm upper");
+        Assert(q10(i,j) == val,"Create SymBandMatrix from vector rm lower");
+        Assert(q11(i,j) == val,"Create SymBandMatrix from vector cm lower");
+        Assert(q12(i,j) == val,"Create SymBandMatrix from vector dm lower");
+        Assert(q13(i,j) == val,"Create SymBandMatrixView from vector rm upper");
+        Assert(q14(i,j) == val,"Create SymBandMatrixView from vector cm upper");
+        Assert(q15(i,j) == val,"Create SymBandMatrixView from vector dm upper");
+        Assert(q16(i,j) == val,"Create SymBandMatrixView from vector rm lower");
+        Assert(q17(i,j) == val,"Create SymBandMatrixView from vector cm lower");
+        Assert(q18(i,j) == val,"Create SymBandMatrixView from vector dm lower");
+        Assert(q19(i,j) == val,"Create SymBandMatrix from << list upper");
+        Assert(q20(i,j) == val,"Create SymBandMatrixView from << list upper");
+        Assert(q21(i,j) == val,"Create SymBandMatrix from << list lower");
+        Assert(q22(i,j) == val,"Create SymBandMatrixView from << list lower");
+        Assert(q23(i,j) == val,"Create SymBandMatrixView of T* (S)");
+        Assert(q24(i,j) == val,"Create SymBandMatrixView of T* (Si,Sj)");
+    }
 
     // Test Basic Arithmetic
     tmv::SymBandMatrix<std::complex<T>,U,S> s1(N,noff);
@@ -1004,50 +1208,256 @@ static void TestBasicHermBandMatrix_2()
         std::cout<<"noff = "<<noff<<std::endl;
     }
 
-#if 0
-    std::vector<T> qv;
-    if (S == tmv::DiagMajor && U == tmv::Upper) {
-        const T qvar[] = { T(0),  T(1), T(2), T(3), T(4),
-            T(-1), T(0), T(1), T(2), T(888),
-            T(-2), T(-1), T(0) };
-        qv.resize(13);
-        for(int i=0;i<13;i++) qv[i] = qvar[i];
-    } else if (S == tmv::DiagMajor && U == tmv::Lower) {
-        const T qvar[] = {                T(-2), T(-1), T(0), 
-            T(888), T(-1), T(0),  T(1),  T(2), 
-            T(0),   T(1),  T(2),  T(3),  T(4) };
-        qv.resize(13);
-        for(int i=0;i<13;i++) qv[i] = qvar[i];
-    } else if ((S == tmv::RowMajor) == (U == tmv::Upper)) {
-        const T qvar[] = { T(0), T(-1), T(-2),
-            T(1),  T(0),  T(-1),
-            T(2),  T(1),  T(0),
-            T(3),  T(2),  T(888),
-            T(4) };
-        qv.resize(13);
-        for(int i=0;i<13;i++) qv[i] = qvar[i];
-    } else {
-        const T qvar[] = { T(0), 
-            T(888),  T(-1), T(1),
-            T(-2), T(0),  T(2),
-            T(-1), T(1), T(3),
-            T(0), T(2), T(4) };
-        qv.resize(13);
-        for(int i=0;i<13;i++) qv[i] = qvar[i];
-    }
-    T qar[13];
-    for(int i=0;i<13;i++) qar[i] = qv[i];
+    // Test assignments and constructors from arrays
+    typedef std::complex<T> CT;
+    
+    const CT quarrm[] = {
+        CT(0,0), CT(2,1), CT(4,2),
+                 CT(1,0), CT(3,1), CT(5,2),
+                          CT(2,0), CT(4,1), CT(6,2),
+                                   CT(3,0), CT(5,1),
+                                            CT(4,0)
+    };
+    const CT qlarrm[] = {
+        CT(0,0),
+        CT(2,-1), CT(1,0),
+        CT(4,-2), CT(3,-1), CT(2,0),
+                  CT(5,-2), CT(4,-1), CT(3,0),
+                            CT(6,-2), CT(5,-1), CT(4,0)
+    };
+    const CT quarcm[] = {
+        CT(0,0),
+        CT(2,1), CT(1,0),
+        CT(4,2), CT(3,1), CT(2,0),
+                 CT(5,2), CT(4,1), CT(3,0),
+                          CT(6,2), CT(5,1), CT(4,0)
+    };
+    const CT qlarcm[] = {
+        CT(0,0), CT(2,-1), CT(4,-2),
+                 CT(1,0),  CT(3,-1), CT(5,-2),
+                           CT(2,0),  CT(4,-1), CT(6,-2),
+                                     CT(3,0),  CT(5,-1),
+                                               CT(4,0)
+    };
+    const CT quardm[] = {
+        CT(0,0), CT(1,0), CT(2,0), CT(3,0), CT(4,0),
+            CT(2,1), CT(3,1), CT(4,1), CT(5,1),
+                 CT(4,2), CT(5,2), CT(6,2)
+    };
+    const CT qlardm[] = {
+                  CT(4,-2), CT(5,-2), CT(6,-2),
+             CT(2,-1), CT(3,-1), CT(4,-1), CT(5,-1),
+        CT(0,0),  CT(1,0),  CT(2,0),  CT(3,0),  CT(4,0)
+    };
 
-    tmv::HermBandMatrix<T,U,S> q4(5,2,qar);
-    tmv::HermBandMatrix<T,U,S> q5(5,2,qv);
-    tmv::ConstSymBandMatrixView<T> q6 = tmv::HermBandMatrixViewOf(qar,5,2,U,S);
-    for(int i=0;i<5;i++) for(int j=0;j<5;j++) if (j<=i+2 && i<=j+2) {
-        T v = T(2)*std::min(i,j)-std::max(i,j);
-        Assert(q4(i,j) == v,"Create HermBandMatrix from T*");
-        Assert(q5(i,j) == v,"Create HermBandMatrix from vector");
-        Assert(q6(i,j) == v,"Create HermBandMatrixView of T*");
+    std::vector<CT> quvecrm(12);
+    for(int i=0;i<12;i++) quvecrm[i] = quarrm[i];
+    std::vector<CT> qlvecrm(12);
+    for(int i=0;i<12;i++) qlvecrm[i] = qlarrm[i];
+    std::vector<CT> quveccm(12);
+    for(int i=0;i<12;i++) quveccm[i] = quarcm[i];
+    std::vector<CT> qlveccm(12);
+    for(int i=0;i<12;i++) qlveccm[i] = qlarcm[i];
+    std::vector<CT> quvecdm(12);
+    for(int i=0;i<12;i++) quvecdm[i] = quardm[i];
+    std::vector<CT> qlvecdm(12);
+    for(int i=0;i<12;i++) qlvecdm[i] = qlardm[i];
+
+    tmv::HermBandMatrix<CT,U,S> q1(5,2);
+    std::copy(quarrm, quarrm+12, q1.upperBand().rowmajor_begin());
+    tmv::HermBandMatrix<CT,U,S> q2(5,2);
+    std::copy(quarcm, quarcm+12, q2.upperBand().colmajor_begin());
+    tmv::HermBandMatrix<CT,U,S> q3(5,2);
+    std::copy(quardm, quardm+12, q3.upperBand().diagmajor_begin());
+
+    tmv::HermBandMatrix<CT,U,S> q4(5,2);
+    std::copy(qlarrm, qlarrm+12, q4.lowerBand().rowmajor_begin());
+    tmv::HermBandMatrix<CT,U,S> q5(5,2);
+    std::copy(qlarcm, qlarcm+12, q5.lowerBand().colmajor_begin());
+    tmv::HermBandMatrix<CT,U,S> q6(5,2);
+    std::copy(qlardm, qlardm+12, q6.lowerBand().diagmajor_begin());
+
+    tmv::HermBandMatrix<CT,U,S> q7(5,2);
+    std::copy(quvecrm.begin(), quvecrm.end(), q7.upperBand().rowmajor_begin());
+    tmv::HermBandMatrix<CT,U,S> q8(5,2);
+    std::copy(quveccm.begin(), quveccm.end(), q8.upperBand().colmajor_begin());
+    tmv::HermBandMatrix<CT,U,S> q9(5,2);
+    std::copy(quvecdm.begin(), quvecdm.end(), q9.upperBand().diagmajor_begin());
+
+    tmv::HermBandMatrix<CT,U,S> q10(5,2);
+    std::copy(qlvecrm.begin(), qlvecrm.end(), q10.lowerBand().rowmajor_begin());
+    tmv::HermBandMatrix<CT,U,S> q11(5,2);
+    std::copy(qlveccm.begin(), qlveccm.end(), q11.lowerBand().colmajor_begin());
+    tmv::HermBandMatrix<CT,U,S> q12(5,2);
+    std::copy(qlvecdm.begin(), qlvecdm.end(), q12.lowerBand().diagmajor_begin());
+
+    tmv::HermBandMatrix<CT,U,S> q13x(50,20);
+    tmv::SymBandMatrixView<CT> q13 = q13x.subSymBandMatrix(3,28,2,5);
+    std::copy(quvecrm.begin(), quvecrm.end(), q13.upperBand().rowmajor_begin());
+    tmv::HermBandMatrix<CT,U,S> q14x(50,20);
+    tmv::SymBandMatrixView<CT> q14 = q14x.subSymBandMatrix(3,28,2,5);
+    std::copy(quveccm.begin(), quveccm.end(), q14.upperBand().colmajor_begin());
+    tmv::HermBandMatrix<CT,U,S> q15x(50,20);
+    tmv::SymBandMatrixView<CT> q15 = q15x.subSymBandMatrix(3,28,2,5);
+    std::copy(quvecdm.begin(), quvecdm.end(), q15.upperBand().diagmajor_begin());
+
+    tmv::HermBandMatrix<CT,U,S> q16x(50,20);
+    tmv::SymBandMatrixView<CT> q16 = q16x.subSymBandMatrix(3,28,2,5);
+    std::copy(qlvecrm.begin(), qlvecrm.end(), q16.lowerBand().rowmajor_begin());
+    tmv::HermBandMatrix<CT,U,S> q17x(50,20);
+    tmv::SymBandMatrixView<CT> q17 = q17x.subSymBandMatrix(3,28,2,5);
+    std::copy(qlveccm.begin(), qlveccm.end(), q17.lowerBand().colmajor_begin());
+    tmv::HermBandMatrix<CT,U,S> q18x(50,20);
+    tmv::SymBandMatrixView<CT> q18 = q18x.subSymBandMatrix(3,28,2,5);
+    std::copy(qlvecdm.begin(), qlvecdm.end(), q18.lowerBand().diagmajor_begin());
+
+    // Assignment using op<< is always in rowmajor order.
+    tmv::HermBandMatrix<CT,U,S> q19(5,2);
+    tmv::HermBandMatrix<CT,U,S> q20t(5,2);
+    tmv::SymBandMatrixView<CT> q20 = q20t.transpose();
+
+    tmv::HermBandMatrix<CT,U,S> q21(5,2);
+    tmv::HermBandMatrix<CT,U,S> q22t(5,2);
+    tmv::SymBandMatrixView<CT> q22 = q22t.transpose();
+
+    q19.upperBand() <<
+        CT(0,0), CT(2,1), CT(4,2),
+                 CT(1,0), CT(3,1), CT(5,2),
+                          CT(2,0), CT(4,1), CT(6,2),
+                                   CT(3,0), CT(5,1),
+                                            CT(4,0);
+    q20.upperBand() <<
+        CT(0,0), CT(2,1), CT(4,2),
+                 CT(1,0), CT(3,1), CT(5,2),
+                          CT(2,0), CT(4,1), CT(6,2),
+                                   CT(3,0), CT(5,1),
+                                            CT(4,0);
+    q21.lowerBand() <<
+        CT(0,0),
+        CT(2,-1), CT(1,0),
+        CT(4,-2), CT(3,-1), CT(2,0),
+                  CT(5,-2), CT(4,-1), CT(3,0),
+                            CT(6,-2), CT(5,-1), CT(4,0);
+    q22.lowerBand() <<
+        CT(0,0),
+        CT(2,-1), CT(1,0),
+        CT(4,-2), CT(3,-1), CT(2,0),
+                  CT(5,-2), CT(4,-1), CT(3,0),
+                            CT(6,-2), CT(5,-1), CT(4,0);
+
+    // Can also view memory directly
+    CT quarrmfull[] = {
+        CT(0,0), CT(2,1), CT(4,2),
+        CT(1,0), CT(3,1), CT(5,2),
+        CT(2,0), CT(4,1), CT(6,2),
+        CT(3,0), CT(5,1), CT(7,2),
+        CT(4,0)
+    };
+    CT quarcmfull[] = {
+                          CT(0,0),
+        CT(3,2), CT(2,1), CT(1,0),
+        CT(4,2), CT(3,1), CT(2,0),
+        CT(5,2), CT(4,1), CT(3,0),
+        CT(6,2), CT(5,1), CT(4,0)
+    };
+    CT quardmfull[] = {
+        CT(0,0), CT(1,0), CT(2,0), CT(3,0), CT(4,0),
+        CT(2,1), CT(3,1), CT(4,1), CT(5,1), CT(6,1),
+        CT(4,2), CT(5,2), CT(6,2)
+    };
+    CT qlarrmfull[] = {
+                            CT(0,0),
+        CT(3,-2), CT(2,-1), CT(1,0),
+        CT(4,-2), CT(3,-1), CT(2,0),
+        CT(5,-2), CT(4,-1), CT(3,0),
+        CT(6,-2), CT(5,-1), CT(4,0)
+    };
+    CT qlarcmfull[] = {
+        CT(0,0), CT(2,-1), CT(4,-2),
+        CT(1,0), CT(3,-1), CT(5,-2),
+        CT(2,0), CT(4,-1), CT(6,-2),
+        CT(3,0), CT(5,-1), CT(7,-2),
+        CT(4,0)
+    };
+    CT qlardmfull[] = {
+                            CT(4,-2), CT(5,-2), CT(6,-2),
+        CT(1,-1), CT(2,-1), CT(3,-1), CT(4,-1), CT(5,-1),
+        CT(0,0),  CT(1,0),  CT(2,0),  CT(3,0),  CT(4,0)
+    };
+    CT* qarfull = (
+        (S == tmv::RowMajor) ?
+        ( (U == tmv::Upper) ? quarrmfull : qlarrmfull ) :
+        (S == tmv::ColMajor) ?
+        ( (U == tmv::Upper) ? quarcmfull : qlarcmfull ) :
+        ( (U == tmv::Upper) ? quardmfull : qlardmfull ) );
+    CT* qarfullx = qarfull + (S == tmv::DiagMajor && U == tmv::Lower ? 8 : 0);
+    const int Si = 
+        (S == tmv::RowMajor) ? 2 :
+        (S == tmv::ColMajor) ? 1 :
+        -4;
+    const int Sj = 
+        (S == tmv::RowMajor) ? 1 :
+        (S == tmv::ColMajor) ? 2 :
+        5;
+    const tmv::ConstSymBandMatrixView<CT> q23 =
+        tmv::HermBandMatrixViewOf(qarfull,5,2,U,S);
+    const tmv::ConstSymBandMatrixView<CT> q24 =
+        tmv::HermBandMatrixViewOf(qarfullx,5,2,U,Si,Sj);
+
+    if (showacc) {
+        std::cout<<"q1 = "<<q1<<std::endl;
+        std::cout<<"q2 = "<<q2<<std::endl;
+        std::cout<<"q3 = "<<q3<<std::endl;
+        std::cout<<"q4 = "<<q4<<std::endl;
+        std::cout<<"q5 = "<<q5<<std::endl;
+        std::cout<<"q6 = "<<q6<<std::endl;
+        std::cout<<"q7 = "<<q7<<std::endl;
+        std::cout<<"q8 = "<<q8<<std::endl;
+        std::cout<<"q9 = "<<q9<<std::endl;
+        std::cout<<"q10 = "<<q10<<std::endl;
+        std::cout<<"q11 = "<<q11<<std::endl;
+        std::cout<<"q12 = "<<q12<<std::endl;
+        std::cout<<"q13 = "<<q13<<std::endl;
+        std::cout<<"q14 = "<<q14<<std::endl;
+        std::cout<<"q15 = "<<q15<<std::endl;
+        std::cout<<"q16 = "<<q16<<std::endl;
+        std::cout<<"q17 = "<<q17<<std::endl;
+        std::cout<<"q18 = "<<q18<<std::endl;
+        std::cout<<"q19 = "<<q19<<std::endl;
+        std::cout<<"q20 = "<<q20<<std::endl;
+        std::cout<<"q21 = "<<q21<<std::endl;
+        std::cout<<"q22 = "<<q22<<std::endl;
+        std::cout<<"q23 = "<<q23<<std::endl;
+        std::cout<<"q24 = "<<q24<<std::endl;
     }
-#endif
+
+    for(int i=0;i<5;i++) for(int j=0;j<5;j++) if (std::abs(i-j) <= 2) {
+        CT val = i >= j ? CT(2*i-j,j-i) : CT(2*j-i,j-i);
+        Assert(q1(i,j) == val,"Create HermBandMatrix from T* rm upper");
+        Assert(q2(i,j) == val,"Create HermBandMatrix from T* cm upper");
+        Assert(q3(i,j) == val,"Create HermBandMatrix from T* dm upper");
+        Assert(q4(i,j) == val,"Create HermBandMatrix from T* rm lower");
+        Assert(q5(i,j) == val,"Create HermBandMatrix from T* cm lower");
+        Assert(q6(i,j) == val,"Create HermBandMatrix from T* dm lower");
+        Assert(q7(i,j) == val,"Create HermBandMatrix from vector rm upper");
+        Assert(q8(i,j) == val,"Create HermBandMatrix from vector cm upper");
+        Assert(q9(i,j) == val,"Create HermBandMatrix from vector dm upper");
+        Assert(q10(i,j) == val,"Create HermBandMatrix from vector rm lower");
+        Assert(q11(i,j) == val,"Create HermBandMatrix from vector cm lower");
+        Assert(q12(i,j) == val,"Create HermBandMatrix from vector dm lower");
+        Assert(q13(i,j) == val,"Create HermBandMatrixView from vector rm upper");
+        Assert(q14(i,j) == val,"Create HermBandMatrixView from vector cm upper");
+        Assert(q15(i,j) == val,"Create HermBandMatrixView from vector dm upper");
+        Assert(q16(i,j) == val,"Create HermBandMatrixView from vector rm lower");
+        Assert(q17(i,j) == val,"Create HermBandMatrixView from vector cm lower");
+        Assert(q18(i,j) == val,"Create HermBandMatrixView from vector dm lower");
+        Assert(q19(i,j) == val,"Create HermBandMatrix from << list upper");
+        Assert(q20(i,j) == val,"Create HermBandMatrixView from << list upper");
+        Assert(q21(i,j) == val,"Create HermBandMatrix from << list lower");
+        Assert(q22(i,j) == val,"Create HermBandMatrixView from << list lower");
+        Assert(q23(i,j) == val,"Create HermBandMatrixView of T* (S)");
+        Assert(q24(i,j) == val,"Create HermBandMatrixView of T* (Si,Sj)");
+    }
 
     // Test Basic Arithmetic
     tmv::HermBandMatrix<std::complex<T>,U,S> h1(N,noff);

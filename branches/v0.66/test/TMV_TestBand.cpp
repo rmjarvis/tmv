@@ -234,7 +234,7 @@ static void TestBasicBandMatrix_2()
         (S == tmv::RowMajor) ? qarrmfull : 
         (S == tmv::ColMajor) ? qarcmfull : 
         qardmfull;
-    T* qarfullx = (S == tmv::DiagMajor) ? qarfull + 2 : qarfull;
+    T* qarfullx = qarfull + (S == tmv::DiagMajor ? 2 : 0);
     const int Si = 
         (S == tmv::RowMajor) ? 3 :
         (S == tmv::ColMajor) ? 1 : 
