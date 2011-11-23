@@ -92,30 +92,6 @@ values equal to \tt{x}
 
 \item
 \begin{tmvcode}
-tmv::Matrix<T,stor,index> m(size_t nrows, size_t ncols, const T* vv)
-tmv::Matrix<T,stor,index> m(size_t nrows, size_t ncols, 
-      const std::vector<T>& vv)
-\end{tmvcode}
-Makes a \tt{Matrix} with \tt{nrows} rows and \tt{ncols} columns,
-which copies the elements of \tt{vv}.
-
-If \tt{stor} is \tt{RowMajor}, then the elements of \tt{vv} are taken to
-be in row-major order: first the \tt{ncols} elements of the first row, then the
-\tt{ncols} elements of the second row, and so on for the \tt{nrows} rows.
-Likewise if \tt{stor} is \tt{ColMajor},
-then the elements of \tt{vv} are taken to be in column-major order - 
-the elements of the first column, then the second, and so on.
-
-\item
-\begin{tmvcode}
-tmv::Matrix<T,stor,index> m(const std::vector<std::vector<T> >& vv)
-\end{tmvcode}
-Makes a \tt{Matrix} with elements \tt{m(i,j) = vv[i][j]}.  The size of
-the \tt{Matrix} is taken from the sizes of the \tt{vector}s.  
-(If \tt{index} is \tt{FortranStyle}, then \tt{m(i,j) = vv[i-1][j-1]}.)
-
-\item
-\begin{tmvcode}
 tmv::Matrix<T,index> m1(const GenMatrix<T2>& m2)
 m1 = m2
 \end{tmvcode}
@@ -181,7 +157,7 @@ Makes a view of the \tt{Vector}, which treats it as an $n \times 1$ \tt{Matrix}
 A \tt{Matrix} can be initialized with a comma-delimited list using
 the \tt{<<} operator, just like with a \tt{Vector}.  For example:
 \begin{tmvcode}
-tmv::Matrix<double,tmv::RowMajor> m(3,5);
+tmv::Matrix<double> m(3,5);
 m << 1.2,  3.2, -9.2, -1.0,  3.3, 
      2.0, -2.7,  2.2, -6.5, -7.6, 
     -8.2,  3.2, -8.7,  5.1,  1.6;
@@ -191,14 +167,23 @@ There must be precisely as many values as there are elements in the \tt{Matrix},
 or a \tt{tmv::ReadError} will be thrown.
 \index{Exceptions!ReadError}
 
-This initialization is most readable when the \tt{Matrix} \tt{m} is \tt{RowMajor}, since then the 
-elements in the list can be arranged as in the above example, which shows the
-correct matrix structure of the elements.  If \tt{m} is \tt{ColMajor}, then the
-list elements are assigned in order of the columns instead.
+This initialization list is always in RowMajor order, regardless of the storage order of the 
+matrix in memory.  That way, the elements in the list appear in the same order as the 
+real matrix.  If the \tt{Matrix} uses \tt{ColMajor} storage, then the assignment is somewhat
+less efficient, but since the initialization is almost never a time-critical part of the code, 
+it probably isn't worth worrying about.
 
-Also, the list initialization works for a \tt{MatrixView} as well.  However, it only works
-if the \tt{MatrixView}'s elements are all contiguous in memory.  You can check
-if this is the case with the \tt{canLinearize()} method described in \S\ref{LinearViews}.
+The list initialization works for a \tt{MatrixView} as well, even if the actual memory elements
+being assigned to are not contiguous in memory.  e.g.:
+\begin{tmvcode}
+tmv::Matrix<double> m(4,4,0.);
+m.subMatrix(0,2,0,2) << // Upper left corner
+    1,  3, 
+    5,  2;
+m.subMatrix(2,4,2,4) << // Lower right corner
+    2,  3, 
+    5,  1;
+\end{tmvcode}
 
 \subsection{Access}
 \index{Matrix!Access methods}
@@ -1864,14 +1849,14 @@ The assignment operator has the same flexibility.
 
 \item
 \begin{tmvcode}
-tmv::SmallMatrix<T,M,N,tmv::RowMajor,index> m;
+tmv::SmallMatrix<T,M,N,stor,index> m;
 m << m00 , m01 , m02 ...
      m10 , m11 , m12 ...
      ...
 \end{tmvcode}
-Initialize the \tt{SmallMatrix m} with a list of values.  The elements are assigned
-in order according to the storage order of \tt{m}.  This is most intuitive if \tt{stor = RowMajor}
-as shown.
+Initialize the \tt{SmallMatrix m} with a list of values.  The elements should be listed in 
+rowmajor order, but they will be assigned to the correct places in the matrix, even if the 
+matrix does not have \tt{RowMajor} storage.
 \index{Matrix!List initialization}
 
 \end{itemize}

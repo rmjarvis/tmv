@@ -52,13 +52,6 @@ Makes an \tt{n} $\times$ \tt{n} \tt{DiagMatrix} with all values along the diagon
 
 \item
 \begin{tmvcode}
-tmv::DiagMatrix<T,index> m(size_t n, const T* vv)
-tmv::DiagMatrix<T,index> m(const std::vector<T>& vv)
-\end{tmvcode}
-Makes a \tt{DiagMatrix} which copies the elements of \tt{vv}.
-
-\item
-\begin{tmvcode}
 tmv::DiagMatrix<T,index> d(const GenVector<T>& v)
 \end{tmvcode}
 Makes a \tt{DiagMatrix} with \tt{v} as the diagonal.
@@ -80,6 +73,17 @@ The assignment operator has the same flexibility.
 
 \item
 \begin{tmvcode}
+tmv::DiagMatrix<T,index> d;
+d << d00,
+         d11,
+             d22,
+                 d33, 
+                     ...
+\end{tmvcode}
+Initialize the \tt{DiagMatrix d}, with a list of values.  Note that only the values on the diagonal should be given.  (They do not need to be on different lines as shown -- that is merely to suggest the structure of the values in the matrix.)
+
+\item
+\begin{tmvcode}
 tmv::DiagMatrixView<T,index> d = 
       DiagMatrixViewOf(VectorView<T,index> v)
 tmv::ConstDiagMatrixView<T,index> d = 
@@ -95,9 +99,13 @@ tmv::DiagMatrixView<T,index> d =
       tmv::DiagMatrixViewOf(T* vv, size_t n)
 tmv::ConstDiagMatrixView<T,index> d = 
       tmv::DiagMatrixViewOf(const T* vv, size_t n)
+tmv::DiagMatrixView<T,index> d = 
+      tmv::DiagMatrixViewOf(T* vv, size_t n, int step)
+tmv::ConstDiagMatrixView<T,index> d = 
+      tmv::DiagMatrixViewOf(const T* vv, size_t n, int step)
 \end{tmvcode}
 \index{DiagMatrix!View of raw memory}
-Make a \tt{DiagMatrixView} whose diagonal consists of the actual memory elements \tt{vv}.
+Make a \tt{DiagMatrixView} whose diagonal consists of the actual memory elements \tt{vv}.  The last two allow for a non-unit step between the elements.
 
 \end{itemize}
 

@@ -68,16 +68,6 @@ tmv::UpperTriMatrix<T,dt,stor,index> U(size_t n, T x)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{UpperTriMatrix} with all values equal to \tt{x}.
 
-\item
-\begin{tmvcode}
-tmv::UpperTriMatrix<T,dt,stor,index> U(size_t n, const T* vv)
-tmv::UpperTriMatrix<T,dt,stor,index> U(size_t n, 
-      const std::vector<T>& vv)
-\end{tmvcode}
-Makes an \tt{UpperTriMatrix} which copies the elements of \tt{vv}.
-Note: the elements in \tt{vv} need to include the zero's of the lower triangle 
-portion of \tt{U}.
-
 \item 
 \begin{tmvcode}
 tmv::UpperTriMatrix<T,dt,stor,index> U(const GenMatrix<T>& m)
@@ -91,13 +81,31 @@ diagonal of the new \tt{UpperTriMatrix} to all 1's.
 
 \item
 \begin{tmvcode}
-tmv::UpperTriMatrix<T> U1(const GenUpperTriMatrix<T2>& U2)
+tmv::UpperTriMatrix<T,dt,stor,index> U1(const GenUpperTriMatrix<T2>& U2)
 U1 = U2
 \end{tmvcode}
 Copy the \tt{UpperTriMatrix U2}, which may be of any type \tt{T2} so long
 as values of type \tt{T2} are convertible into type \tt{T}.
 The assignment operator has the same flexibility.
 
+\vspace{1 in}
+\item
+\begin{tmvcode}
+tmv::UpperTriMatrix<T,dt,stor,index> U;
+U << U00, U01, U02, ...
+          U11, U12, ...
+               U22, ...
+                    ...
+tmv::LowerTriMatrix<T,dt,stor,index> L;
+L << L00,
+     L10, L11, 
+     L20, L21, L22,
+     ...
+\end{tmvcode}
+Initialize the \tt{UpperTriMatrix U} and \tt{LowerTriMatrix L} with lists of values.  As usual, the 
+list elements should be listed in RowMajor order, and only the values that are in the upper or
+lower triangle should be given.  If \tt{dt} is \tt{UnitDiag}, then the diagonal elements should be 
+listed as 1's.
 \item
 \begin{tmvcode}
 tmv::UpperTriMatrixView<T,index> U = 
