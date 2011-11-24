@@ -472,12 +472,12 @@ namespace tmv {
         inline void makeInverseATA(Matrix<T,S,I>& minv) const
         { makeInverseATA(minv.view()); }
 
-        auto_ptr<BaseMatrix<T> > newTranspose() const;
-        auto_ptr<BaseMatrix<T> > newConjugate() const;
-        auto_ptr<BaseMatrix<T> > newAdjoint() const;
-        auto_ptr<BaseMatrix<T> > newInverse() const;
-        auto_ptr<BaseMatrix<T> > newView() const;
-        auto_ptr<BaseMatrix<T> > newCopy() const;
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newTranspose() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newConjugate() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newAdjoint() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newInverse() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newView() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newCopy() const);
 
         typedef QuotXD<T,T> MyQuotXD;
         TMV_DEPRECATED(MyQuotXD Inverse() const)

@@ -323,7 +323,7 @@ valid, mathematically.  Rewriting this as:
 s3 += x*s1;
 s3 += s2;
 \end{tmvcode}
-will compile and work correctly.  This bug will be fixed in version 0.70, which is currently
+will compile and work correctly.  This bug will be fixed in version 0.90, which is currently
 in development.
 
 \item
@@ -352,31 +352,6 @@ memory as a full $N \times N$ matrix using what is known as packed storage.
 There are BLAS routines for dealing with
 these packed storage matrices, but I don't yet have the ability to 
 create/use such matrices.
-
-\item
-\textbf{List initialization for non-rectangular matrices}
-\index{Matrix!List initialization}
-
-I'm not sure what makes the most sense for the list initialization of special matrices.
-The most straightforward way to implement it would be to just assign the elements
-in order that they are stored in memory.  But what do I do for the memory locations
-that do not correspond to a location in memory.
-For example, for an \tt{UpperTriMatrix}, should the initializer be:
-\begin{tmvcode}
-U << 1, 2, 3,
-     0, 4, 5,
-     0, 0, 6;
-\end{tmvcode}
-or
-\begin{tmvcode}
-U << 1, 2, 3,
-        4, 5,
-           6;
-\end{tmvcode}
-Likewise, a \tt{BandMatrix} has confusing locations for elements that are allocated in 
-memory, but are not actually part of the matrix.  Should I require these to be in the 
-list of values?  If you have any thoughts about this, feel free to email 
-the disccussion group (\mygroup) about them.
 
 \item
 \textbf{Hermitian eigenvector algorithm}
@@ -438,11 +413,9 @@ But the SVD only uses half of the potential for OpenMP at the moment.  I need
 to reorganize the algorithm a bit to make it more amenable to being parallelized,
 but it is certainly doable.
 
-Also I should go through the whole code to
-see which other algorithms might benefit from parallelization.  I suspect that all of
-the so-called ``Level 3 BLAS'' functions will be amenable to parallelization.  I'm not sure
-which higher level functions (i.e. those normally in a LAPACK library) can
-be parallelized, but probably some of them.
+The version 0.90 code currently in development also uses OpenMP for
+multiplication and division by triangle matrices on a rectangle matrix.  These 
+algorithms have not been propagated back to the current released version.
 
 \item
 \textbf{Check for memory throws}

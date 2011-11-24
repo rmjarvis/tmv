@@ -114,6 +114,12 @@ tmv::UpperTriMatrixView<T,index> U =
 tmv::ConstUpperTriMatrixView<T,index> U = 
       tmv::UpperTriMatrixViewOf(const T* vv, size_t n, 
       StorageType stor, DiagType dt=NonUnitDiag)
+tmv::UpperTriMatrixView<T,index> U = 
+      tmv::UnitUpperTriMatrixViewOf(T* vv, size_t n, 
+      StorageType stor)
+tmv::UpperTriMatrixView<T,index> U = 
+      tmv::UnitUpperTriMatrixViewOf(T* vv, size_t n, 
+      StorageType stor)
 \end{tmvcode}
 \index{UpperTriMatrix!View of raw memory}
 Make a \tt{UpperTriMatrixView} of the actual memory elements, \tt{vv}.
@@ -125,6 +131,30 @@ be 1).  Also, \tt{vv} must be of length \tt{n} $\times$ \tt{n},
 so all of the lower triangle
 elements must be in memory, even though they are never used.
 
+The last two functions are currently equivalent to the first two with \tt{dt=UnitDiag}.
+However, in future versions of TMV this will allow for the \tt{dt} value to be 
+known at compile time rather than run time which could improve efficiency
+in some cases.
+
+\item
+\begin{tmvcode}
+tmv::UpperTriMatrixView<T,index> U = 
+      tmv::UpperTriMatrixViewOf(T* vv, size_t n, 
+      int stepi, int stepj, DiagType dt=NonUnitDiag)
+tmv::ConstUpperTriMatrixView<T,index> U = 
+      tmv::UpperTriMatrixViewOf(const T* vv, size_t n, 
+      int stepi, int stepj, DiagType dt=NonUnitDiag)
+tmv::UpperTriMatrixView<T,index> U = 
+      tmv::UnitUpperTriMatrixViewOf(T* vv, size_t n, 
+      int stepi, int stepj)
+tmv::ConstUpperTriMatrixView<T,index> U = 
+      tmv::UnitUpperTriMatrixViewOf(const T* vv, size_t n, 
+      int stepi, int stepj)
+\end{tmvcode}
+\index{UpperTriMatrix!View of raw memory}
+Make a \tt{UpperTriMatrixView} of the actual memory elements, \tt{vv}.
+These versions allow you to provide an arbitrary step through the data in 
+the $i$ and $j$ directions. 
 \end{itemize}
 
 \subsection{Access}

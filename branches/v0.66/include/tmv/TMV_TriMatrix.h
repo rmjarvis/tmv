@@ -202,12 +202,6 @@
 //    m.makeInverse(minv) // Takes either a TriMatrix or Matrix argument
 //    m.makeInverseATA(invata)
 //
-//    m.newTranspose()
-//    m.newConjugate()
-//    m.newAdjoint()
-//    m.newInverse()
-//    m.newCopy()
-//
 //
 // I/O: 
 //
@@ -568,12 +562,7 @@ namespace tmv {
         {
             TMVAssert(i>=0 && i<int(size()));
             TMVAssert(j>=0 && j<int(size()));
-            if (i>j) return T(0);
-            else if (isunit() && i==j) return T(1);
-            else {
-                TMVAssert(okij(i,j));
-                return cref(i,j);
-            }
+            return cref(i,j);
         }
 
         inline const_vec_type row(int i, int j1, int j2) const 
@@ -963,12 +952,12 @@ namespace tmv {
         inline void makeInverseATA(Matrix<T,S,I>& minv) const
         { makeInverseATA(minv.view()); }
 
-        auto_ptr<BaseMatrix<T> > newCopy() const;
-        auto_ptr<BaseMatrix<T> > newView() const;
-        auto_ptr<BaseMatrix<T> > newTranspose() const;
-        auto_ptr<BaseMatrix<T> > newConjugate() const;
-        auto_ptr<BaseMatrix<T> > newAdjoint() const;
-        auto_ptr<BaseMatrix<T> > newInverse() const;
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newCopy() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newView() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newTranspose() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newConjugate() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newAdjoint() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newInverse() const);
 
         typedef QuotXU<T,T> MyQuotXU;
         TMV_DEPRECATED(MyQuotXU Inverse() const)
@@ -1125,7 +1114,15 @@ namespace tmv {
             return isComplex(T()) && ct()==Conj;
         }
 
-        virtual T cref(int i, int j) const;
+        virtual inline T cref(int i, int j) const
+        {
+            if (isunit() && i==j) return T(1);
+            else if (i>j) return T(0);
+            else {
+                const T* mi = cptr() + int(i)*stepi() + int(j)*stepj();
+                return (isconj() ? TMV_CONJ(*mi) : *mi);
+            }
+        }
 
         inline int rowstart(int i) const { return i; }
         inline int rowend(int ) const { return size(); }
@@ -1238,12 +1235,7 @@ namespace tmv {
         {
             TMVAssert(i>=0 && i<int(size()));
             TMVAssert(j>=0 && j<int(size()));
-            if (i<j) return T(0);
-            else if (isunit() && i==j) return T(1);
-            else {
-                TMVAssert(okij(i,j));
-                return cref(i,j);
-            }
+            return cref(i,j);
         }
 
         inline const_vec_type row(int i, int j1, int j2) const 
@@ -1615,12 +1607,12 @@ namespace tmv {
         inline void makeInverseATA(Matrix<T,S,I>& minv) const
         { makeInverseATA(minv.view()); }
 
-        auto_ptr<BaseMatrix<T> > newCopy() const;
-        auto_ptr<BaseMatrix<T> > newView() const;
-        auto_ptr<BaseMatrix<T> > newTranspose() const ;
-        auto_ptr<BaseMatrix<T> > newConjugate() const;
-        auto_ptr<BaseMatrix<T> > newAdjoint() const;
-        auto_ptr<BaseMatrix<T> > newInverse() const;
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newCopy() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newView() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newTranspose() const );
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newConjugate() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newAdjoint() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newInverse() const);
 
         typedef QuotXL<T,T> MyQuotXL;
         TMV_DEPRECATED(MyQuotXL Inverse() const)
@@ -1782,7 +1774,15 @@ namespace tmv {
             return isComplex(T()) && ct()==Conj;
         }
 
-        virtual T cref(int i, int j) const;
+        virtual inline T cref(int i, int j) const
+        {
+            if (isunit() && i==j) return T(1);
+            else if (i<j) return T(0);
+            else {
+                const T* mi = cptr() + int(i)*stepi() + int(j)*stepj();
+                return (isconj() ? TMV_CONJ(*mi) : *mi);
+            }
+        }
 
         inline int rowstart(int ) const { return 0; }
         inline int rowend(int i) const { return i+1; }
@@ -2008,12 +2008,7 @@ namespace tmv {
         {
             TMVAssert(i>0 && i<=int(size()));
             TMVAssert(j>0 && j<=int(size()));
-            if (i>j) return T(0);
-            else if (isunit() && i==j) return T(1);
-            else {
-                TMVAssert(okij(i-1,j-1));
-                return cref(i-1,j-1);
-            }
+            return cref(i-1,j-1);
         }
 
         inline const_vec_type row(int i, int j1, int j2) const 
@@ -2200,12 +2195,7 @@ namespace tmv {
         {
             TMVAssert(i>0 && i<=int(size()));
             TMVAssert(j>0 && j<=int(size()));
-            if (i<j) return T(0);
-            else if (isunit() && i==j) return T(1);
-            else {
-                TMVAssert(okij(i-1,j-1));
-                return cref(i-1,j-1);
-            }
+            return cref(i-1,j-1);
         }
 
         inline const_vec_type row(int i, int j1, int j2) const 
@@ -2785,7 +2775,11 @@ namespace tmv {
         inline DiagType dt() const { return itsdiag; }
         inline ConjType ct() const { return itsct; }
 
-        reference ref(int i, int j) const;
+        inline reference ref(int i, int j) const
+        {
+            T* mi = ptr() + int(i)*stepi() + int(j)*stepj();
+            return reference(isunit() && i==j,*mi,ct());
+        }
 
         inline rowmajor_iterator rowmajor_begin() const
         { return rowmajor_iterator(this,0,0); }
@@ -3257,7 +3251,11 @@ namespace tmv {
         inline DiagType dt() const { return itsdiag; }
         inline ConjType ct() const { return itsct; }
 
-        reference ref(int i, int j) const;
+        inline reference ref(int i, int j) const
+        {
+            T* mi = ptr() + int(i)*stepi() + int(j)*stepj();
+            return reference(isunit() && i==j,*mi,ct());
+        }
 
         inline rowmajor_iterator rowmajor_begin() const
         { return rowmajor_iterator(this,0,0); }
@@ -4131,9 +4129,7 @@ namespace tmv {
                 TMVAssert(i>0 && i<=int(size())); --i;
                 TMVAssert(j>0 && j<=int(size())); --j;
             }
-            if (i>j) return T(0);
-            else if (i==j && D == UnitDiag) return T(1);
-            else { TMVAssert(okij(i,j)); return cref(i,j); }
+            return cref(i,j);
         }
 
         inline reference operator()(int i, int j) 
@@ -4142,13 +4138,12 @@ namespace tmv {
                 TMVAssert(i>=0 && i<int(size()));
                 TMVAssert(j>=0 && j<int(size()));
                 TMVAssert(i<=j);
-                return ref(i,j);
             } else {
-                TMVAssert(i>0 && i<= int(size()));
-                TMVAssert(j>0 && j<= int(size()));
+                TMVAssert(i>0 && i<= int(size())); --i;
+                TMVAssert(j>0 && j<= int(size())); --j;
                 TMVAssert(i<=j);
-                return ref(i-1,j-1);
             }
+            return ref(i,j);
         }
 
         inline const_vec_type row(int i, int j1, int j2) const 
@@ -4684,7 +4679,12 @@ namespace tmv {
         }
 
         inline T cref(int i, int j) const 
-        { return itsm.get()[S==RowMajor ? i*itss + j : j*itss + i]; }
+        { 
+            return (
+                (isunit() && i==j) ? T(1) :
+                (i>j) ? T(0) :
+                itsm.get()[S==RowMajor ? i*itss + j : j*itss + i]); 
+        }
 
         inline void resize(size_t s)
         {
@@ -5024,9 +5024,7 @@ namespace tmv {
                 TMVAssert(i>0 && i<=int(size())); --i;
                 TMVAssert(j>0 && j<=int(size())); --j;
             }
-            if (i<j) return T(0);
-            else if (i==j && D == UnitDiag) return T(1);
-            else { TMVAssert(okij(i,j)); return cref(i,j); }
+            return cref(i,j);
         }
 
         inline reference operator()(int i, int j) 
@@ -5035,13 +5033,12 @@ namespace tmv {
                 TMVAssert(i>=0 && i<int(size()));
                 TMVAssert(j>=0 && j<int(size()));
                 TMVAssert(i>=j);
-                return ref(i,j);
             } else {
-                TMVAssert(i>0 && i<= int(size()));
-                TMVAssert(j>0 && j<= int(size()));
+                TMVAssert(i>0 && i<= int(size())); --i;
+                TMVAssert(j>0 && j<= int(size())); --j;
                 TMVAssert(i>=j);
-                return ref(i-1,j-1);
             }
+            return ref(i,j);
         }
 
         inline const_vec_type row(int i, int j1, int j2) const 
@@ -5583,7 +5580,12 @@ namespace tmv {
         }
 
         inline T cref(int i, int j) const 
-        { return itsm.get()[S==RowMajor ? i*itss + j : j*itss + i]; }
+        {
+            return (
+                (isunit() && i==j) ? T(1) :
+                (i<j) ? T(0) :
+                itsm.get()[S==RowMajor ? i*itss + j : j*itss + i]); 
+        }
 
         inline void resize(size_t s)
         {

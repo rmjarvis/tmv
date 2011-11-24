@@ -104,6 +104,37 @@ template <class T> void TestDiagMatrix()
         Assert(q7(i,i) == T(3*i),"Create DiagMatrixView from T* with step");
     }
 
+    // Test the span of the iteration (i.e. the validity of begin(), end())
+    const tmv::DiagMatrix<T>& q1_const = q1;
+    tmv::DiagMatrixView<T> q1_view = q1.view();
+    tmv::ConstDiagMatrixView<T> q1_constview = q1_const.view();
+    tmv::ConstDiagMatrixView<T> q5_const = q5;
+
+    typename tmv::DiagMatrix<T>::iterator it1 = q1.begin();
+    typename tmv::DiagMatrix<T>::const_iterator it2 = q1_const.begin();
+    typename tmv::DiagMatrixView<T>::iterator it3 = q1_view.begin();
+    typename tmv::ConstDiagMatrixView<T>::const_iterator it4 =
+        q1_constview.begin();
+    typename tmv::DiagMatrixView<T>::iterator it5 = q5.begin();
+    typename tmv::ConstDiagMatrixView<T>::const_iterator it6 =
+        q5_const.begin();
+    int i = 0;
+    while (it1 != q1.end()) {
+        Assert(*it1++ == qar[i], "DiagMatrix iteration 1");
+        Assert(*it2++ == qar[i], "DiagMatrix iteration 2");
+        Assert(*it3++ == qar[i], "DiagMatrix iteration 3");
+        Assert(*it4++ == qar[i], "DiagMatrix iteration 4");
+        Assert(*it5++ == qar[i], "DiagMatrix iteration 5");
+        Assert(*it6++ == qar[i], "DiagMatrix iteration 6");
+        ++i;
+    }
+    Assert(i == 3, "DiagMatrix iteration number of elements");
+    Assert(it2 == q1_const.end(), "it2 reaching end");
+    Assert(it3 == q1_view.end(), "it3 reaching end");
+    Assert(it4 == q1_constview.end(), "it4 reaching end");
+    Assert(it5 == q5.end(), "it5 reaching end");
+    Assert(it6 == q5_const.end(), "it6 reaching end");
+
     // Test Basic Arithmetic
     tmv::DiagMatrix<T> b(N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 

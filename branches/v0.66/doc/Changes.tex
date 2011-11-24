@@ -7,148 +7,116 @@ Here is a list of the changes from version \prevtmvversion\ to \tmvversion.
 %Whenever a change is not backward compatible, meaning that code using 
 %the previous version might be broken, I mark the item with a $\times$ bullet rather 
 %than the usual $\bullet$ to indicate this.  
-This version is completely backwards compatible in its functionality, so code that worked
-with version \prevtmvversion\ should still work correctly.
-
-This update primarily fixed some problems for integer matrices.  In addition to some compiler
-errors for some combinations of scons parameters, I also added the ability to calculate the 
-determinant of integer matrices.  It had been documented (albeit somewhat poorly) that 
-this would not work for integer matrices.  However, user Ronny Bergmann convinced me that
-it would make sense to include the ability to produce accurate determinants for integer matrices.
-
-There are also a number miscellaneous feature additions and other bug fixes as well.
-Note that the below list may not be completely comprehensive.  
-There may be some minor bug fixes that I 
-found that I didn't deem significant enough to mention here.
-
+Note: This version does not preserve backwards compatible in its functionality, so code that worked
+with version \prevtmvversion\ may not still work.  The changes below that change functionality
+are marked with an $\times$ bullet rather than the usual $\bullet$.
 
 \begin{itemize}
 
-\item Made \tt{m.det()} produce accurate results if \tt{m} is a \tt{Matrix<int>} or 
-\tt{Matrix<complex<int> >}.  Or in general if the underlying type is an integer type.
+\item[$\times$] 
+Changed the behavior of the \tt{m << 1, 2, 3...} initialization.  Now the items in the initialization list should be in RowMajor order regardless of the storage order of the matrix \tt{m}.  This makes it much easier to understand the initialization, since the list can be arranged to look like the matrix you are setting.  e.g. the snippet:
+\begin{tmvcode}
+tmv::Matrix<double> m(3,5);
+m << 3 ,  9 ,  1 ,  4 ,  2 ,
+     7 , -3 ,  0 , -1 ,  4 ,
+    -6 ,  2 , 11 ,  5 ,  6 ;
+\end{tmvcode}
+now initializes the matrix to have the values as shown in the rectangle.  However, the old behavior was to follow the storage order of the matrix, and since the default storage order is ColMajor, this would unintuitively initialize the matrix to
+\begin{equation*}
+\left(\begin{array}{ccccc}3 & 4 & -3 & 4 & 11   \\9 & 2 & 0 & -6 & 5   \\1 & 7 & -1 & 2 & 6 \end{array}\right) 
+\end{equation*}
+rather than the obviously intended matrix
+\begin{equation*}
+\left(\begin{array}{ccccc}3 & 9 & 1 & 4 & 2   \\7 & -3 & 0 & -1 & 4   \\-6 & 2 & 11 & 5 & 6 \end{array}\right) 
+\end{equation*}
 
-The algorithm in this case is not the usual one (decompose the matrix into $LU$ and
-then compute the product of the diagonal elements of $U$), since this algorithm uses division which obviously leads to errors if the elements are integers.  
-We could just use \tt{double} or \tt{long double} for
-the intermediate storage and convert back to the nearest integer at the end, but it has
-been shown by Bareiss (1968) that a different algorithm is better at avoiding intermediate
-values with significant rounding errors.  So we use that algorithm with \tt{long double} 
-intermediates, which seems to be effective at producing accurate answers over the 
-full range of values expressible as a 32 bit integer, and usually over the full range of a 64 bit 
-integer\footnote{There are probably some very carefully constructed matrices which could produce 
-a wrong answer, but normal matrices should almost always return the correct answer.}.
+Now the code correctly initializes the matrix to the second one regardless of how the matrix intrinsically stores the values, which I believe is a much more intuitive behavior.
 
-\item Added \tt{m.sumAbs2Elements()} (which works for \tt{complex<int>} matrices, unlike the normal method \tt{m.sumAbsElements()}).
+Of course, if you do want to initialize according to a ColMajor list of numbers for some reason, you can initialize \tt{m.transpose()} instead:
+\begin{tmvcode}
+tmv::Matrix<double> m(3,5);
+m.transpose() << 3 ,  7 , -6 ,
+                 9 , -3 ,  2 ,
+                 1 ,  0 , 11 ,
+                 4 , -1 ,  5 ,
+                 2 ,  4 ,  6 ,
+\end{tmvcode}
 
-\item Added \tt{m.addToAll(x)}.
+\item[$\times$] 
+Deprecated the constructors from either a C-style array or a \tt{std::vector}.  The reason is similar to the reasoning above -- I wanted to decouple the internal storage order from the order of the elements in the initializing vector. 
 
-\item Added \tt{m.unitUpperTri()} and \tt{m.unitLowerTri()} for symmetric/hermitian matrices.
-These had been documented to be there, but I had forgotten to actually add them to the code.
+To take the place of these constructors' functionality, I added iterators that iterate over the matrix in either RowMajor or ColMajor order, so the assignment can be done with the standard library's \tt{std::copy} function.
 
-\item Added the \tt{resize} methods to resize an existing vector or matrix, at the request of users Zhaoming Ma and Gary Bernstein.  
-I had thought that there was a speed benefit to having the sizes be \tt{const} variables, so the compiler could make optimization about the sizes of some loops and such.  However, it seems that (at least for the several compilers I tried), there is really no advantage to having the sizes be \tt{const}.  So given that, I might as well allow the sizes to be modifiable by the user.
+\begin{tmvcode}
+const double rmar[15] = 
+    { 3, 9, 1, 4, 2, 7, -3, 0, -1, 4, -6, 2, 11, 5, 6};
+const double cmar[15] = 
+    { 3, 7, -6, 9, -3, 2, 1, 0, 11, 4, -1, 5, 2, 4, 6};
 
-\item Added the ability to compile TMV as a shared library, rather than a static library 
-using the \tt{SHARED=true} option with the scons installation method.
+// Old style constuctors: (now deprecated)
+tmv::Matrix<double,tmv::RowMajor> m1(3,5,rmar);
+tmv::Matrix<double,tmv::ColMajor> m2(3,5,cmar);
 
-\item Added the ability to turn off TMV debug statements with \tt{-DTMVNDEBUG}.
-Defining \tt{NDEBUG} will still work to turn off TMV debugging statements as well, but this
-allows the user to turn off just the TMV debug statements without turning off the debug
-statements in their own code (e.g.\ using the normal \tt{assert} command).
+// New style assignment with iterators:
+tmv::Matrix<double> m3(3,5); // Can be either StorageType
+std::copy(rmar, rmar+15, m3.rowmajor_begin());
+tmv::Matrix<double> m4(3,5);
+std::copy(cmar, cmar+15, m3.colmajor_begin());
+\end{tmvcode}
 
-\item Skip compiling functions that are invalid for integer values, like the various decompositions 
-and such.  The methods that normally use these functions will produce a \tt{FailedAssert}
-exception if the library is compiled with \tt{DEBUG=true}.  And if not, then these methods 
-will typically either not do anything, or return 0, as appropriate.  
+In addition, a \tt{BandMatrix} can be iterated in DiagMajor order using \tt{m.diagmajor_begin()}.
 
-Beginning in version v0.70 (in development), these will produce a \tt{static\_assert} failure
-at compile time, rather than a runtime error, which is a better behavior.
+\item 
+Added the ability to do comma initialization for \tt{DiagMatrix}, \tt{UpperTriMatrix}, \tt{LowerTriMatrix}, \tt{BandMatrix}, and their corresponding view types.  These are also always listed in RowMajor order regardless of the actual storage order of the matrix in memory.  Also, only the values in the corresponding parts of the matrices should be listed in the initialization.  e.g.
+\begin{tmvcode}
+tmv::DiagMatrix<double> d(4);
+d << 4,
+        9,
+           11,
+              -4 ;
+tmv::UpperTriMatrix<double> u(4);
+u << 4 ,  9 , -1 ,  0 ,
+         18 ,  3 , -7 ,
+               1 ,  5 ,
+                   10 ;
+tmv::LowerTriMatrix<double> l(4);
+l <<  1 ,
+     12 , -3 ,
+      8 ,  5 , -9 ,
+      3 , 20 , 14 ,  4 ;
+tmv::BandMatrix<double> b(4,1,1);
+b <<  7 ,  9 ,
+     10 , -1 ,  5 ,
+           8 , -6 , 21 ,
+                2 ,  8 ;
+\end{tmvcode}
 
-\item Updated the test suite to work better with \tt{<int>} tests.  Many tests had been disabled
-for \tt{int}, since the way I had tested things didn't really work with integer matrices.
-But with the new changes, I can run a larger fraction of the test suite on \tt{<int>} and
-\tt{<complex<int> >} matrices.
+I chose not to add similar initializers for symmetric or hermitian matrix types, because I think initialization of them is clearer in terms of only the upper or lower triangle part that is stored in memory.  So the way to initialize them would be something like:
+\begin{tmvcode}
+tmv::SymMatrix<double> s(4);
+s.upperTri() << 2 ,  1 , -3 ,  7 ,
+                    -8 , -2 , 12 ,
+                          6 ,  1 ,
+                               7 ;
+tmv::SymBandMatrix<double> sb(4,1);
+sb.lowerBand() <<  8 ,
+                  12 ,  5 ,
+                       -8 ,  2 ,
+                             6 , 10 ;
+\end{tmvcode}
 
-\item Added \tt{TEST\_FLOAT}, \tt{TEST\_DOUBLE}, etc. to the list of scons options.  
-  This allows one to only test one type at a time without recompiling the libraries.
+\item[$\times$] 
+Deprecated the routines that returned pointers to new \tt{BaseMatrix}es.  In general, using the \tt{BaseMatrix} class directly is not really very useful, so I don't think anyone is actually using these methods.  And in the version 0.9 TMV code in development, I've completely redesigned the back end.  It gets rid of the virtual class hierarchy completely using the CRTP idiom rather than virtual functions.  But this means that methods like \tt{newCopy()}, \tt{newTranspose()}, etc. are not really relevant anymore.  
 
-\item Made the default configuration for scons to be WITH\_LAPACK=false.
-   Too many LAPACK installations are not thread safe.  And since I 
-   personally use a lot of OpenMP code in my programs, I occasionally
-   get random segmentation faults when I use TMV with LAPACK.  
-   And since the native TMV code is almost universally as fast as LAPACK
-   and is thread safe, I finally decided to just make that the default.
+If you were using these functions and are sorry to see them go, or if you are otherwise using the virtual functionality (e.g. with \tt{std::vector<tmv::BaseMatrix*>}), let me know what your use case was (at \mygroup) and we can try to figure out how best to incorporate your needs into the version 0.9 code.
 
-\item Fixed some compiling errors with \tt{INST_INT=true}, including some linking errors 
-for several combinations of compile options.
+\item 
+Added a few more "ViewOf" functions to allow direct views of memory as different kinds of matrix types directly specifying the step in each direction.  These are more flexible than the versions that merely specify a StorageType to use.  For non-contiguous data, those weren't sufficient.  So now, you can view arbitrary data in memory as an \tt{UpperTriMatrixView}, \tt{LowerTriMatrixView},
+\tt{DiagMatrixView}, \tt{BandMatrixView}, \tt{SymMatrixView}, or \tt{SymBandMatrixView} specifying the memory address of $m(0,0)$ and the step size in each direction.
 
-\item Fixed a bug in the allocation code for icpc compilations.
-   icpc has a ``feature'' that it only turns on SSE commands if you explicitly
-   specify the compile flag \tt{-msse} or \tt{-msse2}.  (g++ always turns them on
-   when the architecture supports them.)  The file \tt{TMV\_Array.h} where TMV implements
-   the memory allocation has different
-   behavior depending on whether SSE is enabled or not.
+\item 
+Added support for the clang++ compiler.  This didn't require much editing, but it did complain about a couple things that had passed muster with the other compilers I had used.
 
-   Anyway, we do turn these on in our SCons installation for TMV.
-   However, if a user code does not use these flags then that leads to a
-   mismatch in the behavior for the user code and the TMV
-   library, which could sometimes cause segmentation faults.
-
-   We fixed this by always using the SSE alignment even if SSE is not
-   enabled.  This is probably a good idea anyway, since some BLAS libraries
-   are probably faster with the aligned memory allocation too, so it
-   seems worth it to always align on 16 byte boundaries even if TMV
-   doesn't explicitly know that it will be useful.
-
-\item Fixed a bug in \tt{StackArray} (used for \tt{SmallVector} and \tt{SmallMatrix}) where
-complex allocations were not getting properly aligned on 16 byte boundaries.
-
-\item Increased the maximum number of iterations within the divide-and-conquer SVD
-algorithm from 20 to 100, since I found a case that required 27 iterations to converge.
-
-\item Fixed some places where nan's in the input values could lead to
-infinite loops in certain algorithms. 
-
-\item Fixed a place in the SV Decomposition which could (rarely) go into an infinite loop.
-
-\item Fixed a bug in the calls of BLAS functions that have a
-   \tt{beta} parameter, such as \tt{gemv} and \tt{gemm}.  
-   BLAS reinterprets a statement like \tt{y=A*x} as
-   \tt{y = beta*y + alpha*A*x} with \tt{alpha=1} and \tt{beta=0}.  The problem
-   comes when \tt{y} is uninitialized data (which is often the case in this kind of
-   situation) and that uninitialized data happens to have a \tt{nan} in it.
-   Then some BLAS distributions are true to the \tt{beta*y} formulation which
-   involves a \tt{0*nan = nan}.  So the output preserves the \tt{nan}, rather than
-   overwriting it with the desired answer.
-   
-   From my reading of the BLAS standard, this is a bug in these BLAS distributions.
-   (They are supposed to zero out the input data if \tt{beta = 0}.  But since some 
-   popular distributions (e.g. GotoBLAS) have this bug, the TMV code needs to 
-   work around it.
-
-   The solution is basically to always zero out the \tt{y} value directly
-   before calling \tt{gemv} (or similarly for several other BLAS functions), 
-   rather than counting on the BLAS implementation to do it.  
-   So that is what TMV does now.
-   
-   This can also affect LAPACK functions that set some memory to a value.
-   Depending on the LAPACK implementation, it may or may not initialize the memory before
-   calling a BLAS routine.  So now TMV zeros out all uninitialized data that 
-   it passes to a LAPACK function too.
-   
-   I also added a feature to the test suite where uninitialized data can be intentionally
-   set to all \tt{nan}'s\footnote{To do so, set the ``extreme matrices'' bit in the optional
-   \tt{XTEST} parameter.
-   That is, set \tt{XTEST=64}, or more generally set \tt{XTEST} so that \tt{XTEST&64 == true}}, 
-   rather than relying on happenstance to find these bugs.
-
-\item Now always use -fno-strict-aliasing for g++ compiliations when using scons.
-   (It was just for versions $\le$ 4.2.)  I found a bug in g++ 4.5 that was fixed by
-   turning off strict aliasing.  And there is a different bug for versions before 4.2 that is fixed by turning it off. 
-   Since I don't think the strict aliasing
-   optimizations are probably worth much for TMV, I decided to just always
-   use the -fno-strict-aliasing flag and be safe rather than pick an choose which
-   g++ versions don't have bugs in their aliasing optimizations.
 
 
 \end{itemize}

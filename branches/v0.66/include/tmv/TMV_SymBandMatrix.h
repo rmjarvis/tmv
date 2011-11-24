@@ -235,13 +235,6 @@
 //    m.makeInverse(minv) // Takes either a SymMatrix or Matrix argument
 //    m.makeInverseATA(invata)
 //
-//    m.newView()
-//    m.newtranspose()
-//    m.newConjugate()
-//    m.newAdjoint()
-//    m.newInverse()
-//    m.newCopy()
-//
 //
 // I/O: 
 //
@@ -1064,12 +1057,12 @@ namespace tmv {
         inline QuotXsB<T,T> inverse() const
         { return QInverse(); }
 
-        auto_ptr<BaseMatrix<T> > newCopy() const;
-        auto_ptr<BaseMatrix<T> > newView() const;
-        auto_ptr<BaseMatrix<T> > newTranspose() const;
-        auto_ptr<BaseMatrix<T> > newConjugate() const;
-        auto_ptr<BaseMatrix<T> > newAdjoint() const;
-        auto_ptr<BaseMatrix<T> > newInverse() const;
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newCopy() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newView() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newTranspose() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newConjugate() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newAdjoint() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newInverse() const);
 
         typedef QuotXsB<T,T> MyQuotXsB;
         TMV_DEPRECATED(MyQuotXsB Inverse() const)
@@ -5516,6 +5509,8 @@ namespace tmv {
     //   HermBandMatrixViewOf(m,uplo,nlo)
     //   SymBandMatrixViewOf(mptr,size,nlo,uplo,stor)
     //   HermBandMatrixViewOf(mptr,size,nlo,uplo,stor)
+    //   SymBandMatrixViewOf(mptr,size,nlo,uplo,stepi,stepj)
+    //   HermBandMatrixViewOf(mptr,size,nlo,uplo,stepi,stepj)
     //
 
     template <class T> 

@@ -94,15 +94,6 @@ tmv::SymBandMatrix<T,uplo,stor,index> sb(size_t n, int nlo, T x)
 Makes an \tt{n} $\times$ \tt{n} \tt{SymBandMatrix} with \tt{nlo} off-diagonals
 and with all values equal to \tt{x}.
 
-\item
-\begin{tmvcode}
-tmv::SymBandMatrix<T,uplo,stor,index> sb(size_t n, int nlo, 
-      const T* vv)
-tmv::SymBandMatrix<T,uplo,stor,index> sb(size_t n, int nlo, 
-      const std::vector<T>& vv)
-\end{tmvcode}
-Makes a \tt{SymBandMatrix} which copies the elements from \tt{vv}.  
-
 \item 
 \begin{tmvcode}
 tmv::SymBandMatrix<T,uplo,stor,index> sb(const GenMatrix<T>& m, 
@@ -194,7 +185,28 @@ tmv::ConstSymBandMatrixView<T> sb =
           UpLoType uplo, StorageType stor)
 \end{tmvcode}
 \index{SymBandMatrix!View of raw memory}
-Make a \tt{SymBandMatrixView} of the actual memory elements, \tt{vv}.
+Make a \tt{SymBandMatrixView} of the actual memory elements, \tt{vv}, in either the
+upper or lower band.  The length of the data array should be 
+\tt{BandStorageLength(stor,n,n,nlo,0)}.
+
+\item
+\begin{tmvcode}
+tmv::SymBandMatrixView<T> sb = 
+      tmv::SymBandMatrixViewOf(T* vv, size_t n, int nlo, 
+          UpLoType uplo, StorageType stor)
+tmv::ConstSymBandMatrixView<T> sb = 
+      tmv::SymBandMatrixViewOf(const T* vv, size_t n, int nlo, 
+          UpLoType uplo, StorageType stor)
+tmv::SymBandMatrixView<T> sb = 
+      tmv::HermBandMatrixViewOf(T* vv, size_t n, int nlo, 
+          UpLoType uplo, StorageType stor)
+tmv::ConstSymBandMatrixView<T> sb = 
+      tmv::HermBandMatrixViewOf(const T* vv, size_t n, int nlo, 
+          UpLoType uplo, StorageType stor)
+\end{tmvcode}
+\index{SymBandMatrix!View of raw memory}
+Make a \tt{SymBandMatrixView} of the actual memory elements, \tt{vv}, in either the 
+upper or lower band.  This allows for arbitrary steps through the data.
 
 \end{itemize}
 

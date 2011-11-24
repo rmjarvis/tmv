@@ -126,19 +126,6 @@ tmv::BandMatrix<T,stor,index> b(size_t nrows, size_t ncols,
 \end{tmvcode}
 Makes a \tt{BandMatrix} with all values equal to \tt{x}.
 
-\item
-\begin{tmvcode}
-tmv::BandMatrix<T,stor,index> b(size_t nrows, size_t ncols, 
-      int nlo, int nhi, const T* vv)
-tmv::BandMatrix<T,stor,index> b(size_t nrows, size_t ncols, 
-      int nlo, int nhi, const std::vector<T>& vv)
-\end{tmvcode}
-Makes a \tt{BandMatrix} which copies the elements from \tt{vv}.  See the 
-discussion above about the different storage types to see what order these elements
-should be.  The function \tt{BandStorageLength} will tell you how
-long \tt{vv} must be.  The elements that don't fall in the bounds of the 
-actual matrix are not used and may be left undefined.
-
 \item 
 \begin{tmvcode}
 tmv::BandMatrix<T,stor,index> b(const GenMatrix<T>& m, 
@@ -252,6 +239,24 @@ tmv::ConstBandMatrixView<T> b =
 \end{tmvcode}
 \index{BandMatrix!View of raw memory}
 Make a \tt{BandMatrixView} of the actual memory elements, \tt{vv}.
+One important point: If \tt{stor} is \tt{DiagMajor} and \tt{nlo}$ > 0$, then
+\tt{*vv} is not the memory address of \tt{b(0,0)}.  It is instead the memory
+address of \tt{b(nlo,0)}, i.e. the first element stored in memory.
+
+\item
+\begin{tmvcode}
+tmv::BandMatrixView<T> b = 
+      tmv::BandMatrixViewOf(T* vv, size_t ncols, size_t nrows, 
+          int nlo, int nhi, int stepi, int stepj)
+tmv::ConstBandMatrixView<T> b = 
+      tmv::BandMatrixViewOf(const T* vv, size_t ncols, size_t nrows, 
+          int nlo, int nhi, int stepi, int stepj)
+\end{tmvcode}
+\index{BandMatrix!View of raw memory}
+Make a \tt{BandMatrixView} of the actual memory elements, \tt{vv}.
+These allow for arbitrary steps through the data.  Also, the value \tt{*vv}
+is always \tt{b(0,0)} even if the elements are laid out in DiagMajor order in memory.
+
 
 \end{itemize}
 

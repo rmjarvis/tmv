@@ -2,10 +2,6 @@
 #define CT std::complex<T>
 
 #define Def1(T,RT) \
-  template T GenUpperTriMatrix<T >::cref(int i, int j) const; \
-  template T GenLowerTriMatrix<T >::cref(int i, int j) const; \
-  template TriRef<T,true> UpperTriMatrixView<T,CStyle>::ref(int i, int j) const; \
-  template TriRef<T,true> LowerTriMatrixView<T,CStyle>::ref(int i, int j) const; \
   template bool GenUpperTriMatrix<T >::hasSubMatrix( \
       int i1, int i2, int j1, int j2, int istep, int jstep) const; \
   template bool GenUpperTriMatrix<T >::hasSubVector( \

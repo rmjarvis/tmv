@@ -138,12 +138,12 @@ namespace tmv {
         virtual RT condition() const = 0;
         virtual RT doCondition() const = 0;
 
-        virtual auto_ptr<BaseMatrix<T> > newCopy() const = 0;
-        virtual auto_ptr<BaseMatrix<T> > newView() const = 0;
-        virtual auto_ptr<BaseMatrix<T> > newTranspose() const = 0;
-        virtual auto_ptr<BaseMatrix<T> > newConjugate() const = 0;
-        virtual auto_ptr<BaseMatrix<T> > newAdjoint() const = 0;
-        virtual auto_ptr<BaseMatrix<T> > newInverse() const = 0;
+        TMV_DEPRECATED(virtual auto_ptr<BaseMatrix<T> > newCopy() const) = 0;
+        TMV_DEPRECATED(virtual auto_ptr<BaseMatrix<T> > newView() const) = 0;
+        TMV_DEPRECATED(virtual auto_ptr<BaseMatrix<T> > newTranspose() const) = 0;
+        TMV_DEPRECATED(virtual auto_ptr<BaseMatrix<T> > newConjugate() const) = 0;
+        TMV_DEPRECATED(virtual auto_ptr<BaseMatrix<T> > newAdjoint() const) = 0;
+        TMV_DEPRECATED(virtual auto_ptr<BaseMatrix<T> > newInverse() const) = 0;
 
         TMV_DEPRECATED(T Det() const)
         { return det(); }

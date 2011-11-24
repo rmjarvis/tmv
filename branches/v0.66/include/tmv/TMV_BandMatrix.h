@@ -273,13 +273,6 @@
 //    m.makeInverse(minv)
 //    m.makeInverseATA(invata)
 //
-//    m.newView()
-//    m.newTranspose()
-//    m.newConjugate()
-//    m.newAdjoint()
-//    m.newInverse()
-//    m.newCopy()
-//
 //
 // I/O: 
 //
@@ -949,12 +942,12 @@ namespace tmv {
             return doCondition();
         }
 
-        auto_ptr<BaseMatrix<T> > newCopy() const;
-        auto_ptr<BaseMatrix<T> > newView() const;
-        auto_ptr<BaseMatrix<T> > newTranspose() const;
-        auto_ptr<BaseMatrix<T> > newConjugate() const;
-        auto_ptr<BaseMatrix<T> > newAdjoint() const;
-        auto_ptr<BaseMatrix<T> > newInverse() const;
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newCopy() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newView() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newTranspose() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newConjugate() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newAdjoint() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newInverse() const);
 
         typedef QuotXB<T,T> MyQuotXB;
         TMV_DEPRECATED(MyQuotXB Inverse() const)
@@ -1106,7 +1099,8 @@ namespace tmv {
         inline const_rowmajor_iterator rowmajor_end() const
         {
             return const_rowmajor_iterator(
-                this,rowstart(TMV_MIN(colsize(),rowsize()+nlo())),0); 
+                this,TMV_MIN(colsize(),rowsize()+nlo()),
+                rowstart(TMV_MIN(colsize(),rowsize()+nlo()))); 
         }
 
         inline const_colmajor_iterator colmajor_begin() const
@@ -1114,7 +1108,8 @@ namespace tmv {
         inline const_colmajor_iterator colmajor_end() const
         {
             return const_colmajor_iterator(
-                this,colstart(TMV_MIN(rowsize(),colsize()+nhi())),0); 
+                this,colstart(TMV_MIN(rowsize(),colsize()+nhi())),
+                TMV_MIN(rowsize(),colsize()+nhi()));
         }
 
         inline const_diagmajor_iterator diagmajor_begin() const
@@ -2295,7 +2290,8 @@ namespace tmv {
         inline rowmajor_iterator rowmajor_end() const
         {
             return rowmajor_iterator(
-                this,rowstart(TMV_MIN(colsize(),rowsize()+nlo())),0); 
+                this,TMV_MIN(colsize(),rowsize()+nlo()),
+                this->rowstart(TMV_MIN(colsize(),rowsize()+nlo()))); 
         }
 
         inline colmajor_iterator colmajor_begin() const
@@ -2303,7 +2299,8 @@ namespace tmv {
         inline colmajor_iterator colmajor_end() const
         {
             return colmajor_iterator(
-                this,colstart(TMV_MIN(rowsize(),colsize()+nhi())),0); 
+                this,this->colstart(TMV_MIN(rowsize(),colsize()+nhi())),
+                TMV_MIN(rowsize(),colsize()+nhi()));
         }
 
         inline diagmajor_iterator diagmajor_begin() const
@@ -4019,7 +4016,8 @@ namespace tmv {
         inline rowmajor_iterator rowmajor_end()
         {
             return rowmajor_iterator(
-                this,rowstart(TMV_MIN(colsize(),rowsize()+nlo())),0); 
+                this,TMV_MIN(colsize(),rowsize()+nlo()),
+                this->rowstart(TMV_MIN(colsize(),rowsize()+nlo()))); 
         }
 
         inline const_rowmajor_iterator rowmajor_begin() const
@@ -4027,7 +4025,8 @@ namespace tmv {
         inline const_rowmajor_iterator rowmajor_end() const
         {
             return const_rowmajor_iterator(
-                this,rowstart(TMV_MIN(colsize(),rowsize()+nlo())),0); 
+                this,TMV_MIN(colsize(),rowsize()+nlo()),
+                this->rowstart(TMV_MIN(colsize(),rowsize()+nlo()))); 
         }
 
         inline colmajor_iterator colmajor_begin()
@@ -4035,7 +4034,8 @@ namespace tmv {
         inline colmajor_iterator colmajor_end()
         {
             return colmajor_iterator(
-                this,colstart(TMV_MIN(rowsize(),colsize()+nhi())),0); 
+                this,this->colstart(TMV_MIN(rowsize(),colsize()+nhi())),
+                TMV_MIN(rowsize(),colsize()+nhi()));
         }
 
         inline const_colmajor_iterator colmajor_begin() const
@@ -4043,7 +4043,8 @@ namespace tmv {
         inline const_colmajor_iterator colmajor_end() const
         {
             return const_colmajor_iterator(
-                this,colstart(TMV_MIN(rowsize(),colsize()+nhi())),0); 
+                this,this->colstart(TMV_MIN(rowsize(),colsize()+nhi())),
+                TMV_MIN(rowsize(),colsize()+nhi()));
         }
 
         inline diagmajor_iterator diagmajor_begin()
@@ -4133,6 +4134,7 @@ namespace tmv {
     //   BandMatrixViewOf(LowerTriMatrix m)
     //   BandMatrixViewOf(LowerTriMatrix m, nlo)
     //   BandMatrixViewOf(T* m, cs, rs, nlo, nhi, stor)
+    //   BandMatrixViewOf(T* m, cs, rs, nlo, nhi, stepi, stepj)
     //
     
     template <class T> 

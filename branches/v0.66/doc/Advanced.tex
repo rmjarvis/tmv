@@ -791,7 +791,7 @@ $x$ completely determines the Householder matrix $H_1$ up to an arbitrary sign
 on either $y$ or $\beta$ (or in general an arbitrary factor $e^{i \theta}$) which is 
 chosen to minimize rounding errors.  The optimal choice is to choose
 $y = -||x||_2\:x(1)/|x(1)|$, which makes $\beta$ real.  
-However, the LAPACK choice is $y = -||x||_2 \:sign(real(x(1))$, which means
+However, the LAPACK choice is $y = -||x||_2 \:sign(real(x(1)))$, which means
 $\beta$ is complex, and $H$ is not Hermitian\footnote{
 This choice complicates a lot of the calling routines which use
 Householder matrices, since you need to keep track of conjugation of the 
@@ -980,37 +980,9 @@ The matrices all have to be the same size and shape, but can have any
 (i.e. not necessarily the same) storage method.  Of course, the routines are fastest
 if all the matrices use the same storage.
 
-\subsection{BaseMatrix views}
-\index{BaseMatrix!Views of}
-\index{BaseMatrix!Copy of}
-\index{BaseMatrix!Inverse of}
-\label{BaseMatrixViews}
-
-If you are dealing with objects that are only known to be \tt{BaseMatrix}es
-(i.e. they could be a \tt{Matrix} or a \tt{DiagMatrix} or a \tt{SymMatrix}, etc.),
-then methods like \tt{m.transpose()}, \tt{m.view()}, and such
-can't know what kind of object to return.
-So these methods can't be defined for a \tt{BaseMatrix}.  
-
-Instead, we have the following virtual methods, 
-which are available to a \tt{BaseMatrix}
-object and are defined in each specific kind of matrix to return a pointer
-to the right kind of object:
-\begin{tmvcode}
-std::auto_ptr<tmv::BaseMatrix<T> > m.newCopy()
-std::auto_ptr<tmv::BaseMatrix<T> > m.newView()
-std::auto_ptr<tmv::BaseMatrix<T> > m.newTranspose()
-std::auto_ptr<tmv::BaseMatrix<T> > m.newConjugate()
-std::auto_ptr<tmv::BaseMatrix<T> > m.newAdjoint()
-std::auto_ptr<tmv::BaseMatrix<T> > m.newInverse()
-\end{tmvcode}
-\tt{newCopy} and \tt{newInverse} create new storage to store a copy of the 
-matrix or its inverse, respectively.  The other four just return views of the current 
-matrix.
-
-\subsection{Iterators}
+\subsection{Vector Iterators}
 \index{Vector!Iterators}
-\label{Iterators}
+\label{VectorIterators}
 
 We mentioned that the iterators through a \tt{Vector} are:
 \begin{tmvcode}
@@ -1027,7 +999,7 @@ tmv::CVIt<T,tmv::Unit,tmv::NonConj>
 tmv::VIt<T,tmv::Step,tmv::NonConj>
 tmv::CVIt<T,tmv::Step,tmv::NonConj>
 \end{tmvcode}
-respectively.
+respectively.  They all satisfy the requirements of a STL random-access iterator.
 
 \tt{VIt} is a mutable-iterator, and \tt{CVIt} is a const-iterator.  \tt{Unit} 
 indicates that the step size is 1, while \tt{Step} allows for any step size
@@ -1073,6 +1045,59 @@ Regular \tt{Vector}s are always \tt{Unit} and \tt{NonConj}, so those iterators
 are already fast without using the specific \tt{VIt} names. 
 That is, you can just use \tt{Vector<T>::iterator} rather than \tt{VIt<T,Unit,NonConj>}
 without any drop in performance.
+
+\subsection{Matrix Iterators}
+\index{Matrix!Iterators}
+\label{MatrixIterators}
+
+The \tt{Matrix}, \tt{UpperTriMatrix}, \tt{LowerTriMatrix}, and \tt{BandMatrix}
+classes and their views all have two sets of iterators for traversing the matrix 
+in either row-major or column-major order.  
+\begin{tmvcode}
+typename tmv::Matrix<T>::rowmajor_iterator m.rowmajor_begin()
+typename tmv::Matrix<T>::rowmajor_iterator m.rowmajor_end()
+typename tmv::Matrix<T>::const_rowmajor_iterator m.rowmajor_begin() const
+typename tmv::Matrix<T>::const_rowmajor_iterator m.rowmajor_end() const
+typename tmv::Matrix<T>::colmajor_iterator m.colmajor_begin()
+typename tmv::Matrix<T>::colmajor_iterator m.colmajor_end()
+typename tmv::Matrix<T>::const_colmajor_iterator m.colmajor_begin() const
+typename tmv::Matrix<T>::const_colmajor_iterator m.colmajor_end() const
+\end{tmvcode}
+Only the elements
+that are actually stored in memory are iterated over.  So for a \tt{LowerTriMatrix}, the 
+iteration skips all the elements the the strict upper triangle\footnote{
+The one exception to this is that if the matrix has \tt{dt = UnitDiag}, the 1's on the diagonal
+are actually included in the iteration.  If assigned to, they must be assigned the value 1.}.
+For a \tt{BandMatrix}, the 
+iteration only includes those on the bands used by the matrix.  
+
+The iterators are all guaranteed
+to be at least consistent with the STL requirements for forward iterator.
+For a full rectangular \tt{Matrix} that happens to be stored in the same storage order as the iterator being requested, then the iterator returned will be the same random-access iterators described above in \S\ref{VectorIterators}.
+
+In addition, \tt{BandMatrix} and its views have iterators that traverse the matrix in diagonal-major order:
+\begin{tmvcode}
+typename tmv::BandMatrix<T>::diagmajor_iterator b.diagmajor_begin()
+typename tmv::BandMatrix<T>::diagmajor_iterator b.diagmajor_end()
+typename tmv::BandMatrix<T>::const_diagmajor_iterator 
+        b.diagmajor_begin() const
+typename tmv::BandMatrix<T>::const_diagmajor_iterator 
+        b.diagmajor_end() const
+\end{tmvcode}
+These start at the beginning of the lowest subdiagonal in the band, and proceed up to the highest super-diagonal.
+
+\tt{DiagMatrix} is slightly different, since the elements are actually stored linearly in memory.  So its iterators are equivalent to the vector iterators of its diagonal:
+\begin{tmvcode}
+typename tmv::DiagMatrix<T>::iterator d.begin()
+typename tmv::DiagMatrix<T>::iterator d.end()
+typename tmv::DiagMatrix<T>::const_iterator d.begin() const
+typename tmv::DiagMatrix<T>::const_iterator d.end() const
+\end{tmvcode}
+
+The symmetric and hermitian matrix varieties do not have similar iterators.  The recommended way to iterate over their stored values is to use the \tt{upperTri()} or \tt{lowerTri()} methods\footnote{
+For \tt{SymBandMatrix} and \tt{HermBandMatrix} you would instead use \tt{upperBand()} and 
+\tt{lowerBand()}.
+} and iterate over those portions of the matrix directly.
 
 \subsection{Direct memory access}
 \index{Vector!Direct access to memory}

@@ -43,40 +43,6 @@ namespace tmv {
 #define RT TMV_RealType(T)
 
     //
-    // Access
-    //
-
-    template <class T>
-    T GenUpperTriMatrix<T>::cref(int i, int j) const
-    {
-        const T* mi = cptr() + int(i)*stepi() + int(j)*stepj();
-        return (isconj() ? TMV_CONJ(*mi) : *mi);
-    }
-
-    template <class T, IndexStyle I> 
-    typename UpperTriMatrixView<T,I>::reference
-    UpperTriMatrixView<T,I>::ref(int i, int j) const
-    {
-        T* mi = ptr() + int(i)*stepi() + int(j)*stepj();
-        return reference(isunit() && i==j,*mi,ct());
-    }
-
-    template <class T>
-    T GenLowerTriMatrix<T>::cref(int i, int j) const
-    {
-        const T* mi = cptr() + int(i)*stepi() + int(j)*stepj();
-        return (isconj() ? TMV_CONJ(*mi) : *mi);
-    }
-
-    template <class T, IndexStyle I> 
-    typename LowerTriMatrixView<T,I>::reference
-    LowerTriMatrixView<T,I>::ref(int i, int j) const
-    {
-        T* mi = ptr() + int(i)*stepi() + int(j)*stepj();
-        return reference(isunit() && i==j,*mi,ct());
-    }
-
-    //
     // OK? (SubMatrix, etc.)
     //
 

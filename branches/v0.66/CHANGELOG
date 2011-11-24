@@ -1,121 +1,152 @@
-Changes from version 0.64 to 0.65:  
+Changes from version 0.65 to 0.66:  
 (See the History section in the full documentation for changes from previous
-versions to 0.64.)
+versions to 0.65.)
+
+Deprecated features:
+
+-- Changed the behavior of the m << 1, 2, 3... initialization.  Now the items 
+   in the initialization list should be in RowMajor order regardless of the 
+   storage order of the matrix \tt{m}.  This makes it much easier to 
+   understand the initialization, since the list can be arranged to look like 
+   the matrix you are setting.  e.g. the snippet:
+
+   tmv::Matrix<double> m(3,5);
+   m << 3 ,  9 ,  1 ,  4 ,  2 ,
+        7 , -3 ,  0 , -1 ,  4 ,
+       -6 ,  2 , 11 ,  5 ,  6 ;
+
+   now initializes the matrix to have the values as shown in the rectangle.  
+   However, the old behavior was to follow the storage order of the matrix, 
+   and since the default storage order is ColMajor, this would unintuitively 
+   initialize the matrix to
+
+   (  3   4  -3   4  11  )
+   (  9   2   0  -6   5  )
+   (  1   7  -1   2   6  )
+   
+   rather than the obviously intended matrix
+   
+   (  3   9   1   4   2  )
+   (  7  -3   0  -1   4  )
+   ( -6   2  11   5   6  )
+
+   Now the code correctly initializes the matrix to the second one regardless 
+   of how the matrix intrinsically stores the values, which I believe is a 
+   much more intuitive behavior.
+
+   Of course, if you do want to initialize according to a ColMajor list of 
+   numbers for some reason, you can initialize \tt{m.transpose()} instead:
+
+   tmv::Matrix<double> m(3,5);
+   m.transpose() << 3 ,  7 , -6 ,
+                    9 , -3 ,  2 ,
+                    1 ,  0 , 11 ,
+                    4 , -1 ,  5 ,
+                    2 ,  4 ,  6 ,
+
+-- Deprecated the constructors from either a C-style array or a std::vector.  
+   The reason is similar to the reasoning above -- I wanted to decouple the 
+   internal storage order from the order of the elements in the initializing 
+   vector.
+
+   To take the place of these constructors' functionality, I added iterators 
+   that iterate over the matrix in either RowMajor or ColMajor order, so the 
+   assignment can be done with the standard library's \tt{std::copy} function.
+
+   const double rmar[15] =
+       { 3, 9, 1, 4, 2, 7, -3, 0, -1, 4, -6, 2, 11, 5, 6};
+   const double cmar[15] =
+       { 3, 7, -6, 9, -3, 2, 1, 0, 11, 4, -1, 5, 2, 4, 6};
+
+   // Old style constuctors: (now deprecated)
+   tmv::Matrix<double,tmv::RowMajor> m1(3,5,rmar);
+   tmv::Matrix<double,tmv::ColMajor> m2(3,5,cmar);
+
+   // New style assignment with iterators:
+   tmv::Matrix<double> m3(3,5); // Can be either StorageType
+   std::copy(rmar, rmar+15, m3.rowmajor_begin());
+   tmv::Matrix<double> m4(3,5);
+   std::copy(cmar, cmar+15, m3.colmajor_begin());
+
+   In addition, a BandMatrix can be iterated in DiagMajor order using 
+   m.diagmajor_begin().
+
+-- Deprecated the routines that returned pointers to new BaseMatrixes.  
+   In general, using the \tt{BaseMatrix} class directly is not really very 
+   useful, so I don't think anyone is actually using these methods.  And in 
+   the version 0.9 TMV code in development, I've completely redesigned the 
+   back end.  It gets rid of the virtual class hierarchy completely using the 
+   CRTP idiom rather than virtual functions.  But this means that methods like 
+   newCopy(), newTranspose(), etc. are not really relevant anymore.
+
+   If you were using these functions and are sorry to see them go, or if you 
+   are otherwise using the virtual functionality (e.g. with 
+   std::vector<tmv::BaseMatrix*>), let me know what your use case was 
+   (at tmv-discuss@googlegroups.com) and we can try to figure out how best to 
+   incorporate your needs into the version 0.9 code.
+
 
 New features:
 
--- Made integer determinants calculate correctly.  The previous code
-   used division, which produced wrong answers for integers. Probably 
-   anyone who tried to do this would consider this a bug fix, but
-   it was (somewhat poorly) documented that this wouldn't work.
-   The code now uses Bareiss's algorithm for these matrices, instead
-   of the LU decomposition that floating point matrices use.
+-- Added the matrix iterators described above.
 
--- Added m.sumAbs2Elements()
+-- Added the ability to do comma initialization for DiagMatrix, UpperTriMatrix,
+  LowerTriMatrix, BandMatrix, and their corresponding view types.
+  These are also always listed in RowMajor order regardless of the actual 
+  storage order of the matrix in memory.  Also, only the values in the 
+  corresponding parts of the matrices should be listed in the initialization.
+  e.g.
 
--- Added m.addToAll(x)
+  tmv::DiagMatrix<double> d(4);
+  d << 4,
+          9, 
+            11,
+               -4 ;
+  tmv::UpperTriMatrix<double> u(4);
+  u << 4 ,  9 , -1 ,  0 ,
+           18 ,  3 , -7 ,
+                 1 ,  5 ,
+                     10 ;
+  tmv::LowerTriMatrix<double> l(4);
+  l <<  1 ,
+       12 , -3 ,
+        8 ,  5 , -9 ,
+        3 , 20 , 14 ,  4 ;
+  tmv::BandMatrix<double> b(4,1,1);
+  b <<  7 ,  9 ,
+       10 , -1 ,  5 ,
+             8 , -6 , 21 , 
+                  2 ,  8 ;
+  I chose not to add similar initializers for symmetric or hermitian matrix
+  types, because I think initialization of them is clearer in terms of only
+  the upper or lower triangle part that is stored in memory.  So the way to 
+  initialize them would be something like:
+  
+  tmv::SymMatrix<double> s(4);
+  s.upperTri() << 2 ,  1 , -3 ,  7 ,
+                      -8 , -2 , 12 ,
+                            6 ,  1 ,
+			         7 ;
+  tmv::SymBandMatrix<double> sb(4,1);
+  sb.lowerBand() <<  8 ,
+                    12 ,  5 ,
+		         -8 ,  2 ,
+			       6 , 10 ;
 
--- Added m.resize(nrows,ncols) and v.resize(n) (and similar for other Matrix
-   types).
+-- Added a few more "ViewOf" functions to allow direct views of memory as 
+   different kinds of matrix types directly specifying the step in each 
+   direction.  These are more flexible than the versions that merely specify a
+   StorageType to use.  For non-contiguous data, those weren't sufficient.
+   So now, you can view arbitrary data in memory as an UpperTriMatrixView, 
+   LowerTriMatrixView, DiagMatrixView, BandMatrixView, SymMatrixView, or 
+   SymBandMatrixView specifying the memory address of m(0,0) and the step 
+   size in each direction.
 
--- Added ability to make the libraries shared libraries, rather than static
-   with the SHARED=true scons option.
-
--- Added ability to turn off TMV debug statements with TMVNDEBUG.
-   Defining NDEBUG also still turns off TMV debugging, but this allows 
-   the user to turn off just the TMV debug statements without turning off 
-   the debug statements in their own code.
-
--- Skip compilation of functions for <int> that it will never use.
-   Also specialized some methods for <int> and complex<int> to make sure
-   they don't call those routines.  If compiled with DEBUG=true, the
-   compiled code hits a TMVAssert(false).  
-   
-   Perhaps I should change this to throw an exception rather than use 
-   Assert, so it doesn't get turned off by the (default) DEBUG=false.
-   Something like InvalidCallError or something like that.
-   I'd have to add that to the tmv::Error heirarchy.
-   But in 0.70 these will all become static_assert failures, which is a
-   better way to do it, so it's probably not worth it.
-
--- Updated the test suite to work better with <int> tests.  Many tests
-   had been disabled for int, since the way I tested things didn't really
-   work with integer matrices. But with the new changes, I can run a larger
-   fraction of the test suite on <int> and <complex<int> > matrices.
-
--- Added TEST_FLOAT, TEST_DOUBLE, etc. to scons options.  This allows
-   for only testing one type at a time without recompiling the libraries.
-
--- Made the default configuration for scons to be WITH_LAPACK=false.
-   Too many LAPACK installations are not thread safe.  And since I 
-   personally use a lot of openmp code in my programs, I occasionally
-   get random segmentation faults when I use TMV with LAPACK.  
-   Since the native TMV code is almost universally as fast as LAPACK,
-   and _is_ thread safe, I finally decided to just make that the default.
-
--- Made the code mostly compatible with the Sun CC compiler.  However,
-   there seems to be a bug with the compiler so that it doesn't compile
-   the full test suite.  Only tests 1, 3a, 3d, and 3e compiled successfully.
-   The others died with an internal compiler error.  I couldn't figure out 
-   a workaround to make them work.
 
 Bug fixes:
 
--- Fixed some compilation problems when compiling with INST_INT=true.
-   There were some linking errors that have now been fixed.
-
--- Fixed a bug in the allocation code in TMV_Array.h for icpc compilations.
-   icpc has a "feature" that it only turns on SSE commands if you explicitly
-   specify the compile flag -msse or -msse2.  (g++ always turns them on
-   when the architecture supports them.)  The file TMV_Array.h has different
-   behavior depending on whether SSE is enabled or not.  
-   
-   Anyway, we do turn these on in our SCons installation for TMV.  
-   However, if a user code does not use these flags then that leads to a 
-   mismatch in the TMV_Array.h behavior for the user code and the TMV 
-   library, which could sometimes cause segmentation faults.  
-   
-   We fixed this by always using the SSE alignment even if SSE is not
-   enabled.  This is probably a good idea anyway, since some BLAS libraries
-   are probably faster with the aligned memory allocation too, so it
-   seems worth it to always align on 16 byte boundaries even if TMV 
-   does explicitly know that it will be useful.
-   
--- Fixed a bug in StackArray (used for SmallVector and SmallMatrix) where 
-   complex allocations weren't getting properly aligned on 16 bytes boundaries.
-   
--- Increased the maximum number of iterations within the divide-and-conquer
-   SVD algorithm from 20 to 100, since I found a case that required 27 
-   iterations to converge.
-
--- Fixed some places where nan's in the input data could lead to infinite 
-   loops in certain algorithms.
-
--- Fixed a place in the SV Decomposition which could (rarely) go into
-   an infinite loop.
-
--- Fixed a bug in the BLAS calls of things like gemv, gemm, etc that have a 
-   "beta" parameter.  BLAS reinterprets a statement like y = A * x as
-   y = beta * y + alpha * A * x with alpha = 1, beta = 0.  The problem
-   comes when y is uninitialized data (which it often is in this kind of 
-   situation) and that uninitialized data happens to have a nan in it.
-   Then some BLAS distributions are true to the beta * y formulation which
-   involves a 0 * nan = nan.  So the output preserves the nan, rather than
-   overwriting with the desired answer.  
-
-   From my reading of the BLAS standard, this is a bug in these BLAS 
-   distributions. (They are supposed to zero out the input data if beta == 0.) 
-   But since some distributions have this bug, the TMV code needs to 
-   work around it.
-   
-   The solution is basically to always zero out the y value directly
-   before calling gemv (or any of several others), rather than counting
-   on the BLAS implementation to do it.  So that is what TMV does now.
-
--- In SConstruct file, now always use -fno-strict-aliasing for g++.  (It was
-   just for version <= 4.2.)  I found a bug in g++ 4.5 that was fixed by
-   turning off strict aliasing.  Since I don't think the strict aliasing
-   optimizations are probably worth much for TMV, I decided to just always
-   use the -fno-strict-aliasing flag and be safe.
+-- Added support for the clang++ compiler.  This didn't require much editing, 
+   but it did complain about a couple things that had passed muster with the 
+   other compilers I had used.
 
 

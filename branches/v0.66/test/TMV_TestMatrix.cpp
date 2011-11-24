@@ -334,6 +334,68 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_2()
         Assert(q10(i,j) == T(2*i-j),"Create MatrixView of T* (Si,Sj)");
     }
 
+    // Test the span of the iteration (i.e. the validity of begin(), end())
+    const tmv::Matrix<T,S>& q1_const = q1;
+    tmv::MatrixView<T> q1_view = q1.view();
+    tmv::ConstMatrixView<T> q1_constview = q1_const.view();
+    tmv::ConstMatrixView<T> q5_const = q5;
+
+    typename tmv::Matrix<T,S>::rowmajor_iterator rmit1 = q1.rowmajor_begin();
+    typename tmv::Matrix<T,S>::const_rowmajor_iterator rmit2 = 
+        q1_const.rowmajor_begin();
+    typename tmv::MatrixView<T>::rowmajor_iterator rmit3 = 
+        q1_view.rowmajor_begin();
+    typename tmv::ConstMatrixView<T>::const_rowmajor_iterator rmit4 = 
+        q1_constview.rowmajor_begin();
+    typename tmv::MatrixView<T>::rowmajor_iterator rmit5 = 
+        q5.rowmajor_begin();
+    typename tmv::ConstMatrixView<T>::const_rowmajor_iterator rmit6 = 
+        q5_const.rowmajor_begin();
+    int i = 0;
+    while (rmit1 != q1.rowmajor_end()) {
+        Assert(*rmit1++ == qarrm[i], "RowMajor iteration 1");
+        Assert(*rmit2++ == qarrm[i], "RowMajor iteration 2");
+        Assert(*rmit3++ == qarrm[i], "RowMajor iteration 3");
+        Assert(*rmit4++ == qarrm[i], "RowMajor iteration 4");
+        Assert(*rmit5++ == qarrm[i], "RowMajor iteration 5");
+        Assert(*rmit6++ == qarrm[i], "RowMajor iteration 6");
+        ++i;
+    }
+    Assert(i == 12, "RowMajor iteration number of elements");
+    Assert(rmit2 == q1_const.rowmajor_end(), "rmit2 reaching end");
+    Assert(rmit3 == q1_view.rowmajor_end(), "rmit3 reaching end");
+    Assert(rmit4 == q1_constview.rowmajor_end(), "rmit4 reaching end");
+    Assert(rmit5 == q5.rowmajor_end(), "rmit5 reaching end");
+    Assert(rmit6 == q5_const.rowmajor_end(), "rmit6 reaching end");
+
+    typename tmv::Matrix<T,S>::colmajor_iterator cmit1 = q1.colmajor_begin();
+    typename tmv::Matrix<T,S>::const_colmajor_iterator cmit2 = 
+        q1_const.colmajor_begin();
+    typename tmv::MatrixView<T>::colmajor_iterator cmit3 = 
+        q1_view.colmajor_begin();
+    typename tmv::ConstMatrixView<T>::const_colmajor_iterator cmit4 = 
+        q1_constview.colmajor_begin();
+    typename tmv::MatrixView<T>::colmajor_iterator cmit5 = 
+        q5.colmajor_begin();
+    typename tmv::ConstMatrixView<T>::const_colmajor_iterator cmit6 = 
+        q5_const.colmajor_begin();
+    i = 0;
+    while (cmit1 != q1.colmajor_end()) {
+        Assert(*cmit1++ == qarcm[i], "ColMajor iteration 1");
+        Assert(*cmit2++ == qarcm[i], "ColMajor iteration 2");
+        Assert(*cmit3++ == qarcm[i], "ColMajor iteration 3");
+        Assert(*cmit4++ == qarcm[i], "ColMajor iteration 4");
+        Assert(*cmit5++ == qarcm[i], "ColMajor iteration 5");
+        Assert(*cmit6++ == qarcm[i], "ColMajor iteration 6");
+        ++i;
+    }
+    Assert(i == 12, "ColMajor iteration number of elements");
+    Assert(cmit2 == q1_const.colmajor_end(), "cmit2 reaching end");
+    Assert(cmit3 == q1_view.colmajor_end(), "cmit3 reaching end");
+    Assert(cmit4 == q1_constview.colmajor_end(), "cmit4 reaching end");
+    Assert(cmit5 == q5.colmajor_end(), "cmit5 reaching end");
+    Assert(cmit6 == q5_const.colmajor_end(), "cmit6 reaching end");
+
 
     // Test Basic Arithmetic
     tmv::Matrix<T,S> a(M,N);

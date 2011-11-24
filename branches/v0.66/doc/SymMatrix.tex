@@ -91,17 +91,6 @@ Makes an \tt{n} $\times$ \tt{n} \tt{SymMatrix} or \tt{HermMatrix}
 with all values equal to \tt{x}.
 For the \tt{HermMatrix} version of this, \tt{x} must be real.
 
-\item
-\begin{tmvcode}
-tmv::SymMatrix<T,uplo,stor,index> s(size_t n, const T* vv)
-tmv::SymMatrix<T,uplo,stor,index> s(size_t n, 
-      const std::vector<T>& vv)
-tmv::HermMatrix<T,uplo,stor,index> s(size_t n, const T* vv)
-tmv::HermMatrix<T,uplo,stor,index> s(size_t n, 
-      const std::vector<T>& vv)
-\end{tmvcode}
-Makes a \tt{SymMatrix} or \tt{HermMatrix} which copies the elements from \tt{vv}.
-
 \item 
 \begin{tmvcode}
 tmv::SymMatrix<T,uplo,stor,index> s(const GenMatrix<T>& m)
@@ -157,6 +146,25 @@ Make a \tt{SymMatrixView} of the actual memory elements, \tt{vv}, in either the
 upper or lower triangle.
 \tt{vv} must be of length \tt{n} $\times$ \tt{n}, even though only about half 
 of the values are actually used,
+
+\item
+\begin{tmvcode}
+tmv::SymMatrixView<T,index> s = 
+      tmv::SymMatrixViewOf(T* vv, size_t n, UpLoType uplo, 
+      int stepi, int stepj)
+tmv::ConstSymMatrixView<T,index> s =
+      tmv::SymMatrixViewOf(const T* vv, size_t n, UpLoType uplo, 
+      int stepi, int stepj)
+tmv::SymMatrixView<T,index> s =
+      tmv::HermMatrixViewOf(T* vv, size_t n, UpLoType uplo, 
+      int stepi, int stepj)
+tmv::ConstSymMatrixView<T,index> s =
+      tmv::HermMatrixViewOf(const T* vv, size_t n, UpLoType uplo, 
+      int stepi, int stepj)
+\end{tmvcode}
+\index{SymMatrix!View of raw memory}
+Make a \tt{SymMatrixView} of the actual memory elements, \tt{vv}, in either the 
+upper or lower triangle.  This allows for arbitrary steps through the data.
 
 \end{itemize}
 

@@ -106,8 +106,6 @@ namespace tmv {
         CRMIt() : m(0), i(0), j(0) {}
         CRMIt(const M* _m, int _i, int _j) : m(_m), i(_i), j(_j) {}
         CRMIt(const CRMIt<M>& rhs) : m(rhs.m), i(rhs.i), j(rhs.j) {}
-        CRMIt(const RMIt<M>& rhs) : 
-            m(rhs.getM()), i(rhs.getI()), j(rhs.getJ()) {}
         CRMIt<M>& operator=(const CRMIt<M>& rhs) 
         { 
             TMVAssert(m == rhs.m);
@@ -129,7 +127,7 @@ namespace tmv {
         inline typename M::value_type operator*() const
         { 
             TMVAssert(m);
-            return m->ref(i,j); 
+            return m->cref(i,j); 
         }
 
         inline CRMIt<M>& operator++() 
@@ -218,8 +216,6 @@ namespace tmv {
         CCMIt() : m(0), i(0), j(0) {}
         CCMIt(const M* _m, int _i, int _j) : m(_m), i(_i), j(_j) {}
         CCMIt(const CCMIt<M>& rhs) : m(rhs.m), i(rhs.i), j(rhs.j) {}
-        CCMIt(const CMIt<M>& rhs) : 
-            m(rhs.getM()), i(rhs.getI()), j(rhs.getJ()) {}
         CCMIt<M>& operator=(const CCMIt<M>& rhs) 
         { 
             TMVAssert(m == rhs.m);
@@ -241,7 +237,7 @@ namespace tmv {
         inline typename M::value_type operator*() const
         { 
             TMVAssert(m);
-            return m->ref(i,j); 
+            return m->cref(i,j); 
         }
 
         inline CCMIt<M>& operator++() 
@@ -333,8 +329,6 @@ namespace tmv {
         CDMIt() : m(0), i(0), j(0) {}
         CDMIt(const M* _m, int _i, int _j) : m(_m), i(_i), j(_j) {}
         CDMIt(const CDMIt<M>& rhs) : m(rhs.m), i(rhs.i), j(rhs.j) {}
-        CDMIt(const DMIt<M>& rhs) : 
-            m(rhs.getM()), i(rhs.getI()), j(rhs.getJ()) {}
         CDMIt<M>& operator=(const CDMIt<M>& rhs) 
         { 
             TMVAssert(m == rhs.m);
@@ -356,7 +350,7 @@ namespace tmv {
         inline typename M::value_type operator*() const
         { 
             TMVAssert(m);
-            return m->ref(i,j); 
+            return m->cref(i,j); 
         }
 
         inline CDMIt<M>& operator++() 

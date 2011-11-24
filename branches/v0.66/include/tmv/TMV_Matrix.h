@@ -376,16 +376,6 @@
 //        inverse until there is appropriate storage for it.
 //        m.makeInverse(minv) is equivalent to minv = m.inverse().
 //
-//    m.newView()
-//    m.newTranspose()
-//    m.newConjugate()
-//    m.newAdjoint()
-//    m.newInverse()
-//    m.newCopy()
-//        These all return pointers to new BaseMatrix's equal to the 
-//        view, transpose, conjugate, adjoint, inverse, or itself respectively.
-//        inverse and copy allocate new memory, the others are views.
-//
 // Operators:
 //        Here we use m for a Matrix, v for a Vector and x for a Scalar.
 //
@@ -1034,12 +1024,12 @@ namespace tmv {
         inline void makeInverseATA(Matrix<T,S,I>& ata) const
         { DivHelper<T>::makeInverseATA(ata); }
 
-        auto_ptr<BaseMatrix<T> > newCopy() const;
-        auto_ptr<BaseMatrix<T> > newView() const;
-        auto_ptr<BaseMatrix<T> > newTranspose() const ;
-        auto_ptr<BaseMatrix<T> > newConjugate() const;
-        auto_ptr<BaseMatrix<T> > newAdjoint() const;
-        auto_ptr<BaseMatrix<T> > newInverse() const;
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newCopy() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newView() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newTranspose() const );
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newConjugate() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newAdjoint() const);
+        TMV_DEPRECATED(auto_ptr<BaseMatrix<T> > newInverse() const);
 
         typedef QuotXM<T,T> MyQuotXM;
         TMV_DEPRECATED(MyQuotXM Inverse() const)
