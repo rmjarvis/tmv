@@ -456,13 +456,6 @@ namespace tmv {
     // os << m
     //
 
-#if 0
-    template <class M>
-    static inline std::ostream& operator<<(
-        std::ostream& os, const BaseMatrix_Tri<M>& m)
-    { Write(os,m.calc()); return os; }
-#endif
-
     template <class M>
     static std::istream& operator>>(
         std::istream& is, BaseMatrix_Tri_Mutable<M>& m)

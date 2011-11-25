@@ -176,7 +176,7 @@ namespace tmv {
     }
 
     template <class T1, int C1, class T2> 
-    static void InstAliasCopy(
+    void InstAliasCopy(
         const ConstVectorView<T1,C1>& v1, VectorView<T2> v2)
     { InlineAliasCopy(v1,v2); }
 

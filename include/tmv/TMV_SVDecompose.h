@@ -39,21 +39,21 @@ namespace tmv {
     
     // Defined in TMV_SVDecompose_Bidiag.h
     template <class M, class V1, class V2, class V3, class V4>
-    inline void Bidiagonalize(
+    static inline void Bidiagonalize(
         BaseMatrix_Rec_Mutable<M>& A,
         BaseVector_Mutable<V1>& Ubeta, BaseVector_Mutable<V2>& Vbeta, 
         BaseVector_Mutable<V3>& D, BaseVector_Mutable<V4>& E);
 
     // Defined in TMV_SVDecompose_QR.h
     template <class M1, class V1, class V2, class M2>
-    inline void SV_DecomposeFromBidiagonal_QR(
+    static inline void SV_DecomposeFromBidiagonal_QR(
         BaseMatrix_Rec_Mutable<M1>& U,
         BaseVector_Mutable<V1>& D, BaseVector_Mutable<V2>& E,
         BaseMatrix_Rec_Mutable<M2>& V, bool UisI, bool VisI);
 
     // Defined in TMV_SVDecompose_DC.h
     template <class M1, class V1, class V2, class M2>
-    inline void SV_DecomposeFromBidiagonal_DC(
+    static inline void SV_DecomposeFromBidiagonal_DC(
         BaseMatrix_Rec_Mutable<M1>& U,
         BaseVector_Mutable<V1>& D, BaseVector_Mutable<V2>& E,
         BaseMatrix_Rec_Mutable<M2>& V, bool UisI, bool VisI);

@@ -17,10 +17,6 @@
 //    DiagMatrix<T>(size_t size, T x)
 //        Makes a DiagMatrix of size n with all values = x
 //
-//    DiagMatrix<T>(size_t size, T* vv)
-//    DiagMatrix<T>(size_t size, const std::vector<T>& vv)
-//        Makes a DiagMatrix of size n which copies the values is vv
-//
 //    DiagMatrix<T>(const Vector<T>& vv)
 //        Make a DiagMatrix which copies the elements of vv.
 //
@@ -116,7 +112,6 @@
 #ifndef TMV_DiagMatrix_H
 #define TMV_DiagMatrix_H
 
-#include <vector>
 #include "TMV_BaseMatrix_Diag.h"
 #include "TMV_Array.h"
 
@@ -189,6 +184,10 @@ namespace tmv {
         typedef ConstDiagMatrixView<T,nonconjA> const_nonconj_type;
         typedef DiagMatrixView<T,A> nonconst_type;
 
+        typedef typename const_diag_type::const_iterator const_iterator;
+        typedef const_iterator const_rowmajor_iterator;
+        typedef const_iterator const_colmajor_iterator;
+
         typedef T& reference;
 
         typedef VectorView<T,A> diag_type;
@@ -207,6 +206,10 @@ namespace tmv {
                 DiagMatrixView<real_type,twosA> >::type realpart_type;
         typedef realpart_type imagpart_type;
         typedef DiagMatrixView<T,nonconjA> nonconj_type;
+
+        typedef typename diag_type::iterator iterator;
+        typedef iterator rowmajor_iterator;
+        typedef iterator colmajor_iterator;
     };
 
     // A Helper class to make a DiagMatrix from a BaseMatrix
@@ -268,7 +271,7 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
 #ifdef TMV_DEBUG
-            this->diag().setAllTo(Traits<value_type>::constr_value());
+            this->diag().setAllTo(Traits<T>::constr_value());
 #endif
         }
 
@@ -276,19 +279,6 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
             this->setAllTo(x);
-        }
-
-        DiagMatrix(size_t n, const T* vv) : itssize(n), itsm(n)
-        {
-            TMVStaticAssert(Traits<type>::okA);
-            ConstDiagMatrixView<T,Unit>(vv,n).newAssignTo(*this);
-        }
-
-        DiagMatrix(const std::vector<T>& vv) : 
-            itssize(vv.size()), itsm(itssize)
-        {
-            TMVStaticAssert(Traits<type>::okA);
-            ConstDiagMatrixView<T,Unit>(&vv[0],itssize).newAssignTo(*this);
         }
 
         DiagMatrix(const type& m2) : itssize(m2.itssize), itsm(itssize)
@@ -320,7 +310,7 @@ namespace tmv {
         ~DiagMatrix() 
         {
 #ifdef TMV_DEBUG
-            this->diag().setAllTo(Traits<value_type>::destr_value());
+            this->diag().setAllTo(Traits<T>::destr_value());
 #endif
         }
 
@@ -360,12 +350,12 @@ namespace tmv {
         void resize(const size_t n)
         {
 #ifdef TMV_DEBUG
-            this->diag().setAllTo(Traits<value_type>::destr_value());
+            this->diag().setAllTo(Traits<T>::destr_value());
 #endif
             itssize = n;
             itsm.resize(n);
 #ifdef TMV_DEBUG
-            this->diag().setAllTo(Traits<value_type>::constr_value());
+            this->diag().setAllTo(Traits<T>::constr_value());
 #endif
         }
 
@@ -451,6 +441,10 @@ namespace tmv {
         typedef const_realpart_type const_imagpart_type;
         typedef ConstDiagMatrixView<T,nonconjA> const_nonconj_type;
         typedef DiagMatrixView<T,A> nonconst_type;
+
+        typedef typename const_diag_type::const_iterator const_iterator;
+        typedef const_iterator const_rowmajor_iterator;
+        typedef const_iterator const_colmajor_iterator;
     };
 
     template <class T, int A>
@@ -636,6 +630,10 @@ namespace tmv {
         typedef ConstDiagMatrixView<T,nonconjA> const_nonconj_type;
         typedef DiagMatrixView<T,A> nonconst_type;
 
+        typedef typename const_diag_type::const_iterator const_iterator;
+        typedef const_iterator const_rowmajor_iterator;
+        typedef const_iterator const_colmajor_iterator;
+
         typedef T& reference;
 
         typedef VectorView<T,A> diag_type;
@@ -654,6 +652,10 @@ namespace tmv {
                 DiagMatrixView<real_type,twosA> >::type realpart_type;
         typedef realpart_type imagpart_type;
         typedef DiagMatrixView<T,nonconjA> nonconj_type;
+
+        typedef typename diag_type::iterator iterator;
+        typedef iterator rowmajor_iterator;
+        typedef iterator colmajor_iterator;
     };
 
     template <class T, int A>

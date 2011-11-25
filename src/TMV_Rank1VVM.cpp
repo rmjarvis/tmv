@@ -524,12 +524,12 @@ namespace tmv {
         m3.setZero();
         InstAddRank1Update(x,v1,v2,m3);
 #else
-        if (m3.isrm()) {
-            MatrixView<T3,ColMajor> m3t = m3.transpose();
-            DoRank1Update<false>(x,v2,v1,m3t);
-        } else if (m3.iscm()) {
+        if (m3.iscm()) {
             MatrixView<T3,ColMajor> m3cm = m3;
             DoRank1Update<false>(x,v1,v2,m3cm);
+        } else if (m3.isrm()) {
+            MatrixView<T3,ColMajor> m3t = m3.transpose();
+            DoRank1Update<false>(x,v2,v1,m3t);
         } else {
             Matrix<T3,ColMajor|NoDivider> m3x(m3.colsize(),m3.rowsize());
             MatrixView<T3,ColMajor> m3cm = m3x.cmView();
@@ -543,12 +543,12 @@ namespace tmv {
         const T3 x, const ConstVectorView<T1,C1>& v1,
         const ConstVectorView<T2,C2>& v2, MatrixView<T3> m3)
     {
-        if (m3.isrm()) {
-            MatrixView<T3,ColMajor> m3t = m3.transpose();
-            DoRank1Update<true>(x,v2,v1,m3t);
-        } else if (m3.iscm()) {
+        if (m3.iscm()) {
             MatrixView<T3,ColMajor> m3cm = m3;
             DoRank1Update<true>(x,v1,v2,m3cm);
+        } else if (m3.isrm()) {
+            MatrixView<T3,ColMajor> m3t = m3.transpose();
+            DoRank1Update<true>(x,v2,v1,m3t);
         } else {
             Matrix<T3,ColMajor|NoDivider> m3x(m3.colsize(),m3.rowsize());
             MatrixView<T3,ColMajor> m3cm = m3x.cmView();

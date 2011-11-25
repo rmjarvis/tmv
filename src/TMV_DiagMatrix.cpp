@@ -3,6 +3,7 @@
 #include <iostream>
 #include "tmv/TMV_DiagMatrix.h"
 #include "tmv/TMV_DiagMatrixIO.h"
+#include "tmv/TMV_Vector.h"
 
 namespace tmv {
 

@@ -673,10 +673,8 @@ namespace tmv {
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 22: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
-#if 0
             // See above comments in algo 12 for why this one is not
             // used for rcr storages.
-#endif
 
             const bool u1 = M1::_unit;
             typedef typename M1::value_type T1;

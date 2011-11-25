@@ -57,11 +57,6 @@ namespace tmv {
     template <class M, class V>
     static inline void QR_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, BaseVector_Mutable<V>& beta);
-    template <class M1, class M2>
-    static inline void QR_Decompose(
-        BaseMatrix_Rec_Mutable<M1>& Q, BaseMatrix_Tri_Mutable<M2>& R);
-    template <class M>
-    static inline void QR_Decompose(BaseMatrix_Rec_Mutable<M>& m);
 
     // In TMV_QRInverse.h
     template <class M1, class V1, class M2>

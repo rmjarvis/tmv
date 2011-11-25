@@ -39,8 +39,6 @@
 //    SmallVector<T,N,A>(T x)
 //        Makes a Vector of size N with all values = x
 //
-//    SmallVector<T,N,A>(const T* v2)
-//    SmallVector<T,N,A>(const vector<T>& v2)
 //    SmallVector<T,N,A>(const BaseVector<V2>& v2)
 //        Makes a SmallVector which copies the elements of v2.
 //
@@ -49,7 +47,6 @@
 #define TMV_SmallVector_H
 
 
-#include <vector>
 #include "TMV_BaseVector.h"
 #include "TMV_VIt.h"
 #include "TMV_Array.h"
@@ -174,7 +171,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(N >= 0);
 #ifdef TMV_DEBUG
-            this->setAllTo(Traits<value_type>::constr_value());
+            this->setAllTo(Traits<T>::constr_value());
 #endif
         }
 
@@ -183,21 +180,6 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(N >= 0);
             this->setAllTo(x); 
-        }
-
-        explicit SmallVector(const T* v) 
-        {
-            TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(N >= 0);
-            ConstSmallVectorView<T,N,1>(v).newAssignTo(*this);
-        }
-
-        explicit SmallVector(const std::vector<T>& v2) 
-        {
-            TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(N >= 0);
-            TMVAssert(v2.size() == N);
-            ConstSmallVectorView<T,N,1>(&v2[0]).newAssignTo(*this);
         }
 
         SmallVector(const type& v2) 
@@ -219,7 +201,7 @@ namespace tmv {
         TMV_INLINE_ND ~SmallVector()
         {
 #ifdef TMV_DEBUG
-            this->setAllTo(Traits<value_type>::destr_value());
+            this->setAllTo(Traits<T>::destr_value());
 #endif
         }
 

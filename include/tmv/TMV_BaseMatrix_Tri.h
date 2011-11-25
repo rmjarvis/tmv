@@ -572,6 +572,10 @@ namespace tmv {
         enum { _upper = ShapeTraits<Shape(Traits<M>::_shape)>::upper };
         enum { _lower = ShapeTraits<Shape(Traits<M>::_shape)>::lower };
 
+        typedef typename Traits<M>::const_rowmajor_iterator 
+            const_rowmajor_iterator;
+        typedef typename Traits<M>::const_colmajor_iterator 
+            const_colmajor_iterator;
 
         //
         // Constructor
@@ -858,8 +862,11 @@ namespace tmv {
             return MakeTriView<type,const_nonunitdiag_type>::call(mat()); 
         }
 
-        TMV_INLINE const_unknowndiag_type viewAsUnknownDiag(DiagType newdt=dt()) const
+        TMV_INLINE const_unknowndiag_type viewAsUnknownDiag(DiagType newdt) const
         { return const_unknowndiag_type(cptr(),size(),stepi(),stepj(),newdt); }
+
+        TMV_INLINE const_unknowndiag_type viewAsUnknownDiag() const
+        { return const_unknowndiag_type(cptr(),size(),stepi(),stepj(),dt()); }
 
         TMV_INLINE const_realpart_type realPart() const
         {
@@ -962,6 +969,31 @@ namespace tmv {
 
         TMV_INLINE const value_type* cptr() const { return mat().cptr(); }
 
+        TMV_INLINE int rowstart(int i) const 
+        { return Maybe<_upper>::select(i,0); }
+        TMV_INLINE int rowend(int i) const 
+        { return Maybe<_upper>::select(size(),i+1); }
+        TMV_INLINE int colstart(int j) const 
+        { return Maybe<_upper>::select(0,j); }
+        TMV_INLINE int colend(int j) const 
+        { return Maybe<_upper>::select(j+1,size()); }
+
+        TMV_INLINE const_rowmajor_iterator rowmajor_begin() const
+        { return const_rowmajor_iterator(&mat(),0,0); }
+        TMV_INLINE const_rowmajor_iterator rowmajor_end() const
+        {
+            return const_rowmajor_iterator(
+                &mat(), size(), Maybe<_upper>::select(size(),0)); 
+        }
+
+        TMV_INLINE const_colmajor_iterator colmajor_begin() const
+        { return const_colmajor_iterator(&mat(),0,0); }
+        TMV_INLINE const_colmajor_iterator colmajor_end() const
+        {
+            return const_colmajor_iterator(
+                &mat(), Maybe<_upper>::select(0,size()), size()); 
+        }
+
     }; // BaseMatrix_Tri
 
     template <class M>
@@ -1041,6 +1073,9 @@ namespace tmv {
         typedef typename base::const_nonunitdiag_type const_nonunitdiag_type;
         typedef typename base::const_unknowndiag_type const_unknowndiag_type;
 
+        typedef typename base::const_rowmajor_iterator const_rowmajor_iterator;
+        typedef typename base::const_colmajor_iterator const_colmajor_iterator;
+
         typedef typename Traits<M>::row_sub_type row_sub_type;
         typedef typename Traits<M>::col_sub_type col_sub_type;
         typedef typename Traits<M>::diag_type diag_type;
@@ -1060,6 +1095,12 @@ namespace tmv {
         typedef typename Traits<M>::unitdiag_type unitdiag_type;
         typedef typename Traits<M>::nonunitdiag_type nonunitdiag_type;
         typedef typename Traits<M>::unknowndiag_type unknowndiag_type;
+
+        typedef typename Traits<M>::rowmajor_iterator rowmajor_iterator;
+        typedef typename Traits<M>::colmajor_iterator colmajor_iterator;
+
+        enum { _upper = base::_upper };
+        enum { _lower = base::_lower };
 
         //
         // Constructor
@@ -1442,8 +1483,11 @@ namespace tmv {
             return MakeTriView<type,nonunitdiag_type>::call(mat());
         }
 
-        TMV_INLINE unknowndiag_type viewAsUnknownDiag(DiagType newdt=dt()) 
+        TMV_INLINE unknowndiag_type viewAsUnknownDiag(DiagType newdt) 
         { return unknowndiag_type(ptr(),size(),stepi(),stepj(),newdt); }
+
+        TMV_INLINE unknowndiag_type viewAsUnknownDiag()
+        { return unknowndiag_type(ptr(),size(),stepi(),stepj(),dt()); }
 
         TMV_INLINE realpart_type realPart() 
         {
@@ -1493,8 +1537,10 @@ namespace tmv {
         { return base::viewAsUnitDiag(); }
         TMV_INLINE TMV_MAYBE_CREF(type,const_nonunitdiag_type) viewAsNonUnitDiag() const
         { return base::viewAsNonUnitDiag(); }
-        TMV_INLINE const_unknowndiag_type viewAsUnknownDiag(DiagType newdt=dt()) const
+        TMV_INLINE const_unknowndiag_type viewAsUnknownDiag(DiagType newdt) const
         { return base::viewAsUnknownDiag(newdt); }
+        TMV_INLINE const_unknowndiag_type viewAsUnknownDiag() const
+        { return base::viewAsUnknownDiag(); }
         TMV_INLINE const_realpart_type realPart() const
         { return base::realPart(); }
         TMV_INLINE const_imagpart_type imagPart() const
@@ -1541,6 +1587,33 @@ namespace tmv {
         TMV_INLINE value_type* ptr() { return mat().ptr(); }
         TMV_INLINE reference ref(int i, int j) { return mat().ref(i,j); }
         TMV_INLINE value_type cref(int i, int j) { return mat().cref(i,j); }
+
+        TMV_INLINE rowmajor_iterator rowmajor_begin() 
+        { return rowmajor_iterator(&mat(),0,0); }
+        TMV_INLINE rowmajor_iterator rowmajor_end() 
+        {
+            return rowmajor_iterator(
+                &mat(), size(), Maybe<_upper>::select(size(),0)); 
+        }
+
+        TMV_INLINE const_rowmajor_iterator rowmajor_begin() const
+        { return base::rowmajor_begin(); }
+        TMV_INLINE const_rowmajor_iterator rowmajor_end() const
+        { return base::rowmajor_end(); }
+
+        TMV_INLINE colmajor_iterator colmajor_begin() 
+        { return colmajor_iterator(&mat(),0,0); }
+        TMV_INLINE colmajor_iterator colmajor_end() 
+        {
+            return colmajor_iterator(
+                &mat(), Maybe<_upper>::select(0,size()), size()); 
+        }
+
+        TMV_INLINE const_colmajor_iterator colmajor_begin() const
+        { return base::colmajor_begin(); }
+        TMV_INLINE const_colmajor_iterator colmajor_end() const
+        { return base::colmajor_end(); }
+
 
     }; // BaseMatrix_Tri_Mutable
 
@@ -1993,49 +2066,6 @@ namespace tmv {
         ConjugateU_Helper<algo,M>::call(m.mat());
     }
 
-
-
-#if 0
-    template <int algo, class M>
-    struct TraceU_Helper;
-
-    // algo 1: Unit Diag
-    template <class M>
-    struct TraceU_Helper<1,M>
-    {
-        static inline typename M::value_type call(const M& m)
-        { return typename M::value_type(m.size()); }
-    };
-
-    // algo 2: Unknown Diag
-    template <class M>
-    struct TraceU_Helper<2,M>
-    {
-        static typename M::value_type call(const M& m)
-        {
-            if (m.isunit()) return TraceU_Helper<1,M>::call(m);
-            else return TraceU_Helper<11,M>::call(m);
-        }
-    };
-
-    // algo 11: NonUnit Diag
-    template <class M>
-    struct TraceU_Helper<11,M>
-    {
-        static inline typename M::value_type call(const M& m)
-        { return m.diag().sumElements(); }
-    };
-
-    template <class M>
-    static TMV_INLINE typename M::value_type DoTrace(const BaseMatrix_Tri<M>& m)
-    {
-        const int algo = 
-            M::_unit ? 1 :
-            M::_unknowndiag ? 2 :
-            11;
-        return TraceU_Helper<algo,M>(m); 
-    }
-#endif
 
 
     //

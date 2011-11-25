@@ -6,6 +6,7 @@
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_DiagMatrix.h"
+#include "tmv/TMV_Permutation.h"
 #include "tmv/TMV_CopyM.h"
 #include "tmv/TMV_ProdMM.h"
 #include "tmv/TMV_DivM.h"

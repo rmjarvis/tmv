@@ -484,6 +484,74 @@ namespace tmv {
         { return helper::call(m); }
     };
 
+
+    template <bool lin, int dummy>
+    struct MatrixIterHelper;
+
+    template <int dummy>
+    struct MatrixIterHelper<true,dummy> // Use linear iterator
+    {
+        template <class M>
+        static typename M::rowmajor_iterator rowmajor_begin(M& m)
+        { return typename M::rowmajor_iterator(m.ptr(),1); }
+        template <class M>
+        static typename M::rowmajor_iterator rowmajor_end(M& m)
+        { return typename M::rowmajor_iterator(m.ptr()+m.ls(),1); }
+
+        template <class M>
+        static typename M::const_rowmajor_iterator rowmajor_begin(const M& m)
+        { return typename M::const_rowmajor_iterator(m.cptr(),1); }
+        template <class M>
+        static typename M::const_rowmajor_iterator rowmajor_end(const M& m)
+        { return typename M::const_rowmajor_iterator(m.cptr()+m.ls(),1); }
+
+        template <class M>
+        static typename M::colmajor_iterator colmajor_begin(M& m)
+        { return typename M::colmajor_iterator(m.ptr(),1); }
+        template <class M>
+        static typename M::colmajor_iterator colmajor_end(M& m)
+        { return typename M::colmajor_iterator(m.ptr()+m.ls(),1); }
+
+        template <class M>
+        static typename M::const_colmajor_iterator colmajor_begin(const M& m)
+        { return typename M::const_colmajor_iterator(m.cptr(),1); }
+        template <class M>
+        static typename M::const_colmajor_iterator colmajor_end(const M& m)
+        { return typename M::const_colmajor_iterator(m.cptr()+m.ls(),1); }
+   };
+
+    template <int dummy>
+    struct MatrixIterHelper<false,dummy> // Use RMIt or CMIt
+    {
+        template <class M>
+        static typename M::rowmajor_iterator rowmajor_begin(M& m)
+        { return typename M::rowmajor_iterator(&m,0,0); }
+        template <class M>
+        static typename M::rowmajor_iterator rowmajor_end(M& m)
+        { return typename M::rowmajor_iterator(&m,m.colsize(),0); }
+
+        template <class M>
+        static typename M::const_rowmajor_iterator rowmajor_begin(const M& m)
+        { return typename M::const_rowmajor_iterator(&m,0,0); }
+        template <class M>
+        static typename M::const_rowmajor_iterator rowmajor_end(const M& m)
+        { return typename M::const_rowmajor_iterator(&m,m.colsize(),0); }
+
+        template <class M>
+        static typename M::colmajor_iterator colmajor_begin(M& m)
+        { return typename M::colmajor_iterator(&m,0,0); }
+        template <class M>
+        static typename M::colmajor_iterator colmajor_end(M& m)
+        { return typename M::colmajor_iterator(&m,0,m.rowsize()); }
+
+        template <class M>
+        static typename M::const_colmajor_iterator colmajor_begin(const M& m)
+        { return typename M::const_colmajor_iterator(&m,0,0); }
+        template <class M>
+        static typename M::const_colmajor_iterator colmajor_end(const M& m)
+        { return typename M::const_colmajor_iterator(&m,0,m.rowsize()); }
+   };
+
  
     template <class M>
     class BaseMatrix_Rec : 
@@ -563,6 +631,10 @@ namespace tmv {
         typedef typename Traits<M>::const_linearview_type 
             const_linearview_type;
 
+        typedef typename Traits<M>::const_rowmajor_iterator 
+            const_rowmajor_iterator;
+        typedef typename Traits<M>::const_colmajor_iterator 
+            const_colmajor_iterator;
 
 
         //
@@ -977,6 +1049,32 @@ namespace tmv {
 
         TMV_INLINE const value_type* cptr() const { return mat().cptr(); }
 
+        TMV_INLINE int rowstart(int ) const { return 0; }
+        TMV_INLINE int rowend(int ) const { return rowsize(); }
+        TMV_INLINE int colstart(int ) const { return 0; }
+        TMV_INLINE int colend(int ) const { return colsize(); }
+
+        TMV_INLINE const_rowmajor_iterator rowmajor_begin() const
+        {
+            const bool lin = _canlin && _rowmajor;
+            return MatrixIterHelper<lin,0>::rowmajor_begin(mat()); 
+        }
+        TMV_INLINE const_rowmajor_iterator rowmajor_end() const
+        {
+            const bool lin = _canlin && _rowmajor;
+            return MatrixIterHelper<lin,0>::rowmajor_end(mat()); 
+        }
+        TMV_INLINE const_colmajor_iterator colmajor_begin() const
+        {
+            const bool lin = _canlin && _colmajor;
+            return MatrixIterHelper<lin,0>::colmajor_begin(mat()); 
+        }
+        TMV_INLINE const_colmajor_iterator colmajor_end() const
+        {
+            const bool lin = _canlin && _colmajor;
+            return MatrixIterHelper<lin,0>::colmajor_end(mat()); 
+        }
+
     }; // BaseMatrix_Rec
 
     template <class M>
@@ -1064,6 +1162,9 @@ namespace tmv {
             const_unknown_lowertri_type;
         typedef typename base::const_linearview_type const_linearview_type;
 
+        typedef typename base::const_rowmajor_iterator const_rowmajor_iterator;
+        typedef typename base::const_colmajor_iterator const_colmajor_iterator;
+
         typedef typename Traits<M>::row_type row_type;
         typedef typename Traits<M>::row_sub_type row_sub_type;
         typedef typename Traits<M>::col_type col_type;
@@ -1092,7 +1193,9 @@ namespace tmv {
         typedef typename Traits<M>::unknown_lowertri_type unknown_lowertri_type;
 
         typedef typename Traits<M>::linearview_type linearview_type;
-        typedef typename Traits<M>::linear_iterator linear_iterator;
+
+        typedef typename Traits<M>::rowmajor_iterator rowmajor_iterator;
+        typedef typename Traits<M>::colmajor_iterator colmajor_iterator;
 
         //
         // Constructor
@@ -1260,14 +1363,6 @@ namespace tmv {
             TMVAssert(colsize() == rowsize());
             setToIdentity(x);
             return mat();
-        }
-
-        ListAssigner<value_type,linear_iterator> operator<<(value_type x)
-        {
-            TMVAssert(this->canLinearize());
-            linearview_type v = linearView();
-            return ListAssigner<value_type,linear_iterator>(
-                v.begin(),v.size(),x); 
         }
 
 
@@ -1692,6 +1787,36 @@ namespace tmv {
 
         TMV_INLINE value_type* ptr() { return mat().ptr(); }
         TMV_INLINE reference ref(int i, int j) { return mat().ref(i,j); }
+
+        TMV_INLINE rowmajor_iterator rowmajor_begin() 
+        {
+            const bool lin = _canlin && _rowmajor;
+            return MatrixIterHelper<lin,0>::rowmajor_begin(mat()); 
+        }
+        TMV_INLINE rowmajor_iterator rowmajor_end() 
+        {
+            const bool lin = _canlin && _rowmajor;
+            return MatrixIterHelper<lin,0>::rowmajor_end(mat()); 
+        }
+        TMV_INLINE colmajor_iterator colmajor_begin() 
+        {
+            const bool lin = _canlin && _colmajor;
+            return MatrixIterHelper<lin,0>::colmajor_begin(mat()); 
+        }
+        TMV_INLINE colmajor_iterator colmajor_end() 
+        {
+            const bool lin = _canlin && _colmajor;
+            return MatrixIterHelper<lin,0>::colmajor_end(mat()); 
+        }
+
+        TMV_INLINE const_rowmajor_iterator rowmajor_begin() const
+        { return base::rowmajor_begin(); }
+        TMV_INLINE const_rowmajor_iterator rowmajor_end() const
+        { return base::rowmajor_end(); }
+        TMV_INLINE const_colmajor_iterator colmajor_begin() const
+        { return base::colmajor_begin(); }
+        TMV_INLINE const_colmajor_iterator colmajor_end() const
+        { return base::colmajor_end(); }
 
     }; // BaseMatrix_Rec_Mutable
 

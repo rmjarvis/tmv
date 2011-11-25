@@ -238,6 +238,151 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_2()
     Assert(mf.colRange(3,5) == mfv.colRange(3,5),"colRangeFV");
     Assert(mf.rowRange(4,7) == mfv.rowRange(4,7),"rowRangeFV");
 
+    // Test assignments and constructors from arrays
+    T qarrm[] = { 
+        T(0), T(-1), T(-2), T(-3),
+        T(2), T(1), T(0), T(-1),
+        T(4), T(3), T(2), T(1) 
+    };
+    T qarcm[] = {
+        T(0), T(2), T(4),
+        T(-1), T(1), T(3),
+        T(-2), T(0), T(2),
+        T(-3), T(-1), T(1) 
+    };
+    std::vector<T> qvecrm(12);
+    for(int i=0;i<12;i++) qvecrm[i] = qarrm[i];
+    std::vector<T> qveccm(12);
+    for(int i=0;i<12;i++) qveccm[i] = qarcm[i];
+
+    tmv::Matrix<T,S> q1(3,4);
+    std::copy(qarrm, qarrm+12, q1.rowmajor_begin());
+    tmv::Matrix<T,S> q2(3,4);
+    std::copy(qarcm, qarcm+12, q2.colmajor_begin());
+
+    tmv::Matrix<T,S> q3(3,4);
+    std::copy(qvecrm.begin(), qvecrm.end(), q3.rowmajor_begin());
+    tmv::Matrix<T,S> q4(3,4);
+    std::copy(qveccm.begin(), qveccm.end(), q4.colmajor_begin());
+
+    tmv::Matrix<T,S> q5x(30,40);
+    tmv::MatrixView<T> q5 = q5x.subMatrix(3,18,5,25,5,5);
+    std::copy(qvecrm.begin(), qvecrm.end(), q5.rowmajor_begin());
+
+    tmv::Matrix<T,S> q6x(30,40);
+    tmv::MatrixView<T> q6 = q6x.subMatrix(3,18,5,25,5,5);
+    std::copy(qveccm.begin(), qveccm.end(), q6.colmajor_begin());
+
+    // Assignment using op<< is always in rowmajor order.
+    tmv::Matrix<T,S> q7(3,4);
+    tmv::Matrix<T,S> q8t(4,3);
+    tmv::MatrixView<T> q8 = q8t.transpose();
+    q7 <<
+        0, -1, -2, -3,
+        2, 1, 0, -1,
+        4, 3, 2, 1;
+    q8 <<
+        0, -1, -2, -3,
+        2, 1, 0, -1,
+        4, 3, 2, 1;
+
+    // Can also view memory directly
+    T* qarS = (S == tmv::RowMajor) ? qarrm : qarcm;
+    tmv::ConstMatrixView<T> q9 = tmv::MatrixViewOf(qarS,3,4,S);
+    const int Si = (S == tmv::RowMajor ? 4 : 1);
+    const int Sj = (S == tmv::RowMajor ? 1 : 3);
+    tmv::ConstMatrixView<T> q10 = tmv::MatrixViewOf(qarS,3,4,Si,Sj);
+
+    if (showacc) {
+        std::cout<<"q1 = "<<q1<<std::endl;
+        std::cout<<"q2 = "<<q2<<std::endl;
+        std::cout<<"q3 = "<<q3<<std::endl;
+        std::cout<<"q4 = "<<q4<<std::endl;
+        std::cout<<"q5 = "<<q5<<std::endl;
+        std::cout<<"q6 = "<<q6<<std::endl;
+        std::cout<<"q7 = "<<q7<<std::endl;
+        std::cout<<"q8 = "<<q8<<std::endl;
+        std::cout<<"q9 = "<<q9<<std::endl;
+        std::cout<<"q10 = "<<q10<<std::endl;
+    }
+
+    for(int i=0;i<3;i++) for(int j=0;j<4;j++) {
+        Assert(q1(i,j) == T(2*i-j),"Create Matrix from T* rm");
+        Assert(q2(i,j) == T(2*i-j),"Create Matrix from T* cm");
+        Assert(q3(i,j) == T(2*i-j),"Create Matrix from vector rm");
+        Assert(q4(i,j) == T(2*i-j),"Create Matrix from vector cm");
+        Assert(q5(i,j) == T(2*i-j),"Create MatrixView from vector rm");
+        Assert(q6(i,j) == T(2*i-j),"Create MatrixView from vector cm");
+        Assert(q7(i,j) == T(2*i-j),"Create Matrix from << list");
+        Assert(q8(i,j) == T(2*i-j),"Create MatrixView from << list");
+        Assert(q9(i,j) == T(2*i-j),"Create MatrixView of T* (S)");
+        Assert(q10(i,j) == T(2*i-j),"Create MatrixView of T* (Si,Sj)");
+    }
+
+    // Test the span of the iteration (i.e. the validity of begin(), end())
+    const tmv::Matrix<T,S>& q1_const = q1;
+    tmv::MatrixView<T> q1_view = q1.view();
+    tmv::ConstMatrixView<T> q1_constview = q1_const.view();
+    tmv::ConstMatrixView<T> q5_const = q5;
+
+    typename tmv::Matrix<T,S>::rowmajor_iterator rmit1 = q1.rowmajor_begin();
+    typename tmv::Matrix<T,S>::const_rowmajor_iterator rmit2 = 
+        q1_const.rowmajor_begin();
+    typename tmv::MatrixView<T>::rowmajor_iterator rmit3 = 
+        q1_view.rowmajor_begin();
+    typename tmv::ConstMatrixView<T>::const_rowmajor_iterator rmit4 = 
+        q1_constview.rowmajor_begin();
+    typename tmv::MatrixView<T>::rowmajor_iterator rmit5 = 
+        q5.rowmajor_begin();
+    typename tmv::ConstMatrixView<T>::const_rowmajor_iterator rmit6 = 
+        q5_const.rowmajor_begin();
+    int i = 0;
+    while (rmit1 != q1.rowmajor_end()) {
+        Assert(*rmit1++ == qarrm[i], "RowMajor iteration 1");
+        Assert(*rmit2++ == qarrm[i], "RowMajor iteration 2");
+        Assert(*rmit3++ == qarrm[i], "RowMajor iteration 3");
+        Assert(*rmit4++ == qarrm[i], "RowMajor iteration 4");
+        Assert(*rmit5++ == qarrm[i], "RowMajor iteration 5");
+        Assert(*rmit6++ == qarrm[i], "RowMajor iteration 6");
+        ++i;
+    }
+    Assert(i == 12, "RowMajor iteration number of elements");
+    Assert(rmit2 == q1_const.rowmajor_end(), "rmit2 reaching end");
+    Assert(rmit3 == q1_view.rowmajor_end(), "rmit3 reaching end");
+    Assert(rmit4 == q1_constview.rowmajor_end(), "rmit4 reaching end");
+    Assert(rmit5 == q5.rowmajor_end(), "rmit5 reaching end");
+    Assert(rmit6 == q5_const.rowmajor_end(), "rmit6 reaching end");
+
+    typename tmv::Matrix<T,S>::colmajor_iterator cmit1 = q1.colmajor_begin();
+    typename tmv::Matrix<T,S>::const_colmajor_iterator cmit2 = 
+        q1_const.colmajor_begin();
+    typename tmv::MatrixView<T>::colmajor_iterator cmit3 = 
+        q1_view.colmajor_begin();
+    typename tmv::ConstMatrixView<T>::const_colmajor_iterator cmit4 = 
+        q1_constview.colmajor_begin();
+    typename tmv::MatrixView<T>::colmajor_iterator cmit5 = 
+        q5.colmajor_begin();
+    typename tmv::ConstMatrixView<T>::const_colmajor_iterator cmit6 = 
+        q5_const.colmajor_begin();
+    i = 0;
+    while (cmit1 != q1.colmajor_end()) {
+        Assert(*cmit1++ == qarcm[i], "ColMajor iteration 1");
+        Assert(*cmit2++ == qarcm[i], "ColMajor iteration 2");
+        Assert(*cmit3++ == qarcm[i], "ColMajor iteration 3");
+        Assert(*cmit4++ == qarcm[i], "ColMajor iteration 4");
+        Assert(*cmit5++ == qarcm[i], "ColMajor iteration 5");
+        Assert(*cmit6++ == qarcm[i], "ColMajor iteration 6");
+        ++i;
+    }
+    Assert(i == 12, "ColMajor iteration number of elements");
+    Assert(cmit2 == q1_const.colmajor_end(), "cmit2 reaching end");
+    Assert(cmit3 == q1_view.colmajor_end(), "cmit3 reaching end");
+    Assert(cmit4 == q1_constview.colmajor_end(), "cmit4 reaching end");
+    Assert(cmit5 == q5.colmajor_end(), "cmit5 reaching end");
+    Assert(cmit6 == q5_const.colmajor_end(), "cmit6 reaching end");
+
+
+    // Test Basic Arithmetic
     tmv::Matrix<T,S> a(M,N);
     tmv::Matrix<T,S> b(M,N);
     tmv::Matrix<T,S> c(M,N);
@@ -247,72 +392,6 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_2()
     }
     mf = a;
     Assert(a == mf,"Copy CStyle Matrix to FortranStyle");
-
-    std::vector<T> qv(12);
-    tmv::Matrix<T,S> q4(3,4);
-    tmv::Matrix<T,S> q5t(4,3);
-    tmv::MatrixView<T> q5 = q5t.transpose();
-    if (S == tmv::RowMajor) {
-        T qvar[] = { 
-            T(0), T(-1), T(-2), T(-3),
-            T(2), T(1), T(0), T(-1),
-            T(4), T(3), T(2), T(1) 
-        };
-        for(int i=0;i<12;i++) qv[i] = qvar[i];
-        q4 <<
-            0, -1, -2, -3,
-            2, 1, 0, -1,
-            4, 3, 2, 1;
-        q5 <<
-            0, 2, 4,
-            -1, 1, 3,
-            -2, 0, 2,
-            -3, -1, 1;
-    } else {
-        T qvar[] = {
-            T(0), T(2), T(4),
-            T(-1), T(1), T(3),
-            T(-2), T(0), T(2),
-            T(-3), T(-1), T(1) 
-        };
-        for(int i=0;i<12;i++) qv[i] = qvar[i];
-        q4 <<
-            0, 2, 4,
-            -1, 1, 3,
-            -2, 0, 2,
-            -3, -1, 1;
-        q5 <<
-            0, -1, -2, -3,
-            2, 1, 0, -1,
-            4, 3, 2, 1;
-    }
-    const int Si = (S == tmv::RowMajor ? 4 : 1);
-    const int Sj = (S == tmv::RowMajor ? 1 : 3);
-    T qar[12];
-    for(int i=0;i<12;i++) qar[i] = qv[i];
-    tmv::Matrix<T,S> q1(3,4,qar);
-    tmv::Matrix<T,S> q2(3,4,qv);
-
-    tmv::ConstMatrixView<T> q3 = tmv::MatrixViewOf(qar,3,4,S);
-    tmv::ConstMatrixView<T> q6 = tmv::MatrixViewOf(qar,3,4,Si,Sj);
-
-    if (showacc) {
-        std::cout<<"q1 = "<<q1<<std::endl;
-        std::cout<<"q2 = "<<q2<<std::endl;
-        std::cout<<"q3 = "<<q3<<std::endl;
-        std::cout<<"q4 = "<<q4<<std::endl;
-        std::cout<<"q5 = "<<q5<<std::endl;
-        std::cout<<"q6 = "<<q6<<std::endl;
-    }
-
-    for(int i=0;i<3;i++) for(int j=0;j<4;j++) {
-        Assert(q1(i,j) == T(2*i-j),"Create Matrix from T*");
-        Assert(q2(i,j) == T(2*i-j),"Create Matrix from vector");
-        Assert(q3(i,j) == T(2*i-j),"Create MatrixView of T* (S)");
-        Assert(q4(i,j) == T(2*i-j),"Create Matrix from << list");
-        Assert(q5(i,j) == T(2*i-j),"Create MatrixView from << list");
-        Assert(q6(i,j) == T(2*i-j),"Create MatrixView of T* (Si,Sj)");
-    }
 
     c = a+b;
     for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 

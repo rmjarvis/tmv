@@ -43,34 +43,7 @@ namespace tmv {
         int m = A.colsize();
         int n = A.rowsize();
         beta.setZero();
-        if (A.isrm()) {
-            int lda = A.stepi();
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = 2*n*LAP_BLOCKSIZE;
-            AlignedArray<double> work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<double> work(1);
-            work.get()[0] = 0.;
-            LAPNAME(dgelqf) (
-                LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
-                LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-            lwork = int(work[0]);
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(dgelqf) (
-                LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
-                LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-#ifdef LAPNOWORK
-            LAP_Results("dgelqf");
-#else
-            LAP_Results(int(work[0]),m,n,lwork,"dgelqf");
-#endif
-        } else {
+        if (A.iscm()) {
             int lda = A.stepj();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
@@ -97,6 +70,33 @@ namespace tmv {
 #else
             LAP_Results(int(work[0]),m,n,lwork,"dgeqrf");
 #endif
+        } else {
+            int lda = A.stepi();
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = 2*n*LAP_BLOCKSIZE;
+            AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<double> work(1);
+            work.get()[0] = 0.;
+            LAPNAME(dgelqf) (
+                LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
+                LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+            lwork = int(work[0]);
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(dgelqf) (
+                LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
+                LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+#ifdef LAPNOWORK
+            LAP_Results("dgelqf");
+#else
+            LAP_Results(int(work[0]),m,n,lwork,"dgelqf");
+#endif
         }
         double* bi = beta.ptr();
         for(int i=0;i<n;++i,++bi)  {
@@ -113,34 +113,7 @@ namespace tmv {
         int m = A.colsize();
         int n = A.rowsize();
         beta.setZero();
-        if (A.isrm()) {
-            int lda = A.stepi();
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = 2*n*LAP_BLOCKSIZE;
-            AlignedArray<float> work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<float> work(1);
-            work.get()[0] = 0.F;
-            LAPNAME(sgelqf) (
-                LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
-                LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-            lwork = int(work[0]);
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(sgelqf) (
-                LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
-                LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-#ifdef LAPNOWORK
-            LAP_Results("sgelqf");
-#else
-            LAP_Results(int(work[0]),m,n,lwork,"sgelqf");
-#endif
-        } else {
+        if (A.iscm()) {
             int lda = A.stepj();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
@@ -166,6 +139,33 @@ namespace tmv {
             LAP_Results("sgeqrf");
 #else
             LAP_Results(int(work[0]),m,n,lwork,"sgeqrf");
+#endif
+        } else {
+            int lda = A.stepi();
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = 2*n*LAP_BLOCKSIZE;
+            AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<float> work(1);
+            work.get()[0] = 0.F;
+            LAPNAME(sgelqf) (
+                LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
+                LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+            lwork = int(work[0]);
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(sgelqf) (
+                LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
+                LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+#ifdef LAPNOWORK
+            LAP_Results("sgelqf");
+#else
+            LAP_Results(int(work[0]),m,n,lwork,"sgelqf");
 #endif
         }
         float* bi = beta.ptr();

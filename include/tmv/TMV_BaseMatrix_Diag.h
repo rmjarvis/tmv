@@ -147,6 +147,11 @@ namespace tmv {
         typedef typename Traits<M>::const_subdiagmatrix_step_type 
             const_subdiagmatrix_step_type;
 
+        typedef typename Traits<M>::const_iterator const_iterator;
+        typedef typename Traits<M>::const_rowmajor_iterator 
+            const_rowmajor_iterator;
+        typedef typename Traits<M>::const_colmajor_iterator 
+            const_colmajor_iterator;
 
         //
         // Constructor
@@ -378,6 +383,21 @@ namespace tmv {
         TMV_INLINE value_type cref(int i) const 
         { return mat().cref(i); }
 
+        TMV_INLINE const_iterator begin() const
+        { return diag().begin(); }
+        TMV_INLINE const_iterator end() const
+        { return diag().end(); }
+
+        TMV_INLINE const_rowmajor_iterator rowmajor_begin() const
+        { return begin(); }
+        TMV_INLINE const_rowmajor_iterator rowmajor_end() const
+        { return end(); }
+
+        TMV_INLINE const_colmajor_iterator colmajor_begin() const
+        { return begin(); }
+        TMV_INLINE const_colmajor_iterator colmajor_end() const
+        { return end(); }
+
     };
 
     template <class M>
@@ -442,6 +462,10 @@ namespace tmv {
         typedef typename base::const_subdiagmatrix_step_type 
             const_subdiagmatrix_step_type;
 
+        typedef typename base::const_iterator const_iterator;
+        typedef typename base::const_rowmajor_iterator const_rowmajor_iterator;
+        typedef typename base::const_colmajor_iterator const_colmajor_iterator;
+
         typedef typename Traits<M>::diag_type diag_type;
 
         typedef typename Traits<M>::unitview_type unitview_type;
@@ -449,6 +473,11 @@ namespace tmv {
         typedef typename Traits<M>::subdiagmatrix_type subdiagmatrix_type;
         typedef typename Traits<M>::subdiagmatrix_step_type 
             subdiagmatrix_step_type;
+
+        typedef typename Traits<M>::iterator iterator;
+        typedef typename Traits<M>::rowmajor_iterator rowmajor_iterator;
+        typedef typename Traits<M>::colmajor_iterator colmajor_iterator;
+
 
         //
         //
@@ -607,7 +636,7 @@ namespace tmv {
             return cSubDiagMatrix(i1,i2);
         }
 
-        TMV_INLINE_ND subdiagmatrix_step_type subMatrix(
+        TMV_INLINE_ND subdiagmatrix_step_type subDiagMatrix(
             int i1, int i2, int istep) 
         {
             CheckRange<_fort>(i1,i2,istep,size());
@@ -734,6 +763,36 @@ namespace tmv {
         TMV_INLINE value_type* ptr() { return mat().ptr(); }
         TMV_INLINE reference ref(int i) { return mat().ref(i); }
         TMV_INLINE value_type cref(int i) { return mat().cref(i); }
+
+        TMV_INLINE iterator begin() 
+        { return diag().begin(); }
+        TMV_INLINE iterator end() 
+        { return diag().end(); }
+
+        TMV_INLINE const_iterator begin() const
+        { return diag().begin(); }
+        TMV_INLINE const_iterator end() const
+        { return diag().end(); }
+
+        TMV_INLINE rowmajor_iterator rowmajor_begin() 
+        { return begin(); }
+        TMV_INLINE rowmajor_iterator rowmajor_end() 
+        { return end(); }
+
+        TMV_INLINE colmajor_iterator colmajor_begin() 
+        { return begin(); }
+        TMV_INLINE colmajor_iterator colmajor_end() 
+        { return end(); }
+
+        TMV_INLINE const_rowmajor_iterator rowmajor_begin() const
+        { return begin(); }
+        TMV_INLINE const_rowmajor_iterator rowmajor_end() const
+        { return end(); }
+
+        TMV_INLINE const_colmajor_iterator colmajor_begin() const
+        { return begin(); }
+        TMV_INLINE const_colmajor_iterator colmajor_end() const
+        { return end(); }
 
     }; // BaseMatrix_Diag_Mutable
 

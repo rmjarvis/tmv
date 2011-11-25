@@ -46,44 +46,11 @@ namespace tmv {
         const ConstVectorView<double>& beta,
         MatrixView<double> x)
     {
-        int ldx = x.isrm() ? x.stepi() : x.stepj();
-        int m = x.isrm() ? x.rowsize() : x.colsize();
-        int n = x.isrm() ? x.colsize() : x.rowsize();
+        int ldx = x.iscm() ? x.stepj() : x.stepi();
+        int m = x.iscm() ? x.colsize() : x.rowsize();
+        int n = x.iscm() ? x.rowsize() : x.colsize();
         int k = Q.rowsize();
-        if (Q.isrm()) {
-            int ldq = Q.stepi();
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
-            AlignedArray<double> work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<double> work(1);
-            work.get()[0] = 0.;
-            LAPNAME(dormlq) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_T:LAPCH_NT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(work[0]);
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(dormlq) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_T:LAPCH_NT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-#ifdef LAPNOWORK
-            LAP_Results("dormlq");
-#else
-            LAP_Results(int(work[0]),m,n,lwork,"dormlq");
-#endif
-        } else {
+        if (Q.iscm()) {
             int ldq = Q.stepj();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
@@ -95,8 +62,8 @@ namespace tmv {
             AlignedArray<double> work(1);
             work.get()[0] = 0.;
             LAPNAME(dormqr) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L, 
-                x.isrm()?LAPCH_NT:LAPCH_T, LAPV(m),LAPV(n),LAPV(k),
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R, 
+                x.iscm()?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
                 LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -106,8 +73,8 @@ namespace tmv {
 #endif
 #endif
             LAPNAME(dormqr) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L, 
-                x.isrm()?LAPCH_NT:LAPCH_T, LAPV(m),LAPV(n),LAPV(k),
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R, 
+                x.iscm()?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
                 LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -115,6 +82,39 @@ namespace tmv {
             LAP_Results("dormqr");
 #else
             LAP_Results(int(work[0]),m,n,lwork,"dormqr");
+#endif
+        } else {
+            int ldq = Q.stepi();
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<double> work(1);
+            work.get()[0] = 0.;
+            LAPNAME(dormlq) (
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_NT:LAPCH_T,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            lwork = int(work[0]);
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(dormlq) (
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_NT:LAPCH_T,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+#ifdef LAPNOWORK
+            LAP_Results("dormlq");
+#else
+            LAP_Results(int(work[0]),m,n,lwork,"dormlq");
 #endif
         }
     }
@@ -126,50 +126,12 @@ namespace tmv {
     {
         int k = Q.rowsize();
         Vector<std::complex<double> > cbeta = beta;
-        if (Q.isrm()) {
-            int ldx = x.isrm() ? x.stepi() : x.stepj();
-            int m = x.isrm() ? x.rowsize() : x.colsize();
-            int n = x.isrm() ? x.colsize() : x.rowsize();
-            int ldq = Q.stepi();
-            if (x.isrm() == Q.isconj()) x.conjugateSelf();
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
-            AlignedArray<std::complex<double> > work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<std::complex<double> > work(1);
-            work.get()[0] = 0.;
-            LAPNAME(zunmlq) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_CT:LAPCH_NT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(TMV_REAL(work[0]));
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(zunmlq) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_CT:LAPCH_NT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            if (x.isrm() == Q.isconj()) x.conjugateSelf();
-#ifdef LAPNOWORK
-            LAP_Results("zunmlq");
-#else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zunmlq");
-#endif
-        } else {
-            int ldx = x.isrm() ? x.stepi() : x.stepj();
-            int m = x.isrm() ? x.rowsize() : x.colsize();
-            int n = x.isrm() ? x.colsize() : x.rowsize();
+        if (Q.iscm()) {
+            int ldx = x.iscm() ? x.stepj() : x.stepi();
+            int m = x.iscm() ? x.colsize() : x.rowsize();
+            int n = x.iscm() ? x.rowsize() : x.colsize();
             int ldq = Q.stepj();
-            if (x.isrm() != Q.isconj()) x.conjugateSelf();
+            if (x.iscm() == Q.isconj()) x.conjugateSelf();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -180,8 +142,8 @@ namespace tmv {
             AlignedArray<std::complex<double> > work(1);
             work.get()[0] = 0.;
             LAPNAME(zunmqr) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_NT:LAPCH_CT,
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_CT:LAPCH_NT,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -191,16 +153,54 @@ namespace tmv {
 #endif
 #endif
             LAPNAME(zunmqr) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_NT:LAPCH_CT,
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_CT:LAPCH_NT,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            if (x.isrm() != Q.isconj()) x.conjugateSelf();
+            if (x.iscm() == Q.isconj()) x.conjugateSelf();
 #ifdef LAPNOWORK
             LAP_Results("zunmqr");
 #else
             LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zunmqr");
+#endif
+        } else {
+            int ldx = x.iscm() ? x.stepj() : x.stepi();
+            int m = x.iscm() ? x.colsize() : x.rowsize();
+            int n = x.iscm() ? x.rowsize() : x.colsize();
+            int ldq = Q.stepi();
+            if (x.iscm() != Q.isconj()) x.conjugateSelf();
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            AlignedArray<std::complex<double> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<std::complex<double> > work(1);
+            work.get()[0] = 0.;
+            LAPNAME(zunmlq) (
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_NT:LAPCH_CT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            lwork = int(TMV_REAL(work[0]));
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(zunmlq) (
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_NT:LAPCH_CT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            if (x.iscm() != Q.isconj()) x.conjugateSelf();
+#ifdef LAPNOWORK
+            LAP_Results("zunmlq");
+#else
+            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zunmlq");
 #endif
         }
     }
@@ -209,44 +209,11 @@ namespace tmv {
         const ConstVectorView<double>& beta,
         MatrixView<double> x)
     {
-        int ldx = x.isrm() ? x.stepi() : x.stepj();
-        int m = x.isrm() ? x.rowsize() : x.colsize();
-        int n = x.isrm() ? x.colsize() : x.rowsize();
+        int ldx = x.iscm() ? x.stepj() : x.stepi();
+        int m = x.iscm() ? x.colsize() : x.rowsize();
+        int n = x.iscm() ? x.rowsize() : x.colsize();
         int k = Q.rowsize();
-        if (Q.isrm()) {
-            int ldq = Q.stepi();
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
-            AlignedArray<double> work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<double> work(1);
-            work.get()[0] = 0.;
-            LAPNAME(dormlq) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_NT:LAPCH_T,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(work[0]);
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(dormlq) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_NT:LAPCH_T,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-#ifdef LAPNOWORK
-            LAP_Results("dormlq");
-#else
-            LAP_Results(int(work[0]),m,n,lwork,"dormlq");
-#endif
-        } else {
+        if (Q.iscm()) {
             int ldq = Q.stepj();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
@@ -258,8 +225,8 @@ namespace tmv {
             AlignedArray<double> work(1);
             work.get()[0] = 0.;
             LAPNAME(dormqr) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L, 
-                x.isrm()?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R, 
+                x.iscm()?LAPCH_NT:LAPCH_T, LAPV(m),LAPV(n),LAPV(k),
                 LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -269,8 +236,8 @@ namespace tmv {
 #endif
 #endif
             LAPNAME(dormqr) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L, 
-                x.isrm()?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R, 
+                x.iscm()?LAPCH_NT:LAPCH_T, LAPV(m),LAPV(n),LAPV(k),
                 LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -278,6 +245,39 @@ namespace tmv {
             LAP_Results("dormqr");
 #else
             LAP_Results(int(work[0]),m,n,lwork,"dormqr");
+#endif
+        } else {
+            int ldq = Q.stepi();
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<double> work(1);
+            work.get()[0] = 0.;
+            LAPNAME(dormlq) (
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_T:LAPCH_NT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            lwork = int(work[0]);
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(dormlq) (
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_T:LAPCH_NT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+#ifdef LAPNOWORK
+            LAP_Results("dormlq");
+#else
+            LAP_Results(int(work[0]),m,n,lwork,"dormlq");
 #endif
         }
     }
@@ -289,50 +289,12 @@ namespace tmv {
     {
         int k = Q.rowsize();
         Vector<std::complex<double> > cbeta = beta;
-        if (Q.isrm()) {
-            int ldx = x.isrm() ? x.stepi() : x.stepj();
-            int m = x.isrm() ? x.rowsize() : x.colsize();
-            int n = x.isrm() ? x.colsize() : x.rowsize();
-            int ldq = Q.stepi();
-            if (x.isrm() == Q.isconj()) x.conjugateSelf();
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
-            AlignedArray<std::complex<double> > work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<std::complex<double> > work(1);
-            work.get()[0] = 0.;
-            LAPNAME(zunmlq) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_NT:LAPCH_CT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(TMV_REAL(work[0]));
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(zunmlq) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_NT:LAPCH_CT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            if (x.isrm() == Q.isconj()) x.conjugateSelf();
-#ifdef LAPNOWORK
-            LAP_Results("zunmlq");
-#else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zunmlq");
-#endif
-        } else {
-            int ldx = x.isrm() ? x.stepi() : x.stepj();
-            int m = x.isrm() ? x.rowsize() : x.colsize();
-            int n = x.isrm() ? x.colsize() : x.rowsize();
+        if (Q.iscm()) {
+            int ldx = x.iscm() ? x.stepj() : x.stepi();
+            int m = x.iscm() ? x.colsize() : x.rowsize();
+            int n = x.iscm() ? x.rowsize() : x.colsize();
             int ldq = Q.stepj();
-            if (x.isrm() != Q.isconj()) x.conjugateSelf();
+            if (x.iscm() == Q.isconj()) x.conjugateSelf();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -343,8 +305,8 @@ namespace tmv {
             AlignedArray<std::complex<double> > work(1);
             work.get()[0] = 0.;
             LAPNAME(zunmqr) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_CT:LAPCH_NT,
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_NT:LAPCH_CT,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -354,16 +316,54 @@ namespace tmv {
 #endif
 #endif
             LAPNAME(zunmqr) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_CT:LAPCH_NT,
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_NT:LAPCH_CT,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            if (x.isrm() != Q.isconj()) x.conjugateSelf();
+            if (x.iscm() == Q.isconj()) x.conjugateSelf();
 #ifdef LAPNOWORK
             LAP_Results("zunmqr");
 #else
             LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zunmqr");
+#endif
+        } else {
+            int ldx = x.iscm() ? x.stepj() : x.stepi();
+            int m = x.iscm() ? x.colsize() : x.rowsize();
+            int n = x.iscm() ? x.rowsize() : x.colsize();
+            int ldq = Q.stepi();
+            if (x.iscm() != Q.isconj()) x.conjugateSelf();
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            AlignedArray<std::complex<double> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<std::complex<double> > work(1);
+            work.get()[0] = 0.;
+            LAPNAME(zunmlq) (
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_CT:LAPCH_NT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            lwork = int(TMV_REAL(work[0]));
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(zunmlq) (
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_CT:LAPCH_NT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            if (x.iscm() != Q.isconj()) x.conjugateSelf();
+#ifdef LAPNOWORK
+            LAP_Results("zunmlq");
+#else
+            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zunmlq");
 #endif
         }
     }
@@ -396,44 +396,11 @@ namespace tmv {
         const ConstVectorView<float>& beta,
         MatrixView<float> x)
     {
-        int ldx = x.isrm() ? x.stepi() : x.stepj();
-        int m = x.isrm() ? x.rowsize() : x.colsize();
-        int n = x.isrm() ? x.colsize() : x.rowsize();
+        int ldx = x.iscm() ? x.stepj() : x.stepi();
+        int m = x.iscm() ? x.colsize() : x.rowsize();
+        int n = x.iscm() ? x.rowsize() : x.colsize();
         int k = Q.rowsize();
-        if (Q.isrm()) {
-            int ldq = Q.stepi();
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
-            AlignedArray<float> work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<float> work(1);
-            work.get()[0] = 0.;
-            LAPNAME(sormlq) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_T:LAPCH_NT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(work[0]);
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(sormlq) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_T:LAPCH_NT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-#ifdef LAPNOWORK
-            LAP_Results("sormlq");
-#else
-            LAP_Results(int(work[0]),m,n,lwork,"sormlq");
-#endif
-        } else {
+        if (Q.iscm()) {
             int ldq = Q.stepj();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
@@ -443,10 +410,10 @@ namespace tmv {
 #else
             int lwork = -1;
             AlignedArray<float> work(1);
-            work.get()[0] = 0.;
+            work.get()[0] = 0.F;
             LAPNAME(sormqr) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L, 
-                x.isrm()?LAPCH_NT:LAPCH_T, LAPV(m),LAPV(n),LAPV(k),
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R, 
+                x.iscm()?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
                 LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -456,8 +423,8 @@ namespace tmv {
 #endif
 #endif
             LAPNAME(sormqr) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L, 
-                x.isrm()?LAPCH_NT:LAPCH_T, LAPV(m),LAPV(n),LAPV(k),
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R, 
+                x.iscm()?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
                 LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -465,6 +432,39 @@ namespace tmv {
             LAP_Results("sormqr");
 #else
             LAP_Results(int(work[0]),m,n,lwork,"sormqr");
+#endif
+        } else {
+            int ldq = Q.stepi();
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<float> work(1);
+            work.get()[0] = 0.F;
+            LAPNAME(sormlq) (
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_NT:LAPCH_T,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            lwork = int(work[0]);
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(sormlq) (
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_NT:LAPCH_T,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+#ifdef LAPNOWORK
+            LAP_Results("sormlq");
+#else
+            LAP_Results(int(work[0]),m,n,lwork,"sormlq");
 #endif
         }
     }
@@ -476,50 +476,12 @@ namespace tmv {
     {
         int k = Q.rowsize();
         Vector<std::complex<float> > cbeta = beta;
-        if (Q.isrm()) {
-            int ldx = x.isrm() ? x.stepi() : x.stepj();
-            int m = x.isrm() ? x.rowsize() : x.colsize();
-            int n = x.isrm() ? x.colsize() : x.rowsize();
-            int ldq = Q.stepi();
-            if (x.isrm() == Q.isconj()) x.conjugateSelf();
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
-            AlignedArray<std::complex<float> > work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<std::complex<float> > work(1);
-            work.get()[0] = 0.;
-            LAPNAME(cunmlq) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_CT:LAPCH_NT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(TMV_REAL(work[0]));
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(cunmlq) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_CT:LAPCH_NT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            if (x.isrm() == Q.isconj()) x.conjugateSelf();
-#ifdef LAPNOWORK
-            LAP_Results("cunmlq");
-#else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cunmlq");
-#endif
-        } else {
-            int ldx = x.isrm() ? x.stepi() : x.stepj();
-            int m = x.isrm() ? x.rowsize() : x.colsize();
-            int n = x.isrm() ? x.colsize() : x.rowsize();
+        if (Q.iscm()) {
+            int ldx = x.iscm() ? x.stepj() : x.stepi();
+            int m = x.iscm() ? x.colsize() : x.rowsize();
+            int n = x.iscm() ? x.rowsize() : x.colsize();
             int ldq = Q.stepj();
-            if (x.isrm() != Q.isconj()) x.conjugateSelf();
+            if (x.iscm() == Q.isconj()) x.conjugateSelf();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -528,10 +490,10 @@ namespace tmv {
 #else
             int lwork = -1;
             AlignedArray<std::complex<float> > work(1);
-            work.get()[0] = 0.;
+            work.get()[0] = 0.F;
             LAPNAME(cunmqr) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_NT:LAPCH_CT,
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_CT:LAPCH_NT,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -541,16 +503,54 @@ namespace tmv {
 #endif
 #endif
             LAPNAME(cunmqr) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_NT:LAPCH_CT,
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_CT:LAPCH_NT,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            if (x.isrm() != Q.isconj()) x.conjugateSelf();
+            if (x.iscm() == Q.isconj()) x.conjugateSelf();
 #ifdef LAPNOWORK
             LAP_Results("cunmqr");
 #else
             LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cunmqr");
+#endif
+        } else {
+            int ldx = x.iscm() ? x.stepj() : x.stepi();
+            int m = x.iscm() ? x.colsize() : x.rowsize();
+            int n = x.iscm() ? x.rowsize() : x.colsize();
+            int ldq = Q.stepi();
+            if (x.iscm() != Q.isconj()) x.conjugateSelf();
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            AlignedArray<std::complex<float> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<std::complex<float> > work(1);
+            work.get()[0] = 0.F;
+            LAPNAME(cunmlq) (
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_NT:LAPCH_CT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            lwork = int(TMV_REAL(work[0]));
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(cunmlq) (
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_NT:LAPCH_CT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            if (x.iscm() != Q.isconj()) x.conjugateSelf();
+#ifdef LAPNOWORK
+            LAP_Results("cunmlq");
+#else
+            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cunmlq");
 #endif
         }
     }
@@ -559,44 +559,11 @@ namespace tmv {
         const ConstVectorView<float>& beta,
         MatrixView<float> x)
     {
-        int ldx = x.isrm() ? x.stepi() : x.stepj();
-        int m = x.isrm() ? x.rowsize() : x.colsize();
-        int n = x.isrm() ? x.colsize() : x.rowsize();
+        int ldx = x.iscm() ? x.stepj() : x.stepi();
+        int m = x.iscm() ? x.colsize() : x.rowsize();
+        int n = x.iscm() ? x.rowsize() : x.colsize();
         int k = Q.rowsize();
-        if (Q.isrm()) {
-            int ldq = Q.stepi();
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
-            AlignedArray<float> work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<float> work(1);
-            work.get()[0] = 0.;
-            LAPNAME(sormlq) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_NT:LAPCH_T,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(work[0]);
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(sormlq) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_NT:LAPCH_T,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-#ifdef LAPNOWORK
-            LAP_Results("sormlq");
-#else
-            LAP_Results(int(work[0]),m,n,lwork,"sormlq");
-#endif
-        } else {
+        if (Q.iscm()) {
             int ldq = Q.stepj();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
@@ -606,10 +573,10 @@ namespace tmv {
 #else
             int lwork = -1;
             AlignedArray<float> work(1);
-            work.get()[0] = 0.;
+            work.get()[0] = 0.F;
             LAPNAME(sormqr) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L, 
-                x.isrm()?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R, 
+                x.iscm()?LAPCH_NT:LAPCH_T, LAPV(m),LAPV(n),LAPV(k),
                 LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -619,8 +586,8 @@ namespace tmv {
 #endif
 #endif
             LAPNAME(sormqr) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L, 
-                x.isrm()?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R, 
+                x.iscm()?LAPCH_NT:LAPCH_T, LAPV(m),LAPV(n),LAPV(k),
                 LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -628,6 +595,39 @@ namespace tmv {
             LAP_Results("sormqr");
 #else
             LAP_Results(int(work[0]),m,n,lwork,"sormqr");
+#endif
+        } else {
+            int ldq = Q.stepi();
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<float> work(1);
+            work.get()[0] = 0.F;
+            LAPNAME(sormlq) (
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_T:LAPCH_NT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            lwork = int(work[0]);
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(sormlq) (
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_T:LAPCH_NT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+#ifdef LAPNOWORK
+            LAP_Results("sormlq");
+#else
+            LAP_Results(int(work[0]),m,n,lwork,"sormlq");
 #endif
         }
     }
@@ -639,50 +639,12 @@ namespace tmv {
     {
         int k = Q.rowsize();
         Vector<std::complex<float> > cbeta = beta;
-        if (Q.isrm()) {
-            int ldx = x.isrm() ? x.stepi() : x.stepj();
-            int m = x.isrm() ? x.rowsize() : x.colsize();
-            int n = x.isrm() ? x.colsize() : x.rowsize();
-            int ldq = Q.stepi();
-            if (x.isrm() == Q.isconj()) x.conjugateSelf();
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
-            AlignedArray<std::complex<float> > work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<std::complex<float> > work(1);
-            work.get()[0] = 0.;
-            LAPNAME(cunmlq) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_NT:LAPCH_CT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(TMV_REAL(work[0]));
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(cunmlq) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_NT:LAPCH_CT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            if (x.isrm() == Q.isconj()) x.conjugateSelf();
-#ifdef LAPNOWORK
-            LAP_Results("cunmlq");
-#else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cunmlq");
-#endif
-        } else {
-            int ldx = x.isrm() ? x.stepi() : x.stepj();
-            int m = x.isrm() ? x.rowsize() : x.colsize();
-            int n = x.isrm() ? x.colsize() : x.rowsize();
+        if (Q.iscm()) {
+            int ldx = x.iscm() ? x.stepj() : x.stepi();
+            int m = x.iscm() ? x.colsize() : x.rowsize();
+            int n = x.iscm() ? x.rowsize() : x.colsize();
             int ldq = Q.stepj();
-            if (x.isrm() != Q.isconj()) x.conjugateSelf();
+            if (x.iscm() == Q.isconj()) x.conjugateSelf();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -691,10 +653,10 @@ namespace tmv {
 #else
             int lwork = -1;
             AlignedArray<std::complex<float> > work(1);
-            work.get()[0] = 0.;
+            work.get()[0] = 0.F;
             LAPNAME(cunmqr) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_CT:LAPCH_NT,
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_NT:LAPCH_CT,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -704,16 +666,54 @@ namespace tmv {
 #endif
 #endif
             LAPNAME(cunmqr) (
-                LAPCM x.isrm()?LAPCH_R:LAPCH_L,
-                x.isrm()?LAPCH_CT:LAPCH_NT,
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_NT:LAPCH_CT,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            if (x.isrm() != Q.isconj()) x.conjugateSelf();
+            if (x.iscm() == Q.isconj()) x.conjugateSelf();
 #ifdef LAPNOWORK
             LAP_Results("cunmqr");
 #else
             LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cunmqr");
+#endif
+        } else {
+            int ldx = x.iscm() ? x.stepj() : x.stepi();
+            int m = x.iscm() ? x.colsize() : x.rowsize();
+            int n = x.iscm() ? x.rowsize() : x.colsize();
+            int ldq = Q.stepi();
+            if (x.iscm() != Q.isconj()) x.conjugateSelf();
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            AlignedArray<std::complex<float> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<std::complex<float> > work(1);
+            work.get()[0] = 0.F;
+            LAPNAME(cunmlq) (
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_CT:LAPCH_NT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            lwork = int(TMV_REAL(work[0]));
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(cunmlq) (
+                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
+                x.iscm()?LAPCH_CT:LAPCH_NT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            if (x.iscm() != Q.isconj()) x.conjugateSelf();
+#ifdef LAPNOWORK
+            LAP_Results("cunmlq");
+#else
+            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cunmlq");
 #endif
         }
     }

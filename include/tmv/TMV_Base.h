@@ -254,33 +254,33 @@ namespace tmv {
 
         static std::string text()
         {
-            return 
-                std::string() +
-                ( (A & ColMajor) ? "ColMajor" : 
-                  (A & RowMajor) ? "RowMajor" :
-                  (A & DiagMajor) ? "DiagMajor" : "NonMajor") +
-                ((A & Conj) ? "|Conj" : "") +
-                ((A & FortranStyle) ? "|FortranStyle " : "") +
-                ((A & NonUnitDiag) ? "|NonUnitDiag " : "") +
-                ((A & UnitDiag) ? "|UnitDiag" : "") +
-                ((A & ZeroDiag) ? "|ZeroDiag" : "") +
-                ((A & Packed) ? "|Packed" : "") +
-                ((A & Lower) ? "|Lower" : "") +
-                ((A & Upper) ? "|upper" : "") +
-                ((A & NoDivider) ? "|NoDivider" : "") +
-                ((A & WithDivider) ? "|WithDivider" : "") +
-                ((A & NoAlias) ? "|NoAlias" : "") +
-                ((A & CheckAlias) ? "|CheckAlias" : "");
+            std::string ret;
+            ret += ( (A & ColMajor) ? "ColMajor|" : 
+                     (A & RowMajor) ? "RowMajor|" :
+                     (A & DiagMajor) ? "DiagMajor|" : "");
+            ret += (A & Conj) ? "|Conj" : "";
+            ret += (A & FortranStyle) ? "|FortranStyle " : "";
+            ret += (A & NonUnitDiag) ? "|NonUnitDiag " : "";
+            ret += (A & UnitDiag) ? "|UnitDiag" : "";
+            ret += (A & ZeroDiag) ? "|ZeroDiag" : "";
+            ret += (A & Packed) ? "|Packed" : "";
+            ret += (A & Lower) ? "|Lower" : "";
+            ret += (A & Upper) ? "|Upper" : "";
+            ret += (A & NoDivider) ? "|NoDivider" : "";
+            ret += (A & WithDivider) ? "|WithDivider" : "";
+            ret += (A & NoAlias) ? "|NoAlias" : "";
+            ret += (A & CheckAlias) ? "|CheckAlias" : "";
+            return ret.substr(0,ret.size()-1);
         }
         static std::string vtext()
         {
-            return 
-                std::string() +
-                ((A & Unit) ? "Unit" : "NonUnit") +
-                ((A & Conj) ? "|Conj" : "") +
-                ((A & FortranStyle) ? "|FortranStyle" : "") +
-                ((A & NoAlias) ? "|NoAlias" : "") +
-                ((A & CheckAlias) ? "|CheckAlias" : "");
+            std::string ret;
+            ret += (A & Unit) ? "Unit" : "";
+            ret += (A & Conj) ? "|Conj" : "";
+            ret += (A & FortranStyle) ? "|FortranStyle" : "";
+            ret += (A & NoAlias) ? "|NoAlias" : "";
+            ret += (A & CheckAlias) ? "|CheckAlias" : "";
+            return ret.substr(0,ret.size()-1);
         }
     };
 
@@ -2334,16 +2334,28 @@ namespace tmv {
     TMV_INLINE typename Traits<T>::real_type TMV_Epsilon() 
     { return std::numeric_limits<typename Traits<T>::real_type>::epsilon(); }
 
-    template <class T>
-    inline bool TMV_Underflow(T x)
-    {
-        typedef typename Traits<T>::real_type RT;
-        return TMV_ABS2(x) < 
-            std::numeric_limits<RT>::min() * RT(tmv::Traits<T>::twoifcomplex); 
-    }
+    template <bool isint, class T>
+    struct UnderflowHelper;
 
-    TMV_INLINE bool TMV_Underflow(int )
-    { return false; }
+    template <class T>
+    struct UnderflowHelper<true,T> // T is an integer type
+    { static TMV_INLINE bool call(T x) { return false; } };
+
+    template <class T>
+    struct UnderflowHelper<false,T> // T is not integer
+    {
+        static TMV_INLINE bool call(T x) 
+        {
+            typedef typename Traits<T>::real_type RT;
+            return TMV_ABS2(x) < (
+                std::numeric_limits<RT>::min() *
+                RT(tmv::Traits<T>::twoifcomplex) ); 
+        }
+    };
+
+    template <class T>
+    TMV_INLINE bool TMV_Underflow(T x)
+    { return UnderflowHelper<Traits<T>::isinteger,T>::call(x); }
 
 #ifdef TMV_DEBUG
 #define TMV_TEXT

@@ -1167,10 +1167,6 @@ namespace tmv {
             // 38 = Check if M is small
 
             const bool upper = M2::_upper;
-#if 0
-            //const int algo = upper ? 17 : 27;
-            const int algo = 36;
-#else
             const bool rr = M1::_rowmajor && M2::_rowmajor;
             const bool rc = M1::_rowmajor && M2::_colmajor;
             const bool cx = M1::_colmajor;
@@ -1209,7 +1205,6 @@ namespace tmv {
                 (rs >= 64 && McMcNc >= TMV_DIVMU_OMP_THRESH) ? 36 :
 #endif
                 27 ;
-#endif
 #ifdef PRINTALGO_DivU
             const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;

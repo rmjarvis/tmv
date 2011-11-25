@@ -84,13 +84,9 @@ namespace tmv {
 
     // In TMV_QRPDecompose.h
     template <class M, class V>
-    static inline void QR_Decompose(
-        BaseMatrix_Rec_Mutable<M>& m, BaseVector_Mutable<V>& beta);
-    template <class M1, class M2>
-    static inline void QR_Decompose(
-        BaseMatrix_Rec_Mutable<M1>& Q, BaseMatrix_Tri_Mutable<M2>& R);
-    template <class M>
-    static inline void QR_Decompose(BaseMatrix_Rec_Mutable<M>& m);
+    inline void QRP_Decompose(
+        BaseMatrix_Rec_Mutable<M>& m, BaseVector_Mutable<V>& beta,
+        Permutation& P, bool strict);
 
     // In TMV_QRInverse.h
     template <class M1, class V1, class M2>
@@ -143,7 +139,7 @@ namespace tmv {
 
     // 
     // Store the global variable for StrictQRP as a singleton to make
-    // is thread safe and able to be done inline.
+    // it able to be done inline.
     //
 
     class QRP_StrictSingleton 

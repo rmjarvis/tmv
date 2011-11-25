@@ -115,6 +115,49 @@ static void TestVectorReal()
     Assert(afcv_c == a,"CStyle View of FortransStyle Vector = CStyle Vector");
     Assert(afcv == a,"FortranStyle View of Vector == CStyle Vector");
 
+    // Test assignments and constructors from arrays
+    std::vector<T> qv(6);
+    T qvar[] = { T(8), T(6), T(4), T(2), T(0), T(-2) };
+    T qvar2[] = { T(8), T(7), T(6), T(5), T(4), T(3), T(2), T(1), T(0), T(-1), T(-2) };
+    for(int i=0;i<6;++i) qv[i] = qvar[i];
+
+    // Construct from C array
+    tmv::Vector<T> q1(6);
+    std::copy(qvar,qvar+6,q1.begin());
+    // Construct from vector
+    tmv::Vector<T> q2(6);
+    std::copy(qv.begin(),qv.end(),q2.begin());
+    // Assign VectorView from vector
+    tmv::Vector<T> q3x(50);
+    tmv::VectorView<T> q3 = q3x.subVector(4,34,5);
+    std::copy(qv.begin(),qv.end(),q3.begin());
+    // Use op<< assignment
+    tmv::Vector<T> q4(6);
+    q4 << 8, 6, 4, 2, 0, -2;
+    // Directly view an array
+    tmv::VectorView<T> q5 = tmv::VectorViewOf(qvar,6);
+    // Directly view an array with step = 2
+    tmv::VectorView<T> q6 = tmv::VectorViewOf(qvar2,6,2);
+
+    if (showacc) {
+        std::cout<<"q1 = "<<q1<<std::endl;
+        std::cout<<"q2 = "<<q2<<std::endl;
+        std::cout<<"q3 = "<<q3<<std::endl;
+        std::cout<<"q4 = "<<q4<<std::endl;
+        std::cout<<"q5 = "<<q5<<std::endl;
+        std::cout<<"q6 = "<<q6<<std::endl;
+    }
+
+    for(int i=0;i<6;++i) {
+        Assert(q1(i) == T(8-2*i),"Create Vector from T*");
+        Assert(q2(i) == T(8-2*i),"Create Vector from std::vector");
+        Assert(q3(i) == T(8-2*i),"Create VectorView from std::vector");
+        Assert(q4(i) == T(8-2*i),"Create Vector from << list");
+        Assert(q5(i) == T(8-2*i),"Create VectorView of T* ");
+        Assert(q6(i) == T(8-2*i),"Create VectorView of T* with step");
+    }
+
+    // Test Basic Arithmetic
     for (int i=0; i<N; ++i) b(i) = T(5+2*i);
 
     v = a+b;

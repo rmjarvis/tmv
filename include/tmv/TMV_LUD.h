@@ -49,15 +49,8 @@ namespace tmv {
 
     // In TMV_LUDecompose.h
     template <class M>
-    static inline void LU_Decompose(BaseMatrix_Rec_Mutable<M>& m, int* P);
-    template <class M>
-    static inline void LU_Decompose(
+    inline void LU_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, Permutation& P);
-    template <class T, int A>
-    static inline void LU_Decompose(MatrixView<T,A> m, Permutation& P);
-    template <class T, int M, int N, int Si, int Sj, int A>
-    static inline void LU_Decompose(
-        SmallMatrixView<T,M,N,Si,Sj,A> m, Permutation& P);
 
     // In TMV_LUInverse.h
     template <class M1>

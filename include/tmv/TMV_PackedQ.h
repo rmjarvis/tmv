@@ -556,9 +556,6 @@ namespace tmv {
     {
         static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
         {
-#if 0
-            const int algo = 21;
-#else
             typedef typename M2::value_type T;
             const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
             const int csrs = IntTraits2<cs,rs>::prod;
@@ -571,7 +568,6 @@ namespace tmv {
                     cs < 16 ? 11 : xs == TMV_UNKNOWN ? 31 : 
                     32 ) :
                 rs <= 128 ? 27 : 21;
-#endif
 #ifdef PRINTALGO_QR
             std::cout<<"Inline PackedQ_MultEq\n";
             std::cout<<"div,cs,rs,xs = "<<div<<','<<cs<<','<<rs<<std::endl;

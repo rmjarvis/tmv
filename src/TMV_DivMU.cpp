@@ -54,8 +54,8 @@ namespace tmv {
         int m=A.iscm()?A.colsize():A.rowsize();
         int n=A.iscm()?A.rowsize():A.colsize();
         double alpha(1);
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
+        int lda = A.iscm()?A.stepj():A.stepi();
+        int ldb = B.iscm()?B.stepj():B.stepi();
 
         BLASNAME(dtrsm) (
             BLASCM A.iscm()?BLASCH_L:BLASCH_R, 
@@ -78,8 +78,8 @@ namespace tmv {
         int m=A.iscm()?A.colsize():A.rowsize();
         int n=A.iscm()?A.rowsize():A.colsize();
         std::complex<double> alpha(1);
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
+        int lda = A.iscm()?A.stepj():A.stepi();
+        int ldb = B.iscm()?B.stepj():B.stepi();
         if (A.iscm()==B.iscm() && B.isconj()) {
             A.conjugateSelf();
             BLASNAME(ztrsm) (
@@ -109,12 +109,19 @@ namespace tmv {
         TMVAssert(A.isrm() || A.iscm());
         TMVAssert(B.isrm() || B.iscm());
 
-        if (A.isrm()) {
+        if (A.iscm()) {
+            Matrix<double,ColMajor> A1 = A.realPart();
+            BlasTriLDivEq(A1.xView(),B,double(0));
+            A.realPart() = A1;
+            A1 = A.imagPart();
+            BlasTriLDivEq(A1.xView(),B,double(0));
+            A.imagPart() = A1;
+        } else {
             int m=2*A.rowsize();
             int n=A.colsize();
             double alpha(1);
             int lda = 2*A.stepi();
-            int ldb = B.isrm()?B.stepi():B.stepj();
+            int ldb = B.iscm()?B.stepj():B.stepi();
 
             BLASNAME(dtrsm) (
                 BLASCM A.iscm()?BLASCH_L:BLASCH_R, 
@@ -123,13 +130,6 @@ namespace tmv {
                 B.isunit()?BLASCH_U:BLASCH_NU, 
                 BLASV(m),BLASV(n),BLASV(alpha),BLASP(B.cptr()),BLASV(ldb),
                 BLASP((double*)A.ptr()),BLASV(lda) BLAS1 BLAS1 BLAS1 BLAS1);
-        } else {
-            Matrix<double,ColMajor> A1 = A.realPart();
-            BlasTriLDivEq(A1.xView(),B,double(0));
-            A.realPart() = A1;
-            A1 = A.imagPart();
-            BlasTriLDivEq(A1.xView(),B,double(0));
-            A.imagPart() = A1;
         }
     }
 #endif
@@ -146,8 +146,8 @@ namespace tmv {
         int m=A.iscm()?A.colsize():A.rowsize();
         int n=A.iscm()?A.rowsize():A.colsize();
         float alpha(1);
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
+        int lda = A.iscm()?A.stepj():A.stepi();
+        int ldb = B.iscm()?B.stepj():B.stepi();
 
         BLASNAME(strsm) (
             BLASCM A.iscm()?BLASCH_L:BLASCH_R, 
@@ -170,8 +170,8 @@ namespace tmv {
         int m=A.iscm()?A.colsize():A.rowsize();
         int n=A.iscm()?A.rowsize():A.colsize();
         std::complex<float> alpha(1);
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
+        int lda = A.iscm()?A.stepj():A.stepi();
+        int ldb = B.iscm()?B.stepj():B.stepi();
         if (A.iscm()==B.iscm() && B.isconj()) {
             A.conjugateSelf();
             BLASNAME(ctrsm) (
@@ -201,12 +201,19 @@ namespace tmv {
         TMVAssert(A.isrm() || A.iscm());
         TMVAssert(B.isrm() || B.iscm());
 
-        if (A.isrm()) {
+        if (A.iscm()) {
+            Matrix<float,ColMajor> A1 = A.realPart();
+            BlasTriLDivEq(A1.xView(),B,float(0));
+            A.realPart() = A1;
+            A1 = A.imagPart();
+            BlasTriLDivEq(A1.xView(),B,float(0));
+            A.imagPart() = A1;
+        } else {
             int m=2*A.rowsize();
             int n=A.colsize();
             float alpha(1);
             int lda = 2*A.stepi();
-            int ldb = B.isrm()?B.stepi():B.stepj();
+            int ldb = B.iscm()?B.stepj():B.stepi();
 
             BLASNAME(strsm) (
                 BLASCM A.iscm()?BLASCH_L:BLASCH_R, 
@@ -215,13 +222,6 @@ namespace tmv {
                 B.isunit()?BLASCH_U:BLASCH_NU, 
                 BLASV(m),BLASV(n),BLASV(alpha),BLASP(B.cptr()),BLASV(ldb),
                 BLASP((float*)A.ptr()),BLASV(lda) BLAS1 BLAS1 BLAS1 BLAS1);
-        } else {
-            Matrix<float,ColMajor> A1 = A.realPart();
-            BlasTriLDivEq(A1.xView(),B,float(0));
-            A.realPart() = A1;
-            A1 = A.imagPart();
-            BlasTriLDivEq(A1.xView(),B,float(0));
-            A.imagPart() = A1;
         }
     }
 #endif

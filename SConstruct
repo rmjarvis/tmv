@@ -1,7 +1,4 @@
 # vim: set filetype=python et ts=4 sw=4:
-# to do:  
-#   Add more support for other compilers
-#   will support g++ and icpc at least
 # 
 # Always run scons from the root directory of tmv
 
@@ -119,7 +116,7 @@ opts.Add('LIBS','Libraries to send to the linker','')
 opts.Add(BoolVariable('DEBUG',
         'Turn on debugging statements in compilied library',False))
 opts.Add(BoolVariable('TEST_DEBUG',
-        'Only turn on debugging statements in the test suite',False))
+        'Only turn on debugging statements in the test suite',True))
 opts.Add(BoolVariable('STATIC','Use static linkage', False))
 opts.Add(BoolVariable('WITH_SSE',
         'Only necessary for icpc compilations: Use SSE commands', True))
@@ -147,6 +144,7 @@ Help(opts.GenerateHelpText(initial_env))
 
 # This helps us determine of openmp is available
 openmp_mingcc_vers = 4.1
+openmp_minclang_vers = 3.1 # Probably earlier, but this is the first I tested.
 openmp_minicpc_vers = 9.1  # 9.0 is supposed to work but has bugs
 openmp_minpgcc_vers = 6.0
 openmp_mincc_vers = 5.0    # I don't actually know what this should be.
@@ -194,6 +192,17 @@ def BasicCCFlags(env):
 
     if env['FLAGS'] == '':
         if compiler == 'g++':
+            env.Replace(CCFLAGS=['-O2'])
+            env.Append(CCFLAGS=['-fno-strict-aliasing'])
+            env['TEST_FLAGS'] = []
+            if env['PROFILE']:
+                env.Append(CCFLAGS=['-pg'])
+                env['TEST_FLAGS'] += ['-pg']
+            if env['WARN']:
+                env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror'])
+                env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
+    
+        elif compiler == 'clang++':
             env.Replace(CCFLAGS=['-O2'])
             env.Append(CCFLAGS=['-fno-strict-aliasing'])
             env['TEST_FLAGS'] = []
@@ -274,6 +283,7 @@ def AddOpenMPFlag(env):
     the compiler.
 
     g++ uses -fopemnp
+    clang++ uses -fopemnp
     icpc uses -openmp
     pgCC uses -mp
     CC uses -xopenmp
@@ -285,6 +295,14 @@ def AddOpenMPFlag(env):
     if compiler == 'g++':
         if version < openmp_mingcc_vers: 
             print 'No OpenMP support for g++ versions before ',openmp_mingcc_vers
+            env['WITH_OPENMP'] = False
+            return
+        flag = ['-fopenmp']
+        ldflag = ['-fopenmp']
+        xlib = ['pthread']
+    elif compiler == 'clang++':
+        if version < openmp_minclang_vers: 
+            print 'No OpenMP support for clang++ versions before ',openmp_minclang_vers
             env['WITH_OPENMP'] = False
             return
         flag = ['-fopenmp']
@@ -354,6 +372,10 @@ def GetCompilerVersion(env):
         versionflag = '--version'
         linenum=1
         # pgCC puts the version number on the second line of output.
+    elif 'clang++' in compiler :
+        compilertype = 'clang++'
+        versionflag = '--version'
+        linenum=0
     elif 'g++' in compiler :
         compilertype = 'g++'
         versionflag = '--version'

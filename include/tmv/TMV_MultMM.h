@@ -2191,10 +2191,6 @@ namespace tmv {
             // 86 = copy m2, figure out where to put x
             // 87 = temp m1*m2
 
-#if 0
-            const int algo = 63;
-            const int algo1 = 21;
-#else
             const bool ccc = M1::_colmajor && M2::_colmajor && M3::_colmajor;
             const bool rcc = M1::_rowmajor && M2::_colmajor && M3::_colmajor;
             const bool crc = M1::_colmajor && M2::_rowmajor && M3::_colmajor;
@@ -2302,7 +2298,6 @@ namespace tmv {
                 rcc ? ( M3::iscomplex ? 21 : 22 ) :
                 crc ? ( M3::iscomplex ? 31 : 32 ) :
                 21;
-#endif
 #endif
 #ifdef PRINTALGO_MM
             const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;

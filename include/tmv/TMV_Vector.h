@@ -42,10 +42,6 @@
 //    Vector<T,A>(size_t n, T x)
 //        Makes a Vector of size n with all values = x
 //
-//    Vector<T,A>(size_t n, const T* v2)
-//    Vector<T,A>(const std::vector<T>& v2)
-//        Makes a vector which copies the elements of v2
-//        For the second one, n specifies the length of the vector
 //
 // Special Creators: 
 //
@@ -384,7 +380,6 @@
 #ifndef TMV_Vector_H
 #define TMV_Vector_H
 
-#include <vector>
 #include "TMV_BaseVector.h"
 #include "TMV_VIt.h"
 #include "TMV_Array.h"
@@ -505,7 +500,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVAssert(n>=0);
 #ifdef TMV_DEBUG
-            this->setAllTo(Traits<value_type>::constr_value());
+            this->setAllTo(Traits<T>::constr_value());
 #endif
         }
 
@@ -514,21 +509,6 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVAssert(n>=0);
             this->setAllTo(val);
-        }
-
-        Vector(size_t n, const T* v2) : itssize(n), itsv(n)
-        {
-            TMVStaticAssert(Traits<type>::okA);
-            TMVAssert(n>=0);
-            VectorViewOf(v2,n).newAssignTo(*this);
-        }
-
-        explicit Vector(const std::vector<T>& v2) : 
-            itssize(v2.size()), itsv(itssize)
-        {
-            TMVStaticAssert(Traits<type>::okA);
-            TMVAssert(itssize>=0);
-            VectorViewOf(&v2[0],itssize).newAssignTo(*this);
         }
 
         Vector(const type& v2) : itssize(v2.size()), itsv(itssize)
@@ -550,7 +530,7 @@ namespace tmv {
         ~Vector() 
         {
 #ifdef TMV_DEBUG
-            this->setAllTo(Traits<value_type>::destr_value());
+            this->setAllTo(Traits<T>::destr_value());
 #endif
         }
 
@@ -590,12 +570,12 @@ namespace tmv {
         void resize(size_t n)
         {
 #ifdef TMV_DEBUG
-            this->setAllTo(Traits<value_type>::destr_value());
+            this->setAllTo(Traits<T>::destr_value());
 #endif
             itssize = n;
             itsv.resize(n);
 #ifdef TMV_DEBUG
-            this->setAllTo(Traits<value_type>::constr_value());
+            this->setAllTo(Traits<T>::constr_value());
 #endif
         }
 

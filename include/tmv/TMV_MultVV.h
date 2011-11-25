@@ -5,6 +5,7 @@
 
 #include "TMV_BaseVector.h"
 #include "TMV_Scaling.h"
+#include "TMV_Array.h"
 
 namespace tmv {
 

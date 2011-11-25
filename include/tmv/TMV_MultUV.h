@@ -762,11 +762,6 @@ namespace tmv {
                 s > 10 ? false :
                 s == TMV_UNKNOWN ? false :
                 nops <= TMV_UV_UNROLL;
-#if 0
-            const int algo = 
-                M1::_upper ? M1::_colmajor ? 11 : 12 :
-                M1::_colmajor ? 21 : 22;
-#else
             const int algo = 
                 ( s == 0 ) ? 0 : // trivial - nothing to do
                 ( s == 1 ) ? 1 : // trivial - s = 1
@@ -812,7 +807,6 @@ namespace tmv {
                         s > TMV_UV_COPYSIZE ? 81 : 22 ) :
                     22 ) :
                 V2::_step == 1 ? 22 : V3::_step == 1 ? 21 : 22;
-#endif
 #ifdef PRINTALGO_UV
             std::cout<<"InlineMultUV: \n";
             std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;

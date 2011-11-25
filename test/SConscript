@@ -5,15 +5,17 @@ Import('env')
 ReadFileList=env['__readfunc']
 
 libs=['tmv'] 
-sblibs=['tmv_symband','tmv'] 
+#sblibs=['tmv_symband','tmv'] 
+sblibs=['tmv'] 
 
 test_basic_files = ReadFileList('test_basic.files')
 test_diag_files = ReadFileList('test_diag.files')
 test_tri_files = ReadFileList('test_tri.files')
 test_div_files = ReadFileList('test_div.files')
 test_div_lap_files = ReadFileList('test_div_lap.files')
-test_band_files = ReadFileList('test_band.files')
-test_band_lap_files = ReadFileList('test_band_lap.files')
+test_band_files = ReadFileList('test_band.filesx')
+#test_band_lap_files = ReadFileList('test_band_lap.files')
+test_band_lap_files = []
 test_sym_files = ReadFileList('test_sym.files')
 test_sym_lap_files = ReadFileList('test_sym_lap.files')
 test_symband_files = ReadFileList('test_symband.files')

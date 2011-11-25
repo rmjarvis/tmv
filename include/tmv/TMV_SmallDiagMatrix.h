@@ -17,10 +17,6 @@
 //    SmallDiagMatrix<T,N,A>(T x)
 //        Makes a DiagMatrix of size n with all values = x
 //
-//    SmallDiagMatrix<T,N,A>(T* vv)
-//    SmallDiagMatrix<T,N,A>(const std::vector<T>& vv)
-//        Makes a DiagMatrix of size n which copies the values is vv
-//
 //    SmallDiagMatrix<T,N,A>(const BaseVector<V>& vv)
 //        Make a DiagMatrix which copies the elements of vv.
 //
@@ -31,7 +27,6 @@
 #ifndef TMV_SmallDiagMatrix_H
 #define TMV_SmallDiagMatrix_H
 
-#include <vector>
 #include "TMV_BaseMatrix_Diag.h"
 #include "TMV_VIt.h"
 #include "TMV_Array.h"
@@ -109,6 +104,10 @@ namespace tmv {
         typedef ConstSmallDiagMatrixView<T,N,_diagstep,A> const_nonconj_type;
         typedef SmallDiagMatrixView<T,N,_diagstep,A> nonconst_type;
 
+        typedef typename const_diag_type::const_iterator const_iterator;
+        typedef const_iterator const_rowmajor_iterator;
+        typedef const_iterator const_colmajor_iterator;
+
         typedef T& reference;
 
         typedef SmallVectorView<T,N,_diagstep,A> diag_type;
@@ -125,6 +124,10 @@ namespace tmv {
         typedef SmallDiagMatrixView<real_type,N,twoS,twosA> realpart_type;
         typedef realpart_type imagpart_type;
         typedef SmallDiagMatrixView<T,N,_diagstep,A> nonconj_type;
+
+        typedef typename diag_type::iterator iterator;
+        typedef iterator rowmajor_iterator;
+        typedef iterator colmajor_iterator;
     };
 
     template <class T, int N, int A>
@@ -162,7 +165,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(N >= 0);
 #ifdef TMV_DEBUG
-            this->diag().setAllTo(Traits<value_type>::constr_value());
+            this->diag().setAllTo(Traits<T>::constr_value());
 #endif
         }
 
@@ -171,21 +174,6 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(N >= 0);
             this->setAllTo(x);
-        }
-
-        explicit SmallDiagMatrix(const T* vv) 
-        {
-            TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(N >= 0);
-            ConstSmallDiagMatrixView<T,N,1>(vv).newAssignTo(*this);
-        }
-
-        SmallDiagMatrix(const std::vector<T>& vv)
-        {
-            TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(N >= 0);
-            TMVAssert(vv.size() == N);
-            ConstSmallDiagMatrixView<T,N,1>(&vv[0]).newAssignTo(*this);
         }
 
         SmallDiagMatrix(const type& m2) 
@@ -218,7 +206,7 @@ namespace tmv {
         TMV_INLINE_ND ~SmallDiagMatrix() 
         {
 #ifdef TMV_DEBUG
-            this->diag().setAllTo(Traits<value_type>::destr_value());
+            this->diag().setAllTo(Traits<T>::destr_value());
 #endif
         }
 
@@ -330,6 +318,10 @@ namespace tmv {
         typedef const_realpart_type const_imagpart_type;
         typedef ConstSmallDiagMatrixView<T,N,_diagstep,A> const_nonconj_type;
         typedef SmallDiagMatrixView<T,N,_diagstep,A> nonconst_type;
+
+        typedef typename const_diag_type::const_iterator const_iterator;
+        typedef const_iterator const_rowmajor_iterator;
+        typedef const_iterator const_colmajor_iterator;
     };
 
     template <class T, int N, int S, int A>
@@ -525,6 +517,10 @@ namespace tmv {
         typedef ConstSmallDiagMatrixView<T,N,_diagstep,A> const_nonconj_type;
         typedef SmallDiagMatrixView<T,N,_diagstep,A> nonconst_type;
 
+        typedef typename const_diag_type::const_iterator const_iterator;
+        typedef const_iterator const_rowmajor_iterator;
+        typedef const_iterator const_colmajor_iterator;
+
         typedef typename AuxRef<T,_conj>::reference reference;
 
         typedef SmallVectorView<T,N,_diagstep,A> diag_type;
@@ -541,6 +537,10 @@ namespace tmv {
         typedef SmallDiagMatrixView<real_type,N,twoS,twosA> realpart_type;
         typedef realpart_type imagpart_type;
         typedef SmallDiagMatrixView<T,N,_diagstep,A> nonconj_type;
+
+        typedef typename diag_type::iterator iterator;
+        typedef iterator rowmajor_iterator;
+        typedef iterator colmajor_iterator;
     };
 
     template <class T, int N, int S, int A>

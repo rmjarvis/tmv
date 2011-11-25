@@ -700,10 +700,6 @@ namespace tmv {
             // 27 = split trimatrix into 3 submatrices
 
             const bool upper2 = M2::_upper;
-#if 0
-            //const int algo = upper2 ? 17 : 27;
-            const int algo = 36;
-#else
             const bool rr = M1::_rowmajor && M2::_rowmajor;
             const bool rc = M1::_rowmajor && M2::_colmajor;
             const bool cx = M1::_colmajor;
@@ -720,7 +716,6 @@ namespace tmv {
                 //s <= 5 ? 26 :
                 TMV_OPT == 0 ? ( rr ? 22 : rc ? 23 : cx ? 21 : 23 ) :
                 27;
-#endif
 #ifdef PRINTALGO_DivU
             const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
             std::cout<<"InlineLDivEqUU: \n";

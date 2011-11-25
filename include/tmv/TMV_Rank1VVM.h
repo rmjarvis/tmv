@@ -899,8 +899,9 @@ namespace tmv {
         }
     };
 
+    // TODO: Write SSE Rank1Update functions.
 #if 0
-    // TODO:
+    // (This isn't actually an SSE version.  Just a starting point.)
 #ifdef __SSE2__
     // algo 31: double precision SSE2: all real
     template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
@@ -1343,9 +1344,6 @@ namespace tmv {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
             typedef typename M3::value_type T3;
-#if 0
-            const int algo = 31;
-#else
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : 
                 ( cs == 1 ) ? 1 :
@@ -1365,7 +1363,6 @@ namespace tmv {
                         (M3::iscomplex ? 18 : 14) ) :
                     3 ) :
                 11;
-#endif
             Rank1VVM_Helper<algo,cs,rs,add,ix,T,V1,V2,M3>::call(
                 x,v1,v2,m3);
         }

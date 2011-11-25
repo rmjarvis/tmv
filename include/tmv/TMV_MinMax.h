@@ -78,21 +78,19 @@ namespace tmv {
                 value = Traits<ZT>::convert(*it++);
                 Component<comp,ZT>::applyf(value);
 
-                // It turns out that doing the comparison this way makes 
-                // a huge difference in speed.
-                // The reason is basically that the processor anticipates
-                // if statements to be true and then backtracks if it turned 
-                // out to be false.
-                // So you always want to test for the most likely choice
-                // first.  In this case, it is more likely that value
-                // is not the new best.
                 if (Maybe<max>::less(TMV_REAL(value),TMV_REAL(best))) continue;
                 else { best = Component<comp,ZT>::get(value); bestit = it-1; }
-#if 0
+                // It turns out that doing the comparison this way makes 
+                // a huge difference in speed.
+                // The reason is basically that jumps are relatively
+                // expensive.  So you always want to test for the most 
+                // likely choice first so you can avoid a jump statement.
+                // In this case, it is more likely that value is not the 
+                // new best.
+                //
                 // This is the slower but more intuitive way:
-                if (Maybe<max>::less(TMV_REAL(best),TMV_REAL(value)))
-                { best = Component<comp,ZT>::get(value); bestit = it-1; }
-#endif
+                // if (Maybe<max>::less(TMV_REAL(best),TMV_REAL(value)))
+                // { best = Component<comp,ZT>::get(value); bestit = it-1; }
 
             } while (--n);
             if (ibest) *ibest = bestit - v.begin();
