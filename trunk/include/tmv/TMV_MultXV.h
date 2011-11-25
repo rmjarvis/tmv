@@ -8,6 +8,7 @@
 #include "TMV_MultXV_Funcs.h"
 #include "TMV_CopyV.h"
 #include "TMV_ScaleV.h"
+#include "TMV_Array.h"
 
 #ifdef PRINTALGO_XV
 #include <iostream>

@@ -442,9 +442,6 @@ namespace tmv {
                 allunit && allcomplex &&
                 Traits<T1>::isreal && Traits<T2>::isreal &&
                 V1::_conj == int(V3::_conj) && V2::_conj == int(V3::_conj) ) };
-#if 0
-        enum { algo = 0 };
-#else
         enum { algo =  (
                 size == 0 ? 0 : 
                 TMV_OPT == 0 ? 11 :
@@ -452,7 +449,6 @@ namespace tmv {
                 (sizeof(RT) == 8 && allunit && allreal) ? 12 :
                 (sizeof(RT) == 4 && allunit && allreal) ? 13 :
                 11 ) };
-#endif
         static TMV_INLINE void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)

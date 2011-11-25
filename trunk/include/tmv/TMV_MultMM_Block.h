@@ -2569,9 +2569,6 @@ namespace tmv {
             const bool m3_z = Traits<PT3>::iscomplex;
             const int MB    = 16;
             const int NB    = 16;
-#if 0
-            const int KB    = 16;
-#else
             const int KB    = 
 #ifdef __SSE__
                 Traits2<RT,float>::sametype ? (
@@ -2590,7 +2587,6 @@ namespace tmv {
                     16 ) :
 #endif
                 16;
-#endif
             const int lgMB  = IntTraits<MB>::log;
             const int lgNB  = IntTraits<NB>::log;
             const int lgKB  = IntTraits<KB>::log;
@@ -2716,9 +2712,6 @@ namespace tmv {
             const bool m3_z = Traits<PT3>::iscomplex;
             const int MB    = 16;
             const int NB    = 16;
-#if 0
-            const int KB    = 16;
-#else
             const int KB    = 
 #ifdef __SSE__
                 Traits2<RT,float>::sametype ? 64 :
@@ -2727,7 +2720,6 @@ namespace tmv {
                 Traits2<RT,double>::sametype ? 32 :
 #endif
                 16;
-#endif
             const int lgMB  = IntTraits<MB>::log;
             const int lgNB  = IntTraits<NB>::log;
             const int lgKB  = IntTraits<KB>::log;
@@ -3274,9 +3266,6 @@ namespace tmv {
             const bool m3_z = Traits<PT3>::iscomplex;
             const int MB    = 16;
             const int NB    = 16;
-#if 0
-            const int KB    = 16;
-#else
             const int KB    = 
 #ifdef __SSE__
                 Traits2<RT,float>::sametype ? (
@@ -3295,7 +3284,6 @@ namespace tmv {
                     16 ) :
 #endif
                 16;
-#endif
             const int lgMB  = IntTraits<MB>::log;
             const int lgNB  = IntTraits<NB>::log;
             const int lgKB  = IntTraits<KB>::log;
@@ -3418,9 +3406,6 @@ namespace tmv {
             const bool m3_z = Traits<PT3>::iscomplex;
             const int MB    = 16;
             const int NB    = 16;
-#if 0
-            const int KB    = 16;
-#else
             const int KB    = 
 #ifdef __SSE__
                 Traits2<RT,float>::sametype ? 64 :
@@ -3429,7 +3414,6 @@ namespace tmv {
                 Traits2<RT,double>::sametype ? 32 :
 #endif
                 16;
-#endif
             const int lgMB  = IntTraits<MB>::log;
             const int lgNB  = IntTraits<NB>::log;
             const int lgKB  = IntTraits<KB>::log;

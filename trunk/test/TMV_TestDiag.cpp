@@ -66,18 +66,91 @@ template <class T> void TestDiagMatrix()
     Assert(a==afcv,"Matrix == FortranStyle ConstMatrixView");
     Assert(a==afv,"Matrix == FortranStyle MatrixView");
 
+
+    // Test assignments and constructors from arrays
     T qar[] = { T(0), T(3), T(6) };
-    std::vector<T> qv(3);
-    for(int i=0;i<3;i++) qv[i] = qar[i];
-    tmv::DiagMatrix<T> q1(3,qar);
-    tmv::DiagMatrix<T> q2(qv);
-    tmv::ConstDiagMatrixView<T> q3 = tmv::DiagMatrixViewOf(qar,3);
+    T qar2[] = { T(0), T(1), T(2), T(3), T(4), T(5), T(6) };
+    std::vector<T> qvec(3);
+    for(int i=0;i<3;i++) qvec[i] = qar[i];
+
+    tmv::DiagMatrix<T> q1(3);
+    std::copy(qar, qar+3, q1.begin());
+
+    tmv::DiagMatrix<T> q2(3);
+    std::copy(qvec.begin(), qvec.end(), q2.begin());
+
+    tmv::DiagMatrix<T> q3x(30);
+    tmv::DiagMatrixView<T> q3 = q3x.subDiagMatrix(3,18,5);
+    std::copy(qvec.begin(), qvec.end(), q3.begin());
+
+    tmv::DiagMatrix<T> q4(3);
+    tmv::DiagMatrix<T> q5x(30);
+    tmv::DiagMatrixView<T> q5 = q5x.subDiagMatrix(3,18,5);
+    q4 <<
+        0,
+           3,
+              6;
+    q5 <<
+        0,
+           3,
+              6;
+
+    tmv::ConstDiagMatrixView<T> q6 = tmv::DiagMatrixViewOf(qar,3);
+    tmv::ConstDiagMatrixView<T> q7 = tmv::DiagMatrixViewOf(qar2,3,3);
+
+    if (showacc) {
+        std::cout<<"q1 = "<<q1<<std::endl;
+        std::cout<<"q2 = "<<q2<<std::endl;
+        std::cout<<"q3 = "<<q3<<std::endl;
+        std::cout<<"q4 = "<<q4<<std::endl;
+        std::cout<<"q5 = "<<q5<<std::endl;
+        std::cout<<"q6 = "<<q6<<std::endl;
+        std::cout<<"q7 = "<<q7<<std::endl;
+    }
+
     for(int i=0;i<3;i++) {
         Assert(q1(i,i) == T(3*i),"Create DiagMatrix from T*");
         Assert(q2(i,i) == T(3*i),"Create DiagMatrix from vector");
-        Assert(q3(i,i) == T(3*i),"Create DiagMatrixView of T*");
+        Assert(q3(i,i) == T(3*i),"Create DiagMatrixView from vector");
+        Assert(q4(i,i) == T(3*i),"Create DiagMatrix from << list");
+        Assert(q5(i,i) == T(3*i),"Create DiagMatrixView from << list");
+        Assert(q6(i,i) == T(3*i),"Create DiagMatrixView from T*");
+        Assert(q7(i,i) == T(3*i),"Create DiagMatrixView from T* with step");
     }
 
+    // Test the span of the iteration (i.e. the validity of begin(), end())
+    const tmv::DiagMatrix<T>& q1_const = q1;
+    tmv::DiagMatrixView<T> q1_view = q1.view();
+    tmv::ConstDiagMatrixView<T> q1_constview = q1_const.view();
+    tmv::ConstDiagMatrixView<T> q5_const = q5;
+
+    typename tmv::DiagMatrix<T>::iterator it1 = q1.begin();
+    typename tmv::DiagMatrix<T>::const_iterator it2 = q1_const.begin();
+    typename tmv::DiagMatrixView<T>::iterator it3 = q1_view.begin();
+    typename tmv::ConstDiagMatrixView<T>::const_iterator it4 =
+        q1_constview.begin();
+    typename tmv::DiagMatrixView<T>::iterator it5 = q5.begin();
+    typename tmv::ConstDiagMatrixView<T>::const_iterator it6 =
+        q5_const.begin();
+    int i = 0;
+    while (it1 != q1.end()) {
+        Assert(*it1++ == qar[i], "DiagMatrix iteration 1");
+        Assert(*it2++ == qar[i], "DiagMatrix iteration 2");
+        Assert(*it3++ == qar[i], "DiagMatrix iteration 3");
+        Assert(*it4++ == qar[i], "DiagMatrix iteration 4");
+        Assert(*it5++ == qar[i], "DiagMatrix iteration 5");
+        Assert(*it6++ == qar[i], "DiagMatrix iteration 6");
+        ++i;
+    }
+    Assert(i == 3, "DiagMatrix iteration number of elements");
+    Assert(it2 == q1_const.end(), "it2 reaching end");
+    Assert(it3 == q1_view.end(), "it3 reaching end");
+    Assert(it4 == q1_constview.end(), "it4 reaching end");
+    Assert(it5 == q5.end(), "it5 reaching end");
+    Assert(it6 == q5_const.end(), "it6 reaching end");
+
+
+    // Test Basic Arithmetic
     tmv::DiagMatrix<T> b(N);
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
         if (i == j) {

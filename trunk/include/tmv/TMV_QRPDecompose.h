@@ -912,9 +912,6 @@ namespace tmv {
     {
         static TMV_INLINE void call(M& m, V& beta, int* P, bool strict)
         {
-#if 0
-            const int algo = 21;
-#else
             typedef typename M::value_type T;
             const int csrs = IntTraits2<cs,rs>::prod;
             const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
@@ -924,7 +921,6 @@ namespace tmv {
                 rs == TMV_UNKNOWN ? 31 :
                 cs == TMV_UNKNOWN ? 31 : 
                 csrs <= l2cache ? 11 : 32;
-#endif
 #ifdef PRINTALGO_QR
             std::cout<<"Inline QRPDecompose: \n";
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
@@ -1035,7 +1031,7 @@ namespace tmv {
     // This function is a friend of the Permutation class.
     // Note: The strict=false default is in TMV_Permutation.h
     template <class M, class V>
-    static inline void QRP_Decompose(
+    inline void QRP_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, BaseVector_Mutable<V>& beta,
         Permutation& P, bool strict)
     {
@@ -1045,7 +1041,6 @@ namespace tmv {
         P.isinv = false;
         P.calcDet();
     }
-
 
     // The rest of these below are basically convenience functions
     // to allow the user to provide fewer or different arguments.

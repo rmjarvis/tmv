@@ -6,6 +6,7 @@
 #include "TMV_BaseMatrix.h"
 #include "TMV_BaseMatrix_Rec.h"
 #include "TMV_IntegerDet.h"
+#include "TMV_Array.h"
 
 #ifdef PRINTALGO_DET
 #include <iostream>

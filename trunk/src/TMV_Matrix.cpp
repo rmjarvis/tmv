@@ -39,10 +39,10 @@ namespace tmv {
         } else if (m2.isrm()) {
             NonLapCopy(m1.transpose(),m2.transpose());
         } else {
-            if (m1.isrm())
-                InlineCopy(m1.rmView(),m2);
-            else if (m2.iscm())
+            if (m1.iscm())
                 InlineCopy(m1.cmView(),m2);
+            else if (m1.isrm())
+                InlineCopy(m1.rmView(),m2);
             else
                 InlineCopy(m1,m2);
         }
@@ -170,12 +170,12 @@ namespace tmv {
         } else if (m2.isrm()) {
             InstSwap(m1.transpose(),m2.transpose());
         } else {
-            if (m1.isrm()) {
-                MatrixView<T,C|RowMajor> m1rm = m1.rmView();
-                InlineSwap(m1rm,m2);
-            } else if (m1.iscm()) {
+            if (m1.iscm()) {
                 MatrixView<T,C|ColMajor> m1cm = m1.cmView();
                 InlineSwap(m1cm,m2);
+            } else if (m1.isrm()) {
+                MatrixView<T,C|RowMajor> m1rm = m1.rmView();
+                InlineSwap(m1rm,m2);
             } else
                 InlineSwap(m1,m2);
         }
@@ -340,7 +340,7 @@ namespace tmv {
     static double DoInstNormF(const ConstMatrixView<double>& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstNormF(m.copy());
-        if (m.isrm()) return DoInstNormF(m.transpose());
+        if (!m.iscm()) return DoInstNormF(m.transpose());
         char c = 'F';
         int M = m.colsize();
         int N = m.rowsize();
@@ -355,7 +355,7 @@ namespace tmv {
     static double DoInstNormF(const ConstMatrixView<std::complex<double> >& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstNormF(m.copy());
-        if (m.isrm()) return DoInstNormF(m.transpose());
+        if (!m.iscm()) return DoInstNormF(m.transpose());
         char c = 'F';
         int M = m.colsize();
         int N = m.rowsize();
@@ -371,7 +371,7 @@ namespace tmv {
     static double DoInstMaxAbsElement(const ConstMatrixView<double>& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstMaxAbsElement(m.copy());
-        if (m.isrm()) return DoInstMaxAbsElement(m.transpose());
+        if (!m.iscm()) return DoInstMaxAbsElement(m.transpose());
         char c = 'M';
         int M = m.colsize();
         int N = m.rowsize();
@@ -387,7 +387,7 @@ namespace tmv {
         const ConstMatrixView<std::complex<double> >& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstMaxAbsElement(m.copy());
-        if (m.isrm()) return DoInstMaxAbsElement(m.transpose());
+        if (!m.iscm()) return DoInstMaxAbsElement(m.transpose());
         char c = 'M';
         int M = m.colsize();
         int N = m.rowsize();
@@ -443,7 +443,7 @@ namespace tmv {
     static float DoInstNormF(const ConstMatrixView<float>& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstNormF(m.copy());
-        if (m.isrm()) return DoInstNormF(m.transpose());
+        if (!m.iscm()) return DoInstNormF(m.transpose());
         char c = 'F';
         int M = m.colsize();
         int N = m.rowsize();
@@ -458,7 +458,7 @@ namespace tmv {
     static float DoInstNormF(const ConstMatrixView<std::complex<float> >& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstNormF(m.copy());
-        if (m.isrm()) return DoInstNormF(m.transpose());
+        if (!m.iscm()) return DoInstNormF(m.transpose());
         char c = 'F';
         int M = m.colsize();
         int N = m.rowsize();
@@ -474,7 +474,7 @@ namespace tmv {
     static float DoInstMaxAbsElement(const ConstMatrixView<float>& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstMaxAbsElement(m.copy());
-        if (m.isrm()) return DoInstMaxAbsElement(m.transpose());
+        if (!m.iscm()) return DoInstMaxAbsElement(m.transpose());
         char c = 'M';
         int M = m.colsize();
         int N = m.rowsize();
@@ -490,7 +490,7 @@ namespace tmv {
         const ConstMatrixView<std::complex<float> >& m)
     {
         if (!m.iscm() && !m.isrm()) return DoInstMaxAbsElement(m.copy());
-        if (m.isrm()) return DoInstMaxAbsElement(m.transpose());
+        if (!m.iscm()) return DoInstMaxAbsElement(m.transpose());
         char c = 'M';
         int M = m.colsize();
         int N = m.rowsize();

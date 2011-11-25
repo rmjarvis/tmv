@@ -79,6 +79,40 @@ static void TestSmallVectorReal()
         Assert(af(i) == a(i-1), "FortranStyle SmallVector access");
     Assert(a == af,"FortransStyle SmallVector = CStyle SmallVector");
 
+    // Test assignments and constructors from arrays
+    std::vector<T> qv(6);
+    T qvar[] = { T(8), T(6), T(4), T(2), T(0), T(-2) };
+    for(int i=0;i<6;++i) qv[i] = qvar[i];
+
+    // Construct from C array
+    tmv::SmallVector<T,6> q1;
+    std::copy(qvar,qvar+6,q1.begin());
+    // Construct from vector
+    tmv::SmallVector<T,6> q2;
+    std::copy(qv.begin(),qv.end(),q2.begin());
+    // Assign SmallVectorView from vector
+    tmv::SmallVector<T,50> q3x;
+    tmv::SmallVector<T,50>::subvector_step_type q3 = q3x.subVector(4,34,5);
+    std::copy(qv.begin(),qv.end(),q3.begin());
+    // Use op<< assignment
+    tmv::SmallVector<T,6> q4;
+    q4 << 8, 6, 4, 2, 0, -2;
+
+    if (showacc) {
+        std::cout<<"q1 = "<<q1<<std::endl;
+        std::cout<<"q2 = "<<q2<<std::endl;
+        std::cout<<"q3 = "<<q3<<std::endl;
+        std::cout<<"q4 = "<<q4<<std::endl;
+    }
+
+    for(int i=0;i<6;++i) {
+        Assert(q1(i) == T(8-2*i),"Create Vector from T*");
+        Assert(q2(i) == T(8-2*i),"Create Vector from std::vector");
+        Assert(q3(i) == T(8-2*i),"Create VectorView from std::vector");
+        Assert(q4(i) == T(8-2*i),"Create Vector from << list");
+    }
+
+    // Test Basic Arithmetic
     for (int i=0; i<N; ++i) b(i) = T(5+2*i);
 
     v = a+b;

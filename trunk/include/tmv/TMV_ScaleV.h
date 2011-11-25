@@ -4,6 +4,7 @@
 
 #include "TMV_BaseVector.h"
 #include "TMV_Scaling.h"
+#include "TMV_Array.h"
 
 namespace tmv {
 
@@ -425,9 +426,6 @@ namespace tmv {
         enum { xcomplex = Traits<T>::iscomplex };
         enum { vreal = V::isreal };
         enum { vcomplex = V::iscomplex };
-#if 0
-        enum { algo = 11 };
-#else
         enum { algo = (
                 (s == 0 || ix == 1) ? 0 :
                 (unit && xreal && vcomplex) ? 1 :
@@ -445,7 +443,6 @@ namespace tmv {
                 (vreal && sizeof(RT) == 4) ? 13 :
                 (vreal && sizeof(RT) == 8) ? 12 :
                 11 ) };
-#endif
         static TMV_INLINE void call(const Scaling<ix,T>& x, V& v)
         {
             TMVStaticAssert(!V::_conj);

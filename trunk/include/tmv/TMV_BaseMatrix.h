@@ -118,6 +118,11 @@ namespace tmv {
     //  const_nonconj_type = return type from nonConj() const
     //  nonconst_type = return type from nonConst() const
     //
+    //  const_rowmajor_iterator = return type from rowmajor_begin() const,
+    //                            rowmajor_end() const
+    //  const_colmajor_iterator = return type from colmajor_begin() const,
+    //                            colmajor_end() const
+
 
     // BaseMatrix_Mutable is used for matrices that are allowed to have 
     // their data modified.
@@ -147,6 +152,10 @@ namespace tmv {
     //  realpart_type = return type from realPart()
     //  imagpart_type = return type from imagPart()
     //  nonconj_type = return type from nonConj()
+    //
+    //  rowmajor_iterator = return type from rowmajor_begin(), rowmajor_end()
+    //  colmajor_iterator = return type from colmajor_begin(), colmajor_end()
+
 
     //
     // Helper functions and values:
@@ -498,6 +507,11 @@ namespace tmv {
         typedef typename Traits<M>::const_nonconj_type const_nonconj_type;
         typedef typename Traits<M>::nonconst_type nonconst_type;
 
+        typedef typename Traits<M>::const_rowmajor_iterator 
+            const_rowmajor_iterator;
+        typedef typename Traits<M>::const_colmajor_iterator 
+            const_colmajor_iterator;
+
         //
         // Constructor
         //
@@ -612,6 +626,16 @@ namespace tmv {
         TMV_INLINE size_t colsize() const { return mat().colsize(); }
         TMV_INLINE size_t rowsize() const { return mat().rowsize(); }
 
+        TMV_INLINE int rowstart(int i) const { return mat().rowstart(i); }
+        TMV_INLINE int rowend(int i) const { return mat().rowend(i); }
+        TMV_INLINE int colstart(int j) const { return mat().colstart(j); }
+        TMV_INLINE int colend(int j) const { return mat().colend(j); }
+
+        TMV_INLINE const_rowmajor_iterator rowmajor_begin() const
+        { return mat().rowmajor_begin(); }
+        TMV_INLINE const_colmajor_iterator colmajor_begin() const
+        { return mat().colmajor_begin(); }
+
     }; // BaseMatrix_Calc
 
     template <class M>
@@ -649,6 +673,9 @@ namespace tmv {
  
         typedef typename Traits<M>::reference reference;
 
+        typedef typename Traits<M>::rowmajor_iterator rowmajor_iterator;
+        typedef typename Traits<M>::colmajor_iterator colmajor_iterator;
+        typedef ListAssigner<value_type,rowmajor_iterator> list_assigner;
 
         //
         // Constructor
@@ -696,6 +723,8 @@ namespace tmv {
             return mat(); 
         }
 
+        TMV_INLINE list_assigner operator<<(const value_type& x) 
+        { return list_assigner(rowmajor_begin(),mat().nElements(),x); }
 
 
         //
@@ -815,6 +844,11 @@ namespace tmv {
         TMV_INLINE reference ref(int i, int j) { return mat().ref(i,j); }
         TMV_INLINE value_type cref(int i, int j) const  
         { return mat().cref(i,j); }
+
+        TMV_INLINE rowmajor_iterator rowmajor_begin()
+        { return mat().rowmajor_begin(); }
+        TMV_INLINE colmajor_iterator colmajor_begin()
+        { return mat().colmajor_begin(); }
 
     }; // BaseMatrix_Mutable
 

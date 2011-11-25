@@ -13,7 +13,7 @@ static TMV_INLINE_ND bool CanAddEq(
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
 #endif
-    return CanAdd(a,b) && !a.isunit(); 
+    return a.size() == b.size() && !a.isunit(); 
 }
 
 #include "TMV_TestMatrixArith.h"

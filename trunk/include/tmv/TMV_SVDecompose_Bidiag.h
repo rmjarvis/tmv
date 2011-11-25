@@ -353,9 +353,6 @@ namespace tmv {
     {
         static TMV_INLINE void call(M1& A, V1& Ubeta, V2& Vbeta, V3& D, V4& E)
         {
-#if 0
-            const int algo = 21;
-#else
             typedef typename M1::value_type T;
             const int csrs = IntTraits2<cs,rs>::prod;
             const int rsrs = IntTraits2<rs,rs>::prod;
@@ -368,7 +365,6 @@ namespace tmv {
                 cs == TMV_UNKNOWN ? 31 : 
                 csrs <= l2cache ? 11 :
                 21;
-#endif
 #ifdef PRINTALGO_SVD
             std::cout<<"Inline Bidiagonalize: \n";
             std::cout<<"A = "<<TMV_Text(A)<<std::endl;

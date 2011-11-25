@@ -4,6 +4,7 @@
 #define TMV_SortV_H
 
 #include "TMV_BaseVector.h"
+#include <vector>
 
 namespace tmv {
 

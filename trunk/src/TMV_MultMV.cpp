@@ -178,8 +178,12 @@ namespace tmv {
         double* yp = y.ptr();
         if (ys < 0) yp += (y.size()-1)*ys;
         double beta = 1.;
+        //std::cout<<"m,n = "<<m<<','<<n<<std::endl;
+        //std::cout<<"alpha,Ap,lda = "<<alpha<<','<<A.cptr()<<','<<lda<<std::endl;
+        //std::cout<<"xp,xs = "<<xp<<','<<xs<<std::endl;
+        //std::cout<<"beta,yp,ys = "<<beta<<','<<yp<<','<<ys<<std::endl;
         BLASNAME(dgemv) (
-            BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+            BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
             BLASV(m),BLASV(n),BLASV(alpha),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp),BLASV(xs),BLASV(beta),BLASP(yp),BLASV(ys)
             BLAS1);
@@ -255,7 +259,7 @@ namespace tmv {
 #endif
         } else {
             BLASNAME(zgemv) (
-                BLASCM A.isrm()?A.isconj()?BLASCH_CT:BLASCH_T:BLASCH_NT,
+                BLASCM A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASP(&alpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
                 BLAS1);
@@ -346,12 +350,12 @@ namespace tmv {
             if (ys < 0) yp += (y.size()-1)*ys;
             double xalpha(TMV_REAL(alpha));
             BLASNAME(dgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(beta),
                 BLASP(yp),BLASV(ys) BLAS1);
             BLASNAME(dgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp+1),BLASV(xs),BLASV(beta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
@@ -390,14 +394,14 @@ namespace tmv {
         double beta = 1.;
         if (ar != 0.) {
             BLASNAME(dgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(ar),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(beta),
                 BLASP(yp),BLASV(ys) BLAS1);
         }
         if (ai != 0.) {
             BLASNAME(dgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(ai),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(beta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
@@ -433,7 +437,7 @@ namespace tmv {
         if (ys < 0) yp += (y.size()-1)*ys;
         float beta = 1.F;
         BLASNAME(sgemv) (
-            BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+            BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
             BLASV(m),BLASV(n),BLASV(alpha),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp),BLASV(xs),BLASV(beta),BLASP(yp),BLASV(ys)
             BLAS1);
@@ -508,7 +512,7 @@ namespace tmv {
 #endif
         } else {
             BLASNAME(cgemv) (
-                BLASCM A.isrm()?A.isconj()?BLASCH_CT:BLASCH_T:BLASCH_NT,
+                BLASCM A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASP(&alpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
                 BLAS1);
@@ -597,12 +601,12 @@ namespace tmv {
             float xalpha(TMV_REAL(alpha));
             float beta = 1.;
             BLASNAME(sgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(beta),
                 BLASP(yp),BLASV(ys) BLAS1);
             BLASNAME(sgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp+1),BLASV(xs),BLASV(beta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
@@ -640,14 +644,14 @@ namespace tmv {
         float beta = 1.F;
         if (ar != 0.F) {
             BLASNAME(sgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(ar),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(beta),
                 BLASP(yp),BLASV(ys) BLAS1);
         }
         if (ai != 0.F) {
             BLASNAME(sgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(ai),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(beta),
                 BLASP(yp+1),BLASV(ys) BLAS1);

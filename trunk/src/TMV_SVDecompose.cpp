@@ -289,7 +289,7 @@ namespace tmv {
 #endif
         if (S.size() > 0) {
             if (U.iscm()) {
-                if (V.isrm() || V.iscm() || !V.cptr()) {
+                if (V.iscm() || V.isrm() || !V.cptr()) {
                     //std::cout<<"Normal Case\n";
                     MatrixView<T,ColMajor> Ucm = U;
                     if (V.iscm() || !V.cptr()) {

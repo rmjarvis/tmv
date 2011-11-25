@@ -2035,9 +2035,6 @@ namespace tmv {
             const bool crx = M1::_colmajor && M2::_rowmajor;
             const bool upper = M1::_upper;
 
-#if 0
-            const int algo = 33;
-#else
             const bool nxx = !(M1::_colmajor || M1::_rowmajor);
             const bool xxn = !(M3::_colmajor || M3::_rowmajor);
             // xcc, rxr, crx have fast algorithms already
@@ -2053,9 +2050,6 @@ namespace tmv {
             const int Nc = rs == TMV_UNKNOWN ? TMV_UNKNOWN : (rs < 16) ? 1 : (rs>>4);
             const int McMcNc = IntTraits2<IntTraits2<Mc,Mc>::prod,Nc>::prod;
 #endif
-#if 0
-            const int algo = upper ? 17 : 27;
-#else
             const int algo = 
                 ( cs == 0 || rs == 0 ) ? 0 :
                 cs == 1 ? 1 :
@@ -2089,8 +2083,6 @@ namespace tmv {
                 (rs >= 64 && McMcNc >= TMV_UM_OMP_THRESH) ? 36 :
 #endif
                 27 ;
-#endif
-#endif
 #ifdef PRINTALGO_UM
             const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;

@@ -65,7 +65,7 @@ namespace tmv {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
         int n=A.size();
-        int lda=A.isrm()?A.stepi():A.stepj();
+        int lda=A.iscm()?A.stepj():A.stepi();
         int xs=x.step();
         double* xp = x.ptr();
         if (xs < 0) xp += (n-1)*xs;
@@ -82,7 +82,7 @@ namespace tmv {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
         int n=A.size();
-        int lda=A.isrm()?A.stepi():A.stepj();
+        int lda=A.iscm()?A.stepj():A.stepi();
         int xs=x.step();
         std::complex<double>* xp = x.ptr();
         if (xs < 0) xp += (n-1)*xs;
@@ -110,7 +110,7 @@ namespace tmv {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
         int n=A.size();
-        int lda=A.isrm()?A.stepi():A.stepj();
+        int lda=A.iscm()?A.stepj():A.stepi();
         int xs=2*x.step();
         double* xp = (double*) x.ptr();
         if (xs < 0) xp += (n-1)*xs;
@@ -133,7 +133,7 @@ namespace tmv {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
         int n=A.size();
-        int lda=A.isrm()?A.stepi():A.stepj();
+        int lda=A.iscm()?A.stepj():A.stepi();
         int xs=x.step();
         float* xp = x.ptr();
         if (xs < 0) xp += (n-1)*xs;
@@ -150,7 +150,7 @@ namespace tmv {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
         int n=A.size();
-        int lda=A.isrm()?A.stepi():A.stepj();
+        int lda=A.iscm()?A.stepj():A.stepi();
         int xs=x.step();
         std::complex<float>* xp = x.ptr();
         if (xs < 0) xp += (n-1)*xs;
@@ -178,7 +178,7 @@ namespace tmv {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
         int n=A.size();
-        int lda=A.isrm()?A.stepi():A.stepj();
+        int lda=A.iscm()?A.stepj():A.stepi();
         int xs=2*x.step();
         float* xp = (float*) x.ptr();
         if (xs < 0) xp += (n-1)*xs;
@@ -201,7 +201,7 @@ namespace tmv {
     {
 #ifdef BLAS
         const typename M1::value_type t1(0);
-        if ( (m1.isrm() && m1.stepi()>0) || (m1.iscm() && m1.stepj()>0) ) {
+        if ( (m1.iscm() && m1.stepj()>0) || (m1.isrm() && m1.stepi()>0) ) {
             BlasMultEq(m1,v2,t1);
         } else {
             if (m1.isunit()) {

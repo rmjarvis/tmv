@@ -774,7 +774,7 @@ namespace tmv {
 
     // This function is a friend of Permutation class.
     template <class M>
-    static inline void LU_Decompose(
+    inline void LU_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, Permutation& P)
     {
         TMVAssert(P.size() == m.colsize());

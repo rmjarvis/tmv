@@ -35,11 +35,6 @@
 //        Makes a Triangular Matrix with column size = row size = n
 //        with all values = x
 //
-//    TriMatrix<T,A>(size_t n, T* vv)
-//    TriMatrix<T,A>(size_t n, const std::vector<T>& vv)
-//        Makes a Triangular Matrix with column size = row size = n
-//        which copies the values from vv.
-//
 //    TriMatrix<T,A>(const Matrix<T>& m)
 //    TriMatrix<T,A>(const TriMatrix<T>& m)
 //        Makes a TriMatrix which copies the corresponding elements of m.
@@ -277,9 +272,9 @@
 #ifndef TMV_TriMatrix_H
 #define TMV_TriMatrix_H
 
-#include <vector>
 #include "TMV_BaseMatrix_Tri.h"
 #include "TMV_VIt.h"
+#include "TMV_MIt.h"
 #include "TMV_Array.h"
 
 namespace tmv {
@@ -409,7 +404,7 @@ namespace tmv {
         { return val() == x2; }
         template <class T2>
         friend bool operator==(T2 x1, const TriRef<T,C>& x2)
-        { return x1 == val(); }
+        { return x1 == x2.val(); }
         template <class T2>
         bool operator!=(const TriRef<T2,C>& x2) const
         { return !(operator==(x2)); }
@@ -637,6 +632,10 @@ namespace tmv {
         typedef UpperTriMatrixView<T,A> nonconst_type;
 
         typedef typename TriRefHelper<T,false,_nonunit>::reference reference;
+        typedef CRMIt<type> const_rowmajor_iterator;
+        typedef CCMIt<type> const_colmajor_iterator;
+        typedef RMIt<type> rowmajor_iterator;
+        typedef CMIt<type> colmajor_iterator;
 
         typedef VectorView<T,colA> col_sub_type;
         typedef VectorView<T,rowA> row_sub_type;
@@ -709,7 +708,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
 #ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<value_type>::constr_value());
+                Traits<T>::constr_value());
 #endif
         }
 
@@ -717,22 +716,6 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
             Maybe<_unit>::offdiag(*this).setAllTo(x);
-        }
-
-        UpperTriMatrix(size_t n, const T* vv) : itss(n), itsm(n*n)
-        {
-            TMVStaticAssert(Traits<type>::okA);
-            VectorView<T,Unit> lv(ptr(),n*n);
-            ConstVectorView<T,Unit>(vv,n*n).newAssignTo(lv);
-        }
-
-        UpperTriMatrix(size_t n, const std::vector<T>& vv) :
-            itss(n), itsm(n*n)
-        {
-            TMVStaticAssert(Traits<type>::okA);
-            TMVAssert(vv.size() == n*n);
-            VectorView<T,Unit> lv(ptr(),n*n);
-            ConstVectorView<T,Unit>(&vv[0],n*n).newAssignTo(lv);
         }
 
         UpperTriMatrix(const type& m2) :
@@ -780,7 +763,7 @@ namespace tmv {
         {
 #ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<value_type>::destr_value());
+                Traits<T>::destr_value());
 #endif
         }
 
@@ -818,7 +801,7 @@ namespace tmv {
         T cref(int i, int j) const 
         {
             return (
-                (isunit() && i==j ) ? T(1) :
+                (isunit() && i==j) ? T(1) :
                 (i>j) ? T(0) :
                 itsm[_rowmajor ? i*stepi() + j : i + j*stepj()]);
         }
@@ -841,13 +824,13 @@ namespace tmv {
         {
 #ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<value_type>::destr_value());
+                Traits<T>::destr_value());
 #endif
             itss = s;
             itsm.resize(s*s);
 #ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<value_type>::constr_value());
+                Traits<T>::constr_value());
 #endif
         }
 
@@ -977,6 +960,9 @@ namespace tmv {
         typedef const_realpart_type const_imagpart_type;
         typedef ConstUpperTriMatrixView<T,nonconjA> const_nonconj_type;
         typedef UpperTriMatrixView<T,A> nonconst_type;
+
+        typedef CRMIt<type> const_rowmajor_iterator;
+        typedef CCMIt<type> const_colmajor_iterator;
     };
 
     template <class T, int A> 
@@ -1106,7 +1092,7 @@ namespace tmv {
         T cref(int i, int j) const 
         {
             return (
-                (isunit() && i==j ) ? T(1) :
+                (isunit() && i==j) ? T(1) :
                 (i>j) ? T(0) :
                 DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
@@ -1253,6 +1239,10 @@ namespace tmv {
         typedef UpperTriMatrixView<T,A> nonconst_type;
 
         typedef typename TriRefHelper<T,_conj,_nonunit>::reference reference;
+        typedef CRMIt<type> const_rowmajor_iterator;
+        typedef CCMIt<type> const_colmajor_iterator;
+        typedef RMIt<type> rowmajor_iterator;
+        typedef CMIt<type> colmajor_iterator;
 
         typedef VectorView<T,colA> col_sub_type;
         typedef VectorView<T,rowA> row_sub_type;
@@ -1413,7 +1403,7 @@ namespace tmv {
         T cref(int i, int j) const
         {
             return (
-                (isunit() && i==j ) ? T(1) :
+                (isunit() && i==j) ? T(1) :
                 (i>j) ? T(0) :
                 DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
@@ -1566,6 +1556,10 @@ namespace tmv {
         typedef LowerTriMatrixView<T,A> nonconst_type;
 
         typedef typename TriRefHelper<T,false,_nonunit>::reference reference;
+        typedef CRMIt<type> const_rowmajor_iterator;
+        typedef CCMIt<type> const_colmajor_iterator;
+        typedef RMIt<type> rowmajor_iterator;
+        typedef CMIt<type> colmajor_iterator;
 
         typedef VectorView<T,colA> col_sub_type;
         typedef VectorView<T,rowA> row_sub_type;
@@ -1636,7 +1630,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
 #ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<value_type>::constr_value());
+                Traits<T>::constr_value());
 #endif
         }
 
@@ -1644,22 +1638,6 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
             Maybe<_unit>::offdiag(*this).setAllTo(x);
-        }
-
-        LowerTriMatrix(size_t n, const T* vv) : itss(n), itsm(n*n)
-        {
-            TMVStaticAssert(Traits<type>::okA);
-            VectorView<T,Unit> lv(ptr(),n*n);
-            ConstVectorView<T,Unit>(vv,n*n).newAssignTo(lv);
-        }
-
-        LowerTriMatrix(size_t n, const std::vector<T>& vv) :
-            itss(n), itsm(n*n)
-        {
-            TMVStaticAssert(Traits<type>::okA);
-            TMVAssert(vv.size() == n*n);
-            VectorView<T,Unit> lv(ptr(),n*n);
-            ConstVectorView<T,Unit>(&vv[0],n*n).newAssignTo(lv);
         }
 
         LowerTriMatrix(const type& m2) :
@@ -1706,7 +1684,7 @@ namespace tmv {
         {
 #ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<value_type>::destr_value());
+                Traits<T>::destr_value());
 #endif
         }
 
@@ -1744,7 +1722,7 @@ namespace tmv {
         T cref(int i, int j) const 
         {
             return (
-                (isunit() && i==j ) ? T(1) :
+                (isunit() && i==j) ? T(1) :
                 (i<j) ? T(0) :
                 itsm[_rowmajor ? i*stepi() + j : i + j*stepj()]);
         }
@@ -1767,13 +1745,13 @@ namespace tmv {
         {
 #ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<value_type>::destr_value());
+                Traits<T>::destr_value());
 #endif
             itss = s;
             itsm.resize(s*s);
 #ifdef TMV_DEBUG
             Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<value_type>::constr_value());
+                Traits<T>::constr_value());
 #endif
         }
 
@@ -1903,6 +1881,9 @@ namespace tmv {
         typedef const_realpart_type const_imagpart_type;
         typedef ConstLowerTriMatrixView<T,nonconjA> const_nonconj_type;
         typedef LowerTriMatrixView<T,A> nonconst_type;
+
+        typedef CRMIt<type> const_rowmajor_iterator;
+        typedef CCMIt<type> const_colmajor_iterator;
     };
 
     template <class T, int A>
@@ -2032,7 +2013,7 @@ namespace tmv {
         T cref(int i, int j) const 
         {
             return (
-                (isunit() && i==j ) ? T(1) :
+                (isunit() && i==j) ? T(1) :
                 (i<j) ? T(0) :
                 DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
@@ -2179,6 +2160,10 @@ namespace tmv {
         typedef LowerTriMatrixView<T,A> nonconst_type;
 
         typedef typename TriRefHelper<T,_conj,_nonunit>::reference reference;
+        typedef CRMIt<type> const_rowmajor_iterator;
+        typedef CCMIt<type> const_colmajor_iterator;
+        typedef RMIt<type> rowmajor_iterator;
+        typedef CMIt<type> colmajor_iterator;
 
         typedef VectorView<T,colA> col_sub_type;
         typedef VectorView<T,rowA> row_sub_type;
@@ -2339,7 +2324,7 @@ namespace tmv {
         T cref(int i, int j) const
         {
             return (
-                (isunit() && i==j ) ? T(1) :
+                (isunit() && i==j) ? T(1) :
                 (i<j) ? T(0) :
                 DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }

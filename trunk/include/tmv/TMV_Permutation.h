@@ -485,7 +485,8 @@ namespace tmv {
 
         // In TMV_LUDecompose.h
         template <class M>
-        friend void LU_Decompose(BaseMatrix_Rec_Mutable<M>& m, Permutation& P);
+        friend void LU_Decompose(
+            BaseMatrix_Rec_Mutable<M>& m, Permutation& P);
 
         // In TMV_QRPDecompose.h
         template <class M, class V>

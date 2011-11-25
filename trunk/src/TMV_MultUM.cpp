@@ -18,8 +18,8 @@ namespace tmv {
     template <class M1, class M2>
     static void DoMultEq(const M1& m1, M2& m2)
     {
-        TMVAssert(m1.isrm() || m1.iscm());
-        TMVAssert(m2.isrm() || m2.iscm());
+        TMVAssert(m1.iscm() || m1.isrm());
+        TMVAssert(m2.iscm() || m2.isrm());
         typedef typename M1::real_type RT;
         Scaling<1,RT> one;
         if (m2.iscm()) {
@@ -51,8 +51,8 @@ namespace tmv {
 
         int m=B.iscm()?B.colsize():B.rowsize();
         int n=B.iscm()?B.rowsize():B.colsize();
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
+        int lda = A.iscm()?A.stepj():A.stepi();
+        int ldb = B.iscm()?B.stepj():B.stepi();
         const double alpha(1);
 
         BLASNAME(dtrmm) (
@@ -73,8 +73,8 @@ namespace tmv {
 
         int m=B.iscm()?B.colsize():B.rowsize();
         int n=B.iscm()?B.rowsize():B.colsize();
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
+        int lda = A.iscm()?A.stepj():A.stepi();
+        int ldb = B.iscm()?B.stepj():B.stepi();
         const std::complex<double> alpha(1);
 
         if (A.iscm()==B.iscm() && A.isconj()) {
@@ -104,27 +104,27 @@ namespace tmv {
         TMVAssert(B.rowsize() > 0);
         TMVAssert(B.colsize() > 0);
 
-        if (B.isrm()) {
-            int m = 2*B.rowsize();
-            int n = B.colsize();
-            int lda = A.isrm()?A.stepi():A.stepj();
-            int ldb = 2*B.stepi();
-            double alpha(1);
-            BLASNAME(dtrmm) (
-                BLASCM BLASCH_R, 
-                A.iscm()==M1::_upper?BLASCH_UP:BLASCH_LO, 
-                A.isrm()?BLASCH_NT:BLASCH_T,
-                A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
-                BLASV(alpha),BLASP(A.cptr()),BLASV(lda), 
-                BLASP((double*)B.ptr()), BLASV(ldb)
-                BLAS1 BLAS1 BLAS1 BLAS1);
-        } else {
+        if (B.iscm()) {
             Matrix<double,ColMajor> B1 = B.realPart();
             BlasMultEq(A,B1.xView(),t1);
             B.realPart() = B1;
             B1 = B.imagPart();
             BlasMultEq(A,B1.xView(),t1);
             B.imagPart() = B1;
+        } else {
+            int m = 2*B.rowsize();
+            int n = B.colsize();
+            int lda = A.iscm()?A.stepj():A.stepi();
+            int ldb = 2*B.stepi();
+            double alpha(1);
+            BLASNAME(dtrmm) (
+                BLASCM BLASCH_R, 
+                A.iscm()==M1::_upper?BLASCH_UP:BLASCH_LO, 
+                A.iscm()?BLASCH_T:BLASCH_NT,
+                A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
+                BLASV(alpha),BLASP(A.cptr()),BLASV(lda), 
+                BLASP((double*)B.ptr()), BLASV(ldb)
+                BLAS1 BLAS1 BLAS1 BLAS1);
         }
     }
 #endif
@@ -138,8 +138,8 @@ namespace tmv {
 
         int m=B.iscm()?B.colsize():B.rowsize();
         int n=B.iscm()?B.rowsize():B.colsize();
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
+        int lda = A.iscm()?A.stepj():A.stepi();
+        int ldb = B.iscm()?B.stepj():B.stepi();
         const float alpha(1);
 
         BLASNAME(strmm) (
@@ -160,8 +160,8 @@ namespace tmv {
 
         int m=B.iscm()?B.colsize():B.rowsize();
         int n=B.iscm()?B.rowsize():B.colsize();
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
+        int lda = A.iscm()?A.stepj():A.stepi();
+        int ldb = B.iscm()?B.stepj():B.stepi();
         const std::complex<float> alpha(1);
 
         if (A.iscm()==B.iscm() && A.isconj()) {
@@ -191,27 +191,27 @@ namespace tmv {
         TMVAssert(B.rowsize() > 0);
         TMVAssert(B.colsize() > 0);
 
-        if (B.isrm()) {
-            int m = 2*B.rowsize();
-            int n = B.colsize();
-            int lda = A.isrm()?A.stepi():A.stepj();
-            int ldb = 2*B.stepi();
-            float alpha(1);
-            BLASNAME(strmm) (
-                BLASCM BLASCH_R, 
-                A.iscm()==M1::_upper?BLASCH_UP:BLASCH_LO, 
-                A.isrm()?BLASCH_NT:BLASCH_T,
-                A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
-                BLASV(alpha),BLASP(A.cptr()),BLASV(lda), 
-                BLASP((float*)B.ptr()), BLASV(ldb)
-                BLAS1 BLAS1 BLAS1 BLAS1);
-        } else {
+        if (B.iscm()) {
             Matrix<float,ColMajor> B1 = B.realPart();
             BlasMultEq(A,B1.xView(),t1);
             B.realPart() = B1;
             B1 = B.imagPart();
             BlasMultEq(A,B1.xView(),t1);
             B.imagPart() = B1;
+        } else {
+            int m = 2*B.rowsize();
+            int n = B.colsize();
+            int lda = A.iscm()?A.stepj():A.stepi();
+            int ldb = 2*B.stepi();
+            float alpha(1);
+            BLASNAME(strmm) (
+                BLASCM BLASCH_R, 
+                A.iscm()==M1::_upper?BLASCH_UP:BLASCH_LO, 
+                A.iscm()?BLASCH_T:BLASCH_NT,
+                A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
+                BLASV(alpha),BLASP(A.cptr()),BLASV(lda), 
+                BLASP((float*)B.ptr()), BLASV(ldb)
+                BLAS1 BLAS1 BLAS1 BLAS1);
         }
     }
 #endif
@@ -224,8 +224,8 @@ namespace tmv {
 #ifdef BLAS
         if (m2.colsize() > 0 && m2.rowsize() > 0) {
             const T1 t1(0);
-            if ((m2.isrm() && m2.stepi()>0) || (m2.iscm() && m2.stepj()>0)) {
-                if ((m1.isrm() && m1.stepi()>0) || (m1.iscm() && m1.stepj()>0)) {
+            if ((m2.iscm() && m2.stepj()>0) || (m2.isrm() && m2.stepi()>0)) {
+                if ((m1.iscm() && m1.stepj()>0) || (m1.isrm() && m1.stepi()>0)) {
                     BlasMultEq(m1,m2,t1);
                 } else {
                     Matrix<T1,ColMajor|NoDivider> m1c(m1.size(),m1.size());
@@ -243,8 +243,8 @@ namespace tmv {
             }
         }
 #else
-        if (m2.isrm() || m2.iscm()) {
-            if (m1.isrm() || m1.iscm()) {
+        if (m2.iscm() || m2.isrm()) {
+            if (m1.iscm() || m1.isrm()) {
                 DoMultEq(m1,m2);
             } else {
                 Matrix<T1,ColMajor|NoDivider> m1c(m1.size(),m1.size());

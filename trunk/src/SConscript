@@ -18,8 +18,8 @@ div = ReadFileList('div.files')
 div_omp = ReadFileList('div_omp.files')
 div_geqp3 = ReadFileList('div_geqp3.files')
 
-band = ReadFileList('band.files')
-band_noint = ReadFileList('band_noint.files')
+band = ReadFileList('band.filesx')
+band_noint = ReadFileList('band_noint.filesx')
 sym = ReadFileList('sym.files')
 sym_noint = ReadFileList('sym_noint.files')
 sym_omp_noint = ReadFileList('sym_omp_noint.files')
@@ -32,10 +32,10 @@ lib_noint_files= tri_noint + div
 lib_omp_files= basic_omp+ tri_omp 
 lib_omp_noint_files = tri_omp_noint + div_omp
 lib_geqp3_files= div_geqp3
-sblib_files= band + sym + symband
-sblib_noint_files= band_noint + sym_noint + symband_noint
-sblib_omp_noint_files= sym_omp_noint
-sblib_stegr_files= sym_stegr
+sblib_files= band #+ sym + symband
+sblib_noint_files= band_noint #+ sym_noint + symband_noint
+sblib_omp_noint_files= [] #sym_omp_noint
+sblib_stegr_files= [] #sym_stegr
 
 env1 = env.Clone()
 
@@ -81,16 +81,16 @@ if env['SHARED']:
                              obj_omp_lib + obj_omp_noint_lib +
                              obj_geqp3_lib)
 
-    #obj_sblib = env1.SharedObject(sblib_files)
-    #obj_noint_sblib = env2.SharedObject(sblib_noint_files)
-    #obj_omp_noint_sblib = env4.SharedObject(sblib_omp_noint_files)
-    #obj_stegr_sblib = env6.SharedObject(sblib_stegr_files)
+    obj_sblib = env1.SharedObject(sblib_files)
+    obj_noint_sblib = env2.SharedObject(sblib_noint_files)
+    obj_omp_noint_sblib = env4.SharedObject(sblib_omp_noint_files)
+    obj_stegr_sblib = env6.SharedObject(sblib_stegr_files)
 
-    #env7 = env1.Clone()
-    #env7.Prepend(LIBS=['tmv'])
-    #sblib = env7.SharedLibrary('#lib/tmv_symband',
-                               #obj_sblib + obj_noint_sblib +
-                               #obj_omp_noint_sblib + obj_stegr_sblib)
+    env7 = env1.Clone()
+    env7.Prepend(LIBS=['tmv'])
+    sblib = env7.SharedLibrary('#lib/tmv_symband',
+                               obj_sblib + obj_noint_sblib +
+                               obj_omp_noint_sblib + obj_stegr_sblib)
 
 else:
     obj_lib = env1.StaticObject(lib_files)
@@ -99,26 +99,26 @@ else:
     obj_omp_noint_lib = env4.StaticObject(lib_omp_noint_files)
     obj_geqp3_lib = env5.StaticObject(lib_geqp3_files)
 
-    #obj_sblib = env1.StaticObject(sblib_files)
-    #obj_noint_sblib = env2.StaticObject(sblib_noint_files)
-    #obj_omp_noint_sblib = env4.StaticObject(sblib_omp_noint_files)
-    #obj_stegr_sblib = env6.StaticObject(sblib_stegr_files)
+    obj_sblib = env1.StaticObject(sblib_files)
+    obj_noint_sblib = env2.StaticObject(sblib_noint_files)
+    obj_omp_noint_sblib = env4.StaticObject(sblib_omp_noint_files)
+    obj_stegr_sblib = env6.StaticObject(sblib_stegr_files)
 
 
     lib = env1.StaticLibrary('#lib/tmv',
                              obj_lib + obj_noint_lib +
                              obj_omp_lib + obj_omp_noint_lib +
                              obj_geqp3_lib)
-    #sblib = env1.StaticLibrary('#lib/tmv_symband',
-                               #obj_sblib + obj_noint_sblib +
-                               #obj_omp_noint_sblib + obj_stegr_sblib)
+    sblib = env1.StaticLibrary('#lib/tmv_symband',
+                               obj_sblib + obj_noint_sblib +
+                               obj_omp_noint_sblib + obj_stegr_sblib)
 
 
 env.Alias(target='lib', source=lib)
-#env.Alias(target='sblib', source=sblib)
+env.Alias(target='sblib', source=sblib)
 
-#Default(['lib','sblib'])
-Default(['lib'])
+Default(['lib','sblib'])
+#Default(['lib'])
 
 #
 # install/uninstall
@@ -134,24 +134,24 @@ lib_install_dir = os.path.join(env['INSTALL_PREFIX'], lib_dir)
 header_install_dir = os.path.join(env['INSTALL_PREFIX'], header_dir)
 header_install_dir_sub = os.path.join(env['INSTALL_PREFIX'], header_dir_sub)
 
-#lib_targets = [lib,sblib]
-lib_targets = [lib]
+lib_targets = [lib,sblib]
+#lib_targets = [lib]
 
 lib_file = '#' + lib[0].path
-#sblib_file = '#' + sblib[0].path
+sblib_file = '#' + sblib[0].path
 
 # Save this info for share/SConscript
-#env['LIB_FILE_NAMES'] = [lib_file,sblib_file]
-env['LIB_FILE_NAMES'] = [lib_file]
+env['LIB_FILE_NAMES'] = [lib_file,sblib_file]
+#env['LIB_FILE_NAMES'] = [lib_file]
 
 if 'install' in COMMAND_LINE_TARGETS: 
 
     if env['SHARED']:
         installed_lib = env1.Install(dir=lib_install_dir, source=lib)
-        #env.Depends(sblib,installed_lib)
-        #installed_sblib = env1.Install(dir=lib_install_dir, source=sblib)
-        #env.Alias(target='install', source=[installed_lib,installed_sblib])
-        env.Alias(target='install', source=[installed_lib])
+        env.Depends(sblib,installed_lib)
+        installed_sblib = env1.Install(dir=lib_install_dir, source=sblib)
+        env.Alias(target='install', source=[installed_lib,installed_sblib])
+        #env.Alias(target='install', source=[installed_lib])
 
     else :
         env.Alias(target='install', 

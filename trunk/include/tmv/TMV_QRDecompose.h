@@ -776,9 +776,6 @@ namespace tmv {
     {
         static TMV_INLINE void call(M& m, V& beta)
         {
-#if 0
-            const int algo = 21;
-#else
             typedef typename M::value_type T;
             const int maxunroll = 
                 TMV_OPT==0 ? 0 : 
@@ -803,7 +800,6 @@ namespace tmv {
                 cs == TMV_UNKNOWN ? 31 : 
                 csrs <= l2cache ? 11 :
                 rs <= 128 ? 27 : 22;
-#endif
 #ifdef PRINTALGO_QR
             std::cout<<"Inline QRDecompose: \n";
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;

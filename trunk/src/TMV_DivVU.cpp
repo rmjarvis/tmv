@@ -45,7 +45,7 @@ namespace tmv {
         TMVAssert(A.size() == b.size());
         TMVAssert(b.size()>0);
         int n=A.size();
-        int lda = A.isrm()?A.stepi():A.stepj();
+        int lda = A.iscm()?A.stepj():A.stepi();
         int bs = b.step();
         double* bp = b.ptr();
         if (bs < 0) bp += (n-1)*bs;
@@ -62,7 +62,7 @@ namespace tmv {
         TMVAssert(A.size() == b.size());
         TMVAssert(b.size()>0);
         int n=A.size();
-        int lda = A.isrm()?A.stepi():A.stepj();
+        int lda = A.iscm()?A.stepj():A.stepi();
         int bs = b.step();
         std::complex<double>* bp = b.ptr();
         if (bs < 0) bp += (n-1)*bs;
@@ -90,7 +90,7 @@ namespace tmv {
         TMVAssert(A.size() == b.size());
         TMVAssert(b.size()>0);
         int n=A.size();
-        int lda = A.isrm()?A.stepi():A.stepj();
+        int lda = A.iscm()?A.stepj():A.stepi();
         int bs = 2*b.step();
         double* bp = (double*)(b.ptr());
         if (bs < 0) bp += (n-1)*bs;
@@ -113,7 +113,7 @@ namespace tmv {
         TMVAssert(A.size() == b.size());
         TMVAssert(b.size()>0);
         int n=A.size();
-        int lda = A.isrm()?A.stepi():A.stepj();
+        int lda = A.iscm()?A.stepj():A.stepi();
         int bs = b.step();
         float* bp = b.ptr();
         if (bs < 0) bp += (n-1)*bs;
@@ -130,7 +130,7 @@ namespace tmv {
         TMVAssert(A.size() == b.size());
         TMVAssert(b.size()>0);
         int n=A.size();
-        int lda = A.isrm()?A.stepi():A.stepj();
+        int lda = A.iscm()?A.stepj():A.stepi();
         int bs = b.step();
         std::complex<float>* bp = b.ptr();
         if (bs < 0) bp += (n-1)*bs;
@@ -158,7 +158,7 @@ namespace tmv {
         TMVAssert(A.size() == b.size());
         TMVAssert(b.size()>0);
         int n=A.size();
-        int lda = A.isrm()?A.stepi():A.stepj();
+        int lda = A.iscm()?A.stepj():A.stepi();
         int bs = 2*b.step();
         float* bp = (float*)(b.ptr());
         if (bs < 0) bp += (n-1)*bs;
@@ -181,7 +181,7 @@ namespace tmv {
     {
 #ifdef BLAS
         const typename M2::value_type t2(0);
-        if ( (m2.isrm() && m2.stepi()>0) || (m2.iscm() && m2.stepj()>0) ) {
+        if ( (m2.iscm() && m2.stepj()>0) || (m2.isrm() && m2.stepi()>0) ) {
             BlasTriLDivEq(v1,m2,t2);
         } else {
             if (m2.isunit()) {

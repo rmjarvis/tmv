@@ -4,7 +4,7 @@
 #define TMV_InvertD_H
 
 #include "TMV_BaseMatrix_Diag.h"
-
+#include "TMV_Array.h"
 
 namespace tmv {
 
@@ -267,9 +267,6 @@ namespace tmv {
         enum { vcomplex = V::iscomplex };
         enum { unit = V::_step == 1 };
 
-#if 0
-        enum { algo = 11 };
-#else
         enum { algo = (
                 s == 0 ? 0 : 
                 TMV_OPT == 0? 11 :
@@ -282,7 +279,6 @@ namespace tmv {
                 ( vdouble && vcomplex ) ? 33 :
 #endif
                 11 ) };
-#endif
         static TMV_INLINE void call(V& v)
         {
             TMVStaticAssert(!V::_conj);

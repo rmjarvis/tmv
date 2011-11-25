@@ -540,9 +540,6 @@ namespace tmv {
     {
         static TMV_INLINE void call(M1& R, M2& A)
         {
-#if 0
-            const int algo = 27;
-#else
             typedef typename M1::value_type T;
             const int csrs = IntTraits2<cs,rs>::prod;
             const int rsrs = IntTraits<IntTraits2<rs,rs>::prod>::halfS;
@@ -556,7 +553,6 @@ namespace tmv {
                 cs == TMV_UNKNOWN ? 31 : 
                 totmem <= l2cache ? 11 :
                 rs <= 128 ? 27 : 22;
-#endif
 #ifdef PRINTALGO_QR
             std::cout<<"Inline QRDowndate: \n";
             std::cout<<"R = "<<TMV_Text(R)<<std::endl;

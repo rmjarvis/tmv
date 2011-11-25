@@ -34,6 +34,7 @@ namespace tmv {
     { AliasLDiv(x,m1.calc(),m2.calc(),m3.mat()); }
 
 #if 0
+    // Defined below so it can check whether to run the Debug version...
     template <class M1, class M2>
     static TMV_INLINE void LDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2)
@@ -65,7 +66,7 @@ namespace tmv {
     { AliasRDiv(x,m1.calc(),m2.calc(),m3.mat()); }
 
 #if 0
-    // Defined below...
+    // Defined below so it can check whether to run the Debug version...
     template <class M1, class M2>
     static TMV_INLINE void RDivEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2)
