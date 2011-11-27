@@ -330,13 +330,6 @@
 //
 //    is >> m
 //        Reads m from istream is in the compact format
-//        m must already be the correct size for this to work.
-//
-//    std::auto_ptr<tmv::BandMatrix<T> > mptr;
-//    is >> mptr
-//        If you do not know the size of the BandMatrix to be read, you can
-//        use this form, which will allocate the band matrix to be the 
-//        correct size according to the input data.
 //
 //
 // Division Control Functions:
@@ -355,6 +348,7 @@
 #include "TMV_BaseMatrix_Band.h"
 #include "TMV_BaseMatrix_Rec.h"
 #include "TMV_BaseMatrix_Tri.h"
+#include "TMV_BaseMatrix_Diag.h"
 #include "TMV_Divider.h"
 #include "TMV_Array.h"
 #include "TMV_VIt.h"
@@ -393,9 +387,11 @@ namespace tmv {
         BandMatrix<T> getM() const;
         bool mIsSquare() const;
 
+#if 0
         bandlud_type lud() const;
         bandqrd_type qrd() const;
         bandsvd_type svd() const;
+#endif
 
         virtual ConstBandMatrixView<T> getConstView() const=0;
 
@@ -431,10 +427,11 @@ namespace tmv {
         typedef typename Traits<M>::svd_type svd_type;
 
         TMV_INLINE void resetDivType() const {} 
+#if 0
         TMV_INLINE lud_type lud() const { return lud_type(mat2(),false); }
         TMV_INLINE qrd_type qrd() const { return qrd_type(mat2(),false); }
-        TMV_INLINE qrpd_type qrpd() const { return qrpd_type(mat2(),false); }
         TMV_INLINE svd_type svd() const { return svd_type(mat2(),false); }
+#endif
 
         TMV_INLINE const M& mat2() const
         { return static_cast<const M&>(*this); }
@@ -510,14 +507,21 @@ namespace tmv {
         enum { twoSj = isreal ? int(_stepj) : IntTraits<_stepj>::twoS };
 
         enum { _hasdivider = Attrib<A>::withdivider };
-        typedef QuotXB<1,real_type,type> inverse_type;
 
+#if 0
+        typedef QuotXB<1,real_type,type> inverse_type;
         typedef typename TypeSelect<_hasdivider ,
                 const InstBandLUD<T>& , LUD<copy_type> >::type lud_type;
         typedef typename TypeSelect<_hasdivider ,
                 const InstBandQRD<T>& , QRD<copy_type> >::type qrd_type;
         typedef typename TypeSelect<_hasdivider ,
                 const InstBandSVD<T>& , SVD<copy_type> >::type svd_type;
+#else
+        typedef InvalidType inverse_type;
+        typedef InvalidType lud_type;
+        typedef InvalidType qrd_type;
+        typedef InvalidType svd_type;
+#endif
 
         enum { vecA = (
                 (_fort ? FortranStyle : 0) |
@@ -704,10 +708,10 @@ namespace tmv {
             itscs(m2.itscs), itsrs(m2.itsrs),
             itsnlo(m2.itsnlo), itsnhi(m2.itsnhi),
             linsize(BandStorageLength(_stor,itscs,itsrs,itsnlo,itsnhi)),
-            itssi(_rowmajor ? lo+hi : _colmajor ? 1 : 
+            itssi(_rowmajor ? itsnlo+itsnhi : _colmajor ? 1 : 
                   itsrs >= itscs ? 1-int(itscs) : -int(itsrs)),
-            itssj(_rowmajor ? 1 : _colmajor ? lo+hi : -itssi+1),
-            itsm1(linsize), itsm(itsm1.get() - _diagmajor ? lo*itssi : 0)
+            itssj(_rowmajor ? 1 : _colmajor ? itsnlo+itsnhi : -itssi+1),
+            itsm1(linsize), itsm(itsm1.get() - _diagmajor ? itsnlo*itssi : 0)
         {
             TMVStaticAssert(Traits<type>::okA);
             m2.newAssignTo(*this);
@@ -718,10 +722,10 @@ namespace tmv {
             itscs(m2.colsize()), itsrs(m2.rowsize()), 
             itsnlo(m2.nlo()), itsnhi(m2.nhi()),
             linsize(BandStorageLength(_stor,itscs,itsrs,itsnlo,itsnhi)),
-            itssi(_rowmajor ? lo+hi : _colmajor ? 1 : 
+            itssi(_rowmajor ? itsnlo+itsnhi : _colmajor ? 1 : 
                   itsrs >= itscs ? 1-int(itscs) : -int(itsrs)),
-            itssj(_rowmajor ? 1 : _colmajor ? lo+hi : -itssi+1),
-            itsm1(linsize), itsm(itsm1.get() - _diagmajor ? lo*itssi : 0)
+            itssj(_rowmajor ? 1 : _colmajor ? itsnlo+itsnhi : -itssi+1),
+            itsm1(linsize), itsm(itsm1.get() - _diagmajor ? itsnlo*itssi : 0)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert((ShapeTraits2<M2::_shape,_shape>::assignable));
@@ -768,9 +772,9 @@ namespace tmv {
             itsnlo(Maybe<M2::_upper>::select(0,lohi)),
             itsnhi(Maybe<M2::_upper>::select(lohi,0)),
             linsize(BandStorageLength(_stor,itscs,itsrs,itsnlo,itsnhi)),
-            itssi(_rowmajor ? lo+hi : _colmajor ? 1 : 1-int(itscs)),
-            itssj(_rowmajor ? 1 : _colmajor ? lo+hi : int(itscs)),
-            itsm1(linsize), itsm(itsm1.get() - _diagmajor ? lo*itssi : 0)
+            itssi(_rowmajor ? lohi : _colmajor ? 1 : 1-int(itscs)),
+            itssj(_rowmajor ? 1 : _colmajor ? lohi : int(itscs)),
+            itsm1(linsize), itsm(itsm1.get() - _diagmajor ? itsnlo*itssi : 0)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVAssert(lohi >= 0 && lohi < int(m2.size()));
@@ -785,12 +789,12 @@ namespace tmv {
         BandMatrix(const BaseMatrix_Diag<M2>& m2) :
             itscs(m2.colsize()), itsrs(m2.rowsize()), itsnlo(0), itsnhi(0),
             linsize(BandStorageLength(_stor,itscs,itsrs,itsnlo,itsnhi)),
-            itssi(_rowmajor ? lo+hi : _colmajor ? 1 : 1-int(itscs)),
-            itssj(_rowmajor ? 1 : _colmajor ? lo+hi : int(itscs)),
+            itssi(_rowmajor ? itsnlo+itsnhi : _colmajor ? 1 : 1-int(itscs)),
+            itssj(_rowmajor ? 1 : _colmajor ? itsnlo+itsnhi : int(itscs)),
             itsm1(linsize), itsm(itsm1.get())
         {
             TMVStaticAssert(Traits<type>::okA);
-            m2.diag().newAssignTo(diag());
+            m2.diag().newAssignTo(this->diag());
         }
 
         ~BandMatrix() 
@@ -868,13 +872,6 @@ namespace tmv {
             return const_linearview_type(start_mem(),ls(),1);
         }
 
-        ListAssigner<T,linear_iterator> operator<<(T x)
-        {
-            TMVStaticAssert(_canlin);
-            linearview_type v = linearView();
-            return ListAssigner<T,iter>(v.begin(),v.size(),x); 
-        }
-
         //
         // Auxilliary Functions
         //
@@ -896,7 +893,7 @@ namespace tmv {
             TMVAssert(m2.rowsize() == rowsize());
             TMVAssert(m2.nlo() == nlo());
             TMVAssert(m2.nhi() == nhi());
-            if (itsm.get() == m2.itsm.get()) return;
+            if (itsm1.get() == m2.itsm1.get()) return;
             itsm1.swapWith(m2.itsm1);
             TMV_SWAP(itsm,m2.itsm);
         }
@@ -925,6 +922,8 @@ namespace tmv {
         TMV_INLINE size_t ls() const { return linsize; }
         TMV_INLINE size_t colsize() const { return itscs; }
         TMV_INLINE size_t rowsize() const { return itsrs; }
+        TMV_INLINE int nlo() const { return itsnlo; }
+        TMV_INLINE int nhi() const { return itsnhi; }
         // nElements is only guaranteed to be an upper limit to the 
         // number of non-zero elements.  So _linsize is fine.
         // For views, we can even use simply size*(lo+hi+1)
@@ -1005,14 +1004,21 @@ namespace tmv {
                 NoDivider ) };
         typedef BandMatrix<T,copyA> copy_type;
         enum { _hasdivider = Attrib<A>::withdivider };
-        typedef QuotXB<1,real_type,type> inverse_type;
 
+#if 0
+        typedef QuotXB<1,real_type,type> inverse_type;
         typedef typename TypeSelect<_hasdivider ,
                 const InstBandLUD<T>& , BandLUD<copy_type> >::type lud_type;
         typedef typename TypeSelect<_hasdivider ,
                 const InstBandQRD<T>& , BandQRD<copy_type> >::type qrd_type;
         typedef typename TypeSelect<_hasdivider ,
                 const InstBandSVD<T>& , BandSVD<copy_type> >::type svd_type;
+#else
+        typedef InvalidType inverse_type;
+        typedef InvalidType lud_type;
+        typedef InvalidType qrd_type;
+        typedef InvalidType svd_type;
+#endif
 
         enum { vecA = (
                 (_fort ? FortranStyle : 0) |
@@ -1267,6 +1273,7 @@ namespace tmv {
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
         enum { _colmajor = Attrib<A>::colmajor };
+        enum { _diagmajor = Attrib<A>::diagmajor };
         enum { _stepi = (_colmajor ? 1 : TMV_UNKNOWN) };
         enum { _stepj = (_rowmajor ? 1 : TMV_UNKNOWN) };
         enum { _diagstep = TMV_UNKNOWN };
@@ -1282,14 +1289,21 @@ namespace tmv {
                 NoDivider ) };
         typedef BandMatrix<T,copyA> copy_type;
         enum { _hasdivider = Attrib<A>::withdivider };
-        typedef QuotXB<1,real_type,type> inverse_type;
 
+#if 0
+        typedef QuotXB<1,real_type,type> inverse_type;
         typedef typename TypeSelect<_hasdivider ,
                 const InstBandLUD<T>& , BandLUD<copy_type> >::type lud_type;
         typedef typename TypeSelect<_hasdivider ,
                 const InstBandQRD<T>& , BandQRD<copy_type> >::type qrd_type;
         typedef typename TypeSelect<_hasdivider ,
                 const InstBandSVD<T>& , BandSVD<copy_type> >::type svd_type;
+#else
+        typedef InvalidType inverse_type;
+        typedef InvalidType lud_type;
+        typedef InvalidType qrd_type;
+        typedef InvalidType svd_type;
+#endif
 
         enum { vecA = (
                 (_fort ? FortranStyle : 0) |
@@ -1373,7 +1387,6 @@ namespace tmv {
         typedef BandMatrixView<T,cstyleA> cview_type;
         typedef BandMatrixView<T,fstyleA> fview_type;
         typedef BandMatrixView<T,(_conj ? Conj : NonConj)> xview_type;
-        typedef BandMatrixView<T> xview_type;
         typedef BandMatrixView<T,cmA> cmview_type;
         typedef BandMatrixView<T,rmA> rmview_type;
         typedef BandMatrixView<T,dmA> dmview_type;
@@ -1623,11 +1636,11 @@ namespace tmv {
     { m1.swapWith(m2); }
     template <class M, class T, int A>
     static TMV_INLINE void Swap(
-        BaseBandMatrix_Band_Mutable<M>& m1, BandMatrixView<T,A> m2)
+        BaseMatrix_Band_Mutable<M>& m1, BandMatrixView<T,A> m2)
     { DoSwap(m1,m2); }
     template <class M, class T, int A>
     static TMV_INLINE void Swap(
-        BandMatrixView<T,A> m1, BaseBandMatrix_Band_Mutable<M>& m2)
+        BandMatrixView<T,A> m1, BaseMatrix_Band_Mutable<M>& m2)
     { DoSwap(m1,m2); }
     template <class T, int A1, int A2>
     static TMV_INLINE void Swap(

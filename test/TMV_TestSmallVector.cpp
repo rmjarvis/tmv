@@ -92,7 +92,8 @@ static void TestSmallVectorReal()
     std::copy(qv.begin(),qv.end(),q2.begin());
     // Assign SmallVectorView from vector
     tmv::SmallVector<T,50> q3x;
-    tmv::SmallVector<T,50>::subvector_step_type q3 = q3x.subVector(4,34,5);
+    typename tmv::SmallVector<T,50>::subvector_step_type q3 = 
+        q3x.subVector(4,34,5);
     std::copy(qv.begin(),qv.end(),q3.begin());
     // Use op<< assignment
     tmv::SmallVector<T,6> q4;
@@ -342,8 +343,8 @@ static void TestSmallVectorIO()
     Assert(v == xv1,"SmallVector I/O check #1");
     Assert(cv == xcv1,"CSmallVector I/O check #1");
 
-    std::auto_ptr<tmv::Vector<T> > xv2;
-    std::auto_ptr<tmv::Vector<std::complex<T> > > xcv2;
+    tmv::Vector<T> xv2;
+    tmv::Vector<std::complex<T> > xcv2;
     fin.open("tmvtest_smallvector_io.dat");
     if (!fin) {
 #ifdef NOTHROW
@@ -356,8 +357,8 @@ static void TestSmallVectorIO()
     }
     fin >> xv2 >> xcv2;
     fin.close();
-    Assert(v == *xv2,"SmallVector I/O check #2");
-    Assert(cv == *xcv2,"CSmallVector I/O check #2");
+    Assert(v == xv2,"SmallVector I/O check #2");
+    Assert(cv == xcv2,"CSmallVector I/O check #2");
 
     std::remove("tmvtest_smallvector_io.dat");
 }

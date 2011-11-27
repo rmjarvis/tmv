@@ -8,6 +8,7 @@
 #include "TMV_Rank1VVM.h"
 #include "TMV_MultMM_Funcs.h"
 #include "TMV_MultXM_Funcs.h"
+#include "TMV_Prefetch.h"
 
 #ifdef _OPENMP
 #include "omp.h"

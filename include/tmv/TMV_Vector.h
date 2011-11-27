@@ -366,14 +366,7 @@
 //
 //    void read(std::istream& is)    or is >> v
 //        Reads the vector from istream is in the same format
-//        Note: the vector must already be the correct size
-//
-//    std::auto_ptr<tmv::Vector<T> > vptr;
-//    is >> vptr
-//        If you do not know the size of the vector to be read in, you can
-//        use this form which will allocate the vector to be the correct
-//        size according to the input data.
-//
+//        Note: if the vector is not the right size, it will be resized.
 //
 
 

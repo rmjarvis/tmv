@@ -316,9 +316,9 @@ namespace tmv {
         // Start with XX (= 0) and if we request divtype using getDivType,
         // and it hasn't been manually set yet, then it gets reset to either 
         // LU or QR depending on whether the matrix is square.
-        DivHelper() : divtype(tmv::XX) {}
+        DivHelper() : divider(0), divtype(tmv::XX) {}
 
-        ~DivHelper() {}
+        ~DivHelper() { }
 
         void divideInPlace() const
         { divtype |= tmv::DivInPlaceFlag; saveDiv(); }
@@ -353,7 +353,7 @@ namespace tmv {
         }
 
         void unsetDiv() const
-        { divider.reset(); }
+        { divider.reset(0); }
 
         bool divIsSet() const
         { return getDiv(); }
@@ -375,7 +375,6 @@ namespace tmv {
         virtual void setDiv() const = 0;
         virtual Matrix<T> getM() const = 0;
         virtual bool mIsSquare() const = 0;
-
 
     protected:
 

@@ -267,8 +267,9 @@ namespace tmv {
 
 #define NEW_SIZE(cs,rs) \
 
-        DiagMatrix(size_t n=0) : itssize(n), itsm(n)
+        explicit DiagMatrix(size_t n=0) : itssize(n), itsm(n)
         {
+            TMVAssert(n >= 0);
             TMVStaticAssert(Traits<type>::okA);
 #ifdef TMV_DEBUG
             this->diag().setAllTo(Traits<T>::constr_value());
@@ -277,6 +278,7 @@ namespace tmv {
 
         DiagMatrix(size_t n, T x) : itssize(n), itsm(n)
         {
+            TMVAssert(n >= 0);
             TMVStaticAssert(Traits<type>::okA);
             this->setAllTo(x);
         }

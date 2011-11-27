@@ -267,13 +267,13 @@ static void TestBasicBandMatrix_IO()
     fin.close();
     Assert(ca1 == xb3,"BandMatrix Compact I/O check #3");
 
-    std::auto_ptr<tmv::Matrix<std::complex<T>,tmv::RowMajor> > xm4;
-    std::auto_ptr<tmv::BandMatrix<std::complex<T>,tmv::RowMajor> > xb4;
+    tmv::Matrix<std::complex<T> > xm4;
+    tmv::BandMatrix<std::complex<T> > xb4;
     fin.open("tmvtest_bandmatrix_io.dat");
     fin >> xm4 >> xb4;
     fin.close();
-    Assert(tmv::Matrix<std::complex<T> >(ca1) == *xm4,"BandMatrix I/O check #4");
-    Assert(ca1 == *xb4,"BandMatrix Compact I/O check #4");
+    Assert(tmv::Matrix<std::complex<T> >(ca1) == xm4,"BandMatrix I/O check #4");
+    Assert(ca1 == xb4,"BandMatrix Compact I/O check #4");
 
 #ifndef XTEST
     std::remove("tmvtest_bandmatrix_io.dat");

@@ -11,7 +11,7 @@ namespace tmv {
     //
     // TODO: Have the non-compact versions instantiated as well.
 
-    // Defined in TMV_Matrix.cpp
+    // Defined in TMV_TriMatrix.cpp
     template <class T, int C>
     void InstWriteCompact(
         std::ostream& os, const ConstUpperTriMatrixView<T,C>& m);
@@ -505,9 +505,8 @@ namespace tmv {
 
     template <class T, int A0, int A1, int A2>
     static std::istream& operator>>(
-        std::istream& is, auto_ptr<UpperTriMatrix<T,A0,A1,A2> >& m)
+        std::istream& is, UpperTriMatrix<T,A0,A1,A2>& m)
     {
-        typedef UpperTriMatrix<T,A0,A1,A2> M;
         char ul;
         is >> ul;
         if (!is) {
@@ -515,7 +514,7 @@ namespace tmv {
             std::cerr<<"UpperTriMatrix ReadError: !is\n";
             exit(1);
 #else
-            throw TriMatrixReadError<T>(is,M::_upper);
+            throw TriMatrixReadError<T>(is,true);
 #endif
         }
         if (ul != 'U') {
@@ -523,7 +522,7 @@ namespace tmv {
             std::cerr<<"UpperTriMatrix ReadError: "<<ul<<" != U\n";
             exit(1);
 #else
-            throw TriMatrixReadError<T>(is,'U',ul,M::_upper);
+            throw TriMatrixReadError<T>(is,'U',ul,true);
 #endif
         }
         size_t s;
@@ -533,19 +532,18 @@ namespace tmv {
             std::cerr<<"UpperTriMatrix ReadError: !is \n";
             exit(1);
 #else
-            throw TriMatrixReadError<T>(is,M::_upper);
+            throw TriMatrixReadError<T>(is,true);
 #endif
         }
-        m.reset(new M(s));
-        Read(is,*m);
+        m.resize(s);
+        Read(is,m);
         return is;
     }
 
     template <class T, int A0, int A1, int A2>
     static std::istream& operator>>(
-        std::istream& is, auto_ptr<LowerTriMatrix<T,A0,A1,A2> >& m)
+        std::istream& is, LowerTriMatrix<T,A0,A1,A2>& m)
     {
-        typedef LowerTriMatrix<T,A0,A1,A2> M;
         char ul;
         is >> ul;
         if (!is) {
@@ -553,7 +551,7 @@ namespace tmv {
             std::cerr<<"LowerTriMatrix ReadError: !is\n";
             exit(1);
 #else
-            throw TriMatrixReadError<T>(is,M::_upper);
+            throw TriMatrixReadError<T>(is,false);
 #endif
         }
         if (ul != 'L') {
@@ -561,7 +559,7 @@ namespace tmv {
             std::cerr<<"LowerTriMatrix ReadError: "<<ul<<" != U\n";
             exit(1);
 #else
-            throw TriMatrixReadError<T>(is,'L',ul,M::_upper);
+            throw TriMatrixReadError<T>(is,'L',ul,false);
 #endif
         }
         size_t s;
@@ -571,11 +569,11 @@ namespace tmv {
             std::cerr<<"LowerTriMatrix ReadError: !is \n";
             exit(1);
 #else
-            throw TriMatrixReadError<T>(is,M::_upper);
+            throw TriMatrixReadError<T>(is,false);
 #endif
         }
-        m.reset(new M(s));
-        Read(is,*m);
+        m.resize(s);
+        Read(is,m);
         return is;
     }
 

@@ -172,7 +172,7 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class M>
         MatrixReadError(
-            int _i, int _j, const BaseMatrix<M>& _m, 
+            int _i, int _j, const BaseMatrix_Rec<M>& _m, 
             std::istream& _is) throw() :
             ReadError("Matrix"),
             m(_m), i(_i), j(_j), exp(0), got(0), 
@@ -180,7 +180,7 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class M>
         MatrixReadError(
-            int _i, int _j, const BaseMatrix<M>& _m,
+            int _i, int _j, const BaseMatrix_Rec<M>& _m,
             std::istream& _is, char _e, char _g) throw() :
             ReadError("Matrix"),
             m(_m), i(_i), j(_j), exp(_e), got(_g),
@@ -188,7 +188,7 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class M>
         MatrixReadError(
-            const BaseMatrix<M>& _m,
+            const BaseMatrix_Rec<M>& _m,
             std::istream& _is, size_t _cs, size_t _rs) throw() :
             ReadError("Matrix"),
             m(_m), i(0), exp(0), got(0), cs(_cs), rs(_rs),
@@ -402,8 +402,7 @@ namespace tmv {
     }
 
     template <class T, int A0, int A1>
-    static std::istream& operator>>(
-        std::istream& is, auto_ptr<Matrix<T,A0,A1> >& m)
+    static std::istream& operator>>(std::istream& is, Matrix<T,A0,A1>& m)
     {
         size_t cs,rs;
         is >> cs >> rs;
@@ -415,10 +414,11 @@ namespace tmv {
             throw MatrixReadError<T>(is);
 #endif
         }
-        m.reset(new Matrix<T,A0,A1>(cs,rs));
-        Read(is,*m);
+        m.resize(cs,rs);
+        Read(is,m);
         return is;
     }
+
 } // namespace mv
 
 #endif

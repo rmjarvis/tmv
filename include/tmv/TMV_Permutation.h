@@ -174,7 +174,7 @@ namespace tmv {
         // Constructors
         //
 
-        explicit Permutation(size_t n) :
+        explicit Permutation(size_t n=0) :
             itsn(n), itsmem(n), itsp(itsmem), isinv(false), itsdet(1) 
         { for(int i=0;i<itsn;++i) itsmem[i] = i; }
 
@@ -195,7 +195,7 @@ namespace tmv {
         Permutation& operator=(const Permutation& rhs)
         {
             TMVAssert(size() == rhs.size());
-            itsmem.resize(0);
+            itsmem.resize(0); // also deallocates the memory
             itsp = rhs.itsp;
             isinv = rhs.isinv;
             itsdet = rhs.itsdet;
@@ -636,7 +636,7 @@ namespace tmv {
         TMV_INLINE_ND int* getMem() 
         {
             // Make sure P owns its memory:
-            TMVAssert(itsmem.get());
+            TMVAssert(itsn==0 || itsmem.get());
             // This next one shoudl be true if the previous one passes.
             TMVAssert(itsmem.get() == itsp);
             return itsmem;
@@ -685,8 +685,8 @@ namespace tmv {
         public ReadError
     {
     public :
+        Permutation m;
         int i;
-        mutable auto_ptr<Permutation> m;
         char exp,got;
         size_t n;
         bool is, iseof, isbad;
@@ -695,32 +695,32 @@ namespace tmv {
             int _i, const Permutation& _m, std::istream& _is
         ) throw() :
             ReadError("Permutation."),
-            i(_i), m(new Permutation(_m)), exp(0), got(0),
+            i(_i), m(_m), exp(0), got(0),
             n(_m.size()), is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         PermutationReadError(std::istream& _is) throw() :
             ReadError("Permutation."),
-            i(0), m(0), exp(0), got(0), n(0),
+            i(0), exp(0), got(0), n(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         PermutationReadError(
             int _i, const Permutation& _m,
             std::istream& _is, char _e, char _g
         ) throw() :
             ReadError("Permutation."),
-            i(_i), m(new Permutation(_m)), exp(_e), got(_g),
+            i(_i), m(_m), exp(_e), got(_g),
             n(_m.size()), is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         PermutationReadError(std::istream& _is, char _e, char _g) throw() :
             ReadError("Permutation."),
-            i(0), m(0), exp(_e), got(_g),
+            i(0), exp(_e), got(_g),
             n(0), is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         PermutationReadError(
             const Permutation& _m, std::istream& _is, size_t _n
         ) throw() :
             ReadError("Permutation."),
-            i(0), m(new Permutation(_m)), exp(0), got(0),
+            i(0), m(_m), exp(0), got(0),
             n(_n), is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
         PermutationReadError(const PermutationReadError& rhs) :
-            i(rhs.i), m(rhs.m), exp(rhs.exp), got(rhs.got),
+            m(rhs.m), i(rhs.i), exp(rhs.exp), got(rhs.got),
             n(rhs.n), is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) {}
         virtual ~PermutationReadError() throw() {}
 
@@ -730,8 +730,8 @@ namespace tmv {
             if (exp != got) {
                 os<<"Wrong format: expected '"<<exp<<"', got '"<<got<<"'.\n";
             }
-            if (m.get() && n != m->size()) {
-                os<<"Wrong size: expected "<<m->size()<<", got "<<n<<".\n";
+            if (n != m.size()) {
+                os<<"Wrong size: expected "<<m.size()<<", got "<<n<<".\n";
             }
             if (!is) {
                 if (iseof) {
@@ -742,12 +742,12 @@ namespace tmv {
                     os<<"Input stream cannot read next character.\n";
                 }
             }
-            if (m.get()) {
+            if (m.size() > 0) {
                 os<<"The portion of the Permutation which was successfully "
                     "read is: \n";
                 os<<"( ";
                 for(int k=0;k<i;++k)
-                    os<<' '<<m->getValues()[k]<<' ';
+                    os<<' '<<m.getValues()[k]<<' ';
                 os<<" )\n";
             }
         }
@@ -831,51 +831,8 @@ namespace tmv {
             throw PermutationReadError(is);
 #endif
         }
-        if (n != m.size()) {
-#ifdef TMV_NO_THROWW
-            std::cerr<<"Band Matrix Read Error wrong size \n";
-            exit(1);
-#else
-            throw PermutationReadError(m,is,n);
-#endif
-        }
+        m.resize(n);
         m.read(is);
-        return is;
-    }
-
-    static inline std::istream& operator>>(
-        std::istream& is, std::auto_ptr<Permutation>& m)
-    {
-        char p;
-        is >> p;
-        if (!is) {
-#ifdef TMV_NO_THROWW
-            std::cerr<<"Permutation Read Error !is \n";
-            exit(1);
-#else
-            throw PermutationReadError(is);
-#endif
-        }
-        if (p != 'P') {
-#ifdef TMV_NO_THROWW
-            std::cerr<<"Permutation Read Error "<<p<<" != P\n";
-            exit(1);
-#else
-            throw PermutationReadError(is,'P',p);
-#endif
-        }
-        size_t n;
-        is >> n;
-        if (!is) {
-#ifdef TMV_NO_THROWW
-            std::cerr<<"Permutation Read Error !is \n";
-            exit(1);
-#else
-            throw PermutationReadError(is);
-#endif
-        }
-        m.reset(new Permutation(n));
-        m->read(is);
         return is;
     }
 

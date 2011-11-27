@@ -4,6 +4,7 @@
 
 #include "TMV_BaseMatrix_Rec.h"
 #include "TMV_SwapV.h"
+#include "TMV_Prefetch.h"
 
 //#define PRINTALGO_PERM
 

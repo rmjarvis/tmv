@@ -57,23 +57,21 @@ namespace tmv {
                 2<<','<<2<<std::endl;
 #endif
             typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
             typedef typename M1::real_type RT;
-            T1 det = m1.det();
+            // Find scale to help avoid overflow/underflow.
+            RT scale = m1.maxAbs2Element();
+            typename MCopyHelper<T1,Rec,2,2,false>::type m1c = m1/scale;
+            T1 det = m1c.det();
             if (det == T1(0)) ThrowSingular("2x2 Matrix");
             T1 invdet = ZProd<false,false>::quot(RT(1) , det);
-            // Store these in temporaries just in case there are aliases.
-            const T1 m1_00 = m1.cref(0,0);
-            const T1 m1_01 = m1.cref(0,1);
-            const T1 m1_10 = m1.cref(1,0);
-            const T1 m1_11 = m1.cref(1,1);
-            m2.ref(0,0) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(m1_11 , invdet));
-            m2.ref(0,1) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(-m1_01 , invdet));
-            m2.ref(1,0) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(-m1_10 , invdet));
-            m2.ref(1,1) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(m1_00 , invdet));
+            // Each of the terms like m1c.cref(0,0) has a 1/scale already
+            // so only need one more scale in the xinvdet factor.
+            T2 xinvdet = ZProd<false,false>::prod(x,invdet/scale);
+            m2.ref(0,0) = ZProd<false,false>::prod(m1c.cref(1,1) , xinvdet);
+            m2.ref(0,1) = ZProd<false,false>::prod(-m1c.cref(0,1) , xinvdet);
+            m2.ref(1,0) = ZProd<false,false>::prod(-m1c.cref(1,0) , xinvdet);
+            m2.ref(1,1) = ZProd<false,false>::prod(m1c.cref(0,0) , xinvdet);
         }
     };
 
@@ -90,47 +88,44 @@ namespace tmv {
                 3<<','<<3<<std::endl;
 #endif
             typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
             typedef typename M1::real_type RT;
-            T1 det = m1.det();
+            // Find scale to help avoid overflow/underflow.
+            RT scale = m1.maxAbs2Element();
+            typename MCopyHelper<T1,Rec,3,3,false>::type m1c = m1/scale;
+            T1 det = m1c.det();
             if (det == T1(0)) ThrowSingular("3x3 Matrix");
             T1 invdet = ZProd<false,false>::quot(RT(1) , det);
-            // Store these in temporaries just in case there are aliases.
-            const T1 ae = ZProd<false,false>::prod(m1.cref(0,0),m1.cref(1,1));
-            const T1 ai = ZProd<false,false>::prod(m1.cref(0,0),m1.cref(2,2));
-            const T1 ei = ZProd<false,false>::prod(m1.cref(1,1),m1.cref(2,2));
-            const T1 af = ZProd<false,false>::prod(m1.cref(0,0),m1.cref(1,2));
-            const T1 ah = ZProd<false,false>::prod(m1.cref(0,0),m1.cref(2,1));
-            const T1 fh = ZProd<false,false>::prod(m1.cref(1,2),m1.cref(2,1));
-            const T1 bf = ZProd<false,false>::prod(m1.cref(0,1),m1.cref(1,2));
-            const T1 bg = ZProd<false,false>::prod(m1.cref(0,1),m1.cref(2,0));
-            const T1 fg = ZProd<false,false>::prod(m1.cref(1,2),m1.cref(2,0));
-            const T1 bd = ZProd<false,false>::prod(m1.cref(0,1),m1.cref(1,0));
-            const T1 bi = ZProd<false,false>::prod(m1.cref(0,1),m1.cref(2,2));
-            const T1 di = ZProd<false,false>::prod(m1.cref(1,0),m1.cref(2,2));
-            const T1 cd = ZProd<false,false>::prod(m1.cref(0,2),m1.cref(1,0));
-            const T1 ch = ZProd<false,false>::prod(m1.cref(0,2),m1.cref(2,1));
-            const T1 dh = ZProd<false,false>::prod(m1.cref(1,0),m1.cref(2,1));
-            const T1 ce = ZProd<false,false>::prod(m1.cref(0,2),m1.cref(1,1));
-            const T1 cg = ZProd<false,false>::prod(m1.cref(0,2),m1.cref(2,0));
-            const T1 eg = ZProd<false,false>::prod(m1.cref(1,1),m1.cref(2,0));
-            m2.ref(0,0) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(ei-fh , invdet));
-            m2.ref(0,1) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(ch-bi , invdet));
-            m2.ref(0,2) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(bf-ce , invdet));
-            m2.ref(1,0) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(fg-di , invdet));
-            m2.ref(1,1) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(ai-cg , invdet));
-            m2.ref(1,2) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(cd-af , invdet));
-            m2.ref(2,0) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(dh-eg , invdet));
-            m2.ref(2,1) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(bg-ah , invdet));
-            m2.ref(2,2) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(ae-bd , invdet));
+            const T1 ae = ZProd<false,false>::prod(m1c.cref(0,0),m1c.cref(1,1));
+            const T1 ai = ZProd<false,false>::prod(m1c.cref(0,0),m1c.cref(2,2));
+            const T1 ei = ZProd<false,false>::prod(m1c.cref(1,1),m1c.cref(2,2));
+            const T1 af = ZProd<false,false>::prod(m1c.cref(0,0),m1c.cref(1,2));
+            const T1 ah = ZProd<false,false>::prod(m1c.cref(0,0),m1c.cref(2,1));
+            const T1 fh = ZProd<false,false>::prod(m1c.cref(1,2),m1c.cref(2,1));
+            const T1 bf = ZProd<false,false>::prod(m1c.cref(0,1),m1c.cref(1,2));
+            const T1 bg = ZProd<false,false>::prod(m1c.cref(0,1),m1c.cref(2,0));
+            const T1 fg = ZProd<false,false>::prod(m1c.cref(1,2),m1c.cref(2,0));
+            const T1 bd = ZProd<false,false>::prod(m1c.cref(0,1),m1c.cref(1,0));
+            const T1 bi = ZProd<false,false>::prod(m1c.cref(0,1),m1c.cref(2,2));
+            const T1 di = ZProd<false,false>::prod(m1c.cref(1,0),m1c.cref(2,2));
+            const T1 cd = ZProd<false,false>::prod(m1c.cref(0,2),m1c.cref(1,0));
+            const T1 ch = ZProd<false,false>::prod(m1c.cref(0,2),m1c.cref(2,1));
+            const T1 dh = ZProd<false,false>::prod(m1c.cref(1,0),m1c.cref(2,1));
+            const T1 ce = ZProd<false,false>::prod(m1c.cref(0,2),m1c.cref(1,1));
+            const T1 cg = ZProd<false,false>::prod(m1c.cref(0,2),m1c.cref(2,0));
+            const T1 eg = ZProd<false,false>::prod(m1c.cref(1,1),m1c.cref(2,0));
+            // Each of the terms like ei-fh has two 1/scales already
+            // so only need one more scale in the xinvdet factor.
+            T2 xinvdet = ZProd<false,false>::prod(x,invdet/scale);
+            m2.ref(0,0) = ZProd<false,false>::prod(ei-fh , xinvdet);
+            m2.ref(0,1) = ZProd<false,false>::prod(ch-bi , xinvdet);
+            m2.ref(0,2) = ZProd<false,false>::prod(bf-ce , xinvdet);
+            m2.ref(1,0) = ZProd<false,false>::prod(fg-di , xinvdet);
+            m2.ref(1,1) = ZProd<false,false>::prod(ai-cg , xinvdet);
+            m2.ref(1,2) = ZProd<false,false>::prod(cd-af , xinvdet);
+            m2.ref(2,0) = ZProd<false,false>::prod(dh-eg , xinvdet);
+            m2.ref(2,1) = ZProd<false,false>::prod(bg-ah , xinvdet);
+            m2.ref(2,2) = ZProd<false,false>::prod(ae-bd , xinvdet);
         }
     };
 
@@ -154,50 +149,54 @@ namespace tmv {
             // ( i j k l )
             // ( m n o p )
             typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
             typedef typename M1::real_type RT;
             
-            const T1 af = ZProd<false,false>::prod(m1.cref(0,0),m1.cref(1,1));
-            const T1 ag = ZProd<false,false>::prod(m1.cref(0,0),m1.cref(1,2));
-            const T1 ah = ZProd<false,false>::prod(m1.cref(0,0),m1.cref(1,3));
-            const T1 be = ZProd<false,false>::prod(m1.cref(0,1),m1.cref(1,0));
-            const T1 bg = ZProd<false,false>::prod(m1.cref(0,1),m1.cref(1,2));
-            const T1 bh = ZProd<false,false>::prod(m1.cref(0,1),m1.cref(1,3));
-            const T1 ce = ZProd<false,false>::prod(m1.cref(0,2),m1.cref(1,0));
-            const T1 cf = ZProd<false,false>::prod(m1.cref(0,2),m1.cref(1,1));
-            const T1 ch = ZProd<false,false>::prod(m1.cref(0,2),m1.cref(1,3));
-            const T1 de = ZProd<false,false>::prod(m1.cref(0,3),m1.cref(1,0));
-            const T1 df = ZProd<false,false>::prod(m1.cref(0,3),m1.cref(1,1));
-            const T1 dg = ZProd<false,false>::prod(m1.cref(0,3),m1.cref(1,2));
-            const T1 in = ZProd<false,false>::prod(m1.cref(2,0),m1.cref(3,1));
-            const T1 io = ZProd<false,false>::prod(m1.cref(2,0),m1.cref(3,2));
-            const T1 ip = ZProd<false,false>::prod(m1.cref(2,0),m1.cref(3,3));
-            const T1 jm = ZProd<false,false>::prod(m1.cref(2,1),m1.cref(3,0));
-            const T1 jo = ZProd<false,false>::prod(m1.cref(2,1),m1.cref(3,2));
-            const T1 jp = ZProd<false,false>::prod(m1.cref(2,1),m1.cref(3,3));
-            const T1 km = ZProd<false,false>::prod(m1.cref(2,2),m1.cref(3,0));
-            const T1 kn = ZProd<false,false>::prod(m1.cref(2,2),m1.cref(3,1));
-            const T1 kp = ZProd<false,false>::prod(m1.cref(2,2),m1.cref(3,3));
-            const T1 lm = ZProd<false,false>::prod(m1.cref(2,3),m1.cref(3,0));
-            const T1 ln = ZProd<false,false>::prod(m1.cref(2,3),m1.cref(3,1));
-            const T1 lo = ZProd<false,false>::prod(m1.cref(2,3),m1.cref(3,2));
+            // Find scale to help avoid overflow/underflow.
+            RT scale = m1.maxAbs2Element();
+            typename MCopyHelper<T1,Rec,4,4,false>::type m1c = m1/scale;
+            const T1 af = ZProd<false,false>::prod(m1c.cref(0,0),m1c.cref(1,1));
+            const T1 ag = ZProd<false,false>::prod(m1c.cref(0,0),m1c.cref(1,2));
+            const T1 ah = ZProd<false,false>::prod(m1c.cref(0,0),m1c.cref(1,3));
+            const T1 be = ZProd<false,false>::prod(m1c.cref(0,1),m1c.cref(1,0));
+            const T1 bg = ZProd<false,false>::prod(m1c.cref(0,1),m1c.cref(1,2));
+            const T1 bh = ZProd<false,false>::prod(m1c.cref(0,1),m1c.cref(1,3));
+            const T1 ce = ZProd<false,false>::prod(m1c.cref(0,2),m1c.cref(1,0));
+            const T1 cf = ZProd<false,false>::prod(m1c.cref(0,2),m1c.cref(1,1));
+            const T1 ch = ZProd<false,false>::prod(m1c.cref(0,2),m1c.cref(1,3));
+            const T1 de = ZProd<false,false>::prod(m1c.cref(0,3),m1c.cref(1,0));
+            const T1 df = ZProd<false,false>::prod(m1c.cref(0,3),m1c.cref(1,1));
+            const T1 dg = ZProd<false,false>::prod(m1c.cref(0,3),m1c.cref(1,2));
+            const T1 in = ZProd<false,false>::prod(m1c.cref(2,0),m1c.cref(3,1));
+            const T1 io = ZProd<false,false>::prod(m1c.cref(2,0),m1c.cref(3,2));
+            const T1 ip = ZProd<false,false>::prod(m1c.cref(2,0),m1c.cref(3,3));
+            const T1 jm = ZProd<false,false>::prod(m1c.cref(2,1),m1c.cref(3,0));
+            const T1 jo = ZProd<false,false>::prod(m1c.cref(2,1),m1c.cref(3,2));
+            const T1 jp = ZProd<false,false>::prod(m1c.cref(2,1),m1c.cref(3,3));
+            const T1 km = ZProd<false,false>::prod(m1c.cref(2,2),m1c.cref(3,0));
+            const T1 kn = ZProd<false,false>::prod(m1c.cref(2,2),m1c.cref(3,1));
+            const T1 kp = ZProd<false,false>::prod(m1c.cref(2,2),m1c.cref(3,3));
+            const T1 lm = ZProd<false,false>::prod(m1c.cref(2,3),m1c.cref(3,0));
+            const T1 ln = ZProd<false,false>::prod(m1c.cref(2,3),m1c.cref(3,1));
+            const T1 lo = ZProd<false,false>::prod(m1c.cref(2,3),m1c.cref(3,2));
 
             // Calculate the Inverse * Det
             const T1 r00 = 
-                ZProd<false,false>::prod(m1.cref(1,1),(kp-lo))
-                + ZProd<false,false>::prod(m1.cref(1,2),(ln-jp))
-                + ZProd<false,false>::prod(m1.cref(1,3),(jo-kn));
+                ZProd<false,false>::prod(m1c.cref(1,1),(kp-lo))
+                + ZProd<false,false>::prod(m1c.cref(1,2),(ln-jp))
+                + ZProd<false,false>::prod(m1c.cref(1,3),(jo-kn));
             const T1 r10 = 
-                ZProd<false,false>::prod(m1.cref(1,0),(lo-kp))
-                + ZProd<false,false>::prod(m1.cref(1,2),(ip-lm))
-                + ZProd<false,false>::prod(m1.cref(1,3),(km-io));
+                ZProd<false,false>::prod(m1c.cref(1,0),(lo-kp))
+                + ZProd<false,false>::prod(m1c.cref(1,2),(ip-lm))
+                + ZProd<false,false>::prod(m1c.cref(1,3),(km-io));
             const T1 r20 = 
-                ZProd<false,false>::prod(m1.cref(1,0),(jp-ln))
-                + ZProd<false,false>::prod(m1.cref(1,1),(lm-ip))
-                + ZProd<false,false>::prod(m1.cref(1,3),(in-jm));
+                ZProd<false,false>::prod(m1c.cref(1,0),(jp-ln))
+                + ZProd<false,false>::prod(m1c.cref(1,1),(lm-ip))
+                + ZProd<false,false>::prod(m1c.cref(1,3),(in-jm));
             const T1 r30 = 
-                ZProd<false,false>::prod(m1.cref(1,0),(kn-jo))
-                + ZProd<false,false>::prod(m1.cref(1,1),(io-km))
-                + ZProd<false,false>::prod(m1.cref(1,2),(jm-in));
+                ZProd<false,false>::prod(m1c.cref(1,0),(kn-jo))
+                + ZProd<false,false>::prod(m1c.cref(1,1),(io-km))
+                + ZProd<false,false>::prod(m1c.cref(1,2),(jm-in));
 
             // Interrupt to calculate det now, to make sure it's not 0.
             // We calculate the determinant directly here, since the
@@ -205,95 +204,82 @@ namespace tmv {
             // determinant.  So it saves a few multiplies compared to
             // calling det().
             const T1 det = 
-                ZProd<false,false>::prod(m1.cref(0,0),r00)
-                + ZProd<false,false>::prod(m1.cref(0,1),r10)
-                + ZProd<false,false>::prod(m1.cref(0,2),r20)
-                + ZProd<false,false>::prod(m1.cref(0,3),r30);
+                ZProd<false,false>::prod(m1c.cref(0,0),r00)
+                + ZProd<false,false>::prod(m1c.cref(0,1),r10)
+                + ZProd<false,false>::prod(m1c.cref(0,2),r20)
+                + ZProd<false,false>::prod(m1c.cref(0,3),r30);
             if (det == T1(0)) ThrowSingular("4x4 Matrix");
             T1 invdet = ZProd<false,false>::quot(RT(1) , det);
 
             const T1 r01 = 
-                ZProd<false,false>::prod(m1.cref(0,1),(lo-kp))
-                + ZProd<false,false>::prod(m1.cref(0,2),(jp-ln))
-                + ZProd<false,false>::prod(m1.cref(0,3),(kn-jo));
+                ZProd<false,false>::prod(m1c.cref(0,1),(lo-kp))
+                + ZProd<false,false>::prod(m1c.cref(0,2),(jp-ln))
+                + ZProd<false,false>::prod(m1c.cref(0,3),(kn-jo));
             const T1 r11 = 
-                ZProd<false,false>::prod(m1.cref(0,0),(kp-lo))
-                + ZProd<false,false>::prod(m1.cref(0,2),(lm-ip))
-                + ZProd<false,false>::prod(m1.cref(0,3),(io-km));
+                ZProd<false,false>::prod(m1c.cref(0,0),(kp-lo))
+                + ZProd<false,false>::prod(m1c.cref(0,2),(lm-ip))
+                + ZProd<false,false>::prod(m1c.cref(0,3),(io-km));
             const T1 r21 = 
-                ZProd<false,false>::prod(m1.cref(0,0),(ln-jp))
-                + ZProd<false,false>::prod(m1.cref(0,1),(ip-lm))
-                + ZProd<false,false>::prod(m1.cref(0,3),(jm-in));
+                ZProd<false,false>::prod(m1c.cref(0,0),(ln-jp))
+                + ZProd<false,false>::prod(m1c.cref(0,1),(ip-lm))
+                + ZProd<false,false>::prod(m1c.cref(0,3),(jm-in));
             const T1 r31 = 
-                ZProd<false,false>::prod(m1.cref(0,0),(jo-kn))
-                + ZProd<false,false>::prod(m1.cref(0,1),(km-io))
-                + ZProd<false,false>::prod(m1.cref(0,2),(in-jm));
+                ZProd<false,false>::prod(m1c.cref(0,0),(jo-kn))
+                + ZProd<false,false>::prod(m1c.cref(0,1),(km-io))
+                + ZProd<false,false>::prod(m1c.cref(0,2),(in-jm));
             const T1 r02 = 
-                ZProd<false,false>::prod(m1.cref(3,1),(ch-dg))
-                + ZProd<false,false>::prod(m1.cref(3,2),(df-bh))
-                + ZProd<false,false>::prod(m1.cref(3,3),(bg-cf));
+                ZProd<false,false>::prod(m1c.cref(3,1),(ch-dg))
+                + ZProd<false,false>::prod(m1c.cref(3,2),(df-bh))
+                + ZProd<false,false>::prod(m1c.cref(3,3),(bg-cf));
             const T1 r12 = 
-                ZProd<false,false>::prod(m1.cref(3,0),(dg-ch))
-                + ZProd<false,false>::prod(m1.cref(3,2),(ah-de))
-                + ZProd<false,false>::prod(m1.cref(3,3),(ce-ag));
+                ZProd<false,false>::prod(m1c.cref(3,0),(dg-ch))
+                + ZProd<false,false>::prod(m1c.cref(3,2),(ah-de))
+                + ZProd<false,false>::prod(m1c.cref(3,3),(ce-ag));
             const T1 r22 = 
-                ZProd<false,false>::prod(m1.cref(3,0),(bh-df))
-                + ZProd<false,false>::prod(m1.cref(3,1),(de-ah))
-                + ZProd<false,false>::prod(m1.cref(3,3),(af-be));
+                ZProd<false,false>::prod(m1c.cref(3,0),(bh-df))
+                + ZProd<false,false>::prod(m1c.cref(3,1),(de-ah))
+                + ZProd<false,false>::prod(m1c.cref(3,3),(af-be));
             const T1 r32 = 
-                ZProd<false,false>::prod(m1.cref(3,0),(cf-bg))
-                + ZProd<false,false>::prod(m1.cref(3,1),(ag-ce))
-                + ZProd<false,false>::prod(m1.cref(3,2),(be-af));
+                ZProd<false,false>::prod(m1c.cref(3,0),(cf-bg))
+                + ZProd<false,false>::prod(m1c.cref(3,1),(ag-ce))
+                + ZProd<false,false>::prod(m1c.cref(3,2),(be-af));
             const T1 r03 = 
-                ZProd<false,false>::prod(m1.cref(2,1),(dg-ch))
-                + ZProd<false,false>::prod(m1.cref(2,2),(bh-df))
-                + ZProd<false,false>::prod(m1.cref(2,3),(cf-bg));
+                ZProd<false,false>::prod(m1c.cref(2,1),(dg-ch))
+                + ZProd<false,false>::prod(m1c.cref(2,2),(bh-df))
+                + ZProd<false,false>::prod(m1c.cref(2,3),(cf-bg));
             const T1 r13 = 
-                ZProd<false,false>::prod(m1.cref(2,0),(ch-dg))
-                + ZProd<false,false>::prod(m1.cref(2,2),(de-ah))
-                + ZProd<false,false>::prod(m1.cref(2,3),(ag-ce));
+                ZProd<false,false>::prod(m1c.cref(2,0),(ch-dg))
+                + ZProd<false,false>::prod(m1c.cref(2,2),(de-ah))
+                + ZProd<false,false>::prod(m1c.cref(2,3),(ag-ce));
             const T1 r23 = 
-                ZProd<false,false>::prod(m1.cref(2,0),(df-bh))
-                + ZProd<false,false>::prod(m1.cref(2,1),(ah-de))
-                + ZProd<false,false>::prod(m1.cref(2,3),(be-af));
+                ZProd<false,false>::prod(m1c.cref(2,0),(df-bh))
+                + ZProd<false,false>::prod(m1c.cref(2,1),(ah-de))
+                + ZProd<false,false>::prod(m1c.cref(2,3),(be-af));
             const T1 r33 = 
-                ZProd<false,false>::prod(m1.cref(2,0),(bg-cf))
-                + ZProd<false,false>::prod(m1.cref(2,1),(ce-ag))
-                + ZProd<false,false>::prod(m1.cref(2,2),(af-be));
+                ZProd<false,false>::prod(m1c.cref(2,0),(bg-cf))
+                + ZProd<false,false>::prod(m1c.cref(2,1),(ce-ag))
+                + ZProd<false,false>::prod(m1c.cref(2,2),(af-be));
 
             // Finally divide rij values by det and multiply by x:
-            m2.ref(0,0) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(r00 , invdet));
-            m2.ref(1,0) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(r10 , invdet));
-            m2.ref(2,0) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(r20 , invdet));
-            m2.ref(3,0) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(r30 , invdet));
-            m2.ref(0,1) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(r01 , invdet));
-            m2.ref(1,1) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(r11 , invdet));
-            m2.ref(2,1) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(r21 , invdet));
-            m2.ref(3,1) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(r31 , invdet));
-            m2.ref(0,2) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(r02 , invdet));
-            m2.ref(1,2) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(r12 , invdet));
-            m2.ref(2,2) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(r22 , invdet));
-            m2.ref(3,2) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(r32 , invdet));
-            m2.ref(0,3) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(r03 , invdet));
-            m2.ref(1,3) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(r13 , invdet));
-            m2.ref(2,3) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(r23 , invdet));
-            m2.ref(3,3) = ZProd<false,false>::prod(
-                x , ZProd<false,false>::prod(r33 , invdet));
+            // Each of the terms like r00 has two 1/scales already
+            // so only need one more scale in the xinvdet factor.
+            T2 xinvdet = ZProd<false,false>::prod(x,invdet/scale);
+            m2.ref(0,0) = ZProd<false,false>::prod(r00 , xinvdet);
+            m2.ref(1,0) = ZProd<false,false>::prod(r10 , xinvdet);
+            m2.ref(2,0) = ZProd<false,false>::prod(r20 , xinvdet);
+            m2.ref(3,0) = ZProd<false,false>::prod(r30 , xinvdet);
+            m2.ref(0,1) = ZProd<false,false>::prod(r01 , xinvdet);
+            m2.ref(1,1) = ZProd<false,false>::prod(r11 , xinvdet);
+            m2.ref(2,1) = ZProd<false,false>::prod(r21 , xinvdet);
+            m2.ref(3,1) = ZProd<false,false>::prod(r31 , xinvdet);
+            m2.ref(0,2) = ZProd<false,false>::prod(r02 , xinvdet);
+            m2.ref(1,2) = ZProd<false,false>::prod(r12 , xinvdet);
+            m2.ref(2,2) = ZProd<false,false>::prod(r22 , xinvdet);
+            m2.ref(3,2) = ZProd<false,false>::prod(r32 , xinvdet);
+            m2.ref(0,3) = ZProd<false,false>::prod(r03 , xinvdet);
+            m2.ref(1,3) = ZProd<false,false>::prod(r13 , xinvdet);
+            m2.ref(2,3) = ZProd<false,false>::prod(r23 , xinvdet);
+            m2.ref(3,3) = ZProd<false,false>::prod(r33 , xinvdet);
         }
     };
 

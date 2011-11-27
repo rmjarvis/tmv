@@ -16,6 +16,8 @@
 
 const int TMV_MaxStack = 1024; // bytes
 
+#include <complex>
+
 namespace tmv
 {
     template <class T>
@@ -202,7 +204,7 @@ namespace tmv
         }
         TMV_INLINE AlignedArray(const size_t n) 
         {
-            p.allocate(n); 
+            if (n > 0) p.allocate(n); 
 #ifdef TMV_INITIALIZE_NAN
             _n = n;
             fill_with(TMV_Nan<T>::get());
@@ -237,7 +239,7 @@ namespace tmv
             fill_with(-Traits<T>::destr_value());
 #endif
             p.deallocate(); 
-            p.allocate(n); 
+            if (n > 0) p.allocate(n); 
 #ifdef TMV_INITIALIZE_NAN
             _n = n;
             fill_with(TMV_Nan<T>::get());
@@ -276,7 +278,7 @@ namespace tmv
         }
         TMV_INLINE AlignedArray(const size_t n) 
         {
-            p.allocate(n<<1); 
+            if (n > 0) p.allocate(n<<1); 
 #ifdef TMV_INITIALIZE_NAN
             _n = n;
             fill_with(TMV_Nan<std::complex<RT> >::get());
@@ -316,7 +318,7 @@ namespace tmv
             fill_with(-Traits<RT>::destr_value());
 #endif
             p.deallocate();
-            p.allocate(n<<1); 
+            if (n > 0) p.allocate(n<<1); 
 #ifdef TMV_INITIALIZE_NAN
             _n = n;
             fill_with(TMV_Nan<std::complex<RT> >::get());
