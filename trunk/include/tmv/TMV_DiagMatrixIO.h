@@ -138,8 +138,7 @@ namespace tmv {
 #endif
 
     template <class T, int A>
-    static std::istream& operator>>(
-        std::istream& is, auto_ptr<DiagMatrix<T,A> >& m)
+    static std::istream& operator>>(std::istream& is, DiagMatrix<T,A>& m)
     {
         char d;
         is >> d;
@@ -161,15 +160,15 @@ namespace tmv {
             throw DiagMatrixReadError<T>(is);
 #endif
         }
-        m.reset(new DiagMatrix<T,A>(size));
+        m.resize(size);
 #ifndef TMV_NO_THROW
         try {
 #endif
-            m->diag().read(is);
+            m.diag().read(is);
 #ifndef TMV_NO_THROW
         } catch (VectorReadError<T>& ve) {
             throw DiagMatrixReadError<T>(
-                ve.i,*m,ve.exp,ve.got,ve.s,ve.is,ve.iseof,ve.isbad);
+                ve.i,m,ve.exp,ve.got,ve.s,ve.is,ve.iseof,ve.isbad);
         }
 #endif
         return is;

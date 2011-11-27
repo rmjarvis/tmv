@@ -1253,10 +1253,10 @@ static void TestBasicSymMatrix_IO()
     Assert(s1 == xs4,"SymMatrix Compact I/O check #4");
     Assert(h1 == xh4,"HermMatrix Compact I/O check #4");
 
-    std::auto_ptr<tmv::Matrix<std::complex<T> > > xsm5;
-    std::auto_ptr<tmv::Matrix<std::complex<T> > > xhm5;
-    std::auto_ptr<tmv::SymMatrix<std::complex<T> > > xs5;
-    std::auto_ptr<tmv::HermMatrix<std::complex<T> > > xh5;
+    tmv::Matrix<std::complex<T> > xsm5;
+    tmv::Matrix<std::complex<T> > xhm5;
+    tmv::SymMatrix<std::complex<T> > xs5;
+    tmv::HermMatrix<std::complex<T> > xh5;
     fin.open("tmvtest_symmatrix_io.dat");
     if (!fin) {
 #ifdef NOTHROW
@@ -1270,10 +1270,10 @@ static void TestBasicSymMatrix_IO()
     fin >> xsm5 >> xhm5;
     fin >> xs5 >> xh5;
     fin.close();
-    Assert(tmv::Matrix<std::complex<T> >(s1) == *xsm5,"SymMatrix I/O check #5");
-    Assert(tmv::Matrix<std::complex<T> >(h1) == *xhm5,"HermMatrix I/O check #5");
-    Assert(s1 == *xs5,"SymMatrix Compact I/O check #5");
-    Assert(h1 == *xh5,"HermMatrix Compact I/O check #5");
+    Assert(tmv::Matrix<std::complex<T> >(s1) == xsm5,"SymMatrix I/O check #5");
+    Assert(tmv::Matrix<std::complex<T> >(h1) == xhm5,"HermMatrix I/O check #5");
+    Assert(s1 == xs5,"SymMatrix Compact I/O check #5");
+    Assert(h1 == xh5,"HermMatrix Compact I/O check #5");
 
     std::remove("tmvtest_symmatrix_io.dat");
 }

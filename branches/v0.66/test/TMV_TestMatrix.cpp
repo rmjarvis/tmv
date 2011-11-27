@@ -510,8 +510,8 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_IO()
     Assert(m == xm2,"Matrix I/O check #2");
     Assert(cm == xcm2,"CMatrix I/O check #2");
 
-    std::auto_ptr<tmv::Matrix<T> > xm3;
-    std::auto_ptr<tmv::Matrix<CT> > xcm3;
+    tmv::Matrix<T> xm3;
+    tmv::Matrix<CT> xcm3;
     fin.open("tmvtest_matrix_io.dat");
     if (!fin) 
 #ifdef NOTHROW
@@ -522,8 +522,8 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_IO()
 #endif
     fin >> xm3 >> xcm3;
     fin.close();
-    Assert(m == *xm3,"Matrix I/O check #3");
-    Assert(cm == *xcm3,"CMatrix I/O check #3");
+    Assert(m == xm3,"Matrix I/O check #3");
+    Assert(cm == xcm3,"CMatrix I/O check #3");
 
 #ifndef XTEST
     std::remove("tmvtest_matrix_io.dat");

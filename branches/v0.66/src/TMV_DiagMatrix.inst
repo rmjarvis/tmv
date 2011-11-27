@@ -42,6 +42,7 @@ Def1b(T,CT)
 #define Def2(T,I) \
   template std::istream& operator>>(std::istream& fin, \
       auto_ptr<DiagMatrix<T,I> >& m); \
+  template std::istream& operator>>(std::istream& fin, DiagMatrix<T,I>& m); \
 
 Def2(T,CStyle)
 Def2(T,FortranStyle)

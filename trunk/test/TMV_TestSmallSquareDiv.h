@@ -22,7 +22,7 @@ static void TestSmallSquareDiv_Basic(std::string label)
 
     for(int i=0;i<N;++i) for(int j=0;j<N;++j) m(i,j) = T(2+4*i-5*j);
     m.diag() *= T(11);
-    m /= T(7);
+    m /= T(20);
     if (N > 1) m(1,0) = -2;
     if (N > 2) m(2,0) = 7;
     if (N > 3) m(3,0) = -10;
@@ -33,6 +33,13 @@ static void TestSmallSquareDiv_Basic(std::string label)
     if (N > 1) b(1) = -10;
     if (N > 2) b(2) = 5;
     if (N > 3) b(3) = -5;
+
+    if (showstartdone) {
+        std::cout<<"Start TestSmallSquareDiv_Basic "<<label<<std::endl;
+        std::cout<<"stor = "<<tmv::TMV_Text(stor)<<"  N = "<<N<<std::endl;
+        std::cout<<"m = "<<m<<std::endl;
+        std::cout<<"b = "<<b<<std::endl;
+    }
 
     tmv::SmallMatrix<T,N,N> minv = m.inverse();
     T kappa = Norm(m) * Norm(minv);
@@ -72,21 +79,24 @@ static void TestSmallSquareDiv_Basic(std::string label)
 
     tmv::SmallMatrix<T,N,N> mtm = m.adjoint() * m;
     tmv::SmallMatrix<T,N,N> mata;
+    tmv::SmallMatrix<T,N,N> mtminv = mtm.inverse();
     m.makeInverseATA(mata);
     if (showacc) {
         std::cout<<"mtm = "<<mtm<<std::endl;
         std::cout<<"mtm.inv = "<<mtm.inverse()<<std::endl;
         std::cout<<"m.invata = "<<mata<<std::endl;
         std::cout<<"minv*minvt = "<<(minv*minv.adjoint())<<std::endl;
-        std::cout<<"Norm(diff) = "<<Norm(mata-mtm.inverse())<<std::endl;
+        std::cout<<"Norm(diff) = "<<Norm(mata-mtminv)<<std::endl;
         std::cout<<"c.f. eps*Norm(mata) = "<<eps*kappa<<" * "<<Norm(mata)<<" = "<<eps*Norm(mata)<<std::endl;
     }
-    Assert(Norm(mata-mtm.inverse()) < eps*kappa*Norm(mata),label+" Square inverseATA");
+    Assert(Norm(mata-mtminv) < eps*kappa*Norm(mata),label+" Square inverseATA");
 
     T mdet = Det(tmv::Matrix<T>(m));
-    if (T(1)/tmv::TMV_ABS(mdet) > T(0)) {
+    if (T(1)/std::abs(mdet) > T(0)) {
         // If det is inf, then skip these tests
         // (Happens for the larger sized matrices we test on.)
+        T sdet;
+        T logdet = m.logDet(&sdet);
         if (showacc) {
             std::cout<<"Det(m) = "<<Det(m)<<std::endl;
             std::cout<<"mdet = "<<mdet<<std::endl;
@@ -94,12 +104,18 @@ static void TestSmallSquareDiv_Basic(std::string label)
             std::cout<<"  EPS*abs(mdet) = "<<eps*std::abs(mdet)<<std::endl;
             std::cout<<"abs(logdet-log(mdet)) = "<<
                 std::abs(m.logDet()-std::log(std::abs(mdet)))<<std::endl;
+            std::cout<<"sdet = "<<sdet<<std::endl;
+            std::cout<<"det/|det| = "<<mdet/std::abs(mdet)<<std::endl;
+            std::cout<<"abs(sdet-det/|det|) = "<<
+                std::abs(sdet-mdet/std::abs(mdet))<<std::endl;
+            std::cout<<"eps = "<<eps<<std::endl;
         }
-        Assert(std::abs(Det(m)-mdet) < eps*std::abs(mdet),label+" Square Det");
-        T sdet;
-        Assert(std::abs(m.logDet(&sdet)-std::log(std::abs(mdet))) < eps,
-               "Square LogDet");
-        Assert(std::abs(sdet-mdet/std::abs(mdet)) < eps,label+" Square LogDet - sign");
+        Assert(std::abs(Det(m)-mdet) < eps*std::abs(mdet),
+               label+" Square Det");
+        Assert(std::abs(logdet-std::log(std::abs(mdet))) < eps,
+               label+" Square LogDet");
+        Assert(std::abs(sdet-mdet/std::abs(mdet)) < eps,
+               label+" Square LogDet - sign");
     }
 
     tmv::SmallMatrix<std::complex<T>,N,N,stor> c = m*std::complex<T>(2,3);
@@ -110,35 +126,67 @@ static void TestSmallSquareDiv_Basic(std::string label)
     if (N > 3) c.row(3) += 
         tmv::SmallVector<std::complex<T>,N>(std::complex<T>(1,9));
 
+    if (showstartdone) {
+        std::cout<<"c = "<<c<<std::endl;
+    }
+
     tmv::SmallMatrix<std::complex<T>,N,N> cinv = c.inverse();
     FT ckappa = Norm(c)*Norm(cinv);
     FT ceps = EPS * ckappa;
 
     std::complex<T> cdet = Det(tmv::Matrix<std::complex<T> >(c));
-    if (T(1)/tmv::TMV_ABS(cdet) > T(0)) {
+    T abscdet = std::abs(cdet);
+    if (T(1)/abscdet > T(0)) {
         // If det is inf or (nan,nan) then skip these tests
+        std::complex<T> csdet;
+        T clogdet = c.logDet(&csdet);
+        // clang++ has a weird bug where it doesn't calculate this
+        // correctly if I use (cdet/abscdet) for csdet1.
+        // It ends up as (nan,nan) for the 12x12 float case.
+        // I'm not sure what's going on, but this next line makes it 
+        // work correctly, so I'll just go with that.
+        std::complex<T> csdet1(std::real(cdet)/abscdet,std::imag(cdet)/abscdet);
         if (showacc) {
             std::cout<<"cdet = "<<cdet<<std::endl;
             std::cout<<"Det(c) = "<<Det(c)<<std::endl;
             std::cout<<"abs(det-cdet) = "<<std::abs(Det(c)-cdet);
-            std::cout<<"  EPS*abs(cdet) = "<<ceps*std::abs(cdet)<<std::endl;
+            std::cout<<"  EPS*abs(cdet) = "<<ceps*abscdet<<std::endl;
             std::cout<<"abs(logdet-log(cdet)) = "<<
-                std::abs(c.logDet()-std::log(cdet))<<std::endl;
+                std::abs(clogdet-std::log(cdet))<<std::endl;
+            std::cout<<"csdet = "<<csdet<<std::endl;
+            std::cout<<"cdet/|cdet| = "<<csdet1<<std::endl;
+            std::cout<<"abs(csdet-cdet/|cdet|) = "<<
+                std::abs(csdet-csdet1)<<std::endl;
+            std::cout<<"eps = "<<ceps<<std::endl;
         }
-        Assert(std::abs(Det(c)-cdet) < ceps*std::abs(cdet),label+" Square CDet");
-        std::complex<T> csdet;
-        Assert(std::abs(c.logDet(&csdet)-std::log(std::abs(cdet))) < eps,
-               "Square CLogDet");
-        Assert(std::abs(csdet-cdet/std::abs(cdet)) < eps,label+" Square CLogDet - sign");
+        Assert(std::abs(Det(c)-cdet) < ceps*abscdet,label+" Square CDet");
+        Assert(std::abs(clogdet-std::log(abscdet)) < ceps,
+               label+" Square CLogDet");
+        Assert(std::abs(csdet-csdet1) < ceps,label+" Square CLogDet - sign");
     }
 
     tmv::SmallMatrix<std::complex<T>,N,N> cid = c*cinv;
+    if (showacc) {
+        std::cout<<"cinv = "<<cinv<<std::endl;
+        std::cout<<"c*cinv = "<<cid<<std::endl;
+        std::cout<<"cinv*c = "<<cinv*c<<std::endl;
+        std::cout<<"Norm(id-I) = "<<Norm(cid-T(1))<<std::endl;
+        std::cout<<"eps = "<<ceps<<std::endl;
+    }
     Assert(Norm(cid-T(1)) < ceps,label+" Square CInverse");
 
     tmv::SmallMatrix<std::complex<T>,N,N> ctc = c.adjoint() * c;
     tmv::SmallMatrix<std::complex<T>,N,N> cata;
     tmv::SmallMatrix<std::complex<T>,N,N> ctcinv = ctc.inverse();
     c.makeInverseATA(cata);
+    if (showacc) {
+        std::cout<<"ctc = "<<ctc<<std::endl;
+        std::cout<<"ctc.inv = "<<ctc.inverse()<<std::endl;
+        std::cout<<"c.invata = "<<cata<<std::endl;
+        std::cout<<"cinv*cinvt = "<<(cinv*cinv.adjoint())<<std::endl;
+        std::cout<<"Norm(diff) = "<<Norm(cata-ctcinv)<<std::endl;
+        std::cout<<"c.f. eps*Norm(cata) = "<<ceps*kappa<<" * "<<Norm(cata)<<" = "<<ceps*Norm(cata)<<std::endl;
+    }
     Assert(Norm(cata-ctcinv) < ceps*ckappa*Norm(cata),label+" Square CInverseATA");
 
     tmv::SmallVector<std::complex<T>,N> e = std::complex<T>(2.5,1.5)*c.row(0);

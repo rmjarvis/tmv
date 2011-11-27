@@ -1503,6 +1503,101 @@ namespace tmv {
         return is;
     }
 
+    template <class T, UpLoType U, StorageType S, IndexStyle I> 
+    std::istream& operator>>(std::istream& is, SymMatrix<T,U,S,I>& m)
+    {
+        char sh;
+        is >> sh;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"SymMatrix ReadError: !is (\n"; 
+            exit(1);
+#else
+            throw SymMatrixReadError<T>(is);
+#endif
+        }
+        if (isReal(T())) {
+            if (sh != 'S' && sh != 'H')  {
+#ifdef NOTHROW
+                std::cerr<<"SymMatrix ReadError: "<<sh<<" != S\n"; 
+                exit(1);
+#else
+                throw SymMatrixReadError<T>(is,'S',sh);
+#endif
+            }
+        } else {
+            if (sh != 'S')  {
+#ifdef NOTHROW
+                std::cerr<<"SymMatrix ReadError: "<<sh<<" != S\n"; 
+                exit(1);
+#else
+                throw SymMatrixReadError<T>(is,'S',sh);
+#endif
+            }
+        }
+        size_t size;
+        is >> size;
+        if (!is)  {
+#ifdef NOTHROW
+            std::cerr<<"SymMatrix ReadError: !is (\n"; 
+            exit(1);
+#else
+            throw SymMatrixReadError<T>(is);
+#endif
+        }
+        m.resize(size);
+        m.view().read(is); 
+        return is;
+    }
+
+    template <class T, UpLoType U, StorageType S, IndexStyle I> 
+    std::istream& operator>>(
+        std::istream& is, HermMatrix<T,U,S,I>& m)
+    {
+        char sh;
+        is >> sh;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"HermMatrix ReadError: !is \n"; 
+            exit(1);
+#else
+            throw HermMatrixReadError<T>(is);
+#endif
+        }
+        if (isReal(T())) {
+            if (sh != 'S' && sh != 'H') {
+#ifdef NOTHROW
+                std::cerr<<"HermMatrix ReadError: "<<sh<<" != H\n"; 
+                exit(1);
+#else
+                throw HermMatrixReadError<T>(is,'H',sh);
+#endif
+            }
+        } else {
+            if (sh != 'H') {
+#ifdef NOTHROW
+                std::cerr<<"HermMatrix ReadError: "<<sh<<" != H\n"; 
+                exit(1);
+#else
+                throw HermMatrixReadError<T>(is,'H',sh);
+#endif
+            }
+        }
+        size_t size;
+        is >> size;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"HermMatrix ReadError: !is \n"; 
+            exit(1);
+#else
+            throw HermMatrixReadError<T>(is);
+#endif
+        }
+        m.resize(size);
+        m.view().read(is); 
+        return is;
+    }
+
     template <class T> std::istream& operator>>(
         std::istream& is, const SymMatrixView<T>& m)
     {

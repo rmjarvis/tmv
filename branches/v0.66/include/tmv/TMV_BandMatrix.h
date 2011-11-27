@@ -294,11 +294,6 @@
 //
 //    is >> m
 //        Reads m from istream is in the compact format
-//        m must already be the correct size for this to work.
-//
-//    is >> mptr
-//        If you do not know the size of the BandMatrix to be read, you can
-//        use this form where mptr is an auto_ptr to an undefined BandMatrix.
 //
 //
 // Division Control Functions:
@@ -2763,6 +2758,11 @@ namespace tmv {
         itsm(S==DiagMajor ? itsm1.get() - lo*itssi : itsm1.get()) \
         TMV_DEFFIRSTLAST(itsm1.get(),itsm1.get()+linsize)
 
+        inline BandMatrix() : NEW_SIZE(0,0,0,0) 
+        {
+            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
+        }
+
         inline BandMatrix(size_t cs, size_t rs, int lo, int hi) :
             NEW_SIZE(cs,rs,lo,hi) 
         {
@@ -4715,16 +4715,14 @@ namespace tmv {
     //
 
     template <class T, StorageType S, IndexStyle I> 
-    std::istream& operator>>(
-        std::istream& fin, auto_ptr<BandMatrix<T,S,I> >& m);
+    TMV_DEPRECATED(std::istream& operator>>(
+        std::istream& fin, auto_ptr<BandMatrix<T,S,I> >& m));
 
     template <class T> 
-    std::istream& operator>>(
-        std::istream& fin, const BandMatrixView<T>& m);
+    std::istream& operator>>(std::istream& fin, const BandMatrixView<T>& m);
 
     template <class T, StorageType S, IndexStyle I> 
-    inline std::istream& operator>>(std::istream& fin, BandMatrix<T,S,I>& m)
-    { return fin >> m.view(); }
+    std::istream& operator>>(std::istream& fin, BandMatrix<T,S,I>& m);
 
 } // namespace tmv
 

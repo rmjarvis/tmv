@@ -194,8 +194,7 @@ namespace tmv {
               break; 
           }
           case CH : {
-              this->setDiv(
-                  new HermBandCHDiv<T>(*this,this->isDivInPlace()));
+              this->setDiv(new HermBandCHDiv<T>(*this,this->isDivInPlace()));
               break;
           }
           default : TMVAssert(TMV_FALSE); 
@@ -1858,6 +1857,114 @@ namespace tmv {
         }
         m.reset(new HermBandMatrix<T,U,S,I>(size,nlo));
         m->view().read(is); 
+        return is;
+    }
+
+    template <class T, UpLoType U, StorageType S, IndexStyle I> 
+    std::istream& operator>>(std::istream& is, SymBandMatrix<T,U,S,I>& m)
+    {
+        std::string sh;
+#ifdef NOSTL
+        sh = "  ";
+        is >> sh[0];
+        if (is) is >> sh[1];
+#else
+        is >> sh;
+#endif
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"SymBandMatrix ReadError: !is \n"; 
+            exit(1); 
+#else
+            throw SymBandMatrixReadError<T>(is);
+#endif
+        }
+        if (isReal(T())) {
+            if (sh != "sB" && sh != "hB")  {
+#ifdef NOTHROW
+                std::cerr<<"SymBandMatrix ReadError: "<<sh<<" != sB\n"; 
+                exit(1); 
+#else
+                throw SymBandMatrixReadError<T>(is,"sB",sh);
+#endif
+            }
+        } else {
+            if (sh != "sB")  {
+#ifdef NOTHROW
+                std::cerr<<"SymBandMatrix ReadError: "<<sh<<" != sB\n"; 
+                exit(1); 
+#else
+                throw SymBandMatrixReadError<T>(is,"sB",sh);
+#endif
+            }
+        }
+        size_t size;
+        int nlo;
+        is >> size >> nlo;
+        if (!is)  {
+#ifdef NOTHROW
+            std::cerr<<"SymBandMatrix ReadError: !is \n"; 
+            exit(1); 
+#else
+            throw SymBandMatrixReadError<T>(is);
+#endif
+        }
+        m.resize(size,nlo);
+        m.view().read(is); 
+        return is;
+    }
+
+    template <class T, UpLoType U, StorageType S, IndexStyle I> 
+    std::istream& operator>>(std::istream& is, HermBandMatrix<T,U,S,I>& m)
+    {
+        std::string sh;
+#ifdef NOSTL
+        sh = "  ";
+        is >> sh[0];
+        if (is) is >> sh[1];
+#else
+        is >> sh;
+#endif
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"HermBandMatrix ReadError: !is \n"; 
+            exit(1); 
+#else
+            throw HermBandMatrixReadError<T>(is);
+#endif
+        }
+        if (isReal(T())) {
+            if (sh != "sB" && sh != "hB")  {
+#ifdef NOTHROW
+                std::cerr<<"HermBandMatrix ReadError: "<<sh<<" != hB\n"; 
+                exit(1); 
+#else
+                throw HermBandMatrixReadError<T>(is,"hB",sh);
+#endif
+            }
+        } else {
+            if (sh != "hB")  {
+#ifdef NOTHROW
+                std::cerr<<"HermBandMatrix ReadError: "<<sh<<" != hB\n"; 
+                exit(1); 
+#else
+                throw HermBandMatrixReadError<T>(is,"hB",sh);
+#endif
+            }
+        }
+        size_t size;
+        int nlo;
+        is >> size >> nlo;
+        if (!is)  {
+#ifdef NOTHROW
+            std::cerr<<"HermBandMatrix ReadError: !is \n"; 
+            exit(1); 
+#else
+            throw HermBandMatrixReadError<T>(is);
+#endif
+        }
+        m.resize(size,nlo);
+        m.view().read(is); 
         return is;
     }
 

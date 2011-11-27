@@ -981,10 +981,10 @@ static void TestBasicTriMatrix_IO()
     Assert(u == xu2,"UpperTriMatrix Compact I/O check #2");
     Assert(l == xl2,"LowerTriMatrix Compact I/O check #2");
 
-    std::auto_ptr<tmv::Matrix<std::complex<T> > > xum3;
-    std::auto_ptr<tmv::Matrix<std::complex<T> > > xlm3;
-    std::auto_ptr<tmv::UpperTriMatrix<std::complex<T> > > xu3;
-    std::auto_ptr<tmv::LowerTriMatrix<std::complex<T> > > xl3;
+    tmv::Matrix<std::complex<T> > xum3;
+    tmv::Matrix<std::complex<T> > xlm3;
+    tmv::UpperTriMatrix<std::complex<T> > xu3;
+    tmv::LowerTriMatrix<std::complex<T> > xl3;
     fin.open("tmvtest_trimatrix_io.dat");
     if (!fin) 
 #ifdef NOTHROW
@@ -996,16 +996,16 @@ static void TestBasicTriMatrix_IO()
     fin >> xum3 >> xlm3;
     fin >> xu3 >> xl3;
     fin.close();
-    Assert(tmv::Matrix<std::complex<T> >(u) == *xum3,
+    Assert(tmv::Matrix<std::complex<T> >(u) == xum3,
            "UpperTriMatrix I/O check #3");
-    Assert(tmv::Matrix<std::complex<T> >(l) == *xlm3,
+    Assert(tmv::Matrix<std::complex<T> >(l) == xlm3,
            "LowerTriMatrix I/O check #3");
-    Assert(u == *xu3,"UpperTriMatrix Compact I/O check #3");
-    Assert(l == *xl3,"LowerTriMatrix Compact I/O check #3");
+    Assert(u == xu3,"UpperTriMatrix Compact I/O check #3");
+    Assert(l == xl3,"LowerTriMatrix Compact I/O check #3");
 
     if (D==tmv::UnitDiag) {
-        tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag> xu4(N);
-        tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag> xl4(N);
+        tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag> xu4;
+        tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag> xl4;
         fin.open("tmvtest_trimatrix_io.dat");
         if (!fin) 
 #ifdef NOTHROW

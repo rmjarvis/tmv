@@ -406,13 +406,13 @@ void TestPermutation()
     Assert(m3 == xm1,"Permutation I/O check #1");
     Assert(p3 == xp1,"Permutation Compact I/O check #1");
 
-    std::auto_ptr<tmv::Matrix<T> > xm2;
-    std::auto_ptr<tmv::Permutation> xp2;
+    tmv::Matrix<T> xm2;
+    tmv::Permutation xp2;
     fin.open("tmvtest_permutation_io.dat");
     fin >> xm2 >> xp2;
     fin.close();
-    Assert(m3 == *xm2,"Permutation I/O check #2");
-    Assert(p3 == *xp2,"Permutation Compact I/O check #2");
+    Assert(m3 == xm2,"Permutation I/O check #2");
+    Assert(p3 == xp2,"Permutation Compact I/O check #2");
 
     std::remove("tmvtest_permutation_io.dat");
 

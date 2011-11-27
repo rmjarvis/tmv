@@ -220,8 +220,8 @@ template <class T> void TestDiagMatrix()
     Assert(tmv::Matrix<std::complex<T> >(ca) == xcm1,"DiagMatrix I/O check #1");
     Assert(ca == xcd1,"DiagMatrix Compact I/O check #1");
 
-    std::auto_ptr<tmv::Matrix<std::complex<T> > > xcm2;
-    std::auto_ptr<tmv::DiagMatrix<std::complex<T> > > xcd2;
+    tmv::Matrix<std::complex<T> > xcm2;
+    tmv::DiagMatrix<std::complex<T> > xcd2;
     fin.open("tmvtest_diagmatrix_io.dat");
     if (!fin) {
 #ifdef NOTHROW
@@ -234,8 +234,8 @@ template <class T> void TestDiagMatrix()
     }
     fin >> xcm2 >> xcd2;
     fin.close();
-    Assert(tmv::Matrix<std::complex<T> >(ca) == *xcm2,"DiagMatrix I/O check #2");
-    Assert(ca == *xcd2,"DiagMatrix Compact I/O check #2");
+    Assert(tmv::Matrix<std::complex<T> >(ca) == xcm2,"DiagMatrix I/O check #2");
+    Assert(ca == xcd2,"DiagMatrix Compact I/O check #2");
 
 #ifndef XTEST
     std::remove("tmvtest_diagmatrix_io.dat");

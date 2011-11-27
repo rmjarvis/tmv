@@ -1676,10 +1676,10 @@ static void TestBasicSymBandMatrix_IO()
     Assert(s1 == xs4,"SymBandMatrix Compact I/O check #4");
     Assert(h1 == xh4,"HermBandMatrix Compact I/O check #4");
 
-    std::auto_ptr<tmv::Matrix<std::complex<T> > > xsm5;
-    std::auto_ptr<tmv::Matrix<std::complex<T> > > xhm5;
-    std::auto_ptr<tmv::SymBandMatrix<std::complex<T> > > xs5;
-    std::auto_ptr<tmv::HermBandMatrix<std::complex<T> > > xh5;
+    tmv::Matrix<std::complex<T> > xsm5;
+    tmv::Matrix<std::complex<T> > xhm5;
+    tmv::SymBandMatrix<std::complex<T> > xs5;
+    tmv::HermBandMatrix<std::complex<T> > xh5;
     fin.open("tmvtest_symbandmatrix_io.dat");
     if (!fin) 
 #ifdef NOTHROW
@@ -1691,12 +1691,12 @@ static void TestBasicSymBandMatrix_IO()
     fin >> xsm5 >> xhm5;
     fin >> xs5 >> xh5;
     fin.close();
-    Assert(tmv::Matrix<std::complex<T> >(s1) == *xsm5,
+    Assert(tmv::Matrix<std::complex<T> >(s1) == xsm5,
            "SymBandMatrix I/O check #5");
-    Assert(tmv::Matrix<std::complex<T> >(h1) == *xhm5,
+    Assert(tmv::Matrix<std::complex<T> >(h1) == xhm5,
            "HermBandMatrix I/O check #5");
-    Assert(s1 == *xs5,"SymBandMatrix Compact I/O check #5");
-    Assert(h1 == *xh5,"HermBandMatrix Compact I/O check #5");
+    Assert(s1 == xs5,"SymBandMatrix Compact I/O check #5");
+    Assert(h1 == xh5,"HermBandMatrix Compact I/O check #5");
 
     std::remove("tmvtest_symbandmatrix_io.dat");
 }

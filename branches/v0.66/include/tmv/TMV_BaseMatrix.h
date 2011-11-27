@@ -218,8 +218,7 @@ namespace tmv {
         // Constructors
         //
 
-        inline DivHelper() : pdiv(0) {}
-        inline DivHelper(const BaseMatrix<T>&) : pdiv(0) {}
+        DivHelper();
         // Cannot do this inline, since need to delete pdiv, 
         // and I only define DivImpl in BaseMatrix.cpp.
         virtual ~DivHelper();
@@ -410,7 +409,7 @@ namespace tmv {
 
         struct DivImpl;
 
-        mutable DivImpl* pdiv;
+        mutable std::auto_ptr<DivImpl> pdiv;
 
         const Divider<T>* getDiv() const;
         void setDiv(Divider<T>*) const;

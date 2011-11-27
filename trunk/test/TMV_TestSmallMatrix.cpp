@@ -147,7 +147,7 @@ inline void TestBasicSmallMatrix()
     typename tmv::SmallMatrix<T,3,4,S>::const_view_type::const_rowmajor_iterator
         rmit4 = q1_constview.rowmajor_begin();
     typename step_type::rowmajor_iterator rmit5 = q5.rowmajor_begin();
-    typename step_type::const_rowmajor_iterator rmit5 = 
+    typename step_type::const_view_type::const_rowmajor_iterator rmit6 = 
         q5_const.rowmajor_begin();
     int i = 0;
     while (rmit1 != q1.rowmajor_end()) {
@@ -175,7 +175,7 @@ inline void TestBasicSmallMatrix()
     typename tmv::SmallMatrix<T,3,4,S>::const_view_type::const_colmajor_iterator
         cmit4 = q1_constview.colmajor_begin();
     typename step_type::colmajor_iterator cmit5 = q5.colmajor_begin();
-    typename step_type::const_colmajor_iterator cmit5 = 
+    typename step_type::const_view_type::const_colmajor_iterator cmit6 = 
         q5_const.colmajor_begin();
     i = 0;
     while (cmit1 != q1.colmajor_end()) {

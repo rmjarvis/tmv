@@ -99,25 +99,33 @@ Def2(CT,CT)
 
 #undef Def2
 
-#define Def3(T,D,S) \
+#define Def3(T,D,S,I) \
   template std::istream& operator>>(std::istream& is, \
-      auto_ptr<UpperTriMatrix<T,D,S> >& m); \
+      auto_ptr<UpperTriMatrix<T,D,S,I> >& m); \
   template std::istream& operator>>(std::istream& is, \
-      auto_ptr<LowerTriMatrix<T,D,S> >& m); \
+      auto_ptr<LowerTriMatrix<T,D,S,I> >& m); \
   template std::istream& operator>>(std::istream& is, \
-      auto_ptr<UpperTriMatrix<T,D,S,FortranStyle> >& m); \
-  template std::istream& operator>>(std::istream& is,  \
-      auto_ptr<LowerTriMatrix<T,D,S,FortranStyle> >& m); \
+      UpperTriMatrix<T,D,S,I>& m); \
+  template std::istream& operator>>(std::istream& is, \
+      LowerTriMatrix<T,D,S,I>& m); \
 
-Def3(T,UnitDiag,RowMajor)
-Def3(T,UnitDiag,ColMajor)
-Def3(T,NonUnitDiag,RowMajor)
-Def3(T,NonUnitDiag,ColMajor)
+Def3(T,UnitDiag,RowMajor,CStyle)
+Def3(T,UnitDiag,ColMajor,CStyle)
+Def3(T,NonUnitDiag,RowMajor,CStyle)
+Def3(T,NonUnitDiag,ColMajor,CStyle)
+Def3(T,UnitDiag,RowMajor,FortranStyle)
+Def3(T,UnitDiag,ColMajor,FortranStyle)
+Def3(T,NonUnitDiag,RowMajor,FortranStyle)
+Def3(T,NonUnitDiag,ColMajor,FortranStyle)
 #ifdef INST_COMPLEX
-Def3(CT,UnitDiag,RowMajor)
-Def3(CT,UnitDiag,ColMajor)
-Def3(CT,NonUnitDiag,RowMajor)
-Def3(CT,NonUnitDiag,ColMajor)
+Def3(CT,UnitDiag,RowMajor,CStyle)
+Def3(CT,UnitDiag,ColMajor,CStyle)
+Def3(CT,NonUnitDiag,RowMajor,CStyle)
+Def3(CT,NonUnitDiag,ColMajor,CStyle)
+Def3(CT,UnitDiag,RowMajor,FortranStyle)
+Def3(CT,UnitDiag,ColMajor,FortranStyle)
+Def3(CT,NonUnitDiag,RowMajor,FortranStyle)
+Def3(CT,NonUnitDiag,ColMajor,FortranStyle)
 #endif
 
 #undef Def3

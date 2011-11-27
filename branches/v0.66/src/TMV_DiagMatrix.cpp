@@ -841,6 +841,43 @@ namespace tmv {
         return is;
     }
 
+    template <class T, IndexStyle I> 
+    std::istream& operator>>(std::istream& is, DiagMatrix<T,I>& m)
+    {
+        char d;
+        is >> d;
+        if (!is || d != 'D') {
+#ifdef NOTHROW
+            std::cerr<<"DiagMatrix ReadError: "<<d<<" != D\n";
+            exit(1); 
+#else
+            throw DiagMatrixReadError<T>(is,'D',d);
+#endif
+        }
+        size_t size;
+        is >> size;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"DiagMatrix ReadError: !is\n";
+            exit(1); 
+#else
+            throw DiagMatrixReadError<T>(is);
+#endif
+        }
+        m.resize(size);
+#ifndef NOTHROW
+        try {
+#endif
+            m.diag().read(is);
+#ifndef NOTHROW
+        } catch (VectorReadError<T>& ve) {
+            throw DiagMatrixReadError<T>(
+                ve.i,m,ve.exp,ve.got,ve.s,ve.is,ve.iseof,ve.isbad);
+        }
+#endif
+        return is;
+    }
+
     template <class T>
     std::istream& operator>>(std::istream& is, const DiagMatrixView<T>& m)
     {

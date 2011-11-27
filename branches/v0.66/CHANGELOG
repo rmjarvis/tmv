@@ -2,7 +2,7 @@ Changes from version 0.65 to 0.66:
 (See the History section in the full documentation for changes from previous
 versions to 0.65.)
 
-Deprecated features:
+Changed and Deprecated features:
 
 -- Changed the behavior of the m << 1, 2, 3... initialization.  Now the items 
    in the initialization list should be in RowMajor order regardless of the 
@@ -70,6 +70,22 @@ Deprecated features:
 
    In addition, a BandMatrix can be iterated in DiagMajor order using 
    m.diagmajor_begin().
+
+-- Deprecated the auto_ptr read functions.  This notation was cumbersome,
+   and since all matrices can be resized now (feature added in v0.65),
+   there is no need for it anymore.  The auto_ptr was really just a 
+   workaround for the fact that matrices didn't used to be able to be resized.
+   So rather than writing:
+
+   std::auto_ptr<tmv::Matrix<double> > pm;
+   is >> pm;  // deprecated
+   [... Use matrix as *pm ... ]
+
+   you can now simply write:
+
+   tmv::Matrix<double> m;
+   is >> m;   // m is automatically resized to the correct size.
+   [... Use matrix as m ... ]
 
 -- Deprecated the routines that returned pointers to new BaseMatrixes.  
    In general, using the \tt{BaseMatrix} class directly is not really very 
@@ -141,6 +157,11 @@ New features:
    LowerTriMatrixView, DiagMatrixView, BandMatrixView, SymMatrixView, or 
    SymBandMatrixView specifying the memory address of m(0,0) and the step 
    size in each direction.
+
+-- Added default constructors to Vector, Matrix and all the special matrix 
+   classes.  These construct a zero-sized matrix, so normally you would want
+   to resize the matrix at some point.  See the above item about deprecating
+   the auto_ptr read functions for an example of how this could be useful.
 
 
 Bug fixes:

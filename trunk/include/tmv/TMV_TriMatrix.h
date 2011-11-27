@@ -250,13 +250,6 @@
 //
 //    is >> m
 //        Reads m from istream is in the compact format
-//        m must already be the correct size for this to work.
-//
-//    is >> mptr
-//        If you do not know the size of the TriMatrix to be read, you can
-//        use this form where mptr is an auto_ptr to an undefined TriMatrix.
-//        (Note: if the DiagType for the TriMatrix is UnitDiag, then
-//        all of the diagonals read in must be = 1.)
 //
 //
 // Division Control Functions:

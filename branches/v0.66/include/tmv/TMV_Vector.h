@@ -307,11 +307,6 @@
 //
 //    is >> v
 //        Reads v from istream is in the same format
-//        Note: v must already be the correct size
-//
-//    is >> vptr
-//        If you do not know the size of the Vector to be read in, you can
-//        use this form where vptr is an auto_ptr to an undefined Vector.
 //
 //
 
@@ -1518,7 +1513,7 @@ namespace tmv {
 #define NEW_SIZE(n) \
         _v(n), _size(n) TMV_DEFFIRSTLAST(_v.get(),_v.get()+n)
 
-        explicit inline Vector(size_t n) : NEW_SIZE(n)
+        explicit inline Vector(size_t n=0) : NEW_SIZE(n)
         {
 #ifdef TMVDEBUG
             setAllTo(T(888));
@@ -1526,21 +1521,15 @@ namespace tmv {
         }
 
         inline Vector(size_t n, T val) : NEW_SIZE(n)
-        {
-            setAllTo(val); 
-        }
+        { setAllTo(val); }
 
         TMV_DEPRECATED(inline Vector(size_t n, const T* vv)) : 
             NEW_SIZE(n)
-        {
-            std::copy(vv,vv+n,_v.get());
-        }
+        { std::copy(vv,vv+n,_v.get()); }
 
         TMV_DEPRECATED(inline explicit Vector(const std::vector<T>& vv)) : 
             NEW_SIZE(vv.size())
-        {
-            std::copy(vv.begin(),vv.end(),_v.get());
-        }
+        { std::copy(vv.begin(),vv.end(),_v.get()); }
 
         inline Vector(const Vector<T,I>& rhs) : NEW_SIZE(rhs.size())
         {
@@ -2021,7 +2010,7 @@ namespace tmv {
         inline T& ref(int i)
         { return _v.get()[i]; }
 
-        inline void resize(int n)
+        inline void resize(size_t n)
         {
             _v.resize(n);
             _size = n;
@@ -2388,11 +2377,11 @@ namespace tmv {
     std::istream& operator>>(std::istream& is, const VectorView<T>& v);
 
     template <class T, IndexStyle I> 
-    inline std::istream& operator>>(std::istream& is, Vector<T,I>& v)
-    { return is >> v.view(); }
+    std::istream& operator>>(std::istream& is, Vector<T,I>& v);
 
     template <class T, IndexStyle I> 
-    std::istream& operator>>(std::istream& is, auto_ptr<Vector<T,I> >& v);
+    TMV_DEPRECATED(std::istream& operator>>(
+            std::istream& is, auto_ptr<Vector<T,I> >& v));
 
 } // namespace tmv
 

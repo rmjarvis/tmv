@@ -524,13 +524,7 @@
 //
 //    void read(std::istream& is)    or is >> m
 //        Reads the matrix from istream is in the same format
-//        Note: the matrix must already be the correct size
-//
-//    std::auto_ptr<tmv::Matrix<T> > mptr;
-//    is >> mptr
-//        If you do not know the size of the matrix to be read in, you can
-//        use this form, which will allocate the matrix to be the correct
-//        size according to the input data.
+//        If the matrix is not the correct size, it will be resized.
 //
 //
 // Division Control Functions:

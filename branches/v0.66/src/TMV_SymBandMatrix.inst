@@ -96,6 +96,10 @@ Def2(CT,CT)
       auto_ptr<SymBandMatrix<T,U,S,I> >& m); \
   template std::istream& operator>>(std::istream& is, \
       auto_ptr<HermBandMatrix<T,U,S,I> >& m); \
+  template std::istream& operator>>(std::istream& is, \
+      SymBandMatrix<T,U,S,I>& m); \
+  template std::istream& operator>>(std::istream& is, \
+      HermBandMatrix<T,U,S,I>& m); \
 
 Def3(T,T,Upper,RowMajor,CStyle)
 Def3(T,T,Upper,ColMajor,CStyle)

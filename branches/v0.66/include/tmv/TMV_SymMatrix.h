@@ -2326,8 +2326,8 @@ namespace tmv {
 #define NEW_SIZE(s) itslen((s)*(s)), itsm(itslen), itss(s)  \
         TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+itslen) 
 
-        explicit inline SymMatrix(size_t _size) : NEW_SIZE(_size) 
-        { 
+        explicit inline SymMatrix(size_t _size=0) : NEW_SIZE(_size) 
+        {
             TMVAssert(S==RowMajor || S==ColMajor);
 #ifdef TMVDEBUG
             setAllTo(T(888));
@@ -3378,8 +3378,8 @@ namespace tmv {
 #define NEW_SIZE(s) itslen((s)*(s)), itsm(itslen), itss(s)  \
         TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+itslen)
 
-        explicit inline HermMatrix(size_t _size) : NEW_SIZE(_size) 
-        { 
+        explicit inline HermMatrix(size_t _size=0) : NEW_SIZE(_size) 
+        {
             TMVAssert(S==RowMajor || S==ColMajor);
 #ifdef TMVDEBUG
             setAllTo(T(888));
@@ -4797,23 +4797,21 @@ namespace tmv {
     //
 
     template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    std::istream& operator>>(
-        std::istream& is, auto_ptr<SymMatrix<T,U,S,I> >& m);
+    TMV_DEPRECATED(std::istream& operator>>(
+            std::istream& is, auto_ptr<SymMatrix<T,U,S,I> >& m));
 
     template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    std::istream& operator>>(
-        std::istream& is, auto_ptr<HermMatrix<T,U,S,I> >& m);
+    TMV_DEPRECATED(std::istream& operator>>(
+            std::istream& is, auto_ptr<HermMatrix<T,U,S,I> >& m));
 
     template <class T> 
     std::istream& operator>>(std::istream& is, const SymMatrixView<T>& m);
 
     template <class T, UpLoType U, StorageType S, IndexStyle I>
-    inline std::istream& operator>>(std::istream& is, SymMatrix<T,U,S,I>& m)
-    { return is>>m.view(); }
+    std::istream& operator>>(std::istream& is, SymMatrix<T,U,S,I>& m);
 
     template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    inline std::istream& operator>>(std::istream& is, HermMatrix<T,U,S,I>& m)
-    { return is>>m.view(); }
+    std::istream& operator>>(std::istream& is, HermMatrix<T,U,S,I>& m);
 
 } // namespace tmv
 

@@ -116,7 +116,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
             {
@@ -127,7 +127,7 @@ namespace tmv {
         template <int I, int M, int J>
         struct Unroller<I,M,J,1>
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
             {
@@ -138,14 +138,14 @@ namespace tmv {
         template <int I, int M, int J>
         struct Unroller<I,M,J,0>
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3) {}
         };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
             { m3.ref(I,J) = x1 * m1.cref(I,J) + x2 * m2.cref(I,J); }
@@ -153,7 +153,7 @@ namespace tmv {
         template <int I, int J>
         struct Unroller<I,0,J,1>
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3) {}
         };
@@ -214,7 +214,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
             {
@@ -225,7 +225,7 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,1,J,N>
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
             {
@@ -236,14 +236,14 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,0,J,N>
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3) {}
         };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
             { m3.ref(I,J) = x1 * m1.cref(I,J) + x2 * m2.cref(I,J); }
@@ -251,7 +251,7 @@ namespace tmv {
         template <int I, int J>
         struct Unroller<I,1,J,0>
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix1,T1>& x1, const M1& m1, 
                 const Scaling<ix2,T2>& x2, const M2& m2, M3& m3) {}
         };

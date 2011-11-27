@@ -45,10 +45,10 @@ namespace tmv {
         DivImpl(const BaseMatrix<T>& _m) : 
             m(_m), div(0), dt(m.isSquare() ? LU : QR),
             inplace(false), cache(false) {}
-        ~DivImpl() { if (div) delete div; div=0; }
+        ~DivImpl() {}
 
         const BaseMatrix<T>& m;
-        const Divider<T>* div;
+        mutable std::auto_ptr<Divider<T> > div;
         DivType dt;
         bool inplace;
         bool cache;

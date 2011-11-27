@@ -2,17 +2,8 @@
 //-----------------------------------------------------------------------------
 //
 // This file defines the BaseMatrix_Band and BaseMatrix_Band_Mutable
-// classes.  These are the base classes for the dense rectangular
-// matrices, Matrix and SmallMatrix.
-//
-// BaseMatrix_Band is the base class for all dense rectangular matrices.
-// It adds the rest of the views described in TMV_Matrix.h like
-// subMatrix, subVector, rowRange, colRange, etc. that aren't defined for 
-// a general BaseMatrix.
-//
-// BaseMatrix_Band_Mutable is the base class for mutable dense 
-// rectangular matrices and adds the non-const views along with the
-// other modifying functions like transposeSelf(), setToIdentity(), etc.
+// classes.  These are the base classes for the banded
+// matrices, BandMatrix, ThinBandMatrix, and SmallBandMatrix.
 
 #ifndef TMV_BaseMatrix_Band_H
 #define TMV_BaseMatrix_Band_H
@@ -60,7 +51,7 @@ namespace tmv {
 
 
     // BaseMatrix_Band_Mutable is derived from both BaseMatrix_Band and
-    // BaseMatrix_Mutable, and is used for mutable, dense, rectangular matrices.
+    // BaseMatrix_Mutable, and is used for mutable, banded matrices.
     template <class M>
     class BaseMatrix_Band_Mutable;
 
@@ -96,11 +87,13 @@ namespace tmv {
     class ConstBandMatrixView;
     template <class T, int A=0>
     class BandMatrixView;
-    template <class T, int M, int N, int A=0, int A2=0> 
+    template <class T, int LO, int HI, int A=0, int A2=0> 
+    class ThinBandMatrix;
+    template <class T, int M, int N, int LO, int HI, int A=0, int A2=0> 
     class SmallBandMatrix;
-    template <class T, int M, int N, int Si=TMV_UNKNOWN, int Sj=TMV_UNKNOWN, int A=0>
+    template <class T, int M, int N, int LO, int HI, int Si=TMV_UNKNOWN, int Sj=TMV_UNKNOWN, int A=0>
     class ConstSmallBandMatrixView;
-    template <class T, int M, int N, int Si=TMV_UNKNOWN, int Sj=TMV_UNKNOWN, int A=0>
+    template <class T, int M, int N, int LO, int HI, int Si=TMV_UNKNOWN, int Sj=TMV_UNKNOWN, int A=0>
     class SmallBandMatrixView;
 
     // In TMV_Norm.h
@@ -115,7 +108,7 @@ namespace tmv {
     // Helper functions and values:
     //
 
-    // Specify ExactSameStorage for rectangular matrices:
+    // Specify ExactSameStorage for banded matrices:
     template <class M1, class M2>
     static TMV_INLINE bool ExactSameStorage(
         const BaseMatrix_Band<M1>& m1, const BaseMatrix_Band<M2>& m2)
@@ -139,16 +132,16 @@ namespace tmv {
         int& j, int& i1, int i2, int m, int nlo, int nhi)
     { // CStyle or FortranStyle
         CheckRowRange<_fort>(i1,i2,m);
-        TMVAssert(InBand(i1,j) && "first element must be in band");
-        TMVAssert(InBand(i2-1,j) && "last element must be in band");
+        TMVAssert(InBand(i1,j,nlo,nhi) && "first element must be in band");
+        TMVAssert(InBand(i2-1,j,nlo,nhi) && "last element must be in band");
     }
     template <bool _fort>
     static TMV_INLINE_ND void CheckColRange_Band(
         int& i, int& j1, int j2, int n, int nlo, int nhi)
     { // CStyle or FortranStyle
         CheckColRange<_fort>(j1,j2,n);
-        TMVAssert(InBand(i,j1) && "first element must be in band");
-        TMVAssert(InBand(i,j2-1) && "last element must be in band");
+        TMVAssert(InBand(i,j1,nlo,nhi) && "first element must be in band");
+        TMVAssert(InBand(i,j2-1,nlo,nhi) && "last element must be in band");
     }
     template <bool _fort>
     static TMV_INLINE_ND void CheckDiagIndex_Band(
@@ -254,17 +247,18 @@ namespace tmv {
     static TMV_INLINE_ND void CheckUpperBandOff(int i, int nhi, int n)
     {
         CheckUpperBandOff(nhi,n);
-        TMVAssert(i>0 && i<=nhi "upperBandOff index is not valid");
+        TMVAssert(i>0 && i<=nhi && "upperBandOff index is not valid");
     }
     static TMV_INLINE_ND void CheckLowerBandOff(int i, int nlo, int m)
     {
         CheckLowerBandOff(nlo,m);
-        TMVAssert(i>0 && i<=nlo "lowerBandOff index is not valid");
+        TMVAssert(i>0 && i<=nlo && "lowerBandOff index is not valid");
     }
 
 
     // Since SmallBandMatrix needs to know nlo and nhi at compile time,
     // we always use BandMatrix here. 
+    // Is there a reason to have a BCopyHelper that takes lo,hi params?
     template <class T, int cs, int rs, bool rm, bool fort>
     struct MCopyHelper<T,Band,cs,rs,rm,fort>
     {
@@ -278,7 +272,7 @@ namespace tmv {
     template <class T, int cs, int rs, int si, int sj, int c>
     struct MViewHelper<T,Band,cs,rs,si,sj,c>
     { 
-        enum { xx = TMV_UNKNWON };
+        enum { xx = TMV_UNKNOWN };
         typedef SmallBandMatrixView<T,cs,rs,xx,xx,si,sj,c> type; 
         typedef ConstSmallBandMatrixView<T,cs,rs,xx,xx,si,sj,c> ctype; 
     };
@@ -760,7 +754,7 @@ namespace tmv {
 
         TMV_INLINE_ND const_diagrange_type diagRange(int k1, int k2) const
         {
-            CheckDiagRange<_fort>(k1,k2,nlo(),nhi());
+            CheckDiagRange_Band<_fort>(k1,k2,nlo(),nhi());
             return cDiagRange(k1,k2);
         }
 
@@ -938,7 +932,7 @@ namespace tmv {
         TMV_INLINE int rowstart(int i) const 
         { return TMV_MAX(0,i-nlo()); }
         TMV_INLINE int rowend(int i) const 
-        { return TMV_MIN(int(rowsize()),i+hnhi()+1); }
+        { return TMV_MIN(int(rowsize()),i+nhi()+1); }
         TMV_INLINE int colstart(int j) const 
         { return TMV_MAX(0,j-nhi()); }
         TMV_INLINE int colend(int j) const 
@@ -1051,10 +1045,10 @@ namespace tmv {
         typedef typename Traits<M>::rowrange_type rowrange_type;
         typedef typename Traits<M>::diagrange_type diagrange_type;
 
-        typedef typename Traits<M>::uppertri_type uppertri_type;
-        typedef typename Traits<M>::lowertri_type lowertri_type;
-        typedef typename Traits<M>::uppertrioff_type uppertrioff_type;
-        typedef typename Traits<M>::lowertrioff_type lowertrioff_type;
+        typedef typename Traits<M>::upperband_type upperband_type;
+        typedef typename Traits<M>::lowerband_type lowerband_type;
+        typedef typename Traits<M>::upperbandoff_type upperbandoff_type;
+        typedef typename Traits<M>::lowerbandoff_type lowerbandoff_type;
 
         //
         // Constructor
@@ -1202,13 +1196,13 @@ namespace tmv {
             const int sj = _stepj;
             const int A2 = 
                 (_conj ? Conj : NonConj) |
-                (_rowmajor ? RowMajor : _colmajor ? ColMajor : NoMajor) |
+                (_rowmajor ? RowMajor : _colmajor ? ColMajor : NonMajor) |
                 NoDivider | NoAlias;
-            typename MViewHelper<T,shape,cs,rs,si,sj,A2> U(
+            typename MViewHelper<value_type,shape,cs,rs,si,sj,A2>::type U(
                 ptr(),rowsize(),stepi(),stepj(),NonUnitDiag);
             m2.assignTo(U);
             if (Maybe<M2::_upper>::select(nlo(),nhi()) > 0) 
-                Maybe<!M2::_upper>::upperBandOff(mat()).setZero()
+                Maybe<!M2::_upper>::upperBandOff(mat()).setZero();
             return mat(); 
         }
 
@@ -1220,8 +1214,8 @@ namespace tmv {
             TMVAssert(colsize() == m2.colsize());
             TMVAssert(rowsize() == m2.rowsize());
             m2.diag().assignTo(diag());
-            if (nhi() > 0) upperBandOff().setZero()
-            if (nlo() > 0) lowerBandOff().setZero()
+            if (nhi() > 0) upperBandOff().setZero();
+            if (nlo() > 0) lowerBandOff().setZero();
             return mat(); 
         }
 
@@ -1435,7 +1429,7 @@ namespace tmv {
 
         TMV_INLINE_ND diagrange_type diagRange(int k1, int k2) 
         {
-            CheckDiagRange<_fort>(k1,k2,nlo(),nhi());
+            CheckDiagRange_Band<_fort>(k1,k2,nlo(),nhi());
             return cDiagRange(k1,k2);
         }
 
@@ -1472,7 +1466,7 @@ namespace tmv {
         { return base::subBandMatrix(i1,i2,j1,j2,newnlo,newnhi); }
         TMV_INLINE const_subbandmatrix_type subBandMatrix(
             int i1, int i2, int j1, int j2) const
-        { return base::subBandMatrix(i1,i2,j1,j2,newnlo,newnhi); }
+        { return base::subBandMatrix(i1,i2,j1,j2); }
         TMV_INLINE const_subbandmatrix_type subBandMatrix(
             int i1, int i2, int j1, int j2, int newnlo, int newnhi,
             int istep, int jstep) const
@@ -1698,11 +1692,11 @@ namespace tmv {
     //
 
     template <int algo, class M>
-    struct SetZeroM_Helper;
+    struct SetZeroB_Helper;
 
     // algo 1: Linearize to vector version
     template <class M>
-    struct SetZeroM_Helper<1,M>
+    struct SetZeroB_Helper<1,M>
     {
         static inline void call(M& m) 
         { m.linearView().setZero(); } 
@@ -1710,7 +1704,7 @@ namespace tmv {
 
     // algo 2: RowMajor
     template <class M>
-    struct SetZeroM_Helper<2,M>
+    struct SetZeroB_Helper<2,M>
     {
         static void call(M& m1) 
         {
@@ -1718,10 +1712,10 @@ namespace tmv {
             const int n = m1.rowsize();
             if (m > 0 && n > 0) {
                 int j1=0;
-                int j2=nhi()+1;
-                int k=nlo();
+                int j2=m1.nhi()+1;
+                int k=m1.nlo();
                 for(int i=0;i<m;++i) {
-                    get_row(i,j1,j2).setZero();
+                    m1.get_row(i,j1,j2).setZero();
                     if (k>0) --k; else ++j1;
                     if (j2<n) ++j2;
                     else if (j1==n) break;
@@ -1732,18 +1726,18 @@ namespace tmv {
 
     // algo 3: ColMajor
     template <class M>
-    struct SetZeroM_Helper<3,M>
+    struct SetZeroB_Helper<3,M>
     {
-        static void call(M& m) 
+        static void call(M& m1) 
         {
             const int m = m1.colsize();
             const int n = m1.rowsize();
             if (m > 0 && n > 0) {
                 int i1=0;
-                int i2=nlo()+1;
-                int k=nhi();
+                int i2=m1.nlo()+1;
+                int k=m1.nhi();
                 for(int j=0;j<n;++j) {
-                    get_col(j,i1,i2).setZero();
+                    m1.get_col(j,i1,i2).setZero();
                     if (k>0) --k; else ++i1;
                     if (i2<m) ++i2;
                     else if (i1==m) break;
@@ -1756,7 +1750,7 @@ namespace tmv {
     static TMV_INLINE void SetZero(BaseMatrix_Band_Mutable<M>& m)
     {
         const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
-        SetZeroM_Helper<algo,M>::call(m.mat());
+        SetZeroB_Helper<algo,M>::call(m.mat());
     }
 
     //
@@ -1764,11 +1758,11 @@ namespace tmv {
     //
 
     template <int algo, class M, class T>
-    struct SetAllToM_Helper;
+    struct SetAllToB_Helper;
 
     // algo 1: Linearize to vector version
     template <class M, class T>
-    struct SetAllToM_Helper<1,M,T> // algo 1, linearize
+    struct SetAllToB_Helper<1,M,T> // algo 1, linearize
     {
         static inline void call(M& m, const T& val) 
         { m.linearView().setAllTo(val); } 
@@ -1776,7 +1770,7 @@ namespace tmv {
 
     // algo 2: RowMajor
     template <class M, class T>
-    struct SetAllToM_Helper<2,M,T>
+    struct SetAllToB_Helper<2,M,T>
     {
         static void call(M& m1, const T& val) 
         {
@@ -1784,10 +1778,10 @@ namespace tmv {
             const int n = m1.rowsize();
             if (m > 0 && n > 0) {
                 int j1=0;
-                int j2=nhi()+1;
-                int k=nlo();
+                int j2=m1.nhi()+1;
+                int k=m1.nlo();
                 for(int i=0;i<m;++i) {
-                    get_row(i,j1,j2).setAllTo(val);
+                    m1.get_row(i,j1,j2).setAllTo(val);
                     if (k>0) --k; else ++j1;
                     if (j2<n) ++j2;
                     else if (j1==n) break;
@@ -1798,18 +1792,18 @@ namespace tmv {
 
     // algo 3: ColMajor
     template <class M, class T>
-    struct SetAllToM_Helper<3,M,T>
+    struct SetAllToB_Helper<3,M,T>
     {
-        static void call(M& m, const T& val) 
+        static void call(M& m1, const T& val) 
         {
             const int m = m1.colsize();
             const int n = m1.rowsize();
             if (m > 0 && n > 0) {
                 int i1=0;
-                int i2=nlo()+1;
-                int k=nhi();
+                int i2=m1.nlo()+1;
+                int k=m1.nhi();
                 for(int j=0;j<n;++j) {
-                    get_col(j,i1,i2).setAllTo(val);
+                    m1.get_col(j,i1,i2).setAllTo(val);
                     if (k>0) --k; else ++i1;
                     if (i2<m) ++i2;
                     else if (i1==m) break;
@@ -1822,7 +1816,7 @@ namespace tmv {
     static TMV_INLINE void SetAllTo(BaseMatrix_Band_Mutable<M>& m, const T& val)
     {
         const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
-        SetAllToM_Helper<algo,M,T>::call(m.mat(),val);
+        SetAllToB_Helper<algo,M,T>::call(m.mat(),val);
     }
 
     //
@@ -1830,11 +1824,11 @@ namespace tmv {
     //
 
     template <int algo, class M, class T>
-    struct AddToAllM_Helper;
+    struct AddToAllB_Helper;
 
     // algo 1: Linearize to vector version
     template <class M, class T>
-    struct AddToAllM_Helper<1,M,T> // algo 1, linearize
+    struct AddToAllB_Helper<1,M,T> // algo 1, linearize
     {
         static inline void call(M& m, const T& val) 
         { m.linearView().addToAll(val); } 
@@ -1842,7 +1836,7 @@ namespace tmv {
 
     // algo 2: RowMajor
     template <class M, class T>
-    struct AddToAllM_Helper<2,M,T>
+    struct AddToAllB_Helper<2,M,T>
     {
         static void call(M& m1, const T& val) 
         {
@@ -1850,10 +1844,10 @@ namespace tmv {
             const int n = m1.rowsize();
             if (m > 0 && n > 0) {
                 int j1=0;
-                int j2=nhi()+1;
-                int k=nlo();
+                int j2=m1.nhi()+1;
+                int k=m1.nlo();
                 for(int i=0;i<m;++i) {
-                    get_row(i,j1,j2).addToAll(val);
+                    m1.get_row(i,j1,j2).addToAll(val);
                     if (k>0) --k; else ++j1;
                     if (j2<n) ++j2;
                     else if (j1==n) break;
@@ -1864,18 +1858,18 @@ namespace tmv {
 
     // algo 3: ColMajor
     template <class M, class T>
-    struct AddToAllM_Helper<3,M,T>
+    struct AddToAllB_Helper<3,M,T>
     {
-        static void call(M& m, const T& val) 
+        static void call(M& m1, const T& val) 
         {
             const int m = m1.colsize();
             const int n = m1.rowsize();
             if (m > 0 && n > 0) {
                 int i1=0;
-                int i2=nlo()+1;
-                int k=nhi();
+                int i2=m1.nlo()+1;
+                int k=m1.nhi();
                 for(int j=0;j<n;++j) {
-                    get_col(j,i1,i2).addToAll(val);
+                    m1.get_col(j,i1,i2).addToAll(val);
                     if (k>0) --k; else ++i1;
                     if (i2<m) ++i2;
                     else if (i1==m) break;
@@ -1888,7 +1882,7 @@ namespace tmv {
     static TMV_INLINE void AddToAll(BaseMatrix_Band_Mutable<M>& m, const T& val)
     {
         const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
-        AddToAllM_Helper<algo,M,T>::call(m.mat(),val);
+        AddToAllB_Helper<algo,M,T>::call(m.mat(),val);
     }
 
     //
@@ -1896,11 +1890,11 @@ namespace tmv {
     //
 
     template <int algo, class M, class RT>
-    struct ClipM_Helper;
+    struct ClipB_Helper;
 
     // algo 1: Linearize to vector version
     template <class M, class RT>
-    struct ClipM_Helper<1,M,RT> // algo 1, linearize
+    struct ClipB_Helper<1,M,RT> // algo 1, linearize
     {
         static inline void call(M& m, const RT& thresh) 
         { m.linearView().clip(thresh); } 
@@ -1908,7 +1902,7 @@ namespace tmv {
 
     // algo 2: RowMajor
     template <class M, class RT>
-    struct ClipM_Helper<2,M,RT>
+    struct ClipB_Helper<2,M,RT>
     {
         static void call(M& m1, const RT& thresh) 
         {
@@ -1916,10 +1910,10 @@ namespace tmv {
             const int n = m1.rowsize();
             if (m > 0 && n > 0) {
                 int j1=0;
-                int j2=nhi()+1;
-                int k=nlo();
+                int j2=m1.nhi()+1;
+                int k=m1.nlo();
                 for(int i=0;i<m;++i) {
-                    get_row(i,j1,j2).clip(thresh);
+                    m1.get_row(i,j1,j2).clip(thresh);
                     if (k>0) --k; else ++j1;
                     if (j2<n) ++j2;
                     else if (j1==n) break;
@@ -1930,18 +1924,18 @@ namespace tmv {
 
     // algo 3: ColMajor
     template <class M, class RT>
-    struct ClipM_Helper<3,M,RT>
+    struct ClipB_Helper<3,M,RT>
     {
-        static void call(M& m, const RT& thresh) 
+        static void call(M& m1, const RT& thresh) 
         {
             const int m = m1.colsize();
             const int n = m1.rowsize();
             if (m > 0 && n > 0) {
                 int i1=0;
-                int i2=nlo()+1;
-                int k=nhi();
+                int i2=m1.nlo()+1;
+                int k=m1.nhi();
                 for(int j=0;j<n;++j) {
-                    get_col(j,i1,i2).clip(thresh);
+                    m1.get_col(j,i1,i2).clip(thresh);
                     if (k>0) --k; else ++i1;
                     if (i2<m) ++i2;
                     else if (i1==m) break;
@@ -1954,7 +1948,7 @@ namespace tmv {
     static TMV_INLINE void Clip(BaseMatrix_Band_Mutable<M>& m, const RT& thresh)
     {
         const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
-        ClipM_Helper<algo,M,RT>::call(m.mat(),thresh);
+        ClipB_Helper<algo,M,RT>::call(m.mat(),thresh);
     }
 
     //
@@ -1962,11 +1956,11 @@ namespace tmv {
     //
 
     template <int algo, class M, class F>
-    struct ApplyToAllM_Helper;
+    struct ApplyToAllB_Helper;
 
     // algo 1: Linearize to vector version
     template <class M, class F>
-    struct ApplyToAllM_Helper<1,M,F> // algo 1, linearize
+    struct ApplyToAllB_Helper<1,M,F> // algo 1, linearize
     {
         static inline void call(M& m, const F& f) 
         { m.linearView().applyToAll(f); } 
@@ -1974,7 +1968,7 @@ namespace tmv {
 
     // algo 2: RowMajor
     template <class M, class F>
-    struct ApplyToAllM_Helper<2,M,F>
+    struct ApplyToAllB_Helper<2,M,F>
     {
         static inline void call(M& m1, const F& f) 
         {
@@ -1982,10 +1976,10 @@ namespace tmv {
             const int n = m1.rowsize();
             if (m > 0 && n > 0) {
                 int j1=0;
-                int j2=nhi()+1;
-                int k=nlo();
+                int j2=m1.nhi()+1;
+                int k=m1.nlo();
                 for(int i=0;i<m;++i) {
-                    get_row(i,j1,j2).applyToAll(f);
+                    m1.get_row(i,j1,j2).applyToAll(f);
                     if (k>0) --k; else ++j1;
                     if (j2<n) ++j2;
                     else if (j1==n) break;
@@ -1996,18 +1990,18 @@ namespace tmv {
 
     // algo 3: ColMajor
     template <class M, class F>
-    struct ApplyToAllM_Helper<3,M,F>
+    struct ApplyToAllB_Helper<3,M,F>
     {
-        static inline void call(M& m, const F& f) 
+        static inline void call(M& m1, const F& f) 
         {
             const int m = m1.colsize();
             const int n = m1.rowsize();
             if (m > 0 && n > 0) {
                 int i1=0;
-                int i2=nlo()+1;
-                int k=nhi();
+                int i2=m1.nlo()+1;
+                int k=m1.nhi();
                 for(int j=0;j<n;++j) {
-                    get_col(j,i1,i2).applyToAll(f);
+                    m1.get_col(j,i1,i2).applyToAll(f);
                     if (k>0) --k; else ++i1;
                     if (i2<m) ++i2;
                     else if (i1==m) break;
@@ -2017,10 +2011,10 @@ namespace tmv {
     };
 
     template <class M, class F>
-    static TMV_INLINE void ApplyToAll(BaseMatrix_Mutable<M>& m, const F& f)
+    static TMV_INLINE void ApplyToAll(BaseMatrix_Band_Mutable<M>& m, const F& f)
     {
         const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
-        ApplyToAllM_Helper<algo,M,F>::call(m.mat(),f);
+        ApplyToAllB_Helper<algo,M,F>::call(m.mat(),f);
     }
 
     //
@@ -2028,28 +2022,29 @@ namespace tmv {
     //
 
     template <int algo, class M>
-    struct ConjugateM_Helper;
+    struct ConjugateB_Helper;
 
     // algo 0: Not complex, nothing to do
     template <class M>
-    struct ConjugateM_Helper<0,M>
+    struct ConjugateB_Helper<0,M>
     { static inline void call(M& ) {} };
 
     // algo 1: Linearize to vector version
     template <class M>
-    struct ConjugateM_Helper<1,M>
+    struct ConjugateB_Helper<1,M>
     {
         static inline void call(M& m)
         { m.linearView().conjugateSelf(); }
     };
 
-    // In TMV_ScaleM.h
+    // In TMV_ScaleB.h
     template <int ix, class T, class M>
-    static inline void Scale(const Scaling<ix,T>& x, BaseMatrix_Mutable<M>& m);
+    static inline void Scale(
+        const Scaling<ix,T>& x, BaseMatrix_Band_Mutable<M>& m);
 
     // algo 2: m.imagPart() *= -1
     template <class M>
-    struct ConjugateM_Helper<2,M>
+    struct ConjugateB_Helper<2,M>
     {
         static inline void call(M& m)
         {
@@ -2066,7 +2061,7 @@ namespace tmv {
     {
         const bool isreal = Traits<typename M::value_type>::isreal;
         const int algo = isreal ? 0 : M::_canlin ? 1 : 2;
-        ConjugateM_Helper<algo,M>::call(m.mat());
+        ConjugateB_Helper<algo,M>::call(m.mat());
     }
 
 

@@ -699,15 +699,15 @@ static void TestVectorIO()
     Assert(v == xv1,"Vector I/O check #1");
     Assert(cv == xcv1,"CVector I/O check #1");
 
-    std::auto_ptr<tmv::Vector<T> > xv2;
-    std::auto_ptr<tmv::Vector<std::complex<T> > > xcv2;
+    tmv::Vector<T> xv2;
+    tmv::Vector<std::complex<T> > xcv2;
     fin.open("tmvtest_vector_io.dat");
     if (!fin) throw std::runtime_error(
         "Couldn't open tmvtest_vector_io.dat for input");
     fin >> xv2 >> xcv2;
     fin.close();
-    Assert(v == *xv2,"Vector I/O check #2");
-    Assert(cv == *xcv2,"CVector I/O check #2");
+    Assert(v == xv2,"Vector I/O check #2");
+    Assert(cv == xcv2,"CVector I/O check #2");
 
     std::remove("tmvtest_vector_io.dat");
 

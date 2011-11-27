@@ -459,12 +459,6 @@
 //
 //    is >> m
 //        Reads m from istream is in the same format
-//        m must already be the correct size for this to work.
-//
-//    std::auto_ptr<Matrix<T,S,I> > mptr;
-//    is >> mptr
-//        If you do not know the size of the Matrix to be read, you can
-//        use this form which will allocate the Matrix for you.
 //
 //
 // Division Control Functions:
@@ -2708,6 +2702,11 @@ namespace tmv {
         itsm(linsize), itscs(cs), itsrs(rs) \
         TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+linsize)
 
+        inline Matrix() : NEW_SIZE(0,0)
+        {
+            TMVAssert(S==RowMajor || S==ColMajor);
+        }
+
         inline Matrix(size_t _colsize, size_t _rowsize) :
             NEW_SIZE(_colsize,_rowsize)
         {
@@ -4237,16 +4236,15 @@ namespace tmv {
     //
 
     template <class T, StorageType S, IndexStyle I> 
-    std::istream& operator>>(
-        std::istream& is, auto_ptr<Matrix<T,S,I> >& m);
+    TMV_DEPRECATED(std::istream& operator>>(
+            std::istream& is, auto_ptr<Matrix<T,S,I> >& m));
 
     template <class T> 
     std::istream& operator>>(
         std::istream& is, const MatrixView<T>& m);
 
     template <class T, StorageType S, IndexStyle I> 
-    inline std::istream& operator>>(std::istream& is, Matrix<T,S,I>& m)
-    { return is>>m.view(); }
+    std::istream& operator>>(std::istream& is, Matrix<T,S,I>& m);
 
 } // namespace tmv
 

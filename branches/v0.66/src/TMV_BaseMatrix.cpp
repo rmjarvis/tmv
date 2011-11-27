@@ -36,17 +36,18 @@
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_Divider.h"
 #include "TMV_DivImpl.h"
-#include <iostream>
 
 namespace tmv {
 
     template <class T>
-    DivHelper<T>::~DivHelper() 
-    { if (pdiv) { delete pdiv; pdiv=0; } }
+    DivHelper<T>::DivHelper() : pdiv(0) {}
+
+    template <class T>
+    DivHelper<T>::~DivHelper() {}
 
     template <class T>
     void DivHelper<T>::setupDiv() const
-    { if (!(pdiv)) pdiv = new DivImpl(getMatrix()); }
+    { if (!pdiv.get()) pdiv.reset(new DivImpl(getMatrix())); }
 
     template <class T>
     T DivHelper<T>::doDet() const
@@ -262,7 +263,7 @@ namespace tmv {
     void DivHelper<T>::setDiv() const
     { 
         setupDiv();
-        if (!pdiv->div) {
+        if (!pdiv->div.get()) {
             if (pdiv->dt == XXX) 
                 pdiv->dt = (colsize() == rowsize()) ? LU : QR;
             newDivider();
@@ -273,10 +274,7 @@ namespace tmv {
     void DivHelper<T>::unsetDiv() const
     { 
         setupDiv();
-        if (pdiv->div) {
-            delete pdiv->div;
-            pdiv->div = 0;
-        }
+        pdiv->div.reset(0);
     }
 
     template <class T>
@@ -290,29 +288,25 @@ namespace tmv {
     bool DivHelper<T>::divIsSet() const 
     {
         setupDiv();
-        return pdiv->div; 
+        return pdiv->div.get(); 
     }
 
     template <class T>
     void DivHelper<T>::doneDiv() const
-    { 
-        TMVAssert(pdiv);
-        if (!pdiv->cache) unsetDiv(); 
-    }
+    { if (!pdiv->cache) unsetDiv(); }
 
     template <class T>
     const Divider<T>* DivHelper<T>::getDiv() const 
     {
         setupDiv();
-        return pdiv->div; 
+        return pdiv->div.get(); 
     }
 
     template <class T>
     void DivHelper<T>::setDiv(Divider<T>* d) const 
     {
         setupDiv();
-        if (pdiv->div) delete pdiv->div;
-        pdiv->div = d; 
+        pdiv->div.reset(d);
     }
 
     template <class T>
@@ -325,8 +319,7 @@ namespace tmv {
     template <class T>
     bool DivHelper<T>::checkDecomp(std::ostream* fout) const
     {
-        TMVAssert(pdiv);
-        TMVAssert(pdiv->div);
+        TMVAssert(pdiv->div.get());
         return pdiv->div->checkDecomp(getMatrix(),fout);
     }
 
@@ -334,8 +327,7 @@ namespace tmv {
     bool DivHelper<T>::checkDecomp(
         const BaseMatrix<T>& m2, std::ostream* fout) const
     {
-        TMVAssert(pdiv);
-        TMVAssert(pdiv->div);
+        TMVAssert(pdiv->div.get());
         return pdiv->div->checkDecomp(m2,fout);
     }
 

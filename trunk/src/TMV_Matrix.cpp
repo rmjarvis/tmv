@@ -652,24 +652,20 @@ namespace tmv {
                       dt == tmv::QRP || dt == tmv::SV);
             switch (dt) {
               case tmv::LU : 
-                   this->divider.reset(
-                       new InstLUD<T>(
-                           this->getConstView(),this->divIsInPlace()));
+                   this->divider.reset(new InstLUD<T>(
+                       this->getConstView(),this->divIsInPlace()));
                    break;
               case tmv::QR : 
-                   this->divider.reset(
-                       new InstQRD<T>(
-                           this->getConstView(),this->divIsInPlace()));
+                   this->divider.reset(new InstQRD<T>(
+                       this->getConstView(),this->divIsInPlace()));
                    break;
               case tmv::QRP : 
-                   this->divider.reset(
-                       new InstQRPD<T>(
-                           this->getConstView(),this->divIsInPlace()));
+                   this->divider.reset(new InstQRPD<T>(
+                       this->getConstView(),this->divIsInPlace()));
                    break;
               case tmv::SV : 
-                   this->divider.reset(
-                       new InstSVD<T>(
-                           this->getConstView(),this->divIsInPlace()));
+                   this->divider.reset(new InstSVD<T>(
+                       this->getConstView(),this->divIsInPlace()));
                    break;
               default :
                    // The above assert should have already failed.

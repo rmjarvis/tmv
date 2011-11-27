@@ -466,8 +466,8 @@ static void TestSmallVectorIO()
     Assert(v == xv1,"SmallVector I/O check #1");
     Assert(cv == xcv1,"CSmallVector I/O check #1");
 
-    std::auto_ptr<tmv::Vector<T> > xv2;
-    std::auto_ptr<tmv::Vector<std::complex<T> > > xcv2;
+    tmv::Vector<T> xv2;
+    tmv::Vector<std::complex<T> > xcv2;
     fin.open("tmvtest_smallvector_io.dat");
     if (!fin) {
 #ifdef NOTHROW
@@ -480,8 +480,8 @@ static void TestSmallVectorIO()
     }
     fin >> xv2 >> xcv2;
     fin.close();
-    Assert(v == *xv2,"SmallVector I/O check #2");
-    Assert(cv == *xcv2,"CSmallVector I/O check #2");
+    Assert(v == xv2,"SmallVector I/O check #2");
+    Assert(cv == xcv2,"CSmallVector I/O check #2");
 
     std::remove("tmvtest_smallvector_io.dat");
 }

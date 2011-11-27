@@ -361,13 +361,13 @@ namespace tmv {
             throw VectorReadError<T>(v,is,n);
 #endif
         }
-        v.read(is);
+        Read(is,v);
         return is;
     }
 
     template <class T, int A>
     static std::istream& operator>>(
-        std::istream& is, auto_ptr<Vector<T,A> >& v)
+        std::istream& is, Vector<T,A>& v)
     {
         size_t n;
         is >> n;
@@ -379,8 +379,8 @@ namespace tmv {
             throw VectorReadError<T>(is);
 #endif
         }
-        v.reset(new Vector<T,A>(n));
-        v->read(is);
+        v.resize(n);
+        Read(is,v);
         return is;
     }
 

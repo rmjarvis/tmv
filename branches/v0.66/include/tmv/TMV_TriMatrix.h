@@ -226,11 +226,6 @@
 //
 //    is >> m
 //        reads m from istream is in the compact format
-//        m must already be the correct size for this to work.
-//
-//    is >> mptr
-//        If you do not know the size of the TriMatrix to be read, you can
-//        use this form where mptr is an auto_ptr to an undefined TriMatrix.
 //        (Note: if the DiagType for the TriMatrix is UnitDiag, then
 //        all of the diagonals read in must be = 1.)
 //
@@ -3900,8 +3895,8 @@ namespace tmv {
         itslen((s)*(s)), itsm(itslen), itss(s) \
         TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+itslen)
 
-        explicit inline UpperTriMatrix(size_t _size) : NEW_SIZE(_size) 
-        { 
+        explicit inline UpperTriMatrix(size_t _size=0) : NEW_SIZE(_size) 
+        {
             TMVAssert(S==RowMajor || S==ColMajor); 
 #ifdef TMVDEBUG
             setAllTo(T(888));
@@ -4795,8 +4790,8 @@ namespace tmv {
         itslen((s)*(s)), itsm(itslen), itss(s) \
         TMV_DEFFIRSTLAST(itsm.get(),itsm.get()+itslen)
 
-        explicit inline LowerTriMatrix(size_t _size) : NEW_SIZE(_size) 
-        { 
+        explicit inline LowerTriMatrix(size_t _size=0) : NEW_SIZE(_size) 
+        {
             TMVAssert(S==RowMajor || S==ColMajor); 
 #ifdef TMVDEBUG
             setAllTo(T(888));
@@ -6153,11 +6148,11 @@ namespace tmv {
     //
 
     template <class T, DiagType D, StorageType S, IndexStyle I> 
-    std::istream& operator>>(
-        std::istream& is, auto_ptr<UpperTriMatrix<T,D,S,I> >& m);
+    TMV_DEPRECATED(std::istream& operator>>(
+            std::istream& is, auto_ptr<UpperTriMatrix<T,D,S,I> >& m));
     template <class T, DiagType D, StorageType S, IndexStyle I> 
-    std::istream& operator>>(
-        std::istream& is, auto_ptr<LowerTriMatrix<T,D,S,I> >& m);
+    TMV_DEPRECATED(std::istream& operator>>(
+            std::istream& is, auto_ptr<LowerTriMatrix<T,D,S,I> >& m));
 
     template <class T> 
     std::istream& operator>>(std::istream& is, const UpperTriMatrixView<T>& m);
@@ -6165,13 +6160,9 @@ namespace tmv {
     std::istream& operator>>(std::istream& is, const LowerTriMatrixView<T>& m);
 
     template <class T, DiagType D, StorageType S, IndexStyle I> 
-    inline std::istream& operator>>(
-        std::istream& is, UpperTriMatrix<T,D,S,I>& m)
-    { return is>>m.view(); }
+    std::istream& operator>>(std::istream& is, UpperTriMatrix<T,D,S,I>& m);
     template <class T, DiagType D, StorageType S, IndexStyle I> 
-    inline std::istream& operator>>(
-        std::istream& is, LowerTriMatrix<T,D,S,I>& m)
-    { return is>>m.view(); }
+    std::istream& operator>>(std::istream& is, LowerTriMatrix<T,D,S,I>& m);
 
     template <class T, bool C>
     inline std::string TMV_Text(const TriRef<T,C>& ref)

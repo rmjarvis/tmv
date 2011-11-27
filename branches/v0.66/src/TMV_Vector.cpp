@@ -1880,6 +1880,24 @@ namespace tmv {
         return is;
     }
 
+    template <class T, IndexStyle I> 
+    std::istream& operator>>(std::istream& is, Vector<T,I>& v)
+    {
+        size_t n;
+        is >> n;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"Vector ReadError: !is \n";
+            exit(1); 
+#else
+            throw VectorReadError<T>(is);
+#endif
+        }
+        v.resize(n);
+        v.view().read(is);
+        return is;
+    }
+
 #ifdef BLAS
 #define INST_SKIP_BLAS
 #endif

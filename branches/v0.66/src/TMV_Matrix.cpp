@@ -126,17 +126,17 @@ namespace tmv {
     void GenMatrix<T>::newDivider() const
     {
         switch (this->getDivType()) {
-          case LU : this->setDiv(new LUDiv<T>(*this,
-                                              this->isDivInPlace())); 
+          case LU : this->setDiv(
+                        new LUDiv<T>(*this,this->isDivInPlace())); 
                     break;
-          case QR : this->setDiv(new QRDiv<T>(*this,
-                                              this->isDivInPlace())); 
+          case QR : this->setDiv(
+                        new QRDiv<T>(*this,this->isDivInPlace())); 
                     break;
-          case QRP : this->setDiv(new QRPDiv<T>(*this,
-                                                this->isDivInPlace())); 
+          case QRP : this->setDiv(
+                         new QRPDiv<T>(*this,this->isDivInPlace())); 
                      break;
-          case SV : this->setDiv(new SVDiv<T>(*this,
-                                              this->isDivInPlace())); 
+          case SV : this->setDiv(
+                        new SVDiv<T>(*this,this->isDivInPlace())); 
                     break;
           default : TMVAssert(TMV_FALSE);
         }
@@ -1465,6 +1465,24 @@ namespace tmv {
         }
         m.reset(new Matrix<T,S,I>(cs,rs));
         m->view().read(is); 
+        return is;
+    }
+
+    template <class T, StorageType S, IndexStyle I>
+    std::istream& operator>>(std::istream& is, Matrix<T,S,I>& m)
+    {
+        size_t cs,rs;
+        is >> cs >> rs;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"Matrix ReadError: !is\n";
+            exit(1); 
+#else
+            throw MatrixReadError<T>(is);
+#endif
+        }
+        m.resize(cs,rs);
+        m.view().read(is); 
         return is;
     }
 

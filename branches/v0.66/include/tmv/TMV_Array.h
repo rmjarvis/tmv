@@ -50,6 +50,10 @@ const int TMV_MaxStack = 1024; // bytes
 
 namespace tmv
 {
+    template <class T>
+    inline bool TMV_Aligned(const T* p)
+    { return (reinterpret_cast<size_t>(p) & 0xf) == 0; }
+
     // There doesn't seem to be any portable C++ function that guarantees
     // that the memory allocated will be aligned as necessary for 
     // SSE functions.
@@ -71,16 +75,13 @@ namespace tmv
     // So if end padding is enabled, we make sure to allocate enough memory
     // to finish the block of 16 bytes.  And we write 0's to the values
     // that aren't part of the requested memory.
-    
+
     // First the regular non-SSE version, where we don't need aligment.
     template <class T>
     class AlignedMemory
     {
     public:
-        AlignedMemory() : p(0) 
-        { 
-            //std::cout<<this<<" X constructor: p = "<<p<<std::endl; 
-        }
+        inline AlignedMemory() : p(0) {}
         inline void allocate(const size_t n) 
         { 
 #ifdef TMV_END_PADDING
@@ -90,13 +91,9 @@ namespace tmv
 #else
             p = new T[n]; 
 #endif
-            //std::cout<<this<<" X allocate: n = "<<n<<"  p = "<<p<<std::endl; 
         }
         inline void deallocate()
-        { 
-            if (p) delete [] p; p=0; 
-            //std::cout<<this<<" X deallocate: p = "<<p<<std::endl; 
-        }
+        { if (p) delete [] p; p=0; }
         inline void swapWith(AlignedMemory<T>& rhs)
         { T* temp = p; p = rhs.p; rhs.p = temp; }
         inline T* get() { return p; }
@@ -115,10 +112,7 @@ namespace tmv
     class AlignedMemory<float>
     {
     public:
-        AlignedMemory() : p(0)
-        {
-            //std::cout<<this<<" F constructor: p = "<<(void*)p<<std::endl; 
-        }
+        AlignedMemory() : p(0) {}
         inline void allocate(const size_t n) 
         { 
 #ifdef TMV_END_PADDING
@@ -129,22 +123,16 @@ namespace tmv
 #else
             p = new char[(n<<2)+15];
 #endif
-            //std::cout<<this<<" F allocate: p = "<<(void*)p<<std::endl;
             TMVAssert((void*)(p+(n<<2)+15) >= (void*)(get()+n));
         }
         inline void deallocate()
-        {
-            //std::cout<<this<<" F deallocate: p = "<<(void*)p<<", p = "<<((size_t)p)<<std::endl; 
-            if (p) delete [] p; p=0;
-        }
+        { if (p) delete [] p; p=0; }
         inline void swapWith(AlignedMemory<float>& rhs)
         { char* temp = p; p = rhs.p; rhs.p = temp; }
         inline float* get() 
         {
-            //std::cout<<this<<" F get: p = "<<(void*)p<<std::endl;
             float* pf = reinterpret_cast<float*>(
                 p + ((0x10-((size_t)(p) & 0xf)) & ~0x10));
-            //std::cout<<this<<" pf = "<<(void*)pf<<std::endl;
             TMVAssert( ((size_t)(pf) & 0xf) == 0);
             return pf;
         }
@@ -162,10 +150,7 @@ namespace tmv
     class AlignedMemory<double>
     {
     public:
-        AlignedMemory() : p(0)
-        {
-            //std::cout<<this<<" D constructor: p = "<<(void*)p<<std::endl; 
-        }
+        AlignedMemory() : p(0) {}
         inline void allocate(const size_t n) 
         { 
 #ifdef TMV_END_PADDING
@@ -176,22 +161,16 @@ namespace tmv
 #else
             p = new char[(n<<3)+15];
 #endif
-            //std::cout<<this<<" D allocate: p = "<<(void*)p<<std::endl;
             TMVAssert((void*)(p+(n<<3)+15) >= (void*)(get()+n));
         }
         inline void deallocate()
-        {
-            //std::cout<<this<<" D deallocate: p = "<<(void*)p<<std::endl; 
-            if (p) delete [] p; p=0;
-        }
+        { if (p) delete [] p; p=0; }
         inline void swapWith(AlignedMemory<double>& rhs)
         { char* temp = p; p = rhs.p; rhs.p = temp; }
         inline double* get() 
         {
-            //std::cout<<this<<" D get: p = "<<(void*)p<<std::endl;
             double* pd = reinterpret_cast<double*>(
                 p + ((0x10-((size_t)(p) & 0xf)) & ~0x10));
-            //std::cout<<"pd = "<<(void*)pd<<std::endl;
             TMVAssert( ((size_t)(pd) & 0xf) == 0);
             return pd;
         }
@@ -252,7 +231,7 @@ namespace tmv
         }
         inline AlignedArray(const size_t n) 
         {
-            p.allocate(n); 
+            if (n > 0) p.allocate(n); 
 #ifdef TMV_INITIALIZE_NAN
             _n = n;
             for(size_t i=0;i<_n;++i) get()[i] = TMV_Nan<T>::get();
@@ -287,7 +266,7 @@ namespace tmv
             for(size_t i=0;i<_n;++i) get()[i] = T(-999);
 #endif
             p.deallocate(); 
-            p.allocate(n); 
+            if (n > 0) p.allocate(n); 
 #ifdef TMV_INITIALIZE_NAN
             _n = n;
             for(size_t i=0;i<_n;++i) get()[i] = TMV_Nan<T>::get();
@@ -304,8 +283,8 @@ namespace tmv
         size_t _n;
 #endif
 
-        inline AlignedArray& operator=(AlignedArray& p2);
-        inline AlignedArray(const AlignedArray& p2);
+        AlignedArray& operator=(AlignedArray& p2);
+        AlignedArray(const AlignedArray& p2);
     };
 
     template <class RT>
@@ -322,7 +301,7 @@ namespace tmv
         }
         inline AlignedArray(const size_t n) 
         { 
-            p.allocate(n<<1); 
+            if (n > 0) p.allocate(n<<1); 
 #ifdef TMV_INITIALIZE_NAN
             _n = n;
             for(size_t i=0;i<_n;++i) 
@@ -358,7 +337,7 @@ namespace tmv
             for(size_t i=0;i<_n;++i) get()[i] = std::complex<RT>(-999,-888);
 #endif
             p.deallocate();
-            p.allocate(n<<1); 
+            if (n > 0) p.allocate(n<<1); 
 #ifdef TMV_INITIALIZE_NAN
             _n = n;
             for(size_t i=0;i<_n;++i) 
@@ -377,8 +356,8 @@ namespace tmv
         size_t _n;
 #endif
 
-        inline AlignedArray& operator=(AlignedArray& p2);
-        inline AlignedArray(const AlignedArray& p2);
+        AlignedArray& operator=(AlignedArray& p2);
+        AlignedArray(const AlignedArray& p2);
     };
 
 
@@ -436,7 +415,7 @@ namespace tmv
 #ifdef TMV_END_PADDING
         enum { NN = N + 4 };
 #else 
-        enum { NN = N };
+        enum { NN = N==0 ? 1 : N };
 #endif
         T p[NN];
     };
@@ -456,7 +435,7 @@ namespace tmv
 #ifdef TMV_END_PADDING
         enum { NN = N + 4 };
 #else 
-        enum { NN = N };
+        enum { NN = N==0 ? 1 : N };
 #endif
         union { float p[NN]; __m128 x; } xp;
     };
@@ -474,7 +453,7 @@ namespace tmv
 #ifdef TMV_END_PADDING
         enum { NN = N + 4 };
 #else 
-        enum { NN = N };
+        enum { NN = N==0 ? 1 : N };
 #endif
         float p[NN];
     };
@@ -494,7 +473,7 @@ namespace tmv
 #ifdef TMV_END_PADDING
         enum { NN = N + 2 };
 #else 
-        enum { NN = N };
+        enum { NN = N==0 ? 1 : N };
 #endif
         union { double p[NN]; __m128d x; } xp;
     };
@@ -512,7 +491,7 @@ namespace tmv
 #ifdef TMV_END_PADDING
         enum { NN = N + 2 };
 #else 
-        enum { NN = N };
+        enum { NN = N==0 ? 1 : N };
 #endif
         double p[NN];
     };
@@ -572,8 +551,8 @@ namespace tmv
 
         StackArray2<T,N,bigN,smallN> p;
 
-        inline StackArray& operator=(StackArray& p2);
-        inline StackArray(const StackArray& p2);
+        StackArray& operator=(StackArray& p2);
+        StackArray(const StackArray& p2);
     };
 
     template <class RT, int N>
@@ -621,8 +600,8 @@ namespace tmv
 
         StackArray2<RT,(N<<1),bigN,smallN> p;
 
-        inline StackArray& operator=(StackArray& p2);
-        inline StackArray(const StackArray& p2);
+        StackArray& operator=(StackArray& p2);
+        StackArray(const StackArray& p2);
     };
 
 } // namespace tmv

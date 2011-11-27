@@ -1462,6 +1462,43 @@ namespace tmv {
         return is;
     }
 
+    template <class T, DiagType D, StorageType S, IndexStyle I> 
+    std::istream& operator>>(
+        std::istream& is, UpperTriMatrix<T,D,S,I>& m)
+    {
+        char ul;
+        is >> ul;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"UpperTriMatrix ReadError: !is\n"; 
+            exit(1); 
+#else
+            throw UpperTriMatrixReadError<T>(is);
+#endif
+        }
+        if (ul != 'U') {
+#ifdef NOTHROW
+            std::cerr<<"UpperTriMatrix ReadError: "<<ul<<" != U\n"; 
+            exit(1); 
+#else
+            throw UpperTriMatrixReadError<T>(is,'U',ul);
+#endif
+        }
+        size_t size;
+        is >> size;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"UpperTriMatrix ReadError: !is\n"; 
+            exit(1); 
+#else
+            throw UpperTriMatrixReadError<T>(is);
+#endif
+        }
+        m.resize(size);
+        m.view().read(is); 
+        return is;
+    }
+
     template <class T>
     std::istream& operator>>(std::istream& is, const UpperTriMatrixView<T>& m)
     {
@@ -1796,6 +1833,42 @@ namespace tmv {
         }
         m.reset(new LowerTriMatrix<T,D,S,I>(size));
         m->view().read(is); 
+        return is;
+    }
+
+    template <class T, DiagType D, StorageType S, IndexStyle I>
+    std::istream& operator>>(std::istream& is, LowerTriMatrix<T,D,S,I>& m)
+    {
+        char ul;
+        is >> ul;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"LowerTriMatrix ReadError: !is\n"; 
+            exit(1); 
+#else
+            throw LowerTriMatrixReadError<T>(is);
+#endif
+        }
+        if (ul != 'L') {
+#ifdef NOTHROW
+            std::cerr<<"LowerTriMatrix ReadError: "<<ul<<" != L\n"; 
+            exit(1); 
+#else
+            throw LowerTriMatrixReadError<T>(is,'L',ul);
+#endif
+        }
+        size_t size;
+        is >> size;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"LowerTriMatrix ReadError: !is\n"; 
+            exit(1); 
+#else
+            throw LowerTriMatrixReadError<T>(is);
+#endif
+        }
+        m.resize(size);
+        m.view().read(is); 
         return is;
     }
 

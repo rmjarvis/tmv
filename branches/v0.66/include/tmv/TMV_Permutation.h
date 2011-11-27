@@ -180,7 +180,7 @@ namespace tmv {
         // Constructors
         //
 
-        Permutation(size_t n) :
+        explicit Permutation(size_t n=0) :
             itsn(n), itsmem(n), itsp(itsmem.get()),
             isinv(false), itsdet(1) 
         { for(int i=0;i<itsn;++i) itsmem[i] = i; }
@@ -202,7 +202,7 @@ namespace tmv {
         Permutation& operator=(const Permutation& rhs) 
         {
             TMVAssert(size() == rhs.size());
-            itsmem.resize(0);
+            itsmem.resize(0); // also deallocates the memory
             itsp = rhs.itsp;
             isinv = rhs.isinv;
             itsdet = rhs.itsdet;
@@ -582,8 +582,11 @@ namespace tmv {
 
         inline void resize(size_t n)
         {
+            if (int(n) > itsn) {
+                itsmem.resize(n);
+                itsp = itsmem.get();
+            }
             itsn = n;
-            allocateMem();
             isinv = false;
             itsdet = 1;
         }
@@ -650,7 +653,7 @@ namespace tmv {
         inline int* getMem() 
         { 
             // Make sure P owns its memory:
-            TMVAssert(itsmem.get());
+            TMVAssert(itsn==0 || itsmem.get());
             // This next one shoudl be true if the previous one passes.
             TMVAssert(itsmem.get() == itsp);
             return itsmem.get();
@@ -842,17 +845,15 @@ namespace tmv {
             throw PermutationReadError(is);
 #endif
         }
-        if (n != m.size()) {
-#ifdef NOTHROW
-            std::cerr<<"Band Matrix Read Error wrong size \n";
-            exit(1);
-#else
-            throw PermutationReadError(m,is,n);
-#endif
-        }
+        m.resize(n);
         m.read(is);
         return is;
     }
+
+    // Can't have deprecated attribute on definition. 
+    // So need to declare first.  Then define.
+    TMV_DEPRECATED(std::istream& operator>>(
+        std::istream& is, std::auto_ptr<Permutation>& m));
 
     inline std::istream& operator>>(
         std::istream& is, std::auto_ptr<Permutation>& m)

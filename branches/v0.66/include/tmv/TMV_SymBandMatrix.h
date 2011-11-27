@@ -252,11 +252,6 @@
 //
 //    is >> m
 //        Reads m from istream is in the compact format
-//        m must already be the correct size for this to work.
-//
-//    is >> mptr
-//        If you do not know the size of the SymBandMatrix to be read, you can
-//        use this form where mptr is an auto_ptr to an undefined SymBandMatrix.
 //
 //
 // Division Control Functions:
@@ -2760,6 +2755,11 @@ namespace tmv {
         itsm((S==DiagMajor && U==Lower) ? itsm1.get()-lo*itssi : itsm1.get()) \
         TMV_DEFFIRSTLAST(itsm1.get(),itsm1.get()+linsize) 
 
+        inline SymBandMatrix() : NEW_SIZE(0,0) 
+        {
+            TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
+        }
+
         inline SymBandMatrix(size_t s, int lo) : NEW_SIZE(s,lo) 
         {
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
@@ -4136,6 +4136,11 @@ namespace tmv {
         itssd(S==DiagMajor ? 1 : lo+1), \
         itsm((S==DiagMajor && U==Lower) ? itsm1.get()-lo*itssi : itsm1.get()) \
         TMV_DEFFIRSTLAST(itsm1.get(),itsm1.get()+linsize) 
+
+        inline HermBandMatrix() : NEW_SIZE(0,0) 
+        {
+            TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
+        }
 
         inline HermBandMatrix(size_t s, int lo) : NEW_SIZE(s,lo) 
         {
@@ -6254,25 +6259,21 @@ namespace tmv {
     //
 
     template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    std::istream& operator>>(
-        std::istream& is, auto_ptr<SymBandMatrix<T,U,S,I> >& m);
+    TMV_DEPRECATED(std::istream& operator>>(
+        std::istream& is, auto_ptr<SymBandMatrix<T,U,S,I> >& m));
 
     template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    std::istream& operator>>(
-        std::istream& is, auto_ptr<HermBandMatrix<T,U,S,I> >& m);
+    TMV_DEPRECATED(std::istream& operator>>(
+        std::istream& is, auto_ptr<HermBandMatrix<T,U,S,I> >& m));
 
     template <class T> 
     std::istream& operator>>(std::istream& is, const SymBandMatrixView<T>& m);
 
     template <class T, UpLoType U, StorageType S, IndexStyle I>
-    inline std::istream& operator>>(
-        std::istream& is, SymBandMatrix<T,U,S,I>& m)
-    { return is>>m.view(); }
+    std::istream& operator>>(std::istream& is, SymBandMatrix<T,U,S,I>& m);
 
     template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    inline std::istream& operator>>(
-        std::istream& is, HermBandMatrix<T,U,S,I>& m)
-    { return is>>m.view(); }
+    std::istream& operator>>(std::istream& is, HermBandMatrix<T,U,S,I>& m);
 
 } // namespace tmv
 

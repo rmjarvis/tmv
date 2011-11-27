@@ -72,11 +72,11 @@ namespace tmv {
     {
         switch (this->getDivType()) {
           case LU : 
-               this->setDiv(new BandLUDiv<T>(
-                       *this,this->isDivInPlace())); break;
+               this->setDiv(
+                   new BandLUDiv<T>(*this,this->isDivInPlace())); break;
           case QR : 
-               this->setDiv(new BandQRDiv<T>(
-                       *this,this->isDivInPlace())); break;
+               this->setDiv(
+                   new BandQRDiv<T>(*this,this->isDivInPlace())); break;
           case SV : 
                this->setDiv(new BandSVDiv<T>(*this)); break;
           default : TMVAssert(TMV_FALSE);
@@ -1920,6 +1920,43 @@ namespace tmv {
         }
         m.reset(new BandMatrix<T,S,I>(cs,rs,lo,hi));
         m->view().read(is); 
+        return is;
+    }
+
+    template <class T, StorageType S, IndexStyle I> 
+    std::istream& operator>>(std::istream& is, BandMatrix<T,S,I>& m)
+    {
+        char b;
+        is >> b;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"Band Matrix Read Error !is \n"; 
+            exit(1); 
+#else
+            throw BandMatrixReadError<T>(is);
+#endif
+        }
+        if (b != 'B') {
+#ifdef NOTHROW
+            std::cerr<<"Band Matrix Read Error "<<b<<" != B\n"; 
+            exit(1); 
+#else
+            throw BandMatrixReadError<T>(is,'B',b);
+#endif
+        }
+        size_t cs,rs;
+        int lo,hi;
+        is >> cs >> rs >> lo >> hi;
+        if (!is) {
+#ifdef NOTHROW
+            std::cerr<<"Band Matrix Read Error !is \n"; 
+            exit(1); 
+#else
+            throw BandMatrixReadError<T>(is);
+#endif
+        }
+        m.resize(cs,rs,lo,hi);
+        m.view().read(is); 
         return is;
     }
 

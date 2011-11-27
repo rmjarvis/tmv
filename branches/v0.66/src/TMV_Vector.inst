@@ -78,6 +78,7 @@ Def1a(T,CT)
   template Vector<T,I>& Vector<T,I>::DoSwap(int i1, int i2); \
   template std::istream& operator>>(std::istream& fin, \
       std::auto_ptr<Vector<T,I> >& v); \
+  template std::istream& operator>>(std::istream& fin, Vector<T,I>& v); \
   template Vector<T,I> DoBasisVector(size_t,int); \
 
 Def2(T,T,CStyle)

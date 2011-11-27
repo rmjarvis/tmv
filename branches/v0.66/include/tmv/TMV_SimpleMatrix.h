@@ -90,6 +90,11 @@ namespace tmv {
         // Constructors
         //
 
+        inline SimpleMatrix() : linsize(0), itsm(0), itscs(0), itsrs(0) 
+        {
+            TMVAssert(S==RowMajor || S==ColMajor);
+        }
+
         inline SimpleMatrix(int cs, int rs) :
             linsize((cs)*(rs)), 
             itsm(linsize), itscs(cs), itsrs(rs) 

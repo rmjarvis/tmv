@@ -1252,7 +1252,7 @@ namespace tmv {
         // Constructors
         //
 
-        inline explicit DiagMatrix(size_t _size) : itsdiag(_size) {}
+        inline explicit DiagMatrix(size_t _size=0) : itsdiag(_size) {}
 
         inline DiagMatrix(size_t _size, const T& x) : itsdiag(_size,x)  {}
 
@@ -1582,8 +1582,7 @@ namespace tmv {
 
         using base::size;
 
-        inline void resize(size_t s)
-        { itsdiag.resize(s); }
+        inline void resize(size_t n) { itsdiag.resize(n); }
 
         inline iterator begin()
         { return diag().begin(); }
@@ -1787,14 +1786,14 @@ namespace tmv {
     //
 
     template <class T, IndexStyle I> 
-    std::istream& operator>>(std::istream& fin, auto_ptr<DiagMatrix<T,I> >& m);
+    TMV_DEPRECATED(std::istream& operator>>(
+            std::istream& fin, auto_ptr<DiagMatrix<T,I> >& m));
 
     template <class T> 
     std::istream& operator>>(std::istream& fin, const DiagMatrixView<T>& m);
 
     template <class T, IndexStyle I> 
-    inline std::istream& operator>>(std::istream& fin, DiagMatrix<T,I>& m)
-    { return fin >> m.view(); }
+    std::istream& operator>>(std::istream& fin, DiagMatrix<T,I>& m);
 
 } // namespace tmv
 

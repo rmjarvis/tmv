@@ -105,6 +105,7 @@ Def2(CT,CT)
 #define Def5(T,S,I)\
   template std::istream& operator>>(std::istream& fin, \
       auto_ptr<BandMatrix<T,S,I> >& m); \
+  template std::istream& operator>>(std::istream& fin, BandMatrix<T,S,I>& m); \
 
 Def5(T,RowMajor,CStyle)
 Def5(T,ColMajor,CStyle)

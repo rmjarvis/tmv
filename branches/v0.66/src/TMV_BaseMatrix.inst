@@ -2,6 +2,7 @@
 #define CT std::complex<T>
 
 #define Def1(RT,T) \
+  template DivHelper<T >::DivHelper(); \
   template DivHelper<T >::~DivHelper(); \
   template void DivHelper<T >::divideInPlace() const; \
   template void DivHelper<T >::saveDiv() const; \
