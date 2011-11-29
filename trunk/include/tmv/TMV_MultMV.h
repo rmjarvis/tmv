@@ -2375,38 +2375,44 @@ namespace tmv {
             // 86 = temp v3, figure out where to put x
             const bool unroll = 
                 MultMV_Unroll_Helper<cs,rs,M1::_colmajor>::unroll;
+#ifdef TMV_MV_SCALE
+            const bool doscale = true;
+#else
+            const bool doscale = false;
+#endif
+#ifdef TMV_MV_SMALL
+            const bool dosmall = true;
+#else
+            const bool dosmall = false;
+#endif
+            const bool V3stepxx = (V3::_step == TMV_UNKNOWN);
+            const bool V2stepxx = (V2::_step == TMV_UNKNOWN);
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : // trivial - nothing to do
                 ( cs == 1 ) ? 1 : // trivial - cs = 1
                 ( rs == 1 ) ? 2 : // trivial - rs = 1
                 TMV_OPT == 0 ? ( M1::_colmajor ? 11 : 21 ) :
-                !(Traits2<T1,T2>::samebase && Traits2<T1,T3>::samebase) ?
-                ( M1::_colmajor ? 11 : 21 ) :
-                M1::_colmajor ? 
+                !(Traits2<T1,T2>::samebase && Traits2<T1,T3>::samebase) ? (
+                    ( M1::_colmajor ? 11 : 21 ) ) :
 
-#ifdef TMV_MV_SMALL
-                cs == TMV_UNKNOWN ? 54 :
-#endif
+                M1::_colmajor ? 
+                ( dosmall && cs == TMV_UNKNOWN ) ? 54 :
                 cs == TMV_UNKNOWN ? (
-                    V3::_step == TMV_UNKNOWN ? 86 : 
-#ifdef TMV_MV_SCALE
-                    ( TMV_MV_ZeroIX && add ) ? 52 :
+                    V3stepxx ? 86 : 
+                    ( doscale && TMV_MV_ZeroIX && add ) ? 52 :
                     ( TMV_MV_ZeroIX && !add ) ? 51 : 
-#endif
                     V3::iscomplex ? 17 : 12 ) :
                 rs == TMV_UNKNOWN ? (
-                    ( cs > TMV_MV_COPY_SIZE && V3::_step == TMV_UNKNOWN ) ? 86 :
-#ifdef TMV_MV_SCALE
-                    ( TMV_MV_ZeroIX && add ) ? 52 : 
+                    ( cs > TMV_MV_COPY_SIZE && V3stepxx ) ? 86 :
+                    ( doscale && TMV_MV_ZeroIX && add ) ? 52 : 
                     ( TMV_MV_ZeroIX && !add ) ? 51 : 
-#endif
                     V3::iscomplex ? 17 : 12 ) :
                 unroll ? (
                     ( cs <= TMV_MV_COL_UNROLL ? 
                       ( (rs<cs) ? 26 : 25 ) :
                       ( (rs<cs) ? 16 : 15 ) ) ) :
                 ( cs <= 4 && V2::_step == 1 ) ? V3::iscomplex ? 28 : 23 :
-                ( cs > TMV_MV_COPY_SIZE && V3::_step == TMV_UNKNOWN ) ? (
+                ( cs > TMV_MV_COPY_SIZE && V3stepxx ) ? (
                     rs > cs ? 84 : 85 ) :
                 ( add && TMV_MV_ZeroIX &&
                   rs > IntTraits2<TMV_MV_COPY_SCALE_RATIO,cs>::prod ) ? 84 :
@@ -2415,29 +2421,21 @@ namespace tmv {
                 V3::iscomplex ? 17 : 12 :
 
                 M1::_rowmajor ? 
-#ifdef TMV_MV_SMALL
-                rs == TMV_UNKNOWN ? 64 :
-#endif
+                ( dosmall && rs == TMV_UNKNOWN ) ? 64 :
                 rs == TMV_UNKNOWN ? (
-                    V2::_step == TMV_UNKNOWN ? 83 :
-#ifdef TMV_MV_SCALE
-                    TMV_MV_ZeroIX ? 62 :
-#endif
+                    V2stepxx ? 83 :
+                    ( doscale && TMV_MV_ZeroIX ) ? 62 :
                     V3::iscomplex ? 27 : 22 ) :
                 cs == TMV_UNKNOWN ? (
-                    ( rs > TMV_MV_COPY_SIZE && V2::_step == TMV_UNKNOWN ) ? 83 :
-#ifdef TMV_MV_SCALE
-                    TMV_MV_ZeroIX ? 62 :
-#endif
+                    ( rs > TMV_MV_COPY_SIZE && V2stepxx ) ? 83 :
+                    ( doscale && TMV_MV_ZeroIX ) ? 62 :
                     V3::iscomplex ? 27 : 22 ) :
                 unroll ? ( (rs<cs) ? 26 : 25 ) :
                 ( rs <= 4 && V3::_step == 1 ) ? V3::iscomplex ? 18 : 13 : 
-                ( rs > TMV_MV_COPY_SIZE && V2::_step == TMV_UNKNOWN ) ? (
+                ( rs > TMV_MV_COPY_SIZE && V2stepxx ) ? (
                     rs > cs ? 81 : 82 ) :
-#ifdef TMV_MV_SCALE
-                ( cs > IntTraits2<TMV_MV_COPY_SCALE_RATIO,rs>::prod && 
-                  TMV_MV_ZeroIX ) ? 82 :
-#endif
+                ( doscale && TMV_MV_ZeroIX &&
+                  cs > IntTraits2<TMV_MV_COPY_SCALE_RATIO,rs>::prod ) ? 82 :
                 cs <= 4 ? V3::iscomplex ? 28 : 23 :
                 V3::iscomplex ? 27 : 22 :
 

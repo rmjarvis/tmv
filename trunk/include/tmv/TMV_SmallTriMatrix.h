@@ -29,6 +29,7 @@
 
 #include "TMV_BaseMatrix_Tri.h"
 #include "TMV_VIt.h"
+#include "TMV_MIt.h"
 #include "TMV_Array.h"
 
 namespace tmv {
@@ -69,6 +70,10 @@ namespace tmv {
         enum { _colsize = N };
         enum { _rowsize = N };
         enum { _size = N };
+        enum { _nlo = 0 };
+        enum { _nhi = IntTraits2<IntTraits<N>::Sm1,0>::max };
+        enum { _unit = Attrib<A>::unitdiag };
+        enum { _shape = _unit ? UnitUpperTri : UpperTri };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
@@ -78,11 +83,9 @@ namespace tmv {
         enum { _diagstep = IntTraits<N>::Sp1 };
         enum { _conj = false };
         enum { _checkalias = Attrib<A>::checkalias };
-        enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = false };
         enum { _dt = A & AllDiagType };
-        enum { _shape = _unit ? UnitUpperTri : UpperTri };
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
@@ -402,6 +405,10 @@ namespace tmv {
         enum { _colsize = N };
         enum { _rowsize = N };
         enum { _size = N };
+        enum { _nlo = 0 };
+        enum { _nhi = IntTraits2<IntTraits<N>::Sm1,0>::max };
+        enum { _unit = Attrib<A>::unitdiag };
+        enum { _shape = _unit ? UnitUpperTri : UpperTri };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
@@ -411,11 +418,9 @@ namespace tmv {
         enum { _diagstep = IntTraits2<Si,Sj>::sum };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = Attrib<A>::checkalias };
-        enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
         enum { _dt = _unknowndiag ? TMV_UNKNOWN : A & AllDiagType };
-        enum { _shape = _unit ? UnitUpperTri : UpperTri };
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
@@ -707,6 +712,10 @@ namespace tmv {
         enum { _colsize = N };
         enum { _rowsize = N };
         enum { _size = N };
+        enum { _nlo = 0 };
+        enum { _nhi = IntTraits2<IntTraits<N>::Sm1,0>::max };
+        enum { _unit = Attrib<A>::unitdiag };
+        enum { _shape = _unit ? UnitUpperTri : UpperTri };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
@@ -716,11 +725,9 @@ namespace tmv {
         enum { _diagstep = IntTraits2<Si,Sj>::sum };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = Attrib<A>::checkalias };
-        enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
         enum { _dt = _unknowndiag ? TMV_UNKNOWN : A & AllDiagType };
-        enum { _shape = _unit ? UnitUpperTri : UpperTri };
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
@@ -1052,6 +1059,10 @@ namespace tmv {
         enum { _colsize = N };
         enum { _rowsize = N };
         enum { _size = N };
+        enum { _nlo = IntTraits2<IntTraits<N>::Sm1,0>::max };
+        enum { _nhi = 0 };
+        enum { _unit = Attrib<A>::unitdiag };
+        enum { _shape = _unit ? UnitLowerTri : LowerTri };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
@@ -1061,11 +1072,9 @@ namespace tmv {
         enum { _diagstep = IntTraits<N>::Sp1 };
         enum { _conj = false };
         enum { _checkalias = Attrib<A>::checkalias };
-        enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = false };
         enum { _dt = A & AllDiagType };
-        enum { _shape = _unit ? UnitLowerTri : LowerTri };
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
@@ -1384,6 +1393,10 @@ namespace tmv {
         enum { _colsize = N };
         enum { _rowsize = N };
         enum { _size = N };
+        enum { _nlo = IntTraits2<IntTraits<N>::Sm1,0>::max };
+        enum { _nhi = 0 };
+        enum { _unit = Attrib<A>::unitdiag };
+        enum { _shape = _unit ? UnitLowerTri : LowerTri };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
@@ -1393,11 +1406,9 @@ namespace tmv {
         enum { _diagstep = IntTraits2<Si,Sj>::sum };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = Attrib<A>::checkalias };
-        enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
         enum { _dt = _unknowndiag ? TMV_UNKNOWN : A & AllDiagType };
-        enum { _shape = _unit ? UnitLowerTri : LowerTri };
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
@@ -1680,6 +1691,10 @@ namespace tmv {
         enum { _colsize = N };
         enum { _rowsize = N };
         enum { _size = N };
+        enum { _nlo = IntTraits2<IntTraits<N>::Sm1,0>::max };
+        enum { _nhi = 0 };
+        enum { _unit = Attrib<A>::unitdiag };
+        enum { _shape = _unit ? UnitLowerTri : LowerTri };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
@@ -1689,11 +1704,9 @@ namespace tmv {
         enum { _diagstep = IntTraits2<Si,Sj>::sum };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = Attrib<A>::checkalias };
-        enum { _unit = Attrib<A>::unitdiag };
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
         enum { _dt = _unknowndiag ? TMV_UNKNOWN : A & AllDiagType };
-        enum { _shape = _unit ? UnitLowerTri : LowerTri };
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };

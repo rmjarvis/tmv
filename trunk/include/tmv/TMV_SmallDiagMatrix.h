@@ -61,15 +61,18 @@ namespace tmv {
         enum { _colsize = N };
         enum { _rowsize = N };
         enum { _size = N };
-        enum { _fort = Attrib<A>::fort };
+        enum { _nlo = 0 };
+        enum { _nhi = 0 };
         enum { _shape = Diag };
+        enum { _fort = Attrib<A>::fort };
+        enum { _calc = true };
         enum { _rowmajor = false };
         enum { _colmajor = false };
-        enum { _calc = true };
         enum { _step = 1 };
         enum { _diagstep = 1 };
         enum { _conj = false };
         enum { _checkalias = Attrib<A>::checkalias };
+        enum { _unit = true };
         enum { twoS = isreal ? 1 : 2 };
 
         enum { _hasdivider = false };
@@ -273,11 +276,13 @@ namespace tmv {
         enum { _colsize = N };
         enum { _rowsize = N };
         enum { _size = N };
-        enum { _fort = Attrib<A>::fort };
+        enum { _nlo = 0 };
+        enum { _nhi = 0 };
         enum { _shape = Diag };
+        enum { _fort = Attrib<A>::fort };
+        enum { _calc = true };
         enum { _rowmajor = false };
         enum { _colmajor = false };
-        enum { _calc = true };
         enum { _step = S };
         enum { _diagstep = S };
         enum { _conj = Attrib<A>::conj };
@@ -465,17 +470,19 @@ namespace tmv {
         enum { iscomplex = Traits<T>::iscomplex };
 
         typedef SmallDiagMatrixView<T,N,S,A0> type;
-        typedef ConstSmallDiagMatrixView<T,N,S,A> calc_type;
+        typedef const type& calc_type;
         typedef const type& eval_type;
 
         enum { _colsize = N };
         enum { _rowsize = N };
         enum { _size = N };
-        enum { _fort = Attrib<A>::fort };
+        enum { _nlo = 0 };
+        enum { _nhi = 0 };
         enum { _shape = Diag };
+        enum { _fort = Attrib<A>::fort };
+        enum { _calc = true };
         enum { _rowmajor = false };
         enum { _colmajor = false };
-        enum { _calc = true };
         enum { _step = S };
         enum { _diagstep = S };
         enum { _conj = Attrib<A>::conj };

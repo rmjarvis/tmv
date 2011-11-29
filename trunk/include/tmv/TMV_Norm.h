@@ -5,6 +5,7 @@
 #include "TMV_BaseVector.h"
 #include "TMV_BaseMatrix_Rec.h"
 #include "TMV_BaseMatrix_Tri.h"
+#include "TMV_BaseMatrix_Band.h"
 #include "TMV_SVD.h"
 
 namespace tmv {
@@ -29,6 +30,11 @@ namespace tmv {
     template <class T>
     typename ConstUpperTriMatrixView<T>::float_type InstNormF(
         const ConstUpperTriMatrixView<T>& m);
+    
+    // Defined in TMV_BandMatrix.cpp
+    template <class T>
+    typename ConstBandMatrixView<T>::float_type InstNormF(
+        const ConstBandMatrixView<T>& m);
     
 
     // This helper struct works for either Vector or Matrix "V"
@@ -169,6 +175,9 @@ namespace tmv {
         template <class M2>
         static TMV_INLINE FT call(const BaseMatrix_Tri<M2>& m)
         { return InstNormF(m.mat().xView()); }
+        template <class M2>
+        static TMV_INLINE FT call(const BaseMatrix_Band<M2>& m)
+        { return InstNormF(m.mat().xView()); }
     };
 
     // algo 95: Conjugate Matrix
@@ -303,7 +312,6 @@ namespace tmv {
         return Norm_Helper<-2,Mv>::call(mv);
     }
 
-
     template <class M>
     static inline typename M::float_type InlineNormF(const BaseMatrix_Tri<M>& m)
     {   
@@ -314,6 +322,22 @@ namespace tmv {
 
     template <class M>
     static inline typename M::float_type DoNormF(const BaseMatrix_Tri<M>& m)
+    {
+        typedef typename M::const_cview_type Mv;
+        TMV_MAYBE_CREF(M,Mv) mv = m.cView();
+        return Norm_Helper<-2,Mv>::call(mv);
+    }
+
+    template <class M>
+    static inline typename M::float_type InlineNormF(const BaseMatrix_Band<M>& m)
+    {   
+        typedef typename M::const_cview_type Mv;
+        TMV_MAYBE_CREF(M,Mv) mv = m.cView();
+        return Norm_Helper<-3,Mv>::call(mv);
+    }   
+
+    template <class M>
+    static inline typename M::float_type DoNormF(const BaseMatrix_Band<M>& m)
     {
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();

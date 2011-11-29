@@ -748,7 +748,6 @@ namespace tmv {
 
     //
     // M = x * U + x * U
-    // TODO: I should make inst versions of this and AddUMM too.
     //
 
     template <int algo, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
@@ -763,7 +762,7 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddUU
-            std::cout<<"AddUMM algo 11\n";
+            std::cout<<"AddUUM algo 11\n";
 #endif
             typename M3::uppertri_type m3u = m3.upperTri();
             AliasAddMM(x1,m1,x2,m2,m3u);
@@ -782,7 +781,7 @@ namespace tmv {
             const bool s1 = SameStorage(m1,m3);
             const bool s2 = SameStorage(m2,m3);
 #ifdef PRINTALGO_AddUU
-            std::cout<<"AddUMM algo 12\n";
+            std::cout<<"AddUUM algo 12\n";
             std::cout<<"s1,s22 = "<<s1<<','<<s2<<std::endl;
 #endif
 
@@ -823,7 +822,7 @@ namespace tmv {
             const bool s1 = SameStorage(m1,m3);
             const bool s2 = SameStorage(m2,m3);
 #ifdef PRINTALGO_AddUU
-            std::cout<<"AddUMM algo 13\n";
+            std::cout<<"AddUUM algo 13\n";
             std::cout<<"s1,s22 = "<<s1<<','<<s2<<std::endl;
 #endif
 
@@ -862,7 +861,7 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddUU
-            std::cout<<"AddUMM algo 14\n";
+            std::cout<<"AddUUM algo 14\n";
 #endif
             typename M3::lowertri_type m3l = m3.lowerTri();
             AliasAddMM(x1,m1,x2,m2,m3l);
@@ -879,7 +878,7 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddUU
-            std::cout<<"AddUMM algo 21\n";
+            std::cout<<"AddUUM algo 21\n";
 #endif
             typename M3::uppertri_type m3u = m3.upperTri();
             m3.setZero();
@@ -897,7 +896,7 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddUU
-            std::cout<<"AddUMM algo 22\n";
+            std::cout<<"AddUUM algo 22\n";
 #endif
             if (m1.size() > 0) {
                 typename M3::uppertri_type::offdiag_type m3u = 
@@ -920,7 +919,7 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddUU
-            std::cout<<"AddUMM algo 23\n";
+            std::cout<<"AddUUM algo 23\n";
 #endif
             if (m1.size() > 0) {
                 typename M3::uppertri_type::offdiag_type m3u = 
@@ -943,7 +942,7 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddUU
-            std::cout<<"AddUMM algo 24\n";
+            std::cout<<"AddUUM algo 24\n";
 #endif
             typename M3::lowertri_type m3l = m3.lowerTri();
             m3.setZero();
@@ -963,7 +962,7 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddUU
-            std::cout<<"AddUMM algo 31\n";
+            std::cout<<"AddUUM algo 31\n";
 #endif
             const int algo = 
                 (M1::_unit || M2::_unit) ? 33 :
@@ -982,7 +981,7 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddUU
-            std::cout<<"AddUMM algo 32\n";
+            std::cout<<"AddUUM algo 32\n";
 #endif
             if (m1.isunit() || m2.isunit())
                 AddUUM_Helper<33,ix1,T1,M1,ix2,T2,M2,M3>::call(
@@ -1002,7 +1001,7 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddUU
-            std::cout<<"AddUMM algo 33\n";
+            std::cout<<"AddUUM algo 33\n";
 #endif
             typename M3::diag_type m3d = m3.diag();
             if (m1.isunit()) {
@@ -1028,7 +1027,7 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddUU
-            std::cout<<"AddUMM algo 34\n";
+            std::cout<<"AddUUM algo 34\n";
 #endif
             typename M3::diag_type m3d = m3.diag();
             AddVV(x1,m1.diag(),x2,m2.diag(),m3d);

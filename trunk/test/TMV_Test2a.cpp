@@ -26,10 +26,10 @@ int main() try {
     std::ofstream log("tmvtest2a.log");
     tmv::WriteWarningsTo(&log);
 
-    //showacc=true;
-    //showdiv=true;
-    //showtests=true;
-    //showstartdone=true;
+    showacc=true;
+    showdiv=true;
+    showtests=true;
+    showstartdone=true;
     TestBandMatrix<double>();
 
 #if 0

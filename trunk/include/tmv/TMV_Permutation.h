@@ -159,6 +159,8 @@ namespace tmv {
 
         enum { _colsize = TMV_UNKNOWN };
         enum { _rowsize = TMV_UNKNOWN };
+        enum { _nlo = TMV_UNKNOWN };
+        enum { _nhi = TMV_UNKNOWN };
         enum { _shape = Rec };
         enum { _fort = false };
         enum { _calc = false };
@@ -570,6 +572,8 @@ namespace tmv {
 
         TMV_INLINE size_t size() const { return itsn; }
         TMV_INLINE size_t colsize() const { return itsn; }
+        TMV_INLINE int nlo() const { return TMV_MAX(itsn-1,0); }
+        TMV_INLINE int nhi() const { return TMV_MAX(itsn-1,0); }
         TMV_INLINE size_t rowsize() const { return itsn; }
         TMV_INLINE const int* getValues() const { return itsp; }
         TMV_INLINE bool isInverse() const { return isinv; }

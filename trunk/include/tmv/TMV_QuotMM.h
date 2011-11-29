@@ -236,6 +236,12 @@ namespace tmv {
 
         enum { _colsize = M2::_rowsize };
         enum { _rowsize = M1::_rowsize };
+        enum { _nlo = (
+                M2::_nlo == 0 ? M1::_nlo : 
+                IntTraits2<IntTraits<_colsize>::Sm1,0>::max ) };
+        enum { _nhi = (
+                M2::_nhi == 0 ? M1::_nhi : 
+                IntTraits2<IntTraits<_rowsize>::Sm1,0>::max ) };
         enum { _fort = M1::_fort && M2::_fort };
         enum { _calc = false };
         enum { shape1 = Traits<QuotXM<ix,T,M2> >::_shape };
@@ -283,6 +289,10 @@ namespace tmv {
 
         TMV_INLINE size_t colsize() const { return m2.rowsize(); }
         TMV_INLINE size_t rowsize() const { return m1.rowsize(); }
+        TMV_INLINE int nlo() const 
+        { return m2.nlo() == 0 ? m1.nlo() : TMV_MAX(colsize()-1,0); }
+        TMV_INLINE int nhi() const 
+        { return m2.nhi() == 0 ? m1.nhi() : TMV_MAX(rowsize()-1,0); }
 
         template <class M3>
         TMV_INLINE_ND void assignTo(BaseMatrix_Mutable<M3>& m3) const
@@ -332,6 +342,12 @@ namespace tmv {
 
         enum { _colsize = M1::_colsize };
         enum { _rowsize = M2::_colsize };
+        enum { _nlo = (
+                M2::_nlo == 0 ? M1::_nlo : 
+                IntTraits2<IntTraits<_colsize>::Sm1,0>::max ) };
+        enum { _nhi = (
+                M2::_nhi == 0 ? M1::_nhi : 
+                IntTraits2<IntTraits<_rowsize>::Sm1,0>::max ) };
         enum { _fort = M1::_fort && M2::_fort };
         enum { _calc = false };
         enum { shape1 = Traits<QuotXM<ix,T,M2> >::_shape };
@@ -373,15 +389,19 @@ namespace tmv {
             TMVAssert(m1.rowsize() == m2.rowsize());
         }
 
-        const Scaling<ix,T>& getX() const { return x; }
-        const M1& getM1() const { return m1; }
-        const M2& getM2() const { return m2; }
+        TMV_INLINE const Scaling<ix,T>& getX() const { return x; }
+        TMV_INLINE const M1& getM1() const { return m1; }
+        TMV_INLINE const M2& getM2() const { return m2; }
 
-        size_t colsize() const { return m1.colsize(); }
-        size_t rowsize() const { return m2.colsize(); }
+        TMV_INLINE size_t colsize() const { return m1.colsize(); }
+        TMV_INLINE size_t rowsize() const { return m2.colsize(); }
+        TMV_INLINE int nlo() const 
+        { return m2.nlo() == 0 ? m1.nlo() : TMV_MAX(colsize()-1,0); }
+        TMV_INLINE int nhi() const 
+        { return m2.nhi() == 0 ? m1.nhi() : TMV_MAX(rowsize()-1,0); }
 
         template <class M3>
-        void assignTo(BaseMatrix_Mutable<M3>& m3) const
+        TMV_INLINE_ND void assignTo(BaseMatrix_Mutable<M3>& m3) const
         {
             TMVStaticAssert((type::isreal || M3::iscomplex));
             TMVStaticAssert((Sizes<type::_colsize,M3::_colsize>::same)); 
@@ -396,7 +416,7 @@ namespace tmv {
         }
 
         template <class M3>
-        void newAssignTo(BaseMatrix_Mutable<M3>& m3) const
+        TMV_INLINE_ND void newAssignTo(BaseMatrix_Mutable<M3>& m3) const
         {
             TMVStaticAssert((type::isreal || M3::iscomplex));
             TMVStaticAssert((Sizes<type::_colsize,M3::_colsize>::same)); 

@@ -125,6 +125,8 @@ namespace tmv {
 
         enum { _colsize = M };
         enum { _rowsize = N };
+        enum { _nlo = IntTraits2<M-1,0>::max };
+        enum { _nhi = IntTraits2<N-1,0>::max };
         enum { _shape = Rec };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
@@ -459,6 +461,8 @@ namespace tmv {
 
         enum { _colsize = M };
         enum { _rowsize = N };
+        enum { _nlo = IntTraits2<IntTraits<M>::Sm1,0>::max };
+        enum { _nhi = IntTraits2<IntTraits<N>::Sm1,0>::max };
         enum { _shape = Rec };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
@@ -788,11 +792,13 @@ namespace tmv {
         enum { iscomplex = Traits<T>::iscomplex };
 
         typedef SmallMatrixView<T,M,N,Si,Sj,A0> type;
-        typedef ConstSmallMatrixView<T,M,N,Si,Sj,A> calc_type;
+        typedef const type& calc_type;
         typedef const type& eval_type;
 
         enum { _colsize = M };
         enum { _rowsize = N };
+        enum { _nlo = IntTraits2<IntTraits<M>::Sm1,0>::max };
+        enum { _nhi = IntTraits2<IntTraits<N>::Sm1,0>::max };
         enum { _shape = Rec };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };

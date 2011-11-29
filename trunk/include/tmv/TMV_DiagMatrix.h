@@ -140,11 +140,13 @@ namespace tmv {
         enum { _colsize = TMV_UNKNOWN };
         enum { _rowsize = TMV_UNKNOWN };
         enum { _size = TMV_UNKNOWN };
-        enum { _fort = Attrib<A>::fort };
+        enum { _nlo = 0 };
+        enum { _nhi = 0 };
         enum { _shape = Diag };
+        enum { _fort = Attrib<A>::fort };
+        enum { _calc = true };
         enum { _rowmajor = false };
         enum { _colmajor = false };
-        enum { _calc = true };
         enum { _step = 1 };
         enum { _diagstep = 1 };
         enum { _conj = false };
@@ -251,9 +253,9 @@ namespace tmv {
         enum { _size = Traits<type>::_size };
         enum { _fort = Traits<type>::_fort };
         enum { _shape = Traits<type>::_shape };
+        enum { _calc = Traits<type>::_calc };
         enum { _rowmajor = Traits<type>::_rowmajor };
         enum { _colmajor = Traits<type>::_colmajor };
-        enum { _calc = Traits<type>::_calc };
         enum { _step = Traits<type>::_step };
         enum { _diagstep = Traits<type>::_diagstep };
         enum { _conj = Traits<type>::_conj };
@@ -399,11 +401,13 @@ namespace tmv {
         enum { _colsize = TMV_UNKNOWN };
         enum { _rowsize = TMV_UNKNOWN };
         enum { _size = TMV_UNKNOWN };
-        enum { _fort = Attrib<A>::fort };
+        enum { _nlo = 0 };
+        enum { _nhi = 0 };
         enum { _shape = Diag };
+        enum { _fort = Attrib<A>::fort };
+        enum { _calc = true };
         enum { _rowmajor = false };
         enum { _colmajor = false };
-        enum { _calc = true };
         enum { _step = Attrib<A>::unit ? 1 : TMV_UNKNOWN };
         enum { _diagstep = _step };
         enum { _conj = Attrib<A>::conj };
@@ -579,7 +583,7 @@ namespace tmv {
         enum { iscomplex = Traits<T>::iscomplex };
 
         typedef DiagMatrixView<T,A0> type;
-        typedef ConstDiagMatrixView<T,A> calc_type;
+        typedef const type& calc_type;
         typedef const type& eval_type;
         enum { copyA = Attrib<A>::fort ? FortranStyle : CStyle };
         typedef DiagMatrix<T,copyA> copy_type;
@@ -587,11 +591,13 @@ namespace tmv {
         enum { _colsize = TMV_UNKNOWN };
         enum { _rowsize = TMV_UNKNOWN };
         enum { _size = TMV_UNKNOWN };
-        enum { _fort = Attrib<A>::fort };
+        enum { _nlo = 0 };
+        enum { _nhi = 0 };
         enum { _shape = Diag };
+        enum { _fort = Attrib<A>::fort };
+        enum { _calc = true };
         enum { _rowmajor = false };
         enum { _colmajor = false };
-        enum { _calc = true };
         enum { _step = Attrib<A>::unit ? 1 : TMV_UNKNOWN };
         enum { _diagstep = _step };
         enum { _conj = Attrib<A>::conj };

@@ -713,6 +713,8 @@ namespace tmv {
 
         enum { _colsize = TMV_UNKNOWN };
         enum { _rowsize = TMV_UNKNOWN };
+        enum { _nlo = TMV_UNKNOWN };
+        enum { _nhi = TMV_UNKNOWN };
         enum { _shape = Rec };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
@@ -1050,6 +1052,8 @@ namespace tmv {
 
         enum { _colsize = TMV_UNKNOWN };
         enum { _rowsize = TMV_UNKNOWN };
+        enum { _nlo = TMV_UNKNOWN };
+        enum { _nhi = TMV_UNKNOWN };
         enum { _shape = Rec };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
@@ -1314,11 +1318,13 @@ namespace tmv {
         enum { iscomplex = Traits<T>::iscomplex };
 
         typedef MatrixView<T,A0> type;
-        typedef ConstMatrixView<T,(A&~WithDivider)> calc_type;
+        typedef const type& calc_type;
         typedef const type& eval_type;
 
         enum { _colsize = TMV_UNKNOWN };
         enum { _rowsize = TMV_UNKNOWN };
+        enum { _nlo = TMV_UNKNOWN };
+        enum { _nhi = TMV_UNKNOWN };
         enum { _shape = Rec };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };

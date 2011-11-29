@@ -2,6 +2,10 @@
 #define START1 0
 #define START2 0
 
+#define NODIV 
+#define NOASSIGN
+#define PRINTALGO_NormB
+
 #include "TMV.h"
 #include "TMV_Band.h"
 #include "TMV_Test.h"
@@ -47,6 +51,7 @@ void TestBandMatrixArith_A()
         TestMatrixArith2<T>(bi,cbi,"Band");
         TestMatrixArith3<T>(bi,cbi,"Band");
 
+#if 0
         for(size_t j=START2;j<b.size();j++) if (i!=j) {
             if (showstartdone) {
                 std::cerr<<"Start sub-loop "<<j<<std::endl;
@@ -56,6 +61,7 @@ void TestBandMatrixArith_A()
             TestMatrixArith5<T>(bi,cbi,b[j],cb[j],"Band/Band");
             TestMatrixArith6x<T>(bi,cbi,b[j],cb[j],"Band/Band");
         }
+#endif
     }
 }
 

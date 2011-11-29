@@ -474,7 +474,7 @@ namespace tmv {
         }
         if (ul != ul_exp) {
 #ifdef TMV_NO_THROW
-            std::cerr<<"TriMatrix ReadError: "<<ul<<" != "<<ul_exp;
+            std::cerr<<"TriMatrix ReadError: "<<ul<<" != "<<ul_exp<<std::endl;
             exit(1);
 #else
             throw TriMatrixReadError<T>(is,ul_exp,ul,M::_upper);
