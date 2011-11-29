@@ -1,6 +1,6 @@
 
-#define PRINTALGO_NormB
-#define PRINTALGO_NormM
+//#define PRINTALGO_NormB
+//#define PRINTALGO_NormM
 
 #include "TMV_Blas.h"
 #include "tmv/TMV_BandMatrix.h"
