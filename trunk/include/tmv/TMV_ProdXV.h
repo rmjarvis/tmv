@@ -16,48 +16,48 @@ namespace tmv {
     // These first few are for when an argument is a composite vector
     // and needs to be calculated before running MultXV.
     template <bool add, int ix, class T, class M1, class M2>
-    static TMV_INLINE void MultXV(
+    static inline void MultXV(
         const Scaling<ix,T>& x, const BaseVector<M1>& m1, 
         BaseVector_Mutable<M2>& m2)
     { MultXV(x,m1.calc(),m2.mat()); }
     template <bool add, int ix, class T, class M1, class M2>
-    static TMV_INLINE void NoAliasMultXV(
+    static inline void NoAliasMultXV(
         const Scaling<ix,T>& x, const BaseVector<M1>& m1, 
         BaseVector_Mutable<M2>& m2)
     { NoAliasMultXV(x,m1.calc(),m2.mat()); }
     template <bool add, int ix, class T, class M1, class M2>
-    static TMV_INLINE void AliasMultXV(
+    static inline void AliasMultXV(
         const Scaling<ix,T>& x, const BaseVector<M1>& m1, 
         BaseVector_Mutable<M2>& m2)
     { AliasMultXV(x,m1.calc(),m2.mat()); }
 
     // These are helpers to allow the caller to not use a Scaling object.
     template <bool add, class T, class V1, class V2>
-    static TMV_INLINE void MultXV(
+    static inline void MultXV(
         const T& x, const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     { MultXV<add>(Scaling<0,T>(x),v1.vec(),v2.vec()); }
     template <bool add, class T, class V1, class V2>
-    static TMV_INLINE void NoAliasMultXV(
+    static inline void NoAliasMultXV(
         const T& x, const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     { NoAliasMultXV<add>(Scaling<0,T>(x),v1.vec(),v2.vec()); }
     template <bool add, class T, class V1, class V2>
-    static TMV_INLINE void AliasMultXV(
+    static inline void AliasMultXV(
         const T& x, const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     { AliasMultXV<add>(Scaling<0,T>(x),v1.vec(),v2.vec()); }
 
     template <bool add, class V1, class V2>
-    static TMV_INLINE void MultXV(
+    static inline void MultXV(
         const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     { MultXV<add>(Scaling<1,typename V2::real_type>(),v1.vec(),v2.vec()); }
     template <bool add, class V1, class V2>
-    static TMV_INLINE void NoAliasMultXV(
+    static inline void NoAliasMultXV(
         const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
         NoAliasMultXV<add>(
             Scaling<1,typename V2::real_type>(),v1.vec(),v2.vec()); 
     }
     template <bool add, class V1, class V2>
-    static TMV_INLINE void AliasMultXV(
+    static inline void AliasMultXV(
         const BaseVector<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
         AliasMultXV<add>(
@@ -65,7 +65,7 @@ namespace tmv {
     }
 
     template <class T, class V>
-    static TMV_INLINE void Scale(const T& x, BaseVector_Mutable<V>& v)
+    static inline void Scale(const T& x, BaseVector_Mutable<V>& v)
     { Scale(Scaling<0,T>(x),v); }
 
     template <int ix, class T, class V>
@@ -135,63 +135,63 @@ namespace tmv {
 
     // v *= x
     template <class V>
-    static TMV_INLINE void MultEq(BaseVector_Mutable<V>& v, const int x)
+    static inline void MultEq(BaseVector_Mutable<V>& v, const int x)
     { Scale(RT(x),v.vec()); }
 
     template <class V>
-    static TMV_INLINE void MultEq(BaseVector_Mutable<V>& v, const RT x)
+    static inline void MultEq(BaseVector_Mutable<V>& v, const RT x)
     { Scale(x,v.vec()); }
 
     template <class V>
-    static TMV_INLINE void MultEq(BaseVector_Mutable<V>& v, const CT x)
+    static inline void MultEq(BaseVector_Mutable<V>& v, const CT x)
     { Scale(x,v.vec()); }
 
     template <class V>
-    static TMV_INLINE void MultEq(BaseVector_Mutable<V>& v, const CCT x)
+    static inline void MultEq(BaseVector_Mutable<V>& v, const CCT x)
     { Scale(CT(x),v.vec()); }
 
     template <class V, class T>
-    static TMV_INLINE void MultEq(
+    static inline void MultEq(
         BaseVector_Mutable<V>& v, const Scaling<0,T> x)
     { Scale(x,v.vec()); }
 
     template <class V, class T>
-    static TMV_INLINE void MultEq(
+    static inline void MultEq(
         BaseVector_Mutable<V>& v, const Scaling<1,T> x)
     {}
 
     template <class V, class T>
-    static TMV_INLINE void MultEq(
+    static inline void MultEq(
         BaseVector_Mutable<V>& v, const Scaling<-1,T> x)
     { Scale(x,v.vec()); }
 
     // v /= x
     template <class V>
-    static TMV_INLINE void LDivEq(BaseVector_Mutable<V>& v, const int x)
+    static inline void LDivEq(BaseVector_Mutable<V>& v, const int x)
     { Scale(RT(1)/RT(x),v.vec()); }
 
     template <class V>
-    static TMV_INLINE void LDivEq(BaseVector_Mutable<V>& v, const RT x)
+    static inline void LDivEq(BaseVector_Mutable<V>& v, const RT x)
     { Scale(RT(1)/x,v.vec()); }
 
     template <class V>
-    static TMV_INLINE void LDivEq(BaseVector_Mutable<V>& v, const CT x)
+    static inline void LDivEq(BaseVector_Mutable<V>& v, const CT x)
     { Scale(RT(1)/x,v.vec()); }
 
     template <class V>
-    static TMV_INLINE void LDivEq(BaseVector_Mutable<V>& v, const CCT x)
+    static inline void LDivEq(BaseVector_Mutable<V>& v, const CCT x)
     { Scale(RT(1)/CT(x),v.vec()); }
 
     template <class V, class T>
-    static TMV_INLINE void LDivEq(BaseVector_Mutable<V>& v, const Scaling<0,T> x)
+    static inline void LDivEq(BaseVector_Mutable<V>& v, const Scaling<0,T> x)
     { Scale(RT(1)/T(x),v.vec()); }
 
     template <class V, class T>
-    static TMV_INLINE void LDivEq(BaseVector_Mutable<V>& v, const Scaling<1,T> x)
+    static inline void LDivEq(BaseVector_Mutable<V>& v, const Scaling<1,T> x)
     {}
 
     template <class V, class T>
-    static TMV_INLINE void LDivEq(
+    static inline void LDivEq(
         BaseVector_Mutable<V>& v, const Scaling<-1,T> x)
     { Scale(x,v.vec()); }
 

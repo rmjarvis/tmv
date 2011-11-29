@@ -160,6 +160,20 @@ namespace tmv {
     //  colmajor_iterator = return type from colmajor_begin(), colmajor_end()
 
 
+    // Other BaseMatrxi varieties declared here without definition.
+    template <class M> class BaseMatrix_Rec;
+    template <class M> class BaseMatrix_Rec_Mutable;
+    template <class M> class BaseMatrix_Diag;
+    template <class M> class BaseMatrix_Diag_Mutable;
+    template <class M> class BaseMatrix_Tri;
+    template <class M> class BaseMatrix_Tri_Mutable;
+    template <class M> class BaseMatrix_Band;
+    template <class M> class BaseMatrix_Band_Mutable;
+    template <class M> class BaseMatrix_Sym;
+    template <class M> class BaseMatrix_Sym_Mutable;
+    template <class M> class BaseMatrix_SymBand;
+    template <class M> class BaseMatrix_SymBand_Mutable;
+
     //
     // Helper functions and values:
     //

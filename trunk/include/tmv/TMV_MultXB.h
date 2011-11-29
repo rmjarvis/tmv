@@ -532,12 +532,12 @@ namespace tmv {
     {
         typename BMVO<M2>::b b2 = BandMatrixViewOf(m2,m1.nlo(),m1.nhi());
         MultXM<add>(x,m1,b2);
-        if (m1.nlo() < m2.colsize()-1)
+        if (m1.nlo() < int(m2.colsize())-1)
             Maybe<!add>::zero2(
                 BandMatrixViewOf(
                     m2.cRowRange(m1.nlo()+1,m1.colsize()),
                     m1.colsize()-m1.nlo()-2,0));
-        if (m1.nhi() < m2.rowsize()-1)
+        if (m1.nhi() < int(m2.rowsize())-1)
             Maybe<!add>::zero2(
                 BandMatrixViewOf(
                     m2.cColRange(m1.nhi()+1,m1.rowsize()),
@@ -561,12 +561,12 @@ namespace tmv {
     {
         typename BMVO<M2>::b b2 = BandMatrixViewOf(m2,m1.nlo(),m1.nhi());
         AliasMultXM<add>(x,m1,b2);
-        if (m1.nlo() < m1.colsize()-1)
+        if (m1.nlo() < int(m1.colsize())-1)
             Maybe<!add>::zero2(
                 BandMatrixViewOf(
                     m2.cRowRange(m1.nlo()+1,m1.colsize()),
                     m1.colsize()-m1.nlo()-2,0));
-        if (m1.nhi() < m1.rowsize()-1)
+        if (m1.nhi() < int(m1.rowsize())-1)
             Maybe<!add>::zero2(
                 BandMatrixViewOf(
                     m2.cColRange(m1.nhi()+1,m1.rowsize()),

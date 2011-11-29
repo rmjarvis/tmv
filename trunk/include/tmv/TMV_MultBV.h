@@ -236,7 +236,6 @@ namespace tmv {
 
             typedef typename V2::const_subvector_type V2s;
             typedef typename V2s::const_nonconj_type::const_iterator IT2;
-            const bool c2 = V2::_conj;
 
             typedef typename V3::subvector_type V3s;
             typedef typename V3s::iterator IT3;

@@ -14,7 +14,7 @@ namespace tmv {
     //
 
     template <class T, class M>
-    static TMV_INLINE_ND void AddMX(const T& x, BaseMatrix_Mutable<M>& m)
+    static inline void AddMX(const T& x, BaseMatrix_Mutable<M>& m)
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same)); 
         TMVAssert(m.colsize() == m.rowsize());
@@ -22,7 +22,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, class T2, class M3>
-    static TMV_INLINE_ND void AddMX(
+    static inline void AddMX(
         const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
         const T2& x2, BaseMatrix_Mutable<M3>& m3)
     {
@@ -37,7 +37,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, class T2, class M3>
-    static TMV_INLINE_ND void NoAliasAddMX(
+    static inline void NoAliasAddMX(
         const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
         const T2& x2, BaseMatrix_Mutable<M3>& m3)
     {
@@ -144,45 +144,45 @@ namespace tmv {
 #define CCT ConjRef<CT>
     // m += x
     template <class M1>
-    static TMV_INLINE void AddEq(BaseMatrix_Mutable<M1>& m1, const int x2)
+    static inline void AddEq(BaseMatrix_Mutable<M1>& m1, const int x2)
     { AddMX(RT(x2),m1.mat()); }
 
     template <class M1>
-    static TMV_INLINE void AddEq(BaseMatrix_Mutable<M1>& m1, const RT x2)
+    static inline void AddEq(BaseMatrix_Mutable<M1>& m1, const RT x2)
     { AddMX(x2,m1.mat()); }
 
     template <class M1>
-    static TMV_INLINE void AddEq(BaseMatrix_Mutable<M1>& m1, const CT x2)
+    static inline void AddEq(BaseMatrix_Mutable<M1>& m1, const CT x2)
     { AddMX(x2,m1.mat()); }
 
     template <class M1>
-    static TMV_INLINE void AddEq(BaseMatrix_Mutable<M1>& m1, const CCT x2)
+    static inline void AddEq(BaseMatrix_Mutable<M1>& m1, const CCT x2)
     { AddMX(CT(x2),m1.mat()); }
 
     template <class M1, int ix2, class T2>
-    static TMV_INLINE void AddEq(
+    static inline void AddEq(
         BaseMatrix_Mutable<M1>& m1, const Scaling<ix2,T2>& x2)
     { AddMX(T2(x2),m1.mat()); }
 
     // m -= x
     template <class M1>
-    static TMV_INLINE void SubtractEq(BaseMatrix_Mutable<M1>& m1, const int x2)
+    static inline void SubtractEq(BaseMatrix_Mutable<M1>& m1, const int x2)
     { AddMX(-RT(x2),m1.mat()); }
 
     template <class M1>
-    static TMV_INLINE void SubtractEq(BaseMatrix_Mutable<M1>& m1, const RT x2)
+    static inline void SubtractEq(BaseMatrix_Mutable<M1>& m1, const RT x2)
     { AddMX(-x2,m1.mat()); }
 
     template <class M1>
-    static TMV_INLINE void SubtractEq(BaseMatrix_Mutable<M1>& m1, const CT x2)
+    static inline void SubtractEq(BaseMatrix_Mutable<M1>& m1, const CT x2)
     { AddMX(-x2,m1.mat()); }
 
     template <class M1>
-    static TMV_INLINE void SubtractEq(BaseMatrix_Mutable<M1>& m1, const CCT x2)
+    static inline void SubtractEq(BaseMatrix_Mutable<M1>& m1, const CCT x2)
     { AddMX(-CT(x2),m1.mat()); }
 
     template <class M1, int ix2, class T2>
-    static TMV_INLINE void SubtractEq(
+    static inline void SubtractEq(
         BaseMatrix_Mutable<M1>& m1, const Scaling<ix2,T2>& x2)
     { AddMX(-T2(x2),m1.mat()); }
 

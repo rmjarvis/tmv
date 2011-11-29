@@ -10,7 +10,7 @@
 namespace tmv {
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
-    static TMV_INLINE void AddMM(
+    static inline void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Calc<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Calc<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
@@ -39,7 +39,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
-    static TMV_INLINE void NoAliasAddMM(
+    static inline void NoAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Calc<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix_Calc<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
@@ -50,19 +50,19 @@ namespace tmv {
 
  
     template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
-    static TMV_INLINE void AddMM(
+    static inline void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
     { AddMM(x1,m1.calc(),x2,m2.calc(),m3.mat()); }
     template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
-    static TMV_INLINE void NoAliasAddMM(
+    static inline void NoAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
     { NoAliasAddMM(x1,m1.calc(),x2,m2.calc(),m3.mat()); }
     template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
-    static TMV_INLINE void AliasAddMM(
+    static inline void AliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
@@ -175,25 +175,25 @@ namespace tmv {
 #define RT typename M2::real_type
     // m += m
     template <class M1, class M2>
-    static TMV_INLINE void AddEq(
+    static inline void AddEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2) 
     { MultXM<true>(m2.mat(),m1.mat()); }
 
     // m += xm
     template <class M1, int ix2, class T2, class M2>
-    static TMV_INLINE void AddEq(
+    static inline void AddEq(
         BaseMatrix_Mutable<M1>& m1, const ProdXM<ix2,T2,M2>& m2) 
     { MultXM<true>(m2.getX(),m2.getM().mat(),m1.mat()); }
 
     // m -= m
     template <class M1, class M2>
-    static TMV_INLINE void SubtractEq(
+    static inline void SubtractEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2)
     { MultXM<true>(Scaling<-1,RT>(),m2.mat(),m1.mat()); }
 
     // m -= xm
     template <class M1, int ix2, class T2, class M2>
-    static TMV_INLINE void SubtractEq(
+    static inline void SubtractEq(
         BaseMatrix_Mutable<M1>& m1, const ProdXM<ix2,T2,M2>& m2) 
     { MultXM<true>(-m2.getX(),m2.getM().mat(),m1.mat()); }
 

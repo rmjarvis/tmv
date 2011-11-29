@@ -10,19 +10,19 @@
 namespace tmv {
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
-    static TMV_INLINE void AddVV(
+    static inline void AddVV(
         const Scaling<ix1,T1>& x1, const BaseVector<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector<V2>& v2,
         BaseVector_Mutable<V3>& v3)
     { AddVV(x1,v1.calc(),x2,v2.calc(),v3.vec()); }
     template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
-    static TMV_INLINE void NoAliasAddVV(
+    static inline void NoAliasAddVV(
         const Scaling<ix1,T1>& x1, const BaseVector<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector<V2>& v2,
         BaseVector_Mutable<V3>& v3)
     { NoAliasAddVV(x1,v1.calc(),x2,v2.calc(),v3.vec()); }
     template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
-    static TMV_INLINE void AliasAddVV(
+    static inline void AliasAddVV(
         const Scaling<ix1,T1>& x1, const BaseVector<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector<V2>& v2,
         BaseVector_Mutable<V3>& v3)
@@ -110,25 +110,25 @@ namespace tmv {
 #define RT typename V2::real_type
     // v += v
     template <class V1, class V2>
-    static TMV_INLINE void AddEq(
+    static inline void AddEq(
         BaseVector_Mutable<V1>& v1, const BaseVector<V2>& v2) 
     { MultXV<true>(v2.vec(),v1); }
 
     // v += xv
     template <class V1, int ix2, class T2, class V2>
-    static TMV_INLINE void AddEq(
+    static inline void AddEq(
         BaseVector_Mutable<V1>& v1, const ProdXV<ix2,T2,V2>& v2) 
     { MultXV<true>(v2.getX(),v2.getV().vec(),v1); }
 
     // v -= v
     template <class V1, class V2>
-    static TMV_INLINE void SubtractEq(
+    static inline void SubtractEq(
         BaseVector_Mutable<V1>& v1, const BaseVector<V2>& v2)
     { MultXV<true>(Scaling<-1,RT>(),v2.vec(),v1); }
 
     // v -= xv
     template <class V1, int ix2, class T2, class V2>
-    static TMV_INLINE void SubtractEq(
+    static inline void SubtractEq(
         BaseVector_Mutable<V1>& v1, const ProdXV<ix2,T2,V2>& v2) 
     { MultXV<true>(-v2.getX(),v2.getV().vec(),v1); }
 

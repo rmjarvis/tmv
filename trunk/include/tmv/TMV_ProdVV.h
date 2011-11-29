@@ -18,15 +18,15 @@ namespace tmv {
     // These first few are for when an argument is a composite vector
     // and needs to be calculated before running MultVV.
     template <class V1, class V2>
-    static TMV_INLINE PT MultVV(
+    static inline PT MultVV(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
     { return MultVV(v1.calc(),v2.calc()); }
     template <class V1, class V2>
-    static TMV_INLINE PT NoAliasMultVV(
+    static inline PT NoAliasMultVV(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
     { return NoAliasMultVV(v1.calc(),v2.calc()); }
     template <class V1, class V2>
-    static TMV_INLINE PT AliasMultVV(
+    static inline PT AliasMultVV(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
     { return AliasMultVV(v1.calc(),v2.calc()); }
 

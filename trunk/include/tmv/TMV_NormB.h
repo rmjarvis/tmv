@@ -434,10 +434,8 @@ namespace tmv {
 #endif
             const int M = cs == TMV_UNKNOWN ? int(m.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m.rowsize()) : rs;
-            const int xx = TMV_UNKNOWN;
             typedef typename M1::const_col_sub_type M1c;
 
-            const int lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
             const int j1 = m.nhi();
             const int j2 = TMV_MIN(N,M-m.nlo());
             const int j3 = TMV_MIN(N,M+m.nhi());
@@ -518,7 +516,6 @@ namespace tmv {
 #ifdef PRINTALGO_NormB
             std::cout<<"MaxAbsElementM algo 13: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int xx = TMV_UNKNOWN;
             typedef typename M1::const_diag_sub_type M1d;
             ret max(0);
             for(int k=-m.nlo();k<=m.nhi();++k) {
@@ -688,10 +685,8 @@ namespace tmv {
 #endif
             const int M = cs == TMV_UNKNOWN ? int(m.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m.rowsize()) : rs;
-            const int xx = TMV_UNKNOWN;
             typedef typename M1::const_col_sub_type M1c;
 
-            const int lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
             const int j1 = m.nhi();
             const int j2 = TMV_MIN(N,M-m.nlo());
             const int j3 = TMV_MIN(N,M+m.nhi());

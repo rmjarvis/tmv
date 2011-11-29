@@ -2006,8 +2006,8 @@ namespace tmv {
     static TMV_INLINE typename BMVO<M>::cb BandMatrixViewOf(
         const BaseMatrix_Rec<M>& m, int lo, int hi)
     {
-        TMVAssert(lo < m.colsize());
-        TMVAssert(hi < m.rowsize());
+        TMVAssert(lo < int(m.colsize()));
+        TMVAssert(hi < int(m.rowsize()));
         return typename BMVO<M>::cb(
             m.cptr(),m.colsize(),m.rowsize(),lo,hi,m.stepi(),m.stepj());
     }
@@ -2015,8 +2015,8 @@ namespace tmv {
     static TMV_INLINE typename BMVO<M>::b BandMatrixViewOf(
         BaseMatrix_Rec_Mutable<M>& m, int lo, int hi)
     {
-        TMVAssert(lo < m.colsize());
-        TMVAssert(hi < m.rowsize());
+        TMVAssert(lo < int(m.colsize()));
+        TMVAssert(hi < int(m.rowsize()));
         return typename BMVO<M>::b(
             m.ptr(),m.colsize(),m.rowsize(),lo,hi,m.stepi(),m.stepj());
     }
@@ -2024,8 +2024,8 @@ namespace tmv {
     static TMV_INLINE typename BMVO<MatrixView<T,A> >::b BandMatrixViewOf(
         MatrixView<T,A> m, int lo, int hi)
     {
-        TMVAssert(lo < m.colsize());
-        TMVAssert(hi < m.rowsize());
+        TMVAssert(lo < int(m.colsize()));
+        TMVAssert(hi < int(m.rowsize()));
         return typename BMVO<MatrixView<T,A> >::b(
             m.ptr(),m.colsize(),m.rowsize(),lo,hi,m.stepi(),m.stepj());
     }
@@ -2033,8 +2033,8 @@ namespace tmv {
     static TMV_INLINE typename BMVO<SmallMatrixView<T,M,N,Si,Sj,A> >::b BandMatrixViewOf(
         SmallMatrixView<T,M,N,Si,Sj,A> m, int lo, int hi)
     {
-        TMVAssert(lo < m.colsize());
-        TMVAssert(hi < m.rowsize());
+        TMVAssert(lo < int(m.colsize()));
+        TMVAssert(hi < int(m.rowsize()));
         return typename BMVO<SmallMatrixView<T,M,N,Si,Sj,A> >::b(
             m.ptr(),m.colsize(),m.rowsize(),lo,hi,m.stepi(),m.stepj());
     }
@@ -2108,7 +2108,7 @@ namespace tmv {
     static TMV_INLINE typename BMVOTri<M>::cb BandMatrixViewOf(
         const BaseMatrix_Tri<M>& m, int lohi)
     {
-        TMVAssert(lohi < m.size());
+        TMVAssert(lohi < int(m.size()));
         return typename BMVOTri<M>::cb(
             m.cptr(),m.colsize(),m.rowsize(),
             M::_upper ? 0 : lohi, M::_upper ? lohi : 0,
@@ -2118,7 +2118,7 @@ namespace tmv {
     static TMV_INLINE typename BMVOTri<M>::b BandMatrixViewOf(
         BaseMatrix_Tri_Mutable<M>& m, int lohi)
     {
-        TMVAssert(lohi < m.size());
+        TMVAssert(lohi < int(m.size()));
         return typename BMVOTri<M>::b(
             m.ptr(),m.colsize(),m.rowsize(),
             M::_upper ? 0 : lohi, M::_upper ? lohi : 0,
@@ -2128,6 +2128,7 @@ namespace tmv {
     static TMV_INLINE typename BMVOTri<UpperTriMatrixView<T,A> >::b BandMatrixViewOf(
         UpperTriMatrixView<T,A> m, int hi)
     {
+        TMVAssert(hi < int(m.size()));
         return typename BMVOTri<UpperTriMatrixView<T,A> >::b(
             m.ptr(),m.colsize(),m.rowsize(),0,hi,m.stepi(),m.stepj());
     }
@@ -2135,22 +2136,25 @@ namespace tmv {
     static TMV_INLINE typename BMVOTri<SmallUpperTriMatrixView<T,N,Si,Sj,A> >::b BandMatrixViewOf(
         SmallUpperTriMatrixView<T,N,Si,Sj,A> m, int hi)
     {
+        TMVAssert(hi < int(m.size()));
         return typename BMVOTri<SmallUpperTriMatrixView<T,N,Si,Sj,A> >::b(
             m.ptr(),m.colsize(),m.rowsize(),0,hi,m.stepi(),m.stepj());
     }
     template <class T, int A>
     static TMV_INLINE typename BMVOTri<LowerTriMatrixView<T,A> >::b BandMatrixViewOf(
-        LowerTriMatrixView<T,A> m, int hi)
+        LowerTriMatrixView<T,A> m, int lo)
     {
+        TMVAssert(lo < int(m.size()));
         return typename BMVOTri<LowerTriMatrixView<T,A> >::b(
-            m.ptr(),m.colsize(),m.rowsize(),0,hi,m.stepi(),m.stepj());
+            m.ptr(),m.colsize(),m.rowsize(),lo,0,m.stepi(),m.stepj());
     }
     template <class T, int N, int Si, int Sj, int A>
     static TMV_INLINE typename BMVOTri<SmallLowerTriMatrixView<T,N,Si,Sj,A> >::b BandMatrixViewOf(
-        SmallLowerTriMatrixView<T,N,Si,Sj,A> m, int hi)
+        SmallLowerTriMatrixView<T,N,Si,Sj,A> m, int lo)
     {
+        TMVAssert(lo < int(m.size()));
         return typename BMVOTri<SmallLowerTriMatrixView<T,N,Si,Sj,A> >::b(
-            m.ptr(),m.colsize(),m.rowsize(),0,hi,m.stepi(),m.stepj());
+            m.ptr(),m.colsize(),m.rowsize(),lo,0,m.stepi(),m.stepj());
     }
 
 

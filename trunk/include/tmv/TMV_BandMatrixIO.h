@@ -268,12 +268,9 @@ namespace tmv {
         {
             typedef typename M::value_type T;
             char paren;
-            int j1=0;
-            int j2=m.nhi()+1;
             T temp;
             const int nrows = m.nrows();
             const int ncols = m.ncols();
-            int k = m.nlo();
             for(int i=0;i<nrows;++i) {
                 is >> paren;
                 if (!is || paren != '(') {
