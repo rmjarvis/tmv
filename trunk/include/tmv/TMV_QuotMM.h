@@ -237,10 +237,10 @@ namespace tmv {
         enum { _colsize = M2::_rowsize };
         enum { _rowsize = M1::_rowsize };
         enum { _nlo = (
-                M2::_nlo == 0 ? M1::_nlo : 
+                M2::_nlo == 0 ? int(M1::_nlo) : 
                 IntTraits2<IntTraits<_colsize>::Sm1,0>::max ) };
         enum { _nhi = (
-                M2::_nhi == 0 ? M1::_nhi : 
+                M2::_nhi == 0 ? int(M1::_nhi) : 
                 IntTraits2<IntTraits<_rowsize>::Sm1,0>::max ) };
         enum { _fort = M1::_fort && M2::_fort };
         enum { _calc = false };
@@ -343,10 +343,10 @@ namespace tmv {
         enum { _colsize = M1::_colsize };
         enum { _rowsize = M2::_colsize };
         enum { _nlo = (
-                M2::_nlo == 0 ? M1::_nlo : 
+                M2::_nlo == 0 ? int(M1::_nlo) : 
                 IntTraits2<IntTraits<_colsize>::Sm1,0>::max ) };
         enum { _nhi = (
-                M2::_nhi == 0 ? M1::_nhi : 
+                M2::_nhi == 0 ? int(M1::_nhi) : 
                 IntTraits2<IntTraits<_rowsize>::Sm1,0>::max ) };
         enum { _fort = M1::_fort && M2::_fort };
         enum { _calc = false };

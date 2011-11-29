@@ -11,6 +11,7 @@
 #include "tmv/TMV_ProdMV.h"
 
 #ifdef BLAS
+#include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_AddVV.h"
 #include "tmv/TMV_SumVV.h"
 #include "tmv/TMV_ProdXV.h"
@@ -274,7 +275,10 @@ namespace tmv {
         const ConstBandMatrixView<std::complex<double>,C1>& A,
         const ConstVectorView<double>& x,
         VectorView<std::complex<double> > y)
-    { DoAddMultMV(alpha,A,Vector<std::complex<double> >(x),beta,y); }
+    {
+        const Vector<std::complex<double> > xx = alpha*x;
+        DoAddMultMV(std::complex<double>(1.),A,xx.xView(),y);
+    }
     template <int C2>
     static void DoAddMultMV(  
         std::complex<double> alpha,
@@ -310,13 +314,13 @@ namespace tmv {
                 BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(xalpha),BLASP(A.cptr()-hi),BLASV(ds),
-                BLASP(xp),BLASV(xs),BLASV(xbeta),
+                BLASP(xp),BLASV(xs),BLASV(beta),
                 BLASP(yp),BLASV(ys) BLAS1);
             BLASNAME(dgbmv) (
                 BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(xalpha),BLASP(A.cptr()-hi),BLASV(ds),
-                BLASP(xp+1),BLASV(xs),BLASV(xbeta),
+                BLASP(xp+1),BLASV(xs),BLASV(beta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
         } else {
             const Vector<std::complex<double> > xx = alpha*x;
@@ -358,7 +362,7 @@ namespace tmv {
                 BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(ar),BLASP(A.cptr()-hi),BLASV(ds),
-                BLASP(xp),BLASV(xs),BLASV(xbeta),
+                BLASP(xp),BLASV(xs),BLASV(beta),
                 BLASP(yp),BLASV(ys) BLAS1);
         }
         if (ai != 0.) {
@@ -366,7 +370,7 @@ namespace tmv {
                 BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(ai),BLASP(A.cptr()-hi),BLASV(ds),
-                BLASP(xp),BLASV(xs),BLASV(xbeta),
+                BLASP(xp),BLASV(xs),BLASV(beta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
         }
     }
@@ -500,7 +504,10 @@ namespace tmv {
         const ConstBandMatrixView<std::complex<float>,C1>& A,
         const ConstVectorView<float>& x,
         VectorView<std::complex<float> > y)
-    { DoAddMultMV(alpha,A,Vector<std::complex<float> >(x),beta,y); }
+    {
+        const Vector<std::complex<float> > xx = alpha*x;
+        DoAddMultMV(std::complex<float>(1.F),A,xx.xView(),y);
+    }
     template <int C2>
     static void DoAddMultMV(  
         std::complex<float> alpha,
@@ -536,13 +543,13 @@ namespace tmv {
                 BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(xalpha),BLASP(A.cptr()-hi),BLASV(ds),
-                BLASP(xp),BLASV(xs),BLASV(xbeta),
+                BLASP(xp),BLASV(xs),BLASV(beta),
                 BLASP(yp),BLASV(ys) BLAS1);
             BLASNAME(sgbmv) (
                 BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(xalpha),BLASP(A.cptr()-hi),BLASV(ds),
-                BLASP(xp+1),BLASV(xs),BLASV(xbeta),
+                BLASP(xp+1),BLASV(xs),BLASV(beta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
         } else {
             const Vector<std::complex<float> > xx = alpha*x;
@@ -584,7 +591,7 @@ namespace tmv {
                 BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(ar),BLASP(A.cptr()-hi),BLASV(ds),
-                BLASP(xp),BLASV(xs),BLASV(xbeta),
+                BLASP(xp),BLASV(xs),BLASV(beta),
                 BLASP(yp),BLASV(ys) BLAS1);
         }
         if (ai != 0.) {
@@ -592,7 +599,7 @@ namespace tmv {
                 BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(ai),BLASP(A.cptr()-hi),BLASV(ds),
-                BLASP(xp),BLASV(xs),BLASV(xbeta),
+                BLASP(xp),BLASV(xs),BLASV(beta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
         }
     }
@@ -611,15 +618,7 @@ namespace tmv {
         //std::cout<<"v2 = "<<TMV_Text(v2)<<"  "<<v2<<std::endl;
         //std::cout<<"v3 = "<<TMV_Text(v3)<<"  "<<v3<<std::endl;
 #if TMV_OPT <= 2 || defined(BLAS) 
-        // Some BLAS implementations seem to have trouble if the 
-        // input y has a nan in it and beta = 0.
-        // They propagate the nan into the  output.
-        // I guess they strictly interpret y = beta*y + alpha*m*x,
-        // so if beta = 0, then beta*nan = nan.
-        // This is explicitly wrong behavior according to the standard,
-        // but we still need to guard against it, since some implementations
-        // do it this way.
-        // Anyway, to fix this problem, we always use beta=1, and just
+        // As with the regular BLAS MultMV functions, we always
         // zero out y before calling the blas function if beta is 0.
         // In other words, only have Blas for the AddMultMV path.
         v3.setZero();
@@ -647,7 +646,7 @@ namespace tmv {
         //std::cout<<"v3 = "<<TMV_Text(v3)<<"  "<<v3<<std::endl;
         if (v3.size() > 0 && v2.size() > 0) {
 #ifdef BLAS
-            if ( BlasIsCMBand(m1) || BlasIsRMBand(m1) ) {
+            if ( BlasIsCM(m1) || BlasIsRM(m1) ) {
                 // Check for BandMatrixes that have more diagonals
                 // than either colsize or rowsize.  Then stepi or stepj
                 // is not large enough for the BLAS function.
@@ -666,7 +665,7 @@ namespace tmv {
                             ConstBandMatrixView<T1,C1> m1b =
                                 m1.colRange(m1.nhi(),m1.rowsize());
                             DoAddMultMV(
-                                x,m1b,v2.subVector(m1.nhi(),m1.rowsize()),1,v3);
+                                x,m1b,v2.subVector(m1.nhi(),m1.rowsize()),v3);
                         }
                     } else {
                         TMVAssert(m1.nlo()>0);

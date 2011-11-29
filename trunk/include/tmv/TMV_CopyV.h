@@ -194,7 +194,7 @@ namespace tmv {
         typedef typename V1::const_iterator IT1;
         typedef typename V2::iterator IT2;
 
-        static TMV_INLINE void call(const V1& v1, V2& v2)
+        static void call(const V1& v1, V2& v2)
         {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
@@ -208,13 +208,13 @@ namespace tmv {
                 11;
             CopyV_Helper<algo,s,V1,V2>::call(v1,v2);
         }
-        static TMV_INLINE void call2(const int n, IT1 it1, IT2 it2)
+        static void call2(const int n, IT1 it1, IT2 it2)
         {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
             const int algo = 
                 s == 0 ? 0 :
-                TMV_OPT == 0 ? 11 :
+                ( TMV_OPT == 0 ) ? 11 :
                 ( Traits2<T1,T2>::sametype && 
                   V1::_conj == int(V2::_conj) &&
                   V1::_step == 1 && V2::_step == 1 ) ? 21 :
