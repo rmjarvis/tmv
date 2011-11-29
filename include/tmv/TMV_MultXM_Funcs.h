@@ -93,6 +93,72 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
         BaseMatrix_Tri_Mutable<M2>& m2);
 
+    // From TMV_MultXB.h:
+    template <bool add, int ix, class T, class M1, class M2>
+    static inline void MultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1, 
+        BaseMatrix_Band_Mutable<M2>& m2);
+    template <bool add, int ix, class T, class M1, class M2>
+    static inline void NoAliasMultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1, 
+        BaseMatrix_Band_Mutable<M2>& m2);
+    template <bool add, int ix, class T, class M1, class M2>
+    static inline void AliasMultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1, 
+        BaseMatrix_Band_Mutable<M2>& m2);
+
+    template <bool add, int ix, class T, class M1, class M2>
+    static inline void MultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
+        BaseMatrix_Rec_Mutable<M2>& m2);
+    template <bool add, int ix, class T, class M1, class M2>
+    static inline void NoAliasMultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
+        BaseMatrix_Rec_Mutable<M2>& m2);
+    template <bool add, int ix, class T, class M1, class M2>
+    static inline void AliasMultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
+        BaseMatrix_Rec_Mutable<M2>& m2);
+
+    template <bool add, int ix, class T, class M1, class M2>
+    static inline void MultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
+        BaseMatrix_Tri_Mutable<M2>& m2);
+    template <bool add, int ix, class T, class M1, class M2>
+    static inline void NoAliasMultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
+        BaseMatrix_Tri_Mutable<M2>& m2);
+    template <bool add, int ix, class T, class M1, class M2>
+    static inline void AliasMultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
+        BaseMatrix_Tri_Mutable<M2>& m2);
+
+    template <bool add, int ix, class T, class M1, class M2>
+    static inline void MultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
+        BaseMatrix_Band_Mutable<M2>& m2);
+    template <bool add, int ix, class T, class M1, class M2>
+    static inline void NoAliasMultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
+        BaseMatrix_Band_Mutable<M2>& m2);
+    template <bool add, int ix, class T, class M1, class M2>
+    static inline void AliasMultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
+        BaseMatrix_Band_Mutable<M2>& m2);
+
+    template <bool add, int ix, class T, class M1, class M2>
+    static inline void MultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
+        BaseMatrix_Band_Mutable<M2>& m2);
+    template <bool add, int ix, class T, class M1, class M2>
+    static inline void NoAliasMultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
+        BaseMatrix_Band_Mutable<M2>& m2);
+    template <bool add, int ix, class T, class M1, class M2>
+    static inline void AliasMultXM(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
+        BaseMatrix_Band_Mutable<M2>& m2);
+
 
 } // namespace tmv
 

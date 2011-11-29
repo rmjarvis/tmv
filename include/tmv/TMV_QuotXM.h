@@ -14,17 +14,17 @@ namespace tmv {
     //
 
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE void MakeInverse(
+    static inline void MakeInverse(
         const Scaling<ix,T>& x,
         const BaseMatrix<M1>& m1, BaseMatrix_Mutable<M2>& m2)
     { MakeInverse(x,m1.calc(),m2.mat()); }
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE void NoAliasMakeInverse(
+    static inline void NoAliasMakeInverse(
         const Scaling<ix,T>& x,
         const BaseMatrix<M1>& m1, BaseMatrix_Mutable<M2>& m2)
     { NoAliasMakeInverse(x,m1.calc(),m2.mat()); }
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE void AliasMakeInverse(
+    static inline void AliasMakeInverse(
         const Scaling<ix,T>& x,
         const BaseMatrix<M1>& m1, BaseMatrix_Mutable<M2>& m2)
     { AliasMakeInverse(x,m1.calc(),m2.mat()); }

@@ -699,7 +699,7 @@ namespace tmv {
             int _i, const Permutation& _m, std::istream& _is
         ) throw() :
             ReadError("Permutation."),
-            i(_i), m(_m), exp(0), got(0),
+            m(_m), i(_i), exp(0), got(0),
             n(_m.size()), is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         PermutationReadError(std::istream& _is) throw() :
             ReadError("Permutation."),
@@ -710,7 +710,7 @@ namespace tmv {
             std::istream& _is, char _e, char _g
         ) throw() :
             ReadError("Permutation."),
-            i(_i), m(_m), exp(_e), got(_g),
+            m(_m), i(_i), exp(_e), got(_g),
             n(_m.size()), is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         PermutationReadError(std::istream& _is, char _e, char _g) throw() :
             ReadError("Permutation."),
@@ -720,7 +720,7 @@ namespace tmv {
             const Permutation& _m, std::istream& _is, size_t _n
         ) throw() :
             ReadError("Permutation."),
-            i(0), m(_m), exp(0), got(0),
+            m(_m), i(0), exp(0), got(0),
             n(_n), is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
         PermutationReadError(const PermutationReadError& rhs) :

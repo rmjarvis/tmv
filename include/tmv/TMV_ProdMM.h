@@ -29,40 +29,40 @@ namespace tmv {
     // Also, this effects the intermediate calculation for things like
     // D = A * B * C, where (A*B) needs a temporary.
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static TMV_INLINE void MultMM(
+    static inline void MultMM(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { MultMM<add>(x,m1.calc(),m2.calc(),m3.mat()); }
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static TMV_INLINE void NoAliasMultMM(
+    static inline void NoAliasMultMM(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { NoAliasMultMM<add>(x,m1.calc(),m2.calc(),m3.mat()); }
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static TMV_INLINE void AliasMultMM(
+    static inline void AliasMultMM(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { AliasMultMM<add>(x,m1.calc(),m2.calc(),m3.mat()); }
 
     // These are helpers to allow the caller to not use a Scaling object.
     template <bool add, class T, class M1, class M2, class M3>
-    static TMV_INLINE void MultMM(
+    static inline void MultMM(
         const T& x, const BaseMatrix<M1>& m1,
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { MultMM<add>(Scaling<0,T>(x),m1.mat(),m2.mat(),m3.mat()); }
     template <bool add, class T, class M1, class M2, class M3>
-    static TMV_INLINE void NoAliasMultMM(
+    static inline void NoAliasMultMM(
         const T& x, const BaseMatrix<M1>& m1,
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { NoAliasMultMM<add>(Scaling<0,T>(x),m1.mat(),m2.mat(),m3.mat()); }
     template <bool add, class T, class M1, class M2, class M3>
-    static TMV_INLINE void AliasMultMM(
+    static inline void AliasMultMM(
         const T& x, const BaseMatrix<M1>& m1,
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { AliasMultMM<add>(Scaling<0,T>(x),m1.mat(),m2.mat(),m3.mat()); }
 
     template <bool add, class M1, class M2, class M3>
-    static TMV_INLINE void MultMM(
+    static inline void MultMM(
         const BaseMatrix<M1>& m1,
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     {
@@ -70,7 +70,7 @@ namespace tmv {
             Scaling<1,typename M3::real_type>(),m1.mat(),m2.mat(),m3.mat()); 
     }
     template <bool add, class M1, class M2, class M3>
-    static TMV_INLINE void NoAliasMultMM(
+    static inline void NoAliasMultMM(
         const BaseMatrix<M1>& m1,
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     {
@@ -78,7 +78,7 @@ namespace tmv {
             Scaling<1,typename M3::real_type>(),m1.mat(),m2.mat(),m3.mat()); 
     }
     template <bool add, class M1, class M2, class M3>
-    static TMV_INLINE void AliasMultMM(
+    static inline void AliasMultMM(
         const BaseMatrix<M1>& m1,
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     {
@@ -335,7 +335,7 @@ namespace tmv {
     // m *= m
 #define RT typename M1::real_type
     template <class M1, class M2>
-    static TMV_INLINE void MultEq(
+    static inline void MultEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2)
     {
 #ifdef XDEBUG_PRODMM
@@ -348,7 +348,7 @@ namespace tmv {
 
     // m *= xm
     template <class M1, int ix2, class T2, class M2>
-    static TMV_INLINE void MultEq(
+    static inline void MultEq(
         BaseMatrix_Mutable<M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     {
 #ifdef XDEBUG_PRODMM
@@ -360,7 +360,7 @@ namespace tmv {
 
     // m += mm
     template <class M3, int ix, class T, class M1, class M2>
-    static TMV_INLINE void AddEq(
+    static inline void AddEq(
         BaseMatrix_Mutable<M3>& m3, const ProdMM<ix,T,M1,M2>& mm)
     {
 #ifdef XDEBUG_PRODMM
@@ -373,7 +373,7 @@ namespace tmv {
 
     // m -= mm
     template <class M3, int ix, class T, class M1, class M2>
-    static TMV_INLINE void SubtractEq(
+    static inline void SubtractEq(
         BaseMatrix_Mutable<M3>& m3, const ProdMM<ix,T,M1,M2>& mm)
     {
 #ifdef XDEBUG_PRODMM

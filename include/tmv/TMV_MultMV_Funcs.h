@@ -3,13 +3,6 @@
 #ifndef TMV_MultMV_Funcs_H
 #define TMV_MultMV_Funcs_H
 
-#include "TMV_BaseVector.h"
-#include "TMV_BaseMatrix.h"
-#include "TMV_BaseMatrix_Rec.h"
-#include "TMV_BaseMatrix_Diag.h"
-#include "TMV_BaseMatrix_Tri.h"
-#include "TMV_BaseMatrix_Band.h"
-
 namespace tmv {
 
     //
@@ -214,15 +207,15 @@ namespace tmv {
         const BaseMatrix_Band<M2>& m2, BaseVector_Mutable<V3>& v3);
 
     template <class V1, int ix, class T, class M2>
-    static TMV_INLINE void MultEqVM(
+    static inline void MultEqVM(
         BaseVector_Mutable<V1>& v1,
         const Scaling<ix,T>& x, const BaseMatrix_Band<M2>& m2);
     template <class V1, int ix, class T, class M2>
-    static TMV_INLINE void NoAliasMultEqVM(
+    static inline void NoAliasMultEqVM(
         BaseVector_Mutable<V1>& v1,
         const Scaling<ix,T>& x, const BaseMatrix_Band<M2>& m2);
     template <class V1, int ix, class T, class M2>
-    static TMV_INLINE void AliasMultEqVM(
+    static inline void AliasMultEqVM(
         BaseVector_Mutable<V1>& v1,
         const Scaling<ix,T>& x, const BaseMatrix_Band<M2>& m2);
 

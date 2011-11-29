@@ -22,7 +22,7 @@ namespace tmv {
         if (add) {
             m3 += (x*m1*m2).calc();
         } else {
-            MultXM<false>(x,m2.mat(),m3.mat());
+            MultXM<false>(x,m2.calc(),m3.mat());
             m1.applyOnLeft(m3);
         }
     }
@@ -34,7 +34,7 @@ namespace tmv {
         if (add) {
             m3 += (x*m1*m2).calc();
         } else {
-            NoAliasMultXM<false>(x,m2.mat(),m3.mat());
+            NoAliasMultXM<false>(x,m2.calc(),m3.mat());
             m1.applyOnLeft(m3);
         }
     }
@@ -46,7 +46,7 @@ namespace tmv {
         if (add) {
             m3 += (x*m1*m2).calc();
         } else {
-            AliasMultXM<false>(x,m2.mat(),m3.mat());
+            AliasMultXM<false>(x,m2.calc(),m3.mat());
             m1.applyOnLeft(m3);
         }
     }
@@ -64,7 +64,7 @@ namespace tmv {
         if (add) {
             m3 += (x*m1*m2).calc();
         } else {
-            MultXM<false>(x,m1.mat(),m3.mat());
+            MultXM<false>(x,m1.calc(),m3.mat());
             m2.applyOnRight(m3);
         }
     }
@@ -76,7 +76,7 @@ namespace tmv {
         if (add) {
             m3 += (x*m1*m2).calc();
         } else {
-            NoAliasMultXM<false>(x,m1.mat(),m3.mat());
+            NoAliasMultXM<false>(x,m1.calc(),m3.mat());
             m2.applyOnRight(m3);
         }
     }
@@ -88,7 +88,7 @@ namespace tmv {
         if (add) {
             m3 += (x*m1*m2).calc();
         } else {
-            AliasMultXM<false>(x,m1.mat(),m3.mat());
+            AliasMultXM<false>(x,m1.calc(),m3.mat());
             m2.applyOnRight(m3);
         }
     }
@@ -128,17 +128,17 @@ namespace tmv {
     static TMV_INLINE void LDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { MultMM<false>(x,m2.inverse(),m1.mat(),m3.mat()); }
+    { MultMM<false>(x,m2.inverse(),m1.calc(),m3.mat()); }
     template <int ix, class T, class M1, class M2, class M3>
     static TMV_INLINE void NoAliasLDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { NoAliasMultMM<false>(x,m2.inverse(),m1.mat(),m3.mat()); }
+    { NoAliasMultMM<false>(x,m2.inverse(),m1.calc(),m3.mat()); }
     template <int ix, class T, class M1, class M2, class M3>
     static TMV_INLINE void AliasLDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { AliasMultMM<false>(x,m2.inverse(),m1.mat(),m3.mat()); }
+    { AliasMultMM<false>(x,m2.inverse(),m1.calc(),m3.mat()); }
 
 
     //
@@ -149,17 +149,17 @@ namespace tmv {
     static TMV_INLINE void RDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { MultMM<false>(x,m1.mat(),m2.inverse(),m3.mat()); }
+    { MultMM<false>(x,m1.calc(),m2.inverse(),m3.mat()); }
     template <int ix, class T, class M1, class M2, class M3>
     static TMV_INLINE void NoAliasRDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { NoAliasMultMM<false>(x,m1.mat(),m2.inverse(),m3.mat()); }
+    { NoAliasMultMM<false>(x,m1.calc(),m2.inverse(),m3.mat()); }
     template <int ix, class T, class M1, class M2, class M3>
     static TMV_INLINE void AliasRDiv(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1,
         const Permutation& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { AliasMultMM<false>(x,m1.mat(),m2.inverse(),m3.mat()); }
+    { AliasMultMM<false>(x,m1.calc(),m2.inverse(),m3.mat()); }
 
 
     // 

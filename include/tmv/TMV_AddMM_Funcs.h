@@ -159,6 +159,24 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix_Tri<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3);
 
+
+    // From TMV_AddBB.h:
+    template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
+    static inline void AddMM(
+        const Scaling<ix1,T1>& x1, const BaseMatrix_Band<M1>& m1, 
+        const Scaling<ix2,T2>& x2, const BaseMatrix_Band<M2>& m2, 
+        BaseMatrix_Band_Mutable<M3>& m3);
+    template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
+    static inline void NoAliasAddMM(
+        const Scaling<ix1,T1>& x1, const BaseMatrix_Band<M1>& m1, 
+        const Scaling<ix2,T2>& x2, const BaseMatrix_Band<M2>& m2, 
+        BaseMatrix_Band_Mutable<M3>& m3);
+    template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
+    static inline void AliasAddMM(
+        const Scaling<ix1,T1>& x1, const BaseMatrix_Band<M1>& m1, 
+        const Scaling<ix2,T2>& x2, const BaseMatrix_Band<M2>& m2, 
+        BaseMatrix_Band_Mutable<M3>& m3);
+
 } // namespace tmv
 
 #endif 

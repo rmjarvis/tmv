@@ -123,7 +123,7 @@ namespace tmv {
             (m1.nhi() == m2.nhi() && m1.nlo() == m2.nlo()); 
     }
 
-    static bool InBand(int i, int j, int nlo, int nhi)
+    inline bool InBand(int i, int j, int nlo, int nhi)
     { return (j+nlo >= i) && (i+nhi >= j); }
 
     // These helper functions check the validity of indices according

@@ -13,28 +13,28 @@ namespace tmv {
     //
 
     template <bool add, class T, class V1, class V2, class V3>
-    static TMV_INLINE void ElemMultVV(
+    static inline void ElemMultVV(
         const T& x1, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     { ElemMultVV(Scaling<0,T>(x1),v1.vec(),v2.vec(),v3.vec()); }
     template <bool add, class T, class V1, class V2, class V3>
-    static TMV_INLINE void NoAliasElemMultVV(
+    static inline void NoAliasElemMultVV(
         const T& x1, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     { NoAliasElemMultVV(Scaling<0,T>(x1),v1.vec(),v2.vec(),v3.vec()); }
     template <bool add, class T, class V1, class V2, class V3>
-    static TMV_INLINE void InlineElemMultVV(
+    static inline void InlineElemMultVV(
         const T& x1, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     { InlineElemMultVV(Scaling<0,T>(x1),v1.vec(),v2.vec(),v3.vec()); }
     template <bool add, class T, class V1, class V2, class V3>
-    static TMV_INLINE void AliasElemMultVV(
+    static inline void AliasElemMultVV(
         const T& x1, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     { AliasElemMultVV(Scaling<0,T>(x1),v1.vec(),v2.vec(),v3.vec()); }
 
     template <bool add, class V1, class V2, class V3>
-    static TMV_INLINE void ElemMultVV(
+    static inline void ElemMultVV(
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -42,7 +42,7 @@ namespace tmv {
             Scaling<1,typename V3::real_type(),v1.vec(),v2.vec(),v3.vec()); 
     }
     template <bool add, class V1, class V2, class V3>
-    static TMV_INLINE void NoAliasElemMultVV(
+    static inline void NoAliasElemMultVV(
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -50,7 +50,7 @@ namespace tmv {
             Scaling<1,typename V3::real_type(),v1.vec(),v2.vec(),v3.vec()); 
     }
     template <bool add, class V1, class V2, class V3>
-    static TMV_INLINE void InlineElemMultVV(
+    static inline void InlineElemMultVV(
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -58,7 +58,7 @@ namespace tmv {
             Scaling<1,typename V3::real_type(),v1.vec(),v2.vec(),v3.vec()); 
     }
     template <bool add, class V1, class V2, class V3>
-    static TMV_INLINE void AliasElemMultVV(
+    static inline void AliasElemMultVV(
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {

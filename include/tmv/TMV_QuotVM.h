@@ -21,17 +21,17 @@
 namespace tmv {
 
     template <int ix, class T, class V1, class M2, class V3>
-    static TMV_INLINE void LDiv(
+    static inline void LDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
     { LDiv(x,v1.calc(),m2.calc(),v3.vec()); }
     template <int ix, class T, class V1, class M2, class V3>
-    static TMV_INLINE void NoAliasLDiv(
+    static inline void NoAliasLDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
     { NoAliasLDiv(x,v1.calc(),m2.calc(),v3.vec()); }
     template <int ix, class T, class V1, class M2, class V3>
-    static TMV_INLINE void AliasLDiv(
+    static inline void AliasLDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
     { AliasLDiv(x,v1.calc(),m2.calc(),v3.vec()); }
@@ -39,31 +39,31 @@ namespace tmv {
 #if 0
     // Defined below so it can check whether to run the Debug version...
     template <class V1, class M2>
-    static TMV_INLINE void LDivEq(
+    static inline void LDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     { LDivEq(v1.vec(),m2.calc()); }
 #endif
     template <class V1, class M2>
-    static TMV_INLINE void NoAliasLDivEq(
+    static inline void NoAliasLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     { NoAliasLDivEq(v1.vec(),m2.calc()); }
     template <class V1, class M2>
-    static TMV_INLINE void AliasLDivEq(
+    static inline void AliasLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     { AliasLDivEq(v1.vec(),m2.calc()); }
 
     template <int ix, class T, class V1, class M2, class V3>
-    static TMV_INLINE void RDiv(
+    static inline void RDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
     { RDiv(x,v1.calc(),m2.calc(),v3.vec()); }
     template <int ix, class T, class V1, class M2, class V3>
-    static TMV_INLINE void NoAliasRDiv(
+    static inline void NoAliasRDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
     { NoAliasRDiv(x,v1.calc(),m2.calc(),v3.vec()); }
     template <int ix, class T, class V1, class M2, class V3>
-    static TMV_INLINE void AliasRDiv(
+    static inline void AliasRDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
     { AliasRDiv(x,v1.calc(),m2.calc(),v3.vec()); }
@@ -71,16 +71,16 @@ namespace tmv {
 #if 0
     // Defined below so it can check whether to run the Debug version...
     template <class V1, class M2>
-    static TMV_INLINE void RDivEq(
+    static inline void RDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     { RDivEq(v1.vec(),m2.calc()); }
 #endif
     template <class V1, class M2>
-    static TMV_INLINE void NoAliasRDivEq(
+    static inline void NoAliasRDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     { NoAliasRDivEq(v1.vec(),m2.calc()); }
     template <class V1, class M2>
-    static TMV_INLINE void AliasRDivEq(
+    static inline void AliasRDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     { AliasRDivEq(v1.vec(),m2.calc()); }
 
@@ -413,7 +413,7 @@ namespace tmv {
 
     // v /= m
     template <class V1, class M2>
-    static TMV_INLINE void LDivEq(
+    static inline void LDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     {
 #ifdef XDEBUG_QUOTVM
@@ -425,7 +425,7 @@ namespace tmv {
 
     // v /= xm
     template <class V1, int ix2, class T2, class M2>
-    static TMV_INLINE void LDivEq(
+    static inline void LDivEq(
         BaseVector_Mutable<V1>& v1, const ProdXM<ix2,T2,M2>& m2)
     {
 #ifdef XDEBUG_QUOTVM
@@ -484,7 +484,7 @@ namespace tmv {
 
     // v %= m
     template <class V1, class M2>
-    static TMV_INLINE void RDivEq(
+    static inline void RDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     {
 #ifdef XDEBUG_QUOTVM
@@ -496,7 +496,7 @@ namespace tmv {
 
     // v %= xm
     template <class V1, int ix2, class T2, class M2>
-    static TMV_INLINE void RDivEq(
+    static inline void RDivEq(
         BaseVector_Mutable<V1>& v1, const ProdXM<ix2,T2,M2>& m2)
     {
 #ifdef XDEBUG_QUOTVM
@@ -509,7 +509,7 @@ namespace tmv {
 
     // v *= x/m
     template <class V1, int ix2, class T2, class M2>
-    static TMV_INLINE void MultEq(
+    static inline void MultEq(
         BaseVector_Mutable<V1>& v1, const QuotXM<ix2,T2,M2>& m2)
     {
 #ifdef XDEBUG_QUOTVM
