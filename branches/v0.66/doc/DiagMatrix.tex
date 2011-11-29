@@ -36,6 +36,14 @@ As usual, the optional \tt{index} template argument specifies which indexing
 style to use.
 
 \begin{itemize}
+
+\item
+\begin{tmvcode}
+tmv::DiagMatrix<T,index> d()
+\end{tmvcode}
+Makes a \tt{DiagMatrix} with zero size.  You would normally use the \tt{resize} function later to
+change the size to some useful value.
+
 \item 
 \begin{tmvcode}
 tmv::DiagMatrix<T,index> d(size_t n)
@@ -339,12 +347,10 @@ which outputs in the format:
 D n ( d(0,0)  d(1,1)  d(2,2)  ...  d(n-1,n-1) )
 \end{tmvcode}
 
-The same (compact, that is) format can be read back in the usual two ways:
+The same (compact, that is) format can be read back in the usual way:
 \begin{tmvcode}
 tmv::DiagMatrix<T> d(n);
 is >> d;
-std::auto_ptr<tmv::DiagMatrix<T> > dptr;
-is >> dptr;
 \end{tmvcode}
 where the first gives an error if \tt{d} is the wrong size and the second allocates
 a new \tt{DiagMatrix} that is the correct size.

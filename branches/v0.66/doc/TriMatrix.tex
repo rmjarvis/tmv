@@ -54,6 +54,14 @@ we will explain the difference.
 \label{TriMatrix_Constructors}
 
 \begin{itemize}
+
+\item
+\begin{tmvcode}
+tmv::UpperTriMatrix<T,dt,stor,index> U()
+\end{tmvcode}
+Makes an \tt{UpperTriMatrix} with zero size.  You would normally use the \tt{resize} function later to
+change the size to some useful value.
+
 \item 
 \begin{tmvcode}
 tmv::UpperTriMatrix<T,dt,stor,index> U(size_t n)
@@ -455,14 +463,11 @@ L n
 ( L(n-1,0)  L(n-1,1) ... L(n-1,n-1) )
 \end{tmvcode}
 
-In each case, the compact format can be read back in the usual two ways:
+In each case, the compact format can be read back in the usual way:
 \begin{tmvcode}
-tmv::UpperTriMatrix<T> U(n);
-tmv::LowerTriMatrix<T> L(n);
+tmv::UpperTriMatrix<T> U;
+tmv::LowerTriMatrix<T> L;
 is >> U >> L;
-std::auto_ptr<tmv::UpperTriMatrix<T> > Uptr;
-std::auto_ptr<tmv::LowerTriMatrix<T> > Lptr;
-is >> Uptr >> Lptr;
 \end{tmvcode}
 
 One can write small values as 0 with

@@ -72,10 +72,19 @@ we will explain the difference.
 \label{SymMatrix_Constructors}
 
 \begin{itemize}
+
+\item
+\begin{tmvcode}
+tmv::SymMatrix<T,uplo,stor,index> s()
+tmv::HermMatrix<T,uplo,stor,index> h()
+\end{tmvcode}
+Makes a \tt{SymMatrix} or \tt{HermMatrix} with zero size.  You would normally use the \tt{resize} function later to
+change the size to some useful value.
+
 \item 
 \begin{tmvcode}
 tmv::SymMatrix<T,uplo,stor,index> s(size_t n)
-tmv::HermMatrix<T,uplo,stor,index> s(size_t n)
+tmv::HermMatrix<T,uplo,stor,index> h(size_t n)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{SymMatrix} or \tt{HermMatrix}
 with \underline{uninitialized} values.
@@ -85,7 +94,7 @@ with \tt{-DNDEBUG} or \tt{-DTMVNDEBUG}), then the values are in fact initialized
 \item
 \begin{tmvcode}
 tmv::SymMatrix<T,uplo,stor,index> s(size_t n, T x)
-tmv::HermMatrix<T,uplo,stor,index> s(size_t n, RT x)
+tmv::HermMatrix<T,uplo,stor,index> h(size_t n, RT x)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{SymMatrix} or \tt{HermMatrix} 
 with all values equal to \tt{x}.
@@ -94,16 +103,16 @@ For the \tt{HermMatrix} version of this, \tt{x} must be real.
 \item 
 \begin{tmvcode}
 tmv::SymMatrix<T,uplo,stor,index> s(const GenMatrix<T>& m)
-tmv::HermMatrix<T,uplo,stor,index> s(const GenMatrix<T>& m)
+tmv::HermMatrix<T,uplo,stor,index> h(const GenMatrix<T>& m)
 tmv::SymMatrix<T,uplo,stor,index> s(const GenDiagMatrix<T>& d)
-tmv::HermMatrix<T,uplo,stor,index> s(const GenDiagMatrix<T>& d)
+tmv::HermMatrix<T,uplo,stor,index> h(const GenDiagMatrix<T>& d)
 \end{tmvcode}
 Makes a \tt{SymMatrix} or \tt{HermMatrix} which copies the corresponding values of \tt{m}.
 
 \item
 \begin{tmvcode}
 tmv::SymMatrix<T,uplo,stor,index> s1(const GenSymMatrix<T2>& s2)
-tmv::HermMatrix<T,uplo,stor,index> s1(const GenSymMatrix<T2>& s2)
+tmv::HermMatrix<T,uplo,stor,index> h1(const GenSymMatrix<T2>& s2)
 s1 = s2
 \end{tmvcode}
 Copy the \tt{GenSymMatrix s2}, which may be of any type \tt{T2} so long
@@ -118,9 +127,9 @@ tmv::SymMatrixView<T,index> s =
       tmv::SymMatrixViewOf(MatrixView<T,index> m, UpLoType uplo)
 tmv::ConstSymMatrixView<T,index> s = 
       tmv::SymMatrixViewOf(ConstMatrixView<T,index> m, UpLoType uplo)
-tmv::SymMatrixView<T,index> s = 
+tmv::SymMatrixView<T,index> h = 
       tmv::HermMatrixViewOf(MatrixView<T,index>& m, UpLoType uplo)
-tmv::ConstSymMatrixView<T,index> s = 
+tmv::ConstSymMatrixView<T,index> h = 
       tmv::HermMatrixViewOf(ConstMatrixView<T,index>& m, UpLoType uplo)
 \end{tmvcode}
 \index{Matrix!View portion as SymMatrix or HermMatrix}
@@ -134,10 +143,10 @@ tmv::SymMatrixView<T,index> s =
 tmv::ConstSymMatrixView<T,index> s =
       tmv::SymMatrixViewOf(const T* vv, size_t n, UpLoType uplo, 
       StorageType stor)
-tmv::SymMatrixView<T,index> s =
+tmv::SymMatrixView<T,index> h =
       tmv::HermMatrixViewOf(T* vv, size_t n, UpLoType uplo, 
       StorageType stor)
-tmv::ConstSymMatrixView<T,index> s =
+tmv::ConstSymMatrixView<T,index> h =
       tmv::HermMatrixViewOf(const T* vv, size_t n, UpLoType uplo, 
       StorageType stor)
 \end{tmvcode}
@@ -155,10 +164,10 @@ tmv::SymMatrixView<T,index> s =
 tmv::ConstSymMatrixView<T,index> s =
       tmv::SymMatrixViewOf(const T* vv, size_t n, UpLoType uplo, 
       int stepi, int stepj)
-tmv::SymMatrixView<T,index> s =
+tmv::SymMatrixView<T,index> h =
       tmv::HermMatrixViewOf(T* vv, size_t n, UpLoType uplo, 
       int stepi, int stepj)
-tmv::ConstSymMatrixView<T,index> s =
+tmv::ConstSymMatrixView<T,index> h =
       tmv::HermMatrixViewOf(const T* vv, size_t n, UpLoType uplo, 
       int stepi, int stepj)
 \end{tmvcode}
@@ -681,14 +690,11 @@ H/S n
 \end{tmvcode}
 where \tt{H/S} means \underline{either} the character \tt{H} or \tt{S}, which indicates whether 
 the matrix is hermitian or symmetric.
-In each case, the same compact format can be read back in the usual two ways:
+In each case, the same compact format can be read back in the usual way:
 \begin{tmvcode}
-tmv::SymMatrix<T> s(n);
-tmv::HermMatrix<T> h(n);
+tmv::SymMatrix<T> s;
+tmv::HermMatrix<T> h;
 is >> s >> h;
-std::auto_ptr<tmv::SymMatrix<T> > sptr;
-std::auto_ptr<tmv::HermMatrix<T> > hptr;
-is >> sptr >> hptr;
 \end{tmvcode}
 One can write small values as 0 with
 \begin{tmvcode}

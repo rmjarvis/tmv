@@ -77,11 +77,21 @@ we will explain the difference.
 \label{SymBandMatrix_Constructors}
 
 \begin{itemize}
+
+\item
+\begin{tmvcode}
+tmv::SymBandMatrix<T,uplo,stor,index> sb()
+tmv::HermBandMatrix<T,uplo,stor,index> hb()
+\end{tmvcode}
+Makes a \tt{SymBandMatrix} or \tt{HermBandMatrix} with zero size.  You would normally use the \tt{resize} function later to
+change the size to some useful value.
+
 \item 
 \begin{tmvcode}
 tmv::SymBandMatrix<T,uplo,stor,index> sb(size_t n, int nlo)
+tmv::HermBandMatrix<T,uplo,stor,index> hb(size_t n, int nlo)
 \end{tmvcode}
-Makes an \tt{n} $\times$ \tt{n} \tt{SymBandMatrix} with 
+Makes an \tt{n} $\times$ \tt{n} \tt{SymBandMatrix} or \tt{HermBandMatrix} with 
 \tt{nlo} off-diagonals
 and with \underline{uninitialized} values.
 If debugging is turned on (i.e. not turned off 
@@ -90,8 +100,9 @@ with \tt{-DNDEBUG} or \tt{-DTMVNDEBUG}), then the values are initialized to 888.
 \item
 \begin{tmvcode}
 tmv::SymBandMatrix<T,uplo,stor,index> sb(size_t n, int nlo, T x)
+tmv::HermBandMatrix<T,uplo,stor,index> hb(size_t n, int nlo, T x)
 \end{tmvcode}
-Makes an \tt{n} $\times$ \tt{n} \tt{SymBandMatrix} with \tt{nlo} off-diagonals
+Makes an \tt{n} $\times$ \tt{n} \tt{SymBandMatrix}  or \tt{HermBandMatrix} with \tt{nlo} off-diagonals
 and with all values equal to \tt{x}.
 
 \item 
@@ -107,7 +118,7 @@ tmv::SymBandMatrix<T,uplo,stor,index> sb(const GenSymBandMatrix<T>& m,
 \end{tmvcode}
 Makes a \tt{SymBandMatrix} which copies the corresponding values of \tt{m}.  
 For the last two, \tt{nlo} must not be larger than the number of upper
-or lower bands in \tt{m}.
+or lower bands in \tt{m}.  There are similar constructors for \tt{HermBandMatrix}.
 
 \item
 \begin{tmvcode}
@@ -115,10 +126,10 @@ tmv::SymBandMatrix<T,uplo,DiagMajor> sb = SymTriDiagMatrix(
       const GenVector<T>& v1, const GenVector<T>& v2)
 tmv::SymBandMatrix<T,uplo,DiagMajor> sb = SymTriDiagMatrix(
       const GenVector<T>& v1, const GenVector<T>& v2)
-tmv::HermBandMatrix<T,uplo,DiagMajor> sb = HermTriDiagMatrix(
+tmv::HermBandMatrix<T,uplo,DiagMajor> hb = HermTriDiagMatrix(
       const GenVector<T>& v1, const GenVector<T>& v2, 
       UpLoType uplo)
-tmv::HermBandMatrix<T,uplo,DiagMajor> sb = HermTriDiagMatrix(
+tmv::HermBandMatrix<T,uplo,DiagMajor> hb = HermTriDiagMatrix(
       const GenVector<T>& v1, const GenVector<T>& v2, 
       UpLoType uplo)
 \end{tmvcode}
@@ -151,11 +162,11 @@ tmv::SymBandMatrixView<T> sb =
       SymBandMatrixViewOf(SymMatrixView<T> m, int nlo)
 tmv::SymBandMatrixView<T> sb = 
       SymBandMatrixViewOf(BandMatrixView<T> m, UpLoType uplo, int nlo)
-tmv::SymBandMatrixView<T> sb = 
+tmv::SymBandMatrixView<T> hb = 
       HermBandMatrixViewOf(MatrixView<T> m, UpLoType uplo, int nlo)
-tmv::SymBandMatrixView<T> sb = 
+tmv::SymBandMatrixView<T> hb = 
       HermBandMatrixViewOf(SymMatrixView<T> m, int nlo)
-tmv::SymBandMatrixView<T> sb = 
+tmv::SymBandMatrixView<T> hb = 
       HermBandMatrixViewOf(BandMatrixView<T> m, UpLoType uplo, int nlo)
 \end{tmvcode}
 \index{Matrix!View portion as SymBandMatrix or HermBandMatrix}
@@ -177,10 +188,10 @@ tmv::SymBandMatrixView<T> sb =
 tmv::ConstSymBandMatrixView<T> sb = 
       tmv::SymBandMatrixViewOf(const T* vv, size_t n, int nlo, 
           UpLoType uplo, StorageType stor)
-tmv::SymBandMatrixView<T> sb = 
+tmv::SymBandMatrixView<T> hb = 
       tmv::HermBandMatrixViewOf(T* vv, size_t n, int nlo, 
           UpLoType uplo, StorageType stor)
-tmv::ConstSymBandMatrixView<T> sb = 
+tmv::ConstSymBandMatrixView<T> hb = 
       tmv::HermBandMatrixViewOf(const T* vv, size_t n, int nlo, 
           UpLoType uplo, StorageType stor)
 \end{tmvcode}
@@ -197,10 +208,10 @@ tmv::SymBandMatrixView<T> sb =
 tmv::ConstSymBandMatrixView<T> sb = 
       tmv::SymBandMatrixViewOf(const T* vv, size_t n, int nlo, 
           UpLoType uplo, StorageType stor)
-tmv::SymBandMatrixView<T> sb = 
+tmv::SymBandMatrixView<T> hb = 
       tmv::HermBandMatrixViewOf(T* vv, size_t n, int nlo, 
           UpLoType uplo, StorageType stor)
-tmv::ConstSymBandMatrixView<T> sb = 
+tmv::ConstSymBandMatrixView<T> hb = 
       tmv::HermBandMatrixViewOf(const T* vv, size_t n, int nlo, 
           UpLoType uplo, StorageType stor)
 \end{tmvcode}
@@ -616,14 +627,11 @@ hB/sB n nlo
 where \tt{hB/sB} means \underline{either} \tt{hB} or \tt{sB}, 
 which indicates whether the matrix is hermitian or symmetric.
 
-The same compact format can be read back in the usual two ways:
+The same compact format can be read back in the usual way:
 \begin{tmvcode}
 tmv::SymBandMatrix<T> sb(n,nlo);
 tmv::HermBandMatrix<T> hb(n,nlo);
 is >> sb >> hb;
-std::auto_ptr<tmv::SymBandMatrix<T> > sbptr;
-std::auto_ptr<tmv::HermBandMatrix<T> > hbptr;
-is >> sbptr >> hbptr;
 \end{tmvcode}
 
 One can write small values as 0 with

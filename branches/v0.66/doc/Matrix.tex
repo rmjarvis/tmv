@@ -71,6 +71,14 @@ This argument must be either
 are \tt{tmv::ColMajor} and \tt{tmv::CStyle} if the arguments are omitted.
 
 \begin{itemize}
+
+\item
+\begin{tmvcode}
+tmv::Matrix<T,stor,index> m()
+\end{tmvcode}
+Makes a \tt{Matrix} with zero size.  You would normally use the \tt{resize} function later to
+change the size to some useful value.
+
 \item 
 \begin{tmvcode}
 tmv::Matrix<T,stor,index> m(size_t nrows, size_t ncols)
@@ -1733,19 +1741,12 @@ nrows ncols
 ( m(nrows-1,0) ...  ...  m(nrows-1,ncols-1) )
 \end{tmvcode}
 
-The same format can be read back in one of two ways:
+The same format can be read back using:
 \begin{tmvcode}
-tmv::Matrix<T> m(nrows,ncols);
+tmv::Matrix<T> m;
 is >> m;
-std::auto_ptr<tmv::Matrix<T> > mptr;
-is >> mptr;
 \end{tmvcode}
-For the first version, the \tt{Matrix} must already be declared, which 
-requires knowing how big it needs to be.  If the input \tt{Matrix} does not
-match in size, a runtime error will occur.
-The second version allows you to get the size from the input.  \tt{mptr}
-will be created (with \tt{new}) 
-according to whatever size the input \tt{Matrix} is.
+The \tt{Matrix m} is automatically resized to the correct size.
 
 Often, it is convenient to output only those values that aren't very small. 
 This can be done using
@@ -1905,10 +1906,6 @@ arithmetic is identical.
 The only things that don't take into account the 
 compile-time knowledge of the size are the I/O methods:
 reading from or writing to a file.
-Also, there is no \tt{auto\_ptr} 
-version of the read operation, since you need to know the 
-size of a \tt{SmallMatrix} at compile time anyway, 
-so there is no way to wait until the file is read to determine the size.
 
 \subsubsection{Limitations}
 \index{SmallMatrix!Limitations}

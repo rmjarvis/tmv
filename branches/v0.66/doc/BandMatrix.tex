@@ -108,6 +108,14 @@ we will explain the difference.
 \label{BandMatrix_Constructors}
 
 \begin{itemize}
+
+\item
+\begin{tmvcode}
+tmv::BandMatrix<T,stor,index> b()
+\end{tmvcode}
+Makes a \tt{BandMatrix} with zero size.  You would normally use the \tt{resize} function later to
+change the size to some useful value.
+
 \item 
 \begin{tmvcode}
 tmv::BandMatrix<T,stor,index> b(size_t nrows, size_t ncols, 
@@ -675,12 +683,10 @@ B nrows ncols nlo nhi
 If \tt{nrows} is not equal to \tt{ncols}, then the above isn't exactly accurate.  But the
 essence is the same: all the values in the band from each row are output one row at a time.
 
-The same compact format can be read back in the usual two ways:
+The same compact format can be read back in the usual way:
 \begin{tmvcode}
-tmv::BandMatrix<T> b(nrows,ncols,nlo,nhi);
+tmv::BandMatrix<T> ;
 is >> b;
-std::auto_ptr<tmv::BandMatrix<T> > bptr;
-is >> bptr;
 \end{tmvcode}
 
 One can write small values as 0 with

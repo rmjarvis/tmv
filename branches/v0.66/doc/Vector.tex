@@ -67,6 +67,14 @@ Here, \tt{T} is used to represent the data type of the elements of the \tt{Vecto
 \tt{index} template argument may be omitted, in which case \tt{CStyle} is assumed.
 
 \begin{itemize}
+
+\item 
+\begin{tmvcode}
+tmv::Vector<T,index> v()
+\end{tmvcode}
+Makes a \tt{Vector} of zero size.  You would normally use the \tt{resize} function later to 
+change the size to some useful value.
+
 \item 
 \begin{tmvcode}
 tmv::Vector<T,index> v(size_t n)
@@ -913,18 +921,12 @@ n ( v(0)  v(1)  v(2)  ...  v(3) )
 \end{tmvcode}
 where \tt{n} is the length of the \tt{Vector}.
 
-The same format can be read back in one of two ways:
+The same format can be read back using:
 \begin{tmvcode}
 tmv::Vector<T> v(n);
 is >> v;
-std::auto_ptr<tmv::Vector<T> > vptr;
-is >> vptr;
 \end{tmvcode}
-For the first version, the \tt{Vector} must already be declared, which 
-requires knowing how big it needs to be.  If the input \tt{Vector} does not
-match in size, an exception of type \tt{tmv::ReadError} is thrown.
-The second version allows you to automatically get the size from the input.  
-The \tt{Vector} pointed to by \tt{vptr}
+The \tt{Vector v} will be automatically resized to the correct size.
 will be created according to whatever size the input \tt{Vector} is.
 \index{Exceptions!ReadError}
 
@@ -1049,11 +1051,7 @@ are not done inline.
 
 First, reading \tt{SmallVector} from a file 
 uses the regular
-\tt{Vector} I/O methods.  Also, there is no \tt{auto\_ptr} 
-version of these read operations, since you need to know the 
-size of a \tt{SmallVector} at compile time anyway, 
-so there is no way to wait until the file is read to determine the size.
-
+\tt{Vector} I/O methods.  
 Also, the \tt{sort} command for a \tt{SmallVector} just uses the
 regular \tt{Vector} version.
 

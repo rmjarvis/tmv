@@ -25,6 +25,14 @@ with MatrixView.
 \label{Permutation_Constructors}
 
 \begin{itemize}
+
+\item
+\begin{tmvcode}
+tmv::Permutation p()
+\end{tmvcode}
+Makes a \tt{Permutation} with zero size.  You would normally use the \tt{resize} function later to
+change the size to some useful value.
+
 \item 
 \begin{tmvcode}
 tmv::Permutation p(size_t n)
@@ -220,12 +228,10 @@ In other words, the permutation could be created as
 Permutation p(n,pp,isinv);
 \end{tmvcode}
 
-The same (compact, that is) format can be read back in the usual two ways:
+The same (compact, that is) format can be read back in the usual way:
 \begin{tmvcode}
 tmv::Permutation p(n);
 is >> p;
-std::auto_ptr<tmv::Permutation> pptr;
-is >> pptr;
 \end{tmvcode}
 where the first gives an error if \tt{p} is the wrong size and the second allocates
 a new \tt{Permutation} that is the correct size.
