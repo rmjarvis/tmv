@@ -83,6 +83,9 @@ namespace tmv {
     //  _rowsize = row size of matrix (aka number of columns)
     //  (Use TMV_UNKNOWN if unknown at compile time)
     //
+    //  _nlo = number of non-zero subdiagonals
+    //  _nhi = number of non-zero superdiagonals
+    //
     //  _shape = The shape of the non-zero elements of the matrix
     //
     //  _fort = does the indexing use fortran style?
@@ -318,6 +321,8 @@ namespace tmv {
     public:
         enum { _colsize = Traits<M>::_colsize };
         enum { _rowsize = Traits<M>::_rowsize };
+        enum { _nlo = Traits<M>::_nlo };
+        enum { _nhi = Traits<M>::_nhi };
         enum { _shape = Traits<M>::_shape };
         enum { _fort = Traits<M>::_fort };
         enum { _calc = Traits<M>::_calc };
@@ -449,6 +454,8 @@ namespace tmv {
 
         TMV_INLINE size_t colsize() const { return mat().colsize(); }
         TMV_INLINE size_t rowsize() const { return mat().rowsize(); }
+        TMV_INLINE int nlo() const { return mat().nlo(); }
+        TMV_INLINE int nhi() const { return mat().nhi(); }
         TMV_INLINE int nElements() const { return mat().nElements(); }
 
         TMV_INLINE value_type cref(int i, int j) const  
@@ -867,6 +874,8 @@ namespace tmv {
 
         enum { _colsize = TMV_UNKNOWN };
         enum { _rowsize = TMV_UNKNOWN };
+        enum { _nlo = TMV_UNKNOWN };
+        enum { _nhi = TMV_UNKNOWN };
         enum { _shape = Null };
         enum { _fort = false };
         enum { _calc = false };
@@ -881,6 +890,8 @@ namespace tmv {
             cs(_cs), rs(_rs) {}
         TMV_INLINE size_t colsize() const { return cs; }
         TMV_INLINE size_t rowsize() const { return rs; }
+        TMV_INLINE int nlo() const { return TMV_MAX(cs-1,0); }
+        TMV_INLINE int nhi() const { return TMV_MAX(rs-1,0); }
         TMV_INLINE int nElements() const { return cs * rs; }
 
         TMV_INLINE T cref(int , int ) const  { return T(0); }

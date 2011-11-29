@@ -375,13 +375,19 @@ namespace tmv {
     static inline void NoAliasCopy(
         const BaseMatrix_Tri<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2);
 
-    // Defiend below
     template <class M1, class M2>
     static inline void Copy(
         const BaseMatrix_Tri<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class M2>
     static inline void NoAliasCopy(
         const BaseMatrix_Tri<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
+
+    template <class M1, class M2>
+    static inline void Copy(
+        const BaseMatrix_Diag<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2);
+    template <class M1, class M2>
+    static inline void NoAliasCopy(
+        const BaseMatrix_Diag<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2);
 
     // Defined in TMV_SwapU.h
     template <class M1, class M2>
@@ -963,6 +969,10 @@ namespace tmv {
 
         TMV_INLINE size_t colsize() const { return mat().size(); }
         TMV_INLINE size_t rowsize() const { return mat().size(); }
+        TMV_INLINE int nlo() const 
+        { return Maybe<_upper>::select(0,colsize()-1); }
+        TMV_INLINE int nhi() const 
+        { return Maybe<_upper>::select(rowsize()-1,0); }
         TMV_INLINE size_t size() const { return mat().size(); }
         TMV_INLINE int stepi() const { return mat().stepi(); }
         TMV_INLINE int stepj() const { return mat().stepj(); }

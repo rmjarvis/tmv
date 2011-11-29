@@ -78,6 +78,8 @@ namespace tmv {
 
         enum { _colsize = M::_colsize };
         enum { _rowsize = M::_rowsize };
+        enum { _nlo = M::_nlo };
+        enum { _nhi = M::_nhi };
         enum { _shape = 
             (ix == 1) ?
                 int(M::_shape) :
@@ -115,6 +117,8 @@ namespace tmv {
 
         TMV_INLINE size_t colsize() const { return m.colsize(); }
         TMV_INLINE size_t rowsize() const { return m.rowsize(); }
+        TMV_INLINE int nlo() const { return m.nlo(); }
+        TMV_INLINE int nhi() const { return m.nhi(); }
 
         value_type cref(int i, int j) const
         { return x * m.cref(i,j); }

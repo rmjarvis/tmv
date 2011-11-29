@@ -62,6 +62,8 @@ namespace tmv {
 
         enum { _colsize = M1::_colsize };
         enum { _rowsize = M1::_rowsize };
+        enum { _nlo = M1::_nlo };
+        enum { _nhi = M1::_nhi };
         enum { _shape = ShapeTraits<M1::_shape>::nonunit_shape };
         enum { _fort = M1::_fort };
         enum { _calc = false };
@@ -102,6 +104,8 @@ namespace tmv {
 
         TMV_INLINE size_t colsize() const { return m1.colsize(); }
         TMV_INLINE size_t rowsize() const { return m1.rowsize(); }
+        TMV_INLINE int nlo() const { return m1.nlo(); }
+        TMV_INLINE int nhi() const { return m1.nhi(); }
         TMV_INLINE size_t ls() const { return m1.ls(); }
 
         value_type cref(int i, int j) const

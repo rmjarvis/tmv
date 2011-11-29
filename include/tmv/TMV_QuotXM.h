@@ -40,6 +40,12 @@ namespace tmv {
 
         enum { _colsize = M::_rowsize };
         enum { _rowsize = M::_colsize };
+        enum { _nlo = (
+                M::_nlo == 0 ? 0 : 
+                IntTraits2<IntTraits<_colsize>::Sm1,0>::max ) };
+        enum { _nhi = (
+                M::_nhi == 0 ? 0 : 
+                IntTraits2<IntTraits<_rowsize>::Sm1,0>::max ) };
         enum { shape1 = ShapeTraits<M::_shape>::inverse_shape };
         enum { _shape = 
             (ix == 1) ?
@@ -77,6 +83,10 @@ namespace tmv {
 
         TMV_INLINE size_t colsize() const { return m.rowsize(); }
         TMV_INLINE size_t rowsize() const { return m.colsize(); }
+        TMV_INLINE int nlo() const 
+        { return m.nlo() == 0 ? 0 : TMV_MAX(colsize()-1,0); }
+        TMV_INLINE int nhi() const 
+        { return m.nhi() == 0 ? 0 : TMV_MAX(rowsize()-1,0); }
 
         template <class M2>
         TMV_INLINE_ND void assignTo(BaseMatrix_Mutable<M2>& m2) const

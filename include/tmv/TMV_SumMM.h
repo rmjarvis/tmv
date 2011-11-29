@@ -11,6 +11,46 @@ namespace tmv {
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     static TMV_INLINE void AddMM(
+        const Scaling<ix1,T1>& x1, const BaseMatrix_Calc<M1>& m1,
+        const Scaling<ix2,T2>& x2, const BaseMatrix_Calc<M2>& m2,
+        BaseMatrix_Mutable<M3>& m3)
+    {
+        const bool s1 = SameStorage(m1,m3);
+        const bool s2 = SameStorage(m2,m3);
+
+        if (!s1 && !s2) {
+            // No aliasing 
+            NoAliasMultXM<false>(x1,m1,m3);
+            NoAliasMultXM<true>(x2,m2,m3);
+        } else if (!s2) {
+            // Alias with m1 only, do m1 first
+            AliasMultXM<false>(x1,m1,m3);
+            NoAliasMultXM<true>(x2,m2,m3);
+        } else if (!s1) {
+            // Alias with m2 only, do m2 first
+            AliasMultXM<false>(x2,m2,m3);
+            NoAliasMultXM<true>(x1,m1,m3);
+        } else {
+            // Need a temporary
+            typename M1::copy_type m1c = m1;
+            AliasMultXM<false>(x2,m2,m3);
+            NoAliasMultXM<true>(x1,m1c,m3);
+        }
+    }
+
+    template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
+    static TMV_INLINE void NoAliasAddMM(
+        const Scaling<ix1,T1>& x1, const BaseMatrix_Calc<M1>& m1,
+        const Scaling<ix2,T2>& x2, const BaseMatrix_Calc<M2>& m2,
+        BaseMatrix_Mutable<M3>& m3)
+    {
+        NoAliasMultXM<false>(x1,m1,m3);
+        NoAliasMultXM<true>(x2,m2,m3);
+    }
+
+ 
+    template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
+    static TMV_INLINE void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix<M1>& m1,
         const Scaling<ix2,T2>& x2, const BaseMatrix<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
@@ -44,6 +84,8 @@ namespace tmv {
 
         enum { _colsize = Sizes<M1::_colsize,M2::_colsize>::size };
         enum { _rowsize = Sizes<M1::_rowsize,M2::_rowsize>::size };
+        enum { _nlo = IntTraits2<M1::_nlo,M2::_nlo>::max };
+        enum { _nhi = IntTraits2<M1::_nhi,M2::_nhi>::max };
         enum { _shape = ShapeTraits2<M1::_shape,M2::_shape>::sum };
         enum { _fort = M1::_fort && M2::_fort };
         enum { _calc = false };
@@ -91,6 +133,8 @@ namespace tmv {
 
         TMV_INLINE size_t colsize() const { return m1.colsize(); }
         TMV_INLINE size_t rowsize() const { return m1.rowsize(); }
+        TMV_INLINE int nlo() const { return TMV_MAX(m1.nlo(),m2.nlo()); }
+        TMV_INLINE int nhi() const { return TMV_MAX(m1.nhi(),m2.nhi()); }
 
         value_type cref(int i, int j) const
         { return x1 * m1.cref(i,j) + x2 * m2.cref(i,j); }

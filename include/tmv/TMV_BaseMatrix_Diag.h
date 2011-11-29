@@ -375,6 +375,8 @@ namespace tmv {
         TMV_INLINE size_t colsize() const { return mat().size(); }
         TMV_INLINE size_t rowsize() const { return mat().size(); }
         TMV_INLINE size_t size() const { return mat().size(); }
+        TMV_INLINE int nlo() const { return 0; }
+        TMV_INLINE int nhi() const { return 0; }
         TMV_INLINE int step() const { return mat().step(); }
 
         TMV_INLINE const value_type* cptr() const { return mat().cptr(); }

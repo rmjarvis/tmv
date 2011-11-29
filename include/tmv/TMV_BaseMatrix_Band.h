@@ -9,6 +9,9 @@
 #define TMV_BaseMatrix_Band_H
 
 #include "TMV_BaseMatrix.h"
+#include "TMV_BaseMatrix_Rec.h"
+#include "TMV_BaseMatrix_Tri.h"
+#include "TMV_BaseMatrix_Diag.h"
 
 namespace tmv {
 
@@ -115,10 +118,9 @@ namespace tmv {
     {
         typedef typename M1::value_type T1;
         typedef typename M2::value_type T2;
-        return ( ( &m1 == &m2 ) ||
-                 ( Traits2<T1,T2>::sametype && 
-                   (m1.stepi() == m2.stepi() && m1.stepj() == m2.stepj()) &&
-                   (m1.nhi() == m2.nhi() && m1.nlo() == m2.nlo()) )); 
+        return Traits2<T1,T2>::sametype && 
+            (m1.stepi() == m2.stepi() && m1.stepj() == m2.stepj()) &&
+            (m1.nhi() == m2.nhi() && m1.nlo() == m2.nlo()); 
     }
 
     static bool InBand(int i, int j, int nlo, int nhi)
@@ -207,8 +209,11 @@ namespace tmv {
         ++k2;
     }
 
+    static TMV_INLINE_ND void CheckInBand(
+        int i, int j, int nlo, int nhi)
+    { TMVAssert(InBand(i,j,nlo,nhi) && "Reference value must be in band"); }
     static TMV_INLINE_ND void CheckSubMatrix_Band(
-        int i1, int i2, int j1, int j2, int m, int n, int nlo, int nhi)
+        int i1, int i2, int j1, int j2, int nlo, int nhi)
     {
         TMVAssert(InBand(i1,j1,nlo,nhi) && 
                   "Upper left corner must be in band");
@@ -220,8 +225,7 @@ namespace tmv {
                   "Lower right corner must be in band");
     }
     static TMV_INLINE_ND void CheckSubMatrix_Band(
-        int i1, int i2, int j1, int j2, int istep, int jstep, 
-        int m, int n, int nlo, int nhi)
+        int i1, int i2, int j1, int j2, int istep, int jstep, int nlo, int nhi)
     {
         TMVAssert(InBand(i1,j1,nlo,nhi) && 
                   "Upper left corner must be in band");
@@ -232,6 +236,42 @@ namespace tmv {
         TMVAssert(InBand(i2-istep,j2-jstep,nlo,nhi) && 
                   "Lower right corner must be in band");
     }
+
+    static TMV_INLINE_ND void CheckSubBandMatrix(
+        int i1, int i2, int j1, int j2, int newnlo, int newnhi,
+        int nlo, int nhi)
+    {
+        TMVAssert(InBand(i1,j1,nlo,nhi) && 
+                  "Upper left corner must be in band");
+        TMVAssert(InBand(i2-1,j2-1,nlo,nhi) && 
+                  "Lower right corner must be in band");
+        TMVAssert(InBand(i1+newnlo,j1,nlo,nhi) &&
+                  "New subdiagonals must be in band");
+        TMVAssert(InBand(i1,j1+newnhi,nlo,nhi) &&
+                  "New superdiagonals must be in band");
+        TMVAssert(newnhi < j2-j1 &&
+                  "New nhi must be less than new rowsize");
+        TMVAssert(newnlo < i2-i1 &&
+                  "New nlo must be less than new colsize");
+    }
+    static TMV_INLINE_ND void CheckSubBandMatrix(
+        int i1, int i2, int j1, int j2, int newnlo, int newnhi,
+        int istep, int jstep, int nlo, int nhi)
+    {
+        TMVAssert(InBand(i1,j1,nlo,nhi) && 
+                  "Upper left corner must be in band");
+        TMVAssert(InBand(i2-istep,j2-jstep,nlo,nhi) && 
+                  "Lower right corner must be in band");
+        TMVAssert(InBand(i1+newnlo*istep,j1,nlo,nhi) &&
+                  "New subdiagonals must be in band");
+        TMVAssert(InBand(i1,j1+newnhi*jstep,nlo,nhi) &&
+                  "New superdiagonals must be in band");
+        TMVAssert(newnhi < j2-j1 &&
+                  "New nhi must be less than new rowsize");
+        TMVAssert(newnlo < i2-i1 &&
+                  "New nlo must be less than new colsize");
+    }
+
     static TMV_INLINE_ND void CheckUpperBandOff(int nhi, int n)
     {
         TMVAssert(n>0 && "upperBandOff not possible for zero-sized matrix");
@@ -293,6 +333,34 @@ namespace tmv {
     static inline void NoAliasCopy(
         const BaseMatrix_Band<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2);
 
+    template <class M1, class M2>
+    static inline void Copy(
+        const BaseMatrix_Band<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
+    template <class M1, class M2>
+    static inline void NoAliasCopy(
+        const BaseMatrix_Band<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
+
+    template <class M1, class M2>
+    static inline void Copy(
+        const BaseMatrix_Band<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2);
+    template <class M1, class M2>
+    static inline void NoAliasCopy(
+        const BaseMatrix_Band<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2);
+
+    template <class M1, class M2>
+    static inline void Copy(
+        const BaseMatrix_Tri<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2);
+    template <class M1, class M2>
+    static inline void NoAliasCopy(
+        const BaseMatrix_Tri<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2);
+
+    template <class M1, class M2>
+    static inline void Copy(
+        const BaseMatrix_Diag<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2);
+    template <class M1, class M2>
+    static inline void NoAliasCopy(
+        const BaseMatrix_Diag<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2);
+
     // Defined in TMV_SwapB.h
     template <class M1, class M2>
     static inline void Swap(
@@ -326,8 +394,15 @@ namespace tmv {
 
     // Defined in TMV_BandMatrixIO.h
     template <class M>
+    static inline void WriteCompact(
+        std::ostream& os, const BaseMatrix_Band<M>& m);
+    template <class M>
+    static inline void WriteCompact(
+        std::ostream& os,
+        const BaseMatrix_Band<M>& m, typename M::float_type thresh) ;
+    template <class M>
     static inline void Read(std::istream& is, BaseMatrix_Band_Mutable<M>& m);
-
+ 
     // Defined below:
     template <class M>
     static inline void SetZero(BaseMatrix_Band_Mutable<M>& m);
@@ -466,6 +541,12 @@ namespace tmv {
         typedef typename Traits<M>::const_lowerbandoff_type 
             const_lowerbandoff_type;
 
+        typedef typename Traits<M>::const_rowmajor_iterator
+            const_rowmajor_iterator;
+        typedef typename Traits<M>::const_colmajor_iterator
+            const_colmajor_iterator;
+        typedef typename Traits<M>::const_diagmajor_iterator
+            const_diagmajor_iterator;
 
 
         //
@@ -884,6 +965,15 @@ namespace tmv {
         }
 
 
+        //
+        // I/O
+        //
+
+        TMV_INLINE void writeCompact(std::ostream& os) const
+        { tmv::WriteCompact(os,mat()); }
+        TMV_INLINE void writeCompact(std::ostream& os, float_type thresh) const
+        { tmv::WriteCompact(os,mat(),thresh); }
+
 
         //
         // Auxilliary routines
@@ -916,8 +1006,8 @@ namespace tmv {
 
         TMV_INLINE size_t colsize() const { return mat().colsize(); }
         TMV_INLINE size_t rowsize() const { return mat().rowsize(); }
-        TMV_INLINE size_t nlo() const { return mat().nlo(); }
-        TMV_INLINE size_t nhi() const { return mat().nhi(); }
+        TMV_INLINE int nlo() const { return mat().nlo(); }
+        TMV_INLINE int nhi() const { return mat().nhi(); }
         TMV_INLINE size_t ls() const { return mat().ls(); }
         TMV_INLINE int stepi() const { return mat().stepi(); }
         TMV_INLINE int stepj() const { return mat().stepj(); }
@@ -929,6 +1019,26 @@ namespace tmv {
         TMV_INLINE const value_type* start_mem() const 
         { return mat().start_mem(); }
 
+        int nElements() const 
+        { 
+            const int cs = colsize();
+            const int rs = rowsize();
+            const int lo = nlo();
+            const int hi = nhi();
+            if (cs == 0 || rs == 0) return 0;
+            else if (cs == rs) {
+                return cs*(lo+hi+1) - (lo*(lo+1)/2) - (hi*(hi+1)/2);
+            } else if (cs > rs) {
+                // lox = number of subdiagonals that are clipped.
+                int lox = TMV_MAX(rs+lo-cs,0);
+                return rs*(lo+hi+1) - (lox*(lox+1)/2) - (hi*(hi+1)/2);
+            } else {
+                // hix = number of superdiagonals that are clipped.
+                int hix = TMV_MAX(cs+hi-rs,0);
+                return cs*(lo+hi+1) - (lo*(lo+1)/2) - (hix*(hix+1)/2);
+            }
+        }
+
         TMV_INLINE int rowstart(int i) const 
         { return TMV_MAX(0,i-nlo()); }
         TMV_INLINE int rowend(int i) const 
@@ -937,6 +1047,27 @@ namespace tmv {
         { return TMV_MAX(0,j-nhi()); }
         TMV_INLINE int colend(int j) const 
         { return TMV_MIN(int(colsize()),j+nlo()+1); }
+
+        TMV_INLINE const_rowmajor_iterator rowmajor_begin() const
+        { return const_rowmajor_iterator(&mat(),0,0); }
+        TMV_INLINE const_rowmajor_iterator rowmajor_end() const
+        {
+            return const_rowmajor_iterator(
+                &mat(),TMV_MIN(colsize(),rowsize()+nlo()),
+                rowstart(TMV_MIN(colsize(),rowsize()+nlo())));
+        }
+        TMV_INLINE const_colmajor_iterator colmajor_begin() const
+        { return const_colmajor_iterator(&mat(),0,0); }
+        TMV_INLINE const_colmajor_iterator colmajor_end() const
+        {
+            return const_colmajor_iterator(
+                &mat(),colstart(TMV_MIN(rowsize(),colsize()+nhi())),
+                TMV_MIN(rowsize(),colsize()+nhi()));
+        }
+        TMV_INLINE const_diagmajor_iterator diagmajor_begin() const
+        { return const_diagmajor_iterator(&mat(),nlo(),0); }
+        TMV_INLINE const_diagmajor_iterator diagmajor_end() const
+        { return const_diagmajor_iterator(&mat(),0,nhi()+1); }
 
     }; // BaseMatrix_Band
 
@@ -1023,6 +1154,10 @@ namespace tmv {
         typedef typename base::const_upperbandoff_type const_upperbandoff_type;
         typedef typename base::const_lowerbandoff_type const_lowerbandoff_type;
 
+        typedef typename base::const_rowmajor_iterator const_rowmajor_iterator;
+        typedef typename base::const_colmajor_iterator const_colmajor_iterator;
+        typedef typename base::const_diagmajor_iterator const_diagmajor_iterator;
+
         typedef typename Traits<M>::row_sub_type row_sub_type;
         typedef typename Traits<M>::col_sub_type col_sub_type;
         typedef typename Traits<M>::diag_type diag_type;
@@ -1050,6 +1185,11 @@ namespace tmv {
         typedef typename Traits<M>::upperbandoff_type upperbandoff_type;
         typedef typename Traits<M>::lowerbandoff_type lowerbandoff_type;
 
+        typedef typename Traits<M>::rowmajor_iterator rowmajor_iterator;
+        typedef typename Traits<M>::colmajor_iterator colmajor_iterator;
+        typedef typename Traits<M>::diagmajor_iterator diagmajor_iterator;
+
+
         //
         // Constructor
         //
@@ -1069,6 +1209,7 @@ namespace tmv {
         {
             CheckRowIndex<_fort>(i,colsize());
             CheckColIndex<_fort>(j,rowsize());
+            CheckInBand(i,j,nlo(),nhi());
             return ref(i,j);
         }
 
@@ -1226,16 +1367,6 @@ namespace tmv {
             setToIdentity(x);
             return mat();
         }
-
-#if 0
-        typedef typename Traits<type>::linear_iterator linear_iterator;
-        ListAssigner<value_type,linear_iterator> operator<<(value_type x)
-        {
-            TMVStaticAssert(_canlin);
-            typename Traits<type>::linearview_type v = mat().linearView();
-            return ListAssigner<value_type,iter>(v.begin(),v.size(),x); 
-        }
-#endif
 
 
         //
@@ -1671,8 +1802,8 @@ namespace tmv {
 
         TMV_INLINE size_t colsize() const { return mat().colsize(); }
         TMV_INLINE size_t rowsize() const { return mat().rowsize(); }
-        TMV_INLINE size_t nlo() const { return mat().nlo(); }
-        TMV_INLINE size_t nhi() const { return mat().nhi(); }
+        TMV_INLINE int nlo() const { return mat().nlo(); }
+        TMV_INLINE int nhi() const { return mat().nhi(); }
         TMV_INLINE size_t ls() const { return mat().ls(); }
         TMV_INLINE int stepi() const { return mat().stepi(); }
         TMV_INLINE int stepj() const { return mat().stepj(); }
@@ -1683,6 +1814,40 @@ namespace tmv {
         TMV_INLINE value_type* ptr() { return mat().ptr(); }
         TMV_INLINE reference ref(int i, int j) { return mat().ref(i,j); }
         TMV_INLINE value_type* start_mem() { return mat().start_mem(); }
+
+        TMV_INLINE rowmajor_iterator rowmajor_begin() 
+        { return rowmajor_iterator(&mat(),0,0); }
+        TMV_INLINE rowmajor_iterator rowmajor_end() 
+        {
+            return rowmajor_iterator(
+                &mat(),TMV_MIN(colsize(),rowsize()+nlo()),
+                this->rowstart(TMV_MIN(colsize(),rowsize()+nlo())));
+        }
+        TMV_INLINE colmajor_iterator colmajor_begin() 
+        { return colmajor_iterator(&mat(),0,0); }
+        TMV_INLINE colmajor_iterator colmajor_end() 
+        {
+            return colmajor_iterator(
+                &mat(),this->colstart(TMV_MIN(rowsize(),colsize()+nhi())),
+                TMV_MIN(rowsize(),colsize()+nhi()));
+        }
+        TMV_INLINE diagmajor_iterator diagmajor_begin() 
+        { return diagmajor_iterator(&mat(),nlo(),0); }
+        TMV_INLINE diagmajor_iterator diagmajor_end() 
+        { return diagmajor_iterator(&mat(),0,nhi()+1); }
+
+        TMV_INLINE const_rowmajor_iterator rowmajor_begin() const
+        { return base::rowmajor_begin(); }
+        TMV_INLINE const_rowmajor_iterator rowmajor_end() const
+        { return base::rowmajor_end(); }
+        TMV_INLINE const_colmajor_iterator colmajor_begin() const
+        { return base::colmajor_begin(); }
+        TMV_INLINE const_colmajor_iterator colmajor_end() const
+        { return base::colmajor_end(); }
+        TMV_INLINE const_diagmajor_iterator diagmajor_begin() const
+        { return base::diagmajor_begin(); }
+        TMV_INLINE const_diagmajor_iterator diagmajor_end() const
+        { return base::diagmajor_end(); }
 
     }; // BaseMatrix_Band_Mutable
 
@@ -1746,10 +1911,25 @@ namespace tmv {
         } 
     };
 
+    // algo 4: DiagMajor
+    template <class M>
+    struct SetZeroB_Helper<4,M>
+    {
+        static void call(M& m1) 
+        {
+            for (int k=-m1.nlo();k<=m1.nhi();++k) 
+                m1.diag(k).setZero();
+        } 
+    };
+
     template <class M>
     static TMV_INLINE void SetZero(BaseMatrix_Band_Mutable<M>& m)
     {
-        const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
+        const int algo = (
+            M::_canlin ? 1 :
+            M::_rowmajor ? 2 : 
+            M::_colmajor ? 3 : 
+            4 );
         SetZeroB_Helper<algo,M>::call(m.mat());
     }
 
@@ -1812,10 +1992,25 @@ namespace tmv {
         }
     };
 
+    // algo 4: DiagMajor
+    template <class M, class T>
+    struct SetAllToB_Helper<4,M,T>
+    {
+        static void call(M& m1, const T& val) 
+        {
+            for (int k=-m1.nlo();k<=m1.nhi();++k) 
+                m1.diag(k).setAllTo(val);
+        } 
+    };
+
     template <class M, class T>
     static TMV_INLINE void SetAllTo(BaseMatrix_Band_Mutable<M>& m, const T& val)
     {
-        const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
+        const int algo = (
+            M::_canlin ? 1 :
+            M::_rowmajor ? 2 : 
+            M::_colmajor ? 3 : 
+            4 );
         SetAllToB_Helper<algo,M,T>::call(m.mat(),val);
     }
 
@@ -1878,10 +2073,25 @@ namespace tmv {
         }
     };
 
+    // algo 4: DiagMajor
+    template <class M, class T>
+    struct AddToAllB_Helper<4,M,T>
+    {
+        static void call(M& m1, const T& val) 
+        {
+            for (int k=-m1.nlo();k<=m1.nhi();++k) 
+                m1.diag(k).AddToAll(val);
+        } 
+    };
+
     template <class M, class T>
     static TMV_INLINE void AddToAll(BaseMatrix_Band_Mutable<M>& m, const T& val)
     {
-        const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
+        const int algo = (
+            M::_canlin ? 1 :
+            M::_rowmajor ? 2 : 
+            M::_colmajor ? 3 : 
+            4 );
         AddToAllB_Helper<algo,M,T>::call(m.mat(),val);
     }
 
@@ -1944,10 +2154,25 @@ namespace tmv {
         }
     };
 
+    // algo 4: DiagMajor
+    template <class M, class RT>
+    struct ClipB_Helper<4,M,RT>
+    {
+        static void call(M& m1, const RT& thresh) 
+        {
+            for (int k=-m1.nlo();k<=m1.nhi();++k) 
+                m1.diag(k).clip(thresh);
+        } 
+    };
+
     template <class M, class RT>
     static TMV_INLINE void Clip(BaseMatrix_Band_Mutable<M>& m, const RT& thresh)
     {
-        const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
+        const int algo = (
+            M::_canlin ? 1 :
+            M::_rowmajor ? 2 : 
+            M::_colmajor ? 3 : 
+            4 );
         ClipB_Helper<algo,M,RT>::call(m.mat(),thresh);
     }
 
@@ -2010,10 +2235,25 @@ namespace tmv {
         }
     };
 
+    // algo 4: DiagMajor
+    template <class M, class F>
+    struct ApplyToAllB_Helper<4,M,F>
+    {
+        static void call(M& m1, const F& f) 
+        {
+            for (int k=-m1.nlo();k<=m1.nhi();++k) 
+                m1.diag(k).applyToAll(f);
+        } 
+    };
+
     template <class M, class F>
     static TMV_INLINE void ApplyToAll(BaseMatrix_Band_Mutable<M>& m, const F& f)
     {
-        const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
+        const int algo = (
+            M::_canlin ? 1 :
+            M::_rowmajor ? 2 : 
+            M::_colmajor ? 3 : 
+            4 );
         ApplyToAllB_Helper<algo,M,F>::call(m.mat(),f);
     }
 

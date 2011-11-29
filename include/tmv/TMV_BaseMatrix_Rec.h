@@ -1041,6 +1041,8 @@ namespace tmv {
 
         TMV_INLINE size_t colsize() const { return mat().colsize(); }
         TMV_INLINE size_t rowsize() const { return mat().rowsize(); }
+        TMV_INLINE int nlo() const { return TMV_MAX(colsize()-1,0); }
+        TMV_INLINE int nhi() const { return TMV_MAX(rowsize()-1,0); }
         TMV_INLINE size_t ls() const { return mat().ls(); }
         TMV_INLINE int stepi() const { return mat().stepi(); }
         TMV_INLINE int stepj() const { return mat().stepj(); }

@@ -844,6 +844,8 @@ namespace tmv {
 
         enum { _colsize = M::_colsize };
         enum { _rowsize = M::_rowsize };
+        enum { _nlo = IntTraits2<IntTraits<_colsize>::Sm1,0>::max };
+        enum { _nhi = IntTraits2<IntTraits<_rowsize>::Sm1,0>::max };
         enum { _shape = Rec };
         enum { _fort = M::_fort };
         enum { _calc = false };
@@ -923,6 +925,8 @@ namespace tmv {
 
         TMV_INLINE size_t colsize() const { return Q.colsize(); }
         TMV_INLINE size_t rowsize() const { return Q.rowsize(); }
+        TMV_INLINE int nlo() const { return TMV_MAX(colsize()-1,0); }
+        TMV_INLINE int nhi() const { return TMV_MAX(rowsize()-1,0); }
 
     private : 
 

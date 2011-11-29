@@ -5,8 +5,8 @@ Import('env')
 ReadFileList=env['__readfunc']
 
 libs=['tmv'] 
-#sblibs=['tmv_symband','tmv'] 
-sblibs=['tmv'] 
+sblibs=['tmv_symband','tmv'] 
+#sblibs=['tmv'] 
 
 test_basic_files = ReadFileList('test_basic.files')
 test_diag_files = ReadFileList('test_diag.files')

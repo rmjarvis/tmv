@@ -192,6 +192,12 @@ namespace tmv {
 
         enum { _colsize = M1::_colsize };
         enum { _rowsize = M2::_rowsize };
+        enum { nlo1 = IntTraits2<M1::_nlo,M2::_nlo>::sum };
+        enum { nhi1 = IntTraits2<M1::_nhi,M2::_nlo>::sum };
+        enum { csm1 = IntTraits<_colsize>::Sm1 };
+        enum { rsm1 = IntTraits<_rowsize>::Sm1 };
+        enum { _nlo = IntTraits2<nlo1,csm1>::min };
+        enum { _nhi = IntTraits2<nhi1,rsm1>::min };
         enum { shape1 = Traits<ProdXM<ix,T,M2> >::_shape };
         enum { _shape = ShapeTraits2<shape1,M1::_shape>::prod };
         enum { _fort = M1::_fort && M2::_fort };
@@ -245,6 +251,10 @@ namespace tmv {
 
         TMV_INLINE size_t colsize() const { return m1.colsize(); }
         TMV_INLINE size_t rowsize() const { return m2.rowsize(); }
+        TMV_INLINE int nlo() const 
+        { return TMV_MAX(TMV_MIN(colsize()-1,m1.nlo()+m2.nlo()),0); }
+        TMV_INLINE int nhi() const 
+        { return TMV_MAX(TMV_MIN(rowsize()-1,m1.nhi()+m2.nhi()),0); }
 
         value_type cref(int i, int j) const
         { return x * (m1.get_row(i) * m2.get_col(j)); }

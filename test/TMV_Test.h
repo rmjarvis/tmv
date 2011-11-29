@@ -49,8 +49,9 @@ inline bool Equal(const M1& a, const M2& b, T eps)
     T normdiff = Norm(a-b);
 #ifdef XXD
     if (showacc && !(normdiff <= eps)) {
-        std::cout<<"a = "<<a<<std::endl;
-        std::cout<<"b = "<<b<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
+        std::cout<<"a-b = "<<a-b<<std::endl;
         std::cout<<"Norm(a-b) = "<<normdiff<<std::endl;
         std::cout<<"eps = "<<eps<<std::endl;
     }
