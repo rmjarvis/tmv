@@ -813,29 +813,29 @@ namespace tmv {
     class SmallDiagMatrixView;
 
     // This helper class helps decide calc_type for composite classes:
-    template <class T, int cs, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,Diag,cs,rs,rm,fort>
-    { typedef SmallDiagMatrix<T,cs,(fort?FortranStyle:CStyle)|NoAlias> type; };
-    template <class T, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,Diag,TMV_UNKNOWN,rs,rm,fort>
-    { typedef SmallDiagMatrix<T,rs,(fort?FortranStyle:CStyle)|NoAlias> type; };
-    template <class T, int cs, bool rm, bool fort>
-    struct MCopyHelper<T,Diag,cs,TMV_UNKNOWN,rm,fort>
-    { typedef SmallDiagMatrix<T,cs,(fort?FortranStyle:CStyle)|NoAlias> type; };
-    template <class T, bool rm, bool fort>
-    struct MCopyHelper<T,Diag,TMV_UNKNOWN,TMV_UNKNOWN,rm,fort>
-    { typedef DiagMatrix<T,(fort?FortranStyle:CStyle)|NoAlias> type; };
+    template <class T, int cs, int rs, int A>
+    struct MCopyHelper<T,Diag,cs,rs,A>
+    { typedef SmallDiagMatrix<T,cs,A|NoAlias> type; };
+    template <class T, int rs, int A>
+    struct MCopyHelper<T,Diag,TMV_UNKNOWN,rs,A>
+    { typedef SmallDiagMatrix<T,rs,A|NoAlias> type; };
+    template <class T, int cs, int A>
+    struct MCopyHelper<T,Diag,cs,TMV_UNKNOWN,A>
+    { typedef SmallDiagMatrix<T,cs,A|NoAlias> type; };
+    template <class T, int A>
+    struct MCopyHelper<T,Diag,TMV_UNKNOWN,TMV_UNKNOWN,A>
+    { typedef DiagMatrix<T,A|NoAlias> type; };
 
-    template <class T, int cs, int rs, int si, int sj, int c>
-    struct MViewHelper<T,Diag,cs,rs,si,sj,c>
+    template <class T, int cs, int rs, int si, int sj, int A>
+    struct MViewHelper<T,Diag,cs,rs,si,sj,A>
     { 
-        typedef SmallDiagMatrixView<T,cs,si,c> type; 
-        typedef ConstSmallDiagMatrixView<T,cs,si,c> ctype; 
+        typedef SmallDiagMatrixView<T,cs,si,A> type; 
+        typedef ConstSmallDiagMatrixView<T,cs,si,A> ctype; 
     };
-    template <class T, int si, int sj, int c>
-    struct MViewHelper<T,Diag,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,c>
+    template <class T, int si, int sj, int A>
+    struct MViewHelper<T,Diag,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,A>
     {
-        enum { A2 = c | (si == 1 ? Unit : NonUnit) };
+        enum { A2 = A | (si == 1 ? Unit : NonUnit) };
         typedef DiagMatrixView<T,A2> type; 
         typedef ConstDiagMatrixView<T,A2> ctype; 
     };

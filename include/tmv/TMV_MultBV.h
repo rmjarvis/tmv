@@ -18,12 +18,16 @@
 
 #ifdef XDEBUG_BV
 #include <iostream>
-#include "tmv/TMV_VectorIO.h"
+#include "tmv/TMV_Matrix.h"
+#include "tmv/TMV_Vector.h"
+#include "tmv/TMV_MultMV.h"
 #include "tmv/TMV_MatrixIO.h"
+#include "tmv/TMV_VectorIO.h"
 #include "tmv/TMV_NormV.h"
 #include "tmv/TMV_Norm.h"
 #include "tmv/TMV_AddVV.h"
 #include "tmv/TMV_SumVV.h"
+#include "tmv/TMV_CopyM.h"
 #endif
 
 //
@@ -66,9 +70,9 @@ namespace tmv {
         static TMV_INLINE void call(
             const Scaling<ix,T>& , const M1& , const V2& , V3& v3) 
         {
-#ifdef PRINTALGO_MV
+#ifdef PRINTALGO_BV
             const int M = cs == TMV_UNKNOWN ? int(v3.size()) : cs;
-            std::cout<<"MV algo 0: M,N,cs,rs,x = "<<M<<','<<0<<
+            std::cout<<"BV algo 0: M,N,cs,rs,x = "<<M<<','<<0<<
                 ','<<cs<<','<<rs<<','<<T(0)<<std::endl;
 #endif
             Maybe<(!add && rs == 0 && cs != 0)>::zero(v3); 
@@ -85,8 +89,8 @@ namespace tmv {
             const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
             const int xx = TMV_UNKNOWN;
-#ifdef PRINTALGO_MV
-            std::cout<<"MV algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
+#ifdef PRINTALGO_BV
+            std::cout<<"BV algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::const_col_sub_type M1c;
@@ -117,7 +121,8 @@ namespace tmv {
             IT3 Y0 = v3.begin();
 
             Maybe<!add>::zero(v3);
-            for(int j=0;j<j1;++j) {
+            int j=0;
+            for(;j<j1;++j) {
                 if (*X != T2(0)) {
                     Xj = ZProd<false,c2>::prod(x , *X++);
                     MultXV_Helper<-4,xx,true,0,PT2,M1c,V3s>::call2(
@@ -129,7 +134,7 @@ namespace tmv {
                 if (len < M) ++len;
             }
             if (j1 < j2) TMVAssert(len == m1.nlo()+m1.nhi()+1);
-            for(int j=j1;j<j2;++j) {
+            for(;j<j2;++j) {
                 if (*X != T2(0)) {
                     Xj = ZProd<false,c2>::prod(x , *X++);
                     MultXV_Helper<-4,lh,true,0,PT2,M1c,V3s>::call2(
@@ -140,13 +145,14 @@ namespace tmv {
                 A0j.shiftP(Adiagstep);
                 ++Y0;
             }
-            for(int j=j2;j<j3;++j) {
+            if (j1 >= j2) ++len;
+            for(;j<j3;++j) {
                 if (*X != T2(0)) {
                     Xj = ZProd<false,c2>::prod(x , *X++);
                     MultXV_Helper<-4,xx,true,0,PT2,M1c,V3s>::call2(
                         --len,Scaling<0,PT2>(Xj),A0j,Y0);
                 } else {
-                    ++X;
+                    ++X; --len;
                 }
                 A0j.shiftP(Adiagstep);
                 ++Y0;
@@ -154,9 +160,9 @@ namespace tmv {
         }
     };
 
-    // algo 12: Loop over rows
+    // algo 21: Loop over rows
     template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
-    struct MultBV_Helper<12,cs,rs,add,ix,T,M1,V2,V3>
+    struct MultBV_Helper<21,cs,rs,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
@@ -164,8 +170,8 @@ namespace tmv {
             const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
             const int xx = TMV_UNKNOWN;
-#ifdef PRINTALGO_MV
-            std::cout<<"MV algo 12: M,N,cs,rs,x = "<<M<<','<<N<<
+#ifdef PRINTALGO_BV
+            std::cout<<"BV algo 21: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::const_row_sub_type M1r;
@@ -176,6 +182,7 @@ namespace tmv {
 
             typedef typename M1::value_type T1;
             typedef typename V2::value_type T2;
+            typedef typename V3::value_type T3;
             typedef typename Traits2<T1,T2>::type PT;
             PT Yi;
 
@@ -195,31 +202,34 @@ namespace tmv {
             IT2 X0 = v2.begin().nonConj();
             IT3 Y = v3.begin();
 
-            for(int i=0;i<i1;++i) {
+            int i=0;
+            for(;i<i1;++i) {
                 Yi = MultVV_Helper<-4,xx,M1r,V2s>::call2(len,Ai0,X0);
                 Maybe<add>::add(*Y++, ZProd<false,false>::prod(x,Yi));
                 Ai0.shiftP(Astepi);
                 if (len < N) ++len;
             }
             if (i1 < i2) TMVAssert(len == m1.nlo()+m1.nhi()+1);
-            for(int i=i1;i<i2;++i) {
+            for(;i<i2;++i) {
                 Yi = MultVV_Helper<-4,lh,M1r,V2s>::call2(len,Ai0,X0);
                 Maybe<add>::add(*Y++, ZProd<false,false>::prod(x,Yi));
                 Ai0.shiftP(Adiagstep);
                 ++X0;
             }
-            for(int i=i2;i<i3;++i) {
+            if (i1 >= i2) ++len;
+            for(;i<i3;++i) {
                 Yi = MultVV_Helper<-4,xx,M1r,V2s>::call2(--len,Ai0,X0);
                 Maybe<add>::add(*Y++, ZProd<false,false>::prod(x,Yi));
                 Ai0.shiftP(Adiagstep);
                 ++X0;
             }
+            if (i3 < M && !add) for(int i=i3;i<M;++i) *Y++ = T3(0);
         }
     };
 
-    // algo 13: Loop over diagonals
+    // algo 31: Loop over diagonals
     template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
-    struct MultBV_Helper<13,cs,rs,add,ix,T,M1,V2,V3>
+    struct MultBV_Helper<31,cs,rs,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
@@ -227,8 +237,8 @@ namespace tmv {
             const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
             const int xx = TMV_UNKNOWN;
-#ifdef PRINTALGO_MV
-            std::cout<<"MV algo 13: M,N,cs,rs,x = "<<M<<','<<N<<
+#ifdef PRINTALGO_BV
+            std::cout<<"BV algo 31: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::const_diag_sub_type M1c;
@@ -260,10 +270,10 @@ namespace tmv {
             const int ds = IntTraits2<cs,rs>::min;
             ElemMultVV_Helper<-4,ds,true,ix,T,M1c,V2s,V3s>::call2(
                 len,x,A0,X0,Y0);
-            for(int k=0;k<m1.nhi();++k) {
+            for(int k=1;k<=m1.nhi();++k) {
                 A0.shiftP(Astepj);
                 ++X0;
-                if (k+len >= N) --len;
+                if (k+len > N) --len;
                 ElemMultVV_Helper<-4,xx,true,ix,T,M1c,V2s,V3s>::call2(
                     len,x,A0,X0,Y0);
             }
@@ -280,8 +290,8 @@ namespace tmv {
         {
             const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
-#ifdef PRINTALGO_MV
-            std::cout<<"MV algo 51: M,N,cs,rs,x = "<<M<<','<<N<<
+#ifdef PRINTALGO_BV
+            std::cout<<"BV algo 51: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             TMVStaticAssert(M1::_colmajor || M1::_diagmajor);
@@ -300,10 +310,10 @@ namespace tmv {
         static void call(
             const Scaling<0,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-#ifdef PRINTALGO_MV
+#ifdef PRINTALGO_BV
             const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
-            std::cout<<"MV algo 53: M,N,cs,rs,x = "<<M<<','<<N<<
+            std::cout<<"BV algo 53: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename Traits<T>::real_type RT;
@@ -320,10 +330,10 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-#ifdef PRINTALGO_MV
+#ifdef PRINTALGO_BV
             const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
             const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
-            std::cout<<"MV algo 81: M,N,cs,rs,x = "<<M<<','<<N<<
+            std::cout<<"BV algo 81: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             NoAliasMultMV<add>(x,m1,v2.copy(),v3);
@@ -337,10 +347,10 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-#ifdef PRINTALGO_MV
+#ifdef PRINTALGO_BV
             const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
             const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
-            std::cout<<"MV algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
+            std::cout<<"BV algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename Traits<T>::real_type RT;
@@ -381,10 +391,10 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-#ifdef PRINTALGO_MV
+#ifdef PRINTALGO_BV
             const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
-            std::cout<<"MV algo 84: M,N,cs,rs,x = "<<M<<','<<N<<
+            std::cout<<"BV algo 84: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             NoAliasMultXV<add>(x,(m1*v2).calc(),v3);
@@ -398,10 +408,10 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-#ifdef PRINTALGO_MV
+#ifdef PRINTALGO_BV
             const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
-            std::cout<<"MV algo 85: M,N,cs,rs,x = "<<M<<','<<N<<
+            std::cout<<"BV algo 85: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename Traits<T>::real_type RT;
@@ -585,21 +595,21 @@ namespace tmv {
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : 
                 !(Traits2<T1,T2>::samebase && Traits2<T1,T3>::samebase) ? (
-                    M1::_colmajor ? 11 : M1::_rowmajor ? 12 : 13 ) :
+                    M1::_colmajor ? 11 : M1::_rowmajor ? 21 : 31 ) :
                 M1::_colmajor ? (
                     ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? 11 :
                     ( TMV_MV_ZeroIX && !add && rs > cs ) ? 53 : 
                     11 ) :
-                M1::_rowmajor ? 12 :
+                M1::_rowmajor ? 21 :
                 M1::_diagmajor ? (
-                    ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? 13 :
+                    ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? 31 :
                     ( TMV_MV_ZeroIX && !add && rs > cs ) ? 53 : 
-                    13 ) :
-                V2::_step == 1 ? 12 : V3::_step == 1 ? 11 : 13;
-#ifdef PRINTALGO_MV
+                    31 ) :
+                V2::_step == 1 ? 21 : V3::_step == 1 ? 11 : 31;
+#ifdef PRINTALGO_BV
             const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
-            std::cout<<"MV algo -4: M,N,cs,rs,x = "<<M<<','<<N<<
+            std::cout<<"BV algo -4: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
 #endif
@@ -625,8 +635,8 @@ namespace tmv {
             //
             // Regular algorithm:
             // 11 = column major
-            // 12 = row major
-            // 13 = diag major
+            // 21 = row major
+            // 31 = diag major
             //
             // Meta algorithms
             // 51 = ix==0 && !add, so might want algo 53
@@ -642,9 +652,9 @@ namespace tmv {
             const int algo = 
                 ( rs == 0 || cs == 0 ) ? 0 : // trivial - nothing to do
                 TMV_OPT == 0 ? (
-                    M1::_colmajor ? 11 : M1::_rowmajor ? 12 : 13 ) :
+                    M1::_colmajor ? 11 : M1::_rowmajor ? 21 : 31 ) :
                 !(Traits2<T1,T2>::samebase && Traits2<T1,T3>::samebase) ? (
-                    M1::_colmajor ? 11 : M1::_rowmajor ? 12 : 13 ) :
+                    M1::_colmajor ? 11 : M1::_rowmajor ? 21 : 31 ) :
                 M1::_colmajor ? (
                     ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? (
                         V3::_step == TMV_UNKNOWN ? 86 : 
@@ -655,21 +665,21 @@ namespace tmv {
                     11 ) :
                 M1::_rowmajor ? (
                     ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? (
-                        V2::_step == TMV_UNKNOWN ? 83 : 12 ) :
+                        V2::_step == TMV_UNKNOWN ? 83 : 21 ) :
                     V2::_step == TMV_UNKNOWN ? ( rs > cs ? 81 : 82 ) :
-                    12 ) :
+                    21 ) :
                 M1::_diagmajor ? (
                     ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? (
                         V2::_step == TMV_UNKNOWN ? 83 : 
                         V3::_step == TMV_UNKNOWN ? 86 : 
                         ( TMV_MV_ZeroIX && !add ) ? 51 : 
-                        13 ) :
+                        31 ) :
                     V2::_step == TMV_UNKNOWN ? ( rs > cs ? 81 : 82 ) : 
                     V3::_step == TMV_UNKNOWN ? ( rs > cs ? 84 : 85 ) :
                     ( TMV_MV_ZeroIX && !add && rs > cs ) ? 53 : 
-                    13 ) :
-                V2::_step == 1 ? 12 : V3::_step == 1 ? 11 : 13;
-#ifdef PRINTALGO_MV
+                    31 ) :
+                V2::_step == 1 ? 21 : V3::_step == 1 ? 11 : 31;
+#ifdef PRINTALGO_BV
             std::cout<<"InlineMultMV: \n";
             std::cout<<"x = "<<ix<<"  "<<T(x)<<std::endl;
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
@@ -677,17 +687,22 @@ namespace tmv {
             std::cout<<"v3 = "<<TMV_Text(v3)<<std::endl;
             std::cout<<"cs,rs,algo = "<<cs<<"  "<<rs<<"  "<<algo<<std::endl;
 #endif
-#ifdef XDEBUG_MV
+#ifdef XDEBUG_BV
             typedef typename V3::real_type RT;
             typedef typename V3::value_type T3;
             Matrix<T3> m1c = m1;
             Vector<T3> v2c = v2;
             Vector<T3> v3i = v3;
             Vector<T3> v3c = v3;
-            MultMV<add>(x,m1,v2,v3c);
+            MultMV<add>(x,m1c,v2c,v3c);
+            std::cout<<"m1 = "<<m1<<std::endl;
+            std::cout<<"v2 = "<<v2<<std::endl;
+            if (add) std::cout<<"v3 = "<<v3<<std::endl;
+            std::cout<<"v3c = "<<v3c<<std::endl;
 #endif
             MultBV_Helper<algo,cs,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
-#ifdef XDEBUG_MV
+#ifdef XDEBUG_BV
+            std::cout<<"v3 => "<<v3<<std::endl;
             if (Norm(v3-v3c) > 1.e-3*(Norm(m1c)*Norm(v2c)+(add?Norm(v3i):RT(0)))) {
                 std::cout<<"m1 = "<<m1c<<std::endl;
                 std::cout<<"v2 = "<<v2c<<std::endl;

@@ -1022,7 +1022,7 @@ namespace tmv {
             const int algo2 = M3::iscomplex ? 17 : 13;
             if (NN > TMV_R1_COPY_SCALE_RATIO * MM) {
 #endif
-                Rank1VVM_Helper<82,cs,rs,add,ix,T,V1,V2,M3>::call(
+                Rank1VVM_Helper<81,cs,rs,add,ix,T,V1,V2,M3>::call(
                     x,v1,v2,m3);
 #ifdef TMV_R1_SCALE
             } else 
@@ -1032,26 +1032,9 @@ namespace tmv {
         }
     };
 
-    // algo 81: copy v1
+    // algo 81: copy x*v1
     template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<81,cs,rs,add,ix,T,V1,V2,M3>
-    {
-        static inline void call(
-            const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
-        {
-#ifdef PRINTALGO_MV_R1
-            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
-            std::cout<<"R1 algo 81: M,N,cs,rs,x = "<<M<<','<<N<<
-                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
-#endif
-            NoAliasRank1Update<add>(x,v1.copy(),v2,m3);
-        }
-    };
-
-    // algo 82: copy x*v1
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
-    struct Rank1VVM_Helper<82,cs,rs,add,ix,T,V1,V2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
@@ -1059,7 +1042,7 @@ namespace tmv {
 #ifdef PRINTALGO_R1
             const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
-            std::cout<<"R1 algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
+            std::cout<<"R1 algo 81: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename Traits<T>::real_type RT;
@@ -1068,34 +1051,9 @@ namespace tmv {
         }
     };
 
-    // algo 83: Copy v1, figure out where to put x
+    // algo 82: copy x*v2
     template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
-    struct Rank1VVM_Helper<83,cs,rs,add,ix,T,V1,V2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
-        {
-            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
-            if (M >= N) {
-                Rank1VVM_Helper<81,cs,rs,add,ix,T,V1,V2,M3>::call(x,v1,v2,m3);
-            } else {
-                Rank1VVM_Helper<82,cs,rs,add,ix,T,V1,V2,M3>::call(x,v1,v2,m3);
-            }
-        }
-    };
-    // If ix == 1, don't need the branch - just go to 81
-    template <int cs, int rs, bool add, class T, class V1, class V2, class M3>
-    struct Rank1VVM_Helper<83,cs,rs,add,1,T,V1,V2,M3>
-    {
-        static TMV_INLINE void call(
-            const Scaling<1,T>& x, const V1& v1, const V2& v2, M3& m3)
-        { Rank1VVM_Helper<81,cs,rs,add,1,T,V1,V2,M3>::call(x,v1,v2,m3); }
-    };
-
-    // algo 84: copy v2
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
-    struct Rank1VVM_Helper<84,cs,rs,add,ix,T,V1,V2,M3>
+    struct Rank1VVM_Helper<82,cs,rs,add,ix,T,V1,V2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
@@ -1103,24 +1061,7 @@ namespace tmv {
 #ifdef PRINTALGO_R1
             const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            std::cout<<"R1 algo 84: M,N,cs,rs,x = "<<M<<','<<N<<
-                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
-#endif
-            NoAliasRank1Update<add>(x,v1,v2.copy(),m3);
-        }
-    };
-
-    // algo 85: copy x*v2
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
-    struct Rank1VVM_Helper<85,cs,rs,add,ix,T,V1,V2,M3>
-    {
-        static inline void call(
-            const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
-        {
-#ifdef PRINTALGO_R1
-            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
-            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            std::cout<<"R1 algo 85: M,N,cs,rs,x = "<<M<<','<<N<<
+            std::cout<<"R1 algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename Traits<T>::real_type RT;
@@ -1129,34 +1070,9 @@ namespace tmv {
         }
     };
 
-    // algo 86: Copy v2, figure out where to put x
+    // algo 83: copy both
     template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
-    struct Rank1VVM_Helper<86,cs,rs,add,ix,T,V1,V2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
-        {
-            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
-            if (N >= M) {
-                Rank1VVM_Helper<84,cs,rs,add,ix,T,V1,V2,M3>::call(x,v1,v2,m3);
-            } else {
-                Rank1VVM_Helper<85,cs,rs,add,ix,T,V1,V2,M3>::call(x,v1,v2,m3);
-            }
-        }
-    };
-    // If ix == 1, don't need the branch - just go to 84
-    template <int cs, int rs, bool add, class T, class V1, class V2, class M3>
-    struct Rank1VVM_Helper<86,cs,rs,add,1,T,V1,V2,M3>
-    {
-        static TMV_INLINE void call(
-            const Scaling<1,T>& x, const V1& v1, const V2& v2, M3& m3)
-        { Rank1VVM_Helper<84,cs,rs,add,1,T,V1,V2,M3>::call(x,v1,v2,m3); }
-    };
-
-    // algo 87: copy both
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
-    struct Rank1VVM_Helper<87,cs,rs,add,ix,T,V1,V2,M3>
+    struct Rank1VVM_Helper<83,cs,rs,add,ix,T,V1,V2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
@@ -1164,7 +1080,7 @@ namespace tmv {
             const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
 #ifdef PRINTALGO_R1
-            std::cout<<"R1 algo 87: M,N,cs,rs,x = "<<M<<','<<N<<
+            std::cout<<"R1 algo 83: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename Traits<T>::real_type RT;
@@ -1178,7 +1094,7 @@ namespace tmv {
     };
     // If ix == 1, don't need the branch
     template <int cs, int rs, bool add, class T, class V1, class V2, class M3>
-    struct Rank1VVM_Helper<87,cs,rs,add,1,T,V1,V2,M3>
+    struct Rank1VVM_Helper<83,cs,rs,add,1,T,V1,V2,M3>
     {
         static inline void call(
             const Scaling<1,T>& x, const V1& v1, const V2& v2, M3& m3)
@@ -1186,7 +1102,7 @@ namespace tmv {
 #ifdef PRINTALGO_R1
             const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
-            std::cout<<"R1 algo 87: M,N,cs,rs,x = "<<M<<','<<N<<
+            std::cout<<"R1 algo 83: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             NoAliasRank1Update<add>(x,v1.copy(),v2.copy(),m3);
@@ -1291,13 +1207,13 @@ namespace tmv {
                 Rank1VVM_Helper<-2,cs,rs,add,ix,T,V1,V2,M3>::call(x,v1,v2,m3);
             } else if (s1 && !s2) {
                 // Use temporary for v1
-                Rank1VVM_Helper<83,cs,rs,add,ix,T,V1,V2,M3>::call(x,v1,v2,m3);
+                Rank1VVM_Helper<81,cs,rs,add,ix,T,V1,V2,M3>::call(x,v1,v2,m3);
             } else if (s2 && !s1) {
                 // Use temporary for v2
-                Rank1VVM_Helper<86,cs,rs,add,ix,T,V1,V2,M3>::call(x,v1,v2,m3);
+                Rank1VVM_Helper<82,cs,rs,add,ix,T,V1,V2,M3>::call(x,v1,v2,m3);
             } else {
                 // Use temporary for both 
-                Rank1VVM_Helper<87,cs,rs,add,ix,T,V1,V2,M3>::call(x,v1,v2,m3);
+                Rank1VVM_Helper<83,cs,rs,add,ix,T,V1,V2,M3>::call(x,v1,v2,m3);
             }
         }
     };
@@ -1398,13 +1314,9 @@ namespace tmv {
             //
             // 71 = x != 1, copy v1 if M < N
             //
-            // 81 = copy v1
-            // 82 = copy x*v1
-            // 83 = copy v1, figure out where to put x
-            // 84 = copy v2
-            // 85 = copy x*v2
-            // 86 = copy v2, figure out where to put x
-            // 87 = copy both v1 and v2
+            // 81 = copy x*v1
+            // 82 = copy x*v2
+            // 83 = copy both v1 and v2
             //
             //
 
@@ -1417,11 +1329,11 @@ namespace tmv {
                 ( M3::_rowmajor ? 3 : 11 ) :
                 M3::_colmajor ? (
                     ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? (
-                        ( V1::_step != 1 ? 83 : 
+                        ( V1::_step != 1 ? 81 : 
                           TMV_R1_ZeroIX ? 71 : 
                           M3::iscomplex ? 17 : 13 ) ) :
                     ( rs > cs && cs <= 4 && V2::_step == 1 ) ? 3 :
-                    ( cs > TMV_R1_MIN_COPY_SIZE && V1::_step != 1 ) ? 83 :
+                    ( cs > TMV_R1_MIN_COPY_SIZE && V1::_step != 1 ) ? 81 :
                     ( TMV_R1_ZeroIX && 
                       rs > IntTraits2<TMV_R1_COPY_SCALE_RATIO,cs>::prod ) ? 71 :
                     ( rs <= 4 ) ? (M3::iscomplex ? 18 : 14) :

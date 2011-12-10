@@ -290,7 +290,11 @@ namespace tmv {
         enum { _unit = Attrib<A>::unit };
         enum { twoS = isreal ? 1 : 2 };
 
-        typedef typename MCopyHelper<T,Diag,N,N,false,_fort>::type copy_type;
+        enum { known = (N != TMV_UNKNOWN) };
+        enum { copyA = _fort ? FortranStyle : CStyle };
+        typedef typename TypeSelect<known,
+                SmallDiagMatrix<T,N,copyA|NoAlias>,
+                DiagMatrix<T,copyA> >::type copy_type;
 
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
@@ -490,7 +494,11 @@ namespace tmv {
         enum { _unit = Attrib<A>::unit };
         enum { twoS = isreal ? 1 : 2 };
 
-        typedef typename MCopyHelper<T,Diag,N,N,false,_fort>::type copy_type;
+        enum { known = (N != TMV_UNKNOWN) };
+        enum { copyA = _fort ? FortranStyle : CStyle };
+        typedef typename TypeSelect<known,
+                SmallDiagMatrix<T,N,copyA|NoAlias>,
+                DiagMatrix<T,copyA> >::type copy_type;
 
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;

@@ -1076,36 +1076,36 @@ namespace tmv {
         }
     };
 
-    // algo 87: Use temporary for m1*m2
+    // algo 83: Use temporary for m1*m2
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUL_Helper<87,s,add,ix,T,M1,M2,M3>
+    struct MultUL_Helper<83,s,add,ix,T,M1,M2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UL
             const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
-            std::cout<<"UL algo 87: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
+            std::cout<<"UL algo 83: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type PT3;
-            const bool rm = M1::_rowmajor && M2::_rowmajor;
-            typedef typename MCopyHelper<PT3,Rec,s,s,rm>::type M3c;
+            const int A = M1::_rowmajor && M2::_rowmajor ? RowMajor : ColMajor;
+            typedef typename MCopyHelper<PT3,Rec,s,s,A>::type M3c;
             NoAliasMultXM<add>(x,M3c(m1*m2),m3);
         }
     };
 
-    // algo 88: Copy m2 to the same storage as m3
+    // algo 85: Copy m2 to the same storage as m3
     template <int s, int ix, class T, class M1, class M2, class M3>
-    struct MultUL_Helper<88,s,false,ix,T,M1,M2,M3>
+    struct MultUL_Helper<85,s,false,ix,T,M1,M2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_UL
-            std::cout<<"UL algo 88: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
+            std::cout<<"UL algo 85: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             typedef typename TypeSelect<M2::_upper,
                     typename M3::uppertri_type,
@@ -1520,12 +1520,13 @@ namespace tmv {
             // 26 = unroll small case
             // 27 = split each trimatrix into 3 submatrices and recurse
             //
-            // 87 = use a temporary for m1*m2
-            // 88 = copy m2 to the same storage as m3
+            // Copy matrices to new storage
+            // 83 = temp m1*m2
+            // 85 = copy m2 to the same storage as m3
 
             const int algo = 
                 // TODO: Add checks for bad majority on m1,m2,m3.
-                // Use algo 87, 88.  Need checks about SameStorage,
+                // Use algo 83, 85.  Need checks about SameStorage,
                 // similar to what is done in TMV_MultUL.cpp.
                 -4;
 #ifdef PRINTALGO_UL

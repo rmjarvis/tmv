@@ -819,9 +819,9 @@ namespace tmv {
         }
     };
 
-    // algo 87: Use temporary for m1*m2
+    // algo 83: Use temporary for m1*m2
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUU_Helper<87,s,add,ix,T,M1,M2,M3>
+    struct MultUU_Helper<83,s,add,ix,T,M1,M2,M3>
     {
         // This algo is slightly complicated by the fact that we allow
         // UnknownDiag.  If m3 is UnknownDiag, then its _shape dictates
@@ -860,16 +860,16 @@ namespace tmv {
         {
 #ifdef PRINTALGO_UU
             const int N = s == TMV_UNKNOWN ? int(m3.size()) : s;
-            std::cout<<"UU algo 87: N,s,x = "<<N<< ','<<s<<','<<T(x)<<std::endl;
+            std::cout<<"UU algo 83: N,s,x = "<<N<< ','<<s<<','<<T(x)<<std::endl;
 #endif
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type PT3;
-            const bool rm = M1::_rowmajor && M2::_rowmajor;
+            const int A = M1::_rowmajor && M2::_rowmajor ? RowMajor : ColMajor;
             const int s3 = M3::_shape;
-            typedef typename MCopyHelper<PT3,s3,s,s,rm>::type M3c;
+            typedef typename MCopyHelper<PT3,s3,s,s,A>::type M3c;
             // can't be unitdiag unless x == 1 and !add and m1,m2 are unit
             const bool unknowndiag = 
                 M3::_unknowndiag && ix != -1 && !add &&
@@ -1055,7 +1055,7 @@ namespace tmv {
 #ifdef PRINTALGO_UU
                 std::cout<<"Use temporary\n";
 #endif
-                MultUU_Helper<87,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+                MultUU_Helper<83,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             }
         }
     };
@@ -1153,6 +1153,9 @@ namespace tmv {
             // 23 = loop over k: Rank1
             // 26 = unroll small case
             // 27 = split each trimatrix into 3 submatrices and recurse
+            //
+            // Copy matrices to new storage
+            // 83 = temp m1*m2
             
             const int algo = 
                 // TODO: Add checks for bad majority on m1,m2,m3.

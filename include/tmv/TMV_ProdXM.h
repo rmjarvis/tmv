@@ -90,8 +90,13 @@ namespace tmv {
         enum { _rowmajor = rm1 };
 
         typedef ProdXM<ix,T,M> type;
-        typedef typename MCopyHelper<value_type,_shape,_colsize,_rowsize,
-                _rowmajor,_fort>::type copy_type;
+        enum { s = _shape };
+        enum { cs = _colsize };
+        enum { rs = _rowsize };
+        enum { A = (
+                (_rowmajor ? RowMajor : ColMajor) | 
+                (_fort ? FortranStyle : CStyle) ) };
+        typedef typename MCopyHelper<value_type,s,cs,rs,A>:: type copy_type;
         typedef const copy_type calc_type;
         typedef typename TypeSelect<M::_calc,const type,calc_type>::type 
             eval_type;

@@ -1,4 +1,6 @@
 
+//#define PRINTALGO_XB
+
 #include "tmv/TMV_ScaleB.h"
 #include "tmv/TMV_BandMatrix.h"
 #include "tmv/TMV_Vector.h"

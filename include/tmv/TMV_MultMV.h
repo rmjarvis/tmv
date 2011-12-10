@@ -2340,6 +2340,8 @@ namespace tmv {
             // 11 = column major, simple for loop
             // 12 = column major, 4 columns at a time
             // 13 = column major, rs is known and <= 4
+            // 15 = fully unroll by columns, apply x to v3
+            // 16 = fully unroll by columns, apply x to v2
             // 17 = column major, complex v3, 2 columns at a time
             // 18 = column major, complex v3, rs is known and <= 4
             //
@@ -2347,14 +2349,10 @@ namespace tmv {
             // 21 = row major, simple for loop
             // 22 = row major, 4 rows at a time
             // 23 = row major, cs is known and <= 4
-            // 27 = row major, complex v3, 2 rows at a time
-            // 28 = row major, complex v3, cs is known and <= 4
-            //
-            // Fully Unrolled:
             // 25 = fully unroll by rows, apply x to v3
             // 26 = fully unroll by rows, apply x to v2
-            // 15 = fully unroll by columns, apply x to v3
-            // 16 = fully unroll by columns, apply x to v2
+            // 27 = row major, complex v3, 2 rows at a time
+            // 28 = row major, complex v3, cs is known and <= 4
             //
             // Column Major, meta algorithms
             // 51 = column major, ix==0 && !add, so might want algo 53

@@ -15,26 +15,26 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix_Calc<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
     {
-        const bool s1 = SameStorage(m1,m3);
-        const bool s2 = SameStorage(m2,m3);
+        const bool s1 = SameStorage(m1.mat(),m3.mat());
+        const bool s2 = SameStorage(m2.mat(),m3.mat());
 
         if (!s1 && !s2) {
             // No aliasing 
-            NoAliasMultXM<false>(x1,m1,m3);
-            NoAliasMultXM<true>(x2,m2,m3);
+            NoAliasMultXM<false>(x1,m1.mat(),m3.mat());
+            NoAliasMultXM<true>(x2,m2.mat(),m3.mat());
         } else if (!s2) {
             // Alias with m1 only, do m1 first
-            AliasMultXM<false>(x1,m1,m3);
-            NoAliasMultXM<true>(x2,m2,m3);
+            AliasMultXM<false>(x1,m1.mat(),m3.mat());
+            NoAliasMultXM<true>(x2,m2.mat(),m3.mat());
         } else if (!s1) {
             // Alias with m2 only, do m2 first
-            AliasMultXM<false>(x2,m2,m3);
-            NoAliasMultXM<true>(x1,m1,m3);
+            AliasMultXM<false>(x2,m2.mat(),m3.mat());
+            NoAliasMultXM<true>(x1,m1.mat(),m3.mat());
         } else {
             // Need a temporary
-            typename M1::copy_type m1c = m1;
-            AliasMultXM<false>(x2,m2,m3);
-            NoAliasMultXM<true>(x1,m1c,m3);
+            typename M1::copy_type m1c = m1.mat();
+            AliasMultXM<false>(x2,m2.mat(),m3.mat());
+            NoAliasMultXM<true>(x1,m1c,m3.mat());
         }
     }
 
@@ -44,8 +44,8 @@ namespace tmv {
         const Scaling<ix2,T2>& x2, const BaseMatrix_Calc<M2>& m2,
         BaseMatrix_Mutable<M3>& m3)
     {
-        NoAliasMultXM<false>(x1,m1,m3);
-        NoAliasMultXM<true>(x2,m2,m3);
+        NoAliasMultXM<false>(x1,m1.mat(),m3.mat());
+        NoAliasMultXM<true>(x2,m2.mat(),m3.mat());
     }
 
  
@@ -95,8 +95,13 @@ namespace tmv {
         enum { _rowmajor = ( rm1 || (rm2 && !cm1) ) };
 
         typedef SumMM<ix1,T1,M1,ix2,T2,M2> type;
-        typedef typename MCopyHelper<value_type,_shape,_colsize,_rowsize,
-                _rowmajor,_fort>::type copy_type;
+        enum { s = _shape };
+        enum { cs = _colsize };
+        enum { rs = _rowsize };
+        enum { A = (
+                (_rowmajor ? RowMajor : ColMajor) |
+                (_fort ? FortranStyle : CStyle) ) };
+        typedef typename MCopyHelper<value_type,s,cs,rs,A>::type copy_type;
         typedef const copy_type calc_type;
         typedef typename TypeSelect<
             (M1::_calc && M2::_calc),const type,calc_type>::type eval_type;

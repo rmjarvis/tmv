@@ -380,15 +380,19 @@ namespace tmv {
             const int N = m.rowsize();
             std::cout<<"Norm2 algo 11: N = "<<N<<std::endl;
 #endif
-            typedef typename M::zfloat_type ZFT;
-            const int cs = M::_colsize;
-            const int rs = M::_rowsize;
-            const bool rm = M::_rowmajor;
-            typedef typename MCopyHelper<ZFT,Rec,cs,rs,rm>::type Mc;
-            Mc mc = m;
-            DiagMatrix<FT> S(m.rowsize());
-            SV_Decompose(mc,S,false);
-            return S.cref(0);
+            if (m.rowsize() > 0) {
+                typedef typename M::zfloat_type ZFT;
+                const int cs = M::_colsize;
+                const int rs = M::_rowsize;
+                const int A = M::_rowmajor ? RowMajor : ColMajor;
+                typedef typename MCopyHelper<ZFT,Rec,cs,rs,A>::type Mc;
+                Mc mc = m;
+                DiagMatrix<FT> S(m.rowsize());
+                SV_Decompose(mc,S,false);
+                return S.cref(0);
+            } else {
+                return FT(0);
+            }
         }
     };
 
@@ -403,14 +407,18 @@ namespace tmv {
             const int N = m.rowsize();
             std::cout<<"Norm2 algo 12: N = "<<N<<std::endl;
 #endif
-            m.setDiv();
-            // The Traits<> thing is to get rid of any reference.
-            typedef typename Traits<typename M::svd_type>::type svd_type;
-            TMVAssert(dynamic_cast<const svd_type*>(m.getDiv()));
-            const svd_type* div = static_cast<const svd_type*>(m.getDiv());
-            FT norm2 = div->norm2();
-            m.doneDiv();
-            return norm2;
+            if (m.rowsize() > 0) {
+                m.setDiv();
+                // The Traits<> thing is to get rid of any reference.
+                typedef typename Traits<typename M::svd_type>::type svd_type;
+                TMVAssert(dynamic_cast<const svd_type*>(m.getDiv()));
+                const svd_type* div = static_cast<const svd_type*>(m.getDiv());
+                FT norm2 = div->norm2();
+                m.doneDiv();
+                return norm2;
+            } else {
+                return FT(0);
+            }
         }
     };
 
@@ -539,15 +547,19 @@ namespace tmv {
             const int N = m.rowsize();
             std::cout<<"Condition algo 11: N = "<<N<<std::endl;
 #endif
-            typedef typename M::zfloat_type ZFT;
-            const int cs = M::_colsize;
-            const int rs = M::_rowsize;
-            const bool rm = M::_rowmajor;
-            typedef typename MCopyHelper<ZFT,Rec,cs,rs,rm>::type Mc;
-            Mc mc = m;
-            DiagMatrix<FT> S(m.rowsize());
-            SV_Decompose(mc,S,false);
-            return S.cref(0) / S.cref(S.size()-1);
+            if (m.rowsize() > 0) {
+                typedef typename M::zfloat_type ZFT;
+                const int cs = M::_colsize;
+                const int rs = M::_rowsize;
+                const int A = M::_rowmajor ? RowMajor : ColMajor;
+                typedef typename MCopyHelper<ZFT,Rec,cs,rs,A>::type Mc;
+                Mc mc = m;
+                DiagMatrix<FT> S(m.rowsize());
+                SV_Decompose(mc,S,false);
+                return S.cref(0) / S.cref(S.size()-1);
+            } else {
+                return FT(1);
+            }
         }
     };
 
@@ -562,12 +574,16 @@ namespace tmv {
             const int N = m.rowsize();
             std::cout<<"Condition algo 12: N = "<<N<<std::endl;
 #endif
-            m.setDiv();
-            // SV doesn't use the norminf argument, so don't calculate it.
-            FT norminf = m.getDivType() == tmv::SV ? FT(0) : m.normInf();
-            FT cond = m.getDiv()->condition(norminf);
-            m.doneDiv();
-            return cond;
+            if (m.rowsize() > 0) {
+                m.setDiv();
+                // SV doesn't use the norminf argument, so don't calculate it.
+                FT norminf = m.getDivType() == tmv::SV ? FT(0) : m.normInf();
+                FT cond = m.getDiv()->condition(norminf);
+                m.doneDiv();
+                return cond;
+            } else {
+                return FT(1);
+            }
         }
     };
 

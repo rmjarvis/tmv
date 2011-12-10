@@ -480,9 +480,9 @@ namespace tmv {
         typedef typename M1::value_type T1;
         typedef typename M2::value_type T2;
         typedef typename Traits2<T1,T2>::type T12;
-        enum { rm = M2::_rowmajor };
         enum { xs = M2::_rowsize };
-        typedef typename MCopyHelper<T12,Rec,rs,xs,rm>::type M2c;
+        enum { A = M2::_rowmajor ? RowMajor : ColMajor };
+        typedef typename MCopyHelper<T12,Rec,rs,xs,A>::type M2c;
         typedef typename M3::rowrange_type M3r;
 
         template <int square, int dummy>

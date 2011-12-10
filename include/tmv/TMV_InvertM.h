@@ -61,7 +61,7 @@ namespace tmv {
             typedef typename M1::real_type RT;
             // Find scale to help avoid overflow/underflow.
             RT scale = m1.maxAbs2Element();
-            typename MCopyHelper<T1,Rec,2,2,false>::type m1c = m1/scale;
+            typename MCopyHelper<T1,Rec,2,2>::type m1c = m1/scale;
             T1 det = m1c.det();
             if (det == T1(0)) ThrowSingular("2x2 Matrix");
             T1 invdet = ZProd<false,false>::quot(RT(1) , det);
@@ -92,7 +92,7 @@ namespace tmv {
             typedef typename M1::real_type RT;
             // Find scale to help avoid overflow/underflow.
             RT scale = m1.maxAbs2Element();
-            typename MCopyHelper<T1,Rec,3,3,false>::type m1c = m1/scale;
+            typename MCopyHelper<T1,Rec,3,3>::type m1c = m1/scale;
             T1 det = m1c.det();
             if (det == T1(0)) ThrowSingular("3x3 Matrix");
             T1 invdet = ZProd<false,false>::quot(RT(1) , det);
@@ -154,7 +154,7 @@ namespace tmv {
             
             // Find scale to help avoid overflow/underflow.
             RT scale = m1.maxAbs2Element();
-            typename MCopyHelper<T1,Rec,4,4,false>::type m1c = m1/scale;
+            typename MCopyHelper<T1,Rec,4,4>::type m1c = m1/scale;
             const T1 af = ZProd<false,false>::prod(m1c.cref(0,0),m1c.cref(1,1));
             const T1 ag = ZProd<false,false>::prod(m1c.cref(0,0),m1c.cref(1,2));
             const T1 ah = ZProd<false,false>::prod(m1c.cref(0,0),m1c.cref(1,3));

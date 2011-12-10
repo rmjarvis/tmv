@@ -114,7 +114,8 @@ namespace tmv {
             IT1 it1 = m1.get_col(0,0,len).begin().nonConj();
             IT2 it2 = m2.get_col(0,0,len).begin().nonConj();
             IT3 it3 = m3.get_col(0,0,len).begin();
-            for(int j=0;j<j1;++j) {
+            int j=0;
+            for(;j<j1;++j) {
                 AddVV_Helper<-4,xx,ix1,T1,M1c,ix2,T2,M2c,M3c>::call2(
                     len,x1,it1,x2,it2,it3);
                 it1.shiftP(rowstep1);
@@ -123,14 +124,15 @@ namespace tmv {
                 if (len < M) ++len;
             }
             if (j1 < j2) TMVAssert(len == m1.nlo()+m1.nhi()+1);
-            for(int j=j1;j<j2;++j) {
+            for(;j<j2;++j) {
                 AddVV_Helper<-4,lh,ix1,T1,M1c,ix2,T2,M2c,M3c>::call2(
                     len,x1,it1,x2,it2,it3);
                 it1.shiftP(diagstep1);
                 it2.shiftP(diagstep2);
                 it3.shiftP(diagstep3);
             }
-            for(int j=j2;j<j3;++j) {
+            if (j1 >= j2) ++len;
+            for(;j<j3;++j) {
                 AddVV_Helper<-4,xx,ix1,T1,M1c,ix2,T2,M2c,M3c>::call2(
                     --len,x1,it1,x2,it2,it3);
                 it1.shiftP(diagstep1);
@@ -179,7 +181,8 @@ namespace tmv {
             IT1 it1 = m1.get_row(0,0,len).begin().nonConj();
             IT2 it2 = m2.get_row(0,0,len).begin().nonConj();
             IT3 it3 = m3.get_row(0,0,len).begin();
-            for(int i=0;i<i1;++i) {
+            int i=0;
+            for(;i<i1;++i) {
                 AddVV_Helper<-4,xx,ix1,T1,M1r,ix2,T2,M2r,M3r>::call2(
                     len,x1,it1,x2,it2,it3);
                 it1.shiftP(colstep1);
@@ -188,14 +191,15 @@ namespace tmv {
                 if (len < N) ++len;
             }
             if (i1 < i2) TMVAssert(len == m1.nlo()+m1.nhi()+1);
-            for(int i=i1;i<i2;++i) {
+            for(;i<i2;++i) {
                 AddVV_Helper<-4,lh,ix1,T1,M1r,ix2,T2,M2r,M3r>::call2(
                     len,x1,it1,x2,it2,it3);
                 it1.shiftP(diagstep1);
                 it2.shiftP(diagstep2);
                 it3.shiftP(diagstep3);
             }
-            for(int i=i2;i<i3;++i) {
+            if (i1 >= i2) ++len;
+            for(;i<i3;++i) {
                 AddVV_Helper<-4,xx,ix1,T1,M1r,ix2,T2,M2r,M3r>::call2(
                     --len,x1,it1,x2,it2,it3);
                 it1.shiftP(diagstep1);
@@ -251,11 +255,11 @@ namespace tmv {
             const int ds = IntTraits2<cs,rs>::min;
             AddVV_Helper<-4,ds,ix1,T1,M1d,ix2,T2,M2d,M3d>::call2(
                 len,x1,it1,x2,it2,it3);
-            for(int k=0;k<m1.nhi();++k) {
+            for(int k=1;k<=m1.nhi();++k) {
                 it1.shiftP(rowstep1);
                 it2.shiftP(rowstep2);
                 it3.shiftP(rowstep3);
-                if (k+len >= N) --len;
+                if (k+len > N) --len;
                 AddVV_Helper<-4,xx,ix1,T1,M1d,ix2,T2,M2d,M3d>::call2(
                     len,x1,it1,x2,it2,it3);
             }

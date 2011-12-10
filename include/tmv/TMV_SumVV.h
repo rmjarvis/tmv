@@ -47,7 +47,8 @@ namespace tmv {
         enum { _calc = false };
 
         typedef SumVV<ix1,T1,V1,ix2,T2,V2> type;
-        typedef typename VCopyHelper<value_type,_size,_fort>::type copy_type;
+        enum { A = _fort ? FortranStyle : CStyle };
+        typedef typename VCopyHelper<value_type,_size,A>::type copy_type;
         typedef const copy_type calc_type;
         typedef typename TypeSelect<
             (V1::_calc && V2::_calc),const type,calc_type>::type eval_type;

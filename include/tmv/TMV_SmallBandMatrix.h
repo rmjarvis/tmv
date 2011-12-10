@@ -752,6 +752,7 @@ namespace tmv {
         typedef SmallBandMatrixView<real_type,xx,xx,LO,HI,twoSi,twoSj,twosA> 
             realpart_type;
         typedef realpart_type imagpart_type;
+        typedef VectorView<T,(vecAn|Unit)> linearview_type;
         typedef SmallBandMatrixView<T,xx,xx,LO,HI,_stepi,_stepj,nonconjA> 
             nonconj_type;
     };
@@ -764,7 +765,7 @@ namespace tmv {
     {
     public:
 
-        typedef ThinBandMatrix<T,LO,HI<A0,A1> type;
+        typedef ThinBandMatrix<T,LO,HI,A0,A1> type;
         typedef BaseMatrix_Band_Mutable<type> base_mut;
         typedef BandMatrixDivHelper<type> divhelper;
 
@@ -792,6 +793,8 @@ namespace tmv {
         typedef typename Traits<type>::linearview_type linearview_type;
         typedef typename Traits<type>::const_linearview_type 
             const_linearview_type;
+        typedef typename Traits<type>::diag_sub_type diag_sub_type;
+        typedef typename Traits<type>::diag_type diag_type;
 
         //
         // Constructors
@@ -815,7 +818,7 @@ namespace tmv {
             itssi(_rowmajor ? LO+HI : _colmajor ? 1 :
                   rs >= cs ? 1-int(cs) : -int(rs)),
             itssj(_rowmajor ? 1 : _colmajor ? LO+HI : -itssi+1),
-            itsm1(linsize), itsm(itsm1.get() - _diagmajor ? LO*itssi : 0)
+            itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(LO >= 0);
@@ -833,7 +836,7 @@ namespace tmv {
             itssi(_rowmajor ? LO+HI : _colmajor ? 1 :
                   rs >= cs ? 1-int(cs) : -int(rs)),
             itssj(_rowmajor ? 1 : _colmajor ? LO+HI : -itssi+1),
-            itsm1(linsize), itsm(itsm1.get() - _diagmajor ? LO*itssi : 0)
+            itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(LO >= 0);
@@ -849,7 +852,7 @@ namespace tmv {
             itssi(_rowmajor ? LO+HI : _colmajor ? 1 :
                   itsrs >= itscs ? 1-int(itscs) : -int(itsrs)),
             itssj(_rowmajor ? 1 : _colmajor ? LO+HI : -itssi+1),
-            itsm1(linsize), itsm(itsm1.get() - _diagmajor ? LO*itssi : 0)
+            itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(LO >= 0);
@@ -864,7 +867,7 @@ namespace tmv {
             itssi(_rowmajor ? LO+HI : _colmajor ? 1 :
                   itsrs >= itscs ? 1-int(itscs) : -int(itsrs)),
             itssj(_rowmajor ? 1 : _colmajor ? LO+HI : -itssi+1),
-            itsm1(linsize), itsm(itsm1.get() - _diagmajor ? LO*itssi : 0)
+            itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(LO >= 0);
@@ -882,7 +885,7 @@ namespace tmv {
             itssi(_rowmajor ? LO+HI : _colmajor ? 1 :
                   itsrs >= itscs ? 1-int(itscs) : -int(itsrs)),
             itssj(_rowmajor ? 1 : _colmajor ? LO+HI : -itssi+1),
-            itsm1(linsize), itsm(itsm1.get() - _diagmajor ? LO*itssi : 0)
+            itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(LO >= 0);
@@ -899,7 +902,7 @@ namespace tmv {
             itssi(_rowmajor ? LO+HI : _colmajor ? 1 :
                   itsrs >= itscs ? 1-int(itscs) : -int(itsrs)),
             itssj(_rowmajor ? 1 : _colmajor ? LO+HI : -itssi+1),
-            itsm1(linsize), itsm(itsm1.get() - _diagmajor ? LO*itssi : 0)
+            itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(LO >= 0);
@@ -919,7 +922,7 @@ namespace tmv {
             linsize(BandStorageLength(_stor,itscs,itsrs,LO,HI)),
             itssi(_rowmajor ? LO+HI : _colmajor ? 1 : 1-int(itscs)),
             itssj(_rowmajor ? 1 : _colmajor ? LO+HI : int(itscs)),
-            itsm1(linsize), itsm(itsm1.get() - _diagmajor ? LO*itssi : 0)
+            itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(LO >= 0);
@@ -954,15 +957,17 @@ namespace tmv {
             linsize(BandStorageLength(_stor,itscs,itsrs,LO,HI)),
             itssi(_rowmajor ? 0 : _colmajor ? 1 : 1-int(itscs)),
             itssj(_rowmajor ? 1 : _colmajor ? 0 : int(itscs)),
-            itsm1(linsize), itsm(itsm1.get())
+            itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert((LO == 0 && HI == 1) || (LO == 1 && HI == 0) );
             TMVAssert( (v0.size() == v1.size()) ||
                        (v0.size() == v1.size()-1 && LO==1 && HI==0) ||
                        (v0.size() == v1.size()+1 && LO==0 && HI==1) );
-            v0.newAssignTo(this->diag(LO==1 ? -1 : 0));
-            v1.newAssignTo(this->diag(LO==1 ? 0 : 1));
+            diag_sub_type d0 = this->diag(LO==1 ? -1 : 0);
+            diag_sub_type d1 = this->diag(LO==1 ? 0 : 1);
+            v0.newAssignTo(d0);
+            v1.newAssignTo(d1);
         }
 
         template <class V0, class V1, class V2>
@@ -973,15 +978,18 @@ namespace tmv {
             linsize(BandStorageLength(_stor,itscs,itsrs,LO,HI)),
             itssi(_rowmajor ? 0 : _colmajor ? 1 : 1-int(itscs)),
             itssj(_rowmajor ? 1 : _colmajor ? 0 : int(itscs)),
-            itsm1(linsize), itsm(itsm1.get())
+            itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(LO == 1 && HI == 1);
             TMVAssert( (v0.size() == v1.size()) || (v0.size() == v1.size()-1) );
             TMVAssert( (v2.size() == v1.size()) || (v2.size() == v1.size()-1) );
-            v0.newAssignTo(this->diag(-1));
-            v1.newAssignTo(this->diag());
-            v2.newAssignTo(this->diag(1));
+            diag_sub_type d0 = this->diag(-1);
+            diag_type d1 = this->diag();
+            diag_sub_type d2 = this->diag(1);
+            v0.newAssignTo(d0);
+            v1.newAssignTo(d1);
+            v2.newAssignTo(d2);
         }
 
         ~ThinBandMatrix() 

@@ -6,10 +6,10 @@
 #define NOASSIGN
 #define PRINTALGO_NormB
 
-#include "TMV.h"
-#include "TMV_Band.h"
 #include "TMV_Test.h"
 #include "TMV_Test_2.h"
+#include "TMV.h"
+#include "TMV_Band.h"
 #include "TMV_TestBandArith.h"
 
 template <class T1, class T2> 

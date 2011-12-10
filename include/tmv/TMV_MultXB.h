@@ -7,6 +7,12 @@
 #include "TMV_MultXV.h"
 #include "TMV_CopyB.h"
 
+#ifdef PRINTALGO_XB
+#include <iostream>
+#include "TMV_MatrixIO.h"
+#include "TMV_BandMatrixIO.h"
+#endif
+
 namespace tmv {
 
     // Defined in TMV_MultXB.cpp
@@ -45,7 +51,12 @@ namespace tmv {
     struct MultXB_Helper<1,cs,rs,false,1,T,M1,M2>
     {
         static TMV_INLINE void call(const Scaling<1,T>& , const M1& m1, M2& m2)
-        { CopyB_Helper<-3,cs,rs,M1,M2>::call(m1,m2); }
+        { 
+#ifdef PRINTALGO_XB
+            std::cout<<"XB algo 1\n";
+#endif
+            CopyB_Helper<-3,cs,rs,M1,M2>::call(m1,m2); 
+        }
     };
 
     // algo 101: Same as algo 1, but use algo -3 for Copy
@@ -53,7 +64,12 @@ namespace tmv {
     struct MultXB_Helper<101,cs,rs,false,1,T,M1,M2>
     {
         static TMV_INLINE void call(const Scaling<1,T>& , const M1& m1, M2& m2)
-        { CopyB_Helper<-1,cs,rs,M1,M2>::call(m1,m2); }
+        { 
+#ifdef PRINTALGO_XB
+            std::cout<<"XB algo 101\n";
+#endif
+            CopyB_Helper<-1,cs,rs,M1,M2>::call(m1,m2); 
+        }
     };
 
     // algo 201: Same as algo 1, but use algo -2 for Copy
@@ -62,6 +78,9 @@ namespace tmv {
     {
         static void call(const Scaling<1,T>& , const M1& m1, M2& m2)
         {
+#ifdef PRINTALGO_XB
+            std::cout<<"XB algo 201\n";
+#endif
             // Need a quick alias check here, since ExactSameStorage
             // is allowed for MultXB, but not Copy
             if (!SameStorage(m1,m2)) {
@@ -81,6 +100,10 @@ namespace tmv {
         {
             const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+#ifdef PRINTALGO_XB
+            std::cout<<"XB algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
             const int xx = TMV_UNKNOWN;
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::col_sub_type M2c;
@@ -95,22 +118,28 @@ namespace tmv {
             const int j1 = m1.nhi();
             const int j2 = TMV_MIN(N,M-m1.nlo());
             const int j3 = TMV_MIN(N,M+m1.nhi());
+            //std::cout<<"j1,2,3 = "<<j1<<','<<j2<<','<<j3<<std::endl;
             int len = m1.nlo()+1;
             IT1 it1 = m1.get_col(0,0,len).begin().nonConj();
             IT2 it2 = m2.get_col(0,0,len).begin();
-            for(int j=0;j<j1;++j) {
+            int j=0;
+            for(;j<j1;++j) {
+                //std::cout<<"A: j,len = "<<j<<','<<len<<std::endl;
                 MultXV_Helper<-4,xx,add,ix,T,M1c,M2c>::call2(len,x,it1,it2);
                 it1.shiftP(rowstep1);
                 it2.shiftP(rowstep2);
                 if (len < M) ++len;
             }
             if (j1 < j2) TMVAssert(len == m1.nlo()+m1.nhi()+1);
-            for(int j=j1;j<j2;++j) {
+            for(;j<j2;++j) {
+                //std::cout<<"B: j,len = "<<j<<','<<len<<std::endl;
                 MultXV_Helper<-4,lh,add,ix,T,M1c,M2c>::call2(len,x,it1,it2);
                 it1.shiftP(diagstep1);
                 it2.shiftP(diagstep2);
             }
-            for(int j=j2;j<j3;++j) {
+            if (j1 >= j2) ++len;
+            for(;j<j3;++j) {
+                //std::cout<<"C: j,len = "<<j<<','<<len<<std::endl;
                 MultXV_Helper<-4,xx,add,ix,T,M1c,M2c>::call2(--len,x,it1,it2);
                 it1.shiftP(diagstep1);
                 it2.shiftP(diagstep2);
@@ -118,14 +147,18 @@ namespace tmv {
         }
     };
 
-    // algo 12: Loop over rows
+    // algo 21: Loop over rows
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2>
-    struct MultXB_Helper<12,cs,rs,add,ix,T,M1,M2>
+    struct MultXB_Helper<21,cs,rs,add,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+#ifdef PRINTALGO_XB
+            std::cout<<"XB algo 21: M,N,cs,rs,x = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
             const int xx = TMV_UNKNOWN;
             typedef typename M1::const_row_sub_type M1r;
             typedef typename M2::row_sub_type M2r;
@@ -140,22 +173,28 @@ namespace tmv {
             const int i1 = m1.nlo();
             const int i2 = TMV_MIN(M,N-m1.nhi());
             const int i3 = TMV_MIN(M,N+m1.nlo());
+            //std::cout<<"i1,2,3 = "<<i1<<','<<i2<<','<<i3<<std::endl;
             int len = m1.nhi()+1;
             IT1 it1 = m1.get_row(0,0,len).begin().nonConj();
             IT2 it2 = m2.get_row(0,0,len).begin();
-            for(int i=0;i<i1;++i) {
+            int i=0;
+            for(;i<i1;++i) {
+                //std::cout<<"A: i,len = "<<i<<','<<len<<std::endl;
                 MultXV_Helper<-4,xx,add,ix,T,M1r,M2r>::call2(len,x,it1,it2);
                 it1.shiftP(colstep1);
                 it2.shiftP(colstep2);
                 if (len < N) ++len;
             }
             if (i1 < i2) TMVAssert(len == m1.nlo()+m1.nhi()+1);
-            for(int i=i1;i<i2;++i) {
+            for(;i<i2;++i) {
+                //std::cout<<"B: i,len = "<<i<<','<<len<<std::endl;
                 MultXV_Helper<-4,lh,add,ix,T,M1r,M2r>::call2(len,x,it1,it2);
                 it1.shiftP(diagstep1);
                 it2.shiftP(diagstep2);
             }
-            for(int i=i2;i<i3;++i) {
+            if (i1 >= i2) ++len;
+            for(;i<i3;++i) {
+                //std::cout<<"C: i,len = "<<i<<','<<len<<std::endl;
                 MultXV_Helper<-4,xx,add,ix,T,M1r,M2r>::call2(--len,x,it1,it2);
                 it1.shiftP(diagstep1);
                 it2.shiftP(diagstep2);
@@ -163,14 +202,18 @@ namespace tmv {
         }
     };
 
-    // algo 13: Loop over diagonals
+    // algo 31: Loop over diagonals
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2>
-    struct MultXB_Helper<13,cs,rs,add,ix,T,M1,M2>
+    struct MultXB_Helper<31,cs,rs,add,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+#ifdef PRINTALGO_XB
+            std::cout<<"XB algo 31: M,N,cs,rs,x = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
             const int xx = TMV_UNKNOWN;
             typedef typename M1::const_diag_sub_type M1d;
             typedef typename M2::diag_sub_type M2d;
@@ -184,6 +227,7 @@ namespace tmv {
             IT2 it2 = m2.get_diag(-m1.nlo()).begin();
             int len = TMV_MIN(M-m1.nlo(),N);
             for(int k=m1.nlo();k;--k) {
+                //std::cout<<"A: k,len = "<<k<<','<<len<<std::endl;
                 MultXV_Helper<-4,xx,add,ix,T,M1d,M2d>::call2(len,x,it1,it2);
                 it1.shiftP(-colstep1);
                 it2.shiftP(-colstep2);
@@ -191,11 +235,13 @@ namespace tmv {
             }
             TMVAssert(len == TMV_MIN(M,N));
             const int ds = IntTraits2<cs,rs>::min;
+            //std::cout<<"B: k,len = "<<0<<','<<len<<std::endl;
             MultXV_Helper<-4,ds,add,ix,T,M1d,M2d>::call2(len,x,it1,it2);
-            for(int k=0;k<m1.nhi();++k) {
+            for(int k=1;k<=m1.nhi();++k) {
                 it1.shiftP(rowstep1);
                 it2.shiftP(rowstep2);
-                if (k+len >= N) --len;
+                if (k+len > N) --len;
+                //std::cout<<"C: k,len = "<<k<<','<<len<<std::endl;
                 MultXV_Helper<-4,xx,add,ix,T,M1d,M2d>::call2(len,x,it1,it2);
             }
         }
@@ -352,14 +398,23 @@ namespace tmv {
             typedef typename M2::value_type T2;
             const int algo = 
                 ( ix == 1 && !add ) ? 1 :
-                TMV_OPT == 0 ? 13 :
+                TMV_OPT == 0 ? 31 :
                 ( M1::_colmajor && M2::_colmajor ) ? 11 : 
-                ( M1::_rowmajor && M2::_rowmajor ) ? 12 : 
-                13;
+                ( M1::_rowmajor && M2::_rowmajor ) ? 21 : 
+                31;
 #ifdef PRINTALGO_XB
-            std::cout<<"XB: algo = "<<algo<<std::endl;
+            std::cout<<"XB: algo -4\n";
+            std::cout<<"add = "<<add<<"  x = "<<ix<<" "<<T(x)<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+            std::cout<<"m1 = "<<m1<<std::endl;
+            std::cout<<"m2 = "<<m2<<std::endl;
 #endif
             MultXB_Helper<algo,cs,rs,add,ix,T,M1,M2>::call(x,m1,m2);
+#ifdef PRINTALGO_XB
+            std::cout<<"m2 => "<<m2<<std::endl;
+#endif
         }
     };
 
@@ -370,11 +425,22 @@ namespace tmv {
         static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
+#ifdef PRINTALGO_XB
+            std::cout<<"Inline MultXB\n";
+            std::cout<<"add = "<<add<<"  x = "<<ix<<" "<<T(x)<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+#endif
             MultXB_Helper<-4,cs,rs,add,ix,T,M1,M2>::call(x,m1,m2); 
             if (m2.nlo() > m1.nlo())
                 Maybe<!add>::zero2(m2.diagRange(-m2.nlo(),-m1.nlo()));
             if (m2.nhi() > m1.nhi())
                 Maybe<!add>::zero2(m2.diagRange(m1.nhi()+1,m2.nhi()+1));
+#ifdef PRINTALGO_XB
+            if (m2.nlo() > m1.nlo() || m2.nhi() > m1.nhi()) {
+                std::cout<<"After zeros: m2 => "<<m2<<std::endl;
+            }
+#endif
         }
     };
 
@@ -401,7 +467,19 @@ namespace tmv {
                 M2::_conj ? 97 :
                 inst ? 90 :
                 -3;
+#ifdef PRINTALGO_XB
+            std::cout<<"NoAlias MultXB:\n";
+            std::cout<<"add = "<<add<<"  x = "<<ix<<" "<<T(x)<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+            std::cout<<"m1 = "<<m1<<std::endl;
+            std::cout<<"m2 = "<<m2<<std::endl;
+#endif
             MultXB_Helper<algo,cs,rs,add,ix,T,M1,M2>::call(x,m1,m2);
+#ifdef PRINTALGO_XB
+            std::cout<<"m2 => "<<m2<<std::endl;
+#endif
         }
     };
 
@@ -549,7 +627,7 @@ namespace tmv {
         const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
-        m2.setZero();
+        Maybe<!add>::zero(m2);
         typename BMVO<M2>::b b2 = BandMatrixViewOf(m2,m1.nlo(),m1.nhi());
         NoAliasMultXM<add>(x,m1,b2);
     }
@@ -600,7 +678,7 @@ namespace tmv {
         const int hi = Maybe<M2::_upper>::select(m1.nhi(),m1.nlo());
         TMVAssert(lo == 0);
         typename BMVOTri<M2>::b b2 = BandMatrixViewOf(m2,hi);
-        m2.setZero();
+        Maybe<!add>::zero(m2);
         NoAliasMultXM<add>(x,m1,b2);
     }
 
@@ -641,7 +719,7 @@ namespace tmv {
     {
         typename M1::const_diag_type d1 = m1.diag();
         typename M2::diag_type d2 = m2.diag();
-        m2.setZero();
+        Maybe<!add>::zero(m2);
         NoAliasMultXV<add>(x,d1,d2);
     }
 

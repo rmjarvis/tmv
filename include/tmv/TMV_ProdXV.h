@@ -79,7 +79,8 @@ namespace tmv {
         enum { _fort = V::_fort };
         enum { _calc = false };
         typedef ProdXV<ix,T,V> type;
-        typedef typename VCopyHelper<value_type,_size,_fort>::type copy_type;
+        enum { A = _fort ? FortranStyle : CStyle };
+        typedef typename VCopyHelper<value_type,_size,A>::type copy_type;
         typedef const copy_type calc_type;
         typedef typename TypeSelect<V::_calc,const type,calc_type>::type 
             eval_type;

@@ -286,12 +286,12 @@ namespace tmv {
     // This helper class helps decide calc_type for composite classes:
     // We don't define anything, since it needs to be specialized
     // differently for each shape.
-    template <class T, int shape, int cs, int rs, bool rm=false, bool fort=false>
+    template <class T, int shape, int cs, int rs, int A=0>
     struct MCopyHelper;
 
     // This is similar - it defines the right view type when some
     // sizes or steps might be known.
-    template <class T, int shape, int cs, int rs, int si, int sj, int c=NonConj>
+    template <class T, int shape, int cs, int rs, int si, int sj, int A=0>
     struct MViewHelper;
 
     template <class M>

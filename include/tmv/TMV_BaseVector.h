@@ -424,33 +424,31 @@ namespace tmv {
     };
 
     // This helper class helps decide calc_type for composite classes:
-    template <class T, int s, bool fort=false>
+    template <class T, int s, int A=0>
     struct VCopyHelper
     {
-        enum { A2 = (fort ? FortranStyle : CStyle) | NoAlias };
-        typedef SmallVector<T,s,A2> type; 
+        typedef SmallVector<T,s,A> type; 
     };
-    template <class T, bool fort>
-    struct VCopyHelper<T,TMV_UNKNOWN,fort>
+    template <class T, int A>
+    struct VCopyHelper<T,TMV_UNKNOWN,A>
     {
-        enum { A2 = (fort ? FortranStyle : CStyle) | NoAlias };
-        typedef Vector<T,A2> type; 
+        typedef Vector<T,A|NoAlias> type; 
     };
 
     // This is similar - it defines the right view type when the
     // size or step might be known.
-    template <class T, int N, int S, int C=NonConj>
+    template <class T, int N, int S, int A=0>
     struct VViewHelper
     { 
-        typedef SmallVectorView<T,N,S,C> type; 
-        typedef ConstSmallVectorView<T,N,S,C> ctype; 
+        typedef SmallVectorView<T,N,S,A> type; 
+        typedef ConstSmallVectorView<T,N,S,A> ctype; 
     };
-    template <class T, int S, int C>
-    struct VViewHelper<T,TMV_UNKNOWN,S,C>
+    template <class T, int S, int A>
+    struct VViewHelper<T,TMV_UNKNOWN,S,A>
     {
-        enum { A = C | (S == 1 ? Unit : NonUnit) };
-        typedef VectorView<T,A> type; 
-        typedef ConstVectorView<T,A> ctype; 
+        enum { A2 = A | (S == 1 ? Unit : NonUnit) };
+        typedef VectorView<T,A2> type; 
+        typedef ConstVectorView<T,A2> ctype; 
     };
 
 

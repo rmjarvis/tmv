@@ -1,7 +1,4 @@
 
-//#define PRINTALGO_BV
-//#define XDEBUG_BV
-
 #include "TMV_Blas.h"
 #include "tmv/TMV_MultBV.h"
 #include "tmv/TMV_BandMatrix.h"

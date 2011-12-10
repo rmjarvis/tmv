@@ -10,6 +10,12 @@
 #include "TMV_BaseMatrix_Band.h"
 #include "TMV_ScaleV.h"
 
+#ifdef PRINTALGO_XB
+#include <iostream>
+#include "TMV_MatrixIO.h"
+#include "TMV_BandMatrixIO.h"
+#endif
+
 namespace tmv {
 
     // Defined in TMV_ScaleB.cpp
@@ -34,6 +40,9 @@ namespace tmv {
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
         {
+#ifdef PRINTALGO_XB
+            std::cout<<"ScaleB algo 1\n";
+#endif
             TMVStaticAssert(M1::_canlin);
             typedef typename M1::linearview_type Ml;
             Ml ml = m.linearView();
@@ -49,6 +58,10 @@ namespace tmv {
         {
             const int M = cs == TMV_UNKNOWN ? int(m.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m.rowsize()) : rs;
+#ifdef PRINTALGO_XB
+            std::cout<<"ScaleB algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
             const int xx = TMV_UNKNOWN;
             typedef typename M1::col_sub_type M1c;
             typedef typename M1c::iterator IT;
@@ -59,18 +72,24 @@ namespace tmv {
             const int j1 = m.nhi();
             const int j2 = TMV_MIN(N,M-m.nlo());
             const int j3 = TMV_MIN(N,M+m.nhi());
+            //std::cout<<"j1,j2,j3 = "<<j1<<','<<j2<<','<<j3<<std::endl;
             int len = m.nlo()+1;
             IT it = m.get_col(0,0,len).begin();
-            for(int j=0;j<j1;++j) {
+            int j=0;
+            for(;j<j1;++j) {
+                //std::cout<<"A j = "<<j<<", len  = "<<len<<std::endl;
                 ScaleV_Helper<-3,xx,ix,T,M1c>::call2(len,x,it);
                 it.shiftP(rowstep);
                 if (len < M) ++len;
             }
-            for(int j=j1;j<j2;++j) {
+            for(;j<j2;++j) {
+                //std::cout<<"B j = "<<j<<", len  = "<<len<<std::endl;
                 ScaleV_Helper<-3,lh,ix,T,M1c>::call2(len,x,it);
                 it.shiftP(diagstep);
             }
-            for(int j=j2;j<j3;++j) {
+            if (j1 >= j2) ++len;
+            for(;j<j3;++j) {
+                //std::cout<<"C j = "<<j<<", len  = "<<len<<std::endl;
                 ScaleV_Helper<-3,xx,ix,T,M1c>::call2(--len,x,it);
                 it.shiftP(diagstep);
             }
@@ -85,6 +104,10 @@ namespace tmv {
         {
             const int M = cs == TMV_UNKNOWN ? int(m.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m.rowsize()) : rs;
+#ifdef PRINTALGO_XB
+            std::cout<<"ScaleB algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
             const int xx = TMV_UNKNOWN;
             typedef typename M1::row_sub_type M1r;
             typedef typename M1r::iterator IT;
@@ -97,16 +120,18 @@ namespace tmv {
             const int i3 = TMV_MIN(M,N+m.nlo());
             int len = m.nhi()+1;
             IT it = m.get_row(0,0,len).begin();
-            for(int i=0;i<i1;++i) {
+            int i=0;
+            for(;i<i1;++i) {
                 ScaleV_Helper<-3,xx,ix,T,M1r>::call2(len,x,it);
                 it.shiftP(colstep);
                 if (len < N) ++len;
             }
-            for(int i=i1;i<i2;++i) {
+            for(;i<i2;++i) {
                 ScaleV_Helper<-3,lh,ix,T,M1r>::call2(len,x,it);
                 it.shiftP(diagstep);
             }
-            for(int i=i2;i<i3;++i) {
+            if (i1 >= i2) ++len;
+            for(;i<i3;++i) {
                 ScaleV_Helper<-3,xx,ix,T,M1r>::call2(--len,x,it);
                 it.shiftP(diagstep);
             }
@@ -121,6 +146,10 @@ namespace tmv {
         {
             const int M = cs == TMV_UNKNOWN ? int(m.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m.rowsize()) : rs;
+#ifdef PRINTALGO_XB
+            std::cout<<"ScaleB algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
             const int xx = TMV_UNKNOWN;
             typedef typename M1::diag_sub_type M1d;
             typedef typename M1d::iterator IT;
@@ -136,9 +165,9 @@ namespace tmv {
             TMVAssert(len == TMV_MIN(M,N));
             const int ds = IntTraits2<cs,rs>::min;
             ScaleV_Helper<-3,ds,ix,T,M1d>::call2(len,x,it);
-            for(int k=0;k<m.nhi();++k) {
+            for(int k=1;k<=m.nhi();++k) {
                 it.shiftP(rowstep);
-                if (k+len >= N) --len;
+                if (k+len > N) --len;
                 ScaleV_Helper<-3,xx,ix,T,M1d>::call2(len,x,it);
             }
         }
@@ -183,7 +212,16 @@ namespace tmv {
                 M1::_colmajor ? 11 :
                 M1::_rowmajor ? 12 :
                 13;
+#ifdef PRINTALGO_XB
+            std::cout<<"ScaleB: algo = "<<algo<<std::endl;
+            std::cout<<"x = "<<ix<<" "<<T(x)<<std::endl;
+            std::cout<<"m = "<<TMV_Text(m)<<std::endl;
+            //std::cout<<"m = "<<m<<std::endl;
+#endif
             ScaleB_Helper<algo,cs,rs,ix,T,M1>::call(x,m);
+#ifdef PRINTALGO_XB
+            //std::cout<<"m => "<<m<<std::endl;
+#endif
         }
     };
 

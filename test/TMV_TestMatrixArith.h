@@ -455,14 +455,14 @@ static void DoTestMa_Full(const MM& a, std::string label)
 }
 
 template <class MM> 
-static void DoTestMR(const MM& a, std::string label)
+static void DoTestMR(MM& a, std::string label)
 {
     DoTestMa_Basic(a,label);
     DoTestMa_Basic(Transpose(a),label+" Trans");
 }
 
 template <class MM> 
-static void DoTestMC(const MM& a, std::string label)
+static void DoTestMC(MM& a, std::string label)
 {
     DoTestMa_Full(a,label);
     DoTestMa_Basic(Transpose(a),label+" Trans");
@@ -549,13 +549,13 @@ static void DoTestMX1a_Full(const MM& a, T2 x, std::string label)
 }
 
 template <class MM, class T2> 
-static void DoTestMX1R(const MM& a, T2 x, std::string label)
+static void DoTestMX1R(MM& a, T2 x, std::string label)
 {
     DoTestMX1a_Basic(a,x,label);
 }
 
 template <class MM, class T2> 
-static void DoTestMX1C(const MM& a, T2 x, std::string label)
+static void DoTestMX1C(MM& a, T2 x, std::string label)
 {
     DoTestMX1a_Full(a,x,label);
     DoTestMX1a_Basic(Conjugate(a),x,label+" Conj");
@@ -923,7 +923,7 @@ static void DoTestVM1a_Full(const MM& a, const V& b, std::string label)
 }
 
 template <class MM, class V> 
-static void DoTestMV1R(const MM& a, V& b, std::string label)
+static void DoTestMV1R(MM& a, V& b, std::string label)
 {
     DoTestMV1a_Basic(a,b,label);
     DoTestMV1a_Basic(a,b.reverse(),label);
@@ -966,7 +966,7 @@ static void DoTestMV1R(const MM& a, V& b, std::string label)
 }
 
 template <class MM, class V> 
-static void DoTestVM1R(const MM& a, V& b, std::string label)
+static void DoTestVM1R(MM& a, V& b, std::string label)
 {
     DoTestVM1a_Basic(a,b,label);
     DoTestVM1a_Basic(a,b.reverse(),label);
@@ -1009,7 +1009,7 @@ static void DoTestVM1R(const MM& a, V& b, std::string label)
 }
 
 template <class MM, class V> 
-static void DoTestMV1C(const MM& a, V& b, std::string label)
+static void DoTestMV1C(MM& a, V& b, std::string label)
 {
     DoTestMV1a_Full(a,b,label);
     DoTestMV1a_Basic(a,b.reverse(),label);
@@ -1064,7 +1064,7 @@ static void DoTestMV1C(const MM& a, V& b, std::string label)
 }
 
 template <class MM, class V> 
-static void DoTestVM1C(const MM& a, V& b, std::string label)
+static void DoTestVM1C(MM& a, V& b, std::string label)
 {
     DoTestVM1a_Full(a,b,label);
     DoTestVM1a_Basic(a,b.reverse(),label);
@@ -1596,7 +1596,7 @@ static void DoTestVM2a_Full(const MM& a, V& b, std::string label)
 }
 
 template <class MM, class V> 
-static void DoTestMV2R(const MM& a, V& b, std::string label)
+static void DoTestMV2R(MM& a, V& b, std::string label)
 {
     typename V::reverse_type br = b.reverse();
     DoTestMV2a_Basic(a,b,label);
@@ -1624,7 +1624,7 @@ static void DoTestMV2R(const MM& a, V& b, std::string label)
 }
 
 template <class MM, class V> 
-static void DoTestVM2R(const MM& a, V& b, std::string label)
+static void DoTestVM2R(MM& a, V& b, std::string label)
 {
     typename V::reverse_type br = b.reverse();
     DoTestVM2a_Basic(a,b,label);
@@ -1652,7 +1652,7 @@ static void DoTestVM2R(const MM& a, V& b, std::string label)
 }
 
 template <class MM, class V> 
-static void DoTestMV2C(const MM& a, V& b, std::string label)
+static void DoTestMV2C(MM& a, V& b, std::string label)
 {
     typename V::reverse_type br = b.reverse();
     DoTestMV2a_Full(a,b,label);
@@ -1687,7 +1687,7 @@ static void DoTestMV2C(const MM& a, V& b, std::string label)
 }
 
 template <class MM, class V> 
-static void DoTestVM2C(const MM& a, V& b, std::string label)
+static void DoTestVM2C(MM& a, V& b, std::string label)
 {
     typename V::reverse_type br = b.reverse();
     DoTestVM2a_Full(a,b,label);
@@ -2148,7 +2148,7 @@ static void DoTestVM3a_Full(const MM& a, const V1& b, V2& c, std::string label)
 }
 
 template <class MM, class V1, class V2> 
-static void DoTestMV3R(const MM& a, const V1& b, V2& c, std::string label)
+static void DoTestMV3R(MM& a, V1& b, V2& c, std::string label)
 {
     typename V2::reverse_type cr = c.reverse();
     DoTestMV3a_Basic(a,b,c,label);
@@ -2158,7 +2158,7 @@ static void DoTestMV3R(const MM& a, const V1& b, V2& c, std::string label)
 }
 
 template <class MM, class V1, class V2> 
-static void DoTestVM3R(const MM& a, const V1& b, V2& c, std::string label)
+static void DoTestVM3R(MM& a, V1& b, V2& c, std::string label)
 {
     typename V2::reverse_type cr = c.reverse();
     DoTestVM3a_Basic(a,b,c,label);
@@ -2168,7 +2168,7 @@ static void DoTestVM3R(const MM& a, const V1& b, V2& c, std::string label)
 }
 
 template <class MM, class V1, class V2> 
-static void DoTestMV3C(const MM& a, const V1& b, V2& c, std::string label)
+static void DoTestMV3C(MM& a, V1& b, V2& c, std::string label)
 {
     typename V2::reverse_type cr = c.reverse();
     DoTestMV3a_Full(a,b,c,label);
@@ -2187,7 +2187,7 @@ static void DoTestMV3C(const MM& a, const V1& b, V2& c, std::string label)
 }
 
 template <class MM, class V1, class V2> 
-static void DoTestVM3C(const MM& a, const V1& b, V2& c, std::string label)
+static void DoTestVM3C(MM& a, V1& b, V2& c, std::string label)
 {
     typename V2::reverse_type cr = c.reverse();
     DoTestVM3a_Full(a,b,c,label);
@@ -2328,7 +2328,7 @@ static void DoTestMM1a_Full(const M1& a, const M2& b, std::string label)
 }
 
 template <class M1, class M2> 
-static void DoTestMM1RR(const M1& a, const M2& b, std::string label)
+static void DoTestMM1RR(M1& a, M2& b, std::string label)
 {
     DoTestMM1a_Basic(a,b,label);
 
@@ -2338,7 +2338,7 @@ static void DoTestMM1RR(const M1& a, const M2& b, std::string label)
 }
 
 template <class M1, class M2> 
-static void DoTestMM1RC(const M1& a, const M2& b, std::string label)
+static void DoTestMM1RC(M1& a, M2& b, std::string label)
 {
     DoTestMM1a_Basic(a,b,label);
 
@@ -2350,7 +2350,7 @@ static void DoTestMM1RC(const M1& a, const M2& b, std::string label)
 }
 
 template <class M1, class M2> 
-static void DoTestMM1CR(const M1& a, const M2& b, std::string label)
+static void DoTestMM1CR(M1& a, M2& b, std::string label)
 {
     DoTestMM1a_Basic(a,b,label);
 
@@ -2362,7 +2362,7 @@ static void DoTestMM1CR(const M1& a, const M2& b, std::string label)
 }
 
 template <class M1, class M2> 
-static void DoTestMM1CC(const M1& a, const M2& b, std::string label)
+static void DoTestMM1CC(M1& a, M2& b, std::string label)
 {
     DoTestMM1a_Full(a,b,label);
 
@@ -2521,13 +2521,13 @@ static void DoTestMM2a_Full(M1& a, const M2& b, std::string label)
 }
 
 template <class M1, class M2> 
-static void DoTestMM2RR(M1& a, const M2& b, std::string label)
+static void DoTestMM2RR(M1& a, M2& b, std::string label)
 {
     DoTestMM2a_Basic(a,b,label);
 }
 
 template <class M1, class M2> 
-static void DoTestMM2RC(M1& a, const M2& b, std::string label)
+static void DoTestMM2RC(M1& a, M2& b, std::string label)
 {
     DoTestMM2a_Basic(a,b,label);
 #if (XTEST & 2)
@@ -2536,7 +2536,7 @@ static void DoTestMM2RC(M1& a, const M2& b, std::string label)
 }
 
 template <class M1, class M2> 
-static void DoTestMM2CR(M1& a, const M2& b, std::string label)
+static void DoTestMM2CR(M1& a, M2& b, std::string label)
 {
     typename M1::conjugate_type ac = a.conjugate();
     DoTestMM2a_Basic(a,b,label);
@@ -2544,7 +2544,7 @@ static void DoTestMM2CR(M1& a, const M2& b, std::string label)
 }
 
 template <class M1, class M2> 
-static void DoTestMM2CC(M1& a, const M2& b, std::string label)
+static void DoTestMM2CC(M1& a, M2& b, std::string label)
 {
     typename M1::conjugate_type ac = a.conjugate();
     DoTestMM2a_Full(a,b,label);
@@ -2643,7 +2643,7 @@ static void DoTestMM3a_Full(const M1& a, const M2& b, std::string label)
 }
 
 template <class M1, class M2> 
-static void DoTestMM3RR(const M1& a, const M2& b, std::string label)
+static void DoTestMM3RR(M1& a, M2& b, std::string label)
 {
     DoTestMM3a_Basic(a,b,label);
 
@@ -2653,7 +2653,7 @@ static void DoTestMM3RR(const M1& a, const M2& b, std::string label)
 }
 
 template <class M1, class M2> 
-static void DoTestMM3RC(const M1& a, const M2& b, std::string label)
+static void DoTestMM3RC(M1& a, M2& b, std::string label)
 {
     DoTestMM3a_Basic(a,b,label);
 
@@ -2665,7 +2665,7 @@ static void DoTestMM3RC(const M1& a, const M2& b, std::string label)
 }
 
 template <class M1, class M2> 
-static void DoTestMM3CR(const M1& a, const M2& b, std::string label)
+static void DoTestMM3CR(M1& a, M2& b, std::string label)
 {
     DoTestMM3a_Basic(a,b,label);
 
@@ -2677,7 +2677,7 @@ static void DoTestMM3CR(const M1& a, const M2& b, std::string label)
 }
 
 template <class M1, class M2> 
-static void DoTestMM3CC(const M1& a, const M2& b, std::string label)
+static void DoTestMM3CC(M1& a, M2& b, std::string label)
 {
     DoTestMM3a_Full(a,b,label);
 
@@ -2963,13 +2963,13 @@ static void DoTestMM4a_Full(M1& a, const M2& b, std::string label)
 }
 
 template <class M1, class M2> 
-static void DoTestMM4RR(M1& a, const M2& b, std::string label)
+static void DoTestMM4RR(M1& a, M2& b, std::string label)
 {
     DoTestMM4a_Basic(a,b,label);
 }
 
 template <class M1, class M2> 
-static void DoTestMM4RC(M1& a, const M2& b, std::string label)
+static void DoTestMM4RC(M1& a, M2& b, std::string label)
 {
     DoTestMM4a_Basic(a,b,label);
 #if (XTEST & 2)
@@ -2978,7 +2978,7 @@ static void DoTestMM4RC(M1& a, const M2& b, std::string label)
 }
 
 template <class M1, class M2> 
-static void DoTestMM4CR(M1& a, const M2& b, std::string label)
+static void DoTestMM4CR(M1& a, M2& b, std::string label)
 {
     typename M1::conjugate_type ac = a.conjugate();
     DoTestMM4a_Basic(a,b,label);
@@ -2986,7 +2986,7 @@ static void DoTestMM4CR(M1& a, const M2& b, std::string label)
 }
 
 template <class M1, class M2> 
-static void DoTestMM4CC(M1& a, const M2& b, std::string label)
+static void DoTestMM4CC(M1& a, M2& b, std::string label)
 {
     typename M1::conjugate_type ac = a.conjugate();
     DoTestMM4a_Full(a,b,label);
@@ -3179,13 +3179,13 @@ static void DoTestMM5a_Full(const M1& a, const M2& b, M3& c, std::string label)
 }
 
 template <class M1, class M2, class M3> 
-static void DoTestMM5R(const M1& a, const M2& b, M3& c, std::string label)
+static void DoTestMM5R(M1& a, M2& b, M3& c, std::string label)
 {
     DoTestMM5a_Basic(a,b,c,label);
 }
 
 template <class M1, class M2, class M3> 
-static void DoTestMM5C(const M1& a, const M2& b, M3& c, std::string label)
+static void DoTestMM5C(M1& a, M2& b, M3& c, std::string label)
 {
     DoTestMM5a_Full(a,b,c,label);
     DoTestMM5a_Basic(Conjugate(a),b,c,label+" ConjA");
@@ -3392,7 +3392,7 @@ static void DoTestOProda_Full(
 } 
 
 template <class M, class V1, class V2> 
-static void DoTestOProdR(M& a, const V1& v1, const V2& v2, std::string label)
+static void DoTestOProdR(M& a, V1& v1, V2& v2, std::string label)
 {
     DoTestOProda_Basic(a,v1,v2,label);
     DoTestOProda_Basic(a,v1.reverse(),v2.reverse(),label+" RevBC");
@@ -3403,7 +3403,7 @@ static void DoTestOProdR(M& a, const V1& v1, const V2& v2, std::string label)
 }
 
 template <class M, class V1, class V2> 
-static void DoTestOProdC(M& a, const V1& v1, const V2& v2, std::string label)
+static void DoTestOProdC(M& a, V1& v1, V2& v2, std::string label)
 {
     typename M::conjugate_type ac = a.conjugate();
 
@@ -3478,7 +3478,7 @@ static void TestMatrixArith1(M& a, CM& ca, std::string label)
 // Arith2a does matrix * vector operations.
 template <class T, class M, class CM, class V1, class CV1, class V2, class CV2> 
 static void TestMatrixArith2a(
-    const M& a, const CM& ca, V1& b, CV1& cb, 
+    M& a, CM& ca, V1& b, CV1& cb, 
     V2& c, CV2& cc, std::string label)
 {
 #ifdef XXD
@@ -3517,7 +3517,7 @@ static void TestMatrixArith2a(
 // Arith2a does vector * matrix operations.
 template <class T, class M, class CM, class V1, class CV1, class V2, class CV2> 
 static void TestMatrixArith2b(
-    const M& a, const CM& ca, V1& b, CV1& cb, 
+    M& a, CM& ca, V1& b, CV1& cb, 
     V2& c, CV2& cc, std::string label)
 {
 #ifdef XXD
@@ -3562,6 +3562,8 @@ static void TestMatrixArith2(M& a, CM& ca, std::string label)
     tmv::Vector<T> v(a.rowsize());
     for(int i=0;i<int(a.rowsize());i++) v(i) = T(i+3);
     tmv::Vector<CT> cv = CT(4,5) * v;
+    tmv::VectorView<T> vv = v.view();
+    tmv::VectorView<CT> cvv = cv.view();
 
     tmv::Vector<T> v5(5*a.rowsize(),T(0));
     tmv::Vector<CT> cv5(5*a.rowsize(),CT(0));
@@ -3573,6 +3575,8 @@ static void TestMatrixArith2(M& a, CM& ca, std::string label)
     tmv::Vector<T> w(a.colsize());
     for(int i=0;i<int(a.colsize());i++) w(i) = T(2*i-6);
     tmv::Vector<CT> cw = CT(-1,2) * w;
+    tmv::VectorView<T> wv = w.view();
+    tmv::VectorView<CT> cwv = cw.view();
 
     tmv::Vector<T> w5(5*a.colsize(),T(0));
     tmv::Vector<CT> cw5(5*a.colsize(),CT(0));
@@ -3581,16 +3585,16 @@ static void TestMatrixArith2(M& a, CM& ca, std::string label)
     ws = w;
     cws = cw;
 
-    TestMatrixArith2a<T>(a,ca,v,cv,w,cw,label);
-    TestMatrixArith2a<T>(a,ca,vs,cvs,w,cw,label);
-    TestMatrixArith2b<T>(a,ca,v,cv,w,cw,label);
-    TestMatrixArith2b<T>(a,ca,v,cv,ws,cws,label);
+    TestMatrixArith2a<T>(a,ca,vv,cvv,wv,cwv,label);
+    TestMatrixArith2a<T>(a,ca,vs,cvs,ws,cws,label);
+    TestMatrixArith2b<T>(a,ca,vv,cvv,wv,cwv,label);
+    TestMatrixArith2b<T>(a,ca,vs,cvs,ws,cws,label);
 }
 
 // Arith3a does c = a * b where b,c are vectors.
 template <class T, class M, class CM, class V1, class CV1, class V2, class CV2> 
 static void TestMatrixArith3a(
-    const M& a, const CM& ca, V1& b, CV1& cb,
+    M& a, CM& ca, V1& b, CV1& cb,
     V2& c, CV2& cc, std::string label)
 {
 #ifdef XXD
@@ -3621,7 +3625,7 @@ static void TestMatrixArith3a(
 // Arith3a does b = c * a where b,c are vectors.
 template <class T, class M, class CM, class V1, class CV1, class V2, class CV2> 
 static void TestMatrixArith3b(
-    const M& a, const CM& ca, V1& b, CV1& cb,
+    M& a, CM& ca, V1& b, CV1& cb,
     V2& c, CV2& cc, std::string label)
 {
 #ifdef XXD
@@ -3654,11 +3658,11 @@ template <class T, class M, class CM>
 static void TestMatrixArith3(M& a, CM& ca, std::string label)
 {
     typedef std::complex<T> CT;
-    tmv::Vector<T> vx(a.rowsize());
-    for(int i=0;i<int(a.rowsize());i++) vx(i) = T(i+3);
-    tmv::Vector<CT> cvx = CT(4,5) * vx;
-    tmv::VectorView<T> v = vx.view();
-    tmv::VectorView<CT> cv = cvx.view();
+    tmv::Vector<T> v(a.rowsize());
+    for(int i=0;i<int(a.rowsize());i++) v(i) = T(i+3);
+    tmv::Vector<CT> cv = CT(4,5) * v;
+    tmv::VectorView<T> vv = v.view();
+    tmv::VectorView<CT> cvv = cv.view();
 
     tmv::Vector<T> v5(5*a.rowsize(),T(0));
     tmv::Vector<CT> cv5(5*a.rowsize(),CT(0));
@@ -3667,11 +3671,11 @@ static void TestMatrixArith3(M& a, CM& ca, std::string label)
     vs = v;
     cvs = cv;
 
-    tmv::Vector<T> wx(a.colsize());
-    for(int i=0;i<int(a.colsize());i++) wx(i) = T(2*i-6);
-    tmv::Vector<CT> cwx = CT(-1,2) * wx;
-    tmv::VectorView<T> w = wx.view();
-    tmv::VectorView<CT> cw = cwx.view();
+    tmv::Vector<T> w(a.colsize());
+    for(int i=0;i<int(a.colsize());i++) w(i) = T(2*i-6);
+    tmv::Vector<CT> cw = CT(-1,2) * w;
+    tmv::VectorView<T> wv = w.view();
+    tmv::VectorView<CT> cwv = cw.view();
 
     tmv::Vector<T> w5(5*a.colsize(),T(0));
     tmv::Vector<CT> cw5(5*a.colsize(),CT(0));
@@ -3680,21 +3684,21 @@ static void TestMatrixArith3(M& a, CM& ca, std::string label)
     ws = w;
     cws = cw;
 
-    TestMatrixArith3a<T>(a,ca,v,cv,w,cw,label);
-    TestMatrixArith3a<T>(a,ca,v,cv,ws,cws,label);
-    TestMatrixArith3a<T>(a,ca,vs,cvs,w,cw,label);
+    TestMatrixArith3a<T>(a,ca,vv,cvv,wv,cwv,label);
+    TestMatrixArith3a<T>(a,ca,vv,cvv,ws,cws,label);
+    TestMatrixArith3a<T>(a,ca,vs,cvs,wv,cwv,label);
     TestMatrixArith3a<T>(a,ca,vs,cvs,ws,cws,label); 
 
-    TestMatrixArith3b<T>(a,ca,v,cv,w,cw,label);
-    TestMatrixArith3b<T>(a,ca,v,cv,ws,cws,label);
-    TestMatrixArith3b<T>(a,ca,vs,cvs,w,cw,label);
+    TestMatrixArith3b<T>(a,ca,vv,cvv,wv,cwv,label);
+    TestMatrixArith3b<T>(a,ca,vv,cvv,ws,cws,label);
+    TestMatrixArith3b<T>(a,ca,vs,cvs,wv,cwv,label);
     TestMatrixArith3b<T>(a,ca,vs,cvs,ws,cws,label); 
 }
 
 // Arith4 does matrix + matrix calls and similar
 template <class T, class M1, class CM1, class M2, class CM2> 
 static void TestMatrixArith4(
-    M1& a, CM1& ca, const M2& b, const CM2& cb, std::string label)
+    M1& a, CM1& ca, M2& b, CM2& cb, std::string label)
 {
 #ifdef XXD
     if (showstartdone) {
@@ -3730,7 +3734,7 @@ static void TestMatrixArith4(
 // Arith5 does matrix * matrix calls and similar
 template <class T, class M1, class CM1, class M2, class CM2>
 static void TestMatrixArith5(
-    M1& a, CM1& ca, const M2& b, const CM2& cb, std::string label)
+    M1& a, CM1& ca, M2& b, CM2& cb, std::string label)
 {
 #ifdef XXD
     if (showstartdone) {
@@ -3766,8 +3770,8 @@ static void TestMatrixArith5(
 // Arith6 does c = a * b where all are matrices.
 template <class T, class M1, class CM1, class M2, class CM2, class M3, class CM3> 
 static void TestMatrixArith6(
-    const M1& a, const CM1& ca,
-    const M2& b, const CM2& cb, M3& c, CM3& cc, std::string label)
+    M1& a, CM1& ca,
+    M2& b, CM2& cb, M3& c, CM3& cc, std::string label)
 {
 #ifdef XXD
     if (showstartdone) {
@@ -3797,8 +3801,8 @@ static void TestMatrixArith6(
 // Arith6x calls Arith6 for ColMajor, RowMajor and NonMajor c's.
 template <class T, class M1, class CM1, class M2, class CM2> 
 static void TestMatrixArith6x(
-    const M1& a, const CM1& ca,
-    const M2& b, const CM2& cb, std::string label)
+    M1& a, CM1& ca,
+    M2& b, CM2& cb, std::string label)
 {
     typedef std::complex<T> CT;
     if (CanMultMM(a,b)) {
@@ -3826,8 +3830,8 @@ static void TestMatrixArith6x(
 // Arith7 does a = v1 ^ v2 and similar.
 template <class T, class M, class CM, class V1, class CV1, class V2, class CV2> 
 static void TestMatrixArith7(
-    M& a, CM& ca, const V1& v1, const CV1& cv1,
-    const V2& v2, const CV2& cv2, std::string label)
+    M& a, CM& ca, V1& v1, CV1& cv1,
+    V2& v2, CV2& cv2, std::string label)
 {
 #ifdef XXD
     if (showstartdone) {

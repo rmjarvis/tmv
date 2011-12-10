@@ -1,8 +1,8 @@
 
-#include "TMV.h"
-#include "TMV_Band.h"
 #include "TMV_Test.h"
 #include "TMV_Test_2.h"
+#include "TMV.h"
+#include "TMV_Band.h"
 #include <fstream>
 #include <cstdio>
 
@@ -203,10 +203,6 @@ static void TestBasicBandMatrix_2()
     tmv::BandMatrix<T,S> q10(3,5,1,2);
     tmv::BandMatrix<T,S> q11t(5,3,2,1);
     tmv::BandMatrixView<T> q11 = q11t.transpose();
-    std::cout<<"q10 = "<<q10<<std::endl;
-    std::cout<<"q10.nel = "<<q10.nElements()<<std::endl;
-    std::cout<<"q11 = "<<q11<<std::endl;
-    std::cout<<"q11.nel = "<<q11.nElements()<<std::endl;
     q10 <<
         0, -1, -2,
         3,  2,  1,  0,
@@ -522,11 +518,11 @@ void TestBandMatrix()
     TestBandMatrixArith_A<T>();
     std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<
         "> (Band/Band) Arithmetic passed all tests\n";
-#if 0
     TestBandMatrixArith_B1<T>();
     TestBandMatrixArith_B2<T>();
     std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<
         "> (Matrix/Band) Arithmetic passed all tests\n";
+#if 0
     TestBandMatrixArith_C1<T>();
     TestBandMatrixArith_C2<T>();
     std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<

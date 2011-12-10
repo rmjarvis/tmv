@@ -425,8 +425,14 @@ namespace tmv {
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
 
-        typedef typename MCopyHelper<T,_shape,N,N,_rowmajor,_fort>::type 
-            copy_type;
+        enum { known = N != TMV_UNKNOWN };
+        enum { copyA = (
+                (_rowmajor ? RowMajor : ColMajor) |
+                (_unit ? UnitDiag : _nonunit ? NonUnitDiag : UnknownDiag) |
+                (_fort ? FortranStyle : CStyle) ) };
+        typedef typename TypeSelect<known, 
+                SmallUpperTriMatrix<T,N,copyA|NoAlias>,
+                UpperTriMatrix<T,copyA|NoDivider> >::type copy_type;
 
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
@@ -732,8 +738,14 @@ namespace tmv {
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
 
-        typedef typename MCopyHelper<T,_shape,N,N,_rowmajor,_fort>::type 
-            copy_type;
+        enum { known = N != TMV_UNKNOWN };
+        enum { copyA = (
+                (_rowmajor ? RowMajor : ColMajor) |
+                (_unit ? UnitDiag : _nonunit ? NonUnitDiag : UnknownDiag) |
+                (_fort ? FortranStyle : CStyle) ) };
+        typedef typename TypeSelect<known, 
+                SmallUpperTriMatrix<T,N,copyA|NoAlias>,
+                UpperTriMatrix<T,copyA|NoDivider> >::type copy_type;
 
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
@@ -1413,8 +1425,14 @@ namespace tmv {
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
 
-        typedef typename MCopyHelper<T,_shape,N,N,_rowmajor,_fort>::type 
-            copy_type;
+        enum { known = N != TMV_UNKNOWN };
+        enum { copyA = (
+                (_rowmajor ? RowMajor : ColMajor) |
+                (_unit ? UnitDiag : _nonunit ? NonUnitDiag : UnknownDiag) |
+                (_fort ? FortranStyle : CStyle) ) };
+        typedef typename TypeSelect<known, 
+                SmallLowerTriMatrix<T,N,copyA|NoAlias>,
+                LowerTriMatrix<T,copyA|NoDivider> >::type copy_type;
 
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
@@ -1711,8 +1729,14 @@ namespace tmv {
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
 
-        typedef typename MCopyHelper<T,_shape,N,N,_rowmajor,_fort>::type 
-            copy_type;
+        enum { known = N != TMV_UNKNOWN };
+        enum { copyA = (
+                (_rowmajor ? RowMajor : ColMajor) |
+                (_unit ? UnitDiag : _nonunit ? NonUnitDiag : UnknownDiag) |
+                (_fort ? FortranStyle : CStyle) ) };
+        typedef typename TypeSelect<known, 
+                SmallLowerTriMatrix<T,N,copyA|NoAlias>,
+                LowerTriMatrix<T,copyA|NoDivider> >::type copy_type;
 
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;

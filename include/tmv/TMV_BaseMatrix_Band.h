@@ -243,8 +243,6 @@ namespace tmv {
     {
         TMVAssert(InBand(i1,j1,nlo,nhi) && 
                   "Upper left corner must be in band");
-        TMVAssert(InBand(i2-1,j2-1,nlo,nhi) && 
-                  "Lower right corner must be in band");
         TMVAssert(InBand(i1+newnlo,j1,nlo,nhi) &&
                   "New subdiagonals must be in band");
         TMVAssert(InBand(i1,j1+newnhi,nlo,nhi) &&
@@ -260,8 +258,6 @@ namespace tmv {
     {
         TMVAssert(InBand(i1,j1,nlo,nhi) && 
                   "Upper left corner must be in band");
-        TMVAssert(InBand(i2-istep,j2-jstep,nlo,nhi) && 
-                  "Lower right corner must be in band");
         TMVAssert(InBand(i1+newnlo*istep,j1,nlo,nhi) &&
                   "New subdiagonals must be in band");
         TMVAssert(InBand(i1,j1+newnhi*jstep,nlo,nhi) &&
@@ -299,27 +295,24 @@ namespace tmv {
     // Since SmallBandMatrix needs to know nlo and nhi at compile time,
     // we always use BandMatrix here. 
     // Is there a reason to have a BCopyHelper that takes lo,hi params?
-    template <class T, int cs, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,Band,cs,rs,rm,fort>
+    template <class T, int cs, int rs, int A>
+    struct MCopyHelper<T,Band,cs,rs,A>
     {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) |
-                NoDivider | NoAlias ) };
+        enum { A2 = A | NoDivider | NoAlias };
         typedef BandMatrix<T,A2> type;
     };
 
-    template <class T, int cs, int rs, int si, int sj, int c>
-    struct MViewHelper<T,Band,cs,rs,si,sj,c>
+    template <class T, int cs, int rs, int si, int sj, int A>
+    struct MViewHelper<T,Band,cs,rs,si,sj,A>
     { 
         enum { xx = TMV_UNKNOWN };
-        typedef SmallBandMatrixView<T,cs,rs,xx,xx,si,sj,c> type; 
-        typedef ConstSmallBandMatrixView<T,cs,rs,xx,xx,si,sj,c> ctype; 
+        typedef SmallBandMatrixView<T,cs,rs,xx,xx,si,sj,A> type; 
+        typedef ConstSmallBandMatrixView<T,cs,rs,xx,xx,si,sj,A> ctype; 
     };
-    template <class T, int si, int sj, int c>
-    struct MViewHelper<T,Band,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,c>
+    template <class T, int si, int sj, int A>
+    struct MViewHelper<T,Band,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,A>
     {
-        enum { A2 = c | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
+        enum { A2 = A | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
         typedef BandMatrixView<T,A2> type; 
         typedef ConstBandMatrixView<T,A2> ctype; 
     };
@@ -1242,14 +1235,14 @@ namespace tmv {
         TMV_INLINE_ND row_sub_type row(int i, int j1, int j2) 
         {
             CheckRowIndex<_fort>(i,colsize());
-            CheckColRange<_fort>(j1,j2,rowsize());
+            CheckColRange_Band<_fort>(i,j1,j2,rowsize(),nlo(),nhi());
             return get_row(i,j1,j2); 
         }
 
         TMV_INLINE_ND col_sub_type col(int j, int i1, int i2) 
         {
             CheckColIndex<_fort>(j,rowsize());
-            CheckRowRange<_fort>(i1,i2,colsize());
+            CheckRowRange_Band<_fort>(j,i1,i2,colsize(),nlo(),nhi());
             return get_col(j,i1,i2); 
         }
 

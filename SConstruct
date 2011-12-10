@@ -116,7 +116,7 @@ opts.Add('LIBS','Libraries to send to the linker','')
 opts.Add(BoolVariable('DEBUG',
         'Turn on debugging statements in compilied library',False))
 opts.Add(BoolVariable('TEST_DEBUG',
-        'Only turn on debugging statements in the test suite',True))
+        'Only turn on debugging statements in the test suite',False))
 opts.Add(BoolVariable('STATIC','Use static linkage', False))
 opts.Add(BoolVariable('WITH_SSE',
         'Only necessary for icpc compilations: Use SSE commands', True))
