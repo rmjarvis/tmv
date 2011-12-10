@@ -152,7 +152,7 @@ namespace tmv {
             Vx tempBase = VectorSizer<T>(M);
 
             const int NB = TMV_BIDIAG_BLOCKSIZE;
-            typedef typename MCopyHelper<T,Rec,NB,rs,true>::type M3;
+            typedef typename MCopyHelper<T,Rec,NB,rs,RowMajor>::type M3;
             typedef typename MCopyHelper<T,Rec,cs,NB>::type M4;
 
             typedef typename M3::row_sub_type M3r;

@@ -484,11 +484,10 @@ namespace tmv {
         enum { allknown = (M != TMV_UNKNOWN && N != TMV_UNKNOWN) };
         enum { copyA = (
                 (_rowmajor ? RowMajor : ColMajor) |
-                (_fort ? FortranStyle : CStyle) |
-                NoDivider ) };
+                (_fort ? FortranStyle : CStyle) ) };
         typedef typename TypeSelect<allknown, 
-                SmallMatrix<T,M,N,copyA>,
-                Matrix<T,copyA> >::type copy_type;
+                SmallMatrix<T,M,N,copyA|NoAlias>,
+                Matrix<T,copyA|NoDivider> >::type copy_type;
 
         enum { _hasdivider = Attrib<A>::withdivider };
         typedef QuotXM<1,real_type,type> inverse_type;
@@ -820,11 +819,10 @@ namespace tmv {
         enum { allknown = (M != TMV_UNKNOWN && N != TMV_UNKNOWN) };
         enum { copyA = (
                 (_rowmajor ? RowMajor : ColMajor) |
-                (_fort ? FortranStyle : CStyle) |
-                NoDivider ) };
+                (_fort ? FortranStyle : CStyle) ) };
         typedef typename TypeSelect<allknown, 
-                SmallMatrix<T,M,N,copyA>,
-                Matrix<T,copyA> >::type copy_type;
+                SmallMatrix<T,M,N,copyA|NoAlias>,
+                Matrix<T,copyA|NoDivider> >::type copy_type;
 
         enum { _hasdivider = Attrib<A>::withdivider };
         typedef QuotXM<1,real_type,type> inverse_type;

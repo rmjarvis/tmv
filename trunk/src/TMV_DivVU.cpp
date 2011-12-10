@@ -22,12 +22,12 @@ namespace tmv {
             const int N = m2.size();
             if (m2.isunit()) {
                 const int s = ShapeTraits<M2::_shape>::unit_shape;
-                typename MCopyHelper<T,s,xx,xx,false,false>::type mc(N);
+                typename MCopyHelper<T,s,xx,xx>::type mc(N);
                 InstCopy(m2,mc.xView());
                 InlineTriLDivEq(v1,mc.xView().constView().cmView());
             } else  {
                 const int s = ShapeTraits<M2::_shape>::nonunit_shape;
-                typename MCopyHelper<T,s,xx,xx,false,false>::type mc(N);
+                typename MCopyHelper<T,s,xx,xx>::type mc(N);
                 InstCopy(m2,mc.xView());
                 InlineTriLDivEq(v1,mc.xView().constView().cmView());
             }

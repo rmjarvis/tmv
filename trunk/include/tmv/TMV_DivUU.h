@@ -534,9 +534,9 @@ namespace tmv {
         }
     };
 
-    // algo 87: Use temporary for m1/m2
+    // algo 83: Use temporary for m1/m2
     template <int s, class M1, class M2>
-    struct LDivEqUU_Helper<87,s,M1,M2>
+    struct LDivEqUU_Helper<83,s,M1,M2>
     {
         template <bool unknowndiag, int dummy>
         struct copyBack
@@ -559,7 +559,7 @@ namespace tmv {
         {
 #ifdef PRINTALGO_DivU
             const int N = s == TMV_UNKNOWN ? int(m1.size()) : s;
-            std::cout<<"LDivEqUU algo 87: N,s = "<<N<<','<<s<<std::endl;
+            std::cout<<"LDivEqUU algo 83: N,s = "<<N<<','<<s<<std::endl;
 #endif
             typename M1::copy_type m1c = m1;
             NoAliasTriLDivEq(m1c,m2);
@@ -624,7 +624,7 @@ namespace tmv {
                 LDivEqUU_Helper<-2,s,M1,M2>::call(m1,m2);
             } else {
                 // Use temporary for m1/m2
-                LDivEqUU_Helper<87,s,M1,M2>::call(m1,m2);
+                LDivEqUU_Helper<83,s,M1,M2>::call(m1,m2);
             }
         }
     };

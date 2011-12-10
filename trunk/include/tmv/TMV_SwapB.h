@@ -45,18 +45,20 @@ namespace tmv {
             int len = m1.nlo()+1;
             IT1 it1 = m1.get_col(0,0,len).begin();
             IT2 it2 = m2.get_col(0,0,len).begin();
-            for(int j=0;j<j1;++j) {
+            int j=0;
+            for(;j<j1;++j) {
                 SwapV_Helper<-3,xx,M1c,M2c>::call2(len,it1,it2);
                 it1.shiftP(rowstep1);
                 it2.shiftP(rowstep2);
                 if (len < M) ++len;
             }
-            for(int j=j1;j<j2;++j) {
+            for(;j<j2;++j) {
                 SwapV_Helper<-3,lh,M1c,M2c>::call2(len,it1,it2);
                 it1.shiftP(diagstep1);
                 it2.shiftP(diagstep2);
             }
-            for(int j=j2;j<j3;++j) {
+            if (j1 >= j2) ++len;
+            for(;j<j3;++j) {
                 SwapV_Helper<-3,xx,M1c,M2c>::call2(--len,it1,it2);
                 it1.shiftP(diagstep1);
                 it2.shiftP(diagstep2);
@@ -89,18 +91,20 @@ namespace tmv {
             int len = m1.nhi()+1;
             IT1 it1 = m1.get_row(0,0,len).begin();
             IT2 it2 = m2.get_row(0,0,len).begin();
-            for(int i=0;i<i1;++i) {
+            int i=0;
+            for(;i<i1;++i) {
                 SwapV_Helper<-3,xx,M1r,M2r>::call2(len,it1,it2);
                 it1.shiftP(colstep1);
                 it2.shiftP(colstep2);
                 if (len < N) ++len;
             }
-            for(int i=i1;i<i2;++i) {
+            for(;i<i2;++i) {
                 SwapV_Helper<-3,lh,M1r,M2r>::call2(len,it1,it2);
                 it1.shiftP(diagstep1);
                 it2.shiftP(diagstep2);
             }
-            for(int i=i2;i<i3;++i) {
+            if (i1 >= i2) ++len;
+            for(;i<i3;++i) {
                 SwapV_Helper<-3,xx,M1r,M2r>::call2(--len,it1,it2);
                 it1.shiftP(diagstep1);
                 it2.shiftP(diagstep2);
@@ -137,10 +141,10 @@ namespace tmv {
             TMVAssert(len == TMV_MIN(M,N));
             const int ds = IntTraits2<cs,rs>::min;
             SwapV_Helper<-3,ds,M1d,M2d>::call2(len,it1,it2);
-            for(int k=0;k<m1.nhi();++k) {
+            for(int k=1;k<=m1.nhi();++k) {
                 it1.shiftP(rowstep1);
                 it2.shiftP(rowstep2);
-                if (k+len >= N) --len;
+                if (k+len > N) --len;
                 SwapV_Helper<-3,xx,M1d,M2d>::call2(len,it1,it2);
             }
         }

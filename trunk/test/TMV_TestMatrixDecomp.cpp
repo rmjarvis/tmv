@@ -1,10 +1,9 @@
 
 #define START 0
 
-#undef NDEBUG
-#include "TMV.h"
 #include "TMV_Test.h"
 #include "TMV_Test_1.h"
+#include "TMV.h"
 
 template <class T, tmv::StorageType stor> 
 void TestMatrixDecomp()

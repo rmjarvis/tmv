@@ -280,8 +280,7 @@ namespace tmv {
             // since this is the product that we need.  We update this one 
             // row at a time.
             const int cs1 = IntTraits2<cs,Nx>::min;
-            // TODO: Double check this.  Is RowMajor really better?
-            typedef typename MCopyHelper<T,Rec,cs1,rs,true>::type M3;
+            typedef typename MCopyHelper<T,Rec,cs1,rs,RowMajor>::type M3;
             M3 ZYtA = MatrixSizer<T>(TMV_MIN(M,Nx),N);
             // TODO: Would this be faster for the regular QRDecomposition too?
             // i.e. Rather than using the normal BlockHouseholder calls.

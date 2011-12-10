@@ -53,12 +53,16 @@ namespace tmv {
                 int(ShapeTraits<shape1>::nonunit_shape) };
         enum { _fort = M::_fort };
         enum { _calc = false };
-        enum { rm1 = Traits<typename M::calc_type>::_rowmajor };
-        enum { _rowmajor = rm1 };
+        enum { _rowmajor = Traits<typename M::calc_type>::_rowmajor };
 
         typedef QuotXM<ix,T,M> type;
-        typedef typename MCopyHelper<value_type,_shape,_colsize,_rowsize,
-                _rowmajor,_fort>::type copy_type;
+        enum { s = _shape };
+        enum { cs = _colsize };
+        enum { rs = _rowsize };
+        enum { A = (
+                (_rowmajor ? RowMajor : ColMajor) | 
+                (_fort ? FortranStyle : CStyle) ) };
+        typedef typename MCopyHelper<value_type,s,cs,rs,A>:: type copy_type;
         typedef const copy_type calc_type;
         typedef const copy_type eval_type;
         typedef InvalidType inverse_type;

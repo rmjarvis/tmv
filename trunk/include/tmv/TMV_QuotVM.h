@@ -220,7 +220,8 @@ namespace tmv {
         enum { _calc = false };
 
         typedef QuotVM<ix,T,V1,M2> type;
-        typedef typename VCopyHelper<value_type,_size,_fort>::type copy_type;
+        enum { A = _fort ? FortranStyle : CStyle };
+        typedef typename VCopyHelper<value_type,_size,A>::type copy_type;
         typedef const copy_type calc_type;
         typedef const copy_type eval_type;
     };
@@ -299,7 +300,8 @@ namespace tmv {
         enum { _calc = false };
 
         typedef RQuotVM<ix,T,V1,M2> type;
-        typedef typename VCopyHelper<value_type,_size,_fort>::type copy_type;
+        enum { A = _fort ? FortranStyle : CStyle };
+        typedef typename VCopyHelper<value_type,_size,A>::type copy_type;
         typedef const copy_type calc_type;
         typedef const copy_type eval_type;
     };

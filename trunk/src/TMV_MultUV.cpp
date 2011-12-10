@@ -40,13 +40,13 @@ namespace tmv {
             const int N = m1.size();
             if (m1.isunit()) {
                 const int s = ShapeTraits<M1::_shape>::unit_shape;
-                typename MCopyHelper<T,s,xx,xx,false,false>::type mc(N);
+                typename MCopyHelper<T,s,xx,xx>::type mc(N);
                 InstCopy(m1,mc.xView());
                 InlineMultMV<false>(
                     one,mc.xView().constView().cmView(),v2.constView(),v2);
             } else  {
                 const int s = ShapeTraits<M1::_shape>::nonunit_shape;
-                typename MCopyHelper<T,s,xx,xx,false,false>::type mc(N);
+                typename MCopyHelper<T,s,xx,xx>::type mc(N);
                 InstCopy(m1,mc.xView());
                 InlineMultMV<false>(
                     one,mc.xView().constView().cmView(),v2.constView(),v2);

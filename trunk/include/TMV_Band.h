@@ -19,10 +19,10 @@
 #include "tmv/TMV_AddBB.h"
 
 #include "tmv/TMV_MultBV.h"
-#if 0
 #include "tmv/TMV_MultBM.h"
 #include "tmv/TMV_MultBB.h"
 
+#if 0
 #include "tmv/TMV_BandLUD.h"
 #include "tmv/TMV_BandQRD.h"
 #include "tmv/TMV_BandSVD.h"

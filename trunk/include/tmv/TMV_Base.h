@@ -258,29 +258,31 @@ namespace tmv {
             ret += ( (A & ColMajor) ? "ColMajor|" : 
                      (A & RowMajor) ? "RowMajor|" :
                      (A & DiagMajor) ? "DiagMajor|" : "");
-            ret += (A & Conj) ? "|Conj" : "";
-            ret += (A & FortranStyle) ? "|FortranStyle " : "";
-            ret += (A & NonUnitDiag) ? "|NonUnitDiag " : "";
-            ret += (A & UnitDiag) ? "|UnitDiag" : "";
-            ret += (A & ZeroDiag) ? "|ZeroDiag" : "";
-            ret += (A & Packed) ? "|Packed" : "";
-            ret += (A & Lower) ? "|Lower" : "";
-            ret += (A & Upper) ? "|Upper" : "";
-            ret += (A & NoDivider) ? "|NoDivider" : "";
-            ret += (A & WithDivider) ? "|WithDivider" : "";
-            ret += (A & NoAlias) ? "|NoAlias" : "";
-            ret += (A & CheckAlias) ? "|CheckAlias" : "";
-            return ret.substr(0,ret.size()-1);
+            ret += (A & Conj) ? "Conj|" : "";
+            ret += (A & FortranStyle) ? "FortranStyle|" : "";
+            ret += (A & NonUnitDiag) ? "NonUnitDiag|" : "";
+            ret += (A & UnitDiag) ? "UnitDiag|" : "";
+            ret += (A & ZeroDiag) ? "ZeroDiag|" : "";
+            ret += (A & Packed) ? "Packed|" : "";
+            ret += (A & Lower) ? "Lower|" : "";
+            ret += (A & Upper) ? "Upper|" : "";
+            ret += (A & NoDivider) ? "NoDivider|" : "";
+            ret += (A & WithDivider) ? "WithDivider|" : "";
+            ret += (A & NoAlias) ? "NoAlias|" : "";
+            ret += (A & CheckAlias) ? "CheckAlias|" : "";
+            if (ret.size() == 0) return "Default";
+            else return ret.substr(0,ret.size()-1);
         }
         static std::string vtext()
         {
             std::string ret;
-            ret += (A & Unit) ? "Unit" : "";
-            ret += (A & Conj) ? "|Conj" : "";
-            ret += (A & FortranStyle) ? "|FortranStyle" : "";
-            ret += (A & NoAlias) ? "|NoAlias" : "";
-            ret += (A & CheckAlias) ? "|CheckAlias" : "";
-            return ret.substr(0,ret.size()-1);
+            ret += (A & Unit) ? "Unit|" : "";
+            ret += (A & Conj) ? "Conj|" : "";
+            ret += (A & FortranStyle) ? "FortranStyle|" : "";
+            ret += (A & NoAlias) ? "NoAlias|" : "";
+            ret += (A & CheckAlias) ? "CheckAlias|" : "";
+            if (ret.size() == 0) return "Default";
+            else return ret.substr(0,ret.size()-1);
         }
     };
 

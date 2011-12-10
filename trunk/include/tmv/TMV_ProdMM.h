@@ -210,8 +210,13 @@ namespace tmv {
             (rm1 && rm2) || (!cm1 && !cm2 && _rowsize > int(_colsize)) };
 
         typedef ProdMM<ix,T,M1,M2> type;
-        typedef typename MCopyHelper<value_type,_shape,_colsize,_rowsize,
-                _rowmajor,_fort>::type copy_type;
+        enum { s = _shape };
+        enum { cs = _colsize };
+        enum { rs = _rowsize };
+        enum { A = (
+                (_rowmajor ? RowMajor : ColMajor) | 
+                (_fort ? FortranStyle : CStyle) ) };
+        typedef typename MCopyHelper<value_type,s,cs,rs,A>:: type copy_type;
         typedef const copy_type calc_type;
         enum { caneval = (
                 M1::_calc && M2::_calc && 

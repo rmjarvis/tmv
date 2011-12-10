@@ -285,54 +285,42 @@ namespace tmv {
         --i; --j;
     }
 
-    template <class T, int cs, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,Rec,cs,rs,rm,fort>
+    template <class T, int cs, int rs, int A>
+    struct MCopyHelper<T,Rec,cs,rs,A>
     {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) |
-                NoDivider | NoAlias ) };
+        enum { A2 = A | NoDivider | NoAlias };
         typedef SmallMatrix<T,cs,rs,A2> type;
     };
-    template <class T, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,Rec,TMV_UNKNOWN,rs,rm,fort>
+    template <class T, int rs, int A>
+    struct MCopyHelper<T,Rec,TMV_UNKNOWN,rs,A>
     {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) |
-                NoDivider | NoAlias ) };
+        enum { A2 = A | NoDivider | NoAlias };
         typedef Matrix<T,A2> type; 
     };
-    template <class T, int cs, bool rm, bool fort>
-    struct MCopyHelper<T,Rec,cs,TMV_UNKNOWN,rm,fort>
+    template <class T, int cs, int A>
+    struct MCopyHelper<T,Rec,cs,TMV_UNKNOWN,A>
     { 
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) |
-                NoDivider | NoAlias ) };
+        enum { A2 = A | NoDivider | NoAlias };
         typedef Matrix<T,A2> type; 
     };
-    template <class T, bool rm, bool fort>
-    struct MCopyHelper<T,Rec,TMV_UNKNOWN,TMV_UNKNOWN,rm,fort>
+    template <class T, int A>
+    struct MCopyHelper<T,Rec,TMV_UNKNOWN,TMV_UNKNOWN,A>
     { 
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) |
-                NoDivider | NoAlias ) };
+        enum { A2 = A | NoDivider | NoAlias };
         typedef Matrix<T,A2> type; 
     };
 
 
-    template <class T, int cs, int rs, int si, int sj, int c>
-    struct MViewHelper<T,Rec,cs,rs,si,sj,c>
+    template <class T, int cs, int rs, int si, int sj, int A>
+    struct MViewHelper<T,Rec,cs,rs,si,sj,A>
     { 
-        typedef SmallMatrixView<T,cs,rs,si,sj,c> type; 
-        typedef ConstSmallMatrixView<T,cs,rs,si,sj,c> ctype; 
+        typedef SmallMatrixView<T,cs,rs,si,sj,A> type; 
+        typedef ConstSmallMatrixView<T,cs,rs,si,sj,A> ctype; 
     };
-    template <class T, int si, int sj, int c>
-    struct MViewHelper<T,Rec,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,c>
+    template <class T, int si, int sj, int A>
+    struct MViewHelper<T,Rec,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,A>
     {
-        enum { A2 = c | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
+        enum { A2 = A | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
         typedef MatrixView<T,A2> type; 
         typedef ConstMatrixView<T,A2> ctype; 
     };

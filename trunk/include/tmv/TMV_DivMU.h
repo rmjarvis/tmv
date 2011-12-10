@@ -1014,8 +1014,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             // I think rowmajor is usually better, since it only inverts
             // the diagonal elements of m2 once each.
-            const bool rm = true; 
-            typedef typename MCopyHelper<T1,Rec,cs,rs,rm>::type M1c;
+            typedef typename MCopyHelper<T1,Rec,cs,rs,RowMajor>::type M1c;
             M1c m1c = m1;
             NoAliasTriLDivEq(m1c,m2);
             NoAliasCopy(m1c,m1);

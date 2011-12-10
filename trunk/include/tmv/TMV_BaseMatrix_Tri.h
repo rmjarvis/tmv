@@ -164,204 +164,112 @@ namespace tmv {
     static TMV_INLINE_ND void CheckOffDiag(int n) 
     { TMVAssert(n>0 && "offDiag not possible for zero-sized matrix"); } 
 
-    template <class T, int cs, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,UpperTri,cs,rs,rm,fort>
+    template <class T, int cs, int rs, int A>
+    struct MCopyHelper<T,UpperTri,cs,rs,A>
     {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | 
-                NonUnitDiag | NoAlias )};
-        typedef SmallUpperTriMatrix<T,cs,A2> type;
+        enum { A2 = A | NonUnitDiag | NoAlias };
+        enum { s = Sizes<cs,rs>::size };
+        typedef SmallUpperTriMatrix<T,s,A2> type;
     };
-    template <class T, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,UpperTri,TMV_UNKNOWN,rs,rm,fort>
+    template <class T, int A>
+    struct MCopyHelper<T,UpperTri,TMV_UNKNOWN,TMV_UNKNOWN,A>
     {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | 
-                NonUnitDiag | NoAlias )};
-        typedef SmallUpperTriMatrix<T,rs,A2> type;
-    };
-    template <class T, int cs, bool rm, bool fort>
-    struct MCopyHelper<T,UpperTri,cs,TMV_UNKNOWN,rm,fort>
-    {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | 
-                NonUnitDiag | NoAlias )};
-        typedef SmallUpperTriMatrix<T,cs,A2> type;
-    };
-    template <class T, bool rm, bool fort>
-    struct MCopyHelper<T,UpperTri,TMV_UNKNOWN,TMV_UNKNOWN,rm,fort>
-    {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | 
-                NonUnitDiag | NoAlias )};
+        enum { A2 = A | NonUnitDiag | NoAlias };
         typedef UpperTriMatrix<T,A2> type;
     };
 
-    template <class T, int cs, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,LowerTri,cs,rs,rm,fort>
+    template <class T, int cs, int rs, int A>
+    struct MCopyHelper<T,LowerTri,cs,rs,A>
     {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | 
-                NonUnitDiag | NoAlias )};
-        typedef SmallLowerTriMatrix<T,cs,A2> type;
+        enum { A2 = A | NonUnitDiag | NoAlias };
+        enum { s = Sizes<cs,rs>::size };
+        typedef SmallLowerTriMatrix<T,s,A2> type;
     };
-    template <class T, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,LowerTri,TMV_UNKNOWN,rs,rm,fort>
+    template <class T, int A>
+    struct MCopyHelper<T,LowerTri,TMV_UNKNOWN,TMV_UNKNOWN,A>
     {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | 
-                NonUnitDiag | NoAlias )};
-        typedef SmallLowerTriMatrix<T,rs,A2> type;
-    };
-    template <class T, int cs, bool rm, bool fort>
-    struct MCopyHelper<T,LowerTri,cs,TMV_UNKNOWN,rm,fort>
-    {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | 
-                NonUnitDiag | NoAlias )};
-        typedef SmallLowerTriMatrix<T,cs,A2> type;
-    };
-    template <class T, bool rm, bool fort>
-    struct MCopyHelper<T,LowerTri,TMV_UNKNOWN,TMV_UNKNOWN,rm,fort>
-    {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | 
-                NonUnitDiag | NoAlias )};
+        enum { A2 = A | NonUnitDiag | NoAlias };
         typedef LowerTriMatrix<T,A2> type;
     };
 
-    template <class T, int cs, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,UnitUpperTri,cs,rs,rm,fort>
+    template <class T, int cs, int rs, int A>
+    struct MCopyHelper<T,UnitUpperTri,cs,rs,A>
     {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | 
-                UnitDiag | NoAlias )};
-        typedef SmallUpperTriMatrix<T,cs,A2> type;
+        enum { A2 = A | UnitDiag | NoAlias };
+        enum { s = Sizes<cs,rs>::size };
+        typedef SmallUpperTriMatrix<T,s,A2> type;
     };
-    template <class T, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,UnitUpperTri,TMV_UNKNOWN,rs,rm,fort>
+    template <class T, int A>
+    struct MCopyHelper<T,UnitUpperTri,TMV_UNKNOWN,TMV_UNKNOWN,A>
     {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | 
-                UnitDiag | NoAlias )};
-        typedef SmallUpperTriMatrix<T,rs,A2> type;
-    };
-    template <class T, int cs, bool rm, bool fort>
-    struct MCopyHelper<T,UnitUpperTri,cs,TMV_UNKNOWN,rm,fort>
-    {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | 
-                UnitDiag | NoAlias )};
-        typedef SmallUpperTriMatrix<T,cs,A2> type;
-    };
-    template <class T, bool rm, bool fort>
-    struct MCopyHelper<T,UnitUpperTri,TMV_UNKNOWN,TMV_UNKNOWN,rm,fort>
-    {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | 
-                UnitDiag | NoAlias )};
+        enum { A2 = A | UnitDiag | NoAlias };
         typedef UpperTriMatrix<T,A2> type;
     };
 
-    template <class T, int cs, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,UnitLowerTri,cs,rs,rm,fort>
+    template <class T, int cs, int rs, int A>
+    struct MCopyHelper<T,UnitLowerTri,cs,rs,A>
     {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | 
-                UnitDiag | NoAlias )};
-        typedef SmallLowerTriMatrix<T,cs,A2> type;
+        enum { A2 = A | UnitDiag | NoAlias };
+        enum { s = Sizes<cs,rs>::size };
+        typedef SmallLowerTriMatrix<T,s,A2> type;
     };
-    template <class T, int rs, bool rm, bool fort>
-    struct MCopyHelper<T,UnitLowerTri,TMV_UNKNOWN,rs,rm,fort>
+    template <class T, int A>
+    struct MCopyHelper<T,UnitLowerTri,TMV_UNKNOWN,TMV_UNKNOWN,A>
     {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | 
-                UnitDiag | NoAlias )};
-        typedef SmallLowerTriMatrix<T,rs,A2> type;
-    };
-    template <class T, int cs, bool rm, bool fort>
-    struct MCopyHelper<T,UnitLowerTri,cs,TMV_UNKNOWN,rm,fort>
-    {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | 
-                UnitDiag | NoAlias )};
-        typedef SmallLowerTriMatrix<T,cs,A2> type;
-    };
-    template <class T, bool rm, bool fort>
-    struct MCopyHelper<T,UnitLowerTri,TMV_UNKNOWN,TMV_UNKNOWN,rm,fort>
-    {
-        enum { A2 = (
-                (rm ? RowMajor : ColMajor) |
-                (fort ? FortranStyle : CStyle) | 
-                UnitDiag | NoAlias )};
+        enum { A2 = A | UnitDiag | NoAlias };
         typedef LowerTriMatrix<T,A2> type;
     };
 
 
-    template <class T, int cs, int rs, int si, int sj, int c>
-    struct MViewHelper<T,UpperTri,cs,rs,si,sj,c>
+    template <class T, int cs, int rs, int si, int sj, int A>
+    struct MViewHelper<T,UpperTri,cs,rs,si,sj,A>
     { 
-        typedef SmallUpperTriMatrixView<T,cs,si,sj,c> type; 
-        typedef ConstSmallUpperTriMatrixView<T,cs,si,sj,c> ctype; 
+        typedef SmallUpperTriMatrixView<T,cs,si,sj,A> type; 
+        typedef ConstSmallUpperTriMatrixView<T,cs,si,sj,A> ctype; 
     };
-    template <class T, int si, int sj, int c>
-    struct MViewHelper<T,UpperTri,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,c>
+    template <class T, int si, int sj, int A>
+    struct MViewHelper<T,UpperTri,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,A>
     {
-        enum { A2 = c | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
+        enum { A2 = A | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
         typedef UpperTriMatrixView<T,A2> type; 
         typedef ConstUpperTriMatrixView<T,A2> ctype; 
     };
-    template <class T, int cs, int rs, int si, int sj, int c>
-    struct MViewHelper<T,UnitUpperTri,cs,rs,si,sj,c>
+    template <class T, int cs, int rs, int si, int sj, int A>
+    struct MViewHelper<T,UnitUpperTri,cs,rs,si,sj,A>
     { 
-        typedef SmallUpperTriMatrixView<T,cs,si,sj,c|UnitDiag> type; 
-        typedef ConstSmallUpperTriMatrixView<T,cs,si,sj,c|UnitDiag> ctype; 
+        typedef SmallUpperTriMatrixView<T,cs,si,sj,A|UnitDiag> type; 
+        typedef ConstSmallUpperTriMatrixView<T,cs,si,sj,A|UnitDiag> ctype; 
     };
-    template <class T, int si, int sj, int c>
-    struct MViewHelper<T,UnitUpperTri,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,c>
+    template <class T, int si, int sj, int A>
+    struct MViewHelper<T,UnitUpperTri,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,A>
     {
-        enum { A2 = c | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
+        enum { A2 = A | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
         typedef UpperTriMatrixView<T,A2|UnitDiag> type; 
         typedef ConstUpperTriMatrixView<T,A2|UnitDiag> ctype; 
     };
-    template <class T, int cs, int rs, int si, int sj, int c>
-    struct MViewHelper<T,LowerTri,cs,rs,si,sj,c>
+    template <class T, int cs, int rs, int si, int sj, int A>
+    struct MViewHelper<T,LowerTri,cs,rs,si,sj,A>
     { 
-        typedef SmallLowerTriMatrixView<T,cs,si,sj,c> type; 
-        typedef ConstSmallLowerTriMatrixView<T,cs,si,sj,c> ctype; 
+        typedef SmallLowerTriMatrixView<T,cs,si,sj,A> type; 
+        typedef ConstSmallLowerTriMatrixView<T,cs,si,sj,A> ctype; 
     };
-    template <class T, int si, int sj, int c>
-    struct MViewHelper<T,LowerTri,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,c>
+    template <class T, int si, int sj, int A>
+    struct MViewHelper<T,LowerTri,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,A>
     {
-        enum { A2 = c | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
+        enum { A2 = A | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
         typedef LowerTriMatrixView<T,A2> type; 
         typedef ConstLowerTriMatrixView<T,A2> ctype; 
     };
-    template <class T, int cs, int rs, int si, int sj, int c>
-    struct MViewHelper<T,UnitLowerTri,cs,rs,si,sj,c>
+    template <class T, int cs, int rs, int si, int sj, int A>
+    struct MViewHelper<T,UnitLowerTri,cs,rs,si,sj,A>
     { 
-        typedef SmallLowerTriMatrixView<T,cs,si,sj,c|UnitDiag> type; 
-        typedef ConstSmallLowerTriMatrixView<T,cs,si,sj,c|UnitDiag> ctype; 
+        typedef SmallLowerTriMatrixView<T,cs,si,sj,A|UnitDiag> type; 
+        typedef ConstSmallLowerTriMatrixView<T,cs,si,sj,A|UnitDiag> ctype; 
     };
-    template <class T, int si, int sj, int c>
-    struct MViewHelper<T,UnitLowerTri,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,c>
+    template <class T, int si, int sj, int A>
+    struct MViewHelper<T,UnitLowerTri,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,A>
     {
-        enum { A2 = c | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
+        enum { A2 = A | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
         typedef LowerTriMatrixView<T,A2|UnitDiag> type; 
         typedef ConstLowerTriMatrixView<T,A2|UnitDiag> ctype; 
     };

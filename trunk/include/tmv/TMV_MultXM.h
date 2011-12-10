@@ -8,6 +8,11 @@
 #include "TMV_CopyM.h"
 #include "TMV_SwapM.h"
 
+#ifdef PRINTALGO_XM
+#include <iostream>
+#include "TMV_MatrixIO.h"
+#endif
+
 namespace tmv {
 
     // Defined in TMV_MultXM.cpp
@@ -42,7 +47,12 @@ namespace tmv {
     struct MultXM_Helper<1,cs,rs,false,1,T,M1,M2>
     {
         static TMV_INLINE void call(const Scaling<1,T>& , const M1& m1, M2& m2)
-        { CopyM_Helper<-3,cs,rs,M1,M2>::call(m1,m2); }
+        { 
+#ifdef PRINTALGO_XM
+            std::cout<<"XM algo 1\n";
+#endif
+            CopyM_Helper<-3,cs,rs,M1,M2>::call(m1,m2); 
+        }
     };
 
     // algo 101: Same as algo 1, but use algo -3 for Copy
@@ -50,7 +60,12 @@ namespace tmv {
     struct MultXM_Helper<101,cs,rs,false,1,T,M1,M2>
     {
         static TMV_INLINE void call(const Scaling<1,T>& , const M1& m1, M2& m2)
-        { CopyM_Helper<-1,cs,rs,M1,M2>::call(m1,m2); }
+        { 
+#ifdef PRINTALGO_XM
+            std::cout<<"XM algo 101\n";
+#endif
+            CopyM_Helper<-1,cs,rs,M1,M2>::call(m1,m2); 
+        }
     };
 
     // algo 201: Same as algo 1, but use algo -2 for Copy
@@ -59,6 +74,9 @@ namespace tmv {
     {
         static void call(const Scaling<1,T>& , const M1& m1, M2& m2)
         {
+#ifdef PRINTALGO_XM
+            std::cout<<"XM algo 201\n";
+#endif
             // Need a quick alias check here, since ExactSameStorage
             // is allowed for MultXM, but not Copy
             if (!SameStorage(m1,m2)) {
@@ -76,6 +94,9 @@ namespace tmv {
     {
         static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
+#ifdef PRINTALGO_XM
+            std::cout<<"XM algo 2\n";
+#endif
             typedef typename M1::const_linearview_type M1l;
             typedef typename M2::linearview_type M2l;
             M1l m1l = m1.linearView();
@@ -93,6 +114,10 @@ namespace tmv {
         {
             const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
             int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+#ifdef PRINTALGO_XM
+            std::cout<<"XM algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
             typedef typename M1::const_col_type M1c;
             typedef typename M2::col_type M2c;
             typedef typename M1c::const_nonconj_type::const_iterator IT1;
@@ -117,6 +142,10 @@ namespace tmv {
         {
             int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+#ifdef PRINTALGO_XM
+            std::cout<<"XM algo 12: M,N,cs,rs,x = "<<M<<','<<N<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
             typedef typename M1::const_row_type M1r;
             typedef typename M2::row_type M2r;
             typedef typename M1r::const_nonconj_type::const_iterator IT1;
@@ -181,7 +210,12 @@ namespace tmv {
         };
 
         static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
-        { Unroller<0,cs,0,rs>::unroll(x,m1,m2); }
+        { 
+#ifdef PRINTALGO_XM
+            std::cout<<"XM algo 15\n";
+#endif
+            Unroller<0,cs,0,rs>::unroll(x,m1,m2); 
+        }
     };
 
     // algo 16: Fully unroll by rows
@@ -232,7 +266,12 @@ namespace tmv {
         };
 
         static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
-        { Unroller<0,cs,0,rs>::unroll(x,m1,m2); }
+        { 
+#ifdef PRINTALGO_XM
+            std::cout<<"XM algo 16\n";
+#endif
+            Unroller<0,cs,0,rs>::unroll(x,m1,m2); 
+        }
     };
 
     // algo 30: Unknown sizes, determine which algorithm to use
@@ -241,6 +280,9 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
+#ifdef PRINTALGO_XM
+            std::cout<<"XM algo 30\n";
+#endif
             if (m1.canLinearize() && m2.canLinearize() &&
                 m1.stepi() == m2.stepi() && m1.stepj() == m2.stepj()) 
                 MultXM_Helper<2,cs,rs,add,ix,T,M1,M2>::call(x,m1,m2);
@@ -419,9 +461,18 @@ namespace tmv {
                 ( M1::_rowmajor && M2::_rowmajor ) ? 12 : 
                 11;
 #ifdef PRINTALGO_XM
-            std::cout<<"XM: algo = "<<algo<<std::endl;
+            std::cout<<"XM: algo -4\n";
+            std::cout<<"add = "<<add<<"  x = "<<ix<<" "<<T(x)<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+            std::cout<<"m1 = "<<m1<<std::endl;
+            std::cout<<"m2 = "<<m2<<std::endl;
 #endif
             MultXM_Helper<algo,cs,rs,add,ix,T,M1,M2>::call(x,m1,m2);
+#ifdef PRINTALGO_XM
+            std::cout<<"m2 => "<<m2<<std::endl;
+#endif
         }
     };
 
@@ -476,7 +527,19 @@ namespace tmv {
                 M2::_conj ? 97 :
                 inst ? 90 :
                 -3;
+#ifdef PRINTALGO_XM
+            std::cout<<"NoAlias MultXM:\n";
+            std::cout<<"add = "<<add<<"  x = "<<ix<<" "<<T(x)<<std::endl;
+            std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
+            std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+            std::cout<<"m1 = "<<m1<<std::endl;
+            std::cout<<"m2 = "<<m2<<std::endl;
+#endif
             MultXM_Helper<algo,cs,rs,add,ix,T,M1,M2>::call(x,m1,m2);
+#ifdef PRINTALGO_XM
+            std::cout<<"m2 => "<<m2<<std::endl;
+#endif
         }
     };
 

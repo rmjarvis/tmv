@@ -1218,9 +1218,8 @@ namespace tmv {
             typedef typename Traits2<T1,T2>::type T12;
             const int cs = M1::_colsize;
             const int rs = M1::_rowsize;
-            const int rm = M1::_rowmajor;
-            typename MCopyHelper<T12,Rec,rs,cs,rm>::type m1a =
-                m1.adjoint();
+            const int A = M1::_rowmajor ? ColMajor : RowMajor;
+            typename MCopyHelper<T12,Rec,rs,cs,A>::type m1a = m1.adjoint();
             PackedQ_LDivEq(m2.getQ(),m2.getBeta(),m1a);
             m3.adjoint() = x * m1a.rowRange(0,m3.colsize());
         }
@@ -1283,8 +1282,8 @@ namespace tmv {
             typedef typename Traits2<T1,T2>::type T12;
             const int cs = M1::_colsize;
             const int rs = M1::_rowsize;
-            const int rm = M1::_rowmajor;
-            typename MCopyHelper<T12,Rec,cs,rs,rm>::type m1c = m1;
+            const int A = M1::_rowmajor ? RowMajor : ColMajor;
+            typename MCopyHelper<T12,Rec,cs,rs,A>::type m1c = m1;
             PackedQ_LDivEq(m2.getQ(),m2.getBeta(),m1c);
             m3 = x * m1c.rowRange(0,m3.colsize());
         }

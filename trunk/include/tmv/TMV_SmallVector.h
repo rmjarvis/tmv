@@ -276,8 +276,11 @@ namespace tmv {
         enum { twoS = isreal ? S : IntTraits<S>::twoS };
         enum { twoN = isreal ? N : IntTraits<N>::twoS };
 
-        // Use VCopyHelper for copy_type in case N == TMV_UNKNOWN
-        typedef typename VCopyHelper<T,N,_fort>::type copy_type;
+        enum { known = N != TMV_UNKNOWN };
+        enum { copyA = _fort ? FortranStyle : CStyle };
+        typedef typename TypeSelect<known, 
+                SmallVector<T,N,copyA>,
+                Vector<T,copyA|NoAlias> >::type copy_type;
 
         enum { unitA = A | Unit };
         enum { nonunitA = A & ~Unit };
@@ -472,7 +475,11 @@ namespace tmv {
         enum { twoS = isreal ? S : IntTraits<S>::twoS };
         enum { twoN = isreal ? N : IntTraits<N>::twoS };
 
-        typedef typename VCopyHelper<T,N,_fort>::type copy_type;
+        enum { known = N != TMV_UNKNOWN };
+        enum { copyA = _fort ? FortranStyle : CStyle };
+        typedef typename TypeSelect<known, 
+                SmallVector<T,N,copyA>,
+                Vector<T,copyA|NoAlias> >::type copy_type;
 
         enum { unitA = A | Unit };
         enum { nonunitA = A & ~Unit };

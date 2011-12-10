@@ -599,7 +599,8 @@ namespace tmv {
         enum { istrans = int(M::_colsize) < int(M::_rowsize) };
         enum { cs = istrans ? int(M::_rowsize) : int(M::_colsize) };
         enum { rs = istrans ? int(M::_colsize) : int(M::_rowsize) };
-        typedef typename MCopyHelper<T,Rec,M::_colsize,M::_rowsize,istrans>::type Mc;
+        enum { A = istrans ? RowMajor : ColMajor };
+        typedef typename MCopyHelper<T,Rec,M::_colsize,M::_rowsize,A>::type Mc;
         typedef typename TypeSelect< istrans ,
                 typename Mc::transpose_type ,
                 typename Mc::view_type >::type qrx_type;

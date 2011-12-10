@@ -62,19 +62,19 @@ namespace tmv {
             int i1 = 0;
             int i2 = m.nlo()+1;
             ret sum(0);
-            for(int j=0;j<j1;++j) {
+            int j=0;
+            for(;j<j1;++j) {
                 sum += SumElementsV_Helper<-3,xx,comp,ix,ret,M1c>::call(
                     m.get_col(j,i1,i2),x);
                 if (i2 < M) ++i2;
             }
-            for(int j=j1;j<j2;++j) {
+            for(;j<j2;++j) {
                 sum += SumElementsV_Helper<-3,lh,comp,ix,ret,M1c>::call(
                     m.get_col(j,i1++,i2++),x);
             }
-            --i2;
-            for(int j=j2;j<j3;++j) {
+            for(;j<j3;++j) {
                 sum += SumElementsV_Helper<-3,lh,comp,ix,ret,M1c>::call(
-                    m.get_col(j,i1++,i2),x);
+                    m.get_col(j,i1++,M),x);
             }
             return sum;
         }
@@ -102,19 +102,19 @@ namespace tmv {
             int j1 = 0;
             int j2 = m.nhi()+1;
             ret sum(0);
-            for(int i=0;i<i1;++i) {
+            int i=0;
+            for(;i<i1;++i) {
                 sum += SumElementsV_Helper<-3,xx,comp,ix,ret,M1r>::call(
                     m.get_row(i,j1,j2),x);
                 if (j2 < N) ++j2;
             }
-            for(int i=i1;i<i2;++i) {
+            for(;i<i2;++i) {
                 sum += SumElementsV_Helper<-3,lh,comp,ix,ret,M1r>::call(
                     m.get_row(i,j1++,j2++),x);
             }
-            --j2;
-            for(int i=i2;i<i3;++i) {
+            for(;i<i3;++i) {
                 sum += SumElementsV_Helper<-3,lh,comp,ix,ret,M1r>::call(
-                    m.get_row(i,j1++,j2),x);
+                    m.get_row(i,j1++,N),x);
             }
             return sum;
         }
@@ -442,21 +442,21 @@ namespace tmv {
             int i1 = 0;
             int i2 = m.nlo()+1;
             ret max(0);
-            for(int j=0;j<j1;++j) {
+            int j=0;
+            for(;j<j1;++j) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,M1c>::call(
                     m.get_col(j,i1,i2),0);
                 if (temp > max) max = temp;
                 if (i2 < M) ++i2;
             }
-            for(int j=j1;j<j2;++j) {
+            for(;j<j2;++j) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,M1c>::call(
                     m.get_col(j,i1++,i2++),0);
                 if (temp > max) max = temp;
             }
-            --i2;
-            for(int j=j2;j<j3;++j) {
+            for(;j<j3;++j) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,M1c>::call(
-                    m.get_col(j,i1++,i2),0);
+                    m.get_col(j,i1++,M),0);
                 if (temp > max) max = temp;
             }
             return max;
@@ -485,21 +485,21 @@ namespace tmv {
             int j1 = 0;
             int j2 = m.nhi()+1;
             ret max(0);
-            for(int i=0;i<i1;++i) {
+            int i=0;
+            for(;i<i1;++i) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,M1r>::call(
                     m.get_row(i,j1,j2),0);
                 if (temp > max) max = temp;
                 if (j2 < N) ++j2;
             }
-            for(int i=i1;i<i2;++i) {
+            for(;i<i2;++i) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,M1r>::call(
                     m.get_row(i,j1++,j2++),0);
                 if (temp > max) max = temp;
             }
-            --j2;
-            for(int i=i2;i<i3;++i) {
+            for(;i<i3;++i) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,M1r>::call(
-                    m.get_row(i,j1++,j2),0);
+                    m.get_row(i,j1++,N),0);
                 if (temp > max) max = temp;
             }
             return max;
@@ -693,18 +693,18 @@ namespace tmv {
             int i1 = 0;
             int i2 = m.nlo()+1;
             RT max(0);
-            for(int j=0;j<j1;++j) {
+            int j=0;
+            for(;j<j1;++j) {
                 RT temp = InlineSumAbsElements(m.get_col(j,i1,i2));
                 if (temp > max) max = temp;
                 if (i2 < M) ++i2;
             }
-            for(int j=j1;j<j2;++j) {
+            for(;j<j2;++j) {
                 RT temp = InlineSumAbsElements(m.get_col(j,i1++,i2++));
                 if (temp > max) max = temp;
             }
-            --i2;
-            for(int j=j2;j<j3;++j) {
-                RT temp = InlineSumAbsElements(m.get_col(j,i1++,i2));
+            for(;j<j3;++j) {
+                RT temp = InlineSumAbsElements(m.get_col(j,i1++,M));
                 if (temp > max) max = temp;
             }
             return max;

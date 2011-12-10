@@ -1592,28 +1592,31 @@ namespace tmv {
         }
     };
 
-    // algo 81: copy m1
+    // algo 81: copy x*m1
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<81,cs,rs,add,ix,T,M1,M2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_MV_MM
+#ifdef PRINTALGO_UM
             const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             std::cout<<"UM algo 81: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::value_type T1;
-            const bool rm = M2::_colmajor || M3::_rowmajor; 
-            const int s1 = M1::_shape;
-            typedef typename MCopyHelper<T1,s1,cs,cs,rm>::type M1c;
-            NoAliasMultMM<add>(x,M1c(m1),m2,m3);
+            typedef typename Traits<T>::real_type RT;
+            const Scaling<1,RT> one;
+            typedef typename Traits2<T,T1>::type PT1;
+            const int A = M2::_colmajor || M3::_rowmajor ? RowMajor : ColMajor;
+            const int s1 = ShapeTraits<M1::_shape>::nonunit_shape;
+            typedef typename MCopyHelper<PT1,s1,cs,cs,A>::type M1c;
+            NoAliasMultMM<add>(one,M1c(x*m1),m2,m3);
         }
     };
 
-    // algo 82: copy x*m1
+    // algo 82: copy x*m2
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<82,cs,rs,add,ix,T,M1,M2,M3>
     {
@@ -1626,18 +1629,17 @@ namespace tmv {
             std::cout<<"UM algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
-            typedef typename Traits2<T,T1>::type PT1;
-            const bool rm = M2::_colmajor || M3::_rowmajor; 
-            const int s1 = ShapeTraits<M1::_shape>::nonunit_shape;
-            typedef typename MCopyHelper<PT1,s1,cs,cs,rm>::type M1c;
-            NoAliasMultMM<add>(one,M1c(x*m1),m2,m3);
+            typedef typename Traits2<T,T2>::type PT2;
+            const int A = M1::_colmajor && M3::_rowmajor ? RowMajor : ColMajor;
+            typedef typename MCopyHelper<PT2,Rec,cs,rs,A>::type M2c;
+            NoAliasMultMM<add>(one,m1,M2c(x*m2),m3);
         }
     };
 
-    // algo 83: Copy m1, figure out where to put x
+    // algo 83: Use temporary for m1*m2
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<83,cs,rs,add,ix,T,M1,M2,M3>
     {
@@ -1646,138 +1648,15 @@ namespace tmv {
         {
             const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
-            if (M > N) {
-                MultUM_Helper<81,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-            } else {
-                MultUM_Helper<82,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-            }
-        }
-    };
-    // If ix == 1, don't need the branch - just go to 81
-    template <int cs, int rs, bool add, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<83,cs,rs,add,1,T,M1,M2,M3>
-    {
-        static TMV_INLINE void call(
-            const Scaling<1,T>& x, const M1& m1, const M2& m2, M3& m3)
-        { MultUM_Helper<81,cs,rs,add,1,T,M1,M2,M3>::call(x,m1,m2,m3); }
-    };
-
-    // algo 84: copy m2
-    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<84,cs,rs,add,ix,T,M1,M2,M3>
-    {
-        static inline void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
 #ifdef PRINTALGO_UM
-            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
-            std::cout<<"UM algo 84: M,N,cs,rs,x = "<<M<<','<<N<<
-                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
-#endif
-            typedef typename M2::value_type T2;
-            const bool rm = M1::_colmajor && M3::_rowmajor;
-            typedef typename MCopyHelper<T2,Rec,cs,rs,rm>::type M2c;
-            NoAliasMultMM<add>(x,m1,M2c(m2),m3);
-        }
-    };
-
-    // algo 85: copy x*m2
-    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<85,cs,rs,add,ix,T,M1,M2,M3>
-    {
-        static inline void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-#ifdef PRINTALGO_UM
-            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
-            std::cout<<"UM algo 85: M,N,cs,rs,x = "<<M<<','<<N<<
-                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
-#endif
-            typedef typename M2::value_type T2;
-            typedef typename Traits<T>::real_type RT;
-            const Scaling<1,RT> one;
-            typedef typename Traits2<T,T2>::type PT2;
-            const bool rm = M1::_colmajor && M3::_rowmajor;
-            typedef typename MCopyHelper<PT2,Rec,cs,rs,rm>::type M2c;
-            NoAliasMultMM<add>(one,m1,M2c(x*m2),m3);
-        }
-    };
-
-    // algo 86: Copy m2, figure out where to put x
-    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<86,cs,rs,add,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
-            if (N > M) {
-                MultUM_Helper<84,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-            } else {
-                MultUM_Helper<85,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
-            }
-        }
-    };
-    // If ix == 1, don't need the branch - just go to 84
-    template <int cs, int rs, bool add, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<86,cs,rs,add,1,T,M1,M2,M3>
-    {
-        static TMV_INLINE void call(
-            const Scaling<1,T>& x, const M1& m1, const M2& m2, M3& m3)
-        { MultUM_Helper<84,cs,rs,add,1,T,M1,M2,M3>::call(x,m1,m2,m3); }
-    };
-
-    // algo 87: Use temporary for m1*m2
-    template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<87,cs,rs,add,ix,T,M1,M2,M3>
-    {
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
-#ifdef PRINTALGO_UM
-            std::cout<<"UM algo 87: M,N,cs,rs,x = "<<M<<','<<N<<
-                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
-#endif
-            if (N > M) {
-                typedef typename M1::value_type T1;
-                typedef typename M2::value_type T2;
-                typedef typename Traits2<T1,T2>::type PT3;
-                const bool rm = M1::_rowmajor && M2::_rowmajor;
-                typedef typename MCopyHelper<PT3,Rec,cs,rs,rm>::type M3c;
-                NoAliasMultXM<add>(x,M3c(m1*m2),m3);
-            } else {
-                typedef typename M3::value_type T3;
-                typedef typename Traits<T>::real_type RT;
-                const Scaling<1,RT> one;
-                const bool rm = M1::_rowmajor && M2::_rowmajor;
-                typedef typename MCopyHelper<T3,Rec,cs,rs,rm>::type M3c;
-                NoAliasMultXM<add>(one,M3c(x*m1*m2),m3);
-            }
-        }
-    };
-    // If ix == 1, don't need the branch
-    template <int cs, int rs, bool add, class T, class M1, class M2, class M3>
-    struct MultUM_Helper<87,cs,rs,add,1,T,M1,M2,M3>
-    {
-        static inline void call(
-            const Scaling<1,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-#ifdef PRINTALGO_UM
-            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
-            std::cout<<"UM algo 87: M,N,cs,rs,x = "<<M<<','<<N<<
+            std::cout<<"UM algo 83: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type PT3;
-            const bool rm = M1::_rowmajor && M2::_rowmajor;
-            typedef typename MCopyHelper<PT3,Rec,cs,rs,rm>::type M3c;
+            const int A = M1::_rowmajor && M2::_rowmajor ? RowMajor : ColMajor;
+            typedef typename MCopyHelper<PT3,Rec,cs,rs,A>::type M3c;
             NoAliasMultXM<add>(x,M3c(m1*m2),m3);
         }
     };
@@ -1927,10 +1806,10 @@ namespace tmv {
                 NoAliasMultMM<add>(x,m1,m3,m3);
             } else if (s1 && !s2) {
                 // copy m1
-                MultUM_Helper<83,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+                MultUM_Helper<81,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             } else {
                 // Use temporary for m1*m2
-                MultUM_Helper<87,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+                MultUM_Helper<83,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             }
         }
     };

@@ -516,13 +516,13 @@ namespace tmv {
         enum { istrans = int(M::_colsize) < int(M::_rowsize) };
         enum { cs = istrans ? int(M::_rowsize) : int(M::_colsize) };
         enum { rs = istrans ? int(M::_colsize) : int(M::_rowsize) };
-
-        typedef typename MCopyHelper<T,Rec,M::_colsize,M::_rowsize,istrans>::type Mu;
+        enum { A = istrans ? RowMajor : ColMajor };
+        typedef typename MCopyHelper<T,Rec,M::_colsize,M::_rowsize,A>::type Mu;
         typedef typename TypeSelect< istrans ,
                 typename Mu::transpose_type ,
                 typename Mu::view_type >::type ux_type;
-        typedef typename MCopyHelper<T,Diag,rs,rs,false>::type sx_type;
-        typedef typename MCopyHelper<T,Rec,rs,rs,false>::type vx_type;
+        typedef typename MCopyHelper<T,Diag,rs,rs>::type sx_type;
+        typedef typename MCopyHelper<T,Rec,rs,rs>::type vx_type;
 
         enum { csu = istrans ? int(rs) : int(cs) };
         enum { rsu = rs };

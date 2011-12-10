@@ -26,10 +26,11 @@ int main() try {
     std::ofstream log("tmvtest2a.log");
     tmv::WriteWarningsTo(&log);
 
-    showacc=true;
-    showdiv=true;
-    showtests=true;
-    showstartdone=true;
+    //showacc=true;
+    //showdiv=true;
+    //showtests=true;
+    //showstartdone=true;
+    //XXDEBUG7 = true;
     TestBandMatrix<double>();
 
 #if 0
@@ -57,7 +58,7 @@ int main() try {
 
     return 0;
 }
-#if 1
+#if 0
 #ifndef NOTHROW
 catch (tmv::Error& e) {
     std::cerr<<e<<std::endl;
