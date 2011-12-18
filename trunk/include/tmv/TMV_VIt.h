@@ -339,49 +339,45 @@ namespace tmv {
     };
 
     template <class T, int S, bool C>
-    static TMV_INLINE CVIt<T,S,C> operator+(int i, const CVIt<T,S,C>& it)
+    TMV_INLINE CVIt<T,S,C> operator+(int i, const CVIt<T,S,C>& it)
     { return it + i; }
     template <class T, int S, bool C>
-    static TMV_INLINE VIt<T,S,C> operator+(int i, const VIt<T,S,C>& it)
+    TMV_INLINE VIt<T,S,C> operator+(int i, const VIt<T,S,C>& it)
     { return it + i; }
 
 
     // Overload some functions to work with ConjRef<T>
     template <class T>
-    static TMV_INLINE T TMV_CONJ(const ConjRef<T>& x) { return x.conj(); }
+    TMV_INLINE T TMV_CONJ(const ConjRef<T>& x) { return x.conj(); }
     template <class T>
-    static TMV_INLINE typename Traits<T>::real_type TMV_NORM(
-        const ConjRef<T>& x) 
+    TMV_INLINE typename Traits<T>::real_type TMV_NORM(const ConjRef<T>& x) 
     { return TMV_NORM(x.conj()); }
     template <class T>
-    static TMV_INLINE typename Traits<T>::real_type TMV_ABS(
-        const ConjRef<T>& x) 
+    TMV_INLINE typename Traits<T>::real_type TMV_ABS(const ConjRef<T>& x) 
     { return TMV_ABS(x.conj()); }
     template <class T>
-    static TMV_INLINE T TMV_SQR(const ConjRef<T>& x) 
+    TMV_INLINE T TMV_SQR(const ConjRef<T>& x) 
     { return TMV_SQR(x.conj()); }
     template <class T>
-    static TMV_INLINE T TMV_SQRT(const ConjRef<T>& x) 
+    TMV_INLINE T TMV_SQRT(const ConjRef<T>& x) 
     { return TMV_SQRT(x.conj()); }
     template <class T>
-    static TMV_INLINE typename Traits<T>::real_type TMV_REAL(
-        const ConjRef<T>& x) 
+    TMV_INLINE typename Traits<T>::real_type TMV_REAL(const ConjRef<T>& x) 
     { return x.real(); }
     template <class T>
-    static TMV_INLINE typename Traits<T>::real_type TMV_IMAG(
-        const ConjRef<T>& x) 
+    TMV_INLINE typename Traits<T>::real_type TMV_IMAG(const ConjRef<T>& x) 
     { return x.imag(); }
 
     template <class T>
-    static TMV_INLINE void TMV_SWAP(
+    TMV_INLINE void TMV_SWAP(
         tmv::ConjRef<std::complex<T> > x1, tmv::ConjRef<std::complex<T> > x2)
     { return x1.swapWith(x2); }
     template <class T>
-    static TMV_INLINE void TMV_SWAP(
+    TMV_INLINE void TMV_SWAP(
         std::complex<T>& x1, tmv::ConjRef<std::complex<T> > x2)
     { return x2.swapWith(x1); }
     template <class T>
-    static TMV_INLINE void TMV_SWAP(
+    TMV_INLINE void TMV_SWAP(
         tmv::ConjRef<std::complex<T> > x1, std::complex<T>& x2)
     { return x1.swapWith(x2); }
 
@@ -409,11 +405,11 @@ namespace tmv {
 
 #ifdef TMV_TEXT
     template <class T>
-    static inline std::string TMV_Text(ConjRef<T>)
+    inline std::string TMV_Text(ConjRef<T>)
     { return std::string("ConjRef<") + TMV_Text(T()) + ">"; }
 
     template <class T, int S, bool C>
-    static inline std::string TMV_Text(VIt<T,S,C> it)
+    inline std::string TMV_Text(VIt<T,S,C> it)
     {
         std::ostringstream s;
         s << "VIt<" << TMV_Text(T());
@@ -424,7 +420,7 @@ namespace tmv {
     }
 
     template <class T, int S, bool C>
-    static inline std::string TMV_Text(CVIt<T,S,C> it)
+    inline std::string TMV_Text(CVIt<T,S,C> it)
     {
         std::ostringstream s;
         s << "CVIt<" << TMV_Text(T());

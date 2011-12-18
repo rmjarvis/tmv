@@ -66,7 +66,7 @@ namespace tmv {
             typedef typename V2::subvector_type V2s;
             V2 tempBase(K);
 
-            Q.colRange(0,N).upperTri().offDiag().setZero();
+            if (N > 1) Q.colRange(0,N).upperTri().offDiag().setZero();
 
             IT bj = beta.rbegin(); // rbegin, so iterate from end.
             for (int j=N-1;j>=0;--j,++bj) {
@@ -108,7 +108,7 @@ namespace tmv {
             typedef typename M1::submatrix_type M1s;
             typedef typename V::const_subvector_type Vs;
 
-            typedef Matrix<T,NoAlias> M2;
+            typedef Matrix<T,NoDivider|NoAlias> M2;
             typedef typename M2::submatrix_type M2s;
             typedef typename M2s::uppertri_type M2t;
             M2 tempBase = MatrixSizer<T>(N1,K);
@@ -211,7 +211,8 @@ namespace tmv {
             typedef typename MCopyHelper<T,Rec,cs,rs>::type Mcm;
             Mcm Qcm = Q;
             UnpackQ_Helper<-2,cs,rs,Mcm,V>::call(Qcm,beta);
-            NoAliasCopy(Qcm,Q);
+            typename M::noalias_type Qna = Q.noAlias();
+            Copy(Qcm,Qna);
         }
     };
 
@@ -317,7 +318,7 @@ namespace tmv {
     };
 
     template <class M, class V>
-    static inline void InlineUnpackQ(
+    inline void InlineUnpackQ(
         BaseMatrix_Rec_Mutable<M>& Q, const BaseVector_Calc<V>& beta)
     {
         TMVStaticAssert(V::isreal);
@@ -338,7 +339,7 @@ namespace tmv {
     }
 
     template <class M, class V>
-    static inline void UnpackQ(
+    inline void UnpackQ(
         BaseMatrix_Rec_Mutable<M>& Q, const BaseVector_Calc<V>& beta)
     {
         TMVStaticAssert(V::isreal);

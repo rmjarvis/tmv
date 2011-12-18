@@ -220,7 +220,7 @@ namespace tmv {
     };
 
     template <class M1, class V1, class M2>
-    static inline void InlineQR_Inverse(
+    inline void InlineQR_Inverse(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& minv)
     {
@@ -245,7 +245,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class M2>
-    static inline void QR_Inverse(
+    inline void QR_Inverse(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& minv)
     {
@@ -386,7 +386,7 @@ namespace tmv {
     }; 
 
     template <class M1, class V1, class M2>
-    static inline void InlineQR_InverseATA(
+    inline void InlineQR_InverseATA(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& ata)
     {
@@ -412,7 +412,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class M2>
-    static inline void QR_InverseATA(
+    inline void QR_InverseATA(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& ata)
     {

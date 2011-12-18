@@ -20,7 +20,7 @@ namespace tmv {
     // Matrix * Matrix
     //
 
-    // These first few are for matrices that aren't calculated yet.
+    // This first one is for matrices that aren't calculated yet.
     // Some BaseMatrix objects are overloaded (e.g. Permutation), but
     // others aren't, in which case they calculate the matrix first
     // and then call MultMM.  If a BaseMatrix_Calc type doesn't overload
@@ -29,62 +29,49 @@ namespace tmv {
     // Also, this effects the intermediate calculation for things like
     // D = A * B * C, where (A*B) needs a temporary.
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void MultMM(
+    inline void MultMM(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     { MultMM<add>(x,m1.calc(),m2.calc(),m3.mat()); }
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
-        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { NoAliasMultMM<add>(x,m1.calc(),m2.calc(),m3.mat()); }
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void AliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
-        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { AliasMultMM<add>(x,m1.calc(),m2.calc(),m3.mat()); }
 
-    // These are helpers to allow the caller to not use a Scaling object.
-    template <bool add, class T, class M1, class M2, class M3>
-    static inline void MultMM(
-        const T& x, const BaseMatrix<M1>& m1,
-        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { MultMM<add>(Scaling<0,T>(x),m1.mat(),m2.mat(),m3.mat()); }
-    template <bool add, class T, class M1, class M2, class M3>
-    static inline void NoAliasMultMM(
-        const T& x, const BaseMatrix<M1>& m1,
-        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { NoAliasMultMM<add>(Scaling<0,T>(x),m1.mat(),m2.mat(),m3.mat()); }
-    template <bool add, class T, class M1, class M2, class M3>
-    static inline void AliasMultMM(
-        const T& x, const BaseMatrix<M1>& m1,
-        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    { AliasMultMM<add>(Scaling<0,T>(x),m1.mat(),m2.mat(),m3.mat()); }
+    // If everything is a BaseMatrix_Calc, there should be an overload
+    // that says how to do the calculation.  If we hit this version,
+    // then I'm missing an overload to say how to deal with a particular
+    // combination.  This next line gives a compiler error if we ever try 
+    // to use this function.
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& , const BaseMatrix_Calc<M1>& , 
+        const BaseMatrix_Calc<M2>& , BaseMatrix_Mutable<M3>& )
+    { TMVStaticAssert(ix == 999); }
 
+    // On the other hand, if we don't define a special MultEqMM,
+    // that just implies that there is no way to do it without the
+    // copy.  So just do that here.
+    template <class M1, int ix, class T, class M2>
+    inline void MultEqMM(
+        BaseMatrix_Mutable<M1>& m1,
+        const Scaling<ix,T>& x, const BaseMatrix_Calc<M2>& m2)
+    { 
+        MultMM<false>(
+            Scaling<1,typename M1::real_type>(),
+            (x*m1.mat()).calc(),m2.mat(),m1.mat()); 
+    }
+
+    // Also allow x to be missing (taken to be 1) or a scalar.
     template <bool add, class M1, class M2, class M3>
-    static inline void MultMM(
-        const BaseMatrix<M1>& m1,
+    inline void MultMM(
+        const BaseMatrix<M1>& m1, 
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     {
         MultMM<add>(
-            Scaling<1,typename M3::real_type>(),m1.mat(),m2.mat(),m3.mat()); 
+            Scaling<1,typename M3::real_type>(),m1.calc(),m2.calc(),m3.mat()); 
     }
-    template <bool add, class M1, class M2, class M3>
-    static inline void NoAliasMultMM(
-        const BaseMatrix<M1>& m1,
+    template <bool add, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        T x, const BaseMatrix<M1>& m1, 
         const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    {
-        NoAliasMultMM<add>(
-            Scaling<1,typename M3::real_type>(),m1.mat(),m2.mat(),m3.mat()); 
-    }
-    template <bool add, class M1, class M2, class M3>
-    static inline void AliasMultMM(
-        const BaseMatrix<M1>& m1,
-        const BaseMatrix<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    {
-        AliasMultMM<add>(
-            Scaling<1,typename M3::real_type>(),m1.mat(),m2.mat(),m3.mat()); 
-    }
+    { MultMM<add>(Scaling<0,T>(x),m1.calc(),m2.calc(),m3.mat()); }
 
 #ifdef XDEBUG_PRODMM
     template <bool add, int ix, class T, class M1, class M2, class M3>
@@ -257,9 +244,9 @@ namespace tmv {
         TMV_INLINE size_t colsize() const { return m1.colsize(); }
         TMV_INLINE size_t rowsize() const { return m2.rowsize(); }
         TMV_INLINE int nlo() const 
-        { return TMV_MAX(TMV_MIN(colsize()-1,m1.nlo()+m2.nlo()),0); }
+        { return TMV_MAX(TMV_MIN(int(colsize())-1,m1.nlo()+m2.nlo()),0); }
         TMV_INLINE int nhi() const 
-        { return TMV_MAX(TMV_MIN(rowsize()-1,m1.nhi()+m2.nhi()),0); }
+        { return TMV_MAX(TMV_MIN(int(rowsize())-1,m1.nhi()+m2.nhi()),0); }
 
         value_type cref(int i, int j) const
         { return x * (m1.get_row(i) * m2.get_col(j)); }
@@ -281,23 +268,6 @@ namespace tmv {
 #endif
         }
 
-        template <class M3>
-        TMV_INLINE_ND void newAssignTo(BaseMatrix_Mutable<M3>& m3) const
-        {
-            TMVStaticAssert((
-                    ShapeTraits2<type::_shape,M3::_shape>::assignable)); 
-            TMVStaticAssert((type::isreal || M3::iscomplex));
-            TMVStaticAssert((Sizes<type::_colsize,M3::_colsize>::same)); 
-            TMVStaticAssert((Sizes<type::_rowsize,M3::_rowsize>::same)); 
-            TMVAssert(colsize() == m3.colsize());
-            TMVAssert(rowsize() == m3.rowsize());
-#ifdef XDEBUG_PRODMM
-            MultMM_Debug<false>(x,m1.eval(),m2.eval(),m3.mat());
-#else
-            NoAliasMultMM<false>(x,m1.mat(),m2.mat(),m3.mat());
-#endif
-        }
-
     private:
         const Scaling<ix,T> x;
         const M1& m1;
@@ -308,27 +278,27 @@ namespace tmv {
     // m * m
 #define RT typename M1::real_type
     template <class M1, class M2>
-    static TMV_INLINE ProdMM<1,RT,M1,M2> operator*(
+    TMV_INLINE ProdMM<1,RT,M1,M2> operator*(
         const BaseMatrix<M1>& m1, const BaseMatrix<M2>& m2)
     { return ProdMM<1,RT,M1,M2>(RT(1),m1,m2); }
 #undef RT
 
     // m * xm
     template <class M1, int ix, class T, class M2>
-    static TMV_INLINE ProdMM<ix,T,M1,M2> operator*(
+    TMV_INLINE ProdMM<ix,T,M1,M2> operator*(
         const BaseMatrix<M1>& m1, const ProdXM<ix,T,M2>& m2)
     { return ProdMM<ix,T,M1,M2>(m2.getX(),m1,m2.getM()); }
 
     // xm * m
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<ix,T,M1,M2> operator*(
+    TMV_INLINE ProdMM<ix,T,M1,M2> operator*(
         const ProdXM<ix,T,M1>& m1, const BaseMatrix<M2>& m2)
     { return ProdMM<ix,T,M1,M2>(m1.getX(),m1.getM(),m2); }
 
     // xm * xm
 #define PT typename Traits2<T1,T2>::type
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
-    static TMV_INLINE ProdMM<ix1*ix2,PT,M1,M2> operator*(
+    TMV_INLINE ProdMM<ix1*ix2,PT,M1,M2> operator*(
         const ProdXM<ix1,T1,M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     {
         return ProdMM<ix1*ix2,PT,M1,M2>(
@@ -340,7 +310,7 @@ namespace tmv {
     // m *= m
 #define RT typename M1::real_type
     template <class M1, class M2>
-    static inline void MultEq(
+    inline void MultEq(
         BaseMatrix_Mutable<M1>& m1, const BaseMatrix<M2>& m2)
     {
 #ifdef XDEBUG_PRODMM
@@ -353,7 +323,7 @@ namespace tmv {
 
     // m *= xm
     template <class M1, int ix2, class T2, class M2>
-    static inline void MultEq(
+    inline void MultEq(
         BaseMatrix_Mutable<M1>& m1, const ProdXM<ix2,T2,M2>& m2)
     {
 #ifdef XDEBUG_PRODMM
@@ -365,7 +335,7 @@ namespace tmv {
 
     // m += mm
     template <class M3, int ix, class T, class M1, class M2>
-    static inline void AddEq(
+    inline void AddEq(
         BaseMatrix_Mutable<M3>& m3, const ProdMM<ix,T,M1,M2>& mm)
     {
 #ifdef XDEBUG_PRODMM
@@ -378,7 +348,7 @@ namespace tmv {
 
     // m -= mm
     template <class M3, int ix, class T, class M1, class M2>
-    static inline void SubtractEq(
+    inline void SubtractEq(
         BaseMatrix_Mutable<M3>& m3, const ProdMM<ix,T,M1,M2>& mm)
     {
 #ifdef XDEBUG_PRODMM
@@ -398,33 +368,33 @@ namespace tmv {
 
     // -(mm)
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<-ix,T,M1,M2> operator-(
+    TMV_INLINE ProdMM<-ix,T,M1,M2> operator-(
         const ProdMM<ix,T,M1,M2>& mm)
     { return ProdMM<-ix,T,M1,M2>(-mm.getX(),mm.getM1(),mm.getM2()); }
 
     // x * (mm)
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<0,T,M1,M2> operator*(
+    TMV_INLINE ProdMM<0,T,M1,M2> operator*(
         const int x, const ProdMM<ix,T,M1,M2>& mm)
     { return ProdMM<0,T,M1,M2>(RT(x)*mm.getX(),mm.getM1(),mm.getM2()); }
 
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<0,T,M1,M2> operator*(
+    TMV_INLINE ProdMM<0,T,M1,M2> operator*(
         const RT x, const ProdMM<ix,T,M1,M2>& mm)
     { return ProdMM<0,T,M1,M2>(x*mm.getX(),mm.getM1(),mm.getM2()); }
 
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<0,CT,M1,M2> operator*(
+    TMV_INLINE ProdMM<0,CT,M1,M2> operator*(
         const CT x, const ProdMM<ix,T,M1,M2>& mm)
     { return ProdMM<0,CT,M1,M2>(x*mm.getX(),mm.getM1(),mm.getM2()); }
 
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<0,CT,M1,M2> operator*(
+    TMV_INLINE ProdMM<0,CT,M1,M2> operator*(
         const CCT x, const ProdMM<ix,T,M1,M2>& mm)
     { return ProdMM<0,CT,M1,M2>(x*mm.getX(),mm.getM1(),mm.getM2()); }
 
     template <int ix1, class T1, int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2> operator*(
+    TMV_INLINE ProdMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2> operator*(
         const Scaling<ix1,T1>& x, const ProdMM<ix,T,M1,M2>& mm)
     {
         return ProdMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2>(
@@ -433,27 +403,27 @@ namespace tmv {
 
     // (mm)*x
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<0,T,M1,M2> operator*(
+    TMV_INLINE ProdMM<0,T,M1,M2> operator*(
         const ProdMM<ix,T,M1,M2>& mm, const int x)
     { return ProdMM<0,T,M1,M2>(RT(x)*mm.getX(),mm.getM1(),mm.getM2()); }
 
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<0,T,M1,M2> operator*(
+    TMV_INLINE ProdMM<0,T,M1,M2> operator*(
         const ProdMM<ix,T,M1,M2>& mm, const RT x)
     { return ProdMM<0,T,M1,M2>(x*mm.getX(),mm.getM1(),mm.getM2()); }
 
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<0,CT,M1,M2> operator*(
+    TMV_INLINE ProdMM<0,CT,M1,M2> operator*(
         const ProdMM<ix,T,M1,M2>& mm, const CT x)
     { return ProdMM<0,CT,M1,M2>(x*mm.getX(),mm.getM1(),mm.getM2()); }
 
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<0,CT,M1,M2> operator*(
+    TMV_INLINE ProdMM<0,CT,M1,M2> operator*(
         const ProdMM<ix,T,M1,M2>& mm, const CCT x)
     { return ProdMM<0,CT,M1,M2>(x*mm.getX(),mm.getM1(),mm.getM2()); }
 
     template <int ix1, class T1, int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2> operator*(
+    TMV_INLINE ProdMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2> operator*(
         const ProdMM<ix,T,M1,M2>& mm, const Scaling<ix1,T1>& x)
     {
         return ProdMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2>(
@@ -462,27 +432,27 @@ namespace tmv {
 
     // (mm)/x
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<0,T,M1,M2> operator/(
+    TMV_INLINE ProdMM<0,T,M1,M2> operator/(
         const ProdMM<ix,T,M1,M2>& mm, const int x)
     { return ProdMM<0,T,M1,M2>(mm.getX()/RT(x),mm.getM1(),mm.getM2()); }
 
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<0,T,M1,M2> operator/(
+    TMV_INLINE ProdMM<0,T,M1,M2> operator/(
         const ProdMM<ix,T,M1,M2>& mm, const RT x)
     { return ProdMM<0,T,M1,M2>(mm.getX()/x,mm.getM1(),mm.getM2()); }
 
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<0,CT,M1,M2> operator/(
+    TMV_INLINE ProdMM<0,CT,M1,M2> operator/(
         const ProdMM<ix,T,M1,M2>& mm, const CT x)
     { return ProdMM<0,CT,M1,M2>(mm.getX()/x,mm.getM1(),mm.getM2()); }
 
     template <int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<0,CT,M1,M2> operator/(
+    TMV_INLINE ProdMM<0,CT,M1,M2> operator/(
         const ProdMM<ix,T,M1,M2>& mm, const CCT x)
     { return ProdMM<0,CT,M1,M2>(mm.getX()/x,mm.getM1(),mm.getM2()); }
 
     template <int ix1, class T1, int ix, class T, class M1, class M2>
-    static TMV_INLINE ProdMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2> operator/(
+    TMV_INLINE ProdMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2> operator/(
         const ProdMM<ix,T,M1,M2>& mm, const Scaling<ix1,T1>& x)
     {
         return ProdMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2>(
@@ -497,7 +467,7 @@ namespace tmv {
 
 #ifdef TMV_TEXT
     template <int ix, class T, class M1, class M2>
-    static inline std::string TMV_Text(const ProdMM<ix,T,M1,M2>& mm)
+    inline std::string TMV_Text(const ProdMM<ix,T,M1,M2>& mm)
     {
         std::ostringstream s;
         s << "ProdMM< "<<ix<<","<<TMV_Text(T())<<",";

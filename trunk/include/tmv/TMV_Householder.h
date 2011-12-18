@@ -425,7 +425,7 @@ namespace tmv {
     };
 
     template <class V>
-    static inline void InlineHouseholderReflect(
+    inline void InlineHouseholderReflect(
         typename V::value_type& x0, BaseVector_Mutable<V>& u, 
         typename V::real_type& beta)
     {
@@ -435,7 +435,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline void HouseholderReflect(
+    inline void HouseholderReflect(
         typename V::value_type& x0, BaseVector_Mutable<V>& u, 
         typename V::real_type& beta)
     {
@@ -446,7 +446,7 @@ namespace tmv {
 
     // x0 is also allowed to be a ConjRef
     template <class V>
-    static inline void HouseholderReflect(
+    inline void HouseholderReflect(
         ConjRef<typename V::value_type> x0, BaseVector_Mutable<V>& u, 
         typename V::real_type& beta)
     {
@@ -625,7 +625,7 @@ namespace tmv {
     };
 
     template <class V>
-    static inline bool InlineHouseholderUnReflect(
+    inline bool InlineHouseholderUnReflect(
         typename V::value_type& y, BaseVector_Mutable<V>& u, 
         typename V::real_type& beta)
     {
@@ -635,7 +635,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline bool HouseholderUnReflect(
+    inline bool HouseholderUnReflect(
         typename V::value_type& y, BaseVector_Mutable<V>& u, 
         typename V::real_type& beta)
     {
@@ -646,7 +646,7 @@ namespace tmv {
 
     // y is also allowed to be a ConjRef
     template <class V>
-    static inline bool HouseholderUnReflect(
+    inline bool HouseholderUnReflect(
         ConjRef<typename V::value_type> y, BaseVector_Mutable<V>& u, 
         typename V::real_type& beta)
     {
@@ -769,7 +769,7 @@ namespace tmv {
     };
 
     template <class V>
-    static inline void InlineHouseholderUnpack(
+    inline void InlineHouseholderUnpack(
         BaseVector_Mutable<V>& u, 
         typename V::real_type beta, typename V::reference u0)
     {
@@ -779,7 +779,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline void HouseholderUnpack(
+    inline void HouseholderUnpack(
         BaseVector_Mutable<V>& u, 
         typename V::real_type beta, typename V::reference u0)
     {
@@ -884,7 +884,7 @@ namespace tmv {
             M0cv m0cv = m0c.cView();
             HouseholderMultEq_Helper<-2,V,M0cv,Mx,Vt>::call(
                 u,beta,m0cv,mx,temp);
-            NoAliasCopy(m0c,m0);
+            m0.noAlias() = m0c;
         }
     };
 
@@ -973,7 +973,7 @@ namespace tmv {
     };
 
     template <class V, class M0, class Mx, class Vt>
-    static inline void InlineHouseholderMultEq(
+    inline void InlineHouseholderMultEq(
         const BaseVector_Calc<V>& u, typename V::real_type beta,
         BaseVector_Mutable<M0>& m0, BaseMatrix_Rec_Mutable<Mx>& mx,
         BaseVector_Mutable<Vt>& temp)
@@ -998,7 +998,7 @@ namespace tmv {
     }
 
     template <class V, class M0, class Mx, class Vt>
-    static inline void HouseholderMultEq(
+    inline void HouseholderMultEq(
         const BaseVector_Calc<V>& u, typename V::real_type beta,
         BaseVector_Mutable<M0>& m0, BaseMatrix_Rec_Mutable<Mx>& mx,
         BaseVector_Mutable<Vt>& temp)
@@ -1191,7 +1191,7 @@ namespace tmv {
     };
 
     template <class M1, class M2>
-    static inline void InlineBlockHouseholderAugment(
+    inline void InlineBlockHouseholderAugment(
         const BaseMatrix_Rec<M1>& Y, BaseMatrix_Tri_Mutable<M2>& Z,
         typename M2::real_type beta)
     {
@@ -1207,7 +1207,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void BlockHouseholderAugment(
+    inline void BlockHouseholderAugment(
         const BaseMatrix_Rec<M1>& Y, BaseMatrix_Tri_Mutable<M2>& Z,
         typename M2::real_type beta)
     {
@@ -1414,7 +1414,7 @@ namespace tmv {
     };
 
     template <class M1, class M2, class V>
-    static inline void InlineBlockHouseholderMakeZ(
+    inline void InlineBlockHouseholderMakeZ(
         const BaseMatrix_Rec<M1>& Y, BaseMatrix_Tri_Mutable<M2>& Z, 
         const BaseVector_Calc<V>& beta)
     {
@@ -1433,7 +1433,7 @@ namespace tmv {
     }
 
     template <class M1, class M2, class V>
-    static inline void BlockHouseholderMakeZ(
+    inline void BlockHouseholderMakeZ(
         const BaseMatrix_Rec<M1>& Y, BaseMatrix_Tri_Mutable<M2>& Z, 
         const BaseVector_Calc<V>& beta)
     {
@@ -1622,7 +1622,7 @@ namespace tmv {
     };
 
     template <class M1, class M2, class M3, class M4>
-    static inline void InlineBlockHouseholderLMult(
+    inline void InlineBlockHouseholderLMult(
         const BaseMatrix_Rec<M1>& Y, const BaseMatrix_Tri<M2>& Z,
         BaseMatrix_Rec_Mutable<M3>& m, BaseMatrix_Rec_Mutable<M4>& temp)
     {
@@ -1648,7 +1648,7 @@ namespace tmv {
     }
 
     template <class M1, class M2, class M3, class M4>
-    static inline void BlockHouseholderLMult(
+    inline void BlockHouseholderLMult(
         const BaseMatrix_Rec<M1>& Y, const BaseMatrix_Tri<M2>& Z,
         BaseMatrix_Rec_Mutable<M3>& m, BaseMatrix_Rec_Mutable<M4>& temp)
     {
@@ -1851,7 +1851,7 @@ namespace tmv {
     };
 
     template <class M1, class M2, class M3, class M4>
-    static inline void InlineBlockHouseholderLDiv(
+    inline void InlineBlockHouseholderLDiv(
         const BaseMatrix_Rec<M1>& Y, const BaseMatrix_Tri<M2>& Z,
         BaseMatrix_Rec_Mutable<M3>& m, BaseMatrix_Rec_Mutable<M4>& temp)
     {
@@ -1877,7 +1877,7 @@ namespace tmv {
     }
 
     template <class M1, class M2, class M3, class M4>
-    static inline void BlockHouseholderLDiv(
+    inline void BlockHouseholderLDiv(
         const BaseMatrix_Rec<M1>& Y, const BaseMatrix_Tri<M2>& Z,
         BaseMatrix_Rec_Mutable<M3>& m, BaseMatrix_Rec_Mutable<M4>& temp)
     {
@@ -2026,7 +2026,7 @@ namespace tmv {
     };
 
     template <class M1, class M2, class M3>
-    static inline void InlineBlockHouseholderUnpack(
+    inline void InlineBlockHouseholderUnpack(
         BaseMatrix_Rec_Mutable<M1>& Y, const BaseMatrix_Tri<M2>& Z,
         BaseMatrix_Tri_Mutable<M3>& temp)
     {
@@ -2050,7 +2050,7 @@ namespace tmv {
     }
 
     template <class M1, class M2, class M3>
-    static inline void BlockHouseholderUnpack(
+    inline void BlockHouseholderUnpack(
         BaseMatrix_Rec_Mutable<M1>& Y, const BaseMatrix_Tri<M2>& Z,
         BaseMatrix_Tri_Mutable<M3>& temp)
     {
@@ -2225,7 +2225,7 @@ namespace tmv {
     };
 
     template <class M1, class M2>
-    static inline void InlineBlock2HouseholderAugment(
+    inline void InlineBlock2HouseholderAugment(
         const BaseMatrix_Rec<M1>& Y, BaseMatrix_Tri_Mutable<M2>& Z,
         typename M2::real_type beta)
     {
@@ -2241,7 +2241,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void Block2HouseholderAugment(
+    inline void Block2HouseholderAugment(
         const BaseMatrix_Rec<M1>& Y, BaseMatrix_Tri_Mutable<M2>& Z,
         typename M2::real_type beta)
     {
@@ -2410,7 +2410,7 @@ namespace tmv {
     };
 
     template <class M1, class M2, class V>
-    static inline void InlineBlock2HouseholderMakeZ(
+    inline void InlineBlock2HouseholderMakeZ(
         const BaseMatrix_Rec<M1>& Y, BaseMatrix_Tri_Mutable<M2>& Z, 
         const BaseVector_Calc<V>& beta)
     {
@@ -2428,7 +2428,7 @@ namespace tmv {
     }
 
     template <class M1, class M2, class V>
-    static inline void Block2HouseholderMakeZ(
+    inline void Block2HouseholderMakeZ(
         const BaseMatrix_Rec<M1>& Y, BaseMatrix_Tri_Mutable<M2>& Z, 
         const BaseVector_Calc<V>& beta)
     {
@@ -2609,7 +2609,7 @@ namespace tmv {
     };
 
     template <class M1, class M2, class M3, class M4, class M5>
-    static inline void InlineBlock2HouseholderLMult(
+    inline void InlineBlock2HouseholderLMult(
         const BaseMatrix_Rec<M1>& Y, const BaseMatrix_Tri<M2>& Z,
         BaseMatrix_Rec_Mutable<M3>& ma, BaseMatrix_Rec_Mutable<M4>& mb,
         BaseMatrix_Rec_Mutable<M5>& temp)
@@ -2643,7 +2643,7 @@ namespace tmv {
     }
 
     template <class M1, class M2, class M3, class M4, class M5>
-    static inline void Block2HouseholderLMult(
+    inline void Block2HouseholderLMult(
         const BaseMatrix_Rec<M1>& Y, const BaseMatrix_Tri<M2>& Z,
         BaseMatrix_Rec_Mutable<M3>& ma, BaseMatrix_Rec_Mutable<M4>& mb,
         BaseMatrix_Rec_Mutable<M5>& temp)
@@ -2840,7 +2840,7 @@ namespace tmv {
     };
 
     template <class M1, class M2, class M3, class M4, class M5>
-    static inline void InlineBlock2HouseholderLDiv(
+    inline void InlineBlock2HouseholderLDiv(
         const BaseMatrix_Rec<M1>& Y, const BaseMatrix_Tri<M2>& Z,
         BaseMatrix_Rec_Mutable<M3>& ma, BaseMatrix_Rec_Mutable<M4>& mb,
         BaseMatrix_Rec_Mutable<M5>& temp)
@@ -2874,7 +2874,7 @@ namespace tmv {
     }
 
     template <class M1, class M2, class M3, class M4, class M5>
-    static inline void Block2HouseholderLDiv(
+    inline void Block2HouseholderLDiv(
         const BaseMatrix_Rec<M1>& Y, const BaseMatrix_Tri<M2>& Z,
         BaseMatrix_Rec_Mutable<M3>& ma, BaseMatrix_Rec_Mutable<M4>& mb,
         BaseMatrix_Rec_Mutable<M5>& temp)

@@ -460,7 +460,7 @@ namespace tmv {
     };
 
     template <class M1, class V1, class V2, class V3, class V4>
-    static inline void InlineBidiagonalize(
+    inline void InlineBidiagonalize(
         BaseMatrix_Rec_Mutable<M1>& A,
         BaseVector_Mutable<V1>& Ubeta, BaseVector_Mutable<V2>& Vbeta, 
         BaseVector_Mutable<V3>& D, BaseVector_Mutable<V4>& E)
@@ -505,7 +505,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class V2, class V3, class V4>
-    static inline void Bidiagonalize(
+    inline void Bidiagonalize(
         BaseMatrix_Rec_Mutable<M1>& A,
         BaseVector_Mutable<V1>& Ubeta, BaseVector_Mutable<V2>& Vbeta, 
         BaseVector_Mutable<V3>& D, BaseVector_Mutable<V4>& E)

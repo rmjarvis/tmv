@@ -90,49 +90,49 @@ namespace tmv {
 
     // In TMV_QRInverse.h
     template <class M1, class V1, class M2>
-    static inline void QR_Inverse(
+    inline void QR_Inverse(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& minv);
     template <class M1, class V1, class M2>
-    static inline void QR_InverseATA(
+    inline void QR_InverseATA(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& ata);
 
     // In TMV_QRDiv.h
     template <class M1, class V1, class M2, class M3>
-    static inline void QR_Solve(
+    inline void QR_Solve(
         const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
         const Permutation* P, int N1, 
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
     template <class M1, class V1, class V2, class V3>
-    static inline void QR_Solve(
+    inline void QR_Solve(
         const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
         const Permutation* P, int N1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3);
     template <class M1, class V1, class M2, class M3>
-    static inline void QR_SolveTranspose(
+    inline void QR_SolveTranspose(
         const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
         const Permutation* P, int N1, 
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
     template <class M1, class V1, class V2, class V3>
-    static inline void QR_SolveTranspose(
+    inline void QR_SolveTranspose(
         const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
         const Permutation* P, int N1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3);
     template <class M1, class V1, class M2>
-    static inline void QR_SolveInPlace(
+    inline void QR_SolveInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
         const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class V1, class V2>
-    static inline void QR_SolveInPlace(
+    inline void QR_SolveInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
         const Permutation* P, int N1, BaseVector_Mutable<V2>& v2);
     template <class M1, class V1, class M2>
-    static inline void QR_SolveTransposeInPlace(
+    inline void QR_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
         const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class V1, class V2>
-    static inline void QR_SolveTransposeInPlace(
+    inline void QR_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
         const Permutation* P, int N1, BaseVector_Mutable<V2>& v2);
 
@@ -156,7 +156,7 @@ namespace tmv {
         QRP_StrictSingleton();
     };
 
-    static TMV_INLINE void UseStrictQRP(bool newstrict=true)
+    TMV_INLINE void UseStrictQRP(bool newstrict=true)
     { QRP_StrictSingleton::inst() = newstrict; }
 
 
@@ -596,11 +596,13 @@ namespace tmv {
     {
         typedef typename M::real_type RT;
         typedef typename M::value_type T;
-        enum { istrans = int(M::_colsize) < int(M::_rowsize) };
-        enum { cs = istrans ? int(M::_rowsize) : int(M::_colsize) };
-        enum { rs = istrans ? int(M::_colsize) : int(M::_rowsize) };
-        enum { A = istrans ? RowMajor : ColMajor };
-        typedef typename MCopyHelper<T,Rec,M::_colsize,M::_rowsize,A>::type Mc;
+        enum { cs1 = M::_colsize };
+        enum { rs1 = M::_rowsize };
+        enum { istrans = int(cs1) < int(rs1) };
+        enum { cs = IntTraits2<cs1,rs1>::max };
+        enum { rs = IntTraits2<cs1,rs1>::min };
+        enum { A = (istrans ? RowMajor : ColMajor) | NoAlias };
+        typedef typename MCopyHelper<T,Rec,cs1,rs1,A>::type Mc;
         typedef typename TypeSelect< istrans ,
                 typename Mc::transpose_type ,
                 typename Mc::view_type >::type qrx_type;
@@ -621,7 +623,7 @@ namespace tmv {
             //std::cout<<"SmallQRx = "<<SmallQRx<<std::endl;
             //std::cout<<"QRx = "<<QRx<<std::endl;
             //std::cout<<"beta = "<<beta<<std::endl;
-            A.newAssignTo(SmallQRx);
+            SmallQRx = A;
             //std::cout<<"SmallQRx => "<<SmallQRx<<std::endl;
             //std::cout<<"QRx => "<<QRx<<std::endl;
             QRP_Decompose(QRx,beta,P,QRP_StrictSingleton::inst());
@@ -685,7 +687,7 @@ namespace tmv {
         enum { istrans1 = knownsizes && cs1 < int(rs1) };
         enum { cs = IntTraits2<cs1,rs1>::max };
         enum { rs = IntTraits2<cs1,rs1>::min };
-        typedef typename MViewHelper<T,Rec,cs,rs,1,TMV_UNKNOWN>::type qrx_type;
+        typedef typename MViewHelper<T,Rec,cs,rs,1,TMV_UNKNOWN,NoAlias>::type qrx_type;
         typedef Vector<RT> beta_type;
 
         template <class M2>
@@ -713,9 +715,9 @@ namespace tmv {
                 if (!inplace) {
                     if (istrans) {
                         typename qrx_type::transpose_type QRxt = QRx.transpose();
-                        Maybe<!knownsizes||istrans1>::newAssignTo(A,QRxt);
+                        Maybe<!knownsizes||istrans1>::assignTo(A,QRxt);
                     } else {
-                        Maybe<!knownsizes||!istrans1>::newAssignTo(A,QRx);
+                        Maybe<!knownsizes||!istrans1>::assignTo(A,QRx);
                     }
                 } else {
                     Maybe<M2::_conj>::conjself(QRx);
@@ -749,9 +751,9 @@ namespace tmv {
                 //std::cout<<"QRD_Impl non-Rec A = "<<TMV_Text(A)<<std::endl;
                 if (istrans) {
                     typename qrx_type::transpose_type QRxt = QRx.transpose();
-                    Maybe<!knownsizes||istrans1>::newAssignTo(A,QRxt);
+                    Maybe<!knownsizes||istrans1>::assignTo(A,QRxt);
                 } else {
-                    Maybe<!knownsizes||!istrans1>::newAssignTo(A,QRx);
+                    Maybe<!knownsizes||!istrans1>::assignTo(A,QRx);
                 }
                 QRP_Decompose(QRx,beta,P,QRP_StrictSingleton::inst());
                 //std::cout<<"After QRP_Decompose"<<std::endl;

@@ -31,6 +31,7 @@ int main() try {
     //showtests=true;
     //showstartdone=true;
     //XXDEBUG7 = true;
+    //XXDEBUG9 = true;
     TestBandMatrix<double>();
 
 #if 0
@@ -58,7 +59,7 @@ int main() try {
 
     return 0;
 }
-#if 0
+#if 1
 #ifndef NOTHROW
 catch (tmv::Error& e) {
     std::cerr<<e<<std::endl;

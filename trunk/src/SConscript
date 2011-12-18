@@ -18,7 +18,7 @@ div = ReadFileList('div.files')
 div_omp = ReadFileList('div_omp.files')
 div_geqp3 = ReadFileList('div_geqp3.files')
 
-band = ReadFileList('band.filesx')
+band = ReadFileList('band.files')
 band_noint = ReadFileList('band_noint.filesx')
 sym = ReadFileList('sym.files')
 sym_noint = ReadFileList('sym_noint.files')

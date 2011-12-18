@@ -31,9 +31,11 @@ namespace tmv {
         {
             const int nhi = (hi == TMV_UNKNOWN ? m.nhi() : hi);
             for(int k=1;k<=nhi;++k) {
-                typename M1::diag_sub_type v1 = m.get_diag(-k);
-                typename M1::diag_sub_type v2 = m.get_diag(k);
-                NoAliasSwap(v1,v2);
+                typename M1::diag_sub_type::noalias_type v1 = 
+                    m.get_diag(-k).noAlias();
+                typename M1::diag_sub_type::noalias_type v2 =
+                    m.get_diag(k).noAlias();
+                Swap(v1,v2);
             }
         }
     };
@@ -99,7 +101,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline void TransposeSelf(BaseMatrix_Band_Mutable<M>& m)
+    inline void TransposeSelf(BaseMatrix_Band_Mutable<M>& m)
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same)); 
         TMVStaticAssert((Sizes<M::_nlo,M::_nhi>::same)); 
@@ -112,7 +114,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline void InlineTransposeSelf(BaseMatrix_Band_Mutable<M>& m)
+    inline void InlineTransposeSelf(BaseMatrix_Band_Mutable<M>& m)
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same)); 
         TMVStaticAssert((Sizes<M::_nlo,M::_nhi>::same)); 

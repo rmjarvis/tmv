@@ -238,7 +238,7 @@ namespace tmv {
 
     // Used by both algo 22 and 27
     template <class M1, class M2, class M3>
-    static inline void RecursiveQRDowndate(M1& R, M2& A, M3& Z, bool makeZ)
+    inline void RecursiveQRDowndate(M1& R, M2& A, M3& Z, bool makeZ)
     {
         //const int cs = M2::_colsize;
         //const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
@@ -603,7 +603,7 @@ namespace tmv {
     };
 
     template <class M1, class M2>
-    static inline void InlineQR_Downdate(
+    inline void InlineQR_Downdate(
         BaseMatrix_Tri_Mutable<M1>& R, BaseMatrix_Rec_Mutable<M2>& A)
     {
         typedef typename M1::value_type T1;
@@ -624,7 +624,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void QR_Downdate(
+    inline void QR_Downdate(
         BaseMatrix_Tri_Mutable<M1>& R, BaseMatrix_Rec_Mutable<M2>& A)
     {
         typedef typename M1::value_type T1;
@@ -647,7 +647,7 @@ namespace tmv {
 
     // Allow views as an argument by value (for convenience)
     template <class T, int A1, int A2>
-    static inline void QR_Downdate(
+    inline void QR_Downdate(
         UpperTriMatrixView<T,A1> R, MatrixView<T,A2> A)
     {
         typedef UpperTriMatrixView<T,A1> M1;
@@ -658,7 +658,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Si1, int Sj1, int A1, int Si2, int Sj2, int A2>
-    static inline void QR_Downdate(
+    inline void QR_Downdate(
         SmallUpperTriMatrixView<T,N,Si1,Sj1,A1> R,
         SmallMatrixView<T,M,N,Si2,Sj2,A2> A)
     {
@@ -670,7 +670,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int A1, int Si2, int Sj2, int A2>
-    static inline void QR_Downdate(
+    inline void QR_Downdate(
         UpperTriMatrixView<T,A1> R,
         SmallMatrixView<T,M,N,Si2,Sj2,A2> A)
     {
@@ -682,7 +682,7 @@ namespace tmv {
     }
 
     template <class T, int N, int Si1, int Sj1, int A1, int A2>
-    static inline void QR_Downdate(
+    inline void QR_Downdate(
         SmallUpperTriMatrixView<T,N,Si1,Sj1,A1> R,
         MatrixView<T,A2> A)
     {
@@ -696,7 +696,7 @@ namespace tmv {
 
     // Also versions with A as a single vector:
     template <class M1, class V2>
-    static inline void InlineQR_Downdate(
+    inline void InlineQR_Downdate(
         BaseMatrix_Tri_Mutable<M1>& R, BaseVector_Mutable<V2>& A)
     {
         typedef typename M1::value_type T1;
@@ -717,7 +717,7 @@ namespace tmv {
     }
 
     template <class M1, class V2>
-    static inline void QR_Downdate(
+    inline void QR_Downdate(
         BaseMatrix_Tri_Mutable<M1>& R, BaseVector_Mutable<V2>& A)
     {
         typedef typename M1::value_type T1;
@@ -738,7 +738,7 @@ namespace tmv {
     }
 
     template <class T, int A1, int A2>
-    static inline void QR_Downdate(
+    inline void QR_Downdate(
         UpperTriMatrixView<T,A1> R, VectorView<T,A2> A)
     {
         typedef UpperTriMatrixView<T,A1> M1;
@@ -749,7 +749,7 @@ namespace tmv {
     }
 
     template <class T, int N, int Si1, int Sj1, int A1, int S2, int A2>
-    static inline void QR_Downdate(
+    inline void QR_Downdate(
         SmallUpperTriMatrixView<T,N,Si1,Sj1,A1> R,
         SmallVectorView<T,N,S2,A2> A)
     {
@@ -761,7 +761,7 @@ namespace tmv {
     }
 
     template <class T, int N, int A1, int S2, int A2>
-    static inline void QR_Downdate(
+    inline void QR_Downdate(
         UpperTriMatrixView<T,A1> R,
         SmallVectorView<T,N,S2,A2> A)
     {
@@ -773,7 +773,7 @@ namespace tmv {
     }
 
     template <class T, int N, int Si1, int Sj1, int A1, int A2>
-    static inline void QR_Downdate(
+    inline void QR_Downdate(
         SmallUpperTriMatrixView<T,N,Si1,Sj1,A1> R,
         VectorView<T,A2> A)
     {

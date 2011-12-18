@@ -797,7 +797,7 @@ namespace tmv {
     };
 
     template <class Mu, class Vd, class Ve, class Mv>
-    static inline void InlineSV_DecomposeFromBidiagonal_QR(
+    inline void InlineSV_DecomposeFromBidiagonal_QR(
         BaseMatrix_Rec_Mutable<Mu>& U,
         BaseVector_Mutable<Vd>& D, BaseVector_Mutable<Ve>& E, 
         BaseMatrix_Rec_Mutable<Mv>& V, bool UisI, bool VisI)
@@ -844,7 +844,7 @@ namespace tmv {
     }
 
     template <class Mu, class Vd, class Ve, class Mv>
-    static inline void SV_DecomposeFromBidiagonal_QR(
+    inline void SV_DecomposeFromBidiagonal_QR(
         BaseMatrix_Rec_Mutable<Mu>& U,
         BaseVector_Mutable<Vd>& D, BaseVector_Mutable<Ve>& E, 
         BaseMatrix_Rec_Mutable<Mv>& V, bool UisI, bool VisI)

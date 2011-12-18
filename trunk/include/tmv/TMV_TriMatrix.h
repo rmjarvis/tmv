@@ -218,13 +218,11 @@
 //        a view which is a LowerTriMatrix, and vice versa.
 //
 //    nonconj_type nonConj()
-//        Returns a mutable view of the (const) TriMatrix
-//
 //    nonconst_type nonConst()
-//        Returns a mutable view of a const Matrix.
-//
+//    noalias_type noAlias()
+//    alias_type alias()
 //    const_view_type constView()
-//        Returns a const view of a mutable Matrix.
+//        Just like the regular Matrix versions
 //
 //
 // I/O: 
@@ -494,7 +492,7 @@ namespace tmv {
         template <class M1, class M2>
         static TMV_INLINE void copy(
             const BaseMatrix<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2)
-        { m1.newAssignTo(m2); }
+        { m2.noAlias() = m1; }
     };
     template <>
     struct TriCopy<false>
@@ -505,11 +503,13 @@ namespace tmv {
         {
             const bool up = M2::_upper;
             if (!m2.isunit()) {
-                typename M2::nonunitdiag_type m2nu = m2.viewAsNonUnitDiag();
-                Maybe<up>::uppertri(m1.calc()).newAssignTo(m2nu);
+                typename M2::nonunitdiag_type::noalias_type m2nu = 
+                    m2.viewAsNonUnitDiag().noAlias();
+                Maybe<up>::uppertri(m1.calc()).assignTo(m2nu);
             } else if (m2.size() > 1) {
-                typename M2::offdiag_type m2o = m2.offDiag();
-                Maybe<up>::uppertri(m1.calc()).offDiag().newAssignTo(m2o);
+                typename M2::offdiag_type::noalias_type m2o = 
+                    m2.offDiag().noAlias();
+                Maybe<up>::uppertri(m1.calc()).offDiag().assignTo(m2o);
             }
         }
     };
@@ -520,7 +520,7 @@ namespace tmv {
         typedef typename Traits<T>::real_type real_type;
 
         enum { A012 = A0 | A1 | A2 };
-        enum { A = (A012 & ~NoDivider) | (
+        enum { A = (A012 & ~NoDivider & ~CheckAlias) | (
                 ( Attrib<A012>::rowmajor ? 0 : ColMajor ) |
                 ( Attrib<A012>::unitdiag ? 0 : NonUnitDiag ) )};
         enum { okA = (
@@ -533,6 +533,7 @@ namespace tmv {
                 !Attrib<A>::zerodiag &&
                 !Attrib<A>::packed &&
                 !Attrib<A>::lower &&
+                !Attrib<A>::checkalias &&
                 !Attrib<A>::nodivider &&
                 !Attrib<A>::withdivider )};
         enum { _attrib = A };
@@ -591,8 +592,9 @@ namespace tmv {
         enum { unitA = ndA | UnitDiag };
         enum { nonconjA = A };
         enum { twosA = isreal ? int(A) : (A & ~Conj & ~AllStorageType) };
-        enum { Ac = _checkalias ? (A | CheckAlias) : (A & ~NoAlias) };
-        enum { twosAc = isreal ? int(Ac) : (Ac & ~Conj & ~AllStorageType) };
+        enum { Asm = _checkalias ? (A | CheckAlias) : (A & ~NoAlias) };
+        enum { twosAsm = isreal ? int(Asm) : (Asm & ~Conj & ~AllStorageType) };
+        enum { An = (A & ~NoAlias) };
 
         typedef ConstVectorView<T,colA> const_col_sub_type;
         typedef ConstVectorView<T,rowA> const_row_sub_type;
@@ -620,7 +622,7 @@ namespace tmv {
         typedef ConstUpperTriMatrixView<T,nonunitA> const_nonunitdiag_type;
         typedef ConstUpperTriMatrixView<T,ndA> const_unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                ConstSmallUpperTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
+                ConstSmallUpperTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAsm> ,
                 ConstUpperTriMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstUpperTriMatrixView<T,nonconjA> const_nonconj_type;
@@ -658,10 +660,12 @@ namespace tmv {
         typedef UpperTriMatrixView<T,nonunitA> nonunitdiag_type;
         typedef UpperTriMatrixView<T,ndA> unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                SmallUpperTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
+                SmallUpperTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAsm> ,
                 UpperTriMatrixView<real_type,twosA> >::type realpart_type;
         typedef realpart_type imagpart_type;
         typedef UpperTriMatrixView<T,nonconjA> nonconj_type;
+        typedef UpperTriMatrixView<T,An|NoAlias> noalias_type;
+        typedef UpperTriMatrixView<T,An> alias_type;
     };
 
     template <class T, int A0, int A1, int A2>
@@ -717,7 +721,7 @@ namespace tmv {
             itss(m2.size()), itsm(itss*itss)
         {
             TMVStaticAssert(Traits<type>::okA);
-            m2.newAssignTo(*this);
+            this->noAlias() = m2;
         }
 
         template <class M2>
@@ -727,11 +731,9 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             const bool assignable = 
                 ShapeTraits2<M2::_shape,_shape>::assignable;
-            TMVStaticAssert((
-                (M2::_calc && ShapeTraits<M2::_shape>::upper) || assignable));
+            TMVStaticAssert(M2::_calc || assignable);
             TMVAssert(m2.colsize() == size());
             TMVAssert(m2.rowsize() == size());
-
             TriCopy<assignable>::copy(m2,*this);
         }
 
@@ -741,7 +743,8 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(M2::_upper);
-            Maybe<_unit && !M2::_unit>::unitview(m2).newAssignTo(*this);
+            typename Traits<type>::noalias_type na = this->noAlias();
+            Maybe<_unit && !M2::_unit>::unitview(m2).assignTo(na);
         }
 
         template <class M2>
@@ -749,9 +752,8 @@ namespace tmv {
             itss(m2.size()), itsm(itss*itss)
         {
             TMVStaticAssert(Traits<type>::okA);
-            typename type::diag_type d = this->diag();
             this->setZero();
-            m2.calc().diag().newAssignTo(d);
+            this->diag().noAlias() = m2.calc().diag();
         }
 
         ~UpperTriMatrix()
@@ -851,12 +853,13 @@ namespace tmv {
     {
         typedef typename Traits<T>::real_type real_type;
 
-        enum { A = (A0 & ~NoDivider) };
+        enum { A = (A0 & ~NoDivider & ~CheckAlias) };
         enum { okA = (
                 !Attrib<A>::diagmajor &&
                 !Attrib<A>::zerodiag &&
                 !Attrib<A>::packed &&
                 !Attrib<A>::lower &&
+                !Attrib<A>::checkalias &&
                 !Attrib<A>::nodivider &&
                 !Attrib<A>::withdivider &&
                 ( Traits<T>::iscomplex || !Attrib<A>::conj ) )};
@@ -917,8 +920,8 @@ namespace tmv {
         enum { unitA = ndA | UnitDiag };
         enum { nonconjA = A & ~Conj };
         enum { twosA = isreal ? int(A) : (A & ~Conj & ~AllStorageType) };
-        enum { Ac = _checkalias ? (A | CheckAlias) : (A & ~NoAlias) };
-        enum { twosAc = isreal ? int(Ac) : (Ac & ~Conj & ~AllStorageType) };
+        enum { Asm = _checkalias ? (A | CheckAlias) : (A & ~NoAlias) };
+        enum { twosAsm = isreal ? int(Asm) : (Asm & ~Conj & ~AllStorageType) };
         enum { copyA = (
                 (_rowmajor ? RowMajor : ColMajor) |
                 (_fort ? FortranStyle : CStyle) |
@@ -952,7 +955,7 @@ namespace tmv {
         typedef ConstUpperTriMatrixView<T,nonunitA> const_nonunitdiag_type;
         typedef ConstUpperTriMatrixView<T,ndA> const_unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                ConstSmallUpperTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
+                ConstSmallUpperTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAsm> ,
                 ConstUpperTriMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstUpperTriMatrixView<T,nonconjA> const_nonconj_type;
@@ -1130,12 +1133,13 @@ namespace tmv {
     {
         typedef typename Traits<T>::real_type real_type;
 
-        enum { A = (A0 & ~NoDivider) };
+        enum { A = (A0 & ~NoDivider & ~CheckAlias) };
         enum { okA = (
                 !Attrib<A>::diagmajor &&
                 !Attrib<A>::zerodiag &&
                 !Attrib<A>::packed &&
                 !Attrib<A>::lower &&
+                !Attrib<A>::checkalias &&
                 !Attrib<A>::nodivider &&
                 !Attrib<A>::withdivider &&
                 ( Traits<T>::iscomplex || !Attrib<A>::conj ) )};
@@ -1196,8 +1200,9 @@ namespace tmv {
         enum { unitA = ndA | UnitDiag };
         enum { nonconjA = A & ~Conj };
         enum { twosA = isreal ? int(A) : (A & ~Conj & ~AllStorageType) };
-        enum { Ac = _checkalias ? (A | CheckAlias) : (A & ~NoAlias) };
-        enum { twosAc = isreal ? int(Ac) : (Ac & ~Conj & ~AllStorageType) };
+        enum { Asm = _checkalias ? (A | CheckAlias) : (A & ~NoAlias) };
+        enum { twosAsm = isreal ? int(Asm) : (Asm & ~Conj & ~AllStorageType) };
+        enum { An = (A & ~NoAlias) };
         enum { copyA = (
                 (_rowmajor ? RowMajor : ColMajor) |
                 (_fort ? FortranStyle : CStyle) |
@@ -1231,7 +1236,7 @@ namespace tmv {
         typedef ConstUpperTriMatrixView<T,nonunitA> const_nonunitdiag_type;
         typedef ConstUpperTriMatrixView<T,ndA> const_unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                ConstSmallUpperTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
+                ConstSmallUpperTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAsm> ,
                 ConstUpperTriMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstUpperTriMatrixView<T,nonconjA> const_nonconj_type;
@@ -1269,10 +1274,12 @@ namespace tmv {
         typedef UpperTriMatrixView<T,nonunitA> nonunitdiag_type;
         typedef UpperTriMatrixView<T,ndA> unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                SmallUpperTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
+                SmallUpperTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAsm> ,
                 UpperTriMatrixView<real_type,twosA> >::type realpart_type;
         typedef realpart_type imagpart_type;
         typedef UpperTriMatrixView<T,nonconjA> nonconj_type;
+        typedef UpperTriMatrixView<T,An|NoAlias> noalias_type;
+        typedef UpperTriMatrixView<T,An> alias_type;
     };
 
     template <class T, int A>
@@ -1450,7 +1457,7 @@ namespace tmv {
         typedef typename Traits<T>::real_type real_type;
 
         enum { A012 = A0 | A1 | A2 };
-        enum { A = (A012 & ~NoDivider) | (
+        enum { A = (A012 & ~NoDivider & ~CheckAlias) | (
                 ( Attrib<A012>::rowmajor ? 0 : ColMajor ) |
                 ( Attrib<A012>::unitdiag ? 0 : NonUnitDiag ) )};
         enum { okA = (
@@ -1463,6 +1470,7 @@ namespace tmv {
                 !Attrib<A>::zerodiag &&
                 !Attrib<A>::packed &&
                 !Attrib<A>::lower &&
+                !Attrib<A>::checkalias &&
                 !Attrib<A>::nodivider &&
                 !Attrib<A>::withdivider )};
         enum { _attrib = A };
@@ -1521,8 +1529,9 @@ namespace tmv {
         enum { unitA = ndA | UnitDiag };
         enum { nonconjA = A };
         enum { twosA = isreal ? int(A) : (A & ~Conj & ~AllStorageType) };
-        enum { Ac = _checkalias ? (A | CheckAlias) : (A & ~NoAlias) };
-        enum { twosAc = isreal ? int(Ac) : (Ac & ~Conj & ~AllStorageType) };
+        enum { Asm = _checkalias ? (A | CheckAlias) : (A & ~NoAlias) };
+        enum { twosAsm = isreal ? int(Asm) : (Asm & ~Conj & ~AllStorageType) };
+        enum { An = (A & ~NoAlias) };
 
         typedef ConstVectorView<T,colA> const_col_sub_type;
         typedef ConstVectorView<T,rowA> const_row_sub_type;
@@ -1550,7 +1559,7 @@ namespace tmv {
         typedef ConstLowerTriMatrixView<T,nonunitA> const_nonunitdiag_type;
         typedef ConstLowerTriMatrixView<T,ndA> const_unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                ConstSmallLowerTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
+                ConstSmallLowerTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAsm> ,
                 ConstLowerTriMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstLowerTriMatrixView<T,nonconjA> const_nonconj_type;
@@ -1588,10 +1597,12 @@ namespace tmv {
         typedef LowerTriMatrixView<T,nonunitA> nonunitdiag_type;
         typedef LowerTriMatrixView<T,ndA> unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                SmallLowerTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
+                SmallLowerTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAsm> ,
                 LowerTriMatrixView<real_type,twosA> >::type realpart_type;
         typedef realpart_type imagpart_type;
         typedef LowerTriMatrixView<T,nonconjA> nonconj_type;
+        typedef LowerTriMatrixView<T,An|NoAlias> noalias_type;
+        typedef LowerTriMatrixView<T,An> alias_type;
     };
 
     template <class T, int A0, int A1, int A2>
@@ -1645,7 +1656,7 @@ namespace tmv {
             itss(m2.size()), itsm(itss*itss)
         {
             TMVStaticAssert(Traits<type>::okA);
-            m2.newAssignTo(*this);
+            this->noAlias() = m2;
         }
 
         template <class M2>
@@ -1655,8 +1666,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             const bool assignable = 
                 ShapeTraits2<M2::_shape,_shape>::assignable;
-            TMVStaticAssert((
-                (M2::_calc && ShapeTraits<M2::_shape>::lower) || assignable));
+            TMVStaticAssert(M2::_calc || assignable);
             TMVAssert(m2.colsize() == size());
             TMVAssert(m2.rowsize() == size());
             TriCopy<assignable>::copy(m2,*this);
@@ -1668,7 +1678,8 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(M2::_lower);
-            Maybe<_unit && !M2::_unit>::unitview(m2).newAssignTo(*this);
+            typename Traits<type>::noalias_type na = this->noAlias();
+            Maybe<_unit && !M2::_unit>::unitview(m2).assignTo(na);
         }
 
         template <class M2>
@@ -1676,9 +1687,8 @@ namespace tmv {
             itss(m2.size()), itsm(itss*itss)
         {
             TMVStaticAssert(Traits<type>::okA);
-            typename type::diag_type d = this->diag();
             this->setZero();
-            m2.calc().diag().newAssignTo(d);
+            this->diag().noAlias() = m2.calc().diag();
         }
 
         ~LowerTriMatrix()
@@ -1778,12 +1788,13 @@ namespace tmv {
     {
         typedef typename Traits<T>::real_type real_type;
 
-        enum { A = (A0 & ~NoDivider) };
+        enum { A = (A0 & ~NoDivider & ~CheckAlias) };
         enum { okA = (
                 !Attrib<A>::diagmajor &&
                 !Attrib<A>::zerodiag &&
                 !Attrib<A>::packed &&
                 !Attrib<A>::lower &&
+                !Attrib<A>::checkalias &&
                 !Attrib<A>::nodivider &&
                 !Attrib<A>::withdivider &&
                 ( Traits<T>::iscomplex || !Attrib<A>::conj ) )};
@@ -1844,8 +1855,8 @@ namespace tmv {
         enum { unitA = ndA | UnitDiag };
         enum { nonconjA = A & ~Conj };
         enum { twosA = isreal ? int(A) : (A & ~Conj & ~AllStorageType) };
-        enum { Ac = _checkalias ? (A | CheckAlias) : (A & ~NoAlias) };
-        enum { twosAc = isreal ? int(Ac) : (Ac & ~Conj & ~AllStorageType) };
+        enum { Asm = _checkalias ? (A | CheckAlias) : (A & ~NoAlias) };
+        enum { twosAsm = isreal ? int(Asm) : (Asm & ~Conj & ~AllStorageType) };
         enum { copyA = (
                 (_rowmajor ? RowMajor : ColMajor) |
                 (_fort ? FortranStyle : CStyle) |
@@ -1879,7 +1890,7 @@ namespace tmv {
         typedef ConstLowerTriMatrixView<T,nonunitA> const_nonunitdiag_type;
         typedef ConstLowerTriMatrixView<T,ndA> const_unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                ConstSmallLowerTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
+                ConstSmallLowerTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAsm> ,
                 ConstLowerTriMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstLowerTriMatrixView<T,nonconjA> const_nonconj_type;
@@ -2057,12 +2068,13 @@ namespace tmv {
     {
         typedef typename Traits<T>::real_type real_type;
 
-        enum { A = (A0 & ~NoDivider) };
+        enum { A = (A0 & ~NoDivider & ~CheckAlias) };
         enum { okA = (
                 !Attrib<A>::diagmajor &&
                 !Attrib<A>::zerodiag &&
                 !Attrib<A>::packed &&
                 !Attrib<A>::lower &&
+                !Attrib<A>::checkalias &&
                 !Attrib<A>::nodivider &&
                 !Attrib<A>::withdivider &&
                 ( Traits<T>::iscomplex || !Attrib<A>::conj ) )};
@@ -2123,8 +2135,9 @@ namespace tmv {
         enum { unitA = ndA | UnitDiag };
         enum { nonconjA = A & ~Conj };
         enum { twosA = isreal ? int(A) : (A & ~Conj & ~AllStorageType) };
-        enum { Ac = _checkalias ? (A | CheckAlias) : (A & ~NoAlias) };
-        enum { twosAc = isreal ? int(Ac) : (Ac & ~Conj & ~AllStorageType) };
+        enum { Asm = _checkalias ? (A | CheckAlias) : (A & ~NoAlias) };
+        enum { twosAsm = isreal ? int(Asm) : (Asm & ~Conj & ~AllStorageType) };
+        enum { An = (A & ~NoAlias) };
         enum { copyA = (
                 (_rowmajor ? RowMajor : ColMajor) |
                 (_fort ? FortranStyle : CStyle) |
@@ -2158,7 +2171,7 @@ namespace tmv {
         typedef ConstLowerTriMatrixView<T,nonunitA> const_nonunitdiag_type;
         typedef ConstLowerTriMatrixView<T,ndA> const_unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                ConstSmallLowerTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
+                ConstSmallLowerTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAsm> ,
                 ConstLowerTriMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstLowerTriMatrixView<T,nonconjA> const_nonconj_type;
@@ -2196,10 +2209,12 @@ namespace tmv {
         typedef LowerTriMatrixView<T,nonunitA> nonunitdiag_type;
         typedef LowerTriMatrixView<T,ndA> unknowndiag_type;
         typedef typename TypeSelect< (iscomplex && (_colmajor||_rowmajor)) ,
-                SmallLowerTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAc> ,
+                SmallLowerTriMatrixView<real_type,TMV_UNKNOWN,twoSi,twoSj,twosAsm> ,
                 LowerTriMatrixView<real_type,twosA> >::type realpart_type;
         typedef realpart_type imagpart_type;
         typedef LowerTriMatrixView<T,nonconjA> nonconj_type;
+        typedef LowerTriMatrixView<T,An|NoAlias> noalias_type;
+        typedef LowerTriMatrixView<T,An> alias_type;
     };
 
     template <class T, int A>
@@ -2392,7 +2407,7 @@ namespace tmv {
     //
 
     template <class T>
-    static inline UpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
+    inline UpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
         T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2403,7 +2418,7 @@ namespace tmv {
     }
 
     template <class T>
-    static inline ConstUpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
+    inline ConstUpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
         const T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2414,17 +2429,17 @@ namespace tmv {
     }
 
     template <class T>
-    static TMV_INLINE UpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
+    TMV_INLINE UpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj)
     { return UpperTriMatrixView<T,NonUnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
-    static TMV_INLINE ConstUpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
+    TMV_INLINE ConstUpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj)
     { return ConstUpperTriMatrixView<T,NonUnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
-    static inline UpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
+    inline UpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
         T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2435,7 +2450,7 @@ namespace tmv {
     }
 
     template <class T>
-    static inline ConstUpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
+    inline ConstUpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
         const T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2446,17 +2461,17 @@ namespace tmv {
     }
 
     template <class T>
-    static TMV_INLINE UpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
+    TMV_INLINE UpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj)
     { return UpperTriMatrixView<T,UnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
-    static TMV_INLINE ConstUpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
+    TMV_INLINE ConstUpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj)
     { return ConstUpperTriMatrixView<T,UnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
-    static inline UpperTriMatrixView<T> UpperTriMatrixViewOf(
+    inline UpperTriMatrixView<T> UpperTriMatrixViewOf(
         T* m, size_t size, StorageType stor, DiagType dt)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2468,7 +2483,7 @@ namespace tmv {
     }
 
     template <class T>
-    static inline ConstUpperTriMatrixView<T> UpperTriMatrixViewOf(
+    inline ConstUpperTriMatrixView<T> UpperTriMatrixViewOf(
         const T* m, size_t size, StorageType stor, DiagType dt)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2480,7 +2495,7 @@ namespace tmv {
     }
 
     template <class T>
-    static TMV_INLINE_ND UpperTriMatrixView<T> UpperTriMatrixViewOf(
+    TMV_INLINE_ND UpperTriMatrixView<T> UpperTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj, DiagType dt)
     {
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
@@ -2488,7 +2503,7 @@ namespace tmv {
     }
 
     template <class T>
-    static TMV_INLINE_ND ConstUpperTriMatrixView<T> UpperTriMatrixViewOf(
+    TMV_INLINE_ND ConstUpperTriMatrixView<T> UpperTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj, DiagType dt)
     {
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
@@ -2496,7 +2511,7 @@ namespace tmv {
     }
  
     template <class T>
-    static inline LowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
+    inline LowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
         T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2507,7 +2522,7 @@ namespace tmv {
     }
 
     template <class T>
-    static inline ConstLowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
+    inline ConstLowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
         const T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2518,17 +2533,17 @@ namespace tmv {
     }
 
     template <class T>
-    static TMV_INLINE LowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
+    TMV_INLINE LowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj)
     { return LowerTriMatrixView<T,NonUnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
-    static TMV_INLINE ConstLowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
+    TMV_INLINE ConstLowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj)
     { return ConstLowerTriMatrixView<T,NonUnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
-    static inline LowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
+    inline LowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
         T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2539,7 +2554,7 @@ namespace tmv {
     }
 
     template <class T>
-    static inline ConstLowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
+    inline ConstLowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
         const T* m, size_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2550,17 +2565,17 @@ namespace tmv {
     }
 
     template <class T>
-    static TMV_INLINE LowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
+    TMV_INLINE LowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj)
     { return LowerTriMatrixView<T,UnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
-    static TMV_INLINE ConstLowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
+    TMV_INLINE ConstLowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj)
     { return ConstLowerTriMatrixView<T,UnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
-    static inline LowerTriMatrixView<T> LowerTriMatrixViewOf(
+    inline LowerTriMatrixView<T> LowerTriMatrixViewOf(
         T* m, size_t size, StorageType stor, DiagType dt)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2572,7 +2587,7 @@ namespace tmv {
     }
 
     template <class T>
-    static inline ConstLowerTriMatrixView<T> LowerTriMatrixViewOf(
+    inline ConstLowerTriMatrixView<T> LowerTriMatrixViewOf(
         const T* m, size_t size, StorageType stor, DiagType dt)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -2584,7 +2599,7 @@ namespace tmv {
     }
 
     template <class T>
-    static TMV_INLINE_ND LowerTriMatrixView<T> LowerTriMatrixViewOf(
+    TMV_INLINE_ND LowerTriMatrixView<T> LowerTriMatrixViewOf(
         T* m, size_t size, int stepi, int stepj, DiagType dt)
     {
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
@@ -2592,7 +2607,7 @@ namespace tmv {
     }
 
     template <class T>
-    static TMV_INLINE_ND ConstLowerTriMatrixView<T> LowerTriMatrixViewOf(
+    TMV_INLINE_ND ConstLowerTriMatrixView<T> LowerTriMatrixViewOf(
         const T* m, size_t size, int stepi, int stepj, DiagType dt)
     {
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
@@ -2607,36 +2622,36 @@ namespace tmv {
     //
 
     template <class T, int A0, int A1, int A2>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         UpperTriMatrix<T,A0,A1,A2>& m1, UpperTriMatrix<T,A0,A1,A2>& m2)
     { m1.swapWith(m2); }
     template <class M, class T, int A>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         BaseMatrix_Tri<M>& m1, UpperTriMatrixView<T,A> m2)
     { DoSwap(m1,m2); }
     template <class M, class T, int A>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         UpperTriMatrixView<T,A> m1, BaseMatrix_Tri<M>& m2)
     { DoSwap(m1,m2); }
     template <class T, int A1, int A2>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         UpperTriMatrixView<T,A1> m1, UpperTriMatrixView<T,A2> m2)
     { DoSwap(m1,m2); }
 
     template <class T, int A0, int A1, int A2>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         LowerTriMatrix<T,A0,A1,A2>& m1, LowerTriMatrix<T,A0,A1,A2>& m2)
     { m1.swapWith(m2); }
     template <class M, class T, int A>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         BaseMatrix_Tri<M>& m1, LowerTriMatrixView<T,A> m2)
     { DoSwap(m1,m2); }
     template <class M, class T, int A>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         LowerTriMatrixView<T,A> m1, BaseMatrix_Tri<M>& m2)
     { DoSwap(m1,m2); }
     template <class T, int A1, int A2>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         LowerTriMatrixView<T,A1> m1, LowerTriMatrixView<T,A2> m2)
     { DoSwap(m1,m2); }
 
@@ -2646,56 +2661,56 @@ namespace tmv {
     //
 
     template <class T, int A0, int A1, int A2>
-    static TMV_INLINE typename UpperTriMatrix<T,A0,A1,A2>::conjugate_type Conjugate(
+    TMV_INLINE typename UpperTriMatrix<T,A0,A1,A2>::conjugate_type Conjugate(
         UpperTriMatrix<T,A0,A1,A2>& m)
     { return m.conjugate(); }
     template <class T, int A>
-    static TMV_INLINE typename UpperTriMatrixView<T,A>::conjugate_type Conjugate(
+    TMV_INLINE typename UpperTriMatrixView<T,A>::conjugate_type Conjugate(
         UpperTriMatrixView<T,A> m)
     { return m.conjugate(); }
 
     template <class T, int A0, int A1, int A2>
-    static TMV_INLINE typename UpperTriMatrix<T,A0,A1,A2>::transpose_type Transpose(
+    TMV_INLINE typename UpperTriMatrix<T,A0,A1,A2>::transpose_type Transpose(
         UpperTriMatrix<T,A0,A1,A2>& m)
     { return m.transpose(); }
     template <class T, int A>
-    static TMV_INLINE typename UpperTriMatrixView<T,A>::transpose_type Transpose(
+    TMV_INLINE typename UpperTriMatrixView<T,A>::transpose_type Transpose(
         UpperTriMatrixView<T,A> m)
     { return m.transpose(); }
 
     template <class T, int A0, int A1, int A2>
-    static TMV_INLINE typename UpperTriMatrix<T,A0,A1,A2>::adjoint_type Adjoint(
+    TMV_INLINE typename UpperTriMatrix<T,A0,A1,A2>::adjoint_type Adjoint(
         UpperTriMatrix<T,A0,A1,A2>& m)
     { return m.adjoint(); }
     template <class T, int A>
-    static TMV_INLINE typename UpperTriMatrixView<T,A>::adjoint_type Adjoint(
+    TMV_INLINE typename UpperTriMatrixView<T,A>::adjoint_type Adjoint(
         UpperTriMatrixView<T,A> m)
     { return m.adjoint(); }
 
     template <class T, int A0, int A1, int A2>
-    static TMV_INLINE typename LowerTriMatrix<T,A0,A1,A2>::conjugate_type Conjugate(
+    TMV_INLINE typename LowerTriMatrix<T,A0,A1,A2>::conjugate_type Conjugate(
         LowerTriMatrix<T,A0,A1,A2>& m)
     { return m.conjugate(); }
     template <class T, int A>
-    static TMV_INLINE typename LowerTriMatrixView<T,A>::conjugate_type Conjugate(
+    TMV_INLINE typename LowerTriMatrixView<T,A>::conjugate_type Conjugate(
         LowerTriMatrixView<T,A> m)
     { return m.conjugate(); }
 
     template <class T, int A0, int A1, int A2>
-    static TMV_INLINE typename LowerTriMatrix<T,A0,A1,A2>::transpose_type Transpose(
+    TMV_INLINE typename LowerTriMatrix<T,A0,A1,A2>::transpose_type Transpose(
         LowerTriMatrix<T,A0,A1,A2>& m)
     { return m.transpose(); }
     template <class T, int A>
-    static TMV_INLINE typename LowerTriMatrixView<T,A>::transpose_type Transpose(
+    TMV_INLINE typename LowerTriMatrixView<T,A>::transpose_type Transpose(
         LowerTriMatrixView<T,A> m)
     { return m.transpose(); }
 
     template <class T, int A0, int A1, int A2>
-    static TMV_INLINE typename LowerTriMatrix<T,A0,A1,A2>::adjoint_type Adjoint(
+    TMV_INLINE typename LowerTriMatrix<T,A0,A1,A2>::adjoint_type Adjoint(
         LowerTriMatrix<T,A0,A1,A2>& m)
     { return m.adjoint(); }
     template <class T, int A>
-    static TMV_INLINE typename LowerTriMatrixView<T,A>::adjoint_type Adjoint(
+    TMV_INLINE typename LowerTriMatrixView<T,A>::adjoint_type Adjoint(
         LowerTriMatrixView<T,A> m)
     { return m.adjoint(); }
 
@@ -2706,7 +2721,7 @@ namespace tmv {
 
 #ifdef TMV_TEXT
     template <class T, int A0, int A1, int A2>
-    static inline std::string TMV_Text(const UpperTriMatrix<T,A0,A1,A2>& m)
+    inline std::string TMV_Text(const UpperTriMatrix<T,A0,A1,A2>& m)
     {
         const int A = A0 | A1 | A2;
         std::ostringstream s;
@@ -2718,7 +2733,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    static inline std::string TMV_Text(const ConstUpperTriMatrixView<T,A>& m)
+    inline std::string TMV_Text(const ConstUpperTriMatrixView<T,A>& m)
     {
         std::ostringstream s;
         s << "ConstUpperTriMatrixView<"<<TMV_Text(T());
@@ -2729,7 +2744,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    static inline std::string TMV_Text(const UpperTriMatrixView<T,A>& m)
+    inline std::string TMV_Text(const UpperTriMatrixView<T,A>& m)
     {
         std::ostringstream s;
         s << "UpperTriMatrixView<"<<TMV_Text(T());
@@ -2740,7 +2755,7 @@ namespace tmv {
     }
 
     template <class T, int A0, int A1, int A2>
-    static inline std::string TMV_Text(const LowerTriMatrix<T,A0,A1,A2>& m)
+    inline std::string TMV_Text(const LowerTriMatrix<T,A0,A1,A2>& m)
     {
         const int A = A0 | A1 | A2;
         std::ostringstream s;
@@ -2752,7 +2767,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    static inline std::string TMV_Text(const ConstLowerTriMatrixView<T,A>& m)
+    inline std::string TMV_Text(const ConstLowerTriMatrixView<T,A>& m)
     {
         std::ostringstream s;
         s << "ConstLowerTriMatrixView<"<<TMV_Text(T());
@@ -2763,7 +2778,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    static inline std::string TMV_Text(const LowerTriMatrixView<T,A>& m)
+    inline std::string TMV_Text(const LowerTriMatrixView<T,A>& m)
     {
         std::ostringstream s;
         s << "LowerTriMatrixView<"<<TMV_Text(T());

@@ -230,9 +230,15 @@ namespace tmv {
                 m2.transposeSelf();
                 // And maybe conjugate
                 Maybe<M1::_conj != int(M2::_conj)>::conjself(m2);
-            } else {
+            } else if (m2.ptr()) {
                 // Need a temporary
-                NoAliasCopy(m1.copy(),m2);
+                m2.noAlias() = m1.copy();
+            } else {
+                // else m2.ptr == 0, so don't need to do anything.
+                // m1 and m2 are degenerate
+                TMVAssert(m1.cptr() == 0);
+                TMVAssert(m2.cptr() == 0);
+                TMVAssert(m2.colsize() == 0 || m2.rowsize() == 0);
             }
         }
     };
@@ -332,7 +338,7 @@ namespace tmv {
     };
 
     template <class M1, class M2>
-    static inline void Copy(
+    inline void Copy(
         const BaseMatrix_Band<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -351,26 +357,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void NoAliasCopy(
-        const BaseMatrix_Band<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
-        TMVAssert(m1.colsize() == m2.colsize());
-        TMVAssert(m1.rowsize() == m2.rowsize());
-        TMVAssert(m1.nlo() <= m2.nlo());
-        TMVAssert(m1.nhi() <= m2.nhi());
-        const int cs = Sizes<M1::_colsize,M2::_colsize>::size;
-        const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::cview_type M2v;
-        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
-        CopyB_Helper<-2,cs,rs,M1v,M2v>::call(m1v,m2v);
-    }
-
-    template <class M1, class M2>
-    static inline void InlineCopy(
+    inline void InlineCopy(
         const BaseMatrix_Band<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -389,7 +376,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void InlineAliasCopy(
+    inline void InlineAliasCopy(
         const BaseMatrix_Band<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -407,31 +394,12 @@ namespace tmv {
         CopyB_Helper<98,cs,rs,M1v,M2v>::call(m1v,m2v);
     }
 
-    template <class M1, class M2>
-    static inline void AliasCopy(
-        const BaseMatrix_Band<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
-        TMVAssert(m1.colsize() == m2.colsize());
-        TMVAssert(m1.rowsize() == m2.rowsize());
-        TMVAssert(m1.nlo() <= m2.nlo());
-        TMVAssert(m1.nhi() <= m2.nhi());
-        const int cs = Sizes<M1::_colsize,M2::_colsize>::size;
-        const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::cview_type M2v;
-        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
-        CopyB_Helper<99,cs,rs,M1v,M2v>::call(m1v,m2v);
-    }
-
     //
     // M = B
     //
 
     template <class M1, class M2>
-    static inline void Copy(
+    inline void Copy(
         const BaseMatrix_Band<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -440,55 +408,23 @@ namespace tmv {
         TMVAssert(m1.rowsize() == m2.rowsize());
         typename BMVO<M2>::b b2 = BandMatrixViewOf(m2,m1.nlo(),m1.nhi());
         Copy(m1,b2);
-        if (m1.nlo() < m1.colsize()-1)
+        if (m1.nlo() < int(m1.colsize())-1)
             BandMatrixViewOf(
                 m2.cRowRange(m1.nlo()+1,m1.colsize()),
                 m1.colsize()-m1.nlo()-2,0).setZero();
-        if (m1.nhi() < m1.rowsize()-1)
+        if (m1.nhi() < int(m1.rowsize())-1)
             BandMatrixViewOf(
-                m2.cRowRange(m1.nhi()+1,m1.rowsize()),
-                m1.rowsize()-m1.nhi()-2,0).setZero();
+                m2.cColRange(m1.nhi()+1,m1.rowsize()),
+                0,m1.rowsize()-m1.nhi()-2).setZero();
     }
 
-    template <class M1, class M2>
-    static inline void NoAliasCopy(
-        const BaseMatrix_Band<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
-        TMVAssert(m1.colsize() == m2.colsize());
-        TMVAssert(m1.rowsize() == m2.rowsize());
-        m2.setZero();
-        typename BMVO<M2>::b b2 = BandMatrixViewOf(m2,m1.nlo(),m1.nhi());
-        NoAliasCopy(m1,b2);
-    }
-
-    template <class M1, class M2>
-    static inline void AliasCopy(
-        const BaseMatrix_Band<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
-        TMVAssert(m1.colsize() == m2.colsize());
-        TMVAssert(m1.rowsize() == m2.rowsize());
-        typename BMVO<M2>::b b2 = BandMatrixViewOf(m2,m1.nlo(),m1.nhi());
-        AliasCopy(m1,b2);
-        if (m1.nlo() < m1.colsize()-1)
-            BandMatrixViewOf(
-                m2.cRowRange(m1.nlo()+1,m1.colsize()),
-                m1.colsize()-m1.nlo()-2,0).setZero();
-        if (m1.nhi() < m1.rowsize()-1)
-            BandMatrixViewOf(
-                m2.cRowRange(m1.nhi()+1,m1.rowsize()),
-                m1.rowsize()-m1.nhi()-2,0).setZero();
-    }
 
     //
     // U = B
     //
 
     template <class M1, class M2>
-    static inline void Copy(
+    inline void Copy(
         const BaseMatrix_Band<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_size>::same));
@@ -501,40 +437,6 @@ namespace tmv {
         TMVAssert(lo == 0);
         typename BMVOTri<M2>::b b2 = BandMatrixViewOf(m2,hi);
         Copy(m1,b2);
-        m2.offDiag(hi+1).setZero();
-    }
-
-    template <class M1, class M2>
-    static inline void NoAliasCopy(
-        const BaseMatrix_Band<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_size>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_size>::same));
-        TMVStaticAssert(!M2::_unit);
-        TMVAssert(m1.colsize() == m2.size());
-        TMVAssert(m1.rowsize() == m2.size());
-        const int lo = Maybe<M2::_upper>::select(m1.nlo(),m1.nhi());
-        const int hi = Maybe<M2::_upper>::select(m1.nhi(),m1.nlo());
-        TMVAssert(lo == 0);
-        m2.setZero();
-        typename BMVOTri<M2>::b b2 = BandMatrixViewOf(m2,hi);
-        NoAliasCopy(m1,b2);
-    }
-
-    template <class M1, class M2>
-    static inline void AliasCopy(
-        const BaseMatrix_Band<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_size>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_size>::same));
-        TMVStaticAssert(!M2::_unit);
-        TMVAssert(m1.colsize() == m2.size());
-        TMVAssert(m1.rowsize() == m2.size());
-        const int lo = Maybe<M2::_upper>::select(m1.nlo(),m1.nhi());
-        const int hi = Maybe<M2::_upper>::select(m1.nhi(),m1.nlo());
-        TMVAssert(lo == 0);
-        typename BMVOTri<M2>::b b2 = BandMatrixViewOf(m2,hi);
-        AliasCopy(m1,b2);
         m2.offDiag(hi+1).setZero();
     }
 
@@ -544,7 +446,7 @@ namespace tmv {
     //
 
     template <class M1, class M2>
-    static inline void Copy(
+    inline void Copy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_size,M2::_colsize>::same));
@@ -558,42 +460,12 @@ namespace tmv {
         if (m2.nhi() > 0) m2.cDiagRange(1,m2.nhi()+1).setZero();
     }
 
-    template <class M1, class M2>
-    static inline void NoAliasCopy(
-        const BaseMatrix_Diag<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M1::_size,M2::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_size,M2::_rowsize>::same));
-        TMVAssert(m1.size() == m2.colsize());
-        TMVAssert(m1.size() == m2.rowsize());
-        m2.setZero();
-        typename M1::const_diag_type d1 = m1.diag();
-        typename M2::diag_type d2 = m2.diag();
-        NoAliasCopy(d1,d2);
-    }
-
-    template <class M1, class M2>
-    static inline void AliasCopy(
-        const BaseMatrix_Diag<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M1::_size,M2::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_size,M2::_rowsize>::same));
-        TMVAssert(m1.size() == m2.colsize());
-        TMVAssert(m1.size() == m2.rowsize());
-        typename M1::const_diag_type d1 = m1.diag();
-        typename M2::diag_type d2 = m2.diag();
-        AliasCopy(d1,d2);
-        if (m2.nlo() > 0) m2.cDiagRange(-m2.nlo(),0).setZero();
-        if (m2.nhi() > 0) m2.cDiagRange(1,m2.nhi()+1).setZero();
-    }
-
-
     //
     // B = U
     //
 
     template <class M1, class M2>
-    static inline void Copy(
+    inline void Copy(
         const BaseMatrix_Tri<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_size,M2::_colsize>::same));
@@ -609,44 +481,6 @@ namespace tmv {
         Copy(m1,u2);
         if (k4 > k3) m2.cDiagRange(k3,k4).setZero();
     }
-
-    template <class M1, class M2>
-    static inline void NoAliasCopy(
-        const BaseMatrix_Tri<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M1::_size,M2::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_size,M2::_rowsize>::same));
-        TMVAssert(m1.size() == m2.colsize());
-        TMVAssert(m1.size() == m2.rowsize());
-        const int k1 = Maybe<M1::_upper>::select(0,-m1.size()+1);
-        const int k2 = Maybe<M1::_upper>::select(m1.size(),1);
-        const int k3 = Maybe<M1::_upper>::select(m2.nlo(),1);
-        const int k4 = Maybe<M1::_upper>::select(0,m2.nhi()+1);
-        TMVAssert(Maybe<M1::_upper>::select(m2.nhi(),m2.nlo()) == m1.size()-1);
-        typename M2::diagrange_type u2 = m2.cDiagRange(k1,k2);
-        NoAliasCopy(m1,u2);
-        if (k4 > k3) m2.cDiagRange(k3,k4).setZero();
-    }
-
-    template <class M1, class M2>
-    static inline void AliasCopy(
-        const BaseMatrix_Tri<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M1::_size,M2::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_size,M2::_rowsize>::same));
-        TMVAssert(m1.size() == m2.colsize());
-        TMVAssert(m1.size() == m2.rowsize());
-        const int k1 = Maybe<M1::_upper>::select(0,-m1.size()+1);
-        const int k2 = Maybe<M1::_upper>::select(m1.size(),1);
-        const int k3 = Maybe<M1::_upper>::select(m2.nlo(),1);
-        const int k4 = Maybe<M1::_upper>::select(0,m2.nhi()+1);
-        TMVAssert(Maybe<M1::_upper>::select(m2.nhi(),m2.nlo()) == m1.size()-1);
-        typename M2::diagrange_type u2 = m2.cDiagRange(k1,k2);
-        AliasCopy(m1,u2);
-        if (k4 > k3) m2.cDiagRange(k3,k4).setZero();
-    }
-
-
 
 } // namespace tmv
 

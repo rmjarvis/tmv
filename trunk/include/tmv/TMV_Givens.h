@@ -248,13 +248,13 @@ namespace tmv {
     };
 
     template <class T, class RT>
-    static inline void InlineGivensRotate(T& x, T& y, RT& c, T& s)
+    inline void InlineGivensRotate(T& x, T& y, RT& c, T& s)
     { GivensRotate_Helper<-3,T>::call(x,y,c,s); }
 
     // Note: GivensRotate(x,y) without the "Do" only takes the x,y argument 
     // and returns a Givens<T> object.  This function is found below.
     template <class T, class RT>
-    static inline void DoGivensRotate(T& x, T& y, RT& c, T& s)
+    inline void DoGivensRotate(T& x, T& y, RT& c, T& s)
     { GivensRotate_Helper<-2,T>::call(x,y,c,s); }
 
 
@@ -266,7 +266,7 @@ namespace tmv {
     
     // Better to leave this one inline.  So no Helper struct here.
     template <class RTg, class Tg, class T> 
-    static inline void GivensMult(RTg c, Tg s, T& x, T& y)
+    inline void GivensMult(RTg c, Tg s, T& x, T& y)
     {
         T xx = c*x+s*y;
         y = c*y-TMV_CONJ(s)*x;
@@ -274,7 +274,7 @@ namespace tmv {
     }
          
     template <class RTg, class Tg, class T> 
-    static TMV_INLINE void GivensMult(RTg c, Tg s, ConjRef<T> x, ConjRef<T> y)
+    TMV_INLINE void GivensMult(RTg c, Tg s, ConjRef<T> x, ConjRef<T> y)
     { GivensMult(c,TMV_CONJ(s),x.getRef(),y.getRef()); }
 
     //
@@ -509,7 +509,7 @@ namespace tmv {
     };
 
     template <class T, class V1, class V2>
-    static inline void InlineGivensMultV(
+    inline void InlineGivensMultV(
         typename Traits<T>::real_type c, T s, 
         BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
@@ -531,7 +531,7 @@ namespace tmv {
     }
 
     template <class T, class V1, class V2>
-    static inline void GivensMultV(
+    inline void GivensMultV(
         typename Traits<T>::real_type c, T s, 
         BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
@@ -558,7 +558,7 @@ namespace tmv {
     //
 
     template <class RTg, class Tg, class T> 
-    static inline void GivensHermMult(RTg c, Tg s, T& d0, T& d1, T& e0)
+    inline void GivensHermMult(RTg c, Tg s, T& d0, T& d1, T& e0)
     {
         // [ d0 e0* ] = [  c  s ] [ d0 e0* ] [ c  -s ]
         // [ e0 d1  ]   [ -s* c ] [ e0 d1  ] [ s*  c ]
@@ -580,7 +580,7 @@ namespace tmv {
     }
           
     template <class RTg, class Tg, class T> 
-    static inline void GivensSymMult(RTg c, Tg s, T& d0, T& d1, T& e0)
+    inline void GivensSymMult(RTg c, Tg s, T& d0, T& d1, T& e0)
     {
         // [ d0 e0 ] = [  c  s ] [ d0 e0 ] [ c -s* ]
         // [ e0 d1 ]   [ -s* c ] [ e0 d1 ] [ s  c  ]
@@ -681,7 +681,7 @@ namespace tmv {
     };
 
     template <class T>
-    static inline Givens<T> GivensRotate(T& x, T& y)
+    inline Givens<T> GivensRotate(T& x, T& y)
     {
         typename Traits<T>::real_type c;
         T s;

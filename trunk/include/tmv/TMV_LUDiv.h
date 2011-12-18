@@ -63,12 +63,13 @@ namespace tmv {
 #ifdef PRINTALGO_LU
             //std::cout<<"after permute m2 => "<<m2<<std::endl;
 #endif
-            NoAliasTriLDivEq(m2,m1.unitLowerTri());
+            typename M2::noalias_type m2na = m2.noAlias();
+            TriLDivEq(m2na,m1.unitLowerTri());
 #ifdef PRINTALGO_LU
             //std::cout<<"after L^-1 m2 => "<<m2<<std::endl;
             //std::cout<<"L*m2 = "<<m1.unitLowerTri()*m2<<std::endl;
 #endif
-            NoAliasTriLDivEq(m2,m1.upperTri());
+            TriLDivEq(m2na,m1.upperTri());
 #ifdef PRINTALGO_LU
             //std::cout<<"after U^-1 m2 => "<<m2<<std::endl;
             //std::cout<<"U*m2 = "<<m1.upperTri()*m2<<std::endl;
@@ -89,12 +90,13 @@ namespace tmv {
             // m2 = (PLU)^-1t m2
             //    = (U^-1 L^-1 Pt)t m2
             //    = P L^-1t U^-1t m2
-            NoAliasTriLDivEq(m2,m1.upperTri().transpose());
+            typename M2::noalias_type m2na = m2.noAlias();
+            TriLDivEq(m2na,m1.upperTri().transpose());
 #ifdef PRINTALGO_LU
             //std::cout<<"after UT^-1 m2 => "<<m2<<std::endl;
             //std::cout<<"Ut*m2 = "<<m1.upperTri().transpose()*m2<<std::endl;
 #endif
-            NoAliasTriLDivEq(m2,m1.unitLowerTri().transpose());
+            TriLDivEq(m2na,m1.unitLowerTri().transpose());
 #ifdef PRINTALGO_LU
             //std::cout<<"after LT^-1 m2 => "<<m2<<std::endl;
             //std::cout<<"LT*m2 = "<<m1.unitLowerTri().transpose()*m2<<std::endl;
@@ -214,7 +216,7 @@ namespace tmv {
     };
 
     template <class M1, class M2>
-    static inline void InlineLU_SolveInPlace(
+    inline void InlineLU_SolveInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -228,7 +230,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void LU_SolveInPlace(
+    inline void LU_SolveInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -242,7 +244,7 @@ namespace tmv {
     }
 
     template <class M1, class V2>
-    static inline void InlineLU_SolveInPlace(
+    inline void InlineLU_SolveInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2)
     {
@@ -255,7 +257,7 @@ namespace tmv {
     }
 
     template <class M1, class V2>
-    static inline void LU_SolveInPlace(
+    inline void LU_SolveInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2)
     {
@@ -268,7 +270,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void InlineLU_SolveTransposeInPlace(
+    inline void InlineLU_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -282,7 +284,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void LU_SolveTransposeInPlace(
+    inline void LU_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -296,7 +298,7 @@ namespace tmv {
     }
 
     template <class M1, class V2>
-    static inline void InlineLU_SolveTransposeInPlace(
+    inline void InlineLU_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2)
     {
@@ -309,7 +311,7 @@ namespace tmv {
     }
 
     template <class M1, class V2>
-    static inline void LU_SolveTransposeInPlace(
+    inline void LU_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2)
     {

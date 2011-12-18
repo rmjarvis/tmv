@@ -61,7 +61,7 @@ int main() try {
 
     return 0;
 }
-#if 1
+#if 0
 #ifndef NOTHROW
 catch (tmv::Error& e) {
     std::cerr<<e<<std::endl;

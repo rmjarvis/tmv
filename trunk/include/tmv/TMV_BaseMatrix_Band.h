@@ -101,11 +101,11 @@ namespace tmv {
 
     // In TMV_Norm.h
     template <class M>
-    static inline typename M::float_type DoNormF(const BaseMatrix_Band<M>& m);
+    inline typename M::float_type DoNormF(const BaseMatrix_Band<M>& m);
     template <class M>
-    static inline typename M::float_type DoNorm2(const BaseMatrix<M>& m);
+    inline typename M::float_type DoNorm2(const BaseMatrix<M>& m);
     template <class M>
-    static inline typename M::float_type DoCondition(const BaseMatrix<M>& m);
+    inline typename M::float_type DoCondition(const BaseMatrix<M>& m);
 
     //
     // Helper functions and values:
@@ -113,7 +113,7 @@ namespace tmv {
 
     // Specify ExactSameStorage for banded matrices:
     template <class M1, class M2>
-    static TMV_INLINE bool ExactSameStorage(
+    TMV_INLINE bool ExactSameStorage(
         const BaseMatrix_Band<M1>& m1, const BaseMatrix_Band<M2>& m2)
     {
         typedef typename M1::value_type T1;
@@ -130,7 +130,7 @@ namespace tmv {
     // to whether the matrix uses CStyle or FortranStyle indexing.
     // They also update the indices to be consistent with CStyle.
     template <bool _fort>
-    static TMV_INLINE_ND void CheckRowRange_Band(
+    TMV_INLINE_ND void CheckRowRange_Band(
         int& j, int& i1, int i2, int m, int nlo, int nhi)
     { // CStyle or FortranStyle
         CheckRowRange<_fort>(i1,i2,m);
@@ -138,7 +138,7 @@ namespace tmv {
         TMVAssert(InBand(i2-1,j,nlo,nhi) && "last element must be in band");
     }
     template <bool _fort>
-    static TMV_INLINE_ND void CheckColRange_Band(
+    TMV_INLINE_ND void CheckColRange_Band(
         int& i, int& j1, int j2, int n, int nlo, int nhi)
     { // CStyle or FortranStyle
         CheckColRange<_fort>(j1,j2,n);
@@ -146,7 +146,7 @@ namespace tmv {
         TMVAssert(InBand(i,j2-1,nlo,nhi) && "last element must be in band");
     }
     template <bool _fort>
-    static TMV_INLINE_ND void CheckDiagIndex_Band(
+    TMV_INLINE_ND void CheckDiagIndex_Band(
         int& i, int m, int n, int nlo, int nhi)
     { // CStyle
         TMVAssert(i >= -nlo && "negative diag index must be <= nlo");
@@ -154,7 +154,7 @@ namespace tmv {
         CheckDiagIndex<false>(i,m,n);
     }
     template <bool _fort>
-    static TMV_INLINE_ND void CheckDiagIndex_Band(
+    TMV_INLINE_ND void CheckDiagIndex_Band(
         int& i, int& j1, int& j2, int m, int n, int nlo, int nhi)
     { // CStyle
         TMVAssert(i >= -nlo && "negative diag index must be <= nlo");
@@ -162,7 +162,7 @@ namespace tmv {
         CheckDiagIndex<false>(i,j1,j2,m,n);
     }
     template <bool _fort>
-    static TMV_INLINE_ND void CheckMatSubVector_Band(
+    TMV_INLINE_ND void CheckMatSubVector_Band(
         int& i, int& j, int istep, int jstep, int size, int m, int n,
         int nlo, int nhi)
     { // CStyle or FortranStyle
@@ -173,7 +173,7 @@ namespace tmv {
         CheckMatSubVector<_fort>(i,j,istep,jstep,size,m,n);
     }
     template <bool _fort>
-    static TMV_INLINE_ND void CheckDiagRange_Band(
+    TMV_INLINE_ND void CheckDiagRange_Band(
         int k1, int& k2, int nlo, int nhi)
     { // CStyle
         TMVAssert(k1 <= k2 && 
@@ -209,10 +209,10 @@ namespace tmv {
         ++k2;
     }
 
-    static TMV_INLINE_ND void CheckInBand(
+    TMV_INLINE_ND void CheckInBand(
         int i, int j, int nlo, int nhi)
     { TMVAssert(InBand(i,j,nlo,nhi) && "Reference value must be in band"); }
-    static TMV_INLINE_ND void CheckSubMatrix_Band(
+    TMV_INLINE_ND void CheckSubMatrix_Band(
         int i1, int i2, int j1, int j2, int nlo, int nhi)
     {
         TMVAssert(InBand(i1,j1,nlo,nhi) && 
@@ -224,7 +224,7 @@ namespace tmv {
         TMVAssert(InBand(i2-1,j2-1,nlo,nhi) && 
                   "Lower right corner must be in band");
     }
-    static TMV_INLINE_ND void CheckSubMatrix_Band(
+    TMV_INLINE_ND void CheckSubMatrix_Band(
         int i1, int i2, int j1, int j2, int istep, int jstep, int nlo, int nhi)
     {
         TMVAssert(InBand(i1,j1,nlo,nhi) && 
@@ -237,7 +237,7 @@ namespace tmv {
                   "Lower right corner must be in band");
     }
 
-    static TMV_INLINE_ND void CheckSubBandMatrix(
+    TMV_INLINE_ND void CheckSubBandMatrix(
         int i1, int i2, int j1, int j2, int newnlo, int newnhi,
         int nlo, int nhi)
     {
@@ -252,7 +252,7 @@ namespace tmv {
         TMVAssert(newnlo < i2-i1 &&
                   "New nlo must be less than new colsize");
     }
-    static TMV_INLINE_ND void CheckSubBandMatrix(
+    TMV_INLINE_ND void CheckSubBandMatrix(
         int i1, int i2, int j1, int j2, int newnlo, int newnhi,
         int istep, int jstep, int nlo, int nhi)
     {
@@ -268,24 +268,24 @@ namespace tmv {
                   "New nlo must be less than new colsize");
     }
 
-    static TMV_INLINE_ND void CheckUpperBandOff(int nhi, int n)
+    TMV_INLINE_ND void CheckUpperBandOff(int nhi, int n)
     {
         TMVAssert(n>0 && "upperBandOff not possible for zero-sized matrix");
         TMVAssert(nhi>0 && 
                   "upperBandOff not possible for band matrix with nhi=0");
     }
-    static TMV_INLINE_ND void CheckLowerBandOff(int nlo, int m)
+    TMV_INLINE_ND void CheckLowerBandOff(int nlo, int m)
     {
         TMVAssert(m>0 && "lowerBandOff not possible for zero-sized matrix");
         TMVAssert(nlo>0 && 
                   "lowerBandOff not possible for band matrix with nlo=0");
     }
-    static TMV_INLINE_ND void CheckUpperBandOff(int i, int nhi, int n)
+    TMV_INLINE_ND void CheckUpperBandOff(int i, int nhi, int n)
     {
         CheckUpperBandOff(nhi,n);
         TMVAssert(i>0 && i<=nhi && "upperBandOff index is not valid");
     }
-    static TMV_INLINE_ND void CheckLowerBandOff(int i, int nlo, int m)
+    TMV_INLINE_ND void CheckLowerBandOff(int i, int nlo, int m)
     {
         CheckLowerBandOff(nlo,m);
         TMVAssert(i>0 && i<=nlo && "lowerBandOff index is not valid");
@@ -312,7 +312,8 @@ namespace tmv {
     template <class T, int si, int sj, int A>
     struct MViewHelper<T,Band,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,A>
     {
-        enum { A2 = A | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
+        enum { A2 = A |
+            (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) | NoAlias };
         typedef BandMatrixView<T,A2> type; 
         typedef ConstBandMatrixView<T,A2> ctype; 
     };
@@ -320,95 +321,76 @@ namespace tmv {
 
     // Defined in TMV_CopyB.h
     template <class M1, class M2>
-    static inline void Copy(
-        const BaseMatrix_Band<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2);
-    template <class M1, class M2>
-    static inline void NoAliasCopy(
+    inline void Copy(
         const BaseMatrix_Band<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2);
 
     template <class M1, class M2>
-    static inline void Copy(
-        const BaseMatrix_Band<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
-    template <class M1, class M2>
-    static inline void NoAliasCopy(
+    inline void Copy(
         const BaseMatrix_Band<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
 
     template <class M1, class M2>
-    static inline void Copy(
-        const BaseMatrix_Band<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2);
-    template <class M1, class M2>
-    static inline void NoAliasCopy(
+    inline void Copy(
         const BaseMatrix_Band<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2);
 
     template <class M1, class M2>
-    static inline void Copy(
-        const BaseMatrix_Tri<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2);
-    template <class M1, class M2>
-    static inline void NoAliasCopy(
+    inline void Copy(
         const BaseMatrix_Tri<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2);
 
     template <class M1, class M2>
-    static inline void Copy(
-        const BaseMatrix_Diag<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2);
-    template <class M1, class M2>
-    static inline void NoAliasCopy(
+    inline void Copy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2);
 
     // Defined in TMV_SwapB.h
     template <class M1, class M2>
-    static inline void Swap(
-        BaseMatrix_Band_Mutable<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2);
-    template <class M1, class M2>
-    static inline void NoAliasSwap(
+    inline void Swap(
         BaseMatrix_Band_Mutable<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2);
     template <class M>
-    static inline void TransposeSelf(BaseMatrix_Band_Mutable<M>& m);
+    inline void TransposeSelf(BaseMatrix_Band_Mutable<M>& m);
 
     // Defined in TMV_NormB.h
     template <class M>
-    static inline typename M::real_type DoNormSq(const BaseMatrix_Band<M>& m);
+    inline typename M::real_type DoNormSq(const BaseMatrix_Band<M>& m);
     template <class M>
-    static inline typename M::float_type DoNormSq(
+    inline typename M::float_type DoNormSq(
         const BaseMatrix_Band<M>& m, const typename M::float_type scale);
     template <class M>
-    static inline typename M::float_type DoNorm1(const BaseMatrix_Band<M>& m);
+    inline typename M::float_type DoNorm1(const BaseMatrix_Band<M>& m);
     template <class M>
-    static inline typename M::float_type DoNormInf(const BaseMatrix_Band<M>& m);
+    inline typename M::float_type DoNormInf(const BaseMatrix_Band<M>& m);
     template <class M>
-    static inline typename M::value_type DoSumElements(const BaseMatrix_Band<M>& m);
+    inline typename M::value_type DoSumElements(const BaseMatrix_Band<M>& m);
     template <class M>
-    static inline typename M::float_type DoSumAbsElements(const BaseMatrix_Band<M>& m);
+    inline typename M::float_type DoSumAbsElements(const BaseMatrix_Band<M>& m);
     template <class M>
-    static inline typename M::real_type DoSumAbs2Elements(const BaseMatrix_Band<M>& m);
+    inline typename M::real_type DoSumAbs2Elements(const BaseMatrix_Band<M>& m);
     template <class M>
-    static inline typename M::float_type DoMaxAbsElement(const BaseMatrix_Band<M>& m);
+    inline typename M::float_type DoMaxAbsElement(const BaseMatrix_Band<M>& m);
     template <class M>
-    static inline typename M::real_type DoMaxAbs2Element(const BaseMatrix_Band<M>& m);
+    inline typename M::real_type DoMaxAbs2Element(const BaseMatrix_Band<M>& m);
 
     // Defined in TMV_BandMatrixIO.h
     template <class M>
-    static inline void WriteCompact(
-        std::ostream& os, const BaseMatrix_Band<M>& m);
+    inline void WriteCompact(std::ostream& os, const BaseMatrix_Band<M>& m);
     template <class M>
-    static inline void WriteCompact(
+    inline void WriteCompact(
         std::ostream& os,
         const BaseMatrix_Band<M>& m, typename M::float_type thresh) ;
     template <class M>
-    static inline void Read(std::istream& is, BaseMatrix_Band_Mutable<M>& m);
+    inline void Read(std::istream& is, BaseMatrix_Band_Mutable<M>& m);
  
     // Defined below:
     template <class M>
-    static inline void SetZero(BaseMatrix_Band_Mutable<M>& m);
+    inline void SetZero(BaseMatrix_Band_Mutable<M>& m);
     template <class M, class RT>
-    static inline void Clip(BaseMatrix_Band_Mutable<M>& m, const RT& thresh);
+    inline void Clip(BaseMatrix_Band_Mutable<M>& m, const RT& thresh);
     template <class M, class T>
-    static inline void SetAllTo(BaseMatrix_Band_Mutable<M>& m, const T& val);
+    inline void SetAllTo(BaseMatrix_Band_Mutable<M>& m, const T& val);
     template <class M, class T>
-    static inline void AddToAll(BaseMatrix_Band_Mutable<M>& m, const T& val);
+    inline void AddToAll(BaseMatrix_Band_Mutable<M>& m, const T& val);
     template <class M>
-    static inline void ConjugateSelf(BaseMatrix_Band_Mutable<M>& m);
+    inline void ConjugateSelf(BaseMatrix_Band_Mutable<M>& m);
     template <class M, class F>
-    static inline void ApplyToAll(BaseMatrix_Band_Mutable<M>& m, const F& f);
+    inline void ApplyToAll(BaseMatrix_Band_Mutable<M>& m, const F& f);
 
 
     // A helper class for returning views without necessarily
@@ -979,13 +961,6 @@ namespace tmv {
             tmv::Copy(mat(),m2.mat()); 
         }
 
-        template <class M2>
-        TMV_INLINE_ND void newAssignTo(BaseMatrix_Mutable<M2>& m2) const
-        {
-            TMVStaticAssert((ShapeTraits2<_shape,M2::_shape>::assignable));
-            tmv::NoAliasCopy(mat(),m2.mat()); 
-        }
-
         TMV_INLINE const type& mat() const
         { return static_cast<const type&>(*this); }
 
@@ -1122,6 +1097,8 @@ namespace tmv {
         typedef typename base_mut::realpart_type realpart_type;
         typedef typename base_mut::imagpart_type imagpart_type;
         typedef typename base_mut::nonconj_type nonconj_type;
+        typedef typename base_mut::noalias_type noalias_type;
+        typedef typename base_mut::alias_type alias_type;
         typedef typename base_mut::reference reference;
 
         typedef typename base::const_row_sub_type const_row_sub_type;
@@ -1330,8 +1307,7 @@ namespace tmv {
             const int sj = _stepj;
             const int A2 = 
                 (_conj ? Conj : NonConj) |
-                (_rowmajor ? RowMajor : _colmajor ? ColMajor : NonMajor) |
-                NoDivider | NoAlias;
+                (_rowmajor ? RowMajor : _colmajor ? ColMajor : NonMajor);
             typename MViewHelper<value_type,shape,cs,rs,si,sj,A2>::type U(
                 ptr(),rowsize(),stepi(),stepj(),NonUnitDiag);
             m2.assignTo(U);
@@ -1726,6 +1702,12 @@ namespace tmv {
         TMV_INLINE TMV_MAYBE_REF(type,nonconj_type) nonConj()
         { return MakeBandView<type,nonconj_type>::call(mat()); }
 
+        TMV_INLINE TMV_MAYBE_REF(type,noalias_type) noAlias()
+        { return MakeBandView<type,noalias_type>::call(mat()); }
+
+        TMV_INLINE TMV_MAYBE_REF(type,alias_type) alias()
+        { return MakeBandView<type,alias_type>::call(mat()); }
+
 
         // Repeat the const versions:
         TMV_INLINE TMV_MAYBE_CREF(type,const_view_type) view() const
@@ -1916,7 +1898,7 @@ namespace tmv {
     };
 
     template <class M>
-    static TMV_INLINE void SetZero(BaseMatrix_Band_Mutable<M>& m)
+    TMV_INLINE void SetZero(BaseMatrix_Band_Mutable<M>& m)
     {
         const int algo = (
             M::_canlin ? 1 :
@@ -1997,7 +1979,7 @@ namespace tmv {
     };
 
     template <class M, class T>
-    static TMV_INLINE void SetAllTo(BaseMatrix_Band_Mutable<M>& m, const T& val)
+    TMV_INLINE void SetAllTo(BaseMatrix_Band_Mutable<M>& m, const T& val)
     {
         const int algo = (
             M::_canlin ? 1 :
@@ -2078,7 +2060,7 @@ namespace tmv {
     };
 
     template <class M, class T>
-    static TMV_INLINE void AddToAll(BaseMatrix_Band_Mutable<M>& m, const T& val)
+    TMV_INLINE void AddToAll(BaseMatrix_Band_Mutable<M>& m, const T& val)
     {
         const int algo = (
             M::_canlin ? 1 :
@@ -2159,7 +2141,7 @@ namespace tmv {
     };
 
     template <class M, class RT>
-    static TMV_INLINE void Clip(BaseMatrix_Band_Mutable<M>& m, const RT& thresh)
+    TMV_INLINE void Clip(BaseMatrix_Band_Mutable<M>& m, const RT& thresh)
     {
         const int algo = (
             M::_canlin ? 1 :
@@ -2240,7 +2222,7 @@ namespace tmv {
     };
 
     template <class M, class F>
-    static TMV_INLINE void ApplyToAll(BaseMatrix_Band_Mutable<M>& m, const F& f)
+    TMV_INLINE void ApplyToAll(BaseMatrix_Band_Mutable<M>& m, const F& f)
     {
         const int algo = (
             M::_canlin ? 1 :
@@ -2272,7 +2254,7 @@ namespace tmv {
 
     // In TMV_ScaleB.h
     template <int ix, class T, class M>
-    static inline void Scale(
+    inline void Scale(
         const Scaling<ix,T>& x, BaseMatrix_Band_Mutable<M>& m);
 
     // algo 2: m.imagPart() *= -1
@@ -2290,7 +2272,7 @@ namespace tmv {
     };
 
     template <class M>
-    static TMV_INLINE void ConjugateSelf(BaseMatrix_Band_Mutable<M>& m)
+    TMV_INLINE void ConjugateSelf(BaseMatrix_Band_Mutable<M>& m)
     {
         const bool isreal = Traits<typename M::value_type>::isreal;
         const int algo = isreal ? 0 : M::_canlin ? 1 : 2;
@@ -2305,7 +2287,7 @@ namespace tmv {
 
 #ifdef TMV_TEXT
     template <class M>
-    static inline std::string TMV_Text(const BaseMatrix_Band<M>& m)
+    inline std::string TMV_Text(const BaseMatrix_Band<M>& m)
     {
         std::ostringstream s;
         s << "BaseMatrix_Band< "<<TMV_Text(m.mat())<<" >";
@@ -2313,7 +2295,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline std::string TMV_Text(const BaseMatrix_Band_Mutable<M>& m)
+    inline std::string TMV_Text(const BaseMatrix_Band_Mutable<M>& m)
     {
         std::ostringstream s;
         s << "BaseMatrix_Band_Mutable< "<<TMV_Text(m.mat())<<" >";

@@ -42,9 +42,11 @@ namespace tmv {
         {
             const int n = (s == TMV_UNKNOWN ? int(m.colsize()) : s);
             for(int i=1;i<n;++i) {
-                typename M1::row_sub_type v1 = m.get_row(i,0,i);
-                typename M1::col_sub_type v2 = m.get_col(i,0,i);
-                NoAliasSwap(v1,v2);
+                typename M1::row_sub_type::noalias_type v1 =
+                    m.get_row(i,0,i).noAlias();
+                typename M1::col_sub_type::noalias_type v2 =
+                    m.get_col(i,0,i).noAlias();
+                Swap(v1,v2);
             }
         }
     };
@@ -82,9 +84,11 @@ namespace tmv {
         {
             const int n = (s == TMV_UNKNOWN ? int(m.colsize()) : s);
             for(int i=0;i<n-1;++i) {
-                typename M1::row_sub_type v1 = m.get_row(i,i+1,n);
-                typename M1::col_sub_type v2 = m.get_col(i,i+1,n);
-                NoAliasSwap(v1,v2);
+                typename M1::row_sub_type::noalias_type v1 =
+                    m.get_row(i,i+1,n).noAlias();
+                typename M1::col_sub_type::noalias_type v2 =
+                    m.get_col(i,i+1,n).noAlias();
+                Swap(v1,v2);
             }
         }
     };
@@ -119,7 +123,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static inline void unroll(M1& m)
+            static TMV_INLINE void unroll(M1& m)
             {
                 Unroller<I,M/2,0,I>::unroll(m);
                 Unroller<I+M/2,M-M/2,0,I+M/2>::unroll(m);
@@ -128,7 +132,7 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,1,J,N>
         {
-            static inline void unroll(M1& m)
+            static TMV_INLINE void unroll(M1& m)
             {
                 Unroller<I,1,J,N/2>::unroll(m);
                 Unroller<I,1,J+N/2,N-N/2>::unroll(m);
@@ -136,19 +140,19 @@ namespace tmv {
         };
         template <int I, int J, int N>
         struct Unroller<I,0,J,N>
-        { static inline void unroll(M1& ) {} };
+        { static TMV_INLINE void unroll(M1& ) {} };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static inline void unroll(M1& m)
+            static TMV_INLINE void unroll(M1& m)
             { TMV_SWAP(m.ref(I,J) , m.ref(J,I) ); }
         };
         template <int I>
         struct Unroller<I,1,I,1>
-        { static inline void unroll(M1& m) {} };
+        { static TMV_INLINE void unroll(M1& m) {} };
         template <int I, int J>
         struct Unroller<I,1,J,0>
-        { static inline void unroll(M1& ) {} };
+        { static TMV_INLINE void unroll(M1& ) {} };
 
         static inline void call(M1& m)
         { Unroller<0,s,0,s>::unroll(m); }
@@ -222,7 +226,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline void TransposeSelf(BaseMatrix_Rec_Mutable<M>& m)
+    inline void TransposeSelf(BaseMatrix_Rec_Mutable<M>& m)
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same)); 
         TMVAssert(m.colsize() == m.rowsize());
@@ -233,7 +237,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline void InlineTransposeSelf(BaseMatrix_Rec_Mutable<M>& m)
+    inline void InlineTransposeSelf(BaseMatrix_Rec_Mutable<M>& m)
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same)); 
         TMVAssert(m.colsize() == m.rowsize());

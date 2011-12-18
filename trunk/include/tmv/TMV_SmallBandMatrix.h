@@ -55,7 +55,7 @@ namespace tmv {
         typedef typename Traits<T>::real_type real_type;
 
         enum { A01 = A0 | A1 };
-        enum { A = (A01 & ~NoDivider) | (
+        enum { A = (A01 & ~NoDivider & ~NoAlias) | (
                 ((Attrib<A01>::rowmajor || Attrib<A01>::diagmajor) ? 
                  0 : ColMajor) |
                 ( Attrib<A01>::withdivider ? 0 : NoDivider ) ) };
@@ -72,6 +72,7 @@ namespace tmv {
                 !Attrib<A>::packed &&
                 !Attrib<A>::lower &&
                 !Attrib<A>::upper &&
+                !Attrib<A>::noalias &&
                 (Attrib<A>::nodivider || Attrib<A>::withdivider) &&
                 (Attrib<A>::nodivider != int(Attrib<A>::withdivider) ) &&
                 ( !Attrib<A>::withdivider ||
@@ -157,27 +158,28 @@ namespace tmv {
         enum { adjA = iscomplex ? (trA ^ Conj) : int(trA) };
         enum { nonconjA = ndA };
         enum { twosA = isreal ? int(nonconjA) : (nonconjA & ~AllStorageType) };
-        enum { An = _checkalias ? (ndA & ~CheckAlias) : (ndA | NoAlias) };
-        enum { vecAn = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
-        enum { colAn = vecAn | (_colmajor ? Unit : 0) };
-        enum { rowAn = vecAn | (_rowmajor ? Unit : 0) };
-        enum { diagAn = vecAn | (_diagstep == 1 ? Unit : 0) };
-        enum { nmAn = (An & ~AllStorageType) };
+        enum { Ar = _checkalias ? (ndA & ~CheckAlias) : (ndA | NoAlias) };
+        enum { vecAr = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
+        enum { colAr = vecAr | (_colmajor ? Unit : 0) };
+        enum { rowAr = vecAr | (_rowmajor ? Unit : 0) };
+        enum { diagAr = vecAr | (_diagstep == 1 ? Unit : 0) };
+        enum { nmAr = (Ar & ~AllStorageType) };
+        enum { An = ndA & ~CheckAlias };
 
         enum { xx = TMV_UNKNOWN }; // For brevity.
-        typedef ConstVectorView<T,colAn> const_col_sub_type;
-        typedef ConstVectorView<T,rowAn> const_row_sub_type;
+        typedef ConstVectorView<T,colAr> const_col_sub_type;
+        typedef ConstVectorView<T,rowAr> const_row_sub_type;
         typedef ConstSmallVectorView<T,minMN,_diagstep,diagA> const_diag_type;
         typedef ConstSmallVectorView<T,xx,_diagstep,diagA> const_diag_sub_type;
 
-        typedef ConstMatrixView<T,An> const_submatrix_type;
-        typedef ConstMatrixView<T,nmAn> const_submatrix_step_type;
-        typedef ConstVectorView<T,vecAn> const_subvector_type;
-        typedef ConstBandMatrixView<T,An> const_subbandmatrix_type;
-        typedef ConstBandMatrixView<T,nmAn> const_subbandmatrix_step_type;
-        typedef ConstBandMatrixView<T,An> const_colrange_type;
-        typedef ConstBandMatrixView<T,An> const_rowrange_type;
-        typedef ConstBandMatrixView<T,An> const_diagrange_type;
+        typedef ConstMatrixView<T,Ar> const_submatrix_type;
+        typedef ConstMatrixView<T,nmAr> const_submatrix_step_type;
+        typedef ConstVectorView<T,vecAr> const_subvector_type;
+        typedef ConstBandMatrixView<T,Ar> const_subbandmatrix_type;
+        typedef ConstBandMatrixView<T,nmAr> const_subbandmatrix_step_type;
+        typedef ConstBandMatrixView<T,Ar> const_colrange_type;
+        typedef ConstBandMatrixView<T,Ar> const_rowrange_type;
+        typedef ConstBandMatrixView<T,Ar> const_diagrange_type;
 
         typedef ConstSmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,ndA> 
             const_view_type;
@@ -211,7 +213,7 @@ namespace tmv {
         typedef ConstSmallBandMatrixView<real_type,M,N,LO,HI,twoSi,twoSj,twosA> 
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstSmallVectorView<T,_linsize,1,(vecAn|Unit)> 
+        typedef ConstSmallVectorView<T,_linsize,1,(vecAr|Unit)> 
             const_linearview_type;
         typedef ConstSmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,nonconjA> 
             const_nonconj_type;
@@ -226,19 +228,19 @@ namespace tmv {
         typedef CMIt<type> colmajor_iterator;
         typedef DMIt<type> diagmajor_iterator;
 
-        typedef VectorView<T,colAn> col_sub_type;
-        typedef VectorView<T,rowAn> row_sub_type;
+        typedef VectorView<T,colAr> col_sub_type;
+        typedef VectorView<T,rowAr> row_sub_type;
         typedef SmallVectorView<T,minMN,_diagstep,diagA> diag_type;
         typedef SmallVectorView<T,xx,_diagstep,diagA> diag_sub_type;
 
-        typedef MatrixView<T,An> submatrix_type;
-        typedef MatrixView<T,nmAn> submatrix_step_type;
-        typedef VectorView<T,vecAn> subvector_type;
-        typedef BandMatrixView<T,An> subbandmatrix_type;
-        typedef BandMatrixView<T,nmAn> subbandmatrix_step_type;
-        typedef BandMatrixView<T,An> colrange_type;
-        typedef BandMatrixView<T,An> rowrange_type;
-        typedef BandMatrixView<T,An> diagrange_type;
+        typedef MatrixView<T,Ar> submatrix_type;
+        typedef MatrixView<T,nmAr> submatrix_step_type;
+        typedef VectorView<T,vecAr> subvector_type;
+        typedef BandMatrixView<T,Ar> subbandmatrix_type;
+        typedef BandMatrixView<T,nmAr> subbandmatrix_step_type;
+        typedef BandMatrixView<T,Ar> colrange_type;
+        typedef BandMatrixView<T,Ar> rowrange_type;
+        typedef BandMatrixView<T,Ar> diagrange_type;
 
         typedef SmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,ndA> view_type;
         typedef SmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,cstyleA> 
@@ -268,9 +270,11 @@ namespace tmv {
         typedef SmallBandMatrixView<real_type,M,N,LO,HI,twoSi,twoSj,twosA> 
             realpart_type;
         typedef realpart_type imagpart_type;
-        typedef SmallVectorView<T,_linsize,1,(vecAn|Unit)> linearview_type;
+        typedef SmallVectorView<T,_linsize,1,(vecAr|Unit)> linearview_type;
         typedef SmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,nonconjA> 
             nonconj_type;
+        typedef SmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,An> noalias_type;
+        typedef SmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,An|CheckAlias> alias_type;
     };
 
     template <class T, int M, int N, int LO, int HI, int A0, int A1>
@@ -345,7 +349,7 @@ namespace tmv {
             TMVStaticAssert(N>=0);
             TMVStaticAssert(LO >= 0 && LO < M);
             TMVStaticAssert(HI >= 0 && HI < N);
-            m2.newAssignTo(*this);
+            this->noAlias() = m2;
         }
 
         template <class M2>
@@ -360,7 +364,7 @@ namespace tmv {
             TMVStaticAssert((ShapeTraits2<M2::_shape,_shape>::assignable));
             TMVAssert(m2.colsize() == M);
             TMVAssert(m2.rowsize() == N);
-            m2.newAssignTo(*this);
+            this->noAlias() = m2;
         }
 
         template <class M2>
@@ -376,7 +380,7 @@ namespace tmv {
             TMVAssert(HI <= m2.nhi());
             TMVAssert(m2.colsize() == M);
             TMVAssert(m2.rowsize() == N);
-            m2.cDiagRange(-LO,HI+1).newAssignTo(*this);
+            this->noAlias() = m2.cDiagRange(-LO,HI+1);
         }
 
         template <class M2>
@@ -393,7 +397,7 @@ namespace tmv {
             typedef typename M2::value_type T2;
             ConstBandMatrixView<T2> m2b(
                 m2.cptr(),M,N,LO,HI,m2.stepi(),m2.stepj());
-            m2b.newAssignTo(*this);
+            this->noAlias() = m2b;
         }
 
         template <class M2>
@@ -411,7 +415,7 @@ namespace tmv {
             typedef typename M2::value_type T2;
             ConstBandMatrixView<T2> m2b(
                 m2.cptr(),M,N,LO,HI,m2.stepi(),m2.stepj());
-            m2b.newAssignTo(*this);
+            this->noAlias() = m2b;
         }
 
         template <class M2>
@@ -425,7 +429,7 @@ namespace tmv {
             TMVStaticAssert(HI == 0);
             TMVStaticAssert(M == N);
             TMVAssert(m2.size() == M);
-            m2.diag().newAssignTo(this->diag());
+            this->noAlias() = m2.diag();
         }
 
         ~SmallBandMatrix() 
@@ -547,7 +551,7 @@ namespace tmv {
         typedef typename Traits<T>::real_type real_type;
 
         enum { A01 = A0 | A1 };
-        enum { A = A01 | (
+        enum { A = (A01 & ~NoDivider & ~NoAlias) | (
                 ((Attrib<A01>::rowmajor || Attrib<A01>::diagmajor) ? 
                  0 : ColMajor) |
                 ( !Traits<real_type>::isinst ? NoDivider :
@@ -566,6 +570,7 @@ namespace tmv {
                 !Attrib<A>::packed &&
                 !Attrib<A>::lower &&
                 !Attrib<A>::upper &&
+                !Attrib<A>::noalias &&
                 (Attrib<A>::nodivider || Attrib<A>::withdivider) &&
                 (Attrib<A>::nodivider != int(Attrib<A>::withdivider) ) &&
                 ( !Attrib<A>::withdivider ||
@@ -638,27 +643,28 @@ namespace tmv {
         enum { adjA = iscomplex ? (trA ^ Conj) : int(trA) };
         enum { nonconjA = ndA };
         enum { twosA = isreal ? int(nonconjA) : (nonconjA & ~AllStorageType) };
-        enum { An = _checkalias ? (ndA & ~CheckAlias) : (ndA | NoAlias) };
-        enum { vecAn = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
-        enum { colAn = vecAn | (_colmajor ? Unit : 0) };
-        enum { rowAn = vecAn | (_rowmajor ? Unit : 0) };
-        enum { diagAn = vecAn | (_diagstep == 1 ? Unit : 0) };
-        enum { nmAn = (An & ~AllStorageType) };
+        enum { Ar = _checkalias ? (ndA & ~CheckAlias) : (ndA | NoAlias) };
+        enum { vecAr = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
+        enum { colAr = vecAr | (_colmajor ? Unit : 0) };
+        enum { rowAr = vecAr | (_rowmajor ? Unit : 0) };
+        enum { diagAr = vecAr | (_diagstep == 1 ? Unit : 0) };
+        enum { nmAr = (Ar & ~AllStorageType) };
+        enum { An = ndA & ~CheckAlias };
 
         enum { xx = TMV_UNKNOWN }; // For brevity.
-        typedef ConstVectorView<T,colAn> const_col_sub_type;
-        typedef ConstVectorView<T,rowAn> const_row_sub_type;
+        typedef ConstVectorView<T,colAr> const_col_sub_type;
+        typedef ConstVectorView<T,rowAr> const_row_sub_type;
         typedef ConstSmallVectorView<T,xx,_diagstep,diagA> const_diag_type;
         typedef ConstSmallVectorView<T,xx,_diagstep,diagA> const_diag_sub_type;
 
-        typedef ConstMatrixView<T,An> const_submatrix_type;
-        typedef ConstMatrixView<T,nmAn> const_submatrix_step_type;
-        typedef ConstVectorView<T,vecAn> const_subvector_type;
-        typedef ConstBandMatrixView<T,An> const_subbandmatrix_type;
-        typedef ConstBandMatrixView<T,nmAn> const_subbandmatrix_step_type;
-        typedef ConstBandMatrixView<T,An> const_colrange_type;
-        typedef ConstBandMatrixView<T,An> const_rowrange_type;
-        typedef ConstBandMatrixView<T,An> const_diagrange_type;
+        typedef ConstMatrixView<T,Ar> const_submatrix_type;
+        typedef ConstMatrixView<T,nmAr> const_submatrix_step_type;
+        typedef ConstVectorView<T,vecAr> const_subvector_type;
+        typedef ConstBandMatrixView<T,Ar> const_subbandmatrix_type;
+        typedef ConstBandMatrixView<T,nmAr> const_subbandmatrix_step_type;
+        typedef ConstBandMatrixView<T,Ar> const_colrange_type;
+        typedef ConstBandMatrixView<T,Ar> const_rowrange_type;
+        typedef ConstBandMatrixView<T,Ar> const_diagrange_type;
 
         typedef ConstSmallBandMatrixView<T,xx,xx,LO,HI,_stepi,_stepj,ndA> 
             const_view_type;
@@ -692,7 +698,7 @@ namespace tmv {
         typedef ConstSmallBandMatrixView<real_type,xx,xx,LO,HI,twoSi,twoSj,twosA> 
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstVectorView<T,(vecAn|Unit)> const_linearview_type;
+        typedef ConstVectorView<T,(vecAr|Unit)> const_linearview_type;
         typedef ConstSmallBandMatrixView<T,xx,xx,LO,HI,_stepi,_stepj,nonconjA> 
             const_nonconj_type;
         typedef SmallBandMatrixView<T,xx,xx,LO,HI,_stepi,_stepj,ndA> 
@@ -752,9 +758,11 @@ namespace tmv {
         typedef SmallBandMatrixView<real_type,xx,xx,LO,HI,twoSi,twoSj,twosA> 
             realpart_type;
         typedef realpart_type imagpart_type;
-        typedef VectorView<T,(vecAn|Unit)> linearview_type;
+        typedef VectorView<T,(vecAr|Unit)> linearview_type;
         typedef SmallBandMatrixView<T,xx,xx,LO,HI,_stepi,_stepj,nonconjA> 
             nonconj_type;
+        typedef SmallBandMatrixView<T,xx,xx,LO,HI,_stepi,_stepj,Ar> noalias_type;
+        typedef SmallBandMatrixView<T,xx,xx,LO,HI,_stepi,_stepj,Ar|CheckAlias> alias_type;
     };
 
 
@@ -857,7 +865,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(LO >= 0);
             TMVStaticAssert(HI >= 0);
-            m2.newAssignTo(*this);
+            this->noAlias() = m2;
         }
 
         template <class M2>
@@ -875,7 +883,7 @@ namespace tmv {
             TMVAssert(LO < m2.colsize());
             TMVAssert(HI < m2.rowsize());
             TMVStaticAssert((ShapeTraits2<M2::_shape,_shape>::assignable));
-            m2.newAssignTo(*this);
+            this->noAlias() = m2;
         }
 
         template <class M2>
@@ -892,7 +900,7 @@ namespace tmv {
             TMVStaticAssert(HI >= 0);
             TMVAssert(LO <= m2.nlo());
             TMVAssert(HI <= m2.nhi());
-            m2.cDiagRange(-LO,HI+1).newAssignTo(*this);
+            this->noAlias() = m2.cDiagRange(-LO,HI+1);
         }
 
         template <class M2>
@@ -913,7 +921,7 @@ namespace tmv {
             ConstBandMatrixView<T2> m2b(
                 m2.cptr(),m2.colsize(),m2.rowsize(),LO,HI,
                 m2.stepi(),m2.stepj());
-            m2b.newAssignTo(*this);
+            this->noAlias() = m2b;
         }
 
         template <class M2>
@@ -933,7 +941,7 @@ namespace tmv {
             ConstBandMatrixView<T2> m2b(
                 m2.cptr(),m2.size(),m2.size(),LO,HI,
                 m2.stepi(),m2.stepj());
-            m2b.newAssignTo(*this);
+            this->noAlias() = m2b;
         }
 
         template <class M2>
@@ -947,7 +955,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(LO == 0);
             TMVStaticAssert(HI == 0);
-            m2.diag().newAssignTo(this->diag());
+            this->noAlias() = m2.diag();
         }
 
         template <class V0, class V1>
@@ -966,8 +974,8 @@ namespace tmv {
                        (v0.size() == v1.size()+1 && LO==0 && HI==1) );
             diag_sub_type d0 = this->diag(LO==1 ? -1 : 0);
             diag_sub_type d1 = this->diag(LO==1 ? 0 : 1);
-            v0.newAssignTo(d0);
-            v1.newAssignTo(d1);
+            d0.noAlias() = v0;
+            d1.noAlias() = v1;
         }
 
         template <class V0, class V1, class V2>
@@ -987,9 +995,9 @@ namespace tmv {
             diag_sub_type d0 = this->diag(-1);
             diag_type d1 = this->diag();
             diag_sub_type d2 = this->diag(1);
-            v0.newAssignTo(d0);
-            v1.newAssignTo(d1);
-            v2.newAssignTo(d2);
+            d0.noAlias() = v0;
+            d1.noAlias() = v1;
+            d2.noAlias() = v2;
         }
 
         ~ThinBandMatrix() 
@@ -1148,7 +1156,7 @@ namespace tmv {
         typedef typename Traits<T>::real_type real_type;
 
         enum { SipSj = IntTraits2<Si,Sj>::sum };
-        enum { A = (A0 & ~NoDivider) | (
+        enum { A = (A0 & ~NoDivider & ~NoAlias) | (
                 ( Attrib<A0>::colmajor ? 0 :
                   Attrib<A0>::rowmajor ? 0 :
                   Attrib<A0>::diagmajor ? 0 :
@@ -1163,6 +1171,7 @@ namespace tmv {
                 !Attrib<A>::packed &&
                 !Attrib<A>::lower &&
                 !Attrib<A>::upper &&
+                !Attrib<A>::noalias &&
                 (Attrib<A>::nodivider || Attrib<A>::withdivider) &&
                 (Attrib<A>::nodivider != int(Attrib<A>::withdivider)) &&
                 ( !Attrib<A>::withdivider ||
@@ -1251,27 +1260,28 @@ namespace tmv {
         enum { adjA = iscomplex ? (trA ^ Conj) : int(trA) };
         enum { nonconjA = ndA & ~Conj };
         enum { twosA = isreal ? int(ndA) : (ndA & ~Conj & ~AllStorageType) };
-        enum { An = _checkalias ? (ndA & ~CheckAlias) : (ndA | NoAlias) };
-        enum { vecAn = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
-        enum { colAn = vecAn | (_colmajor ? Unit : 0) };
-        enum { rowAn = vecAn | (_rowmajor ? Unit : 0) };
-        enum { diagAn = vecAn | (_diagstep == 1 ? Unit : 0) };
-        enum { nmAn = (An & ~AllStorageType) };
+        enum { Ar = _checkalias ? (ndA & ~CheckAlias) : (ndA | NoAlias) };
+        enum { vecAr = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
+        enum { colAr = vecAr | (_colmajor ? Unit : 0) };
+        enum { rowAr = vecAr | (_rowmajor ? Unit : 0) };
+        enum { diagAr = vecAr | (_diagstep == 1 ? Unit : 0) };
+        enum { nmAr = (Ar & ~AllStorageType) };
+        enum { An = ndA & ~CheckAlias };
 
         enum { xx = TMV_UNKNOWN }; // For brevity.
-        typedef ConstVectorView<T,colAn> const_col_sub_type;
-        typedef ConstVectorView<T,rowAn> const_row_sub_type;
+        typedef ConstVectorView<T,colAr> const_col_sub_type;
+        typedef ConstVectorView<T,rowAr> const_row_sub_type;
         typedef ConstSmallVectorView<T,minMN,_diagstep,diagA> const_diag_type;
         typedef ConstSmallVectorView<T,xx,_diagstep,diagA> const_diag_sub_type;
 
-        typedef ConstMatrixView<T,An> const_submatrix_type;
-        typedef ConstMatrixView<T,nmAn> const_submatrix_step_type;
-        typedef ConstVectorView<T,vecAn> const_subvector_type;
-        typedef ConstBandMatrixView<T,An> const_subbandmatrix_type;
-        typedef ConstBandMatrixView<T,nmAn> const_subbandmatrix_step_type;
-        typedef ConstBandMatrixView<T,An> const_colrange_type;
-        typedef ConstBandMatrixView<T,An> const_rowrange_type;
-        typedef ConstBandMatrixView<T,An> const_diagrange_type;
+        typedef ConstMatrixView<T,Ar> const_submatrix_type;
+        typedef ConstMatrixView<T,nmAr> const_submatrix_step_type;
+        typedef ConstVectorView<T,vecAr> const_subvector_type;
+        typedef ConstBandMatrixView<T,Ar> const_subbandmatrix_type;
+        typedef ConstBandMatrixView<T,nmAr> const_subbandmatrix_step_type;
+        typedef ConstBandMatrixView<T,Ar> const_colrange_type;
+        typedef ConstBandMatrixView<T,Ar> const_rowrange_type;
+        typedef ConstBandMatrixView<T,Ar> const_diagrange_type;
 
         typedef ConstSmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,ndA> 
             const_view_type;
@@ -1305,7 +1315,7 @@ namespace tmv {
         typedef ConstSmallBandMatrixView<real_type,M,N,LO,HI,twoSi,twoSj,twosA> 
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstVectorView<T,(vecAn|Unit)> const_linearview_type;
+        typedef ConstVectorView<T,(vecAr|Unit)> const_linearview_type;
         typedef ConstSmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,nonconjA> 
             const_nonconj_type;
         typedef SmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,ndA> 
@@ -1527,7 +1537,7 @@ namespace tmv {
         typedef typename Traits<T>::real_type real_type;
 
         enum { SipSj = IntTraits2<Si,Sj>::sum };
-        enum { A = (A0 & ~NoDivider) | (
+        enum { A = (A0 & ~NoDivider & ~NoAlias) | (
                 ( Attrib<A0>::colmajor ? 0 :
                   Attrib<A0>::rowmajor ? 0 :
                   Attrib<A0>::diagmajor ? 0 :
@@ -1542,6 +1552,7 @@ namespace tmv {
                 !Attrib<A>::packed &&
                 !Attrib<A>::lower &&
                 !Attrib<A>::upper &&
+                !Attrib<A>::noalias &&
                 (Attrib<A>::nodivider || Attrib<A>::withdivider) &&
                 (Attrib<A>::nodivider != int(Attrib<A>::withdivider)) &&
                 ( !Attrib<A>::withdivider ||
@@ -1630,27 +1641,28 @@ namespace tmv {
         enum { adjA = iscomplex ? (trA ^ Conj) : int(trA) };
         enum { nonconjA = ndA & ~Conj };
         enum { twosA = isreal ? int(ndA) : (ndA & ~Conj & ~AllStorageType) };
-        enum { An = _checkalias ? (ndA & ~CheckAlias) : (ndA | NoAlias) };
-        enum { vecAn = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
-        enum { colAn = vecAn | (_colmajor ? Unit : 0) };
-        enum { rowAn = vecAn | (_rowmajor ? Unit : 0) };
-        enum { diagAn = vecAn | (_diagstep == 1 ? Unit : 0) };
-        enum { nmAn = (An & ~AllStorageType) };
+        enum { Ar = _checkalias ? (ndA & ~CheckAlias) : (ndA | NoAlias) };
+        enum { vecAr = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
+        enum { colAr = vecAr | (_colmajor ? Unit : 0) };
+        enum { rowAr = vecAr | (_rowmajor ? Unit : 0) };
+        enum { diagAr = vecAr | (_diagstep == 1 ? Unit : 0) };
+        enum { nmAr = (Ar & ~AllStorageType) };
+        enum { An = ndA & ~CheckAlias };
 
         enum { xx = TMV_UNKNOWN }; // For brevity.
-        typedef ConstVectorView<T,colAn> const_col_sub_type;
-        typedef ConstVectorView<T,rowAn> const_row_sub_type;
+        typedef ConstVectorView<T,colAr> const_col_sub_type;
+        typedef ConstVectorView<T,rowAr> const_row_sub_type;
         typedef ConstSmallVectorView<T,minMN,_diagstep,diagA> const_diag_type;
         typedef ConstSmallVectorView<T,xx,_diagstep,diagA> const_diag_sub_type;
 
-        typedef ConstMatrixView<T,An> const_submatrix_type;
-        typedef ConstMatrixView<T,nmAn> const_submatrix_step_type;
-        typedef ConstVectorView<T,vecAn> const_subvector_type;
-        typedef ConstBandMatrixView<T,An> const_subbandmatrix_type;
-        typedef ConstBandMatrixView<T,nmAn> const_subbandmatrix_step_type;
-        typedef ConstBandMatrixView<T,An> const_colrange_type;
-        typedef ConstBandMatrixView<T,An> const_rowrange_type;
-        typedef ConstBandMatrixView<T,An> const_diagrange_type;
+        typedef ConstMatrixView<T,Ar> const_submatrix_type;
+        typedef ConstMatrixView<T,nmAr> const_submatrix_step_type;
+        typedef ConstVectorView<T,vecAr> const_subvector_type;
+        typedef ConstBandMatrixView<T,Ar> const_subbandmatrix_type;
+        typedef ConstBandMatrixView<T,nmAr> const_subbandmatrix_step_type;
+        typedef ConstBandMatrixView<T,Ar> const_colrange_type;
+        typedef ConstBandMatrixView<T,Ar> const_rowrange_type;
+        typedef ConstBandMatrixView<T,Ar> const_diagrange_type;
 
         typedef ConstSmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,ndA> 
             const_view_type;
@@ -1684,7 +1696,7 @@ namespace tmv {
         typedef ConstSmallBandMatrixView<real_type,M,N,LO,HI,twoSi,twoSj,twosA> 
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
-        typedef ConstVectorView<T,(vecAn|Unit)> const_linearview_type;
+        typedef ConstVectorView<T,(vecAr|Unit)> const_linearview_type;
         typedef ConstSmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,nonconjA> 
             const_nonconj_type;
         typedef SmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,ndA> 
@@ -1698,19 +1710,19 @@ namespace tmv {
         typedef CMIt<type> colmajor_iterator;
         typedef DMIt<type> diagmajor_iterator;
 
-        typedef VectorView<T,colAn> col_sub_type;
-        typedef VectorView<T,rowAn> row_sub_type;
+        typedef VectorView<T,colAr> col_sub_type;
+        typedef VectorView<T,rowAr> row_sub_type;
         typedef SmallVectorView<T,minMN,_diagstep,diagA> diag_type;
         typedef SmallVectorView<T,xx,_diagstep,diagA> diag_sub_type;
 
-        typedef MatrixView<T,An> submatrix_type;
-        typedef MatrixView<T,nmAn> submatrix_step_type;
-        typedef VectorView<T,vecAn> subvector_type;
-        typedef BandMatrixView<T,An> subbandmatrix_type;
-        typedef BandMatrixView<T,nmAn> subbandmatrix_step_type;
-        typedef BandMatrixView<T,An> colrange_type;
-        typedef BandMatrixView<T,An> rowrange_type;
-        typedef BandMatrixView<T,An> diagrange_type;
+        typedef MatrixView<T,Ar> submatrix_type;
+        typedef MatrixView<T,nmAr> submatrix_step_type;
+        typedef VectorView<T,vecAr> subvector_type;
+        typedef BandMatrixView<T,Ar> subbandmatrix_type;
+        typedef BandMatrixView<T,nmAr> subbandmatrix_step_type;
+        typedef BandMatrixView<T,Ar> colrange_type;
+        typedef BandMatrixView<T,Ar> rowrange_type;
+        typedef BandMatrixView<T,Ar> diagrange_type;
 
         typedef SmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,ndA> 
             view_type;
@@ -1744,9 +1756,11 @@ namespace tmv {
         typedef SmallBandMatrixView<real_type,M,N,LO,HI,twoSi,twoSj,twosA> 
             realpart_type;
         typedef realpart_type imagpart_type;
-        typedef VectorView<T,(vecAn|Unit)> linearview_type;
+        typedef VectorView<T,(vecAr|Unit)> linearview_type;
         typedef SmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,nonconjA> 
             nonconj_type;
+        typedef SmallBandMatrixView<T,M,M,LO,HI,_stepi,_stepj,Ar> noalias_type;
+        typedef SmallBandMatrixView<T,M,M,LO,HI,_stepi,_stepj,Ar|CheckAlias> alias_type;
     };
 
     template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
@@ -1994,6 +2008,7 @@ namespace tmv {
                 ( M1::_fort ? FortranStyle : CStyle ) |
                 ( M1::_colmajor ? ColMajor : M1::_rowmajor ? RowMajor : 
                   Si == 1 ? ColMajor : Sj == 1 ? RowMajor : 0 ) |
+                ( M1::_checkalias ? CheckAlias : NoAlias ) |
                 NoDivider )};
         enum { xx = TMV_UNKNOWN };
         enum { small = (
@@ -2011,36 +2026,44 @@ namespace tmv {
     };
 
     template <class M>
-    static TMV_INLINE typename BMVO<M>::cb BandMatrixViewOf(
+    TMV_INLINE typename BMVO<M>::cb BandMatrixViewOf(
         const BaseMatrix_Rec<M>& m, int lo, int hi)
     {
+        TMVAssert(lo >= 0);
+        TMVAssert(hi >= 0);
         TMVAssert(lo < int(m.colsize()));
         TMVAssert(hi < int(m.rowsize()));
         return typename BMVO<M>::cb(
             m.cptr(),m.colsize(),m.rowsize(),lo,hi,m.stepi(),m.stepj());
     }
     template <class M>
-    static TMV_INLINE typename BMVO<M>::b BandMatrixViewOf(
+    TMV_INLINE typename BMVO<M>::b BandMatrixViewOf(
         BaseMatrix_Rec_Mutable<M>& m, int lo, int hi)
     {
+        TMVAssert(lo >= 0);
+        TMVAssert(hi >= 0);
         TMVAssert(lo < int(m.colsize()));
         TMVAssert(hi < int(m.rowsize()));
         return typename BMVO<M>::b(
             m.ptr(),m.colsize(),m.rowsize(),lo,hi,m.stepi(),m.stepj());
     }
     template <class T, int A>
-    static TMV_INLINE typename BMVO<MatrixView<T,A> >::b BandMatrixViewOf(
+    TMV_INLINE typename BMVO<MatrixView<T,A> >::b BandMatrixViewOf(
         MatrixView<T,A> m, int lo, int hi)
     {
+        TMVAssert(lo >= 0);
+        TMVAssert(hi >= 0);
         TMVAssert(lo < int(m.colsize()));
         TMVAssert(hi < int(m.rowsize()));
         return typename BMVO<MatrixView<T,A> >::b(
             m.ptr(),m.colsize(),m.rowsize(),lo,hi,m.stepi(),m.stepj());
     }
     template <class T, int M, int N, int Si, int Sj, int A>
-    static TMV_INLINE typename BMVO<SmallMatrixView<T,M,N,Si,Sj,A> >::b BandMatrixViewOf(
-        SmallMatrixView<T,M,N,Si,Sj,A> m, int lo, int hi)
+    TMV_INLINE typename BMVO<SmallMatrixView<T,M,N,Si,Sj,A> >::b 
+    BandMatrixViewOf(SmallMatrixView<T,M,N,Si,Sj,A> m, int lo, int hi)
     {
+        TMVAssert(lo >= 0);
+        TMVAssert(hi >= 0);
         TMVAssert(lo < int(m.colsize()));
         TMVAssert(hi < int(m.rowsize()));
         return typename BMVO<SmallMatrixView<T,M,N,Si,Sj,A> >::b(
@@ -2048,36 +2071,45 @@ namespace tmv {
     }
 
     template <class M>
-    static TMV_INLINE typename BMVO<M>::cb BandMatrixViewOf(
+    TMV_INLINE typename BMVO<M>::cb BandMatrixViewOf(
         const BaseMatrix_Band<M>& m, int lo, int hi)
     {
+        TMVAssert(lo >= 0);
+        TMVAssert(hi >= 0);
         TMVAssert(lo <= m.nlo());
         TMVAssert(hi <= m.nhi());
         return typename BMVO<M>::cb(
             m.cptr(),m.colsize(),m.rowsize(),lo,hi,m.stepi(),m.stepj());
     }
     template <class M>
-    static TMV_INLINE typename BMVO<M>::b BandMatrixViewOf(
+    TMV_INLINE typename BMVO<M>::b BandMatrixViewOf(
         BaseMatrix_Band_Mutable<M>& m, int lo, int hi)
     {
+        TMVAssert(lo >= 0);
+        TMVAssert(hi >= 0);
         TMVAssert(lo <= m.nlo());
         TMVAssert(hi <= m.nhi());
         return typename BMVO<M>::b(
             m.ptr(),m.colsize(),m.rowsize(),lo,hi,m.stepi(),m.stepj());
     }
     template <class T, int A>
-    static TMV_INLINE typename BMVO<BandMatrixView<T,A> >::b BandMatrixViewOf(
+    TMV_INLINE typename BMVO<BandMatrixView<T,A> >::b BandMatrixViewOf(
         BandMatrixView<T,A> m, int lo, int hi)
     {
+        TMVAssert(lo >= 0);
+        TMVAssert(hi >= 0);
         TMVAssert(lo <= m.nlo());
         TMVAssert(hi <= m.nhi());
         return typename BMVO<BandMatrixView<T,A> >::b(
             m.ptr(),m.colsize(),m.rowsize(),lo,hi,m.stepi(),m.stepj());
     }
     template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
-    static TMV_INLINE typename BMVO<SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> >::b BandMatrixViewOf(
+    TMV_INLINE typename BMVO<SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> >::b 
+    BandMatrixViewOf(
         SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m, int lo, int hi)
     {
+        TMVAssert(lo >= 0);
+        TMVAssert(hi >= 0);
         TMVAssert(lo <= m.nlo());
         TMVAssert(hi <= m.nhi());
         return typename BMVO<SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> >::b(
@@ -2097,6 +2129,7 @@ namespace tmv {
                 ( M1::_fort ? FortranStyle : CStyle ) |
                 ( M1::_colmajor ? ColMajor : M1::_rowmajor ? RowMajor : 
                   Si == 1 ? ColMajor : Sj == 1 ? RowMajor : 0 ) |
+                ( M1::_checkalias ? CheckAlias : NoAlias ) |
                 NoDivider )};
         enum { xx = TMV_UNKNOWN };
         enum { small = (
@@ -2104,65 +2137,128 @@ namespace tmv {
                 N != TMV_UNKNOWN ||
                 (Si != TMV_UNKNOWN && Si != 1) ||
                 (Sj != TMV_UNKNOWN && Sj != 1) )};
-        enum { upper = Traits<M1>::_upper };
-        enum { LO = upper ? 0 : xx };
-        enum { HI = upper ? xx : 0 };
+        enum { LO = M1::_upper ? 0 : xx };
+        enum { HI = M1::_upper ? xx : 0 };
+        enum { LO2 = M1::_upper ? 0 : IntTraits2<IntTraits<M>::Sm1,0>::max };
+        enum { HI2 = M1::_upper ? IntTraits2<IntTraits<N>::Sm1,0>::max : 0 };
 
         typedef ConstSmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> cb;
         typedef SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> b;
+        typedef ConstSmallBandMatrixView<T,M,N,LO2,HI2,Si,Sj,A> cb2;
+        typedef SmallBandMatrixView<T,M,N,LO2,HI2,Si,Sj,A> b2;
     };
 
     template <class M>
-    static TMV_INLINE typename BMVOTri<M>::cb BandMatrixViewOf(
+    TMV_INLINE typename BMVOTri<M>::cb BandMatrixViewOf(
         const BaseMatrix_Tri<M>& m, int lohi)
     {
+        TMVAssert(lohi >= 0);
         TMVAssert(lohi < int(m.size()));
         return typename BMVOTri<M>::cb(
-            m.cptr(),m.colsize(),m.rowsize(),
+            m.cptr(),m.size(),m.size(),
             M::_upper ? 0 : lohi, M::_upper ? lohi : 0,
             m.stepi(),m.stepj());
     }
     template <class M>
-    static TMV_INLINE typename BMVOTri<M>::b BandMatrixViewOf(
+    TMV_INLINE typename BMVOTri<M>::b BandMatrixViewOf(
         BaseMatrix_Tri_Mutable<M>& m, int lohi)
     {
+        TMVAssert(lohi >= 0);
         TMVAssert(lohi < int(m.size()));
         return typename BMVOTri<M>::b(
-            m.ptr(),m.colsize(),m.rowsize(),
+            m.ptr(),m.size(),m.size(),
             M::_upper ? 0 : lohi, M::_upper ? lohi : 0,
             m.stepi(),m.stepj());
     }
     template <class T, int A>
-    static TMV_INLINE typename BMVOTri<UpperTriMatrixView<T,A> >::b BandMatrixViewOf(
+    TMV_INLINE typename BMVOTri<UpperTriMatrixView<T,A> >::b BandMatrixViewOf(
         UpperTriMatrixView<T,A> m, int hi)
     {
+        TMVAssert(hi >= 0);
         TMVAssert(hi < int(m.size()));
         return typename BMVOTri<UpperTriMatrixView<T,A> >::b(
-            m.ptr(),m.colsize(),m.rowsize(),0,hi,m.stepi(),m.stepj());
+            m.ptr(),m.size(),m.size(),0,hi,m.stepi(),m.stepj());
     }
     template <class T, int N, int Si, int Sj, int A>
-    static TMV_INLINE typename BMVOTri<SmallUpperTriMatrixView<T,N,Si,Sj,A> >::b BandMatrixViewOf(
-        SmallUpperTriMatrixView<T,N,Si,Sj,A> m, int hi)
+    TMV_INLINE typename BMVOTri<SmallUpperTriMatrixView<T,N,Si,Sj,A> >::b
+    BandMatrixViewOf(SmallUpperTriMatrixView<T,N,Si,Sj,A> m, int hi)
     {
+        TMVAssert(hi >= 0);
         TMVAssert(hi < int(m.size()));
         return typename BMVOTri<SmallUpperTriMatrixView<T,N,Si,Sj,A> >::b(
-            m.ptr(),m.colsize(),m.rowsize(),0,hi,m.stepi(),m.stepj());
+            m.ptr(),m.size(),m.size(),0,hi,m.stepi(),m.stepj());
     }
     template <class T, int A>
-    static TMV_INLINE typename BMVOTri<LowerTriMatrixView<T,A> >::b BandMatrixViewOf(
+    TMV_INLINE typename BMVOTri<LowerTriMatrixView<T,A> >::b BandMatrixViewOf(
         LowerTriMatrixView<T,A> m, int lo)
     {
+        TMVAssert(lo >= 0);
         TMVAssert(lo < int(m.size()));
         return typename BMVOTri<LowerTriMatrixView<T,A> >::b(
-            m.ptr(),m.colsize(),m.rowsize(),lo,0,m.stepi(),m.stepj());
+            m.ptr(),m.size(),m.size(),lo,0,m.stepi(),m.stepj());
     }
     template <class T, int N, int Si, int Sj, int A>
-    static TMV_INLINE typename BMVOTri<SmallLowerTriMatrixView<T,N,Si,Sj,A> >::b BandMatrixViewOf(
-        SmallLowerTriMatrixView<T,N,Si,Sj,A> m, int lo)
+    TMV_INLINE typename BMVOTri<SmallLowerTriMatrixView<T,N,Si,Sj,A> >::b
+    BandMatrixViewOf(SmallLowerTriMatrixView<T,N,Si,Sj,A> m, int lo)
     {
+        TMVAssert(lo >= 0);
         TMVAssert(lo < int(m.size()));
         return typename BMVOTri<SmallLowerTriMatrixView<T,N,Si,Sj,A> >::b(
-            m.ptr(),m.colsize(),m.rowsize(),lo,0,m.stepi(),m.stepj());
+            m.ptr(),m.size(),m.size(),lo,0,m.stepi(),m.stepj());
+    }
+
+    // Repeat without lo/hi variable
+    template <class M>
+    TMV_INLINE typename BMVOTri<M>::cb2 BandMatrixViewOf(
+        const BaseMatrix_Tri<M>& m)
+    {
+        return typename BMVOTri<M>::cb2(
+            m.cptr(),m.size(),m.size(),
+            M::_upper ? 0 : TMV_MAX(int(m.size())-1,0), 
+            M::_upper ? TMV_MAX(int(m.size())-1,0) : 0,
+            m.stepi(),m.stepj());
+    }
+    template <class M>
+    TMV_INLINE typename BMVOTri<M>::b2 BandMatrixViewOf(
+        BaseMatrix_Tri_Mutable<M>& m)
+    {
+        return typename BMVOTri<M>::b2(
+            m.ptr(),m.size(),m.size(),
+            M::_upper ? 0 : TMV_MAX(int(m.size())-1,0), 
+            M::_upper ?  TMV_MAX(int(m.size())-1,0) : 0,
+            m.stepi(),m.stepj());
+    }
+    template <class T, int A>
+    TMV_INLINE typename BMVOTri<UpperTriMatrixView<T,A> >::b2 BandMatrixViewOf(
+        UpperTriMatrixView<T,A> m)
+    {
+        return typename BMVOTri<UpperTriMatrixView<T,A> >::b2(
+            m.ptr(),m.size(),m.size(),
+            0,TMV_MAX(int(m.size())-1,0),m.stepi(),m.stepj());
+    }
+    template <class T, int N, int Si, int Sj, int A>
+    TMV_INLINE typename BMVOTri<SmallUpperTriMatrixView<T,N,Si,Sj,A> >::b2 
+    BandMatrixViewOf(SmallUpperTriMatrixView<T,N,Si,Sj,A> m)
+    {
+        return typename BMVOTri<SmallUpperTriMatrixView<T,N,Si,Sj,A> >::b2(
+            m.ptr(),m.size(),m.size(),
+            0,TMV_MAX(int(m.size())-1,0),m.stepi(),m.stepj());
+    }
+    template <class T, int A>
+    TMV_INLINE typename BMVOTri<LowerTriMatrixView<T,A> >::b2 BandMatrixViewOf(
+        LowerTriMatrixView<T,A> m)
+    {
+        return typename BMVOTri<LowerTriMatrixView<T,A> >::b2(
+            m.ptr(),m.size(),m.size(),
+            TMV_MAX(int(m.size())-1,0),0,m.stepi(),m.stepj());
+    }
+    template <class T, int N, int Si, int Sj, int A>
+    TMV_INLINE typename BMVOTri<SmallLowerTriMatrixView<T,N,Si,Sj,A> >::b2
+    BandMatrixViewOf(SmallLowerTriMatrixView<T,N,Si,Sj,A> m)
+    {
+        return typename BMVOTri<SmallLowerTriMatrixView<T,N,Si,Sj,A> >::b2(
+            m.ptr(),m.size(),m.size(),
+            TMV_MAX(int(m.size())-1,0),0,m.stepi(),m.stepj());
     }
 
 
@@ -2176,6 +2272,7 @@ namespace tmv {
                 ( M1::_conj ? Conj : NonConj ) |
                 ( M1::_fort ? FortranStyle : CStyle ) |
                 ( S == 1 ? DiagMajor : ColMajor ) |
+                ( M1::_checkalias ? CheckAlias : NoAlias ) |
                 NoDivider )};
         enum { xx = TMV_UNKNOWN };
         enum { small = (
@@ -2187,29 +2284,29 @@ namespace tmv {
     };
 
     template <class M>
-    static TMV_INLINE typename BMVODiag<M>::cb BandMatrixViewOf(
+    TMV_INLINE typename BMVODiag<M>::cb BandMatrixViewOf(
         const BaseMatrix_Diag<M>& m)
     {
         return typename BMVODiag<M>::cb(
             m.cptr(),m.size(),m.size(),0,0,1,m.step()-1);
     }
     template <class M>
-    static TMV_INLINE typename BMVODiag<M>::b BandMatrixViewOf(
+    TMV_INLINE typename BMVODiag<M>::b BandMatrixViewOf(
         BaseMatrix_Diag_Mutable<M>& m)
     {
         return typename BMVODiag<M>::b(
             m.ptr(),m.size(),m.size(),0,0,1,m.step()-1);
     }
     template <class T, int A>
-    static TMV_INLINE typename BMVODiag<DiagMatrixView<T,A> >::b BandMatrixViewOf(
+    TMV_INLINE typename BMVODiag<DiagMatrixView<T,A> >::b BandMatrixViewOf(
         DiagMatrixView<T,A> m)
     {
         return typename BMVODiag<DiagMatrixView<T,A> >::b(
             m.ptr(),m.size(),m.size(),0,0,1,m.step()-1);
     }
     template <class T, int N, int S, int A>
-    static TMV_INLINE typename BMVODiag<SmallDiagMatrixView<T,N,S,A> >::b BandMatrixViewOf(
-        SmallDiagMatrixView<T,N,S,A> m)
+    TMV_INLINE typename BMVODiag<SmallDiagMatrixView<T,N,S,A> >::b 
+    BandMatrixViewOf(SmallDiagMatrixView<T,N,S,A> m)
     {
         return typename BMVODiag<SmallDiagMatrixView<T,N,S,A> >::b(
             m.ptr(),m.size(),m.size(),0,0,1,m.step()-1);
@@ -2221,31 +2318,31 @@ namespace tmv {
     //
 
     template <class T, int LO, int HI, int A0, int A1>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         ThinBandMatrix<T,LO,HI,A0,A1>& m1, ThinBandMatrix<T,LO,HI,A0,A1>& m2)
     { m1.swapWith(m2); }
     template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A, class MM>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         BaseMatrix_Band_Mutable<MM>& m1,
         SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m2)
     { DoSwap(m1,m2); }
     template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A, class MM>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m1,
         BaseMatrix_Band_Mutable<MM>& m2)
     { DoSwap(m1,m2); }
     template <class T, int M, int N, int LO, int HI, int Si1, int Sj1, int A1, int Si2, int Sj2, int A2>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         SmallBandMatrixView<T,M,N,LO,HI,Si1,Sj1,A1> m1,
         SmallBandMatrixView<T,M,N,LO,HI,Si2,Sj2,A2> m2)
     { DoSwap(m1,m2); }
     template <class T, int M, int N, int LO, int HI, int Si1, int Sj1, int A1, int A2>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         SmallBandMatrixView<T,M,N,LO,HI,Si1,Sj1,A1> m1,
         BandMatrixView<T,A2> m2)
     { DoSwap(m1,m2); }
     template <class T, int M, int N, int LO, int HI, int A1, int Si2, int Sj2, int A2>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         BandMatrixView<T,A1> m1,
         SmallBandMatrixView<T,M,N,LO,HI,Si2,Sj2,A2> m2)
     { DoSwap(m1,m2); }
@@ -2256,42 +2353,42 @@ namespace tmv {
     //
 
     template <class T, int M, int N, int LO, int HI, int A0, int A1>
-    static TMV_INLINE typename SmallBandMatrix<T,M,N,LO,HI,A0,A1>::conjugate_type Conjugate(
-        SmallBandMatrix<T,M,N,LO,HI,A0,A1>& m)
+    TMV_INLINE typename SmallBandMatrix<T,M,N,LO,HI,A0,A1>::conjugate_type 
+    Conjugate(SmallBandMatrix<T,M,N,LO,HI,A0,A1>& m)
     { return m.conjugate(); }
     template <class T, int LO, int HI, int A0, int A1>
-    static TMV_INLINE typename ThinBandMatrix<T,LO,HI,A0,A1>::conjugate_type Conjugate(
-        ThinBandMatrix<T,LO,HI,A0,A1>& m)
+    TMV_INLINE typename ThinBandMatrix<T,LO,HI,A0,A1>::conjugate_type 
+    Conjugate(ThinBandMatrix<T,LO,HI,A0,A1>& m)
     { return m.conjugate(); }
     template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
-    static TMV_INLINE typename SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A>::conjugate_type Conjugate(
-        SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m)
+    TMV_INLINE typename SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A>::conjugate_type
+    Conjugate(SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m)
     { return m.conjugate(); }
 
     template <class T, int M, int N, int LO, int HI, int A0, int A1>
-    static TMV_INLINE typename SmallBandMatrix<T,M,N,LO,HI,A0,A1>::transpose_type Transpose(
-        SmallBandMatrix<T,M,N,LO,HI,A0,A1>& m)
+    TMV_INLINE typename SmallBandMatrix<T,M,N,LO,HI,A0,A1>::transpose_type 
+    Transpose(SmallBandMatrix<T,M,N,LO,HI,A0,A1>& m)
     { return m.transpose(); }
     template <class T, int LO, int HI, int A0, int A1>
-    static TMV_INLINE typename ThinBandMatrix<T,LO,HI,A0,A1>::transpose_type Transpose(
-        ThinBandMatrix<T,LO,HI,A0,A1>& m)
+    TMV_INLINE typename ThinBandMatrix<T,LO,HI,A0,A1>::transpose_type 
+    Transpose(ThinBandMatrix<T,LO,HI,A0,A1>& m)
     { return m.transpose(); }
     template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
-    static TMV_INLINE typename SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A>::transpose_type Transpose(
-        SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m)
+    TMV_INLINE typename SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A>::transpose_type
+    Transpose(SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m)
     { return m.transpose(); }
 
     template <class T, int M, int N, int LO, int HI, int A0, int A1>
-    static TMV_INLINE typename SmallBandMatrix<T,M,N,LO,HI,A0,A1>::adjoint_type Adjoint(
-        SmallBandMatrix<T,M,N,LO,HI,A0,A1>& m)
+    TMV_INLINE typename SmallBandMatrix<T,M,N,LO,HI,A0,A1>::adjoint_type 
+    Adjoint(SmallBandMatrix<T,M,N,LO,HI,A0,A1>& m)
     { return m.adjoint(); }
     template <class T, int LO, int HI, int A0, int A1>
-    static TMV_INLINE typename ThinBandMatrix<T,LO,HI,A0,A1>::adjoint_type Adjoint(
+    TMV_INLINE typename ThinBandMatrix<T,LO,HI,A0,A1>::adjoint_type Adjoint(
         ThinBandMatrix<T,LO,HI,A0,A1>& m)
     { return m.adjoint(); }
     template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
-    static TMV_INLINE typename SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A>::adjoint_type Adjoint(
-        SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m)
+    TMV_INLINE typename SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A>::adjoint_type 
+    Adjoint(SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m)
     { return m.adjoint(); }
 
 
@@ -2301,7 +2398,7 @@ namespace tmv {
 
 #ifdef TMV_TEXT
     template <class T, int M, int N, int LO, int HI, int A0, int A1>
-    static inline std::string TMV_Text(
+    inline std::string TMV_Text(
         const SmallBandMatrix<T,M,N,LO,HI,A0,A1>& m)
     {
         const int A = A0 | A1;
@@ -2316,7 +2413,7 @@ namespace tmv {
     }
 
     template <class T, int LO, int HI, int A0, int A1>
-    static inline std::string TMV_Text(
+    inline std::string TMV_Text(
         const ThinBandMatrix<T,LO,HI,A0,A1>& m)
     {
         const int A = A0 | A1;
@@ -2331,7 +2428,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
-    static inline std::string TMV_Text(
+    inline std::string TMV_Text(
         const ConstSmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A>& m)
     {
         std::ostringstream s;
@@ -2347,7 +2444,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
-    static inline std::string TMV_Text(
+    inline std::string TMV_Text(
         const SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A>& m)
     {
         std::ostringstream s;

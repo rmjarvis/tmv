@@ -411,9 +411,21 @@ static void TestBasicBandMatrix_2()
             Assert(c(i,j) == T(-2+3*i-9*j),"Subtract BandMatrices");
 
     tmv::Matrix<T> m1 = a1;
-    for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k)
+    //std::cout<<"a1 = "<<a1<<std::endl;
+    //std::cout<<"m1 = "<<m1<<std::endl;
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
+        //std::cout<<"i,j = "<<i<<','<<j<<std::endl;
+        //std::cout<<"m1(i,j) = "<<m1(i,j)<<std::endl;
+        //std::cout<<"a1(i,j) = "<<a1(i,j)<<std::endl;
+        //std::cout<<"a1.cref(i,j) = "<<a1.cref(i,j)<<std::endl;
         if ( j <= i + nhi && i <= j + nlo) 
-            Assert(a1(i,j) == m1(i,j),"BandMatrix -> Matrix");
+            Assert(m1(i,j) == a1(i,j),"BandMatrix -> Matrix (inside band)");
+        else 
+            Assert(m1(i,j) == T(0),"BandMatrix -> Matrix (outside band)");
+        //TODO: Make a reference type that can make this work:
+        //Assert(m1(i,j) == a1(i,j),"BandMatrix -> Matrix");
+    }
+    Assert(a1 == m1,"Matrix == BandMatrix");
     Assert(a1 == tmv::BandMatrix<T>(m1,nlo,nhi),"Matrix -> BandMatrix");
 }
 
@@ -522,7 +534,6 @@ void TestBandMatrix()
     TestBandMatrixArith_B2<T>();
     std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<
         "> (Matrix/Band) Arithmetic passed all tests\n";
-#if 0
     TestBandMatrixArith_C1<T>();
     TestBandMatrixArith_C2<T>();
     std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<
@@ -531,7 +542,6 @@ void TestBandMatrix()
     TestBandMatrixArith_D2<T>();
     std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<
         "> (Tri/Band) Arithmetic passed all tests\n";
-#endif
 }
 
 #ifdef TEST_DOUBLE

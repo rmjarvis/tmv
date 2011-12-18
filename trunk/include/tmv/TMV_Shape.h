@@ -21,6 +21,8 @@ namespace tmv {
         enum { herm = false };
         enum { upper = false };
         enum { lower = false };
+        enum { upper2 = false };
+        enum { lower2 = false };
         enum { band = false };
         enum { unit = false };
         enum { square = false };
@@ -37,6 +39,8 @@ namespace tmv {
         enum { herm = false };
         enum { upper = false };
         enum { lower = false };
+        enum { upper2 = false };
+        enum { lower2 = false };
         enum { band = false };
         enum { unit = false };
         enum { square = false };
@@ -53,6 +57,8 @@ namespace tmv {
         enum { herm = false };
         enum { upper = true };
         enum { lower = true };
+        enum { upper2 = true };
+        enum { lower2 = true };
         enum { band = false };
         enum { unit = false };
         enum { square = false };
@@ -69,6 +75,8 @@ namespace tmv {
         enum { herm = false };
         enum { upper = false };
         enum { lower = false };
+        enum { upper2 = false };
+        enum { lower2 = false };
         enum { band = true };
         enum { unit = false };
         enum { square = true };
@@ -85,6 +93,8 @@ namespace tmv {
         enum { herm = false };
         enum { upper = true };
         enum { lower = false };
+        enum { upper2 = true };
+        enum { lower2 = false };
         enum { band = false };
         enum { unit = false };
         enum { square = true };
@@ -101,6 +111,8 @@ namespace tmv {
         enum { herm = false };
         enum { upper = false };
         enum { lower = true };
+        enum { upper2 = false };
+        enum { lower2 = true };
         enum { band = false };
         enum { unit = false };
         enum { square = true };
@@ -117,6 +129,8 @@ namespace tmv {
         enum { herm = false };
         enum { upper = true };
         enum { lower = false };
+        enum { upper2 = true };
+        enum { lower2 = false };
         enum { band = false };
         enum { unit = true };
         enum { square = true };
@@ -133,6 +147,8 @@ namespace tmv {
         enum { herm = false };
         enum { upper = false };
         enum { lower = true };
+        enum { upper2 = false };
+        enum { lower2 = true };
         enum { band = false };
         enum { unit = true };
         enum { square = true };
@@ -149,6 +165,8 @@ namespace tmv {
         enum { herm = false };
         enum { upper = true };
         enum { lower = true };
+        enum { upper2 = false };
+        enum { lower2 = false };
         enum { band = true };
         enum { unit = false };
         enum { square = false };
@@ -165,6 +183,8 @@ namespace tmv {
         enum { herm = false };
         enum { upper = true };
         enum { lower = false };
+        enum { upper2 = false };
+        enum { lower2 = false };
         enum { band = true };
         enum { unit = false };
         enum { square = true };
@@ -181,6 +201,8 @@ namespace tmv {
         enum { herm = false };
         enum { upper = false };
         enum { lower = true };
+        enum { upper2 = false };
+        enum { lower2 = false };
         enum { band = true };
         enum { unit = false };
         enum { square = true };
@@ -197,6 +219,8 @@ namespace tmv {
         enum { herm = false };
         enum { upper = true };
         enum { lower = false };
+        enum { upper2 = false };
+        enum { lower2 = false };
         enum { band = true };
         enum { unit = true };
         enum { square = true };
@@ -213,6 +237,8 @@ namespace tmv {
         enum { herm = false };
         enum { upper = false };
         enum { lower = true };
+        enum { upper2 = false };
+        enum { lower2 = false };
         enum { band = true };
         enum { unit = true };
         enum { square = true };
@@ -229,6 +255,8 @@ namespace tmv {
         enum { herm = true };
         enum { upper = true };
         enum { lower = true };
+        enum { upper2 = true };
+        enum { lower2 = true };
         enum { band = false };
         enum { unit = false };
         enum { square = true };
@@ -245,6 +273,8 @@ namespace tmv {
         enum { herm = false };
         enum { upper = true };
         enum { lower = true };
+        enum { upper2 = true };
+        enum { lower2 = true };
         enum { band = false };
         enum { unit = false };
         enum { square = true };
@@ -261,6 +291,8 @@ namespace tmv {
         enum { herm = true };
         enum { upper = true };
         enum { lower = true };
+        enum { upper2 = true };
+        enum { lower2 = true };
         enum { band = false };
         enum { unit = false };
         enum { square = true };
@@ -277,6 +309,8 @@ namespace tmv {
         enum { herm = true };
         enum { upper = true };
         enum { lower = true };
+        enum { upper2 = true };
+        enum { lower2 = true };
         enum { band = true };
         enum { unit = false };
         enum { square = true };
@@ -293,6 +327,8 @@ namespace tmv {
         enum { herm = false };
         enum { upper = true };
         enum { lower = true };
+        enum { upper2 = true };
+        enum { lower2 = true };
         enum { band = true };
         enum { unit = false };
         enum { square = true };
@@ -309,6 +345,8 @@ namespace tmv {
         enum { herm = true };
         enum { upper = true };
         enum { lower = true };
+        enum { upper2 = true };
+        enum { lower2 = true };
         enum { band = true };
         enum { unit = false };
         enum { square = true };
@@ -324,39 +362,44 @@ namespace tmv {
         enum { bothband = ShapeTraits<S1>::band && ShapeTraits<S2>::band };
         enum { noupper = !ShapeTraits<S1>::upper && !ShapeTraits<S2>::upper };
         enum { nolower = !ShapeTraits<S1>::lower && !ShapeTraits<S2>::lower };
+        enum { noupper2 = !ShapeTraits<S1>::upper2 && !ShapeTraits<S2>::upper2 };
+        enum { nolower2 = !ShapeTraits<S1>::lower2 && !ShapeTraits<S2>::lower2 };
         enum { bothsym = ShapeTraits<S1>::sym && ShapeTraits<S2>::sym };
         enum { bothherm = ShapeTraits<S1>::herm && ShapeTraits<S2>::herm };
 
         enum { prod = (
                 ( S1 == Null ) ? S2 :
                 ( S2 == Null ) ? S1 :
+                noupper && nolower ? Diag :
                 noupper ? (
-                    nolower ? Diag : 
                     bothband ? bothunit ? UnitLowerBand : LowerBand :
                     bothunit ? UnitLowerTri : LowerTri ) :
                 nolower ? (
                     bothband ? bothunit ? UnitUpperBand : UpperBand :
                     bothunit ? UnitUpperTri : UpperTri ) :
-                bothband ? Band  :
+                bothband || noupper2 || nolower2 ? Band :
                 Rec ) };
         enum { sum = (
                 ( S1 == Null ) ? S2 :
                 ( S2 == Null ) ? S1 :
-                noupper && nolower ? Diag :
+                noupper && nolower2 ? Diag :
                 noupper ? ( bothband ? LowerBand : LowerTri ) :
                 nolower ? ( bothband ? UpperBand : UpperTri ) :
                 bothsym ? ( bothband ? SymBand : Sym ) :
                 bothherm ? ( bothband ? HermBand : Herm ) :
-                bothband ? Band :
+                bothband || noupper2 || nolower2 ? Band :
                 Rec ) };
+        // Note: upper = could have values in the upper-triangle.
+        // upper2 = _must_ have values in the upper-triangle.
+        // (Same with lower,lower2)
         enum { assignable = (
                 ( S1 == Null ) ? true :
                 ( S2 == Null ) ? false :
-                ( ShapeTraits<S1>::upper && !ShapeTraits<S2>::upper ) ? false :
-                ( ShapeTraits<S1>::lower && !ShapeTraits<S2>::lower ) ? false :
                 ( !ShapeTraits<S1>::unit && ShapeTraits<S2>::unit ) ? false :
                 ( !ShapeTraits<S1>::sym && ShapeTraits<S2>::sym ) ? false :
                 ( !ShapeTraits<S1>::herm && ShapeTraits<S2>::herm ) ? false :
+                ( ShapeTraits<S1>::upper2 && !ShapeTraits<S2>::upper ) ? false :
+                ( ShapeTraits<S1>::lower2 && !ShapeTraits<S2>::lower ) ? false :
                 true ) };
     };
 

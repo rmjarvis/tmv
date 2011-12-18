@@ -1,4 +1,6 @@
 
+#define EXPLICIT_ALIAS
+
 #include "tmv/TMV_Base.h"
 
 template <class T> void TestAllSmallVector();

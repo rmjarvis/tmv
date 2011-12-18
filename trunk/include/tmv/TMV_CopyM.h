@@ -218,7 +218,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static inline void unroll(const M1& m1, M2& m2)
+            static TMV_INLINE void unroll(const M1& m1, M2& m2)
             {
                 Unroller<I,M/2,J,N>::unroll(m1,m2);
                 Unroller<I+M/2,M-M/2,J,N>::unroll(m1,m2);
@@ -227,7 +227,7 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,1,J,N>
         {
-            static inline void unroll(const M1& m1, M2& m2)
+            static TMV_INLINE void unroll(const M1& m1, M2& m2)
             {
                 Unroller<I,1,J,N/2>::unroll(m1,m2);
                 Unroller<I,1,J+N/2,N-N/2>::unroll(m1,m2);
@@ -235,16 +235,16 @@ namespace tmv {
         };
         template <int I, int J, int N>
         struct Unroller<I,0,J,N>
-        { static inline void unroll(const M1& , M2& ) {} };
+        { static TMV_INLINE void unroll(const M1& , M2& ) {} };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static inline void unroll(const M1& m1, M2& m2)
+            static TMV_INLINE void unroll(const M1& m1, M2& m2)
             { m2.ref(I,J) = m1.cref(I,J); }
         };
         template <int I, int J>
         struct Unroller<I,1,J,0>
-        { static inline void unroll(const M1& , M2& ) {} };
+        { static TMV_INLINE void unroll(const M1& , M2& ) {} };
 
         static inline void call(const M1& m1, M2& m2)
         { Unroller<0,cs,0,rs>::unroll(m1,m2); }
@@ -327,12 +327,19 @@ namespace tmv {
             } else if (m2.colsize() == m2.rowsize() &&
                        OppositeStorage(m1,m2)) {
                 // Then transpose
-                m2.transposeSelf();
+                const bool sq = cs == rs && cs != TMV_UNKNOWN;
+                Maybe<sq>::tranself(m2);
                 // And maybe conjugate
-                Maybe<M1::_conj != int(M2::_conj)>::conjself(m2);
-            } else {
+                Maybe<sq && M1::_conj != int(M2::_conj)>::conjself(m2);
+            } else if (m2.ptr()) {
                 // Need a temporary
-                NoAliasCopy(m1.copy(),m2);
+                m2.noAlias() = m1.copy();
+            } else {
+                // else m2.ptr == 0, so don't need to do anything.
+                // m1 and m2 are degenerate
+                TMVAssert(m1.cptr() == 0);
+                TMVAssert(m2.cptr() == 0);
+                TMVAssert(m2.colsize() == 0 || m2.rowsize() == 0);
             }
         }
     };
@@ -451,7 +458,7 @@ namespace tmv {
     };
 
     template <class M1, class M2>
-    static inline void Copy(
+    inline void Copy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -468,24 +475,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void NoAliasCopy(
-        const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
-        TMVAssert(m1.colsize() == m2.colsize());
-        TMVAssert(m1.rowsize() == m2.rowsize());
-        const int cs = Sizes<M1::_colsize,M2::_colsize>::size;
-        const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::cview_type M2v;
-        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
-        CopyM_Helper<-2,cs,rs,M1v,M2v>::call(m1v,m2v);
-    }
-
-    template <class M1, class M2>
-    static inline void InlineCopy(
+    inline void InlineCopy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -502,7 +492,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void InlineAliasCopy(
+    inline void InlineAliasCopy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -517,24 +507,6 @@ namespace tmv {
         TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
         CopyM_Helper<98,cs,rs,M1v,M2v>::call(m1v,m2v);
     }
-
-    template <class M1, class M2>
-    static inline void AliasCopy(
-        const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
-        TMVAssert(m1.colsize() == m2.colsize());
-        TMVAssert(m1.rowsize() == m2.rowsize());
-        const int cs = Sizes<M1::_colsize,M2::_colsize>::size;
-        const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::cview_type M2v;
-        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
-        CopyM_Helper<99,cs,rs,M1v,M2v>::call(m1v,m2v);
-    }
-
 
 } // namespace tmv
 

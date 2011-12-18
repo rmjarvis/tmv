@@ -387,10 +387,6 @@ namespace tmv {
             applyOnLeft(m2);
         }
 
-        template <class M2>
-        void newAssignTo(BaseMatrix_Rec_Mutable<M2>& m2) const
-        { assignTo(m2); }
-
         //
         // MakeInverse
         //
@@ -648,38 +644,38 @@ namespace tmv {
 
     }; // Permutation
 
-    static TMV_INLINE Permutation Transpose(const Permutation& m)
+    TMV_INLINE Permutation Transpose(const Permutation& m)
     { return m.transpose(); }
-    static TMV_INLINE Permutation Adjoint(const Permutation& m)
+    TMV_INLINE Permutation Adjoint(const Permutation& m)
     { return m.transpose(); }
-    static TMV_INLINE const Permutation& Conjugate(const Permutation& m)
+    TMV_INLINE const Permutation& Conjugate(const Permutation& m)
     { return m; }
-    static TMV_INLINE Permutation Inverse(const Permutation& m)
+    TMV_INLINE Permutation Inverse(const Permutation& m)
     { return m.transpose(); }
-    static TMV_INLINE double Norm(const Permutation& m)
+    TMV_INLINE double Norm(const Permutation& m)
     { return m.norm(); }
-    static TMV_INLINE double NormF(const Permutation& m)
+    TMV_INLINE double NormF(const Permutation& m)
     { return m.normF(); }
-    static TMV_INLINE int NormSq(const Permutation& m)
+    TMV_INLINE int NormSq(const Permutation& m)
     { return m.normSq(); }
-    static TMV_INLINE int Norm1(const Permutation& m)
+    TMV_INLINE int Norm1(const Permutation& m)
     { return m.norm1(); }
-    static TMV_INLINE int Norm2(const Permutation& m)
+    TMV_INLINE int Norm2(const Permutation& m)
     { return m.norm2(); }
-    static TMV_INLINE int NormInf(const Permutation& m)
+    TMV_INLINE int NormInf(const Permutation& m)
     { return m.normInf(); }
-    static TMV_INLINE int MaxAbsElement(const Permutation& m)
+    TMV_INLINE int MaxAbsElement(const Permutation& m)
     { return m.maxAbsElement(); }
-    static TMV_INLINE int MaxAbs2Element(const Permutation& m)
+    TMV_INLINE int MaxAbs2Element(const Permutation& m)
     { return m.maxAbs2Element(); }
-    static TMV_INLINE int Trace(const Permutation& m)
+    TMV_INLINE int Trace(const Permutation& m)
     { return m.trace(); }
-    static TMV_INLINE int Det(const Permutation& m)
+    TMV_INLINE int Det(const Permutation& m)
     { return m.det(); }
-    static TMV_INLINE int LogDet(const Permutation& m)
+    TMV_INLINE int LogDet(const Permutation& m)
     { return m.logDet(); }
 
-    static inline std::ostream& operator<<(
+    inline std::ostream& operator<<(
         std::ostream& os, const Permutation& p)
     { p.write(os); return os; }
 
@@ -805,7 +801,7 @@ namespace tmv {
         calcDet();
     }
 
-    static inline std::istream& operator>>(std::istream& is, Permutation& m)
+    inline std::istream& operator>>(std::istream& is, Permutation& m)
     {
         char p;
         is >> p;
@@ -860,7 +856,7 @@ namespace tmv {
     //
     
 #ifdef TMV_TEXT
-    static inline std::string TMV_Text(const Permutation& )
+    inline std::string TMV_Text(const Permutation& )
     { return "Permutation"; }
 #endif
 

@@ -19,17 +19,6 @@
 #include <iostream>
 #endif
 
-// The maximum nops to unroll.
-#if TMV_OPT >= 3
-#define TMV_DIVUU_UNROLL 200 
-#elif TMV_OPT >= 2
-#define TMV_DIVUU_UNROLL 25
-#elif TMV_OPT >= 1
-#define TMV_DIVUU_UNROLL 9
-#else
-#define TMV_DIVUU_UNROLL 0
-#endif
-
 // The maximum size to stop recursing
 #define TMV_DIVUU_RECURSE 1
 
@@ -543,7 +532,7 @@ namespace tmv {
         { // unknowndiag = false
             template <class M1c>
             static inline void call(const M1c& m1c, M1& m1)
-            { NoAliasCopy(m1c,m1); }
+            { m1.noAlias() = m1c; }
         };
         template <int dummy>
         struct copyBack<true,dummy>
@@ -551,8 +540,8 @@ namespace tmv {
             template <class M1c>
             static inline void call(const M1c& m1c, M1& m1)
             {
-                if (m1.isunit()) NoAliasCopy(m1c.viewAsUnitDiag(),m1); 
-                else NoAliasCopy(m1c,m1); 
+                if (m1.isunit()) m1.noAlias() = m1c.viewAsUnitDiag();
+                else m1.noAlias() = m1c;
             }
         };
         static void call(M1& m1, const M2& m2)
@@ -562,7 +551,7 @@ namespace tmv {
             std::cout<<"LDivEqUU algo 83: N,s = "<<N<<','<<s<<std::endl;
 #endif
             typename M1::copy_type m1c = m1;
-            NoAliasTriLDivEq(m1c,m2);
+            TriLDivEq(m1c,m2);
             const bool unknowndiag = M1::_unknowndiag && 
                 (M2::_unit || M2::_unknowndiag);
             copyBack<unknowndiag,1>::call(m1c,m1);
@@ -665,9 +654,6 @@ namespace tmv {
             const int algo = 
                 ( s == 0 ) ? 0 :
                 s == 1 ? 1 :
-                //( s != TMV_UNKNOWN ) ? (
-                    //upper2 ? (s <= 5 ? 16 : 17 ) :
-                    //(s <= 5 ? 26 : 27 ) ) :
                 upper2 ? 17 : 27;
             LDivEqUU_Helper<algo,s,M1,M2>::call(m1,m2);
         }
@@ -689,14 +675,12 @@ namespace tmv {
             // 11 = loop over n: MultUV
             // 12 = loop over m: MultMV
             // 13 = loop over k: Rank1 
-            // 16 = unroll
             // 17 = split trimatrix into 3 submatrices
             //
             // LowerTri:
             // 21 = loop over n: MultUV
             // 22 = loop over m: MultMV
             // 23 = loop over k: Rank1
-            // 26 = unroll
             // 27 = split trimatrix into 3 submatrices
 
             const bool upper2 = M2::_upper;
@@ -708,12 +692,10 @@ namespace tmv {
                 s == 1 ? 201 :
 
                 upper2 ? 
-                //s <= 5 ? 16 :
                 TMV_OPT == 0 ? ( rr ? 12 : rc ? 13 : cx ? 11 : 13 ) :
                 17 :
 
                 // lowertri
-                //s <= 5 ? 26 :
                 TMV_OPT == 0 ? ( rr ? 22 : rc ? 23 : cx ? 21 : 23 ) :
                 27;
 #ifdef PRINTALGO_DivU
@@ -787,21 +769,6 @@ namespace tmv {
         LDivEqUU_Helper<-1,s,M1v,M2v>::call(m1v,m2v);
     }
     template <class M1, class M2>
-    static inline void NoAliasTriLDivEq(
-        BaseMatrix_Tri_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M2::_size,M1::_size>::same));
-        TMVAssert(m2.size() == m1.size());
-        TMVAssert(!m1.isunit() || m2.isunit());
-
-        const int s = Sizes<M1::_size,M2::_size>::size;
-        typedef typename M1::cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
-        LDivEqUU_Helper<-2,s,M1v,M2v>::call(m1v,m2v);
-    }
-    template <class M1, class M2>
     static inline void InlineTriLDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     {
@@ -830,21 +797,6 @@ namespace tmv {
         TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
         TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
         LDivEqUU_Helper<98,s,M1v,M2v>::call(m1v,m2v);
-    }
-    template <class M1, class M2>
-    static inline void AliasTriLDivEq(
-        BaseMatrix_Tri_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<M2::_size,M1::_size>::same));
-        TMVAssert(m2.size() == m1.size());
-        TMVAssert(!m1.isunit() || m2.isunit());
-
-        const int s = Sizes<M1::_size,M2::_size>::size;
-        typedef typename M1::cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
-        LDivEqUU_Helper<99,s,M1v,M2v>::call(m1v,m2v);
     }
 
 

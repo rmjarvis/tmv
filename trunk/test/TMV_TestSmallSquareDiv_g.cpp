@@ -5,6 +5,9 @@ template <class T>
 void TestSmallSquareDiv_g()
 {
     TestSmallSquareDiv<T,tmv::ColMajor,39>("CM 39 39");
+#if XTEST & 2
+    TestSmallSquareDiv<T,tmv::RowMajor,328>("RM 328 328");
+#endif
 }
 
 #ifdef TEST_DOUBLE

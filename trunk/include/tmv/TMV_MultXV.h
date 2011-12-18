@@ -114,7 +114,10 @@ namespace tmv {
     struct MultXV_Helper<3,s,true,ix,T,V1,V2>
     {
         static inline void call(const Scaling<ix,T>& x, const V1& v1, V2& v2)
-        { NoAliasMultXV<true>(x,v1.copy(),v2); }
+        { 
+            typename V2::noalias_type v2na = v2.noAlias();
+            MultXV<true>(x,v1.copy(),v2); 
+        }
     };
 
     // algo 4: copy v1 to v2 and turn into a MultEq op
@@ -868,7 +871,7 @@ namespace tmv {
                 MultXV_Helper<-2,s,false,ix,T,V1,V2>::call(x,v1,v2);
             } else {
                 // Let Copy handle the aliasing
-                AliasCopy(v1,v2);
+                Copy(v1,v2);
                 Scale(x,v2);
             }
         }
@@ -886,7 +889,8 @@ namespace tmv {
                 MultXV_Helper<-2,s,true,ix,T,V1,V2>::call(x,v1,v2);
             } else {
                 // Need a temporary
-                NoAliasMultXV<true>(x,v1.copy(),v2);
+                typename V2::noalias_type v2na = v2.noAlias();
+                MultXV<true>(x,v1.copy(),v2na);
             }
         }
     };
@@ -1050,7 +1054,7 @@ namespace tmv {
     };
 
     template <bool add, int ix, class T, class V1, class V2>
-    static inline void MultXV(
+    inline void MultXV(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         BaseVector_Mutable<V2>& v2)
     {
@@ -1065,22 +1069,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class V1, class V2>
-    static inline void NoAliasMultXV(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        BaseVector_Mutable<V2>& v2)
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
-        TMVAssert(v1.size() == v2.size());
-        const int s = Sizes<V1::_size,V2::_size>::size;
-        typedef typename V1::const_cview_type V1v;
-        typedef typename V2::cview_type V2v;
-        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
-        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
-        MultXV_Helper<-2,s,add,ix,T,V1v,V2v>::call(x,v1v,v2v);
-    }
-
-    template <bool add, int ix, class T, class V1, class V2>
-    static inline void InlineMultXV(
+    inline void InlineMultXV(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         BaseVector_Mutable<V2>& v2)
     {
@@ -1095,7 +1084,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class V1, class V2>
-    static inline void InlineAliasMultXV(
+    inline void InlineAliasMultXV(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         BaseVector_Mutable<V2>& v2)
     {
@@ -1107,21 +1096,6 @@ namespace tmv {
         TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
         TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
         MultXV_Helper<98,s,add,ix,T,V1v,V2v>::call(x,v1v,v2v);
-    }
-
-    template <bool add, int ix, class T, class V1, class V2>
-    static inline void AliasMultXV(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        BaseVector_Mutable<V2>& v2)
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
-        TMVAssert(v1.size() == v2.size());
-        const int s = Sizes<V1::_size,V2::_size>::size;
-        typedef typename V1::const_cview_type V1v;
-        typedef typename V2::cview_type V2v;
-        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
-        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
-        MultXV_Helper<99,s,add,ix,T,V1v,V2v>::call(x,v1v,v2v);
     }
 
 } // namespace tmv

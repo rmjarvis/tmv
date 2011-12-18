@@ -142,7 +142,7 @@ namespace tmv {
     };
 
     template <class M1u, class M1s, class M1v, class M2>
-    static inline void InlineSV_Inverse(
+    inline void InlineSV_Inverse(
         const BaseMatrix_Rec<M1u>& U, const BaseMatrix_Diag<M1s>& S,
         const BaseMatrix_Rec<M1v>& V, BaseMatrix_Rec_Mutable<M2>& minv)
     {
@@ -170,7 +170,7 @@ namespace tmv {
     }
 
     template <class M1u, class M1s, class M1v, class M2>
-    static inline void SV_Inverse(
+    inline void SV_Inverse(
         const BaseMatrix_Rec<M1u>& U, const BaseMatrix_Diag<M1s>& S,
         const BaseMatrix_Rec<M1v>& V, BaseMatrix_Rec_Mutable<M2>& minv)
     {
@@ -319,7 +319,7 @@ namespace tmv {
     }; 
 
     template <class M1u, class M1s, class M1v, class M2>
-    static inline void InlineSV_InverseATA(
+    inline void InlineSV_InverseATA(
         const BaseMatrix_Rec<M1u>& U, const BaseMatrix_Diag<M1s>& S,
         const BaseMatrix_Rec<M1v>& V, BaseMatrix_Rec_Mutable<M2>& ata)
     {
@@ -349,7 +349,7 @@ namespace tmv {
     }
 
     template <class M1u, class M1s, class M1v, class M2>
-    static inline void SV_InverseATA(
+    inline void SV_InverseATA(
         const BaseMatrix_Rec<M1u>& U, const BaseMatrix_Diag<M1s>& S,
         const BaseMatrix_Rec<M1v>& V, BaseMatrix_Rec_Mutable<M2>& ata)
     {

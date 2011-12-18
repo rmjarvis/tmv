@@ -280,7 +280,7 @@ namespace tmv {
 
 
     template <class V>
-    static inline typename V::float_type InlineNorm2(
+    inline typename V::float_type InlineNorm2(
         const BaseVector_Calc<V>& v)
     {
         typedef typename V::const_cview_type Vv;
@@ -289,7 +289,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline typename V::float_type DoNorm2(const BaseVector_Calc<V>& v)
+    inline typename V::float_type DoNorm2(const BaseVector_Calc<V>& v)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();
@@ -297,7 +297,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::float_type InlineNormF(const BaseMatrix_Rec<M>& m)
+    inline typename M::float_type InlineNormF(const BaseMatrix_Rec<M>& m)
     {   
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
@@ -305,7 +305,7 @@ namespace tmv {
     }   
 
     template <class M>
-    static inline typename M::float_type DoNormF(const BaseMatrix_Rec<M>& m)
+    inline typename M::float_type DoNormF(const BaseMatrix_Rec<M>& m)
     {
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
@@ -313,7 +313,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::float_type InlineNormF(const BaseMatrix_Tri<M>& m)
+    inline typename M::float_type InlineNormF(const BaseMatrix_Tri<M>& m)
     {   
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
@@ -321,7 +321,7 @@ namespace tmv {
     }   
 
     template <class M>
-    static inline typename M::float_type DoNormF(const BaseMatrix_Tri<M>& m)
+    inline typename M::float_type DoNormF(const BaseMatrix_Tri<M>& m)
     {
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
@@ -329,7 +329,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::float_type InlineNormF(const BaseMatrix_Band<M>& m)
+    inline typename M::float_type InlineNormF(const BaseMatrix_Band<M>& m)
     {   
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
@@ -337,7 +337,7 @@ namespace tmv {
     }   
 
     template <class M>
-    static inline typename M::float_type DoNormF(const BaseMatrix_Band<M>& m)
+    inline typename M::float_type DoNormF(const BaseMatrix_Band<M>& m)
     {
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
@@ -502,7 +502,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline typename M::float_type DoNorm2(const BaseMatrix<M>& m)
+    inline typename M::float_type DoNorm2(const BaseMatrix<M>& m)
     {
         // Don't make a view, since we want to make sure we keep 
         // a divider object if one is present.
@@ -649,7 +649,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline typename M::float_type DoCondition(const BaseMatrix<M>& m)
+    inline typename M::float_type DoCondition(const BaseMatrix<M>& m)
     {
         // Don't make a view, since we want to make sure we keep 
         // a divider object if one is present.

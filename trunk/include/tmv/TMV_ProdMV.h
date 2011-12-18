@@ -23,65 +23,60 @@ namespace tmv {
     // Matrix * Vector
     //
 
-    // These first few are for when an argument is a composite matrix
+    // This is for when an argument is a composite matrix
     // and needs to be calculated before running MultMV.
     template <bool add, int ix, class T, class M1, class V2, class V3>
-    static inline void MultMV(
+    inline void MultMV(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     { MultMV<add>(x,m1.calc(),v2.calc(),v3.vec()); }
-    template <bool add, int ix, class T, class M1, class V2, class V3>
-    static inline void NoAliasMultMV(
-        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
-        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
-    { NoAliasMultMV<add>(x,m1.calc(),v2.calc(),v3.vec()); }
-    template <bool add, int ix, class T, class M1, class V2, class V3>
-    static inline void AliasMultMV(
-        const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
-        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
-    { AliasMultMV<add>(x,m1.calc(),v2.calc(),v3.vec()); }
+    template <bool add, int ix, class T, class V1, class M2, class V3>
+    inline void MultVM(
+        const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
+        const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
+    { MultVM<add>(x,v1.calc(),m2.calc(),v3.vec()); }
 
-    // These are helpers to allow the caller to not use a Scaling object.
-    template <bool add, class T, class M1, class V2, class V3>
-    static inline void MultMV(
-        const T& x, const BaseMatrix<M1>& m1,
-        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
-    { MultMV<add>(Scaling<0,T>(x),m1.mat(),v2.vec(),v3.vec()); }
-    template <bool add, class T, class M1, class V2, class V3>
-    static inline void NoAliasMultMV(
-        const T& x, const BaseMatrix<M1>& m1,
-        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
-    { NoAliasMultMV<add>(Scaling<0,T>(x),m1.mat(),v2.vec(),v3.vec()); }
-    template <bool add, class T, class M1, class V2, class V3>
-    static inline void AliasMultMV(
-        const T& x, const BaseMatrix<M1>& m1,
-        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
-    { AliasMultMV<add>(Scaling<0,T>(x),m1.mat(),v2.vec(),v3.vec()); }
+    // If everything is _Calc, then there should be an overload
+    // that says how to do the calculation.  This will give a 
+    // compiler error on purpose.
+    template <bool add, int ix, class T, class M1, class V2, class V3>
+    inline void MultMV(
+        const Scaling<ix,T>& , const BaseMatrix_Calc<M1>& , 
+        const BaseVector_Calc<V2>& , BaseVector_Mutable<V3>& )
+    { TMVStaticAssert(ix == 999); }
 
+    // The default behavior of MultEqVM is to do a copy.
+    template <class V1, int ix, class T, class M2>
+    inline void MultEqVM(
+        BaseVector_Mutable<V1>& v1,
+        const Scaling<ix,T>& x, const BaseMatrix_Calc<M2>& m2)
+    {
+        MultVM<false>(
+            Scaling<1,typename V1::real_type>(),
+            (x*v1.vec()).calc(),m2.mat(),v1.vec()); 
+    }
+
+    // And the default behavior for MultVM is to transpose m
+    template <bool add, int ix, class T, class V1, class M2, class V3>
+    inline void MultVM(
+        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1, 
+        const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3)
+    { MultMV<add>(x,m2.transpose(),v1.vec(),v3.vec()); }
+
+    // Also allow x to be missing (taken to be 1) or a scalar.
     template <bool add, class M1, class V2, class V3>
-    static inline void MultMV(
-        const BaseMatrix<M1>& m1,
+    inline void MultMV(
+        const BaseMatrix<M1>& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
         MultMV<add>(
-            Scaling<1,typename V3::real_type>(),m1.mat(),v2.vec(),v3.vec()); 
+            Scaling<1,typename V3::real_type>(),m1.calc(),v2.calc(),v3.vec()); 
     }
-    template <bool add, class M1, class V2, class V3>
-    static inline void NoAliasMultMV(
-        const BaseMatrix<M1>& m1,
+    template <bool add, class T, class M1, class V2, class V3>
+    inline void MultMV(
+        T x, const BaseMatrix<M1>& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
-    {
-        NoAliasMultMV<add>(
-            Scaling<1,typename V3::real_type>(),m1.mat(),v2.vec(),v3.vec()); 
-    }
-    template <bool add, class M1, class V2, class V3>
-    static inline void AliasMultMV(
-        const BaseMatrix<M1>& m1,
-        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
-    {
-        AliasMultMV<add>(
-            Scaling<1,typename V3::real_type>(),m1.mat(),v2.vec(),v3.vec());
-    }
+    { MultMV<add>(Scaling<0,T>(x),m1.calc(),v2.calc(),v3.vec()); }
 
 #ifdef XDEBUG_PRODMV
     template <bool add, int ix, class T, class M1, class V2, class V3>
@@ -244,19 +239,6 @@ namespace tmv {
 #endif
         }
 
-        template <class V3>
-        TMV_INLINE_ND void newAssignTo(BaseVector_Mutable<V3>& v3) const
-        {
-            TMVStaticAssert((type::isreal || V3::iscomplex));
-            TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
-            TMVAssert(size() == v3.size());
-#ifdef XDEBUG_PRODMV
-            MultMV_Debug<false>(x,m1.mat(),v2.vec(),v3.vec());
-#else
-            NoAliasMultMV<false>(x,m1.mat(),v2.vec(),v3.vec());
-#endif
-        }
-
     private:
         const Scaling<ix,T> x;
         const M1& m1;
@@ -329,19 +311,6 @@ namespace tmv {
 #endif
         }
 
-        template <class V3>
-        TMV_INLINE_ND void newAssignTo(BaseVector_Mutable<V3>& v3) const
-        {
-            TMVStaticAssert((type::isreal || V3::iscomplex));
-            TMVStaticAssert((Sizes<type::_size,V3::_size>::same)); 
-            TMVAssert(size() == v3.size());
-#ifdef XDEBUG_PRODMV
-            MultVM_Debug<false>(x,v1.vec(),m2.mat(),v3.vec());
-#else
-            NoAliasMultVM<false>(x,v1.vec(),m2.mat(),v3.vec());
-#endif
-        }
-
     private:
         const Scaling<ix,T> x;
         const V1& v1;
@@ -352,27 +321,27 @@ namespace tmv {
     // m * v
 #define RT typename V::real_type
     template <class M, class V>
-    static TMV_INLINE ProdMV<1,RT,M,V> operator*(
+    TMV_INLINE ProdMV<1,RT,M,V> operator*(
         const BaseMatrix<M>& m, const BaseVector<V>& v)
     { return ProdMV<1,RT,M,V>(RT(1),m,v); }
 #undef RT
 
     // m * xv
     template <class M, int ix, class T, class V>
-    static TMV_INLINE ProdMV<ix,T,M,V> operator*(
+    TMV_INLINE ProdMV<ix,T,M,V> operator*(
         const BaseMatrix<M>& m, const ProdXV<ix,T,V>& v)
     { return ProdMV<ix,T,M,V>(v.getX(),m,v.getV()); }
 
     // xm * v
     template <int ix, class T, class M, class V>
-    static TMV_INLINE ProdMV<ix,T,M,V> operator*(
+    TMV_INLINE ProdMV<ix,T,M,V> operator*(
         const ProdXM<ix,T,M>& m, const BaseVector<V>& v)
     { return ProdMV<ix,T,M,V>(m.getX(),m.getM(),v); }
 
     // xm * xv
 #define PT typename Traits2<T1,T2>::type
     template <int ix1, class T1, class M, int ix2, class T2, class V>
-    static TMV_INLINE ProdMV<ix1*ix2,PT,M,V> operator*(
+    TMV_INLINE ProdMV<ix1*ix2,PT,M,V> operator*(
         const ProdXM<ix1,T1,M>& m, const ProdXV<ix2,T2,V>& v)
     { return ProdMV<ix1*ix2,PT,M,V>(m.getX()*v.getX(),m.getM(),v.getV()); }
 #undef PT
@@ -381,27 +350,27 @@ namespace tmv {
     // v * m
 #define RT typename V::real_type
     template <class M, class V>
-    static TMV_INLINE ProdVM<1,RT,V,M> operator*(
+    TMV_INLINE ProdVM<1,RT,V,M> operator*(
         const BaseVector<V>& v, const BaseMatrix<M>& m)
     { return ProdVM<1,RT,V,M>(RT(1),v,m); }
 #undef RT
 
     // v * xm
     template <class M, int ix, class T, class V>
-    static TMV_INLINE ProdVM<ix,T,V,M> operator*(
+    TMV_INLINE ProdVM<ix,T,V,M> operator*(
         const BaseVector<V>& v, const ProdXM<ix,T,M>& m)
     { return ProdVM<ix,T,V,M>(m.getX(),v,m.getM()); }
 
     // xv * m
     template <int ix, class T, class M, class V>
-    static TMV_INLINE ProdVM<ix,T,V,M> operator*(
+    TMV_INLINE ProdVM<ix,T,V,M> operator*(
         const ProdXV<ix,T,V>& v, const BaseMatrix<M>& m)
     { return ProdVM<ix,T,V,M>(v.getX(),v.getV(),m); }
 
     // xv * xm
 #define PT typename Traits2<T1,T2>::type
     template <int ix1, class T1, class M, int ix2, class T2, class V>
-    static TMV_INLINE ProdVM<ix1*ix2,PT,V,M> operator*(
+    TMV_INLINE ProdVM<ix1*ix2,PT,V,M> operator*(
         const ProdXV<ix1,T1,V>& v, const ProdXM<ix2,T2,M>& m)
     { return ProdVM<ix1*ix2,PT,V,M>(m.getX()*v.getX(),v.getV(),m.getM()); }
 #undef PT
@@ -410,7 +379,7 @@ namespace tmv {
 
     // v *= m
     template <class V1, class M2>
-    static inline void MultEq(
+    inline void MultEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix<M2>& m2)
     {
 #ifdef XDEBUG_PRODMV
@@ -422,7 +391,7 @@ namespace tmv {
 
     // v *= xm
     template <class V1, int ix2, class T2, class M2>
-    static inline void MultEq(
+    inline void MultEq(
         BaseVector_Mutable<V1>& v1, const ProdXM<ix2,T2,M2>& m2)
     {
 #ifdef XDEBUG_PRODMV
@@ -434,7 +403,7 @@ namespace tmv {
 
     // v += mv
     template <class V3, int ix, class T, class M1, class V2>
-    static inline void AddEq(
+    inline void AddEq(
         BaseVector_Mutable<V3>& v3, const ProdMV<ix,T,M1,V2>& mv)
     {
 #ifdef XDEBUG_PRODMV
@@ -447,7 +416,7 @@ namespace tmv {
 
     // v -= mv
     template <class V3, int ix, class T, class M1, class V2>
-    static inline void SubtractEq(
+    inline void SubtractEq(
         BaseVector_Mutable<V3>& v3, const ProdMV<ix,T,M1,V2>& mv)
     {
 #ifdef XDEBUG_PRODMV
@@ -460,7 +429,7 @@ namespace tmv {
 
     // v += vm
     template <class V3, int ix, class T, class M1, class V2>
-    static inline void AddEq(
+    inline void AddEq(
         BaseVector_Mutable<V3>& v3, const ProdVM<ix,T,M1,V2>& vm)
     {
 #ifdef XDEBUG_PRODMV
@@ -473,7 +442,7 @@ namespace tmv {
 
     // v -= vm
     template <class V3, int ix, class T, class M1, class V2>
-    static inline void SubtractEq(
+    inline void SubtractEq(
         BaseVector_Mutable<V3>& v3, const ProdVM<ix,T,M1,V2>& vm)
     {
 #ifdef XDEBUG_PRODMV
@@ -493,28 +462,28 @@ namespace tmv {
 
     // -(mv)
     template <int ix, class T, class M1, class V2>
-    static TMV_INLINE ProdMV<-ix,T,M1,V2> operator-(
+    TMV_INLINE ProdMV<-ix,T,M1,V2> operator-(
         const ProdMV<ix,T,M1,V2>& mv)
     { return ProdMV<-ix,T,M1,V2>(-mv.getX(),mv.getM(),mv.getV()); }
 
     // x * (mv)
     template <int ix, class T, class M1, class V2>
-    static TMV_INLINE ProdMV<0,T,M1,V2> operator*(
+    TMV_INLINE ProdMV<0,T,M1,V2> operator*(
         const RT x, const ProdMV<ix,T,M1,V2>& mv)
     { return ProdMV<0,T,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
 
     template <int ix, class T, class M1, class V2>
-    static TMV_INLINE ProdMV<0,CT,M1,V2> operator*(
+    TMV_INLINE ProdMV<0,CT,M1,V2> operator*(
         const CT x, const ProdMV<ix,T,M1,V2>& mv)
     { return ProdMV<0,CT,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
 
     template <int ix, class T, class M1, class V2>
-    static TMV_INLINE ProdMV<0,CT,M1,V2> operator*(
+    TMV_INLINE ProdMV<0,CT,M1,V2> operator*(
         const CCT x, const ProdMV<ix,T,M1,V2>& mv)
     { return ProdMV<0,CT,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
 
     template <int ix1, class T1, int ix, class T, class M1, class V2>
-    static TMV_INLINE ProdMV<ix1*ix,typename Traits2<T1,T>::type,M1,V2> operator*(
+    TMV_INLINE ProdMV<ix1*ix,typename Traits2<T1,T>::type,M1,V2> operator*(
         const Scaling<ix1,T1>& x, const ProdMV<ix,T,M1,V2>& mv)
     {
         return ProdMV<ix1*ix,typename Traits2<T1,T>::type,M1,V2>(
@@ -523,22 +492,22 @@ namespace tmv {
 
     // (mv)*x
     template <int ix, class T, class M1, class V2>
-    static TMV_INLINE ProdMV<0,T,M1,V2> operator*(
+    TMV_INLINE ProdMV<0,T,M1,V2> operator*(
         const ProdMV<ix,T,M1,V2>& mv, const RT x)
     { return ProdMV<0,T,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
 
     template <int ix, class T, class M1, class V2>
-    static TMV_INLINE ProdMV<0,CT,M1,V2> operator*(
+    TMV_INLINE ProdMV<0,CT,M1,V2> operator*(
         const ProdMV<ix,T,M1,V2>& mv, const CT x)
     { return ProdMV<0,CT,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
 
     template <int ix, class T, class M1, class V2>
-    static TMV_INLINE ProdMV<0,CT,M1,V2> operator*(
+    TMV_INLINE ProdMV<0,CT,M1,V2> operator*(
         const ProdMV<ix,T,M1,V2>& mv, const CCT x)
     { return ProdMV<0,CT,M1,V2>(x*mv.getX(),mv.getM(),mv.getV()); }
 
     template <int ix1, class T1, int ix, class T, class M1, class V2>
-    static TMV_INLINE ProdMV<ix1*ix,typename Traits2<T1,T>::type,M1,V2> operator*(
+    TMV_INLINE ProdMV<ix1*ix,typename Traits2<T1,T>::type,M1,V2> operator*(
         const ProdMV<ix,T,M1,V2>& mv, const Scaling<ix1,T1>& x)
     {
         return ProdMV<ix1*ix,typename Traits2<T1,T>::type,M1,V2>(
@@ -547,22 +516,22 @@ namespace tmv {
 
     // (mv)/x
     template <int ix, class T, class M1, class V2>
-    static TMV_INLINE ProdMV<0,T,M1,V2> operator/(
+    TMV_INLINE ProdMV<0,T,M1,V2> operator/(
         const ProdMV<ix,T,M1,V2>& mv, const RT x)
     { return ProdMV<0,T,M1,V2>(mv.getX()/x,mv.getM(),mv.getV()); }
 
     template <int ix, class T, class M1, class V2>
-    static TMV_INLINE ProdMV<0,CT,M1,V2> operator/(
+    TMV_INLINE ProdMV<0,CT,M1,V2> operator/(
         const ProdMV<ix,T,M1,V2>& mv, const CT x)
     { return ProdMV<0,CT,M1,V2>(mv.getX()/x,mv.getM(),mv.getV()); }
 
     template <int ix, class T, class M1, class V2>
-    static TMV_INLINE ProdMV<0,CT,M1,V2> operator/(
+    TMV_INLINE ProdMV<0,CT,M1,V2> operator/(
         const ProdMV<ix,T,M1,V2>& mv, const CCT x)
     { return ProdMV<0,CT,M1,V2>(mv.getX()/x,mv.getM(),mv.getV()); }
 
     template <int ix1, class T1, int ix, class T, class M1, class V2>
-    static TMV_INLINE ProdMV<ix1*ix,typename Traits2<T1,T>::type,M1,V2> operator/(
+    TMV_INLINE ProdMV<ix1*ix,typename Traits2<T1,T>::type,M1,V2> operator/(
         const ProdMV<ix,T,M1,V2>& mv, const Scaling<ix1,T1>& x)
     {
         return ProdMV<ix1*ix,typename Traits2<T1,T>::type,M1,V2>(
@@ -579,33 +548,33 @@ namespace tmv {
 
     // -(vm)
     template <int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<-ix,T,V1,M2> operator-(
+    TMV_INLINE ProdVM<-ix,T,V1,M2> operator-(
         const ProdVM<ix,T,V1,M2>& vm)
     { return ProdVM<-ix,T,V1,M2>(-vm.getX(),vm.getV(),vm.getM()); }
 
     // x * (vm)
     template <int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<0,T,V1,M2> operator*(
+    TMV_INLINE ProdVM<0,T,V1,M2> operator*(
         const int x, const ProdVM<ix,T,V1,M2>& vm)
     { return ProdVM<0,T,V1,M2>(RT(x)*vm.getX(),vm.getV(),vm.getM()); }
 
     template <int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<0,T,V1,M2> operator*(
+    TMV_INLINE ProdVM<0,T,V1,M2> operator*(
         const RT x, const ProdVM<ix,T,V1,M2>& vm)
     { return ProdVM<0,T,V1,M2>(x*vm.getX(),vm.getV(),vm.getM()); }
 
     template <int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<0,CT,V1,M2> operator*(
+    TMV_INLINE ProdVM<0,CT,V1,M2> operator*(
         const CT x, const ProdVM<ix,T,V1,M2>& vm)
     { return ProdVM<0,CT,V1,M2>(x*vm.getX(),vm.getV(),vm.getM()); }
 
     template <int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<0,CT,V1,M2> operator*(
+    TMV_INLINE ProdVM<0,CT,V1,M2> operator*(
         const CCT x, const ProdVM<ix,T,V1,M2>& vm)
     { return ProdVM<0,CT,V1,M2>(x*vm.getX(),vm.getV(),vm.getM()); }
 
     template <int ix1, class T1, int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2> operator*(
+    TMV_INLINE ProdVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2> operator*(
         const Scaling<ix1,T1>& x, const ProdVM<ix,T,V1,M2>& vm)
     {
         return ProdVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2>(
@@ -614,27 +583,27 @@ namespace tmv {
 
     // (vm)*x
     template <int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<0,T,V1,M2> operator*(
+    TMV_INLINE ProdVM<0,T,V1,M2> operator*(
         const ProdVM<ix,T,V1,M2>& vm, const int x)
     { return ProdVM<0,T,V1,M2>(RT(x)*vm.getX(),vm.getV(),vm.getM()); }
 
     template <int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<0,T,V1,M2> operator*(
+    TMV_INLINE ProdVM<0,T,V1,M2> operator*(
         const ProdVM<ix,T,V1,M2>& vm, const RT x)
     { return ProdVM<0,T,V1,M2>(x*vm.getX(),vm.getV(),vm.getM()); }
 
     template <int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<0,CT,V1,M2> operator*(
+    TMV_INLINE ProdVM<0,CT,V1,M2> operator*(
         const ProdVM<ix,T,V1,M2>& vm, const CT x)
     { return ProdVM<0,CT,V1,M2>(x*vm.getX(),vm.getV(),vm.getM()); }
 
     template <int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<0,CT,V1,M2> operator*(
+    TMV_INLINE ProdVM<0,CT,V1,M2> operator*(
         const ProdVM<ix,T,V1,M2>& vm, const CCT x)
     { return ProdVM<0,CT,V1,M2>(x*vm.getX(),vm.getV(),vm.getM()); }
 
     template <int ix1, class T1, int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2> operator*(
+    TMV_INLINE ProdVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2> operator*(
         const ProdVM<ix,T,V1,M2>& vm, const Scaling<ix1,T1>& x)
     {
         return ProdVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2>(
@@ -643,27 +612,27 @@ namespace tmv {
 
     // (vm)/x
     template <int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<0,T,V1,M2> operator/(
+    TMV_INLINE ProdVM<0,T,V1,M2> operator/(
         const ProdVM<ix,T,V1,M2>& vm, const int x)
     { return ProdVM<0,T,V1,M2>(vm.getX()/RT(x),vm.getV(),vm.getM()); }
 
     template <int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<0,T,V1,M2> operator/(
+    TMV_INLINE ProdVM<0,T,V1,M2> operator/(
         const ProdVM<ix,T,V1,M2>& vm, const RT x)
     { return ProdVM<0,T,V1,M2>(vm.getX()/x,vm.getV(),vm.getM()); }
 
     template <int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<0,CT,V1,M2> operator/(
+    TMV_INLINE ProdVM<0,CT,V1,M2> operator/(
         const ProdVM<ix,T,V1,M2>& vm, const CT x)
     { return ProdVM<0,CT,V1,M2>(vm.getX()/x,vm.getV(),vm.getM()); }
 
     template <int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<0,CT,V1,M2> operator/(
+    TMV_INLINE ProdVM<0,CT,V1,M2> operator/(
         const ProdVM<ix,T,V1,M2>& vm, const CCT x)
     { return ProdVM<0,CT,V1,M2>(vm.getX()/x,vm.getV(),vm.getM()); }
 
     template <int ix1, class T1, int ix, class T, class V1, class M2>
-    static TMV_INLINE ProdVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2> operator/(
+    TMV_INLINE ProdVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2> operator/(
         const ProdVM<ix,T,V1,M2>& vm, const Scaling<ix1,T1>& x)
     {
         return ProdVM<ix1*ix,typename Traits2<T1,T>::type,V1,M2>(
@@ -678,7 +647,7 @@ namespace tmv {
 
 #ifdef TMV_TEXT
     template <int ix, class T, class M1, class V2>
-    static inline std::string TMV_Text(const ProdMV<ix,T,M1,V2>& mv)
+    inline std::string TMV_Text(const ProdMV<ix,T,M1,V2>& mv)
     {
         std::ostringstream s;
         s << "ProdMV< "<<ix<<","<<TMV_Text(T())<<" , ";
@@ -687,7 +656,7 @@ namespace tmv {
     }
 
     template <int ix, class T, class V1, class M2>
-    static inline std::string TMV_Text(const ProdVM<ix,T,V1,M2>& vm)
+    inline std::string TMV_Text(const ProdVM<ix,T,V1,M2>& vm)
     {
         std::ostringstream s;
         s << "ProdVM< "<<ix<<","<<TMV_Text(T())<<" , ";

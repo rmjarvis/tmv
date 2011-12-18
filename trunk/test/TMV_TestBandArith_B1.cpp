@@ -6,27 +6,27 @@
 #include "TMV_Band.h"
 #include "TMV_TestBandArith.h"
 
-template <class T1, class T2> 
+template <class M1, class M2>
 inline bool CanAddEq(
-    const tmv::BandMatrixView<T1>& , const tmv::MatrixView<T2>& )
+    const tmv::BaseMatrix_Band_Mutable<M1>& , const tmv::BaseMatrix_Rec<M2>& )
 { return false; }
 
-template <class T1, class T2, class T3> 
+template <class M1, class M2, class M3> 
 inline bool CanMultMM(
-    const tmv::BandMatrixView<T1>& , const tmv::MatrixView<T2>& ,
-    const tmv::BandMatrixView<T3>& )
+    const tmv::BaseMatrix_Band<M1>& , const tmv::BaseMatrix_Rec<M2>& ,
+    const tmv::BaseMatrix_Band_Mutable<M3>& )
 { return false; }
 
-template <class T1, class T2, class T3> 
+template <class M1, class M2, class M3> 
 inline bool CanMultMM(
-    const tmv::MatrixView<T2>& , const tmv::BandMatrixView<T1>& ,
-    const tmv::BandMatrixView<T3>& )
+    const tmv::BaseMatrix_Rec<M1>& , const tmv::BaseMatrix_Band<M2>& ,
+    const tmv::BaseMatrix_Band_Mutable<M3>& )
 { return false; }
 
-template <class T1, class T2, class T3> 
+template <class M1, class M2, class M3> 
 inline bool CanMultMM(
-    const tmv::MatrixView<T2>& , const tmv::MatrixView<T1>& ,
-    const tmv::BandMatrixView<T3>& )
+    const tmv::BaseMatrix_Rec<M1>& , const tmv::BaseMatrix_Rec<M2>& ,
+    const tmv::BaseMatrix_Band_Mutable<M3>& )
 { return false; }
 
 #define NOADDEQ

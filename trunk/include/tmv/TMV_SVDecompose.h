@@ -39,21 +39,21 @@ namespace tmv {
     
     // Defined in TMV_SVDecompose_Bidiag.h
     template <class M, class V1, class V2, class V3, class V4>
-    static inline void Bidiagonalize(
+    inline void Bidiagonalize(
         BaseMatrix_Rec_Mutable<M>& A,
         BaseVector_Mutable<V1>& Ubeta, BaseVector_Mutable<V2>& Vbeta, 
         BaseVector_Mutable<V3>& D, BaseVector_Mutable<V4>& E);
 
     // Defined in TMV_SVDecompose_QR.h
     template <class M1, class V1, class V2, class M2>
-    static inline void SV_DecomposeFromBidiagonal_QR(
+    inline void SV_DecomposeFromBidiagonal_QR(
         BaseMatrix_Rec_Mutable<M1>& U,
         BaseVector_Mutable<V1>& D, BaseVector_Mutable<V2>& E,
         BaseMatrix_Rec_Mutable<M2>& V, bool UisI, bool VisI);
 
     // Defined in TMV_SVDecompose_DC.h
     template <class M1, class V1, class V2, class M2>
-    static inline void SV_DecomposeFromBidiagonal_DC(
+    inline void SV_DecomposeFromBidiagonal_DC(
         BaseMatrix_Rec_Mutable<M1>& U,
         BaseVector_Mutable<V1>& D, BaseVector_Mutable<V2>& E,
         BaseMatrix_Rec_Mutable<M2>& V, bool UisI, bool VisI);
@@ -64,7 +64,7 @@ namespace tmv {
     // if |D(i)|^2*Epsilon == 0, the D(i) = 0
     // if |E(i)| < Epsilon * (|D(i)| + |D(i+1)|), then E(i) = 0
     template <class V1, class V2>
-    static inline void BidiagonalChopSmallElements(
+    inline void BidiagonalChopSmallElements(
         BaseVector_Mutable<V1>& D, BaseVector_Mutable<V2>& E, bool& zd)
     {
         TMVAssert(E.size() == D.size()-1);
@@ -584,7 +584,7 @@ namespace tmv {
     };
 
     template <class Mu, class Vd, class Ve, class Mv>
-    static inline void InlineSV_DecomposeFromBidiagonal(
+    inline void InlineSV_DecomposeFromBidiagonal(
         BaseMatrix_Rec_Mutable<Mu>& U,
         BaseVector_Mutable<Vd>& D, BaseVector_Mutable<Ve>& E, 
         BaseMatrix_Rec_Mutable<Mv>& V, bool setUV)
@@ -628,7 +628,7 @@ namespace tmv {
     }
 
     template <class Mu, class Vd, class Ve, class Mv>
-    static inline void SV_DecomposeFromBidiagonal(
+    inline void SV_DecomposeFromBidiagonal(
         BaseMatrix_Rec_Mutable<Mu>& U,
         BaseVector_Mutable<Vd>& D, BaseVector_Mutable<Ve>& E, 
         BaseMatrix_Rec_Mutable<Mv>& V, bool setUV)
@@ -710,13 +710,13 @@ namespace tmv {
         struct ImagIsZeroHelper<true,dummy>
         {
             template <class M>
-            static inline bool call(M& ) { return true; }
+            static TMV_INLINE bool call(M& ) { return true; }
         };
         template <int dummy> 
         struct ImagIsZeroHelper<false,dummy>
         {
             template <class M>
-            static inline bool call(M& m)
+            static TMV_INLINE bool call(M& m)
             { return Norm1(m.imagPart()) == typename M::real_type(0); }
         };
 
@@ -863,7 +863,7 @@ namespace tmv {
             Mucm Ucm = U;
             SVDecompose_Helper<-2,cs,rs,Mucm,Ms,Mv>::call(
                 Ucm,S,V,signdet,logdet,StoreU);
-            if (StoreU) NoAliasCopy(Ucm,U);
+            if (StoreU) U.noAlias() = Ucm;
         }
     };
 
@@ -1009,7 +1009,7 @@ namespace tmv {
     };
 
     template <class Mu, class Ms, class Mv>
-    static inline void InlineSV_Decompose(
+    inline void InlineSV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U, BaseMatrix_Diag_Mutable<Ms>& S,
         BaseMatrix_Rec_Mutable<Mv>& V, 
         typename Mu::zfloat_type& signdet, typename Mu::float_type& logdet,
@@ -1047,7 +1047,7 @@ namespace tmv {
 
     // This is the basic functionality
     template <class Mu, class Ms, class Mv>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U, BaseMatrix_Diag_Mutable<Ms>& S,
         BaseMatrix_Rec_Mutable<Mv>& V,
         typename Mu::zfloat_type& signdet, typename Mu::float_type& logdet,
@@ -1086,7 +1086,7 @@ namespace tmv {
     // The rest of these below are basically convenience functions
     // to allow the user to provide fewer or different arguments.
     template <class Mu, class Ms, class Mv>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U, BaseMatrix_Diag_Mutable<Ms>& S,
         BaseMatrix_Rec_Mutable<Mv>& V, bool StoreU=true)
     {
@@ -1096,7 +1096,7 @@ namespace tmv {
     }
 
     template <class Mu, class Ms>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U, BaseMatrix_Diag_Mutable<Ms>& S,
         bool StoreU)
     {
@@ -1108,7 +1108,7 @@ namespace tmv {
 
     // Allow views as an argument by value (for convenience)
     template <class T, int Au, int As, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         MatrixView<T,Au> U,
         DiagMatrixView<typename Traits<T>::real_type,As> S,
         MatrixView<T,Av> V, bool StoreU=true)
@@ -1124,7 +1124,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Siu, int Sju, int Au, int Ss, int As, int Siv, int Sjv, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
         SmallMatrixView<T,N,N,Siv,Sjv,Av> V, bool StoreU=true)
@@ -1140,7 +1140,7 @@ namespace tmv {
     }
 
     template <class T, int N, int Au, int As, int Siv, int Sjv, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         MatrixView<T,Au> U,
         DiagMatrixView<typename Traits<T>::real_type,As> S,
         SmallMatrixView<T,N,N,Siv,Sjv,Av> V, bool StoreU=true)
@@ -1156,7 +1156,7 @@ namespace tmv {
     }
 
     template <class T, int N, int Au, int Ss, int As, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         MatrixView<T,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
         MatrixView<T,Av> V, bool StoreU=true)
@@ -1172,7 +1172,7 @@ namespace tmv {
     }
 
     template <class T, int N, int Au, int Ss, int As, int Siv, int Sjv, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         MatrixView<T,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
         SmallMatrixView<T,N,N,Siv,Sjv,Av> V, bool StoreU=true)
@@ -1188,7 +1188,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Siu, int Sju, int Au, int As, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         DiagMatrixView<typename Traits<T>::real_type,As> S,
         MatrixView<T,Av> V, bool StoreU=true)
@@ -1204,7 +1204,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Siu, int Sju, int Au, int As, int Siv, int Sjv, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         DiagMatrixView<typename Traits<T>::real_type,As> S,
         SmallMatrixView<T,N,N,Siv,Sjv,Av> V, bool StoreU=true)
@@ -1220,7 +1220,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Siu, int Sju, int Au, int Ss, int As, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
         MatrixView<T,Av> V, bool StoreU=true)
@@ -1236,7 +1236,7 @@ namespace tmv {
     }
 
     template <class T, int Au, int As>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         MatrixView<T,Au> U,
         DiagMatrixView<typename Traits<T>::real_type,As> S, bool StoreU=true)
     {
@@ -1249,7 +1249,7 @@ namespace tmv {
     }
 
     template <class T, int N, int Au, int Ss, int As>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         MatrixView<T,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
         bool StoreU=true)
@@ -1263,7 +1263,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Siu, int Sju, int Au, int As>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         DiagMatrixView<typename Traits<T>::real_type,As> S, bool StoreU=true)
     {
@@ -1276,7 +1276,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Siu, int Sju, int Au, int Ss, int As>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
         bool StoreU=true)
@@ -1292,7 +1292,7 @@ namespace tmv {
     // Don't forget the ones that mix *MatrixView and BaseMatrix_*_Mutable:
     // U is _Mutable
     template <class Mu, class T, int As, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         DiagMatrixView<typename Traits<T>::real_type,As> S,
         MatrixView<T,Av> V, bool StoreU=true)
@@ -1306,7 +1306,7 @@ namespace tmv {
     }
 
     template <class Mu, class T, int N, int As, int Siv, int Sjv, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         DiagMatrixView<typename Traits<T>::real_type,As> S,
         SmallMatrixView<T,N,N,Siv,Sjv,Av> V, bool StoreU=true)
@@ -1320,7 +1320,7 @@ namespace tmv {
     }
 
     template <class Mu, class T, int N, int Ss, int As, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
         MatrixView<T,Av> V, bool StoreU=true)
@@ -1334,7 +1334,7 @@ namespace tmv {
     }
 
     template <class Mu, class T, int N, int Ss, int As, int Siv, int Sjv, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
         SmallMatrixView<T,N,N,Siv,Sjv,Av> V, bool StoreU=true)
@@ -1348,7 +1348,7 @@ namespace tmv {
     }
 
     template <class Mu, class T, int As>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         DiagMatrixView<typename Traits<T>::real_type,As> S, bool StoreU=true)
     {
@@ -1358,7 +1358,7 @@ namespace tmv {
     }
 
     template <class Mu, class T, int N, int Ss, int As>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
         bool StoreU=true)
@@ -1370,7 +1370,7 @@ namespace tmv {
 
     // S is _Mutable
     template <class T, int Au, class Ms, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         MatrixView<T,Au> U, BaseMatrix_Diag_Mutable<Ms>& S,
         MatrixView<T,Av> V, bool StoreU=true)
     {
@@ -1382,7 +1382,7 @@ namespace tmv {
     }
 
     template <class T, int N, int Au, class Ms, int Siv, int Sjv, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         MatrixView<T,Au> U, BaseMatrix_Diag_Mutable<Ms>& S,
         SmallMatrixView<T,N,N,Siv,Sjv,Av> V, bool StoreU=true)
     {
@@ -1394,7 +1394,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Siu, int Sju, int Au, class Ms, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         BaseMatrix_Diag_Mutable<Ms>& S,
         MatrixView<T,Av> V, bool StoreU=true)
@@ -1407,7 +1407,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Siu, int Sju, int Au, class Ms, int Siv, int Sjv, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         BaseMatrix_Diag_Mutable<Ms>& S,
         SmallMatrixView<T,N,N,Siv,Sjv,Av> V, bool StoreU=true)
@@ -1420,7 +1420,7 @@ namespace tmv {
     }
 
     template <class T, int Au, class Ms>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         MatrixView<T,Au> U, BaseMatrix_Diag_Mutable<Ms>& S, bool StoreU=true)
     {
         typedef MatrixView<T,Au> Mu;
@@ -1428,7 +1428,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Siu, int Sju, int Au, class Ms>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         BaseMatrix_Diag_Mutable<Ms>& S, bool StoreU=true)
     {
@@ -1438,7 +1438,7 @@ namespace tmv {
 
     // V is _Mutable
     template <class T, int Au, int As, class Mv>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         MatrixView<T,Au> U,
         DiagMatrixView<typename Traits<T>::real_type,As> S,
         BaseMatrix_Rec_Mutable<Mv>& V, bool StoreU=true)
@@ -1452,7 +1452,7 @@ namespace tmv {
     }
 
     template <class T, int N, int Au, int Ss, int As, class Mv>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         MatrixView<T,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
         BaseMatrix_Rec_Mutable<Mv>& V, bool StoreU=true)
@@ -1466,7 +1466,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Siu, int Sju, int Au, int As, class Mv>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         DiagMatrixView<typename Traits<T>::real_type,As> S,
         BaseMatrix_Rec_Mutable<Mv>& V, bool StoreU=true)
@@ -1480,7 +1480,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Siu, int Sju, int Au, int Ss, int As, class Mv>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
         BaseMatrix_Rec_Mutable<Mv>& V, bool StoreU=true)
@@ -1495,7 +1495,7 @@ namespace tmv {
 
     // U,S are _Mutable
     template <class Mu, class Ms, class T, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         BaseMatrix_Diag_Mutable<Ms>& S,
         MatrixView<T,Av> V, bool StoreU=true)
@@ -1506,7 +1506,7 @@ namespace tmv {
     }
 
     template <class Mu, class Ms, class T, int N, int Siv, int Sjv, int Av>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         BaseMatrix_Diag_Mutable<Ms>& S,
         SmallMatrixView<T,N,N,Siv,Sjv,Av> V, bool StoreU=true)
@@ -1518,7 +1518,7 @@ namespace tmv {
 
     // S,V are _Mutable
     template <class T, int Au, class Ms, class Mv>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         MatrixView<T,Au> U, BaseMatrix_Diag_Mutable<Ms>& S,
         BaseMatrix_Rec_Mutable<Mv>& V, bool StoreU=true)
     {
@@ -1528,7 +1528,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Siu, int Sju, int Au, class Ms, class Mv>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U, BaseMatrix_Diag_Mutable<Ms>& S,
         BaseMatrix_Rec_Mutable<Mv>& V, bool StoreU=true)
     {
@@ -1539,7 +1539,7 @@ namespace tmv {
 
     // U,V are _Mutable
     template <class Mu, class T, int As, class Mv>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         DiagMatrixView<typename Traits<T>::real_type,As> S,
         BaseMatrix_Rec_Mutable<Mv>& V, bool StoreU=true)
@@ -1551,7 +1551,7 @@ namespace tmv {
     }
 
     template <class Mu, class T, int N, int Ss, int As, class Mv>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
         BaseMatrix_Rec_Mutable<Mv>& V, bool StoreU=true)

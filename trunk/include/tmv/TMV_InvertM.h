@@ -22,7 +22,8 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<0,cs,rs,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {}
     };
 
@@ -469,7 +470,7 @@ namespace tmv {
 #endif
             typename M2::diag_type m2d = m2.diag();
             m2.setZero();
-            NoAliasCopy(m1.diag(),m2d);
+            m2d.noAlias() = m1.diag();
             DiagMatrixViewOf(m2d).invertSelf();
             Scale(x,m2d);
         }
@@ -502,7 +503,7 @@ namespace tmv {
             typename M2::diag_type m2d = m2.diag();
             Scale(x,m1cd);
             m2.setZero();
-            NoAliasCopy(m1cd,m2d);
+            m2d.noAlias() = m1cd;
         }
     };
 
@@ -519,7 +520,7 @@ namespace tmv {
                 cs<<','<<rs<<std::endl;
 #endif
             typename M2::diag_type m2d = m2.diag();
-            NoAliasCopy(m1.diag(),m2d);
+            m2d.noAlias() = m1.diag();
             m2.invertSelf();
             Scale(x,m2d);
         }
@@ -538,7 +539,7 @@ namespace tmv {
                 cs<<','<<rs<<std::endl;
 #endif
             typename M2::diag_type m2d = m2.diag();
-            AliasCopy(m1.diag(),m2d);
+            Copy(m1.diag(),m2d);
             m2.invertSelf();
             Scale(x,m2d);
         }
@@ -561,7 +562,7 @@ namespace tmv {
                      typename M2::lowertri_type>::type m2u = 
                          Maybe<M1::_upper>::uppertri(m2);
             m2.setZero();
-            NoAliasCopy(m1,m2u);
+            m2u.noAlias() = m1;
             m2u.invertSelf();
             Scale(x,m2u);
         }
@@ -583,7 +584,7 @@ namespace tmv {
                      typename M2::uppertri_type ,
                      typename M2::lowertri_type>::type m2u = 
                          Maybe<M1::_upper>::uppertri(m2);
-            AliasCopy(m1,m2u);
+            Copy(m1,m2u);
             m2u.invertSelf();
             Scale(x,m2u);
             if (N > 1) Maybe<!M1::_upper>::uppertri(m2).offDiag().setZero();
@@ -602,7 +603,7 @@ namespace tmv {
             std::cout<<"InvM algo 43: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
-            NoAliasCopy(m1,m2);
+            m2.noAlias() = m1;
             m2.invertSelf();
             Scale(x,m2);
         }
@@ -620,7 +621,7 @@ namespace tmv {
             std::cout<<"InvM algo 44: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
-            AliasCopy(m1,m2);
+            Copy(m1,m2);
             m2.invertSelf();
             Scale(x,m2);
         }
@@ -630,7 +631,8 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<99,cs,rs,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             const bool up1 = ShapeTraits<M1::_shape>::upper;
             const bool lo1 = ShapeTraits<M1::_shape>::lower;
@@ -668,7 +670,8 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<-3,cs,rs,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             const bool up1 = ShapeTraits<M1::_shape>::upper;
             const bool lo1 = ShapeTraits<M1::_shape>::lower;
@@ -706,7 +709,8 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<-2,cs,rs,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         { InvertM_Helper<-3,cs,rs,ix,T,M1,M2>::call(x,m1,m2); }
     };
 
@@ -714,7 +718,8 @@ namespace tmv {
     template <int cs, int rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<-1,cs,rs,ix,T,M1,M2>
     {
-        static TMV_INLINE void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
+        static TMV_INLINE void call(
+            const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
@@ -726,7 +731,7 @@ namespace tmv {
     };
 
     template <int ix, class T, class M1, class M2>
-    static inline void MakeInverse(
+    inline void MakeInverse(
         const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
         BaseMatrix_Mutable<M2>& m2)
     {
@@ -745,48 +750,6 @@ namespace tmv {
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
         InvertM_Helper<-1,cs,rs,ix,T,M1,M2v>::call(x,m1.mat(),m2v);
-    }
-    template <int ix, class T, class M1, class M2>
-    static inline void NoAliasMakeInverse(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
-        BaseMatrix_Mutable<M2>& m2)
-    {
-        typedef typename M1::real_type RT1;
-        typedef typename M2::real_type RT2;
-        TMVStaticAssert(!Traits<RT1>::isinteger);
-        TMVStaticAssert(!Traits<RT2>::isinteger);
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_colsize>::same));
-        TMVAssert(m1.colsize() == m2.rowsize());
-        TMVAssert(m1.rowsize() == m2.colsize());
-        const int cs = Sizes<M2::_colsize,M1::_rowsize>::size;
-        const int rs = Sizes<M2::_rowsize,M1::_colsize>::size;
-        // Don't make a view for m1, since we want to make sure we keep 
-        // a divider object if one is present.
-        typedef typename M2::cview_type M2v;
-        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
-        InvertM_Helper<-3,cs,rs,ix,T,M1,M2v>::call(x,m1.mat(),m2v);
-    }
-    template <int ix, class T, class M1, class M2>
-    static inline void AliasMakeInverse(
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M1>& m1,
-        BaseMatrix_Mutable<M2>& m2)
-    {
-        typedef typename M1::real_type RT1;
-        typedef typename M2::real_type RT2;
-        TMVStaticAssert(!Traits<RT1>::isinteger);
-        TMVStaticAssert(!Traits<RT2>::isinteger);
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_colsize>::same));
-        TMVAssert(m1.colsize() == m2.rowsize());
-        TMVAssert(m1.rowsize() == m2.colsize());
-        const int cs = Sizes<M2::_colsize,M1::_rowsize>::size;
-        const int rs = Sizes<M2::_rowsize,M1::_colsize>::size;
-        // Don't make a view for m1, since we want to make sure we keep 
-        // a divider object if one is present.
-        typedef typename M2::cview_type M2v;
-        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
-        InvertM_Helper<99,cs,rs,ix,T,M1,M2v>::call(x,m1.mat(),m2v);
     }
 
 
@@ -842,9 +805,10 @@ namespace tmv {
             TMVAssert(m1.rowsize() <= m1.colsize());
             typedef typename M1::value_type T1;
             typedef typename M1::real_type RT;
-            SmallMatrix<T1,rs,rs> ata;
-            NoAliasMultMM<false>(Scaling<1,RT>(),m1.adjoint(),m1,ata);
-            NoAliasMakeInverse(Scaling<1,RT>(),ata,m2);
+            SmallMatrix<T1,rs,rs,NoAlias> ata;
+            MultMM<false>(Scaling<1,RT>(),m1.adjoint(),m1,ata);
+            typename M2::noalias_type m2na = m2.noAlias();
+            MakeInverse(Scaling<1,RT>(),ata,m2na);
         }
     };
 
@@ -865,9 +829,10 @@ namespace tmv {
             TMVAssert(m1.colsize() < m1.rowsize());
             typedef typename M1::value_type T1;
             typedef typename M1::real_type RT;
-            SmallMatrix<T1,cs,cs> ata;
-            NoAliasMultMM<false>(Scaling<1,RT>(),m1,m1.adjoint(),ata);
-            NoAliasMakeInverse(Scaling<1,RT>(),ata,m2);
+            SmallMatrix<T1,cs,cs,NoAlias> ata;
+            MultMM<false>(Scaling<1,RT>(),m1,m1.adjoint(),ata);
+            typename M2::noalias_type m2na = m2.noAlias();
+            MakeInverse(Scaling<1,RT>(),ata,m2na);
         }
     };
 
@@ -962,11 +927,11 @@ namespace tmv {
             TMVStaticAssert(ShapeTraits<M2::_shape>::lower || 
                             ShapeTraits<M2::_shape>::upper);
             if (m1.isSingular()) ThrowSingular("DiagMatrix");
-            typename M2::diag_type m2d = m2.diag();
+            typename M2::diag_type::noalias_type m2d = m2.diag().noAlias();
             m2.setZero();
-            NoAliasCopy(m1.diag(),m2d);
+            Copy(m1.diag(),m2d);
             ElemInvert(m2d);
-            NoAliasElemMultVV<false>(Scaling<1,RT>(),m2d.conjugate(),m2d,m2d);
+            ElemMultVV<false>(Scaling<1,RT>(),m2d.conjugate(),m2d,m2d);
         }
     };
 
@@ -989,12 +954,12 @@ namespace tmv {
                             ShapeTraits<M2::_shape>::upper);
             if (m1.isSingular()) ThrowSingular("DiagMatrix");
             typename M1::const_diag_type::copy_type m1d(m1.size());
-            typename M2::diag_type m2d = m2.diag();
-            NoAliasCopy(m1.diag(),m1d);
+            typename M2::diag_type::noalias_type m2d = m2.diag();
+            Copy(m1.diag(),m1d);
             ElemInvert(m1d);
-            NoAliasElemMultVV<false>(Scaling<1,RT>(),m1d.conjugate(),m1d,m1d);
+            ElemMultVV<false>(Scaling<1,RT>(),m1d.conjugate(),m1d,m1d);
             m2.setZero();
-            NoAliasCopy(m1d,m2d);
+            Copy(m1d,m2d);
         }
     };
 
@@ -1016,10 +981,10 @@ namespace tmv {
             TMVStaticAssert(!ShapeTraits<M2::_shape>::upper);
             TMVStaticAssert(!ShapeTraits<M2::_shape>::lower);
             if (m1.isSingular()) ThrowSingular("DiagMatrix");
-            typename M2::diag_type m2d = m2.diag();
-            NoAliasCopy(m1.diag(),m2d);
+            typename M2::diag_type::noalias_type m2d = m2.diag().noAlias();
+            Copy(m1.diag(),m2d);
             ElemInvert(m2d);
-            NoAliasElemMultVV<false>(Scaling<1,RT>(),m2d.conjugate(),m2d,m2d);
+            ElemMultVV<false>(Scaling<1,RT>(),m2d.conjugate(),m2d,m2d);
         }
     };
 
@@ -1042,9 +1007,10 @@ namespace tmv {
             TMVStaticAssert(!ShapeTraits<M2::_shape>::lower);
             if (m1.isSingular()) ThrowSingular("DiagMatrix");
             typename M2::diag_type m2d = m2.diag();
-            AliasCopy(m1.diag(),m2d);
+            Copy(m1.diag(),m2d);
             ElemInvert(m2d);
-            NoAliasElemMultVV<false>(Scaling<1,RT>(),m2d.conjugate(),m2d,m2d);
+            typename M2::diag_type::noalias_type m2dna = m2d.noAlias();
+            ElemMultVV<false>(Scaling<1,RT>(),m2d.conjugate(),m2d,m2dna);
         }
     };
 
@@ -1067,9 +1033,10 @@ namespace tmv {
             TMVStaticAssert(ShapeTraits<M2::_shape>::lower);
             if (m1.isSingular()) ThrowSingular("TriMatrix");
             typename M2::uppertri_type m2u = m2.upperTri();
-            NoAliasCopy(m1,m2u);
+            m2u.noAlias() = m1;
             InvertSelf(m2u);
-            NoAliasMultMM<false>(Scaling<1,RT>(),m2u,m2u.adjoint(),m2);
+            typename M2::noalias_type m2na = m2.noAlias();
+            MultMM<false>(Scaling<1,RT>(),m2u,m2u.adjoint(),m2na);
         }
     };
 
@@ -1092,9 +1059,10 @@ namespace tmv {
             TMVStaticAssert(ShapeTraits<M2::_shape>::lower);
             if (m1.isSingular()) ThrowSingular("TriMatrix");
             typename M2::uppertri_type m2u = m2.upperTri();
-            AliasCopy(m1,m2u);
+            Copy(m1,m2u);
             InvertSelf(m2u);
-            NoAliasMultMM<false>(Scaling<1,RT>(),m2u,m2u.adjoint(),m2);
+            typename M2::noalias_type m2na = m2.noAlias();
+            MultMM<false>(Scaling<1,RT>(),m2u,m2u.adjoint(),m2na);
         }
     };
 
@@ -1117,9 +1085,10 @@ namespace tmv {
             TMVStaticAssert(ShapeTraits<M2::_shape>::lower);
             if (m1.isSingular()) ThrowSingular("TriMatrix");
             typename M2::lowertri_type m2l = m2.lowerTri();
-            NoAliasCopy(m1,m2l);
+            m2l.noAlias() = m1;
             InvertSelf(m2l);
-            NoAliasMultMM<false>(Scaling<1,RT>(),m2l,m2l.adjoint(),m2);
+            typename M2::noalias_type m2na = m2.noAlias();
+            MultMM<false>(Scaling<1,RT>(),m2l,m2l.adjoint(),m2na);
         }
     };
 
@@ -1142,9 +1111,10 @@ namespace tmv {
             TMVStaticAssert(ShapeTraits<M2::_shape>::lower);
             if (m1.isSingular()) ThrowSingular("TriMatrix");
             typename M2::lowertri_type m2l = m2.lowerTri();
-            AliasCopy(m1,m2l);
+            Copy(m1,m2l);
             InvertSelf(m2l);
-            NoAliasMultMM<false>(Scaling<1,RT>(),m2l,m2l.adjoint(),m2);
+            typename M2::noalias_type m2na = m2.noAlias();
+            MultMM<false>(Scaling<1,RT>(),m2l,m2l.adjoint(),m2na);
         }
     };
 
@@ -1246,7 +1216,7 @@ namespace tmv {
     };
 
     template <class M1, class M2>
-    static inline void MakeInverseATA(
+    inline void MakeInverseATA(
         const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2)
     {
         typedef typename M1::real_type RT1;
@@ -1265,44 +1235,6 @@ namespace tmv {
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
         InverseATA_Helper<-1,cs,rs,M1,M2v>::call(m1.mat(),m2v);
-    }
-    template <class M1, class M2>
-    static inline void NoAliasMakeInverseATA(
-        const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2)
-    {
-        typedef typename M1::real_type RT1;
-        typedef typename M2::real_type RT2;
-        TMVStaticAssert(!Traits<RT1>::isinteger);
-        TMVStaticAssert(!Traits<RT2>::isinteger);
-        TMVStaticAssert((Sizes<IntTraits2<M1::_colsize,M1::_rowsize>::min,
-                         M2::_rowsize>::same));
-        TMVStaticAssert((Sizes<M2::_rowsize,M2::_colsize>::same));
-        TMVAssert(TMV_MIN(m1.colsize(),m1.rowsize()) == m2.rowsize());
-        TMVAssert(m2.rowsize() == m2.colsize());
-        const int cs = M1::_colsize;
-        const int rs = M1::_rowsize;
-        typedef typename M2::cview_type M2v;
-        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
-        InverseATA_Helper<-3,cs,rs,M1,M2v>::call(m1.mat(),m2v);
-    }
-    template <class M1, class M2>
-    static inline void AliasMakeInverseATA(
-        const BaseMatrix_Calc<M1>& m1, BaseMatrix_Mutable<M2>& m2)
-    {
-        typedef typename M1::real_type RT1;
-        typedef typename M2::real_type RT2;
-        TMVStaticAssert(!Traits<RT1>::isinteger);
-        TMVStaticAssert(!Traits<RT2>::isinteger);
-        TMVStaticAssert((Sizes<IntTraits2<M1::_colsize,M1::_rowsize>::min,
-                         M2::_rowsize>::same));
-        TMVStaticAssert((Sizes<M2::_rowsize,M2::_colsize>::same));
-        TMVAssert(TMV_MIN(m1.colsize(),m1.rowsize()) == m2.rowsize());
-        TMVAssert(m2.rowsize() == m2.colsize());
-        const int cs = M1::_colsize;
-        const int rs = M1::_rowsize;
-        typedef typename M2::cview_type M2v;
-        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
-        InverseATA_Helper<99,cs,rs,M1,M2v>::call(m1.mat(),m2v);
     }
 
 } // namespace tmv

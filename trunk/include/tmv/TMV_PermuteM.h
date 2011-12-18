@@ -255,7 +255,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline void PermuteRows(
+    inline void PermuteRows(
         BaseMatrix_Rec_Mutable<M>& m,
         const int* p, const int i1, const int i2)
     {
@@ -267,7 +267,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline void InlinePermuteRows(
+    inline void InlinePermuteRows(
         BaseMatrix_Rec_Mutable<M>& m, 
         const int* p, const int i1, const int i2)
     {
@@ -513,7 +513,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline void ReversePermuteRows(
+    inline void ReversePermuteRows(
         BaseMatrix_Rec_Mutable<M>& m,
         const int* p, const int i1, const int i2)
     {
@@ -525,7 +525,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline void InlineReversePermuteRows(
+    inline void InlineReversePermuteRows(
         BaseMatrix_Rec_Mutable<M>& m, 
         const int* p, const int i1, const int i2)
     {

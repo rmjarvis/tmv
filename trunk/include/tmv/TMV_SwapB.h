@@ -218,8 +218,8 @@ namespace tmv {
             } else {
                 // Need a temporary
                 typename M1::copy_type m1c = m1;
-                NoAliasCopy(m2,m1);
-                NoAliasCopy(m1c,m2);
+                m1.noAlias() = m2;
+                m2.noAlias() = m1c;
             }
         }
     };
@@ -298,7 +298,7 @@ namespace tmv {
     };
 
     template <class M1, class M2>
-    static inline void DoSwap(
+    inline void DoSwap(
         BaseMatrix_Band_Mutable<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -315,7 +315,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void InlineSwap(
+    inline void InlineSwap(
         BaseMatrix_Band_Mutable<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -332,7 +332,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void InlineAliasSwap(
+    inline void InlineAliasSwap(
         BaseMatrix_Band_Mutable<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
@@ -349,7 +349,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         BaseMatrix_Band_Mutable<M1>& m1, BaseMatrix_Band_Mutable<M2>& m2)
     { DoSwap(m1,m2); }
 

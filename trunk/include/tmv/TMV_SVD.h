@@ -14,7 +14,7 @@ namespace tmv {
 
     // In TMV_SVDecompose.h
     template <class Mu, class Ms, class Mv>
-    static inline void SV_Decompose(
+    inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U, BaseMatrix_Diag_Mutable<Ms>& S,
         BaseMatrix_Rec_Mutable<Mv>& V, 
         typename Mu::zfloat_type& signdet, typename Mu::float_type& logdet,
@@ -22,23 +22,23 @@ namespace tmv {
 
     // In TMV_SVInverse.h
     template <class M1u, class M1s, class M1v, class M2>
-    static inline void SV_Inverse(
+    inline void SV_Inverse(
         const BaseMatrix_Rec<M1u>& U, const BaseMatrix_Diag<M1s>& S,
         const BaseMatrix_Rec<M1v>& V, 
         BaseMatrix_Rec_Mutable<M2>& minv);
     template <class M1u, class M1s, class M1v, class M2>
-    static inline void SV_InverseATA(
+    inline void SV_InverseATA(
         const BaseMatrix_Rec<M1u>& U, const BaseMatrix_Diag<M1s>& S,
         const BaseMatrix_Rec<M1v>& V, BaseMatrix_Rec_Mutable<M2>& ata);
 
     // In TMV_SVDiv.h
     template <class M1u, class M1s, class M1v, class M2, class M3>
-    static inline void SV_Solve(
+    inline void SV_Solve(
         const BaseMatrix_Rec<M1u>& U, const BaseMatrix_Diag<M1s>& S,
         const BaseMatrix_Rec<M1v>& V, 
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
     template <class M1u, class M1s, class M1v, class V2, class V3>
-    static inline void SV_Solve(
+    inline void SV_Solve(
         const BaseMatrix_Rec<M1u>& U, const BaseMatrix_Diag<M1s>& S,
         const BaseMatrix_Rec<M1v>& V, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3);
@@ -513,16 +513,18 @@ namespace tmv {
         typedef typename M::value_type T;
         typedef typename M::float_type FT;
         typedef typename M::zfloat_type ZT;
-        enum { istrans = int(M::_colsize) < int(M::_rowsize) };
-        enum { cs = istrans ? int(M::_rowsize) : int(M::_colsize) };
-        enum { rs = istrans ? int(M::_colsize) : int(M::_rowsize) };
-        enum { A = istrans ? RowMajor : ColMajor };
-        typedef typename MCopyHelper<T,Rec,M::_colsize,M::_rowsize,A>::type Mu;
+        enum { cs1 = M::_colsize };
+        enum { rs1 = M::_rowsize };
+        enum { istrans = int(cs1) < int(rs1) };
+        enum { cs = IntTraits2<cs1,rs1>::max };
+        enum { rs = IntTraits2<cs1,rs1>::min };
+        enum { A = (istrans ? RowMajor : ColMajor) | NoAlias };
+        typedef typename MCopyHelper<T,Rec,cs1,rs1,A>::type Mu;
         typedef typename TypeSelect< istrans ,
                 typename Mu::transpose_type ,
                 typename Mu::view_type >::type ux_type;
         typedef typename MCopyHelper<T,Diag,rs,rs>::type sx_type;
-        typedef typename MCopyHelper<T,Rec,rs,rs>::type vx_type;
+        typedef typename MCopyHelper<T,Rec,rs,rs,RowMajor|NoAlias>::type vx_type;
 
         enum { csu = istrans ? int(rs) : int(cs) };
         enum { rsu = rs };
@@ -542,7 +544,7 @@ namespace tmv {
             TMVStaticAssert(M::_rowsize != TMV_UNKNOWN);
             TMVAssert(A.colsize() == istrans ? int(rs) : int(cs));
             TMVAssert(A.rowsize() == istrans ? int(cs) : int(rs));
-            A.newAssignTo(SmallUx);
+            SmallUx = A;
             SV_Decompose(Ux,Sx,Vx,signdet,logdet,true);
         }
         template <class M2, class M3>
@@ -604,9 +606,9 @@ namespace tmv {
         enum { istrans1 = knownsizes && cs1 < int(rs1) };
         enum { cs = IntTraits2<cs1,rs1>::max };
         enum { rs = IntTraits2<cs1,rs1>::min };
-        typedef typename MViewHelper<T,Rec,cs,rs,1,TMV_UNKNOWN>::type ux_type;
+        typedef typename MViewHelper<T,Rec,cs,rs,1,TMV_UNKNOWN,ColMajor|NoAlias>::type ux_type;
         typedef DiagMatrix<RT> sx_type;
-        typedef Matrix<T,RowMajor|NoDivider> vx_type;
+        typedef Matrix<T,RowMajor|NoDivider|NoAlias> vx_type;
 
         enum { csu = (
                 knownsizes ? ( istrans1 ? int(rs) : int(cs) ) :
@@ -645,9 +647,9 @@ namespace tmv {
                 if (!inplace) {
                     if (istrans) {
                         typename ux_type::transpose_type Uxt = Ux.transpose();
-                        Maybe<!knownsizes||istrans1>::newAssignTo(A,Uxt);
+                        Maybe<!knownsizes||istrans1>::assignTo(A,Uxt);
                     } else {
-                        Maybe<!knownsizes||!istrans1>::newAssignTo(A,Ux);
+                        Maybe<!knownsizes||!istrans1>::assignTo(A,Ux);
                     }
                 } else {
                     Maybe<M2::_conj>::conjself(Ux);
@@ -672,9 +674,9 @@ namespace tmv {
             {
                 if (istrans) {
                     typename ux_type::transpose_type Uxt = Ux.transpose();
-                    Maybe<!knownsizes||istrans1>::newAssignTo(A,Uxt);
+                    Maybe<!knownsizes||istrans1>::assignTo(A,Uxt);
                 } else {
-                    Maybe<!knownsizes||!istrans1>::newAssignTo(A,Ux);
+                    Maybe<!knownsizes||!istrans1>::assignTo(A,Ux);
                 }
                 SV_Decompose(Ux,Sx,Vx,signdet,logdet,true);
             }

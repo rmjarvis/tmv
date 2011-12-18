@@ -187,8 +187,7 @@ namespace tmv {
     template<>
     struct tmv_static_assert<true>
     { static TMV_INLINE void call() {} };
-#define TMVStaticAssert(e) \
-    do { tmv_static_assert<(e) != 0>::call(); } while (false)
+#define TMVStaticAssert(e) tmv_static_assert<!!(e)>::call()
 
     // Attributes are stored as a binary field, so they can be |'ed
     // together to calculate the full set of attributes.
@@ -1303,9 +1302,6 @@ namespace tmv {
         // x.assignTo(y) or nothing
         template <class T1, class T2>
         static TMV_INLINE void assignTo(const T1& x, T2& y) { x.assignTo(y); }
-        template <class T1, class T2>
-        static TMV_INLINE void newAssignTo(const T1& x, T2& y) 
-        { x.newAssignTo(y); }
 
         // m.ref(i,i) = x or nothing
         template <class M, class T>
@@ -1334,6 +1330,12 @@ namespace tmv {
         static TMV_INLINE void conjself(M& m) { m.conjugateSelf(); }
         template <class M>
         static TMV_INLINE void conjself2(M m) { m.conjugateSelf(); }
+
+        // m.transposeSelf() or nothing
+        template <class M>
+        static TMV_INLINE void tranself(M& m) { m.transposeSelf(); }
+        template <class M>
+        static TMV_INLINE void tranself2(M m) { m.transposeSelf(); }
 
         // m.conjugate() or m
         template <class M>
@@ -1677,8 +1679,6 @@ namespace tmv {
 
         template <class T1, class T2>
         static TMV_INLINE void assignTo(const T1& , T2& ) { }
-        template <class T1, class T2>
-        static TMV_INLINE void newAssignTo(const T1& , T2& )  { }
 
         template <class M, class T>
         static TMV_INLINE void setdiag(M& , int , const T& ) { }
@@ -1699,6 +1699,11 @@ namespace tmv {
         static TMV_INLINE void conjself(M& ) { }
         template <class M>
         static TMV_INLINE void conjself2(M ) { }
+
+        template <class M>
+        static TMV_INLINE void tranself(M& ) { }
+        template <class M>
+        static TMV_INLINE void tranself2(M ) { }
 
         template <class M>
         static TMV_INLINE const M& conjugate(const M& m) { return m; }
@@ -2146,7 +2151,7 @@ namespace tmv {
         { return s1.c_str(); }
     };
 
-    static inline std::ostream& operator<<(
+    inline std::ostream& operator<<(
         std::ostream& os, const Error& e) throw()
     { e.write(os); return os; }
 
@@ -2259,21 +2264,36 @@ namespace tmv {
 
 
 #ifdef TMV_WARN
-    // defined in TMV_Vector.cpp
-    // initialized with &std::cout;
-    extern std::ostream* warn_out;
+    class TMV_WarnSingleton
+    {
+        // Note: This is not thread safe.
+        // If multiple threads write to the warning stream at the
+        // same time, they can clobber each other.
+    public:
+        static TMV_INLINE std::ostream*& inst() {
+            static std::ostream* warn = 0;
+            return warn;
+        }
+    private:
+        TMV_WarnSingleton();
+    };
+
     inline void TMV_Warning(std::string s)
     {
-        if (warn_out) {
-            *warn_out << "Warning:\n" << s << std::endl;
+        if (TMV_WarnSingleton::inst()) {
+            *TMV_WarnSingleton::inst() << "Warning:\n" << s << std::endl;
         }
     }
 
     inline std::ostream* WriteWarningsTo(std::ostream* newos)
-    { std::ostream* temp = warn_out; warn_out = newos; return temp; }
+    {
+        std::ostream* temp = TMV_WarnSingleton::inst();
+        TMV_WarnSingleton::inst() = newos;
+        return temp; 
+    }
 
     inline void NoWarnings()
-    { warn_out = 0; }
+    { TMV_WarnSingleton::inst() = 0; }
 #else
     TMV_INLINE void TMV_Warning(std::string ) {}
     TMV_INLINE std::ostream* WriteWarningsTo(std::ostream* os) { return 0; }
@@ -2365,26 +2385,26 @@ namespace tmv {
 
 #ifdef TMV_TEXT
     template <class T>
-    static inline std::string TMV_Text(const T&)
+    inline std::string TMV_Text(const T&)
     { return std::string("Unknown (") + typeid(T).name() + ")"; }
 
-    static inline std::string TMV_Text(const double&)
+    inline std::string TMV_Text(const double&)
     { return "double"; }
 
-    static inline std::string TMV_Text(const float&)
+    inline std::string TMV_Text(const float&)
     { return "float"; }
 
-    static inline std::string TMV_Text(const int&)
+    inline std::string TMV_Text(const int&)
     { return "int"; }
 
-    static inline std::string TMV_Text(const long double&)
+    inline std::string TMV_Text(const long double&)
     { return "long double"; }
 
     template <class T>
-    static inline std::string TMV_Text(std::complex<T>)
+    inline std::string TMV_Text(std::complex<T>)
     { return std::string("complex<") + TMV_Text(T()) + ">"; }
 
-    static inline std::string TMV_Text(DivType d)
+    inline std::string TMV_Text(DivType d)
     {
         return 
             d==LU ? "LU" :
@@ -2394,16 +2414,16 @@ namespace tmv {
             d==SV ? "SV" : "XX";
     }
 
-    static inline std::string TMV_Text(ConjType c)
+    inline std::string TMV_Text(ConjType c)
     { return c==Conj ? "Conj" : "NonConj"; }
 
-    static inline std::string TMV_Text(IndexStyle i)
+    inline std::string TMV_Text(IndexStyle i)
     { return i==CStyle ? "CStyle" : "FortranStyle"; }
 
-    static inline std::string TMV_Text(StepType s)
+    inline std::string TMV_Text(StepType s)
     { return s==Unit ? "Unit" : "NonUnit"; }
 
-    static inline std::string TMV_Text(StorageType s)
+    inline std::string TMV_Text(StorageType s)
     { 
         return 
             s==ColMajor ? "ColMajor" : 
@@ -2412,7 +2432,7 @@ namespace tmv {
             "NonMajor";
     }
 
-    static inline std::string TMV_Text(DiagType d)
+    inline std::string TMV_Text(DiagType d)
     { 
         return 
             d==NonUnitDiag ? "NonUnitDiag" :
@@ -2421,16 +2441,16 @@ namespace tmv {
             "UnknownDiag";
     }
 
-    static inline std::string TMV_Text(PackType p)
+    inline std::string TMV_Text(PackType p)
     { return p==Packed ? "Packed" : "NonPacked"; }
 
-    static inline std::string TMV_Text(DivStatus d)
+    inline std::string TMV_Text(DivStatus d)
     { return d==WithDivider ? "WithDivider" : "NoDivider"; }
 
-    static inline std::string TMV_Text(AliasStatus a)
+    inline std::string TMV_Text(AliasStatus a)
     { return a==CheckAlias ? "CheckAlias" : "NoAlias"; }
 
-    static inline std::string TMV_Text(UpLoType u)
+    inline std::string TMV_Text(UpLoType u)
     { return u==Upper ? "Upper" : "Lower"; }
 #endif
 

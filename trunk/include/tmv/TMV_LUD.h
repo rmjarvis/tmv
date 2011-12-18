@@ -54,28 +54,28 @@ namespace tmv {
 
     // In TMV_LUInverse.h
     template <class M1>
-    static inline void LU_Inverse(
+    inline void LU_Inverse(
         BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& P);
     template <class M1, class M2>
-    static inline void LU_InverseATA(
+    inline void LU_InverseATA(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         const bool trans, BaseMatrix_Rec_Mutable<M2>& m2);
 
     // In TMV_LUDiv.h
     template <class M1, class M2>
-    static inline void LU_SolveInPlace(
+    inline void LU_SolveInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class V2>
-    static inline void LU_SolveInPlace(
+    inline void LU_SolveInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2);
     template <class M1, class M2>
-    static inline void LU_SolveTransposeInPlace(
+    inline void LU_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class V2>
-    static inline void LU_SolveTransposeInPlace(
+    inline void LU_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2);
 
@@ -357,9 +357,9 @@ namespace tmv {
         {
             // This one might be same storage if LUx was done in place.
             // e.g. { A.divideInPlace(); A = A.inverse(); }
-            // So go ahead and check. (i.e. Don't use NoAliasCopy.)
+            // So go ahead and check. (i.e. Don't use noAlias().)
             // TODO: Add this behavior to test suite.
-            Copy(LUx,m2);
+            m2 = LUx;
             LU_Inverse(m2,P);
         }
     };
@@ -402,9 +402,12 @@ namespace tmv {
     {
         enum { istrans = M::_rowmajor };
         enum { size = M::_colsize };
+        typedef typename M::value_type T;
+        enum { A = NoAlias | (istrans ? RowMajor : ColMajor) };
+        typedef typename MCopyHelper<T,Rec,size,size,A>::type Mc;
         typedef typename TypeSelect< istrans ,
-                typename M::transpose_type ,
-                typename M::view_type>::type lux_type;
+                typename Mc::transpose_type ,
+                typename Mc::view_type>::type lux_type;
 
         template <class M2>
         LUD_Impl(const BaseMatrix<M2>& A, bool ) : 
@@ -417,7 +420,7 @@ namespace tmv {
             TMVStaticAssert(M::_colsize == int(M2::_colsize));
             TMVStaticAssert(M::_rowsize == int(M2::_rowsize));
             TMVStaticAssert(lux_type::_colmajor);
-            A.newAssignTo(SmallLUx);
+            SmallLUx = A;
             LU_Decompose(LUx,P);
         }
         template <class M2, class M3>
@@ -454,7 +457,7 @@ namespace tmv {
         void makeInverseATA(M2& ata)
         { LU_InverseATA(LUx,P,istrans,ata); }
 
-        M SmallLUx;
+        Mc SmallLUx;
         lux_type LUx;
         Permutation P;
     };
@@ -464,8 +467,8 @@ namespace tmv {
     {
         enum { istrans1 = M::_rowmajor };
         typedef typename TypeSelect< istrans1 ,
-                typename M::transpose_type ,
-                typename M::view_type>::type lux_type;
+                typename M::transpose_type::noalias_type ,
+                typename M::noalias_type>::type lux_type;
 
         template <class M2>
         LUD_Impl(const BaseMatrix_Rec<M2>& A, bool _inplace) :
@@ -495,8 +498,8 @@ namespace tmv {
                 TMVStaticAssert((Sizes<M2::_colsize,M2::_rowsize>::same));
                 TMVAssert(A.colsize() == A.rowsize());
                 if (!inplace) {
-                    if (istrans) NoAliasCopy(A.transpose(),LUx); 
-                    else NoAliasCopy(A,LUx); 
+                    if (istrans) LUx = A.transpose();
+                    else LUx = A;
                 } else {
                     Maybe<M2::_conj>::conjself(LUx);
                 }
@@ -525,7 +528,7 @@ namespace tmv {
             TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
             TMVStaticAssert((Sizes<M2::_colsize,M2::_rowsize>::same));
             TMVAssert(A.colsize() == A.rowsize());
-            A.newAssignTo(LUx);
+            LUx = A;
             LU_Decompose(LUx,P);
 #ifdef PRINTALGO_LU
             std::cout<<"LUD_Impl (not small) constructor for non-Rec\n";

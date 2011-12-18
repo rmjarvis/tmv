@@ -236,13 +236,13 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
             {
                 Unroller<I,N/2>::unroll(x1,v1,v2,v3);
                 Unroller<I+N/2,N-N/2>::unroll(x1,v1,v2,v3);
             }
-            static inline void unroll2(
+            static TMV_INLINE void unroll2(
                 const Scaling<ix,T>& x1,
                 const IT1& x, const IT2& y, const IT3& z)
             {
@@ -253,7 +253,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
             {
                 Maybe<add>::add( 
@@ -261,7 +261,7 @@ namespace tmv {
                     ZProd<false,false>::prod(
                         x1 , ZProd<false,false>(v1.cref(I) , v2.cref(I)) )); 
             }
-            static inline void unroll2(
+            static TMV_INLINE void unroll2(
                 const Scaling<ix,T>& x1,
                 const IT1& x, const IT2& y, const IT3& z)
             {
@@ -276,9 +276,9 @@ namespace tmv {
         template <int I>
         struct Unroller<I,0>
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix,T>& , const V1& , const V2& , V3& ) {}
-            static inline void unroll2(
+            static TMV_INLINE void unroll2(
                 const Scaling<ix,T>& , const IT1& , const IT2& , const IT3& )
             {}
         };
@@ -399,18 +399,21 @@ namespace tmv {
                         x1,v1,v2,v3); 
                 } else {
                     // Need a temporary for v2
-                    NoAliasElemMultVV<add>(x1,v1,v2.copy(),v3);
+                    typename V3::noalias_type v3na = v3.noAlias();
+                    ElemMultVV<add>(x1,v1,v2.copy(),v3na);
                 }
             } else {
                 if (noclobber2) {
                     // Need a temporary for v1
-                    NoAliasElemMultVV<add>(x1,v1.copy(),v2,v3);
+                    typename V3::noalias_type v3na = v3.noAlias();
+                    ElemMultVV<add>(x1,v1.copy(),v2,v3na);
                 } else {
                     // Need a temporary for v3
                     typename V3::copy_type v3c(v3.size());
                     Scaling<1,typename Traits<T>::real_type> one;
-                    NoAliasElemMultVV<false>(one,v1,v2,v3c);
-                    NoAliasMultXV<add>(x1,v3c,v3);
+                    ElemMultVV<false>(one,v1,v2,v3c);
+                    typename V3::noalias_type v3na = v3.noAlias();
+                    MultXV<add>(x1,v3c,v3na);
                 }
             }
         }
@@ -537,7 +540,7 @@ namespace tmv {
     };
 
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    static inline void ElemMultVV(
+    inline void ElemMultVV(
         const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -558,28 +561,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    static inline void NoAliasElemMultVV(
-        const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
-        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
-        TMVAssert(v1.size() == v2.size());
-        TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::_size,V2::_size>::size;
-        const int s = Sizes<s12,V3::_size>::size;
-        typedef typename V1::const_cview_type V1v;
-        typedef typename V2::const_cview_type V2v;
-        typedef typename V3::cview_type V3v;
-        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
-        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
-        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
-        ElemMultVV_Helper<-2,s,add,ix,T,V1v,V2v,V3v>::call(
-            x1,v1v,v2v,v3v);
-    }
-
-    template <bool add, int ix, class T, class V1, class V2, class V3>
-    static inline void InlineElemMultVV(
+    inline void InlineElemMultVV(
         const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -600,7 +582,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    static inline void InlineAliasElemMultVV(
+    inline void InlineAliasElemMultVV(
         const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -617,27 +599,6 @@ namespace tmv {
         TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
         TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
         ElemMultVV_Helper<98,s,add,ix,T,V1v,V2v,V3v>::call(
-            x1,v1v,v2v,v3v);
-    }
-
-    template <bool add, int ix, class T, class V1, class V2, class V3>
-    static inline void AliasElemMultVV(
-        const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
-        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
-        TMVAssert(v1.size() == v2.size());
-        TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::_size,V2::_size>::size;
-        const int s = Sizes<s12,V3::_size>::size;
-        typedef typename V1::const_cview_type V1v;
-        typedef typename V2::const_cview_type V2v;
-        typedef typename V3::cview_type V3v;
-        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
-        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
-        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
-        ElemMultVV_Helper<99,s,add,ix,T,V1v,V2v,V3v>::call(
             x1,v1v,v2v,v3v);
     }
 

@@ -271,7 +271,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline typename M::value_type IntegerDet(
+    inline typename M::value_type IntegerDet(
         const BaseMatrix_Rec<M>& m)
     {
         typedef typename M::value_type T;
@@ -284,7 +284,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::value_type InlineIntegerDet(
+    inline typename M::value_type InlineIntegerDet(
         const BaseMatrix_Rec<M>& m)
     {
         typedef typename M::value_type T;

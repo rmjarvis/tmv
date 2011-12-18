@@ -215,7 +215,7 @@ namespace tmv {
     };
 
     template <class M1u, class M1s, class M1v, class M2, class M3>
-    static inline void InlineSV_Solve(
+    inline void InlineSV_Solve(
         const BaseMatrix_Rec<M1u>& U, const BaseMatrix_Diag<M1s>& S,
         const BaseMatrix_Rec<M1v>& V, 
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
@@ -249,7 +249,7 @@ namespace tmv {
     }
 
     template <class M1u, class M1s, class M1v, class M2, class M3>
-    static inline void SV_Solve(
+    inline void SV_Solve(
         const BaseMatrix_Rec<M1u>& U, const BaseMatrix_Diag<M1s>& S,
         const BaseMatrix_Rec<M1v>& V, 
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
@@ -283,7 +283,7 @@ namespace tmv {
     }
 
     template <class M1u, class M1s, class M1v, class V2, class V3>
-    static inline void InlineSV_Solve(
+    inline void InlineSV_Solve(
         const BaseMatrix_Rec<M1u>& U, const BaseMatrix_Diag<M1s>& S,
         const BaseMatrix_Rec<M1v>& V, 
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
@@ -315,7 +315,7 @@ namespace tmv {
     }
 
     template <class M1u, class M1s, class M1v, class V2, class V3>
-    static inline void SV_Solve(
+    inline void SV_Solve(
         const BaseMatrix_Rec<M1u>& U, const BaseMatrix_Diag<M1s>& S,
         const BaseMatrix_Rec<M1v>& V,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)

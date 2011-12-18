@@ -261,7 +261,7 @@ namespace tmv {
     };
 
     template <int ix, class T, class M>
-    static inline void Scale(
+    inline void Scale(
         const Scaling<ix,T>& x, BaseMatrix_Band_Mutable<M>& m)
     {
         const int cs = M::_colsize;
@@ -272,7 +272,7 @@ namespace tmv {
     }
 
     template <int ix, class T, class M>
-    static inline void InlineScale(
+    inline void InlineScale(
         const Scaling<ix,T>& x, BaseMatrix_Band_Mutable<M>& m)
     {
         const int cs = M::_colsize;

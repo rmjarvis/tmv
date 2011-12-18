@@ -213,7 +213,7 @@ namespace tmv {
     };
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void MultMM_OpenMP(
+    inline void MultMM_OpenMP(
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -238,7 +238,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void InlineMultMM_OpenMP(
+    inline void InlineMultMM_OpenMP(
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {

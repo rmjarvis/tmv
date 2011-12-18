@@ -399,23 +399,26 @@ namespace tmv {
                 std::cout<<"Do m1 first\n";
 #endif
                 // Alias with m1 only, do m1 first
-                AliasMultXM<false>(x1,m1,m3);
-                NoAliasMultXM<true>(x2,m2,m3);
+                MultXM<false>(x1,m1,m3);
+                typename M3::noalias_type m3na = m3.noAlias();
+                MultXM<true>(x2,m2,m3na);
             } else if (!s1) {
 #ifdef PRINTALGO_AddMM
                 std::cout<<"Do m2 first\n";
 #endif
                 // Alias with m2 only, do m2 first
-                AliasMultXM<false>(x2,m2,m3);
-                NoAliasMultXM<true>(x1,m1,m3);
+                MultXM<false>(x2,m2,m3);
+                typename M3::noalias_type m3na = m3.noAlias();
+                MultXM<true>(x1,m1,m3na);
             } else {
 #ifdef PRINTALGO_AddMM
                 std::cout<<"Need temporary\n";
 #endif
                 // Need a temporary
                 typename M1::copy_type m1c = m1;
-                AliasMultXM<false>(x2,m2,m3);
-                NoAliasMultXM<true>(x1,m1c,m3);
+                MultXM<false>(x2,m2,m3);
+                typename M3::noalias_type m3na = m3.noAlias();
+                MultXM<true>(x1,m1c,m3na);
             }
         }
     };
@@ -615,7 +618,7 @@ namespace tmv {
     };
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
-    static inline void AddMM(
+    inline void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Rec<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -645,37 +648,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
-    static inline void NoAliasAddMM(
-        const Scaling<ix1,T1>& x1, const BaseMatrix_Rec<M1>& m1, 
-        const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M3::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M3::_rowsize>::same));
-        TMVAssert(m1.colsize() == m2.colsize());
-        TMVAssert(m1.colsize() == m3.colsize());
-        TMVAssert(m1.rowsize() == m2.rowsize());
-        TMVAssert(m1.rowsize() == m3.rowsize());
-        const int cs = 
-            Sizes<Sizes<M1::_colsize,M2::_colsize>::size,M3::_colsize>::size;
-        const int rs = 
-            Sizes<Sizes<M1::_rowsize,M2::_rowsize>::size,M3::_rowsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
-        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
-        AddMM_Helper<-2,cs,rs,ix1,T1,M1v,ix2,T2,M2v,M3v>::call(
-            x1,m1v,x2,m2v,m3v);
-    }
-
-    template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
-    static inline void InlineAddMM(
+    inline void InlineAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Rec<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -705,7 +678,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
-    static inline void InlineAliasAddMM(
+    inline void InlineAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Rec<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
         BaseMatrix_Rec_Mutable<M3>& m3)
@@ -731,36 +704,6 @@ namespace tmv {
         TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
         TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
         AddMM_Helper<98,cs,rs,ix1,T1,M1v,ix2,T2,M2v,M3v>::call(
-            x1,m1v,x2,m2v,m3v);
-    }
-
-    template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
-    static inline void AliasAddMM(
-        const Scaling<ix1,T1>& x1, const BaseMatrix_Rec<M1>& m1, 
-        const Scaling<ix2,T2>& x2, const BaseMatrix_Rec<M2>& m2, 
-        BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M3::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M3::_rowsize>::same));
-        TMVAssert(m1.colsize() == m2.colsize());
-        TMVAssert(m1.colsize() == m3.colsize());
-        TMVAssert(m1.rowsize() == m2.rowsize());
-        TMVAssert(m1.rowsize() == m3.rowsize());
-        const int cs = 
-            Sizes<Sizes<M1::_colsize,M2::_colsize>::size,M3::_colsize>::size;
-        const int rs = 
-            Sizes<Sizes<M1::_rowsize,M2::_rowsize>::size,M3::_rowsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
-        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
-        AddMM_Helper<99,cs,rs,ix1,T1,M1v,ix2,T2,M2v,M3v>::call(
             x1,m1v,x2,m2v,m3v);
     }
 
