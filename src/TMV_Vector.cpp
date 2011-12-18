@@ -19,11 +19,7 @@
 
 namespace tmv {
 
-    // First warn_out from TMV_Base.h
-
-    std::ostream* warn_out = &std::cout;
-
-    // And also some things from TMV_Blas.h
+    // First some things from TMV_Blas.h
     int Lap_info = 0;
 
     void LAP_Results(const char* fn)

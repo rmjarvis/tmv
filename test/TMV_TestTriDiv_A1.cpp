@@ -4,13 +4,13 @@
 #include "TMV.h"
 
 template <class M1, class M2> 
-static TMV_INLINE bool CanLDivEq(
+inline bool CanLDivEq(
     const tmv::BaseMatrix_Tri_Mutable<M1>& a,
     const tmv::BaseMatrix_Tri<M2>& b)
 { return a.size() == b.size() && !a.isunit(); }
 
 template <class M1, class M2> 
-static TMV_INLINE bool CanRDivEq(
+inline bool CanRDivEq(
     const tmv::BaseMatrix_Tri_Mutable<M1>& a,
     const tmv::BaseMatrix_Tri<M2>& b)
 { return a.size() == b.size() && !a.isunit(); }

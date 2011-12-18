@@ -4,7 +4,7 @@
 #include "TMV.h"
 
 template <class M0, class M1>
-static TMV_INLINE_ND void CopyBack(
+inline void CopyBack(
     const tmv::BaseMatrix_Tri<M0>& m0, tmv::BaseMatrix_Tri_Mutable<M1>& m1)
 {
 #ifdef XXD

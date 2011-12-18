@@ -12,18 +12,19 @@
 #include "TMV_Band.h"
 #include "TMV_TestBandArith.h"
 
-template <class T1, class T2> 
+template <class M1, class M2> 
 inline bool CanAddEq(
-    const tmv::BandMatrixView<T1>& a, const tmv::BandMatrixView<T2>& b)
+    const tmv::BaseMatrix_Band_Mutable<M1>& a,
+    const tmv::BaseMatrix_Band<M2>& b)
 { 
     return a.colsize() == b.colsize() && a.rowsize() == b.rowsize() &&
         a.nhi() >= b.nhi() && a.nlo() >= b.nlo();
 }
 
-template <class T1, class T2, class T3> 
+template <class M1, class M2, class M3> 
 inline bool CanMultMM(
-    const tmv::BandMatrixView<T1>& a, const tmv::BandMatrixView<T2>& b,
-    const tmv::BandMatrixView<T3>& c)
+    const tmv::BaseMatrix_Band<M1>& a, const tmv::BaseMatrix_Band<M2>& b,
+    const tmv::BaseMatrix_Band_Mutable<M3>& c)
 { 
     return a.rowsize() == b.colsize() && a.colsize() == c.colsize() &&
         b.rowsize() == c.rowsize() &&
@@ -51,7 +52,6 @@ void TestBandMatrixArith_A()
         TestMatrixArith2<T>(bi,cbi,"Band");
         TestMatrixArith3<T>(bi,cbi,"Band");
 
-#if 0
         for(size_t j=START2;j<b.size();j++) if (i!=j) {
             if (showstartdone) {
                 std::cerr<<"Start sub-loop "<<j<<std::endl;
@@ -61,7 +61,6 @@ void TestBandMatrixArith_A()
             TestMatrixArith5<T>(bi,cbi,b[j],cb[j],"Band/Band");
             TestMatrixArith6x<T>(bi,cbi,b[j],cb[j],"Band/Band");
         }
-#endif
     }
 }
 

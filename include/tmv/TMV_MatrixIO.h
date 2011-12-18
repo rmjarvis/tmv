@@ -112,7 +112,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline void Write(std::ostream& os, const BaseMatrix_Calc<M>& m)
+    inline void Write(std::ostream& os, const BaseMatrix_Calc<M>& m)
     {
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
@@ -120,7 +120,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline void InlineWrite(
+    inline void InlineWrite(
         std::ostream& os, const BaseMatrix_Calc<M>& m)
     {
         typedef typename M::const_cview_type Mv;
@@ -129,7 +129,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline void Write(
+    inline void Write(
         std::ostream& os,
         const BaseMatrix_Calc<M>& m, typename M::float_type thresh) 
     {
@@ -140,7 +140,7 @@ namespace tmv {
 
 
     template <class M>
-    static inline void InlineWrite(
+    inline void InlineWrite(
         std::ostream& os,
         const BaseMatrix_Calc<M>& m, typename M::float_type thresh) 
     {
@@ -346,7 +346,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline void Read(std::istream& is, BaseMatrix_Rec_Mutable<M>& m)
+    inline void Read(std::istream& is, BaseMatrix_Rec_Mutable<M>& m)
     {
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
@@ -354,8 +354,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline void InlineRead(
-        std::istream& is, BaseMatrix_Rec_Mutable<M>& m)
+    inline void InlineRead(std::istream& is, BaseMatrix_Rec_Mutable<M>& m)
     {
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
@@ -370,8 +369,7 @@ namespace tmv {
     //
 
     template <class M>
-    static inline std::ostream& operator<<(
-        std::ostream& os, const BaseMatrix<M>& m)
+    inline std::ostream& operator<<(std::ostream& os, const BaseMatrix<M>& m)
     { Write(os,m.calc()); return os; }
 
     template <class M>

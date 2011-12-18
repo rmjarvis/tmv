@@ -63,7 +63,8 @@ namespace tmv {
             Matrix<T> Uinv = U;
 #endif
             const Scaling<1,typename M1::real_type> one;
-            NoAliasMultMM<false>(one,U,L,m1);
+            typename M1::noalias_type m1na = m1.noAlias();
+            MultMM<false>(one,U,L,m1na);
             P.inverse().applyOnRight(m1);
 #ifdef XDEBUG_LU
             if (Norm(m1*A-T(1)) > 1.e-3*Norm(A)) {
@@ -172,7 +173,7 @@ namespace tmv {
     };
 
     template <class M1>
-    static inline void InlineLU_Inverse(
+    inline void InlineLU_Inverse(
         BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& P)
     {
         const int cs = M1::_colsize;
@@ -183,7 +184,7 @@ namespace tmv {
     }
 
     template <class M1>
-    static inline void LU_Inverse(
+    inline void LU_Inverse(
         BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& P)
     {
         const int cs = M1::_colsize;
@@ -229,37 +230,39 @@ namespace tmv {
             typename M1::const_unit_lowertri_type L = m1.unitLowerTri();
             typename M1::const_uppertri_type U = m1.upperTri();
             Scaling<1,typename M2::real_type> one;
+            typedef typename M2::noalias_type M2na;
+            M2na m2na = m2.noAlias();
 
             if (trans) {
-                typename M2::uppertri_type uinv = m2.upperTri();
-                NoAliasCopy(U,uinv);
+                typename M2na::uppertri_type uinv = m2na.upperTri();
+                Copy(U,uinv);
                 uinv.invertSelf();
                 // m2 = uinv.transpose() * uinv.conjugate();
                 // -> m2.transpose() = uinv.adjoint() * uinv;
                 // Doing it this way means that the NoAlias call works,
                 // even though there actually are aliases.
-                typename M2::transpose_type m2T = m2.transpose();
-                NoAliasMultMM<false>(one,uinv.adjoint(),uinv,m2T);
+                typename M2na::transpose_type m2T = m2na.transpose();
+                MultMM<false>(one,uinv.adjoint(),uinv,m2T);
                 // m2 /= L.transpose();
-                NoAliasTriLDivEq(m2,L.transpose());
+                TriLDivEq(m2na,L.transpose());
                 // m2 %= L.conjugate();
                 // m2 = m2 * L.conjugate()^-1
                 // -> m2.adjoint() = L.transpose()^-1 * m2.adjoint()
-                typename M2::adjoint_type m2t = m2.adjoint();
-                NoAliasTriLDivEq(m2t,L.transpose());
+                typename M2na::adjoint_type m2t = m2na.adjoint();
+                TriLDivEq(m2t,L.transpose());
                 P.inverse().applyOnRight(m2);
                 P.applyOnLeft(m2);
             } else {
-                typename M2::unit_lowertri_type linv = m2.unitLowerTri();
-                NoAliasCopy(L,linv);
+                typename M2na::unit_lowertri_type linv = m2na.unitLowerTri();
+                Copy(L,linv);
                 linv.invertSelf();
                 // m2 = linv * linv.adjoint();
-                NoAliasMultMM<false>(one,linv,linv.adjoint(),m2);
+                MultMM<false>(one,linv,linv.adjoint(),m2na);
                 // m2 /= U;
-                NoAliasTriLDivEq(m2,U);
+                TriLDivEq(m2na,U);
                 // m2 %= U.adjoint();
-                typename M2::adjoint_type m2t = m2.adjoint();
-                NoAliasTriLDivEq(m2t,U);
+                typename M2na::adjoint_type m2t = m2na.adjoint();
+                TriLDivEq(m2t,U);
             }
         }
     };
@@ -385,7 +388,7 @@ namespace tmv {
     };
 
     template <class M1, class M2>
-    static inline void InlineLU_InverseATA(
+    inline void InlineLU_InverseATA(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         const bool trans, BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -399,7 +402,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void LU_InverseATA(
+    inline void LU_InverseATA(
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         const bool trans, BaseMatrix_Rec_Mutable<M2>& m2)
     {

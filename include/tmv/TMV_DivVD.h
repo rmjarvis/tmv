@@ -762,17 +762,20 @@ namespace tmv {
                     ElemDivVV_Helper<-2,s,ix,T,V1,V2,V3>::call(x,v1,v2,v3); 
                 } else {
                     // Need a temporary for v2
-                    NoAliasElemDivVV(x,v1,v2.copy(),v3);
+                    typename V3::noalias_type v3na = v3.noAlias();
+                    ElemDivVV(x,v1,v2.copy(),v3na);
                 }
             } else {
                 if (noclobber2) {
                     // Need a temporary for v1
-                    NoAliasElemDivVV(x,v1.copy(),v2,v3);
+                    typename V3::noalias_type v3na = v3.noAlias();
+                    ElemDivVV(x,v1.copy(),v2,v3na);
                 } else {
                     // Need a temporary for v3
                     typename V3::copy_type v3c(v3.size());
-                    NoAliasElemDivVV(x,v1,v2,v3c);
-                    NoAliasCopy(v3c,v3);
+                    ElemDivVV(x,v1,v2,v3c);
+                    typename V3::noalias_type v3na = v3.noAlias();
+                    Copy(v3c,v3na);
                 }
             }
         }
@@ -897,7 +900,7 @@ namespace tmv {
     };
 
     template <int ix, class T, class V1, class V2, class V3>
-    static inline void ElemDivVV(
+    inline void ElemDivVV(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -917,27 +920,7 @@ namespace tmv {
     }
 
     template <int ix, class T, class V1, class V2, class V3>
-    static inline void NoAliasElemDivVV(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
-        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
-        TMVAssert(v1.size() == v2.size());
-        TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::_size,V2::_size>::size;
-        const int s = Sizes<s12,V3::_size>::size;
-        typedef typename V1::const_cview_type V1v;
-        typedef typename V2::const_cview_type V2v;
-        typedef typename V3::cview_type V3v;
-        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
-        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
-        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
-        ElemDivVV_Helper<-2,s,ix,T,V1v,V2v,V3v>::call(x,v1v,v2v,v3v);
-    }
-
-    template <int ix, class T, class V1, class V2, class V3>
-    static inline void InlineElemDivVV(
+    inline void InlineElemDivVV(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -957,7 +940,7 @@ namespace tmv {
     }
 
     template <int ix, class T, class V1, class V2, class V3>
-    static inline void InlineAliasElemDivVV(
+    inline void InlineAliasElemDivVV(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -976,55 +959,8 @@ namespace tmv {
         ElemDivVV_Helper<98,s,ix,T,V1v,V2v,V3v>::call(x,v1v,v2v,v3v);
     }
 
-    template <int ix, class T, class V1, class V2, class V3>
-    static inline void AliasElemDivVV(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
-        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
-        TMVAssert(v1.size() == v2.size());
-        TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::_size,V2::_size>::size;
-        const int s = Sizes<s12,V3::_size>::size;
-        typedef typename V1::const_cview_type V1v;
-        typedef typename V2::const_cview_type V2v;
-        typedef typename V3::cview_type V3v;
-        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
-        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
-        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
-        ElemDivVV_Helper<99,s,ix,T,V1v,V2v,V3v>::call(x,v1v,v2v,v3v);
-    }
-
     template <int ix, class T, class V1, class M2, class V3>
     static void LDiv(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
-    {
-        if (m2.isSingular()) ThrowSingular("DiagMatrix");
-        ElemDivVV(x,v1,m2.diag(),v3);
-    }
-
-    template <int ix, class T, class V1, class M2, class V3>
-    static void NoAliasLDiv(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
-    {
-        if (m2.isSingular()) ThrowSingular("DiagMatrix");
-        ElemDivVV(x,v1,m2.diag(),v3);
-    }
-
-    template <int ix, class T, class V1, class M2, class V3>
-    static void InlineLDiv(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
-    {
-        if (m2.isSingular()) ThrowSingular("DiagMatrix");
-        ElemDivVV(x,v1,m2.diag(),v3);
-    }
-
-    template <int ix, class T, class V1, class M2, class V3>
-    static void AliasLDiv(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseMatrix_Diag<M2>& m2, BaseVector_Mutable<V3>& v3)
     {

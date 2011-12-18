@@ -131,7 +131,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static inline void unroll(V1& v1, V2& v2)
+            static TMV_INLINE void unroll(V1& v1, V2& v2)
             {
                 Unroller<I,N/2>::unroll(v1,v2);
                 Unroller<I+N/2,N-N/2>::unroll(v1,v2);
@@ -140,12 +140,12 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static inline void unroll(V1& v1, V2& v2)
+            static TMV_INLINE void unroll(V1& v1, V2& v2)
             { TMV_SWAP(v1.ref(I),v2.ref(I)); }
         };
         template <int I>
         struct Unroller<I,0>
-        { static inline void unroll(V1& v1, V2& v2) {} };
+        { static TMV_INLINE void unroll(V1& v1, V2& v2) {} };
         static inline void call(V1& v1, V2& v2)
         { Unroller<0,s>::unroll(v1,v2); }
     };
@@ -264,8 +264,8 @@ namespace tmv {
             } else {
                 // Need a temporary
                 typename V1::copy_type v1c = v1;
-                NoAliasCopy(v2,v1);
-                NoAliasCopy(v1c,v2);
+                v1.noAlias() = v2;
+                v2.noAlias() = v1c;
             }
         }
     };
@@ -367,7 +367,7 @@ namespace tmv {
     };
 
     template <class V1, class V2>
-    static inline void DoSwap(
+    inline void DoSwap(
         BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
         typedef typename V1::value_type T1;
@@ -384,24 +384,7 @@ namespace tmv {
     }
 
     template <class V1, class V2>
-    static inline void NoAliasSwap(
-        BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
-    {
-        typedef typename V1::value_type T1;
-        typedef typename V2::value_type T2;
-        TMVStaticAssert((Traits2<T1,T2>::sametype));
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
-        TMVAssert(v1.size() == v2.size());
-        const int s = Sizes<V1::_size,V2::_size>::size;
-        typedef typename V1::cview_type V1v;
-        typedef typename V2::cview_type V2v;
-        TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
-        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
-        SwapV_Helper<-2,s,V1v,V2v>::call(v1v,v2v);
-    }
-
-    template <class V1, class V2>
-    static inline void InlineSwap(
+    inline void InlineSwap(
         BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
         typedef typename V1::value_type T1;
@@ -418,7 +401,7 @@ namespace tmv {
     }
 
     template <class V1, class V2>
-    static inline void InlineAliasSwap(
+    inline void InlineAliasSwap(
         BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
     {
         typedef typename V1::value_type T1;
@@ -435,24 +418,7 @@ namespace tmv {
     }
 
     template <class V1, class V2>
-    static inline void AliasSwap(
-        BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
-    {
-        typedef typename V1::value_type T1;
-        typedef typename V2::value_type T2;
-        TMVStaticAssert((Traits2<T1,T2>::sametype));
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
-        TMVAssert(v1.size() == v2.size());
-        const int s = Sizes<V1::_size,V2::_size>::size;
-        typedef typename V1::cview_type V1v;
-        typedef typename V2::cview_type V2v;
-        TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
-        TMV_MAYBE_REF(V2,V2v) v2v = v2.cView();
-        SwapV_Helper<99,s,V1v,V2v>::call(v1v,v2v);
-    }
-
-    template <class V1, class V2>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         BaseVector_Mutable<V1>& v1, BaseVector_Mutable<V2>& v2)
     { DoSwap(v1,v2); }
 

@@ -5,7 +5,9 @@
 // NODIV        Don't do Det, Norm2, etc.
 // NOSV         Only skip division stuff that requires SVD, like Norm2.
 // NOMIX        Don't do arithmetic that mixes with regular Vector/Matrix.
-// ALIASOK      Include alised arithmetic, like m = m + x.
+// NOALIAS      Skip alised arithmetic, like v = m * v.
+// EXPLICIT_ALIAS  For alised arithmetic, use explicit alias(): v.alias()=m*v
+// NOASSIGN     Skip tests of assignment to the provided matrices
 // SYMOPROD     Require outer product statements to be symmetric (v1 ^ v1).
 // NOADDEQ      Skip m += m2 and similar.
 // NOADDEQX     Skip m += x and similar.
@@ -16,8 +18,14 @@
 // XXD          Extra debug statements. XXDEBUG1, etc.
 
 
+#ifdef EXPLICIT_ALIAS
+#define ALIAS .alias()
+#else
+#define ALIAS 
+#endif
+
 template <class M1, class M2>
-static TMV_INLINE_ND bool CanAdd(
+inline bool CanAdd(
     const tmv::BaseMatrix<M1>& a, const tmv::BaseMatrix<M2>& b)
 {
 #ifdef XXD
@@ -31,7 +39,7 @@ static TMV_INLINE_ND bool CanAdd(
 }
 
 template <class M1, class M2>
-static TMV_INLINE_ND bool CanAddEq(
+inline bool CanAddEq(
     const tmv::BaseMatrix_Mutable<M1>& a, const tmv::BaseMatrix<M2>& b)
 {
 #ifdef XXD
@@ -45,7 +53,7 @@ static TMV_INLINE_ND bool CanAddEq(
 }
 
 template <class M, class T2>
-static TMV_INLINE_ND bool CanAddX(const tmv::BaseMatrix<M>& a, const T2 x)
+inline bool CanAddX(const tmv::BaseMatrix<M>& a, const T2 x)
 {
 #ifdef XXD
     if (showtests) {
@@ -58,7 +66,7 @@ static TMV_INLINE_ND bool CanAddX(const tmv::BaseMatrix<M>& a, const T2 x)
 }
 
 template <class M, class T2>
-static TMV_INLINE_ND bool CanAddEqX(const tmv::BaseMatrix_Mutable<M>& a, const T2 x)
+inline bool CanAddEqX(const tmv::BaseMatrix_Mutable<M>& a, const T2 x)
 {
 #ifdef XXD
     if (showtests) {
@@ -71,7 +79,7 @@ static TMV_INLINE_ND bool CanAddEqX(const tmv::BaseMatrix_Mutable<M>& a, const T
 }
 
 template <class M, class T2>
-static TMV_INLINE_ND bool CanMultX(const tmv::BaseMatrix<M>& a, const T2 x)
+inline bool CanMultX(const tmv::BaseMatrix<M>& a, const T2 x)
 {
 #ifdef XXD
     if (showtests) {
@@ -84,7 +92,7 @@ static TMV_INLINE_ND bool CanMultX(const tmv::BaseMatrix<M>& a, const T2 x)
 }
 
 template <class M, class T2>
-static TMV_INLINE_ND bool CanMultEqX(const tmv::BaseMatrix_Mutable<M>& a, const T2 x)
+inline bool CanMultEqX(const tmv::BaseMatrix_Mutable<M>& a, const T2 x)
 {
 #ifdef XXD
     if (showtests) {
@@ -97,7 +105,7 @@ static TMV_INLINE_ND bool CanMultEqX(const tmv::BaseMatrix_Mutable<M>& a, const 
 }
 
 template <class M1, class M2>
-static TMV_INLINE_ND bool CanMultMM(
+inline bool CanMultMM(
     const tmv::BaseMatrix<M1>& a, const tmv::BaseMatrix<M2>& b)
 {
 #ifdef XXD
@@ -111,7 +119,7 @@ static TMV_INLINE_ND bool CanMultMM(
 }
 
 template <class M1, class V2>
-static TMV_INLINE_ND bool CanMultMV(
+inline bool CanMultMV(
     const tmv::BaseMatrix<M1>& a, const tmv::BaseVector<V2>& b)
 {
 #ifdef XXD
@@ -125,7 +133,7 @@ static TMV_INLINE_ND bool CanMultMV(
 }
 
 template <class V1, class M2>
-static TMV_INLINE_ND bool CanMultVM(
+inline bool CanMultVM(
     const tmv::BaseVector<V1>& a, const tmv::BaseMatrix<M2>& b)
 {
 #ifdef XXD
@@ -139,7 +147,7 @@ static TMV_INLINE_ND bool CanMultVM(
 }
 
 template <class M1, class M2, class M3>
-static TMV_INLINE_ND bool CanMultMM(
+inline bool CanMultMM(
     const tmv::BaseMatrix<M1>& a, const tmv::BaseMatrix<M2>& b,
     const tmv::BaseMatrix<M3>& c)
 {
@@ -156,7 +164,7 @@ static TMV_INLINE_ND bool CanMultMM(
 }
 
 template <class M1, class V2, class V3>
-static TMV_INLINE_ND bool CanMultMV(
+inline bool CanMultMV(
     const tmv::BaseMatrix<M1>& a, const tmv::BaseVector<V2>& b,
     const tmv::BaseVector<V3>& c)
 {
@@ -172,7 +180,7 @@ static TMV_INLINE_ND bool CanMultMV(
 }
 
 template <class V1, class M2, class V3>
-static TMV_INLINE_ND bool CanMultVM(
+inline bool CanMultVM(
     const tmv::BaseVector<V1>& a, const tmv::BaseMatrix<M2>& b,
     const tmv::BaseVector<V3>& c)
 {
@@ -188,7 +196,7 @@ static TMV_INLINE_ND bool CanMultVM(
 }
 
 template <class M1, class M2, class M3>
-static TMV_INLINE_ND bool CanMultXMM(
+inline bool CanMultXMM(
     const tmv::BaseMatrix<M1>& a, const tmv::BaseMatrix<M2>& b,
     const tmv::BaseMatrix<M3>& c)
 {
@@ -204,7 +212,7 @@ static TMV_INLINE_ND bool CanMultXMM(
 }
 
 template <class V0, class V1>
-static TMV_INLINE_ND void CopyBack(
+inline void CopyBack(
     const tmv::BaseVector<V0>& v0, tmv::BaseVector_Mutable<V1>& v1)
 {
 #ifdef XXD
@@ -218,7 +226,7 @@ static TMV_INLINE_ND void CopyBack(
 }
 
 template <class M0, class M1>
-static TMV_INLINE_ND void CopyBack(
+inline void CopyBack(
     const tmv::BaseMatrix<M0>& m0, tmv::BaseMatrix_Mutable<M1>& m1)
 {
 #ifdef XXD
@@ -270,12 +278,12 @@ static void DoTestMa_Basic(const MM& a, std::string label)
     typedef typename MM::real_type RT;
     typedef typename MM::value_type T;
     typedef typename MM::float_type FT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start Ma "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
-    }
 #endif
+    }
 
     tmv::Matrix<T> m = a;
     FT eps = EPS * FT(m.colsize()+m.rowsize());
@@ -476,13 +484,13 @@ static void DoTestMX1a_Basic(const MM& a, T2 x, std::string label)
     typedef typename MM::value_type T;
     typedef typename MM::real_type RT;
     typedef typename MM::float_type FT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MX1a"<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"x = "<<tmv::TMV_Text(x)<<" "<<x<<std::endl;
-    }
 #endif
+    }
 
     tmv::Matrix<T> m = a;
 
@@ -567,12 +575,14 @@ static void DoTestMX2a_Basic(MM& a, T2 x, std::string label)
     typedef typename MM::value_type T;
     typedef typename MM::real_type RT;
     typedef typename MM::float_type FT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MX2a"<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"x = "<<tmv::TMV_Text(x)<<" "<<x<<std::endl;
+#endif
     }
+#ifdef XXD
     if (XXDEBUG3) {
         std::cout<<"a = "<<a<<std::endl;
     }
@@ -750,12 +760,14 @@ static void DoTestMV1a_Basic(const MM& a, const V& b, std::string label)
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
     typedef typename tmv::Traits2<Ta,T>::type PT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MV1a"<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+#endif
     }
+#ifdef XXD
     if (XXDEBUG4) {
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
@@ -849,12 +861,14 @@ static void DoTestVM1a_Basic(const MM& a, const V& b, std::string label)
     typedef typename V::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VM1a"<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+#endif
     }
+#ifdef XXD
     if (XXDEBUG4) {
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
@@ -1119,9 +1133,9 @@ static void DoTestVM1C(MM& a, V& b, std::string label)
 }
 
 template <class T> 
-static TMV_INLINE void SetZ(T& z) { z = T(5); }
+inline void SetZ(T& z) { z = T(5); }
 template <class T>
-static TMV_INLINE void SetZ(std::complex<T>& z) { z = std::complex<T>(3,4); }
+inline void SetZ(std::complex<T>& z) { z = std::complex<T>(3,4); }
 
 template <class MM, class V> 
 static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
@@ -1131,12 +1145,14 @@ static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
     typedef typename V::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MV2a"<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+#endif
     }
+#ifdef XXD
     if (XXDEBUG5) {
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
@@ -1207,10 +1223,10 @@ static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
         c = c0;
     }
 
-#ifdef ALIASOK
+#ifndef NOALIAS
     if (CanMultMV(a,b,b)) {
         tmv::Vector<T> prod = m*v;
-        b = a*b;
+        b ALIAS = a*b;
 #ifdef XXD
         if (XXDEBUG5) {
             std::cout<<"CanMult("<<tmv::TMV_Text(a)<<","<<tmv::TMV_Text(b)<<","<<tmv::TMV_Text(b)<<")\n";
@@ -1222,22 +1238,22 @@ static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
 #endif
         Assert(Equal(b,prod,eps),label+" b=a*b");
         b = v;
-        b += a*b;
+        b ALIAS += a*b;
         Assert(Equal(b,(v+prod),eps2),label+" b+=a*b");
         b = v;
-        b -= a*b;
+        b ALIAS -= a*b;
         Assert(Equal(b,(v-prod),eps2),label+" b-=a*b");
         b = v;
         RT x(5);
         T z; SetZ(z);
-        b = x*a*b;
+        b ALIAS = x*a*b;
         Assert(Equal(b,x*prod,x*eps),label+" b=x*a*b");
         b = v;
-        b = z*a*b;
+        b ALIAS = z*a*b;
         Assert(Equal(b,z*prod,x*eps),label+" b=z*a*b");
         b = v;
     }
-#endif // ALIAS
+#endif // !NOALIAS
     if (showstartdone) std::cout<<"Done MV2a"<<std::endl;
 }
 
@@ -1312,53 +1328,53 @@ static void DoTestMV2a_Full(const MM& a, V& b, std::string label)
         c = c0;
     }
 
-#ifdef ALIASOK
+#ifndef NOALIAS
     if (CanMultMV(a,b,b)) {
         tmv::Vector<T> prod = m*v;
         RT x(5);
         T z; SetZ(z);
         b = v;
-        b += x*a*b;
+        b ALIAS += x*a*b;
         Assert(Equal(b,(v+x*prod),x*eps2),label+" b+=x*a*b");
         b = v;
-        b += z*a*b;
+        b ALIAS += z*a*b;
         Assert(Equal(b,(v+z*prod),x*eps2),label+" b+=z*a*b");
         b = v;
-        b = -a*b;
+        b ALIAS = -a*b;
         Assert(Equal(b,(-prod),eps),label+" b=-a*b");
         b = v;
-        b = -x*a*b;
+        b ALIAS = -x*a*b;
         Assert(Equal(b,(-x*prod),x*eps),label+" b=-x*a*b");
         b = v;
-        b = -z*a*b;
+        b ALIAS = -z*a*b;
         Assert(Equal(b,(-z*prod),x*eps),label+" b=-z*a*b");
         b = v;
-        b += -a*b;
+        b ALIAS += -a*b;
         Assert(Equal(b,(v-prod),eps2),label+" b+=-a*b");
         b = v;
-        b -= -a*b;
+        b ALIAS -= -a*b;
         Assert(Equal(b,(v+prod),eps2),label+" b-=-a*b");
         b = v;
-        b += -x*a*b;
+        b ALIAS += -x*a*b;
         Assert(Equal(b,(v-x*prod),x*eps2),label+" b+=-x*a*b");
         b = v;
-        b -= x*a*b;
+        b ALIAS -= x*a*b;
         Assert(Equal(b,(v-x*prod),x*eps2),label+" b-=x*a*b");
         b = v;
-        b -= -x*a*b;
+        b ALIAS -= -x*a*b;
         Assert(Equal(b,(v+x*prod),x*eps2),label+" b-=-x*a*b");
         b = v;
-        b += -z*a*b;
+        b ALIAS += -z*a*b;
         Assert(Equal(b,(v-z*prod),x*eps2),label+" b+=-z*a*b");
         b = v;
-        b -= z*a*b;
+        b ALIAS -= z*a*b;
         Assert(Equal(b,(v-z*prod),x*eps2),label+" b-=z*a*b");
         b = v;
-        b -= -z*a*b;
+        b ALIAS -= -z*a*b;
         Assert(Equal(b,(v+z*prod),x*eps2),label+" b-=-z*a*b");
         b = v;
     }
-#endif // ALIAS
+#endif // !NOALIAS
     if (showstartdone) std::cout<<"Done MV2a_Full"<<std::endl;
 #endif
 }
@@ -1371,12 +1387,14 @@ static void DoTestVM2a_Basic(const MM& a, V& b, std::string label)
     typedef typename V::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VM2a"<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+#endif
     }
+#ifdef XXD
     if (XXDEBUG5) {
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
@@ -1435,8 +1453,8 @@ static void DoTestVM2a_Basic(const MM& a, V& b, std::string label)
         b *= a;
         Assert(Equal(b,prod,eps),label+" b*=a");
         b = v;
-#ifdef ALIASOK
-        b = b*a;
+#ifndef NOALIAS
+        b ALIAS = b*a;
 #ifdef XXD
         if (XXDEBUG5) {
             std::cout<<"b = b*a = "<<b<<std::endl;
@@ -1447,7 +1465,7 @@ static void DoTestVM2a_Basic(const MM& a, V& b, std::string label)
 #endif
         Assert(Equal(b,prod,eps),label+" b=b*a");
         b = v;
-        b += b*a;
+        b ALIAS += b*a;
         Assert(Equal(b,(v+prod),eps2),label+" b+=b*a");
         b = v;
 #endif
@@ -1540,53 +1558,53 @@ static void DoTestVM2a_Full(const MM& a, V& b, std::string label)
         b *= -a;
         Assert(Equal(b,(-prod),eps),label+" b*=-a");
         b = v;
-#ifdef ALIASOK
-        b = x*b*a;
+#ifndef NOALIAS
+        b ALIAS = x*b*a;
         Assert(Equal(b,x*prod,x*eps),label+" b=x*b*a");
         b = v;
-        b = z*b*a;
+        b ALIAS = z*b*a;
         Assert(Equal(b,z*prod,x*eps),label+" b=z*b*a");
         b = v;
-        b += x*b*a;
+        b ALIAS += x*b*a;
         Assert(Equal(b,(v+x*prod),x*eps2),label+" b+=x*b*a");
         b = v;
-        b += z*b*a;
+        b ALIAS += z*b*a;
         Assert(Equal(b,(v+z*prod),x*eps2),label+" b+=z*b*a");
         b = v;
-        b = -b*a;
+        b ALIAS = -b*a;
         Assert(Equal(b,(-prod),eps),label+" b=-b*a");
         b = v;
-        b = -x*b*a;
+        b ALIAS = -x*b*a;
         Assert(Equal(b,(-x*prod),x*eps),label+" b=-x*b*a");
         b = v;
-        b = -z*b*a;
+        b ALIAS = -z*b*a;
         Assert(Equal(b,(-z*prod),x*eps),label+" b=-z*b*a");
         b = v;
-        b += -b*a;
+        b ALIAS += -b*a;
         Assert(Equal(b,(v-prod),eps2),label+" b+=-b*a");
         b = v;
-        b -= b*a;
+        b ALIAS -= b*a;
         Assert(Equal(b,(v-prod),eps2),label+" b-=b*a");
         b = v;
-        b -= -b*a;
+        b ALIAS -= -b*a;
         Assert(Equal(b,(v+prod),eps2),label+" b-=-b*a");
         b = v;
-        b += -x*b*a;
+        b ALIAS += -x*b*a;
         Assert(Equal(b,(v-x*prod),x*eps2),label+" b+=-x*b*a");
         b = v;
-        b -= x*b*a;
+        b ALIAS -= x*b*a;
         Assert(Equal(b,(v-x*prod),x*eps2),label+" b-=x*b*a");
         b = v;
-        b -= -x*b*a;
+        b ALIAS -= -x*b*a;
         Assert(Equal(b,(v+x*prod),x*eps2),label+" b-=-x*b*a");
         b = v;
-        b += -z*b*a;
+        b ALIAS += -z*b*a;
         Assert(Equal(b,(v-z*prod),x*eps2),label+" b+=-z*b*a");
         b = v;
-        b -= z*b*a;
+        b ALIAS -= z*b*a;
         Assert(Equal(b,(v-z*prod),x*eps2),label+" b-=z*b*a");
         b = v;
-        b -= -z*b*a;
+        b ALIAS -= -z*b*a;
         Assert(Equal(b,(v+z*prod),x*eps2),label+" b-=-z*b*a");
         b = v;
 #endif
@@ -1731,14 +1749,14 @@ static void DoTestMV3a_Basic(
     typedef typename V2::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MV3a"<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
-    }
 #endif
+    }
 
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Ta> mt = Transpose(a);
@@ -1944,14 +1962,14 @@ static void DoTestVM3a_Basic(
     typedef typename V2::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VM3a"<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
-    }
 #endif
+    }
 
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Ta> mt = Transpose(a);
@@ -2214,12 +2232,14 @@ static void DoTestMM1a_Basic(const M1& a, const M2& b, std::string label)
     typedef typename tmv::Traits<Tb>::real_type RT;
     typedef typename tmv::Traits<Tb>::complex_type CT;
     typedef typename tmv::Traits2<T,Tb>::type PT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MM1a"<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+#endif
     }
+#ifdef XXD
     if (XXDEBUG7) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" = "<<b<<std::endl;
@@ -2384,12 +2404,14 @@ static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
     typedef typename M2::value_type Tb;
     typedef typename M1::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MM2a"<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" "<<b<<std::endl;
+#endif
     }
+#ifdef XXD
     if (XXDEBUG8) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
@@ -2436,8 +2458,8 @@ static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
 #endif
         Assert(Equal(a,m4,eps),label+" a += b");
         CopyBack(a0,a);
-#ifdef ALIASOK
-        a = a+b;
+#ifndef NOALIAS
+        a ALIAS = a+b;
         m4 = m1+m2;
         if (XXDEBUG8) {
             std::cout<<"a.ptr = "<<a.cptr()<<std::endl;
@@ -2490,12 +2512,12 @@ static void DoTestMM2a_Full(M1& a, const M2& b, std::string label)
         m4 = m1+m2;
         Assert(Equal(a,m4,eps),label+" a -= -b");
         CopyBack(a0,a);
-#ifdef ALIASOK
-        a = a-b;
+#ifndef NOALIAS
+        a ALIAS = a-b;
         m4 = m1-m2;
         Assert(Equal(a,m4,eps),label+" a = a-b");
         CopyBack(a0,a);
-        a = b+a; 
+        a ALIAS = b+a; 
         m4 = m2+m1;
         Assert(Equal(a,m4,eps),label+" a = b+a");
         CopyBack(a0,a);
@@ -2503,7 +2525,7 @@ static void DoTestMM2a_Full(M1& a, const M2& b, std::string label)
             std::cout<<"a = "<<a<<std::endl;
             std::cout<<"b = "<<b<<std::endl;
         }
-        a = b-a;
+        a ALIAS = b-a;
         m4 = m2-m1;
         if (XXDEBUG8) {
             std::cout<<"a = b-a = "<<a<<std::endl;
@@ -2564,12 +2586,14 @@ static void DoTestMM3a_Basic(const M1& a, const M2& b, std::string label)
     typedef typename M1::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits2<T,Tb>::type PT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MM3a"<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+#endif
     }
+#ifdef XXD
     if (XXDEBUG7) {
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
@@ -2612,13 +2636,13 @@ static void DoTestMM3a_Full(const M1& a, const M2& b, std::string label)
     DoTestMM3a_Basic(a,b,label);
 
 #if (XTEST & 16)
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MM3a Full"<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
-    }
 #endif
+    }
 
     if (CanMultMM(a,b)) {
         tmv::Matrix<T> m1 = a;
@@ -2700,13 +2724,13 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
     typedef typename M1::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits2<T,Tb>::type PT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MM4a"<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
-    }
 #endif
+    }
 
     if (CanMultMM(a,b)) {
 #ifdef XXD
@@ -2791,8 +2815,8 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
 #endif
             Assert(Equal(a,m4,eps),label+" a *= b");
             CopyBack(a0,a);
-#ifdef ALIASOK
-            a = a*b;
+#ifndef NOALIAS
+            a ALIAS = a*b;
             m4 = mm;
             Assert(Equal(a,m4,eps),label+" a = a*b");
             CopyBack(a0,a);
@@ -2923,32 +2947,32 @@ static void DoTestMM4a_Full(M1& a, const M2& b, std::string label)
             m4 = -z*mm;
             Assert(Equal(a,m4,x*eps),label+" a *= -z*b");
             CopyBack(a0,a);
-#ifdef ALIASOK
-            a = -a*b;
+#ifndef NOALIAS
+            a ALIAS = -a*b;
             m4 = -mm;
             Assert(Equal(a,m4,eps),label+" a = -a*b");
             CopyBack(a0,a);
-            a += a*b;
+            a ALIAS += a*b;
             m4 = m0 + mm;
             Assert(Equal(a,m4,eps2),label+" a += a*b");
             CopyBack(a0,a);
-            a += x*a*b;
+            a ALIAS += x*a*b;
             m4 = m0 + x*mm;
             Assert(Equal(a,m4,x*eps2),label+" a += x*a*b");
             CopyBack(a0,a);
-            a += z*a*b;
+            a ALIAS += z*a*b;
             m4 = m0 + z*mm;
             Assert(Equal(a,m4,x*eps2),label+" a += z*a*b");
             CopyBack(a0,a);
-            a -= a*b;
+            a ALIAS -= a*b;
             m4 = m0 - mm;
             Assert(Equal(a,m4,eps2),label+" a -= a*b");
             CopyBack(a0,a);
-            a -= x*a*b;
+            a ALIAS -= x*a*b;
             m4 = m0 - x*mm;
             Assert(Equal(a,m4,x*eps2),label+" a -= x*a*b");
             CopyBack(a0,a);
-            a -= z*a*b;
+            a ALIAS -= z*a*b;
             m4 = m0 - z*mm;
             Assert(Equal(a,m4,x*eps2),label+" a -= z*a*b");
             CopyBack(a0,a);
@@ -3007,14 +3031,14 @@ static void DoTestMM5a_Basic(
     typedef typename M3::value_type T;
     typedef typename M3::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start MM5a"<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
-    }
 #endif
+    }
 
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Tb> m2 = b;
@@ -3050,6 +3074,11 @@ static void DoTestMM5a_Basic(
 #endif
         Assert(Equal(c,m3,eps),label+" c=a*b");
         CopyBack(c0,c);
+#ifdef XXD
+        if (XXDEBUG9) {
+            std::cout<<"After c=c0: c = "<<c<<std::endl;
+        }
+#endif
 #ifndef BASIC_MULTMM_ONLY
         c += a*b;
         m3 = c0 + mm;
@@ -3207,13 +3236,15 @@ static void DoTestOProda_Basic(
     typedef typename M::value_type T;
     typedef typename M::float_type FT;
     typedef typename tmv::Traits<T>::real_type RT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start OProd"<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"v1 = "<<tmv::TMV_Text(v1)<<std::endl;
         std::cout<<"v2 = "<<tmv::TMV_Text(v2)<<std::endl;
+#endif
     }
+#ifdef XXD
     if (XXDEBUG9) {
         std::cout<<"a = "<<a<<std::endl;
         std::cout<<"v1 = "<<v1<<std::endl;
@@ -3426,13 +3457,13 @@ template <class T, class M, class CM>
 static void TestMatrixArith1(M& a, CM& ca, std::string label)
 {
     typedef std::complex<T> CT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith1 "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
-    }
 #endif
+    }
 
     CT z(9,-2);
     T x = 12;
@@ -3461,12 +3492,14 @@ static void TestMatrixArith1(M& a, CM& ca, std::string label)
 #endif
 #endif
 
-#ifdef ALIASOK
+#ifndef NOALIAS
+#ifndef EXPLICIT_ALIAS
     DoTestMM2RR(a,a,label+" self_arith");
     DoTestMM4RR(a,a,label+" self_arith");
 #ifndef NO_COMPLEX_ARITH
     DoTestMM2CC(ca,ca,label+" self_arith");
     DoTestMM4CC(ca,ca,label+" self_arith");
+#endif
 #endif
 #endif
 
@@ -3481,17 +3514,17 @@ static void TestMatrixArith2a(
     M& a, CM& ca, V1& b, CV1& cb, 
     V2& c, CV2& cc, std::string label)
 {
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith2a "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
         std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
-    }
 #endif
+    }
     DoTestMV1R(a,b,label+" R,R");
 #ifndef NO_COMPLEX_ARITH
     DoTestMV1C(ca,cb,label+" C,C");
@@ -3520,17 +3553,17 @@ static void TestMatrixArith2b(
     M& a, CM& ca, V1& b, CV1& cb, 
     V2& c, CV2& cc, std::string label)
 {
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith2b "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
         std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
-    }
 #endif
+    }
 
     DoTestVM1R(a,c,label+" R,R");
 #ifndef NO_COMPLEX_ARITH
@@ -3597,17 +3630,17 @@ static void TestMatrixArith3a(
     M& a, CM& ca, V1& b, CV1& cb,
     V2& c, CV2& cc, std::string label)
 {
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith3a "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
         std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
-    }
 #endif
+    }
 
     DoTestMV3R(a,b,c,label+" R,R,R");
 #ifndef NO_COMPLEX_ARITH
@@ -3628,17 +3661,17 @@ static void TestMatrixArith3b(
     M& a, CM& ca, V1& b, CV1& cb,
     V2& c, CV2& cc, std::string label)
 {
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith3b "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
         std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
-    }
 #endif
+    }
 
     DoTestVM3R(a,c,b,label+" R,R,R");
 #ifndef NO_COMPLEX_ARITH
@@ -3700,15 +3733,15 @@ template <class T, class M1, class CM1, class M2, class CM2>
 static void TestMatrixArith4(
     M1& a, CM1& ca, M2& b, CM2& cb, std::string label)
 {
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith4 "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
-    }
 #endif
+    }
 
     DoTestMM1RR(a,b,label+" R,R");
 #ifndef NOASSIGN
@@ -3736,15 +3769,15 @@ template <class T, class M1, class CM1, class M2, class CM2>
 static void TestMatrixArith5(
     M1& a, CM1& ca, M2& b, CM2& cb, std::string label)
 {
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith5 "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
-    }
 #endif
+    }
 
     DoTestMM3RR(a,b,label+" R,R");
 #ifndef NOASSIGN
@@ -3773,17 +3806,17 @@ static void TestMatrixArith6(
     M1& a, CM1& ca,
     M2& b, CM2& cb, M3& c, CM3& cc, std::string label)
 {
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith6 "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
         std::cout<<"c = "<<tmv::TMV_Text(c)<<"  "<<c<<std::endl;
         std::cout<<"cc = "<<tmv::TMV_Text(cc)<<"  "<<cc<<std::endl;
-    }
 #endif
+    }
 
     DoTestMM5R(a,b,c,label+" R,R,R");
 #ifndef NO_COMPLEX_ARITH
@@ -3833,17 +3866,17 @@ static void TestMatrixArith7(
     M& a, CM& ca, V1& v1, CV1& cv1,
     V2& v2, CV2& cv2, std::string label)
 {
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start TestMatrixArith6 "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"v1 = "<<tmv::TMV_Text(v1)<<"  "<<v1<<std::endl;
         std::cout<<"cv1 = "<<tmv::TMV_Text(cv1)<<"  "<<cv1<<std::endl;
         std::cout<<"v2 = "<<tmv::TMV_Text(v2)<<"  "<<v2<<std::endl;
         std::cout<<"cv2 = "<<tmv::TMV_Text(cv2)<<"  "<<cv2<<std::endl;
-    }
 #endif
+    }
 
     DoTestOProdR(a,v1,v2,label+" R,R,R");
 #ifndef NO_COMPLEX_ARITH

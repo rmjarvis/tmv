@@ -361,23 +361,26 @@ namespace tmv {
                 std::cout<<"Do m1 first\n";
 #endif
                 // Alias with m1 only, do m1 first
-                AliasMultXM<false>(x1,m1,m3);
-                NoAliasMultXM<true>(x2,m2,m3);
+                MultXM<false>(x1,m1,m3);
+                typename M3::noalias_type m3na = m3.noAlias();
+                MultXM<true>(x2,m2,m3na);
             } else if (!s1) {
 #ifdef PRINTALGO_AddBB
                 std::cout<<"Do m2 first\n";
 #endif
                 // Alias with m2 only, do m2 first
-                AliasMultXM<false>(x2,m2,m3);
-                NoAliasMultXM<true>(x1,m1,m3);
+                MultXM<false>(x2,m2,m3);
+                typename M3::noalias_type m3na = m3.noAlias();
+                MultXM<true>(x1,m1,m3na);
             } else {
 #ifdef PRINTALGO_AddBB
                 std::cout<<"Need temporary\n";
 #endif
                 // Need a temporary
                 typename M1::copy_type m1c = m1;
-                AliasMultXM<false>(x2,m2,m3);
-                NoAliasMultXM<true>(x1,m1c,m3);
+                typename M3::noalias_type m3na = m3.noAlias();
+                MultXM<false>(x2,m2,m3na);
+                MultXM<true>(x1,m1c,m3na);
             }
         }
     };
@@ -461,30 +464,30 @@ namespace tmv {
             const int hi = TMV_MIN(m1.nhi(),m2.nhi());
             typedef typename M1::const_diagrange_type M1x;
             typedef typename M2::const_diagrange_type M2x;
-            typedef typename M3::diagrange_type M3x;
+            typedef typename M3::diagrange_type::noalias_type M3x;
             M1x m1x = m1.cDiagRange(-lo,hi+1);
             M2x m2x = m2.cDiagRange(-lo,hi+1);
             AddBB_Helper<-4,cs,rs,ix1,T1,M1x,ix2,T2,M2x,M3>::call(
                 x1,m1,x2,m2,m3);
             if (m1.nlo() > m2.nlo()) {
                 M1x m1a = m1.cDiagRange(-m1.nlo(),-lo);
-                M3x m3a = m3.cDiagRange(-m1.nlo(),-lo);
-                NoAliasMultXM<false>(x1,m1a,m3a);
+                M3x m3a = m3.cDiagRange(-m1.nlo(),-lo).noAlias();
+                MultXM<false>(x1,m1a,m3a);
             }
             if (m2.nlo() > m1.nlo()) {
                 M2x m2b = m2.cDiagRange(-m2.nlo(),-lo);
-                M3x m3b = m3.cDiagRange(-m2.nlo(),-lo);
-                NoAliasMultXM<false>(x2,m2b,m3b);
+                M3x m3b = m3.cDiagRange(-m2.nlo(),-lo).noAlias();
+                MultXM<false>(x2,m2b,m3b);
             }
             if (m1.nhi() > m2.nhi()) {
                 M1x m1c = m1.cDiagRange(hi+1,m1.nhi()+1);
-                M3x m3c = m3.cDiagRange(hi+1,m1.nhi()+1);
-                NoAliasMultXM<false>(x1,m1c,m3c);
+                M3x m3c = m3.cDiagRange(hi+1,m1.nhi()+1).noAlias();
+                MultXM<false>(x1,m1c,m3c);
             }
             if (m2.nhi() > m1.nhi()) {
                 M2x m2d = m2.cDiagRange(hi+1,m2.nhi()+1);
-                M3x m3d = m3.cDiagRange(hi+1,m2.nhi()+1);
-                NoAliasMultXM<false>(x2,m2d,m3d);
+                M3x m3d = m3.cDiagRange(hi+1,m2.nhi()+1).noAlias();
+                MultXM<false>(x2,m2d,m3d);
             }
             const int maxlo = TMV_MAX(m1.nlo(),m2.nlo());
             const int maxhi = TMV_MAX(m1.nhi(),m2.nhi());
@@ -572,7 +575,7 @@ namespace tmv {
     };
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
-    static inline void AddMM(
+    inline void AddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Band<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Band<M2>& m2, 
         BaseMatrix_Band_Mutable<M3>& m3)
@@ -606,41 +609,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
-    static inline void NoAliasAddMM(
-        const Scaling<ix1,T1>& x1, const BaseMatrix_Band<M1>& m1, 
-        const Scaling<ix2,T2>& x2, const BaseMatrix_Band<M2>& m2, 
-        BaseMatrix_Band_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M3::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M3::_rowsize>::same));
-        TMVAssert(m1.colsize() == m2.colsize());
-        TMVAssert(m1.colsize() == m3.colsize());
-        TMVAssert(m1.rowsize() == m2.rowsize());
-        TMVAssert(m1.rowsize() == m3.rowsize());
-        TMVAssert(m1.nlo() <= m3.nlo());
-        TMVAssert(m2.nlo() <= m3.nlo());
-        TMVAssert(m1.nhi() <= m3.nhi());
-        TMVAssert(m2.nhi() <= m3.nhi());
-        const int cs = 
-            Sizes<Sizes<M1::_colsize,M2::_colsize>::size,M3::_colsize>::size;
-        const int rs = 
-            Sizes<Sizes<M1::_rowsize,M2::_rowsize>::size,M3::_rowsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
-        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
-        AddBB_Helper<-2,cs,rs,ix1,T1,M1v,ix2,T2,M2v,M3v>::call(
-            x1,m1v,x2,m2v,m3v);
-    }
-
-    template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
-    static inline void InlineAddMM(
+    inline void InlineAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Band<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Band<M2>& m2, 
         BaseMatrix_Band_Mutable<M3>& m3)
@@ -674,7 +643,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
-    static inline void InlineAliasAddMM(
+    inline void InlineAliasAddMM(
         const Scaling<ix1,T1>& x1, const BaseMatrix_Band<M1>& m1, 
         const Scaling<ix2,T2>& x2, const BaseMatrix_Band<M2>& m2, 
         BaseMatrix_Band_Mutable<M3>& m3)
@@ -704,40 +673,6 @@ namespace tmv {
         TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
         TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
         AddBB_Helper<98,cs,rs,ix1,T1,M1v,ix2,T2,M2v,M3v>::call(
-            x1,m1v,x2,m2v,m3v);
-    }
-
-    template <int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
-    static inline void AliasAddMM(
-        const Scaling<ix1,T1>& x1, const BaseMatrix_Band<M1>& m1, 
-        const Scaling<ix2,T2>& x2, const BaseMatrix_Band<M2>& m2, 
-        BaseMatrix_Band_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M3::_rowsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M3::_rowsize>::same));
-        TMVAssert(m1.colsize() == m2.colsize());
-        TMVAssert(m1.colsize() == m3.colsize());
-        TMVAssert(m1.rowsize() == m2.rowsize());
-        TMVAssert(m1.rowsize() == m3.rowsize());
-        TMVAssert(m1.nlo() <= m3.nlo());
-        TMVAssert(m2.nlo() <= m3.nlo());
-        TMVAssert(m1.nhi() <= m3.nhi());
-        TMVAssert(m2.nhi() <= m3.nhi());
-        const int cs = 
-            Sizes<Sizes<M1::_colsize,M2::_colsize>::size,M3::_colsize>::size;
-        const int rs = 
-            Sizes<Sizes<M1::_rowsize,M2::_rowsize>::size,M3::_rowsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
-        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
-        AddBB_Helper<99,cs,rs,ix1,T1,M1v,ix2,T2,M2v,M3v>::call(
             x1,m1v,x2,m2v,m3v);
     }
 

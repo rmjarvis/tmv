@@ -4,7 +4,7 @@
 #include "TMV.h"
 
 template <class M1, class M2, class M3>
-static TMV_INLINE_ND bool CanMultMM(
+inline bool CanMultMM(
     const tmv::BaseMatrix_Tri<M1>& a, const tmv::BaseMatrix_Diag<M2>& b, 
     const tmv::BaseMatrix_Tri_Mutable<M3>& c)
 {

@@ -230,7 +230,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static inline ret unroll(const V& v, const Scaling<ix,RT>& x)
+            static TMV_INLINE ret unroll(const V& v, const Scaling<ix,RT>& x)
             {
                 return (
                     Unroller<I,N/2>::unroll(v,x) +
@@ -240,7 +240,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static inline ret unroll(const V& v, const Scaling<ix,RT>& x)
+            static TMV_INLINE ret unroll(const V& v, const Scaling<ix,RT>& x)
             {
                 return Component<comp,BT>::f(
                     x * Traits<BT>::convert(v.cref(I)));
@@ -249,7 +249,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,0>
         {
-            static inline ret unroll(const V& v, const Scaling<ix,RT>& x)
+            static TMV_INLINE ret unroll(const V& v, const Scaling<ix,RT>& x)
             { return ret(0); }
         };
         static inline ret call(const V& v, const Scaling<ix,RT>& x)
@@ -366,7 +366,7 @@ namespace tmv {
     };
 
     template <class V>
-    static inline typename V::value_type InlineSumElements(
+    inline typename V::value_type InlineSumElements(
         const BaseVector_Calc<V>& v)
     {
         typedef typename V::value_type VT;
@@ -378,7 +378,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline typename V::value_type DoSumElements(
+    inline typename V::value_type DoSumElements(
         const BaseVector_Calc<V>& v)
     {
         typedef typename V::value_type VT;
@@ -390,7 +390,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline typename V::float_type InlineSumAbsElements(
+    inline typename V::float_type InlineSumAbsElements(
         const BaseVector_Calc<V>& v)
     {
         typedef typename V::float_type RT;
@@ -401,7 +401,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline typename V::float_type DoSumAbsElements(
+    inline typename V::float_type DoSumAbsElements(
         const BaseVector_Calc<V>& v)
     {
         typedef typename V::float_type RT;
@@ -412,7 +412,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline typename V::real_type InlineSumAbs2Elements(
+    inline typename V::real_type InlineSumAbs2Elements(
         const BaseVector_Calc<V>& v)
     {
         typedef typename V::real_type RT;
@@ -423,7 +423,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline typename V::real_type DoSumAbs2Elements(
+    inline typename V::real_type DoSumAbs2Elements(
         const BaseVector_Calc<V>& v)
     {
         typedef typename V::real_type RT;
@@ -434,7 +434,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline typename V::real_type InlineNormSq(
+    inline typename V::real_type InlineNormSq(
         const BaseVector_Calc<V>& v)
     {
         typedef typename V::real_type RT;
@@ -445,7 +445,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline typename V::real_type DoNormSq(const BaseVector_Calc<V>& v)
+    inline typename V::real_type DoNormSq(const BaseVector_Calc<V>& v)
     {
         typedef typename V::real_type RT;
         typedef typename V::const_cview_type Vv;
@@ -455,7 +455,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline typename V::float_type InlineNormSq(
+    inline typename V::float_type InlineNormSq(
         const BaseVector_Calc<V>& v, typename V::float_type scale)
     {
         typedef typename V::float_type RT;
@@ -466,7 +466,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline typename V::float_type DoNormSq(
+    inline typename V::float_type DoNormSq(
         const BaseVector_Calc<V>& v, const typename V::float_type scale)
     {
         typedef typename V::float_type RT;

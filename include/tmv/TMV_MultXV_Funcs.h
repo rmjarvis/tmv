@@ -12,18 +12,13 @@ namespace tmv {
     // files are included.
     //
 
+    // From TMV_ScaleV.h:
+    template <int ix, class T, class V>
+    inline void Scale(const Scaling<ix,T>& x, BaseVector_Mutable<V>& v);
 
     // From TMV_MultXV.h:
     template <bool add, int ix, class T, class V1, class V2>
-    static inline void MultXV(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        BaseVector_Mutable<V2>& v2);
-    template <bool add, int ix, class T, class V1, class V2>
-    static inline void NoAliasMultXV(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        BaseVector_Mutable<V2>& v2);
-    template <bool add, int ix, class T, class V1, class V2>
-    static inline void AliasMultXV(
+    inline void MultXV(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         BaseVector_Mutable<V2>& v2);
 

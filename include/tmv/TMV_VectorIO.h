@@ -99,7 +99,7 @@ namespace tmv {
     };
 
     template <class V>
-    static inline void Write(std::ostream& os, const BaseVector_Calc<V>& v)
+    inline void Write(std::ostream& os, const BaseVector_Calc<V>& v)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();
@@ -107,8 +107,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline void InlineWrite(
-        std::ostream& os, const BaseVector_Calc<V>& v)
+    inline void InlineWrite(std::ostream& os, const BaseVector_Calc<V>& v)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();
@@ -116,7 +115,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline void Write(
+    inline void Write(
         std::ostream& os,
         const BaseVector_Calc<V>& v, typename V::float_type thresh) 
     {
@@ -126,7 +125,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline void InlineWrite(
+    inline void InlineWrite(
         std::ostream& os,
         const BaseVector_Calc<V>& v, typename V::float_type thresh) 
     {
@@ -310,7 +309,7 @@ namespace tmv {
     };
 
     template <class V>
-    static inline void Read(std::istream& is, BaseVector_Mutable<V>& v)
+    inline void Read(std::istream& is, BaseVector_Mutable<V>& v)
     {
         typedef typename V::cview_type Vv;
         TMV_MAYBE_REF(V,Vv) vv = v.cView();
@@ -318,8 +317,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline void InlineRead(
-        std::istream& is, BaseVector_Mutable<V>& v)
+    inline void InlineRead(std::istream& is, BaseVector_Mutable<V>& v)
     {
         typedef typename V::cview_type Vv;
         TMV_MAYBE_REF(V,Vv) vv = v.cView();
@@ -334,13 +332,11 @@ namespace tmv {
     //
 
     template <class V>
-    static inline std::ostream& operator<<(
-        std::ostream& os, const BaseVector<V>& v)
+    inline std::ostream& operator<<(std::ostream& os, const BaseVector<V>& v)
     { Write(os,v.calc()); return os; }
 
     template <class V>
-    static std::istream& operator>>(
-        std::istream& is, BaseVector_Mutable<V>& v)
+    static std::istream& operator>>(std::istream& is, BaseVector_Mutable<V>& v)
     {
         typedef typename V::value_type T;
         size_t n;

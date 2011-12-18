@@ -21,15 +21,15 @@ namespace tmv {
 
     // Defined in TMV_DiagMatrixIO.h
     template <class M>
-    static inline void Read(std::istream& is, BaseMatrix_Diag_Mutable<M>& m);
+    inline void Read(std::istream& is, BaseMatrix_Diag_Mutable<M>& m);
 
     // Defined in InvertD.h
     template <class M1>
-    static inline void InvertSelf(BaseMatrix_Diag_Mutable<M1>& m1);
+    inline void InvertSelf(BaseMatrix_Diag_Mutable<M1>& m1);
 
     // Defined in ElemMultVV.h
     template <bool add, int ix, class T, class V1, class V2, class V3>
-    static inline void NoAliasElemMultVV(
+    inline void ElemMultVV(
         const Scaling<ix,T>& x1, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3);
 
@@ -38,13 +38,7 @@ namespace tmv {
     static void Copy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class M2>
-    static inline void Copy(
-        const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2);
-    template <class M1, class M2>
-    static void NoAliasCopy(
-        const BaseMatrix_Diag<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
-    template <class M1, class M2>
-    static inline void NoAliasCopy(
+    inline void Copy(
         const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2);
 
     // A helper class for returning views without necessarily
@@ -356,13 +350,6 @@ namespace tmv {
             tmv::Copy(mat(),m2.mat()); 
         }
 
-        template <class M2>
-        TMV_INLINE void newAssignTo(BaseMatrix_Mutable<M2>& m2) const
-        {
-            TMVStaticAssert((ShapeTraits2<_shape,M2::_shape>::assignable));
-            tmv::NoAliasCopy(mat(),m2.mat()); 
-        }
-
         TMV_INLINE const type& mat() const
         { return static_cast<const type&>(*this); }
 
@@ -455,6 +442,8 @@ namespace tmv {
         typedef typename base_mut::realpart_type realpart_type;
         typedef typename base_mut::imagpart_type imagpart_type;
         typedef typename base_mut::nonconj_type nonconj_type;
+        typedef typename base_mut::noalias_type noalias_type;
+        typedef typename base_mut::alias_type alias_type;
         typedef typename base_mut::reference reference;
 
         typedef typename base::const_diag_type const_diag_type;
@@ -711,6 +700,12 @@ namespace tmv {
         TMV_INLINE TMV_MAYBE_REF(type,nonconj_type) nonConj()
         { return MakeDiagView<type,nonconj_type>::call(mat()); }
 
+        TMV_INLINE TMV_MAYBE_REF(type,noalias_type) noAlias()
+        { return MakeDiagView<type,noalias_type>::call(mat()); }
+
+        TMV_INLINE TMV_MAYBE_REF(type,alias_type) alias()
+        { return MakeDiagView<type,alias_type>::call(mat()); }
+
 
         // Repeat the const versions:
         TMV_INLINE TMV_MAYBE_CREF(type,const_view_type) view() const
@@ -815,13 +810,13 @@ namespace tmv {
     // This helper class helps decide calc_type for composite classes:
     template <class T, int cs, int rs, int A>
     struct MCopyHelper<T,Diag,cs,rs,A>
-    { typedef SmallDiagMatrix<T,cs,A|NoAlias> type; };
+    { typedef SmallDiagMatrix<T,cs,A> type; };
     template <class T, int rs, int A>
     struct MCopyHelper<T,Diag,TMV_UNKNOWN,rs,A>
-    { typedef SmallDiagMatrix<T,rs,A|NoAlias> type; };
+    { typedef SmallDiagMatrix<T,rs,A> type; };
     template <class T, int cs, int A>
     struct MCopyHelper<T,Diag,cs,TMV_UNKNOWN,A>
-    { typedef SmallDiagMatrix<T,cs,A|NoAlias> type; };
+    { typedef SmallDiagMatrix<T,cs,A> type; };
     template <class T, int A>
     struct MCopyHelper<T,Diag,TMV_UNKNOWN,TMV_UNKNOWN,A>
     { typedef DiagMatrix<T,A|NoAlias> type; };
@@ -835,7 +830,7 @@ namespace tmv {
     template <class T, int si, int sj, int A>
     struct MViewHelper<T,Diag,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,A>
     {
-        enum { A2 = A | (si == 1 ? Unit : NonUnit) };
+        enum { A2 = A | (si == 1 ? Unit : NonUnit) | NoAlias };
         typedef DiagMatrixView<T,A2> type; 
         typedef ConstDiagMatrixView<T,A2> ctype; 
     };
@@ -854,15 +849,6 @@ namespace tmv {
         Copy(m1d,m2d);
     }
 
-    template <class M1, class M2>
-    inline void NoAliasCopy(
-        const BaseMatrix_Diag<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2)
-    {
-        typename M1::const_diag_type m1d = m1.diag();
-        typename M2::diag_type m2d = m2.diag();
-        NoAliasCopy(m1d,m2d);
-    }
-
     //
     // M = D
     //
@@ -874,31 +860,16 @@ namespace tmv {
         typename M1::const_diag_type m1d = m1.diag();
         typename M2::diag_type m2d = m2.diag();
         if (SameStorage(m1,m2)) {
-            AliasCopy(m1d,m2d);
+            Copy(m1d,m2d);
             if (m1.size() > 1) {
                 m2.upperTri().offDiag().setZero();
                 m2.lowerTri().offDiag().setZero();
             }
         } else {
             m2.setZero();
-            NoAliasCopy(m1d,m2d);
+            m2d.noAlias() = m1d;
         }
     }
-
-    template <class M1, class M2>
-    static void NoAliasCopy(
-        const BaseMatrix_Diag<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
-    {
-        typename M1::const_diag_type m1d = m1.diag();
-        typename M2::diag_type m2d = m2.diag();
-        m2.setZero();
-        NoAliasCopy(m1d,m2d);
-    }
-
-    template <class M1, class M2>
-    static TMV_INLINE void AliasCopy(
-        const BaseMatrix_Diag<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
-    { Copy(m1,m2); }
 
 
     //
@@ -906,7 +877,7 @@ namespace tmv {
     //
 
     template <class M1, class M2>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         BaseMatrix_Diag_Mutable<M1>& m1, BaseMatrix_Diag_Mutable<M2>& m2)
     { Swap(m1.diag(),m2.diag()); }
 
@@ -917,7 +888,7 @@ namespace tmv {
 
 #ifdef TMV_TEXT
     template <class M>
-    static inline std::string TMV_Text(const BaseMatrix_Diag<M>& m)
+    inline std::string TMV_Text(const BaseMatrix_Diag<M>& m)
     {
         std::ostringstream s;
         s << "BaseMatrix_Diag< "<<TMV_Text(m.mat())<<" >";
@@ -925,7 +896,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline std::string TMV_Text(const BaseMatrix_Diag_Mutable<M>& m)
+    inline std::string TMV_Text(const BaseMatrix_Diag_Mutable<M>& m)
     {
         std::ostringstream s;
         s << "BaseMatrix_Diag_Mutable< "<<TMV_Text(m.mat())<<" >";

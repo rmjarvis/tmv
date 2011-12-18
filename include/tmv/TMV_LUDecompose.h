@@ -202,18 +202,20 @@ namespace tmv {
 
             if (N <= 2) return;
             else {
-                typename M1::row_sub_type Aa = A.get_row(0,2,N);
-                typename M1::row_sub_type Ab = A.get_row(1,2,N);
+                typename M1::row_sub_type::noalias_type Aa =
+                    A.get_row(0,2,N).noAlias();
+                typename M1::row_sub_type::noalias_type Ab =
+                    A.get_row(1,2,N).noAlias();
                 // M=2, N>2, so solve for U(0:2,2:N))
                 // A.colRange(2,N).permuteRows(P);
                 if (ip0 == 1) {
                     //A.cColRange(2,N).swapRows(0,1);
-                    NoAliasSwap(Aa,Ab);
+                    Swap(Aa,Ab);
                 }
 
                 // A.colRange(2,N) /= A.colRange(0,2).unitLowerTri();
                 //A.get_row(1,2,N) -= A1.cref(0) * A.get_row(0,2,N);
-                NoAliasMultXV<true>(Scaling<0,T>(-A1.cref(0)),Aa,Ab);
+                MultXV<true>(Scaling<0,T>(-A1.cref(0)),Aa,Ab);
             }
         }
     };
@@ -636,7 +638,7 @@ namespace tmv {
             typedef typename MCopyHelper<T,Rec,cs,rs,ColMajor>::type Mcm;
             Mcm mcm = m;
             LUDecompose_Helper<-2,cs,rs,Mcm>::call(mcm,P);
-            NoAliasCopy(mcm,m);
+            m.noAlias() = mcm;
         }
     };
 
@@ -751,7 +753,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline void InlineLU_Decompose(
+    inline void InlineLU_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, int* P)
     {
         const int cs = M::_colsize;
@@ -762,7 +764,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline void LU_Decompose(
+    inline void LU_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, int* P)
     {
         const int cs = M::_colsize;
@@ -786,13 +788,13 @@ namespace tmv {
 
     // Allow views as an argument by value (for convenience)
     template <class T, int A>
-    static TMV_INLINE void LU_Decompose(MatrixView<T,A> m, Permutation& P)
+    TMV_INLINE void LU_Decompose(MatrixView<T,A> m, Permutation& P)
     {
         typedef MatrixView<T,A> M;
         LU_Decompose(static_cast<BaseMatrix_Rec_Mutable<M>&>(m),P); 
     }
     template <class T, int M, int N, int Si, int Sj, int A>
-    static TMV_INLINE void LU_Decompose(
+    TMV_INLINE void LU_Decompose(
         SmallMatrixView<T,M,N,Si,Sj,A> m, Permutation& P)
     {
         typedef SmallMatrixView<T,M,N,Si,Sj,A> MM;

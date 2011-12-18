@@ -51,10 +51,10 @@ inline bool Equal(const M1& a, const M2& b, T eps)
     T normdiff = Norm(a-b);
 #ifdef XXD
     if (showacc && !(normdiff <= eps)) {
-        std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
-        std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
-        std::cout<<"a-b = "<<a-b<<std::endl;
-        std::cout<<"Norm(a-b) = "<<normdiff<<std::endl;
+        std::cout<<"test1 = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
+        std::cout<<"test2 = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
+        std::cout<<"diff = "<<a-b<<std::endl;
+        std::cout<<"Norm(diff) = "<<normdiff<<std::endl;
         std::cout<<"eps = "<<eps<<std::endl;
     }
     if (showtests) std::cout<<"  "<<normdiff<<" <=? "<<eps<<"  ";
@@ -67,9 +67,9 @@ inline bool Equal2(const X1& a, const X2& b, T eps)
     T absdiff = tmv::TMV_ABS2(a-b);
 #ifdef XXD
     if (showacc && !(absdiff <= eps)) {
-        std::cout<<"a = "<<a<<std::endl;
-        std::cout<<"b = "<<b<<std::endl;
-        std::cout<<"abs2(a-b) = "<<absdiff<<std::endl;
+        std::cout<<"test1 = "<<a<<std::endl;
+        std::cout<<"test2 = "<<b<<std::endl;
+        std::cout<<"abs2(diff) = "<<absdiff<<std::endl;
         std::cout<<"eps = "<<eps<<std::endl;
     }
     if (showtests) std::cout<<"  "<<absdiff<<" <=? "<<eps<<"  ";
@@ -83,10 +83,10 @@ inline bool Equal(const M1& a, const M2& b, int )
     bool eq = (a == b);
 #ifdef XXD
     if (showacc && !(eq)) {
-        std::cout<<"a = "<<a<<std::endl;
-        std::cout<<"b = "<<b<<std::endl;
-        std::cout<<"Norm(a-b) = "<<Norm(a-b)<<std::endl;
-        std::cout<<"a == b = "<<eq<<std::endl;
+        std::cout<<"test1 = "<<a<<std::endl;
+        std::cout<<"test2 = "<<b<<std::endl;
+        std::cout<<"Norm(diff) = "<<Norm(a-b)<<std::endl;
+        std::cout<<"test1 == test2 = "<<eq<<std::endl;
     }
 #endif
     return eq;
@@ -97,10 +97,10 @@ inline bool Equal2(const X1& a, const X2& b, int )
     bool eq = (a == b);
 #ifdef XXD
     if (showacc && !(eq)) {
-        std::cout<<"a = "<<a<<std::endl;
-        std::cout<<"b = "<<b<<std::endl;
-        std::cout<<"abs(a-b) = "<<tmv::TMV_ABS2(a-b)<<std::endl;
-        std::cout<<"a == b = "<<eq<<std::endl;
+        std::cout<<"test1 = "<<a<<std::endl;
+        std::cout<<"test2 = "<<b<<std::endl;
+        std::cout<<"abs(diff) = "<<tmv::TMV_ABS2(a-b)<<std::endl;
+        std::cout<<"test1 == test2 = "<<eq<<std::endl;
     }
 #endif
     return eq;

@@ -380,17 +380,20 @@ namespace tmv {
                     x1,v1,x2,v2,v3);
             } else if (!s2) {
                 // Alias with v1 only, do v1 first
-                AliasMultXV<false>(x1,v1,v3);
-                NoAliasMultXV<true>(x2,v2,v3);
+                MultXV<false>(x1,v1,v3);
+                typename V3::noalias_type v3na = v3.noAlias();
+                MultXV<true>(x2,v2,v3na);
             } else if (!s1) {
                 // Alias with v2 only, do v2 first
-                AliasMultXV<false>(x2,v2,v3);
-                NoAliasMultXV<true>(x1,v1,v3);
+                MultXV<false>(x2,v2,v3);
+                typename V3::noalias_type v3na = v3.noAlias();
+                MultXV<true>(x1,v1,v3na);
             } else {
                 // Need a temporary
                 typename V1::copy_type v1c = v1;
-                AliasMultXV<false>(x2,v2,v3);
-                NoAliasMultXV<true>(x1,v1c,v3);
+                MultXV<false>(x2,v2,v3);
+                typename V3::noalias_type v3na = v3.noAlias();
+                MultXV<true>(x1,v1c,v3na);
             }
         }
     };
@@ -529,7 +532,7 @@ namespace tmv {
     };
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
-    static inline void AddVV(
+    inline void AddVV(
         const Scaling<ix1,T1>& x1, const BaseVector_Calc<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
@@ -550,28 +553,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
-    static inline void NoAliasAddVV(
-        const Scaling<ix1,T1>& x1, const BaseVector_Calc<V1>& v1,
-        const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
-        BaseVector_Mutable<V3>& v3)
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
-        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
-        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
-        TMVAssert(v1.size() == v2.size());
-        TMVAssert(v1.size() == v3.size());
-        const int s = Sizes<Sizes<V1::_size,V2::_size>::size,V3::_size>::size;
-        typedef typename V1::const_cview_type V1v;
-        typedef typename V2::const_cview_type V2v;
-        typedef typename V3::cview_type V3v;
-        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
-        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
-        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
-        AddVV_Helper<-2,s,ix1,T1,V1v,ix2,T2,V2v,V3v>::call(x1,v1v,x2,v2v,v3v);
-    }
-
-    template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
-    static inline void InlineAddVV(
+    inline void InlineAddVV(
         const Scaling<ix1,T1>& x1, const BaseVector_Calc<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
@@ -592,7 +574,7 @@ namespace tmv {
     }
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
-    static inline void InlineAliasAddVV(
+    inline void InlineAliasAddVV(
         const Scaling<ix1,T1>& x1, const BaseVector_Calc<V1>& v1,
         const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
         BaseVector_Mutable<V3>& v3)
@@ -610,27 +592,6 @@ namespace tmv {
         TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
         TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
         AddVV_Helper<98,s,ix1,T1,V1v,ix2,T2,V2v,V3v>::call(x1,v1v,x2,v2v,v3v);
-    }
-
-    template <int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
-    static inline void AliasAddVV(
-        const Scaling<ix1,T1>& x1, const BaseVector_Calc<V1>& v1,
-        const Scaling<ix2,T2>& x2, const BaseVector_Calc<V2>& v2,
-        BaseVector_Mutable<V3>& v3)
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
-        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
-        TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
-        TMVAssert(v1.size() == v2.size());
-        TMVAssert(v1.size() == v3.size());
-        const int s = Sizes<Sizes<V1::_size,V2::_size>::size,V3::_size>::size;
-        typedef typename V1::const_cview_type V1v;
-        typedef typename V2::const_cview_type V2v;
-        typedef typename V3::cview_type V3v;
-        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
-        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
-        TMV_MAYBE_REF(V3,V3v) v3v = v3.cView();
-        AddVV_Helper<99,s,ix1,T1,V1v,ix2,T2,V2v,V3v>::call(x1,v1v,x2,v2v,v3v);
     }
 
 } // namespace tmv

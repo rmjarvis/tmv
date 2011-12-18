@@ -29,7 +29,7 @@ namespace tmv {
         const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void MultMM_Winograd(
+    inline void MultMM_Winograd(
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
 
@@ -181,9 +181,9 @@ namespace tmv {
             // X,Y,Z are temporaries.
             // We use the subscripts 1,2,3 to match the size of the 
             // corrsponding A, B or C submatrix.  0 matches the full size.
-            Matrix<T1,RowMajor | NoDivider> X(Ma,Ka,T1(0)); 
-            Matrix<T2,ColMajor | NoDivider> Y(Ka,Na,T2(0));
-            Matrix<T3,ColMajor | NoDivider> Z(Ma,Na,T3(0));
+            Matrix<T1,RowMajor | NoDivider | NoAlias> X(Ma,Ka,T1(0)); 
+            Matrix<T2,ColMajor | NoDivider | NoAlias> Y(Ka,Na,T2(0));
+            Matrix<T3,ColMajor | NoDivider | NoAlias> Z(Ma,Na,T3(0));
 
             // Only use the versions that maintain knowledge of the
             // majority of X,Y,Z submatrices if the input m1,m2, and m3
@@ -192,8 +192,8 @@ namespace tmv {
                 (M1::_colmajor || M1::_rowmajor) &&
                 (M2::_colmajor || M2::_rowmajor) &&
                 (M3::_colmajor || M3::_rowmajor);
-            const int cmA = majority_known ? ColMajor : NonMajor;
-            const int rmA = majority_known ? RowMajor : NonMajor;
+            const int cmA = (majority_known ? ColMajor : NonMajor) | NoAlias;
+            const int rmA = (majority_known ? RowMajor : NonMajor) | NoAlias;
             const int maybe_one = majority_known ? 1 : 0;
             const int maybe_mone = majority_known ? -1 : 0;
             typedef MatrixView<T1,rmA> M1r;
@@ -231,76 +231,76 @@ namespace tmv {
             M3 C3 = m3.subMatrix(Ma,M,Na,N);
 
             // X = A2 + A3
-            NoAliasCopy(A2,X2);
-            NoAliasMultXM<true>(one,A3,X3);
+            Copy(A2,X2);
+            MultXM<true>(one,A3,X3);
 
             // Y = B1 - B0
-            NoAliasCopy(B1,Y1);
-            NoAliasMultXM<true>(mone,B0,Y0);
+            Copy(B1,Y1);
+            MultXM<true>(mone,B0,Y0);
 
             // Z = X * Y
             // Z is already 0, so can use add=true.
             MultMM_Winograd<true>(one,X2,Y0,Z2);
 
             // C3 (+=) Z
-            NoAliasMultXM<add>(x,Z3,C3);
+            MultXM<add>(x,Z3,C3);
 
             // C1 (+=) Z
-            NoAliasMultXM<add>(x,Z1,C1);
+            MultXM<add>(x,Z1,C1);
 
             // Z = A0 * B0
             Z.setZero();
             MultMM_Winograd<true>(one,A0,B0,Z0);
 
             // C0 (+=) Z
-            NoAliasMultXM<add>(x,Z0,C0);
+            MultXM<add>(x,Z0,C0);
 
             // C0 += A1 * B2
             MultMM_Winograd<true>(x,A1,B2,C0);
 
             // X = X - A0
-            NoAliasMultXM<true>(mone,A0,X0);
+            MultXM<true>(mone,A0,X0);
 
             // Y = B3 - Y
             Scale(mone,Y0);
-            NoAliasMultXM<true>(one,B3,Y3);
+            MultXM<true>(one,B3,Y3);
 
             // Z += X * Y
             MultMM_Winograd<true>(one,X0,Y0,Z0);
 
             // C1 += Z
-            NoAliasMultXM<true>(x,Z1,C1);
+            MultXM<true>(x,Z1,C1);
 
             // X = A1 - X
             Scale(mone,X0);
-            NoAliasMultXM<true>(one,A1,X1);
+            MultXM<true>(one,A1,X1);
 
             // C1 += X * B3
             MultMM_Winograd<true>(x,X1,B3,C1);
 
             // Y = B2 - Y
             Scale(mone,Y0);
-            NoAliasMultXM<true>(one,B2,Y2);
+            MultXM<true>(one,B2,Y2);
 
             // C2 (+=) A3 * Y
             MultMM_Winograd<add>(x,A3,Y2,C2);
 
             // X = A0 - A2
-            NoAliasCopy(A0,X0);
-            NoAliasMultXM<true>(mone,A2,X2);
+            Copy(A0,X0);
+            MultXM<true>(mone,A2,X2);
 
             // Y = B3 - B1
-            NoAliasMultXM<false>(mone,B1,Y1);
-            NoAliasMultXM<true>(one,B3,Y3);
+            MultXM<false>(mone,B1,Y1);
+            MultXM<true>(one,B3,Y3);
 
             // Z += X * Y
             MultMM_Winograd<true>(one,X0,Y1,Z1);
 
             // C3 += Z
-            NoAliasMultXM<true>(x,Z3,C3);
+            MultXM<true>(x,Z3,C3);
 
             // C2 += Z
-            NoAliasMultXM<true>(x,Z2,C2);
+            MultXM<true>(x,Z2,C2);
         }
     };
 
@@ -387,7 +387,7 @@ namespace tmv {
     };
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void MultMM_Winograd(
+    inline void MultMM_Winograd(
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -404,7 +404,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void InlineMultMM_Winograd(
+    inline void InlineMultMM_Winograd(
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {

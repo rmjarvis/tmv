@@ -516,7 +516,7 @@ namespace tmv {
         template <int J, int N>
         struct Unroller
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
             {
                 Unroller<J,N/2>::unroll(x,v1,v2,m3);
@@ -530,7 +530,8 @@ namespace tmv {
             template <int I, int M>
             struct Unroller2
             {
-                static inline void unroll(const V1& v1, const PT2& v2j, M3& m3)
+                static TMV_INLINE void unroll(
+                    const V1& v1, const PT2& v2j, M3& m3)
                 {
                     Unroller2<I,M/2>::unroll(v1,v2j,m3);
                     Unroller2<I+M/2,M-M/2>::unroll(v1,v2j,m3);
@@ -539,14 +540,15 @@ namespace tmv {
             template <int I>
             struct Unroller2<I,1>
             {
-                static inline void unroll(const V1& v1, const PT2& v2j, M3& m3)
+                static TMV_INLINE void unroll(
+                    const V1& v1, const PT2& v2j, M3& m3)
                 {
                     Maybe<add>::add(
                         m3.ref(I,J) , 
                         ZProd<false,false>::prod(v1.cref(I) , v2j ) ); 
                 }
             };
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
             { Unroller2<0,cs>::unroll(v1,x*v2.cref(J),m3); }
         };
@@ -854,7 +856,7 @@ namespace tmv {
         template <int I, int M>
         struct Unroller
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
             {
                 Unroller<I,M/2>::unroll(x,v1,v2,m3);
@@ -868,7 +870,8 @@ namespace tmv {
             template <int J, int N>
             struct Unroller2
             {
-                static inline void unroll(const PT1& v1i, const V2& v2, M3& m3)
+                static TMV_INLINE void unroll(
+                    const PT1& v1i, const V2& v2, M3& m3)
                 {
                     Unroller2<J,N/2>::unroll(v1i,v2,m3);
                     Unroller2<J+N/2,N-N/2>::unroll(v1i,v2,m3);
@@ -877,14 +880,15 @@ namespace tmv {
             template <int J>
             struct Unroller2<J,1>
             {
-                static inline void unroll(const PT1& v1i, const V2& v2, M3& m3)
+                static TMV_INLINE void unroll(
+                    const PT1& v1i, const V2& v2, M3& m3)
                 {
                     Maybe<add>::add(
                         m3.ref(I,J),
                         ZProd<false,false>::prod(v1i , v2.cref(J) ) ); 
                 }
             };
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
             { Unroller2<0,rs>::unroll(x*v1.cref(I),v2,m3); }
         };
@@ -1047,7 +1051,8 @@ namespace tmv {
 #endif
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
-            NoAliasRank1Update<add>(one,(x*v1).calc(),v2,m3);
+            typename M3::noalias_type m3na = m3.noAlias();
+            Rank1Update<add>(one,(x*v1).calc(),v2,m3na);
         }
     };
 
@@ -1066,7 +1071,8 @@ namespace tmv {
 #endif
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
-            NoAliasRank1Update<add>(one,v1,(x*v2).calc(),m3);
+            typename M3::noalias_type m3na = m3.noAlias();
+            Rank1Update<add>(one,v1,(x*v2).calc(),m3na);
         }
     };
 
@@ -1085,10 +1091,11 @@ namespace tmv {
 #endif
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
+            typename M3::noalias_type m3na = m3.noAlias();
             if (M > N) {
-                NoAliasRank1Update<add>(one,v1.copy(),(x*v2).calc(),m3);
+                Rank1Update<add>(one,v1.copy(),(x*v2).calc(),m3na);
             } else {
-                NoAliasRank1Update<add>(one,(x*v1).calc(),v2.copy(),m3);
+                Rank1Update<add>(one,(x*v1).calc(),v2.copy(),m3na);
             }
         }
     };
@@ -1105,7 +1112,8 @@ namespace tmv {
             std::cout<<"R1 algo 83: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            NoAliasRank1Update<add>(x,v1.copy(),v2.copy(),m3);
+            typename M3::noalias_type m3na = m3.noAlias();
+            Rank1Update<add>(x,v1.copy(),v2.copy(),m3na);
         }
     };
 
@@ -1415,7 +1423,7 @@ namespace tmv {
     };
 
     template <bool add, int ix, class T, class V1, class V2, class M3>
-    static inline void Rank1Update(
+    inline void Rank1Update(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -1435,27 +1443,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class V1, class V2, class M3>
-    static inline void NoAliasRank1Update(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M3::_colsize,V1::_size>::same));
-        TMVStaticAssert((Sizes<M3::_rowsize,V2::_size>::same));
-        TMVAssert(m3.colsize() == v1.size());
-        TMVAssert(m3.rowsize() == v2.size());
-        const int cs = Sizes<M3::_colsize,V1::_size>::size;
-        const int rs = Sizes<M3::_rowsize,V2::_size>::size;
-        typedef typename V1::const_cview_type V1v;
-        typedef typename V2::const_cview_type V2v;
-        typedef typename M3::cview_type M3v;
-        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
-        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
-        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
-        Rank1VVM_Helper<-2,cs,rs,add,ix,T,V1v,V2v,M3v>::call(x,v1v,v2v,m3v);
-    }
-
-    template <bool add, int ix, class T, class V1, class V2, class M3>
-    static inline void InlineRank1Update(
+    inline void InlineRank1Update(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -1475,7 +1463,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class V1, class V2, class M3>
-    static inline void InlineAliasRank1Update(
+    inline void InlineAliasRank1Update(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -1492,26 +1480,6 @@ namespace tmv {
         TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
         TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
         Rank1VVM_Helper<98,cs,rs,add,ix,T,V1v,V2v,M3v>::call(x,v1v,v2v,m3v);
-    }
-
-    template <bool add, int ix, class T, class V1, class V2, class M3>
-    static inline void AliasRank1Update(
-        const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1,
-        const BaseVector_Calc<V2>& v2, BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M3::_colsize,V1::_size>::same));
-        TMVStaticAssert((Sizes<M3::_rowsize,V2::_size>::same));
-        TMVAssert(m3.colsize() == v1.size());
-        TMVAssert(m3.rowsize() == v2.size());
-        const int cs = Sizes<M3::_colsize,V1::_size>::size;
-        const int rs = Sizes<M3::_rowsize,V2::_size>::size;
-        typedef typename V1::const_cview_type V1v;
-        typedef typename V2::const_cview_type V2v;
-        typedef typename M3::cview_type M3v;
-        TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
-        TMV_MAYBE_CREF(V2,V2v) v2v = v2.cView();
-        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
-        Rank1VVM_Helper<99,cs,rs,add,ix,T,V1v,V2v,M3v>::call(x,v1v,v2v,m3v);
     }
 
 } // namespace tmv

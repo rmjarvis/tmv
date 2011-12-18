@@ -214,10 +214,10 @@ namespace tmv {
         };
         template <int I>
         struct Unroller<I,1> // diagonal is already done, so nothing to do.
-        { static inline void unroll(M&) {} };
+        { static TMV_INLINE void unroll(M&) {} };
         template <int I>
         struct Unroller<I,0>
-        { static inline void unroll(M&) {} };
+        { static TMV_INLINE void unroll(M&) {} };
         static inline void call(M& m)
         {
 #ifdef PRINTALGO_InvU
@@ -464,7 +464,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline void InvertSelf(BaseMatrix_Tri_Mutable<M>& m)
+    inline void InvertSelf(BaseMatrix_Tri_Mutable<M>& m)
     {
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
@@ -472,7 +472,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline void InlineInvertSelf(BaseMatrix_Tri_Mutable<M>& m)
+    inline void InlineInvertSelf(BaseMatrix_Tri_Mutable<M>& m)
     {
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();

@@ -627,7 +627,7 @@ namespace tmv {
     };
 
     template <class M1, class V1, class M2>
-    static inline void InlinePackedQ_MultEq(
+    inline void InlinePackedQ_MultEq(
         const BaseMatrix_Rec<M1>& Q, const BaseVector_Calc<V1>& beta,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -649,7 +649,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class M2>
-    static inline void PackedQ_MultEq(
+    inline void PackedQ_MultEq(
         const BaseMatrix_Rec<M1>& Q, const BaseVector_Calc<V1>& beta,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -671,7 +671,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class V2>
-    static inline void InlinePackedQ_MultEq(
+    inline void InlinePackedQ_MultEq(
         const BaseMatrix_Rec<M1>& Q, const BaseVector_Calc<V1>& beta,
         BaseVector_Mutable<V2>& v2)
     {
@@ -697,7 +697,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class V2>
-    static inline void PackedQ_MultEq(
+    inline void PackedQ_MultEq(
         const BaseMatrix_Rec<M1>& Q, const BaseVector_Calc<V1>& beta,
         BaseVector_Mutable<V2>& v2)
     {
@@ -723,7 +723,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class M2>
-    static inline void InlinePackedQ_LDivEq(
+    inline void InlinePackedQ_LDivEq(
         const BaseMatrix_Rec<M1>& Q, const BaseVector_Calc<V1>& beta,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -745,7 +745,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class M2>
-    static inline void PackedQ_LDivEq(
+    inline void PackedQ_LDivEq(
         const BaseMatrix_Rec<M1>& Q, const BaseVector_Calc<V1>& beta,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -767,7 +767,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class V2>
-    static inline void InlinePackedQ_LDivEq(
+    inline void InlinePackedQ_LDivEq(
         const BaseMatrix_Rec<M1>& Q, const BaseVector_Calc<V1>& beta,
         BaseVector_Mutable<V2>& v2)
     {
@@ -793,7 +793,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class V2>
-    static inline void PackedQ_LDivEq(
+    inline void PackedQ_LDivEq(
         const BaseMatrix_Rec<M1>& Q, const BaseVector_Calc<V1>& beta,
         BaseVector_Mutable<V2>& v2)
     {
@@ -902,13 +902,6 @@ namespace tmv {
         }
 
         template <class M2>
-        void newAssignTo(BaseMatrix_Rec_Mutable<M2>& m2) const
-        {
-            Q.newAssignTo(m2);
-            UnpackQ(m2,beta);
-        }
-
-        template <class M2>
         void makeFullQ(BaseMatrix_Rec_Mutable<M2>& m2) const
         {
             TMVAssert(m2.colsize() == Q.colsize());
@@ -938,10 +931,10 @@ namespace tmv {
     };
 
     template <class M, class V>
-    static TMV_INLINE int Det(const PackedQ<M,V>& Q)
+    TMV_INLINE int Det(const PackedQ<M,V>& Q)
     { return Q.det(); }
     template <class M, class V>
-    static TMV_INLINE int LogDet(const PackedQ<M,V>& Q)
+    TMV_INLINE int LogDet(const PackedQ<M,V>& Q)
     { return Q.logDet(); }
 
 
@@ -950,7 +943,7 @@ namespace tmv {
     //
 
     template <bool add, int ix, class T, class M1, class V1, class V2, class V3>
-    static inline void MultMV(
+    inline void MultMV(
         const Scaling<ix,T>& x, const PackedQ<M1,V1>& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
@@ -968,16 +961,6 @@ namespace tmv {
             Scale(x,v3);
         }
     }
-    template <bool add, int ix, class T, class M1, class V1, class V2, class V3>
-    static TMV_INLINE void NoAliasMultMV(
-        const Scaling<ix,T>& x, const PackedQ<M1,V1>& m1, 
-        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
-    { MultMV<add>(x,m1,v2,v3); }
-    template <bool add, int ix, class T, class M1, class V1, class V2, class V3>
-    static TMV_INLINE void AliasMultMV(
-        const Scaling<ix,T>& x, const PackedQ<M1,V1>& m1, 
-        const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
-    { MultMV<add>(x,m1,v2,v3); }
 
 
     //
@@ -987,7 +970,7 @@ namespace tmv {
     //
 
     template <bool add, int ix, class T, class V1, class M2, class V2, class V3>
-    static inline void MultVM(
+    inline void MultVM(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
         const PackedQ<M2,V2>& m2, BaseVector_Mutable<V3>& v3)
     {
@@ -1009,16 +992,6 @@ namespace tmv {
             v3 = x * v1c.subVector(0,v3.size());
         }
     }
-    template <bool add, int ix, class T, class V1, class M2, class V2, class V3>
-    static TMV_INLINE void NoAliasMultVM(
-        const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
-        const PackedQ<M2,V2>& m2, BaseVector_Mutable<V3>& v3)
-    { MultVM<add>(x,v1,m2,v3); }
-    template <bool add, int ix, class T, class V1, class M2, class V2, class V3>
-    static TMV_INLINE void AliasMultVM(
-        const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
-        const PackedQ<M2,V2>& m2, BaseVector_Mutable<V3>& v3)
-    { MultVM<add>(x,v1,m2,v3); }
 
 
     //
@@ -1026,7 +999,7 @@ namespace tmv {
     //
 
     template <int ix, class T, class V1, class M2, class V2>
-    static inline void MultEqVM(
+    inline void MultEqVM(
         BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
         const PackedQ<M2,V2>& m2)
     {
@@ -1035,16 +1008,6 @@ namespace tmv {
         m2.divEq(v1c);
         Scale(x,v1);
     }
-    template <int ix, class T, class V1, class M2, class V2>
-    static TMV_INLINE void NoAliasMultEqVM(
-        BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
-        const PackedQ<M2,V2>& m2)
-    { MultEqVM(v1,x,m2); }
-    template <int ix, class T, class V1, class M2, class V2>
-    static TMV_INLINE void AliasMultEqVM(
-        BaseVector_Mutable<V1>& v1, const Scaling<ix,T>& x,
-        const PackedQ<M2,V2>& m2)
-    { MultEqVM(v1,x,m2); }
 
 
     //
@@ -1052,7 +1015,7 @@ namespace tmv {
     //
 
     template <int ix, class T, class V1, class M2, class V2, class V3>
-    static inline void LDiv(
+    inline void LDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const PackedQ<M2,V2>& m2, BaseVector_Mutable<V3>& v3)
     {
@@ -1070,16 +1033,6 @@ namespace tmv {
             v3 = x * v1c.subVector(0,v3.size());
         }
     }
-    template <int ix, class T, class V1, class M2, class V2, class V3>
-    static TMV_INLINE void NoAliasLDiv(
-        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
-        const PackedQ<M2,V2>& m2, BaseVector_Mutable<V3>& v3)
-    { LDiv(x,v1,m2,v3); }
-    template <int ix, class T, class V1, class M2, class V2, class V3>
-    static TMV_INLINE void AliasLDiv(
-        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
-        const PackedQ<M2,V2>& m2, BaseVector_Mutable<V3>& v3)
-    { LDiv(x,v1,m2,v3); }
 
 
     //
@@ -1087,17 +1040,9 @@ namespace tmv {
     //
 
     template <class V1, class M2, class V2>
-    static inline void LDivEq(
+    inline void LDivEq(
         BaseVector_Mutable<V1>& v1, const PackedQ<M2,V2>& m2)
     { PackedQ_LDivEq(m2.getQ(),m2.getBeta(),v1); }
-    template <class V1, class M2, class V2>
-    static TMV_INLINE void NoAliasLDivEq(
-        BaseVector_Mutable<V1>& v1, const PackedQ<M2,V2>& m2)
-    { LDivEq(v1,m2); }
-    template <class V1, class M2, class V2>
-    static TMV_INLINE void AliasLDivEq(
-        BaseVector_Mutable<V1>& v1, const PackedQ<M2,V2>& m2)
-    { LDivEq(v1,m2); }
 
 
     // 
@@ -1108,7 +1053,7 @@ namespace tmv {
     //
 
     template <int ix, class T, class V1, class M2, class V2, class V3>
-    static inline void RDiv(
+    inline void RDiv(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1,
         const PackedQ<M2,V2>& m2, BaseVector_Mutable<V3>& v3)
     {
@@ -1125,16 +1070,6 @@ namespace tmv {
             Scale(x,v3);
         }
     }
-    template <int ix, class T, class V1, class M2, class V2, class V3>
-    static TMV_INLINE void NoAliasRDiv(
-        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
-        const PackedQ<M2,V2>& m2, BaseVector_Mutable<V3>& v3)
-    { RDiv(x,v1,m2,v3); }
-    template <int ix, class T, class V1, class M2, class V2, class V3>
-    static TMV_INLINE void AliasRDiv(
-        const Scaling<ix,T>& x, const BaseVector<V1>& v1,
-        const PackedQ<M2,V2>& m2, BaseVector_Mutable<V3>& v3)
-    { RDiv(x,v1,m2,v3); }
 
 
     // 
@@ -1142,20 +1077,12 @@ namespace tmv {
     //
 
     template <class V1, class M2, class V2>
-    static inline void RDivEq(
+    inline void RDivEq(
         BaseVector_Mutable<V1>& v1, const PackedQ<M2,V2>& m2)
     {
         typename V1::conjugate_type v1c = v1.conjugate();
         PackedQ_MultEq(m2.getQ(),m2.getBeta(),v1c);
     }
-    template <class V1, class M2, class V2>
-    static TMV_INLINE void NoAliasRDivEq(
-        BaseVector_Mutable<V1>& v1, const PackedQ<M2,V2>& m2)
-    { RDivEq(v1,m2); }
-    template <class V1, class M2, class V2>
-    static TMV_INLINE void AliasRDivEq(
-        BaseVector_Mutable<V1>& v1, const PackedQ<M2,V2>& m2)
-    { RDivEq(v1,m2); }
 
 
 
@@ -1164,7 +1091,7 @@ namespace tmv {
     //
 
     template <bool add, int ix, class T, class M1, class V1, class M2, class M3>
-    static inline void MultMM(
+    inline void MultMM(
         const Scaling<ix,T>& x, const PackedQ<M1,V1>& m1, 
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -1182,16 +1109,6 @@ namespace tmv {
             Scale(x,m3);
         }
     }
-    template <bool add, int ix, class T, class M1, class V1, class M2, class M3>
-    static TMV_INLINE void NoAliasMultMM(
-        const Scaling<ix,T>& x, const PackedQ<M1,V1>& m1, 
-        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { MultMV<add>(x,m1,m2,m3); }
-    template <bool add, int ix, class T, class M1, class V1, class M2, class M3>
-    static TMV_INLINE void AliasMultMM(
-        const Scaling<ix,T>& x, const PackedQ<M1,V1>& m1, 
-        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { MultMV<add>(x,m1,m2,m3); }
 
 
     //
@@ -1200,7 +1117,7 @@ namespace tmv {
     //
 
     template <bool add, int ix, class T, class M1, class M2, class V2, class M3>
-    static inline void MultMM(
+    inline void MultMM(
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1, 
         const PackedQ<M2,V2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -1224,24 +1141,13 @@ namespace tmv {
             m3.adjoint() = x * m1a.rowRange(0,m3.colsize());
         }
     }
-    template <bool add, int ix, class T, class M1, class M2, class V2, class M3>
-    static TMV_INLINE void NoAliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1, 
-        const PackedQ<M2,V2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { MultMM<add>(x,m1,m2,m3); }
-    template <bool add, int ix, class T, class M1, class M2, class V2, class M3>
-    static TMV_INLINE void AliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1, 
-        const PackedQ<M2,V2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { MultMM<add>(x,m1,m2,m3); }
-
 
     //
     // m *= Q
     //
 
     template <int ix, class T, class M1, class M2, class V2>
-    static inline void MultEqMM(
+    inline void MultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1, const Scaling<ix,T>& x,
         const PackedQ<M2,V2>& m2)
     {
@@ -1250,16 +1156,6 @@ namespace tmv {
         m2.divEq(m1a);
         Scale(x,m1);
     }
-    template <int ix, class T, class M1, class M2, class V2>
-    static TMV_INLINE void NoAliasMultEqMM(
-        BaseMatrix_Rec_Mutable<M1>& m1, const Scaling<ix,T>& x,
-        const PackedQ<M2,V2>& m2)
-    { MultEqMM(m1,x,m2); }
-    template <int ix, class T, class M1, class M2, class V2>
-    static TMV_INLINE void AliasMultEqMM(
-        BaseMatrix_Rec_Mutable<M1>& m1, const Scaling<ix,T>& x,
-        const PackedQ<M2,V2>& m2)
-    { MultEqMM(m1,x,m2); }
 
 
     //
@@ -1267,7 +1163,7 @@ namespace tmv {
     //
 
     template <int ix, class T, class M1, class M2, class V2, class M3>
-    static inline void LDiv(
+    inline void LDiv(
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
         const PackedQ<M2,V2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -1288,16 +1184,6 @@ namespace tmv {
             m3 = x * m1c.rowRange(0,m3.colsize());
         }
     }
-    template <int ix, class T, class M1, class M2, class V2, class M3>
-    static TMV_INLINE void NoAliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
-        const PackedQ<M2,V2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { LDiv(x,m1,m2,m3); }
-    template <int ix, class T, class M1, class M2, class V2, class M3>
-    static TMV_INLINE void AliasLDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
-        const PackedQ<M2,V2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { LDiv(x,m1,m2,m3); }
 
 
     //
@@ -1305,17 +1191,9 @@ namespace tmv {
     //
 
     template <class M1, class M2, class V2>
-    static inline void LDivEq(
+    inline void LDivEq(
         BaseMatrix_Rec_Mutable<M1>& m1, const PackedQ<M2,V2>& m2)
     { PackedQ_LDivEq(m2.getQ(),m2.getBeta(),m1); }
-    template <class M1, class M2, class V2>
-    static TMV_INLINE void NoAliasLDivEq(
-        BaseMatrix_Rec_Mutable<M1>& m1, const PackedQ<M2,V2>& m2)
-    { LDivEq(m1,m2); }
-    template <class M1, class M2, class V2>
-    static TMV_INLINE void AliasLDivEq(
-        BaseMatrix_Rec_Mutable<M1>& m1, const PackedQ<M2,V2>& m2)
-    { LDivEq(m1,m2); }
 
 
     // 
@@ -1325,7 +1203,7 @@ namespace tmv {
     //
 
     template <int ix, class T, class M1, class M2, class V2, class M3>
-    static inline void RDiv(
+    inline void RDiv(
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
         const PackedQ<M2,V2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -1342,16 +1220,6 @@ namespace tmv {
             Scale(x,m3);
         }
     }
-    template <int ix, class T, class M1, class M2, class V2, class M3>
-    static TMV_INLINE void NoAliasRDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
-        const PackedQ<M2,V2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { RDiv(x,m1,m2,m3); }
-    template <int ix, class T, class M1, class M2, class V2, class M3>
-    static TMV_INLINE void AliasRDiv(
-        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
-        const PackedQ<M2,V2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    { RDiv(x,m1,m2,m3); }
 
 
     // 
@@ -1359,20 +1227,12 @@ namespace tmv {
     //
 
     template <class M1, class M2, class V2>
-    static inline void RDivEq(
+    inline void RDivEq(
         BaseMatrix_Rec_Mutable<M1>& m1, const PackedQ<M2,V2>& m2)
     {
         typename M1::adjoint_type m1a = m1.adjoint();
         PackedQ_MultEq(m2.getQ(),m2.getBeta(),m1a);
     }
-    template <class M1, class M2, class V2>
-    static TMV_INLINE void NoAliasRDivEq(
-        BaseMatrix_Rec_Mutable<M1>& m1, const PackedQ<M2,V2>& m2)
-    { RDivEq(m1,m2); }
-    template <class M1, class M2, class V2>
-    static TMV_INLINE void AliasRDivEq(
-        BaseMatrix_Rec_Mutable<M1>& m1, const PackedQ<M2,V2>& m2)
-    { RDivEq(m1,m2); }
 
 
 
@@ -1382,7 +1242,7 @@ namespace tmv {
 
 #ifdef TMV_TEXT
     template <class M, class V>
-    static inline std::string TMV_Text(const PackedQ<M,V>& Q)
+    inline std::string TMV_Text(const PackedQ<M,V>& Q)
     {
         std::ostringstream s;
         s << "PackedQ< "<<TMV_Text(Q.getQ())<< " , ";

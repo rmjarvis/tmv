@@ -150,7 +150,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline void WriteCompact(
+    inline void WriteCompact(
         std::ostream& os, const BaseMatrix_Tri<M>& m)
     {
         typedef typename M::const_cview_type Mv;
@@ -159,7 +159,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline void InlineWriteCompact(
+    inline void InlineWriteCompact(
         std::ostream& os, const BaseMatrix_Tri<M>& m)
     {
         typedef typename M::const_cview_type Mv;
@@ -168,7 +168,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline void WriteCompact(
+    inline void WriteCompact(
         std::ostream& os,
         const BaseMatrix_Tri<M>& m, typename M::float_type thresh) 
     {
@@ -179,7 +179,7 @@ namespace tmv {
 
 
     template <class M>
-    static inline void InlineWriteCompact(
+    inline void InlineWriteCompact(
         std::ostream& os,
         const BaseMatrix_Tri<M>& m, typename M::float_type thresh) 
     {
@@ -433,7 +433,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline void Read(std::istream& is, BaseMatrix_Tri_Mutable<M>& m)
+    inline void Read(std::istream& is, BaseMatrix_Tri_Mutable<M>& m)
     {
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
@@ -441,7 +441,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline void InlineRead(
+    inline void InlineRead(
         std::istream& is, BaseMatrix_Tri_Mutable<M>& m)
     {
         typedef typename M::cview_type Mv;

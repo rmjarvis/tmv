@@ -94,6 +94,8 @@ namespace tmv {
     //  realpart_type = return type from realPart()
     //  imagpart_type = return type from imagPart() 
     //  nonconj_type = return type from nonConj() 
+    //  noalias_type = return type from noAlias() 
+    //  alias_type = return type from alias() 
     //  linearview_type = return type from linearView() 
     //  
 
@@ -114,11 +116,11 @@ namespace tmv {
 
     // In TMV_Norm.h
     template <class M>
-    static inline typename M::float_type DoNormF(const BaseMatrix_Rec<M>& m);
+    inline typename M::float_type DoNormF(const BaseMatrix_Rec<M>& m);
     template <class M>
-    static inline typename M::float_type DoNorm2(const BaseMatrix<M>& m);
+    inline typename M::float_type DoNorm2(const BaseMatrix<M>& m);
     template <class M>
-    static inline typename M::float_type DoCondition(const BaseMatrix<M>& m);
+    inline typename M::float_type DoCondition(const BaseMatrix<M>& m);
 
     //
     // Helper functions and values:
@@ -126,7 +128,7 @@ namespace tmv {
 
     // Specify ExactSameStorage for rectangular matrices:
     template <class M1, class M2>
-    static TMV_INLINE bool ExactSameStorage(
+    TMV_INLINE bool ExactSameStorage(
         const BaseMatrix_Rec<M1>& m1, const BaseMatrix_Rec<M2>& m2)
     {
         typedef typename M1::value_type T1;
@@ -139,13 +141,13 @@ namespace tmv {
     // to whether the matrix uses CStyle or FortranStyle indexing.
     // They also update the indices to be consistent with CStyle.
     template <bool _fort>
-    static TMV_INLINE_ND void CheckDiagIndex(int& i, int m, int n)
+    TMV_INLINE_ND void CheckDiagIndex(int& i, int m, int n)
     { // CStyle or FortranStyle
         TMVAssert(i >= -m && "negative diag index must be <= nrows");
         TMVAssert(i <= n && "positive diag index must be <= ncols");
     }
     template <bool _fort>
-    static TMV_INLINE_ND void CheckDiagIndex(int& i, int& j1, int& j2, int m, int n)
+    TMV_INLINE_ND void CheckDiagIndex(int& i, int& j1, int& j2, int m, int n)
     { // CStyle
         TMVAssert(i >= -m && "negative diag index must be <= nrows");
         TMVAssert(i <= n && "positive diag index must be <= ncols");
@@ -160,21 +162,21 @@ namespace tmv {
         TMVAssert((i > 0 || j2 <= n) && "last element must be in matrix");
     }
     template <bool _fort>
-    static TMV_INLINE_ND void CheckRowRange(int& i1, int i2, int m)
+    TMV_INLINE_ND void CheckRowRange(int& i1, int i2, int m)
     { // CStyle
         TMVAssert(i1 >= 0 && "first row must be in matrix");
         TMVAssert(i2 <= m && "last row must be in matrix");
         TMVAssert(i2 >= i1 && "range must have a non-negative number of rows");
     }
     template <bool _fort>
-    static TMV_INLINE_ND void CheckColRange(int& j1, int j2, int n)
+    TMV_INLINE_ND void CheckColRange(int& j1, int j2, int n)
     { // CStyle
         TMVAssert(j1 >= 0 && "first column must be in matrix");
         TMVAssert(j2 <= n && "last column must be in matrix");
         TMVAssert(j2 >= j1 && "range must have a non-negative number of columns");
     }
     template <bool _fort>
-    static TMV_INLINE_ND void CheckRowRange(int& i1, int& i2, int istep, int m)
+    TMV_INLINE_ND void CheckRowRange(int& i1, int& i2, int istep, int m)
     { // CStyle
         TMVAssert(istep != 0 && "istep cannot be 0");
         TMVAssert(((i1 >= 0 && i1 < m) || i1==i2) && 
@@ -187,7 +189,7 @@ namespace tmv {
                   "must have a non-negative number of rows");
     }
     template <bool _fort>
-    static TMV_INLINE_ND void CheckColRange(int& j1, int& j2, int jstep, int n)
+    TMV_INLINE_ND void CheckColRange(int& j1, int& j2, int jstep, int n)
     { // CStyle
         TMVAssert(jstep != 0 && "jstep cannot be 0");
         TMVAssert(((j1 >= 0 && j1 < n) || j1==j2) && 
@@ -200,7 +202,7 @@ namespace tmv {
                   "must have a non-negative number of columns");
     }
     template <bool _fort>
-    static TMV_INLINE_ND void CheckMatSubVector(
+    TMV_INLINE_ND void CheckMatSubVector(
         int& i, int& j, int istep, int jstep, int size, int m, int n)
     { // CStyle
         TMVAssert(!(istep == 0 && jstep == 0) && 
@@ -288,8 +290,7 @@ namespace tmv {
     template <class T, int cs, int rs, int A>
     struct MCopyHelper<T,Rec,cs,rs,A>
     {
-        enum { A2 = A | NoDivider | NoAlias };
-        typedef SmallMatrix<T,cs,rs,A2> type;
+        typedef SmallMatrix<T,cs,rs,A> type;
     };
     template <class T, int rs, int A>
     struct MCopyHelper<T,Rec,TMV_UNKNOWN,rs,A>
@@ -365,68 +366,62 @@ namespace tmv {
 
     // Defined in TMV_CopyM.h
     template <class M1, class M2>
-    static inline void Copy(
-        const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
-    template <class M1, class M2>
-    static inline void NoAliasCopy(
+    inline void Copy(
         const BaseMatrix_Rec<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
 
     // Defined in TMV_SwapM.h
     template <class M1, class M2>
-    static inline void Swap(
-        BaseMatrix_Rec_Mutable<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
-    template <class M1, class M2>
-    static inline void NoAliasSwap(
+    inline void Swap(
         BaseMatrix_Rec_Mutable<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M>
-    static inline void TransposeSelf(BaseMatrix_Rec_Mutable<M>& m);
+    inline void TransposeSelf(BaseMatrix_Rec_Mutable<M>& m);
 
     // Defined in TMV_Permute.h
     template <class M>
-    static inline void PermuteRows(
+    inline void PermuteRows(
         BaseMatrix_Rec_Mutable<M>& m, const int* p, int i1, int i2);
     template <class M>
-    static inline void ReversePermuteRows(
+    inline void ReversePermuteRows(
         BaseMatrix_Rec_Mutable<M>& m, const int* p, int i1, int i2);
 
     // Defined in TMV_NormM.h
     template <class M>
-    static inline typename M::real_type DoNormSq(const BaseMatrix_Rec<M>& m);
+    inline typename M::real_type DoNormSq(const BaseMatrix_Rec<M>& m);
     template <class M>
-    static inline typename M::float_type DoNormSq(
+    inline typename M::float_type DoNormSq(
         const BaseMatrix_Rec<M>& m, const typename M::float_type scale);
     template <class M>
-    static inline typename M::float_type DoNorm1(const BaseMatrix_Rec<M>& m);
+    inline typename M::float_type DoNorm1(const BaseMatrix_Rec<M>& m);
     template <class M>
-    static inline typename M::float_type DoNormInf(const BaseMatrix_Rec<M>& m);
+    inline typename M::float_type DoNormInf(const BaseMatrix_Rec<M>& m);
     template <class M>
-    static inline typename M::value_type DoSumElements(const BaseMatrix_Rec<M>& m);
+    inline typename M::value_type DoSumElements(const BaseMatrix_Rec<M>& m);
     template <class M>
-    static inline typename M::float_type DoSumAbsElements(const BaseMatrix_Rec<M>& m);
+    inline typename M::float_type DoSumAbsElements(const BaseMatrix_Rec<M>& m);
     template <class M>
-    static inline typename M::real_type DoSumAbs2Elements(const BaseMatrix_Rec<M>& m);
+    inline typename M::real_type DoSumAbs2Elements(const BaseMatrix_Rec<M>& m);
     template <class M>
-    static inline typename M::float_type DoMaxAbsElement(const BaseMatrix_Rec<M>& m);
+    inline typename M::float_type DoMaxAbsElement(const BaseMatrix_Rec<M>& m);
     template <class M>
-    static inline typename M::real_type DoMaxAbs2Element(const BaseMatrix_Rec<M>& m);
+    inline typename M::real_type DoMaxAbs2Element(const BaseMatrix_Rec<M>& m);
 
     // Defined in TMV_MatrixIO.h
     template <class M>
-    static inline void Read(std::istream& is, BaseMatrix_Rec_Mutable<M>& m);
+    inline void Read(std::istream& is, BaseMatrix_Rec_Mutable<M>& m);
 
     // Defined below:
     template <class M>
-    static inline void SetZero(BaseMatrix_Rec_Mutable<M>& m);
+    inline void SetZero(BaseMatrix_Rec_Mutable<M>& m);
     template <class M, class RT>
-    static inline void Clip(BaseMatrix_Rec_Mutable<M>& m, const RT& thresh);
+    inline void Clip(BaseMatrix_Rec_Mutable<M>& m, const RT& thresh);
     template <class M, class T>
-    static inline void SetAllTo(BaseMatrix_Rec_Mutable<M>& m, const T& val);
+    inline void SetAllTo(BaseMatrix_Rec_Mutable<M>& m, const T& val);
     template <class M, class T>
-    static inline void AddToAll(BaseMatrix_Rec_Mutable<M>& m, const T& val);
+    inline void AddToAll(BaseMatrix_Rec_Mutable<M>& m, const T& val);
     template <class M>
-    static inline void ConjugateSelf(BaseMatrix_Rec_Mutable<M>& m);
+    inline void ConjugateSelf(BaseMatrix_Rec_Mutable<M>& m);
     template <class M, class F>
-    static inline void ApplyToAll(BaseMatrix_Rec_Mutable<M>& m, const F& f);
+    inline void ApplyToAll(BaseMatrix_Rec_Mutable<M>& m, const F& f);
 
 
     // A helper class for returning views without necessarily
@@ -1007,13 +1002,6 @@ namespace tmv {
             tmv::Copy(mat(),m2.mat()); 
         }
 
-        template <class M2>
-        TMV_INLINE void newAssignTo(BaseMatrix_Mutable<M2>& m2) const
-        {
-            TMVStaticAssert((ShapeTraits2<_shape,M2::_shape>::assignable));
-            tmv::NoAliasCopy(mat(),m2.mat()); 
-        }
-
         TMV_INLINE const type& mat() const
         { return static_cast<const type&>(*this); }
 
@@ -1122,6 +1110,8 @@ namespace tmv {
         typedef typename base_mut::realpart_type realpart_type;
         typedef typename base_mut::imagpart_type imagpart_type;
         typedef typename base_mut::nonconj_type nonconj_type;
+        typedef typename base_mut::noalias_type noalias_type;
+        typedef typename base_mut::alias_type alias_type;
         typedef typename base_mut::reference reference;
 
         typedef typename base::const_row_type const_row_type;
@@ -1394,9 +1384,9 @@ namespace tmv {
         type& cSwapRows(int i1, int i2) 
         {
             if (i1 != i2) {
-                row_type row1 = get_row(i1);
-                row_type row2 = get_row(i2);
-                tmv::NoAliasSwap(row1,row2);
+                typename row_type::noalias_type row1 = get_row(i1).noAlias();
+                typename row_type::noalias_type row2 = get_row(i2).noAlias();
+                Swap(row1,row2);
             }
             return mat();
         }
@@ -1410,9 +1400,9 @@ namespace tmv {
         type& cSwapCols(int j1, int j2) 
         {
             if (j1 != j2) {
-                col_type col1 = get_col(j1);
-                col_type col2 = get_col(j2);
-                tmv::NoAliasSwap(col1,col2);
+                typename col_type::noalias_type col1 = get_col(j1).noAlias();
+                typename col_type::noalias_type col2 = get_col(j2).noAlias();
+                Swap(col1,col2);
             }
             return mat();
         }
@@ -1698,6 +1688,12 @@ namespace tmv {
         TMV_INLINE TMV_MAYBE_REF(type,nonconj_type) nonConj()
         { return MakeRecView<type,nonconj_type>::call(mat()); }
 
+        TMV_INLINE TMV_MAYBE_REF(type,noalias_type) noAlias()
+        { return MakeRecView<type,noalias_type>::call(mat()); }
+
+        TMV_INLINE TMV_MAYBE_REF(type,alias_type) alias()
+        { return MakeRecView<type,alias_type>::call(mat()); }
+
 
         // Repeat the const versions:
         TMV_INLINE TMV_MAYBE_CREF(type,const_view_type) view() const
@@ -1849,7 +1845,7 @@ namespace tmv {
     };
 
     template <class M>
-    static TMV_INLINE void SetZero(BaseMatrix_Rec_Mutable<M>& m)
+    TMV_INLINE void SetZero(BaseMatrix_Rec_Mutable<M>& m)
     {
         const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
         SetZeroM_Helper<algo,M>::call(m.mat());
@@ -1893,7 +1889,7 @@ namespace tmv {
     };
 
     template <class M, class T>
-    static TMV_INLINE void SetAllTo(BaseMatrix_Rec_Mutable<M>& m, const T& val)
+    TMV_INLINE void SetAllTo(BaseMatrix_Rec_Mutable<M>& m, const T& val)
     {
         const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
         SetAllToM_Helper<algo,M,T>::call(m.mat(),val);
@@ -1937,7 +1933,7 @@ namespace tmv {
     };
 
     template <class M, class T>
-    static TMV_INLINE void AddToAll(BaseMatrix_Rec_Mutable<M>& m, const T& val)
+    TMV_INLINE void AddToAll(BaseMatrix_Rec_Mutable<M>& m, const T& val)
     {
         const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
         AddToAllM_Helper<algo,M,T>::call(m.mat(),val);
@@ -1981,7 +1977,7 @@ namespace tmv {
     };
 
     template <class M, class RT>
-    static TMV_INLINE void Clip(BaseMatrix_Rec_Mutable<M>& m, const RT& thresh)
+    TMV_INLINE void Clip(BaseMatrix_Rec_Mutable<M>& m, const RT& thresh)
     {
         const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
         ClipM_Helper<algo,M,RT>::call(m.mat(),thresh);
@@ -2025,7 +2021,7 @@ namespace tmv {
     };
 
     template <class M, class F>
-    static TMV_INLINE void ApplyToAll(BaseMatrix_Mutable<M>& m, const F& f)
+    TMV_INLINE void ApplyToAll(BaseMatrix_Mutable<M>& m, const F& f)
     {
         const int algo = M::_canlin ? 1 : M::_rowmajor ? 2 : 3;
         ApplyToAllM_Helper<algo,M,F>::call(m.mat(),f);
@@ -2053,7 +2049,7 @@ namespace tmv {
 
     // In TMV_ScaleM.h
     template <int ix, class T, class M>
-    static inline void Scale(const Scaling<ix,T>& x, BaseMatrix_Mutable<M>& m);
+    inline void Scale(const Scaling<ix,T>& x, BaseMatrix_Mutable<M>& m);
 
     // algo 2: m.imagPart() *= -1
     template <class M>
@@ -2070,7 +2066,7 @@ namespace tmv {
     };
 
     template <class M>
-    static TMV_INLINE void ConjugateSelf(BaseMatrix_Rec_Mutable<M>& m)
+    TMV_INLINE void ConjugateSelf(BaseMatrix_Rec_Mutable<M>& m)
     {
         const bool isreal = Traits<typename M::value_type>::isreal;
         const int algo = isreal ? 0 : M::_canlin ? 1 : 2;
@@ -2085,7 +2081,7 @@ namespace tmv {
 
 #ifdef TMV_TEXT
     template <class M>
-    static inline std::string TMV_Text(const BaseMatrix_Rec<M>& m)
+    inline std::string TMV_Text(const BaseMatrix_Rec<M>& m)
     {
         std::ostringstream s;
         s << "BaseMatrix_Rec< "<<TMV_Text(m.mat())<<" >";
@@ -2093,7 +2089,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline std::string TMV_Text(const BaseMatrix_Rec_Mutable<M>& m)
+    inline std::string TMV_Text(const BaseMatrix_Rec_Mutable<M>& m)
     {
         std::ostringstream s;
         s << "BaseMatrix_Rec_Mutable< "<<TMV_Text(m.mat())<<" >";

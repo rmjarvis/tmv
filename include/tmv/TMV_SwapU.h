@@ -138,7 +138,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static inline void unroll(M1& m1, M2& m2)
+            static TMV_INLINE void unroll(M1& m1, M2& m2)
             {
                 Unroller<I,M-(N-N/2),J,N/2>::unroll(m1,m2);
                 Unroller<I,M,J+N/2,N-N/2>::unroll(m1,m2);
@@ -147,7 +147,7 @@ namespace tmv {
         template <int I, int M, int J>
         struct Unroller<I,M,J,1>
         {
-            static inline void unroll(M1& m1, M2& m2)
+            static TMV_INLINE void unroll(M1& m1, M2& m2)
             {
                 Unroller<I,M/2,J,1>::unroll(m1,m2);
                 Unroller<I+M/2,M-M/2,J,1>::unroll(m1,m2);
@@ -155,16 +155,16 @@ namespace tmv {
         };
         template <int I, int M, int J>
         struct Unroller<I,M,J,0>
-        { static inline void unroll(M1& , M2& ) {} };
+        { static TMV_INLINE void unroll(M1& , M2& ) {} };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static inline void unroll(M1& m1, M2& m2)
+            static TMV_INLINE void unroll(M1& m1, M2& m2)
             { TMV_SWAP(m2.ref(I,J) , m1.ref(I,J)); }
         };
         template <int I, int J>
         struct Unroller<I,0,J,1>
-        { static inline void unroll(M1& , M2& ) {} };
+        { static TMV_INLINE void unroll(M1& , M2& ) {} };
 
         static inline void call(M1& m1, M2& m2)
         { Unroller<0,s,0,s>::unroll(m1,m2); }
@@ -177,7 +177,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static inline void unroll(M1& m1, M2& m2)
+            static TMV_INLINE void unroll(M1& m1, M2& m2)
             {
                 Unroller<I,M/2,J,N>::unroll(m1,m2);
                 Unroller<I+M/2,M-M/2,J+M/2,N-M/2>::unroll(m1,m2);
@@ -186,7 +186,7 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,1,J,N>
         {
-            static inline void unroll(M1& m1, M2& m2)
+            static TMV_INLINE void unroll(M1& m1, M2& m2)
             {
                 Unroller<I,1,J,N/2>::unroll(m1,m2);
                 Unroller<I,1,J+N/2,N-N/2>::unroll(m1,m2);
@@ -194,16 +194,16 @@ namespace tmv {
         };
         template <int I, int J, int N>
         struct Unroller<I,0,J,N>
-        { static inline void unroll(M1& , M2& ) {} };
+        { static TMV_INLINE void unroll(M1& , M2& ) {} };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static inline void unroll(M1& m1, M2& m2)
+            static TMV_INLINE void unroll(M1& m1, M2& m2)
             { TMV_SWAP(m2.ref(I,J) , m1.ref(I,J) ); }
         };
         template <int I, int J>
         struct Unroller<I,1,J,0>
-        { static inline void unroll(M1& , M2& ) {} };
+        { static TMV_INLINE void unroll(M1& , M2& ) {} };
 
         static inline void call(M1& m1, M2& m2)
         { Unroller<0,s,0,s>::unroll(m1,m2); }
@@ -309,8 +309,8 @@ namespace tmv {
             } else {
                 // Need a temporary
                 typename M1::copy_type m1c = m1;
-                NoAliasCopy(m2,m1);
-                NoAliasCopy(m1c,m2);
+                m1.noAlias() = m2;
+                m2.noAlias() = m1c;
             }
         }
     };
@@ -419,7 +419,7 @@ namespace tmv {
 
 
     template <class M1, class M2>
-    static inline void DoSwap(
+    inline void DoSwap(
         BaseMatrix_Tri_Mutable<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2)
     {
         TMVStaticAssert(M1::_upper == int(M2::_upper));
@@ -436,24 +436,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void NoAliasSwap(
-        BaseMatrix_Tri_Mutable<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2)
-    {
-        TMVStaticAssert(M1::_upper == int(M2::_upper));
-        TMVStaticAssert(M1::_unit == int(M2::_unit));
-        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
-        TMVAssert(m1.size() == m2.size());
-        TMVAssert(m1.isunit() == m2.isunit());
-        const int s = Sizes<M1::_size,M2::_size>::size;
-        typedef typename M1::cview_type M1v;
-        typedef typename M2::cview_type M2v;
-        TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
-        SwapU_Helper<-2,s,M1v,M2v>::call(m1v,m2v);
-    }
-
-    template <class M1, class M2>
-    static inline void InlineSwap(
+    inline void InlineSwap(
         BaseMatrix_Tri_Mutable<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2)
     {
         TMVStaticAssert(M1::_upper == int(M2::_upper));
@@ -470,7 +453,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void InlineAliasSwap(
+    inline void InlineAliasSwap(
         BaseMatrix_Tri_Mutable<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2)
     {
         TMVStaticAssert(M1::_upper == int(M2::_upper));
@@ -487,24 +470,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static inline void AliasSwap(
-        BaseMatrix_Tri_Mutable<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2)
-    {
-        TMVStaticAssert(M1::_upper == int(M2::_upper));
-        TMVStaticAssert(M1::_unit == int(M2::_unit));
-        TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
-        TMVAssert(m1.size() == m2.size());
-        TMVAssert(m1.isunit() == m2.isunit());
-        const int s = Sizes<M1::_size,M2::_size>::size;
-        typedef typename M1::cview_type M1v;
-        typedef typename M2::cview_type M2v;
-        TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_REF(M2,M2v) m2v = m2.cView();
-        SwapU_Helper<99,s,M1v,M2v>::call(m1v,m2v);
-    }
-
-    template <class M1, class M2>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         BaseMatrix_Tri_Mutable<M1>& m1, BaseMatrix_Tri_Mutable<M2>& m2)
     { DoSwap(m1,m2); }
 

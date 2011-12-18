@@ -92,7 +92,7 @@ namespace tmv {
         typedef typename Traits<T>::real_type real_type;
 
         enum { A01 = A0 | A1 };
-        enum { A = (A01 & ~NoDivider) | (
+        enum { A = (A01 & ~NoDivider & ~NoAlias) | (
                 (Attrib<A01>::rowmajor ? 0 : ColMajor) |
                 ( Attrib<A0>::withdivider ? 0 : NoDivider ) ) };
         enum { okA = (
@@ -106,6 +106,7 @@ namespace tmv {
                 !Attrib<A>::packed &&
                 !Attrib<A>::lower &&
                 !Attrib<A>::upper &&
+                !Attrib<A>::noalias &&
                 (Attrib<A>::nodivider || Attrib<A>::withdivider) &&
                 (Attrib<A>::nodivider != int(Attrib<A>::withdivider) ) &&
                 ( !Attrib<A>::withdivider ||
@@ -174,24 +175,25 @@ namespace tmv {
         enum { adjA = iscomplex ? (trA ^ Conj) : int(trA) };
         enum { nonconjA = ndA };
         enum { twosA = isreal ? int(nonconjA) : (nonconjA & ~AllStorageType) };
-        enum { An = _checkalias ? (ndA & ~CheckAlias) : (ndA | NoAlias) };
-        enum { vecAn = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
-        enum { colAn = vecAn | (_colmajor ? Unit : 0) };
-        enum { rowAn = vecAn | (_rowmajor ? Unit : 0) };
-        enum { diagAn = vecAn | (_diagstep == 1 ? Unit : 0) };
-        enum { nmAn = (An & ~AllStorageType) };
+        enum { Ar = _checkalias ? (ndA & ~CheckAlias) : (ndA | NoAlias) };
+        enum { vecAr = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
+        enum { colAr = vecAr | (_colmajor ? Unit : 0) };
+        enum { rowAr = vecAr | (_rowmajor ? Unit : 0) };
+        enum { diagAr = vecAr | (_diagstep == 1 ? Unit : 0) };
+        enum { nmAr = (Ar & ~AllStorageType) };
+        enum { An = ndA & ~CheckAlias };
 
         enum { xx = TMV_UNKNOWN }; // for brevity
         typedef ConstSmallVectorView<T,M,_stepi,colA> const_col_type;
-        typedef ConstVectorView<T,colAn> const_col_sub_type;
+        typedef ConstVectorView<T,colAr> const_col_sub_type;
         typedef ConstSmallVectorView<T,N,_stepj,rowA> const_row_type;
-        typedef ConstVectorView<T,rowAn> const_row_sub_type;
+        typedef ConstVectorView<T,rowAr> const_row_sub_type;
         typedef ConstSmallVectorView<T,minMN,_diagstep,diagA> const_diag_type;
-        typedef ConstVectorView<T,diagAn> const_diag_sub_type;
+        typedef ConstVectorView<T,diagAr> const_diag_sub_type;
 
-        typedef ConstMatrixView<T,An> const_submatrix_type;
-        typedef ConstMatrixView<T,nmAn> const_submatrix_step_type;
-        typedef ConstVectorView<T,vecAn> const_subvector_type;
+        typedef ConstMatrixView<T,Ar> const_submatrix_type;
+        typedef ConstMatrixView<T,nmAr> const_submatrix_step_type;
+        typedef ConstVectorView<T,vecAr> const_subvector_type;
         typedef ConstSmallMatrixView<T,M,2,_stepi,xx,colpairA>
             const_colpair_type;
         typedef ConstSmallMatrixView<T,2,N,xx,_stepj,rowpairA>
@@ -252,15 +254,15 @@ namespace tmv {
                 CMIt<type> >::type colmajor_iterator;
 
         typedef SmallVectorView<T,M,_stepi,colA> col_type;
-        typedef VectorView<T,colAn> col_sub_type;
+        typedef VectorView<T,colAr> col_sub_type;
         typedef SmallVectorView<T,N,_stepj,rowA> row_type;
-        typedef VectorView<T,rowAn> row_sub_type;
+        typedef VectorView<T,rowAr> row_sub_type;
         typedef SmallVectorView<T,minMN,_diagstep,diagA> diag_type;
-        typedef VectorView<T,diagAn> diag_sub_type;
+        typedef VectorView<T,diagAr> diag_sub_type;
 
-        typedef MatrixView<T,An> submatrix_type;
-        typedef MatrixView<T,nmAn> submatrix_step_type;
-        typedef VectorView<T,vecAn> subvector_type;
+        typedef MatrixView<T,Ar> submatrix_type;
+        typedef MatrixView<T,nmAr> submatrix_step_type;
+        typedef VectorView<T,vecAr> subvector_type;
         typedef SmallMatrixView<T,M,2,_stepi,xx,colpairA> colpair_type;
         typedef SmallMatrixView<T,2,N,xx,_stepj,rowpairA> rowpair_type;
         typedef SmallMatrixView<T,M,xx,_stepi,_stepj,ndA> colrange_type;
@@ -293,6 +295,8 @@ namespace tmv {
         typedef realpart_type imagpart_type;
         typedef SmallVectorView<T,_linsize,1,(vecA|Unit)> linearview_type;
         typedef SmallMatrixView<T,M,N,_stepi,_stepj,nonconjA> nonconj_type;
+        typedef SmallMatrixView<T,M,N,_stepi,_stepj,An> noalias_type;
+        typedef SmallMatrixView<T,M,N,_stepi,_stepj,An|CheckAlias> alias_type;
     };
 
     template <class T, int M, int N, int A0, int A1>
@@ -354,7 +358,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(M>=0);
             TMVStaticAssert(N>=0);
-            m2.newAssignTo(*this);
+            this->noAlias() = m2;
         }
 
         template <class M2>
@@ -366,7 +370,7 @@ namespace tmv {
             TMVStaticAssert((ShapeTraits2<M2::_shape,_shape>::assignable));
             TMVAssert(m2.colsize() == M);
             TMVAssert(m2.rowsize() == N);
-            m2.newAssignTo(*this);
+            this->noAlias() = m2;
         }
 
         ~SmallMatrix()
@@ -426,7 +430,7 @@ namespace tmv {
     {
         typedef typename Traits<T>::real_type real_type;
 
-        enum { A = (A0 & ~NoDivider) | (
+        enum { A = (A0 & ~NoDivider & ~NoAlias) | (
                 ( Attrib<A0>::colmajor ? 0 :
                   Attrib<A0>::rowmajor ? 0 :
                   Si == 1 ? ColMajor :
@@ -440,6 +444,7 @@ namespace tmv {
                 !Attrib<A>::packed &&
                 !Attrib<A>::lower &&
                 !Attrib<A>::upper &&
+                !Attrib<A>::noalias &&
                 (Attrib<A>::nodivider || Attrib<A>::withdivider) &&
                 (Attrib<A>::nodivider != int(Attrib<A>::withdivider) ) &&
                 ( !Attrib<A>::withdivider ||
@@ -521,24 +526,24 @@ namespace tmv {
         enum { adjA = iscomplex ? (trA ^ Conj) : int(trA) };
         enum { nonconjA = ndA & ~Conj };
         enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
-        enum { An = _checkalias ? (ndA & ~CheckAlias) : (ndA | NoAlias) };
-        enum { vecAn = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
-        enum { colAn = vecAn | (_colmajor ? Unit : 0) };
-        enum { rowAn = vecAn | (_rowmajor ? Unit : 0) };
-        enum { diagAn = vecAn | (_diagstep == 1 ? Unit : 0) };
-        enum { nmAn = (An & ~AllStorageType) };
+        enum { Ar = _checkalias ? (ndA & ~CheckAlias) : (ndA | NoAlias) };
+        enum { vecAr = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
+        enum { colAr = vecAr | (_colmajor ? Unit : 0) };
+        enum { rowAr = vecAr | (_rowmajor ? Unit : 0) };
+        enum { diagAr = vecAr | (_diagstep == 1 ? Unit : 0) };
+        enum { nmAr = (Ar & ~AllStorageType) };
 
         enum { xx = TMV_UNKNOWN }; // for brevity
         typedef ConstSmallVectorView<T,M,_stepi,colA> const_col_type;
-        typedef ConstVectorView<T,colAn> const_col_sub_type;
+        typedef ConstVectorView<T,colAr> const_col_sub_type;
         typedef ConstSmallVectorView<T,N,_stepj,rowA> const_row_type;
-        typedef ConstVectorView<T,rowAn> const_row_sub_type;
+        typedef ConstVectorView<T,rowAr> const_row_sub_type;
         typedef ConstSmallVectorView<T,minMN,_diagstep,diagA> const_diag_type;
-        typedef ConstVectorView<T,diagAn> const_diag_sub_type;
+        typedef ConstVectorView<T,diagAr> const_diag_sub_type;
 
-        typedef ConstMatrixView<T,An> const_submatrix_type;
-        typedef ConstMatrixView<T,nmAn> const_submatrix_step_type;
-        typedef ConstVectorView<T,vecAn> const_subvector_type;
+        typedef ConstMatrixView<T,Ar> const_submatrix_type;
+        typedef ConstMatrixView<T,nmAr> const_submatrix_step_type;
+        typedef ConstVectorView<T,vecAr> const_subvector_type;
         typedef ConstSmallMatrixView<T,M,2,_stepi,xx,colpairA>
             const_colpair_type;
         typedef ConstSmallMatrixView<T,2,N,xx,_stepj,rowpairA>
@@ -761,7 +766,7 @@ namespace tmv {
     {
         typedef typename Traits<T>::real_type real_type;
 
-        enum { A = (A0 & ~NoDivider) | (
+        enum { A = (A0 & ~NoDivider & ~NoAlias) | (
                 ( Attrib<A0>::colmajor ? 0 :
                   Attrib<A0>::rowmajor ? 0 :
                   Si == 1 ? ColMajor :
@@ -775,6 +780,7 @@ namespace tmv {
                 !Attrib<A>::packed &&
                 !Attrib<A>::lower &&
                 !Attrib<A>::upper &&
+                !Attrib<A>::noalias &&
                 (Attrib<A>::nodivider || Attrib<A>::withdivider) &&
                 (Attrib<A>::nodivider != int(Attrib<A>::withdivider) ) &&
                 ( !Attrib<A>::withdivider ||
@@ -856,24 +862,25 @@ namespace tmv {
         enum { adjA = iscomplex ? (trA ^ Conj) : int(trA) };
         enum { nonconjA = ndA & ~Conj };
         enum { twosA = isreal ? nonconjA : int(nonconjA & ~AllStorageType) };
-        enum { An = _checkalias ? (ndA & ~CheckAlias) : (ndA | NoAlias) };
-        enum { vecAn = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
-        enum { colAn = vecAn | (_colmajor ? Unit : 0) };
-        enum { rowAn = vecAn | (_rowmajor ? Unit : 0) };
-        enum { diagAn = vecAn | (_diagstep == 1 ? Unit : 0) };
-        enum { nmAn = (An & ~AllStorageType) };
+        enum { Ar = _checkalias ? (ndA & ~CheckAlias) : (ndA | NoAlias) };
+        enum { vecAr = _checkalias ? (vecA & ~CheckAlias) : (vecA | NoAlias) };
+        enum { colAr = vecAr | (_colmajor ? Unit : 0) };
+        enum { rowAr = vecAr | (_rowmajor ? Unit : 0) };
+        enum { diagAr = vecAr | (_diagstep == 1 ? Unit : 0) };
+        enum { nmAr = (Ar & ~AllStorageType) };
+        enum { An = ndA & ~CheckAlias };
 
         enum { xx = TMV_UNKNOWN }; // for brevity
         typedef ConstSmallVectorView<T,M,_stepi,colA> const_col_type;
-        typedef ConstVectorView<T,colAn> const_col_sub_type;
+        typedef ConstVectorView<T,colAr> const_col_sub_type;
         typedef ConstSmallVectorView<T,N,_stepj,rowA> const_row_type;
-        typedef ConstVectorView<T,rowAn> const_row_sub_type;
+        typedef ConstVectorView<T,rowAr> const_row_sub_type;
         typedef ConstSmallVectorView<T,minMN,_diagstep,diagA> const_diag_type;
-        typedef ConstVectorView<T,diagAn> const_diag_sub_type;
+        typedef ConstVectorView<T,diagAr> const_diag_sub_type;
 
-        typedef ConstMatrixView<T,An> const_submatrix_type;
-        typedef ConstMatrixView<T,nmAn> const_submatrix_step_type;
-        typedef ConstVectorView<T,vecAn> const_subvector_type;
+        typedef ConstMatrixView<T,Ar> const_submatrix_type;
+        typedef ConstMatrixView<T,nmAr> const_submatrix_step_type;
+        typedef ConstVectorView<T,vecAr> const_subvector_type;
         typedef ConstSmallMatrixView<T,M,2,_stepi,xx,colpairA>
             const_colpair_type;
         typedef ConstSmallMatrixView<T,2,N,xx,_stepj,rowpairA>
@@ -939,15 +946,15 @@ namespace tmv {
 
 
         typedef SmallVectorView<T,M,_stepi,colA> col_type;
-        typedef VectorView<T,colAn> col_sub_type;
+        typedef VectorView<T,colAr> col_sub_type;
         typedef SmallVectorView<T,N,_stepj,rowA> row_type;
-        typedef VectorView<T,rowAn> row_sub_type;
+        typedef VectorView<T,rowAr> row_sub_type;
         typedef SmallVectorView<T,minMN,_diagstep,diagA> diag_type;
-        typedef VectorView<T,diagAn> diag_sub_type;
+        typedef VectorView<T,diagAr> diag_sub_type;
 
-        typedef MatrixView<T,An> submatrix_type;
-        typedef MatrixView<T,nmAn> submatrix_step_type;
-        typedef VectorView<T,vecAn> subvector_type;
+        typedef MatrixView<T,Ar> submatrix_type;
+        typedef MatrixView<T,nmAr> submatrix_step_type;
+        typedef VectorView<T,vecAr> subvector_type;
         typedef SmallMatrixView<T,M,2,_stepi,xx,colpairA> colpair_type;
         typedef SmallMatrixView<T,2,N,xx,_stepj,rowpairA> rowpair_type;
         typedef SmallMatrixView<T,M,xx,_stepi,_stepj,ndA> colrange_type;
@@ -980,6 +987,8 @@ namespace tmv {
         typedef realpart_type imagpart_type;
         typedef SmallVectorView<T,_linsize,1,(vecA|Unit)> linearview_type;
         typedef SmallMatrixView<T,M,N,_stepi,_stepj,nonconjA> nonconj_type;
+        typedef SmallMatrixView<T,M,N,_stepi,_stepj,An> noalias_type;
+        typedef SmallMatrixView<T,M,N,_stepi,_stepj,An|CheckAlias> alias_type;
     };
 
     template <class T, int M, int N, int Si, int Sj, int A>
@@ -1154,7 +1163,7 @@ namespace tmv {
         enum { vecA = (
                 ( V::_conj ? Conj : NonConj ) |
                 ( V::_fort ? FortranStyle : CStyle ) |
-                ( Traits<V>::A & AllAliasStatus ) )};
+                ( V::_checkalias ? CheckAlias : NoAlias ) ) };
         enum { colA = vecA | (S == 1 ? ColMajor : 0 ) };
         enum { rowA = vecA | (S == 1 ? RowMajor : 0 ) };
         typedef ConstSmallMatrixView<T,1,N,N,S,rowA> crv;
@@ -1164,41 +1173,25 @@ namespace tmv {
     };
 
     template <class V>
-    static TMV_INLINE typename VVO<V>::crv RowVectorViewOf(
-        const BaseVector_Calc<V>& v)
-    {
-        return typename VVO<V>::crv(
-            v.cptr(),1,v.size(),v.size(),v.step());
-    }
+    TMV_INLINE typename VVO<V>::crv RowVectorViewOf(const BaseVector_Calc<V>& v)
+    { return typename VVO<V>::crv(v.cptr(),1,v.size(),v.size(),v.step()); }
 
     template <class V>
-    static TMV_INLINE typename VVO<V>::rv RowVectorViewOf(
-        BaseVector_Mutable<V>& v)
-    {
-        return typename VVO<V>::rv(
-            v.ptr(),1,v.size(),v.size(),v.step());
-    }
+    TMV_INLINE typename VVO<V>::rv RowVectorViewOf(BaseVector_Mutable<V>& v)
+    { return typename VVO<V>::rv(v.ptr(),1,v.size(),v.size(),v.step()); }
 
     template <class V>
-    static TMV_INLINE typename VVO<V>::ccv ColVectorViewOf(
-        const BaseVector_Calc<V>& v)
-    {
-        return typename VVO<V>::ccv(
-            v.cptr(),v.size(),1,v.step(),v.size());
-    }
+    TMV_INLINE typename VVO<V>::ccv ColVectorViewOf(const BaseVector_Calc<V>& v)
+    { return typename VVO<V>::ccv(v.cptr(),v.size(),1,v.step(),v.size()); }
 
     template <class V>
-    static TMV_INLINE typename VVO<V>::cv ColVectorViewOf(
-        BaseVector_Mutable<V>& v)
-    {
-        return typename VVO<V>::cv(
-            v.ptr(),v.size(),1,v.step(),v.size());
-    }
+    TMV_INLINE typename VVO<V>::cv ColVectorViewOf(BaseVector_Mutable<V>& v)
+    { return typename VVO<V>::cv(v.ptr(),v.size(),1,v.step(),v.size()); }
 
     // Repeat for VectorView and SmallVectorView so we can have them 
     // work without requiring the non-const reference.
     template <class T, int A>
-    static TMV_INLINE typename VVO<VectorView<T,A> >::rv RowVectorViewOf(
+    TMV_INLINE typename VVO<VectorView<T,A> >::rv RowVectorViewOf(
         VectorView<T,A> v)
     {
         return typename VVO<VectorView<T,A> >::rv(
@@ -1206,7 +1199,7 @@ namespace tmv {
     }
 
     template <class T, int N, int S, int A>
-    static TMV_INLINE typename VVO<SmallVectorView<T,N,S,A> >::rv RowVectorViewOf(
+    TMV_INLINE typename VVO<SmallVectorView<T,N,S,A> >::rv RowVectorViewOf(
         SmallVectorView<T,N,S,A> v)
     {
         return typename VVO<SmallVectorView<T,N,S,A> >::rv(
@@ -1214,7 +1207,7 @@ namespace tmv {
     }
 
     template <class T, int S, int A>
-    static TMV_INLINE typename VVO<VectorView<T,A> >::cv ColVectorViewOf(
+    TMV_INLINE typename VVO<VectorView<T,A> >::cv ColVectorViewOf(
         VectorView<T,A> v)
     {
         return typename VVO<VectorView<T,A> >::cv(
@@ -1222,7 +1215,7 @@ namespace tmv {
     }
 
     template <class T, int N, int S, int A>
-    static TMV_INLINE typename VVO<SmallVectorView<T,N,S,A> >::cv ColVectorViewOf(
+    TMV_INLINE typename VVO<SmallVectorView<T,N,S,A> >::cv ColVectorViewOf(
         SmallVectorView<T,N,S,A> v)
     {
         return typename VVO<SmallVectorView<T,N,S,A> >::cv(
@@ -1235,27 +1228,25 @@ namespace tmv {
     //
 
     template <class T, int M, int N, int Si, int Sj, int A, class MM>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         BaseMatrix_Rec_Mutable<MM>& m1, SmallMatrixView<T,M,N,Si,Sj,A> m2)
     { DoSwap(m1,m2); }
     template <class T, int M, int N, int Si, int Sj, int A, class MM>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         SmallMatrixView<T,M,N,Si,Sj,A> m1, BaseMatrix_Rec_Mutable<MM>& m2)
     { DoSwap(m1,m2); }
     template <class T, int M, int N, int Si1, int Sj1, int A1, int Si2, int Sj2, int A2>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         SmallMatrixView<T,M,N,Si1,Sj1,A1> m1,
         SmallMatrixView<T,M,N,Si2,Sj2,A2> m2)
     { DoSwap(m1,m2); }
     template <class T, int M, int N, int Si1, int Sj1, int A1, int A2>
-    static TMV_INLINE void Swap(
-        SmallMatrixView<T,M,N,Si1,Sj1,A1> m1, 
-        MatrixView<T,A2> m2)
+    TMV_INLINE void Swap(
+        SmallMatrixView<T,M,N,Si1,Sj1,A1> m1, MatrixView<T,A2> m2)
     { DoSwap(m1,m2); }
     template <class T, int M, int N, int A1, int Si2, int Sj2, int A2>
-    static TMV_INLINE void Swap(
-        MatrixView<T,A1> m1,
-        SmallMatrixView<T,M,N,Si2,Sj2,A2> m2)
+    TMV_INLINE void Swap(
+        MatrixView<T,A1> m1, SmallMatrixView<T,M,N,Si2,Sj2,A2> m2)
     { DoSwap(m1,m2); }
 
 
@@ -1264,29 +1255,29 @@ namespace tmv {
     //
 
     template <class T, int M, int N, int A0, int A1>
-    static TMV_INLINE typename SmallMatrix<T,M,N,A0,A1>::conjugate_type Conjugate(
+    TMV_INLINE typename SmallMatrix<T,M,N,A0,A1>::conjugate_type Conjugate(
         SmallMatrix<T,M,N,A0,A1>& m)
     { return m.conjugate(); }
     template <class T, int M, int N, int Si, int Sj, int A>
-    static TMV_INLINE typename SmallMatrixView<T,M,N,Si,Sj,A>::conjugate_type Conjugate(
+    TMV_INLINE typename SmallMatrixView<T,M,N,Si,Sj,A>::conjugate_type Conjugate(
         SmallMatrixView<T,M,N,Si,Sj,A> m)
     { return m.conjugate(); }
 
     template <class T, int M, int N, int A0, int A1>
-    static TMV_INLINE typename SmallMatrix<T,M,N,A0,A1>::transpose_type Transpose(
+    TMV_INLINE typename SmallMatrix<T,M,N,A0,A1>::transpose_type Transpose(
         SmallMatrix<T,M,N,A0,A1>& m)
     { return m.transpose(); }
     template <class T, int M, int N, int Si, int Sj, int A>
-    static TMV_INLINE typename SmallMatrixView<T,M,N,Si,Sj,A>::transpose_type Transpose(
+    TMV_INLINE typename SmallMatrixView<T,M,N,Si,Sj,A>::transpose_type Transpose(
         SmallMatrixView<T,M,N,Si,Sj,A> m)
     { return m.transpose(); }
 
     template <class T, int M, int N, int A0, int A1>
-    static TMV_INLINE typename SmallMatrix<T,M,N,A0,A1>::adjoint_type Adjoint(
+    TMV_INLINE typename SmallMatrix<T,M,N,A0,A1>::adjoint_type Adjoint(
         SmallMatrix<T,M,N,A0,A1>& m)
     { return m.adjoint(); }
     template <class T, int M, int N, int Si, int Sj, int A>
-    static TMV_INLINE typename SmallMatrixView<T,M,N,Si,Sj,A>::adjoint_type Adjoint(
+    TMV_INLINE typename SmallMatrixView<T,M,N,Si,Sj,A>::adjoint_type Adjoint(
         SmallMatrixView<T,M,N,Si,Sj,A> m)
     { return m.adjoint(); }
 
@@ -1297,7 +1288,7 @@ namespace tmv {
 
 #ifdef TMV_TEXT
     template <class T, int M, int N, int A0, int A1>
-    static inline std::string TMV_Text(const SmallMatrix<T,M,N,A0,A1>& m)
+    inline std::string TMV_Text(const SmallMatrix<T,M,N,A0,A1>& m)
     {
         const int A = A0 | A1;
         std::ostringstream s;
@@ -1310,7 +1301,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Si, int Sj, int A>
-    static inline std::string TMV_Text(
+    inline std::string TMV_Text(
         const ConstSmallMatrixView<T,M,N,Si,Sj,A>& m)
     {
         std::ostringstream s;
@@ -1324,7 +1315,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Si, int Sj, int A>
-    static inline std::string TMV_Text(
+    inline std::string TMV_Text(
         const SmallMatrixView<T,M,N,Si,Sj,A>& m)
     {
         std::ostringstream s;

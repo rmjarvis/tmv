@@ -136,7 +136,7 @@ namespace tmv {
             }
         };
 
-        static void call(M1& A, V& beta)
+        static inline void call(M1& A, V& beta)
         {
             TMVStaticAssert(rs != TMV_UNKNOWN);
 #ifdef PRINTALGO_QR
@@ -244,7 +244,7 @@ namespace tmv {
 
     // Used by both algo 22 and 27.
     template <class M1, class M2>
-    static inline void RecursiveQRDecompose(M1& A, M2& Z, bool makeZ)
+    inline void RecursiveQRDecompose(M1& A, M2& Z, bool makeZ)
     {
         // This is very similar to the BlockHouseholder_MakeZ function
         // in Householder.cpp.  The difference is the addition of the 
@@ -746,7 +746,8 @@ namespace tmv {
             typedef typename MCopyHelper<T,Rec,cs,rs>::type Mcm;
             Mcm mcm = m;
             QRDecompose_Helper<-2,cs,rs,Mcm,V>::call(mcm,beta);
-            NoAliasCopy(mcm,m);
+            typename M::noalias_type mna = m.noAlias();
+            Copy(mcm,mna);
         }
     };
 
@@ -872,7 +873,7 @@ namespace tmv {
     };
 
     template <class M, class V>
-    static inline void InlineQR_Decompose(
+    inline void InlineQR_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, BaseVector_Mutable<V>& beta)
     {
         const int cs = M::_colsize;
@@ -886,7 +887,7 @@ namespace tmv {
 
     // This is the basic functionality
     template <class M, class V>
-    static inline void QR_Decompose(
+    inline void QR_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, BaseVector_Mutable<V>& beta)
     {
         TMVStaticAssert(V::isreal);
@@ -910,7 +911,7 @@ namespace tmv {
     // The rest of these below are basically convenience functions
     // to allow the user to provide fewer or different arguments.
     template <class M1, class M2>
-    static inline void QR_Decompose(
+    inline void QR_Decompose(
         BaseMatrix_Rec_Mutable<M1>& Q, BaseMatrix_Tri_Mutable<M2>& R)
     {
         TMVStaticAssert((Traits2<
@@ -923,12 +924,12 @@ namespace tmv {
         typedef typename M1::real_type RT;
         Vector<RT> beta(Q.rowsize());
         QR_Decompose(Q,beta);
-        NoAliasCopy(Q.upperTri(),R);
+        Copy(Q.upperTri(),R);
         UnpackQ(Q,beta);
     }
 
     template <class M>
-    static inline void QR_Decompose(BaseMatrix_Rec_Mutable<M>& A)
+    inline void QR_Decompose(BaseMatrix_Rec_Mutable<M>& A)
     {
         TMVAssert(A.colsize() >= A.rowsize());
         typedef typename M::real_type RT;
@@ -939,7 +940,7 @@ namespace tmv {
 
     // Allow views as an argument by value (for convenience)
     template <class T, int A, int A2>
-    static inline void QR_Decompose(
+    inline void QR_Decompose(
         MatrixView<T,A> Q, UpperTriMatrixView<T,A2> R)
     {
         typedef MatrixView<T,A> M1;
@@ -950,7 +951,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Si, int Sj, int A, int Si2, int Sj2, int A2>
-    static inline void QR_Decompose(
+    inline void QR_Decompose(
         SmallMatrixView<T,M,N,Si,Sj,A> Q,
         SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> R)
     {
@@ -962,7 +963,7 @@ namespace tmv {
     }
 
     template <class T, int N, int A, int Si2, int Sj2, int A2>
-    static inline void QR_Decompose(
+    inline void QR_Decompose(
         MatrixView<T,A> Q,
         SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> R)
     {
@@ -974,7 +975,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Si, int Sj, int A, int A2>
-    static inline void QR_Decompose(
+    inline void QR_Decompose(
         SmallMatrixView<T,M,N,Si,Sj,A> Q,
         UpperTriMatrixView<T,A2> R)
     {
@@ -986,14 +987,14 @@ namespace tmv {
     }
 
     template <class T, int A>
-    static inline void QR_Decompose(MatrixView<T,A> m)
+    inline void QR_Decompose(MatrixView<T,A> m)
     {
         typedef MatrixView<T,A> M1;
         QR_Decompose(static_cast<BaseMatrix_Rec_Mutable<M1>&>(m));
     }
 
     template <class T, int M, int N, int Si, int Sj, int A>
-    static inline void QR_Decompose(SmallMatrixView<T,M,N,Si,Sj,A> m)
+    inline void QR_Decompose(SmallMatrixView<T,M,N,Si,Sj,A> m)
     {
         typedef SmallMatrixView<T,M,N,Si,Sj,A> M1;
         QR_Decompose(static_cast<BaseMatrix_Rec_Mutable<M1>&>(m));
@@ -1001,7 +1002,7 @@ namespace tmv {
 
     // Don't forget the ones that mix *MatrixView with BaseMatrix_*_Mutable
     template <class T, int A, class M2>
-    static inline void QR_Decompose(
+    inline void QR_Decompose(
         MatrixView<T,A> Q, BaseMatrix_Tri_Mutable<M2>& R)
     {
         typedef MatrixView<T,A> M1;
@@ -1010,7 +1011,7 @@ namespace tmv {
     }
 
     template <class M1, class T, int A2>
-    static inline void QR_Decompose(
+    inline void QR_Decompose(
         BaseMatrix_Rec_Mutable<M1>& Q, UpperTriMatrixView<T,A2> R)
     {
         typedef UpperTriMatrixView<T,A2> M2;
@@ -1019,7 +1020,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Si, int Sj, int A, class M2>
-    static inline void QR_Decompose(
+    inline void QR_Decompose(
         SmallMatrixView<T,M,N,Si,Sj,A> Q, BaseMatrix_Tri_Mutable<M2>& R)
     {
         typedef SmallMatrixView<T,M,N,Si,Sj,A> M1;
@@ -1028,7 +1029,7 @@ namespace tmv {
     }
 
     template <class M1, class T, int N, int Si2, int Sj2, int A2>
-    static inline void QR_Decompose(
+    inline void QR_Decompose(
         BaseMatrix_Rec_Mutable<M1>& Q,
         SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> R)
     {

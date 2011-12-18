@@ -431,7 +431,7 @@ namespace tmv {
     };
 
     template <class V>
-    static inline void InlineSort(
+    inline void InlineSort(
         BaseVector_Mutable<V>& v, int* P, ADType ad, CompType comp)
     {
         typedef typename V::cview_type Vv;
@@ -441,7 +441,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline void Sort(
+    inline void Sort(
         BaseVector_Mutable<V>& v, int* P, ADType ad, CompType comp)
     {
         typedef typename V::cview_type Vv;
@@ -451,8 +451,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline void InlineSort(
-        BaseVector_Mutable<V>& v, ADType ad, CompType comp)
+    inline void InlineSort(BaseVector_Mutable<V>& v, ADType ad, CompType comp)
     {
         typedef typename V::cview_type Vv;
         TMV_MAYBE_REF(V,Vv) vv = v.cView();
@@ -460,8 +459,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline void Sort(
-        BaseVector_Mutable<V>& v, ADType ad, CompType comp)
+    inline void Sort(BaseVector_Mutable<V>& v, ADType ad, CompType comp)
     {
         typedef typename V::cview_type Vv;
         TMV_MAYBE_REF(V,Vv) vv = v.cView();

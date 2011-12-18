@@ -50,11 +50,6 @@ namespace tmv {
         const T3 x, const ConstLowerTriMatrixView<T1,C1>& m1,
         const ConstDiagMatrixView<T2,C2>& m2, LowerTriMatrixView<T3> m3);
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3);
-
     //
     // Matrix * DiagMatrix
     //
@@ -263,7 +258,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
                 Unroller<I,N/2>::unroll(x,m1,m2,m3);
@@ -273,7 +268,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
                 typedef typename M2::value_type T2;
@@ -293,7 +288,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,0>
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix,T>& , const M1& , const M2& , M3& ) {}
         };
         static inline void call(
@@ -496,7 +491,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
                 Unroller<I,N/2>::unroll(x,m1,m2,m3);
@@ -506,7 +501,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
             {
                 typedef typename M2::value_type T2;
@@ -526,7 +521,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,0>
         {
-            static inline void unroll(
+            static TMV_INLINE void unroll(
                 const Scaling<ix,T>& , const M1& , const M2& , M3& ) {}
         };
         static inline void call(
@@ -581,8 +576,11 @@ namespace tmv {
             std::cout<<"UD algo 82: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             typedef typename M3::real_type RT;
-            const Scaling<1,RT> one;
-            NoAliasMultMM<add>(one,m1,(x*m2).calc(),m3);
+            Scaling<1,RT> one;
+            typedef typename Traits2<T,typename M2::value_type>::type PT;
+            typedef typename MCopyHelper<PT,Diag,s,s>::type M2c;
+            M2c m2c = x*m2;
+            MultUD_Helper<-2,s,add,1,RT,M1,M2c,M3>::call(one,m1,m2c,m3);
         }
     };
 
@@ -707,7 +705,9 @@ namespace tmv {
             } else {
                 // SameStorage(m1,m3)
                 // Need a temporary
-                NoAliasMultMM<true>(x,m1.copy(),m2,m3);
+                typedef typename M1::copy_type M1c;
+                M1c m1c = m1;
+                MultUD_Helper<-2,s,true,ix,T,M1c,M2,M3>::call(x,m1c,m2,m3);
             }
         }
     };
@@ -729,8 +729,10 @@ namespace tmv {
             } else {
                 // SameStorage(m1,m3)
                 // Let Copy handle the aliasing
-                AliasCopy(m1,m3);
-                NoAliasMultMM<false>(x,m3,m2,m3);
+                Copy(m1,m3);
+                typedef typename M3::const_view_type M3c;
+                M3c m3c = m3.constView();
+                MultUD_Helper<-2,s,true,ix,T,M3c,M2,M3>::call(x,m3c,m2,m3);
             }
         }
     };
@@ -897,7 +899,7 @@ namespace tmv {
             Matrix<T3> m2c = m2;
             Matrix<T3> m3i = m3;
             Matrix<T3> m3c = m3;
-            NoAliasMultMM<add>(x,m1c,m2c,m3c);
+            MultMM<add>(x,m1c,m2c,m3c);
 #endif
             MultUD_Helper<algo,s,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
 #ifdef XDEBUG_UD
@@ -960,7 +962,7 @@ namespace tmv {
     };
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void MultMM(
+    inline void MultMM(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
     {
@@ -983,30 +985,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
-    {
-        TMVStaticAssert(!M3::_unit);
-        TMVStaticAssert(M1::_upper == int(M3::_upper));
-        TMVStaticAssert((Sizes<M3::_size,M1::_size>::same));
-        TMVStaticAssert((Sizes<M2::_size,M1::_size>::same));
-        TMVStaticAssert((Sizes<M3::_size,M2::_size>::same));
-        TMVAssert(m3.size() == m1.size());
-        TMVAssert(m3.size() == m2.size());
-        TMVAssert(!m3.isunit());
-        const int s = Sizes<Sizes<M3::_size,M1::_size>::size,M2::_size>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
-        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
-        MultUD_Helper<-2,s,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
-
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void InlineMultMM(
+    inline void InlineMultMM(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
     {
@@ -1029,7 +1008,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void InlineAliasMultMM(
+    inline void InlineAliasMultMM(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
     {
@@ -1051,49 +1030,14 @@ namespace tmv {
         MultUD_Helper<98,s,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
     }
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void AliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3)
-    {
-        TMVStaticAssert(!M3::_unit);
-        TMVStaticAssert(M1::_upper == int(M3::_upper));
-        TMVStaticAssert((Sizes<M3::_size,M1::_size>::same));
-        TMVStaticAssert((Sizes<M2::_size,M1::_size>::same));
-        TMVStaticAssert((Sizes<M3::_size,M2::_size>::same));
-        TMVAssert(m3.size() == m1.size());
-        TMVAssert(m3.size() == m2.size());
-        TMVAssert(!m3.isunit());
-        const int s = Sizes<Sizes<M3::_size,M1::_size>::size,M2::_size>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
-        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
-        MultUD_Helper<99,s,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
-
     template <class M1, int ix, class T, class M2>
-    static TMV_INLINE void MultEqMM(
+    TMV_INLINE void MultEqMM(
         BaseMatrix_Tri_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
     { MultMM<false>(x,m1.mat(),m2.mat(),m1.mat()); }
 
-    template <class M1, int ix, class T, class M2>
-    static TMV_INLINE void NoAliasMultEqMM(
-        BaseMatrix_Tri_Mutable<M1>& m1,
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
-    { NoAliasMultMM<false>(x,m1.mat(),m2.mat(),m1.mat()); }
-
-    template <class M1, int ix, class T, class M2>
-    static TMV_INLINE void AliasMultEqMM(
-        BaseMatrix_Tri_Mutable<M1>& m1,
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2)
-    { AliasMultMM<false>(x,m1.mat(),m2.mat(),m1.mat()); }
-
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void MultMM(
+    inline void MultMM(
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
         const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -1107,58 +1051,12 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        const bool upper = M1::_upper;
-        typedef typename TypeSelect<upper,
-                typename M3::uppertri_type,
-                typename M3::lowertri_type>::type M3u;
-        M3u m3u = Maybe<upper>::uppertri(m3);
-        Maybe<!add>::zero(m3);
-        NoAliasMultMM<add>(x,m1,m2,m3u);
-    }
-
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void AliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
-        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        const bool upper = M1::_upper;
-        typedef typename TypeSelect<upper,
-                typename M3::uppertri_type,
-                typename M3::lowertri_type>::type M3u;
-        M3u m3u = Maybe<upper>::uppertri(m3);
-        AliasMultMM<add>(x,m1,m2,m3u);
-        Maybe<!add>::zero_offdiag2(Maybe<!upper>::uppertri(m3));
-    }
-
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void MultMM(
+    inline void MultMM(
         const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
         const BaseMatrix_Tri<M2>& m2, BaseMatrix_Mutable<M3>& m3)
     {
         typename M3::transpose_type m3t = m3.transpose();
         MultMM<add>(x,m2.transpose(),m1.transpose(),m3t);
-    }
-
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Tri<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    {
-        typename M3::transpose_type m3t = m3.transpose();
-        NoAliasMultMM<add>(x,m2.transpose(),m1.transpose(),m3t);
-    }
-
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void AliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
-        const BaseMatrix_Tri<M2>& m2, BaseMatrix_Mutable<M3>& m3)
-    {
-        typename M3::transpose_type m3t = m3.transpose();
-        AliasMultMM<add>(x,m2.transpose(),m1.transpose(),m3t);
     }
 
 

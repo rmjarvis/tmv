@@ -32,8 +32,7 @@ namespace tmv {
     template <class T, int A>
     struct Traits<BasisVector<T,A> >
     {
-        enum { okA = (
-                A == CStyle || A == FortranStyle ) };
+        enum { okA = (A == CStyle || A == FortranStyle ) };
 
         typedef T value_type;
 
@@ -96,10 +95,6 @@ namespace tmv {
             v2.ref(itsindex) = itsval; 
         }
 
-        template <class V2>
-        void newAssignTo(BaseVector_Mutable<V2>& v2) const
-        { assignTo(v2); }
-
     protected :
 
         size_t itssize;
@@ -115,7 +110,7 @@ namespace tmv {
 
 #ifdef TMV_TEXT
     template <class T, int A>
-    static inline std::string TMV_Text(const BasisVector<T,A>& )
+    inline std::string TMV_Text(const BasisVector<T,A>& )
     {
         std::ostringstream s;
         s << "BasisVector<"<<TMV_Text(T());

@@ -95,12 +95,12 @@ namespace tmv {
             // m2 = (QRP)^-1 m2
             //    = Pt R^-1 Qt m2
             PackedQ_LDivEq(QR,beta,m2);
-            typedef typename M2::rowrange_type M2r;
+            typedef typename M2::rowrange_type::noalias_type M2r;
             const int M = QR.colsize();
-            M2r m2a = m2.rowRange(0,N1);
-            M2r m2b = m2.rowRange(N1,M);
+            M2r m2a = m2.rowRange(0,N1).noAlias();
+            M2r m2b = m2.rowRange(N1,M).noAlias();
             m2b.setZero();
-            NoAliasTriLDivEq(m2a,QR.upperTri().subTriMatrix(0,N1));
+            TriLDivEq(m2a,QR.upperTri().subTriMatrix(0,N1));
             if (P) P->inverse().applyOnLeft(m2);
         }
     };
@@ -121,12 +121,12 @@ namespace tmv {
             //    = (Pt R^-1 Qt)T m2
             //    = Q* R^-1T P m2
             if (P) P->applyOnLeft(m2);
-            typedef typename M2::rowrange_type M2r;
+            typedef typename M2::rowrange_type::noalias_type M2r;
             const int M = QR.colsize();
-            M2r m2a = m2.rowRange(0,N1);
-            M2r m2b = m2.rowRange(N1,M);
+            M2r m2a = m2.rowRange(0,N1).noAlias();
+            M2r m2b = m2.rowRange(N1,M).noAlias();
             m2b.setZero();
-            NoAliasTriLDivEq(m2a,QR.upperTri().subTriMatrix(0,N1).transpose());
+            TriLDivEq(m2a,QR.upperTri().subTriMatrix(0,N1).transpose());
             PackedQ_MultEq(QR.conjugate(),beta,m2);
         }
     };
@@ -148,12 +148,12 @@ namespace tmv {
             // v2 = (QRP)^-1 v2
             //    = Pt R^-1 Qt v2
             PackedQ_LDivEq(QR,beta,v2);
-            typedef typename M2::subvector_type M2s;
+            typedef typename M2::subvector_type::noalias_type M2s;
             const int M = QR.colsize();
-            M2s v2a = v2.subVector(0,N1);
-            M2s v2b = v2.subVector(N1,M);
+            M2s v2a = v2.subVector(0,N1).noAlias();
+            M2s v2b = v2.subVector(N1,M).noAlias();
             v2b.setZero();
-            NoAliasTriLDivEq(v2a,QR.upperTri().subTriMatrix(0,N1));
+            TriLDivEq(v2a,QR.upperTri().subTriMatrix(0,N1));
             if (P) P->inverse().applyOnLeft(v2);
         }
     };
@@ -174,12 +174,12 @@ namespace tmv {
             //    = (Pt R^-1 Qt)T m2
             //    = Q* R^-1T P m2
             if (P) P->applyOnLeft(m2);
-            typedef typename M2::subvector_type M2s;
+            typedef typename M2::subvector_type::noalias_type M2s;
             const int M = QR.colsize();
-            M2s m2a = m2.subVector(0,N1);
-            M2s m2b = m2.subVector(N1,M);
+            M2s m2a = m2.subVector(0,N1).noAlias();
+            M2s m2b = m2.subVector(N1,M).noAlias();
             m2b.setZero();
-            NoAliasTriLDivEq(m2a,QR.upperTri().subTriMatrix(0,N1).transpose());
+            TriLDivEq(m2a,QR.upperTri().subTriMatrix(0,N1).transpose());
             PackedQ_MultEq(QR.conjugate(),beta,m2);
         }
     };
@@ -293,7 +293,7 @@ namespace tmv {
     };
 
     template <class M1, class V1, class M2>
-    static inline void InlineQR_SolveInPlace(
+    inline void InlineQR_SolveInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -314,7 +314,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class M2>
-    static inline void QR_SolveInPlace(
+    inline void QR_SolveInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -335,7 +335,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class V2>
-    static inline void InlineQR_SolveInPlace(
+    inline void InlineQR_SolveInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, BaseVector_Mutable<V2>& v2)
     {
@@ -356,7 +356,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class V2>
-    static inline void QR_SolveInPlace(
+    inline void QR_SolveInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, BaseVector_Mutable<V2>& v2)
     {
@@ -377,7 +377,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class M2>
-    static inline void InlineQR_SolveTransposeInPlace(
+    inline void InlineQR_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -398,7 +398,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class M2>
-    static inline void QR_SolveTransposeInPlace(
+    inline void QR_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
@@ -419,7 +419,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class V2>
-    static inline void InlineQR_SolveTransposeInPlace(
+    inline void InlineQR_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, BaseVector_Mutable<V2>& v2)
     {
@@ -440,7 +440,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class V2>
-    static inline void QR_SolveTransposeInPlace(
+    inline void QR_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, BaseVector_Mutable<V2>& v2)
     {
@@ -483,7 +483,7 @@ namespace tmv {
         enum { xs = M2::_rowsize };
         enum { A = M2::_rowmajor ? RowMajor : ColMajor };
         typedef typename MCopyHelper<T12,Rec,rs,xs,A>::type M2c;
-        typedef typename M3::rowrange_type M3r;
+        typedef typename M3::rowrange_type::noalias_type M3r;
 
         template <int square, int dummy>
         struct Helper;
@@ -541,8 +541,8 @@ namespace tmv {
 #endif
             const int N = QR.rowsize();
 
-            M3r m3a = m3.rowRange(0,N1);
-            M3r m3b = m3.rowRange(N1,N);
+            M3r m3a = m3.rowRange(0,N1).noAlias();
+            M3r m3b = m3.rowRange(N1,N).noAlias();
 
             // m3 = (QRP)^-1 m2
             //    = Pt R^-1 Qt m2
@@ -554,7 +554,7 @@ namespace tmv {
             //std::cout<<"m3 => "<<m3<<std::endl;
             m3b.setZero();
             //std::cout<<"m3 => "<<m3<<std::endl;
-            NoAliasTriLDivEq(m3a,QR.upperTri().subTriMatrix(0,N1));
+            TriLDivEq(m3a,QR.upperTri().subTriMatrix(0,N1));
             //std::cout<<"m3 => "<<m3<<std::endl;
             if (P) P->inverse().applyOnLeft(m3);
             //std::cout<<"m3 => "<<m3<<std::endl;
@@ -575,12 +575,12 @@ namespace tmv {
             //std::cout<<"m2 = "<<m2<<std::endl;
             //std::cout<<"m3 = "<<m3<<std::endl;
 #endif
-            typedef typename M3::rowrange_type M3r;
+            typedef typename M3::rowrange_type::noalias_type M3r;
             const int M = QR.colsize();
             const int N = QR.rowsize();
-            M3r m3a = m3.rowRange(0,N1);
-            M3r m3ax = m3.rowRange(0,N);
-            M3r m3b = m3.rowRange(N1,M);
+            M3r m3a = m3.rowRange(0,N1).noAlias();
+            M3r m3ax = m3.rowRange(0,N).noAlias();
+            M3r m3b = m3.rowRange(N1,M).noAlias();
 
             // m3 = (QRP)^-1T m2
             //    = (Pt R^-1 Qt)T m2
@@ -592,7 +592,7 @@ namespace tmv {
 
             m3b.setZero();
             //std::cout<<"m3 => "<<m3<<std::endl;
-            NoAliasTriLDivEq(m3a,QR.upperTri().subTriMatrix(0,N1).transpose());
+            TriLDivEq(m3a,QR.upperTri().subTriMatrix(0,N1).transpose());
             //std::cout<<"m3 => "<<m3<<std::endl;
             PackedQ_MultEq(QR.conjugate(),beta,m3);
             //std::cout<<"m3 => "<<m3<<std::endl;
@@ -607,7 +607,7 @@ namespace tmv {
         typedef typename M2::value_type T2;
         typedef typename Traits2<T1,T2>::type T12;
         typedef typename VCopyHelper<T12,rs>::type M2c;
-        typedef typename M3::subvector_type M3s;
+        typedef typename M3::subvector_type::noalias_type M3s;
 
         template <int square, int dummy>
         struct Helper;
@@ -678,8 +678,8 @@ namespace tmv {
 #endif
             const int N = QR.rowsize();
 
-            M3s v3a = v3.subVector(0,N1);
-            M3s v3b = v3.subVector(N1,N);
+            M3s v3a = v3.subVector(0,N1).noAlias();
+            M3s v3b = v3.subVector(N1,N).noAlias();
 
             // v3 = (QRP)^-1 v2
             //    = Pt R^-1 Qt v2
@@ -698,7 +698,7 @@ namespace tmv {
             //std::cout<<"Q*v3 = "<<Q*v3<<std::endl;
             //std::cout<<"N1 = "<<N1<<std::endl;
             //std::cout<<"v3a = "<<v3a<<std::endl;
-            NoAliasTriLDivEq(v3a,QR.upperTri().subTriMatrix(0,N1));
+            TriLDivEq(v3a,QR.upperTri().subTriMatrix(0,N1));
             //std::cout<<"v3a => "<<v3a<<std::endl;
             //std::cout<<"after /= R v3 => "<<v3<<std::endl;
             //std::cout<<"R = "<<QR.upperTri()<<std::endl;
@@ -722,12 +722,12 @@ namespace tmv {
             //std::cout<<"v2 = "<<v2<<std::endl;
             //std::cout<<"v3 = "<<v3<<std::endl;
 #endif
-            typedef typename M3::subvector_type M3s;
+            typedef typename M3::subvector_type::noalias_type M3s;
             const int M = QR.colsize();
             const int N = QR.rowsize();
-            M3s v3a = v3.subVector(0,N1);
-            M3s v3ax = v3.subVector(0,N);
-            M3s v3b = v3.subVector(N1,M);
+            M3s v3a = v3.subVector(0,N1).noAlias();
+            M3s v3ax = v3.subVector(0,N).noAlias();
+            M3s v3b = v3.subVector(N1,M).noAlias();
 
             // v3 = (QRP)^-1T v2
             //    = (Pt R^-1 Qt)T v2
@@ -739,7 +739,7 @@ namespace tmv {
 
             v3b.setZero();
             //std::cout<<"v3 => "<<v3<<std::endl;
-            NoAliasTriLDivEq(v3a,QR.upperTri().subTriMatrix(0,N1).transpose());
+            TriLDivEq(v3a,QR.upperTri().subTriMatrix(0,N1).transpose());
             //std::cout<<"After /= RT: v3 => "<<v3<<std::endl;
             PackedQ_MultEq(QR.conjugate(),beta,v3);
             //std::cout<<"After /= QT: v3 => "<<v3<<std::endl;
@@ -878,7 +878,7 @@ namespace tmv {
     };
 
     template <class M1, class V1, class M2, class M3>
-    static inline void InlineQR_Solve(
+    inline void InlineQR_Solve(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, 
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
@@ -911,7 +911,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class M2, class M3>
-    static inline void QR_Solve(
+    inline void QR_Solve(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, 
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
@@ -942,7 +942,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class V2, class V3>
-    static inline void InlineQR_Solve(
+    inline void InlineQR_Solve(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, 
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
@@ -971,7 +971,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class V2, class V3>
-    static inline void QR_Solve(
+    inline void QR_Solve(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, 
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
@@ -1000,7 +1000,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class M2, class M3>
-    static inline void InlineQR_SolveTranspose(
+    inline void InlineQR_SolveTranspose(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, 
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
@@ -1031,7 +1031,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class M2, class M3>
-    static inline void QR_SolveTranspose(
+    inline void QR_SolveTranspose(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, 
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
@@ -1062,7 +1062,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class V2, class V3>
-    static inline void InlineQR_SolveTranspose(
+    inline void InlineQR_SolveTranspose(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, 
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
@@ -1091,7 +1091,7 @@ namespace tmv {
     }
 
     template <class M1, class V1, class V2, class V3>
-    static inline void QR_SolveTranspose(
+    inline void QR_SolveTranspose(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
         const Permutation* P, int N1, 
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)

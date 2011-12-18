@@ -4,7 +4,7 @@
 #include "TMV.h"
 
 template <class M1, class M2>
-static TMV_INLINE_ND bool CanAddEq(
+inline bool CanAddEq(
     const tmv::BaseMatrix_Tri_Mutable<M1>& a, const tmv::BaseMatrix_Diag<M2>& b)
 {
 #ifdef XXD

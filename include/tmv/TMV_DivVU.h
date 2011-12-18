@@ -203,7 +203,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static inline void unroll(V1& v1, const M2& m2)
+            static TMV_INLINE void unroll(V1& v1, const M2& m2)
             {
                 Unroller<I+N/2,N-N/2>::unroll(v1,m2);
                 Unroller<I,N/2>::unroll(v1,m2);
@@ -212,7 +212,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static inline void unroll(V1& v1, const M2& m2)
+            static TMV_INLINE void unroll(V1& v1, const M2& m2)
             {
                 typedef typename V1::const_subvector_type V1s;
                 typedef typename M2::const_row_sub_type M2r;
@@ -225,7 +225,7 @@ namespace tmv {
         };
         template <int I>
         struct Unroller<I,0>
-        { static inline void unroll(V1& , const M2& ) {} };
+        { static TMV_INLINE void unroll(V1& , const M2& ) {} };
         static inline void call(V1& v1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
@@ -347,7 +347,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static inline void unroll(V1& v1, const M2& m2)
+            static TMV_INLINE void unroll(V1& v1, const M2& m2)
             {
                 Unroller<I,N/2>::unroll(v1,m2);
                 Unroller<I+N/2,N-N/2>::unroll(v1,m2);
@@ -356,7 +356,7 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static inline void unroll(V1& v1, const M2& m2)
+            static TMV_INLINE void unroll(V1& v1, const M2& m2)
             {
                 typedef typename M2::const_row_sub_type M2r;
                 typedef typename V1::const_subvector_type V1s;
@@ -369,7 +369,7 @@ namespace tmv {
         };
         template <int I>
         struct Unroller<I,0>
-        { static inline void unroll(V1& , const M2& ) {} };
+        { static TMV_INLINE void unroll(V1& , const M2& ) {} };
         static inline void call(V1& v1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
@@ -407,8 +407,8 @@ namespace tmv {
             std::cout<<"LDivEqVU algo 85: N,s = "<<N<<','<<s<<std::endl;
 #endif
             typename V1::copy_type v1c(v1);
-            NoAliasTriLDivEq(v1c,m2);
-            NoAliasCopy(v1c,v1);
+            TriLDivEq(v1c,m2);
+            v1.noAlias() = v1c;
         }
     };
 
@@ -662,7 +662,7 @@ namespace tmv {
     };
 
     template <class V1, class M2>
-    static inline void TriLDivEq(
+    inline void TriLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Tri<M2>& m2)
     {
         TMVStaticAssert((Sizes<V1::_size,M2::_size>::same));
@@ -675,20 +675,7 @@ namespace tmv {
         LDivEqVU_Helper<-1,s,V1v,M2v>::call(v1v,m2v);
     }
     template <class V1, class M2>
-    static inline void NoAliasTriLDivEq(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Tri<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<V1::_size,M2::_size>::same));
-        TMVAssert(v1.size() == m2.size());
-        const int s = Sizes<V1::_size,M2::_size>::size;
-        typedef typename V1::cview_type V1v;
-        typedef typename M2::const_cview_type M2v;
-        TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
-        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
-        LDivEqVU_Helper<-2,s,V1v,M2v>::call(v1v,m2v);
-    }
-    template <class V1, class M2>
-    static inline void InlineTriLDivEq(
+    inline void InlineTriLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Tri<M2>& m2)
     {
         TMVStaticAssert((Sizes<V1::_size,M2::_size>::same));
@@ -701,7 +688,7 @@ namespace tmv {
         LDivEqVU_Helper<-3,s,V1v,M2v>::call(v1v,m2v);
     }
     template <class V1, class M2>
-    static inline void InlineAliasTriLDivEq(
+    inline void InlineAliasTriLDivEq(
         BaseVector_Mutable<V1>& v1, const BaseMatrix_Tri<M2>& m2)
     {
         TMVStaticAssert((Sizes<V1::_size,M2::_size>::same));
@@ -712,19 +699,6 @@ namespace tmv {
         TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
         TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
         LDivEqVU_Helper<98,s,V1v,M2v>::call(v1v,m2v);
-    }
-    template <class V1, class M2>
-    static inline void AliasTriLDivEq(
-        BaseVector_Mutable<V1>& v1, const BaseMatrix_Tri<M2>& m2)
-    {
-        TMVStaticAssert((Sizes<V1::_size,M2::_size>::same));
-        TMVAssert(v1.size() == m2.size());
-        const int s = Sizes<V1::_size,M2::_size>::size;
-        typedef typename V1::cview_type V1v;
-        typedef typename M2::const_cview_type M2v;
-        TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
-        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
-        LDivEqVU_Helper<99,s,V1v,M2v>::call(v1v,m2v);
     }
 
 } // namespace tmv

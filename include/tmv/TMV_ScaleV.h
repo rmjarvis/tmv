@@ -121,7 +121,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static inline void unroll(const Scaling<ix,T>& x, V& v)
+            static TMV_INLINE void unroll(const Scaling<ix,T>& x, V& v)
             {
                 Unroller<I,N/2>::unroll(x,v);
                 Unroller<I+N/2,N-N/2>::unroll(x,v);
@@ -130,12 +130,12 @@ namespace tmv {
         template <int I>
         struct Unroller<I,1>
         {
-            static inline void unroll(const Scaling<ix,T>& x, V& v)
+            static TMV_INLINE void unroll(const Scaling<ix,T>& x, V& v)
             { v.ref(I) = ZProd<false,false>::prod(x,v.cref(I)); }
         };
         template <int I>
         struct Unroller<I,0>
-        { static inline void unroll(const Scaling<ix,T>& , V& ) {} };
+        { static TMV_INLINE void unroll(const Scaling<ix,T>& , V& ) {} };
 
         static inline void call(const Scaling<ix,T>& x, V& v)
         { Unroller<0,s>::unroll(x,v); }
@@ -484,7 +484,7 @@ namespace tmv {
     };
 
     template <int ix, class T, class V>
-    static inline void Scale(const Scaling<ix,T>& x, BaseVector_Mutable<V>& v)
+    inline void Scale(const Scaling<ix,T>& x, BaseVector_Mutable<V>& v)
     {
         typedef typename V::cview_type Vv;
         TMV_MAYBE_REF(V,Vv) vv = v.cView();
@@ -492,7 +492,7 @@ namespace tmv {
     }
 
     template <int ix, class T, class V>
-    static inline void InlineScale(
+    inline void InlineScale(
         const Scaling<ix,T>& x, BaseVector_Mutable<V>& v)
     {
         typedef typename V::cview_type Vv;

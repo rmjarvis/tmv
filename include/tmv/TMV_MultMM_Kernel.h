@@ -1225,49 +1225,49 @@ namespace tmv {
     // There are always inlined, but get overloaded below
     // as necessary depending on the INST_* definitions.
     template <int ix, class T>
-    static TMV_INLINE void multmm_16_16_16(
+    TMV_INLINE void multmm_16_16_16(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { generic_multmm_16_16_16(x,A0,B0,C0); }
 
     template <int ix, class T>
-    static TMV_INLINE void multmm_M_16_16(
+    TMV_INLINE void multmm_M_16_16(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { generic_multmm_M_16_16<TMV_UNKNOWN>(M,x,A0,B0,C0); }
 
     template <int M2, int ix, class T>
-    static TMV_INLINE void multmm_M_16_16_known(
+    TMV_INLINE void multmm_M_16_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { generic_multmm_M_16_16<M2>(M,x,A0,B0,C0); }
 
     template <int ix, class T>
-    static TMV_INLINE void multmm_16_N_16(
+    TMV_INLINE void multmm_16_N_16(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { generic_multmm_16_N_16<TMV_UNKNOWN>(N,x,A0,B0,C0); }
 
     template <int N2, int ix, class T>
-    static TMV_INLINE void multmm_16_N_16_known(
+    TMV_INLINE void multmm_16_N_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { generic_multmm_16_N_16<N2>(N,x,A0,B0,C0); }
 
     template <int ix, class T>
-    static TMV_INLINE void multmm_16_16_K(
+    TMV_INLINE void multmm_16_16_K(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { generic_multmm_16_16_K<TMV_UNKNOWN>(K,x,A0,B0,C0); }
 
     template <int K2, int ix, class T>
-    static TMV_INLINE void multmm_16_16_K_known(
+    TMV_INLINE void multmm_16_16_K_known(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { generic_multmm_16_16_K<K2>(K,x,A0,B0,C0); }
 
     template <int ix, class T>
-    static TMV_INLINE void multmm_M_N_K(
+    TMV_INLINE void multmm_M_N_K(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { generic_multmm_M_N_K(M,N,K,K,x,A0,B0,C0); }
@@ -3328,49 +3328,49 @@ namespace tmv {
     // These go outside the above ifdef so they are always visible.
 #ifdef __SSE__
     template <int M2, int ix>
-    static TMV_INLINE void multmm_M_16_16_known(
+    TMV_INLINE void multmm_M_16_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x, 
         const float* A0, const float* B0, float* C0)
     { sse_multmm_M_16_16<M2>(M,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static TMV_INLINE void multmm_16_N_16_known(
+    TMV_INLINE void multmm_16_N_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_16_N_16<N2>(N,x,A0,B0,C0); }
 
     template <int K2, int ix>
-    static TMV_INLINE void multmm_16_16_K_known(
+    TMV_INLINE void multmm_16_16_K_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_16_16_K<K2>(K,x,A0,B0,C0); }
 
     template <int M2, int ix>
-    static TMV_INLINE void multmm_M_16_32_known(
+    TMV_INLINE void multmm_M_16_32_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_M_16_32<M2>(M,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static TMV_INLINE void multmm_16_N_32_known(
+    TMV_INLINE void multmm_16_N_32_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_16_N_32<N2>(N,x,A0,B0,C0); }
 
     template <int M2, int ix>
-    static TMV_INLINE void multmm_M_16_64_known(
+    TMV_INLINE void multmm_M_16_64_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_M_16_64<M2>(M,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static TMV_INLINE void multmm_16_N_64_known(
+    TMV_INLINE void multmm_16_N_64_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
@@ -3378,21 +3378,21 @@ namespace tmv {
 
 #else
     template <int M2, int ix>
-    static TMV_INLINE void multmm_M_16_16_known(
+    TMV_INLINE void multmm_M_16_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
     { generic_multmm_M_16_16<M2>(M,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static TMV_INLINE void multmm_16_N_16_known(
+    TMV_INLINE void multmm_16_N_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
     { generic_multmm_16_N_16<N2>(N,x,A0,B0,C0); }
 
     template <int K2, int ix>
-    static TMV_INLINE void multmm_16_16_K_known(
+    TMV_INLINE void multmm_16_16_K_known(
         const int M, const int N, const int K,
         const Scaling<ix,float>& x,
         const float* A0, const float* B0, float* C0)
@@ -5065,35 +5065,35 @@ namespace tmv {
 
 #ifdef __SSE2__
     template <int M2, int ix>
-    static TMV_INLINE void multmm_M_16_16_known(
+    TMV_INLINE void multmm_M_16_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
     { sse2_multmm_M_16_16<M2>(M,x,A0,B0,C0); }
 
     template <int M2, int ix>
-    static TMV_INLINE void multmm_M_16_32_known(
+    TMV_INLINE void multmm_M_16_32_known(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
     { sse2_multmm_M_16_32<M2>(M,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static TMV_INLINE void multmm_16_N_16_known(
+    TMV_INLINE void multmm_16_N_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
     { sse2_multmm_16_N_16<N2>(N,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static TMV_INLINE void multmm_16_N_32_known(
+    TMV_INLINE void multmm_16_N_32_known(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
     { sse2_multmm_16_N_32<N2>(N,x,A0,B0,C0); }
 
     template <int K2, int ix>
-    static TMV_INLINE void multmm_16_16_K_known(
+    TMV_INLINE void multmm_16_16_K_known(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
@@ -5101,21 +5101,21 @@ namespace tmv {
 
 #else
     template <int M2, int ix>
-    static TMV_INLINE void multmm_M_16_16_known(
+    TMV_INLINE void multmm_M_16_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
     { generic_multmm_M_16_16<M2>(M,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static TMV_INLINE void multmm_16_N_16_known(
+    TMV_INLINE void multmm_16_N_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
     { generic_multmm_16_N_16<N2>(N,x,A0,B0,C0); }
 
     template <int K2, int ix>
-    static TMV_INLINE void multmm_16_16_K_known(
+    TMV_INLINE void multmm_16_16_K_known(
         const int M, const int N, const int K,
         const Scaling<ix,double>& x,
         const double* A0, const double* B0, double* C0)
@@ -5197,21 +5197,21 @@ namespace tmv {
 #endif
 
     template <int M2, int ix>
-    static TMV_INLINE void multmm_M_16_16_known(
+    TMV_INLINE void multmm_M_16_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,int>& x,
         const int* A0, const int* B0, int* C0)
     { generic_multmm_M_16_16<M2>(M,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static TMV_INLINE void multmm_16_N_16_known(
+    TMV_INLINE void multmm_16_N_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,int>& x,
         const int* A0, const int* B0, int* C0)
     { generic_multmm_16_N_16<N2>(N,x,A0,B0,C0); }
 
     template <int K2, int ix>
-    static TMV_INLINE void multmm_16_16_K_known(
+    TMV_INLINE void multmm_16_16_K_known(
         const int M, const int N, const int K,
         const Scaling<ix,int>& x,
         const int* A0, const int* B0, int* C0)
@@ -5293,21 +5293,21 @@ namespace tmv {
 #endif 
 
     template <int M2, int ix>
-    static TMV_INLINE void multmm_M_16_16_known(
+    TMV_INLINE void multmm_M_16_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,long double>& x,
         const long double* A0, const long double* B0, long double* C0)
     { generic_multmm_M_16_16<M2>(M,x,A0,B0,C0); }
 
     template <int N2, int ix>
-    static TMV_INLINE void multmm_16_N_16_known(
+    TMV_INLINE void multmm_16_N_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,long double>& x,
         const long double* A0, const long double* B0, long double* C0)
     { generic_multmm_16_N_16<N2>(N,x,A0,B0,C0); }
 
     template <int K2, int ix>
-    static TMV_INLINE void multmm_16_16_K_known(
+    TMV_INLINE void multmm_16_16_K_known(
         const int M, const int N, const int K,
         const Scaling<ix,long double>& x,
         const long double* A0, const long double* B0, long double* C0)
@@ -5326,49 +5326,49 @@ namespace tmv {
     // So we specify this one instead.
 
     template <int ix, class T>
-    static TMV_INLINE void call_multmm_16_16_16(
+    TMV_INLINE void call_multmm_16_16_16(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { multmm_16_16_16(M,N,K,x,A0,B0,C0); }
 
     template <int ix, class T>
-    static TMV_INLINE void call_multmm_M_16_16(
+    TMV_INLINE void call_multmm_M_16_16(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { multmm_M_16_16(M,N,K,x,A0,B0,C0); }
 
     template <int M2, int ix, class T>
-    static TMV_INLINE void call_multmm_M_16_16_known(
+    TMV_INLINE void call_multmm_M_16_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { multmm_M_16_16_known<M2>(M,N,K,x,A0,B0,C0); }
 
     template <int ix, class T>
-    static TMV_INLINE void call_multmm_16_N_16(
+    TMV_INLINE void call_multmm_16_N_16(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { multmm_16_N_16(M,N,K,x,A0,B0,C0); }
 
     template <int N2, int ix, class T>
-    static TMV_INLINE void call_multmm_16_N_16_known(
+    TMV_INLINE void call_multmm_16_N_16_known(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { multmm_16_N_16_known<N2>(M,N,K,x,A0,B0,C0); }
 
     template <int ix, class T>
-    static TMV_INLINE void call_multmm_16_16_K(
+    TMV_INLINE void call_multmm_16_16_K(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { multmm_16_16_K(M,N,K,x,A0,B0,C0); }
 
     template <int K2, int ix, class T>
-    static TMV_INLINE void call_multmm_16_16_K_known(
+    TMV_INLINE void call_multmm_16_16_K_known(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { multmm_16_16_K_known<K2>(M,N,K,x,A0,B0,C0); }
 
     template <int ix, class T>
-    static TMV_INLINE void call_multmm_M_N_K(
+    TMV_INLINE void call_multmm_M_N_K(
         const int M, const int N, const int K,
         const Scaling<ix,T>& x, const T* A0, const T* B0, T* C0)
     { multmm_M_N_K(M,N,K,x,A0,B0,C0); }

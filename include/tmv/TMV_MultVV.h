@@ -841,7 +841,7 @@ namespace tmv {
     };
 
     template <class V1, class V2>
-    static inline typename ProdType<V1,V2>::type MultVV(
+    inline typename ProdType<V1,V2>::type MultVV(
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2)
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
@@ -855,7 +855,7 @@ namespace tmv {
     }
 
     template <class V1, class V2>
-    static inline typename ProdType<V1,V2>::type InlineMultVV(
+    inline typename ProdType<V1,V2>::type InlineMultVV(
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2)
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));

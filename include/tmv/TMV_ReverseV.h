@@ -57,7 +57,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static inline void unroll(V& v)
+            static TMV_INLINE void unroll(V& v)
             {
                 Unroller<I,N-1>::unroll(v);
                 v.cSwap(N-1,size-N);
@@ -65,7 +65,7 @@ namespace tmv {
         };
         template <int I>
         struct Unroller<I,0>
-        { static inline void unroll(V& v) {} };
+        { static TMV_INLINE void unroll(V& v) {} };
         static inline void call(V& v)
         { Unroller<0,size/2>::unroll(v); }
     };
@@ -131,7 +131,7 @@ namespace tmv {
     };
 
     template <class V>
-    static inline void ReverseSelf(BaseVector_Mutable<V>& v)
+    inline void ReverseSelf(BaseVector_Mutable<V>& v)
     {
         const int size = V::_size;
         typedef typename V::cview_type Vv;
@@ -140,7 +140,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline void InlineReverseSelf(BaseVector_Mutable<V>& v)
+    inline void InlineReverseSelf(BaseVector_Mutable<V>& v)
     {
         const int size = V::_size;
         typedef typename V::cview_type Vv;

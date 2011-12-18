@@ -340,7 +340,7 @@ namespace tmv {
     //
 
     template <class V>
-    static inline void ElemInvert(BaseVector_Mutable<V>& v)
+    inline void ElemInvert(BaseVector_Mutable<V>& v)
     {
         typedef typename V::cview_type Vv;
         TMV_MAYBE_REF(V,Vv) vv = v.cView();
@@ -348,7 +348,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline void InlineElemInvert(BaseVector_Mutable<V>& v)
+    inline void InlineElemInvert(BaseVector_Mutable<V>& v)
     {
         typedef typename V::cview_type Vv;
         TMV_MAYBE_REF(V,Vv) vv = v.cView();
@@ -356,7 +356,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline void InvertSelf(BaseMatrix_Diag_Mutable<M>& m)
+    inline void InvertSelf(BaseMatrix_Diag_Mutable<M>& m)
     {
         if (m.isSingular()) ThrowSingular("DiagMatrix");
         typename M::diag_type md = m.diag();
@@ -364,7 +364,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline void InlineInvertSelf(BaseMatrix_Diag_Mutable<M>& m)
+    inline void InlineInvertSelf(BaseMatrix_Diag_Mutable<M>& m)
     {
         if (m.isSingular()) ThrowSingular("DiagMatrix");
         typename M::diag_type md = m.diag();

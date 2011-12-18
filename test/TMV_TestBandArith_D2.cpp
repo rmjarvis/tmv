@@ -6,79 +6,51 @@
 #include "TMV_Band.h"
 #include "TMV_TestBandArith.h"
 
-template <class T1, class T2> 
+template <class M1, class M2> 
 inline bool CanAddEq(
-    const tmv::UpperTriMatrixView<T2>& a,
-    const tmv::BandMatrixView<T1>& b) 
-{
-    return b.colsize() == a.size() && b.rowsize() == a.size() && 
-        b.nlo() == 0 && !a.isunit(); 
-}
-
-template <class T1, class T2> 
-inline bool CanAddEq(
-    const tmv::LowerTriMatrixView<T2>& a,
-    const tmv::BandMatrixView<T1>& b) 
-{
-    return b.colsize() == a.size() && b.rowsize() == a.size() && 
-        b.nhi() == 0 && !a.isunit(); 
-}
-
-template <class T1, class T2, class T3> 
-inline bool CanMultMM(
-    const tmv::UpperTriMatrixView<T2>& a, const tmv::BandMatrixView<T1>& b,
-    const tmv::UpperTriMatrixView<T3>& c)
+    const tmv::BaseMatrix_Tri_Mutable<M1>& a, 
+    const tmv::BaseMatrix_Band<M2>& b)
 { 
-    return a.rowsize() == b.colsize() && a.colsize() == c.colsize() && 
-        b.rowsize() == c.rowsize() && b.nlo() == 0 && !c.isunit(); 
+    return a.colsize() == b.colsize() && a.rowsize() == b.rowsize() && 
+        a.nhi() >= b.nhi() && a.nlo() >= b.nlo() && !a.isunit();
 }
 
-template <class T1, class T2, class T3> 
+template <class M1, class M2, class M3> 
 inline bool CanMultMM(
-    const tmv::BandMatrixView<T1>& a, const tmv::UpperTriMatrixView<T2>& b,
-    const tmv::UpperTriMatrixView<T3>& c)
+    const tmv::BaseMatrix_Tri<M1>& a, const tmv::BaseMatrix_Band<M2>& b,
+    const tmv::BaseMatrix_Tri_Mutable<M3>& c)
 { 
-    return a.rowsize() == b.colsize() && a.colsize() == c.colsize() && 
-        b.rowsize() == c.rowsize() && a.nlo() == 0 && !c.isunit(); 
+    return a.rowsize() == b.colsize() && a.colsize() == c.colsize() &&
+        b.rowsize() == c.rowsize() &&
+        (c.nlo() >= a.nlo() + b.nlo() || c.nlo() == int(c.colsize())-1) &&
+        (c.nhi() >= a.nhi() + b.nhi() || c.nhi() == int(c.rowsize())-1) &&
+        !c.isunit();
 }
 
-template <class T1, class T2, class T3> 
+template <class M1, class M2, class M3> 
 inline bool CanMultMM(
-    const tmv::BandMatrixView<T1>& a, const tmv::BandMatrixView<T2>& b,
-    const tmv::UpperTriMatrixView<T3>& c)
+    const tmv::BaseMatrix_Band<M1>& a, const tmv::BaseMatrix_Tri<M2>& b,
+    const tmv::BaseMatrix_Tri_Mutable<M3>& c)
 { 
-    return a.rowsize() == b.colsize() && a.colsize() == c.colsize() && 
-        b.rowsize() == c.rowsize() && a.nlo() == 0 && b.nlo() == 0 && 
-        !c.isunit(); 
+    return a.rowsize() == b.colsize() && a.colsize() == c.colsize() &&
+        b.rowsize() == c.rowsize() &&
+        (c.nlo() >= a.nlo() + b.nlo() || c.nlo() == int(c.colsize())-1) &&
+        (c.nhi() >= a.nhi() + b.nhi() || c.nhi() == int(c.rowsize())-1) &&
+        !c.isunit();
 }
 
-template <class T1, class T2, class T3> 
+template <class M1, class M2, class M3> 
 inline bool CanMultMM(
-    const tmv::LowerTriMatrixView<T2>& a, const tmv::BandMatrixView<T1>& b,
-    const tmv::LowerTriMatrixView<T3>& c)
+    const tmv::BaseMatrix_Band<M1>& a, const tmv::BaseMatrix_Band<M2>& b,
+    const tmv::BaseMatrix_Tri_Mutable<M3>& c)
 { 
-    return a.rowsize() == b.colsize() && a.colsize() == c.colsize() && 
-        b.rowsize() == c.rowsize() && b.nhi() == 0 && !c.isunit(); 
+    return a.rowsize() == b.colsize() && a.colsize() == c.colsize() &&
+        b.rowsize() == c.rowsize() &&
+        (c.nlo() >= a.nlo() + b.nlo() || c.nlo() == int(c.colsize())-1) &&
+        (c.nhi() >= a.nhi() + b.nhi() || c.nhi() == int(c.rowsize())-1) &&
+        !c.isunit();
 }
 
-template <class T1, class T2, class T3> 
-inline bool CanMultMM(
-    const tmv::BandMatrixView<T1>& a, const tmv::LowerTriMatrixView<T2>& b,
-    const tmv::LowerTriMatrixView<T3>& c)
-{ 
-    return a.rowsize() == b.colsize() && a.colsize() == c.colsize() && 
-        b.rowsize() == c.rowsize() && a.nhi() == 0 && !c.isunit(); 
-}
-
-template <class T1, class T2, class T3> 
-inline bool CanMultMM(
-    const tmv::BandMatrixView<T1>& a, const tmv::BandMatrixView<T2>& b,
-    const tmv::LowerTriMatrixView<T3>& c)
-{ 
-    return a.rowsize() == b.colsize() && a.colsize() == c.colsize() && 
-        b.rowsize() == c.rowsize() && a.nhi() == 0 && b.nhi() == 0 && 
-        !c.isunit(); 
-}
 
 #include "TMV_TestMatrixArith.h"
 

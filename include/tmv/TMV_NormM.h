@@ -135,7 +135,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static TMV_INLINE ret unroll(const M1& m, const Scaling<ix,RT>& x)
             {
                 return (
                     Unroller<I,M,J,N/2>::unroll(m,x) +
@@ -145,7 +145,7 @@ namespace tmv {
         template <int I, int M, int J>
         struct Unroller<I,M,J,1>
         {
-            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static TMV_INLINE ret unroll(const M1& m, const Scaling<ix,RT>& x)
             {
                 return (
                     Unroller<I,M/2,J,1>::unroll(m,x) +
@@ -155,19 +155,19 @@ namespace tmv {
         template <int I, int M, int J>
         struct Unroller<I,M,J,0>
         {
-            static inline ret unroll(const M1& , const Scaling<ix,RT>& ) 
+            static TMV_INLINE ret unroll(const M1& , const Scaling<ix,RT>& ) 
             { return ret(0); } 
         };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static TMV_INLINE ret unroll(const M1& m, const Scaling<ix,RT>& x)
             { return Component<comp,VT>::f(x * m.cref(I,J)); }
         };
         template <int I, int J>
         struct Unroller<I,1,J,0>
         {
-            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static TMV_INLINE ret unroll(const M1& m, const Scaling<ix,RT>& x)
             { return ret(0); }
         };
         static inline ret call(const M1& m, const Scaling<ix,RT>& x)
@@ -188,7 +188,7 @@ namespace tmv {
         template <int I, int M, int J, int N>
         struct Unroller
         {
-            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static TMV_INLINE ret unroll(const M1& m, const Scaling<ix,RT>& x)
             {
                 return (
                     Unroller<I,M/2,J,N>::unroll(m,x) +
@@ -198,7 +198,7 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,1,J,N>
         {
-            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static TMV_INLINE ret unroll(const M1& m, const Scaling<ix,RT>& x)
             {
                 return (
                     Unroller<I,1,J,N/2>::unroll(m,x) +
@@ -208,19 +208,19 @@ namespace tmv {
         template <int I, int J, int N>
         struct Unroller<I,0,J,N>
         {
-            static inline ret unroll(const M1& , const Scaling<ix,RT>& ) 
+            static TMV_INLINE ret unroll(const M1& , const Scaling<ix,RT>& ) 
             { return ret(0); } 
         };
         template <int I, int J>
         struct Unroller<I,1,J,1>
         {
-            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static TMV_INLINE ret unroll(const M1& m, const Scaling<ix,RT>& x)
             { return Component<comp,VT>::f(x * m.cref(I,J)); }
         };
         template <int I, int J>
         struct Unroller<I,1,J,0>
         {
-            static inline ret unroll(const M1& m, const Scaling<ix,RT>& x)
+            static TMV_INLINE ret unroll(const M1& m, const Scaling<ix,RT>& x)
             { return ret(0); }
         };
         static inline ret call(const M1& m, const Scaling<ix,RT>& x)
@@ -409,7 +409,7 @@ namespace tmv {
     };
     
     template <class M>
-    static inline typename M::value_type InlineSumElements(
+    inline typename M::value_type InlineSumElements(
         const BaseMatrix_Rec<M>& m)
     {
         const int cs = M::_colsize;
@@ -423,7 +423,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::value_type DoSumElements(
+    inline typename M::value_type DoSumElements(
         const BaseMatrix_Rec<M>& m)
     {
         const int cs = M::_colsize;
@@ -437,7 +437,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::float_type InlineSumAbsElements(
+    inline typename M::float_type InlineSumAbsElements(
         const BaseMatrix_Rec<M>& m)
     {
         const int cs = M::_colsize;
@@ -450,7 +450,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::float_type DoSumAbsElements(
+    inline typename M::float_type DoSumAbsElements(
         const BaseMatrix_Rec<M>& m)
     {
         const int cs = M::_colsize;
@@ -463,7 +463,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::real_type InlineSumAbs2Elements(
+    inline typename M::real_type InlineSumAbs2Elements(
         const BaseMatrix_Rec<M>& m)
     {
         const int cs = M::_colsize;
@@ -476,7 +476,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::real_type DoSumAbs2Elements(
+    inline typename M::real_type DoSumAbs2Elements(
         const BaseMatrix_Rec<M>& m)
     {
         const int cs = M::_colsize;
@@ -489,7 +489,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::real_type InlineNormSq(
+    inline typename M::real_type InlineNormSq(
         const BaseMatrix_Rec<M>& m)
     {
         const int cs = M::_colsize;
@@ -502,7 +502,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::real_type DoNormSq(const BaseMatrix_Rec<M>& m)
+    inline typename M::real_type DoNormSq(const BaseMatrix_Rec<M>& m)
     {
         const int cs = M::_colsize;
         const int rs = M::_rowsize;
@@ -514,7 +514,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::float_type InlineNormSq(
+    inline typename M::float_type InlineNormSq(
         const BaseMatrix_Rec<M>& m, typename M::float_type scale)
     {
         const int cs = M::_colsize;
@@ -527,7 +527,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::float_type DoNormSq(
+    inline typename M::float_type DoNormSq(
         const BaseMatrix_Rec<M>& m, typename M::float_type scale)
     {
         const int cs = M::_colsize;
@@ -806,7 +806,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline typename M::float_type InlineMaxAbsElement(
+    inline typename M::float_type InlineMaxAbsElement(
         const BaseMatrix_Rec<M>& m)
     {
         const int cs = M::_colsize;
@@ -817,7 +817,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::float_type DoMaxAbsElement(
+    inline typename M::float_type DoMaxAbsElement(
         const BaseMatrix_Rec<M>& m)
     {
         const int cs = M::_colsize;
@@ -828,7 +828,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::real_type InlineMaxAbs2Element(
+    inline typename M::real_type InlineMaxAbs2Element(
         const BaseMatrix_Rec<M>& m)
     {
         const int cs = M::_colsize;
@@ -839,7 +839,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::real_type DoMaxAbs2Element(
+    inline typename M::real_type DoMaxAbs2Element(
         const BaseMatrix_Rec<M>& m)
     {
         const int cs = M::_colsize;
@@ -999,7 +999,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline typename M::float_type InlineNorm1(
+    inline typename M::float_type InlineNorm1(
         const BaseMatrix_Rec<M>& m)
     {
         const int cs = M::_colsize;
@@ -1010,7 +1010,7 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::float_type DoNorm1(const BaseMatrix_Rec<M>& m)
+    inline typename M::float_type DoNorm1(const BaseMatrix_Rec<M>& m)
     {
         const int cs = M::_colsize;
         const int rs = M::_rowsize;
@@ -1020,12 +1020,12 @@ namespace tmv {
     }
 
     template <class M>
-    static inline typename M::float_type InlineNormInf(
+    inline typename M::float_type InlineNormInf(
         const BaseMatrix_Rec<M>& m)
     { return InlineNorm1(m.transpose()); }
 
     template <class M>
-    static inline typename M::float_type DoNormInf(const BaseMatrix_Rec<M>& m)
+    inline typename M::float_type DoNormInf(const BaseMatrix_Rec<M>& m)
     { return Norm1(m.transpose()); }
 
 

@@ -300,7 +300,7 @@ namespace tmv {
         template <int n, int x>
         struct Helper1
         {
-            static inline IT unroll1(const IT& v0)
+            static TMV_INLINE IT unroll1(const IT& v0)
             {
                 const IT temp1 = Helper1<n-1,x>::unroll1(v0);
                 const IT temp2 = v0 + n-1;
@@ -308,14 +308,14 @@ namespace tmv {
                     Component<comp,VT>::f(*temp1),
                     Component<comp,VT>::f(*temp2)) ? temp2 : temp1;
             }
-            static inline ret unroll2(const V& v)
+            static TMV_INLINE ret unroll2(const V& v)
             {
                 const ret temp1 = Helper1<n-1,x>::unroll2(v);
                 const ret temp2 = Component<comp,VT>::f(v.cref(n-1));
                 return Maybe<max>::less(TMV_REAL(temp1),TMV_REAL(temp2)) ?
                     temp2 : temp1;
             }
-            static inline IT unroll3(const IT& v0, ret& best)
+            static TMV_INLINE IT unroll3(const IT& v0, ret& best)
             {
                 const IT temp1 = Helper1<n-1,x>::unroll3(v0,best);
                 const IT temp2 = v0 + n-1;
@@ -328,11 +328,11 @@ namespace tmv {
         template <int x>
         struct Helper1<1,x>
         {
-            static inline IT unroll1(const IT& v0)
+            static TMV_INLINE IT unroll1(const IT& v0)
             { return v0; }
-            static inline ret unroll2(const V& v)
+            static TMV_INLINE ret unroll2(const V& v)
             { return Component<comp,VT>::f(v.cref(0)); }
-            static inline IT unroll3(const IT& v0, ret& best)
+            static TMV_INLINE IT unroll3(const IT& v0, ret& best)
             { best = Component<comp,VT>::f(*v0); return v0; }
         };
         template <int x>
@@ -361,7 +361,7 @@ namespace tmv {
         template <int n, int x>
         struct Helper1
         {
-            static inline void unroll(ret& best, IT& bestit, const IT& v0)
+            static TMV_INLINE void unroll(ret& best, IT& bestit, const IT& v0)
             {
                 Helper1<n-1,x>::unroll(best,bestit,v0);
                 const ret temp = Component<comp,VT>::f(v0[n-1]);
@@ -372,7 +372,7 @@ namespace tmv {
 
         template <int x>
         struct Helper1<1,x>
-        { static inline void unroll(ret& best, IT& bestit, const IT& v0) {} };
+        { static TMV_INLINE void unroll(ret& best, IT& bestit, const IT& v0) {} };
 
         template <int x>
         struct Helper1<0,x>; 
@@ -987,7 +987,7 @@ L2:
     };
 
     template <class V>
-    static inline typename V::value_type DoMaxElement(
+    inline typename V::value_type DoMaxElement(
         const BaseVector_Calc<V>& v, int* imax)
     {
         typedef typename V::const_cview_type Vv;
@@ -996,7 +996,7 @@ L2:
     }
 
     template <class V>
-    static inline typename V::float_type DoMaxAbsElement(
+    inline typename V::float_type DoMaxAbsElement(
         const BaseVector_Calc<V>& v, int* imax)
     {
         typedef typename V::const_cview_type Vv;
@@ -1005,7 +1005,7 @@ L2:
     }
 
     template <class V>
-    static inline typename V::real_type DoMaxAbs2Element(
+    inline typename V::real_type DoMaxAbs2Element(
         const BaseVector_Calc<V>& v, int* imax)
     {
         typedef typename V::const_cview_type Vv;
@@ -1014,7 +1014,7 @@ L2:
     }
 
     template <class V>
-    static inline typename V::value_type DoMinElement(
+    inline typename V::value_type DoMinElement(
         const BaseVector_Calc<V>& v, int* imin)
     {
         typedef typename V::const_cview_type Vv;
@@ -1023,7 +1023,7 @@ L2:
     }
 
     template <class V>
-    static inline typename V::float_type DoMinAbsElement(
+    inline typename V::float_type DoMinAbsElement(
         const BaseVector_Calc<V>& v, int* imin)
     {
         typedef typename V::const_cview_type Vv;
@@ -1032,7 +1032,7 @@ L2:
     }
 
     template <class V>
-    static inline typename V::real_type DoMinAbs2Element(
+    inline typename V::real_type DoMinAbs2Element(
         const BaseVector_Calc<V>& v, int* imin)
     {
         typedef typename V::const_cview_type Vv;
@@ -1041,7 +1041,7 @@ L2:
     }
 
     template <class V>
-    static inline typename V::value_type InlineMaxElement(
+    inline typename V::value_type InlineMaxElement(
         const BaseVector_Calc<V>& v, int* imax)
     {
         typedef typename V::const_cview_type Vv;
@@ -1050,7 +1050,7 @@ L2:
     }
 
     template <class V>
-    static inline typename V::float_type InlineMaxAbsElement(
+    inline typename V::float_type InlineMaxAbsElement(
         const BaseVector_Calc<V>& v, int* imax)
     {
         typedef typename V::const_cview_type Vv;
@@ -1059,7 +1059,7 @@ L2:
     }
 
     template <class V>
-    static inline typename V::real_type InlineMaxAbs2Element(
+    inline typename V::real_type InlineMaxAbs2Element(
         const BaseVector_Calc<V>& v, int* imax)
     {
         typedef typename V::const_cview_type Vv;
@@ -1068,7 +1068,7 @@ L2:
     }
 
     template <class V>
-    static inline typename V::value_type InlineMinElement(
+    inline typename V::value_type InlineMinElement(
         const BaseVector_Calc<V>& v, int* imin)
     {
         typedef typename V::const_cview_type Vv;
@@ -1077,7 +1077,7 @@ L2:
     }
 
     template <class V>
-    static inline typename V::float_type InlineMinAbsElement(
+    inline typename V::float_type InlineMinAbsElement(
         const BaseVector_Calc<V>& v, int* imin)
     {
         typedef typename V::const_cview_type Vv;
@@ -1086,7 +1086,7 @@ L2:
     }
 
     template <class V>
-    static inline typename V::real_type InlineMinAbs2Element(
+    inline typename V::real_type InlineMinAbs2Element(
         const BaseVector_Calc<V>& v, int* imin)
     {
         typedef typename V::const_cview_type Vv;

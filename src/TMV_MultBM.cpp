@@ -38,16 +38,15 @@ namespace tmv {
                 else if (m1.isdm())
                     InlineMultMM<add>(x,m1.dmView(),m2.cmView(),m3cm);
                 else {
-                    BandMatrix<T1,ColMajor|NoDivider> m1c = m1;
-                    InlineMultMM<add>(x,m1c.cmView(),m2.cmView(),m3cm);
+                    BandMatrix<T1,RowMajor|NoDivider> m1c = m1;
+                    InlineMultMM<add>(x,m1c.rmView(),m2.cmView(),m3cm);
                 }
             } else { // crc
                 if (m1.iscm()) 
                     InlineMultMM<add>(x,m1.cmView(),m2.rmView(),m3cm);
                 else {
-                    //BandMatrix<T1,ColMajor|NoDivider> m1cm = m1;
-                    //InlineMultMM<add>(x,m1cm.cmView(),m2.rmView(),m3cm);
-                    InlineMultMM<add>(x,m1,m2.rmView(),m3cm);
+                    BandMatrix<T1,ColMajor|NoDivider> m1cm = m1;
+                    InlineMultMM<add>(x,m1cm.cmView(),m2.rmView(),m3cm);
                 }
             }
         } else {
@@ -56,19 +55,19 @@ namespace tmv {
                 if (m1.isrm()) 
                     InlineMultMM<add>(x,m1.rmView(),m2.cmView(),m3rm);
                 else {
-                    //BandMatrix<T1,RowMajor|NoDivider> m1rm = m1;
-                    //InlineMultMM<add>(x,m1rm.rmView(),m2.cmView(),m3rm);
-                    InlineMultMM<add>(x,m1,m2.cmView(),m3rm);
+                    BandMatrix<T1,RowMajor|NoDivider> m1rm = m1;
+                    InlineMultMM<add>(x,m1rm.rmView(),m2.cmView(),m3rm);
                 }
-            } else { // rrr, crr
+            } else { // xrr
                 if (m1.iscm())
                     InlineMultMM<add>(x,m1.cmView(),m2.rmView(),m3rm);
                 else if (m1.isrm())
                     InlineMultMM<add>(x,m1.rmView(),m2.rmView(),m3rm);
+                else if (m1.isdm())
+                    InlineMultMM<add>(x,m1.dmView(),m2.rmView(),m3rm);
                 else {
-                    //BandMatrix<T1,RowMajor|NoDivider> m1rm = m1;
-                    //InlineMultMM<add>(x,m1rm.rmView(),m2.rmView(),m3rm);
-                    InlineMultMM<add>(x,m1,m2.rmView(),m3rm);
+                    BandMatrix<T1,RowMajor|NoDivider> m1rm = m1;
+                    InlineMultMM<add>(x,m1rm.rmView(),m2.rmView(),m3rm);
                 }
             }
         }
@@ -125,11 +124,11 @@ namespace tmv {
                         // To avoid instantiating x!=1 paths, we need to 
                         // copy something.  m1 is probably the smallest, 
                         // since it is banded, so use that.
-                        if (m3.iscm()) {
-                            BandMatrix<T3,ColMajor|NoDivider> m1c = x*m1;
+                        if (m2.iscm() || m3.isrm()) {
+                            BandMatrix<T3,RowMajor|NoDivider> m1c = x*m1;
                             DoMultMM<true>(one,m1c.constView().xView(),m2,m3);
                         } else {
-                            BandMatrix<T3,RowMajor|NoDivider> m1c = x*m1;
+                            BandMatrix<T3,ColMajor|NoDivider> m1c = x*m1;
                             DoMultMM<true>(one,m1c.constView().xView(),m2,m3);
                         }
 #else

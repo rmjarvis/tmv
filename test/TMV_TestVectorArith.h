@@ -3,17 +3,23 @@
 
 #include "TMV_Test.h"
 
+#ifdef EXPLICIT_ALIAS
+#define ALIAS .alias()
+#else
+#define ALIAS
+#endif
+
 template <class T, class V> 
 inline void TestV(const V& a, std::string label)
 {
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<RT>::float_type FT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start V "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
-    }
 #endif
+    }
 
     tmv::Vector<T> v = a;
     FT eps = EPS*v.size();
@@ -50,13 +56,13 @@ inline void TestVX(const V& a, T2 x, std::string label)
 {
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<RT>::float_type FT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VX "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"x "<<x<<std::endl;
-    }
 #endif
+    }
 
     tmv::Vector<T> v = a;
     FT eps = EPS*v.size();
@@ -93,13 +99,13 @@ inline void TestVX2(V& a, T2 x, std::string label)
 {
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<RT>::float_type FT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VX2 "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"x "<<x<<std::endl;
-    }
 #endif
+    }
 
     tmv::Vector<T> v = a;
     FT eps = EPS*v.size();
@@ -136,19 +142,19 @@ inline void TestVX2(V& a, T2 x, std::string label)
         a = v = a0;
     }
 
-#ifdef ALIASOK
-    a = a*x;
+#ifndef NOALIAS
+    a ALIAS = a*x;
     v = tmv::Vector<T>(v*x);
     Assert(Equal(a,v,eps),label+" a = a*x");
     a = v = a0;
 
-    a = x*a;
+    a ALIAS = x*a;
     v = tmv::Vector<T>(v*x);
     Assert(Equal(a,v,eps),label+" a = x*a");
     a = v = a0;
 
     if (!(std::numeric_limits<RT>::is_integer)) {
-        a = a/x;
+        a ALIAS = a/x;
         v = tmv::Vector<T>(v/x);
         Assert(Equal(a,v,eps),label+" a = a/x");
         a = a0;
@@ -165,13 +171,13 @@ inline void TestVV(const V1& a, const V2& b, std::string label)
 {
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<RT>::float_type FT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VV "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
-    }
 #endif
+    }
 
     tmv::Vector<T> v1 = a;
     tmv::Vector<T2> v2 = b;
@@ -266,13 +272,13 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
 {
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<RT>::float_type FT;
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VV2 "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
-    }
 #endif
+    }
 
     tmv::Vector<T> v1 = a;
     tmv::Vector<T2> v2 = b;
@@ -329,20 +335,20 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     v4 = v1-v2;
     Assert(Equal(a,v4,eps),label+" a -= v");
     a = v4 = v1;
-#ifdef ALIASOK
-    a = a+v2;
+#ifndef NOALIAS
+    a ALIAS = a+v2;
     v4 = v1+v2;
     Assert(Equal(a,v4,eps),label+" a = a+v");
     a = v4 = v1;
-    a = a-v2;
+    a ALIAS = a-v2;
     v4 = v1-v2;
     Assert(Equal(a,v4,eps),label+" a = a-v");
     a = v4 = v1;
-    a = v2+a;
+    a ALIAS = v2+a;
     v4 = v1+v2;
     Assert(Equal(a,v4,eps),label+" a = v+a");
     a = v4 = v1;
-    a = v2-a;
+    a ALIAS = v2-a;
     v4 = v2-v1;
     Assert(Equal(a,v4,eps),label+" a = v-a");
     a = v4 = v1;
@@ -377,20 +383,20 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     v4 = v1+v2;
     Assert(Equal(a,v4,eps),label+" a -= -b");
     a = v4 = v1;
-#ifdef ALIASOK
-    a = a+b;
+#ifndef NOALIAS
+    a ALIAS = a+b;
     v4 = v1+v2;
     Assert(Equal(a,v4,eps),label+" a = a+b");
     a = v4 = v1;
-    a = a-b;
+    a ALIAS = a-b;
     v4 = v1-v2;
     Assert(Equal(a,v4,eps),label+" a = a-b");
     a = v4 = v1;
-    a = b+a;
+    a ALIAS = b+a;
     v4 = v1+v2;
     Assert(Equal(a,v4,eps),label+" a = b+a");
     a = v4 = v1;
-    a = b-a;
+    a ALIAS = b-a;
     v4 = v2-v1;
     Assert(Equal(a,v4,eps),label+" a = b-a");
     a = v4 = v1;
@@ -404,13 +410,13 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
 template <class T, class V, class CV> 
 inline void TestVectorArith1(V& a, CV& ca, std::string label)
 {
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VectorArith1 "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
-    }
 #endif
+    }
 
     TestV<T>(a,label+" R");
     TestV<std::complex<T> >(ca,label+" C");
@@ -427,9 +433,11 @@ inline void TestVectorArith1(V& a, CV& ca, std::string label)
     TestVX2<std::complex<T> >(ca,z,label+" C,C");
     TestVV<T,T>(a,a,label+" R,R");
     TestVV<std::complex<T>,std::complex<T> >(ca,ca,label+" C,C");
-#ifdef ALIASOK
-    TestVV2<T,T>(a,a,label+" R,R");
-    TestVV2<std::complex<T>,std::complex<T> >(ca,ca,label+" C,C");
+#ifndef NOALIAS
+#ifndef EXPLICIT_ALIAS
+    TestVV2<T,T>(a,a,label+" R,R, self_arith");
+    TestVV2<std::complex<T>,std::complex<T> >(ca,ca,label+" C,C, self_arith");
+#endif
 #endif
 
 }
@@ -438,15 +446,15 @@ template <class T, class V1, class CV1, class V2, class CV2>
 inline void TestVectorArith2(
     V1& a, CV1& ca, const V2& b, const CV2& cb, std::string label)
 {
-#ifdef XXD
     if (showstartdone) {
         std::cout<<"Start VectorArith2 "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
-    }
 #endif
+    }
 
     TestVV<T,T>(a,b,label+" R,R");
     TestVV2<T,T>(a,b,label+" R,R");

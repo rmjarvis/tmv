@@ -881,7 +881,8 @@ namespace tmv {
             typedef typename MCopyHelper<T,Rec,cs,rs>::type Mcm;
             Mcm mcm = m;
             QRPDecompose_Helper<-2,cs,rs,Mcm,V>::call(mcm,beta,P,strict);
-            NoAliasCopy(mcm,m);
+            typename M::noalias_type mna = m.noAlias();
+            Copy(mcm,mna);
         }
     };
 
@@ -990,7 +991,7 @@ namespace tmv {
     };
 
     template <class M, class V>
-    static inline void InlineQRP_Decompose(
+    inline void InlineQRP_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, BaseVector_Mutable<V>& beta,
         int* P, bool strict=false)
     {
@@ -1005,7 +1006,7 @@ namespace tmv {
 
     // This is the basic functionality
     template <class M, class V>
-    static inline void QRP_Decompose(
+    inline void QRP_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, BaseVector_Mutable<V>& beta,
         int* P, bool strict=false)
     {
@@ -1044,7 +1045,7 @@ namespace tmv {
     // The rest of these below are basically convenience functions
     // to allow the user to provide fewer or different arguments.
     template <class M1, class M2>
-    static inline void QRP_Decompose(
+    inline void QRP_Decompose(
         BaseMatrix_Rec_Mutable<M1>& Q, BaseMatrix_Tri_Mutable<M2>& R,
         Permutation& P, bool strict=false)
     {
@@ -1058,12 +1059,12 @@ namespace tmv {
         typedef typename M1::real_type RT;
         Vector<RT> beta(Q.rowsize());
         QRP_Decompose(Q,beta,P,strict);
-        NoAliasCopy(Q.upperTri(),R);
+        Copy(Q.upperTri(),R);
         UnpackQ(Q,beta);
     }
 
     template <class M>
-    static inline void QRP_Decompose(BaseMatrix_Rec_Mutable<M>& A,
+    inline void QRP_Decompose(BaseMatrix_Rec_Mutable<M>& A,
         bool strict=false)
     {
         TMVAssert(A.colsize() >= A.rowsize());
@@ -1076,7 +1077,7 @@ namespace tmv {
 
     // Allow views as an argument by value (for convenience)
     template <class T, int A, int A2>
-    static inline void QRP_Decompose(
+    inline void QRP_Decompose(
         MatrixView<T,A> Q, UpperTriMatrixView<T,A2> R,
         Permutation& P, bool strict=false)
     {
@@ -1088,7 +1089,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Si, int Sj, int A, int Si2, int Sj2, int A2>
-    static inline void QRP_Decompose(
+    inline void QRP_Decompose(
         SmallMatrixView<T,M,N,Si,Sj,A> Q,
         SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> R,
         Permutation& P, bool strict=false)
@@ -1101,7 +1102,7 @@ namespace tmv {
     }
 
     template <class T, int N, int A, int Si2, int Sj2, int A2>
-    static inline void QRP_Decompose(
+    inline void QRP_Decompose(
         MatrixView<T,A> Q,
         SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> R,
         Permutation& P, bool strict=false)
@@ -1114,7 +1115,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Si, int Sj, int A, int A2>
-    static inline void QRP_Decompose(
+    inline void QRP_Decompose(
         SmallMatrixView<T,M,N,Si,Sj,A> Q,
         UpperTriMatrixView<T,A2> R,
         Permutation& P, bool strict=false)
@@ -1127,14 +1128,14 @@ namespace tmv {
     }
 
     template <class T, int A>
-    static inline void QRP_Decompose(MatrixView<T,A> m, bool strict=false)
+    inline void QRP_Decompose(MatrixView<T,A> m, bool strict=false)
     {
         typedef MatrixView<T,A> M1;
         QRP_Decompose(static_cast<BaseMatrix_Rec_Mutable<M1>&>(m),strict);
     }
 
     template <class T, int M, int N, int Si, int Sj, int A>
-    static inline void QRP_Decompose(
+    inline void QRP_Decompose(
         SmallMatrixView<T,M,N,Si,Sj,A> m, bool strict=false)
     {
         typedef SmallMatrixView<T,M,N,Si,Sj,A> M1;
@@ -1143,7 +1144,7 @@ namespace tmv {
 
     // Don't forget the ones that mix *MatrixView with BaseMatrix_*_Mutable
     template <class T, int A, class M2>
-    static inline void QRP_Decompose(
+    inline void QRP_Decompose(
         MatrixView<T,A> Q, BaseMatrix_Tri_Mutable<M2>& R,
         Permutation& P, bool strict=false)
     {
@@ -1153,7 +1154,7 @@ namespace tmv {
     }
 
     template <class M1, class T, int A2>
-    static inline void QRP_Decompose(
+    inline void QRP_Decompose(
         BaseMatrix_Rec_Mutable<M1>& Q, UpperTriMatrixView<T,A2> R,
         Permutation& P, bool strict=false)
     {
@@ -1163,7 +1164,7 @@ namespace tmv {
     }
 
     template <class T, int M, int N, int Si, int Sj, int A, class M2>
-    static inline void QRP_Decompose(
+    inline void QRP_Decompose(
         SmallMatrixView<T,M,N,Si,Sj,A> Q, BaseMatrix_Tri_Mutable<M2>& R,
         Permutation& P, bool strict=false)
     {
@@ -1173,7 +1174,7 @@ namespace tmv {
     }
 
     template <class M1, class T, int N, int Si2, int Sj2, int A2>
-    static inline void QRP_Decompose(
+    inline void QRP_Decompose(
         BaseMatrix_Rec_Mutable<M1>& Q,
         SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> R,
         Permutation& P, bool strict=false)

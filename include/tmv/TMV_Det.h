@@ -331,7 +331,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline typename M::value_type Det(const BaseMatrix_Calc<M>& m)
+    inline typename M::value_type Det(const BaseMatrix_Calc<M>& m)
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
         TMVAssert(m.colsize() == m.rowsize());
@@ -513,7 +513,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline typename M::float_type LogDet(
+    inline typename M::float_type LogDet(
         const BaseMatrix_Calc<M>& m, typename M::zfloat_type* sign)
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
@@ -675,7 +675,7 @@ namespace tmv {
     };
 
     template <class M>
-    static inline bool IsSingular(const BaseMatrix_Calc<M>& m)
+    inline bool IsSingular(const BaseMatrix_Calc<M>& m)
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
         TMVAssert(m.colsize() == m.rowsize());
@@ -857,7 +857,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static inline T unroll(const V& v)
+            static TMV_INLINE T unroll(const V& v)
             {
                 return ZProd<false,false>::prod(
                     Unroller<I,N/2>::unroll(v),
@@ -866,10 +866,10 @@ namespace tmv {
         };
         template <int I>
         struct Unroller<I,1>
-        { static inline T unroll(const V& v) { return v.cref(I); } };
+        { static TMV_INLINE T unroll(const V& v) { return v.cref(I); } };
         template <int I>
         struct Unroller<I,0>
-        { static inline T unroll(const V& v) { return T(1); } };
+        { static TMV_INLINE T unroll(const V& v) { return T(1); } };
         static inline T call(const V& v)
         {
 #ifdef PRINTALGO_DET
@@ -1185,7 +1185,7 @@ namespace tmv {
     };
 
     template <class V>
-    static inline typename V::value_type InlineProdElements(
+    inline typename V::value_type InlineProdElements(
         const BaseVector_Calc<V>& v)
     {
         typedef typename V::const_cview_type Vv;
@@ -1194,7 +1194,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline typename V::value_type ProdElements(
+    inline typename V::value_type ProdElements(
         const BaseVector_Calc<V>& v)
     {
         typedef typename V::const_cview_type Vv;
@@ -1485,7 +1485,7 @@ namespace tmv {
     };
 
     template <class V>
-    static inline typename V::float_type InlineLogProdElements(
+    inline typename V::float_type InlineLogProdElements(
         const BaseVector_Calc<V>& v, typename V::zfloat_type* sign)
     {
         typedef typename V::const_cview_type Vv;
@@ -1494,7 +1494,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline typename V::float_type LogProdElements(
+    inline typename V::float_type LogProdElements(
         const BaseVector_Calc<V>& v, typename V::zfloat_type* sign)
     {
         typedef typename V::const_cview_type Vv;
@@ -1617,7 +1617,7 @@ namespace tmv {
         template <int I, int N>
         struct Unroller
         {
-            static inline bool unroll(const V& v)
+            static TMV_INLINE bool unroll(const V& v)
             {
                 return (
                     Unroller<I,N/2>::unroll(v) ||
@@ -1626,10 +1626,13 @@ namespace tmv {
         };
         template <int I>
         struct Unroller<I,1>
-        { static inline bool unroll(const V& v) { return v.cref(I) == T(0); } };
+        {
+            static TMV_INLINE bool unroll(const V& v) 
+            { return v.cref(I) == T(0); } 
+        };
         template <int I>
         struct Unroller<I,0>
-        { static inline bool unroll(const V& v) { return false; } };
+        { static TMV_INLINE bool unroll(const V& v) { return false; } };
         static inline bool call(const V& v)
         {
 #ifdef PRINTALGO_DET
@@ -1712,7 +1715,7 @@ namespace tmv {
     };
 
     template <class V>
-    static inline bool InlineHasZeroElement(const BaseVector_Calc<V>& v)
+    inline bool InlineHasZeroElement(const BaseVector_Calc<V>& v)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();
@@ -1720,7 +1723,7 @@ namespace tmv {
     }
 
     template <class V>
-    static inline bool HasZeroElement(const BaseVector_Calc<V>& v)
+    inline bool HasZeroElement(const BaseVector_Calc<V>& v)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();

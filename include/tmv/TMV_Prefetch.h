@@ -18,20 +18,20 @@ namespace tmv {
     // TODO: I'm not sure if the __GNUC__ guard is sufficient.  I might
     // need to check which version we are using.  I should find out
     // when gcc added this feature.
-    static TMV_INLINE void Prefetch_Read(const void* p) 
+    TMV_INLINE void Prefetch_Read(const void* p) 
     { __builtin_prefetch(p,0,0); }
-    static TMV_INLINE void Prefetch_MultiRead(const void* p) 
+    TMV_INLINE void Prefetch_MultiRead(const void* p) 
     { __builtin_prefetch(p,0,3); }
-    static TMV_INLINE void Prefetch_Write(void* p) 
+    TMV_INLINE void Prefetch_Write(void* p) 
     { __builtin_prefetch(p,1,0); }
-    static TMV_INLINE void Prefetch_MultiWrite(void* p) 
+    TMV_INLINE void Prefetch_MultiWrite(void* p) 
     { __builtin_prefetch(p,1,3); }
 #define TMV_PREFETCH
 #else
-    static TMV_INLINE void Prefetch_Read(const void* ) {}
-    static TMV_INLINE void Prefetch_MultiRead(const void* ) {}
-    static TMV_INLINE void Prefetch_Write(void* ) {}
-    static TMV_INLINE void Prefetch_MultiWrite(void* ) {}
+    TMV_INLINE void Prefetch_Read(const void* ) {}
+    TMV_INLINE void Prefetch_MultiRead(const void* ) {}
+    TMV_INLINE void Prefetch_Write(void* ) {}
+    TMV_INLINE void Prefetch_MultiWrite(void* ) {}
 #endif
 
 } // namespace tmv

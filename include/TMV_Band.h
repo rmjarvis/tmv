@@ -20,6 +20,7 @@
 
 #include "tmv/TMV_MultBV.h"
 #include "tmv/TMV_MultBM.h"
+#include "tmv/TMV_MultBD.h"
 #include "tmv/TMV_MultBB.h"
 
 #if 0

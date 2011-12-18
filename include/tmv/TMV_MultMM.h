@@ -1761,7 +1761,8 @@ namespace tmv {
             typedef typename Traits2<T,T1>::type PT1;
             const int A = M2::_colmajor || M3::_rowmajor ? RowMajor : ColMajor;
             typedef typename MCopyHelper<PT1,Rec,cs,xs,A>::type M1c;
-            NoAliasMultMM<add>(one,M1c(x*m1),m2,m3);
+            typename M3::noalias_type m3na = m3.noAlias();
+            MultMM<add>(one,M1c(x*m1),m2,m3na);
         }
     };
 
@@ -1773,9 +1774,9 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MM
+            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             const int K = xs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
-            const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
             std::cout<<"MM algo 82: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1785,7 +1786,8 @@ namespace tmv {
             typedef typename Traits2<T,T2>::type PT2;
             const int A = M1::_colmajor && M3::_rowmajor ? RowMajor : ColMajor;
             typedef typename MCopyHelper<PT2,Rec,xs,rs,A>::type M2c;
-            NoAliasMultMM<add>(one,m1,M2c(x*m2),m3);
+            typename M3::noalias_type m3na = m3.noAlias();
+            MultMM<add>(one,m1,M2c(x*m2),m3na);
         }
     };
 
@@ -1796,10 +1798,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
+#ifdef PRINTALGO_MM
             const int M = cs == TMV_UNKNOWN ? int(m3.colsize()) : cs;
             const int N = rs == TMV_UNKNOWN ? int(m3.rowsize()) : rs;
             const int K = xs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
-#ifdef PRINTALGO_MM
             std::cout<<"MM algo 83: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -1808,7 +1810,8 @@ namespace tmv {
             typedef typename Traits2<T1,T2>::type PT3;
             const int A = M1::_rowmajor && M2::_rowmajor ? RowMajor : ColMajor;
             typedef typename MCopyHelper<PT3,Rec,cs,rs,A>::type M3c;
-            NoAliasMultXM<add>(x,M3c(m1*m2),m3);
+            typename M3::noalias_type m3na = m3.noAlias();
+            MultXM<add>(x,M3c(m1*m2),m3na);
         }
     };
 
@@ -2196,7 +2199,7 @@ namespace tmv {
             Matrix<T3> m3c = m3;
             for(size_t j=0; j<m3.colsize(); ++j) {
                 typename Matrix<T3>::col_type m3cj = m3c.col(j);
-                NoAliasMultMV<add>(x,m1c,m2c.col(j),m3cj);
+                MultMV<add>(x,m1c,m2c.col(j),m3cj);
             }
 #endif
             try {
@@ -2308,7 +2311,7 @@ namespace tmv {
     };
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void MultMM(
+    inline void MultMM(
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -2335,31 +2338,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void NoAliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
-        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_colsize>::same));
-        TMVStaticAssert((Sizes<M2::_rowsize,M3::_rowsize>::same));
-        TMVAssert(m1.colsize() == m3.colsize());
-        TMVAssert(m1.rowsize() == m2.colsize());
-        TMVAssert(m2.rowsize() == m3.rowsize());
-
-        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
-        const int xs = Sizes<M1::_rowsize,M2::_colsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
-        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
-        MultMM_Helper<-2,cs,rs,xs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
-
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void InlineMultMM(
+    inline void InlineMultMM(
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -2383,7 +2362,7 @@ namespace tmv {
     }
 
     template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void InlineAliasMultMM(
+    inline void InlineAliasMultMM(
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
@@ -2406,48 +2385,11 @@ namespace tmv {
         MultMM_Helper<98,cs,rs,xs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
     }
 
-    template <bool add, int ix, class T, class M1, class M2, class M3>
-    static inline void AliasMultMM(
-        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
-        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
-    {
-        TMVStaticAssert((Sizes<M1::_colsize,M3::_colsize>::same));
-        TMVStaticAssert((Sizes<M1::_rowsize,M2::_colsize>::same));
-        TMVStaticAssert((Sizes<M2::_rowsize,M3::_rowsize>::same));
-        TMVAssert(m1.colsize() == m3.colsize());
-        TMVAssert(m1.rowsize() == m2.colsize());
-        TMVAssert(m2.rowsize() == m3.rowsize());
-
-        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
-        const int xs = Sizes<M1::_rowsize,M2::_colsize>::size;
-        typedef typename M1::const_cview_type M1v;
-        typedef typename M2::const_cview_type M2v;
-        typedef typename M3::cview_type M3v;
-        TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
-        TMV_MAYBE_CREF(M2,M2v) m2v = m2.cView();
-        TMV_MAYBE_REF(M3,M3v) m3v = m3.cView();
-        MultMM_Helper<99,cs,rs,xs,add,ix,T,M1v,M2v,M3v>::call(x,m1v,m2v,m3v);
-    }
-
     template <class M1, int ix, class T, class M2>
-    static TMV_INLINE void MultEqMM(
+    TMV_INLINE void MultEqMM(
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const BaseMatrix_Rec<M2>& m2)
     { MultMM<false>(x,m1.copy(),m2.mat(),m1.mat()); }
-
-    template <class M1, int ix, class T, class M2>
-    static TMV_INLINE void NoAliasMultEqMM(
-        BaseMatrix_Rec_Mutable<M1>& m1,
-        const Scaling<ix,T>& x, const BaseMatrix_Rec<M2>& m2)
-    { NoAliasMultMM<false>(x,m1.copy(),m2.mat(),m1.mat()); }
-
-    template <class M1, int ix, class T, class M2>
-    static TMV_INLINE void AliasMultEqMM(
-        BaseMatrix_Rec_Mutable<M1>& m1,
-        const Scaling<ix,T>& x, const BaseMatrix_Rec<M2>& m2)
-    { AliasMultMM<false>(x,m1.copy(),m2.mat(),m1.mat()); }
-
 
 } // namespace tmv
 
