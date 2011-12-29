@@ -38,7 +38,7 @@ namespace tmv {
         typedef typename V2::iterator IT2;
         static void call(const V1& v1, V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             for(int i=0;i<n;++i) v2.ref(i) = v1.cref(i); 
         }
         static void call2(int n, IT1 it1, IT2 it2)
@@ -77,7 +77,7 @@ namespace tmv {
     {
         static inline void call(const V1& v1, V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             memmove(v2.ptr(),v1.cptr(),n*sizeof(typename V2::value_type));
         }
         static inline void call2(

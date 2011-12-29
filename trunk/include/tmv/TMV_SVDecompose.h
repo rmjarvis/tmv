@@ -237,10 +237,10 @@ namespace tmv {
             typedef typename Vd::real_type RT;
             TMVStaticAssert(Traits<T>::iscomplex);
 
-            const int N = rs==TMV_UNKNOWN ? int(D.size()) : rs;
+            const int N = rs==TMV_UNKNOWN ? D.size() : rs;
             if (N == 0) return;
 #ifdef PRINTALGO_SVD
-            const int M = cs==TMV_UNKNOWN ? int(U.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? U.colsize() : cs;
             std::cout<<"SVDecomposeFromBidiagonal algo 1: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -299,10 +299,10 @@ namespace tmv {
             typedef typename Vd::value_type RT;
             TMVStaticAssert(Traits<RT>::isreal);
 
-            const int N = rs==TMV_UNKNOWN ? int(D.size()) : rs;
+            const int N = rs==TMV_UNKNOWN ? D.size() : rs;
             if (N == 0) return;
 #ifdef PRINTALGO_SVD
-            const int M = cs==TMV_UNKNOWN ? int(U.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? U.colsize() : cs;
             std::cout<<"SVDecomposeFromBidiagonal algo 11: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -370,10 +370,10 @@ namespace tmv {
             typedef typename Vd::value_type RT;
             TMVStaticAssert(Traits<RT>::isreal);
 
-            const int N = rs==TMV_UNKNOWN ? int(D.size()) : rs;
+            const int N = rs==TMV_UNKNOWN ? D.size() : rs;
             if (N == 0) return;
 #ifdef PRINTALGO_SVD
-            const int M = cs==TMV_UNKNOWN ? int(U.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? U.colsize() : cs;
             std::cout<<"SVDecomposeFromBidiagonal algo 21: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -461,8 +461,8 @@ namespace tmv {
             Mu& U, Vd& D, Ve& E, Mv& V, bool UisI, bool VisI)
         {
 #ifdef PRINTALGO_SVD
-            const int M = cs==TMV_UNKNOWN ? int(U.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(D.size()) : rs;
+            const int M = cs==TMV_UNKNOWN ? U.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? D.size() : rs;
             std::cout<<"SVDecomposeFromBidiagonal algo 31: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -503,7 +503,7 @@ namespace tmv {
             std::cout<<"algo = "<<algo<<std::endl;
 #endif
 #ifdef XDEBUG_SVD
-            const int N = rs==TMV_UNKNOWN ? int(D.size()) : rs;
+            const int N = rs==TMV_UNKNOWN ? D.size() : rs;
             dbgcout<<"Start Decompose from Bidiag:\n";
             if (U.ptr()) dbgcout<<"U = "<<TMV_Text(U)<<std::endl;
             if (V.ptr()) dbgcout<<"V = "<<TMV_Text(V)<<std::endl;
@@ -518,7 +518,7 @@ namespace tmv {
             Matrix<RT> B(N,N,RT(0));
             B.diag() = D;
             B.diag(1) = E;
-            const int M1 = U.ptr() && V.ptr() ? int(U.colsize()) : N;
+            const int M1 = U.ptr() && V.ptr() ? U.colsize() : N;
             Matrix<T> A0(M1,N);
             if (U.ptr() && V.ptr() && !setUV) A0 = U * B * V;
             else A0 = B;
@@ -726,8 +726,8 @@ namespace tmv {
         static void call(
             Mu& U, Ms& S, Mv& V, ZT& signdet, FT& logdet, bool StoreU)
         {
-            const int M = cs==TMV_UNKNOWN ? int(U.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(U.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? U.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? U.rowsize() : rs;
             if (N == 0) return;
 #ifdef PRINTALGO_SVD
             std::cout<<"SVDecompose algo 11: M,N,cs,rs = "<<M<<','<<N<<

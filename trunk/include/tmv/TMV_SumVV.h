@@ -67,7 +67,7 @@ namespace tmv {
         TMV_INLINE const Scaling<ix2,T2>& getX2() const { return x2; }
         TMV_INLINE const V2& getV2() const { return v2; }
 
-        TMV_INLINE size_t size() const { return v1.size(); }
+        TMV_INLINE int size() const { return v1.size(); }
         value_type cref(int i) const
         { return x1 * v1.cref(i) + x2 * v2.cref(i); }
 

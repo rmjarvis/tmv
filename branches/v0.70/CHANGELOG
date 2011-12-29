@@ -1,0 +1,247 @@
+Changes from version 0.65 to 0.70:  
+(See the History section in the full documentation for changes from previous
+versions to 0.65.)
+
+The impetus for this release was mostly just the first change listed below
+about the behavior of comma initialization for matrices.  But since I knew
+this change would not be backwards compatible, and might require users
+to edit their code, I decided to try to put all the non-backward-
+compatible changes that I've been thinking about introducing into this
+release to try to do everything at once.
+
+The other big change is the redesigned I/O system that uses the equivalent 
+of stream manipulators to control the I/O behavior.  The default output 
+format hasn't changed, but if you ever did anything fancier than that, 
+you'll need to change your code to use the new system.
+
+There are a number of other non-backwards-compatible changes, so users should
+look through this file carefully to see if any other changes might require 
+some of their own code to be modified.
+
+Changed and Deprecated features:
+
+-- Changed the behavior of the m << 1, 2, 3... initialization.  Now the items 
+   in the initialization list should be in RowMajor order regardless of the 
+   storage order of the matrix m.  This makes it much easier to 
+   understand the initialization, since the list can be arranged to look like 
+   the matrix you are setting.  e.g. the snippet:
+
+   tmv::Matrix<double> m(3,5);
+   m << 3 ,  9 ,  1 ,  4 ,  2 ,
+        7 , -3 ,  0 , -1 ,  4 ,
+       -6 ,  2 , 11 ,  5 ,  6 ;
+
+   now initializes the matrix to have the values as shown in the rectangle.  
+   However, the old behavior was to follow the storage order of the matrix, 
+   and since the default storage order is ColMajor, this would unintuitively 
+   initialize the matrix to
+
+   (  3   4  -3   4  11  )
+   (  9   2   0  -6   5  )
+   (  1   7  -1   2   6  )
+   
+   rather than the obviously intended matrix
+   
+   (  3   9   1   4   2  )
+   (  7  -3   0  -1   4  )
+   ( -6   2  11   5   6  )
+
+   Now the code correctly initializes the matrix to the second one regardless 
+   of how the matrix intrinsically stores the values, which I believe is a 
+   much more intuitive behavior.
+
+   Of course, if you do want to initialize according to a ColMajor list of 
+   numbers for some reason, you can initialize m.transpose() instead:
+
+   tmv::Matrix<double> m(3,5);
+   m.transpose() << 3 ,  7 , -6 ,
+                    9 , -3 ,  2 ,
+                    1 ,  0 , 11 ,
+                    4 , -1 ,  5 ,
+                    2 ,  4 ,  6 ,
+
+-- Removed the constructors from either a C-style array or a std::vector.  
+   The reason is similar to the reasoning above -- I wanted to decouple the 
+   internal storage order from the order of the elements in the initializing 
+   vector.
+
+   To take the place of these constructors' functionality, I added iterators 
+   that iterate over the matrix in either RowMajor or ColMajor order, so the 
+   assignment can be done with the standard library's std::copy function.
+
+   const double rmar[15] =
+       { 3, 9, 1, 4, 2, 7, -3, 0, -1, 4, -6, 2, 11, 5, 6};
+   const double cmar[15] =
+       { 3, 7, -6, 9, -3, 2, 1, 0, 11, 4, -1, 5, 2, 4, 6};
+
+   // Old style constuctors: (no longer valid)
+   tmv::Matrix<double,tmv::RowMajor> m1(3,5,rmar);
+   tmv::Matrix<double,tmv::ColMajor> m2(3,5,cmar);
+
+   // New style assignment with iterators:
+   tmv::Matrix<double> m3(3,5); // Can be either StorageType
+   std::copy(rmar, rmar+15, m3.rowmajor_begin());
+   tmv::Matrix<double> m4(3,5);
+   std::copy(cmar, cmar+15, m3.colmajor_begin());
+
+   In addition, a BandMatrix can be iterated in DiagMajor order using 
+   m.diagmajor_begin().
+
+-- Removed the auto_ptr read functions.  This notation was cumbersome,
+   and since all matrices can be resized now (feature added in v0.65),
+   there is no need for it anymore.  The auto_ptr was really just a 
+   workaround for the fact that matrices didn't used to be able to be resized.
+   So rather than writing:
+
+   std::auto_ptr<tmv::Matrix<double> > pm;
+   is >> pm;  // old style would construct a new Matrix
+   [... Use matrix as *pm ... ]
+
+   you can now simply write:
+
+   tmv::Matrix<double> m;
+   is >> m;   // m is automatically resized to the correct size.
+   [... Use matrix as m ... ]
+
+-- Changed the compact I/O style. Now there are no parentheses,
+   and all the elements are on one line.  The order of the elements is the 
+   same as for the below (new) comma-initialization.  i.e. the rowmajor
+   order of all elements in the band or upper triangle or whatever shape
+   matrix we are reading/writing.
+
+-- Removed the functions read, write and writeCompact, and replaced them 
+   with a more streamlined I/O interface. Now there are objects that act 
+   like stream manipulators to control how the next TMV object should be 
+   written or read:
+
+   os << m;
+   os << tmv::CompactIO() << m;
+   os << tmv::ThreshIO(1.e-8) << m;
+   is >> m;
+   is >> tmv::CompactIO() >> m;
+
+   There is a lot more to the new I/O style than just these.  See the
+   documentation for details about the new features.
+
+-- Removed the routines that returned pointers to new BaseMatrixes.  
+   In general, using the BaseMatrix class directly is not really very 
+   useful, so I don't think anyone is actually using these methods.  And in 
+   the version 0.9 TMV code in development, I've completely redesigned the 
+   back end.  It gets rid of the virtual class hierarchy completely using the 
+   CRTP idiom rather than virtual functions.  But this means that methods like 
+   newCopy(), newTranspose(), etc. are not really relevant anymore.
+
+   There are no simple workarounds for this lost functionality, so if you 
+   were using these functions and are sorry to see them go, or if you are 
+   otherwise using the virtual functionality (e.g. putting pointers to a 
+   bunch of disparate BaseMatrix objects into a std::vector or other 
+   container class), let me know what your use case is and we can try to 
+   figure out how best to incorporate your needs in the next version and 
+   in the version 0.90 redesign.
+
+-- Changed type type of the size values from size_t to int.  The main 
+   reason for this is to prevent the constructors that take size arguments 
+   from implicitly converting a negative number into a very large unsigned 
+   value and then attempt to allocate a huge amount of memory.  If the size 
+   parameters in a constructor such as tmv::Matrix<T>(nrows,ncols) were the 
+   result of some calculation and they accidentally were allowed to be 
+   negative, the new code will hit an assert statement checking that they 
+   are nonnegative, rather than trying to allocate the incorrectly huge 
+   amount of memory.  This seems like safer behavior.
+
+   The only other place where this might matter is that the return type o
+   f functions like m.colsize() now return an int rather than a size_t.  
+   So if you do any comparisons like while(i < m.colsize()) and you compile 
+   with g++ -Wall, you'll want i to be a signed integer type to avoid g++'s 
+   warning about comparing signed and unsigned types.
+
+-- Changed the default behavior to not output warnings.  To turn it on,
+   you need to explicitly use tmv::WriteWarningsTo(&std::cerr) (or whatever
+   stream you want to write the warnings to).
+
+-- Removed warnings for norm2 and makeInverseATA.  I decided that these
+   warnings were probably unneccessary.  Any user who uses these functions
+   probably understands them well enough that they wouldn't be surprised
+   by the behavior of TMV, so the warnings aren't needed.
+
+-- Removed the various functions that had been deprecated in the 0.6x
+   versions of TMV.
+
+
+New features:
+
+-- Added the matrix iterators described above.
+
+-- Added the ability to do comma initialization for DiagMatrix, UpperTriMatrix,
+   LowerTriMatrix, BandMatrix, and their corresponding view types.
+   These are also always listed in RowMajor order regardless of the actual 
+   storage order of the matrix in memory.  Also, only the values in the 
+   corresponding parts of the matrices should be listed in the initialization.
+   e.g.
+ 
+   tmv::DiagMatrix<double> d(4);
+   d << 4 ,
+             9 , 
+                 11 ,
+                      -4 ;
+   tmv::UpperTriMatrix<double> u(4);
+   u << 4 ,  9 , -1 ,  0 ,
+            18 ,  3 , -7 ,
+                  1 ,  5 ,
+                      10 ;
+   tmv::LowerTriMatrix<double> l(4);
+   l <<  1 ,
+        12 , -3 ,
+         8 ,  5 , -9 ,
+         3 , 20 , 14 ,  4 ;
+   tmv::BandMatrix<double> b(4,1,1);
+   b <<  7 ,  9 ,
+        10 , -1 ,  5 ,
+              8 , -6 , 21 , 
+                   2 ,  8 ;
+
+   I chose not to add similar initializers for symmetric or hermitian matrix
+   types, because I think initialization of them is clearer in terms of only
+   the upper or lower triangle part that is stored in memory.  So the way to 
+   initialize them would be something like:
+  
+   tmv::SymMatrix<double> s(4);
+   s.upperTri() << 2 ,  1 , -3 ,  7 ,
+                       -8 , -2 , 12 ,
+                             6 ,  1 ,
+                                  7 ;
+   tmv::SymBandMatrix<double> sb(4,1);
+   sb.lowerBand() <<  8 ,
+                     12 ,  5 ,
+                          -8 ,  2 ,
+                                6 , 10 ;
+ 
+-- Added compact I/O for regular Matrix and Vector objects.  Since the compact 
+   format changed to avoid the parentheses and commas, it makes sense
+   to add this functionality to Matrix and Vector as well.
+
+-- Added a few more "ViewOf" functions to allow direct views of memory as 
+   different kinds of matrix types directly specifying the step in each 
+   direction.  These are more flexible than the versions that merely specify a
+   StorageType to use.  For non-contiguous data, those weren't sufficient.
+   So now, you can view arbitrary data in memory as an UpperTriMatrixView, 
+   LowerTriMatrixView, DiagMatrixView, BandMatrixView, SymMatrixView, or 
+   SymBandMatrixView specifying the memory address of m(0,0) and the step 
+   size in each direction.
+
+-- Added default constructors to Vector, Matrix and all the special matrix 
+   classes.  These construct a zero-sized matrix, so normally you would want
+   to resize the matrix at some point.  See the above item about removing
+   the auto_ptr read functions for an example of how this could be useful.
+
+-- Added a warning for when MultMM catches a std::bad_alloc exception
+   and reverts to using a simpler algorithm that doesn't allocate memory.
+
+
+Bug fixes:
+
+-- Added support for the clang++ compiler.  This didn't require much editing, 
+   but it did complain about a couple things that had passed muster with the 
+   other compilers I had used.
+
+

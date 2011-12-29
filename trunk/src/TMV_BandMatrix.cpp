@@ -406,40 +406,21 @@ namespace tmv {
     //
 
     template <class T, int C>
-    void InstWriteCompact(
-        std::ostream& os, const ConstBandMatrixView<T,C>& m)
+    void InstWrite(
+        const TMV_Writer& writer, const ConstBandMatrixView<T,C>& m)
     {
-        if (m.iscm()) InlineWriteCompact(os,m.cmView());
-        else if (m.isrm()) InlineWriteCompact(os,m.rmView());
-        else if (m.isdm()) InlineWriteCompact(os,m.dmView());
-        else InlineWriteCompact(os,m);
-    }
-
-    template <class T, int C>
-    void InstWriteCompact(
-        std::ostream& os, const ConstBandMatrixView<T,C>& m,
-        typename ConstBandMatrixView<T>::float_type thresh)
-    {
-        if (m.iscm()) InlineWriteCompact(os,m.cmView(),thresh);
-        else if (m.isrm()) InlineWriteCompact(os,m.rmView(),thresh);
-        else if (m.isdm()) InlineWriteCompact(os,m.dmView(),thresh);
-        else InlineWriteCompact(os,m,thresh);
+        if (m.isrm()) InlineWrite(writer,m.rmView());
+        else InlineWrite(writer,m);
     }
 
     template <class T>
-    void InstRead(std::istream& is, BandMatrixView<T> m)
+    void InstRead(const TMV_Reader& reader, BandMatrixView<T> m)
     {
-        if (m.iscm()) {
-            BandMatrixView<T,ColMajor> mcm = m.cmView();
-            InlineRead(is,mcm);
-        } else if (m.isrm()) {
+        if (m.isrm()) {
             BandMatrixView<T,RowMajor> mrm = m.rmView();
-            InlineRead(is,mrm);
-        } else if (m.isdm()) {
-            BandMatrixView<T,DiagMajor> mdm = m.dmView();
-            InlineRead(is,mdm);
+            InlineRead(reader,mrm);
         } else
-            InlineRead(is,m);
+            InlineRead(reader,m);
     }
 
 

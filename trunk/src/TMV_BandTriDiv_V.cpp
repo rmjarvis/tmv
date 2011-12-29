@@ -354,7 +354,7 @@ namespace tmv {
         const Ta* Ajj= A.cptr();
         T* bj = b.ptr();
 
-        int i2=TMV_MIN(A.nlo()+1,int(A.colsize()));
+        int i2=TMV_MIN(A.nlo()+1,A.colsize());
 
         for(int len=i2-1;len>0;++bj,Ajj+=ds) {
             if (*bj != T(0)) {
@@ -724,8 +724,8 @@ namespace tmv {
         TMVAssert(b.size() == A.colsize());
         TMVAssert(A.nlo() == 0 || A.nhi() == 0);
         TMVAssert(A.rowsize() > 0);
-        TMVAssert(A.nhi() < int(A.colsize()));
-        TMVAssert(A.nlo() < int(A.colsize()));
+        TMVAssert(A.nhi() < A.colsize());
+        TMVAssert(A.nlo() < A.colsize());
         if (b.isconj())
             TriLDivEq(A.conjugate(),b.conjugate(),dt);
         else {

@@ -1,0 +1,356 @@
+% !TEX root = TMV_Documentation.tex
+
+\section{Advanced Usage}
+
+\subsection{Element-by-element product}
+\index{Vector!Arithmetic!element by element product}
+\index{Matrix!Arithmetic!element by element product}
+\index{DiagMatrix!Arithmetic!element by element product}
+\index{UpperTriMatrix!Arithmetic!element by element product}
+\index{BandMatrix!Arithmetic!element by element product}
+\index{SymMatrix!Arithmetic!element by element product}
+\index{SymBandMatrix!Arithmetic!element by element product}
+\label{ElementProd}
+
+The two usual kinds of multiplication for vectors are the inner product and 
+the outer product, which result in a scalar and a matrix respectively.
+However there is also a third kind of multiplication that is sometimes needed where
+each element in a vector is multiplied by the
+corresponding element in another vector: $v(i) = v(i) \cdot w(i)$.
+
+There are two functions that should provide all of this kind of functionality
+for you:
+\begin{tmvcode}
+ElementProd(T x, const GenVector<T1>& v1, const VectorView<T>& v2);
+AddElementProd(T x, const GenVector<T1>& v1, const GenVector<T2>& v2,
+      const VectorView<T>& v3)
+\end{tmvcode}
+The first performs $v_2(i) = x \cdot v_1(i) \cdot v_2(i)$, and the second performs
+$v_3(i) = v_3(i) + x \cdot v_1(i) \cdot v_2(i)$ for $i = 0 ... (N-1)$ (where $N$ is the 
+size of the vectors).
+
+There is no operator overloading for \tt{Vector}s that would be equivalent to 
+these expressions.
+But they are actually equivalent to the following:
+\begin{tmvcode}
+v2 *= x * DiagMatrixViewOf(v1);
+v3 += x * DiagMatrixViewOf(v1) * v2;
+\end{tmvcode}
+respectively.  In fact, these statements inline to the above function calls
+automatically.  Depending on you preference and the meanings of your vectors,
+these statements may or may not be clearer as to what you are doing.
+
+There are also corresponding functions for \tt{Matrix} and for each of the special
+matrix types:
+\begin{tmvcode}
+ElementProd(T x, const GenMatrix<T1>& m1, const MatrixView<T>& m2);
+AddElementProd(T x, const GenMatrix<T1>& m1, const GenMatrix<T2>& m2,
+      const MatrixView<T>& m3);
+\end{tmvcode}
+Likewise for the other special matrix classes.  The first performs 
+$m_2(i,j) = x \cdot m_1(i,j) \cdot m_2(i,j)$, and the second performs
+$m_3(i,j) = m_3(i,j) + x \cdot m_1(i,j) \cdot m_2(i,j)$ for every $i,j$ in the matrix.
+
+These don't have any \tt{DiagMatrixViewOf} version, since the corresponding 
+concept would require a four-dimensional tensor, and the TMV library
+just deals with one- and two-dimensional objects.
+
+The matrices all have to be the same size and shape, but can have any 
+(i.e. not necessarily the same) storage method.  Of course, the routines are fastest
+if all the matrices use the same storage.
+
+\subsection{Vector Iterators}
+\index{Vector!Iterators}
+\label{VectorIterators}
+
+We mentioned that the iterators through a \tt{Vector} are:
+\begin{tmvcode}
+typename tmv::Vector<T>::iterator
+typename tmv::Vector<T>::const_iterator
+typename tmv::Vector<T>::reverse_iterator
+typename tmv::Vector<T>::const_reverse_iterator
+\end{tmvcode}
+just like for standard library containers.  The specific types to which these
+typedefs refer are:
+\begin{tmvcode}
+tmv::VIt<T,tmv::Unit,tmv::NonConj>
+tmv::CVIt<T,tmv::Unit,tmv::NonConj>
+tmv::VIt<T,tmv::Step,tmv::NonConj>
+tmv::CVIt<T,tmv::Step,tmv::NonConj>
+\end{tmvcode}
+respectively.  They all satisfy the requirements of a STL random-access iterator.
+
+\tt{VIt} is a mutable-iterator, and \tt{CVIt} is a const-iterator.  \tt{Unit} 
+indicates that the step size is 1, while \tt{Step} allows for any step size
+between successive elements (and is therefore slower).  For the reverse
+iterators, the step size is -1.
+
+This can be worth knowing if you are going to be optimizing code that uses
+iterators of \tt{VectorView}s.
+This is because their iterators are instead:
+\begin{tmvcode}
+tmv::VIter<T>
+tmv::CVIter<T>
+\end{tmvcode}
+which always check the step size (rather than assuming unit steps) and always
+keep track of a possible conjugation.
+
+If you know that you are dealing with a view that is not conjugated, you can 
+convert your iterator into one of the above \tt{VIt} or \tt{CVIt} types, which will be 
+faster, since they won't check the conjugation bit each time. 
+
+Likewise, if you
+know that it {\em is} conjugated, then you can use \tt{tmv::Conj} for the 
+third template parameter above.  This indicates that the vector view really
+refers to the conjugates of the values stored in the actual memory locations.
+
+Also, if you know that your view has unit steps between elements, converting to 
+an iterator with \tt{tmv::Unit} will iterate faster.  It is often faster to check
+the step size once at the beginning of the routine and convert to a unit-step
+iterator if possible.
+
+All of these conversions can be done with a simple cast or constructor, such as:
+\begin{tmvcode}
+if (v.step() == 1) {
+    for(VIt<float,Unit,NonConj> it = v.begin(); it != v.end(); ++it)
+        (*it) = sqrt(*it);
+} else {
+    for(VIt<float,Step,NonConj> it = v.begin(); it != v.end(); ++it)
+        (*it) = sqrt(*it);
+}
+\end{tmvcode}
+
+Regular \tt{Vector}s are always \tt{Unit} and \tt{NonConj}, so those iterators
+are already fast without using the specific \tt{VIt} names. 
+That is, you can just use \tt{Vector<T>::iterator} rather than \tt{VIt<T,Unit,NonConj>}
+without any drop in performance.
+
+\subsection{Matrix Iterators}
+\index{Matrix!Iterators}
+\label{MatrixIterators}
+
+The \tt{Matrix}, \tt{UpperTriMatrix}, \tt{LowerTriMatrix}, and \tt{BandMatrix}
+classes and their views all have two sets of iterators for traversing the matrix 
+in either row-major or column-major order.  
+\begin{tmvcode}
+typename tmv::Matrix<T>::rowmajor_iterator m.rowmajor_begin()
+typename tmv::Matrix<T>::rowmajor_iterator m.rowmajor_end()
+typename tmv::Matrix<T>::const_rowmajor_iterator m.rowmajor_begin() const
+typename tmv::Matrix<T>::const_rowmajor_iterator m.rowmajor_end() const
+typename tmv::Matrix<T>::colmajor_iterator m.colmajor_begin()
+typename tmv::Matrix<T>::colmajor_iterator m.colmajor_end()
+typename tmv::Matrix<T>::const_colmajor_iterator m.colmajor_begin() const
+typename tmv::Matrix<T>::const_colmajor_iterator m.colmajor_end() const
+\end{tmvcode}
+Only the elements
+that are actually stored in memory are iterated over.  So for a \tt{LowerTriMatrix}, the 
+iteration skips all the elements the the strict upper triangle\footnote{
+The one exception to this is that if the matrix has \tt{dt = UnitDiag}, the 1's on the diagonal
+are actually included in the iteration.  If assigned to, they must be assigned the value 1.}.
+For a \tt{BandMatrix}, the 
+iteration only includes those on the bands used by the matrix.  
+
+The iterators are all guaranteed
+to be at least consistent with the STL requirements for forward iterator.
+For a full rectangular \tt{Matrix} that happens to be stored in the same storage order as the iterator being requested, then the iterator returned will be the same random-access iterators described above in \S\ref{VectorIterators}.
+
+In addition, \tt{BandMatrix} and its views have iterators that traverse the matrix in diagonal-major order:
+\begin{tmvcode}
+typename tmv::BandMatrix<T>::diagmajor_iterator b.diagmajor_begin()
+typename tmv::BandMatrix<T>::diagmajor_iterator b.diagmajor_end()
+typename tmv::BandMatrix<T>::const_diagmajor_iterator 
+        b.diagmajor_begin() const
+typename tmv::BandMatrix<T>::const_diagmajor_iterator 
+        b.diagmajor_end() const
+\end{tmvcode}
+These start at the beginning of the lowest subdiagonal in the band, and proceed up to the highest super-diagonal.
+
+\tt{DiagMatrix} is slightly different, since the elements are actually stored linearly in memory.  So its iterators are equivalent to the vector iterators of its diagonal:
+\begin{tmvcode}
+typename tmv::DiagMatrix<T>::iterator d.begin()
+typename tmv::DiagMatrix<T>::iterator d.end()
+typename tmv::DiagMatrix<T>::const_iterator d.begin() const
+typename tmv::DiagMatrix<T>::const_iterator d.end() const
+\end{tmvcode}
+
+The symmetric and hermitian matrix varieties do not have similar iterators.  The recommended way to iterate over their stored values is to use the \tt{upperTri()} or \tt{lowerTri()} methods\footnote{
+For \tt{SymBandMatrix} and \tt{HermBandMatrix} you would instead use \tt{upperBand()} and 
+\tt{lowerBand()}.
+} and iterate over those portions of the matrix directly.
+
+\subsection{Direct memory access}
+\index{Vector!Direct access to memory}
+\index{SmallVector!Direct access to memory}
+\index{Matrix!Direct access to memory}
+\index{DiagMatrix!Direct access to memory}
+\index{UpperTriMatrix!Direct access to memory}
+\index{BandMatrix!Direct access to memory}
+\index{SymMatrix!Direct access to memory}
+\index{SymBandMatrix!Direct access to memory}
+\label{DirectAccess}
+
+We provide methods for accessing the memory of a matrix or vector directly.
+This is especially useful for meshing the TMV objects with other libraries
+(such as BLAS or LAPACK).  But it can also be useful for writing some
+optimized code for a particular function.  
+
+The pointer to the start of the memory for a vector can be obtained by:
+\begin{tmvcode}
+T* v.ptr()
+const T* v.cptr() const
+\end{tmvcode}
+\index{Vector!Methods!ptr}
+\index{Vector!Methods!cptr}
+
+Using the direct memory access
+requires that you know the spacing of the elements in memory and
+(for views) whether the view is conjugated or not.  So we also provide:
+\begin{tmvcode}
+int v.step() const
+bool v.isconj() const
+\end{tmvcode}
+\index{Vector!Methods!step}
+\index{Vector!Methods!isconj}
+
+For matrices, the corresponding routines return the upper-left element
+of the matrix.  Note that for some matrices, (e.g. \tt{BandMatrix<T,DiagMatrix>}) 
+this is not necessarily the first element in memory.  We also need to know the 
+step size in both directions:
+\begin{tmvcode}
+T* m.ptr()
+const T* m.cptr() const
+int m.stepi() const
+int m.stepj() const
+bool m.isconj() const
+bool m.isrm() const
+bool m.iscm() const
+\end{tmvcode}
+\index{Matrix!Methods!ptr}
+\index{Matrix!Methods!cptr}
+\index{Matrix!Methods!stepi}
+\index{Matrix!Methods!stepj}
+\index{Matrix!Methods!isconj}
+\index{Matrix!Methods!isrm}
+\index{Matrix!Methods!iscm}
+\index{DiagMatrix!Methods!ptr}
+\index{DiagMatrix!Methods!cptr}
+\index{DiagMatrix!Methods!isconj}
+\index{UpperTriMatrix!Methods!ptr}
+\index{UpperTriMatrix!Methods!cptr}
+\index{UpperTriMatrix!Methods!stepi}
+\index{UpperTriMatrix!Methods!stepj}
+\index{UpperTriMatrix!Methods!isconj}
+\index{UpperTriMatrix!Methods!isrm}
+\index{UpperTriMatrix!Methods!iscm}
+\index{BandMatrix!Methods!ptr}
+\index{BandMatrix!Methods!cptr}
+\index{BandMatrix!Methods!stepi}
+\index{BandMatrix!Methods!stepj}
+\index{BandMatrix!Methods!isconj}
+\index{BandMatrix!Methods!isrm}
+\index{BandMatrix!Methods!iscm}
+\index{SymMatrix!Methods!ptr}
+\index{SymMatrix!Methods!cptr}
+\index{SymMatrix!Methods!stepi}
+\index{SymMatrix!Methods!stepj}
+\index{SymMatrix!Methods!isconj}
+\index{SymMatrix!Methods!isrm}
+\index{SymMatrix!Methods!iscm}
+\index{SymBandMatrix!Methods!ptr}
+\index{SymBandMatrix!Methods!cptr}
+\index{SymBandMatrix!Methods!stepi}
+\index{SymBandMatrix!Methods!stepj}
+\index{SymBandMatrix!Methods!isconj}
+\index{SymBandMatrix!Methods!isrm}
+\index{SymBandMatrix!Methods!iscm}
+The step in the ``down'' direction along a column is \tt{stepi}, and the step to 
+the ``right'' along a row is \tt{stepj}.
+The last two check if a matrix is \tt{RowMajor} or \tt{ColMajor} respectively.
+
+For band matrices, there are also:
+\begin{tmvcode}
+int m.diagstep() const
+bool m.isdm() const
+\end{tmvcode}
+\index{BandMatrix!Methods!diagstep}
+\index{BandMatrix!Methods!isdm}
+\index{SymBandMatrix!Methods!diagstep}
+\index{SymBandMatrix!Methods!isdm}
+which return the step along the diagonal and whether the matrix is \tt{DiagMajor}.
+
+For symmetric/hermitian matrices, there are some more methods:
+\begin{tmvcode}
+bool m.isherm()
+bool m.issym()
+bool m.isupper()
+\end{tmvcode}
+\index{SymMatrix!Methods!isherm}
+\index{SymMatrix!Methods!issym}
+\index{SymMatrix!Methods!isupper}
+\index{SymBandMatrix!Methods!isherm}
+\index{SymBandMatrix!Methods!issym}
+\index{SymBandMatrix!Methods!isupper}
+The first two both return \tt{true} for real symmetric matrices, but 
+differentiate between hermitian and symmetric varieties for complex types.
+The last one tells you whether the actual elements to be accessed are stored
+in the upper triangle half of the matrix (true) or the lower (false).
+
+\subsection{``Linear'' views}
+\label{LinearViews}
+
+Our matrices generally store the data contiguously in memory with all of the 
+methods like \tt{row} and \tt{col} returning the appropriate slice through the
+data.  Occasionally, though, it can be useful to treat the whole matrix
+as a single vector of elements.  We use this internally for implementing routines
+like \tt{setAllTo} and matrix addition, among others.  These are faster than
+accessing the data in ways that use the actual matrix structure.
+
+This kind of access may be useful for some users of the library, 
+so the following methods are available:
+\begin{tmvcode}
+tmv::VectorView<T> m.linearView()
+tmv::ConstVectorView<T> m.constLinearView()
+bool m.canLinearize()
+\end{tmvcode}
+\index{Matrix!View as a contiguous Vector}
+\index{Matrix!Methods!linearView}
+\index{Matrix!Methods!constLinearView}
+\index{Matrix!Methods!canLinearize}
+These return a view to the elements of a \tt{Matrix} as a single vector.  
+It is always allowed for an actual \tt{Matrix}.  For a \tt{MatrixView} 
+(or \tt{ConstMatrixView}), it is only allowed if all of the elements in the 
+view are in one contiguous block of memory.  The helper function 
+\tt{m.canLinearize()} returns whether or not the first two methods will work.
+
+The same methods are also defined for \tt{BandMatrix} (and corresponding views).
+In this case, there are a few elements in memory that are not necessarily
+defined, since they lie outside of the actual band structure, so some care
+should be used depending on the application of the returned vector views.  
+(For example, one cannot compute things like the
+minimum or maximum element this way, since the undefined elements may
+have very large or small values which would corrupt this calculation.)
+
+The triangular and symmetric matrices have too much memory that is not
+actually used by the matrix for these to be very useful, so we do not provide them.
+When we eventually implement the packed storage varieties, these methods will
+be provided for those.
+
+Along the same lines is another method for a \tt{Vector}:
+\begin{tmvcode}
+tmv::VectorView<RT> v.flatten()
+\end{tmvcode}
+\index{Vector!Methods!flatten}
+This returns a real view to the real and imaginary elements of a complex \tt{Vector}. 
+The initial \tt{Vector} is required to have unit step.  The returned view has twice the 
+length of \tt{v} and also has unit step.
+
+This probably isn't very useful for most users either, but it is useful internally,
+since it allows code such as:
+\begin{tmvcode}
+tmv::Vector<complex<double> > v(500);
+[...]
+v *= 2.3;
+\end{tmvcode}
+to call the BLAS routine \tt{dscal} with \tt{x=2.3}, rather than \tt{zscal}
+with \tt{x=complex<double>(2.3,0.0)}, which would be slower.
+

@@ -85,7 +85,7 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static PT call(const V1& v1, const V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             if (n == 0) return PT(0);
             else {
                 PT sum(0);
@@ -115,7 +115,7 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline PT call(const V1& v1, const V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static PT call2(const int n, IT1 it1, IT2 it2)
@@ -150,7 +150,7 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline PT call(const V1& v1, const V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static PT call2(const int n, IT1 it1, IT2 it2)
@@ -187,7 +187,7 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline PT call(const V1& v1, const V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static PT call2(const int n, IT1 it1, IT2 it2)
@@ -277,7 +277,7 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline double call(const V1& v1, const V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static double call2(int n, IT1 A, IT2 B)
@@ -333,7 +333,7 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline std::complex<double> call(const V1& v1, const V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static std::complex<double> call2(int n, IT1 A, IT2 B)
@@ -399,7 +399,7 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline std::complex<double> call(const V1& v1, const V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static std::complex<double> call2(int n, IT1 A, IT2 B)
@@ -464,7 +464,7 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline float call(const V1& v1, const V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static float call2(int n, IT1 A, IT2 B)
@@ -529,7 +529,7 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline std::complex<float> call(const V1& v1, const V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static std::complex<float> call2(int n, IT1 A, IT2 B)
@@ -603,7 +603,7 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline std::complex<float> call(const V1& v1, const V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static std::complex<float> call2(int n, IT1 A, IT2 B)
@@ -687,7 +687,7 @@ namespace tmv {
         typedef typename Traits<PT>::real_type RT;
         static inline PT call(const V1& v1, const V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
         static PT call2(const int n, const IT1& it1, const IT2& it2)

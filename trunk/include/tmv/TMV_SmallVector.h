@@ -231,7 +231,7 @@ namespace tmv {
         T cref(int i) const  { return itsv[i]; }
         T& ref(int i) { return itsv[i]; }
 
-        TMV_INLINE size_t size() const { return N; }
+        TMV_INLINE int size() const { return N; }
         TMV_INLINE int nElements() const { return N; }
         TMV_INLINE int step() const { return 1; }
         TMV_INLINE bool isconj() const { return false; }
@@ -346,13 +346,13 @@ namespace tmv {
         // Constructors
         //
 
-        ConstSmallVectorView(const T* v, size_t n, int s) : 
+        ConstSmallVectorView(const T* v, int n, int s) : 
             itsv(v), itssize(n), itsstep(s)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstSmallVectorView(const T* v, size_t n) : 
+        ConstSmallVectorView(const T* v, int n) : 
             itsv(v), itssize(n), itsstep(S) 
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -429,7 +429,7 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsv; }
         T cref(int i) const  { return DoConj<_conj>(itsv[i*step()]); }
 
-        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int size() const { return itssize; }
         TMV_INLINE int nElements() const { return itssize; }
         TMV_INLINE int step() const { return itsstep; }
         TMV_INLINE bool isconj() const { return _conj; }
@@ -566,13 +566,13 @@ namespace tmv {
         // Constructors
         //
 
-        SmallVectorView(T* v, size_t n, int s) :
+        SmallVectorView(T* v, int n, int s) :
             itsv(v), itssize(n), itsstep(s) 
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        SmallVectorView(T* v, size_t n) :
+        SmallVectorView(T* v, int n) :
             itsv(v), itssize(n), itsstep(S) 
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -634,7 +634,7 @@ namespace tmv {
         TMV_INLINE T* ptr() { return itsv; }
         reference ref(int i) { return reference(itsv[i*step()]); }
 
-        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int size() const { return itssize; }
         TMV_INLINE int nElements() const { return itssize; }
         TMV_INLINE int step() const { return itsstep; }
         TMV_INLINE bool isconj() const { return _conj; }

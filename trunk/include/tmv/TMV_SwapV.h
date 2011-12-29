@@ -42,7 +42,7 @@ namespace tmv {
         typedef typename V2::iterator IT2;
         static void call(V1& v1, V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             for(int i=0;i<n;++i) TMV_SWAP(v1.ref(i),v2.ref(i));
         }
         static void call2(int n, IT1 it1, IT2 it2)
@@ -57,7 +57,7 @@ namespace tmv {
         typedef typename V2::iterator IT2;
         static inline void call(V1& v1, V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             call2(n,v1.begin(),v2.begin());
         }
         static void call2(const int n, IT1 it1, IT2 it2)
@@ -91,7 +91,7 @@ namespace tmv {
         typedef typename V2::iterator IT2;
         static inline void call(V1& v1, V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             call2(n,v1.begin(),v2.begin());
         }
         static void call2(const int n, IT1 it1, IT2 it2)
@@ -158,7 +158,7 @@ namespace tmv {
         typedef typename V2::iterator IT2;
         static inline void call(V1& v1, V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             call2(n,v1.begin(),v2.begin());
         }
         static void call2(int n, IT1 it1, IT2 it2)
@@ -184,7 +184,7 @@ namespace tmv {
         typedef typename V2::iterator IT2;
         static inline void call(V1& v1, V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? int(v1.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v1.size() : s;
             call2(n,v1.begin(),v2.begin());
         }
         static void call2(int n, IT1 it1, IT2 it2)

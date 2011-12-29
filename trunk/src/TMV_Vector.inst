@@ -32,7 +32,7 @@ template void InstAliasCopy(const ConstVectorView<T >& v1, VectorView<CT > v2);
   template RT InstNormSq(const ConstVectorView<T >& v);  \
   template void InstSort(VectorView<T > v, ADType ad, CompType comp); \
   template void InstSort(VectorView<T > v, int* P, ADType ad, CompType comp); \
-  template void InstRead(std::istream& is, VectorView<T > v); \
+  template void InstRead(const TMV_Reader& reader, VectorView<T > v); \
 
 Def2(T,T)
 #ifdef TMV_INST_COMPLEX
@@ -53,9 +53,7 @@ Def3(FT,CT)
 
 #define Def4(RT,T,C) \
   template void InstWrite( \
-      std::ostream& os, const ConstVectorView<T,C>& v); \
-  template void InstWrite(std::ostream& os, \
-      const ConstVectorView<T,C>& v, RT thresh); \
+      const TMV_Writer& writer, const ConstVectorView<T,C>& v); \
 
 Def4(FT,T,NonConj)
 #ifdef TMV_INST_COMPLEX

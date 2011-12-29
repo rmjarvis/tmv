@@ -92,7 +92,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            const int n = size == TMV_UNKNOWN ? int(v3.size()) : size;
+            const int n = size == TMV_UNKNOWN ? v3.size() : size;
             for(int i=0;i<n;++i) 
                 v3.ref(i) = ZSum::sum(
                     ZProd<false,false>::prod(x1 , v1.cref(i)),
@@ -122,7 +122,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            const int n = size == TMV_UNKNOWN ? int(v3.size()) : size;
+            const int n = size == TMV_UNKNOWN ? v3.size() : size;
             call2(n,x1,v1.begin().nonConj(),x2,v2.begin().nonConj(),v3.begin());
         }
         static void call2(
@@ -162,7 +162,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            const int n = size == TMV_UNKNOWN ? int(v3.size()) : size;
+            const int n = size == TMV_UNKNOWN ? v3.size() : size;
             call2(n,x1,v1.begin().nonConj(),x2,v2.begin().nonConj(),v3.begin());
         }
         static void call2(
@@ -208,7 +208,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            const int n = size == TMV_UNKNOWN ? int(v3.size()) : size;
+            const int n = size == TMV_UNKNOWN ? v3.size() : size;
             call2(n,x1,v1.begin().nonConj(),x2,v2.begin().nonConj(),v3.begin());
         }
         static void call2(

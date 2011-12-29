@@ -52,13 +52,13 @@ namespace tmv
     {
     public:
         TMV_INLINE AlignedMemory() : p(0) {}
-        TMV_INLINE void allocate(const size_t n) 
+        TMV_INLINE void allocate(const int n) 
         {
             //std::cout<<"AlignedMemory allocate "<<n<<std::endl;
 #ifdef TMV_END_PADDING
-            const size_t nn = n + 16/sizeof(T);
+            const int nn = n + 16/sizeof(T);
             p = new T[nn];
-            for(size_t i=n;i<nn;++i) p[i] = T(0);
+            for(int i=n;i<nn;++i) p[i] = T(0);
 #else
             p = new T[n]; 
 #endif
@@ -84,14 +84,14 @@ namespace tmv
     {
     public:
         TMV_INLINE AlignedMemory() : p(0) {}
-        TMV_INLINE void allocate(const size_t n) 
+        TMV_INLINE void allocate(const int n) 
         {
             //std::cout<<"AlignedMemory float allocate "<<n<<std::endl;
 #ifdef TMV_END_PADDING
-            const size_t nn = (n<<2)+15 + 16;
+            const int nn = (n<<2)+15 + 16;
             p = new char[nn];
             float* pf = get();
-            for(size_t i=n;i<(nn>>2);++i) pf[i] = 0.F;
+            for(int i=n;i<(nn>>2);++i) pf[i] = 0.F;
 #else
             p = new char[(n<<2)+15];
 #endif
@@ -123,14 +123,14 @@ namespace tmv
     {
     public:
         TMV_INLINE AlignedMemory() : p(0) {}
-        TMV_INLINE void allocate(const size_t n) 
+        TMV_INLINE void allocate(const int n) 
         {
             //std::cout<<"AlignedMemory double allocate "<<n<<std::endl;
 #ifdef TMV_END_PADDING
-            const size_t nn = (n<<3)+15 + 16;
+            const int nn = (n<<3)+15 + 16;
             p = new char[nn];
             double* pd = get();
-            for(size_t i=n;i<(nn>>3);++i) pd[i] = 0.;
+            for(int i=n;i<(nn>>3);++i) pd[i] = 0.;
 #else
             p = new char[(n<<3)+15];
 #endif
@@ -202,7 +202,7 @@ namespace tmv
             _n = 0;
 #endif
         }
-        TMV_INLINE AlignedArray(const size_t n) 
+        TMV_INLINE AlignedArray(const int n) 
         {
             if (n > 0) p.allocate(n); 
 #ifdef TMV_INITIALIZE_NAN
@@ -233,7 +233,7 @@ namespace tmv
 #endif
             p.swapWith(rhs.p); 
         }
-        TMV_INLINE void resize(const size_t n) 
+        TMV_INLINE void resize(const int n) 
         {
 #ifdef TMV_INITIALIZE_NAN
             fill_with(-Traits<T>::destr_value());
@@ -247,7 +247,7 @@ namespace tmv
         }
 #ifdef TMV_INITIALIZE_NAN
         void fill_with(T x)
-        { for(size_t i=0;i<_n;++i) get()[i] = x; }
+        { for(int i=0;i<_n;++i) get()[i] = x; }
 #endif
 
         TMV_INLINE T* get() { return p.get(); }
@@ -257,7 +257,7 @@ namespace tmv
 
         AlignedMemory<T> p;
 #ifdef TMV_INITIALIZE_NAN
-        size_t _n;
+        int _n;
 #endif
 
         AlignedArray& operator=(AlignedArray& p2);
@@ -276,7 +276,7 @@ namespace tmv
             _n = 0;
 #endif
         }
-        TMV_INLINE AlignedArray(const size_t n) 
+        TMV_INLINE AlignedArray(const int n) 
         {
             if (n > 0) p.allocate(n<<1); 
 #ifdef TMV_INITIALIZE_NAN
@@ -294,7 +294,7 @@ namespace tmv
 
 #ifdef TMV_INITIALIZE_NAN
         void fill_with(std::complex<RT> x)
-        { for(size_t i=0;i<_n;++i) get()[i] = x; }
+        { for(int i=0;i<_n;++i) get()[i] = x; }
 #endif
 
         TMV_INLINE T& operator*() { return *get(); }
@@ -312,7 +312,7 @@ namespace tmv
 #endif
             p.swapWith(rhs.p); 
         }
-        TMV_INLINE void resize(const size_t n) 
+        TMV_INLINE void resize(const int n) 
         {
 #ifdef TMV_INITIALIZE_NAN
             fill_with(-Traits<RT>::destr_value());
@@ -333,7 +333,7 @@ namespace tmv
 
         AlignedMemory<RT> p;
 #ifdef TMV_INITIALIZE_NAN
-        size_t _n;
+        int _n;
 #endif
 
         AlignedArray& operator=(AlignedArray& p2);

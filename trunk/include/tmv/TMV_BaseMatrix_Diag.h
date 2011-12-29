@@ -19,10 +19,6 @@ namespace tmv {
     template <class M>
     class BaseMatrix_Diag_Mutable;
 
-    // Defined in TMV_DiagMatrixIO.h
-    template <class M>
-    inline void Read(std::istream& is, BaseMatrix_Diag_Mutable<M>& m);
-
     // Defined in InvertD.h
     template <class M1>
     inline void InvertSelf(BaseMatrix_Diag_Mutable<M1>& m1);
@@ -328,17 +324,6 @@ namespace tmv {
                 const_cast<value_type*>(cptr()),size(),step()); 
         }
 
-
-        //
-        // I/O
-        //
-
-        void writeCompact(std::ostream& os) const
-        { os << "D " << diag() << std::endl; }
-        void writeCompact(std::ostream& os, float_type thresh) const
-        { os << "D "; diag().write(os,thresh); os << std::endl; }
-
-
         //
         // Auxilliary routines
         //
@@ -359,9 +344,9 @@ namespace tmv {
         // class than this, or an infinite loop will result.
         // Also, cref, get_row and get_col from BaseMatrix.
 
-        TMV_INLINE size_t colsize() const { return mat().size(); }
-        TMV_INLINE size_t rowsize() const { return mat().size(); }
-        TMV_INLINE size_t size() const { return mat().size(); }
+        TMV_INLINE int colsize() const { return mat().size(); }
+        TMV_INLINE int rowsize() const { return mat().size(); }
+        TMV_INLINE int size() const { return mat().size(); }
         TMV_INLINE int nlo() const { return 0; }
         TMV_INLINE int nhi() const { return 0; }
         TMV_INLINE int step() const { return mat().step(); }
@@ -732,13 +717,6 @@ namespace tmv {
         { return base::nonConj(); }
 
         //
-        // I/O
-        //
-
-        TMV_INLINE void read(std::istream& is)
-        { tmv::Read(is,mat()); }
-
-        //
         // Auxilliary routines
         //
 
@@ -752,9 +730,9 @@ namespace tmv {
         // class than this, or an infinite loop will result when compiling.
         // Also, cref and cptr from above.
 
-        TMV_INLINE size_t colsize() const { return mat().size(); }
-        TMV_INLINE size_t rowsize() const { return mat().size(); }
-        TMV_INLINE size_t size() const { return mat().size(); }
+        TMV_INLINE int colsize() const { return mat().size(); }
+        TMV_INLINE int rowsize() const { return mat().size(); }
+        TMV_INLINE int size() const { return mat().size(); }
         TMV_INLINE int step() const { return mat().step(); }
 
         TMV_INLINE value_type* ptr() { return mat().ptr(); }

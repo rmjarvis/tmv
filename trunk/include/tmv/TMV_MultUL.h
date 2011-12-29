@@ -118,7 +118,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 11: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -182,7 +182,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 12: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -256,7 +256,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 13: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -312,7 +312,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 14: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -502,7 +502,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 
             const int sp1 = IntTraits<s>::Sp1;
             const int twosp1 = IntTraits<IntTraits<s>::twoS>::Sp1;
@@ -604,7 +604,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 21: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -664,7 +664,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 22: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -730,7 +730,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 23: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -785,7 +785,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 24: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -974,7 +974,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_UL
             std::cout<<"UL algo 27: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -1079,7 +1079,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UL
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
             std::cout<<"UL algo 83: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::value_type T1;
@@ -1099,8 +1099,8 @@ namespace tmv {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
 #ifdef PRINTALGO_UL
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
             std::cout<<"UL algo 85: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             typedef typename TypeSelect<M2::_upper,
@@ -1487,7 +1487,7 @@ namespace tmv {
                 TMV_OPT >= 1 ? 27 :
                 rcr ? 24 : rxr ? 22 : crx ? 23 : xcc ? 22 : 23;
 #ifdef PRINTALGO_UL
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
             std::cout<<"InlineMultUL: x = "<<ix<<"  "<<T(x)<<std::endl;
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
@@ -1541,7 +1541,7 @@ namespace tmv {
                 // similar to what is done in TMV_MultUL.cpp.
                 -4;
 #ifdef PRINTALGO_UL
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
             std::cout<<"InlineMultUL: x = "<<ix<<"  "<<T(x)<<std::endl;
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;

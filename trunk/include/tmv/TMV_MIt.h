@@ -298,7 +298,7 @@ namespace tmv {
         inline DMIt<M>& operator++() 
         {
             ++i; ++j;
-            if (i == int(m->colsize()) || j == int(m->rowsize())) {
+            if (i == m->colsize() || j == m->rowsize()) {
                 if (i > j) { i -= j+1; j = 0; }
                 else { j -= i-1; i = 0; }
             }
@@ -356,7 +356,7 @@ namespace tmv {
         inline CDMIt<M>& operator++() 
         {
             ++i; ++j;
-            if (i == int(m->colsize()) || j == int(m->rowsize())) {
+            if (i == m->colsize() || j == m->rowsize()) {
                 if (i > j) { i -= j+1; j = 0; }
                 else { j -= i-1; i = 0; }
             }

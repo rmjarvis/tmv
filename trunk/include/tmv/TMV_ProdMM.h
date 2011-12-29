@@ -84,9 +84,9 @@ namespace tmv {
         Matrix<typename M3::value_type> m3i = m3.mat();
         Matrix<typename M3::value_type> m3c = m3.mat();
         if (!add) m3c.setZero();
-        for(size_t i=0;i<m3.colsize();++i) {
-            for(size_t j=0;j<m3.rowsize();++j) {
-                for(size_t k=0;k<m1.rowsize();++k) {
+        for(int i=0;i<m3.colsize();++i) {
+            for(int j=0;j<m3.rowsize();++j) {
+                for(int k=0;k<m1.rowsize();++k) {
                     m3c.ref(i,j) += T(x) * m1i.cref(i,k) * m2i.cref(k,j);
                 }
             }
@@ -137,9 +137,9 @@ namespace tmv {
         Matrix<typename M1::value_type> m2i = m2.mat();
         Matrix<typename M1::value_type> m3 = m1.mat();
         m3.setZero();
-        for(size_t i=0;i<m3.colsize();++i) {
-            for(size_t j=0;j<m3.rowsize();++j) {
-                for(size_t k=0;k<m1.rowsize();++k) {
+        for(int i=0;i<m3.colsize();++i) {
+            for(int j=0;j<m3.rowsize();++j) {
+                for(int k=0;k<m1.rowsize();++k) {
                     m3.ref(i,j) += T(x) * m1i.cref(i,k) * m2i.cref(k,j);
                 }
             }
@@ -241,12 +241,12 @@ namespace tmv {
         TMV_INLINE const M1& getM1() const { return m1; }
         TMV_INLINE const M2& getM2() const { return m2; }
 
-        TMV_INLINE size_t colsize() const { return m1.colsize(); }
-        TMV_INLINE size_t rowsize() const { return m2.rowsize(); }
+        TMV_INLINE int colsize() const { return m1.colsize(); }
+        TMV_INLINE int rowsize() const { return m2.rowsize(); }
         TMV_INLINE int nlo() const 
-        { return TMV_MAX(TMV_MIN(int(colsize())-1,m1.nlo()+m2.nlo()),0); }
+        { return TMV_MAX(TMV_MIN(colsize()-1,m1.nlo()+m2.nlo()),0); }
         TMV_INLINE int nhi() const 
-        { return TMV_MAX(TMV_MIN(int(rowsize())-1,m1.nhi()+m2.nhi()),0); }
+        { return TMV_MAX(TMV_MIN(rowsize()-1,m1.nhi()+m2.nhi()),0); }
 
         value_type cref(int i, int j) const
         { return x * (m1.get_row(i) * m2.get_col(j)); }

@@ -41,8 +41,8 @@ namespace tmv {
     {
         static void call(M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
-            int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
+            int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
             typedef typename M1::col_type M1c;
             typedef typename M2::col_type M2c;
             typedef typename M1c::iterator IT1;
@@ -65,8 +65,8 @@ namespace tmv {
     {
         static void call(M1& m1, M2& m2)
         {
-            int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+            int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
             typedef typename M1::row_type M1r;
             typedef typename M2::row_type M2r;
             typedef typename M1r::iterator IT1;
@@ -389,7 +389,7 @@ namespace tmv {
     }
 
     template <class M1, class M2>
-    static TMV_INLINE void Swap(
+    TMV_INLINE void Swap(
         BaseMatrix_Rec_Mutable<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2)
     { DoSwap(m1,m2); }
 

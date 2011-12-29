@@ -33,15 +33,15 @@
 //
 // Access Functions:
 //
-//     size_t colsize() const
-//     size_t rowsize() const
+//     int colsize() const
+//     int rowsize() const
 //         Return the size of the matrix.
 //     
 //     const M& getQ() const
 //     const V& getBeta() const
 //         Return the component elements
 //
-//     size_t operator()(size_t i, size_t j) const
+//     int operator()(int i, int j) const
 //         This is required for BaseMatrix, but it's extremely inefficient
 //         for PackedQ.  (You basically need to construct the full Q
 //         matrix up to the j column.)
@@ -421,9 +421,9 @@ namespace tmv {
     {
         static void call(const M1& Q, const V1& beta, M2& m2)
         {
-            const int M = cs==TMV_UNKNOWN ? int(Q.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(Q.rowsize()) : rs;
-            const int K = xs==TMV_UNKNOWN ? int(m2.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? Q.rowsize() : rs;
+            const int K = xs==TMV_UNKNOWN ? m2.rowsize() : xs;
             typedef typename M1::value_type T;
             const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
             const int csrs = IntTraits2<cs,rs>::prod;
@@ -916,8 +916,8 @@ namespace tmv {
         // Auxilliary functions
         //
 
-        TMV_INLINE size_t colsize() const { return Q.colsize(); }
-        TMV_INLINE size_t rowsize() const { return Q.rowsize(); }
+        TMV_INLINE int colsize() const { return Q.colsize(); }
+        TMV_INLINE int rowsize() const { return Q.rowsize(); }
         TMV_INLINE int nlo() const { return TMV_MAX(colsize()-1,0); }
         TMV_INLINE int nhi() const { return TMV_MAX(rowsize()-1,0); }
 

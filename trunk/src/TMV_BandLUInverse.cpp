@@ -99,7 +99,7 @@ namespace tmv {
             cerr<<"LUInverse:\n";
             cerr<<"LUx = "<<LUx<<endl;
             cerr<<"p = ";
-            for(size_t i=0;i<LUx.colsize();i++) cerr<<p[i]<<" ";
+            for(int i=0;i<LUx.colsize();i++) cerr<<p[i]<<" ";
             cerr<<endl;
             cerr<<"PLU = "<<PLU<<endl;
             cerr<<"minv = "<<minv<<endl;

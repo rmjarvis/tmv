@@ -51,7 +51,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == TMV_UNKNOWN ? int(v3.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v3.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
@@ -80,7 +80,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
@@ -135,7 +135,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
@@ -188,7 +188,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
@@ -238,7 +238,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
@@ -294,7 +294,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
@@ -345,7 +345,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
@@ -391,7 +391,7 @@ namespace tmv {
                 IT3 C3 = C+3;
 
                 __m128 xx = _mm_set1_ps(float(x));
-                __m128 xA,xB,xC,x1;
+                __m128 xA,xB,xC;
                 do {
                     Maybe2<!unit3,unit1>::sse_load(
                         xA,A.get(),A1.get(),A2.get(),A3.get());
@@ -421,7 +421,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
@@ -481,7 +481,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
@@ -544,7 +544,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
@@ -609,7 +609,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == TMV_UNKNOWN ? int(v2.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)

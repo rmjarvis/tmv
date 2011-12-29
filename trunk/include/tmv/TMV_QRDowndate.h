@@ -77,9 +77,9 @@ namespace tmv {
     {
         static void call(M1& R, M2& A)
         {
-            const int N = rs == TMV_UNKNOWN ? int(R.size()) : rs;
+            const int N = rs == TMV_UNKNOWN ? R.size() : rs;
 #ifdef PRINTALGO_QR
-            const int M = cs == TMV_UNKNOWN ? int(A.colsize()) : cs;
+            const int M = cs == TMV_UNKNOWN ? A.colsize() : cs;
             std::cout<<"QRDowndate algo 11: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -136,9 +136,9 @@ namespace tmv {
     {
         static void call(M1& R, M2& A)
         {
-            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
+            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
             std::cout<<"QRDowndate algo 21: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -241,9 +241,9 @@ namespace tmv {
     inline void RecursiveQRDowndate(M1& R, M2& A, M3& Z, bool makeZ)
     {
         //const int cs = M2::_colsize;
-        //const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
+        //const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
         const int rs = Sizes<M2::_rowsize,M1::_size>::size;
-        const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
+        const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
 
         typedef typename M1::value_type T;
         typedef typename M1::real_type RT;
@@ -349,8 +349,8 @@ namespace tmv {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRDowndate algo 22: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -461,9 +461,9 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
 
-            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
-            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
             std::cout<<"QRDowndate algo 27: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -491,8 +491,8 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
 
-            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
-            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRDowndate algo 31: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;

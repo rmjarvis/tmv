@@ -41,10 +41,10 @@
 //
 // Constructors:
 //
-//    Permutation(size_t n)
+//    Permutation(int n)
 //        Make an identity Permutation of size n.
 //
-//    Permutation(size_t n, const int* pp, bool isinv, int det)
+//    Permutation(int n, const int* pp, bool isinv, int det)
 //        Make a Permutation P from array pp.
 //        If isinv = false, then the swaps are applied in order from the 
 //        left to the rows of m.  If isinv = true, then in reverse order.
@@ -53,9 +53,9 @@
 //
 // Access Functions
 //
-//    size_t size() const
-//    size_t colsize() const
-//    size_t rowsize() const
+//    int size() const
+//    int colsize() const
+//    int rowsize() const
 //        Return the size of the Permutation.  
 //        Since P is a square matrix, all three of these return the same value.
 //
@@ -65,7 +65,7 @@
 //    bool isInverse() const
 //        Return whether the storage order is inverted.
 //
-//    size_t operator()(size_t i, size_t j) const
+//    int operator()(int i, int j) const
 //        Returns the (i,j) element of P (always either 1 or 0).
 //
 //
@@ -104,12 +104,18 @@
 //
 // I/O: 
 //
-//    p.writeCompact(os) const;
-//        Writes p to ostream os in vector format:
-//          size ( p(0) p(1) p(2) ... p(n-1) )
+//    os << p;
+//        Write p in the same format as a Matrix<int>
 //
-//    p.Write(os)
-//        Write p as a Matrix<int>
+//    os << tmv::CompactIO() << p;
+//        Writes p to ostream os in vector format:
+//          P size inv ( p(0) p(1) p(2) ... p(n-1) )
+//
+//    is >> tmv::CompactIO() >> p;
+//        Read p in the compact format.
+//        It is not possible to read in a permutation that was written
+//        using the normal format.
+//
 //
 // Operators:
 //       Here we use p for a Permutation, m for a Matrix and v for a Vector
@@ -137,6 +143,7 @@
 
 #include "TMV_BaseMatrix_Rec.h"
 #include "TMV_Array.h"
+#include "TMV_IOStyle.h"
 
 namespace tmv {
 
@@ -176,17 +183,24 @@ namespace tmv {
         // Constructors
         //
 
-        explicit Permutation(size_t n=0) :
+        explicit Permutation(int n=0) :
             itsn(n), itsmem(n), itsp(itsmem), isinv(false), itsdet(1) 
-        { for(int i=0;i<itsn;++i) itsmem[i] = i; }
+        {
+            TMVAssert(n >= 0);
+            for(int i=0;i<itsn;++i) itsmem[i] = i; 
+        }
 
-        Permutation(size_t n, const int* p, bool _isinv, int d) :
-            itsn(n), itsp(p), isinv(_isinv), itsdet(d) {}
+        Permutation(int n, const int* p, bool _isinv, int d) :
+            itsn(n), itsp(p), isinv(_isinv), itsdet(d) 
+        { TMVAssert(n >= 0); }
 
         // if det is unknown, calculate it now.
-        Permutation(size_t n, const int* p, bool _isinv=false) :
+        Permutation(int n, const int* p, bool _isinv=false) :
             itsn(n), itsp(p), isinv(_isinv), itsdet(1) 
-        { calcDet(); }
+        {
+            TMVAssert(n >= 0);
+            calcDet(); 
+        }
 
         Permutation(const Permutation& rhs) :
             itsn(rhs.itsn), itsp(rhs.itsp),
@@ -402,32 +416,6 @@ namespace tmv {
 
 
         //
-        // I/O
-        //
-
-        void write(std::ostream& os) const
-        {
-            AlignedArray<int> temp(itsn);
-            makeIndex(temp.get());
-            os<<itsn<<"  "<<itsn<<std::endl;
-            for(int i=0;i<itsn;++i) {
-                os << "( ";
-                for(int j=0;j<itsn;++j)
-                    os<<' '<<(temp[i]==j ? 1 : 0)<<' ';
-                os << " )\n";
-            }
-        }
-
-        void writeCompact(std::ostream& os) const
-        {
-            os<<"P "<<itsn<<" "<<isinv<<" (";
-            for(int i=0;i<itsn;++i) os<<' '<<itsp[i]<<' ';
-            os << ")";
-        }
-
-        void read(std::istream& is);
-
-        //
         // Apply permutation to a vector
         //
         
@@ -466,6 +454,10 @@ namespace tmv {
         //
         // Friend functions that can act on a mutable Permutation.
         //
+
+        // Defined below.
+        friend inline std::istream& operator>>(
+            const TMV_Reader& reader, Permutation& p);
 
         friend void Swap(Permutation& p1, Permutation& p2)
         {
@@ -555,9 +547,10 @@ namespace tmv {
         // Auxilliary functions
         //
 
-        void resize(size_t n)
+        void resize(int n)
         {
-            if (int(n) > itsn) {
+            TMVAssert(n >= 0);
+            if (n > itsn) {
                 itsmem.resize(n);
                 itsp = itsmem.get();
             }
@@ -566,11 +559,11 @@ namespace tmv {
             itsdet = 1;
         }
 
-        TMV_INLINE size_t size() const { return itsn; }
-        TMV_INLINE size_t colsize() const { return itsn; }
+        TMV_INLINE int size() const { return itsn; }
+        TMV_INLINE int colsize() const { return itsn; }
         TMV_INLINE int nlo() const { return TMV_MAX(itsn-1,0); }
         TMV_INLINE int nhi() const { return TMV_MAX(itsn-1,0); }
-        TMV_INLINE size_t rowsize() const { return itsn; }
+        TMV_INLINE int rowsize() const { return itsn; }
         TMV_INLINE const int* getValues() const { return itsp; }
         TMV_INLINE bool isInverse() const { return isinv; }
 
@@ -676,8 +669,44 @@ namespace tmv {
     { return m.logDet(); }
 
     inline std::ostream& operator<<(
-        std::ostream& os, const Permutation& p)
-    { p.write(os); return os; }
+        const TMV_Writer& writer, const Permutation& p)
+    {
+        const int N = p.size();
+        writer.begin();
+        writer.writeCode("P");
+        writer.writeSize(N);
+        writer.writeSimpleSize(N);
+        writer.writeFullSize(p.isInverse());
+        writer.writeStart();
+
+        if (writer.isCompact()) {
+            writer.writeLParen();
+            for(int i=0;i<N;++i) {
+                if (i > 0) writer.writeSpace();
+                writer.writeValue(p.getValues()[i]);
+            }
+            writer.writeRParen();
+        } else {
+            AlignedArray<int> temp(N);
+            p.makeIndex(temp.get());
+            for(int i=0;i<N;++i) {
+                writer.writeLParen();
+                for(int j=0;j<N;++j) {
+                    if (j>0) writer.writeSpace();
+                    writer.writeValue(temp[i]==j ? 1 : 0);
+                }
+                writer.writeRParen();
+                if (i < N-1) writer.writeRowEnd();
+            }
+        }
+
+        writer.writeFinal();
+        writer.end();
+        return writer.getos();
+    }
+
+    inline std::ostream& operator<<(std::ostream& os, const Permutation& p)
+    { return os << IOStyle() << p; }
 
 
 #ifndef TMV_NO_THROWW
@@ -687,44 +716,43 @@ namespace tmv {
     public :
         Permutation m;
         int i;
-        char exp,got;
-        size_t n;
+        std::string exp,got;
+        int n;
         bool is, iseof, isbad;
 
-        PermutationReadError(
-            int _i, const Permutation& _m, std::istream& _is
-        ) throw() :
-            ReadError("Permutation."),
-            m(_m), i(_i), exp(0), got(0),
-            n(_m.size()), is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         PermutationReadError(std::istream& _is) throw() :
             ReadError("Permutation."),
-            i(0), exp(0), got(0), n(0),
+            i(0), n(0), is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        PermutationReadError(
+            std::istream& _is,
+            const std::string& _e, const std::string& _g) throw() :
+            ReadError("Permutation."),
+            i(0), exp(_e), got(_g), n(0),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+
+        PermutationReadError(
+            const Permutation& _m, std::istream& _is, int _n) throw() :
+            ReadError("Permutation."),
+            m(_m), i(0), n(_n),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         PermutationReadError(
-            int _i, const Permutation& _m,
-            std::istream& _is, char _e, char _g
-        ) throw() :
+            int _i, const Permutation& _m, std::istream& _is) throw() :
             ReadError("Permutation."),
-            m(_m), i(_i), exp(_e), got(_g),
-            n(_m.size()), is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        PermutationReadError(std::istream& _is, char _e, char _g) throw() :
-            ReadError("Permutation."),
-            i(0), exp(_e), got(_g),
-            n(0), is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+            m(_m), i(_i), n(_m.size()),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         PermutationReadError(
-            const Permutation& _m, std::istream& _is, size_t _n
-        ) throw() :
+            int _i, const Permutation& _m, std::istream& _is,
+            const std::string& _e, const std::string& _g) throw() :
             ReadError("Permutation."),
-            m(_m), i(0), exp(0), got(0),
-            n(_n), is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+            m(_m), i(_i), exp(_e), got(_g), n(_m.size()),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
         PermutationReadError(const PermutationReadError& rhs) :
-            m(rhs.m), i(rhs.i), exp(rhs.exp), got(rhs.got),
-            n(rhs.n), is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) {}
-        virtual ~PermutationReadError() throw() {}
+            m(rhs.m), i(rhs.i), exp(rhs.exp), got(rhs.got), n(rhs.n),
+            is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) {}
+        ~PermutationReadError() throw() {}
 
-        virtual void write(std::ostream& os) const throw()
+        void write(std::ostream& os) const throw()
         {
             os<<"TMV Read Error: Reading istream input for Permutation\n";
             if (exp != got) {
@@ -746,96 +774,124 @@ namespace tmv {
                 os<<"The portion of the Permutation which was successfully "
                     "read is: \n";
                 os<<"( ";
-                for(int k=0;k<i;++k)
-                    os<<' '<<m.getValues()[k]<<' ';
+                for(int k=0;k<i;++k) os<<' '<<m.getValues()[k]<<' ';
                 os<<" )\n";
             }
         }
     };
 #endif
 
-    inline void Permutation::read(std::istream& is)
+    inline std::istream& operator>>(const TMV_Reader& reader, Permutation& p)
     {
-        allocateMem();
-        int _inv;
-        is >> _inv;
-        if (!is) {
-#ifdef TMV_NO_THROWW
-            std::cerr<<"Permutation Read Error !is \n";
+        std::string exp,got;
+        int temp;
+        if (!reader.readCode("P",exp,got)) {
+#ifdef NOTHROW
+            std::cerr<<"Permutation Read Error: "<<got<<" != "<<exp<<std::endl;
             exit(1);
 #else
-            throw PermutationReadError(is);
+            throw PermutationReadError(reader.getis(),exp,got);
 #endif
         }
-        isinv = _inv;
-        char paren;
-        is >> paren;
-        if (!is || paren != '(') {
-#ifdef TMV_NO_THROWW
-            std::cerr<<"Permutation ReadError: "<<paren<<" != (\n";
+        int n=p.size();
+        if (!reader.readSize(n)) {
+#ifdef NOTHROW
+            std::cerr<<"Permutation Read Error: reading size\n";
             exit(1);
 #else
-            throw PermutationReadError(0,*this,is,'(',is?paren:'(');
+            throw PermutationReadError(reader.getis());
 #endif
         }
-        for(int i=0;i<itsn;++i) {
-            is >> itsmem[i];
-            if (!is) {
-#ifdef TMV_NO_THROWW
-                std::cerr<<"Permutation ReadError: !is \n";
+        if (n != p.size()) p.resize(n);
+        n=p.size();
+        if (!reader.readSimpleSize(n)) {
+#ifdef NOTHROW
+            std::cerr<<"Permutation Read Error: reading size\n";
+            exit(1);
+#else
+            throw PermutationReadError(reader.getis());
+#endif
+        }
+        if (n != p.size()) {
+#ifdef NOTHROW
+            std::cerr<<"Permutation Read Error: wrong size\n";
+            exit(1);
+#else
+            throw PermutationReadError(p,reader.getis(),n);
+#endif
+        }
+        p.allocateMem();
+
+        if (!reader.readFullSize(temp)) {
+#ifdef NOTHROW
+            std::cerr<<"Permutation Read Error: reading inv\n";
+            exit(1);
+#else
+            throw PermutationReadError(reader.getis());
+#endif
+        }
+        p.isinv = temp;
+        TMVAssert(reader.isCompact() &&
+                  "NonCompact Read is not supported for Permutation");
+
+        if (!reader.readStart(exp,got)) {
+#ifdef NOTHROW
+            std::cerr<<"Permutation Read Error: "<<got<<" != "<<exp<<std::endl;
+            exit(1);
+#else
+            throw PermutationReadError(0,p,reader.getis(),exp,got);
+#endif
+        }
+        if (!reader.readLParen(exp,got)) {
+#ifdef NOTHROW
+            std::cerr<<"Permutation Read Error: "<<got<<" != "<<exp<<std::endl;
+            exit(1);
+#else
+            throw PermutationReadError(0,p,reader.getis(),exp,got);
+#endif
+        }
+        for(int i=0;i<n;++i) {
+            if (i>0 && !reader.readSpace(exp,got)) {
+#ifdef NOTHROW
+                std::cerr<<"Permutation ReadError: "<<got<<" != "<<exp<<std::endl;
                 exit(1);
 #else
-                throw PermutationReadError(i,*this,is);
+                throw PermutationReadError(i,p,reader.getis(),exp,got);
 #endif
             }
+            if (!reader.readValue(temp)) {
+#ifdef NOTHROW
+                std::cerr<<"Permutation ReadError: reading value\n";
+                exit(1);
+#else
+                throw PermutationReadError(i,p,reader.getis());
+#endif
+            }
+            p.itsmem[i] = temp;
         }
-        is >> paren;
-        if (!is || paren != ')') {
-#ifdef TMV_NO_THROWW
-            std::cerr<<"Permutation ReadError: "<<paren<<" != )\n";
+        if (!reader.readRParen(exp,got)) {
+#ifdef NOTHROW
+            std::cerr<<"Permutation Read Error: "<<got<<" != "<<exp<<std::endl;
             exit(1);
 #else
-            throw PermutationReadError(size(),*this,is,')',is?paren:')');
+            throw PermutationReadError(n,p,reader.getis(),exp,got);
 #endif
         }
-        calcDet();
+        if (!reader.readFinal(exp,got)) {
+#ifdef NOTHROW
+            std::cerr<<"Permutation Read Error: "<<got<<" != "<<exp<<std::endl;
+            exit(1);
+#else
+            throw PermutationReadError(n,p,reader.getis(),exp,got);
+#endif
+        }
+
+        p.calcDet();
+        return reader.getis();
     }
 
     inline std::istream& operator>>(std::istream& is, Permutation& m)
-    {
-        char p;
-        is >> p;
-        if (!is) {
-#ifdef TMV_NO_THROWW
-            std::cerr<<"Permutation Read Error !is \n";
-            exit(1);
-#else
-            throw PermutationReadError(is);
-#endif
-        }
-        if (p != 'P') {
-#ifdef TMV_NO_THROWW
-            std::cerr<<"Permutation Read Error "<<p<<" != P\n";
-            exit(1);
-#else
-            throw PermutationReadError(is,'P',p);
-#endif
-        }
-        size_t n;
-        is >> n;
-        if (!is) {
-#ifdef TMV_NO_THROWW
-            std::cerr<<"Permutation Read Error !is \n";
-            exit(1);
-#else
-            throw PermutationReadError(is);
-#endif
-        }
-        m.resize(n);
-        m.read(is);
-        return is;
-    }
-
+    { return is >> IOStyle() >> m; }
 
     // 
     // Vector::sort 

@@ -303,7 +303,7 @@ namespace tmv {
             TMVAssert(!SameStorage(v1,v2));
             TMVStaticAssert(!V1::_conj);
             TMVStaticAssert(!V2::_conj);
-            int N = size == TMV_UNKNOWN ? int(v2.size()) : size;
+            int N = size == TMV_UNKNOWN ? v2.size() : size;
 
             typedef typename V1::iterator IT1;
             typedef typename V2::iterator IT2;
@@ -334,7 +334,7 @@ namespace tmv {
             TMVAssert(!SameStorage(v1,v2));
             TMVStaticAssert(!V1::_conj);
             TMVStaticAssert(!V2::_conj);
-            const int N = size == TMV_UNKNOWN ? int(v2.size()) : size;
+            const int N = size == TMV_UNKNOWN ? v2.size() : size;
             int N_2 = (N >> 1);
             const int N_x = N - (N_2 << 1);
 
@@ -376,7 +376,7 @@ namespace tmv {
             TMVAssert(!SameStorage(v1,v2));
             TMVStaticAssert(!V1::_conj);
             TMVStaticAssert(!V2::_conj);
-            const int N = size == TMV_UNKNOWN ? int(v2.size()) : size;
+            const int N = size == TMV_UNKNOWN ? v2.size() : size;
             int N_4 = (N >> 2);
             int N_x = N - (N_4 << 2);
 

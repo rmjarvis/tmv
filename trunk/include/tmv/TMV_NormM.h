@@ -93,7 +93,7 @@ namespace tmv {
 #ifdef PRINTALGO_NormM
             std::cout<<"SumElementsM algo 11: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int N = (rs == TMV_UNKNOWN ? int(m.rowsize()) : rs);
+            const int N = (rs == TMV_UNKNOWN ? m.rowsize() : rs);
             typedef typename M1::const_col_type Mc;
             ret sum(0);
             for(int j=0;j<N;++j) {
@@ -114,7 +114,7 @@ namespace tmv {
 #ifdef PRINTALGO_NormM
             std::cout<<"SumElementsM algo 12: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int M = (cs == TMV_UNKNOWN ? int(m.colsize()) : cs);
+            const int M = (cs == TMV_UNKNOWN ? m.colsize() : cs);
             typedef typename M1::const_row_type Mr;
             ret sum(0);
             for(int i=0;i<M;++i) {
@@ -599,7 +599,7 @@ namespace tmv {
             std::cout<<"MaxAbsElementM algo 11: "<<TMV_Text(comp)<<std::endl;
 #endif
             typedef typename M1::const_col_type Mc;
-            const int N = (rs == TMV_UNKNOWN ? int(m.rowsize()) : rs);
+            const int N = (rs == TMV_UNKNOWN ? m.rowsize() : rs);
             ret max(0);
             for(int j=0;j<N;++j) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,Mc>::call(
@@ -621,7 +621,7 @@ namespace tmv {
             std::cout<<"MaxAbsElementM algo 12: "<<TMV_Text(comp)<<std::endl;
 #endif
             typedef typename M1::const_row_type Mr;
-            const int M = (cs == TMV_UNKNOWN ? int(m.colsize()) : cs);
+            const int M = (cs == TMV_UNKNOWN ? m.colsize() : cs);
             ret max(0);
             for(int i=0;i<M;++i) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,Mr>::call(
@@ -644,7 +644,7 @@ namespace tmv {
 #endif
             typedef typename M1::const_col_type Mc;
             typedef tmv::Vector<ret> V;
-            const int N = (rs == TMV_UNKNOWN ? int(m.rowsize()) : rs);
+            const int N = (rs == TMV_UNKNOWN ? m.rowsize() : rs);
             if (N == 0) return ret(0);
             else {
                 V temp(N);
@@ -669,7 +669,7 @@ namespace tmv {
 #endif
             typedef typename M1::const_row_type Mr;
             typedef tmv::Vector<ret> V;
-            const int M = (cs == TMV_UNKNOWN ? int(m.colsize()) : cs);
+            const int M = (cs == TMV_UNKNOWN ? m.colsize() : cs);
             if (M == 0) return ret(0);
             else {
                 V temp(M);
@@ -873,7 +873,7 @@ namespace tmv {
 #ifdef PRINTALGO_NormM
             std::cout<<"Norm1M algo 1: "<<std::endl;
 #endif
-            const int N = (rs == TMV_UNKNOWN ? int(m.rowsize()) : rs);
+            const int N = (rs == TMV_UNKNOWN ? m.rowsize() : rs);
             RT max(0);
             for(int j=0;j<N;++j) {
                 RT temp = InlineSumAbsElements(m.get_col(j));
@@ -893,8 +893,8 @@ namespace tmv {
 #ifdef PRINTALGO_NormM
             std::cout<<"Norm1M algo 12: "<<std::endl;
 #endif
-            int M = (cs == TMV_UNKNOWN ? int(m.colsize()) : cs);
-            int N = (rs == TMV_UNKNOWN ? int(m.rowsize()) : rs);
+            int M = (cs == TMV_UNKNOWN ? m.colsize() : cs);
+            int N = (rs == TMV_UNKNOWN ? m.rowsize() : rs);
             if (M == 0 || N == 0) return RT(0);
 
             if (M <= 8) return Norm1M_Helper<11,cs,rs,M1>::call(m);

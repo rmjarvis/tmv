@@ -26,8 +26,8 @@ namespace tmv {
     {
         static void call(M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
             const int xx = TMV_UNKNOWN;
             typedef typename M1::col_sub_type M1c;
             typedef typename M2::col_sub_type M2c;
@@ -72,8 +72,8 @@ namespace tmv {
     {
         static void call(M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
             const int xx = TMV_UNKNOWN;
             typedef typename M1::row_sub_type M1r;
             typedef typename M2::row_sub_type M2r;
@@ -118,8 +118,8 @@ namespace tmv {
     {
         static void call(M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
             const int xx = TMV_UNKNOWN;
             typedef typename M1::diag_sub_type M1d;
             typedef typename M2::diag_sub_type M2d;

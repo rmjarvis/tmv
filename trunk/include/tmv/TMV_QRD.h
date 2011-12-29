@@ -347,8 +347,8 @@ namespace tmv {
         // const QRD<M>& can release the memory.
         mutable std::auto_ptr<QRD_Impl<small,M> > pimpl;
 
-        size_t colsize() const;
-        size_t rowsize() const;
+        int colsize() const;
+        int rowsize() const;
 
         // op= not allowed.
         QRD<M>& operator=(const QRD<M>&);
@@ -642,7 +642,7 @@ namespace tmv {
                 istrans ? A.colsize() : A.rowsize() ,  // rowsize
                 inplace ? (istrans ? A.stepi() : A.stepj()) : 1 , // stepi
                 ( inplace ? (istrans ? A.stepj() : A.stepi()) : 
-                  int(istrans ? A.rowsize() : A.colsize()) ) // stepj
+                  (istrans ? A.rowsize() : A.colsize()) ) // stepj
             ),
             beta(istrans ? A.colsize() : A.rowsize())
             {
@@ -669,7 +669,7 @@ namespace tmv {
                 istrans ? A.rowsize() : A.colsize() ,  // colsize
                 istrans ? A.colsize() : A.rowsize() ,  // rowsize
                 1 , // stepi
-                int(istrans ? A.rowsize() : A.colsize()) // stepj
+                (istrans ? A.rowsize() : A.colsize()) // stepj
             ),
             beta(istrans ? A.colsize() : A.rowsize())
             {
@@ -926,11 +926,11 @@ namespace tmv {
     }
 
     template <class M>
-    size_t QRD<M>::colsize() const
+    int QRD<M>::colsize() const
     { return pimpl->istrans ? pimpl->QRx.rowsize() : pimpl->QRx.colsize(); }
 
     template <class M>
-    size_t QRD<M>::rowsize() const
+    int QRD<M>::rowsize() const
     { return pimpl->istrans ? pimpl->QRx.colsize() : pimpl->QRx.rowsize(); }
 
 

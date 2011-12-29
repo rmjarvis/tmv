@@ -110,7 +110,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m3.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m3.size() : s;
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 11: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -157,7 +157,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m3.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m3.size() : s;
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 12: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -205,7 +205,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m3.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m3.size() : s;
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 13: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -324,7 +324,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UU
-            const int N = s==TMV_UNKNOWN ? int(m3.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m3.size() : s;
             std::cout<<"UU algo 16: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             Unroller<0,s>::unroll(x,m1,m2,m3); 
@@ -374,7 +374,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m3.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m3.size() : s;
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 17: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -466,7 +466,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m3.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m3.size() : s;
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 21: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -513,7 +513,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m3.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m3.size() : s;
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 22: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -561,7 +561,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m3.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m3.size() : s;
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 23: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -729,7 +729,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==TMV_UNKNOWN ? int(m3.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m3.size() : s;
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 27: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -854,7 +854,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UU
-            const int N = s == TMV_UNKNOWN ? int(m3.size()) : s;
+            const int N = s == TMV_UNKNOWN ? m3.size() : s;
             std::cout<<"UU algo 83: N,s,x = "<<N<< ','<<s<<','<<T(x)<<std::endl;
 #endif
             typedef typename Traits<T>::real_type RT;
@@ -1163,7 +1163,7 @@ namespace tmv {
                 // TODO: Add checks for bad majority on m1,m2,m3.
                 -4;
 #ifdef PRINTALGO_UU
-            const int N = s==TMV_UNKNOWN ? int(m3.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m3.size() : s;
             std::cout<<"InlineMultUU: x = "<<ix<<"  "<<T(x)<<std::endl;
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;

@@ -674,12 +674,12 @@ namespace tmv {
         TMVAssert(m3.rowsize() == m1.rowsize());
         typename BMVO<M3>::b b3 = BandMatrixViewOf(m3,m1.nlo(),m1.nhi());
         MultMM<add>(x,m1,m2,b3);
-        if (m1.nlo() < int(m1.colsize())-1)
+        if (m1.nlo() < m1.colsize()-1)
             Maybe<!add>::zero2(
                 BandMatrixViewOf(
                     m3.cRowRange(m1.nlo()+1,m1.colsize()),
                     m1.colsize()-m1.nlo()-2,0));
-        if (m1.nhi() < int(m1.rowsize())-1)
+        if (m1.nhi() < m1.rowsize()-1)
             Maybe<!add>::zero2(
                 BandMatrixViewOf(
                     m3.cColRange(m1.nhi()+1,m1.rowsize()),
@@ -697,12 +697,12 @@ namespace tmv {
         TMVAssert(m3.rowsize() == m2.rowsize());
         typename BMVO<M3>::b b3 = BandMatrixViewOf(m3,m2.nlo(),m2.nhi());
         MultMM<add>(x,m1,m2,b3);
-        if (m2.nlo() < int(m2.colsize())-1)
+        if (m2.nlo() < m2.colsize()-1)
             Maybe<!add>::zero2(
                 BandMatrixViewOf(
                     m3.cRowRange(m2.nlo()+1,m2.colsize()),
                     m2.colsize()-m2.nlo()-2,0));
-        if (m2.nhi() < int(m2.rowsize())-1)
+        if (m2.nhi() < m2.rowsize()-1)
             Maybe<!add>::zero2(
                 BandMatrixViewOf(
                     m3.cColRange(m2.nhi()+1,m2.rowsize()),
@@ -728,7 +728,7 @@ namespace tmv {
         TMVAssert(lo == 0);
         typename BMVOTri<M2>::b b3 = BandMatrixViewOf(m3,hi);
         MultMM<add>(x,m1,m2,b3);
-        if (hi < int(m3.size())-1)
+        if (hi < m3.size()-1)
             Maybe<!add>::zero2(m3.offDiag(hi+1));
     }
 
@@ -747,7 +747,7 @@ namespace tmv {
         TMVAssert(lo == 0);
         typename BMVOTri<M2>::b b3 = BandMatrixViewOf(m3,hi);
         MultMM<add>(x,m1,m2,b3);
-        if (hi < int(m3.size())-1)
+        if (hi < m3.size()-1)
             Maybe<!add>::zero2(m3.offDiag(hi+1));
     }
 

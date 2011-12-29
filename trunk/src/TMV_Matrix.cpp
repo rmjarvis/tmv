@@ -594,34 +594,20 @@ namespace tmv {
 
     template <class T, int C>
     void InstWrite(
-        std::ostream& os, const ConstMatrixView<T,C>& m)
+        const TMV_Writer& writer, const ConstMatrixView<T,C>& m)
     {
-        if (m.iscm()) InlineWrite(os,m.cmView());
-        else if (m.isrm()) InlineWrite(os,m.rmView());
-        else InlineWrite(os,m);
-    }
-
-    template <class T, int C>
-    void InstWrite(
-        std::ostream& os, const ConstMatrixView<T,C>& m,
-        typename ConstMatrixView<T>::float_type thresh)
-    {
-        if (m.iscm()) InlineWrite(os,m.cmView(),thresh);
-        else if (m.isrm()) InlineWrite(os,m.rmView(),thresh);
-        else InlineWrite(os,m,thresh);
+        if (m.isrm()) InlineWrite(writer,m.rmView());
+        else InlineWrite(writer,m);
     }
 
     template <class T>
-    void InstRead(std::istream& is, MatrixView<T> m)
+    void InstRead(const TMV_Reader& reader, MatrixView<T> m)
     {
-        if (m.iscm()) {
-            MatrixView<T,ColMajor> mcm = m.cmView();
-            InlineRead(is,mcm);
-        } else if (m.isrm()) {
+        if (m.isrm()) {
             MatrixView<T,RowMajor> mrm = m.rmView();
-            InlineRead(is,mrm);
+            InlineRead(reader,mrm);
         } else 
-            InlineRead(is,m);
+            InlineRead(reader,m);
     }
 
     //

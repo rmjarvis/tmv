@@ -38,7 +38,7 @@ namespace tmv {
         const T3 x1, const ConstVectorView<T1,C1>& v1,
         const T3 x2, const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
     {
-#ifdef BLAS
+#if (defined(BLAS) || TMV_OPT <= 2)
         InstMultXV(x1,v1,v3);
         InstAddMultXV(x2,v2,v3);
 #else

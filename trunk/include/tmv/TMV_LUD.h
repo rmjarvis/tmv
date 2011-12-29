@@ -219,8 +219,8 @@ namespace tmv {
         // const LUD<M>& can relase the memory.
         mutable std::auto_ptr<LUD_Impl<small,M> > pimpl;
 
-        size_t colsize() const;
-        size_t rowsize() const;
+        int colsize() const;
+        int rowsize() const;
 
         // op= not allowed.
         LUD<M>& operator=(const LUD<M>&);
@@ -488,7 +488,7 @@ namespace tmv {
                 1 ,  // stepi
                 // Here we do need to check istrans for the right step.
                 ( inplace ? (istrans ? A.stepi() : A.stepj()) :
-                  int(A.rowsize()) ) // stepj
+                  A.rowsize() ) // stepj
             ),
             // allocate memory for the permutation
             P(A.rowsize())
@@ -749,11 +749,11 @@ namespace tmv {
     }
 
     template <class M>
-    size_t LUD<M>::colsize() const
+    int LUD<M>::colsize() const
     { return pimpl->LUx.colsize(); }
 
     template <class M>
-    size_t LUD<M>::rowsize() const
+    int LUD<M>::rowsize() const
     { return pimpl->LUx.rowsize(); }
 
 

@@ -12,7 +12,7 @@
   template RT InstSumAbs2Elements(const ConstMatrixView<T>& m); \
   template RT InstNormSq(const ConstMatrixView<T>& m);  \
   template RT InstMaxAbs2Element(const ConstMatrixView<T>& m);  \
-  template void InstRead(std::istream& is, MatrixView<T> m1); \
+  template void InstRead(const TMV_Reader& reader, MatrixView<T> m1); \
   template class MatrixDivHelper2<T>; \
 
 Def1(T,T)
@@ -47,10 +47,8 @@ Def3(FT,CT)
 #endif
 
 #define Def4(RT,T,C) \
-  template void InstWrite(std::ostream& os, \
+  template void InstWrite(const TMV_Writer& writer, \
       const ConstMatrixView<T,C>& m1); \
-  template void InstWrite(std::ostream& os, \
-      const ConstMatrixView<T,C>& m1, const RT thresh); \
 
 Def4(FT,T,NonConj)
 #ifdef TMV_INST_COMPLEX

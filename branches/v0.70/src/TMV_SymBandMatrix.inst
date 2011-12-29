@@ -1,0 +1,117 @@
+
+#define CT std::complex<T>
+
+#define Def1(RT,T,Ref) \
+  template T GenSymBandMatrix<T >::cref(int i, int j) const; \
+  template Ref SymBandMatrixView<T,CStyle>::ref(int i, int j) const; \
+  template bool GenSymBandMatrix<T >::hasSubMatrix( \
+      int i1, int i2, int j1, int j2, int is, int js) const; \
+  template bool GenSymBandMatrix<T >::hasSubBandMatrix( \
+      int i1, int i2, int j1, int j2, int lo, int hi, int is, int js) const; \
+  template bool GenSymBandMatrix<T >::hasSubVector( \
+      int i, int j, int is, int js, int s) const; \
+  template bool GenSymBandMatrix<T >::hasSubSymMatrix( \
+      int i1, int i2, int is) const; \
+  template bool GenSymBandMatrix<T >::hasSubSymBandMatrix( \
+      int i1, int i2, int lo, int is) const; \
+  template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubMatrix( \
+      int i1, int i2, int j1, int j2, int is, int js) const; \
+  template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubBandMatrix( \
+      int i1, int i2, int j1, int j2, int lo, int hi, int is, int js) const; \
+  template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubVector( \
+      int i, int j, int is, int js, int s) const; \
+  template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubSymMatrix( \
+      int i1, int i2, int is) const; \
+  template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubSymBandMatrix( \
+      int i1, int i2, int lo, int is) const; \
+  template T GenSymBandMatrix<T >::sumElements() const; \
+  template RT GenSymBandMatrix<T >::sumAbsElements() const; \
+  template RT GenSymBandMatrix<T >::sumAbs2Elements() const; \
+  template RT GenSymBandMatrix<T >::normF() const; \
+  template RT GenSymBandMatrix<T >::normSq(const RT scale) const; \
+  template RT GenSymBandMatrix<T >::norm1() const; \
+  template RT GenSymBandMatrix<T >::maxAbsElement() const; \
+  template RT GenSymBandMatrix<T >::maxAbs2Element() const; \
+  template QuotXsB<T,T > GenSymBandMatrix<T >::QInverse() const; \
+  template void GenSymBandMatrix<T >::write(const TMV_Writer& writer) const; \
+  template void SymBandMatrixView<T,CStyle>::read(const TMV_Reader& reader) const; \
+  template SymBandMatrix<T,Upper,DiagMajor> SymTriDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2); \
+  template HermBandMatrix<T,Upper,DiagMajor> HermTriDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2, UpLoType U); \
+
+Def1(T,T,T&)
+#ifdef INST_COMPLEX
+Def1(T,CT,VarConjRef<CT >)
+#endif
+
+#undef Def1
+
+#ifndef TISINT
+#define Def1b(RT,T) \
+  template T GenSymBandMatrix<T >::det() const; \
+  template RT GenSymBandMatrix<T >::logDet(T* sign) const; \
+  template void GenSymBandMatrix<T >::newDivider() const; \
+  template bool GenSymBandMatrix<T >::divIsLUDiv() const; \
+  template bool GenSymBandMatrix<T >::divIsCHDiv() const; \
+  template bool GenSymBandMatrix<T >::divIsHermSVDiv() const; \
+  template bool GenSymBandMatrix<T >::divIsSymSVDiv() const; \
+
+Def1b(T,T)
+#ifdef INST_COMPLEX
+Def1b(T,CT)
+#endif
+
+#undef Def1b
+#endif
+
+  template HermBandMatrix<CT,Upper,DiagMajor> HermTriDiagMatrix( 
+      const GenVector<T >& v1, const GenVector<CT >& v2, UpLoType U); 
+
+#define Def2(T1,T2) \
+  template void GenSymBandMatrix<T1 >::doMakeInverse( \
+      const SymMatrixView<T2 >& sinv) const; \
+
+Def2(T,T)
+#ifdef INST_COMPLEX
+Def2(T,CT)
+Def2(CT,CT)
+#endif
+
+#undef Def2
+
+#define Def3(RT,T,U,S,I) \
+  template void SymBandMatrix<T,U,S,I>::read(const TMV_Reader& reader); \
+  template void HermBandMatrix<T,U,S,I>::read(const TMV_Reader& reader); \
+
+Def3(T,T,Upper,RowMajor,CStyle)
+Def3(T,T,Upper,ColMajor,CStyle)
+Def3(T,T,Upper,DiagMajor,CStyle)
+Def3(T,T,Lower,RowMajor,CStyle)
+Def3(T,T,Lower,ColMajor,CStyle)
+Def3(T,T,Lower,DiagMajor,CStyle)
+Def3(T,T,Upper,RowMajor,FortranStyle)
+Def3(T,T,Upper,ColMajor,FortranStyle)
+Def3(T,T,Upper,DiagMajor,FortranStyle)
+Def3(T,T,Lower,RowMajor,FortranStyle)
+Def3(T,T,Lower,ColMajor,FortranStyle)
+Def3(T,T,Lower,DiagMajor,FortranStyle)
+#ifdef INST_COMPLEX
+Def3(T,CT,Upper,RowMajor,CStyle)
+Def3(T,CT,Upper,ColMajor,CStyle)
+Def3(T,CT,Upper,DiagMajor,CStyle)
+Def3(T,CT,Lower,RowMajor,CStyle)
+Def3(T,CT,Lower,ColMajor,CStyle)
+Def3(T,CT,Lower,DiagMajor,CStyle)
+Def3(T,CT,Upper,RowMajor,FortranStyle)
+Def3(T,CT,Upper,ColMajor,FortranStyle)
+Def3(T,CT,Upper,DiagMajor,FortranStyle)
+Def3(T,CT,Lower,RowMajor,FortranStyle)
+Def3(T,CT,Lower,ColMajor,FortranStyle)
+Def3(T,CT,Lower,DiagMajor,FortranStyle)
+#endif
+
+#undef Def3
+
+#undef CT
+

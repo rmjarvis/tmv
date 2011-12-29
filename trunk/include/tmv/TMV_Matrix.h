@@ -50,23 +50,23 @@
 //
 // Constructors:
 //
-//    Matrix<T,A>(size_t colsize, size_t rowsize)
+//    Matrix<T,A>(int colsize, int rowsize)
 //        Makes a matrix with column size = colsize and row size = rowsize
 //        with _uninitialized_ values
 //
-//    Matrix<T,A>(size_t colsize, size_t rowsize, T x)
+//    Matrix<T,A>(int colsize, int rowsize, T x)
 //        Makes a matrix of size n with all values = x
 //
 //
 // Special Creators:
 //
-//    MatrixView MatrixViewOf(T* m, size_t colsize, size_t rowsize,
+//    MatrixView MatrixViewOf(T* m, int colsize, int rowsize,
 //            StorageType stor)
-//    ConstMatrixView MatrixViewOf(const T* m, size_t colsize, size_t rowsize,
+//    ConstMatrixView MatrixViewOf(const T* m, int colsize, int rowsize,
 //            StorageType stor)
-//    MatrixView MatrixViewOf(T* m, size_t colsize, size_t rowsize,
+//    MatrixView MatrixViewOf(T* m, int colsize, int rowsize,
 //            int stepi, int stepj)
-//    ConstMatrixView MatrixViewOf(const T* m, size_t colsize, size_t rowsize,
+//    ConstMatrixView MatrixViewOf(const T* m, int colsize, int rowsize,
 //            int stepi, int stepj)
 //        Returns a MatrixView of the elements in m, using the actual
 //        elements m for the storage.  This is essentially the same as the 
@@ -74,8 +74,8 @@
 //
 // Access Functions
 //
-//    size_t colsize() const
-//    size_t rowsize() const
+//    int colsize() const
+//    int rowsize() const
 //        Return the dimensions of the matrix
 //
 //    value_type operator()(int i, int j) const
@@ -301,8 +301,8 @@
 //    The default attributes if you don't specify them are:
 //    NonConj, CStyle, NonMajor, NoDivider
 //
-//    ConstMatrixView<T,A>(const T* p, size_t m, size_t n, int si, int sj)
-//    MatrixView<T,A>(T* p, size_t m, size_t n, int si, int sj)
+//    ConstMatrixView<T,A>(const T* p, int m, int n, int si, int sj)
+//    MatrixView<T,A>(T* p, int m, int n, int si, int sj)
 //        Make a matrix view starting at memory location p, 
 //        with m rows and n cols, stepping over the data with step sizes 
 //        si and sj along the columns and rows respectively.
@@ -518,7 +518,7 @@
 //
 // I/O: 
 //
-//    void write(std::ostream& os) const    or os << m
+//    os << m
 //        Writes m to ostream os in the following format:
 //          colsize rowsize
 //          ( m(0,0) m(0,1) m(0,2) ... m(0,rowsize) )
@@ -527,10 +527,10 @@
 //          ( m(colsize,0)  ...  m(colsize,rowsize) )
 //
 //
-//    m.write(ostream& os, real_type thresh)
+//    os << ThreshIO(thresh) << m
 //        Write m to os as above, but if |m(i,j)| < thresh, write 0 instead
 //
-//    void read(std::istream& is)    or is >> m
+//    is >> m
 //        Reads the matrix from istream is in the same format
 //        If the matrix is not the correct size, it will be resized.
 //
@@ -914,19 +914,21 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        Matrix(size_t cs, size_t rs) :
+        Matrix(int cs, int rs) :
             itscs(cs), itsrs(rs), linsize(cs*rs), itsm(linsize)
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVAssert(cs >= 0 && rs >= 0);
 #ifdef TMV_DEBUG
             this->setAllTo(Traits<T>::constr_value());
 #endif
         }
 
-        Matrix(size_t cs, size_t rs, T x) :
+        Matrix(int cs, int rs, T x) :
             itscs(cs), itsrs(rs), linsize(cs*rs), itsm(linsize)
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVAssert(cs >= 0 && rs >= 0);
             this->setAllTo(x);
         }
 
@@ -1000,8 +1002,9 @@ namespace tmv {
             itsm.swapWith(m2.itsm);
         }
 
-        void resize(const size_t cs, const size_t rs)
+        void resize(const int cs, const int rs)
         {
+            TMVAssert(cs >= 0 && rs >= 0);
 #ifdef TMV_DEBUG
             this->setAllTo(Traits<T>::destr_value());
 #endif
@@ -1015,9 +1018,9 @@ namespace tmv {
 #endif
         }
 
-        TMV_INLINE size_t ls() const { return linsize; }
-        TMV_INLINE size_t colsize() const { return itscs; }
-        TMV_INLINE size_t rowsize() const { return itsrs; }
+        TMV_INLINE int ls() const { return linsize; }
+        TMV_INLINE int colsize() const { return itscs; }
+        TMV_INLINE int rowsize() const { return itsrs; }
         int nElements() const { return itscs*itsrs; }
         TMV_INLINE int stepi() const { return _rowmajor ? itsrs : 1; }
         TMV_INLINE int stepj() const { return _rowmajor ? 1 : itscs; }
@@ -1027,9 +1030,9 @@ namespace tmv {
 
     private:
 
-        size_t itscs;
-        size_t itsrs;
-        size_t linsize;
+        int itscs;
+        int itsrs;
+        int linsize;
         AlignedArray<T> itsm;
 
     }; // Matrix
@@ -1199,20 +1202,20 @@ namespace tmv {
         //
 
         TMV_INLINE ConstMatrixView(
-            const T* m, size_t cs, size_t rs, int si, int sj) :
+            const T* m, int cs, int rs, int si, int sj) :
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(sj) 
         { 
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        TMV_INLINE ConstMatrixView(const T* m, size_t cs, size_t rs, int si) :
+        TMV_INLINE ConstMatrixView(const T* m, int cs, int rs, int si) :
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(_stepj) 
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_stepj != TMV_UNKNOWN); 
         }
 
-        TMV_INLINE ConstMatrixView(const T* m, size_t cs, size_t rs) :
+        TMV_INLINE ConstMatrixView(const T* m, int cs, int rs) :
             itsm(m), itscs(cs), itsrs(rs), itssi(_stepi), itssj(_stepj)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1284,9 +1287,9 @@ namespace tmv {
         T cref(int i, int j) const
         { return DoConj<_conj>(itsm[i*stepi()+j*stepj()]); }
 
-        TMV_INLINE size_t ls() const { return itscs*itsrs; }
-        TMV_INLINE size_t colsize() const { return itscs; }
-        TMV_INLINE size_t rowsize() const { return itsrs; }
+        TMV_INLINE int ls() const { return itscs*itsrs; }
+        TMV_INLINE int colsize() const { return itscs; }
+        TMV_INLINE int rowsize() const { return itsrs; }
         int nElements() const { return itscs*itsrs; }
         TMV_INLINE int stepi() const { return itssi; }
         TMV_INLINE int stepj() const { return itssj; }
@@ -1299,8 +1302,8 @@ namespace tmv {
     private :
 
         const T* itsm;
-        const size_t itscs;
-        const size_t itsrs;
+        const int itscs;
+        const int itsrs;
         const CheckedInt<_stepi> itssi;
         const CheckedInt<_stepj> itssj;
 
@@ -1520,20 +1523,20 @@ namespace tmv {
         // Constructors
         //
 
-        TMV_INLINE MatrixView(T* m, size_t cs, size_t rs, int si, int sj) :
+        TMV_INLINE MatrixView(T* m, int cs, int rs, int si, int sj) :
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(sj) 
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        TMV_INLINE MatrixView(T* m, size_t cs, size_t rs, int si) :
+        TMV_INLINE MatrixView(T* m, int cs, int rs, int si) :
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(_stepj) 
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_stepj != TMV_UNKNOWN); 
         }
 
-        TMV_INLINE MatrixView(T* m, size_t cs, size_t rs) :
+        TMV_INLINE MatrixView(T* m, int cs, int rs) :
             itsm(m), itscs(cs), itsrs(rs), itssi(_stepi), itssj(_stepj)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1601,9 +1604,9 @@ namespace tmv {
         reference ref(int i, int j) 
         { return reference(itsm[i*stepi()+j*stepj()]); }
 
-        TMV_INLINE size_t ls() const { return itscs*itsrs; }
-        TMV_INLINE size_t colsize() const { return itscs; }
-        TMV_INLINE size_t rowsize() const { return itsrs; }
+        TMV_INLINE int ls() const { return itscs*itsrs; }
+        TMV_INLINE int colsize() const { return itscs; }
+        TMV_INLINE int rowsize() const { return itsrs; }
         int nElements() const { return itscs*itsrs; }
         TMV_INLINE int stepi() const { return itssi; }
         TMV_INLINE int stepj() const { return itssj; }
@@ -1616,8 +1619,8 @@ namespace tmv {
     private :
 
         T* itsm;
-        const size_t itscs;
-        const size_t itsrs;
+        const int itscs;
+        const int itsrs;
         const CheckedInt<_stepi> itssi;
         const CheckedInt<_stepj> itssj;
 
@@ -1635,9 +1638,10 @@ namespace tmv {
     // MatrixView of raw memory:
     template <class T>
     inline MatrixView<T> MatrixViewOf(
-        T* m, size_t colsize, size_t rowsize, StorageType stor)
+        T* m, int colsize, int rowsize, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(colsize >= 0 && rowsize >= 0);
         if (stor == RowMajor) 
             return MatrixView<T>(m,colsize,rowsize,rowsize,1);
         else 
@@ -1646,9 +1650,10 @@ namespace tmv {
 
     template <class T>
     inline ConstMatrixView<T> MatrixViewOf(
-        const T* m, size_t colsize, size_t rowsize, StorageType stor)
+        const T* m, int colsize, int rowsize, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(colsize >= 0 && rowsize >= 0);
         if (stor == RowMajor)
             return ConstMatrixView<T>(m,colsize,rowsize,rowsize,1);
         else 
@@ -1657,13 +1662,19 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE MatrixView<T> MatrixViewOf(
-        T* m, size_t colsize, size_t rowsize, int stepi, int stepj)
-    { return MatrixView<T>(m,colsize,rowsize,stepi,stepj); }
+        T* m, int colsize, int rowsize, int stepi, int stepj)
+    { 
+        TMVAssert(colsize >= 0 && rowsize >= 0);
+        return MatrixView<T>(m,colsize,rowsize,stepi,stepj); 
+    }
 
     template <class T>
     TMV_INLINE ConstMatrixView<T> MatrixViewOf(
-        const T* m, size_t colsize, size_t rowsize, int stepi, int stepj)
-    { return ConstMatrixView<T>(m,colsize,rowsize,stepi,stepj); }
+        const T* m, int colsize, int rowsize, int stepi, int stepj)
+    {
+        TMVAssert(colsize >= 0 && rowsize >= 0);
+        return ConstMatrixView<T>(m,colsize,rowsize,stepi,stepj); 
+    }
 
 
     //

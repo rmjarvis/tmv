@@ -327,9 +327,6 @@ namespace tmv {
                     "Warning - Unable to find appropriate initial "
                     "guess in FindDCSingularValue\n"
                     "Unsuccessful after 100 iterations.\n");
-#ifdef TMVDEBUG
-                exit(1);
-#endif
             }
         } while (++iter < TMV_MAXITER);
 
@@ -594,11 +591,8 @@ namespace tmv {
                     if (iter3 == TMV_MAXITER-1) {
                         TMV_Warning(
                             "Warning - unable to converge for THREEPOLES "
-                            "solution\n"
+                            "solution in FindDCSingularValue\n"
                             "No solution after 100 iterations.\n");
-#ifdef TMVDEBUG
-                        exit(1);
-#endif
                     }
                 }
                 eta *= d2;
@@ -702,9 +696,6 @@ namespace tmv {
                     "Warning - Unable to find solution in "
                     "FindDCSingularValue\n"
                     "No solution after 100 iterations.\n");
-#ifdef TMVDEBUG
-                exit(1);
-#endif
             }
         } while (++iter < TMV_MAXITER);
         dbgcout<<"Found Singularvalue S("<<k<<") = "<<s<<std::endl;
@@ -831,9 +822,9 @@ namespace tmv {
     {
         static void call(Mu& U, Vd& D, Ve& E, Mv& V, bool UisI, bool VisI)
         {
-            const int N = rs==TMV_UNKNOWN ? int(D.size()) : rs;
+            const int N = rs==TMV_UNKNOWN ? D.size() : rs;
 #ifdef PRINTALGO_SVD
-            const int M = cs==TMV_UNKNOWN ? int(U.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? U.colsize() : cs;
             std::cout<<"SVDecomposeFromBidiagonal algo 1: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -859,9 +850,9 @@ namespace tmv {
             typedef typename Vd::value_type RT;
             TMVStaticAssert(Traits<RT>::isreal);
 
-            int N = rs==TMV_UNKNOWN ? int(D.size()) : rs;
+            int N = rs==TMV_UNKNOWN ? D.size() : rs;
 #ifdef PRINTALGO_SVD
-            const int M1 = cs==TMV_UNKNOWN ? int(U.colsize()) : cs;
+            const int M1 = cs==TMV_UNKNOWN ? U.colsize() : cs;
             std::cout<<"SVDecomposeFromBidiagonal algo 11: M,N,cs,rs = "<<
                 M1<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -1578,7 +1569,7 @@ namespace tmv {
             TMVAssert(D.minAbsElement() > RT(0));
             TMVAssert(E.minAbsElement() > RT(0));
 
-            const int N = rs==TMV_UNKNOWN ? int(D.size()) : rs;
+            const int N = rs==TMV_UNKNOWN ? D.size() : rs;
             dbgcout<<"Start Decompose from Bidiag:\n";
             if (U.cptr()) dbgcout<<"U = "<<TMV_Text(U)<<std::endl;
             if (V.cptr()) dbgcout<<"V = "<<TMV_Text(V)<<std::endl;
@@ -1591,8 +1582,8 @@ namespace tmv {
             Matrix<RT> B(N,N,RT(0));
             B.diag() = D;
             B.diag(1) = E;
-            const int M1 = U.cptr() && V.cptr() ? int(U.colsize()) : 0;
-            const int N1 = U.cptr() && V.cptr() ? int(V.rowsize()) : 0;
+            const int M1 = U.cptr() && V.cptr() ? U.colsize() : 0;
+            const int N1 = U.cptr() && V.cptr() ? V.rowsize() : 0;
             Matrix<T> A0(M1,N1);
             if (U.cptr() && V.cptr()) A0 = U*B*V;
             //dbgcout<<"A0 = "<<A0<<std::endl;

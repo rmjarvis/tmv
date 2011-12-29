@@ -3,99 +3,92 @@
 #define TMV_TriMatrixIO_H
 
 #include "TMV_BaseMatrix_Tri.h"
+#include "TMV_IOStyle.h"
 
 namespace tmv {
 
     //
-    // Write Matrix
+    // Write TriMatrix
     //
-    // TODO: Have the non-compact versions instantiated as well.
 
     // Defined in TMV_TriMatrix.cpp
     template <class T, int C>
-    void InstWriteCompact(
-        std::ostream& os, const ConstUpperTriMatrixView<T,C>& m);
+    void InstWrite(
+        const TMV_Writer& writer, const ConstUpperTriMatrixView<T,C>& m);
     template <class T, int C>
-    void InstWriteCompact(
-        std::ostream& os, const ConstLowerTriMatrixView<T,C>& m);
-    template <class T, int C>
-    void InstWriteCompact(
-        std::ostream& os, const ConstUpperTriMatrixView<T,C>& m,
-        typename ConstUpperTriMatrixView<T>::float_type thresh);
-    template <class T, int C>
-    void InstWriteCompact(
-        std::ostream& os, const ConstLowerTriMatrixView<T,C>& m,
-        typename ConstLowerTriMatrixView<T>::float_type thresh);
+    void InstWrite(
+        const TMV_Writer& writer, const ConstLowerTriMatrixView<T,C>& m);
     template <class T>
-    void InstRead(std::istream& is, UpperTriMatrixView<T> m);
+    void InstRead(const TMV_Reader& reader, UpperTriMatrixView<T> m);
     template <class T>
-    void InstRead(std::istream& is, LowerTriMatrixView<T> m);
-
+    void InstRead(const TMV_Reader& reader, LowerTriMatrixView<T> m);
 
     template <int algo, class M>
     struct WriteU_Helper;
 
+    // algo 11: UpperTriMatrix
     template <class M>
-    struct WriteU_Helper<1,M>
+    struct WriteU_Helper<11,M>
     {
-        static void call(std::ostream& os, const M& m)
+        static void call(const TMV_Writer& writer, const M& m)
         {
             typedef typename M::value_type T;
-            const int len = m.size();
-            const bool upper = m.isupper();
-            const bool unit = m.isunit();
-            os << (upper ? "U " : "L ");
-            os << len << '\n';
-            for(int i=0;i<len;++i) {
-                os << "( ";
-                if (!upper) {
+            const int N = m.size();
+            writer.begin();
+            writer.writeCode("U");
+            writer.writeSize(N);
+            writer.writeSimpleSize(N);
+            writer.writeStart();
+            for(int i=0;i<N;++i) {
+                writer.writeLParen();
+                if (!writer.isCompact()) {
                     for(int j=0;j<i;++j) {
-                        os << " " << Value(m.cref(i,j)) << " ";
+                        writer.writeValue(T(0));
+                        writer.writeSpace();
                     }
                 }
-                if (unit)
-                    os << " " << Value(T(1)) << " ";
-                else
-                    os << " " << Value(m.cref(i,i)) << " ";
-                if (upper) {
-                    for(int j=i+1;j<len;++j) {
-                        os << " " << Value(m.cref(i,j)) << " ";
-                    }
+                for(int j=i;j<N;++j) {
+                    if (j > i) writer.writeSpace();
+                    writer.writeValue(m.cref(i,j));
                 }
-                os << " )\n";
+                writer.writeRParen();
+                if (i < N-1) writer.writeRowEnd();
             }
+            writer.writeFinal();
+            writer.end();
         }
-        static void call(
-            std::ostream& os, const M& m, typename M::float_type thresh)
+    };
+
+    // algo 12: LowerTriMatrix
+    template <class M>
+    struct WriteU_Helper<12,M>
+    {
+        static void call(const TMV_Writer& writer, const M& m)
         {
             typedef typename M::value_type T;
-            const int len = m.size();
-            const bool upper = m.isupper();
-            const bool unit = m.isunit();
-            os << (upper ? "U " : "L ");
-            os << len << '\n';
-            for(int i=0;i<len;++i) {
-                os << "( ";
-                if (!upper) {
-                    for(int j=0;j<i;++j) {
-                        T temp = m.cref(i,j);
-                        os << " " <<
-                            Value((TMV_ABS2(temp)<thresh ? T(0) : temp)) << " ";
+            const int N = m.size();
+            writer.begin();
+            writer.writeCode("L");
+            writer.writeSize(N);
+            writer.writeSimpleSize(N);
+            writer.writeStart();
+            for(int i=0;i<N;++i) {
+                writer.writeLParen();
+                for(int j=0;j<i+1;++j) {
+                    if (j > 0) writer.writeSpace();
+                    writer.writeValue(m.cref(i,j));
+                }
+                if (!writer.isCompact()) {
+                    for(int j=i+1;j<N;++j) {
+                        writer.writeSpace();
+                        writer.writeValue(T(0));
                     }
                 }
-                if (unit)
-                    os << " " << Value(T(1)) << " ";
-                else
-                    os << " " << Value(m.cref(i,i)) << " ";
-                if (upper) {
-                    for(int j=i+1;j<len;++j) {
-                        T temp = m.cref(i,j);
-                        os << " " <<
-                            Value((TMV_ABS2(temp)<thresh ? T(0) : temp)) << " ";
-                    }
-                }
-                os << " )\n";
+                writer.writeRParen();
+                if (i < N-1) writer.writeRowEnd();
             }
+            writer.writeFinal();
+            writer.end();
         }
     };
 
@@ -103,22 +96,19 @@ namespace tmv {
     template <class M>
     struct WriteU_Helper<90,M>
     {
-        static TMV_INLINE void call(std::ostream& os, const M& m)
-        { InstWriteCompact(os,m.calc().xView()); }
-        static TMV_INLINE void call(
-            std::ostream& os, const M& m, typename M::float_type thresh)
-        { InstWriteCompact(os,m.calc().xView(),thresh); }
+        static TMV_INLINE void call(const TMV_Writer& writer, const M& m)
+        { InstWrite(writer,m.calc().xView()); }
     };
              
-    // algo -3: Only one algorithm, so call it.
+    // algo -3: Determine which algorithm to use
     template <class M>
     struct WriteU_Helper<-3,M>
     {
-        static TMV_INLINE void call(std::ostream& os, const M& m)
-        { WriteU_Helper<1,M>::call(os,m); }
-        static TMV_INLINE void call(
-            std::ostream& os, const M& m, typename M::float_type thresh)
-        { WriteU_Helper<1,M>::call(os,m,thresh); }
+        static TMV_INLINE void call(const TMV_Writer& writer, const M& m)
+        { 
+            const int algo = M::_upper ? 11 : 12;
+            WriteU_Helper<algo,M>::call(writer,m); 
+        }
     };
              
     // algo -2: Check for inst
@@ -127,149 +117,117 @@ namespace tmv {
     {
         typedef typename M::value_type T;
         enum { inst = (
-                (M::_size == TMV_UNKNOWN || M::_size > 16) &&
+                (M::_colsize == TMV_UNKNOWN || M::_colsize > 16) &&
+                (M::_rowsize == TMV_UNKNOWN || M::_rowsize > 16) &&
                 Traits<T>::isinst ) };
         enum { algo = (
                 inst ? 90 :
                 -3 ) };
-        static TMV_INLINE void call(std::ostream& os, const M& m)
-        { WriteU_Helper<algo,M>::call(os,m); }
-        static TMV_INLINE void call(
-            std::ostream& os, const M& m, typename M::float_type thresh)
-        { WriteU_Helper<algo,M>::call(os,m,thresh); }
+        static TMV_INLINE void call(const TMV_Writer& writer, const M& m)
+        { WriteU_Helper<algo,M>::call(writer,m); }
     };
 
     template <class M>
     struct WriteU_Helper<-1,M>
     {
-        static TMV_INLINE void call(std::ostream& os, const M& m)
-        { WriteU_Helper<-2,M>::call(os,m); }
-        static TMV_INLINE void call(
-            std::ostream& os, const M& m, typename M::float_type thresh)
-        { WriteU_Helper<-2,M>::call(os,m,thresh); }
+        static TMV_INLINE void call(const TMV_Writer& writer, const M& m)
+        { WriteU_Helper<-2,M>::call(writer,m); }
     };
 
     template <class M>
-    inline void WriteCompact(
-        std::ostream& os, const BaseMatrix_Tri<M>& m)
+    inline void Write(const TMV_Writer& writer, const BaseMatrix_Tri<M>& m)
     {
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
-        WriteU_Helper<-2,Mv>::call(os,mv);
+        WriteU_Helper<-2,Mv>::call(writer,mv);
     }
 
     template <class M>
-    inline void InlineWriteCompact(
-        std::ostream& os, const BaseMatrix_Tri<M>& m)
+    inline void InlineWrite(
+        const TMV_Writer& writer, const BaseMatrix_Tri<M>& m)
     {
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
-        WriteU_Helper<-3,Mv>::call(os,mv);
-    }
-
-    template <class M>
-    inline void WriteCompact(
-        std::ostream& os,
-        const BaseMatrix_Tri<M>& m, typename M::float_type thresh) 
-    {
-        typedef typename M::const_cview_type Mv;
-        TMV_MAYBE_CREF(M,Mv) mv = m.cView();
-        WriteU_Helper<-2,Mv>::call(os,mv,thresh);
-    }
-
-
-    template <class M>
-    inline void InlineWriteCompact(
-        std::ostream& os,
-        const BaseMatrix_Tri<M>& m, typename M::float_type thresh) 
-    {
-        typedef typename M::const_cview_type Mv;
-        TMV_MAYBE_CREF(M,Mv) mv = m.cView();
-        WriteU_Helper<-3,Mv>::call(os,mv,thresh);
+        WriteU_Helper<-3,Mv>::call(writer,mv);
     }
 
 
     //
-    // Read Matrix
+    // Read TriMatrix
     //
 
 #ifndef TMV_NO_THROW
-    template <class T>
+    template <bool upper, class T>
     class TriMatrixReadError : 
         public ReadError
     {
     public :
-        Matrix<T,NoDivider> m;
+        typedef typename 
+            TypeSelect<upper,UpperTriMatrix<T>,LowerTriMatrix<T> >::type M;
+#define TAG (upper ? "UpperTriMatrix" : "LowerTriMatrix")
+
+        M m;
         int i,j;
-        char exp,got;
-        T unitgot;
-        size_t s;
-        bool up;
+        std::string exp,got;
+        int s;
+        T v1;
         bool is, iseof, isbad;
 
-        TriMatrixReadError(std::istream& _is, bool _up) throw() :
-            ReadError("TriMatrix"),
-            i(0), j(0), exp(0), got(0), 
-            unitgot(T(1)), s(0), up(_up),
+        TriMatrixReadError(std::istream& _is) throw() :
+            ReadError(TAG),
+            i(0), j(0), s(0), v1(1),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        TriMatrixReadError(
+            std::istream& _is,
+            const std::string& _e, const std::string& _g) throw() :
+            ReadError(TAG),
+            i(0), j(0), exp(_e), got(_g), s(0), v1(1),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+
+        template <class M>
+        TriMatrixReadError(
+            const BaseMatrix_Tri<M>& _m, std::istream& _is, int _s) throw() :
+            ReadError(TAG),
+            m(_m), i(0), j(0), s(_s), v1(1),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        template <class M>
+        TriMatrixReadError(
+            int _i, int _j, const BaseMatrix_Tri<M>& _m,
+            std::istream& _is,
+            const std::string& _e, const std::string& _g) throw() :
+            ReadError(TAG),
+            m(_m), i(_i), j(_j), exp(_e), got(_g), s(_m.size()), v1(i==j?1:0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class M>
         TriMatrixReadError(
             int _i, int _j, const BaseMatrix_Tri<M>& _m, 
             std::istream& _is) throw() :
-            ReadError("TriMatrix"),
-            m(_m), i(_i), j(_j), exp(0), got(0), 
-            unitgot(T(1)), s(_m.size()), up(_m.isupper()),
+            ReadError(TAG),
+            m(_m), i(_i), j(_j), s(_m.size()), v1(i==j?1:0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class M>
         TriMatrixReadError(
-            int _i, int _j, const BaseMatrix_Tri<M>& _m,
-            std::istream& _is, char _e, char _g) throw() :
-            ReadError("TriMatrix"),
-            m(_m), i(_i), j(_j), exp(_e), got(_g),
-            unitgot(T(1)), s(_m.size()),  up(_m.isupper()),
+            int _i, int _j, const BaseMatrix_Tri<M>& _m, 
+            std::istream& _is, T _v1) throw() :
+            ReadError(TAG),
+            m(_m), i(_i), j(_j), s(_m.size()), v1(_v1),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        TriMatrixReadError(
-            std::istream& _is, char _e, char _g, bool _up) throw() :
-            ReadError("TriMatrix"),
-            i(0), j(0), exp(_e), got(_g),
-            unitgot(T(1)), s(0),  up(_up),
-            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        template <class M>
-        TriMatrixReadError(
-            int _i, int _j, const BaseMatrix_Tri<M>& _m,
-            std::istream& _is, T _u) throw() :
-            ReadError("TriMatrix"),
-            m(_m), i(_i), j(_j), exp(0), got(0),
-            unitgot(_u), s(_m.size()),  up(_m.isupper()),
-            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        template <class M>
-        TriMatrixReadError(
-            const BaseMatrix_Tri<M>& _m, std::istream& _is, size_t _s) throw():
-            ReadError("TriMatrix"),
-            m(_m), i(0), exp(0), got(0), 
-            unitgot(T(1)), s(_s), up(_m.isupper()),
-            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        TriMatrixReadError(const TriMatrixReadError<T>& rhs) :
-            ReadError("TriMatrix"),
+
+        TriMatrixReadError(const TriMatrixReadError<upper,T>& rhs) throw() :
+            ReadError(TAG),
             m(rhs.m), i(rhs.i), j(rhs.j), exp(rhs.exp), got(rhs.got), 
-            unitgot(rhs.unitgot), s(rhs.s), up(rhs.up),
+            s(rhs.s), v1(rhs.v1),
             is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) {}
         ~TriMatrixReadError() throw() {}
 
         void write(std::ostream& os) const throw()
         {
-            os<<"TMV Read Error: Reading istream input for ";
-            if (up) os<<"UpperTriMatrix\n";
-            else os<<"LowerTriMatrix\n";
+            os<<"TMV Read Error: Reading istream input for "<<TAG<<"\n";
             if (exp != got) {
                 os<<"Wrong format: expected '"<<exp<<"', got '"<<got<<"'.\n";
             }
-            if (unitgot != T(1)) {
-                os<<"Wrong format: expected 1 on the diagonal, got '"<<
-                    unitgot<<"'.\n";
-            }
-            if (s != m.colsize()) {
-                os<<"Wrong size: expected "<<m.colsize()<<", got "<<s<<".\n";
+            if (s != m.size()) {
+                os<<"Wrong size: expected "<<m.size()<<", got "<<s<<".\n";
             }
             if (!is) {
                 if (iseof) {
@@ -280,99 +238,256 @@ namespace tmv {
                     os<<"Input stream cannot read next character.\n";
                 }
             }
-            if (m.colsize() > 0) {
-                const int N = m.colsize();
-                os<<"The portion of the TriMatrix which was successfully "
+            if (i != j && v1 != T(0)) {
+                os<<"Invalid input: Expected 0, got "<<v1<<".\n";
+            }
+            if (i == j && v1 != T(1)) {
+                os<<"Invalid input: Expected 1, got "<<v1<<".\n";
+            }
+            if (m.size() > 0) {
+                os<<"The portion of the "<<TAG<<" which was successfully "
                     "read is: \n";
+                const int N = m.size();
                 for(int ii=0;ii<i;++ii) {
                     os<<"( ";
-                    for(int jj=0;jj<N;++jj)
-                        os<<' '<<m.cref(ii,jj)<<' ';
+                    for(int jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
                     os<<" )\n";
                 }
                 os<<"( ";
-                for(int jj=0;jj<j;++jj)
-                    os<<' '<<m.cref(i,jj)<<' ';
+                for(int jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
                 os<<" )\n";
             }
         }
+#undef TAG
+
     };
 #endif
 
     template <int algo, class M>
     struct ReadU_Helper;
 
+    // algo 11: UpperTriMatrix
     template <class M>
-    struct ReadU_Helper<1,M>
+    struct ReadU_Helper<11,M>
     {
-        static void call(std::istream& is, M& m)
+        static void call(const TMV_Reader& reader, M& m)
         {
             typedef typename M::value_type T;
-            char paren;
+            const int N = m.size();
+            std::string exp, got;
             T temp;
-            const int len = m.size();
-            const bool upper = m.isupper();
-            const bool unit = m.isunit();
-            for(int i=0;i<len;++i) {
-                is >> paren;
-                if (!is || paren != '(') {
-#ifdef TMV_NO_THROW
-                    std::cerr<<"TriMatrix ReadError: "<<paren<<" != (\n";
+            if (!reader.readStart(exp,got)) {
+#ifdef NOTHROW
+                std::cerr<<"UpperTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                exit(1);
+#else
+                throw TriMatrixReadError<true,T>(0,0,m,reader.getis(),exp,got);
+#endif
+            }
+            for(int i=0;i<N;++i) {
+                if (!reader.readLParen(exp,got)) {
+#ifdef NOTHROW
+                    std::cerr<<"UpperTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
                     exit(1);
 #else
-                    throw TriMatrixReadError<T>(i,0,m,is,'(',is?paren:'(');
+                    throw TriMatrixReadError<true,T>(i,0,m,reader.getis(),exp,got);
 #endif
                 }
-                if (!upper) {
-                    const int i1 = unit ? i : i+1;
-                    for(int j=0;j<i1;++j) {
-                        is >> temp;
-                        if (!is) {
-#ifdef TMV_NO_THROW
-                            std::cerr<<"TriMatrix ReadError: !is\n";
+                if (!reader.isCompact()) {
+                    for(int j=0;j<i;++j) {
+                        if (!reader.readValue(temp)) {
+#ifdef NOTHROW
+                            std::cerr<<"UpperTriMatrix Read Error: reading value\n";
                             exit(1);
 #else
-                            throw TriMatrixReadError<T>(i,j,m,is);
+                            throw TriMatrixReadError<true,T>(i,j,m,reader.getis());
 #endif
                         }
-                        m.ref(i,j) = temp;
+                        if (temp != T(0)) {
+#ifdef NOTHROW
+                            std::cerr<<"UpperTriMatrix Read Error: "<<temp<<" != 0\n";
+                            exit(1);
+#else
+                            throw TriMatrixReadError<true,T>(i,j,m,reader.getis(),temp);
+#endif
+                        }
+                        if (!reader.readSpace(exp,got)) {
+#ifdef NOTHROW
+                            std::cerr<<"UpperTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                            exit(1);
+#else
+                            throw TriMatrixReadError<true,T>(i,j,m,reader.getis(),exp,got);
+#endif
+                        }
                     }
                 }
-                if (unit) {
-                    is >> temp;
-                    if (!is || temp != T(1)) {
-#ifdef TMV_NO_THROW
-                        std::cerr<<"TriMatrix ReadError: "<<temp<<" != 1\n";
+                for(int j=i;j<N;++j) {
+                    if (j>i && !reader.readSpace(exp,got)) {
+#ifdef NOTHROW
+                        std::cerr<<"UpperTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
                         exit(1);
 #else
-                        throw TriMatrixReadError<T>(i,i,m,is,is?temp:T(1));
+                        throw TriMatrixReadError<true,T>(i,j,m,reader.getis(),exp,got);
 #endif
                     }
-                }
-                if (upper) {
-                    const int i1 = unit ? i+1 : i;
-                    for(int j=i1;j<len;++j) {
-                        is >> temp;
-                        if (!is)  {
-#ifdef TMV_NO_THROW
-                            std::cerr<<"TriMatrix ReadError: !is\n";
+                    if (!reader.readValue(temp)) {
+#ifdef NOTHROW
+                        std::cerr<<"UpperTriMatrix Read Error: reading value\n";
+                        exit(1);
+#else
+                        throw TriMatrixReadError<true,T>(i,j,m,reader.getis());
+#endif
+                    }
+                    if (j==i && m.isunit()) {
+                        if (temp != T(1)) {
+#ifdef NOTHROW
+                            std::cerr<<"UpperTriMatrix Read Error: "<<temp<<" != 1\n";
                             exit(1);
 #else
-                            throw TriMatrixReadError<T>(i,j,m,is);
+                            throw TriMatrixReadError<true,T>(i,j,m,reader.getis(),temp);
 #endif
                         }
+                    } else {
                         m.ref(i,j) = temp;
                     }
                 }
-                is >> paren;
-                if (!is || paren != ')') {
-#ifdef TMV_NO_THROW
-                    std::cerr<<"TriMatrix ReadError: "<<paren<<" != )\n";
+                if (!reader.readRParen(exp,got)) {
+#ifdef NOTHROW
+                    std::cerr<<"UpperTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
                     exit(1);
 #else
-                    throw TriMatrixReadError<T>(i,len,m,is,')',is?paren:')');
+                    throw TriMatrixReadError<true,T>(i,N,m,reader.getis(),exp,got);
 #endif
                 }
+                if (i < N-1 && !reader.readRowEnd(exp,got)) {
+#ifdef NOTHROW
+                    std::cerr<<"UpperTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                    exit(1);
+#else
+                    throw TriMatrixReadError<true,T>(i,N,m,reader.getis(),exp,got);
+#endif
+                }
+            }
+            if (!reader.readFinal(exp,got)) {
+#ifdef NOTHROW
+                std::cerr<<"UpperTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                exit(1);
+#else
+                throw TriMatrixReadError<true,T>(N,0,m,reader.getis(),exp,got);
+#endif
+            }
+        }
+    };
+
+    // algo 12: LowerTriMatrix
+    template <class M>
+    struct ReadU_Helper<12,M>
+    {
+        static void call(const TMV_Reader& reader, M& m)
+        {
+            typedef typename M::value_type T;
+            const int N = m.size();
+            std::string exp, got;
+            T temp;
+            if (!reader.readStart(exp,got)) {
+#ifdef NOTHROW
+                std::cerr<<"LowerTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                exit(1);
+#else
+                throw TriMatrixReadError<false,T>(0,0,m,reader.getis(),exp,got);
+#endif
+            }
+            for(int i=0;i<N;++i) {
+                if (!reader.readLParen(exp,got)) {
+#ifdef NOTHROW
+                    std::cerr<<"LowerTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                    exit(1);
+#else
+                    throw TriMatrixReadError<false,T>(i,0,m,reader.getis(),exp,got);
+#endif
+                }
+                for(int j=0;j<i+1;++j) {
+                    if (j>0 && !reader.readSpace(exp,got)) {
+#ifdef NOTHROW
+                        std::cerr<<"LowerTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                        exit(1);
+#else
+                        throw TriMatrixReadError<false,T>(i,j,m,reader.getis(),exp,got);
+#endif
+                    }
+                    if (!reader.readValue(temp)) {
+#ifdef NOTHROW
+                        std::cerr<<"LowerTriMatrix Read Error: reading value\n";
+                        exit(1);
+#else
+                        throw TriMatrixReadError<false,T>(i,j,m,reader.getis());
+#endif
+                    }
+                    if (j==i && m.isunit()) {
+                        if (temp != T(1)) {
+#ifdef NOTHROW
+                            std::cerr<<"LowerTriMatrix Read Error: "<<temp<<" != 0\n";
+                            exit(1);
+#else
+                            throw TriMatrixReadError<false,T>(i,j,m,reader.getis(),temp);
+#endif
+                        }
+                    } else {
+                        m.ref(i,j) = temp;
+                    }
+                }
+                if (!reader.isCompact()) {
+                    for(int j=i+1;j<N;++j) {
+                        if (!reader.readSpace(exp,got)) {
+#ifdef NOTHROW
+                            std::cerr<<"LowerTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                            exit(1);
+#else
+                            throw TriMatrixReadError<false,T>(i,j,m,reader.getis(),exp,got);
+#endif
+                        }
+                        if (!reader.readValue(temp)) {
+#ifdef NOTHROW
+                            std::cerr<<"LowerTriMatrix Read Error: reading value\n";
+                            exit(1);
+#else
+                            throw TriMatrixReadError<false,T>(i,j,m,reader.getis());
+#endif
+                        }
+                        if (temp != T(0)) {
+#ifdef NOTHROW
+                            std::cerr<<"LowerTriMatrix Read Error: "<<temp<<" != 0\n";
+                            exit(1);
+#else
+                            throw TriMatrixReadError<false,T>(i,j,m,reader.getis(),temp);
+#endif
+                        }
+                    }
+                }
+                if (!reader.readRParen(exp,got)) {
+#ifdef NOTHROW
+                    std::cerr<<"LowerTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                    exit(1);
+#else
+                    throw TriMatrixReadError<false,T>(i,N,m,reader.getis(),exp,got);
+#endif
+                }
+                if (i < N-1 && !reader.readRowEnd(exp,got)) {
+#ifdef NOTHROW
+                    std::cerr<<"LowerTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                    exit(1);
+#else
+                    throw TriMatrixReadError<false,T>(i,N,m,reader.getis(),exp,got);
+#endif
+                }
+            }
+            if (!reader.readFinal(exp,got)) {
+#ifdef NOTHROW
+                std::cerr<<"LowerTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                exit(1);
+#else
+                throw TriMatrixReadError<false,T>(N,0,m,reader.getis(),exp,got);
+#endif
             }
         }
     };
@@ -381,36 +496,39 @@ namespace tmv {
     template <class M>
     struct ReadU_Helper<90,M>
     {
-        static TMV_INLINE void call(std::istream& is, M& m)
-        { InstRead(is,m.xView()); }
+        static TMV_INLINE void call(const TMV_Reader& reader, M& m)
+        { InstRead(reader,m.xView()); }
     };
              
     // algo 97: Conjugate
     template <class M>
     struct ReadU_Helper<97,M>
     {
-        static TMV_INLINE void call(std::istream& is, M& m)
+        static TMV_INLINE void call(const TMV_Reader& reader, M& m)
         {
             typedef typename M::conjugate_type Mc;
             Mc mc = m.conjugate();
-            ReadU_Helper<-2,Mc>::call(is,mc); 
+            ReadU_Helper<-2,Mc>::call(reader,mc); 
             mc.conjugateSelf();
         }
     };
              
-    // algo -3: Only one algorithm, so call it.
+    // algo -3: Determine which algorithm to use
     template <class M>
     struct ReadU_Helper<-3,M>
     {
-        static TMV_INLINE void call(std::istream& is, M& m)
-        { ReadU_Helper<1,M>::call(is,m); }
+        static TMV_INLINE void call(const TMV_Reader& reader, M& m)
+        {
+            const int algo = M::_upper ? 11 : 12;
+            ReadU_Helper<algo,M>::call(reader,m); 
+        }
     };
              
     // algo -2: Check for inst
     template <class M>
     struct ReadU_Helper<-2,M>
     {
-        static TMV_INLINE void call(std::istream& is, M& m)
+        static TMV_INLINE void call(const TMV_Reader& reader, M& m)
         {
             typedef typename M::value_type T;
             const int inst = 
@@ -421,32 +539,32 @@ namespace tmv {
                 M::_conj ? 97 :
                 inst ? 90 :
                 -3;
-            ReadU_Helper<algo,M>::call(is,m); 
+            ReadU_Helper<algo,M>::call(reader,m); 
         }
     };
 
     template <class M>
     struct ReadU_Helper<-1,M>
     {
-        static TMV_INLINE void call(std::istream& is, M& m)
-        { ReadU_Helper<-2,M>::call(is,m); }
+        static TMV_INLINE void call(const TMV_Reader& reader, M& m)
+        { ReadU_Helper<-2,M>::call(reader,m); }
     };
 
     template <class M>
-    inline void Read(std::istream& is, BaseMatrix_Tri_Mutable<M>& m)
+    inline void Read(const TMV_Reader& reader, BaseMatrix_Tri_Mutable<M>& m)
     {
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
-        ReadU_Helper<-2,Mv>::call(is,mv);
+        ReadU_Helper<-2,Mv>::call(reader,mv);
     }
 
     template <class M>
     inline void InlineRead(
-        std::istream& is, BaseMatrix_Tri_Mutable<M>& m)
+        const TMV_Reader& reader, BaseMatrix_Tri_Mutable<M>& m)
     {
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
-        ReadU_Helper<-3,Mv>::call(is,mv);
+        ReadU_Helper<-3,Mv>::call(reader,mv);
     }
 
 
@@ -458,124 +576,223 @@ namespace tmv {
 
     template <class M>
     static std::istream& operator>>(
-        std::istream& is, BaseMatrix_Tri_Mutable<M>& m)
+        const TMV_Reader& reader, BaseMatrix_Tri_Mutable<M>& m)
     {
         typedef typename M::value_type T;
-        char ul;
-        char ul_exp = (M::_upper ? 'U' : 'L');
-        is >> ul;
-        if (!is) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"TriMatrix ReadError: !is\n";
+        std::string exp,got;
+        const bool upper = M::_upper;
+        const char* code = upper ? "U" : "L";
+#ifdef NOTHROW
+        const char* tag = upper ? "UpperTriMatrix" : "LowerTriMatrix";
+#endif
+        if (!reader.readCode(code,exp,got)) {
+#ifdef NOTHROW
+            std::cerr<<tag<<" Read Error: "<<got<<" != "<<exp<<std::endl;
             exit(1);
 #else
-            throw TriMatrixReadError<T>(is,M::_upper);
+            throw TriMatrixReadError<upper,T>(reader.getis(),exp,got);
 #endif
         }
-        if (ul != ul_exp) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"TriMatrix ReadError: "<<ul<<" != "<<ul_exp<<std::endl;
+        int s=m.size();
+        if (!reader.readSize(s)) {
+#ifdef NOTHROW
+            std::cerr<<tag<<" Read Error: reading size\n";
             exit(1);
 #else
-            throw TriMatrixReadError<T>(is,ul_exp,ul,M::_upper);
-#endif
-        }
-
-        size_t s;
-        is >> s;
-        if (!is) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"TriMatrix ReadError: !is \n";
-            exit(1);
-#else
-            throw TriMatrixReadError<T>(is,M::_upper);
+            throw TriMatrixReadError<upper,T>(reader.getis());
 #endif
         }
         if (s != m.size()) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"TriMatrix ReadError: Wrong size \n";
+#ifdef NOTHROW
+            std::cerr<<tag<<" Read Error: wrong size\n";
             exit(1);
 #else
-            throw TriMatrixReadError<T>(m,is,s);
+            throw TriMatrixReadError<upper,T>(m,reader.getis(),s);
 #endif
         }
-        Read(is,m);
-        return is;
+        s=m.size();
+        if (!reader.readSimpleSize(s)) {
+#ifdef NOTHROW
+            std::cerr<<tag<<" Read Error: reading size\n";
+            exit(1);
+#else
+            throw TriMatrixReadError<upper,T>(reader.getis());
+#endif
+        }
+        if (s != m.size()) {
+#ifdef NOTHROW
+            std::cerr<<tag<<" Read Error: Wrong size\n";
+            exit(1);
+#else
+            throw TriMatrixReadError<upper,T>(m,reader.getis(),s);
+#endif
+        }
+        Read(reader,m);
+        return reader.getis();
     }
 
     template <class T, int A0, int A1, int A2>
     static std::istream& operator>>(
-        std::istream& is, UpperTriMatrix<T,A0,A1,A2>& m)
+        const TMV_Reader& reader, UpperTriMatrix<T,A0,A1,A2>& m)
     {
-        char ul;
-        is >> ul;
-        if (!is) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"UpperTriMatrix ReadError: !is\n";
+        std::string exp,got;
+        if (!reader.readCode("U",exp,got)) {
+#ifdef NOTHROW
+            std::cerr<<"UpperTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
             exit(1);
 #else
-            throw TriMatrixReadError<T>(is,true);
+            throw TriMatrixReadError<true,T>(reader.getis(),exp,got);
 #endif
         }
-        if (ul != 'U') {
-#ifdef TMV_NO_THROW
-            std::cerr<<"UpperTriMatrix ReadError: "<<ul<<" != U\n";
+        int s=m.size();
+        if (!reader.readSize(s)) {
+#ifdef NOTHROW
+            std::cerr<<"UpperTriMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw TriMatrixReadError<T>(is,'U',ul,true);
+            throw TriMatrixReadError<true,T>(reader.getis());
 #endif
         }
-        size_t s;
-        is >> s;
-        if (!is) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"UpperTriMatrix ReadError: !is \n";
+        if (s != m.size()) m.resize(s);
+        s=m.size();
+        if (!reader.readSimpleSize(s)) {
+#ifdef NOTHROW
+            std::cerr<<"UpperTriMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw TriMatrixReadError<T>(is,true);
+            throw TriMatrixReadError<true,T>(reader.getis());
 #endif
         }
-        m.resize(s);
-        Read(is,m);
-        return is;
+        if (s != m.size()) {
+#ifdef NOTHROW
+            std::cerr<<"UpperTriMatrix Read Error: Wrong size\n";
+            exit(1);
+#else
+            throw TriMatrixReadError<true,T>(m,reader.getis(),s);
+#endif
+        }
+        Read(reader,m);
+        return reader.getis();
     }
 
     template <class T, int A0, int A1, int A2>
     static std::istream& operator>>(
-        std::istream& is, LowerTriMatrix<T,A0,A1,A2>& m)
+        const TMV_Reader& reader, LowerTriMatrix<T,A0,A1,A2>& m)
     {
-        char ul;
-        is >> ul;
-        if (!is) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"LowerTriMatrix ReadError: !is\n";
+        std::string exp,got;
+        if (!reader.readCode("L",exp,got)) {
+#ifdef NOTHROW
+            std::cerr<<"TriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
             exit(1);
 #else
-            throw TriMatrixReadError<T>(is,false);
+            throw TriMatrixReadError<false,T>(reader.getis(),exp,got);
 #endif
         }
-        if (ul != 'L') {
-#ifdef TMV_NO_THROW
-            std::cerr<<"LowerTriMatrix ReadError: "<<ul<<" != U\n";
+        int s=m.size();
+        if (!reader.readSize(s)) {
+#ifdef NOTHROW
+            std::cerr<<"TriMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw TriMatrixReadError<T>(is,'L',ul,false);
+            throw TriMatrixReadError<false,T>(reader.getis());
 #endif
         }
-        size_t s;
-        is >> s;
-        if (!is) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"LowerTriMatrix ReadError: !is \n";
+        if (s != m.size()) m.resize(s);
+        s=m.size();
+        if (!reader.readSimpleSize(s)) {
+#ifdef NOTHROW
+            std::cerr<<"TriMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw TriMatrixReadError<T>(is,false);
+            throw TriMatrixReadError<false,T>(reader.getis());
 #endif
         }
-        m.resize(s);
-        Read(is,m);
-        return is;
+        if (s != m.size()) {
+#ifdef NOTHROW
+            std::cerr<<"TriMatrix Read Error: Wrong size\n";
+            exit(1);
+#else
+            throw TriMatrixReadError<false,T>(m,reader.getis(),s);
+#endif
+        }
+        Read(reader,m);
+        return reader.getis();
     }
+
+    template <class T, int A0, int A1, int A2>
+    std::istream& operator>>(std::istream& is, UpperTriMatrix<T,A0,A1,A2>& m)
+    { return is >> IOStyle() >> m; }
+
+    template <class T, int A0, int A1, int A2>
+    std::istream& operator>>(std::istream& is, LowerTriMatrix<T,A0,A1,A2>& m)
+    { return is >> IOStyle() >> m; }
+
+    template <class T, int A>
+    std::istream& operator>>(
+        const TMV_Reader& reader, UpperTriMatrixView<T,A> m)
+    {
+        return reader >> 
+            static_cast<BaseMatrix_Tri_Mutable<UpperTriMatrixView<T,A> >&>(m);
+    }
+
+    template <class T, int A>
+    std::istream& operator>>(
+        const TMV_Reader& reader, LowerTriMatrixView<T,A> m)
+    {
+        return reader >> 
+            static_cast<BaseMatrix_Tri_Mutable<LowerTriMatrixView<T,A> >&>(m);
+    }
+
+    template <class T, int N, int Si, int Sj, int A>
+    std::istream& operator>>(
+        const TMV_Reader& reader, SmallUpperTriMatrixView<T,N,Si,Sj,A> m)
+    {
+        return reader >> 
+            static_cast<BaseMatrix_Tri_Mutable<
+            SmallUpperTriMatrixView<T,N,Si,Sj,A> >&>(m);
+    }
+
+    template <class T, int N, int Si, int Sj, int A>
+    std::istream& operator>>(
+        const TMV_Reader& reader, SmallLowerTriMatrixView<T,N,Si,Sj,A> m)
+    {
+        return reader >> 
+            static_cast<BaseMatrix_Tri_Mutable<
+            SmallLowerTriMatrixView<T,N,Si,Sj,A> >&>(m);
+    }
+
+    template <class T, int A>
+    std::istream& operator>>(std::istream& is, UpperTriMatrixView<T,A> m)
+    {
+        return is >> 
+            static_cast<BaseMatrix_Tri_Mutable<UpperTriMatrixView<T,A> >&>(m);
+    }
+
+    template <class T, int A>
+    std::istream& operator>>(std::istream& is, LowerTriMatrixView<T,A> m)
+    {
+        return is >> 
+            static_cast<BaseMatrix_Tri_Mutable<LowerTriMatrixView<T,A> >&>(m);
+    }
+
+    template <class T, int N, int Si, int Sj, int A>
+    std::istream& operator>>(
+        std::istream& is, SmallUpperTriMatrixView<T,N,Si,Sj,A> m)
+    {
+        return is >> 
+            static_cast<BaseMatrix_Tri_Mutable<
+            SmallUpperTriMatrixView<T,N,Si,Sj,A> >&>(m);
+    }
+
+    template <class T, int N, int Si, int Sj, int A>
+    std::istream& operator>>(
+        std::istream& is, SmallLowerTriMatrixView<T,N,Si,Sj,A> m)
+    {
+        return is >> 
+            static_cast<BaseMatrix_Tri_Mutable<
+            SmallLowerTriMatrixView<T,N,Si,Sj,A> >&>(m);
+    }
+
 
 } // namespace mv
 

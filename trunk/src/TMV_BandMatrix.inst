@@ -4,7 +4,7 @@
 
 #define Def1(RT,T)\
   template class BandMatrixDivHelper2<T>; \
-  template void InstRead(std::istream& is, BandMatrixView<T> m1); \
+  template void InstRead(const TMV_Reader& reader, BandMatrixView<T> m1); \
   template void InstTransposeSelf(BandMatrixView<T> m); \
   template T InstSumElements(const ConstBandMatrixView<T>& m); \
   template RT InstSumAbs2Elements(const ConstBandMatrixView<T>& m); \
@@ -43,10 +43,8 @@ Def3(FT,CT)
 #endif
 
 #define Def4(RT,T,C) \
-  template void InstWriteCompact(std::ostream& os, \
+  template void InstWrite(const TMV_Writer& writer, \
       const ConstBandMatrixView<T,C>& m1); \
-  template void InstWriteCompact(std::ostream& os, \
-      const ConstBandMatrixView<T,C>& m1, const RT thresh); \
 
 Def4(FT,T,NonConj)
 #ifdef TMV_INST_COMPLEX

@@ -573,16 +573,6 @@ namespace tmv {
     inline typename V::real_type DoMinAbs2Element(
         const BaseVector_Calc<V>& v, int* imin=0);
 
-    // Defined in TMV_VectorIO.h
-    template <class V>
-    inline void Write(std::ostream& os, const BaseVector_Calc<V>& v);
-    template <class V>
-    inline void Write(
-        std::ostream& os, const BaseVector_Calc<V>& v,
-        typename V::float_type thresh) ;
-    template <class V>
-    inline void Read(std::istream& is, BaseVector_Mutable<V>& v);
-
     // Defined in TMV_SortV.h
     template <class V>
     inline void Sort(BaseVector_Mutable<V>& v, ADType ad, CompType comp);
@@ -735,18 +725,6 @@ namespace tmv {
         { return tmv::HasZeroElement(calc()); }
 
 
-
-        // 
-        // I/O
-        //
-
-        TMV_INLINE void write(std::ostream& os) const
-        { tmv::Write(os,calc()); }
-        TMV_INLINE void write(std::ostream& os, float_type thresh) const
-        { tmv::Write(os,calc(),thresh); }
-
-
-
         //
         // Auxilliary routines
         //
@@ -766,7 +744,7 @@ namespace tmv {
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
 
-        TMV_INLINE size_t size() const { return vec().size(); }
+        TMV_INLINE int size() const { return vec().size(); }
         TMV_INLINE int nElements() const { return vec().nElements(); }
 
         TMV_INLINE value_type cref(int i) const  { return vec().cref(i); }
@@ -914,7 +892,7 @@ namespace tmv {
         const_reverse_type reverse() const
         {
             return const_reverse_type(
-                cptr()+(int(size())-1)*step(), size(), -step());
+                cptr()+(size()-1)*step(), size(), -step());
         }
 
         const_realpart_type realPart() const
@@ -965,7 +943,7 @@ namespace tmv {
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
 
-        TMV_INLINE size_t size() const { return vec().size(); }
+        TMV_INLINE int size() const { return vec().size(); }
         TMV_INLINE int step() const { return vec().step(); }
         TMV_INLINE const value_type* cptr() const { return vec().cptr(); }
         TMV_INLINE value_type cref(int i) const  { return vec().cref(i); }
@@ -1248,7 +1226,7 @@ namespace tmv {
         }
 
         reverse_type reverse() 
-        { return reverse_type(ptr()+(int(size())-1)*step(), size(),-step()); }
+        { return reverse_type(ptr()+(size()-1)*step(), size(),-step()); }
 
         TMV_INLINE TMV_MAYBE_REF(type,view_type) view() 
         { return MakeVecView<type,view_type>::call(vec()); }
@@ -1340,16 +1318,6 @@ namespace tmv {
         { return base::nonConj(); }
 
 
-
-        //
-        // I/O
-        //
-
-        // Defined in TMV_VectorIO.h
-        TMV_INLINE void read(std::istream& is)
-        { tmv::Read(is,vec()); }
-
-
         //
         // Arithmetic
         //
@@ -1399,7 +1367,7 @@ namespace tmv {
         // Note that these last functionsneed to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
 
-        TMV_INLINE size_t size() const { return vec().size(); }
+        TMV_INLINE int size() const { return vec().size(); }
         TMV_INLINE int step() const { return vec().step(); }
         TMV_INLINE value_type* ptr() { return vec().ptr(); }
         TMV_INLINE const value_type* cptr() { return vec().cptr(); }
@@ -1432,7 +1400,7 @@ namespace tmv {
     {
     public:
         TMV_INLINE VectorSizer(const int _s) : s(_s) {}
-        TMV_INLINE size_t size() const { return s; }
+        TMV_INLINE int size() const { return s; }
 
         TMV_INLINE T cref(int ) const  { return T(0); }
 
@@ -1455,7 +1423,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
         const int size = Sizes<V1::_size,V2::_size>::size;
-        const int n = (size == TMV_UNKNOWN ? int(v1.size()) : size);
+        const int n = (size == TMV_UNKNOWN ? v1.size() : size);
         for(int i=0;i<n;++i) if (v1.cref(i) != v2.cref(i)) return false;
         return true;
     }

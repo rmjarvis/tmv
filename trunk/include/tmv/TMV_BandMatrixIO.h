@@ -3,7 +3,7 @@
 #define TMV_BandMatrixIO_H
 
 #include "TMV_BaseMatrix_Band.h"
-#include "TMV_MatrixIO.h"
+#include "TMV_IOStyle.h"
 
 namespace tmv {
 
@@ -13,144 +13,115 @@ namespace tmv {
 
     // Defined in TMV_BandMatrix.cpp
     template <class T, int C>
-    void InstWriteCompact(
-        std::ostream& os, const ConstBandMatrixView<T,C>& m);
-    template <class T, int C>
-    void InstWriteCompact(
-        std::ostream& os, const ConstBandMatrixView<T,C>& m,
-        typename ConstBandMatrixView<T>::float_type thresh);
+    void InstWrite(
+        const TMV_Writer& writer, const ConstBandMatrixView<T,C>& m);
     template <class T>
-    void InstRead(std::istream& is, BandMatrixView<T> m);
+    void InstRead(const TMV_Reader& reader, BandMatrixView<T> m);
 
-    template <int algo, class M>
+    template <int algo, class M1>
     struct WriteB_Helper;
 
-    template <class M>
-    struct WriteB_Helper<11,M>
+    template <class M1>
+    struct WriteB_Helper<11,M1>
     {
-        static void call(std::ostream& os, const M& m)
+        static void call(const TMV_Writer& writer, const M1& m)
         {
-            const int nrows = m.nrows();
-            const int ncols = m.ncols();
-            os << "B " << nrows << "  " << ncols << " " <<
-                m.nlo() << " " << m.nhi()<<std::endl;
-            for(int i=0;i<nrows;++i) {
-                os << "( ";
-                for(int j=m.rowstart(i);j<m.rowend(i);++j) {
-                    os << " " << Value(m.cref(i,j)) << " ";
+            typedef typename M1::value_type T;
+            const int M = m.colsize();
+            const int N = m.rowsize();
+            int j1=0;
+            int j2=m.nhi()+1;
+
+            writer.begin();
+            writer.writeCode("B");
+            writer.writeSize(M);
+            writer.writeSize(N);
+            writer.writeFullSize(m.nlo());
+            writer.writeFullSize(m.nhi());
+            writer.writeStart();
+
+            for(int i=0;i<M;++i) {
+                writer.writeLParen();
+                if (!writer.isCompact()) {
+                    for(int j=0;j<j1;++j) {
+                        writer.writeValue(T(0));
+                        if (j < N-1) writer.writeSpace();
+                    }
                 }
-                os << " )\n";
-            }
-        }
-        static void call(
-            std::ostream& os, const M& m, typename M::float_type thresh)
-        {
-            typedef typename M::value_type T;
-            const int nrows = m.nrows();
-            const int ncols = m.ncols();
-            os << "B " << nrows << "  " << ncols << " " <<
-                m.nlo() << " " << m.nhi()<<std::endl;
-            for(int i=0;i<nrows;++i) {
-                os << "( ";
-                for(int j=m.rowstart(i);j<m.rowend(i);++j) {
-                    T temp = m.cref(i,j);
-                    os << " " << Value((TMV_ABS2(temp) < thresh ? T(0) : temp)) 
-                        << " ";
+                for(int j=j1;j<j2;++j) {
+                    if (j > j1) writer.writeSpace();
+                    writer.writeValue(m.cref(i,j));
                 }
-                os << " )\n";
+                if (!writer.isCompact()) {
+                    for(int j=j2;j<N;++j) {
+                        writer.writeSpace();
+                        writer.writeValue(T(0));
+                    }
+                }
+                writer.writeRParen();
+                if (i < M-1) writer.writeRowEnd();
+                if (j2 < N) ++j2;
+                if (i >= m.nlo() && j1 < N) ++j1;
             }
+            writer.writeFinal();
+            writer.end();
         }
     };
 
     // algo 90: Call inst
-    template <class M>
-    struct WriteB_Helper<90,M>
+    template <class M1>
+    struct WriteB_Helper<90,M1>
     {
-        static TMV_INLINE void call(std::ostream& os, const M& m)
-        { InstWriteCompact(os,m.calc().xView()); }
-        static TMV_INLINE void call(
-            std::ostream& os, const M& m, typename M::float_type thresh)
-        { InstWriteCompact(os,m.calc().xView(),thresh); }
+        static TMV_INLINE void call(const TMV_Writer& writer, const M1& m)
+        { InstWrite(writer,m.calc().xView()); }
     };
              
     // algo -3: Only one algorithm, so call it.
-    template <class M>
-    struct WriteB_Helper<-3,M>
+    template <class M1>
+    struct WriteB_Helper<-3,M1>
     {
-        static TMV_INLINE void call(std::ostream& os, const M& m)
-        { WriteB_Helper<11,M>::call(os,m); }
-        static TMV_INLINE void call(
-            std::ostream& os, const M& m, typename M::float_type thresh)
-        { WriteB_Helper<11,M>::call(os,m,thresh); }
+        static TMV_INLINE void call(const TMV_Writer& writer, const M1& m)
+        { WriteB_Helper<11,M1>::call(writer,m); }
     };
              
     // algo -2: Check for inst
-    template <class M>
-    struct WriteB_Helper<-2,M>
+    template <class M1>
+    struct WriteB_Helper<-2,M1>
     {
-        typedef typename M::value_type T;
+        typedef typename M1::value_type T;
         enum { inst = (
-                (M::_colsize == TMV_UNKNOWN || M::_colsize > 16) &&
-                (M::_rowsize == TMV_UNKNOWN || M::_rowsize > 16) &&
-                Shape(M::_shape) == Band &&
+                (M1::_colsize == TMV_UNKNOWN || M1::_colsize > 16) &&
+                (M1::_rowsize == TMV_UNKNOWN || M1::_rowsize > 16) &&
                 Traits<T>::isinst ) };
         enum { algo = (
                 inst ? 90 :
                 -3 ) };
-        static TMV_INLINE void call(std::ostream& os, const M& m)
-        { WriteB_Helper<algo,M>::call(os,m); }
-        static TMV_INLINE void call(
-            std::ostream& os, const M& m, typename M::float_type thresh)
-        { WriteB_Helper<algo,M>::call(os,m,thresh); }
+        static TMV_INLINE void call(const TMV_Writer& writer, const M1& m)
+        { WriteB_Helper<algo,M1>::call(writer,m); }
+    };
+
+    template <class M1>
+    struct WriteB_Helper<-1,M1>
+    {
+        static TMV_INLINE void call(const TMV_Writer& writer, const M1& m)
+        { WriteB_Helper<-2,M1>::call(writer,m); }
     };
 
     template <class M>
-    struct WriteB_Helper<-1,M>
-    {
-        static TMV_INLINE void call(std::ostream& os, const M& m)
-        { WriteB_Helper<-2,M>::call(os,m); }
-        static TMV_INLINE void call(
-            std::ostream& os, const M& m, typename M::float_type thresh)
-        { WriteB_Helper<-2,M>::call(os,m,thresh); }
-    };
-
-    template <class M>
-    inline void WriteCompact(
-        std::ostream& os, const BaseMatrix_Band<M>& m)
+    inline void Write(const TMV_Writer& writer, const BaseMatrix_Band<M>& m)
     {
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
-        WriteB_Helper<-2,Mv>::call(os,mv);
+        WriteB_Helper<-2,Mv>::call(writer,mv);
     }
 
     template <class M>
-    inline void InlineWriteCompact(
-        std::ostream& os, const BaseMatrix_Band<M>& m)
+    inline void InlineWrite(
+        const TMV_Writer& writer, const BaseMatrix_Band<M>& m)
     {
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
-        WriteB_Helper<-3,Mv>::call(os,mv);
-    }
-
-    template <class M>
-    inline void WriteCompact(
-        std::ostream& os,
-        const BaseMatrix_Band<M>& m, typename M::float_type thresh) 
-    {
-        typedef typename M::const_cview_type Mv;
-        TMV_MAYBE_CREF(M,Mv) mv = m.cView();
-        WriteB_Helper<-2,Mv>::call(os,mv,thresh);
-    }
-
-
-    template <class M>
-    inline void InlineWriteCompact(
-        std::ostream& os,
-        const BaseMatrix_Band<M>& m, typename M::float_type thresh) 
-    {
-        typedef typename M::const_cview_type Mv;
-        TMV_MAYBE_CREF(M,Mv) mv = m.cView();
-        WriteB_Helper<-3,Mv>::call(os,mv,thresh);
+        WriteB_Helper<-3,Mv>::call(writer,mv);
     }
 
 
@@ -166,47 +137,52 @@ namespace tmv {
     public :
         BandMatrix<T,NoDivider> m;
         int i,j;
-        char exp,got;
-        size_t cs,rs;
+        std::string exp,got;
+        int cs,rs;
         int lo,hi;
+        T v1;
         bool is, iseof, isbad;
 
         BandMatrixReadError(std::istream& _is) throw() :
             ReadError("BandMatrix"),
-            i(0), j(0), exp(0), got(0), cs(0), rs(0), lo(0), hi(0),
+            i(0), j(0), cs(0), rs(0), lo(0), hi(0), v1(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        BandMatrixReadError(
+            std::istream& _is,
+            const std::string& _e, const std::string& _g) throw() :
+            ReadError("BandMatrix"),
+            i(0), j(0), exp(_e), got(_g), cs(0), rs(0), lo(0), hi(0), v1(0),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+
         template <class M>
         BandMatrixReadError(
-            int _i, int _j, const BaseMatrix_Band<M>& _m, 
-            std::istream& _is) throw() :
+            const BaseMatrix_Band<M>& _m, std::istream& _is,
+            int _cs, int _rs, int _lo, int _hi) throw() :
             ReadError("BandMatrix"),
-            m(_m), i(_i), j(_j), exp(0), got(0), 
-            cs(_m.colsize()), rs(_m.rowsize()), lo(_m.nlo()),
+            m(_m), i(0), j(0), cs(_cs), rs(_rs), lo(_lo), hi(_hi), v1(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class M>
         BandMatrixReadError(
             int _i, int _j, const BaseMatrix_Band<M>& _m,
-            std::istream& _is, char _e, char _g) throw() :
+            std::istream& _is,
+            const std::string& _e, const std::string& _g) throw() :
             ReadError("BandMatrix"),
-            m(_m), i(_i), j(_j), exp(_e), got(_g),
-            cs(_m.colsize()), rs(_m.rowsize()), lo(_m.nlo()), hi(_m.nhi()),
-            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        BandMatrixReadError(std::istream& _is, char _e, char _g) throw() :
-            ReadError("BandMatrix"),
-            i(0), j(0), exp(_e), got(_g),
-            cs(0), rs(0), lo(0), hi(0),
+            m(_m), i(_i), j(_j), exp(_e), got(_g), 
+            cs(m.colsize()), rs(m.rowsize()), lo(m.nlo()), hi(m.nhi()), v1(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class M>
         BandMatrixReadError(
-            const BaseMatrix_Band<M>& _m, std::istream& _is,
-            size_t _cs, size_t _rs, int _lo, int _hi) throw() :
+            int _i, int _j, const BaseMatrix_Band<M>& _m, 
+            std::istream& _is, T _v1=0) throw() :
             ReadError("BandMatrix"),
-            m(_m), i(0), exp(0), got(0), cs(_cs), rs(_rs), lo(_lo), hi(_hi),
+            m(_m), i(_i), j(_j), 
+            cs(m.colsize()), rs(m.rowsize()), lo(m.nlo()), hi(m.nhi()), v1(_v1),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+
         BandMatrixReadError(const BandMatrixReadError<T>& rhs) throw() :
             ReadError("BandMatrix"),
             m(rhs.m), i(rhs.i), j(rhs.j), exp(rhs.exp), got(rhs.got), 
-            cs(rhs.cs), rs(rhs.rs), lo(rhs.lo), hi(rhs.hi),
+            cs(rhs.cs), rs(rhs.rs), lo(rhs.lo), hi(rhs.hi), v1(rhs.v1),
             is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) {}
         ~BandMatrixReadError() throw() {}
 
@@ -217,11 +193,11 @@ namespace tmv {
                 os<<"Wrong format: expected '"<<exp<<"', got '"<<got<<"'.\n";
             }
             if (cs != m.colsize()) {
-                os<<"Wrong column size: expected "<<m.colsize()<<
+                os<<"Wrong colsize: expected "<<m.colsize()<<
                     ", got "<<cs<<".\n";
             }
             if (rs != m.rowsize()) {
-                os<<"Wrong row size: expected "<<m.rowsize()<<
+                os<<"Wrong rowsize: expected "<<m.rowsize()<<
                     ", got "<<rs<<".\n";
             }
             if (lo != m.nlo()) {
@@ -239,143 +215,233 @@ namespace tmv {
                     os<<"Input stream cannot read next character.\n";
                 }
             }
+            if (v1 != T(0)) {
+                os<<"Invalid input: Expected 0, got "<<v1<<".\n";
+            }
             if (m.colsize() > 0 || m.rowsize() > 0) {
-                const int N = m.rowsize();
                 os<<"The portion of the BandMatrix which was successfully "
                     "read is: \n";
+                const int N = m.rowsize();
                 for(int ii=0;ii<i;++ii) {
                     os<<"( ";
-                    for(int jj=0;jj<N;++jj)
-                        os<<' '<<m.cref(ii,jj)<<' ';
+                    for(int jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
                     os<<" )\n";
                 }
                 os<<"( ";
-                for(int jj=0;jj<j;++jj)
-                    os<<' '<<m.cref(i,jj)<<' ';
+                for(int jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
                 os<<" )\n";
             }
         }
     };
 #endif
 
-    template <int algo, class M>
+    template <int algo, class M1>
     struct ReadB_Helper;
 
-    template <class M>
-    struct ReadB_Helper<11,M>
+    template <class M1>
+    struct ReadB_Helper<11,M1>
     {
-        static void call(std::istream& is, M& m)
+        static void call(const TMV_Reader& reader, M1& m)
         {
-            typedef typename M::value_type T;
-            char paren;
+            typedef typename M1::value_type T;
+            const int M = m.colsize();
+            const int N = m.rowsize();
+            std::string exp, got;
             T temp;
-            const int nrows = m.nrows();
-            const int ncols = m.ncols();
-            for(int i=0;i<nrows;++i) {
-                is >> paren;
-                if (!is || paren != '(') {
-#ifdef TMV_NO_THROW
-                    std::cerr<<"BandMatrix ReadError: "<<paren<<" != (\n"; 
-                    exit(1); 
+            int j1=0;
+            int j2=m.nhi()+1;
+            if (!reader.readStart(exp,got)) {
+#ifdef NOTHROW
+                std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                exit(1);
 #else
-                    throw BandMatrixReadError<T>(i,0,m,is,'(',is?paren:'(');
+                throw BandMatrixReadError<T>(0,0,m,reader.getis(),exp,got);
+#endif
+            }
+            for(int i=0;i<M;++i) {
+                if (!reader.readLParen(exp,got)) {
+#ifdef NOTHROW
+                    std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                    exit(1);
+#else
+                    throw BandMatrixReadError<T>(i,0,m,reader.getis(),exp,got);
 #endif
                 }
-                for(int j=m.rowstart(i);j<m.rowend(i);++j) {
-                    is >> temp;
-                    if (!is) {
-#ifdef TMV_NO_THROW
-                        std::cerr<<"BandMatrix ReadError: !is\n"; 
-                        exit(1); 
+                if (!reader.isCompact()) {
+                    for(int j=0;j<j1;++j) {
+                        if (!reader.readValue(temp)) {
+#ifdef NOTHROW
+                            std::cerr<<"BandMatrix Read Error: reading value\n";
+                            exit(1);
 #else
-                        throw BandMatrixReadError<T>(i,j,m,is);
+                            throw BandMatrixReadError<T>(i,j,m,reader.getis());
+#endif
+                        }
+                        if (temp != T(0)) {
+#ifdef NOTHROW
+                            std::cerr<<"BandMatrix Read Error: "<<temp<<" != 0\n";
+                            exit(1);
+#else
+                            throw BandMatrixReadError<T>(i,j,m,reader.getis(),temp);
+#endif
+                        }
+                        if (!reader.readSpace(exp,got)) {
+#ifdef NOTHROW
+                            std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                            exit(1);
+#else
+                            throw BandMatrixReadError<T>(i,j,m,reader.getis(),exp,got);
+#endif
+                        }
+                    }
+                }
+                for(int j=j1;j<j2;++j) {
+                    if (j>j1 && !reader.readSpace(exp,got)) {
+#ifdef NOTHROW
+                        std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                        exit(1);
+#else
+                        throw BandMatrixReadError<T>(i,j,m,reader.getis(),exp,got);
+#endif
+                    }
+                    if (!reader.readValue(temp)) {
+#ifdef NOTHROW
+                        std::cerr<<"BandMatrix Read Error: reading value\n";
+                        exit(1);
+#else
+                        throw BandMatrixReadError<T>(i,j,m,reader.getis());
 #endif
                     }
                     m.ref(i,j) = temp;
-                } 
-                is >> paren;
-                if (!is || paren != ')') {
-#ifdef TMV_NO_THROW
-                    std::cerr<<"BandMatrix ReadError: "<<paren<<" != )\n"; 
-                    exit(1); 
+                }
+                if (!reader.isCompact()) {
+                    for(int j=j2;j<N;++j) {
+                        if (!reader.readSpace(exp,got)) {
+#ifdef NOTHROW
+                            std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                            exit(1);
 #else
-                    throw BandMatrixReadError<T>(i,ncols,m,is,')',is?paren:')');
+                            throw BandMatrixReadError<T>(i,j,m,reader.getis(),exp,got);
+#endif
+                        }
+                        if (!reader.readValue(temp)) {
+#ifdef NOTHROW
+                            std::cerr<<"BandMatrix Read Error: reading value\n";
+                            exit(1);
+#else
+                            throw BandMatrixReadError<T>(i,j,m,reader.getis());
+#endif
+                        }
+                        if (temp != T(0)) {
+#ifdef NOTHROW
+                            std::cerr<<"BandMatrix Read Error: "<<temp<<" != 0\n";
+                            exit(1);
+#else
+                            throw BandMatrixReadError<T>(i,j,m,reader.getis(),temp);
+#endif
+                        }
+                    }
+                }
+                if (!reader.readRParen(exp,got)) {
+#ifdef NOTHROW
+                    std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                    exit(1);
+#else
+                    throw BandMatrixReadError<T>(i,N,m,reader.getis(),exp,got);
 #endif
                 }
+                if (i < M-1 && !reader.readRowEnd(exp,got)) {
+#ifdef NOTHROW
+                    std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                    exit(1);
+#else
+                    throw BandMatrixReadError<T>(i,N,m,reader.getis(),exp,got);
+#endif
+                }
+                if (j2 < N) ++j2;
+                if (i >= m.nlo() && j1 < N) ++j1;
+            }
+            if (!reader.readFinal(exp,got)) {
+#ifdef NOTHROW
+                std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                exit(1);
+#else
+                throw BandMatrixReadError<T>(N,0,m,reader.getis(),exp,got);
+#endif
             }
         }
     };
 
     // algo 90: Call inst
-    template <class M>
-    struct ReadB_Helper<90,M>
+    template <class M1>
+    struct ReadB_Helper<90,M1>
     {
-        static TMV_INLINE void call(std::istream& is, M& m)
-        { InstRead(is,m.xView()); }
+        static TMV_INLINE void call(const TMV_Reader& reader, M1& m)
+        { InstRead(reader,m.xView()); }
     };
              
     // algo 97: Conjugate
-    template <class M>
-    struct ReadB_Helper<97,M>
+    template <class M1>
+    struct ReadB_Helper<97,M1>
     {
-        static TMV_INLINE void call(std::istream& is, M& m)
+        static TMV_INLINE void call(const TMV_Reader& reader, M1& m)
         {
-            typedef typename M::conjugate_type Mc;
+            typedef typename M1::conjugate_type Mc;
             Mc mc = m.conjugate();
-            ReadB_Helper<-2,Mc>::call(is,mc); 
+            ReadB_Helper<-2,Mc>::call(reader,mc); 
             mc.conjugateSelf();
         }
     };
              
     // algo -3: Only one algorithm, so call it.
-    template <class M>
-    struct ReadB_Helper<-3,M>
+    template <class M1>
+    struct ReadB_Helper<-3,M1>
     {
-        static TMV_INLINE void call(std::istream& is, M& m)
-        { ReadB_Helper<11,M>::call(is,m); }
+        static TMV_INLINE void call(const TMV_Reader& reader, M1& m)
+        { ReadB_Helper<11,M1>::call(reader,m); }
     };
              
     // algo -2: Check for inst
-    template <class M>
-    struct ReadB_Helper<-2,M>
+    template <class M1>
+    struct ReadB_Helper<-2,M1>
     {
-        static TMV_INLINE void call(std::istream& is, M& m)
+        static TMV_INLINE void call(const TMV_Reader& reader, M1& m)
         {
-            typedef typename M::value_type T;
+            typedef typename M1::value_type T;
             const int inst = 
-                (M::_colsize == TMV_UNKNOWN || M::_colsize > 16) &&
-                (M::_rowsize == TMV_UNKNOWN || M::_rowsize > 16) &&
+                (M1::_colsize == TMV_UNKNOWN || M1::_colsize > 16) &&
+                (M1::_rowsize == TMV_UNKNOWN || M1::_rowsize > 16) &&
                 Traits<T>::isinst;
             const int algo = 
-                M::_conj ? 97 :
+                M1::_conj ? 97 :
                 inst ? 90 :
                 -3;
-            ReadB_Helper<algo,M>::call(is,m); 
+            ReadB_Helper<algo,M1>::call(reader,m); 
         }
     };
 
-    template <class M>
-    struct ReadB_Helper<-1,M>
+    template <class M1>
+    struct ReadB_Helper<-1,M1>
     {
-        static TMV_INLINE void call(std::istream& is, M& m)
-        { ReadB_Helper<-2,M>::call(is,m); }
+        static TMV_INLINE void call(const TMV_Reader& reader, M1& m)
+        { ReadB_Helper<-2,M1>::call(reader,m); }
     };
 
     template <class M>
-    inline void Read(std::istream& is, BaseMatrix_Band_Mutable<M>& m)
+    inline void Read(const TMV_Reader& reader, BaseMatrix_Band_Mutable<M>& m)
     {
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
-        ReadB_Helper<-2,Mv>::call(is,mv);
+        ReadB_Helper<-2,Mv>::call(reader,mv);
     }
 
     template <class M>
     inline void InlineRead(
-        std::istream& is, BaseMatrix_Band_Mutable<M>& m)
+        const TMV_Reader& reader, BaseMatrix_Band_Mutable<M>& m)
     {
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
-        ReadB_Helper<-3,Mv>::call(is,mv);
+        ReadB_Helper<-3,Mv>::call(reader,mv);
     }
 
 
@@ -387,87 +453,109 @@ namespace tmv {
 
     template <class M>
     static std::istream& operator>>(
-        std::istream& is, BaseMatrix_Band_Mutable<M>& m)
+        const TMV_Reader& reader, BaseMatrix_Band_Mutable<M>& m)
     {
         typedef typename M::value_type T;
-        char b;
-        is >> b;
-        if (!is) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"BandMatrix ReadError: !is\n";
+        std::string exp,got;
+        if (!reader.readCode("B",exp,got)) {
+#ifdef NOTHROW
+            std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
             exit(1);
 #else
-            throw BandMatrixReadError<T>(is);
+            throw BandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        if (b != 'B') {
-#ifdef TMV_NO_THROW
-            std::cerr<<"BandMatrix ReadError: "<<b<<" != B\n";
+        int cs=m.colsize(), rs=m.rowsize(), lo=m.nlo(), hi=m.nhi();
+        if (!reader.readSize(cs) || !reader.readSize(rs) ||
+            !reader.readFullSize(lo) || !reader.readFullSize(hi)) {
+#ifdef NOTHROW
+            std::cerr<<"BandMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw BandMatrixReadError<T>(is,'B',b);
+            throw BandMatrixReadError<T>(reader.getis());
 #endif
         }
-
-        size_t cs,rs;
-        int lo,hi;
-        is >> cs >> rs >> lo >> hi;
-        if (!is) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"BandMatrix ReadError: !is \n"; 
-            exit(1); 
+        if (cs != m.colsize() || rs != m.rowsize() || 
+            lo != m.nlo() || hi != m.nhi()) {
+#ifdef NOTHROW
+            std::cerr<<"BandMatrix Read Error: Wrong size\n";
+            exit(1);
 #else
-            throw BandMatrixReadError<T>(is);
+            throw BandMatrixReadError<T>(m,reader.getis(),cs,rs,lo,hi);
 #endif
         }
-        if (cs != m.colsize() || rs != m.rowsize()) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"BandMatrix ReadError: Wrong size \n"; 
-            exit(1); 
-#else
-            throw BandMatrixReadError<T>(m,is,cs,rs,lo,hi);
-#endif
-        }
-        Read(is,m);
-        return is;
+        Read(reader,m);
+        return reader.getis();
     }
 
     template <class T, int A0, int A1>
-    static std::istream& operator>>(std::istream& is, BandMatrix<T,A0,A1>& m)
+    static std::istream& operator>>(
+        const TMV_Reader& reader, BandMatrix<T,A0,A1>& m)
     {
-        char b;
-        is >> b;
-        if (!is) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"BandMatrix ReadError: !is\n";
+        std::string exp,got;
+        if (!reader.readCode("B",exp,got)) {
+#ifdef NOTHROW
+            std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
             exit(1);
 #else
-            throw BandMatrixReadError<T>(is);
+            throw BandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        if (b != 'B') {
-#ifdef TMV_NO_THROW
-            std::cerr<<"BandMatrix ReadError: "<<b<<" != B\n";
+        int cs=m.colsize(), rs=m.rowsize(), lo=m.nlo(), hi=m.nhi();
+        if (!reader.readSize(cs) || !reader.readSize(rs) ||
+            !reader.readFullSize(lo) || !reader.readFullSize(hi)) {
+#ifdef NOTHROW
+            std::cerr<<"BandMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw BandMatrixReadError<T>(is,'B',b); 
+            throw BandMatrixReadError<T>(reader.getis());
 #endif
         }
-        size_t cs,rs;
-        int lo,hi;
-        is >> cs >> rs >> lo >> hi;
-        if (!is) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"BandMatrix ReadError: !is \n"; 
-            exit(1); 
-#else
-            throw BandMatrixReadError<T>(is);
-#endif
+        if (cs != m.colsize() || rs != m.rowsize() || 
+            lo != m.nlo() || hi != m.nhi()) {
+            m.resize(cs,rs,lo,hi);
         }
-        m.resize(cs,rs,lo,hi);
-        Read(is,m);
-        return is;
+        Read(reader,m);
+        return reader.getis();
     }
+
+    template <class T, int A0, int A1>
+    std::istream& operator>>(std::istream& is, BandMatrix<T,A0,A1>& m)
+    { return is >> IOStyle() >> m; }
+
+    template <class T, int A>
+    std::istream& operator>>(const TMV_Reader& reader, BandMatrixView<T,A> m)
+    {
+        return reader >> 
+            static_cast<BaseMatrix_Band_Mutable<BandMatrixView<T,A> >&>(m);
+    }
+
+    template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
+    std::istream& operator>>(
+        const TMV_Reader& reader, SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m)
+    {
+        return reader >> 
+            static_cast<BaseMatrix_Band_Mutable<
+            SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> >&>(m);
+    }
+
+
+    template <class T, int A>
+    std::istream& operator>>(std::istream& is, BandMatrixView<T,A> m)
+    {
+        return is >> 
+            static_cast<BaseMatrix_Band_Mutable<BandMatrixView<T,A> >&>(m);
+    }
+
+    template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
+    std::istream& operator>>(
+        std::istream& is, SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m)
+    {
+        return is >> 
+            static_cast<BaseMatrix_Band_Mutable<
+            SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> >&>(m);
+    }
+
 
 } // namespace mv
 

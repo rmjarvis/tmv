@@ -66,7 +66,7 @@ namespace tmv {
     };
 
 #define NEWLO TMV_MIN(A.nlo(),A.nhi())
-#define NEWHI TMV_MIN(A.nlo()+A.nhi(),int(A.colsize())-1)
+#define NEWHI TMV_MIN(A.nlo()+A.nhi(),A.colsize()-1)
 #define APTR1 (inplace ? 0 : \
                BandStorageLength(ColMajor,A.colsize(),A.colsize(),NEWLO,NEWHI))
 #define APTR (inplace ? A.nonConst().ptr() : Aptr1.get())
@@ -123,11 +123,11 @@ namespace tmv {
             // if isrm stepi >= (2*A.nhi()+A.nlo())
             if (A.iscm()) {
                 TMVAssert(!pimpl->istrans);
-                TMVAssert(A.stepj() >= TMV_MIN(int(A.colsize()),2*A.nlo()+A.nhi()));
+                TMVAssert(A.stepj() >= TMV_MIN(A.colsize(),2*A.nlo()+A.nhi()));
                 TMVAssert(pimpl->LUx.diagRange(-A.nlo(),A.nhi()+1) == A);
             } else if (A.isrm()) {
                 TMVAssert(pimpl->istrans);
-                TMVAssert(A.stepi() >= TMV_MIN(int(A.colsize()),2*A.nhi()+A.nlo()));
+                TMVAssert(A.stepi() >= TMV_MIN(A.colsize(),2*A.nhi()+A.nlo()));
                 TMVAssert(
                     pimpl->LUx.diagRange(-A.nhi(),A.nlo()+1).transpose() == A);
             } else {
@@ -154,7 +154,7 @@ namespace tmv {
     }
 
 #define NEWLO TMV_MIN(A.nlo(),A.nhi())
-#define NEWHI TMV_MIN(A.nlo()+A.nhi(),int(A.colsize())-1)
+#define NEWHI TMV_MIN(A.nlo()+A.nhi(),A.colsize()-1)
 #define APTR1 BandStorageLength(ColMajor,A.colsize(),A.colsize(),NEWLO,NEWHI)
 #define APTR Aptr1.get()
 
@@ -348,11 +348,11 @@ namespace tmv {
     }
 
     template <class T> 
-    size_t BandLUDiv<T>::colsize() const
+    int BandLUDiv<T>::colsize() const
     { return pimpl->LUx.colsize(); }
 
     template <class T> 
-    size_t BandLUDiv<T>::rowsize() const
+    int BandLUDiv<T>::rowsize() const
     { return pimpl->LUx.rowsize(); }
 
 #ifdef INST_INT

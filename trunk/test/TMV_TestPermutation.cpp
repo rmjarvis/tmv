@@ -360,32 +360,16 @@ void TestPermutation()
     //
 
     std::ofstream fout("tmvtest_permutation_io.dat");
-    if (!fout) {
-#ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_permutation_io.dat for output\n";
-        exit(1);
-#else
-        throw std::runtime_error(
-            "Couldn't open tmvtest_permutation_io.dat for output");
-#endif
-    }
+    Assert(fout,"Couldn't open tmvtest_permutation_io.dat for output");
     fout << p3 << std::endl;
-    p3.writeCompact(fout);
+    fout << tmv::CompactIO() << p3 << std::endl;
     fout.close();
 
     tmv::Matrix<T> xm1(10,10);
     tmv::Permutation xp1(10);
     std::ifstream fin("tmvtest_permutation_io.dat");
-    if (!fin) {
-#ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_permutation_io.dat for input\n";
-        exit(1);
-#else
-        throw std::runtime_error(
-            "Couldn't open tmvtest_permutation_io.dat for input");
-#endif
-    }
-    fin >> xm1 >> xp1;
+    Assert(fin,"Couldn't open tmvtest_permutation_io.dat for input");
+    fin >> xm1 >> tmv::CompactIO() >> xp1;
     fin.close();
     Assert(m3 == xm1,"Permutation I/O check #1");
     Assert(p3 == xp1,"Permutation Compact I/O check #1");
@@ -393,12 +377,15 @@ void TestPermutation()
     tmv::Matrix<T> xm2;
     tmv::Permutation xp2;
     fin.open("tmvtest_permutation_io.dat");
-    fin >> xm2 >> xp2;
+    fin >> xm2 >> tmv::CompactIO() >> xp2;
     fin.close();
     Assert(m3 == xm2,"Permutation I/O check #2");
     Assert(p3 == xp2,"Permutation Compact I/O check #2");
 
+#if XTEST == 0
     std::remove("tmvtest_permutation_io.dat");
+#endif
+
 
     //
     // Test other arithmetic

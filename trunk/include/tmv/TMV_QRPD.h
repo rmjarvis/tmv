@@ -401,8 +401,8 @@ namespace tmv {
         // const QRPD<M>& can release the memory.
         mutable std::auto_ptr<QRPD_Impl<small,M> > pimpl;
 
-        size_t colsize() const;
-        size_t rowsize() const;
+        int colsize() const;
+        int rowsize() const;
 
         // op= not allowed.
         QRPD<M>& operator=(const QRPD<M>&);
@@ -706,7 +706,7 @@ namespace tmv {
                 istrans ? A.colsize() : A.rowsize() ,  // rowsize
                 inplace ? (istrans ? A.stepi() : A.stepj()) : 1 , // stepi
                 ( inplace ? (istrans ? A.stepj() : A.stepi()) : 
-                  int(istrans ? A.rowsize() : A.colsize()) ) // stepj
+                  (istrans ? A.rowsize() : A.colsize()) ) // stepj
             ),
             beta(istrans ? A.colsize() : A.rowsize()),
             P(beta.size()), N1(beta.size())
@@ -743,7 +743,7 @@ namespace tmv {
                 istrans ? A.rowsize() : A.colsize() ,  // colsize
                 istrans ? A.colsize() : A.rowsize() ,  // rowsize
                 1 , // stepi
-                int(istrans ? A.rowsize() : A.colsize()) // stepj
+                (istrans ? A.rowsize() : A.colsize()) // stepj
             ),
             beta(istrans ? A.colsize() : A.rowsize()),
             P(beta.size()), N1(beta.size())
@@ -1019,11 +1019,11 @@ namespace tmv {
     }
 
     template <class M>
-    size_t QRPD<M>::colsize() const
+    int QRPD<M>::colsize() const
     { return pimpl->istrans ? pimpl->QRx.rowsize() : pimpl->QRx.colsize(); }
 
     template <class M>
-    size_t QRPD<M>::rowsize() const
+    int QRPD<M>::rowsize() const
     { return pimpl->istrans ? pimpl->QRx.colsize() : pimpl->QRx.rowsize(); }
 
 
@@ -1042,7 +1042,7 @@ namespace tmv {
             *fout << "R = "<<qrpd.getR()<<std::endl;
             *fout << "P = "<<qrpd.getP()<<std::endl;
             *fout << "  or by interchanges: ";
-            for(int i=0;i<int(qrpd.getP().size());i++)
+            for(int i=0;i<qrpd.getP().size();i++)
                 *fout<<(qrpd.getP().getValues())[i]<<" ";
             *fout<<std::endl;
         }

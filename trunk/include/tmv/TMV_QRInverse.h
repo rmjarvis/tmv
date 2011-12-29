@@ -231,7 +231,7 @@ namespace tmv {
         TMVAssert(QR.colsize() == minv.rowsize());
         TMVAssert(QR.rowsize() == minv.colsize());
         if (P) TMVAssert(QR.rowsize() == P->size());
-        TMVAssert(N1 <= int(QR.rowsize()));
+        TMVAssert(N1 <= QR.rowsize());
 
         const int cs = Sizes<M2::_rowsize,M1::_colsize>::size;
         const int rs = Sizes<M2::_colsize,M1::_rowsize>::size;
@@ -256,7 +256,7 @@ namespace tmv {
         TMVAssert(QR.colsize() == minv.rowsize());
         TMVAssert(QR.rowsize() == minv.colsize());
         if (P) TMVAssert(QR.rowsize() == P->size());
-        TMVAssert(N1 <= int(QR.rowsize()));
+        TMVAssert(N1 <= QR.rowsize());
 
         const int cs = Sizes<M2::_rowsize,M1::_colsize>::size;
         const int rs = Sizes<M2::_colsize,M1::_rowsize>::size;
@@ -397,7 +397,7 @@ namespace tmv {
         TMVAssert(QR.rowsize() == ata.rowsize());
         TMVAssert(QR.rowsize() == ata.colsize());
         if (P) TMVAssert(QR.rowsize() == P->size());
-        TMVAssert(N1 <= int(QR.rowsize()));
+        TMVAssert(N1 <= QR.rowsize());
 
         const int cs = M1::_colsize;
         const int rs = Sizes<M2::_colsize,
@@ -423,7 +423,7 @@ namespace tmv {
         TMVAssert(QR.rowsize() == ata.rowsize());
         TMVAssert(QR.rowsize() == ata.colsize());
         if (P) TMVAssert(QR.rowsize() == P->size());
-        TMVAssert(N1 <= int(QR.rowsize()));
+        TMVAssert(N1 <= QR.rowsize());
 
         const int cs = M1::_colsize;
         const int rs = Sizes<M2::_colsize,

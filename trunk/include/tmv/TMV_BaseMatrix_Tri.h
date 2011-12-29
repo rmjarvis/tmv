@@ -330,17 +330,6 @@ namespace tmv {
     template <class M>
     inline void InvertSelf(BaseMatrix_Tri_Mutable<M>& m);
 
-    // Defined in TMV_TriMatrixIO.h
-    template <class M>
-    inline void WriteCompact(
-        std::ostream& os, const BaseMatrix_Tri<M>& m);
-    template <class M>
-    inline void WriteCompact(
-        std::ostream& os,
-        const BaseMatrix_Tri<M>& m, typename M::float_type thresh) ;
-    template <class M>
-    inline void Read(std::istream& is, BaseMatrix_Tri_Mutable<M>& m);
-
     // Defined below:
     template <class M>
     inline void SetZero(BaseMatrix_Tri_Mutable<M>& m);
@@ -801,17 +790,6 @@ namespace tmv {
 
 
         //
-        // I/O
-        //
-
-        TMV_INLINE void writeCompact(std::ostream& os) const
-        { tmv::WriteCompact(os,mat()); }
-        TMV_INLINE void writeCompact(std::ostream& os, float_type thresh) const
-        { tmv::WriteCompact(os,mat(),thresh); }
-
-
-
-        //
         // Auxilliary routines
         //
 
@@ -850,13 +828,13 @@ namespace tmv {
         // class than this, or an infinite loop will result when compiling.
         // Also, cref, get_row and get_col from BaseMatrix.
 
-        TMV_INLINE size_t colsize() const { return mat().size(); }
-        TMV_INLINE size_t rowsize() const { return mat().size(); }
+        TMV_INLINE int colsize() const { return mat().size(); }
+        TMV_INLINE int rowsize() const { return mat().size(); }
         TMV_INLINE int nlo() const 
         { return Maybe<_upper>::select(0,colsize()-1); }
         TMV_INLINE int nhi() const 
         { return Maybe<_upper>::select(rowsize()-1,0); }
-        TMV_INLINE size_t size() const { return mat().size(); }
+        TMV_INLINE int size() const { return mat().size(); }
         TMV_INLINE int stepi() const { return mat().stepi(); }
         TMV_INLINE int stepj() const { return mat().stepj(); }
 
@@ -1451,14 +1429,6 @@ namespace tmv {
 
 
         //
-        // I/O
-        //
-
-        TMV_INLINE void read(std::istream& is)
-        { tmv::Read(is,mat()); }
-
-
-        //
         // Auxilliary routines
         //
 
@@ -1474,9 +1444,9 @@ namespace tmv {
         // class than this, or an infinite loop will result when compiling.
         // Also, cref and cptr from above.
 
-        TMV_INLINE size_t colsize() const { return mat().size(); }
-        TMV_INLINE size_t rowsize() const { return mat().size(); }
-        TMV_INLINE size_t size() const { return mat().size(); }
+        TMV_INLINE int colsize() const { return mat().size(); }
+        TMV_INLINE int rowsize() const { return mat().size(); }
+        TMV_INLINE int size() const { return mat().size(); }
         TMV_INLINE DiagType dt() const { return mat().dt(); }
         TMV_INLINE bool isunit() const { return mat().isunit(); }
         TMV_INLINE int stepi() const { return mat().stepi(); }

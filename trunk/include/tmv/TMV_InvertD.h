@@ -36,7 +36,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(V& v)
         {
-            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v.size() : s;
             call2(n,v.begin());
         }
         static void call2(int n, IT A)
@@ -57,7 +57,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(V& v)
         {
-            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v.size() : s;
             call2(n,v.begin());
         }
         static void call2(int n, IT A)
@@ -99,7 +99,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(V& v)
         {
-            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v.size() : s;
             call2(n,v.begin());
         }
         static void call2(int n, IT A)
@@ -147,7 +147,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(V& v)
         {
-            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v.size() : s;
             call2(n,v.begin());
         }
         static void call2(int n, IT A)
@@ -193,7 +193,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(V& v)
         {
-            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v.size() : s;
             call2(n,v.begin());
         }
         static void call2(int n, IT A)

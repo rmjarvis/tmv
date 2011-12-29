@@ -49,8 +49,8 @@ namespace tmv {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int M = cs==TMV_UNKNOWN ? int(Q.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(beta.size()) : rs;
+            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? beta.size() : rs;
             const int K = Q.rowsize();
 #ifdef PRINTALGO_QR
             std::cout<<"UnpackQ algo 11: M,N,cs,rs = "<<M<<','<<N<<
@@ -91,8 +91,8 @@ namespace tmv {
         typedef typename M1::value_type T;
         static void call(M1& Q, const V& beta)
         {
-            const int M = cs==TMV_UNKNOWN ? int(Q.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(beta.size()) : rs;
+            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? beta.size() : rs;
             const int K = Q.rowsize();
 #ifdef PRINTALGO_QR
             std::cout<<"UnpackQ algo 21: M,N,cs,rs = "<<M<<','<<N<<
@@ -138,10 +138,10 @@ namespace tmv {
         typedef typename M1::value_type T;
         static void call(M1& Q, const V& beta)
         {
-            const int N = rs==TMV_UNKNOWN ? int(beta.size()) : rs;
+            const int N = rs==TMV_UNKNOWN ? beta.size() : rs;
             const int K = Q.rowsize();
 #ifdef PRINTALGO_QR
-            const int M = cs==TMV_UNKNOWN ? int(Q.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
             std::cout<<"UnpackQ algo 27: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -177,8 +177,8 @@ namespace tmv {
         typedef typename M1::value_type T;
         static void call(M1& Q, const V& beta)
         {
-            const int M = cs==TMV_UNKNOWN ? int(Q.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(beta.size()) : rs;
+            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? beta.size() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"UnpackQ algo 31: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -278,8 +278,8 @@ namespace tmv {
                 ( TMV_OPT >= 2 && !M1::_colmajor ) ? 81 :
                 -4 );
 #ifdef PRINTALGO_QR
-            const int M = cs==TMV_UNKNOWN ? int(Q.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(beta.size()) : rs;
+            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? beta.size() : rs;
             std::cout<<"UnpackQ algo -3: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif

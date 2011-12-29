@@ -2624,9 +2624,9 @@ namespace tmv {
                 RT* m3p, const int si3, const int sj3,
                 KF* kf);
 
-            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? m3.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? m3.rowsize() : rs;
+            const int K = xs==TMV_UNKNOWN ? m1.rowsize() : xs;
 
             const int Mb = (M>>lgMB); // = M/MB
             const int Nb = (N>>lgNB); // = N/NB
@@ -3321,9 +3321,9 @@ namespace tmv {
                 RT* m3p, const int si3, const int sj3,
                 KF* kf);
 
-            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
-            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
+            const int M = cs==TMV_UNKNOWN ? m3.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? m3.rowsize() : rs;
+            const int K = xs==TMV_UNKNOWN ? m1.rowsize() : xs;
 
             const int Mb = (M>>lgMB); // = M/MB
             const int Nb = (N>>lgNB); // = N/NB

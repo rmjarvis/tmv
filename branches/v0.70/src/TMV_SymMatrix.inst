@@ -1,0 +1,102 @@
+
+#define CT std::complex<T>
+
+#define Def1(RT,T,Ref) \
+  template bool GenSymMatrix<T >::hasSubMatrix( \
+      int i1, int i2, int j1, int j2, int is, int js) const; \
+  template bool GenSymMatrix<T >::hasSubVector( \
+      int i, int j, int is, int js, int s) const; \
+  template bool GenSymMatrix<T >::hasSubSymMatrix( \
+      int i1, int i2, int is) const; \
+  template bool ConstSymMatrixView<T,FortranStyle>::hasSubMatrix( \
+      int i1, int i2, int j1, int j2, int is, int js) const; \
+  template bool ConstSymMatrixView<T,FortranStyle>::hasSubVector( \
+      int i, int j, int is, int js, int s) const; \
+  template bool ConstSymMatrixView<T,FortranStyle>::hasSubSymMatrix( \
+      int i1, int i2, int is) const; \
+  template T GenSymMatrix<T >::sumElements() const; \
+  template RT GenSymMatrix<T >::sumAbsElements() const; \
+  template RT GenSymMatrix<T >::sumAbs2Elements() const; \
+  template RT GenSymMatrix<T >::normF() const; \
+  template RT GenSymMatrix<T >::normSq(const RT scale) const; \
+  template RT GenSymMatrix<T >::norm1() const; \
+  template RT GenSymMatrix<T >::maxAbsElement() const; \
+  template RT GenSymMatrix<T >::maxAbs2Element() const; \
+  template QuotXS<T,T > GenSymMatrix<T >::QInverse() const; \
+  template T GenSymMatrix<T >::cref(int i, int j) const; \
+  template const SymMatrixView<T,CStyle>&  \
+      SymMatrixView<T,CStyle>::swapRowsCols(int i1, int i2) const;\
+  template const SymMatrixView<T,CStyle>&  \
+      SymMatrixView<T,CStyle>::permuteRowsCols(const int* p, \
+      int i1, int i2) const; \
+  template const SymMatrixView<T,CStyle>& \
+      SymMatrixView<T,CStyle>::reversePermuteRowsCols(const int* p, \
+      int i1, int i2) const; \
+  template void GenSymMatrix<T >::write(const TMV_Writer& writer) const; \
+  template void SymMatrixView<T,CStyle>::read(const TMV_Reader& reader) const; \
+  template Ref SymMatrixView<T,CStyle>::ref(int i, int j) const; \
+
+Def1(T,T,T&)
+#ifdef INST_COMPLEX
+Def1(T,CT,VarConjRef<CT >)
+#endif
+
+#undef Def1
+
+#ifndef TISINT
+#define Def1b(RT,T) \
+  template T GenSymMatrix<T >::det() const; \
+  template RT GenSymMatrix<T >::logDet(T* sign) const; \
+  template void GenSymMatrix<T >::newDivider() const; \
+  template bool GenSymMatrix<T >::divIsLUDiv() const; \
+  template bool GenSymMatrix<T >::divIsCHDiv() const; \
+  template bool GenSymMatrix<T >::divIsHermSVDiv() const; \
+  template bool GenSymMatrix<T >::divIsSymSVDiv() const; \
+
+Def1b(T,T)
+#ifdef INST_COMPLEX
+Def1b(T,CT)
+#endif
+
+#undef Def1b
+#endif
+
+#define Def2(T1,T2) \
+  template void GenSymMatrix<T1 >::doMakeInverse( \
+      const SymMatrixView<T2 >& sinv) const; \
+
+Def2(T,T)
+#ifdef INST_COMPLEX
+Def2(T,CT)
+Def2(CT,CT)
+#endif
+
+#undef Def2
+
+#define Def3(T,RT,U,S,I) \
+  template void SymMatrix<T,U,S,I>::read(const TMV_Reader& reader); \
+  template void HermMatrix<T,U,S,I>::read(const TMV_Reader& reader); \
+
+Def3(T,T,Upper,RowMajor,CStyle)
+Def3(T,T,Upper,ColMajor,CStyle)
+Def3(T,T,Lower,RowMajor,CStyle)
+Def3(T,T,Lower,ColMajor,CStyle)
+Def3(T,T,Upper,RowMajor,FortranStyle)
+Def3(T,T,Upper,ColMajor,FortranStyle)
+Def3(T,T,Lower,RowMajor,FortranStyle)
+Def3(T,T,Lower,ColMajor,FortranStyle)
+#ifdef INST_COMPLEX
+Def3(CT,T,Upper,RowMajor,CStyle)
+Def3(CT,T,Upper,ColMajor,CStyle)
+Def3(CT,T,Lower,RowMajor,CStyle)
+Def3(CT,T,Lower,ColMajor,CStyle)
+Def3(CT,T,Upper,RowMajor,FortranStyle)
+Def3(CT,T,Upper,ColMajor,FortranStyle)
+Def3(CT,T,Lower,RowMajor,FortranStyle)
+Def3(CT,T,Lower,ColMajor,FortranStyle)
+#endif
+
+#undef Def3
+
+#undef CT
+

@@ -886,29 +886,20 @@ namespace tmv {
     //
 
     template <class T, int C> 
-    void InstWrite(std::ostream& os, const ConstVectorView<T,C>& v)
+    void InstWrite(const TMV_Writer& writer, const ConstVectorView<T,C>& v)
     {
-        if (v.step() == 1) InlineWrite(os,v.unitView()); 
-        else InlineWrite(os,v); 
-    }
-
-    template <class T, int C> 
-    void InstWrite(
-        std::ostream& os, const ConstVectorView<T,C>& v,
-        typename ConstVectorView<T>::float_type thresh)
-    {
-        if (v.step() == 1) InlineWrite(os,v.unitView(),thresh); 
-        else InlineWrite(os,v,thresh); 
+        if (v.step() == 1) InlineWrite(writer,v.unitView()); 
+        else InlineWrite(writer,v); 
     }
 
     template <class T>
-    void InstRead(std::istream& is, VectorView<T> v)
+    void InstRead(const TMV_Reader& reader, VectorView<T> v)
     {
         if (v.step() == 1) {
             VectorView<T,Unit> vu = v.unitView();
-            InlineRead(is,vu); 
+            InlineRead(reader,vu); 
         } else 
-            InlineRead(is,v); 
+            InlineRead(reader,v); 
     }
 
 #define InstFile "TMV_Vector.inst"

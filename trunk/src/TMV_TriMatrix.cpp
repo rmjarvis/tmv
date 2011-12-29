@@ -466,70 +466,38 @@ namespace tmv {
     //
 
     template <class T, int C>
-    void InstWriteCompact(
-        std::ostream& os, 
-        const ConstUpperTriMatrixView<T,C>& m)
+    void InstWrite(
+        const TMV_Writer& writer, const ConstUpperTriMatrixView<T,C>& m)
     {
-        if (m.iscm()) InlineWriteCompact(os,m.cmView());
-        else if (m.isrm()) InlineWriteCompact(os,m.rmView());
-        else InlineWriteCompact(os,m);
+        if (m.isrm()) InlineWrite(writer,m.rmView());
+        else InlineWrite(writer,m);
     }
 
     template <class T, int C>
-    void InstWriteCompact(
-        std::ostream& os, 
-        const ConstLowerTriMatrixView<T,C>& m)
+    void InstWrite(
+        const TMV_Writer& writer, const ConstLowerTriMatrixView<T,C>& m)
     {
-        if (m.iscm()) InlineWriteCompact(os,m.cmView());
-        else if (m.isrm()) InlineWriteCompact(os,m.rmView());
-        else InlineWriteCompact(os,m);
-    }
-
-    template <class T, int C>
-    void InstWriteCompact(
-        std::ostream& os,
-        const ConstUpperTriMatrixView<T,C>& m, 
-        typename ConstUpperTriMatrixView<T>::float_type thresh)
-    {
-        if (m.iscm()) InlineWriteCompact(os,m.cmView(),thresh);
-        else if (m.isrm()) InlineWriteCompact(os,m.rmView(),thresh);
-        else InlineWriteCompact(os,m,thresh);
-    }
-
-    template <class T, int C>
-    void InstWriteCompact(
-        std::ostream& os,
-        const ConstLowerTriMatrixView<T,C>& m, 
-        typename ConstLowerTriMatrixView<T>::float_type thresh)
-    {
-        if (m.iscm()) InlineWriteCompact(os,m.cmView(),thresh);
-        else if (m.isrm()) InlineWriteCompact(os,m.rmView(),thresh);
-        else InlineWriteCompact(os,m,thresh);
+        if (m.isrm()) InlineWrite(writer,m.rmView());
+        else InlineWrite(writer,m);
     }
 
     template <class T>
-    void InstRead(std::istream& is, UpperTriMatrixView<T> m)
+    void InstRead(const TMV_Reader& reader, UpperTriMatrixView<T> m)
     {
-        if (m.iscm()) {
-            UpperTriMatrixView<T,ColMajor> mcm = m.cmView();
-            InlineRead(is,mcm);
-        } else if (m.isrm()) {
+        if (m.isrm()) {
             UpperTriMatrixView<T,RowMajor> mrm = m.rmView();
-            InlineRead(is,mrm);
+            InlineRead(reader,mrm);
         } else 
-            InlineRead(is,m);
+            InlineRead(reader,m);
     }
     template <class T>
-    void InstRead(std::istream& is, LowerTriMatrixView<T> m)
+    void InstRead(const TMV_Reader& reader, LowerTriMatrixView<T> m)
     {
-        if (m.iscm()) {
-            LowerTriMatrixView<T,ColMajor> mcm = m.cmView();
-            InlineRead(is,mcm);
-        } else if (m.isrm()) {
+        if (m.isrm()) {
             LowerTriMatrixView<T,RowMajor> mrm = m.rmView();
-            InlineRead(is,mrm);
+            InlineRead(reader,mrm);
         } else 
-            InlineRead(is,m);
+            InlineRead(reader,m);
     }
 
 #define InstFile "TMV_TriMatrix.inst"

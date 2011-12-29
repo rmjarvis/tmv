@@ -56,7 +56,7 @@ namespace tmv {
     template <int s, class M1, class M2>
     struct LDivEqUU_Helper<1,s,M1,M2>
     {
-        static inline void call(M1& m1, const M2& m2)
+        static void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqUU algo 1: N,s = "<<1<<','<<s<<std::endl;
@@ -72,7 +72,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"UU algo 11: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -118,7 +118,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqUU algo 12: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -160,7 +160,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqUU algo 13: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -213,7 +213,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqUU algo 17: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -300,7 +300,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"UU algo 11: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -346,7 +346,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqUU algo 22: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -388,7 +388,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqUU algo 23: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -441,7 +441,7 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqUU algo 27: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -531,14 +531,14 @@ namespace tmv {
         struct copyBack
         { // unknowndiag = false
             template <class M1c>
-            static inline void call(const M1c& m1c, M1& m1)
+            static void call(const M1c& m1c, M1& m1)
             { m1.noAlias() = m1c; }
         };
         template <int dummy>
         struct copyBack<true,dummy>
         {
             template <class M1c>
-            static inline void call(const M1c& m1c, M1& m1)
+            static void call(const M1c& m1c, M1& m1)
             {
                 if (m1.isunit()) m1.noAlias() = m1c.viewAsUnitDiag();
                 else m1.noAlias() = m1c;
@@ -547,7 +547,7 @@ namespace tmv {
         static void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int N = s == TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s == TMV_UNKNOWN ? m1.size() : s;
             std::cout<<"LDivEqUU algo 83: N,s = "<<N<<','<<s<<std::endl;
 #endif
             typename M1::copy_type m1c = m1;
@@ -699,7 +699,7 @@ namespace tmv {
                 TMV_OPT == 0 ? ( rr ? 22 : rc ? 23 : cx ? 21 : 23 ) :
                 27;
 #ifdef PRINTALGO_DivU
-            const int N = s==TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s==TMV_UNKNOWN ? m1.size() : s;
             std::cout<<"InlineLDivEqUU: \n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
@@ -754,7 +754,7 @@ namespace tmv {
     };
 
     template <class M1, class M2>
-    static inline void TriLDivEq(
+    inline void TriLDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     {
         TMVStaticAssert((Sizes<M2::_size,M1::_size>::same));
@@ -769,7 +769,7 @@ namespace tmv {
         LDivEqUU_Helper<-1,s,M1v,M2v>::call(m1v,m2v);
     }
     template <class M1, class M2>
-    static inline void InlineTriLDivEq(
+    inline void InlineTriLDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     {
         TMVStaticAssert((Sizes<M2::_size,M1::_size>::same));
@@ -784,7 +784,7 @@ namespace tmv {
         LDivEqUU_Helper<-3,s,M1v,M2v>::call(m1v,m2v);
     }
     template <class M1, class M2>
-    static inline void InlineAliasTriLDivEq(
+    inline void InlineAliasTriLDivEq(
         BaseMatrix_Tri_Mutable<M1>& m1, const BaseMatrix_Tri<M2>& m2)
     {
         TMVStaticAssert((Sizes<M2::_size,M1::_size>::same));

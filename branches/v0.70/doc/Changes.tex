@@ -1,0 +1,177 @@
+% !TEX root = TMV_Documentation.tex
+
+\section{Changes from Version \prevtmvversion\ to \tmvversion}
+\label{Changes}
+
+The impetus for this release was mostly just the first change listed below about the behavior of comma initialization for matrices.  But since I knew this change would not be backwards compatible, and might require users to edit their code, I decided to try to put all the non-backward-compatible changes that I've been thinking about introducing into this release to try to do everything at once.  
+
+The other big change is the redesigned I/O system that uses the equivalent of stream manipulators to control the I/O behavior.  The default output format hasn't changed, but if you ever did anything fancier than that, you'll need to change your code to use the new system.
+
+There are a number of other non-backwards-compatible changes, so users should look through this section carefully to see if any other changes might require  some of their own code to be modified.
+
+Here is a list of the changes from version \prevtmvversion\ to \tmvversion.  
+Whenever a change is not backward compatible, meaning that code using the previous version might be broken, I mark the item with a $\times$ bullet rather than the usual $\bullet$ to indicate this.  
+
+\begin{itemize}
+
+\item[$\times$] 
+Changed the behavior of the \tt{m << 1, 2, 3...} initialization.  Now the items in the initialization list should be in \tt{RowMajor} order regardless of the storage order of the matrix \tt{m}.  This makes it much easier to understand the initialization, since the list can be arranged to look like the matrix you are setting.  e.g. the snippet:
+\begin{tmvcode}
+tmv::Matrix<double> m(3,5);
+m << 3 ,  9 ,  1 ,  4 ,  2 ,
+     7 , -3 ,  0 , -1 ,  4 ,
+    -6 ,  2 , 11 ,  5 ,  6 ;
+\end{tmvcode}
+now initializes the matrix to have the values as shown in the rectangle.  The old behavior was to follow the storage order of the matrix, and since the default storage order is \tt{ColMajor}, this would unintuitively initialize the matrix to
+\begin{equation*}
+\left(\begin{array}{ccccc}3 & 4 & -3 & 4 & 11   \\9 & 2 & 0 & -6 & 5   \\1 & 7 & -1 & 2 & 6 \end{array}\right) 
+\end{equation*}
+rather than the obviously intended matrix
+\begin{equation*}
+\left(\begin{array}{ccccc}3 & 9 & 1 & 4 & 2   \\7 & -3 & 0 & -1 & 4   \\-6 & 2 & 11 & 5 & 6 \end{array}\right) 
+\end{equation*}
+
+Now the code correctly initializes the matrix to the second one regardless of how the matrix intrinsically stores the values, which I believe is a much more intuitive behavior.
+
+Of course, if you do want to initialize according to a \tt{ColMajor} list of numbers for some reason, you can initialize \tt{m.transpose()} instead:
+\begin{tmvcode}
+tmv::Matrix<double> m(3,5);
+m.transpose() << 3 ,  7 , -6 ,
+                 9 , -3 ,  2 ,
+                 1 ,  0 , 11 ,
+                 4 , -1 ,  5 ,
+                 2 ,  4 ,  6 ,
+\end{tmvcode}
+
+\item[$\times$] 
+Removed the constructors from either a C-style array or a \tt{std::vector}.  The reason is similar to the reasoning above -- I wanted to decouple the internal storage order from the order of the elements in the initializing vector. 
+
+To take the place of these constructors' functionality, I added iterators that iterate over the matrix in either \tt{RowMajor} or \tt{ColMajor} order, so the assignment can be done with the standard library's \tt{std::copy} function.
+
+\begin{tmvcode}
+const double rmar[15] = 
+    { 3, 9, 1, 4, 2, 7, -3, 0, -1, 4, -6, 2, 11, 5, 6};
+const double cmar[15] = 
+    { 3, 7, -6, 9, -3, 2, 1, 0, 11, 4, -1, 5, 2, 4, 6};
+
+// Old style constuctors: (no longer valid)
+tmv::Matrix<double,tmv::RowMajor> m1(3,5,rmar);
+tmv::Matrix<double,tmv::ColMajor> m2(3,5,cmar);
+
+// New style assignment with iterators:
+tmv::Matrix<double> m3(3,5); // Can be either StorageType
+std::copy(rmar, rmar+15, m3.rowmajor_begin());
+tmv::Matrix<double> m4(3,5);
+std::copy(cmar, cmar+15, m3.colmajor_begin());
+\end{tmvcode}
+
+In addition, a \tt{BandMatrix} can be iterated in \tt{DiagMajor} order using \tt{m.diagmajor_begin()}.
+
+\item 
+Added the ability to do comma initialization for \tt{DiagMatrix}, \tt{UpperTriMatrix}, \tt{LowerTriMatrix}, \tt{BandMatrix}, and their corresponding view types.  These are also always listed in RowMajor order regardless of the actual storage order of the matrix in memory.  Also, only the values in the corresponding parts of the matrices should be listed in the initialization.  e.g.
+\begin{tmvcode}
+tmv::DiagMatrix<double> d(4);
+d << 4,
+        9,
+           11,
+              -4 ;
+tmv::UpperTriMatrix<double> u(4);
+u << 4 ,  9 , -1 ,  0 ,
+         18 ,  3 , -7 ,
+               1 ,  5 ,
+                   10 ;
+tmv::LowerTriMatrix<double> l(4);
+l <<  1 ,
+     12 , -3 ,
+      8 ,  5 , -9 ,
+      3 , 20 , 14 ,  4 ;
+tmv::BandMatrix<double> b(4,1,1);
+b <<  7 ,  9 ,
+     10 , -1 ,  5 ,
+           8 , -6 , 21 ,
+                2 ,  8 ;
+\end{tmvcode}
+
+I chose not to add similar initializers for symmetric or hermitian matrix types, because I think initialization of them is clearer in terms of only the upper or lower triangle part that is stored in memory.  So the way to initialize them would be something like:
+\begin{tmvcode}
+tmv::SymMatrix<double> s(4);
+s.upperTri() << 2 ,  1 , -3 ,  7 ,
+                    -8 , -2 , 12 ,
+                          6 ,  1 ,
+                               7 ;
+tmv::SymBandMatrix<double> sb(4,1);
+sb.lowerBand() <<  8 ,
+                  12 ,  5 ,
+                       -8 ,  2 ,
+                             6 , 10 ;
+\end{tmvcode}
+
+\item[$\times$]
+Removed the \tt{auto_ptr} read functions.  This notation was cumbersome, and since 
+all matrices can be resized now (a feature added in v0.65), there is no need for it anymore.
+The \tt{auto_ptr} was really just a workaround for the fact that matrices didn't used to be 
+able to be resized.  So rather than writing:
+\begin{tmvcode}
+std::auto_ptr<tmv::Matrix<double> > pm;
+is >> pm;  // old style
+[... Use matrix as *pm ... ]
+\end{tmvcode}
+you can now simply write:
+\begin{tmvcode}
+tmv::Matrix<double> m;
+is >> m;   // m is automatically resized to the correct size.
+[... Use matrix as m ... ]
+\end{tmvcode}
+
+\item
+Added default constructors to \tt{Vector}, \tt{Matrix} and all the special matrix classes.  These construct a zero-sized matrix, so normally you would want to resize the matrix at some point.  See the previous item for an example of how this could be useful.
+
+\item[$\times$]
+Removed the functions read, write and writeCompact, and replaced them with a more streamlined I/O interface. Now there are objects that act like stream manipulators to control how the next TMV object should be written or read.
+\begin{tmvcode}
+os << m;  
+os << tmv::CompactIO() << m;
+os << tmv::ThreshIO(1.e-8) << m;
+is >> m;
+is >> tmv::CompactIO() >> m;
+\end{tmvcode}
+
+The first line outputs the matrix in the same format as previous versions used.  This format is the same regardless of whether it is a regular \tt{Matrix} or one of the special varieties.  
+The next line replaces the old command \tt{m.writeCompact(os)}.  I also changed the ``compact'' style to be more compact than before (which means that it is not backwards compatible with files written by older versions of TMV).  
+The third line replaces the old \tt{m.write(os,1.e-8)} to clip all small values to 0, which is useful when rounding errors are expected to produce many values near 0.  
+And the last two lines show how to read the matrix in either regular or compact format.  This is also not backwards compatible with old code, since \tt{is >> m} used to implicitly expect compact format for the special matrix varieties.  Now special matrices can be read in either format, and the compact style needs to be explicitly specified.  
+
+There is significantly more to the new I/O style than these options.  You can design your own markup (e.g. change the parentheses to brackets, use commas between elements, etc.), you can specify a precision to use in the output, and you can set some specialized style to be the default to be used when no explicit manipulator is given.  See \S\ref{IOStyle} for more information.
+
+\item[$\times$] 
+Removed the routines that returned pointers to new \tt{BaseMatrix}es.  In general, using the \tt{BaseMatrix} class directly is not really very useful, so I don't think anyone is actually using these methods.  And in the version 0.90 TMV code in development, I've completely redesigned the back end.  It gets rid of the virtual class hierarchy completely using the CRTP idiom rather than virtual functions.  But this means that methods like \tt{newCopy()}, \tt{newTranspose()}, etc. are not really relevant anymore.
+
+There are no simple workarounds for this lost functionality, so if you were using these functions and are sorry to see them go, or if you are otherwise using the virtual functionality (e.g. putting pointers to a bunch of disparate \tt{BaseMatrix} objects into a \tt{std::vector} or other container class), let me know what your use case is (at \mygroup) and we can try to figure out how best to incorporate your needs in the next version and in the version 0.90 redesign.
+
+\item 
+Added a few more "ViewOf" functions to allow direct views of memory as different kinds of matrix types directly specifying the step in each direction.  These are more flexible than the versions that merely specify a StorageType to use.  For non-contiguous data, those weren't sufficient.  So now, you can view arbitrary data in memory as an \tt{UpperTriMatrixView}, \tt{LowerTriMatrixView},
+\tt{DiagMatrixView}, \tt{BandMatrixView}, \tt{SymMatrixView}, or \tt{SymBandMatrixView} specifying the memory address of $m(0,0)$ and the step size in each direction.
+
+\item[$\times$]
+Changed type type of the size values from \tt{size_t} to \tt{int}.  The main reason for this is to prevent the constructors that take size arguments from implicitly converting a negative number into a very large unsigned value and then attempt to allocate a huge amount of memory.  If the size parameters in a constructor such as \tt{tmv::Matrix<T>(nrows,ncols)} were the result of some calculation and they accidentally were allowed to be negative, the new code will hit an assert statement checking that they are nonnegative, rather than trying to allocate the incorrectly huge amount of memory.  This seems like safer behavior.
+
+The only other place where this might matter is that the return type of functions like \tt{m.colsize()} now return an \tt{int} rather than a \tt{size_t}.  So if you do any comparisons like \tt{while(i < m.colsize())} and you compile with \tt{g++ -Wall}, you'll want \tt{i} to be a signed integer type to avoid \tt{g++}'s warning about comparing signed and unsigned types.
+
+\item
+Removed warnings related to the norm2 and makeInverseATA methods, since I decided that they were probably unnecessary.  The behavior of TMV is well-enough documented in both cases that I don't think anyone who uses these functions will be surprised by the behavior.
+
+\item 
+Added warning for when the matrix multiplication routine catches a \tt{bad_alloc} exception and reverts to using a function that doesn't allocate memory.  Also added documenation for the Warning that had been output when the divide-and-conquer SVD algorithm has trouble converging.
+
+\item
+Changed the default warning behavior to be no output.  To turn on the warnings, the user needs to explicitly specify an \tt{ostream} with the \tt{tmv::WriteWarningsTo} function.
+
+\item 
+Added support for the \tt{clang++} compiler.  This didn't require much editing, but it did complain about a couple things that had passed muster with the other compilers I had used.
+
+\item[$\times$]
+Removed the functions and methods that had been deprecated in the 0.6x
+versions of TMV.
+
+
+\end{itemize}
