@@ -59,8 +59,8 @@ namespace tmv {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRPDecompose algo 11: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -160,7 +160,7 @@ namespace tmv {
                         if (jpiv != 0) {
                             // Add j to get real index
                             jpiv += j;
-                            TMVAssert(jpiv < int(A.rowsize()));
+                            TMVAssert(jpiv < A.rowsize());
                             colnormsq.swap(j,jpiv);
                             A.swapCols(j,jpiv);
                             P[j] = jpiv;
@@ -211,7 +211,7 @@ namespace tmv {
                 std::cerr<<"-> "<<A<<std::endl;
                 std::cerr<<"beta = "<<beta<<std::endl;
                 std::cerr<<"P = ";
-                for(int i=0;i<int(A.rowsize());i++) std::cerr<<P[i]<<" ";
+                for(int i=0;i<A.rowsize();i++) std::cerr<<P[i]<<" ";
                 std::cerr<<std::endl;
                 std::cerr<<"QRP = "<<AA<<std::endl;
                 std::cerr<<"A0 = "<<A0<<std::endl;
@@ -232,8 +232,8 @@ namespace tmv {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRPDecompose algo 21: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -341,7 +341,7 @@ namespace tmv {
                         // Pivot
                         if (jpiv != 0) {
                             jpiv += j;
-                            TMVAssert(jpiv < int(A.rowsize()));
+                            TMVAssert(jpiv < A.rowsize());
                             //std::cout<<"jpiv => "<<jpiv<<std::endl;
                             colnormsq.swap(j,jpiv);
                             A.swapCols(j,jpiv);
@@ -434,7 +434,7 @@ namespace tmv {
                 std::cerr<<"-> "<<A<<std::endl;
                 std::cerr<<"beta = "<<beta<<std::endl;
                 std::cerr<<"P = ";
-                for(int i=0;i<int(A.rowsize());i++) std::cerr<<P[i]<<" ";
+                for(int i=0;i<A.rowsize();i++) std::cerr<<P[i]<<" ";
                 std::cerr<<std::endl;
                 std::cerr<<"QRP = "<<AA<<std::endl;
                 std::cerr<<"A0 = "<<A0<<std::endl;
@@ -456,9 +456,9 @@ namespace tmv {
                 std::cout<<"diff = "<<beta2-beta<<std::endl;
                 std::cout<<"Norm(b2-b) = "<<Norm(beta2-beta)<<std::endl;
                 std::cerr<<"P = ";
-                for(int i=0;i<int(A.rowsize());i++) std::cerr<<P[i]<<" ";
+                for(int i=0;i<A.rowsize();i++) std::cerr<<P[i]<<" ";
                 std::cerr<<"\nP2 = ";
-                for(int i=0;i<int(A.rowsize());i++) std::cerr<<P2[i]<<" ";
+                for(int i=0;i<A.rowsize();i++) std::cerr<<P2[i]<<" ";
                 std::cerr<<"\n";
                 abort(); 
             }
@@ -494,7 +494,7 @@ namespace tmv {
             if (j3 < j2) j2 = j3+1;
             for(int i=j1;i<j2;++i) {
                 if (colnormsq(i) < thresh) {
-                    TMVAssert(j3 < int(A.rowsize()));
+                    TMVAssert(j3 < A.rowsize());
                     A.swapCols(i,j3);
                     colnormsq.swap(i,j3);
                     P[i] = j3;
@@ -524,8 +524,8 @@ namespace tmv {
 
         static void call(M1& A, V& beta, int* P, bool)
         {
-            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRPDecompose algo 22: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -611,7 +611,7 @@ namespace tmv {
                 if (jpiv0 != 0) {
                     //std::cout<<"pivot\n";
                     jpiv0 += j1;
-                    TMVAssert(jpiv0 < int(A.rowsize()));
+                    TMVAssert(jpiv0 < A.rowsize());
                     A.swapCols(j1,jpiv0);
                     colnormsq.swap(j1,jpiv0);
                     P[j1] = jpiv0;
@@ -675,8 +675,8 @@ namespace tmv {
 #endif
                             if (P[j2] > j2) {
                                 if (P[j] > j2) {
-                                    TMVAssert(P[j] < int(A.rowsize()));
-                                    TMVAssert(P[j2] < int(A.rowsize()));
+                                    TMVAssert(P[j] < A.rowsize());
+                                    TMVAssert(P[j2] < A.rowsize());
                                     TMV_SWAP(P[j],P[j2]);
                                     A.swapCols(P[j],P[j2]);
                                     colnormsq.swap(P[j],P[j2]);
@@ -753,7 +753,7 @@ namespace tmv {
                     // Put the bad columns back where they started before this 
                     // loop:
                     for(int j=j2; j<origj2; ++j) if (P[j] > j2) {
-                        TMVAssert(P[j] < int(A.rowsize()));
+                        TMVAssert(P[j] < A.rowsize());
                         A.swapCols(j,P[j]);
                         colnormsq.swap(j,P[j]);
 #ifdef XDEBUG_QR
@@ -825,8 +825,8 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
 
-            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
-            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRPDecompose algo 31: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -856,8 +856,8 @@ namespace tmv {
         static void call(M1& A, V& beta, int* P, bool strict)
         {
 #ifdef PRINTALGO_QR
-            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
             std::cout<<"QRPDecompose algo 32: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -951,8 +951,8 @@ namespace tmv {
                 ( TMV_OPT >= 2 && !M1::_colmajor ) ? 81 :
                 -4 );
 #ifdef PRINTALGO_QR
-            const int M = cs==TMV_UNKNOWN ? int(m.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(m.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? m.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? m.rowsize() : rs;
             std::cout<<"QRPDecompose algo -3: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;

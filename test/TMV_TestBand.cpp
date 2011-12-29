@@ -432,6 +432,9 @@ static void TestBasicBandMatrix_2()
 template <class T, tmv::StorageType S> 
 static void TestBasicBandMatrix_IO()
 {
+    typedef std::complex<T> CT;
+
+    const int M = 15;
     const int N = 10;
     const int nhi = 1;
     const int nlo = 3;
@@ -444,68 +447,158 @@ static void TestBasicBandMatrix_IO()
         std::cout<<"nlo, nhi = "<<nlo<<','<<nhi<<std::endl;
     }
 
-    tmv::BandMatrix<T> a1(N,N,nlo,nhi);
-
-    for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k)
+    tmv::BandMatrix<T> m(M,N,nlo,nhi);
+    tmv::BandMatrix<CT> cm(M,N,nlo,nhi);
+    for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
         if ( j <= i + nhi && i <= j + nlo) {
-            a1(i,j) = T(k);
+            m(i,j) = T(k);
+            cm(i,j) = CT(k,k+1000);
         }
-
-    tmv::BandMatrix<std::complex<T>,S> ca1 = a1*std::complex<T>(1,2);
-    std::ofstream fout("tmvtest_bandmatrix_io.dat");
-    if (!fout) {
-#ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_bandmatrix_io.dat for output\n"; 
-        exit(1); 
-#else
-        throw std::runtime_error(
-            "Couldn't open tmvtest_bandmatrix_io.dat for output");
-#endif
     }
-    fout << ca1 << std::endl;
-    ca1.writeCompact(fout);
+    m(3,1) = T(1.e-30);
+    cm(3,1) = CT(1.e-30,1.e-30);
+    m(5,6) = T(9.e-3);
+    cm(5,6) = CT(9.e-3,9.e-3);
+    m(7,4) = T(0.123456789);
+    cm(7,4) = CT(3.123456789,600.987654321);
+
+    // First check clipping function...
+    tmv::BandMatrix<T> m2 = m;
+    tmv::BandMatrix<CT> cm2 = cm;
+    if (!std::numeric_limits<T>::is_integer) {
+        m2.clip(1.e-2);
+        cm2.clip(1.e-2);
+    }
+    tmv::BandMatrix<T> m3 = m;
+    tmv::BandMatrix<CT> cm3 = cm;
+    m3(3,1) = T(0);
+    cm3(3,1) = T(0);
+    m3(5,6) = T(0); // Others, esp. cm3(5,6), shouldn't get clipped.
+    Assert(m2 == m3,"BandMatrix clip");
+    Assert(cm2 == cm3,"Complex BandMatrix clip");
+
+    // Write matrices with 4 different styles
+    std::ofstream fout("tmvtest_bandmatrix_io.dat");
+    Assert(fout,"Couldn't open tmvtest_bandmatrix_io.dat for output");
+    fout << m << std::endl;
+    fout << cm << std::endl;
+    fout << tmv::CompactIO() << m << std::endl;
+    fout << tmv::CompactIO() << cm << std::endl;
+    fout << tmv::ThreshIO(1.e-2).setPrecision(12) << m << std::endl;
+    fout << tmv::ThreshIO(1.e-2).setPrecision(12) << cm << std::endl;
+    tmv::IOStyle myStyle = 
+        tmv::CompactIO().setThresh(1.e-2).setPrecision(4).
+        markup("Start","[",",","]","---","Done");
+    fout << myStyle << m << std::endl;
+    fout << myStyle << cm << std::endl;
     fout.close();
 
-    tmv::Matrix<std::complex<T>,tmv::RowMajor> xm1(N,N);
-    tmv::BandMatrix<std::complex<T>,tmv::RowMajor> xb1(N,N,nlo,nhi);
+    // When using (the default) prec(6), these will be the values read in.
+    m(7,4) = T(0.123457);
+    cm(7,4) = CT(3.12346,600.988);
+
+    // When using prec(12), the full correct values will be read in. (m2,cm2)
+
+    // When using prec(4), these will be the values read in.
+    m3(7,4) = T(0.1235);
+    if (std::numeric_limits<T>::is_integer) cm3(7,4) = CT(3,600);
+    else cm3(7,4) = CT(3.123,601.0);
+
+    // Read them back in
+    tmv::BandMatrix<T,tmv::RowMajor> xm1(M,N,nlo,nhi);
+    tmv::BandMatrix<CT,tmv::RowMajor> xcm1(M,N,nlo,nhi);
     std::ifstream fin("tmvtest_bandmatrix_io.dat");
-    if (!fin) {
-#ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_bandmatrix_io.dat for input\n"; 
-        exit(1); 
-#else
-        throw std::runtime_error(
-            "Couldn't open tmvtest_bandmatrix_io.dat for input");
-#endif
-    }
-    fin >> xm1 >> xb1;
+    Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
+    fin >> xm1 >> xcm1;
+    Assert(m == xm1,"BandMatrix I/O check normal");
+    Assert(cm == xcm1,"CBandMatrix I/O check normal");
+    fin >> tmv::CompactIO() >> xm1 >> tmv::CompactIO() >> xcm1;
+    Assert(m == xm1,"BandMatrix I/O check compact");
+    Assert(cm == xcm1,"CBandMatrix I/O check compact");
+    fin >> xm1.view() >> xcm1.view();
+    Assert(m2 == xm1,"BandMatrix I/O check thresh");
+    Assert(cm2 == xcm1,"CBandMatrix I/O check thresh");
+    fin >> myStyle >> xm1.view() >> myStyle >> xcm1.view();
+    Assert(m3 == xm1,"BandMatrix I/O check compact thresh & prec(4)");
+    Assert(cm3 == xcm1,"CBandMatrix I/O check compact thresh & prec(4)");
     fin.close();
-    Assert(tmv::Matrix<std::complex<T> >(ca1) == xm1,"BandMatrix I/O check #1");
-    Assert(ca1 == xb1,"BandMatrix Compact I/O check #1");
 
-    tmv::Matrix<std::complex<T>,tmv::ColMajor> xm2(N,N);
-    tmv::BandMatrix<std::complex<T>,tmv::ColMajor> xb2(N,N,nlo,nhi);
+    // Repeat for column major
+    tmv::BandMatrix<T,tmv::ColMajor> xm2(M,N,nlo,nhi);
+    tmv::BandMatrix<CT,tmv::ColMajor> xcm2(M,N,nlo,nhi);
     fin.open("tmvtest_bandmatrix_io.dat");
-    fin >> xm2 >> xb2;
+    Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
+    fin >> xm2.view() >> xcm2.view();
+    Assert(m == xm2,"BandMatrix I/O check normal");
+    Assert(cm == xcm2,"CBandMatrix I/O check normal");
+    fin >> tmv::CompactIO() >> xm2.view() >> tmv::CompactIO() >> xcm2.view();
+    Assert(m == xm2,"BandMatrix I/O check compact");
+    Assert(cm == xcm2,"CBandMatrix I/O check compact");
+    fin >> xm2 >> xcm2;
+    Assert(m2 == xm2,"BandMatrix I/O check thresh");
+    Assert(cm2 == xcm2,"CBandMatrix I/O check thresh");
+    fin >> myStyle >> xm2 >> myStyle >> xcm2;
+    Assert(m3 == xm2,"BandMatrix I/O check compact thresh & prec(4)");
+    Assert(cm3 == xcm2,"CBandMatrix I/O check compact thresh & prec(4)");
     fin.close();
-    Assert(tmv::Matrix<std::complex<T> >(ca1) == xm2,"BandMatrix I/O check #2");
-    Assert(ca1 == xb2,"BandMatrix Compact I/O check #2");
 
-    tmv::BandMatrix<std::complex<T>,tmv::DiagMajor> xb3(N,N,nlo,nhi);
+    // Repeat for diag major
+    tmv::BandMatrix<T,tmv::DiagMajor> xm3(M,N,nlo,nhi);
+    tmv::BandMatrix<CT,tmv::DiagMajor> xcm3(M,N,nlo,nhi);
     fin.open("tmvtest_bandmatrix_io.dat");
-    fin >> xm1 >> xb3;
+    Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
+    fin >> xm3.view() >> xcm3.view();
+    Assert(m == xm3,"BandMatrix I/O check normal");
+    Assert(cm == xcm3,"CBandMatrix I/O check normal");
+    fin >> tmv::CompactIO() >> xm3.view() >> tmv::CompactIO() >> xcm3.view();
+    Assert(m == xm3,"BandMatrix I/O check compact");
+    Assert(cm == xcm3,"CBandMatrix I/O check compact");
+    fin >> xm3 >> xcm3;
+    Assert(m2 == xm3,"BandMatrix I/O check thresh");
+    Assert(cm2 == xcm3,"CBandMatrix I/O check thresh");
+    fin >> myStyle >> xm3 >> myStyle >> xcm3;
+    Assert(m3 == xm3,"BandMatrix I/O check compact thresh & prec(4)");
+    Assert(cm3 == xcm3,"CBandMatrix I/O check compact thresh & prec(4)");
     fin.close();
-    Assert(ca1 == xb3,"BandMatrix Compact I/O check #3");
 
-    tmv::Matrix<std::complex<T> > xm4;
-    tmv::BandMatrix<std::complex<T> > xb4;
+    // And repeat for matrices that need to be resized.
+    // Note: NormalIO doesn't have lo,hi so need these to be correct.
+    // But cs,rs will be resized to the given values.
+    // The others should resize everything if necessary.
+    // For zm4, check that it works if cs,rs are correct, but not lo,hi.
+    // Also check switching the default IOStyle.
+    tmv::CompactIO().makeDefault();
+    tmv::BandMatrix<T> zm1(5,5,nlo,nhi),zm2,zm3(4,2,nlo,nhi),zm4(M,N,0,0);
+    tmv::BandMatrix<CT> zcm1(5,5,nlo,nhi),zcm2,zcm3(4,2,nlo,nhi),zcm4(M,N,0,0);
     fin.open("tmvtest_bandmatrix_io.dat");
-    fin >> xm4 >> xb4;
+    Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
+    fin >> tmv::NormalIO() >> zm1 >> tmv::NormalIO() >> zcm1;
+    Assert(m == zm1,"BandMatrix I/O check normal with resize");
+    Assert(cm == zcm1,"CBandMatrix I/O check normal with resize");
+    fin >> zm2 >> zcm2;
+    Assert(m == zm2,"BandMatrix I/O check compact with resize");
+    Assert(cm == zcm2,"CBandMatrix I/O check compact with resize");
+    fin >> tmv::NormalIO() >> zm3 >> tmv::NormalIO() >> zcm3;
+    Assert(m2 == zm3,"BandMatrix I/O check thresh with resize");
+    Assert(cm2 == zcm3,"CBandMatrix I/O check thresh with resize");
+    fin >> myStyle >> zm4 >> myStyle >> zcm4;
+    Assert(m3 == zm4,"BandMatrix I/O check compact thresh with resize");
+    Assert(cm3 == zcm4,"CBandMatrix I/O check compact thresh with resize");
     fin.close();
-    Assert(tmv::Matrix<std::complex<T> >(ca1) == xm4,"BandMatrix I/O check #4");
-    Assert(ca1 == xb4,"BandMatrix Compact I/O check #4");
+    // Switch it back.
+    tmv::IOStyle::revertDefault();
 
-#ifndef XTEST
+    // Finally, check that the NormalIO can be read in as a regular matrix.
+    tmv::Matrix<T> zm5;
+    tmv::Matrix<CT> zcm5;
+    fin.open("tmvtest_bandmatrix_io.dat");
+    Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
+    fin >> zm5 >> zcm5;
+    Assert(m == zm5,"BandMatrix -> Matrix I/O check");
+    Assert(cm == zcm5,"CBandMatrix -> CMatrix I/O check");
+    fin.close();
+
+#if XTEST == 0
     std::remove("tmvtest_bandmatrix_io.dat");
 #endif
 }

@@ -67,7 +67,7 @@ namespace tmv {
     };
 
 #define NEWLO (istrans ? A.nhi() : A.nlo())
-#define NEWHI TMV_MIN(A.nlo()+A.nhi(),int(istrans?A.colsize():A.rowsize())-1)
+#define NEWHI TMV_MIN(A.nlo()+A.nhi(),istrans?A.colsize():A.rowsize()-1)
 #define APTR1 inplace ? 0 : \
     BandStorageLength(ColMajor, istrans ? A.rowsize() : A.colsize(), \
                       istrans ? A.colsize() : A.rowsize(), NEWLO, NEWHI)
@@ -300,11 +300,11 @@ namespace tmv {
     }
 
     template <class T> 
-    size_t BandQRDiv<T>::colsize() const
+    int BandQRDiv<T>::colsize() const
     { return pimpl->istrans ? pimpl->QRx.rowsize() : pimpl->QRx.colsize(); }
 
     template <class T> 
-    size_t BandQRDiv<T>::rowsize() const
+    int BandQRDiv<T>::rowsize() const
     { return pimpl->istrans ? pimpl->QRx.colsize() : pimpl->QRx.rowsize(); }
 
 #ifdef INST_INT

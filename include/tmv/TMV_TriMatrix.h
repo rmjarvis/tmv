@@ -27,11 +27,11 @@
 //
 //    The storage options follow the same meaning as for regular Matrices.
 //
-//    TriMatrix<T,A>(size_t n)
+//    TriMatrix<T,A>(int n)
 //        Makes a Triangular Matrix with column size = row size = n
 //        with _uninitialized_ values.
 //
-//    TriMatrix<T,A>(size_t n, T x)
+//    TriMatrix<T,A>(int n, T x)
 //        Makes a Triangular Matrix with column size = row size = n
 //        with all values = x
 //
@@ -43,13 +43,13 @@
 // Special Creators:
 //
 //    ConstUpperTriMatrixView UpperTriMatrixViewOf(
-//            const T* m, size_t size, StorageType stor)
+//            const T* m, int size, StorageType stor)
 //    ConstUpperTriMatrixView UnitUpperTriMatrixViewOf(
-//            const T* m, size_t size, StorageType stor)
+//            const T* m, int size, StorageType stor)
 //    UpperTriMatrixView UpperTriMatrixViewOf(
-//            T* m, size_t size, StorageType stor)
+//            T* m, int size, StorageType stor)
 //    UpperTriMatrixView UnitUpperTriMatrixViewOf(
-//            T* m, size_t size, StorageType stor)
+//            T* m, int size, StorageType stor)
 //        Returns a TriMatrixView of the elements in m, using the 
 //        actual elements m for the storage.  The Unit versions return
 //        views with dt = UnitDiag, the non-Unit versions return views
@@ -61,9 +61,9 @@
 //
 // Access Functions
 //
-//    size_t colsize() const
-//    size_t rowsize() const
-//    size_t size() const
+//    int colsize() const
+//    int rowsize() const
+//    int size() const
 //        Return the dimensions of the TriMatrix
 //
 //    value_type operator()(int i, int j) const
@@ -230,7 +230,7 @@
 //    os << m 
 //        Writes m to ostream os in the usual Matrix format
 //
-//    m.writeCompact(os)
+//    os << CompactIO() << m
 //        Writes m to ostream os in the following compact format:
 //        For an UpperTriMatrix:
 //          size 
@@ -247,6 +247,7 @@
 //          ( m(size,0) ... m(size,size) )
 //
 //    is >> m
+//    is >> CompactIO() >> m
 //        Reads m from istream is in the compact format
 //
 //
@@ -290,6 +291,8 @@ namespace tmv {
         TMV_INLINE reference getRef() { return ref(); }
         T operator-() const { return -val(); }
 
+        TriRef<T,C>& operator=(const TriRef<T,C>& rhs)
+        { assign(rhs.val()); return *this; }
         template <class T2>
         TriRef<T,C>& operator=(const TriRef<T2,C>& rhs)
         { assign(rhs.val()); return *this; }
@@ -702,19 +705,23 @@ namespace tmv {
         // Constructors
         //
 
-        explicit UpperTriMatrix(size_t n=0) : itss(n), itsm(n*n)
+        explicit UpperTriMatrix(int n=0) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVAssert(n >= 0);
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<T>::constr_value());
+            if (n > 0) {
+                Maybe<_unit>::offdiag(*this).setAllTo(
+                    Traits<T>::constr_value());
+            }
 #endif
         }
 
-        UpperTriMatrix(size_t n, T x) : itss(n), itsm(n*n)
+        UpperTriMatrix(int n, T x) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(Traits<type>::okA);
-            Maybe<_unit>::offdiag(*this).setAllTo(x);
+            TMVAssert(n >= 0);
+            if (n > 0) Maybe<_unit>::offdiag(*this).setAllTo(x);
         }
 
         UpperTriMatrix(const type& m2) :
@@ -759,8 +766,10 @@ namespace tmv {
         ~UpperTriMatrix()
         {
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<T>::destr_value());
+            if (size() > 0) {
+                Maybe<_unit>::offdiag(*this).setAllTo(
+                    Traits<T>::destr_value());
+            }
 #endif
         }
 
@@ -817,21 +826,26 @@ namespace tmv {
             itsm.swapWith(m2.itsm);
         }
 
-        void resize(const size_t s)
+        void resize(const int s)
         {
+            TMVAssert(s >= 0);
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<T>::destr_value());
+            if (size() > 0) {
+                Maybe<_unit>::offdiag(*this).setAllTo(
+                    Traits<T>::destr_value());
+            }
 #endif
             itss = s;
             itsm.resize(s*s);
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<T>::constr_value());
+            if (s > 0) {
+                Maybe<_unit>::offdiag(*this).setAllTo(
+                    Traits<T>::constr_value());
+            }
 #endif
         }
 
-        TMV_INLINE size_t size() const { return itss; }
+        TMV_INLINE int size() const { return itss; }
         int nElements() const { return itss*(itss+1)/2; }
         TMV_INLINE int stepi() const { return _rowmajor ? itss : 1; }
         TMV_INLINE int stepj() const { return _rowmajor ? 1 : itss; }
@@ -843,7 +857,7 @@ namespace tmv {
 
     protected :
 
-        size_t itss;
+        int itss;
         AlignedArray<T> itsm;
 
     }; // UpperTriMatrix
@@ -996,20 +1010,20 @@ namespace tmv {
         //
 
         ConstUpperTriMatrixView(
-            const T* m, size_t s, int si, int sj, DiagType dt) :
+            const T* m, int s, int si, int sj, DiagType dt) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstUpperTriMatrixView(const T* m, size_t s, int si, int sj) :
+        ConstUpperTriMatrixView(const T* m, int s, int si, int sj) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
-        ConstUpperTriMatrixView(const T* m, size_t s, int si) :
+        ConstUpperTriMatrixView(const T* m, int s, int si) :
             itsm(m), itss(s), itssi(si), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1017,7 +1031,7 @@ namespace tmv {
             TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
-        ConstUpperTriMatrixView(const T* m, size_t s) :
+        ConstUpperTriMatrixView(const T* m, int s) :
             itsm(m), itss(s), itssi(_stepi), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1097,9 +1111,9 @@ namespace tmv {
                 DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
 
-        TMV_INLINE size_t colsize() const { return itss; }
-        TMV_INLINE size_t rowsize() const { return itss; }
-        TMV_INLINE size_t size() const { return itss; }
+        TMV_INLINE int colsize() const { return itss; }
+        TMV_INLINE int rowsize() const { return itss; }
+        TMV_INLINE int size() const { return itss; }
         int nElements() const { return itss*(itss+1)/2; }
         TMV_INLINE int stepi() const { return itssi; }
         TMV_INLINE int stepj() const { return itssj; }
@@ -1121,7 +1135,7 @@ namespace tmv {
     private :
 
         const T* itsm;
-        const size_t itss;
+        const int itss;
         const CheckedInt<_stepi> itssi;
         const CheckedInt<_stepj> itssj;
         const CheckedInt<_dt> itsdt;
@@ -1314,20 +1328,20 @@ namespace tmv {
         // Constructors
         //
 
-        UpperTriMatrixView(T* m, size_t s, int si, int sj, DiagType dt) :
+        UpperTriMatrixView(T* m, int s, int si, int sj, DiagType dt) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        UpperTriMatrixView(T* m, size_t s, int si, int sj) :
+        UpperTriMatrixView(T* m, int s, int si, int sj) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
-        UpperTriMatrixView(T* m, size_t s, int si) :
+        UpperTriMatrixView(T* m, int s, int si) :
             itsm(m), itss(s), itssi(si), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1335,7 +1349,7 @@ namespace tmv {
             TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
-        UpperTriMatrixView(T* m, size_t s) :
+        UpperTriMatrixView(T* m, int s) :
             itsm(m), itss(s), itssi(_stepi), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1420,9 +1434,9 @@ namespace tmv {
                 isunit() && i==j, itsm[i*stepi()+j*stepj()]); 
         }
 
-        TMV_INLINE size_t colsize() const { return itss; }
-        TMV_INLINE size_t rowsize() const { return itss; }
-        TMV_INLINE size_t size() const { return itss; }
+        TMV_INLINE int colsize() const { return itss; }
+        TMV_INLINE int rowsize() const { return itss; }
+        TMV_INLINE int size() const { return itss; }
         int nElements() const { return itss*(itss+1)/2; }
         TMV_INLINE int stepi() const { return itssi; }
         TMV_INLINE int stepj() const { return itssj; }
@@ -1444,7 +1458,7 @@ namespace tmv {
     private :
 
         T* itsm;
-        const size_t itss;
+        const int itss;
         const CheckedInt<_stepi> itssi;
         const CheckedInt<_stepj> itssj;
         const CheckedInt<_dt> itsdt;
@@ -1637,19 +1651,23 @@ namespace tmv {
         // Constructors
         //
 
-        explicit LowerTriMatrix(size_t n=0) : itss(n), itsm(n*n)
+        explicit LowerTriMatrix(int n=0) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVAssert(n >= 0);
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<T>::constr_value());
+            if (n > 0) {
+                Maybe<_unit>::offdiag(*this).setAllTo(
+                    Traits<T>::constr_value());
+            }
 #endif
         }
 
-        LowerTriMatrix(size_t n, T x) : itss(n), itsm(n*n)
+        LowerTriMatrix(int n, T x) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(Traits<type>::okA);
-            Maybe<_unit>::offdiag(*this).setAllTo(x);
+            TMVAssert(n >= 0);
+            if (n > 0) Maybe<_unit>::offdiag(*this).setAllTo(x);
         }
 
         LowerTriMatrix(const type& m2) :
@@ -1694,8 +1712,10 @@ namespace tmv {
         ~LowerTriMatrix()
         {
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<T>::destr_value());
+            if (size() > 0) {
+                Maybe<_unit>::offdiag(*this).setAllTo(
+                    Traits<T>::destr_value());
+            }
 #endif
         }
 
@@ -1752,21 +1772,26 @@ namespace tmv {
             itsm.swapWith(m2.itsm);
         }
 
-        void resize(const size_t s)
+        void resize(const int s)
         {
+            TMVAssert(s >= 0);
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<T>::destr_value());
+            if (size() > 0) {
+                Maybe<_unit>::offdiag(*this).setAllTo(
+                    Traits<T>::destr_value());
+            }
 #endif
             itss = s;
             itsm.resize(s*s);
 #ifdef TMV_DEBUG
-            Maybe<_unit>::offdiag(*this).setAllTo(
-                Traits<T>::constr_value());
+            if (s > 0) {
+                Maybe<_unit>::offdiag(*this).setAllTo(
+                    Traits<T>::constr_value());
+            }
 #endif
         }
 
-        TMV_INLINE size_t size() const { return itss; }
+        TMV_INLINE int size() const { return itss; }
         int nElements() const { return itss*(itss+1)/2; }
         TMV_INLINE int stepi() const { return _rowmajor ? itss : 1; }
         TMV_INLINE int stepj() const { return _rowmajor ? 1 : itss; }
@@ -1778,7 +1803,7 @@ namespace tmv {
 
     protected :
 
-        size_t itss;
+        int itss;
         AlignedArray<T> itsm;
 
     }; // LowerTriMatrix
@@ -1931,20 +1956,20 @@ namespace tmv {
         //
         
         ConstLowerTriMatrixView(
-            const T* m, size_t s, int si, int sj, DiagType dt) :
+            const T* m, int s, int si, int sj, DiagType dt) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstLowerTriMatrixView(const T* m, size_t s, int si, int sj) :
+        ConstLowerTriMatrixView(const T* m, int s, int si, int sj) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
-        ConstLowerTriMatrixView(const T* m, size_t s, int si) :
+        ConstLowerTriMatrixView(const T* m, int s, int si) :
             itsm(m), itss(s), itssi(si), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1952,7 +1977,7 @@ namespace tmv {
             TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
-        ConstLowerTriMatrixView(const T* m, size_t s) :
+        ConstLowerTriMatrixView(const T* m, int s) :
             itsm(m), itss(s), itssi(_stepi), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -2032,9 +2057,9 @@ namespace tmv {
                 DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
 
-        TMV_INLINE size_t colsize() const { return itss; }
-        TMV_INLINE size_t rowsize() const { return itss; }
-        TMV_INLINE size_t size() const { return itss; }
+        TMV_INLINE int colsize() const { return itss; }
+        TMV_INLINE int rowsize() const { return itss; }
+        TMV_INLINE int size() const { return itss; }
         int nElements() const { return itss*(itss+1)/2; }
         TMV_INLINE int stepi() const { return itssi; }
         TMV_INLINE int stepj() const { return itssj; }
@@ -2056,7 +2081,7 @@ namespace tmv {
     private :
 
         const T* itsm;
-        const size_t itss;
+        const int itss;
         const CheckedInt<_stepi> itssi;
         const CheckedInt<_stepj> itssj;
         const CheckedInt<_dt> itsdt;
@@ -2249,20 +2274,20 @@ namespace tmv {
         // Constructors
         //
 
-        LowerTriMatrixView(T* m, size_t s, int si, int sj, DiagType dt) :
+        LowerTriMatrixView(T* m, int s, int si, int sj, DiagType dt) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        LowerTriMatrixView(T* m, size_t s, int si, int sj) :
+        LowerTriMatrixView(T* m, int s, int si, int sj) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
-        LowerTriMatrixView(T* m, size_t s, int si) :
+        LowerTriMatrixView(T* m, int s, int si) :
             itsm(m), itss(s), itssi(si), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -2270,7 +2295,7 @@ namespace tmv {
             TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
-        LowerTriMatrixView(T* m, size_t s) :
+        LowerTriMatrixView(T* m, int s) :
             itsm(m), itss(s), itssi(_stepi), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -2355,9 +2380,9 @@ namespace tmv {
                 isunit() && i==j, itsm[i*stepi()+j*stepj()]); 
         }
 
-        TMV_INLINE size_t colsize() const { return itss; }
-        TMV_INLINE size_t rowsize() const { return itss; }
-        TMV_INLINE size_t size() const { return itss; }
+        TMV_INLINE int colsize() const { return itss; }
+        TMV_INLINE int rowsize() const { return itss; }
+        TMV_INLINE int size() const { return itss; }
         int nElements() const { return itss*(itss+1)/2; }
         TMV_INLINE int stepi() const { return itssi; }
         TMV_INLINE int stepj() const { return itssj; }
@@ -2379,7 +2404,7 @@ namespace tmv {
     private :
 
         T* itsm;
-        const size_t itss;
+        const int itss;
         const CheckedInt<_stepi> itssi;
         const CheckedInt<_stepj> itssj;
         const CheckedInt<_dt> itsdt;
@@ -2408,9 +2433,10 @@ namespace tmv {
 
     template <class T>
     inline UpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
-        T* m, size_t size, StorageType stor)
+        T* m, int size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(size >= 0);
         if (stor == RowMajor)
             return UpperTriMatrixView<T,NonUnitDiag>(m,size,size,1);
         else
@@ -2419,9 +2445,10 @@ namespace tmv {
 
     template <class T>
     inline ConstUpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
-        const T* m, size_t size, StorageType stor)
+        const T* m, int size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(size >= 0);
         if (stor == RowMajor)
             return ConstUpperTriMatrixView<T,NonUnitDiag>(m,size,size,1);
         else
@@ -2430,19 +2457,20 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE UpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
-        T* m, size_t size, int stepi, int stepj)
+        T* m, int size, int stepi, int stepj)
     { return UpperTriMatrixView<T,NonUnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
     TMV_INLINE ConstUpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
-        const T* m, size_t size, int stepi, int stepj)
+        const T* m, int size, int stepi, int stepj)
     { return ConstUpperTriMatrixView<T,NonUnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
     inline UpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
-        T* m, size_t size, StorageType stor)
+        T* m, int size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(size >= 0);
         if (stor == RowMajor)
             return UpperTriMatrixView<T,UnitDiag>(m,size,size,1);
         else
@@ -2451,9 +2479,10 @@ namespace tmv {
 
     template <class T>
     inline ConstUpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
-        const T* m, size_t size, StorageType stor)
+        const T* m, int size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(size >= 0);
         if (stor == RowMajor)
             return ConstUpperTriMatrixView<T,UnitDiag>(m,size,size,1);
         else
@@ -2462,19 +2491,20 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE UpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
-        T* m, size_t size, int stepi, int stepj)
+        T* m, int size, int stepi, int stepj)
     { return UpperTriMatrixView<T,UnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
     TMV_INLINE ConstUpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
-        const T* m, size_t size, int stepi, int stepj)
+        const T* m, int size, int stepi, int stepj)
     { return ConstUpperTriMatrixView<T,UnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
     inline UpperTriMatrixView<T> UpperTriMatrixViewOf(
-        T* m, size_t size, StorageType stor, DiagType dt)
+        T* m, int size, StorageType stor, DiagType dt)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(size >= 0);
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
         if (stor == RowMajor) 
             return UpperTriMatrixView<T>(m,size,size,1,dt);
@@ -2484,9 +2514,10 @@ namespace tmv {
 
     template <class T>
     inline ConstUpperTriMatrixView<T> UpperTriMatrixViewOf(
-        const T* m, size_t size, StorageType stor, DiagType dt)
+        const T* m, int size, StorageType stor, DiagType dt)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(size >= 0);
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
         if (stor == RowMajor)
             return ConstUpperTriMatrixView<T>(m,size,size,1,dt);
@@ -2496,7 +2527,7 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE_ND UpperTriMatrixView<T> UpperTriMatrixViewOf(
-        T* m, size_t size, int stepi, int stepj, DiagType dt)
+        T* m, int size, int stepi, int stepj, DiagType dt)
     {
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
         return UpperTriMatrixView<T>(m,size,stepi,stepj,dt); 
@@ -2504,7 +2535,7 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE_ND ConstUpperTriMatrixView<T> UpperTriMatrixViewOf(
-        const T* m, size_t size, int stepi, int stepj, DiagType dt)
+        const T* m, int size, int stepi, int stepj, DiagType dt)
     {
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
         return ConstUpperTriMatrixView<T>(m,size,stepi,stepj,dt); 
@@ -2512,9 +2543,10 @@ namespace tmv {
  
     template <class T>
     inline LowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
-        T* m, size_t size, StorageType stor)
+        T* m, int size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(size >= 0);
         if (stor == RowMajor)
             return LowerTriMatrixView<T,NonUnitDiag>(m,size,size,1);
         else
@@ -2523,9 +2555,10 @@ namespace tmv {
 
     template <class T>
     inline ConstLowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
-        const T* m, size_t size, StorageType stor)
+        const T* m, int size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(size >= 0);
         if (stor == RowMajor)
             return ConstLowerTriMatrixView<T,NonUnitDiag>(m,size,size,1);
         else
@@ -2534,19 +2567,20 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE LowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
-        T* m, size_t size, int stepi, int stepj)
+        T* m, int size, int stepi, int stepj)
     { return LowerTriMatrixView<T,NonUnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
     TMV_INLINE ConstLowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
-        const T* m, size_t size, int stepi, int stepj)
+        const T* m, int size, int stepi, int stepj)
     { return ConstLowerTriMatrixView<T,NonUnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
     inline LowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
-        T* m, size_t size, StorageType stor)
+        T* m, int size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(size >= 0);
         if (stor == RowMajor)
             return LowerTriMatrixView<T,UnitDiag>(m,size,size,1);
         else
@@ -2555,9 +2589,10 @@ namespace tmv {
 
     template <class T>
     inline ConstLowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
-        const T* m, size_t size, StorageType stor)
+        const T* m, int size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(size >= 0);
         if (stor == RowMajor)
             return ConstLowerTriMatrixView<T,UnitDiag>(m,size,size,1);
         else
@@ -2566,19 +2601,20 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE LowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
-        T* m, size_t size, int stepi, int stepj)
+        T* m, int size, int stepi, int stepj)
     { return LowerTriMatrixView<T,UnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
     TMV_INLINE ConstLowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
-        const T* m, size_t size, int stepi, int stepj)
+        const T* m, int size, int stepi, int stepj)
     { return ConstLowerTriMatrixView<T,UnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
     inline LowerTriMatrixView<T> LowerTriMatrixViewOf(
-        T* m, size_t size, StorageType stor, DiagType dt)
+        T* m, int size, StorageType stor, DiagType dt)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(size >= 0);
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
         if (stor == RowMajor)
             return LowerTriMatrixView<T>(m,size,size,1,dt);
@@ -2588,9 +2624,10 @@ namespace tmv {
 
     template <class T>
     inline ConstLowerTriMatrixView<T> LowerTriMatrixViewOf(
-        const T* m, size_t size, StorageType stor, DiagType dt)
+        const T* m, int size, StorageType stor, DiagType dt)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
+        TMVAssert(size >= 0);
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
         if (stor == RowMajor)
             return ConstLowerTriMatrixView<T>(m,size,size,1,dt);
@@ -2600,7 +2637,7 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE_ND LowerTriMatrixView<T> LowerTriMatrixViewOf(
-        T* m, size_t size, int stepi, int stepj, DiagType dt)
+        T* m, int size, int stepi, int stepj, DiagType dt)
     {
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
         return LowerTriMatrixView<T>(m,size,stepi,stepj,dt); 
@@ -2608,7 +2645,7 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE_ND ConstLowerTriMatrixView<T> LowerTriMatrixViewOf(
-        const T* m, size_t size, int stepi, int stepj, DiagType dt)
+        const T* m, int size, int stepi, int stepj, DiagType dt)
     {
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
         return ConstLowerTriMatrixView<T>(m,size,stepi,stepj,dt); 

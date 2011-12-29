@@ -24,7 +24,7 @@ namespace tmv {
     {
         static void call(V& v)
         {
-            const int n = size == TMV_UNKNOWN ? int(v.size()) : size;
+            const int n = size == TMV_UNKNOWN ? v.size() : size;
             const int no2 = n/2;
             if (no2) 
                 for(int i1=0;i1<no2;++i1) v.cSwap(i1,n-i1-1);
@@ -40,7 +40,7 @@ namespace tmv {
             typedef typename V::value_type T;
             typedef typename V::subvector_type V1;
             typedef typename V::subvector_type::reverse_type V2;
-            const int n = size == TMV_UNKNOWN ? int(v.size()) : size;
+            const int n = size == TMV_UNKNOWN ? v.size() : size;
             const int sizeo2 = size == TMV_UNKNOWN ? TMV_UNKNOWN : size/2;
             if (n > 1)  {
                 V1 v1 = v.cSubVector(0,n/2);

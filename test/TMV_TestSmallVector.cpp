@@ -197,12 +197,13 @@ static void TestSmallVectorReal()
 template <class T> 
 static void TestSmallVectorComplex()
 {
+    typedef std::complex<T> CT;
     typedef typename tmv::Traits<T>::float_type FT;
 
     const int N = 100;
 
-    tmv::SmallVector<std::complex<T>,N> v;
-    for (int i=0; i<N; ++i) v(i) = std::complex<T>(T(i),T(i+1234));
+    tmv::SmallVector<CT,N> v;
+    for (int i=0; i<N; ++i) v(i) = CT(T(i),T(i+1234));
 
     for (int i=0; i<N; ++i) 
         Assert(v(i).real() == T(i), "CSmallVector set");
@@ -210,28 +211,28 @@ static void TestSmallVectorComplex()
         Assert(v(i).imag() == T(i+1234), "CSmallVector set");
 
     if (N % 2 == 0) {
-        tmv::SmallVectorView<std::complex<T>,N/2,2> v1 = v.subVector(0,N,2);
+        tmv::SmallVectorView<CT,N/2,2> v1 = v.subVector(0,N,2);
         for (int i=0; i<N/2; ++i) 
-            Assert(v1(i)==std::complex<T>(T(2*i),T(2*i+1234)),
+            Assert(v1(i)==CT(T(2*i),T(2*i+1234)),
                    "CSmallVector stride=2");
 
-        for (int i=0; i<N/2; ++i) v1[i] = std::complex<T>(T(i),T(i+9876));
+        for (int i=0; i<N/2; ++i) v1[i] = CT(T(i),T(i+9876));
         for (int i=0; i<N/2; ++i) 
-            Assert(v[2*i]==std::complex<T>(T(i),T(i+9876)),
+            Assert(v[2*i]==CT(T(i),T(i+9876)),
                    "setting CSmallVector with stride = 2");
 
-        for (int i=0; i<N; ++i) v(i) = std::complex<T>(T(i),T(i+1234));
+        for (int i=0; i<N; ++i) v(i) = CT(T(i),T(i+1234));
     }
 
     v.swap(2,5);
-    Assert(v[2] == std::complex<T>(5,5+1234),"Swap in CSmallVector");
-    Assert(v[5] == std::complex<T>(2,2+1234),"Swap in CSmallVector");
+    Assert(v[2] == CT(5,5+1234),"Swap in CSmallVector");
+    Assert(v[5] == CT(2,2+1234),"Swap in CSmallVector");
     v.swap(2,5);
 
-    tmv::SmallVector<std::complex<T>,N> v2 = v.conjugate();
+    tmv::SmallVector<CT,N> v2 = v.conjugate();
 
     for (int i=0; i<N; ++i) 
-        Assert(v2(i) == std::complex<T>(T(i),T(-i-1234)),
+        Assert(v2(i) == CT(T(i),T(-i-1234)),
                "Conjugate CSmallVector");
     Assert(v2 == v.conjugate(),"Conjugate == CSmallVector");
 
@@ -254,12 +255,12 @@ static void TestSmallVectorComplex()
     tmv::SmallVector<T,N> b;
     for(int i=0;i<N;++i) b(i) = T(-3*i+191);
 
-    tmv::SmallVector<std::complex<T>,N> ca = a;
+    tmv::SmallVector<CT,N> ca = a;
     Assert(Equal(ca,a,EPS*Norm(a)),"Copy real V -> complex V");
-    ca *= std::complex<T>(3,4);
-    tmv::SmallVector<std::complex<T>,N> cb = b*std::complex<T>(3,4);
+    ca *= CT(3,4);
+    tmv::SmallVector<CT,N> cb = b*CT(3,4);
 
-    std::complex<T> prod = 0;
+    CT prod = 0;
     FT normsum = 0, normdiff = 0;
     for(int i=0;i<N;++i) {
         prod += ca[i] * cb[i];
@@ -274,7 +275,7 @@ static void TestSmallVectorComplex()
     Assert(Equal2(Norm(ca-cb) , normdiff, EPS*(Norm(ca)+Norm(cb))),
            "CSmallVector Diff");
 
-    tmv::SmallVector<std::complex<T>,20> w;
+    tmv::SmallVector<CT,20> w;
     w << 3.3,1.2,5.4,-1.2,4.3,-9.4,0,-2,4,-11.5,
       -12,14,33,1,-9.3,-3.9,4.9,10,-31,1.e-33;
     tmv::SmallVector<T,20> iw;
@@ -282,7 +283,7 @@ static void TestSmallVectorComplex()
        11.1,-140,-23,11,5.2,-3.8,4.9,99,-71,-0.5;
     w.imagPart() = iw;
 
-    tmv::SmallVector<std::complex<T>,20> origw = w;
+    tmv::SmallVector<CT,20> origw = w;
     tmv::Permutation P(20);
 
     if (showacc)
@@ -304,63 +305,119 @@ static void TestSmallVectorComplex()
 template <class T> 
 static void TestSmallVectorIO()
 {
-    const int N = 100;
+    typedef std::complex<T> CT;
 
-    tmv::SmallVector<T,N> v;
-    tmv::SmallVector<std::complex<T>,N> cv;
-    for (int i=0; i<N; ++i) {
+    const int NN = 20;
+
+    if (showstartdone) {
+        std::cout<<"Start Test SmallVector I/O"<<std::endl;
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"NN = "<<NN<<std::endl;
+    }
+
+    tmv::SmallVector<T,NN> v;
+    tmv::SmallVector<CT,NN> cv;
+    for (int i=0; i<NN; ++i) {
         v(i) = T(i+34);
-        cv(i) = std::complex<T>(T(i),T(N-i));
+        cv(i) = CT(i,100-i);
     }
+    v(3) = T(1.e-30);
+    cv(3) = CT(1.e-30,1.e-30);
+    v(8) = T(9.e-3);
+    cv(8) = CT(9.e-3,9.e-3);
+    v(12) = T(0.123456789);
+    cv(12) = CT(3.123456789,600.987654321);
 
-    std::ofstream fout("tmvtest_smallvector_io.dat");
-    if (!fout) {
-#ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_smallvector_io.dat for output\n";
-        exit(1); 
-#else
-        throw std::runtime_error(
-            "Couldn't open tmvtest_smallvector_io.dat for output");
-#endif
+    // First check clipping function...
+    tmv::SmallVector<T,NN> v2 = v;
+    tmv::SmallVector<CT,NN> cv2 = cv;
+    if (!std::numeric_limits<T>::is_integer) {
+        v2.clip(1.e-2);
+        cv2.clip(1.e-2);
     }
-    fout << v << std::endl << cv << std::endl;
+    tmv::SmallVector<T,NN> v3 = v;
+    tmv::SmallVector<CT,NN> cv3 = cv;
+    v3(3) = T(0);
+    cv3(3) = T(0);
+    v3(8) = T(0); // Others, esp. cv3(8), shouldn't get clipped.
+    Assert(v2 == v3,"SmallVector clip");
+    Assert(cv2 == cv3,"Complex SmallVector clip");
+
+    // Write vectors with 4 different styles
+    std::ofstream fout("tmvtest_smallvector_io.dat");
+    Assert(fout,"Couldn't open tmvtest_smallvector_io.dat for output");
+    fout << v << std::endl;
+    fout << cv << std::endl;
+    fout << tmv::CompactIO() << v << std::endl;
+    fout << tmv::CompactIO() << cv << std::endl;
+    fout << tmv::ThreshIO(1.e-2).setPrecision(12) << v << std::endl;
+    fout << tmv::ThreshIO(1.e-2).setPrecision(12) << cv << std::endl;
+    // Not a very pretty IO style, but it tests being able to read
+    // a style that has no whitespace and has more than one 
+    // character for some of the markup elements.
+    tmv::IOStyle myStyle = 
+        tmv::CompactIO().setThresh(1.e-2).setPrecision(4).
+        markup("Start","[",",","]","---","Done");
+    fout << myStyle << v << std::endl;
+    fout << myStyle << cv << std::endl;
     fout.close();
 
-    tmv::SmallVector<T,N> xv1;
-    tmv::SmallVector<std::complex<T>,N> xcv1;
+    // When using (the default) prec(6), these will be the values read in.
+    v(12) = T(0.123457);
+    cv(12) = CT(3.12346,600.988);
+
+    // When using prec(12), the full correct values will be read in. (v2,cv2)
+
+    // When using prec(4), these will be the values read in.
+    v3(12) = T(0.1235);
+    if (std::numeric_limits<T>::is_integer) cv3(12) = CT(3,600);
+    else cv3(12) = CT(3.123,601.0);
+
+    // Read them back in
+    tmv::SmallVector<T,NN> xv;
+    tmv::SmallVector<CT,NN> xcv;
     std::ifstream fin("tmvtest_smallvector_io.dat");
-    if (!fin) {
-#ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_smallvector_io.dat for input\n";
-        exit(1); 
-#else
-        throw std::runtime_error(
-            "Couldn't open tmvtest_smallvector_io.dat for input");
-#endif
-    }
-    fin >> xv1 >> xcv1;
+    Assert(fin,"Couldn't open tmvtest_smallvector_io.dat for input");
+    fin >> xv >> xcv;
+    Assert(v == xv,"SmallVector I/O check normal");
+    Assert(cv == xcv,"CSmallVector I/O check normal");
+    fin >> tmv::CompactIO() >> xv >> tmv::CompactIO() >> xcv;
+    Assert(v == xv,"SmallVector I/O check compact");
+    Assert(cv == xcv,"CSmallVector I/O check compact");
+    fin >> xv.view() >> xcv.view();
+    Assert(v2 == xv,"SmallVector I/O check thresh");
+    Assert(cv2 == xcv,"CSmallVector I/O check thresh");
+    fin >> myStyle >> xv.view() >> myStyle >> xcv.view();
+    Assert(v3 == xv,"SmallVector I/O check compact thresh & prec(4)");
+    Assert(cv3 == xcv,"CSmallVector I/O check compact thresh & prec(4)");
     fin.close();
-    Assert(v == xv1,"SmallVector I/O check #1");
-    Assert(cv == xcv1,"CSmallVector I/O check #1");
 
-    tmv::Vector<T> xv2;
-    tmv::Vector<std::complex<T> > xcv2;
+    // Read back into regular Vector
+    // Also check switching the default IOStyle.
+    tmv::CompactIO().makeDefault();
+    tmv::Vector<T> zv1, zv2, zv3, zv4;
+    tmv::Vector<CT > zcv1, zcv2, zcv3, zcv4;
     fin.open("tmvtest_smallvector_io.dat");
-    if (!fin) {
-#ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_smallvector_io.dat for input\n";
-        exit(1); 
-#else
-        throw std::runtime_error(
-            "Couldn't open tmvtest_smallvector_io.dat for input");
-#endif
-    }
-    fin >> xv2 >> xcv2;
+    Assert(fin,"Couldn't open tmvtest_smallvector_io.dat for input");
+    fin >> tmv::NormalIO() >> zv1 >> tmv::NormalIO() >> zcv1;
+    Assert(v == zv1,"SmallVector I/O check normal -> Vector");
+    Assert(cv == zcv1,"CSmallVector I/O check normal -> Vector");
+    fin >> zv2 >> zcv2;
+    Assert(v == zv2,"SmallVector I/O check compact -> Vector");
+    Assert(cv == zcv2,"CSmallVector I/O check compact -> Vector");
+    fin >> tmv::NormalIO() >> zv3 >> tmv::NormalIO() >> zcv3;
+    Assert(v2 == zv3,"SmallVector I/O check thresh -> Vector");
+    Assert(cv2 == zcv3,"CSmallVector I/O check thresh -> Vector");
+    fin >> myStyle >> zv4 >> myStyle >> zcv4;
+    Assert(v3 == zv4,"SmallVector I/O check compact thresh -> Vector");
+    Assert(cv3 == zcv4,"CSmallVector I/O check compact thresh -> Vector");
     fin.close();
-    Assert(v == xv2,"SmallVector I/O check #2");
-    Assert(cv == xcv2,"CSmallVector I/O check #2");
+    // Switch it back.
+    tmv::IOStyle::revertDefault();
 
+#if XTEST == 0
     std::remove("tmvtest_smallvector_io.dat");
+#endif
 }
 
 template <class T> 

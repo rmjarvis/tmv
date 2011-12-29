@@ -245,7 +245,7 @@ namespace tmv {
         T cref(int i) const { return itsm[i]; }
         T& ref(int i) { return itsm[i]; }
 
-        TMV_INLINE size_t size() const { return N; }
+        TMV_INLINE int size() const { return N; }
         TMV_INLINE int nElements() const { return N; }
         TMV_INLINE int step() const { return 1; }
         TMV_INLINE bool isconj() const { return false; }
@@ -369,13 +369,13 @@ namespace tmv {
         // Constructors
         //
 
-        ConstSmallDiagMatrixView(const T* m, size_t n, int s) :
+        ConstSmallDiagMatrixView(const T* m, int n, int s) :
             itsm(m), itssize(n), itsstep(s)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstSmallDiagMatrixView(const T* m, size_t n) :
+        ConstSmallDiagMatrixView(const T* m, int n) :
             itsm(m), itssize(n), itsstep(S)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -450,7 +450,7 @@ namespace tmv {
         T cref(int i) const
         { return DoConj<_conj>(itsm[i*step()]); }
 
-        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int size() const { return itssize; }
         TMV_INLINE int nElements() const { return itssize; }
         TMV_INLINE int step() const { return itsstep; }
         TMV_INLINE bool isconj() const { return _conj; }
@@ -602,13 +602,13 @@ namespace tmv {
         // Constructors
         //
 
-        SmallDiagMatrixView(T* m, size_t n, int s) :
+        SmallDiagMatrixView(T* m, int n, int s) :
             itsm(m), itssize(n), itsstep(s) 
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        SmallDiagMatrixView(T* m, size_t n) :
+        SmallDiagMatrixView(T* m, int n) :
             itsm(m), itssize(n), itsstep(S)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -679,7 +679,7 @@ namespace tmv {
         reference ref(int i) 
         { return reference(itsm[i*step()]); }
 
-        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int size() const { return itssize; }
         TMV_INLINE int nElements() const { return itssize; }
         TMV_INLINE int step() const { return itsstep; }
         TMV_INLINE bool isconj() const { return _conj; }
@@ -689,7 +689,7 @@ namespace tmv {
     private :
 
         T* itsm;
-        const size_t itssize;
+        const int itssize;
         const CheckedInt<S> itsstep;
 
     }; // SmallDiagMatrixView

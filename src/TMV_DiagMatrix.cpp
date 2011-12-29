@@ -4,27 +4,27 @@
 #include "tmv/TMV_DiagMatrix.h"
 #include "tmv/TMV_DiagMatrixIO.h"
 #include "tmv/TMV_Vector.h"
+#include "tmv/TMV_CopyV.h"
 
 namespace tmv {
 
     template <class T, int C>
-    void InstWrite(std::ostream& os, const ConstDiagMatrixView<T,C>& m)
+    void InstWrite(const TMV_Writer& writer, const ConstDiagMatrixView<T,C>& m)
     {
         if (m.step() == 1)
-            InlineWrite(os,m.unitView()); 
+            InlineWrite(writer,m.unitView()); 
         else
-            InlineWrite(os,m); 
+            InlineWrite(writer,m); 
     }
 
-    template <class T, int C>
-    void InstWrite(
-        std::ostream& os, const ConstDiagMatrixView<T,C>& m,
-        typename Traits<T>::real_type thresh)
+    template <class T>
+    void InstRead(const TMV_Reader& reader, DiagMatrixView<T> m)
     {
-        if (m.step() == 1)
-            InlineWrite(os,m.unitView(),thresh); 
-        else
-            InlineWrite(os,m,thresh); 
+        if (m.step() == 1) {
+            DiagMatrixView<T,Unit> mu = m.unitView();
+            InlineRead(reader,mu);
+        } else
+            InlineRead(reader,m);
     }
 
 #define InstFile "TMV_DiagMatrix.inst"

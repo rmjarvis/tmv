@@ -130,8 +130,8 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
-            int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
+            int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
             typedef typename M1::const_col_type M1c;
             typedef typename M2::col_type M2c;
             typedef typename M1c::const_iterator IT1;
@@ -193,8 +193,8 @@ namespace tmv {
     {
         static inline void call(const M1& m1, M2& m2)
         {
-            int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+            int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
             typedef typename M1::const_row_type M1r;
             typedef typename M2::row_type M2r;
             typedef typename M1r::const_iterator IT1;

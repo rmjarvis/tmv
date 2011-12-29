@@ -182,7 +182,7 @@ namespace tmv {
 
     template <class T> 
     bool BandSVDiv<T>::isSingular() const 
-    { return pimpl->kmax < int(pimpl->S.size()); }
+    { return pimpl->kmax < pimpl->S.size(); }
 
     template <class T> 
     RT BandSVDiv<T>::norm2() const 
@@ -220,7 +220,7 @@ namespace tmv {
     void BandSVDiv<T>::top(int neigen, std::ostream* debugout) const
     {
         TMVAssert(neigen > 0);
-        if (neigen < int(pimpl->S.size())) pimpl->kmax = neigen;
+        if (neigen < pimpl->S.size()) pimpl->kmax = neigen;
         else pimpl->kmax = pimpl->S.size();
         if(debugout) {
             (*debugout)<<"S = "<<pimpl->S<<std::endl;
@@ -272,11 +272,11 @@ namespace tmv {
     }
 
     template <class T> 
-    size_t BandSVDiv<T>::colsize() const
+    int BandSVDiv<T>::colsize() const
     { return pimpl->istrans ? pimpl->U.rowsize() : pimpl->U.colsize(); }
 
     template <class T> 
-    size_t BandSVDiv<T>::rowsize() const
+    int BandSVDiv<T>::rowsize() const
     { return pimpl->istrans ? pimpl->U.colsize() : pimpl->U.rowsize(); }
 
 #undef RT

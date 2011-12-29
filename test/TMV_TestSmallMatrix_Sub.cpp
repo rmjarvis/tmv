@@ -19,8 +19,8 @@ static void DoTestSmallMatrix_Sub()
         mf(i+1,j+1) = T(k);
     }
 
-#define Si (S==tmv::RowMajor ? int(N) : 1)
-#define Sj (S==tmv::RowMajor ? 1 : int(M))
+#define Si (S==tmv::RowMajor ? N : 1)
+#define Sj (S==tmv::RowMajor ? 1 : M)
 
     Assert(m.subMatrix(2,5,1,4) == m.subMatrix(2,5,1,4,1,1),"subMatrix");
     Assert(m.subVector(2,5,4,2,3) == m.subMatrix(2,14,5,11,4,2).diag(),

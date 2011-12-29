@@ -428,8 +428,8 @@ namespace tmv {
             if (A.colsize() > 0 && A.rowsize() > 0) {
                 if (A.iscm()) {
 #ifdef LAP
-                    if (A.nlo()+Anhi+1 > int(A.rowsize())) {
-                        TMVAssert(A.nhi()+1 == int(A.rowsize()));
+                    if (A.nlo()+Anhi+1 > A.rowsize()) {
+                        TMVAssert(A.nhi()+1 == A.rowsize());
                         NonLapBandLU_Decompose(A,P,det);
                     } else {
                         LapBandLU_Decompose(A,P,det);

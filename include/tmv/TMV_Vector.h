@@ -36,22 +36,22 @@
 //
 // Constructors:
 //
-//    explicit Vector<T,A>(size_t n)
+//    explicit Vector<T,A>(int n)
 //        Makes a Vector of size n with _uninitialized_ values
 //
-//    Vector<T,A>(size_t n, T x)
+//    Vector<T,A>(int n, T x)
 //        Makes a Vector of size n with all values = x
 //
 //
 // Special Creators: 
 //
-//    VectorView VectorViewOf(T* v, size_t n, int step=1) 
-//    ConstVectorView VectorViewOf(const T* v, size_t n, int step=1) 
+//    VectorView VectorViewOf(T* v, int n, int step=1) 
+//    ConstVectorView VectorViewOf(const T* v, int n, int step=1) 
 //        Makes a VectorView of the memory elements stored at vv 
 //
 // Access
 //
-//    size_t size() const
+//    int size() const
 //        Returns the size of the Vector
 //
 //    value_type operator[](int i) const
@@ -245,8 +245,8 @@
 //    To specify more than one, use the bitwise or: |.
 //    So VectorView<T,Unit | FortranStyle> means NonConj, Unit, FortranStyle.
 //
-//    ConstVectorView<T,A>(const T* p, size_t n, int s)
-//    VectorView<T,A>(T* p, size_t n, int s)
+//    ConstVectorView<T,A>(const T* p, int n, int s)
+//    VectorView<T,A>(T* p, int n, int s)
 //        Make a vector view, starting at memory location p, 
 //        with n elements, stepping over the data with step size s.
 //
@@ -357,14 +357,14 @@
 //
 // I/O: 
 //
-//    void write(std::ostream& os) const    or os << v
+//    os << v
 //        Writes v to ostream os in the following format:
 //          n ( v[0] v[1] v[2] ... v[n] )
 //
-//    v.write(ostream& os, real_type thresh)
+//    os << ThreshIO(thresh) << v
 //        Write v to os as above, but if |v[i]| < thresh, write 0 instead
 //
-//    void read(std::istream& is)    or is >> v
+//    is >> v
 //        Reads the vector from istream is in the same format
 //        Note: if the vector is not the right size, it will be resized.
 //
@@ -492,7 +492,7 @@ namespace tmv {
         // Constructors
         //
 
-        explicit Vector(size_t n=0) : itssize(n), itsv(n)
+        explicit Vector(int n=0) : itssize(n), itsv(n)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVAssert(n>=0);
@@ -501,7 +501,7 @@ namespace tmv {
 #endif
         }
 
-        Vector(size_t n, T val) : itssize(n), itsv(n)
+        Vector(int n, T val) : itssize(n), itsv(n)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVAssert(n>=0);
@@ -555,7 +555,7 @@ namespace tmv {
         TMV_INLINE T cref(int i) const  { return itsv[i]; }
         TMV_INLINE T& ref(int i) { return itsv[i]; }
 
-        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int size() const { return itssize; }
         TMV_INLINE int nElements() const { return itssize; }
         TMV_INLINE int step() const { return 1; }
         TMV_INLINE bool isconj() const { return false; }
@@ -566,8 +566,9 @@ namespace tmv {
             itsv.swapWith(rhs.itsv);
         }
 
-        void resize(size_t n)
+        void resize(int n)
         {
+            TMVAssert(n >= 0);
 #ifdef TMV_DEBUG
             this->setAllTo(Traits<T>::destr_value());
 #endif
@@ -580,7 +581,7 @@ namespace tmv {
 
     private:
 
-        size_t itssize;
+        int itssize;
         AlignedArray<T> itsv;
 
     }; // Vector
@@ -679,13 +680,13 @@ namespace tmv {
         // Constructors
         //
 
-        ConstVectorView(const T* v, size_t n, int s) : 
+        ConstVectorView(const T* v, int n, int s) : 
             itsv(v), itssize(n), itsstep(s) 
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstVectorView(const T* v, size_t n) : 
+        ConstVectorView(const T* v, int n) : 
             itsv(v), itssize(n), itsstep(_step) 
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -754,7 +755,7 @@ namespace tmv {
 
         TMV_INLINE T cref(int i) const  { return DoConj<_conj>(itsv[i*step()]); }
 
-        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int size() const { return itssize; }
         TMV_INLINE int nElements() const { return itssize; }
         TMV_INLINE int step() const { return itsstep; }
         TMV_INLINE bool isconj() const { return _conj; }
@@ -762,7 +763,7 @@ namespace tmv {
     protected :
 
         const T* itsv;
-        const size_t itssize;
+        const int itssize;
         const CheckedInt<_step> itsstep;
 
     }; // ConstVectorView
@@ -890,13 +891,13 @@ namespace tmv {
         // Constructors
         //
 
-        VectorView(T* v, size_t n, int s) : 
+        VectorView(T* v, int n, int s) : 
             itsv(v), itssize(n), itsstep(s) 
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        VectorView(T* v, size_t n) : 
+        VectorView(T* v, int n) : 
             itsv(v), itssize(n), itsstep(_step) 
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -953,7 +954,7 @@ namespace tmv {
         TMV_INLINE T cref(int i) const  { return DoConj<_conj>(itsv[i*step()]); }
         TMV_INLINE reference ref(int i) { return reference(itsv[i*step()]); }
 
-        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int size() const { return itssize; }
         TMV_INLINE int nElements() const { return itssize; }
         TMV_INLINE int step() const { return itsstep; }
         TMV_INLINE bool isconj() const { return _conj; }
@@ -961,7 +962,7 @@ namespace tmv {
     protected :
 
         T* itsv;
-        const size_t itssize;
+        const int itssize;
         const CheckedInt<_step> itsstep;
 
     }; // VectorView
@@ -974,12 +975,18 @@ namespace tmv {
 
     // VectorView of raw memory:
     template <class T>
-    TMV_INLINE VectorView<T,Unit> VectorViewOf(T* v, size_t size)
-    { return VectorView<T,Unit>(v,size); }
+    TMV_INLINE VectorView<T,Unit> VectorViewOf(T* v, int size)
+    {
+        TMVAssert(size >= 0);
+        return VectorView<T,Unit>(v,size); 
+    }
 
     template <class T>
-    TMV_INLINE VectorView<T,NonUnit> VectorViewOf(T* v, size_t size, int step)
-    { return VectorView<T,NonUnit>(v,size,step); }
+    TMV_INLINE VectorView<T,NonUnit> VectorViewOf(T* v, int size, int step)
+    {
+        TMVAssert(size >= 0);
+        return VectorView<T,NonUnit>(v,size,step); 
+    }
 
 
     //

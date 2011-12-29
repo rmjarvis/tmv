@@ -11,13 +11,13 @@
 //        with HI non-zero superdiagonals and LO non-zero subdiagonals
 //        with _uninitialized_ values.  
 //   
-//    ThinBandMatrix<T,LO,HI,A>(size_t colsize, size_t rowsize)
+//    ThinBandMatrix<T,LO,HI,A>(int colsize, int rowsize)
 //        Makes a banded matrix with column size = colsize and 
 //        row size = rowsize, with HI non-zero superdiagonals and 
 //        LO non-zero subdiagonals with _uninitialized_ values.
 //   
 //    SmallBandMatrix<T,M,N,LO,HI,A>(T x)
-//    ThinBandMatrix<T,LO,HI,A>(size_t colsize, size_t rowsize, T x)
+//    ThinBandMatrix<T,LO,HI,A>(int colsize, int rowsize, T x)
 //        The same as above, but all values are initialized to x.
 //    
 //    SmallBandMatrix<T,M,N,LO,HI,A>(const BaseMatrix<M>& m)
@@ -475,14 +475,14 @@ namespace tmv {
         {
 #ifdef TMV_USE_VALGRIND
             AlignedArray<int> ok(ls());
-            for (size_t i=0;i<ls();++i) ok[i] = 0;
-            for (size_t i=0;i<colsize();++i) for (size_t j=0;j<rowsize();++j) {
+            for (int i=0;i<ls();++i) ok[i] = 0;
+            for (int i=0;i<colsize();++i) for (int j=0;j<rowsize();++j) {
                 if (okij(i,j)) {
                     int k = i*stepi() + j*stepj();
                     ok[k] = true;
                 }
             }
-            for (size_t k=0;k<ls();++k) if (!ok[k]) {
+            for (int k=0;k<ls();++k) if (!ok[k]) {
                 ptr()[k] = T(-777);
             }
 #endif
@@ -493,14 +493,14 @@ namespace tmv {
         {
 #ifdef TMV_USE_VALGRIND
             AlignedArray<int> ok(ls());
-            for (size_t i=0;i<ls();++i) ok[i] = 0;
-            for (size_t i=0;i<colsize();++i) for (size_t j=0;j<rowsize();++j) {
+            for (int i=0;i<ls();++i) ok[i] = 0;
+            for (int i=0;i<colsize();++i) for (int j=0;j<rowsize();++j) {
                 if (okij(i,j)) {
                     int k = i*stepi() + j*stepj();
                     ok[k] = true;
                 }
             }
-            for (size_t k=0;k<ls();++k) if (!ok[k]) {
+            for (int k=0;k<ls();++k) if (!ok[k]) {
                 ptr()[k] = T(-777);
             }
 #endif
@@ -525,9 +525,9 @@ namespace tmv {
         T& ref(int i, int j)
         { return itsm[i*stepi() + j*stepj()]; }
 
-        TMV_INLINE size_t ls() const { return _linsize; }
-        TMV_INLINE size_t colsize() const { return M; }
-        TMV_INLINE size_t rowsize() const { return N; }
+        TMV_INLINE int ls() const { return _linsize; }
+        TMV_INLINE int colsize() const { return M; }
+        TMV_INLINE int rowsize() const { return N; }
         TMV_INLINE int nlo() const { return LO; }
         TMV_INLINE int nhi() const { return HI; }
         TMV_INLINE int stepi() const { return _stepi; }
@@ -820,15 +820,16 @@ namespace tmv {
 #endif
         }
 
-        ThinBandMatrix(size_t cs, size_t rs) :
+        ThinBandMatrix(int cs, int rs) :
             itscs(cs), itsrs(rs), 
             linsize(BandStorageLength(_stor,itscs,itsrs,LO,HI)),
             itssi(_rowmajor ? LO+HI : _colmajor ? 1 :
-                  rs >= cs ? 1-int(cs) : -int(rs)),
+                  rs >= cs ? 1-cs : -rs),
             itssj(_rowmajor ? 1 : _colmajor ? LO+HI : -itssi+1),
             itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVAssert(cs >= 0 && rs >= 0);
             TMVStaticAssert(LO >= 0);
             TMVStaticAssert(HI >= 0);
             TMVAssert(LO < cs);
@@ -838,15 +839,16 @@ namespace tmv {
 #endif
         }
 
-        ThinBandMatrix(size_t cs, size_t rs, T x) :
+        ThinBandMatrix(int cs, int rs, T x) :
             itscs(cs), itsrs(rs), 
             linsize(BandStorageLength(_stor,itscs,itsrs,LO,HI)),
             itssi(_rowmajor ? LO+HI : _colmajor ? 1 :
-                  rs >= cs ? 1-int(cs) : -int(rs)),
+                  rs >= cs ? 1-cs : -rs),
             itssj(_rowmajor ? 1 : _colmajor ? LO+HI : -itssi+1),
             itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
             TMVStaticAssert(Traits<type>::okA);
+            TMVAssert(cs >= 0 && rs >= 0);
             TMVStaticAssert(LO >= 0);
             TMVStaticAssert(HI >= 0);
             TMVAssert(LO < cs);
@@ -858,7 +860,7 @@ namespace tmv {
             itscs(m2.itscs), itsrs(m2.itsrs), 
             linsize(BandStorageLength(_stor,itscs,itsrs,LO,HI)),
             itssi(_rowmajor ? LO+HI : _colmajor ? 1 :
-                  itsrs >= itscs ? 1-int(itscs) : -int(itsrs)),
+                  itsrs >= itscs ? 1-itscs : -itsrs),
             itssj(_rowmajor ? 1 : _colmajor ? LO+HI : -itssi+1),
             itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
@@ -873,7 +875,7 @@ namespace tmv {
             itscs(m2.colsize()), itsrs(m2.rowsize()), 
             linsize(BandStorageLength(_stor,itscs,itsrs,LO,HI)),
             itssi(_rowmajor ? LO+HI : _colmajor ? 1 :
-                  itsrs >= itscs ? 1-int(itscs) : -int(itsrs)),
+                  itsrs >= itscs ? 1-itscs : -itsrs),
             itssj(_rowmajor ? 1 : _colmajor ? LO+HI : -itssi+1),
             itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
@@ -891,7 +893,7 @@ namespace tmv {
             itscs(m2.colsize()), itsrs(m2.rowsize()), 
             linsize(BandStorageLength(_stor,itscs,itsrs,LO,HI)),
             itssi(_rowmajor ? LO+HI : _colmajor ? 1 :
-                  itsrs >= itscs ? 1-int(itscs) : -int(itsrs)),
+                  itsrs >= itscs ? 1-itscs : -itsrs),
             itssj(_rowmajor ? 1 : _colmajor ? LO+HI : -itssi+1),
             itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
@@ -908,7 +910,7 @@ namespace tmv {
             itscs(m2.colsize()), itsrs(m2.rowsize()), 
             linsize(BandStorageLength(_stor,itscs,itsrs,LO,HI)),
             itssi(_rowmajor ? LO+HI : _colmajor ? 1 :
-                  itsrs >= itscs ? 1-int(itscs) : -int(itsrs)),
+                  itsrs >= itscs ? 1-itscs : -itsrs),
             itssj(_rowmajor ? 1 : _colmajor ? LO+HI : -itssi+1),
             itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
@@ -928,8 +930,8 @@ namespace tmv {
         ThinBandMatrix(const BaseMatrix_Tri<M2>& m2) :
             itscs(m2.size()), itsrs(m2.size()), 
             linsize(BandStorageLength(_stor,itscs,itsrs,LO,HI)),
-            itssi(_rowmajor ? LO+HI : _colmajor ? 1 : 1-int(itscs)),
-            itssj(_rowmajor ? 1 : _colmajor ? LO+HI : int(itscs)),
+            itssi(_rowmajor ? LO+HI : _colmajor ? 1 : 1-itscs),
+            itssj(_rowmajor ? 1 : _colmajor ? LO+HI : itscs),
             itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -948,8 +950,8 @@ namespace tmv {
         ThinBandMatrix(const BaseMatrix_Diag<M2>& m2) :
             itscs(m2.size()), itsrs(m2.size()), 
             linsize(BandStorageLength(_stor,itscs,itsrs,LO,HI)),
-            itssi(_rowmajor ? 0 : _colmajor ? 1 : 1-int(itscs)),
-            itssj(_rowmajor ? 1 : _colmajor ? 0 : int(itscs)),
+            itssi(_rowmajor ? 0 : _colmajor ? 1 : 1-itscs),
+            itssj(_rowmajor ? 1 : _colmajor ? 0 : itscs),
             itsm1(linsize), itsm(itsm1.get())
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -963,8 +965,8 @@ namespace tmv {
             itscs(LO==0?v0.size():v0.size()+1),
             itsrs(HI==0?v1.size():v1.size()+1),
             linsize(BandStorageLength(_stor,itscs,itsrs,LO,HI)),
-            itssi(_rowmajor ? 0 : _colmajor ? 1 : 1-int(itscs)),
-            itssj(_rowmajor ? 1 : _colmajor ? 0 : int(itscs)),
+            itssi(_rowmajor ? 0 : _colmajor ? 1 : 1-itscs),
+            itssj(_rowmajor ? 1 : _colmajor ? 0 : itscs),
             itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -984,8 +986,8 @@ namespace tmv {
             const BaseVector<V2>& v2) :
             itscs(v0.size()+1), itsrs(v2.size()+1),
             linsize(BandStorageLength(_stor,itscs,itsrs,LO,HI)),
-            itssi(_rowmajor ? 0 : _colmajor ? 1 : 1-int(itscs)),
-            itssj(_rowmajor ? 1 : _colmajor ? 0 : int(itscs)),
+            itssi(_rowmajor ? 0 : _colmajor ? 1 : 1-itscs),
+            itssj(_rowmajor ? 1 : _colmajor ? 0 : itscs),
             itsm1(linsize), itsm(itsm1.get() - (_diagmajor ? LO*itssi : 0))
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1043,14 +1045,14 @@ namespace tmv {
         {
 #ifdef TMV_USE_VALGRIND
             AlignedArray<int> ok(ls());
-            for (size_t i=0;i<ls();++i) ok[i] = 0;
-            for (size_t i=0;i<colsize();++i) for (size_t j=0;j<rowsize();++j) {
+            for (int i=0;i<ls();++i) ok[i] = 0;
+            for (int i=0;i<colsize();++i) for (int j=0;j<rowsize();++j) {
                 if (okij(i,j)) {
                     int k = i*stepi() + j*stepj();
                     ok[k] = true;
                 }
             }
-            for (size_t k=0;k<ls();++k) if (!ok[k]) {
+            for (int k=0;k<ls();++k) if (!ok[k]) {
                 ptr()[k] = T(-777);
             }
 #endif
@@ -1061,14 +1063,14 @@ namespace tmv {
         {
 #ifdef TMV_USE_VALGRIND
             AlignedArray<int> ok(ls());
-            for (size_t i=0;i<ls();++i) ok[i] = 0;
-            for (size_t i=0;i<colsize();++i) for (size_t j=0;j<rowsize();++j) {
+            for (int i=0;i<ls();++i) ok[i] = 0;
+            for (int i=0;i<colsize();++i) for (int j=0;j<rowsize();++j) {
                 if (okij(i,j)) {
                     int k = i*stepi() + j*stepj();
                     ok[k] = true;
                 }
             }
-            for (size_t k=0;k<ls();++k) if (!ok[k]) {
+            for (int k=0;k<ls();++k) if (!ok[k]) {
                 ptr()[k] = T(-777);
             }
 #endif
@@ -1104,8 +1106,9 @@ namespace tmv {
             TMV_SWAP(itsm,m2.itsm);
         }
 
-        void resize(size_t cs, size_t rs)
+        void resize(int cs, int rs)
         {
+            TMVAssert(cs >= 0 && rs >= 0);
 #ifdef TMV_DEBUG
             this->setAllTo(Traits<T>::destr_value());
 #endif
@@ -1116,7 +1119,7 @@ namespace tmv {
             itsm1.resize(linsize);
             itsm = itsm1.get() - _diagmajor ? LO*itssi : 0;
             itssi = _rowmajor ? LO+HI : _colmajor ? 1 :
-                rs >= cs ? 1-int(cs) : -int(rs);
+                rs >= cs ? 1-cs : -rs;
             itssj = _rowmajor ? 1 : _colmajor ? LO+HI : -itssi+1;
 #ifdef TMV_DEBUG
             this->setAllTo(Traits<T>::constr_value());
@@ -1124,9 +1127,9 @@ namespace tmv {
         }
 
 
-        TMV_INLINE size_t ls() const { return linsize; }
-        TMV_INLINE size_t colsize() const { return itscs; }
-        TMV_INLINE size_t rowsize() const { return itsrs; }
+        TMV_INLINE int ls() const { return linsize; }
+        TMV_INLINE int colsize() const { return itscs; }
+        TMV_INLINE int rowsize() const { return itsrs; }
         TMV_INLINE int nlo() const { return LO; }
         TMV_INLINE int nhi() const { return HI; }
         TMV_INLINE int stepi() const { return itssi; }
@@ -1140,9 +1143,9 @@ namespace tmv {
 
     private:
 
-        size_t itscs;
-        size_t itsrs;
-        size_t linsize;
+        int itscs;
+        int itsrs;
+        int linsize;
         CheckedInt<_stepi> itssi;
         CheckedInt<_stepj> itssj;
         AlignedArray<T> itsm1;
@@ -1357,7 +1360,7 @@ namespace tmv {
         //
 
         TMV_INLINE ConstSmallBandMatrixView(
-            const T* m, size_t cs, size_t rs, int lo, int hi, int si, int sj) :
+            const T* m, int cs, int rs, int lo, int hi, int si, int sj) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi),
             itssi(si), itssj(sj) 
         { 
@@ -1365,7 +1368,7 @@ namespace tmv {
         }
 
         TMV_INLINE ConstSmallBandMatrixView(
-            const T* m, size_t cs, size_t rs, int lo, int hi, int si) :
+            const T* m, int cs, int rs, int lo, int hi, int si) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi),
             itssi(si), itssj(Sj) 
         {
@@ -1374,7 +1377,7 @@ namespace tmv {
         }
 
         TMV_INLINE ConstSmallBandMatrixView(
-            const T* m, size_t cs, size_t rs, int lo, int hi) :
+            const T* m, int cs, int rs, int lo, int hi) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi),
             itssi(Si), itssj(Sj)
         {
@@ -1384,7 +1387,7 @@ namespace tmv {
         }
 
         TMV_INLINE ConstSmallBandMatrixView(
-            const T* m, size_t cs, size_t rs, int lo) :
+            const T* m, int cs, int rs, int lo) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(HI),
             itssi(Si), itssj(Sj)
         {
@@ -1394,7 +1397,7 @@ namespace tmv {
             TMVStaticAssert(Sj != TMV_UNKNOWN); 
         }
 
-        TMV_INLINE ConstSmallBandMatrixView(const T* m, size_t cs, size_t rs) :
+        TMV_INLINE ConstSmallBandMatrixView(const T* m, int cs, int rs) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(LO), itsnhi(HI),
             itssi(Si), itssj(Sj)
         {
@@ -1405,7 +1408,7 @@ namespace tmv {
             TMVStaticAssert(Sj != TMV_UNKNOWN); 
         }
 
-        TMV_INLINE ConstSmallBandMatrixView(const T* m, size_t cs) :
+        TMV_INLINE ConstSmallBandMatrixView(const T* m, int cs) :
             itsm(m), itscs(cs), itsrs(N), itsnlo(LO), itsnhi(HI),
             itssi(Si), itssj(Sj)
         {
@@ -1503,8 +1506,8 @@ namespace tmv {
             else return T(0);
         }
 
-        TMV_INLINE size_t colsize() const { return itscs; }
-        TMV_INLINE size_t rowsize() const { return itsrs; }
+        TMV_INLINE int colsize() const { return itscs; }
+        TMV_INLINE int rowsize() const { return itsrs; }
         TMV_INLINE int nlo() const { return itsnlo; }
         TMV_INLINE int nhi() const { return itsnhi; }
         TMV_INLINE int stepi() const { return itssi; }
@@ -1797,7 +1800,7 @@ namespace tmv {
         //
 
         TMV_INLINE SmallBandMatrixView(
-            T* m, size_t cs, size_t rs, int lo, int hi, int si, int sj) :
+            T* m, int cs, int rs, int lo, int hi, int si, int sj) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi),
             itssi(si), itssj(sj) 
         {
@@ -1805,7 +1808,7 @@ namespace tmv {
         }
 
         TMV_INLINE SmallBandMatrixView(
-            T* m, size_t cs, size_t rs, int lo, int hi, int si) :
+            T* m, int cs, int rs, int lo, int hi, int si) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi),
             itssi(si), itssj(Sj) 
         {
@@ -1814,7 +1817,7 @@ namespace tmv {
         }
 
         TMV_INLINE SmallBandMatrixView(
-            T* m, size_t cs, size_t rs, int lo, int hi) :
+            T* m, int cs, int rs, int lo, int hi) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi),
             itssi(Si), itssj(Sj)
         {
@@ -1823,7 +1826,7 @@ namespace tmv {
             TMVStaticAssert(Sj != TMV_UNKNOWN); 
         }
 
-        TMV_INLINE SmallBandMatrixView(T* m, size_t cs, size_t rs, int lo) :
+        TMV_INLINE SmallBandMatrixView(T* m, int cs, int rs, int lo) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(HI),
             itssi(Si), itssj(Sj)
         {
@@ -1833,7 +1836,7 @@ namespace tmv {
             TMVStaticAssert(Sj != TMV_UNKNOWN); 
         }
 
-        TMV_INLINE SmallBandMatrixView(T* m, size_t cs, size_t rs) :
+        TMV_INLINE SmallBandMatrixView(T* m, int cs, int rs) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(LO), itsnhi(HI),
             itssi(Si), itssj(Sj)
         {
@@ -1844,7 +1847,7 @@ namespace tmv {
             TMVStaticAssert(Sj != TMV_UNKNOWN); 
         }
 
-        TMV_INLINE SmallBandMatrixView(T* m, size_t cs) :
+        TMV_INLINE SmallBandMatrixView(T* m, int cs) :
             itsm(m), itscs(cs), itsrs(N), itsnlo(LO), itsnhi(HI),
             itssi(Si), itssj(Sj)
         {
@@ -1949,8 +1952,8 @@ namespace tmv {
         reference ref(int i, int j) 
         { return reference(itsm[i*stepi()+j*stepj()]); }
 
-        TMV_INLINE size_t colsize() const { return itscs; }
-        TMV_INLINE size_t rowsize() const { return itsrs; }
+        TMV_INLINE int colsize() const { return itscs; }
+        TMV_INLINE int rowsize() const { return itsrs; }
         TMV_INLINE int nlo() const { return itsnlo; }
         TMV_INLINE int nhi() const { return itsnhi; }
         TMV_INLINE int stepi() const { return itssi; }
@@ -2031,8 +2034,8 @@ namespace tmv {
     {
         TMVAssert(lo >= 0);
         TMVAssert(hi >= 0);
-        TMVAssert(lo < int(m.colsize()));
-        TMVAssert(hi < int(m.rowsize()));
+        TMVAssert(lo < m.colsize());
+        TMVAssert(hi < m.rowsize());
         return typename BMVO<M>::cb(
             m.cptr(),m.colsize(),m.rowsize(),lo,hi,m.stepi(),m.stepj());
     }
@@ -2042,8 +2045,8 @@ namespace tmv {
     {
         TMVAssert(lo >= 0);
         TMVAssert(hi >= 0);
-        TMVAssert(lo < int(m.colsize()));
-        TMVAssert(hi < int(m.rowsize()));
+        TMVAssert(lo < m.colsize());
+        TMVAssert(hi < m.rowsize());
         return typename BMVO<M>::b(
             m.ptr(),m.colsize(),m.rowsize(),lo,hi,m.stepi(),m.stepj());
     }
@@ -2053,8 +2056,8 @@ namespace tmv {
     {
         TMVAssert(lo >= 0);
         TMVAssert(hi >= 0);
-        TMVAssert(lo < int(m.colsize()));
-        TMVAssert(hi < int(m.rowsize()));
+        TMVAssert(lo < m.colsize());
+        TMVAssert(hi < m.rowsize());
         return typename BMVO<MatrixView<T,A> >::b(
             m.ptr(),m.colsize(),m.rowsize(),lo,hi,m.stepi(),m.stepj());
     }
@@ -2064,8 +2067,8 @@ namespace tmv {
     {
         TMVAssert(lo >= 0);
         TMVAssert(hi >= 0);
-        TMVAssert(lo < int(m.colsize()));
-        TMVAssert(hi < int(m.rowsize()));
+        TMVAssert(lo < m.colsize());
+        TMVAssert(hi < m.rowsize());
         return typename BMVO<SmallMatrixView<T,M,N,Si,Sj,A> >::b(
             m.ptr(),m.colsize(),m.rowsize(),lo,hi,m.stepi(),m.stepj());
     }
@@ -2153,7 +2156,7 @@ namespace tmv {
         const BaseMatrix_Tri<M>& m, int lohi)
     {
         TMVAssert(lohi >= 0);
-        TMVAssert(lohi < int(m.size()));
+        TMVAssert(lohi < m.size());
         return typename BMVOTri<M>::cb(
             m.cptr(),m.size(),m.size(),
             M::_upper ? 0 : lohi, M::_upper ? lohi : 0,
@@ -2164,7 +2167,7 @@ namespace tmv {
         BaseMatrix_Tri_Mutable<M>& m, int lohi)
     {
         TMVAssert(lohi >= 0);
-        TMVAssert(lohi < int(m.size()));
+        TMVAssert(lohi < m.size());
         return typename BMVOTri<M>::b(
             m.ptr(),m.size(),m.size(),
             M::_upper ? 0 : lohi, M::_upper ? lohi : 0,
@@ -2175,7 +2178,7 @@ namespace tmv {
         UpperTriMatrixView<T,A> m, int hi)
     {
         TMVAssert(hi >= 0);
-        TMVAssert(hi < int(m.size()));
+        TMVAssert(hi < m.size());
         return typename BMVOTri<UpperTriMatrixView<T,A> >::b(
             m.ptr(),m.size(),m.size(),0,hi,m.stepi(),m.stepj());
     }
@@ -2184,7 +2187,7 @@ namespace tmv {
     BandMatrixViewOf(SmallUpperTriMatrixView<T,N,Si,Sj,A> m, int hi)
     {
         TMVAssert(hi >= 0);
-        TMVAssert(hi < int(m.size()));
+        TMVAssert(hi < m.size());
         return typename BMVOTri<SmallUpperTriMatrixView<T,N,Si,Sj,A> >::b(
             m.ptr(),m.size(),m.size(),0,hi,m.stepi(),m.stepj());
     }
@@ -2193,7 +2196,7 @@ namespace tmv {
         LowerTriMatrixView<T,A> m, int lo)
     {
         TMVAssert(lo >= 0);
-        TMVAssert(lo < int(m.size()));
+        TMVAssert(lo < m.size());
         return typename BMVOTri<LowerTriMatrixView<T,A> >::b(
             m.ptr(),m.size(),m.size(),lo,0,m.stepi(),m.stepj());
     }
@@ -2202,7 +2205,7 @@ namespace tmv {
     BandMatrixViewOf(SmallLowerTriMatrixView<T,N,Si,Sj,A> m, int lo)
     {
         TMVAssert(lo >= 0);
-        TMVAssert(lo < int(m.size()));
+        TMVAssert(lo < m.size());
         return typename BMVOTri<SmallLowerTriMatrixView<T,N,Si,Sj,A> >::b(
             m.ptr(),m.size(),m.size(),lo,0,m.stepi(),m.stepj());
     }
@@ -2214,8 +2217,8 @@ namespace tmv {
     {
         return typename BMVOTri<M>::cb2(
             m.cptr(),m.size(),m.size(),
-            M::_upper ? 0 : TMV_MAX(int(m.size())-1,0), 
-            M::_upper ? TMV_MAX(int(m.size())-1,0) : 0,
+            M::_upper ? 0 : TMV_MAX(m.size()-1,0), 
+            M::_upper ? TMV_MAX(m.size()-1,0) : 0,
             m.stepi(),m.stepj());
     }
     template <class M>
@@ -2224,8 +2227,8 @@ namespace tmv {
     {
         return typename BMVOTri<M>::b2(
             m.ptr(),m.size(),m.size(),
-            M::_upper ? 0 : TMV_MAX(int(m.size())-1,0), 
-            M::_upper ?  TMV_MAX(int(m.size())-1,0) : 0,
+            M::_upper ? 0 : TMV_MAX(m.size()-1,0), 
+            M::_upper ?  TMV_MAX(m.size()-1,0) : 0,
             m.stepi(),m.stepj());
     }
     template <class T, int A>
@@ -2234,7 +2237,7 @@ namespace tmv {
     {
         return typename BMVOTri<UpperTriMatrixView<T,A> >::b2(
             m.ptr(),m.size(),m.size(),
-            0,TMV_MAX(int(m.size())-1,0),m.stepi(),m.stepj());
+            0,TMV_MAX(m.size()-1,0),m.stepi(),m.stepj());
     }
     template <class T, int N, int Si, int Sj, int A>
     TMV_INLINE typename BMVOTri<SmallUpperTriMatrixView<T,N,Si,Sj,A> >::b2 
@@ -2242,7 +2245,7 @@ namespace tmv {
     {
         return typename BMVOTri<SmallUpperTriMatrixView<T,N,Si,Sj,A> >::b2(
             m.ptr(),m.size(),m.size(),
-            0,TMV_MAX(int(m.size())-1,0),m.stepi(),m.stepj());
+            0,TMV_MAX(m.size()-1,0),m.stepi(),m.stepj());
     }
     template <class T, int A>
     TMV_INLINE typename BMVOTri<LowerTriMatrixView<T,A> >::b2 BandMatrixViewOf(
@@ -2250,7 +2253,7 @@ namespace tmv {
     {
         return typename BMVOTri<LowerTriMatrixView<T,A> >::b2(
             m.ptr(),m.size(),m.size(),
-            TMV_MAX(int(m.size())-1,0),0,m.stepi(),m.stepj());
+            TMV_MAX(m.size()-1,0),0,m.stepi(),m.stepj());
     }
     template <class T, int N, int Si, int Sj, int A>
     TMV_INLINE typename BMVOTri<SmallLowerTriMatrixView<T,N,Si,Sj,A> >::b2
@@ -2258,7 +2261,7 @@ namespace tmv {
     {
         return typename BMVOTri<SmallLowerTriMatrixView<T,N,Si,Sj,A> >::b2(
             m.ptr(),m.size(),m.size(),
-            TMV_MAX(int(m.size())-1,0),0,m.stepi(),m.stepj());
+            TMV_MAX(m.size()-1,0),0,m.stepi(),m.stepj());
     }
 
 

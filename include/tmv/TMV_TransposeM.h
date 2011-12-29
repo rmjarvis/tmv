@@ -40,7 +40,7 @@ namespace tmv {
     {
         static void call(M1& m)
         {
-            const int n = (s == TMV_UNKNOWN ? int(m.colsize()) : s);
+            const int n = (s == TMV_UNKNOWN ? m.colsize() : s);
             for(int i=1;i<n;++i) {
                 typename M1::row_sub_type::noalias_type v1 =
                     m.get_row(i,0,i).noAlias();
@@ -57,7 +57,7 @@ namespace tmv {
     {
         static void call(M1& m)
         {
-            const int n = s == TMV_UNKNOWN ? int(m.colsize()) : s;
+            const int n = s == TMV_UNKNOWN ? m.colsize() : s;
             if (n <= 1) return;
             typedef typename M1::row_type Mr;
             typedef typename M1::col_type Mc;
@@ -82,7 +82,7 @@ namespace tmv {
     {
         static void call(M1& m)
         {
-            const int n = (s == TMV_UNKNOWN ? int(m.colsize()) : s);
+            const int n = (s == TMV_UNKNOWN ? m.colsize() : s);
             for(int i=0;i<n-1;++i) {
                 typename M1::row_sub_type::noalias_type v1 =
                     m.get_row(i,i+1,n).noAlias();
@@ -99,7 +99,7 @@ namespace tmv {
     {
         static void call(M1& m)
         {
-            int n = s == TMV_UNKNOWN ? int(m.colsize()) : s;
+            int n = s == TMV_UNKNOWN ? m.colsize() : s;
             if (n <= 1) return;
             typedef typename M1::row_type Mr;
             typedef typename M1::col_type Mc;

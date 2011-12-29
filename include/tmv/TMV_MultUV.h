@@ -472,7 +472,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = s == TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s == TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_UV
             std::cout<<"UV algo 43: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -490,7 +490,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = s == TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s == TMV_UNKNOWN ? m1.size() : s;
 #ifdef PRINTALGO_UV
             std::cout<<"UV algo 53: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -509,7 +509,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
-            const int N = s == TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s == TMV_UNKNOWN ? m1.size() : s;
             std::cout<<"UV algo 81: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             typename V3::noalias_type v3na = v3.noAlias();
@@ -525,7 +525,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
-            const int N = s == TMV_UNKNOWN ? int(m1.size()) : s;
+            const int N = s == TMV_UNKNOWN ? m1.size() : s;
             std::cout<<"UV algo 85: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             typedef typename Traits<T>::real_type RT;

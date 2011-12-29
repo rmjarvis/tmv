@@ -1,16 +1,24 @@
 
 #define CT std::complex<T>
 
-#define Def1(RT,T,C) \
-  template void InstWrite(std::ostream& os, \
-      const ConstDiagMatrixView<T,C>& m); \
-  template void InstWrite(std::ostream& os, \
-      const ConstDiagMatrixView<T,C>& m, RT thresh); \
+#define Def1(RT,T)\
+  template void InstRead(const TMV_Reader& reader, DiagMatrixView<T> m1); \
 
-Def1(T,T,NonConj)
+Def1(T,T)
 #ifdef TMV_INST_COMPLEX
-Def1(T,CT,NonConj)
-Def1(T,CT,Conj)
+Def1(T,CT)
+#endif
+
+#undef Def1
+
+#define Def2(RT,T,C) \
+  template void InstWrite(const TMV_Writer& writer, \
+      const ConstDiagMatrixView<T,C>& m); \
+
+Def2(T,T,NonConj)
+#ifdef TMV_INST_COMPLEX
+Def2(T,CT,NonConj)
+Def2(T,CT,Conj)
 #endif
 
 #undef Def1

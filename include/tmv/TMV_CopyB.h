@@ -34,8 +34,8 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
             const int xx = TMV_UNKNOWN;
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::col_sub_type M2c;
@@ -86,8 +86,8 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
             const int xx = TMV_UNKNOWN;
             typedef typename M1::const_row_sub_type M1r;
             typedef typename M2::row_sub_type M2r;
@@ -133,8 +133,8 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
             const int xx = TMV_UNKNOWN;
             typedef typename M1::const_diag_sub_type M1d;
             typedef typename M2::diag_sub_type M2d;
@@ -408,11 +408,11 @@ namespace tmv {
         TMVAssert(m1.rowsize() == m2.rowsize());
         typename BMVO<M2>::b b2 = BandMatrixViewOf(m2,m1.nlo(),m1.nhi());
         Copy(m1,b2);
-        if (m1.nlo() < int(m1.colsize())-1)
+        if (m1.nlo() < m1.colsize()-1)
             BandMatrixViewOf(
                 m2.cRowRange(m1.nlo()+1,m1.colsize()),
                 m1.colsize()-m1.nlo()-2,0).setZero();
-        if (m1.nhi() < int(m1.rowsize())-1)
+        if (m1.nhi() < m1.rowsize()-1)
             BandMatrixViewOf(
                 m2.cColRange(m1.nhi()+1,m1.rowsize()),
                 0,m1.rowsize()-m1.nhi()-2).setZero();

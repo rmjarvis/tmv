@@ -385,7 +385,7 @@ namespace tmv {
     {
         static void call(V1& v1, const M2& m2)
         {
-            const int N = s == TMV_UNKNOWN ? int(m2.size()) : s;
+            const int N = s == TMV_UNKNOWN ? m2.size() : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqVU algo 43: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -403,7 +403,7 @@ namespace tmv {
         static void call(V1& v1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int N = s == TMV_UNKNOWN ? int(m2.size()) : s;
+            const int N = s == TMV_UNKNOWN ? m2.size() : s;
             std::cout<<"LDivEqVU algo 85: N,s = "<<N<<','<<s<<std::endl;
 #endif
             typename V1::copy_type v1c(v1);

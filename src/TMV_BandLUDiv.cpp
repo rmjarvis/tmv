@@ -119,7 +119,7 @@ namespace tmv {
             int jn=nlo+1;  // jn = j+nlo+1
             const int* pj = p;
             for(int j=0; j+1<N; ++j,++pj) {
-                TMVAssert(*pj<int(m.colsize()));
+                TMVAssert(*pj<m.colsize());
                 m.swapRows(j,*pj);
                 m.rowRange(j+1,jn) -= LUx.col(j,j+1,jn) ^ m.row(j);
                 if (jn<N) ++jn;
@@ -133,7 +133,7 @@ namespace tmv {
             cerr<<"LUx = "<<LUx<<endl;
             cerr<<"PL = "<<PL0<<endl;
             cerr<<"p = ";
-            for(size_t i=0;i<LUx.colsize();i++) cerr<<p[i]<<" ";
+            for(int i=0;i<LUx.colsize();i++) cerr<<p[i]<<" ";
             cerr<<endl;
             cerr<<"m = "<<m0<<endl;
             cerr<<"m => "<<m<<endl;
@@ -180,7 +180,7 @@ namespace tmv {
             cerr<<"L = "<<L0<<endl;
             cerr<<"U = "<<U0<<endl;
             cerr<<"p = ";
-            for(size_t i=0;i<LUx.colsize();i++) cerr<<p[i]<<" ";
+            for(int i=0;i<LUx.colsize();i++) cerr<<p[i]<<" ";
             cerr<<endl;
             cerr<<"PLU = "<<PLU<<endl;
             cerr<<"m = "<<m0<<endl;
@@ -226,7 +226,7 @@ namespace tmv {
             for(int j=N-1;j>0;) {
                 --j; --pj;
                 m.col(j) -= m.colRange(j+1,jn) * LUx.col(j,j+1,jn);
-                TMVAssert(*pj<int(m.rowsize()));
+                TMVAssert(*pj<m.rowsize());
                 m.swapCols(j,*pj);
                 if (k>0) --k; else --jn;
             }
@@ -239,7 +239,7 @@ namespace tmv {
             cerr<<"LUx = "<<LUx<<endl;
             cerr<<"PL = "<<PL0<<endl;
             cerr<<"p = ";
-            for(size_t i=0;i<LUx.colsize();i++) cerr<<p[i]<<" ";
+            for(int i=0;i<LUx.colsize();i++) cerr<<p[i]<<" ";
             cerr<<endl;
             cerr<<"m = "<<m0<<endl;
             cerr<<"m => "<<m<<endl;
@@ -287,7 +287,7 @@ namespace tmv {
             cerr<<"L = "<<L0<<endl;
             cerr<<"U = "<<U0<<endl;
             cerr<<"p = ";
-            for(size_t i=0;i<LUx.colsize();i++) cerr<<p[i]<<" ";
+            for(int i=0;i<LUx.colsize();i++) cerr<<p[i]<<" ";
             cerr<<endl;
             cerr<<"PLU = "<<PLU<<endl;
             cerr<<"m = "<<m0<<endl;
@@ -329,8 +329,8 @@ namespace tmv {
         TMVAssert(m.colsize() > 0);
         TMVAssert(LUx.nhi() > LUx.nlo());
         TMVAssert(LUx.nlo() > 0);
-        TMVAssert(LUx.nhi() < int(LUx.colsize()));
-        TMVAssert(LUx.nlo() < int(LUx.colsize()));
+        TMVAssert(LUx.nhi() < LUx.colsize());
+        TMVAssert(LUx.nlo() < LUx.colsize());
         TMVAssert(LUx.iscm());
         TMVAssert(m.iscm());
 
@@ -359,8 +359,8 @@ namespace tmv {
         TMVAssert(m.colsize() > 0);
         TMVAssert(LUx.nhi() > LUx.nlo());
         TMVAssert(LUx.nlo() > 0);
-        TMVAssert(LUx.nhi() < int(LUx.colsize()));
-        TMVAssert(LUx.nlo() < int(LUx.colsize()));
+        TMVAssert(LUx.nhi() < LUx.colsize());
+        TMVAssert(LUx.nlo() < LUx.colsize());
         TMVAssert(LUx.ct() == NonConj);
         TMVAssert(m.ct() == NonConj);
         TMVAssert(LUx.iscm());
@@ -391,8 +391,8 @@ namespace tmv {
         TMVAssert(m.colsize() > 0);
         TMVAssert(LUx.nhi() == 2);
         TMVAssert(LUx.nlo() == 1);
-        TMVAssert(LUx.nhi() < int(LUx.colsize()));
-        TMVAssert(LUx.nlo() < int(LUx.colsize()));
+        TMVAssert(LUx.nhi() < LUx.colsize());
+        TMVAssert(LUx.nlo() < LUx.colsize());
         TMVAssert(LUx.isdm());
         TMVAssert(m.iscm());
 
@@ -419,8 +419,8 @@ namespace tmv {
         TMVAssert(m.colsize() > 0);
         TMVAssert(LUx.nhi() == 2);
         TMVAssert(LUx.nlo() == 1);
-        TMVAssert(LUx.nhi() < int(LUx.colsize()));
-        TMVAssert(LUx.nlo() < int(LUx.colsize()));
+        TMVAssert(LUx.nhi() < LUx.colsize());
+        TMVAssert(LUx.nlo() < LUx.colsize());
         TMVAssert(LUx.ct() == NonConj);
         TMVAssert(m.ct() == NonConj);
         TMVAssert(LUx.isdm());
@@ -449,8 +449,8 @@ namespace tmv {
         TMVAssert(m.colsize() > 0);
         TMVAssert(LUx.nhi() > LUx.nlo());
         TMVAssert(LUx.nlo() > 0);
-        TMVAssert(LUx.nhi() < int(LUx.colsize()));
-        TMVAssert(LUx.nlo() < int(LUx.colsize()));
+        TMVAssert(LUx.nhi() < LUx.colsize());
+        TMVAssert(LUx.nlo() < LUx.colsize());
         TMVAssert(LUx.iscm());
         TMVAssert(m.isrm());
 
@@ -479,8 +479,8 @@ namespace tmv {
         TMVAssert(m.colsize() > 0);
         TMVAssert(LUx.nhi() > LUx.nlo());
         TMVAssert(LUx.nlo() > 0);
-        TMVAssert(LUx.nhi() < int(LUx.colsize()));
-        TMVAssert(LUx.nlo() < int(LUx.colsize()));
+        TMVAssert(LUx.nhi() < LUx.colsize());
+        TMVAssert(LUx.nlo() < LUx.colsize());
         TMVAssert(m.ct() == NonConj);
         TMVAssert(LUx.iscm());
         TMVAssert(m.isrm());
@@ -511,8 +511,8 @@ namespace tmv {
         TMVAssert(m.colsize() > 0);
         TMVAssert(LUx.nhi() == 2);
         TMVAssert(LUx.nlo() == 1);
-        TMVAssert(LUx.nhi() < int(LUx.colsize()));
-        TMVAssert(LUx.nlo() < int(LUx.colsize()));
+        TMVAssert(LUx.nhi() < LUx.colsize());
+        TMVAssert(LUx.nlo() < LUx.colsize());
         TMVAssert(LUx.isdm());
         TMVAssert(m.isrm());
 
@@ -539,8 +539,8 @@ namespace tmv {
         TMVAssert(m.colsize() > 0);
         TMVAssert(LUx.nhi() == 2);
         TMVAssert(LUx.nlo() == 1);
-        TMVAssert(LUx.nhi() < int(LUx.colsize()));
-        TMVAssert(LUx.nlo() < int(LUx.colsize()));
+        TMVAssert(LUx.nhi() < LUx.colsize());
+        TMVAssert(LUx.nlo() < LUx.colsize());
         TMVAssert(m.ct() == NonConj);
         TMVAssert(LUx.isdm());
         TMVAssert(m.isrm());
@@ -570,8 +570,8 @@ namespace tmv {
         TMVAssert(m.colsize() > 0);
         TMVAssert(LUx.nhi() > LUx.nlo());
         TMVAssert(LUx.nlo() > 0);
-        TMVAssert(LUx.nhi() < int(LUx.colsize()));
-        TMVAssert(LUx.nlo() < int(LUx.colsize()));
+        TMVAssert(LUx.nhi() < LUx.colsize());
+        TMVAssert(LUx.nlo() < LUx.colsize());
         TMVAssert(LUx.iscm());
         TMVAssert(m.iscm());
 
@@ -600,8 +600,8 @@ namespace tmv {
         TMVAssert(m.colsize() > 0);
         TMVAssert(LUx.nhi() > LUx.nlo());
         TMVAssert(LUx.nlo() > 0);
-        TMVAssert(LUx.nhi() < int(LUx.colsize()));
-        TMVAssert(LUx.nlo() < int(LUx.colsize()));
+        TMVAssert(LUx.nhi() < LUx.colsize());
+        TMVAssert(LUx.nlo() < LUx.colsize());
         TMVAssert(LUx.ct() == NonConj);
         TMVAssert(m.ct() == NonConj);
         TMVAssert(LUx.iscm());
@@ -632,8 +632,8 @@ namespace tmv {
         TMVAssert(m.colsize() > 0);
         TMVAssert(LUx.nhi() == 2);
         TMVAssert(LUx.nlo() == 1);
-        TMVAssert(LUx.nhi() < int(LUx.colsize()));
-        TMVAssert(LUx.nlo() < int(LUx.colsize()));
+        TMVAssert(LUx.nhi() < LUx.colsize());
+        TMVAssert(LUx.nlo() < LUx.colsize());
         TMVAssert(LUx.isdm());
         TMVAssert(m.iscm());
 
@@ -660,8 +660,8 @@ namespace tmv {
         TMVAssert(m.colsize() > 0);
         TMVAssert(LUx.nhi() == 2);
         TMVAssert(LUx.nlo() == 1);
-        TMVAssert(LUx.nhi() < int(LUx.colsize()));
-        TMVAssert(LUx.nlo() < int(LUx.colsize()));
+        TMVAssert(LUx.nhi() < LUx.colsize());
+        TMVAssert(LUx.nlo() < LUx.colsize());
         TMVAssert(LUx.ct() == NonConj);
         TMVAssert(m.ct() == NonConj);
         TMVAssert(LUx.isdm());
@@ -690,8 +690,8 @@ namespace tmv {
         TMVAssert(m.colsize() > 0);
         TMVAssert(LUx.nhi() > LUx.nlo());
         TMVAssert(LUx.nlo() > 0);
-        TMVAssert(LUx.nhi() < int(LUx.colsize()));
-        TMVAssert(LUx.nlo() < int(LUx.colsize()));
+        TMVAssert(LUx.nhi() < LUx.colsize());
+        TMVAssert(LUx.nlo() < LUx.colsize());
         TMVAssert(LUx.iscm());
         TMVAssert(m.isrm());
 
@@ -720,8 +720,8 @@ namespace tmv {
         TMVAssert(m.colsize() > 0);
         TMVAssert(LUx.nhi() > LUx.nlo());
         TMVAssert(LUx.nlo() > 0);
-        TMVAssert(LUx.nhi() < int(LUx.colsize()));
-        TMVAssert(LUx.nlo() < int(LUx.colsize()));
+        TMVAssert(LUx.nhi() < LUx.colsize());
+        TMVAssert(LUx.nlo() < LUx.colsize());
         TMVAssert(m.ct() == NonConj);
         TMVAssert(LUx.iscm());
         TMVAssert(m.isrm());
@@ -752,8 +752,8 @@ namespace tmv {
         TMVAssert(m.colsize() > 0);
         TMVAssert(LUx.nhi() == 2);
         TMVAssert(LUx.nlo() == 1);
-        TMVAssert(LUx.nhi() < int(LUx.colsize()));
-        TMVAssert(LUx.nlo() < int(LUx.colsize()));
+        TMVAssert(LUx.nhi() < LUx.colsize());
+        TMVAssert(LUx.nlo() < LUx.colsize());
         TMVAssert(LUx.isdm());
         TMVAssert(m.isrm());
 
@@ -780,8 +780,8 @@ namespace tmv {
         TMVAssert(m.colsize() > 0);
         TMVAssert(LUx.nhi() == 2);
         TMVAssert(LUx.nlo() == 1);
-        TMVAssert(LUx.nhi() < int(LUx.colsize()));
-        TMVAssert(LUx.nlo() < int(LUx.colsize()));
+        TMVAssert(LUx.nhi() < LUx.colsize());
+        TMVAssert(LUx.nlo() < LUx.colsize());
         TMVAssert(m.ct() == NonConj);
         TMVAssert(LUx.isdm());
         TMVAssert(m.isrm());

@@ -42,7 +42,7 @@ namespace tmv {
         const T3 x2, const ConstUpperTriMatrixView<T2,C2>& m2,
         UpperTriMatrixView<T3> m3)
     {
-#ifdef BLAS
+#if (defined(BLAS) || TMV_OPT <= 2)
         InstMultXM(x1,m1,m3);
         InstAddMultXM(x2,m2,m3);
 #else

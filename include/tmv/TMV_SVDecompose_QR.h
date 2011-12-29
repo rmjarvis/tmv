@@ -61,7 +61,7 @@ namespace tmv {
         //
         // mu = c + |b|^2/d / (1 + sqrt(1+|b|^2/d^2))
         const int N = D.size();
-        TMVAssert(int(E.size()) == N-1);
+        TMVAssert(E.size() == N-1);
         TMVAssert(N > 1);
         typedef typename Vd::value_type T;
         typedef typename Vd::real_type RT;
@@ -99,10 +99,10 @@ namespace tmv {
             typedef typename Vd::value_type RT;
             TMVStaticAssert(Traits<RT>::isreal);
 
-            const int N = rs==TMV_UNKNOWN ? int(D.size()) : rs;
+            const int N = rs==TMV_UNKNOWN ? D.size() : rs;
             if (N <= 1) return;
 #ifdef PRINTALGO_SVD
-            const int M = cs==TMV_UNKNOWN ? int(U.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? U.colsize() : cs;
             std::cout<<"SVDecomposeFromBidiagonal algo 11: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -172,9 +172,9 @@ namespace tmv {
         static void reduce(Mu& U, Vd& D, Ve& E, Mv& V)
         {
             typedef typename Mu::real_type RT;
-            const int N = rs==TMV_UNKNOWN ? int(D.size()) : rs;
+            const int N = rs==TMV_UNKNOWN ? D.size() : rs;
 #ifdef PRINTALGO_SVD
-            const int M = cs==TMV_UNKNOWN ? int(U.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? U.colsize() : cs;
             std::cout<<"SVDecomposeFromBidiagonal algo 21: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -196,8 +196,8 @@ namespace tmv {
             Vector<RT> E0 = E;
             B.diag() = D;
             B.diag(1) = E;
-            const int M1 = U.cptr() && V.cptr() ? int(U.colsize()) : 0;
-            const int N1 = U.cptr() && V.cptr() ? int(V.rowsize()) : 0;
+            const int M1 = U.cptr() && V.cptr() ? U.colsize() : 0;
+            const int N1 = U.cptr() && V.cptr() ? V.rowsize() : 0;
             Matrix<T> A0(M1,N1);
             if (U.cptr() && V.cptr()) A0 = U * B * V;
             //dbgcout<<"A0 = "<<A0<<std::endl;
@@ -338,8 +338,8 @@ namespace tmv {
         {
             typedef typename Mu::real_type RT;
 #ifdef PRINTALGO_SVD
-            const int M = cs==TMV_UNKNOWN ? int(U.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(D.size()) : rs;
+            const int M = cs==TMV_UNKNOWN ? U.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? D.size() : rs;
             std::cout<<"SVDecomposeFromBidiagonal algo 22: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -611,8 +611,8 @@ namespace tmv {
             Matrix<RT> g2(2,2); 
             g2(0,0) = c2; g2(0,1) = s2; g2(1,0) = -s2; g2(1,1) = c2;
             Matrix<RT> S = g1 * B * g2;
-            const int M1 = U.cptr() && V.cptr() ? int(U.colsize()) : 0;
-            const int N1 = U.cptr() && V.cptr() ? int(V.rowsize()) : 0;
+            const int M1 = U.cptr() && V.cptr() ? U.colsize() : 0;
+            const int N1 = U.cptr() && V.cptr() ? V.rowsize() : 0;
             Matrix<T> A(M1,N1);
             if (U.cptr() && V.cptr()) A = U * B * V;
             dbgcout<<"c1,s1 = "<<c1<<','<<s1<<std::endl;
@@ -714,7 +714,7 @@ namespace tmv {
             typedef typename Traits2<typename Mu::value_type, typename Mv::value_type>::type T;
             typedef typename Mu::real_type RT;
 
-            const int N = rs==TMV_UNKNOWN ? int(D.size()) : rs;
+            const int N = rs==TMV_UNKNOWN ? D.size() : rs;
             dbgcout<<"Start Decompose from Bidiag:\n";
             if (U.cptr()) dbgcout<<"U = "<<TMV_Text(U)<<std::endl;
             if (V.cptr()) dbgcout<<"V = "<<TMV_Text(V)<<std::endl;
@@ -727,8 +727,8 @@ namespace tmv {
             Matrix<RT> B(N,N,RT(0));
             B.diag() = D;
             B.diag(1) = E;
-            const int M1 = U.cptr() && V.cptr() ? int(U.colsize()) : 0;
-            const int N1 = U.cptr() && V.cptr() ? int(V.rowsize()) : 0;
+            const int M1 = U.cptr() && V.cptr() ? U.colsize() : 0;
+            const int N1 = U.cptr() && V.cptr() ? V.rowsize() : 0;
             Matrix<T> A0(M1,N1);
             if (U.cptr() && V.cptr()) A0 = U * B * V;
             //dbgcout<<"A0 = "<<A0<<std::endl;

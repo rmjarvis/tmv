@@ -159,8 +159,8 @@ namespace tmv {
         TMV_INLINE const Scaling<ix2,T2>& getX2() const { return x2; }
         TMV_INLINE const M2& getM2() const { return m2; }
 
-        TMV_INLINE size_t colsize() const { return m1.colsize(); }
-        TMV_INLINE size_t rowsize() const { return m1.rowsize(); }
+        TMV_INLINE int colsize() const { return m1.colsize(); }
+        TMV_INLINE int rowsize() const { return m1.rowsize(); }
         TMV_INLINE int nlo() const { return TMV_MAX(m1.nlo(),m2.nlo()); }
         TMV_INLINE int nhi() const { return TMV_MAX(m1.nhi(),m2.nhi()); }
 

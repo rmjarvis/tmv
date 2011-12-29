@@ -128,7 +128,7 @@ namespace tmv {
         TMVAssert(R.colsize() == A.rowsize());
         TMVAssert(R.rowsize() == A.rowsize());
         TMVAssert(R.nlo() >= 0);
-        TMVAssert(R.nhi() == int(R.rowsize())-1 || 
+        TMVAssert(R.nhi() == R.rowsize()-1 || 
                   R.nhi() >= A.nlo() + A.nhi());
 
         if (Q.isconj()) {
@@ -138,7 +138,7 @@ namespace tmv {
             T d(0);
             Q.setZero();
             BandMatrixView<T>(Q,A.nlo(),A.nhi()) = A;
-            int newnhi = TMV_MIN(A.nlo()+A.nhi(),int(A.rowsize()-1));
+            int newnhi = TMV_MIN(A.nlo()+A.nhi(),A.rowsize()-1);
             QR_Decompose(BandMatrixViewOf(Q,A.nlo(),newnhi),
                         beta.view(),d);
             R = BandMatrixViewOf(Q,0,newnhi);
@@ -160,12 +160,11 @@ namespace tmv {
         TMVAssert(R.colsize() == A.rowsize());
         TMVAssert(R.rowsize() == A.rowsize());
         TMVAssert(R.nlo() >= 0);
-        TMVAssert(R.nhi() == int(R.rowsize())-1 || 
-                  R.nhi() >= A.nlo() + A.nhi());
+        TMVAssert(R.nhi() == R.rowsize()-1 || R.nhi() >= A.nlo() + A.nhi());
 
         Vector<T> beta(A.rowsize());
         T d(0);
-        int newnhi = TMV_MIN(A.nlo()+A.nhi(),int(A.rowsize()-1));
+        int newnhi = TMV_MIN(A.nlo()+A.nhi(),A.rowsize()-1);
         BandMatrix<T> QR(
             TMV_MIN(A.colsize(),A.rowsize()+A.nlo()),A.rowsize(),
             A.nlo(),newnhi,T(0));

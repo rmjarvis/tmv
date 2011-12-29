@@ -25,9 +25,10 @@
 // might turn up.)
 //
 // A comment here about the letters used to identify each type of Matrix.
-// The writeCompact routines for sparse Matrix types have an identifying
+// The CompactIO format for special Matrix types have an identifying
 // letter(s) before the output.  The same letter (or combination) is 
-// used in the names of the composite arithmetic types like SumDD, etc.
+// used in the names of the files with arithmetic functions, like
+// MultUL.h, MultBB.h, etc.
 // Here is the list of letters used for reference:
 //
 // (* indicates that the type is not yet implemented.)
@@ -174,9 +175,9 @@
 
 namespace tmv {
 
-    TMV_INLINE std::string TMV_Version() { return "0.70"; }
+    TMV_INLINE std::string TMV_Version() { return "0.90"; }
 #define TMV_MAJOR_VERSION 0
-#define TMV_MINOR_VERSION 70
+#define TMV_MINOR_VERSION 90
 #define TMV_VERSION_AT_LEAST(major,minor) \
     ( (major > TMV_MAJOR_VERSION) || \
       (major == TMV_MAJOR_VERSION && minor >= TMV_MINOR_VERSION) )
@@ -2452,79 +2453,6 @@ namespace tmv {
 
     inline std::string TMV_Text(UpLoType u)
     { return u==Upper ? "Upper" : "Lower"; }
-#endif
-
-#ifdef TMV_NO_STL_AUTO_PTR
-    // This is copied more or less verbatim from gcc's auto_ptr implementation.
-    template <class X>
-    class auto_ptr {
-
-    private:
-        X* ptr;
-        template <class Y>
-        struct auto_ptr_ref {
-            Y* ptr;
-            explicit auto_ptr_ref(Y* p) : ptr(p) {}
-        };
-
-    public:
-        typedef X element_type;
-        explicit auto_ptr(X* p = 0) throw() : ptr(p) {}
-        auto_ptr(auto_ptr& a) throw() : ptr(a.release()) {}
-        auto_ptr(auto_ptr_ref<X> ref) throw() : ptr(ref.ptr) {}
-        template <class Y>
-        auto_ptr(auto_ptr<Y>& a) throw() :
-            ptr(a.release()) {}
-
-        auto_ptr& operator=(auto_ptr& a) throw() 
-        {
-            reset(a.release());
-            return *this;
-        }
-        template <class Y>
-        auto_ptr& operator=(auto_ptr<Y>& a) throw() 
-        {
-            reset(a.release());
-            return *this;
-        }
-        auto_ptr& operator=(auto_ptr_ref<X> ref) throw() 
-        {
-            if (ref.ptr != this->get())
-            {
-                delete ptr;
-                ptr = ref.ptr;
-            }
-            return *this;
-        }
-
-        ~auto_ptr() throw() { delete ptr; }
-
-        template <class Y>
-        operator auto_ptr_ref<Y>() throw()
-        { return auto_ptr_ref<Y>(this->release()); }
-        template <class Y>
-        operator auto_ptr<Y>() throw()
-        { return auto_ptr<Y>(this->release()); }
-
-        X& operator*() const throw() { return *ptr; }
-        X* operator->() const throw() { return ptr; }
-        X* get() const throw() { return ptr; }
-        X* release() throw() 
-        {
-            X* tmp = ptr;
-            ptr = 0;
-            return tmp;
-        }
-        void reset(X* p = 0) throw() 
-        {
-            if (p != ptr) {
-                delete ptr;
-                ptr = p;
-            }
-        }
-    }
-#else
-    using std::auto_ptr;
 #endif
 
     // Use DEBUGPARAM(x) for parameters that are only used in TMVAssert

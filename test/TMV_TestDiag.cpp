@@ -5,28 +5,17 @@
 #include <fstream>
 #include <cstdio>
 
-// Break this part out, since we need to skip it for integers
-template <class T> void TestDiagMatrixInvert()
+template <class T> 
+static void TestBasicDiagMatrix_1()
 {
+    typedef std::complex<T> CT;
     const int N = 10;
-    tmv::DiagMatrix<T> a(N);
-    for (int i=0; i<N; ++i) a(i,i) = T(3+5*i);
 
-    tmv::DiagMatrix<T> ainv = a;
-    ainv.invertSelf();
-    tmv::DiagMatrix<T> ainv2 = a.inverse();
-    for(int i=0;i<N;++i)
-        Assert(std::abs(a(i)*ainv(i) - T(1)) < 1.e-6,"DiagMatrix invertSelf");
-    for(int i=0;i<N;++i)
-        Assert(std::abs(a(i)*ainv2(i) - T(1)) < 1.e-6,"DiagMatrix inverse()");
-}
-
-template <> void TestDiagMatrixInvert<int>()
-{}
-
-template <class T> void TestDiagMatrix()
-{
-    const int N = 10;
+    if (showstartdone) {
+        std::cout<<"Start TestDiagMatrix\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
+    }
 
     tmv::DiagMatrix<T> a(N);
     tmv::DiagMatrix<T,tmv::FortranStyle> af(N);
@@ -67,6 +56,79 @@ template <class T> void TestDiagMatrix()
     Assert(a==afv,"Matrix == FortranStyle MatrixView");
 
 
+    // Test Basic Arithmetic
+    tmv::DiagMatrix<T> b(N);
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
+        if (i == j) {
+            a(i,j) = T(3+i+5*j);
+            b(i,j) = T(5+2*i+4*j);
+        }
+    af = a;
+    Assert(a==af,"Copy CStyle DiagMatrix to FotranStyle");
+
+    tmv::DiagMatrix<T> c(N);
+    c = a+b;
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
+        if (i == j)
+            Assert(c(i,j) == T(8+3*i+9*j),"Add DiagMatrices");
+
+    c = a-b;
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
+        if (i == j)
+            Assert(c(i,j) == T(-2-i+j),"Subtract DiagMatrices");
+
+    tmv::Matrix<T> m = a;
+    for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k)
+        if (i == j)
+            Assert(a(i,j) == m(i,j),"DiagMatrix -> Matrix");
+    Assert(a == tmv::DiagMatrix<T>(m),"Matrix -> DiagMatrix");
+
+
+    tmv::DiagMatrix<CT> ca = a*CT(1,2);
+    tmv::DiagMatrix<CT> cb = b*CT(-5,-1);
+
+    a.resize(2);
+    Assert(a.size() == 2,"DiagMatrix a.resize(2)");
+    for (int i=0; i<2; ++i) a(i,i) = T(i);
+    for (int i=0; i<2; ++i) 
+        Assert(a(i,i) == i,"Read/Write resized DiagMatrix");
+
+    a.resize(2*N);
+    Assert(a.size() == 2*N,"DiagMatrix a.resize(2*N)");
+    for (int i=0; i<2*N; ++i) a(i,i) = T(i);
+    for (int i=0; i<2*N; ++i) 
+        Assert(a(i,i) == i,"Read/Write resized DiagMatrix");
+
+}
+
+// Break this part out, since we need to skip it for integers
+template <class T> 
+static void TestDiagMatrixInvert()
+{
+    const int N = 10;
+    tmv::DiagMatrix<T> a(N);
+    for (int i=0; i<N; ++i) a(i,i) = T(3+5*i);
+
+    tmv::DiagMatrix<T> ainv = a;
+    ainv.invertSelf();
+    tmv::DiagMatrix<T> ainv2 = a.inverse();
+    for(int i=0;i<N;++i)
+        Assert(std::abs(a(i)*ainv(i) - T(1)) < 1.e-6,"DiagMatrix invertSelf");
+    for(int i=0;i<N;++i)
+        Assert(std::abs(a(i)*ainv2(i) - T(1)) < 1.e-6,"DiagMatrix inverse()");
+}
+
+#ifdef TEST_INT
+template <> 
+void TestDiagMatrixInvert<int>()
+{}
+#endif
+
+
+template <class T> 
+static void TestBasicDiagMatrix_2()
+{
+
     // Test assignments and constructors from arrays
     T qar[] = { T(0), T(3), T(6) };
     T qar2[] = { T(0), T(1), T(2), T(3), T(4), T(5), T(6) };
@@ -87,13 +149,13 @@ template <class T> void TestDiagMatrix()
     tmv::DiagMatrix<T> q5x(30);
     tmv::DiagMatrixView<T> q5 = q5x.subDiagMatrix(3,18,5);
     q4 <<
-        0,
-           3,
-              6;
+          0,
+             3,
+                6;
     q5 <<
-        0,
-           3,
-              6;
+          0,
+             3,
+                6;
 
     tmv::ConstDiagMatrixView<T> q6 = tmv::DiagMatrixViewOf(qar,3);
     tmv::ConstDiagMatrixView<T> q7 = tmv::DiagMatrixViewOf(qar2,3,3);
@@ -148,104 +210,138 @@ template <class T> void TestDiagMatrix()
     Assert(it4 == q1_constview.end(), "it4 reaching end");
     Assert(it5 == q5.end(), "it5 reaching end");
     Assert(it6 == q5_const.end(), "it6 reaching end");
+}
 
+template <class T> 
+static void TestBasicDiagMatrix_IO()
+{
+    typedef std::complex<T> CT;
 
-    // Test Basic Arithmetic
-    tmv::DiagMatrix<T> b(N);
-    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
-        if (i == j) {
-            a(i,j) = T(3+i+5*j);
-            b(i,j) = T(5+2*i+4*j);
-        }
-    af = a;
-    Assert(a==af,"Copy CStyle DiagMatrix to FotranStyle");
+    const int N = 10;
 
-    tmv::DiagMatrix<T> c(N);
-    c = a+b;
-    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
-        if (i == j)
-            Assert(c(i,j) == T(8+3*i+9*j),"Add DiagMatrices");
-
-    c = a-b;
-    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
-        if (i == j)
-            Assert(c(i,j) == T(-2-i+j),"Subtract DiagMatrices");
-
-    tmv::Matrix<T> m = a;
-    for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k)
-        if (i == j)
-            Assert(a(i,j) == m(i,j),"DiagMatrix -> Matrix");
-    Assert(a == tmv::DiagMatrix<T>(m),"Matrix -> DiagMatrix");
-
-
-    tmv::DiagMatrix<std::complex<T> > ca = a*std::complex<T>(1,2);
-    tmv::DiagMatrix<std::complex<T> > cb = b*std::complex<T>(-5,-1);
-
-    a.resize(2);
-    Assert(a.size() == 2,"DiagMatrix a.resize(2)");
-    for (int i=0; i<2; ++i) a(i,i) = T(i);
-    for (int i=0; i<2; ++i) 
-        Assert(a(i,i) == i,"Read/Write resized DiagMatrix");
-
-    a.resize(2*N);
-    Assert(a.size() == 2*N,"DiagMatrix a.resize(2*N)");
-    for (int i=0; i<2*N; ++i) a(i,i) = T(i);
-    for (int i=0; i<2*N; ++i) 
-        Assert(a(i,i) == i,"Read/Write resized DiagMatrix");
-
-    // Test I/O
-
-    std::ofstream fout("tmvtest_diagmatrix_io.dat");
-    if (!fout) {
-#ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_diagmatrix_io.dat for output\n"; 
-        exit(1); 
-#else
-        throw std::runtime_error(
-            "Couldn't open tmvtest_diagmatrix_io.dat for output");
-#endif
+    if (showstartdone) {
+        std::cout<<"Start TestBasicDiagMatrix_IO\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"N = "<<N<<std::endl;
     }
-    fout << ca << std::endl;
-    ca.writeCompact(fout);
+
+    tmv::DiagMatrix<T> m(N);
+    tmv::DiagMatrix<CT> cm(N);
+
+    for (int i=0;i<N;++i) {
+        m(i,i) = T(i+1);
+        cm(i,i) = CT(i+1,i+1001);
+    }
+    m(3) = T(1.e-30);
+    cm(3) = CT(1.e-30,1.e-30);
+    m(5) = T(9.e-3);
+    cm(5) = CT(9.e-3,9.e-3);
+    m(7) = T(0.123456789);
+    cm(7) = CT(3.123456789,600.987654321);
+
+    // First check clipping function...
+    tmv::DiagMatrix<T> m2 = m;
+    tmv::DiagMatrix<CT> cm2 = cm;
+    if (!std::numeric_limits<T>::is_integer) {
+        m2.clip(1.e-2);
+        cm2.clip(1.e-2);
+    }
+    tmv::DiagMatrix<T> m3 = m;
+    tmv::DiagMatrix<CT> cm3 = cm;
+    m3(3) = T(0);
+    cm3(3) = T(0);
+    m3(5) = T(0); // Others, esp. cm3(5,6), shouldn't get clipped.
+    Assert(m2 == m3,"DiagMatrix clip");
+    Assert(cm2 == cm3,"Complex DiagMatrix clip");
+
+    // Write matrices with 4 different styles
+    std::ofstream fout("tmvtest_diagmatrix_io.dat");
+    Assert(fout,"Couldn't open tmvtest_diagmatrix_io.dat for output");
+    fout << m << std::endl;
+    fout << cm << std::endl;
+    fout << tmv::CompactIO() << m << std::endl;
+    fout << tmv::CompactIO() << cm << std::endl;
+    fout << tmv::ThreshIO(1.e-2).setPrecision(12) << m << std::endl;
+    fout << tmv::ThreshIO(1.e-2).setPrecision(12) << cm << std::endl;
+    tmv::IOStyle myStyle = 
+        tmv::CompactIO().setThresh(1.e-2).setPrecision(4).
+        markup("Start","[",",","]","---","Done");
+    fout << myStyle << m << std::endl;
+    fout << myStyle << cm << std::endl;
     fout.close();
 
-    tmv::Matrix<std::complex<T> > xcm1(N,N);
-    tmv::DiagMatrix<std::complex<T> > xcd1(N);
+    // When using (the default) prec(6), these will be the values read in.
+    m(7) = T(0.123457);
+    cm(7) = CT(3.12346,600.988);
+
+    // When using prec(12), the full correct values will be read in. (m2,cm2)
+
+    // When using prec(4), these will be the values read in.
+    m3(7) = T(0.1235);
+    if (std::numeric_limits<T>::is_integer) cm3(7) = CT(3,600);
+    else cm3(7) = CT(3.123,601.0);
+
+    // Read them back in
+    tmv::DiagMatrix<T> xm1(N);
+    tmv::DiagMatrix<CT> xcm1(N);
     std::ifstream fin("tmvtest_diagmatrix_io.dat");
-    if (!fin) {
-#ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_diagmatrix_io.dat for input\n"; 
-        exit(1); 
-#else
-        throw std::runtime_error(
-            "Couldn't open tmvtest_diagmatrix_io.dat for input");
-#endif
-    }
-    fin >> xcm1 >> xcd1;
+    Assert(fin,"Couldn't open tmvtest_diagmatrix_io.dat for input");
+    fin >> xm1 >> xcm1;
+    Assert(m == xm1,"DiagMatrix I/O check normal");
+    Assert(cm == xcm1,"CDiagMatrix I/O check normal");
+    fin >> tmv::CompactIO() >> xm1 >> tmv::CompactIO() >> xcm1;
+    Assert(m == xm1,"DiagMatrix I/O check compact");
+    Assert(cm == xcm1,"CDiagMatrix I/O check compact");
+    fin >> xm1.view() >> xcm1.view();
+    Assert(m2 == xm1,"DiagMatrix I/O check thresh");
+    Assert(cm2 == xcm1,"CDiagMatrix I/O check thresh");
+    fin >> myStyle >> xm1.view() >> myStyle >> xcm1.view();
+    Assert(m3 == xm1,"DiagMatrix I/O check compact thresh & prec(4)");
+    Assert(cm3 == xcm1,"CDiagMatrix I/O check compact thresh & prec(4)");
     fin.close();
-    Assert(tmv::Matrix<std::complex<T> >(ca) == xcm1,"DiagMatrix I/O check #1");
-    Assert(ca == xcd1,"DiagMatrix Compact I/O check #1");
 
-    tmv::Matrix<std::complex<T> > xcm2;
-    tmv::DiagMatrix<std::complex<T> > xcd2;
+    // Repeat for matrices that need to be resized.
+    // Also check switching the default IOStyle.
+    tmv::CompactIO().makeDefault();
+    tmv::DiagMatrix<T> zm1,zm2,zm3,zm4;
+    tmv::DiagMatrix<CT> zcm1,zcm2,zcm3,zcm4;
     fin.open("tmvtest_diagmatrix_io.dat");
-    if (!fin) {
-#ifdef NOTHROW
-        std::cerr<<"Couldn't open tmvtest_diagmatrix_io.dat for input\n"; 
-        exit(1); 
-#else
-        throw std::runtime_error(
-            "Couldn't open tmvtest_diagmatrix_io.dat for input");
-#endif
-    }
-    fin >> xcm2 >> xcd2;
+    Assert(fin,"Couldn't open tmvtest_diagmatrix_io.dat for input");
+    fin >> tmv::NormalIO() >> zm1 >> tmv::NormalIO() >> zcm1;
+    Assert(m == zm1,"DiagMatrix I/O check normal");
+    Assert(cm == zcm1,"CDiagMatrix I/O check normal");
+    fin >> zm2 >> zcm2;
+    Assert(m == zm2,"DiagMatrix I/O check compact");
+    Assert(cm == zcm2,"CDiagMatrix I/O check compact");
+    fin >> tmv::NormalIO() >> zm3 >> tmv::NormalIO() >> zcm3;
+    Assert(m2 == zm3,"DiagMatrix I/O check thresh");
+    Assert(cm2 == zcm3,"CDiagMatrix I/O check thresh");
+    fin >> myStyle >> zm4 >> myStyle >> zcm4;
+    Assert(m3 == zm4,"DiagMatrix I/O check compact thresh & prec(4)");
+    Assert(cm3 == zcm4,"CDiagMatrix I/O check compact thresh & prec(4)");
     fin.close();
-    Assert(tmv::Matrix<std::complex<T> >(ca) == xcm2,"DiagMatrix I/O check #2");
-    Assert(ca == xcd2,"DiagMatrix Compact I/O check #2");
+    tmv::IOStyle::revertDefault();
 
-#if XTEST==0
+    // Finally, check that the NormalIO can be read in as a regular matrix.
+    tmv::Matrix<T> zm5;
+    tmv::Matrix<CT> zcm5;
+    fin.open("tmvtest_diagmatrix_io.dat");
+    Assert(fin,"Couldn't open tmvtest_diagmatrix_io.dat for input");
+    fin >> zm5 >> zcm5;
+    Assert(m == zm5,"DiagMatrix -> Matrix I/O check");
+    Assert(cm == zcm5,"CDiagMatrix -> CMatrix I/O check");
+    fin.close();
+
+#if XTEST == 0
     std::remove("tmvtest_diagmatrix_io.dat");
 #endif
+}
+
+template <class T> void TestDiagMatrix()
+{
+    TestBasicDiagMatrix_1<T>();
+    TestBasicDiagMatrix_2<T>();
+    TestBasicDiagMatrix_IO<T>();
 
     TestDiagMatrixInvert<T>();
 

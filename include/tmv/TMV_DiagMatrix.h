@@ -10,11 +10,11 @@
 //
 // Constructors:
 //
-//    DiagMatrix<T>(size_t size)
+//    DiagMatrix<T>(int size)
 //        Makes a DiagMatrix with column size and row size = size
 //        with _uninitialized_ values
 //
-//    DiagMatrix<T>(size_t size, T x)
+//    DiagMatrix<T>(int size, T x)
 //        Makes a DiagMatrix of size n with all values = x
 //
 //    DiagMatrix<T>(const Vector<T>& vv)
@@ -31,9 +31,9 @@
 //
 // Access Functions
 //
-//    size_t colsize() const
-//    size_t rowsize() const
-//    size_t size() const
+//    int colsize() const
+//    int rowsize() const
+//    int size() const
 //        Return the dimensions of the DiagMatrix
 //
 //    T& operator()(int i)
@@ -101,10 +101,11 @@
 //    os << d 
 //        Writes d to ostream os as a full matrix
 //
-//    d.writeCompact(os)
+//    os << CompactIO() << d
 //        Writes only the diagonal Vector to os
 //
 //    is >> d
+//    is >> CompactIO() >> d
 //        Reads in d in the compact format
 //
 //
@@ -270,7 +271,7 @@ namespace tmv {
 
 #define NEW_SIZE(cs,rs) \
 
-        explicit DiagMatrix(size_t n=0) : itssize(n), itsm(n)
+        explicit DiagMatrix(int n=0) : itssize(n), itsm(n)
         {
             TMVAssert(n >= 0);
             TMVStaticAssert(Traits<type>::okA);
@@ -279,7 +280,7 @@ namespace tmv {
 #endif
         }
 
-        DiagMatrix(size_t n, T x) : itssize(n), itsm(n)
+        DiagMatrix(int n, T x) : itssize(n), itsm(n)
         {
             TMVAssert(n >= 0);
             TMVStaticAssert(Traits<type>::okA);
@@ -351,8 +352,9 @@ namespace tmv {
             itsm.swapWith(m2.itsm);
         }
 
-        void resize(const size_t n)
+        void resize(const int n)
         {
+            TMVAssert(n >= 0);
 #ifdef TMV_DEBUG
             this->diag().setAllTo(Traits<T>::destr_value());
 #endif
@@ -363,7 +365,7 @@ namespace tmv {
 #endif
         }
 
-        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int size() const { return itssize; }
         TMV_INLINE int nElements() const { return itssize; }
         TMV_INLINE int step() const { return 1; }
         TMV_INLINE bool isconj() const { return false; }
@@ -372,7 +374,7 @@ namespace tmv {
 
     private:
 
-        size_t itssize;
+        int itssize;
         AlignedArray<T> itsm;
 
     }; // DiagMatrix
@@ -480,13 +482,13 @@ namespace tmv {
         // Constructors
         //
 
-        ConstDiagMatrixView(const T* m, size_t n, int s) :
+        ConstDiagMatrixView(const T* m, int n, int s) :
             itsm(m), itssize(n), itsstep(s) 
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstDiagMatrixView(const T* m, size_t n) :
+        ConstDiagMatrixView(const T* m, int n) :
             itsm(m), itssize(n), itsstep(_step)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -553,7 +555,7 @@ namespace tmv {
         T cref(int i) const
         { return DoConj<_conj>(itsm[i*step()]); }
 
-        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int size() const { return itssize; }
         TMV_INLINE int nElements() const { return itssize; }
         TMV_INLINE int step() const { return itsstep; }
         TMV_INLINE bool isconj() const { return _conj; }
@@ -563,7 +565,7 @@ namespace tmv {
     private :
 
         const T* itsm;
-        const size_t itssize;
+        const int itssize;
         const CheckedInt<_step> itsstep;
 
     }; // ConstDiagMatrixView
@@ -699,13 +701,13 @@ namespace tmv {
         // Constructors
         //
 
-        DiagMatrixView(T* m, size_t n, int s) :
+        DiagMatrixView(T* m, int n, int s) :
             itsm(m), itssize(n), itsstep(s) 
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        DiagMatrixView(T* m, size_t n) :
+        DiagMatrixView(T* m, int n) :
             itsm(m), itssize(n), itsstep(_step)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -770,7 +772,7 @@ namespace tmv {
         reference ref(int i) 
         { return reference(itsm[i*step()]); }
 
-        TMV_INLINE size_t size() const { return itssize; }
+        TMV_INLINE int size() const { return itssize; }
         TMV_INLINE int nElements() const { return itssize; }
         TMV_INLINE int step() const { return itsstep; }
         TMV_INLINE bool isconj() const { return _conj; }
@@ -780,7 +782,7 @@ namespace tmv {
     private :
 
         T* itsm;
-        const size_t itssize;
+        const int itssize;
         const CheckedInt<_step> itsstep;
 
     }; // DiagMatrixView
@@ -794,22 +796,33 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE ConstDiagMatrixView<T,Unit> DiagMatrixViewOf(
-        const T* v, size_t size)
-    { return ConstDiagMatrixView<T,Unit>(v,size); }
+        const T* v, int size)
+    {
+        TMVAssert(size >= 0);
+        return ConstDiagMatrixView<T,Unit>(v,size); 
+    }
 
     template <class T>
     TMV_INLINE ConstDiagMatrixView<T> DiagMatrixViewOf(
-        const T* v, size_t size, int step)
-    { return ConstDiagMatrixView<T>(v,size,step); }
+        const T* v, int size, int step)
+    {
+        TMVAssert(size >= 0);
+        return ConstDiagMatrixView<T>(v,size,step); 
+    }
 
     template <class T>
-    TMV_INLINE DiagMatrixView<T,Unit> DiagMatrixViewOf(T* v, size_t size)
-    { return DiagMatrixView<T,Unit>(v,size); }
+    TMV_INLINE DiagMatrixView<T,Unit> DiagMatrixViewOf(T* v, int size)
+    {
+        TMVAssert(size >= 0);
+        return DiagMatrixView<T,Unit>(v,size); 
+    }
 
     template <class T>
-    TMV_INLINE DiagMatrixView<T> DiagMatrixViewOf(
-        T* v, size_t size, int step)
-    { return DiagMatrixView<T>(v,size,step); }
+    TMV_INLINE DiagMatrixView<T> DiagMatrixViewOf(T* v, int size, int step)
+    {
+        TMVAssert(size >= 0);
+        return DiagMatrixView<T>(v,size,step); 
+    }
 
 
     //

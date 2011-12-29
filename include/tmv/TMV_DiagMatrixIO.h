@@ -1,66 +1,118 @@
 
-
 #ifndef TMV_DiagMatrixIO_H
 #define TMV_DiagMatrixIO_H
 
 #include "TMV_BaseMatrix_Diag.h"
-#include "TMV_VectorIO.h"
+#include "TMV_IOStyle.h"
 
 namespace tmv {
-
 
     //
     // Write DiagMatrix
     //
 
-    template <class M>
-    static void InlineWrite(std::ostream& os, const BaseMatrix_Diag<M>& m)
-    {
-        typedef typename M::value_type T;
-        const int n = m.size();
-        os << n << "  " << n << '\n';
-        for(int i=0;i<n;++i) {
-            os << "( ";
-            for(int j=0;j<i;++j) 
-                os << " " << Value(T(0)) << " ";
-            os << " " << Value(m.cref(i)) << " ";
-            for(int j=i+1;j<n;++j) 
-                os << " " << Value(T(0)) << " ";
-            os << " )\n";
-        }
-    }
-
-    // Defined in TMV_Diag.cpp
+    // Defined in TMV_DiagMatrix.cpp
     template <class T, int C>
     void InstWrite(
-        std::ostream& os, const ConstDiagMatrixView<T,C>& m);
+        const TMV_Writer& writer, const ConstDiagMatrixView<T,C>& m);
+    template <class T>
+    void InstRead(const TMV_Reader& reader, DiagMatrixView<T> m);
 
-    // With thresh:
+    template <int algo, class M>
+    struct WriteD_Helper;
+
     template <class M>
-    static void InlineWrite(
-        std::ostream& os, const BaseMatrix_Diag<M>& m,
-        typename M::real_type thresh) 
+    struct WriteD_Helper<11,M>
+    {
+        static void call(const TMV_Writer& writer, const M& m)
+        {
+            typedef typename M::value_type T;
+            const int N = m.size();
+            writer.begin();
+            writer.writeCode("D");
+            writer.writeSize(N);
+            writer.writeSimpleSize(N);
+            writer.writeStart();
+            for(int i=0;i<N;++i) {
+                writer.writeLParen();
+                if (!writer.isCompact()) {
+                    for(int j=0;j<i;++j) {
+                        if (j > 0) writer.writeSpace();
+                        writer.writeValue(T(0));
+                    }
+                    if (i > 0) writer.writeSpace();
+                }
+                writer.writeValue(m.cref(i));
+                if (!writer.isCompact()) {
+                    for(int j=i+1;j<N;++j) {
+                        writer.writeSpace();
+                        writer.writeValue(T(0));
+                    }
+                }
+                writer.writeRParen();
+                if (i < N-1) writer.writeRowEnd();
+            }
+            writer.writeFinal();
+            writer.end();
+        }
+    };
+
+    // algo 90: Call inst
+    template <class M>
+    struct WriteD_Helper<90,M>
+    {
+        static TMV_INLINE void call(const TMV_Writer& writer, const M& m)
+        { InstWrite(writer,m.calc().xView()); }
+    };
+             
+    // algo -3: Only one algorithm, so call it.
+    template <class M>
+    struct WriteD_Helper<-3,M>
+    {
+        static TMV_INLINE void call(const TMV_Writer& writer, const M& m)
+        { WriteD_Helper<11,M>::call(writer,m); }
+    };
+             
+    // algo -2: Check for inst
+    template <class M>
+    struct WriteD_Helper<-2,M>
     {
         typedef typename M::value_type T;
-        const int n = m.size();
-        os << n << "  " << n << '\n';
-        for(int i=0;i<n;++i) {
-            os << "( ";
-            for(int j=0;j<i;++j) 
-                os << " " << Value(T(0)) << " ";
-            T temp = m.cref(i);
-            os << " " << Value((TMV_ABS2(temp) < thresh ? T(0) : temp)) << " ";
-            for(int j=i+1;j<n;++j) 
-                os << " " << Value(T(0)) << " ";
-            os << " )\n";
-        }
+        enum { inst = (
+                (M::_colsize == TMV_UNKNOWN || M::_colsize > 16) &&
+                (M::_rowsize == TMV_UNKNOWN || M::_rowsize > 16) &&
+                Traits<T>::isinst ) };
+        enum { algo = (
+                inst ? 90 :
+                -3 ) };
+        static TMV_INLINE void call(const TMV_Writer& writer, const M& m)
+        { WriteD_Helper<algo,M>::call(writer,m); }
+    };
+
+    template <class M>
+    struct WriteD_Helper<-1,M>
+    {
+        static TMV_INLINE void call(const TMV_Writer& writer, const M& m)
+        { WriteD_Helper<-2,M>::call(writer,m); }
+    };
+
+    template <class M>
+    inline void Write(const TMV_Writer& writer, const BaseMatrix_Diag<M>& m)
+    {
+        typedef typename M::const_cview_type Mv;
+        TMV_MAYBE_CREF(M,Mv) mv = m.cView();
+        WriteD_Helper<-2,Mv>::call(writer,mv);
     }
 
-    // Defined in TMV_Diag.cpp
-    template <class T, int C>
-    void InstWrite(
-        std::ostream& os, const ConstDiagMatrixView<T,C>& m,
-        typename Traits<T>::real_type thresh);
+    template <class M>
+    inline void InlineWrite(
+        const TMV_Writer& writer, const BaseMatrix_Diag<M>& m)
+    {
+        typedef typename M::const_cview_type Mv;
+        TMV_MAYBE_CREF(M,Mv) mv = m.cView();
+        WriteD_Helper<-3,Mv>::call(writer,mv);
+    }
+
 
     //
     // Read DiagMatrix
@@ -73,47 +125,60 @@ namespace tmv {
     {
     public :
         DiagMatrix<T> m;
-        int i;
-        char exp,got;
-        size_t s;
+        int i,j;
+        std::string exp,got;
+        int s;
+        T v1;
         bool is, iseof, isbad;
 
         DiagMatrixReadError(std::istream& _is) throw() :
             ReadError("DiagMatrix"),
-            i(0), exp(0), got(0), s(0),
+            i(0), j(0), s(0), v1(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+        DiagMatrixReadError(
+            std::istream& _is,
+            const std::string& _e, const std::string& _g) throw() :
+            ReadError("DiagMatrix"),
+            i(0), j(0), exp(_e), got(_g), s(0), v1(0),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+
         template <class M>
         DiagMatrixReadError(
-            int _i, const BaseMatrix_Diag<M>& _m, char _e, char _g, size_t _s,
-            bool _is, bool _iseof, bool _isbad) throw() :
+            int _i, int _j, const BaseMatrix_Diag<M>& _m,
+            std::istream& _is,
+            const std::string& _e, const std::string& _g) throw() :
             ReadError("DiagMatrix"),
-            m(_m), i(_i), exp(_e), got(_g), s(_s),
-            is(_is), iseof(_iseof), isbad(_isbad) {}
+            m(_m), i(_i), j(_j), exp(_e), got(_g), s(_m.size()), v1(0),
+            is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class M>
         DiagMatrixReadError(
             const BaseMatrix_Diag<M>& _m,
-            std::istream& _is, size_t _s) throw() :
+            std::istream& _is, int _s) throw() :
             ReadError("DiagMatrix"),
-            m(_m), i(0), exp(0), got(0), s(_s),
+            m(_m), i(0), j(0), s(_s), v1(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
-        DiagMatrixReadError(std::istream& _is, char _e, char _g) throw() :
+        template <class M>
+        DiagMatrixReadError(
+            int _i, int _j, const BaseMatrix_Diag<M>& _m, 
+            std::istream& _is, T _v1=0) throw() :
             ReadError("DiagMatrix"),
-            i(0), exp(_e), got(_g), s(0),
+            m(_m), i(_i), j(_j), s(_m.size()), v1(_v1),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
+
         DiagMatrixReadError(const DiagMatrixReadError<T>& rhs) throw() :
             ReadError("DiagMatrix"),
-            m(rhs.m), i(rhs.i), exp(rhs.exp), got(rhs.got), s(rhs.s),
+            m(rhs.m), i(rhs.i), j(rhs.j), exp(rhs.exp), got(rhs.got), 
+            s(rhs.s), v1(rhs.v1),
             is(rhs.is), iseof(rhs.iseof), isbad(rhs.isbad) {}
-
         ~DiagMatrixReadError() throw() {}
 
-        virtual void write(std::ostream& os) const throw()
+        void write(std::ostream& os) const throw()
         {
             os<<"TMV Read Error: Reading istream input for DiagMatrix\n";
             if (exp != got) {
                 os<<"Wrong format: expected '"<<exp<<"', got '"<<got<<"'.\n";
             }
-            if (m.size() > 0 && s != m.size()) {
+            if (s != m.size()) {
                 os<<"Wrong size: expected "<<m.size()<<", got "<<s<<".\n";
             }
             if (!is) {
@@ -125,102 +190,371 @@ namespace tmv {
                     os<<"Input stream cannot read next character.\n";
                 }
             }
+            if (v1 != T(0)) {
+                os<<"Invalid input: Expected 0, got "<<v1<<".\n";
+            }
             if (m.size() > 0) {
                 os<<"The portion of the DiagMatrix which was successfully "
                     "read is: \n";
+                const int N = m.size();
+                for(int ii=0;ii<i;++ii) {
+                    os<<"( ";
+                    for(int jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
+                    os<<" )\n";
+                }
                 os<<"( ";
-                for(int ii=0;ii<i;++ii)
-                    os<<' '<<m(ii,ii)<<' ';
+                for(int jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
                 os<<" )\n";
             }
         }
     };
 #endif
 
-    template <class T, int A>
-    static std::istream& operator>>(std::istream& is, DiagMatrix<T,A>& m)
+    template <int algo, class M>
+    struct ReadD_Helper;
+
+    template <class M>
+    struct ReadD_Helper<11,M>
     {
-        char d;
-        is >> d;
-        if (!is || d != 'D') {
-#ifdef TMV_NO_THROW
-            std::cerr<<"DiagMatrix ReadError: "<<d<<" != D\n"; 
-            exit(1); 
+        static void call(const TMV_Reader& reader, M& m)
+        {
+            typedef typename M::value_type T;
+            const int N = m.size();
+            std::string exp, got;
+            T temp;
+            if (!reader.readStart(exp,got)) {
+#ifdef NOTHROW
+                std::cerr<<"DiagMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                exit(1);
 #else
-            throw DiagMatrixReadError<T>(is,'D',d);
+                throw DiagMatrixReadError<T>(0,0,m,reader.getis(),exp,got);
 #endif
-        }
-        size_t size;
-        is >> size;
-        if (!is) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"DiagMatrix ReadError: !is\n"; 
-            exit(1); 
+            }
+            for(int i=0;i<N;++i) {
+                if (!reader.readLParen(exp,got)) {
+#ifdef NOTHROW
+                    std::cerr<<"DiagMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                    exit(1);
 #else
-            throw DiagMatrixReadError<T>(is);
+                    throw DiagMatrixReadError<T>(i,0,m,reader.getis(),exp,got);
 #endif
+                }
+                if (!reader.isCompact()) {
+                    for(int j=0;j<i;++j) {
+                        if (j>0 && !reader.readSpace(exp,got)) {
+#ifdef NOTHROW
+                            std::cerr<<"DiagMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                            exit(1);
+#else
+                            throw DiagMatrixReadError<T>(i,j,m,reader.getis(),exp,got);
+#endif
+                        }
+                        if (!reader.readValue(temp)) {
+#ifdef NOTHROW
+                            std::cerr<<"DiagMatrix Read Error: reading value\n";
+                            exit(1);
+#else
+                            throw DiagMatrixReadError<T>(i,j,m,reader.getis());
+#endif
+                        }
+                        if (temp != T(0)) {
+#ifdef NOTHROW
+                            std::cerr<<"DiagMatrix Read Error: "<<temp<<" != 0\n";
+                            exit(1);
+#else
+                            throw DiagMatrixReadError<T>(i,j,m,reader.getis(),temp);
+#endif
+                        }
+                    }
+                    if (i>0 && !reader.readSpace(exp,got)) {
+#ifdef NOTHROW
+                        std::cerr<<"DiagMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                        exit(1);
+#else
+                        throw DiagMatrixReadError<T>(i,i,m,reader.getis(),exp,got);
+#endif
+                    }
+                }
+                if (!reader.readValue(temp)) {
+#ifdef NOTHROW
+                    std::cerr<<"DiagMatrix Read Error: reading value\n";
+                    exit(1);
+#else
+                    throw DiagMatrixReadError<T>(i,i,m,reader.getis());
+#endif
+                }
+                m.diag().ref(i) = temp;
+                if (!reader.isCompact()) {
+                    for(int j=i+1;j<N;++j) {
+                        if (!reader.readSpace(exp,got)) {
+#ifdef NOTHROW
+                            std::cerr<<"DiagMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                            exit(1);
+#else
+                            throw DiagMatrixReadError<T>(i,j,m,reader.getis(),exp,got);
+#endif
+                        }
+                        if (!reader.readValue(temp)) {
+#ifdef NOTHROW
+                            std::cerr<<"DiagMatrix Read Error: reading value\n";
+                            exit(1);
+#else
+                            throw DiagMatrixReadError<T>(i,j,m,reader.getis());
+#endif
+                        }
+                        if (temp != T(0)) {
+#ifdef NOTHROW
+                            std::cerr<<"DiagMatrix Read Error: "<<temp<<" != 0\n";
+                            exit(1);
+#else
+                            throw DiagMatrixReadError<T>(i,j,m,reader.getis(),temp);
+#endif
+                        }
+                    }
+                }
+                if (!reader.readRParen(exp,got)) {
+#ifdef NOTHROW
+                    std::cerr<<"DiagMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                    exit(1);
+#else
+                    throw DiagMatrixReadError<T>(i,N,m,reader.getis(),exp,got);
+#endif
+                }
+                if (i < N-1 && !reader.readRowEnd(exp,got)) {
+#ifdef NOTHROW
+                    std::cerr<<"DiagMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                    exit(1);
+#else
+                    throw DiagMatrixReadError<T>(i,N,m,reader.getis(),exp,got);
+#endif
+                }
+            }
+            if (!reader.readFinal(exp,got)) {
+#ifdef NOTHROW
+                std::cerr<<"DiagMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+                exit(1);
+#else
+                throw DiagMatrixReadError<T>(N,0,m,reader.getis(),exp,got);
+#endif
+            }
         }
-        m.resize(size);
-#ifndef TMV_NO_THROW
-        try {
-#endif
-            m.diag().read(is);
-#ifndef TMV_NO_THROW
-        } catch (VectorReadError<T>& ve) {
-            throw DiagMatrixReadError<T>(
-                ve.i,m,ve.exp,ve.got,ve.s,ve.is,ve.iseof,ve.isbad);
+    };
+
+    // algo 90: Call inst
+    template <class M>
+    struct ReadD_Helper<90,M>
+    {
+        static TMV_INLINE void call(const TMV_Reader& reader, M& m)
+        { InstRead(reader,m.xView()); }
+    };
+             
+    // algo 97: Conjugate
+    template <class M>
+    struct ReadD_Helper<97,M>
+    {
+        static TMV_INLINE void call(const TMV_Reader& reader, M& m)
+        {
+            typedef typename M::conjugate_type Mc;
+            Mc mc = m.conjugate();
+            ReadD_Helper<-2,Mc>::call(reader,mc); 
+            mc.conjugateSelf();
         }
-#endif
-        return is;
+    };
+             
+    // algo -3: Only one algorithm, so call it.
+    template <class M>
+    struct ReadD_Helper<-3,M>
+    {
+        static TMV_INLINE void call(const TMV_Reader& reader, M& m)
+        { ReadD_Helper<11,M>::call(reader,m); }
+    };
+             
+    // algo -2: Check for inst
+    template <class M>
+    struct ReadD_Helper<-2,M>
+    {
+        static TMV_INLINE void call(const TMV_Reader& reader, M& m)
+        {
+            typedef typename M::value_type T;
+            const int inst = 
+                (M::_colsize == TMV_UNKNOWN || M::_colsize > 16) &&
+                (M::_rowsize == TMV_UNKNOWN || M::_rowsize > 16) &&
+                Traits<T>::isinst;
+            const int algo = 
+                M::_conj ? 97 :
+                inst ? 90 :
+                -3;
+            ReadD_Helper<algo,M>::call(reader,m); 
+        }
+    };
+
+    template <class M>
+    struct ReadD_Helper<-1,M>
+    {
+        static TMV_INLINE void call(const TMV_Reader& reader, M& m)
+        { ReadD_Helper<-2,M>::call(reader,m); }
+    };
+
+    template <class M>
+    inline void Read(const TMV_Reader& reader, BaseMatrix_Diag_Mutable<M>& m)
+    {
+        typedef typename M::cview_type Mv;
+        TMV_MAYBE_REF(M,Mv) mv = m.cView();
+        ReadD_Helper<-2,Mv>::call(reader,mv);
     }
 
     template <class M>
-    static std::istream& operator>>(
-        std::istream& is, BaseMatrix_Diag_Mutable<M>& m)
+    inline void InlineRead(
+        const TMV_Reader& reader, BaseMatrix_Diag_Mutable<M>& m)
     {
-        typedef typename M::value_type T;
-        char d;
-        is >> d;
-        if (!is || d != 'D') {
-#ifdef TMV_NO_THROW
-            std::cerr<<"DiagMatrix ReadError: "<<d<<" != D\n"; 
-            exit(1); 
-#else
-            throw DiagMatrixReadError<T>(is,'D',d);
-#endif
-        }
-        size_t s;
-        is >> s;
-        if (!is) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"DiagMatrix ReadError: !is\n"; 
-            exit(1); 
-#else
-            throw DiagMatrixReadError<T>(is);
-#endif
-        }
-        if (m.size() != s) {
-#ifdef TMV_NO_THROW
-            std::cerr<<"DiagMatrix ReadError: Wrong size\n"; 
-            exit(1); 
-#else
-            throw DiagMatrixReadError<T>(m,is,s);
-#endif
-        }
-        TMVAssert(m.size() == s);
-#ifndef TMV_NO_THROW
-        try {
-#endif
-            m.diag().read(is);
-#ifndef TMV_NO_THROW
-        } catch (VectorReadError<T>& ve) {
-            throw DiagMatrixReadError<T>(
-                ve.i,m,ve.exp,ve.got,ve.s,ve.is,ve.iseof,ve.isbad);
-        }
-#endif
-        return is;
+        typedef typename M::cview_type Mv;
+        TMV_MAYBE_REF(M,Mv) mv = m.cView();
+        ReadD_Helper<-3,Mv>::call(reader,mv);
     }
 
-} // namespace tmv
+
+    // 
+    // Operator overloads for I/O
+    // is >> m
+    // os << m
+    //
+
+    template <class M>
+    static std::istream& operator>>(
+        const TMV_Reader& reader, BaseMatrix_Diag_Mutable<M>& m)
+    {
+        typedef typename M::value_type T;
+        std::string exp,got;
+        if (!reader.readCode("D",exp,got)) {
+#ifdef NOTHROW
+            std::cerr<<"DiagMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+            exit(1);
+#else
+            throw DiagMatrixReadError<T>(reader.getis(),exp,got);
+#endif
+        }
+        int s=m.size();
+        if (!reader.readSize(s)) {
+#ifdef NOTHROW
+            std::cerr<<"DiagMatrix Read Error: reading size\n";
+            exit(1);
+#else
+            throw DiagMatrixReadError<T>(reader.getis());
+#endif
+        }
+        if (s != m.size()) {
+#ifdef NOTHROW
+            std::cerr<<"DiagMatrix Read Error: wrong size\n";
+            exit(1);
+#else
+            throw DiagMatrixReadError<T>(m,reader.getis(),s);
+#endif
+        }
+        s=m.size();
+        if (!reader.readSimpleSize(s)) {
+#ifdef NOTHROW
+            std::cerr<<"DiagMatrix Read Error: reading size\n";
+            exit(1);
+#else
+            throw DiagMatrixReadError<T>(reader.getis());
+#endif
+        }
+        if (s != m.size()) {
+#ifdef NOTHROW
+            std::cerr<<"DiagMatrix Read Error: Wrong size\n";
+            exit(1);
+#else
+            throw DiagMatrixReadError<T>(m,reader.getis(),s);
+#endif
+        }
+        Read(reader,m);
+        return reader.getis();
+    }
+
+    template <class T, int A0>
+    static std::istream& operator>>(
+        const TMV_Reader& reader, DiagMatrix<T,A0>& m)
+    {
+        std::string exp,got;
+        if (!reader.readCode("D",exp,got)) {
+#ifdef NOTHROW
+            std::cerr<<"DiagMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
+            exit(1);
+#else
+            throw DiagMatrixReadError<T>(reader.getis(),exp,got);
+#endif
+        }
+        int s=m.size();
+        if (!reader.readSize(s)) {
+#ifdef NOTHROW
+            std::cerr<<"DiagMatrix Read Error: reading size\n";
+            exit(1);
+#else
+            throw DiagMatrixReadError<T>(reader.getis());
+#endif
+        }
+        if (s != m.size()) m.resize(s);
+        s=m.size();
+        if (!reader.readSimpleSize(s)) {
+#ifdef NOTHROW
+            std::cerr<<"DiagMatrix Read Error: reading size\n";
+            exit(1);
+#else
+            throw DiagMatrixReadError<T>(reader.getis());
+#endif
+        }
+        if (s != m.size()) {
+#ifdef NOTHROW
+            std::cerr<<"DiagMatrix Read Error: Wrong size\n";
+            exit(1);
+#else
+            throw DiagMatrixReadError<T>(m,reader.getis(),s);
+#endif
+        }
+        Read(reader,m);
+        return reader.getis();
+    }
+
+    template <class T, int A0>
+    std::istream& operator>>(std::istream& is, DiagMatrix<T,A0>& m)
+    { return is >> IOStyle() >> m; }
+
+    template <class T, int A>
+    std::istream& operator>>(
+        const TMV_Reader& reader, DiagMatrixView<T,A> m)
+    {
+        return reader >> 
+            static_cast<BaseMatrix_Diag_Mutable<DiagMatrixView<T,A> >&>(m); 
+    }
+
+
+    template <class T, int N, int S, int A>
+    std::istream& operator>>(
+        const TMV_Reader& reader, SmallDiagMatrixView<T,N,S,A> m)
+    {
+        return reader >> 
+            static_cast<BaseMatrix_Diag_Mutable<
+            SmallDiagMatrixView<T,N,S,A> >&>(m); 
+    }
+
+
+    template <class T, int A>
+    std::istream& operator>>(std::istream& is, DiagMatrixView<T,A> m)
+    {
+        return is >> 
+            static_cast<BaseMatrix_Diag_Mutable<DiagMatrixView<T,A> >&>(m); 
+    }
+
+
+    template <class T, int N, int S, int A>
+    std::istream& operator>>(std::istream& is, SmallDiagMatrixView<T,N,S,A> m)
+    {
+        return is >> 
+            static_cast<BaseMatrix_Diag_Mutable<
+            SmallDiagMatrixView<T,N,S,A> >&>(m); 
+    }
+
+
+} // namespace mv
 
 #endif

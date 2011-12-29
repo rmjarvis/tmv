@@ -85,8 +85,8 @@ namespace tmv {
         TMV_INLINE const Scaling<ix,T>& getX() const { return x; }
         TMV_INLINE const M& getM() const { return m; }
 
-        TMV_INLINE size_t colsize() const { return m.rowsize(); }
-        TMV_INLINE size_t rowsize() const { return m.colsize(); }
+        TMV_INLINE int colsize() const { return m.rowsize(); }
+        TMV_INLINE int rowsize() const { return m.colsize(); }
         TMV_INLINE int nlo() const 
         { return m.nlo() == 0 ? 0 : TMV_MAX(colsize()-1,0); }
         TMV_INLINE int nhi() const 

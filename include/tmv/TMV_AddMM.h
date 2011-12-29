@@ -57,8 +57,8 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddMM
-            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? m3.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? m3.rowsize() : rs;
             std::cout<<"AddMM algo 1: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -80,8 +80,8 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-            const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
-            int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
+            int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
 #ifdef PRINTALGO_AddMM
             std::cout<<"AddMM algo 11: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -162,8 +162,8 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddMM
-            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? m3.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? m3.rowsize() : rs;
             std::cout<<"AddMM algo 15: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -179,8 +179,8 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const M1& m1, 
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
-            int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+            int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
 #ifdef PRINTALGO_AddMM
             std::cout<<"AddMM algo 21: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -260,8 +260,8 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddMM
-            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? m3.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? m3.rowsize() : rs;
             std::cout<<"AddMM algo 25: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -278,8 +278,8 @@ namespace tmv {
             const Scaling<ix2,T2>& x2, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_AddMM
-            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? m3.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? m3.rowsize() : rs;
             std::cout<<"AddMM algo 41: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -490,8 +490,8 @@ namespace tmv {
                     ( cs > rs ) ? 21 : 11 ) :
                 tworm ? 21 : 11;
 #ifdef PRINTALGO_AddMM
-            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? m3.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? m3.rowsize() : rs;
             std::cout<<"AddMM algo -4: M,N = "<<M<<','<<N<<std::endl;
             std::cout<<"x1 = "<<ix1<<"  "<<T1(x1)<<std::endl;
             std::cout<<"x2 = "<<ix2<<"  "<<T2(x2)<<std::endl;
@@ -526,8 +526,8 @@ namespace tmv {
                 ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? 41 :
                 -4;
 #ifdef PRINTALGO_AddMM
-            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? m3.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? m3.rowsize() : rs;
             std::cout<<"AddMM algo -3: M,N = "<<M<<','<<N<<std::endl;
             std::cout<<"x1 = "<<ix1<<"  "<<T1(x1)<<std::endl;
             std::cout<<"x2 = "<<ix2<<"  "<<T2(x2)<<std::endl;
@@ -569,8 +569,8 @@ namespace tmv {
                 inst ? 90 :
                 -3;
 #ifdef PRINTALGO_AddMM
-            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? m3.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? m3.rowsize() : rs;
             std::cout<<"AddMM algo -2: M,N = "<<M<<','<<N<<std::endl;
             std::cout<<"x1 = "<<ix1<<"  "<<T1(x1)<<std::endl;
             std::cout<<"x2 = "<<ix2<<"  "<<T2(x2)<<std::endl;
@@ -602,8 +602,8 @@ namespace tmv {
                 M3::_checkalias ? 99 : 
                 -2;
 #ifdef PRINTALGO_AddMM
-            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? m3.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? m3.rowsize() : rs;
             std::cout<<"AddMM algo -1: M,N = "<<M<<','<<N<<std::endl;
             std::cout<<"x1 = "<<ix1<<"  "<<T1(x1)<<std::endl;
             std::cout<<"x2 = "<<ix2<<"  "<<T2(x2)<<std::endl;

@@ -68,8 +68,8 @@ namespace tmv {
         Matrix<typename M3::value_type> m3i = m3.mat();
         Matrix<typename M3::value_type> m3c = m3.mat();
         if (!add) m3c.setZero();
-        for(size_t i=0;i<m3.colsize();++i) {
-            for(size_t j=0;j<m3.rowsize();++j) {
+        for(int i=0;i<m3.colsize();++i) {
+            for(int j=0;j<m3.rowsize();++j) {
                 m3c.ref(i,j) += T(x) * v1.cref(i) * v2.cref(j);
             }
         }
@@ -146,8 +146,8 @@ namespace tmv {
         TMV_INLINE const V1& getV1() const { return v1; }
         TMV_INLINE const V2& getV2() const { return v2; }
 
-        TMV_INLINE size_t colsize() const { return v1.size(); }
-        TMV_INLINE size_t rowsize() const { return v2.size(); }
+        TMV_INLINE int colsize() const { return v1.size(); }
+        TMV_INLINE int rowsize() const { return v2.size(); }
         TMV_INLINE int nlo() const { return TMV_MAX(colsize()-1,0); }
         TMV_INLINE int nhi() const { return TMV_MAX(rowsize()-1,0); }
 

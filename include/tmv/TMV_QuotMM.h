@@ -263,8 +263,8 @@ namespace tmv {
         TMV_INLINE const M1& getM1() const { return m1; }
         TMV_INLINE const M2& getM2() const { return m2; }
 
-        TMV_INLINE size_t colsize() const { return m2.rowsize(); }
-        TMV_INLINE size_t rowsize() const { return m1.rowsize(); }
+        TMV_INLINE int colsize() const { return m2.rowsize(); }
+        TMV_INLINE int rowsize() const { return m1.rowsize(); }
         TMV_INLINE int nlo() const 
         { return m2.nlo() == 0 ? m1.nlo() : TMV_MAX(colsize()-1,0); }
         TMV_INLINE int nhi() const 
@@ -359,8 +359,8 @@ namespace tmv {
         TMV_INLINE const M1& getM1() const { return m1; }
         TMV_INLINE const M2& getM2() const { return m2; }
 
-        TMV_INLINE size_t colsize() const { return m1.colsize(); }
-        TMV_INLINE size_t rowsize() const { return m2.colsize(); }
+        TMV_INLINE int colsize() const { return m1.colsize(); }
+        TMV_INLINE int rowsize() const { return m2.colsize(); }
         TMV_INLINE int nlo() const 
         { return m2.nlo() == 0 ? m1.nlo() : TMV_MAX(colsize()-1,0); }
         TMV_INLINE int nhi() const 

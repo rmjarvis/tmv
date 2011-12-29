@@ -358,7 +358,7 @@ namespace tmv {
                 isunit() && i==j, itsm[i*stepi() + j*stepj()] ); 
         }
 
-        TMV_INLINE size_t size() const { return N; }
+        TMV_INLINE int size() const { return N; }
         int nElements() const { return N*(N+1)/2; }
         TMV_INLINE int stepi() const { return _stepi; }
         TMV_INLINE int stepj() const { return _stepj; }
@@ -554,20 +554,20 @@ namespace tmv {
         //
         
         ConstSmallUpperTriMatrixView(
-            const T* m, size_t s, int si, int sj, DiagType dt) :
+            const T* m, int s, int si, int sj, DiagType dt) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstSmallUpperTriMatrixView(const T* m, size_t s, int si, int sj) :
+        ConstSmallUpperTriMatrixView(const T* m, int s, int si, int sj) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
-        ConstSmallUpperTriMatrixView(const T* m, size_t s, int si) :
+        ConstSmallUpperTriMatrixView(const T* m, int s, int si) :
             itsm(m), itss(s), itssi(si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -575,7 +575,7 @@ namespace tmv {
             TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
-        ConstSmallUpperTriMatrixView(const T* m, size_t s) :
+        ConstSmallUpperTriMatrixView(const T* m, int s) :
             itsm(m), itss(s), itssi(Si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -663,10 +663,10 @@ namespace tmv {
                 DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
 
-        TMV_INLINE size_t colsize() const { return itss; }
-        TMV_INLINE size_t rowsize() const { return itss; }
-        TMV_INLINE size_t size() const { return itss; }
-        int nElements() const { return int(itss)*int(itss+1)/2; }
+        TMV_INLINE int colsize() const { return itss; }
+        TMV_INLINE int rowsize() const { return itss; }
+        TMV_INLINE int size() const { return itss; }
+        int nElements() const { return itss*(itss+1)/2; }
         TMV_INLINE int stepi() const { return itssi; }
         TMV_INLINE int stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
@@ -910,20 +910,20 @@ namespace tmv {
         // Constructors
         //
 
-        SmallUpperTriMatrixView(T* m, size_t s, int si, int sj, DiagType dt) :
+        SmallUpperTriMatrixView(T* m, int s, int si, int sj, DiagType dt) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        SmallUpperTriMatrixView(T* m, size_t s, int si, int sj) :
+        SmallUpperTriMatrixView(T* m, int s, int si, int sj) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
-        SmallUpperTriMatrixView(T* m, size_t s, int si) :
+        SmallUpperTriMatrixView(T* m, int s, int si) :
             itsm(m), itss(s), itssi(si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -931,7 +931,7 @@ namespace tmv {
             TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
-        SmallUpperTriMatrixView(T* m, size_t s) :
+        SmallUpperTriMatrixView(T* m, int s) :
             itsm(m), itss(s), itssi(Si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1018,10 +1018,10 @@ namespace tmv {
         }
 
 
-        TMV_INLINE size_t colsize() const { return itss; }
-        TMV_INLINE size_t rowsize() const { return itss; }
-        TMV_INLINE size_t size() const { return itss; }
-        int nElements() const { return int(itss)*int(itss+1)/2; }
+        TMV_INLINE int colsize() const { return itss; }
+        TMV_INLINE int rowsize() const { return itss; }
+        TMV_INLINE int size() const { return itss; }
+        int nElements() const { return itss*(itss+1)/2; }
         TMV_INLINE int stepi() const { return itssi; }
         TMV_INLINE int stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
@@ -1367,7 +1367,7 @@ namespace tmv {
                 isunit() && i==j, itsm[i*stepi() + j*stepj()] ); 
         }
 
-        TMV_INLINE size_t size() const { return N; }
+        TMV_INLINE int size() const { return N; }
         int nElements() const { return N*(N+1)/2; }
         TMV_INLINE int stepi() const { return _stepi; }
         TMV_INLINE int stepj() const { return _stepj; }
@@ -1564,20 +1564,20 @@ namespace tmv {
         //
         
         ConstSmallLowerTriMatrixView(
-            const T* m, size_t s, int si, int sj, DiagType dt) :
+            const T* m, int s, int si, int sj, DiagType dt) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstSmallLowerTriMatrixView(const T* m, size_t s, int si, int sj) :
+        ConstSmallLowerTriMatrixView(const T* m, int s, int si, int sj) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
-        ConstSmallLowerTriMatrixView(const T* m, size_t s, int si) :
+        ConstSmallLowerTriMatrixView(const T* m, int s, int si) :
             itsm(m), itss(s), itssi(si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1585,7 +1585,7 @@ namespace tmv {
             TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
-        ConstSmallLowerTriMatrixView(const T* m, size_t s) :
+        ConstSmallLowerTriMatrixView(const T* m, int s) :
             itsm(m), itss(s), itssi(Si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1664,10 +1664,10 @@ namespace tmv {
                 DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
 
-        TMV_INLINE size_t colsize() const { return itss; }
-        TMV_INLINE size_t rowsize() const { return itss; }
-        TMV_INLINE size_t size() const { return itss; }
-        int nElements() const { return int(itss)*int(itss+1)/2; }
+        TMV_INLINE int colsize() const { return itss; }
+        TMV_INLINE int rowsize() const { return itss; }
+        TMV_INLINE int size() const { return itss; }
+        int nElements() const { return itss*(itss+1)/2; }
         TMV_INLINE int stepi() const { return itssi; }
         TMV_INLINE int stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
@@ -1911,20 +1911,20 @@ namespace tmv {
         // Constructors
         //
 
-        SmallLowerTriMatrixView(T* m, size_t s, int si, int sj, DiagType dt) :
+        SmallLowerTriMatrixView(T* m, int s, int si, int sj, DiagType dt) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        SmallLowerTriMatrixView(T* m, size_t s, int si, int sj) :
+        SmallLowerTriMatrixView(T* m, int s, int si, int sj) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
-        SmallLowerTriMatrixView(T* m, size_t s, int si) :
+        SmallLowerTriMatrixView(T* m, int s, int si) :
             itsm(m), itss(s), itssi(si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1932,7 +1932,7 @@ namespace tmv {
             TMVStaticAssert(_dt != TMV_UNKNOWN); 
         }
 
-        SmallLowerTriMatrixView(T* m, size_t s) :
+        SmallLowerTriMatrixView(T* m, int s) :
             itsm(m), itss(s), itssi(Si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -2019,10 +2019,10 @@ namespace tmv {
         }
  
 
-        TMV_INLINE size_t colsize() const { return itss; }
-        TMV_INLINE size_t rowsize() const { return itss; }
-        TMV_INLINE size_t size() const { return itss; }
-        int nElements() const { return int(itss)*int(itss+1)/2; }
+        TMV_INLINE int colsize() const { return itss; }
+        TMV_INLINE int rowsize() const { return itss; }
+        TMV_INLINE int size() const { return itss; }
+        int nElements() const { return itss*(itss+1)/2; }
         TMV_INLINE int stepi() const { return itssi; }
         TMV_INLINE int stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }

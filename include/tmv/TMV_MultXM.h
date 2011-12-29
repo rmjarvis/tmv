@@ -107,8 +107,8 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
-            int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
+            int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
 #ifdef PRINTALGO_XM
             std::cout<<"XM algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -135,8 +135,8 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-            int M = cs == TMV_UNKNOWN ? int(m2.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m2.rowsize()) : rs;
+            int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
 #ifdef PRINTALGO_XM
             std::cout<<"XM algo 12: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;

@@ -62,7 +62,7 @@ namespace tmv {
             typedef typename TypeSelect<
                 V::isreal || Traits<ret>::iscomplex , ret ,
                 std::complex<ret> >::type BT;
-            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v.size() : s;
             ret sum(0);
             for(int i=0;i<n;++i) 
                 sum += Component<comp,BT>::f(
@@ -82,7 +82,7 @@ namespace tmv {
             typedef typename TypeSelect<
                 V::isreal || Traits<ret>::iscomplex , ret ,
                 std::complex<ret> >::type BT;
-            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v.size() : s;
             ret sum0(0), sum1(0);
             BT v0, v1;
             typedef typename V::const_iterator IT;
@@ -121,7 +121,7 @@ namespace tmv {
             typedef typename TypeSelect<
                 V::isreal || Traits<ret>::iscomplex , ret ,
                 std::complex<ret> >::type BT;
-            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v.size() : s;
             ret sum0(0), sum1(0);
             BT v0, v1;
             typedef typename V::const_iterator IT;
@@ -168,7 +168,7 @@ namespace tmv {
             typedef typename TypeSelect<
                 V::isreal || Traits<ret>::iscomplex , ret ,
                 std::complex<ret> >::type BT;
-            const int n = s == TMV_UNKNOWN ? int(v.size()) : s;
+            const int n = s == TMV_UNKNOWN ? v.size() : s;
             ret sum0(0), sum1(0);
             BT v0, v1;
             typedef typename V::const_iterator IT;
@@ -330,7 +330,7 @@ namespace tmv {
             const int maxunroll = 80;
             const int algo = 
                 TMV_OPT == 0 ? 11 :
-                ( s != TMV_UNKNOWN && s <= int(maxunroll) ) ? 15 :
+                ( s != TMV_UNKNOWN && s <= maxunroll ) ? 15 :
                 (sizeof(RT) == 8 && V::_step == 1) ? (V::iscomplex ? 12 : 13) :
                 (sizeof(RT) == 4 && V::_step == 1) ? (V::iscomplex ? 13 : 14) :
                 11;

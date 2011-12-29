@@ -650,8 +650,8 @@ namespace tmv {
                 // Need to break up the problem into parts.
                 if ((m1.isrm() && m1.stepi() < m1.nlo()+m1.nhi()) ||
                     (m1.iscm() && m1.stepj() < m1.nlo()+m1.nhi())) {
-                    if (m1.nlo()+1 == int(m1.colsize())) {
-                        if (m1.nhi()+1 == int(m1.rowsize())) {
+                    if (m1.nlo()+1 == m1.colsize()) {
+                        if (m1.nhi()+1 == m1.rowsize()) {
                             ConstMatrixView<T1,C1> m1a =
                                 m1.subMatrix(0,m1.colsize(),0,m1.rowsize());
                             v3 += x * m1a * v2;
@@ -666,7 +666,7 @@ namespace tmv {
                         }
                     } else {
                         TMVAssert(m1.nlo()>0);
-                        if (m1.nhi()+1 == int(m1.rowsize())) {
+                        if (m1.nhi()+1 == m1.rowsize()) {
                             ConstMatrixView<T1,C1> m1a =
                                 m1.subMatrix(0,m1.nlo(),0,m1.rowsize());
                             v3.subVector(0,m1.nlo()) += x * m1a * v2;

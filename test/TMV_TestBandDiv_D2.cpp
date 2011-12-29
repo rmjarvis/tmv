@@ -10,22 +10,22 @@
 template <class T1, class T2> 
 inline bool CanLDivEq(
     const tmv::BandMatrixView<T1>& a, const tmv::UpperTriMatrixView<T2>& b)
-{ return b.size() == a.colsize() && a.nhi() == int(a.rowsize())-1; }
+{ return b.size() == a.colsize() && a.nhi() == a.rowsize()-1; }
 
 template <class T1, class T2> 
 inline bool CanRDivEq(
     const tmv::BandMatrixView<T1>& a, const tmv::UpperTriMatrixView<T2>& b)
-{ return b.size() == a.rowsize() && a.nhi() == int(a.rowsize())-1; }
+{ return b.size() == a.rowsize() && a.nhi() == a.rowsize()-1; }
 
 template <class T1, class T2> 
 inline bool CanLDivEq(
     const tmv::BandMatrixView<T1>& a, const tmv::LowerTriMatrixView<T2>& b)
-{ return b.size() == a.colsize() && a.nlo() == int(a.colsize())-1; }
+{ return b.size() == a.colsize() && a.nlo() == a.colsize()-1; }
 
 template <class T1, class T2> 
 inline bool CanRDivEq(
     const tmv::BandMatrixView<T1>& a, const tmv::LowerTriMatrixView<T2>& b)
-{ return b.size() == a.rowsize() && a.nlo() == int(a.colsize())-1; }
+{ return b.size() == a.rowsize() && a.nlo() == a.colsize()-1; }
 
 #include "TMV_TestMatrixDivArith.h"
 

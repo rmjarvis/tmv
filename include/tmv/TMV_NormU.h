@@ -58,7 +58,7 @@ namespace tmv {
                 TMV_Text(comp)<<"  "<<RT(x)<<std::endl;
 #endif
 
-            const int N = (s == TMV_UNKNOWN ? int(m.size()) : s);
+            const int N = (s == TMV_UNKNOWN ? m.size() : s);
             typedef typename M1::const_offdiag_type Mo;
             Mo mo = m.offDiag();
             const int sm1 = IntTraits2<s,-1>::sum;
@@ -96,7 +96,7 @@ namespace tmv {
             std::cout<<"SumElementsU algo 11: "<<
                 TMV_Text(comp)<<"  "<<RT(x)<<std::endl;
 #endif
-            const int N = (s == TMV_UNKNOWN ? int(m.size()) : s);
+            const int N = (s == TMV_UNKNOWN ? m.size() : s);
             typedef typename M1::const_col_sub_type Mc;
             ret sum(0);
             for(int j=0;j<N;++j) {
@@ -118,7 +118,7 @@ namespace tmv {
             std::cout<<"SumElementsU algo 12: "<<
                 TMV_Text(comp)<<"  "<<RT(x)<<std::endl;
 #endif
-            const int N = (s == TMV_UNKNOWN ? int(m.size()) : s);
+            const int N = (s == TMV_UNKNOWN ? m.size() : s);
             typedef typename M1::const_row_sub_type Mr;
             ret sum(0);
             for(int i=0;i<N;++i) {
@@ -604,7 +604,7 @@ namespace tmv {
         static ret call(const M1& m)
         {
             typedef typename M1::const_col_sub_type Mc;
-            const int N = (s == TMV_UNKNOWN ? int(m.size()) : s);
+            const int N = (s == TMV_UNKNOWN ? m.size() : s);
             ret max(0);
             for(int j=0;j<N;++j) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,Mc>::call(
@@ -623,7 +623,7 @@ namespace tmv {
         static ret call(const M1& m)
         {
             typedef typename M1::const_row_sub_type Mr;
-            const int N = (s == TMV_UNKNOWN ? int(m.size()) : s);
+            const int N = (s == TMV_UNKNOWN ? m.size() : s);
             ret max(0);
             for(int i=0;i<N;++i) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,Mr>::call(
@@ -643,7 +643,7 @@ namespace tmv {
         {
             typedef typename M1::const_col_sub_type Mc;
             typedef tmv::Vector<ret> V;
-            const int N = (s == TMV_UNKNOWN ? int(m.size()) : s);
+            const int N = (s == TMV_UNKNOWN ? m.size() : s);
             if (N == 0) return ret(0);
             else {
                 V temp(N);
@@ -665,7 +665,7 @@ namespace tmv {
         {
             typedef typename M1::const_row_sub_type Mr;
             typedef tmv::Vector<ret> V;
-            const int N = (s == TMV_UNKNOWN ? int(m.size()) : s);
+            const int N = (s == TMV_UNKNOWN ? m.size() : s);
             if (N == 0) return ret(0);
             else {
                 V temp(N);
@@ -880,7 +880,7 @@ namespace tmv {
         typedef typename M1::float_type RT;
         static RT call(const M1& m)
         {
-            const int N = (s == TMV_UNKNOWN ? int(m.size()) : s);
+            const int N = (s == TMV_UNKNOWN ? m.size() : s);
             RT max(0);
             for(int j=0;j<N;++j) {
                 // If unit,     temp = 1 + SumAbsElements(m.col(j,0,j)
@@ -901,7 +901,7 @@ namespace tmv {
         typedef typename M1::float_type RT;
         static RT call(const M1& m)
         {
-            int N = (s == TMV_UNKNOWN ? int(m.size()) : s);
+            int N = (s == TMV_UNKNOWN ? m.size() : s);
             if (N <= 8) return Norm1U_Helper<11,s,M1>::call(m);
 
             typedef typename M1::value_type VT;
@@ -945,7 +945,7 @@ namespace tmv {
         typedef typename M1::float_type RT;
         static RT call(const M1& m)
         {
-            const int N = (s == TMV_UNKNOWN ? int(m.size()) : s);
+            const int N = (s == TMV_UNKNOWN ? m.size() : s);
             RT max(0);
             for(int i=0;i<N;++i) {
                 // If unit,     temp = 1 + SumAbsElements(m.col(i,i+1,N)
@@ -966,7 +966,7 @@ namespace tmv {
         typedef typename M1::float_type RT;
         static RT call(const M1& m)
         {
-            int N = (s == TMV_UNKNOWN ? int(m.size()) : s);
+            int N = (s == TMV_UNKNOWN ? m.size() : s);
             if (N <= 8) return Norm1U_Helper<21,s,M1>::call(m);
 
             typedef typename M1::value_type VT;

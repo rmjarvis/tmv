@@ -344,21 +344,21 @@ namespace tmv {
         static inline bool ok(const M& m) 
         {
             return (
-                (m.stepi() == 1 && m.stepj() == int(m.colsize())) ||
-                (m.stepj() == 1 && m.stepi() == int(m.rowsize())) );
+                (m.stepi() == 1 && m.stepj() == m.colsize()) ||
+                (m.stepj() == 1 && m.stepi() == m.rowsize()) );
         }
     };
     template <int Sj, class M>
     struct AuxCanLinearize<false,1,Sj,M>
     {
         static inline bool ok(const M& m) 
-        { return m.stepj() == int(m.colsize()); } 
+        { return m.stepj() == m.colsize(); } 
     };
     template <int Si, class M>
     struct AuxCanLinearize<false,Si,1,M>
     {
         static inline bool ok(const M& m) 
-        { return m.stepi() == int(m.rowsize()); } 
+        { return m.stepi() == m.rowsize(); } 
     };
     template <class M>
     struct AuxCanLinearize<false,1,1,M>
@@ -404,10 +404,6 @@ namespace tmv {
     inline typename M::float_type DoMaxAbsElement(const BaseMatrix_Rec<M>& m);
     template <class M>
     inline typename M::real_type DoMaxAbs2Element(const BaseMatrix_Rec<M>& m);
-
-    // Defined in TMV_MatrixIO.h
-    template <class M>
-    inline void Read(std::istream& is, BaseMatrix_Rec_Mutable<M>& m);
 
     // Defined below:
     template <class M>
@@ -955,8 +951,8 @@ namespace tmv {
         TMV_INLINE_ND const_linearview_type linearView() const
         {
             TMVAssert(
-                (stepi() == 1 && stepj() == int(colsize())) ||
-                (stepj() == 1 && stepi() == int(rowsize())) );
+                (stepi() == 1 && stepj() == colsize()) ||
+                (stepj() == 1 && stepi() == rowsize()) );
             return const_linearview_type(cptr(),ls(),1);
         }
 
@@ -1015,11 +1011,11 @@ namespace tmv {
         // class than this, or an infinite loop will result when compiling.
         // Also, cref from BaseMatrix.
 
-        TMV_INLINE size_t colsize() const { return mat().colsize(); }
-        TMV_INLINE size_t rowsize() const { return mat().rowsize(); }
+        TMV_INLINE int colsize() const { return mat().colsize(); }
+        TMV_INLINE int rowsize() const { return mat().rowsize(); }
         TMV_INLINE int nlo() const { return TMV_MAX(colsize()-1,0); }
         TMV_INLINE int nhi() const { return TMV_MAX(rowsize()-1,0); }
-        TMV_INLINE size_t ls() const { return mat().ls(); }
+        TMV_INLINE int ls() const { return mat().ls(); }
         TMV_INLINE int stepi() const { return mat().stepi(); }
         TMV_INLINE int stepj() const { return mat().stepj(); }
         TMV_INLINE bool isrm() const { return mat().isrm(); }
@@ -1736,14 +1732,6 @@ namespace tmv {
         { return base::nonConj(); }
 
 
-
-        //
-        // I/O
-        //
-
-        TMV_INLINE void read(std::istream& is)
-        { tmv::Read(is,mat()); }
-
         //
         // Auxilliary routines
         //
@@ -1763,9 +1751,9 @@ namespace tmv {
         // class than this, or an infinite loop will result when compiling.
         // Also, cref and cptr from above.
 
-        TMV_INLINE size_t colsize() const { return mat().colsize(); }
-        TMV_INLINE size_t rowsize() const { return mat().rowsize(); }
-        TMV_INLINE size_t ls() const { return mat().ls(); }
+        TMV_INLINE int colsize() const { return mat().colsize(); }
+        TMV_INLINE int rowsize() const { return mat().rowsize(); }
+        TMV_INLINE int ls() const { return mat().ls(); }
         TMV_INLINE int stepi() const { return mat().stepi(); }
         TMV_INLINE int stepj() const { return mat().stepj(); }
         TMV_INLINE bool isrm() const { return mat().isrm(); }

@@ -10,11 +10,11 @@
 // 
 // Constructors:
 //
-//    BasisVector<T,A>(size_t n, int i)  
+//    BasisVector<T,A>(int n, int i)  
 //        Makes a BasisVector of size n, with all values = 0, except for
 //        v[i] = 1.
 //
-//    BasisVector<T,A>(size_t n, int i, T x)  
+//    BasisVector<T,A>(int n, int i, T x)  
 //        Makes a BasisVector of size n, with all values = 0, except for
 //        v[i] = x.
 //
@@ -72,11 +72,13 @@ namespace tmv {
         // Constructors
         //
 
-        BasisVector(size_t n, int i, const T x=T(1)) : 
-            itssize(n), itsindex(A==FortranStyle?i-1:i), itsval(x) 
-            {
-                TMVStaticAssert(Traits<type>::okA);
-            }
+        BasisVector(int n, int i, const T x=T(1)) : 
+            itssize(n), itsindex(Maybe<_fort>::select(i-1,i)), itsval(x) 
+        {
+            TMVAssert(n > 0);
+            TMVAssert(i >= 0 && i < n);
+            TMVStaticAssert(Traits<type>::okA);
+        }
         ~BasisVector() {}
 
         //
@@ -84,7 +86,7 @@ namespace tmv {
         //
 
         T cref(int i) const  { return i==itsindex ? itsval : T(0); }
-        size_t size() const { return itssize; }
+        int size() const { return itssize; }
         int nElements() const { return 1; }
 
         template <class V2>
@@ -97,7 +99,7 @@ namespace tmv {
 
     protected :
 
-        size_t itssize;
+        int itssize;
         int itsindex;
         T itsval;
 

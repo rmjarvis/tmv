@@ -439,71 +439,134 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_IO()
     const int M = 15;
     const int N = 10;
 
+    if (showstartdone) {
+        std::cout<<"Start TestBasicMatrix_IO\n";
+        std::cout<<"T = "<<tmv::TMV_Text(T())<<std::endl;
+        std::cout<<"S = "<<tmv::TMV_Text(S)<<std::endl;
+        std::cout<<"M,N = "<<M<<','<<N<<std::endl;
+    }
+
     tmv::Matrix<T,S> m(M,N);
     tmv::Matrix<CT,S> cm(M,N);
 
     for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
         m(i,j) = T(k);
-        cm(i,j) = CT(T(k),T(k+1000));
+        cm(i,j) = CT(k,k+1000);
     }
+    m(3,1) = T(1.e-30);
+    cm(3,1) = CT(1.e-30,1.e-30);
+    m(5,6) = T(9.e-3);
+    cm(5,6) = CT(9.e-3,9.e-3);
+    m(7,4) = T(0.123456789);
+    cm(7,4) = CT(3.123456789,600.987654321);
 
+    // First check clipping function...
+    tmv::Matrix<T> m2 = m;
+    tmv::Matrix<CT> cm2 = cm;
+    if (!std::numeric_limits<T>::is_integer) {
+        m2.clip(1.e-2);
+        cm2.clip(1.e-2);
+    }
+    tmv::Matrix<T> m3 = m;
+    tmv::Matrix<CT> cm3 = cm;
+    m3(3,1) = T(0);
+    cm3(3,1) = T(0);
+    m3(5,6) = T(0); // Others, esp. cm3(5,6), shouldn't get clipped.
+    Assert(m2 == m3,"Matrix clip");
+    Assert(cm2 == cm3,"Complex Matrix clip");
+
+    // Write matrices with 4 different styles
     std::ofstream fout("tmvtest_matrix_io.dat");
-    if (!fout) 
-#ifdef NOTHROW
-    { std::cerr<<"Couldn't open tmvtest_matrix_io.dat for output\n"; exit(1); }
-#else
-    throw std::runtime_error(
-        "Couldn't open tmvtest_matrix_io.dat for output");
-#endif
-    fout << m << std::endl << cm << std::endl;
+    Assert(fout,"Couldn't open tmvtest_matrix_io.dat for output");
+    fout << m << std::endl;
+    fout << cm << std::endl;
+    fout << tmv::CompactIO() << m << std::endl;
+    fout << tmv::CompactIO() << cm << std::endl;
+    fout << tmv::ThreshIO(1.e-2).setPrecision(12) << m << std::endl;
+    fout << tmv::ThreshIO(1.e-2).setPrecision(12) << cm << std::endl;
+    // Not a very pretty IO style, but it tests being able to read
+    // a style that has no whitespace and has more than one 
+    // character for some of the markup elements.
+    tmv::IOStyle myStyle = 
+        tmv::CompactIO().setThresh(1.e-2).setPrecision(4).
+        markup("Start","[",",","]","---","Done");
+    fout << myStyle << m << std::endl;
+    fout << myStyle << cm << std::endl;
     fout.close();
 
+    // When using (the default) prec(6), these will be the values read in.
+    m(7,4) = T(0.123457);
+    cm(7,4) = CT(3.12346,600.988);
+
+    // When using prec(12), the full correct values will be read in. (m2,cm2)
+
+    // When using prec(4), these will be the values read in.
+    m3(7,4) = T(0.1235);
+    if (std::numeric_limits<T>::is_integer) cm3(7,4) = CT(3,600);
+    else cm3(7,4) = CT(3.123,601.0);
+
+    // Read them back in
     tmv::Matrix<T,tmv::RowMajor> xm1(M,N);
     tmv::Matrix<CT,tmv::RowMajor> xcm1(M,N);
     std::ifstream fin("tmvtest_matrix_io.dat");
-    if (!fin) 
-#ifdef NOTHROW
-    { std::cerr<<"Couldn't open tmvtest_matrix_io.dat for input\n"; exit(1); }
-#else
-    throw std::runtime_error(
-        "Couldn't open tmvtest_matrix_io.dat for input");
-#endif
+    Assert(fin,"Couldn't open tmvtest_matrix_io.dat for input");
     fin >> xm1 >> xcm1;
+    Assert(m == xm1,"Matrix I/O check normal");
+    Assert(cm == xcm1,"CMatrix I/O check normal");
+    fin >> tmv::CompactIO() >> xm1 >> tmv::CompactIO() >> xcm1;
+    Assert(m == xm1,"Matrix I/O check compact");
+    Assert(cm == xcm1,"CMatrix I/O check compact");
+    fin >> xm1.view() >> xcm1.view();
+    Assert(m2 == xm1,"Matrix I/O check thresh");
+    Assert(cm2 == xcm1,"CMatrix I/O check thresh");
+    fin >> myStyle >> xm1.view() >> myStyle >> xcm1.view();
+    Assert(m3 == xm1,"Matrix I/O check compact thresh & prec(4)");
+    Assert(cm3 == xcm1,"CMatrix I/O check compact thresh & prec(4)");
     fin.close();
-    Assert(m == xm1,"Matrix I/O check #1");
-    Assert(cm == xcm1,"CMatrix I/O check #1");
 
+    // Repeat for column major
     tmv::Matrix<T,tmv::ColMajor> xm2(M,N);
     tmv::Matrix<CT,tmv::ColMajor> xcm2(M,N);
     fin.open("tmvtest_matrix_io.dat");
-    if (!fin) 
-#ifdef NOTHROW
-    { std::cerr<<"Couldn't open tmvtest_matrix_io.dat for input\n"; exit(1); }
-#else
-    throw std::runtime_error(
-        "Couldn't open tmvtest_matrix_io.dat for input");
-#endif
+    Assert(fin,"Couldn't open tmvtest_matrix_io.dat for input");
+    fin >> xm2.view() >> xcm2.view();
+    Assert(m == xm2,"Matrix I/O check normal");
+    Assert(cm == xcm2,"CMatrix I/O check normal");
+    fin >> tmv::CompactIO() >> xm2.view() >> tmv::CompactIO() >> xcm2.view();
+    Assert(m == xm2,"Matrix I/O check compact");
+    Assert(cm == xcm2,"CMatrix I/O check compact");
     fin >> xm2 >> xcm2;
+    Assert(m2 == xm2,"Matrix I/O check thresh");
+    Assert(cm2 == xcm2,"CMatrix I/O check thresh");
+    fin >> myStyle >> xm2 >> myStyle >> xcm2;
+    Assert(m3 == xm2,"Matrix I/O check compact thresh & prec(4)");
+    Assert(cm3 == xcm2,"CMatrix I/O check compact thresh & prec(4)");
     fin.close();
-    Assert(m == xm2,"Matrix I/O check #2");
-    Assert(cm == xcm2,"CMatrix I/O check #2");
 
-    tmv::Matrix<T> xm3;
-    tmv::Matrix<CT> xcm3;
+    // And repeat for matrices that need to be resized.
+    // Also check switching the default IOStyle.
+    tmv::CompactIO().makeDefault();
+    tmv::Matrix<T> zm1,zm2,zm3,zm4;
+    tmv::Matrix<CT> zcm1,zcm2,zcm3,zcm4;
     fin.open("tmvtest_matrix_io.dat");
-    if (!fin) 
-#ifdef NOTHROW
-    { std::cerr<<"Couldn't open tmvtest_matrix_io.dat for input\n"; exit(1); }
-#else
-    throw std::runtime_error(
-        "Couldn't open tmvtest_matrix_io.dat for input");
-#endif
-    fin >> xm3 >> xcm3;
+    Assert(fin,"Couldn't open tmvtest_matrix_io.dat for input");
+    fin >> tmv::NormalIO() >> zm1 >> tmv::NormalIO() >> zcm1;
+    Assert(m == zm1,"Matrix I/O check normal with resize");
+    Assert(cm == zcm1,"CMatrix I/O check normal with resize");
+    fin >> zm2 >> zcm2;
+    Assert(m == zm2,"Matrix I/O check compact with resize");
+    Assert(cm == zcm2,"CMatrix I/O check compact with resize");
+    fin >> tmv::NormalIO() >> zm3 >> tmv::NormalIO() >> zcm3;
+    Assert(m2 == zm3,"Matrix I/O check thresh with resize");
+    Assert(cm2 == zcm3,"CMatrix I/O check thresh with resize");
+    fin >> myStyle >> zm4 >> myStyle >> zcm4;
+    Assert(m3 == zm4,"Matrix I/O check compact thresh with resize");
+    Assert(cm3 == zcm4,"CMatrix I/O check compact thresh with resize");
     fin.close();
-    Assert(m == xm3,"Matrix I/O check #3");
-    Assert(cm == xcm3,"CMatrix I/O check #3");
+    // Switch it back.
+    tmv::IOStyle::revertDefault();
 
-#if XTEST==0
+#if XTEST == 0
     std::remove("tmvtest_matrix_io.dat");
 #endif
 

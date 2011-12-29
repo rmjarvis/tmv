@@ -299,14 +299,6 @@ namespace tmv {
     template <class M>
     inline typename M::value_type DoTrace(const BaseMatrix<M>& m);
 
-    // Defined in TMV_MatrixIO.h
-    template <class M>
-    inline void Write(std::ostream& os, const BaseMatrix_Calc<M>& m);
-    template <class M>
-    inline void Write(
-        std::ostream& os,
-        const BaseMatrix_Calc<M>& m, typename M::float_type thresh) ;
-
     // Defined in TMV_QuotXM.h
     template <int ix, class T, class M>
     class QuotXM;
@@ -435,16 +427,6 @@ namespace tmv {
         { return calc().sumElements(f); }
 
 
-        // 
-        // I/O
-        //
-
-        TMV_INLINE void write(std::ostream& os) const
-        { tmv::Write(os,calc()); }
-        TMV_INLINE void write(std::ostream& os, float_type thresh) const
-        { tmv::Write(os,calc(),thresh); }
-
-
         //
         // Auxilliary routines
         //
@@ -461,15 +443,15 @@ namespace tmv {
         TMV_INLINE copy_type copy() const 
         { return static_cast<copy_type>(mat()); }
 
-        TMV_INLINE size_t nrows() const { return colsize(); }
-        TMV_INLINE size_t ncols() const { return rowsize(); }
+        TMV_INLINE int nrows() const { return colsize(); }
+        TMV_INLINE int ncols() const { return rowsize(); }
         TMV_INLINE bool isSquare() const { return colsize() == rowsize(); }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
 
-        TMV_INLINE size_t colsize() const { return mat().colsize(); }
-        TMV_INLINE size_t rowsize() const { return mat().rowsize(); }
+        TMV_INLINE int colsize() const { return mat().colsize(); }
+        TMV_INLINE int rowsize() const { return mat().rowsize(); }
         TMV_INLINE int nlo() const { return mat().nlo(); }
         TMV_INLINE int nhi() const { return mat().nhi(); }
         TMV_INLINE int nElements() const { return mat().nElements(); }
@@ -642,8 +624,8 @@ namespace tmv {
         TMV_INLINE const type& mat() const
         { return static_cast<const type&>(*this); }
 
-        TMV_INLINE size_t colsize() const { return mat().colsize(); }
-        TMV_INLINE size_t rowsize() const { return mat().rowsize(); }
+        TMV_INLINE int colsize() const { return mat().colsize(); }
+        TMV_INLINE int rowsize() const { return mat().rowsize(); }
 
         TMV_INLINE int rowstart(int i) const { return mat().rowstart(i); }
         TMV_INLINE int rowend(int i) const { return mat().rowend(i); }
@@ -814,14 +796,6 @@ namespace tmv {
 
 
         //
-        // I/O
-        //
-
-        TMV_INLINE void read(std::istream& is)
-        { mat().read(is); }
-
-
-        //
         // Arithmetic
         //
 
@@ -866,8 +840,8 @@ namespace tmv {
         TMV_INLINE type& mat()
         { return static_cast<type&>(*this); }
 
-        TMV_INLINE size_t colsize() const { return mat().colsize(); }
-        TMV_INLINE size_t rowsize() const { return mat().rowsize(); }
+        TMV_INLINE int colsize() const { return mat().colsize(); }
+        TMV_INLINE int rowsize() const { return mat().rowsize(); }
         TMV_INLINE reference ref(int i, int j) { return mat().ref(i,j); }
         TMV_INLINE value_type cref(int i, int j) const  
         { return mat().cref(i,j); }
@@ -908,8 +882,8 @@ namespace tmv {
     public:
         TMV_INLINE MatrixSizer(const int _cs, const int _rs) :
             cs(_cs), rs(_rs) {}
-        TMV_INLINE size_t colsize() const { return cs; }
-        TMV_INLINE size_t rowsize() const { return rs; }
+        TMV_INLINE int colsize() const { return cs; }
+        TMV_INLINE int rowsize() const { return rs; }
         TMV_INLINE int nlo() const { return TMV_MAX(cs-1,0); }
         TMV_INLINE int nhi() const { return TMV_MAX(rs-1,0); }
         TMV_INLINE int nElements() const { return cs * rs; }
@@ -1005,7 +979,7 @@ namespace tmv {
 
 
     template <class M>
-    static typename M::value_type DoTrace(const BaseMatrix<M>& m)
+    inline typename M::value_type DoTrace(const BaseMatrix<M>& m)
     {
         TMVStaticAssert((Sizes<M::_rowsize,M::_colsize>::same));
         TMVAssert(m.colsize() == m.rowsize());

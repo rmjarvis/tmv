@@ -119,7 +119,7 @@ namespace tmv {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 1: M,N,cs,rs = "<<1<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -144,7 +144,7 @@ namespace tmv {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 101: M,N,cs,rs = "<<1<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -169,7 +169,7 @@ namespace tmv {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 201: M,N,cs,rs = "<<1<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -194,7 +194,7 @@ namespace tmv {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
             std::cout<<"LDivEqMU algo 2: M,N,cs,rs = "<<M<<','<<1<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -212,7 +212,7 @@ namespace tmv {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
             std::cout<<"LDivEqMU algo 102: M,N,cs,rs = "<<M<<','<<1<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -230,7 +230,7 @@ namespace tmv {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
             std::cout<<"LDivEqMU algo 202: M,N,cs,rs = "<<M<<','<<1<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -247,9 +247,9 @@ namespace tmv {
     {
         static inline void call(M1& m1, const M2& m2)
         {
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
 #ifdef PRINTALGO_DivU
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
             std::cout<<"LDivEqMU algo 11: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -269,9 +269,9 @@ namespace tmv {
     {
         static inline void call(M1& m1, const M2& m2)
         {
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
 #ifdef PRINTALGO_DivU
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 12: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -312,9 +312,9 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
 #ifdef PRINTALGO_DivU
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 13: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -357,8 +357,8 @@ namespace tmv {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 16: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -379,7 +379,7 @@ namespace tmv {
         {
             const int M = m1.colsize();
 #ifdef PRINTALGO_DivU
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 16: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<TMV_UNKNOWN<<','<<rs<<std::endl;
 #endif
@@ -434,9 +434,9 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
 #ifdef PRINTALGO_DivU
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 17: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -531,9 +531,9 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
 #ifdef PRINTALGO_DivU
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
             std::cout<<"LDivEqMU algo 21: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -558,9 +558,9 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
 #ifdef PRINTALGO_DivU
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 22: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -601,9 +601,9 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
 #ifdef PRINTALGO_DivU
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 23: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -646,8 +646,8 @@ namespace tmv {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 26: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -668,7 +668,7 @@ namespace tmv {
         {
             const int M = m1.colsize();
 #ifdef PRINTALGO_DivU
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 26: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<TMV_UNKNOWN<<','<<rs<<std::endl;
 #endif
@@ -723,9 +723,9 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
 #ifdef PRINTALGO_DivU
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 27: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -821,9 +821,9 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
 #if defined(PRINTALGO_DivU) || defined(_OPENMP)
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
 #endif
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqMU algo 31: M,N,cs,rs = "<<M<<','<<N<<
@@ -876,9 +876,9 @@ namespace tmv {
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
 #ifdef PRINTALGO_DivU
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
             std::cout<<"LDivEqMU algo 36: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -955,9 +955,9 @@ namespace tmv {
         static void call(M1& m1, const M2& m2)
         {
             TMVStaticAssert(cs == TMV_UNKNOWN);
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
 #ifdef PRINTALGO_DivU
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 38: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -992,8 +992,8 @@ namespace tmv {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m1.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 81: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -1009,8 +1009,8 @@ namespace tmv {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int M = cs == TMV_UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m1.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 84: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -1208,8 +1208,8 @@ namespace tmv {
 #endif
                 27 ;
 #ifdef PRINTALGO_DivU
-            const int M = cs==TMV_UNKNOWN ? int(m1.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(m1.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? m1.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? m1.rowsize() : rs;
             std::cout<<"InlineLDivEqMU: \n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;

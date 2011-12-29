@@ -104,7 +104,7 @@ namespace tmv {
         TMVAssert(A.colsize() > 0);
         TMVAssert(B.rowsize() > 0);
         TMVAssert(A.nlo() == 0);
-        TMVAssert(int(A.colsize())>A.nhi());
+        TMVAssert(A.colsize()>A.nhi());
         TMVAssert(B.ct() == NonConj);
 
         int N = A.colsize();
@@ -222,8 +222,8 @@ namespace tmv {
         TMVAssert(A.nlo() == 0 || A.nhi() == 0);
         TMVAssert(A.colsize() > 0);
         TMVAssert(B.rowsize() > 1);
-        TMVAssert(A.nhi() < int(A.colsize()));
-        TMVAssert(A.nlo() < int(A.colsize()));
+        TMVAssert(A.nhi() < A.colsize());
+        TMVAssert(A.nlo() < A.colsize());
         TMVAssert(B.ct() == NonConj);
 
         if (B.isrm()) 
@@ -260,8 +260,8 @@ namespace tmv {
         TMVAssert(A.nlo() == 0 || A.nhi() == 0);
         TMVAssert(A.colsize() > 0);
         TMVAssert(B.rowsize() > 1);
-        TMVAssert(A.nhi() < int(A.colsize()));
-        TMVAssert(A.nlo() < int(A.colsize()));
+        TMVAssert(A.nhi() < A.colsize());
+        TMVAssert(A.nlo() < A.colsize());
         TMVAssert(A.ct() == NonConj);
         TMVAssert(B.ct() == NonConj);
         TMVAssert(A.iscm() || A.isrm());
@@ -290,8 +290,8 @@ namespace tmv {
         TMVAssert(A.nlo() == 0 || A.nhi() == 0);
         TMVAssert(A.colsize() > 0);
         TMVAssert(B.rowsize() > 1);
-        TMVAssert(A.nhi() < int(A.colsize()));
-        TMVAssert(A.nlo() < int(A.colsize()));
+        TMVAssert(A.nhi() < A.colsize());
+        TMVAssert(A.nlo() < A.colsize());
         TMVAssert(B.ct() == NonConj);
         TMVAssert(A.iscm() || A.isrm());
         TMVAssert(B.iscm());
@@ -331,8 +331,8 @@ namespace tmv {
         TMVAssert(A.nlo() == 0 || A.nhi() == 0);
         TMVAssert(A.colsize() > 0);
         TMVAssert(B.rowsize() > 1);
-        TMVAssert(A.nhi() < int(A.colsize()));
-        TMVAssert(A.nlo() < int(A.colsize()));
+        TMVAssert(A.nhi() < A.colsize());
+        TMVAssert(A.nlo() < A.colsize());
         TMVAssert(A.ct() == NonConj);
         TMVAssert(B.ct() == NonConj);
         TMVAssert(A.iscm() || A.isrm());
@@ -361,8 +361,8 @@ namespace tmv {
         TMVAssert(A.nlo() == 0 || A.nhi() == 0);
         TMVAssert(A.colsize() > 0);
         TMVAssert(B.rowsize() > 1);
-        TMVAssert(A.nhi() < int(A.colsize()));
-        TMVAssert(A.nlo() < int(A.colsize()));
+        TMVAssert(A.nhi() < A.colsize());
+        TMVAssert(A.nlo() < A.colsize());
         TMVAssert(B.ct() == NonConj);
         TMVAssert(A.iscm() || A.isrm());
         TMVAssert(B.iscm());
@@ -408,8 +408,8 @@ namespace tmv {
         TMVAssert(A.nlo() == 0 || A.nhi() == 0);
         TMVAssert(A.colsize() > 0);
         if (B.rowsize() == 0) return;
-        TMVAssert(A.nhi() < int(A.colsize()));
-        TMVAssert(A.nlo() < int(A.colsize()));
+        TMVAssert(A.nhi() < A.colsize());
+        TMVAssert(A.nlo() < A.colsize());
 
         if (B.rowsize() == 1) TriLDivEq(A,B.col(0),dt);
         else if (B.isconj()) 

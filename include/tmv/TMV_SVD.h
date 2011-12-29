@@ -286,8 +286,8 @@ namespace tmv {
         // const SVD<M>& can release the memory.
         mutable std::auto_ptr<SVD_Impl<small,M> > pimpl;
 
-        size_t colsize() const;
-        size_t rowsize() const;
+        int colsize() const;
+        int rowsize() const;
 
         // op= not allowed.
         SVD<M>& operator=(const SVD<M>&);
@@ -639,7 +639,7 @@ namespace tmv {
                 istrans ? A.colsize() : A.rowsize() ,  // rowsize
                 inplace ? (istrans ? A.stepi() : A.stepj()) : 1 , // stepi
                 ( inplace ? (istrans ? A.stepj() : A.stepi()) : 
-                  int(istrans ? A.rowsize() : A.colsize()) ) // stepj
+                  (istrans ? A.rowsize() : A.colsize()) ) // stepj
             ),
             Sx(Ux.rowsize()), Vx(Ux.rowsize(),Ux.rowsize()), kmax(0),
             signdet(1), logdet(0)
@@ -667,7 +667,7 @@ namespace tmv {
                 istrans ? A.rowsize() : A.colsize() ,  // colsize
                 istrans ? A.colsize() : A.rowsize() ,  // rowsize
                 1 , // stepi
-                int(istrans ? A.rowsize() : A.colsize()) // stepj
+                (istrans ? A.rowsize() : A.colsize()) // stepj
             ),
             Sx(Ux.rowsize()), Vx(Ux.rowsize(),Ux.rowsize()), kmax(0), 
             signdet(1), logdet(0)
@@ -914,11 +914,11 @@ namespace tmv {
     { return pimpl->Sx.cref(0) / pimpl->Sx.cref(pimpl->Sx.size()-1); }
 
     template <class M>
-    size_t SVD<M>::colsize() const
+    int SVD<M>::colsize() const
     { return pimpl->istrans ? pimpl->Ux.rowsize() : pimpl->Ux.colsize(); }
 
     template <class M>
-    size_t SVD<M>::rowsize() const
+    int SVD<M>::rowsize() const
     { return pimpl->istrans ? pimpl->Ux.colsize() : pimpl->Ux.rowsize(); }
 
     template <class M>
@@ -944,7 +944,7 @@ namespace tmv {
     void SVD<M>::top(int neigen, std::ostream* debugout) const
     {
         TMVAssert(neigen > 0);
-        if (neigen < int(pimpl->Sx.size())) pimpl->kmax = neigen;
+        if (neigen < pimpl->Sx.size()) pimpl->kmax = neigen;
         else pimpl->kmax = pimpl->Sx.size();
         if(debugout) {
             (*debugout)<<"S.diag() = "<<pimpl->Sx.diag()<<std::endl;

@@ -368,16 +368,6 @@ namespace tmv {
     template <class M>
     inline typename M::real_type DoMaxAbs2Element(const BaseMatrix_Band<M>& m);
 
-    // Defined in TMV_BandMatrixIO.h
-    template <class M>
-    inline void WriteCompact(std::ostream& os, const BaseMatrix_Band<M>& m);
-    template <class M>
-    inline void WriteCompact(
-        std::ostream& os,
-        const BaseMatrix_Band<M>& m, typename M::float_type thresh) ;
-    template <class M>
-    inline void Read(std::istream& is, BaseMatrix_Band_Mutable<M>& m);
- 
     // Defined below:
     template <class M>
     inline void SetZero(BaseMatrix_Band_Mutable<M>& m);
@@ -709,7 +699,7 @@ namespace tmv {
         const_colrange_type cColRange(int j1, int j2) const
         {
             const int i1 = j1 > nhi() ? j1-nhi() : 0;
-            const int i2 = TMV_MIN(j2 + nlo(),int(colsize()));
+            const int i2 = TMV_MIN(j2 + nlo(),colsize());
             const int newnhi = j1 < nhi() ? TMV_MIN(nhi(),j2-1) - j1 : 0;
             const int newnlo = i1==i2 ? 0 : TMV_MIN(nlo()+nhi()-newnhi,i2-i1-1);
             CheckSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,nlo(),nhi());
@@ -719,7 +709,7 @@ namespace tmv {
         const_rowrange_type cRowRange(int i1, int i2) const
         {
             const int j1 = i1 > nlo() ? i1-nlo() : 0;
-            const int j2 = TMV_MIN(i2 + nhi(),int(rowsize()));
+            const int j2 = TMV_MIN(i2 + nhi(),rowsize());
             const int newnlo = i1 < nlo() ? TMV_MIN(nlo(),i2-1) - i1 : 0;
             const int newnhi = j1==j2 ? 0 : TMV_MIN(nlo()+nhi()-newnlo,j2-j1-1);
             CheckSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,nlo(),nhi());
@@ -729,9 +719,9 @@ namespace tmv {
         const_diagrange_type cDiagRange(int k1, int k2) const
         {
             const int i1 = k2 <= 0 ? -k2+1 : 0;
-            const int i2 = TMV_MIN(int(rowsize())-k1,int(colsize()));
+            const int i2 = TMV_MIN(rowsize()-k1,colsize());
             const int j1 = k1 <= 0 ? 0 : k1;
-            const int j2 = TMV_MIN(int(rowsize()),int(colsize())+k2-1);
+            const int j2 = TMV_MIN(rowsize(),colsize()+k2-1);
             const int newnlo = k2 <= 0 ? k2-k1-1 : k1 < 0 ? -k1 : 0;
             const int newnhi = k2 <= 0 ? 0 : k1 < 0 ? k2-1 : k2-k1-1;
             CheckSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,nlo(),nhi());
@@ -941,16 +931,6 @@ namespace tmv {
 
 
         //
-        // I/O
-        //
-
-        TMV_INLINE void writeCompact(std::ostream& os) const
-        { tmv::WriteCompact(os,mat()); }
-        TMV_INLINE void writeCompact(std::ostream& os, float_type thresh) const
-        { tmv::WriteCompact(os,mat(),thresh); }
-
-
-        //
         // Auxilliary routines
         //
 
@@ -972,11 +952,11 @@ namespace tmv {
         // class than this, or an infinite loop will result when compiling.
         // Also, cref from BaseMatrix.
 
-        TMV_INLINE size_t colsize() const { return mat().colsize(); }
-        TMV_INLINE size_t rowsize() const { return mat().rowsize(); }
+        TMV_INLINE int colsize() const { return mat().colsize(); }
+        TMV_INLINE int rowsize() const { return mat().rowsize(); }
         TMV_INLINE int nlo() const { return mat().nlo(); }
         TMV_INLINE int nhi() const { return mat().nhi(); }
-        TMV_INLINE size_t ls() const { return mat().ls(); }
+        TMV_INLINE int ls() const { return mat().ls(); }
         TMV_INLINE int stepi() const { return mat().stepi(); }
         TMV_INLINE int stepj() const { return mat().stepj(); }
         TMV_INLINE bool isrm() const { return mat().isrm(); }
@@ -1010,11 +990,11 @@ namespace tmv {
         TMV_INLINE int rowstart(int i) const 
         { return TMV_MAX(0,i-nlo()); }
         TMV_INLINE int rowend(int i) const 
-        { return TMV_MIN(int(rowsize()),i+nhi()+1); }
+        { return TMV_MIN(rowsize(),i+nhi()+1); }
         TMV_INLINE int colstart(int j) const 
         { return TMV_MAX(0,j-nhi()); }
         TMV_INLINE int colend(int j) const 
-        { return TMV_MIN(int(colsize()),j+nlo()+1); }
+        { return TMV_MIN(colsize(),j+nlo()+1); }
 
         TMV_INLINE const_rowmajor_iterator rowmajor_begin() const
         { return const_rowmajor_iterator(&mat(),0,0); }
@@ -1428,7 +1408,7 @@ namespace tmv {
         colrange_type cColRange(int j1, int j2) 
         {
             const int i1 = j1 > nhi() ? j1-nhi() : 0;
-            const int i2 = TMV_MIN(j2 + nlo(),int(colsize()));
+            const int i2 = TMV_MIN(j2 + nlo(),colsize());
             const int newnhi = j1 < nhi() ? TMV_MIN(nhi(),j2-1) - j1 : 0;
             const int newnlo = i1==i2 ? 0 : TMV_MIN(nlo()+nhi()-newnhi,i2-i1-1);
             CheckSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,nlo(),nhi());
@@ -1438,7 +1418,7 @@ namespace tmv {
         rowrange_type cRowRange(int i1, int i2) 
         {
             const int j1 = i1 > nlo() ? i1-nlo() : 0;
-            const int j2 = TMV_MIN(i2 + nhi(),int(rowsize()));
+            const int j2 = TMV_MIN(i2 + nhi(),rowsize());
             const int newnlo = i1 < nlo() ? TMV_MIN(nlo(),i2-1) - i1 : 0;
             const int newnhi = j1==j2 ? 0 : TMV_MIN(nlo()+nhi()-newnlo,j2-j1-1);
             CheckSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,nlo(),nhi());
@@ -1448,9 +1428,9 @@ namespace tmv {
         diagrange_type cDiagRange(int k1, int k2) 
         {
             const int i1 = k2 <= 0 ? -k2+1 : 0;
-            const int i2 = TMV_MIN(int(rowsize())-k1,int(colsize()));
+            const int i2 = TMV_MIN(rowsize()-k1,colsize());
             const int j1 = k1 <= 0 ? 0 : k1;
-            const int j2 = TMV_MIN(int(rowsize()),int(colsize())+k2-1);
+            const int j2 = TMV_MIN(rowsize(),colsize()+k2-1);
             const int newnlo = k2 <= 0 ? k2-k1-1 : k1 < 0 ? -k1 : 0;
             const int newnhi = k2 <= 0 ? 0 : k1 < 0 ? k2-1 : k2-k1-1;
             CheckSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,nlo(),nhi());
@@ -1750,14 +1730,6 @@ namespace tmv {
         { return base::nonConj(); }
 
 
-
-        //
-        // I/O
-        //
-
-        TMV_INLINE void read(std::istream& is)
-        { tmv::Read(is,mat()); }
-
         //
         // Auxilliary routines
         //
@@ -1775,11 +1747,11 @@ namespace tmv {
         // class than this, or an infinite loop will result when compiling.
         // Also, cref and cptr from above.
 
-        TMV_INLINE size_t colsize() const { return mat().colsize(); }
-        TMV_INLINE size_t rowsize() const { return mat().rowsize(); }
+        TMV_INLINE int colsize() const { return mat().colsize(); }
+        TMV_INLINE int rowsize() const { return mat().rowsize(); }
         TMV_INLINE int nlo() const { return mat().nlo(); }
         TMV_INLINE int nhi() const { return mat().nhi(); }
-        TMV_INLINE size_t ls() const { return mat().ls(); }
+        TMV_INLINE int ls() const { return mat().ls(); }
         TMV_INLINE int stepi() const { return mat().stepi(); }
         TMV_INLINE int stepj() const { return mat().stepj(); }
         TMV_INLINE bool isrm() const { return mat().isrm(); }

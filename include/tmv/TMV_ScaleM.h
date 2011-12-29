@@ -46,8 +46,8 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
-            const int M = cs == TMV_UNKNOWN ? int(m.colsize()) : cs;
-            int N = rs == TMV_UNKNOWN ? int(m.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
+            int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
             typedef typename M1::col_type Mc;
             typedef typename Mc::iterator IT;
             const int step = m.stepj();
@@ -65,8 +65,8 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
-            int M = cs == TMV_UNKNOWN ? int(m.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m.rowsize()) : rs;
+            int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
             typedef typename M1::row_type Mr;
             typedef typename Mr::iterator IT;
             const int step = m.stepi();

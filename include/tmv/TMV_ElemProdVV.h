@@ -72,7 +72,7 @@ namespace tmv {
         const V1& getV1() const { return v1; }
         const V2& getV2() const { return v2; }
 
-        size_t size() const { return v1.size(); }
+        int size() const { return v1.size(); }
 
         value_type cref(int i) const
         { return x * (v1.cref(i) * v2.cref(i)); }

@@ -28,8 +28,8 @@ inline bool CanMultMM(
 { 
     return a.rowsize() == b.colsize() && a.colsize() == c.colsize() &&
         b.rowsize() == c.rowsize() &&
-        (c.nlo() >= a.nlo() + b.nlo() || c.nlo() == int(c.colsize())-1) &&
-        (c.nhi() >= a.nhi() + b.nhi() || c.nhi() == int(c.rowsize())-1);
+        (c.nlo() >= a.nlo() + b.nlo() || c.nlo() == c.colsize()-1) &&
+        (c.nhi() >= a.nhi() + b.nhi() || c.nhi() == c.rowsize()-1);
 }
 
 #include "TMV_TestMatrixArith.h"

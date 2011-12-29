@@ -7,8 +7,8 @@
   template RT InstSumAbs2Elements(const ConstUpperTriMatrixView<T>& m); \
   template RT InstNormSq(const ConstUpperTriMatrixView<T>& m);  \
   template RT InstMaxAbs2Element(const ConstUpperTriMatrixView<T>& m);  \
-  template void InstRead(std::istream& is, UpperTriMatrixView<T> m1); \
-  template void InstRead(std::istream& is, LowerTriMatrixView<T> m1); \
+  template void InstRead(const TMV_Reader& reader, UpperTriMatrixView<T> m1); \
+  template void InstRead(const TMV_Reader& reader, LowerTriMatrixView<T> m1); \
 
 Def1(T,T)
 #ifdef TMV_INST_COMPLEX
@@ -57,16 +57,10 @@ Def4(FT,CT)
 #endif
 
 #define Def5(RT,T,C) \
-  template void InstWriteCompact(std::ostream& os, \
+  template void InstWrite(const TMV_Writer& writer, \
       const ConstUpperTriMatrixView<T,C>& m1); \
-  template void InstWriteCompact(std::ostream& os, \
-      const ConstUpperTriMatrixView<T,C>& m1,\
-      const RT thresh); \
-  template void InstWriteCompact(std::ostream& os, \
+  template void InstWrite(const TMV_Writer& writer, \
       const ConstLowerTriMatrixView<T,C>& m1); \
-  template void InstWriteCompact(std::ostream& os, \
-      const ConstLowerTriMatrixView<T,C>& m1,\
-      const RT thresh); \
 
 Def5(FT,T,NonConj)
 #ifdef TMV_INST_COMPLEX

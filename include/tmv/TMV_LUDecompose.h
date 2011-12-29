@@ -63,7 +63,7 @@ namespace tmv {
     {
         static void call(M1& A, int* P)
         {
-            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
             TMVAssert(A.rowsize() == 1);
 #ifdef PRINTALGO_LU
             std::cout<<"LUDecompose algo 1: M,N,cs,rs = "<<M<<','<<1<<
@@ -96,7 +96,7 @@ namespace tmv {
     {
         static void call(M1& A, int* P)
         {
-            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
+            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
             TMVAssert(A.rowsize() == 2);
 #ifdef PRINTALGO_LU
             std::cout<<"LUDecompose algo 2: M,N,cs,rs = "<<M<<','<<2<<
@@ -166,7 +166,7 @@ namespace tmv {
     {
         static void call(M1& A, int* P)
         {
-            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
+            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
             TMVAssert(A.colsize() == 2);
 #ifdef PRINTALGO_LU
             std::cout<<"LUDecompose algo 3: M,N,cs,rs = "<<2<<','<<N<<
@@ -291,8 +291,8 @@ namespace tmv {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
-            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
             const int R = TMV_MIN(N,M);
             const int xx = TMV_UNKNOWN;
 #ifdef PRINTALGO_LU
@@ -345,8 +345,8 @@ namespace tmv {
                 // Swap the pivot row with j if necessary
                 if (ip != 0) {
                     ip += j;
-                    TMVAssert(ip < int(A.colsize()));
-                    TMVAssert(j < int(A.colsize()));
+                    TMVAssert(ip < A.colsize());
+                    TMVAssert(j < A.colsize());
                     A.cSwapRows(ip,j);  // This does both Lkb and A'
                     P[j] = ip;
                 } else P[j] = j;
@@ -409,8 +409,8 @@ namespace tmv {
 
             typedef typename M1::real_type RT;
 
-            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
-            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
             const int Nx = TMV_LU_BLOCKSIZE;
             const int R = TMV_MIN(N,M);
             const int xx = TMV_UNKNOWN;
@@ -459,7 +459,6 @@ namespace tmv {
 
             if (jk < R) { // Last block is not full size
 
-                const int Ny = R-jk;
                 typedef typename M1::submatrix_type M1s;
                 typedef typename M1s::const_unit_lowertri_type M1l;
                 M1s A0 = A.cSubMatrix(jk,M,jk,R); // Both A00 and A10
@@ -501,8 +500,8 @@ namespace tmv {
             // get down to an Mx2 or Mx1 matrix.
             typedef typename M1::real_type RT;
 
-            const int N = rs==TMV_UNKNOWN ? int(A.rowsize()) : rs;
-            const int M = cs==TMV_UNKNOWN ? int(A.colsize()) : cs;
+            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
             const int R = TMV_MIN(N,M);
 #ifdef PRINTALGO_LU
             std::cout<<"LUDecompose algo 27: M,N,cs,rs = "<<M<<','<<N<<
@@ -716,8 +715,8 @@ namespace tmv {
                 !M1::_colmajor ? 81 :
                 -4 );
 #ifdef PRINTALGO_LU
-            const int M = cs==TMV_UNKNOWN ? int(m.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(m.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? m.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? m.rowsize() : rs;
             std::cout<<"LUDecompose algo -3: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif

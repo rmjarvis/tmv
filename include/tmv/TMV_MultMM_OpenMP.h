@@ -39,10 +39,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = cs==TMV_UNKNOWN ? int(m3.colsize()) : cs;
-            const int N = rs==TMV_UNKNOWN ? int(m3.rowsize()) : rs;
+            const int M = cs==TMV_UNKNOWN ? m3.colsize() : cs;
+            const int N = rs==TMV_UNKNOWN ? m3.rowsize() : rs;
 #ifdef PRINTALGO_MM
-            const int K = xs==TMV_UNKNOWN ? int(m1.rowsize()) : xs;
+            const int K = xs==TMV_UNKNOWN ? m1.rowsize() : xs;
             std::cout<<"MM algo 69: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif

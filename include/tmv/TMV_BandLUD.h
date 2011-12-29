@@ -200,8 +200,8 @@ namespace tmv {
         // const BandLUD<M>& can relase the memory.
         mutable std::auto_ptr<BandLUD_Impl<small,M> > pimpl;
 
-        size_t colsize() const;
-        size_t rowsize() const;
+        int colsize() const;
+        int rowsize() const;
 
         // op= not allowed.
         BandLUD<M>& operator=(const BandLUD<M>&);
@@ -397,9 +397,9 @@ namespace tmv {
         {
             TMVStaticAssert(M::_colsize != TMV_UNKNOWN);
             TMVStaticAssert(M::_rowsize != TMV_UNKNOWN);
-            TMVStaticAssert(M::_colsize == int(M::_rowsize));
-            TMVStaticAssert(M::_colsize == int(M2::_colsize));
-            TMVStaticAssert(M::_rowsize == int(M2::_rowsize));
+            TMVStaticAssert(M::_colsize == M::_rowsize);
+            TMVStaticAssert(M::_colsize == M2::_colsize);
+            TMVStaticAssert(M::_rowsize == M2::_rowsize);
             TMVStaticAssert(lux_type::_colmajor);
             SmallLUx = A;
             BandLU_Decompose(LUx,P);
@@ -469,7 +469,7 @@ namespace tmv {
                 1 ,  // stepi
                 // Here we do need to check istrans for the right step.
                 ( inplace ? (istrans ? A.stepi() : A.stepj()) :
-                  int(A.rowsize()) ) // stepj
+                  A.rowsize() ) // stepj
             ),
             // allocate memory for the permutation
             P(A.rowsize())
@@ -730,11 +730,11 @@ namespace tmv {
     }
 
     template <class M>
-    size_t BandLUD<M>::colsize() const
+    int BandLUD<M>::colsize() const
     { return pimpl->LUx.colsize(); }
 
     template <class M>
-    size_t BandLUD<M>::rowsize() const
+    int BandLUD<M>::rowsize() const
     { return pimpl->LUx.rowsize(); }
 
 

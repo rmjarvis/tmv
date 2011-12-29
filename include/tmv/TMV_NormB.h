@@ -50,8 +50,8 @@ namespace tmv {
 #ifdef PRINTALGO_NormB
             std::cout<<"SumElementsM algo 11: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int M = cs == TMV_UNKNOWN ? int(m.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
             const int xx = TMV_UNKNOWN;
             typedef typename M1::const_col_sub_type M1c;
 
@@ -90,8 +90,8 @@ namespace tmv {
 #ifdef PRINTALGO_NormB
             std::cout<<"SumElementsM algo 12: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int M = cs == TMV_UNKNOWN ? int(m.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
             const int xx = TMV_UNKNOWN;
             typedef typename M1::const_row_sub_type M1r;
 
@@ -432,8 +432,8 @@ namespace tmv {
 #ifdef PRINTALGO_NormB
             std::cout<<"MaxAbsElementM algo 11: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int M = cs == TMV_UNKNOWN ? int(m.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
             typedef typename M1::const_col_sub_type M1c;
 
             const int j1 = m.nhi();
@@ -473,12 +473,10 @@ namespace tmv {
 #ifdef PRINTALGO_NormB
             std::cout<<"MaxAbsElementM algo 11: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int M = cs == TMV_UNKNOWN ? int(m.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m.rowsize()) : rs;
-            const int xx = TMV_UNKNOWN;
+            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
             typedef typename M1::const_row_sub_type M1r;
 
-            const int lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
             const int i1 = m.nlo();
             const int i2 = TMV_MIN(M,N-m.nhi());
             const int i3 = TMV_MIN(M,N+m.nlo());
@@ -683,8 +681,8 @@ namespace tmv {
 #ifdef PRINTALGO_NormB
             std::cout<<"Norm1M algo 11: "<<std::endl;
 #endif
-            const int M = cs == TMV_UNKNOWN ? int(m.colsize()) : cs;
-            const int N = rs == TMV_UNKNOWN ? int(m.rowsize()) : rs;
+            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
+            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
             typedef typename M1::const_col_sub_type M1c;
 
             const int j1 = m.nhi();

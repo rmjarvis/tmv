@@ -26,10 +26,10 @@ int main() try {
     std::ofstream log("tmvtest1c.log");
     tmv::WriteWarningsTo(&log);
 
-    //showacc=true;
-    //showdiv=true;
-    //showtests=true;
-    //showstartdone=true;
+    showacc=true;
+    showdiv=true;
+    showtests=true;
+    showstartdone=true;
 
 #if 1
 
@@ -56,7 +56,7 @@ int main() try {
 
     return 0;
 }
-#if 1
+#if 0
 #ifndef NOTHROW
 catch (tmv::Error& e) {
     std::cerr<<e<<std::endl;
