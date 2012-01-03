@@ -2699,14 +2699,14 @@ namespace tmv {
         inline void assignToM(const MatrixView<real_type>& m0) const
         {
             TMVAssert(isReal(T()));
-            ElemMultMM<false>(T(1), m1.view(), m2.view(), m0); 
+            ElemMultMM<false>(x, m1.view(), m2.view(), m0); 
         }
         inline void assignToM(const MatrixView<complex_type>& m0) const
-        { ElemMultMM<false>(T(1), m1.view(), m2.view(), m0); }
+        { ElemMultMM<false>(x, m1.view(), m2.view(), m0); }
     private:
         const T x;
         const SmallMatrix<T1,M,N,S1,I1>& m1;
-        const SmallMatrix<T2,N,N,S2,I2>& m2;
+        const SmallMatrix<T2,M,N,S2,I2>& m2;
     };
 
     template <class T, class T1, class T2, int M, int N, StorageType S2, IndexStyle I2> 
