@@ -122,6 +122,7 @@ namespace tmv {
         inline const GenSymBandMatrix<Tm>& getM() const { return m; }
         inline void assignToB(const BandMatrixView<real_type>& m0) const
         {
+            TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
             TMVAssert(m0.nlo() >= nlo());
@@ -144,6 +145,7 @@ namespace tmv {
         }
         inline void assignTosB(const SymBandMatrixView<real_type>& m0) const
         {
+            TMVAssert(isReal(T()));
             TMVAssert(m.issym() || TMV_IMAG(x)==real_type(0) ); 
             TMVAssert(m0.size() == size());
             TMVAssert(m0.nlo() >= nlo());
@@ -263,6 +265,7 @@ namespace tmv {
         inline T getX2() const { return x2; }
         inline void assignToB(const BandMatrixView<real_type>& m0) const
         { 
+            TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
             TMVAssert(m0.nlo() >= nlo());
@@ -281,6 +284,7 @@ namespace tmv {
         } 
         inline void assignTosB(const SymBandMatrixView<real_type>& m0) const
         { 
+            TMVAssert(isReal(T()));
             TMVAssert(isReal(Tm()) || m0.issym() == m.issym());
             TMVAssert(m.issym() || TMV_IMAG(x1)==real_type(0));
             TMVAssert(m.issym() || TMV_IMAG(x2)==real_type(0));
@@ -398,8 +402,7 @@ namespace tmv {
 
         inline SumsBsB(
             T _x1, const GenSymBandMatrix<T1>& _m1, 
-            T _x2, const GenSymBandMatrix<T2>& _m2
-        ) :
+            T _x2, const GenSymBandMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int size() const { return m1.size(); }
@@ -413,7 +416,8 @@ namespace tmv {
         inline T getX2() const { return x2; }
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
         inline void assignToB(const BandMatrixView<real_type>& m0) const
-        { 
+        {
+            TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
             TMVAssert(m0.nlo() >= nlo());
@@ -430,6 +434,7 @@ namespace tmv {
         } 
         inline void assignTosB(const SymBandMatrixView<real_type>& m0) const
         { 
+            TMVAssert(isReal(T()));
             TMVAssert(isReal(T1()) || isReal(T2()) || m1.sym() == m2.sym());
             TMVAssert(m0.size() == size());
             TMVAssert(m0.nlo() >= nlo());
@@ -565,8 +570,7 @@ namespace tmv {
 
         inline ProdsBsB(
             T _x, const GenSymBandMatrix<T1>& _m1,
-            const GenSymBandMatrix<T2>& _m2
-        ) :
+            const GenSymBandMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int colsize() const { return m1.size(); }
@@ -585,6 +589,7 @@ namespace tmv {
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
         inline void assignToB(const BandMatrixView<real_type>& m0) const
         {
+            TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
             TMVAssert(m0.nlo() >= nlo());
@@ -698,6 +703,183 @@ namespace tmv {
 #define GENMATRIX2 GenSymBandMatrix
 #define PRODXM1 ProdXsB
 #define PRODXM2 ProdXsB
+#include "tmv/TMV_AuxProdMM.h"
+#include "tmv/TMV_AuxProdMMa.h"
+#undef PRODMM
+#undef GENMATRIX1
+#undef GENMATRIX2
+#undef PRODXM1
+#undef PRODXM2
+
+
+
+    //
+    // Element Product SymBandMatrix * SymBandMatrix
+    //
+
+    template <class T, class T1, class T2> 
+    class ElemProdsBsB : public SymBandMatrixComposite<T>
+    {
+    public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline ElemProdsBsB(
+            T _x, const GenSymBandMatrix<T1>& _m1,
+            const GenSymBandMatrix<T2>& _m2) :
+            x(_x), m1(_m1), m2(_m2)
+        { 
+            TMVAssert(m1.size() == m2.size()); 
+            TMVAssert(m1.issym() == m2.issym());
+            TMVAssert(m1.isherm() == m2.isherm());
+        }
+        inline int size() const { return m1.size(); }
+        inline int nlo() const 
+        { return TMV_MIN(m1.nlo(),m2.nlo()); }
+        inline SymType sym() const 
+        { return isReal(T1()) ? m2.sym() : m1.sym(); }
+        inline StorageType stor() const 
+        { return m1.stor() == m2.stor() ? BaseStorOf(m1) : DiagMajor; }
+        inline T getX() const { return x; }
+        inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
+        inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
+
+        inline void assignToB(const BandMatrixView<real_type>& m0) const
+        { 
+            TMVAssert(isReal(T()));
+            TMVAssert(m0.colsize() == size());
+            TMVAssert(m0.rowsize() == size());
+            TMVAssert(m0.nlo() >= nlo());
+            TMVAssert(m0.nhi() >= nlo());
+            ElemMultMM<false>(x,m1.upperBand(),m2.upperBand(),m0.upperBand());
+            if (m0.nlo() > 0) {
+                if (m1.nlo() > 0 && m2.nlo() > 0) {
+                    ElemMultMM<false>(
+                        x,m1.lowerBandOff(),m2.lowerBandOff(),
+                        m0.lowerBandOff());
+                } else {
+                    m0.lowerBandOff().setZero();
+                }
+            }
+        }
+        inline void assignToB(const BandMatrixView<complex_type>& m0) const
+        { 
+            TMVAssert(m0.colsize() == size());
+            TMVAssert(m0.rowsize() == size());
+            TMVAssert(m0.nlo() >= nlo());
+            TMVAssert(m0.nhi() >= nlo());
+            ElemMultMM<false>(x,m1.upperBand(),m2.upperBand(),m0.upperBand());
+            if (m0.nlo() > 0) {
+                if (m1.nlo() > 0 && m2.nlo() > 0) {
+                    ElemMultMM<false>(
+                        x,m1.lowerBandOff(),m2.lowerBandOff(),
+                        m0.lowerBandOff());
+                } else {
+                    m0.lowerBandOff().setZero();
+                }
+            }
+        }        
+        inline void assignTosB(const SymBandMatrixView<real_type>& m0) const
+        {
+            TMVAssert(isReal(T()));
+            TMVAssert(isReal(T1()) || isReal(T2()) || m1.sym() == m2.sym());
+            TMVAssert(m0.size() == size());
+            TMVAssert(m0.nlo() >= nlo());
+            TMVAssert(isReal(T1()) || m0.issym() == m1.issym());
+            TMVAssert(isReal(T2()) || m0.issym() == m2.issym());
+            TMVAssert(m0.issym() || TMV_IMAG(x) == real_type(0));
+            ElemMultMM<false>(x,m1.upperBand(),m2.upperBand(),m0.upperBand());
+        }
+        inline void assignTosB(const SymBandMatrixView<complex_type>& m0) const
+        {
+            TMVAssert(isReal(T1()) || isReal(T2()) || m1.sym() == m2.sym());
+            TMVAssert(m0.size() == size());
+            TMVAssert(m0.nlo() >= nlo());
+            TMVAssert(isReal(T1()) || m0.issym() == m1.issym());
+            TMVAssert(isReal(T2()) || m0.issym() == m2.issym());
+            TMVAssert(m0.issym() || TMV_IMAG(x) == real_type(0));
+            ElemMultMM<false>(x,m1.upperBand(),m2.upperBand(),m0.upperBand());
+        }
+    private:
+        T x;
+        const GenSymBandMatrix<T1>& m1;
+        const GenSymBandMatrix<T2>& m2;
+    };
+
+    template <class T, class T1, class T2> 
+    inline const SymBandMatrixView<T>& operator+=(
+        const SymBandMatrixView<T>& m, const ElemProdsBsB<T,T1,T2>& pmm)
+    {
+        TMVAssert(isReal(T1()) || isReal(T2()) || 
+                  pmm.getM1().sym() == pmm.getM2().sym());
+        TMVAssert(m.size() == pmm.size());
+        TMVAssert(m.nlo() >= pmm.nlo());
+        TMVAssert(isReal(T1()) || m0.issym() == pmm.getM1().issym());
+        TMVAssert(isReal(T2()) || m0.issym() == pmm.getM2().issym());
+        TMVAssert(m.issym() || TMV_IMAG(pmm.getX()) == real_type(0));
+        ElemMultMM<true>(
+            pmm.getX(),pmm.getM1().upperBand(),pmm.getM2().upperBand(),
+            m.upperBand()); 
+        return m; 
+    }
+
+    template <class T> 
+    inline const SymBandMatrixView<CT>& operator+=(
+        const SymBandMatrixView<CT>& m, const ElemProdsBsB<T,T,T>& pmm)
+    {
+        TMVAssert(isReal(T1()) || isReal(T2()) || 
+                  pmm.getM1().sym() == pmm.getM2().sym());
+        TMVAssert(m.size() == pmm.size());
+        TMVAssert(m.nlo() >= pmm.nlo());
+        TMVAssert(isReal(T1()) || m0.issym() == pmm.getM1().issym());
+        TMVAssert(isReal(T2()) || m0.issym() == pmm.getM2().issym());
+        TMVAssert(m.issym() || TMV_IMAG(pmm.getX()) == real_type(0));
+        ElemMultMM<true>(
+            pmm.getX(),pmm.getM1().upperBand(),pmm.getM2().upperBand(),
+            m.upperBand()); 
+        return m; 
+    }
+
+    template <class T, class T1, class T2> 
+    inline const SymBandMatrixView<T>& operator-=(
+        const SymBandMatrixView<T>& m, const ElemProdsBsB<T,T1,T2>& pmm)
+    {
+        TMVAssert(isReal(T1()) || isReal(T2()) || 
+                  pmm.getM1().sym() == pmm.getM2().sym());
+        TMVAssert(m.size() == pmm.size());
+        TMVAssert(m.nlo() >= pmm.nlo());
+        TMVAssert(isReal(T1()) || m0.issym() == pmm.getM1().issym());
+        TMVAssert(isReal(T2()) || m0.issym() == pmm.getM2().issym());
+        TMVAssert(m.issym() || TMV_IMAG(pmm.getX()) == real_type(0));
+        ElemMultMM<true>(
+            -pmm.getX(),pmm.getM1().upperBand(),pmm.getM2().upperBand(),
+            m.upperBand()); 
+        return m; 
+    }
+
+    template <class T> 
+    inline const SymBandMatrixView<CT>& operator-=(
+        const SymBandMatrixView<CT>& m, const ElemProdsBsB<T,T,T>& pmm)
+    {
+        TMVAssert(isReal(T1()) || isReal(T2()) || 
+                  pmm.getM1().sym() == pmm.getM2().sym());
+        TMVAssert(m.size() == pmm.size());
+        TMVAssert(m.nlo() >= pmm.nlo());
+        TMVAssert(isReal(T1()) || m0.issym() == pmm.getM1().issym());
+        TMVAssert(isReal(T2()) || m0.issym() == pmm.getM2().issym());
+        TMVAssert(m.issym() || TMV_IMAG(pmm.getX()) == real_type(0));
+        ElemMultMM<true>(
+            -pmm.getX(),pmm.getM1().upperBand(),pmm.getM2().upperBand(),
+            m.upperBand()); 
+        return m; 
+    }
+
+#define PRODMM ElemProdsBsB
+#define GENMATRIX1 GenSymBandMatrix
+#define GENMATRIX2 GenSymBandMatrix
+#define PRODXM1 ProdXsB
+#define PRODXM2 ProdXsB
+#define OP ElemProd
 #include "tmv/TMV_AuxProdMM.h"
 #include "tmv/TMV_AuxProdMMa.h"
 #undef PRODMM

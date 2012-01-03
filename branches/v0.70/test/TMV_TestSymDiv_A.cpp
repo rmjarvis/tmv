@@ -47,8 +47,8 @@ void TestSymDiv_A(tmv::DivType dt, PosDefCode pdc)
         si.saveDiv();
         csi.saveDiv();
 
-        TestMatrixDivArith2<T>(dt,si,s1v,csi,cs1v,"Sym/Sym");
-        TestMatrixDivArith1<T>(dt,si,h1v,csi,ch1v,"Herm/Sym");
+        TestMatrixDivArith2(dt,si,s1v,csi,cs1v,"Sym/Sym");
+        TestMatrixDivArith1(dt,si,h1v,csi,ch1v,"Herm/Sym");
     }
 }
 

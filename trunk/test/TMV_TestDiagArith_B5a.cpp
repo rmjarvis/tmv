@@ -45,15 +45,15 @@ template <class T> void TestDiagMatrixArith_B5a()
     tmv::MatrixView<T> pv = p.view();
     tmv::MatrixView<std::complex<T> > cpv = cp.view();
 
-    TestMatrixArith5<T>(av,cav,pv,cpv, "Diag/SquareM");
+    TestMatrixArith5(av,cav,pv,cpv, "Diag/SquareM");
 
     tmv::MatrixView<T> qv = q.view();
     tmv::MatrixView<std::complex<T> > cqv = cq.view();
     tmv::MatrixView<T> rv = r.view();
     tmv::MatrixView<std::complex<T> > crv = cr.view();
 
-    TestMatrixArith5<T>(av,cav,qv,cqv, "Diag/NonSquareM");
-    TestMatrixArith5<T>(av,cav,rv,crv, "Diag/DegenM");
+    TestMatrixArith5(av,cav,qv,cqv, "Diag/NonSquareM");
+    TestMatrixArith5(av,cav,rv,crv, "Diag/DegenM");
 }
 
 #ifdef TEST_DOUBLE

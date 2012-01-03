@@ -49,14 +49,14 @@ static void DoTestSmallMatrixArith_B3b()
     if (showstartdone) {
         std::cout<<"B3b"<<std::endl;
     }
-    TestMatrixArith3a<T>(a5,ca5,v2,cv2,v1,cv1,"NonSquare");
-    TestMatrixArith3b<T>(a5,ca5,v2,cv2,v1,cv1,"NonSquare");
+    TestMatrixArith3a(a5,ca5,v2,cv2,v1,cv1,"NonSquare");
+    TestMatrixArith3b(a5,ca5,v2,cv2,v1,cv1,"NonSquare");
 
 #if (XTEST & 2)
     tmv::SmallMatrix<T,N,7,tmv::ColMajor> a6 = a5;
     tmv::SmallMatrix<std::complex<T>,N,7,tmv::ColMajor> ca6 = ca5;
-    TestMatrixArith3a<T>(a6,ca6,v2,cv2,v1,cv1,"NonSquare");
-    TestMatrixArith3b<T>(a6,ca6,v2,cv2,v1,cv1,"NonSquare");
+    TestMatrixArith3a(a6,ca6,v2,cv2,v1,cv1,"NonSquare");
+    TestMatrixArith3b(a6,ca6,v2,cv2,v1,cv1,"NonSquare");
 #endif
 
 #if (XTEST & 32)
@@ -70,15 +70,15 @@ static void DoTestSmallMatrixArith_B3b()
     tmv::SmallVector<T,7,tmv::FortranStyle> v2f = v2;
     tmv::SmallVector<std::complex<T>,7,tmv::FortranStyle> cv2f = cv2;
 
-    TestMatrixArith3a<T>(a5f,ca5f,v2,cv2,v1,cv1,"NonSquare");
-    TestMatrixArith3a<T>(a6f,ca6f,v2,cv2,v1,cv1,"NonSquare");
-    TestMatrixArith3a<T>(a5f,ca5f,v2f,cv2f,v1,cv1,"NonSquare");
-    TestMatrixArith3a<T>(a5f,ca5f,v2f,cv2f,v1f,cv1f,"NonSquare");
+    TestMatrixArith3a(a5f,ca5f,v2,cv2,v1,cv1,"NonSquare");
+    TestMatrixArith3a(a6f,ca6f,v2,cv2,v1,cv1,"NonSquare");
+    TestMatrixArith3a(a5f,ca5f,v2f,cv2f,v1,cv1,"NonSquare");
+    TestMatrixArith3a(a5f,ca5f,v2f,cv2f,v1f,cv1f,"NonSquare");
 
-    TestMatrixArith3b<T>(a5f,ca5f,v2,cv2,v1,cv1,"NonSquare");
-    TestMatrixArith3b<T>(a6f,ca6f,v2,cv2,v1,cv1,"NonSquare");
-    TestMatrixArith3b<T>(a5f,ca5f,v2f,cv2f,v1,cv1,"NonSquare");
-    TestMatrixArith3b<T>(a5f,ca5f,v2f,cv2f,v1f,cv1f,"NonSquare");
+    TestMatrixArith3b(a5f,ca5f,v2,cv2,v1,cv1,"NonSquare");
+    TestMatrixArith3b(a6f,ca6f,v2,cv2,v1,cv1,"NonSquare");
+    TestMatrixArith3b(a5f,ca5f,v2f,cv2f,v1,cv1,"NonSquare");
+    TestMatrixArith3b(a5f,ca5f,v2f,cv2f,v1f,cv1f,"NonSquare");
 #endif
 }
 

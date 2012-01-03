@@ -51,8 +51,8 @@ class PRODMV : public VectorComposite<T>
 {
 public:
     inline PRODMV(
-        const T _x, const GENMATRIX<T1>& _m, const GenVector<T2>& _v
-    ) : x(_x), m(_m), v(_v)
+        const T _x, const GENMATRIX<T1>& _m, const GenVector<T2>& _v) :
+        x(_x), m(_m), v(_v)
     { TMVAssert(v.size()==m.rowsize()); }
     inline int size() const { return m.colsize(); }
     inline T getX() const { return x; }
@@ -101,8 +101,8 @@ class PRODVM : public VectorComposite<T>
 {
 public:
     inline PRODVM(
-        const T _x, const GenVector<T1>& _v, const GENMATRIX<T2>& _m
-    ) : x(_x), v(_v), m(_m)
+        const T _x, const GenVector<T1>& _v, const GENMATRIX<T2>& _m) :
+        x(_x), v(_v), m(_m)
     { TMVAssert(v.size()==m.colsize()); }
     inline int size() const { return m.rowsize(); }
     inline T getX() const { return x; }
@@ -201,8 +201,8 @@ class QUOTVM : public VectorComposite<T>
 {
 public:
     inline QUOTVM(
-        const T _x, const GenVector<T1>& _v, const GENMATRIX<T2>& _m
-    ) : x(_x), v(_v), m(_m)
+        const T _x, const GenVector<T1>& _v, const GENMATRIX<T2>& _m) :
+        x(_x), v(_v), m(_m)
     { TMVAssert(v.size()==m.colsize()); }
     inline int size() const { return m.rowsize(); }
     inline T getX() const { return x; }
@@ -232,8 +232,8 @@ class RQUOTVM : public VectorComposite<T>
 {
 public:
     inline RQUOTVM(
-        const T _x, const GenVector<T1>& _v, const GENMATRIX<T2>& _m
-    ) : x(_x), v(_v), m(_m)
+        const T _x, const GenVector<T1>& _v, const GENMATRIX<T2>& _m) :
+        x(_x), v(_v), m(_m)
     { TMVAssert(v.size()==m.rowsize()); }
     inline int size() const { return m.colsize(); }
     inline T getX() const { return x; }

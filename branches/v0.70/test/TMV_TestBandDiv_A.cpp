@@ -55,10 +55,10 @@ void TestBandDiv_A(tmv::DivType dt)
         bi.saveDiv();
         cbi.saveDiv();
 
-        TestMatrixDivArith2<T>(dt,bi,b1v,cbi,cb1v,"SquareBand/Band");
+        TestMatrixDivArith2(dt,bi,b1v,cbi,cb1v,"SquareBand/Band");
 #if (XTEST & 2)
-        TestMatrixDivArith1<T>(dt,bi,b2v,cbi,cb2v,"NonSquareBand/Band");
-        TestMatrixDivArith1<T>(dt,bi,b3v,cbi,cb3v,"NonSquareBand/Band");
+        TestMatrixDivArith1(dt,bi,b2v,cbi,cb2v,"NonSquareBand/Band");
+        TestMatrixDivArith1(dt,bi,b3v,cbi,cb3v,"NonSquareBand/Band");
 #endif
     }
 }

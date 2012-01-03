@@ -48,7 +48,7 @@ static void DoTestSmallMatrixArith_B6b()
     if (showstartdone) {
         std::cout<<"B6b"<<std::endl;
     }
-    TestMatrixArith6<T>(a1,ca1,a5,ca5,a6,ca6,"NonSquare");
+    TestMatrixArith6(a1,ca1,a5,ca5,a6,ca6,"NonSquare");
 #if (XTEST & 2)
     tmv::SmallMatrix<T,N,N,tmv::ColMajor> a2 = a1;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor> ca2 = ca1;
@@ -56,13 +56,13 @@ static void DoTestSmallMatrixArith_B6b()
     tmv::SmallMatrix<std::complex<T>,N,7,tmv::RowMajor> ca5b = ca5;
     tmv::SmallMatrix<T,N,7,tmv::ColMajor> a6b = a6;
     tmv::SmallMatrix<std::complex<T>,N,7,tmv::ColMajor> ca6b = ca6;
-    TestMatrixArith6<T>(a1,ca1,a5,ca5,a5b,ca5b,"NonSquare");
-    TestMatrixArith6<T>(a2,ca2,a5,ca5,a5b,ca5b,"NonSquare");
-    TestMatrixArith6<T>(a2,ca2,a5,ca5,a6,ca6,"NonSquare");
-    TestMatrixArith6<T>(a1,ca1,a6,ca6,a5,ca5,"NonSquare");
-    TestMatrixArith6<T>(a1,ca1,a6,ca6,a6b,ca6b,"NonSquare");
-    TestMatrixArith6<T>(a2,ca2,a6,ca6,a5,ca5,"NonSquare");
-    TestMatrixArith6<T>(a2,ca2,a6,ca6,a6b,ca6b,"NonSquare");
+    TestMatrixArith6(a1,ca1,a5,ca5,a5b,ca5b,"NonSquare");
+    TestMatrixArith6(a2,ca2,a5,ca5,a5b,ca5b,"NonSquare");
+    TestMatrixArith6(a2,ca2,a5,ca5,a6,ca6,"NonSquare");
+    TestMatrixArith6(a1,ca1,a6,ca6,a5,ca5,"NonSquare");
+    TestMatrixArith6(a1,ca1,a6,ca6,a6b,ca6b,"NonSquare");
+    TestMatrixArith6(a2,ca2,a6,ca6,a5,ca5,"NonSquare");
+    TestMatrixArith6(a2,ca2,a6,ca6,a6b,ca6b,"NonSquare");
 #endif
 
 #if (XTEST & 32)
@@ -73,9 +73,9 @@ static void DoTestSmallMatrixArith_B6b()
     tmv::SmallMatrix<T,N,7,tmv::ColMajor,tmv::FortranStyle> a6f = a6;
     tmv::SmallMatrix<std::complex<T>,N,7,tmv::ColMajor,tmv::FortranStyle> ca6f = ca6;
 
-    TestMatrixArith6<T>(a1f,ca1f,a5,ca5,a6,ca6,"NonSquare");
-    TestMatrixArith6<T>(a1f,ca1f,a5f,ca5f,a6,ca6,"NonSquare");
-    TestMatrixArith6<T>(a1f,ca1f,a5f,ca5f,a6f,ca6f,"NonSquare");
+    TestMatrixArith6(a1f,ca1f,a5,ca5,a6,ca6,"NonSquare");
+    TestMatrixArith6(a1f,ca1f,a5f,ca5f,a6,ca6,"NonSquare");
+    TestMatrixArith6(a1f,ca1f,a5f,ca5f,a6f,ca6f,"NonSquare");
 #endif
 }
 

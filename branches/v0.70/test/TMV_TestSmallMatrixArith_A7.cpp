@@ -33,11 +33,11 @@ static void DoTestSmallMatrixArith_A7()
     if (showstartdone) {
         std::cout<<"A7"<<std::endl;
     }
-    TestMatrixArith7<T>(a1,ca1,v1,cv1,v2,cv2,"Square");
+    TestMatrixArith7(a1,ca1,v1,cv1,v2,cv2,"Square");
 #if (XTEST & 2)
     tmv::SmallMatrix<T,N,N,tmv::ColMajor> a2 = a1;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor> ca2 = ca1;
-    TestMatrixArith7<T>(a2,ca2,v1,cv1,v2,cv2,"Square");
+    TestMatrixArith7(a2,ca2,v1,cv1,v2,cv2,"Square");
 #endif
 
 #if (XTEST & 32)
@@ -49,9 +49,9 @@ static void DoTestSmallMatrixArith_A7()
     tmv::SmallVector<T,N,tmv::FortranStyle> v2f = v1;
     tmv::SmallVector<std::complex<T>,N,tmv::FortranStyle> cv2f = cv1;
 
-    TestMatrixArith7<T>(a1f,ca1f,v1,cv1,v2,cv2,"Square");
-    TestMatrixArith7<T>(a1f,ca1f,v1f,cv1f,v2,cv2,"Square");
-    TestMatrixArith7<T>(a1f,ca1f,v1f,cv1f,v2f,cv2f,"Square");
+    TestMatrixArith7(a1f,ca1f,v1,cv1,v2,cv2,"Square");
+    TestMatrixArith7(a1f,ca1f,v1f,cv1f,v2,cv2,"Square");
+    TestMatrixArith7(a1f,ca1f,v1f,cv1f,v2f,cv2f,"Square");
 #endif
 }
 

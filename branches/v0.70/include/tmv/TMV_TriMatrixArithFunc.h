@@ -156,24 +156,15 @@ namespace tmv {
         const GenLowerTriMatrix<Tb>& B, const LowerTriMatrixView<T>& C)
     { MultMM<add>(alpha,B.transpose(),A.transpose(),C.transpose()); }
 
-    template <class T, class Ta> 
-    void ElementProd(
-        const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const UpperTriMatrixView<T>& B);
-    template <class T, class Ta, class Tb> 
-    void AddElementProd(
+    template <bool add, class T, class Ta, class Tb> 
+    void ElemMultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
         const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C);
-    template <class T, class Ta> 
-    inline void ElementProd(
-        const T alpha, const GenLowerTriMatrix<Ta>& A,
-        const LowerTriMatrixView<T>& B)
-    { ElementProd(alpha,A.transpose(),B.transpose()); }
-    template <class T, class Ta, class Tb> 
-    inline void AddElementProd(
+    template <bool add, class T, class Ta, class Tb> 
+    inline void ElemMultMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A,
         const GenLowerTriMatrix<Tb>& B, const LowerTriMatrixView<T>& C)
-    { AddElementProd(alpha,A.transpose(),B.transpose(),C.transpose()); }
+    { ElemMultMM<add>(alpha,A.transpose(),B.transpose(),C.transpose()); }
 
     template <class T> 
     class UpperTriMatrixComposite : public GenUpperTriMatrix<T>
@@ -337,31 +328,21 @@ namespace tmv {
         const GenLowerTriMatrix<Tb>& B, const LowerTriMatrixView<CT>& C)
     { MultMM<add>(CT(alpha),A,B,C); }
 
-    template <class T, class Ta> 
-    inline void ElementProd(
-        const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const UpperTriMatrixView<CT>& B)
-    { ElementProd(CT(alpha),A,B); }
-    template <class T, class Ta, class Tb> 
-    inline void AddElementProd(
+    template <bool add, class T, class Ta, class Tb> 
+    inline void ElemMultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
         const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<CT>& C)
-    { AddElementProd(CT(alpha),A,B,C); }
-    template <class T, class Ta> 
-    inline void ElementProd(
-        const T alpha, const GenLowerTriMatrix<Ta>& A,
-        const LowerTriMatrixView<CT>& B)
-    { ElementProd(CT(alpha),A,B); }
-    template <class T, class Ta, class Tb> 
-    inline void AddElementProd(
+    { ElemMultMM<add>(CT(alpha),A,B,C); }
+    template <bool add, class T, class Ta, class Tb> 
+    inline void ElemMultMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A,
         const GenLowerTriMatrix<Tb>& B, const LowerTriMatrixView<CT>& C)
-    { AddElementProd(CT(alpha),A,B,C); }
-    template <class T> 
-    inline void AddElementProd(
+    { ElemMultMM<add>(CT(alpha),A,B,C); }
+    template <bool add, class T> 
+    inline void ElemMultMM(
         const CT alpha, const GenUpperTriMatrix<CT>& A,
         const GenUpperTriMatrix<T>& B, const UpperTriMatrixView<CT>& C)
-    { AddElementProd(alpha,B,A,C); }
+    { ElemMultMM<add>(alpha,B,A,C); }
 
     // Specialize disallowed complex combinations:
     template <bool add, class T, class Ta, class Tb> 
@@ -478,6 +459,17 @@ namespace tmv {
     inline void MultMM(
         const CT , const GenLowerTriMatrix<Ta>& , 
         const GenUpperTriMatrix<Tb>& , const MatrixView<T>& )
+    { TMVAssert(TMV_FALSE); }
+
+    template <bool add, class T, class Ta, class Tb> 
+    inline void ElemMultMM(
+        const CT , const GenUpperTriMatrix<Ta>& , 
+        const GenUpperTriMatrix<Tb>& , const UpperTriMatrixView<T>& )
+    { TMVAssert(TMV_FALSE); }
+    template <bool add, class T, class Ta, class Tb> 
+    inline void ElemMultMM(
+        const CT , const GenLowerTriMatrix<Ta>& , 
+        const GenLowerTriMatrix<Tb>& , const LowerTriMatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
 
 } // namespace tmv

@@ -42,7 +42,7 @@ void TestSymDiv_C1(tmv::DivType dt, PosDefCode pdc)
         si.saveDiv();
         csi.saveDiv();
 
-        TestMatrixDivArith1<T>(dt,si,dv,csi,cdv,"DiagMatrix/Sym");
+        TestMatrixDivArith1(dt,si,dv,csi,cdv,"DiagMatrix/Sym");
     }
 }
 

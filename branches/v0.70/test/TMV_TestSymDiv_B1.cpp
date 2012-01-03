@@ -58,12 +58,12 @@ void TestSymDiv_B1(tmv::DivType dt, PosDefCode pdc)
         si.saveDiv();
         csi.saveDiv();
 
-        TestMatrixDivArith1<T>(dt,si,a1v,csi,ca1v,"SquareMatrix/Sym");
+        TestMatrixDivArith1(dt,si,a1v,csi,ca1v,"SquareMatrix/Sym");
 #if (XTEST & 2)
-        TestMatrixDivArith1<T>(dt,si,a3v,csi,ca3v,"NonSquareMatrix/Sym");
-        TestMatrixDivArith1<T>(dt,si,a4v,csi,ca4v,"NonSquareMatrix/Sym");
-        TestMatrixDivArith1<T>(dt,si,a5v,csi,ca5v,"DegenerateMatrix/Sym");
-        TestMatrixDivArith1<T>(dt,si,a6v,csi,ca6v,"DegenerateMatrix/Sym");
+        TestMatrixDivArith1(dt,si,a3v,csi,ca3v,"NonSquareMatrix/Sym");
+        TestMatrixDivArith1(dt,si,a4v,csi,ca4v,"NonSquareMatrix/Sym");
+        TestMatrixDivArith1(dt,si,a5v,csi,ca5v,"DegenerateMatrix/Sym");
+        TestMatrixDivArith1(dt,si,a6v,csi,ca6v,"DegenerateMatrix/Sym");
 #endif
     }
 }

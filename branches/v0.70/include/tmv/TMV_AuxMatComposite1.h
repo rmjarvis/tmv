@@ -61,8 +61,7 @@ class SUMMM :
 public:
     inline SUMMM(
         const T _x1, const GenMatrix<T1>& _m1, 
-        const T _x2, const GENMATRIX2<T2>& _m2
-    ) :
+        const T _x2, const GENMATRIX2<T2>& _m2) :
         x1(_x1), m1(_m1), x2(_x2), m2(_m2)
     { 
         TMVAssert(m1.colsize() == m2.colsize());
@@ -189,8 +188,7 @@ class PRODMM :
 public:
     inline PRODMM(
         const T _x, const GenMatrix<T1>& _m1, 
-        const GENMATRIX2<T2>& _m2
-    ) : x(_x), m1(_m1), m2(_m2)
+        const GENMATRIX2<T2>& _m2) : x(_x), m1(_m1), m2(_m2)
     { TMVAssert(m1.rowsize() == m2.colsize()) ; }
     inline int colsize() const { return m1.colsize(); }
     inline int rowsize() const { return m2.rowsize(); }
@@ -309,8 +307,7 @@ class QUOTMM : public MatrixComposite<T>
 {
 public:
     inline QUOTMM(
-        const T _x, const GenMatrix<T1>& _m1, const GENMATRIX2<T2>& _m2
-    ) :
+        const T _x, const GenMatrix<T1>& _m1, const GENMATRIX2<T2>& _m2) :
         x(_x), m1(_m1), m2(_m2)
     { TMVAssert( m1.colsize() == m2.colsize() ); }
     inline int colsize() const { return m2.rowsize(); }
@@ -344,8 +341,7 @@ class TQUOTMM : public QUOTMM<T,T1,T2>
 public :
     inline TQUOTMM(
         const T x, std::auto_ptr<Matrix<T1,ColMajor> > m1,
-        const GENMATRIX2<T2>& m2
-    ) : QUOTMM<T,T1,T2>(x,*m1,m2), m1p(m1) {}
+        const GENMATRIX2<T2>& m2) : QUOTMM<T,T1,T2>(x,*m1,m2), m1p(m1) {}
     inline TQUOTMM(const TQUOTMM<T,T1,T2>& rhs) :
         QUOTMM<T,T1,T2>(rhs), m1p(rhs.m1p) {}
     inline ~TQUOTMM() {}
@@ -361,8 +357,8 @@ class RQUOTMM :
 {
 public:
     inline RQUOTMM(
-        const T _x, const GenMatrix<T1>& _m1, const GENMATRIX2<T2>& _m2
-    ) : x(_x), m1(_m1), m2(_m2)
+        const T _x, const GenMatrix<T1>& _m1, const GENMATRIX2<T2>& _m2) :
+        x(_x), m1(_m1), m2(_m2)
     { TMVAssert( m1.rowsize() == m2.rowsize() ); }
     inline int colsize() const { return m1.colsize(); }
     inline int rowsize() const { return m2.colsize(); }
@@ -395,8 +391,7 @@ class TRQUOTMM : public RQUOTMM<T,T1,T2>
 public :
     inline TRQUOTMM(
         const T x, std::auto_ptr<Matrix<T1,RowMajor> > m1,
-        const GENMATRIX2<T2>& m2
-    ) : RQUOTMM<T,T1,T2>(x,*m1,m2), m1p(m1) {}
+        const GENMATRIX2<T2>& m2) : RQUOTMM<T,T1,T2>(x,*m1,m2), m1p(m1) {}
     inline TRQUOTMM(const TRQUOTMM<T,T1,T2>& rhs) :
         RQUOTMM<T,T1,T2>(rhs), m1p(rhs.m1p) {}
     inline ~TRQUOTMM() {}

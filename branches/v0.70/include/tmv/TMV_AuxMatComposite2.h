@@ -53,8 +53,8 @@ class PRODMM : public MatrixComposite<T>
 {
 public:
     inline PRODMM(
-        const T _x, const GENMATRIX1<T1>& _m1, const GenMatrix<T2>& _m2
-    ) : x(_x), m1(_m1), m2(_m2)
+        const T _x, const GENMATRIX1<T1>& _m1, const GenMatrix<T2>& _m2) :
+        x(_x), m1(_m1), m2(_m2)
     { TMVAssert(m1.rowsize() == m2.colsize()) ; }
     inline int colsize() const { return m1.colsize(); }
     inline int rowsize() const { return m2.rowsize(); }

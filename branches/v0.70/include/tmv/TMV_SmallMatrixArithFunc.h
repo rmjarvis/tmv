@@ -802,24 +802,29 @@ namespace tmv {
     template <int M, int N, StorageType S, class T, class Tx, class Ty, class Ta>
     inline void AddRank1Update(const T alpha, const Tx* x, const Ty* y, Ta* A)
     { AddRank1UpdateHelper<M,N,S,T,Tx,Ty,Ta,OKTypes3(T,Tx,Ty,Ta)>(alpha,x,y,A); }
-
-    template <class T, class Ta, class Tb, int M, int N, StorageType Sa, StorageType Sb> 
-    inline void ElementProd(
-        const T alpha, const SmallMatrix<Ta,M,N,Sa>& A, 
-        SmallMatrix<Tb,M,N,Sb>& B)
+    template <class T, class Ta, class Tb, class Tc, int M, int N, StorageType Sa, StorageType Sb, StorageType Sc> 
+    inline void ElemMultMM(
+        const T alpha, const SmallMatrix<Ta,M,N,Sa>& A,
+        const SmallMatrix<Tb,M,N,Sb>& B, SmallMatrix<Tc,M,N,Sc>& C)
     {
-        if (Sa == Sb) {
+        if (Sa == Sb && Sa == Sc) {
             const Ta* Ap = A.cptr();
-            Tb* Bp = B.ptr();
-            for(int i=0;i<M*N;++i) Bp[i] *= alpha * Ap[i];
+            const Tb* Bp = B.cptr();
+            Tc* Cp = C.ptr();
+            for(int i=0;i<M*N;++i) Cp[i] = alpha * Ap[i] * Bp[i];
         } else {
             for(int i=0;i<M;++i) for(int j=0;j<N;j++) 
-                B.ref(i,j) *= alpha * A.cref(i,j);
+                C.ref(i,j) = alpha * A.cref(i,j) * B.cref(i,j);
         }
     }
+    template <class T, class Ta, class Tb, int M, int N, StorageType Sa, StorageType Sb, StorageType Sc> 
+    inline void ElemMultMM(
+        const CT , const SmallMatrix<Ta,M,N,Sa>& ,
+        const SmallMatrix<Tb,M,N,Sb>& , SmallMatrix<T,M,N,Sc>& )
+    { TMVAssert(TMV_FALSE); }
 
     template <class T, class Ta, class Tb, class Tc, int M, int N, StorageType Sa, StorageType Sb, StorageType Sc> 
-    inline void AddElementProd(
+    inline void AddElemMultMM(
         const T alpha, const SmallMatrix<Ta,M,N,Sa>& A,
         const SmallMatrix<Tb,M,N,Sb>& B, SmallMatrix<Tc,M,N,Sc>& C)
     {
@@ -833,12 +838,8 @@ namespace tmv {
                 C.ref(i,j) += alpha * A.cref(i,j) * B.cref(i,j);
         }
     }
-    template <class T, class Ta, int M, int N, StorageType Sa, StorageType Sb> 
-    inline void ElementProd(
-        const CT , const SmallMatrix<Ta,M,N,Sa>& , SmallMatrix<T,M,N,Sb>& )
-    { TMVAssert(TMV_FALSE); }
     template <class T, class Ta, class Tb, int M, int N, StorageType Sa, StorageType Sb, StorageType Sc> 
-    inline void AddElementProd(
+    inline void AddElemMultMM(
         const CT , const SmallMatrix<Ta,M,N,Sa>& ,
         const SmallMatrix<Tb,M,N,Sb>& , SmallMatrix<T,M,N,Sc>& )
     { TMVAssert(TMV_FALSE); }

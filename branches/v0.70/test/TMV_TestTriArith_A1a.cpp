@@ -2,7 +2,26 @@
 #include "TMV_Test_1.h"
 #include "TMV.h"
 
-#define NOSV
+template <class T1, class T2, class T3>
+inline bool CanAddElemMultMM(
+    const tmv::UpperTriMatrixView<T1>& a,
+    const tmv::UpperTriMatrixView<T2>& b,
+    const tmv::UpperTriMatrixView<T3>& c)
+{
+    return (a.size() == b.size()) && (a.size() == c.size()) &&
+        !c.isunit(); 
+}
+
+template <class T1, class T2, class T3>
+inline bool CanAddElemMultMM(
+    const tmv::LowerTriMatrixView<T1>& a,
+    const tmv::LowerTriMatrixView<T2>& b,
+    const tmv::LowerTriMatrixView<T3>& c)
+{
+    return (a.size() == b.size()) && (a.size() == c.size()) &&
+        !c.isunit(); 
+}
+
 #include "TMV_TestMatrixArith.h"
 
 template <class T> void TestTriMatrixArith_A1a()
@@ -37,8 +56,8 @@ template <class T> void TestTriMatrixArith_A1a()
     tmv::UpperTriMatrixView<T> u2 = a2x.upperTri();
     tmv::UpperTriMatrixView<CT> cu2 = ca2x.upperTri();
 
-    TestMatrixArith1<T>(u1,cu1,"UpperTri 1");
-    TestMatrixArith1<T>(u2,cu2,"UpperTri 2");
+    TestMatrixArith1(u1,cu1,"UpperTri 1");
+    TestMatrixArith1(u2,cu2,"UpperTri 2");
 
 #if (XTEST & 1)
     tmv::Matrix<T> a3x(12,16);
@@ -49,7 +68,7 @@ template <class T> void TestTriMatrixArith_A1a()
 
     tmv::UpperTriMatrixView<T> u3 = a3x.subMatrix(0,12,0,16,3,4).upperTri();
     tmv::UpperTriMatrixView<CT> cu3 = ca3x.subMatrix(0,12,0,16,3,4).upperTri();
-    TestMatrixArith1<T>(u3,cu3,"UpperTri 3");
+    TestMatrixArith1(u3,cu3,"UpperTri 3");
 #endif
 
 #if (XTEST & 2)
@@ -58,12 +77,12 @@ template <class T> void TestTriMatrixArith_A1a()
     tmv::LowerTriMatrixView<T> l2 = a2x.lowerTri();
     tmv::LowerTriMatrixView<CT> cl2 = ca2x.lowerTri();
 
-    TestMatrixArith1<T>(l1,cl1,"LowerTri 1");
-    TestMatrixArith1<T>(l2,cl2,"LowerTri 2");
+    TestMatrixArith1(l1,cl1,"LowerTri 1");
+    TestMatrixArith1(l2,cl2,"LowerTri 2");
 #if (XTEST & 1)
     tmv::LowerTriMatrixView<T> l3 = a3x.subMatrix(0,12,0,16,3,4).lowerTri();
     tmv::LowerTriMatrixView<CT> cl3 = ca3x.subMatrix(0,12,0,16,3,4).lowerTri();
-    TestMatrixArith1<T>(l3,cl3,"LowerTri 3");
+    TestMatrixArith1(l3,cl3,"LowerTri 3");
 #endif
 #endif
 

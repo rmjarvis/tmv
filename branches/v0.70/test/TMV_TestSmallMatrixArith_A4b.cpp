@@ -35,12 +35,12 @@ static void DoTestSmallMatrixArith_A4b()
     if (showstartdone) {
         std::cout<<"A4b"<<std::endl;
     }
-    TestMatrixArith4<T>(a2,ca2,a1,ca1,"Square");
+    TestMatrixArith4(a2,ca2,a1,ca1,"Square");
 
 #if (XTEST & 2)
     tmv::SmallMatrix<T,N,N,tmv::ColMajor> a2b = a2;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor> ca2b = ca2;
-    TestMatrixArith4<T>(a2,ca2,a2b,ca2b,"Square");
+    TestMatrixArith4(a2,ca2,a2b,ca2b,"Square");
 #endif
 
 #if (XTEST & 32)
@@ -49,8 +49,8 @@ static void DoTestSmallMatrixArith_A4b()
     tmv::SmallMatrix<T,N,N,tmv::ColMajor,tmv::FortranStyle> a2f = a2;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor,tmv::FortranStyle> ca2f = ca2;
 
-    TestMatrixArith4<T>(a2f,ca2f,a1,ca1,"Square");
-    TestMatrixArith4<T>(a2f,ca2f,a1f,ca1f,"Square");
+    TestMatrixArith4(a2f,ca2f,a1,ca1,"Square");
+    TestMatrixArith4(a2f,ca2f,a1f,ca1f,"Square");
 #endif
 }
 

@@ -53,8 +53,8 @@ template <class T, int M, int N> void TestSmallMatrixArith_7(std::string label)
     tmv::SmallVector<CT,M> cv1 = ca1.col(0);
     tmv::SmallVector<CT,N> cv2 = ca1.row(0);
 
-    TestMatrixArith7<T>(a1,ca1,v1,cv1,v2,cv2,label+" RowMajor");
-    TestMatrixArith7<T>(a2,ca2,v2,cv2,v1,cv1,label+" ColMajor");
+    TestMatrixArith7(a1,ca1,v1,cv1,v2,cv2,label+" RowMajor");
+    TestMatrixArith7(a2,ca2,v2,cv2,v1,cv1,label+" ColMajor");
 
 #if (XTEST & 1)
     tmv::SmallMatrix<T,3*M,4*N,tmv::ColMajor> a3x;
@@ -77,16 +77,16 @@ template <class T, int M, int N> void TestSmallMatrixArith_7(std::string label)
     tmv::SmallVectorView<CT,N> cv4 = cv4x.subVector(0,5*N,5);
     cv4 = cv2;
 
-    TestMatrixArith7<T>(a1,ca1,v3,cv3,v2,cv2,label+" RowMajor Step1");
-    TestMatrixArith7<T>(a1,ca1,v1,cv1,v4,cv4,label+" RowMajor Step2");
-    TestMatrixArith7<T>(a1,ca1,v3,cv3,v4,cv4,label+" RowMajor Step12");
-    TestMatrixArith7<T>(a2,ca2,v4,cv4,v1,cv1,label+" ColMajor Step1");
-    TestMatrixArith7<T>(a2,ca2,v2,cv2,v3,cv3,label+" ColMajor Step2");
-    TestMatrixArith7<T>(a2,ca2,v4,cv4,v3,cv3,label+" ColMajor Step12");
-    TestMatrixArith7<T>(a3,ca3,v1,cv1,v2,cv2,label+" NonMajor");
-    TestMatrixArith7<T>(a3,ca3,v3,cv3,v2,cv2,label+" NonMajor Step1");
-    TestMatrixArith7<T>(a3,ca3,v1,cv1,v4,cv4,label+" NonMajor Step2");
-    TestMatrixArith7<T>(a3,ca3,v3,cv3,v4,cv4,label+" NonMajor Step12");
+    TestMatrixArith7(a1,ca1,v3,cv3,v2,cv2,label+" RowMajor Step1");
+    TestMatrixArith7(a1,ca1,v1,cv1,v4,cv4,label+" RowMajor Step2");
+    TestMatrixArith7(a1,ca1,v3,cv3,v4,cv4,label+" RowMajor Step12");
+    TestMatrixArith7(a2,ca2,v4,cv4,v1,cv1,label+" ColMajor Step1");
+    TestMatrixArith7(a2,ca2,v2,cv2,v3,cv3,label+" ColMajor Step2");
+    TestMatrixArith7(a2,ca2,v4,cv4,v3,cv3,label+" ColMajor Step12");
+    TestMatrixArith7(a3,ca3,v1,cv1,v2,cv2,label+" NonMajor");
+    TestMatrixArith7(a3,ca3,v3,cv3,v2,cv2,label+" NonMajor Step1");
+    TestMatrixArith7(a3,ca3,v1,cv1,v4,cv4,label+" NonMajor Step2");
+    TestMatrixArith7(a3,ca3,v3,cv3,v4,cv4,label+" NonMajor Step12");
 #endif
 #if (XTEST & 2)
     tmv::MatrixView<T> a1m = a1.view();
@@ -96,7 +96,7 @@ template <class T, int M, int N> void TestSmallMatrixArith_7(std::string label)
     tmv::VectorView<CT> cv1v = cv1.view();
     tmv::VectorView<CT> cv2v = cv2.view();
 
-    TestMatrixArith7<T>(a1m,ca1m,v1,cv1,v2,cv2,label+" RowMajor");
-    TestMatrixArith7<T>(a1,ca1,v1v,cv1v,v2v,cv2v,label+" RowMajor");
+    TestMatrixArith7(a1m,ca1m,v1,cv1,v2,cv2,label+" RowMajor");
+    TestMatrixArith7(a1,ca1,v1v,cv1v,v2v,cv2v,label+" RowMajor");
 #endif
 }

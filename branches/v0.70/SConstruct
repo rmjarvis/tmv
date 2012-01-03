@@ -108,7 +108,7 @@ opts.Add('LIBS','Libraries to send to the linker','')
 opts.Add(BoolVariable('DEBUG',
         'Turn on debugging statements in compilied library',False))
 opts.Add(BoolVariable('TEST_DEBUG',
-        'Turn on debugging statements in test suite',True))
+        'Turn on debugging statements in test suite',False))
 opts.Add(BoolVariable('STATIC',
             'Use static linkage', False))
 opts.Add(BoolVariable('WITH_SSE',
@@ -121,8 +121,6 @@ opts.Add(BoolVariable('SMALL_TESTS',
             'Make the small test programs: tmvtest1a, tmvtest1b, etc.', False))
 opts.Add(BoolVariable('WARN',
             'Add warning compiler flags, like -Wall', False))
-opts.Add(BoolVariable('NOMIX_SMALL',
-            'Do not test the mixed Small and regular arithmetic', False))
 opts.Add(BoolVariable('CACHE_LIB',
             'Cache the results of the library checks',True))
 opts.Add(BoolVariable('WITH_UPS',
@@ -190,7 +188,7 @@ def BasicCCFlags(env):
             env.Replace(CCFLAGS=['-O2'])
             #if version <= 4.2:
             env.Append(CCFLAGS=['-fno-strict-aliasing'])
-            env['TEST_FLAGS'] = []
+            env['TEST_FLAGS'] = ['-O1']
             if env['WARN']:
                 env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror'])
                 env['TEST_FLAGS'] = ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
@@ -200,7 +198,7 @@ def BasicCCFlags(env):
         elif compiler == 'clang++':
             env.Replace(CCFLAGS=['-O2'])
             #env.Append(CCFLAGS=['-fno-strict-aliasing'])
-            env['TEST_FLAGS'] = []
+            env['TEST_FLAGS'] = ['-O1']
             if env['WARN']:
                 env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror'])
                 env['TEST_FLAGS'] = ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
@@ -211,7 +209,7 @@ def BasicCCFlags(env):
             env.Replace(CCFLAGS=['-O2'])
             if env['WITH_SSE']:
                 env.Append(CCFLAGS=['-msse2'])
-            env['TEST_FLAGS'] = []
+            env['TEST_FLAGS'] = ['-O1']
             if version >= 10:
                 env.Append(CCFLAGS=['-vec-report0'])
                 env['TEST_FLAGS'] += ['-vec-report0']
@@ -230,18 +228,18 @@ def BasicCCFlags(env):
 
         elif compiler == 'pgCC':
             env.Replace(CCFLAGS=['-O2','-fast','-Mcache_align'])
-            env['TEST_FLAGS'] = ['-O0']
+            env['TEST_FLAGS'] = ['-O1']
 
         elif compiler == 'CC':
             env.Replace(CCFLAGS=['-O2','-fast','-instances=semiexplicit'])
-            env['TEST_FLAGS'] = ['-instances=semiexplicit']
+            env['TEST_FLAGS'] = ['-O1','-instances=semiexplicit']
             if env['WARN']:
                 env.Append(CCFLAGS=['-g','+w'])
                 env['TEST_FLAGS'] += ['-g','+w']
 
         elif compiler == 'cl':
             env.Replace(CCFLAGS=['/EHsc','/nologo','/O2','/Oi',])
-            env['TEST_FLAGS'] = ['/EHsc','/nologo']
+            env['TEST_FLAGS'] = ['/EHsc','/nologo','/O1']
             if env['WARN']:
                 env.Append(CCFLAGS=['/W2','/WX'])
                 env['TEST_FLAGS'] += ['/W1','/WX']
@@ -996,7 +994,6 @@ def DoLibraryAndHeaderChecks(config):
         elif config.env['FORCE_GOTO']:
             config.CheckGOTO()
             config.env.Append(CPPDEFINES=['FBLAS'])
-            #config.env['NOMIX_SMALL'] = 1
             print 'Using GOTO BLAS'
 
         elif config.env['FORCE_ATLAS']:
@@ -1033,7 +1030,6 @@ def DoLibraryAndHeaderChecks(config):
 
         elif config.CheckGOTO() :
             config.env.Append(CPPDEFINES=['FBLAS'])
-            #config.env['NOMIX_SMALL'] = 1
             print 'Using GotoBLAS'
 
         elif config.CheckCBLAS() :
@@ -1113,7 +1109,7 @@ def DoConfig(env):
         AddOpenMPFlag(env)
     if not env['DEBUG']:
         print 'Debugging turned off'
-        env.Append(CPPDEFINES=['NDEBUG'])
+        env.Append(CPPDEFINES=['TMV_NDEBUG'])
     if env['MEM_TEST']:
         env.Append(CPPDEFINES=['MEMTEST'])
     if '-m32' in env['CCFLAGS']:

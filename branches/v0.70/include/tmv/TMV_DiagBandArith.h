@@ -50,8 +50,7 @@ namespace tmv {
 
         inline SumDB(
             T _x1, const GenDiagMatrix<T1>& _m1, 
-            T _x2, const GenBandMatrix<T2>& _m2
-        ) :
+            T _x2, const GenBandMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { 
             TMVAssert(m1.size() == m2.colsize()); 
@@ -284,8 +283,7 @@ namespace tmv {
 
         inline ProdDB(
             T _x, const GenDiagMatrix<T1>& _m1,
-            const GenBandMatrix<T2>& _m2
-        ) :
+            const GenBandMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.colsize()); }
         inline int colsize() const { return m2.colsize(); }
@@ -328,8 +326,7 @@ namespace tmv {
 
         inline ProdBD(
             T _x, const GenBandMatrix<T1>& _m1,
-            const GenDiagMatrix<T2>& _m2
-        ) :
+            const GenDiagMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.rowsize() == m2.size()); }
         inline int colsize() const { return m1.colsize(); }
@@ -662,8 +659,7 @@ namespace tmv {
 
         inline QuotBD(
             const T _x, const GenBandMatrix<T1>& _m1,
-            const GenDiagMatrix<T2>& _m2
-        ) :
+            const GenDiagMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.colsize() == m2.size() ); }
         inline int colsize() const { return m1.colsize(); }
@@ -708,8 +704,7 @@ namespace tmv {
 
         inline RQuotBD(
             const T _x, const GenBandMatrix<T1>& _m1,
-            const GenDiagMatrix<T2>& _m2
-        ) :
+            const GenDiagMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.rowsize() == m2.size() ); }
         inline int colsize() const { return m1.colsize(); }

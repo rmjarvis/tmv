@@ -52,7 +52,7 @@ namespace tmv {
     // Start with real version so Conj isn't an issue.
     // Specialize for complex below.
     template <class T> class VIter
-    { 
+    {
     public :
 
         VIter() : p(0), s(0) TMV_DEFFIRSTLAST(0,0) {}

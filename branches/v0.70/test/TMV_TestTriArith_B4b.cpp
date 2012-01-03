@@ -3,6 +3,8 @@
 #include "TMV.h"
 
 #define NOADDEQ
+#define NOELEMMULT
+
 #include "TMV_TestMatrixArith.h"
 
 template <class T> void TestTriMatrixArith_B4b()
@@ -46,15 +48,15 @@ template <class T> void TestTriMatrixArith_B4b()
     tmv::MatrixView<T> a2 = a2x.view();
     tmv::MatrixView<CT> ca2 = ca2x.view();
 
-    TestMatrixArith4<T>(u1,cu1,a1,ca1,"UpperTri/Square 1");
-    TestMatrixArith4<T>(u2,cu2,a1,ca1,"UpperTri/Square 2");
-    TestMatrixArith4<T>(u4,cu4,a1,ca1,"UpperTri/Square 3");
-    TestMatrixArith4<T>(u5,cu5,a1,ca1,"UpperTri/Square 4");
-    TestMatrixArith4<T>(u1,cu1,a2,ca2,"UpperTri/Square 5");
+    TestMatrixArith4(u1,cu1,a1,ca1,"UpperTri/Square 1");
+    TestMatrixArith4(u2,cu2,a1,ca1,"UpperTri/Square 2");
+    TestMatrixArith4(u4,cu4,a1,ca1,"UpperTri/Square 3");
+    TestMatrixArith4(u5,cu5,a1,ca1,"UpperTri/Square 4");
+    TestMatrixArith4(u1,cu1,a2,ca2,"UpperTri/Square 5");
 #if (XTEST & 2)
-    TestMatrixArith4<T>(u2,cu2,a2,ca2,"UpperTri/Square 6");
-    TestMatrixArith4<T>(u4,cu4,a2,ca2,"UpperTri/Square 7");
-    TestMatrixArith4<T>(u5,cu5,a2,ca2,"UpperTri/Square 8");
+    TestMatrixArith4(u2,cu2,a2,ca2,"UpperTri/Square 6");
+    TestMatrixArith4(u4,cu4,a2,ca2,"UpperTri/Square 7");
+    TestMatrixArith4(u5,cu5,a2,ca2,"UpperTri/Square 8");
 #endif
 #if (XTEST & 1)
     tmv::Matrix<T> a3x(12,16);
@@ -69,16 +71,16 @@ template <class T> void TestTriMatrixArith_B4b()
     tmv::UpperTriMatrixView<CT> cu6 = ca3x.subMatrix(0,12,0,16,3,4).unitUpperTri();
     tmv::MatrixView<T> a3 = a3x.view();
     tmv::MatrixView<CT> ca3 = ca3x.view();
-    TestMatrixArith4<T>(u3,cu3,a1,ca1,"UpperTri/Square 9");
-    TestMatrixArith4<T>(u3,cu3,a2,ca2,"UpperTri/Square 10");
-    TestMatrixArith4<T>(u3,cu3,a3,ca3,"UpperTri/Square 11");
-    TestMatrixArith4<T>(u6,cu6,a1,ca1,"UpperTri/Square 12");
-    TestMatrixArith4<T>(u6,cu6,a2,ca2,"UpperTri/Square 13");
-    TestMatrixArith4<T>(u6,cu6,a3,ca3,"UpperTri/Square 14");
-    TestMatrixArith4<T>(u1,cu1,a3,ca3,"UpperTri/Square 15");
-    TestMatrixArith4<T>(u2,cu2,a3,ca3,"UpperTri/Square 16");
-    TestMatrixArith4<T>(u4,cu4,a3,ca3,"UpperTri/Square 17");
-    TestMatrixArith4<T>(u5,cu5,a3,ca3,"UpperTri/Square 18");
+    TestMatrixArith4(u3,cu3,a1,ca1,"UpperTri/Square 9");
+    TestMatrixArith4(u3,cu3,a2,ca2,"UpperTri/Square 10");
+    TestMatrixArith4(u3,cu3,a3,ca3,"UpperTri/Square 11");
+    TestMatrixArith4(u6,cu6,a1,ca1,"UpperTri/Square 12");
+    TestMatrixArith4(u6,cu6,a2,ca2,"UpperTri/Square 13");
+    TestMatrixArith4(u6,cu6,a3,ca3,"UpperTri/Square 14");
+    TestMatrixArith4(u1,cu1,a3,ca3,"UpperTri/Square 15");
+    TestMatrixArith4(u2,cu2,a3,ca3,"UpperTri/Square 16");
+    TestMatrixArith4(u4,cu4,a3,ca3,"UpperTri/Square 17");
+    TestMatrixArith4(u5,cu5,a3,ca3,"UpperTri/Square 18");
 #endif
 
     tmv::LowerTriMatrixView<T> l1 = a1x.lowerTri();
@@ -90,31 +92,31 @@ template <class T> void TestTriMatrixArith_B4b()
     tmv::LowerTriMatrixView<T> l5 = a2x.unitLowerTri();
     tmv::LowerTriMatrixView<CT> cl5 = ca2x.unitLowerTri();
 
-    TestMatrixArith4<T>(l1,cl1,a1,ca1,"LowerTri/Square 1");
-    TestMatrixArith4<T>(l2,cl2,a1,ca1,"LowerTri/Square 2");
-    TestMatrixArith4<T>(l4,cl4,a1,ca1,"LowerTri/Square 3");
-    TestMatrixArith4<T>(l5,cl5,a1,ca1,"LowerTri/Square 4");
+    TestMatrixArith4(l1,cl1,a1,ca1,"LowerTri/Square 1");
+    TestMatrixArith4(l2,cl2,a1,ca1,"LowerTri/Square 2");
+    TestMatrixArith4(l4,cl4,a1,ca1,"LowerTri/Square 3");
+    TestMatrixArith4(l5,cl5,a1,ca1,"LowerTri/Square 4");
 #if (XTEST & 2)
-    TestMatrixArith4<T>(l1,cl1,a2,ca2,"LowerTri/Square 5");
-    TestMatrixArith4<T>(l2,cl2,a2,ca2,"LowerTri/Square 6");
-    TestMatrixArith4<T>(l4,cl4,a2,ca2,"LowerTri/Square 7");
-    TestMatrixArith4<T>(l5,cl5,a2,ca2,"LowerTri/Square 8");
+    TestMatrixArith4(l1,cl1,a2,ca2,"LowerTri/Square 5");
+    TestMatrixArith4(l2,cl2,a2,ca2,"LowerTri/Square 6");
+    TestMatrixArith4(l4,cl4,a2,ca2,"LowerTri/Square 7");
+    TestMatrixArith4(l5,cl5,a2,ca2,"LowerTri/Square 8");
 #endif
 #if (XTEST & 1)
     tmv::LowerTriMatrixView<T> l3 = a3x.subMatrix(0,12,0,16,3,4).lowerTri();
     tmv::LowerTriMatrixView<CT> cl3 = ca3x.subMatrix(0,12,0,16,3,4).lowerTri();
     tmv::LowerTriMatrixView<T> l6 = a3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
     tmv::LowerTriMatrixView<CT> cl6 = ca3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
-    TestMatrixArith4<T>(l3,cl3,a1,ca1,"LowerTri/Square 9");
-    TestMatrixArith4<T>(l3,cl3,a2,ca2,"LowerTri/Square 10");
-    TestMatrixArith4<T>(l3,cl3,a3,ca3,"LowerTri/Square 11");
-    TestMatrixArith4<T>(l6,cl6,a1,ca1,"LowerTri/Square 12");
-    TestMatrixArith4<T>(l6,cl6,a2,ca2,"LowerTri/Square 13");
-    TestMatrixArith4<T>(l6,cl6,a3,ca3,"LowerTri/Square 14");
-    TestMatrixArith4<T>(l1,cl1,a3,ca3,"LowerTri/Square 15");
-    TestMatrixArith4<T>(l2,cl2,a3,ca3,"LowerTri/Square 16");
-    TestMatrixArith4<T>(l4,cl4,a3,ca3,"LowerTri/Square 17");
-    TestMatrixArith4<T>(l5,cl5,a3,ca3,"LowerTri/Square 18");
+    TestMatrixArith4(l3,cl3,a1,ca1,"LowerTri/Square 9");
+    TestMatrixArith4(l3,cl3,a2,ca2,"LowerTri/Square 10");
+    TestMatrixArith4(l3,cl3,a3,ca3,"LowerTri/Square 11");
+    TestMatrixArith4(l6,cl6,a1,ca1,"LowerTri/Square 12");
+    TestMatrixArith4(l6,cl6,a2,ca2,"LowerTri/Square 13");
+    TestMatrixArith4(l6,cl6,a3,ca3,"LowerTri/Square 14");
+    TestMatrixArith4(l1,cl1,a3,ca3,"LowerTri/Square 15");
+    TestMatrixArith4(l2,cl2,a3,ca3,"LowerTri/Square 16");
+    TestMatrixArith4(l4,cl4,a3,ca3,"LowerTri/Square 17");
+    TestMatrixArith4(l5,cl5,a3,ca3,"LowerTri/Square 18");
 #endif
 }
 

@@ -4,6 +4,8 @@
 #include "TMV.h"
 #include <fstream>
 
+#define NOELEMMULT
+
 #include "TMV_TestMatrixArith.h"
 
 template <class T> void TestDiagMatrixArith_B4b()
@@ -58,9 +60,9 @@ template <class T> void TestDiagMatrixArith_B4b()
     tmv::MatrixView<T> rv = r.view();
     tmv::MatrixView<std::complex<T> > crv = cr.view();
 
-    TestMatrixArith4<T>(pv,cpv,av,cav, "SquareM/Diag");
-    TestMatrixArith4<T>(qv,cqv,av,cav, "NonSquareM/Diag");
-    TestMatrixArith4<T>(rv,crv,av,cav, "DegenM/Diag");
+    TestMatrixArith4(pv,cpv,av,cav, "SquareM/Diag");
+    TestMatrixArith4(qv,cqv,av,cav, "NonSquareM/Diag");
+    TestMatrixArith4(rv,crv,av,cav, "DegenM/Diag");
 #endif
 }
 

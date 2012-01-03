@@ -228,9 +228,8 @@ namespace tmv {
         typedef typename Traits<value_type>::real_type real_type;
         typedef typename Traits<value_type>::complex_type complex_type;
 
-        ProdMM(
-            const T& _x, const BaseMatrix<M1>& _m1, const BaseMatrix<M2>& _m2
-        ) :
+        ProdMM(const Scaling<ix,T>& _x, const BaseMatrix<M1>& _m1,
+               const BaseMatrix<M2>& _m2) :
             x(_x), m1(_m1.mat()), m2(_m2.mat())
         {
             TMVStaticAssert((Sizes<M1::_rowsize,M2::_colsize>::same)); 
@@ -393,14 +392,6 @@ namespace tmv {
         const CCT x, const ProdMM<ix,T,M1,M2>& mm)
     { return ProdMM<0,CT,M1,M2>(x*mm.getX(),mm.getM1(),mm.getM2()); }
 
-    template <int ix1, class T1, int ix, class T, class M1, class M2>
-    TMV_INLINE ProdMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2> operator*(
-        const Scaling<ix1,T1>& x, const ProdMM<ix,T,M1,M2>& mm)
-    {
-        return ProdMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2>(
-            T1(x)*mm.getX(),mm.getM1(),mm.getM2()); 
-    }
-
     // (mm)*x
     template <int ix, class T, class M1, class M2>
     TMV_INLINE ProdMM<0,T,M1,M2> operator*(
@@ -421,14 +412,6 @@ namespace tmv {
     TMV_INLINE ProdMM<0,CT,M1,M2> operator*(
         const ProdMM<ix,T,M1,M2>& mm, const CCT x)
     { return ProdMM<0,CT,M1,M2>(x*mm.getX(),mm.getM1(),mm.getM2()); }
-
-    template <int ix1, class T1, int ix, class T, class M1, class M2>
-    TMV_INLINE ProdMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2> operator*(
-        const ProdMM<ix,T,M1,M2>& mm, const Scaling<ix1,T1>& x)
-    {
-        return ProdMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2>(
-            T1(x)*mm.getX(),mm.getM1(),mm.getM2()); 
-    }
 
     // (mm)/x
     template <int ix, class T, class M1, class M2>
@@ -451,13 +434,6 @@ namespace tmv {
         const ProdMM<ix,T,M1,M2>& mm, const CCT x)
     { return ProdMM<0,CT,M1,M2>(mm.getX()/x,mm.getM1(),mm.getM2()); }
 
-    template <int ix1, class T1, int ix, class T, class M1, class M2>
-    TMV_INLINE ProdMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2> operator/(
-        const ProdMM<ix,T,M1,M2>& mm, const Scaling<ix1,T1>& x)
-    {
-        return ProdMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2>(
-            mm.getX()/T1(x),mm.getM1(),mm.getM2()); 
-    }
 
 #undef RT
 #undef CT

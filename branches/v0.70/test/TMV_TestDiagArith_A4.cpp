@@ -27,7 +27,7 @@ template <class T> void TestDiagMatrixArith_A4()
     tmv::DiagMatrixView<T> bv = b.view();
     tmv::DiagMatrixView<std::complex<T> > cbv = cb.view();
 
-    TestMatrixArith4<T>(av,cav,bv,cbv, "Diag/Diag");
+    TestMatrixArith4(av,cav,bv,cbv, "Diag/Diag");
 }
 
 #ifdef TEST_DOUBLE

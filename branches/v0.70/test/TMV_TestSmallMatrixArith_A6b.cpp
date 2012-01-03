@@ -38,15 +38,15 @@ static void DoTestSmallMatrixArith_A6b()
     if (showstartdone) {
         std::cout<<"A6b"<<std::endl;
     }
-    TestMatrixArith6<T>(a2,ca2,a1,ca1,a1b,ca1b,"Square");
+    TestMatrixArith6(a2,ca2,a1,ca1,a1b,ca1b,"Square");
 #if (XTEST & 2)
     tmv::SmallMatrix<T,N,N,tmv::RowMajor> a2b = a2;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor> ca2b = ca2;
     tmv::SmallMatrix<T,N,N,tmv::RowMajor> a2c = a2;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor> ca2c = ca2;
-    TestMatrixArith6<T>(a2,ca2,a1,ca1,a2b,ca2b,"Square");
-    TestMatrixArith6<T>(a2,ca2,a2b,ca2b,a1,ca1,"Square");
-    TestMatrixArith6<T>(a2,ca2,a2b,ca2b,a2c,ca2c,"Square");
+    TestMatrixArith6(a2,ca2,a1,ca1,a2b,ca2b,"Square");
+    TestMatrixArith6(a2,ca2,a2b,ca2b,a1,ca1,"Square");
+    TestMatrixArith6(a2,ca2,a2b,ca2b,a2c,ca2c,"Square");
 #endif
 
 #if (XTEST & 32)
@@ -57,9 +57,9 @@ static void DoTestSmallMatrixArith_A6b()
     tmv::SmallMatrix<T,N,N,tmv::ColMajor,tmv::FortranStyle> a2f = a2;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor,tmv::FortranStyle> ca2f = ca2;
 
-    TestMatrixArith6<T>(a2f,ca2f,a1,ca1,a1b,ca1b,"Square");
-    TestMatrixArith6<T>(a2f,ca2f,a1f,ca1f,a1b,ca1b,"Square");
-    TestMatrixArith6<T>(a2f,ca2f,a1f,ca1f,a1fb,ca1fb,"Square");
+    TestMatrixArith6(a2f,ca2f,a1,ca1,a1b,ca1b,"Square");
+    TestMatrixArith6(a2f,ca2f,a1f,ca1f,a1b,ca1b,"Square");
+    TestMatrixArith6(a2f,ca2f,a1f,ca1f,a1fb,ca1fb,"Square");
 #endif
 }
 

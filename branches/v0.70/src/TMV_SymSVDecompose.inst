@@ -23,8 +23,7 @@ template void SV_Decompose(const GenSymMatrix<T >& A, \
     const DiagMatrixView<RT >& S, const MatrixView<T >& V); \
 template void Eigen(const GenSymMatrix<T >& A, \
     const MatrixView<T >& U, const VectorView<RT >& S); \
-template void Eigen(const SymMatrixView<T >& A, \
-    const VectorView<RT >& S); \
+template void Eigen(const GenSymMatrix<T >& A, const VectorView<RT >& S); \
 template void PolarDecompose(const MatrixView<T >& U, \
     const SymMatrixView<T >& P); \
 template void PolarDecompose(const GenBandMatrix<T >& A, \

@@ -8,6 +8,7 @@
 
 #define NOADDEQ
 #define NOMULTEQ
+#define NOELEMMULT
 
 #include "TMV_TestMatrixArith.h"
 
@@ -43,9 +44,9 @@ void TestSymMatrixArith_C2()
         tmv::SymMatrixView<T> si = s[i];
         tmv::SymMatrixView<std::complex<T> > csi = cs[i];
 
-        TestMatrixArith4<T>(d1v,cd1v,si,csi,"Diag/Sym");
-        TestMatrixArith5<T>(d1v,cd1v,si,csi,"Diag/Sym");
-        TestMatrixArith6x<T>(d1v,cd1v,si,csi,"Diag/Sym");
+        TestMatrixArith4(d1v,cd1v,si,csi,"Diag/Sym");
+        TestMatrixArith5(d1v,cd1v,si,csi,"Diag/Sym");
+        TestMatrixArith6x(d1v,cd1v,si,csi,"Diag/Sym");
     }
 #endif
 }

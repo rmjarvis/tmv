@@ -9,8 +9,6 @@
 #include <cmath>
 #include "tmv/TMV_Base.h"
 
-#define EPS (10*tmv::TMV_Epsilon<T>())
-
 #ifndef NO_TEST_DOUBLE
 #define TEST_DOUBLE
 #endif
@@ -22,6 +20,8 @@
 #ifndef NO_TEST_COMPLEX
 #define TEST_COMPLEX
 #endif
+
+#define EPS (10*tmv::TMV_Epsilon<T>())
 
 extern bool showtests;
 extern bool showacc;
@@ -35,27 +35,35 @@ extern std::string lastsuccess;
 
 inline void PreAssert(std::string s)
 {
+#ifdef TMV_DEBUG
     if (showtests) { 
         std::cout<<"Trying: "<<s;  
         std::cout.flush(); 
     } 
+#endif
 }
 
 inline void DoAssert(bool x, std::string s)
 {
     if (x) { 
+#ifdef TMV_DEBUG
         if (showtests) std::cout<<"  Passed"<<std::endl;
         lastsuccess = s; 
+#endif
     } else { 
+#ifdef TMV_DEBUG
         if (showtests) std::cout<<"  Failed"<<std::endl;
         if (dontthrow) std::cout<<"Failed test: "<<s<<std::endl;  
         else {
+#endif
 #ifdef NOTHROW
             std::cerr<<"Error in test: "<<s<<std::endl; exit(1); 
 #else
             throw tmv::Error("Error in test: ",s);  
 #endif
+#ifdef TMV_DEBUG
         }
+#endif
     } 
 }
 

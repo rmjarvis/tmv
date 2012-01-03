@@ -951,7 +951,7 @@ namespace tmv {
 
         virtual inline ~ConstSymMatrixView()
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             const_cast<const T*&>(itsm) = 0;
 #endif
         }
@@ -1187,7 +1187,7 @@ namespace tmv {
         virtual inline ~SymMatrixView() 
         {
             TMV_SETFIRSTLAST(0,0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             const_cast<const T*&>(itsm) = 0;
 #endif
         }
@@ -2046,7 +2046,7 @@ namespace tmv {
         {
             TMVAssert(_size >= 0);
             TMVAssert(S==RowMajor || S==ColMajor);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }
@@ -2204,7 +2204,7 @@ namespace tmv {
         virtual inline ~SymMatrix() 
         {
             TMV_SETFIRSTLAST(0,0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(999));
 #endif
         }
@@ -2931,7 +2931,7 @@ namespace tmv {
             _first = itsm.get();
             _last = _first+itslen;
 #endif
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }
@@ -3002,7 +3002,7 @@ namespace tmv {
         {
             TMVAssert(_size >= 0);
             TMVAssert(S==RowMajor || S==ColMajor);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #else
             if (isComplex(T())) diag().imagPart().setZero();
@@ -3161,7 +3161,7 @@ namespace tmv {
         virtual inline ~HermMatrix() 
         {
             TMV_SETFIRSTLAST(0,0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(999));
 #endif
         }
@@ -3920,7 +3920,7 @@ namespace tmv {
             _first = itsm.get();
             _last = _first+itslen;
 #endif
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #else
             if (isComplex(T())) diag().imagPart().setZero();

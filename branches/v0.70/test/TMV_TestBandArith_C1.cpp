@@ -6,6 +6,8 @@
 #include "TMV_Test_2.h"
 #include "TMV_TestBandArith.h"
 
+#define NOELEMMULT
+
 #include "TMV_TestMatrixArith.h"
 
 template <class T> 
@@ -38,9 +40,9 @@ void TestBandMatrixArith_C1()
         tmv::BandMatrixView<T> bi = b[i];
         tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
 
-        TestMatrixArith4<T>(bi,cbi,d1v,cd1v,"Band/Diag");
-        TestMatrixArith5<T>(bi,cbi,d1v,cd1v,"Band/Diag");
-        TestMatrixArith6x<T>(bi,cbi,d1v,cd1v,"Band/Diag");
+        TestMatrixArith4(bi,cbi,d1v,cd1v,"Band/Diag");
+        TestMatrixArith5(bi,cbi,d1v,cd1v,"Band/Diag");
+        TestMatrixArith6x(bi,cbi,d1v,cd1v,"Band/Diag");
     }
 }
 

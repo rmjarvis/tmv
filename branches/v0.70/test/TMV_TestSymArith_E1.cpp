@@ -11,6 +11,7 @@
 
 #define NOADDEQ
 #define NOMULTEQ
+#define NOELEMMULT
 
 #include "TMV_TestMatrixArith.h"
 
@@ -44,9 +45,9 @@ void TestSymMatrixArith_E1()
             tmv::BandMatrix<T> bx = bj;
             tmv::BandMatrix<std::complex<T> > cbx = cbj;
 
-            TestMatrixArith4<T>(si,csi,bj,cbj,"Sym/Band");
-            TestMatrixArith5<T>(si,csi,bj,cbj,"Sym/Band");
-            TestMatrixArith6x<T>(si,csi,bj,cbj,"Sym/Band");
+            TestMatrixArith4(si,csi,bj,cbj,"Sym/Band");
+            TestMatrixArith5(si,csi,bj,cbj,"Sym/Band");
+            TestMatrixArith6x(si,csi,bj,cbj,"Sym/Band");
         }
     }
 }

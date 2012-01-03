@@ -46,8 +46,8 @@ void TestSymBandDiv_F1(tmv::DivType dt, PosDefCode pdc)
         si.saveDiv();
         csi.saveDiv();
 
-        TestMatrixDivArith1<T>(dt,si,hv,csi,chv,"HermMatrix/SymBand");
-        TestMatrixDivArith1<T>(dt,si,sv,csi,csv,"SymMatrix/SymBand");
+        TestMatrixDivArith1(dt,si,hv,csi,chv,"HermMatrix/SymBand");
+        TestMatrixDivArith1(dt,si,sv,csi,csv,"SymMatrix/SymBand");
     }
 }
 

@@ -663,7 +663,7 @@ namespace tmv {
             mmax *= scale;
             while (mmax > inveps) { scale *= eps; mmax *= eps; }
             return TMV_SQRT(m.normSq(scale))/scale;
-        }  else {
+        } else {
             return TMV_SQRT(m.normSq());
         }
     }

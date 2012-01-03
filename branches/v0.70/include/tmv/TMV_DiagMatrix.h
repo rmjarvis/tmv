@@ -546,6 +546,8 @@ namespace tmv {
         { return cdiag().cptr(); }
         inline int step() const
         { return cdiag().step(); }
+        inline bool isconj() const
+        { return cdiag().isconj(); }
 
         inline const_iterator begin() const
         { return diag().begin(); }

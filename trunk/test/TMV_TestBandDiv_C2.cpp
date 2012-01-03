@@ -36,7 +36,7 @@ void TestBandDiv_C2(tmv::DivType dt)
         tmv::BandMatrixView<T> bi = b[i];
         tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
 
-        TestMatrixDivArith1<T>(dt,dv,bi,cdv,cbi,"Band/DiagMatrix");
+        TestMatrixDivArith1(dt,dv,bi,cdv,cbi,"Band/DiagMatrix");
     }
 }
 

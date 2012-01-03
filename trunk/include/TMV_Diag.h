@@ -22,6 +22,7 @@
 #include "tmv/TMV_ProdXM.h"
 #include "tmv/TMV_SumMM.h"
 #include "tmv/TMV_SumMX.h"
+#include "tmv/TMV_ElemProdMM.h"
 #endif
 
 #endif

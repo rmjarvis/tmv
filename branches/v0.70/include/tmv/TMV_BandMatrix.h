@@ -1105,7 +1105,7 @@ namespace tmv {
 
         virtual inline ~ConstBandMatrixView() 
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             const_cast<const T*&>(itsm) = 0;
 #endif
         }
@@ -1482,7 +1482,7 @@ namespace tmv {
         virtual inline ~BandMatrixView() 
         {
             TMV_SETFIRSTLAST(0,0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             const_cast<T*&>(itsm) = 0;
 #endif
         }
@@ -2454,7 +2454,7 @@ namespace tmv {
             TMVAssert(hi >= 0);
             TMVAssert(lo < cs);
             TMVAssert(hi < rs);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }
@@ -2643,7 +2643,7 @@ namespace tmv {
         virtual inline ~BandMatrix() 
         {
             TMV_SETFIRSTLAST(0,0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(999));
 #endif
             itsm = 0;
@@ -3562,7 +3562,7 @@ namespace tmv {
             _first = itsm1.get();
             _last = _first + linsize;
 #endif
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }

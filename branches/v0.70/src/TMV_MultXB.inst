@@ -11,32 +11,22 @@ DefXM(CT)
 
 #undef DefXM
 
-#define DefEl(T,T1)\
-  template void ElementProd(const T alpha, \
-      const GenBandMatrix<T1 >& A, const BandMatrixView<T >& B);  \
-
-DefEl(T,T)
-#ifdef INST_COMPLEX
-DefEl(CT,T)
-DefEl(CT,CT)
-#endif
-
-#undef DefEl
-
-#define DefAddEl(T,T1,T2)\
-  template void AddElementProd(const T alpha, \
+#define DefEl(T,T1,T2)\
+  template void ElemMultMM<false>(const T alpha, \
+      const GenBandMatrix<T1 >& A, const GenBandMatrix<T2 >& B, \
+      const BandMatrixView<T >& C);  \
+  template void ElemMultMM<true>(const T alpha, \
       const GenBandMatrix<T1 >& A, const GenBandMatrix<T2 >& B, \
       const BandMatrixView<T >& C);  \
 
-DefAddEl(T,T,T)
+DefEl(T,T,T)
 #ifdef INST_COMPLEX
-DefAddEl(CT,T,T)
-DefAddEl(CT,T,CT)
-DefAddEl(CT,CT,T)
-DefAddEl(CT,CT,CT)
+DefEl(CT,T,T)
+DefEl(CT,T,CT)
+DefEl(CT,CT,CT)
 #endif
 
-#undef DefAddEl
+#undef DefEl
 
 #undef CT
 

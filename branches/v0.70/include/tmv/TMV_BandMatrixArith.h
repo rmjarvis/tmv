@@ -315,8 +315,7 @@ namespace tmv {
 
         inline SumBB(
             T _x1, const GenBandMatrix<T1>& _m1, 
-            T _x2, const GenBandMatrix<T2>& _m2
-        ) :
+            T _x2, const GenBandMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { 
             TMVAssert(m1.rowsize() == m2.rowsize()); 
@@ -474,8 +473,7 @@ namespace tmv {
 
         inline ProdBB(
             T _x, const GenBandMatrix<T1>& _m1,
-            const GenBandMatrix<T2>& _m2
-        ) :
+            const GenBandMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.rowsize() == m2.colsize()); }
         inline int colsize() const { return m1.colsize(); }
@@ -635,6 +633,120 @@ namespace tmv {
 #undef GENMATRIX2
 #undef PRODXM1
 #undef PRODXM2
+
+
+    //
+    // Element Product BandMatrix * BandMatrix
+    //
+
+    template <class T, class T1, class T2> 
+    class ElemProdBB : public BandMatrixComposite<T> 
+    {
+    public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline ElemProdBB(
+            T _x, const GenBandMatrix<T1>& _m1, const GenBandMatrix<T2>& _m2) :
+            x(_x),m1(_m1),m2(_m2)
+        { 
+            TMVAssert(m1.rowsize() == m2.rowsize()); 
+            TMVAssert(m1.colsize() == m2.colsize()); 
+        }
+        inline int colsize() const { return m1.colsize(); }
+        inline int rowsize() const { return m1.rowsize(); }
+        inline int nlo() const { return TMV_MIN(m1.nlo(),m2.nlo()); }
+        inline int nhi() const { return TMV_MIN(m1.nhi(),m2.nhi()); }
+        inline StorageType stor() const 
+        { return m1.stor() == m2.stor() ? BaseStorOf(m1) : DiagMajor; }
+        inline T getX() const { return x; }
+        inline const GenBandMatrix<T1>& getM1() const { return m1; }
+        inline const GenBandMatrix<T2>& getM2() const { return m2; }
+        inline void assignToB(const BandMatrixView<real_type>& m0) const
+        { 
+            TMVAssert(isReal(T()));
+            TMVAssert(m0.colsize() == colsize());
+            TMVAssert(m0.rowsize() == rowsize());
+            TMVAssert(m0.nlo() >= nlo());
+            TMVAssert(m0.nhi() >= nhi());
+            ElemMultMM<false>(x,m1,m2,m0);
+        }
+        inline void assignToB(const BandMatrixView<complex_type>& m0) const
+        { 
+            TMVAssert(m0.colsize() == colsize());
+            TMVAssert(m0.rowsize() == rowsize());
+            TMVAssert(m0.nlo() >= nlo());
+            TMVAssert(m0.nhi() >= nhi());
+            ElemMultMM<false>(x,m1,m2,m0);
+        }
+    private:
+        T x;
+        const GenBandMatrix<T1>& m1;
+        const GenBandMatrix<T2>& m2;
+    };
+
+    template <class T, class T2, class T3> 
+    inline const BandMatrixView<T>& operator+=(
+        const BandMatrixView<T>& m, const ElemProdBB<T,T2,T3>& pmm)
+    { 
+        TMVAssert(m.colsize() == pmm.colsize());
+        TMVAssert(m.rowsize() == pmm.rowsize());
+        TMVAssert(m0.nlo() >= pmm.nlo());
+        TMVAssert(m0.nhi() >= pmm.nhi());
+        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T> 
+    inline const BandMatrixView<CT>& operator+=(
+        const BandMatrixView<CT>& m, const ElemProdBB<T,T,T>& pmm)
+    { 
+        TMVAssert(m.colsize() == pmm.colsize());
+        TMVAssert(m.rowsize() == pmm.rowsize());
+        TMVAssert(m0.nlo() >= pmm.nlo());
+        TMVAssert(m0.nhi() >= pmm.nhi());
+        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T, class T2, class T3> 
+    inline const BandMatrixView<T>& operator-=(
+        const BandMatrixView<T>& m, const ElemProdBB<T,T2,T3>& pmm)
+    { 
+        TMVAssert(m.colsize() == pmm.colsize());
+        TMVAssert(m.rowsize() == pmm.rowsize());
+        TMVAssert(m0.nlo() >= pmm.nlo());
+        TMVAssert(m0.nhi() >= pmm.nhi());
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T> 
+    inline const BandMatrixView<CT>& operator-=(
+        const BandMatrixView<CT>& m, const ElemProdBB<T,T,T>& pmm)
+    {
+        TMVAssert(m.colsize() == pmm.colsize());
+        TMVAssert(m.rowsize() == pmm.rowsize());
+        TMVAssert(m0.nlo() >= pmm.nlo());
+        TMVAssert(m0.nhi() >= pmm.nhi());
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+#define PRODMM ElemProdBB
+#define GENMATRIX1 GenBandMatrix
+#define GENMATRIX2 GenBandMatrix
+#define PRODXM1 ProdXB
+#define PRODXM2 ProdXB
+#define OP ElemProd
+#include "tmv/TMV_AuxProdMM.h"
+#include "tmv/TMV_AuxProdMMa.h"
+#undef PRODMM
+#undef GENMATRIX1
+#undef GENMATRIX2
+#undef PRODXM1
+#undef PRODXM2
+
 
 #define GENMATRIX GenBandMatrix
 #define PRODXM ProdXB

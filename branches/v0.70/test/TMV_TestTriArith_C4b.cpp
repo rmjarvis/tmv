@@ -2,6 +2,8 @@
 #include "TMV_Test_1.h"
 #include "TMV.h"
 
+#define NOELEMMULT
+
 template <class T1, class T2>
 static inline bool CanAddEq(
     const tmv::UpperTriMatrixView<T1>& a, const tmv::DiagMatrixView<T2>& b)
@@ -53,10 +55,10 @@ template <class T> void TestTriMatrixArith_C4b()
     tmv::DiagMatrixView<T> d1 = DiagMatrixViewOf(a1x.row(0));
     tmv::DiagMatrixView<CT> cd1 = DiagMatrixViewOf(ca1x.row(0));
 
-    TestMatrixArith4<T>(u1,cu1,d1,cd1,"UpperTri/Diag 1");
-    TestMatrixArith4<T>(u2,cu2,d1,cd1,"UpperTri/Diag 2");
-    TestMatrixArith4<T>(u4,cu4,d1,cd1,"UpperTri/Diag 3");
-    TestMatrixArith4<T>(u5,cu5,d1,cd1,"UpperTri/Diag 4");
+    TestMatrixArith4(u1,cu1,d1,cd1,"UpperTri/Diag 1");
+    TestMatrixArith4(u2,cu2,d1,cd1,"UpperTri/Diag 2");
+    TestMatrixArith4(u4,cu4,d1,cd1,"UpperTri/Diag 3");
+    TestMatrixArith4(u5,cu5,d1,cd1,"UpperTri/Diag 4");
 #if (XTEST & 1)
     tmv::Matrix<T> a3x(12,16);
     for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3x(i,j) = T(1-2*i+3*j);
@@ -70,14 +72,14 @@ template <class T> void TestTriMatrixArith_C4b()
     tmv::UpperTriMatrixView<CT> cu3 = ca3x.subMatrix(0,12,0,16,3,4).upperTri();
     tmv::UpperTriMatrixView<T> u6 = a3x.subMatrix(0,12,0,16,3,4).unitUpperTri();
     tmv::UpperTriMatrixView<CT> cu6 = ca3x.subMatrix(0,12,0,16,3,4).unitUpperTri();
-    TestMatrixArith4<T>(u3,cu3,d1,cd1,"UpperTri/Diag 5");
-    TestMatrixArith4<T>(u3,cu3,d3,cd3,"UpperTri/Diag 6");
-    TestMatrixArith4<T>(u6,cu6,d1,cd1,"UpperTri/Diag 7");
-    TestMatrixArith4<T>(u6,cu6,d3,cd3,"UpperTri/Diag 8");
-    TestMatrixArith4<T>(u1,cu1,d3,cd3,"UpperTri/Diag 9");
-    TestMatrixArith4<T>(u2,cu2,d3,cd3,"UpperTri/Diag 10");
-    TestMatrixArith4<T>(u4,cu4,d3,cd3,"UpperTri/Diag 11");
-    TestMatrixArith4<T>(u5,cu5,d3,cd3,"UpperTri/Diag 12");
+    TestMatrixArith4(u3,cu3,d1,cd1,"UpperTri/Diag 5");
+    TestMatrixArith4(u3,cu3,d3,cd3,"UpperTri/Diag 6");
+    TestMatrixArith4(u6,cu6,d1,cd1,"UpperTri/Diag 7");
+    TestMatrixArith4(u6,cu6,d3,cd3,"UpperTri/Diag 8");
+    TestMatrixArith4(u1,cu1,d3,cd3,"UpperTri/Diag 9");
+    TestMatrixArith4(u2,cu2,d3,cd3,"UpperTri/Diag 10");
+    TestMatrixArith4(u4,cu4,d3,cd3,"UpperTri/Diag 11");
+    TestMatrixArith4(u5,cu5,d3,cd3,"UpperTri/Diag 12");
 #endif
 
 #if (XTEST & 2)
@@ -90,23 +92,23 @@ template <class T> void TestTriMatrixArith_C4b()
     tmv::LowerTriMatrixView<T> l5 = a2x.unitLowerTri();
     tmv::LowerTriMatrixView<CT> cl5 = ca2x.unitLowerTri();
 
-    TestMatrixArith4<T>(l1,cl1,d1,cd1,"LowerTri/Diag 1");
-    TestMatrixArith4<T>(l2,cl2,d1,cd1,"LowerTri/Diag 2");
-    TestMatrixArith4<T>(l4,cl4,d1,cd1,"LowerTri/Diag 3");
-    TestMatrixArith4<T>(l5,cl5,d1,cd1,"LowerTri/Diag 4");
+    TestMatrixArith4(l1,cl1,d1,cd1,"LowerTri/Diag 1");
+    TestMatrixArith4(l2,cl2,d1,cd1,"LowerTri/Diag 2");
+    TestMatrixArith4(l4,cl4,d1,cd1,"LowerTri/Diag 3");
+    TestMatrixArith4(l5,cl5,d1,cd1,"LowerTri/Diag 4");
 #if (XTEST & 1)
     tmv::LowerTriMatrixView<T> l3 = a3x.subMatrix(0,12,0,16,3,4).lowerTri();
     tmv::LowerTriMatrixView<CT> cl3 = ca3x.subMatrix(0,12,0,16,3,4).lowerTri();
     tmv::LowerTriMatrixView<T> l6 = a3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
     tmv::LowerTriMatrixView<CT> cl6 = ca3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
-    TestMatrixArith4<T>(l3,cl3,d1,cd1,"LowerTri/Diag 5");
-    TestMatrixArith4<T>(l3,cl3,d3,cd3,"LowerTri/Diag 6");
-    TestMatrixArith4<T>(l6,cl6,d1,cd1,"LowerTri/Diag 7");
-    TestMatrixArith4<T>(l6,cl6,d3,cd3,"LowerTri/Diag 8");
-    TestMatrixArith4<T>(l1,cl1,d3,cd3,"LowerTri/Diag 9");
-    TestMatrixArith4<T>(l2,cl2,d3,cd3,"LowerTri/Diag 10");
-    TestMatrixArith4<T>(l4,cl4,d3,cd3,"LowerTri/Diag 11");
-    TestMatrixArith4<T>(l5,cl5,d3,cd3,"LowerTri/Diag 12");
+    TestMatrixArith4(l3,cl3,d1,cd1,"LowerTri/Diag 5");
+    TestMatrixArith4(l3,cl3,d3,cd3,"LowerTri/Diag 6");
+    TestMatrixArith4(l6,cl6,d1,cd1,"LowerTri/Diag 7");
+    TestMatrixArith4(l6,cl6,d3,cd3,"LowerTri/Diag 8");
+    TestMatrixArith4(l1,cl1,d3,cd3,"LowerTri/Diag 9");
+    TestMatrixArith4(l2,cl2,d3,cd3,"LowerTri/Diag 10");
+    TestMatrixArith4(l4,cl4,d3,cd3,"LowerTri/Diag 11");
+    TestMatrixArith4(l5,cl5,d3,cd3,"LowerTri/Diag 12");
 #endif
 #endif
 }

@@ -6,6 +6,8 @@
 #include "TMV_Test_2.h"
 #include "TMV_TestSymBandArith.h"
 
+#define NOELEMMULT
+
 template <class T1, class T2> 
 inline bool CanAddEq(
     const tmv::DiagMatrixView<T1>& m1, const tmv::SymBandMatrixView<T2>& m2)
@@ -64,9 +66,9 @@ void TestSymBandMatrixArith_C2()
         tmv::SymBandMatrixView<T> si = sb[i];
         tmv::SymBandMatrixView<std::complex<T> > csi = csb[i];
 
-        TestMatrixArith4<T>(d1v,cd1v,si,csi,"Diag/SymBand");
-        TestMatrixArith5<T>(d1v,cd1v,si,csi,"Diag/SymBand");
-        TestMatrixArith6x<T>(d1v,cd1v,si,csi,"Diag/SymBand");
+        TestMatrixArith4(d1v,cd1v,si,csi,"Diag/SymBand");
+        TestMatrixArith5(d1v,cd1v,si,csi,"Diag/SymBand");
+        TestMatrixArith6x(d1v,cd1v,si,csi,"Diag/SymBand");
     }
 #endif
 }

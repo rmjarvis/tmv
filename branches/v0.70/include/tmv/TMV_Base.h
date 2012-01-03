@@ -95,7 +95,7 @@
 #ifndef TMV_Base_H
 #define TMV_Base_H
 
-#if (!defined(NDEBUG) && !defined(TMVNDEBUG))
+#if ((!defined(NDEBUG) && !defined(TMV_NDEBUG)) || defined(TMV_EXTRA_DEBUG))
 #define TMV_DEBUG
 #endif
 
@@ -109,6 +109,7 @@
 #include <complex>
 #include <memory>
 #include <stdexcept>
+#include <cstddef>
 #include <string>
 #include <algorithm>
 
@@ -148,7 +149,105 @@ namespace tmv {
     ( (major > TMV_MAJOR_VERSION) || \
       (major == TMV_MAJOR_VERSION && minor >= TMV_MINOR_VERSION) )
 
-    enum DivType { XXX, LU, CH, QR, QRP, SV };
+#if 0
+    // Attributes are stored as a binary field, so they can be |'ed
+    // together to calculate the full set of attributes.
+    //
+    // For each object we have a default set of attributes that is 
+    // implied by A=0.  This way we can write, for example:
+    // UpperTriMatrix<T,UnitDiag> U;
+    // and this will imply (UnitDiag | ColMajor | NonPacked | CStyle).
+    //
+    // Attributes that are always the default (whenever they are allowed)
+    // can be defined as 0, since the absence of the converse is sufficient.
+    // e.g. CStyle, NonConj, NonUnit, NonMajor, NonPacked, UnknownDiag.
+    //
+    // Some pairs of attributes are logical opposites, but we can't
+    // set either to 0, since some objects have one as the default, and
+    // others have the other.  e.g. WithDivider and NoDivider.
+    // So these each need to have a non-zero bit.
+    //
+    // (Not implemented yet: Packed, ZeroDiag)
+
+    enum ConjType { NonConj = 0, Conj = 0x1 };
+    enum IndexStyle { CStyle = 0, FortranStyle = 0x2 };
+    enum StepType { NonUnit = 0, Unit = 0x4 };
+    enum StorageType {
+        NonMajor = 0, ColMajor = 0x4, RowMajor = 0x8, DiagMajor = 0x10,
+        AllStorageType = 0x1c };
+    enum DiagType {
+        UnknownDiag = 0, NonUnitDiag = 0x20, UnitDiag = 0x40,
+        ZeroDiag = 0x80, AllDiagType = 0xe0 };
+    enum PackType { NonPacked = 0, Packed = 0x100 };
+    enum DivStatus {
+        NoDivider = 0x200, WithDivider = 0x400, AllDivStatus = 0x600 };
+    enum AliasStatus {
+        NoAlias = 0x800, CheckAlias = 0x1000, AllAliasStatus = 0x1800 };
+    enum UpLoType { Upper = 0x2000, Lower = 0x4000 };
+
+    template <int A>
+    struct Attrib
+    {
+        enum { vectoronly = ((A & ~AllAliasStatus) <= 0x7) };
+        enum { conj = !(!(A & Conj)) };
+        enum { fort = !(!(A & FortranStyle)) };
+        enum { unit = !(!(A & Unit)) };
+        enum { colmajor = !(!(A & ColMajor)) };
+        enum { rowmajor = !(!(A & RowMajor)) };
+        enum { diagmajor = !(!(A & DiagMajor)) };
+        enum { nonmajor = !(colmajor || rowmajor || diagmajor) };
+        enum { nonunitdiag = !(!(A & NonUnitDiag)) };
+        enum { unitdiag = !(!(A & UnitDiag)) };
+        enum { zerodiag = !(!(A & ZeroDiag)) };
+        enum { unknowndiag = !(unitdiag || nonunitdiag || zerodiag) };
+        enum { packed = !(!(A & Packed)) };
+        enum { nodivider = !(!(A & NoDivider)) };
+        enum { withdivider = !(!(A & WithDivider)) };
+        enum { noalias = !(!(A & NoAlias)) };
+        enum { checkalias = !(!(A & CheckAlias)) };
+        enum { lower = !(!(A & Lower)) };
+        enum { upper = !(!(A & Upper)) };
+
+        enum { stor = (
+                rowmajor ? RowMajor : colmajor ? ColMajor :
+                diagmajor ? DiagMajor : NonMajor ) };
+
+        static std::string text()
+        {
+            std::string ret;
+            ret += ( (A & ColMajor) ? "ColMajor|" :
+                     (A & RowMajor) ? "RowMajor|" :
+                     (A & DiagMajor) ? "DiagMajor|" : "");
+            ret += (A & Conj) ? "Conj|" : "";
+            ret += (A & FortranStyle) ? "FortranStyle|" : "";
+            ret += (A & NonUnitDiag) ? "NonUnitDiag|" : "";
+            ret += (A & UnitDiag) ? "UnitDiag|" : "";
+            ret += (A & ZeroDiag) ? "ZeroDiag|" : "";
+            ret += (A & Packed) ? "Packed|" : "";
+            ret += (A & Lower) ? "Lower|" : "";
+            ret += (A & Upper) ? "Upper|" : "";
+            ret += (A & NoDivider) ? "NoDivider|" : "";
+            ret += (A & WithDivider) ? "WithDivider|" : "";
+            ret += (A & NoAlias) ? "NoAlias|" : "";
+            ret += (A & CheckAlias) ? "CheckAlias|" : "";
+            if (ret.size() == 0) return "Default";
+            else return ret.substr(0,ret.size()-1);
+        }
+        static std::string vtext()
+        {
+            std::string ret;
+            ret += (A & Unit) ? "Unit|" : "";
+            ret += (A & Conj) ? "Conj|" : "";
+            ret += (A & FortranStyle) ? "FortranStyle|" : "";
+            ret += (A & NoAlias) ? "NoAlias|" : "";
+            ret += (A & CheckAlias) ? "CheckAlias|" : "";
+            if (ret.size() == 0) return "Default";
+            else return ret.substr(0,ret.size()-1);
+        }
+    };
+#endif
+
+    enum DivType { XX, LU, CH, QR, QRP, SV };
     // MJ: Add the packed storage varieties: RowPack, ColPack, DiagPack
     enum StorageType { RowMajor, ColMajor, DiagMajor, NoMajor };
     enum UpLoType { Upper, Lower };
@@ -171,6 +270,38 @@ namespace tmv {
     template <class M> 
     inline StorageType BaseStorOf(const M& m)
     { return m.stor()==RowMajor ? RowMajor : ColMajor; }
+
+#if 0
+    enum DivType { 
+        XX=0, LU=1, CH=2, QR=4, QRP=8, SV=16,
+        // We store the divtype in a binary field integer.
+        // In addition to the above, we also use the same object to 
+        // store the following other flags related to division.
+        // So these values must not clash with the above DivType values.
+        // These aren't technically DivType's but since they are 
+        // stored together, I think this adds to type-safety.
+        DivInPlaceFlag = 32,
+        SaveDivFlag = 64,
+        // And finally shorthand for "one of the real DivType's":
+        DivTypeFlags = 31
+    };
+    TMV_INLINE DivType operator|(DivType a, DivType b)
+    {
+        return static_cast<DivType>(
+            static_cast<int>(a) | static_cast<int>(b));
+    }
+    TMV_INLINE DivType operator&(DivType a, DivType b)
+    {
+        return static_cast<DivType>(
+            static_cast<int>(a) & static_cast<int>(b));
+    }
+    TMV_INLINE DivType& operator|=(DivType& a, DivType b)
+    { a = (a|b); return a; }
+    TMV_INLINE DivType& operator&=(DivType& a, DivType b)
+    { a = (a&b); return a; }
+    TMV_INLINE DivType operator~(DivType a)
+    { return static_cast<DivType>(~static_cast<int>(a)); }
+#endif
 
 #ifdef NOALIASCHECK
     template <class M1, class M2> 
@@ -685,7 +816,7 @@ namespace tmv {
     inline std::string TMV_Text(DivType d)
     { 
         return 
-            d==XXX ? "XXX" :
+            d==XX ? "XX" :
             d==LU ? "LU" :
             d==CH ? "CH" :
             d==QR ? "QR" :

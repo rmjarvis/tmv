@@ -210,7 +210,7 @@ namespace tmv {
                 if (kC > C.nhi()) break;
                 // C.diag(kC,m1C,m2C) += alpha * DiagMatrixViewOf(A.diag(kA,m1A,m2A))
                 //      * B.diag(kB,m1B,m2B);
-                AddElementProd(
+                ElemMultVV<true>(
                     Tc(alpha),A.diag(kA,m1A,m2A),
                     B.diag(kB,m1B,m2B),C.diag(kC,m1C,m2C));
 

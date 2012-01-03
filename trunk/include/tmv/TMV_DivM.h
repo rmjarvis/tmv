@@ -6,6 +6,7 @@
 #include "TMV_BaseMatrix.h"
 #include "TMV_MultXM_Funcs.h"
 #include "TMV_MultMM_Funcs.h"
+#include "TMV_MultMV_Funcs.h"
 #include "TMV_DivMM_Funcs.h"
 #include "TMV_DivVM_Funcs.h" 
 #include "TMV_Det.h"
@@ -30,111 +31,18 @@ namespace tmv {
     struct LDivEqM_Helper<0,s,xs,M1,M2>
     { static void call(M1& , const M2& ) {} };
 
-    // algo 1: m2 is 1x1
-    template <int xs, class M1, class M2>
-    struct LDivEqM_Helper<1,1,xs,M1,M2>
-    {
-        // This one is different for vector and matrix, so break it out here.
-        template <class M1x>
-        static void call2(BaseVector_Mutable<M1x>& v1, const M2& m2)
-        { v1.ref(0) /= m2.cref(0,0); }
-        template <class M1x>
-        static void call2(BaseMatrix_Mutable<M1x>& m1, const M2& m2)
-        { m1.row(0,0,m1.rowsize()) /= m2.cref(0,0); }
-        template <class M1x>
-        static void call2(BaseMatrix_Rec_Mutable<M1x>& m1, const M2& m2)
-        { m1.row(0) /= m2.cref(0,0); }
-        static void call(M1& m1, const M2& m2)
-        {
-#ifdef PRINTALGO_DIVM
-            std::cout<<"LDivEq algo 1: s,xs = "<<1<<','<<xs<<std::endl;
-#endif
-            typedef typename M2::value_type T2;
-            if (m2.cref(0,0) == T2(0)) ThrowSingular("1x1 Matrix");
-            call2(m1,m2);
-        }
-    };
-
-    // algo 2: m2 is 2x2
-    template <int xs, class M1, class M2>
-    struct LDivEqM_Helper<2,2,xs,M1,M2>
-    {
-        // Several choices within this selection
-        template <int algo2, int dummy>
-        struct Helper2;
-
-        template <int dummy>
-        struct Helper2<1,dummy>
-        {
-            // M1 is a vector, so do the whole calculation directly
-            template <class V1x>
-            static void call(BaseVector_Mutable<V1x>& v1, const M2& m2)
-            {
-                typedef typename V1x::value_type T1;
-                typedef typename M2::value_type T2;
-                T2 det = DetM_Helper<2,2,M2>::call(m2);
-                if (det == T2(0)) ThrowSingular("2x2 Matrix");
-                T1 a = (v1.cref(0) * m2.cref(1,1) - 
-                        v1.cref(1) * m2.cref(0,1))/det;
-                T1 b = (v1.cref(1) * m2.cref(0,0) -
-                        v1.cref(0) * m2.cref(1,0))/det;
-                v1.ref(0) = a;
-                v1.ref(1) = b;
-            }
-            // M1 is a matrix, but only one column. 
-            template <class M1x>
-            static void call(BaseMatrix_Mutable<M1x>& m1, const M2& m2)
-            {
-                typedef typename M1x::col_type M1c;
-                M1c m1c = m1.col(0);
-                LDivEqM_Helper<2,2,1,M1c,M2>::call(m1c,m2);
-            }
-        };
-        // M1 is a matrix, and more than one column.
-        template <int dummy>
-        struct Helper2<2,dummy>
-        {
-            static void call(M1& m1, const M2& m2)
-            {
-                typedef typename M1::value_type T1;
-                typedef typename M2::value_type T2;
-                SmallMatrix<T2,2,2> m2inv = m2.inverse();
-                // TODO: I should write a special in-place mutiply 
-                // in the MultMM helper, but right now a statement like
-                // m2.transpose() *= m1inv.transpose() results in a temporary.
-                // Likewise with a 3x3 matrix.
-                // For now, just write a simple loop.
-                const int K = xs == TMV_UNKNOWN ? m1.rowsize() : xs;
-                for(int k=0;k<K;++k) {
-                    T1 a = (m1.cref(0,k) * m2inv.cref(0,0) + 
-                            m1.cref(1,k) * m2inv.cref(0,1));
-                    T1 b = (m1.cref(0,k) * m2inv.cref(1,0) +
-                            m1.cref(1,k) * m2inv.cref(1,1));
-                    m1.ref(0,k) = a;
-                    m1.ref(1,k) = b;
-                }
-            }
-        };
-        static void call(M1& m1, const M2& m2)
-        {
-#ifdef PRINTALGO_DIVM
-            std::cout<<"LDivEq algo 2: s,xs = "<<2<<','<<xs<<std::endl;
-#endif
-            const int algo2 = xs==1 ? 1 : 2;
-            Helper2<algo2,1>::call(m1,m2);
-        }
-    };
-
-    // algo 3: m2 is small enough to do inverse directly and multiply.
+    // algo 1: xs=1 -- m1 has only one column.
     template <int s, int xs, class M1, class M2>
-    struct LDivEqM_Helper<3,s,xs,M1,M2>
+    struct LDivEqM_Helper<1,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDivEq algo 3: s,xs = "<<s<<','<<xs<<std::endl;
+            std::cout<<"LDivEq algo 1: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
-            m1 = m2.inverse().calc() * m1.copy();
+            typedef typename M1::col_type M1c;
+            M1c m1c = m1.col(0);
+            LDivEqM_Helper<-3,s,xs,M1c,M2>::call(m1c,m2);
         }
     };
 
@@ -168,14 +76,127 @@ namespace tmv {
         }
     };
 
-    // algo 11: Use Divider 
+    // algo 11: m2 is 1x1 
     template <int s, int xs, class M1, class M2>
     struct LDivEqM_Helper<11,s,xs,M1,M2>
+    {
+        template <class M1x>
+        static void call2(BaseMatrix_Mutable<M1x>& m1, const M2& m2)
+        { m1.mat().row(0,m1.rowstart(0),m1.rowend(0)) /= m2.cref(0,0); }
+        template <class M1x>
+        static void call2(BaseMatrix_Rec_Mutable<M1x>& m1, const M2& m2)
+        { m1.row(0) /= m2.cref(0,0); }
+        static void call(M1& m1, const M2& m2)
+        {
+#ifdef PRINTALGO_DIVM
+            std::cout<<"LDivEq algo 11: s,xs = "<<1<<','<<xs<<std::endl;
+#endif
+            typedef typename M2::value_type T2;
+            if (m2.cref(0,0) == T2(0)) ThrowSingular("1x1 Matrix");
+            call2(m1,m2);
+        }
+    };
+
+    // algo 12: m2 is 2x2
+    template <int s, int xs, class M1, class M2>
+    struct LDivEqM_Helper<12,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDivEq algo 11: s,xs = "<<s<<','<<xs<<std::endl;
+            std::cout<<"LDivEq algo 12: s,xs = "<<s<<','<<xs<<std::endl;
+#endif
+            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
+            SmallMatrix<T2,2,2> m2inv = m2.inverse();
+            // TODO: I should write a special in-place mutiply 
+            // in the MultMM helper, but right now a statement like
+            // m2.transpose() *= m1inv.transpose() results in a temporary.
+            // Likewise with a 3x3 matrix.
+            // For now, just write a simple loop.
+            const int K = xs == TMV_UNKNOWN ? m1.rowsize() : xs;
+            for(int k=0;k<K;++k) {
+                T1 a = (m1.cref(0,k) * m2inv.cref(0,0) + 
+                        m1.cref(1,k) * m2inv.cref(0,1));
+                T1 b = (m1.cref(0,k) * m2inv.cref(1,0) +
+                        m1.cref(1,k) * m2inv.cref(1,1));
+                m1.ref(0,k) = a;
+                m1.ref(1,k) = b;
+            }
+        }
+    };
+
+    // algo 13: m2 is small enough to do inverse directly and multiply.
+    template <int s, int xs, class M1, class M2>
+    struct LDivEqM_Helper<13,s,xs,M1,M2>
+    {
+        static void call(M1& m1, const M2& m2)
+        {
+#ifdef PRINTALGO_DIVM
+            std::cout<<"LDivEq algo 13: s,xs = "<<s<<','<<xs<<std::endl;
+#endif
+            m1 = m2.inverse().calc() * m1.copy();
+        }
+    };
+
+    // algo 21: m2 is 1x1, m1 is a vector
+    template <int s, int xs, class M1, class M2>
+    struct LDivEqM_Helper<21,s,xs,M1,M2>
+    {
+        static void call(M1& m1, const M2& m2)
+        {
+#ifdef PRINTALGO_DIVM
+            std::cout<<"LDivEq algo 21: s,xs = "<<1<<','<<xs<<std::endl;
+#endif
+            typedef typename M2::value_type T2;
+            if (m2.cref(0,0) == T2(0)) ThrowSingular("1x1 Matrix");
+            m1.ref(0) /= m2.cref(0,0); 
+        }
+    };
+
+    // algo 22: m2 is 2x2, m1 is a vector
+    template <int s, int xs, class M1, class M2>
+    struct LDivEqM_Helper<22,s,xs,M1,M2>
+    {
+        static void call(M1& m1, const M2& m2)
+        {
+#ifdef PRINTALGO_DIVM
+            std::cout<<"LDivEq algo 22: s,xs = "<<s<<','<<xs<<std::endl;
+#endif
+            typedef typename M1::value_type T1;
+            typedef typename M2::value_type T2;
+            T2 det = DetM_Helper<2,2,M2>::call(m2);
+            if (det == T2(0)) ThrowSingular("2x2 Matrix");
+            T1 a = (m1.cref(0) * m2.cref(1,1) - 
+                    m1.cref(1) * m2.cref(0,1))/det;
+            T1 b = (m1.cref(1) * m2.cref(0,0) -
+                    m1.cref(0) * m2.cref(1,0))/det;
+            m1.ref(0) = a;
+            m1.ref(1) = b;
+        }
+    };
+
+    // algo 23: do inverse directly, m1 is a vector
+    template <int s, int xs, class M1, class M2>
+    struct LDivEqM_Helper<23,s,xs,M1,M2>
+    {
+        static void call(M1& m1, const M2& m2)
+        {
+#ifdef PRINTALGO_DIVM
+            std::cout<<"LDivEq algo 13: s,xs = "<<s<<','<<xs<<std::endl;
+#endif
+            m1 = m2.inverse().calc() * m1.copy();
+        }
+    };
+
+    // algo 31: Use Divider 
+    template <int s, int xs, class M1, class M2>
+    struct LDivEqM_Helper<31,s,xs,M1,M2>
+    {
+        static void call(M1& m1, const M2& m2)
+        {
+#ifdef PRINTALGO_DIVM
+            std::cout<<"LDivEq algo 31: s,xs = "<<s<<','<<xs<<std::endl;
             std::cout<<"divIsSet = "<<m2.divIsSet()<<std::endl;
             std::cout<<"divIsInPlace = "<<m2.divIsInPlace()<<std::endl;
             std::cout<<"divIsSaved = "<<m2.divIsSaved()<<std::endl;
@@ -187,28 +208,28 @@ namespace tmv {
         }
     };
 
-    // algo 12: Calculate LU decomposition on the spot.
+    // algo 32: Calculate LU decomposition on the spot.
     template <int s, int xs, class M1, class M2>
-    struct LDivEqM_Helper<12,s,xs,M1,M2>
+    struct LDivEqM_Helper<32,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDivEq algo 12: s,xs = "<<s<<','<<xs<<std::endl;
+            std::cout<<"LDivEq algo 32: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M2::real_type>::isinteger);
             m2.lud().solveInPlace(m1);
         } 
     };
 
-    // algo 21: Use Divider (transpose)
+    // algo 41: Use Divider (transpose)
     template <int s, int xs, class M1, class M2>
-    struct LDivEqM_Helper<21,s,xs,M1,M2>
+    struct LDivEqM_Helper<41,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDivEq algo 21: s,xs = "<<s<<','<<xs<<std::endl;
+            std::cout<<"LDivEq algo 41: s,xs = "<<s<<','<<xs<<std::endl;
             std::cout<<"divIsSet = "<<m2.divIsSet()<<std::endl;
             std::cout<<"divIsInPlace = "<<m2.divIsInPlace()<<std::endl;
             std::cout<<"divIsSaved = "<<m2.divIsSaved()<<std::endl;
@@ -220,28 +241,28 @@ namespace tmv {
         }
     };
 
-    // algo 22: Calculate LU decomposition on the spot (transpose)
+    // algo 42: Calculate LU decomposition on the spot (transpose)
     template <int s, int xs, class M1, class M2>
-    struct LDivEqM_Helper<22,s,xs,M1,M2>
+    struct LDivEqM_Helper<42,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDivEq algo 22: s,xs = "<<s<<','<<xs<<std::endl;
+            std::cout<<"LDivEq algo 42: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M2::real_type>::isinteger);
             m2.lud().solveTransposeInPlace(m1);
         } 
     };
 
-    // algo 31: m2 is diag, invert it directly.
+    // algo 51: m2 is diag, invert it directly.
     template <int s, int xs, class M1, class M2>
-    struct LDivEqM_Helper<31,s,xs,M1,M2>
+    struct LDivEqM_Helper<51,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDivEq algo 31: s,xs = "<<s<<','<<xs<<std::endl;
+            std::cout<<"LDivEq algo 51: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             Scaling<1,typename M1::real_type> one;
             typename M1::noalias_type m1na = m1.noAlias();
@@ -249,28 +270,28 @@ namespace tmv {
         } 
     };
 
-    // algo 32: m2 is diag, invert it directly, with alias check.
+    // algo 52: m2 is diag, invert it directly, with alias check.
     template <int s, int xs, class M1, class M2>
-    struct LDivEqM_Helper<32,s,xs,M1,M2>
+    struct LDivEqM_Helper<52,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDivEq algo 32: s,xs = "<<s<<','<<xs<<std::endl;
+            std::cout<<"LDivEq algo 52: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             Scaling<1,typename M1::real_type> one;
             MultMM<false>(one,m2.inverse().calc(),m1,m1);
         } 
     };
 
-    // algo 33: m1 is a vector
+    // algo 53: m1 is a vector
     template <int s, int xs, class M1, class M2>
-    struct LDivEqM_Helper<33,s,xs,M1,M2>
+    struct LDivEqM_Helper<53,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDivEq algo 33: s,xs = "<<s<<','<<xs<<std::endl;
+            std::cout<<"LDivEq algo 53: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             if (m2.isSingular()) ThrowSingular("DiagMatrix");
             Scaling<1,typename M1::real_type> one;
@@ -279,14 +300,14 @@ namespace tmv {
         } 
     };
 
-    // algo 34: m1 is a vector, with alias check
+    // algo 54: m1 is a vector, with alias check
     template <int s, int xs, class M1, class M2>
-    struct LDivEqM_Helper<34,s,xs,M1,M2>
+    struct LDivEqM_Helper<54,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDivEq algo 34: s,xs = "<<s<<','<<xs<<std::endl;
+            std::cout<<"LDivEq algo 54: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             if (m2.isSingular()) ThrowSingular("DiagMatrix");
             Scaling<1,typename M1::real_type> one;
@@ -294,14 +315,14 @@ namespace tmv {
         } 
     };
 
-    // algo 35: m1 is diagonal
+    // algo 55: m1 is diagonal
     template <int s, int xs, class M1, class M2>
-    struct LDivEqM_Helper<35,s,xs,M1,M2>
+    struct LDivEqM_Helper<55,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDivEq algo 35: s,xs = "<<s<<','<<xs<<std::endl;
+            std::cout<<"LDivEq algo 55: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             if (m2.isSingular()) ThrowSingular("DiagMatrix");
             Scaling<1,typename M1::real_type> one;
@@ -310,14 +331,14 @@ namespace tmv {
         } 
     };
 
-    // algo 36: m1 is diagonal, with alias check
+    // algo 56: m1 is diagonal, with alias check
     template <int s, int xs, class M1, class M2>
-    struct LDivEqM_Helper<36,s,xs,M1,M2>
+    struct LDivEqM_Helper<56,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDivEq algo 36: s,xs = "<<s<<','<<xs<<std::endl;
+            std::cout<<"LDivEq algo 56: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             if (m2.isSingular()) ThrowSingular("DiagMatrix");
             Scaling<1,typename M1::real_type> one;
@@ -326,28 +347,28 @@ namespace tmv {
         } 
     };
 
-    // algo 41: m2 is triangular
+    // algo 61: m2 is triangular
     template <int s, int xs, class M1, class M2>
-    struct LDivEqM_Helper<41,s,xs,M1,M2>
+    struct LDivEqM_Helper<61,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDivEq algo 41: s,xs = "<<s<<','<<xs<<std::endl;
+            std::cout<<"LDivEq algo 61: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             typename M1::noalias_type m1na = m1.noAlias();
             TriLDivEq(m1na,m2);
         } 
     };
 
-    // algo 42: m2 is triangular, with alias check
+    // algo 62: m2 is triangular, with alias check
     template <int s, int xs, class M1, class M2>
-    struct LDivEqM_Helper<42,s,xs,M1,M2>
+    struct LDivEqM_Helper<62,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDivEq algo 42: s,xs = "<<s<<','<<xs<<std::endl;
+            std::cout<<"LDivEq algo 62: s,xs = "<<s<<','<<xs<<std::endl;
 #endif
             TriLDivEq(m1,m2);
         } 
@@ -366,15 +387,15 @@ namespace tmv {
             const bool lo2 = ShapeTraits<M2::_shape>::lower;
             const int algo = 
                 s == 0 ? 0 :
-                s == 1 ? 1 :
+                s == 1 ? vec1 ? 21 : xs == 1 ? 1 : 11 :
                 !up2 && !lo2 ? ( // m2 is diag
-                    vec1 ? 34 :
-                    (!up1 && !lo1) ? 36 :
-                    32 ) : 
+                    vec1 ? 54 :
+                    (!up1 && !lo1) ? 56 :
+                    52 ) : 
                 (!lo2 || !up2) ? 6 : // m2 is triangular
                 (s != TMV_UNKNOWN && s <= 4) ? 6 :
-                M2::_hasdivider ? 21 :
-                22;
+                M2::_hasdivider ? 41 :
+                42;
 #ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq transpose, alias:\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
@@ -399,16 +420,16 @@ namespace tmv {
             const bool lo2 = ShapeTraits<M2::_shape>::lower;
             const int algo = 
                 s == 0 ? 0 :
-                s == 1 ? 1 :
+                s == 1 ? vec1 ? 21 : xs == 1 ? 1 : 11 :
                 !up2 && !lo2 ? ( // m2 is diag
-                    vec1 ? 34 :
-                    (!up1 && !lo1) ? 36 :
-                    32 ) : 
-                (!lo2 || !up2) ? 42 : // m2 is triangular
-                s == 2 ? 2 :
-                (s != TMV_UNKNOWN && s <= 4) ? 3 :
-                M2::_hasdivider ? 11 :
-                12;
+                    vec1 ? 54 :
+                    (!up1 && !lo1) ? 56 :
+                    52 ) : 
+                (!lo2 || !up2) ? 62 : // m2 is triangular
+                s == 2 ? vec1 ? 22 : xs == 1 ? 1 : 12 :
+                (s != TMV_UNKNOWN && s <= 4) ? vec1 ? 23 : xs == 1 ? 1 : 13 :
+                M2::_hasdivider ? 31 :
+                32;
 #ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq alias:\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
@@ -433,15 +454,15 @@ namespace tmv {
             const bool lo2 = ShapeTraits<M2::_shape>::lower;
             const int algo = 
                 s == 0 ? 0 :
-                s == 1 ? 1 :
+                s == 1 ? vec1 ? 21 : xs == 1 ? 1 : 11 :
                 !up2 && !lo2 ? ( // m2 is diag
-                    vec1 ? 33 :
-                    (!up1 && !lo1) ? 35 :
-                    31 ) : 
+                    vec1 ? 53 :
+                    (!up1 && !lo1) ? 55 :
+                    51 ) : 
                 (!lo2 || !up2) ? 5 : // m2 is triangular
                 (s != TMV_UNKNOWN && s <= 4) ? 5 :
-                M2::_hasdivider ? 21 :
-                22;
+                M2::_hasdivider ? 41 :
+                42;
 #ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq transpose:\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
@@ -468,42 +489,50 @@ namespace tmv {
             // Possible algorithms to choose from:
             //
             //  0 = s==0, so nothing to do
-            //  1 = s==1: reduces to trivial scalar division
-            //  2 = s==2: do division directly
-            //  3 = m2 = m1.inverse() * m2
+            //  1 = xs==1 convert matrices to vectors
             //  5 = Direct transpose
             //  6 = Direct transpose with alias check
+            ///
+            // 11-13: direct inversion of m2, m1,m2 are matrices
+            // 11 = cs,rs == 1
+            // 12 = cs,rs == 2
+            // 13 = cs,rs > 2
             //
-            // 11-12: regular solution
-            // 11 = m2 has a divider object.  Use that.
-            // 12 = Do LU decomposition on the spot.
+            // 21-23: direct inversion of m2, m1,m3 are vectors
+            // 21 = cs,rs == 1
+            // 22 = cs,rs == 2
+            // 23 = cs,rs > 2
+
+            // 31-32: regular solution
+            // 31 = m2 has a divider object.  Use that.
+            // 32 = Do LU decomposition on the spot.
             //
-            // 21-22: transpose solution
-            // 21 = m2 has a divider object.  Use that.
-            // 22 = Do LU decomposition on the spot.
+            // 41-42: transpose solution
+            // 41 = m2 has a divider object.  Use that.
+            // 42 = Do LU decomposition on the spot.
             //
-            // 31 = m2 is diagonal
-            // 32 = m2 is diagonal, with alias check
-            // 33 = m2 is diagonal, m1 is a vector
-            // 34 = m2 is diagonal, m1 is a vector, with alias check
-            // 35 = m1,m2 are both diagonal
-            // 36 = m1,m2 are both diagonal, with alias check
+            // 51 = m2 is diagonal
+            // 52 = m2 is diagonal, with alias check
+            // 53 = m2 is diagonal, m1 is a vector
+            // 54 = m2 is diagonal, m1 is a vector, with alias check
+            // 55 = m1,m2 are both diagonal
+            // 56 = m1,m2 are both diagonal, with alias check
             //
-            // 41 = m2 is triangular 
-            // 42 = m2 is triangular, with alias check
+            // 61 = m2 is triangular 
+            // 62 = m2 is triangular, with alias check
 
             const int algo = 
                 s == 0 ? 0 :
-                s == 1 ? 1 :
+                s == 1 ? vec1 ? 21 : xs == 1 ? 1 : 11 :
                 !up2 && !lo2 ? ( // m2 is diag
-                    vec1 ? 33 :
-                    (!up1 && !lo1) ? 35 :
-                    31 ) : 
-                (!lo2 || !up2) ? 41 : // m2 is triangular
-                s == 2 ? 2 :
-                (s != TMV_UNKNOWN && s <= 4) ? 3 :
-                M2::_hasdivider ? 11 :
-                12;
+                    vec1 ? 53 :
+                    (!up1 && !lo1) ? 55 :
+                    51 ) : 
+                (!lo2 || !up2) ? 61 : // m2 is triangular
+                s == 2 ? vec1 ? 22 : xs == 1 ? 1 : 12 :
+                (s != TMV_UNKNOWN && s <= 4) ? vec1 ? 23 : xs == 1 ? 1 : 13 :
+                M2::_hasdivider ? 31 :
+                32;
 #ifdef PRINTALGO_DIVM
             std::cout<<"LDivEq: regular solution\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
@@ -522,8 +551,6 @@ namespace tmv {
         static TMV_INLINE void call(M1& m1, const M2& m2)
         {
             const int algo = 
-                s == 0 ? 0 :
-                s == 1 ? 1 :
                 M1::_checkalias ? 98 :
                 -4;
             LDivEqM_Helper<algo,s,xs,M1,M2>::call(m1,m2);
@@ -537,8 +564,6 @@ namespace tmv {
         static TMV_INLINE void call(M1& m1, const M2& m2)
         {
             const int algo = 
-                s == 0 ? 0 :
-                s == 1 ? 1 :
                 M1::_checkalias ? 99 :
                 -3;
             LDivEqM_Helper<algo,s,xs,M1,M2>::call(m1,m2);
@@ -663,125 +688,18 @@ namespace tmv {
         {}
     };
 
-    // algo 1: m2 is 1x1
-    template <int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<1,1,1,xs,ix,T,M1,M2,M3>
-    {
-        // This one is different for vector and matrix, so break it out here.
-        template <class M1x, class M3x>
-        static void call2(
-            const Scaling<ix,T>& x, const BaseVector<M1x>& v1, 
-            const M2& m2, BaseVector_Mutable<M3x>& v3)
-        { v3.ref(0) = x * v1.cref(0) / m2.cref(0,0); }
-        template <class M1x, class M3x>
-        static void call2(
-            const Scaling<ix,T>& x, const BaseMatrix_Calc<M1x>& m1,
-            const M2& m2, BaseMatrix_Mutable<M3x>& m3)
-        {
-            m3.row(0,0,m1.rowsize()) =
-                x * m1.row(0,0,m1.rowsize()) / m2.cref(0,0); 
-        }
-        template <class M1x, class M3x>
-        static void call2(
-            const Scaling<ix,T>& x, const BaseMatrix_Calc<M1x>& m1,
-            const M2& m2, BaseMatrix_Rec_Mutable<M3x>& m3)
-        { m3.row(0) = x * m1.row(0,0,m1.rowsize()) / m2.cref(0,0); }
-        template <class M1x, class M3x>
-        static void call2(
-            const Scaling<ix,T>& x, const BaseMatrix_Rec<M1x>& m1,
-            const M2& m2, BaseMatrix_Rec_Mutable<M3x>& m3)
-        { m3.row(0) = x * m1.row(0) / m2.cref(0,0); }
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-#ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 1: cs,rs,xs = "<<
-                1<<','<<1<<','<<xs<<std::endl;
-#endif
-            typedef typename M2::value_type T2;
-            if (m2.cref(0,0) == T2(0)) ThrowSingular("1x1 Matrix");
-            call2(x,m1,m2,m3);
-        }
-    };
-
-    // algo 2: m2 is 2x2
-    template <int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<2,2,2,xs,ix,T,M1,M2,M3>
-    {
-        template <int algo2, int dummy>
-        struct Helper2;
-
-        template <int dummy>
-        struct Helper2<1,dummy>
-        {
-            // M1,M3 are vectors
-            template <class V1x, class V3x>
-            static void call(
-                const Scaling<ix,T>& x, const BaseVector<V1x>& v1, 
-                const M2& m2, BaseVector_Mutable<V3x>& v3)
-            {
-                typedef typename V3x::value_type T3;
-                typedef typename M2::value_type T2;
-                T2 det = DetM_Helper<2,2,M2>::call(m2);
-                if (det == T2(0)) ThrowSingular("2x2 Matrix");
-                // v1, v3 might be aliased, so store temporaries:
-                T3 a = x*(v1.cref(0) * m2.cref(1,1) - 
-                          v1.cref(1) * m2.cref(0,1))/det;
-                T3 b = x*(v1.cref(1) * m2.cref(0,0) -
-                          v1.cref(0) * m2.cref(1,0))/det;
-                v3.ref(0) = a;
-                v3.ref(1) = b;
-            }
-            // M1,m3 are matrices, but only one column. 
-            template <class M1x, class M3x>
-            static void call(
-                const Scaling<ix,T>& x, const BaseMatrix_Calc<M1x>& m1, 
-                const M2& m2, BaseMatrix_Mutable<M3x>& m3)
-            {
-                typedef typename M1x::const_col_type M1c;
-                typedef typename M3x::col_type M3c;
-                M1c m1c = m1.col(0);
-                M3c m3c = m3.col(0);
-                LDivM_Helper<2,2,2,1,ix,T,M1c,M2,M3c>::call(x,m1c,m2,m3c);
-            }
-        };
-        // M1 is a matrix, and more than one column.
-        template <int dummy>
-        struct Helper2<2,dummy>
-        {
-            static void call(
-                const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-            {
-                typedef typename M3::value_type T3;
-                typedef typename M2::value_type T2;
-                SmallMatrix<T2,2,2> m2inv = m2.inverse();
-                m3 = x * m2inv * m1;
-            }
-        };
-        static void call(
-            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
-        {
-#ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 2: cs,rs,xs = "<<
-                2<<','<<2<<','<<xs<<std::endl;
-#endif
-            const int algo2 = xs==1 ? 1 : 2;
-            Helper2<algo2,1>::call(x,m1,m2,m3);
-        }
-    };
-
-    // algo 3: m2 is small enough to do inverse directly and multiply.
+    // algo 1: xs == 1: M1,M3 have only one column
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<3,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<1,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-#ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 3: cs,rs,xs = "<<
-                cs<<','<<rs<<','<<xs<<std::endl;
-#endif
-            m3 = x * m2.inverse().calc() * m1;
+            typedef typename M1::const_col_type M1c;
+            typedef typename M3::col_type M3c;
+            M1c m1c = m1.col(0);
+            M3c m3c = m3.col(0);
+            LDivM_Helper<-3,cs,rs,1,ix,T,M1c,M2,M3c>::call(x,m1c,m2,m3c);
         }
     };
 
@@ -819,15 +737,134 @@ namespace tmv {
         }
     };
 
-    // algo 11: Use Divider
+    // algo 11: m2 is 1x1
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<11,cs,rs,xs,ix,T,M1,M2,M3>
     {
+        template <class M1x, class M3x>
+        static void call2(
+            const Scaling<ix,T>& x, const BaseMatrix_Calc<M1x>& m1,
+            const M2& m2, BaseMatrix_Mutable<M3x>& m3)
+        {
+            m3.row(0,m1.rowstart(0),m1.rowend(0)) = 
+                (x/m2.cref(0,0)) * m1.row(0,m1.rowstart(0),m1.rowend(0));
+            m3.row(0,m3.rowstart(0),m1.rowstart(0)).setZero();
+            m3.row(0,m1.rowend(0),m3.rowend(0)).setZero();
+        }
+        template <class M1x, class M3x>
+        static void call2(
+            const Scaling<ix,T>& x, const BaseMatrix_Rec<M1x>& m1,
+            const M2& m2, BaseMatrix_Rec_Mutable<M3x>& m3)
+        { m3.row(0) = (x/m2.cref(0,0)) * m1.row(0); }
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
             std::cout<<"LDiv algo 11: cs,rs,xs = "<<
+                cs<<','<<rs<<','<<xs<<std::endl;
+#endif
+            typedef typename M2::value_type T2;
+            if (m2.cref(0,0) == T2(0)) ThrowSingular("1x1 Matrix");
+            call2(x,m1,m2,m3);
+        }
+    };
+
+    // algo 12: m2 is 2x2
+    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    struct LDivM_Helper<12,cs,rs,xs,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        { 
+#ifdef PRINTALGO_DIVM
+            std::cout<<"LDiv algo 12: cs,rs,xs = "<<
+                cs<<','<<rs<<','<<xs<<std::endl;
+#endif
+            MultMM<false>(x,m2.inverse().calc(),m1,m3); 
+        }
+    };
+
+    // algo 13: m2 is small enough to do inverse directly and multiply.
+    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    struct LDivM_Helper<13,cs,rs,xs,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+#ifdef PRINTALGO_DIVM
+            std::cout<<"LDiv algo 13: cs,rs,xs = "<<
+                cs<<','<<rs<<','<<xs<<std::endl;
+#endif
+            MultMM<false>(x,m2.inverse().calc(),m1,m3); 
+        }
+    };
+
+    // algo 21: m2 is 1x1, m1,m3 are vectors
+    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    struct LDivM_Helper<21,cs,rs,xs,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+#ifdef PRINTALGO_DIVM
+            std::cout<<"LDiv algo 21: cs,rs,xs = "<<
+                cs<<','<<rs<<','<<xs<<std::endl;
+#endif
+            typedef typename M2::value_type T2;
+            if (m2.cref(0,0) == T2(0)) ThrowSingular("1x1 Matrix");
+            m3.ref(0) = x * m1.cref(0) / m2.cref(0,0); 
+        }
+    };
+
+    // algo 22: m2 is 2x2, m1,m3 are vectors
+    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    struct LDivM_Helper<22,cs,rs,xs,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+#ifdef PRINTALGO_DIVM
+            std::cout<<"LDiv algo 22: cs,rs,xs = "<<
+                cs<<','<<rs<<','<<xs<<std::endl;
+#endif
+            typedef typename M3::value_type T3;
+            typedef typename M2::value_type T2;
+            T2 det = DetM_Helper<2,2,M2>::call(m2);
+            if (det == T2(0)) ThrowSingular("2x2 Matrix");
+            // m1, m3 might be aliased, so store temporaries:
+            T3 a = x*(m1.cref(0) * m2.cref(1,1) - 
+                      m1.cref(1) * m2.cref(0,1))/det;
+            T3 b = x*(m1.cref(1) * m2.cref(0,0) -
+                      m1.cref(0) * m2.cref(1,0))/det;
+            m3.ref(0) = a;
+            m3.ref(1) = b;
+        }
+    };
+
+    // algo 23: do inverse directly, m1,m3 are vectors
+    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    struct LDivM_Helper<23,cs,rs,xs,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+#ifdef PRINTALGO_DIVM
+            std::cout<<"LDiv algo 23: cs,rs,xs = "<<
+                cs<<','<<rs<<','<<xs<<std::endl;
+#endif
+            MultMV<false>(x,m2.inverse().calc(),m1,m3); 
+        }
+    };
+
+    // algo 31: Use Divider
+    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    struct LDivM_Helper<31,cs,rs,xs,ix,T,M1,M2,M3>
+    {
+        static void call(
+            const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
+        {
+#ifdef PRINTALGO_DIVM
+            std::cout<<"LDiv algo 31: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
             std::cout<<"divIsSet = "<<m2.divIsSet()<<std::endl;
             std::cout<<"divIsInPlace = "<<m2.divIsInPlace()<<std::endl;
@@ -841,15 +878,15 @@ namespace tmv {
         }
     };
 
-    // algo 12: Calculate LU decomposition on the spot.
+    // algo 32: Calculate LU decomposition on the spot.
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<12,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<32,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 12: cs,rs,xs = "<<
+            std::cout<<"LDiv algo 32: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M2::real_type>::isinteger);
@@ -858,15 +895,15 @@ namespace tmv {
         }
     };
 
-    // algo 13: Calculate QR decomposition on the spot.
+    // algo 33: Calculate QR decomposition on the spot.
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<13,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<33,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 13: cs,rs,xs = "<<
+            std::cout<<"LDiv algo 33: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M2::real_type>::isinteger);
@@ -875,33 +912,33 @@ namespace tmv {
         }
     };
 
-    // algo 14: Figure out whether to use LU or QR
+    // algo 34: Figure out whether to use LU or QR
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<14,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<34,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 14: cs,rs,xs = "<<
+            std::cout<<"LDiv algo 34: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             if (m2.isSquare())
-                LDivM_Helper<12,cs,rs,xs,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+                LDivM_Helper<32,cs,rs,xs,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             else
-                LDivM_Helper<13,cs,rs,xs,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+                LDivM_Helper<33,cs,rs,xs,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
 
-    // algo 21: Use Divider
+    // algo 41: Use Divider
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<21,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<41,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 21: cs,rs,xs = "<<
+            std::cout<<"LDiv algo 41: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
             std::cout<<"divIsSet = "<<m2.divIsSet()<<std::endl;
             std::cout<<"divIsInPlace = "<<m2.divIsInPlace()<<std::endl;
@@ -915,15 +952,15 @@ namespace tmv {
         }
     };
 
-    // algo 22: Calculate LU decomposition on the spot.
+    // algo 42: Calculate LU decomposition on the spot.
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<22,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<42,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 22: cs,rs,xs = "<<
+            std::cout<<"LDiv algo 42: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M2::real_type>::isinteger);
@@ -932,15 +969,15 @@ namespace tmv {
         }
     };
 
-    // algo 23: Calculate QR decomposition on the spot.
+    // algo 43: Calculate QR decomposition on the spot.
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<23,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<43,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 23: cs,rs,xs = "<<
+            std::cout<<"LDiv algo 43: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M2::real_type>::isinteger);
@@ -949,34 +986,34 @@ namespace tmv {
         }
     };
 
-    // algo 24: Figure out whether to use LU or QR
+    // algo 44: Figure out whether to use LU or QR
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<24,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<44,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 24: cs,rs,xs = "<<
+            std::cout<<"LDiv algo 44: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             if (m2.isSquare())
-                LDivM_Helper<22,cs,rs,xs,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+                LDivM_Helper<42,cs,rs,xs,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
             else
-                LDivM_Helper<23,cs,rs,xs,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
+                LDivM_Helper<43,cs,rs,xs,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
 
-    // 31-38: m2 is diagonal
-    // algo 31: Convert to m3 = x * m2.inverse() * m1
+    // 51-38: m2 is diagonal
+    // algo 51: Convert to m3 = x * m2.inverse() * m1
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<31,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<51,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 31: cs,rs,xs = "<<
+            std::cout<<"LDiv algo 51: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             typename M3::noalias_type m3na = m3.noAlias();
@@ -984,30 +1021,30 @@ namespace tmv {
         }
     };
 
-    // algo 32: Convert to m3 = x * m2.inverse() * m1, with alias
+    // algo 52: Convert to m3 = x * m2.inverse() * m1, with alias
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<32,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<52,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 32: cs,rs,xs = "<<
+            std::cout<<"LDiv algo 52: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             MultMM<false>(x,m2.inverse().calc(),m1,m3);
         }
     };
 
-    // algo 33: m1,m3 are vectors, with alias check
+    // algo 53: m1,m3 are vectors, with alias check
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<33,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<53,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 33: cs,rs,xs = "<<
+            std::cout<<"LDiv algo 53: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             if (m2.isSingular()) ThrowSingular("DiagMatrix");
@@ -1016,15 +1053,15 @@ namespace tmv {
         }
     };
 
-    // algo 34: m1,m3 are vectors, with alias check
+    // algo 54: m1,m3 are vectors, with alias check
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<34,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<54,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 34: cs,rs,xs = "<<
+            std::cout<<"LDiv algo 54: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             if (m2.isSingular()) ThrowSingular("DiagMatrix");
@@ -1032,15 +1069,15 @@ namespace tmv {
         }
     };
 
-    // algo 35: All diagonal
+    // algo 55: All diagonal
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<35,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<55,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 35: cs,rs,xs = "<<
+            std::cout<<"LDiv algo 55: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             if (m2.isSingular()) ThrowSingular("DiagMatrix");
@@ -1049,15 +1086,15 @@ namespace tmv {
         }
     };
 
-    // algo 36: All diagonal, with alias check
+    // algo 56: All diagonal, with alias check
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<36,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<56,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 36: cs,rs,xs = "<<
+            std::cout<<"LDiv algo 56: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             if (m2.isSingular()) ThrowSingular("DiagMatrix");
@@ -1066,15 +1103,15 @@ namespace tmv {
         }
     };
 
-    // algo 37: m1 is diagonal
+    // algo 57: m1 is diagonal
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<37,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<57,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 37: cs,rs,xs = "<<
+            std::cout<<"LDiv algo 57: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             if (m2.isSingular()) ThrowSingular("DiagMatrix");
@@ -1089,10 +1126,10 @@ namespace tmv {
         }
     };
 
-    // 41-46: m2 is triangular
-    // algo 41: Convert to LDivEq
+    // 61-46: m2 is triangular
+    // algo 61: Convert to LDivEq
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<41,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<61,cs,rs,xs,ix,T,M1,M2,M3>
     {
         template <class M>
         static void copy(
@@ -1114,7 +1151,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 41: cs,rs,xs = "<<
+            std::cout<<"LDiv algo 61: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             copy(x,m1,m3);
@@ -1123,9 +1160,9 @@ namespace tmv {
         }
     };
 
-    // algo 42: Convert to LDivEq with alias check
+    // algo 62: Convert to LDivEq with alias check
     template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
-    struct LDivM_Helper<42,cs,rs,xs,ix,T,M1,M2,M3>
+    struct LDivM_Helper<62,cs,rs,xs,ix,T,M1,M2,M3>
     {
         template <class M>
         static void copy(
@@ -1141,7 +1178,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_DIVM
-            std::cout<<"LDiv algo 42: cs,rs,xs = "<<
+            std::cout<<"LDiv algo 62: cs,rs,xs = "<<
                 cs<<','<<rs<<','<<xs<<std::endl;
 #endif
             typename M3::noalias_type m3na = m3.noAlias();
@@ -1170,22 +1207,24 @@ namespace tmv {
             const bool lo2 = ShapeTraits<M2::_shape>::lower;
             const bool up3 = ShapeTraits<M3::_shape>::upper;
             const bool lo3 = ShapeTraits<M3::_shape>::lower;
+            const bool vec1 = ShapeTraits<M1::_shape>::vector;
             const bool vec3 = ShapeTraits<M3::_shape>::vector;
+            TMVStaticAssert(vec1 == vec3);
 
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
-                cs == 1 && rs == 1 ? 1 :
+                cs == 1 && rs == 1 ? vec3 ? 21 : xs == 1 ? 1 : 11 :
                 !up2 && !lo2 ? ( // m2 is diag
-                    vec3 ? 34 :
-                    (!up3 && !lo3) ? 36 : // all diag
-                    (!up1 && !lo1) ? 37 : // m1 diag
-                    32 ) :
+                    vec3 ? 54 :
+                    (!up3 && !lo3) ? 56 : // all diag
+                    (!up1 && !lo1) ? 57 : // m1 diag
+                    52 ) :
                 !up2 || !lo2 ? 6 : // m2 is triangular
                 cs == rs && cs != TMV_UNKNOWN && cs <= 4 ? 6 :
-                M2::_hasdivider ? 21 :
-                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 24 :
-                cs == rs ? 22 :
-                23;
+                M2::_hasdivider ? 41 :
+                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 44 :
+                cs == rs ? 42 :
+                43;
 #ifdef PRINTALGO_DIVM
             std::cout<<"LDiv: alias, transpose \n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
@@ -1211,23 +1250,26 @@ namespace tmv {
             const bool lo2 = ShapeTraits<M2::_shape>::lower;
             const bool up3 = ShapeTraits<M3::_shape>::upper;
             const bool lo3 = ShapeTraits<M3::_shape>::lower;
+            const bool vec1 = ShapeTraits<M1::_shape>::vector;
             const bool vec3 = ShapeTraits<M3::_shape>::vector;
+            TMVStaticAssert(vec1 == vec3);
 
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
-                cs == 1 && rs == 1 ? 1 :
+                cs == 1 && rs == 1 ? vec3 ? 21 : xs == 1 ? 1 : 11 :
                 !up2 && !lo2 ? ( // m2 is diag
-                    vec3 ? 34 :
-                    (!up3 && !lo3) ? 36 : // all diag
-                    (!up1 && !lo1) ? 37 : // m1 diag
-                    32 ) :
-                (!lo2 || !up2) ? 42 : // m1 is triangular
-                cs == 2 && rs == 2 ? 2 :
-                cs == rs && cs != TMV_UNKNOWN && cs <= 4 ? 3 :
-                M2::_hasdivider ? 11 :
-                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 14 :
-                cs == rs ? 12 :
-                13;
+                    vec3 ? 54 :
+                    (!up3 && !lo3) ? 56 : // all diag
+                    (!up1 && !lo1) ? 57 : // m1 diag
+                    52 ) :
+                (!lo2 || !up2) ? 62 : // m1 is triangular
+                cs == 2 && rs == 2 ? vec3 ? 22 : xs == 1 ? 1 : 12 :
+                cs == rs && cs != TMV_UNKNOWN && cs <= 4 ? (
+                    vec3 ? 23 : xs == 1 ? 1 : 13) :
+                M2::_hasdivider ? 31 :
+                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 34 :
+                cs == rs ? 32 :
+                33;
 #ifdef PRINTALGO_DIVM
             std::cout<<"LDiv: alias\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
@@ -1253,22 +1295,24 @@ namespace tmv {
             const bool lo2 = ShapeTraits<M2::_shape>::lower;
             const bool up3 = ShapeTraits<M3::_shape>::upper;
             const bool lo3 = ShapeTraits<M3::_shape>::lower;
+            const bool vec1 = ShapeTraits<M1::_shape>::vector;
             const bool vec3 = ShapeTraits<M3::_shape>::vector;
+            TMVStaticAssert(vec1 == vec3);
 
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
-                cs == 1 && rs == 1 ? 1 :
+                cs == 1 && rs == 1 ? vec3 ? 21 : xs == 1 ? 1 : 11 :
                 !up2 && !lo2 ? ( // m2 is diag
-                    vec3 ? 33 :
-                    (!up3 && !lo3) ? 35 : // all diag
-                    (!up1 && !lo1) ? 37 : // m1 diag
-                    31 ) :
+                    vec3 ? 53 :
+                    (!up3 && !lo3) ? 55 : // all diag
+                    (!up1 && !lo1) ? 57 : // m1 diag
+                    51 ) :
                 !up2 || !lo2 ? 5 : // m2 is triangular
                 cs == rs && cs != TMV_UNKNOWN && cs <= 4 ? 5 :
-                M2::_hasdivider ? 21 :
-                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 24 :
-                cs == rs ? 22 :
-                23;
+                M2::_hasdivider ? 41 :
+                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 44 :
+                cs == rs ? 42 :
+                43;
 #ifdef PRINTALGO_DIVM
             std::cout<<"LDiv: transpose\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
@@ -1294,61 +1338,71 @@ namespace tmv {
             const bool lo2 = ShapeTraits<M2::_shape>::lower;
             const bool up3 = ShapeTraits<M3::_shape>::upper;
             const bool lo3 = ShapeTraits<M3::_shape>::lower;
+            const bool vec1 = ShapeTraits<M1::_shape>::vector;
             const bool vec3 = ShapeTraits<M3::_shape>::vector;
+            TMVStaticAssert(vec1 == vec3);
 
             // Possible algorithms to choose from:
             //
             //  0 = cs==0 or rs==0, so nothing to do
-            //  1 = cs==1, rs==1: reduces to trivial scalar division
-            //  2 = cs==2, rs==2: do division directly
-            //  3 = invert m2 directly and multiply.
-            //  4 = invert m2 directly and multiply, with alias check
-            //  5 = Direct transpose
-            //  6 = Direct transpose with alias check
+            //  1 = xs==1 convert matrices to vectors
+            //  5 = direct transpose
+            //  6 = direct transpose with alias check
             //
-            // 11-14: regular solution
-            // 11 = m2 has a divider object.  Use that.
-            // 12 = Do LU decomposition on the spot.
-            // 13 = Do QR decomposition on the spot.
-            // 14 = Unknown whether square or not, find out.
+            // 11-13: direct inversion of m2, m1,m2 are matrices
+            // 11 = cs,rs == 1
+            // 12 = cs,rs == 2
+            // 13 = cs,rs > 2
+            //
+            // 21-23: direct inversion of m2, m1,m3 are vectors
+            // 21 = cs,rs == 1
+            // 22 = cs,rs == 2
+            // 23 = cs,rs > 2
+            //
+            // 31-34: regular solution
+            // 31 = m2 has a divider object.  Use that.
+            // 32 = Do LU decomposition on the spot.
+            // 33 = Do QR decomposition on the spot.
+            // 34 = Unknown whether square or not, find out.
             //      (This shouldn't usually happen.  In normal usage,
             //       matrices without divider objects know their sizes
             //       at compile time.)
             //
-            // 21-24: transpose solution
-            // 21 = m2 has a divider object.  Use that.
-            // 22 = Do LU decomposition on the spot.
-            // 23 = Do QR decomposition on the spot.
-            // 24 = Unknown whether square or not, find out.
+            // 41-44: transpose solution
+            // 41 = m2 has a divider object.  Use that.
+            // 42 = Do LU decomposition on the spot.
+            // 43 = Do QR decomposition on the spot.
+            // 44 = Unknown whether square or not, find out.
             //
-            // 31-36: m2 is diagonal
-            // 31 = Convert to m3 = x * m2.inverse() * m1
-            // 32 = Convert to m3 = x * m2.inverse() * m1, with alias check
-            // 33 = v1,v3 are vectors, no alias check
-            // 34 = v1,v3 are vectors, with alias check
-            // 35 = m1,m3 are diagonal, no alias check
-            // 36 = m1,m3 are diagonal, with alias check
-            // 37 = m1 is diagonal, no alias check
+            // 51-56: m2 is diagonal
+            // 51 = Convert to m3 = x * m2.inverse() * m1
+            // 52 = Convert to m3 = x * m2.inverse() * m1, with alias check
+            // 53 = v1,v3 are vectors, no alias check
+            // 54 = v1,v3 are vectors, with alias check
+            // 55 = m1,m3 are diagonal, no alias check
+            // 56 = m1,m3 are diagonal, with alias check
+            // 57 = m1 is diagonal, no alias check
             //
-            // 41-42: m2 is triangular
-            // 41 = Turn into LDivEq op
-            // 42 = Do alias check
+            // 61-62: m2 is triangular
+            // 61 = Turn into LDivEq op
+            // 62 = Do alias check
 
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
-                cs == 1 && rs == 1 ? 1 :
+                cs == 1 && rs == 1 ? vec3 ? 21 : xs == 1 ? 1 : 11 :
                 !up2 && !lo2 ? ( // m2 is diag
-                    vec3 ? 33 :
-                    (!up3 && !lo3) ? 35 : // all diag
-                    (!up1 && !lo1) ? 37 : // m1 diag
-                    31 ) :
-                (!lo2 || !up2) ? 41 : // m2 is triangular
-                cs == 2 && rs == 2 ? 2 :
-                cs == rs && cs != TMV_UNKNOWN && cs <= 4 ? 3 :
-                M2::_hasdivider ? 11 :
-                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 14 :
-                cs == rs ? 12 :
-                13;
+                    vec3 ? 53 :
+                    (!up3 && !lo3) ? 55 : // all diag
+                    (!up1 && !lo1) ? 57 : // m1 diag
+                    51 ) :
+                (!lo2 || !up2) ? 61 : // m2 is triangular
+                cs == 2 && rs == 2 ? vec3 ? 22 : xs == 1 ? 1 : 12 :
+                cs == rs && cs != TMV_UNKNOWN && cs <= 4 ? (
+                    vec3 ? 23 : xs == 1 ? 1 : 13) :
+                M2::_hasdivider ? 31 :
+                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 34 :
+                cs == rs ? 32 :
+                33;
 #ifdef PRINTALGO_DIVM
             std::cout<<"LDiv: regular\n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
@@ -1375,8 +1429,6 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int algo = 
-                cs == 0 || rs == 0 ? 0 :
-                cs == 1 && rs == 1 ? 1 :
                 M3::_checkalias ? 98 :
                 -4;
             LDivM_Helper<algo,cs,rs,xs,ix,T,M1,M2,M3>::call(x,m1,m2,m3); 
@@ -1391,8 +1443,6 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
             const int algo = 
-                cs == 0 || rs == 0 ? 0 :
-                cs == 1 && rs == 1 ? 1 :
                 M3::_checkalias ? 99 :
                 -3;
             LDivM_Helper<algo,cs,rs,xs,ix,T,M1,M2,M3>::call(x,m1,m2,m3); 

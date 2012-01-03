@@ -8,6 +8,7 @@
 
 #define NOADDEQ
 #define NOMULTEQ
+#define NOELEMMULT
 
 #include "TMV_TestMatrixArith.h"
 
@@ -74,30 +75,30 @@ void TestSymBandMatrixArith_D2()
         tmv::SymBandMatrixView<T> si = sb[i];
         tmv::SymBandMatrixView<std::complex<T> > csi = csb[i];
 
-        TestMatrixArith4<T>(u1v,cu1v,si,csi,"UpperTri/SymBand");
-        TestMatrixArith5<T>(u1v,cu1v,si,csi,"UpperTri/SymBand");
-        TestMatrixArith6x<T>(u1v,cu1v,si,csi,"UpperTri/SymBand");
-        TestMatrixArith4<T>(l1v,cl1v,si,csi,"LowerTri/SymBand");
-        TestMatrixArith5<T>(l1v,cl1v,si,csi,"LowerTri/SymBand");
-        TestMatrixArith6x<T>(l1v,cl1v,si,csi,"LowerTri/SymBand");
-        TestMatrixArith4<T>(u2v,cu2v,si,csi,"UpperTri/SymBand");
-        TestMatrixArith5<T>(u2v,cu2v,si,csi,"UpperTri/SymBand");
-        TestMatrixArith6x<T>(u2v,cu2v,si,csi,"UpperTri/SymBand");
-        TestMatrixArith4<T>(l2v,cl2v,si,csi,"LowerTri/SymBand");
-        TestMatrixArith5<T>(l2v,cl2v,si,csi,"LowerTri/SymBand");
-        TestMatrixArith6x<T>(l2v,cl2v,si,csi,"LowerTri/SymBand");
-        TestMatrixArith4<T>(u3v,cu3v,si,csi,"UpperTri/SymBand");
-        TestMatrixArith5<T>(u3v,cu3v,si,csi,"UpperTri/SymBand");
-        TestMatrixArith6x<T>(u3v,cu3v,si,csi,"UpperTri/SymBand");
-        TestMatrixArith4<T>(l3v,cl3v,si,csi,"LowerTri/SymBand");
-        TestMatrixArith5<T>(l3v,cl3v,si,csi,"LowerTri/SymBand");
-        TestMatrixArith6x<T>(l3v,cl3v,si,csi,"LowerTri/SymBand");
-        TestMatrixArith4<T>(u4v,cu4v,si,csi,"UpperTri/SymBand");
-        TestMatrixArith5<T>(u4v,cu4v,si,csi,"UpperTri/SymBand");
-        TestMatrixArith6x<T>(u4v,cu4v,si,csi,"UpperTri/SymBand");
-        TestMatrixArith4<T>(l4v,cl4v,si,csi,"LowerTri/SymBand");
-        TestMatrixArith5<T>(l4v,cl4v,si,csi,"LowerTri/SymBand");
-        TestMatrixArith6x<T>(l4v,cl4v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith4(u1v,cu1v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith5(u1v,cu1v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith6x(u1v,cu1v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith4(l1v,cl1v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith5(l1v,cl1v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith6x(l1v,cl1v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith4(u2v,cu2v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith5(u2v,cu2v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith6x(u2v,cu2v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith4(l2v,cl2v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith5(l2v,cl2v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith6x(l2v,cl2v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith4(u3v,cu3v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith5(u3v,cu3v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith6x(u3v,cu3v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith4(l3v,cl3v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith5(l3v,cl3v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith6x(l3v,cl3v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith4(u4v,cu4v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith5(u4v,cu4v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith6x(u4v,cu4v,si,csi,"UpperTri/SymBand");
+        TestMatrixArith4(l4v,cl4v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith5(l4v,cl4v,si,csi,"LowerTri/SymBand");
+        TestMatrixArith6x(l4v,cl4v,si,csi,"LowerTri/SymBand");
     }
 #endif
 }

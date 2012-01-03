@@ -1292,7 +1292,7 @@ namespace tmv {
                 ptr(),rowsize(),stepi(),stepj(),NonUnitDiag);
             m2.assignTo(U);
             if (Maybe<M2::_upper>::select(nlo(),nhi()) > 0) 
-                Maybe<!M2::_upper>::upperBandOff(mat()).setZero();
+                Maybe<!M2::_upper>::upperbandoff(mat()).setZero();
             return mat(); 
         }
 
@@ -1303,7 +1303,7 @@ namespace tmv {
             TMVStaticAssert((Sizes<_rowsize,M2::_rowsize>::same));
             TMVAssert(colsize() == m2.colsize());
             TMVAssert(rowsize() == m2.rowsize());
-            m2.diag().assignTo(diag());
+            diag() = m2.diag();
             if (nhi() > 0) upperBandOff().setZero();
             if (nlo() > 0) lowerBandOff().setZero();
             return mat(); 

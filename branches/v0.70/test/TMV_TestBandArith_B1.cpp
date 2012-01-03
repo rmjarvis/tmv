@@ -6,6 +6,10 @@
 #include "TMV_Test_2.h"
 #include "TMV_TestBandArith.h"
 
+#define NOADDEQ
+#define NOMULTEQ
+#define NOELEMMULT
+
 template <class T1, class T2> 
 inline bool CanAddEq(
     const tmv::BandMatrixView<T1>& , const tmv::MatrixView<T2>& )
@@ -29,8 +33,6 @@ inline bool CanMultMM(
     const tmv::BandMatrixView<T3>& )
 { return false; }
 
-#define NOADDEQ
-#define NOMULTEQ
 #include "TMV_TestMatrixArith.h"
 
 template <class T> 
@@ -79,16 +81,16 @@ void TestBandMatrixArith_B1()
         tmv::Matrix<T> mx = bi;
         tmv::Matrix<std::complex<T> > cmx = cbi;
 
-        TestMatrixArith4<T>(bi,cbi,a1v,ca1v,"Band/SquareM");
-        TestMatrixArith5<T>(bi,cbi,a1v,ca1v,"Band/SquareM");
-        TestMatrixArith6x<T>(bi,cbi,a1v,ca1v,"Band/SquareM");
+        TestMatrixArith4(bi,cbi,a1v,ca1v,"Band/SquareM");
+        TestMatrixArith5(bi,cbi,a1v,ca1v,"Band/SquareM");
+        TestMatrixArith6x(bi,cbi,a1v,ca1v,"Band/SquareM");
 #if (XTEST & 2)
-        TestMatrixArith4<T>(bi,cbi,a3v,ca3v,"Band/NonSquareM");
-        TestMatrixArith5<T>(bi,cbi,a3v,ca3v,"Band/NonSquareM");
-        TestMatrixArith6x<T>(bi,cbi,a3v,ca3v,"Band/NonSquareM");
-        TestMatrixArith4<T>(bi,cbi,a4v,ca4v,"Band/DegenerateM");
-        TestMatrixArith5<T>(bi,cbi,a4v,ca4v,"Band/DegenerateM");
-        TestMatrixArith6x<T>(bi,cbi,a4v,ca4v,"Band/DegenerateM");
+        TestMatrixArith4(bi,cbi,a3v,ca3v,"Band/NonSquareM");
+        TestMatrixArith5(bi,cbi,a3v,ca3v,"Band/NonSquareM");
+        TestMatrixArith6x(bi,cbi,a3v,ca3v,"Band/NonSquareM");
+        TestMatrixArith4(bi,cbi,a4v,ca4v,"Band/DegenerateM");
+        TestMatrixArith5(bi,cbi,a4v,ca4v,"Band/DegenerateM");
+        TestMatrixArith6x(bi,cbi,a4v,ca4v,"Band/DegenerateM");
 #endif
     }
 }

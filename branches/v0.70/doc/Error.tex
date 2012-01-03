@@ -24,12 +24,13 @@ the programmer made a mistake in the code.  (Unless I've made a
 mistake in the TMV code, of course.)
 
 Once the code is working, you can make the code slightly faster by 
-compiling with either \tt{-DNDEBUG} or \tt{-DTMVNDEBUG}.  I say slightly, since most of these checks 
+compiling with either \tt{-DNDEBUG} or \tt{-DTMV\_NDEBUG}.  I say slightly, since most of these checks 
 are pretty innocuous.  And most of the computing time is usually in the depths
 of the various algorithms, not in these $O(1)$ time checks of the dimensions and such.  
+
 There are a few checks which take $O(N)$ time (e.g. making sure that the imaginary
 part of a complex Hermitian matrix is actually 0 as it must be when initializing from values
-that might not be 0's), but not many.
+that might not be 0's), but these are not enabled by default.  They are only turned on when using \tt{-DTMV\_EXTRA\_DEBUG}.
 
 The other kind of error checked for by the code is 
 where the data don't behave in the way
@@ -44,7 +45,7 @@ A Cholesky decomposition is attempted for a
 hermitian matrix that isn't positive definite.
 \end{itemize}
 
-These errors are always checked for even if \tt{-DNDEBUG} or \tt{-DTMVNDEBUG} is used.
+These errors are always checked for even if \tt{-DNDEBUG} or \tt{-DTMV\_NDEBUG} is used.
 That's because they are not problems in the code per se, but rather
 are problems with the data or files used by the code.  So they could
 still happen even after the code has been thoroughly tested.

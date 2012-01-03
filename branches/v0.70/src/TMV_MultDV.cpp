@@ -79,33 +79,8 @@ namespace tmv {
         if (add) y2 += y0;
 #endif
 
-        if (y.size() > 0) {
-            if (alpha == T(0)) {
-                if (!add) y.setZero();
-            } 
-            else if (!add) {
-                if (SameStorage(A.diag(),y)) {
-                    if (y.isSameAs(A.diag())) ElementProd(alpha,x,y);
-                    else if (SameStorage(x,y)) {
-                        if (y.isSameAs(x)) ElementProd(alpha,A.diag(),y);
-                        else {
-                            Vector<T> yy = x;
-                            ElementProd(alpha,A.diag(),yy.view());
-                            y = yy;
-                        }
-                    } 
-                    else {
-                        y = A.diag();
-                        ElementProd(alpha,x,y);
-                    }
-                }
-                else {
-                    y = x;
-                    ElementProd(alpha,A.diag(),y);
-                }
-            }
-            else AddElementProd(alpha,A.diag(),x,y);
-        }
+        ElemMultVV<add>(alpha,A.diag(),x,y); 
+
 #ifdef XDEBUG
         if (!(Norm(y-y2) <=
               0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+

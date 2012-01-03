@@ -81,19 +81,15 @@ change the size to some useful value.
 
 \item 
 \begin{tmvcode}
-tmv::Matrix<T,stor,index> m(size_t nrows, size_t ncols)
+tmv::Matrix<T,stor,index> m(int nrows, int ncols)
 \end{tmvcode}
 Makes a \tt{Matrix} with \tt{nrows} rows and \tt{ncols} columns with 
 \underline{uninitialized} values.
-If debugging is turned on (this is actually the default -
-turn off debugging by compiling
-with \tt{-DNDEBUG} or \tt{-DTMVNDEBUG}), then the values are in fact initialized to 888.  
-This should help you notice
-when you have neglected to initialize the \tt{Matrix} correctly.
+If extra debugging is turned on (with \tt{-DTMV\_EXTRA\_DEBUG}), then the values are in fact initialized to 888.  This should help you notice when you have neglected to initialize the \tt{Matrix} correctly.
 
 \item
 \begin{tmvcode}
-tmv::Matrix<T,stor,index> m(size_t nrows, size_t ncols, T x)
+tmv::Matrix<T,stor,index> m(int nrows, int ncols, T x)
 \end{tmvcode}
 Makes a \tt{Matrix} with \tt{nrows} rows and \tt{ncols} columns with all 
 values equal to \tt{x}
@@ -110,16 +106,16 @@ The assignment operator has the same flexibility.
 \item
 \begin{tmvcode}
 tmv::MatrixView<T,index> m = 
-      tmv::MatrixViewOf(T* mm, size_t nrows, size_t ncols, 
+      tmv::MatrixViewOf(T* mm, int nrows, int ncols, 
       StorageType stor)
 tmv::ConstMatrixView<T,index> m = 
-      tmv::MatrixViewOf(const T* mm,  size_t nrows, size_t ncols, 
+      tmv::MatrixViewOf(const T* mm, int nrows, int ncols, 
       StorageType stor)
 tmv::MatrixView<T,index> m = 
-      tmv::MatrixViewOf(T* mm, size_t nrows, size_t ncols, 
+      tmv::MatrixViewOf(T* mm, int nrows, int ncols, 
       int stepi, int stepj)
 tmv::ConstMatrixView<T,index> m = 
-      tmv::MatrixViewOf(const T* mm,  size_t nrows, size_t ncols, 
+      tmv::MatrixViewOf(const T* mm, int nrows, int ncols, 
       int stepi, int stepj)
 \end{tmvcode}
 \index{Matrix!View of raw memory}
@@ -200,10 +196,10 @@ m.subMatrix(2,4,2,4) << // Lower right corner
 \begin{itemize}
 \item
 \begin{tmvcode}
-size_t m.nrows() const
-size_t m.ncols() const
-size_t m.colsize() const
-size_t m.rowsize() const
+int m.nrows() const
+int m.ncols() const
+int m.colsize() const
+int m.rowsize() const
 \end{tmvcode}
 \index{Matrix!Methods!nrows}
 \index{Matrix!Methods!ncols}
@@ -321,6 +317,71 @@ from the lower-left to the upper-right of an $n \times n$ \tt{Matrix}
 would be obtained by: \tt{m.subVector(n-1,0,-1,1,n)} for C-style or
 \tt{m.subVector(n,1,-1,1,n)} for Fortran-style.
 
+\item
+\begin{tmvcode}
+ConstVectorView<T> m.constLinearView() const
+VectorView<T> m.linearView()
+bool m.canLinearize()
+\end{tmvcode}
+\index{Matrix!View as a contiguous Vector}
+\index{Matrix!Methods!linearView}
+\index{Matrix!Methods!constLinearView}
+\index{Matrix!Methods!canLinearize}
+These return a view to the elements of a \tt{Matrix} as a single vector.  They are always allowed for an actual \tt{Matrix}.  For a \tt{MatrixView} (or \tt{ConstMatrixView}), they are only allowed if all of the elements in the view are in one contiguous block of memory.  The helper function \tt{m.canLinearize()} returns whether or not the first two methods will work.
+
+\item
+\begin{tmvcode}
+typename tmv::Matrix<T>::rowmajor_iterator m.rowmajor_begin()
+typename tmv::Matrix<T>::rowmajor_iterator m.rowmajor_end()
+typename tmv::Matrix<T>::const_rowmajor_iterator m.rowmajor_begin() const
+typename tmv::Matrix<T>::const_rowmajor_iterator m.rowmajor_end() const
+typename tmv::Matrix<T>::colmajor_iterator m.colmajor_begin()
+typename tmv::Matrix<T>::colmajor_iterator m.colmajor_end()
+typename tmv::Matrix<T>::const_colmajor_iterator m.colmajor_begin() const
+typename tmv::Matrix<T>::const_colmajor_iterator m.colmajor_end() const
+\end{tmvcode}
+These iterators traverse the elements of the \tt{Matrix} 
+in either row-major or column-major order.  
+The iterators are only guaranteed
+to be consistent with the STL requirements for forward iterator.
+However, for a regular \tt{Matrix} (i.e. not a \tt{MatrixView}) the iterators in the same direction as the matrices storage order will be a random-access iterator.  In fact, it will be a \tt{VIt<T,Unit,NonConj>} (c.f. \S\ref{VectorIterators}).
+
+\item
+\begin{tmvcode}
+T* m.ptr()
+const T* m.cptr() const
+\end{tmvcode}
+\index{Matrix!Methods!ptr}
+\index{Matrix!Methods!cptr}
+These methods return the pointer to the memory location of the upper-left element of the matrix ($m(0,0)$).  These aren't usually necessary, but sometimes they can be useful for writing optimized code or for meshing with other libraries that need the direct memory access.
+
+\item
+\begin{tmvcode}
+int m.stepi() const
+int m.stepj() const
+\end{tmvcode}
+\index{Matrix!Methods!stepi}
+\index{Matrix!Methods!stepj}
+This returns the step size in memory between the elements of a column and of a row, respectively.  
+In other words, the step in the ``down'' direction along a column is \tt{stepi()}, and the step to 
+the ``right'' along a row is \tt{stepj()}.
+They are usually only required if you are accessing the memory directly with \tt{m.ptr()}.
+
+\item
+\begin{tmvcode}
+bool m.isconj() const
+\end{tmvcode}
+\index{Matrix!Methods!isconj}
+This returns whether or not the elements of the matrix are actually the conjugate of the values in memory.  Again, this is usually only required if you are accessing the memory directly.
+
+\begin{tmvcode}
+bool m.isrm() const
+bool m.iscm() const
+\end{tmvcode}
+\index{Matrix!Methods!isrm}
+\index{Matrix!Methods!iscm}
+These are really just convenience functions that return whether a matrix is \tt{RowMajor} or \tt{ColMajor}, and are equivalent to \tt{(m.stepj()==1)} and \tt{(m.stepi()==1)} respectively.
+
 \end{itemize}
 
 \subsection{Resizing}
@@ -330,12 +391,12 @@ would be obtained by: \tt{m.subVector(n-1,0,-1,1,n)} for C-style or
 It is possible to change the size of a matrix after it has been created using the method \tt{resize}:
 
 \begin{tmvcode}
-m.resize(size_t new_nrows, size_t new_ncols);
+m.resize(int new_nrows, int new_ncols);
 \end{tmvcode}
 \index{Matrix!Methods!resize}
 
 This reallocates memory for the new size with {\u uninitialized} values.  
-(Or if not compiling with \tt{-DNDEBUG} or \tt{-DTMVNDEBUG}, the values are in fact set to 888.)
+(Or if compiling with \tt{-DTMV\_EXTRA\_DEBUG}, the values are in fact set to 888.)
 
 There are no correlates to the other constructors, so after a resize, the 
 values should be set directly in some fashion.
@@ -349,7 +410,7 @@ tmv::Matrix<double> q(20,15);
 m = q.transpose();
 \end{tmvcode}
 will throw a \tt{tmv::FailedAssert} exception (c.f. \S\ref{FailedAssert}) (Or if compiled with 
-\tt{-DNDEBUG} or \tt{-DTMVNDEBUG} to skip TMV's asserts, then it will probably produce a segmentation fault.),
+\tt{-DNDEBUG} or \tt{-DTMV\_NDEBUG} to skip TMV's asserts, then it will probably produce a segmentation fault.),
 rather than resizing \tt{m} to a size of 15 $\times$ 20.  
 
 The reason for this is that such code is more often the result of a bug, rather than intent.
@@ -548,6 +609,17 @@ For now, the latter two versions are equivalent to \tt{m.upperTri(UnitDiag)} and
 (specifically version 0.90, which is in development) will be able to exploit
 the compile-time knowledge of \tt{dt} to make this more efficient.
 
+\begin{tmvcode}
+tmv::VectorView<T> m.linearView()
+tmv::ConstVectorView<T> m.constLinearView()
+bool m.canLinearize()
+\end{tmvcode}
+\index{Matrix!View as a contiguous Vector}
+\index{Matrix!Methods!linearView}
+\index{Matrix!Methods!constLinearView}
+\index{Matrix!Methods!canLinearize}
+These return a view to the elements of a \tt{Matrix} as a single vector.  It is always allowed for an actual \tt{Matrix}.  For a \tt{MatrixView} (or \tt{ConstMatrixView}), it is only allowed if all of the elements in the view are in one contiguous block of memory.  The helper function \tt{m.canLinearize()} returns whether or not the first two methods will work.
+
 \end{itemize}
 
 \subsection{Functions of a matrix}
@@ -683,7 +755,7 @@ RT MaxAbs2Element(m)
 \end{tmvcode}
 \index{Matrix!Methods!maxAbs2Element}
 \index{Matrix!Functions of!MaxAbs2Element}
-The same as \tt{maxAbsElement}, but using $|real(m(i,j)| + |imag(m(i,j))|$ instead
+The same as \tt{maxAbsElement}, but using $|real(m(i,j))| + |imag(m(i,j))|$ instead
 of the normal absolute value for complex matrices.
 
 \item
@@ -979,10 +1051,11 @@ m = x
 For example, you could check if a matrix is numerically close to the identity matrix 
 with:
 \begin{tmvcode}
-if (Norm(m-1.) < 1.e-8) { [...] }
+if (Norm(m-1.) < 1.e-8) { ... }
 \end{tmvcode}
 
 \subsubsection{Outer Products}
+\label{outerproduct}
 
 For the product of two vectors, there are two orientation choices that make sense mathematically.
 It could mean a row vector times a column vector, which is called the inner product.
@@ -990,7 +1063,7 @@ Or it could mean a column vector times a row vector, which is called the outer p
 We chose to let \tt{v1*v2} indicate the inner product, since this is far more common.
 For the outer product, we use a different symbol:
 \begin{tmvcode}
-m = v1 ^ v2
+m = v1^v2
 \end{tmvcode}
 \index{Vector!Arithmetic!outer product}
 \index{Matrix!Arithmetic!rank-1 update}
@@ -999,15 +1072,30 @@ is not the same as for \tt{*}.
 So, one needs to be careful when combining it with other calculations.
 For example
 \begin{tmvcode}
-m2 = m1 + v1 ^ v2   // ERROR!
+m2 = m1 + v1^v2   // ERROR!
 \end{tmvcode}
 will give a compile time error indicating that you can't add a 
 \tt{Matrix} and a \tt{Vector}, 
 because the operator \tt{+} has higher precedence in C++ than \tt{\^}.
 So you need to write:
 \begin{tmvcode}
-m2 = m1 + (v1 ^ v2)
+m2 = m1 + (v1^v2)
 \end{tmvcode}
+
+\subsubsection{Element-by-element product}
+\index{Matrix!Arithmetic!element by element product}
+\label{MatrixElementProd}
+
+Occasionally, it is useful to multiply the corresponding elements of two matrices rather than use the normal meaning of matrix multiplication.  This can be done in TMV using the function \tt{ElemProd}:
+\begin{tmvcode}
+m = ElemProd(m1,m2);
+\end{tmvcode}
+This does the calculation \tt{m(i,j) = m1(i,j) * m2(i,j)} for each element in the matrix.
+Of course, one of the matrices on the right can be the same as the matrix on the left.  So you can do \tt{m(i,j) *= m2(i,j)} by writing
+\begin{tmvcode}
+m = ElemProd(m,m2);
+\end{tmvcode}
+The return value of the \tt{ElemProd} function is a \tt{MatrixComposite} object, so it can be used in more complicated arithmetic expressions just like any other arithmetic operator.
 
 \subsubsection{Subroutines}
 
@@ -1032,24 +1120,23 @@ it would be \tt{v.view()}.)}.
 MultXM(T x, const MatrixView<T>& m)
 \end{tmvcode}
 \index{Matrix!Arithmetic!MultXM function}
-Performs the calculation \tt{m *= x}.
+Performs the calculation $m = x \cdot m$.
 
 \item
 \begin{tmvcode}
-MultMV<bool add>(T x, const GenMatrix<Tm>& m, 
-      const GenVector<Tv1>& v1, const VectorView<T>& v2)
+MultMV<bool add>(T x, const GenMatrix<T1>& m, 
+      const GenVector<T2>& v1, const VectorView<T>& v2)
 \end{tmvcode}
 \index{Matrix!Arithmetic!MultMV function}
-Performs the calculation \tt{v2 (+=) x*m*v1} 
-where ``\tt{(+=)}'' means ``\tt{+=}'' 
-if \tt{add} is true and ``\tt{=}'' if \tt{add} is false.
+Performs the calculation $v_2 =  [v_2 \;+\;] ~ x \cdot m \cdot v_1$ 
+where the result is added to $v_2$ if \tt{add = true} and just assigned to it if \tt{add = false}.
 
 \item
 \begin{tmvcode}
 AddMM(T x, const GenMatrix<T1>& m1, const MatrixView<T>& m2)
 \end{tmvcode}
 \index{Matrix!Arithmetic!AddMM function}
-Performs the calculation \tt{m2 += x*m1}.
+Performs the calculation $m_2 = m_2 + x \cdot m_1$.
 
 \item
 \begin{tmvcode}
@@ -1057,7 +1144,7 @@ AddMM(T x1, const GenMatrix<T1>& m1, T x2, const GenMatrix<T2>& m2,
       const MatrixView<T>& m3)
 \end{tmvcode}
 \index{Matrix!Arithmetic!AddMM function}
-Performs the calculation \tt{m3 = x1*m1 + x2*m2}.
+Performs the calculation $m_3 = x_1 \cdot m_1 + x_2 \cdot m_2$.
 
 \item
 \begin{tmvcode}
@@ -1065,9 +1152,8 @@ MultMM<bool add>(T x, const GenMatrix<T1>& m1,
       const GenMatrix<T2>& m2, const MatrixView<T>& m3)
 \end{tmvcode}
 \index{Matrix!Arithmetic!MultMM function}
-Performs the calculation \tt{m3 (+=) x*m1*m2} 
-where ``\tt{(+=)}'' means ``\tt{+=}'' 
-if \tt{add} is true and ``\tt{=}'' if \tt{add} is false.
+Performs the calculation $m_3 = [m_3 \;+\;] ~ x \cdot m_1 \cdot m_2$
+where the result is added to $m_3$ if \tt{add = true} and just assigned to it if \tt{add = false}.
 
 \item
 \begin{tmvcode}
@@ -1077,10 +1163,17 @@ Rank1Update<bool add>(T x, const GenVector<T1>& v1,
 \index{Matrix!Arithmetic!Rank1Update function}
 \index{Matrix!Arithmetic!rank-1 update}
 Performs the calculation 
-%\tt{m (+=) x*(v1\caret v2)} 
-\tt{m (+=) x*(v1 ^ v2)} 
-where ``\tt{(+=)}'' means ``\tt{+=}'' 
-if \tt{add} is true and ``\tt{=}'' if \tt{add} is false.
+$m(i,j) = [m(i,j) \;+\;] ~ x \cdot v_1(i) \cdot v_2(j)$ for each element in the matrix
+where the result is added to $m(i,j)$ if \tt{add = true} and just assigned to it if \tt{add = false}.
+
+\item
+\begin{tmvcode}
+ElemMultMM<bool add>(T x, const GenMatrix<T1>& m1, 
+      const GenMatrix<T2>& m2, const MatrixView<T>& m3)
+\end{tmvcode}
+\index{Matrix!Arithmetic!MultMM function}
+Performs the calculation $m_3(i,j) = [m_3(i,j) \;+\;] ~ x \cdot m_1(i,j) \cdot m_2(i,j)$ 
+where the result is added to $m_3(i,j)$ if \tt{add = true} and just assigned to it if \tt{add = false}.
 
 \end{itemize}
 
@@ -1659,7 +1752,7 @@ Well, we need to figure out what solution we want from a singular matrix.
 If the matrix is singular, then there are not necessarily any solutions
 to $A x = b$.  Furthermore, if we are looking for a least squares solution 
 (rather than an exact solution) then there are an infinite number of choices for 
-$x$ that give the same minimum value of $||A x-b||_2$.)
+$x$ that give the same minimum value of $||A x-b||_2$.
 
 Another way of looking at is is that there will be particular values of $y$ 
 for which $A y = 0$.
@@ -1723,8 +1816,8 @@ accumulate the $U$ and $V$ matrices.  This saves a lot of the
 calculation time.  Or you might want $U$ or $V$, but not both for 
 some purpose.  See section \S\ref{Decompositions} for how to do this.
 
-\subsection{Input/Output}
-\index{Matrix!Input/output}
+\subsection{I/O}
+\index{Matrix!I/O}
 \label{Matrix_IO}
 
 The simplest output syntax is the usual:
@@ -1830,8 +1923,7 @@ tmv::SmallMatrix<T,M,N,stor,index> m()
 \end{tmvcode}
 Makes an \tt{M} $\times$ \tt{N} \tt{SmallMatrix} 
 with \underline{uninitialized} values.
-If debugging is turned on (i.e. not turned off
-with \tt{-DNDEBUG} or \tt{-DTMVNDEBUG}), then the values are in fact initialized to 888. 
+If extra debugging is turned on (with \tt{-DTMV\_EXTRA\_DEBUG}), then the values are in fact initialized to 888. 
 
 \item
 \begin{tmvcode}

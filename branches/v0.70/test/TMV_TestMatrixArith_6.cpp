@@ -40,8 +40,8 @@ template <class T> void TestMatrixArith_6()
     tmv::MatrixView<T> a2 = a2x.view();
     tmv::MatrixView<CT> ca2 = ca2x.view();
 
-    TestMatrixArith6x<T>(a1,ca1,a2,ca2,"Square 1");
-    TestMatrixArith6x<T>(a2,ca2,a1,ca1,"Square 2");
+    TestMatrixArith6x(a1,ca1,a2,ca2,"Square 1");
+    TestMatrixArith6x(a2,ca2,a1,ca1,"Square 2");
 #if (XTEST & 1)
     tmv::Matrix<T> a3x(12,16);
     for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3x(i,j) = T(1-2*i+3*j);
@@ -51,11 +51,11 @@ template <class T> void TestMatrixArith_6()
     tmv::MatrixView<CT> ca3 = ca3x.subMatrix(0,12,0,16,3,4);
     ca3.diag().addToAll(CT(-22,15));
 
-    TestMatrixArith6x<T>(a3,ca3,a1,ca1,"Square 3");
-    TestMatrixArith6x<T>(a1,ca1,a3,ca3,"Square 4");
+    TestMatrixArith6x(a3,ca3,a1,ca1,"Square 3");
+    TestMatrixArith6x(a1,ca1,a3,ca3,"Square 4");
 #if (XTEST & 2)
-    TestMatrixArith6x<T>(a3,ca3,a2,ca2,"Square 5");
-    TestMatrixArith6x<T>(a2,ca2,a3,ca3,"Square 6");
+    TestMatrixArith6x(a3,ca3,a2,ca2,"Square 5");
+    TestMatrixArith6x(a2,ca2,a3,ca3,"Square 6");
 #endif
 #endif
 
@@ -79,16 +79,16 @@ template <class T> void TestMatrixArith_6()
     tmv::MatrixView<T> a5 = a5x.view();
     tmv::MatrixView<CT> ca5 = ca5x.view();
 
-    TestMatrixArith6x<T>(a1,ca1,a5,ca5,"NonSquare 1");
-    TestMatrixArith6x<T>(a4,ca4,a1,ca1,"NonSquare 2");
-    TestMatrixArith6x<T>(a4,ca4,a5,ca5,"NonSquare 3");
-    TestMatrixArith6x<T>(a5,ca5,a4,ca4,"NonSquare 4");
+    TestMatrixArith6x(a1,ca1,a5,ca5,"NonSquare 1");
+    TestMatrixArith6x(a4,ca4,a1,ca1,"NonSquare 2");
+    TestMatrixArith6x(a4,ca4,a5,ca5,"NonSquare 3");
+    TestMatrixArith6x(a5,ca5,a4,ca4,"NonSquare 4");
 #if (XTEST & 2)
-    TestMatrixArith6x<T>(a2,ca2,a5,ca5,"NonSquare 8");
-    TestMatrixArith6x<T>(a4,ca4,a2,ca2,"NonSquare 5");
+    TestMatrixArith6x(a2,ca2,a5,ca5,"NonSquare 8");
+    TestMatrixArith6x(a4,ca4,a2,ca2,"NonSquare 5");
 #if (XTEST & 1)
-    TestMatrixArith6x<T>(a3,ca3,a5,ca5,"NonSquare 12");
-    TestMatrixArith6x<T>(a4,ca4,a3,ca3,"NonSquare 13");
+    TestMatrixArith6x(a3,ca3,a5,ca5,"NonSquare 12");
+    TestMatrixArith6x(a4,ca4,a3,ca3,"NonSquare 13");
 #endif
 #endif
 
@@ -103,16 +103,16 @@ template <class T> void TestMatrixArith_6()
     tmv::MatrixView<T> a7 = a7x.view();
     tmv::MatrixView<CT> ca7 = ca7x.view();
 
-    TestMatrixArith6x<T>(a1,ca1,a6,ca6,"Degenerate 1");
-    TestMatrixArith6x<T>(a2,ca2,a6,ca6,"Degenerate 2");
-    TestMatrixArith6x<T>(a3,ca3,a6,ca6,"Degenerate 3");
-    TestMatrixArith6x<T>(a4,ca4,a6,ca6,"Degenerate 4");
-    TestMatrixArith6x<T>(a7,ca7,a1,ca1,"Degenerate 16");
-    TestMatrixArith6x<T>(a7,ca7,a2,ca2,"Degenerate 17");
-    TestMatrixArith6x<T>(a7,ca7,a3,ca3,"Degenerate 18");
-    TestMatrixArith6x<T>(a7,ca7,a5,ca5,"Degenerate 20");
-    TestMatrixArith6x<T>(a7,ca7,a6,ca6,"Degenerate 21");
-    TestMatrixArith6x<T>(a6,ca6,a7,ca7,"Degenerate 22");
+    TestMatrixArith6x(a1,ca1,a6,ca6,"Degenerate 1");
+    TestMatrixArith6x(a2,ca2,a6,ca6,"Degenerate 2");
+    TestMatrixArith6x(a3,ca3,a6,ca6,"Degenerate 3");
+    TestMatrixArith6x(a4,ca4,a6,ca6,"Degenerate 4");
+    TestMatrixArith6x(a7,ca7,a1,ca1,"Degenerate 16");
+    TestMatrixArith6x(a7,ca7,a2,ca2,"Degenerate 17");
+    TestMatrixArith6x(a7,ca7,a3,ca3,"Degenerate 18");
+    TestMatrixArith6x(a7,ca7,a5,ca5,"Degenerate 20");
+    TestMatrixArith6x(a7,ca7,a6,ca6,"Degenerate 21");
+    TestMatrixArith6x(a6,ca6,a7,ca7,"Degenerate 22");
 #endif
 }
 

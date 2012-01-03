@@ -165,20 +165,25 @@ namespace tmv {
     }
 #undef ProductType
 
-    template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
-    inline void ElementProd(
-        const T alpha,
-        const SmallVector<T1,N,I1>& v1, SmallVector<T2,N,I2>& v2)
+    template <class T, class T1, class T2, class T3, int N, IndexStyle I1, IndexStyle I2, IndexStyle I3>
+    inline void ElemMultVV(
+        const T alpha, const SmallVector<T1,N,I1>& v1, 
+        const SmallVector<T2,N,I2>& v2, SmallVector<T3,N,I3>& v3)
     {
         if (alpha == T(1))
-            for(int i=0;i<N;++i) v2.ref(i) = v1.cref(i) * v2.cref(i);
-        else if (alpha == T(-1))
-            for(int i=0;i<N;++i) v2.ref(i) = -v1.cref(i) * v2.cref(i);
+            for(int i=0;i<N;++i) v3.ref(i) = v1.cref(i) * v2.cref(i);
         else
-            for(int i=0;i<N;++i) v2.ref(i) = alpha * v1.cref(i) * v2.cref(i);
+            for(int i=0;i<N;++i) v3.ref(i) = alpha * v1.cref(i) * v2.cref(i);
     }
+    template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2, IndexStyle I3> 
+    inline void ElemMultVV(
+        const CT , const SmallVector<T1,N,I1>& ,
+        const SmallVector<T2,N,I2>& , SmallVector<T,N,I3>& )
+    { TMVAssert(TMV_FALSE); }
+
+
     template <class T, class T1, class T2, class T3, int N, IndexStyle I1, IndexStyle I2, IndexStyle I3>
-    inline void AddElementProd(
+    inline void AddElemMultVV(
         const T alpha, const SmallVector<T1,N,I1>& v1, 
         const SmallVector<T2,N,I2>& v2, SmallVector<T3,N,I3>& v3)
     {
@@ -189,12 +194,8 @@ namespace tmv {
         else
             for(int i=0;i<N;++i) v3.ref(i) += alpha * v1.cref(i) * v2.cref(i);
     }
-    template <class T, class T1, int N, IndexStyle I1, IndexStyle I2> 
-    inline void elementProd(
-        const CT , const SmallVector<T1,N,I1>& , const SmallVector<T,N,I2>& )
-    { TMVAssert(TMV_FALSE); }
     template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2, IndexStyle I3> 
-    inline void AddElementProd(
+    inline void AddElemMultVV(
         const CT , const SmallVector<T1,N,I1>& ,
         const SmallVector<T2,N,I2>& , SmallVector<T,N,I3>& )
     { TMVAssert(TMV_FALSE); }

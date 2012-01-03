@@ -46,8 +46,8 @@ void TestSymBandDiv_D1(tmv::DivType dt, PosDefCode pdc)
         si.saveDiv();
         csi.saveDiv();
 
-        TestMatrixDivArith1<T>(dt,si,uv,csi,cuv,"UpperTriMatrix/SymBand");
-        TestMatrixDivArith1<T>(dt,si,lv,csi,clv,"LowerTriMatrix/SymBand");
+        TestMatrixDivArith1(dt,si,uv,csi,cuv,"UpperTriMatrix/SymBand");
+        TestMatrixDivArith1(dt,si,lv,csi,clv,"LowerTriMatrix/SymBand");
     }
 }
 

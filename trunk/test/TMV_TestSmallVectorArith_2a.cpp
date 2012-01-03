@@ -17,7 +17,7 @@ template <int N, class T> static void DoTestSmallVectorArith_2a()
     tmv::SmallVector<std::complex<T>,N> ca = a*std::complex<T>(2,-1);;
     tmv::SmallVector<std::complex<T>,N> cb = b*std::complex<T>(-5,1);
 
-    TestVectorArith2<T>(a,ca,b,cb,"SmallVector CC");
+    TestVectorArith2(a,ca,b,cb,"SmallVector CC");
 
 #if (XTEST & 32)
     tmv::SmallVector<T,N,tmv::FortranStyle> af = a;
@@ -25,9 +25,9 @@ template <int N, class T> static void DoTestSmallVectorArith_2a()
     tmv::SmallVector<std::complex<T>,N,tmv::FortranStyle> caf = ca;
     tmv::SmallVector<std::complex<T>,N,tmv::FortranStyle> cbf = cb;
 
-    TestVectorArith2<T>(af,caf,bf,cbf,"SmallVector FF");
-    TestVectorArith2<T>(a,ca,bf,cbf,"SmallVector CF");
-    TestVectorArith2<T>(af,caf,b,cb,"SmallVector FC");
+    TestVectorArith2(af,caf,bf,cbf,"SmallVector FF");
+    TestVectorArith2(a,ca,bf,cbf,"SmallVector CF");
+    TestVectorArith2(af,caf,b,cb,"SmallVector FC");
 #endif
 }
 

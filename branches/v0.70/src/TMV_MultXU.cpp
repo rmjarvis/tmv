@@ -32,6 +32,8 @@
 
 //#define XDEBUG
 
+//#define TMV_DEBUG
+//#include <iostream>
 
 #include "tmv/TMV_TriMatrixArithFunc.h"
 #include "tmv/TMV_TriMatrix.h"
@@ -148,38 +150,54 @@ namespace tmv {
 #endif
     }
 
-    template <class T, class Ta> 
-    void ElementProd(
-        const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const UpperTriMatrixView<T>& B)
-    {
-        TMVAssert(A.size() == B.size());
-        const int N = B.size();
-        if (B.isrm()) {
-            for(int i=0;i<N;i++)
-                ElementProd(alpha,A.row(i,i,N),B.row(i,i,N));
-        } else {
-            for(int j=0;j<N;j++)
-                ElementProd(alpha,A.col(j,0,j+1),B.col(j,0,j+1));
-        }
-    }
-
-    template <class T, class Ta, class Tb> 
-    void AddElementProd(
+    template <bool add, class T, class Ta, class Tb> 
+    void ElemMultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
         const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C)
     {
+        //std::cout<<"Start ElemMultMM:\n";
+        //std::cout<<"add = "<<add<<std::endl;
+        //std::cout<<"alpha = "<<alpha<<std::endl;
+        //std::cout<<"A = "<<TMV_Text(A)<<"  "<<A<<std::endl;
+        //std::cout<<"B = "<<TMV_Text(B)<<"  "<<B<<std::endl;
+        //std::cout<<"C = "<<TMV_Text(C)<<"  "<<C<<std::endl;
         TMVAssert(A.size() == C.size());
         TMVAssert(B.size() == C.size());
-        const int N = C.size();
-        if (C.isrm()) {
-            for(int i=0;i<N;i++)
-                AddElementProd(alpha,A.row(i,i,N),B.row(i,i,N),C.row(i,i,N));
+        if (C.isunit()) {
+            TMVAssert(alpha == T(1));
+            TMVAssert(A.isunit());
+            TMVAssert(B.isunit());
+            TMVAssert(add == false);
+            if (C.size() > 1) 
+                ElemMultMM<add>(alpha,A.offDiag(),B.offDiag(),C.offDiag());
+        } else if (A.isunit()) {
+            if (B.isunit()) {
+                if (add) C.diag().addToAll(alpha);
+                else C.diag().setAllTo(alpha);
+            } else {
+                if (add) C.diag() += alpha * B.diag();
+                else C.diag() = alpha * B.diag();
+            }
+            if (C.size() > 1) 
+                ElemMultMM<add>(alpha,A.offDiag(),B.offDiag(),C.offDiag());
+        } else if (B.isunit()) {
+            if (add) C.diag() += alpha * A.diag();
+            else C.diag() = alpha * A.diag();
+            if (C.size() > 1) 
+                ElemMultMM<add>(alpha,A.offDiag(),B.offDiag(),C.offDiag());
         } else {
-            for(int j=0;j<N;j++)
-                AddElementProd(alpha,A.col(j,0,j+1),B.col(j,0,j+1),
-                               C.col(j,0,j+1));
+            const int N = C.size();
+            if (C.isrm()) {
+                for(int i=0;i<N;i++)
+                    ElemMultVV<add>(
+                        alpha,A.row(i,i,N),B.row(i,i,N),C.row(i,i,N));
+            } else {
+                for(int j=0;j<N;j++)
+                    ElemMultVV<add>(
+                        alpha,A.col(j,0,j+1),B.col(j,0,j+1),C.col(j,0,j+1));
+            }
         }
+        //std::cout<<"C => "<<TMV_Text(C)<<"  "<<C<<std::endl;
     }
 
 #define InstFile "TMV_MultXU.inst"

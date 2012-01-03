@@ -6,12 +6,13 @@
 #include "TMV_Test_2.h"
 #include "TMV_TestSymArith.h"
 
+#define NOMULTEQ
+#define NOELEMMULT
+
 template <class T1, class T2> 
 inline bool CanAddEq(
     const tmv::SymMatrixView<T1>& a, const tmv::DiagMatrixView<T2>& )
 { return a.issym() || tmv::isReal(T2()); }
-
-#define NOMULTEQ
 
 #include "TMV_TestMatrixArith.h"
 
@@ -44,9 +45,9 @@ void TestSymMatrixArith_C1()
         tmv::SymMatrixView<T> si = s[i];
         tmv::SymMatrixView<std::complex<T> > csi = cs[i];
 
-        TestMatrixArith4<T>(si,csi,d1v,cd1v,"Sym/Diag");
-        TestMatrixArith5<T>(si,csi,d1v,cd1v,"Sym/Diag");
-        TestMatrixArith6x<T>(si,csi,d1v,cd1v,"Sym/Diag");
+        TestMatrixArith4(si,csi,d1v,cd1v,"Sym/Diag");
+        TestMatrixArith5(si,csi,d1v,cd1v,"Sym/Diag");
+        TestMatrixArith6x(si,csi,d1v,cd1v,"Sym/Diag");
     }
 }
 

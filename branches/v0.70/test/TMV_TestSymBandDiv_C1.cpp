@@ -42,7 +42,7 @@ void TestSymBandDiv_C1(tmv::DivType dt, PosDefCode pdc)
         si.saveDiv();
         csi.saveDiv();
 
-        TestMatrixDivArith1<T>(dt,si,dv,csi,cdv,"DiagMatrix/SymBand");
+        TestMatrixDivArith1(dt,si,dv,csi,cdv,"DiagMatrix/SymBand");
     }
 }
 

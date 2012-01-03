@@ -52,10 +52,9 @@ namespace tmv {
         const MatrixView<T>& V, const VectorView<TMV_RealType(T)>& lambda);
 
     // The same, but don't return V
-    // For this one, A is junk on output.
     template <class T> 
     void Eigen(
-        const SymMatrixView<T>& A, const VectorView<TMV_RealType(T)>& lambda);
+        const GenSymMatrix<T>& A, const VectorView<TMV_RealType(T)>& lambda);
 
     // Decompose A into U S V
     template <class T> 

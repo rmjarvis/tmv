@@ -54,8 +54,8 @@ namespace tmv {
         typedef typename Traits<value_type>::real_type real_type;
         typedef typename Traits<value_type>::complex_type complex_type;
 
-        SumVV(const T1& _x1, const BaseVector<V1>& _v1,
-                     const T2& _x2, const BaseVector<V2>& _v2) :
+        SumVV(const Scaling<ix1,T1>& _x1, const BaseVector<V1>& _v1,
+              const Scaling<ix2,T2>& _x2, const BaseVector<V2>& _v2) :
             x1(_x1), v1(_v1.vec()), x2(_x2), v2(_v2.vec())
         {
             TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
@@ -218,14 +218,6 @@ namespace tmv {
             CT(x)*svv.getX1(),svv.getV1(), CT(x)*svv.getX2(),svv.getV2()); 
     }
 
-    template <int ix, class T, int ix1, class T1, class V1, int ix2, class T2, class V2>
-    TMV_INLINE SumVV<ix1*ix,TX1,V1,ix2*ix,TX2,V2> operator*(
-        const Scaling<ix,T>& x, const SumVV<ix1,T1,V1,ix2,T2,V2>& svv)
-    {
-        return SumVV<ix1*ix,TX1,V1,ix2*ix,TX2,V2>(
-            T(x)*svv.getX1(),svv.getV1(),T(x)*svv.getX2(),svv.getV2());
-    }
-
     // (xv+xv)*x
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
     TMV_INLINE SumVV<0,T1,V1,0,T2,V2> operator*(
@@ -259,14 +251,6 @@ namespace tmv {
             CT(x)*svv.getX1(),svv.getV1(), CT(x)*svv.getX2(),svv.getV2()); 
     }
 
-    template <int ix, class T, int ix1, class T1, class V1, int ix2, class T2, class V2>
-    TMV_INLINE SumVV<ix1*ix,TX1,V1,ix2*ix,TX2,V2> operator*(
-        const SumVV<ix1,T1,V1,ix2,T2,V2>& svv, const Scaling<ix,T>& x)
-    {
-        return SumVV<ix1*ix,TX1,V1,ix2*ix,TX2,V2>(
-            T(x)*svv.getX1(),svv.getV1(),T(x)*svv.getX2(),svv.getV2());
-    }
-
     // (xv+xv)/x
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
     TMV_INLINE SumVV<0,T1,V1,0,T2,V2> operator/(
@@ -298,14 +282,6 @@ namespace tmv {
     {
         return SumVV<0,CT,V1,0,CT,V2>(
             svv.getX1()/CT(x),svv.getV1(), svv.getX2()/CT(x),svv.getV2()); 
-    }
-
-    template <int ix, class T, int ix1, class T1, class V1, int ix2, class T2, class V2>
-    TMV_INLINE SumVV<ix1*ix,TX1,V1,ix2*ix,TX2,V2> operator/(
-        const SumVV<ix1,T1,V1,ix2,T2,V2>& svv, const Scaling<ix,T>& x)
-    {
-        return SumVV<ix1*ix,TX1,V1,ix2*ix,TX2,V2>(
-            svv.getX1()/T(x),svv.getV1(),svv.getX2()/T(x),svv.getV2());
     }
 
 #undef RT

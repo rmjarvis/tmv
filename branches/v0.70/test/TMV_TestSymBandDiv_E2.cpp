@@ -51,11 +51,11 @@ void TestSymBandDiv_E2(tmv::DivType dt, PosDefCode pdc)
         tmv::SymBandMatrixView<T> si = sb[i];
         tmv::SymBandMatrixView<std::complex<T> > csi = csb[i];
 
-        TestMatrixDivArith1<T>(dt,b1v,si,cb1v,csi,"SymBand/SquareBandMatrix");
+        TestMatrixDivArith1(dt,b1v,si,cb1v,csi,"SymBand/SquareBandMatrix");
         if (dt == tmv::LU) continue;
 #if (XTEST & 2)
-        TestMatrixDivArith1<T>(dt,b3v,si,cb3v,csi,"SymBand/NonSquareBandMatrix");
-        TestMatrixDivArith1<T>(dt,b4v,si,cb4v,csi,"SymBand/NonSquareBandMatrix");
+        TestMatrixDivArith1(dt,b3v,si,cb3v,csi,"SymBand/NonSquareBandMatrix");
+        TestMatrixDivArith1(dt,b4v,si,cb4v,csi,"SymBand/NonSquareBandMatrix");
 #endif
     }
 }

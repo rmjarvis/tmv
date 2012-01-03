@@ -28,7 +28,7 @@ static void TestSmallNonSquareDiv_B1b()
     tmv::SmallVector<T,6> x = m.col(0);
     tmv::SmallVector<std::complex<T>,6> y = c1.col(0);
 
-    TestMatrixDivArith3d<T>(tmv::QR,a1,x,b,c1,y,e,"V/NonSquare"); 
+    TestMatrixDivArith3d(tmv::QR,a1,x,b,c1,y,e,"V/NonSquare"); 
 #if (XTEST & 32)
     tmv::SmallMatrix<T,6,N,stor,tmv::FortranStyle> a1f = a1;
     tmv::SmallMatrix<std::complex<T>,6,N,stor,tmv::FortranStyle> c1f = c1;
@@ -38,9 +38,9 @@ static void TestSmallNonSquareDiv_B1b()
     tmv::SmallVector<T,6,tmv::FortranStyle> xf = x;
     tmv::SmallVector<std::complex<T>,6,tmv::FortranStyle> yf = y;
 
-    TestMatrixDivArith3d<T>(tmv::QR,a1f,x,b,c1f,y,e,"V/NonSquare"); 
-    TestMatrixDivArith3d<T>(tmv::QR,a1f,xf,b,c1f,yf,e,"V/NonSquare"); 
-    TestMatrixDivArith3d<T>(tmv::QR,a1f,xf,bf,c1f,yf,ef,"V/NonSquare"); 
+    TestMatrixDivArith3d(tmv::QR,a1f,x,b,c1f,y,e,"V/NonSquare"); 
+    TestMatrixDivArith3d(tmv::QR,a1f,xf,b,c1f,yf,e,"V/NonSquare"); 
+    TestMatrixDivArith3d(tmv::QR,a1f,xf,bf,c1f,yf,ef,"V/NonSquare"); 
 #endif
 }
 

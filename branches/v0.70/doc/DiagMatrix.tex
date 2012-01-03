@@ -46,15 +46,14 @@ change the size to some useful value.
 
 \item 
 \begin{tmvcode}
-tmv::DiagMatrix<T,index> d(size_t n)
+tmv::DiagMatrix<T,index> d(int n)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{DiagMatrix} with \underline{uninitialized} values.
-If debugging is turned on (i.e. not turned off
-with \tt{-DNDEBUG} or \tt{-DTMVNDEBUG}), then the values along the diagonal are in fact initialized to 888. 
+If extra debugging is turned on (with \tt{-DTMV\_EXTRA\_DEBUG}), then the values along the diagonal are in fact initialized to 888. 
 
 \item
 \begin{tmvcode}
-tmv::DiagMatrix<T,index> d(size_t n, T x)
+tmv::DiagMatrix<T,index> d(int n, T x)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{DiagMatrix} with all values along the diagonal equal to \tt{x}.
 
@@ -104,13 +103,13 @@ Makes a \tt{DiagMatrixView} whose diagonal is \tt{v}.
 \item
 \begin{tmvcode}
 tmv::DiagMatrixView<T,index> d = 
-      tmv::DiagMatrixViewOf(T* vv, size_t n)
+      tmv::DiagMatrixViewOf(T* vv, int n)
 tmv::ConstDiagMatrixView<T,index> d = 
-      tmv::DiagMatrixViewOf(const T* vv, size_t n)
+      tmv::DiagMatrixViewOf(const T* vv, int n)
 tmv::DiagMatrixView<T,index> d = 
-      tmv::DiagMatrixViewOf(T* vv, size_t n, int step)
+      tmv::DiagMatrixViewOf(T* vv, int n, int step)
 tmv::ConstDiagMatrixView<T,index> d = 
-      tmv::DiagMatrixViewOf(const T* vv, size_t n, int step)
+      tmv::DiagMatrixViewOf(const T* vv, int n, int step)
 \end{tmvcode}
 \index{DiagMatrix!View of raw memory}
 Make a \tt{DiagMatrixView} whose diagonal consists of the actual memory elements \tt{vv}.  The last two allow for a non-unit step between the elements.
@@ -123,7 +122,7 @@ Make a \tt{DiagMatrixView} whose diagonal consists of the actual memory elements
 \label{DiagMatrix_Access}
 
 \begin{tmvcode}
-d.resize(size_t newsize)
+d.resize(int newsize)
 \end{tmvcode}
 \index{DiagMatrix!Methods!resize}
 
@@ -147,6 +146,26 @@ value 0.
 d.diag()
 \end{tmvcode}
 \index{DiagMatrix!Methods!diag}
+
+\begin{tmvcode}
+typename tmv::DiagMatrix<T>::iterator d.begin()
+typename tmv::DiagMatrix<T>::iterator d.end()
+typename tmv::DiagMatrix<T>::const_iterator d.begin() const
+typename tmv::DiagMatrix<T>::const_iterator d.end() const
+\end{tmvcode}
+These iterate along the diagonal of the \tt{DiagMatrix}.
+
+\begin{tmvcode}
+T* d.ptr()
+const T* d.cptr() const
+int d.step() const
+bool d.isconj() const
+\end{tmvcode}
+\index{DiagMatrix!Methods!ptr}
+\index{DiagMatrix!Methods!cptr}
+\index{DiagMatrix!Methods!step}
+\index{DiagMatrix!Methods!isconj}
+These methods allow for direct memory access of a \tt{DiagMatrix}.
 
 \begin{tmvcode}
 d.subDiagMatrix(int i1, int i2, int istep = 1)
@@ -286,6 +305,7 @@ v2 = d * v1
 v2 = v1 * d
 v *= d
 d3 = d1 * d2
+d3 = ElemProd(d1,d2)
 m2 = d * m1
 m2 = m1 * d
 d2 *= d1
@@ -324,8 +344,8 @@ but there is no direct way to use SVD for the division and skip any
 divisions by 0.  If you want to do this, you should use \tt{BandMatrixViewOf(d)} to 
 treat the \tt{DiagMatrix} as a \tt{BandMatrix}, which can use SVD.
 
-\subsection{Input/Output}
-\index{DiagMatrix!Input/output}
+\subsection{I/O}
+\index{DiagMatrix!I/O}
 \label{DiagMatrix_IO}
 
 The simplest I/O syntax is the usual:

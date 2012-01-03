@@ -1239,16 +1239,13 @@ namespace tmv {
     }
 
     template <class T> 
-    void Eigen(
-        const SymMatrixView<T>& A, const VectorView<RT>& SS)
+    void Eigen(const GenSymMatrix<T>& A, const VectorView<RT>& SS)
     {
         TMVAssert(A.isherm());
         TMVAssert(A.size() == SS.size());
 
-        if (A.isconj())
-            UnsortedEigen(A.conjugate(),SS);
-        else
-            UnsortedEigen(A,SS);
+        HermMatrix<T,Lower,ColMajor> A2 = A;
+        UnsortedEigen(A2.view(),SS);
         SS.sort(Ascend);
     }
 

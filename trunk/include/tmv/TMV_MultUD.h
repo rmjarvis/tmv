@@ -564,6 +564,8 @@ namespace tmv {
         }
     };
 
+    template <int ix, class T, class M> class ProdXM;
+
     // algo 82: Copy x*m2
     template <int s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUD_Helper<82,s,add,ix,T,M1,M2,M3>
@@ -579,7 +581,7 @@ namespace tmv {
             Scaling<1,RT> one;
             typedef typename Traits2<T,typename M2::value_type>::type PT;
             typedef typename MCopyHelper<PT,Diag,s,s>::type M2c;
-            M2c m2c = x*m2;
+            M2c m2c = ProdXM<ix,T,M2>(x,m2);
             MultUD_Helper<-2,s,add,1,RT,M1,M2c,M3>::call(one,m1,m2c,m3);
         }
     };

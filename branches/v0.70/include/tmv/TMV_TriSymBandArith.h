@@ -52,8 +52,7 @@ namespace tmv {
 
         inline SumUsB(
             T _x1, const GenUpperTriMatrix<T1>& _m1, 
-            T _x2, const GenSymBandMatrix<T2>& _m2
-        ) :
+            T _x2, const GenSymBandMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int colsize() const { return m1.size(); }
@@ -106,8 +105,7 @@ namespace tmv {
 
         inline SumLsB(
             T _x1, const GenLowerTriMatrix<T1>& _m1, 
-            T _x2, const GenSymBandMatrix<T2>& _m2
-        ) :
+            T _x2, const GenSymBandMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int colsize() const { return m1.size(); }
@@ -187,8 +185,7 @@ namespace tmv {
 
         inline ProdUsB(
             T _x, const GenUpperTriMatrix<T1>& _m1,
-            const GenSymBandMatrix<T2>& _m2
-        ) :
+            const GenSymBandMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int colsize() const { return m2.size(); }
@@ -240,8 +237,7 @@ namespace tmv {
 
         inline ProdsBU(
             T _x, const GenSymBandMatrix<T1>& _m1,
-            const GenUpperTriMatrix<T2>& _m2
-        ) :
+            const GenUpperTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int colsize() const { return m1.size(); }
@@ -293,8 +289,7 @@ namespace tmv {
 
         inline ProdLsB(
             T _x, const GenLowerTriMatrix<T1>& _m1,
-            const GenSymBandMatrix<T2>& _m2
-        ) :
+            const GenSymBandMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int colsize() const { return m2.size(); }
@@ -346,8 +341,7 @@ namespace tmv {
 
         inline ProdsBL(
             T _x, const GenSymBandMatrix<T1>& _m1,
-            const GenLowerTriMatrix<T2>& _m2
-        ) :
+            const GenLowerTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int colsize() const { return m1.size(); }
@@ -447,8 +441,7 @@ namespace tmv {
 
         inline QuotsBU(
             const T _x, const GenSymBandMatrix<T1>& _m1,
-            const GenUpperTriMatrix<T2>& _m2
-        ) :
+            const GenUpperTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
         inline int colsize() const { return m1.colsize(); }
@@ -488,8 +481,7 @@ namespace tmv {
 
         inline RQuotsBU(
             const T _x, const GenSymBandMatrix<T1>& _m1,
-            const GenUpperTriMatrix<T2>& _m2
-        ) :
+            const GenUpperTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.rowsize() == m2.size() ); }
         inline int colsize() const { return m1.colsize(); }
@@ -529,8 +521,7 @@ namespace tmv {
 
         inline QuotsBL(
             const T _x, const GenSymBandMatrix<T1>& _m1,
-            const GenLowerTriMatrix<T2>& _m2
-        ) :
+            const GenLowerTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
         inline int colsize() const { return m1.size(); }
@@ -570,8 +561,7 @@ namespace tmv {
 
         inline RQuotsBL(
             const T _x, const GenSymBandMatrix<T1>& _m1,
-            const GenLowerTriMatrix<T2>& _m2
-        ) :
+            const GenLowerTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.rowsize() == m2.size() ); }
         inline int colsize() const { return m1.colsize(); }

@@ -38,7 +38,7 @@ static void DoTestSmallMatrixArith_B5a()
     if (showstartdone) {
         std::cout<<"B5a"<<std::endl;
     }
-    TestMatrixArith5<T>(a3,ca3,a1,ca1,"NonSquare");
+    TestMatrixArith5(a3,ca3,a1,ca1,"NonSquare");
 
 #if (XTEST & 2)
     tmv::SmallMatrix<T,N,N,tmv::ColMajor> a2 = a1;
@@ -53,11 +53,11 @@ static void DoTestSmallMatrixArith_B5a()
     tmv::SmallMatrix<T,7,N,tmv::RowMajor,tmv::FortranStyle> a3f = a3;
     tmv::SmallMatrix<std::complex<T>,7,N,tmv::RowMajor,tmv::FortranStyle> ca3f = ca3;
 
-    TestMatrixArith5<T>(a3,ca3,a2,ca2,"NonSquare");
-    TestMatrixArith5<T>(a4,ca4,a1,ca1,"NonSquare");
-    TestMatrixArith5<T>(a4,ca4,a2,ca2,"NonSquare");
-    TestMatrixArith5<T>(a3f,ca3f,a1,ca1,"NonSquare");
-    TestMatrixArith5<T>(a3f,ca3f,a1f,ca1f,"NonSquare");
+    TestMatrixArith5(a3,ca3,a2,ca2,"NonSquare");
+    TestMatrixArith5(a4,ca4,a1,ca1,"NonSquare");
+    TestMatrixArith5(a4,ca4,a2,ca2,"NonSquare");
+    TestMatrixArith5(a3f,ca3f,a1,ca1,"NonSquare");
+    TestMatrixArith5(a3f,ca3f,a1f,ca1f,"NonSquare");
 #endif
 }
 

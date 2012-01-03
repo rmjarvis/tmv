@@ -52,8 +52,7 @@ namespace tmv {
 
         inline SumDU(
             T _x1, const GenDiagMatrix<T1>& _m1, 
-            T _x2, const GenUpperTriMatrix<T2>& _m2
-        ) :
+            T _x2, const GenUpperTriMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int size() const { return m1.size(); }
@@ -186,8 +185,7 @@ namespace tmv {
 
         inline SumDL(
             T _x1, const GenDiagMatrix<T1>& _m1, 
-            T _x2, const GenLowerTriMatrix<T2>& _m2
-        ) :
+            T _x2, const GenLowerTriMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int size() const { return m1.size(); }
@@ -345,8 +343,7 @@ namespace tmv {
 
         inline ProdDU(
             T _x, const GenDiagMatrix<T1>& _m1,
-            const GenUpperTriMatrix<T2>& _m2
-        ) :
+            const GenUpperTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int size() const { return m1.size(); }
@@ -383,8 +380,7 @@ namespace tmv {
 
         inline ProdUD(
             T _x, const GenUpperTriMatrix<T1>& _m1,
-            const GenDiagMatrix<T2>& _m2
-        ) :
+            const GenDiagMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int size() const { return m1.size(); }
@@ -521,8 +517,7 @@ namespace tmv {
 
         inline ProdDL(
             T _x, const GenDiagMatrix<T1>& _m1,
-            const GenLowerTriMatrix<T2>& _m2
-        ) :
+            const GenLowerTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int size() const { return m1.size(); }
@@ -559,8 +554,7 @@ namespace tmv {
 
         inline ProdLD(
             T _x, const GenLowerTriMatrix<T1>& _m1,
-            const GenDiagMatrix<T2>& _m2
-        ) :
+            const GenDiagMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int size() const { return m1.size(); }
@@ -744,8 +738,7 @@ namespace tmv {
 
         inline QuotUD(
             const T _x, const GenUpperTriMatrix<T1>& _m1,
-            const GenDiagMatrix<T2>& _m2
-        ) :
+            const GenDiagMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
         inline int size() const { return m1.size(); }
@@ -782,8 +775,7 @@ namespace tmv {
 
         inline RQuotUD(
             const T _x, const GenUpperTriMatrix<T1>& _m1,
-            const GenDiagMatrix<T2>& _m2
-        ) :
+            const GenDiagMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
         inline int size() const { return m1.size(); }
@@ -841,8 +833,7 @@ namespace tmv {
 
         inline QuotLD(
             const T _x, const GenLowerTriMatrix<T1>& _m1,
-            const GenDiagMatrix<T2>& _m2
-        ) :
+            const GenDiagMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
         inline int size() const { return m1.size(); }
@@ -879,8 +870,7 @@ namespace tmv {
 
         inline RQuotLD(
             const T _x, const GenLowerTriMatrix<T1>& _m1,
-            const GenDiagMatrix<T2>& _m2
-        ) :
+            const GenDiagMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
         inline int size() const { return m1.size(); }

@@ -110,7 +110,7 @@ It has defaults for \texttt{g++}, \texttt{icpc} and \texttt{pgCC}.  If you are u
 like the default, then you can specify this by hand.  
 Remember to put the flags in quotes,
 so the whitespace doesn't confuse the parser.  e.g. \texttt{scons FLAGS='-O3 -g'}
-\item \texttt{DEBUG=false} specifies whether to keep the debugging assert statements in the compiled library code.  
+\item \texttt{DEBUG=false} specifies whether to keep the debugging assert statements in the compiled library code.  \tt{DEBUG=true} turns on all the TMV debugging statements, even those that would normall require \tt{-DTMV\_EXTRA\_DEBUG}.
 \item \texttt{PREFIX=/usr/local} specifies where to install the library when running \texttt{scons install} (see below).
 \item \texttt{INST\_FLOAT=true} specifies whether to instantiate the \tt{<float>} templates.
 \item \texttt{INST\_DOUBLE=true} specifies whether to instantiate the \tt{<double>} templates.
@@ -518,16 +518,21 @@ you specified for building the TMV library.
 Here are some compiler define flags to consider using:
 \begin{itemize}
 \item
-\texttt{-DNDEBUG} or \texttt{-DTMVNDEBUG}
+\texttt{-DNDEBUG} or \texttt{-DTMV\_NDEBUG}
 will turn off debugging.  My recommendation is to set this flag when compiling the library,
 but leave it off in your own code, especially during debugging.  This will do most of the 
 relevant sanity checks on calls to TMV functions, but the back end code will be as fast as possible.
 
 Note: The second option allows you to turn off debugging in just the calls to TMV functions
-without turning it off for your own code.  So this can be useful if you 
+without turning it off for your own code.  It is exactly equivalent to \tt{-DNDEBUG} when compiling the library code, but it can be useful when compiling your own code if you 
 find that TMV debugging statements are in time critical parts of the code
 and you want to remove them without turning off other assert statements 
 in your code.
+
+\item
+\texttt{-DTMV\_EXTRA\_DEBUG}
+will add some extra debugging statements that take $O(N)$ or $O(N^2)$ time rather than merely $O(1)$ time.  This can be useful to turn on when debugging your own code, but it is probably not ever necessary to use when compiling the library.
+
 \end{itemize}
 The rest of the flags are only relevant when compiling the TMV library, so you won't 
 need any of them when compiling your own code that uses TMV routines.  And if you 
@@ -860,8 +865,10 @@ Now you should be all set to use the TMV library in your program.
 
 \subsection{Compiling your own program}
 
-Each \texttt{.cpp} file that uses TMV will need to have \\
-\tt{\#include "TMV.h"}\\
+Each \texttt{.cpp} file that uses TMV will need to have 
+\begin{tmvcode}
+#include "TMV.h"
+\end{tmvcode}
 at the top.
 \index{TMV.h}
 
@@ -873,22 +880,51 @@ will need to include their particular header files as well:
 #include "TMV_SymBand.h"
 \end{tmvcode}
 \index{TMV\_Band.h}
-\index{TMV\_Small.h}
 \index{TMV\_Sym.h}
 \index{TMV\_SymBand.h}
 
-If you did not install TMV into a standard place like \tt{/usr/local} (specified
+When compiling your object files, there are a couple of compiler flags that you might want to use:
+\begin{itemize}
+\item
+\texttt{-DNDEBUG}\\
+\texttt{-DTMV\_NDEBUG}
+
+Either of these will turn off the normal debugging statements in the TMV header files.  All of the normal debugging statements in TMV take $O(1)$ time, so they are not too intrusive to leave turned on, and they can be very useful in catching errors in your code.  For example, they check that the sizes of two matrices being multiplied or added match up correctly, and that the indices given for submatrices and subvectors fit into the main matrix or vector.  
+
+The normal behavior that we think will be appropriate for most users is to leave these statements active during development, and then when you turn off your own \tt{assert} statements with \tt{-DNDEBUG}, that will turn off the TMV asserts as well.  However, if you want to turn off the TMV asserts without otherwise affecting your own debug lines, then \tt{-DTMV\_NDEBUG} will do that.
+
+\item
+\texttt{-DTMV\_EXTRA\_DEBUG}
+
+This will turn on some extra debugging statements that can sometimes be useful.  First, whenever you create a matrix that is nominally uninitialized (e.g. \tt{tmv::Matrix<T> m(4,3);}), this will instead initialize it with all 888's.  This can make it easier to find bugs, since uninitialized memory can often be 0's, which might hide that fact that you forgot to initialize some of the values to 0.  So your code might work for a while and then give wrong answers when something else about your code changes.
+
+Perhaps more important, when any matrix is destroyed, this will first set all the values to 999.  That makes it easier to notice if you accidentally use a view to that matrix after that point.  Again, without this step, your code might work correctly for a while, and then suddenly fail, so this can help you find such errors.
+
+Finally, there are a few $O(N)$ asserts that get turned on with this flag, such as checking that hermitian views of a complex \tt{Matrix} actually has real elements on the diagonal (as required for the view to be hermitian).  This takes $O(N)$ time, since it needs to check every element on the diagonal.  
+
+\end{itemize}
+
+Also, if you did not install TMV into a standard place like \tt{/usr/local} (specified
 by \tt{PREFIX} in the scons and make installations), then you will also
-need to tell your compiler where you installed the header files with\\
-\tt{-IPREFIX/include}\\
+need to tell your compiler where you installed the header files with
+\begin{verbatim}
+-IPREFIX/include
+\end{verbatim}
+
 Then for the linking step, you need to link your program with the TMV
-library with\\
-\tt{-ltmv}\\
-or if TMV is not installed in your path then\\
-\tt{-LPREFIX/lib -ltmv}\\
+library with
+\begin{verbatim}
+-ltmv
+\end{verbatim}
+or if TMV is not installed in your path then
+\begin{verbatim}
+-LPREFIX/lib -ltmv
+\end{verbatim}
 If you are using band or symmetric/hermitian matrices, then you will
-need to link with the flags\\
-\tt{-ltmv\_symband -ltmv}.
+need to link with the flags
+\begin{verbatim}
+-ltmv_symband -ltmv
+\end{verbatim}
 
 And if you are using BLAS and/or LAPACK calls from the TMV code,
 then you will also need to

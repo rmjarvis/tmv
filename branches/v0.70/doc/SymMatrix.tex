@@ -83,18 +83,17 @@ change the size to some useful value.
 
 \item 
 \begin{tmvcode}
-tmv::SymMatrix<T,uplo,stor,index> s(size_t n)
-tmv::HermMatrix<T,uplo,stor,index> h(size_t n)
+tmv::SymMatrix<T,uplo,stor,index> s(int n)
+tmv::HermMatrix<T,uplo,stor,index> h(int n)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{SymMatrix} or \tt{HermMatrix}
 with \underline{uninitialized} values.
-If debugging is turned on (i.e. not turned off
-with \tt{-DNDEBUG} or \tt{-DTMVNDEBUG}), then the values are in fact initialized to 888.  
+If extra debugging is turned on (with \tt{-DTMV\_EXTRA\_DEBUG}), then the values are in fact initialized to 888.  
 
 \item
 \begin{tmvcode}
-tmv::SymMatrix<T,uplo,stor,index> s(size_t n, T x)
-tmv::HermMatrix<T,uplo,stor,index> h(size_t n, RT x)
+tmv::SymMatrix<T,uplo,stor,index> s(int n, T x)
+tmv::HermMatrix<T,uplo,stor,index> h(int n, RT x)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{SymMatrix} or \tt{HermMatrix} 
 with all values equal to \tt{x}.
@@ -138,16 +137,16 @@ Make a \tt{SymMatrixView} of the corresponding portion of \tt{m}.
 \item
 \begin{tmvcode}
 tmv::SymMatrixView<T,index> s = 
-      tmv::SymMatrixViewOf(T* vv, size_t n, UpLoType uplo, 
+      tmv::SymMatrixViewOf(T* vv, int n, UpLoType uplo, 
       StorageType stor)
 tmv::ConstSymMatrixView<T,index> s =
-      tmv::SymMatrixViewOf(const T* vv, size_t n, UpLoType uplo, 
+      tmv::SymMatrixViewOf(const T* vv, int n, UpLoType uplo, 
       StorageType stor)
 tmv::SymMatrixView<T,index> h =
-      tmv::HermMatrixViewOf(T* vv, size_t n, UpLoType uplo, 
+      tmv::HermMatrixViewOf(T* vv, int n, UpLoType uplo, 
       StorageType stor)
 tmv::ConstSymMatrixView<T,index> h =
-      tmv::HermMatrixViewOf(const T* vv, size_t n, UpLoType uplo, 
+      tmv::HermMatrixViewOf(const T* vv, int n, UpLoType uplo, 
       StorageType stor)
 \end{tmvcode}
 \index{SymMatrix!View of raw memory}
@@ -159,16 +158,16 @@ of the values are actually used,
 \item
 \begin{tmvcode}
 tmv::SymMatrixView<T,index> s = 
-      tmv::SymMatrixViewOf(T* vv, size_t n, UpLoType uplo, 
+      tmv::SymMatrixViewOf(T* vv, int n, UpLoType uplo, 
       int stepi, int stepj)
 tmv::ConstSymMatrixView<T,index> s =
-      tmv::SymMatrixViewOf(const T* vv, size_t n, UpLoType uplo, 
+      tmv::SymMatrixViewOf(const T* vv, int n, UpLoType uplo, 
       int stepi, int stepj)
 tmv::SymMatrixView<T,index> h =
-      tmv::HermMatrixViewOf(T* vv, size_t n, UpLoType uplo, 
+      tmv::HermMatrixViewOf(T* vv, int n, UpLoType uplo, 
       int stepi, int stepj)
 tmv::ConstSymMatrixView<T,index> h =
-      tmv::HermMatrixViewOf(const T* vv, size_t n, UpLoType uplo, 
+      tmv::HermMatrixViewOf(const T* vv, int n, UpLoType uplo, 
       int stepi, int stepj)
 \end{tmvcode}
 \index{SymMatrix!View of raw memory}
@@ -182,7 +181,7 @@ upper or lower triangle.  This allows for arbitrary steps through the data.
 \label{SymMatrix_Access}
 
 \begin{tmvcode}
-s.resize(size_t new_size)
+s.resize(int new_size)
 \end{tmvcode}
 \index{SymMatrix!Methods!resize}
 
@@ -216,6 +215,30 @@ therefore need to use two steps:
 s.row(i,0,i) = ...
 s.row(i,i,ncols) = ...
 \end{tmvcode}
+
+\begin{tmvcode}
+T* s.ptr()
+const T* s.cptr() const
+int s.stepi() const
+int s.stepj() const
+bool s.isconj() const
+bool s.issym() const
+bool s.isherm() const
+bool s.isupper() const
+bool s.isrm() const
+bool s.iscm() const
+\end{tmvcode}
+\index{SymMatrix!Methods!ptr}
+\index{SymMatrix!Methods!cptr}
+\index{SymMatrix!Methods!stepi}
+\index{SymMatrix!Methods!stepj}
+\index{SymMatrix!Methods!isconj}
+\index{SymMatrix!Methods!issym}
+\index{SymMatrix!Methods!isherm}
+\index{SymMatrix!Methods!isupper}
+\index{SymMatrix!Methods!isrm}
+\index{SymMatrix!Methods!iscm}
+These methods allow for direct memory access of a \tt{SymMatrix}.  There are a few new methods here: \tt{issym()} returns whether the \tt{SymMatrix} is symmetric (as opposed to hermitian), \tt{isherm()} returns whether it is hermitian (as opposed to symmetric), and \tt{isupper()} returns whether the the elements actually stored in memory are for the upper triangle (as opposed to the lower triangle).  Note that for a real \tt{SymMatrix} both \tt{issym()} and \tt{isherm()} will return \tt{true}.
 
 \begin{tmvcode}
 s.subVector(int i, int j, int istep, int jstep, int size)
@@ -275,6 +298,8 @@ you would have to view them as a triangle matrix with \tt{s.upperTri().imagPart(
 since the diagonal elements are all real.
 you could also use \tt{s.upperTri().offDiag().imagPart()}. 
 \vspace{12pt}
+
+Note that there are no iterators provided for \tt{SymMatrix} or \tt{HermMatrix}.  The recommended way to iterate over their stored values is to use the \tt{upperTri()} or \tt{lowerTri()} methods and iterate over those portions of the matrix directly.
 
 \subsection{Functions}
 \index{SymMatrix!Functions of}
@@ -407,6 +432,7 @@ v2 = s * v1
 v2 = v1 * s
 v *= s
 m = s1 * s2
+s3 = ElemProd(s1,s2)
 m2 = s * m1
 m2 = m1 * s
 m *= s
@@ -664,8 +690,8 @@ unless \tt{s}'s data type is an integer type, in which case Bareiss's algorithm
 is used.
 \index{SymMatrix!Determinant}
 
-\subsection{Input/Output}
-\index{SymMatrix!Input/output}
+\subsection{I/O}
+\index{SymMatrix!I/O}
 \label{SymMatrix_IO}
 
 The simplest I/O syntax is the usual:

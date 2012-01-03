@@ -359,13 +359,11 @@ void TestHermDecomp()
 
 #if (XTEST & 16)
             tmv::Vector<T> L2(N);
-            tmv::HermMatrix<T,uplo,stor> m2 = m;
-            Eigen(m2.view(),L2.view());
+            Eigen(m,L2.view());
             Assert(Norm(L2-L) <= eps*normm,"Herm Eigen2");
 
             tmv::Vector<T> cL2(N);
-            tmv::HermMatrix<CT,uplo,stor> c2 = c;
-            Eigen(c2.view(),cL2.view());
+            Eigen(c,cL2.view());
             Assert(Norm(cL2-cL) <= eps*normc,"Herm C Eigen2");
 
             Eigen(c,cV.conjugate(),cL.view());
@@ -380,8 +378,7 @@ void TestHermDecomp()
             Assert(Norm(c*cV-cV*DiagMatrixViewOf(cL)) <= eps*normc,
                    "Herm C Eigen5");
 
-            c2.conjugate() = c;
-            Eigen(c2.conjugate(),cL2.view());
+            Eigen(c.conjugate(),cL2.view());
             Assert(Norm(cL2-cL) <= eps*normc,"Herm C Eigen6");
 #endif
             std::cout<<"."; std::cout.flush();

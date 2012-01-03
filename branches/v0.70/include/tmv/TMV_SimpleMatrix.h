@@ -101,7 +101,7 @@ namespace tmv {
         {
             TMVAssert(cs >= 0 && rs >= 0);
             TMVAssert(S==RowMajor || S==ColMajor);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }
@@ -124,7 +124,7 @@ namespace tmv {
 
         inline ~SimpleMatrix()
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(999));
 #endif
         }
@@ -380,7 +380,7 @@ namespace tmv {
             itsm.resize(linsize);
             itscs = cs;
             itsrs = rs;
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }

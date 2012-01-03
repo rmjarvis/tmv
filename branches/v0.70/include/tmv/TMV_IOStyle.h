@@ -229,7 +229,7 @@ namespace tmv {
         const IOStyle& getstyle() const { return s; }
 
     private :
-        mutable std::ostream& os;
+        std::ostream& os;
         IOStyle s;
 
         mutable std::streamsize oldprec;
@@ -336,7 +336,7 @@ namespace tmv {
         const IOStyle& getstyle() const { return s; }
 
     private :
-        mutable std::istream& is;
+        std::istream& is;
         IOStyle s;
 
         void skipWhiteSpace() const

@@ -43,8 +43,8 @@ void TestSymBandDiv_D2(tmv::DivType dt, PosDefCode pdc)
         tmv::SymBandMatrixView<T> si = sb[i];
         tmv::SymBandMatrixView<std::complex<T> > csi = csb[i];
 
-        TestMatrixDivArith1<T>(dt,uv,si,cuv,csi,"SymBand/UpperTriMatrix");
-        TestMatrixDivArith1<T>(dt,lv,si,clv,csi,"SymBand/LowerTriMatrix");
+        TestMatrixDivArith1(dt,uv,si,cuv,csi,"SymBand/UpperTriMatrix");
+        TestMatrixDivArith1(dt,lv,si,clv,csi,"SymBand/LowerTriMatrix");
     }
 }
 

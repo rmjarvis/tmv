@@ -50,8 +50,7 @@ namespace tmv {
 
         inline SumsBS(
             T _x1, const GenSymBandMatrix<T1>& _m1, 
-            T _x2, const GenSymMatrix<T2>& _m2
-        ) :
+            T _x2, const GenSymMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int size() const { return m2.size(); }
@@ -248,8 +247,7 @@ namespace tmv {
 
         inline ProdsBS(
             T _x, const GenSymBandMatrix<T1>& _m1,
-            const GenSymMatrix<T2>& _m2
-        ) :
+            const GenSymMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int colsize() const { return m2.size(); }
@@ -288,8 +286,7 @@ namespace tmv {
 
         inline ProdSsB(
             T _x, const GenSymMatrix<T1>& _m1,
-            const GenSymBandMatrix<T2>& _m2
-        ) :
+            const GenSymBandMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { 
             TMVAssert(m2.colsize() == m1.size()); 

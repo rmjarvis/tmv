@@ -113,7 +113,8 @@ namespace tmv {
             x(_x), m(_m) {}
         inline int size() const { return m.size(); }
         inline StorageType stor() const { return BaseStorOf(m); }
-        inline DiagType dt() const { return NonUnitDiag; }
+        inline DiagType dt() const 
+        { return x==T(1) ? m.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<Tm>& getM() const { return m; }
         inline void assignToU(
@@ -493,7 +494,7 @@ namespace tmv {
         inline int size() const { return m1.size(); }
         inline StorageType stor() const { return BaseStorOf(m1); }
         inline DiagType dt() const 
-        { return (m1.isunit()&&m2.isunit()&&x==T(1)) ?  UnitDiag : NonUnitDiag; }
+        { return x==T(1) && m1.dt()==m2.dt() ? m1.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
         inline const GenUpperTriMatrix<T2>& getM2() const { return m2; }
@@ -541,7 +542,7 @@ namespace tmv {
         const UpperTriMatrixView<T>& m, const ProdUU<T,T1,T2>& pmm)
     {
         TMVAssert(m.size() == pmm.size());
-        TMVAssert(!m.isunit() || pmm.isunit());
+        TMVAssert(!m.isunit());
         MultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
         return m; 
     }
@@ -551,7 +552,7 @@ namespace tmv {
         const UpperTriMatrixView<CT>& m, const ProdUU<T,T,T>& pmm)
     { 
         TMVAssert(m.size() == pmm.size());
-        TMVAssert(!m.isunit() || pmm.isunit());
+        TMVAssert(!m.isunit());
         MultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
         return m; 
     }
@@ -561,7 +562,7 @@ namespace tmv {
         const UpperTriMatrixView<T>& m, const ProdUU<T,T1,T2>& pmm)
     { 
         TMVAssert(m.size() == pmm.size());
-        TMVAssert(!m.isunit() || pmm.isunit());
+        TMVAssert(!m.isunit());
         MultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
         return m; 
     }
@@ -571,7 +572,7 @@ namespace tmv {
         const UpperTriMatrixView<CT>& m, const ProdUU<T,T,T>& pmm)
     { 
         TMVAssert(m.size() == pmm.size());
-        TMVAssert(!m.isunit() || pmm.isunit());
+        TMVAssert(!m.isunit());
         MultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
         return m; 
     }
@@ -590,6 +591,106 @@ namespace tmv {
 #undef PRODXM1
 #undef PRODXM2
 
+   
+    //
+    // Element Product TriMatrix * TriMatrix
+    //
+
+    template <class T, class T1, class T2> 
+    class ElemProdUU : public UpperTriMatrixComposite<T> 
+    {
+    public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline ElemProdUU(
+            T _x, const GenUpperTriMatrix<T1>& _m1, 
+            const GenUpperTriMatrix<T2>& _m2) :
+            x(_x),m1(_m1),m2(_m2)
+        { TMVAssert(m1.size() == m2.size()); }
+        inline int size() const { return m1.size(); }
+        inline StorageType stor() const { return BaseStorOf(m1); }
+        inline DiagType dt() const 
+        { return x==T(1) && m1.dt()==m2.dt() ? m1.dt() : NonUnitDiag; }
+        inline T getX() const { return x; }
+        inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
+        inline const GenUpperTriMatrix<T2>& getM2() const { return m2; }
+        inline void assignToU(const UpperTriMatrixView<real_type>& m0) const
+        { 
+            TMVAssert(isReal(T()));
+            TMVAssert(m0.size() == size());
+            TMVAssert(!m0.isunit() || m0.dt() == dt());
+            ElemMultMM<false>(x,m1,m2,m0);
+        }
+        inline void assignToU(const UpperTriMatrixView<complex_type>& m0) const
+        { 
+            TMVAssert(m0.size() == size());
+            TMVAssert(!m0.isunit() || m0.dt() == dt());
+            ElemMultMM<false>(x,m1,m2,m0);
+        }
+    private:
+        const T x;
+        const GenUpperTriMatrix<T1>& m1;
+        const GenUpperTriMatrix<T2>& m2;
+    };
+
+    template <class T, class T1, class T2> 
+    inline const UpperTriMatrixView<T>& operator+=(
+        const UpperTriMatrixView<T>& m, const ElemProdUU<T,T1,T2>& pmm)
+    {
+        TMVAssert(m.size() == pmm.size());
+        TMVAssert(!m.isunit());
+        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T> 
+    inline const UpperTriMatrixView<CT>& operator+=(
+        const UpperTriMatrixView<CT>& m, const ElemProdUU<T,T,T>& pmm)
+    { 
+        TMVAssert(m.size() == pmm.size());
+        TMVAssert(!m.isunit());
+        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T, class T1, class T2> 
+    inline const UpperTriMatrixView<T>& operator-=(
+        const UpperTriMatrixView<T>& m, const ElemProdUU<T,T1,T2>& pmm)
+    { 
+        TMVAssert(m.size() == pmm.size());
+        TMVAssert(!m.isunit());
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T> 
+    inline const UpperTriMatrixView<CT>& operator-=(
+        const UpperTriMatrixView<CT>& m, const ElemProdUU<T,T,T>& pmm)
+    { 
+        TMVAssert(m.size() == pmm.size());
+        TMVAssert(!m.isunit());
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+
+#define PRODMM ElemProdUU
+#define GENMATRIX1 GenUpperTriMatrix
+#define GENMATRIX2 GenUpperTriMatrix
+#define PRODXM1 ProdXU
+#define PRODXM2 ProdXU
+#define OP ElemProd
+#include "tmv/TMV_AuxProdMM.h"
+#include "tmv/TMV_AuxProdMMa.h"
+#undef PRODMM
+#undef GENMATRIX1
+#undef GENMATRIX2
+#undef PRODXM1
+#undef PRODXM2
+
+
+ 
     //
     // Scalar / TriMatrix
     //
@@ -1274,7 +1375,7 @@ namespace tmv {
         inline int size() const { return m1.size(); }
         inline StorageType stor() const { return BaseStorOf(m1); }
         inline DiagType dt() const 
-        { return (m1.isunit()&&m2.isunit()&&x==T(1)) ? UnitDiag : NonUnitDiag; }
+        { return x==T(1) && m1.dt()==m2.dt() ? m1.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
         inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
@@ -1369,6 +1470,105 @@ namespace tmv {
 #undef GENMATRIX2
 #undef PRODXM1
 #undef PRODXM2
+ 
+    //
+    // Element Product TriMatrix * TriMatrix
+    //
+
+    template <class T, class T1, class T2> 
+    class ElemProdLL : public LowerTriMatrixComposite<T> 
+    {
+    public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline ElemProdLL(
+            T _x, const GenLowerTriMatrix<T1>& _m1, 
+            const GenLowerTriMatrix<T2>& _m2) :
+            x(_x),m1(_m1),m2(_m2)
+        { TMVAssert(m1.size() == m2.size()); }
+        inline int size() const { return m1.size(); }
+        inline StorageType stor() const { return BaseStorOf(m1); }
+        inline DiagType dt() const 
+        { return x==T(1) && m1.dt()==m2.dt() ? m1.dt() : NonUnitDiag; }
+        inline T getX() const { return x; }
+        inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
+        inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
+        inline void assignToL(const LowerTriMatrixView<real_type>& m0) const
+        { 
+            TMVAssert(isReal(T()));
+            TMVAssert(m0.size() == size());
+            TMVAssert(!m0.isunit() || m0.dt() == dt());
+            ElemMultMM<false>(x,m1,m2,m0);
+        }
+        inline void assignToL(const LowerTriMatrixView<complex_type>& m0) const
+        { 
+            TMVAssert(m0.size() == size());
+            TMVAssert(!m0.isunit() || m0.dt() == dt());
+            ElemMultMM<false>(x,m1,m2,m0);
+        }
+    private:
+        const T x;
+        const GenLowerTriMatrix<T1>& m1;
+        const GenLowerTriMatrix<T2>& m2;
+    };
+
+    template <class T, class T1, class T2> 
+    inline const LowerTriMatrixView<T>& operator+=(
+        const LowerTriMatrixView<T>& m, const ElemProdLL<T,T1,T2>& pmm)
+    {
+        TMVAssert(m.size() == pmm.size());
+        TMVAssert(!m.isunit());
+        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T> 
+    inline const LowerTriMatrixView<CT>& operator+=(
+        const LowerTriMatrixView<CT>& m, const ElemProdLL<T,T,T>& pmm)
+    { 
+        TMVAssert(m.size() == pmm.size());
+        TMVAssert(!m.isunit());
+        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T, class T1, class T2> 
+    inline const LowerTriMatrixView<T>& operator-=(
+        const LowerTriMatrixView<T>& m, const ElemProdLL<T,T1,T2>& pmm)
+    { 
+        TMVAssert(m.size() == pmm.size());
+        TMVAssert(!m.isunit());
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T> 
+    inline const LowerTriMatrixView<CT>& operator-=(
+        const LowerTriMatrixView<CT>& m, const ElemProdLL<T,T,T>& pmm)
+    { 
+        TMVAssert(m.size() == pmm.size());
+        TMVAssert(!m.isunit());
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+
+#define PRODMM ElemProdLL
+#define GENMATRIX1 GenLowerTriMatrix
+#define GENMATRIX2 GenLowerTriMatrix
+#define PRODXM1 ProdXU
+#define PRODXM2 ProdXU
+#define OP ElemProd
+#include "tmv/TMV_AuxProdMM.h"
+#include "tmv/TMV_AuxProdMMa.h"
+#undef PRODMM
+#undef GENMATRIX1
+#undef GENMATRIX2
+#undef PRODXM1
+#undef PRODXM2
+
+
 
     //
     // Scalar / TriMatrix
@@ -1385,7 +1585,8 @@ namespace tmv {
             x(_x), m(_m)  {}
         inline int size() const { return m.size(); }
         inline StorageType stor() const { return BaseStorOf(m); }
-        inline DiagType dt() const { return x==T(1) ? m.dt() : NonUnitDiag; }
+        inline DiagType dt() const 
+        { return x==T(1) ? m.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<Tm>& getM() const { return m; }
         inline void assignToL(const LowerTriMatrixView<real_type>& m0) const

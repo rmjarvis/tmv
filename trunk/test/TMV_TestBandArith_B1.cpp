@@ -6,28 +6,40 @@
 #include "TMV_Band.h"
 #include "TMV_TestBandArith.h"
 
+#if 0
 template <class M1, class M2>
 inline bool CanAddEq(
     const tmv::BaseMatrix_Band_Mutable<M1>& , const tmv::BaseMatrix_Rec<M2>& )
 { return false; }
 
 template <class M1, class M2, class M3> 
-inline bool CanMultMM(
+inline bool CanMult(
     const tmv::BaseMatrix_Band<M1>& , const tmv::BaseMatrix_Rec<M2>& ,
     const tmv::BaseMatrix_Band_Mutable<M3>& )
 { return false; }
 
 template <class M1, class M2, class M3> 
-inline bool CanMultMM(
+inline bool CanMult(
     const tmv::BaseMatrix_Rec<M1>& , const tmv::BaseMatrix_Band<M2>& ,
     const tmv::BaseMatrix_Band_Mutable<M3>& )
 { return false; }
 
 template <class M1, class M2, class M3> 
-inline bool CanMultMM(
+inline bool CanMult(
     const tmv::BaseMatrix_Rec<M1>& , const tmv::BaseMatrix_Rec<M2>& ,
     const tmv::BaseMatrix_Band_Mutable<M3>& )
 { return false; }
+#endif
+
+template <class M1, class M2, class M3> 
+inline bool CanElemMult(
+    const tmv::BaseMatrix_Band<M1>& a, const tmv::BaseMatrix_Rec<M2>& b,
+    const tmv::BaseMatrix_Band_Mutable<M3>& c)
+{ 
+    return a.rowsize() == c.rowsize() && a.colsize() == c.colsize() &&
+        b.rowsize() == c.rowsize() && b.colsize() == c.colsize() &&
+        c.nlo() >= a.nlo() && c.nhi() >= a.nhi();
+}
 
 #define NOADDEQ
 #define NOMULTEQ
@@ -79,16 +91,16 @@ void TestBandMatrixArith_B1()
         tmv::Matrix<T> mx = bi;
         tmv::Matrix<std::complex<T> > cmx = cbi;
 
-        TestMatrixArith4<T>(bi,cbi,a1v,ca1v,"Band/SquareM");
-        TestMatrixArith5<T>(bi,cbi,a1v,ca1v,"Band/SquareM");
-        TestMatrixArith6x<T>(bi,cbi,a1v,ca1v,"Band/SquareM");
+        TestMatrixArith4(bi,cbi,a1v,ca1v,"Band/SquareM");
+        TestMatrixArith5(bi,cbi,a1v,ca1v,"Band/SquareM");
+        TestMatrixArith6x(bi,cbi,a1v,ca1v,"Band/SquareM");
 #if (XTEST & 2)
-        TestMatrixArith4<T>(bi,cbi,a3v,ca3v,"Band/NonSquareM");
-        TestMatrixArith5<T>(bi,cbi,a3v,ca3v,"Band/NonSquareM");
-        TestMatrixArith6x<T>(bi,cbi,a3v,ca3v,"Band/NonSquareM");
-        TestMatrixArith4<T>(bi,cbi,a4v,ca4v,"Band/DegenerateM");
-        TestMatrixArith5<T>(bi,cbi,a4v,ca4v,"Band/DegenerateM");
-        TestMatrixArith6x<T>(bi,cbi,a4v,ca4v,"Band/DegenerateM");
+        TestMatrixArith4(bi,cbi,a3v,ca3v,"Band/NonSquareM");
+        TestMatrixArith5(bi,cbi,a3v,ca3v,"Band/NonSquareM");
+        TestMatrixArith6x(bi,cbi,a3v,ca3v,"Band/NonSquareM");
+        TestMatrixArith4(bi,cbi,a4v,ca4v,"Band/DegenerateM");
+        TestMatrixArith5(bi,cbi,a4v,ca4v,"Band/DegenerateM");
+        TestMatrixArith6x(bi,cbi,a4v,ca4v,"Band/DegenerateM");
 #endif
     }
 }

@@ -44,8 +44,8 @@ namespace tmv {
     public :
 
         inline PackedQ(
-            const tmv::GenMatrix<T>& _Q, const tmv::GenVector<T>& _beta
-        ) : Q(_Q), beta(_beta) 
+            const tmv::GenMatrix<T>& _Q, const tmv::GenVector<T>& _beta) :
+            Q(_Q), beta(_beta) 
         { TMVAssert(beta.size() == Q.rowsize()); }
         inline int colsize() const { return Q.colsize(); }
         inline int rowsize() const { return Q.rowsize(); }
@@ -186,8 +186,8 @@ namespace tmv {
     {   
     public:
         inline ProdpQV(
-            const T _x, const PackedQ<T1>& _q, const GenVector<T2>& _v
-        ) : x(_x), q(_q), v(_v)
+            const T _x, const PackedQ<T1>& _q, const GenVector<T2>& _v) :
+            x(_x), q(_q), v(_v)
         { TMVAssert(v.size()==q.rowsize()); }
         inline int size() const { return q.colsize(); }
         inline T getX() const { return x; }
@@ -215,8 +215,8 @@ namespace tmv {
     {   
     public:
         inline ProdVpQ(
-            const T _x, const GenVector<T1>& _v, const PackedQ<T2>& _q
-        ) : x(_x), v(_v), q(_q)
+            const T _x, const GenVector<T1>& _v, const PackedQ<T2>& _q) :
+            x(_x), v(_v), q(_q)
         { TMVAssert(v.size()==q.colsize()); }
         inline int size() const { return q.rowsize(); }
         inline T getX() const { return x; }
@@ -318,8 +318,8 @@ namespace tmv {
     {   
     public:
         inline ProdpQM(
-            const T _x, const PackedQ<T1>& _q, const GenMatrix<T2>& _m
-        ) : x(_x), q(_q), m(_m)
+            const T _x, const PackedQ<T1>& _q, const GenMatrix<T2>& _m) :
+            x(_x), q(_q), m(_m)
         { TMVAssert(m.colsize()==q.rowsize()); }
         inline int colsize() const { return q.colsize(); }
         inline int rowsize() const { return m.rowsize(); }
@@ -458,8 +458,8 @@ namespace tmv {
     {
     public:
         inline QuotVpQ(
-            const T _x, const GenVector<T1>& _v, const PackedQ<T2>& _q
-        ) : x(_x), v(_v), q(_q)
+            const T _x, const GenVector<T1>& _v, const PackedQ<T2>& _q) :
+            x(_x), v(_v), q(_q)
         { TMVAssert(v.size()==q.colsize()); }
         inline int size() const { return q.rowsize(); }
         inline T getX() const { return x; }
@@ -489,8 +489,8 @@ namespace tmv {
     {
     public:
         inline RQuotVpQ(
-            const T _x, const GenVector<T1>& _v, const PackedQ<T2>& _q
-        ) : x(_x), v(_v), q(_q)
+            const T _x, const GenVector<T1>& _v, const PackedQ<T2>& _q) :
+            x(_x), v(_v), q(_q)
         { TMVAssert(v.size()==q.colsize()); }
         inline int size() const { return q.rowsize(); }
         inline T getX() const { return x; }
@@ -575,8 +575,8 @@ namespace tmv {
     {
     public:
         inline QuotMpQ(
-            const T _x, const GenMatrix<T1>& _m, const PackedQ<T2>& _q
-        ) : x(_x), m(_m), q(_q)
+            const T _x, const GenMatrix<T1>& _m, const PackedQ<T2>& _q) :
+            x(_x), m(_m), q(_q)
         { TMVAssert( m.colsize() == q.colsize() ); }
         inline int colsize() const { return q.rowsize(); }
         inline int rowsize() const { return m.rowsize(); }
@@ -609,8 +609,8 @@ namespace tmv {
     {
     public:
         inline RQuotMpQ(
-            const T _x, const GenMatrix<T1>& _m, const PackedQ<T2>& _q
-        ) : x(_x), m(_m), q(_q)
+            const T _x, const GenMatrix<T1>& _m, const PackedQ<T2>& _q) :
+            x(_x), m(_m), q(_q)
         { TMVAssert( m.rowsize() == q.rowsize() ); }
         inline int colsize() const { return m.colsize(); }
         inline int rowsize() const { return q.colsize(); }

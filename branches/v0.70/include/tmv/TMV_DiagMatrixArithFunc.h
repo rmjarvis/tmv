@@ -34,6 +34,7 @@
 #define TMV_DiagMatrixArithFunc_H
 
 #include "tmv/TMV_BaseDiagMatrix.h"
+#include "tmv/TMV_VectorArithFunc.h"
 
 #define CT std::complex<T>
 
@@ -97,16 +98,11 @@ namespace tmv {
         const DiagMatrixView<T>& C)
     { MultMV<add>(alpha,A,B.diag(),C.diag()); }
 
-    template <class T, class Ta> 
-    inline void ElementProd(
-        const T alpha, const GenDiagMatrix<Ta>& A, const DiagMatrixView<T>& B)
-    { ElementProd(alpha,A.diag(),B.diag()); }
-
-    template <class T, class Ta, class Tb> 
-    inline void addElementProd(
+    template <bool add, class T, class Ta, class Tb> 
+    inline void ElemMultMM(
         const T alpha, const GenDiagMatrix<Ta>& A, const GenDiagMatrix<Tb>& B,
         const DiagMatrixView<T>& C)
-    { AddElementProd(alpha,A.diag(),B.diag(),C.diag()); }
+    { ElemMultVV<add>(alpha,A.diag(),B.diag(),C.diag()); }
 
     template <class T> 
     class DiagMatrixComposite : public GenDiagMatrix<T>
@@ -181,16 +177,11 @@ namespace tmv {
         const DiagMatrixView<CT>& C)
     { MultMM<add>(CT(alpha),A,B,C); }
 
-    template <class T, class Ta> 
-    inline void ElementProd(
-        const T alpha, const GenDiagMatrix<Ta>& A, const DiagMatrixView<CT>& B)
-    { ElementProd(CT(alpha),A,B); }
-
-    template <class T, class Ta, class Tb> 
-    inline void AddElementProd(
+    template <bool add, class T, class Ta, class Tb> 
+    inline void ElemMultMM(
         const T alpha, const GenDiagMatrix<Ta>& A, const GenDiagMatrix<Tb>& B,
         const DiagMatrixView<CT>& C)
-    { AddElementProd(CT(alpha),A,B,C); }
+    { ElemMultMM<add>(CT(alpha),A,B,C); }
 
     // Specialize disallowed complex combinations:
     template <bool add, class T, class Ta, class Tb> 
@@ -231,6 +222,12 @@ namespace tmv {
 
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
+        const CT , const GenDiagMatrix<Ta>& , const GenDiagMatrix<Tb>& ,
+        const DiagMatrixView<T>& )
+    { TMVAssert(TMV_FALSE); }
+
+    template <bool add, class T, class Ta, class Tb> 
+    inline void ElemMultMM(
         const CT , const GenDiagMatrix<Ta>& , const GenDiagMatrix<Tb>& ,
         const DiagMatrixView<T>& )
     { TMVAssert(TMV_FALSE); }

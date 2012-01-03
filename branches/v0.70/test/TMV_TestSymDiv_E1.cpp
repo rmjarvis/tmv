@@ -55,10 +55,10 @@ void TestSymDiv_E1(tmv::DivType dt, PosDefCode pdc)
         si.saveDiv();
         csi.saveDiv();
 
-        TestMatrixDivArith1<T>(dt,si,b1v,csi,cb1v,"SquareBandMatrix/Sym");
+        TestMatrixDivArith1(dt,si,b1v,csi,cb1v,"SquareBandMatrix/Sym");
 #if (XTEST & 2)
-        TestMatrixDivArith1<T>(dt,si,b3v,csi,cb3v,"NonSquareBandMatrix/Sym");
-        TestMatrixDivArith1<T>(dt,si,b4v,csi,cb4v,"NonSquareBandMatrix/Sym");
+        TestMatrixDivArith1(dt,si,b3v,csi,cb3v,"NonSquareBandMatrix/Sym");
+        TestMatrixDivArith1(dt,si,b4v,csi,cb4v,"NonSquareBandMatrix/Sym");
 #endif
     }
 }

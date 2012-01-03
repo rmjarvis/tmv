@@ -429,7 +429,7 @@ namespace tmv {
             TMVStaticAssert(HI == 0);
             TMVStaticAssert(M == N);
             TMVAssert(m2.size() == M);
-            this->noAlias() = m2.diag();
+            this->diag().noAlias() = m2.diag();
         }
 
         ~SmallBandMatrix() 
@@ -957,7 +957,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(LO == 0);
             TMVStaticAssert(HI == 0);
-            this->noAlias() = m2.diag();
+            this->diag().noAlias() = m2.diag();
         }
 
         template <class V0, class V1>

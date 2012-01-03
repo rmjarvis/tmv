@@ -35,13 +35,13 @@ change the size to some useful value.
 
 \item 
 \begin{tmvcode}
-tmv::Permutation p(size_t n)
+tmv::Permutation p(int n)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{Permutation} set initially to the identity matrix.
 
 \item
 \begin{tmvcode}
-tmv::Permutation p(size_t n, const int* pp, bool isinv, int det)
+tmv::Permutation p(int n, const int* pp, bool isinv, int det)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{Permutation} using the provided values as the 
 list of interchanges.  The meaning of pp is that \tt{v=p*v} is equivalent to
@@ -60,7 +60,7 @@ from the input values.  And if \tt{isinv} is omitted, it is taken to be \tt{fals
 \label{Permutation_Access}
 
 \begin{tmvcode}
-p.resize(size_t new_size)
+p.resize(int new_size)
 \end{tmvcode}
 \index{Permutation!Methods!resize}
 
@@ -200,8 +200,8 @@ p1 == p2
 p1 != p2
 \end{tmvcode}
 
-\subsection{Input/Output}
-\index{Permutation!Input/output}
+\subsection{I/O}
+\index{Permutation!I/O}
 \label{Permutation_IO}
 
 The simplest output syntax is the usual:

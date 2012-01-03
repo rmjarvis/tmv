@@ -349,7 +349,7 @@ divide by a \tt{Matrix<int>}, for example, the required calculations are impossi
 for \tt{int}'s,
 so the result will not be correct.  But since the possibility of multiplication of 
 integer matrices seemed desirable, we do allow them to be used.  
-\emph{Caveat programor}.  If debugging is turned on with \tt{DEBUG=true}, 
+\emph{Caveat programor}.  If debugging is turned on (with \tt{DEBUG=true} in the scons installation), 
 then trying to do anything that requires
 \tt{sqrt} or \tt{epsilon} for \tt{int}s will result in a runtime error.  Specifically a 
 \tt{FailedAssert} exception will be thrown.
@@ -431,15 +431,15 @@ I tend to freely mix the syntax of how a function is used with how
 it is declared in order to try to provide all of the information you will need on one line.  
 For example, the constructor listed as:
 \begin{tmvcode}
-tmv::Vector<T,index> v(size_t n, const T* vv)
+tmv::Vector<T,index> v(int n, const T* vv)
 \end{tmvcode}
 is actually declared in the code as:
 \begin{tmvcode}
-tmv::Vector<T,index>::Vector(size_t n, const T* vv);
+tmv::Vector<T,index>::Vector(int n, const T* vv);
 \end{tmvcode}
 and when it is used in your source code, you would write something like:
 \begin{tmvcode}
-size_t n = 5;
+int n = 5;
 const double vv[n] = {1.2, 3.1, 9.1, 9.2, -3.5};
 tmv::Vector<double,tmv::CStyle> v(n,vv);
 \end{tmvcode}

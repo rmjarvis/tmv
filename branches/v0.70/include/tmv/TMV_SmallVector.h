@@ -106,7 +106,7 @@ namespace tmv {
         inline SmallVector() TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }
@@ -198,7 +198,7 @@ namespace tmv {
         virtual inline ~SmallVector()
         {
             TMV_SETFIRSTLAST(0,0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(999));
 #endif
         }

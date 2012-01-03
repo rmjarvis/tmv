@@ -62,11 +62,8 @@ namespace tmv {
     template <class T, class T2> 
     T MultVV(const GenVector<T>& v1, const GenVector<T2>& v2);
 
-    template <class T, class Tx> 
-    void ElementProd(
-        const T alpha, const GenVector<Tx>& x, const VectorView<T>& y);
-    template <class T, class Tx, class Ty> 
-    void AddElementProd(
+    template <bool add, class T, class Tx, class Ty> 
+    void ElemMultVV(
         const T alpha, const GenVector<Tx>& x,
         const GenVector<Ty>& y, const VectorView<T>& z);
 
@@ -116,20 +113,16 @@ namespace tmv {
     inline CT MultVV(const GenVector<T>& v1, const GenVector<CT>& v2)
     { return MultVV(v2,v1); }
 
-    template <class T, class Tx> 
-    inline void ElementProd(
-        const T alpha, const GenVector<Tx>& x, const VectorView<CT>& y)
-    { ElementProd(CT(alpha),x,y); }
-    template <class T, class Tx, class Ty> 
-    inline void AddElementProd(
+    template <bool add, class T, class Tx, class Ty> 
+    inline void ElemMultVV(
         const T alpha, const GenVector<Tx>& x,
         const GenVector<Ty>& y, const VectorView<CT>& z)
-    { AddElementProd(CT(alpha),x,y,z); }
-    template <class T> 
-    inline void AddElementProd(
+    { ElemMultVV<add>(CT(alpha),x,y,z); }
+    template <bool add, class T> 
+    inline void ElemMultVV(
         const CT alpha, const GenVector<CT>& x,
         const GenVector<T>& y, const VectorView<CT>& z)
-    { AddElementProd(alpha,y,x,z); }
+    { ElemMultVV<add>(alpha,y,x,z); }
 
     // Specialize disallowed complex combinations:
     template <class T> 
@@ -148,6 +141,12 @@ namespace tmv {
     inline void AddVV(
         const CT , const GenVector<Ta>& ,
         const CT , const GenVector<Tb>& , const VectorView<T>& )
+    { TMVAssert(TMV_FALSE); }
+
+    template <bool add, class T, class Ta, class Tb> 
+    inline void ElemMultVV(
+        const CT , const GenVector<Ta>& , const GenVector<Tb>& ,
+        const VectorView<T>& )
     { TMVAssert(TMV_FALSE); }
 
 } // namespace tmv

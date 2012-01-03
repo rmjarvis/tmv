@@ -38,7 +38,7 @@ void TestSymDiv_C2(tmv::DivType dt, PosDefCode pdc)
         tmv::SymMatrixView<T> si = s[i];
         tmv::SymMatrixView<std::complex<T> > csi = cs[i];
 
-        TestMatrixDivArith1<T>(dt,dv,si,cdv,csi,"Sym/DiagMatrix");
+        TestMatrixDivArith1(dt,dv,si,cdv,csi,"Sym/DiagMatrix");
     }
 }
 

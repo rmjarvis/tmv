@@ -7,6 +7,7 @@
 #include "TMV_TestBandArith.h"
 
 #define NOADDEQ
+#define NOELEMMULT
 
 template <class T1, class T2, class T3> 
 inline bool CanMultMM(
@@ -67,9 +68,9 @@ void TestBandMatrixArith_C2()
         tmv::BandMatrixView<T> bi = b[i];
         tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
 
-        TestMatrixArith4<T>(d1v,cd1v,bi,cbi,"Diag/Band");
-        TestMatrixArith5<T>(d1v,cd1v,bi,cbi,"Diag/Band");
-        TestMatrixArith6x<T>(d1v,cd1v,bi,cbi,"Diag/Band");
+        TestMatrixArith4(d1v,cd1v,bi,cbi,"Diag/Band");
+        TestMatrixArith5(d1v,cd1v,bi,cbi,"Diag/Band");
+        TestMatrixArith6x(d1v,cd1v,bi,cbi,"Diag/Band");
     }
 #endif
 }

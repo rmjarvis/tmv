@@ -381,8 +381,7 @@ namespace tmv {
 
         inline SumSS(
             T _x1, const GenSymMatrix<T1>& _m1, 
-            T _x2, const GenSymMatrix<T2>& _m2
-        ) :
+            T _x2, const GenSymMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int size() const { return m1.size(); }
@@ -534,8 +533,7 @@ namespace tmv {
 
         inline ProdSS(
             T _x, const GenSymMatrix<T1>& _m1,
-            const GenSymMatrix<T2>& _m2
-        ) :
+            const GenSymMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int colsize() const { return m1.size(); }
@@ -615,6 +613,157 @@ namespace tmv {
 #undef GENMATRIX2
 #undef PRODXM1
 #undef PRODXM2
+
+    
+    //
+    // Element Product SymMatrix * SymMatrix
+    //
+
+    template <class T, class T1, class T2> 
+    class ElemProdSS : public SymMatrixComposite<T> 
+    {
+    public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline ElemProdSS(
+            T _x, const GenSymMatrix<T1>& _m1, const GenSymMatrix<T2>& _m2) :
+            x(_x),m1(_m1),m2(_m2)
+        { TMVAssert(m1.size() == m2.size()); }
+        inline int size() const { return m1.size(); }
+        inline SymType sym() const 
+        { return isReal(T1()) ? m2.sym() : m1.sym(); }
+        inline StorageType stor() const { return BaseStorOf(m1); }
+        inline T getX() const { return x; }
+        inline const GenSymMatrix<T1>& getM1() const { return m1; }
+        inline const GenSymMatrix<T2>& getM2() const { return m2; }
+        inline void assignToM(const MatrixView<real_type>& m0) const
+        {
+            TMVAssert(isReal(T()));
+            TMVAssert(m0.colsize() == size());
+            TMVAssert(m0.rowsize() == size());
+            ElemMultMM<false>(x,m1.upperTri(),m2.upperTri(),m0.upperTri()); 
+            if (m1.size() > 1) {
+                ElemMultMM<false>(
+                    x,m1.lowerTri().offDiag(),m2.lowerTri().offDiag(),
+                    m0.lowerTri().offDiag()); 
+            }
+        } 
+        inline void assignToM(const MatrixView<complex_type>& m0) const
+        { 
+            TMVAssert(m0.colsize() == size());
+            TMVAssert(m0.rowsize() == size());
+            ElemMultMM<false>(x,m1.upperTri(),m2.upperTri(),m0.upperTri()); 
+            if (m1.size() > 1) {
+                ElemMultMM<false>(
+                    x,m1.lowerTri().offDiag(),m2.lowerTri().offDiag(),
+                    m0.lowerTri().offDiag()); 
+            }
+        } 
+        inline void assignToS(const SymMatrixView<real_type>& m0) const
+        { 
+            TMVAssert(isReal(T()));
+            TMVAssert(isReal(T1()) || isReal(T2()) || m1.sym() == m2.sym());
+            TMVAssert(m0.size() == m1.size());
+            TMVAssert(isReal(T1()) || m0.issym() == m1.issym());
+            TMVAssert(isReal(T2()) || m0.issym() == m2.issym());
+            TMVAssert(m0.issym() || TMV_IMAG(x) == real_type(0));
+            ElemMultMM<false>(x,m1.upperTri(),m2.upperTri(),m0.upperTri()); 
+        }
+        inline void assignToS(const SymMatrixView<complex_type>& m0) const
+        { 
+            TMVAssert(isReal(T1()) || isReal(T2()) || m1.sym() == m2.sym());
+            TMVAssert(m0.size() == m1.size());
+            TMVAssert(isReal(T1()) || m0.issym() == m1.issym());
+            TMVAssert(isReal(T2()) || m0.issym() == m2.issym());
+            TMVAssert(m0.issym() || TMV_IMAG(x) == real_type(0));
+            ElemMultMM<false>(x,m1.upperTri(),m2.upperTri(),m0.upperTri()); 
+        }
+    private:
+        T x;
+        const GenSymMatrix<T1>& m1;
+        const GenSymMatrix<T2>& m2;
+    };
+
+    template <class T, class T1, class T2> 
+    inline const SymMatrixView<T>& operator+=(
+        const SymMatrixView<T>& m, const ElemProdSS<T,T1,T2>& pmm)
+    {
+        TMVAssert(isReal(T1()) || isReal(T2()) || 
+                  pmm.getM1().sym() == pmm.getM2().sym());
+        TMVAssert(m.size() == pmm.size());
+        TMVAssert(isReal(T1()) || m.issym() == pmm.getM1().issym());
+        TMVAssert(isReal(T2()) || m.issym() == pmm.getM2().issym());
+        TMVAssert(m.issym() || TMV_IMAG(x) == real_type(0));
+        ElemMultMM<true>(
+            pmm.getX(),pmm.getM1().upperTri(),pmm.getM2().upperTri(),
+            m.upperTri()); 
+        return m; 
+    }
+
+    template <class T> 
+    inline const SymMatrixView<CT>& operator+=(
+        const SymMatrixView<CT>& m, const ElemProdSS<T,T,T>& pmm)
+    {
+        TMVAssert(isReal(T1()) || isReal(T2()) || 
+                  pmm.getM1().sym() == pmm.getM2().sym());
+        TMVAssert(m.size() == pmm.size());
+        TMVAssert(isReal(T1()) || m.issym() == pmm.getM1().issym());
+        TMVAssert(isReal(T2()) || m.issym() == pmm.getM2().issym());
+        TMVAssert(m.issym() || TMV_IMAG(x) == real_type(0));
+        ElemMultMM<true>(
+            pmm.getX(),pmm.getM1().upperTri(),pmm.getM2().upperTri(),
+            m.upperTri()); 
+        return m; 
+    }
+
+    template <class T, class T1, class T2> 
+    inline const SymMatrixView<T>& operator-=(
+        const SymMatrixView<T>& m, const ElemProdSS<T,T1,T2>& pmm)
+    { 
+        TMVAssert(isReal(T1()) || isReal(T2()) || 
+                  pmm.getM1().sym() == pmm.getM2().sym());
+        TMVAssert(m.size() == pmm.size());
+        TMVAssert(isReal(T1()) || m.issym() == pmm.getM1().issym());
+        TMVAssert(isReal(T2()) || m.issym() == pmm.getM2().issym());
+        TMVAssert(m.issym() || TMV_IMAG(x) == real_type(0));
+        ElemMultMM<true>(
+            -pmm.getX(),pmm.getM1().upperTri(),pmm.getM2().upperTri(),
+            m.upperTri()); 
+        return m; 
+    }
+
+    template <class T> 
+    inline const SymMatrixView<CT>& operator-=(
+        const SymMatrixView<CT>& m, const ElemProdSS<T,T,T>& pmm)
+    { 
+        TMVAssert(isReal(T1()) || isReal(T2()) || 
+                  pmm.getM1().sym() == pmm.getM2().sym());
+        TMVAssert(m.size() == pmm.size());
+        TMVAssert(isReal(T1()) || m.issym() == pmm.getM1().issym());
+        TMVAssert(isReal(T2()) || m.issym() == pmm.getM2().issym());
+        TMVAssert(m.issym() || TMV_IMAG(x) == real_type(0));
+        ElemMultMM<true>(
+            -pmm.getX(),pmm.getM1().upperTri(),pmm.getM2().upperTri(),
+            m.upperTri()); 
+        return m; 
+    }
+
+#define PRODMM ElemProdSS
+#define GENMATRIX1 GenSymMatrix
+#define GENMATRIX2 GenSymMatrix
+#define PRODXM1 ProdXS
+#define PRODXM2 ProdXS
+#define OP ElemProd
+#include "tmv/TMV_AuxProdMM.h"
+#include "tmv/TMV_AuxProdMMa.h"
+#undef PRODMM
+#undef GENMATRIX1
+#undef GENMATRIX2
+#undef PRODXM1
+#undef PRODXM2
+
+
 
 
     //

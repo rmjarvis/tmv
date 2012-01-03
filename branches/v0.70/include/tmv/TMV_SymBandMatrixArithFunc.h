@@ -128,17 +128,6 @@ namespace tmv {
         const GenSymBandMatrix<Tb>& B, const BandMatrixView<T>& C)
     { MultMM<add>(alpha,B.transpose(),A.transpose(),C.transpose()); }
 
-    template <class T, class Ta> 
-    inline void ElementProd(
-        const T alpha, const GenSymBandMatrix<Ta>& A,
-        const SymBandMatrixView<T>& B)
-    { ElementProd(alpha,A.upperBand(),B.upperBand()); }
-    template <class T, class Ta, class Tb> 
-    inline void AddElementProd(
-        const T alpha, const GenSymBandMatrix<Ta>& A,
-        const GenSymBandMatrix<Tb>& B, const SymBandMatrixView<T>& C)
-    { AddElementProd(alpha,A.upperBand(),B.upperBand(),C.upperBand()); }
-
     template <class T> 
     class SymBandMatrixComposite : public GenSymBandMatrix<T>
     {
@@ -313,17 +302,6 @@ namespace tmv {
         const T alpha, const GenBandMatrix<Ta>& A, 
         const GenSymBandMatrix<Tb>& B, const BandMatrixView<CT>& C)
     { MultMM<add>(CT(alpha),A,B,C); }
-
-    template <class T, class Ta> 
-    inline void ElementProd(
-        const T alpha, const GenSymBandMatrix<Ta>& A,
-        const SymBandMatrixView<CT>& B)
-    { ElementProd(CT(alpha),A,B); }
-    template <class T, class Ta, class Tb> 
-    inline void AddElementProd(
-        const T alpha, const GenSymBandMatrix<Ta>& A,
-        const GenSymBandMatrix<Tb>& B, const SymBandMatrixView<CT>& C)
-    { AddElementProd(CT(alpha),A,B,C); }
 
     // Specialize disallowed complex combinations:
     template <bool add, class T, class Ta, class Tb> 

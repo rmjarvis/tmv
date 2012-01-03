@@ -3,6 +3,8 @@
 #include "TMV.h"
 
 #define NOADDEQ
+#define NOELEMMULT
+
 #include "TMV_TestMatrixArith.h"
 
 template <class T> 
@@ -45,10 +47,10 @@ void TestTriMatrixArith_C4a()
     tmv::DiagMatrixView<T> d1 = DiagMatrixViewOf(a1x.row(0));
     tmv::DiagMatrixView<CT> cd1 = DiagMatrixViewOf(ca1x.row(0));
 
-    TestMatrixArith4<T>(d1,cd1,u1,cu1,"Diag/UpperTri 1");
-    TestMatrixArith4<T>(d1,cd1,u2,cu2,"Diag/UpperTri 2");
-    TestMatrixArith4<T>(d1,cd1,u4,cu4,"Diag/UpperTri 3");
-    TestMatrixArith4<T>(d1,cd1,u5,cu5,"Diag/UpperTri 4");
+    TestMatrixArith4(d1,cd1,u1,cu1,"Diag/UpperTri 1");
+    TestMatrixArith4(d1,cd1,u2,cu2,"Diag/UpperTri 2");
+    TestMatrixArith4(d1,cd1,u4,cu4,"Diag/UpperTri 3");
+    TestMatrixArith4(d1,cd1,u5,cu5,"Diag/UpperTri 4");
 #if (XTEST & 1)
     tmv::Matrix<T> a3x(12,16);
     for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3x(i,j) = T(1-2*i+3*j);
@@ -62,14 +64,14 @@ void TestTriMatrixArith_C4a()
     tmv::UpperTriMatrixView<CT> cu3 = ca3x.subMatrix(0,12,0,16,3,4).upperTri();
     tmv::UpperTriMatrixView<T> u6 = a3x.subMatrix(0,12,0,16,3,4).unitUpperTri();
     tmv::UpperTriMatrixView<CT> cu6 = ca3x.subMatrix(0,12,0,16,3,4).unitUpperTri();
-    TestMatrixArith4<T>(d3,cd3,u1,cu1,"Diag/UpperTri 5");
-    TestMatrixArith4<T>(d3,cd3,u2,cu2,"Diag/UpperTri 6");
-    TestMatrixArith4<T>(d3,cd3,u3,cu3,"Diag/UpperTri 7");
-    TestMatrixArith4<T>(d3,cd3,u4,cu4,"Diag/UpperTri 8");
-    TestMatrixArith4<T>(d3,cd3,u5,cu5,"Diag/UpperTri 9");
-    TestMatrixArith4<T>(d3,cd3,u6,cu6,"Diag/UpperTri 10");
-    TestMatrixArith4<T>(d1,cd1,u3,cu3,"Diag/UpperTri 11");
-    TestMatrixArith4<T>(d1,cd1,u6,cu6,"Diag/UpperTri 12");
+    TestMatrixArith4(d3,cd3,u1,cu1,"Diag/UpperTri 5");
+    TestMatrixArith4(d3,cd3,u2,cu2,"Diag/UpperTri 6");
+    TestMatrixArith4(d3,cd3,u3,cu3,"Diag/UpperTri 7");
+    TestMatrixArith4(d3,cd3,u4,cu4,"Diag/UpperTri 8");
+    TestMatrixArith4(d3,cd3,u5,cu5,"Diag/UpperTri 9");
+    TestMatrixArith4(d3,cd3,u6,cu6,"Diag/UpperTri 10");
+    TestMatrixArith4(d1,cd1,u3,cu3,"Diag/UpperTri 11");
+    TestMatrixArith4(d1,cd1,u6,cu6,"Diag/UpperTri 12");
 #endif
 
 #if (XTEST & 2)
@@ -82,23 +84,23 @@ void TestTriMatrixArith_C4a()
     tmv::LowerTriMatrixView<T> l5 = a2x.unitLowerTri();
     tmv::LowerTriMatrixView<CT> cl5 = ca2x.unitLowerTri();
 
-    TestMatrixArith4<T>(d1,cd1,l1,cl1,"Diag/LowerTri 1");
-    TestMatrixArith4<T>(d1,cd1,l2,cl2,"Diag/LowerTri 2");
-    TestMatrixArith4<T>(d1,cd1,l4,cl4,"Diag/LowerTri 3");
-    TestMatrixArith4<T>(d1,cd1,l5,cl5,"Diag/LowerTri 4");
+    TestMatrixArith4(d1,cd1,l1,cl1,"Diag/LowerTri 1");
+    TestMatrixArith4(d1,cd1,l2,cl2,"Diag/LowerTri 2");
+    TestMatrixArith4(d1,cd1,l4,cl4,"Diag/LowerTri 3");
+    TestMatrixArith4(d1,cd1,l5,cl5,"Diag/LowerTri 4");
 #if (XTEST & 1)
     tmv::LowerTriMatrixView<T> l3 = a3x.subMatrix(0,12,0,16,3,4).lowerTri();
     tmv::LowerTriMatrixView<CT> cl3 = ca3x.subMatrix(0,12,0,16,3,4).lowerTri();
     tmv::LowerTriMatrixView<T> l6 = a3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
     tmv::LowerTriMatrixView<CT> cl6 = ca3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
-    TestMatrixArith4<T>(d3,cd3,l1,cl1,"Diag/LowerTri 5");
-    TestMatrixArith4<T>(d3,cd3,l2,cl2,"Diag/LowerTri 6");
-    TestMatrixArith4<T>(d3,cd3,l3,cl3,"Diag/LowerTri 7");
-    TestMatrixArith4<T>(d3,cd3,l4,cl4,"Diag/LowerTri 8");
-    TestMatrixArith4<T>(d3,cd3,l5,cl5,"Diag/LowerTri 9");
-    TestMatrixArith4<T>(d3,cd3,l6,cl6,"Diag/LowerTri 10");
-    TestMatrixArith4<T>(d1,cd1,l3,cl3,"Diag/LowerTri 11");
-    TestMatrixArith4<T>(d1,cd1,l6,cl6,"Diag/LowerTri 12");
+    TestMatrixArith4(d3,cd3,l1,cl1,"Diag/LowerTri 5");
+    TestMatrixArith4(d3,cd3,l2,cl2,"Diag/LowerTri 6");
+    TestMatrixArith4(d3,cd3,l3,cl3,"Diag/LowerTri 7");
+    TestMatrixArith4(d3,cd3,l4,cl4,"Diag/LowerTri 8");
+    TestMatrixArith4(d3,cd3,l5,cl5,"Diag/LowerTri 9");
+    TestMatrixArith4(d3,cd3,l6,cl6,"Diag/LowerTri 10");
+    TestMatrixArith4(d1,cd1,l3,cl3,"Diag/LowerTri 11");
+    TestMatrixArith4(d1,cd1,l6,cl6,"Diag/LowerTri 12");
 #endif
 #endif
 }

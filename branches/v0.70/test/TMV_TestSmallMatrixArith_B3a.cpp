@@ -39,18 +39,17 @@ static void DoTestSmallMatrixArith_B3a()
     tmv::SmallVector<T,7> v2 = a3.col(0);
     tmv::SmallVector<std::complex<T>,7> cv2 = ca3.col(0);
 
-#if 0
     if (showstartdone) {
         std::cout<<"B3a"<<std::endl;
     }
-    TestMatrixArith3a<T>(a3,ca3,v1,cv1,v2,cv2,"NonSquare");
-    TestMatrixArith3b<T>(a3,ca3,v1,cv1,v2,cv2,"NonSquare");
+    TestMatrixArith3a(a3,ca3,v1,cv1,v2,cv2,"NonSquare");
+    TestMatrixArith3b(a3,ca3,v1,cv1,v2,cv2,"NonSquare");
 
 #if (XTEST & 2)
     tmv::SmallMatrix<T,7,N,tmv::ColMajor> a4 = a3;
     tmv::SmallMatrix<std::complex<T>,7,N,tmv::ColMajor> ca4 = ca3;
-    TestMatrixArith3a<T>(a4,ca4,v1,cv1,v2,cv2,"NonSquare");
-    TestMatrixArith3b<T>(a4,ca4,v1,cv1,v2,cv2,"NonSquare");
+    TestMatrixArith3a(a4,ca4,v1,cv1,v2,cv2,"NonSquare");
+    TestMatrixArith3b(a4,ca4,v1,cv1,v2,cv2,"NonSquare");
 #endif
 
 #if (XTEST & 32)
@@ -64,16 +63,15 @@ static void DoTestSmallMatrixArith_B3a()
     tmv::SmallVector<T,7,tmv::FortranStyle> v2f = v2;
     tmv::SmallVector<std::complex<T>,7,tmv::FortranStyle> cv2f = cv2;
 
-    TestMatrixArith3a<T>(a3f,ca3f,v1,cv1,v2,cv2,"NonSquare");
-    TestMatrixArith3a<T>(a4f,ca4f,v1,cv1,v2,cv2,"NonSquare");
-    TestMatrixArith3a<T>(a3f,ca3f,v1f,cv1f,v2,cv2,"NonSquare");
-    TestMatrixArith3a<T>(a3f,ca3f,v1f,cv1f,v2f,cv2f,"NonSquare");
+    TestMatrixArith3a(a3f,ca3f,v1,cv1,v2,cv2,"NonSquare");
+    TestMatrixArith3a(a4f,ca4f,v1,cv1,v2,cv2,"NonSquare");
+    TestMatrixArith3a(a3f,ca3f,v1f,cv1f,v2,cv2,"NonSquare");
+    TestMatrixArith3a(a3f,ca3f,v1f,cv1f,v2f,cv2f,"NonSquare");
 
-    TestMatrixArith3b<T>(a3f,ca3f,v1,cv1,v2,cv2,"NonSquare");
-    TestMatrixArith3b<T>(a4f,ca4f,v1,cv1,v2,cv2,"NonSquare");
-    TestMatrixArith3b<T>(a3f,ca3f,v1f,cv1f,v2,cv2,"NonSquare");
-    TestMatrixArith3b<T>(a3f,ca3f,v1f,cv1f,v2f,cv2f,"NonSquare");
-#endif
+    TestMatrixArith3b(a3f,ca3f,v1,cv1,v2,cv2,"NonSquare");
+    TestMatrixArith3b(a4f,ca4f,v1,cv1,v2,cv2,"NonSquare");
+    TestMatrixArith3b(a3f,ca3f,v1f,cv1f,v2,cv2,"NonSquare");
+    TestMatrixArith3b(a3f,ca3f,v1f,cv1f,v2f,cv2f,"NonSquare");
 #endif
 }
 

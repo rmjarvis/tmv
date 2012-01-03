@@ -266,8 +266,7 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline OProdVV(
-            const T _x, const GenVector<T1>& _v1, const GenVector<T2>& _v2
-        ) :
+            const T _x, const GenVector<T1>& _v1, const GenVector<T2>& _v2) :
             x(_x), v1(_v1), v2(_v2) {}
         inline int colsize() const { return v1.size(); }
         inline int rowsize() const { return v2.size(); }
@@ -367,8 +366,7 @@ namespace tmv {
 
         inline SumMM(
             const T _x1, const GenMatrix<T1>& _m1, 
-            const T _x2, const GenMatrix<T2>& _m2
-        ) :
+            const T _x2, const GenMatrix<T2>& _m2) :
             x1(_x1), m1(_m1), x2(_x2), m2(_m2)
         { 
             TMVAssert(m1.colsize() == m2.colsize());
@@ -506,8 +504,7 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline ProdMV(
-            const T _x, const GenMatrix<T1>& _m, const GenVector<T2>& _v
-        ) :
+            const T _x, const GenMatrix<T1>& _m, const GenVector<T2>& _v) :
             x(_x), m(_m), v(_v)
         { TMVAssert(v.size()==m.rowsize()); }
         inline int size() const { return m.colsize(); }
@@ -575,8 +572,7 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline ProdVM(
-            const T _x, const GenVector<T1>& _v, const GenMatrix<T2>& _m
-        ) :
+            const T _x, const GenVector<T1>& _v, const GenMatrix<T2>& _m) :
             x(_x), v(_v), m(_m)
         { TMVAssert(v.size()==m.colsize()); }
         inline int size() const { return m.rowsize(); }
@@ -723,8 +719,7 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline ProdMM(
-            const T _x, const GenMatrix<T1>& _m1, const GenMatrix<T2>& _m2
-        ) :
+            const T _x, const GenMatrix<T1>& _m1, const GenMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.rowsize() == m2.colsize()) ; }
         inline int colsize() const { return m1.colsize(); }
@@ -848,6 +843,103 @@ namespace tmv {
 
 
     //
+    // Element Product Matrix * Matrix
+    //
+
+    template <class T, class T1, class T2> 
+    class ElemProdMM : public MatrixComposite<T>
+    {
+    public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline ElemProdMM(
+            const T _x, const GenMatrix<T1>& _m1, const GenMatrix<T2>& _m2) :
+            x(_x), m1(_m1), m2(_m2)
+        { 
+            TMVAssert(m1.colsize() == m2.colsize());
+            TMVAssert(m1.rowsize() == m2.rowsize()); 
+        }
+        inline int colsize() const { return m1.colsize(); }
+        inline int rowsize() const { return m1.rowsize(); }
+        inline StorageType stor() const { return BaseStorOf(m1); }
+        inline T getX() const { return x; }
+        inline const GenMatrix<T1>& getM1() const { return m1; }
+        inline const GenMatrix<T2>& getM2() const { return m2; }
+        inline void assignToM(const MatrixView<real_type>& m0) const
+        {
+            TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());
+            TMVAssert(isReal(T()));
+            ElemMultMM<false>(x, m1, m2, m0);
+        }
+        inline void assignToM(const MatrixView<complex_type>& m0) const
+        {
+            TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());
+            ElemMultMM<false>(x, m1, m2, m0);
+        }
+
+    private:
+        const T x;
+        const GenMatrix<T1>& m1;
+        const GenMatrix<T2>& m2;
+    };
+
+    template <class T, class T2, class T3> 
+    inline const MatrixView<T>& operator+=(
+        const MatrixView<T>& m, const ElemProdMM<T,T2,T3>& pmm)
+    { 
+        TMVAssert(m.colsize() == pmm.colsize());
+        TMVAssert(m.rowsize() == pmm.rowsize());
+        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T> 
+    inline const MatrixView<CT>& operator+=(
+        const MatrixView<CT>& m, const ElemProdMM<T,T,T>& pmm)
+    { 
+        TMVAssert(m.colsize() == pmm.colsize());
+        TMVAssert(m.rowsize() == pmm.rowsize());
+        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T, class T2, class T3> 
+    inline const MatrixView<T>& operator-=(
+        const MatrixView<T>& m, const ElemProdMM<T,T2,T3>& pmm)
+    { 
+        TMVAssert(m.colsize() == pmm.colsize());
+        TMVAssert(m.rowsize() == pmm.rowsize());
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T> 
+    inline const MatrixView<CT>& operator-=(
+        const MatrixView<CT>& m, const ElemProdMM<T,T,T>& pmm)
+    {
+        TMVAssert(m.colsize() == pmm.colsize());
+        TMVAssert(m.rowsize() == pmm.rowsize());
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+#define PRODMM ElemProdMM
+#define GENMATRIX1 GenMatrix
+#define GENMATRIX2 GenMatrix
+#define PRODXM1 ProdXM
+#define PRODXM2 ProdXM
+#define OP ElemProd
+#include "tmv/TMV_AuxProdMM.h"
+#include "tmv/TMV_AuxProdMMa.h"
+#undef PRODMM
+#undef GENMATRIX1
+#undef GENMATRIX2
+#undef PRODXM1
+#undef PRODXM2
+
+
+    //
     // Scalar / Matrix
     //
 
@@ -909,8 +1001,7 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline QuotVM(
-            const T _x, const GenVector<T1>& _v, const GenMatrix<T2>& _m
-        ) :
+            const T _x, const GenVector<T1>& _v, const GenMatrix<T2>& _m) :
             x(_x), v(_v), m(_m)
         { TMVAssert(v.size()==m.colsize()); }
         inline int size() const { return m.rowsize(); }
@@ -944,8 +1035,7 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline RQuotVM(
-            const T _x, const GenVector<T1>& _v, const GenMatrix<T2>& _m
-        ) :
+            const T _x, const GenVector<T1>& _v, const GenMatrix<T2>& _m) :
             x(_x), v(_v), m(_m)
         { TMVAssert(v.size()==m.rowsize()); }
         inline int size() const { return m.colsize(); }
@@ -1076,8 +1166,7 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline QuotMM(
-            const T _x, const GenMatrix<T1>& _m1, const GenMatrix<T2>& _m2
-        ) :
+            const T _x, const GenMatrix<T1>& _m1, const GenMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.colsize() == m2.colsize() ); }
         inline int colsize() const { return m2.rowsize(); }
@@ -1111,8 +1200,7 @@ namespace tmv {
     public :
         inline TransientQuotMM(
             const T x, std::auto_ptr<Matrix<T1,ColMajor> > m1,
-            const GenMatrix<T2>& m2
-        ) :
+            const GenMatrix<T2>& m2) :
             QuotMM<T,T1,T2>(x,*m1,m2), m1p(m1) {}
         inline TransientQuotMM(const TransientQuotMM<T,T1,T2>& rhs) :
             QuotMM<T,T1,T2>(rhs), m1p(rhs.m1p) {}
@@ -1131,8 +1219,7 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline RQuotMM(
-            const T _x, const GenMatrix<T1>& _m1, const GenMatrix<T2>& _m2
-        ) :
+            const T _x, const GenMatrix<T1>& _m1, const GenMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.rowsize() == m2.rowsize() ); }
         inline int colsize() const { return m1.colsize(); }
@@ -1166,8 +1253,7 @@ namespace tmv {
     public :
         inline TransientRQuotMM(
             const T x, std::auto_ptr<Matrix<T1,RowMajor> > m1,
-            const GenMatrix<T2>& m2
-        ) :
+            const GenMatrix<T2>& m2) :
             RQuotMM<T,T1,T2>(x,*m1,m2), m1p(m1) {}
         inline TransientRQuotMM(const TransientRQuotMM<T,T1,T2>& rhs) :
             RQuotMM<T,T1,T2>(rhs), m1p(rhs.m1p) {}

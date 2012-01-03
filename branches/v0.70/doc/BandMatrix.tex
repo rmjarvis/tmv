@@ -71,7 +71,7 @@ matrices, the formula is more complicated, and changes slightly between the
 three storages.
 If you want to know the memory used by a \tt{BandMatrix}, we provide the routine:
 \begin{tmvcode}
-size_t BandStorageLength(StorageType stor, size_t nrows, size_t ncols, 
+int BandStorageLength(StorageType stor, int nrows, int ncols, 
         int nlo, int nhi)
 \end{tmvcode}
 \index{BandMatrix!Memory usage}
@@ -118,18 +118,17 @@ change the size to some useful value.
 
 \item 
 \begin{tmvcode}
-tmv::BandMatrix<T,stor,index> b(size_t nrows, size_t ncols, 
+tmv::BandMatrix<T,stor,index> b(int nrows, int ncols, 
       int nlo, int nhi)
 \end{tmvcode}
 Makes a \tt{BandMatrix} with \tt{nrows} rows, \tt{ncols} columns, 
 \tt{nlo} sub-diagonals,
 and \tt{nhi} super-diagonals with \underline{uninitialized} values.
-If debugging is turned on (i.e. not turned off 
-with \tt{-DNDEBUG} or \tt{-DTMVNDEBUG}), then the values are initialized to 888.
+If extra debugging is turned on (with \tt{-DTMV\_EXTRA\_DEBUG}), then the values are initialized to 888.
 
 \item
 \begin{tmvcode}
-tmv::BandMatrix<T,stor,index> b(size_t nrows, size_t ncols, 
+tmv::BandMatrix<T,stor,index> b(int nrows, int ncols, 
       int nlo, int nhi, T x)
 \end{tmvcode}
 Makes a \tt{BandMatrix} with all values equal to \tt{x}.
@@ -239,10 +238,10 @@ will create an $8 \times 8$ \tt{BandMatrix}.
 \item
 \begin{tmvcode}
 tmv::BandMatrixView<T> b = 
-      tmv::BandMatrixViewOf(T* vv, size_t ncols, size_t nrows, 
+      tmv::BandMatrixViewOf(T* vv, int ncols, int nrows, 
           int nlo, int nhi, StorageType stor)
 tmv::ConstBandMatrixView<T> b = 
-      tmv::BandMatrixViewOf(const T* vv, size_t ncols, size_t nrows, 
+      tmv::BandMatrixViewOf(const T* vv, int ncols, int nrows, 
           int nlo, int nhi, StorageType stor)
 \end{tmvcode}
 \index{BandMatrix!View of raw memory}
@@ -254,10 +253,10 @@ address of \tt{b(nlo,0)}, i.e. the first element stored in memory.
 \item
 \begin{tmvcode}
 tmv::BandMatrixView<T> b = 
-      tmv::BandMatrixViewOf(T* vv, size_t ncols, size_t nrows, 
+      tmv::BandMatrixViewOf(T* vv, int ncols, int nrows, 
           int nlo, int nhi, int stepi, int stepj)
 tmv::ConstBandMatrixView<T> b = 
-      tmv::BandMatrixViewOf(const T* vv, size_t ncols, size_t nrows, 
+      tmv::BandMatrixViewOf(const T* vv, int ncols, int nrows, 
           int nlo, int nhi, int stepi, int stepj)
 \end{tmvcode}
 \index{BandMatrix!View of raw memory}
@@ -273,7 +272,7 @@ is always \tt{b(0,0)} even if the elements are laid out in DiagMajor order in me
 \label{BandMatrix_Access}
 
 \begin{tmvcode}
-b.resize(size_t new_nrows, size_t new_ncols, int new_nlo, int new_nhi)
+b.resize(int new_nrows, int new_ncols, int new_nlo, int new_nhi)
 \end{tmvcode}
 \index{BandMatrix!Methods!resize}
 
@@ -299,6 +298,60 @@ The versions of \tt{row} and \tt{col} with only one argument are
 missing, since the full row or column isn't accessible as a \tt{VectorView}.
 You must specify a valid range within the row or column that you want, 
 given the banded storage of \tt{b}.
+
+\begin{tmvcode}
+ConstVectorView<T> b.constLinearView() const
+VectorView<T> b.linearView()
+bool b.canLinearize()
+\end{tmvcode}
+\index{BandMatrix!View as a contiguous Vector}
+\index{BandMatrix!Methods!linearView}
+\index{BandMatrix!Methods!constLinearView}
+\index{BandMatrix!Methods!canLinearize}
+These are similar to the regular \tt{Matrix} version in that they return a view to the elements of a \tt{BandMatrix} as a single vector.  However, 
+in this case, there are a few elements in memory that are not necessarily
+defined, since they lie outside of the actual band structure, so some care
+should be used depending on the application of the returned vector views.  
+
+They are always allowed for an actual \tt{BandMatrix}.  For a \tt{BandMatrixView} (or \tt{ConstBandMatrixView}), they are only allowed if all of the elements in the view are in one contiguous block of memory.  The helper function \tt{b.canLinearize()} returns whether or not the first two methods will work.
+
+\begin{tmvcode}
+typename tmv::BandMatrix<T>::rowmajor_iterator b.rowmajor_begin()
+typename tmv::BandMatrix<T>::rowmajor_iterator b.rowmajor_end()
+typename tmv::BandMatrix<T>::const_rowmajor_iterator b.rowmajor_begin() const
+typename tmv::BandMatrix<T>::const_rowmajor_iterator b.rowmajor_end() const
+typename tmv::BandMatrix<T>::colmajor_iterator b.colmajor_begin()
+typename tmv::BandMatrix<T>::colmajor_iterator b.colmajor_end()
+typename tmv::BandMatrix<T>::const_colmajor_iterator b.colmajor_begin() const
+typename tmv::BandMatrix<T>::const_colmajor_iterator b.colmajor_end() const
+typename tmv::BandMatrix<T>::diagmajor_iterator b.diagmajor_begin()
+typename tmv::BandMatrix<T>::diagmajor_iterator b.diagmajor_end()
+typename tmv::BandMatrix<T>::const_diagmajor_iterator b.diagmajor_begin() const
+typename tmv::BandMatrix<T>::const_diagmajor_iterator b.diagmajor_end() const
+\end{tmvcode}
+Here we have added a new set of iterators that traverse the matrix in diagonal-major order.  Unlike the others, they do not start with $m(0,0)$.  They instead start at the beginning of the lowest subdiagonal in the band and proceed up to the highest super-diagonal.
+
+\begin{tmvcode}
+T* b.ptr()
+const T* b.cptr() const
+int b.stepi() const
+int b.stepj() const
+int b.diagstep() const
+bool b.isconj() const
+bool b.isrm() const
+bool b.iscm() const
+bool b.isdm() const
+\end{tmvcode}
+\index{BandMatrix!Methods!ptr}
+\index{BandMatrix!Methods!cptr}
+\index{BandMatrix!Methods!stepi}
+\index{BandMatrix!Methods!stepj}
+\index{BandMatrix!Methods!diagstep}
+\index{BandMatrix!Methods!isconj}
+\index{BandMatrix!Methods!isrm}
+\index{BandMatrix!Methods!iscm}
+\index{BandMatrix!Methods!isdm}
+These methods allow for direct memory access of a \tt{BandMatrix}.  There are two new methods here: \tt{m.diagstep()} returns the step along the diagonal directions, and is equivalent to \tt{(m.stepi()+m.stepj())} and \tt{isdm()} is another convenience function that returns whether \tt{b} is \tt{DiagMajor}. 
 
 \begin{tmvcode}
 b.subVector(int i, int j, int istep, int jstep, int size)
@@ -351,7 +404,7 @@ columns or diagonals that
 appear within the original banded structure.  For our example of viewing just
 the super-diagonals of a $6 \times 6$ \tt{BandMatrix} with 2 sub- and 
 3 super-diagonals, we
-could instead use \tt{m.diagRange(1,4)}.  The last 3 rows would be \tt{m.rowRange(3,6)}.
+could instead use \tt{b.diagRange(1,4)}.  The last 3 rows would be \tt{b.rowRange(3,6)}.
 Note that this wold be a $3 \times 5$ matrix with 0 sub-diagonals and 
 4 super-diagonals.
 These routines calculate the appropriate changes in the size and shape to include
@@ -508,6 +561,7 @@ v2 = b * v1
 v2 = v1 * b
 v *= b
 b3 = b1 * b2
+b3 = ElemProd(b1,b2)
 m2 = b * m1
 m2 = m1 * b
 m *= b
@@ -651,8 +705,8 @@ unless \tt{b}'s data type is an integer type, in which case Bareiss's algorithm
 is used.
 \index{BandMatrix!Determinant}
 
-\subsection{Input/Output}
-\index{BandMatrix!Input/output}
+\subsection{I/O}
+\index{BandMatrix!I/O}
 \label{BandMatrix_IO}
 
 The simplest I/O syntax is the usual:

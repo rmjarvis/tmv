@@ -3,6 +3,40 @@
 #include "TMV_Test_1.h"
 #include "TMV.h"
 
+template <class M1, class M2, class M3>
+static inline bool CanElemMult(
+    const tmv::BaseMatrix_Tri<M1>& a, const tmv::BaseMatrix_Tri<M2>& b,
+    const tmv::BaseMatrix_Tri_Mutable<M3>& c)
+{
+#ifdef XXD
+    if (showtests) {
+        std::cout<<"Tri: CanElemMult:\n";
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
+    }
+#endif
+    return (a.size() == b.size()) && (a.size() == c.size()) &&
+        (!c.isunit() || (a.isunit() && b.isunit()));
+}
+
+template <class M1, class M2, class M3>
+static inline bool CanAddElemMult(
+    const tmv::BaseMatrix_Tri<M1>& a, const tmv::BaseMatrix_Tri<M2>& b,
+    const tmv::BaseMatrix_Tri_Mutable<M3>& c)
+{
+#ifdef XXD
+    if (showtests) {
+        std::cout<<"Tri: CanAddElemMult:\n";
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
+    }
+#endif
+    return (a.size() == b.size()) && (a.size() == c.size()) &&
+        !c.isunit();
+}
+
 #include "TMV_TestMatrixArith.h"
 
 template <class T> void TestTriMatrixArith_A1a()
@@ -38,8 +72,8 @@ template <class T> void TestTriMatrixArith_A1a()
     tmv::UpperTriMatrixView<T> u2 = a2x.upperTri();
     tmv::UpperTriMatrixView<CT> cu2 = ca2x.upperTri();
 
-    TestMatrixArith1<T>(u1,cu1,"UpperTri 1");
-    TestMatrixArith1<T>(u2,cu2,"UpperTri 2");
+    TestMatrixArith1(u1,cu1,"UpperTri 1");
+    TestMatrixArith1(u2,cu2,"UpperTri 2");
 
 #if (XTEST & 1)
     tmv::Matrix<T> a3x(12,16);
@@ -50,7 +84,7 @@ template <class T> void TestTriMatrixArith_A1a()
 
     tmv::UpperTriMatrixView<T> u3 = a3x.subMatrix(0,12,0,16,3,4).upperTri();
     tmv::UpperTriMatrixView<CT> cu3 = ca3x.subMatrix(0,12,0,16,3,4).upperTri();
-    TestMatrixArith1<T>(u3,cu3,"UpperTri 3");
+    TestMatrixArith1(u3,cu3,"UpperTri 3");
 #endif
 
 #if (XTEST & 2)
@@ -59,12 +93,12 @@ template <class T> void TestTriMatrixArith_A1a()
     tmv::LowerTriMatrixView<T> l2 = a2x.lowerTri();
     tmv::LowerTriMatrixView<CT> cl2 = ca2x.lowerTri();
 
-    TestMatrixArith1<T>(l1,cl1,"LowerTri 1");
-    TestMatrixArith1<T>(l2,cl2,"LowerTri 2");
+    TestMatrixArith1(l1,cl1,"LowerTri 1");
+    TestMatrixArith1(l2,cl2,"LowerTri 2");
 #if (XTEST & 1)
     tmv::LowerTriMatrixView<T> l3 = a3x.subMatrix(0,12,0,16,3,4).lowerTri();
     tmv::LowerTriMatrixView<CT> cl3 = ca3x.subMatrix(0,12,0,16,3,4).lowerTri();
-    TestMatrixArith1<T>(l3,cl3,"LowerTri 3");
+    TestMatrixArith1(l3,cl3,"LowerTri 3");
 #endif
 #endif
 

@@ -51,10 +51,10 @@ template <class T, int M, int N> void TestSmallMatrixArith_4(std::string label)
     tmv::SmallMatrix<CT,M,N,tmv::ColMajor> ca1c = ca1r;
     tmv::SmallMatrix<CT,M,N,tmv::ColMajor> ca2c = ca2r;
 
-    TestMatrixArith4<T>(a1r,ca1r,a2r,ca2r,label+" RM/RM");
-    TestMatrixArith4<T>(a1c,ca1c,a2c,ca2c,label+" CM/CM");
-    TestMatrixArith4<T>(a1r,ca1r,a2c,ca2c,label+" RM/CM");
-    TestMatrixArith4<T>(a1c,ca1c,a2r,ca2r,label+" CM/RM");
+    TestMatrixArith4(a1r,ca1r,a2r,ca2r,label+" RM/RM");
+    TestMatrixArith4(a1c,ca1c,a2c,ca2c,label+" CM/CM");
+    TestMatrixArith4(a1r,ca1r,a2c,ca2c,label+" RM/CM");
+    TestMatrixArith4(a1c,ca1c,a2r,ca2r,label+" CM/RM");
 
 #if (XTEST & 1)
     tmv::SmallMatrix<T,3*M,4*N,tmv::ColMajor> a1nx;
@@ -64,11 +64,11 @@ template <class T, int M, int N> void TestSmallMatrixArith_4(std::string label)
     tmv::SmallMatrixView<CT,M,N> ca1n = ca1nx.subMatrix(0,3*M,0,4*N,3,4);
     ca1n = ca1r;
 
-    TestMatrixArith4<T>(a1n,ca1n,a2r,ca2r,label+" NM/RM");
-    TestMatrixArith4<T>(a1r,ca1r,a1n,ca1n,label+" RM/NM");
+    TestMatrixArith4(a1n,ca1n,a2r,ca2r,label+" NM/RM");
+    TestMatrixArith4(a1r,ca1r,a1n,ca1n,label+" RM/NM");
 #if (XTEST & 2)
-    TestMatrixArith4<T>(a1n,ca1n,a2c,ca2c,label+" NM/CM");
-    TestMatrixArith4<T>(a1c,ca1c,a1n,ca1n,label+" CM/NM");
+    TestMatrixArith4(a1n,ca1n,a2c,ca2c,label+" NM/CM");
+    TestMatrixArith4(a1c,ca1c,a1n,ca1n,label+" CM/NM");
 #endif
 #endif
 }

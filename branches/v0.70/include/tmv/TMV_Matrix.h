@@ -1138,7 +1138,7 @@ namespace tmv {
 
         virtual inline ~ConstMatrixView()
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             const_cast<const T*&>(itsm) = 0;
 #endif
         }
@@ -1429,7 +1429,7 @@ namespace tmv {
         virtual inline ~MatrixView() 
         {
             TMV_SETFIRSTLAST(0,0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             const_cast<T*&>(itsm) = 0;
 #endif
         }
@@ -2395,7 +2395,7 @@ namespace tmv {
         {
             TMVAssert(_colsize >= 0 && _rowsize >= 0);
             TMVAssert(S==RowMajor || S==ColMajor);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }
@@ -2482,7 +2482,7 @@ namespace tmv {
 
         virtual inline ~Matrix() 
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(999));
 #endif
         }
@@ -3369,7 +3369,7 @@ namespace tmv {
             _first = itsm.get();
             _last = _first + linsize;
 #endif
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }

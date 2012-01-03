@@ -88,19 +88,18 @@ change the size to some useful value.
 
 \item 
 \begin{tmvcode}
-tmv::SymBandMatrix<T,uplo,stor,index> sb(size_t n, int nlo)
-tmv::HermBandMatrix<T,uplo,stor,index> hb(size_t n, int nlo)
+tmv::SymBandMatrix<T,uplo,stor,index> sb(int n, int nlo)
+tmv::HermBandMatrix<T,uplo,stor,index> hb(int n, int nlo)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{SymBandMatrix} or \tt{HermBandMatrix} with 
 \tt{nlo} off-diagonals
 and with \underline{uninitialized} values.
-If debugging is turned on (i.e. not turned off 
-with \tt{-DNDEBUG} or \tt{-DTMVNDEBUG}), then the values are initialized to 888.
+If extra debugging is turned on (with \tt{-DTMV\_EXTRA\_DEBUG}), then the values are initialized to 888.
 
 \item
 \begin{tmvcode}
-tmv::SymBandMatrix<T,uplo,stor,index> sb(size_t n, int nlo, T x)
-tmv::HermBandMatrix<T,uplo,stor,index> hb(size_t n, int nlo, T x)
+tmv::SymBandMatrix<T,uplo,stor,index> sb(int n, int nlo, T x)
+tmv::HermBandMatrix<T,uplo,stor,index> hb(int n, int nlo, T x)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{SymBandMatrix}  or \tt{HermBandMatrix} with \tt{nlo} off-diagonals
 and with all values equal to \tt{x}.
@@ -183,16 +182,16 @@ There are also \tt{ConstSymBandMatrixView} versions of these.
 \item
 \begin{tmvcode}
 tmv::SymBandMatrixView<T> sb = 
-      tmv::SymBandMatrixViewOf(T* vv, size_t n, int nlo, 
+      tmv::SymBandMatrixViewOf(T* vv, int n, int nlo, 
           UpLoType uplo, StorageType stor)
 tmv::ConstSymBandMatrixView<T> sb = 
-      tmv::SymBandMatrixViewOf(const T* vv, size_t n, int nlo, 
+      tmv::SymBandMatrixViewOf(const T* vv, int n, int nlo, 
           UpLoType uplo, StorageType stor)
 tmv::SymBandMatrixView<T> hb = 
-      tmv::HermBandMatrixViewOf(T* vv, size_t n, int nlo, 
+      tmv::HermBandMatrixViewOf(T* vv, int n, int nlo, 
           UpLoType uplo, StorageType stor)
 tmv::ConstSymBandMatrixView<T> hb = 
-      tmv::HermBandMatrixViewOf(const T* vv, size_t n, int nlo, 
+      tmv::HermBandMatrixViewOf(const T* vv, int n, int nlo, 
           UpLoType uplo, StorageType stor)
 \end{tmvcode}
 \index{SymBandMatrix!View of raw memory}
@@ -203,16 +202,16 @@ upper or lower band.  The length of the data array should be
 \item
 \begin{tmvcode}
 tmv::SymBandMatrixView<T> sb = 
-      tmv::SymBandMatrixViewOf(T* vv, size_t n, int nlo, 
+      tmv::SymBandMatrixViewOf(T* vv, int n, int nlo, 
           UpLoType uplo, StorageType stor)
 tmv::ConstSymBandMatrixView<T> sb = 
-      tmv::SymBandMatrixViewOf(const T* vv, size_t n, int nlo, 
+      tmv::SymBandMatrixViewOf(const T* vv, int n, int nlo, 
           UpLoType uplo, StorageType stor)
 tmv::SymBandMatrixView<T> hb = 
-      tmv::HermBandMatrixViewOf(T* vv, size_t n, int nlo, 
+      tmv::HermBandMatrixViewOf(T* vv, int n, int nlo, 
           UpLoType uplo, StorageType stor)
 tmv::ConstSymBandMatrixView<T> hb = 
-      tmv::HermBandMatrixViewOf(const T* vv, size_t n, int nlo, 
+      tmv::HermBandMatrixViewOf(const T* vv, int n, int nlo, 
           UpLoType uplo, StorageType stor)
 \end{tmvcode}
 \index{SymBandMatrix!View of raw memory}
@@ -226,7 +225,7 @@ upper or lower band.  This allows for arbitrary steps through the data.
 \label{SymBandMatrix_Access}
 
 \begin{tmvcode}
-sb.resize(size_t new_size, int new_nlo)
+sb.resize(int new_size, int new_nlo)
 \end{tmvcode}
 \index{SymBandMatrix!Methods!resize}
 
@@ -255,6 +254,34 @@ missing, since the full row or column isn't accessible as a \tt{VectorView}.
 You must specify a valid range within the row or column that you want, 
 given the banded storage of \tt{sb}.  And, like for \tt{SymMatrix}, a full row
 must be accessed in its two parts, one on each side of the diagonal.
+
+\begin{tmvcode}
+T* sb.ptr()
+const T* sb.cptr() const
+int sb.stepi() const
+int sb.stepj() const
+int sb.diagstep() const
+bool sb.isconj() const
+bool sb.issym() const
+bool sb.isherm() const
+bool sb.isupper() const
+bool sb.isrm() const
+bool sb.iscm() const
+bool sb.isdm() const
+\end{tmvcode}
+\index{SymBandMatrix!Methods!ptr}
+\index{SymBandMatrix!Methods!cptr}
+\index{SymBandMatrix!Methods!stepi}
+\index{SymBandMatrix!Methods!stepj}
+\index{SymBandMatrix!Methods!diagstep}
+\index{SymBandMatrix!Methods!isconj}
+\index{SymBandMatrix!Methods!issym}
+\index{SymBandMatrix!Methods!isherm}
+\index{SymBandMatrix!Methods!isupper}
+\index{SymBandMatrix!Methods!isrm}
+\index{SymBandMatrix!Methods!iscm}
+\index{SymBandMatrix!Methods!isdm}
+These methods allow for direct memory access of a \tt{SymBandMatrix}.
 
 \begin{tmvcode}
 sb.subVector(int i, int j, int istep, int jstep, int size)
@@ -330,6 +357,8 @@ you could use
 \tt{sb.upperBandOff().imagPart()} 
 (since all the diagonal elements are real).
 \vspace{12pt}
+
+Note that there are no iterators provided for \tt{SymBandMatrix} or \tt{HermBandMatrix}.  The recommended way to iterate over their stored values is to use the \tt{upperBand()} or \tt{lowerBand()} methods and iterate over those portions of the matrix directly.
 
 \subsection{Functions}
 \index{SymBandMatrix!Functions of}
@@ -445,6 +474,7 @@ v2 = sb * v1
 v2 = v1 * sb
 v *= sb
 b = sb1 * sb2
+sb3 = ElemProd(sb1,sb2)
 m2 = sb * m1
 m2 = m1 * sb
 m *= sb
@@ -596,8 +626,8 @@ unless \tt{sb}'s data type is an integer type, in which case Bareiss's algorithm
 is used.
 \index{SymBandMatrix!Determinant}
 
-\subsection{Input/Output}
-\index{SymBandMatrix!Input/output}
+\subsection{I/O}
+\index{SymBandMatrix!I/O}
 \label{SymBandMatrix_IO}
 
 The simplest I/O syntax is the usual:

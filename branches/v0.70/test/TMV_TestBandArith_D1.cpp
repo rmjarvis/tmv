@@ -6,6 +6,8 @@
 #include "TMV_Test_2.h"
 #include "TMV_TestBandArith.h"
 
+#define NOELEMMULT
+
 template <class T1, class T2> 
 inline bool CanAddEq(
     const tmv::BandMatrixView<T1>& a, 
@@ -149,31 +151,31 @@ void TestBandMatrixArith_D1()
         tmv::BandMatrixView<T> bi = b[i];
         tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
 
-        TestMatrixArith4<T>(bi,cbi,u1v,cu1v,"Band/UpperTri");
-        TestMatrixArith5<T>(bi,cbi,u1v,cu1v,"Band/UpperTri");
-        TestMatrixArith6x<T>(bi,cbi,u1v,cu1v,"Band/UpperTri");
+        TestMatrixArith4(bi,cbi,u1v,cu1v,"Band/UpperTri");
+        TestMatrixArith5(bi,cbi,u1v,cu1v,"Band/UpperTri");
+        TestMatrixArith6x(bi,cbi,u1v,cu1v,"Band/UpperTri");
 #if (XTEST & 2)
-        TestMatrixArith4<T>(bi,cbi,l1v,cl1v,"Band/LowerTri");
-        TestMatrixArith5<T>(bi,cbi,l1v,cl1v,"Band/LowerTri");
-        TestMatrixArith6x<T>(bi,cbi,l1v,cl1v,"Band/LowerTri");
-        TestMatrixArith4<T>(bi,cbi,u2v,cu2v,"Band/UpperTri");
-        TestMatrixArith5<T>(bi,cbi,u2v,cu2v,"Band/UpperTri");
-        TestMatrixArith6x<T>(bi,cbi,u2v,cu2v,"Band/UpperTri");
-        TestMatrixArith4<T>(bi,cbi,l2v,cl2v,"Band/LowerTri");
-        TestMatrixArith5<T>(bi,cbi,l2v,cl2v,"Band/LowerTri");
-        TestMatrixArith6x<T>(bi,cbi,l2v,cl2v,"Band/LowerTri");
-        TestMatrixArith4<T>(bi,cbi,u3v,cu3v,"Band/UpperTri");
-        TestMatrixArith5<T>(bi,cbi,u3v,cu3v,"Band/UpperTri");
-        TestMatrixArith6x<T>(bi,cbi,u3v,cu3v,"Band/UpperTri");
-        TestMatrixArith4<T>(bi,cbi,l3v,cl3v,"Band/LowerTri");
-        TestMatrixArith5<T>(bi,cbi,l3v,cl3v,"Band/LowerTri");
-        TestMatrixArith6x<T>(bi,cbi,l3v,cl3v,"Band/LowerTri");
-        TestMatrixArith4<T>(bi,cbi,u4v,cu4v,"Band/UpperTri");
-        TestMatrixArith5<T>(bi,cbi,u4v,cu4v,"Band/UpperTri");
-        TestMatrixArith6x<T>(bi,cbi,u4v,cu4v,"Band/UpperTri");
-        TestMatrixArith4<T>(bi,cbi,l4v,cl4v,"Band/LowerTri");
-        TestMatrixArith5<T>(bi,cbi,l4v,cl4v,"Band/LowerTri");
-        TestMatrixArith6x<T>(bi,cbi,l4v,cl4v,"Band/LowerTri");
+        TestMatrixArith4(bi,cbi,l1v,cl1v,"Band/LowerTri");
+        TestMatrixArith5(bi,cbi,l1v,cl1v,"Band/LowerTri");
+        TestMatrixArith6x(bi,cbi,l1v,cl1v,"Band/LowerTri");
+        TestMatrixArith4(bi,cbi,u2v,cu2v,"Band/UpperTri");
+        TestMatrixArith5(bi,cbi,u2v,cu2v,"Band/UpperTri");
+        TestMatrixArith6x(bi,cbi,u2v,cu2v,"Band/UpperTri");
+        TestMatrixArith4(bi,cbi,l2v,cl2v,"Band/LowerTri");
+        TestMatrixArith5(bi,cbi,l2v,cl2v,"Band/LowerTri");
+        TestMatrixArith6x(bi,cbi,l2v,cl2v,"Band/LowerTri");
+        TestMatrixArith4(bi,cbi,u3v,cu3v,"Band/UpperTri");
+        TestMatrixArith5(bi,cbi,u3v,cu3v,"Band/UpperTri");
+        TestMatrixArith6x(bi,cbi,u3v,cu3v,"Band/UpperTri");
+        TestMatrixArith4(bi,cbi,l3v,cl3v,"Band/LowerTri");
+        TestMatrixArith5(bi,cbi,l3v,cl3v,"Band/LowerTri");
+        TestMatrixArith6x(bi,cbi,l3v,cl3v,"Band/LowerTri");
+        TestMatrixArith4(bi,cbi,u4v,cu4v,"Band/UpperTri");
+        TestMatrixArith5(bi,cbi,u4v,cu4v,"Band/UpperTri");
+        TestMatrixArith6x(bi,cbi,u4v,cu4v,"Band/UpperTri");
+        TestMatrixArith4(bi,cbi,l4v,cl4v,"Band/LowerTri");
+        TestMatrixArith5(bi,cbi,l4v,cl4v,"Band/LowerTri");
+        TestMatrixArith6x(bi,cbi,l4v,cl4v,"Band/LowerTri");
 #endif
     }
 }

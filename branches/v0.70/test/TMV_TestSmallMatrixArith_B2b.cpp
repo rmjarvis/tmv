@@ -50,16 +50,16 @@ static void DoTestSmallMatrixArith_B2b()
     if (showstartdone) {
         std::cout<<"B2b"<<std::endl;
     }
-    TestMatrixArith2b<T>(a3,ca3,v1,cv1,v2,cv2,"NonSquare");
-    TestMatrixArith2b<T>(a5,ca5,v2,cv2,v1,cv1,"NonSquare");
+    TestMatrixArith2b(a3,ca3,v1,cv1,v2,cv2,"NonSquare");
+    TestMatrixArith2b(a5,ca5,v2,cv2,v1,cv1,"NonSquare");
 
 #if (XTEST & 2)
     tmv::SmallMatrix<T,7,N,tmv::ColMajor> a4 = a3;
     tmv::SmallMatrix<std::complex<T>,7,N,tmv::ColMajor> ca4 = ca3;
     tmv::SmallMatrix<T,N,7,tmv::ColMajor> a6 = a5;
     tmv::SmallMatrix<std::complex<T>,N,7,tmv::ColMajor> ca6 = ca5;
-    TestMatrixArith2b<T>(a4,ca4,v1,cv1,v2,cv2,"NonSquare");
-    TestMatrixArith2b<T>(a6,ca6,v2,cv2,v1,cv1,"NonSquare");
+    TestMatrixArith2b(a4,ca4,v1,cv1,v2,cv2,"NonSquare");
+    TestMatrixArith2b(a6,ca6,v2,cv2,v1,cv1,"NonSquare");
 #endif
 
 #if (XTEST & 32)
@@ -77,14 +77,14 @@ static void DoTestSmallMatrixArith_B2b()
     tmv::SmallVector<T,7,tmv::FortranStyle> v2f = v2;
     tmv::SmallVector<std::complex<T>,7,tmv::FortranStyle> cv2f = cv2;
 
-    TestMatrixArith2b<T>(a3f,ca3f,v1,cv1,v2,cv2,"NonSquare");
-    TestMatrixArith2b<T>(a4f,ca4f,v1,cv1,v2,cv2,"NonSquare");
-    TestMatrixArith2b<T>(a5f,ca5f,v2,cv2,v1,cv1,"NonSquare");
-    TestMatrixArith2b<T>(a6f,ca6f,v2,cv2,v1,cv1,"NonSquare");
-    TestMatrixArith2b<T>(a3f,ca3f,v1f,cv1f,v2,cv2,"NonSquare");
-    TestMatrixArith2b<T>(a3f,ca3f,v1f,cv1f,v2f,cv2f,"NonSquare");
-    TestMatrixArith2b<T>(a5f,ca5f,v2f,cv2f,v1,cv1,"NonSquare");
-    TestMatrixArith2b<T>(a5f,ca5f,v2f,cv2f,v1f,cv1f,"NonSquare");
+    TestMatrixArith2b(a3f,ca3f,v1,cv1,v2,cv2,"NonSquare");
+    TestMatrixArith2b(a4f,ca4f,v1,cv1,v2,cv2,"NonSquare");
+    TestMatrixArith2b(a5f,ca5f,v2,cv2,v1,cv1,"NonSquare");
+    TestMatrixArith2b(a6f,ca6f,v2,cv2,v1,cv1,"NonSquare");
+    TestMatrixArith2b(a3f,ca3f,v1f,cv1f,v2,cv2,"NonSquare");
+    TestMatrixArith2b(a3f,ca3f,v1f,cv1f,v2f,cv2f,"NonSquare");
+    TestMatrixArith2b(a5f,ca5f,v2f,cv2f,v1,cv1,"NonSquare");
+    TestMatrixArith2b(a5f,ca5f,v2f,cv2f,v1f,cv1f,"NonSquare");
 #endif
 }
 

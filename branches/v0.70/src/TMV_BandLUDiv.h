@@ -99,8 +99,7 @@ namespace tmv {
         BandMatrix<T> A0;
 
         SingularBandLU2(
-            const GenBandMatrix<T>& _A, const GenBandMatrix<T>& _A0
-        ) :
+            const GenBandMatrix<T>& _A, const GenBandMatrix<T>& _A0) :
             SingularBandLU<T>(_A), A0(_A0) {}
         ~SingularBandLU2() throw() {}
 

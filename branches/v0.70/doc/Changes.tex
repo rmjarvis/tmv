@@ -65,7 +65,7 @@ tmv::Matrix<double> m4(3,5);
 std::copy(cmar, cmar+15, m3.colmajor_begin());
 \end{tmvcode}
 
-In addition, a \tt{BandMatrix} can be iterated in \tt{DiagMajor} order using \tt{m.diagmajor_begin()}.
+In addition, a \tt{BandMatrix} can be iterated in \tt{DiagMajor} order using \tt{m.diagmajor\_begin()}.
 
 \item 
 Added the ability to do comma initialization for \tt{DiagMatrix}, \tt{UpperTriMatrix}, \tt{LowerTriMatrix}, \tt{BandMatrix}, and their corresponding view types.  These are also always listed in RowMajor order regardless of the actual storage order of the matrix in memory.  Also, only the values in the corresponding parts of the matrices should be listed in the initialization.  e.g.
@@ -143,6 +143,17 @@ And the last two lines show how to read the matrix in either regular or compact 
 
 There is significantly more to the new I/O style than these options.  You can design your own markup (e.g. change the parentheses to brackets, use commas between elements, etc.), you can specify a precision to use in the output, and you can set some specialized style to be the default to be used when no explicit manipulator is given.  See \S\ref{IOStyle} for more information.
 
+\item[$\times$] Removed the \tt{ElementProd} and \tt{AddElementProd} functions.  The equivalent behavior is now done with a new operator \tt{ElemProd(a,b)} which returns a composite object representing the element-wise product of two vectors or matrices.  So where you used to write:
+\begin{tmvcode}
+ElementProd(x,a,b);
+AddElementProd(y,d,e,f);
+\end{tmvcode}
+you would now write:
+\begin{tmvcode}
+b = x * ElemProd(a,b);
+f += y * ElemProd(d,e);
+\end{tmvcode}
+
 \item[$\times$] 
 Removed the routines that returned pointers to new \tt{BaseMatrix}es.  In general, using the \tt{BaseMatrix} class directly is not really very useful, so I don't think anyone is actually using these methods.  And in the version 0.90 TMV code in development, I've completely redesigned the back end.  It gets rid of the virtual class hierarchy completely using the CRTP idiom rather than virtual functions.  But this means that methods like \tt{newCopy()}, \tt{newTranspose()}, etc. are not really relevant anymore.
 
@@ -153,18 +164,24 @@ Added a few more "ViewOf" functions to allow direct views of memory as different
 \tt{DiagMatrixView}, \tt{BandMatrixView}, \tt{SymMatrixView}, or \tt{SymBandMatrixView} specifying the memory address of $m(0,0)$ and the step size in each direction.
 
 \item[$\times$]
-Changed type type of the size values from \tt{size_t} to \tt{int}.  The main reason for this is to prevent the constructors that take size arguments from implicitly converting a negative number into a very large unsigned value and then attempt to allocate a huge amount of memory.  If the size parameters in a constructor such as \tt{tmv::Matrix<T>(nrows,ncols)} were the result of some calculation and they accidentally were allowed to be negative, the new code will hit an assert statement checking that they are nonnegative, rather than trying to allocate the incorrectly huge amount of memory.  This seems like safer behavior.
+Changed the type of the matrix and vector size values from \tt{size\_t} to \tt{int}.  The main reason for this is to prevent the constructors that take size arguments from implicitly converting a negative number into a very large unsigned value and then attempt to allocate a huge amount of memory.  If the size parameters in a constructor such as \tt{tmv::Matrix<T>(nrows,ncols)} were the result of some calculation and they accidentally were allowed to be negative, the new code will hit an assert statement checking that they are nonnegative, rather than trying to allocate the incorrectly huge amount of memory.  This seems like safer behavior.
 
-The only other place where this might matter is that the return type of functions like \tt{m.colsize()} now return an \tt{int} rather than a \tt{size_t}.  So if you do any comparisons like \tt{while(i < m.colsize())} and you compile with \tt{g++ -Wall}, you'll want \tt{i} to be a signed integer type to avoid \tt{g++}'s warning about comparing signed and unsigned types.
+The only other place where this might matter for the user is that the return type of functions like \tt{m.colsize()} now return an \tt{int} rather than a \tt{size\_t}.  So if you do any comparisons like \tt{while(i < m.colsize())} and you compile with \tt{g++ -Wall}, you'll want \tt{i} to be a signed integer type to avoid \tt{g++}'s warning about comparing signed and unsigned types.
 
 \item
 Removed warnings related to the norm2 and makeInverseATA methods, since I decided that they were probably unnecessary.  The behavior of TMV is well-enough documented in both cases that I don't think anyone who uses these functions will be surprised by the behavior.
 
 \item 
-Added warning for when the matrix multiplication routine catches a \tt{bad_alloc} exception and reverts to using a function that doesn't allocate memory.  Also added documenation for the Warning that had been output when the divide-and-conquer SVD algorithm has trouble converging.
+Added warning for when the matrix multiplication routine catches a \tt{bad\_alloc} exception and reverts to using a function that doesn't allocate memory.  Also added documenation for the Warning that had been output when the divide-and-conquer SVD algorithm has trouble converging.
 
-\item
-Changed the default warning behavior to be no output.  To turn on the warnings, the user needs to explicitly specify an \tt{ostream} with the \tt{tmv::WriteWarningsTo} function.
+\item[$\times$]
+Changed the default TMV warning behavior to be no output.  To turn on the warnings, the user needs to explicitly specify an \tt{ostream} with the \tt{tmv::WriteWarningsTo} function.
+
+\item[$\times$]
+Added a new compiler flag \tt{-DTMV\_EXTRA\_DEBUG} and moved all the debugging statements that are more than $O(1)$ time to this.  So now the default debugging behavior is to do all the $O(1)$ debugging statements, but none of the $O(N)$ or $O(N^2)$ ones.  This new compiler flag turns on the slower debugging statements.
+
+\item[$\times$]
+Changed the compiler flag \tt{-DTMVNDEBUG} to \tt{-DTMV\_NDEBUG} to make it more readable and to be consistent with the other flags that start with TMV.
 
 \item 
 Added support for the \tt{clang++} compiler.  This didn't require much editing, but it did complain about a couple things that had passed muster with the other compilers I had used.

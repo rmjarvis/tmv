@@ -1646,7 +1646,7 @@ namespace tmv {
 
         virtual inline ~ConstUpperTriMatrixView()
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             const_cast<const T*&>(itsm) = 0;
 #endif
         }
@@ -1704,7 +1704,7 @@ namespace tmv {
 
         virtual inline ~ConstLowerTriMatrixView()
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             const_cast<const T*&>(itsm) = 0;
 #endif
         }
@@ -2101,7 +2101,7 @@ namespace tmv {
         virtual inline ~UpperTriMatrixView() 
         {
             TMV_SETFIRSTLAST(0,0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             const_cast<T*&>(itsm) = 0;
 #endif
         }
@@ -2521,7 +2521,7 @@ namespace tmv {
         virtual inline ~LowerTriMatrixView()
         {
             TMV_SETFIRSTLAST(0,0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             const_cast<T*&>(itsm) = 0;
 #endif
         }
@@ -3418,7 +3418,7 @@ namespace tmv {
         {
             TMVAssert(_size >= 0);
             TMVAssert(S==RowMajor || S==ColMajor); 
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }
@@ -3531,7 +3531,7 @@ namespace tmv {
         virtual inline ~UpperTriMatrix()
         {
             TMV_SETFIRSTLAST(0,0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(999));
 #endif
         }
@@ -4128,7 +4128,7 @@ namespace tmv {
             _first = itsm.get();
             _last = _first+itslen;
 #endif
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }
@@ -4232,7 +4232,7 @@ namespace tmv {
         {
             TMVAssert(_size >= 0);
             TMVAssert(S==RowMajor || S==ColMajor); 
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }
@@ -4345,7 +4345,7 @@ namespace tmv {
         virtual inline ~LowerTriMatrix() 
         {
             TMV_SETFIRSTLAST(0,0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(999));
 #endif
         }
@@ -4950,7 +4950,7 @@ namespace tmv {
             _first = itsm.get();
             _last = _first+itslen;
 #endif
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }

@@ -42,7 +42,7 @@ void TestBandDiv_C1(tmv::DivType dt)
         bi.saveDiv();
         cbi.saveDiv();
 
-        TestMatrixDivArith1<T>(dt,bi,dv,cbi,cdv,"DiagMatrix/Band");
+        TestMatrixDivArith1(dt,bi,dv,cbi,cdv,"DiagMatrix/Band");
     }
 }
 

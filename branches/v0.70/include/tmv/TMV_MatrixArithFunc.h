@@ -72,12 +72,8 @@ namespace tmv {
         const T alpha, const GenVector<Tx>& x, const GenVector<Ty>& y, 
         const MatrixView<T>& A);
 
-    template <class T, class Ta> 
-    void ElementProd(
-        const T alpha, const GenMatrix<Ta>& A, const MatrixView<T>& B);
-
-    template <class T, class Ta, class Tb> 
-    void AddElementProd(
+    template <bool add, class T, class Ta, class Tb> 
+    void ElemMultMM(
         const T alpha, const GenMatrix<Ta>& A,
         const GenMatrix<Tb>& B, const MatrixView<T>& C);
 
@@ -121,7 +117,6 @@ namespace tmv {
         const T alpha, const GenMatrix<Ta>& A,
         const T beta, const GenMatrix<Tb>& B, const MatrixView<CT>& C)
     { AddMM(CT(alpha),A,CT(beta),B,C); }
-
     template <class T> 
     inline void AddMM(
         const CT alpha, const GenMatrix<CT>& A,
@@ -140,22 +135,16 @@ namespace tmv {
         const GenVector<Ty>& y, const MatrixView<CT>& A)
     { Rank1Update<add>(CT(alpha),x,y,A); }
 
-    template <class T, class Ta> 
-    inline void ElementProd(
-        const T alpha, const GenMatrix<Ta>& A, const MatrixView<CT>& B)
-    { ElementProd(CT(alpha),A,B); }
-
-    template <class T, class Ta, class Tb> 
-    inline void AddElementProd(
+    template <bool add, class T, class Ta, class Tb> 
+    inline void ElemMultMM(
         const T alpha, const GenMatrix<Ta>& A,
         const GenMatrix<Tb>& B, const MatrixView<CT>& C)
-    { AddElementProd(CT(alpha),A,B,C); }
-
-    template <class T> 
-    inline void AddElementProd(
+    { ElemMultMM<add>(CT(alpha),A,B,C); }
+    template <bool add, class T> 
+    inline void ElemMultMM(
         const CT alpha, const GenMatrix<CT>& A,
         const GenMatrix<T>& B, const MatrixView<CT>& C)
-    { AddElementProd(alpha,B,A,C); }
+    { ElemMultMM<add>(alpha,B,A,C); }
 
     // Specialize disallowed complex combinations:
     template <bool add, class T, class Ta, class Tb> 
@@ -180,6 +169,12 @@ namespace tmv {
 
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
+        const CT , const GenMatrix<Ta>& , const GenMatrix<Tb>& ,
+        const MatrixView<T>& )
+    { TMVAssert(TMV_FALSE); }
+
+    template <bool add, class T, class Ta, class Tb> 
+    inline void ElemMultMM(
         const CT , const GenMatrix<Ta>& , const GenMatrix<Tb>& ,
         const MatrixView<T>& )
     { TMVAssert(TMV_FALSE); }

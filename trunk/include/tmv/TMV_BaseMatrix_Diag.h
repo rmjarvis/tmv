@@ -165,8 +165,7 @@ namespace tmv {
         {
             CheckRowIndex<_fort>(i,size());
             CheckColIndex<_fort>(j,size());
-            TMVAssert(i == j);
-            return cref(i);
+            return cref(i,j);
         }
 
         TMV_INLINE_ND value_type operator()(int i) const
@@ -350,6 +349,11 @@ namespace tmv {
         TMV_INLINE int nlo() const { return 0; }
         TMV_INLINE int nhi() const { return 0; }
         TMV_INLINE int step() const { return mat().step(); }
+
+        TMV_INLINE int rowstart(int i) const { return i; }
+        TMV_INLINE int rowend(int i) const { return i+1; }
+        TMV_INLINE int colstart(int j) const { return j; }
+        TMV_INLINE int colend(int j) const { return j+1; }
 
         TMV_INLINE const value_type* cptr() const { return mat().cptr(); }
         value_type cref(int i, int j) const 
@@ -736,6 +740,7 @@ namespace tmv {
         TMV_INLINE int step() const { return mat().step(); }
 
         TMV_INLINE value_type* ptr() { return mat().ptr(); }
+        TMV_INLINE reference ref(int i, int j) { return mat().ref(i); }
         TMV_INLINE reference ref(int i) { return mat().ref(i); }
         TMV_INLINE value_type cref(int i) { return mat().cref(i); }
 

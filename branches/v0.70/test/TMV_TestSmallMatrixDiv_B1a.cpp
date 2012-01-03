@@ -23,12 +23,12 @@ static void TestSmallNonSquareDiv_B1a()
     tmv::SmallMatrix<T,6,N,stor> a1 = m;
     tmv::SmallMatrix<std::complex<T>,6,N,stor> c1 = a1 * std::complex<T>(1,2);
 
-    TestMatrixDivArith3a<T>(tmv::QR,a1,c1,"NonSquare"); 
+    TestMatrixDivArith3a(tmv::QR,a1,c1,"NonSquare"); 
 #if (XTEST & 32)
     tmv::SmallMatrix<T,6,N,stor,tmv::FortranStyle> a1f = a1;
     tmv::SmallMatrix<std::complex<T>,6,N,stor,tmv::FortranStyle> c1f = c1;
 
-    TestMatrixDivArith3a<T>(tmv::QR,a1f,c1f,"NonSquare"); 
+    TestMatrixDivArith3a(tmv::QR,a1f,c1f,"NonSquare"); 
 #endif
 }
 

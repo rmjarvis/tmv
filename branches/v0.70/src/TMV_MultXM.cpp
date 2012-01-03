@@ -132,28 +132,8 @@ namespace tmv {
 #endif
     }
 
-    template <class T, class Ta> 
-    void ElementProd(
-        const T alpha, const GenMatrix<Ta>& A, const MatrixView<T>& B)
-    {
-        TMVAssert(A.colsize() == B.colsize());
-        TMVAssert(A.rowsize() == B.rowsize());
-        if (A.stor() == B.stor() && A.canLinearize() && B.canLinearize()) {
-            TMVAssert(A.stepi() == B.stepi() && A.stepj() == B.stepj());
-            ElementProd(alpha,A.constLinearView(),B.linearView());
-        } else if (B.isrm()) {
-            const int M = B.colsize();
-            for(int i=0;i<M;i++)
-                ElementProd(alpha,A.row(i),B.row(i));
-        } else {
-            const int N = B.rowsize();
-            for(int j=0;j<N;j++)
-                ElementProd(alpha,A.col(j),B.col(j));
-        }
-    }
-
-    template <class T, class Ta, class Tb> 
-    void AddElementProd(
+    template <bool add, class T, class Ta, class Tb> 
+    void ElemMultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
         const MatrixView<T>& C)
     {
@@ -165,16 +145,16 @@ namespace tmv {
             A.canLinearize() && B.canLinearize() && C.canLinearize()) {
             TMVAssert(A.stepi() == C.stepi() && A.stepj() == C.stepj());
             TMVAssert(B.stepi() == C.stepi() && B.stepj() == C.stepj());
-            AddElementProd(alpha,A.constLinearView(),B.constLinearView(),
-                           C.linearView());
+            ElemMultVV<add>(
+                alpha,A.constLinearView(),B.constLinearView(),C.linearView());
         } else if (C.isrm()) {
             const int M = C.colsize();
             for(int i=0;i<M;i++)
-                AddElementProd(alpha,A.row(i),B.row(i),C.row(i));
+                ElemMultVV<add>(alpha,A.row(i),B.row(i),C.row(i));
         } else {
             const int N = C.rowsize();
             for(int j=0;j<N;j++)
-                AddElementProd(alpha,A.col(j),B.col(j),C.col(j));
+                ElemMultVV<add>(alpha,A.col(j),B.col(j),C.col(j));
         }
     }
 

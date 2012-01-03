@@ -72,11 +72,11 @@ void TestSmallMatrixArith_6(std::string label)
     tmv::SmallMatrix<CT,M,N,tmv::ColMajor> ca1c = ca1r;
     tmv::SmallMatrix<CT,N,K,tmv::ColMajor> ca2c = ca2r;
 
-    TestMatrixArith6x<T>(a1c,ca1c,a2c,ca2c,label+" CM/CM");
+    TestMatrixArith6x(a1c,ca1c,a2c,ca2c,label+" CM/CM");
 #if (XTEST & 2)
-    TestMatrixArith6x<T>(a1r,ca1r,a2r,ca2r,label+" RM/RM");
-    TestMatrixArith6x<T>(a1r,ca1r,a2c,ca2c,label+" RM/CM");
-    TestMatrixArith6x<T>(a1c,ca1c,a2r,ca2r,label+" CM/RM");
+    TestMatrixArith6x(a1r,ca1r,a2r,ca2r,label+" RM/RM");
+    TestMatrixArith6x(a1r,ca1r,a2c,ca2c,label+" RM/CM");
+    TestMatrixArith6x(a1c,ca1c,a2r,ca2r,label+" CM/RM");
 #endif
 
 #if (XTEST & 1)
@@ -93,29 +93,29 @@ void TestSmallMatrixArith_6(std::string label)
     tmv::SmallMatrixView<CT,N,K> ca2n = ca2nx.subMatrix(0,3*N,0,4*K,3,4);
     ca2n = ca2r;
 
-    TestMatrixArith6x<T>(a1n,ca1n,a2r,ca2r,label+" NM/RM");
-    TestMatrixArith6x<T>(a1r,ca1r,a2n,ca2n,label+" RM/NM");
+    TestMatrixArith6x(a1n,ca1n,a2r,ca2r,label+" NM/RM");
+    TestMatrixArith6x(a1r,ca1r,a2n,ca2n,label+" RM/NM");
 #if (XTEST & 2)
-    TestMatrixArith6x<T>(a1n,ca1n,a2c,ca2c,label+" NM/CM");
-    TestMatrixArith6x<T>(a1c,ca1c,a2n,ca2n,label+" CM/NM");
+    TestMatrixArith6x(a1n,ca1n,a2c,ca2c,label+" NM/CM");
+    TestMatrixArith6x(a1c,ca1c,a2n,ca2n,label+" CM/NM");
 #endif
 #endif
 
     tmv::SmallMatrix<T,M,K,tmv::ColMajor> a3c(T(0));
     tmv::SmallMatrix<CT,M,K,tmv::ColMajor> ca3c(CT(0));
 
-    TestMatrixArith6<T>(a1c,ca1c,a2c,ca2c,a3c,ca3c,label+" CM/CM/CM");
-    TestMatrixArith6<T>(a1r,ca1r,a2r,ca2r,a3c,ca3c,label+" RM/RM/CM");
-    TestMatrixArith6<T>(a1r,ca1r,a2c,ca2c,a3c,ca3c,label+" RM/CM/CM");
-    TestMatrixArith6<T>(a1c,ca1c,a2r,ca2r,a3c,ca3c,label+" CM/RM/CM");
+    TestMatrixArith6(a1c,ca1c,a2c,ca2c,a3c,ca3c,label+" CM/CM/CM");
+    TestMatrixArith6(a1r,ca1r,a2r,ca2r,a3c,ca3c,label+" RM/RM/CM");
+    TestMatrixArith6(a1r,ca1r,a2c,ca2c,a3c,ca3c,label+" RM/CM/CM");
+    TestMatrixArith6(a1c,ca1c,a2r,ca2r,a3c,ca3c,label+" CM/RM/CM");
 
 #if (XTEST & 2)
     tmv::SmallMatrix<T,M,K,tmv::RowMajor> a3r(T(0));
     tmv::SmallMatrix<CT,M,K,tmv::RowMajor> ca3r(CT(0));
 
-    TestMatrixArith6<T>(a1c,ca1c,a2c,ca2c,a3r,ca3r,label+" CM/CM/RM");
-    TestMatrixArith6<T>(a1r,ca1r,a2r,ca2r,a3r,ca3r,label+" RM/RM/RM");
-    TestMatrixArith6<T>(a1r,ca1r,a2c,ca2c,a3r,ca3r,label+" RM/CM/RM");
-    TestMatrixArith6<T>(a1c,ca1c,a2r,ca2r,a3r,ca3r,label+" CM/RM/RM");
+    TestMatrixArith6(a1c,ca1c,a2c,ca2c,a3r,ca3r,label+" CM/CM/RM");
+    TestMatrixArith6(a1r,ca1r,a2r,ca2r,a3r,ca3r,label+" RM/RM/RM");
+    TestMatrixArith6(a1r,ca1r,a2c,ca2c,a3r,ca3r,label+" RM/CM/RM");
+    TestMatrixArith6(a1c,ca1c,a2r,ca2r,a3r,ca3r,label+" CM/RM/RM");
 #endif
 }

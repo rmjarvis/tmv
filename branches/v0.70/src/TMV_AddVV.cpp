@@ -52,7 +52,7 @@ namespace tmv {
     //
 
     template <bool c1, class T, class Tx, class T1> 
-    static void nonBlasAddVV(
+    static void NonBlasAddVV(
         const Tx x, const GenVector<T1>& v1, const VectorView<T>& v2)
     {
         TMVAssert(v1.size() == v2.size());
@@ -75,7 +75,7 @@ namespace tmv {
             const int N1 = N/4;
             const int N2 = N-4*N1;
             if (N1) {
-                if (x == Tx(1))        
+                if (x == Tx(1)) {
                     for(int i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
 #ifdef TMVFLDEBUG
                         TMVAssert(v2ptr >= v2._first);
@@ -86,7 +86,7 @@ namespace tmv {
                         v2ptr[2] += (c1 ? TMV_CONJ(v1ptr[2]) : v1ptr[2]);
                         v2ptr[3] += (c1 ? TMV_CONJ(v1ptr[3]) : v1ptr[3]);
                     }
-                else if (x == Tx(-1))
+                } else if (x == Tx(-1)) {
                     for(int i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
 #ifdef TMVFLDEBUG
                         TMVAssert(v2ptr >= v2._first);
@@ -97,7 +97,7 @@ namespace tmv {
                         v2ptr[2] -= (c1 ? TMV_CONJ(v1ptr[2]) : v1ptr[2]);
                         v2ptr[3] -= (c1 ? TMV_CONJ(v1ptr[3]) : v1ptr[3]);
                     }
-                else
+                } else {
                     for(int i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
 #ifdef TMVFLDEBUG
                         TMVAssert(v2ptr >= v2._first);
@@ -108,9 +108,10 @@ namespace tmv {
                         v2ptr[2] += x * (c1 ? TMV_CONJ(v1ptr[2]) : v1ptr[2]);
                         v2ptr[3] += x * (c1 ? TMV_CONJ(v1ptr[3]) : v1ptr[3]);
                     }
+                }
             }
             if (N2) {
-                if (x == Tx(1))        
+                if (x == Tx(1)) {
                     for(int i=N2;i>0;--i,++v1ptr,++v2ptr) {
 #ifdef TMVFLDEBUG
                         TMVAssert(v2ptr >= v2._first);
@@ -118,7 +119,7 @@ namespace tmv {
 #endif
                         *v2ptr += (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                     }
-                else if (x == Tx(-1))
+                } else if (x == Tx(-1)) {
                     for(int i=N2;i>0;--i,++v1ptr,++v2ptr) {
 #ifdef TMVFLDEBUG
                         TMVAssert(v2ptr >= v2._first);
@@ -126,7 +127,7 @@ namespace tmv {
 #endif
                         *v2ptr -= (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                     }
-                else
+                } else {
                     for(int i=N2;i>0;--i,++v1ptr,++v2ptr) {
 #ifdef TMVFLDEBUG
                         TMVAssert(v2ptr >= v2._first);
@@ -134,9 +135,10 @@ namespace tmv {
 #endif
                         *v2ptr += x * (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                     }
+                }
             }
         } else {
-            if (x == Tx(1))        
+            if (x == Tx(1)) {
                 for(int i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2) {
 #ifdef TMVFLDEBUG
                     TMVAssert(v2ptr >= v2._first);
@@ -144,7 +146,7 @@ namespace tmv {
 #endif
                     *v2ptr += (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                 }
-            else if (x == Tx(-1))
+            } else if (x == Tx(-1)) {
                 for(int i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2) {
 #ifdef TMVFLDEBUG
                     TMVAssert(v2ptr >= v2._first);
@@ -152,7 +154,7 @@ namespace tmv {
 #endif
                     *v2ptr -= (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                 }
-            else
+            } else {
                 for(int i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2) {
 #ifdef TMVFLDEBUG
                     TMVAssert(v2ptr >= v2._first);
@@ -160,6 +162,7 @@ namespace tmv {
 #endif
                     *v2ptr += x * (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                 }
+            }
         }
     }
 
@@ -168,11 +171,11 @@ namespace tmv {
         const T x, const GenVector<T1>& v1, const VectorView<T>& v2)
     {
         if (TMV_IMAG(x) == TMV_RealType(T)(0))
-            if (v1.isconj()) nonBlasAddVV<true>(TMV_REAL(x),v1,v2); 
-            else nonBlasAddVV<false>(TMV_REAL(x),v1,v2); 
+            if (v1.isconj()) NonBlasAddVV<true>(TMV_REAL(x),v1,v2); 
+            else NonBlasAddVV<false>(TMV_REAL(x),v1,v2); 
         else
-            if (v1.isconj()) nonBlasAddVV<true>(x,v1,v2); 
-            else nonBlasAddVV<false>(x,v1,v2); 
+            if (v1.isconj()) NonBlasAddVV<true>(x,v1,v2); 
+            else NonBlasAddVV<false>(x,v1,v2); 
     }
 
 #ifdef BLAS
@@ -334,11 +337,11 @@ namespace tmv {
 #endif
 
         if (v2.size() > 0 && x != T(0)) {
-            if (v2.isSameAs(v1)) {
+            if (v2.isSameAs(v1)) 
                 if (x == T(-1)) v2.setZero();
                 else MultXV(x+T(1),v2);
-            }
-            else if (v2.isconj()) AddVV(TMV_CONJ(x),v1.conjugate(),v2.conjugate());
+            else if (v2.isconj()) 
+                AddVV(TMV_CONJ(x),v1.conjugate(),v2.conjugate());
             else if (shouldReverse(v1.step(),v2.step())) 
                 AddVV(x,v1.reverse(),v2.reverse());
 #ifdef BLAS

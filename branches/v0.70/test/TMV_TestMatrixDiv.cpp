@@ -286,7 +286,7 @@ static void TestSquareDiv(tmv::DivType dt)
     c2v.divideUsing(dt);
     c2v.saveDiv();
 
-    TestMatrixDivArith2<T>(dt,a1v,a2v,c1v,c2v,"Square"); 
+    TestMatrixDivArith2(dt,a1v,a2v,c1v,c2v,"Square"); 
 #if (XTEST & 2)
     tmv::Matrix<T,stor,tmv::FortranStyle> a1f = a1;
     tmv::Matrix<T,stor,tmv::FortranStyle> a2f = a2;
@@ -305,9 +305,9 @@ static void TestSquareDiv(tmv::DivType dt)
     c2fv.divideUsing(dt);
     c2fv.saveDiv();
 
-    TestMatrixDivArith1<T>(dt,a1fv,a2v,c1fv,c2v,"Square"); 
-    TestMatrixDivArith1<T>(dt,a1v,a2fv,c1v,c2fv,"Square"); 
-    TestMatrixDivArith1<T>(dt,a1fv,a2fv,c1fv,c2fv,"Square"); 
+    TestMatrixDivArith1(dt,a1fv,a2v,c1fv,c2v,"Square"); 
+    TestMatrixDivArith1(dt,a1v,a2fv,c1v,c2fv,"Square"); 
+    TestMatrixDivArith1(dt,a1fv,a2fv,c1fv,c2fv,"Square"); 
 #endif
 
     tmv::Matrix<T,stor> a3(7,4);
@@ -338,8 +338,8 @@ static void TestSquareDiv(tmv::DivType dt)
     c4v.divideUsing(dt);
     c4v.saveDiv();
 
-    TestMatrixDivArith1<T>(dt,a1v,a3v,c1v,c3v,"Square/NonSquare");
-    TestMatrixDivArith1<T>(dt,a1v,a4v,c1v,c4v,"Square/NonSquare");
+    TestMatrixDivArith1(dt,a1v,a3v,c1v,c3v,"Square/NonSquare");
+    TestMatrixDivArith1(dt,a1v,a4v,c1v,c4v,"Square/NonSquare");
 
 #if (XTEST & 8)
     tmv::Matrix<T,stor> a5(4,0);
@@ -360,8 +360,8 @@ static void TestSquareDiv(tmv::DivType dt)
     c6v.divideUsing(dt);
     c6v.saveDiv();
 
-    TestMatrixDivArith1<T>(dt,a1v,a5v,c1v,c5v,"Square/Degenerate");
-    TestMatrixDivArith1<T>(dt,a1v,a6v,c1v,c6v,"Square/Degenerate");
+    TestMatrixDivArith1(dt,a1v,a5v,c1v,c5v,"Square/Degenerate");
+    TestMatrixDivArith1(dt,a1v,a6v,c1v,c6v,"Square/Degenerate");
 #endif
 
     if (stor == tmv::ColMajor) {
@@ -646,8 +646,8 @@ static void TestNonSquareDiv(tmv::DivType dt)
     c3v.divideUsing(dt);
     c3v.saveDiv();
 
-    TestMatrixDivArith2<T>(dt,a1v,a2v,c1v,c2v,"NonSquare/Square"); 
-    TestMatrixDivArith2<T>(dt,a1v,a3v,c1v,c3v,"NonSquare/Square"); 
+    TestMatrixDivArith2(dt,a1v,a2v,c1v,c2v,"NonSquare/Square"); 
+    TestMatrixDivArith2(dt,a1v,a3v,c1v,c3v,"NonSquare/Square"); 
 
     tmv::Matrix<T,stor> a4(7,4);
     for(int i=0;i<7;++i) for(int j=0;j<4;++j) a4(i,j) = T(1-3*i+2*j);
@@ -702,10 +702,10 @@ static void TestNonSquareDiv(tmv::DivType dt)
     c7v.divideUsing(dt);
     c7v.saveDiv();
 
-    TestMatrixDivArith1<T>(dt,a1v,a4v,c1v,c4v,"NonSquare/NonSquare");
-    TestMatrixDivArith1<T>(dt,a1v,a5v,c1v,c5v,"NonSquare/NonSquare");
-    TestMatrixDivArith1<T>(dt,a1v,a6v,c1v,c6v,"NonSquare/NonSquare");
-    TestMatrixDivArith1<T>(dt,a1v,a7v,c1v,c7v,"NonSquare/NonSquare");
+    TestMatrixDivArith1(dt,a1v,a4v,c1v,c4v,"NonSquare/NonSquare");
+    TestMatrixDivArith1(dt,a1v,a5v,c1v,c5v,"NonSquare/NonSquare");
+    TestMatrixDivArith1(dt,a1v,a6v,c1v,c6v,"NonSquare/NonSquare");
+    TestMatrixDivArith1(dt,a1v,a7v,c1v,c7v,"NonSquare/NonSquare");
 
 #if (XTEST & 8)
     tmv::Matrix<T,stor> a8(4,0);
@@ -742,10 +742,10 @@ static void TestNonSquareDiv(tmv::DivType dt)
     c11v.divideUsing(dt);
     c11v.saveDiv();
 
-    TestMatrixDivArith1<T>(dt,a1v,a8v,c1v,c8v,"NonSquare/Degenerate");
-    TestMatrixDivArith1<T>(dt,a1v,a9v,c1v,c9v,"NonSquare/Degenerate");
-    TestMatrixDivArith1<T>(dt,a1v,a10v,c1v,c10v,"NonSquare/Degenerate");
-    TestMatrixDivArith1<T>(dt,a1v,a11v,c1v,c11v,"NonSquare/Degenerate");
+    TestMatrixDivArith1(dt,a1v,a8v,c1v,c8v,"NonSquare/Degenerate");
+    TestMatrixDivArith1(dt,a1v,a9v,c1v,c9v,"NonSquare/Degenerate");
+    TestMatrixDivArith1(dt,a1v,a10v,c1v,c10v,"NonSquare/Degenerate");
+    TestMatrixDivArith1(dt,a1v,a11v,c1v,c11v,"NonSquare/Degenerate");
 #endif
 
     if (stor == tmv::ColMajor) {

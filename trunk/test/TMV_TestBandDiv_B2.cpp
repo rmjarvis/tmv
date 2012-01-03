@@ -62,13 +62,13 @@ void TestBandDiv_B2(tmv::DivType dt)
         tmv::BandMatrixView<T> bi = b[i];
         tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
 
-        TestMatrixDivArith1<T>(dt,a1v,bi,ca1v,cbi,"Band/SquareMatrix");
+        TestMatrixDivArith1(dt,a1v,bi,ca1v,cbi,"Band/SquareMatrix");
         if (dt == tmv::LU) continue;
 #if (XTEST & 2)
-        TestMatrixDivArith1<T>(dt,a3v,bi,ca3v,cbi,"Band/NonSquareMatrix");
-        TestMatrixDivArith1<T>(dt,a4v,bi,ca4v,cbi,"Band/NonSquareMatrix");
-        TestMatrixDivArith1<T>(dt,a5v,bi,ca5v,cbi,"Band/NonSquareMatrix");
-        TestMatrixDivArith1<T>(dt,a6v,bi,ca6v,cbi,"Band/NonSquareMatrix");
+        TestMatrixDivArith1(dt,a3v,bi,ca3v,cbi,"Band/NonSquareMatrix");
+        TestMatrixDivArith1(dt,a4v,bi,ca4v,cbi,"Band/NonSquareMatrix");
+        TestMatrixDivArith1(dt,a5v,bi,ca5v,cbi,"Band/NonSquareMatrix");
+        TestMatrixDivArith1(dt,a6v,bi,ca6v,cbi,"Band/NonSquareMatrix");
 #endif
     }
 }

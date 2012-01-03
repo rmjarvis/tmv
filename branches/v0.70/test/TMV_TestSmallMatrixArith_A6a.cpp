@@ -38,7 +38,7 @@ static void DoTestSmallMatrixArith_A6a()
     if (showstartdone) {
         std::cout<<"A6a"<<std::endl;
     }
-    TestMatrixArith6<T>(a1,ca1,a2,ca2,a2b,ca2b,"Square");
+    TestMatrixArith6(a1,ca1,a2,ca2,a2b,ca2b,"Square");
 
 #if (XTEST & 2)
     tmv::SmallMatrix<T,N,N,tmv::RowMajor> a1b = a1;
@@ -55,12 +55,12 @@ static void DoTestSmallMatrixArith_A6a()
     tmv::SmallMatrix<T,N,N,tmv::ColMajor,tmv::FortranStyle> a2f = a2;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor,tmv::FortranStyle> ca2f = ca2;
 
-    TestMatrixArith6<T>(a1,ca1,a1b,ca1b,a1c,ca1c,"Square");
-    TestMatrixArith6<T>(a1,ca1,a1b,ca1b,a2,ca2,"Square");
-    TestMatrixArith6<T>(a1,ca1,a2,ca2,a1b,ca1b,"Square");
-    TestMatrixArith6<T>(a1f,ca1f,a2,ca2,a1b,ca1b,"Square");
-    TestMatrixArith6<T>(a1f,ca1f,a2f,ca2f,a1b,ca1b,"Square");
-    TestMatrixArith6<T>(a1f,ca1f,a2f,ca2f,a1fb,ca1fb,"Square");
+    TestMatrixArith6(a1,ca1,a1b,ca1b,a1c,ca1c,"Square");
+    TestMatrixArith6(a1,ca1,a1b,ca1b,a2,ca2,"Square");
+    TestMatrixArith6(a1,ca1,a2,ca2,a1b,ca1b,"Square");
+    TestMatrixArith6(a1f,ca1f,a2,ca2,a1b,ca1b,"Square");
+    TestMatrixArith6(a1f,ca1f,a2f,ca2f,a1b,ca1b,"Square");
+    TestMatrixArith6(a1f,ca1f,a2f,ca2f,a1fb,ca1fb,"Square");
 #endif
 }
 

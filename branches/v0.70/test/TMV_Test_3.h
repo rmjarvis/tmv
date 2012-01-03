@@ -5,10 +5,6 @@
 #define NOSV
 #define USETEMP
 
-#ifdef NOMIX_SMALL
-#define NOMIX
-#endif
-
 template <class T> void TestAllSmallVector();
 template <class T> void TestAllSmallMatrix();
 template <class T> void TestAllSmallMatrixA();

@@ -40,7 +40,7 @@ static void DoTestSmallMatrixArith_B6a()
     if (showstartdone) {
         std::cout<<"B6a"<<std::endl;
     }
-    TestMatrixArith6<T>(a3,ca3,a1,ca1,a4,ca4,"NonSquare");
+    TestMatrixArith6(a3,ca3,a1,ca1,a4,ca4,"NonSquare");
 #if (XTEST & 2)
     tmv::SmallMatrix<T,7,N,tmv::RowMajor> a3b = a3;
     tmv::SmallMatrix<std::complex<T>,7,N,tmv::RowMajor> ca3b = ca3;
@@ -49,13 +49,13 @@ static void DoTestSmallMatrixArith_B6a()
 
     tmv::SmallMatrix<T,N,N,tmv::ColMajor> a2 = a1;
     tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor> ca2 = ca1;
-    TestMatrixArith6<T>(a3,ca3,a1,ca1,a3b,ca3b,"NonSquare");
-    TestMatrixArith6<T>(a3,ca3,a2,ca2,a3b,ca3b,"NonSquare");
-    TestMatrixArith6<T>(a3,ca3,a2,ca2,a4,ca4,"NonSquare");
-    TestMatrixArith6<T>(a4,ca4,a1,ca1,a3,ca3,"NonSquare");
-    TestMatrixArith6<T>(a4,ca4,a1,ca1,a4b,ca4b,"NonSquare");
-    TestMatrixArith6<T>(a4,ca4,a2,ca2,a3,ca3,"NonSquare");
-    TestMatrixArith6<T>(a4,ca4,a2,ca2,a4b,ca4b,"NonSquare");
+    TestMatrixArith6(a3,ca3,a1,ca1,a3b,ca3b,"NonSquare");
+    TestMatrixArith6(a3,ca3,a2,ca2,a3b,ca3b,"NonSquare");
+    TestMatrixArith6(a3,ca3,a2,ca2,a4,ca4,"NonSquare");
+    TestMatrixArith6(a4,ca4,a1,ca1,a3,ca3,"NonSquare");
+    TestMatrixArith6(a4,ca4,a1,ca1,a4b,ca4b,"NonSquare");
+    TestMatrixArith6(a4,ca4,a2,ca2,a3,ca3,"NonSquare");
+    TestMatrixArith6(a4,ca4,a2,ca2,a4b,ca4b,"NonSquare");
 #endif
 
 #if (XTEST & 32)
@@ -66,9 +66,9 @@ static void DoTestSmallMatrixArith_B6a()
     tmv::SmallMatrix<T,7,N,tmv::ColMajor,tmv::FortranStyle> a4f = a4;
     tmv::SmallMatrix<std::complex<T>,7,N,tmv::ColMajor,tmv::FortranStyle> ca4f = ca4;
 
-    TestMatrixArith6<T>(a3f,ca3f,a1,ca1,a4,ca4,"NonSquare");
-    TestMatrixArith6<T>(a3f,ca3f,a1f,ca1f,a4,ca4,"NonSquare");
-    TestMatrixArith6<T>(a3f,ca3f,a1f,ca1f,a4f,ca4f,"NonSquare");
+    TestMatrixArith6(a3f,ca3f,a1,ca1,a4,ca4,"NonSquare");
+    TestMatrixArith6(a3f,ca3f,a1f,ca1f,a4,ca4,"NonSquare");
+    TestMatrixArith6(a3f,ca3f,a1f,ca1f,a4f,ca4f,"NonSquare");
 #endif
 }
 

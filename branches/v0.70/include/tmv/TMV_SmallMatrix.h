@@ -145,7 +145,7 @@ namespace tmv {
             TMVAssert(M>0);
             TMVAssert(N>0);
             TMVAssert(S==RowMajor || S==ColMajor);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }
@@ -247,7 +247,7 @@ namespace tmv {
 
         inline ~SmallMatrix()
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(999));
 #endif
         }

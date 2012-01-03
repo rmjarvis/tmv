@@ -1163,7 +1163,7 @@ namespace tmv {
 
         virtual inline ~ConstSymBandMatrixView()
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             const_cast<const T*&>(itsm) = 0;
 #endif
         }
@@ -1462,7 +1462,7 @@ namespace tmv {
         virtual inline ~SymBandMatrixView()
         {
             TMV_SETFIRSTLAST(0,0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             const_cast<T*&>(itsm) = 0;
 #endif
         }
@@ -2422,7 +2422,7 @@ namespace tmv {
             TMVAssert(s >= 0);
             TMVAssert(lo < s);
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }
@@ -2591,7 +2591,7 @@ namespace tmv {
         virtual inline ~SymBandMatrix() 
         {
             TMV_SETFIRSTLAST(0,0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(999));
 #endif
             itsm = 0;
@@ -3575,7 +3575,7 @@ namespace tmv {
             _first = itsm1.get();
             _last = _first+linsize;
 #endif
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }
@@ -3680,7 +3680,7 @@ namespace tmv {
             TMVAssert(s >= 0);
             TMVAssert(lo < s);
             TMVAssert(S==RowMajor || S==ColMajor || S==DiagMajor);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #else
             if (isComplex(T())) diag().imagPart().setZero();
@@ -3860,7 +3860,7 @@ namespace tmv {
         virtual inline ~HermBandMatrix() 
         {
             TMV_SETFIRSTLAST(0,0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(999));
 #endif
             itsm = 0;
@@ -4865,7 +4865,7 @@ namespace tmv {
             _first = itsm1.get();
             _last = _first+linsize;
 #endif
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #else
             if (isComplex(T())) diag().imagPart().setZero();
@@ -4997,7 +4997,7 @@ namespace tmv {
         const GenMatrix<T>& m, UpLoType uplo, int nlo)
     {
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
         TMVAssert(isReal(T()) || 
                   m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
@@ -5011,7 +5011,7 @@ namespace tmv {
         const ConstMatrixView<T,I>& m, UpLoType uplo, int nlo)
     {
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
         TMVAssert(isReal(T()) || 
                   m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
@@ -5025,7 +5025,7 @@ namespace tmv {
         const Matrix<T,S,I>& m, UpLoType uplo, int nlo)
     {
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
         TMVAssert(isReal(T()) || 
                   m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
@@ -5039,7 +5039,7 @@ namespace tmv {
         const MatrixView<T,I>& m, UpLoType uplo, int nlo)
     {
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
         TMVAssert(isReal(T()) || 
                   m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
@@ -5054,7 +5054,7 @@ namespace tmv {
         Matrix<T,S,I>& m, UpLoType uplo, int nlo)
     {
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
         TMVAssert(isReal(T()) || 
                   m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
@@ -5128,7 +5128,7 @@ namespace tmv {
     {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
         TMVAssert(isReal(T()) || 
                   m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
@@ -5143,7 +5143,7 @@ namespace tmv {
     {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
         TMVAssert(isReal(T()) || 
                   m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
@@ -5158,7 +5158,7 @@ namespace tmv {
     {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
         TMVAssert(isReal(T()) || 
                   m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
@@ -5173,7 +5173,7 @@ namespace tmv {
     {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
         TMVAssert(isReal(T()) || 
                   m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif
@@ -5189,7 +5189,7 @@ namespace tmv {
     {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
         TMVAssert(isReal(T()) || 
                   m.diag().imagPart().normInf() == TMV_RealType(T)(0));
 #endif

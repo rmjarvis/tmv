@@ -32,7 +32,6 @@
 
 //#define XDEBUG
 
-
 #include "tmv/TMV_BandMatrixArithFunc.h"
 #include "tmv/TMV_BandMatrix.h"
 #include "tmv/TMV_VectorArith.h"
@@ -77,25 +76,8 @@ namespace tmv {
 #endif
     }
 
-    template <class T, class Ta> 
-    void ElementProd(
-        const T alpha, const GenBandMatrix<Ta>& A, const BandMatrixView<T>& B)
-    {
-        TMVAssert(A.colsize() == B.colsize());
-        TMVAssert(A.rowsize() == B.rowsize());
-        TMVAssert(A.nlo() == B.nlo());
-        TMVAssert(A.nhi() == B.nhi());
-        if (A.stor() == B.stor() && A.canLinearize() && B.canLinearize()) {
-            TMVAssert(A.stepi() == B.stepi() && A.stepj() == B.stepj());
-            ElementProd(alpha,A.constLinearView(),B.linearView());
-        } else {
-            for(int i=-A.nlo();i<=A.nhi();++i) 
-                ElementProd(alpha,A.diag(i),B.diag(i));
-        }
-    }
-
-    template <class T, class Ta, class Tb> 
-    void AddElementProd(
+    template <bool add, class T, class Ta, class Tb> 
+    void ElemMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenBandMatrix<Tb>& B,
         const BandMatrixView<T>& C)
     {
@@ -103,19 +85,32 @@ namespace tmv {
         TMVAssert(A.rowsize() == C.rowsize());
         TMVAssert(B.colsize() == C.colsize());
         TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(A.nlo() == C.nlo());
-        TMVAssert(A.nhi() == C.nhi());
-        TMVAssert(B.nlo() == C.nlo());
-        TMVAssert(B.nhi() == C.nhi());
-        if (A.stor() == C.stor() && B.stor() == C.stor() &&
-            A.canLinearize() && B.canLinearize() && C.canLinearize()) {
-            TMVAssert(A.stepi() == C.stepi() && A.stepj() == C.stepj());
-            TMVAssert(B.stepi() == C.stepi() && B.stepj() == C.stepj());
-            AddElementProd(alpha,A.constLinearView(),B.constLinearView(),
-                           C.linearView());
+        const int lo = TMV_MIN(A.nlo(),B.nlo());
+        const int hi = TMV_MIN(A.nhi(),B.nhi());
+        if (A.nlo() == lo && A.nhi() == hi && 
+            B.nlo() == lo && B.nhi() == hi &&
+            C.nlo() == lo && C.nhi() == hi) {
+            if (A.stor() == C.stor() && B.stor() == C.stor() &&
+                A.canLinearize() && B.canLinearize() && C.canLinearize()) {
+                ElemMultVV<add>(
+                    alpha,A.constLinearView(),B.constLinearView(),
+                    C.linearView());
+            } else {
+                for(int i=-lo;i<=hi;++i) 
+                    ElemMultVV<add>(alpha,A.diag(i),B.diag(i),C.diag(i));
+            }
         } else {
-            for(int i=-A.nlo();i<=A.nhi();++i) 
-                AddElementProd(alpha,A.diag(i),B.diag(i),C.diag(i));
+            if (!add) {
+                if (C.nlo() > lo) {
+                    C.diagRange(-C.nlo(),-lo).setZero();
+                }
+                if (C.nhi() > hi) {
+                    C.diagRange(hi+1,C.nhi()+1).setZero();
+                }
+            }
+            ElemMultMM<add>(
+                alpha,A.diagRange(-lo,hi+1),B.diagRange(-lo,hi+1),
+                C.diagRange(-lo,hi+1));
         }
     }
 

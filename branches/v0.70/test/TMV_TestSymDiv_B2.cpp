@@ -65,13 +65,13 @@ void TestSymDiv_B2(tmv::DivType dt, PosDefCode pdc)
         si.saveDiv();
         csi.saveDiv();
 
-        TestMatrixDivArith1<T>(dt,a1v,si,ca1v,csi,"Sym/SquareMatrix");
+        TestMatrixDivArith1(dt,a1v,si,ca1v,csi,"Sym/SquareMatrix");
         if (dt == tmv::LU) continue;
 #if (XTEST & 2)
-        TestMatrixDivArith1<T>(dt,a3v,si,ca3v,csi,"Sym/NonSquareMatrix");
-        TestMatrixDivArith1<T>(dt,a4v,si,ca4v,csi,"Sym/NonSquareMatrix");
-        TestMatrixDivArith1<T>(dt,a5v,si,ca5v,csi,"Sym/NonSquareMatrix");
-        TestMatrixDivArith1<T>(dt,a6v,si,ca6v,csi,"Sym/NonSquareMatrix");
+        TestMatrixDivArith1(dt,a3v,si,ca3v,csi,"Sym/NonSquareMatrix");
+        TestMatrixDivArith1(dt,a4v,si,ca4v,csi,"Sym/NonSquareMatrix");
+        TestMatrixDivArith1(dt,a5v,si,ca5v,csi,"Sym/NonSquareMatrix");
+        TestMatrixDivArith1(dt,a6v,si,ca6v,csi,"Sym/NonSquareMatrix");
 #endif
     }
 }

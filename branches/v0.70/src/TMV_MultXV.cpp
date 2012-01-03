@@ -251,8 +251,7 @@ namespace tmv {
 #endif
                 *v2ptr = x * (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
             }
-        }
-        else
+        } else
             for(int i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2)  {
 #ifdef TMVFLDEBUG
                 TMVAssert(v2ptr >= v2._first);
@@ -329,11 +328,28 @@ namespace tmv {
     }
 
     //
-    // ElementProd
+    // ElemMult
     //
 
-    template <bool cx, bool cy, class T, class Ta, class Tx, class Ty>
-    static void DoAddElementProd(
+    template <bool yn>
+    struct Maybe  // yn = true
+    {
+        template <class T1, class T2>
+        static void add(T1& a, const T2& b) { a += b; }
+        template <class T>
+        static T conj(const T& a) { return TMV_CONJ(a); }
+    };
+    template <>
+    struct Maybe<false>  // yn = false
+    {
+        template <class T1, class T2>
+        static void add(T1& a, const T2& b) { a = b; }
+        template <class T>
+        static const T& conj(const T& a) { return a; }
+    };
+
+    template <bool add, bool cx, bool cy, class T, class Ta, class Tx, class Ty>
+    static void DoElemMultVV(
         const Ta alpha, const GenVector<Tx>& x,
         const GenVector<Ty>& y, const VectorView<T>& z)
     // zi += alpha * xi * yi 
@@ -363,174 +379,177 @@ namespace tmv {
             const int N2 = N-4*N1;
 
             if (N1) {
-                if (alpha == Ta(1))
+                if (alpha == Ta(1)) {
                     for(int i=N1;i>0;--i,xp+=4,yp+=4,zp+=4) {
 #ifdef TMVFLDEBUG
                         TMVAssert(zp >= z._first);
                         TMVAssert(zp+3 < z._last);
 #endif
-                        *zp += (cx?TMV_CONJ(*xp):(*xp)) *
-                            (cy?TMV_CONJ(*yp):(*yp));
-                        zp[1] += (cx?TMV_CONJ(xp[1]):xp[1]) *
-                            (cy?TMV_CONJ(yp[1]):yp[1]);
-                        zp[2] += (cx?TMV_CONJ(xp[2]):xp[2]) *
-                            (cy?TMV_CONJ(yp[2]):yp[2]);
-                        zp[3] += (cx?TMV_CONJ(xp[3]):xp[3]) *
-                            (cy?TMV_CONJ(yp[3]):yp[3]);
+                        Maybe<add>::add(
+                            *zp,
+                            Maybe<cx>::conj(*xp) * Maybe<cy>::conj(*yp));
+                        Maybe<add>::add(
+                            zp[1],
+                            Maybe<cx>::conj(xp[1]) * Maybe<cy>::conj(yp[1]));
+                        Maybe<add>::add(
+                            zp[2],
+                            Maybe<cx>::conj(xp[2]) * Maybe<cy>::conj(yp[2]));
+                        Maybe<add>::add(
+                            zp[3],
+                            Maybe<cx>::conj(xp[3]) * Maybe<cy>::conj(yp[3]));
                     }
-                else if (alpha == Ta(-1))
-                    for(int i=N1;i>0;--i,xp+=4,yp+=4,zp+=4){
-#ifdef TMVFLDEBUG
-                        TMVAssert(zp >= z._first);
-                        TMVAssert(zp+3 < z._last);
-#endif
-                        *zp -= (cx?TMV_CONJ(*xp):(*xp)) *
-                            (cy?TMV_CONJ(*yp):(*yp));
-                        zp[1] -= (cx?TMV_CONJ(xp[1]):xp[1]) *
-                            (cy?TMV_CONJ(yp[1]):yp[1]);
-                        zp[2] -= (cx?TMV_CONJ(xp[2]):xp[2]) *
-                            (cy?TMV_CONJ(yp[2]):yp[2]);
-                        zp[3] -= (cx?TMV_CONJ(xp[3]):xp[3]) *
-                            (cy?TMV_CONJ(yp[3]):yp[3]);
-                    }
-                else 
+                } else {
                     for(int i=N1;i>0;--i,xp+=4,yp+=4,zp+=4) {
 #ifdef TMVFLDEBUG
                         TMVAssert(zp >= z._first);
                         TMVAssert(zp+3 < z._last);
 #endif
-                        *zp += alpha *
-                            (cx?TMV_CONJ(*xp):(*xp)) *
-                            (cy?TMV_CONJ(*yp):(*yp));
-                        zp[1] += alpha *
-                            (cx?TMV_CONJ(xp[1]):xp[1]) *
-                            (cy?TMV_CONJ(yp[1]):yp[1]);
-                        zp[2] += alpha *
-                            (cx?TMV_CONJ(xp[2]):xp[2]) *
-                            (cy?TMV_CONJ(yp[2]):yp[2]);
-                        zp[3] += alpha *
-                            (cx?TMV_CONJ(xp[3]):xp[3]) *
-                            (cy?TMV_CONJ(yp[3]):yp[3]);
+                        Maybe<add>::add(
+                            *zp, alpha * 
+                            Maybe<cx>::conj(*xp) * Maybe<cy>::conj(*yp));
+                        Maybe<add>::add(
+                            zp[1], alpha * 
+                            Maybe<cx>::conj(xp[1]) * Maybe<cy>::conj(yp[1]));
+                        Maybe<add>::add(
+                            zp[2], alpha * 
+                            Maybe<cx>::conj(xp[2]) * Maybe<cy>::conj(yp[2]));
+                        Maybe<add>::add(
+                            zp[3], alpha * 
+                            Maybe<cx>::conj(xp[3]) * Maybe<cy>::conj(yp[3]));
                     }
+                }
             }
             if (N2) {
-                if (alpha == Ta(1))
+                if (alpha == Ta(1)) {
                     for(int i=N2;i>0;--i,++xp,++yp,++zp)  {
 #ifdef TMVFLDEBUG
                         TMVAssert(zp >= z._first);
                         TMVAssert(zp < z._last);
 #endif
-                        *zp += (cx?TMV_CONJ(*xp):(*xp)) *
-                            (cy?TMV_CONJ(*yp):(*yp));
+                        Maybe<add>::add(
+                            *zp,
+                            Maybe<cx>::conj(*xp) * Maybe<cy>::conj(*yp));
                     }
-                else if (alpha == Ta(-1))
-                    for(int i=N2;i>0;--i,++xp,++yp,++zp) {
-#ifdef TMVFLDEBUG
-                        TMVAssert(zp >= z._first);
-                        TMVAssert(zp < z._last);
-#endif
-                        *zp -= (cx?TMV_CONJ(*xp):(*xp)) *
-                            (cy?TMV_CONJ(*yp):(*yp));
-                    }
-                else 
+                } else {
                     for(int i=N2;i>0;--i,++xp,++yp,++zp)  {
 #ifdef TMVFLDEBUG
                         TMVAssert(zp >= z._first);
                         TMVAssert(zp < z._last);
 #endif
-                        *zp += alpha *
-                            (cx?TMV_CONJ(*xp):(*xp)) *
-                            (cy?TMV_CONJ(*yp):(*yp));
+                        Maybe<add>::add(
+                            *zp, alpha * 
+                            Maybe<cx>::conj(*xp) * Maybe<cy>::conj(*yp));
                     }
+                }
             }
-        }
-        else {
-            if (alpha == Ta(1))
+        } else {
+            if (alpha == Ta(1)) {
                 for(int i=N;i>0;--i,xp+=sx,yp+=sy,zp+=sz) {
 #ifdef TMVFLDEBUG
                     TMVAssert(zp >= z._first);
                     TMVAssert(zp < z._last);
 #endif
-                    *zp += (cx?TMV_CONJ(*xp):(*xp)) *
-                        (cy?TMV_CONJ(*yp):(*yp));
+                    Maybe<add>::add(
+                        *zp, Maybe<cx>::conj(*xp) * Maybe<cy>::conj(*yp));
                 }
-            else if (alpha == Ta(-1))
+            } else {
                 for(int i=N;i>0;--i,xp+=sx,yp+=sy,zp+=sz) {
 #ifdef TMVFLDEBUG
                     TMVAssert(zp >= z._first);
                     TMVAssert(zp < z._last);
 #endif
-                    *zp -= (cx?TMV_CONJ(*xp):(*xp)) *
-                        (cy?TMV_CONJ(*yp):(*yp));
+                    Maybe<add>::add(
+                        *zp, alpha * 
+                        Maybe<cx>::conj(*xp) * Maybe<cy>::conj(*yp));
                 }
-            else 
-                for(int i=N;i>0;--i,xp+=sx,yp+=sy,zp+=sz) {
-#ifdef TMVFLDEBUG
-                    TMVAssert(zp >= z._first);
-                    TMVAssert(zp < z._last);
-#endif
-                    *zp += alpha *
-                        (cx?TMV_CONJ(*xp):(*xp)) *
-                        (cy?TMV_CONJ(*yp):(*yp));
-                }
+            }
         }
     }
 
-    template <class T, class Tx, class Ty> 
-    void AddElementProd(
+    template <bool add, class T, class Tx, class Ty> 
+    void ElemMultVV(
         const T alpha, const GenVector<Tx>& x, const GenVector<Ty>& y,
         const VectorView<T>& z)
     {
+        typedef typename Traits<T>::real_type RT;
         TMVAssert(z.size() == x.size());
         TMVAssert(z.size() == y.size());
 #ifdef XDEBUG
         Vector<T> z0 = z;
-        Vector<T> zx = z;
-        for(int i=0;i<zx.size();i++) zx(i) += alpha*x(i)*y(i);
+        Vector<T> zx(z.size());
+        for(int i=0;i<z.size();i++) zx(i) = alpha*x(i)*y(i);
+        if (add) zx += z;
+        //cerr<<"ElemMultVV: alpha = "<<alpha<<", add = "<<add<<endl;
+        //cerr<<"x = "<<TMV_Text(x)<<"  step "<<x.step()<<"  "<<x<<endl;
+        //cerr<<"y = "<<TMV_Text(y)<<"  step "<<y.step()<<"  "<<y<<endl;
+        //cerr<<"z = "<<TMV_Text(z)<<"  step "<<z.step()<<"  "<<z0<<endl;
+        //cerr<<"zx = "<<zx<<endl;
 #endif
 
         if (z.size() > 0 && alpha != T(0)) {
             if (z.isconj()) {
-                AddElementProd(
-                    TMV_CONJ(alpha),x.conjugate(),y.conjugate(), z.conjugate());
+                ElemMultVV<add>(
+                    TMV_CONJ(alpha),x.conjugate(),y.conjugate(),z.conjugate());
             } else if (
                 (z.step()==-1 && !(x.step()==1 && y.step()==1)) ||
                 ( z.step()!=1 && 
                   (x.step()==-1 || (x.step()!=1 && y.step()==-1))) ||
                 (z.step()<0 && !(x.step()==1 || y.step()==1))) {
-                AddElementProd(alpha,x.reverse(),y.reverse(),z.reverse());
+                ElemMultVV<add>(alpha,x.reverse(),y.reverse(),z.reverse());
+            } else if (SameStorage(x,z) && x.step() > z.step()) {
+                if (add)
+                    ElemMultVV<add>(alpha,Vector<Tx>(x),y,z);
+                else if (SameStorage(y,z)) {
+                    Vector<Tx> xx(x);
+                    z = y;
+                    ElemMultVV<false>(alpha,xx,z,z);
+                } else {
+                    z = x;
+                    ElemMultVV<false>(alpha,z,y,z);
+                }
+            } else if (SameStorage(y,z) && y.step() > z.step()) {
+                if (add)
+                    ElemMultVV<add>(alpha,x,Vector<Ty>(y),z);
+                else if (SameStorage(x,z)) {
+                    Vector<Ty> yy(y);
+                    z = x;
+                    ElemMultVV<false>(alpha,z,yy,z);
+                } else {
+                    z = y;
+                    ElemMultVV<false>(alpha,x,z,z);
+                }
             } else {
-                if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
-                    const TMV_RealType(T) ralpha = TMV_REAL(alpha);
+                if (TMV_IMAG(alpha) == RT(0)) {
+                    const RT ralpha = TMV_REAL(alpha);
                     if (x.isconj())
                         if (y.isconj())
-                            DoAddElementProd<true,true>(ralpha,x,y,z);
+                            DoElemMultVV<add,true,true>(ralpha,x,y,z);
                         else
-                            DoAddElementProd<true,false>(ralpha,x,y,z);
+                            DoElemMultVV<add,true,false>(ralpha,x,y,z);
                     else
                         if (y.isconj())
-                            DoAddElementProd<false,true>(ralpha,x,y,z);
+                            DoElemMultVV<add,false,true>(ralpha,x,y,z);
                         else
-                            DoAddElementProd<false,false>(ralpha,x,y,z);
+                            DoElemMultVV<add,false,false>(ralpha,x,y,z);
                 } else {
                     if (x.isconj())
                         if (y.isconj())
-                            DoAddElementProd<true,true>(alpha,x,y,z);
+                            DoElemMultVV<add,true,true>(alpha,x,y,z);
                         else
-                            DoAddElementProd<true,false>(alpha,x,y,z);
+                            DoElemMultVV<add,true,false>(alpha,x,y,z);
                     else
                         if (y.isconj())
-                            DoAddElementProd<false,true>(alpha,x,y,z);
+                            DoElemMultVV<add,false,true>(alpha,x,y,z);
                         else
-                            DoAddElementProd<false,false>(alpha,x,y,z);
+                            DoElemMultVV<add,false,false>(alpha,x,y,z);
                 }
             }
         }
 
 #ifdef XDEBUG
         if (!(Norm(zx-z) <= 
-              0.001*(TMV_ABS(alpha)*(Norm(x)+Norm(y))+Norm(z0)))) {
-            cerr<<"AddElProd: alpha = "<<alpha<<endl;
+              0.001*(TMV_ABS(alpha)*(Norm(x)+Norm(y))+(add?Norm(z0):RT(0))))) {
+            cerr<<"ElemMultVV: alpha = "<<alpha<<", add = "<<add<<endl;
             cerr<<"x = "<<TMV_Text(x)<<"  step "<<x.step()<<"  "<<x<<endl;
             cerr<<"y = "<<TMV_Text(y)<<"  step "<<y.step()<<"  "<<y<<endl;
             cerr<<"z = "<<TMV_Text(z)<<"  step "<<z.step()<<"  "<<z0<<endl;
@@ -542,145 +561,6 @@ namespace tmv {
 #endif
     }
 
-    template <bool cx, class T, class Ta, class Tx> 
-    static void DoElementProd(
-        const Ta alpha, const GenVector<Tx>& x, const VectorView<T>& y)
-    {
-        // yi = alpha * xi * yi
-        TMVAssert(x.size() == y.size());
-        TMVAssert(y.size()>0);
-        TMVAssert(alpha != Ta(0));
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(y.step() != 0 || x.step() == 0 || y.size() <= 1);
-        TMVAssert(y.step() != -1);
-        TMVAssert(x.step() != -1 || y.step() == 1);
-        TMVAssert(y.step() > 0 || x.step() == 1);
-
-        const Tx* xp = x.cptr();
-        T* yp = y.ptr();
-        const int sx = x.step();
-        const int sy = y.step();
-        const int N = y.size();
-
-        if (sx == 1 && sy == 1) {
-            const int N1 = N/4;
-            const int N2 = N-4*N1;
-            if (N1) {
-                if (alpha == Ta(1))
-                    for(int i=N1;i>0;--i,xp+=4,yp+=4) {
-#ifdef TMVFLDEBUG
-                        TMVAssert(yp >= y._first);
-                        TMVAssert(yp+3 < y._last);
-#endif
-                        *yp *= cx ? TMV_CONJ(*xp) : (*xp);
-                        yp[1] *= cx ? TMV_CONJ(xp[1]) : xp[1];
-                        yp[2] *= cx ? TMV_CONJ(xp[2]) : xp[2];
-                        yp[3] *= cx ? TMV_CONJ(xp[3]) : xp[3];
-                    }
-                else 
-                    for(int i=N1;i>0;--i,xp+=4,yp+=4) {
-#ifdef TMVFLDEBUG
-                        TMVAssert(yp >= y._first);
-                        TMVAssert(yp+3 < y._last);
-#endif
-                        *yp *= alpha * (cx ? TMV_CONJ(*xp) : (*xp));
-                        yp[1] *= alpha * (cx ? TMV_CONJ(xp[1]) : xp[1]);
-                        yp[2] *= alpha * (cx ? TMV_CONJ(xp[2]) : xp[2]);
-                        yp[3] *= alpha * (cx ? TMV_CONJ(xp[3]) : xp[3]);
-                    }
-            }
-            if (N2) {
-                if (alpha == Ta(1))
-                    for(int i=N2;i>0;--i,++xp,++yp) {
-#ifdef TMVFLDEBUG
-                        TMVAssert(yp >= y._first);
-                        TMVAssert(yp < y._last);
-#endif
-                        *yp *= cx ? TMV_CONJ(*xp) : (*xp);
-                    }
-                else 
-                    for(int i=N2;i>0;--i,++xp,++yp) {
-#ifdef TMVFLDEBUG
-                        TMVAssert(yp >= y._first);
-                        TMVAssert(yp < y._last);
-#endif
-                        *yp *= alpha * (cx ? TMV_CONJ(*xp) : (*xp));
-                    }
-            }
-        }
-        else {
-            if (alpha == Ta(1))
-                for(int i=N;i>0;--i,xp+=sx,yp+=sy) {
-#ifdef TMVFLDEBUG
-                    TMVAssert(yp >= y._first);
-                    TMVAssert(yp < y._last);
-#endif
-                    *yp *= cx ? TMV_CONJ(*xp) : (*xp);
-                }
-            else 
-                for(int i=N;i>0;--i,xp+=sx,yp+=sy) {
-#ifdef TMVFLDEBUG
-                    TMVAssert(yp >= y._first);
-                    TMVAssert(yp < y._last);
-#endif
-                    *yp *= alpha * (cx ? TMV_CONJ(*xp) : (*xp));
-                }
-        }
-    }
-
-    template <class T, class Tx> 
-    void ElementProd(
-        const T alpha, const GenVector<Tx>& x, const VectorView<T>& y)
-    {
-        TMVAssert(x.size() == y.size());
-        TMVAssert(y.step() != 0 || x.step() == 0 || y.size() <= 1);
-
-#ifdef XDEBUG
-        Vector<T> y0 = y;
-        Vector<T> yx = y;
-        for(int i=0;i<yx.size();i++) yx(i) *= alpha*x(i);
-#endif
-
-        if (y.size() > 0 && alpha != T(0)) {
-            if (y.isconj()) {
-                ElementProd(TMV_CONJ(alpha),x.conjugate(),y.conjugate());
-            } else if (y.size() == 1) {
-#ifdef TMVFLDEBUG
-                TMVAssert(y.ptr() >= y._first);
-                TMVAssert(y.ptr() < y._last);
-#endif
-                *y.ptr() *= alpha * 
-                    ( x.isconj() ?
-                      TMV_CONJ(*x.cptr()) :
-                      (*x.cptr())
-                    );
-            } else if (shouldReverse(x.step(),y.step())) {
-                ElementProd(alpha,x.reverse(),y.reverse());
-            } else if (TMV_IMAG(alpha) == 0) {
-                if (x.isconj()) 
-                    DoElementProd<true>(TMV_REAL(alpha),x,y);
-                else 
-                    DoElementProd<false>(TMV_REAL(alpha),x,y);
-            } else {
-                if (x.isconj()) 
-                    DoElementProd<true>(alpha,x,y);
-                else 
-                    DoElementProd<false>(alpha,x,y);
-            }
-        }
-
-#ifdef XDEBUG
-        if (!(Norm(yx-y) <= 0.001*(TMV_ABS(alpha)*Norm(x)+Norm(y0)))) {
-            cerr<<"AddElProd: alpha = "<<alpha<<endl;
-            cerr<<"x = "<<TMV_Text(x)<<"  step "<<x.step()<<"  "<<x<<endl;
-            cerr<<"y = "<<TMV_Text(y)<<"  step "<<y.step()<<"  "<<y0<<endl;
-            cerr<<"-> "<<y<<endl;
-            cerr<<"yx = "<<yx<<endl;
-            cerr<<"Norm(yx-y) = "<<Norm(yx-y)<<endl;
-            abort();
-        }
-#endif
-    }
 
 #define InstFile "TMV_MultXV.inst"
 #include "TMV_Inst.h"

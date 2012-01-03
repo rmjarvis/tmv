@@ -235,8 +235,7 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline SummX_1(
-            T TMV_DEBUGPARAM(_x1), const SmallMatrix<T1,N,N,S,I>& _m, T _x2
-        ) :
+            T TMV_DEBUGPARAM(_x1), const SmallMatrix<T1,N,N,S,I>& _m, T _x2) :
             m(_m), x2(_x2) 
         { TMVAssert(_x1 == T(1)); }
         inline const SmallMatrix<T1,N,N,S,I>& getM() const 
@@ -446,8 +445,7 @@ namespace tmv {
 
         inline OProdvv_1(
             const T TMV_DEBUGPARAM(_x), const SmallVector<T1,M,I1>& _v1,
-            const SmallVector<T2,N,I2>& _v2
-        ) : 
+            const SmallVector<T2,N,I2>& _v2) : 
             v1(_v1), v2(_v2) 
         { TMVAssert(_x == T(1)); }
         inline StorageType stor() const { return ColMajor; }
@@ -524,8 +522,7 @@ namespace tmv {
 
         inline OProdvv(
             const T _x, const SmallVector<T1,M,I1>& _v1,
-            const SmallVector<T2,N,I2>& _v2
-        ) :
+            const SmallVector<T2,N,I2>& _v2) :
             x(_x), v1(_v1), v2(_v2) {}
         inline StorageType stor() const { return ColMajor; }
         inline T getX() const { return x; }
@@ -603,8 +600,7 @@ namespace tmv {
 
         inline OProdVv(
             const T _x, const GenVector<T1>& _v1,
-            const SmallVector<T2,N,I>& _v2
-        ) :
+            const SmallVector<T2,N,I>& _v2) :
             x(_x), v1(_v1), v2(_v2) {}
         inline int colsize() const { return v1.size(); }
         inline int rowsize() const { return N; }
@@ -634,8 +630,7 @@ namespace tmv {
 
         inline OProdvV(
             const T _x, const SmallVector<T1,M,I>& _v1,
-            const GenVector<T2>& _v2
-        ) :
+            const GenVector<T2>& _v2) :
             x(_x), v1(_v1), v2(_v2) {}
         inline int colsize() const { return M; }
         inline int rowsize() const { return v2.size(); }
@@ -932,8 +927,7 @@ namespace tmv {
 
         inline Summm_1_1(
             const T TMV_DEBUGPARAM(_x1), const SmallMatrix<T1,M,N,S1,I1>& _m1, 
-            const T TMV_DEBUGPARAM(_x2), const SmallMatrix<T2,M,N,S2,I2>& _m2
-        ) :
+            const T TMV_DEBUGPARAM(_x2), const SmallMatrix<T2,M,N,S2,I2>& _m2) :
             m1(_m1), m2(_m2) 
         { TMVAssert(_x1 == T(1) && _x2 == T(1)); }
         inline StorageType stor() const { return S1; }
@@ -1038,8 +1032,7 @@ namespace tmv {
 
         inline Summm_1_m1(
             const T TMV_DEBUGPARAM(_x1), const SmallMatrix<T1,M,N,S1,I1>& _m1, 
-            const T TMV_DEBUGPARAM(_x2), const SmallMatrix<T2,M,N,S2,I2>& _m2
-        ) :
+            const T TMV_DEBUGPARAM(_x2), const SmallMatrix<T2,M,N,S2,I2>& _m2) :
             m1(_m1), m2(_m2) 
         { TMVAssert(_x1 == T(1) && _x2 == T(-1)); }
         inline StorageType stor() const { return S1; }
@@ -1142,8 +1135,7 @@ namespace tmv {
 
         inline Summm_1_x(
             const T TMV_DEBUGPARAM(_x1), const SmallMatrix<T1,M,N,S1,I1>& _m1, 
-            const T _x2, const SmallMatrix<T2,M,N,S2,I2>& _m2
-        ) :
+            const T _x2, const SmallMatrix<T2,M,N,S2,I2>& _m2) :
             m1(_m1), x2(_x2), m2(_m2) 
         { TMVAssert(_x1 == T(1)); }
         inline StorageType stor() const { return S1; }
@@ -1252,8 +1244,7 @@ namespace tmv {
 
         inline Summm_x_1(
             const T _x1, const SmallMatrix<T1,M,N,S1,I1>& _m1, 
-            const T TMV_DEBUGPARAM(_x2), const SmallMatrix<T2,M,N,S2,I2>& _m2
-        ) :
+            const T TMV_DEBUGPARAM(_x2), const SmallMatrix<T2,M,N,S2,I2>& _m2) :
             x1(_x1), m1(_m1), m2(_m2) 
         { TMVAssert(_x2 == T(1)); }
         inline StorageType stor() const { return S1; }
@@ -1362,8 +1353,7 @@ namespace tmv {
 
         inline Summm_x_m1(
             const T _x1, const SmallMatrix<T1,M,N,S1,I1>& _m1, 
-            const T TMV_DEBUGPARAM(_x2), const SmallMatrix<T2,M,N,S2,I2>& _m2
-        ) :
+            const T TMV_DEBUGPARAM(_x2), const SmallMatrix<T2,M,N,S2,I2>& _m2) :
             x1(_x1), m1(_m1), m2(_m2) 
         { TMVAssert(_x2 == T(-1)); }
         inline StorageType stor() const { return S1; }
@@ -1472,8 +1462,7 @@ namespace tmv {
 
         inline Summm(
             const T _x1, const SmallMatrix<T1,M,N,S1,I1>& _m1, 
-            const T _x2, const SmallMatrix<T2,M,N,S2,I2>& _m2
-        ) :
+            const T _x2, const SmallMatrix<T2,M,N,S2,I2>& _m2) :
             x1(_x1), m1(_m1), x2(_x2), m2(_m2) {}
         inline StorageType stor() const { return S1; }
         inline T getX1() const { return x1; }
@@ -1583,8 +1572,7 @@ namespace tmv {
 
         inline SummM(
             const T _x1, const SmallMatrix<T1,M,N,S1,I1>& _m1, 
-            const T _x2, const GenMatrix<T2>& _m2
-        ) :
+            const T _x2, const GenMatrix<T2>& _m2) :
             x1(_x1), m1(_m1), x2(_x2), m2(_m2) {}
         inline int colsize() const { return M; }
         inline int rowsize() const { return N; }
@@ -1706,8 +1694,7 @@ namespace tmv {
 
         inline SumMm(
             const T _x1, const GenMatrix<T1>& _m1, 
-            const T _x2, const SmallMatrix<T2,M,N,S2,I2>& _m2
-        ) :
+            const T _x2, const SmallMatrix<T2,M,N,S2,I2>& _m2) :
             x1(_x1), m1(_m1), x2(_x2), m2(_m2) {}
         inline int colsize() const { return M; }
         inline int rowsize() const { return N; }
@@ -2098,8 +2085,7 @@ namespace tmv {
 
         inline Prodmm_1(
             const T TMV_DEBUGPARAM(_x), const SmallMatrix<T1,M,K,S1,I1>& _m1, 
-            const SmallMatrix<T2,K,N,S2,I2>& _m2
-        ) :
+            const SmallMatrix<T2,K,N,S2,I2>& _m2) :
             m1(_m1), m2(_m2) 
         { TMVAssert(_x == T(1)); }
         inline StorageType stor() const 
@@ -2183,8 +2169,7 @@ namespace tmv {
 
         inline Prodmm(
             const T _x, const SmallMatrix<T1,M,K,S1,I1>& _m1, 
-            const SmallMatrix<T2,K,N,S2,I2>& _m2
-        ) :
+            const SmallMatrix<T2,K,N,S2,I2>& _m2) :
             x(_x), m1(_m1), m2(_m2) {}
         inline StorageType stor() const 
         { return S2==RowMajor ? RowMajor : ColMajor; }
@@ -2269,8 +2254,7 @@ namespace tmv {
 
         inline ProdMm(
             const T _x, const GenMatrix<T1>& _m1, 
-            const SmallMatrix<T2,K,N,S2,I2>& _m2
-        ) :
+            const SmallMatrix<T2,K,N,S2,I2>& _m2) :
             x(_x), m1(_m1), m2(_m2) 
         { TMVAssert(m1.rowsize() == K); }
         inline int colsize() const { return m1.colsize(); }
@@ -2299,8 +2283,7 @@ namespace tmv {
 
         inline ProdmM(
             const T _x, const SmallMatrix<T1,M,K,S1,I1>& _m1, 
-            const GenMatrix<T2>& _m2
-        ) :
+            const GenMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2) 
         { TMVAssert(m2.colsize() == K); }
         inline int colsize() const { return M; }
@@ -2689,6 +2672,401 @@ namespace tmv {
 #undef PRODXM1
 #undef PRODXM2
 
+
+    //
+    // Element Product Matrix * Matrix
+    //
+
+    template <class T, class T1, class T2, int M, int N, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
+    class ElemProdmm : public MatrixComposite<T>
+    {
+    public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline ElemProdmm(
+            const T _x, const SmallMatrix<T1,M,N,S1,I1>& _m1, 
+            const SmallMatrix<T2,M,N,S2,I2>& _m2) :
+            x(_x), m1(_m1), m2(_m2)  {}
+        inline int colsize() const { return M; }
+        inline int rowsize() const { return N; }
+        inline StorageType stor() const 
+        { return S2==RowMajor ? RowMajor : ColMajor; }
+        inline T getX() const { return x; }
+        inline const SmallMatrix<T1,M,N,S1,I1>& getM1() const { return m1; }
+        inline const SmallMatrix<T2,M,N,S2,I2>& getM2() const { return m2; }
+
+        inline void assignToM(const MatrixView<real_type>& m0) const
+        {
+            TMVAssert(isReal(T()));
+            ElemMultMM<false>(T(1), m1.view(), m2.view(), m0); 
+        }
+        inline void assignToM(const MatrixView<complex_type>& m0) const
+        { ElemMultMM<false>(T(1), m1.view(), m2.view(), m0); }
+    private:
+        const T x;
+        const SmallMatrix<T1,M,N,S1,I1>& m1;
+        const SmallMatrix<T2,N,N,S2,I2>& m2;
+    };
+
+    template <class T, class T1, class T2, int M, int N, StorageType S2, IndexStyle I2> 
+    class ElemProdMm : public MatrixComposite<T>
+    {
+    public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline ElemProdMm(
+            const T _x, const GenMatrix<T1>& _m1, 
+            const SmallMatrix<T2,M,N,S2,I2>& _m2) :
+            x(_x), m1(_m1), m2(_m2) 
+        {
+            TMVAssert(m1.colsize() == M); 
+            TMVAssert(m1.rowsize() == N); 
+        }
+        inline int colsize() const { return M; }
+        inline int rowsize() const { return N; }
+        inline StorageType stor() const 
+        { return S2==RowMajor ? RowMajor : ColMajor; }
+        inline T getX() const { return x; }
+        inline const GenMatrix<T1>& getM1() const { return m1; }
+        inline const SmallMatrix<T2,M,N,S2,I2>& getM2() const { return m2; }
+        inline void assignToM(const MatrixView<real_type>& m0) const
+        { TMVAssert(isReal(T())); ElemMultMM<false>(x, m1, m2.view(), m0); }
+        inline void assignToM(const MatrixView<complex_type>& m0) const
+        { ElemMultMM<false>(x, m1, m2.view(), m0); }
+    private:
+        const T x;
+        const GenMatrix<T1>& m1;
+        const SmallMatrix<T2,M,N,S2,I2>& m2;
+    };
+
+    template <class T, class T1, class T2, int M, int N, StorageType S1, IndexStyle I1> 
+    class ElemProdmM : public MatrixComposite<T>
+    {
+    public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline ElemProdmM(
+            const T _x, const SmallMatrix<T1,M,N,S1,I1>& _m1, 
+            const GenMatrix<T2>& _m2) :
+            x(_x), m1(_m1), m2(_m2) 
+        { 
+            TMVAssert(m2.colsize() == M);
+            TMVAssert(m2.rowsize() == N);
+        }
+        inline int colsize() const { return M; }
+        inline int rowsize() const { return N; }
+        inline StorageType stor() const 
+        { return m2.stor()==RowMajor ? RowMajor : ColMajor; }
+        inline T getX() const { return x; }
+        inline const SmallMatrix<T1,M,N,S1,I1>& getM1() const { return m1; }
+        inline const GenMatrix<T2>& getM2() const { return m2; }
+        inline void assignToM(const MatrixView<real_type>& m0) const
+        { TMVAssert(isReal(T())); ElemMultMM<false>(x, m1.view(), m2, m0); }
+        inline void assignToM(const MatrixView<complex_type>& m0) const
+        { ElemMultMM<false>(x, m1.view(), m2, m0); }
+    private:
+        const T x;
+        const SmallMatrix<T1,M,N,S1,I1>& m1;
+        const GenMatrix<T2>& m2;
+    };
+
+    // m += xmm
+    template <class T, class T2, class T3, int M, int N, StorageType S1, StorageType S2, StorageType S3, IndexStyle I1, IndexStyle I2, IndexStyle I3>
+    inline SmallMatrix<T,M,N,S1,I1>& operator+=(
+        SmallMatrix<T,M,N,S1,I1>& m, 
+        const ElemProdmm<T,T2,T3,M,N,S2,S3,I2,I3>& pmm)
+    { 
+        ElemMultMM<true>(
+            pmm.getX(),pmm.getM1().view(),pmm.getM2().view(),m.view());
+        return m; 
+    }
+
+    template <class T, int M, int N, StorageType S1, StorageType S2, StorageType S3, IndexStyle I1, IndexStyle I2, IndexStyle I3>
+    inline SmallMatrix<CT,M,N,S1,I1>& operator+=(
+        SmallMatrix<CT,M,N,S1,I1>& m, 
+        const ElemProdmm<T,T,T,M,N,S2,S3,I2,I3>& pmm)
+    {
+        ElemMultMM<true>(
+            pmm.getX(),pmm.getM1().view(),pmm.getM2().view(),m.view());
+        return m;
+    }
+
+    template <class T, class T2, class T3, int M, int N, StorageType S1, IndexStyle I1, StorageType S3, IndexStyle I3>
+    inline SmallMatrix<T,M,N,S1,I1>& operator+=(
+        SmallMatrix<T,M,N,S1,I1>& m, const ElemProdMm<T,T2,T3,M,N,S3,I3>& pmm)
+    {
+        TMVAssert(pmm.colsize() == M);
+        TMVAssert(pmm.rowsize() == N);
+        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2().view(),m.view()); 
+        return m; 
+    }
+
+    template <class T, int M, int N, StorageType S1, IndexStyle I1, StorageType S3, IndexStyle I3>
+    inline SmallMatrix<CT,M,N,S1,I1>& operator+=(
+        SmallMatrix<CT,M,N,S1,I1>& m, const ElemProdMm<T,T,T,M,N,S3,I3>& pmm)
+    {
+        TMVAssert(pmm.colsize() == M);
+        TMVAssert(pmm.rowsize() == N);
+        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2().view(),m.view()); 
+        return m; 
+    }
+
+    template <class T, class T2, class T3, int M, int N, StorageType S1, IndexStyle I1, StorageType S2, IndexStyle I2>
+    inline SmallMatrix<T,M,N,S1,I1>& operator+=(
+        SmallMatrix<T,M,N,S1,I1>& m, const ElemProdmM<T,T2,T3,M,N,S2,I2>& pmm)
+    {
+        TMVAssert(pmm.colsize() == M);
+        TMVAssert(pmm.rowsize() == N);
+        ElemMultMM<true>(pmm.getX(),pmm.getM1().view(),pmm.getM2(),m.view()); 
+        return m; 
+    }
+
+    template <class T, int M, int N, StorageType S1, IndexStyle I1, StorageType S2, IndexStyle I2>
+    inline SmallMatrix<CT,M,N,S1,I1>& operator+=(
+        SmallMatrix<CT,M,N,S1,I1>& m, const ElemProdmM<T,T,T,M,N,S2,I2>& pmm)
+    {
+        TMVAssert(pmm.colsize() == M);
+        TMVAssert(pmm.rowsize() == N);
+        ElemMultMM<true>(pmm.getX(),pmm.getM1().view(),pmm.getM2(),m.view()); 
+        return m; 
+    }
+
+    template <class T, class T2, class T3, int M, int N, StorageType S2, StorageType S3, IndexStyle I2, IndexStyle I3>
+    inline const MatrixView<T>& operator+=(
+        const MatrixView<T>& m, const ElemProdmm<T,T2,T3,M,N,S2,S3,I2,I3>& pmm)
+    {
+        TMVAssert(m.colsize() == M);
+        TMVAssert(m.rowsize() == N);
+        ElemMultMM<true>(pmm.getX(),pmm.getM1().view(),pmm.getM2().view(),m);
+        return m; 
+    }
+
+    template <class T, int M, int N, StorageType S2, StorageType S3, IndexStyle I2, IndexStyle I3>
+    inline const MatrixView<CT>& operator+=(
+        const MatrixView<CT>& m, const ElemProdmm<T,T,T,M,N,S2,S3,I2,I3>& pmm)
+    {
+        TMVAssert(m.colsize() == M);
+        TMVAssert(m.rowsize() == N);
+        ElemMultMM<true>(pmm.getX(),pmm.getM1().view(),pmm.getM2().view(),m);
+        return m; 
+    }
+
+    template <class T, class T2, class T3, int M, int N, StorageType S3, IndexStyle I3>
+    inline const MatrixView<T>& operator+=(
+        const MatrixView<T>& m, const ElemProdMm<T,T2,T3,M,N,S3,I3>& pmm)
+    {
+        TMVAssert(m.colsize() == M);
+        TMVAssert(m.rowsize() == N);
+        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2().view(),m);
+        return m; 
+    }
+
+    template <class T, int M, int N, StorageType S3, IndexStyle I3>
+    inline const MatrixView<CT>& operator+=(
+        const MatrixView<CT>& m, const ElemProdMm<T,T,T,M,N,S3,I3>& pmm)
+    {
+        TMVAssert(m.colsize() == M);
+        TMVAssert(m.rowsize() == N);
+        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2().view(),m);
+        return m; 
+    }
+
+    template <class T, class T2, class T3, int M, int N, StorageType S2, IndexStyle I2>
+    inline const MatrixView<T>& operator+=(
+        const MatrixView<T>& m, const ElemProdmM<T,T2,T3,M,N,S2,I2>& pmm)
+    {
+        TMVAssert(m.colsize() == M);
+        TMVAssert(m.rowsize() == N);
+        ElemMultMM<true>(pmm.getX(),pmm.getM1().view(),pmm.getM2(),m);
+        return m; 
+    }
+
+    template <class T, int M, int N, StorageType S2, IndexStyle I2>
+    inline const MatrixView<CT>& operator+=(
+        const MatrixView<CT>& m, const ElemProdmM<T,T,T,M,N,S2,I2>& pmm)
+    {
+        TMVAssert(m.colsize() == M);
+        TMVAssert(m.rowsize() == N);
+        ElemMultMM<true>(pmm.getX(),pmm.getM1().view(),pmm.getM2(),m);
+        return m; 
+    }
+
+    // m -= xmm
+    template <class T, class T2, class T3, int M, int N, StorageType S1, StorageType S2, StorageType S3, IndexStyle I1, IndexStyle I2, IndexStyle I3>
+    inline SmallMatrix<T,M,N,S1,I1>& operator-=(
+        SmallMatrix<T,M,N,S1,I1>& m, 
+        const ElemProdmm<T,T2,T3,M,N,S2,S3,I2,I3>& pmm)
+    { 
+        ElemMultMM<true>(
+            -pmm.getX(),pmm.getM1().view(),pmm.getM2().view(),m.view());
+        return m; 
+    }
+
+    template <class T, int M, int N, StorageType S1, StorageType S2, StorageType S3, IndexStyle I1, IndexStyle I2, IndexStyle I3>
+    inline SmallMatrix<CT,M,N,S1,I1>& operator-=(
+        SmallMatrix<CT,M,N,S1,I1>& m, 
+        const ElemProdmm<T,T,T,M,N,S2,S3,I2,I3>& pmm)
+    {
+        ElemMultMM<true>(
+            -pmm.getX(),pmm.getM1().view(),pmm.getM2().view(),m.view());
+        return m;
+    }
+
+    template <class T, class T2, class T3, int M, int N, StorageType S1, IndexStyle I1, StorageType S3, IndexStyle I3>
+    inline SmallMatrix<T,M,N,S1,I1>& operator-=(
+        SmallMatrix<T,M,N,S1,I1>& m, const ElemProdMm<T,T2,T3,M,N,S3,I3>& pmm)
+    {
+        TMVAssert(pmm.colsize() == M);
+        TMVAssert(pmm.rowsize() == N);
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2().view(),m.view()); 
+        return m; 
+    }
+
+    template <class T, int M, int N, StorageType S1, IndexStyle I1, StorageType S3, IndexStyle I3>
+    inline SmallMatrix<CT,M,N,S1,I1>& operator-=(
+        SmallMatrix<CT,M,N,S1,I1>& m, const ElemProdMm<T,T,T,M,N,S3,I3>& pmm)
+    {
+        TMVAssert(pmm.colsize() == M);
+        TMVAssert(pmm.rowsize() == N);
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2().view(),m.view()); 
+        return m; 
+    }
+
+    template <class T, class T2, class T3, int M, int N, StorageType S1, IndexStyle I1, StorageType S2, IndexStyle I2>
+    inline SmallMatrix<T,M,N,S1,I1>& operator-=(
+        SmallMatrix<T,M,N,S1,I1>& m, const ElemProdmM<T,T2,T3,M,N,S2,I2>& pmm)
+    {
+        TMVAssert(pmm.colsize() == M);
+        TMVAssert(pmm.rowsize() == N);
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1().view(),pmm.getM2(),m.view()); 
+        return m; 
+    }
+
+    template <class T, int M, int N, StorageType S1, IndexStyle I1, StorageType S2, IndexStyle I2>
+    inline SmallMatrix<CT,M,N,S1,I1>& operator-=(
+        SmallMatrix<CT,M,N,S1,I1>& m, const ElemProdmM<T,T,T,M,N,S2,I2>& pmm)
+    {
+        TMVAssert(pmm.colsize() == M);
+        TMVAssert(pmm.rowsize() == N);
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1().view(),pmm.getM2(),m.view()); 
+        return m; 
+    }
+
+    template <class T, class T2, class T3, int M, int N, StorageType S2, StorageType S3, IndexStyle I2, IndexStyle I3>
+    inline const MatrixView<T>& operator-=(
+        const MatrixView<T>& m, const ElemProdmm<T,T2,T3,M,N,S2,S3,I2,I3>& pmm)
+    {
+        TMVAssert(m.colsize() == M);
+        TMVAssert(m.rowsize() == N);
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1().view(),pmm.getM2().view(),m);
+        return m; 
+    }
+
+    template <class T, int M, int N, StorageType S2, StorageType S3, IndexStyle I2, IndexStyle I3>
+    inline const MatrixView<CT>& operator-=(
+        const MatrixView<CT>& m, const ElemProdmm<T,T,T,M,N,S2,S3,I2,I3>& pmm)
+    {
+        TMVAssert(m.colsize() == M);
+        TMVAssert(m.rowsize() == N);
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1().view(),pmm.getM2().view(),m);
+        return m; 
+    }
+
+    template <class T, class T2, class T3, int M, int N, StorageType S3, IndexStyle I3>
+    inline const MatrixView<T>& operator-=(
+        const MatrixView<T>& m, const ElemProdMm<T,T2,T3,M,N,S3,I3>& pmm)
+    {
+        TMVAssert(m.colsize() == M);
+        TMVAssert(m.rowsize() == N);
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2().view(),m);
+        return m; 
+    }
+
+    template <class T, int M, int N, StorageType S3, IndexStyle I3>
+    inline const MatrixView<CT>& operator-=(
+        const MatrixView<CT>& m, const ElemProdMm<T,T,T,M,N,S3,I3>& pmm)
+    {
+        TMVAssert(m.colsize() == M);
+        TMVAssert(m.rowsize() == N);
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2().view(),m);
+        return m; 
+    }
+
+    template <class T, class T2, class T3, int M, int N, StorageType S2, IndexStyle I2>
+    inline const MatrixView<T>& operator-=(
+        const MatrixView<T>& m, const ElemProdmM<T,T2,T3,M,N,S2,I2>& pmm)
+    {
+        TMVAssert(m.colsize() == M);
+        TMVAssert(m.rowsize() == N);
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1().view(),pmm.getM2(),m);
+        return m; 
+    }
+
+    template <class T, int M, int N, StorageType S2, IndexStyle I2>
+    inline const MatrixView<CT>& operator-=(
+        const MatrixView<CT>& m, const ElemProdmM<T,T,T,M,N,S2,I2>& pmm)
+    {
+        TMVAssert(m.colsize() == M);
+        TMVAssert(m.rowsize() == N);
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1().view(),pmm.getM2(),m);
+        return m; 
+    }
+
+#define GENMATRIX1 SmallMatrix
+#define GENMATRIX2 SmallMatrix
+#define PRODMM ElemProdmm
+#define PRODXM1 ProdXm
+#define PRODXM2 ProdXm
+#define OP ElemProd
+#define X1 ,M,N,S1,I1
+#define X2 ,M,N,S2,I2
+#define X3 ,M,N,S1,S2,I1,I2
+#define Y ,int M,int N,StorageType S1,StorageType S2, IndexStyle I1, IndexStyle I2
+#include "tmv/TMV_AuxProdMM.h"
+#define X3 ,M,N,S1,S2,I1,I2
+#define Y ,int M,int N,StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2
+#include "tmv/TMV_AuxProdMMa.h"
+#undef GENMATRIX1
+#undef GENMATRIX2
+#undef PRODMM
+#undef PRODXM1
+#undef PRODXM2
+
+#define GENMATRIX1 SmallMatrix
+#define GENMATRIX2 GenMatrix
+#define PRODMM ElemProdmM
+#define PRODXM1 ProdXm
+#define PRODXM2 ProdXM
+#define OP ElemProd
+#define X1 ,M,N,S1,I1
+#define X3 ,M,N,S1,I1
+#define Y ,int M,int N, StorageType S1,IndexStyle I1
+#include "tmv/TMV_AuxProdMM.h"
+#undef GENMATRIX1
+#undef GENMATRIX2
+#undef PRODMM
+#undef PRODXM1
+#undef PRODXM2
+
+#define GENMATRIX1 GenMatrix
+#define GENMATRIX2 SmallMatrix
+#define PRODMM ElemProdMm
+#define PRODXM1 ProdXM
+#define PRODXM2 ProdXm
+#define OP ElemProd
+#define X2 ,M,N,S2,I2
+#define X3 ,M,N,S2,I2
+#define Y ,int M,int N,StorageType S2,IndexStyle I2
+#include "tmv/TMV_AuxProdMM.h"
+#undef GENMATRIX1
+#undef GENMATRIX2
+#undef PRODMM
+#undef PRODXM1
+#undef PRODXM2
+
     //
     // Matrix * Vector
     //
@@ -2702,8 +3080,7 @@ namespace tmv {
 
         inline Prodmv_1(
             const T TMV_DEBUGPARAM(_x), const SmallMatrix<T1,M,N,S,I1>& _m,
-            const SmallVector<T2,N,I2>& _v
-        ) :
+            const SmallVector<T2,N,I2>& _v) :
             m(_m), v(_v) 
         { TMVAssert(_x == T(1)); }
         inline const SmallMatrix<T1,M,N,S,I1>& getM() const { return m; }
@@ -2757,8 +3134,7 @@ namespace tmv {
 
         inline Prodmv(
             const T _x, const SmallMatrix<T1,M,N,S,I1>& _m,
-            const SmallVector<T2,N,I2>& _v
-        ) :
+            const SmallVector<T2,N,I2>& _v) :
             x(_x), m(_m), v(_v) {}
         inline T getX() const { return x; }
         inline const SmallMatrix<T1,M,N,S,I1>& getM() const { return m; }
@@ -2809,8 +3185,7 @@ namespace tmv {
 
         inline ProdMv(
             const T _x, const GenMatrix<T1>& _m,
-            const SmallVector<T2,N,I>& _v
-        ) :
+            const SmallVector<T2,N,I>& _v) :
             x(_x), m(_m), v(_v) 
         { TMVAssert(m.rowsize() == N); }
         inline int size() const { return m.colsize(); }
@@ -2839,8 +3214,7 @@ namespace tmv {
 
         inline ProdmV(
             const T _x, const SmallMatrix<T1,M,N,S,I>& _m,
-            const GenVector<T2>& _v
-        ) :
+            const GenVector<T2>& _v) :
             x(_x), m(_m), v(_v) 
         { TMVAssert(v.size() == N); }
         inline int size() const { return M; }
@@ -2887,8 +3261,7 @@ namespace tmv {
 
         inline Prodvm_1(
             const T TMV_DEBUGPARAM(_x), const SmallVector<T1,M,I1>& _v,
-            const SmallMatrix<T2,M,N,S,I2>& _m
-        ) :
+            const SmallMatrix<T2,M,N,S,I2>& _m) :
             v(_v), m(_m) 
         { TMVAssert(_x == T(1)); }
         inline const SmallVector<T1,M,I1>& getV() const { return v; }
@@ -2938,8 +3311,7 @@ namespace tmv {
 
         inline Prodvm(
             const T _x, const SmallVector<T1,M,I1>& _v,
-            const SmallMatrix<T2,M,N,S,I2>& _m
-        ) :
+            const SmallMatrix<T2,M,N,S,I2>& _m) :
             x(_x), v(_v), m(_m) { }
         inline T getX() const { return x; }
         inline const SmallVector<T1,M,I1>& getV() const { return v; }
@@ -2990,8 +3362,7 @@ namespace tmv {
 
         inline ProdVm(
             const T _x, const GenVector<T1>& _v,
-            const SmallMatrix<T2,M,N,S,I>& _m
-        ) :
+            const SmallMatrix<T2,M,N,S,I>& _m) :
             x(_x), v(_v), m(_m) 
         { TMVAssert(v.size() == M); }
         inline int size() const { return N; }
@@ -3037,8 +3408,7 @@ namespace tmv {
 
         inline ProdvM(
             const T _x, const SmallVector<T1,M,I>& _v,
-            const GenMatrix<T2>& _m
-        ) :
+            const GenMatrix<T2>& _m) :
             x(_x), v(_v), m(_m) 
         { TMVAssert(m.colsize() == M); }
         inline int size() const { return m.rowsize(); }
@@ -3716,8 +4086,7 @@ namespace tmv {
 
         inline QuotXm_1(
             const T TMV_DEBUGPARAM(_x), 
-            const SmallMatrix<Tm,M,N,S,I>& _m
-        ) :
+            const SmallMatrix<Tm,M,N,S,I>& _m) :
             m(_m) 
         { TMVAssert(_x == T(1)); }
         inline StorageType stor() const { return ColMajor; }
@@ -3827,8 +4196,7 @@ namespace tmv {
 
         inline Quotvm_1(
             const T TMV_DEBUGPARAM(_x), const SmallVector<T1,M,I1>& _v,
-            const SmallMatrix<T2,M,N,S,I2>& _m
-        ) :
+            const SmallMatrix<T2,M,N,S,I2>& _m) :
             v(_v), m(_m) 
         { TMVAssert(_x == T(1)); }
         inline const SmallVector<T1,M,I1>& getV() const { return v; }
@@ -3866,8 +4234,7 @@ namespace tmv {
 
         inline Quotvm(
             const T _x, const SmallVector<T1,M,I1>& _v,
-            const SmallMatrix<T2,M,N,S,I2>& _m
-        ) :
+            const SmallMatrix<T2,M,N,S,I2>& _m) :
             x(_x), v(_v), m(_m) {}
         inline T getX() const { return x; }
         inline const SmallVector<T1,M,I1>& getV() const { return v; }
@@ -3908,8 +4275,7 @@ namespace tmv {
 
         inline QuotVm_1(
             const T TMV_DEBUGPARAM(_x), const GenVector<T1>& _v,
-            const SmallMatrix<T2,M,N,S,I>& _m
-        ) :
+            const SmallMatrix<T2,M,N,S,I>& _m) :
             v(_v), m(_m) 
         { TMVAssert(_x == T(1)); TMVAssert(v.size() == M); }
         inline int size() const { return N; }
@@ -3942,8 +4308,7 @@ namespace tmv {
 
         inline QuotVm(
             const T _x, const GenVector<T1>& _v,
-            const SmallMatrix<T2,M,N,S,I>& _m
-        ) :
+            const SmallMatrix<T2,M,N,S,I>& _m) :
             x(_x), v(_v), m(_m) 
         { TMVAssert(v.size() == M); }
         inline int size() const { return N; }
@@ -3978,8 +4343,7 @@ namespace tmv {
 
         inline QuotvM(
             const T _x, const SmallVector<T1,M,I>& _v,
-            const GenMatrix<T2>& _m
-        ) :
+            const GenMatrix<T2>& _m) :
             x(_x), v(_v), m(_m) 
         { TMVAssert(m.colsize() == M); }
         inline int size() const { return m.rowsize(); }
@@ -4014,8 +4378,7 @@ namespace tmv {
 
         inline RQuotvm_1(
             const T TMV_DEBUGPARAM(_x), const SmallVector<T1,N,I1>& _v,
-            const SmallMatrix<T2,M,N,S,I2>& _m
-        ) :
+            const SmallMatrix<T2,M,N,S,I2>& _m) :
             v(_v), m(_m) 
         { TMVAssert(_x == T(1)); }
         inline const SmallVector<T1,N,I1>& getV() const { return v; }
@@ -4053,8 +4416,7 @@ namespace tmv {
 
         inline RQuotvm(
             const T _x, const SmallVector<T1,N,I1>& _v,
-            const SmallMatrix<T2,M,N,S,I2>& _m
-        ) :
+            const SmallMatrix<T2,M,N,S,I2>& _m) :
             x(_x), v(_v), m(_m) {}
         inline T getX() const { return x; }
         inline const SmallVector<T1,N,I1>& getV() const { return v; }
@@ -4095,8 +4457,7 @@ namespace tmv {
 
         inline RQuotVm_1(
             const T TMV_DEBUGPARAM(_x), const GenVector<T1>& _v,
-            const SmallMatrix<T2,M,N,S,I>& _m
-        ) :
+            const SmallMatrix<T2,M,N,S,I>& _m) :
             v(_v), m(_m) 
         { TMVAssert(_x==T(1)); TMVAssert(v.size() == N); }
         inline int size() const { return M; }
@@ -4129,8 +4490,7 @@ namespace tmv {
 
         inline RQuotVm(
             const T _x, const GenVector<T1>& _v,
-            const SmallMatrix<T2,M,N,S,I>& _m
-        ) :
+            const SmallMatrix<T2,M,N,S,I>& _m) :
             x(_x), v(_v), m(_m) 
         { TMVAssert(v.size() == N); }
         inline int size() const { return M; }
@@ -4165,8 +4525,7 @@ namespace tmv {
 
         inline RQuotvM(
             const T _x, const SmallVector<T1,N,I>& _v,
-            const GenMatrix<T2>& _m
-        ) :
+            const GenMatrix<T2>& _m) :
             x(_x), v(_v), m(_m) 
         { TMVAssert(m.rowsize() == N); }
         inline int size() const { return m.colsize(); }
@@ -4522,8 +4881,7 @@ namespace tmv {
 
         inline Quotmm_1(
             const T TMV_DEBUGPARAM(_x), const SmallMatrix<T1,K,N,S1,I1>& _m1,
-            const SmallMatrix<T2,K,M,S2,I2>& _m2
-        ) :
+            const SmallMatrix<T2,K,M,S2,I2>& _m2) :
             m1(_m1), m2(_m2) 
         { TMVAssert(_x == T(1)); }
         inline StorageType stor() const { return S1; }
@@ -4578,8 +4936,7 @@ namespace tmv {
 
         inline Quotmm(
             const T _x, const SmallMatrix<T1,K,N,S1,I1>& _m1,
-            const SmallMatrix<T2,K,M,S2,I2>& _m2
-        ) :
+            const SmallMatrix<T2,K,M,S2,I2>& _m2) :
             x(_x), m1(_m1), m2(_m2) {}
         inline StorageType stor() const { return S1; }
         inline T getX() const { return x; }
@@ -4637,8 +4994,7 @@ namespace tmv {
 
         inline QuotMm_1(
             const T TMV_DEBUGPARAM(_x), const GenMatrix<T1>& _m1,
-            const SmallMatrix<T2,K,M,S2,I2>& _m2
-        ) :
+            const SmallMatrix<T2,K,M,S2,I2>& _m2) :
             m1(_m1), m2(_m2) 
         { TMVAssert(_x==T(1)); TMVAssert(m1.colsize() == K); }
         inline int colsize() const { return M; }
@@ -4671,8 +5027,7 @@ namespace tmv {
 
         inline QuotMm(
             const T _x, const GenMatrix<T1>& _m1,
-            const SmallMatrix<T2,K,M,S2,I2>& _m2
-        ) :
+            const SmallMatrix<T2,K,M,S2,I2>& _m2) :
             x(_x), m1(_m1), m2(_m2) 
         { TMVAssert(m1.colsize() == K); }
         inline int colsize() const { return M; }
@@ -4709,8 +5064,7 @@ namespace tmv {
 
         inline QuotmM(
             const T _x, const SmallMatrix<T1,K,N,S1,I1>& _m1,
-            const GenMatrix<T2>& _m2
-        ) :
+            const GenMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2) {}
         inline int colsize() const { return m2.rowsize(); }
         inline int rowsize() const { return N; }
@@ -4746,8 +5100,7 @@ namespace tmv {
 
         inline RQuotmm_1(
             const T TMV_DEBUGPARAM(_x), const SmallMatrix<T1,M,K,S1,I1>& _m1,
-            const SmallMatrix<T2,N,K,S2,I2>& _m2
-        ) :
+            const SmallMatrix<T2,N,K,S2,I2>& _m2) :
             m1(_m1), m2(_m2) 
         { TMVAssert(_x == T(1)); }
         inline StorageType stor() const { return S1; }
@@ -4802,8 +5155,7 @@ namespace tmv {
 
         inline RQuotmm(
             const T _x, const SmallMatrix<T1,M,K,S1,I1>& _m1,
-            const SmallMatrix<T2,N,K,S2,I2>& _m2
-        ) :
+            const SmallMatrix<T2,N,K,S2,I2>& _m2) :
             x(_x), m1(_m1), m2(_m2) {}
         inline StorageType stor() const { return S1; }
         inline const SmallMatrix<T1,M,K,S1,I1>& getM1() const { return m1; }
@@ -4860,8 +5212,7 @@ namespace tmv {
 
         inline RQuotMm_1(
             const T TMV_DEBUGPARAM(_x), const GenMatrix<T1>& _m1,
-            const SmallMatrix<T2,N,K,S2,I2>& _m2
-        ) :
+            const SmallMatrix<T2,N,K,S2,I2>& _m2) :
             m1(_m1), m2(_m2) 
         { TMVAssert(_x==T(1)); TMVAssert(m1.rowsize() == K); }
         inline int colsize() const { return m1.colsize(); }
@@ -4894,8 +5245,7 @@ namespace tmv {
 
         inline RQuotMm(
             const T _x, const GenMatrix<T1>& _m1,
-            const SmallMatrix<T2,N,K,S2,I2>& _m2
-        ) :
+            const SmallMatrix<T2,N,K,S2,I2>& _m2) :
             x(_x), m1(_m1), m2(_m2) 
         { TMVAssert(m1.rowsize() == K); }
         inline int colsize() const { return m1.colsize(); }
@@ -4932,8 +5282,7 @@ namespace tmv {
 
         inline RQuotmM(
             const T _x, const SmallMatrix<T1,M,K,S1,I1>& _m1,
-            const GenMatrix<T2>& _m2
-        ) :
+            const GenMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2) 
         { TMVAssert(m2.rowsize() == K); }
         inline int colsize() const { return M; }

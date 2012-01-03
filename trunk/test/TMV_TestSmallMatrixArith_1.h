@@ -59,8 +59,8 @@ template <class T, int M, int N> void TestSmallMatrixArith_1(std::string label)
     tmv::SmallMatrixView<CT,M,N,N,1> ca1 = ca1x.view();
     tmv::SmallMatrixView<CT,N,M,1,N> ca2 = ca2x.view();
 
-    TestMatrixArith1<T>(a1,ca1,label+" RowMajor");
-    TestMatrixArith1<T>(a2,ca2,label+" ColMajor");
+    TestMatrixArith1(a1,ca1,label+" RowMajor");
+    TestMatrixArith1(a2,ca2,label+" ColMajor");
 
 #if (XTEST & 1)
     tmv::SmallMatrix<T,3*M,4*N,tmv::ColMajor> a3x;
@@ -70,6 +70,6 @@ template <class T, int M, int N> void TestSmallMatrixArith_1(std::string label)
     tmv::SmallMatrixView<CT,M,N> ca3 = ca3x.subMatrix(0,3*M,0,4*N,3,4);
     ca3 = ca1;
 
-    TestMatrixArith1<T>(a3,ca3,label+" NonMajor");
+    TestMatrixArith1(a3,ca3,label+" NonMajor");
 #endif
 }

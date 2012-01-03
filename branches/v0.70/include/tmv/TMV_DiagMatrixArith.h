@@ -247,8 +247,8 @@ namespace tmv {
 
         inline SumDD(
             T _x1, const GenDiagMatrix<T1>& _m1, 
-            T _x2, const GenDiagMatrix<T2>& _m2
-        ) : x1(_x1),m1(_m1),x2(_x2),m2(_m2)
+            T _x2, const GenDiagMatrix<T2>& _m2) :
+            x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int size() const { return m1.size(); }
         inline T getX1() const { return x1; }
@@ -371,8 +371,7 @@ namespace tmv {
 
         inline ProdDD(
             T _x, const GenDiagMatrix<T1>& _m1,
-            const GenDiagMatrix<T2>& _m2
-        ) : x(_x), m1(_m1), m2(_m2)
+            const GenDiagMatrix<T2>& _m2) : x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size()); }
         inline int size() const { return m1.size(); }
         inline T getX() const { return x; }
@@ -485,6 +484,99 @@ namespace tmv {
 
 
     //
+    // Element Product DiagMatrix * DiagMatrix
+    //
+
+    template <class T, class T1, class T2> 
+    class ElemProdDD : public DiagMatrixComposite<T> 
+    {
+    public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline ElemProdDD(
+            T _x, const GenDiagMatrix<T1>& _m1, const GenDiagMatrix<T2>& _m2) : 
+            x(_x),m1(_m1),m2(_m2)
+        { TMVAssert(m1.size() == m2.size()); }
+        inline int size() const { return m1.size(); }
+        inline T getX() const { return x; }
+        inline const GenDiagMatrix<T1>& getM1() const { return m1; }
+        inline const GenDiagMatrix<T2>& getM2() const { return m2; }
+        inline void assignToD(const DiagMatrixView<real_type>& m0) const
+        { 
+            TMVAssert(isReal(T()));
+            TMVAssert(m0.size() == size());
+            ElemMultMM<false>(x,m1,m2,m0);
+        }
+        inline void assignToD(const DiagMatrixView<complex_type>& m0) const
+        { 
+            TMVAssert(m0.size() == size());
+            ElemMultMM<false>(x,m1,m2,m0);
+        }
+    private:
+        T x;
+        const GenDiagMatrix<T1>& m1;
+        const GenDiagMatrix<T2>& m2;
+    };
+
+    template <class T, class T2, class T3> 
+    inline const DiagMatrixView<T>& operator+=(
+        const DiagMatrixView<T>& m, const ElemProdDD<T,T2,T3>& pmm)
+    { 
+        TMVAssert(m.colsize() == pmm.colsize());
+        TMVAssert(m.rowsize() == pmm.rowsize());
+        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T> 
+    inline const DiagMatrixView<CT>& operator+=(
+        const DiagMatrixView<CT>& m, const ElemProdDD<T,T,T>& pmm)
+    { 
+        TMVAssert(m.colsize() == pmm.colsize());
+        TMVAssert(m.rowsize() == pmm.rowsize());
+        ElemMultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T, class T2, class T3> 
+    inline const DiagMatrixView<T>& operator-=(
+        const DiagMatrixView<T>& m, const ElemProdDD<T,T2,T3>& pmm)
+    { 
+        TMVAssert(m.colsize() == pmm.colsize());
+        TMVAssert(m.rowsize() == pmm.rowsize());
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T> 
+    inline const DiagMatrixView<CT>& operator-=(
+        const DiagMatrixView<CT>& m, const ElemProdDD<T,T,T>& pmm)
+    {
+        TMVAssert(m.colsize() == pmm.colsize());
+        TMVAssert(m.rowsize() == pmm.rowsize());
+        ElemMultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+
+#define PRODMM ElemProdDD
+#define GENMATRIX1 GenDiagMatrix
+#define GENMATRIX2 GenDiagMatrix
+#define PRODXM1 ProdXD
+#define PRODXM2 ProdXD
+#define OP ElemProd
+#include "tmv/TMV_AuxProdMM.h"
+#include "tmv/TMV_AuxProdMMa.h"
+#undef PRODMM
+#undef GENMATRIX1
+#undef GENMATRIX2
+#undef PRODXM1
+#undef PRODXM2
+
+
+
+    //
     // Scalar / DiagMatrix
     //
 
@@ -540,8 +632,7 @@ namespace tmv {
 
         inline QuotDD(
             const T _x, const GenDiagMatrix<T1>& _m1,
-            const GenDiagMatrix<T2>& _m2
-        ) : x(_x), m1(_m1), m2(_m2)
+            const GenDiagMatrix<T2>& _m2) : x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
         inline int size() const { return m1.size(); }
         inline T getX() const { return x; }

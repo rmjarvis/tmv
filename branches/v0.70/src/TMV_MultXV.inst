@@ -14,8 +14,6 @@ Def0(CT)
 #define Def1(T,T1)\
   template void MultXV(const T x, const GenVector<T1 >& v1, \
       const VectorView<T >& v2); \
-  template void ElementProd(const T alpha, \
-      const GenVector<T1 >& x, const VectorView<T >& y);  \
 
 Def1(T,T)
 #ifdef INST_COMPLEX
@@ -26,7 +24,10 @@ Def1(CT,CT)
 #undef Def1
 
 #define Def2(T,T1,T2)\
-  template void AddElementProd(const T alpha, \
+  template void ElemMultVV<false>(const T alpha, \
+      const GenVector<T1 >& x, const GenVector<T2 >& y, \
+      const VectorView<T >& z);  \
+  template void ElemMultVV<true>(const T alpha, \
       const GenVector<T1 >& x, const GenVector<T2 >& y, \
       const VectorView<T >& z);  \
 

@@ -140,16 +140,6 @@ namespace tmv {
         const T alpha, const GenMatrix<Ta>& A,
         const GenMatrix<Tb>& B, const SymMatrixView<T>& C);
 
-    template <class T, class Ta> 
-    inline void ElementProd(
-        const T alpha, const GenSymMatrix<Ta>& A, const SymMatrixView<T>& B)
-    { ElementProd(alpha,A.upperTri(),B.upperTri()); }
-    template <class T, class Ta, class Tb> 
-    inline void AddElementProd(
-        const T alpha, const GenSymMatrix<Ta>& A, const GenSymMatrix<Tb>& B,
-        const SymMatrixView<T>& C)
-    { AddElementProd(alpha,A.upperTri(),B.upperTri(),C.upperTri()); }
-
     template <class T> 
     class SymMatrixComposite : public GenSymMatrix<T>
     {
@@ -285,16 +275,6 @@ namespace tmv {
         const T alpha, const GenMatrix<Ta>& A,
         const GenMatrix<Tb>& B, const SymMatrixView<CT>& C)
     { SymMultMM<add>(CT(alpha),A,B,C); }
-
-    template <class T, class Ta> 
-    inline void ElementProd(
-        const T alpha, const GenSymMatrix<Ta>& A, const SymMatrixView<CT>& B)
-    { ElementProd(CT(alpha),A,B); }
-    template <class T, class Ta, class Tb> 
-    inline void AddElementProd(
-        const T alpha, const GenSymMatrix<Ta>& A,
-        const GenSymMatrix<Tb>& B, const SymMatrixView<CT>& C)
-    { AddElementProd(CT(alpha),A,B,C); }
 
     // Specialize disallowed complex combinations:
     template <bool add, class T, class Ta, class Tb> 

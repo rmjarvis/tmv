@@ -44,9 +44,9 @@ void TestSymBandDiv_F2(tmv::DivType dt, PosDefCode pdc)
         tmv::SymBandMatrixView<std::complex<T> > csi = csb[i];
         if (dt == tmv::CH && csi.issym()) continue;
 
-        TestMatrixDivArith1<T>(dt,hv,si,chv,csi,"SymBand/HermMatrix");
+        TestMatrixDivArith1(dt,hv,si,chv,csi,"SymBand/HermMatrix");
         if (dt != tmv::CH)
-            TestMatrixDivArith1<T>(dt,sv,si,csv,csi,"SymBand/SymMatrix");
+            TestMatrixDivArith1(dt,sv,si,csv,csi,"SymBand/SymMatrix");
     }
 }
 

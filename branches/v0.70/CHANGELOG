@@ -123,6 +123,19 @@ Changed and Deprecated features:
    There is a lot more to the new I/O style than just these.  See the
    documentation for details about the new features.
 
+-- Removed the ElementProd and AddElementProd functions.
+   The equivalent behavior is now done with a new operator ElemProd(a,b)
+   which returns a composite object representing the element-wise product
+   of two vectors or matrices.  So where you used to write:
+
+   ElementProd(x,a,b);
+   AddElementProd(y,d,e,f);
+
+   you would now write:
+
+   b = x * ElemProd(a,b);
+   f += y * ElemProd(d,e);
+
 -- Removed the routines that returned pointers to new BaseMatrixes.  
    In general, using the BaseMatrix class directly is not really very 
    useful, so I don't think anyone is actually using these methods.  And in 
@@ -166,6 +179,9 @@ Changed and Deprecated features:
 
 -- Removed the various functions that had been deprecated in the 0.6x
    versions of TMV.
+
+-- Changed the compiler flag -DTMVNDEBUG to -DTMV_NDEBUG to match other 
+   flags that start with TMV.
 
 
 New features:

@@ -8,6 +8,8 @@
 #include "TMV_Test_2.h"
 #include "TMV_TestSymBandArith.h"
 
+#define NOMULTEQ
+
 template <class T1, class T2> 
 inline bool CanAddEq(
     const tmv::SymBandMatrixView<T1>& a, const tmv::SymBandMatrixView<T2>& b)
@@ -29,7 +31,25 @@ inline bool CanMultEqX(
     const tmv::SymBandMatrixView<T1>& a, const T2 x)
 { return tmv::isReal(x) || !a.isherm(); }
 
-#define NOMULTEQ
+template <class T1, class T2>
+static inline bool CanElemMultMM(
+    const tmv::SymBandMatrixView<T1>& a, const tmv::SymBandMatrixView<T2>& b)
+{
+    return a.size() == b.size() &&
+        a.issym() == b.issym() && a.isherm() == b.isherm();
+}
+
+template <class T1, class T2, class T3>
+static inline bool CanAddElemMultMM(
+    const tmv::SymBandMatrixView<T1>& a, const tmv::SymBandMatrixView<T2>& b,
+    const tmv::SymBandMatrixView<T3>& c)
+{
+    return a.size() == b.size() && a.size() == c.size() &&
+        a.issym() == b.issym() && a.issym() == c.issym() &&
+        a.isherm() == b.isherm() && a.isherm() == c.isherm() &&
+        c.nlo() > std::min(a.nlo(),b.nlo());
+}
+
 
 #include "TMV_TestMatrixArith.h"
 
@@ -78,18 +98,18 @@ void TestSymBandMatrixArith_A()
         tmv::SymBandMatrixView<T> si = sb[i];
         tmv::SymBandMatrixView<std::complex<T> > csi = csb[i];
 
-        TestMatrixArith1<T>(si,csi,"SymBand");
-        TestMatrixArith2<T>(si,csi,"SymBand");
-        TestMatrixArith3<T>(si,csi,"SymBand");
+        TestMatrixArith1(si,csi,"SymBand");
+        TestMatrixArith2(si,csi,"SymBand");
+        TestMatrixArith3(si,csi,"SymBand");
 
         for(size_t j=START2;j<sb.size();j++) if (i!=j) {
             if (showstartdone) {
                 std::cout<<"Start sub-loop j = "<<j<<std::endl;
                 std::cout<<"sj = "<<sb[j]<<std::endl;
             }
-            TestMatrixArith4<T>(si,csi,sb[j],csb[j],"SymBand/SymBand");
-            TestMatrixArith5<T>(si,csi,sb[j],csb[j],"SymBand/SymBand");
-            TestMatrixArith6x<T>(si,csi,sb[j],csb[j],"SymBand/SymBand");
+            TestMatrixArith4(si,csi,sb[j],csb[j],"SymBand/SymBand");
+            TestMatrixArith5(si,csi,sb[j],csb[j],"SymBand/SymBand");
+            TestMatrixArith6x(si,csi,sb[j],csb[j],"SymBand/SymBand");
         }
     }
 }

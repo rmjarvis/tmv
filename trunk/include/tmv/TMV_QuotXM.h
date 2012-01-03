@@ -80,7 +80,7 @@ namespace tmv {
         typedef typename Traits<value_type>::real_type real_type;
         typedef typename Traits<value_type>::complex_type complex_type;
 
-        QuotXM(const T _x, const BaseMatrix<M>& _m) : 
+        QuotXM(const Scaling<ix,T>& _x, const BaseMatrix<M>& _m) : 
             x(_x), m(_m.mat()) {}
         TMV_INLINE const Scaling<ix,T>& getX() const { return x; }
         TMV_INLINE const M& getM() const { return m; }
@@ -131,11 +131,6 @@ namespace tmv {
     TMV_INLINE QuotXM<0,CT,M> operator/(const CCT x, const BaseMatrix<M>& m)
     { return CT(x)/m; }
 
-    template <int ix, class T, class M>
-    TMV_INLINE QuotXM<ix,T,M> operator/(
-        const Scaling<ix,T>& x, const BaseMatrix<M>& m)
-    { return QuotXM<ix,T,M>(T(x),m); }
-
     // x / xm
     template <int ix, class T, class M>
     TMV_INLINE QuotXM<0,T,M> operator/(const int x, const ProdXM<ix,T,M>& pxm)
@@ -152,11 +147,6 @@ namespace tmv {
     template <int ix, class T, class M>
     TMV_INLINE QuotXM<0,CT,M> operator/(const CCT x, const ProdXM<ix,T,M>& pxm)
     { return CT(x)/pxm; }
-
-    template <int ix1, class T1, int ix, class T, class M>
-    TMV_INLINE QuotXM<ix1*ix,T,M> operator/(
-        const Scaling<ix,T>& x, const ProdXM<ix,T,M>& pxm)
-    { return QuotXM<ix1*ix,T,M>(T(x)/pxm.getX(),pxm.getM()); }
 
     // x % m
     // In this context, there is no difference between / and %
@@ -176,11 +166,6 @@ namespace tmv {
     TMV_INLINE QuotXM<0,CT,M> operator%(const CCT x, const BaseMatrix<M>& m)
     { return x/m; }
 
-    template <int ix, class T, class M>
-    TMV_INLINE QuotXM<ix,T,M> operator%(
-        const Scaling<ix,T>& x, const BaseMatrix<M>& m)
-    { return x/m; }
-
     // x % xm
     template <int ix, class T, class M>
     TMV_INLINE QuotXM<0,T,M> operator%(const int x, const ProdXM<ix,T,M>& pxm)
@@ -196,11 +181,6 @@ namespace tmv {
 
     template <int ix, class T, class M>
     TMV_INLINE QuotXM<0,CT,M> operator%(const CCT x, const ProdXM<ix,T,M>& pxm)
-    { return x/pxm; }
-
-    template <int ix1, class T1, int ix, class T, class M>
-    TMV_INLINE QuotXM<ix1*ix,T,M> operator%(
-        const Scaling<ix,T>& x, const ProdXM<ix,T,M>& pxm)
     { return x/pxm; }
 
 #undef RT
@@ -235,14 +215,6 @@ namespace tmv {
     TMV_INLINE QuotXM<0,CT,M> operator*(const CCT x, const QuotXM<ix,T,M>& qxm)
     { return QuotXM<0,CT,M>(x*qxm.getX(),qxm.getM()); }
 
-    template <int ix1, class T1, int ix, class T, class M>
-    TMV_INLINE QuotXM<ix*ix1,typename Traits2<T1,T>::type,M> operator*(
-        const Scaling<ix1,T1>& x, const QuotXM<ix,T,M>& qxm)
-    {
-        return QuotXM<ix*ix1,typename Traits2<T1,T>::type,M>(
-            T1(x)*qxm.getX(),qxm.getM()); 
-    }
-
     // (x*m)*x
     template <int ix, class T, class M>
     TMV_INLINE QuotXM<0,T,M> operator*(const QuotXM<ix,T,M>& qxm, const int x)
@@ -260,14 +232,6 @@ namespace tmv {
     TMV_INLINE QuotXM<0,CT,M> operator*(const QuotXM<ix,T,M>& qxm, const CCT x)
     { return QuotXM<0,CT,M>(x*qxm.getX(),qxm.getM()); }
 
-    template <int ix1, class T1, int ix, class T, class M>
-    TMV_INLINE QuotXM<ix*ix1,typename Traits2<T1,T>::type,M> operator*(
-        const QuotXM<ix,T,M>& qxm, const Scaling<ix1,T1>& x)
-    {
-        return QuotXM<ix*ix1,typename Traits2<T1,T>::type,M>(
-            T1(x)*qxm.getX(),qxm.getM()); 
-    }
-
     // (x*m)/x
     template <int ix, class T, class M>
     TMV_INLINE QuotXM<0,RT,M> operator/(const QuotXM<ix,T,M>& qxm, const int x)
@@ -284,14 +248,6 @@ namespace tmv {
     template <int ix, class T, class M>
     TMV_INLINE QuotXM<0,CT,M> operator/(const QuotXM<ix,T,M>& qxm, const CCT x)
     { return QuotXM<0,CT,M>(qxm.getX()/x,qxm.getM()); }
-
-    template <int ix1, class T1, int ix, class T, class M>
-    TMV_INLINE QuotXM<ix*ix1,typename Traits2<T1,T>::type,M> operator/(
-        const QuotXM<ix,T,M>& qxm, const Scaling<ix1,T1>& x)
-    {
-        return QuotXM<ix*ix1,typename Traits2<T1,T>::type,M>(
-            qxm.getX()/T1(x),qxm.getM()); 
-    }
 
 #undef RT
 #undef CT

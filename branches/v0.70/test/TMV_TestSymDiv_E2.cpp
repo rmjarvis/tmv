@@ -52,11 +52,11 @@ void TestSymDiv_E2(tmv::DivType dt, PosDefCode pdc)
         tmv::SymMatrixView<T> si = s[i];
         tmv::SymMatrixView<std::complex<T> > csi = cs[i];
 
-        TestMatrixDivArith1<T>(dt,b1v,si,cb1v,csi,"Sym/SquareBandMatrix");
+        TestMatrixDivArith1(dt,b1v,si,cb1v,csi,"Sym/SquareBandMatrix");
         if (dt == tmv::LU) continue;
 #if (XTEST & 2)
-        TestMatrixDivArith1<T>(dt,b3v,si,cb3v,csi,"Sym/NonSquareBandMatrix");
-        TestMatrixDivArith1<T>(dt,b4v,si,cb4v,csi,"Sym/NonSquareBandMatrix");
+        TestMatrixDivArith1(dt,b3v,si,cb3v,csi,"Sym/NonSquareBandMatrix");
+        TestMatrixDivArith1(dt,b4v,si,cb4v,csi,"Sym/NonSquareBandMatrix");
 #endif
     }
 }

@@ -395,18 +395,18 @@ static void TestSmallVectorArith()
     tmv::SmallVector<CT,NN> ca = a*CT(2,-1);;
     tmv::SmallVector<CT,NN> cb = b*CT(-5,1);
 
-    TestVectorArith1<T>(a,ca,"SmallVector C");
-    TestVectorArith2<T>(a,ca,b,cb,"SmallVector CC");
+    TestVectorArith1(a,ca,"SmallVector C");
+    TestVectorArith2(a,ca,b,cb,"SmallVector CC");
 
     tmv::SmallVector<T,NN,tmv::FortranStyle> af = a;
     tmv::SmallVector<T,NN,tmv::FortranStyle> bf = b;
     tmv::SmallVector<CT,NN,tmv::FortranStyle> caf = ca;
     tmv::SmallVector<CT,NN,tmv::FortranStyle> cbf = cb;
 
-    TestVectorArith1<T>(af,caf,"SmallVector F");
-    TestVectorArith2<T>(af,caf,bf,cbf,"SmallVector FF");
-    TestVectorArith2<T>(a,ca,bf,cbf,"SmallVector CF");
-    TestVectorArith2<T>(af,caf,b,cb,"SmallVector FC");
+    TestVectorArith1(af,caf,"SmallVector F");
+    TestVectorArith2(af,caf,bf,cbf,"SmallVector FF");
+    TestVectorArith2(a,ca,bf,cbf,"SmallVector CF");
+    TestVectorArith2(af,caf,b,cb,"SmallVector FC");
 
 #ifndef NOMIX_SMALL
     tmv::VectorView<T> av = a.view();
@@ -414,8 +414,8 @@ static void TestSmallVectorArith()
     tmv::VectorView<T> bv = b.view();
     tmv::VectorView<CT > cbv = cb.view();
 
-    TestVectorArith2<T>(av,cav,b,cb,"SmallVector/Vector");
-    TestVectorArith2<T>(a,ca,bv,cbv,"Vector/SmallVector");
+    TestVectorArith2(av,cav,b,cb,"SmallVector/Vector");
+    TestVectorArith2(a,ca,bv,cbv,"Vector/SmallVector");
 #endif
 }
 

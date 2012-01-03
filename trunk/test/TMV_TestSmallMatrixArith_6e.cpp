@@ -1,4 +1,5 @@
 
+#define NOELEMMULT
 #define NONSQUARE
 #include "TMV_TestSmallMatrixArith_6.h"
 

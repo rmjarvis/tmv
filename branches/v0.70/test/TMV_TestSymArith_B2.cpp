@@ -5,6 +5,9 @@
 #include "TMV_Test.h"
 #include "TMV_Test_2.h"
 #include "TMV_TestSymArith.h"
+
+#define NOELEMMULT
+
 #include "TMV_TestMatrixArith.h"
 
 template <class T> 
@@ -61,15 +64,15 @@ void TestSymMatrixArith_B2()
         tmv::SymMatrixView<T> si = s[i];
         tmv::SymMatrixView<std::complex<T> > csi = cs[i];
 
-        TestMatrixArith4<T>(a1v,ca1v,si,csi,"SquareM/Sym");
-        TestMatrixArith5<T>(a1v,ca1v,si,csi,"SquareM/Sym");
-        TestMatrixArith6x<T>(a1v,ca1v,si,csi,"SquareM/Sym");
-        TestMatrixArith4<T>(a3v,ca3v,si,csi,"NonSquareM/Sym");
-        TestMatrixArith5<T>(a3v,ca3v,si,csi,"NonSquareM/Sym");
-        TestMatrixArith6x<T>(a3v,ca3v,si,csi,"NonSquareM/Sym");
-        TestMatrixArith4<T>(a4v,ca4v,si,csi,"DegenerateM/Sym");
-        TestMatrixArith5<T>(a4v,ca4v,si,csi,"DegenerateM/Sym");
-        TestMatrixArith6x<T>(a4v,ca4v,si,csi,"DegenerateM/Sym");
+        TestMatrixArith4(a1v,ca1v,si,csi,"SquareM/Sym");
+        TestMatrixArith5(a1v,ca1v,si,csi,"SquareM/Sym");
+        TestMatrixArith6x(a1v,ca1v,si,csi,"SquareM/Sym");
+        TestMatrixArith4(a3v,ca3v,si,csi,"NonSquareM/Sym");
+        TestMatrixArith5(a3v,ca3v,si,csi,"NonSquareM/Sym");
+        TestMatrixArith6x(a3v,ca3v,si,csi,"NonSquareM/Sym");
+        TestMatrixArith4(a4v,ca4v,si,csi,"DegenerateM/Sym");
+        TestMatrixArith5(a4v,ca4v,si,csi,"DegenerateM/Sym");
+        TestMatrixArith6x(a4v,ca4v,si,csi,"DegenerateM/Sym");
     }
 #endif
 }

@@ -20,6 +20,27 @@ inline void CopyBackM(
     else m1 = m0;
 }
 
+template <class T1, class T2, class T3>
+inline bool CanAddElemMultMM(
+    const tmv::UpperTriMatrixView<T1>& a,
+    const tmv::UpperTriMatrixView<T2>& b,
+    const tmv::UpperTriMatrixView<T3>& c)
+{
+    return (a.size() == b.size()) && (a.size() == c.size()) &&
+        !c.isunit(); 
+}
+
+template <class T1, class T2, class T3>
+inline bool CanAddElemMultMM(
+    const tmv::LowerTriMatrixView<T1>& a,
+    const tmv::LowerTriMatrixView<T2>& b,
+    const tmv::LowerTriMatrixView<T3>& c)
+{
+    return (a.size() == b.size()) && (a.size() == c.size()) &&
+        !c.isunit(); 
+}
+
+
 
 #define NOADDEQ
 #define NOADDEQX
@@ -60,8 +81,8 @@ template <class T> void TestTriMatrixArith_A1b()
     tmv::UpperTriMatrixView<T> u5 = a2x.unitUpperTri();
     tmv::UpperTriMatrixView<CT> cu5 = ca2x.unitUpperTri();
 
-    TestMatrixArith1<T>(u4,cu4,"UpperTri 4");
-    TestMatrixArith1<T>(u5,cu5,"UpperTri 5");
+    TestMatrixArith1(u4,cu4,"UpperTri 4");
+    TestMatrixArith1(u5,cu5,"UpperTri 5");
 
 #if (XTEST & 1)
     tmv::Matrix<T> a3x(12,16);
@@ -72,7 +93,7 @@ template <class T> void TestTriMatrixArith_A1b()
 
     tmv::UpperTriMatrixView<T> u6 = a3x.subMatrix(0,12,0,16,3,4).unitUpperTri();
     tmv::UpperTriMatrixView<CT> cu6 = ca3x.subMatrix(0,12,0,16,3,4).unitUpperTri();
-    TestMatrixArith1<T>(u6,cu6,"UpperTri 6");
+    TestMatrixArith1(u6,cu6,"UpperTri 6");
 #endif
 
 #if (XTEST & 2)
@@ -81,12 +102,12 @@ template <class T> void TestTriMatrixArith_A1b()
     tmv::LowerTriMatrixView<T> l5 = a2x.unitLowerTri();
     tmv::LowerTriMatrixView<CT> cl5 = ca2x.unitLowerTri();
 
-    TestMatrixArith1<T>(l4,cl4,"LowerTri 4");
-    TestMatrixArith1<T>(l5,cl5,"LowerTri 5");
+    TestMatrixArith1(l4,cl4,"LowerTri 4");
+    TestMatrixArith1(l5,cl5,"LowerTri 5");
 #if (XTEST & 1)
     tmv::LowerTriMatrixView<T> l6 = a3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
     tmv::LowerTriMatrixView<CT> cl6 = ca3x.subMatrix(0,12,0,16,3,4).unitLowerTri();
-    TestMatrixArith1<T>(l6,cl6,"LowerTri 6");
+    TestMatrixArith1(l6,cl6,"LowerTri 6");
 #endif
 #endif
 

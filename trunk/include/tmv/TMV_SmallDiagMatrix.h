@@ -242,6 +242,8 @@ namespace tmv {
         TMV_INLINE T* ptr() { return itsm; }
 
         T cref(int i, int j) const { return (i!=j ? T(0) : cref(i)); }
+        T& ref(int i, int j) { return ref(i); }
+
         T cref(int i) const { return itsm[i]; }
         T& ref(int i) { return itsm[i]; }
 
@@ -447,8 +449,8 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsm; }
 
         T cref(int i, int j) const { return (i!=j ? T(0) : cref(i)); }
-        T cref(int i) const
-        { return DoConj<_conj>(itsm[i*step()]); }
+
+        T cref(int i) const { return DoConj<_conj>(itsm[i*step()]); }
 
         TMV_INLINE int size() const { return itssize; }
         TMV_INLINE int nElements() const { return itssize; }
@@ -673,11 +675,10 @@ namespace tmv {
         TMV_INLINE T* ptr() { return itsm; }
 
         T cref(int i, int j) const { return (i!=j ? T(0) : cref(i)); }
-        T cref(int i) const
-        { return DoConj<_conj>(itsm[i*step()]); }
+        reference ref(int i, int j) { return ref(i); }
 
-        reference ref(int i) 
-        { return reference(itsm[i*step()]); }
+        T cref(int i) const { return DoConj<_conj>(itsm[i*step()]); }
+        reference ref(int i) { return reference(itsm[i*step()]); }
 
         TMV_INLINE int size() const { return itssize; }
         TMV_INLINE int nElements() const { return itssize; }

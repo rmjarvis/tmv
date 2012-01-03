@@ -1285,6 +1285,8 @@ namespace tmv {
         }
     };
 
+    template <int ix, class T, class M> class ProdXM;
+
     // algo 98: Inline check for aliases
     template <int s, int ix, class T, class M1, class M2, class M3>
     struct MultUL_Helper<98,s,false,ix,T,M1,M2,M3>
@@ -1399,14 +1401,16 @@ namespace tmv {
                 std::cout<<"Copy m2\n";
 #endif
                 typename M3::noalias_type m3na = m3.noAlias();
-                MultMM<true>(Scaling<1,RT>(),m1,(x*m2).calc(),m3na);
+                MultMM<true>(
+                    Scaling<1,RT>(),m1,ProdXM<ix,T,M2>(x,m2).calc(),m3na);
             } else if (!s2 || ExactSameStorage(m2,m3)) {
                 // Use temporary for m1
 #ifdef PRINTALGO_UL
                 std::cout<<"Copy m1\n";
 #endif
                 typename M3::noalias_type m3na = m3.noAlias();
-                MultMM<true>(Scaling<1,RT>(),(x*m1).calc(),m2,m3na);
+                MultMM<true>(
+                    Scaling<1,RT>(),ProdXM<ix,T,M1>(x,m1).calc(),m2,m3na);
             } else {
                 // Use temporary for m1*m2
 #ifdef PRINTALGO_UL

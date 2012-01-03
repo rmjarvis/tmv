@@ -46,7 +46,9 @@ if env['TEST_INT']:
     env1.Append(CPPDEFINES=['TEST_INT'])
 if env['TEST_DEPRECATED']:
     env1.Append(CPPDEFINES=['TMV_TEST_DEPRECATED'])
-if not env['DEBUG'] and not env['TEST_DEBUG']:
+if env['DEBUG']:
+    env1.Append(CPPDEFINES=['TMV_EXTRA_DEBUG'])
+elif not env['TEST_DEBUG']:
     env1.Append(CPPDEFINES=['NDEBUG'])
 
 
@@ -63,12 +65,8 @@ if env['LAP']:
 test_mix_files = ['TMV_TestMix.cpp']
 obj_mix = env1.Object(test_mix_files)
 progmix = env1.Program('tmvtestmix', obj_mix)
-# Ideally, I'd like the NOMIX_SMALL flag to depend on the success of 
-# running testmix, but I have not implemented that yet.
 
 env3 = env1.Clone()
-if env['NOMIX_SMALL']:
-    env3.Append(CPPDEFINES=['NOMIX_SMALL'])
 
 obj_basic = env1.Object(test_basic_files)
 obj_diag = env1.Object(test_diag_files)

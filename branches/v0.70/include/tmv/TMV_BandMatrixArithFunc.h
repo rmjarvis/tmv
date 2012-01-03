@@ -88,11 +88,8 @@ namespace tmv {
         const GenBandMatrix<Tb>& B, const MatrixView<T>& C)
     { MultMM<add>(alpha,B.transpose(),A.transpose(),C.transpose()); }
 
-    template <class T, class Ta> 
-    void ElementProd(
-        const T alpha, const GenBandMatrix<Ta>& A, const BandMatrixView<T>& B);
-    template <class T, class Ta, class Tb> 
-    void AddElementProd(
+    template <bool add, class T, class Ta, class Tb> 
+    void ElemMultMM(
         const T alpha, const GenBandMatrix<Ta>& A,
         const GenBandMatrix<Tb>& B, const BandMatrixView<T>& C);
 
@@ -184,20 +181,16 @@ namespace tmv {
         const MatrixView<CT>& C)
     { MultMM<add>(CT(alpha),A,B,C); }
 
-    template <class T, class Ta> 
-    inline void ElementProd(
-        const T alpha, const GenBandMatrix<Ta>& A, const BandMatrixView<CT>& B)
-    { ElementProd(CT(alpha),A,B); }
-    template <class T, class Ta, class Tb> 
-    inline void AddElementProd(
+    template <bool add, class T, class Ta, class Tb> 
+    inline void ElemMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenBandMatrix<Tb>& B,
         const BandMatrixView<CT>& C)
-    { AddElementProd(CT(alpha),A,B,C); }
-    template <class T> 
-    inline void AddElementProd(
+    { ElemMultMM<add>(CT(alpha),A,B,C); }
+    template <bool add, class T> 
+    inline void ElemMultMM(
         const CT alpha, const GenBandMatrix<CT>& A, const GenBandMatrix<T>& B,
         const BandMatrixView<CT>& C)
-    { AddElementProd(alpha,B,A,C); }
+    { ElemMultMM<add>(alpha,B,A,C); }
 
     // Specialize disallowed complex combinations:
     template <bool add, class T, class Ta, class Tb> 
@@ -248,6 +241,12 @@ namespace tmv {
     inline void MultMM(
         const CT , const GenMatrix<Ta>& ,
         const GenBandMatrix<Tb>& , const MatrixView<T>& )
+    { TMVAssert(TMV_FALSE); }
+
+    template <bool add, class T, class Ta, class Tb> 
+    inline void ElemMultMM(
+        const CT , const GenBandMatrix<Ta>& ,
+        const GenBandMatrix<Tb>& , const BandMatrixView<T>& )
     { TMVAssert(TMV_FALSE); }
 
 }

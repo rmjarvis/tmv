@@ -22,7 +22,7 @@ inline bool CanAddEq(
 }
 
 template <class M1, class M2, class M3> 
-inline bool CanMultMM(
+inline bool CanMult(
     const tmv::BaseMatrix_Band<M1>& a, const tmv::BaseMatrix_Band<M2>& b,
     const tmv::BaseMatrix_Band_Mutable<M3>& c)
 { 
@@ -31,6 +31,18 @@ inline bool CanMultMM(
         (c.nlo() >= a.nlo() + b.nlo() || c.nlo() == c.colsize()-1) &&
         (c.nhi() >= a.nhi() + b.nhi() || c.nhi() == c.rowsize()-1);
 }
+
+template <class M1, class M2, class M3> 
+inline bool CanElemMult(
+    const tmv::BaseMatrix_Band<M1>& a, const tmv::BaseMatrix_Band<M2>& b,
+    const tmv::BaseMatrix_Band_Mutable<M3>& c)
+{ 
+    return a.rowsize() == c.rowsize() && a.colsize() == c.colsize() &&
+        b.rowsize() == c.rowsize() && b.colsize() == c.colsize() &&
+        c.nlo() >= std::min(a.nlo(),b.nlo()) &&
+        c.nhi() >= std::min(a.nhi(),b.nhi());
+}
+
 
 #include "TMV_TestMatrixArith.h"
 
@@ -48,18 +60,18 @@ void TestBandMatrixArith_A()
         }
         tmv::BandMatrixView<T> bi = b[i];
         tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
-        TestMatrixArith1<T>(bi,cbi,"Band");
-        TestMatrixArith2<T>(bi,cbi,"Band");
-        TestMatrixArith3<T>(bi,cbi,"Band");
+        TestMatrixArith1(bi,cbi,"Band");
+        TestMatrixArith2(bi,cbi,"Band");
+        TestMatrixArith3(bi,cbi,"Band");
 
         for(size_t j=START2;j<b.size();j++) if (i!=j) {
             if (showstartdone) {
                 std::cerr<<"Start sub-loop "<<j<<std::endl;
                 std::cerr<<"bj = "<<b[j]<<std::endl;
             }
-            TestMatrixArith4<T>(bi,cbi,b[j],cb[j],"Band/Band");
-            TestMatrixArith5<T>(bi,cbi,b[j],cb[j],"Band/Band");
-            TestMatrixArith6x<T>(bi,cbi,b[j],cb[j],"Band/Band");
+            TestMatrixArith4(bi,cbi,b[j],cb[j],"Band/Band");
+            TestMatrixArith5(bi,cbi,b[j],cb[j],"Band/Band");
+            TestMatrixArith6x(bi,cbi,b[j],cb[j],"Band/Band");
         }
     }
 }

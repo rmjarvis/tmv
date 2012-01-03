@@ -132,6 +132,7 @@ namespace tmv {
 #include "tmv/TMV_AuxProdXM.h"
 #undef GENMATRIX
 #undef PRODXM
+
     //
     // Vector + Vector
     //
@@ -145,8 +146,7 @@ namespace tmv {
 
         inline SumVV(
             T _x1, const GenVector<T1>& _v1, 
-            T _x2, const GenVector<T2>& _v2
-        ) :
+            T _x2, const GenVector<T2>& _v2) :
             x1(_x1),v1(_v1),x2(_x2), v2(_v2)
         { TMVAssert(v1.size() == v2.size()); }
         inline int size() const { return v1.size(); }
@@ -248,9 +248,9 @@ namespace tmv {
         return v; 
     }
 
+#define SUMMM SumVV
 #define GENMATRIX1 GenVector
 #define GENMATRIX2 GenVector
-#define SUMMM SumVV
 #define PRODXM1 ProdXV
 #define PRODXM2 ProdXV
 #define GETM1 .getV()
@@ -259,9 +259,9 @@ namespace tmv {
 #define GETM1 .getV1()
 #define GETM2 .getV2()
 #include "tmv/TMV_AuxSumMMa.h"
+#undef SUMMM
 #undef GENMATRIX1
 #undef GENMATRIX2
-#undef SUMMM
 #undef PRODXM1
 #undef PRODXM2
 
@@ -358,6 +358,101 @@ namespace tmv {
         TMVAssert(v1.size() == v2.size());
         return v1.getX()*v2.getX()*MultVV(v1.getV(),v2.getV()); 
     }
+
+    //
+    // Element Product Vector * Vector
+    //
+
+    template <class T, class T1, class T2> 
+    class ElemProdVV : public VectorComposite<T> 
+    {
+    public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+
+        inline ElemProdVV(
+            T _x, const GenVector<T1>& _v1, const GenVector<T2>& _v2) :
+            x(_x), v1(_v1), v2(_v2)
+        { TMVAssert(v1.size() == v2.size()); }
+        inline int size() const { return v1.size(); }
+        inline T getX() const { return x; }
+        inline const GenVector<T1>& getV1() const { return v1; }
+        inline const GenVector<T2>& getV2() const { return v2; }
+        inline void assignToV(const VectorView<real_type>& v0) const
+        {
+            TMVAssert(v0.size() == v1.size());
+            TMVAssert(isReal(T()));
+            ElemMultVV<false>(x,v1,v2,v0);
+        }
+        inline void assignToV(const VectorView<complex_type>& v0) const
+        {
+            TMVAssert(v0.size() == v1.size());
+            ElemMultVV<false>(x,v1,v2,v0);
+        }
+    private:
+        const T x;
+        const GenVector<T1>& v1;
+        const GenVector<T2>& v2;
+    };
+
+    template <class T, class T2, class T3> 
+    inline const VectorView<T>& operator+=(
+        const VectorView<T>& m, const ElemProdVV<T,T2,T3>& pmm)
+    { 
+        TMVAssert(m.colsize() == pmm.colsize());
+        TMVAssert(m.rowsize() == pmm.rowsize());
+        ElemMultVV<true>(pmm.getX(),pmm.getV1(),pmm.getV2(),m); 
+        return m; 
+    }
+
+    template <class T> 
+    inline const VectorView<CT>& operator+=(
+        const VectorView<CT>& m, const ElemProdVV<T,T,T>& pmm)
+    { 
+        TMVAssert(m.colsize() == pmm.colsize());
+        TMVAssert(m.rowsize() == pmm.rowsize());
+        ElemMultVV<true>(pmm.getX(),pmm.getV1(),pmm.getV2(),m); 
+        return m; 
+    }
+
+    template <class T, class T2, class T3> 
+    inline const VectorView<T>& operator-=(
+        const VectorView<T>& m, const ElemProdVV<T,T2,T3>& pmm)
+    { 
+        TMVAssert(m.colsize() == pmm.colsize());
+        TMVAssert(m.rowsize() == pmm.rowsize());
+        ElemMultVV<true>(-pmm.getX(),pmm.getV1(),pmm.getV2(),m); 
+        return m; 
+    }
+
+    template <class T> 
+    inline const VectorView<CT>& operator-=(
+        const VectorView<CT>& m, const ElemProdVV<T,T,T>& pmm)
+    {
+        TMVAssert(m.colsize() == pmm.colsize());
+        TMVAssert(m.rowsize() == pmm.rowsize());
+        ElemMultVV<true>(-pmm.getX(),pmm.getV1(),pmm.getV2(),m); 
+        return m; 
+    }
+
+#define PRODMM ElemProdVV
+#define GENMATRIX1 GenVector
+#define GENMATRIX2 GenVector
+#define PRODXM1 ProdXV
+#define PRODXM2 ProdXV
+#define OP ElemProd
+#define GETM1 .getV()
+#define GETM2 .getV()
+#include "tmv/TMV_AuxProdMM.h"
+#define GETM1 .getV1()
+#define GETM2 .getV2()
+#include "tmv/TMV_AuxProdMMa.h"
+#undef PRODMM
+#undef GENMATRIX1
+#undef GENMATRIX2
+#undef PRODXM1
+#undef PRODXM2
+
 
 } // namespace tmv
 

@@ -264,7 +264,7 @@ namespace tmv {
     { 
         setupDiv();
         if (!pdiv->div.get()) {
-            if (pdiv->dt == XXX) 
+            if (pdiv->dt == XX) 
                 pdiv->dt = (colsize() == rowsize()) ? LU : QR;
             newDivider();
         }

@@ -561,7 +561,7 @@ namespace tmv {
             _v(v), _size(size), _step(step), _ct(ct) {}
         virtual inline ~ConstVectorView() 
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             const_cast<const T*&>(_v) = 0;
 #endif
         }
@@ -756,7 +756,7 @@ namespace tmv {
         virtual inline ~VectorView() 
         {
             TMV_SETFIRSTLAST(0,0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             const_cast<T*&>(_v) = 0;
 #endif
         }
@@ -1310,7 +1310,7 @@ namespace tmv {
         explicit inline Vector(int n=0) : NEW_SIZE(n)
         {
             TMVAssert(n >= 0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }
@@ -1379,7 +1379,7 @@ namespace tmv {
         virtual inline ~Vector() 
         {
             TMV_SETFIRSTLAST(0,0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(999));
 #endif
         }
@@ -1721,7 +1721,7 @@ namespace tmv {
             _first = _v.get();
             _last = _first + n;
 #endif
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
         }

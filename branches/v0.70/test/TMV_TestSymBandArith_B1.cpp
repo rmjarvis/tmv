@@ -8,6 +8,7 @@
 
 #define NOADDEQ
 #define NOMULTEQ
+#define NOELEMMULT
 
 #include "TMV_TestMatrixArith.h"
 
@@ -56,16 +57,16 @@ void TestSymBandMatrixArith_B1()
         tmv::SymBandMatrixView<T> si = sb[i];
         tmv::SymBandMatrixView<std::complex<T> > csi = csb[i];
 
-        TestMatrixArith4<T>(si,csi,a1v,ca1v,"SymBand/SquareM");
-        TestMatrixArith5<T>(si,csi,a1v,ca1v,"SymBand/SquareM");
-        TestMatrixArith6x<T>(si,csi,a1v,ca1v,"SymBand/SquareM");
+        TestMatrixArith4(si,csi,a1v,ca1v,"SymBand/SquareM");
+        TestMatrixArith5(si,csi,a1v,ca1v,"SymBand/SquareM");
+        TestMatrixArith6x(si,csi,a1v,ca1v,"SymBand/SquareM");
 #if (XTEST & 2)
-        TestMatrixArith4<T>(si,csi,a3v,ca3v,"SymBand/NonSquareM");
-        TestMatrixArith5<T>(si,csi,a3v,ca3v,"SymBand/NonSquareM");
-        TestMatrixArith6x<T>(si,csi,a3v,ca3v,"SymBand/NonSquareM");
-        TestMatrixArith4<T>(si,csi,a4v,ca4v,"SymBand/DegenerateM");
-        TestMatrixArith5<T>(si,csi,a4v,ca4v,"SymBand/DegenerateM");
-        TestMatrixArith6x<T>(si,csi,a4v,ca4v,"SymBand/DegenerateM");
+        TestMatrixArith4(si,csi,a3v,ca3v,"SymBand/NonSquareM");
+        TestMatrixArith5(si,csi,a3v,ca3v,"SymBand/NonSquareM");
+        TestMatrixArith6x(si,csi,a3v,ca3v,"SymBand/NonSquareM");
+        TestMatrixArith4(si,csi,a4v,ca4v,"SymBand/DegenerateM");
+        TestMatrixArith5(si,csi,a4v,ca4v,"SymBand/DegenerateM");
+        TestMatrixArith6x(si,csi,a4v,ca4v,"SymBand/DegenerateM");
 #endif
     }
 }

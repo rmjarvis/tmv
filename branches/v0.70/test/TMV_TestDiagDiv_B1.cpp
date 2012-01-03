@@ -31,7 +31,7 @@ void TestDiagDiv_B1()
     tmv::MatrixView<std::complex<T> > cpv = cp.view();
     tmv::DiagMatrixView<std::complex<T> > cbv = cb.view();
 
-    TestMatrixDivArith1<T>(tmv::LU,pv,bv,cpv,cbv,"Diag/SquareM");
+    TestMatrixDivArith1(tmv::LU,pv,bv,cpv,cbv,"Diag/SquareM");
 }
 
 #ifdef TEST_DOUBLE

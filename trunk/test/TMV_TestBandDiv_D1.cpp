@@ -46,8 +46,8 @@ void TestBandDiv_D1(tmv::DivType dt)
         bi.saveDiv();
         cbi.saveDiv();
 
-        TestMatrixDivArith1<T>(dt,bi,uv,cbi,cuv,"UpperTriMatrix/Band");
-        TestMatrixDivArith1<T>(dt,bi,lv,cbi,clv,"LowerTriMatrix/Band");
+        TestMatrixDivArith1(dt,bi,uv,cbi,cuv,"UpperTriMatrix/Band");
+        TestMatrixDivArith1(dt,bi,lv,cbi,clv,"LowerTriMatrix/Band");
     }
 }
 

@@ -8,6 +8,8 @@
 #include "TMV_TestSymBandArith.h"
 #include "TMV_TestBandArith.h"
 
+#define NOELEMMULT
+
 template <class T1, class T2> 
 inline bool CanAddEq(
     const tmv::BandMatrixView<T1>& a, const tmv::SymBandMatrixView<T2>& b)
@@ -80,9 +82,9 @@ void TestSymBandMatrixArith_E2()
             tmv::BandMatrixView<T> bj = b[j];
             tmv::BandMatrixView<std::complex<T> > cbj = cb[j];
 
-            TestMatrixArith4<T>(bj,cbj,si,csi,"Band/SymBand");
-            TestMatrixArith5<T>(bj,cbj,si,csi,"Band/SymBand");
-            TestMatrixArith6x<T>(bj,cbj,si,csi,"Band/SymBand");
+            TestMatrixArith4(bj,cbj,si,csi,"Band/SymBand");
+            TestMatrixArith5(bj,cbj,si,csi,"Band/SymBand");
+            TestMatrixArith6x(bj,cbj,si,csi,"Band/SymBand");
         }
     }
 #endif

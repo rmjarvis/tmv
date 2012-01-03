@@ -64,8 +64,8 @@ void TestBandDiv_D2(tmv::DivType dt)
         tmv::BandMatrixView<T> bi = b[i];
         tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
 
-        TestMatrixDivArith1<T>(dt,uv,bi,cuv,cbi,"Band/UpperTriMatrix");
-        TestMatrixDivArith1<T>(dt,lv,bi,clv,cbi,"Band/LowerTriMatrix");
+        TestMatrixDivArith1(dt,uv,bi,cuv,cbi,"Band/UpperTriMatrix");
+        TestMatrixDivArith1(dt,lv,bi,clv,cbi,"Band/LowerTriMatrix");
     }
 }
 

@@ -8,7 +8,7 @@
 namespace tmv {
 
     //
-    // ElementProd functions:
+    // ElemProd functions:
     // (Element-wise Vector * Vector)
     //
 
@@ -16,15 +16,15 @@ namespace tmv {
     inline void ElemMultVV(
         const T& x1, const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
-    { ElemMultVV(Scaling<0,T>(x1),v1.vec(),v2.vec(),v3.vec()); }
+    { ElemMultVV<add>(Scaling<0,T>(x1),v1.vec(),v2.vec(),v3.vec()); }
 
     template <bool add, class V1, class V2, class V3>
     inline void ElemMultVV(
         const BaseVector_Calc<V1>& v1,
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
-        ElemMultVV(
-            Scaling<1,typename V3::real_type(),v1.vec(),v2.vec(),v3.vec()); 
+        ElemMultVV<add>(
+            Scaling<1,typename V3::real_type>(),v1.vec(),v2.vec(),v3.vec()); 
     }
 
     template <int ix, class T, class V1, class V2>
@@ -68,17 +68,17 @@ namespace tmv {
             TMVAssert(v1.size() == v2.size());
         }
 
-        const Scaling<ix,T>& getX() const { return x; }
-        const V1& getV1() const { return v1; }
-        const V2& getV2() const { return v2; }
+        TMV_INLINE const Scaling<ix,T>& getX() const { return x; }
+        TMV_INLINE const V1& getV1() const { return v1; }
+        TMV_INLINE const V2& getV2() const { return v2; }
 
-        int size() const { return v1.size(); }
+        TMV_INLINE int size() const { return v1.size(); }
 
         value_type cref(int i) const
         { return x * (v1.cref(i) * v2.cref(i)); }
 
         template <class V3>
-        void assignTo(BaseVector_Mutable<V3>& v3) const
+        TMV_INLINE_ND void assignTo(BaseVector_Mutable<V3>& v3) const
         {
             TMVStaticAssert((Sizes<type::_size,V3::_size>::same));
             TMVAssert(size() == v3.size());
@@ -92,16 +92,36 @@ namespace tmv {
         const V2& v2;
     };
 
+    // [v * v]
 #define RT typename V2::real_type
     template <class V1, class V2>
-    TMV_INLINE_ND ElemProdVV<1,RT,V1,V2> ElementProd(
+    TMV_INLINE_ND ElemProdVV<1,RT,V1,V2> ElemProd(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
-    {
-        TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
-        TMVAssert(v1.size() == v2.size());
-        return ElemProdVV<1,RT,V1,V2>(RT(1),v1,v2);
-    }
+    { return ElemProdVV<1,RT,V1,V2>(RT(1),v1,v2); }
 #undef RT
+
+    // [v * xv]
+    template <class V1, int ix, class T, class V2>
+    TMV_INLINE ElemProdVV<ix,T,V1,V2> ElemProd(
+        const BaseVector<V1>& v1, const ProdXV<ix,T,V2>& v2)
+    { return ElemProdVV<ix,T,V1,V2>(v2.getX(),v1,v2.getV()); }
+
+    // [xv * v]
+    template <int ix, class T, class V1, class V2>
+    TMV_INLINE ElemProdVV<ix,T,V1,V2> ElemProd(
+        const ProdXV<ix,T,V1>& v1, const BaseVector<V2>& v2)
+    { return ElemProdVV<ix,T,V1,V2>(v1.getX(),v1.getV(),v2); }
+
+    // [xv * xv]
+#define PT typename Traits2<T1,T2>::type
+    template <int ix1, class T1, class V1, int ix2, class T2, class V2>
+    TMV_INLINE ElemProdVV<ix1*ix2,PT,V1,V2> ElemProd(
+        const ProdXV<ix1,T1,V1>& v1, const ProdXV<ix2,T2,V2>& v2)
+    {
+        return ElemProdVV<ix1*ix2,PT,V1,V2>(
+            v1.getX()*v2.getX(),v1.getV(),v2.getV());
+    }
+#undef PT
 
     // v += [vv]
     template <class V3, int ix, class T, class V1, class V2>
@@ -130,79 +150,71 @@ namespace tmv {
     // -[vv]
     template <int ix, class T, class V1, class V2>
     TMV_INLINE ElemProdVV<-ix,T,V1,V2> operator-(
-        const ElemProdVV<ix,T,V1,V2>& mv)
-    { return ElemProdVV<-ix,T,V1,V2>(-mv.getX(),mv.getV1(),mv.getV2()); }
+        const ElemProdVV<ix,T,V1,V2>& vv)
+    { return ElemProdVV<-ix,T,V1,V2>(-vv.getX(),vv.getV1(),vv.getV2()); }
 
     // x * [vv]
     template <int ix, class T, class V1, class V2>
     TMV_INLINE ElemProdVV<0,T,V1,V2> operator*(
-        const RT x, const ElemProdVV<ix,T,V1,V2>& mv)
-    { return ElemProdVV<0,T,V1,V2>(x*mv.getX(),mv.getV1(),mv.getV2()); }
+        const int x, const ElemProdVV<ix,T,V1,V2>& vv)
+    { return ElemProdVV<0,T,V1,V2>(RT(x)*vv.getX(),vv.getV1(),vv.getV2()); }
+
+    template <int ix, class T, class V1, class V2>
+    TMV_INLINE ElemProdVV<0,T,V1,V2> operator*(
+        const RT x, const ElemProdVV<ix,T,V1,V2>& vv)
+    { return ElemProdVV<0,T,V1,V2>(x*vv.getX(),vv.getV1(),vv.getV2()); }
 
     template <int ix, class T, class V1, class V2>
     TMV_INLINE ElemProdVV<0,CT,V1,V2> operator*(
-        const CT x, const ElemProdVV<ix,T,V1,V2>& mv)
-    { return ElemProdVV<0,CT,V1,V2>(x*mv.getX(),mv.getV1(),mv.getV2()); }
+        const CT x, const ElemProdVV<ix,T,V1,V2>& vv)
+    { return ElemProdVV<0,CT,V1,V2>(x*vv.getX(),vv.getV1(),vv.getV2()); }
 
     template <int ix, class T, class V1, class V2>
     TMV_INLINE ElemProdVV<0,CT,V1,V2> operator*(
-        const CCT x, const ElemProdVV<ix,T,V1,V2>& mv)
-    { return ElemProdVV<0,CT,V1,V2>(x*mv.getX(),mv.getV1(),mv.getV2()); }
+        const CCT x, const ElemProdVV<ix,T,V1,V2>& vv)
+    { return ElemProdVV<0,CT,V1,V2>(x*vv.getX(),vv.getV1(),vv.getV2()); }
 
-    template <int ix1, class T1, int ix, class T, class V1, class V2>
-    TMV_INLINE ElemProdVV<ix1*ix,typename Traits2<T1,T>::type,V1,V2> operator*(
-        const Scaling<ix1,T1>& x, const ElemProdVV<ix,T,V1,V2>& mv)
-    {
-        return ElemProdVV<ix1*ix,typename Traits2<T1,T>::type,V1,V2>(
-            T1(x)*mv.getX(),mv.getV1(),mv.getV2());
-    }
     // [vv]*x
     template <int ix, class T, class V1, class V2>
     TMV_INLINE ElemProdVV<0,T,V1,V2> operator*(
-        const ElemProdVV<ix,T,V1,V2>& mv, const RT x)
-    { return ElemProdVV<0,T,V1,V2>(x*mv.getX(),mv.getV1(),mv.getV2()); }
+        const ElemProdVV<ix,T,V1,V2>& vv, const int x)
+    { return ElemProdVV<0,T,V1,V2>(RT(x)*vv.getX(),vv.getV1(),vv.getV2()); }
+
+    template <int ix, class T, class V1, class V2>
+    TMV_INLINE ElemProdVV<0,T,V1,V2> operator*(
+        const ElemProdVV<ix,T,V1,V2>& vv, const RT x)
+    { return ElemProdVV<0,T,V1,V2>(x*vv.getX(),vv.getV1(),vv.getV2()); }
 
     template <int ix, class T, class V1, class V2>
     TMV_INLINE ElemProdVV<0,CT,V1,V2> operator*(
-        const ElemProdVV<ix,T,V1,V2>& mv, const CT x)
-    { return ElemProdVV<0,CT,V1,V2>(x*mv.getX(),mv.getV1(),mv.getV2()); }
+        const ElemProdVV<ix,T,V1,V2>& vv, const CT x)
+    { return ElemProdVV<0,CT,V1,V2>(x*vv.getX(),vv.getV1(),vv.getV2()); }
 
     template <int ix, class T, class V1, class V2>
     TMV_INLINE ElemProdVV<0,CT,V1,V2> operator*(
-        const ElemProdVV<ix,T,V1,V2>& mv, const CCT x)
-    { return ElemProdVV<0,CT,V1,V2>(x*mv.getX(),mv.getV1(),mv.getV2()); }
-
-    template <int ix1, class T1, int ix, class T, class V1, class V2>
-    TMV_INLINE ElemProdVV<ix1*ix,typename Traits2<T1,T>::type,V1,V2> operator*(
-        const ElemProdVV<ix,T,V1,V2>& mv, const Scaling<ix1,T1>& x)
-    {
-        return ElemProdVV<ix1*ix,typename Traits2<T1,T>::type,V1,V2>(
-            T1(x)*mv.getX(),mv.getV1(),mv.getV2());
-    }
+        const ElemProdVV<ix,T,V1,V2>& vv, const CCT x)
+    { return ElemProdVV<0,CT,V1,V2>(x*vv.getX(),vv.getV1(),vv.getV2()); }
 
     // [vv]/x
     template <int ix, class T, class V1, class V2>
     TMV_INLINE ElemProdVV<0,T,V1,V2> operator/(
-        const ElemProdVV<ix,T,V1,V2>& mv, const RT x)
-    { return ElemProdVV<0,T,V1,V2>(mv.getX()/x,mv.getV1(),mv.getV2()); }
+        const ElemProdVV<ix,T,V1,V2>& vv, const int x)
+    { return ElemProdVV<0,T,V1,V2>(vv.getX()/RT(x),vv.getV1(),vv.getV2()); }
+
+    template <int ix, class T, class V1, class V2>
+    TMV_INLINE ElemProdVV<0,T,V1,V2> operator/(
+        const ElemProdVV<ix,T,V1,V2>& vv, const RT x)
+    { return ElemProdVV<0,T,V1,V2>(vv.getX()/x,vv.getV1(),vv.getV2()); }
 
     template <int ix, class T, class V1, class V2>
     TMV_INLINE ElemProdVV<0,CT,V1,V2> operator/(
-        const ElemProdVV<ix,T,V1,V2>& mv, const CT x)
-    { return ElemProdVV<0,CT,V1,V2>(mv.getX()/x,mv.getV1(),mv.getV2()); }
+        const ElemProdVV<ix,T,V1,V2>& vv, const CT x)
+    { return ElemProdVV<0,CT,V1,V2>(vv.getX()/x,vv.getV1(),vv.getV2()); }
 
     template <int ix, class T, class V1, class V2>
     TMV_INLINE ElemProdVV<0,CT,V1,V2> operator/(
-        const ElemProdVV<ix,T,V1,V2>& mv, const CCT x)
-    { return ElemProdVV<0,CT,V1,V2>(mv.getX()/x,mv.getV1(),mv.getV2()); }
-
-    template <int ix1, class T1, int ix, class T, class V1, class V2>
-    TMV_INLINE ElemProdVV<ix1*ix,typename Traits2<T1,T>::type,V1,V2> operator/(
-        const ElemProdVV<ix,T,V1,V2>& mv, const Scaling<ix1,T1>& x)
-    {
-        return ElemProdVV<ix1*ix,typename Traits2<T1,T>::type,V1,V2>(
-            mv.getX()/T1(x),mv.getV1(),mv.getV2());
-    }
+        const ElemProdVV<ix,T,V1,V2>& vv, const CCT x)
+    { return ElemProdVV<0,CT,V1,V2>(vv.getX()/x,vv.getV1(),vv.getV2()); }
 
 #undef RT
 #undef CT

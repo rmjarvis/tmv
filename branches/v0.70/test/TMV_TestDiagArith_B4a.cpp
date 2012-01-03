@@ -6,6 +6,7 @@
 
 #define NOADDEQ
 #define NOMULTEQ
+#define NOELEMMULT
 #include "TMV_TestMatrixArith.h"
 
 template <class T> void TestDiagMatrixArith_B4a()
@@ -45,15 +46,15 @@ template <class T> void TestDiagMatrixArith_B4a()
     tmv::MatrixView<T> pv = p.view();
     tmv::MatrixView<std::complex<T> > cpv = cp.view();
 
-    TestMatrixArith4<T>(av,cav,pv,cpv, "Diag/SquareM");
+    TestMatrixArith4(av,cav,pv,cpv, "Diag/SquareM");
 
     tmv::MatrixView<T> qv = q.view();
     tmv::MatrixView<std::complex<T> > cqv = cq.view();
     tmv::MatrixView<T> rv = r.view();
     tmv::MatrixView<std::complex<T> > crv = cr.view();
 
-    TestMatrixArith4<T>(av,cav,qv,cqv, "Diag/NonSquareM");
-    TestMatrixArith4<T>(av,cav,rv,crv, "Diag/DegenM");
+    TestMatrixArith4(av,cav,qv,cqv, "Diag/NonSquareM");
+    TestMatrixArith4(av,cav,rv,crv, "Diag/DegenM");
 }
 
 #ifdef TEST_DOUBLE

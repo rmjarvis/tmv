@@ -64,15 +64,14 @@ change the size to some useful value.
 
 \item 
 \begin{tmvcode}
-tmv::UpperTriMatrix<T,dt,stor,index> U(size_t n)
+tmv::UpperTriMatrix<T,dt,stor,index> U(int n)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{UpperTriMatrix} with \underline{uninitialized} values.
-If debugging is turned on (i.e. not turned off
-with \tt{-DNDEBUG} or \tt{-DTMVNDEBUG}), then the values are in fact initialized to 888.  
+If extra debugging is turned on (with \tt{-DTMV\_EXTRA\_DEBUG}), then the values are in fact initialized to 888.  
 
 \item
 \begin{tmvcode}
-tmv::UpperTriMatrix<T,dt,stor,index> U(size_t n, T x)
+tmv::UpperTriMatrix<T,dt,stor,index> U(int n, T x)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{UpperTriMatrix} with all values equal to \tt{x}.
 
@@ -117,16 +116,16 @@ listed as 1's.
 \item
 \begin{tmvcode}
 tmv::UpperTriMatrixView<T,index> U = 
-      tmv::UpperTriMatrixViewOf(T* vv, size_t n, 
+      tmv::UpperTriMatrixViewOf(T* vv, int n, 
       StorageType stor, DiagType dt=NonUnitDiag)
 tmv::ConstUpperTriMatrixView<T,index> U = 
-      tmv::UpperTriMatrixViewOf(const T* vv, size_t n, 
+      tmv::UpperTriMatrixViewOf(const T* vv, int n, 
       StorageType stor, DiagType dt=NonUnitDiag)
 tmv::UpperTriMatrixView<T,index> U = 
-      tmv::UnitUpperTriMatrixViewOf(T* vv, size_t n, 
+      tmv::UnitUpperTriMatrixViewOf(T* vv, int n, 
       StorageType stor)
 tmv::UpperTriMatrixView<T,index> U = 
-      tmv::UnitUpperTriMatrixViewOf(T* vv, size_t n, 
+      tmv::UnitUpperTriMatrixViewOf(T* vv, int n, 
       StorageType stor)
 \end{tmvcode}
 \index{UpperTriMatrix!View of raw memory}
@@ -147,16 +146,16 @@ in some cases.
 \item
 \begin{tmvcode}
 tmv::UpperTriMatrixView<T,index> U = 
-      tmv::UpperTriMatrixViewOf(T* vv, size_t n, 
+      tmv::UpperTriMatrixViewOf(T* vv, int n, 
       int stepi, int stepj, DiagType dt=NonUnitDiag)
 tmv::ConstUpperTriMatrixView<T,index> U = 
-      tmv::UpperTriMatrixViewOf(const T* vv, size_t n, 
+      tmv::UpperTriMatrixViewOf(const T* vv, int n, 
       int stepi, int stepj, DiagType dt=NonUnitDiag)
 tmv::UpperTriMatrixView<T,index> U = 
-      tmv::UnitUpperTriMatrixViewOf(T* vv, size_t n, 
+      tmv::UnitUpperTriMatrixViewOf(T* vv, int n, 
       int stepi, int stepj)
 tmv::ConstUpperTriMatrixView<T,index> U = 
-      tmv::UnitUpperTriMatrixViewOf(const T* vv, size_t n, 
+      tmv::UnitUpperTriMatrixViewOf(const T* vv, int n, 
       int stepi, int stepj)
 \end{tmvcode}
 \index{UpperTriMatrix!View of raw memory}
@@ -170,7 +169,7 @@ the $i$ and $j$ directions.
 \label{TriMatrix_Access}
 
 \begin{tmvcode}
-U.resize(size_t newsize)
+U.resize(int newsize)
 \end{tmvcode}
 \index{UpperTriMatrix!Methods!resize}
 
@@ -200,6 +199,36 @@ given the upper triangle shape of \tt{U}.  Likewise for the \tt{LowerTriMatrix}
 versions of these.
 If \tt{dt} is \tt{UnitDiag}, then the range may not include the diagonal element.
 Similarly, \tt{U.diag()} is valid only if \tt{dt} is \tt{NonUnitDiag}.
+
+\begin{tmvcode}
+typename tmv::UpperTriMatrix<T>::rowmajor_iterator U.rowmajor_begin()
+typename tmv::UpperTriMatrix<T>::rowmajor_iterator U.rowmajor_end()
+typename tmv::UpperTriMatrix<T>::const_rowmajor_iterator U.rowmajor_begin() const
+typename tmv::UpperTriMatrix<T>::const_rowmajor_iterator U.rowmajor_end() const
+typename tmv::UpperTriMatrix<T>::colmajor_iterator U.colmajor_begin()
+typename tmv::UpperTriMatrix<T>::colmajor_iterator U.colmajor_end()
+typename tmv::UpperTriMatrix<T>::const_colmajor_iterator U.colmajor_begin() const
+typename tmv::UpperTriMatrix<T>::const_colmajor_iterator U.colmajor_end() const
+\end{tmvcode}
+These iterators only traverse the elements that are actually stored in memory. So for an UpperTriMatrix, the iteration skips all the elements the the strict lower triangle.
+
+\begin{tmvcode}
+T* U.ptr()
+const T* U.cptr() const
+int U.stepi() const
+int U.stepj() const
+bool U.isconj() const
+bool U.isrm() const
+bool U.iscm() const
+\end{tmvcode}
+\index{UpperTriMatrix!Methods!ptr}
+\index{UpperTriMatrix!Methods!cptr}
+\index{UpperTriMatrix!Methods!stepi}
+\index{UpperTriMatrix!Methods!stepj}
+\index{UpperTriMatrix!Methods!isconj}
+\index{UpperTriMatrix!Methods!isrm}
+\index{UpperTriMatrix!Methods!iscm}
+These methods allow for direct memory access of an \tt{UpperTriMatrix} or \tt{LowerTriMatrix}.
 
 \begin{tmvcode}
 U.subVector(int i, int j, int istep, int jstep, int size)
@@ -380,6 +409,7 @@ v2 = U * v1
 v2 = v1 * U
 v *= U
 U3 = U1 * U2
+U3 = ElemProd(U1,U2)
 m2 = U * m1
 m2 = m1 * U
 m = U * L
@@ -420,13 +450,13 @@ Hence, it is always done in place.  i.e. no extra storage is needed, and all of
 the \tt{m.divideInPlace()}, \tt{m.saveDiv()}, etc. are irrelevant.
 
 If an \tt{UpperTriMatrix} or \tt{LowerTriMatrix} is singular, 
-you can check easily with \tt{m.isSingular()},
+you can check easily with \tt{U.isSingular()},
 but there is no direct way to use SVD for the division and avoid any
-divisions by 0.  If you want to do this use \tt{BandMatrixViewOf(m)} to 
+divisions by 0.  If you want to do this use \tt{BandMatrixViewOf(U)} to 
 treat the \tt{TriMatrix} as a \tt{BandMatrix}, which can use SVD.
 
-\subsection{Input/Output}
-\index{UpperTriMatrix!Input/output}
+\subsection{I/O}
+\index{UpperTriMatrix!I/O}
 \label{TriMatrix_IO}
 
 The simplest I/O syntax is the usual:

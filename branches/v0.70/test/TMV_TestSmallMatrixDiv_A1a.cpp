@@ -24,12 +24,12 @@ static void TestSmallSquareDiv_A1a()
     tmv::SmallMatrix<std::complex<T>,N,N,stor> c1 = a1 * std::complex<T>(1,2);
     c1.diag().addToAll(std::complex<T>(3,1));
 
-    TestMatrixDivArith3a<T>(tmv::LU,a1,c1,"Square"); 
+    TestMatrixDivArith3a(tmv::LU,a1,c1,"Square"); 
 #if (XTEST & 2)
     tmv::SmallMatrix<T,N,N,stor,tmv::FortranStyle> a1f = a1;
     tmv::SmallMatrix<std::complex<T>,N,N,stor,tmv::FortranStyle> c1f = c1;
 
-    TestMatrixDivArith3a<T>(tmv::LU,a1f,c1f,"Square"); 
+    TestMatrixDivArith3a(tmv::LU,a1f,c1f,"Square"); 
 #endif
 }
 

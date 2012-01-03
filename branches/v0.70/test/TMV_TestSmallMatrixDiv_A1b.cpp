@@ -29,7 +29,7 @@ static void TestSmallSquareDiv_A1b()
     tmv::SmallVector<T,N> x = m.col(0);;
     tmv::SmallVector<std::complex<T>,N> y = c.col(0);
 
-    TestMatrixDivArith3d<T>(tmv::LU,a1,b,x,c1,e,y,"V/Square"); 
+    TestMatrixDivArith3d(tmv::LU,a1,b,x,c1,e,y,"V/Square"); 
 #if (XTEST & 32)
     tmv::SmallMatrix<T,N,N,stor,tmv::FortranStyle> a1f = a1;
     tmv::SmallMatrix<std::complex<T>,N,N,stor,tmv::FortranStyle> c1f = c1;
@@ -39,9 +39,9 @@ static void TestSmallSquareDiv_A1b()
     tmv::SmallVector<T,N,tmv::FortranStyle> xf = x;
     tmv::SmallVector<std::complex<T>,N,tmv::FortranStyle> yf = y;
 
-    TestMatrixDivArith3d<T>(tmv::LU,a1f,b,x,c1f,e,y,"V/Square"); 
-    TestMatrixDivArith3d<T>(tmv::LU,a1f,bf,x,c1f,ef,y,"V/Square"); 
-    TestMatrixDivArith3d<T>(tmv::LU,a1f,bf,xf,c1f,ef,yf,"V/Square"); 
+    TestMatrixDivArith3d(tmv::LU,a1f,b,x,c1f,e,y,"V/Square"); 
+    TestMatrixDivArith3d(tmv::LU,a1f,bf,x,c1f,ef,y,"V/Square"); 
+    TestMatrixDivArith3d(tmv::LU,a1f,bf,xf,c1f,ef,yf,"V/Square"); 
 #endif
 }
 
