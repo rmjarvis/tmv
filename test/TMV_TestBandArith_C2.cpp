@@ -16,7 +16,7 @@ inline bool CanAddEq(
 }
 
 template <class M1, class M2, class M3> 
-inline bool CanMultMM(
+inline bool CanMult(
     const tmv::BaseMatrix_Diag<M1>& a, const tmv::BaseMatrix_Band<M2>& b,
     const tmv::BaseMatrix_Diag_Mutable<M3>& c)
 { 
@@ -25,7 +25,7 @@ inline bool CanMultMM(
 }
 
 template <class M1, class M2, class M3> 
-inline bool CanMultMM(
+inline bool CanMult(
     const tmv::BaseMatrix_Band<M1>& a, const tmv::BaseMatrix_Diag<M2>& b,
     const tmv::BaseMatrix_Diag_Mutable<M3>& c)
 { 
@@ -34,7 +34,7 @@ inline bool CanMultMM(
 }
 
 template <class M1, class M2, class M3> 
-inline bool CanMultMM(
+inline bool CanMult(
     const tmv::BaseMatrix_Band<M1>& a, const tmv::BaseMatrix_Band<M2>& b,
     const tmv::BaseMatrix_Diag_Mutable<M3>& c)
 { 
@@ -74,9 +74,9 @@ void TestBandMatrixArith_C2()
         tmv::BandMatrixView<T> bi = b[i];
         tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
 
-        TestMatrixArith4<T>(d1v,cd1v,bi,cbi,"Diag/Band");
-        TestMatrixArith5<T>(d1v,cd1v,bi,cbi,"Diag/Band");
-        TestMatrixArith6x<T>(d1v,cd1v,bi,cbi,"Diag/Band");
+        TestMatrixArith4(d1v,cd1v,bi,cbi,"Diag/Band");
+        TestMatrixArith5(d1v,cd1v,bi,cbi,"Diag/Band");
+        TestMatrixArith6x(d1v,cd1v,bi,cbi,"Diag/Band");
     }
 #endif
 }

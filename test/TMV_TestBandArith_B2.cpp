@@ -51,15 +51,15 @@ void TestBandMatrixArith_B2()
         tmv::BandMatrixView<T> bi = b[i];
         tmv::BandMatrixView<std::complex<T> > cbi = cb[i];
 
-        TestMatrixArith4<T>(a1v,ca1v,bi,cbi,"SquareM/Band");
-        TestMatrixArith5<T>(a1v,ca1v,bi,cbi,"SquareM/Band");
-        TestMatrixArith6x<T>(a1v,ca1v,bi,cbi,"SquareM/Band");
-        TestMatrixArith4<T>(a3v,ca3v,bi,cbi,"NonSquareM/Band");
-        TestMatrixArith5<T>(a3v,ca3v,bi,cbi,"NonSquareM/Band");
-        TestMatrixArith6x<T>(a3v,ca3v,bi,cbi,"NonSquareM/Band");
-        TestMatrixArith4<T>(a4v,ca4v,bi,cbi,"DegenerateM/Band");
-        TestMatrixArith5<T>(a4v,ca4v,bi,cbi,"DegenerateM/Band");
-        TestMatrixArith6x<T>(a4v,ca4v,bi,cbi,"DegenerateM/Band");
+        TestMatrixArith4(a1v,ca1v,bi,cbi,"SquareM/Band");
+        TestMatrixArith5(a1v,ca1v,bi,cbi,"SquareM/Band");
+        TestMatrixArith6x(a1v,ca1v,bi,cbi,"SquareM/Band");
+        TestMatrixArith4(a3v,ca3v,bi,cbi,"NonSquareM/Band");
+        TestMatrixArith5(a3v,ca3v,bi,cbi,"NonSquareM/Band");
+        TestMatrixArith6x(a3v,ca3v,bi,cbi,"NonSquareM/Band");
+        TestMatrixArith4(a4v,ca4v,bi,cbi,"DegenerateM/Band");
+        TestMatrixArith5(a4v,ca4v,bi,cbi,"DegenerateM/Band");
+        TestMatrixArith6x(a4v,ca4v,bi,cbi,"DegenerateM/Band");
     }
 #endif
 }

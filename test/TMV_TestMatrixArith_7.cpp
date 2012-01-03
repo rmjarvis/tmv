@@ -65,14 +65,14 @@ void TestMatrixArith_7()
     tmv::VectorView<CT> cv2s = cv25.subVector(0,20,5);
     cv2s = cv2v;
 
-    TestMatrixArith7<T>(a1,ca1,v1v,cv1v,v2v,cv2v,"Square 1");
-    TestMatrixArith7<T>(a1,ca1,v1s,cv1s,v2v,cv2v,"Square 2");
-    TestMatrixArith7<T>(a1,ca1,v1v,cv1v,v2s,cv2s,"Square 3");
-    TestMatrixArith7<T>(a1,ca1,v1s,cv1s,v2s,cv2s,"Square 4");
-    TestMatrixArith7<T>(a2,ca2,v1v,cv1v,v2v,cv2v,"Square 5");
-    TestMatrixArith7<T>(a2,ca2,v1s,cv1s,v2v,cv2v,"Square 6");
-    TestMatrixArith7<T>(a2,ca2,v1v,cv1v,v2s,cv2s,"Square 7");
-    TestMatrixArith7<T>(a2,ca2,v1s,cv1s,v2s,cv2s,"Square 8");
+    TestMatrixArith7(a1,ca1,v1v,cv1v,v2v,cv2v,"Square 1");
+    TestMatrixArith7(a1,ca1,v1s,cv1s,v2v,cv2v,"Square 2");
+    TestMatrixArith7(a1,ca1,v1v,cv1v,v2s,cv2s,"Square 3");
+    TestMatrixArith7(a1,ca1,v1s,cv1s,v2s,cv2s,"Square 4");
+    TestMatrixArith7(a2,ca2,v1v,cv1v,v2v,cv2v,"Square 5");
+    TestMatrixArith7(a2,ca2,v1s,cv1s,v2v,cv2v,"Square 6");
+    TestMatrixArith7(a2,ca2,v1v,cv1v,v2s,cv2s,"Square 7");
+    TestMatrixArith7(a2,ca2,v1s,cv1s,v2s,cv2s,"Square 8");
 #if (XTEST & 1)
     tmv::Matrix<T> a3x(12,16);
     for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3x(i,j) = T(1-2*i+3*j);
@@ -82,10 +82,10 @@ void TestMatrixArith_7()
     tmv::MatrixView<CT> ca3 = ca3x.subMatrix(0,12,0,16,3,4);
     ca3.diag().addToAll(CT(-22,15));
 
-    TestMatrixArith7<T>(a3,ca3,v1v,cv1v,v2v,cv2v,"Square 9");
-    TestMatrixArith7<T>(a3,ca3,v1s,cv1s,v2v,cv2v,"Square 10");
-    TestMatrixArith7<T>(a3,ca3,v1v,cv1v,v2s,cv2s,"Square 11");
-    TestMatrixArith7<T>(a3,ca3,v1s,cv1s,v2s,cv2s,"Square 12");
+    TestMatrixArith7(a3,ca3,v1v,cv1v,v2v,cv2v,"Square 9");
+    TestMatrixArith7(a3,ca3,v1s,cv1s,v2v,cv2v,"Square 10");
+    TestMatrixArith7(a3,ca3,v1v,cv1v,v2s,cv2s,"Square 11");
+    TestMatrixArith7(a3,ca3,v1s,cv1s,v2s,cv2s,"Square 12");
 #endif
 
 #if (XTEST & 32)
@@ -96,7 +96,7 @@ void TestMatrixArith_7()
     tmv::Vector<T,tmv::FortranStyle> v2f = v2;
     tmv::Vector<CT,tmv::FortranStyle> cv2f = cv2;
 
-    TestMatrixArith7<T>(a1f,ca1f,v1f,cv1f,v2f,cv2f,"Square 1F");
+    TestMatrixArith7(a1f,ca1f,v1f,cv1f,v2f,cv2f,"Square 1F");
 #endif
 
     tmv::Matrix<T,tmv::RowMajor> a4x(7,4);
@@ -131,14 +131,14 @@ void TestMatrixArith_7()
     tmv::VectorView<CT> cv3s = cv35.subVector(0,35,5);
     cv3s = cv3v;
 
-    TestMatrixArith7<T>(a4,ca4,v3v,cv3v,v2v,cv2v,"NonSquare 1");
-    TestMatrixArith7<T>(a4,ca4,v3s,cv3s,v2v,cv2v,"NonSquare 2");
-    TestMatrixArith7<T>(a4,ca4,v3v,cv3v,v2s,cv2s,"NonSquare 3");
-    TestMatrixArith7<T>(a4,ca4,v3s,cv3s,v2s,cv2s,"NonSquare 4");
-    TestMatrixArith7<T>(a5,ca5,v1v,cv1v,v3v,cv3v,"NonSquare 5");
-    TestMatrixArith7<T>(a5,ca5,v1s,cv1s,v3v,cv3v,"NonSquare 6");
-    TestMatrixArith7<T>(a5,ca5,v1v,cv1v,v3s,cv3s,"NonSquare 7");
-    TestMatrixArith7<T>(a5,ca5,v1s,cv1s,v3s,cv3s,"NonSquare 8");
+    TestMatrixArith7(a4,ca4,v3v,cv3v,v2v,cv2v,"NonSquare 1");
+    TestMatrixArith7(a4,ca4,v3s,cv3s,v2v,cv2v,"NonSquare 2");
+    TestMatrixArith7(a4,ca4,v3v,cv3v,v2s,cv2s,"NonSquare 3");
+    TestMatrixArith7(a4,ca4,v3s,cv3s,v2s,cv2s,"NonSquare 4");
+    TestMatrixArith7(a5,ca5,v1v,cv1v,v3v,cv3v,"NonSquare 5");
+    TestMatrixArith7(a5,ca5,v1s,cv1s,v3v,cv3v,"NonSquare 6");
+    TestMatrixArith7(a5,ca5,v1v,cv1v,v3s,cv3s,"NonSquare 7");
+    TestMatrixArith7(a5,ca5,v1s,cv1s,v3s,cv3s,"NonSquare 8");
 
 #if (XTEST & 8)
     tmv::Matrix<T> a6x(4,0,1);
@@ -161,14 +161,14 @@ void TestMatrixArith_7()
     tmv::Vector<CT> cv45(0);
     tmv::VectorView<CT> cv4s = cv45.subVector(0,0,5);
 
-    TestMatrixArith7<T>(a6,ca6,v1v,cv1v,v4v,cv4v,"Degenerate 1");
-    TestMatrixArith7<T>(a6,ca6,v1s,cv1s,v4v,cv4v,"Degenerate 2");
-    TestMatrixArith7<T>(a6,ca6,v1v,cv1v,v4s,cv4s,"Degenerate 3");
-    TestMatrixArith7<T>(a6,ca6,v1s,cv1s,v4s,cv4s,"Degenerate 4");
-    TestMatrixArith7<T>(a7,ca7,v4v,cv4v,v2v,cv2v,"Degenerate 5");
-    TestMatrixArith7<T>(a7,ca7,v4s,cv4s,v2v,cv2v,"Degenerate 6");
-    TestMatrixArith7<T>(a7,ca7,v4v,cv4v,v2s,cv2s,"Degenerate 7");
-    TestMatrixArith7<T>(a7,ca7,v4s,cv4s,v2s,cv2s,"Degenerate 8");
+    TestMatrixArith7(a6,ca6,v1v,cv1v,v4v,cv4v,"Degenerate 1");
+    TestMatrixArith7(a6,ca6,v1s,cv1s,v4v,cv4v,"Degenerate 2");
+    TestMatrixArith7(a6,ca6,v1v,cv1v,v4s,cv4s,"Degenerate 3");
+    TestMatrixArith7(a6,ca6,v1s,cv1s,v4s,cv4s,"Degenerate 4");
+    TestMatrixArith7(a7,ca7,v4v,cv4v,v2v,cv2v,"Degenerate 5");
+    TestMatrixArith7(a7,ca7,v4s,cv4s,v2v,cv2v,"Degenerate 6");
+    TestMatrixArith7(a7,ca7,v4v,cv4v,v2s,cv2s,"Degenerate 7");
+    TestMatrixArith7(a7,ca7,v4s,cv4s,v2s,cv2s,"Degenerate 8");
 #endif
 }
 

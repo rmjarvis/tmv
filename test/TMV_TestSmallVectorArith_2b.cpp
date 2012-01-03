@@ -23,7 +23,7 @@ template <int N, class T> static void DoTestSmallVectorArith_2b()
     tmv::VectorView<T> bv = b.view();
     tmv::VectorView<std::complex<T> > cbv = cb.view();
 
-    TestVectorArith2<T>(av,cav,b,cb,"SmallVector/Vector");
+    TestVectorArith2(av,cav,b,cb,"SmallVector/Vector");
 }
 
 template <class T> void TestSmallVectorArith_2b()

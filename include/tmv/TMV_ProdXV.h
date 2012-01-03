@@ -65,8 +65,9 @@ namespace tmv {
         typedef typename Traits<value_type>::real_type real_type;
         typedef typename Traits<value_type>::complex_type complex_type;
 
-        ProdXV(const T _x, const BaseVector<V>& _v) : 
+        ProdXV(const Scaling<ix,T>& _x, const BaseVector<V>& _v) : 
             x(_x), v(_v.vec()) {}
+
         TMV_INLINE const Scaling<ix,T>& getX() const { return x; }
         TMV_INLINE const V& getV() const { return v; }
 
@@ -109,18 +110,6 @@ namespace tmv {
     inline void MultEq(BaseVector_Mutable<V>& v, const CCT x)
     { Scale(CT(x),v.vec()); }
 
-    template <class V, class T>
-    inline void MultEq(BaseVector_Mutable<V>& v, const Scaling<0,T> x)
-    { Scale(x,v.vec()); }
-
-    template <class V, class T>
-    inline void MultEq(BaseVector_Mutable<V>& v, const Scaling<1,T> x)
-    {}
-
-    template <class V, class T>
-    inline void MultEq(BaseVector_Mutable<V>& v, const Scaling<-1,T> x)
-    { Scale(x,v.vec()); }
-
     // v /= x
     template <class V>
     inline void LDivEq(BaseVector_Mutable<V>& v, const int x)
@@ -137,18 +126,6 @@ namespace tmv {
     template <class V>
     inline void LDivEq(BaseVector_Mutable<V>& v, const CCT x)
     { Scale(RT(1)/CT(x),v.vec()); }
-
-    template <class V, class T>
-    inline void LDivEq(BaseVector_Mutable<V>& v, const Scaling<0,T> x)
-    { Scale(RT(1)/T(x),v.vec()); }
-
-    template <class V, class T>
-    inline void LDivEq(BaseVector_Mutable<V>& v, const Scaling<1,T> x)
-    {}
-
-    template <class V, class T>
-    inline void LDivEq(BaseVector_Mutable<V>& v, const Scaling<-1,T> x)
-    { Scale(x,v.vec()); }
 
     // -v
     template <class V>
@@ -172,11 +149,6 @@ namespace tmv {
     TMV_INLINE ProdXV<0,CT,V> operator*(const CCT x, const BaseVector<V>& v)
     { return CT(x)*v; }
 
-    template <class V, int ix, class T>
-    TMV_INLINE ProdXV<ix,T,V> operator*(
-        const Scaling<ix,T> x, const BaseVector<V>& v)
-    { return ProdXV<ix,T,V>(T(x),v); }
-
     // v * x
     template <class V>
     TMV_INLINE ProdXV<0,RT,V> operator*(const BaseVector<V>& v, const int x)
@@ -194,11 +166,6 @@ namespace tmv {
     TMV_INLINE ProdXV<0,CT,V> operator*(const BaseVector<V>& v, const CCT x)
     { return CT(x)*v; }
 
-    template <class V, int ix, class T>
-    TMV_INLINE ProdXV<ix,T,V> operator*(
-        const BaseVector<V>& v, const Scaling<ix,T> x)
-    { return ProdXV<ix,T,V>(T(x),v); }
-
     // v / x
     template <class V>
     TMV_INLINE ProdXV<0,RT,V> operator/(const BaseVector<V>& v, const int x)
@@ -215,11 +182,6 @@ namespace tmv {
     template <class V>
     TMV_INLINE ProdXV<0,CT,V> operator/(const BaseVector<V>& v, const CCT x)
     { return (RT(1)/CT(x))*v; }
-
-    template <class V, int ix, class T>
-    TMV_INLINE ProdXV<ix,T,V> operator/(
-        const BaseVector<V>& v, const Scaling<ix,T> x)
-    { return ProdXV<ix,T,V>(RT(1)/T(x),v); }
 
 #undef RT
 #undef CT
@@ -257,14 +219,6 @@ namespace tmv {
         const CCT x, const ProdXV<ix,T,V>& pxv)
     { return ProdXV<0,CT,V>(x*pxv.getX(),pxv.getV()); }
 
-    template <int ix1, class T1, int ix, class T, class V>
-    TMV_INLINE ProdXV<ix1*ix,typename Traits2<T,T1>::type,V> operator*(
-        const Scaling<ix1,T1>& x, const ProdXV<ix,T,V>& pxv)
-    {
-        return ProdXV<ix1*ix,typename Traits2<T,T1>::type,V>(
-            T1(x)*pxv.getX(),pxv.getV()); 
-    }
-
     // (x*v)*x
     template <int ix, class T, class V>
     TMV_INLINE ProdXV<0,T,V> operator*(const ProdXV<ix,T,V>& pxv, const int x)
@@ -281,14 +235,6 @@ namespace tmv {
     template <int ix, class T, class V>
     TMV_INLINE ProdXV<0,CT,V> operator*(const ProdXV<ix,T,V>& pxv, const CCT x)
     { return ProdXV<0,CT,V>(x*pxv.getX(),pxv.getV()); }
-
-    template <int ix1, class T1, int ix, class T, class V>
-    TMV_INLINE ProdXV<ix1*ix,typename Traits2<T,T1>::type,V> operator*(
-        const ProdXV<ix,T,V>& pxv, const Scaling<ix1,T1>& x)
-    {
-        return ProdXV<ix1*ix,typename Traits2<T,T1>::type,V>(
-            T1(x)*pxv.getX(),pxv.getV()); 
-    }
 
     // (x*v)/x
     template <int ix, class T, class V>
@@ -307,14 +253,6 @@ namespace tmv {
     TMV_INLINE ProdXV<0,CT,V> operator/(
         const ProdXV<ix,T,V>& pxv, const CCT x)
     { return ProdXV<0,CT,V>(pxv.getX()/x,pxv.getV()); }
-
-    template <int ix1, class T1, int ix, class T, class V>
-    TMV_INLINE ProdXV<ix1*ix,typename Traits2<T,T1>::type,V> operator/(
-        const ProdXV<ix,T,V>& pxv, const Scaling<ix1,T1>& x)
-    {
-        return ProdXV<ix1*ix,typename Traits2<T,T1>::type,V>(
-            pxv.getX()/T1(x),pxv.getV()); 
-    }
 
 #undef RT
 #undef CT

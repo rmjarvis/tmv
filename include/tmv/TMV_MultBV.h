@@ -341,6 +341,8 @@ namespace tmv {
         }
     };
 
+    template <int ix, class T, class V> class ProdXV;
+
     // algo 82: copy x*v2
     template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultBV_Helper<82,cs,rs,add,ix,T,M1,V2,V3>
@@ -357,7 +359,7 @@ namespace tmv {
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
             typename V3::noalias_type v3na = v3.noAlias();
-            MultMV<add>(one,m1,(x*v2).calc(),v3na);
+            MultMV<add>(one,m1,ProdXV<ix,T,V2>(x,v2).calc(),v3na);
         }
     };
 
@@ -404,6 +406,8 @@ namespace tmv {
         }
     };
 
+    template <int ix, class T, class M, class V> class ProdMV;
+
     // algo 85: v3c = x*m1*v2, v3 (+)= v3c
     template <int cs, int rs, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultBV_Helper<85,cs,rs,add,ix,T,M1,V2,V3>
@@ -420,7 +424,7 @@ namespace tmv {
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
             typename V3::noalias_type v3na = v3.noAlias();
-            MultXV<add>(one,(x*m1*v2).calc(),v3na);
+            MultXV<add>(one,ProdMV<ix,T,M1,V2>(x,m1,v2).calc(),v3na);
         }
     };
 

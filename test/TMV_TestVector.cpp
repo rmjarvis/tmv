@@ -596,14 +596,14 @@ static void TestVectorArith()
     tmv::Vector<CT> ca = a*CT(2,-1);;
     V aa = a.view();
     CV caa = ca.view();
-    TestVectorArith1<T>(aa,caa,"Vector C");
+    TestVectorArith1(aa,caa,"Vector C");
 
     tmv::Vector<T> b(N);
     for(int i=0;i<N;++i) b(i) = T(-3*i+2);
     tmv::Vector<CT> cb = b*CT(-5,1);
     V bb = b.view();
     CV cbb = cb.view();
-    TestVectorArith2<T>(aa,caa,b,cbb,"Vector CC");
+    TestVectorArith2(aa,caa,b,cbb,"Vector CC");
 
     tmv::Vector<T> a10(10*N);
     V as = a10.subVector(0,10*N,10);
@@ -611,7 +611,7 @@ static void TestVectorArith()
     tmv::Vector<CT> ca10(10*N);
     CV cas = ca10.subVector(0,10*N,10);
     cas = ca;
-    TestVectorArith1<T>(as,cas,"Vector C Step");
+    TestVectorArith1(as,cas,"Vector C Step");
 
     tmv::Vector<T> b10(10*N);
     V bs = b10.subVector(0,10*N,10);
@@ -619,49 +619,49 @@ static void TestVectorArith()
     tmv::Vector<CT> cb10(10*N);
     CV cbs = cb10.subVector(0,10*N,10);
     cbs = cb;
-    TestVectorArith2<T>(as,cas,bb,cbb,"Vector C StepA");
-    TestVectorArith2<T>(aa,caa,bs,cbs,"Vector C StepB");
-    TestVectorArith2<T>(as,cas,bs,cbs,"Vector C StepAB");
+    TestVectorArith2(as,cas,bb,cbb,"Vector C StepA");
+    TestVectorArith2(aa,caa,bs,cbs,"Vector C StepB");
+    TestVectorArith2(as,cas,bs,cbs,"Vector C StepAB");
 
     V ar = aa.reverse();
     CV car = caa.reverse();
-    TestVectorArith1<T>(ar,car,"Vector C Rev");
+    TestVectorArith1(ar,car,"Vector C Rev");
 
     V br = bb.reverse();
     CV cbr = cbb.reverse();
-    TestVectorArith2<T>(ar,car,bb,cbb,"Vector C RevA");
-    TestVectorArith2<T>(aa,caa,br,cbr,"Vector C RevB");
-    TestVectorArith2<T>(ar,car,br,cbr,"Vector C RevAB");
+    TestVectorArith2(ar,car,bb,cbb,"Vector C RevA");
+    TestVectorArith2(aa,caa,br,cbr,"Vector C RevB");
+    TestVectorArith2(ar,car,br,cbr,"Vector C RevAB");
 
 #if (XTEST & 32)
     VF af = a.fView();
     CVF caf = ca.fView();
-    TestVectorArith1<T>(af,caf,"Vector F");
+    TestVectorArith1(af,caf,"Vector F");
 
     VF bf = b.fView();
     CVF cbf = cb.fView();
-    TestVectorArith2<T>(af,caf,b,cbb,"Vector FC");
-    TestVectorArith2<T>(aa,caa,bf,cbf,"Vector CF");
-    TestVectorArith2<T>(af,caf,bf,cbf,"Vector FF");
+    TestVectorArith2(af,caf,b,cbb,"Vector FC");
+    TestVectorArith2(aa,caa,bf,cbf,"Vector CF");
+    TestVectorArith2(af,caf,bf,cbf,"Vector FF");
 
     VF asf = as;
     CVF casf = cas;
-    TestVectorArith1<T>(asf,casf,"Vector F Step");
+    TestVectorArith1(asf,casf,"Vector F Step");
 
     VF bsf = bs;
     CVF cbsf = cbs;
-    TestVectorArith2<T>(asf,casf,bf,cbf,"Vector F StepA");
-    TestVectorArith2<T>(af,caf,bsf,cbsf,"Vector F StepB");
-    TestVectorArith2<T>(asf,casf,bsf,cbsf,"Vector F StepAB");
+    TestVectorArith2(asf,casf,bf,cbf,"Vector F StepA");
+    TestVectorArith2(af,caf,bsf,cbsf,"Vector F StepB");
+    TestVectorArith2(asf,casf,bsf,cbsf,"Vector F StepAB");
 
     VF arf = ar;
     VF brf = br;
     CVF carf = car;
     CVF cbrf = cbr;
-    TestVectorArith1<T>(arf,carf,"Vector F Rev");
-    TestVectorArith2<T>(arf,carf,bf,cbf,"Vector F RevA");
-    TestVectorArith2<T>(af,caf,brf,cbrf,"Vector F RevB");
-    TestVectorArith2<T>(arf,carf,brf,cbrf,"Vector F RevAB");
+    TestVectorArith1(arf,carf,"Vector F Rev");
+    TestVectorArith2(arf,carf,bf,cbf,"Vector F RevA");
+    TestVectorArith2(af,caf,brf,cbrf,"Vector F RevB");
+    TestVectorArith2(arf,carf,brf,cbrf,"Vector F RevAB");
 #endif
 
     if (showstartdone) {

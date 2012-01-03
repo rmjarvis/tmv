@@ -163,9 +163,9 @@ namespace tmv {
         enum { vector = false };
         enum { sym = false };
         enum { herm = false };
-        enum { upper = true };
+        enum { upper = true };   // could have elements in upperTri
         enum { lower = true };
-        enum { upper2 = false };
+        enum { upper2 = false }; // not necessarily elements in upperTri
         enum { lower2 = false };
         enum { band = true };
         enum { unit = false };
@@ -360,10 +360,18 @@ namespace tmv {
     {
         enum { bothunit = ShapeTraits<S1>::unit && ShapeTraits<S2>::unit };
         enum { bothband = ShapeTraits<S1>::band && ShapeTraits<S2>::band };
+        enum { eitherband = ShapeTraits<S1>::band || ShapeTraits<S2>::band };
+
+        // noupper = neither has any elements in uppertri
         enum { noupper = !ShapeTraits<S1>::upper && !ShapeTraits<S2>::upper };
         enum { nolower = !ShapeTraits<S1>::lower && !ShapeTraits<S2>::lower };
+        // noupper2 = neither _necessarily_ has any elements in uppertri
         enum { noupper2 = !ShapeTraits<S1>::upper2 && !ShapeTraits<S2>::upper2 };
         enum { nolower2 = !ShapeTraits<S1>::lower2 && !ShapeTraits<S2>::lower2 };
+        // noupper3 = at least one does not have any elements in uppertri
+        enum { noupper3 = !ShapeTraits<S1>::upper || !ShapeTraits<S2>::upper };
+        enum { nolower3 = !ShapeTraits<S1>::lower || !ShapeTraits<S2>::lower };
+
         enum { bothsym = ShapeTraits<S1>::sym && ShapeTraits<S2>::sym };
         enum { bothherm = ShapeTraits<S1>::herm && ShapeTraits<S2>::herm };
 
@@ -379,6 +387,19 @@ namespace tmv {
                     bothunit ? UnitUpperTri : UpperTri ) :
                 bothband || noupper2 || nolower2 ? Band :
                 Rec ) };
+        enum { eprod = (
+                ( S1 == Null ) ? S2 :
+                ( S2 == Null ) ? S1 :
+                noupper3 && nolower3 ? Diag :
+                noupper3 ? (
+                    bothband ? bothunit ? UnitLowerBand : LowerBand :
+                    bothunit ? UnitLowerTri : LowerTri ) :
+                nolower3 ? (
+                    bothband ? bothunit ? UnitUpperBand : UpperBand :
+                    bothunit ? UnitUpperTri : UpperTri ) :
+                bothsym ? (eitherband ? SymBand : Sym) :
+                bothherm ? (eitherband ? HermBand : Herm) :
+                eitherband ? Band : Rec ) };
         enum { sum = (
                 ( S1 == Null ) ? S2 :
                 ( S2 == Null ) ? S1 :

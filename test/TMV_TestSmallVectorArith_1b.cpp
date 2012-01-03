@@ -17,7 +17,7 @@ template <int N, class T> static void DoTestSmallVectorArith_1b()
     tmv::SmallVector<std::complex<T>,N> ca = a*std::complex<T>(2,-1);;
     tmv::SmallVector<std::complex<T>,N> cb = b*std::complex<T>(-5,1);
 
-    TestVectorArith1<T>(a,ca,"SmallVector C");
+    TestVectorArith1(a,ca,"SmallVector C");
 }
 
 template <class T> void TestSmallVectorArith_1b()

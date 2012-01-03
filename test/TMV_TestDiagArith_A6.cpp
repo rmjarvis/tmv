@@ -37,8 +37,8 @@ template <class T> void TestDiagMatrixArith_A6()
     tmv::MatrixView<T> mv = m.view();
     tmv::MatrixView<std::complex<T> > cmv = cm.view();
 
-    TestMatrixArith6<T>(av,cav,bv,cbv,cv,ccv, "Diag/Diag");
-    TestMatrixArith6<T>(av,cav,bv,cbv,mv,cmv, "Diag/Diag/Matrix");
+    TestMatrixArith6(av,cav,bv,cbv,cv,ccv, "Diag/Diag");
+    TestMatrixArith6(av,cav,bv,cbv,mv,cmv, "Diag/Diag/Matrix");
 }
 
 #ifdef TEST_DOUBLE

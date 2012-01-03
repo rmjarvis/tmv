@@ -1036,6 +1036,8 @@ namespace tmv {
         }
     };
 
+    template <int ix, class T, class V> class ProdXV;
+
     // algo 81: copy x*v1
     template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<81,cs,rs,add,ix,T,V1,V2,M3>
@@ -1052,7 +1054,7 @@ namespace tmv {
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
             typename M3::noalias_type m3na = m3.noAlias();
-            Rank1Update<add>(one,(x*v1).calc(),v2,m3na);
+            Rank1Update<add>(one,ProdXV<ix,T,V1>(x,v1).calc(),v2,m3na);
         }
     };
 
@@ -1072,7 +1074,7 @@ namespace tmv {
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
             typename M3::noalias_type m3na = m3.noAlias();
-            Rank1Update<add>(one,v1,(x*v2).calc(),m3na);
+            Rank1Update<add>(one,v1,ProdXV<ix,T,V2>(x,v2).calc(),m3na);
         }
     };
 
@@ -1093,9 +1095,11 @@ namespace tmv {
             const Scaling<1,RT> one;
             typename M3::noalias_type m3na = m3.noAlias();
             if (M > N) {
-                Rank1Update<add>(one,v1.copy(),(x*v2).calc(),m3na);
+                Rank1Update<add>(
+                    one,v1.copy(),ProdXV<ix,T,V2>(x,v2).calc(),m3na);
             } else {
-                Rank1Update<add>(one,(x*v1).calc(),v2.copy(),m3na);
+                Rank1Update<add>(
+                    one,ProdXV<ix,T,V1>(x,v1).calc(),v2.copy(),m3na);
             }
         }
     };

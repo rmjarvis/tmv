@@ -41,8 +41,8 @@ void TestMatrixArith_3()
     tmv::MatrixView<T> a2 = a2x.view();
     tmv::MatrixView<CT> ca2 = ca2x.view();
 
-    TestMatrixArith3<T>(a1,ca1,"Square 1");
-    TestMatrixArith3<T>(a2,ca2,"Square 2");
+    TestMatrixArith3(a1,ca1,"Square 1");
+    TestMatrixArith3(a2,ca2,"Square 2");
 #if (XTEST & 1)
     tmv::Matrix<T> a3x(12,16);
     for(int i=0;i<12;++i) for(int j=0;j<16;++j) a3x(i,j) = T(1-2*i+3*j);
@@ -52,7 +52,7 @@ void TestMatrixArith_3()
     tmv::MatrixView<CT> ca3 = ca3x.subMatrix(0,12,0,16,3,4);
     ca3.diag().addToAll(CT(-22,15));
 
-    TestMatrixArith3<T>(a3,ca3,"Square 3");
+    TestMatrixArith3(a3,ca3,"Square 3");
 #endif
 
 #if (XTEST & 32)
@@ -61,8 +61,8 @@ void TestMatrixArith_3()
     tmv::Matrix<T,tmv::FortranStyle> a2f = a2;
     tmv::Matrix<CT,tmv::FortranStyle> ca2f = ca2;
 
-    TestMatrixArith3<T>(a1f,ca1f,"Square 1F");
-    TestMatrixArith3<T>(a2f,ca2f,"Square 2F");
+    TestMatrixArith3(a1f,ca1f,"Square 1F");
+    TestMatrixArith3(a2f,ca2f,"Square 2F");
 #endif
 
     tmv::Matrix<T,tmv::RowMajor> a4x(7,4);
@@ -85,8 +85,8 @@ void TestMatrixArith_3()
     tmv::MatrixView<T> a5 = a5x.view();
     tmv::MatrixView<CT> ca5 = ca5x.view();
 
-    TestMatrixArith3<T>(a4,ca4,"NonSquare 1");
-    TestMatrixArith3<T>(a5,ca5,"NonSquare 2");
+    TestMatrixArith3(a4,ca4,"NonSquare 1");
+    TestMatrixArith3(a5,ca5,"NonSquare 2");
 
 #if (XTEST & 8)
     tmv::Matrix<T> a6x(4,0,1);
@@ -99,8 +99,8 @@ void TestMatrixArith_3()
     tmv::MatrixView<T> a7 = a7x.view();
     tmv::MatrixView<CT> ca7 = ca7x.view();
 
-    TestMatrixArith3<T>(a6,ca6,"Degenerate 1");
-    TestMatrixArith3<T>(a7,ca7,"Degenerate 2");
+    TestMatrixArith3(a6,ca6,"Degenerate 1");
+    TestMatrixArith3(a7,ca7,"Degenerate 2");
 #endif
 }
 

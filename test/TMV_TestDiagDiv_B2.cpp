@@ -40,15 +40,15 @@ void TestDiagDiv_B2()
     tmv::MatrixView<std::complex<T> > cqv = cq.view();
     tmv::DiagMatrixView<std::complex<T> > cav = ca.view();
 
-    TestMatrixDivArith1<T>(tmv::LU,av,pv,cav,cpv,"SquareM/Diag");
-    TestMatrixDivArith1<T>(tmv::LU,av,qv,cav,cqv,"NonSqaureM/Diag");
+    TestMatrixDivArith1(tmv::LU,av,pv,cav,cpv,"SquareM/Diag");
+    TestMatrixDivArith1(tmv::LU,av,qv,cav,cqv,"NonSqaureM/Diag");
 #if (XTEST & 8)
     tmv::Matrix<T> r(N,0,T(1));
     tmv::Matrix<std::complex<T> > cr(N,0,std::complex<T>(1));
     tmv::MatrixView<T> rv = r.view();
     tmv::MatrixView<std::complex<T> > crv = cr.view();
 
-    TestMatrixDivArith1<T>(tmv::LU,av,rv,cav,crv,"DegenM/Diag");
+    TestMatrixDivArith1(tmv::LU,av,rv,cav,crv,"DegenM/Diag");
 #endif
 }
 

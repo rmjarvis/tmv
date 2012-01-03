@@ -391,18 +391,18 @@ void TestPermutation()
     // Test other arithmetic
     //
 
-    TestMatrixArith1<T>(p3,p3,"Permutation");
-    TestMatrixArith2<T>(p3,p3,"Permutation");
-    TestMatrixArith3<T>(p3,p3,"Permutation");
-    TestMatrixArith4<T>(p3,p3,p2,p2,"Permutation");
-    TestMatrixArith4<T>(p3,p3,m2,cm2,"Permutation");
-    TestMatrixArith4<T>(m3,cm3,p2,p2,"Permutation");
-    TestMatrixArith5<T>(p3,p3,p2,p2,"Permutation");
-    TestMatrixArith5<T>(p3,p3,m2,cm2,"Permutation");
-    TestMatrixArith5<T>(m3,cm3,p2,p2,"Permutation");
-    TestMatrixArith6x<T>(p3,p3,p2,p2,"Permutation");
-    TestMatrixArith6x<T>(p3,p3,m2,cm2,"Permutation");
-    TestMatrixArith6x<T>(m3,cm3,p2,p2,"Permutation");
+    TestMatrixArith1(p3,p3,"Permutation");
+    TestMatrixArith2(p3,p3,"Permutation");
+    TestMatrixArith3(p3,p3,"Permutation");
+    TestMatrixArith4(p3,p3,p2,p2,"Permutation");
+    TestMatrixArith4(p3,p3,m2,cm2,"Permutation");
+    TestMatrixArith4(m3,cm3,p2,p2,"Permutation");
+    TestMatrixArith5(p3,p3,p2,p2,"Permutation");
+    TestMatrixArith5(p3,p3,m2,cm2,"Permutation");
+    TestMatrixArith5(m3,cm3,p2,p2,"Permutation");
+    TestMatrixArith6x(p3,p3,p2,p2,"Permutation");
+    TestMatrixArith6x(p3,p3,m2,cm2,"Permutation");
+    TestMatrixArith6x(m3,cm3,p2,p2,"Permutation");
 
     //
     // Test resize

@@ -248,8 +248,6 @@ the native TMV code will be used instead.
 \item \texttt{SMALL\_TESTS=false} specifies whether to make the smaller test suite programs: \texttt{tmvtest1a}, \texttt{tmvtest1b}, etc. 
 \item \texttt{WARN=false} specifies whether to have the compiler report warning (with -Wall or
 something similar).
-\item \texttt{NOMIX\_SMALL=false} specifies whether to avoid mixing Small and regular arithmetic.  
-(This is automatically selected if GotoBLAS is being used.)
 \item \texttt{CACHE\_LIB=true} specifies whether to cache the results of the library checks.  
 Scons is pretty good at only recompiling what needs to be recompiled based on what options or files you have changed.  However, it is not good at detecting when changed options might change the results of a BLAS or LAPACK library check.  So if you add new paths for it to search, or even more so, if you change the names or locations of libraries on your system, then you should set \tt{CACHE\_LIB=false} to force scons to redo the BLAS and LAPACK checks each time.
 \item \texttt{WITH\_UPS=false} specifies whether to install TMV information for ups into the \tt{PREFIX/ups} directory.

@@ -138,9 +138,9 @@ namespace tmv {
         typedef typename Traits<value_type>::real_type real_type;
         typedef typename Traits<value_type>::complex_type complex_type;
 
-        OProdVV(
-            const T _x, const BaseVector<V1>& _v1, 
-            const BaseVector<V2>& _v2) : x(_x), v1(_v1.vec()), v2(_v2.vec()) {}
+        OProdVV(const Scaling<ix,T>& _x, const BaseVector<V1>& _v1, 
+                const BaseVector<V2>& _v2) :
+            x(_x), v1(_v1.vec()), v2(_v2.vec()) {}
 
         TMV_INLINE const Scaling<ix,T>& getX() const { return x; }
         TMV_INLINE const V1& getV1() const { return v1; }
@@ -266,14 +266,6 @@ namespace tmv {
         const CCT x, const OProdVV<ix,T,V1,V2>& vv)
     { return OProdVV<0,CT,V1,V2>(x*vv.getX(),vv.getV1(),vv.getV2()); }
 
-    template <int ix1, class T1, int ix, class T, class V1, class V2>
-    TMV_INLINE OProdVV<ix*ix1,typename Traits2<T,T1>::type,V1,V2> operator*(
-        const Scaling<ix1,T1>& x, const OProdVV<ix,T,V1,V2>& vv)
-    {
-        return OProdVV<ix*ix1,typename Traits2<T,T1>::type,V1,V2>(
-            T1(x)*vv.getX(),vv.getV1(),vv.getV2()); 
-    }
-
     // (x*v)*x
     template <int ix, class T, class V1, class V2>
     TMV_INLINE OProdVV<0,T,V1,V2> operator*(
@@ -290,14 +282,6 @@ namespace tmv {
         const OProdVV<ix,T,V1,V2>& vv, const CCT x)
     { return OProdVV<0,CT,V1,V2>(x*vv.getX(),vv.getV1(),vv.getV2()); }
 
-    template <int ix1, class T1, int ix, class T, class V1, class V2>
-    TMV_INLINE OProdVV<ix*ix1,typename Traits2<T,T1>::type,V1,V2> operator*(
-        const OProdVV<ix,T,V1,V2>& vv, const Scaling<ix1,T1>& x)
-    {
-        return OProdVV<ix*ix1,typename Traits2<T,T1>::type,V1,V2>(
-            T1(x)*vv.getX(),vv.getV1(),vv.getV2()); 
-    }
-
     // (x*v)/x
     template <int ix, class T, class V1, class V2>
     TMV_INLINE OProdVV<0,T,V1,V2> operator/(
@@ -313,14 +297,6 @@ namespace tmv {
     TMV_INLINE OProdVV<0,CT,V1,V2> operator/(
         const OProdVV<ix,T,V1,V2>& vv, const CCT x)
     { return OProdVV<0,CT,V1,V2>(vv.getX()/x,vv.getV1(),vv.getV2()); }
-
-    template <int ix1, class T1, int ix, class T, class V1, class V2>
-    TMV_INLINE OProdVV<ix*ix1,typename Traits2<T,T1>::type,V1,V2> operator/(
-        const OProdVV<ix,T,V1,V2>& vv, const Scaling<ix1,T1>& x)
-    {
-        return OProdVV<ix*ix1,typename Traits2<T,T1>::type,V1,V2>(
-            vv.getX()/T1(x),vv.getV1(),vv.getV2()); 
-    }
 
 #undef RT
 #undef CT

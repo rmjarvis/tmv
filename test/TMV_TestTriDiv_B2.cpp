@@ -35,8 +35,8 @@ template <class T> void TestTriDiv_B2()
     mv.saveDiv();
     cmv.saveDiv();
 
-    TestMatrixDivArith1<T>(tmv::LU,mv,a1v,cmv,ca1v,"U/M");
-    TestMatrixDivArith1<T>(tmv::LU,mv,a1t,cmv,ca1t,"L/M");
+    TestMatrixDivArith1(tmv::LU,mv,a1v,cmv,ca1v,"U/M");
+    TestMatrixDivArith1(tmv::LU,mv,a1t,cmv,ca1t,"L/M");
 
 #if (XTEST & 2)
     tmv::UpperTriMatrix<T,tmv::UnitDiag> a2(m);
@@ -52,12 +52,12 @@ template <class T> void TestTriDiv_B2()
     mt.saveDiv();
     cmt.saveDiv();
 
-    TestMatrixDivArith1<T>(tmv::LU,mv,a2v,cmv,ca2v,"U/M");
-    TestMatrixDivArith1<T>(tmv::LU,mv,a2t,cmv,ca2t,"L/M");
-    TestMatrixDivArith1<T>(tmv::LU,mt,a1v,cmt,ca1v,"U/M");
-    TestMatrixDivArith1<T>(tmv::LU,mt,a1t,cmt,ca1t,"L/M");
-    TestMatrixDivArith1<T>(tmv::LU,mt,a2v,cmt,ca2v,"U/M");
-    TestMatrixDivArith1<T>(tmv::LU,mt,a2t,cmt,ca2t,"L/M");
+    TestMatrixDivArith1(tmv::LU,mv,a2v,cmv,ca2v,"U/M");
+    TestMatrixDivArith1(tmv::LU,mv,a2t,cmv,ca2t,"L/M");
+    TestMatrixDivArith1(tmv::LU,mt,a1v,cmt,ca1v,"U/M");
+    TestMatrixDivArith1(tmv::LU,mt,a1t,cmt,ca1t,"L/M");
+    TestMatrixDivArith1(tmv::LU,mt,a2v,cmt,ca2v,"U/M");
+    TestMatrixDivArith1(tmv::LU,mt,a2t,cmt,ca2t,"L/M");
 #endif
 }
 

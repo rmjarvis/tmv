@@ -617,6 +617,7 @@ namespace tmv {
         typedef BandMatrixView<T,ndA> nonconst_type;
 
         typedef T& reference;
+
         typedef CRMIt<type> const_rowmajor_iterator;
         typedef CCMIt<type> const_colmajor_iterator;
         typedef CDMIt<type> const_diagmajor_iterator;
@@ -840,8 +841,7 @@ namespace tmv {
             itsm1(linsize), itsm(itsm1.get())
         {
             TMVStaticAssert(Traits<type>::okA);
-            typename Traits<type>::noalias_type diagna = this->diag().noAlias();
-            m2.diag().assignTo(diagna);
+            this->diag().noAlias() = m2.diag();
         }
 
         ~BandMatrix() 
@@ -1430,7 +1430,8 @@ namespace tmv {
         typedef ConstBandMatrixView<T,nonconjA> const_nonconj_type;
         typedef BandMatrixView<T,ndA> nonconst_type;
 
-        typedef T& reference;
+        typedef typename AuxRef<T,_conj>::reference reference;
+
         typedef CRMIt<type> const_rowmajor_iterator;
         typedef CCMIt<type> const_colmajor_iterator;
         typedef CDMIt<type> const_diagmajor_iterator;

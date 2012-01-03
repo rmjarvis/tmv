@@ -250,9 +250,8 @@ namespace tmv {
         typedef typename Traits<value_type>::real_type real_type;
         typedef typename Traits<value_type>::complex_type complex_type;
 
-        QuotMM(
-            const T _x, const BaseMatrix<M1>& _m1, const BaseMatrix<M2>& _m2
-        ) : 
+        QuotMM(const Scaling<ix,T>& _x, const BaseMatrix<M1>& _m1,
+               const BaseMatrix<M2>& _m2) : 
             x(_x), m1(_m1.mat()), m2(_m2.mat())
         {
             TMVStaticAssert((Sizes<M2::_colsize,M1::_colsize>::same)); 
@@ -588,14 +587,6 @@ namespace tmv {
         const CCT x, const QuotMM<ix,T,M1,M2>& qmm)
     { return QuotMM<0,CT,M1,M2>(x*qmm.getX(),qmm.getM1(),qmm.getM2()); }
 
-    template <int ix1, class T1, int ix, class T, class M1, class M2>
-    TMV_INLINE QuotMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2> operator*(
-        const Scaling<ix1,T1>& x, const QuotMM<ix,T,M1,M2>& qmm)
-    {
-        return QuotMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2>(
-            T1(x)*qmm.getX(),qmm.getM1(),qmm.getM2()); 
-    }
-
     // (m/m)*x
     template <int ix, class T, class M1, class M2>
     TMV_INLINE QuotMM<0,T,M1,M2> operator*(
@@ -617,14 +608,6 @@ namespace tmv {
         const QuotMM<ix,T,M1,M2>& qmm, const CCT x)
     { return QuotMM<0,CT,M1,M2>(x*qmm.getX(),qmm.getM1(),qmm.getM2()); }
 
-    template <int ix1, class T1, int ix, class T, class M1, class M2>
-    TMV_INLINE QuotMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2> operator*(
-        const QuotMM<ix,T,M1,M2>& qmm, const Scaling<ix1,T1>& x)
-    {
-        return QuotMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2>(
-            T1(x)*qmm.getX(),qmm.getM1(),qmm.getM2()); 
-    }
-
     // (m/m)/x
     template <int ix, class T, class M1, class M2>
     TMV_INLINE QuotMM<0,T,M1,M2> operator/(
@@ -645,14 +628,6 @@ namespace tmv {
     TMV_INLINE QuotMM<0,CT,M1,M2> operator/(
         const QuotMM<ix,T,M1,M2>& qmm, const CCT x)
     { return QuotMM<0,CT,M1,M2>(qmm.getX()/x,qmm.getM1(),qmm.getM2()); }
-
-    template <int ix1, class T1, int ix, class T, class M1, class M2>
-    TMV_INLINE QuotMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2> operator/(
-        const QuotMM<ix,T,M1,M2>& qmm, const Scaling<ix1,T1>& x)
-    {
-        return QuotMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2>(
-            qmm.getX()/T1(x),qmm.getM1(),qmm.getM2()); 
-    }
 
 #undef RT
 #undef CT
@@ -688,14 +663,6 @@ namespace tmv {
         const CCT x, const RQuotMM<ix,T,M1,M2>& qmm)
     { return RQuotMM<0,CT,M1,M2>(x*qmm.getX(),qmm.getM1(),qmm.getM2()); }
 
-    template <int ix1, class T1, int ix, class T, class M1, class M2>
-    TMV_INLINE RQuotMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2> operator*(
-        const Scaling<ix1,T1>& x, const RQuotMM<ix,T,M1,M2>& qmm)
-    {
-        return RQuotMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2>(
-            T1(x)*qmm.getX(),qmm.getM1(),qmm.getM2()); 
-    }
-
     // (m/m)*x
     template <int ix, class T, class M1, class M2>
     TMV_INLINE RQuotMM<0,T,M1,M2> operator*(
@@ -717,14 +684,6 @@ namespace tmv {
         const RQuotMM<ix,T,M1,M2>& qmm, const CCT x)
     { return RQuotMM<0,CT,M1,M2>(x*qmm.getX(),qmm.getM1(),qmm.getM2()); }
 
-    template <int ix1, class T1, int ix, class T, class M1, class M2>
-    TMV_INLINE RQuotMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2> operator*(
-        const RQuotMM<ix,T,M1,M2>& qmm, const Scaling<ix1,T1>& x)
-    {
-        return RQuotMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2>(
-            T1(x)*qmm.getX(),qmm.getM1(),qmm.getM2()); 
-    }
-
     // (m/m)/x
     template <int ix, class T, class M1, class M2>
     TMV_INLINE RQuotMM<0,T,M1,M2> operator/(
@@ -745,14 +704,6 @@ namespace tmv {
     TMV_INLINE RQuotMM<0,CT,M1,M2> operator/(
         const RQuotMM<ix,T,M1,M2>& qmm, const CCT x)
     { return RQuotMM<0,CT,M1,M2>(qmm.getX()/x,qmm.getM1(),qmm.getM2()); }
-
-    template <int ix1, class T1, int ix, class T, class M1, class M2>
-    TMV_INLINE RQuotMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2> operator/(
-        const RQuotMM<ix,T,M1,M2>& qmm, const Scaling<ix1,T1>& x)
-    {
-        return RQuotMM<ix1*ix,typename Traits2<T1,T>::type,M1,M2>(
-            qmm.getX()/T1(x),qmm.getM1(),qmm.getM2()); 
-    }
 
 #undef RT
 #undef CT

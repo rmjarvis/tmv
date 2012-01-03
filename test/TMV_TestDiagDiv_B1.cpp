@@ -34,7 +34,7 @@ void TestDiagDiv_B1()
     pv.saveDiv();
     cpv.saveDiv();
 
-    TestMatrixDivArith1<T>(tmv::LU,pv,bv,cpv,cbv,"Diag/SquareM");
+    TestMatrixDivArith1(tmv::LU,pv,bv,cpv,cbv,"Diag/SquareM");
 }
 
 #ifdef TEST_DOUBLE

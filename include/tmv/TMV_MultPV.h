@@ -13,13 +13,15 @@ namespace tmv {
     // TODO: break out add option at compile time rather than runtime if
     //
 
+    template <int ix, class T, class M1, class V2> class ProdMV;
+
     template <bool add, int ix, class T, class V2, class V3>
     inline void MultMV(
         const Scaling<ix,T>& x, const Permutation& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
         if (add) {
-            v3 += (x*m1*v2).calc();
+            v3 += ProdMV<ix,T,Permutation,V2>(x,m1,v2).calc();
         } else {
             MultXV<false>(x,v2.vec(),v3.vec());
             m1.applyOnLeft(v3);

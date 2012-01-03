@@ -18,10 +18,12 @@
 #include "tmv/TMV_MultXV.h"
 #include "tmv/TMV_AddVV.h"
 #include "tmv/TMV_MultVV.h"
+#include "tmv/TMV_ElemMultVV.h"
 
 #include "tmv/TMV_ProdXV.h"
 #include "tmv/TMV_SumVV.h"
 #include "tmv/TMV_ProdVV.h"
+#include "tmv/TMV_ElemProdVV.h"
 
 #include "tmv/TMV_Permutation.h"
 #include "tmv/TMV_MultPV.h"

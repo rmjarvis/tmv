@@ -1598,6 +1598,8 @@ namespace tmv {
         }
     };
 
+    template <int ix, class T, class M> class ProdXM;
+
     // algo 81: copy x*m1
     template <int cs, int rs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUM_Helper<81,cs,rs,add,ix,T,M1,M2,M3>
@@ -1619,7 +1621,7 @@ namespace tmv {
             const int s1 = ShapeTraits<M1::_shape>::nonunit_shape;
             typedef typename MCopyHelper<PT1,s1,cs,cs,A>::type M1c;
             typename M3::noalias_type m3na = m3.noAlias();
-            MultMM<add>(one,M1c(x*m1),m2,m3na);
+            MultMM<add>(one,M1c(ProdXM<ix,T,M1>(x,m1)),m2,m3na);
         }
     };
 
@@ -1643,7 +1645,7 @@ namespace tmv {
             const int A = M1::_colmajor && M3::_rowmajor ? RowMajor : ColMajor;
             typedef typename MCopyHelper<PT2,Rec,cs,rs,A>::type M2c;
             typename M3::noalias_type m3na = m3.noAlias();
-            MultMM<add>(one,m1,M2c(x*m2),m3na);
+            MultMM<add>(one,m1,M2c(ProdXM<ix,T,M2>(x,m2)),m3na);
         }
     };
 

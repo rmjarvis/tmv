@@ -59,163 +59,69 @@ namespace tmv {
     TMV_INLINE Scaling<0,T> TMV_CONJ(const Scaling<0,T>& x)
     { return Scaling<0,T>(TMV_CONJ(x.x)); }
 
-#define RT typename Traits<T>::real_type
-#define CT typename Traits<T>::complex_type
-#define CCT ConjRef<CT>
-
     // Define how a Scaling object multiplies a regular number:
-    template <class T>
-    TMV_INLINE RT& operator*=(RT& y, const Scaling<0,T>& x)
+    template <class T1, class T>
+    TMV_INLINE T1& operator*=(T1& y, const Scaling<0,T>& x)
     { y *= x.x; return y; }
-    template <class T>
-    TMV_INLINE RT& operator*=(RT& y, const Scaling<1,T>& x)
+    template <class T1, class T>
+    TMV_INLINE T1& operator*=(T1& y, const Scaling<1,T>& x)
     { return y; }
-    template <class T>
-    TMV_INLINE RT& operator*=(RT& y, const Scaling<-1,T>& x)
+    template <class T1, class T>
+    TMV_INLINE T1& operator*=(T1& y, const Scaling<-1,T>& x)
     { y = -y; return y; }
-    template <class T>
-    TMV_INLINE RT& operator/=(RT& y, const Scaling<0,T>& x)
+    template <class T1, class T>
+    TMV_INLINE T1& operator/=(T1& y, const Scaling<0,T>& x)
     { y /= x.x; return y; }
-    template <class T>
-    TMV_INLINE RT& operator/=(RT& y, const Scaling<1,T>& x)
+    template <class T1, class T>
+    TMV_INLINE T1& operator/=(T1& y, const Scaling<1,T>& x)
     { return y; }
-    template <class T>
-    TMV_INLINE RT& operator/=(RT& y, const Scaling<-1,T>& x)
+    template <class T1, class T>
+    TMV_INLINE T1& operator/=(T1& y, const Scaling<-1,T>& x)
     { y = -y; return y; }
 
-    template <class T>
-    TMV_INLINE CT& operator*=(CT& y, const Scaling<0,T>& x)
-    { y *= x.x; return y; }
-    template <class T>
-    TMV_INLINE CT& operator*=(CT& y, const Scaling<1,T>& x)
-    { return y; }
-    template <class T>
-    TMV_INLINE CT& operator*=(CT& y, const Scaling<-1,T>& x)
-    { y = -y; return y; }
-    template <class T>
-    TMV_INLINE CT& operator/=(CT& y, const Scaling<0,T>& x)
-    { y /= x.x; return y; }
-    template <class T>
-    TMV_INLINE CT& operator/=(CT& y, const Scaling<1,T>& x)
-    { return y; }
-    template <class T>
-    TMV_INLINE CT& operator/=(CT& y, const Scaling<-1,T>& x)
-    { y = -y; return y; }
-
-    template <class T>
-    TMV_INLINE CCT& operator*=(CCT& y, const Scaling<0,T>& x)
-    { y *= x.x; return y; }
-    template <class T>
-    TMV_INLINE CCT& operator*=(CCT& y, const Scaling<1,T>& x)
-    { return y; }
-    template <class T>
-    TMV_INLINE CCT& operator*=(CCT& y, const Scaling<-1,T>& x)
-    { y = -y; return y; }
-    template <class T>
-    TMV_INLINE CCT& operator/=(CCT& y, const Scaling<0,T>& x)
-    { y /= x.x; return y; }
-    template <class T>
-    TMV_INLINE CCT& operator/=(CCT& y, const Scaling<1,T>& x)
-    { return y; }
-    template <class T>
-    TMV_INLINE CCT& operator/=(CCT& y, const Scaling<-1,T>& x)
-    { y = -y; return y; }
-
-
-    template <class T>
-    TMV_INLINE T operator*(const Scaling<0,T>& x, const RT& y)
-    { return x.x * y; }
-    template <class T>
-    TMV_INLINE RT operator*(const Scaling<1,T>& x, const RT& y)
-    { return y; }
-    template <class T>
-    TMV_INLINE RT operator*(const Scaling<-1,T>& x, const RT& y)
-    { return -y; }
-
-    template <class T>
-    TMV_INLINE T operator/(const RT& y, const Scaling<0,T>& x)
-    { return y / x.x; }
-    template <class T>
-    TMV_INLINE RT operator/(const RT& y, const Scaling<1,T>& x)
-    { return y; }
-    template <class T>
-    TMV_INLINE RT operator/(const RT& y, const Scaling<-1,T>& x)
-    { return -y; }
-
-    template <class T>
-    TMV_INLINE CT operator*(const Scaling<0,T>& x, const CT& y)
+    template <class T1, class T>
+    TMV_INLINE typename Traits2<T,T1>::type operator*(
+        const Scaling<0,T>& x, const T1& y)
     { return ZProd<false,false>::prod(x.x,y); }
-    template <class T>
-    TMV_INLINE CT operator*(const Scaling<1,T>& x, const CT& y)
+    template <class T1, class T>
+    TMV_INLINE T1 operator*(const Scaling<1,T>& x, const T1& y)
     { return y; }
-    template <class T>
-    TMV_INLINE CT operator*(const Scaling<-1,T>& x, const CT& y)
+    template <class T1, class T>
+    TMV_INLINE T1 operator*(const Scaling<-1,T>& x, const T1& y)
     { return -y; }
 
-    template <class T>
-    TMV_INLINE CT operator/(const CT& y, const Scaling<0,T>& x)
+    template <class T1, class T>
+    TMV_INLINE typename Traits2<T,T1>::type operator*(
+        const T1& y, const Scaling<0,T>& x)
+    { return ZProd<false,false>::prod(x.x,y); }
+    template <class T1, class T>
+    TMV_INLINE T1 operator*(const T1& y, const Scaling<1,T>& x)
+    { return y; }
+    template <class T1, class T>
+    TMV_INLINE T1 operator*(const T1& y, const Scaling<-1,T>& x)
+    { return -y; }
+
+    template <class T1, class T>
+    TMV_INLINE typename Traits2<T,T1>::type operator/(
+        const Scaling<0,T>& x, const T1& y)
+    { return x.x / y; }
+    template <class T1, class T>
+    TMV_INLINE T1 operator/(const Scaling<1,T>& x, const T1& y)
+    { return typename Traits<T1>::real_type(1) / y; }
+    template <class T1, class T>
+    TMV_INLINE T1 operator/(const Scaling<-1,T>& x, const T1& y)
+    { return typename Traits<T1>::real_type(-1) / y; }
+
+    template <class T1, class T>
+    TMV_INLINE typename Traits2<T,T1>::type operator/(
+        const T1& y, const Scaling<0,T>& x)
     { return y / x.x; }
-    template <class T>
-    TMV_INLINE CT operator/(const CT& y, const Scaling<1,T>& x)
+    template <class T1, class T>
+    TMV_INLINE T1 operator/(const T1& y, const Scaling<1,T>& x)
     { return y; }
-    template <class T>
-    TMV_INLINE CT operator/(const CT& y, const Scaling<-1,T>& x)
+    template <class T1, class T>
+    TMV_INLINE T1 operator/(const T1& y, const Scaling<-1,T>& x)
     { return -y; }
-
-    template <class T>
-    TMV_INLINE CT operator*(const Scaling<0,T>& x, const CCT& y)
-    { return x * CT(y); }
-    template <class T>
-    TMV_INLINE CT operator*(const Scaling<1,T>& x, const CCT& y)
-    { return CT(y); }
-    template <class T>
-    TMV_INLINE CT operator*(const Scaling<-1,T>& x, const CCT& y)
-    { return -CT(y); }
-
-    template <class T>
-    TMV_INLINE CT operator/(const CCT& y, const Scaling<0,T>& x)
-    { return CT(y) / x.x; }
-    template <class T>
-    TMV_INLINE CT operator/(const CCT& y, const Scaling<1,T>& x)
-    { return CT(y); }
-    template <class T>
-    TMV_INLINE CT operator/(const CCT& y, const Scaling<-1,T>& x)
-    { return -CT(y); }
-
-    // Other * and / remap into the above operations:
-    template <int ix, class T>
-    TMV_INLINE RT operator*(const RT& y, const Scaling<ix,T>& x)
-    { return x * y; }
-    template <class T>
-    TMV_INLINE T operator*(const RT& y, const Scaling<0,T>& x)
-    { return x * y; }
-    template <class T>
-    TMV_INLINE T operator/(const Scaling<0,T>& x, const RT& y)
-    { return T(x) / y; }
-    template <class T>
-    TMV_INLINE RT operator/(const Scaling<1,T>& x, const RT& y)
-    { return RT(1) / y; }
-    template <class T>
-    TMV_INLINE RT operator/(const Scaling<-1,T>& x, const RT& y)
-    { return RT(-1) / y; }
-
-    template <int ix, class T>
-    TMV_INLINE CT operator*(const CT& y, const Scaling<ix,T>& x)
-    { return x * y; }
-    template <int ix, class T>
-    TMV_INLINE CT operator/(const Scaling<ix,T>& x, const CT& y)
-    { return T(x) / y; }
-
-    template <int ix, class T>
-    TMV_INLINE CT operator*(const CCT& y, const Scaling<ix,T>& x)
-    { return x * CT(y); }
-    template <int ix, class T>
-    TMV_INLINE CT operator/(const Scaling<ix,T>& x, const CCT& y)
-    { return T(x) / CT(y); }
-
-#undef RT
-#undef CT
-#undef CCT
 
     template <int ix, class T>
     TMV_INLINE Scaling<-ix,T> operator-(const Scaling<ix,T>& x)

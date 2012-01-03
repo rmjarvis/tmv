@@ -63,6 +63,7 @@
 #include "tmv/TMV_OProdVV.h"
 #include "tmv/TMV_ProdMV.h"
 #include "tmv/TMV_ProdMM.h"
+#include "tmv/TMV_ElemProdMM.h"
 #endif
 
 #endif

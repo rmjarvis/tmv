@@ -270,15 +270,15 @@ static void TestSmallSquareDiv_Arith(std::string label)
     tmv::SmallMatrix<T,3*N,N,stor> a5b = a5;
     tmv::SmallMatrix<std::complex<T>,3*N,N,stor> c5b = c5;
 
-    TestMatrixDivArith3a<T>(tmv::LU,a1,c1,label+" Square"); 
-    TestMatrixDivArith3d<T>(tmv::LU,a1,b,x,c1,e,y,label+" V/Square"); 
-    TestMatrixDivArith3e<T>(tmv::LU,a1,b,x,c1,e,y,label+" V/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a1,a2a,a3,c1,c2a,c3,label+" Square/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a1,a2b,a3,c1,c2b,c3,label+" Square/Square"); 
-    TestMatrixDivArith3c<T>(tmv::LU,a1,a2a,a3,c1,c2a,c3,label+" Square/Square"); 
-    TestMatrixDivArith3c<T>(tmv::LU,a1,a2b,a3,c1,c2b,c3,label+" Square/Square"); 
-    TestMatrixDivArith3b<T>(tmv::LU,a1,a4,a4b,c1,c4,c4b,label+" NonSquare/Square");
-    TestMatrixDivArith3c<T>(tmv::LU,a1,a5,a5b,c1,c5,c5b,label+" NonSquare/Square");
+    TestMatrixDivArith3a(tmv::LU,a1,c1,label+" Square"); 
+    TestMatrixDivArith3d(tmv::LU,a1,b,x,c1,e,y,label+" V/Square"); 
+    TestMatrixDivArith3e(tmv::LU,a1,b,x,c1,e,y,label+" V/Square"); 
+    TestMatrixDivArith3b(tmv::LU,a1,a2a,a3,c1,c2a,c3,label+" Square/Square"); 
+    TestMatrixDivArith3b(tmv::LU,a1,a2b,a3,c1,c2b,c3,label+" Square/Square"); 
+    TestMatrixDivArith3c(tmv::LU,a1,a2a,a3,c1,c2a,c3,label+" Square/Square"); 
+    TestMatrixDivArith3c(tmv::LU,a1,a2b,a3,c1,c2b,c3,label+" Square/Square"); 
+    TestMatrixDivArith3b(tmv::LU,a1,a4,a4b,c1,c4,c4b,label+" NonSquare/Square");
+    TestMatrixDivArith3c(tmv::LU,a1,a5,a5b,c1,c5,c5b,label+" NonSquare/Square");
 }
 
 template <class T, tmv::StorageType stor, int N> 

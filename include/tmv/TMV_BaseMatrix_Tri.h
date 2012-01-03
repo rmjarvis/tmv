@@ -1121,7 +1121,7 @@ namespace tmv {
         {
             TMVStaticAssert((Sizes<_size,M2::_size>::same));
             TMVAssert(size() == m2.size());
-            m2.diag().assignTo(diag());
+            diag() = m2.diag();
             if (size() > 1) offDiag().setZero();
             return mat(); 
         }

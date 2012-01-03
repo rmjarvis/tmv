@@ -20,6 +20,7 @@
 #include "tmv/TMV_ProdMV.h"
 #include "tmv/TMV_OProdVV.h"
 #include "tmv/TMV_ProdMM.h"
+#include "tmv/TMV_ElemProdMM.h"
 #include "tmv/TMV_QuotXM.h"
 #include "tmv/TMV_QuotVM.h"
 #include "tmv/TMV_QuotMM.h"

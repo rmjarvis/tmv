@@ -517,6 +517,8 @@ namespace tmv {
         }
     };
 
+    template <int ix, class T, class M, class V> class ProdMV;
+
     // algo 85: v3c = x*m1*v2, v3 (+)= v3c
     template <int s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<85,s,add,ix,T,M1,V2,V3>
@@ -531,7 +533,7 @@ namespace tmv {
             typedef typename Traits<T>::real_type RT;
             const Scaling<1,RT> one;
             typename V3::noalias_type v3na = v3.noAlias();
-            MultXV<add>(one,(x*m1*v2).calc(),v3na);
+            MultXV<add>(one,ProdMV<ix,T,M1,V2>(x,m1,v2).calc(),v3na);
         }
     };
 

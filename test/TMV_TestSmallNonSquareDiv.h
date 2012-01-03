@@ -193,20 +193,20 @@ static void TestSmallNonSquareDiv_Arith(std::string label)
     tmv::SmallMatrix<std::complex<T>,Q,M,stor> c8 = c7.adjoint();
     c8.subMatrix(1,1+N,0,M) += c1.transpose();
 
-    TestMatrixDivArith3a<T>(tmv::QR,a1,c1,label+" NonSquare"); 
-    TestMatrixDivArith3a<T>(tmv::QR,a2,c2,label+" NonSquare"); 
-    TestMatrixDivArith3d<T>(tmv::QR,a1,b,x,c1,e,y,label+" V/NonSquare"); 
-    TestMatrixDivArith3d<T>(tmv::QR,a2,x,b,c2,y,e,label+" V/NonSquare"); 
-    TestMatrixDivArith3e<T>(tmv::QR,a1,x,b,c1,y,e,label+" V%NonSquare"); 
-    TestMatrixDivArith3e<T>(tmv::QR,a2,b,x,c2,e,y,label+" V%NonSquare"); 
-    TestMatrixDivArith3b<T>(tmv::QR,a1,a3,a2,c1,c3,c2,label+" Square/NonSquare"); 
-    TestMatrixDivArith3b<T>(tmv::QR,a2,a4,a1,c2,c4,c1,label+" Square/NonSquare"); 
-    TestMatrixDivArith3c<T>(tmv::QR,a1,a4,a2,c1,c4,c2,label+" Square%NonSquare"); 
-    TestMatrixDivArith3c<T>(tmv::QR,a2,a3,a1,c2,c3,c1,label+" Square%NonSquare"); 
-    TestMatrixDivArith3b<T>(tmv::QR,a1,a7,a5,c1,c7,c5,label+" NonSquare/NonSquare");
-    TestMatrixDivArith3b<T>(tmv::QR,a2,a5,a7,c2,c5,c7,label+" NonSquare/NonSquare");
-    TestMatrixDivArith3c<T>(tmv::QR,a1,a6,a8,c1,c6,c8,label+" NonSquare%NonSquare");
-    TestMatrixDivArith3c<T>(tmv::QR,a2,a8,a6,c2,c8,c6,label+" NonSquare%NonSquare");
+    TestMatrixDivArith3a(tmv::QR,a1,c1,label+" NonSquare"); 
+    TestMatrixDivArith3a(tmv::QR,a2,c2,label+" NonSquare"); 
+    TestMatrixDivArith3d(tmv::QR,a1,b,x,c1,e,y,label+" V/NonSquare"); 
+    TestMatrixDivArith3d(tmv::QR,a2,x,b,c2,y,e,label+" V/NonSquare"); 
+    TestMatrixDivArith3e(tmv::QR,a1,x,b,c1,y,e,label+" V%NonSquare"); 
+    TestMatrixDivArith3e(tmv::QR,a2,b,x,c2,e,y,label+" V%NonSquare"); 
+    TestMatrixDivArith3b(tmv::QR,a1,a3,a2,c1,c3,c2,label+" Square/NonSquare"); 
+    TestMatrixDivArith3b(tmv::QR,a2,a4,a1,c2,c4,c1,label+" Square/NonSquare"); 
+    TestMatrixDivArith3c(tmv::QR,a1,a4,a2,c1,c4,c2,label+" Square%NonSquare"); 
+    TestMatrixDivArith3c(tmv::QR,a2,a3,a1,c2,c3,c1,label+" Square%NonSquare"); 
+    TestMatrixDivArith3b(tmv::QR,a1,a7,a5,c1,c7,c5,label+" NonSquare/NonSquare");
+    TestMatrixDivArith3b(tmv::QR,a2,a5,a7,c2,c5,c7,label+" NonSquare/NonSquare");
+    TestMatrixDivArith3c(tmv::QR,a1,a6,a8,c1,c6,c8,label+" NonSquare%NonSquare");
+    TestMatrixDivArith3c(tmv::QR,a2,a8,a6,c2,c8,c6,label+" NonSquare%NonSquare");
 }
 
 template <class T, tmv::StorageType stor, int M, int N> 
