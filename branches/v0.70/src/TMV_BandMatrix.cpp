@@ -70,41 +70,48 @@ namespace tmv {
     }
 
     template <class T> 
-    void GenBandMatrix<T>::newDivider() const
+    void GenBandMatrix<T>::setDiv() const
     {
-        switch (this->getDivType()) {
-          case LU : 
-               this->setDiv(
-                   new BandLUDiv<T>(*this,this->isDivInPlace())); break;
-          case QR : 
-               this->setDiv(
-                   new BandQRDiv<T>(*this,this->isDivInPlace())); break;
-          case SV : 
-               this->setDiv(new BandSVDiv<T>(*this)); break;
-          default : TMVAssert(TMV_FALSE);
+        if (!this->divIsSet()) {
+            DivType dt = this->getDivType();
+            TMVAssert(dt == tmv::LU || dt == tmv::QR || dt == tmv::SV);
+            switch (dt) {
+              case LU : 
+                   this->divider.reset(
+                       new BandLUDiv<T>(*this,this->divIsInPlace())); break;
+              case QR : 
+                   this->divider.reset(
+                       new BandQRDiv<T>(*this,this->divIsInPlace())); break;
+              case SV : 
+                   this->divider.reset(new BandSVDiv<T>(*this)); break;
+              default : 
+                   // The above assert should have already failed
+                   // so go ahead and fall through.
+                   break;
+            }
         }
     }
 
 #ifdef INST_INT
     template <>
-    void GenBandMatrix<int>::newDivider() const
+    void GenBandMatrix<int>::setDiv() const
     { TMVAssert(TMV_FALSE); }
     template <>
-    void GenBandMatrix<std::complex<int> >::newDivider() const
+    void GenBandMatrix<std::complex<int> >::setDiv() const
     { TMVAssert(TMV_FALSE); }
 #endif
 
     template <class T>
     bool GenBandMatrix<T>::divIsLUDiv() const
-    { return static_cast<bool>(dynamic_cast<const BandLUDiv<T>*>(getDiv())); }
+    { return dynamic_cast<const BandLUDiv<T>*>(this->getDiv()); }
 
     template <class T>
     bool GenBandMatrix<T>::divIsQRDiv() const
-    { return static_cast<bool>(dynamic_cast<const BandQRDiv<T>*>(getDiv())); }
+    { return dynamic_cast<const BandQRDiv<T>*>(this->getDiv()); }
 
     template <class T>
     bool GenBandMatrix<T>::divIsSVDiv() const
-    { return static_cast<bool>(dynamic_cast<const BandSVDiv<T>*>(getDiv())); }
+    { return dynamic_cast<const BandSVDiv<T>*>(this->getDiv()); }
 
 #ifdef INST_INT
     template <>
@@ -632,6 +639,10 @@ namespace tmv {
     RT GenBandMatrix<T>::logDet(T* sign) const
     { return DivHelper<T>::logDet(sign); }
 
+    template <class T>
+    bool GenBandMatrix<T>::isSingular() const
+    { return DivHelper<T>::isSingular(); }
+
 #ifdef INST_INT
     template <>
     int GenBandMatrix<int>::det() const
@@ -648,6 +659,14 @@ namespace tmv {
     template <>
     int GenBandMatrix<std::complex<int> >::logDet(std::complex<int>* ) const
     { TMVAssert(TMV_FALSE); return 0; }
+
+    template <>
+    bool GenBandMatrix<int>::isSingular() const
+    { return det() == 0; }
+
+    template <>
+    bool GenBandMatrix<std::complex<int> >::isSingular() const
+    { return det() == 0; }
 #endif
 
     template <class T>

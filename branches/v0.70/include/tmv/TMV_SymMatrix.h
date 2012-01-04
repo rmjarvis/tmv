@@ -302,7 +302,7 @@ namespace tmv {
     class GenSymMatrix : 
         virtual public AssignableToSymMatrix<T>,
         public BaseMatrix<T>,
-        private DivHelper<T>
+        public DivHelper<T>
     {
     public:
 
@@ -683,9 +683,11 @@ namespace tmv {
         // Functions of Matrix
         //
 
-        T det() const ;
+        T det() const;
 
         RT logDet(T* sign=0) const;
+
+        bool isSingular() const;
 
         inline T trace() const
         { return diag().sumElements(); }
@@ -705,6 +707,12 @@ namespace tmv {
 
         RT norm1() const;
 
+        inline RT normInf() const
+        { return norm1(); }
+
+        RT maxAbsElement() const;
+        RT maxAbs2Element() const;
+
         RT doNorm2() const;
         inline RT norm2() const 
         {
@@ -713,12 +721,6 @@ namespace tmv {
             else return doNorm2();
         }
 
-        inline RT normInf() const
-        { return norm1(); }
-
-        RT maxAbsElement() const;
-        RT maxAbs2Element() const;
-
         RT doCondition() const;
         inline RT condition() const
         {
@@ -726,9 +728,6 @@ namespace tmv {
                 return DivHelper<T>::condition();
             else return doCondition();
         }
-
-        inline bool isSingular() const 
-        { return DivHelper<T>::isSingular(); }
 
         template <class T1> 
         void doMakeInverse(const SymMatrixView<T1>& sinv) const;
@@ -753,13 +752,6 @@ namespace tmv {
         inline void makeInverse(Matrix<T1,S,I>& minv) const
         { DivHelper<T>::makeInverse(minv); }
 
-        inline void makeInverseATA(const MatrixView<T>& ata) const
-        { DivHelper<T>::makeInverseATA(ata); }
-
-        template <StorageType S, IndexStyle I> 
-        inline void makeInverseATA(Matrix<T,S,I>& ata) const
-        { DivHelper<T>::makeInverseATA(ata); }
-
         template <class T1, UpLoType U, StorageType S, IndexStyle I> 
         inline void makeInverse(SymMatrix<T1,U,S,I>& sinv) const
         {
@@ -782,13 +774,7 @@ namespace tmv {
         // Division Control
         //
 
-        using DivHelper<T>::divideInPlace;
-        using DivHelper<T>::saveDiv;
-        using DivHelper<T>::setDiv;
-        using DivHelper<T>::unsetDiv;
-        using DivHelper<T>::resetDiv;
-        using DivHelper<T>::divIsSet;
-        using DivHelper<T>::checkDecomp;
+        void setDiv() const;
 
         inline void divideUsing(DivType dt) const
         {
@@ -837,34 +823,6 @@ namespace tmv {
             return static_cast<const SymSVDiv<T>&>(*this->getDiv());
         }
 
-        template <class T1> 
-        inline void LDivEq(const VectorView<T1>& v) const 
-        { DivHelper<T>::LDivEq(v); }
-        template <class T1> 
-        inline void LDivEq(const MatrixView<T1>& m) const 
-        { DivHelper<T>::LDivEq(m); }
-        template <class T1> 
-        inline void RDivEq(const VectorView<T1>& v) const 
-        { DivHelper<T>::RDivEq(v); }
-        template <class T1> 
-        inline void RDivEq(const MatrixView<T1>& m) const 
-        { DivHelper<T>::RDivEq(m); }
-        template <class T1, class T0> 
-        inline void LDiv(
-            const GenVector<T1>& v1, const VectorView<T0>& v0) const
-        { DivHelper<T>::LDiv(v1,v0); }
-        template <class T1, class T0> 
-        inline void LDiv(
-            const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
-        { DivHelper<T>::LDiv(m1,m0); }
-        template <class T1, class T0> 
-        inline void RDiv(
-            const GenVector<T1>& v1, const VectorView<T0>& v0) const
-        { DivHelper<T>::RDiv(v1,v0); }
-        template <class T1, class T0> 
-        inline void RDiv(
-            const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
-        { DivHelper<T>::RDiv(m1,m0); }
 
         //
         // I/O
@@ -899,9 +857,6 @@ namespace tmv {
 
     protected :
 
-        using DivHelper<T>::getDiv;
-
-        void newDivider() const;
         inline const BaseMatrix<T>& getMatrix() const { return *this; }
 
     private :
@@ -1174,8 +1129,7 @@ namespace tmv {
         inline SymMatrixView(
             T* _m, int _s, int _si, int _sj, 
             SymType _sym, UpLoType _uplo, StorageType _stor, ConjType _ct 
-            TMV_PARAMFIRSTLAST(T) 
-        ) :
+            TMV_PARAMFIRSTLAST(T) ) :
             itsm(_m), itss(_s), itssi(_si), itssj(_sj),
             itssym(_sym), itsuplo(_uplo), itsstor(_stor), itsct(_ct)
             TMV_DEFFIRSTLAST(_first,_last)
@@ -2927,6 +2881,7 @@ namespace tmv {
             itslen = s*s;
             itsm.resize(itslen);
             itss = s;
+            DivHelper<T>::resetDivType();
 #ifdef TMVFLDEBUG
             _first = itsm.get();
             _last = _first+itslen;
@@ -3916,6 +3871,7 @@ namespace tmv {
             itslen = s*s;
             itsm.resize(itslen);
             itss = s;
+            DivHelper<T>::resetDivType();
 #ifdef TMVFLDEBUG
             _first = itsm.get();
             _last = _first+itslen;

@@ -330,7 +330,7 @@ namespace tmv {
         virtual public AssignableToUpperTriMatrix<T>,
         virtual public AssignableToLowerTriMatrix<T>,
         public BaseMatrix<T>,
-        private DivHelper<T>
+        public DivHelper<T>
     {
     public:
 
@@ -811,6 +811,8 @@ namespace tmv {
 
         RT logDet(T* sign=0) const;
 
+        bool isSingular() const;
+
         inline T trace() const
         { return diag().sumElements(); }
 
@@ -829,13 +831,6 @@ namespace tmv {
 
         RT norm1() const;
 
-        RT doNorm2() const;
-        RT norm2() const
-        {
-            if (this->divIsSet() && this->getDivType() == SV)
-                return DivHelper<T>::norm2(); 
-            else return doNorm2();
-        }
 
         inline RT normInf() const
         { return transpose().norm1(); }
@@ -843,30 +838,13 @@ namespace tmv {
         RT maxAbsElement() const;
         RT maxAbs2Element() const;
 
-        QuotXB<T,T> QInverse() const;
-        inline QuotXB<T,T> inverse() const
-        { return QInverse(); }
-
-        inline void makeInverse(const MatrixView<T>& minv) const
-        { DivHelper<T>::makeInverse(minv); }
-
-        template <class T1> 
-        inline void makeInverse(const MatrixView<T1>& minv) const
-        { DivHelper<T>::makeInverse(minv); }
-
-        template <class T1, StorageType S, IndexStyle I> 
-        inline void makeInverse(Matrix<T1,S,I>& minv) const
-        { DivHelper<T>::makeInverse(minv); }
-
-        inline void makeInverseATA(const MatrixView<T>& ata) const
-        { DivHelper<T>::makeInverseATA(ata); }
-
-        template <StorageType S, IndexStyle I> 
-        inline void makeInverseATA(Matrix<T,S,I>& ata) const
-        { DivHelper<T>::makeInverseATA(ata); }
-
-        inline bool isSingular() const
-        { return DivHelper<T>::isSingular(); }
+        RT doNorm2() const;
+        RT norm2() const
+        {
+            if (this->divIsSet() && this->getDivType() == SV)
+                return DivHelper<T>::norm2(); 
+            else return doNorm2();
+        }
 
         RT doCondition() const;
         inline RT condition() const
@@ -876,17 +854,16 @@ namespace tmv {
             else return doCondition();
         }
 
+ 
+        QuotXB<T,T> QInverse() const;
+        inline QuotXB<T,T> inverse() const
+        { return QInverse(); }
+
         //
         // Division Control
         //
 
-        using DivHelper<T>::divideInPlace;
-        using DivHelper<T>::saveDiv;
-        using DivHelper<T>::setDiv;
-        using DivHelper<T>::unsetDiv;
-        using DivHelper<T>::resetDiv;
-        using DivHelper<T>::divIsSet;
-        using DivHelper<T>::checkDecomp;
+        void setDiv() const;
 
         inline void divideUsing(DivType dt) const
         {
@@ -898,57 +875,29 @@ namespace tmv {
         {
             divideUsing(LU);
             setDiv();
-            TMVAssert(getDiv());
+            TMVAssert(this->getDiv());
             TMVAssert(divIsLUDiv());
-            return static_cast<const BandLUDiv<T>&>(*getDiv());
+            return static_cast<const BandLUDiv<T>&>(*this->getDiv());
         }
 
         inline const BandQRDiv<T>& qrd() const
         {
             divideUsing(QR);
             setDiv();
-            TMVAssert(getDiv());
+            TMVAssert(this->getDiv());
             TMVAssert(divIsQRDiv());
-            return static_cast<const BandQRDiv<T>&>(*getDiv());
+            return static_cast<const BandQRDiv<T>&>(*this->getDiv());
         }
 
         inline const BandSVDiv<T>& svd() const
         {
             divideUsing(SV);
             setDiv();
-            TMVAssert(getDiv());
+            TMVAssert(this->getDiv());
             TMVAssert(divIsSVDiv());
-            return static_cast<const BandSVDiv<T>&>(*getDiv());
+            return static_cast<const BandSVDiv<T>&>(*this->getDiv());
         }
 
-        template <class T1> 
-        inline void LDivEq(const VectorView<T1>& v) const 
-        { DivHelper<T>::LDivEq(v); }
-        template <class T1> 
-        inline void LDivEq(const MatrixView<T1>& m) const 
-        { DivHelper<T>::LDivEq(m); }
-        template <class T1> 
-        inline void RDivEq(const VectorView<T1>& v) const 
-        { DivHelper<T>::RDivEq(v); }
-        template <class T1> 
-        inline void RDivEq(const MatrixView<T1>& m) const 
-        { DivHelper<T>::RDivEq(m); }
-        template <class T1, class T0> 
-        inline void LDiv(
-            const GenVector<T1>& v1, const VectorView<T0>& v0) const
-        { DivHelper<T>::LDiv(v1,v0); }
-        template <class T1, class T0> 
-        inline void LDiv(
-            const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
-        { DivHelper<T>::LDiv(m1,m0); }
-        template <class T1, class T0> 
-        inline void RDiv(
-            const GenVector<T1>& v1, const VectorView<T0>& v0) const
-        { DivHelper<T>::RDiv(v1,v0); }
-        template <class T1, class T0> 
-        inline void RDiv(
-            const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
-        { DivHelper<T>::RDiv(m1,m0); }
 
         //
         // I/O
@@ -1011,9 +960,6 @@ namespace tmv {
         inline bool okij(int i, int j) const
         { return (j+nlo() >= i && i+nhi() >= j); }
 
-        using DivHelper<T>::getDiv;
-
-        void newDivider() const;
         inline const BaseMatrix<T>& getMatrix() const { return *this; }
 
     private :
@@ -3558,6 +3504,7 @@ namespace tmv {
                 S==ColMajor ? itssj+1 :
                 1;
             itsm = S==DiagMajor ? itsm1.get()-lo*itssi : itsm1.get();
+            DivHelper<T>::resetDivType();
 #ifdef TMVFLDEBUG
             _first = itsm1.get();
             _last = _first + linsize;

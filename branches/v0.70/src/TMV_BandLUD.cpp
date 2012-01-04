@@ -94,8 +94,7 @@ namespace tmv {
 
     template <class T> 
     BandLUDiv<T>::BandLUDiv_Impl::BandLUDiv_Impl(
-        const GenBandMatrix<T>& A, bool _inplace
-    ) :
+        const GenBandMatrix<T>& A, bool _inplace) :
         istrans(A.nhi()<A.nlo() || (A.nhi()==A.nlo() && A.isrm())),
         inplace(NEWLO == 0 || 
                 (_inplace && 
@@ -104,7 +103,7 @@ namespace tmv {
         Aptr1(APTR1), Aptr(APTR), LUx(LUX),
         P(A.colsize()), logdet(0), signdet(1), donedet(false) 
     {
-        //std::cout<<"BandLUDivImpl constructor\n";
+        //std::cout<<"BandLUDiv_Impl constructor\n";
         //std::cout<<"A = "<<TMV_Text(A)<<" = "<<A<<std::endl;
         //LUx.setZero();
         //std::cout<<"LUx = "<<TMV_Text(LUx)<<" = "<<LUx<<std::endl;

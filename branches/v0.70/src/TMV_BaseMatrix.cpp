@@ -35,26 +35,21 @@
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_Divider.h"
-#include "TMV_DivImpl.h"
 
 namespace tmv {
 
     template <class T>
-    DivHelper<T>::DivHelper() : pdiv(0) {}
+    DivHelper<T>::DivHelper() : divider(0), divtype(tmv::XX) {}
 
     template <class T>
     DivHelper<T>::~DivHelper() {}
-
-    template <class T>
-    void DivHelper<T>::setupDiv() const
-    { if (!pdiv.get()) pdiv.reset(new DivImpl(getMatrix())); }
 
     template <class T>
     T DivHelper<T>::doDet() const
     {
         TMVAssert(colsize() == rowsize());
         setDiv();
-        T det = pdiv->div->det();
+        T det = divider->det();
         doneDiv();
         return det;
     }
@@ -64,7 +59,7 @@ namespace tmv {
     {
         TMVAssert(colsize() == rowsize());
         setDiv();
-        TMV_RealType(T) logdet = pdiv->div->logDet(sign);
+        TMV_RealType(T) logdet = divider->logDet(sign);
         doneDiv();
         return logdet;
     }
@@ -80,7 +75,7 @@ namespace tmv {
         TMVAssert(minv.colsize() == rowsize());
         TMVAssert(minv.rowsize() == colsize());
         setDiv();
-        DoMakeInverse1(*pdiv->div,minv);
+        DoMakeInverse1(*divider,minv);
         doneDiv();
     }
 
@@ -90,7 +85,7 @@ namespace tmv {
         TMVAssert(minv.colsize() == TMV_MIN(rowsize(),colsize()));
         TMVAssert(minv.rowsize() == TMV_MIN(rowsize(),colsize()));
         setDiv();
-        pdiv->div->makeInverseATA(minv);
+        divider->makeInverseATA(minv);
         doneDiv();
     }
 
@@ -98,7 +93,7 @@ namespace tmv {
     bool DivHelper<T>::doIsSingular() const
     {
         setDiv();
-        bool s = pdiv->div->isSingular();
+        bool s = divider->isSingular();
         doneDiv();
         return s;
     }
@@ -106,19 +101,17 @@ namespace tmv {
     template <class T>
     TMV_RealType(T) DivHelper<T>::doNorm2() const
     {
-        setupDiv();
         TMVAssert(divIsSet());
-        TMVAssert(pdiv->dt == SV);
-        return pdiv->div->norm2();
+        TMVAssert(divtype == SV);
+        return divider->norm2();
     }
 
     template <class T>
     TMV_RealType(T) DivHelper<T>::doCondition() const
     {
-        setupDiv();
         TMVAssert(divIsSet());
-        TMVAssert(pdiv->dt == SV);
-        return pdiv->div->condition();
+        TMVAssert(divtype == SV);
+        return divider->condition();
     }
 
     template <class T, class T1> 
@@ -149,7 +142,7 @@ namespace tmv {
         TMVAssert(colsize() == rowsize());
         TMVAssert(colsize() == v.size());
         setDiv();
-        DoLDivEq1(*pdiv->div,ColVectorViewOf(v));
+        DoLDivEq1(*divider,ColVectorViewOf(v));
         doneDiv();
     }
 
@@ -159,7 +152,7 @@ namespace tmv {
         TMVAssert(colsize() == rowsize());
         TMVAssert(colsize() == m.colsize());
         setDiv();
-        DoLDivEq1(*pdiv->div,m);
+        DoLDivEq1(*divider,m);
         doneDiv();
     }
 
@@ -169,7 +162,7 @@ namespace tmv {
         TMVAssert(colsize() == rowsize());
         TMVAssert(colsize() == v.size());
         setDiv();
-        DoRDivEq1(*pdiv->div,RowVectorViewOf(v));
+        DoRDivEq1(*divider,RowVectorViewOf(v));
         doneDiv();
     }
 
@@ -179,7 +172,7 @@ namespace tmv {
         TMVAssert(colsize() == rowsize());
         TMVAssert(colsize() == m.rowsize());
         setDiv();
-        DoRDivEq1(*pdiv->div,m);
+        DoRDivEq1(*divider,m);
         doneDiv();
     }
 
@@ -190,7 +183,7 @@ namespace tmv {
         TMVAssert(rowsize() == v0.size());
         TMVAssert(colsize() == v1.size());
         setDiv();
-        DoLDiv1(*pdiv->div,ColVectorViewOf(v1),ColVectorViewOf(v0));
+        DoLDiv1(*divider,ColVectorViewOf(v1),ColVectorViewOf(v0));
         doneDiv();
     }
 
@@ -202,7 +195,7 @@ namespace tmv {
         TMVAssert(colsize() == m1.colsize());
         TMVAssert(m1.rowsize() == m0.rowsize());
         setDiv();
-        DoLDiv1(*pdiv->div,m1,m0);
+        DoLDiv1(*divider,m1,m0);
         doneDiv();
     }
 
@@ -213,7 +206,7 @@ namespace tmv {
         TMVAssert(rowsize() == v1.size());
         TMVAssert(colsize() == v0.size());
         setDiv();
-        DoRDiv1(*pdiv->div,RowVectorViewOf(v1),RowVectorViewOf(v0));
+        DoRDiv1(*divider,RowVectorViewOf(v1),RowVectorViewOf(v0));
         doneDiv();
     }
 
@@ -225,110 +218,88 @@ namespace tmv {
         TMVAssert(colsize() == m0.rowsize());
         TMVAssert(m1.colsize() == m0.colsize());
         setDiv();
-        DoRDiv1(*pdiv->div,m1,m0);
+        DoRDiv1(*divider,m1,m0);
         doneDiv();
     }
 
     template <class T>
-    void DivHelper<T>::divideInPlace() const
-    {
-        setupDiv();
-        saveDiv();
-        pdiv->inplace = true;
-    }
-
-    template <class T>
-    bool DivHelper<T>::isDivInPlace() const
-    {
-        setupDiv();
-        return pdiv->inplace;
-    }
-
-    template <class T>
-    void DivHelper<T>::saveDiv() const
-    { 
-        setupDiv();
-        pdiv->cache = true; 
-    }
-
-    template <class T>
     void DivHelper<T>::divideUsing(DivType dt) const
-    { 
-        setupDiv();
-        if (dt != pdiv->dt) unsetDiv();
-        pdiv->dt = dt;
-    }
-
-    template <class T>
-    void DivHelper<T>::setDiv() const
-    { 
-        setupDiv();
-        if (!pdiv->div.get()) {
-            if (pdiv->dt == XX) 
-                pdiv->dt = (colsize() == rowsize()) ? LU : QR;
-            newDivider();
+    {
+        if (!(divtype & dt)) {
+            unsetDiv();
+            divtype &= ~tmv::DivTypeFlags;
+            divtype |= dt;
         }
-    }
-
-    template <class T>
-    void DivHelper<T>::unsetDiv() const
-    { 
-        setupDiv();
-        pdiv->div.reset(0);
-    }
-
-    template <class T>
-    void DivHelper<T>::resetDiv() const
-    {
-        unsetDiv(); 
-        setDiv(); 
-    }
-
-    template <class T>
-    bool DivHelper<T>::divIsSet() const 
-    {
-        setupDiv();
-        return pdiv->div.get(); 
-    }
-
-    template <class T>
-    void DivHelper<T>::doneDiv() const
-    { if (!pdiv->cache) unsetDiv(); }
-
-    template <class T>
-    const Divider<T>* DivHelper<T>::getDiv() const 
-    {
-        setupDiv();
-        return pdiv->div.get(); 
-    }
-
-    template <class T>
-    void DivHelper<T>::setDiv(Divider<T>* d) const 
-    {
-        setupDiv();
-        pdiv->div.reset(d);
     }
 
     template <class T>
     DivType DivHelper<T>::getDivType() const 
     {
-        setupDiv();
-        return pdiv->dt; 
+        if ((divtype & tmv::DivTypeFlags) == tmv::XX) resetDivType();
+        return divtype & tmv::DivTypeFlags;
     }
+
+    template <class T>
+    void DivHelper<T>::resetDivType() const
+    { divideUsing(getMatrix().isSquare() ? tmv::LU : tmv::QR); }
+
+    template <class T>
+    void DivHelper<T>::divideInPlace() const
+    { divtype |= tmv::DivInPlaceFlag; saveDiv(); }
+
+    template <class T>
+    void DivHelper<T>::dontDivideInPlace() const
+    { divtype &= ~tmv::DivInPlaceFlag; }
+
+    template <class T>
+    bool DivHelper<T>::divIsInPlace() const
+    { return divtype & tmv::DivInPlaceFlag; }
+
+    template <class T>
+    void DivHelper<T>::saveDiv() const
+    { divtype |= tmv::SaveDivFlag; }
+
+    template <class T>
+    void DivHelper<T>::dontSaveDiv() const
+    { divtype &= ~tmv::SaveDivFlag; }
+
+    template <class T>
+    bool DivHelper<T>::divIsSaved() const
+    { return divtype & tmv::SaveDivFlag; }
+
+    template <class T>
+    void DivHelper<T>::unsetDiv() const
+    { divider.reset(0); }
+
+    template <class T>
+    void DivHelper<T>::resetDiv() const
+    { unsetDiv(); setDiv(); }
+
+    template <class T>
+    bool DivHelper<T>::divIsSet() const 
+    { return getDiv(); }
+
+    template <class T>
+    void DivHelper<T>::doneDiv() const
+    { if (!divIsSaved()) unsetDiv(); }
+
+    template <class T>
+    const Divider<T>* DivHelper<T>::getDiv() const 
+    { return divider.get(); }
 
     template <class T>
     bool DivHelper<T>::checkDecomp(std::ostream* fout) const
     {
-        TMVAssert(pdiv->div.get());
-        return pdiv->div->checkDecomp(getMatrix(),fout);
+        TMVAssert(divider.get());
+        return divider->checkDecomp(getMatrix(),fout);
     }
 
     template <class T>
     bool DivHelper<T>::checkDecomp(
         const BaseMatrix<T>& m2, std::ostream* fout) const
     {
-        TMVAssert(pdiv->div.get());
-        return pdiv->div->checkDecomp(m2,fout);
+        TMVAssert(divider.get());
+        return divider->checkDecomp(m2,fout);
     }
 
 #define InstFile "TMV_BaseMatrix.inst"

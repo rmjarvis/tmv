@@ -74,57 +74,69 @@ namespace tmv {
     }
 
     template <class T>
-    void GenMatrix<T>::newDivider() const
+    void GenMatrix<T>::setDiv() const
     {
-        switch (this->getDivType()) {
-          case LU : this->setDiv(
-                        new LUDiv<T>(*this,this->isDivInPlace())); 
-                    break;
-          case QR : this->setDiv(
-                        new QRDiv<T>(*this,this->isDivInPlace())); 
-                    break;
-          case QRP : this->setDiv(
-                         new QRPDiv<T>(*this,this->isDivInPlace())); 
-                     break;
-          case SV : this->setDiv(
-                        new SVDiv<T>(*this,this->isDivInPlace())); 
-                    break;
-          default : TMVAssert(TMV_FALSE);
+        if (!this->divIsSet()) {
+            DivType dt = this->getDivType();
+            TMVAssert(dt == tmv::LU || dt == tmv::QR ||
+                      dt == tmv::QRP || dt == tmv::SV);
+            switch (dt) {
+              case LU : 
+                   this->divider.reset(
+                       new LUDiv<T>(*this,this->divIsInPlace())); 
+                   break;
+              case QR : 
+                   this->divider.reset(
+                       new QRDiv<T>(*this,this->divIsInPlace())); 
+                   break;
+              case QRP : 
+                   this->divider.reset(
+                       new QRPDiv<T>(*this,this->divIsInPlace())); 
+                   break;
+              case SV : 
+                   this->divider.reset(
+                       new SVDiv<T>(*this,this->divIsInPlace())); 
+                   break;
+              default : 
+                   // The above assert should have already failed
+                   // so go ahead and fall through.
+                   break;
+            }
         }
     }
 
 #ifdef INST_INT
     template <>
-    void GenMatrix<int>::newDivider() const
+    void GenMatrix<int>::setDiv() const
     { TMVAssert(TMV_FALSE); }
     template <>
-    void GenMatrix<std::complex<int> >::newDivider() const
+    void GenMatrix<std::complex<int> >::setDiv() const
     { TMVAssert(TMV_FALSE); }
 #endif
 
     // Note: These need to be in the .cpp file, not the .h file for
     // dynamic libraries.  Apparently the typeinfo used for dynamic_cast
-    // doesn't get shread correctly by different modules, so the 
+    // doesn't get shared correctly by different modules, so the 
     // dynamic_cast fails when called in one module for an object that 
     // was created in a different module.
     //
     // So putting these functions here puts the dynamic cast in the shared
-    // library, which is also where it is created (by newDivider above).
+    // library, which is also where it is created (by setDiv() above).
     template <class T>
     bool GenMatrix<T>::divIsLUDiv() const
-    { return static_cast<bool>(dynamic_cast<const LUDiv<T>*>(getDiv())); }
+    { return dynamic_cast<const LUDiv<T>*>(this->getDiv()); }
 
     template <class T>
     bool GenMatrix<T>::divIsQRDiv() const
-    { return static_cast<bool>(dynamic_cast<const QRDiv<T>*>(getDiv())); }
+    { return dynamic_cast<const QRDiv<T>*>(this->getDiv()); }
 
     template <class T>
     bool GenMatrix<T>::divIsQRPDiv() const
-    { return static_cast<bool>(dynamic_cast<const QRPDiv<T>*>(getDiv())); }
+    { return dynamic_cast<const QRPDiv<T>*>(this->getDiv()); }
 
     template <class T>
     bool GenMatrix<T>::divIsSVDiv() const
-    { return static_cast<bool>(dynamic_cast<const SVDiv<T>*>(getDiv())); }
+    { return dynamic_cast<const SVDiv<T>*>(this->getDiv()); }
 
 
 #ifdef INST_INT

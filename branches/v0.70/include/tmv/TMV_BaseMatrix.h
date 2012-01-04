@@ -131,12 +131,6 @@ namespace tmv {
         virtual RT maxAbsElement() const = 0;
         virtual RT maxAbs2Element() const = 0;
 
-        virtual void makeInverse(const MatrixView<T>& minv) const = 0;
-        virtual void makeInverseATA(const MatrixView<T>& ata) const = 0;
-        virtual bool isSingular() const = 0;
-        virtual RT condition() const = 0;
-        virtual RT doCondition() const = 0;
-
         // 
         // I/O: Write
         //
@@ -313,41 +307,42 @@ namespace tmv {
         // Division Control
         //
 
-        void divideInPlace() const;
-        void saveDiv() const;
         void divideUsing(DivType dt) const;
-        void setDiv() const;
-        bool divIsSet() const;
+
+        void divideInPlace() const;
+        void dontDivideInPlace() const;
+        void saveDiv() const;
+        void dontSaveDiv() const;
+
+        // setDiv is defined in the derived class.
+        virtual void setDiv() const = 0;
         void unsetDiv() const;
         void resetDiv() const;
+
+        DivType getDivType() const;
+        bool divIsInPlace() const;
+        bool divIsSaved() const;
+        bool divIsSet() const;
 
         bool checkDecomp(std::ostream* fout=0) const;
         bool checkDecomp(const BaseMatrix<T>& m2, std::ostream* fout=0) const;
 
     protected :
 
-        struct DivImpl;
-
-        mutable std::auto_ptr<DivImpl> pdiv;
-
-        const Divider<T>* getDiv() const;
-        void setDiv(Divider<T>*) const;
-        DivType getDivType() const;
-        bool isDivInPlace() const;
         void doneDiv() const;
+        const Divider<T>* getDiv() const;
+        void resetDivType() const;
 
-        // This is why the divider stuff is implemented using private
-        // inheritance.  NewDivider needs to be defined in the 
-        // derived class.
-        virtual void newDivider() const = 0;
+        // Two more that need to be defined in the derived class:
         virtual const BaseMatrix<T>& getMatrix() const = 0;
+
+        mutable std::auto_ptr<Divider<T> > divider;
+        mutable DivType divtype;
 
     private :
 
         DivHelper(const DivHelper<T>&);
         DivHelper<T>& operator=(const DivHelper<T>&);
-
-        void setupDiv() const;
 
         T doDet() const;
         RT doLogDet(T* sign) const;

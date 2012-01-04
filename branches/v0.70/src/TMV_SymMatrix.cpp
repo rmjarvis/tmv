@@ -88,36 +88,42 @@ namespace tmv {
         }
     }
 
-    template <class T> 
-    void GenSymMatrix<T>::newDivider() const
+    template <class T>
+    void GenSymMatrix<T>::setDiv() const
     {
-        switch(this->getDivType()) {
-          case LU : {
-              this->setDiv(new SymLDLDiv<T>(*this,this->isDivInPlace())); 
-              break; 
-          }
-          case SV : {
-              if (isReal(T()) || sym()==Herm) {
-                  this->setDiv(new HermSVDiv<T>(*this)); 
-              } else {
-                  this->setDiv(new SymSVDiv<T>(*this)); 
-              }
-              break; 
-          }
-          case CH : {
-              this->setDiv(new HermCHDiv<T>(*this,this->isDivInPlace()));
-              break;
-          }
-          default : TMVAssert(TMV_FALSE); 
+        if (!this->divIsSet()) {
+            DivType dt = this->getDivType();
+            TMVAssert(dt == tmv::LU || dt == tmv::CH || dt == tmv::SV);
+            TMVAssert(isherm() || dt != tmv::CH);
+            switch (dt) {
+              case LU : 
+                   this->divider.reset(
+                       new SymLDLDiv<T>(*this,this->divIsInPlace())); 
+                   break;
+              case CH : 
+                   this->divider.reset(
+                       new HermCHDiv<T>(*this,this->divIsInPlace())); 
+                   break;
+              case SV : 
+                   if (isherm()) 
+                       this->divider.reset(new HermSVDiv<T>(*this));
+                   else
+                       this->divider.reset(new SymSVDiv<T>(*this));
+                   break;
+              default : 
+                   // The above assert should have already failed
+                   // so go ahead and fall through.
+                   break;
+            }
         }
     }
 
 #ifdef INST_INT
     template <>
-    void GenSymMatrix<int>::newDivider() const
+    void GenSymMatrix<int>::setDiv() const
     { TMVAssert(TMV_FALSE); }
     template <>
-    void GenSymMatrix<std::complex<int> >::newDivider() const
+    void GenSymMatrix<std::complex<int> >::setDiv() const
     { TMVAssert(TMV_FALSE); }
 #endif
 
@@ -140,28 +146,19 @@ namespace tmv {
 
     template <class T>
     bool GenSymMatrix<T>::divIsLUDiv() const
-    { return static_cast<bool>(dynamic_cast<const SymLDLDiv<T>*>(getDiv())); }
+    { return dynamic_cast<const SymLDLDiv<T>*>(this->getDiv()); }
 
     template <class T>
     bool GenSymMatrix<T>::divIsCHDiv() const
-    {
-        return static_cast<bool>(
-            dynamic_cast<const HermCHDiv<T>*>(getDiv())); 
-    }
+    { return dynamic_cast<const HermCHDiv<T>*>(this->getDiv()); }
 
     template <class T>
     bool GenSymMatrix<T>::divIsHermSVDiv() const
-    {
-        return static_cast<bool>(
-            dynamic_cast<const HermSVDiv<T>*>(getDiv())); 
-    }
+    { return dynamic_cast<const HermSVDiv<T>*>(this->getDiv()); }
 
     template <class T>
     bool GenSymMatrix<T>::divIsSymSVDiv() const
-    { 
-        return static_cast<bool>(
-            dynamic_cast<const SymSVDiv<T>*>(getDiv())); 
-    }
+    { return dynamic_cast<const SymSVDiv<T>*>(this->getDiv()); }
 
 #ifdef INST_INT
     template <>
@@ -550,6 +547,10 @@ namespace tmv {
     RT GenSymMatrix<T>::logDet(T* sign) const
     { return DivHelper<T>::logDet(sign); }
 
+    template <class T>
+    bool GenSymMatrix<T>::isSingular() const
+    { return DivHelper<T>::isSingular(); }
+
 #ifdef INST_INT
     template <>
     int GenSymMatrix<int>::det() const
@@ -566,6 +567,14 @@ namespace tmv {
     template <>
     int GenSymMatrix<std::complex<int> >::logDet(std::complex<int>* ) const
     { TMVAssert(TMV_FALSE); return 0; }
+
+    template <>
+    bool GenSymMatrix<int>::isSingular() const
+    { return det() == 0; }
+
+    template <>
+    bool GenSymMatrix<std::complex<int> >::isSingular() const
+    { return det() == 0; }
 #endif
 
     template <class T> 

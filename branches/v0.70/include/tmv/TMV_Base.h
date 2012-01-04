@@ -247,7 +247,6 @@ namespace tmv {
     };
 #endif
 
-    enum DivType { XX, LU, CH, QR, QRP, SV };
     // MJ: Add the packed storage varieties: RowPack, ColPack, DiagPack
     enum StorageType { RowMajor, ColMajor, DiagMajor, NoMajor };
     enum UpLoType { Upper, Lower };
@@ -271,7 +270,6 @@ namespace tmv {
     inline StorageType BaseStorOf(const M& m)
     { return m.stor()==RowMajor ? RowMajor : ColMajor; }
 
-#if 0
     enum DivType { 
         XX=0, LU=1, CH=2, QR=4, QRP=8, SV=16,
         // We store the divtype in a binary field integer.
@@ -285,23 +283,22 @@ namespace tmv {
         // And finally shorthand for "one of the real DivType's":
         DivTypeFlags = 31
     };
-    TMV_INLINE DivType operator|(DivType a, DivType b)
+    inline DivType operator|(DivType a, DivType b)
     {
         return static_cast<DivType>(
             static_cast<int>(a) | static_cast<int>(b));
     }
-    TMV_INLINE DivType operator&(DivType a, DivType b)
+    inline DivType operator&(DivType a, DivType b)
     {
         return static_cast<DivType>(
             static_cast<int>(a) & static_cast<int>(b));
     }
-    TMV_INLINE DivType& operator|=(DivType& a, DivType b)
+    inline DivType& operator|=(DivType& a, DivType b)
     { a = (a|b); return a; }
-    TMV_INLINE DivType& operator&=(DivType& a, DivType b)
+    inline DivType& operator&=(DivType& a, DivType b)
     { a = (a&b); return a; }
-    TMV_INLINE DivType operator~(DivType a)
+    inline DivType operator~(DivType a)
     { return static_cast<DivType>(~static_cast<int>(a)); }
-#endif
 
 #ifdef NOALIASCHECK
     template <class M1, class M2> 

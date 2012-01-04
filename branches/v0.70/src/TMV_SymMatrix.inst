@@ -47,7 +47,7 @@ Def1(T,CT,VarConjRef<CT >)
 #define Def1b(RT,T) \
   template T GenSymMatrix<T >::det() const; \
   template RT GenSymMatrix<T >::logDet(T* sign) const; \
-  template void GenSymMatrix<T >::newDivider() const; \
+  template void GenSymMatrix<T >::setDiv() const; \
   template bool GenSymMatrix<T >::divIsLUDiv() const; \
   template bool GenSymMatrix<T >::divIsCHDiv() const; \
   template bool GenSymMatrix<T >::divIsHermSVDiv() const; \

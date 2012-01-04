@@ -36,9 +36,9 @@ inline void TestV(const V& a, std::string label)
     RT norm1 = 0.;
     RT norminf = 0.;
     for(int i=0;i<N;++i) {
-        normsq += std::abs(v(i)*v(i));
-        norm1 += std::abs(v(i));
-        if (std::abs(v(i)) > norminf) norminf = std::abs(v(i));
+        normsq += tmv::TMV_NORM(v(i));
+        norm1 += tmv::TMV_ABS(v(i));
+        if (tmv::TMV_ABS(v(i)) > norminf) norminf = tmv::TMV_ABS(v(i));
     }
 
     if (!(std::numeric_limits<RT>::is_integer)) {

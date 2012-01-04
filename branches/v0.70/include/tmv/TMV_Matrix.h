@@ -528,7 +528,7 @@ namespace tmv {
     template <class T> 
     class GenMatrix : 
         public BaseMatrix<T>,
-        private DivHelper<T>
+        public DivHelper<T>
     {
     public:
 
@@ -892,6 +892,8 @@ namespace tmv {
 
         RT logDet(T* sign=0) const;
 
+        bool isSingular() const;
+
         inline T trace() const
         { return diag().sumElements(); }
 
@@ -922,8 +924,6 @@ namespace tmv {
         // = max_i,j (|real(a_ij)|+|imag(a_ij)|)
         RT maxAbs2Element() const;
 
-        bool isSingular() const;
-
         RT doNorm2() const;
         inline RT norm2() const
         {
@@ -940,43 +940,19 @@ namespace tmv {
             else return doCondition();
         }
 
-        // icc gives a strange compiler error if I don't do this 
-        // throwugh aInverse.  I think I should be able to just write:
+        // icpc gives a strange compiler error if I don't do this 
+        // throwugh QInverse.  I think I should be able to just write:
         // QuotXM<T,T> inverse() const;
         // and then define this in TMV_Matrix.cpp, but that doesn't work.
         QuotXM<T,T> QInverse() const;
         inline QuotXM<T,T> inverse() const
         { return QInverse(); }
 
-        inline void makeInverse(const MatrixView<T>& minv) const
-        { DivHelper<T>::makeInverse(minv); }
-
-        template <class T1> 
-        inline void makeInverse(const MatrixView<T1>& minv) const
-        { DivHelper<T>::makeInverse(minv); }
-
-        template <class T1, StorageType S, IndexStyle I> 
-        inline void makeInverse(Matrix<T1,S,I>& minv) const
-        { DivHelper<T>::makeInverse(minv); }
-
-        inline void makeInverseATA(const MatrixView<T>& ata) const
-        { DivHelper<T>::makeInverseATA(ata); }
-
-        template <StorageType S, IndexStyle I> 
-        inline void makeInverseATA(Matrix<T,S,I>& ata) const
-        { DivHelper<T>::makeInverseATA(ata); }
-
         // 
         // Division Control
         //
 
-        using DivHelper<T>::divideInPlace;
-        using DivHelper<T>::saveDiv;
-        using DivHelper<T>::setDiv;
-        using DivHelper<T>::unsetDiv;
-        using DivHelper<T>::resetDiv;
-        using DivHelper<T>::divIsSet;
-        using DivHelper<T>::checkDecomp;
+        void setDiv() const;
 
         inline void divideUsing(DivType dt) const
         {
@@ -988,69 +964,37 @@ namespace tmv {
         {
             divideUsing(LU);
             setDiv();
-            TMVAssert(getDiv());
+            TMVAssert(this->getDiv());
             TMVAssert(divIsLUDiv());
-            return static_cast<const LUDiv<T>&>(*getDiv());
+            return static_cast<const LUDiv<T>&>(*this->getDiv());
         }
 
         inline const QRDiv<T>& qrd() const
         {
             divideUsing(QR);
             setDiv();
-            TMVAssert(getDiv());
+            TMVAssert(this->getDiv());
             TMVAssert(divIsQRDiv());
-            return static_cast<const QRDiv<T>&>(*getDiv());
+            return static_cast<const QRDiv<T>&>(*this->getDiv());
         }
 
         inline const QRPDiv<T>& qrpd() const
         {
             divideUsing(QRP);
             setDiv();
-            TMVAssert(getDiv());
+            TMVAssert(this->getDiv());
             TMVAssert(divIsQRPDiv());
-            return static_cast<const QRPDiv<T>&>(*getDiv());
+            return static_cast<const QRPDiv<T>&>(*this->getDiv());
         }
 
         inline const SVDiv<T>& svd() const
         {
             divideUsing(SV);
             setDiv();
-            TMVAssert(getDiv());
+            TMVAssert(this->getDiv());
             TMVAssert(divIsSVDiv());
-            return static_cast<const SVDiv<T>&>(*getDiv());
+            return static_cast<const SVDiv<T>&>(*this->getDiv());
         }
-
-        template <class T1> 
-        inline void LDivEq(const VectorView<T1>& v) const 
-        { DivHelper<T>::LDivEq(v); }
-
-        template <class T1> 
-        inline void LDivEq(const MatrixView<T1>& m) const 
-        { DivHelper<T>::LDivEq(m); }
-
-        template <class T1> 
-        inline void RDivEq(const VectorView<T1>& v) const 
-        { DivHelper<T>::RDivEq(v); }
-
-        template <class T1> 
-        inline void RDivEq(const MatrixView<T1>& m) const 
-        { DivHelper<T>::RDivEq(m); }
-
-        template <class T1, class T0> 
-        inline void LDiv(const GenVector<T1>& v1, const VectorView<T0>& v0) const
-        { DivHelper<T>::LDiv(v1,v0); }
-
-        template <class T1, class T0> 
-        inline void LDiv(const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
-        { DivHelper<T>::LDiv(m1,m0); }
-
-        template <class T1, class T0> 
-        inline void RDiv(const GenVector<T1>& v1, const VectorView<T0>& v0) const
-        { DivHelper<T>::RDiv(v1,v0); }
-
-        template <class T1, class T0> 
-        inline void RDiv(const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
-        { DivHelper<T>::RDiv(m1,m0); }
 
 
         //
@@ -1090,9 +1034,6 @@ namespace tmv {
 
     protected :
 
-        using DivHelper<T>::getDiv;
-
-        void newDivider() const;
         inline const BaseMatrix<T>& getMatrix() const { return *this; }
 
     private :
@@ -1127,8 +1068,7 @@ namespace tmv {
 
         inline ConstMatrixView(
             const T* _m, int _cs, int _rs, int _si, int _sj, 
-            StorageType _stor, ConjType _ct, int _ls=0
-        ) : 
+            StorageType _stor, ConjType _ct, int _ls=0) : 
             itsm(_m), itscs(_cs), itsrs(_rs), itssi(_si), itssj(_sj),
             itsstor(_stor), itsct(_ct), linsize(_ls)
         { 
@@ -1404,8 +1344,7 @@ namespace tmv {
         inline MatrixView(
             T* _m, int _cs, int _rs, int _si, int _sj,
             StorageType _stor, ConjType _ct, int _ls 
-            TMV_PARAMFIRSTLAST(T) 
-        ) :
+            TMV_PARAMFIRSTLAST(T) ) :
             itsm(_m), itscs(_cs), itsrs(_rs), itssi(_si), itssj(_sj),
             itsstor(_stor), itsct(_ct), linsize(_ls) 
             TMV_DEFFIRSTLAST(_first,_last)
@@ -1416,8 +1355,7 @@ namespace tmv {
 
         inline MatrixView(
             T* _m, int _cs, int _rs, int _si, int _sj,
-            StorageType _stor, ConjType _ct TMV_PARAMFIRSTLAST(T) 
-        ) :
+            StorageType _stor, ConjType _ct TMV_PARAMFIRSTLAST(T) ) :
             itsm(_m), itscs(_cs), itsrs(_rs), itssi(_si), itssj(_sj),
             itsstor(_stor), itsct(_ct), linsize(0) 
             TMV_DEFFIRSTLAST(_first,_last)
@@ -1979,16 +1917,14 @@ namespace tmv {
         inline MatrixView(
             T* _m, int _cs, int _rs, int _si, int _sj,
             StorageType instor, ConjType inct, int linsize
-            TMV_PARAMFIRSTLAST(T) 
-        ) :
+            TMV_PARAMFIRSTLAST(T) ) :
             c_type(_m,_cs,_rs,_si,_sj,instor,inct,linsize 
                    TMV_FIRSTLAST1(_first,_last) ) 
         {}
 
         inline MatrixView(
             T* _m, int _cs, int _rs, int _si, int _sj,
-            StorageType instor, ConjType inct TMV_PARAMFIRSTLAST(T) 
-        ) :
+            StorageType instor, ConjType inct TMV_PARAMFIRSTLAST(T) ) :
             c_type(_m,_cs,_rs,_si,_sj,instor,inct TMV_FIRSTLAST1(_first,_last))
         {}
 
@@ -3365,6 +3301,7 @@ namespace tmv {
             itsm.resize(linsize);
             itscs = cs;
             itsrs = rs;
+            DivHelper<T>::resetDivType();
 #ifdef TMVFLDEBUG
             _first = itsm.get();
             _last = _first + linsize;

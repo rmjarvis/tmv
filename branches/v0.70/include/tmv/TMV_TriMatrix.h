@@ -1761,8 +1761,7 @@ namespace tmv {
 
         inline ConstUpperTriMatrixView(
             const T* _m, int _s, int _si, int _sj,
-            DiagType indt, StorageType instor, ConjType inct
-        ) : 
+            DiagType indt, StorageType instor, ConjType inct) : 
             c_type(_m,_s,_si,_sj,indt,instor,inct) 
         {}
 
@@ -1920,8 +1919,7 @@ namespace tmv {
 
         inline ConstLowerTriMatrixView(
             const T* _m, int _s, int _si, int _sj,
-            DiagType indt, StorageType instor, ConjType inct
-        ) : 
+            DiagType indt, StorageType instor, ConjType inct) : 
             c_type(_m,_s,_si,_sj,indt,instor,inct) 
         {}
 
@@ -2088,8 +2086,7 @@ namespace tmv {
         inline UpperTriMatrixView(
             T* _m, int _s, int _si, int _sj,
             DiagType _dt, StorageType _stor, ConjType _ct
-            TMV_PARAMFIRSTLAST(T) 
-        ) :
+            TMV_PARAMFIRSTLAST(T) ) :
             itsm(_m), itss(_s), itssi(_si), itssj(_sj),
             itsdiag(_dt), itsstor(_stor), itsct(_ct) 
             TMV_DEFFIRSTLAST(_first,_last)
@@ -2508,8 +2505,7 @@ namespace tmv {
         inline LowerTriMatrixView(
             T* _m, int _s, int _si, int _sj,
             DiagType _dt, StorageType _stor, ConjType _ct
-            TMV_PARAMFIRSTLAST(T) 
-        ) :
+            TMV_PARAMFIRSTLAST(T) ) :
             itsm(_m), itss(_s), itssi(_si), itssj(_sj),
             itsdiag(_dt), itsstor(_stor), itsct(_ct) 
             TMV_DEFFIRSTLAST(_first,_last)
@@ -2934,8 +2930,7 @@ namespace tmv {
         inline UpperTriMatrixView(
             T* _m, int _s, int _si, int _sj,
             DiagType indt, StorageType instor, ConjType inct 
-            TMV_PARAMFIRSTLAST(T) 
-        ) :
+            TMV_PARAMFIRSTLAST(T) ) :
             c_type(_m,_s,_si,_sj,indt,instor,inct 
                    TMV_FIRSTLAST1(_first,_last) ) 
         {}
@@ -3170,8 +3165,7 @@ namespace tmv {
         inline LowerTriMatrixView(
             T* _m, int _s, int _si, int _sj,
             DiagType indt, StorageType instor, ConjType inct 
-            TMV_PARAMFIRSTLAST(T) 
-        ) :
+            TMV_PARAMFIRSTLAST(T) ) :
             c_type(_m,_s,_si,_sj,indt,instor,inct 
                    TMV_FIRSTLAST1(_first,_last) ) 
         {}

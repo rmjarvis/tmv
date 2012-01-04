@@ -78,64 +78,64 @@ namespace tmv {
             return TMV_REF(mi,ct());
         } else {
             T* mi = ptr() + j*stepi() + i*stepj();
-            return this->issym() != this->isconj() ? TMV_REF(mi,NonConj) : TMV_REF(mi,Conj);
+            return this->issym() != this->isconj() ?
+                TMV_REF(mi,NonConj) : TMV_REF(mi,Conj);
         }
     }
 
-    template <class T> 
-    void GenSymBandMatrix<T>::newDivider() const
+    template <class T>
+    void GenSymBandMatrix<T>::setDiv() const
     {
-        switch(this->getDivType()) {
-          case LU : {
-              this->setDiv(new BandLUDiv<T>(*this));
-              break; 
-          }
-          case SV : {
-              if (isherm()) this->setDiv(new HermBandSVDiv<T>(*this)); 
-              else this->setDiv(new SymBandSVDiv<T>(*this)); 
-              break; 
-          }
-          case CH : {
-              this->setDiv(new HermBandCHDiv<T>(*this,this->isDivInPlace()));
-              break;
-          }
-          default : TMVAssert(TMV_FALSE); 
+        if (!this->divIsSet()) {
+            DivType dt = this->getDivType();
+            TMVAssert(dt == tmv::LU || dt == tmv::CH || dt == tmv::SV);
+            TMVAssert(isherm() || dt != tmv::CH);
+            switch (dt) {
+              case LU : 
+                   this->divider.reset(new BandLUDiv<T>(*this)); 
+                   break;
+              case CH : 
+                   this->divider.reset(
+                       new HermBandCHDiv<T>(*this,this->divIsInPlace())); 
+                   break;
+              case SV : 
+                   if (isherm()) 
+                       this->divider.reset(new HermBandSVDiv<T>(*this));
+                   else
+                       this->divider.reset(new SymBandSVDiv<T>(*this));
+                   break;
+              default : 
+                   // The above assert should have already failed
+                   // so go ahead and fall through.
+                   break;
+            }
         }
     }
 
 #ifdef INST_INT
     template <>
-    void GenSymBandMatrix<int>::newDivider() const
+    void GenSymBandMatrix<int>::setDiv() const
     { TMVAssert(TMV_FALSE); }
     template <>
-    void GenSymBandMatrix<std::complex<int> >::newDivider() const
+    void GenSymBandMatrix<std::complex<int> >::setDiv() const
     { TMVAssert(TMV_FALSE); }
 #endif
 
     template <class T>
     bool GenSymBandMatrix<T>::divIsLUDiv() const
-    { return static_cast<bool>(dynamic_cast<const BandLUDiv<T>*>(getDiv())); }
+    { return dynamic_cast<const BandLUDiv<T>*>(this->getDiv()); }
 
     template <class T>
     bool GenSymBandMatrix<T>::divIsCHDiv() const
-    {
-        return static_cast<bool>(
-            dynamic_cast<const HermBandCHDiv<T>*>(getDiv())); 
-    }
+    { return dynamic_cast<const HermBandCHDiv<T>*>(this->getDiv()); }
 
     template <class T>
     bool GenSymBandMatrix<T>::divIsHermSVDiv() const
-    {
-        return static_cast<bool>(
-            dynamic_cast<const HermBandSVDiv<T>*>(getDiv())); 
-    }
+    { return dynamic_cast<const HermBandSVDiv<T>*>(this->getDiv()); }
 
     template <class T>
     bool GenSymBandMatrix<T>::divIsSymSVDiv() const
-    { 
-        return static_cast<bool>(
-            dynamic_cast<const SymBandSVDiv<T>*>(getDiv())); 
-    }
+    { return dynamic_cast<const SymBandSVDiv<T>*>(this->getDiv()); }
 
 #ifdef INST_INT
     template <>
@@ -758,6 +758,10 @@ namespace tmv {
     RT GenSymBandMatrix<T>::logDet(T* sign) const
     { return DivHelper<T>::logDet(sign); }
 
+    template <class T>
+    bool GenSymBandMatrix<T>::isSingular() const
+    { return DivHelper<T>::isSingular(); }
+
 #ifdef INST_INT
     template <>
     int GenSymBandMatrix<int>::det() const
@@ -774,6 +778,14 @@ namespace tmv {
     template <>
     int GenSymBandMatrix<std::complex<int> >::logDet(std::complex<int>* ) const
     { TMVAssert(TMV_FALSE); return 0; }
+
+    template <>
+    bool GenSymBandMatrix<int>::isSingular() const
+    { return det() == 0; }
+
+    template <>
+    bool GenSymBandMatrix<std::complex<int> >::isSingular() const
+    { return det() == 0; }
 #endif
 
     template <class T> 

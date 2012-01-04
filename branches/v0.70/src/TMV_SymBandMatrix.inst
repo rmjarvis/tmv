@@ -51,7 +51,7 @@ Def1(T,CT,VarConjRef<CT >)
 #define Def1b(RT,T) \
   template T GenSymBandMatrix<T >::det() const; \
   template RT GenSymBandMatrix<T >::logDet(T* sign) const; \
-  template void GenSymBandMatrix<T >::newDivider() const; \
+  template void GenSymBandMatrix<T >::setDiv() const; \
   template bool GenSymBandMatrix<T >::divIsLUDiv() const; \
   template bool GenSymBandMatrix<T >::divIsCHDiv() const; \
   template bool GenSymBandMatrix<T >::divIsHermSVDiv() const; \

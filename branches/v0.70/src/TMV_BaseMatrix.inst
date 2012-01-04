@@ -4,22 +4,22 @@
 #define Def1(RT,T) \
   template DivHelper<T >::DivHelper(); \
   template DivHelper<T >::~DivHelper(); \
-  template void DivHelper<T >::divideInPlace() const; \
-  template void DivHelper<T >::saveDiv() const; \
   template void DivHelper<T >::divideUsing(DivType dt) const; \
-  template void DivHelper<T >::setDiv() const; \
+  template void DivHelper<T >::divideInPlace() const; \
+  template void DivHelper<T >::dontDivideInPlace() const; \
+  template bool DivHelper<T >::divIsInPlace() const; \
+  template void DivHelper<T >::saveDiv() const; \
+  template void DivHelper<T >::dontSaveDiv() const; \
+  template bool DivHelper<T >::divIsSaved() const; \
   template void DivHelper<T >::unsetDiv() const; \
   template void DivHelper<T >::resetDiv() const; \
-  template void DivHelper<T >::doneDiv() const; \
   template bool DivHelper<T >::divIsSet() const; \
+  template void DivHelper<T >::doneDiv() const; \
   template bool DivHelper<T >::checkDecomp(std::ostream* os) const; \
   template bool DivHelper<T >::checkDecomp(const BaseMatrix<T >& m2, \
       std::ostream* os) const; \
   template const Divider<T >* DivHelper<T >::getDiv() const; \
-  template void DivHelper<T >::setDiv(Divider<T >*) const; \
   template DivType DivHelper<T >::getDivType() const; \
-  template bool DivHelper<T >::isDivInPlace() const; \
-  template void DivHelper<T >::setupDiv() const; \
   template T DivHelper<T >::doDet() const; \
   template RT DivHelper<T >::doLogDet(T* sign) const; \
   template void DivHelper<T >::doMakeInverseATA( \
@@ -27,6 +27,7 @@
   template bool DivHelper<T >::doIsSingular() const; \
   template RT DivHelper<T >::doNorm2() const; \
   template RT DivHelper<T >::doCondition() const; \
+  template void DivHelper<T>::resetDivType() const; \
 
 Def1(T,T)
 #ifdef INST_COMPLEX

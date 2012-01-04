@@ -18,6 +18,8 @@
   template RT GenMatrix<T >::norm1() const; \
   template RT GenMatrix<T >::maxAbsElement() const; \
   template RT GenMatrix<T >::maxAbs2Element() const; \
+  template RT GenMatrix<T >::doNorm2() const; \
+  template RT GenMatrix<T >::doCondition() const; \
   template QuotXM<T,T > GenMatrix<T >::QInverse() const; \
   template void GenMatrix<T >::write(const TMV_Writer& writer) const; \
   template void MatrixView<T,CStyle>::read(const TMV_Reader& reader) const; \
@@ -54,11 +56,12 @@ Def1(T,CT,VarConjRef<CT >)
   template T GenMatrix<T >::det() const; \
   template RT GenMatrix<T >::logDet(T* sign) const; \
   template bool GenMatrix<T >::isSingular() const; \
-  template void GenMatrix<T >::newDivider() const; \
+  template void GenMatrix<T >::setDiv() const; \
   template bool GenMatrix<T >::divIsLUDiv() const; \
   template bool GenMatrix<T >::divIsQRDiv() const; \
   template bool GenMatrix<T >::divIsQRPDiv() const; \
   template bool GenMatrix<T >::divIsSVDiv() const; \
+
 
 Def1b(T,T)
 #ifdef INST_COMPLEX

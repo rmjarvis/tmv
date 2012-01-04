@@ -63,7 +63,7 @@ Def1(T,CT,VarConjRef<CT >)
 #define Def1b(RT,T) \
   template T GenBandMatrix<T >::det() const; \
   template RT GenBandMatrix<T >::logDet(T* sign) const; \
-  template void GenBandMatrix<T >::newDivider() const; \
+  template void GenBandMatrix<T >::setDiv() const; \
   template bool GenBandMatrix<T >::divIsLUDiv() const; \
   template bool GenBandMatrix<T >::divIsQRDiv() const; \
   template bool GenBandMatrix<T >::divIsSVDiv() const; \
