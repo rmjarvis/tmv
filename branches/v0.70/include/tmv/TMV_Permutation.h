@@ -508,8 +508,8 @@ namespace tmv {
             TMV_SWAP(p1.itsdet,p2.itsdet);
         }
 
-        template <class T, IndexStyle I>
-        friend inline const VectorView<T,I>& VectorView<T,I>::sort(
+        template <class T, int A>
+        friend inline const VectorView<T,A>& VectorView<T,A>::sort(
             Permutation& P, ADType ad, CompType comp) const;
 
         template <class T>
@@ -592,9 +592,9 @@ namespace tmv {
             P.calcDet();
         }
 
-        template <class T, IndexStyle I>
+        template <class T, int A>
         friend inline void DoVectorSort(
-            const VectorView<T,I>& v, Permutation& P, ADType ad, CompType comp)
+            const VectorView<T,A>& v, Permutation& P, ADType ad, CompType comp)
         {
             P.resize(v.size());
             P.allocateMem();
@@ -913,8 +913,8 @@ namespace tmv {
     // Wait unil here to define the version with Permutation.
     //
     
-    template <class T, IndexStyle I>
-    inline const VectorView<T,I>& VectorView<T,I>::sort(
+    template <class T, int A>
+    inline const VectorView<T,A>& VectorView<T,A>::sort(
         Permutation& P, ADType ad, CompType comp) const
     {
         DoVectorSort(*this,P,ad,comp);

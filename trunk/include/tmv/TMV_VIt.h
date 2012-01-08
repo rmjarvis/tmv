@@ -191,7 +191,7 @@ namespace tmv {
 
         TMV_INLINE VIt(T* inp, int step) : p(inp), s(step) {}
         TMV_INLINE explicit VIt(T* inp) : p(inp), s(S) 
-        { TMVAssert(S != TMV_UNKNOWN); }
+        { TMVAssert(S != Unknown); }
         TMV_INLINE VIt(const type& rhs) : p(rhs.get()), s(rhs.step()) {}
 
         template <int S2>
@@ -267,7 +267,7 @@ namespace tmv {
 
         TMV_INLINE CVIt(const T* inp, int step) : p(inp), s(step) {}
         TMV_INLINE explicit CVIt(const T* inp) : p(inp), s(S) 
-        { TMVAssert(S != TMV_UNKNOWN); }
+        { TMVAssert(S != Unknown); }
         TMV_INLINE CVIt(const type& rhs) : p(rhs.get()), s(rhs.step()) {}
 
         template <int S2>
@@ -403,7 +403,6 @@ namespace tmv {
         typedef typename Traits2<T1,T2>::type type;
     };
 
-#ifdef TMV_TEXT
     template <class T>
     inline std::string TMV_Text(ConjRef<T>)
     { return std::string("ConjRef<") + TMV_Text(T()) + ">"; }
@@ -414,7 +413,7 @@ namespace tmv {
         std::ostringstream s;
         s << "VIt<" << TMV_Text(T());
         s << ","<<IntTraits<S>::text();
-        if (S == TMV_UNKNOWN) s << "("<<it.step()<<")";
+        if (S == Unknown) s << "("<<it.step()<<")";
         s << ","<< C << ">";
         return s.str();
     }
@@ -425,11 +424,10 @@ namespace tmv {
         std::ostringstream s;
         s << "CVIt<" << TMV_Text(T());
         s << ","<<IntTraits<S>::text();
-        if (S == TMV_UNKNOWN) s << "("<<it.step()<<")";
+        if (S == Unknown) s << "("<<it.step()<<")";
         s << ","<< C << ">";
         return s.str();
     }
-#endif
 
 } // namespace tmv
 

@@ -46,8 +46,8 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            int N = rs == Unknown ? m.rowsize() : rs;
             typedef typename M1::col_type Mc;
             typedef typename Mc::iterator IT;
             const int step = m.stepj();
@@ -65,8 +65,8 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
-            int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
             typedef typename M1::row_type Mr;
             typedef typename Mr::iterator IT;
             const int step = m.stepi();
@@ -236,7 +236,7 @@ namespace tmv {
                 (ix == 1) ? 1 :
                 M1::_canlin ? 2 :
                 TMV_OPT == 0 ? 11 :
-                ( cs != TMV_UNKNOWN && rs != TMV_UNKNOWN ) ? (
+                ( cs != Unknown && rs != Unknown ) ? (
                     ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T1)) ) ? (
                         ( M1::_rowmajor ? 25 : 15 ) ) :
                     M1::_rowmajor ? 21 :
@@ -257,7 +257,7 @@ namespace tmv {
             const int algo = 
                 (cs == 0 || rs == 0 || ix == 1) ? 0 :
                 M1::_canlin ? 1 :
-                TMV_OPT >= 2 && (cs == TMV_UNKNOWN || rs == TMV_UNKNOWN) ? 31 :
+                TMV_OPT >= 2 && (cs == Unknown || rs == Unknown) ? 31 :
                 -4;
             ScaleM_Helper<algo,cs,rs,ix,T,M1>::call(x,m);
         }
@@ -271,8 +271,8 @@ namespace tmv {
         {
             typedef typename M1::value_type T1;
             const bool inst =
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<T1>::isinst;
             const int algo = 
                 ix == 1 ? 0 :

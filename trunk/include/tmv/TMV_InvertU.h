@@ -73,7 +73,7 @@ namespace tmv {
         static TMV_INLINE void call(M& m)
         {
 #ifdef PRINTALGO_InvU
-            int N = (s == TMV_UNKNOWN ? m.size() : s);
+            int N = (s == Unknown ? m.size() : s);
             std::cout<<"InvU algo 2: N,s,x = "<<N<<','<<s<<std::endl;
 #endif
             typedef typename M::transpose_type Mt;
@@ -88,7 +88,7 @@ namespace tmv {
     {
         static void call(M& m)
         {
-            int N = (s == TMV_UNKNOWN ? m.size() : s);
+            int N = (s == Unknown ? m.size() : s);
 #ifdef PRINTALGO_InvU
             std::cout<<"InvU algo 11: N,s,x = "<<N<<','<<s<<std::endl;
 #endif
@@ -100,7 +100,7 @@ namespace tmv {
             typedef typename M::value_type T;
             typedef typename M::real_type RT;
             typedef typename TypeSelect<u,RT,T>::type XT;
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
 #ifdef TMV_INVU_INLINE_MV
             const int algo2 = -4;
 #else
@@ -125,7 +125,7 @@ namespace tmv {
     {
         static void call(M& m)
         {
-            int N = (s == TMV_UNKNOWN ? m.size() : s);
+            int N = (s == Unknown ? m.size() : s);
 #ifdef PRINTALGO_InvU
             std::cout<<"InvU algo 11: N,s,x = "<<N<<','<<s<<std::endl;
 #endif
@@ -138,7 +138,7 @@ namespace tmv {
             typedef typename M::value_type T;
             typedef typename M::real_type RT;
             typedef typename TypeSelect<u,RT,T>::type XT;
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
 #ifdef TMV_INVU_INLINE_MV
             const int algo2 = -4;
 #else
@@ -246,14 +246,14 @@ namespace tmv {
                 IntTraits2<IntTraits2<s,sp1>::safeprod,sp2>::safeprod/6;
             const bool unroll =
                 s > 10 ? false :
-                s == TMV_UNKNOWN ? false :
+                s == Unknown ? false :
                 nops <= TMV_INVU_UNROLL;
             const int algo2 =
                 s == 0 ? 0 :
                 s == 1 ? ( M::_unit ? 0 : 1 ) :
                 unroll ? 16 :
                 // For known s, always recurse down to unroll size
-                s != TMV_UNKNOWN ? 0 :
+                s != Unknown ? 0 :
                 (TMV_INVU_RECURSE == 1) ? ( M::_unit ? 0 : 1 ) :
                 M::_rowmajor ? 12 : 11;
             const int algo3 =  // The algorithm for N > INVU_RECURSE
@@ -264,7 +264,7 @@ namespace tmv {
             std::cout<<"algo2,3,4 = "<<algo2<<"  "<<algo3<<"  "<<algo4<<std::endl;
 #endif
 
-            if (s==TMV_UNKNOWN ? N > TMV_INVU_RECURSE : (s > 1 && !unroll)) {
+            if (s==Unknown ? N > TMV_INVU_RECURSE : (s > 1 && !unroll)) {
                 // [ B00 B01 ] * [ A00 A01 ] = [ 1 0 ]
                 // [  0  B11 ]   [  0  A11 ]   [ 0 1 ]
                 // B00 A00 = 1
@@ -376,7 +376,7 @@ namespace tmv {
         static TMV_INLINE void call(M& m)
         {
             TMVStaticAssert(M::_upper);
-            const int s2 = s > 20 ? TMV_UNKNOWN : s;
+            const int s2 = s > 20 ? Unknown : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             const int s2p2 = IntTraits<s2p1>::Sp1;
             // nops = 1/6 n(n+1)(n+2)
@@ -384,7 +384,7 @@ namespace tmv {
                 IntTraits2<IntTraits2<s2,s2p1>::safeprod,s2p2>::safeprod / 6;
             const bool unroll = 
                 s > 10 ? false :
-                s == TMV_UNKNOWN ? false :
+                s == Unknown ? false :
                 nops <= TMV_INVU_UNROLL;
             const int algo1 = 
                 M::_unit ? 0 : M::_unknowndiag ? 51 : 50;
@@ -445,7 +445,7 @@ namespace tmv {
         {
             typedef typename M::value_type T;
             const bool inst = 
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 ( s == 0 ) ? 0 :

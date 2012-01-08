@@ -339,17 +339,17 @@ void TestTriDiv()
         tmv::LowerTriMatrix<CT,tmv::UnitDiag> >();
 #if (XTEST & 2)
     TestBasicTriDiv<T,
-        tmv::UpperTriMatrix<T,tmv::NonUnitDiag,tmv::RowMajor>,
-        tmv::UpperTriMatrix<CT,tmv::NonUnitDiag,tmv::RowMajor> >();
+        tmv::UpperTriMatrix<T,tmv::NonUnitDiag|tmv::RowMajor>,
+        tmv::UpperTriMatrix<CT,tmv::NonUnitDiag|tmv::RowMajor> >();
     TestBasicTriDiv<T,
-        tmv::UpperTriMatrix<T,tmv::UnitDiag,tmv::RowMajor>,
-        tmv::UpperTriMatrix<CT,tmv::UnitDiag,tmv::RowMajor> >();
+        tmv::UpperTriMatrix<T,tmv::UnitDiag|tmv::RowMajor>,
+        tmv::UpperTriMatrix<CT,tmv::UnitDiag|tmv::RowMajor> >();
     TestBasicTriDiv<T,
-        tmv::LowerTriMatrix<T,tmv::NonUnitDiag,tmv::RowMajor>,
-        tmv::LowerTriMatrix<CT,tmv::NonUnitDiag,tmv::RowMajor> >();
+        tmv::LowerTriMatrix<T,tmv::NonUnitDiag|tmv::RowMajor>,
+        tmv::LowerTriMatrix<CT,tmv::NonUnitDiag|tmv::RowMajor> >();
     TestBasicTriDiv<T,
-        tmv::LowerTriMatrix<T,tmv::UnitDiag,tmv::RowMajor>,
-        tmv::LowerTriMatrix<CT,tmv::UnitDiag,tmv::RowMajor> >();
+        tmv::LowerTriMatrix<T,tmv::UnitDiag|tmv::RowMajor>,
+        tmv::LowerTriMatrix<CT,tmv::UnitDiag|tmv::RowMajor> >();
 #endif
 
     TestTriDiv_A1<T>();

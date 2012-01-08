@@ -23,10 +23,10 @@ static void TestBasicSymBandMatrix_1()
         std::cout<<"noff = "<<noff<<std::endl;
     }
 
-    tmv::SymBandMatrix<std::complex<T>,U,S> s1(N,noff);
-    tmv::SymBandMatrix<std::complex<T>,U,S> s2(N,noff);
-    tmv::SymBandMatrix<std::complex<T>,U,S,tmv::FortranStyle> s1f(N,noff);
-    tmv::SymBandMatrix<std::complex<T>,U,S,tmv::FortranStyle> s2f(N,noff);
+    tmv::SymBandMatrix<std::complex<T>,U|S> s1(N,noff);
+    tmv::SymBandMatrix<std::complex<T>,U|S> s2(N,noff);
+    tmv::SymBandMatrix<std::complex<T>,U|S|tmv::FortranStyle> s1f(N,noff);
+    tmv::SymBandMatrix<std::complex<T>,U|S|tmv::FortranStyle> s2f(N,noff);
 
     Assert(int(s1.colsize()) == N && int(s1.rowsize()) == N,
            "Creating SymBandMatrix(N)");
@@ -59,10 +59,10 @@ static void TestBasicSymBandMatrix_1()
     tmv::SymBandMatrixView<std::complex<T>,tmv::FortranStyle> s2fv = s2f.view();
     tmv::ConstSymBandMatrixView<std::complex<T>,tmv::FortranStyle> s2fcv = 
         s2f.view();
-    const tmv::SymBandMatrix<std::complex<T>,U,S>& s1x = s1;
-    const tmv::SymBandMatrix<std::complex<T>,U,S>& s2x = s2;
-    const tmv::SymBandMatrix<std::complex<T>,U,S,tmv::FortranStyle>& s1fx = s1f;
-    const tmv::SymBandMatrix<std::complex<T>,U,S,tmv::FortranStyle>& s2fx = s2f;
+    const tmv::SymBandMatrix<std::complex<T>,U|S>& s1x = s1;
+    const tmv::SymBandMatrix<std::complex<T>,U|S>& s2x = s2;
+    const tmv::SymBandMatrix<std::complex<T>,U|S|tmv::FortranStyle>& s1fx = s1f;
+    const tmv::SymBandMatrix<std::complex<T>,U|S|tmv::FortranStyle>& s2fx = s2f;
 
     for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         if ( j <= i + noff && i <= j + noff) {
@@ -410,10 +410,10 @@ static void TestBasicHermBandMatrix_1()
         std::cout<<"noff = "<<noff<<std::endl;
     }
 
-    tmv::HermBandMatrix<std::complex<T>,U,S> h1(N,noff);
-    tmv::HermBandMatrix<std::complex<T>,U,S> h2(N,noff);
-    tmv::HermBandMatrix<std::complex<T>,U,S,tmv::FortranStyle> h1f(N,noff);
-    tmv::HermBandMatrix<std::complex<T>,U,S,tmv::FortranStyle> h2f(N,noff);
+    tmv::HermBandMatrix<std::complex<T>,U|S> h1(N,noff);
+    tmv::HermBandMatrix<std::complex<T>,U|S> h2(N,noff);
+    tmv::HermBandMatrix<std::complex<T>,U|S|tmv::FortranStyle> h1f(N,noff);
+    tmv::HermBandMatrix<std::complex<T>,U|S|tmv::FortranStyle> h2f(N,noff);
 
     Assert(int(h1.colsize()) == N && int(h1.rowsize()) == N,
            "Creating HermBandMatrix(N)");
@@ -447,10 +447,10 @@ static void TestBasicHermBandMatrix_1()
     tmv::SymBandMatrixView<std::complex<T>,tmv::FortranStyle> h2fv = h2f.view();
     tmv::ConstSymBandMatrixView<std::complex<T>,tmv::FortranStyle> h2fcv = 
         h2f.view();
-    const tmv::HermBandMatrix<std::complex<T>,U,S>& h1x = h1;
-    const tmv::HermBandMatrix<std::complex<T>,U,S>& h2x = h2;
-    const tmv::HermBandMatrix<std::complex<T>,U,S,tmv::FortranStyle>& h1fx = h1f;
-    const tmv::HermBandMatrix<std::complex<T>,U,S,tmv::FortranStyle>& h2fx = h2f;
+    const tmv::HermBandMatrix<std::complex<T>,U|S>& h1x = h1;
+    const tmv::HermBandMatrix<std::complex<T>,U|S>& h2x = h2;
+    const tmv::HermBandMatrix<std::complex<T>,U|S|tmv::FortranStyle>& h1fx = h1f;
+    const tmv::HermBandMatrix<std::complex<T>,U|S|tmv::FortranStyle>& h2fx = h2f;
 
     for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         if ( j <= i + noff && i <= j + noff) {
@@ -905,61 +905,61 @@ static void TestBasicSymBandMatrix_2()
     std::vector<T> qlvecdm(12);
     for(int i=0;i<12;i++) qlvecdm[i] = qlardm[i];
 
-    tmv::SymBandMatrix<T,U,S> q1(5,2);
+    tmv::SymBandMatrix<T,U|S> q1(5,2);
     std::copy(quarrm, quarrm+12, q1.upperBand().rowmajor_begin());
-    tmv::SymBandMatrix<T,U,S> q2(5,2);
+    tmv::SymBandMatrix<T,U|S> q2(5,2);
     std::copy(quarcm, quarcm+12, q2.upperBand().colmajor_begin());
-    tmv::SymBandMatrix<T,U,S> q3(5,2);
+    tmv::SymBandMatrix<T,U|S> q3(5,2);
     std::copy(quardm, quardm+12, q3.upperBand().diagmajor_begin());
 
-    tmv::SymBandMatrix<T,U,S> q4(5,2);
+    tmv::SymBandMatrix<T,U|S> q4(5,2);
     std::copy(qlarrm, qlarrm+12, q4.lowerBand().rowmajor_begin());
-    tmv::SymBandMatrix<T,U,S> q5(5,2);
+    tmv::SymBandMatrix<T,U|S> q5(5,2);
     std::copy(qlarcm, qlarcm+12, q5.lowerBand().colmajor_begin());
-    tmv::SymBandMatrix<T,U,S> q6(5,2);
+    tmv::SymBandMatrix<T,U|S> q6(5,2);
     std::copy(qlardm, qlardm+12, q6.lowerBand().diagmajor_begin());
 
-    tmv::SymBandMatrix<T,U,S> q7(5,2);
+    tmv::SymBandMatrix<T,U|S> q7(5,2);
     std::copy(quvecrm.begin(), quvecrm.end(), q7.upperBand().rowmajor_begin());
-    tmv::SymBandMatrix<T,U,S> q8(5,2);
+    tmv::SymBandMatrix<T,U|S> q8(5,2);
     std::copy(quveccm.begin(), quveccm.end(), q8.upperBand().colmajor_begin());
-    tmv::SymBandMatrix<T,U,S> q9(5,2);
+    tmv::SymBandMatrix<T,U|S> q9(5,2);
     std::copy(quvecdm.begin(), quvecdm.end(), q9.upperBand().diagmajor_begin());
 
-    tmv::SymBandMatrix<T,U,S> q10(5,2);
+    tmv::SymBandMatrix<T,U|S> q10(5,2);
     std::copy(qlvecrm.begin(), qlvecrm.end(), q10.lowerBand().rowmajor_begin());
-    tmv::SymBandMatrix<T,U,S> q11(5,2);
+    tmv::SymBandMatrix<T,U|S> q11(5,2);
     std::copy(qlveccm.begin(), qlveccm.end(), q11.lowerBand().colmajor_begin());
-    tmv::SymBandMatrix<T,U,S> q12(5,2);
+    tmv::SymBandMatrix<T,U|S> q12(5,2);
     std::copy(qlvecdm.begin(), qlvecdm.end(), q12.lowerBand().diagmajor_begin());
 
-    tmv::SymBandMatrix<T,U,S> q13x(50,20);
+    tmv::SymBandMatrix<T,U|S> q13x(50,20);
     tmv::SymBandMatrixView<T> q13 = q13x.subSymBandMatrix(3,28,2,5);
     std::copy(quvecrm.begin(), quvecrm.end(), q13.upperBand().rowmajor_begin());
-    tmv::SymBandMatrix<T,U,S> q14x(50,20);
+    tmv::SymBandMatrix<T,U|S> q14x(50,20);
     tmv::SymBandMatrixView<T> q14 = q14x.subSymBandMatrix(3,28,2,5);
     std::copy(quveccm.begin(), quveccm.end(), q14.upperBand().colmajor_begin());
-    tmv::SymBandMatrix<T,U,S> q15x(50,20);
+    tmv::SymBandMatrix<T,U|S> q15x(50,20);
     tmv::SymBandMatrixView<T> q15 = q15x.subSymBandMatrix(3,28,2,5);
     std::copy(quvecdm.begin(), quvecdm.end(), q15.upperBand().diagmajor_begin());
 
-    tmv::SymBandMatrix<T,U,S> q16x(50,20);
+    tmv::SymBandMatrix<T,U|S> q16x(50,20);
     tmv::SymBandMatrixView<T> q16 = q16x.subSymBandMatrix(3,28,2,5);
     std::copy(qlvecrm.begin(), qlvecrm.end(), q16.lowerBand().rowmajor_begin());
-    tmv::SymBandMatrix<T,U,S> q17x(50,20);
+    tmv::SymBandMatrix<T,U|S> q17x(50,20);
     tmv::SymBandMatrixView<T> q17 = q17x.subSymBandMatrix(3,28,2,5);
     std::copy(qlveccm.begin(), qlveccm.end(), q17.lowerBand().colmajor_begin());
-    tmv::SymBandMatrix<T,U,S> q18x(50,20);
+    tmv::SymBandMatrix<T,U|S> q18x(50,20);
     tmv::SymBandMatrixView<T> q18 = q18x.subSymBandMatrix(3,28,2,5);
     std::copy(qlvecdm.begin(), qlvecdm.end(), q18.lowerBand().diagmajor_begin());
 
     // Assignment using op<< is always in rowmajor order.
-    tmv::SymBandMatrix<T,U,S> q19(5,2);
-    tmv::SymBandMatrix<T,U,S> q20t(5,2);
+    tmv::SymBandMatrix<T,U|S> q19(5,2);
+    tmv::SymBandMatrix<T,U|S> q20t(5,2);
     tmv::SymBandMatrixView<T> q20 = q20t.transpose();
 
-    tmv::SymBandMatrix<T,U,S> q21(5,2);
-    tmv::SymBandMatrix<T,U,S> q22t(5,2);
+    tmv::SymBandMatrix<T,U|S> q21(5,2);
+    tmv::SymBandMatrix<T,U|S> q22t(5,2);
     tmv::SymBandMatrixView<T> q22 = q22t.transpose();
 
     q19.upperBand() <<
@@ -1102,8 +1102,8 @@ static void TestBasicSymBandMatrix_2()
     }
 
     // Test Basic Arithmetic
-    tmv::SymBandMatrix<std::complex<T>,U,S> s1(N,noff);
-    tmv::SymBandMatrix<std::complex<T>,U,S> s2(N,noff);
+    tmv::SymBandMatrix<std::complex<T>,U|S> s1(N,noff);
+    tmv::SymBandMatrix<std::complex<T>,U|S> s2(N,noff);
     for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
         if (i <= j && j <= i + noff) {
@@ -1114,7 +1114,7 @@ static void TestBasicSymBandMatrix_2()
         }
     }
 
-    tmv::SymBandMatrix<std::complex<T>,U,S> s3(N,noff);
+    tmv::SymBandMatrix<std::complex<T>,U|S> s3(N,noff);
     s3 = s1+s2;
 
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
@@ -1124,7 +1124,7 @@ static void TestBasicSymBandMatrix_2()
         }
     }
 
-    tmv::SymBandMatrix<std::complex<T>,U,S,tmv::FortranStyle> s3f(N,noff);
+    tmv::SymBandMatrix<std::complex<T>,U|S|tmv::FortranStyle> s3f(N,noff);
     s3f = s3;
     Assert(s3f == s3,"Copy CStyle SymBandMatrix to FortranStyle");
 
@@ -1145,7 +1145,7 @@ static void TestBasicSymBandMatrix_2()
             Assert(s1(i,j) == bm1(i,j),"SymBandMatrix -> BandMatrix");
         }
     }
-    tmv::SymBandMatrix<std::complex<T>,U,S> bm1_sb(bm1,noff);
+    tmv::SymBandMatrix<std::complex<T>,U|S> bm1_sb(bm1,noff);
     Assert(s1 == bm1_sb,"BandMatrix -> SymBandMatrix");
 
     tmv::Matrix<std::complex<T> > m1 = s1;
@@ -1156,7 +1156,7 @@ static void TestBasicSymBandMatrix_2()
             Assert(m1(i,j) == std::complex<T>(0),"SymBandMatrix -> Matrix (0)");
         }
     }
-    tmv::SymBandMatrix<std::complex<T>,U,S> m1_sb(m1,noff);
+    tmv::SymBandMatrix<std::complex<T>,U|S> m1_sb(m1,noff);
     Assert(s1 == m1_sb,"Matrix -> SymBandMatrix");
 
     tmv::SymMatrix<std::complex<T> > sm1 = s1;
@@ -1167,38 +1167,38 @@ static void TestBasicSymBandMatrix_2()
             Assert(sm1(i,j) == std::complex<T>(0),"SymBandMatrix -> SymMatrix (0)");
         }
     }
-    tmv::SymBandMatrix<std::complex<T>,U,S> sm1_sb(sm1,noff);
+    tmv::SymBandMatrix<std::complex<T>,U|S> sm1_sb(sm1,noff);
     Assert(s1 == sm1_sb,"SymMatrix -> SymBandMatrix");
 
-    tmv::SymBandMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor> sur = s1;
-    Assert(s1==sur,"SymBandMatrix == SymBandMatrix<U,R>");
-    Assert(s1.view()==sur.view(),"SymBandMatrix.view == SymBandMatrix<U,R>.view");
+    tmv::SymBandMatrix<std::complex<T>,tmv::Upper|tmv::RowMajor> sur = s1;
+    Assert(s1==sur,"SymBandMatrix == SymBandMatrix<U|R>");
+    Assert(s1.view()==sur.view(),"SymBandMatrix.view == SymBandMatrix<U|R>.view");
     Assert(s1.transpose()==sur.transpose(),
-           "SymBandMatrix.transpose == SymBandMatrix<U,R>.transpose");
+           "SymBandMatrix.transpose == SymBandMatrix<U|R>.transpose");
     Assert(s1.conjugate()==sur.conjugate(),
-           "SymBandMatrix.conjugate == SymBandMatrix<U,R>.conjugate");
+           "SymBandMatrix.conjugate == SymBandMatrix<U|R>.conjugate");
     Assert(s1.adjoint()==sur.adjoint(),
-           "SymBandMatrix.adjoint == SymBandMatrix<U,R>.adjoint");
+           "SymBandMatrix.adjoint == SymBandMatrix<U|R>.adjoint");
     Assert(s1.upperBand()==sur.upperBand(),
-           "SymBandMatrix.upperBand == SymBandMatrix<U,R>.upperBand");
+           "SymBandMatrix.upperBand == SymBandMatrix<U|R>.upperBand");
     Assert(s1.lowerBand()==sur.lowerBand(),
-           "SymBandMatrix.lowerBand == SymBandMatrix<U,R>.lowerBand");
+           "SymBandMatrix.lowerBand == SymBandMatrix<U|R>.lowerBand");
     Assert(s1.realPart()==sur.realPart(),
-           "SymBandMatrix.real == SymBandMatrix<U,R>.real");
+           "SymBandMatrix.real == SymBandMatrix<U|R>.real");
     Assert(s1.imagPart()==sur.imagPart(),
-           "SymBandMatrix.imag == SymBandMatrix<U,R>.imag");
+           "SymBandMatrix.imag == SymBandMatrix<U|R>.imag");
     Assert(s1.subMatrix(N/2,N/2+2,N/2+1,N/2+noff+1)==
            sur.subMatrix(N/2,N/2+2,N/2+1,N/2+noff+1),
-           "SymMatrix.subMatrix1 == SymMatrix<U,R>.subMatrix1");
+           "SymMatrix.subMatrix1 == SymMatrix<U|R>.subMatrix1");
     Assert(s1.subMatrix(3,noff,0,3)==sur.subMatrix(3,noff,0,3),
-           "SymMatrix.subMatrix2 == SymMatrix<U,R>.subMatrix2");
+           "SymMatrix.subMatrix2 == SymMatrix<U|R>.subMatrix2");
     Assert(s1.subSymMatrix(N/4,N/4+noff+1)==sur.subSymMatrix(N/4,N/4+noff+1),
-           "SymMatrix.subSymMatrix == SymMatrix<U,R>.subSymMatrix");
+           "SymMatrix.subSymMatrix == SymMatrix<U|R>.subSymMatrix");
     Assert(s1.subBandMatrix(0,N/2,1,N/2+3,1,2)==
            sur.subBandMatrix(0,N/2,1,N/2+3,1,2),
-           "SymMatrix.subBandMatrix == SymMatrix<U,R>.subBandMatrix");
+           "SymMatrix.subBandMatrix == SymMatrix<U|R>.subBandMatrix");
     Assert(s1.subSymBandMatrix(N/4,3*N/4)==sur.subSymBandMatrix(N/4,3*N/4),
-           "SymMatrix.subSymBandMatrix == SymMatrix<U,R>.subSymBandMatrix");
+           "SymMatrix.subSymBandMatrix == SymMatrix<U|R>.subSymBandMatrix");
 }
 
 template <class T, tmv::UpLoType U, tmv::StorageType S>
@@ -1269,61 +1269,61 @@ static void TestBasicHermBandMatrix_2()
     std::vector<CT> qlvecdm(12);
     for(int i=0;i<12;i++) qlvecdm[i] = qlardm[i];
 
-    tmv::HermBandMatrix<CT,U,S> q1(5,2);
+    tmv::HermBandMatrix<CT,U|S> q1(5,2);
     std::copy(quarrm, quarrm+12, q1.upperBand().rowmajor_begin());
-    tmv::HermBandMatrix<CT,U,S> q2(5,2);
+    tmv::HermBandMatrix<CT,U|S> q2(5,2);
     std::copy(quarcm, quarcm+12, q2.upperBand().colmajor_begin());
-    tmv::HermBandMatrix<CT,U,S> q3(5,2);
+    tmv::HermBandMatrix<CT,U|S> q3(5,2);
     std::copy(quardm, quardm+12, q3.upperBand().diagmajor_begin());
 
-    tmv::HermBandMatrix<CT,U,S> q4(5,2);
+    tmv::HermBandMatrix<CT,U|S> q4(5,2);
     std::copy(qlarrm, qlarrm+12, q4.lowerBand().rowmajor_begin());
-    tmv::HermBandMatrix<CT,U,S> q5(5,2);
+    tmv::HermBandMatrix<CT,U|S> q5(5,2);
     std::copy(qlarcm, qlarcm+12, q5.lowerBand().colmajor_begin());
-    tmv::HermBandMatrix<CT,U,S> q6(5,2);
+    tmv::HermBandMatrix<CT,U|S> q6(5,2);
     std::copy(qlardm, qlardm+12, q6.lowerBand().diagmajor_begin());
 
-    tmv::HermBandMatrix<CT,U,S> q7(5,2);
+    tmv::HermBandMatrix<CT,U|S> q7(5,2);
     std::copy(quvecrm.begin(), quvecrm.end(), q7.upperBand().rowmajor_begin());
-    tmv::HermBandMatrix<CT,U,S> q8(5,2);
+    tmv::HermBandMatrix<CT,U|S> q8(5,2);
     std::copy(quveccm.begin(), quveccm.end(), q8.upperBand().colmajor_begin());
-    tmv::HermBandMatrix<CT,U,S> q9(5,2);
+    tmv::HermBandMatrix<CT,U|S> q9(5,2);
     std::copy(quvecdm.begin(), quvecdm.end(), q9.upperBand().diagmajor_begin());
 
-    tmv::HermBandMatrix<CT,U,S> q10(5,2);
+    tmv::HermBandMatrix<CT,U|S> q10(5,2);
     std::copy(qlvecrm.begin(), qlvecrm.end(), q10.lowerBand().rowmajor_begin());
-    tmv::HermBandMatrix<CT,U,S> q11(5,2);
+    tmv::HermBandMatrix<CT,U|S> q11(5,2);
     std::copy(qlveccm.begin(), qlveccm.end(), q11.lowerBand().colmajor_begin());
-    tmv::HermBandMatrix<CT,U,S> q12(5,2);
+    tmv::HermBandMatrix<CT,U|S> q12(5,2);
     std::copy(qlvecdm.begin(), qlvecdm.end(), q12.lowerBand().diagmajor_begin());
 
-    tmv::HermBandMatrix<CT,U,S> q13x(50,20);
+    tmv::HermBandMatrix<CT,U|S> q13x(50,20);
     tmv::SymBandMatrixView<CT> q13 = q13x.subSymBandMatrix(3,28,2,5);
     std::copy(quvecrm.begin(), quvecrm.end(), q13.upperBand().rowmajor_begin());
-    tmv::HermBandMatrix<CT,U,S> q14x(50,20);
+    tmv::HermBandMatrix<CT,U|S> q14x(50,20);
     tmv::SymBandMatrixView<CT> q14 = q14x.subSymBandMatrix(3,28,2,5);
     std::copy(quveccm.begin(), quveccm.end(), q14.upperBand().colmajor_begin());
-    tmv::HermBandMatrix<CT,U,S> q15x(50,20);
+    tmv::HermBandMatrix<CT,U|S> q15x(50,20);
     tmv::SymBandMatrixView<CT> q15 = q15x.subSymBandMatrix(3,28,2,5);
     std::copy(quvecdm.begin(), quvecdm.end(), q15.upperBand().diagmajor_begin());
 
-    tmv::HermBandMatrix<CT,U,S> q16x(50,20);
+    tmv::HermBandMatrix<CT,U|S> q16x(50,20);
     tmv::SymBandMatrixView<CT> q16 = q16x.subSymBandMatrix(3,28,2,5);
     std::copy(qlvecrm.begin(), qlvecrm.end(), q16.lowerBand().rowmajor_begin());
-    tmv::HermBandMatrix<CT,U,S> q17x(50,20);
+    tmv::HermBandMatrix<CT,U|S> q17x(50,20);
     tmv::SymBandMatrixView<CT> q17 = q17x.subSymBandMatrix(3,28,2,5);
     std::copy(qlveccm.begin(), qlveccm.end(), q17.lowerBand().colmajor_begin());
-    tmv::HermBandMatrix<CT,U,S> q18x(50,20);
+    tmv::HermBandMatrix<CT,U|S> q18x(50,20);
     tmv::SymBandMatrixView<CT> q18 = q18x.subSymBandMatrix(3,28,2,5);
     std::copy(qlvecdm.begin(), qlvecdm.end(), q18.lowerBand().diagmajor_begin());
 
     // Assignment using op<< is always in rowmajor order.
-    tmv::HermBandMatrix<CT,U,S> q19(5,2);
-    tmv::HermBandMatrix<CT,U,S> q20t(5,2);
+    tmv::HermBandMatrix<CT,U|S> q19(5,2);
+    tmv::HermBandMatrix<CT,U|S> q20t(5,2);
     tmv::SymBandMatrixView<CT> q20 = q20t.transpose();
 
-    tmv::HermBandMatrix<CT,U,S> q21(5,2);
-    tmv::HermBandMatrix<CT,U,S> q22t(5,2);
+    tmv::HermBandMatrix<CT,U|S> q21(5,2);
+    tmv::HermBandMatrix<CT,U|S> q22t(5,2);
     tmv::SymBandMatrixView<CT> q22 = q22t.transpose();
 
     q19.upperBand() <<
@@ -1466,8 +1466,8 @@ static void TestBasicHermBandMatrix_2()
     }
 
     // Test Basic Arithmetic
-    tmv::HermBandMatrix<std::complex<T>,U,S> h1(N,noff);
-    tmv::HermBandMatrix<std::complex<T>,U,S> h2(N,noff);
+    tmv::HermBandMatrix<std::complex<T>,U|S> h1(N,noff);
+    tmv::HermBandMatrix<std::complex<T>,U|S> h2(N,noff);
     for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
         std::complex<T> hvalue = i==j ? std::complex<T>(T(k),0) : value;
@@ -1479,7 +1479,7 @@ static void TestBasicHermBandMatrix_2()
         }
     }
 
-    tmv::HermBandMatrix<std::complex<T>,U,S> h3(N,noff);
+    tmv::HermBandMatrix<std::complex<T>,U|S> h3(N,noff);
     h3 = h1+h2;
 
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
@@ -1489,7 +1489,7 @@ static void TestBasicHermBandMatrix_2()
         }
     }
 
-    tmv::HermBandMatrix<std::complex<T>,U,S,tmv::FortranStyle> h3f(N,noff);
+    tmv::HermBandMatrix<std::complex<T>,U|S|tmv::FortranStyle> h3f(N,noff);
     h3f = h3;
     Assert(h3f == h3,"Copy CStyle HermBandMatrix to FortranStyle");
 
@@ -1511,7 +1511,7 @@ static void TestBasicHermBandMatrix_2()
             Assert(h1(i,j) == bn1(i,j),"HermBandMatrix -> BandMatrix");
         }
     }
-    tmv::HermBandMatrix<std::complex<T>,U,S> bn1_hb(bn1,noff);
+    tmv::HermBandMatrix<std::complex<T>,U|S> bn1_hb(bn1,noff);
     Assert(h1 == bn1_hb,"BandMatrix -> HermBandMatrix");
 
     tmv::Matrix<std::complex<T> > n1 = h1;
@@ -1522,7 +1522,7 @@ static void TestBasicHermBandMatrix_2()
             Assert(n1(i,j) == std::complex<T>(0),"HermBandMatrix -> Matrix (0)");
         }
     }
-    tmv::HermBandMatrix<std::complex<T>,U,S> n1_hb(n1,noff);
+    tmv::HermBandMatrix<std::complex<T>,U|S> n1_hb(n1,noff);
     Assert(h1 == n1_hb,"Matrix -> HermBandMatrix");
 
     tmv::HermMatrix<std::complex<T> > hn1 = h1;
@@ -1533,36 +1533,36 @@ static void TestBasicHermBandMatrix_2()
             Assert(hn1(i,j) == std::complex<T>(0),"HermBandMatrix -> HermMatrix (0)");
         }
     }
-    tmv::HermBandMatrix<std::complex<T>,U,S> hn1_hb(hn1,noff);
+    tmv::HermBandMatrix<std::complex<T>,U|S> hn1_hb(hn1,noff);
     Assert(h1 == hn1_hb,"HermMatrix -> HermBandMatrix");
 
-    tmv::HermBandMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor> hur = h1;
-    Assert(h1==hur,"HermMatrix == HermMatrix<U,R>");
-    Assert(h1.view()==hur.view(),"HermMatrix.view == HermMatrix<U,R>.view");
+    tmv::HermBandMatrix<std::complex<T>,tmv::Upper|tmv::RowMajor> hur = h1;
+    Assert(h1==hur,"HermMatrix == HermMatrix<U|R>");
+    Assert(h1.view()==hur.view(),"HermMatrix.view == HermMatrix<U|R>.view");
     Assert(h1.transpose()==hur.transpose(),
-           "HermMatrix.transpose == HermMatrix<U,R>.transpose");
+           "HermMatrix.transpose == HermMatrix<U|R>.transpose");
     Assert(h1.conjugate()==hur.conjugate(),
-           "HermMatrix.conjugate == HermMatrix<U,R>.conjugate");
+           "HermMatrix.conjugate == HermMatrix<U|R>.conjugate");
     Assert(h1.adjoint()==hur.adjoint(),
-           "HermMatrix.adjoint == HermMatrix<U,R>.adjoint");
+           "HermMatrix.adjoint == HermMatrix<U|R>.adjoint");
     Assert(h1.upperBand()==hur.upperBand(),
-           "HermMatrix.upperBand == HermMatrix<U,R>.upperBand");
+           "HermMatrix.upperBand == HermMatrix<U|R>.upperBand");
     Assert(h1.lowerBand()==hur.lowerBand(),
-           "HermMatrix.lowerBand == HermMatrix<U,R>.lowerBand");
+           "HermMatrix.lowerBand == HermMatrix<U|R>.lowerBand");
     Assert(h1.realPart()==hur.realPart(),
-           "HermMatrix.real == HermMatrix<U,R>.real");
+           "HermMatrix.real == HermMatrix<U|R>.real");
     Assert(h1.subMatrix(N/2,N/2+2,N/2+1,N/2+noff+1)==
            hur.subMatrix(N/2,N/2+2,N/2+1,N/2+noff+1),
-           "SymMatrix.subMatrix1 == SymMatrix<U,R>.subMatrix1");
+           "SymMatrix.subMatrix1 == SymMatrix<U|R>.subMatrix1");
     Assert(h1.subMatrix(3,noff,0,3)==hur.subMatrix(3,noff,0,3),
-           "SymMatrix.subMatrix2 == SymMatrix<U,R>.subMatrix2");
+           "SymMatrix.subMatrix2 == SymMatrix<U|R>.subMatrix2");
     Assert(h1.subSymMatrix(N/4,N/4+noff+1)==hur.subSymMatrix(N/4,N/4+noff+1),
-           "SymMatrix.subSymMatrix == SymMatrix<U,R>.subSymMatrix");
+           "SymMatrix.subSymMatrix == SymMatrix<U|R>.subSymMatrix");
     Assert(h1.subBandMatrix(0,N/2,1,N/2+3,1,2)==
            hur.subBandMatrix(0,N/2,1,N/2+3,1,2),
-           "SymMatrix.subBandMatrix == SymMatrix<U,R>.subBandMatrix");
+           "SymMatrix.subBandMatrix == SymMatrix<U|R>.subBandMatrix");
     Assert(h1.subSymBandMatrix(N/4,3*N/4)==hur.subSymBandMatrix(N/4,3*N/4),
-           "SymMatrix.subSymBandMatrix == SymMatrix<U,R>.subSymBandMatrix");
+           "SymMatrix.subSymBandMatrix == SymMatrix<U|R>.subSymBandMatrix");
 }
 
 template <class T, tmv::UpLoType U, tmv::StorageType S>
@@ -1580,10 +1580,10 @@ static void TestBasicSymBandMatrix_IO()
         std::cout<<"noff = "<<noff<<std::endl;
     }
 
-    tmv::SymBandMatrix<T,U,S> s(N,noff);
-    tmv::HermBandMatrix<T,U,S> h(N,noff);
-    tmv::SymBandMatrix<std::complex<T>,U,S> cs(N,noff);
-    tmv::HermBandMatrix<std::complex<T>,U,S> ch(N,noff);
+    tmv::SymBandMatrix<T,U|S> s(N,noff);
+    tmv::HermBandMatrix<T,U|S> h(N,noff);
+    tmv::SymBandMatrix<std::complex<T>,U|S> cs(N,noff);
+    tmv::HermBandMatrix<std::complex<T>,U|S> ch(N,noff);
 
 
     for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
@@ -1664,10 +1664,10 @@ static void TestBasicSymBandMatrix_IO()
     else cs3(4,7) = ch3(7,4)  = CT(3.123,601.0);
 
     // Read them back in
-    tmv::SymBandMatrix<T,tmv::Upper,tmv::RowMajor> xs1(N,noff);
-    tmv::HermBandMatrix<T,tmv::Upper,tmv::RowMajor> xh1(N,noff);
-    tmv::SymBandMatrix<CT,tmv::Upper,tmv::RowMajor> xcs1(N,noff);
-    tmv::HermBandMatrix<CT,tmv::Upper,tmv::RowMajor> xch1(N,noff);
+    tmv::SymBandMatrix<T,tmv::Upper|tmv::RowMajor> xs1(N,noff);
+    tmv::HermBandMatrix<T,tmv::Upper|tmv::RowMajor> xh1(N,noff);
+    tmv::SymBandMatrix<CT,tmv::Upper|tmv::RowMajor> xcs1(N,noff);
+    tmv::HermBandMatrix<CT,tmv::Upper|tmv::RowMajor> xch1(N,noff);
     std::ifstream fin("tmvtest_symbandmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_symbandmatrix_io.dat for input");
     fin >> xs1 >> xh1 >> xcs1 >> xch1;
@@ -1695,10 +1695,10 @@ static void TestBasicSymBandMatrix_IO()
     fin.close();
 
     // Repeat for column major
-    tmv::SymBandMatrix<T,tmv::Upper,tmv::ColMajor> xs2(N,noff);
-    tmv::HermBandMatrix<T,tmv::Upper,tmv::ColMajor> xh2(N,noff);
-    tmv::SymBandMatrix<CT,tmv::Upper,tmv::ColMajor> xcs2(N,noff);
-    tmv::HermBandMatrix<CT,tmv::Upper,tmv::ColMajor> xch2(N,noff);
+    tmv::SymBandMatrix<T,tmv::Upper|tmv::ColMajor> xs2(N,noff);
+    tmv::HermBandMatrix<T,tmv::Upper|tmv::ColMajor> xh2(N,noff);
+    tmv::SymBandMatrix<CT,tmv::Upper|tmv::ColMajor> xcs2(N,noff);
+    tmv::HermBandMatrix<CT,tmv::Upper|tmv::ColMajor> xch2(N,noff);
     fin.open("tmvtest_symbandmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_symbandmatrix_io.dat for input");
     fin >> xs2.view() >> xh2.view() >> xcs2.view() >> xch2.view();
@@ -1726,10 +1726,10 @@ static void TestBasicSymBandMatrix_IO()
     fin.close();
 
     // Repeat for diag major
-    tmv::SymBandMatrix<T,tmv::Upper,tmv::DiagMajor> xs3(N,noff);
-    tmv::HermBandMatrix<T,tmv::Upper,tmv::DiagMajor> xh3(N,noff);
-    tmv::SymBandMatrix<CT,tmv::Upper,tmv::DiagMajor> xcs3(N,noff);
-    tmv::HermBandMatrix<CT,tmv::Upper,tmv::DiagMajor> xch3(N,noff);
+    tmv::SymBandMatrix<T,tmv::Upper|tmv::DiagMajor> xs3(N,noff);
+    tmv::HermBandMatrix<T,tmv::Upper|tmv::DiagMajor> xh3(N,noff);
+    tmv::SymBandMatrix<CT,tmv::Upper|tmv::DiagMajor> xcs3(N,noff);
+    tmv::HermBandMatrix<CT,tmv::Upper|tmv::DiagMajor> xch3(N,noff);
     fin.open("tmvtest_symbandmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_symbandmatrix_io.dat for input");
     fin >> xs3.view() >> xh3.view() >> xcs3.view() >> xch3.view();
@@ -1759,10 +1759,10 @@ static void TestBasicSymBandMatrix_IO()
     // Repeat for Lower Storage
     // Also switch s and h for real matrices.  They should be able to 
     // read the opposite letter for the compact storage.
-    tmv::SymBandMatrix<T,tmv::Lower,tmv::RowMajor> xs4(N,noff);
-    tmv::HermBandMatrix<T,tmv::Lower,tmv::RowMajor> xh4(N,noff);
-    tmv::SymBandMatrix<CT,tmv::Lower,tmv::RowMajor> xcs4(N,noff);
-    tmv::HermBandMatrix<CT,tmv::Lower,tmv::RowMajor> xch4(N,noff);
+    tmv::SymBandMatrix<T,tmv::Lower|tmv::RowMajor> xs4(N,noff);
+    tmv::HermBandMatrix<T,tmv::Lower|tmv::RowMajor> xh4(N,noff);
+    tmv::SymBandMatrix<CT,tmv::Lower|tmv::RowMajor> xcs4(N,noff);
+    tmv::HermBandMatrix<CT,tmv::Lower|tmv::RowMajor> xch4(N,noff);
     fin.open("tmvtest_symbandmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_symbandmatrix_io.dat for input");
     fin >> xh4.view() >> xs4.view() >> xcs4.view() >> xch4.view();
@@ -1789,10 +1789,10 @@ static void TestBasicSymBandMatrix_IO()
     Assert(ch3 == xch4,"CHermBandMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
-    tmv::SymBandMatrix<T,tmv::Lower,tmv::ColMajor> xs5(N,noff);
-    tmv::HermBandMatrix<T,tmv::Lower,tmv::ColMajor> xh5(N,noff);
-    tmv::SymBandMatrix<CT,tmv::Lower,tmv::ColMajor> xcs5(N,noff);
-    tmv::HermBandMatrix<CT,tmv::Lower,tmv::ColMajor> xch5(N,noff);
+    tmv::SymBandMatrix<T,tmv::Lower|tmv::ColMajor> xs5(N,noff);
+    tmv::HermBandMatrix<T,tmv::Lower|tmv::ColMajor> xh5(N,noff);
+    tmv::SymBandMatrix<CT,tmv::Lower|tmv::ColMajor> xcs5(N,noff);
+    tmv::HermBandMatrix<CT,tmv::Lower|tmv::ColMajor> xch5(N,noff);
     fin.open("tmvtest_symbandmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_symbandmatrix_io.dat for input");
     fin >> xh5.view() >> xs5.view() >> xcs5.view() >> xch5.view();
@@ -1819,10 +1819,10 @@ static void TestBasicSymBandMatrix_IO()
     Assert(ch3 == xch5,"CHermBandMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
-    tmv::SymBandMatrix<T,tmv::Lower,tmv::DiagMajor> xs6(N,noff);
-    tmv::HermBandMatrix<T,tmv::Lower,tmv::DiagMajor> xh6(N,noff);
-    tmv::SymBandMatrix<CT,tmv::Lower,tmv::DiagMajor> xcs6(N,noff);
-    tmv::HermBandMatrix<CT,tmv::Lower,tmv::DiagMajor> xch6(N,noff);
+    tmv::SymBandMatrix<T,tmv::Lower|tmv::DiagMajor> xs6(N,noff);
+    tmv::HermBandMatrix<T,tmv::Lower|tmv::DiagMajor> xh6(N,noff);
+    tmv::SymBandMatrix<CT,tmv::Lower|tmv::DiagMajor> xcs6(N,noff);
+    tmv::HermBandMatrix<CT,tmv::Lower|tmv::DiagMajor> xch6(N,noff);
     fin.open("tmvtest_symbandmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_symbandmatrix_io.dat for input");
     fin >> xh6.view() >> xs6.view() >> xcs6.view() >> xch6.view();

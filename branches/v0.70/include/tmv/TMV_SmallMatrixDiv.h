@@ -44,25 +44,22 @@ namespace tmv {
     // all that are needed in the routines here.
     //
 
-    // I use this macro to inline some of the ref() and cref()
-    // calls.  The ref and cref inline to this anyway, but this way
-    // I can get rid of some of the IndexStyle template parameters, 
-    // which helps to reduce the compiled size of the test suite.
-    // So any SmallMatrix<...,CStyle> is left as is.
 #define TMV_Val(m,M,N,S,i,j) (S==RowMajor ? m[i*N+j] : m[j*M+i])
 
+#define TMV_TransOf(S) (S==RowMajor ? ColMajor : RowMajor)
+
 #ifndef NOTHROW
-    template <class T, int M, int N, StorageType S, IndexStyle I> 
+    template <class T, int M, int N, int A> 
     class SingularSmallMatrix : public Singular
     {
     public:
-        SmallMatrix<T,M,N,S,I> A;
+        SmallMatrix<T,M,N,A> m;
 
-        inline SingularSmallMatrix(const SmallMatrix<T,M,N,S,I>& _A) :
-            Singular("SmallMatrix."), A(_A) {}
+        inline SingularSmallMatrix(const SmallMatrix<T,M,N,A>& _m) :
+            Singular("SmallMatrix."), m(_m) {}
         inline ~SingularSmallMatrix() throw() {}
         inline void write(std::ostream& os) const throw()
-        { Singular::write(os); os<<A<<std::endl; }
+        { Singular::write(os); os<<m<<std::endl; }
     };
 #endif
 
@@ -345,7 +342,7 @@ namespace tmv {
         {
             SmallMatrix<T,N,N,ColMajor> LU;
             // LU = m;
-            DoCopy<N,N,S,ColMajor>(m,LU.ptr());
+            SmallMatrixCopy<N,N,S,ColMajor>(m,LU.ptr());
             int P[N];
             T d(1);
             DoLUD(LU,P,d);
@@ -387,9 +384,9 @@ namespace tmv {
         static T det(const T* m)
         {
             typedef typename Helper<T>::longdouble_type DT;
-            SimpleMatrix<DT,ColMajor> A(N,N);
+            SimpleMatrix<DT> A(N,N);
             // A = m;
-            DoCopy<N,N,S,ColMajor>(m,A.ptr());
+            SmallMatrixCopy<N,N,S,ColMajor>(m,A.ptr());
             // This is the 1x1 Bareiss algorithm
             T det = 1;
             for (int k=0; k<N-1; ++k) {
@@ -425,15 +422,16 @@ namespace tmv {
         }
     };
 
-    template <class T, int M, int N, StorageType S, IndexStyle I> 
-    inline T DoDet(const SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A> 
+    inline T DoDet(const SmallMatrix<T,M,N,A>& m)
     {
-        enum { algo = (
-                N == 1 ? 1 :
-                N == 2 ? 2 :
-                N == 3 ? 3 :
-                Traits<T>::isinteger ? 20 :
-                10 ) };
+        const int algo = 
+            N == 1 ? 1 :
+            N == 2 ? 2 :
+            N == 3 ? 3 :
+            Traits<T>::isinteger ? 20 :
+            10;
+        const StorageType S = static_cast<StorageType>(A & AllStorageType);
         return SMDet<algo,T,M,N,S>::det(m.cptr()); 
     }
 
@@ -470,7 +468,7 @@ namespace tmv {
             // (M < N and M == N specialized below)
             SmallMatrix<T,M,N,ColMajor> QR;
             // QR = m;
-            DoCopy<M,N,S,ColMajor>(m,QR.ptr());
+            SmallMatrixCopy<M,N,S,ColMajor>(m,QR.ptr());
             SMQRInv<S2>(QR,minv);
         }
     };
@@ -485,7 +483,7 @@ namespace tmv {
             TMVAssert(M < N);
             SmallMatrix<T,N,M,ColMajor> QR;
             // QR = m.transpose();
-            DoCopy<M,N,S,RowMajor>(m,QR.ptr());
+            SmallMatrixCopy<M,N,S,RowMajor>(m,QR.ptr());
             SMQRInv<TMV_TransOf(S2)>(QR,minv);
         }
     };
@@ -513,7 +511,7 @@ namespace tmv {
         {
             SmallMatrix<T,N,N,ColMajor> LU;
             // LU = m;
-            DoCopy<N,N,S,ColMajor>(m,LU.ptr());
+            SmallMatrixCopy<N,N,S,ColMajor>(m,LU.ptr());
             int P[N];
             T signdet(0);
             DoLUD(LU,P,signdet);
@@ -649,17 +647,19 @@ namespace tmv {
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <class T, class T2, int M, int N, StorageType S, StorageType S2, IndexStyle I, IndexStyle I2> 
+    template <class T, class T2, int M, int N, int A, int A2> 
     inline void DoInverse(
-        const SmallMatrix<T,M,N,S,I>& m, SmallMatrix<T2,N,M,S2,I2>& minv)
+        const SmallMatrix<T,M,N,A>& m, SmallMatrix<T2,N,M,A2>& minv)
     {
+        const StorageType S = static_cast<StorageType>(A & AllStorageType);
+        const StorageType S2 = static_cast<StorageType>(A2 & AllStorageType);
 #ifndef NOTHROW
         try {
 #endif
             SMInv<T,T2,M,N,M<N,S,S2>(m.cptr(),minv.ptr());
 #ifndef NOTHROW
         } catch (tmv::Singular) {
-            throw SingularSmallMatrix<T,M,N,S,I>(m); 
+            throw SingularSmallMatrix<T,M,N,A>(m); 
         }
 #endif
     }
@@ -680,10 +680,10 @@ namespace tmv {
         // m2 = R^-1 Qt m1
         //SmallMatrix<T,M,K,RowMajor> temp = m1;
         T2 temp[M*K];
-        DoCopy<M,K,S1,RowMajor>(m1,temp);
+        SmallMatrixCopy<M,K,S1,RowMajor>(m1,temp);
         Q_LDivEq<K,RowMajor>(QR,beta,temp);
         //m2 = temp.rowRange(0,N);
-        DoCopy<N,K,RowMajor,S2>(temp,m2);
+        SmallMatrixCopy<N,K,RowMajor,S2>(temp,m2);
         //m2.view() /= QR.upperTri();
         LDivEq_U<N,K,S2>(QR,m2);
     }
@@ -702,7 +702,7 @@ namespace tmv {
         for(int i=0;i<K*M;++i) m2[i] = T2(0);
         //m2.colRange(0,N) = m1;
         if (S2 == ColMajor) 
-            DoCopy<K,N,S1,S2>(m1,m2);
+            SmallMatrixCopy<K,N,S1,S2>(m1,m2);
         else 
             for(int i=0;i<K;++i) for(int j=0;j<N;j++) 
                 //m2(i,j) = m1(i,j);
@@ -751,7 +751,7 @@ namespace tmv {
             // (M < N and M == N specialized below)
             SmallMatrix<T,M,N,ColMajor> QR;
             // QR = m;
-            DoCopy<M,N,S,ColMajor>(m,QR.ptr());
+            SmallMatrixCopy<M,N,S,ColMajor>(m,QR.ptr());
             SMQRLDiv<K,S1,S2>(QR,m1,m2);
         }
     };
@@ -769,7 +769,7 @@ namespace tmv {
             // m2T = m1T mT^-1
             SmallMatrix<T,N,M,ColMajor> QR;
             // QR = m.transpose();
-            DoCopy<M,N,S,RowMajor>(m,QR.ptr());
+            SmallMatrixCopy<M,N,S,RowMajor>(m,QR.ptr());
             SMQRRDiv<K,TMV_TransOf(S1),TMV_TransOf(S2)>(QR,m1,m2);
         }
     };
@@ -811,7 +811,7 @@ namespace tmv {
         {
             SmallMatrix<T,N,N,ColMajor> LU;
             // LU = m;
-            DoCopy<N,N,S,ColMajor>(m,LU.ptr());
+            SmallMatrixCopy<N,N,S,ColMajor>(m,LU.ptr());
             SMLULDivEq<K,S2>(LU,m2);
         }
     };
@@ -832,7 +832,7 @@ namespace tmv {
             //SmallMatrix<T2,N,K,S2> m2
         {
             //m2 = m1;
-            DoCopy<N,K,S1,S2>(m1,m2);
+            SmallMatrixCopy<N,K,S1,S2>(m1,m2);
             SMLDivEqM<T,T2,N,K,S,S2>(m,m2);
         }
     };
@@ -852,34 +852,39 @@ namespace tmv {
     };
 
     // m2 = m^-1 m2
-    template <class T, class T2, int N, int K, StorageType S, StorageType S2, IndexStyle I, IndexStyle I2> 
+    template <class T, class T2, int N, int K, int A, int A2> 
     inline void DoLDivEq(
-        const SmallMatrix<T,N,N,S,I>& m, SmallMatrix<T2,N,K,S2,I2>& m2)
+        const SmallMatrix<T,N,N,A>& m, SmallMatrix<T2,N,K,A2>& m2)
     {
+        const StorageType S = static_cast<StorageType>(A & AllStorageType);
+        const StorageType S2 = static_cast<StorageType>(A2 & AllStorageType);
 #ifndef NOTHROW
         try {
 #endif
             SMLDivEqM<T,T2,N,K,S,S2>(m.cptr(),m2.ptr());
 #ifndef NOTHROW
         } catch (tmv::Singular) {
-            throw SingularSmallMatrix<T,N,N,S,I>(m); 
+            throw SingularSmallMatrix<T,N,N,A>(m); 
         }
 #endif
     }
 
     // m2 = m^-1 m1
-    template <class T, class T1, class T2, int M, int N, int K, StorageType S, StorageType S1, StorageType S2, IndexStyle I, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T1, class T2, int M, int N, int K, int A, int A1, int A2> 
     inline void DoLDiv(
-        const SmallMatrix<T,M,N,S,I>& m,
-        const SmallMatrix<T1,M,K,S1,I1>& m1, SmallMatrix<T2,N,K,S2,I2>& m2)
+        const SmallMatrix<T,M,N,A>& m,
+        const SmallMatrix<T1,M,K,A1>& m1, SmallMatrix<T2,N,K,A2>& m2)
     {
+        const StorageType S = static_cast<StorageType>(A & AllStorageType);
+        const StorageType S1 = static_cast<StorageType>(A1 & AllStorageType);
+        const StorageType S2 = static_cast<StorageType>(A2 & AllStorageType);
 #ifndef NOTHROW
         try {
 #endif
             SMLDivM<T,T1,T2,M,N,M<N,K,S,S1,S2>(m.cptr(),m1.cptr(),m2.ptr());
 #ifndef NOTHROW
         } catch (tmv::Singular) {
-            throw SingularSmallMatrix<T,M,N,S,I>(m); 
+            throw SingularSmallMatrix<T,M,N,A>(m); 
         }
 #endif
     }
@@ -890,27 +895,29 @@ namespace tmv {
     //
 
     // v2 = m^-1 v2
-    template <class T, class T2, int N, StorageType S, IndexStyle I, IndexStyle I2> 
+    template <class T, class T2, int N, int A, int A2> 
     inline void DoLDivEq(
-        const SmallMatrix<T,N,N,S,I>& m, SmallVector<T2,N,I2>& v2)
+        const SmallMatrix<T,N,N,A>& m, SmallVector<T2,N,A2>& v2)
     {
+        const StorageType S = static_cast<StorageType>(A & AllStorageType);
 #ifndef NOTHROW
         try {
 #endif
             SMLDivEqM<T,T2,N,1,S,ColMajor>(m.cptr(),v2.ptr());
 #ifndef NOTHROW
         } catch (tmv::Singular) {
-            throw SingularSmallMatrix<T,N,N,S,I>(m); 
+            throw SingularSmallMatrix<T,N,N,A>(m); 
         }
 #endif
     }
 
     // v2 = m^-1 v1
-    template <class T, class T1, class T2, int M, int N, StorageType S, IndexStyle I, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T1, class T2, int M, int N, int A, int A1, int A2> 
     inline void DoLDiv(
-        const SmallMatrix<T,M,N,S,I>& m,
-        const SmallVector<T1,M,I1>& v1, SmallVector<T2,N,I2>& v2)
+        const SmallMatrix<T,M,N,A>& m,
+        const SmallVector<T1,M,A1>& v1, SmallVector<T2,N,A2>& v2)
     {
+        const StorageType S = static_cast<StorageType>(A & AllStorageType);
 #ifndef NOTHROW
         try {
 #endif
@@ -918,7 +925,7 @@ namespace tmv {
                 m.cptr(),v1.cptr(),v2.ptr());
 #ifndef NOTHROW
         } catch (tmv::Singular) {
-            throw SingularSmallMatrix<T,M,N,S,I>(m); 
+            throw SingularSmallMatrix<T,M,N,A>(m); 
         }
 #endif
     }
@@ -940,7 +947,7 @@ namespace tmv {
             // (M < N and M == N specialized below)
             SmallMatrix<T,M,N,ColMajor> QR;
             // QR = m
-            DoCopy<M,N,S,ColMajor>(m,QR.ptr());
+            SmallMatrixCopy<M,N,S,ColMajor>(m,QR.ptr());
             SMQRRDiv<K,S1,S2>(QR,m1,m2);
         }
     };
@@ -958,7 +965,7 @@ namespace tmv {
             // m2t = mt^-1 m1t
             SmallMatrix<T,N,M,ColMajor> QR;
             // QR = m.transpose();
-            DoCopy<M,N,S,RowMajor>(m,QR.ptr());
+            SmallMatrixCopy<M,N,S,RowMajor>(m,QR.ptr());
             SMQRLDiv<K,TMV_TransOf(S1),TMV_TransOf(S2)>(QR,m1,m2);
         }
     };
@@ -1002,7 +1009,7 @@ namespace tmv {
             // m2t = mt^-1 m2t
             SmallMatrix<T,N,N,ColMajor> LU;
             // LU = m.transpose()
-            DoCopy<N,N,S,RowMajor>(m,LU.ptr());
+            SmallMatrixCopy<N,N,S,RowMajor>(m,LU.ptr());
             SMLULDivEq<K,TMV_TransOf(S2)>(LU,m2);
         }
     };
@@ -1023,7 +1030,7 @@ namespace tmv {
             //SmallMatrix<T2,K,N,S2> m2
         {
             //m2 = m1;
-            DoCopy<K,N,S1,S2>(m1,m2);
+            SmallMatrixCopy<K,N,S1,S2>(m1,m2);
             //DoRDivEq(m,m2);
             SMRDivEqM<T,T2,N,K,S,S2>(m,m2);
         }
@@ -1044,34 +1051,39 @@ namespace tmv {
     };
 
     // m2 = m2 m^-1
-    template <class T, class T2, int N, int K, StorageType S, StorageType S2, IndexStyle I, IndexStyle I2> 
+    template <class T, class T2, int N, int K, int A, int A2> 
     inline void DoRDivEq(
-        const SmallMatrix<T,N,N,S,I>& m, SmallMatrix<T2,K,N,S2,I2>& m2)
+        const SmallMatrix<T,N,N,A>& m, SmallMatrix<T2,K,N,A2>& m2)
     {
+        const StorageType S = static_cast<StorageType>(A & AllStorageType);
+        const StorageType S2 = static_cast<StorageType>(A2 & AllStorageType);
 #ifndef NOTHROW
         try {
 #endif
             SMRDivEqM<T,T2,N,K,S,S2>(m.cptr(),m2.ptr());
 #ifndef NOTHROW
         } catch (tmv::Singular) {
-            throw SingularSmallMatrix<T,N,N,S,I>(m); 
+            throw SingularSmallMatrix<T,N,N,A>(m); 
         }
 #endif
     }
 
     // m2 = m^-1 m1
-    template <class T, class T1, class T2, int M, int N, int K, StorageType S, StorageType S1, StorageType S2, IndexStyle I, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T1, class T2, int M, int N, int K, int A, int A1, int A2> 
     inline void DoRDiv(
-        const SmallMatrix<T,M,N,S,I>& m,
-        const SmallMatrix<T1,K,N,S1,I1>& m1, SmallMatrix<T2,K,M,S2,I2>& m2)
+        const SmallMatrix<T,M,N,A>& m,
+        const SmallMatrix<T1,K,N,A1>& m1, SmallMatrix<T2,K,M,A2>& m2)
     {
+        const StorageType S = static_cast<StorageType>(A & AllStorageType);
+        const StorageType S1 = static_cast<StorageType>(A1 & AllStorageType);
+        const StorageType S2 = static_cast<StorageType>(A2 & AllStorageType);
 #ifndef NOTHROW
         try {
 #endif
             SMRDivM<T,T1,T2,M,N,M<N,K,S,S1,S2>(m.cptr(),m1.cptr(),m2.ptr());
 #ifndef NOTHROW
         } catch (tmv::Singular) {
-            throw SingularSmallMatrix<T,M,N,S,I>(m); 
+            throw SingularSmallMatrix<T,M,N,A>(m); 
         }
 #endif
     }
@@ -1081,27 +1093,29 @@ namespace tmv {
     //
 
     // v2 = v2 m^-1
-    template <class T, class T2, int N, StorageType S, IndexStyle I, IndexStyle I2> 
+    template <class T, class T2, int N, int A, int A2> 
     inline void DoRDivEq(
-        const SmallMatrix<T,N,N,S,I>& m, SmallVector<T2,N,I2>& v2)
+        const SmallMatrix<T,N,N,A>& m, SmallVector<T2,N,A2>& v2)
     {
+        const StorageType S = static_cast<StorageType>(A & AllStorageType);
 #ifndef NOTHROW
         try {
 #endif
             SMRDivEqM<T,T2,N,1,S,RowMajor>(m.cptr(),v2.ptr()); 
 #ifndef NOTHROW
         } catch (tmv::Singular) {
-            throw SingularSmallMatrix<T,N,N,S,I>(m); 
+            throw SingularSmallMatrix<T,N,N,A>(m); 
         }
 #endif
     }
 
     // v2 = m^-1 v1
-    template <class T, class T1, class T2, int M, int N, StorageType S, IndexStyle I, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T1, class T2, int M, int N, int A, int A1, int A2> 
     inline void DoRDiv(
-        const SmallMatrix<T,M,N,S,I>& m,
-        const SmallVector<T1,N,I1>& v1, SmallVector<T2,M,I2>& v2)
+        const SmallMatrix<T,M,N,A>& m,
+        const SmallVector<T1,N,A1>& v1, SmallVector<T2,M,A2>& v2)
     { 
+        const StorageType S = static_cast<StorageType>(A & AllStorageType);
 #ifndef NOTHROW
         try {
 #endif
@@ -1109,7 +1123,7 @@ namespace tmv {
                 m.cptr(),v1.cptr(),v2.ptr()); 
 #ifndef NOTHROW
         } catch (tmv::Singular) {
-            throw SingularSmallMatrix<T,M,N,S,I>(m); 
+            throw SingularSmallMatrix<T,M,N,A>(m); 
         }
 #endif
     }
@@ -1151,7 +1165,7 @@ namespace tmv {
             TMVAssert(M >= N);
             SmallMatrix<T,M,N,ColMajor> QR;
             // QR = m;
-            DoCopy<M,N,S,ColMajor>(m,QR.ptr());
+            SmallMatrixCopy<M,N,S,ColMajor>(m,QR.ptr());
             SMQRATA<S2>(QR,ata);
         }
     };
@@ -1166,15 +1180,19 @@ namespace tmv {
             TMVAssert(M < N);
             SmallMatrix<T,N,M,ColMajor> QR;
             // QR = m.transpose();
-            DoCopy<M,N,S,RowMajor>(m,QR.ptr());
+            SmallMatrixCopy<M,N,S,RowMajor>(m,QR.ptr());
             SMQRATA<S2>(QR,ata);
         }
     };
 
-    template <class T, int M, int N, StorageType S, StorageType S2, IndexStyle I, IndexStyle I2> 
+    template <class T, int M, int N, int A, int A2> 
     inline void DoInverseATA(
-        const SmallMatrix<T,M,N,S,I>& m, SmallMatrix<T,N,N,S2,I2>& ata)
-    { SMATA<T,M,N,M<N,S,S2>(m.cptr(),ata.ptr()); }
+        const SmallMatrix<T,M,N,A>& m, SmallMatrix<T,N,N,A2>& ata)
+    {
+        const StorageType S = static_cast<StorageType>(A & AllStorageType);
+        const StorageType S2 = static_cast<StorageType>(A2 & AllStorageType);
+        SMATA<T,M,N,M<N,S,S2>(m.cptr(),ata.ptr()); 
+    }
 
 #undef TMV_Val
 }

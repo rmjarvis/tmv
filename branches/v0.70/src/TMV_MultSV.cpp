@@ -62,8 +62,7 @@ namespace tmv {
             int len = s*s;
             itsm.resize(len);
             this->assignToS(SymMatrixView<T>(
-                    itsm.get(),s,stepi(),stepj(),
-                    Sym,uplo(),this->stor(),NonConj 
+                    itsm.get(),s,stepi(),stepj(),Sym,uplo(),NonConj 
                     TMV_FIRSTLAST1(itsm.get(),itsm.get()+len) ));
         }
         return itsm.get();
@@ -71,11 +70,11 @@ namespace tmv {
 
     template <class T> 
     int SymMatrixComposite<T>::stepi() const
-    { return this->isrm() ? this->size() : 1; }
+    { return 1; }
 
     template <class T> 
     int SymMatrixComposite<T>::stepj() const
-    { return this->isrm() ? 1 : this->size(); }
+    { return this->size(); }
 
     //
     // MultMV
@@ -198,16 +197,6 @@ namespace tmv {
         const GenSymMatrix<double>& A, const GenVector<double>& x,
         int beta, const VectorView<double>& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         int n = A.size();
         int lda = A.stepj();
         int xs = x.step();
@@ -231,16 +220,6 @@ namespace tmv {
         const GenVector<std::complex<double> >& x,
         int beta, const VectorView<std::complex<double> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         if (A.isherm()) {
             int n = A.size();
             int lda = A.stepj();
@@ -296,16 +275,6 @@ namespace tmv {
         const GenVector<std::complex<double> >& x,
         int beta, const VectorView<std::complex<double> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         if (beta == 0) {
             int n = A.size();
             int lda = A.stepj();
@@ -363,16 +332,6 @@ namespace tmv {
         const GenVector<double>& x,
         int beta, const VectorView<std::complex<double> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         int n = A.size();
         int lda = A.stepj();
         int xs = x.step();
@@ -408,17 +367,6 @@ namespace tmv {
         const GenSymMatrix<float>& A, const GenVector<float>& x,
         int beta, const VectorView<float>& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-        TMVAssert(A.isherm());
-
         int n = A.size();
         int lda = A.stepj();
         int xs = x.step();
@@ -442,16 +390,6 @@ namespace tmv {
         const GenVector<std::complex<float> >& x,
         int beta, const VectorView<std::complex<float> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         if (A.isherm()) {
             int n = A.size();
             int lda = A.stepj();
@@ -507,16 +445,6 @@ namespace tmv {
         const GenVector<std::complex<float> >& x,
         int beta, const VectorView<std::complex<float> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         if (beta == 0) {
             int n = A.size();
             int lda = A.stepj();
@@ -574,16 +502,6 @@ namespace tmv {
         const GenVector<float>& x,
         int beta, const VectorView<std::complex<float> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         int n = A.size();
         int lda = A.stepj();
         int xs = x.step();
@@ -630,7 +548,7 @@ namespace tmv {
         if (A.isconj()) 
             DoMultMV<add>(
                 TMV_CONJ(alpha),A.conjugate(),x.conjugate(),y.conjugate());
-        else if (A.isrm()) 
+        else if (!A.iscm() && A.isrm()) 
             if (A.isherm()) DoMultMV<add>(alpha,A.adjoint(),x,y);
             else DoMultMV<add>(alpha,A.transpose(),x,y);
         else if (x.step() == 0) {
@@ -666,21 +584,21 @@ namespace tmv {
         } else if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
             if (A.isherm()) {
                 if (A.uplo() == Upper) {
-                    HermMatrix<Ta,Upper,ColMajor> A2 =
+                    HermMatrix<Ta,Upper|ColMajor> A2 =
                         TMV_REAL(alpha)*A;
                     DoMultMV<add>(T(1),A2,x,y);
                 } else {
-                    HermMatrix<Ta,Lower,ColMajor> A2 =
+                    HermMatrix<Ta,Lower|ColMajor> A2 =
                         TMV_REAL(alpha)*A;
                     DoMultMV<add>(T(1),A2,x,y);
                 }
             } else {
                 if (A.uplo() == Upper) {
-                    SymMatrix<Ta,Upper,ColMajor> A2 =
+                    SymMatrix<Ta,Upper|ColMajor> A2 =
                         TMV_REAL(alpha)*A;
                     DoMultMV<add>(T(1),A2,x,y);
                 } else {
-                    SymMatrix<Ta,Lower,ColMajor> A2 =
+                    SymMatrix<Ta,Lower|ColMajor> A2 =
                         TMV_REAL(alpha)*A;
                     DoMultMV<add>(T(1),A2,x,y);
                 }
@@ -688,18 +606,18 @@ namespace tmv {
         } else {
             if (!A.issym()) {
                 if (A.uplo() == Upper) {
-                    HermMatrix<Ta,Upper,ColMajor> A2 = A;
+                    HermMatrix<Ta,Upper|ColMajor> A2 = A;
                     DoMultMV<add>(alpha,A2,x,y);
                 } else {
-                    HermMatrix<Ta,Lower,ColMajor> A2 = A;
+                    HermMatrix<Ta,Lower|ColMajor> A2 = A;
                     DoMultMV<add>(alpha,A2,x,y);
                 }
             } else {
                 if (A.uplo() == Upper) {
-                    SymMatrix<T,Upper,ColMajor> A2 = alpha*A;
+                    SymMatrix<T,Upper|ColMajor> A2 = alpha*A;
                     DoMultMV<add>(T(1),A2,x,y);
                 } else {
-                    SymMatrix<T,Lower,ColMajor> A2 = alpha*A;
+                    SymMatrix<T,Lower|ColMajor> A2 = alpha*A;
                     DoMultMV<add>(T(1),A2,x,y);
                 }
             }

@@ -21,7 +21,7 @@ static void TestBasicMatrix_1()
     }
 
     tmv::Matrix<T,S> m(M,N);
-    tmv::Matrix<T,S,tmv::FortranStyle> mf(M,N);
+    tmv::Matrix<T,S|tmv::FortranStyle> mf(M,N);
     Assert(m.colsize() == M && m.rowsize() == N,
            "Creating Matrix(M,N)");
     Assert(m.colsize() == M && m.rowsize() == N,
@@ -205,7 +205,7 @@ static void TestBasicMatrix_2()
     }
 
     tmv::Matrix<T,S> m(M,N);
-    tmv::Matrix<T,S,tmv::FortranStyle> mf(M,N);
+    tmv::Matrix<T,S|tmv::FortranStyle> mf(M,N);
 
     for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
         m(i,j) = T(k);

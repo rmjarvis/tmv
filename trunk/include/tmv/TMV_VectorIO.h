@@ -61,7 +61,7 @@ namespace tmv {
     {
         typedef typename V::value_type T;
         enum { inst = (
-                (V::_size == TMV_UNKNOWN || V::_size > 16) &&
+                (V::_size == Unknown || V::_size > 16) &&
                 Traits<T>::isinst ) };
         enum { algo = (
                 inst ? 90 :
@@ -263,7 +263,7 @@ namespace tmv {
         {
             typedef typename V::value_type T;
             const int inst = 
-                (V::_size == TMV_UNKNOWN || V::_size > 16) &&
+                (V::_size == Unknown || V::_size > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 V::_conj ? 97 :

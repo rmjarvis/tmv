@@ -182,8 +182,8 @@ namespace tmv {
                 U->diag() = Ud;
             }
         } else {
-            std::auto_ptr<SymMatrix<T,Lower,ColMajor> > UUS(0);
-            std::auto_ptr<HermMatrix<T,Lower,ColMajor> > UUH(0);
+            std::auto_ptr<SymMatrix<T,Lower|ColMajor> > UUS(0);
+            std::auto_ptr<HermMatrix<T,Lower|ColMajor> > UUH(0);
             std::auto_ptr<SymMatrixView<T> > U1(0);
             if (U) {
                 *U = A;
@@ -193,10 +193,10 @@ namespace tmv {
                     U1.reset(new SymMatrixView<T>(HermMatrixViewOf(*U,Lower)));
             } else {
                 if (A.issym()) {
-                    UUS.reset(new SymMatrix<T,Lower,ColMajor>(A));
+                    UUS.reset(new SymMatrix<T,Lower|ColMajor>(A));
                     U1.reset(new SymMatrixView<T>(UUS->view()));
                 } else {
-                    UUH.reset(new HermMatrix<T,Lower,ColMajor>(A));
+                    UUH.reset(new HermMatrix<T,Lower|ColMajor>(A));
                     U1.reset(new SymMatrixView<T>(UUH->view()));
                 }
             }
@@ -278,7 +278,7 @@ namespace tmv {
 
         int n = A.size();
         int kl = A.nlo();
-        SymBandMatrix<double,Lower,ColMajor> A2 = A;
+        SymBandMatrix<double,Lower|ColMajor> A2 = A;
         int lda = A2.diagstep();
         int ldu = U ? U->stepj() : 1;
         char vect = U ? 'V' : 'N';
@@ -322,7 +322,7 @@ namespace tmv {
 
         int n = A.size();
         int kl = A.nlo();
-        HermBandMatrix<std::complex<double>,Lower,ColMajor> A2 = A;
+        HermBandMatrix<std::complex<double>,Lower|ColMajor> A2 = A;
         int lda = A2.diagstep();
         int ldu = U ? U->stepj() : 1;
         char vect = U ? 'V' : 'N';
@@ -365,7 +365,7 @@ namespace tmv {
 
         int n = A.size();
         int kl = A.nlo();
-        SymBandMatrix<float,Lower,ColMajor> A2 = A;
+        SymBandMatrix<float,Lower|ColMajor> A2 = A;
         int lda = A2.diagstep();
         int ldu = U ? U->stepj() : 1;
         char vect = U ? 'V' : 'N';
@@ -409,7 +409,7 @@ namespace tmv {
 
         int n = A.size();
         int kl = A.nlo();
-        HermBandMatrix<std::complex<float>,Lower,ColMajor> A2 = A;
+        HermBandMatrix<std::complex<float>,Lower|ColMajor> A2 = A;
         int lda = A2.diagstep();
         int ldu = U ? U->stepj() : 1;
         char vect = U ? 'V' : 'N';

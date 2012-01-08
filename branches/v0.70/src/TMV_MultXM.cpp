@@ -141,8 +141,9 @@ namespace tmv {
         TMVAssert(A.rowsize() == C.rowsize());
         TMVAssert(B.colsize() == C.colsize());
         TMVAssert(B.rowsize() == C.rowsize());
-        if (A.stor() == C.stor() && B.stor() == C.stor() &&
-            A.canLinearize() && B.canLinearize() && C.canLinearize()) {
+        if (A.canLinearize() && B.canLinearize() && C.canLinearize() &&
+            A.stepi() == C.stepi() && A.stepj() == C.stepj() &&
+            B.stepi() == C.stepi() && B.stepj() == C.stepj()) {
             TMVAssert(A.stepi() == C.stepi() && A.stepj() == C.stepj());
             TMVAssert(B.stepi() == C.stepi() && B.stepj() == C.stepj());
             ElemMultVV<add>(

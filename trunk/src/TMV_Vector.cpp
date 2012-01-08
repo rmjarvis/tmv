@@ -78,8 +78,6 @@ namespace tmv {
     static void DoInstCopy(
         const ConstVectorView<double>& v1, VectorView<double> v2)
     {
-        TMVAssert(v1.size() == v2.size());
-        //TMVAssert(v1.cptr() != v2.cptr());
         int n=v2.size();
         if (n == 0) return;
         int s1=v1.step();
@@ -94,8 +92,6 @@ namespace tmv {
         const ConstVectorView<std::complex<double> >& v1,
         VectorView<std::complex<double> > v2)
     {
-        TMVAssert(v1.size() == v2.size());
-        //TMVAssert(v1.cptr() != v2.cptr());
         int n=v2.size();
         if (n == 0) return;
         int s1=v1.step();
@@ -118,8 +114,6 @@ namespace tmv {
     static void DoInstCopy(
         const ConstVectorView<float>& v1, VectorView<float> v2)
     {
-        TMVAssert(v1.size() == v2.size());
-        //TMVAssert(v1.cptr() != v2.cptr());
         int n=v2.size();
         if (n == 0) return;
         int s1=v1.step();
@@ -134,8 +128,6 @@ namespace tmv {
         const ConstVectorView<std::complex<float> >& v1,
         VectorView<std::complex<float> > v2)
     {
-        TMVAssert(v1.size() == v2.size());
-        //TMVAssert(v1.cptr() != v2.cptr());
         int n=v2.size();
         if (n == 0) return;
         int s1=v1.step();

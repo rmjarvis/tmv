@@ -69,8 +69,8 @@ namespace tmv {
         }
     }
 
-    template <class T, IndexStyle I> 
-    typename SymBandMatrixView<T,I>::reference SymBandMatrixView<T,I>::ref(
+    template <class T, int A>
+    typename SymBandMatrixView<T,A>::reference SymBandMatrixView<T,A>::ref(
         int i, int j) const
     {
         if ((uplo() == Upper && i<=j) || (uplo() == Lower && i>=j)) {
@@ -1123,22 +1123,22 @@ namespace tmv {
     { return tmv::DoCondition(*this); }
 
     template <class T> 
-    SymBandMatrix<T,Upper,DiagMajor> SymTriDiagMatrix(
+    SymBandMatrix<T,Upper|DiagMajor> SymTriDiagMatrix(
         const GenVector<T>& v1, const GenVector<T>& v2)
     {
         TMVAssert2(v2.size() == v1.size()-1);
-        SymBandMatrix<T,Upper,DiagMajor> temp(v1.size(),1);
+        SymBandMatrix<T,Upper|DiagMajor> temp(v1.size(),1);
         temp.diag() = v1;
         temp.diag(1) = v2;
         return temp;
     }
 
     template <class T> 
-    HermBandMatrix<T,Upper,DiagMajor> HermTriDiagMatrix(
+    HermBandMatrix<T,Upper|DiagMajor> HermTriDiagMatrix(
         const GenVector<T>& v1, const GenVector<T>& v2, UpLoType uplo)
     {
         TMVAssert2(v2.size() == v1.size()-1);
-        HermBandMatrix<T,Upper,DiagMajor> temp(v1.size(),1);
+        HermBandMatrix<T,Upper|DiagMajor> temp(v1.size(),1);
         temp.diag() = v1;
         if (uplo == Upper)
             temp.diag(1) = v2;
@@ -1148,12 +1148,12 @@ namespace tmv {
     }
 
     template <class T> 
-    HermBandMatrix<std::complex<T>,Upper,DiagMajor> HermTriDiagMatrix(
+    HermBandMatrix<std::complex<T>,Upper|DiagMajor> HermTriDiagMatrix(
         const GenVector<T>& v1, const GenVector<std::complex<T> >& v2,
         UpLoType uplo)
     {
         TMVAssert2(v2.size() == v1.size()-1);
-        HermBandMatrix<std::complex<T>,Upper,DiagMajor> temp(v1.size(),1);
+        HermBandMatrix<std::complex<T>,Upper|DiagMajor> temp(v1.size(),1);
         temp.diag() = v1;
         if (uplo == Upper)
             temp.diag(1) = v2;
@@ -1624,8 +1624,8 @@ namespace tmv {
         }
     }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    void SymBandMatrix<T,U,S,I>::read(const TMV_Reader& reader)
+    template <class T, int A>
+    void SymBandMatrix<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
         if (!reader.readCode("sB",exp,got) && !(isReal(T()) && got=="hB")) {
@@ -1675,8 +1675,8 @@ namespace tmv {
         FinishRead(reader,v);
     }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    void HermBandMatrix<T,U,S,I>::read(const TMV_Reader& reader)
+    template <class T, int A>
+    void HermBandMatrix<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
         if (!reader.readCode("hB",exp,got) && !(isReal(T()) && got=="sB")) {
@@ -1726,8 +1726,8 @@ namespace tmv {
         FinishRead(reader,v);
     }
 
-    template <class T, IndexStyle I> 
-    void SymBandMatrixView<T,I>::read(const TMV_Reader& reader) const
+    template <class T, int A>
+    void SymBandMatrixView<T,A>::read(const TMV_Reader& reader) const
     {
         std::string exp,got;
         if (!reader.readCode(issym()?"sB":"hB",exp,got) && 

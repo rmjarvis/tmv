@@ -30,7 +30,7 @@ namespace tmv {
     static void DoMultEq(const M1& m1, VectorView<T2,Unit> v2)
     {
         const Scaling<1,typename Traits<T2>::real_type> one;
-        const int xx = TMV_UNKNOWN;
+        const int xx = Unknown;
         if (m1.iscm()) 
             InlineMultMV<false>(one,m1.cmView(),v2.constView(),v2);
         else if (m1.isrm())
@@ -62,8 +62,6 @@ namespace tmv {
     template <class M1>
     static void BlasMultEq(const M1& A, VectorView<double,Unit> x, double)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
         int n=A.size();
         int lda=A.iscm()?A.stepj():A.stepi();
         int xs=x.step();
@@ -77,10 +75,9 @@ namespace tmv {
     }
     template <class M1>
     static void BlasMultEq(
-        const M1& A, VectorView<std::complex<double>,Unit> x, std::complex<double>)
+        const M1& A, VectorView<std::complex<double>,Unit> x,
+        std::complex<double>)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
         int n=A.size();
         int lda=A.iscm()?A.stepj():A.stepi();
         int xs=x.step();
@@ -107,8 +104,6 @@ namespace tmv {
     static void BlasMultEq( 
         const M1& A, VectorView<std::complex<double>,Unit> x, double)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
         int n=A.size();
         int lda=A.iscm()?A.stepj():A.stepi();
         int xs=2*x.step();
@@ -130,8 +125,6 @@ namespace tmv {
     template <class M1>
     static void BlasMultEq(const M1& A, VectorView<float,Unit> x, float)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
         int n=A.size();
         int lda=A.iscm()?A.stepj():A.stepi();
         int xs=x.step();
@@ -145,10 +138,9 @@ namespace tmv {
     }
     template <class M1>
     static void BlasMultEq(
-        const M1& A, VectorView<std::complex<float>,Unit> x, std::complex<float>)
+        const M1& A, VectorView<std::complex<float>,Unit> x,
+        std::complex<float>)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
         int n=A.size();
         int lda=A.iscm()?A.stepj():A.stepi();
         int xs=x.step();
@@ -175,8 +167,6 @@ namespace tmv {
     static void BlasMultEq( 
         const M1& A, VectorView<std::complex<float>,Unit> x, float)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
         int n=A.size();
         int lda=A.iscm()?A.stepj():A.stepi();
         int xs=2*x.step();

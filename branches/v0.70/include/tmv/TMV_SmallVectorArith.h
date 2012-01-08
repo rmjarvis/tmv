@@ -67,16 +67,16 @@ namespace tmv {
     // Vector * / Scalar
     //
 
-    template <class T, class T1, int N, IndexStyle I> 
+    template <class T, class T1, int N, int A> 
     class ProdXv : public SmallVectorComposite<T,N> 
     {
     public:
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
 
-        inline ProdXv(T _x, const SmallVector<T1,N,I>& _v) : x(_x), v(_v) {}
+        inline ProdXv(T _x, const SmallVector<T1,N,A>& _v) : x(_x), v(_v) {}
         inline T getX() const { return x; }
-        inline const SmallVector<T1,N,I>& getV() const { return v; }
+        inline const SmallVector<T1,N,A>& getV() const { return v; }
         inline void assignTov(SmallVector<real_type,N,CStyle>& v0) const
         { TMVAssert(isReal(T())); MultXV<N>(x,v.cptr(),v0.ptr()); }
         inline void assignTov(SmallVector<complex_type,N,CStyle>& v0) const
@@ -104,45 +104,45 @@ namespace tmv {
         }
     private:
         const T x;
-        const SmallVector<T1,N,I>& v;
+        const SmallVector<T1,N,A>& v;
     };
 
-    template <class T, int N, IndexStyle I> 
-    inline SmallVector<T,N,I>& operator*=(SmallVector<T,N,I>& v1, T x2)
+    template <class T, int N, int A> 
+    inline SmallVector<T,N,A>& operator*=(SmallVector<T,N,A>& v1, T x2)
     { MultXV<N>(x2,v1.ptr()); return v1; }
 
-    template <class T, int N, IndexStyle I> 
-    inline SmallVector<CT,N,I>& operator*=(SmallVector<CT,N,I>& v1, T x2)
+    template <class T, int N, int A> 
+    inline SmallVector<CT,N,A>& operator*=(SmallVector<CT,N,A>& v1, T x2)
     { MultXV<N>(x2,v1.ptr()); return v1; }
 
-    template <class T, int N, IndexStyle I> 
-    inline SmallVector<CT,N,I>& operator*=(SmallVector<CT,N,I>& v1, CCT x2)
+    template <class T, int N, int A> 
+    inline SmallVector<CT,N,A>& operator*=(SmallVector<CT,N,A>& v1, CCT x2)
     { MultXV<N>(CT(x2),v1.ptr()); return v1; }
 
-    template <class T, int N, IndexStyle I> 
-    inline SmallVector<CT,N,I>& operator*=(SmallVector<CT,N,I>& v1, VCT x2)
+    template <class T, int N, int A> 
+    inline SmallVector<CT,N,A>& operator*=(SmallVector<CT,N,A>& v1, VCT x2)
     { MultXV<N>(CT(x2),v1.ptr()); return v1; }
 
-    template <class T, int N, IndexStyle I> 
-    inline SmallVector<T,N,I>& operator/=(SmallVector<T,N,I>& v1, T x2)
+    template <class T, int N, int A> 
+    inline SmallVector<T,N,A>& operator/=(SmallVector<T,N,A>& v1, T x2)
     { MultXV<N>(T(1)/x2,v1.ptr()); return v1; }
 
-    template <class T, int N, IndexStyle I> 
-    inline SmallVector<CT,N,I>& operator/=(SmallVector<CT,N,I>& v1, T x2)
+    template <class T, int N, int A> 
+    inline SmallVector<CT,N,A>& operator/=(SmallVector<CT,N,A>& v1, T x2)
     { MultXV<N>(T(1)/x2,v1.ptr()); return v1; }
 
-    template <class T, int N, IndexStyle I> 
-    inline SmallVector<CT,N,I>& operator/=(SmallVector<CT,N,I>& v1, CCT x2)
+    template <class T, int N, int A> 
+    inline SmallVector<CT,N,A>& operator/=(SmallVector<CT,N,A>& v1, CCT x2)
     { MultXV<N>(T(1)/CT(x2),v1.ptr()); return v1; }
 
-    template <class T, int N, IndexStyle I> 
-    inline SmallVector<CT,N,I>& operator/=(SmallVector<CT,N,I>& v1, VCT x2)
+    template <class T, int N, int A> 
+    inline SmallVector<CT,N,A>& operator/=(SmallVector<CT,N,A>& v1, VCT x2)
     { MultXV<N>(T(1)/CT(x2),v1.ptr()); return v1; }
 
 #define GENMATRIX SmallVector
 #define PRODXM ProdXv
-#define X ,N,I
-#define Y ,int N, IndexStyle I
+#define X ,N,A
+#define Y ,int N, int A
 #define GETM .getV()
 #include "tmv/TMV_AuxProdXM.h"
 #undef GENMATRIX
@@ -152,7 +152,7 @@ namespace tmv {
     // Vector + Vector
     //
 
-    template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T1, class T2, int N, int A1, int A2> 
     class Sumvv_1_1 : public SmallVectorComposite<T,N> 
     {
     public:
@@ -160,12 +160,12 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline Sumvv_1_1(
-            T TMV_DEBUGPARAM(_x1), const SmallVector<T1,N,I1>& _v1, 
-            T TMV_DEBUGPARAM(_x2), const SmallVector<T2,N,I2>& _v2) :
+            T TMV_DEBUGPARAM(_x1), const SmallVector<T1,N,A1>& _v1, 
+            T TMV_DEBUGPARAM(_x2), const SmallVector<T2,N,A2>& _v2) :
             v1(_v1),v2(_v2)
         { TMVAssert(_x1 == T(1) && _x2 == T(1)); }
-        inline const SmallVector<T1,N,I1>& getV1() const { return v1; }
-        inline const SmallVector<T2,N,I2>& getV2() const { return v2; }
+        inline const SmallVector<T1,N,A1>& getV1() const { return v1; }
+        inline const SmallVector<T2,N,A2>& getV2() const { return v2; }
         inline void assignTov(SmallVector<real_type,N,CStyle>& v0) const
         { TMVAssert(isReal(T())); AddVV_1_1<N>(v1.cptr(),v2.cptr(),v0.ptr()); }
         inline void assignTov(SmallVector<complex_type,N,CStyle>& v0) const
@@ -192,11 +192,11 @@ namespace tmv {
                 AddVV(T(1),v1.view(),T(1),v2.view(),v0);
         }
     private:
-        const SmallVector<T1,N,I1>& v1;
-        const SmallVector<T2,N,I2>& v2;
+        const SmallVector<T1,N,A1>& v1;
+        const SmallVector<T2,N,A2>& v2;
     };
 
-    template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T1, class T2, int N, int A1, int A2> 
     class Sumvv_1_m1 : public SmallVectorComposite<T,N> 
     {
     public:
@@ -204,12 +204,12 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline Sumvv_1_m1(
-            T TMV_DEBUGPARAM(_x1), const SmallVector<T1,N,I1>& _v1, 
-            T TMV_DEBUGPARAM(_x2), const SmallVector<T2,N,I2>& _v2) :
+            T TMV_DEBUGPARAM(_x1), const SmallVector<T1,N,A1>& _v1, 
+            T TMV_DEBUGPARAM(_x2), const SmallVector<T2,N,A2>& _v2) :
             v1(_v1),v2(_v2)
         { TMVAssert(_x1 == T(1) && _x2 == T(-1)); }
-        inline const SmallVector<T1,N,I1>& getV1() const { return v1; }
-        inline const SmallVector<T2,N,I2>& getV2() const { return v2; }
+        inline const SmallVector<T1,N,A1>& getV1() const { return v1; }
+        inline const SmallVector<T2,N,A2>& getV2() const { return v2; }
         inline void assignTov(SmallVector<real_type,N,CStyle>& v0) const
         { TMVAssert(isReal(T())); AddVV_1_m1<N>(v1.cptr(),v2.cptr(),v0.ptr()); }
         inline void assignTov(SmallVector<complex_type,N,CStyle>& v0) const
@@ -236,11 +236,11 @@ namespace tmv {
                 AddVV(T(1),v1.view(),T(-1),v2.view(),v0);
         }
     private:
-        const SmallVector<T1,N,I1>& v1;
-        const SmallVector<T2,N,I2>& v2;
+        const SmallVector<T1,N,A1>& v1;
+        const SmallVector<T2,N,A2>& v2;
     };
 
-    template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T1, class T2, int N, int A1, int A2> 
     class Sumvv_1_x : public SmallVectorComposite<T,N> 
     {
     public:
@@ -248,13 +248,13 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline Sumvv_1_x(
-            T TMV_DEBUGPARAM(_x1), const SmallVector<T1,N,I1>& _v1, 
-            T _x2, const SmallVector<T2,N,I2>& _v2) :
+            T TMV_DEBUGPARAM(_x1), const SmallVector<T1,N,A1>& _v1, 
+            T _x2, const SmallVector<T2,N,A2>& _v2) :
             v1(_v1),x2(_x2),v2(_v2)
         { TMVAssert(_x1 == T(1)); }
-        inline const SmallVector<T1,N,I1>& getV1() const { return v1; }
+        inline const SmallVector<T1,N,A1>& getV1() const { return v1; }
         inline T getX2() const { return x2; }
-        inline const SmallVector<T2,N,I2>& getV2() const { return v2; }
+        inline const SmallVector<T2,N,A2>& getV2() const { return v2; }
         inline void assignTov(SmallVector<real_type,N,CStyle>& v0) const
         { TMVAssert(isReal(T())); AddVV_1_x<N>(v1.cptr(),x2,v2.cptr(),v0.ptr()); }
         inline void assignTov(SmallVector<complex_type,N,CStyle>& v0) const
@@ -281,12 +281,12 @@ namespace tmv {
                 AddVV(T(1),v1.view(),x2,v2.view(),v0);
         }
     private:
-        const SmallVector<T1,N,I1>& v1;
+        const SmallVector<T1,N,A1>& v1;
         const T x2;
-        const SmallVector<T2,N,I2>& v2;
+        const SmallVector<T2,N,A2>& v2;
     };
 
-    template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T1, class T2, int N, int A1, int A2> 
     class Sumvv_x_1 : public SmallVectorComposite<T,N> 
     {
     public:
@@ -294,13 +294,13 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline Sumvv_x_1(
-            T _x1, const SmallVector<T1,N,I1>& _v1, 
-            T TMV_DEBUGPARAM(_x2), const SmallVector<T2,N,I2>& _v2) :
+            T _x1, const SmallVector<T1,N,A1>& _v1, 
+            T TMV_DEBUGPARAM(_x2), const SmallVector<T2,N,A2>& _v2) :
             x1(_x1),v1(_v1),v2(_v2)
         { TMVAssert(_x2 == T(1)); }
         inline T getX1() const { return x1; }
-        inline const SmallVector<T1,N,I1>& getV1() const { return v1; }
-        inline const SmallVector<T2,N,I2>& getV2() const { return v2; }
+        inline const SmallVector<T1,N,A1>& getV1() const { return v1; }
+        inline const SmallVector<T2,N,A2>& getV2() const { return v2; }
         inline void assignTov(SmallVector<real_type,N,CStyle>& v0) const
         { TMVAssert(isReal(T())); AddVV_x_1<N>(x1,v1.cptr(),v2.cptr(),v0.ptr()); }
         inline void assignTov(SmallVector<complex_type,N,CStyle>& v0) const
@@ -328,11 +328,11 @@ namespace tmv {
         }
     private:
         const T x1;
-        const SmallVector<T1,N,I1>& v1;
-        const SmallVector<T2,N,I2>& v2;
+        const SmallVector<T1,N,A1>& v1;
+        const SmallVector<T2,N,A2>& v2;
     };
 
-    template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T1, class T2, int N, int A1, int A2> 
     class Sumvv_x_m1 : public SmallVectorComposite<T,N> 
     {
     public:
@@ -340,13 +340,13 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline Sumvv_x_m1(
-            T _x1, const SmallVector<T1,N,I1>& _v1, 
-            T TMV_DEBUGPARAM(_x2), const SmallVector<T2,N,I2>& _v2) :
+            T _x1, const SmallVector<T1,N,A1>& _v1, 
+            T TMV_DEBUGPARAM(_x2), const SmallVector<T2,N,A2>& _v2) :
             x1(_x1),v1(_v1),v2(_v2)
         { TMVAssert(_x2 == T(-1)); }
         inline T getX1() const { return x1; }
-        inline const SmallVector<T1,N,I1>& getV1() const { return v1; }
-        inline const SmallVector<T2,N,I2>& getV2() const { return v2; }
+        inline const SmallVector<T1,N,A1>& getV1() const { return v1; }
+        inline const SmallVector<T2,N,A2>& getV2() const { return v2; }
         inline void assignTov(
             SmallVector<real_type,N,CStyle>& v0) const
         { 
@@ -388,11 +388,11 @@ namespace tmv {
         }
     private:
         const T x1;
-        const SmallVector<T1,N,I1>& v1;
-        const SmallVector<T2,N,I2>& v2;
+        const SmallVector<T1,N,A1>& v1;
+        const SmallVector<T2,N,A2>& v2;
     };
 
-    template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T1, class T2, int N, int A1, int A2> 
     class Sumvv : public SmallVectorComposite<T,N> 
     {
     public:
@@ -400,13 +400,13 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline Sumvv(
-            T _x1, const SmallVector<T1,N,I1>& _v1, 
-            T _x2, const SmallVector<T2,N,I2>& _v2) :
+            T _x1, const SmallVector<T1,N,A1>& _v1, 
+            T _x2, const SmallVector<T2,N,A2>& _v2) :
             x1(_x1),v1(_v1),x2(_x2), v2(_v2) {}
         inline T getX1() const { return x1; }
-        inline const SmallVector<T1,N,I1>& getV1() const { return v1; }
+        inline const SmallVector<T1,N,A1>& getV1() const { return v1; }
         inline T getX2() const { return x2; }
-        inline const SmallVector<T2,N,I2>& getV2() const { return v2; }
+        inline const SmallVector<T2,N,A2>& getV2() const { return v2; }
         inline void assignTov(
             SmallVector<real_type,N,CStyle>& v0) const
         { 
@@ -448,12 +448,12 @@ namespace tmv {
         }
     private:
         const T x1;
-        const SmallVector<T1,N,I1>& v1;
+        const SmallVector<T1,N,A1>& v1;
         const T x2;
-        const SmallVector<T2,N,I2>& v2;
+        const SmallVector<T2,N,A2>& v2;
     };
 
-    template <class T, class T1, class T2, int N, IndexStyle I> 
+    template <class T, class T1, class T2, int N, int A> 
     class SumVv : public VectorComposite<T> 
     {
     public:
@@ -462,13 +462,13 @@ namespace tmv {
 
         inline SumVv(
             T _x1, const GenVector<T1>& _v1, 
-            T _x2, const SmallVector<T2,N,I>& _v2) :
+            T _x2, const SmallVector<T2,N,A>& _v2) :
             x1(_x1),v1(_v1),x2(_x2), v2(_v2) { TMVAssert(v1.size() == N); }
         inline int size() const { return N; }
         inline T getX1() const { return x1; }
         inline const GenVector<T1>& getV1() const { return v1; }
         inline T getX2() const { return x2; }
-        inline const SmallVector<T2,N,I>& getV2() const { return v2; }
+        inline const SmallVector<T2,N,A>& getV2() const { return v2; }
         inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(isReal(T()));
@@ -516,10 +516,10 @@ namespace tmv {
         const T x1;
         const GenVector<T1>& v1;
         const T x2;
-        const SmallVector<T2,N,I>& v2;
+        const SmallVector<T2,N,A>& v2;
     };
 
-    template <class T, class T1, class T2, int N, IndexStyle I> 
+    template <class T, class T1, class T2, int N, int A> 
     class SumvV : public VectorComposite<T> 
     {
     public:
@@ -527,12 +527,12 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline SumvV(
-            T _x1, const SmallVector<T1,N,I>& _v1, 
+            T _x1, const SmallVector<T1,N,A>& _v1, 
             T _x2, const GenVector<T2>& _v2) :
             x1(_x1),v1(_v1),x2(_x2), v2(_v2) { TMVAssert(v2.size() == N); }
         inline int size() const { return N; }
         inline T getX1() const { return x1; }
-        inline const SmallVector<T1,N,I>& getV1() const { return v1; }
+        inline const SmallVector<T1,N,A>& getV1() const { return v1; }
         inline T getX2() const { return x2; }
         inline const GenVector<T2>& getV2() const { return v2; }
         inline void assignToV(const VectorView<real_type>& v0) const
@@ -580,59 +580,59 @@ namespace tmv {
         }
     private:
         const T x1;
-        const SmallVector<T1,N,I>& v1;
+        const SmallVector<T1,N,A>& v1;
         const T x2;
         const GenVector<T2>& v2;
     };
 
     // v+=v
-    template <class T, int N, IndexStyle I1, IndexStyle I2> 
-    inline SmallVector<T,N,I1>& operator+=(
-        SmallVector<T,N,I1>& v1, const SmallVector<T,N,I2>& v2) 
+    template <class T, int N, int A1, int A2> 
+    inline SmallVector<T,N,A1>& operator+=(
+        SmallVector<T,N,A1>& v1, const SmallVector<T,N,A2>& v2) 
     { AddVV_1<N>(v2.cptr(),v1.ptr()); return v1; }
 
-    template <class T, int N, IndexStyle I1, IndexStyle I2> 
-    inline SmallVector<CT,N,I1>& operator+=(
-        SmallVector<CT,N,I1>& v1, const SmallVector<T,N,I2>& v2) 
+    template <class T, int N, int A1, int A2> 
+    inline SmallVector<CT,N,A1>& operator+=(
+        SmallVector<CT,N,A1>& v1, const SmallVector<T,N,A2>& v2) 
     { AddVV_1<N>(v2.cptr(),v1.ptr()); return v1; }
 
     // v-=v
-    template <class T, int N, IndexStyle I1, IndexStyle I2> 
-    inline SmallVector<T,N,I1>& operator-=(
-        SmallVector<T,N,I1>& v1, const SmallVector<T,N,I2>& v2)
+    template <class T, int N, int A1, int A2> 
+    inline SmallVector<T,N,A1>& operator-=(
+        SmallVector<T,N,A1>& v1, const SmallVector<T,N,A2>& v2)
     { AddVV_m1<N>(v2.cptr(),v1.ptr()); return v1; }
 
-    template <class T, int N, IndexStyle I1, IndexStyle I2> 
-    inline SmallVector<CT,N,I1>& operator-=(
-        SmallVector<CT,N,I1>& v1, const SmallVector<T,N,I2>& v2) 
+    template <class T, int N, int A1, int A2> 
+    inline SmallVector<CT,N,A1>& operator-=(
+        SmallVector<CT,N,A1>& v1, const SmallVector<T,N,A2>& v2) 
     { AddVV_m1<N>(v2.cptr(),v1.ptr()); return v1; }
 
     // v+=(x*v)
-    template <class T, class T2, int N, IndexStyle I1, IndexStyle I2> 
-    inline SmallVector<T,N,I1>& operator+=(
-        SmallVector<T,N,I1>& v, const ProdXv<T,T2,N,I2>& v2)
+    template <class T, class T2, int N, int A1, int A2> 
+    inline SmallVector<T,N,A1>& operator+=(
+        SmallVector<T,N,A1>& v, const ProdXv<T,T2,N,A2>& v2)
     { AddVV<N>(v2.getX(),v2.getV().cptr(),v.ptr()); return v; }
 
-    template <class T, int N, IndexStyle I1, IndexStyle I2> 
-    inline SmallVector<CT,N,I1>& operator+=(
-        SmallVector<CT,N,I1>& v, const ProdXv<T,T,N,I2>& v2)
+    template <class T, int N, int A1, int A2> 
+    inline SmallVector<CT,N,A1>& operator+=(
+        SmallVector<CT,N,A1>& v, const ProdXv<T,T,N,A2>& v2)
     { AddVV<N>(v2.getX(),v2.getV().cptr(),v.ptr()); return v; }
 
     // v-=(x*v)
-    template <class T, class T2, int N, IndexStyle I1, IndexStyle I2> 
-    inline SmallVector<T,N,I1>& operator-=(
-        SmallVector<T,N,I1>& v, const ProdXv<T,T2,N,I2>& v2)
+    template <class T, class T2, int N, int A1, int A2> 
+    inline SmallVector<T,N,A1>& operator-=(
+        SmallVector<T,N,A1>& v, const ProdXv<T,T2,N,A2>& v2)
     { AddVV<N>(-v2.getX(),v2.getV().cptr(),v.ptr()); return v; }
 
-    template <class T, int N, IndexStyle I1, IndexStyle I2> 
-    inline SmallVector<CT,N,I1>& operator-=(
-        SmallVector<CT,N,I1>& v, const ProdXv<T,T,N,I2>& v2)
+    template <class T, int N, int A1, int A2> 
+    inline SmallVector<CT,N,A1>& operator-=(
+        SmallVector<CT,N,A1>& v, const ProdXv<T,T,N,A2>& v2)
     { AddVV<N>(-v2.getX(),v2.getV().cptr(),v.ptr()); return v; }
 
     // Mix with Vector
-    template <class T, int N, IndexStyle I> 
-    inline SmallVector<T,N,I>& operator+=(
-        SmallVector<T,N,I>& v1, const GenVector<T>& v2) 
+    template <class T, int N, int A> 
+    inline SmallVector<T,N,A>& operator+=(
+        SmallVector<T,N,A>& v1, const GenVector<T>& v2) 
     {
         TMVAssert(v2.size() == N);
         if (v2.step() == 1 && !v2.isconj())
@@ -642,9 +642,9 @@ namespace tmv {
         return v1; 
     }
 
-    template <class T, int N, IndexStyle I> 
-    inline SmallVector<CT,N,I>& operator+=(
-        SmallVector<CT,N,I>& v1, const GenVector<T>& v2) 
+    template <class T, int N, int A> 
+    inline SmallVector<CT,N,A>& operator+=(
+        SmallVector<CT,N,A>& v1, const GenVector<T>& v2) 
     {
         TMVAssert(v2.size() == N);
         if (v2.step() == 1)
@@ -654,9 +654,9 @@ namespace tmv {
         return v1; 
     }
 
-    template <class T, int N, IndexStyle I> 
-    inline SmallVector<T,N,I>& operator-=(
-        SmallVector<T,N,I>& v1, const GenVector<T>& v2) 
+    template <class T, int N, int A> 
+    inline SmallVector<T,N,A>& operator-=(
+        SmallVector<T,N,A>& v1, const GenVector<T>& v2) 
     {
         TMVAssert(v2.size() == N);
         if (v2.step() == 1 && !v2.isconj())
@@ -666,9 +666,9 @@ namespace tmv {
         return v1; 
     }
 
-    template <class T, int N, IndexStyle I> 
-    inline SmallVector<CT,N,I>& operator-=(
-        SmallVector<CT,N,I>& v1, const GenVector<T>& v2) 
+    template <class T, int N, int A> 
+    inline SmallVector<CT,N,A>& operator-=(
+        SmallVector<CT,N,A>& v1, const GenVector<T>& v2) 
     {
         TMVAssert(v2.size() == N);
         if (v2.step() == 1)
@@ -681,9 +681,9 @@ namespace tmv {
     template <class T, class Tv> 
     class ProdXV;
 
-    template <class T, class T2, int N, IndexStyle I> 
-    inline SmallVector<T,N,I>& operator+=(
-        SmallVector<T,N,I>& v, const ProdXV<T,T2>& v2) 
+    template <class T, class T2, int N, int A> 
+    inline SmallVector<T,N,A>& operator+=(
+        SmallVector<T,N,A>& v, const ProdXV<T,T2>& v2) 
     {
         TMVAssert(v2.size() == N);
         if (v2.getV().step() == 1 && !v2.getV().isconj())
@@ -693,9 +693,9 @@ namespace tmv {
         return v; 
     }
 
-    template <class T, int N, IndexStyle I> 
-    inline SmallVector<CT,N,I>& operator+=(
-        SmallVector<CT,N,I>& v, const ProdXV<T,T>& v2) 
+    template <class T, int N, int A> 
+    inline SmallVector<CT,N,A>& operator+=(
+        SmallVector<CT,N,A>& v, const ProdXV<T,T>& v2) 
     {
         TMVAssert(v2.size() == N);
         if (v2.getV().step() == 1 && !v2.getV().isconj())
@@ -705,9 +705,9 @@ namespace tmv {
         return v; 
     }
 
-    template <class T, class T2, int N, IndexStyle I> 
-    inline SmallVector<T,N,I>& operator-=(
-        SmallVector<T,N,I>& v, const ProdXV<T,T2>& v2) 
+    template <class T, class T2, int N, int A> 
+    inline SmallVector<T,N,A>& operator-=(
+        SmallVector<T,N,A>& v, const ProdXV<T,T2>& v2) 
     {
         TMVAssert(v2.size() == N);
         if (v2.getV().step() == 1 && !v2.getV().isconj())
@@ -717,9 +717,9 @@ namespace tmv {
         return v; 
     }
 
-    template <class T, int N, IndexStyle I> 
-    inline SmallVector<CT,N,I>& operator-=(
-        SmallVector<CT,N,I>& v, const ProdXV<T,T>& v2) 
+    template <class T, int N, int A> 
+    inline SmallVector<CT,N,A>& operator-=(
+        SmallVector<CT,N,A>& v, const ProdXV<T,T>& v2) 
     {
         TMVAssert(v2.size() == N);
         if (v2.getV().step() == 1 && !v2.getV().isconj())
@@ -729,9 +729,9 @@ namespace tmv {
         return v; 
     }
 
-    template <class T, int N, IndexStyle I> 
+    template <class T, int N, int A> 
     inline const VectorView<T>& operator+=(
-        const VectorView<T>& v1, const SmallVector<T,N,I>& v2) 
+        const VectorView<T>& v1, const SmallVector<T,N,A>& v2) 
     { 
         if (v1.step() == 1 && !v1.isconj())
             AddVV_1<N>(v2.cptr(),v1.ptr());
@@ -740,9 +740,9 @@ namespace tmv {
         return v1; 
     }
 
-    template <class T, int N, IndexStyle I> 
+    template <class T, int N, int A> 
     inline const VectorView<CT>& operator+=(
-        const VectorView<CT>& v1, const SmallVector<T,N,I>& v2) 
+        const VectorView<CT>& v1, const SmallVector<T,N,A>& v2) 
     {
         if (v1.step() == 1)
             AddVV_1<N>(v2.cptr(),v1.ptr());
@@ -752,9 +752,9 @@ namespace tmv {
     }
 
     // v-=v
-    template <class T, int N, IndexStyle I> 
+    template <class T, int N, int A> 
     inline const VectorView<T>& operator-=(
-        const VectorView<T>& v1, const SmallVector<T,N,I>& v2)
+        const VectorView<T>& v1, const SmallVector<T,N,A>& v2)
     { 
         if (v1.step() == 1 && !v1.isconj())
             AddVV_m1<N>(v2.cptr(),v1.ptr());
@@ -763,9 +763,9 @@ namespace tmv {
         return v1;
     }
 
-    template <class T, int N, IndexStyle I> 
+    template <class T, int N, int A> 
     inline const VectorView<CT>& operator-=(
-        const VectorView<CT>& v1, const SmallVector<T,N,I>& v2) 
+        const VectorView<CT>& v1, const SmallVector<T,N,A>& v2) 
     { 
         if (v1.step() == 1)
             AddVV_m1<N>(v2.cptr(),v1.ptr());
@@ -775,9 +775,9 @@ namespace tmv {
     }
 
     // v+=(x*v)
-    template <class T, class T2, int N, IndexStyle I> 
+    template <class T, class T2, int N, int A> 
     inline const VectorView<T>& operator+=(
-        const VectorView<T>& v, const ProdXv<T,T2,N,I>& v2)
+        const VectorView<T>& v, const ProdXv<T,T2,N,A>& v2)
     {
         if (v.step() == 1 && !v.isconj())
             AddVV<N>(v2.getX(),v2.getV().cptr(),v.ptr());
@@ -786,9 +786,9 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, IndexStyle I> 
+    template <class T, int N, int A> 
     inline const VectorView<CT>& operator+=(
-        const VectorView<CT>& v, const ProdXv<T,T,N,I>& v2)
+        const VectorView<CT>& v, const ProdXv<T,T,N,A>& v2)
     { 
         if (v.step() == 1)
             AddVV<N>(v2.getX(),v2.getV().cptr(),v.ptr());
@@ -798,9 +798,9 @@ namespace tmv {
     }
 
     // v-=(x*v)
-    template <class T, class T2, int N, IndexStyle I> 
+    template <class T, class T2, int N, int A> 
     inline const VectorView<T>& operator-=(
-        const VectorView<T>& v, const ProdXv<T,T2,N,I>& v2)
+        const VectorView<T>& v, const ProdXv<T,T2,N,A>& v2)
     { 
         if (v.step() == 1 && !v.isconj())
             AddVV<N>(-v2.getX(),v2.getV().cptr(),v.ptr());
@@ -809,9 +809,9 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, IndexStyle I> 
+    template <class T, int N, int A> 
     inline const VectorView<CT>& operator-=(
-        const VectorView<CT>& v, const ProdXv<T,T,N,I>& v2)
+        const VectorView<CT>& v, const ProdXv<T,T,N,A>& v2)
     {
         if (v.step() == 1)
             AddVV<N>(-v2.getX(),v2.getV().cptr(),v.ptr());
@@ -830,10 +830,10 @@ namespace tmv {
 #define SUMMM_x_m1 Sumvv_x_m1
 #define PRODXM1 ProdXv
 #define PRODXM2 ProdXv
-#define X1 ,N,I1
-#define X2 ,N,I2
-#define X3 ,N,I1,I2
-#define Y ,int N, IndexStyle I1, IndexStyle I2
+#define X1 ,N,A1
+#define X2 ,N,A2
+#define X3 ,N,A1,A2
+#define Y ,int N, int A1, int A2
 #define GETM1 .getV()
 #define GETM2 .getV()
 #include "tmv/TMV_AuxSumMM.h"
@@ -843,8 +843,8 @@ namespace tmv {
 #define SUMMM_1_x Sumvv_1_x
 #define SUMMM_x_1 Sumvv_x_1
 #define SUMMM_x_m1 Sumvv_x_m1
-#define X3 ,N,I1,I2
-#define Y ,int N, IndexStyle I1, IndexStyle I2
+#define X3 ,N,A1,A2
+#define Y ,int N, int A1, int A2
 #define GETM1 .getV1()
 #define GETM2 .getV2()
 #include "tmv/TMV_AuxSumMMa.h"
@@ -859,9 +859,9 @@ namespace tmv {
 #define SUMMM SumvV
 #define PRODXM1 ProdXv
 #define PRODXM2 ProdXV
-#define X1 ,N,I
-#define X3 ,N,I
-#define Y ,int N, IndexStyle I
+#define X1 ,N,A
+#define X3 ,N,A
+#define Y ,int N, int A
 #define GETM1 .getV()
 #define GETM2 .getV()
 #include "tmv/TMV_AuxSumMM.h"
@@ -876,9 +876,9 @@ namespace tmv {
 #define SUMMM SumVv
 #define PRODXM1 ProdXV
 #define PRODXM2 ProdXv
-#define X2 ,N,I
-#define X3 ,N,I
-#define Y ,int N, IndexStyle I
+#define X2 ,N,A
+#define X3 ,N,A
+#define Y ,int N, int A
 #define GETM1 .getV()
 #define GETM2 .getV()
 #include "tmv/TMV_AuxSumMM.h"
@@ -892,7 +892,7 @@ namespace tmv {
     // Element Product Vector * Vector
     //
 
-    template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T1, class T2, int N, int A1, int A2> 
     class ElemProdvv : public VectorComposite<T> 
     {
     public:
@@ -900,13 +900,13 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline ElemProdvv(
-            T _x, const SmallVector<T1,N,I1>& _v1, 
-            const SmallVector<T2,N,I2>& _v2) :
+            T _x, const SmallVector<T1,N,A1>& _v1, 
+            const SmallVector<T2,N,A2>& _v2) :
             x(_x),v1(_v1),v2(_v2) {}
         inline int size() const { return N; }
         inline T getX() const { return x; }
-        inline const SmallVector<T1,N,I1>& getV1() const { return v1; }
-        inline const SmallVector<T2,N,I2>& getV2() const { return v2; }
+        inline const SmallVector<T1,N,A1>& getV1() const { return v1; }
+        inline const SmallVector<T2,N,A2>& getV2() const { return v2; }
         inline void assignToV(const VectorView<real_type>& v0) const
         {
             TMVAssert(isReal(T()));
@@ -916,11 +916,11 @@ namespace tmv {
         { ElemMultVV<false>(x,v1.view(),v2.view(),v0); }
     private:
         const T x;
-        const SmallVector<T1,N,I1>& v1;
-        const SmallVector<T2,N,I2>& v2;
+        const SmallVector<T1,N,A1>& v1;
+        const SmallVector<T2,N,A2>& v2;
     };
 
-    template <class T, class T1, class T2, int N, IndexStyle I> 
+    template <class T, class T1, class T2, int N, int A> 
     class ElemProdVv : public VectorComposite<T> 
     {
     public:
@@ -928,12 +928,12 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline ElemProdVv(
-            T _x, const GenVector<T1>& _v1, const SmallVector<T2,N,I>& _v2) :
+            T _x, const GenVector<T1>& _v1, const SmallVector<T2,N,A>& _v2) :
             x(_x),v1(_v1),v2(_v2) { TMVAssert(v1.size() == N); }
         inline int size() const { return N; }
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV1() const { return v1; }
-        inline const SmallVector<T2,N,I>& getV2() const { return v2; }
+        inline const SmallVector<T2,N,A>& getV2() const { return v2; }
         inline void assignToV(const VectorView<real_type>& v0) const
         { 
             TMVAssert(isReal(T()));
@@ -944,10 +944,10 @@ namespace tmv {
     private:
         const T x;
         const GenVector<T1>& v1;
-        const SmallVector<T2,N,I>& v2;
+        const SmallVector<T2,N,A>& v2;
     };
 
-    template <class T, class T1, class T2, int N, IndexStyle I> 
+    template <class T, class T1, class T2, int N, int A> 
     class ElemProdvV : public VectorComposite<T> 
     {
     public:
@@ -955,11 +955,11 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline ElemProdvV(
-            T _x, const SmallVector<T1,N,I>& _v1, const GenVector<T2>& _v2) :
+            T _x, const SmallVector<T1,N,A>& _v1, const GenVector<T2>& _v2) :
             x(_x),v1(_v1),v2(_v2) { TMVAssert(v2.size() == N); }
         inline int size() const { return N; }
         inline T getX() const { return x; }
-        inline const SmallVector<T1,N,I>& getV1() const { return v1; }
+        inline const SmallVector<T1,N,A>& getV1() const { return v1; }
         inline const GenVector<T2>& getV2() const { return v2; }
         inline void assignToV(const VectorView<real_type>& v0) const
         { 
@@ -970,256 +970,256 @@ namespace tmv {
         { ElemMultVV<false>(x,v1.view(),v2,v0); }
     private:
         const T x;
-        const SmallVector<T1,N,I>& v1;
+        const SmallVector<T1,N,A>& v1;
         const GenVector<T2>& v2;
     };
 
-    template <class T, int N, IndexStyle I, class T2, class T3>
-    inline SmallVector<T,N,I>& operator+=(
-        SmallVector<T,N,I>& v, const ElemProdVV<T,T2,T3>& pvv)
+    template <class T, int N, int A, class T2, class T3>
+    inline SmallVector<T,N,A>& operator+=(
+        SmallVector<T,N,A>& v, const ElemProdVV<T,T2,T3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(pvv.getX(),pvv.getV1(),pvv.getV2(),v.view());
         return v;
     }
 
-    template <class T, int N, IndexStyle I>
-    inline SmallVector<CT,N,I>& operator+=(
-        SmallVector<CT,N,I>& v, const ElemProdVV<T,T,T>& pvv)
+    template <class T, int N, int A>
+    inline SmallVector<CT,N,A>& operator+=(
+        SmallVector<CT,N,A>& v, const ElemProdVV<T,T,T>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(pvv.getX(),pvv.getV1(),pvv.getV2(),v.view());
         return v;
     }
 
-    template <class T, int N, IndexStyle I, class T2, class T3>
-    inline SmallVector<T,N,I>& operator-=(
-        SmallVector<T,N,I>& v, const ElemProdVV<T,T2,T3>& pvv)
+    template <class T, int N, int A, class T2, class T3>
+    inline SmallVector<T,N,A>& operator-=(
+        SmallVector<T,N,A>& v, const ElemProdVV<T,T2,T3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(-pvv.getX(),pvv.getV1(),pvv.getV2(),v.view());
         return v;
     }
 
-    template <class T, int N, IndexStyle I>
-    inline SmallVector<CT,N,I>& operator-=(
-        SmallVector<CT,N,I>& v, const ElemProdVV<T,T,T>& pvv)
+    template <class T, int N, int A>
+    inline SmallVector<CT,N,A>& operator-=(
+        SmallVector<CT,N,A>& v, const ElemProdVV<T,T,T>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(-pvv.getX(),pvv.getV1(),pvv.getV2(),v.view());
         return v;
     }
 
-    template <class T, int N, IndexStyle I, class T2, IndexStyle I2, class T3>
-    inline SmallVector<T,N,I>& operator+=(
-        SmallVector<T,N,I>& v, const ElemProdvV<T,T2,T3,N,I2>& pvv)
+    template <class T, int N, int A, class T2, int A2, class T3>
+    inline SmallVector<T,N,A>& operator+=(
+        SmallVector<T,N,A>& v, const ElemProdvV<T,T2,T3,N,A2>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(pvv.getX(),pvv.getV1().view(),pvv.getV2(),v.view());
         return v;
     }
 
-    template <class T, int N, IndexStyle I, IndexStyle I2>
-    inline SmallVector<CT,N,I>& operator+=(
-        SmallVector<CT,N,I>& v, const ElemProdvV<T,T,T,N,I2>& pvv)
+    template <class T, int N, int A, int A2>
+    inline SmallVector<CT,N,A>& operator+=(
+        SmallVector<CT,N,A>& v, const ElemProdvV<T,T,T,N,A2>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(pvv.getX(),pvv.getV1().view(),pvv.getV2(),v.view());
         return v;
     }
 
-    template <class T, int N, IndexStyle I, class T2, IndexStyle I2, class T3>
-    inline SmallVector<T,N,I>& operator-=(
-        SmallVector<T,N,I>& v, const ElemProdvV<T,T2,T3,N,I2>& pvv)
+    template <class T, int N, int A, class T2, int A2, class T3>
+    inline SmallVector<T,N,A>& operator-=(
+        SmallVector<T,N,A>& v, const ElemProdvV<T,T2,T3,N,A2>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(-pvv.getX(),pvv.getV1().view(),pvv.getV2(),v.view());
         return v;
     }
 
-    template <class T, int N, IndexStyle I, IndexStyle I2>
-    inline SmallVector<CT,N,I>& operator-=(
-        SmallVector<CT,N,I>& v, const ElemProdvV<T,T,T,N,I2>& pvv)
+    template <class T, int N, int A, int A2>
+    inline SmallVector<CT,N,A>& operator-=(
+        SmallVector<CT,N,A>& v, const ElemProdvV<T,T,T,N,A2>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(-pvv.getX(),pvv.getV1().view(),pvv.getV2(),v.view());
         return v;
     }
 
-    template <class T, int N, IndexStyle I, class T2, class T3, IndexStyle I3>
-    inline SmallVector<T,N,I>& operator+=(
-        SmallVector<T,N,I>& v, const ElemProdVv<T,T2,T3,N,I3>& pvv)
+    template <class T, int N, int A, class T2, class T3, int A3>
+    inline SmallVector<T,N,A>& operator+=(
+        SmallVector<T,N,A>& v, const ElemProdVv<T,T2,T3,N,A3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(pvv.getX(),pvv.getV1(),pvv.getV2().view(),v.view());
         return v;
     }
 
-    template <class T, int N, IndexStyle I, IndexStyle I3>
-    inline SmallVector<CT,N,I>& operator+=(
-        SmallVector<CT,N,I>& v, const ElemProdVv<T,T,T,N,I3>& pvv)
+    template <class T, int N, int A, int A3>
+    inline SmallVector<CT,N,A>& operator+=(
+        SmallVector<CT,N,A>& v, const ElemProdVv<T,T,T,N,A3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(pvv.getX(),pvv.getV1(),pvv.getV2().view(),v.view());
         return v;
     }
 
-    template <class T, int N, IndexStyle I, class T2, class T3, IndexStyle I3>
-    inline SmallVector<T,N,I>& operator-=(
-        SmallVector<T,N,I>& v, const ElemProdVv<T,T2,T3,N,I3>& pvv)
+    template <class T, int N, int A, class T2, class T3, int A3>
+    inline SmallVector<T,N,A>& operator-=(
+        SmallVector<T,N,A>& v, const ElemProdVv<T,T2,T3,N,A3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(-pvv.getX(),pvv.getV1(),pvv.getV2().view(),v.view());
         return v;
     }
 
-    template <class T, int N, IndexStyle I, IndexStyle I3>
-    inline SmallVector<CT,N,I>& operator-=(
-        SmallVector<CT,N,I>& v, const ElemProdVv<T,T,T,N,I3>& pvv)
+    template <class T, int N, int A, int A3>
+    inline SmallVector<CT,N,A>& operator-=(
+        SmallVector<CT,N,A>& v, const ElemProdVv<T,T,T,N,A3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(-pvv.getX(),pvv.getV1(),pvv.getV2().view(),v.view());
         return v;
     }
 
-    template <class T, int N, IndexStyle I, class T2, IndexStyle I2, class T3, IndexStyle I3>
-    inline SmallVector<T,N,I>& operator+=(
-        SmallVector<T,N,I>& v, const ElemProdvv<T,T2,T3,N,I2,I3>& pvv)
+    template <class T, int N, int A, class T2, int A2, class T3, int A3>
+    inline SmallVector<T,N,A>& operator+=(
+        SmallVector<T,N,A>& v, const ElemProdvv<T,T2,T3,N,A2,A3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(pvv.getX(),pvv.getV1().view(),pvv.getV2().view(),v.view());
         return v;
     }
 
-    template <class T, int N, IndexStyle I, IndexStyle I2, IndexStyle I3>
-    inline SmallVector<CT,N,I>& operator+=(
-        SmallVector<CT,N,I>& v, const ElemProdvv<T,T,T,N,I2,I3>& pvv)
+    template <class T, int N, int A, int A2, int A3>
+    inline SmallVector<CT,N,A>& operator+=(
+        SmallVector<CT,N,A>& v, const ElemProdvv<T,T,T,N,A2,A3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(pvv.getX(),pvv.getV1().view(),pvv.getV2().view(),v.view());
         return v;
     }
 
-    template <class T, int N, IndexStyle I, class T2, IndexStyle I2, class T3, IndexStyle I3>
-    inline SmallVector<T,N,I>& operator-=(
-        SmallVector<T,N,I>& v, const ElemProdvv<T,T2,T3,N,I2,I3>& pvv)
+    template <class T, int N, int A, class T2, int A2, class T3, int A3>
+    inline SmallVector<T,N,A>& operator-=(
+        SmallVector<T,N,A>& v, const ElemProdvv<T,T2,T3,N,A2,A3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(-pvv.getX(),pvv.getV1().view(),pvv.getV2().view(),v.view());
         return v;
     }
 
-    template <class T, int N, IndexStyle I, IndexStyle I2, IndexStyle I3>
-    inline SmallVector<CT,N,I>& operator-=(
-        SmallVector<CT,N,I>& v, const ElemProdvv<T,T,T,N,I2,I3>& pvv)
+    template <class T, int N, int A, int A2, int A3>
+    inline SmallVector<CT,N,A>& operator-=(
+        SmallVector<CT,N,A>& v, const ElemProdvv<T,T,T,N,A2,A3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(-pvv.getX(),pvv.getV1().view(),pvv.getV2().view(),v.view());
         return v;
     }
 
-    template <class T, int N, class T2, IndexStyle I2, class T3>
+    template <class T, int N, class T2, int A2, class T3>
     inline const VectorView<T>& operator+=(
-        const VectorView<T>& v, const ElemProdvV<T,T2,T3,N,I2>& pvv)
+        const VectorView<T>& v, const ElemProdvV<T,T2,T3,N,A2>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(pvv.getX(),pvv.getV1().view(),pvv.getV2(),v);
         return v;
     }
 
-    template <class T, int N, IndexStyle I2>
+    template <class T, int N, int A2>
     inline const VectorView<CT>& operator+=(
-        const VectorView<CT>& v, const ElemProdvV<T,T,T,N,I2>& pvv)
+        const VectorView<CT>& v, const ElemProdvV<T,T,T,N,A2>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(pvv.getX(),pvv.getV1().view(),pvv.getV2(),v);
         return v;
     }
 
-    template <class T, int N, class T2, IndexStyle I2, class T3>
+    template <class T, int N, class T2, int A2, class T3>
     inline const VectorView<T>& operator-=(
-        const VectorView<T>& v, const ElemProdvV<T,T2,T3,N,I2>& pvv)
+        const VectorView<T>& v, const ElemProdvV<T,T2,T3,N,A2>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(-pvv.getX(),pvv.getV1().view(),pvv.getV2(),v);
         return v;
     }
 
-    template <class T, int N, IndexStyle I2>
+    template <class T, int N, int A2>
     inline const VectorView<CT>& operator-=(
-        const VectorView<CT>& v, const ElemProdvV<T,T,T,N,I2>& pvv)
+        const VectorView<CT>& v, const ElemProdvV<T,T,T,N,A2>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(-pvv.getX(),pvv.getV1().view(),pvv.getV2(),v);
         return v;
     }
 
-    template <class T, int N, class T2, class T3, IndexStyle I3>
+    template <class T, int N, class T2, class T3, int A3>
     inline const VectorView<T>& operator+=(
-        const VectorView<T>& v, const ElemProdVv<T,T2,T3,N,I3>& pvv)
+        const VectorView<T>& v, const ElemProdVv<T,T2,T3,N,A3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(pvv.getX(),pvv.getV1(),pvv.getV2().view(),v);
         return v;
     }
 
-    template <class T, int N, IndexStyle I3>
+    template <class T, int N, int A3>
     inline const VectorView<CT>& operator+=(
-        const VectorView<CT>& v, const ElemProdVv<T,T,T,N,I3>& pvv)
+        const VectorView<CT>& v, const ElemProdVv<T,T,T,N,A3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(pvv.getX(),pvv.getV1(),pvv.getV2().view(),v);
         return v;
     }
 
-    template <class T, int N, class T2, class T3, IndexStyle I3>
+    template <class T, int N, class T2, class T3, int A3>
     inline const VectorView<T>& operator-=(
-        const VectorView<T>& v, const ElemProdVv<T,T2,T3,N,I3>& pvv)
+        const VectorView<T>& v, const ElemProdVv<T,T2,T3,N,A3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(-pvv.getX(),pvv.getV1(),pvv.getV2().view(),v);
         return v;
     }
 
-    template <class T, int N, IndexStyle I3>
+    template <class T, int N, int A3>
     inline const VectorView<CT>& operator-=(
-        const VectorView<CT>& v, const ElemProdVv<T,T,T,N,I3>& pvv)
+        const VectorView<CT>& v, const ElemProdVv<T,T,T,N,A3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(-pvv.getX(),pvv.getV1(),pvv.getV2().view(),v);
         return v;
     }
 
-    template <class T, int N, class T2, IndexStyle I2, class T3, IndexStyle I3>
+    template <class T, int N, class T2, int A2, class T3, int A3>
     inline const VectorView<T>& operator+=(
-        const VectorView<T>& v, const ElemProdvv<T,T2,T3,N,I2,I3>& pvv)
+        const VectorView<T>& v, const ElemProdvv<T,T2,T3,N,A2,A3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(pvv.getX(),pvv.getV1().view(),pvv.getV2().view(),v);
         return v;
     }
 
-    template <class T, int N, IndexStyle I2, IndexStyle I3>
+    template <class T, int N, int A2, int A3>
     inline const VectorView<CT>& operator+=(
-        const VectorView<CT>& v, const ElemProdvv<T,T,T,N,I2,I3>& pvv)
+        const VectorView<CT>& v, const ElemProdvv<T,T,T,N,A2,A3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(pvv.getX(),pvv.getV1().view(),pvv.getV2().view(),v);
         return v;
     }
 
-    template <class T, int N, class T2, IndexStyle I2, class T3, IndexStyle I3>
+    template <class T, int N, class T2, int A2, class T3, int A3>
     inline const VectorView<T>& operator-=(
-        const VectorView<T>& v, const ElemProdvv<T,T2,T3,N,I2,I3>& pvv)
+        const VectorView<T>& v, const ElemProdvv<T,T2,T3,N,A2,A3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(-pvv.getX(),pvv.getV1().view(),pvv.getV2().view(),v);
         return v;
     }
 
-    template <class T, int N, IndexStyle I2, IndexStyle I3>
+    template <class T, int N, int A2, int A3>
     inline const VectorView<CT>& operator-=(
-        const VectorView<CT>& v, const ElemProdvv<T,T,T,N,I2,I3>& pvv)
+        const VectorView<CT>& v, const ElemProdvv<T,T,T,N,A2,A3>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(-pvv.getX(),pvv.getV1().view(),pvv.getV2().view(),v);
@@ -1232,16 +1232,16 @@ namespace tmv {
 #define PRODMM ElemProdvv
 #define PRODXM1 ProdXv
 #define PRODXM2 ProdXv
-#define X1 ,N,I1
-#define X2 ,N,I2
-#define X3 ,N,I1,I2
-#define Y ,int N, IndexStyle I1, IndexStyle I2
+#define X1 ,N,A1
+#define X2 ,N,A2
+#define X3 ,N,A1,A2
+#define Y ,int N, int A1, int A2
 #define GETM1 .getV()
 #define GETM2 .getV()
 #define OP ElemProd
 #include "tmv/TMV_AuxProdMM.h"
-#define X3 ,N,I1,I2
-#define Y ,int N, IndexStyle I1, IndexStyle I2
+#define X3 ,N,A1,A2
+#define Y ,int N, int A1, int A2
 #define GETM1 .getV1()
 #define GETM2 .getV2()
 #include "tmv/TMV_AuxProdMMa.h"
@@ -1257,9 +1257,9 @@ namespace tmv {
 #define PRODXM1 ProdXv
 #define PRODXM2 ProdXV
 #define OP ElemProd
-#define X1 ,N,I
-#define X3 ,N,I
-#define Y ,int N, IndexStyle I
+#define X1 ,N,A
+#define X3 ,N,A
+#define Y ,int N, int A
 #define GETM1 .getV()
 #define GETM2 .getV()
 #include "tmv/TMV_AuxProdMM.h"
@@ -1275,9 +1275,9 @@ namespace tmv {
 #define PRODXM1 ProdXV
 #define PRODXM2 ProdXv
 #define OP ElemProd
-#define X2 ,N,I
-#define X3 ,N,I
-#define Y ,int N, IndexStyle I
+#define X2 ,N,A
+#define X3 ,N,A
+#define Y ,int N, int A
 #define GETM1 .getV()
 #define GETM2 .getV()
 #include "tmv/TMV_AuxProdMM.h"
@@ -1291,75 +1291,75 @@ namespace tmv {
     // Vector * Vector
     //
 
-    template <class T, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, int N, int A1, int A2> 
     inline T operator*(
-        const SmallVector<T,N,I1>& v1, const SmallVector<T,N,I2>& v2) 
+        const SmallVector<T,N,A1>& v1, const SmallVector<T,N,A2>& v2) 
     { return MultVV<N>(v1.cptr(),v2.cptr()); }
 
-    template <class T, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, int N, int A1, int A2> 
     inline CT operator*(
-        const SmallVector<CT,N,I1>& v1, const SmallVector<T,N,I2>& v2)
+        const SmallVector<CT,N,A1>& v1, const SmallVector<T,N,A2>& v2)
     { return MultVV<N>(v1.cptr(),v2.cptr()); }
 
-    template <class T, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, int N, int A1, int A2> 
     inline CT operator*(
-        const SmallVector<T,N,I1>& v1, const SmallVector<CT,N,I2>& v2)
+        const SmallVector<T,N,A1>& v1, const SmallVector<CT,N,A2>& v2)
     { return MultVV<N>(v2.cptr(),v1.cptr()); }
 
     // v * (x*v)
-    template <class T, class T2, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T2, int N, int A1, int A2> 
     inline T operator*(
-        const SmallVector<T,N,I1>& v1, const ProdXv<T,T2,N,I2>& v2) 
+        const SmallVector<T,N,A1>& v1, const ProdXv<T,T2,N,A2>& v2) 
     { return v2.getX()*MultVV<N>(v1.cptr(),v2.getV().cptr()); }
 
-    template <class T, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, int N, int A1, int A2> 
     inline CT operator*(
-        const SmallVector<CT,N,I1>& v1, const ProdXv<T,T,N,I2>& v2)
+        const SmallVector<CT,N,A1>& v1, const ProdXv<T,T,N,A2>& v2)
     { return v2.getX()*MultVV<N>(v1.cptr(),v2.getV().cptr()); }
 
-    template <class T, class T2, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T2, int N, int A1, int A2> 
     inline CT operator*(
-        const SmallVector<T,N,I1>& v1, const ProdXv<CT,T2,N,I2>& v2)
+        const SmallVector<T,N,A1>& v1, const ProdXv<CT,T2,N,A2>& v2)
     { return v2.getX()*MultVV<N>(v2.getV().cptr(),v1.cptr()); }
 
     // (x*v) * v
-    template <class T, class T1, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T1, int N, int A1, int A2> 
     inline T operator*(
-        const ProdXv<T,T1,N,I1>& v1, const SmallVector<T,N,I2>& v2)
+        const ProdXv<T,T1,N,A1>& v1, const SmallVector<T,N,A2>& v2)
     { return v1.getX()*MultVV<N>(v1.getV().cptr(),v2.cptr()); }
 
-    template <class T, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, int N, int A1, int A2> 
     inline CT operator*(
-        const ProdXv<T,T,N,I1>& v1, const SmallVector<CT,N,I2>& v2)
+        const ProdXv<T,T,N,A1>& v1, const SmallVector<CT,N,A2>& v2)
     { return v1.getX()*MultVV<N>(v2.cptr(),v1.getV().cptr()); }
 
-    template <class T, class T1, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T1, int N, int A1, int A2> 
     inline CT operator*(
-        const ProdXv<CT,T1,N,I1>& v1, const SmallVector<T,N,I2>& v2)
+        const ProdXv<CT,T1,N,A1>& v1, const SmallVector<T,N,A2>& v2)
     { return v1.getX()*MultVV<N>(v1.getV().cptr(),v2.cptr()); }
 
     // (x*v) * (x*v)
-    template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T1, class T2, int N, int A1, int A2> 
     inline T operator*(
-        const ProdXv<T,T1,N,I1>& v1, const ProdXv<T,T2,N,I2>& v2)
+        const ProdXv<T,T1,N,A1>& v1, const ProdXv<T,T2,N,A2>& v2)
     { return v1.getX()*v2.getX()*MultVV<N>(v1.getV().cptr(),v2.getV().cptr()); }
 
-    template <class T, class T1, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T1, int N, int A1, int A2> 
     inline CT operator*(
-        const ProdXv<CT,T1,N,I1>& v1, const ProdXv<T,T,N,I2>& v2)
+        const ProdXv<CT,T1,N,A1>& v1, const ProdXv<T,T,N,A2>& v2)
     { return v1.getX()*v2.getX()*MultVV<N>(v1.getV().cptr(),v2.getV().cptr()); }
 
-    template <class T, class T2, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T, class T2, int N, int A1, int A2> 
     inline CT operator*(
-        const ProdXv<T,T,N,I1>& v1, const ProdXv<CT,T2,N,I2>& v2)
+        const ProdXv<T,T,N,A1>& v1, const ProdXv<CT,T2,N,A2>& v2)
     { return v1.getX()*v2.getX()*MultVV<N>(v1.getV().cptr(),v2.getV().cptr()); }
 
 
     // Mix with Vector:
 
     // v * v
-    template <class T, int N, IndexStyle I> 
-    inline T operator*(const GenVector<T>& v1, const SmallVector<T,N,I>& v2) 
+    template <class T, int N, int A> 
+    inline T operator*(const GenVector<T>& v1, const SmallVector<T,N,A>& v2) 
     { 
         if (v1.step() == 1 && !v1.isconj())
             return MultVV<N>(v1.cptr(),v2.cptr());
@@ -1367,8 +1367,8 @@ namespace tmv {
             return MultVV(v1,v2.view());
     }
 
-    template <class T, int N, IndexStyle I> 
-    inline CT operator*(const GenVector<CT>& v1, const SmallVector<T,N,I>& v2)
+    template <class T, int N, int A> 
+    inline CT operator*(const GenVector<CT>& v1, const SmallVector<T,N,A>& v2)
     { 
         if (v1.step() == 1 && !v1.isconj())
             return MultVV<N>(v1.cptr(),v2.cptr());
@@ -1376,8 +1376,8 @@ namespace tmv {
             return MultVV(v1,v2.view()); 
     }
 
-    template <class T, int N, IndexStyle I> 
-    inline CT operator*(const GenVector<T>& v1, const SmallVector<CT,N,I>& v2)
+    template <class T, int N, int A> 
+    inline CT operator*(const GenVector<T>& v1, const SmallVector<CT,N,A>& v2)
     {
         if (v1.step() == 1 && !v1.isconj())
             return MultVV<N>(v2.cptr(),v1.cptr());
@@ -1386,8 +1386,8 @@ namespace tmv {
     }
 
     // v * (x*v)
-    template <class T, class T2, int N, IndexStyle I> 
-    inline T operator*(const GenVector<T>& v1, const ProdXv<T,T2,N,I>& v2) 
+    template <class T, class T2, int N, int A> 
+    inline T operator*(const GenVector<T>& v1, const ProdXv<T,T2,N,A>& v2) 
     { 
         if (v1.step() == 1 && !v1.isconj())
             return v2.getX()*MultVV<N>(v1.cptr(),v2.getV().cptr());
@@ -1395,8 +1395,8 @@ namespace tmv {
             return v2.getX()*MultVV(v1,v2.getV().view());
     }
 
-    template <class T, int N, IndexStyle I> 
-    inline CT operator*(const GenVector<CT>& v1, const ProdXv<T,T,N,I>& v2)
+    template <class T, int N, int A> 
+    inline CT operator*(const GenVector<CT>& v1, const ProdXv<T,T,N,A>& v2)
     {
         if (v1.step() == 1 && !v1.isconj())
             return v2.getX()*MultVV<N>(v1.cptr(),v2.getV().cptr());
@@ -1404,8 +1404,8 @@ namespace tmv {
             return v2.getX()*MultVV(v1,v2.getV().view());
     }
 
-    template <class T, class T2, int N, IndexStyle I> 
-    inline CT operator*(const GenVector<T>& v1, const ProdXv<CT,T2,N,I>& v2)
+    template <class T, class T2, int N, int A> 
+    inline CT operator*(const GenVector<T>& v1, const ProdXv<CT,T2,N,A>& v2)
     {
         if (v1.step() == 1 && !v1.isconj())
             return v2.getX()*MultVV<N>(v2.getV().cptr(),v1.cptr());
@@ -1414,8 +1414,8 @@ namespace tmv {
     }
 
     // (x*v) * v
-    template <class T, class T1, int N, IndexStyle I> 
-    inline T operator*(const ProdXV<T,T1>& v1, const SmallVector<T,N,I>& v2)
+    template <class T, class T1, int N, int A> 
+    inline T operator*(const ProdXV<T,T1>& v1, const SmallVector<T,N,A>& v2)
     {
         if (v1.getV().step() == 1)
             return v1.getX()*MultVV<N>(v1.getV().cptr(),v2.cptr());
@@ -1423,8 +1423,8 @@ namespace tmv {
             return v1.getX()*MultVV(v1.getV(),v2.view());
     }
 
-    template <class T, class T1, int N, IndexStyle I> 
-    inline CT operator*(const ProdXV<CT,T1>& v1, const SmallVector<T,N,I>& v2)
+    template <class T, class T1, int N, int A> 
+    inline CT operator*(const ProdXV<CT,T1>& v1, const SmallVector<T,N,A>& v2)
     {
         if (v1.getV().step() == 1)
             return v1.getX()*MultVV<N>(v1.getV().cptr(),v2.cptr());
@@ -1432,8 +1432,8 @@ namespace tmv {
             return v1.getX()*MultVV(v1.getV(),v2.view());
     }
 
-    template <class T, int N, IndexStyle I> 
-    inline CT operator*(const ProdXV<T,T>& v1, const SmallVector<CT,N,I>& v2)
+    template <class T, int N, int A> 
+    inline CT operator*(const ProdXV<T,T>& v1, const SmallVector<CT,N,A>& v2)
     {
         if (v1.getV().step() == 1)
             return v1.getX()*MultVV<N>(v2.cptr(),v1.getV().cptr());
@@ -1442,8 +1442,8 @@ namespace tmv {
     }
 
     // (x*v) * (x*v)
-    template <class T, class T1, class T2, int N, IndexStyle I> 
-    inline T operator*(const ProdXV<T,T1>& v1, const ProdXv<T,T2,N,I>& v2)
+    template <class T, class T1, class T2, int N, int A> 
+    inline T operator*(const ProdXV<T,T1>& v1, const ProdXv<T,T2,N,A>& v2)
     {
         if (v1.getV().step() == 1)
             return v1.getX()*v2.getX()*
@@ -1452,8 +1452,8 @@ namespace tmv {
             return v1.getX()*v2.getX()*MultVV(v1.getV(),v2.getV().view());
     }
 
-    template <class T, class T1, int N, IndexStyle I> 
-    inline CT operator*(const ProdXV<CT,T1>& v1, const ProdXv<T,T,N,I>& v2)
+    template <class T, class T1, int N, int A> 
+    inline CT operator*(const ProdXV<CT,T1>& v1, const ProdXv<T,T,N,A>& v2)
     {
         if (v1.getV().step() == 1)
             return v1.getX()*v2.getX()*
@@ -1462,8 +1462,8 @@ namespace tmv {
             return v1.getX()*v2.getX()*MultVV(v1.getV(),v2.getV().view());
     }
 
-    template <class T, class T2, int N, IndexStyle I> 
-    inline CT operator*(const ProdXV<T,T>& v1, const ProdXv<CT,T2,N,I>& v2)
+    template <class T, class T2, int N, int A> 
+    inline CT operator*(const ProdXV<T,T>& v1, const ProdXv<CT,T2,N,A>& v2)
     {
         if (v1.getV().step() == 1)
             return v1.getX()*v2.getX()*
@@ -1473,8 +1473,8 @@ namespace tmv {
     }
 
     // v * v 
-    template <class T, int N, IndexStyle I> 
-    inline T operator*(const SmallVector<T,N,I>& v1, const GenVector<T>& v2) 
+    template <class T, int N, int A> 
+    inline T operator*(const SmallVector<T,N,A>& v1, const GenVector<T>& v2) 
     {
         if (v2.step() == 1 && !v2.step())
             return MultVV<N>(v1.cptr(),v2.cptr());
@@ -1482,8 +1482,8 @@ namespace tmv {
             return MultVV(v1.view(),v2);
     }
 
-    template <class T, int N, IndexStyle I> 
-    inline CT operator*(const SmallVector<CT,N,I>& v1, const GenVector<T>& v2)
+    template <class T, int N, int A> 
+    inline CT operator*(const SmallVector<CT,N,A>& v1, const GenVector<T>& v2)
     {
         if (v2.step() == 1 && !v2.step())
             return MultVV<N>(v1.cptr(),v2.cptr());
@@ -1491,8 +1491,8 @@ namespace tmv {
             return MultVV(v1.view(),v2);
     }
 
-    template <class T, int N, IndexStyle I> 
-    inline CT operator*(const SmallVector<T,N,I>& v1, const GenVector<CT>& v2)
+    template <class T, int N, int A> 
+    inline CT operator*(const SmallVector<T,N,A>& v1, const GenVector<CT>& v2)
     { 
         if (v2.step() == 1 && !v2.step())
             return MultVV<N>(v2.cptr(),v1.cptr());
@@ -1501,8 +1501,8 @@ namespace tmv {
     }
 
     // v * (x*v)
-    template <class T, class T2, int N, IndexStyle I> 
-    inline T operator*(const SmallVector<T,N,I>& v1, const ProdXV<T,T2>& v2) 
+    template <class T, class T2, int N, int A> 
+    inline T operator*(const SmallVector<T,N,A>& v1, const ProdXV<T,T2>& v2) 
     { 
         if (v2.getV().step() == 1)
             return v2.getX()*MultVV<N>(v1.cptr(),v2.getV().cptr());
@@ -1510,8 +1510,8 @@ namespace tmv {
             return v2.getX()*MultVV(v1.view(),v2.getV());
     }
 
-    template <class T, int N, IndexStyle I> 
-    inline CT operator*(const SmallVector<CT,N,I>& v1, const ProdXV<T,T>& v2)
+    template <class T, int N, int A> 
+    inline CT operator*(const SmallVector<CT,N,A>& v1, const ProdXV<T,T>& v2)
     {
         if (v2.getV().step() == 1)
             return v2.getX()*MultVV<N>(v1.cptr(),v2.getV().cptr());
@@ -1519,8 +1519,8 @@ namespace tmv {
             return v2.getX()*MultVV(v1.view(),v2.getV());
     }
 
-    template <class T, class T2, int N, IndexStyle I> 
-    inline CT operator*(const SmallVector<T,N,I>& v1, const ProdXV<CT,T2>& v2)
+    template <class T, class T2, int N, int A> 
+    inline CT operator*(const SmallVector<T,N,A>& v1, const ProdXV<CT,T2>& v2)
     { 
         if (v2.getV().step() == 1)
             return v2.getX()*MultVV<N>(v2.getV().cptr(),v1.cptr());
@@ -1529,8 +1529,8 @@ namespace tmv {
     }
 
     // (x*v) * v
-    template <class T, class T1, int N, IndexStyle I> 
-    inline T operator*(const ProdXv<T,T1,N,I>& v1, const GenVector<T>& v2)
+    template <class T, class T1, int N, int A> 
+    inline T operator*(const ProdXv<T,T1,N,A>& v1, const GenVector<T>& v2)
     {
         if (v2.step() == 1 && !v2.step())
             return v1.getX()*MultVV<N>(v1.getV().cptr(),v2.cptr());
@@ -1538,8 +1538,8 @@ namespace tmv {
             return v1.getX()*MultVV(v1.getV().view(),v2);
     }
 
-    template <class T, class T1, int N, IndexStyle I> 
-    inline CT operator*(const ProdXv<CT,T1,N,I>& v1, const GenVector<T>& v2)
+    template <class T, class T1, int N, int A> 
+    inline CT operator*(const ProdXv<CT,T1,N,A>& v1, const GenVector<T>& v2)
     {
         if (v2.step() == 1 && !v2.step())
             return v1.getX()*MultVV<N>(v1.getV().cptr(),v2.cptr());
@@ -1547,8 +1547,8 @@ namespace tmv {
             return v1.getX()*MultVV(v1.getV().view(),v2);
     }
 
-    template <class T, int N, IndexStyle I> 
-    inline CT operator*(const ProdXv<T,T,N,I>& v1, const GenVector<CT>& v2)
+    template <class T, int N, int A> 
+    inline CT operator*(const ProdXv<T,T,N,A>& v1, const GenVector<CT>& v2)
     {
         if (v2.step() == 1 && !v2.step())
             return v1.getX()*MultVV<N>(v2.cptr(),v1.getV().cptr());
@@ -1558,8 +1558,8 @@ namespace tmv {
 
     // (x*v) * (x*v)
 
-    template <class T, class T1, class T2, int N, IndexStyle I> 
-    inline T operator*(const ProdXv<T,T1,N,I>& v1, const ProdXV<T,T2>& v2)
+    template <class T, class T1, class T2, int N, int A> 
+    inline T operator*(const ProdXv<T,T1,N,A>& v1, const ProdXV<T,T2>& v2)
     {
         if (v2.getV().step() == 1)
             return v1.getX()*v2.getX()*
@@ -1568,8 +1568,8 @@ namespace tmv {
             return v1.getX()*v2.getX()*MultVV(v1.getV().view(),v2.getV());
     }
 
-    template <class T, class T1, int N, IndexStyle I> 
-    inline CT operator*(const ProdXv<CT,T1,N,I>& v1, const ProdXV<T,T>& v2)
+    template <class T, class T1, int N, int A> 
+    inline CT operator*(const ProdXv<CT,T1,N,A>& v1, const ProdXV<T,T>& v2)
     {
         if (v2.getV().step() == 1)
             return v1.getX()*v2.getX()*
@@ -1578,8 +1578,8 @@ namespace tmv {
             return v1.getX()*v2.getX()*MultVV(v1.getV().view(),v2.getV());
     }
 
-    template <class T, class T2, int N, IndexStyle I> 
-    inline CT operator*(const ProdXv<T,T,N,I>& v1, const ProdXV<CT,T2>& v2)
+    template <class T, class T2, int N, int A> 
+    inline CT operator*(const ProdXv<T,T,N,A>& v1, const ProdXV<CT,T2>& v2)
     {
         if (v2.getV().step() == 1)
             return v1.getX()*v2.getX()*

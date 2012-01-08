@@ -58,16 +58,16 @@ namespace tmv {
     template <class T> 
     class GenMatrix;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class ConstMatrixView;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class MatrixView;
 
-    template <class T, StorageType S=ColMajor, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class Matrix;
 
-    template <class T, int M, int N, StorageType S=ColMajor, IndexStyle I=CStyle> 
+    template <class T, int M, int N, int A=0>
     class SmallMatrix;
 
     template <class T, int M, int N> 
@@ -187,8 +187,8 @@ namespace tmv {
             doMakeInverse(minv);
         }
 
-        template <class T1, StorageType S, IndexStyle I> 
-        inline void makeInverse(Matrix<T1,S,I>& minv) const
+        template <class T1, int A>
+        inline void makeInverse(Matrix<T1,A>& minv) const
         {
             TMVAssert(minv.colsize() == rowsize());
             TMVAssert(minv.rowsize() == colsize());
@@ -204,8 +204,8 @@ namespace tmv {
             doMakeInverseATA(ata);
         }
 
-        template <StorageType S, IndexStyle I> 
-        inline void makeInverseATA(Matrix<T,S,I>& ata) const
+        template <int A>
+        inline void makeInverseATA(Matrix<T,A>& ata) const
         { 
             TMVAssert(ata.colsize() == 
                       (rowsize() < colsize() ? rowsize() : colsize()));
@@ -451,49 +451,28 @@ namespace tmv {
     { return os << IOStyle() << m; }
 
 
-    inline std::string TMV_Text(StorageType s)
-    {
-        return 
-            s == RowMajor ? "RowMajor" :
-            s == ColMajor ? "ColMajor" :
-            s == DiagMajor ? "DiagMajor" :
-            s == NoMajor ? "NoMajor" : 
-            "Unknown";
-    }
-
-    template <class T, StorageType S, IndexStyle I> 
-    inline std::string TMV_Text(const Matrix<T,S,I>& )
+    template <class T, int A>
+    inline std::string TMV_Text(const Matrix<T,A>& )
     {
         return std::string("Matrix<") +
-            TMV_Text(T()) + "," + 
-            TMV_Text(S) + "," +
-            TMV_Text(I) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
     template <class T> 
     inline std::string TMV_Text(const GenMatrix<T>& m)
     {
-        return std::string("GenMatrix<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.stor()) + "," +
-            TMV_Text(m.ct()) + ">";
+        return std::string("GenMatrix<") + TMV_Text(T()) + ">";
     }
-    template <class T, IndexStyle I> 
-    inline std::string TMV_Text(const ConstMatrixView<T,I>& m)
+    template <class T, int A>
+    inline std::string TMV_Text(const ConstMatrixView<T,A>& m)
     {
         return std::string("ConstMatrixView<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.stor()) + "," +
-            TMV_Text(I) + "," +
-            TMV_Text(m.ct()) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
-    template <class T, IndexStyle I> 
-    inline std::string TMV_Text(const MatrixView<T,I>& m)
+    template <class T, int A>
+    inline std::string TMV_Text(const MatrixView<T,A>& m)
     {
         return std::string("MatrixView<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.stor()) + "," +
-            TMV_Text(I) + "," +
-            TMV_Text(m.ct()) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
 } // namespace tmv

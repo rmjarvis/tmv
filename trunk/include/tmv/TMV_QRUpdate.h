@@ -43,9 +43,9 @@ namespace tmv {
     {
         static void call(M1& R, M2& A)
         {
-            const int N = rs == TMV_UNKNOWN ? R.size() : rs;
+            const int N = rs == Unknown ? R.size() : rs;
 #ifdef PRINTALGO_QR
-            const int M = cs == TMV_UNKNOWN ? A.colsize() : cs;
+            const int M = cs == Unknown ? A.colsize() : cs;
             std::cout<<"QRUpdate algo 11: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -85,9 +85,9 @@ namespace tmv {
     {
         static void call(M1& R, M2& A)
         {
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+            const int M = cs==Unknown ? A.colsize() : cs;
             std::cout<<"QRUpdate algo 21: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -106,11 +106,11 @@ namespace tmv {
             Ztype BaseZ = MatrixSizer<T>(NB,NB);
             typename Ztype::view_type Z = BaseZ.view();
 
-            typedef typename MCopyHelper<T,Rec,NB,TMV_UNKNOWN>::type M3;
+            typedef typename MCopyHelper<T,Rec,NB,Unknown>::type M3;
             typedef typename M3::col_sub_type M3c;
             const int Si = M3::_stepi;
             const int Sj = M3::_stepj;
-            typedef typename MViewHelper<T,Rec,NB,TMV_UNKNOWN,Si,Sj>::type M3cr;
+            typedef typename MViewHelper<T,Rec,NB,Unknown,Si,Sj>::type M3cr;
 
             M3 tempBase = MatrixSizer<T>(NB,TMV_MAX(1,N-NB));
 
@@ -151,9 +151,9 @@ namespace tmv {
     inline void RecursiveQRUpdate(M1& R, M2& A, M3& Z, bool makeZ)
     {
         //const int cs = M2::_colsize;
-        //const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+        //const int M = cs==Unknown ? A.colsize() : cs;
         const int rs = Sizes<M2::_rowsize,M1::_size>::size;
-        const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+        const int N = rs==Unknown ? A.rowsize() : rs;
 
         typedef typename M1::value_type T;
         typedef typename M1::real_type RT;
@@ -223,8 +223,8 @@ namespace tmv {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRUpdate algo 22: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -249,7 +249,7 @@ namespace tmv {
             const int C2 = M2::_conj;
             typedef typename MViewHelper<T,Rec,cs,NB,Si2,Sj2,C2>::type M2a;
             const int s4 = (
-                rs == TMV_UNKNOWN ? TMV_UNKNOWN :
+                rs == Unknown ? Unknown :
                 rs - NB*(rs/NB) );
             typedef typename MViewHelper<T,Rec,cs,s4,Si2,Sj2,C2>::type M2b;
 
@@ -303,9 +303,9 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
 
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+            const int M = cs==Unknown ? A.colsize() : cs;
             std::cout<<"QRUpdate algo 27: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -325,16 +325,16 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
 
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRUpdate algo 31: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
             const int algo27 = 
-                (rs == TMV_UNKNOWN || rs <= 128) ? 27 : 0;
+                (rs == Unknown || rs <= 128) ? 27 : 0;
             const int algo22 = 
-                (rs == TMV_UNKNOWN || rs > 128) ? 22 : 0;
+                (rs == Unknown || rs > 128) ? 22 : 0;
             const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
 
             if (N*(M+N) <= l2cache)
@@ -382,9 +382,9 @@ namespace tmv {
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                rs == TMV_UNKNOWN ? 31 :
+                rs == Unknown ? 31 :
                 rsrs > l2cache ? (rs <= 128 ? 27 : 22) :
-                cs == TMV_UNKNOWN ? 31 : 
+                cs == Unknown ? 31 : 
                 totmem <= l2cache ? 11 :
                 rs <= 128 ? 27 : 22;
 #ifdef PRINTALGO_QR
@@ -417,8 +417,8 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16 || cs == 1) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16 || cs == 1) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
@@ -544,7 +544,7 @@ namespace tmv {
         const int cs = 1;
         const int rs = Sizes<V2::_size,M1::_size>::size;
         typedef typename M1::nonunitdiag_type::cview_type M1v;
-        typedef typename MViewHelper<T2,Rec,1,rs,TMV_UNKNOWN,V2::_step>::type V2v;
+        typedef typename MViewHelper<T2,Rec,1,rs,Unknown,V2::_step>::type V2v;
         TMV_MAYBE_REF(M1,M1v) Rv = R.viewAsNonUnitDiag().cView();
         V2v Av = RowVectorViewOf(A);
         QRUpdate_Helper<-3,cs,rs,M1v,V2v>::call(Rv,Av);
@@ -565,7 +565,7 @@ namespace tmv {
         const int cs = 1;
         const int rs = Sizes<V2::_size,M1::_size>::size;
         typedef typename M1::nonunitdiag_type::cview_type M1v;
-        typedef typename MViewHelper<T2,Rec,1,rs,TMV_UNKNOWN,V2::_step>::type V2v;
+        typedef typename MViewHelper<T2,Rec,1,rs,Unknown,V2::_step>::type V2v;
         TMV_MAYBE_REF(M1,M1v) Rv = R.viewAsNonUnitDiag().cView();
         V2v Av = RowVectorViewOf(A);
         QRUpdate_Helper<-2,cs,rs,M1v,V2v>::call(Rv,Av);

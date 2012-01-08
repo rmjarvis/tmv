@@ -45,10 +45,6 @@ namespace tmv {
     template <class M1>
     static void BlasMultEq(const M1& A, MatrixView<double> B, double)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-
         int m=B.iscm()?B.colsize():B.rowsize();
         int n=B.iscm()?B.rowsize():B.colsize();
         int lda = A.iscm()?A.stepj():A.stepi();
@@ -67,10 +63,6 @@ namespace tmv {
     static void BlasMultEq(
         const M1& A, MatrixView<std::complex<double> > B, std::complex<double>)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-
         int m=B.iscm()?B.colsize():B.rowsize();
         int n=B.iscm()?B.rowsize():B.colsize();
         int lda = A.iscm()?A.stepj():A.stepi();
@@ -100,10 +92,6 @@ namespace tmv {
     static void BlasMultEq(
         const M1& A, MatrixView<std::complex<double> > B, double t1)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-
         if (B.iscm()) {
             Matrix<double,ColMajor> B1 = B.realPart();
             BlasMultEq(A,B1.xView(),t1);
@@ -132,10 +120,6 @@ namespace tmv {
     template <class M1>
     static void BlasMultEq(const M1& A, MatrixView<float> B, float)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-
         int m=B.iscm()?B.colsize():B.rowsize();
         int n=B.iscm()?B.rowsize():B.colsize();
         int lda = A.iscm()?A.stepj():A.stepi();
@@ -154,10 +138,6 @@ namespace tmv {
     static void BlasMultEq(
         const M1& A, MatrixView<std::complex<float> > B, std::complex<float>)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-
         int m=B.iscm()?B.colsize():B.rowsize();
         int n=B.iscm()?B.rowsize():B.colsize();
         int lda = A.iscm()?A.stepj():A.stepi();
@@ -187,10 +167,6 @@ namespace tmv {
     static void BlasMultEq(
         const M1& A, MatrixView<std::complex<float> > B, float t1)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-
         if (B.iscm()) {
             Matrix<float,ColMajor> B1 = B.realPart();
             BlasMultEq(A,B1.xView(),t1);

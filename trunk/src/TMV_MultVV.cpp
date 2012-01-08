@@ -24,7 +24,6 @@ namespace tmv {
     double DoMultVV(
         const ConstVectorView<double>& v1, const ConstVectorView<double>& v2) 
     { 
-        TMVAssert(v1.size()==v2.size());
         int n=v1.size();
         if (n == 0) return 0.;
         int s1=v1.step();
@@ -40,7 +39,6 @@ namespace tmv {
         const ConstVectorView<std::complex<double> >& v1, 
         const ConstVectorView<std::complex<double> >& v2) 
     {
-        TMVAssert(v1.size()==v2.size());
         int n=v1.size();
         if (n == 0) return 0.;
         int s1=v1.step();
@@ -61,7 +59,6 @@ namespace tmv {
         const ConstVectorView<std::complex<double>,Conj>& v1,
         const ConstVectorView<std::complex<double> >& v2) 
     {
-        TMVAssert(v1.size()==v2.size());
         int n=v1.size();
         if (n == 0) return 0.;
         int s1=v1.step();
@@ -83,7 +80,6 @@ namespace tmv {
         const ConstVectorView<double>& v1, 
         const ConstVectorView<std::complex<double> >& v2) 
     {
-        TMVAssert(v1.size()==v2.size());
         int n=v1.size();
         if (n == 0) return 0.F;
         int s1=v1.step();
@@ -104,7 +100,6 @@ namespace tmv {
     float DoMultVV(
         const ConstVectorView<float>& v1, const ConstVectorView<float>& v2) 
     {
-        TMVAssert(v1.size()==v2.size());
         int n=v1.size();
         if (n == 0) return 0.F;
         int s1=v1.step();
@@ -120,7 +115,6 @@ namespace tmv {
         const ConstVectorView<std::complex<float> >& v1, 
         const ConstVectorView<std::complex<float> >& v2) 
     {
-        TMVAssert(v1.size()==v2.size());
         int n=v1.size();
         if (n == 0) return 0.F;
         int s1=v1.step();
@@ -141,7 +135,6 @@ namespace tmv {
         const ConstVectorView<std::complex<float>,Conj>& v1,
         const ConstVectorView<std::complex<float> >& v2) 
     {
-        TMVAssert(v1.size()==v2.size());
         int n=v1.size();
         if (n == 0) return 0.F;
         int s1=v1.step();
@@ -163,7 +156,6 @@ namespace tmv {
         const ConstVectorView<float>& v1, 
         const ConstVectorView<std::complex<float> >& v2) 
     {
-        TMVAssert(v1.size()==v2.size());
         int n=v1.size();
         if (n == 0) return 0.F;
         int s1=v1.step();

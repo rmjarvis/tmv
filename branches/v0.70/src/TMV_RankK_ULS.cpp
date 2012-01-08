@@ -186,30 +186,20 @@ namespace tmv {
     template<> 
     void LapSetUUt(const SymMatrixView<double>& A)
     {
-        TMVAssert(A.issym());
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(A.uplo() == Upper);
-
         int n = A.size();
-        int lda = A.isrm() ? A.stepi() : A.stepj();
+        int lda = A.iscm() ? A.stepj() : A.stepi();
         LAPNAME(dlauum) (
-            LAPCM A.isrm()?LAPCH_LO:LAPCH_UP,LAPV(n),
+            LAPCM A.iscm()?LAPCH_UP:LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(lda) LAPINFO LAP1);
         LAP_Results("dlauum");
     }
     template<> 
     void LapSetUUt(const SymMatrixView<std::complex<double> >& A)
     {
-        TMVAssert(A.issym());
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(A.uplo() == Upper);
-
         int n = A.size();
-        int lda = A.isrm() ? A.stepi() : A.stepj();
+        int lda = A.iscm() ? A.stepj() : A.stepi();
         LAPNAME(zlauum) (
-            LAPCM A.isrm()?LAPCH_LO:LAPCH_UP,LAPV(n),
+            LAPCM A.iscm()?LAPCH_UP:LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(lda) LAPINFO LAP1);
         LAP_Results("zlauum");
     }
@@ -218,30 +208,20 @@ namespace tmv {
     template<> 
     void LapSetUUt(const SymMatrixView<float>& A)
     {
-        TMVAssert(A.issym());
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(A.uplo() == Upper);
-
         int n = A.size();
-        int lda = A.isrm() ? A.stepi() : A.stepj();
+        int lda = A.iscm() ? A.stepj() : A.stepi();
         LAPNAME(slauum) (
-            LAPCM A.isrm()?LAPCH_LO:LAPCH_UP,LAPV(n),
+            LAPCM A.iscm()?LAPCH_UP:LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(lda) LAPINFO LAP1);
         LAP_Results("slauum");
     }
     template<> 
     void LapSetUUt(const SymMatrixView<std::complex<float> >& A)
     {
-        TMVAssert(A.issym());
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(A.uplo() == Upper);
-
         int n = A.size();
-        int lda = A.isrm() ? A.stepi() : A.stepj();
+        int lda = A.iscm() ? A.stepj() : A.stepi();
         LAPNAME(clauum) (
-            LAPCM A.isrm()?LAPCH_LO:LAPCH_UP,LAPV(n),
+            LAPCM A.iscm()?LAPCH_UP:LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(lda) LAPINFO LAP1);
         LAP_Results("clauum");
     }
@@ -252,8 +232,8 @@ namespace tmv {
     static inline void setUUt(const SymMatrixView<T>& A)
     {
 #ifdef AELAP
-        if (A.issym() && (
-                (A.isrm() && A.stepi()>0) || (A.iscm() && A.stepj()>0)))
+        if (A.issym() && 
+            ( (A.isrm() && A.stepi()>0) || (A.iscm() && A.stepj()>0)))
             LapSetUUt(A);
         else
 #endif

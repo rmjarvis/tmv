@@ -53,7 +53,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT it)
@@ -71,7 +71,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
         static void call2(const int n, const Scaling<ix,T>& x, IT it)
@@ -94,7 +94,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
         static void call2(const int n, const Scaling<ix,T>& x, IT it)
@@ -149,7 +149,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT A)
@@ -188,7 +188,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT A)
@@ -214,7 +214,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT A)
@@ -263,7 +263,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT A)
@@ -306,7 +306,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT A)
@@ -345,7 +345,7 @@ namespace tmv {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
         static void call2(int n, const Scaling<ix,T>& x, IT A)
@@ -464,7 +464,7 @@ namespace tmv {
         {
             typedef typename V::value_type T1;
             const bool inst =
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
                 Traits<T1>::isinst;
             const bool conj = V::_conj;
             const int algo = 

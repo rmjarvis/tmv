@@ -65,7 +65,7 @@ namespace tmv {
 #define APTR (inplace ? A.nonConst().ptr() : Aptr1.get())
 #define LLX \
     (inplace ? (A.uplo()==Upper ? A.nonConst().adjoint() : A.nonConst()) : \
-     HermMatrixViewOf(Aptr,A.size(),Lower,BaseStorOf(A.lowerTri())))
+     HermMatrixViewOf(Aptr,A.size(),Lower,ColMajor))
 
     template <class T>
     HermCHDiv<T>::HermCHDiv_Impl::HermCHDiv_Impl(

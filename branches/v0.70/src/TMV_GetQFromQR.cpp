@@ -98,7 +98,7 @@ namespace tmv {
         const int M = Q.colsize();
         const int N = Q.rowsize();
         Q.upperTri().setZero();
-        UpperTriMatrix<T,NonUnitDiag,ColMajor> BaseZ(TMV_MIN(QR_BLOCKSIZE,N));
+        UpperTriMatrix<T,NonUnitDiag|ColMajor> BaseZ(TMV_MIN(QR_BLOCKSIZE,N));
         for(int j2=N;j2>0;) {
             int j1 = j2 > QR_BLOCKSIZE ? j2-QR_BLOCKSIZE : 0;
             MatrixView<T> Y = Q.subMatrix(j1,M,j1,j2);
@@ -147,34 +147,7 @@ namespace tmv {
         TMVAssert(beta.step() == 1);
         int m = Q.colsize();
         int n = Q.rowsize();
-        if (Q.isrm()) {
-            int ldq = Q.stepi();
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = n*LAP_BLOCKSIZE;
-            AlignedArray<double> work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<double> work(1);
-            work.get()[0] = 0.;
-            LAPNAME(dorglq) (
-                LAPCM LAPV(n),LAPV(m),LAPV(n),LAPP(Q.ptr()),LAPV(ldq),
-                LAPP(beta.cptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-            lwork = int(work[0]);
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(dorglq) (
-                LAPCM LAPV(n),LAPV(m),LAPV(n),LAPP(Q.ptr()),LAPV(ldq),
-                LAPP(beta.cptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-#ifdef LAPNOWORK
-            LAP_Results("dorglq");
-#else
-            LAP_Results(int(work[0]),m,n,lwork,"dorglq");
-#endif
-        } else {
+        if (BlasIsCM(Q)) {
             int ldq = Q.stepj();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
@@ -201,6 +174,33 @@ namespace tmv {
 #else
             LAP_Results(int(work[0]),m,n,lwork,"dorgqr");
 #endif
+        } else {
+            int ldq = Q.stepi();
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = n*LAP_BLOCKSIZE;
+            AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<double> work(1);
+            work.get()[0] = 0.;
+            LAPNAME(dorglq) (
+                LAPCM LAPV(n),LAPV(m),LAPV(n),LAPP(Q.ptr()),LAPV(ldq),
+                LAPP(beta.cptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+            lwork = int(work[0]);
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(dorglq) (
+                LAPCM LAPV(n),LAPV(m),LAPV(n),LAPP(Q.ptr()),LAPV(ldq),
+                LAPP(beta.cptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+#ifdef LAPNOWORK
+            LAP_Results("dorglq");
+#else
+            LAP_Results(int(work[0]),m,n,lwork,"dorglq");
+#endif
         }
     }
     template <> 
@@ -215,36 +215,7 @@ namespace tmv {
         TMVAssert(beta.step() == 1);
         int m = Q.colsize();
         int n = Q.rowsize();
-        if (Q.isrm()) {
-            int ldq = Q.stepi();
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = n*LAP_BLOCKSIZE;
-            AlignedArray<std::complex<double> > work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<std::complex<double> > work(1);
-            work.get()[0] = 0.;
-            LAPNAME(zunglq) (
-                LAPCM LAPV(n),LAPV(m),LAPV(n),
-                LAPP(Q.ptr()),LAPV(ldq),LAPP(beta.cptr())
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-            lwork = int(TMV_REAL(work[0]));
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(zunglq) (
-                LAPCM LAPV(n),LAPV(m),LAPV(n),
-                LAPP(Q.ptr()),LAPV(ldq),LAPP(beta.cptr())
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-#ifdef LAPNOWORK
-            LAP_Results("zunglq");
-#else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zunglq");
-#endif
-        } else {
+        if (BlasIsCM(Q)) {
             int ldq = Q.stepj();
             Vector<std::complex<double> > conjbeta = beta.conjugate();
 #ifndef LAPNOWORK
@@ -274,6 +245,35 @@ namespace tmv {
 #else
             LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zungqr");
 #endif
+        } else {
+            int ldq = Q.stepi();
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = n*LAP_BLOCKSIZE;
+            AlignedArray<std::complex<double> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<std::complex<double> > work(1);
+            work.get()[0] = 0.;
+            LAPNAME(zunglq) (
+                LAPCM LAPV(n),LAPV(m),LAPV(n),
+                LAPP(Q.ptr()),LAPV(ldq),LAPP(beta.cptr())
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+            lwork = int(TMV_REAL(work[0]));
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(zunglq) (
+                LAPCM LAPV(n),LAPV(m),LAPV(n),
+                LAPP(Q.ptr()),LAPV(ldq),LAPP(beta.cptr())
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+#ifdef LAPNOWORK
+            LAP_Results("zunglq");
+#else
+            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zunglq");
+#endif
         }
     }
 #endif
@@ -289,34 +289,7 @@ namespace tmv {
         TMVAssert(beta.step() == 1);
         int m = Q.colsize();
         int n = Q.rowsize();
-        if (Q.isrm()) {
-            int ldq = Q.stepi();
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = n*LAP_BLOCKSIZE;
-            AlignedArray<float> work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<float> work(1);
-            work.get()[0] = 0.F;
-            LAPNAME(sorglq) (
-                LAPCM LAPV(n),LAPV(m),LAPV(n),LAPP(Q.ptr()),LAPV(ldq),
-                LAPP(beta.cptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-            lwork = int(work[0]);
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(sorglq) (
-                LAPCM LAPV(n),LAPV(m),LAPV(n),LAPP(Q.ptr()),LAPV(ldq),
-                LAPP(beta.cptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-#ifdef LAPNOWORK
-            LAP_Results("sorglq");
-#else
-            LAP_Results(int(work[0]),m,n,lwork,"sorglq");
-#endif
-        } else {
+        if (BlasIsCM(Q)) {
             int ldq = Q.stepj();
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
@@ -343,6 +316,33 @@ namespace tmv {
 #else
             LAP_Results(int(work[0]),m,n,lwork,"sorgqr");
 #endif
+        } else {
+            int ldq = Q.stepi();
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = n*LAP_BLOCKSIZE;
+            AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<float> work(1);
+            work.get()[0] = 0.F;
+            LAPNAME(sorglq) (
+                LAPCM LAPV(n),LAPV(m),LAPV(n),LAPP(Q.ptr()),LAPV(ldq),
+                LAPP(beta.cptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+            lwork = int(work[0]);
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(sorglq) (
+                LAPCM LAPV(n),LAPV(m),LAPV(n),LAPP(Q.ptr()),LAPV(ldq),
+                LAPP(beta.cptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+#ifdef LAPNOWORK
+            LAP_Results("sorglq");
+#else
+            LAP_Results(int(work[0]),m,n,lwork,"sorglq");
+#endif
         }
     }
     template <> 
@@ -357,36 +357,7 @@ namespace tmv {
         TMVAssert(beta.step() == 1);
         int m = Q.colsize();
         int n = Q.rowsize();
-        if (Q.isrm()) {
-            int ldq = Q.stepi();
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = n*LAP_BLOCKSIZE;
-            AlignedArray<std::complex<float> > work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<std::complex<float> > work(1);
-            work.get()[0] = 0.F;
-            LAPNAME(cunglq) (
-                LAPCM LAPV(n),LAPV(m),LAPV(n),
-                LAPP(Q.ptr()),LAPV(ldq),LAPP(beta.cptr())
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-            lwork = int(TMV_REAL(work[0]));
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(cunglq) (
-                LAPCM LAPV(n),LAPV(m),LAPV(n),
-                LAPP(Q.ptr()),LAPV(ldq),LAPP(beta.cptr())
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
-#ifdef LAPNOWORK
-            LAP_Results("cunglq");
-#else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cunglq");
-#endif
-        } else {
+        if (BlasIsCM(Q)) {
             int ldq = Q.stepj();
             Vector<std::complex<float> > conjbeta = beta.conjugate();
 #ifndef LAPNOWORK
@@ -415,6 +386,35 @@ namespace tmv {
             LAP_Results("cungqr");
 #else
             LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cungqr");
+#endif
+        } else {
+            int ldq = Q.stepi();
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = n*LAP_BLOCKSIZE;
+            AlignedArray<std::complex<float> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<std::complex<float> > work(1);
+            work.get()[0] = 0.F;
+            LAPNAME(cunglq) (
+                LAPCM LAPV(n),LAPV(m),LAPV(n),
+                LAPP(Q.ptr()),LAPV(ldq),LAPP(beta.cptr())
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+            lwork = int(TMV_REAL(work[0]));
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(cunglq) (
+                LAPCM LAPV(n),LAPV(m),LAPV(n),
+                LAPP(Q.ptr()),LAPV(ldq),LAPP(beta.cptr())
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+#ifdef LAPNOWORK
+            LAP_Results("cunglq");
+#else
+            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cunglq");
 #endif
         }
     }

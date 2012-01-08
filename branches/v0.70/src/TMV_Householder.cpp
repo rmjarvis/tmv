@@ -845,7 +845,7 @@ namespace tmv {
         // Make the first N columns equal to 
         // Ht [ I ] = (I - YZYt) [ I ]
         //    [ 0 ]              [ 0 ]
-        UpperTriMatrix<T,NonUnitDiag,RowMajor> temp = 
+        UpperTriMatrix<T,NonUnitDiag|RowMajor> temp = 
             -Z * Y.rowRange(0,N).lowerTri(UnitDiag).adjoint();
         Y.rowRange(N,M) *= temp;
         Y.rowRange(0,N) = Y.rowRange(0,N).lowerTri(UnitDiag) * temp;

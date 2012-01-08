@@ -51,11 +51,11 @@
 //
 // Constructors:
 //
-//    SimpleMatrix<T,M,N,stor,I>()
+//    SimpleMatrix<T,M,N,A>()
 //        Makes a SimpleMatrix with column size = M and row size = N
 //        with _uninitialized_ values
 //
-//    SimpleMatrix<T,M,N,stor,I>(const GenMatrix<T2>& m)
+//    SimpleMatrix<T,M,N,A>(const GenMatrix<T2>& m)
 //        Make a SimpleMatrix which copies the elements of m.
 //        T2 may be different than T.
 //
@@ -75,10 +75,10 @@
 
 namespace tmv {
 
-    template <class T, StorageType S=ColMajor>
+    template <class T>
     class SimpleMatrix 
     {
-        typedef SimpleMatrix<T,S> type;
+        typedef SimpleMatrix<T> type;
         typedef T value_type;
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
@@ -90,17 +90,13 @@ namespace tmv {
         // Constructors
         //
 
-        inline SimpleMatrix() : linsize(0), itsm(0), itscs(0), itsrs(0) 
-        {
-            TMVAssert(S==RowMajor || S==ColMajor);
-        }
+        inline SimpleMatrix() : linsize(0), itsm(0), itscs(0), itsrs(0) {}
 
         inline SimpleMatrix(int cs, int rs) :
             linsize((cs)*(rs)), 
             itsm(linsize), itscs(cs), itsrs(rs) 
         {
             TMVAssert(cs >= 0 && rs >= 0);
-            TMVAssert(S==RowMajor || S==ColMajor);
 #ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
@@ -356,22 +352,19 @@ namespace tmv {
         inline int colsize() const { return itscs; }
         inline int rowsize() const { return itsrs; }
         inline bool isSquare() const { return itscs == itsrs; }
-        inline int stepi() const { return S == RowMajor ? itsrs : 1; }
-        inline int stepj() const { return S == RowMajor ? 1 : itscs; }
-        inline bool isrm() const { return S == RowMajor; }
-        inline bool iscm() const { return S == ColMajor; }
+        inline int stepi() const { return 1; }
+        inline int stepj() const { return itscs; }
+        inline bool isrm() const { return false; }
+        inline bool iscm() const { return true; }
         inline bool isconj() const { return false; }
-        inline StorageType stor() const { return S; }
         inline ConjType ct() const { return NonConj; }
         inline int ls() const { return linsize; }
         inline const T* cptr() const { return itsm; }
         inline T* ptr() { return itsm; }
 
-        inline T cref(int i, int j) const
-        { return S == RowMajor ? itsm[i*itsrs+j] : itsm[j*itscs+i]; }
+        inline T cref(int i, int j) const { return itsm[j*itscs+i]; }
 
-        inline T& ref(int i, int j)
-        { return S == RowMajor ? itsm[i*itsrs+j] : itsm[j*itscs+i]; }
+        inline T& ref(int i, int j) { return itsm[j*itscs+i]; }
 
         inline void resize(int cs, int rs)
         {
@@ -394,18 +387,10 @@ namespace tmv {
 
     }; // SimpleMatrix
 
-    template <class T, StorageType S> 
-    inline std::ostream& operator<<(
-        std::ostream& os, const SimpleMatrix<T,S>& m)
-    { m.write(os); return os; }
-
-    template <class T, int M, int N, StorageType S, IndexStyle I> 
-    inline std::string TMV_Text(const SimpleMatrix<T,S>& )
+    template <class T>
+    inline std::string TMV_Text(const SimpleMatrix<T>& )
     { 
-        std::ostringstream s;
-        s << std::string("SimpleMatrix<")<<TMV_Text(T());
-        s << ','<<TMV_Text(S)<<">"; 
-        return s.str();
+        return std::string("SimpleMatrix<")+TMV_Text(T())+">";
     }
 
 } // namespace tmv

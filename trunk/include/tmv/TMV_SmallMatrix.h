@@ -183,7 +183,7 @@ namespace tmv {
         enum { nmAr = (Ar & ~AllStorageType) };
         enum { An = ndA & ~CheckAlias };
 
-        enum { xx = TMV_UNKNOWN }; // for brevity
+        enum { xx = Unknown }; // for brevity
         typedef ConstSmallVectorView<T,M,_stepi,colA> const_col_type;
         typedef ConstVectorView<T,colAr> const_col_sub_type;
         typedef ConstSmallVectorView<T,N,_stepj,rowA> const_row_type;
@@ -340,7 +340,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(M>=0);
             TMVStaticAssert(N>=0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::constr_value());
 #endif
         }
@@ -375,7 +375,7 @@ namespace tmv {
 
         ~SmallMatrix()
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::destr_value());
 #endif
         }
@@ -451,8 +451,8 @@ namespace tmv {
                   ( Traits<real_type>::isinst &&
                     !Traits<real_type>::isinteger) ) &&
                 ( Traits<T>::iscomplex || !Attrib<A>::conj ) &&
-                !( Si != TMV_UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
-                !( Sj != TMV_UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
+                !( Si != Unknown && Si != 1 && Attrib<A>::colmajor ) &&
+                !( Sj != Unknown && Sj != 1 && Attrib<A>::rowmajor ) )};
         enum { _attrib = A };
 
         typedef T value_type;
@@ -479,14 +479,14 @@ namespace tmv {
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = Attrib<A>::checkalias };
         enum { _canlin = (
-                (Si == 1 && M != TMV_UNKNOWN && Sj == M) || 
-                (Sj == 1 && N != TMV_UNKNOWN && Si == N) )};
+                (Si == 1 && M != Unknown && Sj == M) || 
+                (Sj == 1 && N != Unknown && Si == N) )};
         enum { _linsize = IntTraits2<M,N>::prod };
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { minMN = IntTraits2<M,N>::min };
 
-        enum { allknown = (M != TMV_UNKNOWN && N != TMV_UNKNOWN) };
+        enum { allknown = (M != Unknown && N != Unknown) };
         enum { copyA = (
                 (_rowmajor ? RowMajor : ColMajor) |
                 (_fort ? FortranStyle : CStyle) ) };
@@ -533,7 +533,7 @@ namespace tmv {
         enum { diagAr = vecAr | (_diagstep == 1 ? Unit : 0) };
         enum { nmAr = (Ar & ~AllStorageType) };
 
-        enum { xx = TMV_UNKNOWN }; // for brevity
+        enum { xx = Unknown }; // for brevity
         typedef ConstSmallVectorView<T,M,_stepi,colA> const_col_type;
         typedef ConstVectorView<T,colAr> const_col_sub_type;
         typedef ConstSmallVectorView<T,N,_stepj,rowA> const_row_type;
@@ -645,33 +645,33 @@ namespace tmv {
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE ConstSmallMatrixView(const T* m, int cs, int rs) :
             itsm(m), itscs(cs), itsrs(rs), itssi(Si), itssj(Sj)
         { 
-            TMVStaticAssert(Si != TMV_UNKNOWN);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(Si != Unknown);
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE ConstSmallMatrixView(const T* m, int cs) :
             itsm(m), itscs(cs), itsrs(N), itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(N != TMV_UNKNOWN);
-            TMVStaticAssert(Si != TMV_UNKNOWN);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(N != Unknown);
+            TMVStaticAssert(Si != Unknown);
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE ConstSmallMatrixView(const T* m) :
             itsm(m), itscs(M), itsrs(N), itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(M != TMV_UNKNOWN);
-            TMVStaticAssert(N != TMV_UNKNOWN);
-            TMVStaticAssert(Si != TMV_UNKNOWN);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(M != Unknown);
+            TMVStaticAssert(N != Unknown);
+            TMVStaticAssert(Si != Unknown);
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE ConstSmallMatrixView(const type& m2) :
@@ -720,7 +720,7 @@ namespace tmv {
         }
 
         TMV_INLINE ~ConstSmallMatrixView() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
         }
@@ -787,8 +787,8 @@ namespace tmv {
                   ( Traits<real_type>::isinst &&
                     !Traits<real_type>::isinteger) ) &&
                 ( Traits<T>::iscomplex || !Attrib<A>::conj ) &&
-                !( Si != TMV_UNKNOWN && Si != 1 && Attrib<A>::colmajor ) &&
-                !( Sj != TMV_UNKNOWN && Sj != 1 && Attrib<A>::rowmajor ) )};
+                !( Si != Unknown && Si != 1 && Attrib<A>::colmajor ) &&
+                !( Sj != Unknown && Sj != 1 && Attrib<A>::rowmajor ) )};
         enum { _attrib = A };
 
         typedef T value_type;
@@ -815,14 +815,14 @@ namespace tmv {
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = Attrib<A>::checkalias };
         enum { _canlin = (
-                (Si == 1 && M != TMV_UNKNOWN && Sj == M) || 
-                (Sj == 1 && N != TMV_UNKNOWN && Si == N) )};
+                (Si == 1 && M != Unknown && Sj == M) || 
+                (Sj == 1 && N != Unknown && Si == N) )};
         enum { _linsize = IntTraits2<M,N>::prod };
         enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
         enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
         enum { minMN = IntTraits2<M,N>::min };
 
-        enum { allknown = (M != TMV_UNKNOWN && N != TMV_UNKNOWN) };
+        enum { allknown = (M != Unknown && N != Unknown) };
         enum { copyA = (
                 (_rowmajor ? RowMajor : ColMajor) |
                 (_fort ? FortranStyle : CStyle) ) };
@@ -870,7 +870,7 @@ namespace tmv {
         enum { nmAr = (Ar & ~AllStorageType) };
         enum { An = ndA & ~CheckAlias };
 
-        enum { xx = TMV_UNKNOWN }; // for brevity
+        enum { xx = Unknown }; // for brevity
         typedef ConstSmallVectorView<T,M,_stepi,colA> const_col_type;
         typedef ConstVectorView<T,colAr> const_col_sub_type;
         typedef ConstSmallVectorView<T,N,_stepj,rowA> const_row_type;
@@ -1036,34 +1036,34 @@ namespace tmv {
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE SmallMatrixView(T* m, int cs, int rs) :
             itsm(m), itscs(cs), itsrs(rs), itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(Si != TMV_UNKNOWN);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(Si != Unknown);
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE SmallMatrixView(T* m, int cs) :
             itsm(m), itscs(cs), itsrs(N), itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(N != TMV_UNKNOWN);
-            TMVStaticAssert(Si != TMV_UNKNOWN); 
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(N != Unknown);
+            TMVStaticAssert(Si != Unknown); 
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE SmallMatrixView(T* m) :
             itsm(m), itscs(M), itsrs(N), itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(M != TMV_UNKNOWN);
-            TMVStaticAssert(N != TMV_UNKNOWN);
-            TMVStaticAssert(Si != TMV_UNKNOWN);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(M != Unknown);
+            TMVStaticAssert(N != Unknown);
+            TMVStaticAssert(Si != Unknown);
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE SmallMatrixView(const type& m2) :
@@ -1092,7 +1092,7 @@ namespace tmv {
         }
 
         TMV_INLINE ~SmallMatrixView() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
         }
@@ -1286,7 +1286,6 @@ namespace tmv {
     // TMV_Text
     //
 
-#ifdef TMV_TEXT
     template <class T, int M, int N, int A0, int A1>
     inline std::string TMV_Text(const SmallMatrix<T,M,N,A0,A1>& m)
     {
@@ -1327,7 +1326,6 @@ namespace tmv {
         s << m.stepi()<<","<<m.stepj()<<")";
         return s.str();
     }
-#endif
 
 } // namespace tmv
 

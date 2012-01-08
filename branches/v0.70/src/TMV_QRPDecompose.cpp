@@ -570,7 +570,7 @@ namespace tmv
 #endif
 
                 int origj2 = j2;
-                UpperTriMatrix<T,NonUnitDiag,ColMajor> Z(j2-j1);
+                UpperTriMatrix<T,NonUnitDiag|ColMajor> Z(j2-j1);
 
                 T* bj = beta.ptr()+j1*beta.step();
                 for(int j=j1; j<j2; ++j, ++bj) {
@@ -1100,7 +1100,7 @@ namespace tmv
 
         if (A.rowsize() > 0) {
 #ifdef LAP
-            if (strict && A.iscm()) {
+            if (strict && BlasIsCM(A)) {
                 LapQRPDecompose(A,beta,P,det);
             } else {
                 NonLapQRPDecompose(A,beta,P,det,strict);

@@ -104,7 +104,7 @@ namespace tmv {
         enum { rs = M::_rowsize };
 
         enum { small = (
-                M::_colsize != TMV_UNKNOWN && M::_rowsize != TMV_UNKNOWN &&
+                M::_colsize != Unknown && M::_rowsize != Unknown &&
                 M::_colsize <= 8 && M::_rowsize <= 8 ) };
 
         typedef typename LUD_Impl<small,M>::lux_type lux_type;
@@ -414,8 +414,8 @@ namespace tmv {
             LUx( Maybe<istrans>::transposeview(SmallLUx) ),
             P(size)
         {
-            TMVStaticAssert(M::_colsize != TMV_UNKNOWN);
-            TMVStaticAssert(M::_rowsize != TMV_UNKNOWN);
+            TMVStaticAssert(M::_colsize != Unknown);
+            TMVStaticAssert(M::_rowsize != Unknown);
             TMVStaticAssert(M::_colsize == int(M::_rowsize));
             TMVStaticAssert(M::_colsize == int(M2::_colsize));
             TMVStaticAssert(M::_rowsize == int(M2::_rowsize));

@@ -77,7 +77,7 @@ namespace tmv {
         const GenBandMatrix<T2>& m2, const BandMatrixView<T>& m0)
     { 
         if (m1.isunit()) {
-            UpperTriMatrix<T1,NonUnitDiag,RowMajor> m1x = m1;
+            UpperTriMatrix<T1,NonUnitDiag|RowMajor> m1x = m1;
             MultMM<add>(x,BandMatrixViewOf(m1x),m2,m0);
         } else {
             MultMM<add>(x,BandMatrixViewOf(m1),m2,m0);
@@ -89,7 +89,7 @@ namespace tmv {
         const GenUpperTriMatrix<T2>& m2, const BandMatrixView<T>& m0)
     { 
         if (m2.isunit()) {
-            UpperTriMatrix<T2,NonUnitDiag,RowMajor> m2x = m2;
+            UpperTriMatrix<T2,NonUnitDiag|RowMajor> m2x = m2;
             MultMM<add>(x,m1,BandMatrixViewOf(m2x),m0);
         } else {
             MultMM<add>(x,m1,BandMatrixViewOf(m2),m0);
@@ -101,7 +101,7 @@ namespace tmv {
         const GenBandMatrix<T2>& m2, const BandMatrixView<T>& m0)
     { 
         if (m1.isunit()) {
-            LowerTriMatrix<T1,NonUnitDiag,RowMajor> m1x = m1;
+            LowerTriMatrix<T1,NonUnitDiag|RowMajor> m1x = m1;
             MultMM<add>(x,BandMatrixViewOf(m1x),m2,m0);
         } else {
             MultMM<add>(x,BandMatrixViewOf(m1),m2,m0);
@@ -113,7 +113,7 @@ namespace tmv {
         const GenLowerTriMatrix<T2>& m2, const BandMatrixView<T>& m0)
     { 
         if (m2.isunit()) {
-            LowerTriMatrix<T2,NonUnitDiag,RowMajor> m2x = m2;
+            LowerTriMatrix<T2,NonUnitDiag|RowMajor> m2x = m2;
             MultMM<add>(x,m1,BandMatrixViewOf(m2x),m0);
         } else {
             MultMM<add>(x,m1,BandMatrixViewOf(m2),m0);

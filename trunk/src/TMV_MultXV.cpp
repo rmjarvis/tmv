@@ -81,7 +81,6 @@ namespace tmv {
         const double x,
         const ConstVectorView<double>& v1, VectorView<double> v2)
     { 
-        TMVAssert(v1.size() == v1.size()); 
         int n=v2.size();
         int s1=v1.step();
         int s2=v2.step();
@@ -98,7 +97,6 @@ namespace tmv {
         const ConstVectorView<std::complex<double> >& v1, 
         VectorView<std::complex<double> > v2)
     {
-        TMVAssert(v1.size() == v1.size()); 
         if (imag(x) == 0.) {
             if (v1.step() == 1 && v2.step() == 1) {
                 DoAddMultXV(
@@ -126,7 +124,6 @@ namespace tmv {
         const ConstVectorView<double>& v1, 
         VectorView<std::complex<double> > v2)
     {
-        TMVAssert(v1.size() == v1.size()); 
         double xr = real(x);
         if (xr != 0.) DoAddMultXV(xr,v1,v2.realPart());
         double xi = imag(x);
@@ -155,7 +152,6 @@ namespace tmv {
         const float x,
         const ConstVectorView<float>& v1, VectorView<float> v2)
     {
-        TMVAssert(v1.size() == v1.size()); 
         int n=v2.size();
         int s1=v1.step();
         int s2=v2.step();
@@ -172,7 +168,6 @@ namespace tmv {
         const ConstVectorView<std::complex<float> >& v1, 
         VectorView<std::complex<float> > v2)
     {
-        TMVAssert(v1.size() == v1.size()); 
         if (imag(x) == 0.F) {
             if (v1.step() == 1 && v2.step() == 1) 
                 DoAddMultXV(
@@ -200,7 +195,6 @@ namespace tmv {
         const ConstVectorView<float>& v1, 
         VectorView<std::complex<float> > v2)
     {
-        TMVAssert(v1.size() == v1.size()); 
         float xr = real(x);
         if (xr != 0.F) DoAddMultXV(xr,v1,v2.realPart());
         float xi = imag(x);

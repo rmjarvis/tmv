@@ -61,8 +61,8 @@ namespace tmv {
         }
     }
 
-    template <class T, IndexStyle I> 
-    typename BandMatrixView<T,I>::reference BandMatrixView<T,I>::ref(
+    template <class T, int A>
+    typename BandMatrixView<T,A>::reference BandMatrixView<T,A>::ref(
         int i, int j) const
     {
         T* mi = ptr()+i*stepi()+j*stepj();
@@ -573,53 +573,42 @@ namespace tmv {
         return ok;
     } 
 
-    template <class T, IndexStyle I> 
-    bool ConstBandMatrixView<T,I>::canLinearize() const
+    template <class T, int A>
+    bool ConstBandMatrixView<T,A>::canLinearize() const
     {
-        if (linsize == 1) {
+        if (linsize == -1) {
             int rs = this->rowsize();
             int cs = this->colsize();
+            int lo = this->nlo();
+            int hi = this->nhi();
             if (rs > cs+this->nhi()) rs = cs+this->nhi();
             if (cs > rs+this->nlo()) cs = rs+this->nlo();
-            if (rs != 1 || cs != 1) {
-                if (rs == 0 || cs == 0) linsize = 0;
-                else {
-                    TMVAssert(this->isrm() || this->iscm());
-                    if (this->isrm()) linsize = rs + (cs-1)*this->stepi();
-                    else linsize = cs + (rs-1)*this->stepj();
-                }
-            }
-            // If linsize is only 1, then no big savings in the linear version.
-            // However, doing this segment over and over would be slow.
-            // So set linsize to 0 to make canLinearize() faster when linsize
-            // would be legitimately equal to 1.
-            // Also, the Assert in BandMatrix.h about (linsize != 1 || 
-            // rowsize == 1 && colsize == 1) can fail, since really it is
-            // rs == 1 && cs == 1 which lead to linsize == 1.
-            // Probably a better solution would be to have the guard be 
-            // linsize == -1, but I haven't done that yet. 
-            if (linsize == 1) linsize = 0;
+
+            if (rs == 0 || cs == 0) linsize = 0;
+            else if (stepi() == 1 && stepj() == (lo+hi))  
+                linsize = cs + (rs-1)*(lo+hi);
+            else if (stepj() == 1 && stepi() == (lo+hi))
+                linsize = rs + (cs-1)*(lo+hi);
         }
         return linsize > 0;
     }
 
-    template <class T, IndexStyle I> 
-    bool BandMatrixView<T,I>::canLinearize() const
+    template <class T, int A>
+    bool BandMatrixView<T,A>::canLinearize() const
     {
-        if (linsize == 1) {
+        if (linsize == -1) {
             int rs = this->rowsize();
             int cs = this->colsize();
+            int lo = this->nlo();
+            int hi = this->nhi();
             if (rs > cs+this->nhi()) rs = cs+this->nhi();
             if (cs > rs+this->nlo()) cs = rs+this->nlo();
-            if (rs != 1 || cs != 1) {
-                if (rs == 0 || cs == 0) linsize = 0;
-                else {
-                    TMVAssert(this->isrm() || this->iscm());
-                    if (this->isrm()) linsize = rs + (cs-1)*this->stepi();
-                    else linsize = cs + (rs-1)*this->stepj();
-                }
-            }
-            if (linsize == 1) linsize = 0;
+
+            if (rs == 0 || cs == 0) linsize = 0;
+            else if (stepi() == 1 && stepj() == (lo+hi))  
+                linsize = cs + (rs-1)*(lo+hi);
+            else if (stepj() == 1 && stepi() == (lo+hi))
+                linsize = rs + (cs-1)*(lo+hi);
         }
         return linsize > 0;
     }
@@ -979,7 +968,7 @@ namespace tmv {
         char cc = c;
         int n = m.colsize();
         double norm;
-        if (m.iscm()) {
+        if (BlasIsCM(m)) {
             int kl = m.nlo();
             int ku = m.nhi();
             int lda = m.stepj()+1;
@@ -1007,7 +996,7 @@ namespace tmv {
         char cc = c;
         int n = m.colsize();
         double norm;
-        if (m.iscm()) {
+        if (BlasIsCM(m)) {
             int kl = m.nlo();
             int ku = m.nhi();
             int lda = m.stepj()+1;
@@ -1037,7 +1026,7 @@ namespace tmv {
         char cc = c;
         int n = m.colsize();
         float norm;
-        if (m.iscm()) {
+        if (BlasIsCM(m)) {
             int kl = m.nlo();
             int ku = m.nhi();
             int lda = m.stepj()+1;
@@ -1065,7 +1054,7 @@ namespace tmv {
         char cc = c;
         int n = m.colsize();
         float norm;
-        if (m.iscm()) {
+        if (BlasIsCM(m)) {
             int kl = m.nlo();
             int ku = m.nhi();
             int lda = m.stepj()+1;
@@ -1103,8 +1092,9 @@ namespace tmv {
     RT GenBandMatrix<T>::maxAbsElement() const
     {
 #ifdef XLAP
-        if (isrm() && this->isSquare()) return LapNorm('M',transpose());
-        else if (iscm() && this->isSquare()) return LapNorm('M',*this);
+        if (BlasIsRM(*this) && this->isSquare()) 
+            return LapNorm('M',transpose());
+        else if (BlasIsCM(*this) && this->isSquare()) return LapNorm('M',*this);
         else if (isdm() && this->isSquare() && nlo()==1 && nhi()==1)
             return LapNorm('M',*this);
         else
@@ -1116,8 +1106,9 @@ namespace tmv {
     {
 #ifdef XLAP
         if (Traits<T>::iscomplex) return NonLapMaxAbs2Element(*this);
-        else if (isrm() && this->isSquare()) return LapNorm('M',transpose());
-        else if (iscm() && this->isSquare()) return LapNorm('M',*this);
+        else if (BlasIsRM(*this) && this->isSquare()) 
+            return LapNorm('M',transpose());
+        else if (BlasIsCM(*this) && this->isSquare()) return LapNorm('M',*this);
         else if (isdm() && this->isSquare() && nlo()==1 && nhi()==1)
             return LapNorm('M',*this);
         else
@@ -1128,8 +1119,8 @@ namespace tmv {
     RT GenBandMatrix<T>::norm1() const
     {
 #ifdef XLAP
-        if (isrm() && this->isSquare()) return LapNorm('I',transpose());
-        else if (iscm() && this->isSquare()) return LapNorm('1',*this);
+        if (BlasIsRM(*this) && this->isSquare()) return LapNorm('I',transpose());
+        else if (BlasIsCM(*this) && this->isSquare()) return LapNorm('1',*this);
         else if (isdm() && this->isSquare() && nlo()==1 && nhi()==1)
             return LapNorm('1',*this);
         else
@@ -1140,8 +1131,8 @@ namespace tmv {
     RT GenBandMatrix<T>::normF() const
     {
 #ifdef XLAP
-        if (isrm() && this->isSquare()) return LapNorm('F',transpose());
-        else if (iscm() && this->isSquare()) return LapNorm('F',*this);
+        if (BlasIsRM(*this) && this->isSquare()) return LapNorm('F',transpose());
+        else if (BlasIsCM(*this) && this->isSquare()) return LapNorm('F',*this);
         else if (isdm() && this->isSquare() && nlo()==1 && nhi()==1)
             return LapNorm('F',*this);
         else
@@ -1192,8 +1183,8 @@ namespace tmv {
     // Modifying Functions
     //
 
-    template <class T, IndexStyle I>
-    const BandMatrixView<T,I>& BandMatrixView<T,I>::clip(RT thresh) const
+    template <class T, int A>
+    const BandMatrixView<T,A>& BandMatrixView<T,A>::clip(RT thresh) const
     {
         if (this->canLinearize()) linearView().clip(thresh);
         else {
@@ -1228,8 +1219,8 @@ namespace tmv {
         return *this;
     }
 
-    template <class T, IndexStyle I> 
-    const BandMatrixView<T,I>& BandMatrixView<T,I>::setZero() const
+    template <class T, int A>
+    const BandMatrixView<T,A>& BandMatrixView<T,A>::setZero() const
     {
         if (this->canLinearize()) linearView().setZero();
         else {
@@ -1264,8 +1255,8 @@ namespace tmv {
         return *this;
     }
 
-    template <class T, IndexStyle I> 
-    const BandMatrixView<T,I>& BandMatrixView<T,I>::setAllTo(const T& x) const
+    template <class T, int A>
+    const BandMatrixView<T,A>& BandMatrixView<T,A>::setAllTo(const T& x) const
     {
         if (this->canLinearize()) linearView().setAllTo(x);
         else {
@@ -1300,8 +1291,8 @@ namespace tmv {
         return *this;
     }
 
-    template <class T, IndexStyle I> 
-    const BandMatrixView<T,I>& BandMatrixView<T,I>::addToAll(const T& x) const
+    template <class T, int A>
+    const BandMatrixView<T,A>& BandMatrixView<T,A>::addToAll(const T& x) const
     {
         if (this->canLinearize()) linearView().addToAll(x);
         else {
@@ -1336,16 +1327,16 @@ namespace tmv {
         return *this;
     }
 
-    template <class T, IndexStyle I> 
-    void BandMatrixView<T,I>::doTransposeSelf() const
+    template <class T, int A>
+    void BandMatrixView<T,A>::doTransposeSelf() const
     {
         TMVAssert(colsize() == rowsize());
         TMVAssert(nlo() == nhi());
         for(int i=1;i<=nhi();++i) Swap(diag(-i),diag(i));
     }
 
-    template <class T, IndexStyle I> 
-    const BandMatrixView<T,I>& BandMatrixView<T,I>::conjugateSelf() const
+    template <class T, int A>
+    const BandMatrixView<T,A>& BandMatrixView<T,A>::conjugateSelf() const
     {
         if (this->canLinearize()) linearView().conjugateSelf();
         else {
@@ -1823,8 +1814,8 @@ namespace tmv {
         }
     }
 
-    template <class T, StorageType S, IndexStyle I> 
-    void BandMatrix<T,S,I>::read(const TMV_Reader& reader)
+    template <class T, int A>
+    void BandMatrix<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
         if (!reader.readCode("B",exp,got)) {
@@ -1852,8 +1843,8 @@ namespace tmv {
         FinishRead(reader,v);
     }
 
-    template <class T, IndexStyle I> 
-    void BandMatrixView<T,I>::read(const TMV_Reader& reader) const
+    template <class T, int A>
+    void BandMatrixView<T,A>::read(const TMV_Reader& reader) const
     {
         std::string exp,got;
         if (!reader.readCode("B",exp,got)) {

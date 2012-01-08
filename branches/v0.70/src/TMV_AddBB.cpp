@@ -66,9 +66,9 @@ namespace tmv {
         TMVAssert(B.ct() == NonConj);
         TMVAssert(!SameStorage(A,B));
 
-        if (A.stor() == B.stor() && A.nlo() == B.nlo() && A.nhi() == B.nhi() && 
-            A.canLinearize() && B.canLinearize()) {
-            TMVAssert(A.stepi() == B.stepi() && A.stepj() == B.stepj());
+        if (A.nlo() == B.nlo() && A.nhi() == B.nhi() && 
+            A.canLinearize() && B.canLinearize() &&
+            A.stepi() == B.stepi() && A.stepj() == B.stepj()) {
             B.linearView() += alpha*A.constLinearView();
         } else {
             for(int i=-A.nlo();i<=A.nhi();++i) {

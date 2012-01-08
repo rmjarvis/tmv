@@ -160,7 +160,7 @@ namespace tmv {
 
         int ncolmax = MIN(HESS_BLOCKSIZE,N-1);
         Matrix<T,RowMajor> mYZt_full(N,ncolmax);
-        UpperTriMatrix<T,NonUnitDiag,ColMajor> Z_full(ncolmax);
+        UpperTriMatrix<T,NonUnitDiag|ColMajor> Z_full(ncolmax);
 
         T det(0); // Ignore Householder Determinant calculations
         T* Uj = Ubeta.ptr();

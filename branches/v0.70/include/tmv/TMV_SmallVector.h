@@ -36,15 +36,15 @@
 //
 // Constructors:
 //
-//    explicit SmallVector<T,N,I>()  
+//    explicit SmallVector<T,N,A>()  
 //        Makes a Vector of size N with _uninitialized_ values
 //
-//    SmallVector<T,N,I>(T x)
+//    SmallVector<T,N,A>(T x)
 //        Makes a Vector of size N with all values = x
 //
-//    SmallVector<T,N,I>(const T* vv)
-//    SmallVector<T,N,I>(const vector<T>& vv)
-//    SmallVector<T,N,I>(const GenVector<T>& vv)
+//    SmallVector<T,N,A>(const T* vv)
+//    SmallVector<T,N,A>(const vector<T>& vv)
+//    SmallVector<T,N,A>(const GenVector<T>& vv)
 //        Makes a SmallVector which copies the elements of vv.
 //
 // 
@@ -72,26 +72,26 @@ namespace tmv {
     template <class T, int N> 
     class SmallVectorComposite;
 
-    template <class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
-    inline void Copy(const SmallVector<T1,N,I1>& v1, SmallVector<T2,N,I2>& v2);
+    template <class T1, class T2, int N, int A1, int A2> 
+    inline void Copy(const SmallVector<T1,N,A1>& v1, SmallVector<T2,N,A2>& v2);
 
-    template <class T, int N, IndexStyle I> 
+    template <class T, int N, int A> 
     class SmallVector 
     {
     public:
 
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
-        typedef SmallVector<T,N,I> type;
+        typedef SmallVector<T,N,A> type;
         typedef type copy_type;
-        typedef ConstVectorView<T,I> const_view_type;
+        typedef ConstVectorView<T,A> const_view_type;
         typedef const_view_type const_conjugate_type;
         typedef const_view_type const_reverse_type;
-        typedef VectorView<T,I> view_type;
+        typedef VectorView<T,A> view_type;
         typedef view_type conjugate_type;
         typedef view_type reverse_type;
-        typedef ConstVectorView<RT,I> const_real_type;
-        typedef VectorView<RT,I> real_type;
+        typedef ConstVectorView<RT,A> const_real_type;
+        typedef VectorView<RT,A> real_type;
         typedef T value_type;
         typedef VIt<T,Unit,NonConj> iterator;
         typedef CVIt<T,Unit,NonConj> const_iterator;
@@ -126,8 +126,8 @@ namespace tmv {
             for(int i=0;i<N;++i) itsv[i] = v2.cref(i);
         }
 
-        template <IndexStyle I2> 
-        inline SmallVector(const SmallVector<T,N,I2>& v2) 
+        template <int A2> 
+        inline SmallVector(const SmallVector<T,N,A2>& v2) 
             TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
@@ -135,8 +135,8 @@ namespace tmv {
             for(int i=0;i<N;++i) itsv[i] = v2.cref(i);
         }
 
-        template <class T2, IndexStyle I2> 
-        inline SmallVector(const SmallVector<T2,N,I2>& v2) 
+        template <class T2, int A2> 
+        inline SmallVector(const SmallVector<T2,N,A2>& v2) 
             TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
@@ -144,8 +144,8 @@ namespace tmv {
             Copy(v2,*this); 
         }
 
-        template <IndexStyle I2> 
-        inline SmallVector(const Vector<T,I2>& v2) 
+        template <int A2> 
+        inline SmallVector(const Vector<T,A2>& v2) 
             TMV_DEFFIRSTLAST2(itsv.get(),itsv.get()+N)
         {
             TMVAssert(N > 0);
@@ -214,16 +214,16 @@ namespace tmv {
             return *this; 
         }
 
-        template <IndexStyle I2> 
-        inline type& operator=(SmallVector<T,N,I2>& v2)
+        template <int A2> 
+        inline type& operator=(SmallVector<T,N,A2>& v2)
         { 
             if (&v2 != this) 
                 for(int i=0;i<N;++i) itsv[i] = v2.cref(i);
             return *this; 
         }
 
-        template <class T2, IndexStyle I2> 
-        inline type& operator=(const SmallVector<T2,N,I2>& v2) 
+        template <class T2, int A2> 
+        inline type& operator=(const SmallVector<T2,N,A2>& v2) 
         { 
             TMVAssert(isReal(T2()) || isComplex(T()));
             TMVAssert(v2.size() == N);
@@ -295,7 +295,7 @@ namespace tmv {
 
         inline T operator[](int i) const 
         { 
-            if (I == CStyle) {
+            if (A == int(CStyle)) {
                 TMVAssert(i>=0 && i<N);
                 return cref(i); 
             } else {
@@ -305,7 +305,7 @@ namespace tmv {
         }
         inline T operator()(int i) const 
         { 
-            if (I == CStyle) {
+            if (A == int(CStyle)) {
                 TMVAssert(i>=0 && i<N);
                 return cref(i); 
             } else {
@@ -326,7 +326,7 @@ namespace tmv {
 
         inline T& operator[](int i) 
         { 
-            if (I == CStyle) {
+            if (A == int(CStyle)) {
                 TMVAssert(i>=0 && i<N);
                 return ref(i); 
             } else {
@@ -336,7 +336,7 @@ namespace tmv {
         }
         inline T& operator()(int i) 
         { 
-            if (I == CStyle) {
+            if (A == int(CStyle)) {
                 TMVAssert(i>=0 && i<N);
                 return ref(i); 
             } else {
@@ -402,7 +402,7 @@ namespace tmv {
                     if (iminout) *iminout = i;
                 }
             }
-            if (I == FortranStyle && iminout) ++(*iminout);
+            if (A == int(FortranStyle) && iminout) ++(*iminout);
             return min;
         }
 
@@ -416,7 +416,7 @@ namespace tmv {
                     if (imaxout) *imaxout = i;
                 }
             }
-            if (I == FortranStyle && imaxout) ++(*imaxout);
+            if (A == int(FortranStyle) && imaxout) ++(*imaxout);
             return  max;
         }
 
@@ -431,7 +431,7 @@ namespace tmv {
                     if (iminout) *iminout = i;
                 }
             }
-            if (I == FortranStyle && iminout) ++(*iminout);
+            if (A == int(FortranStyle) && iminout) ++(*iminout);
             return min;
         }
 
@@ -446,7 +446,7 @@ namespace tmv {
                     if (imaxout) *imaxout = i;
                 }
             }
-            if (I == FortranStyle && imaxout) ++(*imaxout);
+            if (A == int(FortranStyle) && imaxout) ++(*imaxout);
             return max;
         }
 
@@ -461,7 +461,7 @@ namespace tmv {
                     if (iminout) *iminout = i;
                 }
             }
-            if (I == FortranStyle && iminout) ++(*iminout);
+            if (A == int(FortranStyle) && iminout) ++(*iminout);
             return min;
         }
 
@@ -476,7 +476,7 @@ namespace tmv {
                     if (imaxout) *imaxout = i;
                 }
             }
-            if (I == FortranStyle && imaxout) ++(*imaxout);
+            if (A == int(FortranStyle) && imaxout) ++(*imaxout);
             return max;
         }
 
@@ -520,7 +520,7 @@ namespace tmv {
 
         inline type& makeBasis(int i)
         { 
-            if (I == CStyle) {
+            if (A == int(CStyle)) {
                 TMVAssert(i>=0 && i<N);
                 setZero(); itsv[i] = T(1);
             } else {
@@ -532,7 +532,7 @@ namespace tmv {
 
         inline type& swap(int i1, int i2)
         {
-            if (I == CStyle) {
+            if (A == int(CStyle)) {
                 TMVAssert(i1>=0 && i1<N);
                 TMVAssert(i2>=0 && i2<N);
                 if (i1 != i2) TMV_SWAP(itsv[i1],itsv[i2]);
@@ -546,7 +546,7 @@ namespace tmv {
 
         inline type& permute(const int* p, int i1, int i2) 
         {
-            if (I == CStyle) {
+            if (A == int(CStyle)) {
                 TMVAssert(i1>=0 && i1<=i2 && i2<=N);
                 for(int i=i1;i<i2;++i) swap(i,p[i]);
             } else {
@@ -557,12 +557,12 @@ namespace tmv {
         }
 
         inline type& permute(const int* p) 
-        { return permute(p,I==CStyle?0:1,N); }
+        { return permute(p,A==int(CStyle)?0:1,N); }
 
         inline type& reversePermute(
             const int* p, int i1, int i2)
         {
-            if (I == CStyle) {
+            if (A == int(CStyle)) {
                 TMVAssert(i1>=0 && i1<=i2 && i2<=N);
                 for(int i=i2-1;i>=i1;--i) swap(i,p[i]);
             } else {
@@ -573,7 +573,7 @@ namespace tmv {
         }
 
         inline type& reversePermute(const int* p)
-        { return reversePermute(p,I==CStyle?0:1,N); }
+        { return reversePermute(p,A==int(CStyle)?0:1,N); }
 
         inline type& reverseSelf()
         {
@@ -694,79 +694,79 @@ namespace tmv {
     };
 
     template <int N, class T1, class T2> 
-    inline void DoCopy(const T1* v1, T2* v2)
+    inline void SmallVectorCopy(const T1* v1, T2* v2)
     { DoCopyv<N,T1,T2>(v1,v2); }
 
-    template <class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
-    inline void Copy(const SmallVector<T1,N,I1>& v1, SmallVector<T2,N,I2>& v2)
+    template <class T1, class T2, int N, int A1, int A2> 
+    inline void Copy(const SmallVector<T1,N,A1>& v1, SmallVector<T2,N,A2>& v2)
     { DoCopyv<N,T1,T2>(v1.cptr(),v2.ptr()); }
 
     //
     // Swap SmallVectors
     //
 
-    template <class T, int N, IndexStyle I1, IndexStyle I2> 
-    inline void Swap(SmallVector<T,N,I1>& v1, SmallVector<T,N,I2>& v2)
+    template <class T, int N, int A1, int A2> 
+    inline void Swap(SmallVector<T,N,A1>& v1, SmallVector<T,N,A2>& v2)
     { for(int i=0;i<N;++i) TMV_SWAP(v1.ref(i),v2.ref(i)); }
 
     //
     // Functions of Vectors
     //
 
-    template <class T, int N, IndexStyle I> 
-    inline TMV_RealType(T) Norm(const SmallVector<T,N,I>& v)
+    template <class T, int N, int A> 
+    inline TMV_RealType(T) Norm(const SmallVector<T,N,A>& v)
     { return v.norm(); }
 
-    template <class T, int N, IndexStyle I> 
-    inline TMV_RealType(T) Norm1( const SmallVector<T,N,I>& v)
+    template <class T, int N, int A> 
+    inline TMV_RealType(T) Norm1( const SmallVector<T,N,A>& v)
     { return v.norm1(); }
 
-    template <class T, int N, IndexStyle I> 
-    inline TMV_RealType(T) NormSq( const SmallVector<T,N,I>& v)
+    template <class T, int N, int A> 
+    inline TMV_RealType(T) NormSq( const SmallVector<T,N,A>& v)
     { return v.normSq(); }
 
-    template <class T, int N, IndexStyle I> 
-    inline TMV_RealType(T) Norm2( const SmallVector<T,N,I>& v)
+    template <class T, int N, int A> 
+    inline TMV_RealType(T) Norm2( const SmallVector<T,N,A>& v)
     { return v.norm2(); }
 
-    template <class T, int N, IndexStyle I> 
-    inline TMV_RealType(T) NormInf( const SmallVector<T,N,I>& v)
+    template <class T, int N, int A> 
+    inline TMV_RealType(T) NormInf( const SmallVector<T,N,A>& v)
     { return v.normInf(); }
 
-    template <class T, int N, IndexStyle I> 
-    inline T SumElements( const SmallVector<T,N,I>& v)
+    template <class T, int N, int A> 
+    inline T SumElements( const SmallVector<T,N,A>& v)
     { return v.sumElements(); }
 
-    template <class T, int N, IndexStyle I> 
-    inline TMV_RealType(T) SumAbsElements(const SmallVector<T,N,I>& v)
+    template <class T, int N, int A> 
+    inline TMV_RealType(T) SumAbsElements(const SmallVector<T,N,A>& v)
     { return v.sumAbsElements(); }
 
-    template <class T, int N, IndexStyle I> 
-    inline TMV_RealType(T) SumAbs2Elements(const SmallVector<T,N,I>& v)
+    template <class T, int N, int A> 
+    inline TMV_RealType(T) SumAbs2Elements(const SmallVector<T,N,A>& v)
     { return v.sumAbs2Elements(); }
 
-    template <class T, int N, IndexStyle I> 
-    inline T MinElement(const SmallVector<T,N,I>& v)
+    template <class T, int N, int A> 
+    inline T MinElement(const SmallVector<T,N,A>& v)
     { return v.minElement(); }
 
-    template <class T, int N, IndexStyle I> 
-    inline T MaxElement(const SmallVector<T,N,I>& v)
+    template <class T, int N, int A> 
+    inline T MaxElement(const SmallVector<T,N,A>& v)
     { return v.maxElement(); }
 
-    template <class T, int N, IndexStyle I> 
-    inline TMV_RealType(T) MinAbsElement(const SmallVector<T,N,I>& v)
+    template <class T, int N, int A> 
+    inline TMV_RealType(T) MinAbsElement(const SmallVector<T,N,A>& v)
     { return v.minAbsElement(); }
 
-    template <class T, int N, IndexStyle I> 
-    inline TMV_RealType(T) MaxAbsElement(const SmallVector<T,N,I>& v)
+    template <class T, int N, int A> 
+    inline TMV_RealType(T) MaxAbsElement(const SmallVector<T,N,A>& v)
     { return v.maxAbsElement(); }
 
-    template <class T, int N, IndexStyle I> 
-    inline VectorView<T,I> Conjugate(const SmallVector<T,N,I>& v)
+    template <class T, int N, int A> 
+    inline VectorView<T,A> Conjugate(const SmallVector<T,N,A>& v)
     { return v.conjugate(); }
 
-    template <class T, int N, IndexStyle I> 
-    inline VectorView<T,I> Conjugate(SmallVector<T,N,I>& v)
+    template <class T, int N, int A> 
+    inline VectorView<T,A> Conjugate(SmallVector<T,N,A>& v)
     { return v.conjugate(); }
 
     
@@ -775,37 +775,37 @@ namespace tmv {
     // Vector ==, != Vector
     //
 
-    template <class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T1, class T2, int N, int A1, int A2> 
     inline bool operator==(
-        const SmallVector<T1,N,I1>& v1, const SmallVector<T2,N,I2>& v2)
+        const SmallVector<T1,N,A1>& v1, const SmallVector<T2,N,A2>& v2)
     {
         for(int i=0;i<N;++i) if (v1.cref(i) != v2.cref(i)) return false;
         return true;
     }
 
-    template <class T1, class T2, int N, IndexStyle I1, IndexStyle I2> 
+    template <class T1, class T2, int N, int A1, int A2> 
     inline bool operator!=(
-        const SmallVector<T1,N,I1>& v1, const SmallVector<T2,N,I2>& v2)
+        const SmallVector<T1,N,A1>& v1, const SmallVector<T2,N,A2>& v2)
     { return !(v1 == v2); }
 
-    template <class T1, class T2, int N, IndexStyle I> 
+    template <class T1, class T2, int N, int A> 
     inline bool operator==(
-        const GenVector<T1>& v1, const SmallVector<T2,N,I>& v2)
+        const GenVector<T1>& v1, const SmallVector<T2,N,A>& v2)
     { return v1 == v2.view(); }
 
-    template <class T1, class T2, int N, IndexStyle I> 
+    template <class T1, class T2, int N, int A> 
     inline bool operator==(
-        const SmallVector<T1,N,I>& v1, const GenVector<T2>& v2)
+        const SmallVector<T1,N,A>& v1, const GenVector<T2>& v2)
     { return v1.view() == v2; }
 
-    template <class T1, class T2, int N, IndexStyle I> 
+    template <class T1, class T2, int N, int A> 
     inline bool operator!=(
-        const GenVector<T1>& v1, const SmallVector<T2,N,I>& v2)
+        const GenVector<T1>& v1, const SmallVector<T2,N,A>& v2)
     { return v1 != v2.view(); }
 
-    template <class T1, class T2, int N, IndexStyle I> 
+    template <class T1, class T2, int N, int A> 
     inline bool operator!=(
-        const SmallVector<T1,N,I>& v1, const GenVector<T2>& v2)
+        const SmallVector<T1,N,A>& v1, const GenVector<T2>& v2)
     { return v1.view() != v2; }
 
 
@@ -813,35 +813,27 @@ namespace tmv {
     // I/O
     //
 
-    template <class T, int N, IndexStyle I> 
+    template <class T, int N, int A> 
     inline std::ostream& operator<<(
-        const TMV_Writer& writer, const SmallVector<T,N,I>& v)
+        const TMV_Writer& writer, const SmallVector<T,N,A>& v)
     { v.view().write(writer); return writer.getos(); }
 
-    template <class T, int N, IndexStyle I> 
+    template <class T, int N, int A> 
     inline std::ostream& operator<<(
-        std::ostream& os, const SmallVector<T,N,I>& v)
+        std::ostream& os, const SmallVector<T,N,A>& v)
     { return os << IOStyle() << v; }
 
-    template <class T, int N, IndexStyle I> 
+    template <class T, int N, int A> 
     inline std::istream& operator>>(
-        const TMV_Reader& reader, SmallVector<T,N,I>& v)
+        const TMV_Reader& reader, SmallVector<T,N,A>& v)
     { v.view().read(reader); return reader.getis(); }
 
-    template <class T, int N, IndexStyle I> 
+    template <class T, int N, int A> 
     inline std::istream& operator>>(
-        std::istream& is, SmallVector<T,N,I>& v)
+        std::istream& is, SmallVector<T,N,A>& v)
     { return is >> IOStyle() >> v; }
 
 
-
-    template <class T, int N, IndexStyle I> 
-    inline std::string TMV_Text(const SmallVector<T,N,I>& )
-    { 
-        std::ostringstream s;
-        s << "SmallVector<"<<TMV_Text(T())<<","<<N<<","<<TMV_Text(I)<<">";
-        return s.str();
-    }
 
 } // namespace tmv
 

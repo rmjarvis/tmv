@@ -4,7 +4,6 @@
 #include "TMV.h"
 #include <fstream>
 
-#define XXD
 #include "TMV_TestMatrixArith.h"
 #define CT std::complex<T>
 

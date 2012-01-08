@@ -68,7 +68,7 @@ namespace tmv {
     // beginning and then dividing by a regular triangle matrix.
     //
     // Here are some timing measurements on my computer for 
-    // 2000 x 2000 SymMatrix<double,Lower,ColMajor> decomposition and division,
+    // 2000 x 2000 SymMatrix<double,Lower|ColMajor> decomposition and division,
     // both using my TMV code and directly calling the LAPACK routines
     // (not through the TMV library).
     // All times are in seconds - I took the fastest of 3 runs.

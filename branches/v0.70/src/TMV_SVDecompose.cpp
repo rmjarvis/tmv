@@ -284,7 +284,6 @@ namespace tmv {
             TMVAssert(V->rowsize() == V->colsize()); 
             TMVAssert(V->rowsize() == D.size()); 
             TMVAssert(V->ct()==NonConj);
-            if (U && setUV) TMVAssert(U->stor() == V->stor());
         }
 
         char u = 'U';
@@ -496,7 +495,6 @@ namespace tmv {
             TMVAssert(V->rowsize() == V->colsize()); 
             TMVAssert(V->rowsize() == D.size()); 
             TMVAssert(V->ct()==NonConj);
-            if (U && setUV) TMVAssert(U->stor() == V->stor());
         }
 
         char u = 'U';
@@ -693,7 +691,6 @@ namespace tmv {
         TMVAssert((!V || V->iscm() || V->isrm()));
         TMVAssert(D.step() == 1);
         TMVAssert(E.step() == 1);
-        TMVAssert(!U || !V || !setUV || U->stor()==V->stor());
 
         if (D.size() > 0) {
 #ifdef LAP

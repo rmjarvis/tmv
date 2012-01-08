@@ -60,8 +60,6 @@ namespace tmv {
         inline int rowsize() const { return m2.size(); }
         inline int nlo() const { return TMV_MAX(m1.nlo(),m2.nlo()); }
         inline int nhi() const { return TMV_MAX(m1.nhi(),m2.nhi()); }
-        inline StorageType stor() const 
-        { return m1.stor() == m2.stor() ? BaseStorOf(m2) : DiagMajor; }
         inline T getX1() const { return x1; }
         inline const GenBandMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
@@ -257,11 +255,6 @@ namespace tmv {
         { return TMV_MIN(colsize()-1,m1.nlo()+m2.nlo()); }
         inline int nhi() const 
         { return TMV_MIN(rowsize()-1,m1.nhi()+m2.nhi()); }
-        inline StorageType stor() const
-        {
-            return m1.isrm() ? RowMajor : m2.iscm() ? ColMajor :
-                (m1.iscm() && m2.isrm()) ? ColMajor : DiagMajor;
-        }
         inline T getX() const { return x; }
         inline const GenBandMatrix<T1>& getM1() const { return m1; }
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
@@ -306,11 +299,6 @@ namespace tmv {
         { return TMV_MIN(colsize()-1,m1.nlo()+m2.nlo()); }
         inline int nhi() const
         { return TMV_MIN(rowsize()-1,m1.nhi()+m2.nhi()); }
-        inline StorageType stor() const 
-        {
-            return m1.isrm() ? RowMajor : m2.iscm() ? ColMajor :
-                (m1.iscm() && m2.isrm()) ? ColMajor : DiagMajor;
-        }
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenBandMatrix<T2>& getM2() const { return m2; }

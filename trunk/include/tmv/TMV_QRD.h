@@ -133,7 +133,7 @@ namespace tmv {
         enum { rs = IntTraits2<M::_colsize,M::_rowsize>::min };
 
         enum { small = (
-                M::_colsize != TMV_UNKNOWN && M::_rowsize != TMV_UNKNOWN
+                M::_colsize != Unknown && M::_rowsize != Unknown
                 && M::_colsize <= 32 && M::_rowsize <= 32 ) };
 
         typedef typename QRD_Impl<small,M>::qrx_type qrx_type;
@@ -551,8 +551,8 @@ namespace tmv {
         QRD_Impl(const BaseMatrix<M2>& A, bool ) : 
             QRx(Maybe<istrans>::transposeview(SmallQRx) )
         {
-            TMVStaticAssert(M::_colsize != TMV_UNKNOWN);
-            TMVStaticAssert(M::_rowsize != TMV_UNKNOWN);
+            TMVStaticAssert(M::_colsize != Unknown);
+            TMVStaticAssert(M::_rowsize != Unknown);
             TMVAssert(A.colsize() == istrans ? int(rs) : int(cs));
             TMVAssert(A.rowsize() == istrans ? int(cs) : int(rs));
             //std::cout<<"QRD_Impl small\n";
@@ -619,11 +619,11 @@ namespace tmv {
         typedef typename M::real_type RT;
         enum { cs1 = M::_colsize };
         enum { rs1 = M::_rowsize };
-        enum { knownsizes = cs1 != TMV_UNKNOWN && rs1 != TMV_UNKNOWN };
+        enum { knownsizes = cs1 != Unknown && rs1 != Unknown };
         enum { istrans1 = knownsizes && cs1 < int(rs1) };
         enum { cs = IntTraits2<cs1,rs1>::max };
         enum { rs = IntTraits2<cs1,rs1>::min };
-        typedef typename MViewHelper<T,Rec,cs,rs,1,TMV_UNKNOWN,NoAlias>::type qrx_type;
+        typedef typename MViewHelper<T,Rec,cs,rs,1,Unknown,NoAlias>::type qrx_type;
         typedef Vector<RT> beta_type;
 
         template <class M2>

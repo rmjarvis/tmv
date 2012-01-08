@@ -1,6 +1,4 @@
 
-#define XXD
-
 #include "TMV_Test.h"
 #include "TMV_Test_1.h"
 #include "TMV.h"
@@ -24,7 +22,7 @@ static void TestVectorReal()
     }
 
     tmv::Vector<T> v(N);
-    Assert(int(v.size()) == N,"Creating Vector");
+    Assert(v.size() == N,"Creating Vector");
     for (int i=0; i<N; ++i) v(i) = T(i);
     for (int i=0; i<N; ++i) Assert(v(i) == T(i),"Setting Vector");
 
@@ -108,7 +106,9 @@ static void TestVectorReal()
     Assert(a != b,"Vector = Vector copied address, not values");
 
     tmv::Vector<T,tmv::FortranStyle> af(N);
-    for (int i=1; i<=N; ++i) af(i) = T(3+i-1);
+    for (int i=1; i<=N; ++i) {
+        af(i) = T(3+i-1);
+    }
     for (int i=1; i<=N; ++i) 
         Assert(af(i) == a(i-1),"FortranStyle Vector access");
     tmv::ConstVectorView<T,tmv::FortranStyle> afcv = af.view();
@@ -117,9 +117,9 @@ static void TestVectorReal()
     tmv::VectorView<T,tmv::FortranStyle> afv = af.view();
     for (int i=1; i<=N; ++i) 
         Assert(afv(i) == a(i-1),"FortranStyle Vector V access");
-    Assert(a == af,"FortransStyle Vector = CStyle Vector");
+    Assert(a == af,"FortransStyle Vector == CStyle Vector");
     tmv::ConstVectorView<T> afcv_c = afcv;
-    Assert(afcv_c == a,"CStyle View of FortransStyle Vector = CStyle Vector");
+    Assert(afcv_c == a,"CStyle View of FortransStyle Vector == CStyle Vector");
     Assert(afcv == a,"FortranStyle View of Vector == CStyle Vector");
 
     // Test assignments and constructors from arrays
@@ -205,7 +205,7 @@ static void TestVectorReal()
         std::cout<<"a*b = "<<a*b<<std::endl;
         std::cout<<"expected prod = "<<prod<<std::endl;
         std::cout<<"abs(diff) = "<<tmv::TMV_ABS(a*b-prod)<<std::endl;
-        std::cout<<"eps = "<<EPS*Norm(a)*Norm(b)<<std::endl;
+        std::cout<<"eps = "<<EPS<<std::endl;
         std::cout<<"a+b = "<<a+b<<std::endl;
         std::cout<<"NormSq(a+b) = "<<NormSq(a+b)<<std::endl;
         std::cout<<"expected normsqsum = "<<normsqsum<<std::endl;
@@ -350,15 +350,15 @@ static void TestVectorComplex()
     v3(42) = CT(0,1);
     v3(15) = CT(-32*N,24*N);
     int imax,imin;
-    if (showacc) {
-        std::cout<<"v = "<<v3<<std::endl;
-        std::cout<<"v.MaxAbs = "<<v3.maxAbsElement(&imax)<<std::endl;
-        std::cout<<"imax = "<<imax<<std::endl;
-        std::cout<<"v.MinAbs = "<<v3.minAbsElement(&imin)<<std::endl;
-        std::cout<<"imin = "<<imin<<std::endl;
-    }
 
     if (!std::numeric_limits<T>::is_integer) {
+        if (showacc) {
+            std::cout<<"v = "<<v3<<std::endl;
+            std::cout<<"v.MaxAbs = "<<v3.maxAbsElement(&imax)<<std::endl;
+            std::cout<<"imax = "<<imax<<std::endl;
+            std::cout<<"v.MinAbs = "<<v3.minAbsElement(&imin)<<std::endl;
+            std::cout<<"imin = "<<imin<<std::endl;
+        }
         Assert(Equal2(v3.maxAbsElement(&imax),T(41*N),EPS),
                "MaxAbsElement of Vector did not return correct value");
         Assert(imax == 23,
@@ -450,14 +450,14 @@ static void TestVectorComplex()
     prod = T(29)*T(25)*CT(-28,96);
     T normsqsum = 34342500;
     T normsqdiff = 34052500;
+    T eps = EPS;
+    if (!std::numeric_limits<T>::is_integer) eps *= Norm(ca) * Norm(cb);
     if (showacc) {
         std::cout<<"ca*cb = "<<ca*cb<<std::endl;
         std::cout<<"expected prod = "<<prod<<std::endl;
         std::cout<<"abs(diff) = "<<tmv::TMV_ABS(ca*cb-prod)<<std::endl;
-        std::cout<<"eps = "<<EPS*Norm(ca)*Norm(cb)<<std::endl;
+        std::cout<<"eps = "<<eps<<std::endl;
     }
-    T eps = EPS;
-    if (!std::numeric_limits<T>::is_integer) eps *= Norm(ca) * Norm(cb);
     Assert(Equal2(ca*cb,prod,eps),"CInner Product");
     T eps2 = EPS;
     if (!std::numeric_limits<T>::is_integer) eps2 *= Norm1(ca) * Norm1(cb);

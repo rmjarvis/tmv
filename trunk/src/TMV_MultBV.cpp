@@ -151,16 +151,6 @@ namespace tmv {
         const ConstVectorView<double>& x,
         VectorView<double> y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-        TMVAssert(!SameStorage(A,y));
-        TMVAssert(A.isrm() || A.iscm());
-        if (A.isrm()) TMVAssert(A.stepi() >= A.nlo()+A.nhi());
-        else TMVAssert(A.stepj() >= A.nlo()+A.nhi());
-
         int m = A.iscm() ? A.colsize() : A.rowsize();
         int n = A.iscm() ? A.rowsize() : A.colsize();
         int lo = A.iscm() ? A.nlo() : A.nhi();
@@ -189,15 +179,6 @@ namespace tmv {
         const ConstVectorView<std::complex<double>,C2>& x,
         VectorView<std::complex<double> > y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-        TMVAssert(!SameStorage(A,y));
-        if (A.isrm()) TMVAssert(A.stepi() >= A.nlo()+A.nhi());
-        else TMVAssert(A.stepj() >= A.nlo()+A.nhi());
-
         if (x.isconj()
 #ifndef CBLAS
             && !(A.isconj() && A.iscm()) 
@@ -283,14 +264,6 @@ namespace tmv {
         const ConstVectorView<std::complex<double>,C2>& x,
         VectorView<std::complex<double> > y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-        if (A.isrm()) TMVAssert(A.stepi() >= A.nlo()+A.nhi());
-        else TMVAssert(A.stepj() >= A.nlo()+A.nhi());
-
         double beta = 1.;
         if (TMV_IMAG(alpha) == 0. && !x.isconj()) {
             int m = A.iscm() ? A.colsize() : A.rowsize();
@@ -330,14 +303,6 @@ namespace tmv {
         const ConstVectorView<double>& x,
         VectorView<std::complex<double> > y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-        if (A.isrm()) TMVAssert(A.stepi() >= A.nlo()+A.nhi());
-        else TMVAssert(A.stepj() >= A.nlo()+A.nhi());
-
         int m = A.iscm() ? A.colsize() : A.rowsize();
         int n = A.iscm() ? A.rowsize() : A.colsize();
         int lo = A.iscm() ? A.nlo() : A.nhi();
@@ -380,16 +345,6 @@ namespace tmv {
         const ConstVectorView<float>& x,
         VectorView<float> y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-        TMVAssert(!SameStorage(A,y));
-        TMVAssert(A.isrm() || A.iscm());
-        if (A.isrm()) TMVAssert(A.stepi() >= A.nlo()+A.nhi());
-        else TMVAssert(A.stepj() >= A.nlo()+A.nhi());
-
         int m = A.iscm() ? A.colsize() : A.rowsize();
         int n = A.iscm() ? A.rowsize() : A.colsize();
         int lo = A.iscm() ? A.nlo() : A.nhi();
@@ -418,15 +373,6 @@ namespace tmv {
         const ConstVectorView<std::complex<float>,C2>& x,
         VectorView<std::complex<float> > y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-        TMVAssert(!SameStorage(A,y));
-        if (A.isrm()) TMVAssert(A.stepi() >= A.nlo()+A.nhi());
-        else TMVAssert(A.stepj() >= A.nlo()+A.nhi());
-
         if (x.isconj()
 #ifndef CBLAS
             && !(A.isconj() && A.iscm()) 
@@ -512,14 +458,6 @@ namespace tmv {
         const ConstVectorView<std::complex<float>,C2>& x,
         VectorView<std::complex<float> > y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-        if (A.isrm()) TMVAssert(A.stepi() >= A.nlo()+A.nhi());
-        else TMVAssert(A.stepj() >= A.nlo()+A.nhi());
-
         float beta = 1.F;
         if (TMV_IMAG(alpha) == 0. && !x.isconj()) {
             int m = A.iscm() ? A.colsize() : A.rowsize();
@@ -559,14 +497,6 @@ namespace tmv {
         const ConstVectorView<float>& x,
         VectorView<std::complex<float> > y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-        if (A.isrm()) TMVAssert(A.stepi() >= A.nlo()+A.nhi());
-        else TMVAssert(A.stepj() >= A.nlo()+A.nhi());
-
         int m = A.iscm() ? A.colsize() : A.rowsize();
         int n = A.iscm() ? A.rowsize() : A.colsize();
         int lo = A.iscm() ? A.nlo() : A.nhi();
@@ -644,46 +574,44 @@ namespace tmv {
         if (v3.size() > 0 && v2.size() > 0) {
 #ifdef BLAS
             if ( BlasIsCM(m1) || BlasIsRM(m1) ) {
+                DoAddMultMV(x,m1,v2,v3);
+            } else if ((m1.isrm() && m1.stepi() < m1.nlo()+m1.nhi()) ||
+                       (m1.iscm() && m1.stepj() < m1.nlo()+m1.nhi())) {
                 // Check for BandMatrixes that have more diagonals
                 // than either colsize or rowsize.  Then stepi or stepj
                 // is not large enough for the BLAS function.
                 // Need to break up the problem into parts.
-                if ((m1.isrm() && m1.stepi() < m1.nlo()+m1.nhi()) ||
-                    (m1.iscm() && m1.stepj() < m1.nlo()+m1.nhi())) {
-                    if (m1.nlo()+1 == m1.colsize()) {
-                        if (m1.nhi()+1 == m1.rowsize()) {
-                            ConstMatrixView<T1,C1> m1a =
-                                m1.subMatrix(0,m1.colsize(),0,m1.rowsize());
-                            v3 += x * m1a * v2;
-                        } else {
-                            ConstMatrixView<T1,C1> m1a =
-                                m1.subMatrix(0,m1.colsize(),0,m1.nhi());
-                            v3 += x * m1a * v2.subVector(0,m1.nhi());
-                            ConstBandMatrixView<T1,C1> m1b =
-                                m1.colRange(m1.nhi(),m1.rowsize());
-                            DoAddMultMV(
-                                x,m1b,v2.subVector(m1.nhi(),m1.rowsize()),v3);
-                        }
+                if (m1.nlo()+1 == m1.colsize()) {
+                    if (m1.nhi()+1 == m1.rowsize()) {
+                        ConstMatrixView<T1,C1> m1a =
+                            m1.subMatrix(0,m1.colsize(),0,m1.rowsize());
+                        v3 += x * m1a * v2;
                     } else {
-                        TMVAssert(m1.nlo()>0);
-                        if (m1.nhi()+1 == m1.rowsize()) {
-                            ConstMatrixView<T1,C1> m1a =
-                                m1.subMatrix(0,m1.nlo(),0,m1.rowsize());
-                            v3.subVector(0,m1.nlo()) += x * m1a * v2;
-                        } else {
-                            ConstBandMatrixView<T1,C1> m1a =
-                                m1.rowRange(0,m1.nlo());
-                            DoAddMultMV(
-                                x,m1a,v2.subVector(0,m1a.rowsize()),
-                                v3.subVector(0,m1.nlo()));
-                        }
+                        ConstMatrixView<T1,C1> m1a =
+                            m1.subMatrix(0,m1.colsize(),0,m1.nhi());
+                        v3 += x * m1a * v2.subVector(0,m1.nhi());
                         ConstBandMatrixView<T1,C1> m1b =
-                            m1.rowRange(m1.nlo(),m1.colsize());
+                            m1.colRange(m1.nhi(),m1.rowsize());
                         DoAddMultMV(
-                            x,m1b,v2,v3.subVector(m1.nlo(),m1.colsize()));
+                            x,m1b,v2.subVector(m1.nhi(),m1.rowsize()),v3);
                     }
                 } else {
-                    DoAddMultMV(x,m1,v2,v3);
+                    TMVAssert(m1.nlo()>0);
+                    if (m1.nhi()+1 == m1.rowsize()) {
+                        ConstMatrixView<T1,C1> m1a =
+                            m1.subMatrix(0,m1.nlo(),0,m1.rowsize());
+                        v3.subVector(0,m1.nlo()) += x * m1a * v2;
+                    } else {
+                        ConstBandMatrixView<T1,C1> m1a =
+                            m1.rowRange(0,m1.nlo());
+                        DoAddMultMV(
+                            x,m1a,v2.subVector(0,m1a.rowsize()),
+                            v3.subVector(0,m1.nlo()));
+                    }
+                    ConstBandMatrixView<T1,C1> m1b =
+                        m1.rowRange(m1.nlo(),m1.colsize());
+                    DoAddMultMV(
+                        x,m1b,v2,v3.subVector(m1.nlo(),m1.colsize()));
                 }
             } else {
                 BandMatrix<T1,ColMajor|NoDivider> m1c = m1;

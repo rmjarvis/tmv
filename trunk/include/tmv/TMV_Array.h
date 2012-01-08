@@ -177,7 +177,7 @@ namespace tmv
         {
             static T zero(0);
             static T nan = 
-                std::numeric_limits<T>::is_integer ? TMV_UNKNOWN : zero/zero;
+                std::numeric_limits<T>::is_integer ? Unknown : zero/zero;
             return nan; 
         }
     };

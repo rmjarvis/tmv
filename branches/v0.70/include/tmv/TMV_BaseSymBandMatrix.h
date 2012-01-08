@@ -41,16 +41,16 @@ namespace tmv {
     template <class T> 
     class GenSymBandMatrix;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class ConstSymBandMatrixView;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class SymBandMatrixView;
 
-    template <class T, UpLoType U=Upper, StorageType S=ColMajor, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class SymBandMatrix;
 
-    template <class T, UpLoType U=Upper, StorageType S=ColMajor, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class HermBandMatrix;
 
     template <class T> 
@@ -69,10 +69,6 @@ namespace tmv {
     class ProdBB;
 
     template <class T> 
-    inline StorageType BaseStorOf(const GenSymBandMatrix<T>& m)
-    { return m.stor() != NoMajor ? m.stor() : DiagMajor; }
-
-    template <class T> 
     struct AssignableToSymBandMatrix :
         virtual public AssignableToSymMatrix<T>,
         virtual public AssignableToBandMatrix<T>
@@ -85,61 +81,40 @@ namespace tmv {
     };
 
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I>
-    inline std::string TMV_Text(const SymBandMatrix<T,U,S,I>& )
+    template <class T, int A>
+    inline std::string TMV_Text(const SymBandMatrix<T,A>& )
     {
         return std::string("SymBandMatrix<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(U) + "," +
-            TMV_Text(S) + "," +
-            TMV_Text(I) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I>
-    inline std::string TMV_Text(const HermBandMatrix<T,U,S,I>& )
+    template <class T, int A>
+    inline std::string TMV_Text(const HermBandMatrix<T,A>& )
     {
         return std::string("HermBandMatrix<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(U) + "," +
-            TMV_Text(S) + "," +
-            TMV_Text(I) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
     template <class T> 
     inline std::string TMV_Text(const GenSymBandMatrix<T>& m)
     {
-        return std::string("GenSymBandMatrix<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.sym()) + "," +
-            TMV_Text(m.uplo()) + "," +
-            TMV_Text(m.ct()) + "," +
-            TMV_Text(m.stor()) + ">";
+        return std::string("GenSymBandMatrix<") + TMV_Text(T()) + ">";
     }
 
-    template <class T, IndexStyle I> 
+    template <class T, int A>
     inline std::string TMV_Text(
-        const ConstSymBandMatrixView<T,I>& m)
+        const ConstSymBandMatrixView<T,A>& m)
     {
         return std::string("ConstSymBandMatrixView<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.sym()) + "," +
-            TMV_Text(m.uplo()) +  "," +
-            TMV_Text(m.stor()) +  "," +
-            TMV_Text(I) + "," +
-            TMV_Text(m.ct()) +  ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
-    template <class T, IndexStyle I> 
+    template <class T, int A>
     inline std::string TMV_Text(
-        const SymBandMatrixView<T,I>& m)
+        const SymBandMatrixView<T,A>& m)
     {
         return std::string("SymBandMatrixView<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.sym()) + "," +
-            TMV_Text(m.uplo()) +  "," +
-            TMV_Text(m.stor()) +  "," +
-            TMV_Text(I) + "," + 
-            TMV_Text(m.ct()) +  ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
 }

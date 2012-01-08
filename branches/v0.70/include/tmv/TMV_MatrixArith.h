@@ -46,24 +46,24 @@ namespace tmv {
     template <class T, class Tv> 
     class ProdXV;
 
-    template <class T, StorageType S, IndexStyle I, class Tx> 
-    inline Matrix<T,S>& operator+=(Matrix<T,S,I>& m, const Tx& x) 
+    template <class T, int A, class Tx> 
+    inline Matrix<T,A>& operator+=(Matrix<T,A>& m, const Tx& x) 
     { m.view() += x; return m; }
 
-    template <class T, StorageType S, IndexStyle I, class Tx> 
-    inline Matrix<T,S>& operator-=(Matrix<T,S,I>& m, const Tx& x) 
+    template <class T, int A, class Tx> 
+    inline Matrix<T,A>& operator-=(Matrix<T,A>& m, const Tx& x) 
     { m.view() -= x; return m; }
 
-    template <class T, StorageType S, IndexStyle I, class Tx> 
-    inline Matrix<T,S>& operator*=(Matrix<T,S,I>& m, const Tx& x) 
+    template <class T, int A, class Tx> 
+    inline Matrix<T,A>& operator*=(Matrix<T,A>& m, const Tx& x) 
     { m.view() *= x; return m; }
 
-    template <class T, StorageType S, IndexStyle I, class Tx> 
-    inline Matrix<T,S>& operator/=(Matrix<T,S,I>& m, const Tx& x) 
+    template <class T, int A, class Tx> 
+    inline Matrix<T,A>& operator/=(Matrix<T,A>& m, const Tx& x) 
     { m.view() /= x; return m; }
 
-    template <class T, StorageType S, IndexStyle I, class Tx> 
-    inline Matrix<T,S>& operator%=(Matrix<T,S,I>& m, const Tx& x) 
+    template <class T, int A, class Tx> 
+    inline Matrix<T,A>& operator%=(Matrix<T,A>& m, const Tx& x) 
     { m.view() %= x; return m; }
 
     //
@@ -80,7 +80,6 @@ namespace tmv {
         inline ProdXM(const T _x, const GenMatrix<Tm>& _m) : x(_x), m(_m) {}
         inline int colsize() const { return m.colsize(); }
         inline int rowsize() const { return m.rowsize(); }
-        inline StorageType stor() const { return BaseStorOf(m); }
         inline T getX() const { return x; }
         inline const GenMatrix<Tm>& getM() const { return m; }
         inline void assignToM(const MatrixView<real_type>& m0) const
@@ -156,7 +155,6 @@ namespace tmv {
         { TMVAssert(m.isSquare()); }
         inline int colsize() const { return m.colsize(); }
         inline int rowsize() const { return m.rowsize(); }
-        inline StorageType stor() const { return BaseStorOf(m); }
         inline T getX1() const { return x1; }
         inline const GenMatrix<Tm>& getM() const { return m; }
         inline T getX2() const { return x2; }
@@ -270,7 +268,6 @@ namespace tmv {
             x(_x), v1(_v1), v2(_v2) {}
         inline int colsize() const { return v1.size(); }
         inline int rowsize() const { return v2.size(); }
-        inline StorageType stor() const { return RowMajor; } // arbitrary
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV1() const { return v1; }
         inline const GenVector<T2>& getV2() const { return v2; }
@@ -374,7 +371,6 @@ namespace tmv {
         }
         inline int colsize() const { return m1.colsize(); }
         inline int rowsize() const { return m1.rowsize(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline T getX1() const { return x1; }
         inline const GenMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
@@ -724,7 +720,6 @@ namespace tmv {
         { TMVAssert(m1.rowsize() == m2.colsize()) ; }
         inline int colsize() const { return m1.colsize(); }
         inline int rowsize() const { return m2.rowsize(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM1() const { return m1; }
         inline const GenMatrix<T2>& getM2() const { return m2; }
@@ -862,7 +857,6 @@ namespace tmv {
         }
         inline int colsize() const { return m1.colsize(); }
         inline int rowsize() const { return m1.rowsize(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM1() const { return m1; }
         inline const GenMatrix<T2>& getM2() const { return m2; }
@@ -953,7 +947,6 @@ namespace tmv {
         inline QuotXM(const T _x, const GenMatrix<Tm>& _m) : x(_x), m(_m) {}
         inline int colsize() const { return m.rowsize(); }
         inline int rowsize() const { return m.colsize(); }
-        inline StorageType stor() const { return ColMajor; }
         inline T getX() const { return x; }
         inline const GenMatrix<Tm>& getM() const { return m; }
         inline void assignToM(const MatrixView<real_type>& m0) const
@@ -1171,7 +1164,6 @@ namespace tmv {
         { TMVAssert( m1.colsize() == m2.colsize() ); }
         inline int colsize() const { return m2.rowsize(); }
         inline int rowsize() const { return m1.rowsize(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM1() const { return m1; }
         inline const GenMatrix<T2>& getM2() const { return m2; }
@@ -1224,7 +1216,6 @@ namespace tmv {
         { TMVAssert( m1.rowsize() == m2.rowsize() ); }
         inline int colsize() const { return m1.colsize(); }
         inline int rowsize() const { return m2.colsize(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM1() const { return m1; }
         inline const GenMatrix<T2>& getM2() const { return m2; }

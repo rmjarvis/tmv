@@ -58,7 +58,6 @@ public:
     { TMVAssert(m1.rowsize() == m2.colsize()) ; }
     inline int colsize() const { return m1.colsize(); }
     inline int rowsize() const { return m2.rowsize(); }
-    inline StorageType stor() const { return BaseStorOf(m2); }
     inline T getX() const { return x; }
     inline const GENMATRIX1<T1>& getM1() const { return m1; }
     inline const GenMatrix<T2>& getM2() const { return m2; }

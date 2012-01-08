@@ -93,8 +93,8 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
+            const int M = cs == Unknown ? m2.colsize() : cs;
+            const int N = rs == Unknown ? m2.rowsize() : rs;
 #ifdef PRINTALGO_XB
             std::cout<<"XB algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -108,7 +108,7 @@ namespace tmv {
             const int diagstep1 = m1.diagstep();
             const int diagstep2 = m2.diagstep();
 
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             const int lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
             const int j1 = m1.nhi();
             const int j2 = TMV_MIN(N,M-m1.nlo());
@@ -146,8 +146,8 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
+            const int M = cs == Unknown ? m2.colsize() : cs;
+            const int N = rs == Unknown ? m2.rowsize() : rs;
 #ifdef PRINTALGO_XB
             std::cout<<"XB algo 21: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -161,7 +161,7 @@ namespace tmv {
             const int diagstep1 = m1.diagstep();
             const int diagstep2 = m2.diagstep();
 
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             const int lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
             const int i1 = m1.nlo();
             const int i2 = TMV_MIN(M,N-m1.nhi());
@@ -199,8 +199,8 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
+            const int M = cs == Unknown ? m2.colsize() : cs;
+            const int N = rs == Unknown ? m2.rowsize() : rs;
 #ifdef PRINTALGO_XB
             std::cout<<"XB algo 31: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -214,7 +214,7 @@ namespace tmv {
             const int rowstep1 = m1.stepj();
             const int rowstep2 = m2.stepj();
 
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             const int ds = IntTraits2<cs,rs>::min;
             int len = TMV_MIN(M-m1.nlo(),N);
             IT1 it1 = m1.get_diag(-m1.nlo()).begin().nonConj();
@@ -366,8 +366,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst =
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -450,8 +450,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst =
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

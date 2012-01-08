@@ -31,8 +31,8 @@ static void TestSmallSquareDiv_A1b()
 
     TestMatrixDivArith3d(tmv::LU,a1,b,x,c1,e,y,"V/Square"); 
 #if (XTEST & 32)
-    tmv::SmallMatrix<T,N,N,stor,tmv::FortranStyle> a1f = a1;
-    tmv::SmallMatrix<std::complex<T>,N,N,stor,tmv::FortranStyle> c1f = c1;
+    tmv::SmallMatrix<T,N,N,stor|tmv::FortranStyle> a1f = a1;
+    tmv::SmallMatrix<std::complex<T>,N,N,stor|tmv::FortranStyle> c1f = c1;
 
     tmv::SmallVector<T,N,tmv::FortranStyle> bf = b;
     tmv::SmallVector<std::complex<T>,N,tmv::FortranStyle> ef = e;

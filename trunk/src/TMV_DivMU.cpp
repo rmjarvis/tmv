@@ -45,12 +45,6 @@ namespace tmv {
     template <class M2> 
     static void BlasTriLDivEq(MatrixView<double> A, const M2& B, double )
     {
-        TMVAssert(B.size() == A.colsize());
-        TMVAssert(A.colsize()>0);
-        TMVAssert(A.rowsize()>0);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-
         int m=A.iscm()?A.colsize():A.rowsize();
         int n=A.iscm()?A.rowsize():A.colsize();
         double alpha(1);
@@ -69,12 +63,6 @@ namespace tmv {
     static void BlasTriLDivEq(
         MatrixView<std::complex<double> > A, const M2& B, std::complex<double> )
     {
-        TMVAssert(B.size() == A.colsize());
-        TMVAssert(A.colsize()>0);
-        TMVAssert(A.rowsize()>0);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-
         int m=A.iscm()?A.colsize():A.rowsize();
         int n=A.iscm()?A.rowsize():A.colsize();
         std::complex<double> alpha(1);
@@ -103,12 +91,6 @@ namespace tmv {
     static void BlasTriLDivEq(
         MatrixView<std::complex<double> > A, const M2& B, double )
     {
-        TMVAssert(B.size() == A.colsize());
-        TMVAssert(A.colsize()>0);
-        TMVAssert(A.rowsize()>0);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-
         if (A.iscm()) {
             Matrix<double,ColMajor> A1 = A.realPart();
             BlasTriLDivEq(A1.xView(),B,double(0));
@@ -137,12 +119,6 @@ namespace tmv {
     template <class M2> 
     static void BlasTriLDivEq(MatrixView<float> A, const M2& B, float )
     {
-        TMVAssert(B.size() == A.colsize());
-        TMVAssert(A.colsize()>0);
-        TMVAssert(A.rowsize()>0);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-
         int m=A.iscm()?A.colsize():A.rowsize();
         int n=A.iscm()?A.rowsize():A.colsize();
         float alpha(1);
@@ -161,12 +137,6 @@ namespace tmv {
     static void BlasTriLDivEq(
         MatrixView<std::complex<float> > A, const M2& B, std::complex<float> )
     {
-        TMVAssert(B.size() == A.colsize());
-        TMVAssert(A.colsize()>0);
-        TMVAssert(A.rowsize()>0);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-
         int m=A.iscm()?A.colsize():A.rowsize();
         int n=A.iscm()?A.rowsize():A.colsize();
         std::complex<float> alpha(1);
@@ -195,12 +165,6 @@ namespace tmv {
     static void BlasTriLDivEq(
         MatrixView<std::complex<float> > A, const M2& B, float )
     {
-        TMVAssert(B.size() == A.colsize());
-        TMVAssert(A.colsize()>0);
-        TMVAssert(A.rowsize()>0);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-
         if (A.iscm()) {
             Matrix<float,ColMajor> A1 = A.realPart();
             BlasTriLDivEq(A1.xView(),B,float(0));

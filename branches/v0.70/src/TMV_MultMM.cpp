@@ -113,42 +113,24 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static inline void BlasMultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const int beta, const MatrixView<T>& C)
-    {
-        if (beta == 0) NonBlasMultMM<false>(alpha,A,B,C); 
-        else NonBlasMultMM<true>(alpha,A,B,C); 
-    }
+        const MatrixView<T>& C)
+    { NonBlasMultMM<true>(alpha,A,B,C); }
 #ifdef INST_DOUBLE
     template <> 
     void BlasMultMM(
         const double alpha, const GenMatrix<double>& A,
-        const GenMatrix<double>& B, const int beta, const MatrixView<double>& C)
+        const GenMatrix<double>& B, const MatrixView<double>& C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(alpha != 0.);
-        TMVAssert(A.ct()==NonConj);
-        TMVAssert(B.ct()==NonConj);
-        TMVAssert(C.ct()==NonConj);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-        TMVAssert(C.iscm());
-
         int m = C.colsize();
         int n = C.rowsize();
         int k = A.rowsize();
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
+        int lda = BlasIsCM(A)?A.stepj():A.stepi();
+        int ldb = BlasIsCM(B)?B.stepj():B.stepi();
         int ldc = C.stepj();
-        if (beta == 0) C.setZero();
         double xbeta(1);
         BLASNAME(dgemm) (
-            BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
-            B.iscm()?BLASCH_NT:BLASCH_T,
+            BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
+            BlasIsCM(B)?BLASCH_NT:BLASCH_T,
             BLASV(m),BLASV(n),BLASV(k),BLASV(alpha),
             BLASP(A.cptr()),BLASV(lda),BLASP(B.cptr()),BLASV(ldb),
             BLASV(xbeta),BLASP(C.ptr()),BLASV(ldc) BLAS1 BLAS1);
@@ -158,38 +140,25 @@ namespace tmv {
         const std::complex<double> alpha,
         const GenMatrix<std::complex<double> >& A,
         const GenMatrix<std::complex<double> >& B,
-        const int beta, const MatrixView<std::complex<double> >& C)
+        const MatrixView<std::complex<double> >& C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(alpha != 0.);
-        TMVAssert(C.ct()==NonConj);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-        TMVAssert(C.iscm());
-
-        if (A.iscm() && A.isconj()) {
+        if (BlasIsCM(A) && A.isconj()) {
             Matrix<std::complex<double>,ColMajor> AA = alpha*A;
-            return BlasMultMM(std::complex<double>(1),AA,B,beta,C);
-        } else if (B.iscm() && B.isconj()) {
+            return BlasMultMM(std::complex<double>(1),AA,B,C);
+        } else if (BlasIsCM(B) && B.isconj()) {
             Matrix<std::complex<double>,ColMajor> BB = alpha*B;
-            return BlasMultMM(std::complex<double>(1),A,BB,beta,C);
+            return BlasMultMM(std::complex<double>(1),A,BB,C);
         } else {
             int m = C.colsize();
             int n = C.rowsize();
             int k = A.rowsize();
-            int lda = A.isrm()?A.stepi():A.stepj();
-            int ldb = B.isrm()?B.stepi():B.stepj();
+            int lda = BlasIsCM(A)?A.stepj():A.stepi();
+            int ldb = BlasIsCM(B)?B.stepj():B.stepi();
             int ldc = C.stepj();
-            if (beta == 0) C.setZero();
             std::complex<double> xbeta(1);
             BLASNAME(zgemm) (
-                BLASCM A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
-                B.iscm()?BLASCH_NT:B.isconj()?BLASCH_CT:BLASCH_T,
+                BLASCM BlasIsCM(A)?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
+                BlasIsCM(B)?BLASCH_NT:B.isconj()?BLASCH_CT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(k),BLASP(&alpha),
                 BLASP(A.cptr()),BLASV(lda),BLASP(B.cptr()),BLASV(ldb),
                 BLASP(&xbeta),BLASP(C.ptr()),BLASV(ldc) BLAS1 BLAS1);
@@ -200,76 +169,45 @@ namespace tmv {
         const std::complex<double> alpha,
         const GenMatrix<std::complex<double> >& A,
         const GenMatrix<double>& B,
-        const int beta, const MatrixView<std::complex<double> >& C)
+        const MatrixView<std::complex<double> >& C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(alpha != 0.);
-        TMVAssert(C.ct()==NonConj);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-        TMVAssert(C.iscm());
-
-        if (A.iscm() && ((!A.isconj() && TMV_IMAG(alpha)==0.) || beta == 0)) {
+        if (BlasIsCM(A) && ((!A.isconj() && TMV_IMAG(alpha)==0.))) {
             int m = 2*C.colsize();
             int n = C.rowsize();
             int k = A.rowsize();
             int lda = 2*A.stepj();
-            int ldb = B.isrm()?B.stepi():B.stepj();
+            int ldb = BlasIsCM(B)?B.stepj():B.stepi();
             int ldc = 2*C.stepj();
-            if (beta == 0) {
-                double xalpha(1);
-                C.setZero();
-                double xbeta(1);
-                BLASNAME(dgemm) (
-                    BLASCM BLASCH_NT, B.iscm()?BLASCH_NT:BLASCH_T,
-                    BLASV(m),BLASV(n),BLASV(k),BLASV(xalpha),
-                    BLASP((const double*)(A.cptr())),BLASV(lda),
-                    BLASP(B.cptr()),BLASV(ldb),
-                    BLASV(xbeta),BLASP((double*)(C.ptr())),BLASV(ldc) 
-                    BLAS1 BLAS1);
-                if (A.isconj()) C.conjugateSelf();
-                C *= alpha;
-            } else {
-                double xalpha(TMV_REAL(alpha));
-                double xbeta(1);
-                BLASNAME(dgemm) (
-                    BLASCM BLASCH_NT, B.iscm()?BLASCH_NT:BLASCH_T,
-                    BLASV(m),BLASV(n),BLASV(k),BLASV(xalpha),
-                    BLASP((const double*)(A.cptr())),BLASV(lda),
-                    BLASP(B.cptr()),BLASV(ldb),
-                    BLASV(xbeta),BLASP((double*)(C.ptr())),BLASV(ldc) 
-                    BLAS1 BLAS1);
-            } 
+            double xalpha(TMV_REAL(alpha));
+            double xbeta(1);
+            BLASNAME(dgemm) (
+                BLASCM BLASCH_NT, BlasIsCM(B)?BLASCH_NT:BLASCH_T,
+                BLASV(m),BLASV(n),BLASV(k),BLASV(xalpha),
+                BLASP((const double*)(A.cptr())),BLASV(lda),
+                BLASP(B.cptr()),BLASV(ldb),
+                BLASV(xbeta),BLASP((double*)(C.ptr())),BLASV(ldc) 
+                BLAS1 BLAS1);
         } else {
             if (TMV_IMAG(alpha) == 0.) {
                 Matrix<double,ColMajor> A1 = A.realPart();
                 Matrix<double,ColMajor> C1 = TMV_REAL(alpha)*A1*B;
-                if (beta == 0) C.realPart() = C1;
-                else C.realPart() += C1;
+                C.realPart() += C1;
                 A1 = A.imagPart();
                 if (A.isconj()) C1 = -TMV_REAL(alpha)*A1*B;
                 else C1 = TMV_REAL(alpha)*A1*B;
-                if (beta == 0) C.imagPart() = C1;
-                else C.imagPart() += C1;
+                C.imagPart() += C1;
             } else {
                 Matrix<double,ColMajor> Ar = A.realPart();
                 Matrix<double,ColMajor> Ai = A.imagPart();
                 Matrix<double,ColMajor> C1 = TMV_REAL(alpha)*Ar*B;
                 if (A.isconj()) C1 += TMV_IMAG(alpha)*Ai*B;
                 else C1 -= TMV_IMAG(alpha)*Ai*B;
-                if (beta == 0) C.realPart() = C1;
-                else C.realPart() += C1;
+                C.realPart() += C1;
 
                 if (A.isconj()) C1 = -TMV_REAL(alpha)*Ai*B;
                 else C1 = TMV_REAL(alpha)*Ai*B;
                 C1 += TMV_IMAG(alpha)*Ar*B;
-                if (beta == 0) C.imagPart() = C1;
-                else C.imagPart() += C1;
+                C.imagPart() += C1;
             }
         }
     }
@@ -278,97 +216,52 @@ namespace tmv {
         const std::complex<double> alpha,
         const GenMatrix<double>& A,
         const GenMatrix<std::complex<double> >& B,
-        const int beta, const MatrixView<std::complex<double> >& C)
+        const MatrixView<std::complex<double> >& C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(alpha != 0.);
-        TMVAssert(C.ct()==NonConj);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-        TMVAssert(C.iscm());
-
         if (TMV_IMAG(alpha) == 0.) {
             Matrix<double,ColMajor> B1 = B.realPart();
             Matrix<double,ColMajor> C1 = TMV_REAL(alpha)*A*B1;
-            if (beta == 0) C.realPart() = C1;
-            else C.realPart() += C1;
+            C.realPart() += C1;
             B1 = B.imagPart();
             if (B.isconj()) C1 = -TMV_REAL(alpha)*A*B1;
             else C1 = TMV_REAL(alpha)*A*B1;
-            if (beta == 0) C.imagPart() = C1;
-            else C.imagPart() += C1;
+            C.imagPart() += C1;
         } else {
             Matrix<double,ColMajor> Br = B.realPart();
             Matrix<double,ColMajor> Bi = B.imagPart();
             Matrix<double,ColMajor> C1 = TMV_REAL(alpha)*A*Br;
             if (B.isconj()) C1 += TMV_IMAG(alpha)*A*Bi;
             else C1 -= TMV_IMAG(alpha)*A*Bi;
-            if (beta == 0) C.realPart() = C1;
-            else C.realPart() += C1;
+            C.realPart() += C1;
 
             if (B.isconj()) C1 = -TMV_REAL(alpha)*A*Bi;
             else C1 = TMV_REAL(alpha)*A*Bi;
             C1 += TMV_IMAG(alpha)*A*Br;
-            if (beta == 0) C.imagPart() = C1;
-            else C.imagPart() += C1;
+            C.imagPart() += C1;
         }
     }
     template <> 
     void BlasMultMM(
         const std::complex<double> alpha,
-        const GenMatrix<double>& A,
-        const GenMatrix<double>& B,
-        const int beta, const MatrixView<std::complex<double> >& C)
+        const GenMatrix<double>& A, const GenMatrix<double>& B,
+        const MatrixView<std::complex<double> >& C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(alpha != 0.);
-        TMVAssert(C.ct()==NonConj);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-        TMVAssert(C.iscm());
-
         Matrix<double,ColMajor> C1 = A*B;
-        if (beta == 0) C = alpha*C1;
-        else C += alpha*C1;
+        C += alpha*C1;
     }
 #endif // INST_DOUBLE
 #ifdef INST_FLOAT
     template <> 
     void BlasMultMM(
         const float alpha, const GenMatrix<float>& A,
-        const GenMatrix<float>& B, const int beta, const MatrixView<float>& C)
+        const GenMatrix<float>& B, const MatrixView<float>& C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(alpha != 0.F);
-        TMVAssert(A.ct()==NonConj);
-        TMVAssert(B.ct()==NonConj);
-        TMVAssert(C.ct()==NonConj);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-        TMVAssert(C.iscm());
-
         int m = C.colsize();
         int n = C.rowsize();
         int k = A.rowsize();
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
+        int lda = BlasIsCM(A)?A.stepj():A.stepi();
+        int ldb = BlasIsCM(B)?B.stepj():B.stepi();
         int ldc = C.stepj();
-        if (beta == 0) C.setZero();
         float xbeta(1);
         //std::cout<<"Before sgemm"<<std::endl;
         //std::cout<<"A = "<<TMV_Text(A)<<std::endl;
@@ -380,8 +273,8 @@ namespace tmv {
         //std::cout<<"m n k = "<<m<<"  "<<n<<"  "<<k<<std::endl;
         //std::cout<<"lda b c = "<<lda<<"  "<<ldb<<"  "<<ldc<<std::endl;
         BLASNAME(sgemm) (
-            BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
-            B.iscm()?BLASCH_NT:BLASCH_T,
+            BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
+            BlasIsCM(B)?BLASCH_NT:BLASCH_T,
             BLASV(m),BLASV(n),BLASV(k),BLASV(alpha),
             BLASP(A.cptr()),BLASV(lda),BLASP(B.cptr()),BLASV(ldb),
             BLASV(xbeta),BLASP(C.ptr()),BLASV(ldc) BLAS1 BLAS1);
@@ -392,39 +285,26 @@ namespace tmv {
         const std::complex<float> alpha,
         const GenMatrix<std::complex<float> >& A,
         const GenMatrix<std::complex<float> >& B,
-        const int beta, const MatrixView<std::complex<float> >& C)
+        const MatrixView<std::complex<float> >& C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(alpha != 0.F);
-        TMVAssert(C.ct()==NonConj);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-        TMVAssert(C.iscm());
-
-        if (A.iscm() && A.isconj()) {
+        if (BlasIsCM(A) && A.isconj()) {
             Matrix<std::complex<float> > AA = alpha*A;
-            return BlasMultMM(std::complex<float>(1),AA,B,beta,C);
-        } else if (B.iscm() && B.isconj()) {
+            return BlasMultMM(std::complex<float>(1),AA,B,C);
+        } else if (BlasIsCM(B) && B.isconj()) {
             Matrix<std::complex<float> > BB = alpha*B;
-            return BlasMultMM(std::complex<float>(1),A,BB,beta,C);
+            return BlasMultMM(std::complex<float>(1),A,BB,C);
         } else {
             int m = C.colsize();
             int n = C.rowsize();
             int k = A.rowsize();
-            int lda = A.isrm()?A.stepi():A.stepj();
-            int ldb = B.isrm()?B.stepi():B.stepj();
+            int lda = BlasIsCM(A)?A.stepj():A.stepi();
+            int ldb = BlasIsCM(B)?B.stepj():B.stepi();
             int ldc = C.stepj();
-            if (beta == 0) C.setZero();
             std::complex<float> xbeta(1);
             //std::cout<<"Before cgemm"<<std::endl;
             BLASNAME(cgemm) (
-                BLASCM A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
-                B.iscm()?BLASCH_NT:B.isconj()?BLASCH_CT:BLASCH_T,
+                BLASCM BlasIsCM(A)?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
+                BlasIsCM(B)?BLASCH_NT:B.isconj()?BLASCH_CT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(k),BLASP(&alpha),
                 BLASP(A.cptr()),BLASV(lda),BLASP(B.cptr()),BLASV(ldb),
                 BLASP(&xbeta),BLASP(C.ptr()),BLASV(ldc) BLAS1 BLAS1);
@@ -434,77 +314,46 @@ namespace tmv {
     template <> 
     void BlasMultMM(
         const std::complex<float> alpha,
-        const GenMatrix<std::complex<float> >& A,
-        const GenMatrix<float>& B,
-        const int beta, const MatrixView<std::complex<float> >& C)
+        const GenMatrix<std::complex<float> >& A, const GenMatrix<float>& B,
+        const MatrixView<std::complex<float> >& C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(alpha != 0.F);
-        TMVAssert(C.ct()==NonConj);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-        TMVAssert(C.iscm());
-
-        if (A.iscm() && !A.isconj() && (TMV_IMAG(alpha)==0.F || beta == 0)) {
+        if (BlasIsCM(A) && !A.isconj() && (TMV_IMAG(alpha)==0.F)) {
             int m = 2*C.colsize();
             int n = C.rowsize();
             int k = A.rowsize();
             int lda = 2*A.stepj();
-            int ldb = B.isrm()?B.stepi():B.stepj();
+            int ldb = BlasIsCM(B)?B.stepj():B.stepi();
             int ldc = 2*C.stepj();
-            if (beta == 0) {
-                float xalpha(1);
-                C.setZero();
-                float xbeta(1);
-                BLASNAME(sgemm) (
-                    BLASCM BLASCH_NT, B.iscm()?BLASCH_NT:BLASCH_T,
-                    BLASV(m),BLASV(n),BLASV(k),BLASV(xalpha),
-                    BLASP((const float*)(A.cptr())),BLASV(lda),
-                    BLASP(B.cptr()),BLASV(ldb),
-                    BLASV(xbeta),BLASP((float*)(C.ptr())),BLASV(ldc) 
-                    BLAS1 BLAS1);
-                C *= alpha;
-            } else {
-                float xalpha(TMV_REAL(alpha));
-                float xbeta(1);
-                BLASNAME(sgemm) (
-                    BLASCM BLASCH_NT, B.iscm()?BLASCH_NT:BLASCH_T,
-                    BLASV(m),BLASV(n),BLASV(k),BLASV(xalpha),
-                    BLASP((const float*)(A.cptr())),BLASV(lda),
-                    BLASP(B.cptr()),BLASV(ldb),
-                    BLASV(xbeta),BLASP((float*)(C.ptr())),BLASV(ldc) 
-                    BLAS1 BLAS1);
-            }
+            float xalpha(TMV_REAL(alpha));
+            float xbeta(1);
+            BLASNAME(sgemm) (
+                BLASCM BLASCH_NT, BlasIsCM(B)?BLASCH_NT:BLASCH_T,
+                BLASV(m),BLASV(n),BLASV(k),BLASV(xalpha),
+                BLASP((const float*)(A.cptr())),BLASV(lda),
+                BLASP(B.cptr()),BLASV(ldb),
+                BLASV(xbeta),BLASP((float*)(C.ptr())),BLASV(ldc) 
+                BLAS1 BLAS1);
         } else {
             if (TMV_IMAG(alpha) == 0.F) {
                 Matrix<float,ColMajor> A1 = A.realPart();
                 Matrix<float,ColMajor> C1 = TMV_REAL(alpha)*A1*B;
-                if (beta == 0) C.realPart() = C1;
-                else C.realPart() += C1;
+                C.realPart() += C1;
                 A1 = A.imagPart();
                 if (A.isconj()) C1 = -TMV_REAL(alpha)*A.imagPart()*B;
                 else C1 = TMV_REAL(alpha)*A1*B;
-                if (beta == 0) C.imagPart() = C1;
-                else C.imagPart() += C1;
+                C.imagPart() += C1;
             } else {
                 Matrix<float,ColMajor> Ar = A.realPart();
                 Matrix<float,ColMajor> Ai = A.imagPart();
                 Matrix<float,ColMajor> C1 = TMV_REAL(alpha)*Ar*B;
                 if (A.isconj()) C1 += TMV_IMAG(alpha)*Ai*B;
                 else C1 -= TMV_IMAG(alpha)*Ai*B;
-                if (beta == 0) C.realPart() = C1;
-                else C.realPart() += C1;
+                C.realPart() += C1;
 
                 if (A.isconj()) C1 = -TMV_REAL(alpha)*Ai*B;
                 else C1 = TMV_REAL(alpha)*Ai*B;
                 C1 += TMV_IMAG(alpha)*Ar*B;
-                if (beta == 0) C.imagPart() = C1;
-                else C.imagPart() += C1;
+                C.imagPart() += C1;
             }
         }
     }
@@ -513,141 +362,54 @@ namespace tmv {
         const std::complex<float> alpha,
         const GenMatrix<float>& A,
         const GenMatrix<std::complex<float> >& B,
-        const int beta, const MatrixView<std::complex<float> >& C)
+        const MatrixView<std::complex<float> >& C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(alpha != 0.F);
-        TMVAssert(C.ct()==NonConj);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-        TMVAssert(C.iscm());
-
         if (TMV_IMAG(alpha) == 0.F) {
             Matrix<float,ColMajor> B1 = B.realPart();
             Matrix<float,ColMajor> C1 = TMV_REAL(alpha)*A*B1;
-            if (beta == 0) C.realPart() = C1;
-            else C.realPart() += C1;
+            C.realPart() += C1;
             B1 = B.imagPart();
             if (B.isconj()) C1 = -TMV_REAL(alpha)*A*B1;
             else C1 = TMV_REAL(alpha)*A*B1;
-            if (beta == 0) C.imagPart() = C1;
-            else C.imagPart() += C1;
+            C.imagPart() += C1;
         } else {
             Matrix<float,ColMajor> Br = B.realPart();
             Matrix<float,ColMajor> Bi = B.imagPart();
             Matrix<float,ColMajor> C1 = TMV_REAL(alpha)*A*Br;
             if (B.isconj()) C1 += TMV_IMAG(alpha)*A*Bi;
             else C1 -= TMV_IMAG(alpha)*A*Bi;
-            if (beta == 0) C.realPart() = C1;
-            else C.realPart() += C1;
+            C.realPart() += C1;
 
             if (B.isconj()) C1 = -TMV_REAL(alpha)*A*Bi;
             else C1 = TMV_REAL(alpha)*A*Bi;
             C1 += TMV_IMAG(alpha)*A*Br;
-            if (beta == 0) C.imagPart() = C1;
-            else C.imagPart() += C1;
+            C.imagPart() += C1;
         }
     }
     template <> 
     void BlasMultMM(
         const std::complex<float> alpha,
-        const GenMatrix<float>& A,
-        const GenMatrix<float>& B,
-        const int beta, const MatrixView<std::complex<float> >& C)
+        const GenMatrix<float>& A, const GenMatrix<float>& B,
+        const MatrixView<std::complex<float> >& C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(alpha != 0.F);
-        TMVAssert(C.ct()==NonConj);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-        TMVAssert(C.iscm());
-
         Matrix<float,ColMajor> C1 = A*B;
-        if (beta == 0) C = alpha*C1;
-        else C += alpha*C1;
+        C += alpha*C1;
     }
 #endif // INST_FLOAT
 #endif // BLAS
 
     template <bool add, class T, class Ta, class Tb> 
-    static void DoMultMM(
+    void DoMultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
         const MatrixView<T>& C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(alpha != T(0));
-        TMVAssert(C.ct() == NonConj);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(B.isrm() || B.iscm());
-        TMVAssert(C.iscm());
-
 #ifdef BLAS
-        if (isComplex(T()) && (isReal(Ta()) || isReal(Tb())))
-            BlasMultMM(alpha,A,B,add?1:0,C);
-        else if (!((A.isrm() && A.stepi()>0) || (A.iscm() && A.stepj()>0))) {
-            Matrix<T,ColMajor> A2 = alpha*A;
-            DoMultMM<add>(T(1),A2,B,C);
-        } else if (!((B.isrm() && B.stepi()>0) || (B.iscm() && B.stepj()>0))) {
-            Matrix<T,ColMajor> B2 = alpha*B;
-            DoMultMM<add>(T(1),A,B2,C);
-        } else {
-            BlasMultMM(alpha,A,B,add?1:0,C);
-        }
+        if (!add) C.setZero();
+        BlasMultMM(alpha,A,B,C);
 #else
         NonBlasMultMM<add>(alpha,A,B,C);
 #endif
     }
-
-    template <bool add, class T, class Ta, class Tb> 
-    static void FullTempMultMM(
-        const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
-        // C (+)= alpha * A * B  via a temporary
-    {
-        Matrix<T,ColMajor> C2(C.colsize(),C.rowsize());
-        DoMultMM<false>(T(1),A,B,C2.view());
-
-        if (add) C += alpha*C2;
-        else C = alpha*C2;
-    }
-
-    // Block Temp allows B to be the same storage as C
-    template <bool add, class T, class Ta, class Tb> 
-    static void BlockTempMultMM(
-        const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
-        // C (+)= alpha * A * C
-    {
-        const int N = C.rowsize();
-        for (int j=0,j2;j<N;j=j2) {
-            j2 = TMV_MIN(N,j+16);
-            if (C.isrm()) {
-                Matrix<T,ColMajor> B2 = alpha * B.colRange(j,j2);
-                DoMultMM<add>(
-                    T(1),B2.transpose(),A.transpose(),
-                    C.colRange(j,j2).transpose());
-            } else {
-                Matrix<T,ColMajor> B2 = alpha * B.colRange(j,j2);
-                DoMultMM<add>(T(1),A,B2,C.colRange(j,j2));
-            }
-        }
-    }
-
 
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
@@ -677,37 +439,30 @@ namespace tmv {
         if (C.colsize() > 0 && C.rowsize() > 0) {
             if (A.rowsize() == 0 || alpha == T(0))  {
                 if (!add) C.setZero();
-            } else if (C.isconj()) 
+            } else if (C.isconj()) {
                 MultMM<add>(
                     TMV_CONJ(alpha),A.conjugate(),B.conjugate(),C.conjugate());
-            else if (C.isrm()) 
+            } else if (BlasIsCM(C)) {
+                if (!SameStorage(A,C) && (BlasIsCM(A) || BlasIsRM(A))) {
+                    if (!SameStorage(B,C) && (BlasIsCM(B) || BlasIsRM(B))) {
+                        DoMultMM<add>(alpha,A,B,C);
+                    } else {
+                        Matrix<T,ColMajor> B2 = alpha*B;
+                        DoMultMM<add>(T(1),A,B2,C);
+                    }
+                } else {
+                    Matrix<T,ColMajor> A2 = alpha*A;
+                    MultMM<add>(T(1),A2,B,C);
+                }
+            } else if (BlasIsRM(C)) {
                 MultMM<add>(alpha,B.transpose(),A.transpose(),C.transpose());
-            else if (!(B.isrm() || B.iscm())) 
-                MultMM<add>(alpha,A,Matrix<Tb,ColMajor>(B),C);
-            else if (!(A.isrm() || A.iscm())) 
-                if (B.iscm())
-                    MultMM<add>(alpha,Matrix<Ta,RowMajor>(A),B,C);
-                else
-                    MultMM<add>(alpha,Matrix<Ta,ColMajor>(A),B,C);
-            else if (!C.iscm()) 
-                FullTempMultMM<add>(alpha,A,B,C);
-            else if (SameStorage(A,C)) 
-                if (SameStorage(B,C)) 
-                    FullTempMultMM<add>(alpha,A,B,C);
-                else if (C.stepi() == A.stepi() && C.stepj() == A.stepj())
-                    BlockTempMultMM<add>(alpha,B.transpose(),A.transpose(),
-                                         C.transpose());
-                else
-                    FullTempMultMM<add>(alpha,A,B,C);
-            else if (SameStorage(B,C))
-                if (C.stepi() == B.stepi() && C.stepj() == B.stepj())
-                    BlockTempMultMM<add>(alpha,A,B,C);
-                else
-                    FullTempMultMM<add>(alpha,A,B,C);
-            else
-                DoMultMM<add>(alpha,A,B,C);
+            } else {
+                Matrix<T,ColMajor> C2(C.colsize(),C.rowsize());
+                MultMM<false>(T(1),A,B,C2.view());
+                if (add) C += alpha*C2;
+                else C = alpha*C2;
+            }
         }
-
 #ifdef XDEBUG
         cout<<"Done MultMM\n";
         cout<<"C = "<<C<<std::endl;

@@ -58,10 +58,10 @@ static void DoTestSmallMatrixArith_B5b()
 #endif
 
 #if (XTEST & 32)
-    tmv::SmallMatrix<T,N,N,tmv::ColMajor,tmv::FortranStyle> a1f = a1;
-    tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor,tmv::FortranStyle> ca1f = ca1;
-    tmv::SmallMatrix<T,N,7,tmv::RowMajor,tmv::FortranStyle> a5f = a5;
-    tmv::SmallMatrix<std::complex<T>,N,7,tmv::RowMajor,tmv::FortranStyle> ca5f = ca5;
+    tmv::SmallMatrix<T,N,N,tmv::ColMajor|tmv::FortranStyle> a1f = a1;
+    tmv::SmallMatrix<std::complex<T>,N,N,tmv::ColMajor|tmv::FortranStyle> ca1f = ca1;
+    tmv::SmallMatrix<T,N,7,tmv::RowMajor|tmv::FortranStyle> a5f = a5;
+    tmv::SmallMatrix<std::complex<T>,N,7,tmv::RowMajor|tmv::FortranStyle> ca5f = ca5;
 
     TestMatrixArith5(a1f,ca1f,a5,ca5,"NonSquare");
     TestMatrixArith5(a1f,ca1f,a5f,ca5f,"NonSquare");

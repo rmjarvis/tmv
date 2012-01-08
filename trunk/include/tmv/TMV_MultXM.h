@@ -107,8 +107,8 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
-            int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
+            const int M = cs == Unknown ? m2.colsize() : cs;
+            int N = rs == Unknown ? m2.rowsize() : rs;
 #ifdef PRINTALGO_XM
             std::cout<<"XM algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -135,8 +135,8 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-            int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
+            int M = cs == Unknown ? m2.colsize() : cs;
+            const int N = rs == Unknown ? m2.rowsize() : rs;
 #ifdef PRINTALGO_XM
             std::cout<<"XM algo 12: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -419,8 +419,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst =
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -451,7 +451,7 @@ namespace tmv {
                 ( ix == 1 && !add ) ? 1 :
                 canlin ? 2 :
                 TMV_OPT == 0 ? 11 :
-                ( cs != TMV_UNKNOWN && rs != TMV_UNKNOWN ) ? (
+                ( cs != Unknown && rs != Unknown ) ? (
                     ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T2)) ) ? (
                         ( M1::_rowmajor && M2::_rowmajor ) ? 16 : 15 ) :
                     ( M1::_rowmajor && M2::_rowmajor ) ? 12 : 
@@ -489,7 +489,7 @@ namespace tmv {
             const int algo = 
                 ( ix == 1 && !add ) ? 1 :
                 canlin ? 2 :
-                TMV_OPT >= 2 && ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? 30 :
+                TMV_OPT >= 2 && ( cs == Unknown || rs == Unknown ) ? 30 :
                 -4;
 #ifdef PRINTALGO_XM
             std::cout<<"InlineMultXM: x = "<<ix<<"  "<<T(x)<<std::endl;
@@ -513,8 +513,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst =
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

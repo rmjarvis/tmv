@@ -99,11 +99,11 @@ namespace tmv {
     {
         if (SameStorage(*this,m2)) {
             if (m2.isrm()) {
-                UpperTriMatrix<T2,NonUnitDiag,RowMajor> temp = m1;
+                UpperTriMatrix<T2,NonUnitDiag|RowMajor> temp = m1;
                 TriLDivEq(*this,temp.view());
                 m2 = temp;
             } else {
-                UpperTriMatrix<T2,NonUnitDiag,ColMajor> temp = m1;
+                UpperTriMatrix<T2,NonUnitDiag|ColMajor> temp = m1;
                 TriLDivEq(*this,temp.view());
                 m2 = temp;
             }
@@ -163,11 +163,11 @@ namespace tmv {
     {
         if (SameStorage(*this,m2)) {
             if (m2.isrm()) {
-                LowerTriMatrix<T2,NonUnitDiag,RowMajor> temp = m1;
+                LowerTriMatrix<T2,NonUnitDiag|RowMajor> temp = m1;
                 TriLDivEq(*this,temp.view());
                 m2 = temp;
             } else {
-                LowerTriMatrix<T2,NonUnitDiag,ColMajor> temp = m1;
+                LowerTriMatrix<T2,NonUnitDiag|ColMajor> temp = m1;
                 TriLDivEq(*this,temp.view());
                 m2 = temp;
             }
@@ -191,8 +191,8 @@ namespace tmv {
         }                  
     }
 
-    template <class T, IndexStyle I> 
-    const UpperTriMatrixView<T,I>& UpperTriMatrixView<T,I>::invertSelf() const
+    template <class T, int A>
+    const UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::invertSelf() const
     {
         TriInverse(*this);
         return *this;

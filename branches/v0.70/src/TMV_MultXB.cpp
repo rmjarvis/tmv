@@ -90,8 +90,9 @@ namespace tmv {
         if (A.nlo() == lo && A.nhi() == hi && 
             B.nlo() == lo && B.nhi() == hi &&
             C.nlo() == lo && C.nhi() == hi) {
-            if (A.stor() == C.stor() && B.stor() == C.stor() &&
-                A.canLinearize() && B.canLinearize() && C.canLinearize()) {
+            if (A.canLinearize() && B.canLinearize() && C.canLinearize() &&
+                A.stepi() == C.stepi() && A.stepj() == C.stepj() &&
+                B.stepi() == C.stepi() && B.stepj() == C.stepj()) {
                 ElemMultVV<add>(
                     alpha,A.constLinearView(),B.constLinearView(),
                     C.linearView());

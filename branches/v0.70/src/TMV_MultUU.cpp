@@ -234,13 +234,13 @@ namespace tmv {
                 CMultEqMM(alpha,A,B);
             } else {
                 if (B.isunit()) {
-                    UpperTriMatrix<T,UnitDiag,ColMajor> BB = B;
+                    UpperTriMatrix<T,UnitDiag|ColMajor> BB = B;
                     if (!(A.isrm() || A.iscm())) {
                         if (A.isunit()) {
-                            UpperTriMatrix<T,UnitDiag,ColMajor> AA = A;
+                            UpperTriMatrix<T,UnitDiag|ColMajor> AA = A;
                             CMultEqMM(alpha,AA,BB.view());
                         } else {
-                            UpperTriMatrix<T,NonUnitDiag,ColMajor> AA = A;
+                            UpperTriMatrix<T,NonUnitDiag|ColMajor> AA = A;
                             CMultEqMM(alpha,AA,BB.view());
                         }
                     } else {
@@ -248,13 +248,13 @@ namespace tmv {
                     }
                     B = BB;
                 } else {
-                    UpperTriMatrix<T,NonUnitDiag,ColMajor> BB = B;
+                    UpperTriMatrix<T,NonUnitDiag|ColMajor> BB = B;
                     if (!(A.isrm() || A.iscm())) {
                         if (A.isunit()) {
-                            UpperTriMatrix<T,UnitDiag,ColMajor> AA = A;
+                            UpperTriMatrix<T,UnitDiag|ColMajor> AA = A;
                             CMultEqMM(alpha,AA,BB.view());
                         } else {
-                            UpperTriMatrix<T,NonUnitDiag,ColMajor> AA = A;
+                            UpperTriMatrix<T,NonUnitDiag|ColMajor> AA = A;
                             CMultEqMM(alpha,AA,BB.view());
                         }
                     } else {
@@ -432,13 +432,13 @@ namespace tmv {
                 CMultEqMM(alpha,A,B);
             } else {
                 if (B.isunit()) {
-                    LowerTriMatrix<T,UnitDiag,ColMajor> BB = B;
+                    LowerTriMatrix<T,UnitDiag|ColMajor> BB = B;
                     if (!(A.isrm() || A.iscm())) {
                         if (A.isunit()) {
-                            LowerTriMatrix<T,UnitDiag,ColMajor> AA = A;
+                            LowerTriMatrix<T,UnitDiag|ColMajor> AA = A;
                             CMultEqMM(alpha,AA,BB.view());
                         } else {
-                            LowerTriMatrix<T,NonUnitDiag,ColMajor> AA = A;
+                            LowerTriMatrix<T,NonUnitDiag|ColMajor> AA = A;
                             CMultEqMM(alpha,AA,BB.view());
                         }
                     } else {
@@ -446,13 +446,13 @@ namespace tmv {
                     }
                     B = BB;
                 } else {
-                    LowerTriMatrix<T,NonUnitDiag,ColMajor> BB = B;
+                    LowerTriMatrix<T,NonUnitDiag|ColMajor> BB = B;
                     if (!(A.isrm() || A.iscm())) {
                         if (A.isunit()) {
-                            LowerTriMatrix<T,UnitDiag,ColMajor> AA = A;
+                            LowerTriMatrix<T,UnitDiag|ColMajor> AA = A;
                             CMultEqMM(alpha,AA,BB.view());
                         } else {
-                            LowerTriMatrix<T,NonUnitDiag,ColMajor> AA = A;
+                            LowerTriMatrix<T,NonUnitDiag|ColMajor> AA = A;
                             CMultEqMM(alpha,AA,BB.view());
                         }
                     } else {
@@ -656,10 +656,10 @@ namespace tmv {
                 CRAddMultMM(alpha,A,B,C);
             } else if (!A.isrm() && !A.iscm()) {
                 if (A.isunit()) {
-                    UpperTriMatrix<T,UnitDiag,ColMajor> AA = A;
+                    UpperTriMatrix<T,UnitDiag|ColMajor> AA = A;
                     AddMultMM(alpha,AA,B,C);
                 } else {
-                    UpperTriMatrix<T,NonUnitDiag,ColMajor> AA = A;
+                    UpperTriMatrix<T,NonUnitDiag|ColMajor> AA = A;
                     AddMultMM(alpha,AA,B,C);
                 }
             } else if (B.iscm() && C.iscm()) {
@@ -667,23 +667,23 @@ namespace tmv {
             } else if (C.isrm()) { 
                 TMVAssert(!B.isrm());
                 if (B.isunit()) {
-                    UpperTriMatrix<T,UnitDiag,RowMajor> BB = B;
+                    UpperTriMatrix<T,UnitDiag|RowMajor> BB = B;
                     AddMultMM(alpha,A,BB,C);
                 } else {
-                    UpperTriMatrix<T,NonUnitDiag,RowMajor> BB = B;
+                    UpperTriMatrix<T,NonUnitDiag|RowMajor> BB = B;
                     AddMultMM(alpha,A,BB,C);
                 }
             } else if (C.iscm()) { 
                 TMVAssert(!B.iscm());
                 if (B.isunit()) {
-                    UpperTriMatrix<T,UnitDiag,ColMajor> BB = B;
+                    UpperTriMatrix<T,UnitDiag|ColMajor> BB = B;
                     AddMultMM(alpha,A,BB,C);
                 } else {
-                    UpperTriMatrix<T,NonUnitDiag,ColMajor> BB = B;
+                    UpperTriMatrix<T,NonUnitDiag|ColMajor> BB = B;
                     AddMultMM(alpha,A,BB,C);
                 }
             } else {
-                UpperTriMatrix<T,NonUnitDiag,ColMajor> CC = C;
+                UpperTriMatrix<T,NonUnitDiag|ColMajor> CC = C;
                 AddMultMM(alpha,A,B,CC.view());
                 C = CC;
             }
@@ -719,24 +719,24 @@ namespace tmv {
     { 
         if (B.isrm()) {
             if (C.isunit() && B.isunit()) {
-                UpperTriMatrix<T,UnitDiag,RowMajor> tempB(B);
+                UpperTriMatrix<T,UnitDiag|RowMajor> tempB(B);
                 MultEqMM(alpha,A,tempB.view());
                 if (add) C += tempB;
                 else C = tempB;
             } else {
-                UpperTriMatrix<T,NonUnitDiag,RowMajor> tempB(B);
+                UpperTriMatrix<T,NonUnitDiag|RowMajor> tempB(B);
                 MultEqMM(alpha,A,tempB.view());
                 if (add) C += tempB;
                 else C = tempB;
             }
         } else {
             if (C.isunit() && B.isunit()) {
-                UpperTriMatrix<T,UnitDiag,ColMajor> tempB(B);
+                UpperTriMatrix<T,UnitDiag|ColMajor> tempB(B);
                 MultEqMM(alpha,A,tempB.view());
                 if (add) C += tempB;
                 else C = tempB;
             } else {
-                UpperTriMatrix<T,NonUnitDiag,ColMajor> tempB(B);
+                UpperTriMatrix<T,NonUnitDiag|ColMajor> tempB(B);
                 MultEqMM(alpha,A,tempB.view());
                 if (add) C += tempB;
                 else C = tempB;

@@ -56,13 +56,13 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
 #ifdef PRINTALGO_XB
             std::cout<<"ScaleB algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             typedef typename M1::col_sub_type M1c;
             typedef typename M1c::iterator IT;
             const int rowstep = m.stepj();
@@ -102,13 +102,13 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
 #ifdef PRINTALGO_XB
             std::cout<<"ScaleB algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             typedef typename M1::row_sub_type M1r;
             typedef typename M1r::iterator IT;
             const int colstep = m.stepi();
@@ -144,13 +144,13 @@ namespace tmv {
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
 #ifdef PRINTALGO_XB
             std::cout<<"ScaleB algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             typedef typename M1::diag_sub_type M1d;
             typedef typename M1d::iterator IT;
             const int colstep = m.stepi();
@@ -241,8 +241,8 @@ namespace tmv {
         {
             typedef typename M1::value_type T1;
             const bool inst =
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<T1>::isinst;
             const int algo = 
                 ix == 1 ? 0 :

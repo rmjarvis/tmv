@@ -41,8 +41,8 @@ static void DoTestSmallMatrixArith_A7()
 #endif
 
 #if (XTEST & 32)
-    tmv::SmallMatrix<T,N,N,tmv::RowMajor,tmv::FortranStyle> a1f = a1;
-    tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor,tmv::FortranStyle> ca1f = ca1;
+    tmv::SmallMatrix<T,N,N,tmv::RowMajor|tmv::FortranStyle> a1f = a1;
+    tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor|tmv::FortranStyle> ca1f = ca1;
 
     tmv::SmallVector<T,N,tmv::FortranStyle> v1f = v1;
     tmv::SmallVector<std::complex<T>,N,tmv::FortranStyle> cv1f = cv1;

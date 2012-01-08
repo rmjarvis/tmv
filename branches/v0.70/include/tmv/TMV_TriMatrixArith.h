@@ -53,29 +53,29 @@ namespace tmv {
     // or only deals with an UpperTriMatrix, and not a LowerTriMatrix
     //
 
-    template <class T, DiagType D, StorageType S, IndexStyle I, class Tx>
-    inline UpperTriMatrix<T,D,S,I>& operator+=(
-        UpperTriMatrix<T,D,S,I>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline UpperTriMatrix<T,A>& operator+=(
+        UpperTriMatrix<T,A>& m, const Tx& x) 
     { m.view() += x; return m; }
 
-    template <class T, DiagType D, StorageType S, IndexStyle I, class Tx>
-    inline UpperTriMatrix<T,D,S,I>& operator-=(
-        UpperTriMatrix<T,D,S,I>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline UpperTriMatrix<T,A>& operator-=(
+        UpperTriMatrix<T,A>& m, const Tx& x) 
     { m.view() -= x; return m; }
 
-    template <class T, DiagType D, StorageType S, IndexStyle I, class Tx>
-    inline UpperTriMatrix<T,D,S,I>& operator*=(
-        UpperTriMatrix<T,D,S,I>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline UpperTriMatrix<T,A>& operator*=(
+        UpperTriMatrix<T,A>& m, const Tx& x) 
     { m.view() *= x; return m; }
 
-    template <class T, DiagType D, StorageType S, IndexStyle I, class Tx>
-    inline UpperTriMatrix<T,D,S,I>& operator/=(
-        UpperTriMatrix<T,D,S,I>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline UpperTriMatrix<T,A>& operator/=(
+        UpperTriMatrix<T,A>& m, const Tx& x) 
     { m.view() /= x; return m; }
 
-    template <class T, DiagType D, StorageType S, IndexStyle I, class Tx>
-    inline UpperTriMatrix<T,D,S,I>& operator%=(
-        UpperTriMatrix<T,D,S,I>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline UpperTriMatrix<T,A>& operator%=(
+        UpperTriMatrix<T,A>& m, const Tx& x) 
     { m.view() %= x; return m; }
 
     template <class T, class T2> 
@@ -112,7 +112,6 @@ namespace tmv {
         inline ProdXU(const T _x, const GenUpperTriMatrix<Tm>& _m) :
             x(_x), m(_m) {}
         inline int size() const { return m.size(); }
-        inline StorageType stor() const { return BaseStorOf(m); }
         inline DiagType dt() const 
         { return x==T(1) ? m.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
@@ -231,7 +230,6 @@ namespace tmv {
         inline SumUX(T _x1, const GenUpperTriMatrix<Tm>& _m, T _x2) :
             x1(_x1), m(_m), x2(_x2) {}
         inline int size() const { return m.size(); }
-        inline StorageType stor() const { return BaseStorOf(m); }
         inline DiagType dt() const { return NonUnitDiag; }
         inline T getX1() const { return x1; }
         inline const GenUpperTriMatrix<Tm>& getM() const { return m; }
@@ -357,7 +355,6 @@ namespace tmv {
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int size() const { return m1.size(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline DiagType dt() const { return NonUnitDiag; }
         inline T getX1() const { return x1; }
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
@@ -492,7 +489,6 @@ namespace tmv {
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int size() const { return m1.size(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline DiagType dt() const 
         { return x==T(1) && m1.dt()==m2.dt() ? m1.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
@@ -609,7 +605,6 @@ namespace tmv {
             x(_x),m1(_m1),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int size() const { return m1.size(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline DiagType dt() const 
         { return x==T(1) && m1.dt()==m2.dt() ? m1.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
@@ -705,7 +700,6 @@ namespace tmv {
         inline QuotXU(const T _x, const GenUpperTriMatrix<Tm>& _m) :
             x(_x), m(_m)  {}
         inline int size() const { return m.size(); }
-        inline StorageType stor() const { return BaseStorOf(m); }
         inline DiagType dt() const 
         { return x==T(1) ? m.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
@@ -756,7 +750,6 @@ namespace tmv {
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
         inline int size() const { return m1.size(); }
-        inline StorageType stor() const { return BaseStorOf(m2); }
         inline DiagType dt() const 
         { return x==T(1) && m1.dt()==m2.dt() ? m1.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
@@ -796,7 +789,6 @@ namespace tmv {
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
         inline int size() const { return m1.size(); }
-        inline StorageType stor() const { return BaseStorOf(m2); }
         inline DiagType dt() const 
         { return x==T(1) && m1.dt()==m2.dt() ? m1.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
@@ -935,29 +927,29 @@ namespace tmv {
     // or only deal with a LowerTriMatrix
     //
 
-    template <class T, DiagType D, StorageType S, IndexStyle I, class Tx>
-    inline LowerTriMatrix<T,D,S,I>& operator+=(
-        LowerTriMatrix<T,D,S,I>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline LowerTriMatrix<T,A>& operator+=(
+        LowerTriMatrix<T,A>& m, const Tx& x) 
     { m.view() += x; return m; }
 
-    template <class T, DiagType D, StorageType S, IndexStyle I, class Tx>
-    inline LowerTriMatrix<T,D,S,I>& operator-=(
-        LowerTriMatrix<T,D,S,I>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline LowerTriMatrix<T,A>& operator-=(
+        LowerTriMatrix<T,A>& m, const Tx& x) 
     { m.view() -= x; return m; }
 
-    template <class T, DiagType D, StorageType S, IndexStyle I, class Tx>
-    inline LowerTriMatrix<T,D,S,I>& operator*=(
-        LowerTriMatrix<T,D,S,I>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline LowerTriMatrix<T,A>& operator*=(
+        LowerTriMatrix<T,A>& m, const Tx& x) 
     { m.view() *= x; return m; }
 
-    template <class T, DiagType D, StorageType S, IndexStyle I, class Tx>
-    inline LowerTriMatrix<T,D,S,I>& operator/=(
-        LowerTriMatrix<T,D,S,I>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline LowerTriMatrix<T,A>& operator/=(
+        LowerTriMatrix<T,A>& m, const Tx& x) 
     { m.view() /= x; return m; }
 
-    template <class T, DiagType D, StorageType S, IndexStyle I, class Tx>
-    inline LowerTriMatrix<T,D,S,I>& operator%=(
-        LowerTriMatrix<T,D,S,I>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline LowerTriMatrix<T,A>& operator%=(
+        LowerTriMatrix<T,A>& m, const Tx& x) 
     { m.view() %= x; return m; }
 
     template <class T, class T2> 
@@ -994,7 +986,6 @@ namespace tmv {
         inline ProdXL(const T _x, const GenLowerTriMatrix<Tm>& _m) :
             x(_x), m(_m) {}
         inline int size() const { return m.size(); }
-        inline StorageType stor() const { return BaseStorOf(m); }
         inline DiagType dt() const { return NonUnitDiag; }
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<Tm>& getM() const { return m; }
@@ -1111,7 +1102,6 @@ namespace tmv {
         inline SumLX(T _x1, const GenLowerTriMatrix<Tm>& _m, T _x2) :
             x1(_x1), m(_m), x2(_x2) {}
         inline int size() const { return m.size(); }
-        inline StorageType stor() const { return BaseStorOf(m); }
         inline DiagType dt() const { return NonUnitDiag; }
         inline T getX1() const { return x1; }
         inline const GenLowerTriMatrix<Tm>& getM() const { return m; }
@@ -1237,7 +1227,6 @@ namespace tmv {
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int size() const { return m2.size(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline DiagType dt() const { return NonUnitDiag; }
         inline T getX1() const { return x1; }
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
@@ -1373,7 +1362,6 @@ namespace tmv {
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m2.size() == m2.size()); }
         inline int size() const { return m1.size(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline DiagType dt() const 
         { return x==T(1) && m1.dt()==m2.dt() ? m1.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
@@ -1488,7 +1476,6 @@ namespace tmv {
             x(_x),m1(_m1),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
         inline int size() const { return m1.size(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline DiagType dt() const 
         { return x==T(1) && m1.dt()==m2.dt() ? m1.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
@@ -1584,7 +1571,6 @@ namespace tmv {
         inline QuotXL(const T _x, const GenLowerTriMatrix<Tm>& _m) :
             x(_x), m(_m)  {}
         inline int size() const { return m.size(); }
-        inline StorageType stor() const { return BaseStorOf(m); }
         inline DiagType dt() const 
         { return x==T(1) ? m.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
@@ -1635,7 +1621,6 @@ namespace tmv {
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
         inline int size() const { return m1.size(); }
-        inline StorageType stor() const { return BaseStorOf(m2); }
         inline DiagType dt() const 
         { return x==T(1) && m1.dt()==m2.dt() ? m1.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
@@ -1675,7 +1660,6 @@ namespace tmv {
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
         inline int size() const { return m1.size(); }
-        inline StorageType stor() const { return BaseStorOf(m2); }
         inline DiagType dt() const 
         { return x==T(1) && m1.dt()==m2.dt() ? m1.dt() : NonUnitDiag; }
         inline T getX() const { return x; }
@@ -1825,7 +1809,6 @@ namespace tmv {
         {  TMVAssert(m1.size() == m2.size()); }
         inline int colsize() const { return m1.size(); }
         inline int rowsize() const { return m1.size(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline T getX1() const { return x1; }
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
@@ -1877,7 +1860,6 @@ namespace tmv {
         { TMVAssert( m1.size() == m2.size()); }
         inline int colsize() const { return m1.size(); }
         inline int rowsize() const { return m1.size(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
         inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
@@ -1984,7 +1966,6 @@ namespace tmv {
         { TMVAssert( m1.size() == m2.size()); }
         inline int colsize() const { return m1.size(); }
         inline int rowsize() const { return m1.size(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
         inline const GenUpperTriMatrix<T2>& getM2() const { return m2; }

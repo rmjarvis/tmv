@@ -58,14 +58,14 @@ namespace tmv {
             const Scaling<1,T>& x, const T* A, const T* B, T* C);
         static TMV_INLINE Kcleanup* call(const int K)
         {
-            TMVStaticAssert(K2 != TMV_UNKNOWN);
+            TMVStaticAssert(K2 != Unknown);
             return &call_multmm_16_16_K_known<K2,1,T>;
         }
     };
 
 #ifndef TMV_MM_OPT_CLEANUP
     template <int KB, class T>
-    struct get_Kcleanup<TMV_UNKNOWN,KB,T>
+    struct get_Kcleanup<Unknown,KB,T>
     {
         typedef void Kcleanup(
             const int M, const int N, const int K,
@@ -81,7 +81,7 @@ namespace tmv {
     // power of 2 from 2 to 64, so it is easy to switch KB values without
     // worrying about whether I have the corresponding get_Kcleanup function.
     template <class T>
-    struct get_Kcleanup<TMV_UNKNOWN,64,T>
+    struct get_Kcleanup<Unknown,64,T>
     {
         typedef void Kcleanup(
             const int M, const int N, const int K,
@@ -224,7 +224,7 @@ namespace tmv {
         }
     };
     template <class T>
-    struct get_Kcleanup<TMV_UNKNOWN,32,T>
+    struct get_Kcleanup<Unknown,32,T>
     {
         typedef void Kcleanup(
             const int M, const int N, const int K,
@@ -303,7 +303,7 @@ namespace tmv {
         }
     };
     template <class T>
-    struct get_Kcleanup<TMV_UNKNOWN,16,T>
+    struct get_Kcleanup<Unknown,16,T>
     {
         typedef void Kcleanup(
             const int M, const int N, const int K,
@@ -395,7 +395,7 @@ namespace tmv {
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             //std::cout<<"m1 = "<<m1<<std::endl;
 #endif
-            CopyM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,M1,M2>::call(m1,m2); 
+            CopyM_Helper<-4,Unknown,Unknown,M1,M2>::call(m1,m2); 
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"after copy\n";
             //std::cout<<"m2 = "<<m2<<std::endl;
@@ -433,8 +433,8 @@ namespace tmv {
 #endif
             const int ix1 = M1::_conj ? -1 : 1; // 1 or -1 as required
             const Scaling<ix1,RT> one;
-            CopyM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,M1r,M2r>::call(m1r,m2r); 
-            MultXM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,false,ix1,RT,M1r,M2r>::call(
+            CopyM_Helper<-4,Unknown,Unknown,M1r,M2r>::call(m1r,m2r); 
+            MultXM_Helper<-4,Unknown,Unknown,false,ix1,RT,M1r,M2r>::call(
                 one,m1i,m2i); 
 #ifdef PRINTALGO_MM_BLOCK
             //std::cout<<"m2r => "<<m2r<<std::endl;
@@ -551,7 +551,7 @@ namespace tmv {
         { multmm_M_16_64_known<MB>(M,N,K,x,A,B,C); }
     };
     template <int ix, class T>
-    struct select_multmm<TMV_UNKNOWN,16,16,ix,T>
+    struct select_multmm<Unknown,16,16,ix,T>
     {
         static TMV_INLINE void call(
             const int M, const int N, const int K,
@@ -559,7 +559,7 @@ namespace tmv {
         { multmm_M_16_16(M,N,K,x,A,B,C); }
     };
     template <int ix, class T>
-    struct select_multmm<TMV_UNKNOWN,16,32,ix,T>
+    struct select_multmm<Unknown,16,32,ix,T>
     {
         static TMV_INLINE void call(
             const int M, const int N, const int K,
@@ -567,7 +567,7 @@ namespace tmv {
         { multmm_M_16_32(M,N,K,x,A,B,C); }
     };
     template <int ix, class T>
-    struct select_multmm<TMV_UNKNOWN,16,64,ix,T>
+    struct select_multmm<Unknown,16,64,ix,T>
     {
         static TMV_INLINE void call(
             const int M, const int N, const int K,
@@ -599,7 +599,7 @@ namespace tmv {
         { multmm_16_N_64_known<NB>(M,N,K,x,A,B,C); }
     };
     template <int ix, class T>
-    struct select_multmm<16,TMV_UNKNOWN,16,ix,T>
+    struct select_multmm<16,Unknown,16,ix,T>
     {
         static TMV_INLINE void call(
             const int M, const int N, const int K,
@@ -607,7 +607,7 @@ namespace tmv {
         { multmm_16_N_16(M,N,K,x,A,B,C); }
     };
     template <int ix, class T>
-    struct select_multmm<16,TMV_UNKNOWN,32,ix,T>
+    struct select_multmm<16,Unknown,32,ix,T>
     {
         static TMV_INLINE void call(
             const int M, const int N, const int K,
@@ -615,7 +615,7 @@ namespace tmv {
         { multmm_16_N_32(M,N,K,x,A,B,C); }
     };
     template <int ix, class T>
-    struct select_multmm<16,TMV_UNKNOWN,64,ix,T>
+    struct select_multmm<16,Unknown,64,ix,T>
     {
         static TMV_INLINE void call(
             const int M, const int N, const int K,
@@ -631,7 +631,7 @@ namespace tmv {
         { multmm_16_16_K_known<KB>(M,N,K,x,A,B,C); }
     };
     template <int ix, class T>
-    struct select_multmm<16,16,TMV_UNKNOWN,ix,T>
+    struct select_multmm<16,16,Unknown,ix,T>
     {
         static TMV_INLINE void call(
             const int M, const int N, const int K,
@@ -1079,15 +1079,15 @@ namespace tmv {
 #endif
             if (xx == RT(1)) {
                 Scaling<1,RT> one;
-                MultXM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,add,1,RT,M1r,M2>::call(
+                MultXM_Helper<-4,Unknown,Unknown,add,1,RT,M1r,M2>::call(
                     one,m1,m2); 
             } else if (xx == RT(-1)) {
                 Scaling<-1,RT> mone;
-                MultXM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,add,-1,RT,M1r,M2>::call(
+                MultXM_Helper<-4,Unknown,Unknown,add,-1,RT,M1r,M2>::call(
                     mone,m1,m2); 
             } else {
                 Scaling<0,RT> x(xx);
-                MultXM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,add,0,RT,M1r,M2>::call(
+                MultXM_Helper<-4,Unknown,Unknown,add,0,RT,M1r,M2>::call(
                     x,m1,m2); 
             }
 #ifdef PRINTALGO_MM_BLOCK
@@ -1132,7 +1132,7 @@ namespace tmv {
             //std::cout<<"m1 = "<<m1<<std::endl;
             //std::cout<<"m2x = "<<TMV_Text(m2x)<<std::endl;
 #endif
-            MultXM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,add,0,T2,M1r,M2>::call(x,m1,m2); 
+            MultXM_Helper<-4,Unknown,Unknown,add,0,T2,M1r,M2>::call(x,m1,m2); 
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"done assign\n";
             //std::cout<<"m2 => "<<m2<<std::endl;
@@ -1182,21 +1182,21 @@ namespace tmv {
 #endif
             if (xx == RT(1)) {
                 Scaling<1,RT> one;
-                MultXM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,add,1,RT,M1r,M2r>::call(
+                MultXM_Helper<-4,Unknown,Unknown,add,1,RT,M1r,M2r>::call(
                     one,m1r,m2r); 
-                MultXM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,add,1,RT,M1r,M2i>::call(
+                MultXM_Helper<-4,Unknown,Unknown,add,1,RT,M1r,M2i>::call(
                     one,m1i,m2i); 
             } else if (xx == RT(-1)) {
                 Scaling<-1,RT> mone;
-                MultXM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,add,-1,RT,M1r,M2r>::call(
+                MultXM_Helper<-4,Unknown,Unknown,add,-1,RT,M1r,M2r>::call(
                     mone,m1r,m2r); 
-                MultXM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,add,-1,RT,M1r,M2i>::call(
+                MultXM_Helper<-4,Unknown,Unknown,add,-1,RT,M1r,M2i>::call(
                     mone,m1i,m2i); 
             } else {
                 Scaling<0,RT> x(xx);
-                MultXM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,add,0,RT,M1r,M2r>::call(
+                MultXM_Helper<-4,Unknown,Unknown,add,0,RT,M1r,M2r>::call(
                     x,m1r,m2r); 
-                MultXM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,add,0,RT,M1r,M2i>::call(
+                MultXM_Helper<-4,Unknown,Unknown,add,0,RT,M1r,M2i>::call(
                     x,m1i,m2i); 
             }
 #ifdef PRINTALGO_MM_BLOCK
@@ -1248,13 +1248,13 @@ namespace tmv {
             //m2r -= TMV_IMAG(x) * m1i;
             //m2i += TMV_REAL(x) * m1i;
             //m2i += TMV_IMAG(x) * m1r;
-            MultXM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,add,0,RT,M1r,M2r>::call(
+            MultXM_Helper<-4,Unknown,Unknown,add,0,RT,M1r,M2r>::call(
                 Scaling<0,RT>(TMV_REAL(xx)),m1r,m2r); 
-            MultXM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,true,0,RT,M1r,M2i>::call(
+            MultXM_Helper<-4,Unknown,Unknown,true,0,RT,M1r,M2i>::call(
                 Scaling<0,RT>(-TMV_IMAG(xx)),m1i,m2r); 
-            MultXM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,add,0,RT,M1r,M2r>::call(
+            MultXM_Helper<-4,Unknown,Unknown,add,0,RT,M1r,M2r>::call(
                 Scaling<0,RT>(TMV_REAL(xx)),m1i,m2i); 
-            MultXM_Helper<-4,TMV_UNKNOWN,TMV_UNKNOWN,true,0,RT,M1r,M2i>::call(
+            MultXM_Helper<-4,Unknown,Unknown,true,0,RT,M1r,M2i>::call(
                 Scaling<0,RT>(TMV_IMAG(xx)),m1r,m2i); 
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"done assign\n";
@@ -2572,7 +2572,7 @@ namespace tmv {
             const int KB    = 
 #ifdef __SSE__
                 Traits2<RT,float>::sametype ? (
-                    ( xs == TMV_UNKNOWN || xs >= 128 ) ? 64 :
+                    ( xs == Unknown || xs >= 128 ) ? 64 :
                     ( xs >= 96 ) ? 32 :
                     ( xs >= 64 ) ? 64 :
                     ( xs >= 48 ) ? 16 :
@@ -2581,7 +2581,7 @@ namespace tmv {
 #endif
 #ifdef __SSE2__
                 Traits2<RT,double>::sametype ? (
-                    ( xs == TMV_UNKNOWN || xs >= 64 ) ? 32 :
+                    ( xs == Unknown || xs >= 64 ) ? 32 :
                     ( xs >= 48 ) ? 16 :
                     ( xs >= 32 ) ? 32 :
                     16 ) :
@@ -2590,9 +2590,9 @@ namespace tmv {
             const int lgMB  = IntTraits<MB>::log;
             const int lgNB  = IntTraits<NB>::log;
             const int lgKB  = IntTraits<KB>::log;
-            const int csx = cs == TMV_UNKNOWN ? TMV_UNKNOWN : (cs-((cs>>lgMB)<<lgMB));
-            const int rsx = rs == TMV_UNKNOWN ? TMV_UNKNOWN : (rs-((rs>>lgNB)<<lgNB));
-            const int xsx = xs == TMV_UNKNOWN ? TMV_UNKNOWN : (xs-((xs>>lgKB)<<lgKB));
+            const int csx = cs == Unknown ? Unknown : (cs-((cs>>lgMB)<<lgMB));
+            const int rsx = rs == Unknown ? Unknown : (rs-((rs>>lgNB)<<lgNB));
+            const int xsx = xs == Unknown ? Unknown : (xs-((xs>>lgKB)<<lgKB));
 
             typedef typename M1::const_submatrix_type M1sub;
             typedef typename M1sub::const_transpose_type M1sub_t;
@@ -2624,9 +2624,9 @@ namespace tmv {
                 RT* m3p, const int si3, const int sj3,
                 KF* kf);
 
-            const int M = cs==TMV_UNKNOWN ? m3.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? m3.rowsize() : rs;
-            const int K = xs==TMV_UNKNOWN ? m1.rowsize() : xs;
+            const int M = cs==Unknown ? m3.colsize() : cs;
+            const int N = rs==Unknown ? m3.rowsize() : rs;
+            const int K = xs==Unknown ? m1.rowsize() : xs;
 
             const int Mb = (M>>lgMB); // = M/MB
             const int Nb = (N>>lgNB); // = N/NB
@@ -2753,7 +2753,7 @@ namespace tmv {
             const int N = m3.rowsize();
             const int K = m1.rowsize();
 
-            const int XX = TMV_UNKNOWN;
+            const int XX = Unknown;
 
             const int Mb = (M>>lgMB); // = M/MB
             const int Nb = (N>>lgNB); // = N/NB
@@ -3269,7 +3269,7 @@ namespace tmv {
             const int KB    = 
 #ifdef __SSE__
                 Traits2<RT,float>::sametype ? (
-                    ( xs == TMV_UNKNOWN || xs >= 128 ) ? 64 :
+                    ( xs == Unknown || xs >= 128 ) ? 64 :
                     ( xs >= 96 ) ? 32 :
                     ( xs >= 64 ) ? 64 :
                     ( xs >= 48 ) ? 16 :
@@ -3278,7 +3278,7 @@ namespace tmv {
 #endif
 #ifdef __SSE2__
                 Traits2<RT,double>::sametype ? (
-                    ( xs == TMV_UNKNOWN || xs >= 64 ) ? 32 :
+                    ( xs == Unknown || xs >= 64 ) ? 32 :
                     ( xs >= 48 ) ? 16 :
                     ( xs >= 32 ) ? 32 :
                     16 ) :
@@ -3287,9 +3287,9 @@ namespace tmv {
             const int lgMB  = IntTraits<MB>::log;
             const int lgNB  = IntTraits<NB>::log;
             const int lgKB  = IntTraits<KB>::log;
-            const int csx = cs == TMV_UNKNOWN ? TMV_UNKNOWN : (cs-((cs>>lgMB)<<lgMB));
-            const int rsx = rs == TMV_UNKNOWN ? TMV_UNKNOWN : (rs-((rs>>lgNB)<<lgNB));
-            const int xsx = xs == TMV_UNKNOWN ? TMV_UNKNOWN : (xs-((xs>>lgKB)<<lgKB));
+            const int csx = cs == Unknown ? Unknown : (cs-((cs>>lgMB)<<lgMB));
+            const int rsx = rs == Unknown ? Unknown : (rs-((rs>>lgNB)<<lgNB));
+            const int xsx = xs == Unknown ? Unknown : (xs-((xs>>lgKB)<<lgKB));
 
             typedef typename M1::const_submatrix_type M1sub;
             typedef typename M1sub::const_transpose_type M1sub_t;
@@ -3321,9 +3321,9 @@ namespace tmv {
                 RT* m3p, const int si3, const int sj3,
                 KF* kf);
 
-            const int M = cs==TMV_UNKNOWN ? m3.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? m3.rowsize() : rs;
-            const int K = xs==TMV_UNKNOWN ? m1.rowsize() : xs;
+            const int M = cs==Unknown ? m3.colsize() : cs;
+            const int N = rs==Unknown ? m3.rowsize() : rs;
+            const int K = xs==Unknown ? m1.rowsize() : xs;
 
             const int Mb = (M>>lgMB); // = M/MB
             const int Nb = (N>>lgNB); // = N/NB
@@ -3447,7 +3447,7 @@ namespace tmv {
             const int N = m3.rowsize();
             const int K = m1.rowsize();
 
-            const int XX = TMV_UNKNOWN;
+            const int XX = Unknown;
 
             const int Mb = (M>>lgMB); // = M/MB
             const int Nb = (N>>lgNB); // = N/NB

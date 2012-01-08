@@ -40,16 +40,16 @@ namespace tmv {
     template <class T> 
     class GenVector;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0> 
     class ConstVectorView;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0> 
     class VectorView;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0> 
     class Vector;
 
-    template <class T, int N, IndexStyle I=CStyle> 
+    template <class T, int N, int A=0> 
     class SmallVector;
 
     template <class T, int N> 
@@ -62,8 +62,10 @@ namespace tmv {
     struct AssignableToVector
     {
         virtual int size() const = 0;
-        virtual void assignToV(const VectorView<TMV_RealType(T)>& rhs) const = 0;
-        virtual void assignToV(const VectorView<TMV_ComplexType(T)>& rhs) const = 0;
+        virtual void assignToV(
+            const VectorView<TMV_RealType(T)>& rhs) const = 0;
+        virtual void assignToV(
+            const VectorView<TMV_ComplexType(T)>& rhs) const = 0;
         virtual inline ~AssignableToVector() {}
     };
 
@@ -78,29 +80,35 @@ namespace tmv {
             comp == ImagComp ? "Imag" : "Arg"; 
     }
 
-    inline std::string TMV_Text(IndexStyle I)
-    { return I == CStyle ? "CStyle" : "FortranStyle"; }
-
-    template <class T, IndexStyle I> 
-    inline std::string TMV_Text(const Vector<T,I>& )
-    { return std::string("Vector<")+TMV_Text(T())+","+TMV_Text(I)+">"; }
+    template <class T, int A> 
+    inline std::string TMV_Text(const Vector<T,A>& )
+    { return std::string("Vector<")+TMV_Text(T())+","+Attrib<A>::vtext()+">"; }
 
     template <class T> 
     inline std::string TMV_Text(const GenVector<T>& v)
-    { return std::string("GenVector<")+TMV_Text(T())+","+TMV_Text(v.ct())+">"; }
+    { return std::string("GenVector<")+TMV_Text(T())+">"; }
 
-    template <class T, IndexStyle I> 
-    inline std::string TMV_Text(const ConstVectorView<T,I>& v)
+    template <class T, int A> 
+    inline std::string TMV_Text(const ConstVectorView<T,A>& v)
     { 
-        return std::string("ConstVectorView<")+TMV_Text(T())+","+TMV_Text(I)+","+
-            TMV_Text(v.ct())+">"; 
+        return std::string("ConstVectorView<")+TMV_Text(T())+","+
+            Attrib<A>::vtext()+">"; 
     }
 
-    template <class T, IndexStyle I> 
-    inline std::string TMV_Text(const VectorView<T,I>& v)
+    template <class T, int A> 
+    inline std::string TMV_Text(const VectorView<T,A>& v)
     { 
-        return std::string("VectorView<")+TMV_Text(T())+","+TMV_Text(I)+","
-            +TMV_Text(v.ct())+">"; 
+        return std::string("VectorView<")+TMV_Text(T())+","+
+            Attrib<A>::vtext()+">"; 
+    }
+
+    template <class T, int N, int A> 
+    inline std::string TMV_Text(const SmallVector<T,N,A>& )
+    { 
+        std::ostringstream s;
+        s << "SmallVector<"<<TMV_Text(T())<<","<<N<<","<<
+            Attrib<A>::vtext()<<">";
+        return s.str();
     }
 
 } // namespace tmv

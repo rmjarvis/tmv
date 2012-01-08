@@ -63,7 +63,7 @@ namespace tmv {
             if (P) P->applyOnRight(A1);
 #endif
             minv.setZero();
-            const int N = rs == TMV_UNKNOWN ? QR.rowsize() : rs;
+            const int N = rs == Unknown ? QR.rowsize() : rs;
             typename M2::colrange_type::uppertri_type R = 
                 minv.colRange(0,N1).upperTri();
             R = QR.upperTri().subTriMatrix(0,N1);
@@ -108,7 +108,7 @@ namespace tmv {
             Matrix<T> A1 = Q1*R1;
             if (P) P->applyOnRight(A1);
 #endif
-            const int N = rs == TMV_UNKNOWN ? QR.rowsize() : rs;
+            const int N = rs == Unknown ? QR.rowsize() : rs;
             typename M2::transpose_type m2t = minv.transpose();
             m2t = QR.conjugate();
             UnpackQ(m2t,beta);
@@ -167,8 +167,8 @@ namespace tmv {
                 cs == 0 || rs == 0 ? 0 : 
                 // algo 11 is a bit better for smaller matrices.
                 // Not a big enough difference to warrant a runtime 
-                // check if rs == TMV_UNKNOWN though.
-                (rs != TMV_UNKNOWN && rs < 16) ? 11 :
+                // check if rs == Unknown though.
+                (rs != Unknown && rs < 16) ? 11 :
                 12;
 #ifdef PRINTALGO_QR
             std::cout<<"Inline QRInverse\n";
@@ -194,8 +194,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -360,8 +360,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

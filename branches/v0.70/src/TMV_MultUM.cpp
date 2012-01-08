@@ -158,7 +158,7 @@ namespace tmv {
             } else if (A.iscm() && B.isrm()) {
                 CRMultEqMM(alpha,A,B);
             } else if (!(A.iscm() || A.isrm()) || SameStorage(A,B)) {
-                UpperTriMatrix<T,NonUnitDiag,ColMajor> AA = alpha*A;
+                UpperTriMatrix<T,NonUnitDiag|ColMajor> AA = alpha*A;
                 NonBlasMultEqMM(T(1),AA,B);
             } else {
                 CMultEqMM(alpha,A,B);
@@ -291,7 +291,7 @@ namespace tmv {
             } else if (A.iscm() && B.isrm()) {
                 CRMultEqMM(alpha,A,B);
             } else if (!(A.iscm() || A.isrm()) || SameStorage(A,B)) {
-                LowerTriMatrix<T,NonUnitDiag,ColMajor> AA = alpha*A;
+                LowerTriMatrix<T,NonUnitDiag|ColMajor> AA = alpha*A;
                 NonBlasMultEqMM(T(1),AA,B);
             } else {
                 CMultEqMM(alpha,A,B);
@@ -330,22 +330,15 @@ namespace tmv {
         double alpha, const GenUpperTriMatrix<double>& A, 
         const MatrixView<double>& B)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-        TMVAssert(alpha != 0.);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(B.ct() == NonConj);
-
-        int m=B.iscm()?B.colsize():B.rowsize();
-        int n=B.iscm()?B.rowsize():B.colsize();
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
+        int m=BlasIsCM(B)?B.colsize():B.rowsize();
+        int n=BlasIsCM(B)?B.rowsize():B.colsize();
+        int lda = BlasIsCM(A)?A.stepj():A.stepi();
+        int ldb = BlasIsCM(B)?B.stepj():B.stepi();
 
         BLASNAME(dtrmm) (
-            BLASCM B.iscm()?BLASCH_L:BLASCH_R, 
-            A.iscm()?BLASCH_UP:BLASCH_LO, 
-            A.iscm()==B.iscm()?BLASCH_NT:BLASCH_T,
+            BLASCM BlasIsCM(B)?BLASCH_L:BLASCH_R, 
+            BlasIsCM(A)?BLASCH_UP:BLASCH_LO, 
+            BlasIsCM(A)==BlasIsCM(B)?BLASCH_NT:BLASCH_T,
             A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
             BLASV(alpha),BLASP(A.cptr()),BLASV(lda), BLASP(B.ptr()), 
             BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
@@ -355,22 +348,15 @@ namespace tmv {
         double alpha, const GenLowerTriMatrix<double>& A, 
         const MatrixView<double>& B)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-        TMVAssert(alpha != 0.);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(B.ct() == NonConj);
-
-        int m=B.iscm()?B.colsize():B.rowsize();
-        int n=B.iscm()?B.rowsize():B.colsize();
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
+        int m=BlasIsCM(B)?B.colsize():B.rowsize();
+        int n=BlasIsCM(B)?B.rowsize():B.colsize();
+        int lda = BlasIsCM(A)?A.stepj():A.stepi();
+        int ldb = BlasIsCM(B)?B.stepj():B.stepi();
 
         BLASNAME(dtrmm) (
-            BLASCM B.iscm()?BLASCH_L:BLASCH_R, 
-            A.iscm()?BLASCH_LO:BLASCH_UP, 
-            A.iscm()==B.iscm()?BLASCH_NT:BLASCH_T,
+            BLASCM BlasIsCM(B)?BLASCH_L:BLASCH_R, 
+            BlasIsCM(A)?BLASCH_LO:BLASCH_UP, 
+            BlasIsCM(A)==BlasIsCM(B)?BLASCH_NT:BLASCH_T,
             A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
             BLASV(alpha),BLASP(A.cptr()),BLASV(lda), BLASP(B.ptr()), 
             BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
@@ -381,31 +367,25 @@ namespace tmv {
         const GenUpperTriMatrix<std::complex<double> >& A,
         const MatrixView<std::complex<double> >& B)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-        TMVAssert(alpha != 0.);
-        TMVAssert(B.ct() == NonConj);
+        int m=BlasIsCM(B)?B.colsize():B.rowsize();
+        int n=BlasIsCM(B)?B.rowsize():B.colsize();
+        int lda = BlasIsCM(A)?A.stepj():A.stepi();
+        int ldb = BlasIsCM(B)?B.stepj():B.stepi();
 
-        int m=B.iscm()?B.colsize():B.rowsize();
-        int n=B.iscm()?B.rowsize():B.colsize();
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
-
-        if (A.iscm()==B.iscm() && A.isconj()) {
+        if (BlasIsCM(A)==BlasIsCM(B) && A.isconj()) {
             B.conjugateSelf();
             BLASNAME(ztrmm) (
-                BLASCM B.iscm()?BLASCH_L:BLASCH_R, 
-                A.iscm()?BLASCH_UP:BLASCH_LO, BLASCH_NT,
+                BLASCM BlasIsCM(B)?BLASCH_L:BLASCH_R, 
+                BlasIsCM(A)?BLASCH_UP:BLASCH_LO, BLASCH_NT,
                 A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
                 BLASP(&alpha),BLASP(A.cptr()),BLASV(lda), BLASP(B.ptr()), 
                 BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
             B.conjugateSelf();
         } else {
             BLASNAME(ztrmm) (
-                BLASCM B.iscm()?BLASCH_L:BLASCH_R, 
-                A.iscm()?BLASCH_UP:BLASCH_LO, 
-                A.iscm()==B.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
+                BLASCM BlasIsCM(B)?BLASCH_L:BLASCH_R, 
+                BlasIsCM(A)?BLASCH_UP:BLASCH_LO, 
+                BlasIsCM(A)==BlasIsCM(B)?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
                 A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
                 BLASP(&alpha),BLASP(A.cptr()),BLASV(lda), BLASP(B.ptr()), 
                 BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
@@ -417,31 +397,25 @@ namespace tmv {
         const GenLowerTriMatrix<std::complex<double> >& A,
         const MatrixView<std::complex<double> >& B)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-        TMVAssert(alpha != 0.);
-        TMVAssert(B.ct() == NonConj);
+        int m=BlasIsCM(B)?B.colsize():B.rowsize();
+        int n=BlasIsCM(B)?B.rowsize():B.colsize();
+        int lda = BlasIsCM(A)?A.stepj():A.stepi();
+        int ldb = BlasIsCM(B)?B.stepj():B.stepi();
 
-        int m=B.iscm()?B.colsize():B.rowsize();
-        int n=B.iscm()?B.rowsize():B.colsize();
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
-
-        if (A.iscm()==B.iscm() && A.isconj()) {
+        if (BlasIsCM(A)==BlasIsCM(B) && A.isconj()) {
             B.conjugateSelf();
             BLASNAME(ztrmm) (
-                BLASCM B.iscm()?BLASCH_L:BLASCH_R, 
-                A.iscm()?BLASCH_LO:BLASCH_UP, BLASCH_NT,
+                BLASCM BlasIsCM(B)?BLASCH_L:BLASCH_R, 
+                BlasIsCM(A)?BLASCH_LO:BLASCH_UP, BLASCH_NT,
                 A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
                 BLASP(&alpha),BLASP(A.cptr()),BLASV(lda), BLASP(B.ptr()), 
                 BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
             B.conjugateSelf();
         } else {
             BLASNAME(ztrmm) (
-                BLASCM B.iscm()?BLASCH_L:BLASCH_R, 
-                A.iscm()?BLASCH_LO:BLASCH_UP, 
-                A.iscm()==B.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
+                BLASCM BlasIsCM(B)?BLASCH_L:BLASCH_R, 
+                BlasIsCM(A)?BLASCH_LO:BLASCH_UP, 
+                BlasIsCM(A)==BlasIsCM(B)?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
                 A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
                 BLASP(&alpha),BLASP(A.cptr()),BLASV(lda), BLASP(B.ptr()), 
                 BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
@@ -452,13 +426,6 @@ namespace tmv {
         std::complex<double> alpha, const GenUpperTriMatrix<double>& A,
         const MatrixView<std::complex<double> >& B)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-        TMVAssert(alpha != 0.);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(B.ct() == NonConj);
-
         // The four possibilities from cm or rm are:
         //   A    B      L/R     op(A) 
         //  cm   cm       L       NT
@@ -488,12 +455,6 @@ namespace tmv {
         std::complex<double> alpha, const GenLowerTriMatrix<double>& A,
         const MatrixView<std::complex<double> >& B)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-        TMVAssert(alpha != 0.);
-        TMVAssert(B.ct() == NonConj);
-
         Matrix<double,ColMajor> B1 = B.realPart();
         BlasMultEqMM(1.,A,B1.view());
         B.realPart() = B1;
@@ -509,22 +470,15 @@ namespace tmv {
         float alpha, const GenUpperTriMatrix<float>& A, 
         const MatrixView<float>& B)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-        TMVAssert(alpha != 0.F);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(B.ct() == NonConj);
-
-        int m=B.iscm()?B.colsize():B.rowsize();
-        int n=B.iscm()?B.rowsize():B.colsize();
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
+        int m=BlasIsCM(B)?B.colsize():B.rowsize();
+        int n=BlasIsCM(B)?B.rowsize():B.colsize();
+        int lda = BlasIsCM(A)?A.stepj():A.stepi();
+        int ldb = BlasIsCM(B)?B.stepj():B.stepi();
 
         BLASNAME(strmm) (
-            BLASCM B.iscm()?BLASCH_L:BLASCH_R, 
-            A.iscm()?BLASCH_UP:BLASCH_LO, 
-            A.iscm()==B.iscm()?BLASCH_NT:BLASCH_T,
+            BLASCM BlasIsCM(B)?BLASCH_L:BLASCH_R, 
+            BlasIsCM(A)?BLASCH_UP:BLASCH_LO, 
+            BlasIsCM(A)==BlasIsCM(B)?BLASCH_NT:BLASCH_T,
             A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
             BLASV(alpha),BLASP(A.cptr()),BLASV(lda), BLASP(B.ptr()), 
             BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
@@ -534,22 +488,15 @@ namespace tmv {
         float alpha, const GenLowerTriMatrix<float>& A, 
         const MatrixView<float>& B)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-        TMVAssert(alpha != 0.F);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(B.ct() == NonConj);
-
-        int m=B.iscm()?B.colsize():B.rowsize();
-        int n=B.iscm()?B.rowsize():B.colsize();
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
+        int m=BlasIsCM(B)?B.colsize():B.rowsize();
+        int n=BlasIsCM(B)?B.rowsize():B.colsize();
+        int lda = BlasIsCM(A)?A.stepj():A.stepi();
+        int ldb = BlasIsCM(B)?B.stepj():B.stepi();
 
         BLASNAME(strmm) (
-            BLASCM B.iscm()?BLASCH_L:BLASCH_R, 
-            A.iscm()?BLASCH_LO:BLASCH_UP, 
-            A.iscm()==B.iscm()?BLASCH_NT:BLASCH_T,
+            BLASCM BlasIsCM(B)?BLASCH_L:BLASCH_R, 
+            BlasIsCM(A)?BLASCH_LO:BLASCH_UP, 
+            BlasIsCM(A)==BlasIsCM(B)?BLASCH_NT:BLASCH_T,
             A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
             BLASV(alpha),BLASP(A.cptr()),BLASV(lda), BLASP(B.ptr()), 
             BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
@@ -560,31 +507,25 @@ namespace tmv {
         const GenUpperTriMatrix<std::complex<float> >& A,
         const MatrixView<std::complex<float> >& B)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-        TMVAssert(alpha != 0.F);
-        TMVAssert(B.ct() == NonConj);
+        int m=BlasIsCM(B)?B.colsize():B.rowsize();
+        int n=BlasIsCM(B)?B.rowsize():B.colsize();
+        int lda = BlasIsCM(A)?A.stepj():A.stepi();
+        int ldb = BlasIsCM(B)?B.stepj():B.stepi();
 
-        int m=B.iscm()?B.colsize():B.rowsize();
-        int n=B.iscm()?B.rowsize():B.colsize();
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
-
-        if (A.iscm()==B.iscm() && A.isconj()) {
+        if (BlasIsCM(A)==BlasIsCM(B) && A.isconj()) {
             B.conjugateSelf();
             BLASNAME(ctrmm) (
-                BLASCM B.iscm()?BLASCH_L:BLASCH_R, 
-                A.iscm()?BLASCH_UP:BLASCH_LO, BLASCH_NT,
+                BLASCM BlasIsCM(B)?BLASCH_L:BLASCH_R, 
+                BlasIsCM(A)?BLASCH_UP:BLASCH_LO, BLASCH_NT,
                 A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
                 BLASP(&alpha),BLASP(A.cptr()),BLASV(lda), BLASP(B.ptr()), 
                 BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
             B.conjugateSelf();
         } else {
             BLASNAME(ctrmm) (
-                BLASCM B.iscm()?BLASCH_L:BLASCH_R, 
-                A.iscm()?BLASCH_UP:BLASCH_LO, 
-                A.iscm()==B.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
+                BLASCM BlasIsCM(B)?BLASCH_L:BLASCH_R, 
+                BlasIsCM(A)?BLASCH_UP:BLASCH_LO, 
+                BlasIsCM(A)==BlasIsCM(B)?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
                 A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
                 BLASP(&alpha),BLASP(A.cptr()),BLASV(lda), BLASP(B.ptr()), 
                 BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
@@ -596,31 +537,25 @@ namespace tmv {
         const GenLowerTriMatrix<std::complex<float> >& A,
         const MatrixView<std::complex<float> >& B)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-        TMVAssert(alpha != 0.F);
-        TMVAssert(B.ct() == NonConj);
+        int m=BlasIsCM(B)?B.colsize():B.rowsize();
+        int n=BlasIsCM(B)?B.rowsize():B.colsize();
+        int lda = BlasIsCM(A)?A.stepj():A.stepi();
+        int ldb = BlasIsCM(B)?B.stepj():B.stepi();
 
-        int m=B.iscm()?B.colsize():B.rowsize();
-        int n=B.iscm()?B.rowsize():B.colsize();
-        int lda = A.isrm()?A.stepi():A.stepj();
-        int ldb = B.isrm()?B.stepi():B.stepj();
-
-        if (A.iscm()==B.iscm() && A.isconj()) {
+        if (BlasIsCM(A)==BlasIsCM(B) && A.isconj()) {
             B.conjugateSelf();
             BLASNAME(ctrmm) (
-                BLASCM B.iscm()?BLASCH_L:BLASCH_R, 
-                A.iscm()?BLASCH_LO:BLASCH_UP, BLASCH_NT,
+                BLASCM BlasIsCM(B)?BLASCH_L:BLASCH_R, 
+                BlasIsCM(A)?BLASCH_LO:BLASCH_UP, BLASCH_NT,
                 A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
                 BLASP(&alpha),BLASP(A.cptr()),BLASV(lda), BLASP(B.ptr()), 
                 BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
             B.conjugateSelf();
         } else {
             BLASNAME(ctrmm) (
-                BLASCM B.iscm()?BLASCH_L:BLASCH_R, 
-                A.iscm()?BLASCH_LO:BLASCH_UP, 
-                A.iscm()==B.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
+                BLASCM BlasIsCM(B)?BLASCH_L:BLASCH_R, 
+                BlasIsCM(A)?BLASCH_LO:BLASCH_UP, 
+                BlasIsCM(A)==BlasIsCM(B)?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
                 A.isunit()?BLASCH_U:BLASCH_NU, BLASV(m),BLASV(n),
                 BLASP(&alpha),BLASP(A.cptr()),BLASV(lda), BLASP(B.ptr()), 
                 BLASV(ldb) BLAS1 BLAS1 BLAS1 BLAS1);
@@ -631,13 +566,6 @@ namespace tmv {
         std::complex<float> alpha, const GenUpperTriMatrix<float>& A,
         const MatrixView<std::complex<float> >& B)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-        TMVAssert(alpha != 0.F);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(B.ct() == NonConj);
-
         Matrix<float,ColMajor> B1 = B.realPart();
         BlasMultEqMM(1.F,A,B1.view());
         B.realPart() = B1;
@@ -651,12 +579,6 @@ namespace tmv {
         std::complex<float> alpha, const GenLowerTriMatrix<float>& A,
         const MatrixView<std::complex<float> >& B)
     {
-        TMVAssert(A.size() == B.colsize());
-        TMVAssert(B.rowsize() > 0);
-        TMVAssert(B.colsize() > 0);
-        TMVAssert(alpha != 0.F);
-        TMVAssert(B.ct() == NonConj);
-
         Matrix<float,ColMajor> B1 = B.realPart();
         BlasMultEqMM(1.F,A,B1.view());
         B.realPart() = B1;
@@ -684,20 +606,19 @@ namespace tmv {
         TMVAssert(alpha != T(0));
         TMVAssert(B.ct() == NonConj);
 #ifdef BLAS
-        if ( !((B.isrm() && B.stepi()>0) || (B.iscm() && B.stepj()>0)) ||
-             SameStorage(A,B)) {
+        if ( !(BlasIsCM(B) || BlasIsRM(B)) || SameStorage(A,B)) {
             Matrix<T> BB = alpha*B;
             MultEqMM(T(1),A,BB.view());
             B = BB;
-        } else if (!((A.isrm() && A.stepi()>0) || (A.iscm() && A.stepj()>0))) {
+        } else if (!(BlasIsCM(A) || BlasIsRM(A))) {
             if (A.isunit()) {
-                UpperTriMatrix<Ta,UnitDiag,RowMajor> AA = A;
+                UpperTriMatrix<Ta,UnitDiag|RowMajor> AA = A;
                 BlasMultEqMM(alpha,AA,B);
             } else if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
-                UpperTriMatrix<Ta,NonUnitDiag,RowMajor> AA = TMV_REAL(alpha)*A;
+                UpperTriMatrix<Ta,NonUnitDiag|RowMajor> AA = TMV_REAL(alpha)*A;
                 BlasMultEqMM(T(1),AA,B);
             } else {
-                UpperTriMatrix<T,NonUnitDiag,RowMajor> AA = alpha*A;
+                UpperTriMatrix<T,NonUnitDiag|RowMajor> AA = alpha*A;
                 BlasMultEqMM(T(1),AA,B);
             }
         } else {
@@ -737,20 +658,19 @@ namespace tmv {
         TMVAssert(alpha != T(0));
         TMVAssert(B.ct() == NonConj);
 #ifdef BLAS
-        if ( !((B.isrm() && B.stepi()>0) || (B.iscm() && B.stepj()>0)) ||
-             SameStorage(A,B)) {
+        if ( !(BlasIsCM(B) || BlasIsRM(B)) || SameStorage(A,B)) {
             Matrix<T> BB = alpha*B;
             MultEqMM(T(1),A,BB.view());
             B = BB;
-        } else if (!((A.isrm() && A.stepi()>0) || (A.iscm() && A.stepj()>0))) {
+        } else if (!(BlasIsCM(A) || BlasIsRM(A))) {
             if (A.isunit()) {
-                LowerTriMatrix<Ta,UnitDiag,RowMajor> AA = A;
+                LowerTriMatrix<Ta,UnitDiag|RowMajor> AA = A;
                 BlasMultEqMM(alpha,AA,B);
             } else if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
-                LowerTriMatrix<Ta,NonUnitDiag,RowMajor> AA = TMV_REAL(alpha)*A;
+                LowerTriMatrix<Ta,NonUnitDiag|RowMajor> AA = TMV_REAL(alpha)*A;
                 BlasMultEqMM(T(1),AA,B);
             } else {
-                LowerTriMatrix<T,NonUnitDiag,RowMajor> AA = alpha*A;
+                LowerTriMatrix<T,NonUnitDiag|RowMajor> AA = alpha*A;
                 BlasMultEqMM(T(1),AA,B);
             }
         } else {
@@ -893,7 +813,7 @@ namespace tmv {
             } else if (A.iscm() && B.isrm()) {
                 CRAddMultMM(alpha,A,B,C);
             } else if (!(A.isrm() || A.iscm())) {
-                UpperTriMatrix<T,NonUnitDiag,ColMajor> AA = A;
+                UpperTriMatrix<T,NonUnitDiag|ColMajor> AA = A;
                 AddMultMM(alpha,AA,B,C);
             }
             else CAddMultMM(alpha,A,B,C);
@@ -1035,7 +955,7 @@ namespace tmv {
             } else if (A.iscm() && B.isrm()) {
                 CRAddMultMM(alpha,A,B,C);
             } else if (!(A.isrm() || A.iscm())) {
-                LowerTriMatrix<T,NonUnitDiag,ColMajor> AA = A;
+                LowerTriMatrix<T,NonUnitDiag|ColMajor> AA = A;
                 AddMultMM(alpha,AA,B,C);
             } else {
                 CAddMultMM(alpha,A,B,C); 
@@ -1235,25 +1155,24 @@ namespace tmv {
         TMVAssert(B.rowsize() == C.rowsize());
 
         if (C.colsize() > 0 && C.rowsize() > 0) {
-            if (C.isconj()) 
+            if (C.isconj()) {
                 MultMM<add>(
                     TMV_CONJ(alpha),A.conjugate(),B.conjugate(),C.conjugate());
-            else if (alpha==T(0)) {
+            } else if (alpha==T(0)) {
                 if (!add) C.setZero();
-            }
-            else if (SameStorage(A,C)) 
+            } else if (SameStorage(A,C)) {
                 FullTempMultMM<add>(alpha,A,B,C);
-            else if (!add) {
+            } else if (!add) {
                 C = alpha * B;
                 MultEqMM(T(1),A,C);
-            } 
-            else if (SameStorage(B,C)) 
+            } else if (SameStorage(B,C)) {
                 if (C.stepi() == B.stepi() && C.stepj() == B.stepj())
                     BlockTempMultMM<add>(alpha,A,B,C);
                 else
                     FullTempMultMM<add>(alpha,A,B,C);
-            else 
+            } else {
                 AddMultMM(alpha,A,B,C);
+            }
         }
 #ifdef XDEBUG
         cout<<"Norm(C-C2) = "<<Norm(C-C2)<<endl;

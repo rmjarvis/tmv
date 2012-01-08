@@ -185,11 +185,6 @@ namespace tmv {
         const double x,
         const GenVector<double>& v1, const VectorView<double>& v2)
     { 
-        TMVAssert(v1.size() == v1.size()); 
-        TMVAssert(v2.size()>0);
-        TMVAssert(x != 0.);
-        TMVAssert(v1.ct()==NonConj);
-        TMVAssert(v2.ct()==NonConj);
         int n=v2.size();
         int s1=v1.step();
         int s2=v2.step();
@@ -197,8 +192,8 @@ namespace tmv {
         if (s1<0) v1p += (n-1)*s1;
         double* v2p = v2.ptr();
         if (s2<0) v2p += (n-1)*s2;
-        BLASNAME(daxpy) (BLASV(n),BLASV(x),BLASP(v1p),BLASV(s1),
-                         BLASP(v2p),BLASV(s2));
+        BLASNAME(daxpy) (
+            BLASV(n),BLASV(x),BLASP(v1p),BLASV(s1),BLASP(v2p),BLASV(s2));
     }
     template <> 
     void DoAddVV(
@@ -206,11 +201,6 @@ namespace tmv {
         const GenVector<std::complex<double> >& v1, 
         const VectorView<std::complex<double> >& v2)
     { 
-        TMVAssert(v1.size() == v1.size()); 
-        TMVAssert(v2.size()>0);
-        TMVAssert(x != 0.);
-        TMVAssert(v1.ct()==NonConj);
-        TMVAssert(v2.ct()==NonConj);
         int n=v2.size();
         int s1=v1.step();
         int s2=v2.step();
@@ -218,8 +208,8 @@ namespace tmv {
         if (s1<0) v1p += (n-1)*s1;
         std::complex<double>* v2p = v2.ptr();
         if (s2<0) v2p += (n-1)*s2;
-        BLASNAME(zaxpy) (BLASV(n),BLASP(&x),BLASP(v1p),BLASV(s1),
-                         BLASP(v2p),BLASV(s2));
+        BLASNAME(zaxpy) (
+            BLASV(n),BLASP(&x),BLASP(v1p),BLASV(s1),BLASP(v2p),BLASV(s2));
     }
     template <> 
     void DoAddVV(
@@ -227,11 +217,6 @@ namespace tmv {
         const GenVector<double>& v1, 
         const VectorView<std::complex<double> >& v2)
     { 
-        TMVAssert(v1.size() == v1.size()); 
-        TMVAssert(v2.size()>0);
-        TMVAssert(x != 0.);
-        TMVAssert(v1.ct()==NonConj);
-        TMVAssert(v2.ct()==NonConj);
         double xr = TMV_REAL(x);
         double xi = TMV_IMAG(x);
         int n=v2.size();
@@ -242,11 +227,13 @@ namespace tmv {
         std::complex<double>* v2p = v2.ptr();
         if (s2<0) v2p += (n-1)*v2.step();
         if (xr != 0.)
-            BLASNAME(daxpy) (BLASV(n),BLASV(xr),BLASP(v1p),BLASV(s1),
-                             BLASP((double*)v2p),BLASV(s2));
+            BLASNAME(daxpy) (
+                BLASV(n),BLASV(xr),BLASP(v1p),BLASV(s1),
+                BLASP((double*)v2p),BLASV(s2));
         if (xi != 0.)
-            BLASNAME(daxpy) (BLASV(n),BLASV(xi),BLASP(v1p),BLASV(s1),
-                             BLASP((double*)v2p+1),BLASV(s2));
+            BLASNAME(daxpy) (
+                BLASV(n),BLASV(xi),BLASP(v1p),BLASV(s1),
+                BLASP((double*)v2p+1),BLASV(s2));
     }
 #endif
 #ifdef INST_FLOAT
@@ -255,11 +242,6 @@ namespace tmv {
         const float x,
         const GenVector<float>& v1, const VectorView<float>& v2)
     { 
-        TMVAssert(v1.size() == v1.size()); 
-        TMVAssert(v2.size()>0);
-        TMVAssert(x != 0.F);
-        TMVAssert(v1.ct()==NonConj);
-        TMVAssert(v2.ct()==NonConj);
         int n=v2.size();
         int s1=v1.step();
         int s2=v2.step();
@@ -267,8 +249,8 @@ namespace tmv {
         if (s1<0) v1p += (n-1)*s1;
         float* v2p = v2.ptr();
         if (s2<0) v2p += (n-1)*s2;
-        BLASNAME(saxpy) (BLASV(n),BLASV(x),BLASP(v1p),BLASV(s1),
-                         BLASP(v2p),BLASV(s2));
+        BLASNAME(saxpy) (
+            BLASV(n),BLASV(x),BLASP(v1p),BLASV(s1),BLASP(v2p),BLASV(s2));
     }
     template <> 
     void DoAddVV(
@@ -276,11 +258,6 @@ namespace tmv {
         const GenVector<std::complex<float> >& v1, 
         const VectorView<std::complex<float> >& v2)
     { 
-        TMVAssert(v1.size() == v1.size()); 
-        TMVAssert(v2.size()>0);
-        TMVAssert(x != 0.F);
-        TMVAssert(v1.ct()==NonConj);
-        TMVAssert(v2.ct()==NonConj);
         int n=v2.size();
         int s1=v1.step();
         int s2=v2.step();
@@ -288,8 +265,8 @@ namespace tmv {
         if (s1<0) v1p += (n-1)*s1;
         std::complex<float>* v2p = v2.ptr();
         if (s2<0) v2p += (n-1)*s2;
-        BLASNAME(caxpy) (BLASV(n),BLASP(&x),BLASP(v1p),BLASV(s1),
-                         BLASP(v2p),BLASV(s2));
+        BLASNAME(caxpy) (
+            BLASV(n),BLASP(&x),BLASP(v1p),BLASV(s1),BLASP(v2p),BLASV(s2));
     }
     template <> 
     void DoAddVV(
@@ -297,11 +274,6 @@ namespace tmv {
         const GenVector<float>& v1, 
         const VectorView<std::complex<float> >& v2)
     { 
-        TMVAssert(v1.size() == v1.size()); 
-        TMVAssert(v2.size()>0);
-        TMVAssert(x != 0.F);
-        TMVAssert(v1.ct()==NonConj);
-        TMVAssert(v2.ct()==NonConj);
         float xr = TMV_REAL(x);
         float xi = TMV_IMAG(x);
         int n=v2.size();
@@ -312,11 +284,13 @@ namespace tmv {
         std::complex<float>* v2p = v2.ptr();
         if (s2<0) v2p += (n-1)*v2.step();
         if (xr != 0.F)
-            BLASNAME(saxpy) (BLASV(n),BLASV(xr),BLASP(v1p),BLASV(s1),
-                             BLASP((float*)v2p),BLASV(s2));
+            BLASNAME(saxpy) (
+                BLASV(n),BLASV(xr),BLASP(v1p),BLASV(s1),
+                BLASP((float*)v2p),BLASV(s2));
         if (xi != 0.F)
-            BLASNAME(saxpy) (BLASV(n),BLASV(xi),BLASP(v1p),BLASV(s1),
-                             BLASP((float*)v2p+1),BLASV(s2));
+            BLASNAME(saxpy) (
+                BLASV(n),BLASV(xi),BLASP(v1p),BLASV(s1),
+                BLASP((float*)v2p+1),BLASV(s2));
     }
 #endif
 #endif // BLAS

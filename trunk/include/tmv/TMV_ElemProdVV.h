@@ -220,7 +220,6 @@ namespace tmv {
 #undef CT
 #undef CCT
 
-#ifdef TMV_TEXT
     template <int ix, class T, class V1, class V2>
     inline std::string TMV_Text(const ElemProdVV<ix,T,V1,V2>& svv)
     {
@@ -230,7 +229,6 @@ namespace tmv {
         s << TMV_Text(svv.getV2())<<" >";
         return s.str();
     }
-#endif
 
 
 } // namespace tmv

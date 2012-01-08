@@ -67,8 +67,7 @@ namespace tmv {
             (inplace ? A.nonConst().transpose() : \
              MatrixViewOf(Aptr,A.rowsize(),A.colsize(),ColMajor)) : \
             (inplace ? A.nonConst().view() : \
-             MatrixViewOf(Aptr,A.colsize(),A.rowsize(), \
-                          A.isSquare() ? BaseStorOf(A) : ColMajor)))
+             MatrixViewOf(Aptr,A.colsize(),A.rowsize(),ColMajor)))
 
     template <class T> 
     SVDiv<T>::SVDiv_Impl::SVDiv_Impl(const GenMatrix<T>& A, bool _inplace) :

@@ -126,10 +126,10 @@ namespace tmv {
     // v3 = x1 * v1 + x2 * v2
     template <int N, class T1, class T2, class T3> 
     inline void AddVV_1_1(const T1* v1, const T2* v2, T3* v3)
-    { DoCopy<N>(v1,v3); AddVV_1<N>(v2,v3); }
+    { SmallVectorCopy<N>(v1,v3); AddVV_1<N>(v2,v3); }
     template <int N, class T1, class T2, class T3> 
     inline void AddVV_1_m1(const T1* v1, const T2* v2, T3* v3)
-    { DoCopy<N>(v1,v3); AddVV_m1<N>(v2,v3); }
+    { SmallVectorCopy<N>(v1,v3); AddVV_m1<N>(v2,v3); }
     template <int N, class T, class T1, class T2, class T3>
     inline void AddVV_1_x(const T1* v1, const T x2, const T2* v2, T3* v3)
     { MultXV<N>(x2,v2,v3); AddVV_1<N>(v1,v3); }
@@ -165,27 +165,27 @@ namespace tmv {
     }
 #undef ProductType
 
-    template <class T, class T1, class T2, class T3, int N, IndexStyle I1, IndexStyle I2, IndexStyle I3>
+    template <class T, class T1, class T2, class T3, int N, int A1, int A2, int A3>
     inline void ElemMultVV(
-        const T alpha, const SmallVector<T1,N,I1>& v1, 
-        const SmallVector<T2,N,I2>& v2, SmallVector<T3,N,I3>& v3)
+        const T alpha, const SmallVector<T1,N,A1>& v1, 
+        const SmallVector<T2,N,A2>& v2, SmallVector<T3,N,A3>& v3)
     {
         if (alpha == T(1))
             for(int i=0;i<N;++i) v3.ref(i) = v1.cref(i) * v2.cref(i);
         else
             for(int i=0;i<N;++i) v3.ref(i) = alpha * v1.cref(i) * v2.cref(i);
     }
-    template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2, IndexStyle I3> 
+    template <class T, class T1, class T2, int N, int A1, int A2, int A3> 
     inline void ElemMultVV(
-        const CT , const SmallVector<T1,N,I1>& ,
-        const SmallVector<T2,N,I2>& , SmallVector<T,N,I3>& )
+        const CT , const SmallVector<T1,N,A1>& ,
+        const SmallVector<T2,N,A2>& , SmallVector<T,N,A3>& )
     { TMVAssert(TMV_FALSE); }
 
 
-    template <class T, class T1, class T2, class T3, int N, IndexStyle I1, IndexStyle I2, IndexStyle I3>
+    template <class T, class T1, class T2, class T3, int N, int A1, int A2, int A3>
     inline void AddElemMultVV(
-        const T alpha, const SmallVector<T1,N,I1>& v1, 
-        const SmallVector<T2,N,I2>& v2, SmallVector<T3,N,I3>& v3)
+        const T alpha, const SmallVector<T1,N,A1>& v1, 
+        const SmallVector<T2,N,A2>& v2, SmallVector<T3,N,A3>& v3)
     {
         if (alpha == T(1))
             for(int i=0;i<N;++i) v3.ref(i) += v1.cref(i) * v2.cref(i);
@@ -194,10 +194,10 @@ namespace tmv {
         else
             for(int i=0;i<N;++i) v3.ref(i) += alpha * v1.cref(i) * v2.cref(i);
     }
-    template <class T, class T1, class T2, int N, IndexStyle I1, IndexStyle I2, IndexStyle I3> 
+    template <class T, class T1, class T2, int N, int A1, int A2, int A3> 
     inline void AddElemMultVV(
-        const CT , const SmallVector<T1,N,I1>& ,
-        const SmallVector<T2,N,I2>& , SmallVector<T,N,I3>& )
+        const CT , const SmallVector<T1,N,A1>& ,
+        const SmallVector<T2,N,A2>& , SmallVector<T,N,A3>& )
     { TMVAssert(TMV_FALSE); }
 
 #undef OKTypes

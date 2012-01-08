@@ -63,16 +63,16 @@ Def1a(T,CT)
   template void VectorReadError<CT>::write(std::ostream& os) const throw();
 #endif
 
-#define Def2(RT,T,I) \
-  template Vector<T,I>& Vector<T,I>::setZero(); \
-  template Vector<T,I>& Vector<T,I>::clip(RT thresh); \
-  template Vector<T,I>& Vector<T,I>::setAllTo(const T& x); \
-  template Vector<T,I>& Vector<T,I>::addToAll(const T& x); \
-  template Vector<T,I>& Vector<T,I>::conjugateSelf(); \
-  template Vector<T,I>& Vector<T,I>::DoBasis(int i); \
-  template Vector<T,I>& Vector<T,I>::DoSwap(int i1, int i2); \
-  template void Vector<T,I>::read(const TMV_Reader& reader); \
-  template Vector<T,I> DoBasisVector(int,int); \
+#define Def2(RT,T,A) \
+  template Vector<T,A>& Vector<T,A>::setZero(); \
+  template Vector<T,A>& Vector<T,A>::clip(RT thresh); \
+  template Vector<T,A>& Vector<T,A>::setAllTo(const T& x); \
+  template Vector<T,A>& Vector<T,A>::addToAll(const T& x); \
+  template Vector<T,A>& Vector<T,A>::conjugateSelf(); \
+  template Vector<T,A>& Vector<T,A>::DoBasis(int i); \
+  template Vector<T,A>& Vector<T,A>::DoSwap(int i1, int i2); \
+  template void Vector<T,A>::read(const TMV_Reader& reader); \
+  template Vector<T,A> DoBasisVector(int,int); \
 
 Def2(T,T,CStyle)
 Def2(T,T,FortranStyle)

@@ -70,9 +70,9 @@ namespace tmv {
         for (int k2=KB;k2<=K;k1=k2,k2+=KB,Ap+=size1,Bp+=size2) {
             //std::cout<<"Ax: "<<Ap<<"..."<<Ap+MB*KB<<std::endl;
             //std::cout<<"Bx: "<<Bp<<"..."<<Bp+NB*KB<<std::endl;
-            MatrixView<RT> Ax(Ap,MB,KB,KB,1,RowMajor,NonConj,MB*KB 
+            MatrixView<RT> Ax(Ap,MB,KB,KB,1,NonConj,MB*KB 
                               TMV_FIRSTLAST1(Ap,Ap+MB*KB));
-            MatrixView<RT> Bx(Bp,KB,NB,1,KB,ColMajor,NonConj,NB*KB 
+            MatrixView<RT> Bx(Bp,KB,NB,1,KB,NonConj,NB*KB 
                               TMV_FIRSTLAST1(Bp,Bp+NB*KB));
             if (firstA) Ax = A.subMatrix(i1,i2,k1,k2);
             if (firstB) Bx = B.subMatrix(k1,k2,j1,j2);
@@ -82,9 +82,9 @@ namespace tmv {
         if (Kc) {
             //std::cout<<"Ay: "<<Ap<<"..."<<Ap+MB*Kc<<std::endl;
             //std::cout<<"By: "<<Bp<<"..."<<Bp+NB*Kc<<std::endl;
-            MatrixView<RT> Ay(Ap,MB,Kc,Kd,1,RowMajor,NonConj,MB*Kc
+            MatrixView<RT> Ay(Ap,MB,Kc,Kd,1,NonConj,MB*Kc
                               TMV_FIRSTLAST1(Ap,Ap+MB*Kc));
-            MatrixView<RT> By(Bp,Kc,NB,1,Kd,ColMajor,NonConj,NB*Kc
+            MatrixView<RT> By(Bp,Kc,NB,1,Kd,NonConj,NB*Kc
                               TMV_FIRSTLAST1(Bp,Bp+NB*Kc));
             if (firstA) Ay = A.subMatrix(i1,i2,k1,K);
             if (firstB) By = B.subMatrix(k1,K,j1,j2);
@@ -93,13 +93,13 @@ namespace tmv {
         //std::cout<<"Cx: "<<Cp<<"..."<<Cp+MB*NB<<std::endl;
         if (add) {
             C.subMatrix(i1,i2,j1,j2) += 
-                x*ConstMatrixView<RT>(Cp,MB,NB,1,MB,ColMajor,NonConj,MB*NB);
+                x*ConstMatrixView<RT>(Cp,MB,NB,1,MB,NonConj,MB*NB);
         } else if (x != T(1)) {
             C.subMatrix(i1,i2,j1,j2) = 
-                x*ConstMatrixView<RT>(Cp,MB,NB,1,MB,ColMajor,NonConj,MB*NB);
+                x*ConstMatrixView<RT>(Cp,MB,NB,1,MB,NonConj,MB*NB);
         } else {
             C.subMatrix(i1,i2,j1,j2) = 
-                ConstMatrixView<RT>(Cp,MB,NB,1,MB,ColMajor,NonConj,MB*NB);
+                ConstMatrixView<RT>(Cp,MB,NB,1,MB,NonConj,MB*NB);
         }
     }
 

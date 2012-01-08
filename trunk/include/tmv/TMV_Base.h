@@ -286,12 +286,6 @@ namespace tmv {
         }
     };
 
-    // TMV_UNKNOWN is the value of _size, _step, etc. whenever it
-    // is not known at compile time.
-    // We use for this value the maximally negative int.
-    // In binary, this is a 1 followed by all zeros.
-    const int TMV_UNKNOWN = (1<<(sizeof(int)*8-1));
-
     enum DivType {
         XX=0, LU=1, CH=2, QR=4, QRP=8, SV=16,
         // We store the divtype in a binary field integer.
@@ -369,6 +363,15 @@ namespace tmv {
     struct InstType<double>
     { enum { inst = true }; };
 #endif
+
+    // Unknown is the value of _size, _step, etc. whenever it
+    // is not known at compile time.
+    // We use for this value the maximally negative int.
+    // In binary, this is a 1 followed by all zeros.
+    // Note: can't use numeric_limits<int>::min, since it is a function,
+    // not a compile-time constant.  
+    // And we need Unknown as a compile-time constant.
+    const int Unknown = 1<<(sizeof(int)*8-1);
 
     // This helper class acts as a ? : operator for a typedef
     template <bool first, class T1, class T2>
@@ -587,29 +590,29 @@ namespace tmv {
                 // Probably this is high enough for any conceivable use.
                 // I only use up to 64 right now, but I provided a few
                 // extra values to be safe.
-                TMV_UNKNOWN ) 
+                Unknown ) 
         };
         enum { half_roundup = (
-                // For very large S, just call it TMV_UNKNOWN to keep from 
+                // For very large S, just call it Unknown to keep from 
                 // having big complicated recursive structures.
-                S > 128 ? TMV_UNKNOWN :
+                S > 128 ? Unknown :
                 S > 16 ? ((((S-1)>>5)+1)<<4) :
                 (S>>1)  )
         };
         static inline int text() { return S; }
     };
     template <>
-    struct IntTraits<TMV_UNKNOWN>
+    struct IntTraits<Unknown>
     {
-        enum { negS = TMV_UNKNOWN };
-        enum { twoS = TMV_UNKNOWN };
-        enum { halfS = TMV_UNKNOWN };
-        enum { Sm1 = TMV_UNKNOWN };
-        enum { Sp1 = TMV_UNKNOWN };
-        enum { Sp2 = TMV_UNKNOWN };
+        enum { negS = Unknown };
+        enum { twoS = Unknown };
+        enum { halfS = Unknown };
+        enum { Sm1 = Unknown };
+        enum { Sp1 = Unknown };
+        enum { Sp2 = Unknown };
         enum { ispowerof2 = false };
-        enum { log = TMV_UNKNOWN };
-        enum { half_roundup = TMV_UNKNOWN };
+        enum { log = Unknown };
+        enum { half_roundup = Unknown };
         static inline const char* text() { return "UNKNOWN"; }
     };
 
@@ -620,7 +623,7 @@ namespace tmv {
         enum { diff = S1 - S2 };
         enum { prod = S1 * S2 };
         enum { safeprod = IntTraits2<
-            (S1<300 ? S1 : TMV_UNKNOWN), (S2<300 ? S2 : TMV_UNKNOWN)>::prod };
+            (S1<300 ? S1 : Unknown), (S2<300 ? S2 : Unknown)>::prod };
         //enum { quot = S2 == 0 ? 0 : S1 / S2 };
         enum { quot = S1 / S2 };
         enum { min = S1 < S2 ? S1 : S2 };
@@ -638,48 +641,48 @@ namespace tmv {
         enum { max = S1 > 0 ? S1 : 0 };
     };
     template <int S1>
-    struct IntTraits2<S1,TMV_UNKNOWN>
+    struct IntTraits2<S1,Unknown>
     {
-        enum { sum = TMV_UNKNOWN };
-        enum { diff = TMV_UNKNOWN };
-        enum { prod = TMV_UNKNOWN };
-        enum { safeprod = TMV_UNKNOWN };
-        enum { quot = TMV_UNKNOWN };
-        enum { min = TMV_UNKNOWN };
-        enum { max = TMV_UNKNOWN };
+        enum { sum = Unknown };
+        enum { diff = Unknown };
+        enum { prod = Unknown };
+        enum { safeprod = Unknown };
+        enum { quot = Unknown };
+        enum { min = Unknown };
+        enum { max = Unknown };
     };
     template <int S2>
-    struct IntTraits2<TMV_UNKNOWN,S2>
+    struct IntTraits2<Unknown,S2>
     {
-        enum { sum = TMV_UNKNOWN };
-        enum { diff = TMV_UNKNOWN };
-        enum { prod = TMV_UNKNOWN };
-        enum { safeprod = TMV_UNKNOWN };
-        enum { quot = TMV_UNKNOWN };
-        enum { min = TMV_UNKNOWN };
-        enum { max = TMV_UNKNOWN };
+        enum { sum = Unknown };
+        enum { diff = Unknown };
+        enum { prod = Unknown };
+        enum { safeprod = Unknown };
+        enum { quot = Unknown };
+        enum { min = Unknown };
+        enum { max = Unknown };
     };
     template <>
-    struct IntTraits2<TMV_UNKNOWN,TMV_UNKNOWN>
+    struct IntTraits2<Unknown,Unknown>
     {
-        enum { sum = TMV_UNKNOWN };
-        enum { diff = TMV_UNKNOWN };
-        enum { prod = TMV_UNKNOWN };
-        enum { safeprod = TMV_UNKNOWN };
-        enum { quot = TMV_UNKNOWN };
-        enum { min = TMV_UNKNOWN };
-        enum { max = TMV_UNKNOWN };
+        enum { sum = Unknown };
+        enum { diff = Unknown };
+        enum { prod = Unknown };
+        enum { safeprod = Unknown };
+        enum { quot = Unknown };
+        enum { min = Unknown };
+        enum { max = Unknown };
     };
     template <>
-    struct IntTraits2<TMV_UNKNOWN,0>
+    struct IntTraits2<Unknown,0>
     {
-        enum { sum = TMV_UNKNOWN };
-        enum { diff = TMV_UNKNOWN };
-        enum { prod = TMV_UNKNOWN };
-        enum { safeprod = TMV_UNKNOWN };
-        enum { quot = TMV_UNKNOWN };
-        enum { min = TMV_UNKNOWN };
-        enum { max = TMV_UNKNOWN };
+        enum { sum = Unknown };
+        enum { diff = Unknown };
+        enum { prod = Unknown };
+        enum { safeprod = Unknown };
+        enum { quot = Unknown };
+        enum { min = Unknown };
+        enum { max = Unknown };
     };
 
     template <class T>
@@ -2302,8 +2305,8 @@ namespace tmv {
 #endif
 
     // A helper structure that acts like an int,
-    // but only bothers to make the integer if S == TMV_UNKNOWN.
-    // It also checks the constructor if S != TMV_UNKNOWN
+    // but only bothers to make the integer if S == Unknown.
+    // It also checks the constructor if S != Unknown
     template <int S>
     struct CheckedInt
     {
@@ -2320,22 +2323,12 @@ namespace tmv {
         TMV_INLINE operator int() const { return S; }
     };
     template <>
-    struct CheckedInt<TMV_UNKNOWN>
+    struct CheckedInt<Unknown>
     {
         int step;
         TMV_INLINE CheckedInt(int s) : step(s) {}
-        TMV_INLINE operator int() const 
-        {
-#ifdef TMV_DEBUG
-            TMVAssert(step != -987234);
-#endif
-            return step; 
-        }
-        TMV_INLINE ~CheckedInt() {
-#ifdef TMV_DEBUG
-            step = -987234;
-#endif
-        }
+        TMV_INLINE operator int() const { return step; }
+        TMV_INLINE ~CheckedInt() {}
     };
 
     // A similar helper to account for possibly unknown DiagType
@@ -2380,11 +2373,6 @@ namespace tmv {
     TMV_INLINE bool TMV_Underflow(T x)
     { return UnderflowHelper<Traits<T>::isinteger,T>::call(x); }
 
-#ifdef TMV_DEBUG
-#define TMV_TEXT
-#endif
-
-#ifdef TMV_TEXT
     template <class T>
     inline std::string TMV_Text(const T&)
     { return std::string("Unknown (") + typeid(T).name() + ")"; }
@@ -2453,7 +2441,6 @@ namespace tmv {
 
     inline std::string TMV_Text(UpLoType u)
     { return u==Upper ? "Upper" : "Lower"; }
-#endif
 
     // Use DEBUGPARAM(x) for parameters that are only used in TMVAssert
     // statements.  So then they don't give warnings when compiled with 

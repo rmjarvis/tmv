@@ -61,12 +61,12 @@ namespace tmv {
         if (!itsm1.get()) {         
             int s = this->size();        
             int lo = this->nlo();      
-            int len = BandStorageLength(this->stor(),s,s,lo,0);
+            int len = BandStorageLength(ColMajor,s,s,lo,0);
             itsm1.resize(len);
-            itsm = this->isdm() ? itsm1.get() + lo*(s-1) : itsm1.get();
+            itsm = itsm1.get();
             this->assignTosB(SymBandMatrixView<T>(
                     itsm,s,lo,stepi(),stepj(),diagstep(),
-                    Sym,this->uplo(),this->stor(),NonConj                   
+                    Sym,this->uplo(),NonConj                   
                     TMV_FIRSTLAST1(itsm1.get(),itsm1.get()+len) ));
         }                                     
         return itsm;
@@ -74,23 +74,15 @@ namespace tmv {
 
     template <class T> 
     int SymBandMatrixComposite<T>::stepi() const
-    {   
-        return ( this->iscm() ? 1 :
-                 this->isrm() ? this->nlo() : 
-                 -this->size() + 1 );
-    }
+    { return 1; }
 
     template <class T> 
     int SymBandMatrixComposite<T>::stepj() const
-    { 
-        return ( this->isrm() ?  1 :
-                 this->iscm() ? this->nlo() : 
-                 this->size() );
-    }
+    { return this->nlo(); }
 
     template <class T> 
     int SymBandMatrixComposite<T>::diagstep() const
-    { return this->isdm() ? 1 : this->nlo()+1; }
+    { return this->nlo() + 1; }
 
 
     //
@@ -181,16 +173,6 @@ namespace tmv {
         const GenSymBandMatrix<double>& A, const GenVector<double>& x,
         const int beta, const VectorView<double>& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         int n = A.size();
         int k = A.nlo();
         int lda = A.diagstep();
@@ -217,16 +199,6 @@ namespace tmv {
         const GenVector<std::complex<double> >& x,
         const int beta, const VectorView<std::complex<double> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         if (A.isherm()) {
             int n = A.size();
             int k = A.nlo();
@@ -265,16 +237,6 @@ namespace tmv {
         const GenVector<std::complex<double> >& x,
         const int beta, const VectorView<std::complex<double> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         if (beta == 0) {
             int n = A.size();
             int k = A.nlo();
@@ -338,16 +300,6 @@ namespace tmv {
         const GenVector<double>& x,
         const int beta, const VectorView<std::complex<double> >& y) 
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         int n = A.size();
         int k = A.nlo();
         int lda = A.diagstep();
@@ -386,16 +338,6 @@ namespace tmv {
         const GenSymBandMatrix<float>& A, const GenVector<float>& x,
         const int beta, const VectorView<float>& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         int n = A.size();
         int k = A.nlo();
         int lda = A.diagstep();
@@ -422,16 +364,6 @@ namespace tmv {
         const GenVector<std::complex<float> >& x,
         const int beta, const VectorView<std::complex<float> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         if (A.isherm()) {
             int n = A.size();
             int k = A.nlo();
@@ -470,16 +402,6 @@ namespace tmv {
         const GenVector<std::complex<float> >& x,
         const int beta, const VectorView<std::complex<float> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         if (beta == 0) {
             int n = A.size();
             int k = A.nlo();
@@ -543,16 +465,6 @@ namespace tmv {
         const GenVector<float>& x,
         const int beta, const VectorView<std::complex<float> >& y) 
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         int n = A.size();
         int k = A.nlo();
         int lda = A.diagstep();
@@ -599,7 +511,7 @@ namespace tmv {
         TMVAssert(!SameStorage(x,y));
 
 #ifdef BLAS
-        if (A.isrm()) 
+        if (!A.iscm() && A.isrm()) 
             if (A.isherm()) DoMultMV<add>(alpha,A.adjoint(),x,y);
             else DoMultMV<add>(alpha,A.transpose(),x,y);
         else if (A.isconj()) 
@@ -646,21 +558,21 @@ namespace tmv {
                 if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                     if (A.isherm()) {
                         if (A.uplo() == Upper) {
-                            HermBandMatrix<Ta,Upper,ColMajor> A2 =
+                            HermBandMatrix<Ta,Upper|ColMajor> A2 =
                                 TMV_REAL(alpha)*A;
                             DoMultMV<add>(T(1),A2,x,y);
                         } else {
-                            HermBandMatrix<Ta,Lower,ColMajor> A2 =
+                            HermBandMatrix<Ta,Lower|ColMajor> A2 =
                                 TMV_REAL(alpha)*A;
                             DoMultMV<add>(T(1),A2,x,y);
                         }
                     } else {
                         if (A.uplo() == Upper) {
-                            SymBandMatrix<Ta,Upper,ColMajor> A2 =
+                            SymBandMatrix<Ta,Upper|ColMajor> A2 =
                                 TMV_REAL(alpha)*A;
                             DoMultMV<add>(T(1),A2,x,y);
                         } else {
-                            SymBandMatrix<Ta,Lower,ColMajor> A2 =
+                            SymBandMatrix<Ta,Lower|ColMajor> A2 =
                                 TMV_REAL(alpha)*A;
                             DoMultMV<add>(T(1),A2,x,y);
                         }
@@ -668,18 +580,18 @@ namespace tmv {
                 } else {
                     if (!A.issym()) {
                         if (A.uplo() == Upper) {
-                            HermBandMatrix<Ta,Upper,ColMajor> A2 = A;
+                            HermBandMatrix<Ta,Upper|ColMajor> A2 = A;
                             DoMultMV<add>(alpha,A2,x,y);
                         } else {
-                            HermBandMatrix<Ta,Lower,ColMajor> A2 = A;
+                            HermBandMatrix<Ta,Lower|ColMajor> A2 = A;
                             DoMultMV<add>(alpha,A2,x,y);
                         }
                     } else {
                         if (A.uplo() == Upper) {
-                            SymBandMatrix<T,Upper,ColMajor> A2 = alpha*A;
+                            SymBandMatrix<T,Upper|ColMajor> A2 = alpha*A;
                             DoMultMV<add>(T(1),A2,x,y);
                         } else {
-                            SymBandMatrix<T,Lower,ColMajor> A2 = alpha*A;
+                            SymBandMatrix<T,Lower|ColMajor> A2 = alpha*A;
                             DoMultMV<add>(T(1),A2,x,y);
                         }
                     }

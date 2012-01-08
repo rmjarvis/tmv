@@ -60,7 +60,7 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-            const int N = (s == TMV_UNKNOWN ? m2.size() : s);
+            const int N = (s == Unknown ? m2.size() : s);
             if (!m2.isunit()) m2.diag().setAllTo(1);
             if (N > 1) {
                 typedef typename M1::const_offdiag_type M1o;
@@ -92,7 +92,7 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-            int N = (s == TMV_UNKNOWN ? m2.size() : s);
+            int N = (s == Unknown ? m2.size() : s);
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::col_sub_type M2c;
             typedef typename M1c::const_iterator IT1;
@@ -103,7 +103,7 @@ namespace tmv {
             IT2 it2 = m2.get_col(0,0,1).begin();
             int M=1;
             for(;N;--N) {
-                CopyV_Helper<-3,TMV_UNKNOWN,M1c,M2c>::call2(M++,it1,it2);
+                CopyV_Helper<-3,Unknown,M1c,M2c>::call2(M++,it1,it2);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
             } 
@@ -155,7 +155,7 @@ namespace tmv {
     {
         static inline void call(const M1& m1, M2& m2)
         {
-            int N = (s == TMV_UNKNOWN ? m2.size() : s);
+            int N = (s == Unknown ? m2.size() : s);
             typedef typename M1::const_row_sub_type M1r;
             typedef typename M2::row_sub_type M2r;
             typedef typename M1r::const_iterator IT1;
@@ -165,7 +165,7 @@ namespace tmv {
             IT1 it1 = m1.get_row(0,0,N).begin();
             IT2 it2 = m2.get_row(0,0,N).begin();
             for(;N;--N) {
-                CopyV_Helper<-3,TMV_UNKNOWN,M1r,M2r>::call2(N,it1,it2);
+                CopyV_Helper<-3,Unknown,M1r,M2r>::call2(N,it1,it2);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
             }
@@ -386,7 +386,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -416,13 +416,13 @@ namespace tmv {
             TMVAssert(m1.size() == m2.size());
             TMVAssert(!m1.isunit() && !m2.isunit());
             typedef typename M2::value_type T2;
-            const int s2 = s > 20 ? TMV_UNKNOWN : s;
+            const int s2 = s > 20 ? Unknown : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
             const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s > 10 ? false :
-                s == TMV_UNKNOWN ? false :
+                s == Unknown ? false :
                 nops <= TMV_COPYU_UNROLL;
             const int algo = 
                 unroll ? ( M2::_rowmajor ? 25 : 15 ) :
@@ -467,7 +467,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

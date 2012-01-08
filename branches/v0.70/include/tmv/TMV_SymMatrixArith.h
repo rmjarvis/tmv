@@ -63,44 +63,44 @@ namespace tmv {
     template <class T, class T1, class T2> 
     class ProdUL;
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline SymMatrix<T,U,S>& operator+=(SymMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline SymMatrix<T,A>& operator+=(SymMatrix<T,A>& m, const Tx& x) 
     { m.view() += x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline SymMatrix<T,U,S>& operator-=(SymMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline SymMatrix<T,A>& operator-=(SymMatrix<T,A>& m, const Tx& x) 
     { m.view() -= x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline SymMatrix<T,U,S>& operator*=(SymMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline SymMatrix<T,A>& operator*=(SymMatrix<T,A>& m, const Tx& x) 
     { m.view() *= x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline SymMatrix<T,U,S>& operator/=(SymMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline SymMatrix<T,A>& operator/=(SymMatrix<T,A>& m, const Tx& x) 
     { m.view() /= x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline SymMatrix<T,U,S>& operator%=(SymMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline SymMatrix<T,A>& operator%=(SymMatrix<T,A>& m, const Tx& x) 
     { m.view() %= x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline HermMatrix<T,U,S>& operator+=(HermMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline HermMatrix<T,A>& operator+=(HermMatrix<T,A>& m, const Tx& x) 
     { m.view() += x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline HermMatrix<T,U,S>& operator-=(HermMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline HermMatrix<T,A>& operator-=(HermMatrix<T,A>& m, const Tx& x) 
     { m.view() -= x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline HermMatrix<T,U,S>& operator*=(HermMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline HermMatrix<T,A>& operator*=(HermMatrix<T,A>& m, const Tx& x) 
     { m.view() *= x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline HermMatrix<T,U,S>& operator/=(HermMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline HermMatrix<T,A>& operator/=(HermMatrix<T,A>& m, const Tx& x) 
     { m.view() /= x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline HermMatrix<T,U,S>& operator%=(HermMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline HermMatrix<T,A>& operator%=(HermMatrix<T,A>& m, const Tx& x) 
     { m.view() %= x; return m; }
 
 
@@ -119,7 +119,6 @@ namespace tmv {
             x(_x), m(_m) {}
         inline int size() const { return m.size(); }
         inline SymType sym() const { return m.issym() ? Sym : Herm; }
-        inline StorageType stor() const { return BaseStorOf(m); }
         inline T getX() const { return x; }
         inline const GenSymMatrix<Tm>& getM() const { return m; }
         inline void assignToM(const MatrixView<real_type>& m0) const
@@ -248,7 +247,6 @@ namespace tmv {
             x1(_x1), m(_m), x2(_x2) {}
         inline int size() const { return m.size(); }
         inline SymType sym() const { return m.issym() ? Sym : Herm; }
-        inline StorageType stor() const { return BaseStorOf(m); }
         inline T getX1() const { return x1; }
         inline const GenSymMatrix<Tm>& getM() const { return m; }
         inline T getX2() const { return x2; }
@@ -387,7 +385,6 @@ namespace tmv {
         inline int size() const { return m1.size(); }
         inline SymType sym() const 
         { return isReal(T1()) ? m2.sym() : m1.sym(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline T getX1() const { return x1; }
         inline const GenSymMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
@@ -538,7 +535,6 @@ namespace tmv {
         { TMVAssert(m1.size() == m2.size()); }
         inline int colsize() const { return m1.size(); }
         inline int rowsize() const { return m1.size(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline T getX() const { return x; }
         inline const GenSymMatrix<T1>& getM1() const { return m1; }
         inline const GenSymMatrix<T2>& getM2() const { return m2; }
@@ -633,7 +629,6 @@ namespace tmv {
         inline int size() const { return m1.size(); }
         inline SymType sym() const 
         { return isReal(T1()) ? m2.sym() : m1.sym(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline T getX() const { return x; }
         inline const GenSymMatrix<T1>& getM1() const { return m1; }
         inline const GenSymMatrix<T2>& getM2() const { return m2; }
@@ -694,7 +689,8 @@ namespace tmv {
         TMVAssert(m.size() == pmm.size());
         TMVAssert(isReal(T1()) || m.issym() == pmm.getM1().issym());
         TMVAssert(isReal(T2()) || m.issym() == pmm.getM2().issym());
-        TMVAssert(m.issym() || TMV_IMAG(x) == real_type(0));
+        TMVAssert(m.issym() || 
+                  TMV_IMAG(pmm.getX()) == typename Traits<T>::real_type(0));
         ElemMultMM<true>(
             pmm.getX(),pmm.getM1().upperTri(),pmm.getM2().upperTri(),
             m.upperTri()); 
@@ -705,12 +701,8 @@ namespace tmv {
     inline const SymMatrixView<CT>& operator+=(
         const SymMatrixView<CT>& m, const ElemProdSS<T,T,T>& pmm)
     {
-        TMVAssert(isReal(T1()) || isReal(T2()) || 
-                  pmm.getM1().sym() == pmm.getM2().sym());
         TMVAssert(m.size() == pmm.size());
-        TMVAssert(isReal(T1()) || m.issym() == pmm.getM1().issym());
-        TMVAssert(isReal(T2()) || m.issym() == pmm.getM2().issym());
-        TMVAssert(m.issym() || TMV_IMAG(x) == real_type(0));
+        TMVAssert(m.issym() || TMV_IMAG(pmm.getX()) == T(0));
         ElemMultMM<true>(
             pmm.getX(),pmm.getM1().upperTri(),pmm.getM2().upperTri(),
             m.upperTri()); 
@@ -726,7 +718,8 @@ namespace tmv {
         TMVAssert(m.size() == pmm.size());
         TMVAssert(isReal(T1()) || m.issym() == pmm.getM1().issym());
         TMVAssert(isReal(T2()) || m.issym() == pmm.getM2().issym());
-        TMVAssert(m.issym() || TMV_IMAG(x) == real_type(0));
+        TMVAssert(m.issym() || 
+                  TMV_IMAG(pmm.getX()) == typename Traits<T>::real_type(0));
         ElemMultMM<true>(
             -pmm.getX(),pmm.getM1().upperTri(),pmm.getM2().upperTri(),
             m.upperTri()); 
@@ -737,12 +730,8 @@ namespace tmv {
     inline const SymMatrixView<CT>& operator-=(
         const SymMatrixView<CT>& m, const ElemProdSS<T,T,T>& pmm)
     { 
-        TMVAssert(isReal(T1()) || isReal(T2()) || 
-                  pmm.getM1().sym() == pmm.getM2().sym());
         TMVAssert(m.size() == pmm.size());
-        TMVAssert(isReal(T1()) || m.issym() == pmm.getM1().issym());
-        TMVAssert(isReal(T2()) || m.issym() == pmm.getM2().issym());
-        TMVAssert(m.issym() || TMV_IMAG(x) == real_type(0));
+        TMVAssert(m.issym() || TMV_IMAG(pmm.getX()) == T(0));
         ElemMultMM<true>(
             -pmm.getX(),pmm.getM1().upperTri(),pmm.getM2().upperTri(),
             m.upperTri()); 

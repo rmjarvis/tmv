@@ -405,7 +405,7 @@ namespace tmv {
         static void call(T& x0, V& u, RT& beta)
         { 
             const bool inst = 
-                (V::_size == TMV_UNKNOWN || V::_size > 16) &&
+                (V::_size == Unknown || V::_size > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 V::_conj ? 97 : 
@@ -605,7 +605,7 @@ namespace tmv {
         static bool call(T& y, V& u, RT& beta)
         { 
             const bool inst = 
-                (V::_size == TMV_UNKNOWN || V::_size > 16) &&
+                (V::_size == Unknown || V::_size > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 V::_conj ? 97 : 
@@ -748,7 +748,7 @@ namespace tmv {
         static void call(V& u, RT beta, Ref u0)
         { 
             const bool inst = 
-                (V::_size == TMV_UNKNOWN || V::_size > 16) &&
+                (V::_size == Unknown || V::_size > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 V::_conj ? 97 : 
@@ -951,10 +951,10 @@ namespace tmv {
         static void call(const V& u, RT beta, M0& m0, Mx& mx, Vt& temp)
         { 
             const bool inst = 
-                (V::_size == TMV_UNKNOWN || V::_size > 16) &&
-                (Mx::_colsize == TMV_UNKNOWN || Mx::_colsize > 16) &&
-                (Mx::_rowsize == TMV_UNKNOWN || Mx::_rowsize > 16) &&
-                (M0::_size == TMV_UNKNOWN || M0::_size > 16) &&
+                (V::_size == Unknown || V::_size > 16) &&
+                (Mx::_colsize == Unknown || Mx::_colsize > 16) &&
+                (Mx::_rowsize == Unknown || Mx::_rowsize > 16) &&
+                (M0::_size == Unknown || M0::_size > 16) &&
                 Traits<RT>::isinst;
             const int algo = 
                 Mx::_conj ? 97 : 
@@ -981,7 +981,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<V::_size,Mx::_colsize>::same));
         TMVStaticAssert((Sizes<M0::_size,Mx::_rowsize>::same));
         TMVStaticAssert((Sizes<Vt::_size,Mx::_rowsize>::same));
-        TMVStaticAssert(Vt::_step == 1 || Vt::_step == TMV_UNKNOWN);
+        TMVStaticAssert(Vt::_step == 1 || Vt::_step == Unknown);
         TMVAssert(u.size() == mx.colsize());
         TMVAssert(m0.size() == mx.rowsize());
         TMVAssert(temp.size() == mx.rowsize());
@@ -1006,7 +1006,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<V::_size,Mx::_colsize>::same));
         TMVStaticAssert((Sizes<M0::_size,Mx::_rowsize>::same));
         TMVStaticAssert((Sizes<Vt::_size,Mx::_rowsize>::same));
-        TMVStaticAssert(Vt::_step == 1 || Vt::_step == TMV_UNKNOWN);
+        TMVStaticAssert(Vt::_step == 1 || Vt::_step == Unknown);
         TMVAssert(u.size() == mx.colsize());
         TMVAssert(m0.size() == mx.rowsize());
         TMVAssert(temp.size() == mx.rowsize());
@@ -1170,9 +1170,9 @@ namespace tmv {
         static void call(const M1& Y, M2& Z, RT beta)
         { 
             const bool inst = 
-                (M1::_colsize == TMV_UNKNOWN || M1::_colsize > 16) &&
-                (M1::_rowsize == TMV_UNKNOWN || M1::_rowsize > 16) &&
-                (M2::_size == TMV_UNKNOWN || M2::_size > 16) &&
+                (M1::_colsize == Unknown || M1::_colsize > 16) &&
+                (M1::_rowsize == Unknown || M1::_rowsize > 16) &&
+                (M2::_size == Unknown || M2::_size > 16) &&
                 Traits<RT>::isinst;
             const int algo = 
                 M1::_conj || M2::_conj ? 97 : 
@@ -1393,10 +1393,10 @@ namespace tmv {
         { 
             typedef typename V::real_type RT;
             const bool inst = 
-                (V::_size == TMV_UNKNOWN || V::_size > 16) &&
-                (M1::_colsize == TMV_UNKNOWN || M1::_colsize > 16) &&
-                (M1::_rowsize == TMV_UNKNOWN || M1::_rowsize > 16) &&
-                (M2::_size == TMV_UNKNOWN || M2::_size > 16) &&
+                (V::_size == Unknown || V::_size > 16) &&
+                (M1::_colsize == Unknown || M1::_colsize > 16) &&
+                (M1::_rowsize == Unknown || M1::_rowsize > 16) &&
+                (M2::_size == Unknown || M2::_size > 16) &&
                 Traits<RT>::isinst;
             const int algo = 
                 M1::_conj || M2::_conj ? 97 : 
@@ -1599,11 +1599,11 @@ namespace tmv {
         { 
             typedef typename M3::real_type RT;
             const bool inst = 
-                (M1::_colsize == TMV_UNKNOWN || M1::_colsize > 16) &&
-                (M1::_rowsize == TMV_UNKNOWN || M1::_rowsize > 16) &&
-                (M2::_size == TMV_UNKNOWN || M2::_size > 16) &&
-                (M3::_colsize == TMV_UNKNOWN || M3::_colsize > 16) &&
-                (M3::_rowsize == TMV_UNKNOWN || M3::_rowsize > 16) &&
+                (M1::_colsize == Unknown || M1::_colsize > 16) &&
+                (M1::_rowsize == Unknown || M1::_rowsize > 16) &&
+                (M2::_size == Unknown || M2::_size > 16) &&
+                (M3::_colsize == Unknown || M3::_colsize > 16) &&
+                (M3::_rowsize == Unknown || M3::_rowsize > 16) &&
                 Traits<RT>::isinst;
             const int algo = 
                 M3::_conj ? 97 : 
@@ -1828,11 +1828,11 @@ namespace tmv {
         { 
             typedef typename M3::real_type RT;
             const bool inst = 
-                (M1::_colsize == TMV_UNKNOWN || M1::_colsize > 16) &&
-                (M1::_rowsize == TMV_UNKNOWN || M1::_rowsize > 16) &&
-                (M2::_size == TMV_UNKNOWN || M2::_size > 16) &&
-                (M3::_colsize == TMV_UNKNOWN || M3::_colsize > 16) &&
-                (M3::_rowsize == TMV_UNKNOWN || M3::_rowsize > 16) &&
+                (M1::_colsize == Unknown || M1::_colsize > 16) &&
+                (M1::_rowsize == Unknown || M1::_rowsize > 16) &&
+                (M2::_size == Unknown || M2::_size > 16) &&
+                (M3::_colsize == Unknown || M3::_colsize > 16) &&
+                (M3::_rowsize == Unknown || M3::_rowsize > 16) &&
                 Traits<RT>::isinst;
             const int algo = 
                 M3::_conj ? 97 : 
@@ -2005,10 +2005,10 @@ namespace tmv {
         { 
             typedef typename M2::real_type RT;
             const bool inst = 
-                (M1::_colsize == TMV_UNKNOWN || M1::_colsize > 16) &&
-                (M1::_rowsize == TMV_UNKNOWN || M1::_rowsize > 16) &&
-                (M2::_size == TMV_UNKNOWN || M2::_size > 16) &&
-                (M3::_size == TMV_UNKNOWN || M3::_size > 16) &&
+                (M1::_colsize == Unknown || M1::_colsize > 16) &&
+                (M1::_rowsize == Unknown || M1::_rowsize > 16) &&
+                (M2::_size == Unknown || M2::_size > 16) &&
+                (M3::_size == Unknown || M3::_size > 16) &&
                 Traits<RT>::isinst;
             const int algo = 
                 M1::_conj || M2::_conj ? 97 : 
@@ -2204,9 +2204,9 @@ namespace tmv {
         static void call(const M1& Y, M2& Z, RT beta)
         { 
             const bool inst = 
-                (M1::_colsize == TMV_UNKNOWN || M1::_colsize > 16) &&
-                (M1::_rowsize == TMV_UNKNOWN || M1::_rowsize > 16) &&
-                (M2::_size == TMV_UNKNOWN || M2::_size > 16) &&
+                (M1::_colsize == Unknown || M1::_colsize > 16) &&
+                (M1::_rowsize == Unknown || M1::_rowsize > 16) &&
+                (M2::_size == Unknown || M2::_size > 16) &&
                 Traits<RT>::isinst;
             const int algo = 
                 M1::_conj || M2::_conj ? 97 : 
@@ -2389,10 +2389,10 @@ namespace tmv {
         { 
             typedef typename V::real_type RT;
             const bool inst = 
-                (V::_size == TMV_UNKNOWN || V::_size > 16) &&
-                (M1::_colsize == TMV_UNKNOWN || M1::_colsize > 16) &&
-                (M1::_rowsize == TMV_UNKNOWN || M1::_rowsize > 16) &&
-                (M2::_size == TMV_UNKNOWN || M2::_size > 16) &&
+                (V::_size == Unknown || V::_size > 16) &&
+                (M1::_colsize == Unknown || M1::_colsize > 16) &&
+                (M1::_rowsize == Unknown || M1::_rowsize > 16) &&
+                (M2::_size == Unknown || M2::_size > 16) &&
                 Traits<RT>::isinst;
             const int algo = 
                 M1::_conj || M2::_conj ? 97 : 
@@ -2582,11 +2582,11 @@ namespace tmv {
         { 
             typedef typename M3::real_type RT;
             const bool inst = 
-                (M1::_colsize == TMV_UNKNOWN || M1::_colsize > 16) &&
-                (M1::_rowsize == TMV_UNKNOWN || M1::_rowsize > 16) &&
-                (M2::_size == TMV_UNKNOWN || M2::_size > 16) &&
-                (M3::_colsize == TMV_UNKNOWN || M3::_colsize > 16) &&
-                (M3::_rowsize == TMV_UNKNOWN || M3::_rowsize > 16) &&
+                (M1::_colsize == Unknown || M1::_colsize > 16) &&
+                (M1::_rowsize == Unknown || M1::_rowsize > 16) &&
+                (M2::_size == Unknown || M2::_size > 16) &&
+                (M3::_colsize == Unknown || M3::_colsize > 16) &&
+                (M3::_rowsize == Unknown || M3::_rowsize > 16) &&
                 Traits<RT>::isinst;
             const int algo = 
                 M4::_conj ? 97 : 
@@ -2813,11 +2813,11 @@ namespace tmv {
         { 
             typedef typename M3::real_type RT;
             const bool inst = 
-                (M1::_colsize == TMV_UNKNOWN || M1::_colsize > 16) &&
-                (M1::_rowsize == TMV_UNKNOWN || M1::_rowsize > 16) &&
-                (M2::_size == TMV_UNKNOWN || M2::_size > 16) &&
-                (M3::_colsize == TMV_UNKNOWN || M3::_colsize > 16) &&
-                (M3::_rowsize == TMV_UNKNOWN || M3::_rowsize > 16) &&
+                (M1::_colsize == Unknown || M1::_colsize > 16) &&
+                (M1::_rowsize == Unknown || M1::_rowsize > 16) &&
+                (M2::_size == Unknown || M2::_size > 16) &&
+                (M3::_colsize == Unknown || M3::_colsize > 16) &&
+                (M3::_rowsize == Unknown || M3::_rowsize > 16) &&
                 Traits<RT>::isinst;
             const int algo = 
                 M4::_conj ? 97 : 

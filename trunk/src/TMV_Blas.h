@@ -685,8 +685,12 @@ namespace tmv {
                      const int lwork, const char* fn);
 
 
+    template <class M> class BaseMatrix_Rec;
+    template <class M> class BaseMatrix_Tri;
+    template <class M> class BaseMatrix_Band;
+
     template <class M>
-    static inline bool BlasIsRM(const M& m)
+    static inline bool BlasIsRM(const BaseMatrix_Rec<M>& m)
     {
 #ifdef BLAS
         return m.isrm() && m.stepi() >= m.rowsize() && m.stepi() >= 1;
@@ -696,10 +700,50 @@ namespace tmv {
     }
 
     template <class M>
-    static inline bool BlasIsCM(const M& m)
+    static inline bool BlasIsCM(const BaseMatrix_Rec<M>& m)
     {
 #ifdef BLAS
         return m.iscm() && m.stepj() >= m.colsize() && m.stepj() >= 1;
+#else
+        return m.iscm();
+#endif
+    }
+
+    template <class M>
+    static inline bool BlasIsRM(const BaseMatrix_Tri<M>& m)
+    {
+#ifdef BLAS
+        return m.isrm() && m.stepi() >= m.rowsize() && m.stepi() >= 1;
+#else
+        return m.isrm();
+#endif
+    }
+
+    template <class M>
+    static inline bool BlasIsCM(const BaseMatrix_Tri<M>& m)
+    {
+#ifdef BLAS
+        return m.iscm() && m.stepj() >= m.colsize() && m.stepj() >= 1;
+#else
+        return m.iscm();
+#endif
+    }
+
+    template <class M>
+    static inline bool BlasIsRM(const BaseMatrix_Band<M>& m)
+    {
+#ifdef BLAS
+        return m.isrm() && m.stepi() >= (m.nlo()+m.nhi()) && m.stepi() >= 0;
+#else
+        return m.isrm();
+#endif
+    }
+
+    template <class M>
+    static inline bool BlasIsCM(const BaseMatrix_Band<M>& m)
+    {
+#ifdef BLAS
+        return m.iscm() && m.stepj() >= (m.nlo()+m.nhi()) && m.stepj() >= 0;
 #else
         return m.iscm();
 #endif

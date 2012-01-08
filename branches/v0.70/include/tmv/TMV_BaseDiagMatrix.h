@@ -40,13 +40,13 @@ namespace tmv {
     template <class T> 
     class GenDiagMatrix;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class ConstDiagMatrixView;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class DiagMatrixView;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class DiagMatrix;
 
     template <class T, class Tm> 
@@ -64,38 +64,31 @@ namespace tmv {
         virtual inline ~AssignableToDiagMatrix() {}
     };
 
-    template <class T, IndexStyle I> 
-    inline std::string TMV_Text(const DiagMatrix<T,I>& )
+    template <class T, int A>
+    inline std::string TMV_Text(const DiagMatrix<T,A>& )
     {
         return std::string("DiagMatrix<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(I) + ">"; 
+            TMV_Text(T()) + "," + Attrib<A>::vtext() + ">";
     }
 
     template <class T> 
     inline std::string TMV_Text(const GenDiagMatrix<T>& m)
     {
-        return std::string("GenDiagMatrix<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.diag().ct()) + ">";
+        return std::string("GenDiagMatrix<") + TMV_Text(T()) + ">";
     }
 
-    template <class T, IndexStyle I> 
-    inline std::string TMV_Text(const ConstDiagMatrixView<T,I>& m)
+    template <class T, int A>
+    inline std::string TMV_Text(const ConstDiagMatrixView<T,A>& m)
     {
         return std::string("ConstDiagMatrixView<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(I) + "," + 
-            TMV_Text(m.diag().ct()) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::vtext() + ">";
     }
 
-    template <class T, IndexStyle I> 
-    inline std::string TMV_Text(const DiagMatrixView<T,I>& m)
+    template <class T, int A>
+    inline std::string TMV_Text(const DiagMatrixView<T,A>& m)
     {
         return std::string("DiagMatrixView<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(I) + "," + 
-            TMV_Text(m.diag().ct()) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::vtext() + ">";
     }
 
 } // namespace tmv

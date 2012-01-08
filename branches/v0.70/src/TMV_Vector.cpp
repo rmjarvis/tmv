@@ -98,8 +98,8 @@ namespace tmv {
         return (ct() == Conj) ? TMV_CONJ(*vi) : *vi;
     }
 
-    template <class T, IndexStyle I> 
-    typename VectorView<T,I>::reference VectorView<T,I>::ref(int i) const
+    template <class T, int A>
+    typename VectorView<T,A>::reference VectorView<T,A>::ref(int i) const
     {
         T* vi = ptr() + i*step();
         return TMV_REF(vi,ct());
@@ -191,10 +191,11 @@ namespace tmv {
                     for(int i=size();i>0;--i,++p) sum += TMV_NORM(scale* (*p));
                 return sum;
             }
-        }
-        else if (s < 0) return reverse().normSq(scale);
-        else if (s == 0) return RT(size()) * TMV_NORM(scale*(*cptr()));
-        else {
+        } else if (s < 0) {
+            return reverse().normSq(scale);
+        } else if (s == 0) {
+            return RT(size()) * TMV_NORM(scale*(*cptr()));
+        } else {
             RT sum(0);
             const T* p = cptr();
             if (scale == RT(1))
@@ -340,7 +341,6 @@ namespace tmv {
     template <> 
     double DoSumAbsElements(const GenVector<double>& v)
     { 
-        TMVAssert(v.step()>=0);
         int n=v.size();
         int s=v.step();
         return BLASNAME(dasum) (BLASV(n),BLASP(v.cptr()),BLASV(s));
@@ -350,7 +350,6 @@ namespace tmv {
     template <> 
     float DoSumAbsElements(const GenVector<float>& v)
     { 
-        TMVAssert(v.step()>=0);
         int n=v.size();
         int s=v.step();
         return BLASNAME(sasum) (BLASV(n),BLASP(v.cptr()),BLASV(s));
@@ -362,7 +361,6 @@ namespace tmv {
     double DoSumAbsElements(
         const GenVector<std::complex<double> >& v)
     { 
-        TMVAssert(v.step()>=0);
         int n = v.size();
         int s = v.step();
         return LAPNAME(dzsum1) (LAPV(n),LAPP(v.cptr()),LAPV(s)); 
@@ -373,7 +371,6 @@ namespace tmv {
     float DoSumAbsElements(
         const GenVector<std::complex<float> >& v)
     { 
-        TMVAssert(v.step()>=0);
         int n = v.size();
         int s = v.step();
         return LAPNAME(scsum1) (LAPV(n),LAPP(v.cptr()),LAPV(s)); 
@@ -901,23 +898,23 @@ namespace tmv {
     //   sort
     //
 
-    template <class T, IndexStyle I> 
-    const VectorView<T,I>& VectorView<T,I>::setZero() const
+    template <class T, int A>
+    const VectorView<T,A>& VectorView<T,A>::setZero() const
     {
         if (step() == 1) std::fill_n(ptr(),size(),T(0));
         else setAllTo(T(0));
         return *this;
     }
 
-    template <class T, IndexStyle I> 
-    Vector<T,I>& Vector<T,I>::setZero() 
+    template <class T, int A>
+    Vector<T,A>& Vector<T,A>::setZero() 
     {
         std::fill_n(ptr(),size(),T(0));
         return *this;
     }
 
-    template <class T, IndexStyle I> 
-    const VectorView<T,I>& VectorView<T,I>::clip(RT thresh) const
+    template <class T, int A>
+    const VectorView<T,A>& VectorView<T,A>::clip(RT thresh) const
     {
         const int s = step();
         if (s < 0) {
@@ -945,12 +942,12 @@ namespace tmv {
     { TMVAssert(TMV_FALSE); return *this; }
 #endif
 
-    template <class T, IndexStyle I> 
-    Vector<T,I>& Vector<T,I>::clip(RT thresh)
+    template <class T, int A>
+    Vector<T,A>& Vector<T,A>::clip(RT thresh)
     { view().clip(thresh); return *this; }
 
-    template <class T, IndexStyle I> 
-    const VectorView<T,I>& VectorView<T,I>::setAllTo(const T& x) const
+    template <class T, int A>
+    const VectorView<T,A>& VectorView<T,A>::setAllTo(const T& x) const
     {
         const int s = step();
         if (s < 0) {
@@ -986,15 +983,15 @@ namespace tmv {
         return *this; 
     }
 
-    template <class T, IndexStyle I> 
-    Vector<T,I>& Vector<T,I>::setAllTo(const T& x) 
+    template <class T, int A>
+    Vector<T,A>& Vector<T,A>::setAllTo(const T& x) 
     {
         std::fill_n(ptr(),size(),x);
         return *this;
     }
 
-    template <class T, IndexStyle I> 
-    const VectorView<T,I>& VectorView<T,I>::addToAll(const T& x) const
+    template <class T, int A>
+    const VectorView<T,A>& VectorView<T,A>::addToAll(const T& x) const
     {
         const int s = step();
         if (s < 0) {
@@ -1021,8 +1018,8 @@ namespace tmv {
         return *this; 
     }
 
-    template <class T, IndexStyle I> 
-    Vector<T,I>& Vector<T,I>::addToAll(const T& x)
+    template <class T, int A>
+    Vector<T,A>& Vector<T,A>::addToAll(const T& x)
     {
         T* p = ptr();
         for(int i=size();i>0;--i,++p) *p += x;
@@ -1072,8 +1069,8 @@ namespace tmv {
     }
 #endif
 #endif // ELAP
-    template <class T, IndexStyle I> 
-    const VectorView<T,I>& VectorView<T,I>::conjugateSelf() const
+    template <class T, int A>
+    const VectorView<T,A>& VectorView<T,A>::conjugateSelf() const
     {
         if (step() < 0) {
             reverse().conjugateSelf();
@@ -1087,45 +1084,45 @@ namespace tmv {
         return *this; 
     }
 
-    template <class T, IndexStyle I> 
-    Vector<T,I>& Vector<T,I>::conjugateSelf()
+    template <class T, int A>
+    Vector<T,A>& Vector<T,A>::conjugateSelf()
     { 
         view().conjugateSelf(); 
         return *this; 
     }
 
 
-    template <class T, IndexStyle I> 
-    const VectorView<T,I>& VectorView<T,I>::DoBasis(int i) const
+    template <class T, int A>
+    const VectorView<T,A>& VectorView<T,A>::DoBasis(int i) const
     { 
-        TMVAssert(I==CStyle);
+        TMVAssert(A==CStyle);
         TMVAssert(i < size());
         setZero();
         ref(i) = T(1);
         return *this; 
     }
 
-    template <class T, IndexStyle I> 
-    Vector<T,I>& Vector<T,I>::DoBasis(int i)
+    template <class T, int A>
+    Vector<T,A>& Vector<T,A>::DoBasis(int i)
     {
-        if (I == CStyle) {
+        if (A == CStyle) {
             TMVAssert(i<size()); 
         } else { 
             TMVAssert(i>0 && i<=size()); 
         }
 
-        const int ix = (I==CStyle ? i : i-1);
+        const int ix = (A==CStyle ? i : i-1);
         setZero();
         ref(ix) = T(1);
         return *this;
     }
 
-    template <class T, IndexStyle I> 
-    const VectorView<T,I>& VectorView<T,I>::DoSwap(int i1, int i2) const
+    template <class T, int A>
+    const VectorView<T,A>& VectorView<T,A>::DoSwap(int i1, int i2) const
     {
         TMVAssert(i1 < size());
         TMVAssert(i2 < size());
-        TMVAssert(I==CStyle);
+        TMVAssert(A==CStyle);
         if (i1 != i2) {
             const int s = step();
             if (s == 1) TMV_SWAP(*(ptr()+i1),*(ptr()+i2));
@@ -1134,42 +1131,42 @@ namespace tmv {
         return *this;
     }
 
-    template <class T, IndexStyle I> 
-    Vector<T,I>& Vector<T,I>::DoSwap(int i1, int i2)
+    template <class T, int A>
+    Vector<T,A>& Vector<T,A>::DoSwap(int i1, int i2)
     {
         TMVAssert(i1 < size());
         TMVAssert(i2 < size());
         if (i1 != i2)  {
-            if (I==CStyle) TMV_SWAP(*(ptr()+i1),*(ptr()+i2));
+            if (A==CStyle) TMV_SWAP(*(ptr()+i1),*(ptr()+i2));
             else TMV_SWAP(*(ptr()+i1-1),*(ptr()+i2-1));
         }
         return *this;
     }
 
-    template <class T, IndexStyle I> 
-    const VectorView<T,I>& VectorView<T,I>::DoPermute(
+    template <class T, int A>
+    const VectorView<T,A>& VectorView<T,A>::DoPermute(
         const int* p, int i1, int i2) const
     { 
         TMVAssert(i2 <= size());
         TMVAssert(i1 <= i2);
-        TMVAssert(I==CStyle);
+        TMVAssert(A==CStyle);
         for(int i=i1;i<i2;++i) DoSwap(i,p[i]);
         return *this; 
     }
 
-    template <class T, IndexStyle I> 
-    const VectorView<T,I>& VectorView<T,I>::DoReversePermute(
+    template <class T, int A>
+    const VectorView<T,A>& VectorView<T,A>::DoReversePermute(
         const int* p, int i1, int i2) const
     { 
         TMVAssert(i2 <= size());
         TMVAssert(i1 <= i2);
-        TMVAssert(I==CStyle);
+        TMVAssert(A==CStyle);
         for(int i=i2;i>i1;) { --i; DoSwap(i,p[i]); }
         return *this; 
     }
 
-    template <class T, IndexStyle I> 
-    const VectorView<T,I>& VectorView<T,I>::reverseSelf() const
+    template <class T, int A>
+    const VectorView<T,A>& VectorView<T,A>::reverseSelf() const
     {
         const int s = step();
         if (s < 0) reverse().reverseSelf();
@@ -1276,8 +1273,8 @@ namespace tmv {
         const CompType comp;
     };
 
-    template <class T, IndexStyle I> 
-    const VectorView<T,I>& VectorView<T,I>::sort(
+    template <class T, int A>
+    const VectorView<T,A>& VectorView<T,A>::sort(
         int* p, ADType ad, CompType comp) const
     {
         if (tmv::Traits<T>::iscomplex) {
@@ -1310,12 +1307,12 @@ namespace tmv {
     // Special Constructors
     //
 
-    template <class T, IndexStyle I> 
-    Vector<T,I> DoBasisVector(int n, int i)
+    template <class T, int A>
+    Vector<T,A> DoBasisVector(int n, int i)
     {
-        if (I == CStyle) { TMVAssert(i<n); }
+        if (A == CStyle) { TMVAssert(i<n); }
         else { TMVAssert(i>0 && i<=n); }
-        Vector<T,I> temp(n,T(0));
+        Vector<T,A> temp(n,T(0));
         temp(i) = T(1);
         return temp;
     }
@@ -1357,15 +1354,7 @@ namespace tmv {
     template <> 
     void DoCopySameType(
         const GenVector<double>& v1, const VectorView<double>& v2)
-    { 
-        TMVAssert(v1.size() == v2.size());
-        TMVAssert(v2.size()>0);
-        TMVAssert(v1.ct()==NonConj);
-        TMVAssert(v2.ct()==NonConj);
-        TMVAssert(v2.step() != -1);
-        TMVAssert(v1.step() != -1 || v2.step() == 1);
-        TMVAssert(v2.step() > 0 || v1.step() == 1);
-        TMVAssert(!v2.isSameAs(v1));
+    {
         int n=v2.size();
         int s1=v1.step();
         int s2=v2.step();
@@ -1379,15 +1368,7 @@ namespace tmv {
     void DoCopySameType(
         const GenVector<std::complex<double> >& v1,
         const VectorView<std::complex<double> >& v2)
-    { 
-        TMVAssert(v1.size() == v2.size());
-        TMVAssert(v2.size()>0);
-        TMVAssert(v1.ct()==NonConj);
-        TMVAssert(v2.ct()==NonConj);
-        TMVAssert(v2.step() != -1);
-        TMVAssert(v1.step() != -1 || v2.step() == 1);
-        TMVAssert(v2.step() > 0 || v1.step() == 1);
-        TMVAssert(!v2.isSameAs(v1));
+    {
         int n=v2.size();
         int s1=v1.step();
         int s2=v2.step();
@@ -1402,15 +1383,7 @@ namespace tmv {
     template <> 
     void DoCopySameType(
         const GenVector<float>& v1, const VectorView<float>& v2)
-    { 
-        TMVAssert(v1.size() == v2.size());
-        TMVAssert(v2.size()>0);
-        TMVAssert(v1.ct()==NonConj);
-        TMVAssert(v2.ct()==NonConj);
-        TMVAssert(v2.step() != -1);
-        TMVAssert(v1.step() != -1 || v2.step() == 1);
-        TMVAssert(v2.step() > 0 || v1.step() == 1);
-        TMVAssert(!v2.isSameAs(v1));
+    {
         int n=v2.size();
         int s1=v1.step();
         int s2=v2.step();
@@ -1424,15 +1397,7 @@ namespace tmv {
     void DoCopySameType(
         const GenVector<std::complex<float> >& v1,
         const VectorView<std::complex<float> >& v2)
-    { 
-        TMVAssert(v1.size() == v2.size());
-        TMVAssert(v2.size()>0);
-        TMVAssert(v1.ct()==NonConj);
-        TMVAssert(v2.ct()==NonConj);
-        TMVAssert(v2.step() != -1);
-        TMVAssert(v1.step() != -1 || v2.step() == 1);
-        TMVAssert(v2.step() > 0 || v1.step() == 1);
-        TMVAssert(!v2.isSameAs(v1));
+    {
         int n=v2.size();
         int s1=v1.step();
         int s2=v2.step();
@@ -1727,8 +1692,8 @@ namespace tmv {
         }
     }
 
-    template <class T, IndexStyle I> 
-    void Vector<T,I>::read(const TMV_Reader& reader)
+    template <class T, int A>
+    void Vector<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
         if (!reader.readCode("V",exp,got)) {
@@ -1753,8 +1718,8 @@ namespace tmv {
         FinishRead(reader,vv);
     }
 
-    template <class T, IndexStyle I> 
-    void VectorView<T,I>::read(const TMV_Reader& reader) const
+    template <class T, int A>
+    void VectorView<T,A>::read(const TMV_Reader& reader) const
     {
         std::string exp,got;
         if (!reader.readCode("V",exp,got)) {

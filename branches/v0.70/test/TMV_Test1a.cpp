@@ -29,11 +29,10 @@ int main() try
 
     //showacc=true;
     //showdiv=true;
-    showtests=true;
-    showstartdone=true;
-    TestVector<int>();
+    //showtests=true;
+    //showstartdone=true;
 
-#if 0
+#if 1
 
 #ifdef TEST_DOUBLE
     TestVector<double>();

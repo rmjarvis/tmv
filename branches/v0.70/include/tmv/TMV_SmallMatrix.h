@@ -36,14 +36,14 @@
 //
 // Constructors:
 //
-//    SmallMatrix<T,M,N,stor,I>()
+//    SmallMatrix<T,M,N,A>()
 //        Makes a SmallMatrix with column size = M and row size = N
 //        with _uninitialized_ values
 //
-//    SmallMatrix<T,M,N,stor,I>(T x)
+//    SmallMatrix<T,M,N,A>(T x)
 //        Makes a SmallMatrix of size n with all values = x
 //
-//    SmallMatrix<T,M,N,stor,I>(const GenMatrix<T>& m)
+//    SmallMatrix<T,M,N,A>(const GenMatrix<T>& m)
 //        Make a SmallMatrix which copies the elements of m.
 //
 // SmallMatrix doesn't have views like a regular Matrix.
@@ -64,50 +64,48 @@
 
 namespace tmv {
 
-    template <class T1, class T2, int M, int N, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
+    template <class T1, class T2, int M, int N, int A1, int A2>
     inline void Copy(
-        const SmallMatrix<T1,M,N,S1,I1>& m1,
-        SmallMatrix<T2,M,N,S2,I2>& m2);
+        const SmallMatrix<T1,M,N,A1>& m1, SmallMatrix<T2,M,N,A2>& m2);
 
-    template <class T, int M, int N, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
+    template <class T, int M, int N, int A1, int A2>
     inline void Copy(
-        const SmallMatrix<std::complex<T>,M,N,S1,I1>& ,
-        SmallMatrix<T,M,N,S2,I2>& )
+        const SmallMatrix<std::complex<T>,M,N,A1>& , SmallMatrix<T,M,N,A2>& )
     { TMVAssert(TMV_FALSE); }
 
-    template <class T, class Tm, int M, int N, StorageType S, IndexStyle I> 
+    template <class T, class Tm, int M, int N, int A>
     class QuotXm_1;
 
     template <class T, int M, int N> 
     class SmallMatrixComposite;
 
-    template <class T, int M, int N, StorageType S, IndexStyle I> 
-    inline T DoDet(const SmallMatrix<T,M,N,S,I>& m);
+    template <class T, int M, int N, int A>
+    inline T DoDet(const SmallMatrix<T,M,N,A>& m);
 
-    template <class T, class T2, int M, int N, StorageType S, StorageType S2, IndexStyle I, IndexStyle I2> 
+    template <class T, class T2, int M, int N, int A, int A2>
     inline void DoInverse(
-        const SmallMatrix<T,M,N,S,I>& m, SmallMatrix<T2,N,M,S2,I2>& minv);
+        const SmallMatrix<T,M,N,A>& m, SmallMatrix<T2,N,M,A2>& minv);
 
-    template <class T, int M, int N, StorageType S, StorageType S2, IndexStyle I, IndexStyle I2> 
+    template <class T, int M, int N, int A, int A2>
     inline void DoInverseATA(
-        const SmallMatrix<T,M,N,S,I>& m, SmallMatrix<T,N,N,S2,I2>& ata);
+        const SmallMatrix<T,M,N,A>& m, SmallMatrix<T,N,N,A2>& ata);
 
-
-    // defaults S=ColMajor and I=CStyle are set in TMV_BaseMatrix.h
-    template <class T, int M, int N, StorageType S, IndexStyle I> 
+    template <class T, int M, int N, int A>
     class SmallMatrix 
     {
     public:
 
-        enum { Si = (S == RowMajor ? N : 1) };
-        enum { Sj = (S == RowMajor ? 1 : M) };
+        enum { S = A & AllStorageType };
+        enum { I = A & FortranStyle };
+        enum { Si = (S == int(RowMajor) ? N : 1) };
+        enum { Sj = (S == int(RowMajor) ? 1 : M) };
 
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef T value_type;
         typedef RT real_type;
         typedef CT complex_type;
-        typedef SmallMatrix<T,M,N,S,I> type;
+        typedef SmallMatrix<T,M,N,A> type;
         typedef type copy_type;
         typedef ConstMatrixView<T,I> const_view_type;
         typedef const_view_type const_transpose_type;
@@ -144,7 +142,7 @@ namespace tmv {
         {
             TMVAssert(M>0);
             TMVAssert(N>0);
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::matrixok);
 #ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
@@ -154,7 +152,7 @@ namespace tmv {
         { 
             TMVAssert(M>0);
             TMVAssert(N>0);
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::matrixok);
             if (x == T(0)) setZero();
             else setAllTo(x);
         }
@@ -163,25 +161,16 @@ namespace tmv {
         { 
             TMVAssert(M>0);
             TMVAssert(N>0);
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::matrixok);
             for(int i=0;i<M*N;++i) itsm[i] = m2.itsm[i];
         }
 
-        template <IndexStyle I2> 
-        inline SmallMatrix(const SmallMatrix<T,M,N,S,I2>& m2) 
+        template <class T2, int A2> 
+        inline SmallMatrix(const SmallMatrix<T2,M,N,A2>& m2) 
         { 
             TMVAssert(M>0);
             TMVAssert(N>0);
-            TMVAssert(S==RowMajor || S==ColMajor);
-            for(int i=0;i<M*N;++i) itsm[i] = m2.cptr()[i];
-        }
-
-        template <class T2, StorageType S2, IndexStyle I2> 
-        inline SmallMatrix(const SmallMatrix<T2,M,N,S2,I2>& m2) 
-        { 
-            TMVAssert(M>0);
-            TMVAssert(N>0);
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::matrixok);
             TMVAssert(isComplex(T()) || isReal(T2()));
             Copy(m2,*this);
         }
@@ -190,7 +179,7 @@ namespace tmv {
         { 
             TMVAssert(M>0);
             TMVAssert(N>0);
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::matrixok);
             TMVAssert(m2.colsize() == M);
             TMVAssert(m2.rowsize() == N);
             view() = m2;
@@ -201,8 +190,8 @@ namespace tmv {
         { 
             TMVAssert(M>0);
             TMVAssert(N>0);
+            TMVAssert(Attrib<A>::matrixok);
             TMVAssert(isComplex(T()) || isReal(T2()));
-            TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(m2.colsize() == M);
             TMVAssert(m2.rowsize() == N);
             view() = m2;
@@ -212,7 +201,7 @@ namespace tmv {
         { 
             TMVAssert(M>0);
             TMVAssert(N>0);
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::matrixok);
             TMVAssert(m2.colsize() == M);
             TMVAssert(m2.rowsize() == N);
             view() = m2;
@@ -222,8 +211,8 @@ namespace tmv {
         { 
             TMVAssert(M>0);
             TMVAssert(N>0);
+            TMVAssert(Attrib<A>::matrixok);
             TMVAssert(isComplex(T()));
-            TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(m2.colsize() == M);
             TMVAssert(m2.rowsize() == N);
             view() = m2;
@@ -233,7 +222,7 @@ namespace tmv {
         { 
             TMVAssert(M>0);
             TMVAssert(N>0);
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::matrixok);
             m2.assignTom(*this);
         }
 
@@ -241,7 +230,7 @@ namespace tmv {
         { 
             TMVAssert(M>0);
             TMVAssert(N>0);
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::matrixok);
             m2.assignTom(*this);
         }
 
@@ -263,15 +252,8 @@ namespace tmv {
             return *this; 
         }
 
-        template <IndexStyle I2> 
-        inline type& operator=(const SmallMatrix<T,M,N,S,I2>& m2)
-        { 
-            Copy(m2,*this);
-            return *this; 
-        }
-
-        template <class T2, StorageType S2, IndexStyle I2> 
-        inline type& operator=(const SmallMatrix<T2,M,N,S2,I2>& m2)
+        template <class T2, int A2> 
+        inline type& operator=(const SmallMatrix<T2,M,N,A2>& m2)
         { 
             TMVAssert(isComplex(T()) || isReal(T2()));
             Copy(m2,*this);
@@ -330,7 +312,7 @@ namespace tmv {
 
         inline T operator()(int i,int j) const
         { 
-            if (I == CStyle) {
+            if (I == int(CStyle)) {
                 TMVAssert(i>=0 && i<M);
                 TMVAssert(j>=0 && j<N);
                 return cref(i,j); 
@@ -343,7 +325,7 @@ namespace tmv {
 
         inline T& operator()(int i,int j) 
         { 
-            if (I == CStyle) {
+            if (I == int(CStyle)) {
                 TMVAssert(i>=0 && i<M);
                 TMVAssert(j>=0 && j<N);
                 return ref(i,j);
@@ -533,8 +515,8 @@ namespace tmv {
         // Division Control
         //
 
-        inline QuotXm_1<T,T,M,N,S,I> inverse() const
-        { return QuotXm_1<T,T,M,N,S,I>(T(1),*this); }
+        inline QuotXm_1<T,T,M,N,A> inverse() const
+        { return QuotXm_1<T,T,M,N,A>(T(1),*this); }
 
         inline void makeInverse(const MatrixView<T>& minv) const
         { view().makeInverse(minv); }
@@ -543,23 +525,23 @@ namespace tmv {
         inline void makeInverse(const MatrixView<T1>& minv) const
         { view().makeInverse(minv); }
 
-        template <class T2, StorageType S2, IndexStyle I2> 
-        inline void makeInverse(Matrix<T2,S2,I2>& minv) const
+        template <class T2, int A2> 
+        inline void makeInverse(Matrix<T2,A2>& minv) const
         { view().makeInverse(minv); }
 
         inline void makeInverseATA(const MatrixView<T>& ata) const
         { view().makeInverseATA(ata); }
 
-        template <StorageType S2, IndexStyle I2> 
-        inline void makeInverseATA(Matrix<T,S2,I2>& ata) const
+        template <int A2> 
+        inline void makeInverseATA(Matrix<T,A2>& ata) const
         { view().makeInverseATA(ata); }
 
-        template <class T2, StorageType S2, IndexStyle I2> 
-        inline void makeInverse(SmallMatrix<T2,N,M,S2,I2>& minv) const
+        template <class T2, int A2> 
+        inline void makeInverse(SmallMatrix<T2,N,M,A2>& minv) const
         { DoInverse(*this,minv); }
 
-        template <class T2, StorageType S2, IndexStyle I2> 
-        inline void makeInverseATA(SmallMatrix<T2,N,N,S2,I2>& ata) const
+        template <class T2, int A2> 
+        inline void makeInverseATA(SmallMatrix<T2,N,N,A2>& ata) const
         { DoInverseATA(*this,ata); }
 
         //
@@ -615,7 +597,7 @@ namespace tmv {
 
         inline type& swapRows(int i1, int i2)
         {
-            if (I == CStyle) {
+            if (I == int(CStyle)) {
                 TMVAssert(i1 >= 0 && i1 < M);
                 TMVAssert(i2 >= 0 && i2 < M);
                 if (i1 != i2)
@@ -631,7 +613,7 @@ namespace tmv {
 
         inline type& swapCols(int j1, int j2)
         {
-            if (I == CStyle) {
+            if (I == int(CStyle)) {
                 TMVAssert(j1 >= 0 && j1 < N);
                 TMVAssert(j2 >= 0 && j2 < N);
                 if (j1 != j2)
@@ -647,7 +629,7 @@ namespace tmv {
 
         inline type& permuteRows(const int* p, int i1, int i2)
         {
-            if (I == CStyle) {
+            if (I == int(CStyle)) {
                 TMVAssert(i1 >= 0 && i1 <= i2 && i2 <= M);
                 for(int i=i1;i<i2;++i) swapRows(i,p[i]);
             } else {
@@ -658,11 +640,11 @@ namespace tmv {
         }
 
         inline type& permuteRows(const int* p)
-        { permuteRows(p,I==CStyle?0:1,M); return *this; }
+        { permuteRows(p,I==int(CStyle)?0:1,M); return *this; }
 
         inline type& permuteCols(const int* p, int j1, int j2)
         {
-            if (I == CStyle) {
+            if (I == int(CStyle)) {
                 TMVAssert(j1 >= 0 && j1 <= j2 && j2 <= N);
                 for(int j=j1;j<j2;++j) swapCols(j,p[j]);
             } else {
@@ -673,11 +655,11 @@ namespace tmv {
         }
 
         inline type& permuteCols(const int* p)
-        { permuteCols(p,I==CStyle?0:1,N); return *this; }
+        { permuteCols(p,I==int(CStyle)?0:1,N); return *this; }
 
         inline type& reversePermuteRows(const int* p, int i1, int i2)
         {
-            if (I == CStyle) {
+            if (I == int(CStyle)) {
                 TMVAssert(i1 >= 0 && i1 <= i2 && i2 <= M);
                 for(int i=i2-1;i>=i1;--i) swapRows(i,p[i]);
             } else {
@@ -688,11 +670,11 @@ namespace tmv {
         }
 
         inline type& reversePermuteRows(const int* p)
-        { reversePermuteRows(p,I==CStyle?0:1,M); return *this; }
+        { reversePermuteRows(p,I==int(CStyle)?0:1,M); return *this; }
 
         inline type& reversePermuteCols(const int* p, int j1, int j2)
         {
-            if (I == CStyle) {
+            if (I == int(CStyle)) {
                 TMVAssert(j1 >= 0 && j1 <= j2 && j2 <= N);
                 for(int j=j2-1;j>=j1;--j) swapCols(j,p[j]);
             } else {
@@ -703,7 +685,7 @@ namespace tmv {
         }
 
         inline type& reversePermuteCols(const int* p)
-        { reversePermuteCols(p,I==CStyle?0:1,N); return *this; }
+        { reversePermuteCols(p,I==int(CStyle)?0:1,N); return *this; }
 
         //
         // SubMatrix
@@ -792,63 +774,51 @@ namespace tmv {
         //
 
         inline const_view_type view() const
-        { return const_view_type(cptr(),M,N,Si,Sj,S,NonConj,M*N); }
+        { return const_view_type(cptr(),M,N,Si,Sj,NonConj,M*N); }
 
         inline const_view_type transpose() const
         {
-            return const_view_type(
-                cptr(),N,M,Sj,Si,TMV_TransOf(S),NonConj,M*N); 
+            return const_view_type(cptr(),N,M,Sj,Si,NonConj,M*N); 
         }
 
         inline const_view_type conjugate() const
         {
             return const_view_type(
-                cptr(),M,N,Si,Sj,S,isReal(T())?NonConj:Conj,M*N); 
+                cptr(),M,N,Si,Sj,isReal(T())?NonConj:Conj,M*N); 
         }
 
         inline const_view_type adjoint() const
         {
             return const_view_type(
-                cptr(),N,M,Sj,Si,TMV_TransOf(S),
-                isReal(T())?NonConj:Conj,M*N); 
+                cptr(),N,M,Sj,Si,isReal(T())?NonConj:Conj,M*N); 
         }
 
         inline const_uppertri_type upperTri(DiagType dt=NonUnitDiag) const
-        { return const_uppertri_type(cptr(),N,Si,Sj,dt,S,NonConj); }
+        { return const_uppertri_type(cptr(),N,Si,Sj,dt,NonConj); }
 
         inline const_lowertri_type lowerTri(DiagType dt=NonUnitDiag) const
-        { return const_lowertri_type(cptr(),M,Si,Sj,dt,S,NonConj); }
+        { return const_lowertri_type(cptr(),M,Si,Sj,dt,NonConj); }
 
         inline const_vec_type constLinearView() const
         { return const_vec_type(cptr(),M*N,1,NonConj); }
 
         inline view_type view()
-        { return view_type(ptr(),M,N,Si,Sj,S,NonConj,M*N); }
+        { return view_type(ptr(),M,N,Si,Sj,NonConj,M*N); }
 
         inline view_type transpose() 
-        {
-            return view_type(ptr(),N,M,Sj,Si,
-                           TMV_TransOf(S),NonConj,M*N); 
-        }
+        { return view_type(ptr(),N,M,Sj,Si,NonConj,M*N); }
 
         inline view_type conjugate()
-        { 
-            return view_type(
-                ptr(),M,N,Si,Sj,S,isReal(T())?NonConj:Conj,M*N); 
-        }
+        { return view_type(ptr(),M,N,Si,Sj,isReal(T())?NonConj:Conj,M*N); }
 
         inline view_type adjoint()
-        { 
-            return view_type(
-                ptr(),N,M,Sj,Si,TMV_TransOf(S),
-                isReal(T())?NonConj:Conj,M*N); 
-        }
+        { return view_type(ptr(),N,M,Sj,Si,isReal(T())?NonConj:Conj,M*N); }
 
         inline uppertri_type upperTri(DiagType dt=NonUnitDiag) 
-        { return uppertri_type(ptr(),N,Si,Sj,dt,S,NonConj); }
+        { return uppertri_type(ptr(),N,Si,Sj,dt,NonConj); }
 
         inline lowertri_type lowerTri(DiagType dt=NonUnitDiag)
-        { return lowertri_type(ptr(),M,Si,Sj,dt,S,NonConj); }
+        { return lowertri_type(ptr(),M,Si,Sj,dt,NonConj); }
 
         inline vec_type linearView()
         { return vec_type(ptr(),M*N,1,NonConj); }
@@ -859,20 +829,19 @@ namespace tmv {
         inline bool isSquare() const { return M == N; }
         inline int stepi() const { return Si; }
         inline int stepj() const { return Sj; }
-        inline bool isrm() const { return S == RowMajor; }
-        inline bool iscm() const { return S == ColMajor; }
+        inline bool isrm() const { return S == int(RowMajor); }
+        inline bool iscm() const { return S == int(ColMajor); }
         inline bool isconj() const { return false; }
-        inline StorageType stor() const { return isrm() ? RowMajor : ColMajor; }
         inline ConjType ct() const { return NonConj; }
         inline int ls() const { return M*N; }
         inline const T* cptr() const { return itsm; }
         inline T* ptr() { return itsm; }
 
         inline T cref(int i, int j) const
-        { return S == RowMajor ? itsm[i*N+j] : itsm[j*M+i]; }
+        { return S == int(RowMajor) ? itsm[i*N+j] : itsm[j*M+i]; }
 
         inline T& ref(int i, int j)
-        { return S == RowMajor ? itsm[i*N+j] : itsm[j*M+i]; }
+        { return S == int(RowMajor) ? itsm[i*N+j] : itsm[j*M+i]; }
 
         inline int rowstart(int ) const { return 0; }
         inline int rowend(int ) const { return N; }
@@ -944,26 +913,28 @@ namespace tmv {
     { inline DoCopym(const std::complex<T>*, T*) { TMVAssert(TMV_FALSE); } };
 
     template <int M, int N, StorageType S1, StorageType S2, class T1, class T2>
-    inline void DoCopy(const T1* m1, T2* m2)
+    inline void SmallMatrixCopy(const T1* m1, T2* m2)
     { DoCopym<M,N,S1,S2,T1,T2>(m1,m2); }
 
-    template <class T1, class T2, int M, int N, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
+    template <class T1, class T2, int M, int N, int A1, int A2> 
     inline void Copy(
-        const SmallMatrix<T1,M,N,S1,I1>& m1, SmallMatrix<T2,M,N,S2,I2>& m2)
+        const SmallMatrix<T1,M,N,A1>& m1, SmallMatrix<T2,M,N,A2>& m2)
     { 
         TMVAssert(isComplex(T2()) || isReal(T1()));
-        DoCopy<M,N,S1,S2>(m1.cptr(),m2.ptr()); 
+        const StorageType S1 = static_cast<StorageType>(A1 & AllStorageType);
+        const StorageType S2 = static_cast<StorageType>(A2 & AllStorageType);
+        SmallMatrixCopy<M,N,S1,S2>(m1.cptr(),m2.ptr()); 
     }
 
     //
     // Swap Matrices
     //
 
-    template <class T, int M, int N, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
+    template <class T, int M, int N, int A1, int A2> 
     inline void Swap(
-        SmallMatrix<T,M,N,S1,I1>& m1, SmallMatrix<T,M,N,S2,I2>& m2) 
+        SmallMatrix<T,M,N,A1>& m1, SmallMatrix<T,M,N,A2>& m2) 
     {
-        if (S1==S2)
+        if ((A1&AllStorageType)==(A2&AllStorageType))
             for(int i=0;i<M*N;++i) TMV_SWAP(m1.ptr()[i],m2.ptr()[i]);
         else
             for(int i=0;i<M;++i) for(int j=0;j<N;++j) 
@@ -974,88 +945,90 @@ namespace tmv {
     // Functions of Matrices:
     //
 
-    template <class T, int M, int N, StorageType S, IndexStyle I>
-    inline T Det(const SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A>
+    inline T Det(const SmallMatrix<T,M,N,A>& m)
     { return m.det(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I>
-    inline TMV_RealType(T) LogDet(const SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A>
+    inline TMV_RealType(T) LogDet(const SmallMatrix<T,M,N,A>& m)
     { return m.logDet(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I>
-    inline T Trace(const SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A>
+    inline T Trace(const SmallMatrix<T,M,N,A>& m)
     { return m.trace(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I>
-    inline TMV_RealType(T) Norm(const SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A>
+    inline TMV_RealType(T) Norm(const SmallMatrix<T,M,N,A>& m)
     { return m.norm(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I>
-    inline TMV_RealType(T) NormSq(const SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A>
+    inline TMV_RealType(T) NormSq(const SmallMatrix<T,M,N,A>& m)
     { return m.normSq(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I>
-    inline TMV_RealType(T) NormF(const SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A>
+    inline TMV_RealType(T) NormF(const SmallMatrix<T,M,N,A>& m)
     { return m.normF(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I>
-    inline TMV_RealType(T) Norm1(const SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A>
+    inline TMV_RealType(T) Norm1(const SmallMatrix<T,M,N,A>& m)
     { return m.norm1(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I>
-    inline TMV_RealType(T) Norm2(const SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A>
+    inline TMV_RealType(T) Norm2(const SmallMatrix<T,M,N,A>& m)
     { return m.norm2(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I>
-    inline TMV_RealType(T) NormInf(const SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A>
+    inline TMV_RealType(T) NormInf(const SmallMatrix<T,M,N,A>& m)
     { return m.normInf(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I>
-    inline TMV_RealType(T) MaxAbsElement(const SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A>
+    inline TMV_RealType(T) MaxAbsElement(const SmallMatrix<T,M,N,A>& m)
     { return m.maxAbsElement(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I>
-    inline TMV_RealType(T) MaxAbs2Element(const SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A>
+    inline TMV_RealType(T) MaxAbs2Element(const SmallMatrix<T,M,N,A>& m)
     { return m.maxAbs2Element(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I> 
-    inline ConstMatrixView<T,I> Transpose(const SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A> 
+    inline ConstMatrixView<T,A&FortranStyle> Transpose(
+        const SmallMatrix<T,M,N,A>& m)
     { return m.transpose(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I> 
-    inline MatrixView<T,I> Transpose(SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A> 
+    inline MatrixView<T,A&FortranStyle> Transpose(SmallMatrix<T,M,N,A>& m)
     { return m.transpose(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I> 
-    inline ConstMatrixView<T,I> Conjugate(const SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A> 
+    inline ConstMatrixView<T,A&FortranStyle> Conjugate(
+        const SmallMatrix<T,M,N,A>& m)
     { return m.conjugate(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I> 
-    inline MatrixView<T,I> Conjugate(SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A> 
+    inline MatrixView<T,A&FortranStyle> Conjugate(SmallMatrix<T,M,N,A>& m)
     { return m.conjugate(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I> 
-    inline ConstMatrixView<T,I> Adjoint(const SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A> 
+    inline ConstMatrixView<T,A&FortranStyle> Adjoint(
+        const SmallMatrix<T,M,N,A>& m)
     { return m.adjoint(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I> 
-    inline MatrixView<T,I> Adjoint(SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A> 
+    inline MatrixView<T,A&FortranStyle> Adjoint(SmallMatrix<T,M,N,A>& m)
     { return m.adjoint(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I>
-    inline QuotXm_1<T,T,M,N,S,I> Inverse(const SmallMatrix<T,M,N,S,I>& m)
+    template <class T, int M, int N, int A>
+    inline QuotXm_1<T,T,M,N,A> Inverse(const SmallMatrix<T,M,N,A>& m)
     { return m.inverse(); }
 
     //
     // Matrix ==, != Matrix
     //
 
-    template <class T1, class T2, int M, int N, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
+    template <class T1, class T2, int M, int N, int A1, int A2> 
     inline bool operator==(
-        const SmallMatrix<T1,M,N,S1,I1>& m1, 
-        const SmallMatrix<T2,M,N,S2,I2>& m2)
+        const SmallMatrix<T1,M,N,A1>& m1, const SmallMatrix<T2,M,N,A2>& m2)
     { 
-        if (S1==S2)
+        if ((A1&AllStorageType)==(A2&AllStorageType))
             for(int i=0;i<M*N;++i) {
                 if (m1.cptr()[i] != m2.cptr()[i]) return false;
             }
@@ -1066,30 +1039,29 @@ namespace tmv {
         return true;
     }
 
-    template <class T1, class T2, int M, int N, StorageType S1, StorageType S2, IndexStyle I1, IndexStyle I2> 
+    template <class T1, class T2, int M, int N, int A1, int A2> 
     inline bool operator!=(
-        const SmallMatrix<T1,M,N,S1,I1>& m1, 
-        const SmallMatrix<T2,M,N,S2,I2>& m2)
+        const SmallMatrix<T1,M,N,A1>& m1, const SmallMatrix<T2,M,N,A2>& m2)
     { return !(m1 == m2); }
 
-    template <class T1, class T2, int M, int N, StorageType S, IndexStyle I> 
+    template <class T1, class T2, int M, int N, int A> 
     inline bool operator==(
-        const GenMatrix<T1>& m1, const SmallMatrix<T2,M,N,S,I>& m2)
+        const GenMatrix<T1>& m1, const SmallMatrix<T2,M,N,A>& m2)
     { return m1 == m2.view(); }
 
-    template <class T1, class T2, int M, int N, StorageType S, IndexStyle I> 
+    template <class T1, class T2, int M, int N, int A> 
     inline bool operator==(
-        const SmallMatrix<T1,M,N,S,I>& m1, const GenMatrix<T2>& m2)
+        const SmallMatrix<T1,M,N,A>& m1, const GenMatrix<T2>& m2)
     { return m1.view() == m2; }
 
-    template <class T1, class T2, int M, int N, StorageType S, IndexStyle I> 
+    template <class T1, class T2, int M, int N, int A> 
     inline bool operator!=(
-        const GenMatrix<T1>& m1, const SmallMatrix<T2,M,N,S,I>& m2)
+        const GenMatrix<T1>& m1, const SmallMatrix<T2,M,N,A>& m2)
     { return m1 != m2.view(); }
 
-    template <class T1, class T2, int M, int N, StorageType S, IndexStyle I> 
+    template <class T1, class T2, int M, int N, int A> 
     inline bool operator!=(
-        const SmallMatrix<T1,M,N,S,I>& m1, const GenMatrix<T2>& m2)
+        const SmallMatrix<T1,M,N,A>& m1, const GenMatrix<T2>& m2)
     { return m1.view() != m2; }
 
 
@@ -1098,32 +1070,32 @@ namespace tmv {
     // I/O
     //
 
-    template <class T, int M, int N, StorageType S, IndexStyle I> 
+    template <class T, int M, int N, int A> 
     inline std::ostream& operator<<(
-        const TMV_Writer& writer, const SmallMatrix<T,M,N,S,I>& m)
+        const TMV_Writer& writer, const SmallMatrix<T,M,N,A>& m)
     { m.view().write(writer); return writer.getos(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I> 
+    template <class T, int M, int N, int A> 
     inline std::ostream& operator<<(
-        std::ostream& os, const SmallMatrix<T,M,N,S,I>& m)
+        std::ostream& os, const SmallMatrix<T,M,N,A>& m)
     { return os << IOStyle() << m; }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I> 
+    template <class T, int M, int N, int A> 
     inline std::istream& operator>>(
-        const TMV_Reader& reader, SmallMatrix<T,M,N,S,I>& m)
+        const TMV_Reader& reader, SmallMatrix<T,M,N,A>& m)
     { m.view().read(reader); return reader.getis(); }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I> 
+    template <class T, int M, int N, int A> 
     inline std::istream& operator>>(
-        std::istream& is, SmallMatrix<T,M,N,S,I>& m)
+        std::istream& is, SmallMatrix<T,M,N,A>& m)
     { return is >> IOStyle() >> m; }
 
-    template <class T, int M, int N, StorageType S, IndexStyle I> 
-    inline std::string TMV_Text(const SmallMatrix<T,M,N,S,I>& )
+    template <class T, int M, int N, int A> 
+    inline std::string TMV_Text(const SmallMatrix<T,M,N,A>& )
     { 
         std::ostringstream s;
         s << std::string("SmallMatrix<")<<TMV_Text(T())<<','<<M<<','<<N;
-        s <<','<<TMV_Text(S)<<','<<TMV_Text(I)<<">"; 
+        s <<','<<Attrib<A>::text()<<'>';
         return s.str();
     }
 

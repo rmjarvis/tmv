@@ -46,7 +46,7 @@ namespace tmv {
         typedef const type& eval_type; 
         typedef calc_type copy_type;
 
-        enum { _size = TMV_UNKNOWN }; 
+        enum { _size = Unknown }; 
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _checkalias = false };
@@ -110,7 +110,6 @@ namespace tmv {
     // TMV_Text functions
     //
 
-#ifdef TMV_TEXT
     template <class T, int A>
     inline std::string TMV_Text(const BasisVector<T,A>& )
     {
@@ -119,7 +118,6 @@ namespace tmv {
         s <<","<<Attrib<A>::vtext()<<">";
         return s.str();
     }
-#endif
 
 } // namespace tmv
 

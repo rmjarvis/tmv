@@ -73,27 +73,27 @@ Def2(CT,CT)
 
 #undef Def2
 
-#define Def3(T,RT,U,S,I) \
-  template void SymMatrix<T,U,S,I>::read(const TMV_Reader& reader); \
-  template void HermMatrix<T,U,S,I>::read(const TMV_Reader& reader); \
+#define Def3(T,RT,A) \
+  template void SymMatrix<T,A>::read(const TMV_Reader& reader); \
+  template void HermMatrix<T,A>::read(const TMV_Reader& reader); \
 
-Def3(T,T,Upper,RowMajor,CStyle)
-Def3(T,T,Upper,ColMajor,CStyle)
-Def3(T,T,Lower,RowMajor,CStyle)
-Def3(T,T,Lower,ColMajor,CStyle)
-Def3(T,T,Upper,RowMajor,FortranStyle)
-Def3(T,T,Upper,ColMajor,FortranStyle)
-Def3(T,T,Lower,RowMajor,FortranStyle)
-Def3(T,T,Lower,ColMajor,FortranStyle)
+Def3(T,T,Upper|RowMajor|CStyle)
+Def3(T,T,Upper|ColMajor|CStyle)
+Def3(T,T,Lower|RowMajor|CStyle)
+Def3(T,T,Lower|ColMajor|CStyle)
+Def3(T,T,Upper|RowMajor|FortranStyle)
+Def3(T,T,Upper|ColMajor|FortranStyle)
+Def3(T,T,Lower|RowMajor|FortranStyle)
+Def3(T,T,Lower|ColMajor|FortranStyle)
 #ifdef INST_COMPLEX
-Def3(CT,T,Upper,RowMajor,CStyle)
-Def3(CT,T,Upper,ColMajor,CStyle)
-Def3(CT,T,Lower,RowMajor,CStyle)
-Def3(CT,T,Lower,ColMajor,CStyle)
-Def3(CT,T,Upper,RowMajor,FortranStyle)
-Def3(CT,T,Upper,ColMajor,FortranStyle)
-Def3(CT,T,Lower,RowMajor,FortranStyle)
-Def3(CT,T,Lower,ColMajor,FortranStyle)
+Def3(CT,T,Upper|RowMajor|CStyle)
+Def3(CT,T,Upper|ColMajor|CStyle)
+Def3(CT,T,Lower|RowMajor|CStyle)
+Def3(CT,T,Lower|ColMajor|CStyle)
+Def3(CT,T,Upper|RowMajor|FortranStyle)
+Def3(CT,T,Upper|ColMajor|FortranStyle)
+Def3(CT,T,Lower|RowMajor|FortranStyle)
+Def3(CT,T,Lower|ColMajor|FortranStyle)
 #endif
 
 #undef Def3

@@ -19,7 +19,7 @@ static void TestBasicUpperTriMatrix_1()
         std::cout<<"N = "<<N<<std::endl;
     }
 
-    tmv::UpperTriMatrix<T,D,S> u(N);
+    tmv::UpperTriMatrix<T,D|S> u(N);
 
     Assert(u.colsize() == N && u.rowsize() == N,
            "Creating UpperTriMatrix(N)");
@@ -33,7 +33,7 @@ static void TestBasicUpperTriMatrix_1()
     tmv::UpperTriMatrixView<T> uv = u.view();
     tmv::ConstUpperTriMatrixView<T> ucv = u.view();
 
-    const tmv::UpperTriMatrix<T,D,S>& ux = u;
+    const tmv::UpperTriMatrix<T,D|S>& ux = u;
 
     for(int i=0,k=1;i<N;++i) for(int j=0;j<N;++j,++k) {
         if (i < j) {
@@ -106,7 +106,7 @@ static void TestBasicUpperTriMatrix_1()
     }
 
 #if (XTEST & 32)
-    tmv::UpperTriMatrix<T,D,S,tmv::FortranStyle> uf(N);
+    tmv::UpperTriMatrix<T,D|S|tmv::FortranStyle> uf(N);
     for (int i=0,k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         if (i < j || (D==tmv::NonUnitDiag && i==j)) {
             uf(i+1,j+1) = T(k);
@@ -116,7 +116,7 @@ static void TestBasicUpperTriMatrix_1()
     tmv::UpperTriMatrixView<T,tmv::FortranStyle> ufv = uf.view();
     tmv::ConstUpperTriMatrixView<T,tmv::FortranStyle> ufcv = uf.view();
 
-    const tmv::UpperTriMatrix<T,D,S,tmv::FortranStyle>& ufx = uf;
+    const tmv::UpperTriMatrix<T,D|S|tmv::FortranStyle>& ufx = uf;
 
     for(int i=0,k=1;i<N;++i) for(int j=0;j<N;++j,++k) {
         if (i < j) {
@@ -220,7 +220,7 @@ static void TestBasicLowerTriMatrix_1()
         std::cout<<"N = "<<N<<std::endl;
     }
 
-    tmv::LowerTriMatrix<T,D,S> l(N);
+    tmv::LowerTriMatrix<T,D|S> l(N);
 
     Assert(l.colsize() == N && l.rowsize() == N,
            "Creating LowerTriMatrix(N)");
@@ -234,7 +234,7 @@ static void TestBasicLowerTriMatrix_1()
     tmv::LowerTriMatrixView<T> lv = l.view();
     tmv::ConstLowerTriMatrixView<T> lcv = l.view();
 
-    const tmv::LowerTriMatrix<T,D,S>& lx = l;
+    const tmv::LowerTriMatrix<T,D|S>& lx = l;
 
     for(int i=0,k=1;i<N;++i) for(int j=0;j<N;++j,++k) {
         if (i < j) {
@@ -307,7 +307,7 @@ static void TestBasicLowerTriMatrix_1()
     }
 
 #if (XTEST & 32)
-    tmv::LowerTriMatrix<T,D,S,tmv::FortranStyle> lf(N);
+    tmv::LowerTriMatrix<T,D|S|tmv::FortranStyle> lf(N);
 
     for (int i=0,k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         if (j < i || (D==tmv::NonUnitDiag && i==j)) {
@@ -318,7 +318,7 @@ static void TestBasicLowerTriMatrix_1()
     tmv::LowerTriMatrixView<T,tmv::FortranStyle> lfv = lf.view();
     tmv::ConstLowerTriMatrixView<T,tmv::FortranStyle> lfcv = lf.view();
 
-    const tmv::LowerTriMatrix<T,D,S,tmv::FortranStyle>& lfx = lf;
+    const tmv::LowerTriMatrix<T,D|S|tmv::FortranStyle>& lfx = lf;
 
     for(int i=0,k=1;i<N;++i) for(int j=0;j<N;++j,++k) {
         if (i < j) {
@@ -422,10 +422,10 @@ static void TestBasicTriMatrix_2()
         std::cout<<"N = "<<N<<std::endl;
     }
 
-    tmv::UpperTriMatrix<T,D,S> u(N);
-    tmv::LowerTriMatrix<T,D,S> l(N);
-    const tmv::UpperTriMatrix<T,D,S>& ux = u;
-    const tmv::LowerTriMatrix<T,D,S>& lx = l;
+    tmv::UpperTriMatrix<T,D|S> u(N);
+    tmv::LowerTriMatrix<T,D|S> l(N);
+    const tmv::UpperTriMatrix<T,D|S>& ux = u;
+    const tmv::LowerTriMatrix<T,D|S>& lx = l;
 
     Assert(u.colsize() == N && u.rowsize() == N,
            "Creating UpperTriMatrix(N)");
@@ -449,10 +449,10 @@ static void TestBasicTriMatrix_2()
         Assert(ml(i,j) == lx(i,j),"TriMatrix -> Matrix");
     }
     Assert(u == mu.upperTri(),"TriMatrix == ");
-    tmv::UpperTriMatrix<T,D,S> umu(mu);
+    tmv::UpperTriMatrix<T,D|S> umu(mu);
     Assert(u == umu,"TriMatrix == ");
     Assert(l == ml.lowerTri(),"TriMatrix == ");
-    tmv::LowerTriMatrix<T,D,S> lml(ml);
+    tmv::LowerTriMatrix<T,D|S> lml(ml);
     Assert(l == lml,"TriMatrix == ");
 
     // Test assignments and constructors from arrays
@@ -513,47 +513,47 @@ static void TestBasicTriMatrix_2()
     std::vector<T> qlveccm(6);
     for(int i=0;i<6;i++) qlveccm[i] = qlarcm[i];
 
-    tmv::UpperTriMatrix<T,D,S> qu1(3);
+    tmv::UpperTriMatrix<T,D|S> qu1(3);
     std::copy(quarrm, quarrm+6, qu1.rowmajor_begin());
-    tmv::UpperTriMatrix<T,D,S> qu2(3);
+    tmv::UpperTriMatrix<T,D|S> qu2(3);
     std::copy(quarcm, quarcm+6, qu2.colmajor_begin());
 
-    tmv::LowerTriMatrix<T,D,S> ql1(3);
+    tmv::LowerTriMatrix<T,D|S> ql1(3);
     std::copy(qlarrm, qlarrm+6, ql1.rowmajor_begin());
-    tmv::LowerTriMatrix<T,D,S> ql2(3);
+    tmv::LowerTriMatrix<T,D|S> ql2(3);
     std::copy(qlarcm, qlarcm+6, ql2.colmajor_begin());
 
-    tmv::UpperTriMatrix<T,D,S> qu3(3);
+    tmv::UpperTriMatrix<T,D|S> qu3(3);
     std::copy(quvecrm.begin(), quvecrm.end(), qu3.rowmajor_begin());
-    tmv::UpperTriMatrix<T,D,S> qu4(3);
+    tmv::UpperTriMatrix<T,D|S> qu4(3);
     std::copy(quveccm.begin(), quveccm.end(), qu4.colmajor_begin());
 
-    tmv::LowerTriMatrix<T,D,S> ql3(3);
+    tmv::LowerTriMatrix<T,D|S> ql3(3);
     std::copy(qlvecrm.begin(), qlvecrm.end(), ql3.rowmajor_begin());
-    tmv::LowerTriMatrix<T,D,S> ql4(3);
+    tmv::LowerTriMatrix<T,D|S> ql4(3);
     std::copy(qlveccm.begin(), qlveccm.end(), ql4.colmajor_begin());
 
-    tmv::UpperTriMatrix<T,D,S> qu5x(30);
+    tmv::UpperTriMatrix<T,D|S> qu5x(30);
     tmv::UpperTriMatrixView<T> qu5 = qu5x.subTriMatrix(3,18,5);
     std::copy(quvecrm.begin(), quvecrm.end(), qu5.rowmajor_begin());
-    tmv::UpperTriMatrix<T,D,S> qu6x(30);
+    tmv::UpperTriMatrix<T,D|S> qu6x(30);
     tmv::UpperTriMatrixView<T> qu6 = qu6x.subTriMatrix(3,18,5);
     std::copy(quveccm.begin(), quveccm.end(), qu6.colmajor_begin());
 
-    tmv::LowerTriMatrix<T,D,S> ql5x(30);
+    tmv::LowerTriMatrix<T,D|S> ql5x(30);
     tmv::LowerTriMatrixView<T> ql5 = ql5x.subTriMatrix(3,18,5);
     std::copy(qlvecrm.begin(), qlvecrm.end(), ql5.rowmajor_begin());
-    tmv::LowerTriMatrix<T,D,S> ql6x(30);
+    tmv::LowerTriMatrix<T,D|S> ql6x(30);
     tmv::LowerTriMatrixView<T> ql6 = ql6x.subTriMatrix(3,18,5);
     std::copy(qlveccm.begin(), qlveccm.end(), ql6.colmajor_begin());
 
     // Assignment using op<< is always in rowmajor order.
-    tmv::UpperTriMatrix<T,D,S> qu7(3);
-    tmv::LowerTriMatrix<T,D,S> qu8t(3);
+    tmv::UpperTriMatrix<T,D|S> qu7(3);
+    tmv::LowerTriMatrix<T,D|S> qu8t(3);
     tmv::UpperTriMatrixView<T> qu8 = qu8t.transpose();
 
-    tmv::LowerTriMatrix<T,D,S> ql7(3);
-    tmv::UpperTriMatrix<T,D,S> ql8t(3);
+    tmv::LowerTriMatrix<T,D|S> ql7(3);
+    tmv::UpperTriMatrix<T,D|S> ql8t(3);
     tmv::LowerTriMatrixView<T> ql8 = ql8t.transpose();
 
     if (D == tmv::UnitDiag) {
@@ -671,14 +671,14 @@ static void TestBasicTriMatrix_2()
     }
 
     // Test the span of the iteration (i.e. the validity of begin(), end())
-    const tmv::UpperTriMatrix<T,D,S>& qu1_const = qu1;
+    const tmv::UpperTriMatrix<T,D|S>& qu1_const = qu1;
     tmv::UpperTriMatrixView<T> qu1_view = qu1.view();
     tmv::ConstUpperTriMatrixView<T> qu1_constview = qu1_const.view();
     tmv::ConstUpperTriMatrixView<T> qu5_const = qu5;
 
-    typename tmv::UpperTriMatrix<T,D,S>::rowmajor_iterator rmitu1 = 
+    typename tmv::UpperTriMatrix<T,D|S>::rowmajor_iterator rmitu1 = 
         qu1.rowmajor_begin();
-    typename tmv::UpperTriMatrix<T,D,S>::const_rowmajor_iterator rmitu2 =
+    typename tmv::UpperTriMatrix<T,D|S>::const_rowmajor_iterator rmitu2 =
         qu1_const.rowmajor_begin();
     typename tmv::UpperTriMatrixView<T>::rowmajor_iterator rmitu3 =
         qu1_view.rowmajor_begin();
@@ -705,14 +705,14 @@ static void TestBasicTriMatrix_2()
     Assert(rmitu5 == qu5.rowmajor_end(), "rmitu5 reaching end");
     Assert(rmitu6 == qu5_const.rowmajor_end(), "rmitu6 reaching end");
 
-    const tmv::LowerTriMatrix<T,D,S>& ql1_const = ql1;
+    const tmv::LowerTriMatrix<T,D|S>& ql1_const = ql1;
     tmv::LowerTriMatrixView<T> ql1_view = ql1.view();
     tmv::ConstLowerTriMatrixView<T> ql1_constview = ql1_const.view();
     tmv::ConstLowerTriMatrixView<T> ql5_const = ql5;
 
-    typename tmv::LowerTriMatrix<T,D,S>::rowmajor_iterator rmitl1 = 
+    typename tmv::LowerTriMatrix<T,D|S>::rowmajor_iterator rmitl1 = 
         ql1.rowmajor_begin();
-    typename tmv::LowerTriMatrix<T,D,S>::const_rowmajor_iterator rmitl2 =
+    typename tmv::LowerTriMatrix<T,D|S>::const_rowmajor_iterator rmitl2 =
         ql1_const.rowmajor_begin();
     typename tmv::LowerTriMatrixView<T>::rowmajor_iterator rmitl3 =
         ql1_view.rowmajor_begin();
@@ -739,9 +739,9 @@ static void TestBasicTriMatrix_2()
     Assert(rmitl5 == ql5.rowmajor_end(), "rmitl5 reaching end");
     Assert(rmitl6 == ql5_const.rowmajor_end(), "rmitl6 reaching end");
 
-    typename tmv::UpperTriMatrix<T,D,S>::colmajor_iterator cmitu1 = 
+    typename tmv::UpperTriMatrix<T,D|S>::colmajor_iterator cmitu1 = 
         qu1.colmajor_begin();
-    typename tmv::UpperTriMatrix<T,D,S>::const_colmajor_iterator cmitu2 =
+    typename tmv::UpperTriMatrix<T,D|S>::const_colmajor_iterator cmitu2 =
         qu1_const.colmajor_begin();
     typename tmv::UpperTriMatrixView<T>::colmajor_iterator cmitu3 =
         qu1_view.colmajor_begin();
@@ -768,9 +768,9 @@ static void TestBasicTriMatrix_2()
     Assert(cmitu5 == qu5.colmajor_end(), "cmitu5 reaching end");
     Assert(cmitu6 == qu5_const.colmajor_end(), "cmitu6 reaching end");
 
-    typename tmv::LowerTriMatrix<T,D,S>::colmajor_iterator cmitl1 = 
+    typename tmv::LowerTriMatrix<T,D|S>::colmajor_iterator cmitl1 = 
         ql1.colmajor_begin();
-    typename tmv::LowerTriMatrix<T,D,S>::const_colmajor_iterator cmitl2 =
+    typename tmv::LowerTriMatrix<T,D|S>::const_colmajor_iterator cmitl2 =
         ql1_const.colmajor_begin();
     typename tmv::LowerTriMatrixView<T>::colmajor_iterator cmitl3 =
         ql1_view.colmajor_begin();
@@ -802,14 +802,14 @@ static void TestBasicTriMatrix_2()
     tmv::Matrix<T> a(N,N);
     for(int i=0;i<N;++i) for(int j=0;j<N;++j) a(i,j) = T(12+3*i-5*j);
 
-    tmv::UpperTriMatrix<T,D,S> u1(a);
-    tmv::UpperTriMatrix<T,D,S> u2(a.transpose());
-    tmv::LowerTriMatrix<T,D,S> l1(a);
-    tmv::LowerTriMatrix<T,D,S> l2(a.transpose());
-    const tmv::UpperTriMatrix<T,D,S>& u1x = u1;
-    const tmv::UpperTriMatrix<T,D,S>& u2x = u2;
-    const tmv::LowerTriMatrix<T,D,S>& l1x = l1;
-    const tmv::LowerTriMatrix<T,D,S>& l2x = l2;
+    tmv::UpperTriMatrix<T,D|S> u1(a);
+    tmv::UpperTriMatrix<T,D|S> u2(a.transpose());
+    tmv::LowerTriMatrix<T,D|S> l1(a);
+    tmv::LowerTriMatrix<T,D|S> l2(a.transpose());
+    const tmv::UpperTriMatrix<T,D|S>& u1x = u1;
+    const tmv::UpperTriMatrix<T,D|S>& u2x = u2;
+    const tmv::LowerTriMatrix<T,D|S>& l1x = l1;
+    const tmv::LowerTriMatrix<T,D|S>& l2x = l2;
 
     tmv::UpperTriMatrix<T> u4 = u1+u1;
     tmv::UpperTriMatrix<T> u5 = u1+u2;
@@ -866,12 +866,12 @@ static void TestBasicTriMatrix_2()
         Assert(m4(i,j) == l2x(i,j) - u2x(i,j),"Subtract TriMatrices");
     }
 
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag,tmv::RowMajor> cunr = u;
+    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag|tmv::RowMajor> cunr = u;
     if (D == tmv::UnitDiag)
         cunr.offDiag() *= std::complex<T>(1,2);
     else
         cunr *= std::complex<T>(1,2);
-    tmv::UpperTriMatrix<std::complex<T>,D,S> cu = cunr;
+    tmv::UpperTriMatrix<std::complex<T>,D|S> cu = cunr;
     Assert(cunr == cu,"TriMatrix == TriMatrix<N,R>");
     Assert(cunr.view() == cu.view(),"TriMatrix View");
     Assert(cunr.transpose() == cu.transpose(),"TriMatrix transpose");
@@ -885,12 +885,12 @@ static void TestBasicTriMatrix_2()
     Assert(cunr.subTriMatrix(0,N/2) == cu.subTriMatrix(0,N/2),"TriMatrix subTriMatrix");
     Assert(cunr.subTriMatrix(N/2,N) == cu.subTriMatrix(N/2,N),"TriMatrix subTriMatrix");
 
-    tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag,tmv::RowMajor> clnr = l;
+    tmv::LowerTriMatrix<std::complex<T>,tmv::NonUnitDiag|tmv::RowMajor> clnr = l;
     if (D == tmv::UnitDiag)
         clnr.offDiag() *= std::complex<T>(1,2);
     else
         clnr *= std::complex<T>(1,2);
-    tmv::LowerTriMatrix<std::complex<T>,D,S> cl = clnr;
+    tmv::LowerTriMatrix<std::complex<T>,D|S> cl = clnr;
     Assert(clnr == cl,"TriMatrix == TriMatrix<N,R>");
     Assert(clnr.view() == cl.view(),"TriMatrix View");
     Assert(clnr.transpose() == cl.transpose(),"TriMatrix transpose");
@@ -918,10 +918,10 @@ static void TestBasicTriMatrix_IO()
         std::cout<<"N = "<<N<<std::endl;
     }
 
-    tmv::UpperTriMatrix<T,D,S> u(N);
-    tmv::UpperTriMatrix<CT,D,S> cu(N);
-    tmv::LowerTriMatrix<T,D,S> l(N);
-    tmv::LowerTriMatrix<CT,D,S> cl(N);
+    tmv::UpperTriMatrix<T,D|S> u(N);
+    tmv::UpperTriMatrix<CT,D|S> cu(N);
+    tmv::LowerTriMatrix<T,D|S> l(N);
+    tmv::LowerTriMatrix<CT,D|S> cl(N);
 
     for (int i=0,k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         if (i < j || (D==tmv::NonUnitDiag && i==j)) {
@@ -999,10 +999,10 @@ static void TestBasicTriMatrix_IO()
     else cu3(4,7) = cl3(7,4) = CT(3.123,601.0);
 
     // Read them back in
-    tmv::UpperTriMatrix<T,D,tmv::RowMajor> xu1(N);
-    tmv::LowerTriMatrix<T,D,tmv::RowMajor> xl1(N);
-    tmv::UpperTriMatrix<CT,D,tmv::RowMajor> xcu1(N);
-    tmv::LowerTriMatrix<CT,D,tmv::RowMajor> xcl1(N);
+    tmv::UpperTriMatrix<T,D|tmv::RowMajor> xu1(N);
+    tmv::LowerTriMatrix<T,D|tmv::RowMajor> xl1(N);
+    tmv::UpperTriMatrix<CT,D|tmv::RowMajor> xcu1(N);
+    tmv::LowerTriMatrix<CT,D|tmv::RowMajor> xcl1(N);
     std::ifstream fin("tmvtest_trimatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_trimatrix_io.dat for input");
     fin >> xu1 >> xl1 >> xcu1 >> xcl1;
@@ -1030,10 +1030,10 @@ static void TestBasicTriMatrix_IO()
     fin.close();
 
     // Repeat for column major
-    tmv::UpperTriMatrix<T,D,tmv::ColMajor> xu2(N);
-    tmv::LowerTriMatrix<T,D,tmv::ColMajor> xl2(N);
-    tmv::UpperTriMatrix<CT,D,tmv::ColMajor> xcu2(N);
-    tmv::LowerTriMatrix<CT,D,tmv::ColMajor> xcl2(N);
+    tmv::UpperTriMatrix<T,D|tmv::ColMajor> xu2(N);
+    tmv::LowerTriMatrix<T,D|tmv::ColMajor> xl2(N);
+    tmv::UpperTriMatrix<CT,D|tmv::ColMajor> xcu2(N);
+    tmv::LowerTriMatrix<CT,D|tmv::ColMajor> xcl2(N);
     fin.open("tmvtest_trimatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_trimatrix_io.dat for input");
     fin >> xu2.view() >> xl2.view() >> xcu2.view() >> xcl2.view();

@@ -1244,7 +1244,7 @@ namespace tmv {
         TMVAssert(A.isherm());
         TMVAssert(A.size() == SS.size());
 
-        HermMatrix<T,Lower,ColMajor> A2 = A;
+        HermMatrix<T,Lower|ColMajor> A2 = A;
         UnsortedEigen(A2.view(),SS);
         SS.sort(Ascend);
     }

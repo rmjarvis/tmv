@@ -93,11 +93,11 @@ namespace tmv {
         if (SameStorage(A,C) && A.stepj() == C.stepi()) {
             // Then need temporary (see below)
             if (A.isrm()) {
-                UpperTriMatrix<Ta,NonUnitDiag,RowMajor> A2 = A;
+                UpperTriMatrix<Ta,NonUnitDiag|RowMajor> A2 = A;
                 ColMultMM<add>(alpha,A2,B,C);
             }
             else {
-                UpperTriMatrix<Ta,NonUnitDiag,ColMajor> A2 = A;
+                UpperTriMatrix<Ta,NonUnitDiag|ColMajor> A2 = A;
                 ColMultMM<add>(alpha,A2,B,C);
             }
         } else {
@@ -415,11 +415,11 @@ namespace tmv {
         if (SameStorage(A,C) && A.stepi() == C.stepj()) {
             // Then need temporary (see below)
             if (A.isrm()) {
-                LowerTriMatrix<Ta,NonUnitDiag,RowMajor> A2 = A;
+                LowerTriMatrix<Ta,NonUnitDiag|RowMajor> A2 = A;
                 ColMultMM<add>(alpha,A2,B,C);
             }
             else {
-                LowerTriMatrix<Ta,NonUnitDiag,ColMajor> A2 = A;
+                LowerTriMatrix<Ta,NonUnitDiag|ColMajor> A2 = A;
                 ColMultMM<add>(alpha,A2,B,C);
             }
         } else {

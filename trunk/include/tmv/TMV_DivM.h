@@ -114,7 +114,7 @@ namespace tmv {
             // m2.transpose() *= m1inv.transpose() results in a temporary.
             // Likewise with a 3x3 matrix.
             // For now, just write a simple loop.
-            const int K = xs == TMV_UNKNOWN ? m1.rowsize() : xs;
+            const int K = xs == Unknown ? m1.rowsize() : xs;
             for(int k=0;k<K;++k) {
                 T1 a = (m1.cref(0,k) * m2inv.cref(0,0) + 
                         m1.cref(1,k) * m2inv.cref(0,1));
@@ -393,7 +393,7 @@ namespace tmv {
                     (!up1 && !lo1) ? 56 :
                     52 ) : 
                 (!lo2 || !up2) ? 6 : // m2 is triangular
-                (s != TMV_UNKNOWN && s <= 4) ? 6 :
+                (s != Unknown && s <= 4) ? 6 :
                 M2::_hasdivider ? 41 :
                 42;
 #ifdef PRINTALGO_DIVM
@@ -427,7 +427,7 @@ namespace tmv {
                     52 ) : 
                 (!lo2 || !up2) ? 62 : // m2 is triangular
                 s == 2 ? vec1 ? 22 : xs == 1 ? 1 : 12 :
-                (s != TMV_UNKNOWN && s <= 4) ? vec1 ? 23 : xs == 1 ? 1 : 13 :
+                (s != Unknown && s <= 4) ? vec1 ? 23 : xs == 1 ? 1 : 13 :
                 M2::_hasdivider ? 31 :
                 32;
 #ifdef PRINTALGO_DIVM
@@ -460,7 +460,7 @@ namespace tmv {
                     (!up1 && !lo1) ? 55 :
                     51 ) : 
                 (!lo2 || !up2) ? 5 : // m2 is triangular
-                (s != TMV_UNKNOWN && s <= 4) ? 5 :
+                (s != Unknown && s <= 4) ? 5 :
                 M2::_hasdivider ? 41 :
                 42;
 #ifdef PRINTALGO_DIVM
@@ -530,7 +530,7 @@ namespace tmv {
                     51 ) : 
                 (!lo2 || !up2) ? 61 : // m2 is triangular
                 s == 2 ? vec1 ? 22 : xs == 1 ? 1 : 12 :
-                (s != TMV_UNKNOWN && s <= 4) ? vec1 ? 23 : xs == 1 ? 1 : 13 :
+                (s != Unknown && s <= 4) ? vec1 ? 23 : xs == 1 ? 1 : 13 :
                 M2::_hasdivider ? 31 :
                 32;
 #ifdef PRINTALGO_DIVM
@@ -1220,9 +1220,9 @@ namespace tmv {
                     (!up1 && !lo1) ? 57 : // m1 diag
                     52 ) :
                 !up2 || !lo2 ? 6 : // m2 is triangular
-                cs == rs && cs != TMV_UNKNOWN && cs <= 4 ? 6 :
+                cs == rs && cs != Unknown && cs <= 4 ? 6 :
                 M2::_hasdivider ? 41 :
-                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 44 :
+                cs == Unknown || rs == Unknown ? 44 :
                 cs == rs ? 42 :
                 43;
 #ifdef PRINTALGO_DIVM
@@ -1264,10 +1264,10 @@ namespace tmv {
                     52 ) :
                 (!lo2 || !up2) ? 62 : // m1 is triangular
                 cs == 2 && rs == 2 ? vec3 ? 22 : xs == 1 ? 1 : 12 :
-                cs == rs && cs != TMV_UNKNOWN && cs <= 4 ? (
+                cs == rs && cs != Unknown && cs <= 4 ? (
                     vec3 ? 23 : xs == 1 ? 1 : 13) :
                 M2::_hasdivider ? 31 :
-                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 34 :
+                cs == Unknown || rs == Unknown ? 34 :
                 cs == rs ? 32 :
                 33;
 #ifdef PRINTALGO_DIVM
@@ -1308,9 +1308,9 @@ namespace tmv {
                     (!up1 && !lo1) ? 57 : // m1 diag
                     51 ) :
                 !up2 || !lo2 ? 5 : // m2 is triangular
-                cs == rs && cs != TMV_UNKNOWN && cs <= 4 ? 5 :
+                cs == rs && cs != Unknown && cs <= 4 ? 5 :
                 M2::_hasdivider ? 41 :
-                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 44 :
+                cs == Unknown || rs == Unknown ? 44 :
                 cs == rs ? 42 :
                 43;
 #ifdef PRINTALGO_DIVM
@@ -1397,10 +1397,10 @@ namespace tmv {
                     51 ) :
                 (!lo2 || !up2) ? 61 : // m2 is triangular
                 cs == 2 && rs == 2 ? vec3 ? 22 : xs == 1 ? 1 : 12 :
-                cs == rs && cs != TMV_UNKNOWN && cs <= 4 ? (
+                cs == rs && cs != Unknown && cs <= 4 ? (
                     vec3 ? 23 : xs == 1 ? 1 : 13) :
                 M2::_hasdivider ? 31 :
-                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 34 :
+                cs == Unknown || rs == Unknown ? 34 :
                 cs == rs ? 32 :
                 33;
 #ifdef PRINTALGO_DIVM

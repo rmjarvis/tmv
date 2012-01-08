@@ -34,49 +34,50 @@
 //
 // This file defines the TMV SymMatrix and HermMatrix classes.
 //
+// SymMatrix is used for symmetric matrices, and 
+// HermMatrix is used for Hermitian matrices.  
+// For real matrices, these are the same thing:
+//     A = A.transpose().
+// But for complex, they are different:
+//     A_sym = A_sym.transpose()
+//     A_herm = A_herm.adjoint()
+//
+// For these notes, I will always write SymMatrix, but (except where
+// otherwise indicated) everything applies the same for Sym and Herm.
+// Also, the Views keep track of sym/herm difference with a parameter,
+// so it is always a GenSymMatrix, ConstSymMatrixView, or 
+// SymMatrixView - never Herm in any of these.
+//
+// Caveat: Complex Hermitian matrices are such that A = At, which 
+// implies that their diagonal elements are real.  Many routines
+// involving HermMatrixes assume the reality of the diagonal.
+// However, it is possible to assign a non-real value to a diagonal
+// element.  If the user does this, the results are undefined.
+//
+// As usual, the first template parameter is the type of the data,
+// and the optional second template parameter specifies the known
+// attributes.  The valid attributs for a SymMatrix are:
+// - ColMajor or RoMajor
+// - CStyle or FortranStyle
+// - Lower or Upper
+// The defaults are (ColMajor,CStyle,Lower) if you do not specify
+// otherwise.
+//
+// The storage and index style follow the same meaning as for regular
+// Matrices.  
+// Lower or Upper refers to which triangular half stores the actual data.
+//
 // Constructors:
 //
-//    SymMatrix is used for symmetric matrices, and HermMatrix is used
-//    for Hermitian matrices.  For real matrices, these are the same thing:
-//    A = A.transpose().
-//    But for complex, they are different:
-//    A_sym = A_sym.transpose()
-//    A_herm = A_herm.adjoint()
-//
-//    For these notes, I will always write SymMatrix, but (except where
-//    otherwise indicated) everything applies the same for Sym and Herm.
-//    Also, the Views keep track of sym/herm difference with a parameter,
-//    so it is always a GenSymMatrix, ConstSymMatrixView, or 
-//    SymMatrixView - never Herm in any of these.
-//
-//    Caveat: Complex Hermitian matrices are such that A = At, which 
-//    implies that their diagonal elements are real.  Many routines
-//    involving HermMatrixes assume the reality of the diagonal.
-//    However, it is possible to assign a non-real value to a diagonal
-//    element.  If the user does this, the results are undefined.
-//
-//    In addition to the type template parameter (T), SymMatrixes have two
-//    additional template parameters:
-//        UpLoType uplo = Upper || Lower
-//        StorageType stor = RowMajor || ColMajor
-//
-//        They both have default values, so you can omit both, or
-//        just stor.  The default values are: {Upper, RowMajor}
-//
-//        The first, uplo, refers to which triangular half stores the actual 
-//        data.
-//
-//        The storage follows the same meaning as for regular Matrices.
-//
-//    SymMatrix<T,uplo,stor>(int n)
+//    SymMatrix<T,A>(int n)
 //        Makes a Symmetric Matrix with column size = row size = n
 //        with _uninitialized_ values.
 //
-//    SymMatrix<T,uplo,stor>(int n, T x)
+//    SymMatrix<T,A>(int n, T x)
 //        Makes a Symmetric Matrix with values all initialized to x
 //        For Hermitian matrixces, x must be real.
 //
-//    SymMatrix<T,uplo,stor>(const Matrix<T>& m)
+//    SymMatrix<T,A>(const Matrix<T>& m)
 //        Makes a SymMatrix which copies the corresponding elements of m.
 //
 //    ConstSymMatrixView<T> SymMatrixViewOf(const Matrix<T>& m, uplo)
@@ -501,32 +502,29 @@ namespace tmv {
             if ( (uplo()==Upper && i2-j1<=1) || (uplo()==Lower && j2-i1<=1) )
                 return const_rec_type(
                     cptr()+i1*stepi()+j1*stepj(),
-                    i2-i1,j2-j1,stepi(),stepj(),stor(),ct());
+                    i2-i1,j2-j1,stepi(),stepj(),ct());
             else
                 return const_rec_type(
                     cptr()+i1*stepj()+j1*stepi(),
-                    i2-i1,j2-j1,stepj(),stepi(),TMV_TransOf(stor()),
+                    i2-i1,j2-j1,stepj(),stepi(),
                     issym()?ct():TMV_ConjOf(T,ct()));
         }
 
         inline const_rec_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
-            const StorageType newstor =
-                iscm() ? (istep == 1 ? ColMajor : NoMajor) :
-                isrm() ? (jstep == 1 ? RowMajor : NoMajor) : NoMajor;
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             if ( (uplo()==Upper && i2-j1<=istep) || 
                  (uplo()==Lower && j2-i1<=istep) )
                 return const_rec_type(
                     cptr()+i1*stepi()+j1*stepj(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepi(),jstep*stepj(),
-                    newstor,ct());
+                    ct());
             else
                 return const_rec_type(
                     cptr()+i1*stepj()+j1*stepi(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepj(),jstep*stepi(),
-                    TMV_TransOf(newstor),issym()?ct():TMV_ConjOf(T,ct()));
+                    issym()?ct():TMV_ConjOf(T,ct()));
         }
 
         bool hasSubVector(
@@ -553,7 +551,7 @@ namespace tmv {
             TMVAssert(hasSubSymMatrix(i1,i2,1));
             return const_view_type(
                 cptr()+i1*(stepi()+stepj()),i2-i1,
-                stepi(),stepj(),sym(),uplo(),stor(),ct());
+                stepi(),stepj(),sym(),uplo(),ct());
         }
 
         inline const_view_type subSymMatrix(
@@ -562,20 +560,17 @@ namespace tmv {
             TMVAssert(hasSubSymMatrix(i1,i2,istep));
             return const_view_type(
                 cptr()+i1*(stepi()+stepj()),
-                (i2-i1)/istep,istep*stepi(),istep*stepj(),sym(),uplo(),
-                istep==1 ? stor() : NoMajor,ct());
+                (i2-i1)/istep,istep*stepi(),istep*stepj(),sym(),uplo(),ct());
         }
 
         inline const_uppertri_type upperTri(DiagType dt = NonUnitDiag) const
         {
             if (uplo() == Upper)
                 return const_uppertri_type(
-                    cptr(),size(),
-                    stepi(),stepj(),dt,stor(),ct());
+                    cptr(),size(),stepi(),stepj(),dt,ct());
             else
                 return const_uppertri_type(
-                    cptr(),size(),
-                    stepj(),stepi(),dt,TMV_TransOf(stor()),
+                    cptr(),size(),stepj(),stepi(),dt,
                     issym()?ct():TMV_ConjOf(T,ct()));
         }
 
@@ -583,12 +578,10 @@ namespace tmv {
         {
             if (uplo() == Upper)
                 return const_uppertri_type(
-                    cptr(),size(),
-                    stepi(),stepj(),UnitDiag,stor(),ct());
+                    cptr(),size(),stepi(),stepj(),UnitDiag,ct());
             else
                 return const_uppertri_type(
-                    cptr(),size(),
-                    stepj(),stepi(),UnitDiag,TMV_TransOf(stor()),
+                    cptr(),size(),stepj(),stepi(),UnitDiag,
                     issym()?ct():TMV_ConjOf(T,ct()));
         }
 
@@ -596,12 +589,10 @@ namespace tmv {
         {
             if (uplo() == Lower)
                 return const_lowertri_type(
-                    cptr(),size(),
-                    stepi(),stepj(),dt,stor(),ct());
+                    cptr(),size(),stepi(),stepj(),dt,ct());
             else
                 return const_lowertri_type(
-                    cptr(),size(),
-                    stepj(),stepi(),dt,TMV_TransOf(stor()),
+                    cptr(),size(),stepj(),stepi(),dt,
                     issym()?ct():TMV_ConjOf(T,ct()));
         }
 
@@ -610,11 +601,10 @@ namespace tmv {
             if (uplo() == Lower)
                 return const_lowertri_type(
                     cptr(),size(),
-                    stepi(),stepj(),UnitDiag,stor(),ct());
+                    stepi(),stepj(),UnitDiag,ct());
             else
                 return const_lowertri_type(
-                    cptr(),size(),
-                    stepj(),stepi(),UnitDiag,TMV_TransOf(stor()),
+                    cptr(),size(),stepj(),stepi(),UnitDiag,
                     issym()?ct():TMV_ConjOf(T,ct()));
         }
 
@@ -623,8 +613,7 @@ namespace tmv {
             return const_realpart_type(
                 reinterpret_cast<const RT*>(cptr()),size(),
                 isReal(T()) ? stepi() : 2*stepi(),
-                isReal(T()) ? stepj() : 2*stepj(),
-                Sym, uplo(), isReal(T()) ? stor() : NoMajor,NonConj);
+                isReal(T()) ? stepj() : 2*stepj(), Sym, uplo(), NonConj);
         }
 
         inline const_realpart_type imagPart() const
@@ -634,7 +623,7 @@ namespace tmv {
             // The imaginary part of a Hermitian matrix is anti-symmetric
             return const_realpart_type(
                 reinterpret_cast<const RT*>(cptr())+1,
-                size(),2*stepi(),2*stepj(), Sym,uplo(),NoMajor,NonConj);
+                size(),2*stepi(),2*stepj(), Sym,uplo(),NonConj);
         }
 
         // 
@@ -644,37 +633,32 @@ namespace tmv {
         inline const_view_type view() const
         { 
             return const_view_type(
-                cptr(),size(),stepi(),stepj(),
-                sym(),uplo(),stor(),ct());
+                cptr(),size(),stepi(),stepj(),sym(),uplo(),ct());
         }
 
         inline const_view_type transpose() const
         { 
             return const_view_type(
-                cptr(),size(),stepj(),stepi(),
-                sym(),TMV_UTransOf(uplo()),TMV_TransOf(stor()),ct());
+                cptr(),size(),stepj(),stepi(),sym(),TMV_UTransOf(uplo()),ct());
         }
 
         inline const_view_type conjugate() const
         { 
             return const_view_type(
-                cptr(),size(),stepi(),stepj(),
-                sym(),uplo(),stor(),TMV_ConjOf(T,ct()));
+                cptr(),size(),stepi(),stepj(),sym(),uplo(),TMV_ConjOf(T,ct()));
         }
 
         inline const_view_type adjoint() const
         { 
             return const_view_type(
-                cptr(),size(),stepj(),stepi(),
-                sym(),TMV_UTransOf(uplo()),TMV_TransOf(stor()),
+                cptr(),size(),stepj(),stepi(),sym(),TMV_UTransOf(uplo()),
                 TMV_ConjOf(T,ct()));
         }
 
         inline nonconst_type nonConst() const
         {
             return SymMatrixView<T>(
-                const_cast<T*>(cptr()),size(),
-                stepi(),stepj(),sym(),uplo(),stor(),ct()
+                const_cast<T*>(cptr()),size(),stepi(),stepj(),sym(),uplo(),ct()
                 TMV_FIRSTLAST1(
                     cptr(),row(colsize()-1,0,colsize()).end().getP()));
         }
@@ -748,19 +732,19 @@ namespace tmv {
         inline void makeInverse(const MatrixView<T1>& minv) const
         { DivHelper<T>::makeInverse(minv); }
 
-        template <class T1, StorageType S, IndexStyle I> 
-        inline void makeInverse(Matrix<T1,S,I>& minv) const
+        template <class T1, int A>
+        inline void makeInverse(Matrix<T1,A>& minv) const
         { DivHelper<T>::makeInverse(minv); }
 
-        template <class T1, UpLoType U, StorageType S, IndexStyle I> 
-        inline void makeInverse(SymMatrix<T1,U,S,I>& sinv) const
+        template <class T1, int A>
+        inline void makeInverse(SymMatrix<T1,A>& sinv) const
         {
             TMVAssert(issym());
             makeInverse(sinv.view()); 
         }
 
-        template <class T1, UpLoType U, StorageType S, IndexStyle I> 
-        inline void makeInverse(HermMatrix<T1,U,S,I>& sinv) const
+        template <class T1, int A>
+        inline void makeInverse(HermMatrix<T1,A>& sinv) const
         {
             TMVAssert(isherm());
             makeInverse(sinv.view()); 
@@ -834,10 +818,9 @@ namespace tmv {
         virtual int stepi() const = 0;
         virtual int stepj() const = 0;
         virtual UpLoType uplo() const = 0;
-        virtual StorageType stor() const = 0;
         virtual ConjType ct() const = 0;
-        virtual inline bool isrm() const { return stor() == RowMajor; }
-        virtual inline bool iscm() const { return stor() == ColMajor; }
+        virtual inline bool isrm() const { return stepj() == 1; }
+        virtual inline bool iscm() const { return stepi() == 1; }
         inline bool isconj() const
         { 
             TMVAssert(isComplex(T()) || ct()==NonConj);
@@ -870,39 +853,33 @@ namespace tmv {
 
     }; // GenSymMatrix
 
-    template <class T, IndexStyle I> 
+    template <class T, int A> 
     class ConstSymMatrixView : public GenSymMatrix<T>
     {
     public :
 
-        typedef ConstSymMatrixView<T,I> type;
+        typedef ConstSymMatrixView<T,A> type;
         typedef GenSymMatrix<T> base;
 
         inline ConstSymMatrixView(const type& rhs) :
             itsm(rhs.itsm), itss(rhs.itss), itssi(rhs.itssi), itssj(rhs.itssj),
-            itssym(rhs.itssym), itsuplo(rhs.itsuplo), itsstor(rhs.itsstor),
-            itsct(rhs.itsct) 
-        {
-        }
+            itssym(rhs.itssym), itsuplo(rhs.itsuplo),
+            itsct(rhs.itsct)
+        { TMVAssert(Attrib<A>::viewok);  }
 
         inline ConstSymMatrixView(const base& rhs) :
             itsm(rhs.cptr()), itss(rhs.size()), 
             itssi(rhs.stepi()), itssj(rhs.stepj()),
-            itssym(rhs.sym()), itsuplo(rhs.uplo()), itsstor(rhs.stor()),
-            itsct(rhs.ct()) 
-        {
-        }
+            itssym(rhs.sym()), itsuplo(rhs.uplo()),
+            itsct(rhs.ct())
+        { TMVAssert(Attrib<A>::viewok);  }
 
         inline ConstSymMatrixView(
             const T* _m, int _s, int _si, int _sj,
-            SymType _sym, UpLoType _uplo, StorageType _stor,
-            ConjType _ct) : 
+            SymType _sym, UpLoType _uplo, ConjType _ct) : 
             itsm(_m), itss(_s), itssi(_si), itssj(_sj),
-            itssym(_sym), itsuplo(_uplo), itsstor(_stor), itsct(_ct)
-        { 
-            TMVAssert(_stor==RowMajor ? _sj == 1 : _stor==ColMajor ?
-                      _si==1 : true);
-        }
+            itssym(_sym), itsuplo(_uplo), itsct(_ct)
+        { TMVAssert(Attrib<A>::viewok);  }
 
         virtual inline ~ConstSymMatrixView()
         {
@@ -917,7 +894,6 @@ namespace tmv {
         inline int stepj() const { return itssj; }
         inline SymType sym() const { return itssym; }
         inline UpLoType uplo() const { return itsuplo; }
-        inline StorageType stor() const { return itsstor; }
         inline ConjType ct() const { return itsct; }
 
     protected :
@@ -929,7 +905,6 @@ namespace tmv {
 
         const SymType itssym;
         const UpLoType itsuplo;
-        const StorageType itsstor;
         const ConjType itsct;
 
     private :
@@ -967,8 +942,8 @@ namespace tmv {
 
         inline ConstSymMatrixView(
             const T* _m, int _s, int _si, int _sj,
-            SymType _sym, UpLoType _uplo, StorageType _stor, ConjType _ct) : 
-            c_type(_m,_s,_si,_sj,_sym,_uplo,_stor,_ct) {}
+            SymType _sym, UpLoType _uplo, ConjType _ct) : 
+            c_type(_m,_s,_si,_sj,_sym,_uplo,_ct) {}
 
         virtual inline ~ConstSymMatrixView() {}
 
@@ -1097,24 +1072,24 @@ namespace tmv {
 
     }; // FortranStyle ConstSymMatrixView
 
-    template <class T, IndexStyle I> 
+    template <class T, int A> 
     class SymMatrixView : public GenSymMatrix<T>
     {
     public:
 
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
-        typedef SymMatrixView<T,I> type;
+        typedef SymMatrixView<T,A> type;
         typedef GenSymMatrix<T> base;
-        typedef SymMatrixView<T,I> view_type;
+        typedef SymMatrixView<T,A> view_type;
         typedef view_type transpose_type;
         typedef view_type conjugate_type;
         typedef view_type adjoint_type;
-        typedef VectorView<T,I> vec_type;
-        typedef MatrixView<T,I> rec_type;
-        typedef UpperTriMatrixView<T,I> uppertri_type;
-        typedef LowerTriMatrixView<T,I> lowertri_type;
-        typedef SymMatrixView<RT,I> realpart_type;
+        typedef VectorView<T,A> vec_type;
+        typedef MatrixView<T,A> rec_type;
+        typedef UpperTriMatrixView<T,A> uppertri_type;
+        typedef LowerTriMatrixView<T,A> lowertri_type;
+        typedef SymMatrixView<RT,A> realpart_type;
         typedef TMV_RefType(T) reference;
 
         //
@@ -1123,20 +1098,18 @@ namespace tmv {
 
         inline SymMatrixView(const type& rhs) : 
             itsm(rhs.itsm), itss(rhs.itss), itssi(rhs.itssi), itssj(rhs.itssj),
-            itssym(rhs.sym()), itsuplo(rhs.uplo()), itsstor(rhs.stor()),
-            itsct(rhs.ct()) TMV_DEFFIRSTLAST(rhs._first,rhs._last) {}
+            itssym(rhs.sym()), itsuplo(rhs.uplo()),
+            itsct(rhs.ct()) TMV_DEFFIRSTLAST(rhs._first,rhs._last)
+        { TMVAssert(Attrib<A>::viewok);  }
 
         inline SymMatrixView(
             T* _m, int _s, int _si, int _sj, 
-            SymType _sym, UpLoType _uplo, StorageType _stor, ConjType _ct 
+            SymType _sym, UpLoType _uplo, ConjType _ct 
             TMV_PARAMFIRSTLAST(T) ) :
             itsm(_m), itss(_s), itssi(_si), itssj(_sj),
-            itssym(_sym), itsuplo(_uplo), itsstor(_stor), itsct(_ct)
+            itssym(_sym), itsuplo(_uplo), itsct(_ct)
             TMV_DEFFIRSTLAST(_first,_last)
-        {
-            TMVAssert(_stor==RowMajor ? _sj==1 : _stor==ColMajor ?
-                      _si==1 : true); 
-        }
+        { TMVAssert(Attrib<A>::viewok);  }
 
         virtual inline ~SymMatrixView() 
         {
@@ -1483,31 +1456,27 @@ namespace tmv {
                  (uplo()==Lower && j2-i1<=1) )
                 return rec_type(
                     ptr()+i1*stepi()+j1*stepj(),
-                    i2-i1,j2-j1,stepi(),stepj(),stor(),ct() TMV_FIRSTLAST);
+                    i2-i1,j2-j1,stepi(),stepj(),ct() TMV_FIRSTLAST);
             else
                 return rec_type(
-                    ptr()+i1*stepj()+j1*stepi(),
-                    i2-i1,j2-j1,stepj(),stepi(),TMV_TransOf(stor()),
+                    ptr()+i1*stepj()+j1*stepi(),i2-i1,j2-j1,stepj(),stepi(),
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
         inline rec_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
-            const StorageType newstor =
-                this->iscm() ? (istep == 1 ? ColMajor : NoMajor) :
-                this->isrm() ? (jstep == 1 ? RowMajor : NoMajor) : NoMajor;
             TMVAssert(base::hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             if ( (uplo()==Upper && i2-j1<=istep) || 
                  (uplo()==Lower && j2-i1<=istep) )
                 return rec_type(
                     ptr()+i1*stepi()+j1*stepj(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepi(),jstep*stepj(),
-                    newstor,ct() TMV_FIRSTLAST);
+                    ct() TMV_FIRSTLAST);
             else
                 return rec_type(
                     ptr()+i1*stepj()+j1*stepi(),(i2-i1)/istep,(j2-j1)/jstep,
-                    istep*stepj(),jstep*stepi(), TMV_TransOf(newstor),
+                    istep*stepj(),jstep*stepi(),
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
@@ -1530,7 +1499,7 @@ namespace tmv {
             TMVAssert(base::hasSubSymMatrix(i1,i2,1));
             return view_type(
                 ptr()+i1*(stepi()+stepj()),i2-i1,
-                stepi(),stepj(),sym(),uplo(),stor(),ct() TMV_FIRSTLAST);
+                stepi(),stepj(),sym(),uplo(),ct() TMV_FIRSTLAST);
         }
 
         inline view_type subSymMatrix(int i1, int i2, int istep) const
@@ -1538,20 +1507,17 @@ namespace tmv {
             TMVAssert(base::hasSubSymMatrix(i1,i2,istep));
             return view_type(
                 ptr()+i1*(stepi()+stepj()),(i2-i1)/istep,
-                istep*stepi(),istep*stepj(),sym(),uplo(),
-                istep==1 ? stor() : NoMajor,ct() TMV_FIRSTLAST);
+                istep*stepi(),istep*stepj(),sym(),uplo(), ct() TMV_FIRSTLAST);
         }
 
         inline uppertri_type upperTri(DiagType dt = NonUnitDiag) const
         {
             if (uplo() == Upper)
                 return uppertri_type(
-                    ptr(),size(),
-                    stepi(),stepj(),dt,stor(),ct() TMV_FIRSTLAST);
+                    ptr(),size(),stepi(),stepj(),dt,ct() TMV_FIRSTLAST);
             else
                 return uppertri_type(
-                    ptr(),size(),
-                    stepj(),stepi(),dt,TMV_TransOf(stor()),
+                    ptr(),size(),stepj(),stepi(),dt,
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
@@ -1559,12 +1525,10 @@ namespace tmv {
         {
             if (uplo() == Upper)
                 return uppertri_type(
-                    ptr(),size(),
-                    stepi(),stepj(),UnitDiag,stor(),ct() TMV_FIRSTLAST);
+                    ptr(),size(),stepi(),stepj(),UnitDiag,ct() TMV_FIRSTLAST);
             else
                 return uppertri_type(
-                    ptr(),size(),
-                    stepj(),stepi(),UnitDiag,TMV_TransOf(stor()),
+                    ptr(),size(),stepj(),stepi(),UnitDiag,
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
@@ -1572,12 +1536,10 @@ namespace tmv {
         {
             if (uplo() == Lower)
                 return lowertri_type(
-                    ptr(),size(),
-                    stepi(),stepj(),dt,stor(),ct() TMV_FIRSTLAST);
+                    ptr(),size(),stepi(),stepj(),dt,ct() TMV_FIRSTLAST);
             else
                 return lowertri_type(
-                    ptr(),size(),
-                    stepj(),stepi(),dt,TMV_TransOf(stor()),
+                    ptr(),size(),stepj(),stepi(),dt,
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
@@ -1585,12 +1547,10 @@ namespace tmv {
         {
             if (uplo() == Lower)
                 return lowertri_type(
-                    ptr(),size(),
-                    stepi(),stepj(),UnitDiag,stor(),ct() TMV_FIRSTLAST);
+                    ptr(),size(),stepi(),stepj(),UnitDiag,ct() TMV_FIRSTLAST);
             else
                 return lowertri_type(
-                    ptr(),size(),
-                    stepj(),stepi(),UnitDiag,TMV_TransOf(stor()),
+                    ptr(),size(),stepj(),stepi(),UnitDiag,
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
@@ -1599,8 +1559,7 @@ namespace tmv {
             return realpart_type(
                 reinterpret_cast<RT*>(ptr()),size(),
                 isReal(T()) ? stepi() : 2*stepi(),
-                isReal(T()) ? stepj() : 2*stepj(),
-                sym(),uplo(), isReal(T()) ? stor() : NoMajor, NonConj
+                isReal(T()) ? stepj() : 2*stepj(), sym(),uplo(),NonConj
 #ifdef TMVFLDEBUG
                 ,reinterpret_cast<const RT*>(_first)
                 ,reinterpret_cast<const RT*>(_last)
@@ -1614,7 +1573,7 @@ namespace tmv {
             TMVAssert(this->issym());
             return realpart_type(
                 reinterpret_cast<RT*>(ptr())+1,
-                size(),2*stepi(),2*stepj(),sym(),uplo(),NoMajor, NonConj
+                size(),2*stepi(),2*stepj(),sym(),uplo(),NonConj
 #ifdef TMVFLDEBUG
                 ,reinterpret_cast<const RT*>(_first)+1
                 ,reinterpret_cast<const RT*>(_last)+1
@@ -1628,23 +1587,21 @@ namespace tmv {
         inline view_type transpose() const
         {
             return view_type(
-                ptr(),size(),stepj(),stepi(),
-                sym(),TMV_UTransOf(uplo()),TMV_TransOf(stor()),ct() 
+                ptr(),size(),stepj(),stepi(),sym(),TMV_UTransOf(uplo()),ct() 
                 TMV_FIRSTLAST);
         }
 
         inline view_type conjugate() const
         {
             return view_type(
-                ptr(),size(),stepi(),stepj(),
-                sym(),uplo(),stor(),TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
+                ptr(),size(),stepi(),stepj(),sym(),uplo(),TMV_ConjOf(T,ct()) 
+                TMV_FIRSTLAST);
         }
 
         inline view_type adjoint() const
         {
             return view_type(
-                ptr(),size(),stepj(),stepi(),
-                sym(),TMV_UTransOf(uplo()),TMV_TransOf(stor()),
+                ptr(),size(),stepj(),stepi(),sym(),TMV_UTransOf(uplo()),
                 TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
@@ -1661,7 +1618,6 @@ namespace tmv {
         inline int stepj() const { return itssj; }
         inline SymType sym() const { return itssym; }
         inline UpLoType uplo() const { return itsuplo; }
-        inline StorageType stor() const { return itsstor; }
         inline ConjType ct() const { return itsct; }
         using base::issym;
         using base::isherm;
@@ -1677,7 +1633,6 @@ namespace tmv {
 
         const SymType itssym;
         const UpLoType itsuplo;
-        const StorageType itsstor;
         const ConjType itsct;
 
 #ifdef TMVFLDEBUG
@@ -1720,9 +1675,9 @@ namespace tmv {
 
         inline SymMatrixView(
             T* _m, int _s, int _si, int _sj, 
-            SymType _sym, UpLoType _uplo, StorageType _stor, ConjType _ct 
+            SymType _sym, UpLoType _uplo, ConjType _ct 
             TMV_PARAMFIRSTLAST(T) ) :
-            c_type(_m,_s,_si,_sj,_sym,_uplo,_stor,_ct
+            c_type(_m,_s,_si,_sj,_sym,_uplo,_ct
                    TMV_FIRSTLAST1(_first,_last) ) {}
 
         virtual inline ~SymMatrixView() {} 
@@ -1959,14 +1914,18 @@ namespace tmv {
 
     }; // FortranStyle SymMatrixView
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I> 
+    template <class T, int A>
     class SymMatrix : public GenSymMatrix<T>
     {
     public:
 
+        enum { S = A & AllStorageType };
+        enum { U = A & Upper };
+        enum { I = A & FortranStyle };
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
-        typedef SymMatrix<T,U,S,I> type;
+        typedef SymMatrix<T,A> type;
         typedef type copy_type;
         typedef GenSymMatrix<T> base;
         typedef ConstSymMatrixView<T,I> const_view_type;
@@ -1998,8 +1957,8 @@ namespace tmv {
 
         explicit inline SymMatrix(int _size=0) : NEW_SIZE(_size) 
         {
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(_size >= 0);
-            TMVAssert(S==RowMajor || S==ColMajor);
 #ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #endif
@@ -2007,31 +1966,24 @@ namespace tmv {
 
         inline SymMatrix(int _size, const T& x) : NEW_SIZE(_size)
         {
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(_size >= 0);
-            TMVAssert(S==RowMajor || S==ColMajor);
             setAllTo(x);
         }
 
         inline SymMatrix(const type& rhs) : NEW_SIZE(rhs.size())
         {
-            TMVAssert(S==RowMajor || S==ColMajor);
-            std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
-        }
-
-        template <IndexStyle I2> 
-        inline SymMatrix(const SymMatrix<T,U,S,I2>& rhs) : NEW_SIZE(rhs.size())
-        {
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::symmatrixok);
             std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
         }
 
         inline SymMatrix(const GenSymMatrix<RT>& rhs) : NEW_SIZE(rhs.size())
         {
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::symmatrixok);
             if (rhs.issym()) 
                 rhs.assignToS(view());
             else {
-                if (U == Upper)
+                if (uplo() == Upper)
                     upperTri() = rhs.upperTri();
                 else
                     lowerTri() = rhs.lowerTri();
@@ -2040,12 +1992,12 @@ namespace tmv {
 
         inline SymMatrix(const GenSymMatrix<CT>& rhs) : NEW_SIZE(rhs.size())
         {
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(isComplex(T()));
-            TMVAssert(S==RowMajor || S==ColMajor);
             if (rhs.issym()) 
                 rhs.assignToS(view());
             else {
-                if (U == Upper)
+                if (uplo() == Upper)
                     upperTri() = rhs.upperTri();
                 else
                     lowerTri() = rhs.lowerTri();
@@ -2055,29 +2007,20 @@ namespace tmv {
         template <class T2> 
         inline SymMatrix(const GenSymMatrix<T2>& rhs) : NEW_SIZE(rhs.size())
         { 
-            TMVAssert(S==RowMajor || S==ColMajor);
-            if (U == Upper)
+            TMVAssert(Attrib<A>::symmatrixok);
+            if (uplo() == Upper)
                 upperTri() = rhs.upperTri();
             else
                 lowerTri() = rhs.lowerTri();
-        }
-
-        template <IndexStyle I2> 
-        inline explicit SymMatrix(const Matrix<T,S,I2>& rhs) :
-            NEW_SIZE(rhs.rowsize())
-        {
-            TMVAssert(S==RowMajor || S==ColMajor);
-            TMVAssert(rhs.isSquare());
-            std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
         }
 
         template <class T2> 
         inline SymMatrix(const GenMatrix<T2>& rhs) :
             NEW_SIZE(rhs.rowsize())
         { 
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(rhs.isSquare());
-            if (U == Upper)
+            if (uplo() == Upper)
                 upperTri() = rhs.upperTri();
             else
                 lowerTri() = rhs.lowerTri();
@@ -2086,7 +2029,7 @@ namespace tmv {
         inline SymMatrix(const AssignableToSymMatrix<RT>& m2) :
             NEW_SIZE(m2.size())
         { 
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(m2.issym());
             m2.assignToS(view());
         }
@@ -2094,8 +2037,8 @@ namespace tmv {
         inline SymMatrix(const AssignableToSymMatrix<CT>& m2) :
             NEW_SIZE(m2.size())
         { 
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(isComplex(T()));
-            TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(m2.issym());
             m2.assignToS(view());
         }
@@ -2103,6 +2046,7 @@ namespace tmv {
         inline explicit SymMatrix(const GenDiagMatrix<RT>& m2) :
             NEW_SIZE(m2.size())
         { 
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(size() == m2.size());
             setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
@@ -2111,6 +2055,7 @@ namespace tmv {
         inline explicit SymMatrix(const GenDiagMatrix<CT>& m2) :
             NEW_SIZE(m2.size())
         { 
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(isComplex(T()));
             TMVAssert(size() == m2.size());
             setZero();
@@ -2121,6 +2066,7 @@ namespace tmv {
         inline SymMatrix(const OProdVV<T,T2,T2>& opvv) :
             NEW_SIZE(opvv.colsize())
         {
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(opvv.colsize() == opvv.rowsize());
             TMVAssert(opvv.getV1().isSameAs(opvv.getV2().view()));
             Rank1Update<false>(opvv.getX(),opvv.getV1(),view());
@@ -2130,6 +2076,7 @@ namespace tmv {
         inline SymMatrix(const ProdMM<T,T2,T2>& pmm) :
             NEW_SIZE(pmm.colsize())
         {
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(pmm.colsize() == pmm.rowsize());
             TMVAssert(pmm.getM1().isSameAs(pmm.getM2().transpose()));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),view());
@@ -2139,6 +2086,7 @@ namespace tmv {
         inline SymMatrix(const ProdUL<T,T2,T2>& pmm) :
             NEW_SIZE(pmm.colsize())
         {
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(pmm.colsize() == pmm.rowsize());
             TMVAssert(pmm.getM1().isSameAs(pmm.getM2().transpose()));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),view());
@@ -2148,6 +2096,7 @@ namespace tmv {
         inline SymMatrix(const ProdLU<T,T2,T2>& pmm) :
             NEW_SIZE(pmm.colsize())
         {
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(pmm.colsize() == pmm.rowsize());
             TMVAssert(pmm.getM1().isSameAs(pmm.getM2().transpose()));
             RankKUpdate<false>(pmm.getX(),pmm.getM1(),view());
@@ -2168,15 +2117,6 @@ namespace tmv {
         //
 
         inline type& operator=(const type& m2)
-        { 
-            TMVAssert(size() == m2.size());
-            if (&m2 != this) 
-                std::copy(m2.cptr(),m2.cptr()+itslen,itsm.get());
-            return *this;
-        }
-
-        template <IndexStyle I2>
-        inline type& operator=(const SymMatrix<T,U,S,I2>& m2)
         { 
             TMVAssert(size() == m2.size());
             if (&m2 != this) 
@@ -2292,7 +2232,7 @@ namespace tmv {
 
         inline T operator()(int i, int j) const
         { 
-            if (I==CStyle) {
+            if (I==int(CStyle)) {
                 TMVAssert(i>=0 && i<size());
                 TMVAssert(j>=0 && j<size());
                 return cref(i,j); 
@@ -2305,7 +2245,7 @@ namespace tmv {
 
         inline T& operator()(int i, int j) 
         { 
-            if (I==CStyle) {
+            if (I==int(CStyle)) {
                 TMVAssert(i>=0 && i<size());
                 TMVAssert(j>=0 && j<size());
                 return ref(i,j); 
@@ -2318,7 +2258,7 @@ namespace tmv {
 
         inline const_vec_type row(int i, int j1, int j2) const 
         { 
-            if (I==FortranStyle) {
+            if (I==int(FortranStyle)) {
                 TMVAssert(i>0 && i<=size());
                 --i;
                 TMVAssert(j1>0 && j1-j2<=0 && j2<=size());
@@ -2327,7 +2267,7 @@ namespace tmv {
                 TMVAssert(i>=0 && i<size());
                 TMVAssert(j1>=0 && j1-j2<=0 && j2<=size());
             }
-            if ((U==Upper && i-j1<=0) || (U==Lower && j2-i<=1))
+            if ((uplo()==Upper && i-j1<=0) || (uplo()==Lower && j2-i<=1))
                 return const_vec_type(
                     itsm.get()+i*stepi()+j1*stepj(),
                     j2-j1,stepj(),NonConj); 
@@ -2339,7 +2279,7 @@ namespace tmv {
 
         inline const_vec_type col(int j, int i1, int i2) const
         {
-            if (I==FortranStyle) { 
+            if (I==int(FortranStyle)) { 
                 TMVAssert(j>0 && j<=size());
                 --j;
                 TMVAssert(i1>0 && i1-i2<=0 && i2<=size());
@@ -2348,7 +2288,7 @@ namespace tmv {
                 TMVAssert(j>=0 && j<size());
                 TMVAssert(i1>=0 && i1-i2<=0 && i2<=size());
             }
-            if ((U==Upper && i2-j<=1) || (U==Lower && j-i1<=0))
+            if ((uplo()==Upper && i2-j<=1) || (uplo()==Lower && j-i1<=0))
                 return const_vec_type(
                     itsm.get()+i1*stepi()+j*stepj(),
                     i2-i1,stepi(),NonConj); 
@@ -2367,14 +2307,14 @@ namespace tmv {
             TMVAssert(i>=-size() && i<=size()); 
             i = std::abs(i);
             return const_vec_type(
-                itsm.get()+i*(U==Upper?stepj():stepi()),
+                itsm.get()+i*(uplo()==Upper?stepj():stepi()),
                 size()-i,stepi()+stepj(),NonConj); 
         }
 
         inline const_vec_type diag(int i, int j1, int j2) const
         {
             TMVAssert(i>=-size() && i<=size()); 
-            if (I==FortranStyle) {
+            if (I==int(FortranStyle)) {
                 TMVAssert(j1>0 && j1-j2<=0 && j2<=size()-std::abs(i));
                 --j1;
             } else {
@@ -2383,13 +2323,13 @@ namespace tmv {
             i = std::abs(i);
             const int ds = stepi()+stepj();
             return const_vec_type(
-                itsm.get()+i*(U==Upper?stepj():stepi())+j1*ds,
+                itsm.get()+i*(uplo()==Upper?stepj():stepi())+j1*ds,
                 j2-j1,ds,NonConj);
         }
 
         inline vec_type row(int i, int j1, int j2)
         { 
-            if (I==FortranStyle) {
+            if (I==int(FortranStyle)) {
                 TMVAssert(i>0 && i<=size());
                 --i;
                 TMVAssert(j1>0 && j1-j2<=0 && j2<=size());
@@ -2398,7 +2338,7 @@ namespace tmv {
                 TMVAssert(i>=0 && i<size());
                 TMVAssert(j1>=0 && j1-j2<=0 && j2<=size());
             }
-            if ((U==Upper && i-j1<=0) || (U==Lower && j2-i<=1))
+            if ((uplo()==Upper && i-j1<=0) || (uplo()==Lower && j2-i<=1))
                 return vec_type(
                     itsm.get()+i*stepi()+j1*stepj(),
                     j2-j1,stepj(),NonConj TMV_FIRSTLAST); 
@@ -2410,7 +2350,7 @@ namespace tmv {
 
         inline vec_type col(int j, int i1, int i2)
         {
-            if (I==FortranStyle) { 
+            if (I==int(FortranStyle)) { 
                 TMVAssert(j>0 && j<=size());
                 --j;
                 TMVAssert(i1>0 && i1-i2<=0 && i2<=size());
@@ -2419,7 +2359,7 @@ namespace tmv {
                 TMVAssert(j>=0 && j<size());
                 TMVAssert(i1>=0 && i1-i2<=0 && i2<=size());
             }
-            if ((U==Upper && i2-j<=1) || (U==Lower && j-i1<=0))
+            if ((uplo()==Upper && i2-j<=1) || (uplo()==Lower && j-i1<=0))
                 return vec_type(
                     itsm.get()+i1*stepi()+j*stepj(),
                     i2-i1,stepi(),NonConj TMV_FIRSTLAST); 
@@ -2442,14 +2382,14 @@ namespace tmv {
             i = std::abs(i);
             TMVAssert(i<=size()); 
             return vec_type(
-                itsm.get()+i*(U==Upper?stepj():stepi()),
+                itsm.get()+i*(uplo()==Upper?stepj():stepi()),
                 size()-i,stepi()+stepj(),NonConj TMV_FIRSTLAST); 
         }
 
         inline vec_type diag(int i, int j1, int j2) 
         {
             TMVAssert(i>=-size() && i<=size()); 
-            if (I==FortranStyle) {
+            if (I==int(FortranStyle)) {
                 TMVAssert(j1>0 && j1-j2<=0 && j2<=size()-std::abs(i));
                 --j1;
             } else {
@@ -2458,7 +2398,7 @@ namespace tmv {
             i = std::abs(i);
             const int ds = stepi()+stepj();
             return vec_type(
-                itsm.get()+i*(U==Upper?stepj():stepi())+j1*ds,
+                itsm.get()+i*(uplo()==Upper?stepj():stepi())+j1*ds,
                 j2-j1,ds,NonConj TMV_FIRSTLAST);
         }
 
@@ -2510,43 +2450,41 @@ namespace tmv {
         inline const_rec_type subMatrix(int i1, int i2, int j1, int j2) const
         {
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,1,1));
-            if (I==FortranStyle) { --i1; --j1; }
-            if ( (U==Upper && i2-j1<=1) || (U==Lower && j2-i1<=1) )
+            if (I==int(FortranStyle)) { --i1; --j1; }
+            if ( (uplo()==Upper && i2-j1<=1) || (uplo()==Lower && j2-i1<=1) )
                 return const_rec_type(
                     itsm.get()+i1*stepi()+j1*stepj(),
-                    i2-i1,j2-j1,stepi(),stepj(),S,NonConj);
+                    i2-i1,j2-j1,stepi(),stepj(),NonConj);
             else
                 return const_rec_type(
                     itsm.get()+i1*stepj()+j1*stepi(),
-                    i2-i1,j2-j1,stepj(),stepi(),TMV_TransOf(S),NonConj);
+                    i2-i1,j2-j1,stepj(),stepi(),NonConj);
         }
 
         inline const_rec_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            if (I==FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
-            const StorageType newstor = S==RowMajor ?
-                jstep == 1 ? RowMajor : NoMajor :
-                istep == 1 ? ColMajor : NoMajor;
-            if ( (U==Upper && i2-j1<=istep) || (U==Lower && j2-i1<=jstep) )
+            if (I==int(FortranStyle)) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
+            if ( (uplo()==Upper && i2-j1<=istep) || 
+                 (uplo()==Lower && j2-i1<=jstep) )
                 return const_rec_type(
                     itsm.get()+i1*stepi()+j1*stepj(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepi(),jstep*stepj(),
-                    newstor,NonConj);
+                    NonConj);
             else
                 return const_rec_type(
                     itsm.get()+i1*stepj()+j1*stepi(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepj(),jstep*stepi(),
-                    TMV_TransOf(newstor),NonConj);
+                    NonConj);
         }
 
         inline const_vec_type subVector(
             int i, int j, int istep, int jstep, int n) const
         {
             TMVAssert(view().hasSubVector(i,j,istep,jstep,n));
-            if (I==FortranStyle) { --i; --j; }
-            if ((U==Upper && i-j<=0) || (U==Lower && j-i<=0))
+            if (I==int(FortranStyle)) { --i; --j; }
+            if ((uplo()==Upper && i-j<=0) || (uplo()==Lower && j-i<=0))
                 return const_vec_type(
                     itsm.get()+i*stepi()+j*stepj(),n,
                     istep*stepi()+jstep*stepj(),NonConj);
@@ -2559,64 +2497,57 @@ namespace tmv {
         inline const_view_type subSymMatrix(int i1, int i2) const
         {
             TMVAssert(view().hasSubSymMatrix(i1,i2,1));
-            if (I==FortranStyle) { --i1; }
+            if (I==int(FortranStyle)) { --i1; }
             return const_view_type(
                 itsm.get()+i1*(stepi()+stepj()),i2-i1,
-                stepi(),stepj(),Sym,U,S,NonConj);
+                stepi(),stepj(),Sym,uplo(),NonConj);
         }
 
         inline const_view_type subSymMatrix(int i1, int i2, int istep) const
         {
             TMVAssert(view().hasSubSymMatrix(i1,i2,istep));
-            if (I==FortranStyle) { --i1; i2+=istep-1; }
+            if (I==int(FortranStyle)) { --i1; i2+=istep-1; }
             return const_view_type(
                 itsm.get()+i1*(stepi()+stepj()),
-                (i2-i1)/istep,istep*stepi(),istep*stepj(),Sym,U,
-                istep==1 ? S : NoMajor, NonConj);
+                (i2-i1)/istep,istep*stepi(),istep*stepj(),Sym,uplo(),
+                NonConj);
         }
 
         inline const_uppertri_type upperTri(DiagType dt = NonUnitDiag) const
         {
-            return U==Upper ? 
+            return uplo()==Upper ? 
                 const_uppertri_type(
-                    itsm.get(),size(),
-                    stepi(),stepj(),dt,S,NonConj) :
+                    itsm.get(),size(),stepi(),stepj(),dt,NonConj) :
                 const_uppertri_type(
-                    itsm.get(),size(),
-                    stepj(),stepi(),dt,TMV_TransOf(S),NonConj);
+                    itsm.get(),size(),stepj(),stepi(),dt,NonConj);
         }
 
         inline const_uppertri_type unitUpperTri() const
         {
-            return U==Upper ? 
+            return uplo()==Upper ? 
                 const_uppertri_type(
-                    itsm.get(),size(),
-                    stepi(),stepj(),UnitDiag,S,NonConj) :
+                    itsm.get(),size(),stepi(),stepj(),UnitDiag,NonConj) :
                 const_uppertri_type(
-                    itsm.get(),size(),
-                    stepj(),stepi(),UnitDiag,TMV_TransOf(S),NonConj);
+                    itsm.get(),size(),stepj(),stepi(),UnitDiag,NonConj);
         }
 
         inline const_lowertri_type lowerTri(DiagType dt = NonUnitDiag) const
         {
-            return U==Lower ? 
+            return uplo()==Lower ? 
                 const_lowertri_type(
-                    itsm.get(),size(),
-                    stepi(),stepj(),dt,S,NonConj) :
+                    itsm.get(),size(),stepi(),stepj(),dt,NonConj) :
                 const_lowertri_type(
-                    itsm.get(),size(),
-                    stepj(),stepi(),dt,TMV_TransOf(S),NonConj);
+                    itsm.get(),size(),stepj(),stepi(),dt,NonConj);
         }
 
         inline const_lowertri_type unitLowerTri() const
         {
-            return U==Lower ? 
+            return uplo()==Lower ? 
                 const_lowertri_type(
                     itsm.get(),size(),
-                    stepi(),stepj(),UnitDiag,S,NonConj) :
+                    stepi(),stepj(),UnitDiag,NonConj) :
                 const_lowertri_type(
-                    itsm.get(),size(),
-                    stepj(),stepi(),UnitDiag,TMV_TransOf(S),NonConj);
+                    itsm.get(),size(),stepj(),stepi(),UnitDiag,NonConj);
         }
 
         inline const_realpart_type realPart() const
@@ -2624,8 +2555,7 @@ namespace tmv {
             return const_realpart_type(
                 reinterpret_cast<const RT*>(itsm.get()),size(),
                 isReal(T()) ? stepi() : 2*stepi(),
-                isReal(T()) ? stepj() : 2*stepj(),
-                Sym,U,isReal(T())?S:NoMajor,NonConj);
+                isReal(T()) ? stepj() : 2*stepj(), Sym,uplo(),NonConj);
         }
 
         inline const_realpart_type imagPart() const
@@ -2633,78 +2563,73 @@ namespace tmv {
             TMVAssert(isComplex(T()));
             return const_realpart_type(
                 reinterpret_cast<const RT*>(itsm.get())+1,size(),
-                2*stepi(),2*stepj(),Sym,U,NoMajor,NonConj);
+                2*stepi(),2*stepj(),Sym,uplo(),NonConj);
         } 
 
         inline const_view_type view() const
         { 
             return const_view_type(
-                itsm.get(),size(),stepi(),stepj(),
-                Sym,U,S,NonConj);
+                itsm.get(),size(),stepi(),stepj(),Sym,uplo(),NonConj);
         }
 
         inline const_view_type transpose() const
         {
             return const_view_type(
-                itsm.get(),size(),stepj(),stepi(),
-                Sym,TMV_UTransOf(U),TMV_TransOf(S),NonConj);
+                itsm.get(),size(),stepj(),stepi(),Sym,TMV_UTransOf(U),NonConj);
         }
 
         inline const_view_type conjugate() const
         { 
             return const_view_type(
-                itsm.get(),size(),stepi(),stepj(),
-                Sym,U,S,TMV_ConjOf(T,NonConj));
+                itsm.get(),size(),stepi(),stepj(),Sym,uplo(),
+                TMV_ConjOf(T,NonConj));
         }
 
         inline const_view_type adjoint() const
         {
             return const_view_type(
                 itsm.get(),size(),stepj(),stepi(),
-                Sym,TMV_UTransOf(U),TMV_TransOf(S),TMV_ConjOf(T,NonConj));
+                Sym,TMV_UTransOf(U),TMV_ConjOf(T,NonConj));
         }
 
         inline rec_type subMatrix(int i1, int i2, int j1, int j2)
         {
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,1,1));
-            if (I==FortranStyle) { --i1; --j1; }
-            if ( (U==Upper && i2-j1<=1) || (U==Lower && j2-i1<=1) )
+            if (I==int(FortranStyle)) { --i1; --j1; }
+            if ( (uplo()==Upper && i2-j1<=1) || (uplo()==Lower && j2-i1<=1) )
                 return rec_type(
                     itsm.get()+i1*stepi()+j1*stepj(),
-                    i2-i1,j2-j1,stepi(),stepj(),S,NonConj TMV_FIRSTLAST);
+                    i2-i1,j2-j1,stepi(),stepj(),NonConj TMV_FIRSTLAST);
             else
                 return rec_type(
                     itsm.get()+i1*stepj()+j1*stepi(),
-                    i2-i1,j2-j1,stepj(),stepi(),TMV_TransOf(S),NonConj 
-                    TMV_FIRSTLAST);
+                    i2-i1,j2-j1,stepj(),stepi(),NonConj TMV_FIRSTLAST);
         }
 
         inline rec_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep)
         {
-            const StorageType newstor = S==RowMajor ?
-                jstep == 1 ? RowMajor : NoMajor :
-                istep == 1 ? ColMajor : NoMajor;
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            if (I==FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
-            if ( (U==Upper && i2-j1<=istep) || (U==Lower && j2-i1<=jstep) )
+            if (I==int(FortranStyle)) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
+            if ( (uplo()==Upper && i2-j1<=istep) || 
+                 (uplo()==Lower && j2-i1<=jstep) )
                 return rec_type(
                     itsm.get()+i1*stepi()+j1*stepj(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepi(),jstep*stepj(),
-                    newstor,NonConj TMV_FIRSTLAST);
+                    NonConj TMV_FIRSTLAST);
             else
                 return rec_type(
                     itsm.get()+i1*stepj()+j1*stepi(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepj(),jstep*stepi(),
-                    TMV_TransOf(newstor),NonConj TMV_FIRSTLAST);
+                    NonConj TMV_FIRSTLAST);
         }
 
         inline vec_type subVector(
             int i, int j, int istep, int jstep, int n)
         {
             TMVAssert(view().hasSubVector(i,j,istep,jstep,n));
-            if (I==FortranStyle) { --i; --j; }
-            if ((U==Upper && i-j<=0) || (U==Lower && j-i<=0))
+            if (I==int(FortranStyle)) { --i; --j; }
+            if ((uplo()==Upper && i-j<=0) || (uplo()==Lower && j-i<=0))
                 return vec_type(
                     itsm.get()+i*stepi()+j*stepj(),n,
                     istep*stepi()+jstep*stepj(),NonConj TMV_FIRSTLAST);
@@ -2717,64 +2642,63 @@ namespace tmv {
         inline view_type subSymMatrix(int i1, int i2)
         {
             TMVAssert(view().hasSubSymMatrix(i1,i2,1));
-            if (I==FortranStyle) { --i1; }
+            if (I==int(FortranStyle)) { --i1; }
             return view_type(
                 itsm.get()+i1*(stepi()+stepj()),i2-i1,
-                stepi(),stepj(),Sym,U,S,NonConj TMV_FIRSTLAST);
+                stepi(),stepj(),Sym,uplo(),NonConj TMV_FIRSTLAST);
         }
 
         inline view_type subSymMatrix(int i1, int i2, int istep) 
         {
             TMVAssert(view().hasSubSymMatrix(i1,i2,istep));
-            if (I==FortranStyle) { --i1; i2+=istep-1; }
+            if (I==int(FortranStyle)) { --i1; i2+=istep-1; }
             return view_type(
                 itsm.get()+i1*(stepi()+stepj()),(i2-i1)/istep,
-                istep*stepi(),istep*stepj(),Sym,U,
-                istep==1 ? S : NoMajor,NonConj TMV_FIRSTLAST);
+                istep*stepi(),istep*stepj(),Sym,uplo(), NonConj TMV_FIRSTLAST);
         }
 
         inline uppertri_type upperTri(DiagType dt = NonUnitDiag)
         {
-            return U==Upper ? 
+            return uplo()==Upper ? 
                 uppertri_type(
-                    itsm.get(),size(),
-                    stepi(),stepj(),dt,S,NonConj TMV_FIRSTLAST) :
+                    itsm.get(),size(),stepi(),stepj(),dt,NonConj 
+                    TMV_FIRSTLAST) :
                 uppertri_type(
-                    itsm.get(),size(),
-                    stepj(),stepi(),dt,TMV_TransOf(S),NonConj TMV_FIRSTLAST);
+                    itsm.get(),size(),stepj(),stepi(),dt,NonConj 
+                    TMV_FIRSTLAST);
         }
 
         inline uppertri_type unitUpperTri()
         {
-            return U==Upper ? 
+            return uplo()==Upper ? 
                 uppertri_type(
-                    itsm.get(),size(),
-                    stepi(),stepj(),UnitDiag,S,NonConj TMV_FIRSTLAST) :
+                    itsm.get(),size(),stepi(),stepj(),UnitDiag,NonConj 
+                    TMV_FIRSTLAST) :
                 uppertri_type(
-                    itsm.get(),size(),
-                    stepj(),stepi(),UnitDiag,TMV_TransOf(S),NonConj TMV_FIRSTLAST);
+                    itsm.get(),size(),stepj(),stepi(),UnitDiag,NonConj 
+                    TMV_FIRSTLAST);
         }
 
         inline lowertri_type lowerTri(DiagType dt = NonUnitDiag)
         {
-            return U==Lower ? 
+            return uplo()==Lower ? 
                 lowertri_type(
-                    itsm.get(),size(),
-                    stepi(),stepj(),dt,S,NonConj TMV_FIRSTLAST) :
+                    itsm.get(),size(),stepi(),stepj(),dt,NonConj 
+                    TMV_FIRSTLAST) :
                 lowertri_type(
-                    itsm.get(),size(),
-                    stepj(),stepi(),dt,TMV_TransOf(S),NonConj TMV_FIRSTLAST);
+                    itsm.get(),size(),stepj(),stepi(),dt,NonConj 
+                    TMV_FIRSTLAST);
         }
 
         inline lowertri_type unitLowerTri()
         {
-            return U==Lower ? 
+            return uplo()==Lower ? 
                 lowertri_type(
-                    itsm.get(),size(),
-                    stepi(),stepj(),UnitDiag,S,NonConj TMV_FIRSTLAST) :
+                    itsm.get(),size(),stepi(),stepj(),UnitDiag,NonConj 
+                    TMV_FIRSTLAST) :
                 lowertri_type(
-                    itsm.get(),size(),
-                    stepj(),stepi(),UnitDiag,TMV_TransOf(S),NonConj TMV_FIRSTLAST);
+                    itsm.get(),size(),stepj(),stepi(),UnitDiag,NonConj 
+                    TMV_FIRSTLAST);
         }
 
         inline realpart_type realPart()
@@ -2782,8 +2706,7 @@ namespace tmv {
             return realpart_type(
                 reinterpret_cast<RT*>(itsm.get()),size(),
                 isReal(T()) ? stepi() : 2*stepi(),
-                isReal(T()) ? stepj() : 2*stepj(),
-                Sym,U,isReal(T())?S:NoMajor,NonConj
+                isReal(T()) ? stepj() : 2*stepj(), Sym,uplo(),NonConj
 #ifdef TMVFLDEBUG
                 ,reinterpret_cast<const RT*>(_first)
                 ,reinterpret_cast<const RT*>(_last)
@@ -2796,7 +2719,7 @@ namespace tmv {
             TMVAssert(isComplex(T()));
             return realpart_type(
                 reinterpret_cast<RT*>(itsm.get())+1,size(),
-                2*stepi(),2*stepj(),Sym,U,NoMajor,NonConj
+                2*stepi(),2*stepj(),Sym,uplo(),NonConj
 #ifdef TMVFLDEBUG
                 ,reinterpret_cast<const RT*>(_first)+1
                 ,reinterpret_cast<const RT*>(_last)+1
@@ -2807,30 +2730,29 @@ namespace tmv {
         inline view_type view() 
         { 
             return view_type(
-                itsm.get(),size(),stepi(),stepj(),
-                Sym,U,S,NonConj TMV_FIRSTLAST);
+                itsm.get(),size(),stepi(),stepj(),Sym,uplo(),NonConj 
+                TMV_FIRSTLAST);
         }
 
         inline view_type transpose() 
         {
             return view_type(
                 itsm.get(),size(),stepj(),stepi(),
-                Sym,TMV_UTransOf(U),TMV_TransOf(S),NonConj TMV_FIRSTLAST);
+                Sym,TMV_UTransOf(U),NonConj TMV_FIRSTLAST);
         }
 
         inline view_type conjugate() 
         { 
             return view_type(
                 itsm.get(),size(),stepi(),stepj(),
-                Sym,U,S,TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
+                Sym,uplo(),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
         }
 
         inline view_type adjoint() 
         {
             return view_type(
                 itsm.get(),size(),stepj(),stepi(),
-                Sym,TMV_UTransOf(U),TMV_TransOf(S),TMV_ConjOf(T,NonConj) 
-                TMV_FIRSTLAST);
+                Sym,TMV_UTransOf(U),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
         }
 
         //
@@ -2842,36 +2764,35 @@ namespace tmv {
         inline int size() const { return itss; }
         inline const T* cptr() const { return itsm.get(); }
         inline T* ptr() { return itsm.get(); }
-        inline int stepi() const { return S==RowMajor ? itss : 1; }
-        inline int stepj() const { return S==RowMajor ? 1 : itss; }
+        inline int stepi() const { return S==int(RowMajor) ? itss : 1; }
+        inline int stepj() const { return S==int(RowMajor) ? 1 : itss; }
         inline SymType sym() const { return Sym; }
-        inline UpLoType uplo() const { return U; }
-        inline StorageType stor() const { return S; }
+        inline UpLoType uplo() const { return static_cast<UpLoType>(U); }
         inline ConjType ct() const { return NonConj; }
-        inline bool isrm() const { return S==RowMajor; }
-        inline bool iscm() const { return S==ColMajor; }
+        inline bool isrm() const { return S==int(RowMajor); }
+        inline bool iscm() const { return S==int(ColMajor); }
         inline bool isconj() const { return false; }
         inline bool isherm() const { return isReal(T()); }
         inline bool issym() const { return true; }
-        inline bool isupper() const { return U == Upper; }
+        inline bool isupper() const { return U==int(Upper); }
 
         inline T& ref(int i, int j)
         {
-            if ((U==Upper && i <= j) || (U==Lower && i>=j)) 
-                if (S == RowMajor) return itsm.get()[i*itss + j];
+            if ((uplo()==Upper && i <= j) || (uplo()==Lower && i>=j)) 
+                if (S == int(RowMajor)) return itsm.get()[i*itss + j];
                 else return itsm.get()[j*itss + i];
             else 
-                if (S == RowMajor) return itsm.get()[j*itss + i];
+                if (S == int(RowMajor)) return itsm.get()[j*itss + i];
                 else return itsm.get()[i*itss + j];
         }
 
         inline T cref(int i, int j) const 
         {
-            if ((U==Upper && i <= j) || (U==Lower && i>=j)) 
-                if (S == RowMajor) return itsm.get()[i*itss + j];
+            if ((uplo()==Upper && i <= j) || (uplo()==Lower && i>=j)) 
+                if (S == int(RowMajor)) return itsm.get()[i*itss + j];
                 else return itsm.get()[j*itss + i];
             else 
-                if (S == RowMajor) return itsm.get()[j*itss + i];
+                if (S == int(RowMajor)) return itsm.get()[j*itss + i];
                 else return itsm.get()[i*itss + j];
         }
 
@@ -2903,8 +2824,7 @@ namespace tmv {
         const T* _last;
 #endif
 
-        template <IndexStyle I2>
-        friend void Swap(SymMatrix<T,U,S,I>& m1, SymMatrix<T,U,S,I2>& m2)
+        friend void Swap(SymMatrix<T,A>& m1, SymMatrix<T,A>& m2)
         {
             TMVAssert(m1.size() == m2.size());
             m1.itsm.swapWith(m2.itsm);
@@ -2916,14 +2836,18 @@ namespace tmv {
 
     }; // SymMatrix
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I> 
+    template <class T, int A>
     class HermMatrix : public GenSymMatrix<T>
     {
     public:
 
+        enum { S = A & AllStorageType };
+        enum { U = A & Upper };
+        enum { I = A & FortranStyle };
+
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
-        typedef HermMatrix<T,U,S,I> type;
+        typedef HermMatrix<T,A> type;
         typedef type copy_type;
         typedef GenSymMatrix<T> base;
         typedef ConstSymMatrixView<T,I> const_view_type;
@@ -2955,8 +2879,8 @@ namespace tmv {
 
         explicit inline HermMatrix(int _size=0) : NEW_SIZE(_size) 
         {
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(_size >= 0);
-            TMVAssert(S==RowMajor || S==ColMajor);
 #ifdef TMV_EXTRA_DEBUG
             setAllTo(T(888));
 #else
@@ -2966,40 +2890,33 @@ namespace tmv {
 
         HermMatrix(int _size, const RT& x) : NEW_SIZE(_size)
         {
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(_size >= 0);
-            TMVAssert(S==RowMajor || S==ColMajor);
             setAllTo(x);
         }
 
         HermMatrix(const type& rhs) : NEW_SIZE(rhs.size())
         {
-            TMVAssert(S==RowMajor || S==ColMajor);
-            std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
-        }
-
-        template <IndexStyle I2> 
-        HermMatrix(const HermMatrix<T,U,S,I2>& rhs) : NEW_SIZE(rhs.size())
-        {
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::symmatrixok);
             std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
         }
 
         HermMatrix(const GenSymMatrix<RT>& rhs) : NEW_SIZE(rhs.size())
         {
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::symmatrixok);
             if (rhs.isherm()) rhs.assignToS(view());
-            else if (U == Upper) upperTri() = rhs.upperTri();
+            else if (uplo() == Upper) upperTri() = rhs.upperTri();
             else lowerTri() = rhs.lowerTri();
         }
 
         HermMatrix(const GenSymMatrix<CT>& rhs) : NEW_SIZE(rhs.size())
         {
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(isComplex(T()));
-            TMVAssert(S==RowMajor || S==ColMajor);
             if (rhs.isherm())
                 rhs.assignToS(view());
             else {
-                if (U == Upper) upperTri() = rhs.upperTri();
+                if (uplo() == Upper) upperTri() = rhs.upperTri();
                 else lowerTri() = rhs.lowerTri();
                 diag().imagPart().setZero();
             }
@@ -3008,29 +2925,19 @@ namespace tmv {
         template <class T2> 
         inline HermMatrix(const GenSymMatrix<T2>& rhs) : NEW_SIZE(rhs.size())
         { 
-            TMVAssert(S==RowMajor || S==ColMajor);
-            if (U == Upper) upperTri() = rhs.upperTri();
+            TMVAssert(Attrib<A>::symmatrixok);
+            if (uplo() == Upper) upperTri() = rhs.upperTri();
             else lowerTri() = rhs.lowerTri();
             if (isComplex(T()) && isComplex(T2()) && rhs.issym()) 
                 diag().imagPart().setZero();
         }
 
-        template <IndexStyle I2> 
-        inline explicit HermMatrix(const Matrix<T,S,I2>& rhs) : 
-            NEW_SIZE(rhs.rowsize())
-        {
-            TMVAssert(S==RowMajor || S==ColMajor);
-            TMVAssert(rhs.isSquare());
-            std::copy(rhs.cptr(),rhs.cptr()+itslen,itsm.get());
-            if (isComplex(T())) diag().imagPart().setZero();
-        }
-
         template <class T2> 
         inline HermMatrix(const GenMatrix<T2>& rhs) : NEW_SIZE(rhs.rowsize())
         { 
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(rhs.isSquare());
-            if (U == Upper)
+            if (uplo() == Upper)
                 upperTri() = rhs.upperTri();
             else
                 lowerTri() = rhs.lowerTri();
@@ -3040,7 +2947,7 @@ namespace tmv {
         inline HermMatrix(const AssignableToSymMatrix<RT>& m2) :
             NEW_SIZE(m2.size())
         { 
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(m2.isherm());
             m2.assignToS(view());
         }
@@ -3048,8 +2955,8 @@ namespace tmv {
         inline HermMatrix(const AssignableToSymMatrix<CT>& m2) :
             NEW_SIZE(m2.size())
         { 
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(isComplex(T()));
-            TMVAssert(S==RowMajor || S==ColMajor);
             TMVAssert(m2.isherm());
             m2.assignToS(view());
         }
@@ -3057,7 +2964,7 @@ namespace tmv {
         inline explicit HermMatrix(const GenDiagMatrix<RT>& m2) :
             NEW_SIZE(m2.size())
         { 
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::symmatrixok);
             m2.assignToD(DiagMatrixViewOf(diag()));
             upperTri().offDiag().setZero();
         }
@@ -3065,7 +2972,7 @@ namespace tmv {
         inline explicit HermMatrix(const GenDiagMatrix<CT>& m2) :
             NEW_SIZE(m2.size())
         { 
-            TMVAssert(S==RowMajor || S==ColMajor);
+            TMVAssert(Attrib<A>::symmatrixok);
             m2.assignToD(DiagMatrixViewOf(diag().realPart()));
             upperTri().offDiag().setZero();
             if (isComplex(T())) diag().imagPart().setZero();
@@ -3075,6 +2982,7 @@ namespace tmv {
         inline HermMatrix(const OProdVV<T,T2,T2>& opvv) :
             NEW_SIZE(opvv.colsize())
         {
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(opvv.colsize() == opvv.rowsize());
             TMVAssert(opvv.getV1().isSameAs(opvv.getV2().conjugate()));
             TMVAssert(TMV_IMAG(opvv.getX()) == RT(0));
@@ -3085,6 +2993,7 @@ namespace tmv {
         inline HermMatrix(const ProdMM<T,T2,T2>& pmm) :
             NEW_SIZE(pmm.colsize())
         {
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(pmm.colsize() == pmm.rowsize());
             TMVAssert(pmm.getM1().isSameAs(pmm.getM2().adjoint()));
             TMVAssert(TMV_IMAG(pmm.getX()) == RT(0));
@@ -3095,6 +3004,7 @@ namespace tmv {
         inline HermMatrix(const ProdUL<T,T2,T2>& pmm) :
             NEW_SIZE(pmm.colsize())
         {
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(pmm.colsize() == pmm.rowsize());
             TMVAssert(pmm.getM1().isSameAs(pmm.getM2().adjoint()));
             TMVAssert(TMV_IMAG(pmm.getX()) == RT(0));
@@ -3105,6 +3015,7 @@ namespace tmv {
         inline HermMatrix(const ProdLU<T,T2,T2>& pmm) :
             NEW_SIZE(pmm.colsize())
         {
+            TMVAssert(Attrib<A>::symmatrixok);
             TMVAssert(pmm.colsize() == pmm.rowsize());
             TMVAssert(pmm.getM1().isSameAs(pmm.getM2().adjoint()));
             TMVAssert(TMV_IMAG(pmm.getX()) == RT(0));
@@ -3126,15 +3037,6 @@ namespace tmv {
         //
 
         inline type& operator=(const type& m2)
-        { 
-            TMVAssert(m2.size() == size());
-            if (&m2 != this) 
-                std::copy(m2.cptr(),m2.cptr()+itslen,itsm.get());
-            return *this;
-        }
-
-        template <IndexStyle I2>
-        inline type& operator=(const HermMatrix<T,U,S,I2>& m2)
         { 
             TMVAssert(m2.size() == size());
             if (&m2 != this) 
@@ -3256,7 +3158,7 @@ namespace tmv {
 
         inline T operator()(int i, int j) const
         {
-            if (I==CStyle) {
+            if (I==int(CStyle)) {
                 TMVAssert(i>=0 && i<size());
                 TMVAssert(j>=0 && j<size());
                 return cref(i,j); 
@@ -3269,7 +3171,7 @@ namespace tmv {
 
         inline reference operator()(int i, int j) 
         { 
-            if (I==CStyle) {
+            if (I==int(CStyle)) {
                 TMVAssert(i>=0 && i<size());
                 TMVAssert(j>=0 && j<size());
                 return ref(i,j); 
@@ -3282,7 +3184,7 @@ namespace tmv {
 
         inline const_vec_type row(int i, int j1, int j2) const 
         { 
-            if (I==FortranStyle) {
+            if (I==int(FortranStyle)) {
                 TMVAssert(i>0 && i<=size());
                 --i;
                 TMVAssert(j1>0 && j1-j2<=0 && j2<=size());
@@ -3291,7 +3193,7 @@ namespace tmv {
                 TMVAssert(i>=0 && i<size());
                 TMVAssert(j1>=0 && j1-j2<=0 && j2<=size());
             }
-            if ((U==Upper && i-j1<=0) || (U==Lower && j2-i<=1))
+            if ((uplo()==Upper && i-j1<=0) || (uplo()==Lower && j2-i<=1))
                 return const_vec_type(
                     itsm.get()+i*stepi()+j1*stepj(),
                     j2-j1,stepj(),NonConj); 
@@ -3303,7 +3205,7 @@ namespace tmv {
 
         inline const_vec_type col(int j, int i1, int i2) const
         {
-            if (I==FortranStyle) { 
+            if (I==int(FortranStyle)) { 
                 TMVAssert(j>0 && j<=size());
                 --j;
                 TMVAssert(i1>0 && i1-i2<=0 && i2<=size());
@@ -3312,7 +3214,7 @@ namespace tmv {
                 TMVAssert(j>=0 && j<size());
                 TMVAssert(i1>=0 && i1-i2<=0 && i2<=size());
             }
-            if ((U==Upper && i2-j<=1) || (U==Lower && j-i1<=0))
+            if ((uplo()==Upper && i2-j<=1) || (uplo()==Lower && j-i1<=0))
                 return const_vec_type(
                     itsm.get()+i1*stepi()+j*stepj(),
                     i2-i1,stepi(),NonConj); 
@@ -3330,35 +3232,35 @@ namespace tmv {
         {
             TMVAssert(i>=-size() && i<=size()); 
             ConjType newct = 
-                ((i>0) == (U==Upper)) ? NonConj : TMV_ConjOf(T,NonConj);
+                ((i>0) == (uplo()==Upper)) ? NonConj : TMV_ConjOf(T,NonConj);
             i = std::abs(i);
             TMVAssert(i<=size()); 
             return const_vec_type(
-                itsm.get()+i*(U==Upper?stepj():stepi()),
+                itsm.get()+i*(uplo()==Upper?stepj():stepi()),
                 size()-i,stepi()+stepj(),newct);
         }
 
         inline const_vec_type diag(int i, int j1, int j2) const
         {
             TMVAssert(i>=-size() && i<=size()); 
-            if (I==FortranStyle) {
+            if (I==int(FortranStyle)) {
                 TMVAssert(j1>0 && j1-j2<=0 && j2<=size()-std::abs(i));
                 --j1;
             } else {
                 TMVAssert(j1>=0 && j1-j2<=0 && j2<=size()-std::abs(i));
             }
             ConjType newct = 
-                ((i>0) == (U==Upper)) ? NonConj : TMV_ConjOf(T,NonConj);
+                ((i>0) == (uplo()==Upper)) ? NonConj : TMV_ConjOf(T,NonConj);
             i = std::abs(i);
             const int ds = stepi()+stepj();
             return const_vec_type(
-                itsm.get()+i*(U==Upper?stepj():stepi())+j1*ds,
+                itsm.get()+i*(uplo()==Upper?stepj():stepi())+j1*ds,
                 j2-j1,ds,newct);
         }
 
         inline vec_type row(int i, int j1, int j2)
         { 
-            if (I==FortranStyle) {
+            if (I==int(FortranStyle)) {
                 TMVAssert(i>0 && i<=size());
                 --i;
                 TMVAssert(j1>0 && j1-j2<=0 && j2<=size());
@@ -3367,7 +3269,7 @@ namespace tmv {
                 TMVAssert(i>=0 && i<size());
                 TMVAssert(j1>=0 && j1-j2<=0 && j2<=size());
             }
-            if ((U==Upper && i-j1<=0) || (U==Lower && j2-i<=1))
+            if ((uplo()==Upper && i-j1<=0) || (uplo()==Lower && j2-i<=1))
                 return vec_type(
                     itsm.get()+i*stepi()+j1*stepj(),
                     j2-j1,stepj(),NonConj TMV_FIRSTLAST); 
@@ -3379,7 +3281,7 @@ namespace tmv {
 
         inline vec_type col(int j, int i1, int i2)
         {
-            if (I==FortranStyle) { 
+            if (I==int(FortranStyle)) { 
                 TMVAssert(j>0 && j<=size());
                 --j;
                 TMVAssert(i1>0 && i1-i2<=0 && i2<=size());
@@ -3388,7 +3290,7 @@ namespace tmv {
                 TMVAssert(j>=0 && j<size());
                 TMVAssert(i1>=0 && i1-i2<=0 && i2<=size());
             }
-            if ((U==Upper && i2-j<=1) || (U==Lower && j-i1<=0))
+            if ((uplo()==Upper && i2-j<=1) || (uplo()==Lower && j-i1<=0))
                 return vec_type(
                     itsm.get()+i1*stepi()+j*stepj(),
                     i2-i1,stepi(),NonConj TMV_FIRSTLAST); 
@@ -3408,29 +3310,29 @@ namespace tmv {
         {
             TMVAssert(i>=-size() && i<=size()); 
             ConjType newct = 
-                ((i>0) == (U==Upper)) ? NonConj : TMV_ConjOf(T,NonConj);
+                ((i>0) == (uplo()==Upper)) ? NonConj : TMV_ConjOf(T,NonConj);
             i = std::abs(i);
             TMVAssert(i<=size()); 
             return vec_type(
-                itsm.get()+i*(U==Upper?stepj():stepi()),size()-i,
+                itsm.get()+i*(uplo()==Upper?stepj():stepi()),size()-i,
                 stepi()+stepj(),newct TMV_FIRSTLAST); 
         }
 
         inline vec_type diag(int i, int j1, int j2) 
         {
             TMVAssert(i>=-size() && i<=size()); 
-            if (I==FortranStyle) {
+            if (I==int(FortranStyle)) {
                 TMVAssert(j1>0 && j1-j2<=0 && j2<=size()-std::abs(i));
                 --j1;
             } else {
                 TMVAssert(j1>=0 && j1-j2<=0 && j2<=size()-std::abs(i));
             }
             ConjType newct = 
-                ((i>0) == (U==Upper)) ? NonConj : TMV_ConjOf(T,NonConj);
+                ((i>0) == (uplo()==Upper)) ? NonConj : TMV_ConjOf(T,NonConj);
             i = std::abs(i);
             const int ds = stepi()+stepj();
             return vec_type(
-                itsm.get()+i*(U==Upper?stepj():stepi())+j1*ds,
+                itsm.get()+i*(uplo()==Upper?stepj():stepi())+j1*ds,
                 j2-j1,ds,newct TMV_FIRSTLAST);
         }
 
@@ -3497,42 +3399,40 @@ namespace tmv {
         inline const_rec_type subMatrix(int i1, int i2, int j1, int j2) const
         {
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,1,1));
-            if (I==FortranStyle) { --i1; --j1; }
-            if ((U==Upper && i2-j1<=1) || (U==Lower && j2-i1<=1))
+            if (I==int(FortranStyle)) { --i1; --j1; }
+            if ((uplo()==Upper && i2-j1<=1) || (uplo()==Lower && j2-i1<=1))
                 return const_rec_type(
                     itsm.get()+i1*stepi()+j1*stepj(),
-                    i2-i1,j2-j1,stepi(),stepj(),S,NonConj);
+                    i2-i1,j2-j1,stepi(),stepj(),NonConj);
             else
                 return const_rec_type(
                     itsm.get()+i1*stepj()+j1*stepi(),i2-i1,j2-j1,
-                    stepj(),stepi(),TMV_TransOf(S),TMV_ConjOf(T,NonConj));
+                    stepj(),stepi(),TMV_ConjOf(T,NonConj));
         }
 
         inline const_rec_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
-            const StorageType newstor = S==RowMajor ?
-                jstep == 1 ? RowMajor : NoMajor :
-                istep == 1 ? ColMajor : NoMajor;
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            if (I==FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
-            if ((U==Upper && i2-j1<=istep) || (U==Lower && j2-i1<=jstep))
+            if (I==int(FortranStyle)) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
+            if ((uplo()==Upper && i2-j1<=istep) || 
+                (uplo()==Lower && j2-i1<=jstep))
                 return const_rec_type(
                     itsm.get()+i1*stepi()+j1*stepj(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepi(),jstep*stepj(),
-                    newstor,NonConj);
+                    NonConj);
             else
                 return const_rec_type(
                     itsm.get()+i1*stepj()+j1*stepi(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepj(),jstep*stepi(),
-                    TMV_TransOf(newstor),TMV_ConjOf(T,NonConj));
+                    TMV_ConjOf(T,NonConj));
         }
 
         inline const_vec_type subVector(
             int i, int j, int istep, int jstep, int n) const
         {
             TMVAssert(base::hasSubVector(i,j,istep,jstep,n));
-            if ((U==Upper && i-j<=0) || (U==Lower && j-i<=0))
+            if ((uplo()==Upper && i-j<=0) || (uplo()==Lower && j-i<=0))
                 return const_vec_type(
                     itsm.get()+i*stepi()+j*stepj(),n,
                     istep*stepi()+jstep*stepj(),NonConj);
@@ -3545,64 +3445,59 @@ namespace tmv {
         inline const_view_type subSymMatrix(int i1, int i2) const
         {
             TMVAssert(view().hasSubSymMatrix(i1,i2,1));
-            if (I==FortranStyle) { --i1; }
+            if (I==int(FortranStyle)) { --i1; }
             return const_view_type(
                 itsm.get()+i1*(stepi()+stepj()),
-                i2-i1,stepi(),stepj(),Herm,U,S,NonConj);
+                i2-i1,stepi(),stepj(),Herm,uplo(),NonConj);
         }
 
         inline const_view_type subSymMatrix(int i1, int i2, int istep) const
         {
             TMVAssert(view().hasSubSymMatrix(i1,i2,istep));
-            if (I==FortranStyle) { --i1; i2+=istep-1; }
+            if (I==int(FortranStyle)) { --i1; i2+=istep-1; }
             return const_view_type(
                 itsm.get()+i1*(stepi()+stepj()),
-                (i2-i1)/istep,istep*stepi(),istep*stepj(),Herm,U,
-                istep==1 ? S : NoMajor, NonConj);
+                (i2-i1)/istep,istep*stepi(),istep*stepj(),Herm,uplo(), NonConj);
         }
 
         inline const_uppertri_type upperTri(DiagType dt = NonUnitDiag) const
         {
-            return U==Upper ? 
+            return uplo()==Upper ? 
                 const_uppertri_type(
-                    itsm.get(),size(),stepi(),stepj(),
-                    dt,S,NonConj) :
+                    itsm.get(),size(),stepi(),stepj(),dt,NonConj) :
                 const_uppertri_type(
                     itsm.get(),size(),stepj(),stepi(),
-                    dt,TMV_TransOf(S),TMV_ConjOf(T,NonConj));
+                    dt,TMV_ConjOf(T,NonConj));
         }
 
         inline const_uppertri_type unitUpperTri() const
         {
-            return U==Upper ? 
+            return uplo()==Upper ? 
                 const_uppertri_type(
-                    itsm.get(),size(),stepi(),stepj(),
-                    UnitDiag,S,NonConj) :
+                    itsm.get(),size(),stepi(),stepj(),UnitDiag,NonConj) :
                 const_uppertri_type(
                     itsm.get(),size(),stepj(),stepi(),
-                    UnitDiag,TMV_TransOf(S),TMV_ConjOf(T,NonConj));
+                    UnitDiag,TMV_ConjOf(T,NonConj));
         }
 
         inline const_lowertri_type lowerTri(DiagType dt = NonUnitDiag) const
         {
-            return U==Lower ? 
+            return uplo()==Lower ? 
                 const_lowertri_type(
-                    itsm.get(),size(),stepi(),stepj(),
-                    dt,S,NonConj) :
+                    itsm.get(),size(),stepi(),stepj(),dt,NonConj) :
                 const_lowertri_type(
                     itsm.get(),size(),stepj(),stepi(),
-                    dt,TMV_TransOf(S),TMV_ConjOf(T,NonConj));
+                    dt,TMV_ConjOf(T,NonConj));
         }
 
         inline const_lowertri_type unitLowerTri() const
         {
-            return U==Lower ? 
+            return uplo()==Lower ? 
                 const_lowertri_type(
-                    itsm.get(),size(),stepi(),stepj(),
-                    UnitDiag,S,NonConj) :
+                    itsm.get(),size(),stepi(),stepj(),UnitDiag,NonConj) :
                 const_lowertri_type(
                     itsm.get(),size(),stepj(),stepi(),
-                    UnitDiag,TMV_TransOf(S),TMV_ConjOf(T,NonConj));
+                    UnitDiag,TMV_ConjOf(T,NonConj));
         }
 
         inline const_realpart_type realPart() const
@@ -3610,8 +3505,7 @@ namespace tmv {
             return const_realpart_type(
                 reinterpret_cast<const RT*>(itsm.get()),size(),
                 isReal(T()) ? stepi() : 2*stepi(),
-                isReal(T()) ? stepj() : 2*stepj(),
-                Herm,U,isReal(T())?S:NoMajor,NonConj);
+                isReal(T()) ? stepj() : 2*stepj(), Herm,uplo(),NonConj);
         }
 
         inline const_realpart_type imagPart() const
@@ -3619,77 +3513,74 @@ namespace tmv {
             // The imaginary part of a Hermitian matrix is anti-symmetric
             // so this is illegal.
             TMVAssert(TMV_FALSE);
-            return const_realpart_type(0,0,0,0,Herm,U,S,NonConj);
+            return const_realpart_type(0,0,0,0,Herm,uplo(),NonConj);
         }
 
         inline const_view_type view() const
         { 
             return const_view_type(
-                itsm.get(),size(),stepi(),stepj(),
-                Herm,U,S,NonConj);
+                itsm.get(),size(),stepi(),stepj(),Herm,uplo(),NonConj);
         }
 
         inline const_view_type transpose() const
         {
             return const_view_type(
                 itsm.get(),size(),stepj(),stepi(),
-                Herm,TMV_UTransOf(U),TMV_TransOf(S),NonConj);
+                Herm,TMV_UTransOf(U),NonConj);
         }
 
         inline const_view_type conjugate() const
         { 
             return const_view_type(
                 itsm.get(),size(),stepi(),stepj(),
-                Herm,U,S,TMV_ConjOf(T,NonConj));
+                Herm,uplo(),TMV_ConjOf(T,NonConj));
         }
 
         inline const_view_type adjoint() const
         {
             return const_view_type(
                 itsm.get(),size(),stepj(),stepi(),
-                Herm,TMV_UTransOf(U),TMV_TransOf(S),TMV_ConjOf(T,NonConj));
+                Herm,TMV_UTransOf(U),TMV_ConjOf(T,NonConj));
         }
 
         inline rec_type subMatrix(int i1, int i2, int j1, int j2)
         {
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,1,1));
-            if (I==FortranStyle) { --i1; --j1; }
-            if ((U==Upper && i2-j1<=1) || (U==Lower && j2-i1<=1))
+            if (I==int(FortranStyle)) { --i1; --j1; }
+            if ((uplo()==Upper && i2-j1<=1) || (uplo()==Lower && j2-i1<=1))
                 return rec_type(
                     itsm.get()+i1*stepi()+j1*stepj(),
-                    i2-i1,j2-j1,stepi(),stepj(),S,NonConj TMV_FIRSTLAST);
+                    i2-i1,j2-j1,stepi(),stepj(),NonConj TMV_FIRSTLAST);
             else
                 return rec_type(
                     itsm.get()+i1*stepj()+j1*stepi(),
-                    i2-i1,j2-j1,stepj(),stepi(),TMV_TransOf(S),
+                    i2-i1,j2-j1,stepj(),stepi(),
                     TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
         }
 
         inline rec_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep)
         {
-            const StorageType newstor = S==RowMajor ?
-                jstep == 1 ? RowMajor : NoMajor :
-                istep == 1 ? ColMajor : NoMajor;
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            if (I==FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
-            if ((U==Upper && i2-j1<=istep) || (U==Lower && j2-i1<=jstep))
+            if (I==int(FortranStyle)) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
+            if ((uplo()==Upper && i2-j1<=istep) || 
+                (uplo()==Lower && j2-i1<=jstep))
                 return rec_type(
                     itsm.get()+i1*stepi()+j1*stepj(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepi(),jstep*stepj(),
-                    newstor,NonConj TMV_FIRSTLAST);
+                    NonConj TMV_FIRSTLAST);
             else
                 return rec_type(
                     itsm.get()+i1*stepj()+j1*stepi(),
                     (i2-i1)/istep,(j2-j1)/jstep,istep*stepj(),jstep*stepi(),
-                    TMV_TransOf(newstor),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
+                    TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
         }
 
         inline vec_type subVector(
             int i, int j, int istep, int jstep, int n)
         {
             TMVAssert(base::hasSubVector(i,j,istep,jstep,n));
-            if ((U==Upper && i-j<=0) || (U==Lower && j-i<=0))
+            if ((uplo()==Upper && i-j<=0) || (uplo()==Lower && j-i<=0))
                 return vec_type(
                     itsm.get()+i*stepi()+j*stepj(),n,
                     istep*stepi()+jstep*stepj(),NonConj TMV_FIRSTLAST);
@@ -3700,67 +3591,67 @@ namespace tmv {
                     TMV_FIRSTLAST);
         }
 
-        inline SymMatrixView<T,I> subSymMatrix(int i1, int i2)
+        inline view_type subSymMatrix(int i1, int i2)
         {
             TMVAssert(view().hasSubSymMatrix(i1,i2,1));
-            if (I==FortranStyle) { --i1; }
-            return SymMatrixView<T,I>(
+            if (I==int(FortranStyle)) { --i1; }
+            return view_type(
                 itsm.get()+i1*(stepi()+stepj()),
-                i2-i1,stepi(),stepj(),Herm,U,S,NonConj TMV_FIRSTLAST);
+                i2-i1,stepi(),stepj(),Herm,uplo(),NonConj TMV_FIRSTLAST);
         }
 
-        inline SymMatrixView<T,I> subSymMatrix(int i1, int i2, int istep) 
+        inline view_type subSymMatrix(int i1, int i2, int istep) 
         {
             TMVAssert(view().hasSubSymMatrix(i1,i2,istep));
-            if (I==FortranStyle) { --i1; i2+=istep-1; }
-            return SymMatrixView<T,I>(
+            if (I==int(FortranStyle)) { --i1; i2+=istep-1; }
+            return view_type(
                 itsm.get()+i1*(stepi()+stepj()),
-                (i2-i1)/istep,istep*stepi(),istep*stepj(),Herm,U,
-                istep==1 ? S : NoMajor,NonConj TMV_FIRSTLAST);
+                (i2-i1)/istep,istep*stepi(),istep*stepj(),Herm,uplo(), NonConj 
+                TMV_FIRSTLAST);
         }
 
         inline uppertri_type upperTri(DiagType dt = NonUnitDiag)
         {
-            return U==Upper ? 
+            return uplo()==Upper ? 
                 uppertri_type(
-                    itsm.get(),size(),stepi(),stepj(),
-                    dt,S,NonConj TMV_FIRSTLAST) :
+                    itsm.get(),size(),stepi(),stepj(),dt,NonConj 
+                    TMV_FIRSTLAST) :
                 uppertri_type(
-                    itsm.get(),size(),stepj(),stepi(),
-                    dt,TMV_TransOf(S),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
+                    itsm.get(),size(),stepj(),stepi(),dt,TMV_ConjOf(T,NonConj) 
+                    TMV_FIRSTLAST);
         }
 
         inline uppertri_type unitUpperTri()
         {
-            return U==Upper ? 
+            return uplo()==Upper ? 
                 uppertri_type(
-                    itsm.get(),size(),stepi(),stepj(),
-                    UnitDiag,S,NonConj TMV_FIRSTLAST) :
+                    itsm.get(),size(),stepi(),stepj(),UnitDiag,NonConj 
+                    TMV_FIRSTLAST) :
                 uppertri_type(
                     itsm.get(),size(),stepj(),stepi(),
-                    UnitDiag,TMV_TransOf(S),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
+                    UnitDiag,TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
         }
 
         inline lowertri_type lowerTri(DiagType dt = NonUnitDiag)
         {
-            return U==Lower ? 
+            return uplo()==Lower ? 
                 lowertri_type(
-                    itsm.get(),size(),stepi(),stepj(),
-                    dt,S,NonConj TMV_FIRSTLAST) :
+                    itsm.get(),size(),stepi(),stepj(),dt,NonConj 
+                    TMV_FIRSTLAST) :
                 lowertri_type(
                     itsm.get(),size(),stepj(),stepi(),
-                    dt,TMV_TransOf(S),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
+                    dt,TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
         }
 
         inline lowertri_type unitLowerTri()
         {
-            return U==Lower ? 
+            return uplo()==Lower ? 
                 lowertri_type(
-                    itsm.get(),size(),stepi(),stepj(),
-                    UnitDiag,S,NonConj TMV_FIRSTLAST) :
+                    itsm.get(),size(),stepi(),stepj(),UnitDiag,NonConj 
+                    TMV_FIRSTLAST) :
                 lowertri_type(
                     itsm.get(),size(),stepj(),stepi(),
-                    UnitDiag,TMV_TransOf(S),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
+                    UnitDiag,TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
         }
 
         inline realpart_type realPart()
@@ -3769,8 +3660,7 @@ namespace tmv {
                 reinterpret_cast<RT*>(
                     itsm.get()),size(),
                 isReal(T()) ? stepi() : 2*stepi(),
-                isReal(T()) ? stepj() : 2*stepj(),
-                Herm,U,isReal(T())?S:NoMajor,NonConj
+                isReal(T()) ? stepj() : 2*stepj(), Herm,uplo(),NonConj
 #ifdef TMVFLDEBUG
                 ,reinterpret_cast<const RT*>(_first)
                 ,reinterpret_cast<const RT*>(_last)
@@ -3783,35 +3673,36 @@ namespace tmv {
             // The imaginary part of a Hermitian matrix is anti-symmetric
             // so this is illegal.
             TMVAssert(TMV_FALSE);
-            return realpart_type(0,0,0,0,Herm,U,S,NonConj TMV_FIRSTLAST1(0,0) );
+            return realpart_type(0,0,0,0,Herm,uplo(),NonConj 
+                                 TMV_FIRSTLAST1(0,0) );
         }
 
         inline view_type view() 
         { 
             return view_type(
-                itsm.get(),size(),stepi(),stepj(),
-                Herm,U,S,NonConj TMV_FIRSTLAST);
+                itsm.get(),size(),stepi(),stepj(),Herm,uplo(),NonConj 
+                TMV_FIRSTLAST);
         }
 
         inline view_type transpose() 
         {
             return view_type(
-                itsm.get(),size(),stepj(),stepi(),
-                Herm,TMV_UTransOf(U),TMV_TransOf(S),NonConj TMV_FIRSTLAST);
+                itsm.get(),size(),stepj(),stepi(),Herm,TMV_UTransOf(U),NonConj 
+                TMV_FIRSTLAST);
         }
 
         inline view_type conjugate() 
         { 
             return view_type(
                 itsm.get(),size(),stepi(),stepj(),
-                Herm,U,S,TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
+                Herm,uplo(),TMV_ConjOf(T,NonConj) TMV_FIRSTLAST);
         }
 
         inline view_type adjoint() 
         {
             return view_type(
                 itsm.get(),size(),stepj(),stepi(),
-                Herm,TMV_UTransOf(U),TMV_TransOf(S),TMV_ConjOf(T,NonConj) 
+                Herm,TMV_UTransOf(U),TMV_ConjOf(T,NonConj) 
                 TMV_FIRSTLAST);
         }
 
@@ -3824,28 +3715,27 @@ namespace tmv {
         inline int size() const { return itss; }
         inline const T* cptr() const { return itsm.get(); }
         inline T* ptr() { return itsm.get(); }
-        inline int stepi() const { return S==RowMajor ? itss : 1; }
-        inline int stepj() const { return S==RowMajor ? 1 : itss; }
+        inline int stepi() const { return S==int(RowMajor) ? itss : 1; }
+        inline int stepj() const { return S==int(RowMajor) ? 1 : itss; }
         inline SymType sym() const { return Herm; }
-        inline UpLoType uplo() const { return U; }
-        inline StorageType stor() const { return S; }
+        inline UpLoType uplo() const { return static_cast<UpLoType>(U); }
         inline ConjType ct() const { return NonConj; }
-        inline bool isrm() const { return S==RowMajor; }
-        inline bool iscm() const { return S==ColMajor; }
+        inline bool isrm() const { return S==int(RowMajor); }
+        inline bool iscm() const { return S==int(ColMajor); }
         inline bool isconj() const { return false; }
         inline bool isherm() const { return true; }
         inline bool issym() const { return isReal(T()); }
-        inline bool isupper() const { return U == Upper; }
+        inline bool isupper() const { return U==int(Upper); }
 
         inline reference ref(int i, int j)
         {
-            if ((U==Upper && i <= j) || (U==Lower && i>=j)) 
-                if (S == RowMajor) 
+            if ((uplo()==Upper && i <= j) || (uplo()==Lower && i>=j)) 
+                if (S == int(RowMajor)) 
                     return TMV_REF(itsm.get() + i*itss + j, NonConj);
                 else 
                     return TMV_REF(itsm.get() + j*itss + i, NonConj);
             else 
-                if (S == RowMajor) 
+                if (S == int(RowMajor)) 
                     return TMV_REF(itsm.get() + j*itss + i, Conj);
                 else 
                     return TMV_REF(itsm.get() + i*itss + j, Conj);
@@ -3853,13 +3743,13 @@ namespace tmv {
 
         inline T cref(int i, int j) const 
         {
-            if ((U==Upper && i <= j) || (U==Lower && i>=j)) 
-                if (S == RowMajor) 
+            if ((uplo()==Upper && i <= j) || (uplo()==Lower && i>=j)) 
+                if (S == int(RowMajor)) 
                     return itsm.get()[i*itss + j];
                 else 
                     return itsm.get()[j*itss + i];
             else 
-                if (S == RowMajor) 
+                if (S == int(RowMajor)) 
                     return TMV_CONJ(itsm.get()[j*itss + i]);
                 else 
                     return TMV_CONJ(itsm.get()[i*itss + j]);
@@ -3895,8 +3785,7 @@ namespace tmv {
         const T* _last;
 #endif
 
-        template <IndexStyle I2>
-        friend void Swap(HermMatrix<T,U,S,I>& m1, HermMatrix<T,U,S,I2>& m2)
+        friend void Swap(HermMatrix<T,A>& m1, HermMatrix<T,A>& m2)
         {
             TMVAssert(m1.size() == m2.size());
             m1.itsm.swapWith(m2.itsm);
@@ -3926,48 +3815,45 @@ namespace tmv {
     {
         TMVAssert(m.colsize()==m.rowsize());
         return ConstSymMatrixView<T>(
-            m.cptr(),m.rowsize(),m.stepi(),m.stepj(),
-            Sym,uplo,m.stor(),m.ct()); 
+            m.cptr(),m.rowsize(),m.stepi(),m.stepj(),Sym,uplo,m.ct()); 
     }
 
-    template <class T, IndexStyle I> 
-    inline ConstSymMatrixView<T,I> SymMatrixViewOf(
-        const ConstMatrixView<T,I>& m, UpLoType uplo)
+    template <class T, int A> 
+    inline ConstSymMatrixView<T,A> SymMatrixViewOf(
+        const ConstMatrixView<T,A>& m, UpLoType uplo)
     { 
         TMVAssert(m.colsize()==m.rowsize());
-        return ConstSymMatrixView<T,I>(
-            m.cptr(),m.rowsize(),m.stepi(),m.stepj(),
-            Sym,uplo,m.stor(),m.ct()); 
+        return ConstSymMatrixView<T,A>(
+            m.cptr(),m.rowsize(),m.stepi(),m.stepj(),Sym,uplo,m.ct()); 
     }
 
-    template <class T, StorageType S, IndexStyle I> 
-    inline ConstSymMatrixView<T,I> SymMatrixViewOf(
-        const Matrix<T,S,I>& m, UpLoType uplo)
+    template <class T, int A>
+    inline ConstSymMatrixView<T,A&FortranStyle> SymMatrixViewOf(
+        const Matrix<T,A>& m, UpLoType uplo)
     {
         TMVAssert(m.colsize()==m.rowsize());
-        return ConstSymMatrixView<T,I>(
-            m.cptr(),m.rowsize(),m.stepi(),m.stepj(),
-            Sym,uplo,m.stor(),m.ct()); 
+        return ConstSymMatrixView<T,A&FortranStyle>(
+            m.cptr(),m.rowsize(),m.stepi(),m.stepj(),Sym,uplo,m.ct()); 
     }
 
-    template <class T, IndexStyle I> 
-    inline SymMatrixView<T,I> SymMatrixViewOf(
-        const MatrixView<T,I>& m, UpLoType uplo)
+    template <class T, int A> 
+    inline SymMatrixView<T,A> SymMatrixViewOf(
+        const MatrixView<T,A>& m, UpLoType uplo)
     { 
         TMVAssert(m.colsize()==m.rowsize());
-        return SymMatrixView<T,I>(
-            m.ptr(),m.rowsize(),m.stepi(),m.stepj(),
-            Sym,uplo,m.stor(),m.ct() TMV_FIRSTLAST1(m._first,m._last)); 
+        return SymMatrixView<T,A>(
+            m.ptr(),m.rowsize(),m.stepi(),m.stepj(),Sym,uplo,m.ct() 
+            TMV_FIRSTLAST1(m._first,m._last)); 
     }
 
-    template <class T, StorageType S, IndexStyle I> 
-    inline SymMatrixView<T,I> SymMatrixViewOf(
-        Matrix<T,S,I>& m, UpLoType uplo)
+    template <class T, int A>
+    inline SymMatrixView<T,A&FortranStyle> SymMatrixViewOf(
+        Matrix<T,A>& m, UpLoType uplo)
     {
         TMVAssert(m.colsize()==m.rowsize());
-        return SymMatrixView<T,I>(
-            m.ptr(),m.rowsize(),m.stepi(),m.stepj(),
-            Sym,uplo,m.stor(),m.ct() TMV_FIRSTLAST1(m._first,m._last)); 
+        return SymMatrixView<T,A&FortranStyle>(
+            m.ptr(),m.rowsize(),m.stepi(),m.stepj(),Sym,uplo,m.ct() 
+            TMV_FIRSTLAST1(m._first,m._last)); 
     }
 
     template <class T> 
@@ -3978,56 +3864,53 @@ namespace tmv {
         TMVAssert(isReal(T()) || 
                   m.diag().imagPart().normInf() == TMV_RealType(T)(0));
         return ConstSymMatrixView<T>(
-            m.cptr(),m.rowsize(),m.stepi(),m.stepj(),
-            Herm,uplo,m.stor(),m.ct()); 
+            m.cptr(),m.rowsize(),m.stepi(),m.stepj(),Herm,uplo,m.ct()); 
     }
 
-    template <class T, IndexStyle I> 
-    inline ConstSymMatrixView<T> HermMatrixViewOf(
-        const ConstMatrixView<T,I>& m, UpLoType uplo)
+    template <class T, int A> 
+    inline ConstSymMatrixView<T,A> HermMatrixViewOf(
+        const ConstMatrixView<T,A>& m, UpLoType uplo)
     { 
         TMVAssert(m.colsize()==m.rowsize());
         TMVAssert(isReal(T()) || 
                   m.diag().imagPart().normInf() == TMV_RealType(T)(0));
-        return ConstSymMatrixView<T,I>(
-            m.cptr(),m.rowsize(),m.stepi(),m.stepj(),
-            Herm,uplo,m.stor(),m.ct()); 
+        return ConstSymMatrixView<T,A>(
+            m.cptr(),m.rowsize(),m.stepi(),m.stepj(),Herm,uplo,m.ct()); 
     }
 
-    template <class T, StorageType S, IndexStyle I> 
-    inline ConstSymMatrixView<T,I> HermMatrixViewOf(
-        const Matrix<T,S,I>& m, UpLoType uplo)
+    template <class T, int A>
+    inline ConstSymMatrixView<T,A&FortranStyle> HermMatrixViewOf(
+        const Matrix<T,A>& m, UpLoType uplo)
     {
         TMVAssert(m.colsize()==m.rowsize());
         TMVAssert(isReal(T()) || 
                   m.diag().imagPart().normInf() == TMV_RealType(T)(0));
-        return ConstSymMatrixView<T,I>(
-            m.cptr(),m.rowsize(),m.stepi(),m.stepj(),
-            Herm,uplo,m.stor(),m.ct()); 
+        return ConstSymMatrixView<T,A&FortranStyle>(
+            m.cptr(),m.rowsize(),m.stepi(),m.stepj(),Herm,uplo,m.ct()); 
     }
 
-    template <class T, IndexStyle I> 
-    inline SymMatrixView<T> HermMatrixViewOf(
-        const MatrixView<T,I>& m, UpLoType uplo)
+    template <class T, int A> 
+    inline SymMatrixView<T,A> HermMatrixViewOf(
+        const MatrixView<T,A>& m, UpLoType uplo)
     { 
         TMVAssert(m.colsize()==m.rowsize());
         TMVAssert(isReal(T()) || 
                   m.diag().imagPart().normInf() == TMV_RealType(T)(0));
-        return SymMatrixView<T,I>(
-            m.ptr(),m.rowsize(),m.stepi(),m.stepj(),
-            Herm,uplo,m.stor(),m.ct() TMV_FIRSTLAST1(m._first,m._last)); 
+        return SymMatrixView<T,A>(
+            m.ptr(),m.rowsize(),m.stepi(),m.stepj(),Herm,uplo,m.ct() 
+            TMV_FIRSTLAST1(m._first,m._last)); 
     }
 
-    template <class T, StorageType S, IndexStyle I> 
-    inline SymMatrixView<T,I> HermMatrixViewOf(
-        Matrix<T,S,I>& m, UpLoType uplo)
+    template <class T, int A>
+    inline SymMatrixView<T,A&FortranStyle> HermMatrixViewOf(
+        Matrix<T,A>& m, UpLoType uplo)
     {
         TMVAssert(m.colsize()==m.rowsize());
         TMVAssert(isReal(T()) || 
                   m.diag().imagPart().normInf() == TMV_RealType(T)(0));
-        return SymMatrixView<T,I>(
-            m.ptr(),m.rowsize(),m.stepi(),m.stepj(),
-            Herm,uplo,m.stor(),m.ct() TMV_FIRSTLAST1(m._first,m._last)); 
+        return SymMatrixView<T,A&FortranStyle>(
+            m.ptr(),m.rowsize(),m.stepi(),m.stepj(),Herm,uplo,m.ct()
+            TMV_FIRSTLAST1(m._first,m._last)); 
     }
 
     template <class T> 
@@ -4039,7 +3922,7 @@ namespace tmv {
         const int stepi = stor == RowMajor ? size : 1;
         const int stepj = stor == RowMajor ? 1 : size;
         return ConstSymMatrixView<T>(
-            m,size,stepi,stepj,Sym,uplo,stor,NonConj);
+            m,size,stepi,stepj,Sym,uplo,NonConj);
     }
 
     template <class T> 
@@ -4050,8 +3933,7 @@ namespace tmv {
         TMVAssert(size>=0);
         const int stepi = stor == RowMajor ? size : 1;
         const int stepj = stor == RowMajor ? 1 : size;
-        return ConstSymMatrixView<T>(
-            m,size,stepi,stepj,Herm,uplo,stor,NonConj);
+        return ConstSymMatrixView<T>(m,size,stepi,stepj,Herm,uplo,NonConj);
     }
 
     template <class T> 
@@ -4063,8 +3945,7 @@ namespace tmv {
         const int stepi = stor == RowMajor ? size : 1;
         const int stepj = stor == RowMajor ? 1 : size;
         return SymMatrixView<T>(
-            m,size,stepi,stepj,Sym,uplo,stor,NonConj
-            TMV_FIRSTLAST1(m,m+size*size));
+            m,size,stepi,stepj,Sym,uplo,NonConj TMV_FIRSTLAST1(m,m+size*size));
     }
 
     template <class T> 
@@ -4076,8 +3957,7 @@ namespace tmv {
         const int stepi = stor == RowMajor ? size : 1;
         const int stepj = stor == RowMajor ? 1 : size;
         return SymMatrixView<T>(
-            m,size,stepi,stepj,Herm,uplo,stor,NonConj
-            TMV_FIRSTLAST1(m,m+size*size));
+            m,size,stepi,stepj,Herm,uplo,NonConj TMV_FIRSTLAST1(m,m+size*size));
     }
 
     template <class T> 
@@ -4085,10 +3965,8 @@ namespace tmv {
         const T* m, int size, UpLoType uplo, int stepi, int stepj)
     {
         TMVAssert(size>=0);
-        const StorageType stor = 
-            stepi == 1 ? ColMajor : stepj == 1 ? RowMajor : NoMajor;
         return ConstSymMatrixView<T>(
-            m,size,stepi,stepj,Sym,uplo,stor,NonConj);
+            m,size,stepi,stepj,Sym,uplo,NonConj);
     }
 
     template <class T> 
@@ -4096,10 +3974,8 @@ namespace tmv {
         const T* m, int size, UpLoType uplo, int stepi, int stepj)
     {
         TMVAssert(size>=0);
-        const StorageType stor = 
-            stepi == 1 ? ColMajor : stepj == 1 ? RowMajor : NoMajor;
         return ConstSymMatrixView<T>(
-            m,size,stepi,stepj,Herm,uplo,stor,NonConj);
+            m,size,stepi,stepj,Herm,uplo,NonConj);
     }
 
     template <class T> 
@@ -4107,11 +3983,8 @@ namespace tmv {
         T* m, int size, UpLoType uplo, int stepi, int stepj)
     {
         TMVAssert(size>=0);
-        const StorageType stor = 
-            stepi == 1 ? ColMajor : stepj == 1 ? RowMajor : NoMajor;
         return SymMatrixView<T>(
-            m,size,stepi,stepj,Sym,uplo,stor,NonConj
-            TMV_FIRSTLAST1(m,m+size*size));
+            m,size,stepi,stepj,Sym,uplo,NonConj TMV_FIRSTLAST1(m,m+size*size));
     }
 
     template <class T> 
@@ -4119,11 +3992,8 @@ namespace tmv {
         T* m, int size, UpLoType uplo, int stepi, int stepj)
     {
         TMVAssert(size>=0);
-        const StorageType stor = 
-            stepi == 1 ? ColMajor : stepj == 1 ? RowMajor : NoMajor;
         return SymMatrixView<T>(
-            m,size,stepi,stepj,Herm,uplo,stor,NonConj
-            TMV_FIRSTLAST1(m,m+size*size));
+            m,size,stepi,stepj,Herm,uplo,NonConj TMV_FIRSTLAST1(m,m+size*size));
     }
 
     //
@@ -4139,28 +4009,28 @@ namespace tmv {
         Swap(m1.upperTri(),m2.upperTri()); 
     }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    inline void Swap(const SymMatrixView<T>& m1, SymMatrix<T,U,S,I>& m2)
+    template <class T, int A>
+    inline void Swap(const SymMatrixView<T>& m1, SymMatrix<T,A>& m2)
     { Swap(m1,m2.view()); }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    inline void Swap(SymMatrix<T,U,S,I>& m1, const SymMatrixView<T>& m2)
+    template <class T, int A>
+    inline void Swap(SymMatrix<T,A>& m1, const SymMatrixView<T>& m2)
     { Swap(m1.view(),m2); }
 
-    template <class T, UpLoType U1, StorageType S1, IndexStyle I1, UpLoType U2, StorageType S2, IndexStyle I2>
-    inline void Swap(SymMatrix<T,U1,S1,I1>& m1, SymMatrix<T,U2,S2,I2>& m2)
+    template <class T, int A1, int A2>
+    inline void Swap(SymMatrix<T,A1>& m1, SymMatrix<T,A2>& m2)
     { Swap(m1.view(),m2.view()); }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    inline void Swap(const SymMatrixView<T>& m1, HermMatrix<T,U,S,I>& m2)
+    template <class T, int A>
+    inline void Swap(const SymMatrixView<T>& m1, HermMatrix<T,A>& m2)
     { Swap(m1,m2.view()); }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    inline void Swap(HermMatrix<T,U,S,I>& m1, const SymMatrixView<T>& m2)
+    template <class T, int A>
+    inline void Swap(HermMatrix<T,A>& m1, const SymMatrixView<T>& m2)
     { Swap(m1.view(),m2); }
 
-    template <class T, UpLoType U1, StorageType S1, IndexStyle I1, UpLoType U2, StorageType S2, IndexStyle I2>
-    inline void Swap(HermMatrix<T,U1,S1,I1>& m1, HermMatrix<T,U2,S2,I2>& m2)
+    template <class T, int A1, int A2>
+    inline void Swap(HermMatrix<T,A1>& m1, HermMatrix<T,A2>& m2)
     { Swap(m1.view(),m2.view()); }
 
 
@@ -4173,60 +4043,90 @@ namespace tmv {
     inline ConstSymMatrixView<T> Transpose(const GenSymMatrix<T>& m)
     { return m.transpose(); }
 
-    template <class T, IndexStyle I> 
-    inline ConstSymMatrixView<T,I> Transpose(const ConstSymMatrixView<T,I>& m)
+    template <class T, int A> 
+    inline ConstSymMatrixView<T,A> Transpose(const ConstSymMatrixView<T,A>& m)
     { return m.transpose(); }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    inline ConstSymMatrixView<T,I> Transpose(const SymMatrix<T,U,S,I>& m)
+    template <class T, int A>
+    inline ConstSymMatrixView<T,A&FortranStyle> Transpose(
+        const SymMatrix<T,A>& m)
     { return m.transpose(); }
 
-    template <class T, IndexStyle I> 
-    inline SymMatrixView<T,I> Transpose(const SymMatrixView<T,I>& m)
+    template <class T, int A>
+    inline ConstSymMatrixView<T,A&FortranStyle> Transpose(
+        const HermMatrix<T,A>& m)
     { return m.transpose(); }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    inline SymMatrixView<T,I> Transpose(SymMatrix<T,U,S,I>& m)
+    template <class T, int A> 
+    inline SymMatrixView<T,A> Transpose(const SymMatrixView<T,A>& m)
+    { return m.transpose(); }
+
+    template <class T, int A>
+    inline SymMatrixView<T,A&FortranStyle> Transpose(SymMatrix<T,A>& m)
+    { return m.transpose(); }
+
+    template <class T, int A>
+    inline SymMatrixView<T,A&FortranStyle> Transpose(HermMatrix<T,A>& m)
     { return m.transpose(); }
 
     template <class T> 
     inline ConstSymMatrixView<T> Conjugate(const GenSymMatrix<T>& m)
     { return m.conjugate(); }
 
-    template <class T, IndexStyle I> 
-    inline ConstSymMatrixView<T,I> Conjugate(const ConstSymMatrixView<T,I>& m)
+    template <class T, int A> 
+    inline ConstSymMatrixView<T,A> Conjugate(const ConstSymMatrixView<T,A>& m)
     { return m.conjugate(); }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    inline ConstSymMatrixView<T,I> Conjugate(const SymMatrix<T,U,S,I>& m)
+    template <class T, int A>
+    inline ConstSymMatrixView<T,A&FortranStyle> Conjugate(
+        const SymMatrix<T,A>& m)
     { return m.conjugate(); }
 
-    template <class T, IndexStyle I> 
-    inline SymMatrixView<T,I> Conjugate(const SymMatrixView<T,I>& m)
+    template <class T, int A>
+    inline ConstSymMatrixView<T,A&FortranStyle> Conjugate(
+        const HermMatrix<T,A>& m)
     { return m.conjugate(); }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    inline SymMatrixView<T,I> Conjugate(SymMatrix<T,U,S,I>& m)
+    template <class T, int A> 
+    inline SymMatrixView<T,A> Conjugate(const SymMatrixView<T,A>& m)
+    { return m.conjugate(); }
+
+    template <class T, int A>
+    inline SymMatrixView<T,A&FortranStyle> Conjugate(SymMatrix<T,A>& m)
+    { return m.conjugate(); }
+
+    template <class T, int A>
+    inline SymMatrixView<T,A&FortranStyle> Conjugate(HermMatrix<T,A>& m)
     { return m.conjugate(); }
 
     template <class T> 
     inline ConstSymMatrixView<T> Adjoint(const GenSymMatrix<T>& m)
     { return m.adjoint(); }
 
-    template <class T, IndexStyle I> 
-    inline ConstSymMatrixView<T,I> Adjoint(const ConstSymMatrixView<T,I>& m)
+    template <class T, int A> 
+    inline ConstSymMatrixView<T,A> Adjoint(const ConstSymMatrixView<T,A>& m)
     { return m.adjoint(); }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    inline ConstSymMatrixView<T,I> Adjoint(const SymMatrix<T,U,S,I>& m)
+    template <class T, int A>
+    inline ConstSymMatrixView<T,A&FortranStyle> Adjoint(
+        const SymMatrix<T,A>& m)
     { return m.adjoint(); }
 
-    template <class T, IndexStyle I> 
-    inline SymMatrixView<T,I> Adjoint(const SymMatrixView<T,I>& m)
+    template <class T, int A>
+    inline ConstSymMatrixView<T,A&FortranStyle> Adjoint(
+        const HermMatrix<T,A>& m)
     { return m.adjoint(); }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I> 
-    inline SymMatrixView<T,I> Adjoint(SymMatrix<T,U,S,I>& m)
+    template <class T, int A> 
+    inline SymMatrixView<T,A> Adjoint(const SymMatrixView<T,A>& m)
+    { return m.adjoint(); }
+
+    template <class T, int A>
+    inline SymMatrixView<T,A&FortranStyle> Adjoint(SymMatrix<T,A>& m)
+    { return m.adjoint(); }
+
+    template <class T, int A>
+    inline SymMatrixView<T,A&FortranStyle> Adjoint(HermMatrix<T,A>& m)
     { return m.adjoint(); }
 
     template <class T> 
@@ -4280,12 +4180,12 @@ namespace tmv {
     std::istream& operator>>(std::istream& is, const SymMatrixView<T>& m)
     { return is >> IOStyle() >> m; }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I>
-    std::istream& operator>>(std::istream& is, SymMatrix<T,U,S,I>& m)
+    template <class T, int A>
+    std::istream& operator>>(std::istream& is, SymMatrix<T,A>& m)
     { return is >> IOStyle() >> m; }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I>
-    std::istream& operator>>(std::istream& is, HermMatrix<T,U,S,I>& m)
+    template <class T, int A>
+    std::istream& operator>>(std::istream& is, HermMatrix<T,A>& m)
     { return is >> IOStyle() >> m; }
 
     template <class T>
@@ -4293,14 +4193,14 @@ namespace tmv {
         const TMV_Reader& reader, const SymMatrixView<T>& m)
     { m.read(reader); return reader.getis(); }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I>
+    template <class T, int A>
     inline std::istream& operator>>(
-        const TMV_Reader& reader, SymMatrix<T,U,S,I>& m)
+        const TMV_Reader& reader, SymMatrix<T,A>& m)
     { m.read(reader); return reader.getis(); }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I>
+    template <class T, int A>
     inline std::istream& operator>>(
-        const TMV_Reader& reader, HermMatrix<T,U,S,I>& m)
+        const TMV_Reader& reader, HermMatrix<T,A>& m)
     { m.read(reader); return reader.getis(); }
 
 } // namespace tmv

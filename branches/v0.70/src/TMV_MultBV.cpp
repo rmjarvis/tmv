@@ -71,7 +71,7 @@ namespace tmv {
     int BandMatrixComposite<T>::ls() const 
     {
         return BandStorageLength(
-            this->stor(),this->colsize(),this->rowsize(),
+            ColMajor,this->colsize(),this->rowsize(),
             this->nlo(),this->nhi());
     }
 
@@ -97,8 +97,7 @@ namespace tmv {
             int ds = si + sj;
             itsm = this->isdm() ? itsm1.get()-lo*si : itsm1.get();
             this->assignToB(BandMatrixView<T>(
-                    itsm,cs,rs,lo,hi,si,sj,ds,
-                    this->stor(),NonConj,this->isdm()?0:len
+                    itsm,cs,rs,lo,hi,si,sj,ds,NonConj,len
                     TMV_FIRSTLAST1(itsm1.get(),itsm1.get()+len) ) );
         }
         return itsm;
@@ -106,25 +105,15 @@ namespace tmv {
 
     template <class T> 
     int BandMatrixComposite<T>::stepi() const
-    {
-        return this->iscm() ? 1 : this->isrm() ? this->nlo()+this->nhi() :
-            this->rowsize()>=this->colsize() ? -this->colsize()+1 : 
-            -this->rowsize();
-    }
+    { return 1; }
 
     template <class T> 
     int BandMatrixComposite<T>::stepj() const
-    {
-        return this->isrm() ? 1 : this->iscm() ? this->nlo()+this->nhi() :
-            this->rowsize()>=this->colsize() ? this->colsize() : 
-            this->rowsize()+1;
-    }
+    { return this->nlo()+this->nhi(); }
 
     template <class T> 
     int BandMatrixComposite<T>::diagstep() const
-    {
-        return this->isdm() ? 1 : this->nlo()+this->nhi()+1;
-    }
+    { return this->nlo()+this->nhi()+1; }
 
 
     //
@@ -382,7 +371,7 @@ namespace tmv {
             const Ta* p = A.cptr()+i1*A.stepi()+j1*A.stepj();
             ConstBandMatrixView<Ta> Acols(
                 p,newM,newN,newlo,newhi,
-                A.stepi(),A.stepj(),A.diagstep(),A.stor(),A.ct());
+                A.stepi(),A.stepj(),A.diagstep(),A.ct());
             UnitAMultMV1<add,cx>(Acols,x.subVector(j1,j2),y.subVector(i1,i2));
             if (!add) {
                 y.subVector(0,i1).setZero();
@@ -405,7 +394,7 @@ namespace tmv {
         TMVAssert(y.ct() == NonConj);
 
 #ifdef XDEBUG
-        //cout<<"NonBlasMultMV: A = "<<A<<endl;
+        cout<<"NonBlasMultMV: A = "<<A<<endl;
         Vector<T> y0 = y;
         Vector<Tx> x0 = x;
         Matrix<Ta> A0 = A;
@@ -473,7 +462,7 @@ namespace tmv {
 
 #ifdef BLAS
     template <class T, class Ta, class Tx> 
-    static inline void DoBlasMultMV(
+    static inline void BlasMultMV(
         const T alpha, const GenBandMatrix<Ta>& A,
         const GenVector<Tx>& x, int beta, const VectorView<T>& y)
     { 
@@ -482,24 +471,15 @@ namespace tmv {
     }
 #ifdef INST_DOUBLE
     template <> 
-    void DoBlasMultMV(
+    void BlasMultMV(
         const double alpha,
         const GenBandMatrix<double>& A, const GenVector<double>& x,
         int beta, const VectorView<double>& y)
     {
-        TMVAssert(alpha != 0.);
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-        if (A.isrm()) TMVAssert(A.stepi() >= A.nlo()+A.nhi());
-        else TMVAssert(A.stepj() >= A.nlo()+A.nhi());
-
-        int m = A.iscm() ? A.colsize() : A.rowsize();
-        int n = A.iscm() ? A.rowsize() : A.colsize();
-        int lo = A.iscm() ? A.nlo() : A.nhi();
-        int hi = A.iscm() ? A.nhi() : A.nlo();
+        int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+        int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+        int lo = BlasIsCM(A) ? A.nlo() : A.nhi();
+        int hi = BlasIsCM(A) ? A.nhi() : A.nlo();
         int ds = A.diagstep();
         int xs = x.step();
         int ys = y.step();
@@ -510,42 +490,32 @@ namespace tmv {
         if (beta == 0) y.setZero();
         double xbeta(1);
         BLASNAME(dgbmv) (
-            BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
+            BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
             BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
             BLASV(alpha),BLASP(A.cptr()-hi),BLASV(ds),
             BLASP(xp),BLASV(xs),BLASV(xbeta),
             BLASP(yp),BLASV(ys) BLAS1); 
     }
     template <> 
-    void DoBlasMultMV(
+    void BlasMultMV(
         const std::complex<double> alpha,
         const GenBandMatrix<std::complex<double> >& A,
         const GenVector<std::complex<double> >& x,
         int beta, const VectorView<std::complex<double> >& y)
     {
-        TMVAssert(alpha != std::complex<double>(0));
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-        if (A.isrm()) TMVAssert(A.stepi() >= A.nlo()+A.nhi());
-        else TMVAssert(A.stepj() >= A.nlo()+A.nhi());
-
         if (x.isconj()
 #ifndef CBLAS
-            && !(A.isconj() && A.iscm())
+            && !(A.isconj() && BlasIsCM(A))
 #endif
         ) {
             Vector<std::complex<double> > xx = alpha*x;
-            return DoBlasMultMV(std::complex<double>(1),A,xx,beta,y);
+            return BlasMultMV(std::complex<double>(1),A,xx,beta,y);
         }
 
-        int m = A.iscm() ? A.colsize() : A.rowsize();
-        int n = A.iscm() ? A.rowsize() : A.colsize();
-        int lo = A.iscm() ? A.nlo() : A.nhi();
-        int hi = A.iscm() ? A.nhi() : A.nlo();
+        int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+        int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+        int lo = BlasIsCM(A) ? A.nlo() : A.nhi();
+        int hi = BlasIsCM(A) ? A.nhi() : A.nlo();
         int ds = A.diagstep();
         int xs = x.step();
         int ys = y.step();
@@ -556,7 +526,7 @@ namespace tmv {
         if (beta == 0) y.setZero();
         std::complex<double> xbeta(1);
 
-        if (A.isconj() && A.iscm()) {
+        if (A.isconj() && BlasIsCM(A)) {
 #ifdef CBLAS
             TMV_SWAP(m,n);
             TMV_SWAP(lo,hi);
@@ -591,7 +561,7 @@ namespace tmv {
 #endif
         } else {
             BLASNAME(zgbmv) (
-                BLASCM A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
+                BLASCM BlasIsCM(A)?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASP(&alpha),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp),BLASV(xs),BLASP(&xbeta),
@@ -599,34 +569,24 @@ namespace tmv {
         }
     }
     template <> 
-    void DoBlasMultMV(
+    void BlasMultMV(
         const std::complex<double> alpha,
         const GenBandMatrix<std::complex<double> >& A,
         const GenVector<double>& x,
         int beta, const VectorView<std::complex<double> >& y)
-    { DoBlasMultMV(alpha,A,Vector<std::complex<double> >(x),beta,y); }
+    { BlasMultMV(alpha,A,Vector<std::complex<double> >(x),beta,y); }
     template <> 
-    void DoBlasMultMV(
+    void BlasMultMV(
         const std::complex<double> alpha,
         const GenBandMatrix<double>& A,
         const GenVector<std::complex<double> >& x,
         int beta, const VectorView<std::complex<double> >& y)
     {
-        TMVAssert(alpha != 0.);
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-        if (A.isrm()) TMVAssert(A.stepi() >= A.nlo()+A.nhi());
-        else TMVAssert(A.stepj() >= A.nlo()+A.nhi());
-
         if (beta == 0) {
-            int m = A.iscm() ? A.colsize() : A.rowsize();
-            int n = A.iscm() ? A.rowsize() : A.colsize();
-            int lo = A.iscm() ? A.nlo() : A.nhi();
-            int hi = A.iscm() ? A.nhi() : A.nlo();
+            int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+            int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+            int lo = BlasIsCM(A) ? A.nlo() : A.nhi();
+            int hi = BlasIsCM(A) ? A.nhi() : A.nlo();
             int ds = A.diagstep();
             int xs = 2*x.step();
             int ys = 2*y.step();
@@ -638,13 +598,13 @@ namespace tmv {
             y.setZero();
             double xbeta(1);
             BLASNAME(dgbmv) (
-                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(xalpha),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1); 
             BLASNAME(dgbmv) (
-                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(xalpha),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp+1),BLASV(xs),BLASV(xbeta),
@@ -652,10 +612,10 @@ namespace tmv {
             if (x.isconj()) y.conjugateSelf();
             y *= alpha;
         } else if (TMV_IMAG(alpha) == 0. && !x.isconj()) {
-            int m = A.iscm() ? A.colsize() : A.rowsize();
-            int n = A.iscm() ? A.rowsize() : A.colsize();
-            int lo = A.iscm() ? A.nlo() : A.nhi();
-            int hi = A.iscm() ? A.nhi() : A.nlo();
+            int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+            int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+            int lo = BlasIsCM(A) ? A.nlo() : A.nhi();
+            int hi = BlasIsCM(A) ? A.nhi() : A.nlo();
             int ds = A.diagstep();
             int xs = 2*x.step();
             int ys = 2*y.step();
@@ -666,43 +626,33 @@ namespace tmv {
             double xalpha(TMV_REAL(alpha));
             double xbeta(beta);
             BLASNAME(dgbmv) (
-                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(xalpha),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1); 
             BLASNAME(dgbmv) (
-                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(xalpha),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp+1),BLASV(xs),BLASV(xbeta),
                 BLASP(yp+1),BLASV(ys) BLAS1); 
         } else {
             Vector<std::complex<double> > xx = alpha*x;
-            DoBlasMultMV(std::complex<double>(1),A,xx,1,y);
+            BlasMultMV(std::complex<double>(1),A,xx,1,y);
         }
     }
     template <> 
-    void DoBlasMultMV(
+    void BlasMultMV(
         const std::complex<double> alpha,
         const GenBandMatrix<double>& A,
         const GenVector<double>& x,
         int beta, const VectorView<std::complex<double> >& y)
     {
-        TMVAssert(alpha != 0.);
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-        if (A.isrm()) TMVAssert(A.stepi() >= A.nlo()+A.nhi());
-        else TMVAssert(A.stepj() >= A.nlo()+A.nhi());
-
-        int m = A.iscm() ? A.colsize() : A.rowsize();
-        int n = A.iscm() ? A.rowsize() : A.colsize();
-        int lo = A.iscm() ? A.nlo() : A.nhi();
-        int hi = A.iscm() ? A.nhi() : A.nlo();
+        int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+        int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+        int lo = BlasIsCM(A) ? A.nlo() : A.nhi();
+        int hi = BlasIsCM(A) ? A.nhi() : A.nlo();
         int ds = A.diagstep();
         int xs = x.step();
         int ys = 2*y.step();
@@ -716,7 +666,7 @@ namespace tmv {
         double xbeta(1);
         if (ar != 0.) {
             BLASNAME(dgbmv) (
-                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(ar),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
@@ -724,7 +674,7 @@ namespace tmv {
         }
         if (ai != 0.) {
             BLASNAME(dgbmv) (
-                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(ai),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
@@ -734,25 +684,15 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <> 
-    void DoBlasMultMV(
+    void BlasMultMV(
         const float alpha,
         const GenBandMatrix<float>& A, const GenVector<float>& x,
         int beta, const VectorView<float>& y)
     {
-        TMVAssert(alpha != 0.F);
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-        if (A.isrm()) TMVAssert(A.stepi() >= A.nlo()+A.nhi());
-        else TMVAssert(A.stepj() >= A.nlo()+A.nhi());
-
-        int m = A.iscm() ? A.colsize() : A.rowsize();
-        int n = A.iscm() ? A.rowsize() : A.colsize();
-        int lo = A.iscm() ? A.nlo() : A.nhi();
-        int hi = A.iscm() ? A.nhi() : A.nlo();
+        int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+        int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+        int lo = BlasIsCM(A) ? A.nlo() : A.nhi();
+        int hi = BlasIsCM(A) ? A.nhi() : A.nlo();
         int ds = A.diagstep();
         int xs = x.step();
         int ys = y.step();
@@ -763,42 +703,32 @@ namespace tmv {
         if (beta == 0) y.setZero();
         float xbeta(1);
         BLASNAME(sgbmv) (
-            BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
+            BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
             BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
             BLASV(alpha),BLASP(A.cptr()-hi),BLASV(ds),
             BLASP(xp),BLASV(xs),BLASV(xbeta),
             BLASP(yp),BLASV(ys) BLAS1); 
     }
     template <> 
-    void DoBlasMultMV(
+    void BlasMultMV(
         const std::complex<float> alpha,
         const GenBandMatrix<std::complex<float> >& A,
         const GenVector<std::complex<float> >& x,
         int beta, const VectorView<std::complex<float> >& y)
     {
-        TMVAssert(alpha != std::complex<float>(0));
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-        if (A.isrm()) TMVAssert(A.stepi() >= A.nlo()+A.nhi());
-        else TMVAssert(A.stepj() >= A.nlo()+A.nhi());
-
         if (x.isconj()
 #ifndef CBLAS
-            && !(A.isconj() && A.iscm())
+            && !(A.isconj() && BlasIsCM(A))
 #endif
         ) {
             Vector<std::complex<float> > xx = alpha*x;
-            return DoBlasMultMV(std::complex<float>(1),A,xx,beta,y);
+            return BlasMultMV(std::complex<float>(1),A,xx,beta,y);
         }
 
-        int m = A.iscm() ? A.colsize() : A.rowsize();
-        int n = A.iscm() ? A.rowsize() : A.colsize();
-        int lo = A.iscm() ? A.nlo() : A.nhi();
-        int hi = A.iscm() ? A.nhi() : A.nlo();
+        int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+        int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+        int lo = BlasIsCM(A) ? A.nlo() : A.nhi();
+        int hi = BlasIsCM(A) ? A.nhi() : A.nlo();
         int ds = A.diagstep();
         int xs = x.step();
         int ys = y.step();
@@ -809,7 +739,7 @@ namespace tmv {
         if (beta == 0) y.setZero();
         std::complex<float> xbeta(1);
 
-        if (A.isconj() && A.iscm()) {
+        if (A.isconj() && BlasIsCM(A)) {
 #ifdef CBLAS
             TMV_SWAP(m,n);
             TMV_SWAP(lo,hi);
@@ -844,7 +774,7 @@ namespace tmv {
 #endif
         } else {
             BLASNAME(cgbmv) (
-                BLASCM A.iscm()?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
+                BLASCM BlasIsCM(A)?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASP(&alpha),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp),BLASV(xs),BLASP(&xbeta),
@@ -852,34 +782,24 @@ namespace tmv {
         }
     }
     template <> 
-    void DoBlasMultMV(
+    void BlasMultMV(
         const std::complex<float> alpha,
         const GenBandMatrix<std::complex<float> >& A,
         const GenVector<float>& x,
         int beta, const VectorView<std::complex<float> >& y)
-    { DoBlasMultMV(alpha,A,Vector<std::complex<float> >(x),beta,y); }
+    { BlasMultMV(alpha,A,Vector<std::complex<float> >(x),beta,y); }
     template <> 
-    void DoBlasMultMV(
+    void BlasMultMV(
         const std::complex<float> alpha,
         const GenBandMatrix<float>& A,
         const GenVector<std::complex<float> >& x,
         int beta, const VectorView<std::complex<float> >& y)
     {
-        TMVAssert(alpha != 0.F);
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-        if (A.isrm()) TMVAssert(A.stepi() >= A.nlo()+A.nhi());
-        else TMVAssert(A.stepj() >= A.nlo()+A.nhi());
-
         if (beta == 0) {
-            int m = A.iscm() ? A.colsize() : A.rowsize();
-            int n = A.iscm() ? A.rowsize() : A.colsize();
-            int lo = A.iscm() ? A.nlo() : A.nhi();
-            int hi = A.iscm() ? A.nhi() : A.nlo();
+            int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+            int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+            int lo = BlasIsCM(A) ? A.nlo() : A.nhi();
+            int hi = BlasIsCM(A) ? A.nhi() : A.nlo();
             int ds = A.diagstep();
             int xs = 2*x.step();
             int ys = 2*y.step();
@@ -891,13 +811,13 @@ namespace tmv {
             y.setZero();
             float xbeta(1);
             BLASNAME(sgbmv) (
-                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(xalpha),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1); 
             BLASNAME(sgbmv) (
-                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(xalpha),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp+1),BLASV(xs),BLASV(xbeta),
@@ -905,10 +825,10 @@ namespace tmv {
             if (x.isconj()) y.conjugateSelf();
             y *= alpha;
         } else if (TMV_IMAG(alpha) == 0.F && !x.isconj()) {
-            int m = A.iscm() ? A.colsize() : A.rowsize();
-            int n = A.iscm() ? A.rowsize() : A.colsize();
-            int lo = A.iscm() ? A.nlo() : A.nhi();
-            int hi = A.iscm() ? A.nhi() : A.nlo();
+            int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+            int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+            int lo = BlasIsCM(A) ? A.nlo() : A.nhi();
+            int hi = BlasIsCM(A) ? A.nhi() : A.nlo();
             int ds = A.diagstep();
             int xs = 2*x.step();
             int ys = 2*y.step();
@@ -919,43 +839,33 @@ namespace tmv {
             float xalpha(TMV_REAL(alpha));
             float xbeta(1);
             BLASNAME(sgbmv) (
-                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(xalpha),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1); 
             BLASNAME(sgbmv) (
-                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(xalpha),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp+1),BLASV(xs),BLASV(xbeta),
                 BLASP(yp+1),BLASV(ys) BLAS1); 
         } else {
             Vector<std::complex<float> > xx = alpha*x;
-            DoBlasMultMV(std::complex<float>(1),A,xx,1,y);
+            BlasMultMV(std::complex<float>(1),A,xx,1,y);
         }
     }
     template <> 
-    void DoBlasMultMV(
+    void BlasMultMV(
         const std::complex<float> alpha,
         const GenBandMatrix<float>& A,
         const GenVector<float>& x,
         int beta, const VectorView<std::complex<float> >& y)
     {
-        TMVAssert(alpha != 0.F);
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-        if (A.isrm()) TMVAssert(A.stepi() >= A.nlo()+A.nhi());
-        else TMVAssert(A.stepj() >= A.nlo()+A.nhi());
-
-        int m = A.iscm() ? A.colsize() : A.rowsize();
-        int n = A.iscm() ? A.rowsize() : A.colsize();
-        int lo = A.iscm() ? A.nlo() : A.nhi();
-        int hi = A.iscm() ? A.nhi() : A.nlo();
+        int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+        int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+        int lo = BlasIsCM(A) ? A.nlo() : A.nhi();
+        int hi = BlasIsCM(A) ? A.nhi() : A.nlo();
         int ds = A.diagstep();
         int xs = x.step();
         int ys = 2*y.step();
@@ -969,7 +879,7 @@ namespace tmv {
         float xbeta(1);
         if (ar != 0.F) {
             BLASNAME(sgbmv) (
-                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(ar),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
@@ -977,7 +887,7 @@ namespace tmv {
         }
         if (ai != 0.F) {
             BLASNAME(sgbmv) (
-                BLASCM A.iscm()?BLASCH_NT:BLASCH_T,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(lo),BLASV(hi),
                 BLASV(ai),BLASP(A.cptr()-hi),BLASV(ds),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
@@ -985,47 +895,6 @@ namespace tmv {
         }
     }
 #endif
-
-    template <class T, class Ta, class Tx> 
-    static void BlasMultMV(
-        const T alpha, const GenBandMatrix<Ta>& A, const GenVector<Tx>& x,
-        int beta, const VectorView<T>& y)
-    {
-        if ((A.isrm() && A.stepi() < A.nlo()+A.nhi()) ||
-            (A.iscm() && A.stepj() < A.nlo()+A.nhi())) {
-            if (A.nlo()+1 == A.colsize()) {
-                if (A.nhi()+1 == A.rowsize()) {
-                    ConstMatrixView<Ta> A1 =
-                        A.subMatrix(0,A.colsize(),0,A.rowsize());
-                    if (beta == 0) y = alpha * A1 * x;
-                    else y += alpha * A1 * x;
-                } else {
-                    ConstMatrixView<Ta> A1 =
-                        A.subMatrix(0,A.colsize(),0,A.nhi());
-                    if (beta == 0) y = alpha * A1 * x.subVector(0,A.nhi());
-                    else y += alpha * A1 * x.subVector(0,A.nhi());
-                    ConstBandMatrixView<Ta> A2 = A.colRange(A.nhi(),A.rowsize());
-                    BlasMultMV(alpha,A2,x.subVector(A.nhi(),A.rowsize()),1,y);
-                }
-            } else {
-                TMVAssert(A.nlo()>0);
-                if (A.nhi()+1 == A.rowsize()) {
-                    ConstMatrixView<Ta> A1 =
-                        A.subMatrix(0,A.nlo(),0,A.rowsize());
-                    if (beta == 0) y.subVector(0,A.nlo()) = alpha * A1 * x;
-                    else y.subVector(0,A.nlo()) += alpha * A1 * x;
-                } else {
-                    ConstBandMatrixView<Ta> A1 = A.rowRange(0,A.nlo());
-                    BlasMultMV(alpha,A1,x.subVector(0,A1.rowsize()),
-                               beta,y.subVector(0,A.nlo()));
-                }
-                ConstBandMatrixView<Ta> A2 = A.rowRange(A.nlo(),A.colsize());
-                BlasMultMV(alpha,A2,x,beta,y.subVector(A.nlo(),A.colsize()));
-            }
-        } else {
-            DoBlasMultMV(alpha,A,x,beta,y);
-        }
-    }
 #endif // BLAS
 
     template <bool add, class T, class Ta, class Tx> 
@@ -1033,6 +902,11 @@ namespace tmv {
         const T alpha, const GenBandMatrix<Ta>& A, const GenVector<Tx>& x,
         const VectorView<T>& y)
     {
+        //cout<<"Start DoMultMV\n";
+        //cout<<"A = "<<TMV_Text(A)<<"  "<<A.cptr()<<"  "<<A<<endl;
+        //cout<<"x = "<<TMV_Text(x)<<"  "<<x.cptr()<<"  step "<<x.step()<<"  "<<x<<endl;
+        //cout<<"y = "<<TMV_Text(y)<<"  "<<y.cptr()<<"  step "<<y.step()<<"  "<<y<<endl;
+        //cout<<"alpha = "<<alpha<<", add = "<<add<<endl;
         TMVAssert(A.rowsize() == x.size());
         TMVAssert(A.colsize() == y.size());
         TMVAssert(alpha != T(0));
@@ -1042,8 +916,7 @@ namespace tmv {
         if (y.isconj()) {
             DoMultMV<add>(
                 TMV_CONJ(alpha),A.conjugate(),x.conjugate(),y.conjugate());
-        }
-        else {
+        } else {
 #ifdef BLAS
             if (x.step() == 0) {
                 if (x.size() <= 1) 
@@ -1056,7 +929,7 @@ namespace tmv {
                 TMVAssert(y.size() <= 1);
                 DoMultMV<add>(
                     alpha,A,x,VectorView<T>(y.ptr(),y.size(),1,y.ct()));
-            } else if ((A.isrm()&&A.stepi()>0) || (A.iscm()&&A.stepj()>0)) {
+            } else if (BlasIsRM(A) || BlasIsCM(A)) {
                 if (!SameStorage(A,y)) {
                     if (!SameStorage(x,y) && !SameStorage(A,x)) {
                         BlasMultMV(alpha,A,x,add?1:0,y);
@@ -1077,6 +950,41 @@ namespace tmv {
                         else y = yy;
                     }
                 }
+            } else if ((A.isrm() && A.stepi() < A.nlo()+A.nhi()) ||
+                       (A.iscm() && A.stepj() < A.nlo()+A.nhi())) {
+                if (SameStorage(A,y)) {
+                    Vector<T> yy(y.size(),T(0));
+                    DoMultMV<false>(T(1),A,x,yy.view());
+                    if (add) y += alpha*yy;
+                    else y = alpha*yy;
+                } else if (SameStorage(x,y)) {
+                    DoMultMV<add>(T(1),A,Vector<T>(alpha*x),y);
+                } else if (A.nlo()+1 == A.colsize()) {
+                    if (A.nhi()+1 == A.rowsize()) {
+                        ConstMatrixView<Ta> A1 =
+                            A.subMatrix(0,A.colsize(),0,A.rowsize());
+                        MultMV<add>(alpha,A1,x,y);
+                    } else {
+                        ConstMatrixView<Ta> A1 =
+                            A.subMatrix(0,A.colsize(),0,A.nhi());
+                        MultMV<add>(alpha,A1,x.subVector(0,A.nhi()),y);
+                        ConstBandMatrixView<Ta> A2 = A.colRange(A.nhi(),A.rowsize());
+                        BlasMultMV(alpha,A2,x.subVector(A.nhi(),A.rowsize()),1,y);
+                    }
+                } else {
+                    TMVAssert(A.nlo()>0);
+                    if (A.nhi()+1 == A.rowsize()) {
+                        ConstMatrixView<Ta> A1 =
+                            A.subMatrix(0,A.nlo(),0,A.rowsize());
+                        MultMV<add>(alpha,A1,x,y.subVector(0,A.nlo()));
+                    } else {
+                        ConstBandMatrixView<Ta> A1 = A.rowRange(0,A.nlo());
+                        BlasMultMV(alpha,A1,x.subVector(0,A1.rowsize()),
+                                   add?1:0,y.subVector(0,A.nlo()));
+                    }
+                    ConstBandMatrixView<Ta> A2 = A.rowRange(A.nlo(),A.colsize());
+                    BlasMultMV(alpha,A2,x,add?1:0,y.subVector(A.nlo(),A.colsize()));
+                }
             } else {
                 if (TMV_IMAG(alpha) == T(0)) {
                     BandMatrix<Ta,RowMajor> A2 = TMV_REAL(alpha)*A;
@@ -1090,6 +998,7 @@ namespace tmv {
             NonBlasMultMV<add>(alpha,A,x,y);
 #endif
         }
+        //std::cout<<"Done DoMultMV\n";
     }
 
     //
@@ -1391,21 +1300,21 @@ namespace tmv {
             if (N22 > A.nhi()) {
                 ConstBandMatrixView<Ta> A22(
                     p22,N22,N22,0,A.nhi(),
-                    A.stepi(),A.stepj(),A.diagstep(),A.stor(),A.ct());
+                    A.stepi(),A.stepj(),A.diagstep(),A.ct());
                 if (j1 > 0) {
                     const int jx = j1+A.nhi();
                     if (j1 < A.nhi()) {
                         const Ta* p12 = A.cptr() + j1*A.stepj();
                         ConstBandMatrixView<Ta> A12(
                             p12,j1,A.nhi(),j1-1,A.nhi()-j1,
-                            A.stepi(),A.stepj(),A.diagstep(),A.stor(),A.ct());
+                            A.stepi(),A.stepj(),A.diagstep(),A.ct());
                         UnitAMultMV1<false,false>(
                             A12,x.subVector(j1,jx),x.subVector(0,j1));
                     } else {
                         const Ta* p12 = p22 - A.nhi()*A.stepi();
                         ConstBandMatrixView<Ta> A12(
                             p12,A.nhi(),A.nhi(),A.nhi()-1,0,
-                            A.stepi(),A.stepj(),A.diagstep(),A.stor(),A.ct());
+                            A.stepi(),A.stepj(),A.diagstep(),A.ct());
                         VectorView<T> x1x = x.subVector(j1-A.nhi(),j1);
                         x1x = x.subVector(j1,jx);
                         DoLowerMultEqMV(A12,x1x);
@@ -1415,7 +1324,7 @@ namespace tmv {
             } else {
                 ConstBandMatrixView<Ta> A22(
                     p22,N22,N22,0,N22-1,
-                    A.stepi(),A.stepj(),A.diagstep(),A.stor(),A.ct());
+                    A.stepi(),A.stepj(),A.diagstep(),A.ct());
                 if (j1 > 0) {
                     const int M12 = (j1 < A.nhi()) ? j1 : A.nhi();
                     const Ta* p12 = p22 - M12*A.stepi();
@@ -1423,7 +1332,7 @@ namespace tmv {
                     if (newhi >= N22) newhi = N22-1;
                     ConstBandMatrixView<Ta> A12(
                         p12,M12,N22,M12-1,newhi,
-                        A.stepi(),A.stepj(),A.diagstep(),A.stor(),A.ct());
+                        A.stepi(),A.stepj(),A.diagstep(),A.ct());
                     UnitAMultMV1<false,false>(A12,x2,x.subVector(j1-M12,j1));
                 } 
                 DoUpperMultEqMV(A22,x2);
@@ -1461,7 +1370,7 @@ namespace tmv {
             if (N22 > A.nlo()) {
                 ConstBandMatrixView<Ta> A22(
                     p22,N22,N22,A.nlo(),0,
-                    A.stepi(),A.stepj(),A.diagstep(),A.stor(),A.ct());
+                    A.stepi(),A.stepj(),A.diagstep(),A.ct());
                 if (j2 < N) {
                     const int jx = j2-A.nlo();
                     const Ta* p32 = A.cptr() +
@@ -1469,13 +1378,13 @@ namespace tmv {
                     if (j2+A.nlo() > N) {
                         ConstBandMatrixView<Ta> A32(
                             p32,N-j2,A.nlo(),0,A.nlo()-1,
-                            A.stepi(),A.stepj(),A.diagstep(),A.stor(),A.ct());
+                            A.stepi(),A.stepj(),A.diagstep(),A.ct());
                         UnitAMultMV1<false,false>(
                             A32,x.subVector(jx,j2),x.subVector(j2,N));
                     } else {
                         ConstBandMatrixView<Ta> A32(
                             p32,A.nlo(),A.nlo(),0,A.nlo()-1,
-                            A.stepi(),A.stepj(),A.diagstep(),A.stor(),A.ct());
+                            A.stepi(),A.stepj(),A.diagstep(),A.ct());
                         VectorView<T> x3x = x.subVector(j2,j2+A.nlo());
                         x3x = x.subVector(jx,j2);
                         DoUpperMultEqMV(A32,x3x);
@@ -1485,7 +1394,7 @@ namespace tmv {
             } else {
                 ConstBandMatrixView<Ta> A22(
                     p22,N22,N22,N22-1,0,
-                    A.stepi(),A.stepj(),A.diagstep(),A.stor(),A.ct());
+                    A.stepi(),A.stepj(),A.diagstep(),A.ct());
                 if (j2 < N) {
                     const Ta* p32 = p22 + N22*A.stepi();
                     const int M32 = (j2+A.nlo() > N) ? N-j2 : A.nlo();
@@ -1493,7 +1402,7 @@ namespace tmv {
                     if (newlo >= M32) newlo = M32-1;
                     ConstBandMatrixView<Ta> A32(
                         p32,M32,N22,newlo,N22-1,
-                        A.stepi(),A.stepj(),A.diagstep(),A.stor(),A.ct());
+                        A.stepi(),A.stepj(),A.diagstep(),A.ct());
                     UnitAMultMV1<false,false>(A32,x2,x.subVector(j2,j2+M32));
                 } 
                 DoLowerMultEqMV(A22,x2);
@@ -1514,24 +1423,17 @@ namespace tmv {
     void BlasMultEqMV( 
         const GenBandMatrix<double>& A, const VectorView<double>& x)
     {
-        TMVAssert(A.isSquare());
-        TMVAssert(A.colsize() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(A.nlo() == 0 || A.nhi() == 0);
-
         bool up = A.nlo()==0;
         int n=A.colsize();
         int lohi = up ? A.nhi() : A.nlo();
-        int aoffset = up && A.iscm() ? A.nhi() : !up && A.isrm() ? A.nlo() : 0;
+        int aoffset = 
+            up && BlasIsCM(A) ? A.nhi() : 
+            !up && !BlasIsCM(A) ? A.nlo() : 0;
         int ds = A.diagstep();
         int xs = x.step();
         BLASNAME(dtbmv) (
-            BLASCM A.iscm() == up?BLASCH_UP:BLASCH_LO, 
-            A.isrm() ? BLASCH_T : BLASCH_NT, BLASCH_NU,
+            BLASCM BlasIsCM(A) == up?BLASCH_UP:BLASCH_LO, 
+            BlasIsCM(A) ? BLASCH_NT : BLASCH_T, BLASCH_NU,
             BLASV(n),BLASV(lohi),BLASP(A.cptr()-aoffset),BLASV(ds),
             BLASP(x.ptr()),BLASV(xs) BLAS1 BLAS1 BLAS1);
     }
@@ -1540,21 +1442,15 @@ namespace tmv {
         const GenBandMatrix<std::complex<double> >& A,
         const VectorView<std::complex<double> >& x)
     {
-        TMVAssert(A.isSquare());
-        TMVAssert(A.colsize() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(A.nlo() == 0 || A.nhi() == 0);
-
         bool up = A.nlo()==0;
         int n=A.colsize();
         int lohi = up ? A.nhi() : A.nlo();
-        int aoffset = up && A.iscm() ? A.nhi() : !up && A.isrm() ? A.nlo() : 0;
+        int aoffset = 
+            up && BlasIsCM(A) ? A.nhi() : 
+            !up && !BlasIsCM(A) ? A.nlo() : 0;
         int ds = A.diagstep();
         int xs = x.step();
-        if (A.iscm() && A.isconj()) {
+        if (BlasIsCM(A) && A.isconj()) {
 #ifdef CBLAS
             BLASNAME(ztbmv) (
                 BLASRM up ? BLASCH_LO : BLASCH_UP, BLASCH_CT, BLASCH_NU,
@@ -1570,8 +1466,9 @@ namespace tmv {
 #endif
         } else {
             BLASNAME(ztbmv) (
-                BLASCM A.iscm() == up?BLASCH_UP:BLASCH_LO, 
-                A.isrm() ? A.isconj() ? BLASCH_CT : BLASCH_T : BLASCH_NT, BLASCH_NU,
+                BLASCM BlasIsCM(A) == up?BLASCH_UP:BLASCH_LO, 
+                BlasIsCM(A) ? BLASCH_NT : A.isconj() ? BLASCH_CT : BLASCH_T,
+                BLASCH_NU,
                 BLASV(n),BLASV(lohi),BLASP(A.cptr()-aoffset),BLASV(ds),
                 BLASP(x.ptr()),BLASV(xs) BLAS1 BLAS1 BLAS1);
         }
@@ -1581,29 +1478,22 @@ namespace tmv {
         const GenBandMatrix<double>& A,
         const VectorView<std::complex<double> >& x)
     {
-        TMVAssert(A.isSquare());
-        TMVAssert(A.colsize() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(A.nlo() == 0 || A.nhi() == 0);
-
         bool up = A.nlo()==0;
         int n=A.colsize();
         int lohi = up ? A.nhi() : A.nlo();
-        int aoffset = up && A.iscm() ? A.nhi() : !up && A.isrm() ? A.nlo() : 0;
+        int aoffset = 
+            up && BlasIsCM(A) ? A.nhi() : 
+            !up && !BlasIsCM(A) ? A.nlo() : 0;
         int ds = A.diagstep();
         int xs = 2*x.step();
         BLASNAME(dtbmv) (
-            BLASCM A.iscm() == up?BLASCH_UP:BLASCH_LO, 
-            A.isrm() ? BLASCH_T : BLASCH_NT, BLASCH_NU,
+            BLASCM BlasIsCM(A) == up?BLASCH_UP:BLASCH_LO, 
+            BlasIsCM(A) ? BLASCH_NT : BLASCH_T, BLASCH_NU,
             BLASV(n),BLASV(lohi),BLASP(A.cptr()-aoffset),BLASV(ds),
             BLASP((double*)x.ptr()),BLASV(xs) BLAS1 BLAS1 BLAS1);
         BLASNAME(dtbmv) (
-            BLASCM A.iscm() == up?BLASCH_UP:BLASCH_LO, 
-            A.isrm() ? BLASCH_T : BLASCH_NT, BLASCH_NU,
+            BLASCM BlasIsCM(A) == up?BLASCH_UP:BLASCH_LO, 
+            BlasIsCM(A) ? BLASCH_NT : BLASCH_T, BLASCH_NU,
             BLASV(n),BLASV(lohi),BLASP(A.cptr()-aoffset),BLASV(ds),
             BLASP((double*)x.ptr()+1),BLASV(xs) BLAS1 BLAS1 BLAS1);
     }
@@ -1613,24 +1503,17 @@ namespace tmv {
     void BlasMultEqMV( 
         const GenBandMatrix<float>& A, const VectorView<float>& x)
     {
-        TMVAssert(A.isSquare());
-        TMVAssert(A.colsize() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(A.nlo() == 0 || A.nhi() == 0);
-
         bool up = A.nlo()==0;
         int n=A.colsize();
         int lohi = up ? A.nhi() : A.nlo();
-        int aoffset = up && A.iscm() ? A.nhi() : !up && A.isrm() ? A.nlo() : 0;
+        int aoffset = 
+            up && BlasIsCM(A) ? A.nhi() : 
+            !up && !BlasIsCM(A) ? A.nlo() : 0;
         int ds = A.diagstep();
         int xs = x.step();
         BLASNAME(stbmv) (
-            BLASCM A.iscm() == up?BLASCH_UP:BLASCH_LO, 
-            A.isrm() ? BLASCH_T : BLASCH_NT, BLASCH_NU,
+            BLASCM BlasIsCM(A) == up?BLASCH_UP:BLASCH_LO, 
+            BlasIsCM(A) ? BLASCH_NT : BLASCH_T, BLASCH_NU,
             BLASV(n),BLASV(lohi),BLASP(A.cptr()-aoffset),BLASV(ds),
             BLASP(x.ptr()),BLASV(xs) BLAS1 BLAS1 BLAS1);
     }
@@ -1639,21 +1522,23 @@ namespace tmv {
         const GenBandMatrix<std::complex<float> >& A,
         const VectorView<std::complex<float> >& x)
     {
-        TMVAssert(A.isSquare());
-        TMVAssert(A.colsize() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(A.nlo() == 0 || A.nhi() == 0);
-
         bool up = A.nlo()==0;
         int n=A.colsize();
         int lohi = up ? A.nhi() : A.nlo();
-        int aoffset = up && A.iscm() ? A.nhi() : !up && A.isrm() ? A.nlo() : 0;
+        int aoffset = 
+            up && BlasIsCM(A) ? A.nhi() : 
+            !up && !BlasIsCM(A) ? A.nlo() : 0;
         int ds = A.diagstep();
         int xs = x.step();
-        if (A.iscm() && A.isconj()) {
+        //cout<<"Before ctbmv\n";
+        //cout<<"up = "<<up<<std::endl;
+        //cout<<"n = "<<n<<std::endl;
+        //cout<<"lohi = "<<lohi<<std::endl;
+        //cout<<"aoffset = "<<aoffset<<std::endl;
+        //cout<<"ds = "<<ds<<std::endl;
+        //cout<<"xs = "<<xs<<std::endl;
+        if (BlasIsCM(A) && A.isconj()) {
+            //cout<<"cm && conj\n";
 #ifdef CBLAS
             BLASNAME(ctbmv) (
                 BLASRM up ? BLASCH_LO : BLASCH_UP, BLASCH_CT, BLASCH_NU,
@@ -1668,9 +1553,11 @@ namespace tmv {
             x.conjugateSelf();
 #endif
         } else {
+            //cout<<"!cm || !conj\n";
             BLASNAME(ctbmv) (
-                BLASCM A.iscm() == up?BLASCH_UP:BLASCH_LO, 
-                A.isrm() ? A.isconj() ? BLASCH_CT : BLASCH_T : BLASCH_NT, BLASCH_NU,
+                BLASCM BlasIsCM(A) == up?BLASCH_UP:BLASCH_LO, 
+                BlasIsCM(A) ? BLASCH_NT : A.isconj() ? BLASCH_CT : BLASCH_T, 
+                BLASCH_NU,
                 BLASV(n),BLASV(lohi),BLASP(A.cptr()-aoffset),BLASV(ds),
                 BLASP(x.ptr()),BLASV(xs) BLAS1 BLAS1 BLAS1);
         }
@@ -1680,29 +1567,22 @@ namespace tmv {
         const GenBandMatrix<float>& A,
         const VectorView<std::complex<float> >& x)
     {
-        TMVAssert(A.isSquare());
-        TMVAssert(A.colsize() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(A.nlo() == 0 || A.nhi() == 0);
-
         bool up = A.nlo()==0;
         int n=A.colsize();
         int lohi = up ? A.nhi() : A.nlo();
-        int aoffset = up && A.iscm() ? A.nhi() : !up && A.isrm() ? A.nlo() : 0;
+        int aoffset = 
+            up && BlasIsCM(A) ? A.nhi() : 
+            !up && !BlasIsCM(A) ? A.nlo() : 0;
         int ds = A.diagstep();
         int xs = 2*x.step();
         BLASNAME(stbmv) (
-            BLASCM A.iscm() == up?BLASCH_UP:BLASCH_LO, 
-            A.isrm() ? BLASCH_T : BLASCH_NT, BLASCH_NU,
+            BLASCM BlasIsCM(A) == up?BLASCH_UP:BLASCH_LO, 
+            BlasIsCM(A) ? BLASCH_NT : BLASCH_T, BLASCH_NU,
             BLASV(n),BLASV(lohi),BLASP(A.cptr()-aoffset),BLASV(ds),
             BLASP((float*)x.ptr()),BLASV(xs) BLAS1 BLAS1 BLAS1);
         BLASNAME(stbmv) (
-            BLASCM A.iscm() == up?BLASCH_UP:BLASCH_LO, 
-            A.isrm() ? BLASCH_T : BLASCH_NT, BLASCH_NU,
+            BLASCM BlasIsCM(A) == up?BLASCH_UP:BLASCH_LO, 
+            BlasIsCM(A) ? BLASCH_NT : BLASCH_T, BLASCH_NU,
             BLASV(n),BLASV(lohi),BLASP(A.cptr()-aoffset),BLASV(ds),
             BLASP((float*)x.ptr()+1),BLASV(xs) BLAS1 BLAS1 BLAS1);
     }
@@ -1728,14 +1608,17 @@ namespace tmv {
         if (x.isconj()) MultEqMV(A.conjugate(),x.conjugate());
         else {
 #ifdef BLAS
-            if ( !((A.isrm() && A.stepi()>0) || (A.iscm() && A.stepj()>0)) ) {
+            if ( !(BlasIsRM(A) || BlasIsCM(A)) ) {
+                //cout<<"!(rm or cm)\n";
                 BandMatrix<Ta,ColMajor> AA = A;
                 BlasMultEqMV(AA,x);
             } else if (SameStorage(A,x) || x.step() != 1) {
+                //cout<<"copy x\n";
                 Vector<T> xx = x;
                 BlasMultEqMV(A,xx.view());
                 x = xx;
             } else {
+                //cout<<"normal\n";
                 BlasMultEqMV(A,x);
             }
 #else
@@ -1759,8 +1642,7 @@ namespace tmv {
 
     template <bool add, class T, class Ta, class Tx> 
     void MultMV(
-        const T alpha,
-        const GenBandMatrix<Ta>& A, const GenVector<Tx>& x,
+        const T alpha, const GenBandMatrix<Ta>& A, const GenVector<Tx>& x,
         const VectorView<T>& y)
     // y (+)= alpha * A * x
     { 
@@ -1773,22 +1655,30 @@ namespace tmv {
         cout<<"y = "<<TMV_Text(y)<<"  "<<y.cptr()<<"  step "<<y.step()<<"  "<<y<<endl;
         cout<<"alpha = "<<alpha<<", add = "<<add<<endl;
         Vector<T> y0 = y;
+        cout<<"y0 = "<<y0<<std::endl;
         Vector<Tx> x0 = x;
+        cout<<"x0 = "<<x0<<std::endl;
         Matrix<Ta> A0 = A;
+        cout<<"A0 = "<<A0<<std::endl;
         Vector<T> y2 = alpha*A0*x0;
+        cout<<"y2 = "<<y2<<std::endl;
         if (add) y2 += y0;
+        cout<<"y2 => "<<y2<<std::endl;
 #endif
 
         if (y.size() > 0) {
             if (x.size()==0 || alpha==T(0)) {
                 if (!add) y.setZero();
             } else if (A.rowsize() > A.colsize()+A.nhi()) {
-                MultMV<add>(alpha,A.colRange(0,A.colsize()+A.nhi()),
-                            x.subVector(0,A.colsize()+A.nhi()),y);
+                MultMV<add>(
+                    alpha,A.colRange(0,A.colsize()+A.nhi()),
+                    x.subVector(0,A.colsize()+A.nhi()),y);
             } else if (A.colsize() > A.rowsize()+A.nlo()) {
-                MultMV<add>(alpha,A.rowRange(0,A.rowsize()+A.nlo()),
-                            x,y.subVector(0,A.rowsize()+A.nlo()));
-                if (!add) y.subVector(A.rowsize()+A.nlo(),A.colsize()).setZero();
+                MultMV<add>(
+                    alpha,A.rowRange(0,A.rowsize()+A.nlo()),
+                    x,y.subVector(0,A.rowsize()+A.nlo()));
+                if (!add) 
+                    y.subVector(A.rowsize()+A.nlo(),A.colsize()).setZero();
             } else if (A.isSquare() && (A.nlo() == 0 || A.nhi() == 0)) {
                 if (A.nlo() == 0 && A.nhi() == 0)
                     MultMV<add>(alpha,DiagMatrixViewOf(A.diag()),x,y);

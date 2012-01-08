@@ -269,7 +269,7 @@ namespace tmv {
 #ifdef XDEBUG
         //cout<<"Start Block CH_Decomp: A = "<<TMV_Text(A)<<"  "<<A<<endl;
         Matrix<T> A0(A);
-        HermMatrix<T,Lower,ColMajor> A2 = A;
+        HermMatrix<T,Lower|ColMajor> A2 = A;
         NonBlockCH_Decompose(A2.view());
 #endif
         TMVAssert(A.uplo() == Lower);
@@ -319,7 +319,7 @@ namespace tmv {
 #ifdef XDEBUG
         //cout<<"Start Recursive CH_Decomp: A = "<<TMV_Text(A)<<"  "<<A<<endl;
         Matrix<T> A0(A);
-        HermMatrix<T,Lower,ColMajor> A2(A);
+        HermMatrix<T,Lower|ColMajor> A2(A);
         NonBlockCH_Decompose<true>(A2.view());
 #endif
         TMVAssert(A.uplo() == Lower);

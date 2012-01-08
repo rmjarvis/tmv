@@ -65,10 +65,8 @@ namespace tmv {
         TMVAssert(x.size() > 0);
         TMVAssert(A.ct() == NonConj);
         TMVAssert(A.uplo() == Lower);
-        TMVAssert(rm == A.isrm());
         TMVAssert(a1 == (alpha == Ta(1)));
         TMVAssert(x.step()==1);
-        TMVAssert(rm == A.isrm());
         TMVAssert(cx == x.isconj());
         TMVAssert(ha == A.isherm());
 #ifdef XDEBUG
@@ -402,7 +400,7 @@ namespace tmv {
         TMVAssert(x.ct() == NonConj);
         TMVAssert(A.iscm());
 
-        SymMatrix<double,Lower,ColMajor> A1(A.size(),0.);
+        SymMatrix<double,Lower|ColMajor> A1(A.size(),0.);
         BlasRank1Update(1.,x,A1.view());
         A += alpha*A1;
     }
@@ -509,7 +507,7 @@ namespace tmv {
         TMVAssert(x.ct() == NonConj);
         TMVAssert(A.iscm());
 
-        SymMatrix<float,Lower,ColMajor> A1(A.size(),0.F);
+        SymMatrix<float,Lower|ColMajor> A1(A.size(),0.F);
         BlasRank1Update(1.F,x,A1.view());
         A += alpha*A1;
     }
@@ -539,7 +537,7 @@ namespace tmv {
         TMVAssert(TMV_IMAG(alpha)==TMV_RealType(T)(0) || !A.isherm());
         if (alpha != T(0) && A.size() > 0) {
 #ifdef BLAS
-            if (A.isrm()) {
+            if (!A.iscm() && A.isrm()) {
                 return Rank1Update<add>(
                     alpha,x,A.issym()?A.transpose():A.adjoint());
             } else if (A.isconj())  {
@@ -562,12 +560,12 @@ namespace tmv {
                 }
             } else {
                 if (A.isherm()) {
-                    HermMatrix<T,Lower,ColMajor> AA(A.size());
+                    HermMatrix<T,Lower|ColMajor> AA(A.size());
                     Rank1Update<false>(alpha,x,AA.view());
                     if (add) A += AA;
                     else A = AA;
                 } else {
-                    SymMatrix<T,Lower,ColMajor> AA(A.size(),T(0));
+                    SymMatrix<T,Lower|ColMajor> AA(A.size(),T(0));
                     Rank1Update<false>(alpha,x,AA.view());
                     if (add) A += AA;
                     else A = AA;

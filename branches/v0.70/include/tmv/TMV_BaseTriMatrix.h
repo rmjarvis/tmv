@@ -43,22 +43,22 @@ namespace tmv {
     template <class T> 
     class GenLowerTriMatrix;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class ConstUpperTriMatrixView;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class ConstLowerTriMatrixView;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class UpperTriMatrixView;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class LowerTriMatrixView;
 
-    template <class T, DiagType D=NonUnitDiag, StorageType S=ColMajor, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class UpperTriMatrix;
 
-    template <class T, DiagType D=NonUnitDiag, StorageType S=ColMajor, IndexStyle I=CStyle>
+    template <class T, int A=0>
     class LowerTriMatrix;
 
     template <class T> 
@@ -103,88 +103,58 @@ namespace tmv {
         virtual inline ~AssignableToLowerTriMatrix() {}
     };
 
-    template <class T, DiagType D, StorageType S, IndexStyle I>
-    inline std::string TMV_Text(const UpperTriMatrix<T,D,S,I>& )
+    template <class T, int A>
+    inline std::string TMV_Text(const UpperTriMatrix<T,A>& )
     {
         return std::string("UpperTriMatrix<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(D) + "," +
-            TMV_Text(S) + "," +
-            TMV_Text(I) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
-    template <class T, DiagType D, StorageType S, IndexStyle I>
-    inline std::string TMV_Text(const LowerTriMatrix<T,D,S,I>& )
+    template <class T, int A>
+    inline std::string TMV_Text(const LowerTriMatrix<T,A>& )
     {
         return std::string("LowerTriMatrix<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(D) + "," +
-            TMV_Text(S) + "," +
-            TMV_Text(I) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
     template <class T> 
     inline std::string TMV_Text(const GenUpperTriMatrix<T>& m)
     {
-        return std::string("GenUpperTriMatrix<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.dt()) + "," +
-            TMV_Text(m.ct()) + "," +
-            TMV_Text(m.stor()) + ">";
+        return std::string("GenUpperTriMatrix<") + TMV_Text(T()) + ">";
     }
     template <class T> 
     inline std::string TMV_Text(const GenLowerTriMatrix<T>& m)
     {
-        return std::string("GenLowerTriMatrix<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.dt()) + "," +
-            TMV_Text(m.ct()) + "," +
-            TMV_Text(m.stor()) + ">";
+        return std::string("GenLowerTriMatrix<") + TMV_Text(T()) + ">";
     }
 
-    template <class T, IndexStyle I> 
+    template <class T, int A>
     inline std::string TMV_Text(
-        const ConstUpperTriMatrixView<T,I>& m)
+        const ConstUpperTriMatrixView<T,A>& m)
     {
         return std::string("ConstUpperTriMatrixView<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.dt()) + "," +
-            TMV_Text(m.ct()) + "," +
-            TMV_Text(m.stor()) + "," +
-            TMV_Text(I) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
-    template <class T, IndexStyle I> 
+    template <class T, int A>
     inline std::string TMV_Text(
-        const ConstLowerTriMatrixView<T,I>& m)
+        const ConstLowerTriMatrixView<T,A>& m)
     {
         return std::string("ConstLowerTriMatrixView<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.dt()) + "," +
-            TMV_Text(m.ct()) + "," +
-            TMV_Text(m.stor()) + "," +
-            TMV_Text(I) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
-    template <class T, IndexStyle I> 
+    template <class T, int A>
     inline std::string TMV_Text(
-        const UpperTriMatrixView<T,I>& m)
+        const UpperTriMatrixView<T,A>& m)
     {
         return std::string("UpperTriMatrixView<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.dt()) + "," +
-            TMV_Text(m.ct()) + "," +
-            TMV_Text(m.stor()) + "," +
-            TMV_Text(I) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
-    template <class T, IndexStyle I> 
+    template <class T, int A>
     inline std::string TMV_Text(
-        const LowerTriMatrixView<T,I>& m)
+        const LowerTriMatrixView<T,A>& m)
     {
         return std::string("LowerTriMatrixView<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.dt()) + "," +
-            TMV_Text(m.ct()) + "," +
-            TMV_Text(m.stor()) + "," + 
-            TMV_Text(I) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
 } // namespace tmv

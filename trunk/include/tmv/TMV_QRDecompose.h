@@ -52,8 +52,8 @@ namespace tmv {
             
             typedef typename M1::value_type T;
 
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRDecompose algo 11: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -98,7 +98,7 @@ namespace tmv {
 
         // This prevents large matrices from unrolling a lot of 
         // intermediate MultMM, etc. calls.
-        enum { csx = cs == TMV_UNKNOWN || cs > 64 ? TMV_UNKNOWN : cs };
+        enum { csx = cs == Unknown || cs > 64 ? Unknown : cs };
 
 
         template <int j1, int j2, int N1>
@@ -121,7 +121,7 @@ namespace tmv {
             {
                 TMVStaticAssert(j2 == j1+1);
                 const int Mx = IntTraits2<csx,j2>::diff;
-                const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+                const int M = cs==Unknown ? A.colsize() : cs;
                 typename VViewHelper<T,Mx,AS1,C>::type u = A.col(j1,j2,M);
                 RT b0;
                 HouseholderReflect(A.ref(j1,j1),u,b0);
@@ -138,10 +138,10 @@ namespace tmv {
 
         static inline void call(M1& A, V& beta)
         {
-            TMVStaticAssert(rs != TMV_UNKNOWN);
+            TMVStaticAssert(rs != Unknown);
 #ifdef PRINTALGO_QR
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
             std::cout<<"QRDecompose algo 16: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
             //typedef typename M1::copy_type M1x;
@@ -170,8 +170,8 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
 
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRDecompose algo 21: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -194,11 +194,11 @@ namespace tmv {
 
             typedef typename V::iterator IT;
 
-            typedef typename MCopyHelper<T,Rec,NB,TMV_UNKNOWN>::type M3;
+            typedef typename MCopyHelper<T,Rec,NB,Unknown>::type M3;
             typedef typename M3::col_sub_type M3c;
             const int Si = M3::_stepi;
             const int Sj = M3::_stepj;
-            typedef typename MViewHelper<T,Rec,NB,TMV_UNKNOWN,Si,Sj>::type M3cr;
+            typedef typename MViewHelper<T,Rec,NB,Unknown,Si,Sj>::type M3cr;
 
             M3 tempBase = MatrixSizer<T>(NB,TMV_MAX(1,N-NB));
 
@@ -256,8 +256,8 @@ namespace tmv {
 
         const int cs = M1::_colsize;
         const int rs = Sizes<M1::_rowsize,M2::_size>::size;
-        const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
-        const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+        const int M = cs==Unknown ? A.colsize() : cs;
+        const int N = rs==Unknown ? A.rowsize() : rs;
 
         typedef typename M1::value_type T;
         typedef typename M1::real_type RT;
@@ -325,8 +325,8 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
 
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRDecompose algo 22: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -358,12 +358,12 @@ namespace tmv {
             typedef typename M3::submatrix_type M3s;
             M3 tempBase = MatrixSizer<T>(N1,N3);
 
-            typedef typename MViewHelper<T1,Rec,TMV_UNKNOWN,NB,Si1,Sj1,C>::type M1sa;
+            typedef typename MViewHelper<T1,Rec,Unknown,NB,Si1,Sj1,C>::type M1sa;
             const int s4 = (
-                rs == TMV_UNKNOWN ? TMV_UNKNOWN : 
+                rs == Unknown ? Unknown : 
                 rs - NB*(rs/NB) );
             const int s5 = (
-                (cs == TMV_UNKNOWN || rs == TMV_UNKNOWN) ? TMV_UNKNOWN :
+                (cs == Unknown || rs == Unknown) ? Unknown :
                 cs - NB*(rs/NB) );
             typedef typename MViewHelper<T1,Rec,s5,s4,Si1,Sj1,C>::type M1sb;
 
@@ -417,7 +417,7 @@ namespace tmv {
 
         // This prevents large matrices from unrolling a lot of 
         // intermediate MultMM, etc. calls.
-        enum { csx = cs == TMV_UNKNOWN || cs > 64 ? TMV_UNKNOWN : cs };
+        enum { csx = cs == Unknown || cs > 64 ? Unknown : cs };
 
         template <bool makeZ, int j1, int j2, int N1>
         struct MakeZ_Helper  // makeZ = false, any N1
@@ -433,7 +433,7 @@ namespace tmv {
                 const int jmid = IntTraits<IntTraits2<j1,j2>::sum>::halfS;
                 const int Na = jmid-j1;
                 const int Nb = j2-jmid;
-                const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+                const int M = cs==Unknown ? A.colsize() : cs;
                 const int Mx = IntTraits2<csx,j2>::diff;
 
                 typename MViewHelper<T,UpperTri,Na,Na,ZS1,ZS2>::type Z1 = 
@@ -478,7 +478,7 @@ namespace tmv {
             {
                 TMVStaticAssert(j2 == j1+2);
                 //std::cout<<"N==2 MakeZ:\n";
-                const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+                const int M = cs==Unknown ? A.colsize() : cs;
                 const int Mx = IntTraits2<csx,j2>::diff;
                 typename VViewHelper<T,Mx,AS1,C>::ctype A1b = A.col(j1,j2,M);
                 //std::cout<<"A1b = "<<A1b<<std::endl;
@@ -503,7 +503,7 @@ namespace tmv {
             static inline void unroll(M1& A, M2& Z, M3& tempBase) 
             {
                 TMVStaticAssert(j2 == j1+N1);
-                const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+                const int M = cs==Unknown ? A.colsize() : cs;
                 //std::cout<<"Start unroll: N = "<<N1<<"  "<<j1<<','<<j2<<std::endl;
                 const int jmid = IntTraits<IntTraits2<j1,j2>::sum>::halfS;
                 const int Na = jmid-j1;
@@ -542,7 +542,7 @@ namespace tmv {
             static inline void unroll(M1& A, M2& Z, M3& tempBase) 
             {
                 TMVStaticAssert(j2 == j1+2);
-                const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+                const int M = cs==Unknown ? A.colsize() : cs;
                 //std::cout<<"Start unroll: N = "<<2<<"  "<<j1<<','<<j2<<std::endl;
                 const int Mx1 = IntTraits2<csx,j1+1>::diff;
                 const int Mx2 = IntTraits2<csx,j2>::diff;
@@ -581,7 +581,7 @@ namespace tmv {
             static inline void unroll(M1& A, M2& Z, M3& tempBase) 
             {
                 TMVStaticAssert(j2 == j1+1);
-                const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+                const int M = cs==Unknown ? A.colsize() : cs;
                 //std::cout<<"Start unroll: N = "<<1<<"  "<<j1<<','<<j2<<std::endl;
                 const int Mx = IntTraits2<csx,j2>::diff;
                 typename VViewHelper<T,Mx,AS1,C>::type u0 = A.col(j1,j1+1,M);
@@ -594,10 +594,10 @@ namespace tmv {
         };
         static void call(M1& A, V& beta)
         {
-            TMVStaticAssert(rs != TMV_UNKNOWN);
+            TMVStaticAssert(rs != Unknown);
 #ifdef PRINTALGO_QR
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
             std::cout<<"QRDecompose algo 26: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
             //typedef typename M1::copy_type M1x;
@@ -627,9 +627,9 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
 
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+            const int M = cs==Unknown ? A.colsize() : cs;
             std::cout<<"QRDecompose algo 27: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -650,16 +650,16 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
 
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRDecompose algo 31: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
             const int algo27 = 
-                (rs == TMV_UNKNOWN || rs <= 128) ? 27 : 0;
+                (rs == Unknown || rs <= 128) ? 27 : 0;
             const int algo22 = 
-                (rs == TMV_UNKNOWN || rs > 128) ? 22 : 0;
+                (rs == Unknown || rs > 128) ? 22 : 0;
             const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
 
             // I'm assuming that this first transition is primarily 
@@ -689,11 +689,11 @@ namespace tmv {
     {
         static void call(M1& A, V& beta)
         {
-            TMVStaticAssert(rs != TMV_UNKNOWN);
+            TMVStaticAssert(rs != Unknown);
             typedef typename M1::value_type T;
 
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRDecompose algo 32: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -714,12 +714,12 @@ namespace tmv {
     {
         static void call(M1& A, V& beta)
         {
-            TMVStaticAssert(rs != TMV_UNKNOWN);
+            TMVStaticAssert(rs != Unknown);
             typedef typename M1::value_type T;
 
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+            const int M = cs==Unknown ? A.colsize() : cs;
 #ifdef PRINTALGO_QR
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
             std::cout<<"QRDecompose algo 33: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -789,15 +789,15 @@ namespace tmv {
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                rs == TMV_UNKNOWN ? 31 :
+                rs == Unknown ? 31 :
                 rs <= maxunroll ? (
                     rs <= 32 ? (
-                        cs == TMV_UNKNOWN ? 32 :
+                        cs == Unknown ? 32 :
                         (csrs <= l1cache ? 16 : 26) ) :
-                    cs == TMV_UNKNOWN ? 33 : 
+                    cs == Unknown ? 33 : 
                     cs <= 128 ? 11 : 26) :
                 rsrs > l2cache ? (rs <= 128 ? 27 : 22) :
-                cs == TMV_UNKNOWN ? 31 : 
+                cs == Unknown ? 31 : 
                 csrs <= l2cache ? 11 :
                 rs <= 128 ? 27 : 22;
 #ifdef PRINTALGO_QR
@@ -825,13 +825,13 @@ namespace tmv {
         static TMV_INLINE void call(M1& m, V& beta)
         {
             const int algo = (
-                ( cs != TMV_UNKNOWN && rs != TMV_UNKNOWN &&
+                ( cs != Unknown && rs != Unknown &&
                   cs <= 16 && rs <= 16 ) ? -4 :
                 ( TMV_OPT >= 2 && !M1::_colmajor ) ? 81 :
                 -4 );
 #ifdef PRINTALGO_QR
-            const int M = cs==TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs==Unknown ? m.colsize() : cs;
+            const int N = rs==Unknown ? m.rowsize() : rs;
             std::cout<<"QRDecompose algo -3: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
@@ -852,8 +852,8 @@ namespace tmv {
         {
             typedef typename M::value_type T;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 cs == 0 || rs == 0 || cs == 1 ? 0 :

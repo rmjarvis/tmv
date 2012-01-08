@@ -21,10 +21,10 @@ static void TestBasicSymMatrix_1()
         std::cout<<"N = "<<N<<std::endl;
     }
 
-    tmv::SymMatrix<std::complex<T>,U,S> s1(N);
-    tmv::SymMatrix<std::complex<T>,U,S> s2(N);
-    tmv::SymMatrix<std::complex<T>,U,S,tmv::FortranStyle> s1f(N);
-    tmv::SymMatrix<std::complex<T>,U,S,tmv::FortranStyle> s2f(N);
+    tmv::SymMatrix<std::complex<T>,U|S> s1(N);
+    tmv::SymMatrix<std::complex<T>,U|S> s2(N);
+    tmv::SymMatrix<std::complex<T>,U|S|tmv::FortranStyle> s1f(N);
+    tmv::SymMatrix<std::complex<T>,U|S|tmv::FortranStyle> s2f(N);
 
     Assert(int(s1.colsize()) == N && int(s1.rowsize()) == N,
            "Creating SymMatrix(N)");
@@ -51,10 +51,10 @@ static void TestBasicSymMatrix_1()
     tmv::SymMatrixView<std::complex<T>,tmv::FortranStyle> s2fv = s2f.view();
     tmv::ConstSymMatrixView<std::complex<T>,tmv::FortranStyle> s2fcv =
         s2f.view();
-    const tmv::SymMatrix<std::complex<T>,U,S>& s1x = s1;
-    const tmv::SymMatrix<std::complex<T>,U,S>& s2x = s2;
-    const tmv::SymMatrix<std::complex<T>,U,S,tmv::FortranStyle>& s1fx = s1f;
-    const tmv::SymMatrix<std::complex<T>,U,S,tmv::FortranStyle>& s2fx = s2f;
+    const tmv::SymMatrix<std::complex<T>,U|S>& s1x = s1;
+    const tmv::SymMatrix<std::complex<T>,U|S>& s2x = s2;
+    const tmv::SymMatrix<std::complex<T>,U|S|tmv::FortranStyle>& s1fx = s1f;
+    const tmv::SymMatrix<std::complex<T>,U|S|tmv::FortranStyle>& s2fx = s2f;
 
     for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
@@ -326,10 +326,10 @@ static void TestBasicHermMatrix_1()
         std::cout<<"N = "<<N<<std::endl;
     }
 
-    tmv::HermMatrix<std::complex<T>,U,S> h1(N);
-    tmv::HermMatrix<std::complex<T>,U,S> h2(N);
-    tmv::HermMatrix<std::complex<T>,U,S,tmv::FortranStyle> h1f(N);
-    tmv::HermMatrix<std::complex<T>,U,S,tmv::FortranStyle> h2f(N);
+    tmv::HermMatrix<std::complex<T>,U|S> h1(N);
+    tmv::HermMatrix<std::complex<T>,U|S> h2(N);
+    tmv::HermMatrix<std::complex<T>,U|S|tmv::FortranStyle> h1f(N);
+    tmv::HermMatrix<std::complex<T>,U|S|tmv::FortranStyle> h2f(N);
 
     Assert(int(h1.colsize()) == N && int(h1.rowsize()) == N,
            "Creating HermMatrix(N)");
@@ -357,10 +357,10 @@ static void TestBasicHermMatrix_1()
     tmv::SymMatrixView<std::complex<T>,tmv::FortranStyle> h2fv = h2f.view();
     tmv::ConstSymMatrixView<std::complex<T>,tmv::FortranStyle> h2fcv =
         h2f.view();
-    const tmv::HermMatrix<std::complex<T>,U,S>& h1x = h1;
-    const tmv::HermMatrix<std::complex<T>,U,S>& h2x = h2;
-    const tmv::HermMatrix<std::complex<T>,U,S,tmv::FortranStyle>& h1fx = h1f;
-    const tmv::HermMatrix<std::complex<T>,U,S,tmv::FortranStyle>& h2fx = h2f;
+    const tmv::HermMatrix<std::complex<T>,U|S>& h1x = h1;
+    const tmv::HermMatrix<std::complex<T>,U|S>& h2x = h2;
+    const tmv::HermMatrix<std::complex<T>,U|S|tmv::FortranStyle>& h1fx = h1f;
+    const tmv::HermMatrix<std::complex<T>,U|S|tmv::FortranStyle>& h2fx = h2f;
 
     for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
@@ -693,47 +693,47 @@ static void TestBasicSymMatrix_2()
     std::vector<T> qlveccm(6);
     for(int i=0;i<6;i++) qlveccm[i] = qlarcm[i];
 
-    tmv::SymMatrix<T,U,S> q1(3);
+    tmv::SymMatrix<T,U|S> q1(3);
     std::copy(quarrm, quarrm+6, q1.upperTri().rowmajor_begin());
-    tmv::SymMatrix<T,U,S> q2(3);
+    tmv::SymMatrix<T,U|S> q2(3);
     std::copy(quarcm, quarcm+6, q2.upperTri().colmajor_begin());
 
-    tmv::SymMatrix<T,U,S> q3(3);
+    tmv::SymMatrix<T,U|S> q3(3);
     std::copy(qlarrm, qlarrm+6, q3.lowerTri().rowmajor_begin());
-    tmv::SymMatrix<T,U,S> q4(3);
+    tmv::SymMatrix<T,U|S> q4(3);
     std::copy(qlarcm, qlarcm+6, q4.lowerTri().colmajor_begin());
 
-    tmv::SymMatrix<T,U,S> q5(3);
+    tmv::SymMatrix<T,U|S> q5(3);
     std::copy(quvecrm.begin(), quvecrm.end(), q5.upperTri().rowmajor_begin());
-    tmv::SymMatrix<T,U,S> q6(3);
+    tmv::SymMatrix<T,U|S> q6(3);
     std::copy(quveccm.begin(), quveccm.end(), q6.upperTri().colmajor_begin());
 
-    tmv::SymMatrix<T,U,S> q7(3);
+    tmv::SymMatrix<T,U|S> q7(3);
     std::copy(qlvecrm.begin(), qlvecrm.end(), q7.lowerTri().rowmajor_begin());
-    tmv::SymMatrix<T,U,S> q8(3);
+    tmv::SymMatrix<T,U|S> q8(3);
     std::copy(qlveccm.begin(), qlveccm.end(), q8.lowerTri().colmajor_begin());
 
-    tmv::SymMatrix<T,U,S> q9x(30);
+    tmv::SymMatrix<T,U|S> q9x(30);
     tmv::SymMatrixView<T> q9 = q9x.subSymMatrix(3,18,5);
     std::copy(quvecrm.begin(), quvecrm.end(), q9.upperTri().rowmajor_begin());
-    tmv::SymMatrix<T,U,S> q10x(30);
+    tmv::SymMatrix<T,U|S> q10x(30);
     tmv::SymMatrixView<T> q10 = q10x.subSymMatrix(3,18,5);
     std::copy(quveccm.begin(), quveccm.end(), q10.upperTri().colmajor_begin());
 
-    tmv::SymMatrix<T,U,S> q11x(30);
+    tmv::SymMatrix<T,U|S> q11x(30);
     tmv::SymMatrixView<T> q11 = q11x.subSymMatrix(3,18,5);
     std::copy(qlvecrm.begin(), qlvecrm.end(), q11.lowerTri().rowmajor_begin());
-    tmv::SymMatrix<T,U,S> q12x(30);
+    tmv::SymMatrix<T,U|S> q12x(30);
     tmv::SymMatrixView<T> q12 = q12x.subSymMatrix(3,18,5);
     std::copy(qlveccm.begin(), qlveccm.end(), q12.lowerTri().colmajor_begin());
 
     // Assignment using op<< is always in rowmajor order.
-    tmv::SymMatrix<T,U,S> q13(3);
-    tmv::SymMatrix<T,U,S> q14t(3);
+    tmv::SymMatrix<T,U|S> q13(3);
+    tmv::SymMatrix<T,U|S> q14t(3);
     tmv::SymMatrixView<T> q14 = q14t.transpose();
 
-    tmv::SymMatrix<T,U,S> q15(3);
-    tmv::SymMatrix<T,U,S> q16t(3);
+    tmv::SymMatrix<T,U|S> q15(3);
+    tmv::SymMatrix<T,U|S> q16t(3);
     tmv::SymMatrixView<T> q16 = q16t.transpose();
 
     q13.upperTri() <<
@@ -829,8 +829,8 @@ static void TestBasicSymMatrix_2()
     }
 
     // Test Basic Arithmetic
-    tmv::SymMatrix<std::complex<T>,U,S> s1(N);
-    tmv::SymMatrix<std::complex<T>,U,S> s2(N);
+    tmv::SymMatrix<std::complex<T>,U|S> s1(N);
+    tmv::SymMatrix<std::complex<T>,U|S> s2(N);
 
     for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
@@ -842,7 +842,7 @@ static void TestBasicSymMatrix_2()
         }
     }
 
-    tmv::SymMatrix<std::complex<T>,U,S> s3(N);
+    tmv::SymMatrix<std::complex<T>,U|S> s3(N);
     s3 = s1+s2;
 
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
@@ -862,12 +862,12 @@ static void TestBasicSymMatrix_2()
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         Assert(s1(i,j) == m1(i,j),"SymMatrix -> Matrix");
     }
-    tmv::SymMatrix<std::complex<T>,U,S> sm1(m1);
+    tmv::SymMatrix<std::complex<T>,U|S> sm1(m1);
     Assert(s1 == sm1,"Matrix -> SymMatrix1");
-    tmv::SymMatrix<std::complex<T>,U,S> sm2 = m1;
+    tmv::SymMatrix<std::complex<T>,U|S> sm2 = m1;
     Assert(s1 == sm2,"Matrix -> SymMatrix2");
 
-    tmv::SymMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor> sur = s1;
+    tmv::SymMatrix<std::complex<T>,tmv::Upper|tmv::RowMajor> sur = s1;
     Assert(s1==sur,"SymMatrix == SymMatrix<U,R>");
     Assert(s1.view()==sur.view(),"SymMatrix.view == SymMatrix<U,R>.view");
     Assert(s1.transpose()==sur.transpose(),
@@ -936,47 +936,47 @@ static void TestBasicHermMatrix_2()
     std::vector<CT> qlveccm(6);
     for(int i=0;i<6;i++) qlveccm[i] = qlarcm[i];
 
-    tmv::HermMatrix<CT,U,S> q1(3);
+    tmv::HermMatrix<CT,U|S> q1(3);
     std::copy(quarrm, quarrm+6, q1.upperTri().rowmajor_begin());
-    tmv::HermMatrix<CT,U,S> q2(3);
+    tmv::HermMatrix<CT,U|S> q2(3);
     std::copy(quarcm, quarcm+6, q2.upperTri().colmajor_begin());
 
-    tmv::HermMatrix<CT,U,S> q3(3);
+    tmv::HermMatrix<CT,U|S> q3(3);
     std::copy(qlarrm, qlarrm+6, q3.lowerTri().rowmajor_begin());
-    tmv::HermMatrix<CT,U,S> q4(3);
+    tmv::HermMatrix<CT,U|S> q4(3);
     std::copy(qlarcm, qlarcm+6, q4.lowerTri().colmajor_begin());
 
-    tmv::HermMatrix<CT,U,S> q5(3);
+    tmv::HermMatrix<CT,U|S> q5(3);
     std::copy(quvecrm.begin(), quvecrm.end(), q5.upperTri().rowmajor_begin());
-    tmv::HermMatrix<CT,U,S> q6(3);
+    tmv::HermMatrix<CT,U|S> q6(3);
     std::copy(quveccm.begin(), quveccm.end(), q6.upperTri().colmajor_begin());
 
-    tmv::HermMatrix<CT,U,S> q7(3);
+    tmv::HermMatrix<CT,U|S> q7(3);
     std::copy(qlvecrm.begin(), qlvecrm.end(), q7.lowerTri().rowmajor_begin());
-    tmv::HermMatrix<CT,U,S> q8(3);
+    tmv::HermMatrix<CT,U|S> q8(3);
     std::copy(qlveccm.begin(), qlveccm.end(), q8.lowerTri().colmajor_begin());
 
-    tmv::HermMatrix<CT,U,S> q9x(30);
+    tmv::HermMatrix<CT,U|S> q9x(30);
     tmv::SymMatrixView<CT> q9 = q9x.subSymMatrix(3,18,5);
     std::copy(quvecrm.begin(), quvecrm.end(), q9.upperTri().rowmajor_begin());
-    tmv::HermMatrix<CT,U,S> q10x(30);
+    tmv::HermMatrix<CT,U|S> q10x(30);
     tmv::SymMatrixView<CT> q10 = q10x.subSymMatrix(3,18,5);
     std::copy(quveccm.begin(), quveccm.end(), q10.upperTri().colmajor_begin());
 
-    tmv::HermMatrix<CT,U,S> q11x(30);
+    tmv::HermMatrix<CT,U|S> q11x(30);
     tmv::SymMatrixView<CT> q11 = q11x.subSymMatrix(3,18,5);
     std::copy(qlvecrm.begin(), qlvecrm.end(), q11.lowerTri().rowmajor_begin());
-    tmv::HermMatrix<CT,U,S> q12x(30);
+    tmv::HermMatrix<CT,U|S> q12x(30);
     tmv::SymMatrixView<CT> q12 = q12x.subSymMatrix(3,18,5);
     std::copy(qlveccm.begin(), qlveccm.end(), q12.lowerTri().colmajor_begin());
 
     // Assignment using op<< is always in rowmajor order.
-    tmv::HermMatrix<CT,U,S> q13(3);
-    tmv::HermMatrix<CT,U,S> q14t(3);
+    tmv::HermMatrix<CT,U|S> q13(3);
+    tmv::HermMatrix<CT,U|S> q14t(3);
     tmv::SymMatrixView<CT> q14 = q14t.transpose();
 
-    tmv::HermMatrix<CT,U,S> q15(3);
-    tmv::HermMatrix<CT,U,S> q16t(3);
+    tmv::HermMatrix<CT,U|S> q15(3);
+    tmv::HermMatrix<CT,U|S> q16t(3);
     tmv::SymMatrixView<CT> q16 = q16t.transpose();
 
     q13.upperTri() <<
@@ -1072,8 +1072,8 @@ static void TestBasicHermMatrix_2()
     }
 
     // Test Basic Arithmetic
-    tmv::HermMatrix<std::complex<T>,U,S> h1(N);
-    tmv::HermMatrix<std::complex<T>,U,S> h2(N);
+    tmv::HermMatrix<std::complex<T>,U|S> h1(N);
+    tmv::HermMatrix<std::complex<T>,U|S> h2(N);
 
     for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         std::complex<T> value(T(k),T(2*k));
@@ -1086,7 +1086,7 @@ static void TestBasicHermMatrix_2()
         }
     }
 
-    tmv::HermMatrix<std::complex<T>,U,S> h3(N);
+    tmv::HermMatrix<std::complex<T>,U|S> h3(N);
     h3 = h1+h2;
 
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
@@ -1106,12 +1106,12 @@ static void TestBasicHermMatrix_2()
     for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         Assert(h1(i,j) == n1(i,j),"HermMatrix -> Matrix");
     }
-    tmv::HermMatrix<std::complex<T>,U,S> hn1(n1);
+    tmv::HermMatrix<std::complex<T>,U|S> hn1(n1);
     Assert(h1 == hn1,"Matrix -> HermMatrix1");
-    tmv::HermMatrix<std::complex<T>,U,S> hn2 = n1;
+    tmv::HermMatrix<std::complex<T>,U|S> hn2 = n1;
     Assert(h1 == hn2,"Matrix -> HermMatrix2");
 
-    tmv::HermMatrix<std::complex<T>,tmv::Upper,tmv::RowMajor> hur = h1;
+    tmv::HermMatrix<std::complex<T>,tmv::Upper|tmv::RowMajor> hur = h1;
     Assert(h1==hur,"HermMatrix == HermMatrix<U,R>");
     Assert(h1.view()==hur.view(),"HermMatrix.view == HermMatrix<U,R>.view");
     Assert(h1.transpose()==hur.transpose(),
@@ -1147,10 +1147,10 @@ static void TestBasicSymMatrix_IO()
         std::cout<<"N = "<<N<<std::endl;
     }
 
-    tmv::SymMatrix<T,U,S> s(N);
-    tmv::HermMatrix<T,U,S> h(N);
-    tmv::SymMatrix<std::complex<T>,U,S> cs(N);
-    tmv::HermMatrix<std::complex<T>,U,S> ch(N);
+    tmv::SymMatrix<T,U|S> s(N);
+    tmv::HermMatrix<T,U|S> h(N);
+    tmv::SymMatrix<std::complex<T>,U|S> cs(N);
+    tmv::HermMatrix<std::complex<T>,U|S> ch(N);
 
     for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         if ( (U == tmv::Upper && i<=j) ||
@@ -1228,10 +1228,10 @@ static void TestBasicSymMatrix_IO()
     else cs3(4,7) = ch3(7,4)  = CT(3.123,601.0);
 
     // Read them back in
-    tmv::SymMatrix<T,tmv::Upper,tmv::RowMajor> xs1(N);
-    tmv::HermMatrix<T,tmv::Upper,tmv::RowMajor> xh1(N);
-    tmv::SymMatrix<CT,tmv::Upper,tmv::RowMajor> xcs1(N);
-    tmv::HermMatrix<CT,tmv::Upper,tmv::RowMajor> xch1(N);
+    tmv::SymMatrix<T,tmv::Upper|tmv::RowMajor> xs1(N);
+    tmv::HermMatrix<T,tmv::Upper|tmv::RowMajor> xh1(N);
+    tmv::SymMatrix<CT,tmv::Upper|tmv::RowMajor> xcs1(N);
+    tmv::HermMatrix<CT,tmv::Upper|tmv::RowMajor> xch1(N);
     std::ifstream fin("tmvtest_symmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_symmatrix_io.dat for input");
     fin >> xs1 >> xh1 >> xcs1 >> xch1;
@@ -1259,10 +1259,10 @@ static void TestBasicSymMatrix_IO()
     fin.close();
 
     // Repeat for column major
-    tmv::SymMatrix<T,tmv::Upper,tmv::ColMajor> xs2(N);
-    tmv::HermMatrix<T,tmv::Upper,tmv::ColMajor> xh2(N);
-    tmv::SymMatrix<CT,tmv::Upper,tmv::ColMajor> xcs2(N);
-    tmv::HermMatrix<CT,tmv::Upper,tmv::ColMajor> xch2(N);
+    tmv::SymMatrix<T,tmv::Upper|tmv::ColMajor> xs2(N);
+    tmv::HermMatrix<T,tmv::Upper|tmv::ColMajor> xh2(N);
+    tmv::SymMatrix<CT,tmv::Upper|tmv::ColMajor> xcs2(N);
+    tmv::HermMatrix<CT,tmv::Upper|tmv::ColMajor> xch2(N);
     fin.open("tmvtest_symmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_symmatrix_io.dat for input");
     fin >> xs2.view() >> xh2.view() >> xcs2.view() >> xch2.view();
@@ -1292,10 +1292,10 @@ static void TestBasicSymMatrix_IO()
     // Repeat for Lower Storage
     // Also switch s and h for real matrices.  They should be able to 
     // read the opposite letter for the compact storage.
-    tmv::SymMatrix<T,tmv::Lower,tmv::RowMajor> xs3(N);
-    tmv::HermMatrix<T,tmv::Lower,tmv::RowMajor> xh3(N);
-    tmv::SymMatrix<CT,tmv::Lower,tmv::RowMajor> xcs3(N);
-    tmv::HermMatrix<CT,tmv::Lower,tmv::RowMajor> xch3(N);
+    tmv::SymMatrix<T,tmv::Lower|tmv::RowMajor> xs3(N);
+    tmv::HermMatrix<T,tmv::Lower|tmv::RowMajor> xh3(N);
+    tmv::SymMatrix<CT,tmv::Lower|tmv::RowMajor> xcs3(N);
+    tmv::HermMatrix<CT,tmv::Lower|tmv::RowMajor> xch3(N);
     fin.open("tmvtest_symmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_symmatrix_io.dat for input");
     fin >> xh3.view() >> xs3.view() >> xcs3.view() >> xch3.view();
@@ -1322,10 +1322,10 @@ static void TestBasicSymMatrix_IO()
     Assert(ch3 == xch3,"CHermMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
-    tmv::SymMatrix<T,tmv::Lower,tmv::ColMajor> xs4(N);
-    tmv::HermMatrix<T,tmv::Lower,tmv::ColMajor> xh4(N);
-    tmv::SymMatrix<CT,tmv::Lower,tmv::ColMajor> xcs4(N);
-    tmv::HermMatrix<CT,tmv::Lower,tmv::ColMajor> xch4(N);
+    tmv::SymMatrix<T,tmv::Lower|tmv::ColMajor> xs4(N);
+    tmv::HermMatrix<T,tmv::Lower|tmv::ColMajor> xh4(N);
+    tmv::SymMatrix<CT,tmv::Lower|tmv::ColMajor> xcs4(N);
+    tmv::HermMatrix<CT,tmv::Lower|tmv::ColMajor> xch4(N);
     fin.open("tmvtest_symmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_symmatrix_io.dat for input");
     fin >> xh4.view() >> xs4.view() >> xcs4.view() >> xch4.view();

@@ -651,7 +651,7 @@ namespace tmv {
                 cs == 3 && rs == 3 ? 3 :
                 cs == 4 && rs == 4 ? 4 :
                 M1::_hasdivider ? 11 :
-                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 14 :
+                cs == Unknown || rs == Unknown ? 14 :
                 cs == rs ? 12 : 
                 13;
 #ifdef PRINTALGO_INVM
@@ -690,7 +690,7 @@ namespace tmv {
                 cs == 3 && rs == 3 ? 3 :
                 cs == 4 && rs == 4 ? 4 :
                 M1::_hasdivider ? 11 :
-                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 14 :
+                cs == Unknown || rs == Unknown ? 14 :
                 cs == rs ? 12 : 
                 13;
 #ifdef PRINTALGO_INVM
@@ -800,8 +800,8 @@ namespace tmv {
             std::cout<<"InvATA algo 2: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
-            TMVStaticAssert(rs != TMV_UNKNOWN);
-            TMVStaticAssert(cs == TMV_UNKNOWN || rs <= cs);
+            TMVStaticAssert(rs != Unknown);
+            TMVStaticAssert(cs == Unknown || rs <= cs);
             TMVAssert(m1.rowsize() <= m1.colsize());
             typedef typename M1::value_type T1;
             typedef typename M1::real_type RT;
@@ -824,8 +824,8 @@ namespace tmv {
             std::cout<<"InvATA algo 3: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
-            TMVStaticAssert(cs != TMV_UNKNOWN);
-            TMVStaticAssert(rs == TMV_UNKNOWN || cs < rs);
+            TMVStaticAssert(cs != Unknown);
+            TMVStaticAssert(rs == Unknown || cs < rs);
             TMVAssert(m1.colsize() < m1.rowsize());
             typedef typename M1::value_type T1;
             typedef typename M1::real_type RT;
@@ -1136,10 +1136,10 @@ namespace tmv {
                     (up2 || lo2) ? 22 : 24 ) :
                 !lo1 ? 32 : // m1 is uppertri
                 !up1 ? 42 : // m1 is lowertri
-                (rs != TMV_UNKNOWN && cs != TMV_UNKNOWN && rs <= 4 && rs <= cs) ? 2 :
-                (rs != TMV_UNKNOWN && cs != TMV_UNKNOWN && cs <= 4) ? 2 :
+                (rs != Unknown && cs != Unknown && rs <= 4 && rs <= cs) ? 2 :
+                (rs != Unknown && cs != Unknown && cs <= 4) ? 2 :
                 M1::_hasdivider ? 11 :
-                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 14 :
+                cs == Unknown || rs == Unknown ? 14 :
                 cs == rs ? 12 : 
                 13;
 #ifdef PRINTALGO_INVM
@@ -1173,10 +1173,10 @@ namespace tmv {
                     (up2 || lo2) ? 21 : 23 ) :
                 !lo1 ? 31 : // m1 is uppertri
                 !up1 ? 41 : // m1 is lowertri
-                (rs != TMV_UNKNOWN && cs != TMV_UNKNOWN && rs <= 4 && rs <= cs) ? 2 :
-                (rs != TMV_UNKNOWN && cs != TMV_UNKNOWN && cs <= 4) ? 2 :
+                (rs != Unknown && cs != Unknown && rs <= 4 && rs <= cs) ? 2 :
+                (rs != Unknown && cs != Unknown && cs <= 4) ? 2 :
                 M1::_hasdivider ? 11 :
-                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 14 :
+                cs == Unknown || rs == Unknown ? 14 :
                 cs == rs ? 12 : 
                 13;
 #ifdef PRINTALGO_INVM

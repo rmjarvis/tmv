@@ -24,7 +24,7 @@ static void TestBasicBandMatrix_1()
     }
 
     tmv::BandMatrix<T> a1(N,N,nlo,nhi);
-    tmv::BandMatrix<T,tmv::RowMajor,tmv::FortranStyle> a1f(N,N,nlo,nhi);
+    tmv::BandMatrix<T,tmv::RowMajor|tmv::FortranStyle> a1f(N,N,nlo,nhi);
 
     Assert(a1.colsize() == N && a1.rowsize() == N,
            "Creating BandMatrix(N)");
@@ -396,7 +396,7 @@ static void TestBasicBandMatrix_2()
             a1(i,j) = T(3+i-5*j);
             a2(i,j) = T(5-2*i+4*j);
         }
-    tmv::BandMatrix<T,tmv::RowMajor,tmv::FortranStyle> a1f(N,N,nlo,nhi);
+    tmv::BandMatrix<T,tmv::RowMajor|tmv::FortranStyle> a1f(N,N,nlo,nhi);
     a1f = a1;
     Assert(a1f == a1,"Copy CStyle BandMatrix to FortranStyle");
 

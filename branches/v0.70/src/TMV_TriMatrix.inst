@@ -62,27 +62,27 @@ Def2(CT,CT)
 
 #undef Def2
 
-#define Def3(T,D,S,I) \
-  template void UpperTriMatrix<T,D,S,I>::read(const TMV_Reader& reader); \
-  template void LowerTriMatrix<T,D,S,I>::read(const TMV_Reader& reader); \
+#define Def3(T,A) \
+  template void UpperTriMatrix<T,A>::read(const TMV_Reader& reader); \
+  template void LowerTriMatrix<T,A>::read(const TMV_Reader& reader); \
 
-Def3(T,UnitDiag,RowMajor,CStyle)
-Def3(T,UnitDiag,ColMajor,CStyle)
-Def3(T,NonUnitDiag,RowMajor,CStyle)
-Def3(T,NonUnitDiag,ColMajor,CStyle)
-Def3(T,UnitDiag,RowMajor,FortranStyle)
-Def3(T,UnitDiag,ColMajor,FortranStyle)
-Def3(T,NonUnitDiag,RowMajor,FortranStyle)
-Def3(T,NonUnitDiag,ColMajor,FortranStyle)
+Def3(T,UnitDiag|RowMajor|CStyle)
+Def3(T,UnitDiag|ColMajor|CStyle)
+Def3(T,NonUnitDiag|RowMajor|CStyle)
+Def3(T,NonUnitDiag|ColMajor|CStyle)
+Def3(T,UnitDiag|RowMajor|FortranStyle)
+Def3(T,UnitDiag|ColMajor|FortranStyle)
+Def3(T,NonUnitDiag|RowMajor|FortranStyle)
+Def3(T,NonUnitDiag|ColMajor|FortranStyle)
 #ifdef INST_COMPLEX
-Def3(CT,UnitDiag,RowMajor,CStyle)
-Def3(CT,UnitDiag,ColMajor,CStyle)
-Def3(CT,NonUnitDiag,RowMajor,CStyle)
-Def3(CT,NonUnitDiag,ColMajor,CStyle)
-Def3(CT,UnitDiag,RowMajor,FortranStyle)
-Def3(CT,UnitDiag,ColMajor,FortranStyle)
-Def3(CT,NonUnitDiag,RowMajor,FortranStyle)
-Def3(CT,NonUnitDiag,ColMajor,FortranStyle)
+Def3(CT,UnitDiag|RowMajor|CStyle)
+Def3(CT,UnitDiag|ColMajor|CStyle)
+Def3(CT,NonUnitDiag|RowMajor|CStyle)
+Def3(CT,NonUnitDiag|ColMajor|CStyle)
+Def3(CT,UnitDiag|RowMajor|FortranStyle)
+Def3(CT,UnitDiag|ColMajor|FortranStyle)
+Def3(CT,NonUnitDiag|RowMajor|FortranStyle)
+Def3(CT,NonUnitDiag|ColMajor|FortranStyle)
 #endif
 
 #undef Def3

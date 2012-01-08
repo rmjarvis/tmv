@@ -29,7 +29,7 @@ namespace tmv {
     {
         static void call(M1& m)
         {
-            const int nhi = (hi == TMV_UNKNOWN ? m.nhi() : hi);
+            const int nhi = (hi == Unknown ? m.nhi() : hi);
             for(int k=1;k<=nhi;++k) {
                 typename M1::diag_sub_type::noalias_type v1 = 
                     m.get_diag(-k).noAlias();
@@ -83,7 +83,7 @@ namespace tmv {
             typedef typename M1::value_type T;
             const int s = Sizes<M1::_colsize,M1::_rowsize>::size;
             const bool inst = 
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 M1::_conj ? 97 :

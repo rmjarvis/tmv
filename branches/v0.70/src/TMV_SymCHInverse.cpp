@@ -138,7 +138,7 @@ namespace tmv {
                 !isSameType(T(),T1()) || 
 #endif
                 !(sinv.iscm() || sinv.isrm())) {
-                HermMatrix<T,Lower,ColMajor> temp(sinv.size());
+                HermMatrix<T,Lower|ColMajor> temp(sinv.size());
                 CH_Inverse(LLx,temp.view());
                 sinv = temp;
 #ifdef ALAP

@@ -624,7 +624,6 @@ namespace tmv {
 
     // TMV_Text
 
-#ifdef TMV_TEXT
     template <int ix, class T, class V1, class M2>
     inline std::string TMV_Text(const QuotVM<ix,T,V1,M2>& qvm)
     {
@@ -642,7 +641,6 @@ namespace tmv {
         s << TMV_Text(qvm.getV())<<" , "<<TMV_Text(qvm.getM())<<" >";
         return s.str();
     }
-#endif
 
 } // namespace tmv
 

@@ -53,8 +53,8 @@ namespace tmv {
     //
 
     template <bool rm, bool a1, bool ca, class T, class T1, class T2> 
-    static void DoRowAddMM(const T1 alpha, const GenMatrix<T2>& A, 
-                           const MatrixView<T>& B)
+    static void DoRowAddMM(
+        const T1 alpha, const GenMatrix<T2>& A, const MatrixView<T>& B)
     {
         TMVAssert(A.colsize() == B.colsize());
         TMVAssert(A.rowsize() == B.rowsize());
@@ -90,7 +90,8 @@ namespace tmv {
         }
     }
 
-    template <bool rm, class T, class Ta> static void rowAddMM(
+    template <bool rm, class T, class Ta> 
+    static void rowAddMM(
         const T alpha, const GenMatrix<Ta>& A, const MatrixView<T>& B)
     { 
         if (TMV_IMAG(alpha) == TMV_RealType(T)(0))
@@ -105,7 +106,8 @@ namespace tmv {
             else DoRowAddMM<rm,false,false>(alpha,A,B);
     }
 
-    template <class T, class Ta> static void DoAddMM(
+    template <class T, class Ta> 
+    static void DoAddMM(
         const T alpha, const GenMatrix<Ta>& A, const MatrixView<T>& B)
     { 
         TMVAssert(A.colsize() == B.colsize());
@@ -116,8 +118,16 @@ namespace tmv {
         TMVAssert(B.ct() == NonConj);
         TMVAssert(!SameStorage(A,B));
 
-        if (A.stor() == B.stor() && A.canLinearize() && B.canLinearize()) {
-            TMVAssert(A.stepi() == B.stepi() && A.stepj() == B.stepj());
+        //cout<<"!SameStorage\n";
+        //cout<<"A = "<<A.cptr()<<" "<<A.stepi()<<"  "<<A.stepj()<<std::endl;;
+        //cout<<"B = "<<B.cptr()<<" "<<B.stepi()<<"  "<<B.stepj()<<std::endl;;
+        //cout<<"A.isrm = "<<A.isrm()<<std::endl;
+        //cout<<"B.isrm = "<<A.isrm()<<std::endl;
+        //cout<<"A.iscm = "<<A.iscm()<<std::endl;
+        //cout<<"B.iscm = "<<A.iscm()<<std::endl;
+        if (A.canLinearize() && B.canLinearize() &&
+            A.stepi() == B.stepi() && A.stepj() == B.stepj()) {
+            //cout<<"linearize\n";
             B.linearView() += alpha * A.constLinearView();
         } else {
             if (A.isrm() && B.isrm())
@@ -131,9 +141,8 @@ namespace tmv {
         }
     }
 
-    template <class T, class Ta> void AddMM(const T alpha,
-              const GenMatrix<Ta>& A, const MatrixView<T>& B)
-        // B += alpha * A 
+    template <class T, class Ta> 
+    void AddMM(const T alpha, const GenMatrix<Ta>& A, const MatrixView<T>& B)
     {
         TMVAssert(A.colsize() == B.colsize());
         TMVAssert(A.rowsize() == B.rowsize());
@@ -144,8 +153,8 @@ namespace tmv {
         for(int i=0;i<A.colsize();i++)
             for(int j=0;j<A.rowsize();j++)
                 B2(i,j) += alpha*A(i,j);
-        //cout<<"AddMM: alpha = "<<alpha<<", A = "<<TMV_Text(A)<<"  "<<A<<endl;
-        //cout<<", B = "<<TMV_Text(B)<<"  "<<B<<endl;
+        cout<<"AddMM: alpha = "<<alpha<<", A = "<<TMV_Text(A)<<"  "<<A<<endl;
+        cout<<", B = "<<TMV_Text(B)<<"  "<<B<<endl;
 #endif
 
         if (alpha != T(0) && B.colsize() > 0 && B.rowsize() > 0) {
@@ -154,9 +163,11 @@ namespace tmv {
             else {
                 if (SameStorage(A,B)) {
                     if (B.isrm()) {
+                        //cout<<"SameStorage, B isrm\n";
                         Matrix<T,RowMajor> A2 = A;
                         DoAddMM(alpha,A2,B);
                     } else {
+                        //cout<<"SameStorage, B iscm\n";
                         Matrix<T,ColMajor> A2 = A;
                         DoAddMM(alpha,A2,B);
                     }
@@ -165,7 +176,7 @@ namespace tmv {
             }
         }
 #ifdef XDEBUG
-        //cout<<"done: B = "<<B<<endl;
+        cout<<"done: B = "<<B<<endl;
         Matrix<T> diff(B.colsize(),B.rowsize());
         for(int i=0;i<B.colsize();i++)
             for(int j=0;j<B.rowsize();j++)
@@ -181,10 +192,10 @@ namespace tmv {
 #endif
     }
 
-    template <class T, class Ta, class Tb> void AddMM(const T alpha,
-              const GenMatrix<Ta>& A, const T beta, const GenMatrix<Tb>& B,
-              const MatrixView<T>& C)
-        // C = alpha * A + beta * B
+    template <class T, class Ta, class Tb> 
+    void AddMM(
+        const T alpha, const GenMatrix<Ta>& A,
+        const T beta, const GenMatrix<Tb>& B, const MatrixView<T>& C)
     {
         TMVAssert(A.colsize() == B.colsize());
         TMVAssert(A.rowsize() == B.rowsize());
@@ -197,9 +208,9 @@ namespace tmv {
         for(int i=0;i<A.colsize();i++)
             for(int j=0;j<A.rowsize();j++)
                 C2(i,j) = alpha*A(i,j) + beta*B(i,j);
-        //cout<<"AddMM: alpha = "<<alpha<<", A = "<<TMV_Text(A)<<"  "<<A<<endl;
-        //cout<<"beta = "<<beta<<", B = "<<TMV_Text(B)<<"  "<<B;
-        //cout<<", C = "<<TMV_Text(C)<<"  "<<C<<endl;
+        cout<<"AddMM: alpha = "<<alpha<<", A = "<<TMV_Text(A)<<"  "<<A<<endl;
+        cout<<"beta = "<<beta<<", B = "<<TMV_Text(B)<<"  "<<B;
+        cout<<", C = "<<TMV_Text(C)<<"  "<<C<<endl;
 #endif
 
         if (C.colsize() > 0 && C.rowsize() > 0) {
@@ -229,7 +240,7 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        //cout<<"Done: C = "<<C<<endl;
+        cout<<"Done: C = "<<C<<endl;
         Matrix<T> diff(C.colsize(),C.rowsize());
         for(int i=0;i<C.colsize();i++)
             for(int j=0;j<C.rowsize();j++)

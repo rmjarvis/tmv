@@ -50,54 +50,44 @@ namespace tmv {
     template <class T, class Tv> 
     class ProdXM;
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline SymBandMatrix<T,U,S>& operator+=(
-        SymBandMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline SymBandMatrix<T,A>& operator+=(SymBandMatrix<T,A>& m, const Tx& x) 
     { m.view() += x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline SymBandMatrix<T,U,S>& operator-=(
-        SymBandMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline SymBandMatrix<T,A>& operator-=(SymBandMatrix<T,A>& m, const Tx& x) 
     { m.view() -= x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline SymBandMatrix<T,U,S>& operator*=(
-        SymBandMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline SymBandMatrix<T,A>& operator*=(SymBandMatrix<T,A>& m, const Tx& x) 
     { m.view() *= x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline SymBandMatrix<T,U,S>& operator/=(
-        SymBandMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline SymBandMatrix<T,A>& operator/=(SymBandMatrix<T,A>& m, const Tx& x) 
     { m.view() /= x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline SymBandMatrix<T,U,S>& operator%=(
-        SymBandMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline SymBandMatrix<T,A>& operator%=(SymBandMatrix<T,A>& m, const Tx& x) 
     { m.view() %= x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline HermBandMatrix<T,U,S>& operator+=(
-        HermBandMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline HermBandMatrix<T,A>& operator+=(HermBandMatrix<T,A>& m, const Tx& x) 
     { m.view() += x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline HermBandMatrix<T,U,S>& operator-=(
-        HermBandMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline HermBandMatrix<T,A>& operator-=(HermBandMatrix<T,A>& m, const Tx& x) 
     { m.view() -= x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline HermBandMatrix<T,U,S>& operator*=(
-        HermBandMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline HermBandMatrix<T,A>& operator*=(HermBandMatrix<T,A>& m, const Tx& x) 
     { m.view() *= x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline HermBandMatrix<T,U,S>& operator/=(
-        HermBandMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline HermBandMatrix<T,A>& operator/=(HermBandMatrix<T,A>& m, const Tx& x) 
     { m.view() /= x; return m; }
 
-    template <class T, UpLoType U, StorageType S, class Tx>
-    inline HermBandMatrix<T,U,S>& operator%=(
-        HermBandMatrix<T,U,S>& m, const Tx& x) 
+    template <class T, int A, class Tx>
+    inline HermBandMatrix<T,A>& operator%=(HermBandMatrix<T,A>& m, const Tx& x) 
     { m.view() %= x; return m; }
 
 
@@ -117,7 +107,6 @@ namespace tmv {
         inline int size() const { return m.size(); }
         inline SymType sym() const { return m.issym() ? Sym : Herm; }
         inline int nlo() const { return m.nlo(); }
-        inline StorageType stor() const { return BaseStorOf(m); }
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<Tm>& getM() const { return m; }
         inline void assignToB(const BandMatrixView<real_type>& m0) const
@@ -259,7 +248,6 @@ namespace tmv {
         inline int size() const { return m.size(); }
         inline int nlo() const { return m.nlo(); }
         inline SymType sym() const { return m.issym() ? Sym : Herm; }
-        inline StorageType stor() const { return BaseStorOf(m); }
         inline T getX1() const { return x1; }
         inline const GenSymBandMatrix<Tm>& getM() const { return m; }
         inline T getX2() const { return x2; }
@@ -409,8 +397,6 @@ namespace tmv {
         inline int nlo() const { return TMV_MAX(m1.nlo(),m2.nlo()); }
         inline SymType sym() const 
         { return isReal(T1()) ? m2.sym() : m1.sym(); }
-        inline StorageType stor() const 
-        { return m1.stor() == m2.stor() ? BaseStorOf(m1) : DiagMajor; }
         inline T getX1() const { return x1; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
@@ -579,11 +565,6 @@ namespace tmv {
         { return TMV_MIN(colsize()-1,m1.nlo()+m2.nlo()); }
         inline int nhi() const 
         { return TMV_MIN(rowsize()-1,m1.nhi()+m2.nhi()); }
-        inline StorageType stor() const 
-        { 
-            return m1.isrm() ? RowMajor : m2.iscm() ? ColMajor :
-                (m1.iscm() && m2.isrm()) ? ColMajor : DiagMajor;
-        }
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
@@ -738,8 +719,6 @@ namespace tmv {
         { return TMV_MIN(m1.nlo(),m2.nlo()); }
         inline SymType sym() const 
         { return isReal(T1()) ? m2.sym() : m1.sym(); }
-        inline StorageType stor() const 
-        { return m1.stor() == m2.stor() ? BaseStorOf(m1) : DiagMajor; }
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
@@ -814,9 +793,10 @@ namespace tmv {
                   pmm.getM1().sym() == pmm.getM2().sym());
         TMVAssert(m.size() == pmm.size());
         TMVAssert(m.nlo() >= pmm.nlo());
-        TMVAssert(isReal(T1()) || m0.issym() == pmm.getM1().issym());
-        TMVAssert(isReal(T2()) || m0.issym() == pmm.getM2().issym());
-        TMVAssert(m.issym() || TMV_IMAG(pmm.getX()) == real_type(0));
+        TMVAssert(isReal(T1()) || m.issym() == pmm.getM1().issym());
+        TMVAssert(isReal(T2()) || m.issym() == pmm.getM2().issym());
+        TMVAssert(m.issym() || 
+                  TMV_IMAG(pmm.getX()) == typename Traits<T>::real_type(0));
         ElemMultMM<true>(
             pmm.getX(),pmm.getM1().upperBand(),pmm.getM2().upperBand(),
             m.upperBand()); 
@@ -827,13 +807,9 @@ namespace tmv {
     inline const SymBandMatrixView<CT>& operator+=(
         const SymBandMatrixView<CT>& m, const ElemProdsBsB<T,T,T>& pmm)
     {
-        TMVAssert(isReal(T1()) || isReal(T2()) || 
-                  pmm.getM1().sym() == pmm.getM2().sym());
         TMVAssert(m.size() == pmm.size());
         TMVAssert(m.nlo() >= pmm.nlo());
-        TMVAssert(isReal(T1()) || m0.issym() == pmm.getM1().issym());
-        TMVAssert(isReal(T2()) || m0.issym() == pmm.getM2().issym());
-        TMVAssert(m.issym() || TMV_IMAG(pmm.getX()) == real_type(0));
+        TMVAssert(m.issym() || TMV_IMAG(pmm.getX()) == T(0));
         ElemMultMM<true>(
             pmm.getX(),pmm.getM1().upperBand(),pmm.getM2().upperBand(),
             m.upperBand()); 
@@ -848,9 +824,10 @@ namespace tmv {
                   pmm.getM1().sym() == pmm.getM2().sym());
         TMVAssert(m.size() == pmm.size());
         TMVAssert(m.nlo() >= pmm.nlo());
-        TMVAssert(isReal(T1()) || m0.issym() == pmm.getM1().issym());
-        TMVAssert(isReal(T2()) || m0.issym() == pmm.getM2().issym());
-        TMVAssert(m.issym() || TMV_IMAG(pmm.getX()) == real_type(0));
+        TMVAssert(isReal(T1()) || m.issym() == pmm.getM1().issym());
+        TMVAssert(isReal(T2()) || m.issym() == pmm.getM2().issym());
+        TMVAssert(m.issym() || 
+                  TMV_IMAG(pmm.getX()) == typename Traits<T>::real_type(0));
         ElemMultMM<true>(
             -pmm.getX(),pmm.getM1().upperBand(),pmm.getM2().upperBand(),
             m.upperBand()); 
@@ -861,13 +838,9 @@ namespace tmv {
     inline const SymBandMatrixView<CT>& operator-=(
         const SymBandMatrixView<CT>& m, const ElemProdsBsB<T,T,T>& pmm)
     {
-        TMVAssert(isReal(T1()) || isReal(T2()) || 
-                  pmm.getM1().sym() == pmm.getM2().sym());
         TMVAssert(m.size() == pmm.size());
         TMVAssert(m.nlo() >= pmm.nlo());
-        TMVAssert(isReal(T1()) || m0.issym() == pmm.getM1().issym());
-        TMVAssert(isReal(T2()) || m0.issym() == pmm.getM2().issym());
-        TMVAssert(m.issym() || TMV_IMAG(pmm.getX()) == real_type(0));
+        TMVAssert(m.issym() || TMV_IMAG(pmm.getX()) == T(0));
         ElemMultMM<true>(
             -pmm.getX(),pmm.getM1().upperBand(),pmm.getM2().upperBand(),
             m.upperBand()); 

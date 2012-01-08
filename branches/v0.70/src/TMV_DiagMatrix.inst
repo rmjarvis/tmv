@@ -31,8 +31,8 @@ Def1b(T,CT)
 #undef Def1b
 #endif
 
-#define Def2(T,I) \
-  template void DiagMatrix<T,I>::read(const TMV_Reader& reader); \
+#define Def2(T,A) \
+  template void DiagMatrix<T,A>::read(const TMV_Reader& reader); \
 
 Def2(T,CStyle)
 Def2(T,FortranStyle)

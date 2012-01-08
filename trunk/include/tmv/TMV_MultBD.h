@@ -64,8 +64,8 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = (cs == TMV_UNKNOWN ? m3.colsize() : cs);
-            const int N = (rs == TMV_UNKNOWN ? m3.rowsize() : rs);
+            const int M = (cs == Unknown ? m3.colsize() : cs);
+            const int N = (rs == Unknown ? m3.rowsize() : rs);
 #ifdef PRINTALGO_BD
             std::cout<<"BD algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -83,7 +83,7 @@ namespace tmv {
             const int diagstep1 = m1.diagstep();
             const int diagstep3 = m3.diagstep();
 
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             const int c2 = M2::_conj;
             const int lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
             const int j1 = m1.nhi();
@@ -128,8 +128,8 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = (cs == TMV_UNKNOWN ? m3.colsize() : cs);
-            const int N = (rs == TMV_UNKNOWN ? m3.rowsize() : rs);
+            const int M = (cs == Unknown ? m3.colsize() : cs);
+            const int N = (rs == Unknown ? m3.rowsize() : rs);
 #ifdef PRINTALGO_BD
             std::cout<<"BD algo 21: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -145,7 +145,7 @@ namespace tmv {
             const int diagstep1 = m1.diagstep();
             const int diagstep3 = m3.diagstep();
  
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             const int lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
             const int i1 = m1.nlo();
             const int i2 = TMV_MIN(M,N-m1.nhi());
@@ -188,8 +188,8 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = (cs == TMV_UNKNOWN ? m3.colsize() : cs);
-            const int N = (rs == TMV_UNKNOWN ? m3.rowsize() : rs);
+            const int M = (cs == Unknown ? m3.colsize() : cs);
+            const int N = (rs == Unknown ? m3.rowsize() : rs);
 #ifdef PRINTALGO_BD
             std::cout<<"BD algo 31: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -205,7 +205,7 @@ namespace tmv {
             const int rowstep1 = m1.stepj();
             const int rowstep3 = m3.stepj();
  
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             const int ds = IntTraits2<cs,rs>::min;
             int len = TMV_MIN(M-m1.nlo(),N);
             IT1 it1 = m1.get_diag(-m1.nlo()).begin().nonConj();
@@ -242,8 +242,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_BD
-            const int N = (rs == TMV_UNKNOWN ? m3.rowsize() : rs);
-            const int M = (cs == TMV_UNKNOWN ? m3.colsize() : cs);
+            const int N = (rs == Unknown ? m3.rowsize() : rs);
+            const int M = (cs == Unknown ? m3.colsize() : cs);
             std::cout<<"BD algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -400,8 +400,8 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -535,8 +535,8 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&

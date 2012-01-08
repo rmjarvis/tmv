@@ -508,13 +508,6 @@ namespace tmv {
         const GenBandMatrix<double>& A, const VectorView<double>& b,
         DiagType dt)
     {
-        TMVAssert(A.isSquare());
-        TMVAssert(b.size() == A.colsize());
-        TMVAssert(A.nlo() == 0 || A.nhi() == 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(A.iscm() || A.isrm());
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(b.ct() == NonConj);
         int n = A.colsize();
         int kd = A.nlo()==0 ? A.nhi() : A.nlo();
         int aoffset = A.isrm() ? A.nlo() : A.nhi();
@@ -534,13 +527,6 @@ namespace tmv {
         const GenBandMatrix<std::complex<double> >& A,
         const VectorView<std::complex<double> >& b, DiagType dt)
     {
-        TMVAssert(A.isSquare());
-        TMVAssert(b.size() == A.colsize());
-        TMVAssert(A.nlo() == 0 || A.nhi() == 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(A.iscm() || A.isrm());
-        TMVAssert(b.ct() == NonConj);
-
         int n = A.colsize();
         int kd = A.nlo()==0 ? A.nhi() : A.nlo();
         int aoffset = A.isrm() ? A.nlo() : A.nhi();
@@ -578,13 +564,6 @@ namespace tmv {
         const GenBandMatrix<double>& A, 
         const VectorView<std::complex<double> >& b, DiagType dt)
     {
-        TMVAssert(A.isSquare());
-        TMVAssert(b.size() == A.colsize());
-        TMVAssert(A.nlo() == 0 || A.nhi() == 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(A.iscm() || A.isrm());
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(b.ct() == NonConj);
         int n = A.colsize();
         int kd = A.nlo()==0 ? A.nhi() : A.nlo();
         int aoffset = A.isrm() ? A.nlo() : A.nhi();
@@ -611,13 +590,6 @@ namespace tmv {
     void BlasTriLDivEq(
         const GenBandMatrix<float>& A, const VectorView<float>& b, DiagType dt)
     {
-        TMVAssert(A.isSquare());
-        TMVAssert(b.size() == A.colsize());
-        TMVAssert(A.nlo() == 0 || A.nhi() == 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(A.iscm() || A.isrm());
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(b.ct() == NonConj);
         int n = A.colsize();
         int kd = A.nlo()==0 ? A.nhi() : A.nlo();
         int aoffset = A.isrm() ? A.nlo() : A.nhi();
@@ -637,13 +609,6 @@ namespace tmv {
         const GenBandMatrix<std::complex<float> >& A,
         const VectorView<std::complex<float> >& b, DiagType dt)
     {
-        TMVAssert(A.isSquare());
-        TMVAssert(b.size() == A.colsize());
-        TMVAssert(A.nlo() == 0 || A.nhi() == 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(A.iscm() || A.isrm());
-        TMVAssert(b.ct() == NonConj);
-
         int n = A.colsize();
         int kd = A.nlo()==0 ? A.nhi() : A.nlo();
         int aoffset = A.isrm() ? A.nlo() : A.nhi();
@@ -681,13 +646,6 @@ namespace tmv {
         const GenBandMatrix<float>& A, 
         const VectorView<std::complex<float> >& b, DiagType dt)
     {
-        TMVAssert(A.isSquare());
-        TMVAssert(b.size() == A.colsize());
-        TMVAssert(A.nlo() == 0 || A.nhi() == 0);
-        TMVAssert(A.rowsize() > 0);
-        TMVAssert(A.iscm() || A.isrm());
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(b.ct() == NonConj);
         int n = A.colsize();
         int kd = A.nlo()==0 ? A.nhi() : A.nlo();
         int aoffset = A.isrm() ? A.nlo() : A.nhi();

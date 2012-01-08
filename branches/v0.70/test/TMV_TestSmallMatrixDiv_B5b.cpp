@@ -40,12 +40,12 @@ static void TestSmallNonSquareDiv_B5b()
 
     TestMatrixDivArith3c(tmv::QR,a2,a6,a4,c2,c6,c4,"NonSquare/NonSquare"); 
 #if (XTEST & 32)
-    tmv::SmallMatrix<T,N,6,stor,tmv::FortranStyle> a2f = a2;
-    tmv::SmallMatrix<std::complex<T>,N,6,stor,tmv::FortranStyle> c2f = c2;
-    tmv::SmallMatrix<T,7,N,stor,tmv::FortranStyle> a4f = a4;
-    tmv::SmallMatrix<std::complex<T>,7,N,stor,tmv::FortranStyle> c4f = c4;
-    tmv::SmallMatrix<T,7,6,stor,tmv::FortranStyle> a6f = a6;
-    tmv::SmallMatrix<std::complex<T>,7,6,stor,tmv::FortranStyle> c6f = c6;
+    tmv::SmallMatrix<T,N,6,stor|tmv::FortranStyle> a2f = a2;
+    tmv::SmallMatrix<std::complex<T>,N,6,stor|tmv::FortranStyle> c2f = c2;
+    tmv::SmallMatrix<T,7,N,stor|tmv::FortranStyle> a4f = a4;
+    tmv::SmallMatrix<std::complex<T>,7,N,stor|tmv::FortranStyle> c4f = c4;
+    tmv::SmallMatrix<T,7,6,stor|tmv::FortranStyle> a6f = a6;
+    tmv::SmallMatrix<std::complex<T>,7,6,stor|tmv::FortranStyle> c6f = c6;
 
     TestMatrixDivArith3c(tmv::QR,a2f,a6,a4,c2f,c6,c4,"NonSquare/NonSquare"); 
     TestMatrixDivArith3c(tmv::QR,a2f,a6f,a4,c2f,c6f,c4,"NonSquare/NonSquare"); 

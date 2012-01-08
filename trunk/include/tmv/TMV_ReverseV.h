@@ -24,7 +24,7 @@ namespace tmv {
     {
         static void call(V& v)
         {
-            const int n = size == TMV_UNKNOWN ? v.size() : size;
+            const int n = size == Unknown ? v.size() : size;
             const int no2 = n/2;
             if (no2) 
                 for(int i1=0;i1<no2;++i1) v.cSwap(i1,n-i1-1);
@@ -40,8 +40,8 @@ namespace tmv {
             typedef typename V::value_type T;
             typedef typename V::subvector_type V1;
             typedef typename V::subvector_type::reverse_type V2;
-            const int n = size == TMV_UNKNOWN ? v.size() : size;
-            const int sizeo2 = size == TMV_UNKNOWN ? TMV_UNKNOWN : size/2;
+            const int n = size == Unknown ? v.size() : size;
+            const int sizeo2 = size == Unknown ? Unknown : size/2;
             if (n > 1)  {
                 V1 v1 = v.cSubVector(0,n/2);
                 V2 v2 = v.cSubVector(n-n/2,n).reverse();
@@ -98,7 +98,7 @@ namespace tmv {
         {
             const int algo = 
                 TMV_OPT == 0 ? 11 :
-                size != TMV_UNKNOWN && size <= 32 ? 15 :
+                size != Unknown && size <= 32 ? 15 :
                 V::iscomplex ? 12 :
                 11;
             ReverseV_Helper<algo,size,V>::call(v);
@@ -114,7 +114,7 @@ namespace tmv {
             typedef typename V::value_type T;
             const bool inst =
                 Traits<T>::isinst &&
-                V::_size == TMV_UNKNOWN;
+                V::_size == Unknown;
             const int algo = 
                 V::_conj ? 97 :
                 inst ? 90 :

@@ -77,7 +77,7 @@ namespace tmv {
              (inplace ? \
               BandMatrixView<T>(A.nonConst().ptr(),A.colsize(),A.colsize(),\
                                 A.nhi(),NEWHI,A.stepj(),A.stepi(),A.diagstep(),\
-                                TMV_TransOf(A.stor()),A.ct() \
+                                A.ct() \
                                 TMV_FIRSTLAST1(A.nonConst()._first,\
                                                A.nonConst()._last) ) : \
               BandMatrixViewOf(Aptr,A.colsize(),A.colsize(),A.nhi(), \
@@ -86,7 +86,7 @@ namespace tmv {
               BandMatrixView<T>(A.nonConst().ptr(),A.colsize(),\
                                 A.colsize(),A.nlo(),NEWHI,\
                                 A.stepi(),A.stepj(),A.diagstep(),\
-                                A.stor(),A.ct() \
+                                A.ct() \
                                 TMV_FIRSTLAST1(A.nonConst()._first,\
                                                A.nonConst()._last) ) : \
               BandMatrixViewOf(Aptr,A.colsize(),A.colsize(),A.nlo(), \

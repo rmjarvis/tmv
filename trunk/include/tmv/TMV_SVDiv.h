@@ -60,7 +60,7 @@ namespace tmv {
             typedef typename M1u::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type T12;
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             const int xs = Sizes<M2::_rowsize,M3::_rowsize>::size;
             typedef typename MCopyHelper<T12,Rec,xx,xs>::type M2c;
 
@@ -91,7 +91,7 @@ namespace tmv {
             typedef typename M1u::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type T12;
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             typedef typename VCopyHelper<T12,xx>::type V2c;
 
 #ifdef PRINTALGO_SVD
@@ -183,8 +183,8 @@ namespace tmv {
             typedef typename M1u::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

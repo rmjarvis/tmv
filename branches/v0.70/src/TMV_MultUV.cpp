@@ -63,38 +63,40 @@ namespace tmv {
     {
         if (!itsm.get()) {
             itsm.resize(this->size()*this->size());
-            UpperTriMatrixViewOf(
-                itsm.get(),this->size(), this->stor(), this->dt()) = *this;
+            UpperTriMatrixView<T>(
+                itsm.get(),this->size(),stepi(),stepj(),this->dt(),NonConj) =
+                *this;
         }
         return itsm.get();
     }
 
     template <class T> 
     int UpperTriMatrixComposite<T>::stepi() const 
-    { return this->isrm() ? this->size() : 1; }
+    { return 1; }
 
     template <class T> 
     int UpperTriMatrixComposite<T>::stepj() const 
-    { return this->isrm() ? 1 : this->size(); }
+    { return this->size(); }
 
     template <class T> 
     const T* LowerTriMatrixComposite<T>::cptr() const
     {
         if (!itsm.get()) {
             itsm.resize(this->size()*this->size());
-            LowerTriMatrixViewOf(
-                itsm.get(),this->size(), this->stor(), this->dt()) = *this;
+            LowerTriMatrixView<T>(
+                itsm.get(),this->size(),stepi(),stepj(),this->dt(),NonConj) =
+                *this;
         }
         return itsm.get();
     }
 
     template <class T> 
     int LowerTriMatrixComposite<T>::stepi() const 
-    { return this->isrm() ? this->size() : 1; }
+    { return 1; }
 
     template <class T> 
     int LowerTriMatrixComposite<T>::stepj() const 
-    { return this->isrm() ? 1 : this->size(); }
+    { return this->size(); }
 
     // 
     // MultEqMV
@@ -450,12 +452,6 @@ namespace tmv {
     void BlasMultEqMV( 
         const GenUpperTriMatrix<double>& A, const VectorView<double>& x)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=x.step();
@@ -470,12 +466,6 @@ namespace tmv {
     void BlasMultEqMV( 
         const GenLowerTriMatrix<double>& A, const VectorView<double>& x)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=x.step();
@@ -491,11 +481,6 @@ namespace tmv {
         const GenUpperTriMatrix<std::complex<double> >& A,
         const VectorView<std::complex<double> >& x)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=x.step();
@@ -530,11 +515,6 @@ namespace tmv {
         const GenLowerTriMatrix<std::complex<double> >& A,
         const VectorView<std::complex<double> >& x)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=x.step();
@@ -569,12 +549,6 @@ namespace tmv {
         const GenUpperTriMatrix<double>& A,
         const VectorView<std::complex<double> >& x)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=2*x.step();
@@ -595,12 +569,6 @@ namespace tmv {
         const GenLowerTriMatrix<double>& A,
         const VectorView<std::complex<double> >& x)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=2*x.step();
@@ -622,12 +590,6 @@ namespace tmv {
     void BlasMultEqMV( 
         const GenUpperTriMatrix<float>& A, const VectorView<float>& x)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=x.step();
@@ -642,12 +604,6 @@ namespace tmv {
     void BlasMultEqMV( 
         const GenLowerTriMatrix<float>& A, const VectorView<float>& x)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=x.step();
@@ -663,11 +619,6 @@ namespace tmv {
         const GenUpperTriMatrix<std::complex<float> >& A,
         const VectorView<std::complex<float> >& x)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=x.step();
@@ -702,11 +653,6 @@ namespace tmv {
         const GenLowerTriMatrix<std::complex<float> >& A,
         const VectorView<std::complex<float> >& x)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=x.step();
@@ -741,12 +687,6 @@ namespace tmv {
         const GenUpperTriMatrix<float>& A,
         const VectorView<std::complex<float> >& x)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=2*x.step();
@@ -767,12 +707,6 @@ namespace tmv {
         const GenLowerTriMatrix<float>& A,
         const VectorView<std::complex<float> >& x)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.step() == 1);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-
         int n=A.size();
         int lda=A.isrm()?A.stepi():A.stepj();
         int xs=2*x.step();
@@ -812,10 +746,10 @@ namespace tmv {
                 BlasMultEqMV(A,x);
             else {
                 if (A.isunit()) {
-                    UpperTriMatrix<Ta,UnitDiag,RowMajor> A2(A);
+                    UpperTriMatrix<Ta,UnitDiag|RowMajor> A2(A);
                     BlasMultEqMV(A2,x);
                 } else {
-                    UpperTriMatrix<Ta,NonUnitDiag,RowMajor> A2(A);
+                    UpperTriMatrix<Ta,NonUnitDiag|RowMajor> A2(A);
                     BlasMultEqMV(A2,x);
                 }
             }
@@ -856,10 +790,10 @@ namespace tmv {
                 BlasMultEqMV(A,x);
             else {
                 if (A.isunit()) {
-                    LowerTriMatrix<Ta,UnitDiag,RowMajor> A2(A);
+                    LowerTriMatrix<Ta,UnitDiag|RowMajor> A2(A);
                     BlasMultEqMV(A2,x);
                 } else {
-                    LowerTriMatrix<Ta,NonUnitDiag,RowMajor> A2(A);
+                    LowerTriMatrix<Ta,NonUnitDiag|RowMajor> A2(A);
                     BlasMultEqMV(A2,x);
                 }
             }

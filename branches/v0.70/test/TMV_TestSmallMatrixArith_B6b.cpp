@@ -69,12 +69,12 @@ static void DoTestSmallMatrixArith_B6b()
 #endif
 
 #if (XTEST & 32)
-    tmv::SmallMatrix<T,N,N,tmv::RowMajor,tmv::FortranStyle> a1f = a1;
-    tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor,tmv::FortranStyle> ca1f = ca1;
-    tmv::SmallMatrix<T,N,7,tmv::RowMajor,tmv::FortranStyle> a5f = a5;
-    tmv::SmallMatrix<std::complex<T>,N,7,tmv::RowMajor,tmv::FortranStyle> ca5f = ca5;
-    tmv::SmallMatrix<T,N,7,tmv::ColMajor,tmv::FortranStyle> a6f = a6;
-    tmv::SmallMatrix<std::complex<T>,N,7,tmv::ColMajor,tmv::FortranStyle> ca6f = ca6;
+    tmv::SmallMatrix<T,N,N,tmv::RowMajor|tmv::FortranStyle> a1f = a1;
+    tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor|tmv::FortranStyle> ca1f = ca1;
+    tmv::SmallMatrix<T,N,7,tmv::RowMajor|tmv::FortranStyle> a5f = a5;
+    tmv::SmallMatrix<std::complex<T>,N,7,tmv::RowMajor|tmv::FortranStyle> ca5f = ca5;
+    tmv::SmallMatrix<T,N,7,tmv::ColMajor|tmv::FortranStyle> a6f = a6;
+    tmv::SmallMatrix<std::complex<T>,N,7,tmv::ColMajor|tmv::FortranStyle> ca6f = ca6;
 
     TestMatrixArith6(a1f,ca1f,a5,ca5,a6,ca6,"NonSquare");
     TestMatrixArith6(a1f,ca1f,a5f,ca5f,a6,ca6,"NonSquare");

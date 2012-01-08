@@ -172,9 +172,9 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = (rs == TMV_UNKNOWN ? m3.rowsize() : rs);
+            const int N = (rs == Unknown ? m3.rowsize() : rs);
 #ifdef PRINTALGO_MD
-            const int M = (cs == TMV_UNKNOWN ? m3.colsize() : cs);
+            const int M = (cs == Unknown ? m3.colsize() : cs);
             std::cout<<"MD algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -200,8 +200,8 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = (cs == TMV_UNKNOWN ? m3.colsize() : cs);
-            int N = (rs == TMV_UNKNOWN ? m3.rowsize() : rs);
+            const int M = (cs == Unknown ? m3.colsize() : cs);
+            int N = (rs == Unknown ? m3.rowsize() : rs);
 #ifdef PRINTALGO_MD
             std::cout<<"MD algo 12: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -252,9 +252,9 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = (cs == TMV_UNKNOWN ? m3.colsize() : cs);
+            const int M = (cs == Unknown ? m3.colsize() : cs);
 #ifdef PRINTALGO_MD
-            const int N = (rs == TMV_UNKNOWN ? m3.rowsize() : rs);
+            const int N = (rs == Unknown ? m3.rowsize() : rs);
             std::cout<<"MD algo 21: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -280,8 +280,8 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            int M = (cs == TMV_UNKNOWN ? m3.colsize() : cs);
-            const int N = (rs == TMV_UNKNOWN ? m3.rowsize() : rs);
+            int M = (cs == Unknown ? m3.colsize() : cs);
+            const int N = (rs == Unknown ? m3.rowsize() : rs);
 #ifdef PRINTALGO_MD
             std::cout<<"MD algo 22: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -330,8 +330,8 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_MD
-            const int N = (rs == TMV_UNKNOWN ? m3.rowsize() : rs);
-            const int M = (cs == TMV_UNKNOWN ? m3.colsize() : cs);
+            const int N = (rs == Unknown ? m3.rowsize() : rs);
+            const int M = (cs == Unknown ? m3.colsize() : cs);
             std::cout<<"MD algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -488,8 +488,8 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -521,11 +521,11 @@ namespace tmv {
                 ( cs == 1 ) ? 1 :
                 ( rs == 1 ) ? 2 :
                 bothrm ? ( 
-                    ( rs != TMV_UNKNOWN && rs <= 5 && cs > rs ) ? 11 : 
-                    ( rs != TMV_UNKNOWN && rs <= 10 ) ? 21 : 22 ) :
+                    ( rs != Unknown && rs <= 5 && cs > rs ) ? 11 : 
+                    ( rs != Unknown && rs <= 10 ) ? 21 : 22 ) :
                 bothcm ? ( 
-                    ( cs != TMV_UNKNOWN && cs <= 10 ) ? 11 : 12 ) :
-                ( cs != TMV_UNKNOWN && cs <= 10 ) ? 11 : 12;
+                    ( cs != Unknown && cs <= 10 ) ? 11 : 12 ) :
+                ( cs != Unknown && cs <= 10 ) ? 11 : 12;
             MultMD_Helper<algo,cs,rs,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3);
         }
     };
@@ -561,12 +561,12 @@ namespace tmv {
                 ( cs == 1 ) ? 1 :
                 ( rs == 1 ) ? 2 :
                 bothrm ? ( 
-                    ( rs != TMV_UNKNOWN && rs <= 5 && cs > rs ) ? 11 : 
+                    ( rs != Unknown && rs <= 5 && cs > rs ) ? 11 : 
                     docopy ? 82 : 
-                    ( rs != TMV_UNKNOWN && rs <= 10 ) ? 21 : 22 ) :
+                    ( rs != Unknown && rs <= 10 ) ? 21 : 22 ) :
                 bothcm ? ( 
-                    ( cs != TMV_UNKNOWN && cs <= 10 ) ? 11 : 12 ) :
-                ( cs != TMV_UNKNOWN && cs <= 10 ) ? 11 : 12;
+                    ( cs != Unknown && cs <= 10 ) ? 11 : 12 ) :
+                ( cs != Unknown && cs <= 10 ) ? 11 : 12;
 #ifdef PRINTALGO_MD
             std::cout<<"InlineMultMD: \n";
             std::cout<<"x = "<<ix<<"  "<<T(x)<<"  add = "<<add<<std::endl;
@@ -609,8 +609,8 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename M3::value_type T3;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&

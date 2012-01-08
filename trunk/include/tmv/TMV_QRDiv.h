@@ -262,7 +262,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
+                (cs == Unknown || cs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -547,7 +547,7 @@ namespace tmv {
             // m3 = (QRP)^-1 m2
             //    = Pt R^-1 Qt m2
             const int square =
-                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 2 :
+                cs == Unknown || rs == Unknown ? 2 :
                 cs == rs ? 1 : 0;
             //std::cout<<"square = "<<square<<std::endl;
             Helper<square,1>::call(QR,beta,m2,m3);
@@ -684,7 +684,7 @@ namespace tmv {
             // v3 = (QRP)^-1 v2
             //    = Pt R^-1 Qt v2
             const int square =
-                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 2 :
+                cs == Unknown || rs == Unknown ? 2 :
                 cs == rs ? 1 : 0;
             //std::cout<<"square = "<<square<<std::endl;
             Helper<square,1>::call(QR,beta,v2,v3);
@@ -845,8 +845,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

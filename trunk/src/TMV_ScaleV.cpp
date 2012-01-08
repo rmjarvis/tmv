@@ -47,8 +47,6 @@ namespace tmv {
 #ifdef TMV_INST_DOUBLE
     static void DoScale(const double x, VectorView<double> v)
     {
-        TMVAssert(v.size() > 0);
-        TMVAssert(v.step() > 0);
         int n=v.size();
         int s=v.step();
         double* vp = v.ptr();
@@ -57,8 +55,6 @@ namespace tmv {
     static void DoScale(
         const std::complex<double> x, VectorView<std::complex<double> > v)
     {
-        TMVAssert(v.size() > 0);
-        TMVAssert(v.step() > 0);
         int n=v.size();
         int s=v.step();
         std::complex<double>* vp = v.ptr();
@@ -74,8 +70,6 @@ namespace tmv {
 #ifdef TMV_INST_FLOAT
     static void DoScale(const float x, VectorView<float> v)
     {
-        TMVAssert(v.size() > 0);
-        TMVAssert(v.step() > 0);
         int n=v.size();
         int s=v.step();
         float* vp = v.ptr();
@@ -84,8 +78,6 @@ namespace tmv {
     static void DoScale(
         const std::complex<float> x, VectorView<std::complex<float> > v)
     {
-        TMVAssert(v.size() > 0);
-        TMVAssert(v.step() > 0);
         int n=v.size();
         int s=v.step();
         std::complex<float>* vp = v.ptr();

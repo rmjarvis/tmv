@@ -105,7 +105,7 @@ namespace tmv {
         {
             const int algo = 
                 TMV_OPT == 0 ? 12 :
-                s != TMV_UNKNOWN && s <= 32 ? 15 :
+                s != Unknown && s <= 32 ? 15 :
                 12;
             ConjugateV_Helper<algo,s,V>::call(v);
         }
@@ -119,7 +119,7 @@ namespace tmv {
         {
             typedef typename V::value_type T;
             const bool inst =
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 V::isreal ? 0 :

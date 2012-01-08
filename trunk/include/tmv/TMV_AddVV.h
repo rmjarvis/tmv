@@ -57,7 +57,7 @@ namespace tmv {
         typedef typename V1f::const_nonconj_type::const_iterator IT1f;
         typedef typename V2f::const_nonconj_type::const_iterator IT2f;
         typedef typename V3f::iterator IT3f;
-        enum { size2 = size == TMV_UNKNOWN ? TMV_UNKNOWN : (size<<1) };
+        enum { size2 = size == Unknown ? Unknown : (size<<1) };
         static inline void call(
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
@@ -92,7 +92,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            const int n = size == TMV_UNKNOWN ? v3.size() : size;
+            const int n = size == Unknown ? v3.size() : size;
             for(int i=0;i<n;++i) 
                 v3.ref(i) = ZSum::sum(
                     ZProd<false,false>::prod(x1 , v1.cref(i)),
@@ -122,7 +122,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            const int n = size == TMV_UNKNOWN ? v3.size() : size;
+            const int n = size == Unknown ? v3.size() : size;
             call2(n,x1,v1.begin().nonConj(),x2,v2.begin().nonConj(),v3.begin());
         }
         static void call2(
@@ -162,7 +162,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            const int n = size == TMV_UNKNOWN ? v3.size() : size;
+            const int n = size == Unknown ? v3.size() : size;
             call2(n,x1,v1.begin().nonConj(),x2,v2.begin().nonConj(),v3.begin());
         }
         static void call2(
@@ -208,7 +208,7 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            const int n = size == TMV_UNKNOWN ? v3.size() : size;
+            const int n = size == Unknown ? v3.size() : size;
             call2(n,x1,v1.begin().nonConj(),x2,v2.begin().nonConj(),v3.begin());
         }
         static void call2(
@@ -410,7 +410,7 @@ namespace tmv {
             typedef typename V2::value_type TV2;
             typedef typename V3::value_type TV3;
             const bool inst =
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<TV1,TV2>::samebase &&
                 Traits2<TV1,TV3>::samebase &&
@@ -458,7 +458,7 @@ namespace tmv {
         {
             TMVStaticAssert(!V3::_conj);
             const int algo1 = 
-                (size != TMV_UNKNOWN && size <= int(128/sizeof(T3))) ? 15 :
+                (size != Unknown && size <= int(128/sizeof(T3))) ? 15 :
                 algo;
             AddVV_Helper<algo1,size,ix1,T1,V1,ix2,T2,V2,V3>::call(
                 x1,v1,x2,v2,v3);
@@ -498,7 +498,7 @@ namespace tmv {
             typedef typename V2::value_type TV2;
             typedef typename V3::value_type TV3;
             const bool inst =
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<TV1,TV2>::samebase &&
                 Traits2<TV1,TV3>::samebase &&

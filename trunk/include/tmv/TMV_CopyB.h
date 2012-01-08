@@ -34,9 +34,9 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
-            const int xx = TMV_UNKNOWN;
+            const int M = cs == Unknown ? m2.colsize() : cs;
+            const int N = rs == Unknown ? m2.rowsize() : rs;
+            const int xx = Unknown;
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::col_sub_type M2c;
             typedef typename M1c::const_iterator IT1;
@@ -86,9 +86,9 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
-            const int xx = TMV_UNKNOWN;
+            const int M = cs == Unknown ? m2.colsize() : cs;
+            const int N = rs == Unknown ? m2.rowsize() : rs;
+            const int xx = Unknown;
             typedef typename M1::const_row_sub_type M1r;
             typedef typename M2::row_sub_type M2r;
             typedef typename M1r::const_iterator IT1;
@@ -133,9 +133,9 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
-            const int xx = TMV_UNKNOWN;
+            const int M = cs == Unknown ? m2.colsize() : cs;
+            const int N = rs == Unknown ? m2.rowsize() : rs;
+            const int xx = Unknown;
             typedef typename M1::const_diag_sub_type M1d;
             typedef typename M2::diag_sub_type M2d;
             typedef typename M1d::const_iterator IT1;
@@ -252,8 +252,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -308,8 +308,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

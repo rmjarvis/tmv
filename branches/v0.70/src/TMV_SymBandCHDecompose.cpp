@@ -397,18 +397,14 @@ namespace tmv {
     template <> 
     void LapCH_Decompose(const SymBandMatrixView<double>& A)
     {
-        TMVAssert(A.uplo() == Lower);
-        TMVAssert(A.iscm() || A.isrm());
-        TMVAssert(A.ct()==NonConj);
-
         int n = A.size();
         int kl = A.nlo();
-        int lda = (A.iscm() ? A.stepj() : A.stepi()) + 1;
+        int lda = (BlasIsCM(A.lowerBand()) ? A.stepj() : A.stepi()) + 1;
         double* Aptr = A.ptr();
-        if (A.isrm()) Aptr -= A.nlo();
+        if (!BlasIsCM(A.lowerBand())) Aptr -= A.nlo();
 
         LAPNAME(dpbtrf) (
-            LAPCM A.iscm()?LAPCH_LO:LAPCH_UP, LAPV(n), LAPV(kl),
+            LAPCM BlasIsCM(A.lowerBand())?LAPCH_LO:LAPCH_UP, LAPV(n), LAPV(kl),
             LAPP(Aptr),LAPV(lda) LAPINFO LAP1);
         if (Lap_info > 0)  {
 #ifdef NOTHROW
@@ -423,19 +419,14 @@ namespace tmv {
     template <> 
     void LapCH_Decompose(const SymBandMatrixView<std::complex<double> >& A)
     {
-        TMVAssert(A.uplo() == Lower);
-        TMVAssert(A.iscm() || A.isrm());
-        TMVAssert(A.ct()==NonConj);
-        TMVAssert(A.isherm());
-
         int n = A.size();
         int kl = A.nlo();
-        int lda = (A.iscm() ? A.stepj() : A.stepi()) + 1;
+        int lda = (BlasIsCM(A.lowerBand()) ? A.stepj() : A.stepi()) + 1;
         std::complex<double>* Aptr = A.ptr();
-        if (A.isrm()) Aptr -= A.nlo();
+        if (!BlasIsCM(A.lowerBand())) Aptr -= A.nlo();
 
         LAPNAME(zpbtrf) (
-            LAPCM A.iscm()?LAPCH_LO:LAPCH_UP, LAPV(n), LAPV(kl),
+            LAPCM BlasIsCM(A.lowerBand())?LAPCH_LO:LAPCH_UP, LAPV(n), LAPV(kl),
             LAPP(Aptr),LAPV(lda) LAPINFO LAP1);
         if (Lap_info > 0)  {
 #ifdef NOTHROW
@@ -543,18 +534,14 @@ namespace tmv {
     template <> 
     void LapCH_Decompose(const SymBandMatrixView<float>& A)
     {
-        TMVAssert(A.uplo() == Lower);
-        TMVAssert(A.iscm() || A.isrm());
-        TMVAssert(A.ct()==NonConj);
-
         int n = A.size();
         int kl = A.nlo();
-        int lda = (A.iscm() ? A.stepj() : A.stepi()) + 1;
+        int lda = (BlasIsCM(A.lowerBand()) ? A.stepj() : A.stepi()) + 1;
         float* Aptr = A.ptr();
-        if (A.isrm()) Aptr -= A.nlo();
+        if (!BlasIsCM(A.lowerBand())) Aptr -= A.nlo();
 
         LAPNAME(spbtrf) (
-            LAPCM A.iscm()?LAPCH_LO:LAPCH_UP, LAPV(n), LAPV(kl),
+            LAPCM BlasIsCM(A.lowerBand())?LAPCH_LO:LAPCH_UP, LAPV(n), LAPV(kl),
             LAPP(Aptr),LAPV(lda) LAPINFO LAP1);
         if (Lap_info > 0)  {
 #ifdef NOTHROW
@@ -569,19 +556,14 @@ namespace tmv {
     template <> 
     void LapCH_Decompose(const SymBandMatrixView<std::complex<float> >& A)
     {
-        TMVAssert(A.uplo() == Lower);
-        TMVAssert(A.iscm() || A.isrm());
-        TMVAssert(A.ct()==NonConj);
-        TMVAssert(A.isherm());
-
         int n = A.size();
         int kl = A.nlo();
-        int lda = (A.iscm() ? A.stepj() : A.stepi()) + 1;
+        int lda = (BlasIsCM(A.lowerBand()) ? A.stepj() : A.stepi()) + 1;
         std::complex<float>* Aptr = A.ptr();
-        if (A.isrm()) Aptr -= A.nlo();
+        if (!BlasIsCM(A.lowerBand())) Aptr -= A.nlo();
 
         LAPNAME(cpbtrf) (
-            LAPCM A.iscm()?LAPCH_LO:LAPCH_UP, LAPV(n), LAPV(kl),
+            LAPCM BlasIsCM(A.lowerBand())?LAPCH_LO:LAPCH_UP, LAPV(n), LAPV(kl),
             LAPP(Aptr),LAPV(lda) LAPINFO LAP1);
         if (Lap_info > 0)  {
 #ifdef NOTHROW
@@ -608,7 +590,7 @@ namespace tmv {
 #ifdef LAP 
                 if (A.isdm()) LapLDL_Decompose(A);
                 else {
-                    HermBandMatrix<T,Lower,DiagMajor> A2 = A;
+                    HermBandMatrix<T,Lower|DiagMajor> A2 = A;
                     LapLDL_Decompose(A2.view());
                     A = A2;
                 }

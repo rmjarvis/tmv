@@ -99,14 +99,14 @@ namespace tmv {
             typedef typename Vd::value_type RT;
             TMVStaticAssert(Traits<RT>::isreal);
 
-            const int N = rs==TMV_UNKNOWN ? D.size() : rs;
+            const int N = rs==Unknown ? D.size() : rs;
             if (N <= 1) return;
 #ifdef PRINTALGO_SVD
-            const int M = cs==TMV_UNKNOWN ? U.colsize() : cs;
+            const int M = cs==Unknown ? U.colsize() : cs;
             std::cout<<"SVDecomposeFromBidiagonal algo 11: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             typedef typename Mu::colrange_type Mus;
             typedef typename Vd::subvector_type Vds;
             typedef typename Ve::subvector_type Ves;
@@ -172,9 +172,9 @@ namespace tmv {
         static void reduce(Mu& U, Vd& D, Ve& E, Mv& V)
         {
             typedef typename Mu::real_type RT;
-            const int N = rs==TMV_UNKNOWN ? D.size() : rs;
+            const int N = rs==Unknown ? D.size() : rs;
 #ifdef PRINTALGO_SVD
-            const int M = cs==TMV_UNKNOWN ? U.colsize() : cs;
+            const int M = cs==Unknown ? U.colsize() : cs;
             std::cout<<"SVDecomposeFromBidiagonal algo 21: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -338,8 +338,8 @@ namespace tmv {
         {
             typedef typename Mu::real_type RT;
 #ifdef PRINTALGO_SVD
-            const int M = cs==TMV_UNKNOWN ? U.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? D.size() : rs;
+            const int M = cs==Unknown ? U.colsize() : cs;
+            const int N = rs==Unknown ? D.size() : rs;
             std::cout<<"SVDecomposeFromBidiagonal algo 22: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -714,7 +714,7 @@ namespace tmv {
             typedef typename Traits2<typename Mu::value_type, typename Mv::value_type>::type T;
             typedef typename Mu::real_type RT;
 
-            const int N = rs==TMV_UNKNOWN ? D.size() : rs;
+            const int N = rs==Unknown ? D.size() : rs;
             dbgcout<<"Start Decompose from Bidiag:\n";
             if (U.cptr()) dbgcout<<"U = "<<TMV_Text(U)<<std::endl;
             if (V.cptr()) dbgcout<<"V = "<<TMV_Text(V)<<std::endl;
@@ -774,8 +774,8 @@ namespace tmv {
         {
             typedef typename Mu::value_type T;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 inst ? 90 :

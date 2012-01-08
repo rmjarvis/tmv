@@ -70,7 +70,6 @@ namespace tmv {
         TMVAssert(x.size() > 0);
         TMVAssert(y.size() > 0);
         TMVAssert(A.ct() == NonConj);
-        TMVAssert(!A.isrm());
         TMVAssert(x.step() == 1);
         TMVAssert(cm == A.iscm());
         TMVAssert(cx == x.isconj());
@@ -124,7 +123,6 @@ namespace tmv {
         TMVAssert(x.size() > 0);
         TMVAssert(y.size() > 0);
         TMVAssert(A.ct() == NonConj);
-        TMVAssert(!A.isrm());
         TMVAssert(x.step() == 1);
         TMVAssert(cx == x.isconj());
 
@@ -151,7 +149,6 @@ namespace tmv {
         TMVAssert(x.size() > 0);
         TMVAssert(y.size() > 0);
         TMVAssert(A.ct() == NonConj);
-        TMVAssert(!A.isrm());
 
         if (x.step() != 1 || alpha != T(1)) {
             if (x.step() == 1 && y.size() < x.size()) {
@@ -668,10 +665,10 @@ namespace tmv {
                 Rank1Update<add>(
                     TMV_CONJ(alpha),x.conjugate(),y.conjugate(),
                     A.conjugate());
-            else if (A.isrm()) 
+            else if (!BlasIsCM(A) && BlasIsRM(A)) 
                 Rank1Update<add>(alpha,y,x,A.transpose());
 #ifdef BLAS
-            else if (!((A.iscm() && A.stepj()>0))) {
+            else if (!BlasIsCM(A)) {
                 Matrix<T,ColMajor> A2(A);
                 Rank1Update<add>(alpha,x,y,A2.view());
                 A = A2;

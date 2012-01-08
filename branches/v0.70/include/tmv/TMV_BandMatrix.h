@@ -29,82 +29,90 @@
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
-//#define USE_VALGRIND
 
 //---------------------------------------------------------------------------
 //
 // This file defines the TMV BandMatrix class.
 //
+// A BandMatrix is only non-zero in a (typically small) number of 
+// diagonals around the main diagonal.
+// Specifically, we store nhi super-diagonals (above the main diagonal) 
+// and nlo sub-diagonals (below the main).
+// 
+// As with the regular Matrix class, there are two template arguments.
+// The first is simply the type of the data.
+// The second, which is optional, specifies the known attributes of
+// the matrix.  The valid attributes are:
+// - ColMajor or RowMajor or DiagMajor
+// - CStyle or FortranStyle
+// - WithDivider or NoDivider
+//
+// The attributes are treated as a bit field, so you | them together to 
+// get the complete value, just like with a regular Matrix.
+// The default values are ColMajor, CStyle and WithDivider, so you 
+// only need to specify changes to that.
+// 
+// The RowMajor and ColMajor storage options are the same as for a normal 
+// Matrix.  But there is a new possibility for BandMatrices -- DiagMajor.
+// In this case the storage is in order of each diagonal starting 
+// with the lowest one, proceding along that whole diagonal, and then 
+// the next diagonal up, and so on.
+//
+// Also, for each storage possibility, we store some extra elements 
+// in order to have the rows, columns, and diagonals all have constant
+// steps.  For example, a 6x6 ColMajor BandMatrix with nlo=2,nhi=3 has 
+// the following elements, numbered in order that they are stored.
+//
+// [ 1   6  11  16         ]
+// [ 2   7  12  17  22     ]
+// [ 3   8  13  18  23  28 ]
+// [     9  14  19  24  29 ]
+// [        15  20  25  30 ]
+// [            21  26  31 ]
+//
+// We do not ever use elements stored at the memory locations 4-5, 10, 27.
+// We need to skip those in order to get the rows and diagonals to have 
+// constant steps in the memory.  If we had started the second column
+// with memory location 4, and the third at 8, then the first row would 
+// be 1 4 8 13 which cannot be referenced by a VectorView.
+//
+// Likewise, the same BandMatrix in RowMajor and DiagMajor storage
+// is as follows:
+//
+// [  1   2   3   4         ]  [ 11  17  23  29         ]
+// [  6   7   8   9  10     ]  [  6  12  18  24  30     ]
+// [ 11  12  13  14  15  16 ]  [  1   7  13  19  25  31 ]
+// [     17  18  19  20  21 ]  [      2   8  14  20  26 ]
+// [         23  24  25  26 ]  [          3   9  15  21 ]
+// [             29  30  31 ]  [              4  10  16 ]
+//
+// For square BandMatrices, the wasted storage is only 
+// (nlo-1)*nlo/2 + (nhi-1)*nhi/2 memory locations,
+// which, if nlo and nhi are small compared to the size N,
+// is negligible compared to the total memory allocated of 
+// (N-1)*(nlo+nhi+1)+1.
+//    
+// Also, we don't actually require that the BandMatrix be square,
+// although that is the usual case.  Hopefully, the extension
+// of the above formats to non-square cases is obvious. 
+// The memory required for non-square BandMatrices is not quite as
+// simple a formula, and it depends on the StorageType.
+// The required memory (in units of sizeof(T)) can be obtained
+// by the function:
+//
+// int BandStorageLength(stor, colsize, rowsize, nlo, nhi);
+//
 // Constructors:
 //
-//    BandMatrices have 1 template parameter: T = the type of data.
-//    The default is double if it is omitted.
-//
-//    A BandMatrix is only non-zero in a small number of diagonals around
-//    the main diagonal.  Specifically, we store nhi super-diagonals 
-//    (above the main diagonal) and nlo sub-diagonals (below the main).
-//    
-//    All constructors have the storage pattern as the last parameter.
-//    RowMajor and ColMajor are as for a normal Matrix.
-//    But there is a new possibility for BandMatrices: DiagMajor.
-//    In this case the storage is in order of each diagonal starting 
-//    with the lowest one, proceding along that whole diagonal, and then 
-//    the next diagonal up, and so on.
-//
-//    Also, for each storage possibility, we store some extra elements 
-//    in order to have the rows, columns, and diagonals all have constant
-//    steps.  For example, a 6x6 ColMajor BandMatrix with nlo=2,nhi=3 has 
-//    the following elements, numbered in order that they are stored.
-//
-//    [ 1   6  11  16         ]
-//    [ 2   7  12  17  22     ]
-//    [ 3   8  13  18  23  28 ]
-//    [     9  14  19  24  29 ]
-//    [        15  20  25  30 ]
-//    [            21  26  31 ]
-//
-//    We do not ever use elements stored at the memory locations 4-5, 10, 27.
-//    We need to skip those in order to get the rows and diagonals to have 
-//    constant steps in the memory.  If we had started the second column
-//    with memory location 4, and the third at 8, then the first row would 
-//    be 1 4 8 13 which cannot be referenced by a VectorView.
-//
-//    Likewise, the same BandMatrix in RowMajor and DiagMajor storage
-//    is as follows:
-//
-//    [  1   2   3   4         ]  [ 11  17  23  29         ]
-//    [  6   7   8   9  10     ]  [  6  12  18  24  30     ]
-//    [ 11  12  13  14  15  16 ]  [  1   7  13  19  25  31 ]
-//    [     17  18  19  20  21 ]  [      2   8  14  20  26 ]
-//    [         23  24  25  26 ]  [          3   9  15  21 ]
-//    [             29  30  31 ]  [              4  10  16 ]
-//
-//    For square BandMatrices, the wasted storage is only 
-//    (nlo-1)*nlo/2 + (nhi-1)*nhi/2 memory locations,
-//    which, if nlo and nhi are small compared to the size N,
-//    is negligible compared to the total memory allocated of 
-//    (N-1)*(nlo+nhi+1)+1.
-//    
-//    Also, we don't actually require that the BandMatrix be square,
-//    although that is the usual case.  Hopefully, the extension
-//    of the above formats to non-square cases is obvious. 
-//    The memory required for non-square BandMatrices is not quite as
-//    simple a formula, and it depends on the StorageType.
-//    The required memory (in units of sizeof(T)) can be obtained
-//    by the function:
-//
-//    int BandStorageLength(stor, colsize, rowsize, nlo, nhi);
-//
-//
-//    BandMatrix<T,stor>(colsize, rowsize, nlo, nhi)
+//    BandMatrix<T,A>(colsize, rowsize, nlo, nhi)
 //        Makes a BandMatrix with column size = row size = size 
 //        with nhi non-zero superdiagonals and nlo non-zero subdiagonals
 //        with _uninitialized_ values
 //
-//    BandMatrix<T,stor>(colsize, rowsize, nlo, nhi, x)
+//    BandMatrix<T,A>(colsize, rowsize, nlo, nhi, x)
 //        The same as above, but all values are initialized to x
 //
-//    BandMatrix<T,stor>(const Matrix<T>& m, nlo, nhi)
+//    BandMatrix<T,A>(const Matrix<T>& m, nlo, nhi)
 //        Makes a BandMatrix which copies the corresponding elements of m.
 //
 //
@@ -146,6 +154,10 @@
 //            colsize, rowsize, nlo, nhi, stor)
 //    BandMatrixView BandMatrixViewOf(T* m, 
 //            colsize, rowsize, nlo, nhi, stor)
+//    ConstBandMatrixView BandMatrixViewOf(const T* m,
+//            colsize, rowsize, nlo, nhi, stepi, stepj)
+//    BandMatrixView BandMatrixViewOf(T* m, 
+//            colsize, rowsize, nlo, nhi, stepi, stepj)
 //        Makes a BandMatrixView of the elements in m using the actual
 //        element m for the storage.  This is essentially the same as the 
 //        constructor with (const T* m), except that the data isn't duplicated.
@@ -562,20 +574,17 @@ namespace tmv {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
             return const_rec_type(
                 cptr()+i1*stepi()+j1*stepj(),
-                i2-i1, j2-j1, stepi(), stepj(), stor(), ct());
+                i2-i1, j2-j1, stepi(), stepj(), ct());
         }
 
         inline const_rec_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const 
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            const StorageType newstor = 
-                iscm() ? (istep == 1 ? ColMajor : NoMajor) :
-                isrm() ? (jstep == 1 ? RowMajor : NoMajor) : NoMajor;
             return const_rec_type(
                 cptr()+i1*stepi()+j1*stepj(),
                 (i2-i1)/istep, (j2-j1)/jstep, istep*stepi(), jstep*stepj(),
-                newstor,ct());
+                ct());
         }
 
         bool hasSubVector(
@@ -601,7 +610,7 @@ namespace tmv {
             return const_view_type(
                 cptr()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
-                diagstep(),stor(),ct());
+                diagstep(),ct());
         }
 
         inline const_view_type subBandMatrix(
@@ -617,15 +626,12 @@ namespace tmv {
             int istep, int jstep) const
         {
             TMVAssert(hasSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,istep,jstep));
-            const StorageType newstor = 
-                iscm() ? (istep == 1 ? ColMajor : NoMajor) :
-                isrm() ? (jstep == 1 ? RowMajor : NoMajor) : NoMajor;
             const int newstepi = stepi()*istep;
             const int newstepj = stepj()*jstep;
             return const_view_type(
                 cptr()+i1*stepi()+j1*stepj(),
                 (i2-i1)/istep, (j2-j1)/jstep, newnlo, newnhi, 
-                newstepi, newstepj, newstepi+newstepj, newstor, ct());
+                newstepi, newstepj, newstepi+newstepj, ct());
         }
 
         inline const_view_type rowRange(int i1, int i2) const
@@ -636,12 +642,12 @@ namespace tmv {
             const int j2 = TMV_MIN(i2 + nhi(),rowsize());
             const int newnlo = i1 < nlo() ? TMV_MIN(nlo(),i2-1) - i1 : 0;
             const int newnhi = j1==j2 ? 0 : TMV_MIN(nlo()+nhi()-newnlo,j2-j1-1);
-            const int newlin = (ls() && isrm()) ? 1 : 0;
+            const int newlin = (ls() && isrm()) ? -1 : 0;
             TMVAssert(hasSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,1,1));
             return const_view_type(
                 cptr()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
-                diagstep(), stor(), ct(), newlin);
+                diagstep(), ct(), newlin);
         }
 
         inline const_view_type colRange(int j1, int j2) const
@@ -653,11 +659,11 @@ namespace tmv {
             const int newnhi = j1 < nhi() ? TMV_MIN(nhi(),j2-1) - j1 : 0;
             const int newnlo = i1==i2 ? 0 : TMV_MIN(nlo()+nhi()-newnhi,i2-i1-1);
             TMVAssert(hasSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,1,1));
-            const int newlin = (ls() && iscm()) ? 1 : 0;
+            const int newlin = (ls() && iscm()) ? -1 : 0;
             return const_view_type(
                 cptr()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
-                diagstep(), stor(), ct(), newlin);
+                diagstep(), ct(), newlin);
         }
 
         inline const_view_type diagRange(int k1, int k2) const
@@ -674,7 +680,7 @@ namespace tmv {
             return const_view_type(
                 cptr()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
-                diagstep(), stor(), ct());
+                diagstep(), ct());
         }
 
         inline const_view_type upperBand() const
@@ -682,7 +688,7 @@ namespace tmv {
             return const_view_type(
                 cptr(),TMV_MIN(colsize(),rowsize()),
                 TMV_MIN(colsize()+nhi(),rowsize()),
-                0,nhi(),stepi(),stepj(),diagstep(),stor(),ct());
+                0,nhi(),stepi(),stepj(),diagstep(),ct());
         }
 
         inline const_view_type lowerBand() const
@@ -690,7 +696,7 @@ namespace tmv {
             return const_view_type(
                 cptr(),TMV_MIN(colsize(),rowsize()+nlo()),
                 TMV_MIN(colsize(),rowsize()),
-                nlo(),0,stepi(),stepj(),diagstep(),stor(),ct());
+                nlo(),0,stepi(),stepj(),diagstep(),ct());
         }
 
         inline const_view_type upperBandOff() const
@@ -698,7 +704,7 @@ namespace tmv {
             return const_view_type(
                 cptr()+stepj(),TMV_MIN(colsize(),rowsize()-1),
                 TMV_MIN(colsize()+nhi(),rowsize()-1),
-                0,nhi()-1,stepi(),stepj(),diagstep(),stor(),ct());
+                0,nhi()-1,stepi(),stepj(),diagstep(),ct());
         }
 
         inline const_view_type lowerBandOff() const
@@ -706,7 +712,7 @@ namespace tmv {
             return const_view_type(
                 cptr()+stepi(),TMV_MIN(colsize()-1,rowsize()+nlo()),
                 TMV_MIN(colsize()-1,rowsize()),
-                nlo()-1,0,stepi(),stepj(),diagstep(),stor(),ct());
+                nlo()-1,0,stepi(),stepj(),diagstep(),ct());
         }
 
         inline const_realpart_type realPart() const
@@ -716,8 +722,7 @@ namespace tmv {
                 colsize(),rowsize(),nlo(),nhi(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
-                isReal(T()) ? diagstep() : 2*diagstep(),
-                isReal(T()) ? stor() : NoMajor, NonConj);
+                isReal(T()) ? diagstep() : 2*diagstep(),NonConj);
         }
 
         inline const_realpart_type imagPart() const
@@ -726,7 +731,7 @@ namespace tmv {
             return const_realpart_type(
                 reinterpret_cast<const RT*>(cptr())+1,
                 colsize(),rowsize(),nlo(),nhi(),
-                2*stepi(),2*stepj(),2*diagstep(),NoMajor, NonConj);
+                2*stepi(),2*stepj(),2*diagstep(),NonConj);
         }
 
         //
@@ -737,7 +742,7 @@ namespace tmv {
         { 
             return const_view_type(
                 cptr(),colsize(),rowsize(),nlo(),nhi(),
-                stepi(),stepj(),diagstep(),stor(),ct(),
+                stepi(),stepj(),diagstep(),ct(),
                 isdm()?0:ls());
         }
 
@@ -745,7 +750,7 @@ namespace tmv {
         { 
             return const_view_type(
                 cptr(),rowsize(),colsize(),nhi(),nlo(),
-                stepj(),stepi(),diagstep(),TMV_TransOf(stor()),ct(),
+                stepj(),stepi(),diagstep(),ct(),
                 isdm()?0:ls());
         }
 
@@ -753,7 +758,7 @@ namespace tmv {
         { 
             return const_view_type(
                 cptr(),colsize(),rowsize(),nlo(),nhi(),
-                stepi(),stepj(),diagstep(),stor(),TMV_ConjOf(T,ct()),
+                stepi(),stepj(),diagstep(),TMV_ConjOf(T,ct()),
                 isdm()?0:ls());
         }
 
@@ -761,7 +766,7 @@ namespace tmv {
         { 
             return const_view_type(
                 cptr(),rowsize(),colsize(),nhi(),nlo(),
-                stepj(),stepi(),diagstep(),TMV_TransOf(stor()),
+                stepj(),stepi(),diagstep(),
                 TMV_ConjOf(T,ct()),isdm()?0:ls());
         }
 
@@ -774,8 +779,8 @@ namespace tmv {
         // funtion, which it needs to be for virtual overriding.
         virtual inline const_vec_type constLinearView() const
         {
-            TMVAssert(!isdm());
-            TMVAssert(ls() != 1 || (rowsize() == 1 && colsize() == 1));
+            TMVAssert(iscm() || isrm());
+            TMVAssert(ls() != -1);
             // (To assure that next assert has no effect.)
             TMVAssert(canLinearize());
 #ifdef TMV_USE_VALGRIND
@@ -796,7 +801,7 @@ namespace tmv {
         {
             return nonconst_type(
                 const_cast<T*>(cptr()),colsize(),rowsize(),
-                nlo(),nhi(),stepi(),stepj(),diagstep(),stor(),ct(),
+                nlo(),nhi(),stepi(),stepj(),diagstep(),ct(),
                 isdm()?0:ls()
                 TMV_FIRSTLAST1(isdm() ? diag(-nlo()).begin().getP() : cptr(),
                                isdm() ? diag(nhi()).end().getP() :
@@ -910,15 +915,14 @@ namespace tmv {
         virtual int stepj() const = 0;
         virtual int diagstep() const = 0;
         virtual int ls() const  = 0;
-        virtual inline bool isrm() const { return stor() == RowMajor; }
-        virtual inline bool iscm() const { return stor() == ColMajor; }
-        virtual inline bool isdm() const { return stor() == DiagMajor; }
+        virtual inline bool isrm() const { return stepj() == 1; }
+        virtual inline bool iscm() const { return stepi() == 1; }
+        virtual inline bool isdm() const { return diagstep() == 1; }
         inline bool isconj() const
         {
             TMVAssert(isComplex(T()) || ct()==NonConj);
             return isComplex(T()) && ct()==Conj;
         }
-        virtual StorageType stor() const = 0;
         virtual ConjType ct() const = 0;
 
         virtual bool canLinearize() const = 0;
@@ -972,55 +976,60 @@ namespace tmv {
 
     }; // GenBandMatrix
 
-    template <class T, IndexStyle I> 
+    template <class T, int A> 
     class ConstBandMatrixView : public GenBandMatrix<T>
     {
     public :
 
         typedef GenBandMatrix<T> base;
-        typedef ConstBandMatrixView<T,I> type;
+        typedef ConstBandMatrixView<T,A> type;
 
         inline ConstBandMatrixView(const type& rhs) :
             itsm(rhs.itsm), itscs(rhs.itscs), itsrs(rhs.itsrs),
             itsnlo(rhs.itsnlo), itsnhi(rhs.itsnhi),
             itssi(rhs.itssi), itssj(rhs.itssj), itssd(rhs.itssd),
-            itsstor(rhs.itsstor), itsct(rhs.itsct), linsize(rhs.linsize) 
-        { TMVAssert(!(isdm() && linsize != 0)); }
+            itsct(rhs.itsct), linsize(rhs.linsize) 
+        {
+            TMVAssert(Attrib<A>::viewok);
+            TMVAssert(!(isdm() && linsize != 0)); 
+        }
 
         inline ConstBandMatrixView(const base& rhs) :
             itsm(rhs.cptr()), itscs(rhs.colsize()), itsrs(rhs.rowsize()),
             itsnlo(rhs.nlo()), itsnhi(rhs.nhi()),
             itssi(rhs.stepi()), itssj(rhs.stepj()), itssd(rhs.diagstep()),
-            itsstor(rhs.stor()), itsct(rhs.ct()), 
+            itsct(rhs.ct()), 
             linsize(rhs.isdm()?0:rhs.ls()) 
-            { TMVAssert(!(isdm() && linsize != 0)); }
+            {
+                TMVAssert(Attrib<A>::viewok);
+                TMVAssert(!(isdm() && linsize != 0)); 
+            }
 
         inline ConstBandMatrixView(
             const T* _m, int _cs, int _rs, 
             int _lo, int _hi, int _si, int _sj, int _sd, 
-            StorageType _stor, ConjType _ct, int _ls=0) : 
+            ConjType _ct, int _ls=0) : 
             itsm(_m), itscs(_cs), itsrs(_rs),
             itsnlo(_lo), itsnhi(_hi), itssi(_si), itssj(_sj), itssd(_sd),
-            itsstor(_stor), itsct(_ct), linsize(_ls)
+            itsct(_ct), linsize(_ls)
         { 
-            TMVAssert(itsstor==RowMajor ? itssj==1 :
-                      itsstor==ColMajor ? itssi==1 :
-                      itsstor==DiagMajor ? itssd==1 : true); 
+            TMVAssert(Attrib<A>::viewok);
             TMVAssert(rowsize() == 0 || nhi() < rowsize());
             TMVAssert(colsize() == 0 || nlo() < colsize());
             TMVAssert(nhi() >= 0);
             TMVAssert(nlo() >= 0);
-            TMVAssert(!(isdm() && linsize!=0));
-            TMVAssert(linsize==0 || linsize==1 || 
-                      linsize==BandStorageLength(
-                          itsstor,itscs,itsrs,itsnlo,itsnhi));
+            TMVAssert(linsize==0 || linsize==-1 || 
+                      ( (itssi == 1 || itssj == 1) &&
+                        linsize==BandStorageLength(
+                            (itssi == 1 ? ColMajor : RowMajor),
+                            itscs,itsrs,itsnlo,itsnhi)));
         }
 
         // These two work slightly differently than the BandMatrixViewOf
         // commands when the rhs matrix is not square.  
         // These two constructors copy the size of rhs viewing only 
         // the relevant rows.
-        // In contrast, BandMatrixViewOf shrinks colsize of rowsize down to
+        // In contrast, BandMatrixViewOf shrinks colsize or rowsize down to
         // only the rows and columns which include the bands.
         //   e.g. if rhs is 10 x 8, then:
         //   BandMatrixView(rhs,0,2) will have cs = rs = 8
@@ -1029,8 +1038,9 @@ namespace tmv {
             itsm(rhs.cptr()), itscs(rhs.colsize()), itsrs(rhs.rowsize()),
             itsnlo(lo), itsnhi(hi),
             itssi(rhs.stepi()), itssj(rhs.stepj()), itssd(rhs.diagstep()),
-            itsstor(rhs.stor()), itsct(rhs.ct()), linsize(0)
+            itsct(rhs.ct()), linsize(0)
         { 
+            TMVAssert(Attrib<A>::viewok);
             TMVAssert(rowsize() == 0 || nhi() < rowsize());
             TMVAssert(colsize() == 0 || nlo() < colsize());
             TMVAssert(nhi() >= 0);
@@ -1041,8 +1051,9 @@ namespace tmv {
             itsm(rhs.cptr()), itscs(rhs.colsize()), itsrs(rhs.rowsize()),
             itsnlo(lo), itsnhi(hi),
             itssi(rhs.stepi()), itssj(rhs.stepj()), itssd(itssi+itssj),
-            itsstor(rhs.stor()), itsct(rhs.ct()), linsize(0)
+            itsct(rhs.ct()), linsize(0)
         { 
+            TMVAssert(Attrib<A>::viewok);
             TMVAssert(rowsize() == 0 || nhi() < rowsize());
             TMVAssert(colsize() == 0 || nlo() < colsize());
             TMVAssert(nhi() >= 0);
@@ -1065,7 +1076,6 @@ namespace tmv {
         inline int stepj() const { return itssj; }
         inline int diagstep() const { return itssd; }
         inline int ls() const { return linsize; }
-        inline StorageType stor() const { return itsstor; }
         inline ConjType ct() const { return itsct; }
         using base::isdm;
 
@@ -1082,7 +1092,6 @@ namespace tmv {
         const int itssj;
         const int itssd;
 
-        const StorageType itsstor;
         const ConjType itsct;
         mutable int linsize;
 
@@ -1118,8 +1127,8 @@ namespace tmv {
         inline ConstBandMatrixView(
             const T* _m, int _cs, int _rs, 
             int _lo, int _hi, int _si, int _sj, int _sd, 
-            StorageType instor, ConjType inct, int ls=0) : 
-            c_type(_m,_cs,_rs,_lo,_hi,_si,_sj,_sd, instor,inct,ls) {}
+            ConjType _ct, int ls=0) : 
+            c_type(_m,_cs,_rs,_lo,_hi,_si,_sj,_sd,_ct,ls) {}
 
         inline ConstBandMatrixView(const base& rhs, int lo, int hi) : 
             c_type(rhs,lo,hi) {}
@@ -1303,7 +1312,7 @@ namespace tmv {
 
     }; // FortranStyle ConstBandMatrixView
 
-    template <class T, IndexStyle I> 
+    template <class T, int A> 
     class BandMatrixView : public GenBandMatrix<T>
     {
     public:
@@ -1311,14 +1320,14 @@ namespace tmv {
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef GenBandMatrix<T> base;
-        typedef BandMatrixView<T,I> type;
-        typedef BandMatrixView<T,I> view_type;
+        typedef BandMatrixView<T,A> type;
+        typedef BandMatrixView<T,A> view_type;
         typedef view_type transpose_type;
         typedef view_type conjugate_type;
         typedef view_type adjoint_type;
-        typedef VectorView<T,I> vec_type;
-        typedef MatrixView<T,I> rec_type;
-        typedef BandMatrixView<RT,I> realpart_type;
+        typedef VectorView<T,A> vec_type;
+        typedef MatrixView<T,A> rec_type;
+        typedef BandMatrixView<RT,A> realpart_type;
         typedef TMV_RefType(T) reference;
         typedef RMIt<const type> rowmajor_iterator;
         typedef CMIt<const type> colmajor_iterator;
@@ -1332,77 +1341,45 @@ namespace tmv {
             itsm(rhs.itsm), itscs(rhs.itscs), itsrs(rhs.itsrs),
             itsnlo(rhs.itsnlo), itsnhi(rhs.itsnhi),
             itssi(rhs.itssi), itssj(rhs.itssj), itssd(rhs.itssd),
-            itsstor(rhs.stor()), itsct(rhs.ct()), linsize(rhs.ls())
+            itsct(rhs.ct()), linsize(rhs.ls())
             TMV_DEFFIRSTLAST(rhs._first,rhs._last) 
         { 
-            TMVAssert(itsstor==RowMajor ? itssj==1 :
-                      itsstor==ColMajor ? itssi==1 :
-                      itsstor==DiagMajor ? itssd==1 : true); 
+            TMVAssert(Attrib<A>::viewok);
             TMVAssert(rowsize() == 0 || nhi() < rowsize());
             TMVAssert(colsize() == 0 || nlo() < colsize());
             TMVAssert(nhi() >= 0);
             TMVAssert(nlo() >= 0);
-            TMVAssert(!(isdm() && linsize != 0));
-            TMVAssert(itsstor==DiagMajor ? linsize == 0 : true);
-            TMVAssert(linsize==0 || linsize==1 || 
-                      linsize==BandStorageLength(
-                          itsstor,itscs,itsrs,itsnlo,itsnhi));
         }
 
         inline BandMatrixView(
             T* _m, int _cs, int _rs, int _lo, int _hi,
-            int _si, int _sj, int _sd, StorageType _stor, ConjType _ct,
-            int _ls TMV_PARAMFIRSTLAST(T) ) :
+            int _si, int _sj, int _sd, ConjType _ct,
+            int _ls=0 TMV_PARAMFIRSTLAST(T) ) :
             itsm(_m), itscs(_cs), itsrs(_rs),
             itsnlo(_lo), itsnhi(_hi), itssi(_si), itssj(_sj), itssd(_sd),
-            itsstor(_stor), itsct(_ct), linsize(_ls)
+            itsct(_ct), linsize(_ls)
             TMV_DEFFIRSTLAST(_first,_last)
         { 
-            TMVAssert(itsstor==RowMajor ? itssj==1 :
-                      itsstor==ColMajor ? itssi==1 :
-                      itsstor==DiagMajor ? itssd==1 : true); 
+            TMVAssert(Attrib<A>::viewok);
             TMVAssert(rowsize() == 0 || nhi() < rowsize());
             TMVAssert(colsize() == 0 || nlo() < colsize());
             TMVAssert(nhi() >= 0);
             TMVAssert(nlo() >= 0);
-            TMVAssert(!(isdm() && linsize != 0));
-            TMVAssert(itsstor==DiagMajor ? linsize == 0 : true);
-            TMVAssert(linsize==0 || linsize==1 || 
-                      linsize==BandStorageLength(
-                          itsstor,itscs,itsrs,itsnlo,itsnhi));
-        }
-
-        inline BandMatrixView(
-            T* _m, int _cs, int _rs, int _lo, int _hi,
-            int _si, int _sj, int _sd, StorageType _stor, ConjType _ct
-            TMV_PARAMFIRSTLAST(T) ) :
-            itsm(_m), itscs(_cs), itsrs(_rs),
-            itsnlo(_lo), itsnhi(_hi), itssi(_si), itssj(_sj), itssd(_sd),
-            itsstor(_stor), itsct(_ct), linsize(0)
-            TMV_DEFFIRSTLAST(_first,_last)
-        { 
-            TMVAssert(itsstor==RowMajor ? itssj==1 :
-                      itsstor==ColMajor ? itssi==1 :
-                      itsstor==DiagMajor ? itssd==1 : true); 
-            TMVAssert(rowsize() == 0 || nhi() < rowsize());
-            TMVAssert(colsize() == 0 || nlo() < colsize());
-            TMVAssert(nhi() >= 0);
-            TMVAssert(nlo() >= 0);
-            TMVAssert(!(isdm() && linsize != 0));
-            TMVAssert(itsstor==DiagMajor ? linsize == 0 : true);
-            TMVAssert(linsize == 0);
+            TMVAssert(linsize==0 || linsize==-1 || 
+                      ( (itssi == 1 || itssj == 1) &&
+                        linsize==BandStorageLength(
+                            (itssi == 1 ? ColMajor : RowMajor),
+                            itscs,itsrs,itsnlo,itsnhi)));
         }
 
         inline BandMatrixView(const BandMatrixView<T>& rhs, int lo, int hi) : 
             itsm(rhs.ptr()), itscs(rhs.colsize()), itsrs(rhs.rowsize()),
             itsnlo(lo), itsnhi(hi),
             itssi(rhs.stepi()), itssj(rhs.stepj()), itssd(rhs.diagstep()),
-            itsstor(rhs.stor()), itsct(rhs.ct()), linsize(0)
+            itsct(rhs.ct()), linsize(0)
             TMV_DEFFIRSTLAST(rhs._first,rhs._last) 
         { 
-            TMVAssert(itsstor==RowMajor ? itssj==1 :
-                      itsstor==ColMajor ? itssi==1 :
-                      true); 
+            TMVAssert(Attrib<A>::viewok);
             TMVAssert(rowsize() == 0 || nhi() < rowsize());
             TMVAssert(colsize() == 0 || nlo() < colsize());
             TMVAssert(nhi() >= 0);
@@ -1413,12 +1390,10 @@ namespace tmv {
             itsm(rhs.ptr()), itscs(rhs.colsize()), itsrs(rhs.rowsize()),
             itsnlo(lo), itsnhi(hi),
             itssi(rhs.stepi()), itssj(rhs.stepj()), itssd(itssi+itssj),
-            itsstor(rhs.stor()), itsct(rhs.ct()), linsize(0)
+            itsct(rhs.ct()), linsize(0)
             TMV_DEFFIRSTLAST(rhs._first,rhs._last) 
         { 
-            TMVAssert(itsstor==RowMajor ? itssj==1 :
-                      itsstor==ColMajor ? itssi==1 :
-                      true); 
+            TMVAssert(Attrib<A>::viewok);
             TMVAssert(rowsize() == 0 || nhi() < rowsize());
             TMVAssert(colsize() == 0 || nlo() < colsize());
             TMVAssert(nhi() >= 0);
@@ -1548,7 +1523,7 @@ namespace tmv {
             m2.assignToU(
                 UpperTriMatrixView<T>(
                     ptr(),colsize(),stepi(),stepj(),
-                    NonUnitDiag,isdm()?NoMajor:stor(),ct() TMV_FIRSTLAST));
+                    NonUnitDiag,ct() TMV_FIRSTLAST));
             if (nlo() > 0) diagRange(-nlo(),0).setZero();
             return *this;
         }
@@ -1563,7 +1538,7 @@ namespace tmv {
             m2.assignToU(
                 UpperTriMatrixView<T>(
                     ptr(),colsize(),stepi(),stepj(),
-                    NonUnitDiag,isdm()?NoMajor:stor(),ct() TMV_FIRSTLAST));
+                    NonUnitDiag,ct() TMV_FIRSTLAST));
             if (nlo() > 0) diagRange(-nlo(),0).setZero();
             return *this;
         }
@@ -1577,7 +1552,7 @@ namespace tmv {
             m2.assignToL(
                 LowerTriMatrixView<T>(
                     ptr(),colsize(),stepi(),stepj(),
-                    NonUnitDiag,isdm()?NoMajor:stor(),ct() TMV_FIRSTLAST));
+                    NonUnitDiag,ct() TMV_FIRSTLAST));
             if (nhi() > 0) diagRange(1,nhi()+1).setZero();
             return *this;
         }
@@ -1592,7 +1567,7 @@ namespace tmv {
             m2.assignToL(
                 LowerTriMatrixView<T>(
                     ptr(),colsize(),stepi(),stepj(),
-                    NonUnitDiag,isdm()?NoMajor:stor(),ct() TMV_FIRSTLAST));
+                    NonUnitDiag,ct() TMV_FIRSTLAST));
             if (nhi() > 0) diagRange(1,nhi()+1).setZero();
             return *this;
         }
@@ -1713,20 +1688,17 @@ namespace tmv {
             TMVAssert(base::hasSubMatrix(i1,i2,j1,j2,1,1));
             return rec_type(
                 ptr()+i1*stepi()+j1*stepj(),
-                i2-i1, j2-j1, stepi(), stepj(), stor(), ct() TMV_FIRSTLAST);
+                i2-i1, j2-j1, stepi(), stepj(), ct() TMV_FIRSTLAST);
         }
 
         inline rec_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const 
         {
-            const StorageType newstor = 
-                iscm() ? (istep == 1 ? ColMajor : NoMajor) :
-                isrm() ? (jstep == 1 ? RowMajor : NoMajor) : NoMajor;
             TMVAssert(base::hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             return rec_type(
                 ptr()+i1*stepi()+j1*stepj(),
                 (i2-i1)/istep,(j2-j1)/jstep,istep*stepi(),jstep*stepj(),
-                newstor, ct() TMV_FIRSTLAST);
+                ct() TMV_FIRSTLAST);
         }
 
         inline vec_type subVector(
@@ -1741,12 +1713,11 @@ namespace tmv {
         inline view_type subBandMatrix(
             int i1, int i2, int j1, int j2, int newnlo, int newnhi) const
         {
-            TMVAssert(base::hasSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,
-                                             1,1));
+            TMVAssert(base::hasSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,1,1));
             return view_type(
                 ptr()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
-                diagstep(), stor(), ct() TMV_FIRSTLAST);
+                diagstep(), ct() TMV_FIRSTLAST);
         }
 
         inline view_type subBandMatrix(
@@ -1761,18 +1732,15 @@ namespace tmv {
             int i1, int i2, int j1, int j2, int newnlo, int newnhi,
             int istep, int jstep) const
         {
-            TMVAssert(base::hasSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,
-                                             istep,jstep));
-            const StorageType newstor = 
-                iscm() ? (istep == 1 ? ColMajor : NoMajor) :
-                isrm() ? (jstep == 1 ? RowMajor : NoMajor) : NoMajor;
+            TMVAssert(base::hasSubBandMatrix(
+                    i1,i2,j1,j2,newnlo,newnhi,istep,jstep));
             const int newstepi = stepi()*istep;
             const int newstepj = stepj()*jstep;
             return view_type(
                 ptr()+i1*stepi()+j1*stepj(),
                 (i2-i1)/istep, (j2-j1)/jstep, newnlo, newnhi, 
-                stepi()*istep, stepj()*jstep, newstepi+newstepj, newstor, 
-                             ct() TMV_FIRSTLAST);
+                stepi()*istep, stepj()*jstep, newstepi+newstepj, ct() 
+                TMV_FIRSTLAST);
         }
 
         inline view_type rowRange(int i1, int i2) const
@@ -1783,13 +1751,13 @@ namespace tmv {
             const int j2 = TMV_MIN(i2 + nhi(),rowsize());
             const int newnlo = i1 < nlo() ? TMV_MIN(nlo(),i2-1) - i1 : 0;
             const int newnhi = j1==j2 ? 0 : TMV_MIN(nlo()+nhi()-newnlo,j2-j1-1);
-            const int newlin = (ls() && isrm()) ? 1 : 0;
+            const int newlin = (ls() && isrm()) ? -1 : 0;
             TMVAssert(base::hasSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,
                                              1,1));
             return view_type(
                 ptr()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
-                diagstep(), stor(), ct(), newlin TMV_FIRSTLAST);
+                diagstep(), ct(), newlin TMV_FIRSTLAST);
         }
 
         inline view_type colRange(int j1, int j2) const
@@ -1800,13 +1768,13 @@ namespace tmv {
             const int i2 = TMV_MIN(j2 + nlo(),colsize());
             const int newnhi = j1 < nhi() ? TMV_MIN(nhi(),j2-1) - j1 : 0;
             const int newnlo = i1==i2 ? 0 : TMV_MIN(nlo()+nhi()-newnhi,i2-i1-1);
-            const int newlin = (ls() && iscm()) ? 1 : 0;
+            const int newlin = (ls() && iscm()) ? -1 : 0;
             TMVAssert(base::hasSubBandMatrix(
                     i1,i2,j1,j2,newnlo,newnhi,1,1));
             return view_type(
                 ptr()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
-                diagstep(), stor(), ct(), newlin TMV_FIRSTLAST);
+                diagstep(), ct(), newlin TMV_FIRSTLAST);
         }
 
         inline view_type diagRange(int k1, int k2) const
@@ -1824,7 +1792,7 @@ namespace tmv {
             return view_type(
                 ptr()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
-                diagstep(), stor(), ct() TMV_FIRSTLAST);
+                diagstep(), ct() TMV_FIRSTLAST);
         }
 
         inline view_type upperBand() const
@@ -1832,7 +1800,7 @@ namespace tmv {
             return view_type(
                 ptr(),TMV_MIN(colsize(),rowsize()),
                 TMV_MIN(colsize()+nhi(),rowsize()),
-                0,nhi(),stepi(),stepj(),diagstep(),stor(),ct() TMV_FIRSTLAST);
+                0,nhi(),stepi(),stepj(),diagstep(),ct() TMV_FIRSTLAST);
         }
 
         inline view_type lowerBand() const
@@ -1840,7 +1808,7 @@ namespace tmv {
             return view_type(
                 ptr(),TMV_MIN(colsize(),rowsize()+nlo()),
                 TMV_MIN(colsize(),rowsize()),
-                nlo(),0,stepi(),stepj(),diagstep(),stor(),ct() TMV_FIRSTLAST);
+                nlo(),0,stepi(),stepj(),diagstep(),ct() TMV_FIRSTLAST);
         }
 
         inline view_type upperBandOff() const
@@ -1848,7 +1816,7 @@ namespace tmv {
             return view_type(
                 ptr()+stepj(),TMV_MIN(colsize(),rowsize()-1),
                 TMV_MIN(colsize()+nhi(),rowsize()-1),
-                0,nhi()-1,stepi(),stepj(),diagstep(),stor(),ct() TMV_FIRSTLAST);
+                0,nhi()-1,stepi(),stepj(),diagstep(),ct() TMV_FIRSTLAST);
         }
 
         inline view_type lowerBandOff() const
@@ -1856,7 +1824,7 @@ namespace tmv {
             return view_type(
                 ptr()+stepi(),TMV_MIN(colsize()-1,rowsize()+nlo()),
                 TMV_MIN(colsize()-1,rowsize()),
-                nlo()-1,0,stepi(),stepj(),diagstep(),stor(),ct() TMV_FIRSTLAST);
+                nlo()-1,0,stepi(),stepj(),diagstep(),ct() TMV_FIRSTLAST);
         }
 
         inline realpart_type realPart() const
@@ -1866,8 +1834,7 @@ namespace tmv {
                 colsize(),rowsize(),nlo(),nhi(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
-                isReal(T()) ? diagstep() : 2*diagstep(),
-                isReal(T()) ? stor() : NoMajor,NonConj
+                isReal(T()) ? diagstep() : 2*diagstep(), NonConj
 #ifdef TMVFLDEBUG
                 ,reinterpret_cast<const RT*>(_first)
                 ,reinterpret_cast<const RT*>(_last)
@@ -1881,7 +1848,7 @@ namespace tmv {
             return realpart_type(
                 reinterpret_cast<RT*>(ptr())+1,
                 colsize(),rowsize(),nlo(),nhi(),
-                2*stepi(),2*stepj(),2*diagstep(),NoMajor, NonConj
+                2*stepi(),2*stepj(),2*diagstep(),NonConj
 #ifdef TMVFLDEBUG
                 ,reinterpret_cast<const RT*>(_first)+1
                 ,reinterpret_cast<const RT*>(_last)+1
@@ -1896,7 +1863,7 @@ namespace tmv {
         { 
             return view_type(
                 ptr(),rowsize(),colsize(),nhi(),nlo(),
-                stepj(),stepi(),diagstep(),TMV_TransOf(stor()),ct(),
+                stepj(),stepi(),diagstep(),ct(),
                 isdm()?0:ls() TMV_FIRSTLAST);
         }
 
@@ -1904,7 +1871,7 @@ namespace tmv {
         { 
             return view_type(
                 ptr(),colsize(),rowsize(),nlo(),nhi(),
-                stepi(),stepj(),diagstep(),stor(),TMV_ConjOf(T,ct()),
+                stepi(),stepj(),diagstep(),TMV_ConjOf(T,ct()),
                 isdm()?0:ls() TMV_FIRSTLAST);
         }
 
@@ -1912,14 +1879,14 @@ namespace tmv {
         { 
             return view_type(
                 ptr(),rowsize(),colsize(),nhi(),nlo(),
-                stepj(),stepi(),diagstep(),TMV_TransOf(stor()),
+                stepj(),stepi(),diagstep(),
                 TMV_ConjOf(T,ct()),isdm()?0:ls() TMV_FIRSTLAST);
         }
 
         inline vec_type linearView() const
         {
-            TMVAssert(!isdm());
-            TMVAssert(ls() != 1 || (rowsize() == 1 && colsize() == 1));
+            TMVAssert(iscm() || isrm());
+            TMVAssert(ls() != -1);
             // (To assure that next assert has no effect.)
             TMVAssert(canLinearize());
 
@@ -1968,7 +1935,6 @@ namespace tmv {
         using base::isdm;
         using base::isconj;
         inline int ls() const { return linsize; }
-        inline StorageType stor() const { return itsstor; }
         inline ConjType ct() const { return itsct; }
 
         bool canLinearize() const;
@@ -2009,7 +1975,6 @@ namespace tmv {
         const int itssj;
         const int itssd;
 
-        const StorageType itsstor;
         const ConjType itsct;
         mutable int linsize;
 
@@ -2053,16 +2018,9 @@ namespace tmv {
 
         inline BandMatrixView(
             T* _m, int _cs, int _rs, int _lo, int _hi,
-            int _si, int _sj, int _sd, StorageType instor, ConjType inct,
-            int ls TMV_PARAMFIRSTLAST(T) ) :
-            c_type(_m,_cs,_rs,_lo,_hi,_si,_sj,_sd,instor,inct,ls
-                   TMV_FIRSTLAST1(_first,_last) ) {}
-
-        inline BandMatrixView(
-            T* _m, int _cs, int _rs, int _lo, int _hi,
-            int _si, int _sj, int _sd, StorageType instor, ConjType inct
-            TMV_PARAMFIRSTLAST(T) ) :
-            c_type(_m,_cs,_rs,_lo,_hi,_si,_sj,_sd,instor,inct
+            int _si, int _sj, int _sd, ConjType _ct,
+            int _ls=0 TMV_PARAMFIRSTLAST(T) ) :
+            c_type(_m,_cs,_rs,_lo,_hi,_si,_sj,_sd,_ct,_ls
                    TMV_FIRSTLAST1(_first,_last) ) {}
 
         inline BandMatrixView(const BandMatrixView<T>& rhs, int lo, int hi) : 
@@ -2330,15 +2288,17 @@ namespace tmv {
 
     }; // FortranStyle BandMatrixView
 
-    template <class T, StorageType S, IndexStyle I> 
+    template <class T, int A> 
     class BandMatrix : public GenBandMatrix<T>
     {
     public:
 
+        enum { S = A & AllStorageType };
+        enum { I = A & FortranStyle };
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
         typedef GenBandMatrix<T> base;
-        typedef BandMatrix<T,S,I> type;
+        typedef BandMatrix<T,A> type;
         typedef BandMatrixView<T,I> view_type;
         typedef view_type transpose_type;
         typedef view_type conjugate_type;
@@ -2367,34 +2327,34 @@ namespace tmv {
         //
 
 #define NEW_SIZE(cs,rs,lo,hi) \
-        linsize(BandStorageLength(S,cs,rs,lo,hi)), \
+        linsize(BandStorageLength(static_cast<StorageType>(S),cs,rs,lo,hi)), \
         itsm1(linsize), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi), \
-        itssi(S==RowMajor ? lo+hi : S==ColMajor ? 1 : \
+        itssi(S==int(RowMajor) ? lo+hi : S==int(ColMajor) ? 1 : \
               rs>= cs ? 1-cs : -rs ), \
-        itssj(S==RowMajor ? 1 : S==ColMajor ? lo+hi : -itssi+1), \
-        itsds(S==RowMajor ? itssi+1 : S==ColMajor ? itssj+1 : 1), \
-        itsm(S==DiagMajor ? itsm1.get() - lo*itssi : itsm1.get()) \
+        itssj(S==int(RowMajor) ? 1 : S==int(ColMajor) ? lo+hi : -itssi+1), \
+        itsds(S==int(RowMajor) ? itssi+1 : S==int(ColMajor) ? itssj+1 : 1), \
+        itsm(S==int(DiagMajor) ? itsm1.get() - lo*itssi : itsm1.get()) \
         TMV_DEFFIRSTLAST(itsm1.get(),itsm1.get()+linsize)
 
 #define NEW_SIZE2(ls,cs,rs,lo,hi) \
         linsize(ls), \
         itsm1(linsize), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi), \
-        itssi(S==RowMajor ? lo+hi : S==ColMajor ? 1 : \
+        itssi(S==int(RowMajor) ? lo+hi : S==int(ColMajor) ? 1 : \
               rs>= cs ? 1-cs : -rs ), \
-        itssj(S==RowMajor ? 1 : S==ColMajor ? lo+hi : -itssi+1), \
-        itsds(S==RowMajor ? itssi+1 : S==ColMajor ? itssj+1 : 1), \
-        itsm(S==DiagMajor ? itsm1.get() - lo*itssi : itsm1.get()) \
+        itssj(S==int(RowMajor) ? 1 : S==int(ColMajor) ? lo+hi : -itssi+1), \
+        itsds(S==int(RowMajor) ? itssi+1 : S==int(ColMajor) ? itssj+1 : 1), \
+        itsm(S==int(DiagMajor) ? itsm1.get() - lo*itssi : itsm1.get()) \
         TMV_DEFFIRSTLAST(itsm1.get(),itsm1.get()+linsize)
 
         inline BandMatrix() : NEW_SIZE(0,0,0,0) 
         {
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
+            TMVAssert(Attrib<A>::bandmatrixok); 
         }
 
         inline BandMatrix(int cs, int rs, int lo, int hi) :
             NEW_SIZE(cs,rs,lo,hi) 
         {
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
+            TMVAssert(Attrib<A>::bandmatrixok); 
             TMVAssert(cs >= 0 && rs >= 0);
             TMVAssert(lo >= 0);
             TMVAssert(hi >= 0);
@@ -2408,7 +2368,7 @@ namespace tmv {
         inline BandMatrix(int cs, int rs, int lo, int hi, const T& x) :
             NEW_SIZE(cs,rs,lo,hi)
         {
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
+            TMVAssert(Attrib<A>::bandmatrixok); 
             TMVAssert(cs >= 0 && rs >= 0);
             TMVAssert(lo >= 0);
             TMVAssert(hi >= 0);
@@ -2417,33 +2377,25 @@ namespace tmv {
             setAllTo(x);
         }
 
-        inline BandMatrix(const BandMatrix<T,S,I>& m2) :
+        inline BandMatrix(const BandMatrix<T,A>& m2) :
             NEW_SIZE2(m2.ls(),m2.itscs,m2.itsrs,m2.itsnlo,m2.itsnhi)
         {
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
-            std::copy(m2.start_mem(),m2.start_mem()+linsize,itsm1.get());
-        }
-
-        template <IndexStyle I2> 
-        inline BandMatrix(const BandMatrix<T,S,I2>& m2) :
-            NEW_SIZE2(m2.ls(),m2.colsize(),m2.rowsize(),m2.nlo(),m2.nhi())
-        {
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
+            TMVAssert(Attrib<A>::bandmatrixok); 
             std::copy(m2.start_mem(),m2.start_mem()+linsize,itsm1.get());
         }
 
         inline BandMatrix(const GenBandMatrix<RT>& m2) :
             NEW_SIZE(m2.colsize(),m2.rowsize(),m2.nlo(),m2.nhi())
         {
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
+            TMVAssert(Attrib<A>::bandmatrixok); 
             m2.assignToB(view());
         }
 
         inline BandMatrix(const GenBandMatrix<CT>& m2) :
             NEW_SIZE(m2.colsize(),m2.rowsize(),m2.nlo(),m2.nhi())
         {
+            TMVAssert(Attrib<A>::bandmatrixok); 
             TMVAssert(isComplex(T()));
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
             m2.assignToB(view());
         }
 
@@ -2451,8 +2403,8 @@ namespace tmv {
         inline BandMatrix(const GenBandMatrix<T2>& m2) :
             NEW_SIZE(m2.colsize(),m2.rowsize(),m2.nlo(),m2.nhi())
         { 
+            TMVAssert(Attrib<A>::bandmatrixok); 
             TMVAssert(isReal(T2()) || isComplex(T()));
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
             Copy(m2,view()); 
         }
 
@@ -2460,14 +2412,14 @@ namespace tmv {
         inline BandMatrix(const GenBandMatrix<T2>& m2, int lo, int hi) :
             NEW_SIZE(m2.colsize(),m2.rowsize(),lo,hi)
         { 
+            TMVAssert(Attrib<A>::bandmatrixok); 
             TMVAssert(isReal(T2()) || isComplex(T()));
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
             TMVAssert(lo >= 0);
             TMVAssert(hi >= 0);
             TMVAssert(lo <= m2.nlo());
             TMVAssert(hi <= m2.nhi());
             Copy(ConstBandMatrixView<T2>(m2,lo,hi),view()); 
-            if (I==CStyle) {
+            if (I==int(CStyle)) {
                 if (lo > m2.nlo()) diagRange(-lo,-m2.nlo()).setZero();
                 if (hi > m2.nhi()) diagRange(m2.nhi()+1,hi+1).setZero();
             } else {
@@ -2479,7 +2431,7 @@ namespace tmv {
         inline BandMatrix(const GenMatrix<T>& m2, int lo, int hi) :
             NEW_SIZE(m2.colsize(),m2.rowsize(),lo,hi)
         {
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
+            TMVAssert(Attrib<A>::bandmatrixok); 
             TMVAssert(lo >= 0);
             TMVAssert(hi >= 0);
             TMVAssert(lo < m2.colsize());
@@ -2490,7 +2442,7 @@ namespace tmv {
         inline BandMatrix(const GenUpperTriMatrix<T>& m2, int hi) :
             NEW_SIZE(m2.size(),m2.size(),0,hi)
         {
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
+            TMVAssert(Attrib<A>::bandmatrixok); 
             TMVAssert(hi >= 0);
             TMVAssert(hi < m2.size());
             Copy(BandMatrixViewOf(m2,hi),view());
@@ -2499,7 +2451,7 @@ namespace tmv {
         inline BandMatrix(const GenLowerTriMatrix<T>& m2, int lo) :
             NEW_SIZE(m2.size(),m2.size(),lo,0)
         {
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
+            TMVAssert(Attrib<A>::bandmatrixok); 
             TMVAssert(lo >= 0);
             TMVAssert(lo < m2.size());
             Copy(BandMatrixViewOf(m2,lo),view());
@@ -2508,22 +2460,22 @@ namespace tmv {
         inline BandMatrix(const AssignableToBandMatrix<RT>& m2) :
             NEW_SIZE(m2.colsize(),m2.rowsize(),m2.nlo(),m2.nhi())
         {
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
+            TMVAssert(Attrib<A>::bandmatrixok); 
             m2.assignToB(view());
         }
 
         inline BandMatrix(const AssignableToBandMatrix<CT>& m2) :
             NEW_SIZE(m2.colsize(),m2.rowsize(),m2.nlo(),m2.nhi())
         {
+            TMVAssert(Attrib<A>::bandmatrixok); 
             TMVAssert(isComplex(T()));
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
             m2.assignToB(view());
         }
 
         inline BandMatrix(const GenDiagMatrix<RT>& m2) :
             NEW_SIZE(m2.size(),m2.size(),0,0)
         { 
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
+            TMVAssert(Attrib<A>::bandmatrixok); 
             setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
         }
@@ -2531,8 +2483,8 @@ namespace tmv {
         inline BandMatrix(const GenDiagMatrix<CT>& m2) :
             NEW_SIZE(m2.size(),m2.size(),0,0)
         { 
+            TMVAssert(Attrib<A>::bandmatrixok); 
             TMVAssert(isComplex(T()));
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
             setZero();
             m2.assignToD(DiagMatrixViewOf(diag()));
         }
@@ -2540,47 +2492,47 @@ namespace tmv {
         inline BandMatrix(const GenUpperTriMatrix<RT>& m2) :
             NEW_SIZE(m2.size(),m2.size(),0,m2.size()-1)
         { 
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
+            TMVAssert(Attrib<A>::bandmatrixok); 
             setZero();
             m2.assignToU(
                 UpperTriMatrixView<T>(
                     itsm,colsize(),stepi(),stepj(),
-                    NonUnitDiag,isdm()?NoMajor:stor(),ct() TMV_FIRSTLAST));
+                    NonUnitDiag,ct() TMV_FIRSTLAST));
         }
 
         inline BandMatrix(const GenUpperTriMatrix<CT>& m2) :
             NEW_SIZE(m2.size(),m2.size(),0,m2.size()-1)
         { 
+            TMVAssert(Attrib<A>::bandmatrixok); 
             TMVAssert(isComplex(T()));
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
             setZero();
             m2.assignToU(
                 UpperTriMatrixView<T>(
                     itsm,colsize(),stepi(),stepj(),
-                    NonUnitDiag,isdm()?NoMajor:stor(),ct() TMV_FIRSTLAST));
+                    NonUnitDiag,ct() TMV_FIRSTLAST));
         }
 
         inline BandMatrix(const GenLowerTriMatrix<RT>& m2) :
             NEW_SIZE(m2.size(),m2.size(),m2.size()-1,0)
         { 
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
+            TMVAssert(Attrib<A>::bandmatrixok); 
             setZero();
             m2.assignToL(
                 LowerTriMatrixView<T>(
                     itsm,colsize(),stepi(),stepj(),
-                    NonUnitDiag,isdm()?NoMajor:stor(),ct() TMV_FIRSTLAST));
+                    NonUnitDiag,ct() TMV_FIRSTLAST));
         }
 
         inline BandMatrix(const GenLowerTriMatrix<CT>& m2) :
             NEW_SIZE(m2.size(),m2.size(),m2.size()-1,0)
         { 
+            TMVAssert(Attrib<A>::bandmatrixok); 
             TMVAssert(isComplex(T()));
-            TMVAssert(S == RowMajor || S == ColMajor || S == DiagMajor);
             setZero();
             m2.assignToL(
                 LowerTriMatrixView<T>(
                     itsm,colsize(),stepi(),stepj(),
-                    NonUnitDiag,isdm()?NoMajor:stor(),ct() TMV_FIRSTLAST));
+                    NonUnitDiag,ct() TMV_FIRSTLAST));
         }
 
 #undef NEW_SIZE
@@ -2601,17 +2553,6 @@ namespace tmv {
         //
 
         inline type& operator=(const type& m2)
-        {
-            TMVAssert(colsize() == m2.colsize());
-            TMVAssert(rowsize() == m2.rowsize());
-            TMVAssert(nlo() >= m2.nlo());
-            TMVAssert(nhi() >= m2.nhi());
-            m2.assignToB(view());
-            return *this;
-        }
-
-        template <IndexStyle I2>
-        inline type& operator=(const BandMatrix<T,S,I2>& m2)
         {
             TMVAssert(colsize() == m2.colsize());
             TMVAssert(rowsize() == m2.rowsize());
@@ -2735,7 +2676,7 @@ namespace tmv {
             view() = m2;
             return *this;
         }
-
+    
         typedef ListAssigner<T,rowmajor_iterator> MyListAssigner;
         inline MyListAssigner operator<<(const T& x) 
         {
@@ -2749,7 +2690,7 @@ namespace tmv {
 
         inline T operator()(int i,int j) const
         { 
-            if (I==CStyle) {
+            if (I==int(CStyle)) {
                 TMVAssert(i>=0 && i<colsize());
                 TMVAssert(j>=0 && j<rowsize());
                 return cref(i,j);
@@ -2762,7 +2703,7 @@ namespace tmv {
 
         inline T& operator()(int i,int j) 
         { 
-            if (I==CStyle) {
+            if (I==int(CStyle)) {
                 TMVAssert(i>=0 && i<colsize());
                 TMVAssert(j>=0 && j<rowsize());
                 TMVAssert(okij(i,j));
@@ -2777,7 +2718,7 @@ namespace tmv {
 
         inline const_vec_type row(int i, int j1, int j2) const
         { 
-            if (I == FortranStyle) {
+            if (I == int(FortranStyle)) {
                 TMVAssert(i>0 && i<=colsize()); --i;
                 TMVAssert(j1>0 && j1-j2<=0 && j2<=rowsize()); --j1;
             } else {
@@ -2792,7 +2733,7 @@ namespace tmv {
 
         inline const_vec_type col(int j, int i1, int i2) const
         {
-            if (I == FortranStyle) {
+            if (I == int(FortranStyle)) {
                 TMVAssert(j>0 && j<=rowsize()); --j;
                 TMVAssert(i1>0 && i1-i2<=0 && i2<=colsize()); --i1;
             } else {
@@ -2830,7 +2771,7 @@ namespace tmv {
         {
             TMVAssert(i>=-nlo() && i<=nhi());
             TMVAssert(i>=-colsize() && i<=rowsize());
-            if (I==FortranStyle) { 
+            if (I==int(FortranStyle)) { 
                 TMVAssert(j1>0 && j1-j2<=0); --j1;
             } else {
                 TMVAssert(j1>=0 && j1-j2<=0);
@@ -2848,7 +2789,7 @@ namespace tmv {
 
         inline vec_type row(int i, int j1, int j2)
         { 
-            if (I == FortranStyle) {
+            if (I == int(FortranStyle)) {
                 TMVAssert(i>0 && i<=colsize()); --i;
                 TMVAssert(j1>0 && j1-j2<=0 && j2<=rowsize()); --j1;
             } else {
@@ -2863,7 +2804,7 @@ namespace tmv {
 
         inline vec_type col(int j, int i1, int i2)
         {
-            if (I == FortranStyle) {
+            if (I == int(FortranStyle)) {
                 TMVAssert(j>0 && j<=rowsize()); --j;
                 TMVAssert(i1>0 && i1-i2<=0 && i2<=colsize()); --i1;
             } else {
@@ -2902,7 +2843,7 @@ namespace tmv {
         {
             TMVAssert(i>=-nlo() && i<=nhi());
             TMVAssert(i>=-colsize() && i<=rowsize());
-            if (I==FortranStyle) { 
+            if (I==int(FortranStyle)) { 
                 TMVAssert(j1>0 && j1-j2<=0); --j1;
             } else {
                 TMVAssert(j1>=0 && j1-j2<=0);
@@ -2962,30 +2903,27 @@ namespace tmv {
             int i1, int i2, int j1, int j2) const
         {
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,1,1));
-            if (I == FortranStyle) { --i1; --j1; }
+            if (I == int(FortranStyle)) { --i1; --j1; }
             return const_rec_type(
                 itsm+i1*stepi()+j1*stepj(), i2-i1, j2-j1,
-                stepi(), stepj(), S, NonConj);
+                stepi(), stepj(), NonConj);
         }
 
         inline const_rec_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            const StorageType newstor = S==RowMajor ?
-                jstep == 1 ? RowMajor : NoMajor :
-                S==ColMajor ? istep == 1 ? ColMajor : NoMajor : NoMajor;
-            if (I == FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
+            if (I == int(FortranStyle)) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
             return const_rec_type(
                 itsm+i1*stepi()+j1*stepj(), (i2-i1)/istep, (j2-j1)/jstep,
-                istep*stepi(),jstep*stepj(), newstor, NonConj);
+                istep*stepi(),jstep*stepj(), NonConj);
         }
 
         inline const_vec_type subVector(
             int i, int j, int istep, int jstep, int size) const
         {
             TMVAssert(view().hasSubVector(i,j,istep,jstep,size));
-            if (I == FortranStyle) { --i; --j; }
+            if (I == int(FortranStyle)) { --i; --j; }
             return const_vec_type(
                 itsm+i*stepi()+j*stepj(), size,
                 istep*stepi()+jstep*stepj(), NonConj);
@@ -2995,17 +2933,17 @@ namespace tmv {
             int i1, int i2, int j1, int j2, int newnlo, int newnhi) const
         {
             TMVAssert(view().hasSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,1,1));
-            if (I == FortranStyle) { --i1; --j1; }
+            if (I == int(FortranStyle)) { --i1; --j1; }
             return const_view_type(
                 itsm+i1*stepi()+j1*stepj(), i2-i1, j2-j1,
-                newnlo, newnhi, stepi(), stepj(), diagstep(), S, NonConj);
+                newnlo, newnhi, stepi(), stepj(), diagstep(), NonConj);
         }
 
         inline const_view_type subBandMatrix(
             int i1, int i2, int j1, int j2) const
         {
-            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-(I==CStyle?1:0));
-            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-(I==CStyle?1:0));
+            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-(I==int(CStyle)?1:0));
+            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-(I==int(CStyle)?1:0));
             return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
         }
 
@@ -3015,22 +2953,20 @@ namespace tmv {
         {
             TMVAssert(view().hasSubBandMatrix(
                     i1,i2,j1,j2, newnlo,newnhi,istep,jstep));
-            StorageType newstor = S==RowMajor ?
-                jstep == 1 ? RowMajor : NoMajor :
-                S==ColMajor ? istep == 1 ? ColMajor : NoMajor : 
-                istep == 1 && jstep == 1 ? DiagMajor : NoMajor;
-            if (I == FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
+            if (I == int(FortranStyle)) {
+                --i1; --j1; i2+=istep-1; j2+=jstep-1; 
+            }
             const int newstepi = stepi()*istep;
             const int newstepj = stepj()*jstep;
             return const_view_type(
                 itsm+i1*stepi()+j1*stepj(),
                 (i2-i1)/istep, (j2-j1)/jstep, newnlo, newnhi, 
-                newstepi, newstepj, newstepi+newstepj, newstor, NonConj);
+                newstepi, newstepj, newstepi+newstepj, NonConj);
         }
 
         inline const_view_type rowRange(int i1, int i2) const
         {
-            if (I==FortranStyle) { 
+            if (I==int(FortranStyle)) { 
                 TMVAssert(i1>0 && i1-i2<=0 && i2<=colsize()); --i1; 
             } else {
                 TMVAssert(i1>=0 && i1-i2<=0 && i2<=colsize());
@@ -3040,18 +2976,18 @@ namespace tmv {
             const int j2 = TMV_MIN(i2 + nhi(),rowsize());
             const int newnlo = i1 < nlo() ? TMV_MIN(nlo(),i2-1) - i1 : 0;
             const int newnhi = j1==j2 ? 0 : TMV_MIN(nlo()+nhi()-newnlo,j2-j1-1);
-            const int newlin = isrm() ? 1 : 0;
+            const int newlin = isrm() ? -1 : 0;
             TMVAssert(base::hasSubBandMatrix(
                     i1,i2,j1,j2,newnlo,newnhi,1,1));
             return const_view_type(
                 itsm+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
-                diagstep(), stor(), ct(), newlin);
+                diagstep(), ct(), newlin);
         }
 
         inline const_view_type colRange(int j1, int j2) const
         {
-            if (I==FortranStyle) {
+            if (I==int(FortranStyle)) {
                 TMVAssert(j1>0 && j1-j2<=0 && j2<=rowsize()); --j1;
             } else { 
                 TMVAssert(j1>=0 && j1-j2<=0 && j2<=rowsize()); 
@@ -3061,18 +2997,18 @@ namespace tmv {
             const int i2 = TMV_MIN(j2 + nlo(),colsize());
             const int newnhi = j1 < nhi() ? TMV_MIN(nhi(),j2-1) - j1 : 0;
             const int newnlo = i1==i2 ? 0 : TMV_MIN(nlo()+nhi()-newnhi,i2-i1-1);
-            const int newlin = iscm() ? 1 : 0;
+            const int newlin = iscm() ? -1 : 0;
             TMVAssert(base::hasSubBandMatrix(
                     i1,i2,j1,j2,newnlo,newnhi,1,1));
             return const_view_type(
                 itsm+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
-                diagstep(), stor(), ct(), newlin);
+                diagstep(), ct(), newlin);
         }
 
         inline const_view_type diagRange(int k1, int k2) const
         {
-            if (I==FortranStyle) {
+            if (I==int(FortranStyle)) {
                 TMVAssert(k1>=-nlo() && k1<=k2 && k2<=nhi()); ++k2;
             } else {
                 TMVAssert(k1>=-nlo() && k1<k2 && k2<=nhi()+1);
@@ -3089,7 +3025,7 @@ namespace tmv {
             return const_view_type(
                 itsm+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
-                diagstep(), stor(), ct());
+                diagstep(), ct());
         }
 
         inline const_view_type upperBand() const
@@ -3097,7 +3033,7 @@ namespace tmv {
             return const_view_type(
                 itsm,TMV_MIN(colsize(),rowsize()),
                 TMV_MIN(colsize()+nhi(),rowsize()),
-                0,nhi(),stepi(),stepj(),diagstep(),stor(),ct());
+                0,nhi(),stepi(),stepj(),diagstep(),ct());
         }
 
         inline const_view_type lowerBand() const
@@ -3105,7 +3041,7 @@ namespace tmv {
             return const_view_type(
                 itsm,TMV_MIN(colsize(),rowsize()+nlo()),
                 TMV_MIN(colsize(),rowsize()),
-                nlo(),0,stepi(),stepj(),diagstep(),stor(),ct());
+                nlo(),0,stepi(),stepj(),diagstep(),ct());
         }
 
         inline const_view_type upperBandOff() const
@@ -3113,7 +3049,7 @@ namespace tmv {
             return const_view_type(
                 itsm+stepj(),TMV_MIN(colsize(),rowsize()-1),
                 TMV_MIN(colsize()+nhi(),rowsize()-1),
-                0,nhi()-1,stepi(),stepj(),diagstep(),stor(),ct());
+                0,nhi()-1,stepi(),stepj(),diagstep(),ct());
         }
 
         inline const_view_type lowerBandOff() const
@@ -3121,7 +3057,7 @@ namespace tmv {
             return const_view_type(
                 itsm+stepi(),TMV_MIN(colsize()-1,rowsize()+nlo()),
                 TMV_MIN(colsize()-1,rowsize()),
-                nlo()-1,0,stepi(),stepj(),diagstep(),stor(),ct());
+                nlo()-1,0,stepi(),stepj(),diagstep(),ct());
         }
 
         inline const_realpart_type realPart() const
@@ -3131,8 +3067,7 @@ namespace tmv {
                 colsize(),rowsize(),nlo(),nhi(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
-                isReal(T()) ? diagstep() : 2*diagstep(),
-                isReal(T()) ? S : NoMajor, NonConj);
+                isReal(T()) ? diagstep() : 2*diagstep());
         }
 
         inline const_realpart_type imagPart() const
@@ -3141,36 +3076,33 @@ namespace tmv {
             return const_realpart_type(
                 reinterpret_cast<const RT*>(itsm)+1,
                 colsize(),rowsize(),nlo(),nhi(),
-                2*stepi(),2*stepj(),2*diagstep(),NoMajor,NonConj);
+                2*stepi(),2*stepj(),2*diagstep(),NonConj);
         }
 
         inline rec_type subMatrix(int i1, int i2, int j1, int j2)
         {
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,1,1));
-            if (I == FortranStyle) { --i1; --j1; }
+            if (I == int(FortranStyle)) { --i1; --j1; }
             return rec_type(
                 itsm+i1*stepi()+j1*stepj(),
-                i2-i1, j2-j1, stepi(), stepj(), S, NonConj TMV_FIRSTLAST);
+                i2-i1, j2-j1, stepi(), stepj(), NonConj TMV_FIRSTLAST);
         }
 
         inline rec_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep)
         {
             TMVAssert(view().hasSubMatrix(i1,i2,j1,j2,istep,jstep));
-            const StorageType newstor = S==RowMajor ?
-                jstep == 1 ? RowMajor : NoMajor :
-                S==ColMajor ? istep == 1 ? ColMajor : NoMajor : NoMajor;
-            if (I == FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
+            if (I == int(FortranStyle)) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
             return rec_type(
                 itsm+i1*stepi()+j1*stepj(),
                 (i2-i1)/istep,(j2-j1)/jstep,istep*stepi(),jstep*stepj(),
-                newstor, NonConj TMV_FIRSTLAST);
+                NonConj TMV_FIRSTLAST);
         }
 
         inline vec_type subVector(int i, int j, int istep, int jstep, int size)
         {
             TMVAssert(view().hasSubVector(i,j,istep,jstep,size));
-            if (I == FortranStyle) { --i; --j; }
+            if (I == int(FortranStyle)) { --i; --j; }
             return vec_type(
                 itsm+i*stepi()+j*stepj(),size,
                 istep*stepi()+jstep*stepj(), NonConj TMV_FIRSTLAST);
@@ -3180,17 +3112,17 @@ namespace tmv {
             int i1, int i2, int j1, int j2, int newnlo, int newnhi)
         {
             TMVAssert(view().hasSubBandMatrix(i1,i2,j1,j2,newnlo,newnhi,1,1));
-            if (I==FortranStyle) { --i1; --j1; }
+            if (I==int(FortranStyle)) { --i1; --j1; }
             return view_type(
                 itsm+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
-                diagstep(), S, NonConj TMV_FIRSTLAST);
+                diagstep(), NonConj TMV_FIRSTLAST);
         }
 
         inline view_type subBandMatrix(int i1, int i2, int j1, int j2)
         {
-            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-(I==CStyle?1:0));
-            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-(I==CStyle?1:0));
+            const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-(I==int(CStyle)?1:0));
+            const int newnhi = TMV_MIN(nhi()+i1-j1,j2-j1-(I==int(CStyle)?1:0));
             return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
         }
 
@@ -3200,23 +3132,18 @@ namespace tmv {
         {
             TMVAssert(view().hasSubBandMatrix(i1,i2,j1,j2,
                                               newnlo,newnhi,istep,jstep));
-            StorageType newstor = S==RowMajor ?
-                jstep == 1 ? RowMajor : NoMajor :
-                S==ColMajor ? istep == 1 ? ColMajor : NoMajor : 
-                istep == 1 && jstep == 1 ? DiagMajor : NoMajor;
-            if (I==FortranStyle) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
+            if (I==int(FortranStyle)) { --i1; --j1; i2+=istep-1; j2+=jstep-1; }
             const int newstepi = stepi()*istep;
             const int newstepj = stepj()*jstep;
             return view_type(
                 itsm+i1*stepi()+j1*stepj(),
                 (i2-i1)/istep, (j2-j1)/jstep, newnlo, newnhi, 
-                newstepi, newstepj, newstepi+newstepj, newstor, 
-                                       NonConj TMV_FIRSTLAST);
+                newstepi, newstepj, newstepi+newstepj, NonConj TMV_FIRSTLAST);
         }
 
         inline view_type rowRange(int i1, int i2)
         {
-            if (I==FortranStyle) { 
+            if (I==int(FortranStyle)) { 
                 TMVAssert(i1>0 && i1-i2<=0 && i2<=colsize()); --i1; 
             } else {
                 TMVAssert(i1>=0 && i1-i2<=0 && i2<=colsize());
@@ -3225,18 +3152,18 @@ namespace tmv {
             const int j2 = TMV_MIN(i2 + nhi(),rowsize());
             const int newnlo = i1 < nlo() ? TMV_MIN(nlo(),i2-1) - i1 : 0;
             const int newnhi = j1==j2 ? 0 : TMV_MIN(nlo()+nhi()-newnlo,j2-j1-1);
-            const int newlin = isrm() ? 1 : 0;
+            const int newlin = isrm() ? -1 : 0;
             TMVAssert(base::hasSubBandMatrix(
                     i1,i2,j1,j2,newnlo,newnhi,1,1));
             return view_type(
                 itsm+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
-                diagstep(), stor(), ct(), newlin TMV_FIRSTLAST);
+                diagstep(), ct(), newlin TMV_FIRSTLAST);
         }
 
         inline view_type colRange(int j1, int j2)
         {
-            if (I==FortranStyle) {
+            if (I==int(FortranStyle)) {
                 TMVAssert(j1>0 && j1-j2<=0 && j2<=rowsize()); --j1;
             } else {
                 TMVAssert(j1>=0 && j1-j2<=0 && j2<=rowsize()); 
@@ -3246,18 +3173,18 @@ namespace tmv {
             const int i2 = TMV_MIN(j2 + nlo(),colsize());
             const int newnhi = j1 < nhi() ? TMV_MIN(nhi(),j2-1) - j1 : 0;
             const int newnlo = i1==i2 ? 0 : TMV_MIN(nlo()+nhi()-newnhi,i2-i1-1);
-            const int newlin = iscm() ? 1 : 0;
+            const int newlin = iscm() ? -1 : 0;
             TMVAssert(base::hasSubBandMatrix(
                     i1,i2,j1,j2,newnlo,newnhi,1,1));
             return view_type(
                 itsm+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
-                diagstep(), stor(), ct(), newlin TMV_FIRSTLAST);
+                diagstep(), ct(), newlin TMV_FIRSTLAST);
         }
 
         inline view_type diagRange(int k1, int k2)
         {
-            if (I==FortranStyle) {
+            if (I==int(FortranStyle)) {
                 TMVAssert(k1>=-nlo() && k1<=k2 && k2<=nhi()); ++k2;
             } else {
                 TMVAssert(k1>=-nlo() && k1<k2 && k2<=nhi()+1);
@@ -3274,7 +3201,7 @@ namespace tmv {
             return view_type(
                 itsm+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, newnlo, newnhi, stepi(), stepj(),
-                diagstep(), stor(), ct()  TMV_FIRSTLAST);
+                diagstep(), ct()  TMV_FIRSTLAST);
         }
 
         inline view_type upperBand() 
@@ -3282,7 +3209,7 @@ namespace tmv {
             return view_type(
                 itsm,TMV_MIN(colsize(),rowsize()),
                 TMV_MIN(colsize()+nhi(),rowsize()),
-                0,nhi(),stepi(),stepj(),diagstep(),stor(),ct() TMV_FIRSTLAST);
+                0,nhi(),stepi(),stepj(),diagstep(),ct() TMV_FIRSTLAST);
         }
 
         inline view_type lowerBand()
@@ -3290,7 +3217,7 @@ namespace tmv {
             return view_type(
                 itsm,TMV_MIN(colsize(),rowsize()+nlo()),
                 TMV_MIN(colsize(),rowsize()),
-                nlo(),0,stepi(),stepj(),diagstep(),stor(),ct() TMV_FIRSTLAST);
+                nlo(),0,stepi(),stepj(),diagstep(),ct() TMV_FIRSTLAST);
         }
 
         inline view_type upperBandOff() 
@@ -3298,7 +3225,7 @@ namespace tmv {
             return view_type(
                 itsm+stepj(),TMV_MIN(colsize(),rowsize()-1),
                 TMV_MIN(colsize()+nhi(),rowsize()-1),
-                0,nhi()-1,stepi(),stepj(),diagstep(),stor(),ct() TMV_FIRSTLAST);
+                0,nhi()-1,stepi(),stepj(),diagstep(),ct() TMV_FIRSTLAST);
         }
 
         inline view_type lowerBandOff()
@@ -3306,7 +3233,7 @@ namespace tmv {
             return view_type(
                 itsm+stepi(),TMV_MIN(colsize()-1,rowsize()+nlo()),
                 TMV_MIN(colsize()-1,rowsize()),
-                nlo()-1,0,stepi(),stepj(),diagstep(),stor(),ct() TMV_FIRSTLAST);
+                nlo()-1,0,stepi(),stepj(),diagstep(),ct() TMV_FIRSTLAST);
         }
 
         inline realpart_type realPart()
@@ -3316,8 +3243,7 @@ namespace tmv {
                 colsize(),rowsize(),nlo(),nhi(),
                 isReal(T()) ? stepi() : 2*stepi(),
                 isReal(T()) ? stepj() : 2*stepj(),
-                isReal(T()) ? diagstep() : 2*diagstep(),
-                isReal(T()) ? S : NoMajor, NonConj
+                isReal(T()) ? diagstep() : 2*diagstep(), NonConj
 #ifdef TMVFLDEBUG
                 ,reinterpret_cast<const RT*>(_first)
                 ,reinterpret_cast<const RT*>(_last)
@@ -3331,7 +3257,7 @@ namespace tmv {
             return realpart_type(
                 reinterpret_cast<RT*>(itsm)+1,
                 colsize(),rowsize(),nlo(),nhi(),
-                2*stepi(),2*stepj(),2*diagstep(),NoMajor,NonConj
+                2*stepi(),2*stepj(),2*diagstep(),NonConj
 #ifdef TMVFLDEBUG
                 ,reinterpret_cast<const RT*>(_first)+1
                 ,reinterpret_cast<const RT*>(_last)+1
@@ -3353,22 +3279,21 @@ namespace tmv {
         { 
             return const_view_type(
                 itsm,colsize(),rowsize(),nlo(),nhi(),
-                stepi(),stepj(),diagstep(),S,NonConj,isdm()?0:linsize);
+                stepi(),stepj(),diagstep(),NonConj,isdm()?0:linsize);
         }
 
         inline const_view_type transpose() const
         { 
             return const_view_type(
                 itsm,rowsize(),colsize(),nhi(),nlo(),
-                stepj(),stepi(),diagstep(),TMV_TransOf(S),
-                NonConj,isdm()?0:linsize);
+                stepj(),stepi(),diagstep(),NonConj,isdm()?0:linsize);
         }
 
         inline const_view_type conjugate() const
         { 
             return const_view_type(
                 itsm,colsize(),rowsize(),nlo(),nhi(),
-                stepi(),stepj(),diagstep(),S,TMV_ConjOf(T,NonConj),
+                stepi(),stepj(),diagstep(),TMV_ConjOf(T,NonConj),
                 isdm()?0:linsize);
         }
 
@@ -3376,7 +3301,7 @@ namespace tmv {
         { 
             return const_view_type(
                 itsm,rowsize(),colsize(),nhi(),nlo(),
-                stepj(),stepi(),diagstep(),TMV_TransOf(S),
+                stepj(),stepi(),diagstep(),
                 TMV_ConjOf(T,NonConj),isdm()?0:linsize);
         }
 
@@ -3400,7 +3325,7 @@ namespace tmv {
         { 
             return view_type(
                 itsm,colsize(),rowsize(),nlo(),nhi(),
-                stepi(),stepj(),diagstep(),S,NonConj,isdm()?0:linsize 
+                stepi(),stepj(),diagstep(),NonConj,isdm()?0:linsize 
                 TMV_FIRSTLAST);
         }
 
@@ -3408,15 +3333,15 @@ namespace tmv {
         { 
             return view_type(
                 itsm,rowsize(),colsize(),nhi(),nlo(),
-                stepj(),stepi(),diagstep(),TMV_TransOf(S),
-                NonConj,isdm()?0:linsize TMV_FIRSTLAST);
+                stepj(),stepi(),diagstep(),NonConj,isdm()?0:linsize 
+                TMV_FIRSTLAST);
         }
 
         inline view_type conjugate()
         { 
             return view_type(
                 itsm,colsize(),rowsize(),nlo(),nhi(),
-                stepi(),stepj(),diagstep(),S,TMV_ConjOf(T,NonConj),
+                stepi(),stepj(),diagstep(),TMV_ConjOf(T,NonConj),
                 isdm()?0:linsize TMV_FIRSTLAST);
         }
 
@@ -3424,7 +3349,7 @@ namespace tmv {
         { 
             return view_type(
                 itsm,rowsize(),colsize(),nhi(),nlo(),
-                stepj(),stepi(),diagstep(),TMV_TransOf(S),
+                stepj(),stepi(),diagstep(),
                 TMV_ConjOf(T,NonConj),isdm()?0:linsize TMV_FIRSTLAST);
         }
 
@@ -3461,11 +3386,10 @@ namespace tmv {
         inline int stepi() const { return itssi; }
         inline int stepj() const { return itssj; }
         inline int diagstep() const { return itsds; }
-        inline StorageType stor() const { return S; }
         inline ConjType ct() const { return NonConj; }
-        inline bool isrm() const { return S==RowMajor; }
-        inline bool iscm() const { return S==ColMajor; }
-        inline bool isdm() const { return S==DiagMajor; }
+        inline bool isrm() const { return S==int(RowMajor); }
+        inline bool iscm() const { return S==int(ColMajor); }
+        inline bool isdm() const { return S==int(DiagMajor); }
         inline bool isconj() const { return false; }
         inline int ls() const { return linsize; }
 
@@ -3485,25 +3409,26 @@ namespace tmv {
             TMVAssert(hi >= 0);
             TMVAssert(lo < cs);
             TMVAssert(hi < rs);
-            linsize = BandStorageLength(S,cs,rs,lo,hi);
+            linsize = BandStorageLength(
+                static_cast<StorageType>(S),cs,rs,lo,hi);
             itsm1.resize(linsize);
             itscs = cs;
             itsrs = rs;
             itsnlo = lo;
             itsnhi = hi;
             itssi = 
-                S==RowMajor ? lo+hi : 
-                S==ColMajor ? 1 : 
+                S==int(RowMajor) ? lo+hi : 
+                S==int(ColMajor) ? 1 : 
                 rs>= cs ? 1-cs : -rs;
             itssj = 
-                S==RowMajor ? 1 :
-                S==ColMajor ? lo+hi :
+                S==int(RowMajor) ? 1 :
+                S==int(ColMajor) ? lo+hi :
                 -itssi+1;
             itsds = 
-                S==RowMajor ? itssi+1 :
-                S==ColMajor ? itssj+1 :
+                S==int(RowMajor) ? itssi+1 :
+                S==int(ColMajor) ? itssj+1 :
                 1;
-            itsm = S==DiagMajor ? itsm1.get()-lo*itssi : itsm1.get();
+            itsm = S==int(DiagMajor) ? itsm1.get()-lo*itssi : itsm1.get();
             DivHelper<T>::resetDivType();
 #ifdef TMVFLDEBUG
             _first = itsm1.get();
@@ -3584,8 +3509,7 @@ namespace tmv {
         inline bool okij(int i, int j) const
         { return (j+nlo() >= i && i+nhi() >= j); }
 
-        template <IndexStyle I2>
-        friend void Swap(BandMatrix<T,S,I>& m1, BandMatrix<T,S,I2>& m2)
+        friend void Swap(BandMatrix<T,A>& m1, BandMatrix<T,A>& m2)
         {
             TMVAssert(m1.colsize() == m2.colsize());
             TMVAssert(m1.rowsize() == m2.rowsize());
@@ -3648,52 +3572,52 @@ namespace tmv {
             m.cptr(),
             TMV_MIN(m.colsize(),m.rowsize()+nlo),
             TMV_MIN(m.rowsize(),m.colsize()+nhi),nlo,nhi,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct()); 
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct()); 
     }
 
-    template <class T, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> BandMatrixViewOf(
-        const ConstMatrixView<T,I>& m, int nlo, int nhi)
+    template <class T, int A> 
+    inline ConstBandMatrixView<T,A> BandMatrixViewOf(
+        const ConstMatrixView<T,A>& m, int nlo, int nhi)
     { 
-        return ConstBandMatrixView<T,I>(
+        return ConstBandMatrixView<T,A>(
             m.cptr(),
             TMV_MIN(m.colsize(),m.rowsize()+nlo),
             TMV_MIN(m.rowsize(),m.colsize()+nhi),nlo,nhi,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct()); 
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct()); 
     }
 
-    template <class T, StorageType S, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> BandMatrixViewOf(
-        const Matrix<T,S,I>& m, int nlo, int nhi)
+    template <class T, int A> 
+    inline ConstBandMatrixView<T,A&FortranStyle> BandMatrixViewOf(
+        const Matrix<T,A>& m, int nlo, int nhi)
     { 
-        return ConstBandMatrixView<T,I>(
+        return ConstBandMatrixView<T,A&FortranStyle>(
             m.cptr(),
             TMV_MIN(m.colsize(),m.rowsize()+nlo),
             TMV_MIN(m.rowsize(),m.colsize()+nhi),nlo,nhi,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct()); 
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct()); 
     }
 
-    template <class T, IndexStyle I> 
-    inline BandMatrixView<T,I> BandMatrixViewOf(
-        const MatrixView<T,I>& m, int nlo, int nhi)
+    template <class T, int A> 
+    inline BandMatrixView<T,A> BandMatrixViewOf(
+        const MatrixView<T,A>& m, int nlo, int nhi)
     {  
-        return BandMatrixView<T,I>(
+        return BandMatrixView<T,A>(
             m.ptr(),
             TMV_MIN(m.colsize(),m.rowsize()+nlo),
             TMV_MIN(m.rowsize(),m.colsize()+nhi),nlo,nhi,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct()
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct()
             TMV_FIRSTLAST1(m._first,m._last) ); 
     }
 
-    template <class T, StorageType S, IndexStyle I> 
-    inline BandMatrixView<T,I> BandMatrixViewOf(
-        Matrix<T,S,I>& m, int nlo, int nhi)
+    template <class T, int A> 
+    inline BandMatrixView<T,A&FortranStyle> BandMatrixViewOf(
+        Matrix<T,A>& m, int nlo, int nhi)
     {  
-        return BandMatrixView<T,I>(
+        return BandMatrixView<T,A&FortranStyle>(
             m.ptr(),
             TMV_MIN(m.colsize(),m.rowsize()+nlo),
             TMV_MIN(m.rowsize(),m.colsize()+nhi),nlo,nhi,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct()
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct()
             TMV_FIRSTLAST1(m._first,m._last) ); 
     }
 
@@ -3706,56 +3630,56 @@ namespace tmv {
             m.cptr(),
             TMV_MIN(m.colsize(),m.rowsize()+nlo),
             TMV_MIN(m.rowsize(),m.colsize()+nhi),nlo,nhi,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct()); 
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct()); 
     }
 
-    template <class T, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> BandMatrixViewOf(
-        const ConstBandMatrixView<T,I>& m, int nlo, int nhi)
+    template <class T, int A> 
+    inline ConstBandMatrixView<T,A> BandMatrixViewOf(
+        const ConstBandMatrixView<T,A>& m, int nlo, int nhi)
     { 
         TMVAssert(nlo <= m.nlo() && nhi <= m.nhi()); 
-        return ConstBandMatrixView<T,I>(
+        return ConstBandMatrixView<T,A>(
             m.cptr(),
             TMV_MIN(m.colsize(),m.rowsize()+nlo),
             TMV_MIN(m.rowsize(),m.colsize()+nhi),nlo,nhi,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct()); 
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct()); 
     }
 
-    template <class T, StorageType S, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> BandMatrixViewOf(
-        const BandMatrix<T,S,I>& m, int nlo, int nhi)
+    template <class T, int A> 
+    inline ConstBandMatrixView<T,A&FortranStyle> BandMatrixViewOf(
+        const BandMatrix<T,A>& m, int nlo, int nhi)
     { 
         TMVAssert(nlo <= m.nlo() && nhi <= m.nhi()); 
-        return ConstBandMatrixView<T,I>(
+        return ConstBandMatrixView<T,A&FortranStyle>(
             m.cptr(),
             TMV_MIN(m.colsize(),m.rowsize()+nlo),
             TMV_MIN(m.rowsize(),m.colsize()+nhi),nlo,nhi,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct()); 
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct()); 
     }
 
-    template <class T, IndexStyle I> 
-    inline BandMatrixView<T,I> BandMatrixViewOf(
-        const BandMatrixView<T,I>& m, int nlo, int nhi)
+    template <class T, int A> 
+    inline BandMatrixView<T,A> BandMatrixViewOf(
+        const BandMatrixView<T,A>& m, int nlo, int nhi)
     { 
         TMVAssert(nlo <= m.nlo() && nhi <= m.nhi()); 
-        return BandMatrixView<T,I>(
+        return BandMatrixView<T,A>(
             m.ptr(),
             TMV_MIN(m.colsize(),m.rowsize()+nlo),
             TMV_MIN(m.rowsize(),m.colsize()+nhi),nlo,nhi,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct()
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct()
             TMV_FIRSTLAST1(m._first,m._last) ); 
     }
 
-    template <class T, StorageType S, IndexStyle I> 
-    inline BandMatrixView<T,I> BandMatrixViewOf(
-        BandMatrix<T,S,I>& m, int nlo, int nhi)
+    template <class T, int A> 
+    inline BandMatrixView<T,A&FortranStyle> BandMatrixViewOf(
+        BandMatrix<T,A>& m, int nlo, int nhi)
     { 
         TMVAssert(nlo <= m.nlo() && nhi <= m.nhi()); 
-        return BandMatrixView<T,I>(
+        return BandMatrixView<T,A&FortranStyle>(
             m.ptr(),
             TMV_MIN(m.colsize(),m.rowsize()+nlo),
             TMV_MIN(m.rowsize(),m.colsize()+nhi),nlo,nhi,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct()
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct()
             TMV_FIRSTLAST1(m._first,m._last) ); 
     }
 
@@ -3764,46 +3688,43 @@ namespace tmv {
     { 
         return ConstBandMatrixView<T>(
             m.diag().cptr(),m.size(),m.size(),0,0,
-            m.diag().step()-1,1,m.diag().step(),
-            m.diag().step()==1?DiagMajor:RowMajor,m.diag().ct());
+            m.diag().step()-1,1,m.diag().step(),m.diag().ct());
     }
 
-    template <class T, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> BandMatrixViewOf(
-        const ConstDiagMatrixView<T,I>& m)
+    template <class T, int A> 
+    inline ConstBandMatrixView<T,A> BandMatrixViewOf(
+        const ConstDiagMatrixView<T,A>& m)
     {
-        return ConstBandMatrixView<T,I>(
+        return ConstBandMatrixView<T,A>(
             m.diag().cptr(),m.size(),m.size(),0,0,
-            m.diag().step()-1,1,m.diag().step(),
-            m.diag().step()==1?DiagMajor:RowMajor,m.diag().ct());
+            m.diag().step()-1,1,m.diag().step(),m.diag().ct());
     }
 
-    template <class T, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> BandMatrixViewOf(const DiagMatrix<T,I>& m)
+    template <class T, int A> 
+    inline ConstBandMatrixView<T,A&FortranStyle> BandMatrixViewOf(
+        const DiagMatrix<T,A>& m)
     {
-        return ConstBandMatrixView<T,I>(
+        return ConstBandMatrixView<T,A&FortranStyle>(
             m.diag().cptr(),m.size(),m.size(),0,0,
-            m.diag().step()-1,1,m.diag().step(),
-            m.diag().step()==1?DiagMajor:RowMajor,m.diag().ct());
+            m.diag().step()-1,1,m.diag().step(),m.diag().ct());
     }
 
-    template <class T, IndexStyle I> 
-    inline BandMatrixView<T,I> BandMatrixViewOf(const DiagMatrixView<T,I>& m)
+    template <class T, int A> 
+    inline BandMatrixView<T,A> BandMatrixViewOf(const DiagMatrixView<T,A>& m)
     {
-        return BandMatrixView<T,I>(
+        return BandMatrixView<T,A>(
             m.diag().ptr(),m.size(),m.size(),0,0,
-            m.diag().step()-1,1,m.diag().step(),
-            m.diag().step()==1?DiagMajor:RowMajor,m.diag().ct()
+            m.diag().step()-1,1,m.diag().step(),m.diag().ct()
             TMV_FIRSTLAST1(m.diag()._first,m.diag()._last) ); 
     }
 
-    template <class T, IndexStyle I> 
-    inline BandMatrixView<T,I> BandMatrixViewOf(DiagMatrix<T,I>& m)
+    template <class T, int A> 
+    inline BandMatrixView<T,A&FortranStyle> BandMatrixViewOf(
+        DiagMatrix<T,A>& m)
     {
-        return BandMatrixView<T,I>(
+        return BandMatrixView<T,A&FortranStyle>(
             m.diag().ptr(),m.size(),m.size(),0,0,
-            m.diag().step()-1,1,m.diag().step(),
-            m.diag().step()==1?DiagMajor:RowMajor,m.diag().ct()
+            m.diag().step()-1,1,m.diag().step(),m.diag().ct()
             TMV_FIRSTLAST1(m.diag()._first,m.diag()._last) ); 
     }
 
@@ -3815,52 +3736,52 @@ namespace tmv {
         TMVAssert(!m.isunit());
         return ConstBandMatrixView<T>(
             m.cptr(),m.size(),m.size(),0,nhi,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct());
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct());
     }
 
-    template <class T, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> BandMatrixViewOf(
-        const ConstUpperTriMatrixView<T,I>& m, int nhi=-1)
+    template <class T, int A> 
+    inline ConstBandMatrixView<T,A> BandMatrixViewOf(
+        const ConstUpperTriMatrixView<T,A>& m, int nhi=-1)
     {
         if (nhi < 0) nhi = m.size()-1;
         TMVAssert(!m.isunit());
-        return ConstBandMatrixView<T,I>(
+        return ConstBandMatrixView<T,A>(
             m.cptr(),m.size(),m.size(),0,nhi,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct());
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct());
     }
 
-    template <class T, DiagType D, StorageType S, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> BandMatrixViewOf(
-        const UpperTriMatrix<T,D,S,I>& m, int nhi=-1)
-    {
-        if (nhi < 0) nhi = m.size()-1;
-        TMVAssert(D==NonUnitDiag);
-        return ConstBandMatrixView<T,I>(
-            m.cptr(),m.size(),m.size(),0,nhi,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct()); 
-    }
-
-    template <class T, IndexStyle I> 
-    inline BandMatrixView<T,I> BandMatrixViewOf(
-        const UpperTriMatrixView<T,I>& m, int nhi=-1)
+    template <class T, int A> 
+    inline ConstBandMatrixView<T,A&FortranStyle> BandMatrixViewOf(
+        const UpperTriMatrix<T,A>& m, int nhi=-1)
     {
         if (nhi < 0) nhi = m.size()-1;
         TMVAssert(!m.isunit());
-        return BandMatrixView<T,I>(
+        return ConstBandMatrixView<T,A&FortranStyle>(
+            m.cptr(),m.size(),m.size(),0,nhi,
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct()); 
+    }
+
+    template <class T, int A> 
+    inline BandMatrixView<T,A> BandMatrixViewOf(
+        const UpperTriMatrixView<T,A>& m, int nhi=-1)
+    {
+        if (nhi < 0) nhi = m.size()-1;
+        TMVAssert(!m.isunit());
+        return BandMatrixView<T,A>(
             m.ptr(),m.size(),m.size(),0,nhi,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct() 
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct() 
             TMV_FIRSTLAST1(m._first,m._last) ); 
     }
 
-    template <class T, DiagType D, StorageType S, IndexStyle I> 
-    inline BandMatrixView<T,I> BandMatrixViewOf(
-        UpperTriMatrix<T,D,S,I>& m, int nhi=-1)
+    template <class T, int A> 
+    inline BandMatrixView<T,A&FortranStyle> BandMatrixViewOf(
+        UpperTriMatrix<T,A>& m, int nhi=-1)
     {
         if (nhi < 0) nhi = m.size()-1;
-        TMVAssert(D==NonUnitDiag);
-        return BandMatrixView<T,I>(
+        TMVAssert(!m.isunit());
+        return BandMatrixView<T,A&FortranStyle>(
             m.ptr(),m.size(),m.size(),0,nhi,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct() 
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct() 
             TMV_FIRSTLAST1(m._first,m._last) ); 
     }
 
@@ -3872,52 +3793,52 @@ namespace tmv {
         TMVAssert(!m.isunit());
         return ConstBandMatrixView<T>(
             m.cptr(),m.size(),m.size(),nlo,0,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct());
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct());
     }
 
-    template <class T, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> BandMatrixViewOf(
-        const ConstLowerTriMatrixView<T,I>& m, int nlo=-1)
+    template <class T, int A> 
+    inline ConstBandMatrixView<T,A> BandMatrixViewOf(
+        const ConstLowerTriMatrixView<T,A>& m, int nlo=-1)
     {
         if (nlo < 0) nlo = m.size() - 1;
         TMVAssert(!m.isunit());
-        return ConstBandMatrixView<T,I>(
+        return ConstBandMatrixView<T,A>(
             m.cptr(),m.size(),m.size(),nlo,0,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct());
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct());
     }
 
-    template <class T, DiagType D, StorageType S, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> BandMatrixViewOf(
-        const LowerTriMatrix<T,D,S,I>& m, int nlo=-1)
-    {
-        if (nlo < 0) nlo = m.size() - 1;
-        TMVAssert(D==NonUnitDiag);
-        return ConstBandMatrixView<T,I>(
-            m.cptr(),m.size(),m.size(),nlo,0,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct()); 
-    }
-
-    template <class T, IndexStyle I> 
-    inline BandMatrixView<T,I> BandMatrixViewOf(
-        const LowerTriMatrixView<T,I>& m, int nlo=-1)
+    template <class T, int A> 
+    inline ConstBandMatrixView<T,A&FortranStyle> BandMatrixViewOf(
+        const LowerTriMatrix<T,A>& m, int nlo=-1)
     {
         if (nlo < 0) nlo = m.size() - 1;
         TMVAssert(!m.isunit());
-        return BandMatrixView<T,I>(
+        return ConstBandMatrixView<T,A&FortranStyle>(
+            m.cptr(),m.size(),m.size(),nlo,0,
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct()); 
+    }
+
+    template <class T, int A> 
+    inline BandMatrixView<T,A> BandMatrixViewOf(
+        const LowerTriMatrixView<T,A>& m, int nlo=-1)
+    {
+        if (nlo < 0) nlo = m.size() - 1;
+        TMVAssert(!m.isunit());
+        return BandMatrixView<T,A>(
             m.ptr(),m.size(),m.size(),nlo,0,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct()
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct()
             TMV_FIRSTLAST1(m._first,m._last) ); 
     }
 
-    template <class T, DiagType D, StorageType S, IndexStyle I> 
-    inline BandMatrixView<T,I> BandMatrixViewOf(
-        LowerTriMatrix<T,D,S,I>& m, int nlo=-1)
+    template <class T, int A> 
+    inline BandMatrixView<T,A&FortranStyle> BandMatrixViewOf(
+        LowerTriMatrix<T,A>& m, int nlo=-1)
     {
         if (nlo < 0) nlo = m.size() - 1;
-        TMVAssert(D==NonUnitDiag);
-        return BandMatrixView<T,I>(
+        TMVAssert(!m.isunit());
+        return BandMatrixView<T,A&FortranStyle>(
             m.ptr(),m.size(),m.size(),nlo,0,
-            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.stor(),m.ct() 
+            m.stepi(),m.stepj(),m.stepi()+m.stepj(),m.ct() 
             TMV_FIRSTLAST1(m._first,m._last) ); 
     }
 
@@ -3942,7 +3863,7 @@ namespace tmv {
             rs >= cs ? cs : rs+1 );
         T* m0 = (stor == DiagMajor) ? m - nlo*stepi : m;
         return ConstBandMatrixView<T>(
-            m0,cs,rs,nlo,nhi,stepi,stepj,stor,NonConj);
+            m0,cs,rs,nlo,nhi,stepi,stepj,NonConj);
     }
 
     template <class T> 
@@ -3966,14 +3887,13 @@ namespace tmv {
             rs >= cs ? cs : rs+1 );
         T* m0 = (stor == DiagMajor) ? m - nlo*stepi : m;
         return BandMatrixView<T>(
-            m0,cs,rs,nlo,nhi,stepi,stepj,stepi+stepj,stor,NonConj
+            m0,cs,rs,nlo,nhi,stepi,stepj,stepi+stepj,NonConj
             TMV_FIRSTLAST1(m,m+BandStorageLength(stor,cs,rs,nlo,nhi)));
     }
 
     template <class T> 
     inline ConstBandMatrixView<T> BandMatrixViewOf(
-        const T* m, int cs, int rs, int nlo, int nhi,
-        int stepi, int stepj)
+        const T* m, int cs, int rs, int nlo, int nhi, int stepi, int stepj)
     {
         TMVAssert(cs > 0);
         TMVAssert(rs > 0);
@@ -3981,17 +3901,13 @@ namespace tmv {
         TMVAssert(nhi >= 0);
         TMVAssert(nlo < cs);
         TMVAssert(nhi < rs);
-        const StorageType stor = (
-            stepi == 1 ? ColMajor : stepj == 1 ? RowMajor :
-            stepi+stepj == 1 ? DiagMajor : NoMajor);
         return BandMatrixView<T>(
-            m,cs,rs,nlo,nhi,stepi,stepj,stepi+stepj,stor,NonConj);
+            m,cs,rs,nlo,nhi,stepi,stepj,stepi+stepj,NonConj);
     }
 
     template <class T> 
     inline BandMatrixView<T> BandMatrixViewOf(
-        T* m, int cs, int rs, int nlo, int nhi,
-        int stepi, int stepj)
+        T* m, int cs, int rs, int nlo, int nhi, int stepi, int stepj)
     {
         TMVAssert(cs > 0);
         TMVAssert(rs > 0);
@@ -3999,15 +3915,15 @@ namespace tmv {
         TMVAssert(nhi >= 0);
         TMVAssert(nlo < cs);
         TMVAssert(nhi < rs);
-        const StorageType stor = (
-            stepi == 1 ? ColMajor : stepj == 1 ? RowMajor :
-            stepi+stepj == 1 ? DiagMajor : NoMajor);
         return BandMatrixView<T>(
-            m,cs,rs,nlo,nhi,stepi,stepj,stepi+stepj,stor,NonConj 
+            m,cs,rs,nlo,nhi,stepi,stepj,stepi+stepj,NonConj 
             TMV_FIRSTLAST1(
-                m + (stepi < 0 ? (stepi*nlo) : stepj < 0 ? (stepj*nhi) : 0),
-                m + ((stepi < 0 ? (stepi*nlo) : stepj < 0 ? (stepj*nhi) : 0) +
-                     BandStorageLength(stor,cs,rs,nlo,nhi))));
+                m + (stepi < 0 ? 
+                     (stepj < 0 ? stepi*(cs-1) + stepj*(rs-1) : stepi*nlo) :
+                     (stepj < 0 ? stepj*nhi : 0)),
+                m + (stepi > 0 ? 
+                     (stepj > 0 ? stepi*(cs-1) + stepj*(rs-1) : stepi*nlo) :
+                     (stepj > 0 ? stepj*nhi : 0)) + 1) );
     }
 
 
@@ -4029,12 +3945,11 @@ namespace tmv {
         TMVAssert(m2.ct()==NonConj);
         TMVAssert(!m2.isSameAs(m1));
 
-        if (m1.stor() == m2.stor() && m1.canLinearize() && m2.canLinearize()) {
+        if (m1.canLinearize() && m2.canLinearize() &&
+            m1.stepi() == m2.stepi() && m1.stepj() == m2.stepj()) {
             TMVAssert(m1.constLinearView().size() == m2.linearView().size());
-            TMVAssert(m1.stepi() == m2.stepi() && m1.stepj() == m2.stepj());
             m2.linearView() = m1.constLinearView();
-        }
-        else {
+        } else {
             const int lo = m2.nlo();
             const int hi = m2.nhi();
             for(int k = -lo; k <= hi; ++k) m2.diag(k) = m1.diag(k);
@@ -4070,9 +3985,11 @@ namespace tmv {
                     DoCopy1(BandMatrix<T1,ColMajor>(m1),m2);
                 else 
                     DoCopy1(BandMatrix<T1,DiagMajor>(m1),m2);
+            } else if (m2.isconj()) {
+                DoCopy(m1.conjugate(),m2.conjugate());
+            } else {
+                DoCopy(m1,m2);
             }
-            else if (m2.isconj()) DoCopy(m1.conjugate(),m2.conjugate());
-            else DoCopy(m1,m2);
         }
     }
 
@@ -4103,18 +4020,18 @@ namespace tmv {
     inline void Swap(
         const BandMatrixView<T>& m1, const BandMatrixView<T>& m2);
 
-    template <class T, StorageType S, IndexStyle I> 
+    template <class T, int A> 
     inline void Swap(
-        const BandMatrixView<T>& m1, BandMatrix<T,S,I>& m2)
+        const BandMatrixView<T>& m1, BandMatrix<T,A>& m2)
     { Swap(m1,m2.view()); }
 
-    template <class T, StorageType S, IndexStyle I> 
+    template <class T, int A> 
     inline void Swap(
-        BandMatrix<T,S,I>& m1, const BandMatrixView<T>& m2)
+        BandMatrix<T,A>& m1, const BandMatrixView<T>& m2)
     { Swap(m1.view(),m2); }
 
-    template <class T, StorageType S1, IndexStyle I1, StorageType S2, IndexStyle I2> 
-    inline void Swap(BandMatrix<T,S1,I1>& m1, BandMatrix<T,S2,I2>& m2)
+    template <class T, int A1, int A2> 
+    inline void Swap(BandMatrix<T,A1>& m1, BandMatrix<T,A2>& m2)
     { Swap(m1.view(),m2.view()); }
 
 
@@ -4126,60 +4043,63 @@ namespace tmv {
     inline ConstBandMatrixView<T> Transpose(const GenBandMatrix<T>& m)
     { return m.transpose(); }
 
-    template <class T, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> Transpose(const ConstBandMatrixView<T,I>& m)
+    template <class T, int A> 
+    inline ConstBandMatrixView<T,A> Transpose(const ConstBandMatrixView<T,A>& m)
     { return m.transpose(); }
 
-    template <class T, StorageType S, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> Transpose(const BandMatrix<T,S,I>& m)
+    template <class T, int A> 
+    inline ConstBandMatrixView<T,A&FortranStyle> Transpose(
+        const BandMatrix<T,A>& m)
     { return m.transpose(); }
 
-    template <class T, IndexStyle I> 
-    inline BandMatrixView<T,I> Transpose(const BandMatrixView<T,I>& m)
+    template <class T, int A> 
+    inline BandMatrixView<T,A> Transpose(const BandMatrixView<T,A>& m)
     { return m.transpose(); }
 
-    template <class T, StorageType S, IndexStyle I> 
-    inline BandMatrixView<T,I> Transpose(BandMatrix<T,S,I>& m)
+    template <class T, int A> 
+    inline BandMatrixView<T,A&FortranStyle> Transpose(BandMatrix<T,A>& m)
     { return m.transpose(); }
 
     template <class T> 
     inline ConstBandMatrixView<T> Conjugate(const GenBandMatrix<T>& m)
     { return m.conjugate(); }
 
-    template <class T, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> Conjugate(const ConstBandMatrixView<T,I>& m)
+    template <class T, int A> 
+    inline ConstBandMatrixView<T,A> Conjugate(const ConstBandMatrixView<T,A>& m)
     { return m.conjugate(); }
 
-    template <class T, StorageType S, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> Conjugate(const BandMatrix<T,S,I>& m)
+    template <class T, int A> 
+    inline ConstBandMatrixView<T,A&FortranStyle> Conjugate(
+        const BandMatrix<T,A>& m)
     { return m.conjugate(); }
 
-    template <class T, IndexStyle I> 
-    inline BandMatrixView<T,I> Conjugate(const BandMatrixView<T,I>& m)
+    template <class T, int A> 
+    inline BandMatrixView<T,A> Conjugate(const BandMatrixView<T,A>& m)
     { return m.conjugate(); }
 
-    template <class T, StorageType S, IndexStyle I> 
-    inline BandMatrixView<T,I> Conjugate(BandMatrix<T,S,I>& m)
+    template <class T, int A> 
+    inline BandMatrixView<T,A&FortranStyle> Conjugate(BandMatrix<T,A>& m)
     { return m.conjugate(); }
 
     template <class T> 
     inline ConstBandMatrixView<T> Adjoint(const GenBandMatrix<T>& m)
     { return m.adjoint(); }
 
-    template <class T, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> Adjoint(const ConstBandMatrixView<T,I>& m)
+    template <class T, int A> 
+    inline ConstBandMatrixView<T,A> Adjoint(const ConstBandMatrixView<T,A>& m)
     { return m.adjoint(); }
 
-    template <class T, StorageType S, IndexStyle I> 
-    inline ConstBandMatrixView<T,I> Adjoint(const BandMatrix<T,S,I>& m)
+    template <class T, int A> 
+    inline ConstBandMatrixView<T,A&FortranStyle> Adjoint(
+        const BandMatrix<T,A>& m)
     { return m.adjoint(); }
 
-    template <class T, IndexStyle I> 
-    inline BandMatrixView<T,I> Adjoint(const BandMatrixView<T,I>& m)
+    template <class T, int A> 
+    inline BandMatrixView<T,A> Adjoint(const BandMatrixView<T,A>& m)
     { return m.adjoint(); }
 
-    template <class T, StorageType S, IndexStyle I> 
-    inline BandMatrixView<T,I> Adjoint(BandMatrix<T,S,I>& m)
+    template <class T, int A> 
+    inline BandMatrixView<T,A&FortranStyle> Adjoint(BandMatrix<T,A>& m)
     { return m.adjoint(); }
 
     template <class T> 
@@ -4230,17 +4150,17 @@ namespace tmv {
         const TMV_Reader& reader, const BandMatrixView<T>& m)
     { m.read(reader); return reader.getis(); }
 
-    template <class T, StorageType S, IndexStyle I>
+    template <class T, int A>
     inline std::istream& operator>>(
-        const TMV_Reader& reader, BandMatrix<T,S,I>& m)
+        const TMV_Reader& reader, BandMatrix<T,A>& m)
     { m.read(reader); return reader.getis(); }
 
     template <class T>
     std::istream& operator>>(std::istream& is, const BandMatrixView<T>& m)
     { return is >> IOStyle() >> m; }
 
-    template <class T, StorageType S, IndexStyle I>
-    std::istream& operator>>(std::istream& is, BandMatrix<T,S,I>& m)
+    template <class T, int A>
+    std::istream& operator>>(std::istream& is, BandMatrix<T,A>& m)
     { return is >> IOStyle() >> m; }
 
 

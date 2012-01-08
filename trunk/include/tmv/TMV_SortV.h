@@ -408,7 +408,7 @@ namespace tmv {
         {
             typedef typename V::value_type T;
             const bool inst = 
-                (V::_size == TMV_UNKNOWN || V::_size > 16) &&
+                (V::_size == Unknown || V::_size > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 V::_conj ? 97 :
@@ -420,7 +420,7 @@ namespace tmv {
         {
             typedef typename V::value_type T;
             const bool inst = 
-                (V::_size == TMV_UNKNOWN || V::_size > 16) &&
+                (V::_size == Unknown || V::_size > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 V::_conj ? 97 :

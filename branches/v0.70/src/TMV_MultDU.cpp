@@ -293,11 +293,11 @@ namespace tmv {
                 MultEqMM(alpha,A,C);
             } else if (SameStorage(B,C)) {
                 if (B.isrm()) {
-                    UpperTriMatrix<T,NonUnitDiag,RowMajor> tempB = B;
+                    UpperTriMatrix<T,NonUnitDiag|RowMajor> tempB = B;
                     MultEqMM(alpha,A,tempB.view());
                     C += tempB;
                 } else {
-                    UpperTriMatrix<T,NonUnitDiag,ColMajor> tempB = B;
+                    UpperTriMatrix<T,NonUnitDiag|ColMajor> tempB = B;
                     MultEqMM(alpha,A,tempB.view());
                     C += tempB;
                 }
@@ -566,11 +566,11 @@ namespace tmv {
                 MultEqMM(alpha,A,C);
             } else if (SameStorage(B,C)) {
                 if (B.isrm()) {
-                    LowerTriMatrix<T,NonUnitDiag,RowMajor> tempB = B;
+                    LowerTriMatrix<T,NonUnitDiag|RowMajor> tempB = B;
                     MultEqMM(alpha,A,tempB.view());
                     C += tempB;
                 } else {
-                    LowerTriMatrix<T,NonUnitDiag,ColMajor> tempB = B;
+                    LowerTriMatrix<T,NonUnitDiag|ColMajor> tempB = B;
                     MultEqMM(alpha,A,tempB.view());
                     C += tempB;
                 }

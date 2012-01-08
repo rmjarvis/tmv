@@ -720,6 +720,92 @@ namespace tmv {
         const int lwork_opt, const int m, const int n,
         const int lwork, const char* fn);
 
+    template <class T> class GenMatrix;
+    template <class T> class GenUpperTriMatrix;
+    template <class T> class GenLowerTriMatrix;
+    template <class T> class GenBandMatrix;
+
+    template <class T>
+    static inline bool BlasIsRM(const GenMatrix<T>& m)
+    {
+#ifdef BLAS
+        return m.isrm() && m.stepi() >= m.rowsize() && m.stepi() >= 1;
+#else
+        return m.isrm();
+#endif
+    }
+
+    template <class T>
+    static inline bool BlasIsCM(const GenMatrix<T>& m)
+    {
+#ifdef BLAS
+        return m.iscm() && m.stepj() >= m.colsize() && m.stepj() >= 1;
+#else
+        return m.iscm();
+#endif
+    }
+
+    template <class T>
+    static inline bool BlasIsRM(const GenUpperTriMatrix<T>& m)
+    {
+#ifdef BLAS
+        return m.isrm() && m.stepi() >= m.rowsize() && m.stepi() >= 1;
+#else
+        return m.isrm();
+#endif
+    }
+
+    template <class T>
+    static inline bool BlasIsCM(const GenUpperTriMatrix<T>& m)
+    {
+#ifdef BLAS
+        return m.iscm() && m.stepj() >= m.colsize() && m.stepj() >= 1;
+#else
+        return m.iscm();
+#endif
+    }
+
+    template <class T>
+    static inline bool BlasIsRM(const GenLowerTriMatrix<T>& m)
+    {
+#ifdef BLAS
+        return m.isrm() && m.stepi() >= m.rowsize() && m.stepi() >= 1;
+#else
+        return m.isrm();
+#endif
+    }
+
+    template <class T>
+    static inline bool BlasIsCM(const GenLowerTriMatrix<T>& m)
+    {
+#ifdef BLAS
+        return m.iscm() && m.stepj() >= m.colsize() && m.stepj() >= 1;
+#else
+        return m.iscm();
+#endif
+    }
+
+
+    template <class T>
+    static inline bool BlasIsRM(const GenBandMatrix<T>& m)
+    {
+#ifdef BLAS
+        return m.isrm() && m.stepi() >= (m.nlo()+m.nhi()) && m.stepi() >= 0;
+#else
+        return m.isrm();
+#endif
+    }
+
+    template <class T>
+    static inline bool BlasIsCM(const GenBandMatrix<T>& m)
+    {
+#ifdef BLAS
+        return m.iscm() && m.stepj() >= (m.nlo()+m.nhi()) && m.stepj() >= 0;
+#else
+        return m.iscm();
+#endif
+    }
+
 }
 
 #endif // TMV_BLAS_H

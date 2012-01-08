@@ -733,14 +733,14 @@ namespace tmv {
             cerr<<"diff = "<<Matrix<T>(A0-A2).clip(1.e-3*A0.maxAbsElement())<<endl;
             cerr<<"Norm(diff) = "<<Norm(A0-A2)<<endl;
             cerr<<"Compare to NonBlock version:\n";
-            std::auto_ptr<SymMatrix<T,Lower,ColMajor> > A3S(0);
-            std::auto_ptr<HermMatrix<T,Lower,ColMajor> > A3H(0);
+            std::auto_ptr<SymMatrix<T,Lower|ColMajor> > A3S(0);
+            std::auto_ptr<HermMatrix<T,Lower|ColMajor> > A3H(0);
             std::auto_ptr<SymMatrixView<T> > A3(0);
             if (A.isherm()) {
-                A3H.reset(new HermMatrix<T,Lower,ColMajor>(A0));
+                A3H.reset(new HermMatrix<T,Lower|ColMajor>(A0));
                 A3.reset(new SymMatrixView<T>(A3H->view()));
             } else {
-                A3S.reset(new SymMatrix<T,Lower,ColMajor>(A0));
+                A3S.reset(new SymMatrix<T,Lower|ColMajor>(A0));
                 A3.reset(new SymMatrixView<T>(A3S->view()));
             }
             Vector<T> xD3(xD.size(),T(0));
@@ -1363,14 +1363,14 @@ namespace tmv {
             cerr<<"Norm(diff) = "<<Norm(A0-A2)<<endl;
 #ifdef LAP
             cerr<<"Compare to NonLap version:\n";
-            std::auto_ptr<SymMatrix<T,Lower,ColMajor> > A3S(0);
-            std::auto_ptr<HermMatrix<T,Lower,ColMajor> > A3H(0);
+            std::auto_ptr<SymMatrix<T,Lower|ColMajor> > A3S(0);
+            std::auto_ptr<HermMatrix<T,Lower|ColMajor> > A3H(0);
             std::auto_ptr<SymMatrixView<T> > A3(0);
             if (A.isherm()) {
-                A3H.reset(new HermMatrix<T,Lower,ColMajor>(A0));
+                A3H.reset(new HermMatrix<T,Lower|ColMajor>(A0));
                 A3.reset(new SymMatrixView<T>(A3H->view()));
             } else {
-                A3S.reset(new SymMatrix<T,Lower,ColMajor>(A0));
+                A3S.reset(new SymMatrix<T,Lower|ColMajor>(A0));
                 A3.reset(new SymMatrixView<T>(A3S->view()));
             }
             Vector<T> xD3(xD.size(),T(0));

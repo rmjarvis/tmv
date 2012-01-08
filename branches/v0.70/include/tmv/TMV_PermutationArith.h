@@ -124,7 +124,6 @@ namespace tmv {
         { TMVAssert(m.colsize()==p.rowsize()); }
         inline int colsize() const { return p.colsize(); }
         inline int rowsize() const { return m.rowsize(); }
-        inline StorageType stor() const { return ColMajor; }
         inline const Permutation& getP() const { return p; }
         inline const BaseMatrix<T>& getM() const { return m; }
         inline void assignToM(const MatrixView<TMV_RealType(T)>& m0) const

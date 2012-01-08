@@ -91,22 +91,22 @@ Def2(CT,CT)
 
 #undef Def2
 
-#define Def5(T,S,I)\
-  template void BandMatrix<T,S,I>::read(const TMV_Reader& reader); \
+#define Def5(T,A)\
+  template void BandMatrix<T,A>::read(const TMV_Reader& reader); \
 
-Def5(T,RowMajor,CStyle)
-Def5(T,ColMajor,CStyle)
-Def5(T,DiagMajor,CStyle)
-Def5(T,RowMajor,FortranStyle)
-Def5(T,ColMajor,FortranStyle)
-Def5(T,DiagMajor,FortranStyle)
+Def5(T,RowMajor|CStyle)
+Def5(T,ColMajor|CStyle)
+Def5(T,DiagMajor|CStyle)
+Def5(T,RowMajor|FortranStyle)
+Def5(T,ColMajor|FortranStyle)
+Def5(T,DiagMajor|FortranStyle)
 #ifdef INST_COMPLEX
-Def5(CT,RowMajor,CStyle)
-Def5(CT,ColMajor,CStyle)
-Def5(CT,DiagMajor,CStyle)
-Def5(CT,RowMajor,FortranStyle)
-Def5(CT,ColMajor,FortranStyle)
-Def5(CT,DiagMajor,FortranStyle)
+Def5(CT,RowMajor|CStyle)
+Def5(CT,ColMajor|CStyle)
+Def5(CT,DiagMajor|CStyle)
+Def5(CT,RowMajor|FortranStyle)
+Def5(CT,ColMajor|FortranStyle)
+Def5(CT,DiagMajor|FortranStyle)
 #endif
 
 #undef Def5

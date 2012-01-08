@@ -391,15 +391,6 @@ namespace tmv {
         const double alpha, const GenVector<double>& x,
         const GenVector<double>& y, const SymMatrixView<double>& A)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(A.size() == y.size());
-        TMVAssert(alpha != 0.);
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(A.iscm());
-
         int n=A.size();
         int xs=x.step();
         int ys=y.step();
@@ -420,15 +411,6 @@ namespace tmv {
         const GenVector<std::complex<double> >& y, 
         const SymMatrixView<std::complex<double> >& A)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(A.size() == y.size());
-        TMVAssert(alpha != 0.);
-        TMVAssert(x.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(A.iscm());
-
         if (A.issym() && (x.step() != 1 || y.step() != 1)) {
             if (x.step() != 1) {
                 Vector<std::complex<double> > xx = x;
@@ -438,7 +420,6 @@ namespace tmv {
                 } 
                 else return BlasRank2Update(alpha,xx,y,A);
             } else {
-                TMVAssert(y.step() != 1);
                 Vector<std::complex<double> > yy = y;
                 return BlasRank2Update(alpha,x,yy,A);
             }
@@ -474,15 +455,6 @@ namespace tmv {
         const GenVector<double>& y, 
         const SymMatrixView<std::complex<double> >& A)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(A.size() == y.size());
-        TMVAssert(alpha != 0.);
-        TMVAssert(x.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(A.iscm());
-
         SymMatrix<double> A1(A.size(),0.);
         BlasRank2Update(1.,x.realPart(),y,A1.view());
         A += alpha*A1;
@@ -497,15 +469,6 @@ namespace tmv {
         const GenVector<std::complex<double> >& y, 
         const SymMatrixView<std::complex<double> >& A)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(A.size() == y.size());
-        TMVAssert(alpha != 0.);
-        TMVAssert(x.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(A.iscm());
-
         SymMatrix<double> A1(A.size(),0.);
         BlasRank2Update(1.,x,y.realPart(),A1.view());
         A += alpha*A1;
@@ -519,15 +482,6 @@ namespace tmv {
         const GenVector<double>& x, const GenVector<double>& y, 
         const SymMatrixView<std::complex<double> >& A)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(A.size() == y.size());
-        TMVAssert(alpha != 0.);
-        TMVAssert(x.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(A.iscm());
-
         SymMatrix<double> A1(A.size(),0.);
         BlasRank2Update(1.,x,y,A1.view());
         A += alpha*A1;
@@ -539,15 +493,6 @@ namespace tmv {
         const float alpha, const GenVector<float>& x,
         const GenVector<float>& y, const SymMatrixView<float>& A)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(A.size() == y.size());
-        TMVAssert(alpha != 0.F);
-        TMVAssert(x.size() > 0);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(A.iscm());
-
         int n=A.size();
         int xs=x.step();
         int ys=y.step();
@@ -568,15 +513,6 @@ namespace tmv {
         const GenVector<std::complex<float> >& y, 
         const SymMatrixView<std::complex<float> >& A)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(A.size() == y.size());
-        TMVAssert(alpha != 0.F);
-        TMVAssert(x.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(A.iscm());
-
         if (A.issym() && (x.step() != 1 || y.step() != 1)) {
             if (x.step() != 1) {
                 Vector<std::complex<float> > xx = x;
@@ -586,7 +522,6 @@ namespace tmv {
                 } 
                 else return BlasRank2Update(alpha,xx,y,A);
             } else {
-                TMVAssert(y.step() != 1);
                 Vector<std::complex<float> > yy = y;
                 return BlasRank2Update(alpha,x,yy,A);
             }
@@ -622,15 +557,6 @@ namespace tmv {
         const GenVector<float>& y, 
         const SymMatrixView<std::complex<float> >& A)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(A.size() == y.size());
-        TMVAssert(alpha != 0.F);
-        TMVAssert(x.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(A.iscm());
-
         SymMatrix<float> A1(A.size(),0.F);
         BlasRank2Update(1.F,x.realPart(),y,A1.view());
         A += alpha*A1;
@@ -645,15 +571,6 @@ namespace tmv {
         const GenVector<std::complex<float> >& y, 
         const SymMatrixView<std::complex<float> >& A)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(A.size() == y.size());
-        TMVAssert(alpha != 0.F);
-        TMVAssert(x.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(A.iscm());
-
         SymMatrix<float> A1(A.size(),0.F);
         BlasRank2Update(1.F,x,y.realPart(),A1.view());
         A += alpha*A1;
@@ -667,15 +584,6 @@ namespace tmv {
         const GenVector<float>& x, const GenVector<float>& y, 
         const SymMatrixView<std::complex<float> >& A)
     {
-        TMVAssert(A.size() == x.size());
-        TMVAssert(A.size() == y.size());
-        TMVAssert(alpha != 0.F);
-        TMVAssert(x.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(A.iscm());
-
         SymMatrix<float> A1(A.size(),0.F);
         BlasRank2Update(1.F,x,y,A1.view());
         A += alpha*A1;
@@ -715,10 +623,10 @@ namespace tmv {
         TMVAssert(A.size() == x.size());
         TMVAssert(A.size() == y.size());
         if (alpha != T(0) && A.size() > 0) {
-        if (A.isconj()) 
-            Rank2Update<add>(
+            if (A.isconj()) 
+                Rank2Update<add>(
                     TMV_CONJ(alpha),x.conjugate(),y.conjugate(),A.conjugate());
-            else if (A.isrm())
+            else if (!A.iscm() && A.isrm())
                 if (A.isherm()) Rank2Update<add>(alpha,x,y,A.adjoint());
                 else Rank2Update<add>(alpha,x,y,A.transpose());
             else if (!(A.iscm() 
@@ -727,12 +635,12 @@ namespace tmv {
 #endif
             )) {
                 if (A.isherm()) {
-                    HermMatrix<T,Lower,ColMajor> AA(A.size());
+                    HermMatrix<T,Lower|ColMajor> AA(A.size());
                     Rank2Update<false>(alpha,x,y,AA.view());
                     if (add) A += AA;
                     else A = AA;
                 } else {
-                    SymMatrix<T,Lower,ColMajor> AA(A.size());
+                    SymMatrix<T,Lower|ColMajor> AA(A.size());
                     Rank2Update<false>(alpha,x,y,AA.view());
                     if (add) A += AA;
                     else A = AA;

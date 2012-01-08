@@ -139,7 +139,7 @@ namespace tmv {
 
         if (sinv.size() > 0) {
             if (!( sinv.iscm() || sinv.isrm() )) {
-                HermMatrix<T,Lower,ColMajor> temp(sinv.size());
+                HermMatrix<T,Lower|ColMajor> temp(sinv.size());
                 CH_Inverse(LLx,temp.view());
                 sinv = temp;
             } else {
@@ -187,7 +187,7 @@ namespace tmv {
 
         if (sinv.size() > 0) {
             if (!( sinv.iscm() || sinv.isrm() )) {
-                HermMatrix<T,Lower,ColMajor> temp(sinv.size());
+                HermMatrix<T,Lower|ColMajor> temp(sinv.size());
                 LDL_Inverse(LLx,temp.view());
                 sinv = temp;
             } else {

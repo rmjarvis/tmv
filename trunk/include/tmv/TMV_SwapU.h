@@ -54,12 +54,12 @@ namespace tmv {
     {
         static void call(M1& m1, M2& m2)
         {
-            const int s2 = s > 20 ? TMV_UNKNOWN : s;
+            const int s2 = s > 20 ? Unknown : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s > 10 ? false :
-                s == TMV_UNKNOWN ? false :
+                s == Unknown ? false :
                 nops <= TMV_SWAPU_UNROLL;
             const int algo2 = 
                 unroll ? ( M2::_rowmajor ? 16 : 15 ) :
@@ -91,7 +91,7 @@ namespace tmv {
     {
         static void call(M1& m1, M2& m2)
         {
-            const int N = (s == TMV_UNKNOWN ? m2.size() : s);
+            const int N = (s == Unknown ? m2.size() : s);
             typedef typename M1::col_sub_type M1c;
             typedef typename M2::col_sub_type M2c;
             typedef typename M1c::iterator IT1;
@@ -101,7 +101,7 @@ namespace tmv {
             IT1 it1 = m1.get_col(0,0,1).begin();
             IT2 it2 = m2.get_col(0,0,1).begin();
             for(int j=0;j<N;++j) {
-                SwapV_Helper<-3,TMV_UNKNOWN,M1c,M2c>::call2(j+1,it1,it2);
+                SwapV_Helper<-3,Unknown,M1c,M2c>::call2(j+1,it1,it2);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
             } 
@@ -114,7 +114,7 @@ namespace tmv {
     {
         static void call(M1& m1, M2& m2)
         {
-            int N = (s == TMV_UNKNOWN ? m2.size() : s);
+            int N = (s == Unknown ? m2.size() : s);
             typedef typename M1::row_sub_type M1r;
             typedef typename M2::row_sub_type M2r;
             typedef typename M1r::iterator IT1;
@@ -124,7 +124,7 @@ namespace tmv {
             IT1 it1 = m1.get_row(0,0,N).begin();
             IT2 it2 = m2.get_row(0,0,N).begin();
             for(;N;--N) {
-                SwapV_Helper<-3,TMV_UNKNOWN,M1r,M2r>::call2(N,it1,it2);
+                SwapV_Helper<-3,Unknown,M1r,M2r>::call2(N,it1,it2);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
             } 
@@ -324,7 +324,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst =
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
                 Traits2<T1,T2>::sametype &&
                 Traits<T1>::isinst;
             const int algo =
@@ -347,12 +347,12 @@ namespace tmv {
             TMVStaticAssert(M1::_upper);
             TMVStaticAssert(M2::_upper);
             typedef typename M2::value_type T2;
-            const int s2 = s > 20 ? TMV_UNKNOWN : s;
+            const int s2 = s > 20 ? Unknown : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
             const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
-                s == TMV_UNKNOWN ? false :
+                s == Unknown ? false :
                 nops > TMV_SWAPU_UNROLL ? false :
                 s <= 10;
             const int algo = 
@@ -388,7 +388,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst =
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
                 Traits2<T1,T2>::sametype &&
                 Traits<T1>::isinst;
             const int algo =

@@ -11,6 +11,8 @@ template <class T> void TestAllSmallMatrixB()
     TestSmallMatrixArith_B2b<T>();
     TestSmallMatrixArith_B3a<T>();
     TestSmallMatrixArith_B3b<T>();
+    TestSmallMatrixArith_B3c<T>();
+    TestSmallMatrixArith_B3d<T>();
     TestSmallMatrixArith_B4a<T>();
     TestSmallMatrixArith_B4b<T>();
     TestSmallMatrixArith_B4c<T>();

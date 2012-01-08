@@ -28,9 +28,9 @@ namespace tmv {
 
     // BaseMatrix_Rec adds the following requirements to Traits<M>:
     //
-    //  _stepi = the step size along column if known (else TMV_UNKNOWN)
-    //  _stepj = the step size along row if known (else TMV_UNKNOWN)
-    //  _diagstep = the step size along row if known (else TMV_UNKNOWN)
+    //  _stepi = the step size along column if known (else Unknown)
+    //  _stepj = the step size along row if known (else Unknown)
+    //  _diagstep = the step size along row if known (else Unknown)
     //
     //  const_row_type = return type from row(i) const
     //  const_col_type = return type from col(j) const
@@ -109,9 +109,9 @@ namespace tmv {
     class MatrixView;
     template <class T, int M, int N, int A=0, int A2=0> 
     class SmallMatrix;
-    template <class T, int M, int N, int Si=TMV_UNKNOWN, int Sj=TMV_UNKNOWN, int A=0>
+    template <class T, int M, int N, int Si=Unknown, int Sj=Unknown, int A=0>
     class ConstSmallMatrixView;
-    template <class T, int M, int N, int Si=TMV_UNKNOWN, int Sj=TMV_UNKNOWN, int A=0>
+    template <class T, int M, int N, int Si=Unknown, int Sj=Unknown, int A=0>
     class SmallMatrixView;
 
     // In TMV_Norm.h
@@ -293,19 +293,19 @@ namespace tmv {
         typedef SmallMatrix<T,cs,rs,A> type;
     };
     template <class T, int rs, int A>
-    struct MCopyHelper<T,Rec,TMV_UNKNOWN,rs,A>
+    struct MCopyHelper<T,Rec,Unknown,rs,A>
     {
         enum { A2 = A | NoDivider | NoAlias };
         typedef Matrix<T,A2> type; 
     };
     template <class T, int cs, int A>
-    struct MCopyHelper<T,Rec,cs,TMV_UNKNOWN,A>
+    struct MCopyHelper<T,Rec,cs,Unknown,A>
     { 
         enum { A2 = A | NoDivider | NoAlias };
         typedef Matrix<T,A2> type; 
     };
     template <class T, int A>
-    struct MCopyHelper<T,Rec,TMV_UNKNOWN,TMV_UNKNOWN,A>
+    struct MCopyHelper<T,Rec,Unknown,Unknown,A>
     { 
         enum { A2 = A | NoDivider | NoAlias };
         typedef Matrix<T,A2> type; 
@@ -319,7 +319,7 @@ namespace tmv {
         typedef ConstSmallMatrixView<T,cs,rs,si,sj,A> ctype; 
     };
     template <class T, int si, int sj, int A>
-    struct MViewHelper<T,Rec,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,A>
+    struct MViewHelper<T,Rec,Unknown,Unknown,si,sj,A>
     {
         enum { A2 = A | (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) };
         typedef MatrixView<T,A2> type; 
@@ -1002,7 +1002,7 @@ namespace tmv {
         { return static_cast<const type&>(*this); }
 
         TMV_INLINE int diagstep() const 
-        { return _diagstep == TMV_UNKNOWN ? stepi() + stepj() : _diagstep; }
+        { return _diagstep == Unknown ? stepi() + stepj() : _diagstep; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE bool canLinearize() const 
         { return (AuxCanLinearize<_canlin,_colmajor,_rowmajor,M>::ok(mat())); }
@@ -1743,7 +1743,7 @@ namespace tmv {
 
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE int diagstep() const 
-        { return _diagstep == TMV_UNKNOWN ? stepi() + stepj() : _diagstep; }
+        { return _diagstep == Unknown ? stepi() + stepj() : _diagstep; }
         TMV_INLINE bool canLinearize() const 
         { return (AuxCanLinearize<_canlin,_colmajor,_rowmajor,M>::ok(mat())); }
 
@@ -2067,7 +2067,6 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_TEXT
     template <class M>
     inline std::string TMV_Text(const BaseMatrix_Rec<M>& m)
     {
@@ -2083,7 +2082,6 @@ namespace tmv {
         s << "BaseMatrix_Rec_Mutable< "<<TMV_Text(m.mat())<<" >";
         return s.str();
     }
-#endif
 
 } // namespace tmv
 

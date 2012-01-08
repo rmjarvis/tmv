@@ -30,8 +30,8 @@ static void TestSmallNonSquareDiv_B1b()
 
     TestMatrixDivArith3d(tmv::QR,a1,x,b,c1,y,e,"V/NonSquare"); 
 #if (XTEST & 32)
-    tmv::SmallMatrix<T,6,N,stor,tmv::FortranStyle> a1f = a1;
-    tmv::SmallMatrix<std::complex<T>,6,N,stor,tmv::FortranStyle> c1f = c1;
+    tmv::SmallMatrix<T,6,N,stor|tmv::FortranStyle> a1f = a1;
+    tmv::SmallMatrix<std::complex<T>,6,N,stor|tmv::FortranStyle> c1f = c1;
 
     tmv::SmallVector<T,N,tmv::FortranStyle> bf = b;
     tmv::SmallVector<std::complex<T>,N,tmv::FortranStyle> ef = e;

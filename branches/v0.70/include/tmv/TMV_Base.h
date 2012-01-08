@@ -149,126 +149,72 @@ namespace tmv {
     ( (major > TMV_MAJOR_VERSION) || \
       (major == TMV_MAJOR_VERSION && minor >= TMV_MINOR_VERSION) )
 
-#if 0
     // Attributes are stored as a binary field, so they can be |'ed
     // together to calculate the full set of attributes.
     //
     // For each object we have a default set of attributes that is 
     // implied by A=0.  This way we can write, for example:
     // UpperTriMatrix<T,UnitDiag> U;
-    // and this will imply (UnitDiag | ColMajor | NonPacked | CStyle).
+    // and this will imply (UnitDiag | ColMajor | CStyle).
     //
     // Attributes that are always the default (whenever they are allowed)
     // can be defined as 0, since the absence of the converse is sufficient.
-    // e.g. CStyle, NonConj, NonUnit, NonMajor, NonPacked, UnknownDiag.
-    //
-    // Some pairs of attributes are logical opposites, but we can't
-    // set either to 0, since some objects have one as the default, and
-    // others have the other.  e.g. WithDivider and NoDivider.
-    // So these each need to have a non-zero bit.
-    //
-    // (Not implemented yet: Packed, ZeroDiag)
+    // e.g. CStyle, ColMajor, Lower
 
-    enum ConjType { NonConj = 0, Conj = 0x1 };
-    enum IndexStyle { CStyle = 0, FortranStyle = 0x2 };
-    enum StepType { NonUnit = 0, Unit = 0x4 };
+    enum IndexStyle { CStyle = 0, FortranStyle = 0x1 };
     enum StorageType {
-        NonMajor = 0, ColMajor = 0x4, RowMajor = 0x8, DiagMajor = 0x10,
-        AllStorageType = 0x1c };
-    enum DiagType {
-        UnknownDiag = 0, NonUnitDiag = 0x20, UnitDiag = 0x40,
-        ZeroDiag = 0x80, AllDiagType = 0xe0 };
-    enum PackType { NonPacked = 0, Packed = 0x100 };
-    enum DivStatus {
-        NoDivider = 0x200, WithDivider = 0x400, AllDivStatus = 0x600 };
-    enum AliasStatus {
-        NoAlias = 0x800, CheckAlias = 0x1000, AllAliasStatus = 0x1800 };
-    enum UpLoType { Upper = 0x2000, Lower = 0x4000 };
+        ColMajor = 0, RowMajor = 0x2, DiagMajor = 0x4,
+        AllStorageType = 0x6 };
+    enum DiagType { NonUnitDiag = 0, UnitDiag = 0x8 };
+    enum UpLoType { Lower = 0, Upper = 0x10 };
 
     template <int A>
     struct Attrib
     {
-        enum { vectoronly = ((A & ~AllAliasStatus) <= 0x7) };
-        enum { conj = !(!(A & Conj)) };
-        enum { fort = !(!(A & FortranStyle)) };
-        enum { unit = !(!(A & Unit)) };
-        enum { colmajor = !(!(A & ColMajor)) };
-        enum { rowmajor = !(!(A & RowMajor)) };
-        enum { diagmajor = !(!(A & DiagMajor)) };
-        enum { nonmajor = !(colmajor || rowmajor || diagmajor) };
-        enum { nonunitdiag = !(!(A & NonUnitDiag)) };
-        enum { unitdiag = !(!(A & UnitDiag)) };
-        enum { zerodiag = !(!(A & ZeroDiag)) };
-        enum { unknowndiag = !(unitdiag || nonunitdiag || zerodiag) };
-        enum { packed = !(!(A & Packed)) };
-        enum { nodivider = !(!(A & NoDivider)) };
-        enum { withdivider = !(!(A & WithDivider)) };
-        enum { noalias = !(!(A & NoAlias)) };
-        enum { checkalias = !(!(A & CheckAlias)) };
-        enum { lower = !(!(A & Lower)) };
-        enum { upper = !(!(A & Upper)) };
+        enum { onestoragetype = !( !!(A & RowMajor) && !!(A & DiagMajor) ) };
+        enum { viewok = A <= 0x1 };
+        enum { vectorok = A <= 0x1 };
+        enum { matrixok = A <= 0x3 };
+        enum { diagmatrixok = A <= 0x1 };
+        enum { trimatrixok = ( A <= 0xb && !(A & DiagMajor) ) };
+        enum { bandmatrixok = A <= 0x5 };
+        enum { symmatrixok = (
+                A <= 0x13 && !(A & DiagMajor) && !(A & UnitDiag) ) };
+        enum { symbandmatrixok = (
+                A <= 0x15 && onestoragetype && !(A & UnitDiag) ) };
 
-        enum { stor = (
-                rowmajor ? RowMajor : colmajor ? ColMajor :
-                diagmajor ? DiagMajor : NonMajor ) };
+        enum { fort = !!(A & FortranStyle) };
+        enum { rowmajor = !!(A & RowMajor) };
+        enum { diagmajor = !!(A & DiagMajor) };
+        enum { colmajor = !(rowmajor || diagmajor) };
+        enum { unitdiag = !!(A & UnitDiag) };
+        enum { nonunitdiag = !unitdiag };
+        enum { upper = !!(A & Upper) };
+        enum { lower = !upper };
+
+        enum { stor = rowmajor ? RowMajor : diagmajor ? DiagMajor : ColMajor };
 
         static std::string text()
         {
-            std::string ret;
-            ret += ( (A & ColMajor) ? "ColMajor|" :
-                     (A & RowMajor) ? "RowMajor|" :
-                     (A & DiagMajor) ? "DiagMajor|" : "");
-            ret += (A & Conj) ? "Conj|" : "";
-            ret += (A & FortranStyle) ? "FortranStyle|" : "";
-            ret += (A & NonUnitDiag) ? "NonUnitDiag|" : "";
-            ret += (A & UnitDiag) ? "UnitDiag|" : "";
-            ret += (A & ZeroDiag) ? "ZeroDiag|" : "";
-            ret += (A & Packed) ? "Packed|" : "";
-            ret += (A & Lower) ? "Lower|" : "";
-            ret += (A & Upper) ? "Upper|" : "";
-            ret += (A & NoDivider) ? "NoDivider|" : "";
-            ret += (A & WithDivider) ? "WithDivider|" : "";
-            ret += (A & NoAlias) ? "NoAlias|" : "";
-            ret += (A & CheckAlias) ? "CheckAlias|" : "";
-            if (ret.size() == 0) return "Default";
-            else return ret.substr(0,ret.size()-1);
+            std::string ret =
+                ( colmajor ? "ColMajor" :
+                  rowmajor ? "RowMajor" : "DiagMajor" );
+            ret += fort ? "|FortranStyle" : "";
+            ret += unitdiag ? "|UnitDiag" : "";
+            ret += upper ? "|Upper" : "";
+            return ret;
         }
         static std::string vtext()
-        {
-            std::string ret;
-            ret += (A & Unit) ? "Unit|" : "";
-            ret += (A & Conj) ? "Conj|" : "";
-            ret += (A & FortranStyle) ? "FortranStyle|" : "";
-            ret += (A & NoAlias) ? "NoAlias|" : "";
-            ret += (A & CheckAlias) ? "CheckAlias|" : "";
-            if (ret.size() == 0) return "Default";
-            else return ret.substr(0,ret.size()-1);
-        }
+        { return fort ? "FortranStyle" : "CStyle"; }
     };
-#endif
 
-    // MJ: Add the packed storage varieties: RowPack, ColPack, DiagPack
-    enum StorageType { RowMajor, ColMajor, DiagMajor, NoMajor };
-    enum UpLoType { Upper, Lower };
-    enum DiagType { UnitDiag, NonUnitDiag };
-    // MJ: Any reason to add AntiSym, AntiHerm? Are they useful?
-    enum SymType { Sym, Herm /*, AntiSym, AntiHerm*/ };
-    enum IndexStyle { CStyle, FortranStyle };
     enum ADType { Ascend, Descend };
     enum CompType { RealComp, AbsComp, ImagComp, ArgComp };
-    // Not sure why I did these in a different format, but let's normalize them.
-    enum OldADType { ASCEND, DESCEND };
-    enum OldCompType { REAL_COMP, ABS_COMP, IMAG_COMP, ARG_COMP };
     enum StepType { Unit, Step };
     enum ConjType { NonConj, Conj };
+    enum SymType { Sym, Herm };
 
-#define TMV_TransOf(s) \
-    (s==RowMajor ? ColMajor : s==ColMajor ? RowMajor : s)
-#define TMV_UTransOf(U) (U==Upper ? Lower : Upper)
-
-    template <class M> 
-    inline StorageType BaseStorOf(const M& m)
-    { return m.stor()==RowMajor ? RowMajor : ColMajor; }
+#define TMV_UTransOf(U) (U==int(Upper) ? Lower : Upper)
 
     enum DivType { 
         XX=0, LU=1, CH=2, QR=4, QRP=8, SV=16,
@@ -729,6 +675,42 @@ namespace tmv {
     inline void NoWarnings() {}
 #endif
 
+    // Unknown is the value of _size, _step, etc. whenever it
+    // is not known at compile time.
+    // We use for this value the maximally negative int.
+    // In binary, this is a 1 followed by all zeros.
+    // Note: can't use numeric_limits<int>::min, since it is a function,
+    // not a compile-time constant.  
+    // And we need Unknown as a compile-time constant.
+    const int Unknown = 1<<(sizeof(int)*8-1);
+
+    // A helper structure that acts like an int,
+    // but only bothers to make the integer if S == Unknown.
+    // It also checks the constructor if S != Unknown
+    template <int S>
+    struct CheckedInt
+    {
+        CheckedInt(int s) {
+#ifdef TMV_DEBUG
+            if (s != S) {
+                std::cerr<<"Mismatched CheckInt:\n";
+                std::cerr<<"template parameter S = "<<S<<std::endl;
+                std::cerr<<"argument s = "<<s<<std::endl;
+            }
+#endif
+            TMVAssert(s == S);
+        }
+        operator int() const { return S; }
+    };
+    template <>
+    struct CheckedInt<Unknown>
+    {
+        int step;
+        CheckedInt(int s) : step(s) {}
+        operator int() const { return step; }
+        ~CheckedInt() {}
+    };
+
     template <class T> 
     inline TMV_RealType(T) TMV_Epsilon()
     { return std::numeric_limits<typename Traits<T>::real_type>::epsilon(); }
@@ -745,28 +727,28 @@ namespace tmv {
     // = false (in TMV_Vector.cpp), but without the unreachable returns
 
     inline double TMV_ABS(const std::complex<int>& x)
-    { return TMV_ABS(std::complex<double>(real(x),imag(x))); }
+    { return TMV_ABS(std::complex<double>(std::real(x),std::imag(x))); }
 
     inline double TMV_ARG(const std::complex<int>& x)
-    { return TMV_ARG(std::complex<double>(real(x),imag(x))); }
+    { return TMV_ARG(std::complex<double>(std::real(x),std::imag(x))); }
 
     inline double TMV_SQRT(int x) 
     { return TMV_SQRT(double(x)); }
 
     inline std::complex<double> TMV_SQRT(const std::complex<int>& x)
-    { return TMV_SQRT(std::complex<double>(real(x),imag(x))); }
+    { return TMV_SQRT(std::complex<double>(std::real(x),std::imag(x))); }
 
     inline double TMV_EXP(int x) 
     { return TMV_EXP(double(x)); }
 
     inline std::complex<double> TMV_EXP(const std::complex<int>& x)
-    { return TMV_EXP(std::complex<double>(real(x),imag(x))); }
+    { return TMV_EXP(std::complex<double>(std::real(x),std::imag(x))); }
 
     inline double TMV_LOG(int x) 
     { return TMV_LOG(double(x)); }
 
     inline std::complex<double> TMV_LOG(const std::complex<int>& x)
-    { return TMV_LOG(std::complex<double>(real(x),imag(x))); }
+    { return TMV_LOG(std::complex<double>(std::real(x),std::imag(x))); }
 
     inline bool TMV_Underflow(int )
     { return false; }
@@ -791,24 +773,30 @@ namespace tmv {
     inline std::string TMV_Text(std::complex<T>)
     { return std::string("complex<") + TMV_Text(T()) + ">"; }
 
-    inline std::string TMV_Text(StepType s)
-    { return s == Unit ? "Unit" : "Step"; }
-
     inline std::string TMV_Text(ConjType c)
     { return c == Conj ? "Conj" : c == NonConj ? "NonConj" : "VarConj"; }
 
-    inline std::string TMV_Text(UpLoType u)
-    { return u == Upper ? "Upper" : "Lower"; }
+    inline std::string TMV_Text(IndexStyle i)
+    { return i == CStyle ? "CStyle" : "FortranStyle"; }
+
+    inline std::string TMV_Text(StepType s)
+    { return s == Unit ? "Unit" : "Step"; }
+
+    inline std::string TMV_Text(StorageType s)
+    {
+        return 
+            s==ColMajor ? "ColMajor" :
+            s==RowMajor ? "RowMajor" : "DiagMajor";
+    }
 
     inline std::string TMV_Text(DiagType u)
     { return u == UnitDiag ? "UnitDiag" : "NonUnitDiag"; }
 
+    inline std::string TMV_Text(UpLoType u)
+    { return u == Upper ? "Upper" : "Lower"; }
+
     inline std::string TMV_Text(SymType s)
-    { 
-        return s == Sym ? "Sym" : "Herm";
-        //return s == Sym ? "Sym" : s == Herm ? "Herm" :
-        //  s == AntiSym ? "AntiSym" : "AntiHerm";
-    }
+    { return s == Sym ? "Sym" : "Herm"; }
 
     inline std::string TMV_Text(DivType d)
     { 
@@ -819,7 +807,7 @@ namespace tmv {
             d==QR ? "QR" :
             d==QRP ? "QRP" :
             d==SV ? "SV" :
-            "unkown dt";
+            "unkown DivType";
     }
 
 //#define TMVFLDEBUG

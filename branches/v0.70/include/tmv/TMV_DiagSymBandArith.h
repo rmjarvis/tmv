@@ -59,7 +59,6 @@ namespace tmv {
         inline int size() const { return m1.size(); }
         inline int nlo() const { return m2.nlo(); }
         inline SymType sym() const { return m2.sym(); }
-        inline StorageType stor() const { return BaseStorOf(m2); }
         inline T getX1() const { return x1; }
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
@@ -309,7 +308,6 @@ namespace tmv {
         inline int rowsize() const { return m1.size(); }
         inline int nlo() const { return m2.nlo(); }
         inline int nhi() const { return m2.nlo(); }
-        inline StorageType stor() const { return BaseStorOf(m2); }
         inline T getX() const { return x; }
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }
@@ -366,7 +364,6 @@ namespace tmv {
         inline int rowsize() const { return m1.size(); }
         inline int nlo() const { return m1.nlo(); }
         inline int nhi() const { return m1.nlo(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
@@ -493,7 +490,6 @@ namespace tmv {
         inline int rowsize() const { return m1.size(); }
         inline int nlo() const { return m1.nlo(); }
         inline int nhi() const { return m1.nlo(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
@@ -538,7 +534,6 @@ namespace tmv {
         inline int rowsize() const { return m1.size(); }
         inline int nlo() const { return m1.nlo(); }
         inline int nhi() const { return m1.nlo(); }
-        inline StorageType stor() const { return BaseStorOf(m1); }
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }

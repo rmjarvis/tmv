@@ -288,10 +288,10 @@ static void TestSquareDiv(tmv::DivType dt)
 
     TestMatrixDivArith2(dt,a1v,a2v,c1v,c2v,"Square"); 
 #if (XTEST & 2)
-    tmv::Matrix<T,stor,tmv::FortranStyle> a1f = a1;
-    tmv::Matrix<T,stor,tmv::FortranStyle> a2f = a2;
-    tmv::Matrix<std::complex<T>,stor,tmv::FortranStyle> c1f = c1;
-    tmv::Matrix<std::complex<T>,stor,tmv::FortranStyle> c2f = c2;
+    tmv::Matrix<T,stor|tmv::FortranStyle> a1f = a1;
+    tmv::Matrix<T,stor|tmv::FortranStyle> a2f = a2;
+    tmv::Matrix<std::complex<T>,stor|tmv::FortranStyle> c1f = c1;
+    tmv::Matrix<std::complex<T>,stor|tmv::FortranStyle> c2f = c2;
     tmv::MatrixView<T,tmv::FortranStyle> a1fv = a1f.view();
     tmv::MatrixView<T,tmv::FortranStyle> a2fv = a2f.view();
     tmv::MatrixView<std::complex<T>,tmv::FortranStyle> c1fv = c1f.view();
@@ -532,16 +532,16 @@ static void TestNonSquareDiv(tmv::DivType dt)
     // Test QR Update/Downdate:
 
     tmv::Matrix<std::complex<T>,stor> q30 = a;
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag,stor> r30(10,10);
+    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag|stor> r30(10,10);
     QR_Decompose(q30.view(),r30.view());
     Assert(Norm(q30*r30-a) < eps*Norm(a),"QR_Decompose");
     Assert(Norm(r30.adjoint()*r30-a.adjoint()*a) < eps*r30.normSq(),
            "QR_Decompose (RtR)");
 
     tmv::Matrix<std::complex<T>,stor> q10 = a.rowRange(0,10);
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag,stor> r10(10,10);
+    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag|stor> r10(10,10);
     QR_Decompose(q10.view(),r10.view());
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag,stor> r = r10;
+    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag|stor> r = r10;
     tmv::Matrix<std::complex<T>,stor> a1030 = a.rowRange(10,30);
     QR_Update(r.view(),a1030.view());
     Assert(Norm(r.adjoint()*r-r30.adjoint()*r30) < eps*r.normSq(),
@@ -571,7 +571,7 @@ static void TestNonSquareDiv(tmv::DivType dt)
     r = r10;
 
     tmv::Matrix<std::complex<T>,stor> q29 = a.rowRange(0,29);
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag,stor> r29(10,10);
+    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag|stor> r29(10,10);
     QR_Decompose(q29.view(),r29.view());
     r = r30;
     tmv::Vector<std::complex<T> > a29 = a.row(29);

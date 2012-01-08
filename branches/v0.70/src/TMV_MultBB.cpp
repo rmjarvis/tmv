@@ -58,7 +58,7 @@ namespace tmv {
         const BandMatrixView<T>& C)
     {
 #ifdef XDEBUG
-        //cout<<"Start RowMultMM"<<std::endl;
+        cout<<"Start RowMultMM"<<std::endl;
 #endif
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -117,7 +117,7 @@ namespace tmv {
         const BandMatrixView<T>& C)
     {
 #ifdef XDEBUG
-        //cout<<"Start OPMultMM"<<std::endl;
+        cout<<"Start OPMultMM"<<std::endl;
 #endif
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -371,7 +371,7 @@ namespace tmv {
     // C (+)= alpha * A * B
     {
 #ifdef XDEBUG
-        //cout<<"Start DiagMultMM"<<std::endl;
+        cout<<"Start DiagMultMM"<<std::endl;
 #endif
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -402,6 +402,10 @@ namespace tmv {
         const T alpha, const GenBandMatrix<Ta>& A, const GenBandMatrix<Tb>& B,
         const BandMatrixView<T>& C)
     {
+        //cout<<"Start DoMultMM"<<std::endl;
+        //cout<<"A = "<<TMV_Text(A)<<"  "<<A.cptr()<<"  "<<A.nlo()<<','<<A.nhi()<<"  "<<A<<endl;
+        //cout<<"B = "<<TMV_Text(B)<<"  "<<B.cptr()<<"  "<<B.nlo()<<','<<B.nhi()<<"  "<<B<<endl;
+        //cout<<"C = "<<TMV_Text(C)<<"  "<<C.cptr()<<"  "<<C.nlo()<<','<<C.nhi()<<"  "<<C<<endl;
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
         TMVAssert(B.rowsize() == C.rowsize());
@@ -463,6 +467,7 @@ namespace tmv {
         else if (A.isrm() || C.isrm()) RowMultMM<add>(alpha,A,B,C);
         else if (A.iscm() || B.isrm()) OPMultMM<add>(alpha,A,B,C);
         else RowMultMM<add>(alpha,B.transpose(),A.transpose(),C.transpose());
+        //cout<<"Done DoMultMM: C = "<<C<<endl;
     }
 
     template <bool add, class T, class Ta, class Tb> 
@@ -495,10 +500,10 @@ namespace tmv {
     // C (+)= alpha * A * B
     {
 #ifdef XDEBUG
-        //cout<<"Start MultMM"<<std::endl;
-        //cout<<"A = "<<A.cptr()<<"  "<<TMV_Text(A)<<"  "<<A.cptr()<<"  "<<A.nlo()<<','<<A.nhi()<<"  "<<A<<endl;
-        //cout<<"B = "<<B.cptr()<<"  "<<TMV_Text(B)<<"  "<<B.cptr()<<"  "<<B.nlo()<<','<<B.nhi()<<"  "<<B<<endl;
-        //cout<<"C = "<<C.cptr()<<"  "<<TMV_Text(C)<<"  "<<C.cptr()<<"  "<<C.nlo()<<','<<C.nhi()<<"  "<<C<<endl;
+        cout<<"Start MultMM"<<std::endl;
+        cout<<"A = "<<A.cptr()<<"  "<<TMV_Text(A)<<"  "<<A.cptr()<<"  "<<A.nlo()<<','<<A.nhi()<<"  "<<A<<endl;
+        cout<<"B = "<<B.cptr()<<"  "<<TMV_Text(B)<<"  "<<B.cptr()<<"  "<<B.nlo()<<','<<B.nhi()<<"  "<<B<<endl;
+        cout<<"C = "<<C.cptr()<<"  "<<TMV_Text(C)<<"  "<<C.cptr()<<"  "<<C.nlo()<<','<<C.nhi()<<"  "<<C<<endl;
         Matrix<Ta> A0 = A;
         Matrix<Tb> B0 = B;
         Matrix<T> C0 = C;
@@ -551,20 +556,21 @@ namespace tmv {
                         if (C.nhi() > nhi)
                             C.diagRange(nhi+1,C.nhi()+1).setZero();
                     }
-                }
-                else if (C.isconj()) 
+                } else if (C.isconj()) {
                     MultMM<add>(
                         TMV_CONJ(alpha),A.conjugate(),B.conjugate(),
                         C.conjugate());
-                else if (SameStorage(A,C) || SameStorage(B,C)) 
+                } else if (SameStorage(A,C) || SameStorage(B,C)) {
                     TempMultMM<add>(alpha,A,B,C);
-                else DoMultMM<add>(alpha, A, B, C);
+                } else {
+                    DoMultMM<add>(alpha, A, B, C);
+                }
             }
         }
 #ifdef XDEBUG
-        //cout<<"Done: C = "<<TMV_Text(C)<<"  "<<C.nlo()<<','<<C.nhi()<<"  "<<C<<endl;
-        //cout<<"C2-C = "<<(C2-C)<<endl;
-        //cout<<"Norm(C2-C) = "<<Norm(C2-C)<<endl;
+        cout<<"Done: C = "<<TMV_Text(C)<<"  "<<C.nlo()<<','<<C.nhi()<<"  "<<C<<endl;
+        cout<<"C2-C = "<<(C2-C)<<endl;
+        cout<<"Norm(C2-C) = "<<Norm(C2-C)<<endl;
         if (!(Norm(C2-C) <= 
               0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(B0)+
                      (add?Norm(C0):TMV_RealType(T)(0))))) {

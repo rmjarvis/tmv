@@ -34,11 +34,10 @@ static void DoTestSmallMatrixArith_A3a()
         std::cout<<"A3a"<<std::endl;
     }
     TestMatrixArith3a(a1,ca1,v1,cv1,v2,cv2,"Square");
-    TestMatrixArith3b(a1,ca1,v1,cv1,v2,cv2,"Square");
 
 #if (XTEST & 32)
-    tmv::SmallMatrix<T,N,N,tmv::RowMajor,tmv::FortranStyle> a1f = a1;
-    tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor,tmv::FortranStyle> ca1f = ca1;
+    tmv::SmallMatrix<T,N,N,tmv::RowMajor|tmv::FortranStyle> a1f = a1;
+    tmv::SmallMatrix<std::complex<T>,N,N,tmv::RowMajor|tmv::FortranStyle> ca1f = ca1;
 
     tmv::SmallVector<T,N,tmv::FortranStyle> v1f = v1;
     tmv::SmallVector<std::complex<T>,N,tmv::FortranStyle> cv1f = cv1;
@@ -48,9 +47,6 @@ static void DoTestSmallMatrixArith_A3a()
     TestMatrixArith3a(a1f,ca1f,v1,cv1,v2,cv2,"Square");
     TestMatrixArith3a(a1f,ca1f,v1f,cv1f,v2,cv2,"Square");
     TestMatrixArith3a(a1f,ca1f,v1f,cv1f,v2f,cv2f,"Square");
-    TestMatrixArith3b(a1f,ca1f,v1,cv1,v2,cv2,"Square");
-    TestMatrixArith3b(a1f,ca1f,v1f,cv1f,v2,cv2,"Square");
-    TestMatrixArith3b(a1f,ca1f,v1f,cv1f,v2f,cv2f,"Square");
 #endif
 }
 

@@ -49,8 +49,8 @@ namespace tmv {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? beta.size() : rs;
+            const int M = cs==Unknown ? Q.colsize() : cs;
+            const int N = rs==Unknown ? beta.size() : rs;
             const int K = Q.rowsize();
 #ifdef PRINTALGO_QR
             std::cout<<"UnpackQ algo 11: M,N,cs,rs = "<<M<<','<<N<<
@@ -91,8 +91,8 @@ namespace tmv {
         typedef typename M1::value_type T;
         static void call(M1& Q, const V& beta)
         {
-            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? beta.size() : rs;
+            const int M = cs==Unknown ? Q.colsize() : cs;
+            const int N = rs==Unknown ? beta.size() : rs;
             const int K = Q.rowsize();
 #ifdef PRINTALGO_QR
             std::cout<<"UnpackQ algo 21: M,N,cs,rs = "<<M<<','<<N<<
@@ -138,10 +138,10 @@ namespace tmv {
         typedef typename M1::value_type T;
         static void call(M1& Q, const V& beta)
         {
-            const int N = rs==TMV_UNKNOWN ? beta.size() : rs;
+            const int N = rs==Unknown ? beta.size() : rs;
             const int K = Q.rowsize();
 #ifdef PRINTALGO_QR
-            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
+            const int M = cs==Unknown ? Q.colsize() : cs;
             std::cout<<"UnpackQ algo 27: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -150,7 +150,7 @@ namespace tmv {
 
             typedef typename M1::colrange_type M1c;
 
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             typedef typename MCopyHelper<T,Rec,rs,xx>::type M2;
             typedef typename M2::colrange_type M2c;
             typedef typename M2c::uppertri_type M2t;
@@ -177,16 +177,16 @@ namespace tmv {
         typedef typename M1::value_type T;
         static void call(M1& Q, const V& beta)
         {
-            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? beta.size() : rs;
+            const int M = cs==Unknown ? Q.colsize() : cs;
+            const int N = rs==Unknown ? beta.size() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"UnpackQ algo 31: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
             const int algo27 =
-                (rs == TMV_UNKNOWN || rs <= 128) ? 27 : 0;
+                (rs == Unknown || rs <= 128) ? 27 : 0;
             const int algo21 =
-                (rs == TMV_UNKNOWN || rs > 128) ? 21 : 0;
+                (rs == Unknown || rs > 128) ? 21 : 0;
             const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
 
             if (M*N <= l2cache)
@@ -249,8 +249,8 @@ namespace tmv {
             const int algo = 
                 cs == 0 || rs == 0 || cs == 1 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                rs == TMV_UNKNOWN ? 31 :
-                cs == TMV_UNKNOWN ? 31 :
+                rs == Unknown ? 31 :
+                cs == Unknown ? 31 :
                 csrs <= l2cache ? 11 :
                 rs <= 128 ? 27 : 21;
 #ifdef PRINTALGO_QR
@@ -273,13 +273,13 @@ namespace tmv {
         static TMV_INLINE void call(M1& Q, const V& beta)
         {
             const int algo = (
-                ( cs != TMV_UNKNOWN && rs != TMV_UNKNOWN &&
+                ( cs != Unknown && rs != Unknown &&
                   cs <= 16 && rs <= 16 ) ? -4 :
                 ( TMV_OPT >= 2 && !M1::_colmajor ) ? 81 :
                 -4 );
 #ifdef PRINTALGO_QR
-            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? beta.size() : rs;
+            const int M = cs==Unknown ? Q.colsize() : cs;
+            const int N = rs==Unknown ? beta.size() : rs;
             std::cout<<"UnpackQ algo -3: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -298,8 +298,8 @@ namespace tmv {
         {
             typedef typename M::value_type T;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 cs == 0 || rs == 0 || cs == 1 ? 0 :

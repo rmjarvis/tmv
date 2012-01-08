@@ -66,8 +66,8 @@ namespace tmv {
         return isconj() ? TMV_CONJ(*mi) : *mi;
     }
 
-    template <class T, IndexStyle I>
-    typename MatrixView<T,I>::reference MatrixView<T,I>::ref(int i, int j) const
+    template <class T, int A>
+    typename MatrixView<T,A>::reference MatrixView<T,A>::ref(int i, int j) const
     {
         T* mi = ptr() + i*itssi + j*stepj();
         return TMV_REF(mi,ct());
@@ -562,7 +562,7 @@ namespace tmv {
             mmax *= scale;
             while (mmax > inveps) { scale *= eps; mmax *= eps; }
             norm = TMV_SQRT(m.normSq(scale))/scale;
-        }  else {
+        } else {
             norm = TMV_SQRT(m.normSq());
         }
         return norm;
@@ -765,17 +765,16 @@ namespace tmv {
     // Modifying Functions
     //
 
-    template <class T, IndexStyle I> 
-    const MatrixView<T,I>& MatrixView<T,I>::clip(RT thresh) const
+    template <class T, int A>
+    const MatrixView<T,A>& MatrixView<T,A>::clip(RT thresh) const
     {
-        TMVAssert(I==CStyle);
+        TMVAssert(A==CStyle);
         if (this->canLinearize()) linearView().clip(thresh);
         else {
             if (this->isrm()) {
                 const int M = colsize();
                 for(int i=0;i<M;++i) row(i).clip(thresh);
-            }
-            else {
+            } else {
                 const int N = rowsize();
                 for(int j=0;j<N;++j) col(j).clip(thresh);
             }
@@ -783,17 +782,16 @@ namespace tmv {
         return *this; 
     }
 
-    template <class T, IndexStyle I> 
-    const MatrixView<T,I>& MatrixView<T,I>::setZero() const
+    template <class T, int A>
+    const MatrixView<T,A>& MatrixView<T,A>::setZero() const
     {
-        TMVAssert(I==CStyle);
+        TMVAssert(A==CStyle);
         if (this->canLinearize()) linearView().setZero();
         else {
             if (this->isrm()) {
                 const int M = colsize();
                 for(int i=0;i<M;++i) row(i).setZero();
-            }
-            else {
+            } else {
                 const int N = rowsize();
                 for(int j=0;j<N;++j) col(j).setZero();
             }
@@ -801,10 +799,10 @@ namespace tmv {
         return *this; 
     }
 
-    template <class T, IndexStyle I> 
-    const MatrixView<T,I>& MatrixView<T,I>::setAllTo(const T& x) const
+    template <class T, int A>
+    const MatrixView<T,A>& MatrixView<T,A>::setAllTo(const T& x) const
     {
-        TMVAssert(I==CStyle);
+        TMVAssert(A==CStyle);
         if (this->canLinearize()) linearView().setAllTo(x);
         else {
             if (this->isrm()) {
@@ -818,10 +816,10 @@ namespace tmv {
         return *this; 
     }
 
-    template <class T, IndexStyle I> 
-    const MatrixView<T,I>& MatrixView<T,I>::addToAll(const T& x) const
+    template <class T, int A>
+    const MatrixView<T,A>& MatrixView<T,A>::addToAll(const T& x) const
     {
-        TMVAssert(I==CStyle);
+        TMVAssert(A==CStyle);
         if (this->canLinearize()) linearView().addToAll(x);
         else {
             if (this->isrm()) {
@@ -835,20 +833,20 @@ namespace tmv {
         return *this; 
     }
 
-    template <class T, IndexStyle I> 
-    const MatrixView<T,I>& MatrixView<T,I>::transposeSelf() const
+    template <class T, int A>
+    const MatrixView<T,A>& MatrixView<T,A>::transposeSelf() const
     {
-        TMVAssert(I==CStyle);
+        TMVAssert(A==CStyle);
         TMVAssert(colsize() == rowsize());
         const int M = colsize();
         for(int i=1;i<M;++i) Swap(row(i,0,i),col(i,0,i));
         return *this; 
     }
 
-    template <class T, IndexStyle I> 
-    const MatrixView<T,I>& MatrixView<T,I>::conjugateSelf() const
+    template <class T, int A>
+    const MatrixView<T,A>& MatrixView<T,A>::conjugateSelf() const
     {
-        TMVAssert(I==CStyle);
+        TMVAssert(A==CStyle);
         if (isComplex(T())) {
             if (this->canLinearize()) linearView().conjugateSelf();
             else {
@@ -864,21 +862,21 @@ namespace tmv {
         return *this; 
     }
 
-    template <class T, IndexStyle I> 
-    const MatrixView<T,I>& MatrixView<T,I>::setToIdentity(const T& x) const 
+    template <class T, int A>
+    const MatrixView<T,A>& MatrixView<T,A>::setToIdentity(const T& x) const 
     {
-        TMVAssert(I==CStyle);
+        TMVAssert(A==CStyle);
         TMVAssert(colsize() == rowsize());
         setZero();
         diag().setAllTo(x);
         return *this;
     }
 
-    template <class T, IndexStyle I> 
-    const MatrixView<T,I>& MatrixView<T,I>::permuteRows(
+    template <class T, int A>
+    const MatrixView<T,A>& MatrixView<T,A>::permuteRows(
         const int* p, int i1, int i2) const
     {
-        TMVAssert(I==CStyle);
+        TMVAssert(A==CStyle);
         TMVAssert(i2<=colsize());
         TMVAssert(i1<=i2);
         // This idea of doing the permutations a block at a time
@@ -909,11 +907,11 @@ namespace tmv {
         return *this;
     }
 
-    template <class T, IndexStyle I> 
-    const MatrixView<T,I>& MatrixView<T,I>::reversePermuteRows(
+    template <class T, int A>
+    const MatrixView<T,A>& MatrixView<T,A>::reversePermuteRows(
         const int* p, int i1, int i2) const
     {
-        TMVAssert(I==CStyle);
+        TMVAssert(A==CStyle);
         TMVAssert(i2<=colsize());
         TMVAssert(i1<=i2);
         const int N = rowsize();
@@ -952,7 +950,6 @@ namespace tmv {
         TMVAssert(m2.colsize() == m1.colsize());
         TMVAssert(m1.ct()==NonConj);
         TMVAssert(m2.ct()==NonConj);
-        TMVAssert(!(m1.isrm() && m2.isrm()));
         const int M = m2.colsize();
         const int N = m2.rowsize();
 
@@ -1070,7 +1067,6 @@ namespace tmv {
         TMVAssert(m2.colsize() > 0);
         TMVAssert(m1.ct() == NonConj);
         TMVAssert(m2.ct() == NonConj);
-        TMVAssert(!m2.isrm());
         TMVAssert(!m2.isSameAs(m1));
 
 #ifdef ELAP
@@ -1090,12 +1086,12 @@ namespace tmv {
     {
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
-        if (m1.stor() == m2.stor() && m1.canLinearize() && m2.canLinearize()) {
+        if (m1.canLinearize() && m2.canLinearize() &&
+            m1.stepi() == m2.stepi() && m1.stepj() == m2.stepj()) {
             TMVAssert(m1.linearView().size() == m2.linearView().size());
             TMVAssert(m1.stepi()==m2.stepi() && m1.stepj()==m2.stepj());
             Swap(m1.linearView(),m2.linearView());
-        }
-        else {
+        } else {
             if (m1.isrm() && m2.isrm()) {
                 const int M = m1.colsize();
                 for(int i=0;i<M;++i) Swap(m1.row(i),m2.row(i)); 
@@ -1314,8 +1310,8 @@ namespace tmv {
         }
     }
 
-    template <class T, StorageType S, IndexStyle I>
-    void Matrix<T,S,I>::read(const TMV_Reader& reader)
+    template <class T, int A>
+    void Matrix<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
         if (!reader.readCode("M",exp,got)) {
@@ -1340,8 +1336,8 @@ namespace tmv {
         FinishRead(reader,v);
     }
 
-    template <class T, IndexStyle I>
-    void MatrixView<T,I>::read(const TMV_Reader& reader) const
+    template <class T, int A>
+    void MatrixView<T,A>::read(const TMV_Reader& reader) const
     {
         std::string exp,got;
         if (!reader.readCode("M",exp,got)) {

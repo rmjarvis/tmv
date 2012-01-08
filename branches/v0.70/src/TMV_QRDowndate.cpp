@@ -284,7 +284,7 @@ namespace tmv {
 
         const int N = A.rowsize();
 
-        UpperTriMatrix<T,NonUnitDiag,ColMajor> BaseZ(
+        UpperTriMatrix<T,NonUnitDiag|ColMajor> BaseZ(
             TMV_MIN(QR_BLOCKSIZE,N));
         for(int j1=0;j1<N;) {
             int j2 = TMV_MIN(N,j1+QR_BLOCKSIZE);
@@ -344,7 +344,7 @@ namespace tmv {
             if (A.rowsize() > QR_BLOCKSIZE)
                 BlockQRDowndate(R,A);
             else {
-                UpperTriMatrix<T,NonUnitDiag,ColMajor> Z(A.rowsize());
+                UpperTriMatrix<T,NonUnitDiag|ColMajor> Z(A.rowsize());
                 RecursiveQRDowndate(R,A,Z.view(),false);
             }
         }

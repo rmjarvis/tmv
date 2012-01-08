@@ -5,8 +5,6 @@
 #define XTEST 0
 #endif
 
-#define TMV_TEXT
-
 #include <iostream>
 #include <typeinfo>
 #include <cmath>

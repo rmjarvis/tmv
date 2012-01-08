@@ -63,17 +63,17 @@ namespace tmv {
             int len = this->colsize()*this->rowsize();
             itsm.resize(len);
             MatrixView<T>(itsm.get(),this->colsize(),this->rowsize(),
-                          stepi(),stepj(),this->stor(),NonConj,len 
+                          stepi(),stepj(),NonConj,len 
                           TMV_FIRSTLAST1(itsm.get(),itsm.get()+len) ) = *this;
         }
         return itsm.get();
     }
 
     template <class T> int MatrixComposite<T>::stepi() const 
-    { return this->isrm() ? this->rowsize() : 1; }
+    { return 1; }
 
     template <class T> int MatrixComposite<T>::stepj() const 
-    { return this->isrm() ? 1 : this->colsize(); }
+    { return this->colsize(); }
 
     template <class T> int MatrixComposite<T>::ls() const 
     { return this->rowsize() * this->colsize(); }
@@ -100,7 +100,6 @@ namespace tmv {
         TMVAssert(!SameStorage(x,y));
         TMVAssert(cx == x.isconj());
         TMVAssert(ca == A.isconj());
-        TMVAssert(rm == A.isrm());
 
         const int M = A.colsize();
         const int N = A.rowsize();
@@ -232,11 +231,11 @@ namespace tmv {
         const GenMatrix<Ta>& A, const GenVector<Tx>& x, const VectorView<T>& y)
     {
 #ifdef XDEBUG
-        //cout<<"Start UnitAMultMV: \n";
-        //cout<<"add = "<<add<<endl;
-        //cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
-        //cout<<"x = "<<TMV_Text(x)<<" step "<<x.step()<<"  "<<x<<endl;
-        //cout<<"y = "<<TMV_Text(y)<<" step "<<y.step()<<"  "<<y<<endl;
+        cout<<"Start UnitAMultMV: \n";
+        cout<<"add = "<<add<<endl;
+        cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
+        cout<<"x = "<<TMV_Text(x)<<" step "<<x.step()<<"  "<<x<<endl;
+        cout<<"y = "<<TMV_Text(y)<<" step "<<y.step()<<"  "<<y<<endl;
         Vector<Tx> x0 = x;
         Vector<T> y0 = y;
         Matrix<Ta> A0 = A;
@@ -247,7 +246,7 @@ namespace tmv {
             else
                 y2(i) = (A.row(i) * x0);
         }
-        //cout<<"y2 = "<<y2<<endl;
+        cout<<"y2 = "<<y2<<endl;
 #endif
         // Check for 0's in beginning or end of x:
         // y += [ A1 A2 A3 ] [ 0 ]  -->  y += A2 x
@@ -268,7 +267,7 @@ namespace tmv {
         else UnitAMultMV1<add,cx>(A.colRange(j1,j2),x.subVector(j1,j2),y);
 
 #ifdef XDEBUG
-        //cout<<"y => "<<y<<endl;
+        cout<<"y => "<<y<<endl;
         if (!(Norm(y-y2) <=
               0.001*(Norm(A0)*Norm(x0)+
                      (add?Norm(y0):TMV_RealType(T)(0))))) {
@@ -312,11 +311,11 @@ namespace tmv {
         // y (+)= alpha * A * x
     {
 #ifdef XDEBUG
-        //cout<<"Start MultMV: alpha = "<<alpha<<endl;
-        //cout<<"add = "<<add<<endl;
-        //cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
-        //cout<<"x = "<<TMV_Text(x)<<" step "<<x.step()<<"  "<<x<<endl;
-        //cout<<"y = "<<TMV_Text(y)<<" step "<<y.step()<<"  "<<y<<endl;
+        cout<<"Start MultMV: alpha = "<<alpha<<endl;
+        cout<<"add = "<<add<<endl;
+        cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
+        cout<<"x = "<<TMV_Text(x)<<" step "<<x.step()<<"  "<<x<<endl;
+        cout<<"y = "<<TMV_Text(y)<<" step "<<y.step()<<"  "<<y<<endl;
         Vector<Tx> x0 = x;
         Vector<T> y0 = y;
         Matrix<Ta> A0 = A;
@@ -327,7 +326,7 @@ namespace tmv {
             else
                 y2(i) = alpha * (A.row(i) * x0);
         }
-        //cout<<"y2 = "<<y2<<endl;
+        cout<<"y2 = "<<y2<<endl;
 #endif
         TMVAssert(A.rowsize() == x.size());
         TMVAssert(A.colsize() == y.size());
@@ -384,7 +383,7 @@ namespace tmv {
                 UnitAMultMV<add,false>(A,x,y);
         } 
 #ifdef XDEBUG
-        //cout<<"y => "<<y<<endl;
+        cout<<"y => "<<y<<endl;
         if (!(Norm(y-y2) <=
               0.001*(TMV_ABS(alpha)*Norm(A0)*Norm(x0)+
                      (add?Norm(y0):TMV_RealType(T)(0))))) {
@@ -435,21 +434,14 @@ namespace tmv {
         const double alpha, const GenMatrix<double>& A,
         const GenVector<double>& x, const int beta, const VectorView<double>& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
-        int m = A.iscm() ? A.colsize() : A.rowsize();
-        int n = A.iscm() ? A.rowsize() : A.colsize();
-        int lda = A.iscm() ? A.stepj() : A.stepi();
+        int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+        int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+        int lda = BlasIsCM(A) ? A.stepj() : A.stepi();
+        if (lda < m) { TMVAssert(n==1); lda = m; }
         int xs = x.step();
         int ys = y.step();
+        if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+        if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
         const double* xp = x.cptr();
         if (xs < 0) xp += (x.size()-1)*xs;
         double* yp = y.ptr();
@@ -496,7 +488,7 @@ namespace tmv {
         }
 #endif
         BLASNAME(dgemv) (
-            BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+            BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
             BLASV(m),BLASV(n),BLASV(alpha),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp),BLASV(xs),BLASV(xbeta),BLASP(yp),BLASV(ys) BLAS1);
 #if 0
@@ -509,28 +501,23 @@ namespace tmv {
         const GenVector<std::complex<double> >& x,
         const int beta, const VectorView<std::complex<double> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         if (x.isconj()
 #ifndef CBLAS
-            && !(A.isconj() && A.iscm()) 
+            && !(A.isconj() && BlasIsCM(A)) 
 #endif
         ) {
             Vector<std::complex<double> > xx = alpha*x;
             return BlasMultMV(std::complex<double>(1),A,xx,beta,y);
         } 
 
-        int m = A.iscm() ? A.colsize() : A.rowsize();
-        int n = A.iscm() ? A.rowsize() : A.colsize();
-        int lda = A.iscm() ? A.stepj() : A.stepi();
+        int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+        int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+        int lda = BlasIsCM(A) ? A.stepj() : A.stepi();
+        if (lda < m) { TMVAssert(n==1); lda = m; }
         int xs = x.step();
         int ys = y.step();
+        if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+        if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
         const std::complex<double>* xp = x.cptr();
         if (xs < 0) xp += (x.size()-1)*xs;
         std::complex<double>* yp = y.ptr();
@@ -553,7 +540,7 @@ namespace tmv {
         std::cout<<"xp = "<<xp<<std::endl;
         std::cout<<"yp = "<<yp<<std::endl;
 #endif
-        if (A.isconj() && A.iscm()) {
+        if (A.isconj() && BlasIsCM(A)) {
 #ifdef CBLAS
             TMV_SWAP(m,n);
             BLASNAME(zgemv) (
@@ -586,7 +573,7 @@ namespace tmv {
 #endif
         } else {
             BLASNAME(zgemv) (
-                BLASCM A.isrm()?A.isconj()?BLASCH_CT:BLASCH_T:BLASCH_NT,
+                BLASCM BlasIsCM(A)?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASP(&alpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
                 BLAS1);
@@ -598,15 +585,7 @@ namespace tmv {
         const GenVector<double>& x,
         const int beta, const VectorView<std::complex<double> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
-        if (A.iscm()) {
+        if (BlasIsCM(A)) {
             if (y.step() != 1) {
                 Vector<std::complex<double> > yy(y.size());
                 BlasMultMV(std::complex<double>(1),A,x,0,yy.view());
@@ -617,6 +596,7 @@ namespace tmv {
                     int m = 2*A.colsize();
                     int n = A.rowsize();
                     int lda = 2*A.stepj();
+                    if (lda < m) { TMVAssert(n==1); lda = m; }
                     int xs = x.step();
                     int ys = 1;
                     const double* xp = x.cptr();
@@ -642,6 +622,7 @@ namespace tmv {
                     int m = 2*A.colsize();
                     int n = A.rowsize();
                     int lda = 2*A.stepj();
+                    if (lda < m) { TMVAssert(n==1); lda = m; }
                     int xs = x.step();
                     int ys = 1;
                     const double* xp = x.cptr();
@@ -672,20 +653,15 @@ namespace tmv {
         const GenVector<std::complex<double> >& x,
         const int beta, const VectorView<std::complex<double> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         if (beta == 0) {
-            int m = A.iscm() ? A.colsize() : A.rowsize();
-            int n = A.iscm() ? A.rowsize() : A.colsize();
-            int lda = A.iscm() ? A.stepj() : A.stepi();
+            int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+            int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+            int lda = BlasIsCM(A) ? A.stepj() : A.stepi();
+            if (lda < m) { TMVAssert(n==1); lda = m; }
             int xs = 2*x.step();
             int ys = 2*y.step();
+            if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+            if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
             const double* xp = (const double*) x.cptr();
             if (xs < 0) xp += (x.size()-1)*xs;
             double* yp = (double*) y.ptr();
@@ -694,23 +670,26 @@ namespace tmv {
             y.setZero();
             double xbeta(1);
             BLASNAME(dgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1);
             BLASNAME(dgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp+1),BLASV(xs),BLASV(xbeta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
             if (x.isconj()) y.conjugateSelf();
             y *= alpha;
         } else if (TMV_IMAG(alpha) == 0. && !x.isconj()) {
-            int m = A.iscm() ? A.colsize() : A.rowsize();
-            int n = A.iscm() ? A.rowsize() : A.colsize();
-            int lda = A.iscm() ? A.stepj() : A.stepi();
+            int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+            int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+            int lda = BlasIsCM(A) ? A.stepj() : A.stepi();
+            if (lda < m) { TMVAssert(n==1); lda = m; }
             int xs = 2*x.step();
             int ys = 2*y.step();
+            if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+            if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
             const double* xp = (const double*) x.cptr();
             if (xs < 0) xp += (x.size()-1)*xs;
             double* yp = (double*) y.ptr();
@@ -718,12 +697,12 @@ namespace tmv {
             double xalpha(TMV_REAL(alpha));
             double xbeta(1);
             BLASNAME(dgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1);
             BLASNAME(dgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp+1),BLASV(xs),BLASV(xbeta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
@@ -738,19 +717,14 @@ namespace tmv {
         const GenVector<double>& x,
         const int beta, const VectorView<std::complex<double> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
-        int m = A.iscm() ? A.colsize() : A.rowsize();
-        int n = A.iscm() ? A.rowsize() : A.colsize();
-        int lda = A.iscm() ? A.stepj() : A.stepi();
+        int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+        int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+        int lda = BlasIsCM(A) ? A.stepj() : A.stepi();
+        if (lda < m) { TMVAssert(n==1); lda = m; }
         int xs = x.step();
         int ys = 2*y.step();
+        if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+        if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
         const double* xp = x.cptr();
         if (xs < 0) xp += (x.size()-1)*xs;
         double* yp = (double*) y.ptr();
@@ -761,14 +735,14 @@ namespace tmv {
         if (beta == 0) y.setZero();
         if (ar != 0.) {
             BLASNAME(dgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(ar),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1);
         }
         if (ai != 0.) {
             BLASNAME(dgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(ai),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
@@ -780,21 +754,14 @@ namespace tmv {
         const float alpha, const GenMatrix<float>& A,
         const GenVector<float>& x, const int beta, const VectorView<float>& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(x.ct() == NonConj);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
-        int m = A.iscm() ? A.colsize() : A.rowsize();
-        int n = A.iscm() ? A.rowsize() : A.colsize();
-        int lda = A.iscm() ? A.stepj() : A.stepi();
+        int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+        int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+        int lda = BlasIsCM(A) ? A.stepj() : A.stepi();
+        if (lda < m) { TMVAssert(n==1); lda = m; }
         int xs = x.step();
         int ys = y.step();
+        if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+        if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
         const float* xp = x.cptr();
         if (xs < 0) xp += (x.size()-1)*xs;
         float* yp = y.ptr();
@@ -812,11 +779,11 @@ namespace tmv {
         std::cout<<"xp = "<<xp<<std::endl;
         std::cout<<"yp = "<<yp<<std::endl;
         std::cout<<"lda,xs,ys = "<<lda<<','<<xs<<','<<ys<<std::endl;
-        std::cout<<"cm = "<<A.iscm()<<std::endl;
+        std::cout<<"cm = "<<BlasIsCM(A)<<std::endl;
 #endif
 
         BLASNAME(sgemv) (
-            BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+            BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
             BLASV(m),BLASV(n),BLASV(alpha),BLASP(A.cptr()),BLASV(lda),
             BLASP(xp),BLASV(xs),BLASV(xbeta),BLASP(yp),BLASV(ys)
             BLAS1);
@@ -831,28 +798,23 @@ namespace tmv {
         const GenVector<std::complex<float> >& x,
         const int beta, const VectorView<std::complex<float> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         if (x.isconj()
 #ifndef CBLAS
-            && !(A.isconj() && A.iscm()) 
+            && !(A.isconj() && BlasIsCM(A)) 
 #endif
         ) {
             Vector<std::complex<float> > xx = alpha*x;
             return BlasMultMV(std::complex<float>(1),A,xx,beta,y);
         } 
 
-        int m = A.iscm() ? A.colsize() : A.rowsize();
-        int n = A.iscm() ? A.rowsize() : A.colsize();
-        int lda = A.iscm() ? A.stepj() : A.stepi();
+        int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+        int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+        int lda = BlasIsCM(A) ? A.stepj() : A.stepi();
+        if (lda < m) { TMVAssert(n==1); lda = m; }
         int xs = x.step();
         int ys = y.step();
+        if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+        if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
         const std::complex<float>* xp = x.cptr();
         if (xs < 0) xp += (x.size()-1)*xs;
         std::complex<float>* yp = y.ptr();
@@ -873,7 +835,7 @@ namespace tmv {
         std::cout<<"conj = "<<A.isconj()<<std::endl;
         std::cout<<"cm = "<<A.iscm()<<std::endl;
 #endif
-        if (A.isconj() && A.iscm()) {
+        if (A.isconj() && BlasIsCM(A)) {
 #ifdef CBLAS
             TMV_SWAP(m,n);
             BLASNAME(cgemv) (
@@ -906,7 +868,7 @@ namespace tmv {
 #endif
         } else {
             BLASNAME(cgemv) (
-                BLASCM A.isrm()?A.isconj()?BLASCH_CT:BLASCH_T:BLASCH_NT,
+                BLASCM BlasIsCM(A)?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASP(&alpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASP(&xbeta),BLASP(yp),BLASV(ys)
                 BLAS1);
@@ -922,15 +884,7 @@ namespace tmv {
         const GenVector<float>& x,
         const int beta, const VectorView<std::complex<float> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
-        if (A.iscm()) {
+        if (BlasIsCM(A)) {
             if (y.step() != 1) {
                 Vector<std::complex<float> > yy(y.size());
                 BlasMultMV(std::complex<float>(1),A,x,0,yy.view());
@@ -941,6 +895,7 @@ namespace tmv {
                     int m = 2*A.colsize();
                     int n = A.rowsize();
                     int lda = 2*A.stepj();
+                    if (lda < m) { TMVAssert(n==1); lda = m; }
                     int xs = x.step();
                     int ys = 1;
                     const float* xp = x.cptr();
@@ -965,6 +920,7 @@ namespace tmv {
                     int m = 2*A.colsize();
                     int n = A.rowsize();
                     int lda = 2*A.stepj();
+                    if (lda < m) { TMVAssert(n==1); lda = m; }
                     int xs = x.step();
                     int ys = 1;
                     const float* xp = x.cptr();
@@ -994,20 +950,15 @@ namespace tmv {
         const GenVector<std::complex<float> >& x,
         const int beta, const VectorView<std::complex<float> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
         if (beta == 0) {
-            int m = A.iscm() ? A.colsize() : A.rowsize();
-            int n = A.iscm() ? A.rowsize() : A.colsize();
-            int lda = A.iscm() ? A.stepj() : A.stepi();
+            int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+            int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+            int lda = BlasIsCM(A) ? A.stepj() : A.stepi();
+            if (lda < m) { TMVAssert(n==1); lda = m; }
             int xs = 2*x.step();
             int ys = 2*y.step();
+            if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+            if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
             const float* xp = (const float*) x.cptr();
             if (xs < 0) xp += (x.size()-1)*xs;
             float* yp = (float*) y.ptr();
@@ -1016,23 +967,26 @@ namespace tmv {
             y.setZero();
             float xbeta(1);
             BLASNAME(sgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1);
             BLASNAME(sgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp+1),BLASV(xs),BLASV(xbeta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
             if (x.isconj()) y.conjugateSelf();
             y *= alpha;
         } else if (TMV_IMAG(alpha) == 0.F && !x.isconj()) {
-            int m = A.iscm() ? A.colsize() : A.rowsize();
-            int n = A.iscm() ? A.rowsize() : A.colsize();
-            int lda = A.iscm() ? A.stepj() : A.stepi();
+            int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+            int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+            int lda = BlasIsCM(A) ? A.stepj() : A.stepi();
+            if (lda < m) { TMVAssert(n==1); lda = m; }
             int xs = 2*x.step();
             int ys = 2*y.step();
+            if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+            if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
             const float* xp = (const float*) x.cptr();
             if (xs < 0) xp += (x.size()-1)*xs;
             float* yp = (float*) y.ptr();
@@ -1040,12 +994,12 @@ namespace tmv {
             float xalpha(TMV_REAL(alpha));
             float xbeta(1);
             BLASNAME(sgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1);
             BLASNAME(sgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(xalpha),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp+1),BLASV(xs),BLASV(xbeta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
@@ -1060,19 +1014,14 @@ namespace tmv {
         const GenVector<float>& x,
         const int beta, const VectorView<std::complex<float> >& y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(A.isrm() || A.iscm());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(y.ct() == NonConj);
-        TMVAssert(!SameStorage(x,y));
-
-        int m = A.iscm() ? A.colsize() : A.rowsize();
-        int n = A.iscm() ? A.rowsize() : A.colsize();
-        int lda = A.iscm() ? A.stepj() : A.stepi();
+        int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
+        int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
+        int lda = BlasIsCM(A) ? A.stepj() : A.stepi();
+        if (lda < m) { TMVAssert(n==1); lda = m; }
         int xs = x.step();
         int ys = 2*y.step();
+        if (xs == 0) { TMVAssert(x.size() == 1); xs = 1; }
+        if (ys == 0) { TMVAssert(y.size() == 1); ys = 1; }
         const float* xp = x.cptr();
         if (xs < 0) xp += (x.size()-1)*xs;
         float* yp = (float*) y.ptr();
@@ -1083,14 +1032,14 @@ namespace tmv {
         float xbeta(1);
         if (ar != 0.F) {
             BLASNAME(sgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(ar),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp),BLASV(ys) BLAS1);
         }
         if (ai != 0.F) {
             BLASNAME(sgemv) (
-                BLASCM A.isrm()?BLASCH_T:BLASCH_NT,
+                BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
                 BLASV(m),BLASV(n),BLASV(ai),BLASP(A.cptr()),BLASV(lda),
                 BLASP(xp),BLASV(xs),BLASV(xbeta),
                 BLASP(yp+1),BLASV(ys) BLAS1);
@@ -1154,7 +1103,7 @@ namespace tmv {
 #endif
             Vector<T> xx = alpha*x;
             DoMultMV<add>(T(1),A,xx,y);
-        } else if ((A.isrm()&&A.stepi()>0) || (A.iscm()&&A.stepj()>0)) {
+        } else if (BlasIsCM(A) || BlasIsRM(A)) {
             if (!SameStorage(A,y)) {
                 if (!SameStorage(x,y) && !SameStorage(A,x)) {
                     BlasMultMV(alpha,A,x,add?1:0,y);

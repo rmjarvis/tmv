@@ -53,7 +53,7 @@ void TestHermBandDecomp()
                 ", nlo = "<<nlo<<std::endl;
         }
 
-        tmv::HermBandMatrix<T,uplo,stor> m(N,nlo);
+        tmv::HermBandMatrix<T,uplo|stor> m(N,nlo);
         //std::cout<<"m = "<<TMV_Text(m)<<std::endl;
         for(int i=0;i<N;++i) for(int j=0;j<N;++j) 
             if ((uplo == tmv::Upper && j>=i && j<=i+nlo) || 
@@ -90,7 +90,7 @@ void TestHermBandDecomp()
         }
         //std::cout<<"m = "<<m<<std::endl;
 
-        tmv::HermBandMatrix<CT,uplo,stor> c(N,nlo);
+        tmv::HermBandMatrix<CT,uplo|stor> c(N,nlo);
         //std::cout<<"c = "<<TMV_Text(c)<<std::endl;
         for(int i=0;i<N;++i) for(int j=0;j<N;++j) 
             if ((uplo == tmv::Upper && j>=i && j<=i+nlo) || 
@@ -219,13 +219,13 @@ void TestHermBandDecomp()
             }
 
 #if (XTEST & 16)
-            tmv::HermBandMatrix<T,uplo,stor> m2 = m;
+            tmv::HermBandMatrix<T,uplo|stor> m2 = m;
             CH_Decompose(m2.view());
             L = m2.lowerBand();
             LLt = L*L.adjoint();
             Assert(Norm(m-LLt) <= eps*normm,"HermBand CH2");
 
-            tmv::HermBandMatrix<CT,uplo,stor> c2 = c;
+            tmv::HermBandMatrix<CT,uplo|stor> c2 = c;
             CH_Decompose(c2.view());
             cL = c2.lowerBand();
             cLLt = cL*cL.adjoint();
@@ -269,7 +269,7 @@ void TestHermBandDecomp()
                 }
 
 #if (XTEST & 16)
-                tmv::HermBandMatrix<T,uplo,stor> m2 = m;
+                tmv::HermBandMatrix<T,uplo|stor> m2 = m;
                 LDL_Decompose(m2.view());
                 (L = m2.lowerBand()).diag().setAllTo(T(1));
                 D = DiagMatrixViewOf(m2.diag());
@@ -287,7 +287,7 @@ void TestHermBandDecomp()
                 LDL.diag(1) = LDL.diag(-1);
                 Assert(Norm(m-LDL) <= eps*normm,"HermBand LDL2 Alt");
 
-                tmv::HermBandMatrix<CT,uplo,stor> c2 = c;
+                tmv::HermBandMatrix<CT,uplo|stor> c2 = c;
                 LDL_Decompose(c2.view());
                 (cL = c2.lowerBand()).diag().setAllTo(T(1));
                 cD = DiagMatrixViewOf(c2.diag());
@@ -455,11 +455,11 @@ void TestHermBandDecomp()
             try {
 #endif
                 if (showstartdone) std::cout<<"Square Root"<<std::endl;
-                tmv::HermMatrix<T,uplo,stor> S(N);
+                tmv::HermMatrix<T,uplo|stor> S(N);
                 SquareRoot(m,S.view());
                 Assert(Norm(m-S*S) <= eps*normm,"HermBand Square Root");
 
-                tmv::HermMatrix<CT,uplo,stor> cS(N);
+                tmv::HermMatrix<CT,uplo|stor> cS(N);
                 SquareRoot(c,cS.view());
                 Assert(Norm(c-cS*cS) <= eps*normc,"HermBand C Square Root");
 
@@ -552,7 +552,7 @@ void TestSymBandDecomp()
                 ", nlo = "<<nlo<<std::endl;
         }
 
-        tmv::SymBandMatrix<T,uplo,stor> m(N,nlo);
+        tmv::SymBandMatrix<T,uplo|stor> m(N,nlo);
         for(int i=0;i<N;++i) for(int j=0;j<N;++j) 
             if ((uplo == tmv::Upper && j>=i && j<=i+nlo) || 
                 (uplo == tmv::Lower && i>=j && i<=j+nlo)) 
@@ -586,7 +586,7 @@ void TestSymBandDecomp()
         }
         //std::cout<<"m = "<<m<<std::endl;
 
-        tmv::SymBandMatrix<CT,uplo,stor> c(N,nlo);
+        tmv::SymBandMatrix<CT,uplo|stor> c(N,nlo);
         for(int i=0;i<N;++i) for(int j=0;j<N;++j) 
             if ((uplo == tmv::Upper && j>=i && j<=i+nlo) || 
                 (uplo == tmv::Lower && i>=j && i<=j+nlo)) 
@@ -692,7 +692,7 @@ void TestSymBandDecomp()
             tmv::DiagMatrix<T> D(N);
             tmv::BandMatrix<T> LDL(N,N,1,1);
 
-            tmv::SymBandMatrix<T,uplo,stor> m2 = m;
+            tmv::SymBandMatrix<T,uplo|stor> m2 = m;
             LDL_Decompose(m2.view());
             (L = m2.lowerBand()).diag().setAllTo(T(1));
             D = DiagMatrixViewOf(m2.diag());
@@ -716,7 +716,7 @@ void TestSymBandDecomp()
             tmv::DiagMatrix<CT> cD(N);
             tmv::BandMatrix<CT> cLDL(N,N,nlo,nlo);
 
-            tmv::SymBandMatrix<CT,uplo,stor> c2 = c;
+            tmv::SymBandMatrix<CT,uplo|stor> c2 = c;
             LDL_Decompose(c2.view());
             (cL = c2.lowerBand()).diag().setAllTo(T(1));
             cD = DiagMatrixViewOf(c2.diag());

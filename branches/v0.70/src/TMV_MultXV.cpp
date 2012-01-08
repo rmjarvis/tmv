@@ -100,10 +100,6 @@ namespace tmv {
     template <> 
     void DoMultXV(const double x, const VectorView<double>& v)
     {
-        TMVAssert(x!=0.);
-        TMVAssert(x!=1.);
-        TMVAssert(v.size()>0);
-        TMVAssert(v.step()>=0);
         int n=v.size();
         int s=v.step();
         BLASNAME(dscal) (BLASV(n),BLASV(x),BLASP(v.ptr()),BLASV(s));
@@ -111,24 +107,15 @@ namespace tmv {
     template <> 
     void DoMultXV(const double x, const VectorView<std::complex<double> >& v)
     {
-        TMVAssert(x!=0.);
-        TMVAssert(x!=1.);
-        TMVAssert(v.size()>0);
-        TMVAssert(v.step()>=0);
-        TMVAssert(v.ct() == NonConj);
         int n=v.size();
         int s=v.step();
         BLASNAME(zdscal) (BLASV(n),BLASV(x),BLASP(v.ptr()),BLASV(s));
     }
     template <> 
-    void DoMultXV(const std::complex<double> x,
-                  const VectorView<std::complex<double> >& v)
+    void DoMultXV(
+        const std::complex<double> x,
+        const VectorView<std::complex<double> >& v)
     { 
-        TMVAssert(x!=0.);
-        TMVAssert(x!=1.);
-        TMVAssert(v.size()>0);
-        TMVAssert(v.step()>=0);
-        TMVAssert(v.ct() == NonConj);
         int n=v.size();
         int s=v.step();
         BLASNAME(zscal) (BLASV(n),BLASP(&x),BLASP(v.ptr()),BLASV(s));
@@ -138,10 +125,6 @@ namespace tmv {
     template <> 
     void DoMultXV(const float x, const VectorView<float>& v)
     {
-        TMVAssert(x!=0.F);
-        TMVAssert(x!=1.F);
-        TMVAssert(v.size()>0);
-        TMVAssert(v.step()>=0);
         int n=v.size();
         int s=v.step();
         BLASNAME(sscal) (BLASV(n),BLASV(x),BLASP(v.ptr()),BLASV(s));
@@ -149,24 +132,15 @@ namespace tmv {
     template <> 
     void DoMultXV(const float x, const VectorView<std::complex<float> >& v)
     {
-        TMVAssert(x!=0.F);
-        TMVAssert(x!=1.F);
-        TMVAssert(v.size()>0);
-        TMVAssert(v.step()>=0);
-        TMVAssert(v.ct() == NonConj);
         int n=v.size();
         int s=v.step();
         BLASNAME(csscal) (BLASV(n),BLASV(x),BLASP(v.ptr()),BLASV(s));
     }
     template <> 
-    void DoMultXV(const std::complex<float> x,
-                  const VectorView<std::complex<float> >& v)
+    void DoMultXV(
+        const std::complex<float> x,
+        const VectorView<std::complex<float> >& v)
     { 
-        TMVAssert(x!=0.F);
-        TMVAssert(x!=1.F);
-        TMVAssert(v.size()>0);
-        TMVAssert(v.step()>=0);
-        TMVAssert(v.ct() == NonConj);
         int n=v.size();
         int s=v.step();
         BLASNAME(cscal) (BLASV(n),BLASP(&x),BLASP(v.ptr()),BLASV(s));

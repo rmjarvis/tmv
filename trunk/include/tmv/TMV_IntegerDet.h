@@ -251,8 +251,8 @@ namespace tmv {
         static TMV_INLINE T call(const M& m)
         {
             const bool inst =
-                (M::_colsize == TMV_UNKNOWN || M::_colsize > 16) &&
-                (M::_rowsize == TMV_UNKNOWN || M::_rowsize > 16) &&
+                (M::_colsize == Unknown || M::_colsize > 16) &&
+                (M::_rowsize == Unknown || M::_rowsize > 16) &&
                 Traits<T>::isinst;
             const int algo =
                 M::_conj ? 97 :

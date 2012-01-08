@@ -40,13 +40,13 @@ namespace tmv {
     template <class T> 
     class GenBandMatrix;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class ConstBandMatrixView;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class BandMatrixView;
 
-    template <class T, StorageType S=ColMajor, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class BandMatrix;
 
     template <class T> 
@@ -60,14 +60,6 @@ namespace tmv {
 
     template <class T, class Tm> 
     class QuotXB;
-
-    template <class T> 
-    inline StorageType BaseStorOf(const GenBandMatrix<T>& m)
-    {
-        return 
-            (m.stor()==RowMajor || m.stor()==ColMajor || m.stor()==DiagMajor) ?
-            m.stor() : DiagMajor;
-    }
 
     int BandStorageLength(StorageType s, int cs, int rs, int lo, int hi);
     int BandNumElements(int cs, int rs, int lo, int hi);
@@ -87,40 +79,29 @@ namespace tmv {
         virtual inline ~AssignableToBandMatrix() {}
     };
 
-    template <class T, StorageType S, IndexStyle I> 
-    inline std::string TMV_Text(const BandMatrix<T,S,I>& )
+    template <class T, int A>
+    inline std::string TMV_Text(const BandMatrix<T,A>& )
     { 
         return std::string("BandMatrix<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(I) + "," +
-            TMV_Text(S) + ">"; 
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
     template <class T> 
     inline std::string TMV_Text(const GenBandMatrix<T>& m)
     {
-        return std::string("GenBandMatrix<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.ct()) + "," +
-            TMV_Text(m.stor()) + ">";
+        return std::string("GenBandMatrix<") + TMV_Text(T()) + ">";
     }
-    template <class T, IndexStyle I> 
-    inline std::string TMV_Text(const ConstBandMatrixView<T,I>& m)
+    template <class T, int A>
+    inline std::string TMV_Text(const ConstBandMatrixView<T,A>& m)
     {
         return std::string("ConstBandMatrixView<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(I) + "," +
-            TMV_Text(m.ct()) + "," +
-            TMV_Text(m.stor()) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
-    template <class T, IndexStyle I> 
-    inline std::string TMV_Text(const BandMatrixView<T,I>& m)
+    template <class T, int A>
+    inline std::string TMV_Text(const BandMatrixView<T,A>& m)
     {
         return std::string("BandMatrixView<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(I) + "," +
-            TMV_Text(m.ct()) + "," + 
-            TMV_Text(m.stor()) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
 } // namespace tmv

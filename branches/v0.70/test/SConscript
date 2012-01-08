@@ -33,8 +33,14 @@ if env['END_PADDING']:
     env1.Append(CPPDEFINES=['TMV_END_PADDING'])
 if env['XTEST'] > 0:
     env1.Append(CPPDEFINES=['XTEST=' + env['XTEST']])
-if (int(env['XTEST']) & 64):
+if (int(env['XTEST']) & 64) and not env['WITH_BLAS']:
     env1.Append(CPPDEFINES=['TMV_INITIALIZE_NAN'])
+if env['TEST_DEBUG'] or env['DEBUG']:
+    env1.Append(CPPDEFINES=['XXD'])
+else:
+    env1.Append(CPPDEFINES=['NDEBUG'])
+if env['DEBUG']:
+    env1.Append(CPPDEFINES=['TMV_EXTRA_DEBUG'])
 
 if not env['TEST_FLOAT'] or not env['INST_FLOAT']:
     env1.Append(CPPDEFINES=['NO_TEST_FLOAT'])
@@ -46,10 +52,6 @@ if env['TEST_INT']:
     env1.Append(CPPDEFINES=['TEST_INT'])
 if env['TEST_DEPRECATED']:
     env1.Append(CPPDEFINES=['TMV_TEST_DEPRECATED'])
-if env['DEBUG']:
-    env1.Append(CPPDEFINES=['TMV_EXTRA_DEBUG'])
-elif not env['TEST_DEBUG']:
-    env1.Append(CPPDEFINES=['NDEBUG'])
 
 
 env1b = env1.Clone()

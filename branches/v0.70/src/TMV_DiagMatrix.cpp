@@ -168,8 +168,8 @@ namespace tmv {
     };
 #endif
 
-    template <class T, IndexStyle I> 
-    const DiagMatrixView<T,I>& DiagMatrixView<T,I>::invertSelf() const
+    template <class T, int A>
+    const DiagMatrixView<T,A>& DiagMatrixView<T,A>::invertSelf() const
     {
         T* di = diag().ptr();
         const int dstep = diag().step();
@@ -876,8 +876,8 @@ namespace tmv {
         }
     }
 
-    template <class T, IndexStyle I> 
-    void DiagMatrix<T,I>::read(const TMV_Reader& reader)
+    template <class T, int A>
+    void DiagMatrix<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
         if (!reader.readCode("D",exp,got)) {
@@ -919,8 +919,8 @@ namespace tmv {
         FinishRead(reader,v);
     }
 
-    template <class T, IndexStyle I> 
-    void DiagMatrixView<T,I>::read(const TMV_Reader& reader) const
+    template <class T, int A>
+    void DiagMatrixView<T,A>::read(const TMV_Reader& reader) const
     {
         std::string exp,got;
         if (!reader.readCode("D",exp,got)) {

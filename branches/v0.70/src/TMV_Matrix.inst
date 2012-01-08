@@ -71,18 +71,18 @@ Def1b(T,CT)
 #undef Def1b
 #endif
 
-#define Def2(T,S,I) \
-  template void Matrix<T,S,I>::read(const TMV_Reader& reader); \
+#define Def2(T,A) \
+  template void Matrix<T,A>::read(const TMV_Reader& reader); \
 
-Def2(T,RowMajor,CStyle)
-Def2(T,ColMajor,CStyle)
-Def2(T,RowMajor,FortranStyle)
-Def2(T,ColMajor,FortranStyle)
+Def2(T,RowMajor|CStyle)
+Def2(T,ColMajor|CStyle)
+Def2(T,RowMajor|FortranStyle)
+Def2(T,ColMajor|FortranStyle)
 #ifdef INST_COMPLEX
-Def2(CT,RowMajor,CStyle)
-Def2(CT,ColMajor,CStyle)
-Def2(CT,RowMajor,FortranStyle)
-Def2(CT,ColMajor,FortranStyle)
+Def2(CT,RowMajor|CStyle)
+Def2(CT,ColMajor|CStyle)
+Def2(CT,RowMajor|FortranStyle)
+Def2(CT,ColMajor|FortranStyle)
 #endif
 
 #undef Def2

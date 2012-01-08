@@ -40,16 +40,16 @@ namespace tmv {
     template <class T> 
     class GenSymMatrix;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class ConstSymMatrixView;
 
-    template <class T, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class SymMatrixView;
 
-    template <class T, UpLoType U=Upper, StorageType S=ColMajor, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class SymMatrix;
 
-    template <class T, UpLoType U=Upper, StorageType S=ColMajor, IndexStyle I=CStyle> 
+    template <class T, int A=0>
     class HermMatrix;
 
     template <class T> 
@@ -86,59 +86,38 @@ namespace tmv {
         virtual inline ~AssignableToSymMatrix() {}
     };
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I>
-    inline std::string TMV_Text(const SymMatrix<T,U,S,I>& )
+    template <class T, int A>
+    inline std::string TMV_Text(const SymMatrix<T,A>& )
     {
         return std::string("SymMatrix<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(U) + "," +
-            TMV_Text(S) + "," +
-            TMV_Text(I) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
-    template <class T, UpLoType U, StorageType S, IndexStyle I>
-    inline std::string TMV_Text(const HermMatrix<T,U,S,I>& )
+    template <class T, int A>
+    inline std::string TMV_Text(const HermMatrix<T,A>& )
     {
         return std::string("HermMatrix<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(U) + "," +
-            TMV_Text(S) + "," +
-            TMV_Text(I) + ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
     template <class T> 
     inline std::string TMV_Text(const GenSymMatrix<T>& m)
     {
-        return std::string("GenSymMatrix<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.sym()) + "," +
-            TMV_Text(m.uplo()) + "," +
-            TMV_Text(m.ct()) + "," +
-            TMV_Text(m.stor()) + ">";
+        return std::string("GenSymMatrix<") + TMV_Text(T()) + ">";
     }
 
-    template <class T, IndexStyle I> 
-    inline std::string TMV_Text(const ConstSymMatrixView<T,I>& m)
+    template <class T, int A>
+    inline std::string TMV_Text(const ConstSymMatrixView<T,A>& m)
     {
         return std::string("ConstSymMatrixView<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.sym()) + "," +
-            TMV_Text(m.uplo()) +  "," +
-            TMV_Text(m.stor()) +  "," +
-            TMV_Text(I) + "," +
-            TMV_Text(m.ct()) +  ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
-    template <class T, IndexStyle I> 
-    inline std::string TMV_Text(const SymMatrixView<T,I>& m)
+    template <class T, int A>
+    inline std::string TMV_Text(const SymMatrixView<T,A>& m)
     {
         return std::string("SymMatrixView<") +
-            TMV_Text(T()) + "," +
-            TMV_Text(m.sym()) + "," +
-            TMV_Text(m.uplo()) +  "," +
-            TMV_Text(m.stor()) +  "," +
-            TMV_Text(I) + "," + 
-            TMV_Text(m.ct()) +  ">";
+            TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
 }

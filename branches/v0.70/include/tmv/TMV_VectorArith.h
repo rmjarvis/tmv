@@ -42,24 +42,24 @@
 namespace tmv {
 
     // These are what we want to do no matter what type Tx is:
-    template <class T, IndexStyle I, class Tx> 
-    inline Vector<T>& operator+=(Vector<T,I>& v, const Tx& x)
+    template <class T, int A, class Tx> 
+    inline Vector<T,A>& operator+=(Vector<T,A>& v, const Tx& x)
     { v.view() += x; return v; }
 
-    template <class T, IndexStyle I, class Tx> 
-    inline Vector<T>& operator-=(Vector<T,I>& v, const Tx& x)
+    template <class T, int A, class Tx> 
+    inline Vector<T,A>& operator-=(Vector<T,A>& v, const Tx& x)
     { v.view() -= x; return v; }
 
-    template <class T, IndexStyle I, class Tx> 
-    inline Vector<T>& operator*=(Vector<T,I>& v, const Tx& x)
+    template <class T, int A, class Tx> 
+    inline Vector<T,A>& operator*=(Vector<T,A>& v, const Tx& x)
     { v.view() *= x; return v; }
 
-    template <class T, IndexStyle I, class Tx> 
-    inline Vector<T>& operator/=(Vector<T,I>& v, const Tx& x)
+    template <class T, int A, class Tx> 
+    inline Vector<T,A>& operator/=(Vector<T,A>& v, const Tx& x)
     { v.view() /= x; return v; }
 
-    template <class T, IndexStyle I, class Tx> 
-    inline Vector<T>& operator%=(Vector<T,I>& v, const Tx& x)
+    template <class T, int A, class Tx> 
+    inline Vector<T,A>& operator%=(Vector<T,A>& v, const Tx& x)
     { v.view() %= x; return v; }
 
 
@@ -397,42 +397,38 @@ namespace tmv {
 
     template <class T, class T2, class T3> 
     inline const VectorView<T>& operator+=(
-        const VectorView<T>& m, const ElemProdVV<T,T2,T3>& pmm)
+        const VectorView<T>& v, const ElemProdVV<T,T2,T3>& pvv)
     { 
-        TMVAssert(m.colsize() == pmm.colsize());
-        TMVAssert(m.rowsize() == pmm.rowsize());
-        ElemMultVV<true>(pmm.getX(),pmm.getV1(),pmm.getV2(),m); 
-        return m; 
+        TMVAssert(v.size() == pvv.size());
+        ElemMultVV<true>(pvv.getX(),pvv.getV1(),pvv.getV2(),v); 
+        return v; 
     }
 
     template <class T> 
     inline const VectorView<CT>& operator+=(
-        const VectorView<CT>& m, const ElemProdVV<T,T,T>& pmm)
+        const VectorView<CT>& v, const ElemProdVV<T,T,T>& pvv)
     { 
-        TMVAssert(m.colsize() == pmm.colsize());
-        TMVAssert(m.rowsize() == pmm.rowsize());
-        ElemMultVV<true>(pmm.getX(),pmm.getV1(),pmm.getV2(),m); 
-        return m; 
+        TMVAssert(v.size() == pvv.size());
+        ElemMultVV<true>(pvv.getX(),pvv.getV1(),pvv.getV2(),v); 
+        return v; 
     }
 
     template <class T, class T2, class T3> 
     inline const VectorView<T>& operator-=(
-        const VectorView<T>& m, const ElemProdVV<T,T2,T3>& pmm)
+        const VectorView<T>& v, const ElemProdVV<T,T2,T3>& pvv)
     { 
-        TMVAssert(m.colsize() == pmm.colsize());
-        TMVAssert(m.rowsize() == pmm.rowsize());
-        ElemMultVV<true>(-pmm.getX(),pmm.getV1(),pmm.getV2(),m); 
-        return m; 
+        TMVAssert(v.size() == pvv.size());
+        ElemMultVV<true>(-pvv.getX(),pvv.getV1(),pvv.getV2(),v); 
+        return v; 
     }
 
     template <class T> 
     inline const VectorView<CT>& operator-=(
-        const VectorView<CT>& m, const ElemProdVV<T,T,T>& pmm)
+        const VectorView<CT>& v, const ElemProdVV<T,T,T>& pvv)
     {
-        TMVAssert(m.colsize() == pmm.colsize());
-        TMVAssert(m.rowsize() == pmm.rowsize());
-        ElemMultVV<true>(-pmm.getX(),pmm.getV1(),pmm.getV2(),m); 
-        return m; 
+        TMVAssert(v.size() == pvv.size());
+        ElemMultVV<true>(-pvv.getX(),pvv.getV1(),pvv.getV2(),v); 
+        return v; 
     }
 
 #define PRODMM ElemProdVV

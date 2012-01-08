@@ -75,8 +75,8 @@ namespace tmv {
       (A.isherm() ? A.nonConst().adjoint() : A.nonConst().transpose()) : \
       A.nonConst()) : \
      (A.isherm() ? \
-      HermMatrixViewOf(Aptr,A.size(),Lower,BaseStorOf(A.lowerTri())) : \
-      SymMatrixViewOf(Aptr,A.size(),Lower,BaseStorOf(A.lowerTri()))))
+      HermMatrixViewOf(Aptr,A.size(),Lower,ColMajor) : \
+      SymMatrixViewOf(Aptr,A.size(),Lower,ColMajor)))
 
     template <class T>
     SymLDLDiv<T>::SymLDLDiv_Impl::SymLDLDiv_Impl(

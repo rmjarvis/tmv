@@ -484,10 +484,6 @@ namespace tmv {
     void BlasTriLDivEq(
         const GenUpperTriMatrix<double>& A, const VectorView<double>& b)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(b.ct() == NonConj);
         int n=A.size();
         int lda = A.isrm()?A.stepi():A.stepj();
         int bs = b.step();
@@ -503,10 +499,6 @@ namespace tmv {
     void BlasTriLDivEq(
         const GenLowerTriMatrix<double>& A, const VectorView<double>& b)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(b.ct() == NonConj);
         int n=A.size();
         int lda = A.isrm()?A.stepi():A.stepj();
         int bs = b.step();
@@ -523,10 +515,6 @@ namespace tmv {
         const GenUpperTriMatrix<std::complex<double> >& A,
         const VectorView<std::complex<double> >& b)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
-        TMVAssert(b.ct() == NonConj);
-
         int n=A.size();
         int lda = A.isrm()?A.stepi():A.stepj();
         int bs = b.step();
@@ -534,10 +522,11 @@ namespace tmv {
         if (bs < 0) bp += (n-1)*bs;
         if (A.iscm() && A.isconj()) {
 #ifdef CBLAS
-            BLASNAME(ztrsv) (BLASRM BLASCH_LO,BLASCH_CT,
-                             A.isunit()?BLASCH_U:BLASCH_NU,
-                             BLASV(n),BLASP(A.cptr()),BLASV(lda),BLASP(bp),BLASV(bs)
-                             BLAS1 BLAS1 BLAS1);
+            BLASNAME(ztrsv) (
+                BLASRM BLASCH_LO,BLASCH_CT,
+                A.isunit()?BLASCH_U:BLASCH_NU,
+                BLASV(n),BLASP(A.cptr()),BLASV(lda),BLASP(bp),BLASV(bs)
+                BLAS1 BLAS1 BLAS1);
 #else
             b.conjugateSelf();
             BLASNAME(ztrsv) (
@@ -561,10 +550,6 @@ namespace tmv {
         const GenLowerTriMatrix<std::complex<double> >& A,
         const VectorView<std::complex<double> >& b)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
-        TMVAssert(b.ct() == NonConj);
-
         int n=A.size();
         int lda = A.isrm()?A.stepi():A.stepj();
         int bs = b.step();
@@ -572,10 +557,11 @@ namespace tmv {
         if (bs < 0) bp += (n-1)*bs;
         if (A.iscm() && A.isconj()) {
 #ifdef CBLAS
-            BLASNAME(ztrsv) (BLASRM BLASCH_UP,BLASCH_CT,
-                             A.isunit()?BLASCH_U:BLASCH_NU,
-                             BLASV(n),BLASP(A.cptr()),BLASV(lda),BLASP(bp),BLASV(bs)
-                             BLAS1 BLAS1 BLAS1);
+            BLASNAME(ztrsv) (
+                BLASRM BLASCH_UP,BLASCH_CT,
+                A.isunit()?BLASCH_U:BLASCH_NU,
+                BLASV(n),BLASP(A.cptr()),BLASV(lda),BLASP(bp),BLASV(bs)
+                BLAS1 BLAS1 BLAS1);
 #else
             b.conjugateSelf();
             BLASNAME(ztrsv) (
@@ -599,10 +585,6 @@ namespace tmv {
         const GenUpperTriMatrix<double>& A,
         const VectorView<std::complex<double> >& b)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(b.ct() == NonConj);
         int n=A.size();
         int lda = A.isrm()?A.stepi():A.stepj();
         int bs = 2*b.step();
@@ -624,10 +606,6 @@ namespace tmv {
         const GenLowerTriMatrix<double>& A, 
         const VectorView<std::complex<double> >& b)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(b.ct() == NonConj);
         int n=A.size();
         int lda = A.isrm()?A.stepi():A.stepj();
         int bs = 2*b.step();
@@ -650,10 +628,6 @@ namespace tmv {
     void BlasTriLDivEq(
         const GenUpperTriMatrix<float>& A, const VectorView<float>& b)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(b.ct() == NonConj);
         int n=A.size();
         int lda = A.isrm()?A.stepi():A.stepj();
         int bs = b.step();
@@ -669,10 +643,6 @@ namespace tmv {
     void BlasTriLDivEq(
         const GenLowerTriMatrix<float>& A, const VectorView<float>& b)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(b.ct() == NonConj);
         int n=A.size();
         int lda = A.isrm()?A.stepi():A.stepj();
         int bs = b.step();
@@ -689,10 +659,6 @@ namespace tmv {
         const GenUpperTriMatrix<std::complex<float> >& A,
         const VectorView<std::complex<float> >& b)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
-        TMVAssert(b.ct() == NonConj);
-
         int n=A.size();
         int lda = A.isrm()?A.stepi():A.stepj();
         int bs = b.step();
@@ -700,10 +666,11 @@ namespace tmv {
         if (bs < 0) bp += (n-1)*bs;
         if (A.iscm() && A.isconj()) {
 #ifdef CBLAS
-            BLASNAME(ctrsv) (BLASRM BLASCH_LO,BLASCH_CT,
-                             A.isunit()?BLASCH_U:BLASCH_NU,
-                             BLASV(n),BLASP(A.cptr()),BLASV(lda),BLASP(bp),BLASV(bs)
-                             BLAS1 BLAS1 BLAS1);
+            BLASNAME(ctrsv) (
+                BLASRM BLASCH_LO,BLASCH_CT,
+                A.isunit()?BLASCH_U:BLASCH_NU,
+                BLASV(n),BLASP(A.cptr()),BLASV(lda),BLASP(bp),BLASV(bs)
+                BLAS1 BLAS1 BLAS1);
 #else
             b.conjugateSelf();
             BLASNAME(ctrsv) (
@@ -727,10 +694,6 @@ namespace tmv {
         const GenLowerTriMatrix<std::complex<float> >& A,
         const VectorView<std::complex<float> >& b)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
-        TMVAssert(b.ct() == NonConj);
-
         int n=A.size();
         int lda = A.isrm()?A.stepi():A.stepj();
         int bs = b.step();
@@ -738,10 +701,11 @@ namespace tmv {
         if (bs < 0) bp += (n-1)*bs;
         if (A.iscm() && A.isconj()) {
 #ifdef CBLAS
-            BLASNAME(ctrsv) (BLASRM BLASCH_UP,BLASCH_CT,
-                             A.isunit()?BLASCH_U:BLASCH_NU,
-                             BLASV(n),BLASP(A.cptr()),BLASV(lda),BLASP(bp),BLASV(bs)
-                             BLAS1 BLAS1 BLAS1);
+            BLASNAME(ctrsv) (
+                BLASRM BLASCH_UP,BLASCH_CT,
+                A.isunit()?BLASCH_U:BLASCH_NU,
+                BLASV(n),BLASP(A.cptr()),BLASV(lda),BLASP(bp),BLASV(bs)
+                BLAS1 BLAS1 BLAS1);
 #else
             b.conjugateSelf();
             BLASNAME(ctrsv) (
@@ -765,10 +729,6 @@ namespace tmv {
         const GenUpperTriMatrix<float>& A,
         const VectorView<std::complex<float> >& b)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(b.ct() == NonConj);
         int n=A.size();
         int lda = A.isrm()?A.stepi():A.stepj();
         int bs = 2*b.step();
@@ -790,10 +750,6 @@ namespace tmv {
         const GenLowerTriMatrix<float>& A, 
         const VectorView<std::complex<float> >& b)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
-        TMVAssert(A.ct() == NonConj);
-        TMVAssert(b.ct() == NonConj);
         int n=A.size();
         int lda = A.isrm()?A.stepi():A.stepj();
         int bs = 2*b.step();
@@ -831,10 +787,10 @@ namespace tmv {
                 else if ( !((A.isrm() && A.stepi()>0) || 
                             (A.iscm() && A.stepj()>0)) ) {
                     if (A.isunit()) {
-                        UpperTriMatrix<Ta,UnitDiag,ColMajor> AA = A;
+                        UpperTriMatrix<Ta,UnitDiag|ColMajor> AA = A;
                         BlasTriLDivEq(AA,b);
                     } else {
-                        UpperTriMatrix<Ta,NonUnitDiag,ColMajor> AA = A;
+                        UpperTriMatrix<Ta,NonUnitDiag|ColMajor> AA = A;
                         BlasTriLDivEq(AA,b);
                     }
                 }
@@ -873,10 +829,10 @@ namespace tmv {
                 else if ( !((A.isrm() && A.stepi()>0) ||
                             (A.iscm() && A.stepj()>0)) ) {
                     if (A.isunit()) {
-                        LowerTriMatrix<Ta,UnitDiag,ColMajor> AA = A;
+                        LowerTriMatrix<Ta,UnitDiag|ColMajor> AA = A;
                         BlasTriLDivEq(AA,b);
                     } else {
-                        LowerTriMatrix<Ta,NonUnitDiag,ColMajor> AA = A;
+                        LowerTriMatrix<Ta,NonUnitDiag|ColMajor> AA = A;
                         BlasTriLDivEq(AA,b);
                     }
                 } else {

@@ -35,9 +35,9 @@
   template QuotXsB<T,T > GenSymBandMatrix<T >::QInverse() const; \
   template void GenSymBandMatrix<T >::write(const TMV_Writer& writer) const; \
   template void SymBandMatrixView<T,CStyle>::read(const TMV_Reader& reader) const; \
-  template SymBandMatrix<T,Upper,DiagMajor> SymTriDiagMatrix( \
+  template SymBandMatrix<T,Upper|DiagMajor> SymTriDiagMatrix( \
       const GenVector<T >& v1, const GenVector<T >& v2); \
-  template HermBandMatrix<T,Upper,DiagMajor> HermTriDiagMatrix( \
+  template HermBandMatrix<T,Upper|DiagMajor> HermTriDiagMatrix( \
       const GenVector<T >& v1, const GenVector<T >& v2, UpLoType U); \
 
 Def1(T,T,T&)
@@ -65,7 +65,7 @@ Def1b(T,CT)
 #undef Def1b
 #endif
 
-  template HermBandMatrix<CT,Upper,DiagMajor> HermTriDiagMatrix( 
+  template HermBandMatrix<CT,Upper|DiagMajor> HermTriDiagMatrix( 
       const GenVector<T >& v1, const GenVector<CT >& v2, UpLoType U); 
 
 #define Def2(T1,T2) \
@@ -80,35 +80,35 @@ Def2(CT,CT)
 
 #undef Def2
 
-#define Def3(RT,T,U,S,I) \
-  template void SymBandMatrix<T,U,S,I>::read(const TMV_Reader& reader); \
-  template void HermBandMatrix<T,U,S,I>::read(const TMV_Reader& reader); \
+#define Def3(RT,T,A) \
+  template void SymBandMatrix<T,A>::read(const TMV_Reader& reader); \
+  template void HermBandMatrix<T,A>::read(const TMV_Reader& reader); \
 
-Def3(T,T,Upper,RowMajor,CStyle)
-Def3(T,T,Upper,ColMajor,CStyle)
-Def3(T,T,Upper,DiagMajor,CStyle)
-Def3(T,T,Lower,RowMajor,CStyle)
-Def3(T,T,Lower,ColMajor,CStyle)
-Def3(T,T,Lower,DiagMajor,CStyle)
-Def3(T,T,Upper,RowMajor,FortranStyle)
-Def3(T,T,Upper,ColMajor,FortranStyle)
-Def3(T,T,Upper,DiagMajor,FortranStyle)
-Def3(T,T,Lower,RowMajor,FortranStyle)
-Def3(T,T,Lower,ColMajor,FortranStyle)
-Def3(T,T,Lower,DiagMajor,FortranStyle)
+Def3(T,T,Upper|RowMajor|CStyle)
+Def3(T,T,Upper|ColMajor|CStyle)
+Def3(T,T,Upper|DiagMajor|CStyle)
+Def3(T,T,Lower|RowMajor|CStyle)
+Def3(T,T,Lower|ColMajor|CStyle)
+Def3(T,T,Lower|DiagMajor|CStyle)
+Def3(T,T,Upper|RowMajor|FortranStyle)
+Def3(T,T,Upper|ColMajor|FortranStyle)
+Def3(T,T,Upper|DiagMajor|FortranStyle)
+Def3(T,T,Lower|RowMajor|FortranStyle)
+Def3(T,T,Lower|ColMajor|FortranStyle)
+Def3(T,T,Lower|DiagMajor|FortranStyle)
 #ifdef INST_COMPLEX
-Def3(T,CT,Upper,RowMajor,CStyle)
-Def3(T,CT,Upper,ColMajor,CStyle)
-Def3(T,CT,Upper,DiagMajor,CStyle)
-Def3(T,CT,Lower,RowMajor,CStyle)
-Def3(T,CT,Lower,ColMajor,CStyle)
-Def3(T,CT,Lower,DiagMajor,CStyle)
-Def3(T,CT,Upper,RowMajor,FortranStyle)
-Def3(T,CT,Upper,ColMajor,FortranStyle)
-Def3(T,CT,Upper,DiagMajor,FortranStyle)
-Def3(T,CT,Lower,RowMajor,FortranStyle)
-Def3(T,CT,Lower,ColMajor,FortranStyle)
-Def3(T,CT,Lower,DiagMajor,FortranStyle)
+Def3(T,CT,Upper|RowMajor|CStyle)
+Def3(T,CT,Upper|ColMajor|CStyle)
+Def3(T,CT,Upper|DiagMajor|CStyle)
+Def3(T,CT,Lower|RowMajor|CStyle)
+Def3(T,CT,Lower|ColMajor|CStyle)
+Def3(T,CT,Lower|DiagMajor|CStyle)
+Def3(T,CT,Upper|RowMajor|FortranStyle)
+Def3(T,CT,Upper|ColMajor|FortranStyle)
+Def3(T,CT,Upper|DiagMajor|FortranStyle)
+Def3(T,CT,Lower|RowMajor|FortranStyle)
+Def3(T,CT,Lower|ColMajor|FortranStyle)
+Def3(T,CT,Lower|DiagMajor|FortranStyle)
 #endif
 
 #undef Def3

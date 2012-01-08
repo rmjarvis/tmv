@@ -192,10 +192,10 @@ namespace tmv {
             else {
                 if (SameStorage(A,B)) {
                     if (B.isrm()) {
-                        UpperTriMatrix<Ta,NonUnitDiag,RowMajor> tempA = alpha*A;
+                        UpperTriMatrix<Ta,NonUnitDiag|RowMajor> tempA = alpha*A;
                         DoAddMM(T(1),tempA,B);
                     } else {
-                        UpperTriMatrix<Ta,NonUnitDiag,ColMajor> tempA = alpha*A;
+                        UpperTriMatrix<Ta,NonUnitDiag|ColMajor> tempA = alpha*A;
                         DoAddMM(T(1),tempA,B);
                     }
                 } 
@@ -257,24 +257,24 @@ namespace tmv {
                     if (SameStorage(B,C)) {
                         if (A.isunit()) {
                             if (A.isrm()) {
-                                UpperTriMatrix<Ta,UnitDiag,RowMajor> tempA 
+                                UpperTriMatrix<Ta,UnitDiag|RowMajor> tempA 
                                     = alpha*A;
                                 C = beta*B;
                                 AddMM(T(1),tempA,C);
                             } else {
-                                UpperTriMatrix<Ta,UnitDiag,ColMajor> tempA 
+                                UpperTriMatrix<Ta,UnitDiag|ColMajor> tempA 
                                     = alpha*A;
                                 C = beta*B;
                                 AddMM(T(1),tempA,C);
                             }
                         } else {
                             if (A.isrm()) {
-                                UpperTriMatrix<Ta,NonUnitDiag,RowMajor> tempA 
+                                UpperTriMatrix<Ta,NonUnitDiag|RowMajor> tempA 
                                     = alpha*A;
                                 C = beta*B;
                                 AddMM(T(1),tempA,C);
                             } else {
-                                UpperTriMatrix<Ta,NonUnitDiag,ColMajor> tempA 
+                                UpperTriMatrix<Ta,NonUnitDiag|ColMajor> tempA 
                                     = alpha*A;
                                 C = beta*B;
                                 AddMM(T(1),tempA,C);

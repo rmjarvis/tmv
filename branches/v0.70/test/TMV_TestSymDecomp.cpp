@@ -43,7 +43,7 @@ void TestHermDecomp()
                 ", singular = "<<singular<<std::endl;
         }
 
-        tmv::HermMatrix<T,uplo,stor> m(N);
+        tmv::HermMatrix<T,uplo|stor> m(N);
         for(int i=0;i<N;++i) for(int j=0;j<N;++j) 
             if ((uplo == tmv::Upper && j>=i) || (uplo == tmv::Lower && i>=j)) 
                 m(i,j) = T(2+4*i-5*j);
@@ -70,7 +70,7 @@ void TestHermDecomp()
             m.subSymMatrix(N/2,3*N/4,2) /= T(100);
         }
 
-        tmv::HermMatrix<CT,uplo,stor> c(N);
+        tmv::HermMatrix<CT,uplo|stor> c(N);
         for(int i=0;i<N;++i) for(int j=0;j<N;++j) 
             if ((uplo == tmv::Upper && j>=i) || (uplo == tmv::Lower && i>=j)) 
                 c(i,j) = CT(2+4*i-5*j,3-i);
@@ -176,13 +176,13 @@ void TestHermDecomp()
                 Assert(Norm(c-cLLt) <= ceps*normc,"Herm C CH");
 
 #if (XTEST & 16)
-                tmv::HermMatrix<T,uplo,stor> m2 = m;
+                tmv::HermMatrix<T,uplo|stor> m2 = m;
                 CH_Decompose(m2.view());
                 L = m2.lowerTri();
                 LLt = L*L.adjoint();
                 Assert(Norm(m-LLt) <= eps*normm,"Herm CH2");
 
-                tmv::HermMatrix<CT,uplo,stor> c2 = c;
+                tmv::HermMatrix<CT,uplo|stor> c2 = c;
                 CH_Decompose(c2.view());
                 cL = c2.lowerTri();
                 cLLt = cL*cL.adjoint();
@@ -225,16 +225,16 @@ void TestHermDecomp()
                 Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL");
 
 #if (XTEST & 16)
-                tmv::HermMatrix<T,uplo,stor> m2 = m;
-                tmv::HermBandMatrix<T,uplo,stor> D2(N,1);
+                tmv::HermMatrix<T,uplo|stor> m2 = m;
+                tmv::HermBandMatrix<T,uplo|stor> D2(N,1);
                 tmv::Permutation P2(N);
                 LDL_Decompose(m2.view(),D2.view(),P2);
                 L = m2.lowerTri(tmv::UnitDiag);
                 LDL = P2*L*D2*L.adjoint()*P2.transpose();
                 Assert(Norm(m-LDL) <= eps*normm,"Herm LDL2");
 
-                tmv::HermMatrix<CT,uplo,stor> c2 = c;
-                tmv::HermBandMatrix<CT,uplo,stor> cD2(N,1);
+                tmv::HermMatrix<CT,uplo|stor> c2 = c;
+                tmv::HermBandMatrix<CT,uplo|stor> cD2(N,1);
                 LDL_Decompose(c2.view(),cD2.view(),P2);
                 cL = c2.lowerTri(tmv::UnitDiag);
                 cLDL = P2*cL*cD2*cL.adjoint()*P2.transpose();
@@ -297,7 +297,7 @@ void TestHermDecomp()
             SV_Decompose(m,U2.view(),S2.view(),V2.view());
             Assert(Norm(m-U2*S2*V2) <= eps*normm,"Herm SV2");
 
-            tmv::HermMatrix<T,uplo,stor> m2 = m;
+            tmv::HermMatrix<T,uplo|stor> m2 = m;
             SV_Decompose(m2.view(),S2.view());
             Assert(Norm(S2-S) <= eps*normm,"Herm SV3");
             SV_Decompose(m,U2.view(),S2.view());
@@ -317,7 +317,7 @@ void TestHermDecomp()
             SV_Decompose(c,cU2.view(),cS2.view(),cV2.view());
             Assert(Norm(c-cU2*cS2*cV2) <= ceps*normc,"Herm C SV2");
 
-            tmv::HermMatrix<CT,uplo,stor> c2 = c;
+            tmv::HermMatrix<CT,uplo|stor> c2 = c;
             SV_Decompose(c2.view(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"Herm C SV3");
             SV_Decompose(c,cU2.view(),cS2.view());
@@ -391,11 +391,11 @@ void TestHermDecomp()
             try {
 #endif
                 if (showstartdone) std::cout<<"SquareRoot"<<std::endl;
-                tmv::HermMatrix<T,uplo,stor> S = m;
+                tmv::HermMatrix<T,uplo|stor> S = m;
                 SquareRoot(S.view());
                 Assert(Norm(m-S*S) <= eps*normm,"Herm Square Root");
 
-                tmv::HermMatrix<CT,uplo,stor> cS = c;
+                tmv::HermMatrix<CT,uplo|stor> cS = c;
                 SquareRoot(cS.view());
 
 #if (XTEST & 16)
@@ -451,7 +451,7 @@ void TestSymDecomp()
                 ", singular = "<<singular<<std::endl;
         }
 
-        tmv::SymMatrix<T,uplo,stor> m(N);
+        tmv::SymMatrix<T,uplo|stor> m(N);
         for(int i=0;i<N;++i) for(int j=0;j<N;++j) 
             if ((uplo == tmv::Upper && j>=i) || (uplo == tmv::Lower && i>=j)) 
                 m(i,j) = T(2+4*i-5*j);
@@ -478,7 +478,7 @@ void TestSymDecomp()
             m.subSymMatrix(N/2,3*N/4,2) /= T(100);
         } 
 
-        tmv::SymMatrix<CT,uplo,stor> c(N);
+        tmv::SymMatrix<CT,uplo|stor> c(N);
         for(int i=0;i<N;++i) for(int j=0;j<N;++j) 
             c(i,j) = CT(2+4*i-5*j,3-i);
         if (posdef) {
@@ -593,16 +593,16 @@ void TestSymDecomp()
                 Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL");
 
 #if (XTEST & 16)
-                tmv::SymMatrix<T,uplo,stor> m2 = m;
-                tmv::SymBandMatrix<T,uplo,stor> D2(N,1);
+                tmv::SymMatrix<T,uplo|stor> m2 = m;
+                tmv::SymBandMatrix<T,uplo|stor> D2(N,1);
                 tmv::Permutation P2(N);
                 LDL_Decompose(m2.view(),D2.view(),P2);
                 L = m2.lowerTri(tmv::UnitDiag);
                 LDL = P2*L*D2*L.transpose()*P2.transpose();
                 Assert(Norm(m-LDL) <= eps*normm,"Sym LDL2");
 
-                tmv::SymMatrix<CT,uplo,stor> c2 = c;
-                tmv::SymBandMatrix<CT,uplo,stor> cD2(N,1);
+                tmv::SymMatrix<CT,uplo|stor> c2 = c;
+                tmv::SymBandMatrix<CT,uplo|stor> cD2(N,1);
                 LDL_Decompose(c2.view(),cD2.view(),P2);
                 cL = c2.lowerTri(tmv::UnitDiag);
                 cLDL = P2*cL*cD2*cL.transpose()*P2.transpose();
@@ -669,7 +669,7 @@ void TestSymDecomp()
             SV_Decompose(m,U2.view(),S2.view(),V2.view());
             Assert(Norm(m-U2*S2*V2) <= eps*normm,"Sym SV2");
 
-            tmv::SymMatrix<T,uplo,stor> m2 = m;
+            tmv::SymMatrix<T,uplo|stor> m2 = m;
             SV_Decompose(m2.view(),S2.view());
             Assert(Norm(S2-S) <= eps*normm,"Sym SV3");
             SV_Decompose(m,U2.view(),S2.view());
@@ -689,7 +689,7 @@ void TestSymDecomp()
             SV_Decompose(c,cU2.view(),cS2.view(),cV2.view());
             Assert(Norm(c-cU2*cS2*cV2) <= ceps*normc,"Sym C SV2");
 
-            tmv::SymMatrix<CT,uplo,stor> c2 = c;
+            tmv::SymMatrix<CT,uplo|stor> c2 = c;
             SV_Decompose(c2.view(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"Sym C SV3");
             SV_Decompose(c,cU2.view(),cS2.view());
@@ -832,7 +832,7 @@ void TestPolar()
         // Matrix Polar Decomposition
         do {
             if (showstartdone) std::cout<<"Matrix Polar"<<std::endl;
-            tmv::HermMatrix<T,tmv::Lower,tmv::ColMajor> P(N);
+            tmv::HermMatrix<T,tmv::Lower|tmv::ColMajor> P(N);
             tmv::Matrix<T,stor> U = m;
             PolarDecompose(U.view(),P.view());
             if (showacc) {
@@ -844,7 +844,7 @@ void TestPolar()
             Assert(Norm(m-U*P) <= eps*normm,"Polar");
             Assert(Norm(U.adjoint()*U-T(1)) <= eps,"Polar UtU");
 
-            tmv::HermMatrix<CT,tmv::Lower,tmv::ColMajor> cP(N);
+            tmv::HermMatrix<CT,tmv::Lower|tmv::ColMajor> cP(N);
             tmv::Matrix<CT,stor> cU = c;
             PolarDecompose(cU.view(),cP.view());
             Assert(Norm(c-cU*cP) <= ceps*normc,"C Polar");
@@ -904,7 +904,7 @@ void TestPolar()
             T normb = Norm(b);
             T normcb = Norm(cb);
 
-            tmv::HermMatrix<T,tmv::Lower,tmv::ColMajor> P(N);
+            tmv::HermMatrix<T,tmv::Lower|tmv::ColMajor> P(N);
             tmv::Matrix<T,stor> U(b.colsize(),N);
             PolarDecompose(b,U.view(),P.view());
             if (showacc) {
@@ -914,7 +914,7 @@ void TestPolar()
             Assert(Norm(b-U*P) <= eps*normb,"Band Polar");
             Assert(Norm(U.adjoint()*U-T(1)) <= eps,"Band Polar UtU");
 
-            tmv::HermMatrix<CT,tmv::Lower,tmv::ColMajor> cP(N);
+            tmv::HermMatrix<CT,tmv::Lower|tmv::ColMajor> cP(N);
             tmv::Matrix<CT,stor> cU(cb.colsize(),N);
             PolarDecompose(cb,cU.view(),cP.view());
             if (showacc) {

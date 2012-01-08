@@ -68,7 +68,7 @@ namespace tmv {
 #define TMV_UV_UNROLL 0
 #endif
 
-    // The minimum size to copy a vector if its step == TMV_UNKNOWN.
+    // The minimum size to copy a vector if its step == Unknown.
 #define TMV_UV_COPYSIZE 4
 
     // The crossover memory size to start using prefetch commands.
@@ -117,7 +117,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            int N = (s == TMV_UNKNOWN ? m1.size() : s);
+            int N = (s == Unknown ? m1.size() : s);
             if (N == 0) return;
 #ifdef PRINTALGO_UV
             std::cout<<"UV algo 11: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
@@ -154,7 +154,7 @@ namespace tmv {
                 if (*X != T2(0)) {
                     Xj = ZProd<false,c2>::prod(x , *X++);
                     // y.subVector(0,j) += x(j) * A.col(j,0,j);
-                    MultXV_Helper<-4,TMV_UNKNOWN,true,0,PT2,M1c,V3>::call2(
+                    MultXV_Helper<-4,Unknown,true,0,PT2,M1c,V3>::call2(
                         j,Scaling<0,PT2>(Xj),A0j,Y0);
                     A0j.shiftP(Astepj);
                     if (dopref) Prefetch_Read(A0j.get());
@@ -176,7 +176,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            int N = (s == TMV_UNKNOWN ? m1.size() : s);
+            int N = (s == Unknown ? m1.size() : s);
             if (N == 0) return;
 #ifdef PRINTALGO_UV
             std::cout<<"UV algo 12: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
@@ -215,7 +215,7 @@ namespace tmv {
             int i1=0;
             while (N > 0 && *X == T2(0)) { ++i1; --N; ++X; ++Aii; }
             for(int i=0;i<i1;++i) {
-                Yi = MultVV_Helper<-4,TMV_UNKNOWN,M1r,V2>::call2(N,Aii-1,X);
+                Yi = MultVV_Helper<-4,Unknown,M1r,V2>::call2(N,Aii-1,X);
                 Aii.shiftP(Astepi);
                 if (dopref) Prefetch_Read(Aii.get()-1);
                 Maybe<add>::add(*Y++, x * Yi);
@@ -227,7 +227,7 @@ namespace tmv {
                 //    = A(i,i) * x(i)
                 //      + A.row(i,i+1,N) * x.subVector(i+1,N)
                 Yi = Maybe<!unit>::template zprod<false,c2>(m1.cref(i,i),*X++);
-                Yi += MultVV_Helper<-4,TMV_UNKNOWN,M1r,V2>::call2(N,Aii,X);
+                Yi += MultVV_Helper<-4,Unknown,M1r,V2>::call2(N,Aii,X);
                 Aii.shiftP(Adiagstep);
                 if (dopref) Prefetch_Read(Aii.get()-1);
                 Maybe<add>::add(*Y++, x * Yi);
@@ -290,7 +290,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = (s == TMV_UNKNOWN ? m1.size() : s);
+            const int N = (s == Unknown ? m1.size() : s);
             if (N == 0) return;
 #ifdef PRINTALGO_UV
             std::cout<<"UV algo 21: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
@@ -329,7 +329,7 @@ namespace tmv {
                 if (*X != T2(0)) {
                     Xj = ZProd<false,c2>::prod(x , *X--);
                     // y.subVector(j+1,N) += x(j) * A.col(j,j+1,N);
-                    MultXV_Helper<-4,TMV_UNKNOWN,true,0,PT2,M1c,V3>::call2(
+                    MultXV_Helper<-4,Unknown,true,0,PT2,M1c,V3>::call2(
                         len,Scaling<0,PT2>(Xj),Ajj,Y--);
                     Ajj.shiftP(-Adiagstep);
                     if (dopref) Prefetch_Read(Ajj.get()-1);
@@ -352,7 +352,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            int N = (s == TMV_UNKNOWN ? m1.size() : s);
+            int N = (s == Unknown ? m1.size() : s);
             if (N == 0) return;
 #ifdef PRINTALGO_UV
             std::cout<<"UV algo 22: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
@@ -397,7 +397,7 @@ namespace tmv {
             int i2=i;
             while (N > 0 && *X == T2(0)) { --i2; --N; --X; }
             for(;i>i2;--i) {
-                Yi = MultVV_Helper<-4,TMV_UNKNOWN,M1r,V2>::call2(N,Ai0,X0);
+                Yi = MultVV_Helper<-4,Unknown,M1r,V2>::call2(N,Ai0,X0);
                 Ai0.shiftP(-Astepi);
                 if (dopref) Prefetch_Read(Ai0.get());
                 Maybe<add>::add(*Y--, x * Yi);
@@ -408,7 +408,7 @@ namespace tmv {
                 // Yi = A.row(i,0,i+1) * x.subVector(0,i+1)
                 //    = A(i,i) * x(i)
                 //      + A.row(i,0,i) * x.subVector(0,i)
-                Yi = MultVV_Helper<-4,TMV_UNKNOWN,M1r,V2>::call2(N,Ai0,X0);
+                Yi = MultVV_Helper<-4,Unknown,M1r,V2>::call2(N,Ai0,X0);
                 Ai0.shiftP(-Astepi);
                 if (dopref) Prefetch_Read(Ai0.get());
                 Yi += Maybe<!unit>::template zprod<false,c2>(m1.cref(i,i),*X--);
@@ -465,14 +465,14 @@ namespace tmv {
         }
     };
 
-    // algo 43: colmajor, v3.step == TMV_UNKNOWN, so maybe copy v3
+    // algo 43: colmajor, v3.step == Unknown, so maybe copy v3
     template <int s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<43,s,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = s == TMV_UNKNOWN ? m1.size() : s;
+            const int N = s == Unknown ? m1.size() : s;
 #ifdef PRINTALGO_UV
             std::cout<<"UV algo 43: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -483,14 +483,14 @@ namespace tmv {
         }
     };
 
-    // algo 53: rowmajor, v2.step == TMV_UNKNOWN, so maybe copy v2
+    // algo 53: rowmajor, v2.step == Unknown, so maybe copy v2
     template <int s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<53,s,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = s == TMV_UNKNOWN ? m1.size() : s;
+            const int N = s == Unknown ? m1.size() : s;
 #ifdef PRINTALGO_UV
             std::cout<<"UV algo 53: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -509,7 +509,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
-            const int N = s == TMV_UNKNOWN ? m1.size() : s;
+            const int N = s == Unknown ? m1.size() : s;
             std::cout<<"UV algo 81: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             typename V3::noalias_type v3na = v3.noAlias();
@@ -527,7 +527,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
-            const int N = s == TMV_UNKNOWN ? m1.size() : s;
+            const int N = s == Unknown ? m1.size() : s;
             std::cout<<"UV algo 85: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             typedef typename Traits<T>::real_type RT;
@@ -679,7 +679,7 @@ namespace tmv {
             typedef typename V2::value_type T2;
             typedef typename V3::value_type T3;
             const bool inst = 
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -706,13 +706,13 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             TMVStaticAssert(!V3::_conj);
-            const int s2 = s > 20 ? TMV_UNKNOWN : s;
+            const int s2 = s > 20 ? Unknown : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
             const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s > 10 ? false :
-                s == TMV_UNKNOWN ? false :
+                s == Unknown ? false :
                 nops <= TMV_UV_UNROLL;
             const int algo = 
                 ( s == 0 ) ? 0 : 
@@ -759,13 +759,13 @@ namespace tmv {
             // 81 = copy v2
             // 85 = temp v3 = x*m1*v2
 
-            const int s2 = s > 20 ? TMV_UNKNOWN : s;
+            const int s2 = s > 20 ? Unknown : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
             const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s > 10 ? false :
-                s == TMV_UNKNOWN ? false :
+                s == Unknown ? false :
                 nops <= TMV_UV_UNROLL;
             const int algo = 
                 ( s == 0 ) ? 0 : // trivial - nothing to do
@@ -775,19 +775,19 @@ namespace tmv {
                 TMV_OPT == 0 ? ( M1::_colmajor ? 11 : 12 ) :
                 unroll ? 15 :
                 M1::_colmajor ? (
-                    V3::_step == TMV_UNKNOWN ? (
+                    V3::_step == Unknown ? (
 #ifdef TMV_OPT_SCALE
-                        s == TMV_UNKNOWN ? 43 :
+                        s == Unknown ? 43 :
 #endif
-                        s == TMV_UNKNOWN ? 85 :
+                        s == Unknown ? 85 :
                         s > TMV_UV_COPYSIZE ? 85 : 11 ) :
                     11 ) :
                 M1::_rowmajor ? (
-                    V2::_step == TMV_UNKNOWN ? (
+                    V2::_step == Unknown ? (
 #ifdef TMV_OPT_SCALE
-                        s == TMV_UNKNOWN ? 53 :
+                        s == Unknown ? 53 :
 #endif
-                        s == TMV_UNKNOWN ? 81 :
+                        s == Unknown ? 81 :
                         s > TMV_UV_COPYSIZE ? 81 : 12 ) :
                     12 ) :
                 V2::_step == 1 ? 12 : V3::_step == 1 ? 11 : 12 :
@@ -796,19 +796,19 @@ namespace tmv {
                 TMV_OPT == 0 ? ( M1::_colmajor ? 21 : 22 ) :
                 unroll ? 25 :
                 M1::_colmajor ? (
-                    V3::_step == TMV_UNKNOWN ? (
+                    V3::_step == Unknown ? (
 #ifdef TMV_OPT_SCALE
-                        s == TMV_UNKNOWN ? 43 :
+                        s == Unknown ? 43 :
 #endif
-                        s == TMV_UNKNOWN ? 85 :
+                        s == Unknown ? 85 :
                         s > TMV_UV_COPYSIZE ? 85 : 21 ) :
                     21 ) :
                 M1::_rowmajor ? (
-                    V2::_step == TMV_UNKNOWN ? (
+                    V2::_step == Unknown ? (
 #ifdef TMV_OPT_SCALE
-                        s == TMV_UNKNOWN ? 53 :
+                        s == Unknown ? 53 :
 #endif
-                        s == TMV_UNKNOWN ? 81 :
+                        s == Unknown ? 81 :
                         s > TMV_UV_COPYSIZE ? 81 : 22 ) :
                     22 ) :
                 V2::_step == 1 ? 22 : V3::_step == 1 ? 21 : 22;
@@ -854,7 +854,7 @@ namespace tmv {
             typedef typename V2::value_type T2;
             typedef typename V3::value_type T3;
             const bool inst = 
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&

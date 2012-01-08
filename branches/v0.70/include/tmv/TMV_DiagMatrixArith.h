@@ -50,24 +50,24 @@ namespace tmv {
     template <class T, class Tv> 
     class ProdXM;
 
-    template <class T, IndexStyle I, class Tx> 
-    inline DiagMatrix<T,I>& operator+=(DiagMatrix<T,I>& m, const Tx& x)
+    template <class T, int A, class Tx> 
+    inline DiagMatrix<T,A>& operator+=(DiagMatrix<T,A>& m, const Tx& x)
     { m.view() += x; return m; }
 
-    template <class T, IndexStyle I, class Tx> 
-    inline DiagMatrix<T,I>& operator-=(DiagMatrix<T,I>& m, const Tx& x)
+    template <class T, int A, class Tx> 
+    inline DiagMatrix<T,A>& operator-=(DiagMatrix<T,A>& m, const Tx& x)
     { m.view() -= x; return m; }
 
-    template <class T, IndexStyle I, class Tx> 
-    inline DiagMatrix<T,I>& operator*=(DiagMatrix<T,I>& m, const Tx& x)
+    template <class T, int A, class Tx> 
+    inline DiagMatrix<T,A>& operator*=(DiagMatrix<T,A>& m, const Tx& x)
     { m.view() *= x; return m; }
 
-    template <class T, IndexStyle I, class Tx> 
-    inline DiagMatrix<T,I>& operator/=(DiagMatrix<T,I>& m, const Tx& x)
+    template <class T, int A, class Tx> 
+    inline DiagMatrix<T,A>& operator/=(DiagMatrix<T,A>& m, const Tx& x)
     { m.view() /= x; return m; }
 
-    template <class T, IndexStyle I, class Tx> 
-    inline DiagMatrix<T,I>& operator%=(DiagMatrix<T,I>& m, const Tx& x)
+    template <class T, int A, class Tx> 
+    inline DiagMatrix<T,A>& operator%=(DiagMatrix<T,A>& m, const Tx& x)
     { m.view() %= x; return m; }
 
 

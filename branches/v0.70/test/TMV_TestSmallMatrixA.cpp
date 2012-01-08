@@ -12,6 +12,8 @@ void TestAllSmallMatrixA()
     TestSmallMatrixArith_A2b<T>();
     TestSmallMatrixArith_A3a<T>();
     TestSmallMatrixArith_A3b<T>();
+    TestSmallMatrixArith_A3c<T>();
+    TestSmallMatrixArith_A3d<T>();
     TestSmallMatrixArith_A4a<T>();
     TestSmallMatrixArith_A4b<T>();
     TestSmallMatrixArith_A5a<T>();

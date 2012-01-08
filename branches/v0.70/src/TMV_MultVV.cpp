@@ -138,8 +138,6 @@ namespace tmv {
     template <> 
     double DoMultVV(const GenVector<double>& v1, const GenVector<double>& v2) 
     { 
-        TMVAssert(v1.size()==v2.size());
-        TMVAssert(v1.size()>0);
         int n=v2.size();
         int s1=v1.step();
         int s2=v2.step();
@@ -154,10 +152,7 @@ namespace tmv {
     std::complex<double> DoMultVV(
         const GenVector<std::complex<double> >& v1, 
         const GenVector<std::complex<double> >& v2) 
-    { 
-        TMVAssert(v1.size()==v2.size());
-        TMVAssert(v1.size()>0);
-        TMVAssert(v1.ct() == NonConj);
+    {
         int n=v2.size();
         int s1=v1.step();
         int s2=v2.step();
@@ -184,10 +179,7 @@ namespace tmv {
     std::complex<double> DoMultVV(
         const GenVector<std::complex<double> >& v1, 
         const GenVector<double>& v2) 
-    { 
-        TMVAssert(v1.size()==v2.size());
-        TMVAssert(v1.size()>0);
-        TMVAssert(v1.ct() == NonConj);
+    {
         int n=v2.size();
         int s1=2*v1.step();
         int s2=v2.step();
@@ -205,9 +197,7 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     float DoMultVV(const GenVector<float>& v1, const GenVector<float>& v2) 
-    { 
-        TMVAssert(v1.size()==v2.size());
-        TMVAssert(v1.size()>0);
+    {
         int n=v2.size();
         int s1=v1.step();
         int s2=v2.step();
@@ -222,10 +212,7 @@ namespace tmv {
     std::complex<float> DoMultVV(
         const GenVector<std::complex<float> >& v1, 
         const GenVector<std::complex<float> >& v2) 
-    { 
-        TMVAssert(v1.size()==v2.size());
-        TMVAssert(v1.size()>0);
-        TMVAssert(v1.ct() == NonConj);
+    {
         int n=v2.size();
         int s1=v1.step();
         int s2=v2.step();
@@ -252,10 +239,7 @@ namespace tmv {
     std::complex<float> DoMultVV(
         const GenVector<std::complex<float> >& v1, 
         const GenVector<float>& v2) 
-    { 
-        TMVAssert(v1.size()==v2.size());
-        TMVAssert(v1.size()>0);
-        TMVAssert(v1.ct() == NonConj);
+    {
         int n=v2.size();
         int s1=2*v1.step();
         int s2=v2.step();
