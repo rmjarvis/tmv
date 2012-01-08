@@ -41,8 +41,8 @@ namespace tmv {
     {
         static void call(M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
-            int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
+            const int M = cs == Unknown ? m2.colsize() : cs;
+            int N = rs == Unknown ? m2.rowsize() : rs;
             typedef typename M1::col_type M1c;
             typedef typename M2::col_type M2c;
             typedef typename M1c::iterator IT1;
@@ -65,8 +65,8 @@ namespace tmv {
     {
         static void call(M1& m1, M2& m2)
         {
-            int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
+            int M = cs == Unknown ? m2.colsize() : cs;
+            const int N = rs == Unknown ? m2.rowsize() : rs;
             typedef typename M1::row_type M1r;
             typedef typename M2::row_type M2r;
             typedef typename M1r::iterator IT1;
@@ -259,8 +259,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits2<T1,T2>::sametype &&
                 Traits<T1>::isinst;
             const int algo =
@@ -285,7 +285,7 @@ namespace tmv {
             const int algo = 
                 canlin ? 1 :
                 TMV_OPT == 0 ? (( M1::_rowmajor && M2::_rowmajor ) ? 2 : 11 ) :
-                ( cs != TMV_UNKNOWN && rs != TMV_UNKNOWN ) ? (
+                ( cs != Unknown && rs != Unknown ) ? (
                     ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T2)) ) ? (
                         ( M1::_rowmajor && M2::_rowmajor ) ? 16 : 15 ) :
                     ( M1::_rowmajor && M2::_rowmajor ) ? 12 :
@@ -294,7 +294,7 @@ namespace tmv {
                 TMV_OPT >= 2 ? 30 :
                 ( M1::_rowmajor && M2::_rowmajor ) ? 12 :
                 ( M1::_colmajor && M2::_colmajor ) ? 11 :
-                ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? 11 :
+                ( cs == Unknown || rs == Unknown ) ? 11 :
                 ( cs > rs ) ? 12 : 
                 11;
             SwapM_Helper<algo,cs,rs,M1,M2>::call(m1,m2);
@@ -310,8 +310,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits2<T1,T2>::sametype &&
                 Traits<T1>::isinst;
             const int algo =

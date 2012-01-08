@@ -448,6 +448,10 @@ static void DoTestMa_Full(const MM& a, std::string label)
     DoTestMa_Basic(a,label);
 
 #if (XTEST & 16)
+    if (showstartdone) {
+        std::cout<<"Continuing on to Ma Full"<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+    }
 
     tmv::Matrix<T> m = a;
     FT eps = EPS * (a.colsize() + a.rowsize());
@@ -575,6 +579,11 @@ static void DoTestMX1a_Full(const MM& a, T2 x, std::string label)
     DoTestMX1a_Basic(a,x,label);
 
 #if (XTEST & 16)
+    if (showstartdone) {
+        std::cout<<"Continuing on to MX1a Full"<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"x = "<<tmv::TMV_Text(x)<<" "<<x<<std::endl;
+    }
     tmv::Matrix<T> m = a;
 
     FT eps = EPS * (a.colsize() + a.rowsize());
@@ -697,6 +706,11 @@ static void DoTestMX2a_Full(MM& a, T2 x, std::string label)
     DoTestMX2a_Basic(a,x,label);
 
 #if (XTEST & 16)
+    if (showstartdone) {
+        std::cout<<"Continuing on to MX2a Full"<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"x = "<<tmv::TMV_Text(x)<<" "<<x<<std::endl;
+    }
     tmv::Matrix<T> m1 = a;
     tmv::Matrix<T> temp = a;
 
@@ -869,6 +883,11 @@ static void DoTestMV1a_Full(const MM& a, const V& b, std::string label)
     DoTestMV1a_Basic(a,b,label);
 
 #if (XTEST & 16)
+    if (showstartdone) {
+        std::cout<<"Continuing on to MV1a Full"<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+    }
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
 
@@ -954,6 +973,11 @@ static void DoTestVM1a_Full(const MM& a, const V& b, std::string label)
     DoTestVM1a_Basic(a,b,label);
 
 #if (XTEST & 16)
+    if (showstartdone) {
+        std::cout<<"Continuing on to VM1a Full"<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+    }
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
 
@@ -1307,6 +1331,11 @@ static void DoTestMV2a_Full(const MM& a, V& b, std::string label)
     DoTestMV2a_Basic(a,b,label);
 
 #if (XTEST & 16)
+    if (showstartdone) {
+        std::cout<<"Continuing on to MV2a Full"<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+    }
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
 
@@ -1523,6 +1552,11 @@ static void DoTestVM2a_Full(const MM& a, V& b, std::string label)
     DoTestVM2a_Basic(a,b,label);
 
 #if (XTEST & 16)
+    if (showstartdone) {
+        std::cout<<"Continuing on to VM2a Full"<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+    }
     tmv::Matrix<Ta> m = a;
     tmv::Vector<T> v = b;
 
@@ -1870,6 +1904,12 @@ static void DoTestMV3a_Full(const MM& a, const V1& b, V2& c, std::string label)
     DoTestMV3a_Basic(a,b,c,label);
 
 #if (XTEST & 16)
+    if (showstartdone) {
+        std::cout<<"Continuing on to MV3a Full"<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
+    }
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Ta> mt = Transpose(a);
     tmv::Vector<Tb> v1 = b;
@@ -2081,6 +2121,12 @@ static void DoTestVM3a_Full(const MM& a, const V1& b, V2& c, std::string label)
     DoTestVM3a_Basic(a,b,c,label);
 
 #if (XTEST & 16)
+    if (showstartdone) {
+        std::cout<<"Continuing on to VM3a Full"<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
+    }
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Ta> mt = Transpose(a);
     tmv::Vector<Tb> v1 = b;
@@ -2358,6 +2404,11 @@ static void DoTestMM1a_Full(const M1& a, const M2& b, std::string label)
     DoTestMM1a_Basic(a,b,label);
 
 #if (XTEST & 16)
+    if (showstartdone) {
+        std::cout<<"Continuing on to MM1a Full"<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+    }
     if (CanAdd(a,b)) {
         tmv::Matrix<T> m1 = a;
         tmv::Matrix<Tb> m2 = b;
@@ -2685,6 +2736,11 @@ static void DoTestMM2a_Full(M1& a, const M2& b, std::string label)
     DoTestMM2a_Basic(a,b,label);
 
 #if (XTEST & 16)
+    if (showstartdone) {
+        std::cout<<"Continuing on to MM2a Full"<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+    }
 #ifndef NOADDEQ
     const tmv::Matrix<T> m1 = a;
     const tmv::Matrix<Tb> m2 = b;
@@ -2830,7 +2886,7 @@ static void DoTestMM3a_Full(const M1& a, const M2& b, std::string label)
 
 #if (XTEST & 16)
     if (showstartdone) {
-        std::cout<<"Start MM3a Full"<<label<<std::endl;
+        std::cout<<"Continuing on to MM3a Full"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
     }
@@ -3028,6 +3084,11 @@ static void DoTestMM4a_Full(M1& a, const M2& b, std::string label)
     DoTestMM4a_Basic(a,b,label);
 
 #if (XTEST & 16)
+    if (showstartdone) {
+        std::cout<<"Continuing on to MM4a Full"<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+    }
     if (CanMult(a,b)) {
         const tmv::Matrix<T> m1 = a;
         const tmv::Matrix<Tb> m2 = b;
@@ -3433,6 +3494,12 @@ static void DoTestMM5a_Full(const M1& a, const M2& b, M3& c, std::string label)
 
 #ifndef BASIC_MULTMM_ONLY
 #if (XTEST & 16)
+    if (showstartdone) {
+        std::cout<<"Continuing on to MM5a Full"<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
+    }
     tmv::Matrix<Ta> m = a;
     tmv::Matrix<Tb> m2 = b;
     tmv::Matrix<T> m3 = c;
@@ -3608,6 +3675,12 @@ static void DoTestOProda_Full(
     DoTestOProda_Basic(a,v1,v2,label);
 
 #if (XTEST & 16)
+    if (showstartdone) {
+        std::cout<<"Continuing on to OProda Full"<<label<<std::endl;
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"v1 = "<<tmv::TMV_Text(v1)<<std::endl;
+        std::cout<<"v2 = "<<tmv::TMV_Text(v2)<<std::endl;
+    }
     tmv::Matrix<T> vv = tmv::Vector<T>(v1)^tmv::Vector<T>(v2);
     typename M::copy_type a0 = vv;
 

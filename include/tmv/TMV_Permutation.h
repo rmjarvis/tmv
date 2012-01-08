@@ -164,10 +164,10 @@ namespace tmv {
         typedef copy_type eval_type;
         typedef Permutation inverse_type;
 
-        enum { _colsize = TMV_UNKNOWN };
-        enum { _rowsize = TMV_UNKNOWN };
-        enum { _nlo = TMV_UNKNOWN };
-        enum { _nhi = TMV_UNKNOWN };
+        enum { _colsize = Unknown };
+        enum { _rowsize = Unknown };
+        enum { _nlo = Unknown };
+        enum { _nhi = Unknown };
         enum { _shape = Rec };
         enum { _fort = false };
         enum { _calc = false };
@@ -911,10 +911,8 @@ namespace tmv {
     // TMV_Text
     //
     
-#ifdef TMV_TEXT
     inline std::string TMV_Text(const Permutation& )
     { return "Permutation"; }
-#endif
 
  
 } // namespace tmv

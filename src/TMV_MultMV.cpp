@@ -157,13 +157,6 @@ namespace tmv {
         VectorView<double> y)
     {
         //std::cout<<"dddd\n";
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-        TMVAssert(!SameStorage(A,y));
-
         int m = A.iscm() ? A.colsize() : A.rowsize();
         int n = A.iscm() ? A.rowsize() : A.colsize();
         int lda = A.iscm() ? A.stepj() : A.stepi();
@@ -195,13 +188,6 @@ namespace tmv {
         VectorView<std::complex<double> > y)
     {
         //std::cout<<"zzzz\n";
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-        TMVAssert(!SameStorage(A,y));
-
         if (x.isconj()
 #ifndef CBLAS
             && !(A.isconj() && A.iscm()) 
@@ -273,12 +259,6 @@ namespace tmv {
         VectorView<std::complex<double> > y)
     {
         //std::cout<<"zzdz\n";
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-
         double beta = 1.;
         if (A.iscm()) {
             if (y.step() != 1) {
@@ -327,12 +307,6 @@ namespace tmv {
         VectorView<std::complex<double> > y)
     {
         //std::cout<<"zdzz\n";
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-
         double beta = 1.;
         if (TMV_IMAG(alpha) == 0. && !x.isconj()) {
             int m = A.iscm() ? A.colsize() : A.rowsize();
@@ -370,12 +344,6 @@ namespace tmv {
         VectorView<std::complex<double> > y)
     {
         //std::cout<<"zddz\n";
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-
         int m = A.iscm() ? A.colsize() : A.rowsize();
         int n = A.iscm() ? A.rowsize() : A.colsize();
         int lda = A.iscm() ? A.stepj() : A.stepi();
@@ -415,13 +383,6 @@ namespace tmv {
         const ConstVectorView<float>& x,
         VectorView<float> y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-        TMVAssert(!SameStorage(A,y));
-
         int m = A.iscm() ? A.colsize() : A.rowsize();
         int n = A.iscm() ? A.rowsize() : A.colsize();
         int lda = A.iscm() ? A.stepj() : A.stepi();
@@ -448,13 +409,6 @@ namespace tmv {
         const ConstVectorView<std::complex<float>,C2>& x,
         VectorView<std::complex<float> > y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-        TMVAssert(!SameStorage(A,y));
-
         if (x.isconj()
 #ifndef CBLAS
             && !(A.isconj() && A.iscm()) 
@@ -525,12 +479,6 @@ namespace tmv {
         const ConstVectorView<float>& x,
         VectorView<std::complex<float> > y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-
         if (A.iscm()) {
             if (y.step() != 1) {
                 Vector<std::complex<float> > yy(y.size(),0.F);
@@ -578,12 +526,6 @@ namespace tmv {
         const ConstVectorView<std::complex<float>,C2>& x,
         VectorView<std::complex<float> > y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-
         if (TMV_IMAG(alpha) == 0.F && !x.isconj()) {
             int m = A.iscm() ? A.colsize() : A.rowsize();
             int n = A.iscm() ? A.rowsize() : A.colsize();
@@ -620,12 +562,6 @@ namespace tmv {
         const ConstVectorView<float>& x,
         VectorView<std::complex<float> > y)
     {
-        TMVAssert(A.rowsize() == x.size());
-        TMVAssert(A.colsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-        TMVAssert(!SameStorage(x,y));
-
         int m = A.iscm() ? A.colsize() : A.rowsize();
         int n = A.iscm() ? A.rowsize() : A.colsize();
         int lda = A.iscm() ? A.stepj() : A.stepi();

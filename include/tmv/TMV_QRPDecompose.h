@@ -59,8 +59,8 @@ namespace tmv {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRPDecompose algo 11: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -232,8 +232,8 @@ namespace tmv {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRPDecompose algo 21: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -524,8 +524,8 @@ namespace tmv {
 
         static void call(M1& A, V& beta, int* P, bool)
         {
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRPDecompose algo 22: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -825,8 +825,8 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
 
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRPDecompose algo 31: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -856,8 +856,8 @@ namespace tmv {
         static void call(M1& A, V& beta, int* P, bool strict)
         {
 #ifdef PRINTALGO_QR
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
             std::cout<<"QRPDecompose algo 32: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -918,8 +918,8 @@ namespace tmv {
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                rs == TMV_UNKNOWN ? 31 :
-                cs == TMV_UNKNOWN ? 31 : 
+                rs == Unknown ? 31 :
+                cs == Unknown ? 31 : 
                 csrs <= l2cache ? 11 : 32;
 #ifdef PRINTALGO_QR
             std::cout<<"Inline QRPDecompose: \n";
@@ -946,13 +946,13 @@ namespace tmv {
         static TMV_INLINE void call(M1& m, V& beta, int* P, bool strict)
         {
             const int algo = (
-                ( cs != TMV_UNKNOWN && rs != TMV_UNKNOWN &&
+                ( cs != Unknown && rs != Unknown &&
                   cs <= 16 && rs <= 16 ) ? -4 :
                 ( TMV_OPT >= 2 && !M1::_colmajor ) ? 81 :
                 -4 );
 #ifdef PRINTALGO_QR
-            const int M = cs==TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs==Unknown ? m.colsize() : cs;
+            const int N = rs==Unknown ? m.rowsize() : rs;
             std::cout<<"QRPDecompose algo -3: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
@@ -971,8 +971,8 @@ namespace tmv {
         {
             typedef typename M::value_type T;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :

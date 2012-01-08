@@ -499,7 +499,7 @@ namespace tmv {
                 Traits<MRT>::isinteger ? 1 :
                 !up && !lo ? 11 :
                 !up || !lo ? 21 :
-                s != TMV_UNKNOWN && s <= 3 ? 1 :
+                s != Unknown && s <= 3 ? 1 :
                 M::_hasdivider ? 12 :
                 13;
 #ifdef PRINTALGO_DET
@@ -661,7 +661,7 @@ namespace tmv {
                 Traits<T>::isinteger ? 1 :
                 !up && !lo ? 11 :
                 !up || !lo ? 21 :
-                s != TMV_UNKNOWN && s <= 3 ? 1 :
+                s != Unknown && s <= 3 ? 1 :
                 M::_hasdivider ? 12 :
                 13;
 #ifdef PRINTALGO_DET
@@ -708,7 +708,7 @@ namespace tmv {
         static TMV_INLINE T call(const V& v)
         {
 #ifdef PRINTALGO_DET
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
             std::cout<<"Prod Elements algo 0: n,s = "<<n<<','<<s<<std::endl;
 #endif
             return T(1);
@@ -722,7 +722,7 @@ namespace tmv {
         static TMV_INLINE T call(const V& v)
         {
 #ifdef PRINTALGO_DET
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
             std::cout<<"Prod Elements algo 1: n,s = "<<n<<','<<s<<std::endl;
 #endif
             return v.cref(0);
@@ -736,7 +736,7 @@ namespace tmv {
         typedef typename V::value_type T;
         static T call(const V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 11: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -756,7 +756,7 @@ namespace tmv {
         typedef typename V::value_type T;
         static T call(const V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 12: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -787,7 +787,7 @@ namespace tmv {
         typedef typename V::value_type T;
         static T call(const V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 13: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -818,7 +818,7 @@ namespace tmv {
         typedef typename V::value_type T;
         static T call(const V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 14: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -889,7 +889,7 @@ namespace tmv {
         typedef typename V::const_iterator IT;
         static double call(const V& v)
         {
-            int n = s == TMV_UNKNOWN ? v.size() : s;
+            int n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 31: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -938,7 +938,7 @@ namespace tmv {
         typedef typename V::const_iterator IT;
         static std::complex<double> call(const V& v)
         {
-            int n = s == TMV_UNKNOWN ? v.size() : s;
+            int n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 32: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -997,7 +997,7 @@ namespace tmv {
             if (max > RT(1) && min < RT(1)) {
                 // Then it's possible for a direct product to overflow,
                 // but the actual product to be calculable.
-                const int n = s == TMV_UNKNOWN ? v.size() : s;
+                const int n = s == Unknown ? v.size() : s;
                 // There is probably a more efficient way to do this.
                 // This requires 2*log(n) multiplies, which isn't
                 // large compared to what will actually be done in the 
@@ -1116,7 +1116,7 @@ namespace tmv {
                 s == 0 ? 0 :
                 s == 1 ? 1 :
                 TMV_OPT == 0 ? 11 :
-                (s != TMV_UNKNOWN && s <= int(128/sizeof(T))) ? 15 :
+                (s != Unknown && s <= int(128/sizeof(T))) ? 15 :
 #ifdef __SSE2__
                 (vdouble && vreal) ? 31 :
                 (vdouble && vcomplex) ? 32 :
@@ -1145,7 +1145,7 @@ namespace tmv {
                 TMV_OPT <= 1 ? -4 :
                 // 20 here is just arbitrary.  
                 // For N <= 20, the product is not very likely to overflow.
-                (!Traits<T>::isinteger && (s == TMV_UNKNOWN || s > 20)) ? 72 :
+                (!Traits<T>::isinteger && (s == Unknown || s > 20)) ? 72 :
                 -4;
 #ifdef PRINTALGO_DET
             std::cout<<"Inline ProdElements\n";
@@ -1166,7 +1166,7 @@ namespace tmv {
         static TMV_INLINE T call(const V& v)
         {
             const bool inst =
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
                 Traits<T>::isinst;
             const int algo =
                 V::_conj ? 97 : 
@@ -1236,7 +1236,7 @@ namespace tmv {
         static RT call(const V& v, T* sign)
         {
             TMVStaticAssert(Traits<T>::isreal);
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 11: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -1257,7 +1257,7 @@ namespace tmv {
         static RT call(const V& v)
         {
             TMVStaticAssert(Traits<T>::isreal);
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 11: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -1280,7 +1280,7 @@ namespace tmv {
         typedef typename V::zfloat_type T;
         static RT call(const V& v, T* sign)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 12: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -1314,7 +1314,7 @@ namespace tmv {
         }
         static RT call(const V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 12: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -1349,7 +1349,7 @@ namespace tmv {
         static RT call(const V& v, T* sign)
         {
             TMVStaticAssert(Traits<T>::iscomplex);
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 16: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -1371,7 +1371,7 @@ namespace tmv {
         static RT call(const V& v)
         {
             TMVStaticAssert(Traits<T>::iscomplex);
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 16: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -1465,7 +1465,7 @@ namespace tmv {
         static TMV_INLINE RT call(const V& v, T* sign)
         {
             const bool inst =
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
                 Traits<T>::isinst;
             const int algo =
                 V::_conj ? 97 : 
@@ -1514,7 +1514,7 @@ namespace tmv {
         typedef typename V::value_type T;
         static bool call(const V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"HasZeroElement algo 11: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -1533,7 +1533,7 @@ namespace tmv {
         typedef typename V::value_type T;
         static bool call(const V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"HasZeroElement algo 12: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -1557,7 +1557,7 @@ namespace tmv {
         typedef typename V::value_type T;
         static bool call(const V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"HasZeroElement algo 13: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -1585,7 +1585,7 @@ namespace tmv {
         typedef typename V::value_type T;
         static bool call(const V& v)
         {
-            const int n = s == TMV_UNKNOWN ? v.size() : s;
+            const int n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"HasZeroElement algo 14: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -1674,7 +1674,7 @@ namespace tmv {
             typedef typename V::real_type RT;
             const int algo = 
                 TMV_OPT == 0 ? 11 :
-                (s != TMV_UNKNOWN && s <= int(128/sizeof(T))) ? 15 :
+                (s != Unknown && s <= int(128/sizeof(T))) ? 15 :
                 (sizeof(RT) == 8) ? (V::iscomplex ? 12 : 13) :
                 (sizeof(RT) == 4) ? (V::iscomplex ? 13 : 14) :
                 11;
@@ -1696,7 +1696,7 @@ namespace tmv {
         static TMV_INLINE bool call(const V& v)
         {
             const bool inst =
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
                 Traits<T>::isinst;
             const int algo =
                 V::_conj ? 97 : 

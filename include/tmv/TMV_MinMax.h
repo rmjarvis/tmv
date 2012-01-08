@@ -67,7 +67,7 @@ namespace tmv {
                     typename V::zfloat_type , typename V::value_type >::type ZT;
             ZT value;
             ret best;
-            int n = V::_size == TMV_UNKNOWN ? v.size() : V::_size;
+            int n = V::_size == Unknown ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             IT it = v.begin();
@@ -112,7 +112,7 @@ namespace tmv {
             ret best;
             ZT value, value1;
             IT it = v.begin();
-            int n = V::_size == TMV_UNKNOWN ? v.size() : V::_size;
+            int n = V::_size == Unknown ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             best = Component<comp,VT>::f(*it);
@@ -162,7 +162,7 @@ namespace tmv {
             ret best;
             ZT value, value1, value2;
             IT it = v.begin();
-            int n = V::_size == TMV_UNKNOWN ? v.size() : V::_size;
+            int n = V::_size == Unknown ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             const IT end = it + n;
@@ -226,7 +226,7 @@ namespace tmv {
             ret best;
             ZT value, value1, value2, value3;
             IT it = v.begin();
-            int n = V::_size == TMV_UNKNOWN ? v.size() : V::_size;
+            int n = V::_size == Unknown ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             int n_4 = ((n-1)>>2);
@@ -402,7 +402,7 @@ namespace tmv {
             typedef typename V::zfloat_type ZT;
             ZT value;
             ret best;
-            int n = V::_size == TMV_UNKNOWN ? v.size() : V::_size;
+            int n = V::_size == Unknown ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,AbsComp,true,V>::call(v,ibest);
             IT it = v.begin();
@@ -437,7 +437,7 @@ namespace tmv {
             typedef typename V::zfloat_type ZT;
             ZT value;
             ret best;
-            int n = V::_size == TMV_UNKNOWN ? v.size() : V::_size;
+            int n = V::_size == Unknown ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,AbsComp,false,V>::call(v,ibest);
             IT it = v.begin();
@@ -476,7 +476,7 @@ namespace tmv {
             ret best;
             ZT value, value1;
             IT it = v.begin();
-            int n = V::_size == TMV_UNKNOWN ? v.size() : V::_size;
+            int n = V::_size == Unknown ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             int n_4 = ((n-1)>>2);
@@ -682,7 +682,7 @@ L2:
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
-                V::_size != TMV_UNKNOWN ? (
+                V::_size != Unknown ? (
                     V::_size <= maxunroll ? 15 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 12 : 24 ) ) :
@@ -693,7 +693,7 @@ L2:
             const int algo2 = 
                 V::_size == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                V::_size != TMV_UNKNOWN ? (
+                V::_size != Unknown ? (
                     V::_size <= maxunroll && V::_size <= 12 ? 15 :
                     V::_size <= maxunroll ? 16 :
                     (V::_step == 1 && V::_size > 250) ? (
@@ -729,7 +729,7 @@ L2:
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
-                V::_size != TMV_UNKNOWN ? (
+                V::_size != Unknown ? (
                     V::iscomplex ? (
                         V::_size <= maxunroll && V::_size <= 12 ? 15 :
                         V::_step == 1 ? 21 : 11 ) :
@@ -741,7 +741,7 @@ L2:
             const int algo2 = 
                 V::_size == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                V::_size != TMV_UNKNOWN ? (
+                V::_size != Unknown ? (
                     V::iscomplex ? (
                         ( V::_step == 1 ? 21 : 11 ) ) :
                     V::_size <= maxunroll && V::_size <= 12 ? 15 :
@@ -777,7 +777,7 @@ L2:
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
-                V::_size != TMV_UNKNOWN ? (
+                V::_size != Unknown ? (
                     V::_size <= maxunroll ? 15 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 12 : 24 ) ) :
@@ -788,7 +788,7 @@ L2:
             const int algo2 = 
                 V::_size == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                V::_size != TMV_UNKNOWN ? (
+                V::_size != Unknown ? (
                     V::_size <= maxunroll && V::_size <= 12 ? 15 :
                     V::_size <= maxunroll ? 16 :
                     (V::_step == 1 && V::_size > 250) ? (
@@ -824,7 +824,7 @@ L2:
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
-                V::_size != TMV_UNKNOWN ? (
+                V::_size != Unknown ? (
                     V::_size <= maxunroll ? 15 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 12 : 24 ) ) :
@@ -835,7 +835,7 @@ L2:
             const int algo2 = 
                 V::_size == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                V::_size != TMV_UNKNOWN ? (
+                V::_size != Unknown ? (
                     V::_size <= maxunroll && V::_size <= 12 ? 15 :
                     V::_size <= maxunroll ? 16 :
                     (V::_step == 1 && V::_size > 250) ? (
@@ -872,7 +872,7 @@ L2:
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
-                V::_size != TMV_UNKNOWN ? (
+                V::_size != Unknown ? (
                     V::iscomplex ? (
                         V::_size <= maxunroll && V::_size <= 12 ? 15 :
                         V::_step == 1 ? 21 : 11 ) :
@@ -884,7 +884,7 @@ L2:
             const int algo2 = 
                 V::_size == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                V::_size != TMV_UNKNOWN ? (
+                V::_size != Unknown ? (
                     V::iscomplex ? (
                         ( V::_step == 1 ? 
                           ( V::_size <= 20 ? 12 : 21 ) : 
@@ -922,7 +922,7 @@ L2:
 #if TMV_OPT >= 2
             const int algo1 = 
                 V::_size == 0 ? 0 :
-                V::_size != TMV_UNKNOWN ? (
+                V::_size != Unknown ? (
                     V::_size <= maxunroll ? 15 :
                     (V::_step == 1 && V::_size > 250) ? (
                         ( V::iscomplex ? 12 : 24 ) ) :
@@ -933,7 +933,7 @@ L2:
             const int algo2 = 
                 V::_size == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                V::_size != TMV_UNKNOWN ? (
+                V::_size != Unknown ? (
                     V::_size <= maxunroll && V::_size <= 12 ? 15 :
                     V::_size <= maxunroll ? 16 :
                     (V::_step == 1 && V::_size > 250) ? (
@@ -968,7 +968,7 @@ L2:
         {
             typedef typename V::value_type VT;
             const bool inst = 
-                (V::_size == TMV_UNKNOWN || V::_size > 16) &&
+                (V::_size == Unknown || V::_size > 16) &&
                 Traits<VT>::isinst;
             const int algo =
                 V::_conj ? 97 :

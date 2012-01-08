@@ -50,7 +50,7 @@ namespace tmv {
             // m2 = (USV)^-1
             //    = Vt S^-1 Ut
             typedef typename M1u::value_type T;
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             typename MCopyHelper<T,Rec,xx,cs>::type SinvUt = U.adjoint() / S;
             minv = V.adjoint() * SinvUt;
         }
@@ -116,8 +116,8 @@ namespace tmv {
             typedef typename M1u::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -222,7 +222,7 @@ namespace tmv {
             // AtA = Vt S^2 V
             //     = Vt S^-2 V
             typedef typename M1u::value_type T;
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             typename MCopyHelper<T,Rec,xx,rs>::type SinvV = V / S;
             ata = SinvV.adjoint() * SinvV;
         }
@@ -289,8 +289,8 @@ namespace tmv {
             typedef typename M1u::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

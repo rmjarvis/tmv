@@ -81,7 +81,7 @@ namespace tmv {
     //
     //  _colsize = column size of matrix (aka number of rows)
     //  _rowsize = row size of matrix (aka number of columns)
-    //  (Use TMV_UNKNOWN if unknown at compile time)
+    //  (Use Unknown if unknown at compile time)
     //
     //  _nlo = number of non-zero subdiagonals
     //  _nhi = number of non-zero superdiagonals
@@ -223,7 +223,7 @@ namespace tmv {
     TMV_INLINE bool SameStorage(
         const BaseMatrix<M1>& v1, const BaseVector<V2>& m2)
     { return false; }
-#ifndef TMV_NO_ALIAS_CHECK
+
     template <class V1, class M2>
     TMV_INLINE bool SameStorage(
         const BaseVector_Calc<V1>& v1, const BaseMatrix_Calc<M2>& m2)
@@ -248,7 +248,6 @@ namespace tmv {
             static_cast<const void*>(m1.mat().cptr()) == 
             static_cast<const void*>(m2.mat().cptr()); 
     }
-#endif
 
     template <class M1, class M2>
     TMV_INLINE bool ExactSameStorage(
@@ -269,10 +268,10 @@ namespace tmv {
         typedef typename M1::value_type T1;
         typedef typename M2::value_type T2;
         enum { known = (
-                M1::_stepi != TMV_UNKNOWN &&
-                M1::_stepj != TMV_UNKNOWN &&
-                M2::_stepi != TMV_UNKNOWN &&
-                M2::_stepj != TMV_UNKNOWN ) };
+                M1::_stepi != Unknown &&
+                M1::_stepj != Unknown &&
+                M2::_stepi != Unknown &&
+                M2::_stepj != Unknown ) };
         enum { same = (
                 Traits2<T1,T2>::sametype &&
                 known &&
@@ -866,10 +865,10 @@ namespace tmv {
         typedef InvalidType copy_type;
         typedef InvalidType inverse_type;
 
-        enum { _colsize = TMV_UNKNOWN };
-        enum { _rowsize = TMV_UNKNOWN };
-        enum { _nlo = TMV_UNKNOWN };
-        enum { _nhi = TMV_UNKNOWN };
+        enum { _colsize = Unknown };
+        enum { _rowsize = Unknown };
+        enum { _nlo = Unknown };
+        enum { _nhi = Unknown };
         enum { _shape = Null };
         enum { _fort = false };
         enum { _calc = false };
@@ -932,7 +931,7 @@ namespace tmv {
     {
         static inline typename M::value_type call(const M& m) 
         {
-            const int n = size == TMV_UNKNOWN ? m.colsize() : size;
+            const int n = size == Unknown ? m.colsize() : size;
             typename M::value_type sum(0);
             for (int i=0;i<n;++i) sum += m.cref(i,i);
             return sum;
@@ -945,7 +944,7 @@ namespace tmv {
     {
         static inline typename M::value_type call(const M& m) 
         {
-            const int n = size == TMV_UNKNOWN ? m.colsize() : size;
+            const int n = size == Unknown ? m.colsize() : size;
             return typename M::value_type(n); 
         }
     };
@@ -1016,8 +1015,8 @@ namespace tmv {
     {
         static bool eq(const M1& m1, const M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? m1.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m1.rowsize() : rs;
+            const int M = cs == Unknown ? m1.colsize() : cs;
+            const int N = rs == Unknown ? m1.rowsize() : rs;
             for(int i=0;i<M;++i) {
                 for(int j=0;j<N;++j) {
                     if (m1.cref(i,j) != m2.cref(i,j)) return false;
@@ -1032,8 +1031,8 @@ namespace tmv {
     {
         static bool eq(const M1& m1, const M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? m1.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m1.rowsize() : rs;
+            const int M = cs == Unknown ? m1.colsize() : cs;
+            const int N = rs == Unknown ? m1.rowsize() : rs;
             for(int j=0;j<N;++j) {
                 for(int i=0;i<M;++i) {
                     if (m1.cref(i,j) != m2.cref(i,j)) return false;
@@ -1156,7 +1155,6 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_TEXT
     template <class M>
     inline std::string TMV_Text(const BaseMatrix<M>& m)
     {
@@ -1180,7 +1178,6 @@ namespace tmv {
         s << "BaseMatrix_Mutable< "<<TMV_Text(m.mat())<<" >";
         return s.str();
     }
-#endif
 
 } // namespace tmv
 

@@ -50,9 +50,9 @@ namespace tmv {
 #ifdef PRINTALGO_NormB
             std::cout<<"SumElementsM algo 11: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
-            const int xx = TMV_UNKNOWN;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
+            const int xx = Unknown;
             typedef typename M1::const_col_sub_type M1c;
 
             const int lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
@@ -90,9 +90,9 @@ namespace tmv {
 #ifdef PRINTALGO_NormB
             std::cout<<"SumElementsM algo 12: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
-            const int xx = TMV_UNKNOWN;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
+            const int xx = Unknown;
             typedef typename M1::const_row_sub_type M1r;
 
             const int lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
@@ -130,7 +130,7 @@ namespace tmv {
 #ifdef PRINTALGO_NormB
             std::cout<<"SumElementsM algo 13: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             typedef typename M1::const_diag_sub_type M1d;
             ret sum(0);
             for(int k=-m.nlo();k<=m.nhi();++k) {
@@ -254,8 +254,8 @@ namespace tmv {
         {
             typedef typename M1::value_type VT;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<VT>::isinst;
             const int algo =
                 M1::_conj ? 97 :
@@ -432,8 +432,8 @@ namespace tmv {
 #ifdef PRINTALGO_NormB
             std::cout<<"MaxAbsElementM algo 11: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
             typedef typename M1::const_col_sub_type M1c;
 
             const int j1 = m.nhi();
@@ -473,8 +473,8 @@ namespace tmv {
 #ifdef PRINTALGO_NormB
             std::cout<<"MaxAbsElementM algo 11: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
             typedef typename M1::const_row_sub_type M1r;
 
             const int i1 = m.nlo();
@@ -594,8 +594,8 @@ namespace tmv {
         {
             typedef typename M1::value_type VT;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<VT>::isinst;
             const int algo =
                 M1::_conj ? 97 :
@@ -681,8 +681,8 @@ namespace tmv {
 #ifdef PRINTALGO_NormB
             std::cout<<"Norm1M algo 11: "<<std::endl;
 #endif
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
             typedef typename M1::const_col_sub_type M1c;
 
             const int j1 = m.nhi();
@@ -758,8 +758,8 @@ namespace tmv {
         {
             typedef typename M1::value_type VT;
             const bool inst =
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<VT>::isinst;
             const int algo =
                 M1::_conj ? 97 :

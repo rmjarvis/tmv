@@ -401,7 +401,6 @@ namespace tmv {
 #undef CT
 #undef CCT
 
-#ifdef TMV_TEXT
     template <int ix, class T, class M1, class M2>
     inline std::string TMV_Text(const ElemProdMM<ix,T,M1,M2>& mm)
     {
@@ -410,7 +409,6 @@ namespace tmv {
         s << TMV_Text(mm.getM1())<<" , "<<TMV_Text(mm.getM2())<<" >";
         return s.str();
     }
-#endif
 
 
 } // namespace tmv

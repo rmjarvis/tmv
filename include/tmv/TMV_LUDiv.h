@@ -185,8 +185,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16 || rs == 1) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16 || rs == 1) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

@@ -153,8 +153,8 @@ namespace tmv {
         {
             typedef typename M1::value_type T1;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<T1>::isinst;
             const int algo = 
                 cs == 0 || rs == 0 ? 0 : 
@@ -359,8 +359,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

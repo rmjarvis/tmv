@@ -10,23 +10,15 @@
 //
 // Constructors:
 //
-//    DiagMatrix<T>(int size)
+//    DiagMatrix<T,A>(int size)
 //        Makes a DiagMatrix with column size and row size = size
 //        with _uninitialized_ values
 //
-//    DiagMatrix<T>(int size, T x)
+//    DiagMatrix<T,A>(int size, T x)
 //        Makes a DiagMatrix of size n with all values = x
 //
-//    DiagMatrix<T>(const Vector<T>& vv)
+//    DiagMatrix<T,A>(const Vector<T>& vv)
 //        Make a DiagMatrix which copies the elements of vv.
-//
-//    ConstDiagMatrixView<T>(const Vector<T>& v)
-//        Make a constant DiagMatrix view with v as the diagonal.
-//        While this view cannon be modified, changing the original v or m
-//        will cause corresponding changes in this view.
-//
-//    DiagMatrixView<T>(Vector<T>& v)
-//        Make a mutable DiagMatrix view with v as the diagonal.
 //
 //
 // Access Functions
@@ -106,7 +98,7 @@
 //
 //    is >> d
 //    is >> CompactIO() >> d
-//        Reads in d in the compact format
+//        Reads in d in either format
 //
 //
 
@@ -140,9 +132,9 @@ namespace tmv {
         typedef const type& eval_type;
         typedef type copy_type;
 
-        enum { _colsize = TMV_UNKNOWN };
-        enum { _rowsize = TMV_UNKNOWN };
-        enum { _size = TMV_UNKNOWN };
+        enum { _colsize = Unknown };
+        enum { _rowsize = Unknown };
+        enum { _size = Unknown };
         enum { _nlo = 0 };
         enum { _nhi = 0 };
         enum { _shape = Diag };
@@ -184,7 +176,7 @@ namespace tmv {
         typedef ConstDiagMatrixView<T,A> const_transpose_type;
         typedef ConstDiagMatrixView<T,conjA> const_adjoint_type;
         typedef typename TypeSelect< iscomplex ,
-                ConstSmallDiagMatrixView<real_type,TMV_UNKNOWN,twoS,twosAsm> ,
+                ConstSmallDiagMatrixView<real_type,Unknown,twoS,twosAsm> ,
                 ConstDiagMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstDiagMatrixView<T,nonconjA> const_nonconj_type;
@@ -208,7 +200,7 @@ namespace tmv {
         typedef DiagMatrixView<T,A> transpose_type;
         typedef DiagMatrixView<T,conjA> adjoint_type;
         typedef typename TypeSelect< iscomplex ,
-                SmallDiagMatrixView<real_type,TMV_UNKNOWN,twoS,twosAsm> ,
+                SmallDiagMatrixView<real_type,Unknown,twoS,twosAsm> ,
                 DiagMatrixView<real_type,twosA> >::type realpart_type;
         typedef realpart_type imagpart_type;
         typedef DiagMatrixView<T,nonconjA> nonconj_type;
@@ -276,7 +268,7 @@ namespace tmv {
         {
             TMVAssert(n >= 0);
             TMVStaticAssert(Traits<type>::okA);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->diag().setAllTo(Traits<T>::constr_value());
 #endif
         }
@@ -315,7 +307,7 @@ namespace tmv {
 
         ~DiagMatrix() 
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->diag().setAllTo(Traits<T>::destr_value());
 #endif
         }
@@ -358,12 +350,12 @@ namespace tmv {
         void resize(const int n)
         {
             TMVAssert(n >= 0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->diag().setAllTo(Traits<T>::destr_value());
 #endif
             itssize = n;
             itsm.resize(n);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->diag().setAllTo(Traits<T>::constr_value());
 #endif
         }
@@ -404,9 +396,9 @@ namespace tmv {
         enum { copyA = Attrib<A>::fort ? FortranStyle : CStyle };
         typedef DiagMatrix<T,copyA> copy_type;
 
-        enum { _colsize = TMV_UNKNOWN };
-        enum { _rowsize = TMV_UNKNOWN };
-        enum { _size = TMV_UNKNOWN };
+        enum { _colsize = Unknown };
+        enum { _rowsize = Unknown };
+        enum { _size = Unknown };
         enum { _nlo = 0 };
         enum { _nhi = 0 };
         enum { _shape = Diag };
@@ -414,7 +406,7 @@ namespace tmv {
         enum { _calc = true };
         enum { _rowmajor = false };
         enum { _colmajor = false };
-        enum { _step = Attrib<A>::unit ? 1 : TMV_UNKNOWN };
+        enum { _step = Attrib<A>::unit ? 1 : Unknown };
         enum { _diagstep = _step };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
@@ -448,7 +440,7 @@ namespace tmv {
         typedef ConstDiagMatrixView<T,A> const_transpose_type;
         typedef ConstDiagMatrixView<T,conjA> const_adjoint_type;
         typedef typename TypeSelect< iscomplex ,
-                ConstSmallDiagMatrixView<real_type,TMV_UNKNOWN,twoS,twosAsm> ,
+                ConstSmallDiagMatrixView<real_type,Unknown,twoS,twosAsm> ,
                 ConstDiagMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstDiagMatrixView<T,nonconjA> const_nonconj_type;
@@ -495,7 +487,7 @@ namespace tmv {
             itsm(m), itssize(n), itsstep(_step)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_step != TMV_UNKNOWN); 
+            TMVStaticAssert(_step != Unknown); 
         }
 
         ConstDiagMatrixView(const type& m2) :
@@ -539,7 +531,7 @@ namespace tmv {
         }
 
         ~ConstDiagMatrixView() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
         }
@@ -595,9 +587,9 @@ namespace tmv {
         enum { copyA = Attrib<A>::fort ? FortranStyle : CStyle };
         typedef DiagMatrix<T,copyA> copy_type;
 
-        enum { _colsize = TMV_UNKNOWN };
-        enum { _rowsize = TMV_UNKNOWN };
-        enum { _size = TMV_UNKNOWN };
+        enum { _colsize = Unknown };
+        enum { _rowsize = Unknown };
+        enum { _size = Unknown };
         enum { _nlo = 0 };
         enum { _nhi = 0 };
         enum { _shape = Diag };
@@ -605,7 +597,7 @@ namespace tmv {
         enum { _calc = true };
         enum { _rowmajor = false };
         enum { _colmajor = false };
-        enum { _step = Attrib<A>::unit ? 1 : TMV_UNKNOWN };
+        enum { _step = Attrib<A>::unit ? 1 : Unknown };
         enum { _diagstep = _step };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
@@ -640,7 +632,7 @@ namespace tmv {
         typedef ConstDiagMatrixView<T,A> const_transpose_type;
         typedef ConstDiagMatrixView<T,conjA> const_adjoint_type;
         typedef typename TypeSelect< iscomplex ,
-                ConstSmallDiagMatrixView<real_type,TMV_UNKNOWN,twoS,twosAsm> ,
+                ConstSmallDiagMatrixView<real_type,Unknown,twoS,twosAsm> ,
                 ConstDiagMatrixView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstDiagMatrixView<T,nonconjA> const_nonconj_type;
@@ -664,7 +656,7 @@ namespace tmv {
         typedef DiagMatrixView<T,A> transpose_type;
         typedef DiagMatrixView<T,conjA> adjoint_type;
         typedef typename TypeSelect< iscomplex ,
-                SmallDiagMatrixView<real_type,TMV_UNKNOWN,twoS,twosAsm> ,
+                SmallDiagMatrixView<real_type,Unknown,twoS,twosAsm> ,
                 DiagMatrixView<real_type,twosA> >::type realpart_type;
         typedef realpart_type imagpart_type;
         typedef DiagMatrixView<T,nonconjA> nonconj_type;
@@ -714,7 +706,7 @@ namespace tmv {
             itsm(m), itssize(n), itsstep(_step)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_step != TMV_UNKNOWN); 
+            TMVStaticAssert(_step != Unknown); 
         }
 
         DiagMatrixView(const type& m2) :
@@ -740,7 +732,7 @@ namespace tmv {
         }
 
         ~DiagMatrixView() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
         }
@@ -883,7 +875,6 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_TEXT
     template <class T, int A>
     inline std::string TMV_Text(const DiagMatrix<T,A>& m)
     {
@@ -913,7 +904,6 @@ namespace tmv {
         s << "("<<m.size()<<","<<m.step()<<")";
         return s.str();
     }
-#endif
 
 } // namespace tmv
 

@@ -154,8 +154,8 @@ namespace tmv {
 #endif
             typedef typename M1::real_type RT;
 
-            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? Q.rowsize() : rs;
+            const int M = cs==Unknown ? Q.colsize() : cs;
+            const int N = rs==Unknown ? Q.rowsize() : rs;
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::row_type M2r;
             typedef typename M2::rowrange_type M2rr;
@@ -199,8 +199,8 @@ namespace tmv {
 #endif
             typedef typename M1::real_type RT;
 
-            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? Q.rowsize() : rs;
+            const int M = cs==Unknown ? Q.colsize() : cs;
+            const int N = rs==Unknown ? Q.rowsize() : rs;
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::row_type M2r;
             typedef typename M2::rowrange_type M2rr;
@@ -233,8 +233,8 @@ namespace tmv {
     {
         static void call(const M1& Q, const V1& beta, M2& m2)
         {
-            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? Q.rowsize() : rs;
+            const int M = cs==Unknown ? Q.colsize() : cs;
+            const int N = rs==Unknown ? Q.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"PackedQ_MultEq algo 13: div,cs,rs,xs = "<<
                 true<<','<<cs<<','<<rs<<','<<xs<<std::endl;
@@ -275,8 +275,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
 
-            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? Q.rowsize() : rs;
+            const int M = cs==Unknown ? Q.colsize() : cs;
+            const int N = rs==Unknown ? Q.rowsize() : rs;
             const int Nb = TMV_QR_BLOCKSIZE;
             const int s1 = IntTraits2<Nb,rs>::min;
             const int N1 = TMV_MIN(Nb,N);
@@ -327,8 +327,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
 
-            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? Q.rowsize() : rs;
+            const int M = cs==Unknown ? Q.colsize() : cs;
+            const int N = rs==Unknown ? Q.rowsize() : rs;
             const int Nb = TMV_QR_BLOCKSIZE;
             const int s1 = IntTraits2<Nb,rs>::min;
             const int N1 = TMV_MIN(Nb,N);
@@ -375,7 +375,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
 
-            const int N = rs==TMV_UNKNOWN ? Q.rowsize() : rs;
+            const int N = rs==Unknown ? Q.rowsize() : rs;
 
             typedef typename MCopyHelper<T1,UpperTri,rs,rs>::type Ztype;
             Ztype Z(MatrixSizer<T1>(N,N));
@@ -402,7 +402,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
 
-            const int N = rs==TMV_UNKNOWN ? Q.rowsize() : rs;
+            const int N = rs==Unknown ? Q.rowsize() : rs;
 
             typedef typename MCopyHelper<T1,UpperTri,rs,rs>::type Ztype;
             Ztype Z(MatrixSizer<T1>(N,N));
@@ -421,18 +421,18 @@ namespace tmv {
     {
         static void call(const M1& Q, const V1& beta, M2& m2)
         {
-            const int M = cs==TMV_UNKNOWN ? Q.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? Q.rowsize() : rs;
-            const int K = xs==TMV_UNKNOWN ? m2.rowsize() : xs;
+            const int M = cs==Unknown ? Q.colsize() : cs;
+            const int N = rs==Unknown ? Q.rowsize() : rs;
+            const int K = xs==Unknown ? m2.rowsize() : xs;
             typedef typename M1::value_type T;
             const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
             const int csrs = IntTraits2<cs,rs>::prod;
             const int algo27 =
-                csrs != TMV_UNKNOWN && csrs <= l2cache ? 0 :
-                (rs == TMV_UNKNOWN || rs <= 128) ? 27 : 0;
+                csrs != Unknown && csrs <= l2cache ? 0 :
+                (rs == Unknown || rs <= 128) ? 27 : 0;
             const int algo21 =
-                csrs != TMV_UNKNOWN && csrs <= l2cache ? 0 :
-                (rs == TMV_UNKNOWN || rs > 128) ? 21 : 0;
+                csrs != Unknown && csrs <= l2cache ? 0 :
+                (rs == Unknown || rs > 128) ? 21 : 0;
 #ifdef PRINTALGO_QR
             std::cout<<"PackedQ_MultEq algo 31: div,cs,rs,xs = "<<
                 div<<','<<cs<<','<<rs<<','<<xs<<std::endl;
@@ -490,9 +490,9 @@ namespace tmv {
     {
         static void call(const M1& Q, const V1& beta, M2& m2)
         {
-            TMVStaticAssert(cs != TMV_UNKNOWN);
-            TMVStaticAssert(rs != TMV_UNKNOWN);
-            TMVStaticAssert(xs != TMV_UNKNOWN);
+            TMVStaticAssert(cs != Unknown);
+            TMVStaticAssert(rs != Unknown);
+            TMVStaticAssert(xs != Unknown);
             TMVStaticAssert(cs >= 16);
 
 #ifdef PRINTALGO_QR
@@ -562,10 +562,10 @@ namespace tmv {
             const int algo =
                 cs == 0 || rs == 0 || cs == 1 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                rs == TMV_UNKNOWN ? 31 :
-                cs == TMV_UNKNOWN ? 31 :
+                rs == Unknown ? 31 :
+                cs == Unknown ? 31 :
                 csrs <= l2cache ? (
-                    cs < 16 ? 11 : xs == TMV_UNKNOWN ? 31 : 
+                    cs < 16 ? 11 : xs == Unknown ? 31 : 
                     32 ) :
                 rs <= 128 ? 27 : 21;
 #ifdef PRINTALGO_QR
@@ -595,9 +595,9 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
-                (xs == TMV_UNKNOWN || xs > 16 || xs == 1) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
+                (xs == Unknown || xs > 16 || xs == 1) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -687,7 +687,7 @@ namespace tmv {
         typedef typename V2::value_type T2;
         const int xs = 1;
         const int s2 = V2::_step;
-        const int xx = TMV_UNKNOWN;
+        const int xx = Unknown;
         const int c = V2::_conj ? Conj : NonConj;
         typedef typename MViewHelper<T2,Rec,cs,xs,s2,xx,c>::type V2v;
         TMV_MAYBE_CREF(M1,M1v) Qv = Q.cView();
@@ -713,7 +713,7 @@ namespace tmv {
         typedef typename V2::value_type T2;
         const int xs = 1;
         const int s2 = V2::_step;
-        const int xx = TMV_UNKNOWN;
+        const int xx = Unknown;
         const int c = V2::_conj ? Conj : NonConj;
         typedef typename MViewHelper<T2,Rec,cs,xs,s2,xx,c>::type V2v;
         TMV_MAYBE_CREF(M1,M1v) Qv = Q.cView();
@@ -783,7 +783,7 @@ namespace tmv {
         typedef typename V2::value_type T2;
         const int xs = 1;
         const int s2 = V2::_step;
-        const int xx = TMV_UNKNOWN;
+        const int xx = Unknown;
         const int c = V2::_conj ? Conj : NonConj;
         typedef typename MViewHelper<T2,Rec,cs,xs,s2,xx,c>::type V2v;
         TMV_MAYBE_CREF(M1,M1v) Qv = Q.cView();
@@ -809,7 +809,7 @@ namespace tmv {
         typedef typename V2::value_type T2;
         const int xs = 1;
         const int s2 = V2::_step;
-        const int xx = TMV_UNKNOWN;
+        const int xx = Unknown;
         const int c = V2::_conj ? Conj : NonConj;
         typedef typename MViewHelper<T2,Rec,cs,xs,s2,xx,c>::type V2v;
         TMV_MAYBE_CREF(M1,M1v) Qv = Q.cView();
@@ -1122,7 +1122,7 @@ namespace tmv {
         const PackedQ<M2,V2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
         if (add) {
-            m3 += (x*m1*m2).calc();
+            m3 += (x*m1.mat()*m2.mat()).calc();
         } else if (m2.isSquare()) {
             m3 = m1;
             typename M3::adjoint_type m3a = m3.adjoint();
@@ -1240,7 +1240,6 @@ namespace tmv {
     // TMV_Text
     //
 
-#ifdef TMV_TEXT
     template <class M, class V>
     inline std::string TMV_Text(const PackedQ<M,V>& Q)
     {
@@ -1249,7 +1248,6 @@ namespace tmv {
         s << TMV_Text(Q.getBeta())<<" >";
         return s.str();
     }
-#endif
 
 
 } // namespace mv

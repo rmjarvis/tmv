@@ -625,7 +625,7 @@ namespace tmv {
     { return getConstView().isSquare(); }
 
     template <class T>
-    Matrix<T> MatrixDivHelper2<T>::getM() const
+    Matrix<T> MatrixDivHelper2<T>::getMatrix() const
     { return Matrix<T>(getConstView()); }
 
     template <class T>

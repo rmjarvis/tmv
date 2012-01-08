@@ -55,7 +55,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == TMV_UNKNOWN ? v3.size() : s;
+            const int n = s == Unknown ? v3.size() : s;
             call2(n,x1,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(
@@ -82,7 +82,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == TMV_UNKNOWN ? v3.size() : s;
+            const int n = s == Unknown ? v3.size() : s;
             call2(n,x1,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(
@@ -122,7 +122,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == TMV_UNKNOWN ? v3.size() : s;
+            const int n = s == Unknown ? v3.size() : s;
             call2(n,x1,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(
@@ -171,7 +171,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == TMV_UNKNOWN ? v3.size() : s;
+            const int n = s == Unknown ? v3.size() : s;
             call2(n,x1,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(
@@ -430,7 +430,7 @@ namespace tmv {
             typedef typename V2::value_type T2;
             typedef typename V3::value_type T3;
             const bool inst =
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&
@@ -462,7 +462,7 @@ namespace tmv {
                 s == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
                 // Unrolling doesn't ever seem to be faster for this function.
-                //(s != TMV_UNKNOWN && s <= int(128/sizeof(VT))) ? 15 :
+                //(s != Unknown && s <= int(128/sizeof(VT))) ? 15 :
                 (allunit && sizeof(RT) == 8) ? V3::iscomplex ? 12 : 13 :
                 (allunit && sizeof(RT) == 4) ? V3::iscomplex ? 13 : 14 :
                 11 ) };
@@ -501,7 +501,7 @@ namespace tmv {
             typedef typename V2::value_type T2;
             typedef typename V3::value_type T3;
             const bool inst =
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T3>::samebase &&
                 Traits2<T2,T3>::samebase &&

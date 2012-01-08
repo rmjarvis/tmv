@@ -18,14 +18,14 @@ namespace tmv {
     template <class T>
     struct Scaling<0,T>
     {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
         T x;
 #else
         const T x;
 #endif
         TMV_INLINE Scaling(const T _x) : x(_x) {}
         TMV_INLINE_ND ~Scaling() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             x = Traits<T>::destr_value();
 #endif
         }

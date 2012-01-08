@@ -38,7 +38,7 @@ namespace tmv {
         typedef typename V2::iterator IT2;
         static void call(const V1& v1, V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? v1.size() : s;
+            const int n = s == Unknown ? v1.size() : s;
             for(int i=0;i<n;++i) v2.ref(i) = v1.cref(i); 
         }
         static void call2(int n, IT1 it1, IT2 it2)
@@ -77,7 +77,7 @@ namespace tmv {
     {
         static inline void call(const V1& v1, V2& v2)
         {
-            const int n = s == TMV_UNKNOWN ? v1.size() : s;
+            const int n = s == Unknown ? v1.size() : s;
             memmove(v2.ptr(),v1.cptr(),n*sizeof(typename V2::value_type));
         }
         static inline void call2(
@@ -178,7 +178,7 @@ namespace tmv {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
             const bool inst = 
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -207,7 +207,7 @@ namespace tmv {
             const int algo = 
                 s == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                ( s != TMV_UNKNOWN && s <= 8 ) ? 15 :
+                ( s != Unknown && s <= 8 ) ? 15 :
                 ( Traits2<T1,T2>::sametype && 
                   V1::_conj == int(V2::_conj) &&
                   V1::_step == 1 && V2::_step == 1 ) ? 21 :
@@ -238,7 +238,7 @@ namespace tmv {
             typedef typename V1::value_type T1;
             typedef typename V2::value_type T2;
             const bool inst = 
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

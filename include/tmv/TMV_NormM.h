@@ -93,7 +93,7 @@ namespace tmv {
 #ifdef PRINTALGO_NormM
             std::cout<<"SumElementsM algo 11: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int N = (rs == TMV_UNKNOWN ? m.rowsize() : rs);
+            const int N = (rs == Unknown ? m.rowsize() : rs);
             typedef typename M1::const_col_type Mc;
             ret sum(0);
             for(int j=0;j<N;++j) {
@@ -114,7 +114,7 @@ namespace tmv {
 #ifdef PRINTALGO_NormM
             std::cout<<"SumElementsM algo 12: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int M = (cs == TMV_UNKNOWN ? m.colsize() : cs);
+            const int M = (cs == Unknown ? m.colsize() : cs);
             typedef typename M1::const_row_type Mr;
             ret sum(0);
             for(int i=0;i<M;++i) {
@@ -327,14 +327,14 @@ namespace tmv {
 
         static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         {
-            const int cs2 = cs > 20 ? TMV_UNKNOWN : cs;
-            const int rs2 = rs > 20 ? TMV_UNKNOWN : rs;
+            const int cs2 = cs > 20 ? Unknown : cs;
+            const int rs2 = rs > 20 ? Unknown : rs;
             // nops = m*n
             const int nops = IntTraits2<cs2,rs2>::safeprod;
             const bool unroll = 
                 ( cs > 10 && rs > 10 ) ? false :
-                ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? false :
-                nops == TMV_UNKNOWN ? false :
+                ( cs == Unknown || rs == Unknown ) ? false :
+                nops == Unknown ? false :
                 // Norm is faster with the regular algorithm except for 
                 // very small matrices.
                 (nops > 9 && comp == NormComp) ? false :
@@ -344,8 +344,8 @@ namespace tmv {
                 unroll ? ( M1::_colmajor ? 15 : 16 ) :
                 M1::_rowmajor ? 12 :
                 M1::_colmajor ? 11 :
-                rs == TMV_UNKNOWN ? 11 :
-                cs == TMV_UNKNOWN ? 12 :
+                rs == Unknown ? 11 :
+                cs == Unknown ? 12 :
                 ( cs < rs ) ? 11 : 12;
 #ifdef PRINTALGO_NormM
             std::cout<<"SumElementsM algo -4: "<<TMV_Text(comp)<<std::endl;
@@ -366,7 +366,7 @@ namespace tmv {
         {
             const int algo = 
                 M1::_canlin ? 1 : 
-                TMV_OPT >= 2 && (cs == TMV_UNKNOWN || rs == TMV_UNKNOWN) ? 30 :
+                TMV_OPT >= 2 && (cs == Unknown || rs == Unknown) ? 30 :
                 -4;
 #ifdef PRINTALGO_NormM
             std::cout<<"Inline SumElementsM: "<<TMV_Text(comp)<<std::endl;
@@ -387,8 +387,8 @@ namespace tmv {
         {
             typedef typename M1::value_type VT;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<VT>::isinst;
             const int algo =
                 M1::_canlin ? 201 : 
@@ -599,7 +599,7 @@ namespace tmv {
             std::cout<<"MaxAbsElementM algo 11: "<<TMV_Text(comp)<<std::endl;
 #endif
             typedef typename M1::const_col_type Mc;
-            const int N = (rs == TMV_UNKNOWN ? m.rowsize() : rs);
+            const int N = (rs == Unknown ? m.rowsize() : rs);
             ret max(0);
             for(int j=0;j<N;++j) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,Mc>::call(
@@ -621,7 +621,7 @@ namespace tmv {
             std::cout<<"MaxAbsElementM algo 12: "<<TMV_Text(comp)<<std::endl;
 #endif
             typedef typename M1::const_row_type Mr;
-            const int M = (cs == TMV_UNKNOWN ? m.colsize() : cs);
+            const int M = (cs == Unknown ? m.colsize() : cs);
             ret max(0);
             for(int i=0;i<M;++i) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,Mr>::call(
@@ -644,7 +644,7 @@ namespace tmv {
 #endif
             typedef typename M1::const_col_type Mc;
             typedef tmv::Vector<ret> V;
-            const int N = (rs == TMV_UNKNOWN ? m.rowsize() : rs);
+            const int N = (rs == Unknown ? m.rowsize() : rs);
             if (N == 0) return ret(0);
             else {
                 V temp(N);
@@ -669,7 +669,7 @@ namespace tmv {
 #endif
             typedef typename M1::const_row_type Mr;
             typedef tmv::Vector<ret> V;
-            const int M = (cs == TMV_UNKNOWN ? m.colsize() : cs);
+            const int M = (cs == Unknown ? m.colsize() : cs);
             if (M == 0) return ret(0);
             else {
                 V temp(M);
@@ -765,7 +765,7 @@ namespace tmv {
         {
             const int algo =
                 M1::_canlin ? 1 :
-                TMV_OPT >= 2 && ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ) ? 30 :
+                TMV_OPT >= 2 && ( cs == Unknown || rs == Unknown ) ? 30 :
                 -4;
 #ifdef PRINTALGO_NormM
             std::cout<<"Inline MaxAbsElementM: "<<TMV_Text(comp)<<std::endl;
@@ -785,8 +785,8 @@ namespace tmv {
         {
             typedef typename M1::value_type VT;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<VT>::isinst;
             const int algo =
                 M1::_canlin ? 201 : 
@@ -873,7 +873,7 @@ namespace tmv {
 #ifdef PRINTALGO_NormM
             std::cout<<"Norm1M algo 1: "<<std::endl;
 #endif
-            const int N = (rs == TMV_UNKNOWN ? m.rowsize() : rs);
+            const int N = (rs == Unknown ? m.rowsize() : rs);
             RT max(0);
             for(int j=0;j<N;++j) {
                 RT temp = InlineSumAbsElements(m.get_col(j));
@@ -893,8 +893,8 @@ namespace tmv {
 #ifdef PRINTALGO_NormM
             std::cout<<"Norm1M algo 12: "<<std::endl;
 #endif
-            int M = (cs == TMV_UNKNOWN ? m.colsize() : cs);
-            int N = (rs == TMV_UNKNOWN ? m.rowsize() : rs);
+            int M = (cs == Unknown ? m.colsize() : cs);
+            int N = (rs == Unknown ? m.rowsize() : rs);
             if (M == 0 || N == 0) return RT(0);
 
             if (M <= 8) return Norm1M_Helper<11,cs,rs,M1>::call(m);
@@ -958,7 +958,7 @@ namespace tmv {
             const int algo =
                 TMV_OPT == 0 ? 11 :
                 ( M1::_rowmajor &&
-                  ( cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ||
+                  ( cs == Unknown || rs == Unknown ||
                     (cs > 16 && rs < 512) || (cs > 8 && rs >= 512) ) ) ? 12 :
                 11;
 #ifdef PRINTALGO_NormM
@@ -979,8 +979,8 @@ namespace tmv {
         {
             typedef typename M1::value_type VT;
             const bool inst =
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<VT>::isinst;
             const int algo =
                 M1::_conj ? 97 :

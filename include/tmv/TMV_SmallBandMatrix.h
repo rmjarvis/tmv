@@ -166,7 +166,7 @@ namespace tmv {
         enum { nmAr = (Ar & ~AllStorageType) };
         enum { An = ndA & ~CheckAlias };
 
-        enum { xx = TMV_UNKNOWN }; // For brevity.
+        enum { xx = Unknown }; // For brevity.
         typedef ConstVectorView<T,colAr> const_col_sub_type;
         typedef ConstVectorView<T,rowAr> const_row_sub_type;
         typedef ConstSmallVectorView<T,minMN,_diagstep,diagA> const_diag_type;
@@ -325,7 +325,7 @@ namespace tmv {
             TMVStaticAssert(N>=0);
             TMVStaticAssert(LO >= 0 && LO < M);
             TMVStaticAssert(HI >= 0 && HI < N);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::constr_value());
 #endif
         }
@@ -434,7 +434,7 @@ namespace tmv {
 
         ~SmallBandMatrix() 
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::destr_value());
 #endif
         }
@@ -588,8 +588,8 @@ namespace tmv {
         typedef const type& eval_type;
         typedef ThinBandMatrix<T,LO,HI,A01> copy_type;
 
-        enum { _colsize = TMV_UNKNOWN };
-        enum { _rowsize = TMV_UNKNOWN };
+        enum { _colsize = Unknown };
+        enum { _rowsize = Unknown };
         enum { _nlo = LO };
         enum { _nhi = HI };
         enum { _shape = Band };
@@ -598,8 +598,8 @@ namespace tmv {
         enum { _rowmajor = Attrib<A>::rowmajor };
         enum { _colmajor = Attrib<A>::colmajor };
         enum { _diagmajor = Attrib<A>::diagmajor };
-        enum { _stepi = _colmajor ? 1 : _rowmajor ? LO+HI : TMV_UNKNOWN };
-        enum { _stepj = _rowmajor ? 1 : _colmajor ? LO+HI : TMV_UNKNOWN };
+        enum { _stepi = _colmajor ? 1 : _rowmajor ? LO+HI : Unknown };
+        enum { _stepj = _rowmajor ? 1 : _colmajor ? LO+HI : Unknown };
         enum { _diagstep = _diagmajor ? 1 : LO+HI+1 };
         enum { _conj = false };
         enum { _checkalias = !Attrib<A>::noalias };
@@ -651,7 +651,7 @@ namespace tmv {
         enum { nmAr = (Ar & ~AllStorageType) };
         enum { An = ndA & ~CheckAlias };
 
-        enum { xx = TMV_UNKNOWN }; // For brevity.
+        enum { xx = Unknown }; // For brevity.
         typedef ConstVectorView<T,colAr> const_col_sub_type;
         typedef ConstVectorView<T,rowAr> const_row_sub_type;
         typedef ConstSmallVectorView<T,xx,_diagstep,diagA> const_diag_type;
@@ -815,7 +815,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(LO >= 0);
             TMVStaticAssert(HI >= 0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::constr_value());
 #endif
         }
@@ -834,7 +834,7 @@ namespace tmv {
             TMVStaticAssert(HI >= 0);
             TMVAssert(LO < cs);
             TMVAssert(HI < rs);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::constr_value());
 #endif
         }
@@ -1004,7 +1004,7 @@ namespace tmv {
 
         ~ThinBandMatrix() 
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::destr_value());
 #endif
         }
@@ -1109,7 +1109,7 @@ namespace tmv {
         void resize(int cs, int rs)
         {
             TMVAssert(cs >= 0 && rs >= 0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::destr_value());
 #endif
             itscs = cs;
@@ -1121,7 +1121,7 @@ namespace tmv {
             itssi = _rowmajor ? LO+HI : _colmajor ? 1 :
                 rs >= cs ? 1-cs : -rs;
             itssj = _rowmajor ? 1 : _colmajor ? LO+HI : -itssi+1;
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::constr_value());
 #endif
         }
@@ -1181,9 +1181,9 @@ namespace tmv {
                   ( Traits<real_type>::isinst && 
                     !Traits<real_type>::isinteger ) ) &&
                 ( Traits<T>::iscomplex || !Attrib<A>::conj ) &&
-                !( Si!=TMV_UNKNOWN && Si!=1 && Attrib<A>::colmajor ) &&
-                !( Sj!=TMV_UNKNOWN && Sj!=1 && Attrib<A>::rowmajor ) &&
-                !( SipSj!=TMV_UNKNOWN && SipSj!=1 && Attrib<A>::diagmajor ) )};
+                !( Si!=Unknown && Si!=1 && Attrib<A>::colmajor ) &&
+                !( Sj!=Unknown && Sj!=1 && Attrib<A>::rowmajor ) &&
+                !( SipSj!=Unknown && SipSj!=1 && Attrib<A>::diagmajor ) )};
         enum { _attrib = A };
 
         typedef T value_type;
@@ -1215,8 +1215,8 @@ namespace tmv {
         enum { twoSj = isreal ? int(_stepj) : IntTraits<_stepj>::twoS };
         enum { minMN = IntTraits2<M,N>::min };
 
-        enum { bandknown = LO != TMV_UNKNOWN && HI != TMV_UNKNOWN };
-        enum { allknown = M != TMV_UNKNOWN && N != TMV_UNKNOWN && bandknown };
+        enum { bandknown = LO != Unknown && HI != Unknown };
+        enum { allknown = M != Unknown && N != Unknown && bandknown };
         enum { copyA = (
                 (_rowmajor ? RowMajor : _colmajor ? ColMajor : DiagMajor) |
                 (_fort ? FortranStyle : CStyle) |
@@ -1271,7 +1271,7 @@ namespace tmv {
         enum { nmAr = (Ar & ~AllStorageType) };
         enum { An = ndA & ~CheckAlias };
 
-        enum { xx = TMV_UNKNOWN }; // For brevity.
+        enum { xx = Unknown }; // For brevity.
         typedef ConstVectorView<T,colAr> const_col_sub_type;
         typedef ConstVectorView<T,rowAr> const_row_sub_type;
         typedef ConstSmallVectorView<T,minMN,_diagstep,diagA> const_diag_type;
@@ -1373,7 +1373,7 @@ namespace tmv {
             itssi(si), itssj(Sj) 
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE ConstSmallBandMatrixView(
@@ -1382,8 +1382,8 @@ namespace tmv {
             itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(Si != TMV_UNKNOWN);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(Si != Unknown);
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE ConstSmallBandMatrixView(
@@ -1392,9 +1392,9 @@ namespace tmv {
             itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(HI != TMV_UNKNOWN); 
-            TMVStaticAssert(Si != TMV_UNKNOWN);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(HI != Unknown); 
+            TMVStaticAssert(Si != Unknown);
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE ConstSmallBandMatrixView(const T* m, int cs, int rs) :
@@ -1402,10 +1402,10 @@ namespace tmv {
             itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(LO != TMV_UNKNOWN);
-            TMVStaticAssert(HI != TMV_UNKNOWN); 
-            TMVStaticAssert(Si != TMV_UNKNOWN);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(LO != Unknown);
+            TMVStaticAssert(HI != Unknown); 
+            TMVStaticAssert(Si != Unknown);
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE ConstSmallBandMatrixView(const T* m, int cs) :
@@ -1413,11 +1413,11 @@ namespace tmv {
             itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(M != TMV_UNKNOWN);
-            TMVStaticAssert(LO != TMV_UNKNOWN);
-            TMVStaticAssert(HI != TMV_UNKNOWN); 
-            TMVStaticAssert(Si != TMV_UNKNOWN);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(M != Unknown);
+            TMVStaticAssert(LO != Unknown);
+            TMVStaticAssert(HI != Unknown); 
+            TMVStaticAssert(Si != Unknown);
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE ConstSmallBandMatrixView(const T* m) :
@@ -1425,12 +1425,12 @@ namespace tmv {
             itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(M != TMV_UNKNOWN);
-            TMVStaticAssert(N != TMV_UNKNOWN);
-            TMVStaticAssert(LO != TMV_UNKNOWN);
-            TMVStaticAssert(HI != TMV_UNKNOWN); 
-            TMVStaticAssert(Si != TMV_UNKNOWN);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(M != Unknown);
+            TMVStaticAssert(N != Unknown);
+            TMVStaticAssert(LO != Unknown);
+            TMVStaticAssert(HI != Unknown); 
+            TMVStaticAssert(Si != Unknown);
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE ConstSmallBandMatrixView(const type& m2) :
@@ -1484,7 +1484,7 @@ namespace tmv {
         }
 
         TMV_INLINE ~ConstSmallBandMatrixView() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
         }
@@ -1562,9 +1562,9 @@ namespace tmv {
                   ( Traits<real_type>::isinst && 
                     !Traits<real_type>::isinteger ) ) &&
                 ( Traits<T>::iscomplex || !Attrib<A>::conj ) &&
-                !( Si!=TMV_UNKNOWN && Si!=1 && Attrib<A>::colmajor ) &&
-                !( Sj!=TMV_UNKNOWN && Sj!=1 && Attrib<A>::rowmajor ) &&
-                !( SipSj!=TMV_UNKNOWN && SipSj!=1 && Attrib<A>::diagmajor ) )};
+                !( Si!=Unknown && Si!=1 && Attrib<A>::colmajor ) &&
+                !( Sj!=Unknown && Sj!=1 && Attrib<A>::rowmajor ) &&
+                !( SipSj!=Unknown && SipSj!=1 && Attrib<A>::diagmajor ) )};
         enum { _attrib = A };
 
         typedef T value_type;
@@ -1596,8 +1596,8 @@ namespace tmv {
         enum { twoSj = isreal ? int(_stepj) : IntTraits<_stepj>::twoS };
         enum { minMN = IntTraits2<M,N>::min };
 
-        enum { bandknown = LO != TMV_UNKNOWN && HI != TMV_UNKNOWN };
-        enum { allknown = M != TMV_UNKNOWN && N != TMV_UNKNOWN && bandknown };
+        enum { bandknown = LO != Unknown && HI != Unknown };
+        enum { allknown = M != Unknown && N != Unknown && bandknown };
         enum { copyA = (
                 (_rowmajor ? RowMajor : _colmajor ? ColMajor : DiagMajor) |
                 (_fort ? FortranStyle : CStyle) |
@@ -1652,7 +1652,7 @@ namespace tmv {
         enum { nmAr = (Ar & ~AllStorageType) };
         enum { An = ndA & ~CheckAlias };
 
-        enum { xx = TMV_UNKNOWN }; // For brevity.
+        enum { xx = Unknown }; // For brevity.
         typedef ConstVectorView<T,colAr> const_col_sub_type;
         typedef ConstVectorView<T,rowAr> const_row_sub_type;
         typedef ConstSmallVectorView<T,minMN,_diagstep,diagA> const_diag_type;
@@ -1813,7 +1813,7 @@ namespace tmv {
             itssi(si), itssj(Sj) 
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE SmallBandMatrixView(
@@ -1822,8 +1822,8 @@ namespace tmv {
             itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(Si != TMV_UNKNOWN);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(Si != Unknown);
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE SmallBandMatrixView(T* m, int cs, int rs, int lo) :
@@ -1831,9 +1831,9 @@ namespace tmv {
             itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(HI != TMV_UNKNOWN); 
-            TMVStaticAssert(Si != TMV_UNKNOWN);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(HI != Unknown); 
+            TMVStaticAssert(Si != Unknown);
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE SmallBandMatrixView(T* m, int cs, int rs) :
@@ -1841,10 +1841,10 @@ namespace tmv {
             itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(LO != TMV_UNKNOWN);
-            TMVStaticAssert(HI != TMV_UNKNOWN); 
-            TMVStaticAssert(Si != TMV_UNKNOWN);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(LO != Unknown);
+            TMVStaticAssert(HI != Unknown); 
+            TMVStaticAssert(Si != Unknown);
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE SmallBandMatrixView(T* m, int cs) :
@@ -1852,11 +1852,11 @@ namespace tmv {
             itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(M != TMV_UNKNOWN);
-            TMVStaticAssert(LO != TMV_UNKNOWN);
-            TMVStaticAssert(HI != TMV_UNKNOWN); 
-            TMVStaticAssert(Si != TMV_UNKNOWN);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(M != Unknown);
+            TMVStaticAssert(LO != Unknown);
+            TMVStaticAssert(HI != Unknown); 
+            TMVStaticAssert(Si != Unknown);
+            TMVStaticAssert(Sj != Unknown); 
         }
 
         TMV_INLINE SmallBandMatrixView(T* m) :
@@ -1864,12 +1864,12 @@ namespace tmv {
             itssi(Si), itssj(Sj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(M != TMV_UNKNOWN);
-            TMVStaticAssert(N != TMV_UNKNOWN);
-            TMVStaticAssert(LO != TMV_UNKNOWN);
-            TMVStaticAssert(HI != TMV_UNKNOWN); 
-            TMVStaticAssert(Si != TMV_UNKNOWN);
-            TMVStaticAssert(Sj != TMV_UNKNOWN); 
+            TMVStaticAssert(M != Unknown);
+            TMVStaticAssert(N != Unknown);
+            TMVStaticAssert(LO != Unknown);
+            TMVStaticAssert(HI != Unknown); 
+            TMVStaticAssert(Si != Unknown);
+            TMVStaticAssert(Sj != Unknown); 
         }
 
 
@@ -1903,7 +1903,7 @@ namespace tmv {
         }
 
         TMV_INLINE ~SmallBandMatrixView() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
         }
@@ -2013,12 +2013,12 @@ namespace tmv {
                   Si == 1 ? ColMajor : Sj == 1 ? RowMajor : 0 ) |
                 ( M1::_checkalias ? CheckAlias : NoAlias ) |
                 NoDivider )};
-        enum { xx = TMV_UNKNOWN };
+        enum { xx = Unknown };
         enum { small = (
-                M != TMV_UNKNOWN || 
-                N != TMV_UNKNOWN ||
-                (Si != TMV_UNKNOWN && Si != 1) ||
-                (Sj != TMV_UNKNOWN && Sj != 1) )};
+                M != Unknown || 
+                N != Unknown ||
+                (Si != Unknown && Si != 1) ||
+                (Sj != Unknown && Sj != 1) )};
 
         typedef typename TypeSelect<small,
             ConstBandMatrixView<T,A> ,
@@ -2134,12 +2134,12 @@ namespace tmv {
                   Si == 1 ? ColMajor : Sj == 1 ? RowMajor : 0 ) |
                 ( M1::_checkalias ? CheckAlias : NoAlias ) |
                 NoDivider )};
-        enum { xx = TMV_UNKNOWN };
+        enum { xx = Unknown };
         enum { small = (
-                M != TMV_UNKNOWN || 
-                N != TMV_UNKNOWN ||
-                (Si != TMV_UNKNOWN && Si != 1) ||
-                (Sj != TMV_UNKNOWN && Sj != 1) )};
+                M != Unknown || 
+                N != Unknown ||
+                (Si != Unknown && Si != 1) ||
+                (Sj != Unknown && Sj != 1) )};
         enum { LO = M1::_upper ? 0 : xx };
         enum { HI = M1::_upper ? xx : 0 };
         enum { LO2 = M1::_upper ? 0 : IntTraits2<IntTraits<M>::Sm1,0>::max };
@@ -2277,10 +2277,10 @@ namespace tmv {
                 ( S == 1 ? DiagMajor : ColMajor ) |
                 ( M1::_checkalias ? CheckAlias : NoAlias ) |
                 NoDivider )};
-        enum { xx = TMV_UNKNOWN };
+        enum { xx = Unknown };
         enum { small = (
-                N != TMV_UNKNOWN ||
-                (S != TMV_UNKNOWN && S != 1) )};
+                N != Unknown ||
+                (S != Unknown && S != 1) )};
 
         typedef ConstSmallBandMatrixView<T,N,N,0,0,1,S-1,A> cb;
         typedef SmallBandMatrixView<T,N,N,0,0,1,S-1,A> b;
@@ -2399,7 +2399,6 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_TEXT
     template <class T, int M, int N, int LO, int HI, int A0, int A1>
     inline std::string TMV_Text(
         const SmallBandMatrix<T,M,N,LO,HI,A0,A1>& m)
@@ -2461,7 +2460,6 @@ namespace tmv {
         s << m.stepi()<<","<<m.stepj()<<")";
         return s.str();
     }
-#endif
 
 } // namespace tmv
 

@@ -130,8 +130,8 @@ namespace tmv {
     {
         static void call(const M1& m1, M2& m2)
         {
-            const int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
-            int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
+            const int M = cs == Unknown ? m2.colsize() : cs;
+            int N = rs == Unknown ? m2.rowsize() : rs;
             typedef typename M1::const_col_type M1c;
             typedef typename M2::col_type M2c;
             typedef typename M1c::const_iterator IT1;
@@ -193,8 +193,8 @@ namespace tmv {
     {
         static inline void call(const M1& m1, M2& m2)
         {
-            int M = cs == TMV_UNKNOWN ? m2.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m2.rowsize() : rs;
+            int M = cs == Unknown ? m2.colsize() : cs;
+            const int N = rs == Unknown ? m2.rowsize() : rs;
             typedef typename M1::const_row_type M1r;
             typedef typename M2::row_type M2r;
             typedef typename M1r::const_iterator IT1;
@@ -327,7 +327,7 @@ namespace tmv {
             } else if (m2.colsize() == m2.rowsize() &&
                        OppositeStorage(m1,m2)) {
                 // Then transpose
-                const bool sq = cs == rs && cs != TMV_UNKNOWN;
+                const bool sq = cs == rs && cs != Unknown;
                 Maybe<sq>::tranself(m2);
                 // And maybe conjugate
                 Maybe<sq && M1::_conj != int(M2::_conj)>::conjself(m2);
@@ -353,8 +353,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else
@@ -386,7 +386,7 @@ namespace tmv {
                 rs == 1 ? 2 : 
                 cs == 1 ? 3 :
                 TMV_OPT == 0 ? (allrm ? 21 : 11) :
-                ( cs != TMV_UNKNOWN && rs != TMV_UNKNOWN ) ? (
+                ( cs != Unknown && rs != Unknown ) ? (
                     ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T2)) ) ? (
                         ( M1::_rowmajor && M2::_rowmajor ) ? 25 : 15 ) :
                     allrm ? 21 : 
@@ -407,7 +407,7 @@ namespace tmv {
                 rs == 1 ? 2 : 
                 cs == 1 ? 3 :
                 TMV_OPT <= 1 ? -4 : 
-                cs == TMV_UNKNOWN || rs == TMV_UNKNOWN ? 31 :
+                cs == Unknown || rs == Unknown ? 31 :
                 -4;
             CopyM_Helper<algo,cs,rs,M1,M2>::call(m1,m2); 
         }
@@ -422,8 +422,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<T1,T2>::samebase &&
 #else

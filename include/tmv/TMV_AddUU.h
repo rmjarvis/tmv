@@ -111,7 +111,7 @@ namespace tmv {
 #ifdef PRINTALGO_AddUU
             std::cout<<"AddUU algo 11: N,s = "<<m3.size()<<','<<s<<std::endl;
 #endif
-            int N = (s == TMV_UNKNOWN ? m2.size() : s);
+            int N = (s == Unknown ? m2.size() : s);
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::const_col_sub_type M2c;
             typedef typename M3::col_sub_type M3c;
@@ -126,7 +126,7 @@ namespace tmv {
             IT3 it3 = m3.get_col(0,0,1).begin();
             int M=1;
             for(;N;--N) {
-                AddVV_Helper<-4,TMV_UNKNOWN,ix1,T1,M1c,ix2,T2,M2c,M3c>::call2(
+                AddVV_Helper<-4,Unknown,ix1,T1,M1c,ix2,T2,M2c,M3c>::call2(
                     M++,x1,it1,x2,it2,it3);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
@@ -146,7 +146,7 @@ namespace tmv {
 #ifdef PRINTALGO_AddUU
             std::cout<<"AddUU algo 12: N,s = "<<m3.size()<<','<<s<<std::endl;
 #endif
-            int N = (s == TMV_UNKNOWN ? m2.size() : s);
+            int N = (s == Unknown ? m2.size() : s);
             typedef typename M1::const_row_sub_type M1r;
             typedef typename M2::const_row_sub_type M2r;
             typedef typename M3::row_sub_type M3r;
@@ -160,7 +160,7 @@ namespace tmv {
             IT2 it2 = m2.get_row(0,0,N).begin().nonConj();
             IT3 it3 = m3.get_row(0,0,N).begin();
             for(;N;--N) {
-                AddVV_Helper<-4,TMV_UNKNOWN,ix1,T1,M1r,ix2,T2,M2r,M3r>::call2(
+                AddVV_Helper<-4,Unknown,ix1,T1,M1r,ix2,T2,M2r,M3r>::call2(
                     N,x1,it1,x2,it2,it3);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
@@ -453,7 +453,7 @@ namespace tmv {
             typedef typename M2::value_type TM2;
             typedef typename M3::value_type TM3;
             const bool inst =
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<TM1,TM2>::samebase &&
                 Traits2<TM1,TM3>::samebase &&
@@ -490,13 +490,13 @@ namespace tmv {
             TMVAssert(!m2.isunit());
             TMVAssert(!m3.isunit());
             typedef typename M3::value_type T3;
-            const int s2 = s > 20 ? TMV_UNKNOWN : s;
+            const int s2 = s > 20 ? Unknown : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)
             const int nops = IntTraits2<s2,s2p1>::safeprod;
             const bool unroll = 
                 s > 10 ? false :
-                s == TMV_UNKNOWN ? false :
+                s == Unknown ? false :
                 nops <= TMV_ADDUU_UNROLL;
             const int algo = 
                 unroll ? (
@@ -531,13 +531,13 @@ namespace tmv {
             TMVStaticAssert(!M3::_conj);
             TMVStaticAssert(M3::_upper);
             typedef typename M3::value_type T3;
-            const int s2 = s > 20 ? TMV_UNKNOWN : s;
+            const int s2 = s > 20 ? Unknown : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)
             const int nops = IntTraits2<s2,s2p1>::safeprod;
             const bool unroll = 
                 s > 10 ? false :
-                s == TMV_UNKNOWN ? false :
+                s == Unknown ? false :
                 nops <= TMV_ADDUU_UNROLL;
             const int algo = 
                 ( M1::_unit || M2::_unit ) ? 2 :
@@ -578,7 +578,7 @@ namespace tmv {
             typedef typename M2::value_type TM2;
             typedef typename M3::value_type TM3;
             const bool inst =
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
 #ifdef TMV_INST_MIX
                 Traits2<TM1,TM2>::samebase &&
                 Traits2<TM1,TM3>::samebase &&

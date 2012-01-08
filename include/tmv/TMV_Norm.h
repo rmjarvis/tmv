@@ -244,8 +244,8 @@ namespace tmv {
         {
             typedef typename M::value_type VT;
             const bool inst = 
-                (M::_colsize == TMV_UNKNOWN || M::_colsize > 16) &&
-                (M::_rowsize == TMV_UNKNOWN || M::_rowsize > 16) &&
+                (M::_colsize == Unknown || M::_colsize > 16) &&
+                (M::_rowsize == Unknown || M::_rowsize > 16) &&
                 Traits<VT>::isinst;
             const bool up = ShapeTraits<M::_shape>::upper;
             const bool lo = ShapeTraits<M::_shape>::lower;
@@ -267,7 +267,7 @@ namespace tmv {
         {
             typedef typename V::value_type VT;
             const bool inst = 
-                (V::_size == TMV_UNKNOWN || V::_size > 16) &&
+                (V::_size == Unknown || V::_size > 16) &&
                 Traits<VT>::isinst;
             const int algo = 
                 V::_conj ? 97 :
@@ -468,7 +468,7 @@ namespace tmv {
             const int cs = M::_colsize;
             const int rs = M::_rowsize;
             const int algo = 
-                cs != TMV_UNKNOWN && rs != TMV_UNKNOWN ? (
+                cs != Unknown && rs != Unknown ? (
                     cs < rs ? 1 : 11 ) :
                 ShapeTraits<M::_shape>::square ? 11 :
                 32;
@@ -615,7 +615,7 @@ namespace tmv {
             const int cs = M::_colsize;
             const int rs = M::_rowsize;
             const int algo = 
-                cs != TMV_UNKNOWN && rs != TMV_UNKNOWN ? (
+                cs != Unknown && rs != Unknown ? (
                     cs < rs ? 1 : 11 ) :
                 ShapeTraits<M::_shape>::square ? 11 :
                 32;

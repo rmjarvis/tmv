@@ -439,7 +439,7 @@ namespace tmv {
     { return getConstView().isSquare(); }
 
     template <class T>
-    Matrix<T> BandMatrixDivHelper2<T>::getM() const
+    Matrix<T> BandMatrixDivHelper2<T>::getMatrix() const
     { return Matrix<T>(getConstView()); }
 
     template <class T> 

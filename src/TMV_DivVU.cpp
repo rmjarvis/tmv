@@ -12,7 +12,7 @@ namespace tmv {
     template <class T1, class M2>
     static void DoTriLDivEq(VectorView<T1,Unit> v1, const M2& m2)
     {
-        const int xx = TMV_UNKNOWN;
+        const int xx = Unknown;
         if (m2.iscm()) 
             InlineTriLDivEq(v1,m2.cmView());
         else if (m2.isrm())
@@ -42,8 +42,6 @@ namespace tmv {
     template <class M2> 
     static void BlasTriLDivEq(VectorView<double> b, const M2& A, double)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
         int n=A.size();
         int lda = A.iscm()?A.stepj():A.stepi();
         int bs = b.step();
@@ -59,8 +57,6 @@ namespace tmv {
     static void BlasTriLDivEq(
         VectorView<std::complex<double> > b, const M2& A, std::complex<double>)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
         int n=A.size();
         int lda = A.iscm()?A.stepj():A.stepi();
         int bs = b.step();
@@ -87,8 +83,6 @@ namespace tmv {
     static void BlasTriLDivEq(
         VectorView<std::complex<double> > b, const M2& A, double)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
         int n=A.size();
         int lda = A.iscm()?A.stepj():A.stepi();
         int bs = 2*b.step();
@@ -110,8 +104,6 @@ namespace tmv {
     template <class M2> 
     static void BlasTriLDivEq(VectorView<float> b, const M2& A, float)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
         int n=A.size();
         int lda = A.iscm()?A.stepj():A.stepi();
         int bs = b.step();
@@ -127,8 +119,6 @@ namespace tmv {
     static void BlasTriLDivEq(
         VectorView<std::complex<float> > b, const M2& A, std::complex<float>)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
         int n=A.size();
         int lda = A.iscm()?A.stepj():A.stepi();
         int bs = b.step();
@@ -155,8 +145,6 @@ namespace tmv {
     static void BlasTriLDivEq(
         VectorView<std::complex<float> > b, const M2& A, float)
     {
-        TMVAssert(A.size() == b.size());
-        TMVAssert(b.size()>0);
         int n=A.size();
         int lda = A.iscm()?A.stepj():A.stepi();
         int bs = 2*b.step();

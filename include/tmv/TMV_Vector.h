@@ -301,13 +301,13 @@
 //
 //    xview_type xView()
 //        Returns a view of a Vector with the template step parameter 
-//        equal to TMV_UNKNOWN, rather than any known value.
+//        equal to Unknown, rather than any known value.
 //        Also, it is always CStyle indexing.
 //
 //    unitview_type unitView()
 //        Returns a view of a Vector with the template step parameter 
 //        equal to 1.  This is only useful if the original step parameter
-//        is TMV_UNKNOWN, since the actual step size must = 1.
+//        is Unknown, since the actual step size must = 1.
 //
 //    realpart_type realPart()
 //    imagpart_type imagPart()
@@ -404,7 +404,7 @@ namespace tmv {
         typedef const type& eval_type;
         typedef type copy_type;
 
-        enum { _size = TMV_UNKNOWN };
+        enum { _size = Unknown };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _step = 1 };
@@ -432,9 +432,9 @@ namespace tmv {
         typedef ConstVectorView<T> const_xview_type;
         typedef ConstVectorView<T,unitA> const_unitview_type;
         typedef ConstVectorView<T,conjA> const_conjugate_type;
-        typedef ConstSmallVectorView<T,TMV_UNKNOWN,-1,nonunitAsm> 
+        typedef ConstSmallVectorView<T,Unknown,-1,nonunitAsm> 
             const_reverse_type;
-        typedef ConstSmallVectorView<real_type,TMV_UNKNOWN,twoS,twosAsm> 
+        typedef ConstSmallVectorView<real_type,Unknown,twoS,twosAsm> 
             const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstVectorView<real_type,unitA> const_flatten_type;
@@ -454,8 +454,8 @@ namespace tmv {
         typedef VectorView<T> xview_type;
         typedef VectorView<T,unitA> unitview_type;
         typedef VectorView<T,conjA> conjugate_type;
-        typedef SmallVectorView<T,TMV_UNKNOWN,-1,nonunitAsm> reverse_type;
-        typedef SmallVectorView<real_type,TMV_UNKNOWN,twoS,twosAsm> realpart_type;
+        typedef SmallVectorView<T,Unknown,-1,nonunitAsm> reverse_type;
+        typedef SmallVectorView<real_type,Unknown,twoS,twosAsm> realpart_type;
         typedef realpart_type imagpart_type;
         typedef VectorView<real_type,A> flatten_type;
         typedef VectorView<T,A> nonconj_type;
@@ -496,7 +496,7 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVAssert(n>=0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::constr_value());
 #endif
         }
@@ -528,7 +528,7 @@ namespace tmv {
 
         ~Vector() 
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::destr_value());
 #endif
         }
@@ -569,12 +569,12 @@ namespace tmv {
         void resize(int n)
         {
             TMVAssert(n >= 0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::destr_value());
 #endif
             itssize = n;
             itsv.resize(n);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::constr_value());
 #endif
         }
@@ -612,10 +612,10 @@ namespace tmv {
         enum { copyA = Attrib<A>::fort ? FortranStyle : CStyle };
         typedef Vector<T,copyA> copy_type;
 
-        enum { _size = TMV_UNKNOWN };
+        enum { _size = Unknown };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
-        enum { _step = Attrib<A>::unit ? 1 : TMV_UNKNOWN };
+        enum { _step = Attrib<A>::unit ? 1 : Unknown };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _unit = Attrib<A>::unit };
@@ -643,10 +643,10 @@ namespace tmv {
         typedef ConstVectorView<T,unitA> const_unitview_type;
         typedef ConstVectorView<T,conjA> const_conjugate_type;
         typedef typename TypeSelect<_unit ,
-                ConstSmallVectorView<T,TMV_UNKNOWN,negS,nonunitAsm> ,
+                ConstSmallVectorView<T,Unknown,negS,nonunitAsm> ,
                 ConstVectorView<T,nonunitA> >::type const_reverse_type;
         typedef typename TypeSelect< (iscomplex && _unit) ,
-                ConstSmallVectorView<real_type,TMV_UNKNOWN,twoS,twosAsm> ,
+                ConstSmallVectorView<real_type,Unknown,twoS,twosAsm> ,
                 ConstVectorView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstVectorView<real_type,flatA> const_flatten_type;
@@ -690,7 +690,7 @@ namespace tmv {
             itsv(v), itssize(n), itsstep(_step) 
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_step != TMV_UNKNOWN);
+            TMVStaticAssert(_step != Unknown);
         }
 
         ConstVectorView(const type& v2) : 
@@ -738,7 +738,7 @@ namespace tmv {
         }
 
         ~ConstVectorView() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             itsv = 0; 
 #endif
         }
@@ -795,10 +795,10 @@ namespace tmv {
         enum { copyA = Attrib<A>::fort ? FortranStyle : CStyle };
         typedef Vector<T,copyA> copy_type;
 
-        enum { _size = TMV_UNKNOWN };
+        enum { _size = Unknown };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
-        enum { _step = Attrib<A>::unit ? 1 : TMV_UNKNOWN };
+        enum { _step = Attrib<A>::unit ? 1 : Unknown };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _unit = Attrib<A>::unit };
@@ -827,10 +827,10 @@ namespace tmv {
         typedef ConstVectorView<T,unitA> const_unitview_type;
         typedef ConstVectorView<T,conjA> const_conjugate_type;
         typedef typename TypeSelect<_unit ,
-                ConstSmallVectorView<T,TMV_UNKNOWN,negS,nonunitAsm> ,
+                ConstSmallVectorView<T,Unknown,negS,nonunitAsm> ,
                 ConstVectorView<T,nonunitA> >::type const_reverse_type;
         typedef typename TypeSelect< (iscomplex && _unit) ,
-                ConstSmallVectorView<real_type,TMV_UNKNOWN,twoS,twosAsm> ,
+                ConstSmallVectorView<real_type,Unknown,twoS,twosAsm> ,
                 ConstVectorView<real_type,twosA> >::type const_realpart_type;
         typedef const_realpart_type const_imagpart_type;
         typedef ConstVectorView<real_type,flatA> const_flatten_type;
@@ -851,10 +851,10 @@ namespace tmv {
         typedef VectorView<T,unitA> unitview_type;
         typedef VectorView<T,conjA> conjugate_type;
         typedef typename TypeSelect<_unit ,
-                SmallVectorView<T,TMV_UNKNOWN,negS,nonunitAsm> ,
+                SmallVectorView<T,Unknown,negS,nonunitAsm> ,
                 VectorView<T,nonunitA> >::type reverse_type;
         typedef typename TypeSelect< (iscomplex && _unit) ,
-                SmallVectorView<real_type,TMV_UNKNOWN,twoS,twosAsm> ,
+                SmallVectorView<real_type,Unknown,twoS,twosAsm> ,
                 VectorView<real_type,twosA> >::type realpart_type;
         typedef realpart_type imagpart_type;
         typedef VectorView<real_type,flatA> flatten_type;
@@ -901,7 +901,7 @@ namespace tmv {
             itsv(v), itssize(n), itsstep(_step) 
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_step != TMV_UNKNOWN);
+            TMVStaticAssert(_step != Unknown);
         }
 
         VectorView(const type& v2) : 
@@ -927,7 +927,7 @@ namespace tmv {
         }
 
         ~VectorView() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             itsv = 0; 
 #endif
         }
@@ -1025,7 +1025,6 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_TEXT
     template <class T, int A>
     inline std::string TMV_Text(const Vector<T,A>& v)
     {
@@ -1055,7 +1054,6 @@ namespace tmv {
         s << "("<<v.size()<<","<<v.step()<<")";
         return s.str();
     }
-#endif
 
 } // namespace tmv
 

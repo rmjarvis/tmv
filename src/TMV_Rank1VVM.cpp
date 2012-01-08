@@ -70,11 +70,6 @@ namespace tmv {
         double alpha, const ConstVectorView<double>& x,
         const ConstVectorView<double>& y, MatrixView<double,ColMajor> A)
     {
-        TMVAssert(A.colsize() == x.size());
-        TMVAssert(A.rowsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-
         int m = A.colsize();
         int n = A.rowsize();
         int xs = x.step();
@@ -99,11 +94,6 @@ namespace tmv {
         const ConstVectorView<std::complex<double>,C2>& y,
         MatrixView<std::complex<double>,ColMajor> A)
     {
-        TMVAssert(A.colsize() == x.size());
-        TMVAssert(A.rowsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-
         if (C1 && C2) {
             const Vector<std::complex<double> > xx = alpha * x;
             return BlasRank1Update(std::complex<double>(1.),xx.xView(),y,A);
@@ -158,11 +148,6 @@ namespace tmv {
         // (Ar + I Ai) += (ar + I ai) * x ^ (yr + I yi)
         // Ar += ar * x ^ yr - ai * x ^ yi
         // Ai += ai * x ^ yr + ar * x ^ yi
-        TMVAssert(A.colsize() == x.size());
-        TMVAssert(A.rowsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-
         int m = 2*A.colsize();
         int n = A.rowsize();
         int xs = 1;
@@ -201,11 +186,6 @@ namespace tmv {
         const ConstVectorView<double>& y,
         MatrixView<std::complex<double>,ColMajor> A)
     {
-        TMVAssert(A.colsize() == x.size());
-        TMVAssert(A.rowsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-
         int m = 2*A.colsize();
         int n = A.rowsize();
         int xs = 1;
@@ -242,11 +222,6 @@ namespace tmv {
         // (Ar + I Ai) += (ar + I ai) * x ^ y
         // Ar += ar * x ^ y
         // Ai += ai * x ^ y
-        TMVAssert(A.colsize() == x.size());
-        TMVAssert(A.rowsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-
         int m = 2*A.colsize();
         int n = A.rowsize();
         int xs = 1;
@@ -294,11 +269,6 @@ namespace tmv {
         float alpha, const ConstVectorView<float>& x,
         const ConstVectorView<float>& y, MatrixView<float,ColMajor> A)
     {
-        TMVAssert(A.colsize() == x.size());
-        TMVAssert(A.rowsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-
         int m = A.colsize();
         int n = A.rowsize();
         int xs = x.step();
@@ -323,11 +293,6 @@ namespace tmv {
         const ConstVectorView<std::complex<float>,C2>& y,
         MatrixView<std::complex<float>,ColMajor> A)
     {
-        TMVAssert(A.colsize() == x.size());
-        TMVAssert(A.rowsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-
         if (C1 && C2) {
             const Vector<std::complex<float> > xx = alpha * x;
             return BlasRank1Update(std::complex<float>(1.),xx.xView(),y,A);
@@ -382,11 +347,6 @@ namespace tmv {
         // (Ar + I Ai) += (ar + I ai) * x ^ (yr + I yi)
         // Ar += ar * x ^ yr - ai * x ^ yi
         // Ai += ai * x ^ yr + ar * x ^ yi
-        TMVAssert(A.colsize() == x.size());
-        TMVAssert(A.rowsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-
         int m = 2*A.colsize();
         int n = A.rowsize();
         int xs = 1;
@@ -425,11 +385,6 @@ namespace tmv {
         const ConstVectorView<float>& y,
         MatrixView<std::complex<float>,ColMajor> A)
     {
-        TMVAssert(A.colsize() == x.size());
-        TMVAssert(A.rowsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-
         int m = 2*A.colsize();
         int n = A.rowsize();
         int xs = 1;
@@ -466,11 +421,6 @@ namespace tmv {
         // (Ar + I Ai) += (ar + I ai) * x ^ y
         // Ar += ar * x ^ y
         // Ai += ai * x ^ y
-        TMVAssert(A.colsize() == x.size());
-        TMVAssert(A.rowsize() == y.size());
-        TMVAssert(x.size() > 0);
-        TMVAssert(y.size() > 0);
-
         int m = 2*A.colsize();
         int n = A.rowsize();
         int xs = 1;

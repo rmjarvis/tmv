@@ -258,7 +258,6 @@ namespace tmv {
 #undef CT
 #undef CCT
 
-#ifndef TMV_NO_ALIAS_CHECK
     // Have SameStorage look into a ProdXV object:
     template <int ix1, class T1, class V1, class V2>
     TMV_INLINE bool SameStorage(
@@ -272,10 +271,8 @@ namespace tmv {
     TMV_INLINE bool SameStorage(
         const ProdXV<ix1,T1,V1>& v1, const ProdXV<ix2,T2,V2>& v2)
     { return SameStorage(v1.getV().vec(),v2.getV().vec()); }
-#endif
 
 
-#ifdef TMV_TEXT
     template <int ix, class T, class V>
     inline std::string TMV_Text(const ProdXV<ix,T,V>& pxv)
     {
@@ -284,7 +281,6 @@ namespace tmv {
         s << " , "<<TMV_Text(pxv.getV())<<" >";
         return s.str();
     }
-#endif
 
 
 } // namespace tmv

@@ -34,10 +34,14 @@ if env['MEM_TEST']:
     env1.Append(CPPDEFINES=['TMV_MEM_TEST'])
 if env['XTEST'] > 0:
     env1.Append(CPPDEFINES=['XTEST=' + env['XTEST']])
-if ((int(env['XTEST']) & 64) and not env['WITH_BLAS']):
+if (int(env['XTEST']) & 64) and not env['WITH_BLAS']:
     env1.Append(CPPDEFINES=['TMV_INITIALIZE_NAN'])
 if env['DEBUG'] or env['TEST_DEBUG']:
     env1.Append(CPPDEFINES=['XXD'])
+else:
+    env1.Append(CPPDEFINES=['NDEBUG'])
+if env['DEBUG']:
+    env1.Append(CPPDEFINES=['TMV_EXTRA_DEBUG'])
 
 if not env['INST_FLOAT']:
     env1.Append(CPPDEFINES=['TMV_NO_INST_FLOAT'])
@@ -59,8 +63,6 @@ if env['TEST_LONGDOUBLE']:
     env1.Append(CPPDEFINES=['TEST_LONGDOUBLE'])
 if env['TEST_INT']:
     env1.Append(CPPDEFINES=['TEST_INT'])
-if not env['DEBUG'] and not env['TEST_DEBUG']:
-    env1.Append(CPPDEFINES=['NDEBUG'])
 
 
 env1b = env1.Clone()

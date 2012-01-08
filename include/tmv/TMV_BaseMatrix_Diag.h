@@ -785,9 +785,9 @@ namespace tmv {
     class DiagMatrixView;
     template <class T, int N, int A=0>
     class SmallDiagMatrix;
-    template <class T, int N, int S=TMV_UNKNOWN, int A=0>
+    template <class T, int N, int S=Unknown, int A=0>
     class ConstSmallDiagMatrixView;
-    template <class T, int N, int S=TMV_UNKNOWN, int A=0>
+    template <class T, int N, int S=Unknown, int A=0>
     class SmallDiagMatrixView;
 
     // This helper class helps decide calc_type for composite classes:
@@ -795,13 +795,13 @@ namespace tmv {
     struct MCopyHelper<T,Diag,cs,rs,A>
     { typedef SmallDiagMatrix<T,cs,A> type; };
     template <class T, int rs, int A>
-    struct MCopyHelper<T,Diag,TMV_UNKNOWN,rs,A>
+    struct MCopyHelper<T,Diag,Unknown,rs,A>
     { typedef SmallDiagMatrix<T,rs,A> type; };
     template <class T, int cs, int A>
-    struct MCopyHelper<T,Diag,cs,TMV_UNKNOWN,A>
+    struct MCopyHelper<T,Diag,cs,Unknown,A>
     { typedef SmallDiagMatrix<T,cs,A> type; };
     template <class T, int A>
-    struct MCopyHelper<T,Diag,TMV_UNKNOWN,TMV_UNKNOWN,A>
+    struct MCopyHelper<T,Diag,Unknown,Unknown,A>
     { typedef DiagMatrix<T,A|NoAlias> type; };
 
     template <class T, int cs, int rs, int si, int sj, int A>
@@ -811,7 +811,7 @@ namespace tmv {
         typedef ConstSmallDiagMatrixView<T,cs,si,A> ctype; 
     };
     template <class T, int si, int sj, int A>
-    struct MViewHelper<T,Diag,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,A>
+    struct MViewHelper<T,Diag,Unknown,Unknown,si,sj,A>
     {
         enum { A2 = A | (si == 1 ? Unit : NonUnit) | NoAlias };
         typedef DiagMatrixView<T,A2> type; 
@@ -869,7 +869,6 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_TEXT
     template <class M>
     inline std::string TMV_Text(const BaseMatrix_Diag<M>& m)
     {
@@ -885,7 +884,6 @@ namespace tmv {
         s << "BaseMatrix_Diag_Mutable< "<<TMV_Text(m.mat())<<" >";
         return s.str();
     }
-#endif
 
 } // namespace tmv
 

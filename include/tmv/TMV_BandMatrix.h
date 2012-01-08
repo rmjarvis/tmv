@@ -12,12 +12,12 @@
 // As with the regular Matrix class, there are two template arguments.
 // The first is simply the type of the data.
 // The second, which is optional, specifies the known attributes of
-// the matrix.  The valid options are:
-// ColMajor or RowMajor or DiagMajor
-// CStyle or FortranStyle
-// WithDivider or NoDivider
+// the matrix.  The valid attributes are:
+// - ColMajor or RowMajor or DiagMajor
+// - CStyle or FortranStyle
+// - WithDivider or NoDivider
 //
-// The options are treated as a bit field, so you | them together to 
+// The attributes are treated as a bit field, so you | them together to 
 // get the complete value, just like with a regular Matrix.
 // The default values are ColMajor, CStyle and WithDivider, so you 
 // only need to specify changes to that.
@@ -121,17 +121,13 @@
 //        the orginial Matrix.
 //
 //    ConstBandMatrixView BandMatrixViewOf(const T* m,
-//            int colsize, int rowsize, int nlo, int nhi, 
-//            StorageType stor)
+//            colsize, rowsize, nlo, nhi, stor)
 //    BandMatrixView BandMatrixViewOf(const T* m, 
-//            int colsize, int rowsize, int nlo, int nhi, 
-//            StorageType stor)
+//            colsize, rowsize, nlo, nhi, stor)
 //    ConstBandMatrixView BandMatrixViewOf(const T* m,
-//            int colsize, int rowsize, int nlo, int nhi, 
-//            int stepi, int stepj)
+//            colsize, rowsize, nlo, nhi, stepi, stepj)
 //    BandMatrixView BandMatrixViewOf(const T* m, 
-//            int colsize, int rowsize, int nlo, int nhi, 
-//            int stepi, int stepj)
+//            colsize, rowsize, nlo, nhi, stepi, stepj)
 //        Makes a BandMatrixView of the elements in m using the actual
 //        element m for the storage.  This is essentially the same as the 
 //        constructor with (const T* m), except that the data isn't duplicated.
@@ -387,8 +383,14 @@ namespace tmv {
         ~BandMatrixDivHelper2();
 
         void setDiv() const;
-        Matrix<T> getM() const;
+        Matrix<T> getMatrix() const;
         bool mIsSquare() const;
+
+        void divideUsing(DivType dt) const
+        {
+            TMVAssert(dt == tmv::LU || dt == tmv::QR || dt == tmv::SV);
+            DivHelper<T>::divideUsing(dt);
+        }
 
 #if 0
         bandlud_type lud() const;
@@ -518,19 +520,19 @@ namespace tmv {
         typedef const type& eval_type;
         typedef BandMatrix<T,A01> copy_type;
 
-        enum { _colsize = TMV_UNKNOWN };
-        enum { _rowsize = TMV_UNKNOWN };
-        enum { _nlo = TMV_UNKNOWN };
-        enum { _nhi = TMV_UNKNOWN };
+        enum { _colsize = Unknown };
+        enum { _rowsize = Unknown };
+        enum { _nlo = Unknown };
+        enum { _nhi = Unknown };
         enum { _shape = Band };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
         enum { _colmajor = Attrib<A>::colmajor };
         enum { _diagmajor = Attrib<A>::diagmajor };
-        enum { _stepi = (_colmajor ? 1 : TMV_UNKNOWN) };
-        enum { _stepj = (_rowmajor ? 1 : TMV_UNKNOWN) };
-        enum { _diagstep = (_diagmajor ? 1 : TMV_UNKNOWN) };
+        enum { _stepi = (_colmajor ? 1 : Unknown) };
+        enum { _stepj = (_rowmajor ? 1 : Unknown) };
+        enum { _diagstep = (_diagmajor ? 1 : Unknown) };
         enum { _conj = false };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _canlin = true };
@@ -607,7 +609,7 @@ namespace tmv {
         typedef ConstBandMatrixView<T,ndA> const_upperbandoff_type;
         typedef ConstBandMatrixView<T,ndA> const_lowerbandoff_type;
 
-        enum { xx = TMV_UNKNOWN }; // Just for brevity.
+        enum { xx = Unknown }; // Just for brevity.
         typedef typename TypeSelect< iscomplex ,
                 ConstSmallBandMatrixView<real_type,xx,xx,xx,xx,twoSi,twoSj,twosAsm> ,
                 ConstBandMatrixView<real_type,twosA> >::type const_realpart_type;
@@ -726,7 +728,7 @@ namespace tmv {
             TMVAssert(cs >= 0 && rs >= 0);
             TMVAssert(lo >= 0 && lo < cs);
             TMVAssert(hi >= 0 && hi < rs);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::constr_value());
 #endif
         }
@@ -846,7 +848,7 @@ namespace tmv {
 
         ~BandMatrix() 
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::destr_value());
 #endif
         }
@@ -953,7 +955,7 @@ namespace tmv {
             TMVAssert(cs >= 0 && rs >= 0);
             TMVAssert(lo >= 0 && lo < cs);
             TMVAssert(hi >= 0 && hi < rs);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::destr_value());
 #endif
             itscs = cs;
@@ -967,7 +969,7 @@ namespace tmv {
             itssi = _rowmajor ? lo+hi : _colmajor ? 1 : 
                   rs >= cs ? 1-cs : -rs;
             itssj = _rowmajor ? 1 : _colmajor ? lo+hi : -itssi+1;
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::constr_value());
 #endif
         }
@@ -1029,10 +1031,10 @@ namespace tmv {
         typedef const type& calc_type;
         typedef const type& eval_type;
 
-        enum { _colsize = TMV_UNKNOWN };
-        enum { _rowsize = TMV_UNKNOWN };
-        enum { _nlo = TMV_UNKNOWN };
-        enum { _nhi = TMV_UNKNOWN };
+        enum { _colsize = Unknown };
+        enum { _rowsize = Unknown };
+        enum { _nlo = Unknown };
+        enum { _nhi = Unknown };
         enum { _unit = false };
         enum { _nonunit = true };
         enum { _shape = Band };
@@ -1041,9 +1043,9 @@ namespace tmv {
         enum { _rowmajor = Attrib<A>::rowmajor };
         enum { _colmajor = Attrib<A>::colmajor };
         enum { _diagmajor = Attrib<A>::diagmajor };
-        enum { _stepi = (_colmajor ? 1 : TMV_UNKNOWN) };
-        enum { _stepj = (_rowmajor ? 1 : TMV_UNKNOWN) };
-        enum { _diagstep = (_diagmajor ? 1 : TMV_UNKNOWN) };
+        enum { _stepi = (_colmajor ? 1 : Unknown) };
+        enum { _stepj = (_rowmajor ? 1 : Unknown) };
+        enum { _diagstep = (_diagmajor ? 1 : Unknown) };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _canlin = false };
@@ -1125,7 +1127,7 @@ namespace tmv {
         typedef ConstBandMatrixView<T,ndA> const_upperbandoff_type;
         typedef ConstBandMatrixView<T,ndA> const_lowerbandoff_type;
 
-        enum { xx = TMV_UNKNOWN }; // Just for brevity.
+        enum { xx = Unknown }; // Just for brevity.
         typedef typename TypeSelect< iscomplex && (_colmajor||_rowmajor||_diagmajor) ,
                 ConstSmallBandMatrixView<real_type,xx,xx,xx,xx,twoSi,twoSj,twosAsm> ,
                 ConstBandMatrixView<real_type,twosA> >::type const_realpart_type;
@@ -1182,7 +1184,7 @@ namespace tmv {
             itssi(si), itssj(_stepj) 
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_stepj != TMV_UNKNOWN); 
+            TMVStaticAssert(_stepj != Unknown); 
         }
 
         TMV_INLINE ConstBandMatrixView(
@@ -1191,8 +1193,8 @@ namespace tmv {
             itssi(_stepi), itssj(_stepj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_stepi != TMV_UNKNOWN);
-            TMVStaticAssert(_stepj != TMV_UNKNOWN); 
+            TMVStaticAssert(_stepi != Unknown);
+            TMVStaticAssert(_stepj != Unknown); 
         }
 
         TMV_INLINE ConstBandMatrixView(const type& m2) :
@@ -1246,7 +1248,7 @@ namespace tmv {
         }
 
         TMV_INLINE ~ConstBandMatrixView() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
         }
@@ -1325,10 +1327,10 @@ namespace tmv {
         typedef const type& calc_type;
         typedef const type& eval_type;
 
-        enum { _colsize = TMV_UNKNOWN };
-        enum { _rowsize = TMV_UNKNOWN };
-        enum { _nlo = TMV_UNKNOWN };
-        enum { _nhi = TMV_UNKNOWN };
+        enum { _colsize = Unknown };
+        enum { _rowsize = Unknown };
+        enum { _nlo = Unknown };
+        enum { _nhi = Unknown };
         enum { _unit = false };
         enum { _nonunit = true };
         enum { _shape = Band };
@@ -1337,9 +1339,9 @@ namespace tmv {
         enum { _rowmajor = Attrib<A>::rowmajor };
         enum { _colmajor = Attrib<A>::colmajor };
         enum { _diagmajor = Attrib<A>::diagmajor };
-        enum { _stepi = (_colmajor ? 1 : TMV_UNKNOWN) };
-        enum { _stepj = (_rowmajor ? 1 : TMV_UNKNOWN) };
-        enum { _diagstep = TMV_UNKNOWN };
+        enum { _stepi = (_colmajor ? 1 : Unknown) };
+        enum { _stepj = (_rowmajor ? 1 : Unknown) };
+        enum { _diagstep = Unknown };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _canlin = false };
@@ -1422,7 +1424,7 @@ namespace tmv {
         typedef ConstBandMatrixView<T,ndA> const_upperbandoff_type;
         typedef ConstBandMatrixView<T,ndA> const_lowerbandoff_type;
 
-        enum { xx = TMV_UNKNOWN }; // Just for brevity.
+        enum { xx = Unknown }; // Just for brevity.
         typedef typename TypeSelect< iscomplex && (_colmajor||_rowmajor||_diagmajor) ,
                 ConstSmallBandMatrixView<real_type,xx,xx,xx,xx,twoSi,twoSj,twosAsm> ,
                 ConstBandMatrixView<real_type,twosA> >::type const_realpart_type;
@@ -1527,7 +1529,7 @@ namespace tmv {
             itssi(si), itssj(_stepj) 
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_stepj != TMV_UNKNOWN); 
+            TMVStaticAssert(_stepj != Unknown); 
         }
 
         TMV_INLINE BandMatrixView(T* m, int cs, int rs, int lo, int hi) :
@@ -1535,8 +1537,8 @@ namespace tmv {
             itssi(_stepi), itssj(_stepj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_stepi != TMV_UNKNOWN);
-            TMVStaticAssert(_stepj != TMV_UNKNOWN); 
+            TMVStaticAssert(_stepi != Unknown);
+            TMVStaticAssert(_stepj != Unknown); 
         }
 
         TMV_INLINE BandMatrixView(const type& m2) :
@@ -1569,7 +1571,7 @@ namespace tmv {
         }
 
         TMV_INLINE ~BandMatrixView() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
         }
@@ -1781,7 +1783,6 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_TEXT
     template <class T, int A0, int A1>
     inline std::string TMV_Text(const BandMatrix<T,A0,A1>& m)
     {
@@ -1818,7 +1819,6 @@ namespace tmv {
         s << m.stepi()<<","<<m.stepj()<<")";
         return s.str();
     }
-#endif
 
 } // namespace tmv
 

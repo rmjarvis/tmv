@@ -77,29 +77,12 @@ namespace tmv {
         double alpha, const ConstMatrixView<double,C1>& A,
         const ConstMatrixView<double,C2>& B, MatrixView<double> C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-
         int m = C.colsize();
         int n = C.rowsize();
         int k = A.rowsize();
         int lda = BlasIsCM(A)?A.stepj():A.stepi();
         int ldb = BlasIsCM(B)?B.stepj():B.stepi();
         int ldc = C.stepj();
-#if 0
-        if (ldc < m) {
-            // This is illegal as an argument do dgemm,
-            // however it is possible if C is rowmajor but n = 1
-            // Then stepi = stepj = 1.
-            // So just set ldc = m in this case.
-            TMVAssert(n == 1 && ldc == 1);
-            ldc = m;
-        }
-#endif
         double xbeta(1.);
         BLASNAME(dgemm) (
             BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
@@ -115,13 +98,6 @@ namespace tmv {
         const ConstMatrixView<std::complex<double>,C2>& B,
         MatrixView<std::complex<double> > C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-
         if (BlasIsCM(A) && A.isconj()) {
             const Matrix<std::complex<double>,ColMajor> AA = alpha*A;
             DoAddMultMM(std::complex<double>(1),AA.xView(),B,C);
@@ -135,12 +111,6 @@ namespace tmv {
             int lda = BlasIsCM(A)?A.stepj():A.stepi();
             int ldb = BlasIsCM(B)?B.stepj():B.stepi();
             int ldc = C.stepj();
-#if 0
-            if (ldc < m) {
-                TMVAssert(n == 1 && ldc == 1);
-                ldc = m;
-            }
-#endif
             std::complex<double> xbeta(1.);
             BLASNAME(zgemm) (
                 BLASCM BlasIsCM(A)?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
@@ -158,13 +128,6 @@ namespace tmv {
         const ConstMatrixView<double,C2>& B,
         MatrixView<std::complex<double> > C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-
         if (BlasIsCM(A) && !A.isconj() && TMV_IMAG(alpha)==0.) {
             int m = 2*C.colsize();
             int n = C.rowsize();
@@ -172,12 +135,6 @@ namespace tmv {
             int lda = 2*A.stepj();
             int ldb = BlasIsCM(B)?B.stepj():B.stepi();
             int ldc = 2*C.stepj();
-#if 0
-            if (ldc < m) {
-                TMVAssert(n == 1 && ldc == 2);
-                ldc = 2*m;
-            }
-#endif
             double xalpha(TMV_REAL(alpha));
             double xbeta(1.);
             BLASNAME(dgemm) (
@@ -217,13 +174,6 @@ namespace tmv {
         const ConstMatrixView<std::complex<double>,C2>& B,
         MatrixView<std::complex<double> > C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-
         if (TMV_IMAG(alpha) == 0.) {
             Matrix<double,ColMajor> Bx = B.realPart();
             Matrix<double,ColMajor> Cx = TMV_REAL(alpha)*A*Bx;
@@ -253,13 +203,6 @@ namespace tmv {
         const ConstMatrixView<double,C2>& B,
         MatrixView<std::complex<double> > C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-
         Matrix<double,ColMajor> Cx = A*B;
         C += alpha*Cx;
     }
@@ -271,25 +214,12 @@ namespace tmv {
         float alpha, const ConstMatrixView<float,C1>& A,
         const ConstMatrixView<float,C2>& B, MatrixView<float> C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-
         int m = C.colsize();
         int n = C.rowsize();
         int k = A.rowsize();
         int lda = BlasIsCM(A)?A.stepj():A.stepi();
         int ldb = BlasIsCM(B)?B.stepj():B.stepi();
         int ldc = C.stepj();
-#if 0
-        if (ldc < m) {
-            TMVAssert(n == 1 && ldc == 1);
-            ldc = m;
-        }
-#endif
         float xbeta(1.F);
         BLASNAME(sgemm) (
             BLASCM BlasIsCM(A)?BLASCH_NT:BLASCH_T,
@@ -305,13 +235,6 @@ namespace tmv {
         const ConstMatrixView<std::complex<float>,C2>& B,
         MatrixView<std::complex<float> > C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-
         if (BlasIsCM(A) && A.isconj()) {
             const Matrix<std::complex<float>,ColMajor> AA = alpha*A;
             DoAddMultMM(std::complex<float>(1),AA.xView(),B,C);
@@ -325,12 +248,6 @@ namespace tmv {
             int lda = BlasIsCM(A)?A.stepj():A.stepi();
             int ldb = BlasIsCM(B)?B.stepj():B.stepi();
             int ldc = C.stepj();
-#if 0
-            if (ldc < m) {
-                TMVAssert(n == 1 && ldc == 1);
-                ldc = m;
-            }
-#endif
             std::complex<float> xbeta(1.F);
             BLASNAME(cgemm) (
                 BLASCM BlasIsCM(A)?BLASCH_NT:A.isconj()?BLASCH_CT:BLASCH_T,
@@ -348,13 +265,6 @@ namespace tmv {
         const ConstMatrixView<float,C2>& B,
         MatrixView<std::complex<float> > C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-
         if (BlasIsCM(A) && !A.isconj() && TMV_IMAG(alpha)==0.) {
             int m = 2*C.colsize();
             int n = C.rowsize();
@@ -362,12 +272,6 @@ namespace tmv {
             int lda = 2*A.stepj();
             int ldb = BlasIsCM(B)?B.stepj():B.stepi();
             int ldc = 2*C.stepj();
-#if 0
-            if (ldc < m) {
-                TMVAssert(n == 1 && ldc == 2);
-                ldc = 2*m;
-            }
-#endif
             float xalpha(TMV_REAL(alpha));
             float xbeta(1.F);
             BLASNAME(sgemm) (
@@ -407,13 +311,6 @@ namespace tmv {
         const ConstMatrixView<std::complex<float>,C2>& B,
         MatrixView<std::complex<float> > C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-
         if (TMV_IMAG(alpha) == 0.F) {
             Matrix<float,ColMajor> Bx = B.realPart();
             Matrix<float,ColMajor> Cx = TMV_REAL(alpha)*A*Bx;
@@ -443,13 +340,6 @@ namespace tmv {
         const ConstMatrixView<float,C2>& B,
         MatrixView<std::complex<float> > C)
     {
-        TMVAssert(A.colsize() == C.colsize());
-        TMVAssert(A.rowsize() == B.colsize());
-        TMVAssert(B.rowsize() == C.rowsize());
-        TMVAssert(C.colsize() > 0);
-        TMVAssert(C.rowsize() > 0);
-        TMVAssert(A.rowsize() > 0);
-
         Matrix<float,ColMajor> Cx = A*B;
         C += alpha*Cx;
     }

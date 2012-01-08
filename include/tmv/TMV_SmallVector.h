@@ -173,7 +173,7 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(N >= 0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::constr_value());
 #endif
         }
@@ -205,7 +205,7 @@ namespace tmv {
 
         TMV_INLINE_ND ~SmallVector()
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::destr_value());
 #endif
         }
@@ -281,7 +281,7 @@ namespace tmv {
         enum { twoS = isreal ? S : IntTraits<S>::twoS };
         enum { twoN = isreal ? N : IntTraits<N>::twoS };
 
-        enum { known = N != TMV_UNKNOWN };
+        enum { known = N != Unknown };
         enum { copyA = _fort ? FortranStyle : CStyle };
         typedef typename TypeSelect<known, 
                 SmallVector<T,N,copyA>,
@@ -356,14 +356,14 @@ namespace tmv {
             itsv(v), itssize(n), itsstep(S) 
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(S != TMV_UNKNOWN); 
+            TMVStaticAssert(S != Unknown); 
         }
 
         ConstSmallVectorView(const T* v) :
             itsv(v), itssize(N), itsstep(S) 
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(N != TMV_UNKNOWN); TMVStaticAssert(S != TMV_UNKNOWN); 
+            TMVStaticAssert(N != Unknown); TMVStaticAssert(S != Unknown); 
         }
 
         ConstSmallVectorView(const type& v2) : 
@@ -412,7 +412,7 @@ namespace tmv {
         }
 
         ~ConstSmallVectorView() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             itsv = 0; 
 #endif
         }
@@ -480,7 +480,7 @@ namespace tmv {
         enum { twoS = isreal ? S : IntTraits<S>::twoS };
         enum { twoN = isreal ? N : IntTraits<N>::twoS };
 
-        enum { known = N != TMV_UNKNOWN };
+        enum { known = N != Unknown };
         enum { copyA = _fort ? FortranStyle : CStyle };
         typedef typename TypeSelect<known, 
                 SmallVector<T,N,copyA>,
@@ -576,13 +576,13 @@ namespace tmv {
             itsv(v), itssize(n), itsstep(S) 
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(S != TMV_UNKNOWN); 
+            TMVStaticAssert(S != Unknown); 
         }
 
         SmallVectorView(T* v) : itsv(v), itssize(N), itsstep(S) 
         { 
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(N != TMV_UNKNOWN);  TMVStaticAssert(S != TMV_UNKNOWN); 
+            TMVStaticAssert(N != Unknown);  TMVStaticAssert(S != Unknown); 
         }
 
         SmallVectorView(const type& v2) : 
@@ -608,7 +608,7 @@ namespace tmv {
         }
 
         ~SmallVectorView() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             itsv = 0; 
 #endif
         }
@@ -692,7 +692,6 @@ namespace tmv {
     // TMV_Text functions
     //
 
-#ifdef TMV_TEXT
     template <class T, int N, int A>
     inline std::string TMV_Text(const SmallVector<T,N,A>& v)
     {
@@ -726,7 +725,6 @@ namespace tmv {
         s << "("<<v.size()<<","<<v.step()<<")";
         return s.str();
     }
-#endif
 
 } // namespace tmv
 

@@ -58,7 +58,7 @@ namespace tmv {
                 TMV_Text(comp)<<"  "<<RT(x)<<std::endl;
 #endif
 
-            const int N = (s == TMV_UNKNOWN ? m.size() : s);
+            const int N = (s == Unknown ? m.size() : s);
             typedef typename M1::const_offdiag_type Mo;
             Mo mo = m.offDiag();
             const int sm1 = IntTraits2<s,-1>::sum;
@@ -96,12 +96,12 @@ namespace tmv {
             std::cout<<"SumElementsU algo 11: "<<
                 TMV_Text(comp)<<"  "<<RT(x)<<std::endl;
 #endif
-            const int N = (s == TMV_UNKNOWN ? m.size() : s);
+            const int N = (s == Unknown ? m.size() : s);
             typedef typename M1::const_col_sub_type Mc;
             ret sum(0);
             for(int j=0;j<N;++j) {
                 Mc mc = m.get_col(j,0,j+1);
-                sum += SumElementsV_Helper<-3,TMV_UNKNOWN,comp,ix,ret,Mc>::call(mc,x);
+                sum += SumElementsV_Helper<-3,Unknown,comp,ix,ret,Mc>::call(mc,x);
             }
             return sum;
         }
@@ -118,12 +118,12 @@ namespace tmv {
             std::cout<<"SumElementsU algo 12: "<<
                 TMV_Text(comp)<<"  "<<RT(x)<<std::endl;
 #endif
-            const int N = (s == TMV_UNKNOWN ? m.size() : s);
+            const int N = (s == Unknown ? m.size() : s);
             typedef typename M1::const_row_sub_type Mr;
             ret sum(0);
             for(int i=0;i<N;++i) {
                 Mr mr = m.get_row(i,i,N);
-                sum += SumElementsV_Helper<-3,TMV_UNKNOWN,comp,ix,ret,Mr>::call(mr,x);
+                sum += SumElementsV_Helper<-3,Unknown,comp,ix,ret,Mr>::call(mr,x);
             }
             return sum;
         }
@@ -346,14 +346,14 @@ namespace tmv {
             TMVStaticAssert(M1::_upper);
             TMVStaticAssert(!M1::_unit);
             TMVAssert(!m.isunit());
-            const int s2 = s > 20 ? TMV_UNKNOWN : s;
+            const int s2 = s > 20 ? Unknown : s;
             const int s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
             const int nops = IntTraits<IntTraits2<s2,s2p1>::safeprod>::halfS;
             const bool unroll = 
                 s > 10 ? false :
-                s == TMV_UNKNOWN ? false :
-                nops == TMV_UNKNOWN ? false :
+                s == Unknown ? false :
+                nops == Unknown ? false :
                 // Norm is faster with the regular algorithm except for 
                 // very small matrices.
                 (s > 3 && comp == NormComp) ? false :
@@ -405,7 +405,7 @@ namespace tmv {
         {
             typedef typename M1::value_type VT;
             const bool inst = 
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
                 Traits<VT>::isinst;
             const int algo =
                 M1::_lower ? 96 :
@@ -604,7 +604,7 @@ namespace tmv {
         static ret call(const M1& m)
         {
             typedef typename M1::const_col_sub_type Mc;
-            const int N = (s == TMV_UNKNOWN ? m.size() : s);
+            const int N = (s == Unknown ? m.size() : s);
             ret max(0);
             for(int j=0;j<N;++j) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,Mc>::call(
@@ -623,7 +623,7 @@ namespace tmv {
         static ret call(const M1& m)
         {
             typedef typename M1::const_row_sub_type Mr;
-            const int N = (s == TMV_UNKNOWN ? m.size() : s);
+            const int N = (s == Unknown ? m.size() : s);
             ret max(0);
             for(int i=0;i<N;++i) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,Mr>::call(
@@ -643,7 +643,7 @@ namespace tmv {
         {
             typedef typename M1::const_col_sub_type Mc;
             typedef tmv::Vector<ret> V;
-            const int N = (s == TMV_UNKNOWN ? m.size() : s);
+            const int N = (s == Unknown ? m.size() : s);
             if (N == 0) return ret(0);
             else {
                 V temp(N);
@@ -665,7 +665,7 @@ namespace tmv {
         {
             typedef typename M1::const_row_sub_type Mr;
             typedef tmv::Vector<ret> V;
-            const int N = (s == TMV_UNKNOWN ? m.size() : s);
+            const int N = (s == Unknown ? m.size() : s);
             if (N == 0) return ret(0);
             else {
                 V temp(N);
@@ -774,7 +774,7 @@ namespace tmv {
         {
             typedef typename M1::value_type VT;
             const bool inst = 
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
                 Traits<VT>::isinst;
             const int algo =
                 M1::_lower ? 96 :
@@ -880,7 +880,7 @@ namespace tmv {
         typedef typename M1::float_type RT;
         static RT call(const M1& m)
         {
-            const int N = (s == TMV_UNKNOWN ? m.size() : s);
+            const int N = (s == Unknown ? m.size() : s);
             RT max(0);
             for(int j=0;j<N;++j) {
                 // If unit,     temp = 1 + SumAbsElements(m.col(j,0,j)
@@ -901,7 +901,7 @@ namespace tmv {
         typedef typename M1::float_type RT;
         static RT call(const M1& m)
         {
-            int N = (s == TMV_UNKNOWN ? m.size() : s);
+            int N = (s == Unknown ? m.size() : s);
             if (N <= 8) return Norm1U_Helper<11,s,M1>::call(m);
 
             typedef typename M1::value_type VT;
@@ -945,7 +945,7 @@ namespace tmv {
         typedef typename M1::float_type RT;
         static RT call(const M1& m)
         {
-            const int N = (s == TMV_UNKNOWN ? m.size() : s);
+            const int N = (s == Unknown ? m.size() : s);
             RT max(0);
             for(int i=0;i<N;++i) {
                 // If unit,     temp = 1 + SumAbsElements(m.col(i,i+1,N)
@@ -966,7 +966,7 @@ namespace tmv {
         typedef typename M1::float_type RT;
         static RT call(const M1& m)
         {
-            int N = (s == TMV_UNKNOWN ? m.size() : s);
+            int N = (s == Unknown ? m.size() : s);
             if (N <= 8) return Norm1U_Helper<21,s,M1>::call(m);
 
             typedef typename M1::value_type VT;
@@ -1034,12 +1034,12 @@ namespace tmv {
             const int algo = 
                 M1::_upper ? 
                 TMV_OPT == 0 ? 11 :
-                ( M1::_rowmajor && (s == TMV_UNKNOWN || s > 8) ) ? 12 :
+                ( M1::_rowmajor && (s == Unknown || s > 8) ) ? 12 :
                 11 :
 
                 // lower
                 TMV_OPT == 0 ? 21 :
-                ( M1::_rowmajor && (s == TMV_UNKNOWN || s > 8) ) ? 22 :
+                ( M1::_rowmajor && (s == Unknown || s > 8) ) ? 22 :
                 21 ;
             return Norm1U_Helper<algo,s,M1>::call(m);
         }
@@ -1066,7 +1066,7 @@ namespace tmv {
         {
             typedef typename M1::value_type VT;
             const bool inst =
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
                 Traits<VT>::isinst;
             const int algo =
                 M1::_conj ? 97 :

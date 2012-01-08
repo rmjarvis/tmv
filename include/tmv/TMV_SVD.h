@@ -70,7 +70,7 @@ namespace tmv {
         enum { rs = IntTraits2<M::_colsize,M::_rowsize>::min };
 
         enum { small = (
-                M::_colsize != TMV_UNKNOWN && M::_rowsize != TMV_UNKNOWN
+                M::_colsize != Unknown && M::_rowsize != Unknown
                 && M::_colsize <= 32 && M::_rowsize <= 32 ) };
 
         typedef typename SVD_Impl<small,M>::getu_type getu_type;
@@ -540,8 +540,8 @@ namespace tmv {
             Ux(Maybe<istrans>::transposeview(SmallUx) ), kmax(0),
             signdet(1), logdet(0)
         {
-            TMVStaticAssert(M::_colsize != TMV_UNKNOWN);
-            TMVStaticAssert(M::_rowsize != TMV_UNKNOWN);
+            TMVStaticAssert(M::_colsize != Unknown);
+            TMVStaticAssert(M::_rowsize != Unknown);
             TMVAssert(A.colsize() == istrans ? int(rs) : int(cs));
             TMVAssert(A.rowsize() == istrans ? int(cs) : int(rs));
             SmallUx = A;
@@ -602,22 +602,22 @@ namespace tmv {
         typedef typename M::zfloat_type ZT;
         enum { cs1 = M::_colsize };
         enum { rs1 = M::_rowsize };
-        enum { knownsizes = cs1 != TMV_UNKNOWN && rs1 != TMV_UNKNOWN };
+        enum { knownsizes = cs1 != Unknown && rs1 != Unknown };
         enum { istrans1 = knownsizes && cs1 < int(rs1) };
         enum { cs = IntTraits2<cs1,rs1>::max };
         enum { rs = IntTraits2<cs1,rs1>::min };
-        typedef typename MViewHelper<T,Rec,cs,rs,1,TMV_UNKNOWN,ColMajor|NoAlias>::type ux_type;
+        typedef typename MViewHelper<T,Rec,cs,rs,1,Unknown,ColMajor|NoAlias>::type ux_type;
         typedef DiagMatrix<RT> sx_type;
         typedef Matrix<T,RowMajor|NoDivider|NoAlias> vx_type;
 
         enum { csu = (
                 knownsizes ? ( istrans1 ? int(rs) : int(cs) ) :
-                int(TMV_UNKNOWN) ) };
-        enum { rsu = knownsizes ? int(rs) : int(TMV_UNKNOWN) };
-        enum { csv = knownsizes ? int(rs) : int(TMV_UNKNOWN) };
+                int(Unknown) ) };
+        enum { rsu = knownsizes ? int(rs) : int(Unknown) };
+        enum { csv = knownsizes ? int(rs) : int(Unknown) };
         enum { rsv = (
                 knownsizes ? ( istrans1 ? int(cs) : int(rs) ) :
-                int(TMV_UNKNOWN) ) };
+                int(Unknown) ) };
 
         typedef typename MViewHelper<T,Rec,csu,rsu,1,csu>::type getu_type;
         typedef typename sx_type::const_view_type gets_type;

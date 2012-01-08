@@ -88,7 +88,7 @@ namespace tmv {
     // Use this type when you need elements in the original vector
     // after overwriting those elements.
     //
-    // _size = size of vector (Use TMV_UNKNOWN if unknown at compile time)
+    // _size = size of vector (Use Unknown if unknown at compile time)
     //
     // _fort = does the indexing use fortran style?
     //
@@ -104,7 +104,7 @@ namespace tmv {
 
     // BaseVector_Calc adds some more requirements to the Traits<V> class:
     //
-    //  _step = the step size if known (else TMV_UNKNOWN)
+    //  _step = the step size if known (else Unknown)
     //  _conj = is the vector the conjugate of the underlying data?
     //  _checkalias = do we need to check this vector for aliases?
     //
@@ -166,9 +166,9 @@ namespace tmv {
     class VectorView;
     template <class T, int N, int A=0>
     class SmallVector;
-    template <class T, int N, int S=TMV_UNKNOWN, int A=0>
+    template <class T, int N, int S=Unknown, int A=0>
     class ConstSmallVectorView;
-    template <class T, int N, int S=TMV_UNKNOWN, int A=0>
+    template <class T, int N, int S=Unknown, int A=0>
     class SmallVectorView;
 
     // Used by sort(p)
@@ -420,9 +420,9 @@ namespace tmv {
     template <int S1, int S2>
     struct Sizes
     {
-        enum { same = (S1==TMV_UNKNOWN || S2==TMV_UNKNOWN || S1==S2) };
-        enum { equal = (S1!=TMV_UNKNOWN && S2!=TMV_UNKNOWN && S1==S2) };
-        enum { size = (S1==TMV_UNKNOWN ? S2 : S1) };
+        enum { same = (S1==Unknown || S2==Unknown || S1==S2) };
+        enum { equal = (S1!=Unknown && S2!=Unknown && S1==S2) };
+        enum { size = (S1==Unknown ? S2 : S1) };
     };
 
     // This helper class helps decide calc_type for composite classes:
@@ -432,7 +432,7 @@ namespace tmv {
         typedef SmallVector<T,s,A|NoAlias> type; 
     };
     template <class T, int A>
-    struct VCopyHelper<T,TMV_UNKNOWN,A>
+    struct VCopyHelper<T,Unknown,A>
     {
         typedef Vector<T,A|NoAlias> type; 
     };
@@ -446,7 +446,7 @@ namespace tmv {
         typedef ConstSmallVectorView<T,N,S,A|NoAlias> ctype; 
     };
     template <class T, int S, int A>
-    struct VViewHelper<T,TMV_UNKNOWN,S,A>
+    struct VViewHelper<T,Unknown,S,A>
     {
         enum { A2 = A | (S == 1 ? Unit : NonUnit) | NoAlias };
         typedef VectorView<T,A2> type; 
@@ -461,7 +461,6 @@ namespace tmv {
     TMV_INLINE bool SameStorage(
         const BaseVector<V1>& v1, const BaseVector<V2>& v2)
     { return false; }
-#ifndef TMV_NO_ALIAS_CHECK
     template <class V1, class V2>
     TMV_INLINE bool SameStorage(
         const BaseVector_Calc<V1>& v1, const BaseVector_Calc<V2>& v2)
@@ -469,7 +468,6 @@ namespace tmv {
         return static_cast<const void*>(v1.vec().cptr()) == 
             static_cast<const void*>(v2.vec().cptr()); 
     }
-#endif
 
     // This next one is sometime used after SameStorage is found to be true.
     // Here we check whether the elements are exactly the same 
@@ -495,8 +493,8 @@ namespace tmv {
     struct VStepHelper
     {
         enum { known = (
-                V1::_step != TMV_UNKNOWN &&
-                V2::_step != TMV_UNKNOWN ) };
+                V1::_step != Unknown &&
+                V2::_step != Unknown ) };
         enum { same = (
                 known &&
                 V1::_step == int(V2::_step) ) };
@@ -911,7 +909,7 @@ namespace tmv {
 
         const_flatten_type flatten() const
         {
-            TMVStaticAssert(_step == TMV_UNKNOWN || _step == 1);
+            TMVStaticAssert(_step == Unknown || _step == 1);
             TMVAssert(step() == 1);
             return const_flatten_type(
                 reinterpret_cast<const real_type*>(cptr()),
@@ -1265,7 +1263,7 @@ namespace tmv {
 
         flatten_type flatten() 
         {
-            TMVStaticAssert(_step == TMV_UNKNOWN || _step == 1);
+            TMVStaticAssert(_step == Unknown || _step == 1);
             TMVAssert(step() == 1);
             return flatten_type(
                 reinterpret_cast<real_type*>(ptr()),
@@ -1388,7 +1386,7 @@ namespace tmv {
         typedef InvalidType eval_type;
         typedef InvalidType copy_type;
 
-        enum { _size = TMV_UNKNOWN };
+        enum { _size = Unknown };
         enum { _shape = Vec };
         enum { _fort = false };
         enum { _calc = false };
@@ -1423,7 +1421,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
         const int size = Sizes<V1::_size,V2::_size>::size;
-        const int n = (size == TMV_UNKNOWN ? v1.size() : size);
+        const int n = (size == Unknown ? v1.size() : size);
         for(int i=0;i<n;++i) if (v1.cref(i) != v2.cref(i)) return false;
         return true;
     }
@@ -1509,7 +1507,6 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_TEXT
     inline std::string TMV_Text(ADType ad)
     { return ad == Ascend ? "Ascend" : "Descend"; }
 
@@ -1545,7 +1542,6 @@ namespace tmv {
         s << "BaseVector_Mutable< "<<TMV_Text(v.vec())<<" >";
         return s.str();
     }
-#endif
 
 } // namespace tmv
 

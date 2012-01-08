@@ -90,8 +90,8 @@ namespace tmv {
     {
         typedef typename M1::value_type T;
         enum { inst = (
-                (M1::_colsize == TMV_UNKNOWN || M1::_colsize > 16) &&
-                (M1::_rowsize == TMV_UNKNOWN || M1::_rowsize > 16) &&
+                (M1::_colsize == Unknown || M1::_colsize > 16) &&
+                (M1::_rowsize == Unknown || M1::_rowsize > 16) &&
                 Traits<T>::isinst ) };
         enum { algo = (
                 inst ? 90 :
@@ -409,8 +409,8 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
             const int inst = 
-                (M1::_colsize == TMV_UNKNOWN || M1::_colsize > 16) &&
-                (M1::_rowsize == TMV_UNKNOWN || M1::_rowsize > 16) &&
+                (M1::_colsize == Unknown || M1::_colsize > 16) &&
+                (M1::_rowsize == Unknown || M1::_rowsize > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 M1::_conj ? 97 :

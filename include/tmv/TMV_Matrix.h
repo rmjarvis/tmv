@@ -17,20 +17,22 @@
 // tmv::Matrix<double>.  
 //
 // An optional second template parameter specifies the known attributes
-// of the matrix.  The valid options are:
-// ColMajor or RowMajor
-// CStyle or FortranStyle
-// WithDivider or NoDivider
-// The default is (ColMajor,CStyle,WithDivider).
+// of the matrix.  The valid attributes for a Matrix are:
+// - ColMajor or RowMajor
+// - CStyle or FortranStyle
+// - WithDivider or NoDivider
+// The defaults are (ColMajor,CStyle,WithDivider) if you do not specify 
+// otherwise.
 //
-// The options are treated as a bit field, so you | them together to 
+// The attributes are treated as a bit field, so you | them together to 
 // get the complete value.  e.g.
 // Matrix<double,ColMajor | NoDivider | FortranStyle>
 //
 // Also, you only need to specify things that differ from the default, so
 // Matrix<T,RowMajor> means Matrix<T,RowMajor|CStyle|WithDivider>
 //
-// The *Style options indicate whether to use C-style or Fortran-style indexing.
+// The *Style attributes indicate whether to use C-style or Fortran-style 
+// indexing.
 // With C-style (the default), the upper left corner of an MxN matrix is 
 // m(0,0), and the lower right is m(M-1,N-1).  
 // With Fortran-style, these are m(1,1) and m(M,N) respectively.  
@@ -624,8 +626,15 @@ namespace tmv {
         ~MatrixDivHelper2();
 
         void setDiv() const;
-        Matrix<T> getM() const;
+        Matrix<T> getMatrix() const;
         bool mIsSquare() const;
+
+        void divideUsing(DivType dt) const
+        {
+            TMVAssert(dt == tmv::LU || dt == tmv::QR || 
+                      dt == tmv::QRP || dt == tmv::SV);
+            DivHelper<T>::divideUsing(dt);
+        }
 
         lud_type lud() const;
         qrd_type qrd() const;
@@ -720,18 +729,18 @@ namespace tmv {
         typedef const type& eval_type;
         typedef Matrix<T,A01> copy_type;
 
-        enum { _colsize = TMV_UNKNOWN };
-        enum { _rowsize = TMV_UNKNOWN };
-        enum { _nlo = TMV_UNKNOWN };
-        enum { _nhi = TMV_UNKNOWN };
+        enum { _colsize = Unknown };
+        enum { _rowsize = Unknown };
+        enum { _nlo = Unknown };
+        enum { _nhi = Unknown };
         enum { _shape = Rec };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
         enum { _colmajor = Attrib<A>::colmajor };
-        enum { _stepi = (_colmajor ? 1 : TMV_UNKNOWN) };
-        enum { _stepj = (_rowmajor ? 1 : TMV_UNKNOWN) };
-        enum { _diagstep = TMV_UNKNOWN };
+        enum { _stepi = (_colmajor ? 1 : Unknown) };
+        enum { _stepj = (_rowmajor ? 1 : Unknown) };
+        enum { _diagstep = Unknown };
         enum { _conj = false };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _canlin = true };
@@ -779,7 +788,7 @@ namespace tmv {
         typedef ConstVectorView<T,vecA> const_diag_type;
         typedef ConstVectorView<T,vecA> const_diag_sub_type;
 
-        enum { xx = TMV_UNKNOWN }; // for brevity
+        enum { xx = Unknown }; // for brevity
         typedef ConstMatrixView<T,ndA> const_submatrix_type;
         typedef ConstMatrixView<T,nmA> const_submatrix_step_type;
         typedef ConstVectorView<T,vecA> const_subvector_type;
@@ -919,7 +928,7 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVAssert(cs >= 0 && rs >= 0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::constr_value());
 #endif
         }
@@ -961,7 +970,7 @@ namespace tmv {
 
         ~Matrix() 
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::destr_value());
 #endif
         }
@@ -1005,7 +1014,7 @@ namespace tmv {
         void resize(const int cs, const int rs)
         {
             TMVAssert(cs >= 0 && rs >= 0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::destr_value());
 #endif
             itscs = cs;
@@ -1013,7 +1022,7 @@ namespace tmv {
             divhelper::resetDivType();
             linsize = cs*rs;
             itsm.resize(linsize);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::constr_value());
 #endif
         }
@@ -1066,18 +1075,18 @@ namespace tmv {
         typedef const type& calc_type;
         typedef const type& eval_type;
 
-        enum { _colsize = TMV_UNKNOWN };
-        enum { _rowsize = TMV_UNKNOWN };
-        enum { _nlo = TMV_UNKNOWN };
-        enum { _nhi = TMV_UNKNOWN };
+        enum { _colsize = Unknown };
+        enum { _rowsize = Unknown };
+        enum { _nlo = Unknown };
+        enum { _nhi = Unknown };
         enum { _shape = Rec };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
         enum { _colmajor = Attrib<A>::colmajor };
-        enum { _stepi = (_colmajor ? 1 : TMV_UNKNOWN) };
-        enum { _stepj = (_rowmajor ? 1 : TMV_UNKNOWN) };
-        enum { _diagstep = TMV_UNKNOWN };
+        enum { _stepi = (_colmajor ? 1 : Unknown) };
+        enum { _stepj = (_rowmajor ? 1 : Unknown) };
+        enum { _diagstep = Unknown };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _canlin = false };
@@ -1123,7 +1132,7 @@ namespace tmv {
         enum { rowpairAsm = Asm & ~ColMajor };
         enum { twosAsm = isreal ? int(Asm) : (Asm & ~Conj & ~AllStorageType) };
 
-        enum { xx = TMV_UNKNOWN }; // for brevity
+        enum { xx = Unknown }; // for brevity
         typedef ConstVectorView<T,colA> const_col_type;
         typedef ConstVectorView<T,colA> const_col_sub_type;
         typedef ConstVectorView<T,rowA> const_row_type;
@@ -1212,15 +1221,15 @@ namespace tmv {
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(_stepj) 
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_stepj != TMV_UNKNOWN); 
+            TMVStaticAssert(_stepj != Unknown); 
         }
 
         TMV_INLINE ConstMatrixView(const T* m, int cs, int rs) :
             itsm(m), itscs(cs), itsrs(rs), itssi(_stepi), itssj(_stepj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_stepi != TMV_UNKNOWN);
-            TMVStaticAssert(_stepj != TMV_UNKNOWN); 
+            TMVStaticAssert(_stepi != Unknown);
+            TMVStaticAssert(_stepj != Unknown); 
         }
 
         TMV_INLINE ConstMatrixView(const type& m2) :
@@ -1269,7 +1278,7 @@ namespace tmv {
         }
 
         TMV_INLINE ~ConstMatrixView() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
         }
@@ -1338,18 +1347,18 @@ namespace tmv {
         typedef const type& calc_type;
         typedef const type& eval_type;
 
-        enum { _colsize = TMV_UNKNOWN };
-        enum { _rowsize = TMV_UNKNOWN };
-        enum { _nlo = TMV_UNKNOWN };
-        enum { _nhi = TMV_UNKNOWN };
+        enum { _colsize = Unknown };
+        enum { _rowsize = Unknown };
+        enum { _nlo = Unknown };
+        enum { _nhi = Unknown };
         enum { _shape = Rec };
         enum { _fort = Attrib<A>::fort };
         enum { _calc = true };
         enum { _rowmajor = Attrib<A>::rowmajor };
         enum { _colmajor = Attrib<A>::colmajor };
-        enum { _stepi = (_colmajor ? 1 : TMV_UNKNOWN) };
-        enum { _stepj = (_rowmajor ? 1 : TMV_UNKNOWN) };
-        enum { _diagstep = TMV_UNKNOWN };
+        enum { _stepi = (_colmajor ? 1 : Unknown) };
+        enum { _stepj = (_rowmajor ? 1 : Unknown) };
+        enum { _diagstep = Unknown };
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _canlin = false };
@@ -1396,7 +1405,7 @@ namespace tmv {
         enum { twosAsm = isreal ? int(Asm) : (Asm & ~Conj & ~AllStorageType) };
         enum { An = (ndA & ~NoAlias) };
 
-        enum { xx = TMV_UNKNOWN }; // for brevity
+        enum { xx = Unknown }; // for brevity
         typedef ConstVectorView<T,colA> const_col_type;
         typedef ConstVectorView<T,colA> const_col_sub_type;
         typedef ConstVectorView<T,rowA> const_row_type;
@@ -1533,15 +1542,15 @@ namespace tmv {
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(_stepj) 
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_stepj != TMV_UNKNOWN); 
+            TMVStaticAssert(_stepj != Unknown); 
         }
 
         TMV_INLINE MatrixView(T* m, int cs, int rs) :
             itsm(m), itscs(cs), itsrs(rs), itssi(_stepi), itssj(_stepj)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(_stepi != TMV_UNKNOWN);
-            TMVStaticAssert(_stepj != TMV_UNKNOWN); 
+            TMVStaticAssert(_stepi != Unknown);
+            TMVStaticAssert(_stepj != Unknown); 
         }
 
         TMV_INLINE MatrixView(const type& m2) :
@@ -1570,7 +1579,7 @@ namespace tmv {
         }
 
         TMV_INLINE ~MatrixView() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
         }
@@ -1733,7 +1742,6 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_TEXT
     template <class T, int A0, int A1>
     inline std::string TMV_Text(const Matrix<T,A0,A1>& m)
     {
@@ -1767,7 +1775,6 @@ namespace tmv {
         s << m.stepi()<<","<<m.stepj()<<")";
         return s.str();
     }
-#endif
 
 } // namespace tmv
 

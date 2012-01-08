@@ -39,18 +39,18 @@ namespace tmv {
         static void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = cs==TMV_UNKNOWN ? m3.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? m3.rowsize() : rs;
+            const int M = cs==Unknown ? m3.colsize() : cs;
+            const int N = rs==Unknown ? m3.rowsize() : rs;
 #ifdef PRINTALGO_MM
-            const int K = xs==TMV_UNKNOWN ? m1.rowsize() : xs;
+            const int K = xs==Unknown ? m1.rowsize() : xs;
             std::cout<<"MM algo 69: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
 
 #ifdef TMV_MM_USE_RECURSIVE_BLOCK
-            const int Mb = cs == TMV_UNKNOWN ? TMV_UNKNOWN : (cs >> 6);
-            const int Nb = rs == TMV_UNKNOWN ? TMV_UNKNOWN : (rs >> 6);
-            const int Kb = xs == TMV_UNKNOWN ? TMV_UNKNOWN : (xs >> 6);
+            const int Mb = cs == Unknown ? Unknown : (cs >> 6);
+            const int Nb = rs == Unknown ? Unknown : (rs >> 6);
+            const int Kb = xs == Unknown ? Unknown : (xs >> 6);
             const int Kb2 = IntTraits2<Kb,Kb>::prod;
             const int MbNbKb2 = IntTraits2<IntTraits2<Mb,Nb>::prod,Kb2>::prod;
 #endif
@@ -80,7 +80,7 @@ namespace tmv {
             // due to the if statements in algo 72.
             const int algo1 = 
                 inst ? -2 : 
-                (cs == TMV_UNKNOWN || rs == TMV_UNKNOWN || xs == TMV_UNKNOWN) ? 72 :
+                (cs == Unknown || rs == Unknown || xs == Unknown) ? 72 :
 #ifdef TMV_MM_USE_WINOGRAD
                 (cs >= TMV_MM_MIN_WINOGRAD && rs >= TMV_MM_MIN_WINOGRAD && 
                  xs >= TMV_MM_MIN_WINOGRAD) ? 68 :
@@ -107,7 +107,7 @@ namespace tmv {
                         // Need to make sure, since we rounded up Mx!
                         typedef typename M1::const_rowrange_type M1r;
                         typedef typename M3::rowrange_type M3r;
-                        const int csx = TMV_UNKNOWN; 
+                        const int csx = Unknown; 
                         M1r m1r = m1.cRowRange(i1,i2);
                         M3r m3r = m3.cRowRange(i1,i2);
 
@@ -124,7 +124,7 @@ namespace tmv {
                     if (j1 < N)  {
                         typedef typename M2::const_colrange_type M2c;
                         typedef typename M3::colrange_type M3c;
-                        const int rsx = TMV_UNKNOWN; 
+                        const int rsx = Unknown; 
                         M2c m2c = m2.cColRange(j1,j2);
                         M3c m3c = m3.cColRange(j1,j2);
                         MultMM_Helper<

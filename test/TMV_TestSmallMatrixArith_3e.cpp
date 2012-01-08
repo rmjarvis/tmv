@@ -5,6 +5,9 @@
 template <class T> void TestSmallMatrixArith_3e()
 {
     TestSmallMatrixArith_3<T,1,10>("1 10");
+#if XTEST & 2
+    TestSmallMatrixArith_3<T,10,1>("10 1");
+#endif
 }
 
 #ifdef TEST_DOUBLE

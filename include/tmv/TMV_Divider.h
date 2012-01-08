@@ -320,25 +320,9 @@ namespace tmv {
 
         ~DivHelper() { }
 
-        void divideInPlace() const
-        { divtype |= tmv::DivInPlaceFlag; saveDiv(); }
-
-        bool divIsInPlace() const 
-        { return divtype & tmv::DivInPlaceFlag; }
-
-        void saveDiv() const
-        { divtype |= tmv::SaveDivFlag; }
-
-        void unsaveDiv() const
-        { divtype &= ~tmv::SaveDivFlag; }
-
-        bool divIsSaved() const 
-        { return divtype & tmv::SaveDivFlag; }
-
+        // Set, get the DivType:
         void divideUsing(DivType dt) const
         {
-            TMVAssert(dt == tmv::LU || dt == tmv::QR || 
-                      dt == tmv::QRP || dt == tmv::SV);
             if (!(divtype & dt)) {
                 unsetDiv();
                 divtype &= ~tmv::DivTypeFlags;
@@ -352,31 +336,53 @@ namespace tmv {
             return divtype & tmv::DivTypeFlags; 
         }
 
+        // Set, unset in-place division
+        void divideInPlace() const
+        { divtype |= tmv::DivInPlaceFlag; saveDiv(); }
+
+        void dontDivideInPlace() const
+        { divtype &= ~tmv::DivInPlaceFlag; }
+
+        bool divIsInPlace() const 
+        { return divtype & tmv::DivInPlaceFlag; }
+
+        // Set, unset whether to save the divider object
+        void saveDiv() const
+        { divtype |= tmv::SaveDivFlag; }
+
+        void dontSaveDiv() const
+        { divtype &= ~tmv::SaveDivFlag; }
+
+        bool divIsSaved() const 
+        { return divtype & tmv::SaveDivFlag; }
+
+        // Set, unset the divider object
         void unsetDiv() const
         { divider.reset(0); }
-
-        bool divIsSet() const
-        { return getDiv(); }
 
         void resetDiv() const
         { unsetDiv(); setDiv(); }
 
-        void doneDiv() const
-        { if (!divIsSaved()) unsetDiv(); }
+        bool divIsSet() const
+        { return getDiv(); }
+
+        // This needs to be defined in the derived class:
+        virtual void setDiv() const = 0;
 
         getdiv_type getDiv() const
         { return divider.get(); }
 
+        void doneDiv() const
+        { if (!divIsSaved()) unsetDiv(); }
+
+    protected:
+
         void resetDivType() const
         { divideUsing(mIsSquare() ? tmv::LU : tmv::QR); }
 
-        // Here are the virtual functions that need to be 
-        // defined in the derived class:
-        virtual void setDiv() const = 0;
-        virtual Matrix<T> getM() const = 0;
+        // Two more that need to be defined in the derived class:
+        virtual Matrix<T> getMatrix() const = 0;
         virtual bool mIsSquare() const = 0;
-
-    protected:
 
         mutable std::auto_ptr<div_type> divider;
         mutable DivType divtype;

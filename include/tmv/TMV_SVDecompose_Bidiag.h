@@ -53,8 +53,8 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
 
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
             if (N == 0) return;
 #ifdef PRINTALGO_SVD
             std::cout<<"Bidiagonalize algo 11: M,N,cs,rs = "<<
@@ -108,8 +108,8 @@ namespace tmv {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_SVD
             std::cout<<"Bidiagonalize algo 21: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
@@ -320,8 +320,8 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
 
-            const int M = cs==TMV_UNKNOWN ? A.colsize() : cs;
-            const int N = rs==TMV_UNKNOWN ? A.rowsize() : rs;
+            const int M = cs==Unknown ? A.colsize() : cs;
+            const int N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_SVD
             std::cout<<"Bidiagonalize algo 31: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
@@ -360,9 +360,9 @@ namespace tmv {
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                rs == TMV_UNKNOWN ? 31 :
+                rs == Unknown ? 31 :
                 rsrs > l2cache ? 21 :
-                cs == TMV_UNKNOWN ? 31 : 
+                cs == Unknown ? 31 : 
                 csrs <= l2cache ? 11 :
                 21;
 #ifdef PRINTALGO_SVD
@@ -378,7 +378,7 @@ namespace tmv {
             //std::cout<<"m = "<<U<<std::endl;
 #endif
 #ifdef XDEBUG_SVD
-            const int N = rs==TMV_UNKNOWN ? D.size() : rs;
+            const int N = rs==Unknown ? D.size() : rs;
             dbgcout<<"Start Bidiagonalize:\n";
             dbgcout<<"A = "<<TMV_Text(A)<<"   "<<A<<std::endl;
             typedef typename M1::value_type T;
@@ -438,8 +438,8 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 inst ? 90 :

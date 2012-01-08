@@ -24,9 +24,9 @@ namespace tmv {
     //
     //  _nlo = the number of (non-zero) bands below the main diagonal if known
     //  _nhi = the number of (non-zero) bands above the main diagonal if known
-    //  _stepi = the step size along column if known (else TMV_UNKNOWN)
-    //  _stepj = the step size along row if known (else TMV_UNKNOWN)
-    //  _diagstep = the step size along row if known (else TMV_UNKNOWN)
+    //  _stepi = the step size along column if known (else Unknown)
+    //  _stepj = the step size along row if known (else Unknown)
+    //  _diagstep = the step size along row if known (else Unknown)
     //
     //  const_diag_type = return type from diag() const
     //  const_row_sub_type = return type from row(i,j1,j2) const
@@ -94,9 +94,9 @@ namespace tmv {
     class ThinBandMatrix;
     template <class T, int M, int N, int LO, int HI, int A=0, int A2=0> 
     class SmallBandMatrix;
-    template <class T, int M, int N, int LO, int HI, int Si=TMV_UNKNOWN, int Sj=TMV_UNKNOWN, int A=0>
+    template <class T, int M, int N, int LO, int HI, int Si=Unknown, int Sj=Unknown, int A=0>
     class ConstSmallBandMatrixView;
-    template <class T, int M, int N, int LO, int HI, int Si=TMV_UNKNOWN, int Sj=TMV_UNKNOWN, int A=0>
+    template <class T, int M, int N, int LO, int HI, int Si=Unknown, int Sj=Unknown, int A=0>
     class SmallBandMatrixView;
 
     // In TMV_Norm.h
@@ -305,12 +305,12 @@ namespace tmv {
     template <class T, int cs, int rs, int si, int sj, int A>
     struct MViewHelper<T,Band,cs,rs,si,sj,A>
     { 
-        enum { xx = TMV_UNKNOWN };
+        enum { xx = Unknown };
         typedef SmallBandMatrixView<T,cs,rs,xx,xx,si,sj,A> type; 
         typedef ConstSmallBandMatrixView<T,cs,rs,xx,xx,si,sj,A> ctype; 
     };
     template <class T, int si, int sj, int A>
-    struct MViewHelper<T,Band,TMV_UNKNOWN,TMV_UNKNOWN,si,sj,A>
+    struct MViewHelper<T,Band,Unknown,Unknown,si,sj,A>
     {
         enum { A2 = A |
             (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) | NoAlias };
@@ -945,7 +945,7 @@ namespace tmv {
         { return static_cast<const type&>(*this); }
 
         TMV_INLINE int diagstep() const 
-        { return _diagstep == TMV_UNKNOWN ? stepi() + stepj() : _diagstep; }
+        { return _diagstep == Unknown ? stepi() + stepj() : _diagstep; }
         TMV_INLINE bool isconj() const { return _conj; }
 
         // Note that these last functions need to be defined in a more derived
@@ -1741,7 +1741,7 @@ namespace tmv {
 
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE int diagstep() const 
-        { return _diagstep == TMV_UNKNOWN ? stepi() + stepj() : _diagstep; }
+        { return _diagstep == Unknown ? stepi() + stepj() : _diagstep; }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
@@ -2257,7 +2257,6 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_TEXT
     template <class M>
     inline std::string TMV_Text(const BaseMatrix_Band<M>& m)
     {
@@ -2273,7 +2272,6 @@ namespace tmv {
         s << "BaseMatrix_Band_Mutable< "<<TMV_Text(m.mat())<<" >";
         return s.str();
     }
-#endif
 
 } // namespace tmv
 

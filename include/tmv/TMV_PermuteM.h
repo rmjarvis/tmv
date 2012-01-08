@@ -37,9 +37,9 @@ namespace tmv {
     {
         static void call(M1& m, const int* p, const int i1, const int i2)
         {
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
 #ifdef PRINTALGO_PERM
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
+            const int M = cs == Unknown ? m.colsize() : cs;
             std::cout<<"PermuteRows algo 11: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -55,8 +55,8 @@ namespace tmv {
         static void call(M1& m, const int* p, const int i1, const int i2)
         {
 #ifdef PRINTALGO_PERM
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
             std::cout<<"PermuteRows algo 12: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -74,9 +74,9 @@ namespace tmv {
     {
         static void call(M1& m, const int* p, const int i1, const int i2)
         {
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
 #ifdef PRINTALGO_PERM
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
+            const int M = cs == Unknown ? m.colsize() : cs;
             std::cout<<"PermuteRows algo 13: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -85,7 +85,7 @@ namespace tmv {
 
             int N_32 = (N>>5); // N_32 = N/32
             const int Nx = N - (N_32<<5); // Nx = N % 32
-            const int rsx = rs == TMV_UNKNOWN ? TMV_UNKNOWN : (rs % 32);
+            const int rsx = rs == Unknown ? Unknown : (rs % 32);
             IT it1 = m.get_row(0).begin();
             const int stepi = m.stepi();
             it1.shiftP(i1*stepi);
@@ -124,9 +124,9 @@ namespace tmv {
     {
         static void call(M1& m, const int* p, const int i1, const int i2)
         {
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
 #ifdef PRINTALGO_PERM
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
+            const int M = cs == Unknown ? m.colsize() : cs;
             std::cout<<"PermuteRows algo 14: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -156,8 +156,8 @@ namespace tmv {
             M1& m, const int* p, const int i1, const int i2)
         {
 #ifdef PRINTALGO_PERM
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
             std::cout<<"PermuteRows algo 90: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -173,8 +173,8 @@ namespace tmv {
             M1& m, const int* p, const int i1, const int i2)
         {
 #ifdef PRINTALGO_PERM
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
             std::cout<<"PermuteRows algo 97: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -193,12 +193,12 @@ namespace tmv {
         {
             const int algo = 
                 TMV_OPT == 0 ? 12 :
-                (M1::_colmajor && (rs != TMV_UNKNOWN && rs <= 32)) ? 11 :
+                (M1::_colmajor && (rs != Unknown && rs <= 32)) ? 11 :
                 M1::_rowmajor ? 14 : M1::_colmajor ? 13 :
                 12;
 #ifdef PRINTALGO_PERM
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
             std::cout<<"InlinePermuteRows: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
@@ -222,16 +222,16 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 M1::_conj ? 97 :
                 inst ? 90 :
                 -3;
 #ifdef PRINTALGO_PERM
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
             std::cout<<"PermuteRows: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
@@ -292,9 +292,9 @@ namespace tmv {
     {
         static void call(M1& m, const int* p, const int i1, const int i2)
         {
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
 #ifdef PRINTALGO_PERM
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
+            const int M = cs == Unknown ? m.colsize() : cs;
             std::cout<<"ReversePermuteRows algo 11: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -310,8 +310,8 @@ namespace tmv {
         static void call(M1& m, const int* p, const int i1, const int i2)
         {
 #ifdef PRINTALGO_PERM
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
             std::cout<<"ReversePermuteRows algo 12: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -329,9 +329,9 @@ namespace tmv {
     {
         static void call(M1& m, const int* p, const int i1, const int i2)
         {
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
 #ifdef PRINTALGO_PERM
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
+            const int M = cs == Unknown ? m.colsize() : cs;
             std::cout<<"ReversePermuteRows algo 13: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -341,7 +341,7 @@ namespace tmv {
 
             int N_32 = (N>>5); // N_32 = N/32
             const int Nx = N - (N_32<<5); // Nx = N % 32
-            const int rsx = rs == TMV_UNKNOWN ? TMV_UNKNOWN : (rs % 32);
+            const int rsx = rs == Unknown ? Unknown : (rs % 32);
             IT it1 = m.get_row(0).begin();
             const int stepi = m.stepi();
             it1.shiftP((i2-1)*stepi);
@@ -381,9 +381,9 @@ namespace tmv {
     {
         static void call(M1& m, const int* p, const int i1, const int i2)
         {
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
 #ifdef PRINTALGO_PERM
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
+            const int M = cs == Unknown ? m.colsize() : cs;
             std::cout<<"ReversePermuteRows algo 14: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -414,8 +414,8 @@ namespace tmv {
             M1& m, const int* p, const int i1, const int i2)
         { 
 #ifdef PRINTALGO_PERM
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
             std::cout<<"ReversePermuteRows algo 90: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -431,8 +431,8 @@ namespace tmv {
             M1& m, const int* p, const int i1, const int i2)
         {
 #ifdef PRINTALGO_PERM
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
             std::cout<<"ReversePermuteRows algo 97: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -451,12 +451,12 @@ namespace tmv {
         {
             const int algo = 
                 TMV_OPT == 0 ? 12 :
-                (M1::_rowmajor && (rs != TMV_UNKNOWN && rs <= 32)) ? 14 :
+                (M1::_rowmajor && (rs != Unknown && rs <= 32)) ? 14 :
                 M1::_colmajor ? 11 : M1::_rowmajor ? 13 :
                 12;
 #ifdef PRINTALGO_PERM
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
             std::cout<<"InlineReversePermuteRows: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
@@ -480,16 +480,16 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
             const bool inst = 
-                (cs == TMV_UNKNOWN || cs > 16) &&
-                (rs == TMV_UNKNOWN || rs > 16) &&
+                (cs == Unknown || cs > 16) &&
+                (rs == Unknown || rs > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 M1::_conj ? 97 :
                 inst ? 90 :
                 -3;
 #ifdef PRINTALGO_PERM
-            const int M = cs == TMV_UNKNOWN ? m.colsize() : cs;
-            const int N = rs == TMV_UNKNOWN ? m.rowsize() : rs;
+            const int M = cs == Unknown ? m.colsize() : cs;
+            const int N = rs == Unknown ? m.rowsize() : rs;
             std::cout<<"ReversePermuteRows: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;

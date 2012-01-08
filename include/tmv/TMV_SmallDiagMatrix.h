@@ -173,7 +173,7 @@ namespace tmv {
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(N >= 0);
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->diag().setAllTo(Traits<T>::constr_value());
 #endif
         }
@@ -214,7 +214,7 @@ namespace tmv {
 
         TMV_INLINE_ND ~SmallDiagMatrix() 
         {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             this->diag().setAllTo(Traits<T>::destr_value());
 #endif
         }
@@ -299,7 +299,7 @@ namespace tmv {
         enum { _unit = Attrib<A>::unit };
         enum { twoS = isreal ? 1 : 2 };
 
-        enum { known = (N != TMV_UNKNOWN) };
+        enum { known = (N != Unknown) };
         enum { copyA = _fort ? FortranStyle : CStyle };
         typedef typename TypeSelect<known,
                 SmallDiagMatrix<T,N,copyA|NoAlias>,
@@ -381,15 +381,15 @@ namespace tmv {
             itsm(m), itssize(n), itsstep(S)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(S != TMV_UNKNOWN); 
+            TMVStaticAssert(S != Unknown); 
         }
 
         ConstSmallDiagMatrixView(const T* m) :
             itsm(m), itssize(N), itsstep(S)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(N != TMV_UNKNOWN); 
-            TMVStaticAssert(S != TMV_UNKNOWN); 
+            TMVStaticAssert(N != Unknown); 
+            TMVStaticAssert(S != Unknown); 
         }
 
         ConstSmallDiagMatrixView(const type& m2) :
@@ -433,7 +433,7 @@ namespace tmv {
         }
 
         ~ConstSmallDiagMatrixView() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
         }
@@ -506,7 +506,7 @@ namespace tmv {
         enum { _unit = Attrib<A>::unit };
         enum { twoS = isreal ? 1 : 2 };
 
-        enum { known = (N != TMV_UNKNOWN) };
+        enum { known = (N != Unknown) };
         enum { copyA = _fort ? FortranStyle : CStyle };
         typedef typename TypeSelect<known,
                 SmallDiagMatrix<T,N,copyA|NoAlias>,
@@ -614,13 +614,13 @@ namespace tmv {
             itsm(m), itssize(n), itsstep(S)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(S != TMV_UNKNOWN); 
+            TMVStaticAssert(S != Unknown); 
         }
 
         SmallDiagMatrixView(T* m) : itsm(m), itssize(N), itsstep(S)
         {
             TMVStaticAssert(Traits<type>::okA);
-            TMVStaticAssert(N != TMV_UNKNOWN); TMVStaticAssert(S != TMV_UNKNOWN); 
+            TMVStaticAssert(N != Unknown); TMVStaticAssert(S != Unknown); 
         }
 
         SmallDiagMatrixView(const type& m2) :
@@ -646,7 +646,7 @@ namespace tmv {
         }
 
         ~SmallDiagMatrixView() {
-#ifdef TMV_DEBUG
+#ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
         }
@@ -713,11 +713,11 @@ namespace tmv {
                 ( S == 1 ? Unit : NonUnit ) )};
 
         typedef typename TypeSelect<
-            ( N==TMV_UNKNOWN && (S==TMV_UNKNOWN || S==1) ),
+            ( N==Unknown && (S==Unknown || S==1) ),
             ConstDiagMatrixView<T,A> ,
             ConstSmallDiagMatrixView<T,N,S,A> >::type cv;
         typedef typename TypeSelect<
-            ( N==TMV_UNKNOWN && (S==TMV_UNKNOWN || S==1) ),
+            ( N==Unknown && (S==Unknown || S==1) ),
             DiagMatrixView<T,A> ,
             SmallDiagMatrixView<T,N,S,A> >::type v;
     };
@@ -808,7 +808,6 @@ namespace tmv {
     // TMV_Text 
     //
 
-#ifdef TMV_TEXT
     template <class T, int N, int A>
     inline std::string TMV_Text(const SmallDiagMatrix<T,N,A>& m)
     {
@@ -843,7 +842,6 @@ namespace tmv {
         s << "("<<m.size()<<","<<m.step()<<")";
         return s.str();
     }
-#endif
 
 } // namespace tmv
 

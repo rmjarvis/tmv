@@ -40,7 +40,7 @@ namespace tmv {
     {
         static void call(M1& m)
         {
-            const int n = (s == TMV_UNKNOWN ? m.colsize() : s);
+            const int n = (s == Unknown ? m.colsize() : s);
             for(int i=1;i<n;++i) {
                 typename M1::row_sub_type::noalias_type v1 =
                     m.get_row(i,0,i).noAlias();
@@ -57,7 +57,7 @@ namespace tmv {
     {
         static void call(M1& m)
         {
-            const int n = s == TMV_UNKNOWN ? m.colsize() : s;
+            const int n = s == Unknown ? m.colsize() : s;
             if (n <= 1) return;
             typedef typename M1::row_type Mr;
             typedef typename M1::col_type Mc;
@@ -68,7 +68,7 @@ namespace tmv {
             const int step1 = m.stepi();
             const int step2 = m.stepj();
             for(int i=1;i<n;++i) {
-                SwapV_Helper<-3,TMV_UNKNOWN,Mr,Mc>::call2(i,it1,it2);
+                SwapV_Helper<-3,Unknown,Mr,Mc>::call2(i,it1,it2);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
             }
@@ -82,7 +82,7 @@ namespace tmv {
     {
         static void call(M1& m)
         {
-            const int n = (s == TMV_UNKNOWN ? m.colsize() : s);
+            const int n = (s == Unknown ? m.colsize() : s);
             for(int i=0;i<n-1;++i) {
                 typename M1::row_sub_type::noalias_type v1 =
                     m.get_row(i,i+1,n).noAlias();
@@ -99,7 +99,7 @@ namespace tmv {
     {
         static void call(M1& m)
         {
-            int n = s == TMV_UNKNOWN ? m.colsize() : s;
+            int n = s == Unknown ? m.colsize() : s;
             if (n <= 1) return;
             typedef typename M1::row_type Mr;
             typedef typename M1::col_type Mc;
@@ -109,7 +109,7 @@ namespace tmv {
             IT2 it2 = m.col(0).begin(); ++it2;
             const int step = m.stepi() + m.stepj();
             for(--n;n;--n) {
-                SwapV_Helper<-3,TMV_UNKNOWN,Mr,Mc>::call2(n,it1,it2);
+                SwapV_Helper<-3,Unknown,Mr,Mc>::call2(n,it1,it2);
                 it1.shiftP(step);
                 it2.shiftP(step);
             }
@@ -190,7 +190,7 @@ namespace tmv {
             const int nops = IntTraits2<s,sm1>::safeprod / 2;
             const bool unroll = 
                 s >= 8 ? false :
-                s == TMV_UNKNOWN ? false :
+                s == Unknown ? false :
                 nops <= TMV_TRANSPOSEM_UNROLL;
             const int algo = 
                 s == 0 || s == 1 ? 0 :
@@ -208,7 +208,7 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
             const bool inst = 
-                (s == TMV_UNKNOWN || s > 16) &&
+                (s == Unknown || s > 16) &&
                 Traits<T>::isinst;
             const int algo = 
                 M1::_conj ? 97 :

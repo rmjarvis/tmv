@@ -311,7 +311,7 @@ namespace tmv {
         static TMV_INLINE void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int xx = TMV_UNKNOWN;
+            const int xx = Unknown;
             MultMM_Helper<73,xx,xx,xx,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3); 
         }
     };
