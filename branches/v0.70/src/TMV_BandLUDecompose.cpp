@@ -199,7 +199,8 @@ namespace tmv {
             if (TMV_Underflow(*Ujj)) {
                 *Ujj = *Lj = T(0);
             } else {
-                *Lj /= *Ujj;
+                // *Lj /= *Ujj;
+                *Lj = TMV_Divide(*Lj,*Ujj);
             }
 
             //A.row(j+1,j+1,endrow) -= *Lj * A.row(j,j+1,endrow);

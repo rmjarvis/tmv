@@ -697,7 +697,7 @@ namespace tmv {
         typedef DiagMatrixView<RT,A> realpart_type;
         typedef VectorView<T,A> vec_type;
         typedef ConstVectorView<T,A> const_vec_type;
-        typedef TMV_RefType(T) reference;
+        typedef typename RefHelper<T>::reference reference;
         typedef typename vec_type::iterator iterator;
 
         //
@@ -875,6 +875,7 @@ namespace tmv {
         typedef view_type adjoint_type;
         typedef DiagMatrixView<RT,FortranStyle> realpart_type;
         typedef VectorView<T,FortranStyle> vec_type;
+        typedef typename RefHelper<T>::reference reference;
 
         //
         // Constructors
@@ -933,12 +934,12 @@ namespace tmv {
         // Access
         //
 
-        inline TMV_RefType(T) operator()(int i) const 
+        inline reference operator()(int i) const 
         { 
             TMVAssert(i>0 && i<=size());
             return diag()(i); 
         }
-        inline TMV_RefType(T) operator()(int i, int TMV_DEBUGPARAM(j)) const 
+        inline reference operator()(int i, int TMV_DEBUGPARAM(j)) const 
         { 
             TMVAssert(i==j); 
             TMVAssert(i>0 && i<=size());

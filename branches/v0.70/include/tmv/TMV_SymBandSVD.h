@@ -59,11 +59,11 @@ namespace tmv {
         const GenSymBandMatrix<T>& A,
         const VectorView<TMV_RealType(T)>& lambda);
 
-    // Decompose A into U S V
+    // Decompose A into U S Vt
     template <class T> 
     void SV_Decompose(
         const GenSymBandMatrix<T>& A, const MatrixView<T>& U,
-        const DiagMatrixView<TMV_RealType(T)>& S, const MatrixView<T>& V);
+        const DiagMatrixView<TMV_RealType(T)>& S, const MatrixView<T>& Vt);
 
     // The same, but don't return U and/or V
     template <class T> 
@@ -73,7 +73,7 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenSymBandMatrix<T>& A,
-        const DiagMatrixView<TMV_RealType(T)>& S, const MatrixView<T>& V);
+        const DiagMatrixView<TMV_RealType(T)>& S, const MatrixView<T>& Vt);
     template <class T> 
     void SV_Decompose(
         const GenSymBandMatrix<T>& A,
@@ -106,11 +106,9 @@ namespace tmv {
         template <class T1> 
         void doRDivEq(const MatrixView<T1>& m) const;
         template <class T1, class T2> 
-        void doLDiv(const GenMatrix<T1>& m,
-                    const MatrixView<T2>& x) const;
+        void doLDiv(const GenMatrix<T1>& m, const MatrixView<T2>& x) const;
         template <class T1, class T2> 
-        void doRDiv(const GenMatrix<T1>& m, 
-                    const MatrixView<T2>& x) const;
+        void doRDiv(const GenMatrix<T1>& m, const MatrixView<T2>& x) const;
 
         //
         // Determinant, Inverse
@@ -157,7 +155,7 @@ namespace tmv {
 
         ConstMatrixView<T> getU() const;
         DiagMatrix<TMV_RealType(T)> getS() const;
-        Matrix<T> getV() const;
+        Matrix<T> getVt() const;
 
         bool checkDecomp(const BaseMatrix<T>& m, std::ostream* fout) const;
 
@@ -247,7 +245,7 @@ namespace tmv {
 
         ConstMatrixView<T> getU() const;
         ConstDiagMatrixView<TMV_RealType(T)> getS() const;
-        ConstMatrixView<T> getV() const;
+        ConstMatrixView<T> getVt() const;
 
         bool checkDecomp(const BaseMatrix<T>& m, std::ostream* fout) const;
 

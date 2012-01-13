@@ -172,6 +172,7 @@ namespace tmv {
             
             // Check for underflow:
             if (TMV_Underflow(piv)) {
+                //std::cout<<piv<<" underflowed.\n";
                 *Pj = j;
                 A.col(j,j,M).setZero();
                 //std::cout<<"col is zero\n";
@@ -294,9 +295,11 @@ namespace tmv {
             //std::cout<<"A0 = "<<A0<<std::endl;
             RT piv = A0.maxAbsElement(&ip0);
             //std::cout<<"ip0 => "<<ip0<<std::endl;
+            //std::cout<<"piv = "<<piv<<std::endl;
 
             // Check for underflow:
             if (TMV_Underflow(piv)) {
+                //std::cout<<piv<<" underflowed.\n";
                 ip0 = 0;
                 piv = RT(0);
                 A0.setZero();
@@ -311,7 +314,7 @@ namespace tmv {
 
                 // A0.subVector(1,M) /= A00;
                 // A1.subVector(1,M) -= A0.subVector(1,M) * A01;
-                const T invA00 = RT(1)/(*A0.cptr());
+                const T invA00 = TMV_InverseOf(*A0.cptr());
                 const T A01 = (*A1.cptr());
                 piv = RT(0); // next pivot element
                 ip1 = 1;
@@ -333,11 +336,13 @@ namespace tmv {
                 //std::cout<<"A1 = "<<A1.subVector(1,M)<<std::endl;
                 piv = A1.subVector(1,M).maxAbsElement(&ip1); 
                 //std::cout<<"ip1 => "<<ip1<<std::endl;
+                //std::cout<<"piv = "<<piv<<std::endl;
                 ++ip1;
             }
 
             // Check for underflow:
             if (TMV_Underflow(piv)) {
+                //std::cout<<piv<<" underflowed.\n";
                 piv = RT(0);
                 ip1 = 1;
                 A1.subVector(1,M).setZero();
@@ -352,13 +357,15 @@ namespace tmv {
 
                 //A1.subVector(2,M) /= A1(1);
                 const T A11 = (*(A1.cptr()+1));
+                //std::cout<<"A1(2:M) /= "<<A11<<std::endl;
                 A1.subVector(2,M) /= A11;
+                //std::cout<<" => "<<A1.subVector(2,M)<<std::endl;
             }
 
             if (N > 2) {
                 // M=2, N>2, so solve for U(0:2,2:N))
                 // A.colRange(2,N).permuteRows(P);
-                if (*P == 1) A.colRange(2,N).swapRows(0,1);
+                if (ip0 == 1) A.colRange(2,N).swapRows(0,1);
                 // A.colRange(2,N) /= A.colRange(0,2).lowerTri(UnitDiag);
                 const T A01 = (*A1.cptr());
                 A.row(1,2,N) -= A01 * A.row(0,2,N);
@@ -366,13 +373,16 @@ namespace tmv {
             P[0] = ip0;
             P[1] = ip1;
         } else if (R == 1) {
+            //std::cout<<"R == 1\n";
             // Same as NonBlock version, but with R==1 hard coded
             VectorView<T> A0 = A.col(0);
 
             RT piv = A0.maxAbsElement(P);
+            //std::cout<<"piv = "<<piv<<std::endl;
 
             // Check for underflow:
             if (TMV_Underflow(piv)) {
+                //std::cout<<piv<<" underflowed.\n";
                 piv = RT(0);
                 *P = 0;
                 A0.setZero();
@@ -383,7 +393,9 @@ namespace tmv {
                     A0.swap(*P,0);
                     detp = -detp;
                 }
+                //std::cout<<"A0(1:M) /= "<<*A0.cptr()<<std::endl;
                 A0.subVector(1,M) /= (*A0.cptr());
+                //std::cout<<" => "<<A0.subVector(1,M)<<std::endl;
             }
         }
 #ifdef XDEBUG

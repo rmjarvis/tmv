@@ -1,8 +1,6 @@
 
-//#undef NDEBUG
 //#define PRINTALGO_SVD
 //#define XDEBUG_SVD
-//#include "TMV.h"
 
 #include "TMV_Blas.h"
 #include "tmv/TMV_SVDecompose.h"
@@ -41,14 +39,32 @@ namespace tmv {
         MatrixView<Tu> U, VectorView<RT>& D, VectorView<RT>& E,
         MatrixView<Tv> V, bool setUV)
     { 
+#ifdef XDEBUG_SVD
+        std::cout<<"Start DoSV_DecomposeFromBidiagonal\n";
+        dbgcout<<"Norm(U) = "<<Norm(U)<<std::endl;
+        dbgcout<<"Norm(V) = "<<Norm(V)<<std::endl;
+        dbgcout<<"Norm(D) = "<<Norm(D)<<std::endl;
+        dbgcout<<"Norm(E) = "<<Norm(E)<<std::endl;
+#endif
         MatrixView<Tu,ColMajor> Ucm = U;
         VectorView<RT,Unit> Du = D;
         VectorView<RT,Unit> Eu = E;
+#ifdef XDEBUG_SVD
+        dbgcout<<"Norm(Ucm) = "<<Norm(Ucm)<<std::endl;
+        dbgcout<<"Norm(Du) = "<<Norm(Du)<<std::endl;
+        dbgcout<<"Norm(Eu) = "<<Norm(Eu)<<std::endl;
+#endif
         if (V.iscm()) {
             MatrixView<Tv,ColMajor> Vcm = V;
+#ifdef XDEBUG_SVD
+            dbgcout<<"Norm(Vcm) = "<<Norm(Vcm)<<std::endl;
+#endif
             InlineSV_DecomposeFromBidiagonal(Ucm,Du,Eu,Vcm,setUV);
         } else {
             MatrixView<Tv,RowMajor> Vrm = V;
+#ifdef XDEBUG_SVD
+            dbgcout<<"Norm(Vrm) = "<<Norm(Vrm)<<std::endl;
+#endif
             InlineSV_DecomposeFromBidiagonal(Ucm,Du,Eu,Vrm,setUV);
         }
     }

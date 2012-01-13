@@ -196,7 +196,7 @@ namespace tmv {
         const SymBandMatrixView<T>& m, T x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
-        MultXM(TMV_RealType(T)(1)/x,m);
+        MultXM(TMV_InverseOf(x),m);
         return m;
     }
 
@@ -204,7 +204,7 @@ namespace tmv {
     inline const SymBandMatrixView<CT>& operator/=(
         const SymBandMatrixView<CT>& m, T x) 
     { 
-        MultXM(T(1)/x,m);
+        MultXM(TMV_InverseOf(x),m);
         return m;
     }
 
@@ -213,7 +213,7 @@ namespace tmv {
         const SymBandMatrixView<CT>& m, CCT x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
-        MultXM(T(1)/CT(x),m);
+        MultXM(TMV_InverseOf(CT(x)),m);
         return m;
     }
 
@@ -222,7 +222,7 @@ namespace tmv {
         const SymBandMatrixView<CT>& m, VCT x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
-        MultXM(T(1)/CT(x),m);
+        MultXM(TMV_InverseOf(CT(x)),m);
         return m;
     }
 

@@ -1126,7 +1126,7 @@ def DoConfig(env):
     env.Append(CPPDEFINES=['TMV_OPT=' + env['OPT']])
     if not env['DEBUG']:
         print 'Debugging turned off'
-        env.Append(CPPDEFINES=['NDEBUG'])
+        env.Append(CPPDEFINES=['TMV_NDEBUG'])
     if env['MEM_TEST']:
         env.Append(CPPDEFINES=['TMV_MEM_TEST'])
     if '-m32' in env['CCFLAGS']:

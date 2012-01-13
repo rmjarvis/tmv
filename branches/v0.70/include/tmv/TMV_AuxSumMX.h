@@ -343,31 +343,31 @@ inline SUMMX<CT,T1 X2> operator*(const SUMMX<CT,T1 X2>& smx, const VCT x)
 
 template <class T, class T1 Y> 
 inline SUMMX<T,T1 X2> operator/(const SUMMX<T,T1 X2>& smx, const T x)
-{ return SUMMX<T,T1 X2>(smx.getX1()/x,smx.getM(),smx.getX2()/x); }
+{ return SUMMX<T,T1 X2>(TMV_Divide(smx.getX1(),x),smx.getM(),TMV_Divide(smx.getX2(),x)); }
 
 template <class T, class T1 Y> 
 inline SUMMX<CT,T1 X2> operator/(const SUMMX<CT,T1 X2>& smx, const T x)
-{ return SUMMX<CT,T1 X2>(smx.getX1()/x,smx.getM(),smx.getX2()/x); }
+{ return SUMMX<CT,T1 X2>(TMV_Divide(smx.getX1(),x),smx.getM(),TMV_Divide(smx.getX2(),x)); }
 
 template <class T Y> 
 inline SUMMX<CT,T X2> operator/(const SUMMX<T,T X2>& smx, const CT x)
-{ return SUMMX<CT,T X2>(smx.getX1()/x,smx.getM(),smx.getX2()/x); }
+{ return SUMMX<CT,T X2>(TMV_Divide(smx.getX1(),x),smx.getM(),TMV_Divide(smx.getX2(),x)); }
 
 template <class T Y> 
 inline SUMMX<CT,T X2> operator/(const SUMMX<T,T X2>& smx, const CCT x)
-{ return SUMMX<CT,T X2>(smx.getX1()/CT(x),smx.getM(),smx.getX2()/CT(x)); }
+{ return SUMMX<CT,T X2>(TMV_Divide(smx.getX1(),CT(x)),smx.getM(),TMV_Divide(smx.getX2(),CT(x))); }
 
 template <class T Y> 
 inline SUMMX<CT,T X2> operator/(const SUMMX<T,T X2>& smx, const VCT x)
-{ return SUMMX<CT,T X2>(smx.getX1()/CT(x),smx.getM(),smx.getX2()/CT(x)); }
+{ return SUMMX<CT,T X2>(TMV_Divide(smx.getX1(),CT(x)),smx.getM(),TMV_Divide(smx.getX2(),CT(x))); }
 
 template <class T, class T1 Y> 
 inline SUMMX<CT,T1 X2> operator/(const SUMMX<CT,T1 X2>& smx, const CCT x)
-{ return SUMMX<CT,T1 X2>(smx.getX1()/CT(x),smx.getM(),smx.getX2()/CT(x)); }
+{ return SUMMX<CT,T1 X2>(TMV_Divide(smx.getX1(),CT(x)),smx.getM(),TMV_Divide(smx.getX2(),CT(x))); }
 
 template <class T, class T1 Y> 
 inline SUMMX<CT,T1 X2> operator/(const SUMMX<CT,T1 X2>& smx, const VCT x)
-{ return SUMMX<CT,T1 X2>(smx.getX1()/CT(x),smx.getM(),smx.getX2()/CT(x)); }
+{ return SUMMX<CT,T1 X2>(TMV_Divide(smx.getX1(),CT(x)),smx.getM(),TMV_Divide(smx.getX2(),CT(x))); }
 
 // x+(x*m)
 
@@ -560,31 +560,31 @@ inline SUMMX<CT,T1 X2> operator*(const SUMMX_1<CT,T1 X2>& smx, const VCT x)
 
 template <class T, class T1 Y> 
 inline SUMMX<T,T1 X2> operator/(const SUMMX_1<T,T1 X2>& smx, const T x)
-{ return SUMMX<T,T1 X2>(TMV_RealType(T)(1)/x,smx.getM(),smx.getX2()/x); }
+{ return SUMMX<T,T1 X2>(TMV_InverseOf(x),smx.getM(),TMV_Divide(smx.getX2(),x)); }
 
 template <class T, class T1 Y> 
 inline SUMMX<CT,T1 X2> operator/(const SUMMX_1<CT,T1 X2>& smx, const T x)
-{ return SUMMX<CT,T1 X2>(T(1)/x,smx.getM(),smx.getX2()/x); }
+{ return SUMMX<CT,T1 X2>(TMV_InverseOf(x),smx.getM(),TMV_Divide(smx.getX2(),x)); }
 
 template <class T Y> 
 inline SUMMX<CT,T X2> operator/(const SUMMX_1<T,T X2>& smx, const CT x)
-{ return SUMMX<CT,T X2>(T(1)/x,smx.getM(),smx.getX2()/x); }
+{ return SUMMX<CT,T X2>(TMV_InverseOf(x),smx.getM(),TMV_Divide(smx.getX2(),x)); }
 
 template <class T Y> 
 inline SUMMX<CT,T X2> operator/(const SUMMX_1<T,T X2>& smx, const CCT x)
-{ return SUMMX<CT,T X2>(T(1)/CT(x),smx.getM(),smx.getX2()/CT(x)); }
+{ return SUMMX<CT,T X2>(TMV_InverseOf(CT(x)),smx.getM(),TMV_Divide(smx.getX2(),CT(x))); }
 
 template <class T Y> 
 inline SUMMX<CT,T X2> operator/(const SUMMX_1<T,T X2>& smx, const VCT x)
-{ return SUMMX<CT,T X2>(T(1)/CT(x),smx.getM(),smx.getX2()/CT(x)); }
+{ return SUMMX<CT,T X2>(TMV_InverseOf(CT(x)),smx.getM(),TMV_Divide(smx.getX2(),CT(x))); }
 
 template <class T, class T1 Y> 
 inline SUMMX<CT,T1 X2> operator/(const SUMMX_1<CT,T1 X2>& smx, const CCT x)
-{ return SUMMX<CT,T1 X2>(T(1)/CT(x),smx.getM(),smx.getX2()/CT(x)); }
+{ return SUMMX<CT,T1 X2>(TMV_InverseOf(CT(x)),smx.getM(),TMV_Divide(smx.getX2(),CT(x))); }
 
 template <class T, class T1 Y> 
 inline SUMMX<CT,T1 X2> operator/(const SUMMX_1<CT,T1 X2>& smx, const VCT x)
-{ return SUMMX<CT,T1 X2>(T(1)/CT(x),smx.getM(),smx.getX2()/CT(x)); }
+{ return SUMMX<CT,T1 X2>(TMV_InverseOf(CT(x)),smx.getM(),TMV_Divide(smx.getX2(),CT(x))); }
 #endif
 
 #undef X1

@@ -1377,7 +1377,7 @@ namespace tmv {
         typedef SymMatrixView<T,A> sym_type;
         typedef BandMatrixView<T,A> band_type;
         typedef SymBandMatrixView<RT,A> realpart_type;
-        typedef TMV_RefType(T) reference;
+        typedef typename RefHelper<T>::reference reference;
 
         //
         // Constructors
@@ -2004,6 +2004,7 @@ namespace tmv {
         typedef SymMatrixView<T,FortranStyle> sym_type;
         typedef BandMatrixView<T,FortranStyle> band_type;
         typedef SymBandMatrixView<RT,FortranStyle> realpart_type;
+        typedef typename RefHelper<T>::reference reference;
 
         //
         // Constructors
@@ -2075,7 +2076,7 @@ namespace tmv {
         // Access
         //
 
-        inline TMV_RefType(T) operator()(int i,int j) const 
+        inline reference operator()(int i,int j) const 
         {
             TMVAssert(i>0 && i<=this->size());
             TMVAssert(j>0 && j<=this->size());
@@ -3513,7 +3514,7 @@ namespace tmv {
         typedef SymMatrixView<T,I> sym_type;
         typedef BandMatrixView<T,I> band_type;
         typedef SymBandMatrixView<RT,I> realpart_type;
-        typedef TMV_RefType(T) reference;
+        typedef typename RefHelper<T>::reference reference;
 
         //
         // Constructors
@@ -4641,9 +4642,11 @@ namespace tmv {
         inline reference ref(int i, int j)
         {
             if ((uplo()==Upper && i <= j) || (uplo()==Lower && i>=j)) 
-                return TMV_REF(itsm + i*stepi() + j*stepj(),NonConj);
+                return RefHelper<T>::makeRef(
+                    itsm + i*stepi() + j*stepj(),NonConj);
             else 
-                return TMV_REF(itsm + j*stepi() + i*stepj(),Conj);
+                return RefHelper<T>::makeRef(
+                    itsm + j*stepi() + i*stepj(),Conj);
         }
 
         inline T cref(int i, int j) const 

@@ -55,7 +55,7 @@ namespace tmv {
     { 
         MultMM<false>(
             Scaling<1,typename M1::real_type>(),
-            (x*m1.mat()).calc(),m2.mat(),m1.mat()); 
+            ProdXM<ix,T,M1>(x,m1.mat()).calc(),m2.mat(),m1.mat()); 
     }
 
     // Also allow x to be missing (taken to be 1) or a scalar.
@@ -417,22 +417,34 @@ namespace tmv {
     template <int ix, class T, class M1, class M2>
     TMV_INLINE ProdMM<0,T,M1,M2> operator/(
         const ProdMM<ix,T,M1,M2>& mm, const int x)
-    { return ProdMM<0,T,M1,M2>(mm.getX()/RT(x),mm.getM1(),mm.getM2()); }
+    {
+        return ProdMM<0,T,M1,M2>(
+            ZProd<false,false>::quot(mm.getX(),RT(x)),mm.getM1(),mm.getM2()); 
+    }
 
     template <int ix, class T, class M1, class M2>
     TMV_INLINE ProdMM<0,T,M1,M2> operator/(
         const ProdMM<ix,T,M1,M2>& mm, const RT x)
-    { return ProdMM<0,T,M1,M2>(mm.getX()/x,mm.getM1(),mm.getM2()); }
+    { 
+        return ProdMM<0,T,M1,M2>(
+            ZProd<false,false>::quot(mm.getX(),x),mm.getM1(),mm.getM2()); 
+    }
 
     template <int ix, class T, class M1, class M2>
     TMV_INLINE ProdMM<0,CT,M1,M2> operator/(
         const ProdMM<ix,T,M1,M2>& mm, const CT x)
-    { return ProdMM<0,CT,M1,M2>(mm.getX()/x,mm.getM1(),mm.getM2()); }
+    { 
+        return ProdMM<0,CT,M1,M2>(
+            ZProd<false,false>::quot(mm.getX(),x),mm.getM1(),mm.getM2()); 
+    }
 
     template <int ix, class T, class M1, class M2>
     TMV_INLINE ProdMM<0,CT,M1,M2> operator/(
         const ProdMM<ix,T,M1,M2>& mm, const CCT x)
-    { return ProdMM<0,CT,M1,M2>(mm.getX()/x,mm.getM1(),mm.getM2()); }
+    { 
+        return ProdMM<0,CT,M1,M2>(
+            ZProd<false,false>::quot(mm.getX(),x),mm.getM1(),mm.getM2()); 
+    }
 
 
 #undef RT

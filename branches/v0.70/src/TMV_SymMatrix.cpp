@@ -67,8 +67,7 @@ namespace tmv {
             return isconj() ? TMV_CONJ(*mi) : *mi;
         } else {
             const T* mi = cptr() + j*stepi() + i*stepj();
-            return isReal(T()) ? *mi : 
-                (ct()==Conj) != (sym()==Herm) ? TMV_CONJ(*mi) : *mi;
+            return issym() != isconj() ? *mi : TMV_CONJ(*mi);
         }
     }
 
@@ -78,13 +77,11 @@ namespace tmv {
     {
         if ((uplo() == Upper && i<=j) || (uplo() == Lower && i>=j)) {
             T* mi = ptr() + i*stepi() + j*stepj();
-            return TMV_REF(mi,ct());
+            return RefHelper<T>::makeRef(mi,ct());
         } else {
             T* mi = ptr() + j*stepi() + i*stepj();
-            return
-                isReal(T()) ? TMV_REF(mi,NonConj) : 
-                (ct()==Conj) != (sym()==Herm) ? TMV_REF(mi,Conj) :
-                TMV_REF(mi,NonConj);
+            return RefHelper<T>::makeRef(
+                mi, this->issym() != this->isconj() ? NonConj : Conj);
         }
     }
 

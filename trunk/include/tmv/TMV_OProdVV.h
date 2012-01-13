@@ -286,17 +286,23 @@ namespace tmv {
     template <int ix, class T, class V1, class V2>
     TMV_INLINE OProdVV<0,T,V1,V2> operator/(
         const OProdVV<ix,T,V1,V2>& vv, const RT x)
-    { return OProdVV<0,T,V1,V2>(vv.getX()/x,vv.getV1(),vv.getV2()); }
+    {
+        return OProdVV<0,T,V1,V2>(
+            ZProd<false,false>::quot(vv.getX(),x),vv.getV1(),vv.getV2()); }
 
     template <int ix, class T, class V1, class V2>
     TMV_INLINE OProdVV<0,CT,V1,V2> operator/(
         const OProdVV<ix,T,V1,V2>& vv, const CT x)
-    { return OProdVV<0,CT,V1,V2>(vv.getX()/x,vv.getV1(),vv.getV2()); }
+    { 
+        return OProdVV<0,CT,V1,V2>(
+            ZProd<false,false>::quot(vv.getX(),x),vv.getV1(),vv.getV2()); }
 
     template <int ix, class T, class V1, class V2>
     TMV_INLINE OProdVV<0,CT,V1,V2> operator/(
         const OProdVV<ix,T,V1,V2>& vv, const CCT x)
-    { return OProdVV<0,CT,V1,V2>(vv.getX()/x,vv.getV1(),vv.getV2()); }
+    { 
+        return OProdVV<0,CT,V1,V2>(
+            ZProd<false,false>::quot(vv.getX(),CT(x)),vv.getV1(),vv.getV2()); }
 
 #undef RT
 #undef CT

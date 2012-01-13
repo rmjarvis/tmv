@@ -125,22 +125,22 @@ namespace tmv {
     template <class T> 
     inline const DiagMatrixView<T>& operator/=(
         const DiagMatrixView<T>& m, T x) 
-    { MultXV(TMV_RealType(T)(1)/x,m.diag()); return m; }
+    { MultXV(TMV_InverseOf(x),m.diag()); return m; }
 
     template <class T> 
     inline const DiagMatrixView<CT>& operator/=(
         const DiagMatrixView<CT>& m, T x) 
-    { MultXV(T(1)/x,m.diag()); return m; }
+    { MultXV(TMV_InverseOf(x),m.diag()); return m; }
 
     template <class T> 
     inline const DiagMatrixView<CT>& operator/=(
         const DiagMatrixView<CT>& m, CCT x) 
-    { MultXV(T(1)/CT(x),m.diag()); return m; }
+    { MultXV(TMV_InverseOf(CT(x)),m.diag()); return m; }
 
     template <class T> 
     inline const DiagMatrixView<CT>& operator/=(
         const DiagMatrixView<CT>& m, VCT x) 
-    { MultXV(T(1)/CT(x),m.diag()); return m; }
+    { MultXV(TMV_InverseOf(CT(x)),m.diag()); return m; }
 
 #define GENMATRIX GenDiagMatrix
 #define PRODXM ProdXD

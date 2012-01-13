@@ -55,13 +55,13 @@ namespace tmv {
     template <class T, class T1> 
     void SymSV_Inverse(
         const GenMatrix<T1>& U, const GenDiagMatrix<TMV_RealType(T1)>& SS, 
-        const GenMatrix<T1>& V, int kmax, const SymMatrixView<T>& sinv)
+        const GenMatrix<T1>& Vt, int kmax, const SymMatrixView<T>& sinv)
     {
-        // A = U S V
-        // A^-1 = Vt S^-1 Ut
+        // A = U S Vt
+        // A^-1 = V S^-1 Ut
         Matrix<T,ColMajor> SinvUt = U.adjoint().rowRange(0,kmax) /
             SS.subDiagMatrix(0,kmax);
-        SymMultMM<false>(T(1),V.adjoint().colRange(0,kmax),SinvUt,sinv);
+        SymMultMM<false>(T(1),Vt.adjoint().colRange(0,kmax),SinvUt,sinv);
     }
 
 #ifdef INST_INT

@@ -35,6 +35,7 @@
 
 #include "tmv/TMV_BaseSymMatrix.h"
 #include "tmv/TMV_SymMatrixArithFunc.h"
+#include "tmv/TMV_VIt.h"
 
 #define CT std::complex<T>
 #define CCT ConjRef<std::complex<T> >
@@ -197,14 +198,14 @@ namespace tmv {
     inline const SymMatrixView<T>& operator/=(const SymMatrixView<T>& m, T x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
-        MultXM(TMV_RealType(T)(1)/x,m);
+        MultXM(TMV_InverseOf(x),m); 
         return m;
     }
 
     template <class T> 
     inline const SymMatrixView<CT>& operator/=(const SymMatrixView<CT>& m, T x) 
     { 
-        MultXM(T(1)/x,m);
+        MultXM(TMV_InverseOf(x),m); 
         return m;
     }
 
@@ -213,7 +214,7 @@ namespace tmv {
         const SymMatrixView<CT>& m, CCT x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
-        MultXM(T(1)/CT(x),m);
+        MultXM(TMV_InverseOf(CT(x)),m); 
         return m;
     }
 
@@ -222,7 +223,7 @@ namespace tmv {
         const SymMatrixView<CT>& m, VCT x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
-        MultXM(T(1)/CT(x),m);
+        MultXM(TMV_InverseOf(CT(x)),m); 
         return m;
     }
 

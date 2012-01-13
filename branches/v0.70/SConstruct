@@ -191,7 +191,7 @@ def BasicCCFlags(env):
             env['TEST_FLAGS'] = ['-O1']
             if env['WARN']:
                 env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror'])
-                env['TEST_FLAGS'] = ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
+                env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
             if env['TEST_DEPRECATED']:
                 env['TEST_FLAGS'] += ['-Wno-deprecated-declarations']
 
@@ -201,7 +201,7 @@ def BasicCCFlags(env):
             env['TEST_FLAGS'] = ['-O1']
             if env['WARN']:
                 env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror'])
-                env['TEST_FLAGS'] = ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
+                env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
             if env['TEST_DEPRECATED']:
                 env['TEST_FLAGS'] += ['-Wno-deprecated-declarations']
 

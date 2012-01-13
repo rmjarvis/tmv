@@ -75,11 +75,11 @@ namespace tmv {
     {
         if ((uplo() == Upper && i<=j) || (uplo() == Lower && i>=j)) {
             T* mi = ptr() + i*stepi() + j*stepj();
-            return TMV_REF(mi,ct());
+            return RefHelper<T>::makeRef(mi,ct());
         } else {
             T* mi = ptr() + j*stepi() + i*stepj();
-            return this->issym() != this->isconj() ?
-                TMV_REF(mi,NonConj) : TMV_REF(mi,Conj);
+            return RefHelper<T>::makeRef(
+                mi, this->issym() != this->isconj() ? NonConj : Conj);
         }
     }
 

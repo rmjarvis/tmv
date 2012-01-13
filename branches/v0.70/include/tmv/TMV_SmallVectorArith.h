@@ -125,19 +125,19 @@ namespace tmv {
 
     template <class T, int N, int A> 
     inline SmallVector<T,N,A>& operator/=(SmallVector<T,N,A>& v1, T x2)
-    { MultXV<N>(T(1)/x2,v1.ptr()); return v1; }
+    { MultXV<N>(TMV_InverseOf(x2),v1.ptr()); return v1; }
 
     template <class T, int N, int A> 
     inline SmallVector<CT,N,A>& operator/=(SmallVector<CT,N,A>& v1, T x2)
-    { MultXV<N>(T(1)/x2,v1.ptr()); return v1; }
+    { MultXV<N>(TMV_InverseOf(x2),v1.ptr()); return v1; }
 
     template <class T, int N, int A> 
     inline SmallVector<CT,N,A>& operator/=(SmallVector<CT,N,A>& v1, CCT x2)
-    { MultXV<N>(T(1)/CT(x2),v1.ptr()); return v1; }
+    { MultXV<N>(TMV_InverseOf(CT(x2)),v1.ptr()); return v1; }
 
     template <class T, int N, int A> 
     inline SmallVector<CT,N,A>& operator/=(SmallVector<CT,N,A>& v1, VCT x2)
-    { MultXV<N>(T(1)/CT(x2),v1.ptr()); return v1; }
+    { MultXV<N>(TMV_InverseOf(CT(x2)),v1.ptr()); return v1; }
 
 #define GENMATRIX SmallVector
 #define PRODXM ProdXv

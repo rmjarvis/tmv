@@ -89,7 +89,7 @@ namespace tmv {
         // Beta is the return value.
 
         // Determine normx = |x|
-        RT invscale = RT(1)/scale;
+        RT invscale = TMV_InverseOf(scale);
         RT normsqx = x.normSq(invscale);
         //std::cout<<"invscale = "<<invscale<<std::endl;
         //std::cout<<"new normsqx = "<<normsqx<<std::endl;
@@ -122,8 +122,8 @@ namespace tmv {
         // Renormalize beta,v so that v(0) = 1
         T v0 = x0-y;
         RT normv0 = TMV_NORM(v0);
-        T beta = normv0 / (normsqx - y * x0);
-        T invv0 = RT(1)/v0;
+        T beta = TMV_Divide(normv0 , (normsqx - y * x0));
+        T invv0 = TMV_InverseOf(v0);
         //std::cout<<"v0 = "<<v0<<", normv0 = "<<normv0;
         //std::cout<<", beta = "<<beta<<", invv0 = "<<invv0<<std::endl;
 

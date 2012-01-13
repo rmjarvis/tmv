@@ -1090,7 +1090,7 @@ namespace tmv {
         typedef UpperTriMatrixView<T,A> uppertri_type;
         typedef LowerTriMatrixView<T,A> lowertri_type;
         typedef SymMatrixView<RT,A> realpart_type;
-        typedef TMV_RefType(T) reference;
+        typedef typename RefHelper<T>::reference reference;
 
         //
         // Constructors
@@ -1664,6 +1664,7 @@ namespace tmv {
         typedef LowerTriMatrixView<T,FortranStyle> lowertri_type;
         typedef SymMatrixView<RT,FortranStyle> realpart_type;
         typedef ConstSymMatrixView<T,FortranStyle> const_type;
+        typedef typename RefHelper<T>::reference reference;
 
         //
         // Constructors
@@ -1744,7 +1745,7 @@ namespace tmv {
         // Access
         //
 
-        inline TMV_RefType(T) operator()(int i,int j) const 
+        inline reference operator()(int i,int j) const 
         {
             TMVAssert(i>0 && i<=this->size());
             TMVAssert(j>0 && j<=this->size());
@@ -2779,21 +2780,17 @@ namespace tmv {
         inline T& ref(int i, int j)
         {
             if ((uplo()==Upper && i <= j) || (uplo()==Lower && i>=j)) 
-                if (S == int(RowMajor)) return itsm.get()[i*itss + j];
-                else return itsm.get()[j*itss + i];
+                return itsm.get()[i*stepi() + j*stepj()];
             else 
-                if (S == int(RowMajor)) return itsm.get()[j*itss + i];
-                else return itsm.get()[i*itss + j];
+                return itsm.get()[j*stepi() + i*stepj()];
         }
 
         inline T cref(int i, int j) const 
         {
             if ((uplo()==Upper && i <= j) || (uplo()==Lower && i>=j)) 
-                if (S == int(RowMajor)) return itsm.get()[i*itss + j];
-                else return itsm.get()[j*itss + i];
+                return itsm.get()[i*stepi() + j*stepj()];
             else 
-                if (S == int(RowMajor)) return itsm.get()[j*itss + i];
-                else return itsm.get()[i*itss + j];
+                return itsm.get()[j*stepi() + i*stepj()];
         }
 
         inline void resize(int s)
@@ -2868,7 +2865,7 @@ namespace tmv {
         typedef UpperTriMatrixView<T,I> uppertri_type;
         typedef LowerTriMatrixView<T,I> lowertri_type;
         typedef SymMatrixView<RT,I> realpart_type;
-        typedef TMV_RefType(T) reference;
+        typedef typename RefHelper<T>::reference reference;
 
         //
         // Constructors
@@ -3730,29 +3727,19 @@ namespace tmv {
         inline reference ref(int i, int j)
         {
             if ((uplo()==Upper && i <= j) || (uplo()==Lower && i>=j)) 
-                if (S == int(RowMajor)) 
-                    return TMV_REF(itsm.get() + i*itss + j, NonConj);
-                else 
-                    return TMV_REF(itsm.get() + j*itss + i, NonConj);
+                return RefHelper<T>::makeRef(
+                    itsm.get() + i*stepi() + j*stepj(),NonConj);
             else 
-                if (S == int(RowMajor)) 
-                    return TMV_REF(itsm.get() + j*itss + i, Conj);
-                else 
-                    return TMV_REF(itsm.get() + i*itss + j, Conj);
+                return RefHelper<T>::makeRef(
+                    itsm.get() + j*stepi() + i*stepj(),Conj);
         }
 
         inline T cref(int i, int j) const 
         {
             if ((uplo()==Upper && i <= j) || (uplo()==Lower && i>=j)) 
-                if (S == int(RowMajor)) 
-                    return itsm.get()[i*itss + j];
-                else 
-                    return itsm.get()[j*itss + i];
+                return itsm.get()[i*stepi() + j*stepj()];
             else 
-                if (S == int(RowMajor)) 
-                    return TMV_CONJ(itsm.get()[j*itss + i]);
-                else 
-                    return TMV_CONJ(itsm.get()[i*itss + j]);
+                return TMV_CONJ(itsm.get()[j*stepi() + i*stepj()]);
         }
 
         inline void resize(int s)

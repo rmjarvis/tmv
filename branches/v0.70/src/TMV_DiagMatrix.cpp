@@ -76,34 +76,22 @@ namespace tmv {
             for(int i=size();i>0;--i,++di) {
                 if (*di == T(0)) { 
                     logdet = TMV_LOG(TMV_REAL(*di));
-                    if (sign) s = T(0); 
+                    s = T(0); 
                 } else {
                     RT a = TMV_ABS(*di);
                     logdet += TMV_LOG(a);
-                    if (sign) {
-                        if (isReal(T())) {
-                            if (TMV_REAL(*di) < RT(0)) s = -s;
-                        } else {
-                            s *= (*di/a);
-                        }
-                    }
+                    s *= TMV_SIGN(*di,a);
                 }
             }
         } else {
             for(int i=size();i>0;--i,di+=ds) {
                 if (*di == T(0)) { 
                     logdet = TMV_LOG(TMV_REAL(*di));
-                    if (sign) s = T(0); 
+                    s = T(0); 
                 } else {
                     RT a = TMV_ABS(*di);
                     logdet += TMV_LOG(a);
-                    if (sign) {
-                        if (isReal(T())) {
-                            if (TMV_REAL(*di) < RT(0)) s = -s;
-                        } else {
-                            s *= (*di/a);
-                        }
-                    }
+                    s *= TMV_SIGN(*di,a);
                 }
             }
         }
@@ -188,10 +176,7 @@ namespace tmv {
                 TMVAssert(di >= itsdiag._first);
                 TMVAssert(di < itsdiag._last);
 #endif
-                if (TMV_IMAG(*di) == RT(0))
-                    *di = RT(1) / TMV_REAL(*di);
-                else
-                    *di = RT(1) / *di;
+                *di = TMV_InverseOf(*di);
             }
         } else {
             for(int i=size();i>0;--i,di+=dstep) {
@@ -207,10 +192,7 @@ namespace tmv {
                 TMVAssert(di >= itsdiag._first);
                 TMVAssert(di < itsdiag._last);
 #endif
-                if (TMV_IMAG(*di) == RT(0))
-                    *di = RT(1) / TMV_REAL(*di);
-                else
-                    *di = RT(1) / *di;
+                *di = TMV_InverseOf(*di);
             }
         }
         return *this;
@@ -349,12 +331,7 @@ namespace tmv {
                     throw SingularDiagMatrix<Td>(d);
 #endif
                 }
-                if (TMV_IMAG(*di) == RT(0)) {
-                    if (TMV_REAL(*di) != RT(1))
-                        *vi /= TMV_REAL(*di);
-                } else {
-                    *vi /= (cd?TMV_CONJ(*di):*di);
-                }
+                *vi = TMV_Divide(*vi,(cd?TMV_CONJ(*di):*di));
             }
         } else {
             for(int i=v.size();i>0;--i,di+=dstep,vi+=vstep) {
@@ -370,11 +347,7 @@ namespace tmv {
                     throw SingularDiagMatrix<Td>(d);
 #endif
                 }
-                if (TMV_IMAG(*di) == RT(0)) {
-                    if (TMV_REAL(*di) != RT(1)) *vi /= TMV_REAL(*di);
-                } else {
-                    *vi /= (cd?TMV_CONJ(*di):*di);
-                }
+                *vi = TMV_Divide(*vi,(cd?TMV_CONJ(*di):*di));
             }
         }
     }
@@ -478,17 +451,8 @@ namespace tmv {
 #else
                 throw SingularDiagMatrix<Td>(d);
 #endif
-            } else if (TMV_IMAG(*di) == RT(0)) {
-                RT invdi = RT(1)/TMV_REAL(*di);
-                for(int j=N;j>0;--j,(rm?++mij:mij+=stepj)) {
-#ifdef TMVFLDEBUG
-                    TMVAssert(mij >= m._first);
-                    TMVAssert(mij < m._last);
-#endif
-                    *mij *= invdi;
-                }
             } else {
-                Td invdi = RT(1)/(cd?TMV_CONJ(*di):*di);
+                Td invdi = TMV_InverseOf(cd?TMV_CONJ(*di):*di);
                 for(int j=N;j>0;--j,(rm?++mij:mij+=stepj)) {
 #ifdef TMVFLDEBUG
                     TMVAssert(mij >= m._first);
@@ -530,7 +494,7 @@ namespace tmv {
                 TMVAssert(invdi >= invd.diag()._first);
                 TMVAssert(invdi < invd.diag()._last);
 #endif
-                *invdi = RT(1)/(cd?TMV_CONJ(*di):*di);
+                *invdi = TMV_InverseOf(cd?TMV_CONJ(*di):*di);
             }
         } else {
             for(int i=d.size();i>0;--i,di+=step,++invdi) {
@@ -546,7 +510,7 @@ namespace tmv {
                 TMVAssert(invdi >= invd.diag()._first);
                 TMVAssert(invdi < invd.diag()._last);
 #endif
-                *invdi = RT(1)/(cd?TMV_CONJ(*di):*di);
+                *invdi = TMV_InverseOf(cd?TMV_CONJ(*di):*di);
             }
         }
         m = invd*m;

@@ -1,5 +1,5 @@
 
-#define START 0
+#define START 4
 
 #include "TMV.h"
 #include "TMV_Test.h"
@@ -437,43 +437,43 @@ void TestMatrixDecomp()
             }
             tmv::Matrix<T> U = m.svd().getU();
             tmv::DiagMatrix<T> S = m.svd().getS();
-            tmv::Matrix<T> V = m.svd().getV();
+            tmv::Matrix<T> Vt = m.svd().getVt();
             if (showacc) {
                 std::cout<<"U = "<<U<<std::endl;
-                std::cout<<"V = "<<V<<std::endl;
+                std::cout<<"Vt = "<<Vt<<std::endl;
                 std::cout<<"S = "<<S<<std::endl;
-                std::cout<<"m-USV = "<<m-U*S*V<<std::endl;
-                std::cout<<"Norm(m-USV) = "<<Norm(m-U*S*V)<<
+                std::cout<<"m-USVt = "<<m-U*S*Vt<<std::endl;
+                std::cout<<"Norm(m-USVt) = "<<Norm(m-U*S*Vt)<<
                     "  cf "<<eps*normm<<std::endl;
                 std::cout<<"Norm(UtU-1) = "<<Norm(U.transpose()*U-T(1))<<
                     "  cf "<<eps<<std::endl;
-                std::cout<<"Norm(VtV-1) = "<<Norm(V.transpose()*V-T(1))<<
+                std::cout<<"Norm(VtV-1) = "<<Norm(Vt*Vt.transpose()-T(1))<<
                     "  cf "<<eps<<std::endl;
-                std::cout<<"Norm(VVt-1) = "<<Norm(V*V.transpose()-T(1))<<
+                std::cout<<"Norm(VVt-1) = "<<Norm(Vt.transpose()*Vt-T(1))<<
                     "  cf "<<eps<<std::endl;
             }
-            Assert(Equal(m,U*S*V,eps*normm),"SV"); 
+            Assert(Equal(m,U*S*Vt,eps*normm),"SV"); 
             Assert(Equal(U.transpose()*U,T(1),eps),"SV - UtU"); 
-            Assert(Equal(V.transpose()*V,T(1),eps),"SV - VtV"); 
-            Assert(Equal(V*V.transpose(),T(1),eps),"SV - VVt"); 
+            Assert(Equal(Vt.transpose()*Vt,T(1),eps),"SV - VVt"); 
+            Assert(Equal(Vt*Vt.transpose(),T(1),eps),"SV - VtV"); 
 
             tmv::Matrix<CT> cU = c.svd().getU();
             tmv::DiagMatrix<T> cS = c.svd().getS();
-            tmv::Matrix<CT> cV = c.svd().getV();
+            tmv::Matrix<CT> cVt = c.svd().getVt();
             if (showacc) {
-                std::cout<<"Norm(c-USV) = "<<Norm(c-cU*cS*cV)<<
+                std::cout<<"Norm(c-USVt) = "<<Norm(c-cU*cS*cVt)<<
                     "  cf "<<ceps*normm<<std::endl;
                 std::cout<<"Norm(UtU-1) = "<<Norm(cU.adjoint()*cU-T(1))<<
                     "  cf "<<ceps<<std::endl;
-                std::cout<<"Norm(VtV-1) = "<<Norm(cV.adjoint()*cV-T(1))<<
+                std::cout<<"Norm(VVt-1) = "<<Norm(cVt.adjoint()*cVt-T(1))<<
                     "  cf "<<ceps<<std::endl;
-                std::cout<<"Norm(VVt-1) = "<<Norm(cV*cV.adjoint()-T(1))<<
+                std::cout<<"Norm(VtV-1) = "<<Norm(cVt*cVt.adjoint()-T(1))<<
                     "  cf "<<ceps<<std::endl;
             }
-            Assert(Equal(c,cU*cS*cV,ceps*normc),"C SV"); 
+            Assert(Equal(c,cU*cS*cVt,ceps*normc),"C SV"); 
             Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C SV - UtU"); 
-            Assert(Equal(cV.adjoint()*cV,T(1),ceps),"C SV - VtV"); 
-            Assert(Equal(cV*cV.adjoint(),T(1),ceps),"C SV - VVt"); 
+            Assert(Equal(cVt.adjoint()*cVt,T(1),ceps),"C SV - VVt"); 
+            Assert(Equal(cVt*cVt.adjoint(),T(1),ceps),"C SV - VtV"); 
 
 #if (XTEST & 16)
             const T x = 
@@ -482,12 +482,12 @@ void TestMatrixDecomp()
 
             tmv::Matrix<T,stor> U2 = m;
             tmv::DiagMatrix<T> S2(N);
-            tmv::Matrix<T> V2(N,N);
-            SV_Decompose(U2.view(),S2.view(),V2.view(),true);
-            Assert(Equal(m,U2*S2*V2,eps*normm),"SV2"); 
+            tmv::Matrix<T> Vt2(N,N);
+            SV_Decompose(U2.view(),S2.view(),Vt2.view(),true);
+            Assert(Equal(m,U2*S2*Vt2,eps*normm),"SV2"); 
             Assert(Equal(U2.transpose()*U2,T(1),eps),"SV2 - UtU"); 
-            Assert(Equal(V2.transpose()*V2,T(1),eps),"SV2 - VtV"); 
-            Assert(Equal(V2*V2.transpose(),T(1),eps),"SV2 - VVt"); 
+            Assert(Equal(Vt2.transpose()*Vt2,T(1),eps),"SV2 - VVt"); 
+            Assert(Equal(Vt2*Vt2.transpose(),T(1),eps),"SV2 - VtV"); 
 
             tmv::Matrix<T,stor> m2 = m;
             SV_Decompose(m2.view(),S2.view(),false);
@@ -501,22 +501,22 @@ void TestMatrixDecomp()
                     tmv::DiagMatrix<T>(S2/x) * U2.transpose(),
                     eps*(normm/x)*(normm/x)),"SV4 U"); 
             m2 = m;
-            SV_Decompose(m2.view(),S2.view(),V2.view(),false);
+            SV_Decompose(m2.view(),S2.view(),Vt2.view(),false);
             Assert(Equal(S2,S,eps*normm),"SV5 S"); 
             Assert(Equal(
                     tmv::Matrix<T>(m.transpose()/x) * tmv::Matrix<T>(m/x),
-                    V2.transpose() * tmv::DiagMatrix<T>(S2/x) *
-                    tmv::DiagMatrix<T>(S2/x) * V2,
-                    eps*(normm/x)*(normm/x)),"SV5 V"); 
+                    Vt2.transpose() * tmv::DiagMatrix<T>(S2/x) *
+                    tmv::DiagMatrix<T>(S2/x) * Vt2,
+                    eps*(normm/x)*(normm/x)),"SV5 Vt"); 
 
             tmv::Matrix<CT,stor> cU2 = c;
             tmv::DiagMatrix<T> cS2(N);
-            tmv::Matrix<CT> cV2(N,N);
-            SV_Decompose(cU2.view(),cS2.view(),cV2.view(),true);
-            Assert(Equal(c,cU2*cS2*cV2,ceps*normm),"C SV2"); 
+            tmv::Matrix<CT> cVt2(N,N);
+            SV_Decompose(cU2.view(),cS2.view(),cVt2.view(),true);
+            Assert(Equal(c,cU2*cS2*cVt2,ceps*normm),"C SV2"); 
             Assert(Equal(cU2.adjoint()*cU2,T(1),ceps),"C SV2 - UtU"); 
-            Assert(Equal(cV2.adjoint()*cV2,T(1),ceps),"C SV2 - VtV"); 
-            Assert(Equal(cV2*cV2.adjoint(),T(1),ceps),"C SV2 - VVt"); 
+            Assert(Equal(cVt2.adjoint()*cVt2,T(1),ceps),"C SV2 - VVt"); 
+            Assert(Equal(cVt2*cVt2.adjoint(),T(1),ceps),"C SV2 - VtV"); 
 
             tmv::Matrix<CT,stor> c2 = c;
             SV_Decompose(c2.view(),cS2.view(),false);
@@ -530,20 +530,20 @@ void TestMatrixDecomp()
                     tmv::DiagMatrix<CT>(cS2/x) * cU2.adjoint(),
                     ceps*(normc/x)*(normc/x)),"C SV4 U"); 
             c2 = c;
-            SV_Decompose(c2.view(),cS2.view(),cV2.view(),false);
+            SV_Decompose(c2.view(),cS2.view(),cVt2.view(),false);
             Assert(Equal(cS2,cS,ceps*normc),"C SV5 S"); 
             Assert(Equal(
                     tmv::Matrix<CT>(c.adjoint()/x) * tmv::Matrix<CT>(c/x),
-                    cV2.adjoint() * tmv::DiagMatrix<CT>(cS2/x) *
-                    tmv::DiagMatrix<CT>(cS2/x) * cV2,
-                    ceps*(normc/x)*(normc/x)),"C SV5 V"); 
+                    cVt2.adjoint() * tmv::DiagMatrix<CT>(cS2/x) *
+                    tmv::DiagMatrix<CT>(cS2/x) * cVt2,
+                    ceps*(normc/x)*(normc/x)),"C SV5 Vt"); 
 
             cU2.conjugate() = c;
-            SV_Decompose(cU2.conjugate(),cS2.view(),cV2.view(),true);
-            Assert(Equal(c,cU2.conjugate()*cS2*cV2,ceps*normm),"C SV6"); 
+            SV_Decompose(cU2.conjugate(),cS2.view(),cVt2.view(),true);
+            Assert(Equal(c,cU2.conjugate()*cS2*cVt2,ceps*normm),"C SV6"); 
             Assert(Equal(cU2.adjoint()*cU2,T(1),ceps),"C SV6 - UtU"); 
-            Assert(Equal(cV2.adjoint()*cV2,T(1),ceps),"C SV6 - VtV"); 
-            Assert(Equal(cV2*cV2.adjoint(),T(1),ceps),"C SV6 - VVt"); 
+            Assert(Equal(cVt2.adjoint()*cVt2,T(1),ceps),"C SV6 - VVt"); 
+            Assert(Equal(cVt2*cVt2.adjoint(),T(1),ceps),"C SV6 - VtV"); 
             c2.conjugate() = c;
             SV_Decompose(c2.conjugate(),cS2.view(),false);
             Assert(Equal(cS2,cS,ceps*normc),"C SV7"); 
@@ -556,44 +556,44 @@ void TestMatrixDecomp()
                     tmv::DiagMatrix<CT>(cS2/x) * cU2.transpose(),
                     ceps*(normc/x)*(normc/x)),"C SV8 U"); 
             c2.conjugate() = c;
-            SV_Decompose(c2.conjugate(),cS2.view(),cV2.view(),false);
+            SV_Decompose(c2.conjugate(),cS2.view(),cVt2.view(),false);
             Assert(Equal(cS2,cS,ceps*normc),"C SV9 S"); 
             Assert(Equal(
                     tmv::Matrix<CT>(c.adjoint()/x) * tmv::Matrix<CT>(c/x),
-                    cV2.adjoint() * tmv::DiagMatrix<CT>(cS2/x) *
-                    tmv::DiagMatrix<CT>(cS2/x) * cV2,
-                    ceps*(normc/x)*(normc/x)),"C SV9 V"); 
+                    cVt2.adjoint() * tmv::DiagMatrix<CT>(cS2/x) *
+                    tmv::DiagMatrix<CT>(cS2/x) * cVt2,
+                    ceps*(normc/x)*(normc/x)),"C SV9 Vt"); 
 
             cU2 = c;
-            SV_Decompose(cU2.view(),cS2.view(),cV2.conjugate(),true);
-            Assert(Equal(c,cU2*cS2*cV2.conjugate(),ceps*normm),"C SV10"); 
+            SV_Decompose(cU2.view(),cS2.view(),cVt2.conjugate(),true);
+            Assert(Equal(c,cU2*cS2*cVt2.conjugate(),ceps*normm),"C SV10"); 
             Assert(Equal(cU2.adjoint()*cU2,T(1),ceps),"C SV10 - UtU"); 
-            Assert(Equal(cV2.adjoint()*cV2,T(1),ceps),"C SV10 - VtV"); 
-            Assert(Equal(cV2*cV2.adjoint(),T(1),ceps),"C SV10 - VVt"); 
+            Assert(Equal(cVt2.adjoint()*cVt2,T(1),ceps),"C SV10 - VVt"); 
+            Assert(Equal(cVt2*cVt2.adjoint(),T(1),ceps),"C SV10 - VtV"); 
             c2 = c;
-            SV_Decompose(c2.view(),cS2.view(),cV2.conjugate(),false);
+            SV_Decompose(c2.view(),cS2.view(),cVt2.conjugate(),false);
             Assert(Equal(cS2,cS,ceps*normc),"C SV11 S"); 
             Assert(Equal(
                     tmv::Matrix<CT>(c.adjoint()/x) * tmv::Matrix<CT>(c/x),
-                    cV2.transpose() * tmv::DiagMatrix<CT>(cS2/x) *
-                    tmv::DiagMatrix<CT>(cS2/x) * cV2.conjugate(),
-                    ceps*(normc/x)*(normc/x)),"C SV9 V"); 
+                    cVt2.transpose() * tmv::DiagMatrix<CT>(cS2/x) *
+                    tmv::DiagMatrix<CT>(cS2/x) * cVt2.conjugate(),
+                    ceps*(normc/x)*(normc/x)),"C SV9 Vt"); 
 
             cU2.conjugate() = c;
-            SV_Decompose(cU2.conjugate(),cS2.view(),cV2.conjugate(),true);
-            Assert(Equal(c,cU2.conjugate()*cS2*cV2.conjugate(),ceps*normm),
+            SV_Decompose(cU2.conjugate(),cS2.view(),cVt2.conjugate(),true);
+            Assert(Equal(c,cU2.conjugate()*cS2*cVt2.conjugate(),ceps*normm),
                    "C SV12"); 
             Assert(Equal(cU2.adjoint()*cU2,T(1),ceps),"C SV12 - UtU"); 
-            Assert(Equal(cV2.adjoint()*cV2,T(1),ceps),"C SV12 - VtV"); 
-            Assert(Equal(cV2*cV2.adjoint(),T(1),ceps),"C SV12 - VVt"); 
+            Assert(Equal(cVt2.adjoint()*cVt2,T(1),ceps),"C SV12 - VVt"); 
+            Assert(Equal(cVt2*cVt2.adjoint(),T(1),ceps),"C SV12 - VtV"); 
             c2.conjugate() = c;
-            SV_Decompose(c2.conjugate(),cS2.view(),cV2.conjugate(),false);
+            SV_Decompose(c2.conjugate(),cS2.view(),cVt2.conjugate(),false);
             Assert(Equal(cS2,cS,ceps*normc),"C SV13 S"); 
             Assert(Equal(
                     tmv::Matrix<CT>(c.adjoint()/x) * tmv::Matrix<CT>(c/x),
-                    cV2.transpose() * tmv::DiagMatrix<CT>(cS2/x) *
-                    tmv::DiagMatrix<CT>(cS2/x) * cV2.conjugate(),
-                    ceps*(normc/x)*(normc/x)),"C SV13 V"); 
+                    cVt2.transpose() * tmv::DiagMatrix<CT>(cS2/x) *
+                    tmv::DiagMatrix<CT>(cS2/x) * cVt2.conjugate(),
+                    ceps*(normc/x)*(normc/x)),"C SV13 Vt"); 
 #endif
             std::cout<<"."; std::cout.flush();
         } while (false);

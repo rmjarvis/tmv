@@ -561,7 +561,7 @@ namespace tmv {
 #else
             { throw Singular(); }
 #endif
-            *minv = T(1)/(*m);
+            *minv = TMV_InverseOf(*m);
         }
     };
 

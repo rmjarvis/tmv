@@ -45,70 +45,53 @@ explicitly change it with a cast.  You can cast a \tt{VectorView<T,CStyle>} as
 a \tt{VectorView<T,FortranStyle>} and vice versa.  Likewise for
 \tt{ConstVectorView}.  
 
-The only thing to watch out for about the indexing is that \tt{GenVector}
-and \tt{VectorComposite} do not have the extra \tt{index} 
-template argument and are always
-indexed using the C-style convention.  Therefore, 
-if you want to index a \tt{GenVector}
-using the Fortran-style convention, you would need to recast it
-as an object of type
-\tt{ConstVectorView<T,FortranStyle>}.  A \tt{VectorComposite} would 
-not generally be indexed, but if you did want to do so using the 
-Fortran-style conventions, you would need to explicitly instantiate it
-as a \tt{Vector<T,FortranStyle>}.
-
 \subsection{Constructors}
 \index{Vector!Constructors}
 \label{Vector_Constructors}
 
 Here, \tt{T} is used to represent the data type of the elements of the \tt{Vector}
-(e.g. \tt{double}, \tt{complex<double>}, \tt{int}, etc.) and \tt{index} is either
-\tt{tmv::CStyle} or \tt{tmv::FortranStyle}.  In all of the constructors the
-\tt{index} template argument may be omitted, in which case \tt{CStyle} is assumed.
+(e.g. \tt{double}, \tt{complex<double>}, \tt{int}, etc.) and \tt{A} is either
+\tt{tmv::CStyle} or \tt{tmv::FortranStyle}.  The \tt{A} stands for Attributes.
+A \tt{Vector} only has one available attribute, the indexing style, but 
+the various matrix types will have other options as well which will be
+specified with the Attributes template parameters.
+In all of the constructors the
+Attributes parameter may be omitted, in which case \tt{CStyle} is assumed.
 
 \begin{itemize}
 
 \item 
 \begin{tmvcode}
-tmv::Vector<T,index> v()
+tmv::Vector<T,A> v()
 \end{tmvcode}
 Makes a \tt{Vector} of zero size.  You would normally use the \tt{resize} function later to 
 change the size to some useful value.
 
 \item 
 \begin{tmvcode}
-tmv::Vector<T,index> v(int n)
+tmv::Vector<T,A> v(int n)
 \end{tmvcode}
-Makes a \tt{Vector} of size \tt{n} with \underline{uninitialized} values.
-If extra debugging is turned on (with \tt{-DTMV\_EXTRA\_DEBUG}), then the values are in fact initialized to 888.  This should help you notice when you have neglected to initialize the \tt{Vector} correctly.
+Makes a \tt{Vector} of size \tt{n} with {\em uninitialized} values.
+If extra debugging is turned on (with the compiler flag \tt{-DTMV\_EXTRA\_DEBUG}), then the values are in fact initialized to 888.  This should help you notice when you have neglected to initialize the \tt{Vector} correctly.
 
 \item
 \begin{tmvcode}
-tmv::Vector<T,index> v(int n, T x)
+tmv::Vector<T,A> v(int n, T x)
 \end{tmvcode}
 Makes a \tt{Vector} of size \tt{n} with all values equal to \tt{x}
 
 \item
 \begin{tmvcode}
-tmv::Vector<T,index> v(int n, const T* vv)
-tmv::Vector<T,index> v(const std::vector<T>& vv)
-\end{tmvcode}
-Make a \tt{Vector} which copies the elements of \tt{vv}.
-For the first one, \tt{n} specifies the length.  The second gets
-the length from \tt{vv}.
-
-\item
-\begin{tmvcode}
-tmv::Vector<T,index> v = tmv::BasisVector<T,index>(int n, int i)
+tmv::Vector<T,A> v = tmv::BasisVector<T,A>(int n, int i)
 \end{tmvcode}
 Makes a \tt{Vector} whose elements are all \tt{0}, except \tt{v(i) = 1}.
-Note the \tt{BasisVector} also has the \tt{index} template argument to 
+Note the \tt{BasisVector} also has the \tt{A} template argument to 
 indicate which element is meant by \tt{v(i)}.  Again, if it is omitted,
 \tt{CStyle} is assumed.
 
 \item
 \begin{tmvcode}
-tmv::Vector<T,index> v1(const tmv::GenVector<T2>& v2)
+tmv::Vector<T,A> v1(const tmv::GenVector<T2>& v2)
 v1 = v2
 \end{tmvcode}
 Copy the \tt{Vector v2}, which may be of any type \tt{T2} so long
@@ -117,9 +100,9 @@ The assignment operator has the same flexibility.
 
 \item
 \begin{tmvcode}
-tmv::VectorView<T,index> v = 
+tmv::VectorView<T,A> v = 
       tmv::VectorViewOf(T* vv, int n, int step = 1)
-tmv::ConstVectorView<T,index> v = 
+tmv::ConstVectorView<T,A> v = 
       tmv::VectorViewOf(const T* vv, int n, int step = 1)
 \end{tmvcode}
 \index{Vector!View of raw memory}
@@ -214,18 +197,18 @@ Returns the size (length) of \tt{v}.
 T v[int i] const
 T v(int i) const
 T v.cref(int i) const
-typename Vector<T>::reference v[int i]
-typename Vector<T>::reference v(int i)
-typename Vector<T>::reference v.ref(int i)
+Vector<T>::reference v[int i]
+Vector<T>::reference v(int i)
+Vector<T>::reference v.ref(int i)
 \end{tmvcode}
 \index{Vector!Methods!operator()}
 \index{Vector!Methods!operator[]}
 \index{Vector!Methods!cref}
 \index{Vector!Methods!ref}
 The \tt{[]} and \tt{()} forms are equivalent.  Each returns the \tt{i}-th element of \tt{v}.  
-With \tt{index = CStyle}, the first 
+With \tt{A = CStyle}, the first 
 element is \tt{v(0)}, and the last element is \tt{v(n-1)}.
-With \tt{index = FortranStyle}, they are \tt{v(1)} and \tt{v(n)}.
+With \tt{A = FortranStyle}, they are \tt{v(1)} and \tt{v(n)}.
 
 If \tt{v} is a 
 \tt{const Vector}, a \tt{ConstVectorView}, or a \tt{GenVector}, 
@@ -236,7 +219,7 @@ non-\tt{const Vector}, then the return type is a normal reference, \tt{T\&}.
 
 If \tt{v} is a \tt{VectorView}, then the return type is an object, which is
 an lvalue (i.e. it is assignable), but which may not be \tt{T\&}.
-Specifically, it has the type \tt{typename VectorView<T>::reference}.
+Specifically, it has the type \tt{VectorView<T>::reference}.
 For a real-typed \tt{VectorView}, it is just \tt{T\&}.  But for a
 complex-typed \tt{VectorView}, the return type is an object that keeps track of the
 possibility of a conjugation.
@@ -248,14 +231,14 @@ Also, \tt{cref} and \tt{ref} always use \tt{CStyle} indexing.
 
 \item
 \begin{tmvcode}
-typename tmv::Vector<T>::iterator v.begin()
-typename tmv::Vector<T>::iterator v.end()
-typename tmv::Vector<T>::const_iterator v.begin() const
-typename tmv::Vector<T>::const_iterator v.end() const
-typename tmv::Vector<T>::reverse_iterator v.rbegin()
-typename tmv::Vector<T>::reverse_iterator v.rend()
-typename tmv::Vector<T>::const_reverse_iterator v.rbegin() const
-typename tmv::Vector<T>::const_reverse_iterator v.rend() const
+Vector<T>::iterator v.begin()
+Vector<T>::iterator v.end()
+Vector<T>::const_iterator v.begin() const
+Vector<T>::const_iterator v.end() const
+Vector<T>::reverse_iterator v.rbegin()
+Vector<T>::reverse_iterator v.rend()
+Vector<T>::const_reverse_iterator v.rbegin() const
+Vector<T>::const_reverse_iterator v.rend() const
 \end{tmvcode}
 \index{Vector!Iterators}
 \index{Vector!Methods!begin}
@@ -265,7 +248,7 @@ typename tmv::Vector<T>::const_reverse_iterator v.rend() const
 These provide iterator-style access into a \tt{Vector}, which works just like
 the standard template library's iterators.  If \tt{v} is a \tt{VectorView},
 the iterator types are slightly different from the \tt{Vector} iterators, 
-so you should declare them as \tt{typename tmv::VectorView<T>::iterator},
+so you should declare them as \tt{VectorView<T>::iterator},
 etc. instead.
 
 \item
@@ -303,10 +286,7 @@ It is possible to change the size of a vector after it has been created using th
 v.resize(int newsize);
 \end{tmvcode}
 \index{Vector!Methods!resize}
-
-This reallocates memory for the new size with {\u uninitialized} values.  
-(Or if compiling with \tt{-DTMV\_EXTRA\_DEBUG}, the values are in fact set to 888.)
-
+This reallocates memory for the new size with {\em uninitialized} values.  
 There are no correlates to the other constructors, so after a resize, the 
 values should be set directly in some fashion.
 
@@ -946,8 +926,8 @@ Performs the calculation $v_1 \cdot v_2$.
 
 \item
 \begin{tmvcode}
-ElemMult<bool add>(T x, const GenVector<T1>& v1, const GenVector<T2>& v2,
-      const VectorView<T>& v3)
+ElemMult<bool add>(T x, const GenVector<T1>& v1, 
+      const GenVector<T2>& v2, const VectorView<T>& v3)
 \end{tmvcode}
 Performs the calculation $v_3(i) = [v_3(i) \;+\;]  ~ x \cdot v_1(i) \cdot v_2(i)$ for all $i = 0..N$ where $N$ is the size of the vectors where the result is added to $v_3(i)$ if \tt{add = true} and just assigned to it if \tt{add = false}.
 
@@ -1022,65 +1002,53 @@ or specifying an output precision.
 
 We mentioned that the iterators through a \tt{Vector} are:
 \begin{tmvcode}
-typename tmv::Vector<T>::iterator
-typename tmv::Vector<T>::const_iterator
-typename tmv::Vector<T>::reverse_iterator
-typename tmv::Vector<T>::const_reverse_iterator
+Vector<T>::iterator
+Vector<T>::const_iterator
+Vector<T>::reverse_iterator
+Vector<T>::const_reverse_iterator
 \end{tmvcode}
 just like for standard library containers.  Sometimes it can be useful to use the underlying iterator types that TMV uses rather than merely the above typedefs.  The specific types to which these
 typedefs refer are:
 \begin{tmvcode}
-tmv::VIt<T,tmv::Unit,tmv::NonConj>
-tmv::CVIt<T,tmv::Unit,tmv::NonConj>
-tmv::VIt<T,tmv::Step,tmv::NonConj>
-tmv::CVIt<T,tmv::Step,tmv::NonConj>
+tmv::VIt<T,1,tmv::NonConj>
+tmv::CVIt<T,1,tmv::NonConj>
+tmv::VIt<T,-1,tmv::NonConj>
+tmv::CVIt<T,-1,tmv::NonConj>
 \end{tmvcode}
 respectively.  They all satisfy the requirements of a STL random-access iterator.
+\tt{VIt} is a mutable-iterator, and \tt{CVIt} is a const-iterator.
 
-\tt{VIt} is a mutable-iterator, and \tt{CVIt} is a const-iterator.  \tt{Unit} 
-indicates that the step size is 1, while \tt{Step} allows for any step size
-between successive elements (and is therefore slower).  For the reverse
-iterators, the step size is -1.
+The second template parameter is the step size between successive elements, if known at compile time.  If the step size is not known at compile time, you can use the special value \tt{tmv::Unknown}, and TMV will get the correct value at run time.  
 
-This can be worth knowing if you are going to be optimizing code that uses
-iterators of \tt{VectorView}s.
-This is because their iterators are instead:
+The third template parameter must be either \tt{tmv::NonConj} or \tt{tmv::Conj} and indicates whether the values being iterated over are the actual values in memory or their conjugates, respectively.
+
+These types can be worth using explicitly if you want to be optimize code that uses iterators of \tt{VectorView}s.
+This is because their iterators always use \tt{tmv::Unknown} as the step parameter.  For complex \tt{VectorView}s, it is even worse, since the possible conjugation is also a run-time variable.  These use a different type that allows for the variable conjugation possibility:
 \begin{tmvcode}
-tmv::VIter<T>
-tmv::CVIter<T>
+tmv::VarConjIter<T>
+tmv::CVarConjIter<T>
 \end{tmvcode}
-which always check the step size (rather than assuming unit steps) and always
-keep track of a possible conjugation.
 
-If you know that you are dealing with a view that is not conjugated, you can 
+If you know that you are dealing with a complex view that is not conjugated, you can 
 convert your iterator into one of the above \tt{VIt} or \tt{CVIt} types, which will be 
 faster, since they won't check the conjugation bit each time. 
-
 Likewise, if you
 know that it {\em is} conjugated, then you can use \tt{tmv::Conj} for the 
-third template parameter above.  This indicates that the vector view really
-refers to the conjugates of the values stored in the actual memory locations.
+third template parameter above.
 
-Also, if you know that your view has unit steps between elements, converting to 
-an iterator with \tt{tmv::Unit} will iterate faster.  It is often faster to check
-the step size once at the beginning of the routine and convert to a unit-step
-iterator if possible.
+Also, if you know the step size between elements at compile time, converting to 
+an iterator with that step size will iterate faster, especially if that step size is known to be 1.
 
 All of these conversions can be done seamlessly through assignments.  E.g.
 \begin{tmvcode}
 if (v.step() == 1) {
-    for(VIt<float,Unit,NonConj> it = v.begin(); it != v.end(); ++it)
+    for(VIt<float,1,NonConj> it = v.begin(); it != v.end(); ++it)
         (*it) = sqrt(*it);
 } else {
-    for(VIt<float,Step,NonConj> it = v.begin(); it != v.end(); ++it)
+    for(VIt<float,Unknown,NonConj> it = v.begin(); it != v.end(); ++it)
         (*it) = sqrt(*it);
 }
 \end{tmvcode}
-
-Regular \tt{Vector}s are always \tt{Unit} and \tt{NonConj}, so those iterators
-are already fast without using the specific \tt{VIt} names. 
-That is, you can just use \tt{Vector<T>::iterator} rather than \tt{VIt<T,Unit,NonConj>}
-without any drop in performance.
 
 \subsection{Small vectors}
 \index{SmallVector}
@@ -1104,43 +1072,34 @@ essentially all the same methods, functions, and arithmetic operators.
 
 The template argument \tt{N} below is an integer and
 represent the size of the vector.
-The template argument 
- \tt{index} may be either \tt{tmv::CStyle} or
+The Attributes template argument 
+ \tt{A} may be either \tt{tmv::CStyle} or
 \tt{tmv::FortranStyle} and has the same meanings as 
 for a regular \tt{Vector}. The default is \tt{CStyle} if it is omitted.
 
 \begin{itemize}
 \item 
 \begin{tmvcode}
-tmv::SmallVector<T,N,index> v()
+tmv::SmallVector<T,N,A> v()
 \end{tmvcode}
 Makes a \tt{SmallVector} of size \tt{N}
-with \underline{uninitialized} values.
-If extra debugging is turned on (with \tt{-DTMV\_EXTRA\_DEBUG}), then the values are in fact initialized to 888. 
+with {\em uninitialized} values.
 
 \item
 \begin{tmvcode}
-tmv::SmallVector<T,N,index> v(T x)
+tmv::SmallVector<T,N,A> v(T x)
 \end{tmvcode}
 Makes a \tt{SmallVector} with all values equal to \tt{x}.
 
-\item
-\begin{tmvcode}
-tmv::SmallVector<T,N,index> v(const T* vv)
-tmv::SmallVector<T,N,index> v(const std::vector<T>& vv)
-\end{tmvcode}
-Makes a \tt{SmallVector} with values copied from vv.
-
 \item 
 \begin{tmvcode}
-tmv::SmallVector<T,N,stor,index> v1(const GenVector<T>& v2)
+tmv::SmallVector<T,N,A> v1(const GenVector<T>& v2)
 \end{tmvcode}
 Makes a \tt{SmallVector} from a regular \tt{Vector}.
 
 \item
 \begin{tmvcode}
-tmv::SmallVector<T,N,stor,index> v1(
-      const SmallVector<T2,N,stor2,index2>& v2)
+tmv::SmallVector<T,N,A> v1(const SmallVector<T2,N,A2>& v2)
 v1 = v2
 \end{tmvcode}
 Copy the \tt{SmallVector v2}, which may be of any type \tt{T2} so long

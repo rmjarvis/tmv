@@ -127,31 +127,31 @@ inline PRODMM<CT,T1,T2 X3> operator*(const PRODMM<CT,T1,T2 X3>& pmm, VCT x)
 
 template <class T, class T1, class T2 Y> 
 inline PRODMM<T,T1,T2 X3> operator/(const PRODMM<T,T1,T2 X3>& pmm, T x)
-{ return PRODMM<T,T1,T2 X3>(pmm.getX()/x,pmm GETM1,pmm GETM2); }
+{ return PRODMM<T,T1,T2 X3>(TMV_Divide(pmm.getX(),x),pmm GETM1,pmm GETM2); }
 
 template <class T Y> 
 inline PRODMM<CT,T,T X3> operator/(const PRODMM<T,T,T X3>& pmm, CT x)
-{ return PRODMM<CT,T,T X3>(pmm.getX()/x,pmm GETM1,pmm GETM2); }
+{ return PRODMM<CT,T,T X3>(TMV_Divide(pmm.getX(),x),pmm GETM1,pmm GETM2); }
 
 template <class T Y> 
 inline PRODMM<CT,T,T X3> operator/(const PRODMM<T,T,T X3>& pmm, CCT x)
-{ return PRODMM<CT,T,T X3>(pmm.getX()/CT(x),pmm GETM1,pmm GETM2); }
+{ return PRODMM<CT,T,T X3>(TMV_Divide(pmm.getX(),CT(x)),pmm GETM1,pmm GETM2); }
 
 template <class T Y> 
 inline PRODMM<CT,T,T X3> operator/(const PRODMM<T,T,T X3>& pmm, VCT x)
-{ return PRODMM<CT,T,T X3>(pmm.getX()/CT(x),pmm GETM1,pmm GETM2); }
+{ return PRODMM<CT,T,T X3>(TMV_Divide(pmm.getX(),CT(x)),pmm GETM1,pmm GETM2); }
 
 template <class T, class T1, class T2 Y> 
 inline PRODMM<CT,T1,T2 X3> operator/(const PRODMM<CT,T1,T2 X3>& pmm, T x)
-{ return PRODMM<CT,T1,T2 X3>(pmm.getX()/x,pmm GETM1,pmm GETM2); }
+{ return PRODMM<CT,T1,T2 X3>(TMV_Divide(pmm.getX(),x),pmm GETM1,pmm GETM2); }
 
 template <class T, class T1, class T2 Y> 
 inline PRODMM<CT,T1,T2 X3> operator/(const PRODMM<CT,T1,T2 X3>& pmm, CCT x)
-{ return PRODMM<CT,T1,T2 X3>(pmm.getX()/CT(x),pmm GETM1,pmm GETM2); }
+{ return PRODMM<CT,T1,T2 X3>(TMV_Divide(pmm.getX(),CT(x)),pmm GETM1,pmm GETM2); }
 
 template <class T, class T1, class T2 Y> 
 inline PRODMM<CT,T1,T2 X3> operator/(const PRODMM<CT,T1,T2 X3>& pmm, VCT x)
-{ return PRODMM<CT,T1,T2 X3>(pmm.getX()/CT(x),pmm GETM1,pmm GETM2); }
+{ return PRODMM<CT,T1,T2 X3>(TMV_Divide(pmm.getX(),CT(x)),pmm GETM1,pmm GETM2); }
 
 #ifdef PRODMM_1
 
@@ -219,31 +219,31 @@ inline PRODMM<CT,T1,T2 X3> operator*(const PRODMM_1<CT,T1,T2 X3>& pmm, VCT x)
 
 template <class T, class T1, class T2 Y> 
 inline PRODMM<T,T1,T2 X3> operator/(const PRODMM_1<T,T1,T2 X3>& pmm, T x)
-{ return PRODMM<T,T1,T2 X3>(TMV_RealType(T)(1)/x,pmm GETM1,pmm GETM2); }
+{ return PRODMM<T,T1,T2 X3>(TMV_InverseOf(x),pmm GETM1,pmm GETM2); }
 
 template <class T Y> 
 inline PRODMM<CT,T,T X3> operator/(const PRODMM_1<T,T,T X3>& pmm, CT x)
-{ return PRODMM<CT,T,T X3>(T(1)/x,pmm GETM1,pmm GETM2); }
+{ return PRODMM<CT,T,T X3>(TMV_InverseOf(x),pmm GETM1,pmm GETM2); }
 
 template <class T Y> 
 inline PRODMM<CT,T,T X3> operator/(const PRODMM_1<T,T,T X3>& pmm, CCT x)
-{ return PRODMM<CT,T,T X3>(T(1)/CT(x),pmm GETM1,pmm GETM2); }
+{ return PRODMM<CT,T,T X3>(TMV_InverseOf(CT(x)),pmm GETM1,pmm GETM2); }
 
 template <class T Y> 
 inline PRODMM<CT,T,T X3> operator/(const PRODMM_1<T,T,T X3>& pmm, VCT x)
-{ return PRODMM<CT,T,T X3>(T(1)/CT(x),pmm GETM1,pmm GETM2); }
+{ return PRODMM<CT,T,T X3>(TMV_InverseOf(CT(x)),pmm GETM1,pmm GETM2); }
 
 template <class T, class T1, class T2 Y> 
 inline PRODMM<CT,T1,T2 X3> operator/(const PRODMM_1<CT,T1,T2 X3>& pmm, T x)
-{ return PRODMM<CT,T1,T2 X3>(CT(T(1)/x),pmm GETM1,pmm GETM2); }
+{ return PRODMM<CT,T1,T2 X3>(TMV_InverseOf(x),pmm GETM1,pmm GETM2); }
 
 template <class T, class T1, class T2 Y> 
 inline PRODMM<CT,T1,T2 X3> operator/(const PRODMM_1<CT,T1,T2 X3>& pmm, CCT x)
-{ return PRODMM<CT,T1,T2 X3>(T(1)/CT(x),pmm GETM1,pmm GETM2); }
+{ return PRODMM<CT,T1,T2 X3>(TMV_InverseOf(CT(x)),pmm GETM1,pmm GETM2); }
 
 template <class T, class T1, class T2 Y> 
 inline PRODMM<CT,T1,T2 X3> operator/(const PRODMM_1<CT,T1,T2 X3>& pmm, VCT x)
-{ return PRODMM<CT,T1,T2 X3>(T(1)/CT(x),pmm GETM1,pmm GETM2); }
+{ return PRODMM<CT,T1,T2 X3>(TMV_InverseOf(CT(x)),pmm GETM1,pmm GETM2); }
 
 #undef PRODMM_1
 #endif

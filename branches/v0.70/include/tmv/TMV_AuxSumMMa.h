@@ -161,42 +161,51 @@ inline SUMMM<CT,T1,T2 X3> operator*(const SUMMM<CT,T1,T2 X3>& smm, const VCT x)
 
 template <class T, class T1, class T2 Y> 
 inline SUMMM<T,T1,T2 X3> operator/(const SUMMM<T,T1,T2 X3>& smm, const T x)
-{ return SUMMM<T,T1,T2 X3>(smm.getX1()/x,smm GETM1,smm.getX2()/x, smm GETM2); }
+{
+    return SUMMM<T,T1,T2 X3>(
+        TMV_Divide(smm.getX1(),x),smm GETM1,TMV_Divide(smm.getX2(),x), smm GETM2); 
+}
 
 template <class T, class T1, class T2 Y> 
 inline SUMMM<CT,T1,T2 X3> operator/(const SUMMM<CT,T1,T2 X3>& smm, const T x)
-{ return SUMMM<CT,T1,T2 X3>(smm.getX1()/x,smm GETM1,smm.getX2()/x, smm GETM2); }
+{
+    return SUMMM<CT,T1,T2 X3>(
+        TMV_Divide(smm.getX1(),x),smm GETM1,TMV_Divide(smm.getX2(),x), smm GETM2); 
+}
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM<T,T,T X3>& smm, const CT x)
-{ return SUMMM<CT,T,T X3>(smm.getX1()/x,smm GETM1,smm.getX2()/x, smm GETM2); }
+{
+    return SUMMM<CT,T,T X3>(
+        TMV_Divide(smm.getX1(),x),smm GETM1,TMV_Divide(smm.getX2(),x), smm GETM2); 
+}
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM<T,T,T X3>& smm, const CCT x)
 { 
     return SUMMM<CT,T,T X3>(
-        smm.getX1()/CT(x),smm GETM1,smm.getX2()/CT(x),smm GETM2); 
+        TMV_Divide(smm.getX1(),CT(x)),smm GETM1,TMV_Divide(smm.getX2(),CT(x)),smm GETM2); 
 }
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM<T,T,T X3>& smm, const VCT x)
 { 
     return SUMMM<CT,T,T X3>(
-        smm.getX1()/CT(x),smm GETM1,smm.getX2()/CT(x),smm GETM2); 
+        TMV_Divide(smm.getX1(),CT(x)),smm GETM1,TMV_Divide(smm.getX2(),CT(x)),smm GETM2); 
 }
 
 template <class T, class T1, class T2 Y> 
 inline SUMMM<CT,T1,T2 X3> operator/(const SUMMM<CT,T1,T2 X3>& smm, const CCT x)
 { 
     return SUMMM<CT,T1,T2 X3>(
-        smm.getX1()/CT(x),smm GETM1,smm.getX2()/CT(x),smm GETM2); 
+        TMV_Divide(smm.getX1(),CT(x)),smm GETM1,TMV_Divide(smm.getX2(),CT(x)),smm GETM2); 
 }
 
 template <class T, class T1, class T2 Y> 
 inline SUMMM<CT,T1,T2 X3> operator/(const SUMMM<CT,T1,T2 X3>& smm, const VCT x)
 { 
     return SUMMM<CT,T1,T2 X3>(
-        smm.getX1()/CT(x),smm GETM1,smm.getX2()/CT(x),smm GETM2); 
+        TMV_Divide(smm.getX1(),CT(x)),smm GETM1,TMV_Divide(smm.getX2(),CT(x)),smm GETM2); 
 }
 
 #ifdef SUMMM_1_1
@@ -287,29 +296,47 @@ inline SUMMM<T,T1,T2 X3> operator/(
 template <class T, class T1, class T2 Y> 
 inline SUMMM<CT,T1,T2 X3> operator/(
     const SUMMM_1_1<CT,T1,T2 X3>& smm, const T x)
-{ return SUMMM<CT,T1,T2 X3>(CT(T(1)/x),smm GETM1,CT(T(1)/x),smm GETM2); }
+{
+    return SUMMM<CT,T1,T2 X3>(
+        TMV_InverseOf(x),smm GETM1,TMV_InverseOf(x),smm GETM2); 
+}
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM_1_1<T,T,T X3>& smm, const CT x)
-{ return SUMMM<CT,T,T X3>(T(1)/x,smm GETM1,T(1)/x,smm GETM2); }
+{
+    return SUMMM<CT,T,T X3>(
+        TMV_InverseOf(x),smm GETM1,TMV_InverseOf(x),smm GETM2); 
+}
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM_1_1<T,T,T X3>& smm, const CCT x)
-{ return SUMMM<CT,T,T X3>(T(1)/CT(x),smm GETM1,T(1)/CT(x),smm GETM2); }
+{
+    return SUMMM<CT,T,T X3>(
+        TMV_InverseOf(CT(x)),smm GETM1,TMV_InverseOf(CT(x)),smm GETM2); 
+}
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM_1_1<T,T,T X3>& smm, const VCT x)
-{ return SUMMM<CT,T,T X3>(T(1)/CT(x),smm GETM1,T(1)/CT(x),smm GETM2); }
+{
+    return SUMMM<CT,T,T X3>(
+        TMV_InverseOf(CT(x)),smm GETM1,TMV_InverseOf(CT(x)),smm GETM2); 
+}
 
 template <class T, class T1, class T2 Y> 
 inline SUMMM<CT,T1,T2 X3> operator/(
     const SUMMM_1_1<CT,T1,T2 X3>& smm, const CCT x)
-{ return SUMMM<CT,T1,T2 X3>(T(1)/CT(x),smm GETM1,T(1)/CT(x),smm GETM2); }
+{
+    return SUMMM<CT,T1,T2 X3>(
+        TMV_InverseOf(CT(x)),smm GETM1,TMV_InverseOf(CT(x)),smm GETM2); 
+}
 
 template <class T, class T1, class T2 Y> 
 inline SUMMM<CT,T1,T2 X3> operator/(
     const SUMMM_1_1<CT,T1,T2 X3>& smm, const VCT x)
-{ return SUMMM<CT,T1,T2 X3>(T(1)/CT(x),smm GETM1,T(1)/CT(x),smm GETM2); }
+{
+    return SUMMM<CT,T1,T2 X3>(
+        TMV_InverseOf(CT(x)),smm GETM1,TMV_InverseOf(CT(x)),smm GETM2); 
+}
 
 
 // SUMMM_1_m1
@@ -396,35 +423,53 @@ inline SUMMM<T,T1,T2 X3> operator/(
     const SUMMM_1_m1<T,T1,T2 X3>& smm, const T x)
 {
     return SUMMM<T,T1,T2 X3>(
-        TMV_RealType(T)(1)/x,smm GETM1,TMV_RealType(T)(-1)/x,smm GETM2); 
+        TMV_InverseOf(x),smm GETM1,TMV_InverseOf(-x),smm GETM2); 
 }
 
 template <class T, class T1, class T2 Y> 
 inline SUMMM<CT,T1,T2 X3> operator/(
     const SUMMM_1_m1<CT,T1,T2 X3>& smm, const T x)
-{ return SUMMM<CT,T1,T2 X3>(T(1)/x,smm GETM1,T(-1)/x,smm GETM2); }
+{
+    return SUMMM<CT,T1,T2 X3>(
+        TMV_InverseOf(x),smm GETM1,TMV_InverseOf(-x),smm GETM2); 
+}
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM_1_m1<T,T,T X3>& smm, const CT x)
-{ return SUMMM<CT,T,T X3>(T(1)/x,smm GETM1,T(-1)/x,smm GETM2); }
+{
+    return SUMMM<CT,T,T X3>(
+        TMV_InverseOf(x),smm GETM1,TMV_InverseOf(-x),smm GETM2); 
+}
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM_1_m1<T,T,T X3>& smm, const CCT x)
-{ return SUMMM<CT,T,T X3>(T(1)/CT(x),smm GETM1,T(-1)/CT(x),smm GETM2); }
+{
+    return SUMMM<CT,T,T X3>(
+        TMV_InverseOf(CT(x)),smm GETM1,TMV_InverseOf(-CT(x)),smm GETM2); 
+}
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM_1_m1<T,T,T X3>& smm, const VCT x)
-{ return SUMMM<CT,T,T X3>(T(1)/CT(x),smm GETM1,T(-1)/CT(x),smm GETM2); }
+{
+    return SUMMM<CT,T,T X3>(
+        TMV_InverseOf(CT(x)),smm GETM1,TMV_InverseOf(-CT(x)),smm GETM2); 
+}
 
 template <class T, class T1, class T2 Y> 
 inline SUMMM<CT,T1,T2 X3> operator/(
     const SUMMM_1_m1<CT,T1,T2 X3>& smm, const CCT x)
-{ return SUMMM<CT,T1,T2 X3>(T(1)/CT(x),smm GETM1,T(-1)/CT(x),smm GETM2); }
+{
+    return SUMMM<CT,T1,T2 X3>(
+        TMV_InverseOf(CT(x)),smm GETM1,TMV_InverseOf(-CT(x)),smm GETM2); 
+}
 
 template <class T, class T1, class T2 Y> 
 inline SUMMM<CT,T1,T2 X3> operator/(
     const SUMMM_1_m1<CT,T1,T2 X3>& smm, const VCT x)
-{ return SUMMM<CT,T1,T2 X3>(T(1)/CT(x),smm GETM1,T(-1)/CT(x),smm GETM2); }
+{
+    return SUMMM<CT,T1,T2 X3>(
+        TMV_InverseOf(CT(x)),smm GETM1,TMV_InverseOf(-CT(x)),smm GETM2); 
+}
 
 // SUMMM_1_m1
 
@@ -509,47 +554,53 @@ template <class T, class T1, class T2 Y>
 inline SUMMM<T,T1,T2 X3> operator/(
     const SUMMM_1_x<T,T1,T2 X3>& smm, const T x)
 {
-    return SUMMM<T,T1,T2 X3>(TMV_RealType(T)(1)/x,smm GETM1,smm.getX2()/x,
-                             smm GETM2); 
+    return SUMMM<T,T1,T2 X3>(
+        TMV_InverseOf(x),smm GETM1,TMV_Divide(smm.getX2(),x),smm GETM2); 
 }
 
 template <class T, class T1, class T2 Y> 
 inline SUMMM<CT,T1,T2 X3> operator/(
     const SUMMM_1_x<CT,T1,T2 X3>& smm, const T x)
-{ return SUMMM<CT,T1,T2 X3>(CT(T(1)/x),smm GETM1,smm.getX2()/x,smm GETM2); }
+{
+    return SUMMM<CT,T1,T2 X3>(
+        TMV_InverseOf(x),smm GETM1,TMV_Divide(smm.getX2(),x),smm GETM2); 
+}
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM_1_x<T,T,T X3>& smm, const CT x)
-{ return SUMMM<CT,T,T X3>(T(1)/x,smm GETM1,smm.getX2()/x,smm GETM2); }
+{
+    return SUMMM<CT,T,T X3>(
+        TMV_InverseOf(x),smm GETM1,TMV_Divide(smm.getX2(),x),smm GETM2); 
+}
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM_1_x<T,T,T X3>& smm, const CCT x)
-{ 
+{
     return SUMMM<CT,T,T X3>(
-        T(1)/CT(x),smm GETM1,smm.getX2()/CT(x),smm GETM2); 
+        TMV_InverseOf(CT(x)),smm GETM1,TMV_Divide(smm.getX2(),CT(x)),smm GETM2); 
 }
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM_1_x<T,T,T X3>& smm, const VCT x)
-{ 
+{
     return SUMMM<CT,T,T X3>(
-        T(1)/CT(x),smm GETM1,smm.getX2()/CT(x),smm GETM2); 
+        TMV_InverseOf(CT(x)),smm GETM1,TMV_Divide(smm.getX2(),CT(x)),smm GETM2); 
 }
 
 template <class T, class T1, class T2 Y> 
 inline SUMMM<CT,T1,T2 X3> operator/(
     const SUMMM_1_x<CT,T1,T2 X3>& smm, const CCT x)
-{ 
+{
     return SUMMM<CT,T1,T2 X3>(
-        T(1)/CT(x),smm GETM1,smm.getX2()/CT(x),smm GETM2); 
+        TMV_InverseOf(CT(x)),smm GETM1,TMV_Divide(smm.getX2(),CT(x)),smm GETM2); 
 }
 
 template <class T, class T1, class T2 Y> 
 inline SUMMM<CT,T1,T2 X3> operator/(
     const SUMMM_1_x<CT,T1,T2 X3>& smm, const VCT x)
-{ 
+{
     return SUMMM<CT,T1,T2 X3>(
-        T(1)/CT(x),smm GETM1,smm.getX2()/CT(x),smm GETM2); 
+        TMV_InverseOf(CT(x)),smm GETM1,TMV_Divide(smm.getX2(),CT(x)),smm GETM2); 
 }
 
 // SUMMM_1_m1
@@ -632,34 +683,53 @@ inline SUMMM<CT,T1,T2 X3> operator*(
 template <class T, class T1, class T2 Y> 
 inline SUMMM<T,T1,T2 X3> operator/(const SUMMM_x_1<T,T1,T2 X3>& smm, const T x)
 {
-    return SUMMM<T,T1,T2 X3>(smm.getX1()/x,smm GETM1,TMV_RealType(T)(1)/x,smm GETM2); 
+    return SUMMM<T,T1,T2 X3>(
+        TMV_Divide(smm.getX1(),x),smm GETM1,TMV_InverseOf(x),smm GETM2); 
 }
 
 template <class T, class T1, class T2 Y> 
 inline SUMMM<CT,T1,T2 X3> operator/(const SUMMM_x_1<CT,T1,T2 X3>& smm, const T x)
-{ return SUMMM<CT,T1,T2 X3>(smm.getX1()/x,smm GETM1,CT(T(1)/x),smm GETM2); }
+{
+    return SUMMM<CT,T1,T2 X3>(
+        TMV_Divide(smm.getX1(),x),smm GETM1,TMV_InverseOf(x),smm GETM2); 
+}
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM_x_1<T,T,T X3>& smm, const CT x)
-{ return SUMMM<CT,T,T X3>(smm.getX1()/x,smm GETM1,T(1)/x,smm GETM2); }
+{
+    return SUMMM<CT,T,T X3>(
+        TMV_Divide(smm.getX1(),x),smm GETM1,TMV_InverseOf(x),smm GETM2); 
+}
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM_x_1<T,T,T X3>& smm, const CCT x)
-{ return SUMMM<CT,T,T X3>(smm.getX1()/CT(x),smm GETM1,T(1)/CT(x),smm GETM2); }
+{
+    return SUMMM<CT,T,T X3>(
+        TMV_Divide(smm.getX1(),CT(x)),smm GETM1,TMV_InverseOf(CT(x)),smm GETM2); 
+}
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM_x_1<T,T,T X3>& smm, const VCT x)
-{ return SUMMM<CT,T,T X3>(smm.getX1()/CT(x),smm GETM1,T(1)/CT(x),smm GETM2); }
+{
+    return SUMMM<CT,T,T X3>(
+        TMV_Divide(smm.getX1(),CT(x)),smm GETM1,TMV_InverseOf(CT(x)),smm GETM2); 
+}
 
 template <class T, class T1, class T2 Y> 
 inline SUMMM<CT,T1,T2 X3> operator/(
     const SUMMM_x_1<CT,T1,T2 X3>& smm, const CCT x)
-{ return SUMMM<CT,T1,T2 X3>(smm.getX1()/CT(x),smm GETM1,T(1)/CT(x),smm GETM2); }
+{
+    return SUMMM<CT,T1,T2 X3>(
+        TMV_Divide(smm.getX1(),CT(x)),smm GETM1,TMV_InverseOf(CT(x)),smm GETM2); 
+}
 
 template <class T, class T1, class T2 Y> 
 inline SUMMM<CT,T1,T2 X3> operator/(
     const SUMMM_x_1<CT,T1,T2 X3>& smm, const VCT x)
-{ return SUMMM<CT,T1,T2 X3>(smm.getX1()/CT(x),smm GETM1,T(1)/CT(x),smm GETM2); }
+{
+    return SUMMM<CT,T1,T2 X3>(
+        TMV_Divide(smm.getX1(),CT(x)),smm GETM1,TMV_InverseOf(CT(x)),smm GETM2); 
+}
 
 // SUMMM_1_m1
 
@@ -742,29 +812,38 @@ inline SUMMM<CT,T1,T2 X3> operator*(
 template <class T, class T1, class T2 Y> 
 inline SUMMM<T,T1,T2 X3> operator/(const SUMMM_x_m1<T,T1,T2 X3>& smm, const T x)
 { 
-    return SUMMM<T,T1,T2 X3>(smm.getX1()/x,smm GETM1,
-                             TMV_RealType(T)(-1)/x,smm GETM2); 
+    return SUMMM<T,T1,T2 X3>(
+        TMV_Divide(smm.getX1(),x),smm GETM1,TMV_InverseOf(-x),smm GETM2); 
 }
 
 template <class T, class T1, class T2 Y> 
 inline SUMMM<CT,T1,T2 X3> operator/(
     const SUMMM_x_m1<CT,T1,T2 X3>& smm, const T x)
-{ return SUMMM<CT,T1,T2 X3>(smm.getX1()/x,smm GETM1,CT(T(-1)/x),smm GETM2); }
+{
+    return SUMMM<CT,T1,T2 X3>(
+        TMV_Divide(smm.getX1(),x),smm GETM1,TMV_InverseOf(-x),smm GETM2); 
+}
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM_x_m1<T,T,T X3>& smm, const CT x)
-{ return SUMMM<CT,T,T X3>(smm.getX1()/x,smm GETM1,T(-1)/x,smm GETM2); }
+{
+    return SUMMM<CT,T,T X3>(
+        TMV_Divide(smm.getX1(),x),smm GETM1,TMV_InverseOf(-x),smm GETM2); 
+}
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(
     const SUMMM_x_m1<T,T,T X3>& smm, const CCT x)
-{ return SUMMM<CT,T,T X3>(smm.getX1()/CT(x),smm GETM1,T(-1)/CT(x),smm GETM2); }
+{
+    return SUMMM<CT,T,T X3>(
+        TMV_Divide(smm.getX1(),CT(x)),smm GETM1,TMV_InverseOf(-CT(x)),smm GETM2); 
+}
 
 template <class T Y> 
 inline SUMMM<CT,T,T X3> operator/(const SUMMM_x_m1<T,T,T X3>& smm, const VCT x)
 { 
     return SUMMM<CT,T,T X3>(
-        smm.getX1()/CT(x),smm GETM1,T(-1)/CT(x),smm GETM2); 
+        TMV_Divide(smm.getX1(),CT(x)),smm GETM1,TMV_InverseOf(-CT(x)),smm GETM2); 
 }
 
 template <class T, class T1, class T2 Y> 
@@ -772,7 +851,7 @@ inline SUMMM<CT,T1,T2 X3> operator/(
     const SUMMM_x_m1<CT,T1,T2 X3>& smm, const CCT x)
 { 
     return SUMMM<CT,T1,T2 X3>(
-        smm.getX1()/CT(x),smm GETM1,T(-1)/CT(x),smm GETM2); 
+        TMV_Divide(smm.getX1(),CT(x)),smm GETM1,TMV_InverseOf(-CT(x)),smm GETM2); 
 }
 
 template <class T, class T1, class T2 Y> 
@@ -780,7 +859,7 @@ inline SUMMM<CT,T1,T2 X3> operator/(
     const SUMMM_x_m1<CT,T1,T2 X3>& smm, const VCT x)
 { 
     return SUMMM<CT,T1,T2 X3>(
-        smm.getX1()/CT(x),smm GETM1,T(-1)/CT(x),smm GETM2); 
+        TMV_Divide(smm.getX1(),CT(x)),smm GETM1,TMV_InverseOf(-CT(x)),smm GETM2); 
 }
 #undef SUMMM_1_1
 #undef SUMMM_1_m1

@@ -21,6 +21,19 @@
 #include "TMV_PermuteM.h"
 #endif
 
+#ifdef XDEBUG_LU
+#include <iostream>
+#include "TMV_MatrixIO.h"
+#include "TMV_TriMatrixIO.h"
+#include "TMV_SumMM.h"
+#include "TMV_AddMM.h"
+#include "TMV_ProdMM.h"
+#include "TMV_MultUL.h"
+#include "TMV_PermuteM.h"
+#include "TMV_NormM.h"
+#include "TMV_Norm.h"
+#endif
+
 // BLOCKSIZE is the block size to use in algo 21
 #define TMV_LU_BLOCKSIZE 64
 
@@ -85,7 +98,8 @@ namespace tmv {
                 }
                 //A0.cSubVector(1,M) /= A0.cref(0);
                 typename M1::col_sub_type A0b = A0.cSubVector(1,M);
-                Scale(Scaling<0,T>(RT(1)/A0.cref(0)),A0b);
+                const T invpiv = ZProd<false,false>::quot(RT(1),A0.cref(0));
+                Scale(Scaling<0,T>(invpiv),A0b);
             }
         }
     };
@@ -127,12 +141,12 @@ namespace tmv {
 
                 // A0.subVector(1,M) /= A00;
                 // A1.subVector(1,M) -= A0.subVector(1,M) * A01;
-                const T invA00 = RT(1)/(*it0++);
+                const T invpiv = ZProd<false,false>::quot(RT(1),*it0++);
                 const T A01 = *it1++;
                 piv = RT(0); // next pivot element
                 ip1 = 1;
                 for(int i=1;i<M;++i,++it0,++it1) {
-                    *it0 *= invA00;
+                    *it0 *= invpiv;
                     *it1 -= *it0 * A01;
                     RT absAi1 = TMV_ABS(*it1);
                     if (absAi1 > piv) { piv = absAi1; ip1=i; }
@@ -151,7 +165,8 @@ namespace tmv {
 
                     //A1.cSubVector(2,M) /= A1.cref(1);
                     typename M1::col_sub_type A1b = A1.cSubVector(2,M);
-                    Scale(Scaling<0,T>(RT(1)/A1.cref(1)),A1b);
+                    const T invpiv = ZProd<false,false>::quot(RT(1),A1.cref(1));
+                    Scale(Scaling<0,T>(invpiv),A1b);
                 }
             }
 
@@ -358,7 +373,8 @@ namespace tmv {
                 if (A.cref(j,j) != T(0)) {
                     //A.col(j,j+1,M) /= *Ujj;
                     M1c Ajc = A.get_col(j,j+1,M);
-                    Scale(Scaling<0,T>(RT(1)/A.cref(j,j)),Ajc);
+                    const T invpiv = ZProd<false,false>::quot(RT(1),A.cref(j,j));
+                    Scale(Scaling<0,T>(invpiv),Ajc);
                 }
             }
             if (N > M) {
@@ -683,7 +699,6 @@ namespace tmv {
             std::cout<<"algo = "<<algo<<std::endl;
 #endif
 #ifdef XDEBUG_LU
-            typedef typename M3::real_type RT;
             Matrix<T> mi = m;
 #endif
             LUDecompose_Helper<algo,cs,rs,M1>::call(m,P);

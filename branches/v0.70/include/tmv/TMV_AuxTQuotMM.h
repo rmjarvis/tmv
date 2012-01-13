@@ -159,7 +159,7 @@ inline TQUOTMM<T,T,T2> operator/(
     const GENMATRIX1<T>& m, const PRODXM2<T,T2>& pxm)
 { 
     std::auto_ptr<Matrix<T,ColMajor> > newm1(new Matrix<T,ColMajor>(m));
-    return TQUOTMM<T,T,T2>(TMV_RealType(T)(1)/pxm.getX(),newm1,pxm.getM());
+    return TQUOTMM<T,T,T2>(TMV_InverseOf(pxm.getX()),newm1,pxm.getM());
 }
 
 template <class T> 
@@ -167,7 +167,7 @@ inline TQUOTMM<CT,CT,T> operator/(
     const GENMATRIX1<CT>& m, const PRODXM2<T,T>& pxm)
 { 
     std::auto_ptr<Matrix<CT,ColMajor> > newm1(new Matrix<CT,ColMajor>(m));
-    return TQUOTMM<CT,CT,T>(CT(T(1)/pxm.getX()),newm1,pxm.getM());
+    return TQUOTMM<CT,CT,T>(TMV_InverseOf(pxm.getX()),newm1,pxm.getM());
 }
 
 template <class T, class T2> 
@@ -175,7 +175,7 @@ inline TQUOTMM<CT,T,T2> operator/(
     const GENMATRIX1<T>& m, const PRODXM2<CT,T2>& pxm)
 { 
     std::auto_ptr<Matrix<T,ColMajor> > newm1(new Matrix<T,ColMajor>(m));
-    return TQUOTMM<CT,T,T2>(T(1)/pxm.getX(),newm1,pxm.getM());
+    return TQUOTMM<CT,T,T2>(TMV_InverseOf(pxm.getX()),newm1,pxm.getM());
 }
 
 // m%(x*m)
@@ -185,7 +185,7 @@ inline TRQUOTMM<T,T,T2> operator%(
     const GENMATRIX1<T>& m, const PRODXM2<T,T2>& pxm)
 { 
     std::auto_ptr<Matrix<T,RowMajor> > newm1(new Matrix<T,RowMajor>(m));
-    return TRQUOTMM<T,T,T2>(TMV_RealType(T)(1)/pxm.getX(),newm1,pxm.getM());
+    return TRQUOTMM<T,T,T2>(TMV_InverseOf(pxm.getX()),newm1,pxm.getM());
 }
 
 template <class T> 
@@ -193,7 +193,7 @@ inline TRQUOTMM<CT,CT,T> operator%(
     const GENMATRIX1<CT>& m, const PRODXM2<T,T>& pxm)
 { 
     std::auto_ptr<Matrix<CT,RowMajor> > newm1(new Matrix<CT,RowMajor>(m));
-    return TRQUOTMM<CT,CT,T>(CT(T(1)/pxm.getX()),newm1,pxm.getM());
+    return TRQUOTMM<CT,CT,T>(TMV_InverseOf(pxm.getX()),newm1,pxm.getM());
 }
 
 template <class T, class T2> 
@@ -201,7 +201,7 @@ inline TRQUOTMM<CT,T,T2> operator%(
     const GENMATRIX1<T>& m, const PRODXM2<CT,T2>& pxm)
 { 
     std::auto_ptr<Matrix<T,RowMajor> > newm1(new Matrix<T,RowMajor>(m));
-    return TRQUOTMM<CT,T,T2>(T(1)/pxm.getX(),newm1,pxm.getM());
+    return TRQUOTMM<CT,T,T2>(TMV_InverseOf(pxm.getX()),newm1,pxm.getM());
 }
 
 // (x*m)/(x*m)
@@ -211,7 +211,7 @@ inline TQUOTMM<T,T1,T2> operator/(
     const PRODXM1<T,T1>& pxm1, const PRODXM2<T,T2>& pxm2)
 { 
     std::auto_ptr<Matrix<T1,ColMajor> > newm1(new Matrix<T1,ColMajor>(pxm1.getM()));
-    return TQUOTMM<T,T1,T2>(pxm1.getX()/pxm2.getX(),newm1,pxm2.getM());
+    return TQUOTMM<T,T1,T2>(TMV_Divide(pxm1.getX(),pxm2.getX()),newm1,pxm2.getM());
 }
 
 template <class T, class T1> 
@@ -219,7 +219,7 @@ inline TQUOTMM<CT,T1,T> operator/(
     const PRODXM1<CT,T1>& pxm1, const PRODXM2<T,T>& pxm2)
 { 
     std::auto_ptr<Matrix<T1,ColMajor> > newm1(new Matrix<T1,ColMajor>(pxm1.getM()));
-    return TQUOTMM<CT,T1,T>(pxm1.getX()/pxm2.getX(),newm1,pxm2.getM());
+    return TQUOTMM<CT,T1,T>(TMV_Divide(pxm1.getX(),pxm2.getX()),newm1,pxm2.getM());
 }
 
 template <class T, class T2> 
@@ -227,7 +227,7 @@ inline TQUOTMM<CT,T,T2> operator/(
     const PRODXM1<T,T>& pxm1, const PRODXM2<CT,T2>& pxm2)
 { 
     std::auto_ptr<Matrix<T,ColMajor> > newm1(new Matrix<T,ColMajor>(pxm1.getM()));
-    return TQUOTMM<CT,T,T2>(pxm1.getX()/pxm2.getX(),newm1,pxm2.getM());
+    return TQUOTMM<CT,T,T2>(TMV_Divide(pxm1.getX(),pxm2.getX()),newm1,pxm2.getM());
 }
 
 // (x*m)%(x*m)
@@ -237,7 +237,7 @@ inline TRQUOTMM<T,T1,T2> operator%(
     const PRODXM1<T,T1>& pxm1, const PRODXM2<T,T2>& pxm2)
 { 
     std::auto_ptr<Matrix<T1,RowMajor> > newm1(new Matrix<T1,RowMajor>(pxm1.getM()));
-    return TRQUOTMM<T,T1,T2>(pxm1.getX()/pxm2.getX(),newm1,pxm2.getM());
+    return TRQUOTMM<T,T1,T2>(TMV_Divide(pxm1.getX(),pxm2.getX()),newm1,pxm2.getM());
 }
 
 template <class T, class T1> 
@@ -245,7 +245,7 @@ inline TRQUOTMM<CT,T1,T> operator%(
     const PRODXM1<CT,T1>& pxm1, const PRODXM2<T,T>& pxm2)
 { 
     std::auto_ptr<Matrix<T1,RowMajor> > newm1(new Matrix<T1,RowMajor>(pxm1.getM()));
-    return TRQUOTMM<CT,T1,T>(pxm1.getX()/pxm2.getX(),newm1,pxm2.getM());
+    return TRQUOTMM<CT,T1,T>(TMV_Divide(pxm1.getX(),pxm2.getX()),newm1,pxm2.getM());
 }
 
 template <class T, class T2> 
@@ -253,7 +253,7 @@ inline TRQUOTMM<CT,T,T2> operator%(
     const PRODXM1<T,T>& pxm1, const PRODXM2<CT,T2>& pxm2)
 { 
     std::auto_ptr<Matrix<T,RowMajor> > newm1(new Matrix<T,RowMajor>(pxm1.getM()));
-    return TRQUOTMM<CT,T,T2>(pxm1.getX()/pxm2.getX(),newm1,pxm2.getM());
+    return TRQUOTMM<CT,T,T2>(TMV_Divide(pxm1.getX(),pxm2.getX()),newm1,pxm2.getM());
 }
 
 // (x/m)*m

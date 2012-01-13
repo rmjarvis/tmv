@@ -179,7 +179,7 @@ namespace tmv {
         const UpperTriMatrixView<T>& m, T x) 
     { 
         TMVAssert(!m.isunit());
-        MultXM(TMV_RealType(T)(1)/x,m);
+        MultXM(TMV_InverseOf(x),m);
         return m;
     }
 
@@ -188,7 +188,7 @@ namespace tmv {
         const UpperTriMatrixView<CT>& m, T x) 
     { 
         TMVAssert(!m.isunit());
-        MultXM(T(1)/x,m);
+        MultXM(TMV_InverseOf(x),m);
         return m;
     }
 
@@ -197,7 +197,7 @@ namespace tmv {
         const UpperTriMatrixView<CT>& m, CCT x) 
     { 
         TMVAssert(!m.isunit());
-        MultXM(T(1)/CT(x),m);
+        MultXM(TMV_InverseOf(CT(x)),m);
         return m;
     }
 
@@ -206,7 +206,7 @@ namespace tmv {
         const UpperTriMatrixView<CT>& m, VCT x) 
     { 
         TMVAssert(!m.isunit());
-        MultXM(T(1)/CT(x),m);
+        MultXM(TMV_InverseOf(CT(x)),m);
         return m;
     }
 
@@ -1050,7 +1050,7 @@ namespace tmv {
         const LowerTriMatrixView<T>& m, T x) 
     { 
         TMVAssert(!m.isunit());
-        MultXM(TMV_RealType(T)(1)/x,m);
+        MultXM(TMV_InverseOf(x),m);
         return m;
     }
 
@@ -1059,7 +1059,7 @@ namespace tmv {
         const LowerTriMatrixView<CT>& m, T x) 
     { 
         TMVAssert(!m.isunit());
-        MultXM(T(1)/x,m);
+        MultXM(TMV_InverseOf(x),m);
         return m;
     }
 
@@ -1068,7 +1068,7 @@ namespace tmv {
         const LowerTriMatrixView<CT>& m, CCT x) 
     { 
         TMVAssert(!m.isunit());
-        MultXM(T(1)/CT(x),m);
+        MultXM(TMV_InverseOf(CT(x)),m);
         return m;
     }
 
@@ -1077,7 +1077,7 @@ namespace tmv {
         const LowerTriMatrixView<CT>& m, VCT x) 
     { 
         TMVAssert(!m.isunit());
-        MultXM(T(1)/CT(x),m);
+        MultXM(TMV_InverseOf(CT(x)),m);
         return m;
     }
 

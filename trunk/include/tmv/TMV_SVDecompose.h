@@ -16,12 +16,16 @@
 #include "TMV_MultMM.h"
 #include "TMV_MultMD.h"
 #include "TMV_AddMM.h"
+#include "TMV_SumMM.h"
+#include "TMV_NormM.h"
+#include "TMV_Norm.h"
 #include "TMV_MultXM.h"
 #endif
 
 #ifdef PRINTALGO_SVD
 #include <iostream>
 #include "TMV_MatrixIO.h"
+#include "TMV_DiagMatrixIO.h"
 #include "TMV_VectorIO.h"
 #define TMV_USE_WRITER
 #endif
@@ -257,10 +261,13 @@ namespace tmv {
             }
 
             for(int j=0;j<N-1;++j) {
+                dbgcout<<"j = "<<j<<", D = "<<D.cref(j)<<", E = "<<E.cref(j)<<std::endl;
                 RT absDj = TMV_ABS(D.cref(j));
                 T signDj = TMV_SIGN(D.cref(j),absDj);
+                dbgcout<<"absdj = "<<absDj<<", signdj = "<<signDj<<std::endl;
                 rD.ref(j) = absDj;
                 E.ref(j) *= TMV_CONJ(signDj);
+                dbgcout<<"rD => "<<rD.cref(j)<<", e => "<<E.cref(j)<<std::endl;
                 if (U.ptr()) {
                     if (setUV) U.ref(j,j) = signDj;
                     else U.col(j) *= signDj;
@@ -268,16 +275,21 @@ namespace tmv {
 
                 RT absEj = TMV_ABS(E.cref(j));
                 T signEj = TMV_SIGN(E.cref(j),absEj);
+                dbgcout<<"absej = "<<absEj<<", signej = "<<signEj<<std::endl;
                 rE.ref(j) = absEj;
                 D.ref(j+1) *= TMV_CONJ(signEj);
+                dbgcout<<"rE => "<<rE.cref(j)<<", d => "<<D.cref(j+1)<<std::endl;
                 if (V.ptr()) {
                     if (setUV) V.ref(j+1,j+1) = signEj;
                     else V.row(j+1) *= signEj;
                 }
             }
+            dbgcout<<"j = "<<N-1<<", D = "<<D.cref(N-1)<<std::endl;
             RT absDj = TMV_ABS(D.cref(N-1));
             T signDj = TMV_SIGN(D.cref(N-1),absDj);
+            dbgcout<<"absdj = "<<absDj<<", signdj = "<<signDj<<std::endl;
             rD.ref(N-1) = absDj;
+            dbgcout<<"rD => "<<rD.cref(N-1)<<std::endl;
             if (U.ptr()) {
                 if (setUV) U.ref(N-1,N-1) = signDj;
                 else U.col(N-1) *= signDj;
@@ -504,7 +516,11 @@ namespace tmv {
 #endif
 #ifdef XDEBUG_SVD
             const int N = rs==Unknown ? D.size() : rs;
-            dbgcout<<"Start Decompose from Bidiag:\n";
+            dbgcout<<"Start Decompose from Bidiag algo -3:\n";
+            dbgcout<<"Norm(U) = "<<Norm(U)<<std::endl;
+            dbgcout<<"Norm(V) = "<<Norm(V)<<std::endl;
+            dbgcout<<"Norm(D) = "<<Norm(D)<<std::endl;
+            dbgcout<<"Norm(E) = "<<Norm(E)<<std::endl;
             if (U.ptr()) dbgcout<<"U = "<<TMV_Text(U)<<std::endl;
             if (V.ptr()) dbgcout<<"V = "<<TMV_Text(V)<<std::endl;
             dbgcout<<"D = "<<TMV_Text(D)<<"  step "<<D.step()<<"  "<<D<<std::endl;
@@ -526,10 +542,14 @@ namespace tmv {
 #endif
             SVDecomposeFromBidiagonal_Helper<algo,cs,rs,Mu,Vd,Ve,Mv>::call( 
                 U,D,E,V,setUV);
-            //std::cout<<"U = "<<U<<std::endl;
-            //std::cout<<"S = "<<S<<std::endl;
-            //std::cout<<"V = "<<V<<std::endl;
 #ifdef XDEBUG_SVD
+            dbgcout<<"Done SVDecomposeFromBidiagonal\n";
+            dbgcout<<"Norm(U) = "<<Norm(U)<<std::endl;
+            dbgcout<<"Norm(V) = "<<Norm(V)<<std::endl;
+            dbgcout<<"Norm(S) = "<<Norm(D)<<std::endl;
+            dbgcout<<"S = "<<D<<std::endl;
+            //if (U.ptr()) dbgcout<<"U = "<<U<<std::endl;
+            //if (C.ptr()) dbgcout<<"V = "<<V<<std::endl;
             if (U.ptr() && V.ptr()) {
                 Matrix<T> AA = U * DiagMatrixViewOf(D) * V;
                 if (!(Norm(A0-AA) <= THRESH*Norm(A0))) {
@@ -540,9 +560,9 @@ namespace tmv {
                     std::cerr<<"V => "<<V<<std::endl;
                     std::cerr<<"UBV = "<<A0<<std::endl;
                     std::cerr<<"USV = "<<AA<<std::endl;
-                    std::cerr<<"diff = ";
-                    (A0-AA).write(std::cerr,(A0-AA).maxAbsElement()*1.e-3);
-                    std::cerr<<std::endl;
+                    std::cerr<<"diff = "<<
+                        ThreshIO((A0-AA).maxAbsElement()*1.e-3)<<
+                        (A0-AA)<<std::endl;
                     std::cerr<<"Norm(diff) = "<<Norm(A0-AA)<<std::endl;
                     std::cerr<<"THRESH*Norm(A0) = "<<THRESH<<"*"<<Norm(A0)<<
                         " = "<<THRESH*Norm(A0)<<std::endl;
@@ -568,6 +588,11 @@ namespace tmv {
                 Traits<typename Vd::value_type>::iscomplex ? 1 :
                 inst ? 90 :
                 -3;
+            dbgcout<<"SV_DecomposeFromBidiagonal algo -2:\n";
+            dbgcout<<"Norm(U) = "<<Norm(U)<<std::endl;
+            dbgcout<<"Norm(V) = "<<Norm(V)<<std::endl;
+            dbgcout<<"Norm(D) = "<<Norm(D)<<std::endl;
+            dbgcout<<"Norm(E) = "<<Norm(E)<<std::endl;
             SVDecomposeFromBidiagonal_Helper<algo,cs,rs,Mu,Vd,Ve,Mv>::call(
                 U,D,E,V,setUV);
         }
@@ -667,6 +692,15 @@ namespace tmv {
         TMV_MAYBE_REF(Vd,Vdv) Dv = D.cView();
         TMV_MAYBE_REF(Ve,Vev) Ev = E.cView();
         TMV_MAYBE_REF(Mv,Mvv) Vv = V.cView();
+        dbgcout<<"SV_DecomposeFromBidiagonal:\n";
+        dbgcout<<"Norm(U) = "<<Norm(U)<<std::endl;
+        dbgcout<<"Norm(V) = "<<Norm(V)<<std::endl;
+        dbgcout<<"Norm(D) = "<<Norm(D)<<std::endl;
+        dbgcout<<"Norm(E) = "<<Norm(E)<<std::endl;
+        dbgcout<<"Norm(Uv) = "<<Norm(Uv)<<std::endl;
+        dbgcout<<"Norm(Vv) = "<<Norm(Vv)<<std::endl;
+        dbgcout<<"Norm(Dv) = "<<Norm(Dv)<<std::endl;
+        dbgcout<<"Norm(Ev) = "<<Norm(Ev)<<std::endl;
         SVDecomposeFromBidiagonal_Helper<-2,cs,rs,Muv,Vdv,Vev,Mvv>::call(
             Uv,Dv,Ev,Vv,setUV);
     }
@@ -755,6 +789,10 @@ namespace tmv {
                 dbgcout<<"E.maxAbs = "<<E.maxAbsElement()<<std::endl;
                 dbgcout<<"D = "<<D<<std::endl;
                 dbgcout<<"E = "<<E<<std::endl;
+                dbgcout<<"Norm(U) = "<<Norm(U)<<std::endl;
+                dbgcout<<"Norm(V) = "<<Norm(V)<<std::endl;
+                dbgcout<<"Norm(D) = "<<Norm(D)<<std::endl;
+                dbgcout<<"Norm(E) = "<<Norm(E)<<std::endl;
 
                 // The determinant of B is just the product of the 
                 // diagonal elements.
@@ -793,6 +831,11 @@ namespace tmv {
                     dbgcout<<"Norm(UtU-1) = "<<
                         Norm(U.adjoint()*U-T(1))<<std::endl;
                 }
+                dbgcout<<"After UnpackU,V:\n";
+                dbgcout<<"Norm(U) = "<<Norm(U)<<std::endl;
+                dbgcout<<"Norm(V) = "<<Norm(V)<<std::endl;
+                dbgcout<<"Norm(D) = "<<Norm(D)<<std::endl;
+                dbgcout<<"Norm(E) = "<<Norm(E)<<std::endl;
 
                 if (StoreU) {
                     SV_DecomposeFromBidiagonal(U,D,E,V,false);
@@ -806,6 +849,11 @@ namespace tmv {
                     MatrixView<T> U0(0,0,0,1,1);
                     SV_DecomposeFromBidiagonal(U0,D,E,V,false);
                 }
+                dbgcout<<"After DecomposeFromBidiagonal:\n";
+                dbgcout<<"Norm(U) = "<<Norm(U)<<std::endl;
+                dbgcout<<"Norm(V) = "<<Norm(V)<<std::endl;
+                dbgcout<<"Norm(D) = "<<Norm(D)<<std::endl;
+                dbgcout<<"Norm(E) = "<<Norm(E)<<std::endl;
                 
                 // Now S is the real part of D:
                 S.diag() = D.realPart();

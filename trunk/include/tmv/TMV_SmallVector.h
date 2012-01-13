@@ -115,8 +115,8 @@ namespace tmv {
         typedef ConstSmallVectorView<T,N,1,nonconjA> const_nonconj_type;
         typedef SmallVectorView<T,N,1,A> nonconst_type;
 
-        typedef CVIt<T,1,false> const_iterator;
-        typedef CVIt<T,-1,false> const_reverse_iterator;
+        typedef CVIt<T,1,NonConj> const_iterator;
+        typedef CVIt<T,-1,NonConj> const_reverse_iterator;
 
         typedef T& reference;
 
@@ -137,8 +137,8 @@ namespace tmv {
         typedef SmallVectorView<T,N,1,An> noalias_type;
         typedef SmallVectorView<T,N,1,An|CheckAlias> alias_type;
 
-        typedef VIt<T,1,false> iterator;
-        typedef VIt<T,-1,false> reverse_iterator;
+        typedef VIt<T,1,NonConj> iterator;
+        typedef VIt<T,-1,NonConj> reverse_iterator;
     };
 
     template <class T, int N, int A>
@@ -316,8 +316,8 @@ namespace tmv {
         typedef ConstSmallVectorView<T,N,S,nonconjA> const_nonconj_type;
         typedef SmallVectorView<T,N,S,A> nonconst_type;
 
-        typedef CVIt<T,S,_conj> const_iterator;
-        typedef CVIt<T,negS,_conj> const_reverse_iterator;
+        typedef CVIt<T,S,_conj?Conj:NonConj> const_iterator;
+        typedef CVIt<T,negS,_conj?Conj:NonConj> const_reverse_iterator;
     };
 
     template <class T, int N, int S, int A>
@@ -516,8 +516,8 @@ namespace tmv {
         typedef ConstSmallVectorView<T,N,S,nonconjA> const_nonconj_type;
         typedef SmallVectorView<T,N,S,A> nonconst_type;
 
-        typedef CVIt<T,S,_conj> const_iterator;
-        typedef CVIt<T,negS,_conj> const_reverse_iterator;
+        typedef CVIt<T,S,_conj?Conj:NonConj> const_iterator;
+        typedef CVIt<T,negS,_conj?Conj:NonConj> const_reverse_iterator;
     
         typedef typename AuxRef<T,_conj>::reference reference;
 
@@ -537,8 +537,8 @@ namespace tmv {
         typedef SmallVectorView<T,N,S,An> noalias_type;
         typedef SmallVectorView<T,N,S,An|CheckAlias> alias_type;
 
-        typedef VIt<T,S,_conj> iterator;
-        typedef VIt<T,negS,_conj> reverse_iterator;
+        typedef VIt<T,S,_conj?Conj:NonConj> iterator;
+        typedef VIt<T,negS,_conj?Conj:NonConj> reverse_iterator;
     };
 
     template <class T, int N, int S, int A>

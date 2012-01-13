@@ -104,7 +104,7 @@ namespace tmv {
             TMVAssert(bi >= b._first);
             TMVAssert(bi < b._last);
 #endif
-            *bi /= (ca ? TMV_CONJ(*Aii) : *Aii);
+            *bi = TMV_Divide(*bi,(ca ? TMV_CONJ(*Aii) : *Aii));
             Aii -= ds;
             --bi;
         }
@@ -138,7 +138,7 @@ namespace tmv {
                 TMVAssert(bi >= b._first);
                 TMVAssert(bi < b._last);
 #endif
-                *bi /= (ca ? TMV_CONJ(*Aii) : *Aii);
+                *bi = TMV_Divide(*bi,(ca ? TMV_CONJ(*Aii) : *Aii));
             }
             if (k > 0) { --k; ++len; }
         } 
@@ -199,7 +199,7 @@ namespace tmv {
                     TMVAssert(bj >= b._first);
                     TMVAssert(bj < b._last);
 #endif
-                    *bj /= (ca ? TMV_CONJ(*Ajj) : *Ajj);
+                    *bj = TMV_Divide(*bj,(ca ? TMV_CONJ(*Ajj) : *Ajj));
                     Ajj -= ds;
                 }
 
@@ -232,7 +232,7 @@ namespace tmv {
             TMVAssert(bj >= b._first);
             TMVAssert(bj < b._last);
 #endif
-            *bj /= (ca ? TMV_CONJ(*Ajj) : *Ajj);
+            *bj = TMV_Divide(*bj,(ca ? TMV_CONJ(*Ajj) : *Ajj));
         }
     }
 
@@ -283,7 +283,7 @@ namespace tmv {
             TMVAssert(bi >= b._first);
             TMVAssert(bi < b._last);
 #endif
-            *bi /= (ca ? TMV_CONJ(*Aij1) : *Aij1);
+            *bi = TMV_Divide(*bi,(ca ? TMV_CONJ(*Aij1) : *Aij1));
         }
 
         ++bi;
@@ -315,7 +315,7 @@ namespace tmv {
                 TMVAssert(bi >= b._first);
                 TMVAssert(bi < b._last);
 #endif
-                *bi /= (ca ? TMV_CONJ(*Aij) : *Aij);
+                *bi = TMV_Divide(*bi,(ca ? TMV_CONJ(*Aij) : *Aij));
             }
             if (k>0) { --k; ++len; Aij1+=A.stepi(); } 
             else { ++bj1; Aij1+=ds; }
@@ -371,7 +371,7 @@ namespace tmv {
                     TMVAssert(bj >= b._first);
                     TMVAssert(bj < b._last);
 #endif
-                    *bj /= (ca ? TMV_CONJ(*Ajj) : *Ajj);
+                    *bj = TMV_Divide(*bj,(ca ? TMV_CONJ(*Ajj) : *Ajj));
                 }
                 // b.subVector(j+1,i2) -= *bj * A.col(j,j+1,i2)
                 T* bi = bj+1;
@@ -399,7 +399,7 @@ namespace tmv {
             TMVAssert(bj >= b._first);
             TMVAssert(bj < b._last);
 #endif
-            *bj /= (ca ? TMV_CONJ(*Ajj) : *Ajj);
+            *bj = TMV_Divide(*bj,(ca ? TMV_CONJ(*Ajj) : *Ajj));
         }
     }
 

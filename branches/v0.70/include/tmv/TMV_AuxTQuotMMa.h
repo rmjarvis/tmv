@@ -104,31 +104,31 @@ inline TQUOTMM<CT,T1,T2> operator*(const TQUOTMM<CT,T1,T2>& qmm, VCT x)
 
 template <class T, class T1, class T2> 
 inline TQUOTMM<T,T1,T2> operator/(const TQUOTMM<T,T1,T2>& qmm, T x)
-{ return TQUOTMM<T,T1,T2>(qmm.getX()/x,qmm.getP(),qmm.getM2()); }
+{ return TQUOTMM<T,T1,T2>(TMV_Divide(qmm.getX(),x),qmm.getP(),qmm.getM2()); }
 
 template <class T> 
 inline TQUOTMM<CT,T,T> operator/(const TQUOTMM<CT,T,T>& qmm, CT x)
-{ return TQUOTMM<CT,T,T>(qmm.getX()/x,qmm.getP(),qmm.getM2()); }
+{ return TQUOTMM<CT,T,T>(TMV_Divide(qmm.getX(),x),qmm.getP(),qmm.getM2()); }
 
 template <class T> 
 inline TQUOTMM<CT,T,T> operator/(const TQUOTMM<CT,T,T>& qmm, CCT x)
-{ return TQUOTMM<CT,T,T>(qmm.getX()/CT(x),qmm.getP(),qmm.getM2()); }
+{ return TQUOTMM<CT,T,T>(TMV_Divide(qmm.getX(),CT(x)),qmm.getP(),qmm.getM2()); }
 
 template <class T> 
 inline TQUOTMM<CT,T,T> operator/(const TQUOTMM<CT,T,T>& qmm, VCT x)
-{ return TQUOTMM<CT,T,T>(qmm.getX()/CT(x),qmm.getP(),qmm.getM2()); }
+{ return TQUOTMM<CT,T,T>(TMV_Divide(qmm.getX(),CT(x)),qmm.getP(),qmm.getM2()); }
 
 template <class T, class T1, class T2> 
 inline TQUOTMM<CT,T1,T2> operator/(const TQUOTMM<CT,T1,T2>& qmm, T x)
-{ return TQUOTMM<CT,T1,T2>(qmm.getX()/x,qmm.getP(),qmm.getM2()); }
+{ return TQUOTMM<CT,T1,T2>(TMV_Divide(qmm.getX(),x),qmm.getP(),qmm.getM2()); }
 
 template <class T, class T1, class T2> 
 inline TQUOTMM<CT,T1,T2> operator/(const TQUOTMM<CT,T1,T2>& qmm, CCT x)
-{ return TQUOTMM<CT,T1,T2>(qmm.getX()/CT(x),qmm.getP(),qmm.getM2()); }
+{ return TQUOTMM<CT,T1,T2>(TMV_Divide(qmm.getX(),CT(x)),qmm.getP(),qmm.getM2()); }
 
 template <class T, class T1, class T2> 
 inline TQUOTMM<CT,T1,T2> operator/(const TQUOTMM<CT,T1,T2>& qmm, VCT x)
-{ return TQUOTMM<CT,T1,T2>(qmm.getX()/CT(x),qmm.getP(),qmm.getM2()); }
+{ return TQUOTMM<CT,T1,T2>(TMV_Divide(qmm.getX(),CT(x)),qmm.getP(),qmm.getM2()); }
 
 // x*(x*m%m)
 
@@ -194,29 +194,29 @@ inline TRQUOTMM<CT,T1,T2> operator*(const TRQUOTMM<CT,T1,T2>& qmm, VCT x)
 
 template <class T, class T1, class T2> 
 inline TRQUOTMM<T,T1,T2> operator/(const TRQUOTMM<T,T1,T2>& qmm, T x)
-{ return TRQUOTMM<T,T1,T2>(qmm.getX()/x,qmm.getP(),qmm.getM2()); }
+{ return TRQUOTMM<T,T1,T2>(TMV_Divide(qmm.getX(),x),qmm.getP(),qmm.getM2()); }
 
 template <class T> 
 inline TRQUOTMM<CT,T,T> operator/(const TRQUOTMM<CT,T,T>& qmm, CT x)
-{ return TRQUOTMM<CT,T,T>(qmm.getX()/x,qmm.getP(),qmm.getM2()); }
+{ return TRQUOTMM<CT,T,T>(TMV_Divide(qmm.getX(),x),qmm.getP(),qmm.getM2()); }
 
 template <class T> 
 inline TRQUOTMM<CT,T,T> operator/(const TRQUOTMM<CT,T,T>& qmm, CCT x)
-{ return TRQUOTMM<CT,T,T>(qmm.getX()/CT(x),qmm.getP(),qmm.getM2()); }
+{ return TRQUOTMM<CT,T,T>(TMV_Divide(qmm.getX(),CT(x)),qmm.getP(),qmm.getM2()); }
 
 template <class T> 
 inline TRQUOTMM<CT,T,T> operator/(const TRQUOTMM<CT,T,T>& qmm, VCT x)
-{ return TRQUOTMM<CT,T,T>(qmm.getX()/CT(x),qmm.getP(),qmm.getM2()); }
+{ return TRQUOTMM<CT,T,T>(TMV_Divide(qmm.getX(),CT(x)),qmm.getP(),qmm.getM2()); }
 
 template <class T, class T1, class T2> 
 inline TRQUOTMM<CT,T1,T2> operator/(const TRQUOTMM<CT,T1,T2>& qmm, T x)
-{ return TRQUOTMM<CT,T1,T2>(qmm.getX()/x,qmm.getP(),qmm.getM2()); }
+{ return TRQUOTMM<CT,T1,T2>(TMV_Divide(qmm.getX(),x),qmm.getP(),qmm.getM2()); }
 
 template <class T, class T1, class T2> 
 inline TRQUOTMM<CT,T1,T2> operator/(const TRQUOTMM<CT,T1,T2>& qmm, CCT x)
-{ return TRQUOTMM<CT,T1,T2>(qmm.getX()/CT(x),qmm.getP(),qmm.getM2()); }
+{ return TRQUOTMM<CT,T1,T2>(TMV_Divide(qmm.getX(),CT(x)),qmm.getP(),qmm.getM2()); }
 
 template <class T, class T1, class T2> 
 inline TRQUOTMM<CT,T1,T2> operator/(const TRQUOTMM<CT,T1,T2>& qmm, VCT x)
-{ return TRQUOTMM<CT,T1,T2>(qmm.getX()/CT(x),qmm.getP(),qmm.getM2()); }
+{ return TRQUOTMM<CT,T1,T2>(TMV_Divide(qmm.getX(),CT(x)),qmm.getP(),qmm.getM2()); }
 

@@ -150,7 +150,7 @@ namespace tmv {
 #endif
             typedef typename M2::value_type T2;
             if (m2.cref(0,0) == T2(0)) ThrowSingular("1x1 Matrix");
-            m1.ref(0) /= m2.cref(0,0); 
+            m1.ref(0) = ZProd<false,false>::quot(m1.cref(0),m2.cref(0,0)); 
         }
     };
 
@@ -165,12 +165,14 @@ namespace tmv {
 #endif
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
+            typedef typename M2::real_type RT;
             T2 det = DetM_Helper<2,2,M2>::call(m2);
             if (det == T2(0)) ThrowSingular("2x2 Matrix");
+            T2 invdet = ZProd<false,false>::quot(RT(1),det);
             T1 a = (m1.cref(0) * m2.cref(1,1) - 
-                    m1.cref(1) * m2.cref(0,1))/det;
+                    m1.cref(1) * m2.cref(0,1))*invdet;
             T1 b = (m1.cref(1) * m2.cref(0,0) -
-                    m1.cref(0) * m2.cref(1,0))/det;
+                    m1.cref(0) * m2.cref(1,0))*invdet;
             m1.ref(0) = a;
             m1.ref(1) = b;
         }
@@ -747,7 +749,8 @@ namespace tmv {
             const M2& m2, BaseMatrix_Mutable<M3x>& m3)
         {
             m3.row(0,m1.rowstart(0),m1.rowend(0)) = 
-                (x/m2.cref(0,0)) * m1.row(0,m1.rowstart(0),m1.rowend(0));
+                ZProd<false,false>::quot(x,m2.cref(0,0)) * 
+                m1.row(0,m1.rowstart(0),m1.rowend(0));
             m3.row(0,m3.rowstart(0),m1.rowstart(0)).setZero();
             m3.row(0,m1.rowend(0),m3.rowend(0)).setZero();
         }
@@ -755,7 +758,7 @@ namespace tmv {
         static void call2(
             const Scaling<ix,T>& x, const BaseMatrix_Rec<M1x>& m1,
             const M2& m2, BaseMatrix_Rec_Mutable<M3x>& m3)
-        { m3.row(0) = (x/m2.cref(0,0)) * m1.row(0); }
+        { m3.row(0) = ZProd<false,false>::quot(x,m2.cref(0,0)) * m1.row(0); }
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
@@ -812,7 +815,7 @@ namespace tmv {
 #endif
             typedef typename M2::value_type T2;
             if (m2.cref(0,0) == T2(0)) ThrowSingular("1x1 Matrix");
-            m3.ref(0) = x * m1.cref(0) / m2.cref(0,0); 
+            m3.ref(0) = x * ZProd<false,false>::quot(m1.cref(0),m2.cref(0,0)); 
         }
     };
 
@@ -829,13 +832,15 @@ namespace tmv {
 #endif
             typedef typename M3::value_type T3;
             typedef typename M2::value_type T2;
+            typedef typename M2::real_type RT;
             T2 det = DetM_Helper<2,2,M2>::call(m2);
             if (det == T2(0)) ThrowSingular("2x2 Matrix");
+            T2 invdet = ZProd<false,false>::quot(RT(1),det);
             // m1, m3 might be aliased, so store temporaries:
             T3 a = x*(m1.cref(0) * m2.cref(1,1) - 
-                      m1.cref(1) * m2.cref(0,1))/det;
+                      m1.cref(1) * m2.cref(0,1))*invdet;
             T3 b = x*(m1.cref(1) * m2.cref(0,0) -
-                      m1.cref(0) * m2.cref(1,0))/det;
+                      m1.cref(0) * m2.cref(1,0))*invdet;
             m3.ref(0) = a;
             m3.ref(1) = b;
         }

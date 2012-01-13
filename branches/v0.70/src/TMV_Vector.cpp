@@ -102,7 +102,7 @@ namespace tmv {
     typename VectorView<T,A>::reference VectorView<T,A>::ref(int i) const
     {
         T* vi = ptr() + i*step();
-        return TMV_REF(vi,ct());
+        return RefHelper<T>::makeRef(vi,ct());
     }
 
     //

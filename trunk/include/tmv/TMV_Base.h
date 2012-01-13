@@ -791,14 +791,6 @@ namespace tmv {
     { return std::abs(x.real()) + std::abs(x.imag()); }
 
     template <class T>
-    inline T TMV_SIGN(const T& x, const T& )
-    { return x > 0 ? T(1) : T(-1); }
-
-    template <class T>
-    inline std::complex<T> TMV_SIGN(const std::complex<T>& x, const T& absx)
-    { return absx > 0 ? x/absx : std::complex<T>(1); }
-
-    template <class T>
     inline T TMV_MIN(const T& x, const T& y)
     { return x > y ? y : x; }
 
@@ -1074,14 +1066,15 @@ namespace tmv {
         static inline typename Traits2<T1,T2>::type quot(
             const T1& x, const T2& y)
         {
+            const bool c1 = Traits<T1>::iscomplex;
             const bool c2 = Traits<T2>::iscomplex;
-            return makequot<c2,T1,T2>::call(x,y);
+            return makequot<c1,c2,T1,T2>::call(x,y);
         }
         template <int ix, class T1, class T2>
         static inline typename Traits2<T1,T2>::type quot(
             const Scaling<ix,T1>& x, const T2& y)
         { return quot(T1(x),y); }
-        template <int ix, class T1, class T2>
+        template <class T1, int ix, class T2>
         static inline typename Traits2<T1,T2>::type quot(
             const T1& x, const Scaling<ix,T2>& y)
         { return prod(x,y); }
@@ -1089,23 +1082,43 @@ namespace tmv {
         static inline typename Traits2<T1,T2>::type quot(
             const T1& x, const Scaling<0,T2>& y)
         { return quot(x , y.x); }
+        template <int ix1, class T1, int ix2, class T2>
+        static inline typename Traits2<T1,T2>::type quot(
+            const Scaling<ix1,T1>& x, const Scaling<ix2,T2>& y)
+        { return prod(x,y); }
+        template <int ix1, class T1, class T2>
+        static inline typename Traits2<T1,T2>::type quot(
+            const Scaling<ix1,T1>& x, const Scaling<0,T2>& y)
+        { return quot(T1(x) , y.x); }
 
-        template <bool c2, class T1, class T2>
+        template <bool c1, bool c2, class T1, class T2>
         struct makequot;
-        template <class T1, class T2>
-        struct makequot<true,T1,T2>
+        template <bool c1, class T1, class T2>
+        struct makequot<c1,true,T1,T2>
         {
             typedef typename Traits2<T1,T2>::type PT;
             typedef typename Traits<PT>::real_type RT;
             static inline PT call(const T1& x, const T2& y)
-            { return ZProd<conj1,!conj2>::prod(x,y) / std::norm(y); }
+            { 
+                RT absy = TMV_ABS(y);
+                return ZProd<conj1,!conj2>::prod(
+                    ZProd<false,false>::quot(x,absy),
+                    ZProd<false,false>::quot(y,absy));
+            }
         };
         template <class T1, class T2>
-        struct makequot<false,T1,T2>
+        struct makequot<false,false,T1,T2>
         {
             typedef typename Traits2<T1,T2>::type PT;
             static inline PT call(const T1& x, const T2& y)
-            { return Maybe<conj1>::conj(x/y); }
+            { return x/y; }
+        };
+        template <class T1, class T2>
+        struct makequot<true,false,T1,T2>
+        {
+            typedef typename Traits2<T1,T2>::type PT;
+            static inline PT call(const T1& x, const T2& y)
+            { return PT(TMV_REAL(x)/y,Maybe<conj1>::neg(TMV_IMAG(x))/y); }
         };
 
     };
@@ -2134,6 +2147,14 @@ namespace tmv {
 #endif
     };
 
+    template <class T>
+    inline T TMV_SIGN(const T& x, const T& )
+    { return x > 0 ? T(1) : T(-1); }
+
+    template <class T>
+    inline std::complex<T> TMV_SIGN(const std::complex<T>& x, const T& absx)
+    { return absx > 0 ? ZProd<false,false>::quot(x,absx) : std::complex<T>(1); }
+
 #define TMV_MAYBE_CREF(T1,T2) \
     typename TypeSelect<Traits2<T1,T2>::sametype,const T1&,T2>::type
 #define TMV_MAYBE_REF(T1,T2) \
@@ -2363,9 +2384,9 @@ namespace tmv {
         static TMV_INLINE bool call(T x) 
         {
             typedef typename Traits<T>::real_type RT;
-            return TMV_ABS2(x) < (
+            return TMV_ABS2(x) <
                 std::numeric_limits<RT>::min() *
-                RT(tmv::Traits<T>::twoifcomplex) ); 
+                RT(tmv::Traits<T>::twoifcomplex); 
         }
     };
 

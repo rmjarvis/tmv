@@ -7,16 +7,27 @@ about the behavior of comma initialization for matrices.  But since I knew
 this change would not be backwards compatible, and might require users
 to edit their code, I decided to try to put all the non-backward-
 compatible changes that I've been thinking about introducing into this
-release to try to do everything at once.
+release to try to do everything at once. 
 
-The other big change is the redesigned I/O system that uses the equivalent 
-of stream manipulators to control the I/O behavior.  The default output 
-format hasn't changed, but if you ever did anything fancier than that, 
-you'll need to change your code to use the new system.
+Another big change is to have only two template parameters.  The first one is
+still the value type (e.g. double).  But the second one now is an int.
+All the parameters that been 2nd, 3rd or 4th, such as CStyle, FortranStyle, 
+UnitDiag, NonUnitDiag, Upper, Lower etc. are now combined into the single
+integer using the bitwise or operator (|).  
 
-There are a number of other non-backwards-compatible changes, so users should
-look through this file carefully to see if any other changes might require 
-some of their own code to be modified.
+I also redesigned the I/O system to use the equivalent of stream manipulators 
+to control the I/O behavior.  The default output format hasn't changed, but 
+if you ever did anything fancier than that, you'll need to change your code 
+to use the new system.
+
+There are quite a few other non-backwards-compatible changes that are 
+probably less of an issue for most people, but you should look through 
+this file carefully to see if any other changes might require some
+of your code to be modified.  It might be a bit of work to covert your 
+code to this version, and I apologize for that, but my hope is that the 
+UI will be pretty stable after this release.  I don't foresee any other
+big changes to the UI coming down the pike, even with the upcoming 
+redesigned back end that I've been advertising for a while now.
 
 Changed and Deprecated features:
 
@@ -87,6 +98,42 @@ Changed and Deprecated features:
    In addition, a BandMatrix can be iterated in DiagMajor order using 
    m.diagmajor_begin().
 
+-- Changed all (non-Small) matrix and vector types to only use 2 template
+   parameters.  The second parameter is now an integer that includes all
+   the information that was in the sometimes several parameters.  The 
+   values should be combined using the bitwise or operator (|).  
+   
+   So if you had declared an upper triangle matrix as:
+
+   tmv::UpperTriMatrix<double,UnitDiag,ColMajor,FortranStyle> U(5);
+
+   Now you would instead write:
+
+   tmv::UpperTriMatrix<double,UnitDiag|ColMajor|FortranStyle> U(5);
+
+   This doesn't sound like a very useful change yet.  The advantage is that
+   now you can leave out _any_ parameters that you don't want to specify,
+   and the default value would be used.  For example, the default 
+   StorageType is ColMajor, so the above declaration could instead be:
+
+   tmv::UpperTriMatrix<double,UnitDiag|FortranStyle> U(5);
+
+   Or if you want to decalare a symmetric matrix for which you want to
+   use fortran-style indexing, you used to have to write:
+
+   tmv::SymMatrix<double,Upper,ColMajor,FortranStyle> S(5);
+
+   even though you probably don't really care about which half of the 
+   matrix is directly stored in memory or what its storage order is.
+   Now you can just write:
+
+   tmv::SymMatrix<double,FortranStyle> S(5);
+
+   In future releases, I am planning to add some more attribute options,
+   and also to extend some of these attributs to Views.  However,
+   this release does not have any new functionality with respect to the
+   attributes.  It only effects the change in the UI.
+   
 -- Removed the auto_ptr read functions.  This notation was cumbersome,
    and since all matrices can be resized now (feature added in v0.65),
    there is no need for it anymore.  The auto_ptr was really just a 
@@ -152,6 +199,21 @@ Changed and Deprecated features:
    figure out how best to incorporate your needs in the next version and 
    in the version 0.90 redesign.
 
+-- Changed the second template parameter of VIt and CVIt from either
+   Step or Unit to the actual step size to use if known.  If the step
+   size is not known at compile time, you can use the special value
+   tmv::Unknown, and the value will be determined at run time with
+   a variable.  This allows the user more flexibility for optimizing
+   code.  For example, if you want to iterate over the real values 
+   of a complex vector, you could explicitly set the step size to 2:
+
+   for(VIt<T,2,NonConj> i=v.realPart().begin(); i!=v.realPart().end(); ++i) {
+       ....
+   }
+
+   This would probably be a bit more efficient than using the default
+   VectorView<T>::iterator which has the step size as a variable.
+
 -- Changed type type of the size values from size_t to int.  The main 
    reason for this is to prevent the constructors that take size arguments 
    from implicitly converting a negative number into a very large unsigned 
@@ -167,6 +229,14 @@ Changed and Deprecated features:
    So if you do any comparisons like while(i < m.colsize()) and you compile 
    with g++ -Wall, you'll want i to be a signed integer type to avoid g++'s 
    warning about comparing signed and unsigned types.
+
+-- Changed the svd().getV() method to svd().getVt() to conform to the 
+   usual definition of the SVD: A = U * S * Vt.  The underlying matrix
+   in question hasn't changed.  We just refer to it as Vt now rather than V.
+   While I still haven't seen a good reason for this to be the definition
+   of the SVD, I'm admitting the point that _everyone_ else seems
+   to use this definition.  So no point in me trying to get TMV users
+   to use my preferred definition: A = U * S * V.
 
 -- Changed the default behavior to not output warnings.  To turn it on,
    you need to explicitly use tmv::WriteWarningsTo(&std::cerr) (or whatever

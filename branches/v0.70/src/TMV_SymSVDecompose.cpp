@@ -1098,15 +1098,15 @@ namespace tmv {
     template <class T> 
     void SymSV_Decompose(
         const MatrixView<T>& U, const DiagMatrixView<RT>& SS, 
-        MVP<T> V, RT& logdet, T& signdet)
+        MVP<T> Vt, RT& logdet, T& signdet)
     {
         TMVAssert(U.rowsize() == SS.size());
         TMVAssert(U.colsize() == SS.size());
         TMVAssert(U.ct() == NonConj);
-        if (V) {
-            TMVAssert(V->rowsize() == SS.size());
-            TMVAssert(V->colsize() == SS.size());
-            TMVAssert(V->ct() == NonConj);
+        if (Vt) {
+            TMVAssert(Vt->rowsize() == SS.size());
+            TMVAssert(Vt->colsize() == SS.size());
+            TMVAssert(Vt->ct() == NonConj);
         }
         TMVAssert(SS.diag().ct() == NonConj);
 
@@ -1119,10 +1119,10 @@ namespace tmv {
 #endif
 
         TMVAssert(isComplex(T()));
-        // Decompose complex symmetric A (input as lower tri of U) into U S V
-        // where S is a diagonal real matrix, and U,V are unitary matrices.
-        // U,S,V are N x N
-        // If V = 0, then U,V are not formed.  Only S,det are accurate on return.
+        // Decompose complex symmetric A (input as lower tri of U) into U S Vt
+        // where S is a diagonal real matrix, and U,Vt are unitary matrices.
+        // U,S,Vt are N x N
+        // If Vt = 0, then U,Vt are not formed.  Only S,det are accurate on return.
         const int N = U.colsize();
         if (N == 0) return;
 
@@ -1151,37 +1151,37 @@ namespace tmv {
         U.col(0).makeBasis(0);
         U.row(0,1,N).setZero();
         GetQFromQR(U.subMatrix(1,N,1,N),Ubeta.subVector(0,N-1));
-        if (V) *V = U.transpose();
+        if (Vt) *Vt = U.transpose();
         Matrix<T,ColMajor> U1(N,N);
-        Matrix<T,ColMajor> V1(N,N);
-        SV_Decompose<T>(B,U1.view(),SS,V1.view(),logdet,signdet);
+        Matrix<T,ColMajor> Vt1(N,N);
+        SV_Decompose<T>(B,U1.view(),SS,Vt1.view(),logdet,signdet);
         U = U*U1;
-        if (V) *V = V1*(*V);
+        if (Vt) *Vt = Vt1*(*Vt);
 
 #ifdef XDEBUG
-        if (V) {
-            Matrix<T> A2 = U * SS * (*V);
+        if (Vt) {
+            Matrix<T> A2 = U * SS * (*Vt);
             std::cout<<"Done SymSV_Decompose\n";
             //std::cout<<"U = "<<U<<endl;
             std::cout<<"SS = "<<SS<<endl;
-            //std::cout<<"V = "<<*V<<endl;
+            //std::cout<<"Vt = "<<*Vt<<endl;
             //std::cout<<"A0 = "<<A0<<endl;
             //std::cout<<"A2 = "<<A2<<endl;
             std::cout<<"Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
-            if (!(Norm(A0-A2) < THRESH * Norm(U) * Norm(SS) * Norm(*V))) {
+            if (!(Norm(A0-A2) < THRESH * Norm(U) * Norm(SS) * Norm(*Vt))) {
                 cerr<<"SymSV_Decompose:\n";
                 cerr<<"A = "<<A0<<endl;
                 cerr<<"U = "<<U<<endl;
                 cerr<<"S = "<<SS.diag()<<endl;
-                cerr<<"V = "<<*V<<endl;
-                cerr<<"USV = "<<A2<<endl;
+                cerr<<"Vt = "<<*Vt<<endl;
+                cerr<<"USVt = "<<A2<<endl;
                 abort();
             }
         }
 #endif
     }
 
-    // This version does not accumulate U or V
+    // This version does not accumulate U or Vt
     template <class T> 
     void SV_Decompose(
         const SymMatrixView<T>& A, const DiagMatrixView<RT>& SS)
@@ -1252,38 +1252,38 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenSymMatrix<T>& A, const MatrixView<T>& U,
-        const DiagMatrixView<RT>& SS, const MatrixView<T>& V)
+        const DiagMatrixView<RT>& SS, const MatrixView<T>& Vt)
     {
         TMVAssert(A.size() == U.colsize());
         TMVAssert(A.size() == U.rowsize());
         TMVAssert(A.size() == SS.size());
-        TMVAssert(A.size() == V.colsize());
-        TMVAssert(A.size() == V.rowsize());
+        TMVAssert(A.size() == Vt.colsize());
+        TMVAssert(A.size() == Vt.rowsize());
 
         if (U.isconj()) {
-            if (V.isconj()) {
-                SV_Decompose(A.conjugate(),U.conjugate(),SS,V.conjugate());
+            if (Vt.isconj()) {
+                SV_Decompose(A.conjugate(),U.conjugate(),SS,Vt.conjugate());
             } else {
-                SV_Decompose(A.conjugate(),U.conjugate(),SS,V);
-                V.conjugateSelf();
+                SV_Decompose(A.conjugate(),U.conjugate(),SS,Vt);
+                Vt.conjugateSelf();
             }
         } else {
-            if (V.isconj()) {
-                SV_Decompose(A,U,SS,V.conjugate());
-                V.conjugateSelf();
+            if (Vt.isconj()) {
+                SV_Decompose(A,U,SS,Vt.conjugate());
+                Vt.conjugateSelf();
             } else {
                 U.lowerTri() = A.lowerTri();
                 if (A.isherm()) {
                     HermSV_Decompose<T>(U,SS);
-                    V = U.adjoint();
+                    Vt = U.adjoint();
                     for(int i=0;i<SS.size();i++) if (SS(i) < RT(0)) {
                         SS(i) = -SS(i);
-                        V.row(i) = -V.row(i);
+                        Vt.row(i) = -Vt.row(i);
                     }
                 } else {
                     RT ld(0);
                     T d(0);
-                    SymSV_Decompose<T>(U,SS,V,ld,d);
+                    SymSV_Decompose<T>(U,SS,Vt,ld,d);
                 }
             }
         }
@@ -1317,14 +1317,14 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenSymMatrix<T>& A,
-        const DiagMatrixView<RT>& SS, const MatrixView<T>& V)
+        const DiagMatrixView<RT>& SS, const MatrixView<T>& Vt)
     {
         TMVAssert(A.size() == SS.size());
-        TMVAssert(A.size() == V.colsize());
-        TMVAssert(A.size() == V.rowsize());
+        TMVAssert(A.size() == Vt.colsize());
+        TMVAssert(A.size() == Vt.rowsize());
 
-        if (A.isherm()) SV_Decompose(A,V.adjoint(),SS);
-        else SV_Decompose(A,V.transpose(),SS);
+        if (A.isherm()) SV_Decompose(A,Vt.adjoint(),SS);
+        else SV_Decompose(A,Vt.transpose(),SS);
     }
 
     template <class T> 
@@ -1341,9 +1341,9 @@ namespace tmv {
         // which leads to A = U.  Then P = UtA.
 
         // The easier (but slower) algorithm is:
-        // A = W S V
-        // U = W V
-        // P = Vt S V
+        // A = W S Vt
+        // U = W Vt
+        // P = V S Vt
 #ifdef XDEBUG
         Matrix<T> A0 = U;
         std::cout<<"Start PolarDecompose:\n";
@@ -1351,20 +1351,20 @@ namespace tmv {
         std::cout<<"P = "<<TMV_Text(P)<<std::endl;
         //std::cout<<"A0 = "<<A0<<std::endl;
 #endif
-        Matrix<T> V(U.rowsize(),U.rowsize());
+        Matrix<T> Vt(U.rowsize(),U.rowsize());
         DiagMatrix<RT> S(U.rowsize());
-        SV_Decompose(U.view(),S.view(),V.view(),true);
+        SV_Decompose(U.view(),S.view(),Vt.view(),true);
         //std::cout<<"S = "<<S.diag()<<std::endl;
         RT thresh = TMV_Epsilon<T>()*S.size()*S(0);
         for(int i=0;i<S.size();i++) if (S(i) < thresh) S(i) = RT(0);
         //std::cout<<"S => "<<S.diag()<<std::endl;
-        U *= V;
-        Matrix<T> VtS = V.adjoint() * S;
-        SymMultMM<false>(T(1),VtS,V,P);
+        U *= Vt;
+        Matrix<T> VS = Vt.adjoint() * S;
+        SymMultMM<false>(T(1),VS,Vt,P);
 #ifdef XDEBUG
         Matrix<T> A2 = U*P;
         std::cout<<"Done PolarDecompose:\n";
-        std::cout<<"Norm(A0 - USV) = "<<Norm(A0-U*S*V)<<std::endl;
+        std::cout<<"Norm(A0 - USVt) = "<<Norm(A0-U*S*Vt)<<std::endl;
         std::cout<<"Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
         if (!(Norm(A2-A0) < THRESH*Norm(A0))) {
             cerr<<"PolarDecompose "<<TMV_Text(U)<<"  "<<A0<<endl;
@@ -1384,12 +1384,12 @@ namespace tmv {
         const GenBandMatrix<T>& A,
         const MatrixView<T>& U, const SymMatrixView<T>& P)
     {
-        Matrix<T> V(A.rowsize(),A.rowsize());
+        Matrix<T> Vt(A.rowsize(),A.rowsize());
         DiagMatrix<RT> S(A.rowsize());
-        SV_Decompose(A,U.view(),S.view(),V.view());
-        U *= V;
-        Matrix<T> VtS = V.adjoint() * S;
-        SymMultMM<false>(T(1),VtS,V,P);
+        SV_Decompose(A,U.view(),S.view(),Vt.view());
+        U *= Vt;
+        Matrix<T> VS = Vt.adjoint() * S;
+        SymMultMM<false>(T(1),VS,Vt,P);
 #ifdef XDEBUG
         std::cout<<"Band PolarDecompose "<<TMV_Text(A)<<"  "<<A<<endl;
         //std::cout<<"U = "<<U<<endl;

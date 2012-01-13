@@ -24,12 +24,12 @@ performed on any kind of \tt{Matrix} regardless of its structure or sparsity.
 \index{BaseMatrix}
 
 In addition to the data type template parameter (indicated here by \tt{T} as usual),
-there is also a storage template parameter, which may be either 
-\tt{RowMajor} or \tt{ColMajor}.
-
-Finally, there is also a template argument indicating which indexing convention
-you want the matrix to use, which may be either \tt{CStyle} or 
-\tt{FortranStyle}.
+there is also a second template parameter that specifies attributes of the
+\tt{Matrix}.  The two attributes that are allowed are:
+\begin{itemize}
+\item \tt{CStyle} or \tt{FortranStyle}
+\item \tt{ColMajor} or \tt{RowMajor}
+\end{itemize}
 
 With C-style indexing, the upper-left element of an $M \times N$ \tt{Matrix} is
 \tt{m(0,0)}, the lower-left is \tt{m(M-1,0)}, the upper-right is \tt{m(0,N-1)},
@@ -44,52 +44,65 @@ and the lower-right is \tt{m(M,N)}.  Also, methods that take range arguments
 take the pair of indices to be the actual first and last elements in the range.
 So \tt{m.subMatrix(1,3,4,6)} returns the same $3 \times 3$ submatrix as given above.
 
+The other attribute specifies which storage order you want to use for the 
+matrix: column-major or row-major.  \tt{ColMajor} stores the elements of the 
+first column first, then the second column, and so on.  \tt{RowMajor} stores
+the elements by rows instead. 
+
+If you leave off the Attributes parameter, it will use the default values:
+\tt{CStyle} and \tt{ColMajor}.  If you want to specify either \tt{FortranStyle}
+or \tt{RowMajor}, you simply write (e.g. for double):
+\begin{tmvcode}
+tmv::Matrix<double,tmv::FortranStyle> m1;
+tmv::Matrix<double,tmv::RowMajor> m2;
+\end{tmvcode}
+If you want to specify both, then the two values are combined with the 
+bit-wise or operator (\tt{|}):
+\begin{tmvcode}
+tmv::Matrix<double,tmv::FortranStyle | tmv::RowMajor> m3;
+\end{tmvcode}
+Other special matrix types will have the possibility of still more 
+attributes, which act the same way.  You only need to specify ones that
+aren't the default, and you specify multiple values by using the \tt{|} 
+operator.
+
 All views of a \tt{Matrix} keep the same indexing style as the original unless you
 explicitly change it with a cast.  You can cast a \tt{MatrixView<T,CStyle>}
 as a \tt{MatrixView<T,FortranStyle>} and vice versa.  (Likewise for 
-\tt{ConstMatrixView}.)  However, as for \tt{GenVector}, you should be
-aware that \tt{GenMatrix}
-and \tt{MatrixComposite} do not have the extra template argument and are always
-indexed using the C-style convention.  So if you want to index one of these 
-using the Fortran-style convention, you need to (respectively) cast the 
-\tt{GenMatrix} as a \tt{ConstMatrixView<T,FortranStyle>} or instantiate the
-\tt{MatrixComposite} as a \tt{Matrix<T,FortranStyle>}.
-
-You may omit the indexing template argument, in which case \tt{CStyle} is assumed.
-And if so, you may also then omit the storage argument, in which case \tt{ColMajor}
-is assumed.  If you want to specify \tt{FortranStyle} indexing, you need
-to include the storage argument.
+\tt{ConstMatrixView}.)  This is the only attribute available for a 
+\tt{MatrixView}, since it automatically inherits the storage pattern from
+the matrix being viewed.
 
 \subsection{Constructors}
 \index{Matrix!Constructors}
 \label{Matrix_Constructors}
 
-We use \tt{stor} to indicate the storage template argument. 
-This argument must be either 
-\tt{tmv::RowMajor} or \tt{tmv::ColMajor}.  And \tt{index} indicates either 
-\tt{tmv::CStyle} or \tt{tmv::FortranStyle}.  The default values for these
-are \tt{tmv::ColMajor} and \tt{tmv::CStyle} if the arguments are omitted.
+Here, \tt{T} is used to represent the data type of the elements of the \tt{Matrix}
+(e.g. \tt{double}, \tt{complex<double>}, \tt{int}, etc.) and \tt{A} is the
+Attributes parameter.
+In all of the constructors the
+Attributes parameter may be omitted, in which case \tt{CStyle|ColMajor} is assumed.
 
 \begin{itemize}
 
 \item
 \begin{tmvcode}
-tmv::Matrix<T,stor,index> m()
+tmv::Matrix<T,A> m()
 \end{tmvcode}
 Makes a \tt{Matrix} with zero size.  You would normally use the \tt{resize} function later to
 change the size to some useful value.
 
 \item 
 \begin{tmvcode}
-tmv::Matrix<T,stor,index> m(int nrows, int ncols)
+tmv::Matrix<T,A> m(int nrows, int ncols)
 \end{tmvcode}
 Makes a \tt{Matrix} with \tt{nrows} rows and \tt{ncols} columns with 
-\underline{uninitialized} values.
-If extra debugging is turned on (with \tt{-DTMV\_EXTRA\_DEBUG}), then the values are in fact initialized to 888.  This should help you notice when you have neglected to initialize the \tt{Matrix} correctly.
+{\em uninitialized} values.
+If extra debugging is turned on (with the compiler flag \tt{-DTMV\_EXTRA\_DEBUG}), then the values are in fact initialized to 888.  This should help you notice when you have neglected to initialize the \tt{Matrix} correctly.
 
 \item
 \begin{tmvcode}
-tmv::Matrix<T,stor,index> m(int nrows, int ncols, T x)
+tmv::Matrix<T,A> m(int nrows, int ncols, T x)
 \end{tmvcode}
 Makes a \tt{Matrix} with \tt{nrows} rows and \tt{ncols} columns with all 
 values equal to \tt{x}
@@ -132,10 +145,8 @@ m(i,j) == *(mm + i*stepi + j*stepj)
 
 \item
 \begin{tmvcode}
-tmv::MatrixView<T,index> m = 
-      RowVectorViewOf(VectorView<T,index> v)
-tmv::ConstMatrixView<T,index> m = 
-      RowVectorViewOf(ConstVectorView<T,index> v)
+tmv::MatrixView<T,A> m = RowVectorViewOf(VectorView<T> v)
+tmv::ConstMatrixView<T,A> m = RowVectorViewOf(ConstVectorView<T> v)
 \end{tmvcode}
 \index{Vector!View as a 1$\times$n matrix}
 Makes a view of the \tt{Vector}, which treats it as a $1\times n$ \tt{Matrix}
@@ -143,10 +154,8 @@ Makes a view of the \tt{Vector}, which treats it as a $1\times n$ \tt{Matrix}
 
 \item
 \begin{tmvcode}
-tmv::MatrixView<T,index> m = 
-      ColVectorViewOf(VectorView<T,index> v)
-tmv::ConstMatrixView<T,index> m = 
-      ColVectorViewOf(ConstVectorView<T,index> v)
+tmv::MatrixView<T,A> m = ColVectorViewOf(VectorView<T> v)
+tmv::ConstMatrixView<T,A> m = ColVectorViewOf(ConstVectorView<T> v)
 \end{tmvcode}
 \index{Vector!View as an n$\times$1 matrix}
 Makes a view of the \tt{Vector}, which treats it as an $n \times 1$ \tt{Matrix}
@@ -213,9 +222,9 @@ Likewise \tt{ncols} and \tt{rowsize()} are equivalent.
 T m(int i, int j) const
 T m[int i][int j] const
 T m.cref(int i, int j) const
-typename tmv::Matrix<T>::reference m(int i, int j)
-typename tmv::Matrix<T>::reference m[int i][int j]
-typename tmv::Matrix<T>::reference m.ref(int i,int j)
+Matrix<T>::reference m(int i, int j)
+Matrix<T>::reference m[int i][int j]
+Matrix<T>::reference m.ref(int i,int j)
 \end{tmvcode}
 \index{Matrix!Methods!operator()}
 \index{Matrix!Methods!operator[]}
@@ -241,10 +250,9 @@ then the return type is just the value, not a reference.
 If \tt{m} is a 
 non-\tt{const Matrix}, then the return type is a normal reference \tt{T\&}.
 
-If \tt{m} is a \tt{MatrixView}, then the return type is an object,
-which is an lvalue (i.e. it is assignable), but which may not be \tt{T\&}.
-It has the type \tt{typename MatrixView<T>::reference}, 
-(which is the same as \tt{typename VectorView<T>::reference}).
+If \tt{m} is a \tt{MatrixView}, then the return type is an lvalue (i.e. it is assignable), but it may or may not be \tt{T\&}.
+It has the type \tt{MatrixView<T>::reference}
+(which is the same as \tt{VectorView<T>::reference}).
 It is equal to \tt{T\&} for real \tt{MatrixView}s, but is
 more complicated for complex \tt{MatrixView}s since it needs to 
 keep track of the possibility of conjugation.
@@ -331,20 +339,20 @@ These return a view to the elements of a \tt{Matrix} as a single vector.  They a
 
 \item
 \begin{tmvcode}
-typename tmv::Matrix<T>::rowmajor_iterator m.rowmajor_begin()
-typename tmv::Matrix<T>::rowmajor_iterator m.rowmajor_end()
-typename tmv::Matrix<T>::const_rowmajor_iterator m.rowmajor_begin() const
-typename tmv::Matrix<T>::const_rowmajor_iterator m.rowmajor_end() const
-typename tmv::Matrix<T>::colmajor_iterator m.colmajor_begin()
-typename tmv::Matrix<T>::colmajor_iterator m.colmajor_end()
-typename tmv::Matrix<T>::const_colmajor_iterator m.colmajor_begin() const
-typename tmv::Matrix<T>::const_colmajor_iterator m.colmajor_end() const
+Matrix<T>::rowmajor_iterator m.rowmajor_begin()
+Matrix<T>::rowmajor_iterator m.rowmajor_end()
+Matrix<T>::const_rowmajor_iterator m.rowmajor_begin() const
+Matrix<T>::const_rowmajor_iterator m.rowmajor_end() const
+Matrix<T>::colmajor_iterator m.colmajor_begin()
+Matrix<T>::colmajor_iterator m.colmajor_end()
+Matrix<T>::const_colmajor_iterator m.colmajor_begin() const
+Matrix<T>::const_colmajor_iterator m.colmajor_end() const
 \end{tmvcode}
 These iterators traverse the elements of the \tt{Matrix} 
 in either row-major or column-major order.  
 The iterators are only guaranteed
 to be consistent with the STL requirements for forward iterator.
-However, for a regular \tt{Matrix} (i.e. not a \tt{MatrixView}) the iterators in the same direction as the matrices storage order will be a random-access iterator.  In fact, it will be a \tt{VIt<T,Unit,NonConj>} (c.f. \S\ref{VectorIterators}).
+However, for a regular \tt{Matrix} (i.e. not a \tt{MatrixView}) the iterators in the same direction as the matrices storage order will be a random-access iterator.  In fact, it will be a \tt{VIt<T,1,NonConj>} (c.f. \S\ref{VectorIterators}).
 
 \item
 \begin{tmvcode}
@@ -389,15 +397,11 @@ These are really just convenience functions that return whether a matrix is \tt{
 \label{Matrix_Resize}
 
 It is possible to change the size of a matrix after it has been created using the method \tt{resize}:
-
 \begin{tmvcode}
 m.resize(int new_nrows, int new_ncols);
 \end{tmvcode}
 \index{Matrix!Methods!resize}
-
-This reallocates memory for the new size with {\u uninitialized} values.  
-(Or if compiling with \tt{-DTMV\_EXTRA\_DEBUG}, the values are in fact set to 888.)
-
+This reallocates memory for the new size with {\em uninitialized} values.
 There are no correlates to the other constructors, so after a resize, the 
 values should be set directly in some fashion.
 
@@ -485,7 +489,7 @@ board.subMatrix(1,9,1,9,2,2).setAllTo(1);
 
 For Fortran-style indexing, the same thing would be accomplished by:
 \begin{tmvcode}
-tmv::Matrix<int,tmv::ColMajor,tmv::FortranStyle> board(8,8,0)
+tmv::Matrix<int,tmv::FortranStyle> board(8,8,0)
 board.subMatrix(1,7,1,7,2,2).setAllTo(1);
 board.subMatrix(2,8,2,8,2,2).setAllTo(1);
 \end{tmvcode}
@@ -1364,9 +1368,9 @@ singular matrices, and it is much faster than the strict algorithm.
 \textbf{Singular Value Decomposition}: 
 \index{Matrix!Singular value decomposition}
 \index{Singular Value Decomposition!Matrix}
-(\tt{dt} = \tt{tmv::SV}) $A = U S V$ where $U$ is unitary
+(\tt{dt} = \tt{tmv::SV}) $A = U S V^\dagger$ where $U$ is unitary
 (or column-unitary if $M > N$), $S$ is diagonal and real, and $V$ is unitary 
-(or row-unitary if $M < N$).  The values of $S$ will be such that all the values will
+(or column-unitary if $M < N$).  The values of $S$ will be such that all the values will
 be non-negative and will decrease along the diagonal.
 The singular value decomposition is most useful
 for matrices that are singular or nearly so.  
@@ -1661,17 +1665,17 @@ For the SV decomposition, we have:
 \begin{tmvcode}
 tmv::ConstMatrixView<T> m.svd().getU()
 tmv::ConstDiagMatrixView<RT> m.svd().getS()
-tmv::ConstMatrixView<T> m.svd().getV()
+tmv::ConstMatrixView<T> m.svd().getVt()
 \end{tmvcode}
 \index{Matrix!Methods!svd}
 \index{Matrix!Singular value decomposition}
 \index{Singular Value Decomposition!Matrix}
-\tt{getU()}, \tt{getS()}, and \tt{getV()} return $U$, $S$, and $V$.
+\tt{getU()}, \tt{getS()}, and \tt{getVt()} return $U$, $S$, and $V^\dagger$.
 
 The following should result in a \tt{Matrix m2}
 that is numerically very close to the original \tt{Matrix m}:
 \begin{tmvcode}
-tmv::Matrix<T> m2 = m.svd().getU() * m.svd().getS() * m.svd().getV();
+tmv::Matrix<T> m2 = m.svd().getU() * m.svd().getS() * m.svd().getVt();
 \end{tmvcode}
 \end{itemize}
 
@@ -1909,47 +1913,42 @@ essentially all the same methods, functions, and arithmetic operators.
 
 The template arguments \tt{M} and \tt{N} below are both integers and
 represent the size of the matrix.
-The template argument \tt{stor} may be either \tt{tmv::RowMajor} or
-\tt{tmv::ColMajor}, and
- \tt{index} may be either \tt{tmv::CStyle} or
+The template argument \tt{A} can be used to specify the same attributes
+as for a regular \tt{Matrix}, namely either \tt{tmv::RowMajor} or
+\tt{tmv::ColMajor}, either \tt{tmv::CStyle} or
 \tt{tmv::FortranStyle}.  These both have the same meanings as they do 
-for a regular \tt{Matrix}. The defaults are \tt{ColMajor} and \tt{CStyle} if they
-are omitted.
+for a regular \tt{Matrix}. The defaults are \tt{ColMajor} and \tt{CStyle} if 
+note otherwise specified.
 
 \begin{itemize}
 \item 
 \begin{tmvcode}
-tmv::SmallMatrix<T,M,N,stor,index> m()
+tmv::SmallMatrix<T,M,N,A> m()
 \end{tmvcode}
 Makes an \tt{M} $\times$ \tt{N} \tt{SmallMatrix} 
-with \underline{uninitialized} values.
-If extra debugging is turned on (with \tt{-DTMV\_EXTRA\_DEBUG}), then the values are in fact initialized to 888. 
+with {\em uninitialized} values.
 
 \item
 \begin{tmvcode}
-tmv::SmallMatrix<T,M,N,stor,index> m(T x)
+tmv::SmallMatrix<T,M,N,A> m(T x)
 \end{tmvcode}
 Makes an \tt{M} $\times$ \tt{N} \tt{SmallMatrix} with all values equal to \tt{x}.
 
 \item
 \begin{tmvcode}
-tmv::SmallMatrix<T,M,N,stor,index> m(const T* vv)
-tmv::SmallMatrix<T,M,N,stor,index> m(const std::vector<T>& vv)
-tmv::SmallMatrix<T,M,N,stor,index> m(
-      const std::vector<std::vector<T> >& vv)
+tmv::SmallMatrix<T,M,N,A> m(const T* vv)
 \end{tmvcode}
 Makes an \tt{M} $\times$ \tt{N} \tt{SmallMatrix} with values copied from vv.
 
 \item 
 \begin{tmvcode}
-tmv::SmallMatrix<T,M,N,stor,index> m1(const GenMatrix<T>& m2)
+tmv::SmallMatrix<T,M,N,A> m1(const GenMatrix<T>& m2)
 \end{tmvcode}
 Makes an \tt{M} $\times$ \tt{N} \tt{SmallMatrix} from a regular \tt{Matrix}.
 
 \item
 \begin{tmvcode}
-tmv::SmallMatrix<T,M,N,stor,index> m1(
-      const SmallMatrix<T2,M,N,stor2,index2>& m2)
+tmv::SmallMatrix<T,M,N,A> m1(const SmallMatrix<T2,M,N,A2>& m2)
 m1 = m2
 \end{tmvcode}
 Copy the \tt{SmallMatrix m2}, which may be of any type \tt{T2} so long
@@ -1958,7 +1957,7 @@ The assignment operator has the same flexibility.
 
 \item
 \begin{tmvcode}
-tmv::SmallMatrix<T,M,N,stor,index> m;
+tmv::SmallMatrix<T,M,N,A> m;
 m << m00 , m01 , m02 ...
      m10 , m11 , m12 ...
      ...

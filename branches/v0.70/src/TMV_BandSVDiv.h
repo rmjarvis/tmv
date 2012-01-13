@@ -39,7 +39,7 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenBandMatrix<T>& A,
-        MVP<T> U, const DiagMatrixView<TMV_RealType(T)>& S, MVP<T> V, 
+        MVP<T> U, const DiagMatrixView<TMV_RealType(T)>& S, MVP<T> Vt, 
         TMV_RealType(T)& logdet, T& signdet);
 
 }

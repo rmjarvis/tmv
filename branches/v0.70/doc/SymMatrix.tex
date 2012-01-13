@@ -37,15 +37,18 @@ All the \tt{SymMatrix} and \tt{HermMatrix} routines are included by:
 \end{tmvcode}
 \index{TMV\_Sym.h}
 
-In addition to the \tt{T} template parameter, there are three other template 
-parameters: \tt{uplo}, which can be either \tt{tmv::Upper} or \tt{tmv::Lower};
-\tt{stor}, which can be either \tt{tmv::RowMajor} or \tt{tmv::ColMajor}; and
-\tt{index}, which can be either \tt{tmv::CStyle} or \tt{tmv::FortranStyle}.
-The parameter \tt{uplo} refers to which triangle the data are actually stored in, 
+In addition to the data type template parameter (indicated here by \tt{T} as usual),
+there is also a second template parameter that specifies attributes of the
+\tt{SymMatrix} or \tt{HermMatrix}.  The attributes that are allowed are:
+\begin{itemize}
+\item \tt{CStyle} or \tt{FortranStyle}
+\item \tt{ColMajor}, \tt{RowMajor} or \tt{DiagMajor}
+\item \tt{Upper} or \tt{Lower}
+\end{itemize}
+The final option refers to which triangle the data are actually stored in, 
 since the
 other half of the values are identical, so we do not need to reference them.
-The default values for these are \tt{Lower}, \tt{ColMajor}, and \tt{CStyle}
-respectively.
+The default attributes are \tt{CStyle}, \tt{ColMajor} and \tt{Lower}.
 
 The storage of a \tt{SymMatrix} takes
 $N \times N$ elements of memory, even though approximately half of them 
@@ -71,29 +74,34 @@ we will explain the difference.
 \index{SymMatrix!Constructors}
 \label{SymMatrix_Constructors}
 
+As usual, the optional \tt{A} template argument specifies attributes about
+the \tt{SymMatrix}.  The default attributes if not specified are
+\tt{CStyle}, \tt{ColMajor} and \tt{Lower}.
+
+
 \begin{itemize}
 
 \item
 \begin{tmvcode}
-tmv::SymMatrix<T,uplo,stor,index> s()
-tmv::HermMatrix<T,uplo,stor,index> h()
+tmv::SymMatrix<T,A> s()
+tmv::HermMatrix<T,A> h()
 \end{tmvcode}
 Makes a \tt{SymMatrix} or \tt{HermMatrix} with zero size.  You would normally use the \tt{resize} function later to
 change the size to some useful value.
 
 \item 
 \begin{tmvcode}
-tmv::SymMatrix<T,uplo,stor,index> s(int n)
-tmv::HermMatrix<T,uplo,stor,index> h(int n)
+tmv::SymMatrix<T,A> s(int n)
+tmv::HermMatrix<T,A> h(int n)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{SymMatrix} or \tt{HermMatrix}
-with \underline{uninitialized} values.
-If extra debugging is turned on (with \tt{-DTMV\_EXTRA\_DEBUG}), then the values are in fact initialized to 888.  
+with {\em uninitialized} values.
+If extra debugging is turned on (with the compiler flag \tt{-DTMV\_EXTRA\_DEBUG}), then the values are in fact initialized to 888.  
 
 \item
 \begin{tmvcode}
-tmv::SymMatrix<T,uplo,stor,index> s(int n, T x)
-tmv::HermMatrix<T,uplo,stor,index> h(int n, RT x)
+tmv::SymMatrix<T,A> s(int n, T x)
+tmv::HermMatrix<T,A> h(int n, RT x)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{SymMatrix} or \tt{HermMatrix} 
 with all values equal to \tt{x}.
@@ -101,17 +109,17 @@ For the \tt{HermMatrix} version of this, \tt{x} must be real.
 
 \item 
 \begin{tmvcode}
-tmv::SymMatrix<T,uplo,stor,index> s(const GenMatrix<T>& m)
-tmv::HermMatrix<T,uplo,stor,index> h(const GenMatrix<T>& m)
-tmv::SymMatrix<T,uplo,stor,index> s(const GenDiagMatrix<T>& d)
-tmv::HermMatrix<T,uplo,stor,index> h(const GenDiagMatrix<T>& d)
+tmv::SymMatrix<T,A> s(const GenMatrix<T>& m)
+tmv::HermMatrix<T,A> h(const GenMatrix<T>& m)
+tmv::SymMatrix<T,A> s(const GenDiagMatrix<T>& d)
+tmv::HermMatrix<T,A> h(const GenDiagMatrix<T>& d)
 \end{tmvcode}
 Makes a \tt{SymMatrix} or \tt{HermMatrix} which copies the corresponding values of \tt{m}.
 
 \item
 \begin{tmvcode}
-tmv::SymMatrix<T,uplo,stor,index> s1(const GenSymMatrix<T2>& s2)
-tmv::HermMatrix<T,uplo,stor,index> h1(const GenSymMatrix<T2>& s2)
+tmv::SymMatrix<T,A> s1(const GenSymMatrix<T2>& s2)
+tmv::HermMatrix<T,A> h1(const GenSymMatrix<T2>& s2)
 s1 = s2
 \end{tmvcode}
 Copy the \tt{GenSymMatrix s2}, which may be of any type \tt{T2} so long
@@ -122,30 +130,32 @@ either both symmetric or both hermitian.
 
 \item
 \begin{tmvcode}
-tmv::SymMatrixView<T,index> s = 
-      tmv::SymMatrixViewOf(MatrixView<T,index> m, UpLoType uplo)
-tmv::ConstSymMatrixView<T,index> s = 
-      tmv::SymMatrixViewOf(ConstMatrixView<T,index> m, UpLoType uplo)
-tmv::SymMatrixView<T,index> h = 
-      tmv::HermMatrixViewOf(MatrixView<T,index>& m, UpLoType uplo)
-tmv::ConstSymMatrixView<T,index> h = 
-      tmv::HermMatrixViewOf(ConstMatrixView<T,index>& m, UpLoType uplo)
+tmv::SymMatrixView<T,A> s = 
+      tmv::SymMatrixViewOf(MatrixView<T> m, UpLoType uplo)
+tmv::ConstSymMatrixView<T,A> s = 
+      tmv::SymMatrixViewOf(ConstMatrixView<T> m, UpLoType uplo)
+tmv::SymMatrixView<T,A> h = 
+      tmv::HermMatrixViewOf(MatrixView<T>& m, UpLoType uplo)
+tmv::ConstSymMatrixView<T,A> h = 
+      tmv::HermMatrixViewOf(ConstMatrixView<T>& m, UpLoType uplo)
 \end{tmvcode}
 \index{Matrix!View portion as SymMatrix or HermMatrix}
 Make a \tt{SymMatrixView} of the corresponding portion of \tt{m}.
+\tt{uplo} should be either \tt{Lower} or \tt{Upper} to indicate which
+portion of \tt{m} you want to view as symmetric.
 
 \item
 \begin{tmvcode}
-tmv::SymMatrixView<T,index> s = 
+tmv::SymMatrixView<T,A> s = 
       tmv::SymMatrixViewOf(T* vv, int n, UpLoType uplo, 
       StorageType stor)
-tmv::ConstSymMatrixView<T,index> s =
+tmv::ConstSymMatrixView<T,A> s =
       tmv::SymMatrixViewOf(const T* vv, int n, UpLoType uplo, 
       StorageType stor)
-tmv::SymMatrixView<T,index> h =
+tmv::SymMatrixView<T,A> h =
       tmv::HermMatrixViewOf(T* vv, int n, UpLoType uplo, 
       StorageType stor)
-tmv::ConstSymMatrixView<T,index> h =
+tmv::ConstSymMatrixView<T,A> h =
       tmv::HermMatrixViewOf(const T* vv, int n, UpLoType uplo, 
       StorageType stor)
 \end{tmvcode}
@@ -157,16 +167,16 @@ of the values are actually used,
 
 \item
 \begin{tmvcode}
-tmv::SymMatrixView<T,index> s = 
+tmv::SymMatrixView<T,A> s = 
       tmv::SymMatrixViewOf(T* vv, int n, UpLoType uplo, 
       int stepi, int stepj)
-tmv::ConstSymMatrixView<T,index> s =
+tmv::ConstSymMatrixView<T,A> s =
       tmv::SymMatrixViewOf(const T* vv, int n, UpLoType uplo, 
       int stepi, int stepj)
-tmv::SymMatrixView<T,index> h =
+tmv::SymMatrixView<T,A> h =
       tmv::HermMatrixViewOf(T* vv, int n, UpLoType uplo, 
       int stepi, int stepj)
-tmv::ConstSymMatrixView<T,index> h =
+tmv::ConstSymMatrixView<T,A> h =
       tmv::HermMatrixViewOf(const T* vv, int n, UpLoType uplo, 
       int stepi, int stepj)
 \end{tmvcode}
@@ -180,13 +190,12 @@ upper or lower triangle.  This allows for arbitrary steps through the data.
 \index{SymMatrix!Access methods}
 \label{SymMatrix_Access}
 
-\begin{tmvcode}
-s.resize(int new_size)
-\end{tmvcode}
-\index{SymMatrix!Methods!resize}
+\begin{itemize}
 
+\item
 \begin{tmvcode}
 s.nrows() = s.ncols() = s.colsize() = s.rowsize() = s.size()
+s.resize(int new_size)
 s(i,j)
 s.row(int i, int j1, int j2)
 s.col(int i, int j1, int j2)
@@ -199,11 +208,11 @@ s.diag(int i, int k1, int k2)
 \index{SymMatrix!Methods!rowsize}
 \index{SymMatrix!Methods!colsize}
 \index{SymMatrix!Methods!size}
+\index{SymMatrix!Methods!resize}
 \index{SymMatrix!Methods!operator()}
 \index{SymMatrix!Methods!row}
 \index{SymMatrix!Methods!col}
 \index{SymMatrix!Methods!diag}
-For the mutable \tt{d(i,j)} version, 
 As for triangle matrices, the versions of \tt{row} and \tt{col} with only one argument are
 missing, since the full row or column isn't accessible as a \tt{VectorView}.
 You must specify a valid range within the row or column that you want, 
@@ -216,6 +225,7 @@ s.row(i,0,i) = ...
 s.row(i,i,ncols) = ...
 \end{tmvcode}
 
+\item
 \begin{tmvcode}
 T* s.ptr()
 const T* s.cptr() const
@@ -240,6 +250,7 @@ bool s.iscm() const
 \index{SymMatrix!Methods!iscm}
 These methods allow for direct memory access of a \tt{SymMatrix}.  There are a few new methods here: \tt{issym()} returns whether the \tt{SymMatrix} is symmetric (as opposed to hermitian), \tt{isherm()} returns whether it is hermitian (as opposed to symmetric), and \tt{isupper()} returns whether the the elements actually stored in memory are for the upper triangle (as opposed to the lower triangle).  Note that for a real \tt{SymMatrix} both \tt{issym()} and \tt{isherm()} will return \tt{true}.
 
+\item
 \begin{tmvcode}
 s.subVector(int i, int j, int istep, int jstep, int size)
 s.subMatrix(int i1, int i2, int j1, int j2)
@@ -252,6 +263,7 @@ These work the same as for a \tt{Matrix}
 except that the entire
 subvector or submatrix must be completely within the upper or lower triangle.
 
+\item
 \begin{tmvcode}
 s.subSymMatrix(int i1, int i2, int istep = 1)
 \end{tmvcode}
@@ -261,6 +273,7 @@ corner is \tt{s(i1,i1)}, and whose lower-right corner is
 \tt{s(i2-istep,i2-istep)}.  If \tt{istep} $\neq 1$, then it is the 
 step in both the \tt{i} and \tt{j} directions.
 
+\item
 \begin{tmvcode}
 s.upperTri(DiagType dt=NonUnitDiag)
 s.lowerTri(DiagType dt=NonUnitDiag)
@@ -273,6 +286,8 @@ s.unitLowerTri()
 \index{SymMatrix!Methods!unitLowerTri}
 Both of these are valid, regardless
 of which triangle stores the actual data for \tt{s}.
+
+\item
 \begin{tmvcode}
 s.transpose()
 s.conjugate()
@@ -291,13 +306,16 @@ s.imagPart()
 \index{SymMatrix!Methods!fView}
 \index{SymMatrix!Methods!realPart}
 \index{SymMatrix!Methods!imagPart}
+These return \tt{SymMatrixView}s.
 Note that the imaginary part of a complex hermitian matrix is skew-symmetric,
 so \tt{s.imagPart()} is illegal for a \tt{HermMatrix}.  If you need to
 deal with the imaginary part of a \tt{HermMatrix},
-you would have to view them as a triangle matrix with \tt{s.upperTri().imagPart()}.  Or, 
+you can view them as a triangle matrix with \tt{s.upperTri().imagPart()}
+\footnote{Or, 
 since the diagonal elements are all real.
-you could also use \tt{s.upperTri().offDiag().imagPart()}. 
-\vspace{12pt}
+you could also use \tt{s.upperTri().offDiag().imagPart()}.}.
+
+\end{itemize}
 
 Note that there are no iterators provided for \tt{SymMatrix} or \tt{HermMatrix}.  The recommended way to iterate over their stored values is to use the \tt{upperTri()} or \tt{lowerTri()} methods and iterate over those portions of the matrix directly.
 
@@ -630,7 +648,7 @@ To access this decomposition, use:
 \begin{tmvcode}
 ConstMatrixView<T> s.svd().getU()
 DiagMatrix<RT> s.svd().getS()
-Matrix<T> s.svd().getV()
+Matrix<T> s.svd().getVt()
 \end{tmvcode}
 \index{SymMatrix!Methods!svd}
 \index{SymMatrix!Methods!symsvd}
@@ -638,21 +656,20 @@ Matrix<T> s.svd().getV()
 \index{Singular Value Decomposition!SymMatrix}
 The following should result in a matrix numerically very close to \tt{s}.
 \begin{tmvcode}
-Matrix<T> m2 = s.svd().getU() * s.svd().getS() * s.svd().getV()
+Matrix<T> m2 = s.svd().getU() * s.svd().getS() * s.svd().getVt()
 \end{tmvcode}
 
-For a complex symmetric \tt{s}, the situation is not as convenient.
-In principle, one could find a decomposition $s = USU^T$ where $S$ is 
-a complex diagonal matrix, but such a decomposition is not easy to find. 
+For a complex symmetric \tt{s}, the situation is not as convenient,
+since $V \neq U^\dagger$.
 So for complex symmetric matrices, we
-just do the normal SVD: $s = USV$, although the algorithm
+just do the normal SVD: $s = USV^\dagger$, although the algorithm
 does use the symmetry of the matrix to 
 speed up portions of the algorithm relative that that for a general matrix.
 
 The access is also necessarily different, since the object returned by 
-\tt{s.svd()} implicitly assumes that \tt{V = U.adjoint()} (modulo some sign changes), 
+\tt{s.svd()} implicitly assumes that $V = U$ (modulo some sign changes), 
 so we need a 
-new accessor: \tt{s.symsvd()}.  Its \tt{getS} and \tt{getV} methods return Views
+new accessor: \tt{s.symsvd()}.  Its \tt{getS} and \tt{getVt} methods return Views
 rather than instantiated matrices.
 
 Both versions also have the same control and access routines as a regular SVD

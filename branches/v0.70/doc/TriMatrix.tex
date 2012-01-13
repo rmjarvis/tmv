@@ -22,23 +22,27 @@ as appropriate.
 \index{UpperTriMatrix!UpperTriMatrixComposite}
 \index{BaseMatrix}
 
-In addition to the \tt{T} template parameter, there are three other template 
-parameters:
-\tt{dt}, which can be either \tt{tmv::UnitDiag} or \tt{tmv::NonUnitDiag};
-\tt{stor}, which can be \tt{tmv::RowMajor} or \tt{tmv::ColMajor};
-and \tt{index}, which can be \tt{tmv::CStyle} or \tt{tmv::FortranStyle}.
-The default values for these template parameters are 
-\tt{NonUnitDiag}, \tt{ColMajor}, and \tt{CStyle} respectively.
+In addition to the data type template parameter (indicated here by \tt{T} as usual),
+there is also a second template parameter that specifies attributes of the
+\tt{UpperTriMatrix} or \tt{LowerTriMatrix}.  The attributes that are allowed are:
+\begin{itemize}
+\item \tt{CStyle} or \tt{FortranStyle}
+\item \tt{ColMajor} or \tt{RowMajor}
+\item \tt{NonUnitDiag} or \tt{UnitDiag}
+\end{itemize}
+The final option refers to whether the elements on the diagonal should be 
+taken to be all 1's (\tt{UnitDiag}) rather than what is actually stored 
+in memory (\tt{NonUnitDiag}).
+The default attributes are \tt{CStyle}, \tt{ColMajor} and \tt{NonUnitDiag}.
 
 The storage of both an \tt{UpperTriMatrix} and a \tt{LowerTriMatrix} takes
 $N \times N$ elements of memory, even though approximately half of them 
-are never used.  Someday, I'll write the packed storage versions, which allow for
-efficient storage of the matrices.
+are never used.  Someday, I'll write the packed storage versions, which will
+allow for more efficient storage of the matrices.
 
 All of the routines are analogous for \tt{UpperTriMatrix} and 
 \tt{LowerTriMatrix}, so we only list each routine once 
-(the \tt{UpperTriMatrix} version for
-definiteness).  
+(the \tt{UpperTriMatrix} version for definiteness).  
 
 Most functions and methods for \tt{UpperTriMatrix} and \tt{LowerTriMatrix}
 work the same as they do for \tt{Matrix}.
@@ -53,42 +57,47 @@ we will explain the difference.
 \index{UpperTriMatrix!Constructors}
 \label{TriMatrix_Constructors}
 
+As usual, the optional \tt{A} template argument specifies attributes about
+the \tt{UpperTriMatrix}.  The default attributes if not specified are
+\tt{CStyle}, \tt{ColMajor} and \tt{NonUnitDiag}.
+
 \begin{itemize}
 
 \item
 \begin{tmvcode}
-tmv::UpperTriMatrix<T,dt,stor,index> U()
+tmv::UpperTriMatrix<T,A> U()
 \end{tmvcode}
 Makes an \tt{UpperTriMatrix} with zero size.  You would normally use the \tt{resize} function later to
 change the size to some useful value.
 
 \item 
 \begin{tmvcode}
-tmv::UpperTriMatrix<T,dt,stor,index> U(int n)
+tmv::UpperTriMatrix<T,A> U(int n)
 \end{tmvcode}
-Makes an \tt{n} $\times$ \tt{n} \tt{UpperTriMatrix} with \underline{uninitialized} values.
-If extra debugging is turned on (with \tt{-DTMV\_EXTRA\_DEBUG}), then the values are in fact initialized to 888.  
+Makes an \tt{n} $\times$ \tt{n} \tt{UpperTriMatrix} with {\em uninitialized} values.
+If extra debugging is turned on (with the compiler flag \tt{-DTMV\_EXTRA\_DEBUG}), then the values are in fact initialized to 888.  
 
 \item
 \begin{tmvcode}
-tmv::UpperTriMatrix<T,dt,stor,index> U(int n, T x)
+tmv::UpperTriMatrix<T,A> U(int n, T x)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{UpperTriMatrix} with all values equal to \tt{x}.
 
 \item 
 \begin{tmvcode}
-tmv::UpperTriMatrix<T,dt,stor,index> U(const GenMatrix<T>& m)
-tmv::UpperTriMatrix<T,dt,stor,index> U(const GenUperTriMatrix<T>& U2)
+tmv::UpperTriMatrix<T,A> U(const GenMatrix<T>& m)
+tmv::UpperTriMatrix<T,A> U(const GenUperTriMatrix<T>& U2)
 \end{tmvcode}
 Make an \tt{UpperTriMatrix} which copies the corresponding values of
-\tt{U2}.  Note that the second one is allowed to have \tt{U2} be
-\tt{NonUnitDiag} but \tt{dt = UnitDiag}, in which case only the 
-off-diagonal elements are copied.  The converse would set the 
-diagonal of the new \tt{UpperTriMatrix} to all 1's.
+\tt{U2}.  Note that the second allows the attributes to be different.
+Specifically, \tt{U2} can be \tt{NonUnitDiag} and \tt{U} can be \tt{UnitDiag},
+in which case, it will only copy the off-diagonal values, and take
+the diagonal values to be all 1's.  Going the other way from \tt{UnitDiag}
+to \tt{NonUnitDiag} will put actual 1's into memory along the diagonal.
 
 \item
 \begin{tmvcode}
-tmv::UpperTriMatrix<T,dt,stor,index> U1(const GenUpperTriMatrix<T2>& U2)
+tmv::UpperTriMatrix<T,A> U1(const GenUpperTriMatrix<T2>& U2)
 U1 = U2
 \end{tmvcode}
 Copy the \tt{UpperTriMatrix U2}, which may be of any type \tt{T2} so long
@@ -98,12 +107,12 @@ The assignment operator has the same flexibility.
 \vspace{1 in}
 \item
 \begin{tmvcode}
-tmv::UpperTriMatrix<T,dt,stor,index> U;
+tmv::UpperTriMatrix<T,A> U;
 U << U00, U01, U02, ...
           U11, U12, ...
                U22, ...
                     ...
-tmv::LowerTriMatrix<T,dt,stor,index> L;
+tmv::LowerTriMatrix<T,A> L;
 L << L00,
      L10, L11, 
      L20, L21, L22,
@@ -111,20 +120,20 @@ L << L00,
 \end{tmvcode}
 Initialize the \tt{UpperTriMatrix U} and \tt{LowerTriMatrix L} with lists of values.  As usual, the 
 list elements should be listed in RowMajor order, and only the values that are in the upper or
-lower triangle should be given.  If \tt{dt} is \tt{UnitDiag}, then the diagonal elements should be 
+lower triangle should be given.  If \tt{U} or \tt{L} is \tt{UnitDiag}, then the diagonal elements should be 
 listed as 1's.
 \item
 \begin{tmvcode}
-tmv::UpperTriMatrixView<T,index> U = 
+tmv::UpperTriMatrixView<T,A> U = 
       tmv::UpperTriMatrixViewOf(T* vv, int n, 
       StorageType stor, DiagType dt=NonUnitDiag)
-tmv::ConstUpperTriMatrixView<T,index> U = 
+tmv::ConstUpperTriMatrixView<T,A> U = 
       tmv::UpperTriMatrixViewOf(const T* vv, int n, 
       StorageType stor, DiagType dt=NonUnitDiag)
-tmv::UpperTriMatrixView<T,index> U = 
+tmv::UpperTriMatrixView<T,A> U = 
       tmv::UnitUpperTriMatrixViewOf(T* vv, int n, 
       StorageType stor)
-tmv::UpperTriMatrixView<T,index> U = 
+tmv::UpperTriMatrixView<T,A> U = 
       tmv::UnitUpperTriMatrixViewOf(T* vv, int n, 
       StorageType stor)
 \end{tmvcode}
@@ -145,16 +154,16 @@ in some cases.
 
 \item
 \begin{tmvcode}
-tmv::UpperTriMatrixView<T,index> U = 
+tmv::UpperTriMatrixView<T,A> U = 
       tmv::UpperTriMatrixViewOf(T* vv, int n, 
       int stepi, int stepj, DiagType dt=NonUnitDiag)
-tmv::ConstUpperTriMatrixView<T,index> U = 
+tmv::ConstUpperTriMatrixView<T,A> U = 
       tmv::UpperTriMatrixViewOf(const T* vv, int n, 
       int stepi, int stepj, DiagType dt=NonUnitDiag)
-tmv::UpperTriMatrixView<T,index> U = 
+tmv::UpperTriMatrixView<T,A> U = 
       tmv::UnitUpperTriMatrixViewOf(T* vv, int n, 
       int stepi, int stepj)
-tmv::ConstUpperTriMatrixView<T,index> U = 
+tmv::ConstUpperTriMatrixView<T,A> U = 
       tmv::UnitUpperTriMatrixViewOf(const T* vv, int n, 
       int stepi, int stepj)
 \end{tmvcode}
@@ -168,13 +177,12 @@ the $i$ and $j$ directions.
 \index{UpperTriMatrix!Access methods}
 \label{TriMatrix_Access}
 
-\begin{tmvcode}
-U.resize(int newsize)
-\end{tmvcode}
-\index{UpperTriMatrix!Methods!resize}
+\begin{itemize}
 
+\item
 \begin{tmvcode}
 U.nrows() = U.ncols() = U.colsize() = U.rowsize() = U.size()
+U.resize(int newsize)
 U(i,j)
 U.row(int i, int j1, int j2)
 U.col(int i, int j1, int j2)
@@ -187,31 +195,38 @@ U.diag(int i, int k1, int k2)
 \index{UpperTriMatrix!Methods!rowsize}
 \index{UpperTriMatrix!Methods!colsize}
 \index{UpperTriMatrix!Methods!size}
+\index{UpperTriMatrix!Methods!resize}
 \index{UpperTriMatrix!Methods!operator()}
 \index{UpperTriMatrix!Methods!row}
 \index{UpperTriMatrix!Methods!col}
 \index{UpperTriMatrix!Methods!diag}
-For the mutable \tt{d(i,j)} version, 
+For the mutable \tt{U(i,j)} version, the position must fall within the
+upper triangle.  If \tt{U} is not mutable, then \tt{U(i,j)} return 0 for
+positions in the lower triangle.
 Note that the versions of \tt{row} and \tt{col} with only one argument are
 missing, since the full row or column isn't accessible as a \tt{VectorView}.
 You must specify a valid range within the row or column that you want, 
 given the upper triangle shape of \tt{U}.  Likewise for the \tt{LowerTriMatrix}
 versions of these.
-If \tt{dt} is \tt{UnitDiag}, then the range may not include the diagonal element.
-Similarly, \tt{U.diag()} is valid only if \tt{dt} is \tt{NonUnitDiag}.
+If \tt{U} is \tt{UnitDiag}, then the range may not include the diagonal element.
+Similarly, \tt{U.diag()} is valid only if \tt{U} is \tt{NonUnitDiag}.
+\tt{U(i,j)} does work if \tt{U} is \tt{UnitDiag}, but assigning anything
+other than \tt{1} is an error.
 
+\item
 \begin{tmvcode}
-typename tmv::UpperTriMatrix<T>::rowmajor_iterator U.rowmajor_begin()
-typename tmv::UpperTriMatrix<T>::rowmajor_iterator U.rowmajor_end()
-typename tmv::UpperTriMatrix<T>::const_rowmajor_iterator U.rowmajor_begin() const
-typename tmv::UpperTriMatrix<T>::const_rowmajor_iterator U.rowmajor_end() const
-typename tmv::UpperTriMatrix<T>::colmajor_iterator U.colmajor_begin()
-typename tmv::UpperTriMatrix<T>::colmajor_iterator U.colmajor_end()
-typename tmv::UpperTriMatrix<T>::const_colmajor_iterator U.colmajor_begin() const
-typename tmv::UpperTriMatrix<T>::const_colmajor_iterator U.colmajor_end() const
+UpperTriMatrix<T>::rowmajor_iterator U.rowmajor_begin()
+UpperTriMatrix<T>::rowmajor_iterator U.rowmajor_end()
+UpperTriMatrix<T>::const_rowmajor_iterator U.rowmajor_begin() const
+UpperTriMatrix<T>::const_rowmajor_iterator U.rowmajor_end() const
+UpperTriMatrix<T>::colmajor_iterator U.colmajor_begin()
+UpperTriMatrix<T>::colmajor_iterator U.colmajor_end()
+UpperTriMatrix<T>::const_colmajor_iterator U.colmajor_begin() const
+UpperTriMatrix<T>::const_colmajor_iterator U.colmajor_end() const
 \end{tmvcode}
 These iterators only traverse the elements that are actually stored in memory. So for an UpperTriMatrix, the iteration skips all the elements the the strict lower triangle.
 
+\item
 \begin{tmvcode}
 T* U.ptr()
 const T* U.cptr() const
@@ -230,6 +245,7 @@ bool U.iscm() const
 \index{UpperTriMatrix!Methods!iscm}
 These methods allow for direct memory access of an \tt{UpperTriMatrix} or \tt{LowerTriMatrix}.
 
+\item
 \begin{tmvcode}
 U.subVector(int i, int j, int istep, int jstep, int size)
 U.subMatrix(int i1, int i2, int j1, int j2)
@@ -241,9 +257,10 @@ This works the same as for \tt{Matrix}
 (See \ref{Matrix_Access}),
 except that all of the elements in the 
 subvector or submatrix must be completely within the upper or lower triangle, as
-appropriate.  If \tt{dt} is \tt{UnitDiag}, then no elements may be on the 
+appropriate.  If \tt{U} is \tt{UnitDiag}, then no elements may be on the 
 main diagonal.
 
+\item
 \begin{tmvcode}
 U.subTriMatrix(int i1, int i2, int istep = 1)
 \end{tmvcode}
@@ -254,6 +271,7 @@ corner is \tt{U(i1,i1)}, and whose lower-right corner is
 for Fortran-style indexing.  If \tt{istep} $\neq 1$, then it is the 
 step in both the \tt{i} and \tt{j} directions.
 
+\item
 \begin{tmvcode}
 U.offDiag()
 \end{tmvcode}
@@ -263,6 +281,7 @@ the diagonal elements.  It will always be \tt{NonUnitDiag}.
 Internally, it provides an easy way to deal with the \tt{UnitDiag} triangle matrices
 for many routines.  But it may be useful for some users as well.
 
+\item
 \begin{tmvcode}
 U.viewAsUnitDiag()
 \end{tmvcode}
@@ -270,6 +289,7 @@ U.viewAsUnitDiag()
 This returns a view to a \tt{NonUnitDiag} triangle matrix that treats it
 instead as a \tt{UnitDiag} triangle matrix.
 
+\item
 \begin{tmvcode}
 U.transpose()
 U.conjugate()
@@ -289,8 +309,10 @@ U.imagPart()
 \index{UpperTriMatrix!Methods!realPart}
 \index{UpperTriMatrix!Methods!imagPart}
 Note that the transpose and adjoint of an \tt{UpperTriMatrix} is an
-\tt{LowerTriMatrixView} and vice versa.
-\vspace{12pt}
+\tt{LowerTriMatrixView} and vice versa.  Otherwise, these all return
+\tt{UpperTriMatrixView}s.
+
+\end{itemize}
 
 \subsection{Functions}
 \index{UpperTriMatrix!Functions of}

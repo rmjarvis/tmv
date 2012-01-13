@@ -67,7 +67,7 @@ namespace tmv {
 
             if (unit) {
                 while (n && !TMV_Aligned(A.get()) ) {
-                    *A = one / *A;
+                    *A = ZProd<false,false>::quot(one , *A);
                     ++A; --n;
                 }
             }
@@ -88,7 +88,7 @@ namespace tmv {
                 } while (--n_2);
             }
 
-            if (nb) *A = one / *A;
+            if (nb) *A = ZProd<false,false>::quot(one , *A);
         }
     };
 
@@ -157,7 +157,7 @@ namespace tmv {
 
             if (unit) {
                 while (n && !TMV_Aligned(A.get()) ) {
-                    *A = one / *A;
+                    *A = ZProd<false,false>::quot(one , *A);
                     ++A; --n;
                 }
             }
@@ -182,7 +182,9 @@ namespace tmv {
                 } while (--n_4);
             }
 
-            if (nb) do { *A = one / *A; ++A; } while (--nb);
+            if (nb) do {
+                *A = ZProd<false,false>::quot(one , *A); ++A; 
+            } while (--nb);
         }
     };
 

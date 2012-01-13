@@ -155,22 +155,22 @@ namespace tmv {
     template <class T> 
     inline const BandMatrixView<T>& operator/=(
         const BandMatrixView<T>& m, T x) 
-    { MultXM(TMV_RealType(T)(1)/x,m); return m; }
+    { MultXM(TMV_InverseOf(x),m); return m; }
 
     template <class T> 
     inline const BandMatrixView<CT>& operator/=(
         const BandMatrixView<CT>& m, T x) 
-    { MultXM(T(1)/x,m); return m; }
+    { MultXM(TMV_InverseOf(x),m); return m; }
 
     template <class T> 
     inline const BandMatrixView<CT>& operator/=(
         const BandMatrixView<CT>& m, CCT x) 
-    { MultXM(T(1)/CT(x),m); return m; }
+    { MultXM(TMV_InverseOf(CT(x)),m); return m; }
 
     template <class T> 
     inline const BandMatrixView<CT>& operator/=(
         const BandMatrixView<CT>& m, VCT x) 
-    { MultXM(T(1)/CT(x),m); return m; }
+    { MultXM(TMV_InverseOf(CT(x)),m); return m; }
 
 #define GENMATRIX GenBandMatrix
 #define PRODXM ProdXB

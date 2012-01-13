@@ -309,41 +309,41 @@ void TestBandDecomp()
             }
             tmv::Matrix<T> U = m.svd().getU();
             tmv::DiagMatrix<T> S = m.svd().getS();
-            tmv::Matrix<T> V = m.svd().getV();
+            tmv::Matrix<T> Vt = m.svd().getVt();
             if (showacc) {
                 std::cout<<"U = "<<U<<std::endl;
-                std::cout<<"V = "<<V<<std::endl;
+                std::cout<<"Vt = "<<Vt<<std::endl;
                 std::cout<<"S = "<<S<<std::endl;
-                std::cout<<"m-USV = "<<m-U*S*V<<std::endl;
-                std::cout<<"Norm(m-USV) = "<<Norm(m-U*S*V)<<
+                std::cout<<"m-USVt = "<<m-U*S*Vt<<std::endl;
+                std::cout<<"Norm(m-USVt) = "<<Norm(m-U*S*Vt)<<
                     "  cf "<<eps*normm<<std::endl;
                 std::cout<<"Norm(UtU-1) = "<<Norm(U.transpose()*U-T(1))<<
                     "  cf "<<eps<<std::endl;
-                std::cout<<"Norm(VtV-1) = "<<Norm(V.transpose()*V-T(1))<<
+                std::cout<<"Norm(VVt-1) = "<<Norm(Vt.transpose()*Vt-T(1))<<
                     "  cf "<<eps<<std::endl;
-                std::cout<<"Norm(VVt-1) = "<<Norm(V*V.transpose()-T(1))<<
+                std::cout<<"Norm(VtV-1) = "<<Norm(Vt*Vt.transpose()-T(1))<<
                     "  cf "<<eps<<std::endl;
             }
-            Assert(Norm(m-U*S*V) <= eps*normm,"SV");
+            Assert(Norm(m-U*S*Vt) <= eps*normm,"SV");
 
             tmv::Matrix<CT> cU = c.svd().getU();
             tmv::DiagMatrix<T> cS = c.svd().getS();
-            tmv::Matrix<CT> cV = c.svd().getV();
+            tmv::Matrix<CT> cVt = c.svd().getVt();
             if (showacc) {
                 std::cout<<"cU = "<<cU<<std::endl;
-                std::cout<<"cV = "<<cV<<std::endl;
+                std::cout<<"cVt = "<<cVt<<std::endl;
                 std::cout<<"cS = "<<cS<<std::endl;
-                std::cout<<"c-cUcScV = "<<c-cU*cS*cV<<std::endl;
-                std::cout<<"Norm(c-cUcScV) = "<<Norm(c-cU*cS*cV)<<
+                std::cout<<"c-cUcScVt = "<<c-cU*cS*cVt<<std::endl;
+                std::cout<<"Norm(c-cUcScVt) = "<<Norm(c-cU*cS*cVt)<<
                     "  cf "<<eps*normm<<std::endl;
                 std::cout<<"Norm(cUtcU-1) = "<<Norm(cU.adjoint()*cU-T(1))<<
                     "  cf "<<eps<<std::endl;
-                std::cout<<"Norm(cVtcV-1) = "<<Norm(cV.adjoint()*cV-T(1))<<
+                std::cout<<"Norm(cVcVt-1) = "<<Norm(cVt.adjoint()*cVt-T(1))<<
                     "  cf "<<eps<<std::endl;
-                std::cout<<"Norm(cVcVt-1) = "<<Norm(cV*cV.adjoint()-T(1))<<
+                std::cout<<"Norm(cVtcV-1) = "<<Norm(cVt*cVt.adjoint()-T(1))<<
                     "  cf "<<eps<<std::endl;
             }
-            Assert(Norm(c-cU*cS*cV) <= ceps*normc,"C SV");
+            Assert(Norm(c-cU*cS*cVt) <= ceps*normc,"C SV");
 
 #if (XTEST & 16)
             const T x = 
@@ -352,9 +352,9 @@ void TestBandDecomp()
 
             tmv::Matrix<T> U2(M,N);
             tmv::DiagMatrix<T> S2(N);
-            tmv::Matrix<T> V2(N,N);
-            SV_Decompose(m,U2.view(),S2.view(),V2.view());
-            Assert(Norm(m-U2*S2*V2) <= eps*normm,"SV2");
+            tmv::Matrix<T> Vt2(N,N);
+            SV_Decompose(m,U2.view(),S2.view(),Vt2.view());
+            Assert(Norm(m-U2*S2*Vt2) <= eps*normm,"SV2");
 
             SV_Decompose(m,S2.view());
             if (showacc) {
@@ -370,17 +370,17 @@ void TestBandDecomp()
             Assert(Norm(tmv::Matrix<T>(m/x)*tmv::Matrix<T>(m.transpose()/x)-
                         U2*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*U2.transpose()) <= 
                    eps*(normm/x)*(normm/x),"SV3 U");
-            SV_Decompose(m,S2.view(),V2.view());
+            SV_Decompose(m,S2.view(),Vt2.view());
             Assert(Norm(S2-S) <= eps*normm,"SV5 S");
             Assert(Norm(tmv::Matrix<T>(m.transpose()/x)*tmv::Matrix<T>(m/x)-
-                        V2.transpose()*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*V2) <= 
-                   eps*(normm/x)*(normm/x),"SV5 V");
+                        Vt2.transpose()*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*Vt2) <= 
+                   eps*(normm/x)*(normm/x),"SV5 Vt");
 
             tmv::Matrix<CT> cU2(M,N);
             tmv::DiagMatrix<T> cS2(N);
-            tmv::Matrix<CT> cV2(N,N);
-            SV_Decompose(c,cU2.view(),cS2.view(),cV2.view());
-            Assert(Norm(c-cU2*cS2*cV2) <= eps*normc,"C SV2");
+            tmv::Matrix<CT> cVt2(N,N);
+            SV_Decompose(c,cU2.view(),cS2.view(),cVt2.view());
+            Assert(Norm(c-cU2*cS2*cVt2) <= eps*normc,"C SV2");
 
             SV_Decompose(c,cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV3");
@@ -389,18 +389,18 @@ void TestBandDecomp()
             Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
                         cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <= 
                    ceps*(normc/x)*(normc/x),"C SV4 U");
-            SV_Decompose(c,cS2.view(),cV2.view());
+            SV_Decompose(c,cS2.view(),cVt2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV5 S");
             Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
-                        cV2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cV2) <= 
-                   ceps*(normc/x)*(normc/x),"C SV5 V");
+                        cVt2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cVt2) <= 
+                   ceps*(normc/x)*(normc/x),"C SV5 Vt");
 
-            SV_Decompose(c,cU2.conjugate(),cS2.view(),cV2.view());
-            Assert(Norm(c-cU2.conjugate()*cS2*cV2) <= eps*normc,"C SV6");
-            SV_Decompose(c,cU2.view(),cS2.view(),cV2.conjugate());
-            Assert(Norm(c-cU2*cS2*cV2.conjugate()) <= eps*normc,"C SV7");
-            SV_Decompose(c,cU2.conjugate(),cS2.view(),cV2.conjugate());
-            Assert(Norm(c-cU2.conjugate()*cS2*cV2.conjugate()) <= eps*normc,
+            SV_Decompose(c,cU2.conjugate(),cS2.view(),cVt2.view());
+            Assert(Norm(c-cU2.conjugate()*cS2*cVt2) <= eps*normc,"C SV6");
+            SV_Decompose(c,cU2.view(),cS2.view(),cVt2.conjugate());
+            Assert(Norm(c-cU2*cS2*cVt2.conjugate()) <= eps*normc,"C SV7");
+            SV_Decompose(c,cU2.conjugate(),cS2.view(),cVt2.conjugate());
+            Assert(Norm(c-cU2.conjugate()*cS2*cVt2.conjugate()) <= eps*normc,
                    "C SV8");
 
             SV_Decompose(c,cU2.view(),cS2.view());
@@ -408,14 +408,14 @@ void TestBandDecomp()
             Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
                         cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <= 
                    ceps*(normc/x)*(normc/x),"C SV9 U");
-            SV_Decompose(c,cS2.view(),cV2.view());
+            SV_Decompose(c,cS2.view(),cVt2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV10 S");
             Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
-                        cV2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cV2) <= 
-                   ceps*(normc/x)*(normc/x),"C SV10 V");
+                        cVt2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cVt2) <= 
+                   ceps*(normc/x)*(normc/x),"C SV10 Vt");
 
-            SV_Decompose(c.conjugate(),cU2.view(),cS2.view(),cV2.view());
-            Assert(Norm(c.conjugate()-cU2*cS2*cV2) <= eps*normc,"C SV11");
+            SV_Decompose(c.conjugate(),cU2.view(),cS2.view(),cVt2.view());
+            Assert(Norm(c.conjugate()-cU2*cS2*cVt2) <= eps*normc,"C SV11");
             SV_Decompose(c.conjugate(),cS2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV12");
             SV_Decompose(c.conjugate(),cU2.view(),cS2.view());
@@ -423,21 +423,21 @@ void TestBandDecomp()
             Assert(Norm(tmv::Matrix<CT>(c.conjugate()/x)*tmv::Matrix<CT>(c.transpose()/x)-
                         cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <=
                    ceps*(normc/x)*(normc/x),"C SV13 U");
-            SV_Decompose(c.conjugate(),cS2.view(),cV2.view());
+            SV_Decompose(c.conjugate(),cS2.view(),cVt2.view());
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV14 S");
             Assert(Norm(tmv::Matrix<CT>(c.transpose()/x)*tmv::Matrix<CT>(c.conjugate()/x)-
-                        cV2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cV2) <=
-                   ceps*(normc/x)*(normc/x),"C SV14 V");
+                        cVt2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cVt2) <=
+                   ceps*(normc/x)*(normc/x),"C SV14 Vt");
 
-            SV_Decompose(c.conjugate(),cU2.conjugate(),cS2.view(),cV2.view());
-            Assert(Norm(c.conjugate()-cU2.conjugate()*cS2*cV2) <= eps*normc,
+            SV_Decompose(c.conjugate(),cU2.conjugate(),cS2.view(),cVt2.view());
+            Assert(Norm(c.conjugate()-cU2.conjugate()*cS2*cVt2) <= eps*normc,
                    "C SV15");
-            SV_Decompose(c.conjugate(),cU2.view(),cS2.view(),cV2.conjugate());
-            Assert(Norm(c.conjugate()-cU2*cS2*cV2.conjugate()) <= eps*normc,
+            SV_Decompose(c.conjugate(),cU2.view(),cS2.view(),cVt2.conjugate());
+            Assert(Norm(c.conjugate()-cU2*cS2*cVt2.conjugate()) <= eps*normc,
                    "C SV16");
             SV_Decompose(c.conjugate(),cU2.conjugate(),cS2.view(),
-                         cV2.conjugate());
-            Assert(Norm(c.conjugate()-cU2.conjugate()*cS2*cV2.conjugate()) <= 
+                         cVt2.conjugate());
+            Assert(Norm(c.conjugate()-cU2.conjugate()*cS2*cVt2.conjugate()) <= 
                    eps*normc,"C SV17");
 
             SV_Decompose(c.conjugate(),cU2.conjugate(),cS2.view());
@@ -445,11 +445,11 @@ void TestBandDecomp()
             Assert(Norm(tmv::Matrix<CT>(c.conjugate()/x)*tmv::Matrix<CT>(c.transpose()/x)-
                         cU2.conjugate()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.transpose()) <=
                    ceps*(normc/x)*(normc/x),"C SV18 U");
-            SV_Decompose(c.conjugate(),cS2.view(),cV2.conjugate());
+            SV_Decompose(c.conjugate(),cS2.view(),cVt2.conjugate());
             Assert(Norm(cS2-cS) <= ceps*normc,"C SV19 S");
             Assert(Norm(tmv::Matrix<CT>(c.transpose()/x)*tmv::Matrix<CT>(c.conjugate()/x)-
-                        cV2.transpose()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cV2.conjugate()) <=
-                   ceps*(normc/x)*(normc/x),"C SV19 V");
+                        cVt2.transpose()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cVt2.conjugate()) <=
+                   ceps*(normc/x)*(normc/x),"C SV19 Vt");
 #endif
             std::cout<<"."; std::cout.flush();
         } while (false);

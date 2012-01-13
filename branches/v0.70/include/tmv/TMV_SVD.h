@@ -39,19 +39,19 @@
 
 namespace tmv {
 
-    // Decompose A (input as U) into A = U S V
-    // where U is column-unitary, S is diagonal, and V is unitary.
+    // Decompose A (input as U) into A = U S Vt
+    // where U is column-unitary, S is diagonal, and Vt is unitary.
     // U must have U.nrows() >= U.ncols().
     // S must have S.size() == U.ncols().
-    // V must have V.nrows() == V.ncols() == U.ncols().
+    // Vt must have Vt.nrows() == Vt.ncols() == U.ncols().
     // If StoreU is false, then U will be junk on output.
     template <class T> 
     void SV_Decompose(
         const MatrixView<T>& U,
         const DiagMatrixView<TMV_RealType(T)>& S, 
-        const MatrixView<T>& V, bool StoreU=true);
+        const MatrixView<T>& Vt, bool StoreU=true);
 
-    // The same, but don't return V:
+    // The same, but don't return Vt:
     template <class T> 
     void SV_Decompose(
         const MatrixView<T>& U,
@@ -112,7 +112,7 @@ namespace tmv {
 
         ConstMatrixView<T> getU() const;
         ConstDiagMatrixView<TMV_RealType(T)> getS() const;
-        ConstMatrixView<T> getV() const;
+        ConstMatrixView<T> getVt() const;
 
         bool checkDecomp(const BaseMatrix<T>& m, std::ostream* fout) const;
 

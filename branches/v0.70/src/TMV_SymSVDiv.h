@@ -58,10 +58,10 @@ namespace tmv {
     template <class T> 
     void SymSV_Decompose(
         const MatrixView<T>& U,
-        const DiagMatrixView<RT>& S, MVP<T> V, RT& logdet, T& signdet);
+        const DiagMatrixView<RT>& S, MVP<T> Vt, RT& logdet, T& signdet);
     template <class T> 
     void SV_Decompose(
-        const SymMatrixView<T>& A, const DiagMatrixView<RT>& S, MVP<T> V);
+        const SymMatrixView<T>& A, const DiagMatrixView<RT>& S, MVP<T> Vt);
 
     template <class T, class T1> 
     void HermSV_Inverse(
@@ -70,7 +70,7 @@ namespace tmv {
     template <class T, class T1> 
     void SymSV_Inverse(
         const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S,
-        const GenMatrix<T1>& V, int kmax, const SymMatrixView<T>& sinv);
+        const GenMatrix<T1>& Vt, int kmax, const SymMatrixView<T>& sinv);
 
     template <class T> 
     void HermTridiagonalChopSmallElements(
@@ -114,14 +114,14 @@ namespace tmv {
     template <class T, class T1> 
     inline void CallSymSV_Inverse(
         T , const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S,
-        const GenMatrix<T1>& V, int kmax, const SymMatrixView<T>& sinv)
-    { SymSV_Inverse(U,S,V,kmax,sinv); }
+        const GenMatrix<T1>& Vt, int kmax, const SymMatrixView<T>& sinv)
+    { SymSV_Inverse(U,S,Vt,kmax,sinv); }
 
     template <class T, class T1> 
     inline void CallSymSV_Inverse(
         T , const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S,
-        const GenMatrix<T1>& V, int kmax, const SymMatrixView<CT>& sinv)
-    { SymSV_Inverse(U,S,V,kmax,sinv); }
+        const GenMatrix<T1>& Vt, int kmax, const SymMatrixView<CT>& sinv)
+    { SymSV_Inverse(U,S,Vt,kmax,sinv); }
 
     // Specialize disallowed complex combinations:
     template <class T>

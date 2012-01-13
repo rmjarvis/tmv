@@ -49,563 +49,10 @@
 
 namespace tmv {
 
-    // Start with real version so Conj isn't an issue.
-    // Specialize for complex below.
-    template <class T> class VIter
-    {
-    public :
-
-        VIter() : p(0), s(0) TMV_DEFFIRSTLAST(0,0) {}
-        VIter(T* inp, int instep, ConjType 
-              TMV_DEBUGPARAM(inc) TMV_PARAMFIRSTLAST(T) ) : 
-            p(inp), s(instep) TMV_DEFFIRSTLAST(_first,_last) 
-        { TMVAssert(inc==NonConj); }
-        VIter(const VIter<T>& rhs) : 
-            p(rhs.p), s(rhs.s) TMV_DEFFIRSTLAST(rhs._first,rhs._last) {}
-        VIter<T>& operator=(const VIter<T>& rhs) 
-        { 
-            TMVAssert(s == rhs.s);
-            p=rhs.p; 
-            TMV_SETFIRSTLAST(rhs._first,rhs._last);
-            return *this; 
-        }
-        ~VIter() {}
-
-        T* getP() const { return p; }
-        int step() const { return s; }
-        ConjType getC() const { return NonConj; }
-
-        inline bool operator==(const VIter<T>& rhs) const 
-        { return p == rhs.p; }
-        inline bool operator!=(const VIter<T>& rhs) const 
-        { return p != rhs.p; }
-        inline bool operator<(const VIter<T>& rhs) const 
-        { return (s > 0 ? p < rhs.p : p > rhs.p); }
-
-        inline T& operator*() const
-        { 
-#ifdef TMVFLDEBUG
-            if (!(p>=_first && p<_last)) {
-                std::cerr<<"p = "<<p<<std::endl;
-                std::cerr<<"first,last = "<<_first<<"  "<<_last<<std::endl;
-            }
-            TMVAssert(p>=_first);
-            TMVAssert(p<_last);
-#endif
-            return *p; 
-        }
-
-        inline VIter<T>& operator++() { p += s; return *this; }
-        inline VIter<T>& operator--() { p -= s; return *this; }
-        inline VIter<T> operator++(int) 
-        { VIter<T> p2 = *this; p+=s; return p2; }
-        inline VIter<T> operator--(int) 
-        { VIter<T> p2 = *this; p-=s; return p2; }
-
-        inline VIter<T>& operator+=(int n) { p += n*s; return *this; }
-        inline VIter<T>& operator-=(int n) { p -= n*s; return *this; }
-        inline VIter<T> operator+(int n) const 
-        { return VIter<T>(p+n*s,s,NonConj TMV_FIRSTLAST ); }
-        inline VIter<T> operator-(int n) const 
-        { return VIter<T>(p-n*s,s,NonConj TMV_FIRSTLAST ); }
-
-        inline ptrdiff_t operator-(const VIter<T>& rhs) const 
-        { return (p-rhs.p)/s; }
-
-        inline T& operator[](int n) const
-        {
-#ifdef TMVFLDEBUG
-            T* pn = p+n*s;
-            if (!(p>=_first && p<_last)) {
-                std::cerr<<"p = "<<p<<std::endl;
-                std::cerr<<"first,last = "<<_first<<"  "<<_last<<std::endl;
-            }
-            TMVAssert(pn >= _first);
-            TMVAssert(pn < _last);
-            return *pn; 
-#else
-            return *(p+n*s); 
-#endif
-        }
-
-        typedef std::random_access_iterator_tag iterator_category;
-        typedef T                               value_type;
-        typedef ptrdiff_t                       difference_type;
-        typedef T*                              pointer;
-        typedef T&                              reference;
-
-    private :
-
-        T* p;
-        const int s;
-
-#ifdef TMVFLDEBUG
-    public :
-        const T* _first;
-        const T* _last;
-#endif
-
-    };
-
-    template <class T> class CVIter
-    { 
-    public :
-
-        CVIter() : p(0), s(0) {}
-        CVIter(const T* inp, int instep, ConjType TMV_DEBUGPARAM(inc)) : 
-            p(inp), s(instep) 
-        { TMVAssert(inc==NonConj); }
-        CVIter(const CVIter<T>& rhs) : p(rhs.p), s(rhs.s) {}
-        CVIter(const VIter<T>& rhs) : p(rhs.getP()), s(rhs.step()) {}
-        CVIter<T>& operator=(const CVIter<T>& rhs) 
-        { 
-            TMVAssert(s == rhs.s);
-            p=rhs.p; 
-            return *this; 
-        }
-        ~CVIter() {}
-
-        const T* getP() const { return p; }
-        int step() const { return s; }
-        ConjType getC() const { return NonConj; }
-
-        inline bool operator==(const CVIter<T>& rhs) const 
-        { return p == rhs.p; }
-        inline bool operator!=(const CVIter<T>& rhs) const 
-        { return p != rhs.p; }
-        inline bool operator<(const CVIter<T>& rhs) const 
-        { return (s > 0 ? p < rhs.p : p > rhs.p); }
-
-        inline T operator*() const { return *p; }
-
-        inline CVIter<T>& operator++() { p += s; return *this; }
-        inline CVIter<T>& operator--() { p -= s; return *this; }
-        inline CVIter<T> operator++(int) 
-        { CVIter<T> p2 = *this; p+=s; return p2; }
-        inline CVIter<T> operator--(int) 
-        { CVIter<T> p2 = *this; p-=s; return p2; }
-
-        inline CVIter<T>& operator+=(int n) { p += n*s; return *this; }
-        inline CVIter<T>& operator-=(int n) { p -= n*s; return *this; }
-        inline CVIter<T> operator+(int n) const 
-        { return CVIter<T>(p+n*s,s,NonConj); }
-        inline CVIter<T> operator-(int n) const 
-        { return CVIter<T>(p-n*s,s,NonConj); }
-
-        inline ptrdiff_t operator-(const CVIter<T>& rhs) const 
-        { return (p-rhs.p)/s; }
-
-        inline T operator[](int n) const { return *(p+n*s); }
-
-        typedef std::random_access_iterator_tag iterator_category;
-        typedef T                               value_type;
-        typedef ptrdiff_t                       difference_type;
-        typedef const T*                        pointer;
-        typedef const T&                        reference;
-
-    private :
-
-        const T* p;
-        const int s;
-
-    };
-
-    // These (C)VIt, rather than (C)VIter have the StepType and 
-    // ConjType specified as templates.  When these can be known,
-    // it is faster to let the compiler know which variety
-    // of iterator you are dealing with.  
-    // For example, if the step is 1, p++ is much faster than p+=s
-    // (where s==1), so the S=Unit iterator does this.
-    // Likewise when you know you do not have a Conjugate iterator, 
-    // you can specify NonConj for the ConjType and it doesn't have
-    // to deal with the complications of the VarConjRef type.
-
-    // The general template specification is really that of
-    // T = real, S = Unit, C = irrelevant
-    // T = complex and S = Step are specialized below.
-    template <class T, StepType S, ConjType C> class VIt 
-    { 
-    public :
-
-        VIt() : p(0) TMV_DEFFIRSTLAST(0,0) {}
-
-        VIt(T* inp, int TMV_DEBUGPARAM(step) TMV_PARAMFIRSTLAST(T) ) : 
-            p(inp) TMV_DEFFIRSTLAST(_first,_last)
-        { TMVAssert(step==1); }
-
-        VIt(const VIt<T,S,C>& rhs) : 
-            p(rhs.p)  TMV_DEFFIRSTLAST(rhs._first,rhs._last) {}
-
-        VIt(const VIter<T>& rhs) : 
-            p(rhs.getP())  TMV_DEFFIRSTLAST(rhs._first,rhs._last) 
-        { TMVAssert(rhs.step()==1); }
-
-        template <StepType S2> VIt(const VIt<T,S2,C>& rhs) : 
-            p(rhs.getP())  TMV_DEFFIRSTLAST(rhs._first,rhs._last) 
-        { TMVAssert(rhs.step()==1); }
-
-        VIt<T,S,C>& operator=(const VIt<T,S,C>& rhs) 
-        { 
-            p=rhs.p; 
-            TMV_SETFIRSTLAST(rhs._first,rhs._last);
-            return *this; 
-        }
-
-        VIt<T,S,C>& operator=(const VIter<T>& rhs) 
-        { 
-            p=rhs.getP(); 
-            TMVAssert(rhs.step()==1);
-            TMV_SETFIRSTLAST(rhs._first,rhs._last);
-            return *this; 
-        }
-
-        template <StepType S2> VIt<T,S,C>& operator=(const VIt<T,S2,C>& rhs) 
-        { 
-            p=rhs.getP(); 
-            TMVAssert(rhs.step()==1);
-            TMV_SETFIRSTLAST(rhs._first,rhs._last);
-            return *this; 
-        }
-
-        ~VIt() {}
-
-        T* getP() const { return p; }
-        int step() const { return 1; }
-
-        inline bool operator==(const VIt<T,S,C>& rhs) const 
-        { return p == rhs.p; }
-        inline bool operator!=(const VIt<T,S,C>& rhs) const 
-        { return p != rhs.p; }
-        inline bool operator<(const VIt<T,S,C>& rhs) const 
-        { return (p < rhs.p); }
-
-        inline T& operator*() const
-        { 
-#ifdef TMVFLDEBUG
-            if (!(p>=_first && p<_last)) {
-                std::cerr<<"p = "<<p<<std::endl;
-                std::cerr<<"first,last = "<<_first<<"  "<<_last<<std::endl;
-            }
-            TMVAssert(p>=_first);
-            TMVAssert(p<_last);
-#endif
-            return *p; 
-        }
-
-        inline VIt<T,S,C>& operator++() { ++p; return *this; }
-        inline VIt<T,S,C>& operator--() { --p; return *this; }
-        inline VIt<T,S,C> operator++(int) 
-        { VIt<T,S,C> p2 = *this; ++p; return p2; }
-        inline VIt<T,S,C> operator--(int) 
-        { VIt<T,S,C> p2 = *this; --p; return p2; }
-
-        inline VIt<T,S,C>& operator+=(int n) { p += n; return *this; }
-        inline VIt<T,S,C>& operator-=(int n) { p -= n; return *this; }
-        inline VIt<T,S,C> operator+(int n) const 
-        { return VIt<T,S,C>(p+n,1 TMV_FIRSTLAST ); }
-        inline VIt<T,S,C> operator-(int n) const 
-        { return VIt<T,S,C>(p-n,1 TMV_FIRSTLAST ); }
-
-        inline ptrdiff_t operator-(const VIt<T,S,C>& rhs) const 
-        { return p-rhs.p; }
-
-        inline T& operator[](int n) const
-        {
-#ifdef TMVFLDEBUG
-            T* pn = p+n;
-            if (!(p>=_first && p<_last)) {
-                std::cerr<<"p = "<<p<<std::endl;
-                std::cerr<<"first,last = "<<_first<<"  "<<_last<<std::endl;
-            }
-            TMVAssert(pn >= _first);
-            TMVAssert(pn < _first);
-            return *pn; 
-#else
-            return *(p+n);
-#endif
-        }
-
-        typedef std::random_access_iterator_tag iterator_category;
-        typedef T                               value_type;
-        typedef ptrdiff_t                       difference_type;
-        typedef T*                              pointer;
-        typedef T&                              reference;
-
-    private :
-
-        T* p;
-
-#ifdef TMVFLDEBUG
-    public :
-        const T* _first;
-        const T* _last;
-#endif
-
-    };
-
-    template <class T, StepType S, ConjType C> class CVIt 
-    { 
-    public :
-
-        CVIt() : p(0) {}
-        CVIt(const T* inp, int TMV_DEBUGPARAM(step)) : p(inp) 
-        { TMVAssert(step==1); }
-        CVIt(const CVIt<T,S,C>& rhs) : p(rhs.p) 
-        { TMVAssert(rhs.step()==1); }
-        CVIt(const VIt<T,S,C>& rhs) : p(rhs.getP()) 
-        { TMVAssert(rhs.step()==1); }
-        CVIt(const CVIter<T>& rhs) : p(rhs.getP()) 
-        { TMVAssert(rhs.step()==1); }
-        CVIt(const VIter<T>& rhs) : p(rhs.getP()) 
-        { TMVAssert(rhs.step()==1); }
-        template <StepType S2> CVIt(const CVIt<T,S2,C>& rhs) : p(rhs.getP())
-        { TMVAssert(rhs.step()==1); }
-        template <StepType S2> CVIt(const VIt<T,S2,C>& rhs) : p(rhs.getP())
-        { TMVAssert(rhs.step()==1); }
-
-        CVIt<T,S,C>& operator=(const CVIt<T,S,C>& rhs)
-        { TMVAssert(rhs.step()==1); p = rhs.p; return *this; }
-        CVIt<T,S,C>& operator=(const VIt<T,S,C>& rhs)
-        { TMVAssert(rhs.step()==1); p = rhs.getP(); return *this; }
-        CVIt<T,S,C>& operator=(const CVIter<T>& rhs)
-        { TMVAssert(rhs.step()==1); p = rhs.getP(); return *this; }
-        CVIt<T,S,C>& operator=(const VIter<T>& rhs)
-        { TMVAssert(rhs.step()==1); p = rhs.getP(); return *this; }
-        template <StepType S2> CVIt<T,S,C>& operator=(const CVIt<T,S2,C>& rhs)
-        { TMVAssert(rhs.step()==1); p = rhs.getP(); return *this; }
-        template <StepType S2> CVIt<T,S,C>& operator=(const VIt<T,S2,C>& rhs)
-        { TMVAssert(rhs.step()==1); p = rhs.getP(); return *this; }
-        ~CVIt() {}
-
-        const T* getP() const { return p; }
-        int step() const { return 1; }
-
-        inline bool operator==(const CVIt<T,S,C>& rhs) const 
-        { return p == rhs.p; }
-        inline bool operator!=(const CVIt<T,S,C>& rhs) const 
-        { return p != rhs.p; }
-        inline bool operator<(const CVIt<T,S,C>& rhs) const 
-        { return (p < rhs.p); }
-
-        inline T operator*() const { return *p; }
-
-        inline CVIt<T,S,C>& operator++() { ++p; return *this; }
-        inline CVIt<T,S,C>& operator--() { --p; return *this; }
-        inline CVIt<T,S,C> operator++(int) 
-        { CVIt<T,S,C> p2 = *this; ++p; return p2; }
-        inline CVIt<T,S,C> operator--(int) 
-        { CVIt<T,S,C> p2 = *this; --p; return p2; }
-
-        inline CVIt<T,S,C>& operator+=(int n) { p += n; return *this; }
-        inline CVIt<T,S,C>& operator-=(int n) { p -= n; return *this; }
-        inline CVIt<T,S,C> operator+(int n) const 
-        { return CVIt<T,S,C>(p+n,1); }
-        inline CVIt<T,S,C> operator-(int n) const 
-        { return CVIt<T,S,C>(p-n,1); }
-
-        inline ptrdiff_t operator-(const CVIt<T,S,C>& rhs) const 
-        { return (p-rhs.p); }
-
-        inline T operator[](int n) const { return *(p+n); }
-
-        typedef std::random_access_iterator_tag iterator_category;
-        typedef T                               value_type;
-        typedef ptrdiff_t                       difference_type;
-        typedef const T*                        pointer;
-        typedef const T&                        reference;
-
-    private :
-
-        const T* p;
-    };
-
-    template <class T, ConjType C> class VIt<T,Step,C> 
-    { 
-    public :
-
-        VIt() : p(0), s(0) TMV_DEFFIRSTLAST(0,0) {}
-        VIt(T* inp, int instep TMV_PARAMFIRSTLAST(T) ) : 
-            p(inp), s(instep) TMV_DEFFIRSTLAST(_first,_last) {}
-        VIt(const VIt<T,Step,C>& rhs) : 
-            p(rhs.p), s(rhs.s) TMV_DEFFIRSTLAST(rhs._first,rhs._last) {}
-        VIt(const VIt<T,Unit,C>& rhs) : 
-            p(rhs.getP()), s(1) TMV_DEFFIRSTLAST(rhs._first,rhs._last) {}
-        VIt(const VIter<T>& rhs) : 
-            p(rhs.getP()), s(rhs.step()) TMV_DEFFIRSTLAST(rhs._first,rhs._last)
-        {}
-        VIt<T,Step,C>& operator=(const VIt<T,Step,C>& rhs) 
-        { 
-            TMVAssert(s==rhs.s);
-            p=rhs.p; 
-            TMV_SETFIRSTLAST(rhs._first,rhs._last);
-            return *this; 
-        }
-        VIt<T,Step,C>& operator=(const VIt<T,Unit,C>& rhs) 
-        { 
-            TMVAssert(s==1);
-            p=rhs.getP(); 
-            TMV_SETFIRSTLAST(rhs._first,rhs._last);
-            return *this; 
-        }
-        VIt<T,Step,C>& operator=(const VIter<T>& rhs) 
-        { 
-            TMVAssert(s==rhs.step());
-            p=rhs.getP(); 
-            TMV_SETFIRSTLAST(rhs._first,rhs._last);
-            return *this; 
-        }
-        ~VIt() {}
-
-        T* getP() const { return p; }
-        int step() const { return s; }
-
-        inline bool operator==(const VIt<T,Step,C>& rhs) const 
-        { return p == rhs.p; }
-        inline bool operator!=(const VIt<T,Step,C>& rhs) const 
-        { return p != rhs.p; }
-        inline bool operator<(const VIt<T,Step,C>& rhs) const 
-        { return (s > 0 ? p < rhs.p : p > rhs.p); }
-
-        inline T& operator*() const
-        { 
-#ifdef TMVFLDEBUG
-            if (!(p>=_first && p<_last)) {
-                std::cerr<<"p = "<<p<<std::endl;
-                std::cerr<<"first,last = "<<_first<<"  "<<_last<<std::endl;
-            }
-            TMVAssert(p>=_first);
-            TMVAssert(p<_last);
-#endif
-            return *p; 
-        }
-
-        inline VIt<T,Step,C>& operator++() { p += s; return *this; }
-        inline VIt<T,Step,C>& operator--() { p -= s; return *this; }
-        inline VIt<T,Step,C> operator++(int) 
-        { VIt<T,Step,C> p2 = *this; p+=s; return p2; }
-        inline VIt<T,Step,C> operator--(int) 
-        { VIt<T,Step,C> p2 = *this; p-=s; return p2; }
-
-        inline VIt<T,Step,C>& operator+=(int n) { p += n*s; return *this; }
-        inline VIt<T,Step,C>& operator-=(int n) { p -= n*s; return *this; }
-        inline VIt<T,Step,C> operator+(int n) const 
-        { return VIt<T,Step,C>(p+n*s,s TMV_FIRSTLAST ); }
-        inline VIt<T,Step,C> operator-(int n) const 
-        { return VIt<T,Step,C>(p-n*s,s TMV_FIRSTLAST ); }
-
-        inline ptrdiff_t operator-(const VIt<T,Step,C>& rhs) const 
-        { return (p-rhs.p)/s; }
-
-        inline T& operator[](int n) const
-        {
-#ifdef TMVFLDEBUG
-            T* pn = p+n*s;
-            if (!(pn>=_first && pn<_last)) {
-                std::cerr<<"pn = "<<pn<<std::endl;
-                std::cerr<<"first,last = "<<_first<<"  "<<_last<<std::endl;
-            }
-            TMVAssert(pn >= _first);
-            TMVAssert(pn < _last);
-            return *pn; 
-#else
-            return *(p+n*s); 
-#endif
-        }
-
-        typedef std::random_access_iterator_tag iterator_category;
-        typedef T                               value_type;
-        typedef ptrdiff_t                       difference_type;
-        typedef T*                              pointer;
-        typedef T&                              reference;
-
-    private :
-
-        T* p;
-        const int s;
-
-#ifdef TMVFLDEBUG
-    public :
-        const T* _first;
-        const T* _last;
-#endif
-
-    };
-
-    template <class T, ConjType C> class CVIt<T,Step,C> 
-    { 
-    public :
-
-        CVIt() : p(0), s(0) {}
-        CVIt(const T* inp, int instep) : p(inp), s(instep) {}
-        CVIt(const CVIt<T,Step,C>& rhs) : p(rhs.p), s(rhs.s) {}
-        CVIt(const VIt<T,Step,C>& rhs) : p(rhs.getP()), s(rhs.step()) {}
-        CVIt(const CVIt<T,Unit,C>& rhs) : p(rhs.getP()), s(1) {}
-        CVIt(const VIt<T,Unit,C>& rhs) : p(rhs.getP()), s(1) {}
-        CVIt(const CVIter<T>& rhs) : p(rhs.getP()), s(rhs.step()) {}
-        CVIt(const VIter<T>& rhs) : p(rhs.getP()), s(rhs.step()) {}
-        CVIt<T,Step,C>& operator=(const CVIt<T,Step,C>& rhs)
-        { TMVAssert(s==rhs.s); p = rhs.p; return *this; }
-        CVIt<T,Step,C>& operator=(const VIt<T,Step,C>& rhs)
-        { TMVAssert(s==rhs.step()); p = rhs.getP(); return *this; }
-        CVIt<T,Step,C>& operator=(const CVIt<T,Unit,C>& rhs)
-        { TMVAssert(s==1); p = rhs.getP(); return *this; }
-        CVIt<T,Step,C>& operator=(const VIt<T,Unit,C>& rhs)
-        { TMVAssert(s==1); p = rhs.getP(); return *this; }
-        CVIt<T,Step,C>& operator=(const CVIter<T>& rhs)
-        { TMVAssert(s==rhs.step()); p = rhs.getP(); return *this; }
-        CVIt<T,Step,C>& operator=(const VIter<T>& rhs)
-        { TMVAssert(s==rhs.step()); p = rhs.getP(); return *this; }
-        ~CVIt() {}
-
-        const T* getP() const { return p; }
-        int step() const { return s; }
-
-        inline bool operator==(const CVIt<T,Step,C>& rhs) const 
-        { return p == rhs.p; }
-        inline bool operator!=(const CVIt<T,Step,C>& rhs) const 
-        { return p != rhs.p; }
-        inline bool operator<(const CVIt<T,Step,C>& rhs) const 
-        { return (s > 0 ? p < rhs.p : p > rhs.p); }
-
-        inline T operator*() const { return *p; }
-
-        inline CVIt<T,Step,C>& operator++() { p += s; return *this; }
-        inline CVIt<T,Step,C>& operator--() { p -= s; return *this; }
-        inline CVIt<T,Step,C> operator++(int) 
-        { CVIt<T,Step,C> p2 = *this; p+=s; return p2; }
-        inline CVIt<T,Step,C> operator--(int) 
-        { CVIt<T,Step,C> p2 = *this; p-=s; return p2; }
-
-        inline CVIt<T,Step,C>& operator+=(int n) 
-        { p += n*s; return *this; }
-        inline CVIt<T,Step,C>& operator-=(int n) 
-        { p -= n*s; return *this; }
-        inline CVIt<T,Step,C> operator+(int n) const 
-        { return CVIt<T,Step,C>(p+n*s,s); }
-        inline CVIt<T,Step,C> operator-(int n) const 
-        { return CVIt<T,Step,C>(p-n*s,s); }
-
-        inline ptrdiff_t operator-(const CVIt<T,Step,C>& rhs) const 
-        { return (p-rhs.p)/s; }
-
-        inline T operator[](int n) const { return *(p+n*s); }
-
-        typedef std::random_access_iterator_tag iterator_category;
-        typedef T                               value_type;
-        typedef ptrdiff_t                       difference_type;
-        typedef const T*                        pointer;
-        typedef const T&                        reference;
-
-    private :
-
-        const T* p;
-        const int s;
-    };
-
-    template <class T> 
+    template <class T>
     class ConjRef; // Undefined unless T is complex<T>
-    
-    template <class T> 
+
+    template <class T>
     class ConjRef<std::complex<T> >
     {
     public:
@@ -613,599 +60,377 @@ namespace tmv {
         typedef std::complex<T> CT;
 
         explicit ConjRef(CT& _val) : val(_val) {}
-        ConjRef(const ConjRef<CT>& rhs) : val(rhs.val) {}
+        ConjRef(const ConjRef<CT>& rhs) : val(rhs.getRef()) {}
         ~ConjRef() {}
 
-        inline operator CT() const { return std::conj(val); }
-        inline CT& getRef() { return val; }
-        inline CT conj() const { return val; }
-        inline T real() const { return val.real(); }
-        inline T imag() const { return -val.imag(); }
-        inline CT operator-() const { return -std::conj(val); }
+        operator CT() const { return std::conj(val); }
+        CT& getRef() { return val; }
+        CT conj() const { return val; }
+        T real() const { return val.real(); }
+        T imag() const { return -val.imag(); }
+        CT operator-() const { return -std::conj(val); }
 
-        inline ConjRef<CT>& operator=(const ConjRef<CT>& rhs)
-        { val = rhs.val; return *this; }
-        inline ConjRef<CT>& operator=(CT rhs)
+        ConjRef<CT>& operator=(const ConjRef<CT>& rhs)
+        { val = rhs.getRef(); return *this; }
+        ConjRef<CT>& operator=(CT rhs)
         { val = std::conj(rhs); return *this; }
-        inline ConjRef<CT>& operator=(T rhs)
+        ConjRef<CT>& operator=(T rhs)
         { val = rhs; return *this; }
 
-        inline ConjRef<CT>& operator+=(const ConjRef<CT>& x2)
+        ConjRef<CT>& operator+=(const ConjRef<CT>& x2)
         { val += x2.val; return *this; }
-        inline ConjRef<CT>& operator+=(CT x2)
+        ConjRef<CT>& operator+=(CT x2)
         { val += std::conj(x2); return *this; }
-        inline ConjRef<CT>& operator+=(T x2)
+        ConjRef<CT>& operator+=(T x2)
         { val += x2; return *this; }
-        inline CT operator+(const ConjRef<CT>& x2)
+        CT operator+(const ConjRef<CT>& x2)
         { return std::conj(val+x2.val); }
-        inline friend CT operator+(const ConjRef<CT>& x1, CT x2)
+        friend CT operator+(const ConjRef<CT>& x1, CT x2)
         { return std::conj(x1.val)+x2; }
-        inline friend CT operator+(ConjRef<CT>& x1, T x2)
+        friend CT operator+(const ConjRef<CT>& x1, T x2)
         { return std::conj(x1.val)+x2; }
-        inline friend CT operator+(CT x1, const ConjRef<CT>& x2)
+        friend CT operator+(CT x1, const ConjRef<CT>& x2)
         { return x1+std::conj(x2.val); }
-        inline friend CT operator+(T x1, const ConjRef<CT>& x2)
+        friend CT operator+(T x1, const ConjRef<CT>& x2)
         { return x1+std::conj(x2.val); }
-        //inline friend CT& operator+=(CT& x1, const ConjRef<CT>& x2)
+        //friend CT& operator+=(CT& x1, const ConjRef<CT>& x2)
         //{ return x1+=std::conj(x2.val); }
 
-        inline ConjRef<CT>& operator-=(const ConjRef<CT>& x2) 
+        ConjRef<CT>& operator-=(const ConjRef<CT>& x2) 
         { val -= x2.val; return *this; }
-        inline ConjRef<CT>& operator-=(CT x2) 
+        ConjRef<CT>& operator-=(CT x2) 
         { val -= std::conj(x2); return *this; }
-        inline ConjRef<CT>& operator-=(T x2) 
+        ConjRef<CT>& operator-=(T x2) 
         { val -= x2; return *this; }
-        inline CT operator-(const ConjRef<CT>& x2)
+        CT operator-(const ConjRef<CT>& x2)
         { return std::conj(val-x2.val); }
-        inline friend CT operator-(const ConjRef<CT>& x1, CT x2)
+        friend CT operator-(const ConjRef<CT>& x1, CT x2)
         { return std::conj(x1.val)-x2; }
-        inline friend CT operator-(const ConjRef<CT>& x1, T x2)
+        friend CT operator-(const ConjRef<CT>& x1, T x2)
         { return std::conj(x1.val)-x2; }
-        inline friend CT operator-(CT x1, const ConjRef<CT>& x2)
+        friend CT operator-(CT x1, const ConjRef<CT>& x2)
         { return x1-std::conj(x2.val); }
-        inline friend CT operator-(T x1, const ConjRef<CT>& x2)
+        friend CT operator-(T x1, const ConjRef<CT>& x2)
         { return x1-std::conj(x2.val); }
-        //inline friend CT& operator-=(CT& x1, const ConjRef<CT>& x2)
+        //friend CT& operator-=(CT& x1, const ConjRef<CT>& x2)
         //{ return x1-=std::conj(x2.val); }
 
-        inline ConjRef<CT>& operator*=(const ConjRef<CT>& x2) 
+        ConjRef<CT>& operator*=(const ConjRef<CT>& x2) 
         { val *= x2.val; return *this; }
-        inline ConjRef<CT>& operator*=(CT x2) 
+        ConjRef<CT>& operator*=(CT x2) 
         { val *= std::conj(x2); return *this; }
-        inline ConjRef<CT>& operator*=(T x2) 
+        ConjRef<CT>& operator*=(T x2) 
         { val *= x2; return *this; }
-        inline CT operator*(const ConjRef<CT> x2)
+        CT operator*(const ConjRef<CT> x2)
         { return std::conj(val*x2.val); }
-        inline friend CT operator*(const ConjRef<CT>& x1, CT x2)
+        friend CT operator*(const ConjRef<CT>& x1, CT x2)
         { return std::conj(x1.val)*x2; }
-        inline friend CT operator*(const ConjRef<CT>& x1, T x2)
+        friend CT operator*(const ConjRef<CT>& x1, T x2)
         { return std::conj(x1.val)*x2; }
-        inline friend CT operator*(CT x1, const ConjRef<CT>& x2)
+        friend CT operator*(CT x1, const ConjRef<CT>& x2)
         { return x1*std::conj(x2.val); }
-        inline friend CT operator*(T x1, const ConjRef<CT>& x2)
+        friend CT operator*(T x1, const ConjRef<CT>& x2)
         { return x1*std::conj(x2.val); }
-        //inline friend CT& operator*=(CT& x1, const ConjRef<CT>& x2)
+        //friend CT& operator*=(CT& x1, const ConjRef<CT>& x2)
         //{ return x1*=std::conj(x2.val); }
 
-        inline ConjRef<CT>& operator/=(const ConjRef<CT>& x2) 
+        ConjRef<CT>& operator/=(const ConjRef<CT>& x2) 
         { val /= x2.val; return *this; }
-        inline ConjRef<CT>& operator/=(CT x2) 
+        ConjRef<CT>& operator/=(CT x2) 
         { val /= std::conj(x2); return *this; }
-        inline ConjRef<CT>& operator/=(T x2) 
+        ConjRef<CT>& operator/=(T x2) 
         { val /= x2; return *this; }
-        inline CT operator/(const ConjRef<CT>& x2)
+        CT operator/(const ConjRef<CT>& x2)
         { return std::conj(val/x2.val); }
-        inline friend CT operator/(const ConjRef<CT>& x1, CT x2)
+        friend CT operator/(const ConjRef<CT>& x1, CT x2)
         { return std::conj(x1.val)/x2; }
-        inline friend CT operator/(const ConjRef<CT>& x1, T x2)
+        friend CT operator/(const ConjRef<CT>& x1, T x2)
         { return std::conj(x1.val)/x2; }
-        inline friend CT operator/(CT x1, const ConjRef<CT>& x2)
+        friend CT operator/(CT x1, const ConjRef<CT>& x2)
         { return x1/std::conj(x2.val); }
-        inline friend CT operator/(T x1, const ConjRef<CT>& x2)
+        friend CT operator/(T x1, const ConjRef<CT>& x2)
         { return x1/std::conj(x2.val); }
-        //inline friend CT& operator/=(CT& x1, const ConjRef<CT>& x2)
+        //friend CT& operator/=(CT& x1, const ConjRef<CT>& x2)
         //{ return x1/=std::conj(x2.val); }
 
-        inline bool operator==(const ConjRef<CT>& x2) const
+        bool operator==(const ConjRef<CT>& x2) const
         { return val == x2.val; }
-        inline bool operator==(CT x2) const 
+        bool operator==(CT x2) const 
         { return std::conj(val) == x2; }
-        inline bool operator==(T x2) const 
+        bool operator==(T x2) const 
         { return std::real(val) == x2 && std::imag(val) == T(0); }
-        inline friend bool operator==(CT x1, const ConjRef<CT>& x2)
+        friend bool operator==(CT x1, const ConjRef<CT>& x2)
         { return x2==x1; }
-        inline friend bool operator==(T x1, const ConjRef<CT>& x2)
+        friend bool operator==(T x1, const ConjRef<CT>& x2)
         { return x2==x1; }
-        inline bool operator!=(const ConjRef<CT>& x2) const
+        bool operator!=(const ConjRef<CT>& x2) const
         { return !(operator==(x2)); }
-        inline bool operator!=(CT x2) const 
+        bool operator!=(CT x2) const 
         { return !(operator==(x2)); }
-        inline bool operator!=(T x2) const 
+        bool operator!=(T x2) const 
         { return !(operator==(x2)); }
-        inline friend bool operator!=(CT x1, const ConjRef<CT>& x2)
+        friend bool operator!=(CT x1, const ConjRef<CT>& x2)
         { return !(x2==x1); }
-        inline friend bool operator!=(T x1, const ConjRef<CT>& x2)
+        friend bool operator!=(T x1, const ConjRef<CT>& x2)
         { return !(x2==x1); }
 
-        inline void swapWith(CT& x2)
-        { 
+        void swapWith(CT& x2)
+        {
             TMVAssert(&val != &x2);
             CT temp = x2; x2 = std::conj(val); val = std::conj(temp); 
         }
-        inline void swapWith(ConjRef<CT> x2)
-        { 
+        void swapWith(ConjRef<CT> x2)
+        {
             TMVAssert(&val != &x2);
             CT temp = x2.val; x2.val = val; val = temp; 
         }
 
-        inline friend std::ostream& operator<<(std::ostream& os, ConjRef<CT> x)
+        friend std::ostream& operator<<(std::ostream& os, ConjRef<CT> x)
         { os << std::conj(x.val); return os; }
-        inline friend std::istream& operator>>(std::istream& is, ConjRef<CT> x)
+        friend std::istream& operator>>(std::istream& is, ConjRef<CT> x)
         { is >> x.val; x.val = std::conj(x.val); return is; }
 
     private:
 
+        CT& getRef() const { return val; }
         CT& val;
     };
 
-    template <class T> inline T TMV_CONJ(const ConjRef<T>& x) 
-    { return x.conj(); }
-    template <class T> inline TMV_RealType(T) TMV_NORM(const ConjRef<T>& x) 
-    { return norm(x.conj()); }
-    template <class T> inline TMV_RealType(T) TMV_ABS(const ConjRef<T>& x) 
-    { return std::abs(x.conj()); }
-    template <class T> inline T TMV_SQR(const ConjRef<T>& x) 
-    { return TMV_SQR(T(x)); }
-    template <class T> inline T TMV_SQRT(const ConjRef<T>& x) 
-    { return TMV_SQRT(T(x)); }
-    template <class T> inline TMV_RealType(T) TMV_REAL(const ConjRef<T>& x) 
-    { return x.real(); }
-    template <class T> inline TMV_RealType(T) TMV_IMAG(const ConjRef<T>& x) 
-    { return x.imag(); }
-    template <class T> inline void TMV_SWAP(
-        tmv::ConjRef<std::complex<T> > x1, tmv::ConjRef<std::complex<T> > x2)
-    { return x1.swapWith(x2); }
-    template <class T> inline void TMV_SWAP(
-        std::complex<T>& x1, tmv::ConjRef<std::complex<T> > x2)
-    { return x2.swapWith(x1); }
-    template <class T> inline void TMV_SWAP(
-        tmv::ConjRef<std::complex<T> > x1, std::complex<T>& x2)
-    { return x1.swapWith(x2); }
-}
-
-namespace std {
-    template <class T> inline T conj(const tmv::ConjRef<T>& x) 
-    { return x.conj(); }
-    template <class T> inline TMV_RealType(T) norm(const tmv::ConjRef<T>& x) 
-    { return norm(x.conj()); }
-    template <class T> inline TMV_RealType(T) real(const tmv::ConjRef<T>& x) 
-    { return x.real(); }
-    template <class T> inline TMV_RealType(T) imag(const tmv::ConjRef<T>& x) 
-    { return x.imag(); }
-    template <class T> inline void swap(
-        tmv::ConjRef<std::complex<T> > x1, tmv::ConjRef<std::complex<T> > x2)
-    { return x1.swapWith(x2); }
-    template <class T> inline void swap(
-        std::complex<T>& x1, tmv::ConjRef<std::complex<T> > x2)
-    { return x2.swapWith(x1); }
-    template <class T> inline void swap(
-        tmv::ConjRef<std::complex<T> > x1, std::complex<T>& x2)
-    { return x1.swapWith(x2); }
-}
-
-namespace tmv {
-
-    template <class T> class VIt<std::complex<T>,Unit,Conj> 
+    // A helper structure to define the reference type correctly for VIt.
+    // Also applies a conjugation if necessary.
+    template <class T, ConjType C>
+    struct AuxRef // real T or C = NonConj
     { 
-        typedef std::complex<T> CT;
+        typedef T& reference; 
+        static T apply(const T& x) { return x; }
+    };
+    template <class T>
+    struct AuxRef<std::complex<T>,Conj>
+    {
+        typedef ConjRef<T> reference; 
+        static std::complex<T> apply(const std::complex<T>& x) 
+        { return std::conj(x); }
+    };
+
+    template <ConjType C, class T>
+    T DoConj(const T& x) { return AuxRef<T,C>::apply(x); }
+
+
+    template <class T, int S, ConjType C>
+    class VIt 
+    {
     public :
 
-        VIt() : p(0) TMV_DEFFIRSTLAST(0,0) {}
-        VIt(CT* inp, int TMV_DEBUGPARAM(step) 
-            TMV_PARAMFIRSTLAST(CT)) :
-            p(inp) TMV_DEFFIRSTLAST(_first,_last)
-        { TMVAssert(step==1); }
-        VIt(const VIt<CT,Unit,Conj>& rhs) : 
-            p(rhs.p) TMV_DEFFIRSTLAST(rhs._first,rhs._last) {}
-        VIt(const VIt<CT,Step,Conj>& rhs) : 
-            p(rhs.getP())  TMV_DEFFIRSTLAST(rhs._first,rhs._last) 
-        { TMVAssert(rhs.step() == 1); }
-        VIt(const VIter<CT >& rhs) : 
-            p(rhs.getP())  TMV_DEFFIRSTLAST(rhs._first,rhs._last) 
-        { 
-            TMVAssert(rhs.step() == 1); 
-            TMVAssert(rhs.getC() == Conj);
-        }
-        VIt& operator=(const VIt<CT,Unit,Conj>& rhs) 
-        { 
-            p=rhs.p; 
-            TMV_SETFIRSTLAST(rhs._first,rhs._last);
-            return *this; 
-        }
-        VIt& operator=(const VIt<CT,Step,Conj>& rhs) 
-        { 
-            TMVAssert(rhs.step()==1);
-            p=rhs.getP(); 
-            TMV_SETFIRSTLAST(rhs._first,rhs._last);
-            return *this; 
-        }
-        VIt& operator=(const VIter<CT >& rhs) 
-        { 
-            TMVAssert(rhs.step()==1);
-            TMVAssert(rhs.getC()==Conj);
-            p=rhs.getP(); 
-            TMV_SETFIRSTLAST(rhs._first,rhs._last);
-            return *this; 
-        }
+        typedef VIt<T,S,C> type;
+        typedef std::random_access_iterator_tag iterator_category;
+        typedef T value_type;
+        typedef ptrdiff_t difference_type;
+        typedef T* pointer;
+        typedef typename AuxRef<T,C>::reference reference;
+
+        VIt(T* inp, int step) : p(inp), s(step) {}
+        explicit VIt(T* inp) : p(inp), s(S) 
+        { TMVAssert(S != Unknown); }
+        VIt(const type& rhs) : p(rhs.get()), s(rhs.step()) {}
+
+        template <int S2>
+        VIt(const VIt<T,S2,C>& rhs) : p(rhs.get()), s(rhs.step()) {}
+
+        type& operator=(const type& rhs) 
+        { TMVAssert(step()==rhs.step()); p=rhs.get(); return *this; }
+
+        template <int S2>
+        type& operator=(const VIt<T,S2,C>& rhs) 
+        { TMVAssert(step()==rhs.step()); p=rhs.get(); return *this; }
+
         ~VIt() {}
 
-        CT* getP() const { return p; }
-        int step() const { return 1; }
-
-        inline bool operator==(const VIt<CT,Unit,Conj>& rhs) const 
-        { return p == rhs.p; }
-        inline bool operator!=(const VIt<CT,Unit,Conj>& rhs) const 
-        { return p != rhs.p; }
-        inline bool operator<(const VIt<CT,Unit,Conj>& rhs) const 
-        { return (p < rhs.p); }
-
-        inline ConjRef<CT > operator*() const
-        { 
-#ifdef TMVFLDEBUG
-            if (!(p>=_first && p<_last)) {
-                std::cerr<<"p = "<<p<<std::endl;
-                std::cerr<<"first,last = "<<_first<<"  "<<_last<<std::endl;
-            }
-            TMVAssert(p>=_first);
-            TMVAssert(p<_last);
-#endif
-            return ConjRef<CT >(*p);
-        }
-
-        inline VIt<CT,Unit,Conj>& operator++() 
-        { ++p; return *this; }
-        inline VIt<CT,Unit,Conj>& operator--() 
-        { --p; return *this; }
-        inline VIt<CT,Unit,Conj> operator++(int) 
-        { VIt<CT,Unit,Conj> p2 = *this; ++p; return p2; }
-        inline VIt<CT,Unit,Conj> operator--(int) 
-        { VIt<CT,Unit,Conj> p2 = *this; --p; return p2; }
-
-        inline VIt<CT,Unit,Conj>& operator+=(int n) 
-        { p += n; return *this; }
-        inline VIt<CT,Unit,Conj>& operator-=(int n) 
-        { p -= n; return *this; }
-        inline VIt<CT,Unit,Conj> operator+(int n) const 
-        { return VIt<CT,Unit,Conj>(p+n,1 TMV_FIRSTLAST ); }
-        inline VIt<CT,Unit,Conj> operator-(int n) const 
-        { return VIt<CT,Unit,Conj>(p-n,1 TMV_FIRSTLAST ); }
-
-        inline ptrdiff_t operator-(
-            const VIt<CT,Unit,Conj>& rhs) const 
-        { return (p-rhs.p); }
-
-        inline CT& operator[](int n) const
-        {
-#ifdef TMVFLDEBUG
-            CT* pn = p+n;
-            if (!(pn>=_first && pn<_last)) {
-                std::cerr<<"pn = "<<pn<<std::endl;
-                std::cerr<<"first,last = "<<_first<<"  "<<_last<<std::endl;
-            }
-            TMVAssert(pn >= _first);
-            TMVAssert(pn < _last);
-            return ConjRef<CT >(*pn); 
-#else
-            return ConjRef<CT >(*(p+n)); 
-#endif
-        }
-
-        typedef std::random_access_iterator_tag   iterator_category;
-        typedef CT                                value_type;
-        typedef ptrdiff_t                         difference_type;
-        typedef VIt<CT,Unit,Conj>                 pointer;
-        typedef ConjRef<CT >                      reference;
-
-    private :
-
-        CT* p;
-
-#ifdef TMVFLDEBUG
-    public :
-        const CT* _first;
-        const CT* _last;
-#endif
-    };
-
-    template <class T> class CVIt<std::complex<T>,Unit,Conj> 
-    { 
-        typedef std::complex<T> CT;
-    public :
-
-        CVIt() : p(0) {}
-        CVIt(const CT* inp, int TMV_DEBUGPARAM(step)) : p(inp) 
-        { TMVAssert(step==1); }
-        CVIt(const CVIt<CT,Unit,Conj>& rhs) : p(rhs.p) {}
-        CVIt(const VIt<CT,Unit,Conj>& rhs) : p(rhs.getP()) {}
-        CVIt(const CVIt<CT,Step,Conj>& rhs) : p(rhs.getP())
-        { TMVAssert(rhs.step() == 1); }
-        CVIt(const VIt<CT,Step,Conj>& rhs) : p(rhs.getP())
-        { TMVAssert(rhs.step() == 1); }
-        CVIt(const CVIter<CT >& rhs) : p(rhs.getP())
-        { 
-            TMVAssert(rhs.getC() == Conj);
-            TMVAssert(rhs.step() == 1); 
-        }
-        CVIt(const VIter<CT >& rhs) : p(rhs.getP())
-        { 
-            TMVAssert(rhs.getC() == Conj);
-            TMVAssert(rhs.step() == 1); 
-        }
-        CVIt<CT,Unit,Conj>& operator=(const CVIt<CT,Unit,Conj>& rhs)
-        { p = rhs.p; return *this; }
-        CVIt<CT,Unit,Conj>& operator=(const VIt<CT,Unit,Conj>& rhs)
-        { p = rhs.getP(); return *this; }
-        CVIt<CT,Unit,Conj>& operator=(const CVIt<CT,Step,Conj>& rhs)
-        { TMVAssert(rhs.step()==1); p = rhs.getP(); return *this; }
-        CVIt<CT,Unit,Conj>& operator=(const VIt<CT,Step,Conj>& rhs)
-        { TMVAssert(rhs.step()==1); p = rhs.getP(); return *this; }
-        CVIt<CT,Unit,Conj>& operator=(const CVIter<std::complex<T> >& rhs)
-        { 
-            TMVAssert(rhs.getC() == Conj);
-            TMVAssert(rhs.step()==1); 
-            p = rhs.getP(); 
-            return *this; 
-        }
-        CVIt<CT,Unit,Conj>& operator=(const VIter<CT >& rhs)
-        { 
-            TMVAssert(rhs.getC() == Conj);
-            TMVAssert(rhs.step()==1); 
-            p = rhs.getP(); 
-            return *this; 
-        }
-        ~CVIt() {}
-
-        const CT* getP() const { return p; }
-        int step() const { return 1; }
-
-        inline bool operator==(const CVIt<CT,Unit,Conj>& rhs) const 
-        { return p == rhs.p; }
-        inline bool operator!=(const CVIt<CT,Unit,Conj>& rhs) const 
-        { return p != rhs.p; }
-        inline bool operator<(const CVIt<CT,Unit,Conj>& rhs) const 
-        { return (p < rhs.p); }
-
-        inline CT operator*() const { return std::conj(*p); }
-
-        inline CVIt<CT,Unit,Conj>& operator++() { ++p; return *this; }
-        inline CVIt<CT,Unit,Conj>& operator--() { --p; return *this; }
-        inline CVIt<CT,Unit,Conj> operator++(int) 
-        { CVIt<CT,Unit,Conj> p2 = *this; ++p; return p2; }
-        inline CVIt<CT,Unit,Conj> operator--(int) 
-        { CVIt<CT,Unit,Conj> p2 = *this; --p; return p2; }
-
-        inline CVIt<CT,Unit,Conj>& operator+=(int n) { p += n; return *this; }
-        inline CVIt<CT,Unit,Conj>& operator-=(int n) { p -= n; return *this; }
-        inline CVIt<CT,Unit,Conj> operator+(int n) const 
-        { return CVIt<CT,Unit,Conj>(p+n,1); }
-        inline CVIt<CT,Unit,Conj> operator-(int n) const 
-        { return CVIt<CT,Unit,Conj>(p-n,1); }
-
-        inline ptrdiff_t operator-(const CVIt<CT,Unit,Conj>& rhs) const 
-        { return (p-rhs.p); }
-
-        inline CT operator[](int n) const 
-        { return std::conj(*(p+n)); }
-
-        typedef std::random_access_iterator_tag   iterator_category;
-        typedef CT                                value_type;
-        typedef ptrdiff_t                         difference_type;
-        typedef CVIt<CT,Unit,Conj>                pointer;
-        typedef const ConjRef<CT >                reference;
-
-    private :
-
-        const std::complex<T>* p;
-    };
-
-    template <class T> class VIt<std::complex<T>,Step,Conj> 
-    { 
-        typedef std::complex<T> CT;
-    public :
-
-        VIt() : p(0), s(0) TMV_DEFFIRSTLAST(0,0) {}
-        VIt(CT* inp, int instep TMV_PARAMFIRSTLAST(CT)) :
-            p(inp), s(instep) TMV_DEFFIRSTLAST(_first,_last) {}
-        VIt(const VIt<CT,Step,Conj>& rhs) : 
-            p(rhs.p), s(rhs.s) TMV_DEFFIRSTLAST(rhs._first,rhs._last) {}
-        VIt(const VIt<CT,Unit,Conj>& rhs) : 
-            p(rhs.getP()), s(1) TMV_DEFFIRSTLAST(rhs._first,rhs._last) {}
-        VIt(const VIter<CT >& rhs) : 
-            p(rhs.getP()), s(rhs.step()) TMV_DEFFIRSTLAST(rhs._first,rhs._last) 
-        { TMVAssert(rhs.getC()==Conj); }
-        VIt& operator=(const VIt<CT,Step,Conj>& rhs) 
-        { 
-            TMVAssert(s==rhs.s);
-            p=rhs.p; 
-            TMV_SETFIRSTLAST(rhs._first,rhs._last);
-            return *this; 
-        }
-        VIt& operator=(const VIt<CT,Unit,Conj>& rhs) 
-        { 
-            TMVAssert(s==1);
-            p=rhs.getP(); 
-            TMV_SETFIRSTLAST(rhs._first,rhs._last);
-            return *this; 
-        }
-        VIt& operator=(const VIter<CT >& rhs) 
-        { 
-            TMVAssert(s==rhs.step());
-            TMVAssert(rhs.getC()==Conj);
-            p=rhs.getP(); 
-            TMV_SETFIRSTLAST(rhs._first,rhs._last);
-            return *this; 
-        }
-        ~VIt() {}
-
-        CT* getP() const { return p; }
+        T* get() const { return p; }
         int step() const { return s; }
 
-        inline bool operator==(const VIt<CT,Step,Conj>& rhs) const 
-        { return p == rhs.p; }
-        inline bool operator!=(const VIt<CT,Step,Conj>& rhs) const 
-        { return p != rhs.p; }
-        inline bool operator<(const VIt<CT,Step,Conj>& rhs) const 
-        { return (s > 0 ? p < rhs.p : p > rhs.p); }
+        bool operator==(const type& rhs) const 
+        { return p == rhs.get(); }
+        bool operator!=(const type& rhs) const 
+        { return p != rhs.get(); }
+        bool operator<(const type& rhs) const 
+        { return (step()>0 ? p < rhs.get() : p > rhs.get()); }
 
-        inline ConjRef<CT > operator*() const
-        { 
-#ifdef TMVFLDEBUG
-            if (!(p>=_first && p<_last)) {
-                std::cerr<<"p = "<<p<<std::endl;
-                std::cerr<<"first,last = "<<_first<<"  "<<_last<<std::endl;
-            }
-            TMVAssert(p>=_first);
-            TMVAssert(p<_last);
-#endif
-            return ConjRef<CT >(*p);
-        }
+        reference operator*() const { return reference(*p); }
 
-        inline VIt<CT,Step,Conj>& operator++() { p+=s; return *this; }
-        inline VIt<CT,Step,Conj>& operator--() { p-=s; return *this; }
-        inline VIt<CT,Step,Conj> operator++(int) 
-        { VIt<CT,Step,Conj> p2 = *this; p+=s; return p2; }
-        inline VIt<CT,Step,Conj> operator--(int) 
-        { VIt<CT,Step,Conj> p2 = *this; p-=s; return p2; }
+        type& operator++() { p+=step(); return *this; }
+        type& operator--() { p-=step(); return *this; }
+        type operator++(int) 
+        { type p2 = *this; p+=step(); return p2; }
+        type operator--(int) 
+        { type p2 = *this; p-=step(); return p2; }
 
-        inline VIt<CT,Step,Conj>& operator+=(int n) { p += n*s; return *this; }
-        inline VIt<CT,Step,Conj>& operator-=(int n) { p -= n*s; return *this; }
-        inline VIt<CT,Step,Conj> operator+(int n) const 
-        { return VIt<CT,Step,Conj>(p+n*s,s TMV_FIRSTLAST ); }
-        inline VIt<CT,Step,Conj> operator-(int n) const 
-        { return VIt<CT,Step,Conj>(p-n*s,s TMV_FIRSTLAST ); }
+        type& operator+=(int n) { p += n*step(); return *this; }
+        type& operator-=(int n) { p -= n*step(); return *this; }
+        type operator+(int n) const 
+        { return type(p+n*step(),step()); }
+        type operator-(int n) const 
+        { return type(p-n*step(),step()); }
+        type& shiftP(int n) { p += n; return *this; }
 
-        inline ptrdiff_t operator-(const VIt<CT,Step,Conj>& rhs) const 
-        { return (p-rhs.p)/s; }
+        ptrdiff_t operator-(const type& rhs) const 
+        { return (p-rhs.get())/step(); }
 
-        inline CT& operator[](int n) const
-        {
-#ifdef TMVFLDEBUG
-            CT* pn = p+n*s;
-            if (!(pn>=_first && pn<_last)) {
-                std::cerr<<"pn = "<<pn<<std::endl;
-                std::cerr<<"first,last = "<<_first<<"  "<<_last<<std::endl;
-            }
-            TMVAssert(pn >= _first);
-            TMVAssert(pn < _last);
-            return ConjRef<CT >(*pn); 
-#else
-            return ConjRef<CT >(*(p+n*s)); 
-#endif
-        }
+        reference operator[](int n) const 
+        { return reference(p[n*step()]); }
 
-        typedef std::random_access_iterator_tag   iterator_category;
-        typedef CT                                value_type;
-        typedef ptrdiff_t                         difference_type;
-        typedef VIt<CT,Step,Conj>                 pointer;
-        typedef ConjRef<CT >                      reference;
+        typedef VIt<T,S,NonConj> nonconj_type;
+        nonconj_type nonConj() const 
+        { return nonconj_type(p,step()); }
+        typedef typename Traits<T>::real_type real_type;
+        typedef VIt<real_type,S,NonConj> flatten_type;
+        flatten_type flatten() const 
+        { return flatten_type(reinterpret_cast<real_type*>(p),1); }
 
     private :
 
-        CT* p;
-        const int s;
-
-#ifdef TMVFLDEBUG
-    public :
-        const CT* _first;
-        const CT* _last;
-#endif
+        T* p;
+        const CheckedInt<S> s;
     };
 
-    template <class T> class CVIt<std::complex<T>,Step,Conj> 
-    { 
-        typedef std::complex<T> CT;
+    template <class T, int S, ConjType C>
+    class CVIt
+    {
     public :
 
-        CVIt() : p(0), s(0) {}
-        CVIt(const CT* inp, int instep) : p(inp), s(instep) {}
-        CVIt(const CVIt<CT,Step,Conj>& rhs) : p(rhs.p), s(rhs.s) {}
-        CVIt(const VIt<CT,Step,Conj>& rhs) : p(rhs.getP()), s(rhs.step()) {}
-        CVIt(const CVIt<CT,Unit,Conj>& rhs) : p(rhs.getP()), s(1) {}
-        CVIt(const VIt<CT,Unit,Conj>& rhs) : p(rhs.getP()), s(1) {}
-        CVIt(const CVIter<CT >& rhs) : p(rhs.getP()), s(rhs.step()) 
-        { TMVAssert(rhs.getC()==Conj); }
-        CVIt(const VIter<CT >& rhs) : p(rhs.getP()), s(rhs.step()) 
-        { TMVAssert(rhs.getC()==Conj); }
-        CVIt<CT,Step,Conj>& operator=(const CVIt<CT,Step,Conj>& rhs)
-        { TMVAssert(s==rhs.s); p = rhs.p; return *this; }
-        CVIt<CT,Step,Conj>& operator=(const VIt<CT,Step,Conj>& rhs)
-        { TMVAssert(s==rhs.s); p = rhs.getP(); return *this; }
-        CVIt<CT,Step,Conj>& operator=(const CVIt<CT,Unit,Conj>& rhs)
-        { TMVAssert(s==1); p = rhs.getP(); return *this; }
-        CVIt<CT,Step,Conj>& operator=(const VIt<CT,Unit,Conj>& rhs)
-        { TMVAssert(s==1); p = rhs.getP(); return *this; }
-        CVIt<CT,Step,Conj>& operator=(const CVIter<CT >& rhs)
-        { 
-            TMVAssert(s==rhs.step()); 
-            TMVAssert(rhs.getC()==Conj);
-            p = rhs.getP(); return *this; 
-        }
-        CVIt<CT,Step,Conj>& operator=(const VIter<CT >& rhs)
-        { 
-            TMVAssert(s==rhs.step()); 
-            TMVAssert(rhs.getC()==Conj);
-            p = rhs.getP(); return *this; 
-        }
+        typedef CVIt<T,S,C> type;
+        typedef std::random_access_iterator_tag iterator_category;
+        typedef T value_type;
+        typedef ptrdiff_t difference_type;
+        typedef const T* pointer;
+        typedef const T& reference;
+
+        CVIt(const T* inp, int step) : p(inp), s(step) {}
+        explicit CVIt(const T* inp) : p(inp), s(S) 
+        { TMVAssert(S != Unknown); }
+        CVIt(const type& rhs) : p(rhs.get()), s(rhs.step()) {}
+
+        template <int S2>
+        CVIt(const CVIt<T,S2,C>& rhs) : 
+            p(rhs.get()), s(rhs.step()) {}
+
+        template <int S2>
+        CVIt(const VIt<T,S2,C>& rhs) : 
+            p(rhs.get()), s(rhs.step()) {}
+
+        type& operator=(const type& rhs)
+        { TMVAssert(step()==rhs.step()); p = rhs.get(); return *this; }
+
+        template <int S2>
+        type& operator=(const CVIt<T,S2,C>& rhs)
+        { TMVAssert(step()==rhs.step()); p = rhs.get(); return *this; }
+
+        template <int S2>
+        type& operator=(const VIt<T,S2,C>& rhs)
+        { TMVAssert(step()==rhs.step()); p = rhs.get(); return *this; }
+
         ~CVIt() {}
 
-        const CT* getP() const { return p; }
+        const T* get() const { return p; }
         int step() const { return s; }
 
-        inline bool operator==(const CVIt<CT,Step,Conj>& rhs) const 
-        { return p == rhs.p; }
-        inline bool operator!=(const CVIt<CT,Step,Conj>& rhs) const 
-        { return p != rhs.p; }
-        inline bool operator<(const CVIt<CT,Step,Conj>& rhs) const 
-        { return (s > 0 ? p < rhs.p : p > rhs.p); }
+        bool operator==(const type& rhs) const 
+        { return p == rhs.get(); }
+        bool operator!=(const type& rhs) const 
+        { return p != rhs.get(); }
+        bool operator<(const type& rhs) const 
+        { return (step()>0 ? p < rhs.get() : p > rhs.get()); }
 
-        inline CT operator*() const { return std::conj(*p); }
+        T operator*() const { return DoConj<C>(*p); }
 
-        inline CVIt<CT,Step,Conj>& operator++() { p+=s; return *this; }
-        inline CVIt<CT,Step,Conj>& operator--() { p-=s; return *this; }
-        inline CVIt<CT,Step,Conj> operator++(int) 
-        { CVIt<CT,Step,Conj> p2 = *this; p+=s; return p2; }
-        inline CVIt<CT,Step,Conj> operator--(int) 
-        { CVIt<CT,Step,Conj> p2 = *this; p-=s; return p2; }
+        type& operator++() { p+=step(); return *this; }
+        type& operator--() { p-=step(); return *this; }
+        type operator++(int) 
+        { type p2 = *this; p+=step(); return p2; }
+        type operator--(int) 
+        { type p2 = *this; p-=step(); return p2; }
 
-        inline CVIt<CT,Step,Conj>& operator+=(int n) 
-        { p += n*s; return *this; }
-        inline CVIt<CT,Step,Conj>& operator-=(int n) 
-        { p -= n*s; return *this; }
-        inline CVIt<CT,Step,Conj> operator+(int n) const 
-        { return CVIt<CT,Step,Conj>(p+n*s,s); }
-        inline CVIt<CT,Step,Conj> operator-(int n) const 
-        { return CVIt<CT,Step,Conj>(p-n*s,s); }
+        type& operator+=(int n) { p += n*step(); return *this; }
+        type& operator-=(int n) { p -= n*step(); return *this; }
+        type operator+(int n) const 
+        { return type(p+n*step(),step()); }
+        type operator-(int n) const 
+        { return type(p-n*step(),step()); }
+        type& shiftP(int n) { p += n; return *this; }
 
-        inline ptrdiff_t operator-(const CVIt<CT,Step,Conj>& rhs) const 
-        { return (p-rhs.p)/s; }
+        ptrdiff_t operator-(const type& rhs) const 
+        { return (p-rhs.get())/step(); }
 
-        inline CT operator[](int n) const 
-        { return std::conj(*(p+n*s)); }
+        T operator[](int n) const 
+        { return DoConj<C>(p[n*step()]); }
 
-        typedef std::random_access_iterator_tag   iterator_category;
-        typedef CT                                value_type;
-        typedef ptrdiff_t                         difference_type;
-        typedef CVIt<CT,Step,Conj>                pointer;
-        typedef const ConjRef<CT >                reference;
+        typedef CVIt<T,S,NonConj> nonconj_type;
+        nonconj_type nonConj() const 
+        { return nonconj_type(p,step()); }
+        typedef typename Traits<T>::real_type real_type;
+        typedef CVIt<real_type,S,NonConj> flatten_type;
+        flatten_type flatten() const 
+        { return flatten_type(reinterpret_cast<const real_type*>(p),1); }
 
     private :
 
-        const CT* p;
-        const int s;
+        const T* p;
+        const CheckedInt<S> s;
     };
 
+    template <class T, int S, ConjType C>
+    CVIt<T,S,C> operator+(int i, const CVIt<T,S,C>& it)
+    { return it + i; }
+    template <class T, int S, ConjType C>
+    VIt<T,S,C> operator+(int i, const VIt<T,S,C>& it)
+    { return it + i; }
+
+
+    // Overload some functions to work with ConjRef<T>
+    template <class T>
+    T TMV_CONJ(const ConjRef<T>& x) { return x.conj(); }
+    template <class T>
+    typename Traits<T>::real_type TMV_NORM(const ConjRef<T>& x) 
+    { return TMV_NORM(x.conj()); }
+    template <class T>
+    typename Traits<T>::real_type TMV_ABS(const ConjRef<T>& x) 
+    { return TMV_ABS(x.conj()); }
+    template <class T>
+    T TMV_SQR(const ConjRef<T>& x) 
+    { return TMV_SQR(x.conj()); }
+    template <class T>
+    T TMV_SQRT(const ConjRef<T>& x) 
+    { return TMV_SQRT(x.conj()); }
+    template <class T>
+    typename Traits<T>::real_type TMV_REAL(const ConjRef<T>& x) 
+    { return x.real(); }
+    template <class T>
+    typename Traits<T>::real_type TMV_IMAG(const ConjRef<T>& x) 
+    { return x.imag(); }
+
+    template <class T>
+    void TMV_SWAP(
+        tmv::ConjRef<std::complex<T> > x1, tmv::ConjRef<std::complex<T> > x2)
+    { return x1.swapWith(x2); }
+    template <class T>
+    void TMV_SWAP(
+        std::complex<T>& x1, tmv::ConjRef<std::complex<T> > x2)
+    { return x2.swapWith(x1); }
+    template <class T>
+    void TMV_SWAP(
+        tmv::ConjRef<std::complex<T> > x1, std::complex<T>& x2)
+    { return x1.swapWith(x2); }
+
+
+    // Now some special classes to deal with complex<T> when there is 
+    // a possibility (unknown at compile time) of the reference
+    // or iterator needing to be conjugated:
+    
     template <class T> 
     class VarConjRef; // Undefined unless T is complex<T>
+    template <class T> 
+    class VarConjIter; // Undefined unless T is complex<T>
+    template <class T> 
+    class CVarConjIter; // Undefined unless T is complex<T>
 
     template <class T> 
     class VarConjRef<std::complex<T> >
@@ -1390,46 +615,21 @@ namespace tmv {
     template <class T> inline void TMV_SWAP(
         tmv::VarConjRef<std::complex<T> > x1, std::complex<T>& x2)
     { return x1.swapWith(x2); }
-}
 
-namespace std {
-    template <class T> inline T conj(const tmv::VarConjRef<T>& x) 
-    { return x.conj(); }
-    template <class T> inline TMV_RealType(T) norm(const tmv::VarConjRef<T>& x) 
-    { return norm(T(x)); }
-    template <class T> inline TMV_RealType(T) real(const tmv::VarConjRef<T>& x) 
-    { return x.real(); }
-    template <class T> inline TMV_RealType(T) imag(const tmv::VarConjRef<T>& x) 
-    { return x.imag(); }
     template <class T> 
-    inline void swap(
-        tmv::VarConjRef<std::complex<T> > x1,
-        tmv::VarConjRef<std::complex<T> > x2)
-    { return x1.swapWith(x2); }
-    template <class T> 
-    inline void swap(
-        std::complex<T>& x1, tmv::VarConjRef<std::complex<T> > x2)
-    { return x2.swapWith(x1); }
-    template <class T> 
-    inline void swap(tmv::VarConjRef<std::complex<T> > x1, std::complex<T>& x2)
-    { return x1.swapWith(x2); }
-}
-
-namespace tmv {
-
-    template <class T> class VIter<std::complex<T> >
+    class VarConjIter<std::complex<T> >
     { 
         typedef std::complex<T> CT;
     public :
 
-        VIter() : p(0), s(0), c(NonConj) TMV_DEFFIRSTLAST(0,0) {}
-        VIter(CT* inp, int instep, ConjType inc 
+        VarConjIter() : p(0), s(0), c(NonConj) TMV_DEFFIRSTLAST(0,0) {}
+        VarConjIter(CT* inp, int instep, ConjType inc 
               TMV_PARAMFIRSTLAST(CT) ) : 
             p(inp), s(instep), c(inc) TMV_DEFFIRSTLAST(_first,_last) {}
-        VIter(const VIter<CT >& rhs) : 
+        VarConjIter(const VarConjIter<CT >& rhs) : 
             p(rhs.p), s(rhs.s), c(rhs.c) TMV_DEFFIRSTLAST(rhs._first,rhs._last) 
         {}
-        VIter<CT >& operator=(const VIter<CT >& rhs) 
+        VarConjIter<CT >& operator=(const VarConjIter<CT >& rhs) 
         { 
             TMVAssert(s==rhs.s);
             TMVAssert(c==rhs.c);
@@ -1437,17 +637,17 @@ namespace tmv {
             TMV_SETFIRSTLAST(rhs._first,rhs._last);
             return *this; 
         }
-        ~VIter() {}
+        ~VarConjIter() {}
 
         CT* getP() const { return p; }
         int step() const { return s; }
         ConjType getC() const { return c; }
 
-        inline bool operator==(const VIter<CT >& rhs) const 
+        inline bool operator==(const VarConjIter<CT >& rhs) const 
         { return p == rhs.p; }
-        inline bool operator!=(const VIter<CT >& rhs) const 
+        inline bool operator!=(const VarConjIter<CT >& rhs) const 
         { return p != rhs.p; }
-        inline bool operator<(const VIter<CT >& rhs) const 
+        inline bool operator<(const VarConjIter<CT >& rhs) const 
         { return (s > 0 ? p < rhs.p : p > rhs.p); }
 
         inline VarConjRef<CT > operator*() const
@@ -1463,23 +663,23 @@ namespace tmv {
             return VarConjRef<CT >(*p,c);
         }
 
-        inline VIter<CT >& operator++() { p += s; return *this; }
-        inline VIter<CT >& operator--() { p -= s; return *this; }
-        inline VIter<CT > operator++(int) 
-        { VIter<CT > p2 = *this; p+=s; return p2; }
-        inline VIter<CT > operator--(int) 
-        { VIter<CT > p2 = *this; p-=s; return p2; }
+        inline VarConjIter<CT >& operator++() { p += s; return *this; }
+        inline VarConjIter<CT >& operator--() { p -= s; return *this; }
+        inline VarConjIter<CT > operator++(int) 
+        { VarConjIter<CT > p2 = *this; p+=s; return p2; }
+        inline VarConjIter<CT > operator--(int) 
+        { VarConjIter<CT > p2 = *this; p-=s; return p2; }
 
-        inline VIter<CT >& operator+=(int n) 
+        inline VarConjIter<CT >& operator+=(int n) 
         { if(s==1) ++p; else p += n*s; return *this; }
-        inline VIter<CT >& operator-=(int n) 
+        inline VarConjIter<CT >& operator-=(int n) 
         { if(s==1) --p; else p -= n*s; return *this; }
-        inline VIter<CT > operator+(int n) const 
-        { return VIter<CT >(s==1?p+n:p+n*s,s,c TMV_FIRSTLAST ); }
-        inline VIter<CT > operator-(int n) const 
-        { return VIter<CT >(s==1?p-n:p-n*s,s,c TMV_FIRSTLAST ); }
+        inline VarConjIter<CT > operator+(int n) const 
+        { return VarConjIter<CT >(s==1?p+n:p+n*s,s,c TMV_FIRSTLAST ); }
+        inline VarConjIter<CT > operator-(int n) const 
+        { return VarConjIter<CT >(s==1?p-n:p-n*s,s,c TMV_FIRSTLAST ); }
 
-        inline ptrdiff_t operator-(const VIter<CT >& rhs) const 
+        inline ptrdiff_t operator-(const VarConjIter<CT >& rhs) const 
         {
             TMVAssert(rhs.c==c);
             TMVAssert(rhs.s==s);
@@ -1521,64 +721,65 @@ namespace tmv {
 #endif
     };
 
-    template <class T> class CVIter<std::complex<T> >
+    template <class T> class CVarConjIter<std::complex<T> >
     { 
         typedef std::complex<T> CT;
     public :
 
-        CVIter() : p(0), s(0), c(NonConj) {}
-        CVIter(const CT* inp, int instep, ConjType inc) :
+        CVarConjIter() : p(0), s(0), c(NonConj) {}
+        CVarConjIter(const CT* inp, int instep, ConjType inc) :
             p(inp), s(instep), c(inc) {}
-        CVIter(const CVIter<CT >& rhs) : p(rhs.p), s(rhs.s), c(rhs.c) {}
-        CVIter(const VIter<CT >& rhs) : 
+        CVarConjIter(const CVarConjIter<CT >& rhs) : 
+            p(rhs.p), s(rhs.s), c(rhs.c) {}
+        CVarConjIter(const VarConjIter<CT >& rhs) : 
             p(rhs.getP()), s(rhs.step()), c(rhs.getC()) {}
-        CVIter<CT >& operator=(const CVIter<CT >& rhs) 
+        CVarConjIter<CT >& operator=(const CVarConjIter<CT >& rhs) 
         { 
             TMVAssert(s==rhs.s);
             TMVAssert(c==rhs.c);
             p=rhs.p; 
             return *this; 
         }
-        CVIter<CT >& operator=(const VIter<CT >& rhs) 
+        CVarConjIter<CT >& operator=(const VarConjIter<CT >& rhs) 
         { 
             TMVAssert(s==rhs.step());
             TMVAssert(c==rhs.getC());
             p=rhs.getP(); 
             return *this; 
         }
-        ~CVIter() {}
+        ~CVarConjIter() {}
 
         const CT* getP() const { return p; }
         int step() const { return s; }
         ConjType getC() const { return c; }
 
-        inline bool operator==(const CVIter<CT >& rhs) const 
+        inline bool operator==(const CVarConjIter<CT >& rhs) const 
         { return p == rhs.p; }
-        inline bool operator!=(const CVIter<CT >& rhs) const 
+        inline bool operator!=(const CVarConjIter<CT >& rhs) const 
         { return p != rhs.p; }
-        inline bool operator<(const CVIter<CT >& rhs) const 
+        inline bool operator<(const CVarConjIter<CT >& rhs) const 
         { return (s > 0 ? p < rhs.p : p > rhs.p); }
 
         inline CT operator*() const 
         { return c==Conj ? std::conj(*p) : *p; }
 
-        inline CVIter<CT >& operator++() { p += s; return *this; }
-        inline CVIter<CT >& operator--() { p -= s; return *this; }
-        inline CVIter<CT > operator++(int) 
-        { CVIter<CT > p2 = *this; p+=s; return p2; }
-        inline CVIter<CT > operator--(int) 
-        { CVIter<CT > p2 = *this; p-=s; return p2; }
+        inline CVarConjIter<CT >& operator++() { p += s; return *this; }
+        inline CVarConjIter<CT >& operator--() { p -= s; return *this; }
+        inline CVarConjIter<CT > operator++(int) 
+        { CVarConjIter<CT > p2 = *this; p+=s; return p2; }
+        inline CVarConjIter<CT > operator--(int) 
+        { CVarConjIter<CT > p2 = *this; p-=s; return p2; }
 
-        inline CVIter<CT >& operator+=(int n) 
+        inline CVarConjIter<CT >& operator+=(int n) 
         { if(s==1) ++p; else p += n*s; return *this; }
-        inline CVIter<CT >& operator-=(int n) 
+        inline CVarConjIter<CT >& operator-=(int n) 
         { if(s==1) --p; else p -= n*s; return *this; }
-        inline CVIter<CT > operator+(int n) const 
-        { return CVIter<CT >(s==1?p+n:p+n*s,s,c); }
-        inline CVIter<CT > operator-(int n) const 
-        { return CVIter<CT >(s==1?p-n:p-n*s,s,c); }
+        inline CVarConjIter<CT > operator+(int n) const 
+        { return CVarConjIter<CT >(s==1?p+n:p+n*s,s,c); }
+        inline CVarConjIter<CT > operator-(int n) const 
+        { return CVarConjIter<CT >(s==1?p-n:p-n*s,s,c); }
 
-        inline ptrdiff_t operator-(const CVIter<CT >& rhs) const 
+        inline ptrdiff_t operator-(const CVarConjIter<CT >& rhs) const 
         {
             TMVAssert(rhs.c==c);
             TMVAssert(rhs.s==s);
@@ -1601,44 +802,72 @@ namespace tmv {
         ConjType c;
     };
 
-    template <class T> inline T& TMV_REF(T* vi, ConjType )
-    { return *vi; }
-    template <class T> inline VarConjRef<std::complex<T> > TMV_REF(
-        std::complex<T>* vi, ConjType ct)
-    { return VarConjRef<std::complex<T> >(*vi,ct); }
+    template <class T>
+    struct RefHelper
+    {
+        typedef T& reference;
+        typedef VIt<T,Unknown,NonConj> iterator;
+        typedef CVIt<T,Unknown,NonConj> const_iterator;
+        static reference makeRef(T* p, ConjType ) { return *p; }
+        static iterator makeIter(T* p, int s, ConjType ) 
+        { return iterator(p,s); }
+        static const_iterator makeIter(const T* p, int s, ConjType ) 
+        { return const_iterator(p,s); }
+    };
 
-    template <class T> inline std::string TMV_Text(ConjRef<T>)
+    template <class RT>
+    struct RefHelper<std::complex<RT> >
+    {
+        typedef std::complex<RT> T;
+        typedef VarConjRef<T> reference;
+        typedef VarConjIter<T>  iterator;
+        typedef CVarConjIter<T> const_iterator;
+        static reference makeRef(T* p, ConjType c) { return reference(*p,c); }
+        static iterator makeIter(T* p, int s, ConjType c) 
+        { return iterator(p,s,c); }
+        static const_iterator makeIter(const T* p, int s, ConjType c) 
+        { return const_iterator(p,s,c); }
+    };
+
+    template <class T>
+    inline std::string TMV_Text(ConjRef<T>)
     { return std::string("ConjRef<") + TMV_Text(T()) + ">"; }
+
+    template <class T, int S, ConjType C>
+    inline std::string TMV_Text(VIt<T,S,C> it)
+    {
+        std::ostringstream s;
+        s << "VIt<" << TMV_Text(T())<<",";
+        if (S == Unknown) s << "Unknown ("<<it.step()<<")";
+        else s << S;
+        s << ","<< TMV_Text(C) << ">";
+        return s.str();
+    }
+
+    template <class T, int S, ConjType C>
+    inline std::string TMV_Text(CVIt<T,S,C> it)
+    {
+        std::ostringstream s;
+        s << "CVIt<" << TMV_Text(T())<<",";
+        if (S == Unknown) s << "Unknown ("<<it.step()<<")";
+        else s << S;
+        s << ","<< TMV_Text(C) << ">";
+        return s.str();
+    }
 
     template <class T> inline std::string TMV_Text(VarConjRef<T>)
     { return std::string("VarConjRef<") + TMV_Text(T()) + ">"; }
 
-    template <class T, StepType S, ConjType C> 
-    inline std::string TMV_Text(VIt<T,S,C>)
+    template <class T> inline std::string TMV_Text(VarConjIter<T> it)
     { 
-        return std::string("VIt<") + TMV_Text(T()) + "," +
-            TMV_Text(S) + "," + TMV_Text(C) + ">"; 
+        return std::string("VarConjIter<") + TMV_Text(T()) + "," +
+            it.step() + "," + TMV_Text(it.getC()) + ">"; 
     }
 
-    template <class T, StepType S, ConjType C> 
-    inline std::string TMV_Text(CVIt<T,S,C>)
-    {
-        return std::string("CVIt<") + TMV_Text(T()) + "," +
-            TMV_Text(S) + "," + TMV_Text(C) + ">"; 
-    }
-
-    template <class T> inline std::string TMV_Text(VIter<T> it)
+    template <class T> inline std::string TMV_Text(CVarConjIter<T> it)
     { 
-        return std::string("VIter<") + TMV_Text(T()) + "," +
-            it.step()==1 ? TMV_Text(Unit) : TMV_Text(Step) + "," +
-            TMV_Text(it.getC()) + ">"; 
-    }
-
-    template <class T> inline std::string TMV_Text(CVIter<T> it)
-    { 
-        return std::string("CVIter<") + TMV_Text(T()) + "," +
-            it.step()==1 ? TMV_Text(Unit) : TMV_Text(Step) + "," +
-            TMV_Text(it.getC()) + ">"; 
+        return std::string("CVarConjIter<") + TMV_Text(T()) + "," +
+            it.step() + "," + TMV_Text(it.getC()) + ">"; 
     }
 
 } // namespace tmv

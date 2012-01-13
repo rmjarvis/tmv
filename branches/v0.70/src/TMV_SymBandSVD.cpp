@@ -226,7 +226,7 @@ namespace tmv {
     }
 
     template <class T>
-    Matrix<T> HermBandSVDiv<T>::getV() const
+    Matrix<T> HermBandSVDiv<T>::getVt() const
     {
         Matrix<T> temp = pimpl->U.adjoint();
         const int N = pimpl->S.size();
@@ -245,15 +245,15 @@ namespace tmv {
             *fout << "M = "<<mm<<std::endl;
             *fout << "U = "<<getU()<<std::endl;
             *fout << "S = "<<getS()<<std::endl;
-            *fout << "V = "<<getV()<<std::endl;
+            *fout << "Vt = "<<getVt()<<std::endl;
         }
-        Matrix<T> usv = getU()*getS()*getV();
+        Matrix<T> usv = getU()*getS()*getVt();
         RT nm = Norm(usv-mm);
-        nm /= Norm(getU())*Norm(getS())*Norm(getV());
+        nm /= Norm(getU())*Norm(getS())*Norm(getVt());
         RT cond = condition();
         if (fout) {
-            *fout << "USV = "<<usv<<std::endl;
-            *fout << "Norm(M-USV)/Norm(USV) = "<<nm;
+            *fout << "USVt = "<<usv<<std::endl;
+            *fout << "Norm(M-USVt)/Norm(USVt) = "<<nm;
             *fout <<"  "<<cond<<" * "<<TMV_Epsilon<T>()<<std::endl;
         }
         return nm < cond*RT(mm.colsize())*TMV_Epsilon<T>();
@@ -272,12 +272,12 @@ namespace tmv {
     {
     public :
         SymBandSVDiv_Impl(const GenSymBandMatrix<T>& m) :
-            U(m.size(),m.size()), S(m.size()), V(m.size(),m.size()), 
+            U(m.size(),m.size()), S(m.size()), Vt(m.size(),m.size()), 
             logdet(0), signdet(1), kmax(0) {}
 
         Matrix<T,ColMajor> U;
         DiagMatrix<RT> S;
-        Matrix<T,ColMajor> V;
+        Matrix<T,ColMajor> Vt;
         RT logdet;
         T signdet;
         mutable int kmax;
@@ -290,7 +290,7 @@ namespace tmv {
         TMVAssert(isComplex(T()));
 
         SV_Decompose<T>(A,pimpl->U.view(),pimpl->S.view(),
-                       pimpl->V.view(),pimpl->logdet,pimpl->signdet);
+                       pimpl->Vt.view(),pimpl->logdet,pimpl->signdet);
         thresh(TMV_Epsilon<T>());
     }
 
@@ -301,14 +301,14 @@ namespace tmv {
     void SymBandSVDiv<T>::doLDivEq(const MatrixView<T1>& m) const
     {
         TMVAssert(m.colsize() == pimpl->U.colsize());
-        CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,m);
+        CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,m);
     }
 
     template <class T> template <class T1>
     void SymBandSVDiv<T>::doRDivEq(const MatrixView<T1>& m) const
     {
         TMVAssert(m.rowsize() == pimpl->U.rowsize());
-        CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,m);
+        CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,m);
     }
 
     template <class T> template <class T1, class T2> 
@@ -318,7 +318,7 @@ namespace tmv {
         TMVAssert(m.rowsize() == x.rowsize());
         TMVAssert(m.colsize() == colsize());
         TMVAssert(x.colsize() == rowsize());
-        CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,x);
+        CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,x);
     }
 
     template <class T> template <class T1, class T2> 
@@ -328,7 +328,7 @@ namespace tmv {
         TMVAssert(m.colsize() == x.colsize());
         TMVAssert(m.rowsize() == rowsize());
         TMVAssert(x.rowsize() == colsize());
-        CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,x);
+        CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,x);
     }
 
     template <class T>
@@ -350,14 +350,14 @@ namespace tmv {
     {
         TMVAssert(sinv.size() == pimpl->S.size());
         TMVAssert(sinv.issym());
-        CallSymSV_Inverse(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,sinv);
+        CallSymSV_Inverse(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,sinv);
     }
 
     template <class T> template <class T1>
     void SymBandSVDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
     { 
         CallSymSV_Inverse(
-            T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
+            T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,
             SymMatrixViewOf(minv,Upper));
         if (pimpl->S.size() > 1)
             minv.lowerTri().offDiag() = minv.upperTri().offDiag().transpose();
@@ -366,15 +366,15 @@ namespace tmv {
     template <class T>
     void SymBandSVDiv<T>::doMakeInverseATA(const MatrixView<T>& minv) const
     {
-        // A = U S V
-        // At = Vt S Ut
-        // AtA = Vt S^2 V
-        // (AtA)^-1 = Vt S^-2 V
+        // A = U S Vt
+        // At = V S Ut
+        // AtA = V S^2 Vt
+        // (AtA)^-1 = V S^-2 Vt
         //
-        Matrix<T,RowMajor> SinvV =
-            pimpl->V.rowRange(0,pimpl->kmax) /
+        Matrix<T,RowMajor> SinvVt =
+            pimpl->Vt.rowRange(0,pimpl->kmax) /
             pimpl->S.subDiagMatrix(0,pimpl->kmax);
-        minv = SinvV.adjoint() * SinvV;
+        minv = SinvVt.adjoint() * SinvVt;
     }
 
     template <class T> 
@@ -435,8 +435,8 @@ namespace tmv {
     { return pimpl->S.view(); }
 
     template <class T>
-    ConstMatrixView<T> SymBandSVDiv<T>::getV() const
-    { return pimpl->V.view(); }
+    ConstMatrixView<T> SymBandSVDiv<T>::getVt() const
+    { return pimpl->Vt.view(); }
 
     template <class T> 
     bool SymBandSVDiv<T>::checkDecomp(
@@ -448,15 +448,15 @@ namespace tmv {
             *fout << "M = "<<mm<<std::endl;
             *fout << "U = "<<getU()<<std::endl;
             *fout << "S = "<<getS()<<std::endl;
-            *fout << "V = "<<getV()<<std::endl;
+            *fout << "Vt = "<<getVt()<<std::endl;
         }
-        Matrix<T> usv = getU()*getS()*getV();
+        Matrix<T> usv = getU()*getS()*getVt();
         RT nm = Norm(usv-mm);
-        nm /= Norm(getU())*Norm(getS())*Norm(getV());
+        nm /= Norm(getU())*Norm(getS())*Norm(getVt());
         RT cond = condition();
         if (fout) {
-            *fout << "USV = "<<usv<<std::endl;
-            *fout << "Norm(M-USV)/Norm(USV) = "<<nm;
+            *fout << "USVt = "<<usv<<std::endl;
+            *fout << "Norm(M-USVt)/Norm(USVt) = "<<nm;
             *fout <<"  "<<cond<<" * "<<TMV_Epsilon<T>()<<std::endl;
         }
         return nm < cond*RT(mm.colsize())*TMV_Epsilon<T>();

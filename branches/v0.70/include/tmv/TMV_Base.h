@@ -345,14 +345,6 @@ namespace tmv {
     { return std::abs(std::real(x)) + std::abs(std::imag(x)); }
 
     template <class T> 
-    inline T TMV_SIGN(T x, T )
-    { return x > 0 ? T(1) : T(-1); }
-
-    template <class T> 
-    inline std::complex<T> TMV_SIGN(std::complex<T> x, T absx)
-    { return absx > 0 ? x/absx : std::complex<T>(1); }
-
-    template <class T> 
     inline T TMV_MIN(T x, T y)
     { return x > y ? y : x; }
 
@@ -718,10 +710,75 @@ namespace tmv {
     template <class T>
     inline bool TMV_Underflow(T x)
     {
-        typedef typename Traits<T>::real_type RT;
-        return TMV_ABS2(x) < 
-            std::numeric_limits<RT>::min() * RT(tmv::Traits<T>::twoifcomplex); 
+        return tmv::Traits<T>::isinteger ? false :
+            TMV_ABS2(x) < std::numeric_limits<T>::min();
     }
+
+    template <class T>
+    inline bool TMV_Underflow(std::complex<T> x)
+    {
+        return tmv::Traits<T>::isinteger ? false :
+            TMV_ABS2(x) < T(2) * std::numeric_limits<T>::min();
+    }
+
+    template <class T>
+    inline T TMV_Divide(T x, T y)
+    { return x / y; }
+
+    template <class T>
+    inline std::complex<T> TMV_Divide(std::complex<T> x, T y)
+    {
+        // return x / y;
+        // Amazingly, some implementations get even this one wrong!  
+        // So I need to do each component explicitly.
+        return std::complex<T>(x.real()/y,x.imag()/y); 
+    }
+
+    template <class T>
+    inline T TMV_InverseOf(T x)
+    { return T(1) / x; }
+
+    template <class T>
+    inline std::complex<T> TMV_InverseOf(std::complex<T> x)
+    {
+        // The standard library's implemenation of complex division
+        // does not guard against overflow/underflow.  So we have
+        // our own version here.
+
+        T xr = x.real();
+        T xi = x.imag();
+        if (std::abs(xr) > std::abs(xi)) {
+            xi /= xr;
+            T denom = xr*(T(1)+xi*xi);
+            return std::complex<T>(T(1)/denom,-xi/denom);
+        } else if (std::abs(xi) > T(0)) {
+            xr /= xi;
+            T denom = xi*(T(1)+xr*xr);
+            return std::complex<T>(xr/denom,T(-1)/denom);
+        } else {
+            // (xr,xi) = (0,0)
+            // division by zero.  Just go ahead and do it.
+            return T(1) / xi;
+        }
+    }
+
+
+    template <class T>
+    inline std::complex<T> TMV_Divide(T x, std::complex<T> y)
+    { return x * TMV_InverseOf(y); }
+
+    template <class T>
+    inline std::complex<T> TMV_Divide(std::complex<T> x, std::complex<T> y)
+    { return x * TMV_InverseOf(y); }
+
+    template <class T> 
+    inline T TMV_SIGN(T x, T )
+    { return x > 0 ? T(1) : T(-1); }
+
+    template <class T> 
+    inline std::complex<T> TMV_SIGN(std::complex<T> x, T absx)
+    { return absx > 0 ? TMV_Divide(x,absx) : std::complex<T>(1); }
+
 
     extern bool TMV_FALSE; 
     // = false (in TMV_Vector.cpp), but without the unreachable returns
@@ -828,37 +885,7 @@ namespace tmv {
 #define TMV_SETFIRSTLAST(f,l)
 #endif
 
-    template <class T> 
-    inline ConjType conjugateOf(ConjType C)
-    {
-        return (isReal(T()) || C==Conj) ? NonConj : Conj;
-    }
-#define TMV_ConjOf(T,C) conjugateOf<T>(C)
-
-    template <class T, StepType S, ConjType C> 
-    class VIt;
-    template <class T, StepType S, ConjType C> 
-    class CVIt;
-    template <class T> 
-    class VIter;
-    template <class T> 
-    class CVIter;
-    template <class T> 
-    class ConjRef;
-    template <class T> 
-    class VarConjRef;
-
-    template <class T> 
-    struct AuxRef
-    {
-        typedef T& reference;
-    };
-    template <class T> 
-    struct AuxRef<std::complex<T> >
-    {
-        typedef VarConjRef<std::complex<T> > reference;
-    };
-#define TMV_RefType(T) typename AuxRef<T>::reference
+#define TMV_ConjOf(T,C) ((isReal(T()) || C==Conj) ? NonConj : Conj)
 
     // Use DEBUGPARAM(x) for parameters that are only used in TMVAssert
     // statements.  So then they don't give warnings when compiled with 

@@ -56,25 +56,25 @@ namespace tmv {
     template <class T, class Tm, class Tx> 
     void SV_LDiv(
         const GenMatrix<T>& U, const GenDiagMatrix<RT>& SS, 
-        const GenMatrix<T>& V, int kmax,
+        const GenMatrix<T>& Vt, int kmax,
         const GenMatrix<Tm>& m, const MatrixView<Tx>& x)
     {
         // A x = m
-        // U S V x = m
-        // x = Vt S^-1 Ut m
+        // U S Vt x = m
+        // x = V S^-1 Ut m
         TMVAssert(m.colsize() == U.colsize()); // = M
-        TMVAssert(x.colsize() == V.rowsize()); // = N
+        TMVAssert(x.colsize() == Vt.rowsize()); // = N
         TMVAssert(x.rowsize() == m.rowsize()); // = R
-        TMVAssert(kmax <= V.rowsize()); // = K
+        TMVAssert(kmax <= Vt.rowsize()); // = K
         TMVAssert(kmax <= U.colsize());
 #ifdef XDEBUG
-        Matrix<T> A = U * SS * V;
+        Matrix<T> A = U * SS * Vt;
         Matrix<Tm> m0(m);
 #endif
 
         Matrix<Tx,RowMajor> m2 = U.adjoint().rowRange(0,kmax) * m; // KxR
         m2 /= SS.subDiagMatrix(0,kmax);
-        x = V.adjoint().colRange(0,kmax) * m2; // NxR
+        x = Vt.adjoint().colRange(0,kmax) * m2; // NxR
 
 #ifdef XDEBUG
         // Note: this test only works for square matrices
@@ -84,8 +84,8 @@ namespace tmv {
             cerr<<"SV_LDiv\n";
             cerr<<"U = "<<U<<endl;
             cerr<<"S = "<<SS.diag()<<endl;
-            cerr<<"V = "<<V<<endl;
-            cerr<<"A = USV = "<<A<<endl;
+            cerr<<"Vt = "<<Vt<<endl;
+            cerr<<"A = USVt = "<<A<<endl;
             cerr<<"m0 = "<<m0<<endl;
             cerr<<"x = "<<x<<endl;
             cerr<<"Ax = "<<mm<<endl;
@@ -101,23 +101,23 @@ namespace tmv {
     template <class T, class Tm, class Tx> 
     void SV_RDiv(
         const GenMatrix<T>& U, const GenDiagMatrix<RT>& SS, 
-        const GenMatrix<T>& V, int kmax,
+        const GenMatrix<T>& Vt, int kmax,
         const GenMatrix<Tm>& m, const MatrixView<Tx>& x) 
     {
         // x A = m
-        // x U S V = m
-        // x = m Vt S^-1 Ut
-        TMVAssert(m.rowsize() == V.rowsize()); // = N
+        // x U S Vt = m
+        // x = m V S^-1 Ut
+        TMVAssert(m.rowsize() == Vt.rowsize()); // = N
         TMVAssert(x.rowsize() == U.colsize()); // = M
         TMVAssert(x.colsize() == m.colsize()); // = R
         TMVAssert(kmax <= U.colsize()); // = K
-        TMVAssert(kmax <= V.rowsize());
+        TMVAssert(kmax <= Vt.rowsize());
 #ifdef XDEBUG
-        Matrix<T> A = U * SS * V;
+        Matrix<T> A = U * SS * Vt;
         Matrix<Tm> m0(m);
 #endif
 
-        Matrix<Tx,RowMajor> m2 = m * V.adjoint().colRange(0,kmax); // = RxK
+        Matrix<Tx,RowMajor> m2 = m * Vt.adjoint().colRange(0,kmax); // = RxK
         m2 %= SS.subDiagMatrix(0,kmax);
         x = m2 * U.adjoint().rowRange(0,kmax); // = RxM
 
@@ -129,8 +129,8 @@ namespace tmv {
             cerr<<"SV_RDiv\n";
             cerr<<"U = "<<U<<endl;
             cerr<<"S = "<<SS.diag()<<endl;
-            cerr<<"V = "<<V<<endl;
-            cerr<<"A = USV = "<<A<<endl;
+            cerr<<"Vt = "<<Vt<<endl;
+            cerr<<"A = USVt = "<<A<<endl;
             cerr<<"m0 = "<<m0<<endl;
             cerr<<"x = "<<x<<endl;
             cerr<<"xA = "<<mm<<endl;

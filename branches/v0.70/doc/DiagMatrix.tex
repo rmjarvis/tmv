@@ -18,6 +18,15 @@ also inherit from \tt{GenDiagMatrix}.
 \index{DiagMatrix!DiagMatrixComposite}
 \index{BaseMatrix}
 
+In addition to the data type template parameter (indicated here by \tt{T} as usual),
+there is also a second template parameter that specifies attributes of the
+\tt{DiagMatrix}.  The only attributes that are allowed are:
+\begin{itemize}
+\item \tt{CStyle} or \tt{FortranStyle}
+\end{itemize}
+which work basically the same way as for a \tt{Vector}.
+The default value is \tt{CStyle}.
+
 Most functions and methods for \tt{DiagMatrix} work the same
 as they do for \tt{Matrix}.
 In these cases, we will just list the functions
@@ -32,46 +41,46 @@ we will explain the difference.
 \index{DiagMatrix!Constructors}
 \label{DiagMatrix_Constructors}
 
-As usual, the optional \tt{index} template argument specifies which indexing
-style to use.
+As usual, the optional \tt{A} template argument specifies attributes about
+the \tt{DiagMatrix}.  The default value if not specified is \tt{CStyle}.
 
 \begin{itemize}
 
 \item
 \begin{tmvcode}
-tmv::DiagMatrix<T,index> d()
+tmv::DiagMatrix<T,A> d()
 \end{tmvcode}
 Makes a \tt{DiagMatrix} with zero size.  You would normally use the \tt{resize} function later to
 change the size to some useful value.
 
 \item 
 \begin{tmvcode}
-tmv::DiagMatrix<T,index> d(int n)
+tmv::DiagMatrix<T,A> d(int n)
 \end{tmvcode}
-Makes an \tt{n} $\times$ \tt{n} \tt{DiagMatrix} with \underline{uninitialized} values.
-If extra debugging is turned on (with \tt{-DTMV\_EXTRA\_DEBUG}), then the values along the diagonal are in fact initialized to 888. 
+Makes an \tt{n} $\times$ \tt{n} \tt{DiagMatrix} with {\em uninitialized} values.
+If extra debugging is turned on (with the compiler flag \tt{-DTMV\_EXTRA\_DEBUG}), then the values along the diagonal are in fact initialized to 888. 
 
 \item
 \begin{tmvcode}
-tmv::DiagMatrix<T,index> d(int n, T x)
+tmv::DiagMatrix<T,A> d(int n, T x)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{DiagMatrix} with all values along the diagonal equal to \tt{x}.
 
 \item
 \begin{tmvcode}
-tmv::DiagMatrix<T,index> d(const GenVector<T>& v)
+tmv::DiagMatrix<T,A> d(const GenVector<T>& v)
 \end{tmvcode}
 Makes a \tt{DiagMatrix} with \tt{v} as the diagonal.
 
 \item 
 \begin{tmvcode}
-tmv::DiagMatrix<T,index> d(const GenMatrix<T>& m)
+tmv::DiagMatrix<T,A> d(const GenMatrix<T>& m)
 \end{tmvcode}
 Makes a \tt{DiagMatrix} with the diagonal of \tt{m} as the diagonal.
 
 \item
 \begin{tmvcode}
-tmv::DiagMatrix<T,index> d1(const GenDiagMatrix<T2>& d2)
+tmv::DiagMatrix<T,A> d1(const GenDiagMatrix<T2>& d2)
 d1 = d2
 \end{tmvcode}
 Copy the \tt{DiagMatrix d2}, which may be of any type \tt{T2} so long
@@ -80,7 +89,7 @@ The assignment operator has the same flexibility.
 
 \item
 \begin{tmvcode}
-tmv::DiagMatrix<T,index> d;
+tmv::DiagMatrix<T,A> d;
 d << d00,
          d11,
              d22,
@@ -91,10 +100,9 @@ Initialize the \tt{DiagMatrix d}, with a list of values.  Note that only the val
 
 \item
 \begin{tmvcode}
-tmv::DiagMatrixView<T,index> d = 
-      DiagMatrixViewOf(VectorView<T,index> v)
-tmv::ConstDiagMatrixView<T,index> d = 
-      DiagMatrixViewOf(ConstVectorView<T,index> v)
+tmv::DiagMatrixView<T,A> d = DiagMatrixViewOf(VectorView<T> v)
+tmv::ConstDiagMatrixView<T,A> d = 
+      DiagMatrixViewOf(ConstVectorView<T> v)
 \end{tmvcode}
 \index{Vector!Functions of!DiagMatrixViewOf}
 \index{Vector!View as a diagonal matrix}
@@ -102,13 +110,12 @@ Makes a \tt{DiagMatrixView} whose diagonal is \tt{v}.
 
 \item
 \begin{tmvcode}
-tmv::DiagMatrixView<T,index> d = 
-      tmv::DiagMatrixViewOf(T* vv, int n)
-tmv::ConstDiagMatrixView<T,index> d = 
+tmv::DiagMatrixView<T,A> d = tmv::DiagMatrixViewOf(T* vv, int n)
+tmv::ConstDiagMatrixView<T,A> d = 
       tmv::DiagMatrixViewOf(const T* vv, int n)
-tmv::DiagMatrixView<T,index> d = 
+tmv::DiagMatrixView<T,A> d = 
       tmv::DiagMatrixViewOf(T* vv, int n, int step)
-tmv::ConstDiagMatrixView<T,index> d = 
+tmv::ConstDiagMatrixView<T,A> d = 
       tmv::DiagMatrixViewOf(const T* vv, int n, int step)
 \end{tmvcode}
 \index{DiagMatrix!View of raw memory}
@@ -121,13 +128,12 @@ Make a \tt{DiagMatrixView} whose diagonal consists of the actual memory elements
 \index{DiagMatrix!Access methods}
 \label{DiagMatrix_Access}
 
-\begin{tmvcode}
-d.resize(int newsize)
-\end{tmvcode}
-\index{DiagMatrix!Methods!resize}
+\begin{itemize}
 
+\item
 \begin{tmvcode}
 d.nrows() = d.ncols() = d.colsize() = d.rowsize() = d.size()
+d.resize(int newsize)
 d(i,j)
 d(i) = d(i,i)
 \end{tmvcode}
@@ -136,25 +142,29 @@ d(i) = d(i,i)
 \index{DiagMatrix!Methods!rowsize}
 \index{DiagMatrix!Methods!colsize}
 \index{DiagMatrix!Methods!size}
+\index{DiagMatrix!Methods!resize}
 \index{DiagMatrix!Methods!operator()}
-For the mutable \tt{d(i,j)} version, 
-\tt{i} must equal \tt{j}.
+For the mutable \tt{d(i,j)} version, \tt{i} must equal \tt{j}.
 If \tt{d} is not mutable, then \tt{d(i,j)} with \tt{i}$\neq$\tt{j} returns the 
 value 0.
 
+\item
 \begin{tmvcode}
 d.diag()
 \end{tmvcode}
 \index{DiagMatrix!Methods!diag}
+This returns the main diagonal as usual.
 
+\item
 \begin{tmvcode}
-typename tmv::DiagMatrix<T>::iterator d.begin()
-typename tmv::DiagMatrix<T>::iterator d.end()
-typename tmv::DiagMatrix<T>::const_iterator d.begin() const
-typename tmv::DiagMatrix<T>::const_iterator d.end() const
+DiagMatrix<T>::iterator d.begin()
+DiagMatrix<T>::iterator d.end()
+DiagMatrix<T>::const_iterator d.begin() const
+DiagMatrix<T>::const_iterator d.end() const
 \end{tmvcode}
 These iterate along the diagonal of the \tt{DiagMatrix}.
 
+\item
 \begin{tmvcode}
 T* d.ptr()
 const T* d.cptr() const
@@ -167,10 +177,13 @@ bool d.isconj() const
 \index{DiagMatrix!Methods!isconj}
 These methods allow for direct memory access of a \tt{DiagMatrix}.
 
+\item
 \begin{tmvcode}
 d.subDiagMatrix(int i1, int i2, int istep = 1)
 \end{tmvcode}
 This is equivalent to \tt{DiagMatrixViewOf(d.diag().subVector(i1,i2,istep))}.
+
+\item
 \begin{tmvcode}
 d.transpose() = d.view()
 d.conjugate() = d.adjoint()
@@ -188,6 +201,9 @@ d.imagPart()
 \index{DiagMatrix!Methods!fView}
 \index{DiagMatrix!Methods!realPart}
 \index{DiagMatrix!Methods!imagPart}
+These return \tt{DiagMatrixView}s.
+
+\end{itemize}
 
 \subsection{Functions}
 \index{DiagMatrix!Functions of}

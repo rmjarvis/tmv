@@ -93,10 +93,10 @@ namespace tmv {
         typedef ConstVectorView<RT,A> const_real_type;
         typedef VectorView<RT,A> real_type;
         typedef T value_type;
-        typedef VIt<T,Unit,NonConj> iterator;
-        typedef CVIt<T,Unit,NonConj> const_iterator;
-        typedef VIt<T,Step,NonConj> reverse_iterator;
-        typedef CVIt<T,Step,NonConj> const_reverse_iterator;
+        typedef VIt<T,1,NonConj> iterator;
+        typedef CVIt<T,1,NonConj> const_iterator;
+        typedef VIt<T,-1,NonConj> reverse_iterator;
+        typedef CVIt<T,-1,NonConj> const_reverse_iterator;
         typedef T& reference;
 
         //

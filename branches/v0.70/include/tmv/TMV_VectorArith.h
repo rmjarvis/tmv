@@ -34,6 +34,7 @@
 #define TMV_VectorArith_H
 
 #include "tmv/TMV_VectorArithFunc.h"
+#include "tmv/TMV_VIt.h"
 
 #define CT std::complex<T>
 #define CCT ConjRef<std::complex<T> >
@@ -112,19 +113,19 @@ namespace tmv {
 
     template <class T> 
     inline const VectorView<T>& operator/=(const VectorView<T>& v1, T x2)
-    { MultXV(T(1)/x2,v1); return v1; }
+    { MultXV(TMV_InverseOf(x2),v1); return v1; }
 
     template <class T> 
     inline const VectorView<CT>& operator/=(const VectorView<CT>& v1, T x2)
-    { MultXV(T(1)/x2,v1); return v1; }
+    { MultXV(TMV_InverseOf(x2),v1); return v1; }
 
     template <class T> 
     inline const VectorView<CT>& operator/=(const VectorView<CT>& v1, CCT x2)
-    { MultXV(T(1)/CT(x2),v1); return v1; }
+    { MultXV(TMV_InverseOf(CT(x2)),v1); return v1; }
 
     template <class T> 
     inline const VectorView<CT>& operator/=(const VectorView<CT>& v1, VCT x2)
-    { MultXV(T(1)/CT(x2),v1); return v1; }
+    { MultXV(TMV_InverseOf(CT(x2)),v1); return v1; }
 
 #define GENMATRIX GenVector
 #define PRODXM ProdXV

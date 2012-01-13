@@ -68,47 +68,47 @@ namespace tmv {
     template <class T> 
     static void NonBlockBidiagonalize(
         const MatrixView<T>& A, const VectorView<T>& Ubeta,
-        const VectorView<T>& Vbeta, const VectorView<RT>& D,
+        const VectorView<T>& Vtbeta, const VectorView<RT>& D,
         const VectorView<RT>& E, T& signdet)
     {
 #ifdef XDEBUG
         //cout<<"Start NonBlockBidiag: A = "<<A<<endl;
         Matrix<T> A0(A);
 #endif
-        // Decompose A into U B V
+        // Decompose A into U B Vt
         // The Bidiagonal Matrix B is stored as two vectors: D, E
         // D is the diagonal, E is the super-diagonal
-        // A along with Ubeta and Vbeta hold the U and V matrices.
+        // A along with Ubeta and Vtbeta hold the U and Vt matrices.
         const int M = A.colsize();
         const int N = A.rowsize();
 
         TMVAssert(N <= M);
         TMVAssert(N > 0);
         TMVAssert(Ubeta.size() == N);
-        TMVAssert(Vbeta.size() == N-1);
+        TMVAssert(Vtbeta.size() == N-1);
         TMVAssert(D.size() == N);
         TMVAssert(E.size() == N-1);
         TMVAssert(A.iscm() || A.isrm());
         TMVAssert(!Ubeta.isconj());
-        TMVAssert(!Vbeta.isconj());
+        TMVAssert(!Vtbeta.isconj());
 
         // We use Householder reflections to reduce A to the bidiagonal form:
         T* Uj = Ubeta.ptr();
-        T* Vj = Vbeta.ptr();
+        T* Vtj = Vtbeta.ptr();
         //cout<<"Start Bidiag\n";
         //cout<<"A = "<<A<<endl;
-        for(int j=0;j<N-1;++j,++Uj,++Vj) {
+        for(int j=0;j<N-1;++j,++Uj,++Vtj) {
 #ifdef TMVFLDEBUG
             TMVAssert(Uj >= Ubeta._first);
             TMVAssert(Uj < Ubeta._last);
-            TMVAssert(Vj >= Vbeta._first);
-            TMVAssert(Vj < Vbeta._last);
+            TMVAssert(Vtj >= Vtbeta._first);
+            TMVAssert(Vtj < Vtbeta._last);
 #endif
             //cout<<"j = "<<j<<endl;
             *Uj = HouseholderReflect(A.subMatrix(j,M,j,N),signdet);
             //cout<<"U reflect: A("<<j<<","<<j<<") = "<<A.cref(j,j)<<endl;
-            *Vj = HouseholderReflect(A.transpose().subMatrix(j+1,N,j,M),signdet);
-            //cout<<"V reflect: A("<<j<<","<<j+1<<") = "<<A.cref(j,j+1)<<endl;
+            *Vtj = HouseholderReflect(A.transpose().subMatrix(j+1,N,j,M),signdet);
+            //cout<<"Vt reflect: A("<<j<<","<<j+1<<") = "<<A.cref(j,j+1)<<endl;
         }
 #ifdef TMVFLDEBUG
         TMVAssert(Uj >= Ubeta._first);
@@ -131,23 +131,23 @@ namespace tmv {
 #ifdef XDEBUG
         Matrix<T> U(A);
         GetQFromQR(U.view(),Ubeta);
-        Matrix<T> V(N,N);
-        V.setToIdentity();
-        V.subMatrix(1,N,1,N) = A.subMatrix(0,N-1,1,N);
-        GetQFromQR(V.subMatrix(1,N,1,N).transpose(),Vbeta);
+        Matrix<T> Vt(N,N);
+        Vt.setToIdentity();
+        Vt.subMatrix(1,N,1,N) = A.subMatrix(0,N-1,1,N);
+        GetQFromQR(Vt.subMatrix(1,N,1,N).transpose(),Vtbeta);
         Matrix<RT> B(N,N,RT(0));
         B.diag() = D;
         B.diag(1) = E;
-        Matrix<T> AA = U*B*V;
+        Matrix<T> AA = U*B*Vt;
         if (!(Norm(A0-AA) < 0.001*Norm(A0))) {
             cerr<<"Bidiagonalize: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"A = "<<A<<endl;
             cerr<<"Ubeta = "<<Ubeta<<endl;
-            cerr<<"Vbeta = "<<Vbeta<<endl;
+            cerr<<"Vtbeta = "<<Vtbeta<<endl;
             cerr<<"U = "<<U<<endl;
             cerr<<"B = "<<B<<endl;
-            cerr<<"V = "<<V<<endl;
-            cerr<<"UBV = "<<AA<<endl;
+            cerr<<"Vt = "<<Vt<<endl;
+            cerr<<"UBVt = "<<AA<<endl;
             abort();
         }
 #endif
@@ -156,7 +156,7 @@ namespace tmv {
     template <class T> 
     static void BlockBidiagonalize(
         const MatrixView<T>& A, const VectorView<T>& Ubeta,
-        const VectorView<T>& Vbeta, const VectorView<RT>& D,
+        const VectorView<T>& Vtbeta, const VectorView<RT>& D,
         const VectorView<RT>& E, T& signdet)
     {
         // Normally we keep the Z matrix for block Householder matrices where 
@@ -195,22 +195,22 @@ namespace tmv {
         TMVAssert(D.size() == N);
         TMVAssert(E.size() == N-1);
         TMVAssert(!Ubeta.isconj());
-        TMVAssert(!Vbeta.isconj());
+        TMVAssert(!Vtbeta.isconj());
         TMVAssert(Ubeta.step()==1);
-        TMVAssert(Vbeta.step()==1);
+        TMVAssert(Vtbeta.step()==1);
         TMVAssert(E.step()==1);
 
         Matrix<T,RowMajor> ZYtm(TMV_MIN(BIDIAG_BLOCKSIZE,N-1),N);
         Matrix<T,ColMajor> mXtW(M,TMV_MIN(BIDIAG_BLOCKSIZE,N-1));
 
         T* Uj = Ubeta.ptr();
-        T* Vj = Vbeta.ptr();
+        T* Vtj = Vtbeta.ptr();
         RT* Dj = D.ptr();
         const int Ds = D.step();
         RT* Ej = E.ptr();
         for(int j1=0;j1<N-1;) {
             int j2 = TMV_MIN(N-1,j1+BIDIAG_BLOCKSIZE);
-            for(int j=j1,jj=0;j<j2;++j,++jj,++Uj,++Vj,Dj+=Ds,++Ej) { // jj = j-j1
+            for(int j=j1,jj=0;j<j2;++j,++jj,++Uj,++Vtj,Dj+=Ds,++Ej) { // jj = j-j1
                 //cout<<"j = "<<j<<endl;
 
                 // Update current column:
@@ -313,19 +313,19 @@ namespace tmv {
                 }
                 //cout<<"v => "<<v<<endl;
 
-                // Do the Householder reflection for V
+                // Do the Householder reflection for Vt
                 //
                 T bv = HouseholderReflect(v,signdet);
                 //cout<<"bv = "<<bv<<endl;
 #ifdef TMVFLDEBUG
-                TMVAssert(Vj >= Vbeta._first);
-                TMVAssert(Vj < Vbeta._last);
+                TMVAssert(Vtj >= Vtbeta._first);
+                TMVAssert(Vtj < Vtbeta._last);
                 TMVAssert(Ej >= E._first);
                 TMVAssert(Ej < E._last);
                 TMVAssert(v.ptr() >= A._first);
                 TMVAssert(v.ptr() < A._last);
 #endif
-                *Vj = bv;
+                *Vtj = bv;
                 TMVAssert(TMV_IMAG(*v.cptr()) == RT(0));
                 *Ej = TMV_REAL(*v.cptr());
                 *v.ptr() = T(1);
@@ -392,34 +392,34 @@ namespace tmv {
 #ifdef XDEBUG
         Matrix<T> U(A);
         GetQFromQR(U.view(),Ubeta);
-        Matrix<T> V(N,N);
-        V.setToIdentity();
-        V.subMatrix(1,N,1,N) = A.subMatrix(0,N-1,1,N);
-        GetQFromQR(V.subMatrix(1,N,1,N).transpose(),Vbeta);
+        Matrix<T> Vt(N,N);
+        Vt.setToIdentity();
+        Vt.subMatrix(1,N,1,N) = A.subMatrix(0,N-1,1,N);
+        GetQFromQR(Vt.subMatrix(1,N,1,N).transpose(),Vtbeta);
         Matrix<RT> B(N,N,RT(0));
         B.diag() = D;
         B.diag(1) = E;
-        Matrix<T> AA = U*B*V;
+        Matrix<T> AA = U*B*Vt;
         if (!(Norm(A0-AA) < 0.001*Norm(A0))) {
             cerr<<"Bidiagonalize: A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"A = "<<A<<endl;
             cerr<<"U = "<<U<<endl;
             cerr<<"B = "<<B<<endl;
-            cerr<<"V = "<<V<<endl;
-            cerr<<"UBV = "<<AA<<endl;
+            cerr<<"Vt = "<<Vt<<endl;
+            cerr<<"UBVt = "<<AA<<endl;
             Matrix<T,ColMajor> A2 = A0;
             Vector<T> Ub2(Ubeta.size());
-            Vector<T> Vb2(Vbeta.size());
+            Vector<T> Vtb2(Vtbeta.size());
             Vector<RT> D2(D.size());
             Vector<RT> E2(E.size());
             T signdet2(0);
             NonBlockBidiagonalize(
-                A2.view(),Ub2.view(),Vb2.view(),D2.view(),E2.view(),signdet2);
+                A2.view(),Ub2.view(),Vtb2.view(),D2.view(),E2.view(),signdet2);
             cerr<<"NonBlock: "<<A2<<endl;
             cerr<<"Ubeta = "<<Ubeta<<endl;
             cerr<<"Nonblock: "<<Ub2<<endl;
-            cerr<<"Vbeta = "<<Vbeta<<endl;
-            cerr<<"Nonblock: "<<Vb2<<endl;
+            cerr<<"Vtbeta = "<<Vtbeta<<endl;
+            cerr<<"Nonblock: "<<Vtb2<<endl;
             cerr<<"D = "<<D<<endl;
             cerr<<"D2 = "<<D2<<endl;
             cerr<<"E = "<<E<<endl;
@@ -433,34 +433,34 @@ namespace tmv {
     template <class T> 
     static inline void NonLapBidiagonalize(
         const MatrixView<T>& A, const VectorView<T>& Ubeta,
-        const VectorView<T>& Vbeta, const VectorView<RT>& D,
+        const VectorView<T>& Vtbeta, const VectorView<RT>& D,
         const VectorView<RT>& E, T& signdet)
     {
         TMVAssert(A.rowsize() <= A.colsize());
         TMVAssert(A.rowsize() > 0);
         TMVAssert(Ubeta.size() == A.rowsize());
-        TMVAssert(Vbeta.size() == A.rowsize()-1);
+        TMVAssert(Vtbeta.size() == A.rowsize()-1);
         TMVAssert(D.size() == A.rowsize());
         TMVAssert(E.size() == A.rowsize()-1);
 
         if (A.rowsize() > BIDIAG_BLOCKSIZE)
-            BlockBidiagonalize(A,Ubeta,Vbeta,D,E,signdet);
+            BlockBidiagonalize(A,Ubeta,Vtbeta,D,E,signdet);
         else
-            NonBlockBidiagonalize(A,Ubeta,Vbeta,D,E,signdet);
+            NonBlockBidiagonalize(A,Ubeta,Vtbeta,D,E,signdet);
     }
 
 #ifdef LAP
     template <class T> 
     static inline void LapBidiagonalize(
         const MatrixView<T>& A, const VectorView<T>& Ubeta,
-        const VectorView<T>& Vbeta, const VectorView<RT>& D,
+        const VectorView<T>& Vtbeta, const VectorView<RT>& D,
         const VectorView<RT>& E, T& signdet)
-    { NonLapBidiagonalize(A,Ubeta,Vbeta,D,E,signdet); }
+    { NonLapBidiagonalize(A,Ubeta,Vtbeta,D,E,signdet); }
 #ifdef INST_DOUBLE
     template <> 
     void LapBidiagonalize(
         const MatrixView<double>& A, const VectorView<double>& Ubeta,
-        const VectorView<double>& Vbeta, const VectorView<double>& D,
+        const VectorView<double>& Vtbeta, const VectorView<double>& D,
         const VectorView<double>& E, double& signdet)
     {
         //std::cout<<"LapBidiagonalize double"<<std::endl;
@@ -469,7 +469,7 @@ namespace tmv {
         TMVAssert(E.step() == 1);
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(Ubeta.size() == A.rowsize());
-        TMVAssert(Vbeta.size() == A.rowsize()-1);
+        TMVAssert(Vtbeta.size() == A.rowsize()-1);
         TMVAssert(A.ct()==NonConj);
         TMVAssert(D.ct()==NonConj);
         TMVAssert(E.ct()==NonConj);
@@ -480,8 +480,8 @@ namespace tmv {
         D.setZero();
         E.setZero();
         Ubeta.setZero();
-        Vector<double> Vbeta2(n,0.);  
-        // Stupid LAPACK requires an extra element in the Vbeta vector
+        Vector<double> Vtbeta2(n,0.);  
+        // Stupid LAPACK requires an extra element in the Vtbeta vector
         // which it sets to 0 (!!!) rather than ignores.
         // So we need to create a temporary Vector which is size n.
 #ifndef LAPNOWORK
@@ -495,7 +495,7 @@ namespace tmv {
         work.get()[0] = 0.;
         LAPNAME(dgebrd) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(ldu),
-            LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vbeta2.ptr())
+            LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vtbeta2.ptr())
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(work[0]);
         work.resize(lwork);
@@ -505,10 +505,10 @@ namespace tmv {
         //std::cout<<"Before dgebrd"<<std::endl;
         LAPNAME(dgebrd) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(ldu),
-            LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vbeta2.ptr())
+            LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vtbeta2.ptr())
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         //std::cout<<"After dgebrd"<<std::endl;
-        Vbeta = Vbeta2.subVector(0,n-1);
+        Vtbeta = Vtbeta2.subVector(0,n-1);
 #ifdef LAPNOWORK
         LAP_Results("dgebrd");
 #else
@@ -518,8 +518,8 @@ namespace tmv {
             const double* Ubi = Ubeta.cptr();
             for(int i=0;i<n;++i,++Ubi) if (*Ubi != 0.) 
                 signdet = -signdet;
-            const double* Vbi = Vbeta.cptr();
-            for(int i=0;i<n-1;++i,++Vbi) if (*Vbi != 0.) 
+            const double* Vtbi = Vtbeta.cptr();
+            for(int i=0;i<n-1;++i,++Vtbi) if (*Vtbi != 0.) 
                 signdet = -signdet;
         }
     }
@@ -527,7 +527,7 @@ namespace tmv {
     void LapBidiagonalize(
         const MatrixView<std::complex<double> >& A, 
         const VectorView<std::complex<double> >& Ubeta, 
-        const VectorView<std::complex<double> >& Vbeta,
+        const VectorView<std::complex<double> >& Vtbeta,
         const VectorView<double>& D, const VectorView<double>& E,
         std::complex<double>& signdet)
     {
@@ -537,7 +537,7 @@ namespace tmv {
         TMVAssert(E.step() == 1);
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(Ubeta.size() == A.rowsize());
-        TMVAssert(Vbeta.size() == A.rowsize()-1);
+        TMVAssert(Vtbeta.size() == A.rowsize()-1);
         TMVAssert(A.ct()==NonConj);
         TMVAssert(D.ct()==NonConj);
         TMVAssert(E.ct()==NonConj);
@@ -548,7 +548,7 @@ namespace tmv {
         D.setZero();
         E.setZero();
         Ubeta.setZero();
-        Vector<std::complex<double> > Vbeta2(n,0.);
+        Vector<std::complex<double> > Vtbeta2(n,0.);
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = (m+n)*LAP_BLOCKSIZE;
@@ -560,7 +560,7 @@ namespace tmv {
         work.get()[0] = 0.;
         LAPNAME(zgebrd) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(ldu),
-            LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vbeta2.ptr())
+            LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vtbeta2.ptr())
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(TMV_REAL(work[0]));
         work.resize(lwork);
@@ -570,11 +570,11 @@ namespace tmv {
         //std::cout<<"Before zgebrd"<<std::endl;
         LAPNAME(zgebrd) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(ldu),
-            LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vbeta2.ptr())
+            LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vtbeta2.ptr())
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         //std::cout<<"After zgebrd"<<std::endl;
         Ubeta.conjugateSelf();
-        Vbeta = Vbeta2.subVector(0,n-1);
+        Vtbeta = Vtbeta2.subVector(0,n-1);
 #ifdef LAPNOWORK
         LAP_Results("zgebrd");
 #else
@@ -585,9 +585,9 @@ namespace tmv {
             for(int i=0;i<n;++i,++Ubi) if (*Ubi != 0.) {
                 signdet *= TMV_CONJ((*Ubi)*(*Ubi))/norm(*Ubi);
             }
-            const std::complex<double>* Vbi = Vbeta.cptr();
-            for(int i=0;i<n-1;++i,++Vbi) if (*Vbi != 0.) {
-                signdet *= -TMV_CONJ((*Vbi)*(*Vbi))/norm(*Vbi);
+            const std::complex<double>* Vtbi = Vtbeta.cptr();
+            for(int i=0;i<n-1;++i,++Vtbi) if (*Vtbi != 0.) {
+                signdet *= -TMV_CONJ((*Vtbi)*(*Vtbi))/norm(*Vtbi);
             }
         }
     }
@@ -596,7 +596,7 @@ namespace tmv {
     template <> 
     void LapBidiagonalize(
         const MatrixView<float>& A, const VectorView<float>& Ubeta,
-        const VectorView<float>& Vbeta, const VectorView<float>& D,
+        const VectorView<float>& Vtbeta, const VectorView<float>& D,
         const VectorView<float>& E, float& signdet)
     {
         //std::cout<<"LapBidiagonalize float"<<std::endl;
@@ -605,7 +605,7 @@ namespace tmv {
         TMVAssert(E.step() == 1);
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(Ubeta.size() == A.rowsize());
-        TMVAssert(Vbeta.size() == A.rowsize()-1);
+        TMVAssert(Vtbeta.size() == A.rowsize()-1);
         TMVAssert(A.ct()==NonConj);
         TMVAssert(D.ct()==NonConj);
         TMVAssert(E.ct()==NonConj);
@@ -616,7 +616,7 @@ namespace tmv {
         D.setZero();
         E.setZero();
         Ubeta.setZero();
-        Vector<float> Vbeta2(n,0.F);  
+        Vector<float> Vtbeta2(n,0.F);  
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = (m+n)*LAP_BLOCKSIZE;
@@ -628,7 +628,7 @@ namespace tmv {
         work.get()[0] = 0.F;
         LAPNAME(sgebrd) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(ldu),
-            LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vbeta2.ptr())
+            LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vtbeta2.ptr())
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(work[0]);
         work.resize(lwork);
@@ -638,10 +638,10 @@ namespace tmv {
         //std::cout<<"Before sgebrd"<<std::endl;
         LAPNAME(sgebrd) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(ldu),
-            LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vbeta2.ptr())
+            LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vtbeta2.ptr())
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         //std::cout<<"After sgebrd"<<std::endl;
-        Vbeta = Vbeta2.subVector(0,n-1);
+        Vtbeta = Vtbeta2.subVector(0,n-1);
 #ifdef LAPNOWORK
         LAP_Results("sgebrd");
 #else
@@ -651,8 +651,8 @@ namespace tmv {
             const float* Ubi = Ubeta.cptr();
             for(int i=0;i<n;++i,++Ubi) if (*Ubi != 0.F) 
                 signdet = -signdet;
-            const float* Vbi = Vbeta.cptr();
-            for(int i=0;i<n-1;++i,++Vbi) if (*Vbi != 0.F) 
+            const float* Vtbi = Vtbeta.cptr();
+            for(int i=0;i<n-1;++i,++Vtbi) if (*Vtbi != 0.F) 
                 signdet = -signdet;
         }
     }
@@ -660,7 +660,7 @@ namespace tmv {
     void LapBidiagonalize(
         const MatrixView<std::complex<float> >& A, 
         const VectorView<std::complex<float> >& Ubeta, 
-        const VectorView<std::complex<float> >& Vbeta,
+        const VectorView<std::complex<float> >& Vtbeta,
         const VectorView<float>& D, const VectorView<float>& E,
         std::complex<float>& signdet)
     {
@@ -670,7 +670,7 @@ namespace tmv {
         TMVAssert(E.step() == 1);
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(Ubeta.size() == A.rowsize());
-        TMVAssert(Vbeta.size() == A.rowsize()-1);
+        TMVAssert(Vtbeta.size() == A.rowsize()-1);
         TMVAssert(A.ct()==NonConj);
         TMVAssert(D.ct()==NonConj);
         TMVAssert(E.ct()==NonConj);
@@ -681,7 +681,7 @@ namespace tmv {
         D.setZero();
         E.setZero();
         Ubeta.setZero();
-        Vector<std::complex<float> > Vbeta2(n,0.F);
+        Vector<std::complex<float> > Vtbeta2(n,0.F);
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = (m+n)*LAP_BLOCKSIZE;
@@ -693,7 +693,7 @@ namespace tmv {
         work[0] = 0.F;
         LAPNAME(cgebrd) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(ldu),
-            LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vbeta2.ptr())
+            LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vtbeta2.ptr())
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(TMV_REAL(work[0]));
         work.resize(lwork);
@@ -708,11 +708,11 @@ namespace tmv {
         //std::cout<<"Lap_info = "<<Lap_info<<std::endl;
         LAPNAME(cgebrd) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(ldu),
-            LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vbeta2.ptr())
+            LAPP(D.ptr()),LAPP(E.ptr()),LAPP(Ubeta.ptr()),LAPP(Vtbeta2.ptr())
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         //std::cout<<"After cgebrd"<<std::endl;
         Ubeta.conjugateSelf();
-        Vbeta = Vbeta2.subVector(0,n-1);
+        Vtbeta = Vtbeta2.subVector(0,n-1);
 #ifdef LAPNOWORK
         LAP_Results("cgebrd");
 #else
@@ -723,9 +723,9 @@ namespace tmv {
             for(int i=0;i<n;++i,++Ubi) if (*Ubi != 0.F) {
                 signdet *= TMV_CONJ((*Ubi)*(*Ubi))/norm(*Ubi);
             }
-            const std::complex<float>* Vbi = Vbeta.cptr();
-            for(int i=0;i<n-1;++i,++Vbi) if (*Vbi != 0.F) {
-                signdet *= -TMV_CONJ((*Vbi)*(*Vbi))/norm(*Vbi);
+            const std::complex<float>* Vtbi = Vtbeta.cptr();
+            for(int i=0;i<n-1;++i,++Vtbi) if (*Vtbi != 0.F) {
+                signdet *= -TMV_CONJ((*Vtbi)*(*Vtbi))/norm(*Vtbi);
             }
         }
     }
@@ -735,7 +735,7 @@ namespace tmv {
     template <class T> 
     void Bidiagonalize(
         const MatrixView<T>& A, const VectorView<T>& Ubeta,
-        const VectorView<T>& Vbeta, const VectorView<RT>& D,
+        const VectorView<T>& Vtbeta, const VectorView<RT>& D,
         const VectorView<RT>& E, T& signdet)
     {
 #ifdef XDEBUG
@@ -746,43 +746,43 @@ namespace tmv {
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(A.rowsize() == D.size());
         TMVAssert(Ubeta.size() == A.rowsize());
-        TMVAssert(Vbeta.size() == A.rowsize()-1);
+        TMVAssert(Vtbeta.size() == A.rowsize()-1);
         TMVAssert(A.isrm() || A.iscm());
         TMVAssert(A.ct()==NonConj);
         TMVAssert(D.ct()==NonConj);
         TMVAssert(E.ct()==NonConj);
         TMVAssert(Ubeta.step() == 1);
-        TMVAssert(Vbeta.step() == 1);
+        TMVAssert(Vtbeta.step() == 1);
         TMVAssert(D.step() == 1);
         TMVAssert(E.step() == 1);
 
         if (A.rowsize() > 0) {
 #ifdef LAP
             if (A.iscm()) 
-                LapBidiagonalize(A,Ubeta,Vbeta,D,E,signdet);
+                LapBidiagonalize(A,Ubeta,Vtbeta,D,E,signdet);
             else 
 #endif
-                NonLapBidiagonalize(A,Ubeta,Vbeta,D,E,signdet);
+                NonLapBidiagonalize(A,Ubeta,Vtbeta,D,E,signdet);
         }
 #ifdef XDEBUG
         std::cout<<"Done Bidiagonalize: \n";
         std::cout<<"A = "<<A<<std::endl;
         std::cout<<"Ubeta = "<<Ubeta<<std::endl;
-        std::cout<<"Vbeta = "<<Vbeta<<std::endl;
+        std::cout<<"Vtbeta = "<<Vtbeta<<std::endl;
         std::cout<<"D = "<<D<<std::endl;
         std::cout<<"E = "<<E<<std::endl;
         std::cout<<"signdet = "<<signdet<<std::endl;
         int N = D.size();
         Matrix<T> U(A);
         GetQFromQR(U.view(),Ubeta);
-        Matrix<T> V(N,N);
-        V.setToIdentity();
-        V.subMatrix(1,N,1,N) = A.subMatrix(0,N-1,1,N);
-        GetQFromQR(V.subMatrix(1,N,1,N).transpose(),Vbeta);
+        Matrix<T> Vt(N,N);
+        Vt.setToIdentity();
+        Vt.subMatrix(1,N,1,N) = A.subMatrix(0,N-1,1,N);
+        GetQFromQR(Vt.subMatrix(1,N,1,N).transpose(),Vtbeta);
         Matrix<RT> B(N,N,RT(0));
         B.diag() = D;
         B.diag(1) = E;
-        Matrix<T> AA = U*B*V;
+        Matrix<T> AA = U*B*Vt;
         cout<<"SVBidiag: Norm(A0-AA) = "<<Norm(A0-AA)<<std::endl;
         cout<<"cf "<<0.001*Norm(A0)<<std::endl;
         if (!(Norm(A0-AA) < 0.001*Norm(A0))) {
@@ -790,22 +790,22 @@ namespace tmv {
             cerr<<"A = "<<A<<endl;
             cerr<<"U = "<<U<<endl;
             cerr<<"B = "<<B<<endl;
-            cerr<<"V = "<<V<<endl;
-            cerr<<"UBV = "<<AA<<endl;
+            cerr<<"Vt = "<<Vt<<endl;
+            cerr<<"UBVt = "<<AA<<endl;
 #ifdef LAP
             Matrix<T,ColMajor> A2 = A0;
             Vector<T> Ub2(Ubeta.size());
-            Vector<T> Vb2(Vbeta.size());
+            Vector<T> Vtb2(Vtbeta.size());
             Vector<RT> D2(D.size());
             Vector<RT> E2(E.size());
             T signdet2(0);
             NonLapBidiagonalize(
-                A2.view(),Ub2.view(),Vb2.view(),D2.view(),E2.view(),signdet2);
+                A2.view(),Ub2.view(),Vtb2.view(),D2.view(),E2.view(),signdet2);
             cerr<<"NonLap: "<<A2<<endl;
             cerr<<"Ubeta = "<<Ubeta<<endl;
             cerr<<"NonLap: "<<Ub2<<endl;
-            cerr<<"Vbeta = "<<Vbeta<<endl;
-            cerr<<"NonLap: "<<Vb2<<endl;
+            cerr<<"Vtbeta = "<<Vtbeta<<endl;
+            cerr<<"NonLap: "<<Vtb2<<endl;
             cerr<<"D = "<<D<<endl;
             cerr<<"D2 = "<<D2<<endl;
             cerr<<"E = "<<E<<endl;

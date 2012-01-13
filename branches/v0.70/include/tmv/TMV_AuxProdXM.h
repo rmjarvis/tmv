@@ -179,58 +179,59 @@ inline PRODXM<CT,CT X> operator*(const GENMATRIX<CT X>& m, T x)
 // m/x
 #ifdef INTT
 inline PRODXM<double,int> operator/(const GENMATRIX<int>& m, int x) 
-{ return PRODXM<double,int>(double(1)/double(x),m); }
+{ return PRODXM<double,int>(TMV_InverseOf(double(x)),v); }
 
 inline PRODXM<float,int> operator/(const GENMATRIX<int>& m, float x) 
-{ return PRODXM<float,int>(float(1)/x,m); }
+{ return PRODXM<float,int>(TMV_InverseOf(float(x)),v); }
 
 inline PRODXM<double,int> operator/(const GENMATRIX<int>& m, double x) 
-{ return PRODXM<double,int>(double(1)/x,m); }
+{ return PRODXM<double,int>(TMV_InverseOf(x),v); }
 
 inline PRODXM<long double,int> operator/(
     const GENMATRIX<int>& m, long double x) 
-{ return PRODXM<long double,int>((long double)(1)/x,m); }
+{ return PRODXM<long double,int>(TMV_InverseOf(x),v); }
 
 template <class T Y> 
 inline PRODXM<CT,int X> operator/(const GENMATRIX<int X>& m, CT x)
-{ return PRODXM<CT,int X>(T(1)/x,m); }
+{ return PRODXM<CT,int X>(TMV_InverseOf(x),m); }
 
 template <class T Y> 
-inline PRODXM<CT,T X> operator/(const GENMATRIX<int X>& m, CCT x)
-{ return PRODXM<CT,T X>(T(1)/CT(x),m); }
+inline PRODXM<CT,int X> operator/(const GENMATRIX<int X>& m, CCT x)
+{ return PRODXM<CT,int X>(TMV_InverseOf(CT(x)),m); }
 
 template <class T Y> 
 inline PRODXM<CT,int X> operator/(const GENMATRIX<int X>& m, VCT x)
-{ return PRODXM<CT,int X>(T(1)/CT(x),m); }
+{ return PRODXM<CT,int X>(TMV_InverseOf(CT(x)),m); }
 #undef INTT
 #else
 template <class T Y> 
 inline PRODXM<T,T X> operator/(const GENMATRIX<T X>& m, T x) 
-{ return PRODXM<T,T X>(TMV_RealType(T)(1)/x,m); }
+{ return PRODXM<T,T X>(TMV_InverseOf(x),m); }
 
 template <class T Y> 
 inline PRODXM<CT,T X> operator/(const GENMATRIX<T X>& m, CT x)
-{ return PRODXM<CT,T X>(T(1)/x,m); }
+{ return PRODXM<CT,T X>(TMV_InverseOf(x),m); }
 
 template <class T Y> 
 inline PRODXM<CT,T X> operator/(const GENMATRIX<T X>& m, CCT x)
-{ return PRODXM<CT,T X>(T(1)/CT(x),m); }
+{ return PRODXM<CT,T X>(TMV_InverseOf(CT(x)),m); }
 
 template <class T Y> 
 inline PRODXM<CT,T X> operator/(const GENMATRIX<T X>& m, VCT x)
-{ return PRODXM<CT,T X>(T(1)/CT(x),m); }
+{ return PRODXM<CT,T X>(TMV_InverseOf(CT(x)),m); }
 
 template <class T Y> 
 inline PRODXM<CT,CT X> operator/(const GENMATRIX<CT X>& m, CCT x)
-{ return PRODXM<CT,CT X>(T(1)/CT(x),m); }
+{ return PRODXM<CT,CT X>(TMV_InverseOf(CT(x)),m); }
 
 template <class T Y> 
 inline PRODXM<CT,CT X> operator/(const GENMATRIX<CT X>& m, VCT x)
-{ return PRODXM<CT,CT X>(T(1)/CT(x),m); }
+{ return PRODXM<CT,CT X>(TMV_InverseOf(CT(x)),m); }
 
 template <class T Y> 
 inline PRODXM<CT,CT X> operator/(const GENMATRIX<CT X>& m, T x)
-{ return PRODXM<CT,CT X>(CT(T(1)/x),m); }
+{ return PRODXM<CT,CT X>(TMV_InverseOf(x),m); }
+
 #endif
 
 // -(x*m)
@@ -303,31 +304,31 @@ inline PRODXM<CT,T2 X> operator*(const PRODXM<CT,T2 X>& pxm, const VCT x)
 
 template <class T, class T2 Y> 
 inline PRODXM<T,T2 X> operator/(const PRODXM<T,T2 X>& pxm, const T x)
-{ return PRODXM<T,T2 X>(pxm.getX()/x,pxm GETM); }
+{ return PRODXM<T,T2 X>(TMV_Divide(pxm.getX(),x),pxm GETM); }
 
 template <class T, class T2 Y> 
 inline PRODXM<CT,T2 X> operator/(const PRODXM<CT,T2 X>& pxm, const T x)
-{ return PRODXM<CT,T2 X>(pxm.getX()/x,pxm GETM); }
+{ return PRODXM<CT,T2 X>(TMV_Divide(pxm.getX(),x),pxm GETM); }
 
 template <class T Y> 
 inline PRODXM<CT,T X> operator/(const PRODXM<T,T X>& pxm, const CT x)
-{ return PRODXM<CT,T X>(pxm.getX()/x,pxm GETM); }
+{ return PRODXM<CT,T X>(TMV_Divide(pxm.getX(),x),pxm GETM); }
 
 template <class T Y> 
 inline PRODXM<CT,T X> operator/(const PRODXM<T,T X>& pxm, const CCT x)
-{ return PRODXM<CT,T X>(pxm.getX()/CT(x),pxm GETM); }
+{ return PRODXM<CT,T X>(TMV_Divide(pxm.getX(),CT(x)),pxm GETM); }
 
 template <class T Y> 
 inline PRODXM<CT,T X> operator/(const PRODXM<T,T X>& pxm, const VCT x)
-{ return PRODXM<CT,T X>(pxm.getX()/CT(x),pxm GETM); }
+{ return PRODXM<CT,T X>(TMV_Divide(pxm.getX(),CT(x)),pxm GETM); }
 
 template <class T, class T2 Y> 
 inline PRODXM<CT,T2 X> operator/(const PRODXM<CT,T2 X>& pxm, const CCT x)
-{ return PRODXM<CT,T2 X>(pxm.getX()/CT(x),pxm GETM); }
+{ return PRODXM<CT,T2 X>(TMV_Divide(pxm.getX(),CT(x)),pxm GETM); }
 
 template <class T, class T2 Y> 
 inline PRODXM<CT,T2 X> operator/(const PRODXM<CT,T2 X>& pxm, const VCT x)
-{ return PRODXM<CT,T2 X>(pxm.getX()/CT(x),pxm GETM); }
+{ return PRODXM<CT,T2 X>(TMV_Divide(pxm.getX(),CT(x)),pxm GETM); }
 
 #undef X
 #undef Y

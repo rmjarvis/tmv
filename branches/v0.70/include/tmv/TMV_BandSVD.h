@@ -40,16 +40,16 @@
 
 namespace tmv {
 
-    // Decompose A into U S V
-    // where S is a diagonal real matrix, and U,V are unitary matrices.
-    // U,S,V are N x N
+    // Decompose A into U S Vt
+    // where S is a diagonal real matrix, and U,Vt are unitary matrices.
+    // U,S,Vt are N x N
     template <class T> 
     void SV_Decompose(
         const GenBandMatrix<T>& A,
         const MatrixView<T>& U, const DiagMatrixView<TMV_RealType(T)>& S, 
-        const MatrixView<T>& V);
+        const MatrixView<T>& Vt);
 
-    // The same decomposition, but don't return U and/or V
+    // The same decomposition, but don't return U and/or Vt
     template <class T> 
     void SV_Decompose(
         const GenBandMatrix<T>& A,
@@ -57,7 +57,7 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenBandMatrix<T>& A,
-        const DiagMatrixView<TMV_RealType(T)>& S, const MatrixView<T>& V);
+        const DiagMatrixView<TMV_RealType(T)>& S, const MatrixView<T>& Vt);
     template <class T> 
     void SV_Decompose(
         const GenBandMatrix<T>& A, const DiagMatrixView<TMV_RealType(T)>& S);
@@ -118,7 +118,7 @@ namespace tmv {
 
         ConstMatrixView<T> getU() const;
         ConstDiagMatrixView<TMV_RealType(T)> getS() const;
-        ConstMatrixView<T> getV() const;
+        ConstMatrixView<T> getVt() const;
 
         bool checkDecomp(const BaseMatrix<T>& m, std::ostream* fout) const;
 

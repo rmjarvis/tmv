@@ -70,7 +70,7 @@ namespace tmv {
     typename MatrixView<T,A>::reference MatrixView<T,A>::ref(int i, int j) const
     {
         T* mi = ptr() + i*itssi + j*stepj();
-        return TMV_REF(mi,ct());
+        return RefHelper<T>::makeRef(mi,ct());
     }
 
     template <class T>

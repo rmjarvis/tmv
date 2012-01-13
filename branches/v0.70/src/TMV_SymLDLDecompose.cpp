@@ -283,7 +283,7 @@ namespace tmv {
                         if (dj == T(0)) signdet = T(0);
                         else {
                             RT absd = TMV_ABS(dj);
-                            signdet *= dj/absd;
+                            signdet *= TMV_SIGN(dj,absd);
                             logdet += TMV_LOG(absd);
                         }
                     }
@@ -319,7 +319,7 @@ namespace tmv {
                         logdet += TMV_LOG(TMV_ABS(TMV_REAL(d)));
                     } else {
                         RT absd = TMV_ABS(d);
-                        signdet *= d/absd;
+                        signdet *= TMV_SIGN(d,absd);
                         logdet += TMV_LOG(absd);
                     }
                     //std::cout<<"logdet,signdet => "<<logdet<<','<<signdet<<std::endl;
@@ -597,9 +597,9 @@ namespace tmv {
                             if (signdet != T(0)) {
                                 if (dj == RT(0)) signdet = T(0);
                                 else {
-                                    RT ad = TMV_ABS(dj);
-                                    signdet *= dj/ad;
-                                    logdet += TMV_LOG(ad);
+                                    RT absd = TMV_ABS(dj);
+                                    signdet *= TMV_SIGN(dj,absd);
+                                    logdet += TMV_LOG(absd);
                                 }
                             }
                             if (dj != T(0)) A.col(j,j+1,N) /= dj;
@@ -640,13 +640,13 @@ namespace tmv {
                         if (signdet != T(0)) {
                             if (d == RT(0)) signdet = T(0);
                             else if (herm) {
-                                RT ad = TMV_ABS(TMV_REAL(d));
+                                RT absd = TMV_ABS(TMV_REAL(d));
                                 if (TMV_REAL(d) < 0) signdet = -signdet;
-                                logdet += TMV_LOG(ad);
+                                logdet += TMV_LOG(absd);
                             } else {
-                                RT ad = TMV_ABS(d);
-                                signdet *= d/ad;
-                                logdet += TMV_LOG(ad);
+                                RT absd = TMV_ABS(d);
+                                signdet *= TMV_SIGN(d,absd);
+                                logdet += TMV_LOG(absd);
                             }
                         }
 
@@ -994,9 +994,9 @@ namespace tmv {
                             if (TMV_REAL(*Aii) < 0.) signdet = -signdet;
                             logdet += TMV_LOG(TMV_ABS(TMV_REAL(*Aii)));
                         } else {
-                            double ad = TMV_ABS(*Aii);
-                            signdet *= *Aii/ad;
-                            logdet += TMV_LOG(ad);
+                            double absd = TMV_ABS(*Aii);
+                            signdet *= TMV_SIGN(*Aii,absd);
+                            logdet += TMV_LOG(absd);
                         }
                     }
                 } else {
@@ -1030,9 +1030,9 @@ namespace tmv {
                             std::complex<double> d = a*c-b*b;
                             if (d == 0.) signdet = 0.;
                             else {
-                                double ad = TMV_ABS(d);
-                                signdet *= d/ad;
-                                logdet += TMV_LOG(ad);
+                                double absd = TMV_ABS(d);
+                                signdet *= TMV_SIGN(d,absd);
+                                logdet += TMV_LOG(absd);
                             }
                         }
                     } else { Aii += Astep; }
@@ -1045,9 +1045,9 @@ namespace tmv {
                         if (TMV_REAL(*Aii) < 0.) signdet = -signdet;
                         logdet += TMV_LOG(TMV_ABS(TMV_REAL(*Aii)));
                     } else {
-                        double ad = TMV_ABS(*Aii);
-                        signdet *= *Aii/ad;
-                        logdet += TMV_LOG(ad);
+                        double absd = TMV_ABS(*Aii);
+                        signdet *= TMV_SIGN(*Aii,absd);
+                        logdet += TMV_LOG(absd);
                     }
                 }
                 P[i] = i;
@@ -1237,9 +1237,9 @@ namespace tmv {
                             if (TMV_REAL(*Aii) < 0.F) signdet = -signdet;
                             logdet += TMV_LOG(TMV_ABS(TMV_REAL(*Aii)));
                         } else {
-                            float ad = TMV_ABS(*Aii);
-                            signdet *= *Aii/ad;
-                            logdet += TMV_LOG(ad);
+                            float absd = TMV_ABS(*Aii);
+                            signdet *= TMV_SIGN(*Aii,absd);
+                            logdet += TMV_LOG(absd);
                         }
                     }
                 } else {
@@ -1273,9 +1273,9 @@ namespace tmv {
                             std::complex<float> d = a*c-b*b;
                             if (d == 0.F) signdet = 0.F;
                             else {
-                                float ad = TMV_ABS(d);
-                                signdet *= d/ad;
-                                logdet += TMV_LOG(ad);
+                                float absd = TMV_ABS(d);
+                                signdet *= TMV_SIGN(d,absd);
+                                logdet += TMV_LOG(absd);
                             }
                         }
                     } else { Aii += Astep; }
@@ -1288,9 +1288,9 @@ namespace tmv {
                         if (TMV_REAL(*Aii) < 0.F) signdet = -signdet;
                         logdet += TMV_LOG(TMV_ABS(TMV_REAL(*Aii)));
                     } else {
-                        float ad = TMV_ABS(*Aii);
-                        signdet *= *Aii/ad;
-                        logdet += TMV_LOG(ad);
+                        float absd = TMV_ABS(*Aii);
+                        signdet *= TMV_SIGN(*Aii,absd);
+                        logdet += TMV_LOG(absd);
                     }
                 }
                 P[i] = i;

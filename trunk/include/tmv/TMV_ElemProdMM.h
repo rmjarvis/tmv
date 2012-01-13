@@ -380,22 +380,34 @@ namespace tmv {
     template <int ix, class T, class M1, class M2>
     TMV_INLINE ElemProdMM<0,T,M1,M2> operator/(
         const ElemProdMM<ix,T,M1,M2>& mm, const int x)
-    { return ElemProdMM<0,T,M1,M2>(mm.getX()/RT(x),mm.getM1(),mm.getM2()); }
+    {
+        return ElemProdMM<0,T,M1,M2>(
+            ZProd<false,false>::quot(mm.getX(),RT(x)),mm.getM1(),mm.getM2()); 
+    }
 
     template <int ix, class T, class M1, class M2>
     TMV_INLINE ElemProdMM<0,T,M1,M2> operator/(
         const ElemProdMM<ix,T,M1,M2>& mm, const RT x)
-    { return ElemProdMM<0,T,M1,M2>(mm.getX()/x,mm.getM1(),mm.getM2()); }
+    { 
+        return ElemProdMM<0,T,M1,M2>(
+            ZProd<false,false>::quot(mm.getX(),x),mm.getM1(),mm.getM2()); 
+    }
 
     template <int ix, class T, class M1, class M2>
     TMV_INLINE ElemProdMM<0,CT,M1,M2> operator/(
         const ElemProdMM<ix,T,M1,M2>& mm, const CT x)
-    { return ElemProdMM<0,CT,M1,M2>(mm.getX()/x,mm.getM1(),mm.getM2()); }
+    { 
+        return ElemProdMM<0,CT,M1,M2>(
+            ZProd<false,false>::quot(mm.getX(),x),mm.getM1(),mm.getM2()); 
+    }
 
     template <int ix, class T, class M1, class M2>
     TMV_INLINE ElemProdMM<0,CT,M1,M2> operator/(
         const ElemProdMM<ix,T,M1,M2>& mm, const CCT x)
-    { return ElemProdMM<0,CT,M1,M2>(mm.getX()/x,mm.getM1(),mm.getM2()); }
+    { 
+        return ElemProdMM<0,CT,M1,M2>(
+            ZProd<false,false>::quot(mm.getX(),x),mm.getM1(),mm.getM2()); 
+    }
 
 #undef RT
 #undef CT

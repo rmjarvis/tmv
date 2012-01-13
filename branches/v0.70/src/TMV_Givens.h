@@ -115,6 +115,7 @@
 
 #include "tmv/TMV_BaseVector.h"
 #include "tmv/TMV_BaseMatrix.h"
+#include "tmv/TMV_VIt.h"
 
 namespace tmv {
 

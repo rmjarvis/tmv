@@ -1319,7 +1319,7 @@ namespace tmv {
         typedef VectorView<T,A> vec_type;
         typedef UpperTriMatrixView<T,A> uppertri_type;
         typedef LowerTriMatrixView<T,A> lowertri_type;
-        typedef TMV_RefType(T) reference;
+        typedef typename RefHelper<T>::reference reference;
         typedef RMIt<const type> rowmajor_iterator;
         typedef CMIt<const type> colmajor_iterator;
 
@@ -1873,6 +1873,7 @@ namespace tmv {
         typedef VectorView<T,FortranStyle> vec_type;
         typedef UpperTriMatrixView<T,FortranStyle> uppertri_type;
         typedef LowerTriMatrixView<T,FortranStyle> lowertri_type;
+        typedef typename RefHelper<T>::reference reference;
 
         //
         // Constructors
@@ -1937,7 +1938,7 @@ namespace tmv {
         // Access
         //
 
-        inline TMV_RefType(T) operator()(int i,int j) const 
+        inline reference operator()(int i,int j) const 
         { 
             TMVAssert(i > 0 && i <= this->colsize());
             TMVAssert(j > 0 && j <= this->rowsize());
@@ -2177,8 +2178,8 @@ namespace tmv {
     struct MatrixIterHelper<RowMajor,M>
     {
         typedef typename M::value_type T;
-        typedef VIt<T,Unit,NonConj> rowmajor_iterator;
-        typedef CVIt<T,Unit,NonConj> const_rowmajor_iterator;
+        typedef VIt<T,1,NonConj> rowmajor_iterator;
+        typedef CVIt<T,1,NonConj> const_rowmajor_iterator;
 
         static rowmajor_iterator rowmajor_begin(M* m)
         { return rowmajor_iterator(m->ptr(),1); }
@@ -2222,8 +2223,8 @@ namespace tmv {
         { return const_rowmajor_iterator(m,m->colsize(),0); }
 
         typedef typename M::value_type T;
-        typedef VIt<T,Unit,NonConj> colmajor_iterator;
-        typedef CVIt<T,Unit,NonConj> const_colmajor_iterator;
+        typedef VIt<T,1,NonConj> colmajor_iterator;
+        typedef CVIt<T,1,NonConj> const_colmajor_iterator;
 
         static colmajor_iterator colmajor_begin(M* m)
         { return colmajor_iterator(m->ptr(),1); }

@@ -370,7 +370,8 @@ namespace tmv {
         const SumMM<ix1,T1,M1,ix2,T2,M2>& smm, const int x)
     {
         return SumMM<0,T1,M1,0,T2,M2>(
-            smm.getX1()/RT(x),smm.getM1(), smm.getX2()/RT(x),smm.getM2());
+            ZProd<false,false>::quot(smm.getX1(),RT(x)),smm.getM1(),
+            ZProd<false,false>::quot(smm.getX2(),RT(x)),smm.getM2());
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
@@ -378,7 +379,8 @@ namespace tmv {
         const SumMM<ix1,T1,M1,ix2,T2,M2>& smm, const RT x)
     {
         return SumMM<0,T1,M1,0,T2,M2>(
-            smm.getX1()/x,smm.getM1(), smm.getX2()/x,smm.getM2());
+            ZProd<false,false>::quot(smm.getX1(),x),smm.getM1(),
+            ZProd<false,false>::quot(smm.getX2(),x),smm.getM2());
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
@@ -386,7 +388,8 @@ namespace tmv {
         const SumMM<ix1,T1,M1,ix2,T2,M2>& smm, const CT x)
     {
         return SumMM<0,CT,M1,0,CT,M2>(
-            smm.getX1()/x,smm.getM1(), smm.getX2()/x,smm.getM2());
+            ZProd<false,false>::quot(smm.getX1(),x),smm.getM1(),
+            ZProd<false,false>::quot(smm.getX2(),x),smm.getM2());
     }
 
     template <int ix1, class T1, class M1, int ix2, class T2, class M2>
@@ -394,7 +397,8 @@ namespace tmv {
         const SumMM<ix1,T1,M1,ix2,T2,M2>& smm, const CCT x)
     {
         return SumMM<0,CT,M1,0,CT,M2>(
-            smm.getX1()/CT(x),smm.getM1(), smm.getX2()/CT(x),smm.getM2());
+            ZProd<false,false>::quot(smm.getX1(),CT(x)),smm.getM1(),
+            ZProd<false,false>::quot(smm.getX2(),CT(x)),smm.getM2());
     }
 
 #undef RT

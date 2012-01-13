@@ -1363,7 +1363,7 @@ namespace tmv {
                 v0 = *it++;
                 absv0 = std::abs(v0);
                 sum += std::log(absv0);
-                if (v0 != T(0)) *sign *= v0/absv0; 
+                if (v0 != T(0)) *sign *= TMV_SIGN(v0,absv0); 
                 else { *sign = T(0); return sum; }
             }
             return sum;

@@ -55,7 +55,7 @@ namespace tmv {
         T* Aptr;
         MatrixView<T> U;
         DiagMatrix<RT> S;
-        Matrix<T,ColMajor> V;
+        Matrix<T,ColMajor> Vt;
         RT logdet;
         T signdet;
         mutable int kmax;
@@ -73,7 +73,7 @@ namespace tmv {
     SVDiv<T>::SVDiv_Impl::SVDiv_Impl(const GenMatrix<T>& A, bool _inplace) :
         istrans(A.colsize() < A.rowsize()), 
         inplace(_inplace && (A.isrm() || A.iscm())), Aptr1(APTR1), Aptr(APTR),
-        U(UX), S(U.rowsize()), V(U.rowsize(),U.rowsize()), 
+        U(UX), S(U.rowsize()), Vt(U.rowsize(),U.rowsize()), 
         logdet(0), signdet(1), kmax(0) {}
 
 #undef UX
@@ -91,7 +91,7 @@ namespace tmv {
             else pimpl->U = A;
         }
 
-        SV_Decompose<T>(pimpl->U,pimpl->S.view(),pimpl->V.view(),
+        SV_Decompose<T>(pimpl->U,pimpl->S.view(),pimpl->Vt.view(),
                         pimpl->logdet, pimpl->signdet,true);
 
         // Set kmax for actual 0 elements (to within machine precision).
@@ -109,10 +109,10 @@ namespace tmv {
         TMVAssert(m.colsize() == colsize());
         TMVAssert(m.colsize() == rowsize());
         if (pimpl->istrans) 
-            CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
+            CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,
                     m.transpose(),m.transpose());
         else 
-            CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,m);
+            CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,m);
     }
 
     template <class T> template <class T1> 
@@ -122,10 +122,10 @@ namespace tmv {
         TMVAssert(m.rowsize() == rowsize());
 
         if (pimpl->istrans) 
-            CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
+            CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,
                     m.transpose(),m.transpose());
         else 
-            CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,m);
+            CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,m);
     }
 
     template <class T> template <class T1, class T2> 
@@ -135,10 +135,10 @@ namespace tmv {
         TMVAssert(m.colsize() == colsize());
         TMVAssert(x.colsize() == rowsize());
         if (pimpl->istrans) 
-            CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
+            CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,
                    m.transpose(),x.transpose());
         else 
-            CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,x);
+            CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,x);
     }
 
     template <class T> template <class T1, class T2> 
@@ -149,10 +149,10 @@ namespace tmv {
         TMVAssert(x.rowsize() == colsize());
 
         if (pimpl->istrans) 
-            CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
+            CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,
                    m.transpose(),x.transpose());
         else 
-            CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,x);
+            CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,x);
     }
 
     template <class T> 
@@ -173,40 +173,40 @@ namespace tmv {
     void SVDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
     { 
         if (pimpl->istrans) {
-            // A^-1 = (Vt S^-1 Ut)T = U* S^-1 V*
-            Matrix<T,ColMajor> SinvV =
-                pimpl->V.conjugate().rowRange(0,pimpl->kmax) /
+            // A^-1 = (V S^-1 Ut)T = U* S^-1 Vt*
+            Matrix<T,ColMajor> SinvVt =
+                pimpl->Vt.conjugate().rowRange(0,pimpl->kmax) /
                 pimpl->S.subDiagMatrix(0,pimpl->kmax);
-            minv = pimpl->U.conjugate().colRange(0,pimpl->kmax) * SinvV;
+            minv = pimpl->U.conjugate().colRange(0,pimpl->kmax) * SinvVt;
         } else {
-            // A^-1 = Vt S^-1 Ut
+            // A^-1 = V S^-1 Ut
             Matrix<T,ColMajor> SinvUt =
                 pimpl->U.adjoint().rowRange(0,pimpl->kmax) /
                 pimpl->S.subDiagMatrix(0,pimpl->kmax);
-            minv = pimpl->V.adjoint().colRange(0,pimpl->kmax) * SinvUt;
+            minv = pimpl->Vt.adjoint().colRange(0,pimpl->kmax) * SinvUt;
         }
     }
 
     template <class T> 
     void SVDiv<T>::doMakeInverseATA(const MatrixView<T>& minv) const
     {
-        // A = U S V
-        // At = Vt S Ut
-        // AtA = Vt S^2 V
-        // (AtA)^-1 = Vt S^-2 V
+        // A = U S Vt
+        // At = V S Ut
+        // AtA = V S^2 Vt
+        // (AtA)^-1 = V S^-2 Vt
         //
         // if istrans:
-        // AT = U S V
-        // At = U* S V*
-        // AAt = VT S^2 V*
-        // (AAt)^-1 = VT S^-2 V*
+        // AT = U S Vt
+        // At = U* S VT
+        // AAt = V* S^2 VT
+        // (AAt)^-1 = V* S^-2 VT
         //
-        Matrix<T,ColMajor> SinvV = pimpl->V.rowRange(0,pimpl->kmax) /
+        Matrix<T,ColMajor> SinvVt = pimpl->Vt.rowRange(0,pimpl->kmax) /
             pimpl->S.subDiagMatrix(0,pimpl->kmax);
         if (pimpl->istrans)
-            minv = SinvV.transpose() * SinvV.conjugate();
+            minv = SinvVt.transpose() * SinvVt.conjugate();
         else
-            minv = SinvV.adjoint() * SinvV;
+            minv = SinvVt.adjoint() * SinvVt;
     }
 
     template <class T> 
@@ -264,7 +264,7 @@ namespace tmv {
     template <class T> 
     ConstMatrixView<T> SVDiv<T>::getU() const
     {
-        if (pimpl->istrans) return pimpl->V.transpose(); 
+        if (pimpl->istrans) return pimpl->Vt.transpose(); 
         else return pimpl->U.view(); 
     }
     template <class T> 
@@ -272,10 +272,10 @@ namespace tmv {
     { return pimpl->S.view(); }
 
     template <class T> 
-    ConstMatrixView<T> SVDiv<T>::getV() const
+    ConstMatrixView<T> SVDiv<T>::getVt() const
     {
         if (pimpl->istrans) return pimpl->U.transpose(); 
-        else return pimpl->V.view(); 
+        else return pimpl->Vt.view(); 
     }
 
     template <class T> 
@@ -288,15 +288,15 @@ namespace tmv {
             *fout << "M = "<<mm<<std::endl;
             *fout << "U = "<<getU()<<std::endl;
             *fout << "S = "<<getS()<<std::endl;
-            *fout << "V = "<<getV()<<std::endl;
+            *fout << "Vt = "<<getVt()<<std::endl;
         }
-        Matrix<T> usv = getU()*getS()*getV();
+        Matrix<T> usv = getU()*getS()*getVt();
         RT nm = Norm(usv-mm);
-        nm /= Norm(getU())*Norm(getS())*Norm(getV());
+        nm /= Norm(getU())*Norm(getS())*Norm(getVt());
         RT cond = getS()(0) / getS()(getKMax()-1);
         if (fout) {
-            *fout << "USV = "<<usv<<std::endl;
-            *fout << "Norm(M-USV)/Norm(USV) = "<<nm;
+            *fout << "USVt = "<<usv<<std::endl;
+            *fout << "Norm(M-USVt)/Norm(USVt) = "<<nm;
             *fout <<"  "<<cond<<" * "<<TMV_Epsilon<T>()<<std::endl;
         }
         return nm < cond*RT(mm.colsize())*TMV_Epsilon<T>();

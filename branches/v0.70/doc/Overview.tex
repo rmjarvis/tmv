@@ -431,11 +431,12 @@ I tend to freely mix the syntax of how a function is used with how
 it is declared in order to try to provide all of the information you will need on one line.  
 For example, the constructor listed as:
 \begin{tmvcode}
-tmv::Vector<T,index> v(int n, const T* vv)
+tmv::Vector<T,A> v(int n, const T* vv)
 \end{tmvcode}
 is actually declared in the code as:
 \begin{tmvcode}
-tmv::Vector<T,index>::Vector(int n, const T* vv);
+template <class T, int A>
+tmv::Vector<T,A>::Vector(int n, const T* vv);
 \end{tmvcode}
 and when it is used in your source code, you would write something like:
 \begin{tmvcode}

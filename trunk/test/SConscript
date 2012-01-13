@@ -39,7 +39,7 @@ if (int(env['XTEST']) & 64) and not env['WITH_BLAS']:
 if env['DEBUG'] or env['TEST_DEBUG']:
     env1.Append(CPPDEFINES=['XXD'])
 else:
-    env1.Append(CPPDEFINES=['NDEBUG'])
+    env1.Append(CPPDEFINES=['TMV_NDEBUG'])
 if env['DEBUG']:
     env1.Append(CPPDEFINES=['TMV_EXTRA_DEBUG'])
 
@@ -163,6 +163,6 @@ if env['SMALL_TESTS'] :
 else :
 
     env.Alias(target='test', source=[
-        'test1','test2','test3'])
+        'test1','test2a','test3'])
 
 

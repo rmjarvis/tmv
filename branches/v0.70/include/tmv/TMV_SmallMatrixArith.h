@@ -201,19 +201,19 @@ namespace tmv {
     // m/=x
     template <class T, int M, int N, int A>
     inline SmallMatrix<T,M,N,A>& operator/=(SmallMatrix<T,M,N,A>& m, T x) 
-    { m *= T(1)/x; return m; }
+    { m *= TMV_InverseOf(x); return m; }
 
     template <class T, int M, int N, int A>
     inline SmallMatrix<CT,M,N,A>& operator/=(SmallMatrix<CT,M,N,A>& m, T x) 
-    { m *= T(1)/x; return m; }
+    { m *= TMV_InverseOf(x); return m; }
 
     template <class T, int M, int N, int A>
     inline SmallMatrix<CT,M,N,A>& operator/=(SmallMatrix<CT,M,N,A>& m, CCT x) 
-    { m *= T(1)/CT(x); return m; }
+    { m *= TMV_InverseOf(CT(x)); return m; }
 
     template <class T, int M, int N, int A>
     inline SmallMatrix<CT,M,N,A>& operator/=(SmallMatrix<CT,M,N,A>& m, VCT x) 
-    { m *= T(1)/CT(x); return m; }
+    { m *= TMV_InverseOf(CT(x)); return m; }
 
 #define GENMATRIX SmallMatrix
 #define PRODXM ProdXm

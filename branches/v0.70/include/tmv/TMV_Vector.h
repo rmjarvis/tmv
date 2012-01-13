@@ -316,10 +316,7 @@
 #include "tmv/TMV_ListInit.h"
 #include "tmv/TMV_Array.h"
 #include "tmv/TMV_IOStyle.h"
-
-#ifdef TMVFLDEBUG
 #include "tmv/TMV_VIt.h"
-#endif
 
 namespace tmv {
 
@@ -347,8 +344,8 @@ namespace tmv {
         typedef ConstVectorView<T,FortranStyle> const_fview_type;
         typedef ConstVectorView<RT> const_real_type;
         typedef VectorView<T> nonconst_type;
-        typedef CVIter<T> const_iterator;
-        typedef CVIter<T> const_reverse_iterator;
+        typedef typename RefHelper<T>::const_iterator const_iterator;
+        typedef typename RefHelper<T>::const_iterator const_reverse_iterator;
 
         //
         // Constructor
@@ -385,11 +382,14 @@ namespace tmv {
         { return operator()(i); }
 
         inline const_iterator begin() const
-        { return const_iterator(cptr(),step(),ct()); }
+        { return RefHelper<T>::makeIter(cptr(),step(),ct()); }
         inline const_iterator end() const
         { return begin() + size(); }
         inline const_reverse_iterator rbegin() const
-        { return const_reverse_iterator(cptr(),step(),ct()); }
+        { 
+            return RefHelper<T>::makeIter(
+                cptr()+step()*(size()-1),-step(),ct()); 
+        }
         inline const_reverse_iterator rend() const
         { return rbegin() + size(); }
 
@@ -728,11 +728,11 @@ namespace tmv {
         typedef VectorView<T,FortranStyle> fview_type;
         typedef VectorView<RT,A> real_type;
         typedef T value_type;
-        typedef VIter<T> iterator;
-        typedef CVIter<T> const_iterator;
-        typedef VIter<T> reverse_iterator;
-        typedef CVIter<T> const_reverse_iterator;
-        typedef TMV_RefType(T) reference;
+        typedef typename RefHelper<T>::reference reference;
+        typedef typename RefHelper<T>::iterator iterator;
+        typedef typename RefHelper<T>::iterator reverse_iterator;
+        typedef typename RefHelper<T>::const_iterator const_iterator;
+        typedef typename RefHelper<T>::const_iterator const_reverse_iterator;
 
         //
         // Constructors 
@@ -837,12 +837,12 @@ namespace tmv {
         { return operator()(i); }
 
         inline iterator begin() const
-        { return iterator(ptr(),step(),ct() TMV_FIRSTLAST ); }
+        { return RefHelper<T>::makeIter(ptr(),step(),ct() TMV_FIRSTLAST ); }
         inline iterator end() const
         { return begin() + size(); }
         inline reverse_iterator rbegin() const
         {
-            return reverse_iterator(
+            return RefHelper<T>::makeIter(
                 ptr()+step()*(size()-1),-step(),ct() TMV_FIRSTLAST ); 
         }
         inline reverse_iterator rend() const
@@ -1045,6 +1045,8 @@ namespace tmv {
         typedef VectorView<T,FortranStyle> fview_type;
         typedef VectorView<RT,FortranStyle> real_type;
         typedef ConstVectorView<T,FortranStyle> const_type;
+        typedef typename RefHelper<T>::reference reference;
+        typedef typename RefHelper<T>::iterator iterator;
 
         //
         // Constructors 
@@ -1105,15 +1107,15 @@ namespace tmv {
         // Access Functions
         //
 
-        inline TMV_RefType(T) operator()(int i) const 
+        inline reference operator()(int i) const 
         { 
             TMVAssert(i>0 && i<=this->size());
             return c_type::ref(i-1); 
         }
-        inline TMV_RefType(T) operator[](int i) const 
+        inline reference operator[](int i) const 
         { return operator()(i); }
 
-        typedef ListAssigner<T,VIter<T> > MyListAssigner;
+        typedef ListAssigner<T,iterator> MyListAssigner;
         inline MyListAssigner operator<<(const T& x)
         { return c_type::operator<<(x); }
 
@@ -1282,10 +1284,10 @@ namespace tmv {
         typedef VectorView<T,FortranStyle> fview_type;
         typedef VectorView<RT,A> real_type;
         typedef T value_type;
-        typedef VIt<T,Unit,NonConj> iterator;
-        typedef CVIt<T,Unit,NonConj> const_iterator;
-        typedef VIt<T,Step,NonConj> reverse_iterator;
-        typedef CVIt<T,Step,NonConj> const_reverse_iterator;
+        typedef VIt<T,1,NonConj> iterator;
+        typedef CVIt<T,1,NonConj> const_iterator;
+        typedef VIt<T,-1,NonConj> reverse_iterator;
+        typedef CVIt<T,-1,NonConj> const_reverse_iterator;
         typedef T& reference;
 
         //

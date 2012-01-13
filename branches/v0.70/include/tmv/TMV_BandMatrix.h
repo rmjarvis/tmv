@@ -1328,7 +1328,7 @@ namespace tmv {
         typedef VectorView<T,A> vec_type;
         typedef MatrixView<T,A> rec_type;
         typedef BandMatrixView<RT,A> realpart_type;
-        typedef TMV_RefType(T) reference;
+        typedef typename RefHelper<T>::reference reference;
         typedef RMIt<const type> rowmajor_iterator;
         typedef CMIt<const type> colmajor_iterator;
         typedef DMIt<const type> diagmajor_iterator;
@@ -2007,6 +2007,7 @@ namespace tmv {
         typedef MatrixView<T,FortranStyle> rec_type;
         typedef BandMatrixView<RT,FortranStyle> realpart_type;
         typedef ConstBandMatrixView<T,FortranStyle> const_view_type;
+        typedef typename RefHelper<T>::reference reference;
 
         //
         // Constructors
@@ -2094,7 +2095,7 @@ namespace tmv {
         // Access
         //
 
-        inline TMV_RefType(T) operator()(int i,int j) const 
+        inline reference operator()(int i,int j) const 
         { 
             TMVAssert(i>0 && i<=colsize());
             TMVAssert(j>0 && j<=rowsize());

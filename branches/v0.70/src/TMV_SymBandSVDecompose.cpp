@@ -577,7 +577,7 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenSymBandMatrix<T>& A,
-        MVP<T> U, const DiagMatrixView<RT>& SS, MVP<T> V, 
+        MVP<T> U, const DiagMatrixView<RT>& SS, MVP<T> Vt, 
         RT& logdet, T& signdet)
     {
         TMVAssert(A.size() > 0);
@@ -586,10 +586,10 @@ namespace tmv {
             TMVAssert(U->colsize() == A.size());
             TMVAssert(U->ct() == NonConj);
         }
-        if (V) {
-            TMVAssert(V->rowsize() == A.size());
-            TMVAssert(V->colsize() == A.size());
-            TMVAssert(V->ct() == NonConj);
+        if (Vt) {
+            TMVAssert(Vt->rowsize() == A.size());
+            TMVAssert(Vt->colsize() == A.size());
+            TMVAssert(Vt->ct() == NonConj);
         }
         TMVAssert(SS.size() == A.size());
 
@@ -598,42 +598,42 @@ namespace tmv {
 #endif
 
         if (A.isherm()) {
-            if (V && !U) {
-                UnsortedEigen<T>(A,V->transpose(),SS.diag());
-                V->conjugateSelf();
+            if (Vt && !U) {
+                UnsortedEigen<T>(A,Vt->transpose(),SS.diag());
+                Vt->conjugateSelf();
             } else  {
                 UnsortedEigen<T>(A,U,SS.diag());
             }
-            if (V && U) *V = U->adjoint();
+            if (Vt && U) *Vt = U->adjoint();
             if (signdet != T(0)) {
                 RT s;
                 logdet += SS.logDet(&s);
                 signdet *= s;
             }
-            if (U || V) {
+            if (U || Vt) {
                 AlignedArray<int> sortp(A.size());
                 SS.diag().sort(sortp.get(),Descend,AbsComp);
                 if (U) U->permuteCols(sortp.get());
-                if (V) V->permuteRows(sortp.get());
+                if (Vt) Vt->permuteRows(sortp.get());
             } else {
                 SS.diag().sort(Descend,AbsComp);
             }
         } else {
             TMVAssert(isComplex(T()));
             // Decompose complex symmetric A (input as lower tri of U) into 
-            // U S V where S is a diagonal real matrix, and U,V are
+            // U S Vt where S is a diagonal real matrix, and U,Vt are
             // unitary matrices.
-            // U,S,V are N x N
-            // If V = 0, then U,V are not formed.
+            // U,S,Vt are N x N
+            // If Vt = 0, then U,Vt are not formed.
             // Only S,det are accurate on return.
             const int N = A.size();
             if (N == 0) return;
 
             if (A.nlo() == 0) {
-                SV_Decompose(A.diagRange(0,1),U,SS,V,logdet,signdet);
+                SV_Decompose(A.diagRange(0,1),U,SS,Vt,logdet,signdet);
             } else if (A.nlo() == 1) {
                 BandMatrix<T,ColMajor> B = A;
-                SV_Decompose(B,U,SS,V,logdet,signdet);
+                SV_Decompose(B,U,SS,Vt,logdet,signdet);
             } else {
                 // First we reduce A to tridiagonal form: A = U * T * UT
                 // using a series of Householder transformations.
@@ -641,12 +641,12 @@ namespace tmv {
                 // The subdiagonal is stored in E.
                 Vector<T> D(N);
                 Vector<RT> E(N-1);
-                if (V && !U) {
+                if (Vt && !U) {
                     Tridiagonalize<T>(
-                        A,V->transpose(),D.view(),E.view(),signdet);
+                        A,Vt->transpose(),D.view(),E.view(),signdet);
                 } else {
                     Tridiagonalize<T>(A,U,D.view(),E.view(),signdet);
-                    if (V) { TMVAssert(U); *V = U->transpose(); }
+                    if (Vt) { TMVAssert(U); *Vt = U->transpose(); }
                 }
 
                 BandMatrix<T,ColMajor> B(N,N,1,1);
@@ -656,19 +656,19 @@ namespace tmv {
 
                 if (U) {
                     Matrix<T,ColMajor> U1(N,N);
-                    if (V) {
-                        Matrix<T,ColMajor> V1(N,N);
-                        SV_Decompose<T>(B,U1.view(),SS,V1.view(),logdet,signdet);
-                        *V = V1*(*V);
+                    if (Vt) {
+                        Matrix<T,ColMajor> Vt1(N,N);
+                        SV_Decompose<T>(B,U1.view(),SS,Vt1.view(),logdet,signdet);
+                        *Vt = Vt1*(*Vt);
                     } else {
                         SV_Decompose<T>(B,U1.view(),SS,0,logdet,signdet);
                     }
                     *U = *U*U1;
                 } else {
-                    if (V) {
-                        Matrix<T,ColMajor> V1(N,N);
-                        SV_Decompose<T>(B,0,SS,V1.view(),logdet,signdet);
-                        *V = V1*(*V);
+                    if (Vt) {
+                        Matrix<T,ColMajor> Vt1(N,N);
+                        SV_Decompose<T>(B,0,SS,Vt1.view(),logdet,signdet);
+                        *Vt = Vt1*(*Vt);
                     } else {
                         SV_Decompose<T>(B,0,SS,0,logdet,signdet);
                     }
@@ -676,15 +676,15 @@ namespace tmv {
             }
         }
 #ifdef XDEBUG
-        if (U&&V) {
-            Matrix<T> A2 = (*U) * SS * (*V);
-            if (!(Norm(A0-A2) < 0.0001 * Norm(*U) * Norm(SS) * Norm(*V))) {
+        if (U&&Vt) {
+            Matrix<T> A2 = (*U) * SS * (*Vt);
+            if (!(Norm(A0-A2) < 0.0001 * Norm(*U) * Norm(SS) * Norm(*Vt))) {
                 cerr<<"SV_Decompose:\n";
                 cerr<<"A = "<<A0<<endl;
                 cerr<<"U = "<<U<<endl;
                 cerr<<"S = "<<SS<<endl;
-                cerr<<"V = "<<*V<<endl;
-                cerr<<"USV = "<<A2<<endl;
+                cerr<<"Vt = "<<*Vt<<endl;
+                cerr<<"USVt = "<<A2<<endl;
                 abort();
             }
         }
@@ -738,55 +738,55 @@ namespace tmv {
     void SV_Decompose(
         const GenSymBandMatrix<T>& A,
         const MatrixView<T>& U, const DiagMatrixView<RT>& SS,
-        const MatrixView<T>& V)
+        const MatrixView<T>& Vt)
     {
         TMVAssert(U.colsize() == A.size());
         TMVAssert(U.rowsize() == A.size());
         TMVAssert(SS.size() == A.size());
-        TMVAssert(V.colsize() == A.size());
-        TMVAssert(V.rowsize() == A.size());
+        TMVAssert(Vt.colsize() == A.size());
+        TMVAssert(Vt.rowsize() == A.size());
 
         if (A.isconj()) {
             if (U.isconj()) {
-                if (V.isconj()) {
-                    SV_Decompose(A.conjugate(),U.conjugate(),SS,V.conjugate());
+                if (Vt.isconj()) {
+                    SV_Decompose(A.conjugate(),U.conjugate(),SS,Vt.conjugate());
                 } else {
-                    SV_Decompose(A.conjugate(),U.conjugate(),SS,V);
-                    V.conjugateSelf();
+                    SV_Decompose(A.conjugate(),U.conjugate(),SS,Vt);
+                    Vt.conjugateSelf();
                 }
             } else {
-                if (V.isconj()) {
-                    SV_Decompose(A.conjugate(),U,SS,V.conjugate());
+                if (Vt.isconj()) {
+                    SV_Decompose(A.conjugate(),U,SS,Vt.conjugate());
                     U.conjugateSelf();
                 } else {
-                    SV_Decompose(A.conjugate(),U,SS,V);
+                    SV_Decompose(A.conjugate(),U,SS,Vt);
                     U.conjugateSelf();
-                    V.conjugateSelf();
+                    Vt.conjugateSelf();
                 }
             }
         } else {
             if (U.isconj()) {
-                if (V.isconj()) {
-                    SV_Decompose(A,U.conjugate(),SS,V.conjugate());
+                if (Vt.isconj()) {
+                    SV_Decompose(A,U.conjugate(),SS,Vt.conjugate());
                     U.conjugateSelf();
-                    V.conjugateSelf();
+                    Vt.conjugateSelf();
                 } else {
-                    SV_Decompose(A,U.conjugate(),SS,V);
+                    SV_Decompose(A,U.conjugate(),SS,Vt);
                     U.conjugateSelf();
                 }
             } else {
-                if (V.isconj()) {
-                    SV_Decompose(A,U,SS,V.conjugate());
-                    V.conjugateSelf();
+                if (Vt.isconj()) {
+                    SV_Decompose(A,U,SS,Vt.conjugate());
+                    Vt.conjugateSelf();
                 } else {
                     RT ld(0);
                     T d(0);
-                    SV_Decompose<T>(A,U,SS,V,ld,d);
+                    SV_Decompose<T>(A,U,SS,Vt,ld,d);
                     if (A.isherm()) {
                         // Then S values might be negative:
                         for(int i=0;i<SS.size();i++) if (SS(i) < RT(0)) {
                             SS(i) = -SS(i);
-                            V.row(i) = -V.row(i);
+                            Vt.row(i) = -Vt.row(i);
                         }
                     }
                 }
@@ -828,14 +828,14 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenSymBandMatrix<T>& A,
-        const DiagMatrixView<RT>& SS, const MatrixView<T>& V)
+        const DiagMatrixView<RT>& SS, const MatrixView<T>& Vt)
     {
         TMVAssert(SS.size() == A.size());
-        TMVAssert(V.colsize() == A.size());
-        TMVAssert(V.rowsize() == A.size());
+        TMVAssert(Vt.colsize() == A.size());
+        TMVAssert(Vt.rowsize() == A.size());
 
-        if (A.isherm()) SV_Decompose(A,V.adjoint(),SS);
-        else SV_Decompose(A,V.transpose(),SS);
+        if (A.isherm()) SV_Decompose(A,Vt.adjoint(),SS);
+        else SV_Decompose(A,Vt.transpose(),SS);
     }
 
     template <class T> 

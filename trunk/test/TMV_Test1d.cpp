@@ -28,11 +28,10 @@ int main() try {
 
     //showacc=true;
     //showdiv=true;
-    showtests=true;
-    showstartdone=true;
-    TestMatrixDiv<float>();
+    //showtests=true;
+    //showstartdone=true;
 
-#if 0
+#if 1
 
 #ifdef TEST_DOUBLE
     TestMatrixDiv<double>();

@@ -441,8 +441,8 @@ namespace tmv {
         typedef ConstVectorView<T,nonconjA> const_nonconj_type;
         typedef VectorView<T,A> nonconst_type;
 
-        typedef CVIt<T,1,false> const_iterator;
-        typedef CVIt<T,-1,false> const_reverse_iterator;
+        typedef CVIt<T,1,NonConj> const_iterator;
+        typedef CVIt<T,-1,NonConj> const_reverse_iterator;
 
         typedef T& reference;
 
@@ -462,8 +462,8 @@ namespace tmv {
         typedef VectorView<T,An|NoAlias> noalias_type;
         typedef VectorView<T,An> alias_type;
 
-        typedef VIt<T,1,false> iterator;
-        typedef VIt<T,-1,false> reverse_iterator;
+        typedef VIt<T,1,NonConj> iterator;
+        typedef VIt<T,-1,NonConj> reverse_iterator;
     };
 
     template <class T, int A>
@@ -653,8 +653,8 @@ namespace tmv {
         typedef ConstVectorView<T,nonconjA> const_nonconj_type;
         typedef VectorView<T,A> nonconst_type;
 
-        typedef CVIt<T,_step,_conj> const_iterator;
-        typedef CVIt<T,negS,_conj> const_reverse_iterator;
+        typedef CVIt<T,_step,_conj?Conj:NonConj> const_iterator;
+        typedef CVIt<T,negS,_conj?Conj:NonConj> const_reverse_iterator;
     };
 
     template <class T, int A>
@@ -837,8 +837,8 @@ namespace tmv {
         typedef ConstVectorView<T,nonconjA> const_nonconj_type;
         typedef VectorView<T,A> nonconst_type;
 
-        typedef CVIt<T,_step,_conj> const_iterator;
-        typedef CVIt<T,negS,_conj> const_reverse_iterator;
+        typedef CVIt<T,_step,_conj?Conj:NonConj> const_iterator;
+        typedef CVIt<T,negS,_conj?Conj:NonConj> const_reverse_iterator;
 
         typedef typename AuxRef<T,_conj>::reference reference;
 
@@ -862,8 +862,8 @@ namespace tmv {
         typedef VectorView<T,An|NoAlias> noalias_type;
         typedef VectorView<T,An> alias_type;
 
-        typedef VIt<T,_step,_conj> iterator;
-        typedef VIt<T,negS,_conj> reverse_iterator;
+        typedef VIt<T,_step,_conj?Conj:NonConj> iterator;
+        typedef VIt<T,negS,_conj?Conj:NonConj> reverse_iterator;
     };
 
     template <class T, int A>

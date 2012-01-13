@@ -124,31 +124,31 @@ inline PRODXV<CT,CT X> operator*(const GENVECTOR<CT X>& v, VCT x)
 
 template <class T Y> 
 inline PRODXV<T,T X> operator/(const GENVECTOR<T X>& v, T x) 
-{ return PRODXV<T,T X>(TMV_RealType(T)(1)/x,v); }
+{ return PRODXV<T,T X>(TMV_InverseOf(x),v); }
 
 template <class T Y> 
 inline PRODXV<CT,T X> operator/(const GENVECTOR<T X>& v, CT x)
-{ return PRODXV<CT,T X>(T(1)/x,v); }
+{ return PRODXV<CT,T X>(TMV_InverseOf(x),v); }
 
 template <class T Y> 
 inline PRODXV<CT,T X> operator/(const GENVECTOR<T X>& v, CCT x)
-{ return PRODXV<CT,T X>(T(1)/CT(x),v); }
+{ return PRODXV<CT,T X>(TMV_InverseOf(CT(x)),v); }
 
 template <class T Y> 
 inline PRODXV<CT,T X> operator/(const GENVECTOR<T X>& v, VCT x)
-{ return PRODXV<CT,T X>(T(1)/CT(x),v); }
+{ return PRODXV<CT,T X>(TMV_InverseOf(CT(x)),v); }
 
 template <class T Y> 
 inline PRODXV<CT,CT X> operator/(const GENVECTOR<CT X>& v, T x)
-{ return PRODXV<CT,CT X>(T(1)/x,v); }
+{ return PRODXV<CT,CT X>(TMV_InverseOf(x),v); }
 
 template <class T Y> 
 inline PRODXV<CT,CT X> operator/(const GENVECTOR<CT X>& v, CCT x)
-{ return PRODXV<CT,CT X>(T(1)/CT(x),v); }
+{ return PRODXV<CT,CT X>(TMV_InverseOf(CT(x)),v); }
 
 template <class T Y> 
 inline PRODXV<CT,CT X> operator/(const GENVECTOR<CT X>& v, VCT x)
-{ return PRODXV<CT,CT X>(T(1)/CT(x),v); }
+{ return PRODXV<CT,CT X>(TMV_InverseOf(CT(x)),v); }
 
 // -(x*v)
 
@@ -220,31 +220,31 @@ inline PRODXV<CT,T2 X> operator*(const PRODXV<CT,T2 X>& pxv, const VCT x)
 
 template <class T, class T2 Y> 
 inline PRODXV<T,T X> operator/(const PRODXV<T,T2 X>& pxv, const T x)
-{ return PRODXV<T,T2 X>(pxv.getX()/x,pxv.getV()); }
+{ return PRODXV<T,T2 X>(TMV_Divide(pxv.getX(),x),pxv.getV()); }
 
 template <class T, class T2 Y> 
 inline PRODXV<CT,T2 X> operator/(const PRODXV<CT,T2 X>& pxv, const T x)
-{ return PRODXV<CT,T2 X>(pxv.getX()/x,pxv.getV()); }
+{ return PRODXV<CT,T2 X>(TMV_Divide(pxv.getX(),x),pxv.getV()); }
 
 template <class T Y> 
 inline PRODXV<CT,T X> operator/(const PRODXV<T,T X>& pxv, const CT x)
-{ return PRODXV<CT,T X>(pxv.getX()/x,pxv.getV()); }
+{ return PRODXV<CT,T X>(TMV_Divide(pxv.getX(),x),pxv.getV()); }
 
 template <class T Y> 
 inline PRODXV<CT,T X> operator/(const PRODXV<T,T X>& pxv, const CCT x)
-{ return PRODXV<CT,T X>(pxv.getX()/CT(x),pxv.getV()); }
+{ return PRODXV<CT,T X>(TMV_Divide(pxv.getX(),CT(x)),pxv.getV()); }
 
 template <class T Y> 
 inline PRODXV<CT,T X> operator/(const PRODXV<T,T X>& pxv, const VCT x)
-{ return PRODXV<CT,T X>(pxv.getX()/CT(x),pxv.getV()); }
+{ return PRODXV<CT,T X>(TMV_Divide(pxv.getX(),CT(x)),pxv.getV()); }
 
 template <class T, class T2 Y> 
 inline PRODXV<CT,T2 X> operator/(const PRODXV<CT,T2 X>& pxv, const CCT x)
-{ return PRODXV<CT,T2 X>(pxv.getX()/CT(x),pxv.getV()); }
+{ return PRODXV<CT,T2 X>(TMV_Divide(pxv.getX(),CT(x)),pxv.getV()); }
 
 template <class T, class T2 Y> 
 inline PRODXV<CT,T2 X> operator/(const PRODXV<CT,T2 X>& pxv, const VCT x)
-{ return PRODXV<CT,T2 X>(pxv.getX()/CT(x),pxv.getV()); }
+{ return PRODXV<CT,T2 X>(TMV_Divide(pxv.getX(),CT(x)),pxv.getV()); }
 
 #undef X
 #undef Y

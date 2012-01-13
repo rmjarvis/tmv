@@ -284,8 +284,8 @@ namespace tmv {
         reference itsref;
     };
 
-    // A helper struct to provide a valid reference when the DiagType
-    // is UnitDiag (or UnknownDiag)
+    // A helper struct to provide a valid reference for TriMatrix, correctly
+    // dealing with the possibility of UnitDiag.
     // It is very similar to VarConjRef, but also has a boolean isunit
     // which indicates whether the reference is on the diagonal of a 
     // UnitDiag TriMatrix.  If so, it can be an rhs with the value 1, 
