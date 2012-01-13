@@ -118,11 +118,6 @@ namespace tmv {
         const T alpha, const GenVector<Tx>& x,
         const GenVector<Ty>& y, const VectorView<CT>& z)
     { ElemMultVV<add>(CT(alpha),x,y,z); }
-    template <bool add, class T> 
-    inline void ElemMultVV(
-        const CT alpha, const GenVector<CT>& x,
-        const GenVector<T>& y, const VectorView<CT>& z)
-    { ElemMultVV<add>(alpha,y,x,z); }
 
     // Specialize disallowed complex combinations:
     template <class T> 

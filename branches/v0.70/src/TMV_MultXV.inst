@@ -35,6 +35,7 @@ Def2(T,T,T)
 #ifdef INST_COMPLEX
 Def2(CT,T,T)
 Def2(CT,T,CT)
+Def2(CT,CT,T)
 Def2(CT,CT,CT)
 #endif
 

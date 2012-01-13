@@ -23,6 +23,7 @@ DefAddEl(T,T,T)
 #ifdef INST_COMPLEX
 DefAddEl(CT,T,T)
 DefAddEl(CT,T,CT)
+DefAddEl(CT,CT,T)
 DefAddEl(CT,CT,CT)
 #endif
 

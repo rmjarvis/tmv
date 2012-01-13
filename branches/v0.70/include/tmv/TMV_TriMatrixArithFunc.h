@@ -338,11 +338,6 @@ namespace tmv {
         const T alpha, const GenLowerTriMatrix<Ta>& A,
         const GenLowerTriMatrix<Tb>& B, const LowerTriMatrixView<CT>& C)
     { ElemMultMM<add>(CT(alpha),A,B,C); }
-    template <bool add, class T> 
-    inline void ElemMultMM(
-        const CT alpha, const GenUpperTriMatrix<CT>& A,
-        const GenUpperTriMatrix<T>& B, const UpperTriMatrixView<CT>& C)
-    { ElemMultMM<add>(alpha,B,A,C); }
 
     // Specialize disallowed complex combinations:
     template <bool add, class T, class Ta, class Tb> 
