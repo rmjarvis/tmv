@@ -337,7 +337,10 @@ namespace tmv {
     template <int ix1, class T1, class M, int ix2, class T2, class V>
     TMV_INLINE QuotVM<ix1*ix2,PT,V,M> operator/(
         const ProdXV<ix1,T1,V>& v, const ProdXM<ix2,T2,M>& m)
-    { return QuotVM<ix1*ix2,PT,V,M>(v.getX()/m.getX(),v.getV(),m.getM()); }
+    {
+        return QuotVM<ix1*ix2,PT,V,M>(
+            ZProd<false,false>::quot(v.getX(),m.getX()),v.getV(),m.getM()); 
+    }
 #undef PT
 
     // x/m * v
@@ -372,12 +375,13 @@ namespace tmv {
     inline void LDivEq(
         BaseVector_Mutable<V1>& v1, const ProdXM<ix2,T2,M2>& m2)
     {
+        typedef typename Traits<T2>::real_type RT;
 #ifdef XDEBUG_QUOTVM
         LDivEq_Debug(v1.vec(),m2.getM().mat()); 
 #else
         LDivEq(v1.vec(),m2.getM().mat()); 
 #endif
-        Scale(typename Traits<T2>::real_type(1)/m2.getX(),v1.vec());
+        Scale(ZProd<false,false>::quot(RT(1),m2.getX()),v1.vec());
     }
 
 
@@ -394,8 +398,9 @@ namespace tmv {
     TMV_INLINE RQuotVM<ix,T,V,M> operator%(
         const BaseVector<V>& v, const ProdXM<ix,T,M>& m)
     {
+        typedef typename Traits<T>::real_type RT;
         return RQuotVM<ix,T,V,M>(
-            typename Traits<T>::real_type(1)/m.getX(),v,m.getM()); 
+            ZProd<false,false>::quot(RT(1),m.getX()),v,m.getM()); 
     }
 
     // xv % m
@@ -409,7 +414,10 @@ namespace tmv {
     template <int ix1, class T1, class V, int ix2, class T2, class M>
     TMV_INLINE RQuotVM<ix1*ix2,PT,V,M> operator%(
         const ProdXV<ix1,T1,V>& v, const ProdXM<ix2,T2,M>& m)
-    { return RQuotVM<ix1*ix2,PT,V,M>(v.getX()/m.getX(),v.getV(),m.getM()); }
+    { 
+        return RQuotVM<ix1*ix2,PT,V,M>(
+            ZProd<false,false>::quot(v.getX(),m.getX()),v.getV(),m.getM()); 
+    }
 #undef PT
 
     // v * x/m
@@ -443,12 +451,13 @@ namespace tmv {
     inline void RDivEq(
         BaseVector_Mutable<V1>& v1, const ProdXM<ix2,T2,M2>& m2)
     {
+        typedef typename Traits<T2>::real_type RT;
 #ifdef XDEBUG_QUOTVM
         RDivEq_Debug(v1.vec(),m2.getM().mat()); 
 #else
         RDivEq(v1.vec(),m2.getM().calc()); 
 #endif
-        Scale(typename Traits<T2>::real_type(1)/m2.getX(),v1.vec());
+        Scale(ZProd<false,false>::quot(RT(1),m2.getX()),v1.vec());
     }
 
     // v *= x/m
@@ -523,22 +532,34 @@ namespace tmv {
     template <int ix, class T, class V1, class M2>
     TMV_INLINE QuotVM<0,T,V1,M2> operator/(
         const QuotVM<ix,T,V1,M2>& qvm, const int x)
-    { return QuotVM<0,T,V1,M2>(qvm.getX()/RT(x),qvm.getV(),qvm.getM()); }
+    {
+        return QuotVM<0,T,V1,M2>(
+            ZProd<false,false>::quot(qvm.getX(),RT(x)),qvm.getV(),qvm.getM()); 
+    }
 
     template <int ix, class T, class V1, class M2>
     TMV_INLINE QuotVM<0,T,V1,M2> operator/(
         const QuotVM<ix,T,V1,M2>& qvm, const RT x)
-    { return QuotVM<0,T,V1,M2>(qvm.getX()/x,qvm.getV(),qvm.getM()); }
+    {
+        return QuotVM<0,T,V1,M2>(
+            ZProd<false,false>::quot(qvm.getX(),x),qvm.getV(),qvm.getM()); 
+    }
 
     template <int ix, class T, class V1, class M2>
     TMV_INLINE QuotVM<0,CT,V1,M2> operator/(
         const QuotVM<ix,T,V1,M2>& qvm, const CT x)
-    { return QuotVM<0,CT,V1,M2>(qvm.getX()/x,qvm.getV(),qvm.getM()); }
+    {
+        return QuotVM<0,CT,V1,M2>(
+            ZProd<false,false>::quot(qvm.getX(),x),qvm.getV(),qvm.getM()); 
+    }
 
     template <int ix, class T, class V1, class M2>
     TMV_INLINE QuotVM<0,CT,V1,M2> operator/(
         const QuotVM<ix,T,V1,M2>& qvm, const CCT x)
-    { return QuotVM<0,CT,V1,M2>(qvm.getX()/x,qvm.getV(),qvm.getM()); }
+    {
+        return QuotVM<0,CT,V1,M2>(
+            ZProd<false,false>::quot(qvm.getX(),CT(x)),qvm.getV(),qvm.getM()); 
+    }
 
 #undef RT
 #undef CT
@@ -600,22 +621,34 @@ namespace tmv {
     template <int ix, class T, class V1, class M2>
     TMV_INLINE RQuotVM<0,T,V1,M2> operator/(
         const RQuotVM<ix,T,V1,M2>& qvm, const int x)
-    { return RQuotVM<0,T,V1,M2>(qvm.getX()/RT(x),qvm.getV(),qvm.getM()); }
+    {
+        return RQuotVM<0,T,V1,M2>(
+            ZProd<false,false>::quot(qvm.getX(),RT(x)),qvm.getV(),qvm.getM()); 
+    }
 
     template <int ix, class T, class V1, class M2>
     TMV_INLINE RQuotVM<0,T,V1,M2> operator/(
         const RQuotVM<ix,T,V1,M2>& qvm, const RT x)
-    { return RQuotVM<0,T,V1,M2>(qvm.getX()/x,qvm.getV(),qvm.getM()); }
+    {
+        return RQuotVM<0,T,V1,M2>(
+            ZProd<false,false>::quot(qvm.getX(),x),qvm.getV(),qvm.getM()); 
+    }
 
     template <int ix, class T, class V1, class M2>
     TMV_INLINE RQuotVM<0,CT,V1,M2> operator/(
         const RQuotVM<ix,T,V1,M2>& qvm, const CT x)
-    { return RQuotVM<0,CT,V1,M2>(qvm.getX()/x,qvm.getV(),qvm.getM()); }
+    {
+        return RQuotVM<0,CT,V1,M2>(
+            ZProd<false,false>::quot(qvm.getX(),x),qvm.getV(),qvm.getM()); 
+    }
 
     template <int ix, class T, class V1, class M2>
     TMV_INLINE RQuotVM<0,CT,V1,M2> operator/(
         const RQuotVM<ix,T,V1,M2>& qvm, const CCT x)
-    { return RQuotVM<0,CT,V1,M2>(qvm.getX()/x,qvm.getV(),qvm.getM()); }
+    {
+        return RQuotVM<0,CT,V1,M2>(
+            ZProd<false,false>::quot(qvm.getX(),x),qvm.getV(),qvm.getM()); 
+    }
 
 #undef RT
 #undef CT

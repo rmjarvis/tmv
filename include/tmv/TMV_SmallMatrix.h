@@ -242,8 +242,8 @@ namespace tmv {
         typedef SmallMatrixView<T,M,N,_stepi,_stepj,ndA> nonconst_type;
 
         typedef T& reference;
-        typedef CVIt<T,1,false> const_linear_iterator;
-        typedef VIt<T,1,false> linear_iterator;
+        typedef CVIt<T,1,NonConj> const_linear_iterator;
+        typedef VIt<T,1,NonConj> linear_iterator;
         typedef typename TypeSelect< _rowmajor , const_linear_iterator ,
                 CRMIt<type> >::type const_rowmajor_iterator;
         typedef typename TypeSelect< _colmajor , const_linear_iterator ,
@@ -591,7 +591,7 @@ namespace tmv {
             const_nonconj_type;
         typedef SmallMatrixView<T,M,N,_stepi,_stepj,ndA> nonconst_type;
 
-        typedef CVIt<T,1,_conj> const_linear_iterator;
+        typedef CVIt<T,1,_conj?Conj:NonConj> const_linear_iterator;
         typedef typename TypeSelect< _canlin && _rowmajor ,
                 const_linear_iterator ,
                 CRMIt<type> >::type const_rowmajor_iterator;
@@ -929,8 +929,8 @@ namespace tmv {
         typedef SmallMatrixView<T,M,N,_stepi,_stepj,ndA> nonconst_type;
 
         typedef typename AuxRef<T,_conj>::reference reference;
-        typedef CVIt<T,1,_conj> const_linear_iterator;
-        typedef VIt<T,1,_conj> linear_iterator;
+        typedef CVIt<T,1,_conj?Conj:NonConj> const_linear_iterator;
+        typedef VIt<T,1,_conj?Conj:NonConj> linear_iterator;
         typedef typename TypeSelect< _canlin && _rowmajor ,
                 const_linear_iterator ,
                 CRMIt<type> >::type const_rowmajor_iterator;

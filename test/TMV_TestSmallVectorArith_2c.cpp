@@ -6,6 +6,8 @@
 #include <fstream>
 #include <cstdio>
 
+#define EXPLICIT_ALIAS
+
 #include "TMV_TestVectorArith.h"
 
 template <int N, class T> static void DoTestSmallVectorArith_2c()

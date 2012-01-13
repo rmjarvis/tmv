@@ -257,7 +257,8 @@ namespace tmv {
         const SumVV<ix1,T1,V1,ix2,T2,V2>& svv, const int x)
     {
         return SumVV<0,T1,V1,0,T2,V2>(
-            svv.getX1()/RT(x),svv.getV1(), svv.getX2()/RT(x),svv.getV2()); 
+            ZProd<false,false>::quot(svv.getX1(),RT(x)),svv.getV1(), 
+            ZProd<false,false>::quot(svv.getX2(),RT(x)),svv.getV2()); 
     }
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
@@ -265,7 +266,8 @@ namespace tmv {
         const SumVV<ix1,T1,V1,ix2,T2,V2>& svv, const RT x)
     {
         return SumVV<0,T1,V1,0,T2,V2>(
-            svv.getX1()/x,svv.getV1(), svv.getX2()/x,svv.getV2()); 
+            ZProd<false,false>::quot(svv.getX1(),x),svv.getV1(), 
+            ZProd<false,false>::quot(svv.getX2(),x),svv.getV2()); 
     }
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
@@ -273,7 +275,8 @@ namespace tmv {
         const SumVV<ix1,T1,V1,ix2,T2,V2>& svv, const CT x)
     {
         return SumVV<0,CT,V1,0,CT,V2>(
-            svv.getX1()/x,svv.getV1(), svv.getX2()/x,svv.getV2()); 
+            ZProd<false,false>::quot(svv.getX1(),x),svv.getV1(), 
+            ZProd<false,false>::quot(svv.getX2(),x),svv.getV2()); 
     }
 
     template <int ix1, class T1, class V1, int ix2, class T2, class V2>
@@ -281,7 +284,8 @@ namespace tmv {
         const SumVV<ix1,T1,V1,ix2,T2,V2>& svv, const CCT x)
     {
         return SumVV<0,CT,V1,0,CT,V2>(
-            svv.getX1()/CT(x),svv.getV1(), svv.getX2()/CT(x),svv.getV2()); 
+            ZProd<false,false>::quot(svv.getX1(),CT(x)),svv.getV1(),
+            ZProd<false,false>::quot(svv.getX2(),CT(x)),svv.getV2()); 
     }
 
 #undef RT

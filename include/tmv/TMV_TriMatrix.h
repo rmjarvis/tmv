@@ -2766,7 +2766,7 @@ namespace tmv {
         s << "UpperTriMatrix<"<<TMV_Text(T());
         s << ","<<Attrib<A>::text()<<">";
         s << "("<<m.size()<<","<<m.stepi()<<","<<m.stepj();
-        s << ","<<(m.isunit()?"Unit":"NonUnit")<<")";
+        s << ","<<(m.isunit()?"UnitDiag":"NonUnitDiag")<<")";
         return s.str();
     }
 
@@ -2777,7 +2777,7 @@ namespace tmv {
         s << "ConstUpperTriMatrixView<"<<TMV_Text(T());
         s << ","<<Attrib<A>::text()<<">";
         s << "("<<m.size()<<","<<m.stepi()<<","<<m.stepj();
-        s << ","<<(m.isunit()?"Unit":"NonUnit")<<")";
+        s << ","<<(m.isunit()?"UnitDiag":"NonUnitDiag")<<")";
         return s.str();
     }
 
@@ -2788,7 +2788,7 @@ namespace tmv {
         s << "UpperTriMatrixView<"<<TMV_Text(T());
         s << ","<<Attrib<A>::text()<<">";
         s << "("<<m.size()<<","<<m.stepi()<<","<<m.stepj();
-        s << ","<<(m.isunit()?"Unit":"NonUnit")<<")";
+        s << ","<<(m.isunit()?"UnitDiag":"NonUnitDiag")<<")";
         return s.str();
     }
 
@@ -2800,7 +2800,7 @@ namespace tmv {
         s << "LowerTriMatrix<"<<TMV_Text(T());
         s << ","<<Attrib<A>::text()<<">";
         s << "("<<m.size()<<","<<m.stepi()<<","<<m.stepj();
-        s << ","<<(m.isunit()?"Unit":"NonUnit")<<")";
+        s << ","<<(m.isunit()?"UnitDiag":"NonUnitDiag")<<")";
         return s.str();
     }
 
@@ -2811,7 +2811,7 @@ namespace tmv {
         s << "ConstLowerTriMatrixView<"<<TMV_Text(T());
         s << ","<<Attrib<A>::text()<<">";
         s << "("<<m.size()<<","<<m.stepi()<<","<<m.stepj();
-        s << ","<<(m.isunit()?"Unit":"NonUnit")<<")";
+        s << ","<<(m.isunit()?"UnitDiag":"NonUnitDiag")<<")";
         return s.str();
     }
 
@@ -2822,7 +2822,7 @@ namespace tmv {
         s << "LowerTriMatrixView<"<<TMV_Text(T());
         s << ","<<Attrib<A>::text()<<">";
         s << "("<<m.size()<<","<<m.stepi()<<","<<m.stepj();
-        s << ","<<(m.isunit()?"Unit":"NonUnit")<<")";
+        s << ","<<(m.isunit()?"UnitDiag":"NonUnitDiag")<<")";
         return s.str();
     }
 

@@ -1,5 +1,6 @@
 
 //#define PRINTALGO_LU
+//#define XDEBUG_LU
 
 #include "TMV_Blas.h"
 #include "tmv/TMV_LUDecompose.h"

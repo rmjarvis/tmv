@@ -2620,7 +2620,7 @@ static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
     if (CanElemMult(a,b,a)) {
         for(int i=0;i<M;++i) for(int j=0;j<N;++j)
             m3(i,j) = m1(i,j) * m2(i,j);
-        a = ElemProd(a,b);
+        a ALIAS = ElemProd(a,b);
 #ifdef XXD
         if (XXDEBUG8) {
             std::cout<<"a = ElemProd(a,b) = "<<a<<std::endl;
@@ -2632,94 +2632,96 @@ static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
 #endif
         Assert(Equal(a,m3,eps2),label+" a = ElemProd(a,b)");
         CopyBack(a0,a);
-        a = ElemProd(b,a);
+        a ALIAS = ElemProd(b,a);
         Assert(Equal(a,m3,eps2),label+" a = ElemProd(b,a)");
         CopyBack(a0,a);
     }
 
+#ifndef NOADDEQ
     if (CanAddElemMult(a,b,a)) {
         for(int i=0;i<M;++i) for(int j=0;j<N;++j)
             m3(i,j) = m1(i,j) + m1(i,j) * m2(i,j);
-        a += ElemProd(a,b);
+        a ALIAS += ElemProd(a,b);
         Assert(Equal(a,m3,eps2),label+" a += ElemProd(a,b)");
         CopyBack(a0,a);
-        a += ElemProd(b,a);
+        a ALIAS += ElemProd(b,a);
         Assert(Equal(a,m3,eps2),label+" a += ElemProd(b,a)");
         CopyBack(a0,a);
 
         for(int i=0;i<M;++i) for(int j=0;j<N;++j)
             m3(i,j) = m1(i,j) - m1(i,j) * m2(i,j);
-        a -= ElemProd(a,b);
+        a ALIAS -= ElemProd(a,b);
         Assert(Equal(a,m3,eps2),label+" a -= ElemProd(a,b)");
         CopyBack(a0,a);
-        a -= ElemProd(b,a);
+        a ALIAS -= ElemProd(b,a);
         Assert(Equal(a,m3,eps2),label+" a -= ElemProd(b,a)");
         CopyBack(a0,a);
 
         RT x = 5;
         for(int i=0;i<M;++i) for(int j=0;j<N;++j)
             m3(i,j) = x * m1(i,j) * m2(i,j);
-        a = x*ElemProd(a,b);
+        a ALIAS = x*ElemProd(a,b);
         Assert(Equal(a,m3,eps2),label+" a = x*ElemProd(a,b)");
         CopyBack(a0,a);
-        a = x*ElemProd(b,a);
+        a ALIAS = x*ElemProd(b,a);
         Assert(Equal(a,m3,eps2),label+" a = x*ElemProd(b,a)");
         CopyBack(a0,a);
-        a = ElemProd(x*a,b);
+        a ALIAS = ElemProd(x*a,b);
         Assert(Equal(a,m3,eps2),label+" a = ElemProd(x*a,b)");
         CopyBack(a0,a);
-        a = ElemProd(b,x*a);
+        a ALIAS = ElemProd(b,x*a);
         Assert(Equal(a,m3,eps2),label+" a = ElemProd(b,x*a)");
         CopyBack(a0,a);
-        a = ElemProd(a,x*b);
+        a ALIAS = ElemProd(a,x*b);
         Assert(Equal(a,m3,eps2),label+" a = ElemProd(a,x*b)");
         CopyBack(a0,a);
-        a = ElemProd(x*b,a);
+        a ALIAS = ElemProd(x*b,a);
         Assert(Equal(a,m3,eps2),label+" a = ElemProd(x*b,a)");
         CopyBack(a0,a);
 
         for(int i=0;i<M;++i) for(int j=0;j<N;++j)
             m3(i,j) = m1(i,j) + x * m1(i,j) * m2(i,j);
-        a += x*ElemProd(a,b);
+        a ALIAS += x*ElemProd(a,b);
         Assert(Equal(a,m3,eps2),label+" a += x*ElemProd(a,b)");
         CopyBack(a0,a);
-        a += x*ElemProd(b,a);
+        a ALIAS += x*ElemProd(b,a);
         Assert(Equal(a,m3,eps2),label+" a += x*ElemProd(b,a)");
         CopyBack(a0,a);
-        a += ElemProd(x*a,b);
+        a ALIAS += ElemProd(x*a,b);
         Assert(Equal(a,m3,eps2),label+" a += ElemProd(x*a,b)");
         CopyBack(a0,a);
-        a += ElemProd(b,x*a);
+        a ALIAS += ElemProd(b,x*a);
         Assert(Equal(a,m3,eps2),label+" a += ElemProd(b,x*a)");
         CopyBack(a0,a);
-        a += ElemProd(a,x*b);
+        a ALIAS += ElemProd(a,x*b);
         Assert(Equal(a,m3,eps2),label+" a += ElemProd(a,x*b)");
         CopyBack(a0,a);
-        a += ElemProd(x*b,a);
+        a ALIAS += ElemProd(x*b,a);
         Assert(Equal(a,m3,eps2),label+" a += ElemProd(x*b,a)");
         CopyBack(a0,a);
 
         for(int i=0;i<M;++i) for(int j=0;j<N;++j)
             m3(i,j) = m1(i,j) - x * m1(i,j) * m2(i,j);
-        a -= x*ElemProd(a,b);
+        a ALIAS -= x*ElemProd(a,b);
         Assert(Equal(a,m3,eps2),label+" a -= x*ElemProd(a,b)");
         CopyBack(a0,a);
-        a -= x*ElemProd(b,a);
+        a ALIAS -= x*ElemProd(b,a);
         Assert(Equal(a,m3,eps2),label+" a -= x*ElemProd(b,a)");
         CopyBack(a0,a);
-        a -= ElemProd(x*a,b);
+        a ALIAS -= ElemProd(x*a,b);
         Assert(Equal(a,m3,eps2),label+" a -= ElemProd(x*a,b)");
         CopyBack(a0,a);
-        a -= ElemProd(b,x*a);
+        a ALIAS -= ElemProd(b,x*a);
         Assert(Equal(a,m3,eps2),label+" a -= ElemProd(b,x*a)");
         CopyBack(a0,a);
-        a -= ElemProd(a,x*b);
+        a ALIAS -= ElemProd(a,x*b);
         Assert(Equal(a,m3,eps2),label+" a -= ElemProd(a,x*b)");
         CopyBack(a0,a);
-        a -= ElemProd(x*b,a);
+        a ALIAS -= ElemProd(x*b,a);
         Assert(Equal(a,m3,eps2),label+" a -= ElemProd(x*b,a)");
         CopyBack(a0,a);
     }
+#endif
 #endif
 #endif
 

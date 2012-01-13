@@ -167,17 +167,14 @@ namespace tmv {
     };
 
     // A helper struct to determine the reference type of VIt, VectorView
-    template <class T, bool isconj>
-    struct AuxRef
+    template <class T, bool conj>
+    struct AuxRef // real T or NonConj
     { typedef T& reference; };
     template <class T>
     struct AuxRef<std::complex<T>,true>
     { typedef ConjRef<std::complex<T> > reference; };
-    template <class T>
-    struct AuxRef<std::complex<T>,false>
-    { typedef std::complex<T>& reference; };
 
-    template <class T, int S, bool C>
+    template <class T, int S, ConjType C>
     class VIt 
     {
     public :
@@ -187,7 +184,7 @@ namespace tmv {
         typedef T value_type;
         typedef ptrdiff_t difference_type;
         typedef T* pointer;
-        typedef typename AuxRef<T,C>::reference reference;
+        typedef typename AuxRef<T,C==Conj>::reference reference;
 
         TMV_INLINE VIt(T* inp, int step) : p(inp), s(step) {}
         TMV_INLINE explicit VIt(T* inp) : p(inp), s(S) 
@@ -239,11 +236,11 @@ namespace tmv {
         TMV_INLINE reference operator[](int n) const 
         { return reference(p[n*step()]); }
 
-        typedef VIt<T,S,false> nonconj_type;
+        typedef VIt<T,S,NonConj> nonconj_type;
         TMV_INLINE nonconj_type nonConj() const 
         { return nonconj_type(p,step()); }
         typedef typename Traits<T>::real_type real_type;
-        typedef VIt<real_type,S,false> flatten_type;
+        typedef VIt<real_type,S,NonConj> flatten_type;
         TMV_INLINE flatten_type flatten() const 
         { return flatten_type(reinterpret_cast<real_type*>(p),1); }
 
@@ -253,7 +250,7 @@ namespace tmv {
         const CheckedInt<S> s;
     };
 
-    template <class T, int S, bool C>
+    template <class T, int S, ConjType C>
     class CVIt
     {
     public :
@@ -324,11 +321,11 @@ namespace tmv {
         TMV_INLINE T operator[](int n) const 
         { return DoConj<C>(p[n*step()]); }
 
-        typedef CVIt<T,S,false> nonconj_type;
+        typedef CVIt<T,S,NonConj> nonconj_type;
         TMV_INLINE nonconj_type nonConj() const 
         { return nonconj_type(p,step()); }
         typedef typename Traits<T>::real_type real_type;
-        typedef CVIt<real_type,S,false> flatten_type;
+        typedef CVIt<real_type,S,NonConj> flatten_type;
         TMV_INLINE flatten_type flatten() const 
         { return flatten_type(reinterpret_cast<const real_type*>(p),1); }
 
@@ -338,10 +335,10 @@ namespace tmv {
         const CheckedInt<S> s;
     };
 
-    template <class T, int S, bool C>
+    template <class T, int S, ConjType C>
     TMV_INLINE CVIt<T,S,C> operator+(int i, const CVIt<T,S,C>& it)
     { return it + i; }
-    template <class T, int S, bool C>
+    template <class T, int S, ConjType C>
     TMV_INLINE VIt<T,S,C> operator+(int i, const VIt<T,S,C>& it)
     { return it + i; }
 
@@ -407,25 +404,25 @@ namespace tmv {
     inline std::string TMV_Text(ConjRef<T>)
     { return std::string("ConjRef<") + TMV_Text(T()) + ">"; }
 
-    template <class T, int S, bool C>
+    template <class T, int S, ConjType C>
     inline std::string TMV_Text(VIt<T,S,C> it)
     {
         std::ostringstream s;
         s << "VIt<" << TMV_Text(T());
         s << ","<<IntTraits<S>::text();
         if (S == Unknown) s << "("<<it.step()<<")";
-        s << ","<< C << ">";
+        s << ","<< TMV_Text(C) << ">";
         return s.str();
     }
 
-    template <class T, int S, bool C>
+    template <class T, int S, ConjType C>
     inline std::string TMV_Text(CVIt<T,S,C> it)
     {
         std::ostringstream s;
         s << "CVIt<" << TMV_Text(T());
         s << ","<<IntTraits<S>::text();
         if (S == Unknown) s << "("<<it.step()<<")";
-        s << ","<< C << ">";
+        s << ","<< TMV_Text(C) << ">";
         return s.str();
     }
 

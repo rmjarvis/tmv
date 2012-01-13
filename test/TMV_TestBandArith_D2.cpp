@@ -51,6 +51,22 @@ inline bool CanMult(
         !c.isunit();
 }
 
+template <class M1, class M2, class M3> 
+inline bool CanElemMult(
+    const tmv::BaseMatrix_Band<M1>& a, const tmv::BaseMatrix_Tri<M2>& b,
+    const tmv::BaseMatrix_Tri_Mutable<M3>& c)
+{ 
+    return a.rowsize() == c.rowsize() && a.colsize() == c.colsize() &&
+        b.rowsize() == c.rowsize() && b.colsize() == c.colsize() &&
+        c.nlo() >= std::min(a.nlo(),b.nlo()) &&
+        c.nhi() >= std::min(a.nhi(),b.nhi()) && !c.isunit();
+}
+
+template <class M1, class M2, class M3> 
+inline bool CanElemMult(
+    const tmv::BaseMatrix_Tri<M1>& a, const tmv::BaseMatrix_Band<M2>& b,
+    const tmv::BaseMatrix_Tri_Mutable<M3>& c)
+{ return CanElemMult(b,a,c); }
 
 #include "TMV_TestMatrixArith.h"
 

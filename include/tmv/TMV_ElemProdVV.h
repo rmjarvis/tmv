@@ -36,13 +36,14 @@ namespace tmv {
         typedef typename ProdXV<ix,T,V1>::value_type vtype1;
         typedef typename V2::value_type vtype2;
         typedef typename Traits2<vtype1,vtype2>::type value_type;
-
+ 
         enum { _size = Sizes<V1::_size,V2::_size>::size };
         enum { _fort = V1::_fort && V2::_fort };
         enum { _calc = false };
+        enum { A = _fort ? FortranStyle : CStyle };
 
         typedef ElemProdVV<ix,T,V1,V2> type;
-        typedef typename VCopyHelper<value_type,_size,_fort>::type copy_type;
+        typedef typename VCopyHelper<value_type,_size,A>::type copy_type;
         typedef const copy_type calc_type;
         typedef typename TypeSelect<V1::_calc&&V2::_calc,
                 const type,calc_type>::type eval_type;
@@ -199,22 +200,30 @@ namespace tmv {
     template <int ix, class T, class V1, class V2>
     TMV_INLINE ElemProdVV<0,T,V1,V2> operator/(
         const ElemProdVV<ix,T,V1,V2>& vv, const int x)
-    { return ElemProdVV<0,T,V1,V2>(vv.getX()/RT(x),vv.getV1(),vv.getV2()); }
+    {
+        return ElemProdVV<0,T,V1,V2>(
+            ZProd<false,false>::quot(vv.getX(),RT(x)),vv.getV1(),vv.getV2()); }
 
     template <int ix, class T, class V1, class V2>
     TMV_INLINE ElemProdVV<0,T,V1,V2> operator/(
         const ElemProdVV<ix,T,V1,V2>& vv, const RT x)
-    { return ElemProdVV<0,T,V1,V2>(vv.getX()/x,vv.getV1(),vv.getV2()); }
+    { 
+        return ElemProdVV<0,T,V1,V2>(
+            ZProd<false,false>::quot(vv.getX(),x),vv.getV1(),vv.getV2()); }
 
     template <int ix, class T, class V1, class V2>
     TMV_INLINE ElemProdVV<0,CT,V1,V2> operator/(
         const ElemProdVV<ix,T,V1,V2>& vv, const CT x)
-    { return ElemProdVV<0,CT,V1,V2>(vv.getX()/x,vv.getV1(),vv.getV2()); }
+    { 
+        return ElemProdVV<0,CT,V1,V2>(
+            ZProd<false,false>::quot(vv.getX(),x),vv.getV1(),vv.getV2()); }
 
     template <int ix, class T, class V1, class V2>
     TMV_INLINE ElemProdVV<0,CT,V1,V2> operator/(
         const ElemProdVV<ix,T,V1,V2>& vv, const CCT x)
-    { return ElemProdVV<0,CT,V1,V2>(vv.getX()/x,vv.getV1(),vv.getV2()); }
+    { 
+        return ElemProdVV<0,CT,V1,V2>(
+            ZProd<false,false>::quot(vv.getX(),CT(x)),vv.getV1(),vv.getV2()); }
 
 #undef RT
 #undef CT

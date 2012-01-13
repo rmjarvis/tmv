@@ -30,8 +30,6 @@ int main() try {
     //showdiv=true;
     //showtests=true;
     //showstartdone=true;
-    //XXDEBUG7 = true;
-    //XXDEBUG9 = true;
     TestBandMatrix<double>();
 
 #if 0

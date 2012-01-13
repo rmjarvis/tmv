@@ -93,12 +93,12 @@ namespace tmv {
 
             if (unit2) {
                 while (n && !TMV_Aligned(B.get()) ) {
-                    *B++ = x / *A++;
+                    *B++ = ZProd<false,false>::quot(x , *A++);
                     --n;
                 }
             } else if (unit1) {
                 while (n && !TMV_Aligned(A.get()) ) {
-                    *B++ = x / *A++;
+                    *B++ = ZProd<false,false>::quot(x , *A++);
                     --n;
                 }
             }
@@ -121,7 +121,7 @@ namespace tmv {
                 } while (--n_2);
             }
 
-            if (nb) *B = x / *A;
+            if (nb) *B = ZProd<false,false>::quot(x , *A);
         }
     };
 
@@ -147,7 +147,7 @@ namespace tmv {
 
             if (unit1) {
                 while (n && !TMV_Aligned(A.get()) ) {
-                    *B++ = x / *A++;
+                    *B++ = ZProd<false,false>::quot(x , *A++);
                     --n;
                 }
             }
@@ -174,7 +174,7 @@ namespace tmv {
                 } while (--n_2);
             }
 
-            if (nb) *B = x / *A;
+            if (nb) *B = ZProd<false,false>::quot(x , *A);
         }
     };
 
@@ -252,7 +252,7 @@ namespace tmv {
 
             if (unit1) {
                 while (n && !TMV_Aligned(A.get()) ) {
-                    *B++ = x / *A++;
+                    *B++ = ZProd<false,false>::quot(x , *A++);
                     --n;
                 }
             }
@@ -280,7 +280,7 @@ namespace tmv {
                 } while (--n_2);
             }
 
-            if (nb) *B = x / *A;
+            if (nb) *B = ZProd<false,false>::quot(x , *A);
         }
     };
 
@@ -359,17 +359,17 @@ namespace tmv {
 
             if (unit3) {
                 while (n && !TMV_Aligned(C.get()) ) {
-                    *C++ = x * *A++ / *B++;
+                    *C++ = x * ZProd<false,false>::quot(*A++ , *B++);
                     --n;
                 }
             } else if (unit1) {
                 while (n && !TMV_Aligned(A.get()) ) {
-                    *C++ = x * *A++ / *B++;
+                    *C++ = x * ZProd<false,false>::quot(*A++ , *B++);
                     --n;
                 }
             } else if (unit2) {
                 while (n && !TMV_Aligned(B.get()) ) {
-                    *C++ = x * *A++ / *B++;
+                    *C++ = x * ZProd<false,false>::quot(*A++ , *B++);
                     --n;
                 }
             }
@@ -407,7 +407,9 @@ namespace tmv {
                 } while (--n_4);
             }
 
-            if (nb) do { *C++ = x * *A++ / *B++; } while (--nb);
+            if (nb) do { 
+                *C++ = x * ZProd<false,false>::quot(*A++ , *B++);
+            } while (--nb);
         }
     };
 
@@ -434,7 +436,7 @@ namespace tmv {
 
             if (unit1) {
                 while (n && !TMV_Aligned(A.get()) ) {
-                    *B++ = x / *A++;
+                    *B++ = ZProd<false,false>::quot(x , *A++);
                     --n;
                 }
             }
@@ -467,7 +469,9 @@ namespace tmv {
                 } while (--n_4);
             }
 
-            if (nb) do { *B++ = x / *A++; } while (--nb);
+            if (nb) do { 
+                *B++ = ZProd<false,false>::quot(x , *A++);
+            } while (--nb);
         }
     };
 
@@ -559,7 +563,7 @@ namespace tmv {
 
             if (unit1) {
                 while (n && !TMV_Aligned(A.get()) ) {
-                    *B++ = x / *A++;
+                    *B++ = ZProd<false,false>::quot(x , *A++);
                     --n;
                 }
             }
@@ -595,7 +599,9 @@ namespace tmv {
                 } while (--n_4);
             }
 
-            if (nb) do { *B++ = x / *A++; } while (--nb);
+            if (nb) do { 
+                *B++ = ZProd<false,false>::quot(x , *A++);
+            } while (--nb);
         }
     };
 

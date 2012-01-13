@@ -53,7 +53,7 @@ namespace tmv {
     {
         MultVM<false>(
             Scaling<1,typename V1::real_type>(),
-            (x*v1.vec()).calc(),m2.mat(),v1.vec()); 
+            ProdXV<ix,T,V1>(x,v1.vec()).calc(),m2.mat(),v1.vec()); 
     }
 
     // And the default behavior for MultVM is to transpose m
@@ -500,17 +500,26 @@ namespace tmv {
     template <int ix, class T, class M1, class V2>
     TMV_INLINE ProdMV<0,T,M1,V2> operator/(
         const ProdMV<ix,T,M1,V2>& mv, const RT x)
-    { return ProdMV<0,T,M1,V2>(mv.getX()/x,mv.getM(),mv.getV()); }
+    {
+        return ProdMV<0,T,M1,V2>(
+            ZProd<false,false>::quot(mv.getX(),x),mv.getM(),mv.getV()); 
+    }
 
     template <int ix, class T, class M1, class V2>
     TMV_INLINE ProdMV<0,CT,M1,V2> operator/(
         const ProdMV<ix,T,M1,V2>& mv, const CT x)
-    { return ProdMV<0,CT,M1,V2>(mv.getX()/x,mv.getM(),mv.getV()); }
+    { 
+        return ProdMV<0,CT,M1,V2>(
+            ZProd<false,false>::quot(mv.getX(),x),mv.getM(),mv.getV()); 
+    }
 
     template <int ix, class T, class M1, class V2>
     TMV_INLINE ProdMV<0,CT,M1,V2> operator/(
         const ProdMV<ix,T,M1,V2>& mv, const CCT x)
-    { return ProdMV<0,CT,M1,V2>(mv.getX()/x,mv.getM(),mv.getV()); }
+    { 
+        return ProdMV<0,CT,M1,V2>(
+            ZProd<false,false>::quot(mv.getX(),x),mv.getM(),mv.getV()); 
+    }
 
 #undef RT
 #undef CT
@@ -572,22 +581,34 @@ namespace tmv {
     template <int ix, class T, class V1, class M2>
     TMV_INLINE ProdVM<0,T,V1,M2> operator/(
         const ProdVM<ix,T,V1,M2>& vm, const int x)
-    { return ProdVM<0,T,V1,M2>(vm.getX()/RT(x),vm.getV(),vm.getM()); }
+    {
+        return ProdVM<0,T,V1,M2>(
+            ZProd<false,false>::quot(vm.getX(),RT(x)),vm.getV(),vm.getM()); 
+    }
 
     template <int ix, class T, class V1, class M2>
     TMV_INLINE ProdVM<0,T,V1,M2> operator/(
         const ProdVM<ix,T,V1,M2>& vm, const RT x)
-    { return ProdVM<0,T,V1,M2>(vm.getX()/x,vm.getV(),vm.getM()); }
+    { 
+        return ProdVM<0,T,V1,M2>(
+            ZProd<false,false>::quot(vm.getX(),x),vm.getV(),vm.getM()); 
+    }
 
     template <int ix, class T, class V1, class M2>
     TMV_INLINE ProdVM<0,CT,V1,M2> operator/(
         const ProdVM<ix,T,V1,M2>& vm, const CT x)
-    { return ProdVM<0,CT,V1,M2>(vm.getX()/x,vm.getV(),vm.getM()); }
+    { 
+        return ProdVM<0,CT,V1,M2>(
+            ZProd<false,false>::quot(vm.getX(),x),vm.getV(),vm.getM()); 
+    }
 
     template <int ix, class T, class V1, class M2>
     TMV_INLINE ProdVM<0,CT,V1,M2> operator/(
         const ProdVM<ix,T,V1,M2>& vm, const CCT x)
-    { return ProdVM<0,CT,V1,M2>(vm.getX()/x,vm.getV(),vm.getM()); }
+    { 
+        return ProdVM<0,CT,V1,M2>(
+            ZProd<false,false>::quot(vm.getX(),x),vm.getV(),vm.getM()); 
+    }
 
 #undef RT
 #undef CT

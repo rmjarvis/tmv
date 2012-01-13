@@ -364,13 +364,13 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     (a=v1) -= -b;
     Assert(Equal(a,v4,eps),label+" a -= -b");
 #ifndef NOALIAS
-    (a=v1) = a+v2;
+    (a=v1) ALIAS = a+v2;
     Assert(Equal(a,v4,eps),label+" a = a+v");
-    (a=v1) = v2+a;
+    (a=v1) ALIAS = v2+a;
     Assert(Equal(a,v4,eps),label+" a = v+a");
-    (a=v1) = a+b;
+    (a=v1) ALIAS = a+b;
     Assert(Equal(a,v4,eps),label+" a = a+b");
-    (a=v1) = b+a;
+    (a=v1) ALIAS = b+a;
     Assert(Equal(a,v4,eps),label+" a = b+a");
 #endif
     a = v1;
@@ -388,9 +388,9 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     (a=v1) += -b;
     Assert(Equal(a,v4,eps),label+" a += -b");
 #ifndef NOALIAS
-    (a=v1) = a-v2;
+    (a=v1) ALIAS = a-v2;
     Assert(Equal(a,v4,eps),label+" a = a-v");
-    (a=v1) = a-b;
+    (a=v1) ALIAS = a-b;
     Assert(Equal(a,v4,eps),label+" a = a-b");
 #endif
     a = v1;
@@ -400,9 +400,9 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     (v3=v1) = b-v3;
     Assert(Equal(v3,v4,eps),label+" v = b-v");
 #ifndef NOALIAS
-    (a=v1) = v2-a;
+    (a=v1) ALIAS = v2-a;
     Assert(Equal(a,v4,eps),label+" a = v-a");
-    (a=v1) = b-a;
+    (a=v1) ALIAS = b-a;
     Assert(Equal(a,v4,eps),label+" a = b-a");
 #endif
     a = v1;
@@ -414,13 +414,13 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     (v3=v1) = ElemProd(b,v3);
     Assert(Equal(v3,v4,eps),label+" v = ElemProd(b,v)");
 #ifndef NOALIAS
-    (a=v1) = ElemProd(a,v2);
+    (a=v1) ALIAS = ElemProd(a,v2);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(a,v)");
-    (a=v1) = ElemProd(v2,a);
+    (a=v1) ALIAS = ElemProd(v2,a);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(v,a)");
-    (a=v1) = ElemProd(a,b);
+    (a=v1) ALIAS = ElemProd(a,b);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(a,b)");
-    (a=v1) = ElemProd(b,a);
+    (a=v1) ALIAS = ElemProd(b,a);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(b,a)");
 #endif
     a = v1;
@@ -432,13 +432,13 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     (v3=v1) += ElemProd(b,v3);
     Assert(Equal(v3,v4,eps),label+" v += ElemProd(b,v)");
 #ifndef NOALIAS
-    (a=v1) += ElemProd(a,v2);
+    (a=v1) ALIAS += ElemProd(a,v2);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(a,v)");
-    (a=v1) += ElemProd(v2,a);
+    (a=v1) ALIAS += ElemProd(v2,a);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(v,a)");
-    (a=v1) += ElemProd(a,b);
+    (a=v1) ALIAS += ElemProd(a,b);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(a,b)");
-    (a=v1) += ElemProd(b,a);
+    (a=v1) ALIAS += ElemProd(b,a);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(b,a)");
 #endif
     a = v1;
@@ -450,13 +450,13 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     (v3=v1) -= ElemProd(b,v3);
     Assert(Equal(v3,v4,eps),label+" v -= ElemProd(b,v)");
 #ifndef NOALIAS
-    (a=v1) -= ElemProd(a,v2);
+    (a=v1) ALIAS -= ElemProd(a,v2);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(a,v)");
-    (a=v1) -= ElemProd(v2,a);
+    (a=v1) ALIAS -= ElemProd(v2,a);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(v,a)");
-    (a=v1) -= ElemProd(a,b);
+    (a=v1) ALIAS -= ElemProd(a,b);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(a,b)");
-    (a=v1) -= ElemProd(b,a);
+    (a=v1) ALIAS -= ElemProd(b,a);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(b,a)");
 #endif
     a = v1;
@@ -477,29 +477,29 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     (v3=v1) = ElemProd(b,x*v3);
     Assert(Equal(v3,v4,eps),label+" v = ElemProd(b,x*v)");
 #ifndef NOALIAS
-    (a=v1) = x*ElemProd(a,v2);
+    (a=v1) ALIAS = x*ElemProd(a,v2);
     Assert(Equal(a,v4,eps),label+" a = x*ElemProd(a,v)");
-    (a=v1) = x*ElemProd(v2,a);
+    (a=v1) ALIAS = x*ElemProd(v2,a);
     Assert(Equal(a,v4,eps),label+" a = x*ElemProd(v,a)");
-    (a=v1) = ElemProd(x*a,v2);
+    (a=v1) ALIAS = ElemProd(x*a,v2);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(x*a,v)");
-    (a=v1) = ElemProd(a,x*v2);
+    (a=v1) ALIAS = ElemProd(a,x*v2);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(a,x*v)");
-    (a=v1) = ElemProd(x*v2,a);
+    (a=v1) ALIAS = ElemProd(x*v2,a);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(x*v,a)");
-    (a=v1) = ElemProd(v2,x*a);
+    (a=v1) ALIAS = ElemProd(v2,x*a);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(v,x*a)");
-    (a=v1) = x*ElemProd(a,b);
+    (a=v1) ALIAS = x*ElemProd(a,b);
     Assert(Equal(a,v4,eps),label+" a = x*ElemProd(a,b)");
-    (a=v1) = x*ElemProd(b,a);
+    (a=v1) ALIAS = x*ElemProd(b,a);
     Assert(Equal(a,v4,eps),label+" a = x*ElemProd(b,a)");
-    (a=v1) = ElemProd(x*a,b);
+    (a=v1) ALIAS = ElemProd(x*a,b);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(x*a,b)");
-    (a=v1) = ElemProd(a,x*b);
+    (a=v1) ALIAS = ElemProd(a,x*b);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(a,x*b)");
-    (a=v1) = ElemProd(x*b,a);
+    (a=v1) ALIAS = ElemProd(x*b,a);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(x*b,a)");
-    (a=v1) = ElemProd(b,x*a);
+    (a=v1) ALIAS = ElemProd(b,x*a);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(b,x*a)");
 #endif
     a = v1;
@@ -519,29 +519,29 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     (v3=v1) += ElemProd(b,x*v3);
     Assert(Equal(v3,v4,eps),label+" v += ElemProd(b,x*v)");
 #ifndef NOALIAS
-    (a=v1) += x*ElemProd(a,v2);
+    (a=v1) ALIAS += x*ElemProd(a,v2);
     Assert(Equal(a,v4,eps),label+" a += x*ElemProd(a,v)");
-    (a=v1) += x*ElemProd(v2,a);
+    (a=v1) ALIAS += x*ElemProd(v2,a);
     Assert(Equal(a,v4,eps),label+" a += x*ElemProd(v,a)");
-    (a=v1) += ElemProd(x*a,v2);
+    (a=v1) ALIAS += ElemProd(x*a,v2);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(x*a,v)");
-    (a=v1) += ElemProd(a,x*v2);
+    (a=v1) ALIAS += ElemProd(a,x*v2);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(a,x*v)");
-    (a=v1) += ElemProd(x*v2,a);
+    (a=v1) ALIAS += ElemProd(x*v2,a);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(x*v,a)");
-    (a=v1) += ElemProd(v2,x*a);
+    (a=v1) ALIAS += ElemProd(v2,x*a);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(v,x*a)");
-    (a=v1) += x*ElemProd(a,b);
+    (a=v1) ALIAS += x*ElemProd(a,b);
     Assert(Equal(a,v4,eps),label+" a += x*ElemProd(a,b)");
-    (a=v1) += x*ElemProd(b,a);
+    (a=v1) ALIAS += x*ElemProd(b,a);
     Assert(Equal(a,v4,eps),label+" a += x*ElemProd(b,a)");
-    (a=v1) += ElemProd(x*a,b);
+    (a=v1) ALIAS += ElemProd(x*a,b);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(x*a,b)");
-    (a=v1) += ElemProd(a,x*b);
+    (a=v1) ALIAS += ElemProd(a,x*b);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(a,x*b)");
-    (a=v1) += ElemProd(x*b,a);
+    (a=v1) ALIAS += ElemProd(x*b,a);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(x*b,a)");
-    (a=v1) += ElemProd(b,x*a);
+    (a=v1) ALIAS += ElemProd(b,x*a);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(b,x*a)");
 #endif
     a = v1;
@@ -561,29 +561,29 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     (v3=v1) -= ElemProd(b,x*v3);
     Assert(Equal(v3,v4,eps),label+" v -= ElemProd(b,x*v)");
 #ifndef NOALIAS
-    (a=v1) -= x*ElemProd(a,v2);
+    (a=v1) ALIAS -= x*ElemProd(a,v2);
     Assert(Equal(a,v4,eps),label+" a -= x*ElemProd(a,v)");
-    (a=v1) -= x*ElemProd(v2,a);
+    (a=v1) ALIAS -= x*ElemProd(v2,a);
     Assert(Equal(a,v4,eps),label+" a -= x*ElemProd(v,a)");
-    (a=v1) -= ElemProd(x*a,v2);
+    (a=v1) ALIAS -= ElemProd(x*a,v2);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(x*a,v)");
-    (a=v1) -= ElemProd(a,x*v2);
+    (a=v1) ALIAS -= ElemProd(a,x*v2);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(a,x*v)");
-    (a=v1) -= ElemProd(x*v2,a);
+    (a=v1) ALIAS -= ElemProd(x*v2,a);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(x*v,a)");
-    (a=v1) -= ElemProd(v2,x*a);
+    (a=v1) ALIAS -= ElemProd(v2,x*a);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(v,x*a)");
-    (a=v1) -= x*ElemProd(a,b);
+    (a=v1) ALIAS -= x*ElemProd(a,b);
     Assert(Equal(a,v4,eps),label+" a -= x*ElemProd(a,b)");
-    (a=v1) -= x*ElemProd(b,a);
+    (a=v1) ALIAS -= x*ElemProd(b,a);
     Assert(Equal(a,v4,eps),label+" a -= x*ElemProd(b,a)");
-    (a=v1) -= ElemProd(x*a,b);
+    (a=v1) ALIAS -= ElemProd(x*a,b);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(x*a,b)");
-    (a=v1) -= ElemProd(a,x*b);
+    (a=v1) ALIAS -= ElemProd(a,x*b);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(a,x*b)");
-    (a=v1) -= ElemProd(x*b,a);
+    (a=v1) ALIAS -= ElemProd(x*b,a);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(x*b,a)");
-    (a=v1) -= ElemProd(b,x*a);
+    (a=v1) ALIAS -= ElemProd(b,x*a);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(b,x*a)");
 #endif
     a = v1;

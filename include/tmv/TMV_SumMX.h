@@ -404,27 +404,35 @@ namespace tmv {
         const SumMX<ix1,T1,M1,T2>& smx, const int x)
     {
         return SumMX<0,T1,M1,T2>(
-            smx.getX1()/RT(x),smx.getM1(),smx.getX2()/RT(x));
+            ZProd<false,false>::quot(smx.getX1(),RT(x)),smx.getM1(),
+            ZProd<false,false>::quot(smx.getX2(),RT(x)));
     }
 
     template <int ix1, class T1, class M1, class T2>
     TMV_INLINE SumMX<0,T1,M1,T2> operator/(
         const SumMX<ix1,T1,M1,T2>& smx, const RT x)
     {
-        return SumMX<0,T1,M1,T2>(smx.getX1()/x,smx.getM1(),smx.getX2()/x);
+        return SumMX<0,T1,M1,T2>(
+            ZProd<false,false>::quot(smx.getX1(),x),smx.getM1(),
+            ZProd<false,false>::quot(smx.getX2(),x));
     }
 
     template <int ix1, class T1, class M1, class T2>
     TMV_INLINE SumMX<0,CT,M1,CT> operator/(
         const SumMX<ix1,T1,M1,T2>& smx, const CT x)
-    { return SumMX<0,CT,M1,CT>(smx.getX1()/x,smx.getM1(), smx.getX2()/x); }
+    {
+        return SumMX<0,CT,M1,CT>(
+            ZProd<false,false>::quot(smx.getX1(),x),smx.getM1(), 
+            ZProd<false,false>::quot(smx.getX2(),x)); 
+    }
 
     template <int ix1, class T1, class M1, class T2>
     TMV_INLINE SumMX<0,CT,M1,CT> operator/(
         const SumMX<ix1,T1,M1,T2>& smx, const CCT x)
     {
         return SumMX<0,CT,M1,CT>(
-            smx.getX1()/CT(x),smx.getM1(),smx.getX2()/CT(x));
+            ZProd<false,false>::quot(smx.getX1(),CT(x)),smx.getM1(),
+            ZProd<false,false>::quot(smx.getX2(),CT(x)));
     }
 
 #undef RT

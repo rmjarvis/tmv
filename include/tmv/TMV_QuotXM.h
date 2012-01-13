@@ -134,15 +134,24 @@ namespace tmv {
     // x / xm
     template <int ix, class T, class M>
     TMV_INLINE QuotXM<0,T,M> operator/(const int x, const ProdXM<ix,T,M>& pxm)
-    { return QuotXM<0,T,M>(RT(x)/pxm.getX(),pxm.getM()); }
+    {
+        return QuotXM<0,T,M>(
+            ZProd<false,false>::quot(RT(x),pxm.getX()),pxm.getM()); 
+    }
 
     template <int ix, class T, class M>
     TMV_INLINE QuotXM<0,T,M> operator/(const RT x, const ProdXM<ix,T,M>& pxm)
-    { return QuotXM<0,T,M>(x/pxm.getX(),pxm.getM()); }
+    { 
+        return QuotXM<0,T,M>(
+            ZProd<false,false>::quot(x,pxm.getX()),pxm.getM()); 
+    }
 
     template <int ix, class T, class M>
     TMV_INLINE QuotXM<0,CT,M> operator/(const CT x, const ProdXM<ix,T,M>& pxm)
-    { return QuotXM<0,CT,M>(x/pxm.getX(),pxm.getM()); }
+    { 
+        return QuotXM<0,CT,M>(
+            ZProd<false,false>::quot(x,pxm.getX()),pxm.getM()); 
+    }
 
     template <int ix, class T, class M>
     TMV_INLINE QuotXM<0,CT,M> operator/(const CCT x, const ProdXM<ix,T,M>& pxm)
@@ -235,19 +244,31 @@ namespace tmv {
     // (x*m)/x
     template <int ix, class T, class M>
     TMV_INLINE QuotXM<0,RT,M> operator/(const QuotXM<ix,T,M>& qxm, const int x)
-    { return QuotXM<0,RT,M>(qxm.getX()/RT(x),qxm.getM()); }
+    { 
+        return QuotXM<0,RT,M>(
+            ZProd<false,false>::quot(qxm.getX(),RT(x)),qxm.getM()); 
+    }
 
     template <int ix, class T, class M>
     TMV_INLINE QuotXM<0,RT,M> operator/(const QuotXM<ix,T,M>& qxm, const RT x)
-    { return QuotXM<0,RT,M>(qxm.getX()/x,qxm.getM()); }
+    { 
+        return QuotXM<0,RT,M>(
+            ZProd<false,false>::quot(qxm.getX(),x),qxm.getM()); 
+    }
 
     template <int ix, class T, class M>
     TMV_INLINE QuotXM<0,CT,M> operator/(const QuotXM<ix,T,M>& qxm, const CT x)
-    { return QuotXM<0,CT,M>(qxm.getX()/x,qxm.getM()); }
+    { 
+        return QuotXM<0,CT,M>(
+            ZProd<false,false>::quot(qxm.getX(),x),qxm.getM()); 
+    }
 
     template <int ix, class T, class M>
     TMV_INLINE QuotXM<0,CT,M> operator/(const QuotXM<ix,T,M>& qxm, const CCT x)
-    { return QuotXM<0,CT,M>(qxm.getX()/x,qxm.getM()); }
+    { 
+        return QuotXM<0,CT,M>(
+            ZProd<false,false>::quot(qxm.getX(),x),qxm.getM()); 
+    }
 
 #undef RT
 #undef CT

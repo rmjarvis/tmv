@@ -68,7 +68,8 @@ namespace tmv {
             T1 invdet = ZProd<false,false>::quot(RT(1) , det);
             // Each of the terms like m1c.cref(0,0) has a 1/scale already
             // so only need one more scale in the xinvdet factor.
-            T2 xinvdet = ZProd<false,false>::prod(x,invdet/scale);
+            T2 xinvdet = ZProd<false,false>::prod(
+                x,ZProd<false,false>::quot(invdet,scale));
             m2.ref(0,0) = ZProd<false,false>::prod(m1c.cref(1,1) , xinvdet);
             m2.ref(0,1) = ZProd<false,false>::prod(-m1c.cref(0,1) , xinvdet);
             m2.ref(1,0) = ZProd<false,false>::prod(-m1c.cref(1,0) , xinvdet);
@@ -117,7 +118,8 @@ namespace tmv {
             const T1 eg = ZProd<false,false>::prod(m1c.cref(1,1),m1c.cref(2,0));
             // Each of the terms like ei-fh has two 1/scales already
             // so only need one more scale in the xinvdet factor.
-            T2 xinvdet = ZProd<false,false>::prod(x,invdet/scale);
+            T2 xinvdet = ZProd<false,false>::prod(
+                x,ZProd<false,false>::quot(invdet,scale));
             m2.ref(0,0) = ZProd<false,false>::prod(ei-fh , xinvdet);
             m2.ref(0,1) = ZProd<false,false>::prod(ch-bi , xinvdet);
             m2.ref(0,2) = ZProd<false,false>::prod(bf-ce , xinvdet);
@@ -264,7 +266,8 @@ namespace tmv {
             // Finally divide rij values by det and multiply by x:
             // Each of the terms like r00 has two 1/scales already
             // so only need one more scale in the xinvdet factor.
-            T2 xinvdet = ZProd<false,false>::prod(x,invdet/scale);
+            T2 xinvdet = ZProd<false,false>::prod(
+                x,ZProd<false,false>::quot(invdet,scale));
             m2.ref(0,0) = ZProd<false,false>::prod(r00 , xinvdet);
             m2.ref(1,0) = ZProd<false,false>::prod(r10 , xinvdet);
             m2.ref(2,0) = ZProd<false,false>::prod(r20 , xinvdet);

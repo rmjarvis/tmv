@@ -269,19 +269,31 @@ namespace tmv {
     // (x*m)/x
     template <int ix, class T, class M>
     TMV_INLINE ProdXM<0,RT,M> operator/(const ProdXM<ix,T,M>& pxm, const int x)
-    { return ProdXM<0,RT,M>(pxm.getX()/RT(x),pxm.getM()); }
+    {
+        return ProdXM<0,RT,M>(
+            ZProd<false,false>::quot(pxm.getX(),RT(x)),pxm.getM()); 
+    }
 
     template <int ix, class T, class M>
     TMV_INLINE ProdXM<0,RT,M> operator/(const ProdXM<ix,T,M>& pxm, const RT x)
-    { return ProdXM<0,RT,M>(pxm.getX()/x,pxm.getM()); }
+    { 
+        return ProdXM<0,RT,M>(
+            ZProd<false,false>::quot(pxm.getX(),x),pxm.getM()); 
+    }
 
     template <int ix, class T, class M>
     TMV_INLINE ProdXM<0,CT,M> operator/(const ProdXM<ix,T,M>& pxm, const CT x)
-    { return ProdXM<0,CT,M>(pxm.getX()/x,pxm.getM()); }
+    { 
+        return ProdXM<0,CT,M>(
+            ZProd<false,false>::quot(pxm.getX(),x),pxm.getM()); 
+    }
 
     template <int ix, class T, class M>
     TMV_INLINE ProdXM<0,CT,M> operator/(const ProdXM<ix,T,M>& pxm, const CCT x)
-    { return ProdXM<0,CT,M>(pxm.getX()/x,pxm.getM()); }
+    { 
+        return ProdXM<0,CT,M>(
+            ZProd<false,false>::quot(pxm.getX(),x),pxm.getM()); 
+    }
 
 #undef RT
 #undef CT
