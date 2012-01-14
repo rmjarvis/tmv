@@ -1,5 +1,5 @@
 
-#define START 4
+#define START 0
 
 #include "TMV.h"
 #include "TMV_Test.h"

@@ -1,5 +1,5 @@
 
-#define START 9
+#define START 0
 
 #include "TMV.h"
 #include "TMV_SymBand.h"

@@ -511,8 +511,11 @@ namespace tmv {
         Matrix<T> m0 = m;
         Matrix<T> m2 = QQ.adjoint() * m;
         std::cout<<"Q = "<<TMV_Text(Q)<<std::endl;
+        std::cout<<"steps = "<<Q.stepi()<<"  "<<Q.stepj()<<std::endl;
         std::cout<<"beta = "<<TMV_Text(beta)<<std::endl;
+        std::cout<<"step = "<<beta.step()<<std::endl;
         std::cout<<"m = "<<TMV_Text(m)<<std::endl;
+        std::cout<<"steps = "<<m.stepi()<<"  "<<m.stepj()<<std::endl;
         std::cout<<"Q = "<<Q<<std::endl;
         std::cout<<"beta = "<<beta<<std::endl;
         std::cout<<"QQ = "<<QQ<<std::endl;
@@ -530,11 +533,12 @@ namespace tmv {
 
         if (m.colsize() > 0 && m.rowsize() > 0) {
 #ifdef LAP
-            if ( BlasIsRM(m) || BlasIsCM(m) )
+            if ( BlasIsRM(m) || BlasIsCM(m) ) {
                 LapQLDivEq(Q,beta,m);
-            else {
+            } else {
                 Matrix<T> mc = m;
                 LapQLDivEq(Q,beta,mc.view());
+                m = mc;
             }
 #else
             NonLapQLDivEq(Q,beta,m);
@@ -1018,11 +1022,12 @@ namespace tmv {
 
         if (m.colsize() > 0 && m.rowsize() > 0) {
 #ifdef LAP
-            if ( BlasIsRM(m) || BlasIsCM(m) )
+            if ( BlasIsRM(m) || BlasIsCM(m) ) {
                 LapQRDivEq(Q,beta,m);
-            else {
+            } else {
                 Matrix<T> mc = m;
                 LapQRDivEq(Q,beta,mc.view());
+                m = mc;
             }
 #else
             NonLapQRDivEq(Q,beta,m);

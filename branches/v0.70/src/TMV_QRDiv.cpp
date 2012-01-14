@@ -58,6 +58,9 @@ namespace tmv {
         // where Q and R are stored in QRx, and beta are the beta
 
         //std::cout<<"Start QR_LDiv"<<std::endl;
+        //std::cout<<"QRx = "<<QRx<<std::endl;
+        //std::cout<<"beta = "<<beta<<std::endl;
+        //std::cout<<"m = "<<m<<std::endl;
         //std::cout<<"Norm(QRx) = "<<Norm(QRx)<<std::endl;
         //std::cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
         //std::cout<<"Norm(m) = "<<Norm(m)<<std::endl;
@@ -66,6 +69,7 @@ namespace tmv {
         if (QRx.isSquare()) {
             x = m;
             Q_LDivEq(QRx,beta,x);
+            //std::cout<<"x = m/Q = "<<x<<std::endl;
         } else {
             if (m.isrm()) {
                 Matrix<T,RowMajor> m1 = m;
@@ -81,18 +85,22 @@ namespace tmv {
                 Q_LDivEq(QRx,beta,m1.view());
                 x = m1.rowRange(0,x.colsize()); // x = y here
             }
+            //std::cout<<"x = m/Q (non-sq) = "<<x<<std::endl;
         }
 
         // Now solve R z = y
         x.rowRange(N1,x.colsize()).setZero();
+        //std::cout<<"x(N1:N).zero = "<<x<<std::endl;
         //std::cout<<"1 Norm(x) = "<<Norm(x)<<std::endl;
 
         //x.rowRange(0,N1) /= QRx.upperTri().subTriMatrix(0,N1);
         QRx.upperTri().subTriMatrix(0,N1).LDivEq(x.rowRange(0,N1));
+        //std::cout<<"x /= R = "<<x<<std::endl;
         //std::cout<<"2 Norm(x) = "<<Norm(x)<<std::endl;
 
         // Finally P x = z
         if (P) x.reversePermuteRows(P);
+        //std::cout<<"x /= P = "<<x<<std::endl;
         //std::cout<<"3 Norm(x) = "<<Norm(x)<<std::endl;
     }
 

@@ -439,7 +439,7 @@ namespace tmv {
             LAPNAME(dbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
-                LAPP(U1.ptr()),LAPV(ldu),LAPP(V1.ptr()),LAPV(ldv),0,0
+                LAPP(U1.ptr()),LAPV(ldu),LAPP(Vt1.ptr()),LAPV(ldv),0,0
                 LAPWK(work.get()) LAPWK(iwork.get()) LAPINFO LAP1 LAP1);
             if (setUV) {
                 if (U) *U = U1;
@@ -556,7 +556,7 @@ namespace tmv {
             LAPNAME(sbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
-                LAPP(U1.ptr()),LAPV(ldu),LAPP(V1.ptr()),LAPV(ldv),0,0
+                LAPP(U1.ptr()),LAPV(ldu),LAPP(Vt1.ptr()),LAPV(ldv),0,0
                 LAPWK(work.get()) LAPWK(iwork.get()) LAPINFO LAP1 LAP1);
             if (U) *U = *U*U1;
             if (Vt) *Vt = Vt1*(*Vt);
