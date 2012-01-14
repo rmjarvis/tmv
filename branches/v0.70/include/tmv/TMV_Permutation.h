@@ -843,8 +843,16 @@ namespace tmv {
         }
         isinv = temp;
 
-        TMVAssert(reader.isCompact() && 
-                  "NonCompact Read is not supported for Permutation");
+        if (!reader.isCompact()) {
+#ifdef NOTHROW
+            std::cerr<<"NonCompact Read is not supported for Permutation");
+            exit(1);
+#else
+            throw ReadError(
+                "Permutation.\n"
+                "NonCompact Read is not supported for Permutation.");
+#endif
+        }
 
         if (!reader.readStart(exp,got)) {
 #ifdef NOTHROW

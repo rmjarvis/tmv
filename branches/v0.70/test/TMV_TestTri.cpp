@@ -1127,7 +1127,6 @@ static void TestBasicTriMatrix_IO()
         Assert(l3 == zl8,"LowerTriMatrix I/O check compact thresh Unit->NonUnit");
         Assert(cu3 == zcu8,"CUpperTriMatrix I/O check compact thresh Unit->NonUnit");
         Assert(cl3 == zcl8,"CLowerTriMatrix I/O check compact thresh Unit->NonUnit");
-        fin.close();
     } else {
 #ifndef NOTHROW
         tmv::UpperTriMatrix<T,tmv::UnitDiag> zu5;

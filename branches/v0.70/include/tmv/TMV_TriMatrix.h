@@ -432,28 +432,15 @@ namespace tmv {
 
     private:
 
-        template <class T2>
-        void check(T2 TMV_DEBUGPARAM(x)) const
-        {
-            TMVAssert(
-                (!isunit || x == T2(1)) &&
-                "Trying to assign to the diagonal of a UnitDiag TriMatrix.");
-        }
-        void check() const
-        {
-            TMVAssert(
-                !isunit &&
-                "Trying to assign to the diagonal of a UnitDiag TriMatrix.");
-        }
         reference ref() 
         {
-            check();
+            TMVAssert(!isunit);
             return helper.itsref; 
         }
         template <class T2>
         void assign(T2 x) 
         {
-            check(x);
+            TMVAssert(!isunit || x == T2(1)); 
             if (!isunit) helper.itsref = x; 
         }
         T val() const 
