@@ -222,7 +222,7 @@ def BasicCCFlags(env):
 
         elif compiler == 'pgCC':
             env.Replace(CCFLAGS=['-O2','-fast','-Mcache_align'])
-            env['TEST_FLAGS'] = ['-O1']
+            env['TEST_FLAGS'] = ['-O0']
 
         elif compiler == 'CC':
             env.Replace(CCFLAGS=['-O2','-fast','-instances=semiexplicit'])
