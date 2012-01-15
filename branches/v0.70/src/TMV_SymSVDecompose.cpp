@@ -120,6 +120,7 @@ namespace tmv {
         MVP<double> U, const VectorView<double>& D, 
         const VectorView<double>& E)
     {
+        //std::cout<<"AltLapEigen double\n";
         TMVAssert(D.size() == E.size()+1);
         TMVAssert(D.ct()==NonConj);
         TMVAssert(E.ct()==NonConj);
@@ -212,6 +213,7 @@ namespace tmv {
         MVP<std::complex<double> > U, const VectorView<double>& D, 
         const VectorView<double>& E)
     {
+        //std::cout<<"AltLapEigen complex double\n";
         TMVAssert(D.size() == E.size()+1);
         TMVAssert(D.ct()==NonConj);
         TMVAssert(E.ct()==NonConj);
@@ -306,6 +308,7 @@ namespace tmv {
         MVP<float> U, const VectorView<float>& D, 
         const VectorView<float>& E)
     {
+        //std::cout<<"AltLapEigen float\n";
         TMVAssert(D.size() == E.size()+1);
         TMVAssert(D.ct()==NonConj);
         TMVAssert(E.ct()==NonConj);
@@ -398,6 +401,7 @@ namespace tmv {
         MVP<std::complex<float> > U, const VectorView<float>& D, 
         const VectorView<float>& E)
     {
+        //std::cout<<"AltLapEigen complex float\n";
         TMVAssert(D.size() == E.size()+1);
         TMVAssert(D.ct()==NonConj);
         TMVAssert(E.ct()==NonConj);
@@ -519,6 +523,7 @@ namespace tmv {
         MVP<double> U, const VectorView<double>& D, 
         const VectorView<double>& E)
     {
+        //std::cout<<"Regular LapEigen double\n";
         TMVAssert(D.size() == E.size()+1);
         if (U) {
             TMVAssert(U->colsize() >= U->rowsize());
@@ -531,7 +536,7 @@ namespace tmv {
             double junk = 0;
             int ijunk = 0;
             double tol = 0;
-            int neigen;
+            int neigen = 0;
             Vector<double> Din = D;
             Vector<double> E1(n);
             E1.subVector(0,n-1) = E;  E1(n-1) = 0.;
@@ -546,6 +551,16 @@ namespace tmv {
             int liwork = 10*n;
             AlignedArray<int> iwork(liwork);
 #endif
+            //std::cout<<"U size,step = "<<U->colsize()<<" "<<U->rowsize()<<" ";
+            //std::cout<<U->stepi()<<" "<<U->stepj()<<" ";
+            //std::cout<<"U1 size,step = "<<U1.colsize()<<" "<<U1.rowsize()<<" ";
+            //std::cout<<U1.stepi()<<" "<<U1.stepj()<<" ";
+            //std::cout<<"dstegr:\n";
+            //std::cout<<c1<<"  "<<c2<<"  "<<n<<std::endl;
+            //std::cout<<Din.ptr()<<"  "<<E1.ptr()<<"  "<<neigen<<std::endl;
+            //std::cout<<Dout.ptr()<<"  "<<U1.ptr()<<"  "<<ldu<<std::endl;
+            //std::cout<<isuppz.get()<<"  "<<work.get()<<"  "<<lwork<<std::endl;
+            //std::cout<<iwork.get()<<"  "<<liwork<<"  "<<Lap_info<<std::endl;
             LAPNAME(dstegr) (
                 LAPCM LAPV(c1),LAPV(c2),LAPV(n),
                 LAPP(Din.ptr()),LAPP(E1.ptr()),
@@ -613,6 +628,7 @@ namespace tmv {
         MVP<std::complex<double> > U, const VectorView<double>& D, 
         const VectorView<double>& E)
     {
+        //std::cout<<"Regular LapEigen complex double\n";
         TMVAssert(D.size() == E.size()+1);
         if (U) {
             TMVAssert(U->colsize() >= U->rowsize());
@@ -640,6 +656,14 @@ namespace tmv {
             int liwork = 10*n;
             AlignedArray<int> iwork(liwork);
 #endif
+            //std::cout<<"U size,step = "<<U->colsize()<<" "<<U->rowsize()<<" ";
+            //std::cout<<U->stepi()<<" "<<U->stepj()<<" ";
+            //std::cout<<"U1 size,step = "<<U1.colsize()<<" "<<U1.rowsize()<<" ";
+            //std::cout<<U1.stepi()<<" "<<U1.stepj()<<" ";
+            //std::cout<<"dstegr:\n";
+            //std::cout<<c1<<"  "<<c2<<"  "<<n<<std::endl;
+            //std::cout<<Din.ptr()<<"  "<<E1.ptr()<<std::endl;
+            //std::cout<<Dout.ptr()<<"  "<<U1.ptr()<<"  "<<ldu<<std::endl;
             LAPNAME(dstegr) (
                 LAPCM LAPV(c1),LAPV(c2),LAPV(n),
                 LAPP(Din.ptr()),LAPP(E1.ptr()),
@@ -693,6 +717,7 @@ namespace tmv {
         MVP<float> U, const VectorView<float>& D, 
         const VectorView<float>& E)
     {
+        //std::cout<<"Regular LapEigen float\n";
         TMVAssert(D.size() == E.size()+1);
         if (U) {
             TMVAssert(U->colsize() >= U->rowsize());
@@ -771,6 +796,7 @@ namespace tmv {
         MVP<std::complex<float> > U, const VectorView<float>& D, 
         const VectorView<float>& E)
     {
+        //std::cout<<"Regular LapEigen complex float\n";
         TMVAssert(D.size() == E.size()+1);
         if (U) {
             TMVAssert(U->colsize() >= U->rowsize());
@@ -865,6 +891,9 @@ namespace tmv {
 
 #ifdef XDEBUG
         std::cout<<"Start EigenFromTridiag\n";
+        std::cout<<"D = "<<D<<std::endl;
+        std::cout<<"E = "<<E<<std::endl;
+        if (U) { std::cout<<"U = "<<*U<<std::endl; }
         Matrix<T> A0(D.size(),D.size());
         Vector<RT> D0(D);
         Vector<RT> E0(E);
@@ -910,7 +939,7 @@ namespace tmv {
         // Technically, singular values should be positive, but we allow them
         // to be negative, since these are the eigenvalues of A - no sense
         // killing that.  Also, to make them positive, we'd have to break the
-        // V = Ut relationship.  So just keep that in mind later when we use S.
+        // V = U relationship.  So just keep that in mind later when we use S.
 
         // Sort output singular values by absolute value:
         AlignedArray<int> sortp(D.size());
@@ -1067,8 +1096,8 @@ namespace tmv {
         Matrix<T> A0(U);
         A0.upperTri() = A0.lowerTri().adjoint();
         std::cout<<"Start HermSV_Decompose\n";
-        //std::cout<<"U = "<<U<<endl;
-        //std::cout<<"A0 = "<<A0<<endl;
+        std::cout<<"U = "<<U<<endl;
+        std::cout<<"A0 = "<<A0<<endl;
 #endif
 
         UnsortedHermEigen(U,SS.diag());
@@ -1079,10 +1108,10 @@ namespace tmv {
 #ifdef XDEBUG
         Matrix<T> A2 = U * SS * U.adjoint();
         std::cout<<"Done HermSV_Decompose\n";
-        //std::cout<<"U = "<<U<<endl;
+        std::cout<<"U = "<<U<<endl;
         std::cout<<"SS = "<<SS<<endl;
-        //std::cout<<"A0 = "<<A0<<endl;
-        //std::cout<<"A2 = "<<A2<<endl;
+        std::cout<<"A0 = "<<A0<<endl;
+        std::cout<<"A2 = "<<A2<<endl;
         std::cout<<"Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
         if (!(Norm(A0-A2) < THRESH * TMV_NORM(Norm(U)) * Norm(SS))) {
             cerr<<"HermSV_Decompose:\n";
@@ -1114,8 +1143,8 @@ namespace tmv {
         Matrix<T> A0(U);
         A0.upperTri() = A0.lowerTri().transpose();
         std::cout<<"Start SymSV_Decompose\n";
-        //std::cout<<"U = "<<U<<endl;
-        //std::cout<<"A0 = "<<A0<<endl;
+        std::cout<<"U = "<<U<<endl;
+        std::cout<<"A0 = "<<A0<<endl;
 #endif
 
         TMVAssert(isComplex(T()));
@@ -1162,11 +1191,11 @@ namespace tmv {
         if (Vt) {
             Matrix<T> A2 = U * SS * (*Vt);
             std::cout<<"Done SymSV_Decompose\n";
-            //std::cout<<"U = "<<U<<endl;
+            std::cout<<"U = "<<U<<endl;
             std::cout<<"SS = "<<SS<<endl;
-            //std::cout<<"Vt = "<<*Vt<<endl;
-            //std::cout<<"A0 = "<<A0<<endl;
-            //std::cout<<"A2 = "<<A2<<endl;
+            std::cout<<"Vt = "<<*Vt<<endl;
+            std::cout<<"A0 = "<<A0<<endl;
+            std::cout<<"A2 = "<<A2<<endl;
             std::cout<<"Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
             if (!(Norm(A0-A2) < THRESH * Norm(U) * Norm(SS) * Norm(*Vt))) {
                 cerr<<"SymSV_Decompose:\n";

@@ -37,13 +37,11 @@ opts = Variables(config_file)
 # Now set up options for the command line
 opts.Add('CXX','Name of c++ compiler')
 opts.Add('FLAGS','Compile flags to send to the compiler','')
+opts.Add(BoolVariable('DEBUG',
+        'Turn on debugging statements in compilied library',False))
 opts.Add(PathVariable('PREFIX',
             'prefix for installation','', PathVariable.PathAccept))
-opts.Add(BoolVariable('SHARED',
-            'Build a shared library',False))
 
-opts.Add(BoolVariable('WITH_OPENMP',
-        'Look for openmp and use if found.', True))
 opts.Add(BoolVariable('INST_FLOAT',
         'Instantiate <float> templates in compiled library', True))
 opts.Add(BoolVariable('INST_DOUBLE',
@@ -52,6 +50,10 @@ opts.Add(BoolVariable('INST_LONGDOUBLE',
         'Instantiate <long double> templates in compiled library', False))
 opts.Add(BoolVariable('INST_INT',
         'Instantiate <int> templates in compiled library', False))
+opts.Add(BoolVariable('WITH_OPENMP',
+        'Look for openmp and use if found.', True))
+opts.Add(BoolVariable('SHARED',
+            'Build a shared library',False))
 
 opts.Add(BoolVariable('TEST_FLOAT',
         'Instantiate <float> in the test suite', True))
@@ -100,13 +102,11 @@ opts.Add(BoolVariable('FORCE_ATLAS_LAPACK',
 opts.Add(BoolVariable('FORCE_FLAPACK',
             'Force scons to use Fortran LAPACK', False))
 opts.Add(BoolVariable('USE_STEGR',
-            'Use the LAPACK function ?stegr for finding eigenvectors', True))
+            'Use the LAPACK function ?stegr for finding eigenvectors', False))
 opts.Add(BoolVariable('USE_GEQP3',
             'Use the LAPACK function ?qeqp3 for finding strict QRP decomposition', True))
 opts.Add('LIBS','Libraries to send to the linker','')
 
-opts.Add(BoolVariable('DEBUG',
-        'Turn on debugging statements in compilied library',False))
 opts.Add(BoolVariable('TEST_DEBUG',
         'Turn on debugging statements in test suite',False))
 opts.Add(BoolVariable('STATIC',
@@ -125,8 +125,6 @@ opts.Add(BoolVariable('CACHE_LIB',
             'Cache the results of the library checks',True))
 opts.Add(BoolVariable('WITH_UPS',
             'Install the ups directory under PREFIX/ups',False))
-opts.Add(BoolVariable('TEST_DEPRECATED',
-            'Test the deprecated method names',False))
 
 
 opts.Update(initial_env)
@@ -192,8 +190,6 @@ def BasicCCFlags(env):
             if env['WARN']:
                 env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror'])
                 env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
-            if env['TEST_DEPRECATED']:
-                env['TEST_FLAGS'] += ['-Wno-deprecated-declarations']
 
         elif compiler == 'clang++':
             env.Replace(CCFLAGS=['-O2'])
@@ -202,8 +198,6 @@ def BasicCCFlags(env):
             if env['WARN']:
                 env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror'])
                 env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
-            if env['TEST_DEPRECATED']:
-                env['TEST_FLAGS'] += ['-Wno-deprecated-declarations']
 
         elif compiler == 'icpc':
             env.Replace(CCFLAGS=['-O2'])

@@ -264,6 +264,29 @@ Changed the compiler flag \tt{-DTMVNDEBUG} to \tt{-DTMV\_NDEBUG} to make it more
 \item 
 Added support for the \tt{clang++} compiler.  This didn't require much editing, but it did complain about a couple things that had passed muster with the other compilers I had used.
 
+\item
+Changed the default for the \tt{USE\_STEGR} \tt{scons} flag to false.  Too many
+systems I've run this on have trouble with the LAPACK \tt{stegr} algorithm.
+It's just not very robust with respect to \tt{nan}'s and \tt{inf}'s.  TMV can
+sometimes detect the problem and call \tt{stedc} instead when it finds 
+that \tt{stegr} failed to work correctly.  But sometimes that program just
+crashes.  That's not very nice behavior, so rather than let users run 
+into problems and then turn it off at that point, I'll make using 
+using the \tt{stegr} algorithm a feature for advanced users to turn on if 
+they know what they are doing.
+
+\item
+Removed the \tt{make} and \tt{cmake} installation methods.  
+Now \tt{scons} is the 
+only supported method for installation.  I use \tt{scons} exclusively now, 
+and it works well on every system I've run it on.  So it seems silly
+to keep supporting the other installation methods.  
+
+The Windows Visual C++ solution files are still there for those who use VC++,
+but I haven't done (and don't plan to do) much to gussy them up.  They're
+still pretty bare bones to just get the library installed for you and
+compile the test suite.
+
 \item[$\times$]
 Removed the functions and methods that had been deprecated in the 0.6x
 versions of TMV.

@@ -926,8 +926,7 @@ namespace tmv {
     double LapNorm(const char c, const GenSymBandMatrix<double>& m)
     {
         TMVAssert(m.iscm() || m.isrm());
-        if (m.isrm()) return LapNorm(c,m.transpose());
-        else {
+        if (m.iscm()) {
             char cc = c;
             int N = m.size();
             int noff = m.nlo();
@@ -943,6 +942,8 @@ namespace tmv {
                 LAPCM LAPV(cc), (m.uplo()==Upper) ? LAPCH_UP : LAPCH_LO,
                 LAPV(N),LAPV(noff),LAPP(mp),LAPV(lda) LAPWK(work.get()) 
                 LAP1 LAP1);
+        } else {
+            return LapNorm(c,m.transpose());
         }
     }
     template <> 
@@ -950,8 +951,7 @@ namespace tmv {
         const char c, const GenSymBandMatrix<std::complex<double> >& m)
     {
         TMVAssert(m.iscm() || m.isrm());
-        if (m.isrm()) return LapNorm(c,m.transpose());
-        else {
+        if (m.iscm()) {
             char cc = c;
             int N = m.size();
             int noff = m.nlo();
@@ -973,6 +973,8 @@ namespace tmv {
                     LAPCM LAPV(cc), (m.uplo()==Upper) ? LAPCH_UP : LAPCH_LO,
                     LAPV(N),LAPV(noff),LAPP(mp),LAPV(lda) LAPWK(work.get()) 
                     LAP1 LAP1);
+        } else {
+            return LapNorm(c,m.transpose());
         }
     }
 #endif
@@ -981,8 +983,7 @@ namespace tmv {
     float LapNorm(const char c, const GenSymBandMatrix<float>& m)
     {
         TMVAssert(m.iscm() || m.isrm());
-        if (m.isrm()) return LapNorm(c,m.transpose());
-        else {
+        if (m.iscm()) {
             char cc = c;
             int N = m.size();
             int noff = m.nlo();
@@ -998,6 +999,8 @@ namespace tmv {
                 LAPCM LAPV(cc), (m.uplo()==Upper) ? LAPCH_UP : LAPCH_LO,
                 LAPV(N),LAPV(noff),LAPP(mp),LAPV(lda) LAPWK(work.get()) 
                 LAP1 LAP1);
+        } else {
+            return LapNorm(c,m.transpose());
         }
     }
     template <>
@@ -1005,8 +1008,7 @@ namespace tmv {
         const char c, const GenSymBandMatrix<std::complex<float> >& m)
     {
         TMVAssert(m.iscm() || m.isrm());
-        if (m.isrm()) return LapNorm(c,m.transpose());
-        else {
+        if (m.iscm()) {
             char cc = c;
             int N = m.size();
             int noff = m.nlo();
@@ -1028,6 +1030,8 @@ namespace tmv {
                     LAPCM LAPV(cc), (m.uplo()==Upper) ? LAPCH_UP : LAPCH_LO,
                     LAPV(N),LAPV(noff),LAPP(mp),LAPV(lda) LAPWK(work.get()) 
                     LAP1 LAP1);
+        } else {
+            return LapNorm(c,m.transpose());
         }
     }
 #endif
