@@ -350,37 +350,6 @@ namespace tmv {
         { return 1; }
 
         //
-        // op==
-        //
-        friend inline bool operator==(
-            const Permutation& p1, const Permutation& p2)
-        {
-            TMVAssert(p1.size() == p2.size());
-            const int n = p1.itsn;
-            if (p1.isinv == p2.isinv) {
-                for(int i=0;i<n;++i) {
-                    if (p1.itsp[i] != p2.itsp[i]) return false;
-                }
-                return true;
-            } else {
-                // If not the same storage, then this requires a bit of work
-                // to see if they effect the same permutation.
-                AlignedArray<int> temp1(n);
-                AlignedArray<int> temp2(n);
-                p1.makeIndex(temp1.get());
-                p2.makeIndex(temp2.get());
-                for(int i=0;i<n;++i) {
-                    if (temp1[i] != temp2[i]) return false;
-                }
-                return true;
-            }
-        }
-
-        friend inline bool operator!=(
-            const Permutation& p1, const Permutation& p2)
-        { return !(p1==p2); }
-
-        //
         // Mutable Functions
         // (Not too many here, since most normal functions are invalid
         //  for permutations.)
@@ -499,109 +468,63 @@ namespace tmv {
         // Friend functions that can act on a mutable Permutation.
         //
 
-        friend inline void Swap(Permutation& p1, Permutation& p2)
-        {
-            TMVAssert(p1.size() == p2.size());
-            p1.itsmem.swapWith(p2.itsmem);
-            TMV_SWAP(p1.itsp,p2.itsp);
-            TMV_SWAP(p1.isinv,p2.isinv);
-            TMV_SWAP(p1.itsdet,p2.itsdet);
-        }
+        friend inline void Swap(Permutation& p1, Permutation& p2);
 
         template <class T, int A>
         friend inline const VectorView<T,A>& VectorView<T,A>::sort(
-            Permutation& P, ADType ad, CompType comp) const;
+            Permutation& p, ADType ad, CompType comp) const;
 
         template <class T>
         friend inline void LU_Decompose(
-            const MatrixView<T>& A, Permutation& P)
-        {
-            P.resize(A.colsize());
-            P.allocateMem();
-            LU_Decompose(A,P.getMem(),P.itsdet=1);
-            P.isinv = true;
-        }
+            const MatrixView<T>& m, Permutation& p);
 
         template <class T>
         friend inline void QRP_Decompose(
             const MatrixView<T>& Q, const UpperTriMatrixView<T>& R,
-            Permutation& P, bool strict=false)
-        {
-            P.resize(Q.rowsize());
-            P.allocateMem();
-            QRP_Decompose(Q,R,P.getMem(),strict);
-            P.isinv = false; 
-            P.calcDet();
-        }
+            Permutation& p, bool strict=false);
 
         template <class T>
         friend inline void QRP_Decompose(
             const MatrixView<T>& QRx, const VectorView<T>& beta,
-            Permutation& P, T& signdet, bool strict=false)
-        {
-            P.resize(QRx.rowsize());
-            P.allocateMem();
-            QRP_Decompose(QRx,beta,P.getMem(),signdet,strict);
-            P.isinv = false; 
-            P.calcDet();
-        }
+            Permutation& p, T& signdet, bool strict=false);
 
         template <class T> 
         friend inline void LU_Decompose(
-            const GenBandMatrix<T>& A, const LowerTriMatrixView<T>& L,
-            const BandMatrixView<T>& U, Permutation& P)
-        {
-            P.resize(A.colsize());
-            P.allocateMem();
-            LU_Decompose(A,L,U,P.getMem());
-            P.isinv = true;
-            P.calcDet();
-        }
+            const GenBandMatrix<T>& m, const LowerTriMatrixView<T>& L,
+            const BandMatrixView<T>& U, Permutation& p);
 
         template <class T> 
         friend inline void LU_Decompose(
-            const BandMatrixView<T>& A, Permutation& P, int nhi)
-        {
-            P.resize(A.colsize());
-            P.allocateMem();
-            LU_Decompose(A,P.getMem(),P.itsdet=1,nhi);
-            P.isinv = true;
-        }
+            const BandMatrixView<T>& m, Permutation& p, int nhi);
 
         template <class T>
         friend inline void LDL_Decompose(
-            const SymMatrixView<T>& A, const SymBandMatrixView<T>& D,
-            Permutation& P)
-        { 
-            P.resize(A.colsize());
-            P.allocateMem();
-            LDL_Decompose(A,D,P.getMem());
-            P.isinv = true;
-            P.calcDet();
-        }
+            const SymMatrixView<T>& m, const SymBandMatrixView<T>& D,
+            Permutation& p);
 
         template <class T>
         friend inline void LDL_Decompose(
-            const SymMatrixView<T>& A, const VectorView<T>& xD,
-            Permutation& P, TMV_RealType(T)& logdet, T& signdet)
-        {
-            P.resize(A.size());
-            P.allocateMem();
-            LDL_Decompose(A,xD,P.getMem(),logdet,signdet);
-            P.isinv = true;
-            P.calcDet();
-        }
+            const SymMatrixView<T>& m, const VectorView<T>& xD,
+            Permutation& p, TMV_RealType(T)& logdet, T& signdet);
 
         template <class T, int A>
         friend inline void DoVectorSort(
-            const VectorView<T,A>& v, Permutation& P, ADType ad, CompType comp)
-        {
-            P.resize(v.size());
-            P.allocateMem();
-            v.sort(P.getMem(),ad,comp);
-            P.calcDet();
-            P.isinv = false;
-        }
+            const VectorView<T,A>& v, Permutation& p,
+            ADType ad, CompType comp);
+
+        //
+        // Op ==, !=
+        //
+
+        friend inline bool operator==(
+            const Permutation& p1, const Permutation& p2);
+        friend inline bool operator!=(
+            const Permutation& p1, const Permutation& p2);
+
+
+        //
+        // resize
+        //
 
         inline void resize(int n)
         {
@@ -685,36 +608,36 @@ namespace tmv {
 
     };
 
-    inline Permutation Transpose(const Permutation& m)
-    { return m.transpose(); }
-    inline Permutation Adjoint(const Permutation& m)
-    { return m.transpose(); }
-    inline const Permutation& Conjugate(const Permutation& m)
-    { return m; }
-    inline Permutation Inverse(const Permutation& m)
-    { return m.transpose(); }
-    inline double Norm(const Permutation& m)
-    { return m.norm(); }
-    inline double NormF(const Permutation& m)
-    { return m.normF(); }
-    inline int NormSq(const Permutation& m)
-    { return m.normSq(); }
-    inline int Norm1(const Permutation& m)
-    { return m.norm1(); }
-    inline int Norm2(const Permutation& m)
-    { return m.norm2(); }
-    inline int NormInf(const Permutation& m)
-    { return m.normInf(); }
-    inline int MaxAbsElement(const Permutation& m)
-    { return m.maxAbsElement(); }
-    inline int MaxAbs2Element(const Permutation& m)
-    { return m.maxAbs2Element(); }
-    inline int Trace(const Permutation& m)
-    { return m.trace(); }
-    inline int Det(const Permutation& m)
-    { return m.det(); }
-    inline int LogDet(const Permutation& m)
-    { return m.logDet(); }
+    inline Permutation Transpose(const Permutation& p)
+    { return p.transpose(); }
+    inline Permutation Adjoint(const Permutation& p)
+    { return p.transpose(); }
+    inline const Permutation& Conjugate(const Permutation& p)
+    { return p; }
+    inline Permutation Inverse(const Permutation& p)
+    { return p.transpose(); }
+    inline double Norm(const Permutation& p)
+    { return p.norm(); }
+    inline double NormF(const Permutation& p)
+    { return p.normF(); }
+    inline int NormSq(const Permutation& p)
+    { return p.normSq(); }
+    inline int Norm1(const Permutation& p)
+    { return p.norm1(); }
+    inline int Norm2(const Permutation& p)
+    { return p.norm2(); }
+    inline int NormInf(const Permutation& p)
+    { return p.normInf(); }
+    inline int MaxAbsElement(const Permutation& p)
+    { return p.maxAbsElement(); }
+    inline int MaxAbs2Element(const Permutation& p)
+    { return p.maxAbs2Element(); }
+    inline int Trace(const Permutation& p)
+    { return p.trace(); }
+    inline int Det(const Permutation& p)
+    { return p.det(); }
+    inline int LogDet(const Permutation& p)
+    { return p.logDet(); }
 
     inline std::ostream& operator<<(
         const TMV_Writer& writer, const Permutation& p)
@@ -909,25 +832,154 @@ namespace tmv {
     }
 
     inline std::istream& operator>>(
-        const TMV_Reader& reader, Permutation& m)
-    { m.read(reader); return reader.getis(); }
+        const TMV_Reader& reader, Permutation& p)
+    { p.read(reader); return reader.getis(); }
 
-    inline std::istream& operator>>(std::istream& is, Permutation& m)
-    { return is >> IOStyle() >> m; }
+    inline std::istream& operator>>(std::istream& is, Permutation& p)
+    { return is >> IOStyle() >> p; }
 
 
     // 
-    // Vector::sort 
-    // Wait unil here to define the version with Permutation.
+    // Permutation's friends
     //
     
+    inline void Swap(Permutation& p1, Permutation& p2)
+    {
+        TMVAssert(p1.size() == p2.size());
+        p1.itsmem.swapWith(p2.itsmem);
+        TMV_SWAP(p1.itsp,p2.itsp);
+        TMV_SWAP(p1.isinv,p2.isinv);
+        TMV_SWAP(p1.itsdet,p2.itsdet);
+    }
+
     template <class T, int A>
     inline const VectorView<T,A>& VectorView<T,A>::sort(
-        Permutation& P, ADType ad, CompType comp) const
+        Permutation& p, ADType ad, CompType comp) const
     {
-        DoVectorSort(*this,P,ad,comp);
+        DoVectorSort(*this,p,ad,comp);
         return *this;
     }
+
+
+    template <class T>
+    inline void LU_Decompose(
+        const MatrixView<T>& m, Permutation& p)
+    {
+        p.resize(m.colsize());
+        p.allocateMem();
+        LU_Decompose(m,p.getMem(),p.itsdet=1);
+        p.isinv = true;
+    }
+
+    template <class T>
+    inline void QRP_Decompose(
+        const MatrixView<T>& Q, const UpperTriMatrixView<T>& R,
+        Permutation& p, bool strict=false)
+    {
+        p.resize(Q.rowsize());
+        p.allocateMem();
+        QRP_Decompose(Q,R,p.getMem(),strict);
+        p.isinv = false; 
+        p.calcDet();
+    }
+
+    template <class T>
+    inline void QRP_Decompose(
+        const MatrixView<T>& QRx, const VectorView<T>& beta,
+        Permutation& p, T& signdet, bool strict=false)
+    {
+        p.resize(QRx.rowsize());
+        p.allocateMem();
+        QRP_Decompose(QRx,beta,p.getMem(),signdet,strict);
+        p.isinv = false; 
+        p.calcDet();
+    }
+
+    template <class T> 
+    inline void LU_Decompose(
+        const GenBandMatrix<T>& m, const LowerTriMatrixView<T>& L,
+        const BandMatrixView<T>& U, Permutation& p)
+    {
+        p.resize(m.colsize());
+        p.allocateMem();
+        LU_Decompose(m,L,U,p.getMem());
+        p.isinv = true;
+        p.calcDet();
+    }
+
+    template <class T> 
+    inline void LU_Decompose(
+        const BandMatrixView<T>& m, Permutation& p, int nhi)
+    {
+        p.resize(m.colsize());
+        p.allocateMem();
+        LU_Decompose(m,p.getMem(),p.itsdet=1,nhi);
+        p.isinv = true;
+    }
+
+    template <class T>
+    inline void LDL_Decompose(
+        const SymMatrixView<T>& m, const SymBandMatrixView<T>& D,
+        Permutation& p)
+    { 
+        p.resize(m.colsize());
+        p.allocateMem();
+        LDL_Decompose(m,D,p.getMem());
+        p.isinv = true;
+        p.calcDet();
+    }
+
+    template <class T>
+    inline void LDL_Decompose(
+        const SymMatrixView<T>& m, const VectorView<T>& xD,
+        Permutation& p, TMV_RealType(T)& logdet, T& signdet)
+    {
+        p.resize(m.size());
+        p.allocateMem();
+        LDL_Decompose(m,xD,p.getMem(),logdet,signdet);
+        p.isinv = true;
+        p.calcDet();
+    }
+
+    template <class T, int A>
+    inline void DoVectorSort(
+        const VectorView<T,A>& v, Permutation& p, ADType ad, CompType comp)
+    {
+        p.resize(v.size());
+        p.allocateMem();
+        v.sort(p.getMem(),ad,comp);
+        p.calcDet();
+        p.isinv = false;
+    }
+
+    inline bool operator==(
+        const Permutation& p1, const Permutation& p2)
+    {
+        TMVAssert(p1.size() == p2.size());
+        const int n = p1.itsn;
+        if (p1.isinv == p2.isinv) {
+            for(int i=0;i<n;++i) {
+                if (p1.itsp[i] != p2.itsp[i]) return false;
+            }
+            return true;
+        } else {
+            // If not the same storage, then this requires a bit of work
+            // to see if they effect the same permutation.
+            AlignedArray<int> temp1(n);
+            AlignedArray<int> temp2(n);
+            p1.makeIndex(temp1.get());
+            p2.makeIndex(temp2.get());
+            for(int i=0;i<n;++i) {
+                if (temp1[i] != temp2[i]) return false;
+            }
+            return true;
+        }
+    }
+
+    inline bool operator!=(
+        const Permutation& p1, const Permutation& p2)
+    { return !(p1==p2); }
+
 
 
     //

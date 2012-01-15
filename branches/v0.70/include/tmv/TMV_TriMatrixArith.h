@@ -1544,8 +1544,8 @@ namespace tmv {
 #define PRODMM ElemProdLL
 #define GENMATRIX1 GenLowerTriMatrix
 #define GENMATRIX2 GenLowerTriMatrix
-#define PRODXM1 ProdXU
-#define PRODXM2 ProdXU
+#define PRODXM1 ProdXL
+#define PRODXM2 ProdXL
 #define OP ElemProd
 #include "tmv/TMV_AuxProdMM.h"
 #include "tmv/TMV_AuxProdMMa.h"
