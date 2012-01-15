@@ -2034,9 +2034,9 @@ static void DoTestVM3R(const MM& a, const V1& b, V2& c, std::string label)
 template <class MM, class V1, class V2> 
 static void DoTestMV3C(const MM& a, const V1& b, V2& c, std::string label)
 {
-    typename V2::reverse_type cr = c.reverse();
     DoTestMV3a_Full(a,b,c,label);
 #if (XTEST & 1)
+    typename V2::reverse_type cr = c.reverse();
     DoTestMV3a_Basic(a,b.reverse(),c,label);
     DoTestMV3a_Basic(a,b,cr,label);
     DoTestMV3a_Basic(a,b.reverse(),cr,label);
@@ -2053,9 +2053,9 @@ static void DoTestMV3C(const MM& a, const V1& b, V2& c, std::string label)
 template <class MM, class V1, class V2> 
 static void DoTestVM3C(const MM& a, const V1& b, V2& c, std::string label)
 {
-    typename V2::reverse_type cr = c.reverse();
     DoTestVM3a_Full(a,b,c,label);
 #if (XTEST & 1)
+    typename V2::reverse_type cr = c.reverse();
     DoTestVM3a_Basic(a,b.reverse(),c,label);
     DoTestVM3a_Basic(a,b,cr,label);
     DoTestVM3a_Basic(a,b.reverse(),cr,label);

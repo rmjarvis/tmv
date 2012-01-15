@@ -171,17 +171,17 @@ static void TestBasicDiagMatrix_2()
     typename tmv::DiagMatrixView<T>::iterator it5 = q5.begin();
     typename tmv::ConstDiagMatrixView<T>::const_iterator it6 =
         q5_const.begin();
-    int i = 0;
+    int ii = 0;
     while (it1 != q1.end()) {
-        Assert(*it1++ == qar[i], "DiagMatrix iteration 1");
-        Assert(*it2++ == qar[i], "DiagMatrix iteration 2");
-        Assert(*it3++ == qar[i], "DiagMatrix iteration 3");
-        Assert(*it4++ == qar[i], "DiagMatrix iteration 4");
-        Assert(*it5++ == qar[i], "DiagMatrix iteration 5");
-        Assert(*it6++ == qar[i], "DiagMatrix iteration 6");
-        ++i;
+        Assert(*it1++ == qar[ii], "DiagMatrix iteration 1");
+        Assert(*it2++ == qar[ii], "DiagMatrix iteration 2");
+        Assert(*it3++ == qar[ii], "DiagMatrix iteration 3");
+        Assert(*it4++ == qar[ii], "DiagMatrix iteration 4");
+        Assert(*it5++ == qar[ii], "DiagMatrix iteration 5");
+        Assert(*it6++ == qar[ii], "DiagMatrix iteration 6");
+        ++ii;
     }
-    Assert(i == 3, "DiagMatrix iteration number of elements");
+    Assert(ii == 3, "DiagMatrix iteration number of elements");
     Assert(it2 == q1_const.end(), "it2 reaching end");
     Assert(it3 == q1_view.end(), "it3 reaching end");
     Assert(it4 == q1_constview.end(), "it4 reaching end");

@@ -1551,11 +1551,12 @@ namespace tmv {
     { m.read(reader); return reader.getis(); }
 
     template <class T>
-    std::istream& operator>>(std::istream& is, const DiagMatrixView<T>& m)
+    inline std::istream& operator>>(
+        std::istream& is, const DiagMatrixView<T>& m)
     { return is >> IOStyle() >> m; }
 
     template <class T, int A> 
-    std::istream& operator>>(std::istream& is, DiagMatrix<T,A>& m)
+    inline std::istream& operator>>(std::istream& is, DiagMatrix<T,A>& m)
     { return is >> IOStyle() >> m; }
 
 } // namespace tmv

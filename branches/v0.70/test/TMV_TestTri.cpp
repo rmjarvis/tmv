@@ -688,17 +688,17 @@ static void TestBasicTriMatrix_2()
         qu5.rowmajor_begin();
     typename tmv::ConstUpperTriMatrixView<T>::const_rowmajor_iterator rmitu6 =
         qu5_const.rowmajor_begin();
-    int i = 0;
+    int ii = 0;
     while (rmitu1 != qu1.rowmajor_end()) {
-        Assert(*rmitu1++ == quarrm[i], "RowMajor iteration 1");
-        Assert(*rmitu2++ == quarrm[i], "RowMajor iteration 2");
-        Assert(*rmitu3++ == quarrm[i], "RowMajor iteration 3");
-        Assert(*rmitu4++ == quarrm[i], "RowMajor iteration 4");
-        Assert(*rmitu5++ == quarrm[i], "RowMajor iteration 5");
-        Assert(*rmitu6++ == quarrm[i], "RowMajor iteration 6");
-        ++i;
+        Assert(*rmitu1++ == quarrm[ii], "RowMajor iteration 1");
+        Assert(*rmitu2++ == quarrm[ii], "RowMajor iteration 2");
+        Assert(*rmitu3++ == quarrm[ii], "RowMajor iteration 3");
+        Assert(*rmitu4++ == quarrm[ii], "RowMajor iteration 4");
+        Assert(*rmitu5++ == quarrm[ii], "RowMajor iteration 5");
+        Assert(*rmitu6++ == quarrm[ii], "RowMajor iteration 6");
+        ++ii;
     }
-    Assert(i == 6, "RowMajor iteration number of elements");
+    Assert(ii == 6, "RowMajor iteration number of elements");
     Assert(rmitu2 == qu1_const.rowmajor_end(), "rmitu2 reaching end");
     Assert(rmitu3 == qu1_view.rowmajor_end(), "rmitu3 reaching end");
     Assert(rmitu4 == qu1_constview.rowmajor_end(), "rmitu4 reaching end");
@@ -722,17 +722,17 @@ static void TestBasicTriMatrix_2()
         ql5.rowmajor_begin();
     typename tmv::ConstLowerTriMatrixView<T>::const_rowmajor_iterator rmitl6 =
         ql5_const.rowmajor_begin();
-    i = 0;
+    ii = 0;
     while (rmitl1 != ql1.rowmajor_end()) {
-        Assert(*rmitl1++ == qlarrm[i], "RowMajor iteration 1");
-        Assert(*rmitl2++ == qlarrm[i], "RowMajor iteration 2");
-        Assert(*rmitl3++ == qlarrm[i], "RowMajor iteration 3");
-        Assert(*rmitl4++ == qlarrm[i], "RowMajor iteration 4");
-        Assert(*rmitl5++ == qlarrm[i], "RowMajor iteration 5");
-        Assert(*rmitl6++ == qlarrm[i], "RowMajor iteration 6");
-        ++i;
+        Assert(*rmitl1++ == qlarrm[ii], "RowMajor iteration 1");
+        Assert(*rmitl2++ == qlarrm[ii], "RowMajor iteration 2");
+        Assert(*rmitl3++ == qlarrm[ii], "RowMajor iteration 3");
+        Assert(*rmitl4++ == qlarrm[ii], "RowMajor iteration 4");
+        Assert(*rmitl5++ == qlarrm[ii], "RowMajor iteration 5");
+        Assert(*rmitl6++ == qlarrm[ii], "RowMajor iteration 6");
+        ++ii;
     }
-    Assert(i == 6, "RowMajor iteration number of elements");
+    Assert(ii == 6, "RowMajor iteration number of elements");
     Assert(rmitl2 == ql1_const.rowmajor_end(), "rmitl2 reaching end");
     Assert(rmitl3 == ql1_view.rowmajor_end(), "rmitl3 reaching end");
     Assert(rmitl4 == ql1_constview.rowmajor_end(), "rmitl4 reaching end");
@@ -751,17 +751,17 @@ static void TestBasicTriMatrix_2()
         qu5.colmajor_begin();
     typename tmv::ConstUpperTriMatrixView<T>::const_colmajor_iterator cmitu6 =
         qu5_const.colmajor_begin();
-    i = 0;
+    ii = 0;
     while (cmitu1 != qu1.colmajor_end()) {
-        Assert(*cmitu1++ == quarcm[i], "ColMajor iteration 1");
-        Assert(*cmitu2++ == quarcm[i], "ColMajor iteration 2");
-        Assert(*cmitu3++ == quarcm[i], "ColMajor iteration 3");
-        Assert(*cmitu4++ == quarcm[i], "ColMajor iteration 4");
-        Assert(*cmitu5++ == quarcm[i], "ColMajor iteration 5");
-        Assert(*cmitu6++ == quarcm[i], "ColMajor iteration 6");
-        ++i;
+        Assert(*cmitu1++ == quarcm[ii], "ColMajor iteration 1");
+        Assert(*cmitu2++ == quarcm[ii], "ColMajor iteration 2");
+        Assert(*cmitu3++ == quarcm[ii], "ColMajor iteration 3");
+        Assert(*cmitu4++ == quarcm[ii], "ColMajor iteration 4");
+        Assert(*cmitu5++ == quarcm[ii], "ColMajor iteration 5");
+        Assert(*cmitu6++ == quarcm[ii], "ColMajor iteration 6");
+        ++ii;
     }
-    Assert(i == 6, "ColMajor iteration number of elements");
+    Assert(ii == 6, "ColMajor iteration number of elements");
     Assert(cmitu2 == qu1_const.colmajor_end(), "cmitu2 reaching end");
     Assert(cmitu3 == qu1_view.colmajor_end(), "cmitu3 reaching end");
     Assert(cmitu4 == qu1_constview.colmajor_end(), "cmitu4 reaching end");
@@ -780,17 +780,17 @@ static void TestBasicTriMatrix_2()
         ql5.colmajor_begin();
     typename tmv::ConstLowerTriMatrixView<T>::const_colmajor_iterator cmitl6 =
         ql5_const.colmajor_begin();
-    i = 0;
+    ii = 0;
     while (cmitl1 != ql1.colmajor_end()) {
-        Assert(*cmitl1++ == qlarcm[i], "ColMajor iteration 1");
-        Assert(*cmitl2++ == qlarcm[i], "ColMajor iteration 2");
-        Assert(*cmitl3++ == qlarcm[i], "ColMajor iteration 3");
-        Assert(*cmitl4++ == qlarcm[i], "ColMajor iteration 4");
-        Assert(*cmitl5++ == qlarcm[i], "ColMajor iteration 5");
-        Assert(*cmitl6++ == qlarcm[i], "ColMajor iteration 6");
-        ++i;
+        Assert(*cmitl1++ == qlarcm[ii], "ColMajor iteration 1");
+        Assert(*cmitl2++ == qlarcm[ii], "ColMajor iteration 2");
+        Assert(*cmitl3++ == qlarcm[ii], "ColMajor iteration 3");
+        Assert(*cmitl4++ == qlarcm[ii], "ColMajor iteration 4");
+        Assert(*cmitl5++ == qlarcm[ii], "ColMajor iteration 5");
+        Assert(*cmitl6++ == qlarcm[ii], "ColMajor iteration 6");
+        ++ii;
     }
-    Assert(i == 6, "ColMajor iteration number of elements");
+    Assert(ii == 6, "ColMajor iteration number of elements");
     Assert(cmitl2 == ql1_const.colmajor_end(), "cmitl2 reaching end");
     Assert(cmitl3 == ql1_view.colmajor_end(), "cmitl3 reaching end");
     Assert(cmitl4 == ql1_constview.colmajor_end(), "cmitl4 reaching end");

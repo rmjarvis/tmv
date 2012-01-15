@@ -85,18 +85,18 @@ namespace tmv {
     { return std::string("Vector<")+TMV_Text(T())+","+Attrib<A>::vtext()+">"; }
 
     template <class T> 
-    inline std::string TMV_Text(const GenVector<T>& v)
+    inline std::string TMV_Text(const GenVector<T>& )
     { return std::string("GenVector<")+TMV_Text(T())+">"; }
 
     template <class T, int A> 
-    inline std::string TMV_Text(const ConstVectorView<T,A>& v)
+    inline std::string TMV_Text(const ConstVectorView<T,A>& )
     { 
         return std::string("ConstVectorView<")+TMV_Text(T())+","+
             Attrib<A>::vtext()+">"; 
     }
 
     template <class T, int A> 
-    inline std::string TMV_Text(const VectorView<T,A>& v)
+    inline std::string TMV_Text(const VectorView<T,A>& )
     { 
         return std::string("VectorView<")+TMV_Text(T())+","+
             Attrib<A>::vtext()+">"; 

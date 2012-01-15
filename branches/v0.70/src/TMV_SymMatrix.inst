@@ -22,6 +22,8 @@
   template RT GenSymMatrix<T >::norm1() const; \
   template RT GenSymMatrix<T >::maxAbsElement() const; \
   template RT GenSymMatrix<T >::maxAbs2Element() const; \
+  template RT GenSymMatrix<T >::doNorm2() const; \
+  template RT GenSymMatrix<T >::doCondition() const; \
   template QuotXS<T,T > GenSymMatrix<T >::QInverse() const; \
   template T GenSymMatrix<T >::cref(int i, int j) const; \
   template const SymMatrixView<T,CStyle>&  \

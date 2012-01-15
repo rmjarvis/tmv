@@ -1038,7 +1038,7 @@ namespace tmv {
         {
             TMVAssert(i>=0 && i < size());
             TMVAssert(j>=0 && j < size());
-            if (isunit()) return i<j; else return i<=j;
+            return isunit() ? i-j<0 : i-j<=0;
         }
 
     private :
@@ -1575,7 +1575,7 @@ namespace tmv {
         {
             TMVAssert(i>=0 && i < size());
             TMVAssert(j>=0 && j < size());
-            if (isunit()) return i-j>0; else return i-j>=0;
+            return isunit() ? i-j>0 : i-j>=0;
         }
 
     private :
@@ -4054,8 +4054,7 @@ namespace tmv {
         {
             TMVAssert(i>=0 && i < size());
             TMVAssert(j>=0 && j < size());
-            if (isunit()) return i<j; else return i<=j;
-            if (isunit()) return i-j<0; else return i-j<=0;
+            return isunit() ? i-j<0 : i-j<=0;
         }
 
         friend void Swap(
@@ -4841,7 +4840,7 @@ namespace tmv {
         {
             TMVAssert(i>=0 && i < size());
             TMVAssert(j>=0 && j < size());
-            return isunit() ? i>j : i>=j;
+            return isunit() ? i-j>0 : i-j>=0;
         }
 
         friend void Swap(
@@ -5344,19 +5343,21 @@ namespace tmv {
     //
 
     template <class T>
-    std::istream& operator>>(std::istream& is, const UpperTriMatrixView<T>& m)
+    inline std::istream& operator>>(
+        std::istream& is, const UpperTriMatrixView<T>& m)
     { return is >> IOStyle() >> m; }
 
     template <class T, int A>
-    std::istream& operator>>(std::istream& is, UpperTriMatrix<T,A>& m)
+    inline std::istream& operator>>(std::istream& is, UpperTriMatrix<T,A>& m)
     { return is >> IOStyle() >> m; }
 
     template <class T>
-    std::istream& operator>>(std::istream& is, const LowerTriMatrixView<T>& m)
+    inline std::istream& operator>>(
+        std::istream& is, const LowerTriMatrixView<T>& m)
     { return is >> IOStyle() >> m; }
 
     template <class T, int A>
-    std::istream& operator>>(std::istream& is, LowerTriMatrix<T,A>& m)
+    inline std::istream& operator>>(std::istream& is, LowerTriMatrix<T,A>& m)
     { return is >> IOStyle() >> m; }
 
     template <class T>

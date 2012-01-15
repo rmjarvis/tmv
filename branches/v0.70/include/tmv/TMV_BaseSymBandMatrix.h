@@ -96,22 +96,20 @@ namespace tmv {
     }
 
     template <class T> 
-    inline std::string TMV_Text(const GenSymBandMatrix<T>& m)
+    inline std::string TMV_Text(const GenSymBandMatrix<T>& )
     {
         return std::string("GenSymBandMatrix<") + TMV_Text(T()) + ">";
     }
 
     template <class T, int A>
-    inline std::string TMV_Text(
-        const ConstSymBandMatrixView<T,A>& m)
+    inline std::string TMV_Text(const ConstSymBandMatrixView<T,A>& )
     {
         return std::string("ConstSymBandMatrixView<") +
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
     template <class T, int A>
-    inline std::string TMV_Text(
-        const SymBandMatrixView<T,A>& m)
+    inline std::string TMV_Text(const SymBandMatrixView<T,A>& )
     {
         return std::string("SymBandMatrixView<") +
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";

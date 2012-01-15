@@ -399,7 +399,7 @@ namespace tmv {
 #endif // BLAS
 
     template <bool add, class T, class Ta, class Tb> 
-    void DoMultMM(
+    static void DoMultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
         const MatrixView<T>& C)
     {

@@ -5451,15 +5451,16 @@ namespace tmv {
     //
 
     template <class T>
-    std::istream& operator>>(std::istream& is, const SymBandMatrixView<T>& m)
+    inline std::istream& operator>>(
+        std::istream& is, const SymBandMatrixView<T>& m)
     { return is >> IOStyle() >> m; }
 
     template <class T, int A>
-    std::istream& operator>>(std::istream& is, SymBandMatrix<T,A>& m)
+    inline std::istream& operator>>(std::istream& is, SymBandMatrix<T,A>& m)
     { return is >> IOStyle() >> m; }
 
     template <class T, int A>
-    std::istream& operator>>(std::istream& is, HermBandMatrix<T,A>& m)
+    inline std::istream& operator>>(std::istream& is, HermBandMatrix<T,A>& m)
     { return is >> IOStyle() >> m; }
 
     template <class T>

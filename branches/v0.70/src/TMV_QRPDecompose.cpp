@@ -824,7 +824,6 @@ namespace tmv
         double thresh = TMV_Epsilon<double>()*A.normF();
         for(int i=0;i<n;++i) {
             if (TMV_ABS(A(i,i)) < thresh) {
-                TMVAssert(NormInf(A.diag(0,i+1,A.rowsize())) < thresh);
                 A.subMatrix(i,A.colsize(),i,A.rowsize()).setZero();
                 beta.subVector(i,n).setZero();
                 break;
@@ -898,7 +897,6 @@ namespace tmv
         for(int i=0;i<n;++i,Aii+=Ads) {
             TMVAssert(TMV_ABS(TMV_IMAG(*Aii)) < TMV_Epsilon<double>());
             if (TMV_ABS(TMV_REAL(*Aii)) < thresh) {
-                TMVAssert(NormInf(A.diag(0,i+1,A.rowsize())) < thresh);
                 A.subMatrix(i,A.colsize(),i,A.rowsize()).setZero();
                 beta.subVector(i,n).setZero();
                 break;
@@ -970,7 +968,6 @@ namespace tmv
         float thresh = TMV_Epsilon<float>()*A.normF();
         for(int i=0;i<n;++i) {
             if (TMV_ABS(A(i,i)) < thresh) {
-                TMVAssert(NormInf(A.diag(0,i+1,A.rowsize())) < thresh);
                 A.subMatrix(i,A.colsize(),i,A.rowsize()).setZero();
                 beta.subVector(i,n).setZero();
                 break;
@@ -1043,7 +1040,6 @@ namespace tmv
         for(int i=0;i<n;++i,Aii+=Ads) {
             TMVAssert(TMV_ABS(TMV_IMAG(*Aii)) < TMV_Epsilon<float>());
             if (TMV_ABS(TMV_REAL(*Aii)) < thresh) {
-                TMVAssert(NormInf(A.diag(0,i+1,A.rowsize())) < thresh);
                 A.subMatrix(i,A.colsize(),i,A.rowsize()).setZero();
                 beta.subVector(i,n).setZero();
                 break;

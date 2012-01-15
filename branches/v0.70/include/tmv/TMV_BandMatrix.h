@@ -3868,7 +3868,7 @@ namespace tmv {
     }
 
     template <class T> 
-    BandMatrixView<T> BandMatrixViewOf(
+    inline BandMatrixView<T> BandMatrixViewOf(
         T* m, int cs, int rs, int nlo, int nhi, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor || stor == DiagMajor);
@@ -4157,11 +4157,12 @@ namespace tmv {
     { m.read(reader); return reader.getis(); }
 
     template <class T>
-    std::istream& operator>>(std::istream& is, const BandMatrixView<T>& m)
+    inline std::istream& operator>>(
+        std::istream& is, const BandMatrixView<T>& m)
     { return is >> IOStyle() >> m; }
 
     template <class T, int A>
-    std::istream& operator>>(std::istream& is, BandMatrix<T,A>& m)
+    inline std::istream& operator>>(std::istream& is, BandMatrix<T,A>& m)
     { return is >> IOStyle() >> m; }
 
 

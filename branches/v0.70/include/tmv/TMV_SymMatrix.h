@@ -3901,7 +3901,7 @@ namespace tmv {
     }
 
     template <class T> 
-    ConstSymMatrixView<T> SymMatrixViewOf(
+    inline ConstSymMatrixView<T> SymMatrixViewOf(
         const T* m, int size, UpLoType uplo, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -3913,7 +3913,7 @@ namespace tmv {
     }
 
     template <class T> 
-    ConstSymMatrixView<T> HermMatrixViewOf(
+    inline ConstSymMatrixView<T> HermMatrixViewOf(
         const T* m, int size, UpLoType uplo, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -3924,7 +3924,7 @@ namespace tmv {
     }
 
     template <class T> 
-    SymMatrixView<T> SymMatrixViewOf(
+    inline SymMatrixView<T> SymMatrixViewOf(
         T* m, int size, UpLoType uplo, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -3936,7 +3936,7 @@ namespace tmv {
     }
 
     template <class T> 
-    SymMatrixView<T> HermMatrixViewOf(
+    inline SymMatrixView<T> HermMatrixViewOf(
         T* m, int size, UpLoType uplo, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
@@ -3948,7 +3948,7 @@ namespace tmv {
     }
 
     template <class T> 
-    ConstSymMatrixView<T> SymMatrixViewOf(
+    inline ConstSymMatrixView<T> SymMatrixViewOf(
         const T* m, int size, UpLoType uplo, int stepi, int stepj)
     {
         TMVAssert(size>=0);
@@ -3957,7 +3957,7 @@ namespace tmv {
     }
 
     template <class T> 
-    ConstSymMatrixView<T> HermMatrixViewOf(
+    inline ConstSymMatrixView<T> HermMatrixViewOf(
         const T* m, int size, UpLoType uplo, int stepi, int stepj)
     {
         TMVAssert(size>=0);
@@ -3966,7 +3966,7 @@ namespace tmv {
     }
 
     template <class T> 
-    SymMatrixView<T> SymMatrixViewOf(
+    inline SymMatrixView<T> SymMatrixViewOf(
         T* m, int size, UpLoType uplo, int stepi, int stepj)
     {
         TMVAssert(size>=0);
@@ -3975,7 +3975,7 @@ namespace tmv {
     }
 
     template <class T> 
-    SymMatrixView<T> HermMatrixViewOf(
+    inline SymMatrixView<T> HermMatrixViewOf(
         T* m, int size, UpLoType uplo, int stepi, int stepj)
     {
         TMVAssert(size>=0);
@@ -4164,15 +4164,16 @@ namespace tmv {
     //
 
     template <class T>
-    std::istream& operator>>(std::istream& is, const SymMatrixView<T>& m)
+    inline std::istream& operator>>(
+        std::istream& is, const SymMatrixView<T>& m)
     { return is >> IOStyle() >> m; }
 
     template <class T, int A>
-    std::istream& operator>>(std::istream& is, SymMatrix<T,A>& m)
+    inline std::istream& operator>>(std::istream& is, SymMatrix<T,A>& m)
     { return is >> IOStyle() >> m; }
 
     template <class T, int A>
-    std::istream& operator>>(std::istream& is, HermMatrix<T,A>& m)
+    inline std::istream& operator>>(std::istream& is, HermMatrix<T,A>& m)
     { return is >> IOStyle() >> m; }
 
     template <class T>

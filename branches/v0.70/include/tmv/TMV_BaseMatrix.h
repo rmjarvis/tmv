@@ -458,18 +458,18 @@ namespace tmv {
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
     template <class T> 
-    inline std::string TMV_Text(const GenMatrix<T>& m)
+    inline std::string TMV_Text(const GenMatrix<T>& )
     {
         return std::string("GenMatrix<") + TMV_Text(T()) + ">";
     }
     template <class T, int A>
-    inline std::string TMV_Text(const ConstMatrixView<T,A>& m)
+    inline std::string TMV_Text(const ConstMatrixView<T,A>& )
     {
         return std::string("ConstMatrixView<") +
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
     template <class T, int A>
-    inline std::string TMV_Text(const MatrixView<T,A>& m)
+    inline std::string TMV_Text(const MatrixView<T,A>& )
     {
         return std::string("MatrixView<") +
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";

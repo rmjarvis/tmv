@@ -32,6 +32,8 @@
   template RT GenSymBandMatrix<T >::norm1() const; \
   template RT GenSymBandMatrix<T >::maxAbsElement() const; \
   template RT GenSymBandMatrix<T >::maxAbs2Element() const; \
+  template RT GenSymBandMatrix<T >::doNorm2() const; \
+  template RT GenSymBandMatrix<T >::doCondition() const; \
   template QuotXsB<T,T > GenSymBandMatrix<T >::QInverse() const; \
   template void GenSymBandMatrix<T >::write(const TMV_Writer& writer) const; \
   template void SymBandMatrixView<T,CStyle>::read(const TMV_Reader& reader) const; \

@@ -304,17 +304,17 @@ static void TestBasicBandMatrix_2()
         q7.rowmajor_begin();
     typename tmv::ConstBandMatrixView<T>::const_rowmajor_iterator rmit6 =
         q7_const.rowmajor_begin();
-    int i = 0;
+    int ii = 0;
     while (rmit1 != q1.rowmajor_end()) {
-        Assert(*rmit1++ == qarrm[i], "RowMajor iteration 1");
-        Assert(*rmit2++ == qarrm[i], "RowMajor iteration 2");
-        Assert(*rmit3++ == qarrm[i], "RowMajor iteration 3");
-        Assert(*rmit4++ == qarrm[i], "RowMajor iteration 4");
-        Assert(*rmit5++ == qarrm[i], "RowMajor iteration 5");
-        Assert(*rmit6++ == qarrm[i], "RowMajor iteration 6");
-        ++i;
+        Assert(*rmit1++ == qarrm[ii], "RowMajor iteration 1");
+        Assert(*rmit2++ == qarrm[ii], "RowMajor iteration 2");
+        Assert(*rmit3++ == qarrm[ii], "RowMajor iteration 3");
+        Assert(*rmit4++ == qarrm[ii], "RowMajor iteration 4");
+        Assert(*rmit5++ == qarrm[ii], "RowMajor iteration 5");
+        Assert(*rmit6++ == qarrm[ii], "RowMajor iteration 6");
+        ++ii;
     }
-    Assert(i == 11, "RowMajor iteration number of elements");
+    Assert(ii == 11, "RowMajor iteration number of elements");
     Assert(rmit2 == q1_const.rowmajor_end(), "rmit2 reaching end");
     Assert(rmit3 == q1_view.rowmajor_end(), "rmit3 reaching end");
     Assert(rmit4 == q1_constview.rowmajor_end(), "rmit4 reaching end");
@@ -333,17 +333,17 @@ static void TestBasicBandMatrix_2()
         q7.colmajor_begin();
     typename tmv::ConstBandMatrixView<T>::const_colmajor_iterator cmit6 =
         q7_const.colmajor_begin();
-    i = 0;
+    ii = 0;
     while (cmit1 != q1.colmajor_end()) {
-        Assert(*cmit1++ == qarcm[i], "ColMajor iteration 1");
-        Assert(*cmit2++ == qarcm[i], "ColMajor iteration 2");
-        Assert(*cmit3++ == qarcm[i], "ColMajor iteration 3");
-        Assert(*cmit4++ == qarcm[i], "ColMajor iteration 4");
-        Assert(*cmit5++ == qarcm[i], "ColMajor iteration 5");
-        Assert(*cmit6++ == qarcm[i], "ColMajor iteration 6");
-        ++i;
+        Assert(*cmit1++ == qarcm[ii], "ColMajor iteration 1");
+        Assert(*cmit2++ == qarcm[ii], "ColMajor iteration 2");
+        Assert(*cmit3++ == qarcm[ii], "ColMajor iteration 3");
+        Assert(*cmit4++ == qarcm[ii], "ColMajor iteration 4");
+        Assert(*cmit5++ == qarcm[ii], "ColMajor iteration 5");
+        Assert(*cmit6++ == qarcm[ii], "ColMajor iteration 6");
+        ++ii;
     }
-    Assert(i == 11, "ColMajor iteration number of elements");
+    Assert(ii == 11, "ColMajor iteration number of elements");
     Assert(cmit2 == q1_const.colmajor_end(), "cmit2 reaching end");
     Assert(cmit3 == q1_view.colmajor_end(), "cmit3 reaching end");
     Assert(cmit4 == q1_constview.colmajor_end(), "cmit4 reaching end");
@@ -362,17 +362,17 @@ static void TestBasicBandMatrix_2()
         q7.diagmajor_begin();
     typename tmv::ConstBandMatrixView<T>::const_diagmajor_iterator dmit6 =
         q7_const.diagmajor_begin();
-    i = 0;
+    ii = 0;
     while (dmit1 != q1.diagmajor_end()) {
-        Assert(*dmit1++ == qardm[i], "DiagMajor iteration 1");
-        Assert(*dmit2++ == qardm[i], "DiagMajor iteration 2");
-        Assert(*dmit3++ == qardm[i], "DiagMajor iteration 3");
-        Assert(*dmit4++ == qardm[i], "DiagMajor iteration 4");
-        Assert(*dmit5++ == qardm[i], "DiagMajor iteration 5");
-        Assert(*dmit6++ == qardm[i], "DiagMajor iteration 6");
-        ++i;
+        Assert(*dmit1++ == qardm[ii], "DiagMajor iteration 1");
+        Assert(*dmit2++ == qardm[ii], "DiagMajor iteration 2");
+        Assert(*dmit3++ == qardm[ii], "DiagMajor iteration 3");
+        Assert(*dmit4++ == qardm[ii], "DiagMajor iteration 4");
+        Assert(*dmit5++ == qardm[ii], "DiagMajor iteration 5");
+        Assert(*dmit6++ == qardm[ii], "DiagMajor iteration 6");
+        ++ii;
     }
-    Assert(i == 11, "DiagMajor iteration number of elements");
+    Assert(ii == 11, "DiagMajor iteration number of elements");
     Assert(dmit2 == q1_const.diagmajor_end(), "dmit2 reaching end");
     Assert(dmit3 == q1_view.diagmajor_end(), "dmit3 reaching end");
     Assert(dmit4 == q1_constview.diagmajor_end(), "dmit4 reaching end");

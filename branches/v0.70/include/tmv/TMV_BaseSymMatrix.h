@@ -101,20 +101,20 @@ namespace tmv {
     }
 
     template <class T> 
-    inline std::string TMV_Text(const GenSymMatrix<T>& m)
+    inline std::string TMV_Text(const GenSymMatrix<T>& )
     {
         return std::string("GenSymMatrix<") + TMV_Text(T()) + ">";
     }
 
     template <class T, int A>
-    inline std::string TMV_Text(const ConstSymMatrixView<T,A>& m)
+    inline std::string TMV_Text(const ConstSymMatrixView<T,A>& )
     {
         return std::string("ConstSymMatrixView<") +
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";
     }
 
     template <class T, int A>
-    inline std::string TMV_Text(const SymMatrixView<T,A>& m)
+    inline std::string TMV_Text(const SymMatrixView<T,A>& )
     {
         return std::string("SymMatrixView<") +
             TMV_Text(T()) + "," + Attrib<A>::text() + ">";

@@ -191,7 +191,7 @@ namespace tmv {
         TMVAssert(N <= M);
         TMVAssert(N > 0);
         TMVAssert(Ubeta.size() == N);
-        TMVAssert(Vbeta.size() == N-1);
+        TMVAssert(Vtbeta.size() == N-1);
         TMVAssert(D.size() == N);
         TMVAssert(E.size() == N-1);
         TMVAssert(!Ubeta.isconj());

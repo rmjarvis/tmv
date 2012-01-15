@@ -72,20 +72,20 @@ namespace tmv {
     }
 
     template <class T> 
-    inline std::string TMV_Text(const GenDiagMatrix<T>& m)
+    inline std::string TMV_Text(const GenDiagMatrix<T>& )
     {
         return std::string("GenDiagMatrix<") + TMV_Text(T()) + ">";
     }
 
     template <class T, int A>
-    inline std::string TMV_Text(const ConstDiagMatrixView<T,A>& m)
+    inline std::string TMV_Text(const ConstDiagMatrixView<T,A>& )
     {
         return std::string("ConstDiagMatrixView<") +
             TMV_Text(T()) + "," + Attrib<A>::vtext() + ">";
     }
 
     template <class T, int A>
-    inline std::string TMV_Text(const DiagMatrixView<T,A>& m)
+    inline std::string TMV_Text(const DiagMatrixView<T,A>& )
     {
         return std::string("DiagMatrixView<") +
             TMV_Text(T()) + "," + Attrib<A>::vtext() + ">";
