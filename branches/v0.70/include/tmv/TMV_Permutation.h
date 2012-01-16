@@ -874,7 +874,7 @@ namespace tmv {
     template <class T>
     inline void QRP_Decompose(
         const MatrixView<T>& Q, const UpperTriMatrixView<T>& R,
-        Permutation& p, bool strict=false)
+        Permutation& p, bool strict)
     {
         p.resize(Q.rowsize());
         p.allocateMem();
@@ -886,7 +886,7 @@ namespace tmv {
     template <class T>
     inline void QRP_Decompose(
         const MatrixView<T>& QRx, const VectorView<T>& beta,
-        Permutation& p, T& signdet, bool strict=false)
+        Permutation& p, T& signdet, bool strict)
     {
         p.resize(QRx.rowsize());
         p.allocateMem();
