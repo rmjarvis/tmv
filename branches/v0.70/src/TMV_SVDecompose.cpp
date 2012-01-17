@@ -249,9 +249,8 @@ namespace tmv {
                 cerr<<"Vt => "<<*Vt<<endl;
                 cerr<<"UBVt = "<<A0<<endl;
                 cerr<<"USVt = "<<AA<<endl;
-                cerr<<"diff = ";
-                (A0-AA).write(cerr,(A0-AA).maxAbsElement()*1.e-3);
-                cerr<<endl;
+                cerr<<"diff = "<<ThreshIO((A0-AA).maxAbsElement()*1.e-3)<<
+                    (A0-AA)<<endl;
                 cerr<<"Norm(diff) = "<<Norm(A0-AA)<<std::endl;
                 cerr<<"THRESH*Norm(A0) = "<<THRESH<<"*"<<Norm(A0)<<" = "<<THRESH*Norm(A0)<<std::endl;
                 abort();
@@ -717,9 +716,8 @@ namespace tmv {
                 cerr<<"input B = "<<B<<endl;
                 cerr<<"UBVt = "<<A0<<endl;
                 cerr<<"USVt = "<<AA<<endl;
-                cerr<<"diff = ";
-                (A0-AA).write(cerr,(A0-AA).maxAbsElement()*1.e-3);
-                cerr<<endl;
+                cerr<<"diff = "<<ThreshIO((A0-AA).maxAbsElement()*1.e-3)<<
+                    (A0-AA)<<endl;
                 cerr<<"U = "<<*U<<endl;
                 cerr<<"S = "<<D<<endl;
                 cerr<<"Vt = "<<*Vt<<endl;

@@ -1010,13 +1010,14 @@ namespace tmv {
             int _i, int _j, const GenUpperTriMatrix<T>& _m,
             std::istream& _is, std::string _e, std::string _g) throw() :
             ReadError("UpperTriMatrix"),
-            m(_m), i(_i), j(_j), exp(_e), got(_g), s(m.size()), v1(i==j?1:0),
+            m(_m), i(_i), j(_j), exp(_e), got(_g), 
+            s(m.size()), v1(i==j?T(1):T(0)),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         UpperTriMatrixReadError(
             int _i, int _j, const GenUpperTriMatrix<T>& _m,
             std::istream& _is) throw() :
             ReadError("UpperTriMatrix"),
-            m(_m), i(_i), j(_j), s(m.size()), v1(i==j?1:0),
+            m(_m), i(_i), j(_j), s(m.size()), v1(i==j?T(1):T(0)),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         UpperTriMatrixReadError(
             int _i, int _j, const GenUpperTriMatrix<T>& _m,
@@ -1330,7 +1331,8 @@ namespace tmv {
             std::istream& _is,
             const std::string& _e, const std::string& _g) throw() :
             ReadError("LowerTriMatrix"),
-            m(_m), i(_i), j(_j), exp(_e), got(_g), s(m.size()), v1(i==j?1:0),
+            m(_m), i(_i), j(_j), exp(_e), got(_g), 
+            s(m.size()), v1(i==j?T(1):T(0)),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         LowerTriMatrixReadError(
             const GenLowerTriMatrix<T>& _m,
@@ -1342,7 +1344,7 @@ namespace tmv {
             int _i, int _j, const GenLowerTriMatrix<T>& _m,
             std::istream& _is) throw() :
             ReadError("LowerTriMatrix"),
-            m(_m), i(_i), j(_j), s(m.size()), v1(i==j?1:0),
+            m(_m), i(_i), j(_j), s(m.size()), v1(i==j?T(1):T(0)),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         LowerTriMatrixReadError(
             int _i, int _j, const GenLowerTriMatrix<T>& _m,

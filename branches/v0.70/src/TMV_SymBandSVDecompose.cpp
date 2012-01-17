@@ -500,9 +500,7 @@ namespace tmv {
                 cerr<<"D = "<<D<<endl;
                 cerr<<"E = "<<E<<endl;
                 cerr<<"TT = "<<TT<<endl;
-                cerr<<"UU * TT * UUt = ";
-                A2.write(cerr,RT(1.e-12));
-                cerr<<endl;
+                cerr<<"UU * TT * UUt = "<<A2.maxAbs2Element()*1.e-3<<endl;
                 cerr<<"A0 = "<<A0<<endl;
                 cerr<<"A2-A0 = "<<A2-A0<<endl;
                 cerr<<"Norm(A2-A0) = "<<Norm(A2-A0)<<endl;

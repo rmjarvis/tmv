@@ -1110,6 +1110,16 @@ namespace tmv {
 
                 // Find the new singular values. 
                 Vector<RT> S(N);
+
+                // First rescale DN,zN by their maximum value to 
+                // avoid issues with underflow/overflow:
+                RT scale = TMV_MAX(zN.maxAbsElement(),TMV_SQRT(TMV_ABS(DN[N-1])));
+                dbgcout<<"scale = "<<scale<<std::endl;
+                DN /= scale*scale;
+                zN /= scale;
+                dbgcout<<"After scale: DN = "<<DN<<std::endl;
+                dbgcout<<"zN = "<<zN<<std::endl;
+
                 if (U) {
                     Matrix<RT,ColMajor> W(N,N); // W(i,j) = D(i)-S(j)
                     FindDCEigenValues(S,RT(1),DN,zN,W);
@@ -1133,8 +1143,8 @@ namespace tmv {
                         if (z(i) > 0) z(i) = prod;
                         else z(i) = -prod;
                     }
-                    //dbgcout<<"z => "<<z<<endl;
-                    //dbgcout<<"W = "<<W<<endl;
+                    dbgcout<<"z => "<<z*scale<<endl;
+                    //dbgcout<<"W = "<<W*scale*scale<<endl;
 
                     // Make X matrix
                     // x_j = ( z1/(d1-sj) , z2/(d2-sj) , ... zN/(dN-sj) )
@@ -1148,8 +1158,9 @@ namespace tmv {
                         xj /= Norm(xj);
                     }
                     U->colRange(0,N) *= W;
-#ifdef XDEBUG
                     //dbgcout<<"W => (X) "<<W<<endl;
+                    //dbgcout<<"U => "<<*U<<endl;
+#ifdef XDEBUG
                     if (U) {
                         M.subMatrix(0,N,0,N) = 
                             W.adjoint() * M.subMatrix(0,N,0,N) * W;
@@ -1166,19 +1177,19 @@ namespace tmv {
                     dbgcout<<"S = "<<S<<endl;
                 }
 
-                // Done.  Copy S to D
+                // Done.  Copy S to D and undo scaling
                 dbgcout<<"before copy S: D = "<<D<<endl;
-                D.subVector(0,N) = S;
+                DN = scale * scale * S;
 
-#ifdef XDEBUG
                 dbgcout<<"Done D = "<<D<<endl;
+#ifdef XDEBUG
                 if (U) {
                     //dbgcout<<"N = "<<N<<std::endl;
                     //dbgcout<<"M.diag = "<<M.diag()<<std::endl;
                     //dbgcout<<"S = "<<S<<std::endl;
                     //dbgcout<<"diff = "<<M.diag(0,0,N)-S<<std::endl;
                     //dbgcout<<"Norm(diff) = "<<Norm(M.diag(0,0,N)-S)<<std::endl;
-                    M.subMatrix(0,N,0,N) = DiagMatrixViewOf(S);
+                    M.subMatrix(0,N,0,N) = DiagMatrixViewOf(DN);
                     //dbgcout<<"M = "<<M<<endl;
                     //dbgcout<<"U = "<<*U<<endl;
                     //dbgcout<<"U M Ut = "<<*U*M*U->adjoint()<<endl;

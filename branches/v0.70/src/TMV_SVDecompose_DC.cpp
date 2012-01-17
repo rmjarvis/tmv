@@ -1341,6 +1341,16 @@ namespace tmv {
 
                 // Find the new singular values. 
                 Vector<RT> S(N);
+
+                // First rescale DN,zN by their maximum value to 
+                // avoid issues with underflow/overflow:
+                RT scale = TMV_MAX(zN.maxAbs2Element(),TMV_ABS2(DN[N-1]));
+                dbgcout<<"scale = "<<scale<<std::endl;
+                DN /= scale;
+                zN /= scale;
+                dbgcout<<"After scale: DN = "<<DN<<std::endl;
+                dbgcout<<"zN = "<<zN<<std::endl;
+
                 if (U || Vt) {
                     Matrix<RT,ColMajor> W(N,N); // W(i,j) = D(i)-S(j)
                     FindDCSingularValues(S,RT(1),DN,zN,W);
@@ -1405,11 +1415,11 @@ namespace tmv {
                     dbgcout<<"S = "<<S<<endl;
                 }
 
-                // Done.  Copy S to D
-                D.subVector(0,N) = S;
+                // Done.  Copy S to D and undo scaling.
+                DN = scale * S;
 
-#ifdef XDEBUG
                 dbgcout<<"Done D = "<<D<<endl;
+#ifdef XDEBUG
                 if (U && Vt) {
                     M.subMatrix(0,N,0,N) = DiagMatrixViewOf(S);
                     //dbgcout<<"M = "<<M<<endl;

@@ -267,7 +267,7 @@ namespace tmv {
         // 4) Repeat with A11'.
         //
 #ifdef XDEBUG
-        //cout<<"Start Block CH_Decomp: A = "<<TMV_Text(A)<<"  "<<A<<endl;
+        cout<<"Start Block CH_Decomp: A = "<<TMV_Text(A)<<"  "<<A<<endl;
         Matrix<T> A0(A);
         HermMatrix<T,Lower|ColMajor> A2 = A;
         NonBlockCH_Decompose(A2.view());
@@ -317,7 +317,7 @@ namespace tmv {
     static void RecursiveCH_Decompose(const SymMatrixView<T>& A)
     {
 #ifdef XDEBUG
-        //cout<<"Start Recursive CH_Decomp: A = "<<TMV_Text(A)<<"  "<<A<<endl;
+        cout<<"Start Recursive CH_Decomp: A = "<<TMV_Text(A)<<"  "<<A<<endl;
         Matrix<T> A0(A);
         HermMatrix<T,Lower|ColMajor> A2(A);
         NonBlockCH_Decompose<true>(A2.view());
