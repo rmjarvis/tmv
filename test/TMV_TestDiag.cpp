@@ -24,30 +24,40 @@ static void TestBasicDiagMatrix_1()
     Assert(af.colsize() == size_t(N) && af.rowsize() == size_t(N),
            "Creating DiagMatrix(N)");
 
-    for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         if (i == j) a(i,j) = T(k);
         if (i == j) af(i+1,j+1) = T(k);
     }
+    const tmv::DiagMatrix<T>& ac = a;
     tmv::ConstDiagMatrixView<T> acv = a.view();
     tmv::DiagMatrixView<T> av = a.view();
+    const tmv::DiagMatrix<T,tmv::FortranStyle>& afc = af;
     tmv::ConstDiagMatrixView<T,tmv::FortranStyle> afcv = af.view();
     tmv::DiagMatrixView<T,tmv::FortranStyle> afv = af.view();
 
-    for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k)
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         if (i == j) {
-            Assert(a(i,j) == k,"Read/Write DiagMatrix");
-            Assert(acv(i,j) == k,"Access DiagMatrix CV");
-            Assert(av(i,j) == k,"Access DiagMatrix V");
-            Assert(af(i+1,j+1) == k,"Read/Write DiagMatrixF");
-            Assert(afcv(i+1,i+1) == k,"Access DiagMatrixF CV");
-            Assert(afv(i+1,i+1) == k,"Access DiagMatrixF V");
-            Assert(a(i) == k,"Single argument access for DiagMatrix");
-            Assert(acv(i) == k,"Single argument access for DiagMatrix CV");
-            Assert(av(i) == k,"Single argument access for DiagMatrix V");
-            Assert(af(i+1) == k,"Single argument access for DiagMatrixF");
-            Assert(afcv(i+1) == k,"Single argument access for DiagMatrixF CV");
-            Assert(afv(i+1) == k,"Single argument access for DiagMatrixF V");
+            Assert(a(i,j) == T(k),"Read/Write DiagMatrix");
+            Assert(ac(i,j) == T(k),"Access const DiagMatrix");
+            Assert(acv(i,j) == T(k),"Access DiagMatrix CV");
+            Assert(av(i,j) == T(k),"Access DiagMatrix V");
+            Assert(af(i+1,j+1) == T(k),"Read/Write DiagMatrixF");
+            Assert(afc(i+1,j+1) == T(k),"Access const DiagMatrixF");
+            Assert(afcv(i+1,j+1) == T(k),"Access DiagMatrixF CV");
+            Assert(afv(i+1,j+1) == T(k),"Access DiagMatrixF V");
+            Assert(a(i) == T(k),"Single argument access for DiagMatrix");
+            Assert(acv(i) == T(k),"Single argument access for DiagMatrix CV");
+            Assert(av(i) == T(k),"Single argument access for DiagMatrix V");
+            Assert(af(i+1) == T(k),"Single argument access for DiagMatrixF");
+            Assert(afcv(i+1) == T(k),"Single argument access for DiagMatrixF CV");
+            Assert(afv(i+1) == T(k),"Single argument access for DiagMatrixF V");
+        } else {
+            Assert(ac(i,j) == T(0),"Access const DiagMatrix");
+            Assert(acv(i,j) == T(0),"Access DiagMatrix CV");
+            Assert(afc(i+1,j+1) == T(0),"Access const DiagMatrixF");
+            Assert(afcv(i+1,j+1) == T(0),"Access DiagMatrixF CV");
         }
+    }
 
     Assert(a==af,"CStyle Matrix == FortranStyle Matrix");
     Assert(a==acv,"Matrix == ConstMatrixView");
@@ -58,29 +68,33 @@ static void TestBasicDiagMatrix_1()
 
     // Test Basic Arithmetic
     tmv::DiagMatrix<T> b(N);
-    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if (i == j) {
             a(i,j) = T(3+i+5*j);
             b(i,j) = T(5+2*i+4*j);
         }
+    }
     af = a;
     Assert(a==af,"Copy CStyle DiagMatrix to FotranStyle");
 
     tmv::DiagMatrix<T> c(N);
     c = a+b;
-    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if (i == j)
             Assert(c(i,j) == T(8+3*i+9*j),"Add DiagMatrices");
+    }
 
     c = a-b;
-    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if (i == j)
             Assert(c(i,j) == T(-2-i+j),"Subtract DiagMatrices");
+    }
 
     tmv::Matrix<T> m = a;
-    for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k)
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if (i == j)
             Assert(a(i,j) == m(i,j),"DiagMatrix -> Matrix");
+    }
     Assert(a == tmv::DiagMatrix<T>(m),"Matrix -> DiagMatrix");
 
 

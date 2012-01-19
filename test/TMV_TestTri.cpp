@@ -182,19 +182,23 @@ static void TestBasicUpperTriMatrix_1()
 
     u.resize(2);
     Assert(u.colsize() == 2 && u.rowsize() == 2,"u.resize(2)");
-    for (int i=0, k=0; i<2; ++i) for (int j=0; j<2; ++j, ++k) 
+    for (int i=0, k=1; i<2; ++i) for (int j=0; j<2; ++j, ++k) {
         if (i < j || (D==tmv::NonUnitDiag && i==j)) u(i,j) = T(k);
-    for (int i=0, k=0; i<2; ++i) for (int j=0; j<2; ++j, ++k) 
+    }
+    for (int i=0, k=1; i<2; ++i) for (int j=0; j<2; ++j, ++k) {
         if (i < j || (D==tmv::NonUnitDiag && i==j)) 
             Assert(u(i,j) == k,"Read/Write resized UpperTriMatrix");
+    }
 
     u.resize(2*N);
     Assert(u.colsize() == 2*N && u.rowsize() == 2*N,"m.resize(2*N)");
-    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) 
+    for (int i=0, k=1; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) {
         if (i < j || (D==tmv::NonUnitDiag && i==j)) u(i,j) = T(k);
-    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) 
+    }
+    for (int i=0, k=1; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) {
         if (i < j || (D==tmv::NonUnitDiag && i==j)) 
             Assert(u(i,j) == k,"Read/Write resized UpperTriMatrix");
+    }
 
 }
 
@@ -376,19 +380,23 @@ static void TestBasicLowerTriMatrix_1()
 
     l.resize(2);
     Assert(l.colsize() == 2 && l.rowsize() == 2,"l.resize(2)");
-    for (int i=0, k=0; i<2; ++i) for (int j=0; j<2; ++j, ++k) 
+    for (int i=0, k=1; i<2; ++i) for (int j=0; j<2; ++j, ++k) {
         if (j < i || (D==tmv::NonUnitDiag && i==j)) l(i,j) = T(k);
-    for (int i=0, k=0; i<2; ++i) for (int j=0; j<2; ++j, ++k) 
+    }
+    for (int i=0, k=1; i<2; ++i) for (int j=0; j<2; ++j, ++k) {
         if (j < i || (D==tmv::NonUnitDiag && i==j)) 
             Assert(l(i,j) == k,"Read/Write resized UpperTriMatrix");
+    }
 
     l.resize(2*N);
     Assert(l.colsize() == 2*N && l.rowsize() == 2*N,"m.resize(2*N)");
-    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) 
+    for (int i=0, k=1; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) {
         if (j < i || (D==tmv::NonUnitDiag && i==j)) l(i,j) = T(k);
-    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) 
+    }
+    for (int i=0, k=1; i<2*N; ++i) for (int j=0; j<2*N; ++j, ++k) {
         if (j < i || (D==tmv::NonUnitDiag && i==j)) 
             Assert(l(i,j) == k,"Read/Write resized UpperTriMatrix");
+    }
 
 }
 
