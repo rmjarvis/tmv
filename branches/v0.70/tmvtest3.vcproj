@@ -230,6 +230,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\TMV_TestSmallMatrixArith_A3c.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TMV_TestSmallMatrixArith_A3d.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\test\TMV_TestSmallMatrixArith_A4a.cpp"
 				>
 			</File>
@@ -275,6 +283,14 @@
 			</File>
 			<File
 				RelativePath=".\test\TMV_TestSmallMatrixArith_B3b.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TMV_TestSmallMatrixArith_B3c.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TMV_TestSmallMatrixArith_B3d.cpp"
 				>
 			</File>
 			<File

@@ -196,14 +196,15 @@ namespace tmv {
             std::istream& _is,
             const std::string& _e, const std::string& _g) throw() :
             ReadError(TAG),
-            m(_m), i(_i), j(_j), exp(_e), got(_g), s(_m.size()), v1(i==j?1:0),
+            m(_m), i(_i), j(_j), exp(_e), got(_g), 
+            s(_m.size()), v1(i==j?T(1):T(0)),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class M>
         TriMatrixReadError(
             int _i, int _j, const BaseMatrix_Tri<M>& _m, 
             std::istream& _is) throw() :
             ReadError(TAG),
-            m(_m), i(_i), j(_j), s(_m.size()), v1(i==j?1:0),
+            m(_m), i(_i), j(_j), s(_m.size()), v1(i==j?T(1):T(0)),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class M>
         TriMatrixReadError(

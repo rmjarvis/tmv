@@ -29,26 +29,36 @@ static void TestBasicDiagMatrix_1()
         if (i == j) a(i,j) = T(k);
         if (i == j) af(i+1,j+1) = T(k);
     }
+    const tmv::DiagMatrix<T>& ac = a;
     tmv::ConstDiagMatrixView<T> acv = a.view();
     tmv::DiagMatrixView<T> av = a.view();
+    const tmv::DiagMatrix<T,tmv::FortranStyle>& afc = af;
     tmv::ConstDiagMatrixView<T,tmv::FortranStyle> afcv = af.view();
     tmv::DiagMatrixView<T,tmv::FortranStyle> afv = af.view();
 
-    for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k)
+    for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         if (i == j) {
-            Assert(a(i,j) == k,"Read/Write DiagMatrix");
-            Assert(acv(i,j) == k,"Access DiagMatrix CV");
-            Assert(av(i,j) == k,"Access DiagMatrix V");
-            Assert(af(i+1,j+1) == k,"Read/Write DiagMatrixF");
-            Assert(afcv(i+1,i+1) == k,"Access DiagMatrixF CV");
-            Assert(afv(i+1,i+1) == k,"Access DiagMatrixF V");
-            Assert(a(i) == k,"Single argument access for DiagMatrix");
-            Assert(acv(i) == k,"Single argument access for DiagMatrix CV");
-            Assert(av(i) == k,"Single argument access for DiagMatrix V");
-            Assert(af(i+1) == k,"Single argument access for DiagMatrixF");
-            Assert(afcv(i+1) == k,"Single argument access for DiagMatrixF CV");
-            Assert(afv(i+1) == k,"Single argument access for DiagMatrixF V");
+            Assert(a(i,j) == T(k),"Read/Write DiagMatrix");
+            Assert(ac(i,j) == T(k),"Access const DiagMatrix");
+            Assert(acv(i,j) == T(k),"Access DiagMatrix CV");
+            Assert(av(i,j) == T(k),"Access DiagMatrix V");
+            Assert(af(i+1,j+1) == T(k),"Read/Write DiagMatrixF");
+            Assert(afc(i+1,j+1) == T(k),"Access const DiagMatrixF");
+            Assert(afcv(i+1,j+1) == T(k),"Access DiagMatrixF CV");
+            Assert(afv(i+1,j+1) == T(k),"Access DiagMatrixF V");
+            Assert(a(i) == T(k),"Single argument access for DiagMatrix");
+            Assert(acv(i) == T(k),"Single argument access for DiagMatrix CV");
+            Assert(av(i) == T(k),"Single argument access for DiagMatrix V");
+            Assert(af(i+1) == T(k),"Single argument access for DiagMatrixF");
+            Assert(afcv(i+1) == T(k),"Single argument access for DiagMatrixF CV");
+            Assert(afv(i+1) == T(k),"Single argument access for DiagMatrixF V");
+        } else {
+            Assert(ac(i,j) == T(0),"Access const DiagMatrix");
+            Assert(acv(i,j) == T(0),"Access DiagMatrix CV");
+            Assert(afc(i+1,j+1) == T(0),"Access const DiagMatrixF");
+            Assert(afcv(i+1,j+1) == T(0),"Access DiagMatrixF CV");
         }
+    }
 
     Assert(a==af,"CStyle Matrix == FortranStyle Matrix");
     Assert(a==acv,"Matrix == ConstMatrixView");
@@ -171,17 +181,17 @@ static void TestBasicDiagMatrix_2()
     typename tmv::DiagMatrixView<T>::iterator it5 = q5.begin();
     typename tmv::ConstDiagMatrixView<T>::const_iterator it6 =
         q5_const.begin();
-    int ii = 0;
+    int i = 0;
     while (it1 != q1.end()) {
-        Assert(*it1++ == qar[ii], "DiagMatrix iteration 1");
-        Assert(*it2++ == qar[ii], "DiagMatrix iteration 2");
-        Assert(*it3++ == qar[ii], "DiagMatrix iteration 3");
-        Assert(*it4++ == qar[ii], "DiagMatrix iteration 4");
-        Assert(*it5++ == qar[ii], "DiagMatrix iteration 5");
-        Assert(*it6++ == qar[ii], "DiagMatrix iteration 6");
-        ++ii;
+        Assert(*it1++ == qar[i], "DiagMatrix iteration 1");
+        Assert(*it2++ == qar[i], "DiagMatrix iteration 2");
+        Assert(*it3++ == qar[i], "DiagMatrix iteration 3");
+        Assert(*it4++ == qar[i], "DiagMatrix iteration 4");
+        Assert(*it5++ == qar[i], "DiagMatrix iteration 5");
+        Assert(*it6++ == qar[i], "DiagMatrix iteration 6");
+        ++i;
     }
-    Assert(ii == 3, "DiagMatrix iteration number of elements");
+    Assert(i == 3, "DiagMatrix iteration number of elements");
     Assert(it2 == q1_const.end(), "it2 reaching end");
     Assert(it3 == q1_view.end(), "it3 reaching end");
     Assert(it4 == q1_constview.end(), "it4 reaching end");

@@ -412,7 +412,7 @@ namespace tmv {
         // If s == 0, the BLAS standard is to return 0 for the sum,
         // rather than the correct value.  Weird.
         // The non-blas version works correctly, but just do it here anyway.
-        else return size() * TMV_ABS(*cptr());
+        else return RT(size() * TMV_ABS(*cptr()));
     }
 
     template <class T> 
@@ -424,7 +424,7 @@ namespace tmv {
         // If s == 0, the BLAS standard is to return 0 for the sum,
         // rather than the correct value.  Weird.
         // The non-blas version works correctly, but just do it here anyway.
-        else return size() * TMV_ABS2(*cptr());
+        else return RT(size() * TMV_ABS2(*cptr()));
     }
 
     //
@@ -813,7 +813,7 @@ namespace tmv {
             return min;
         } else if (step() == 0) {
             if (iminout) *iminout = 0;
-            return TMV_ABS(*cptr());
+            return RT(TMV_ABS(*cptr()));
         } else {
             RT min = reverse().minAbsElement(iminout);
             if (iminout) *iminout = size()-1-(*iminout);
@@ -835,7 +835,7 @@ namespace tmv {
             return max;
         } else if (step() == 0) {
             if (imaxout) *imaxout = 0;
-            return TMV_ABS(*cptr());
+            return RT(TMV_ABS(*cptr()));
         } else {
             RT max = reverse().maxAbsElement(imaxout);
             if (imaxout) *imaxout = size()-1-(*imaxout);
@@ -1198,16 +1198,16 @@ namespace tmv {
             bool neg = ad==Descend;
             switch(comp) {
               case RealComp : 
-                   itsvalue = neg ? -TMV_REAL(val) : TMV_REAL(val);
+                   itsvalue = RT(neg ? -TMV_REAL(val) : TMV_REAL(val));
                    break;
               case AbsComp : 
-                   itsvalue = neg ? -TMV_ABS(val) : TMV_ABS(val);
+                   itsvalue = RT(neg ? -TMV_ABS(val) : TMV_ABS(val));
                    break;
               case ImagComp :
-                   itsvalue = neg ? -TMV_IMAG(val) : TMV_IMAG(val);
+                   itsvalue = RT(neg ? -TMV_IMAG(val) : TMV_IMAG(val));
                    break;
               case ArgComp : 
-                   itsvalue = neg ? -TMV_ARG(val) : TMV_ARG(val);
+                   itsvalue = RT(neg ? -TMV_ARG(val) : TMV_ARG(val));
                    break;
               default : 
                    TMVAssert2(TMV_FALSE);

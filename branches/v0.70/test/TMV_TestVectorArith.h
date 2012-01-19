@@ -42,7 +42,8 @@ inline void TestV(const V& a, std::string label)
     }
 
     if (!(std::numeric_limits<RT>::is_integer)) {
-        Assert(Equal2(Norm2(a),sqrt(normsq),eps*sqrt(normsq)),label+" Norm2");
+        Assert(Equal2(Norm2(a),tmv::TMV_SQRT(normsq),eps*tmv::TMV_SQRT(normsq)),
+               label+" Norm2");
     }
     if (!(std::numeric_limits<RT>::is_integer && tmv::Traits<T>::iscomplex)) {
         Assert(Equal2(Norm1(a),norm1,eps*norm1),label+" Norm1");
