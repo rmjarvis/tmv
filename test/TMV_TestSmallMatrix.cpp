@@ -21,7 +21,7 @@ inline void TestBasicSmallMatrix_1()
     // So make it explicit here to avoid confusion.
 
     tmv::SmallMatrix<T,M,N,S> m;
-    tmv::SmallMatrix<T,M,N,S,tmv::FortranStyle> mf;
+    tmv::SmallMatrix<T,M,N,S|tmv::FortranStyle> mf;
     Assert(m.colsize() == size_t(M) && m.rowsize() == size_t(N),
            "Creating SmallMatrix(M,N)");
     Assert(m.colsize() == size_t(M) && m.rowsize() == size_t(N),

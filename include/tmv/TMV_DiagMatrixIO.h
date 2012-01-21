@@ -471,9 +471,9 @@ namespace tmv {
         return reader.getis();
     }
 
-    template <class T, int A0>
+    template <class T, int A>
     static std::istream& operator>>(
-        const TMV_Reader& reader, DiagMatrix<T,A0>& m)
+        const TMV_Reader& reader, DiagMatrix<T,A>& m)
     {
         std::string exp,got;
         if (!reader.readCode("D",exp,got)) {
@@ -515,8 +515,8 @@ namespace tmv {
         return reader.getis();
     }
 
-    template <class T, int A0>
-    std::istream& operator>>(std::istream& is, DiagMatrix<T,A0>& m)
+    template <class T, int A>
+    std::istream& operator>>(std::istream& is, DiagMatrix<T,A>& m)
     { return is >> IOStyle() >> m; }
 
     template <class T, int A>

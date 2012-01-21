@@ -4,7 +4,6 @@
 //              such as += x, etc.
 // NODIV        Don't do Det, Norm2, etc.
 // NOSV         Only skip division stuff that requires SVD, like Norm2.
-// NOMIX        Don't do arithmetic that mixes with regular Vector/Matrix.
 // NOALIAS      Skip alised arithmetic, like v = m * v.
 // EXPLICIT_ALIAS  For alised arithmetic, use explicit alias(): v.alias()=m*v
 // NOASSIGN     Skip tests of assignment to the provided matrices

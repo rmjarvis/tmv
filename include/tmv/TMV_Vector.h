@@ -737,7 +737,8 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        ~ConstVectorView() {
+        ~ConstVectorView() 
+        {
 #ifdef TMV_EXTRA_DEBUG
             itsv = 0; 
 #endif
@@ -926,7 +927,8 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        ~VectorView() {
+        ~VectorView() 
+        {
 #ifdef TMV_EXTRA_DEBUG
             itsv = 0; 
 #endif

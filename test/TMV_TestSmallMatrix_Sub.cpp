@@ -8,7 +8,7 @@ template <class T, size_t M, size_t N, tmv::StorageType S>
 static void DoTestSmallMatrix_Sub()
 {
     tmv::SmallMatrix<T,M,N,S> m;
-    tmv::SmallMatrix<T,M,N,S,tmv::FortranStyle> mf;
+    tmv::SmallMatrix<T,M,N,S|tmv::FortranStyle> mf;
     Assert(m.colsize() == size_t(M) && m.rowsize() == size_t(N),
            "Creating SmallMatrix(M,N)");
     Assert(m.colsize() == size_t(M) && m.rowsize() == size_t(N),

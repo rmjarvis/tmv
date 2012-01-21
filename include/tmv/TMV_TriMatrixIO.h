@@ -632,9 +632,9 @@ namespace tmv {
         return reader.getis();
     }
 
-    template <class T, int A0, int A1, int A2>
+    template <class T, int A>
     static std::istream& operator>>(
-        const TMV_Reader& reader, UpperTriMatrix<T,A0,A1,A2>& m)
+        const TMV_Reader& reader, UpperTriMatrix<T,A>& m)
     {
         std::string exp,got;
         if (!reader.readCode("U",exp,got)) {
@@ -676,9 +676,9 @@ namespace tmv {
         return reader.getis();
     }
 
-    template <class T, int A0, int A1, int A2>
+    template <class T, int A>
     static std::istream& operator>>(
-        const TMV_Reader& reader, LowerTriMatrix<T,A0,A1,A2>& m)
+        const TMV_Reader& reader, LowerTriMatrix<T,A>& m)
     {
         std::string exp,got;
         if (!reader.readCode("L",exp,got)) {
@@ -720,12 +720,12 @@ namespace tmv {
         return reader.getis();
     }
 
-    template <class T, int A0, int A1, int A2>
-    std::istream& operator>>(std::istream& is, UpperTriMatrix<T,A0,A1,A2>& m)
+    template <class T, int A>
+    std::istream& operator>>(std::istream& is, UpperTriMatrix<T,A>& m)
     { return is >> IOStyle() >> m; }
 
-    template <class T, int A0, int A1, int A2>
-    std::istream& operator>>(std::istream& is, LowerTriMatrix<T,A0,A1,A2>& m)
+    template <class T, int A>
+    std::istream& operator>>(std::istream& is, LowerTriMatrix<T,A>& m)
     { return is >> IOStyle() >> m; }
 
     template <class T, int A>

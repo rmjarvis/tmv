@@ -86,14 +86,13 @@ namespace tmv {
     // SmallMatrix
     //
 
-    template <class T, int M, int N, int A0, int A1>
-    struct Traits<SmallMatrix<T,M,N,A0,A1> >
+    template <class T, int M, int N, int A0>
+    struct Traits<SmallMatrix<T,M,N,A0> >
     {
         typedef typename Traits<T>::real_type real_type;
 
-        enum { A01 = A0 | A1 };
-        enum { A = (A01 & ~NoDivider & ~NoAlias) | (
-                (Attrib<A01>::rowmajor ? 0 : ColMajor) |
+        enum { A = (A0 & ~NoDivider & ~NoAlias) | (
+                (Attrib<A0>::rowmajor ? 0 : ColMajor) |
                 ( Attrib<A0>::withdivider ? 0 : NoDivider ) ) };
         enum { okA = (
                 !Attrib<A>::conj &&
@@ -119,10 +118,10 @@ namespace tmv {
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef SmallMatrix<T,M,N,A0,A1> type;
+        typedef SmallMatrix<T,M,N,A0> type;
         typedef const type& calc_type;
         typedef const type& eval_type;
-        typedef SmallMatrix<T,M,N,A01> copy_type;
+        typedef SmallMatrix<T,M,N,A0> copy_type;
 
         enum { _colsize = M };
         enum { _rowsize = N };
@@ -299,14 +298,14 @@ namespace tmv {
         typedef SmallMatrixView<T,M,N,_stepi,_stepj,An|CheckAlias> alias_type;
     };
 
-    template <class T, int M, int N, int A0, int A1>
+    template <class T, int M, int N, int A>
     class SmallMatrix : 
-        public BaseMatrix_Rec_Mutable<SmallMatrix<T,M,N,A0,A1> >,
-        public MatrixDivHelper<SmallMatrix<T,M,N,A0,A1> >
+        public BaseMatrix_Rec_Mutable<SmallMatrix<T,M,N,A> >,
+        public MatrixDivHelper<SmallMatrix<T,M,N,A> >
     {
     public:
 
-        typedef SmallMatrix<T,M,N,A0,A1> type;
+        typedef SmallMatrix<T,M,N,A> type;
         typedef BaseMatrix_Rec_Mutable<type> base_mut;
         //typedef typename Traits<type>::lud_type lud_type;
         //typedef typename Traits<type>::qrd_type qrd_type;
@@ -719,7 +718,8 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        TMV_INLINE ~ConstSmallMatrixView() {
+        TMV_INLINE ~ConstSmallMatrixView() 
+        {
 #ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
@@ -1091,7 +1091,8 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        TMV_INLINE ~SmallMatrixView() {
+        TMV_INLINE ~SmallMatrixView() 
+        {
 #ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
@@ -1254,27 +1255,27 @@ namespace tmv {
     // Conjugate, Transpose, Adjoint
     //
 
-    template <class T, int M, int N, int A0, int A1>
-    TMV_INLINE typename SmallMatrix<T,M,N,A0,A1>::conjugate_type Conjugate(
-        SmallMatrix<T,M,N,A0,A1>& m)
+    template <class T, int M, int N, int A>
+    TMV_INLINE typename SmallMatrix<T,M,N,A>::conjugate_type Conjugate(
+        SmallMatrix<T,M,N,A>& m)
     { return m.conjugate(); }
     template <class T, int M, int N, int Si, int Sj, int A>
     TMV_INLINE typename SmallMatrixView<T,M,N,Si,Sj,A>::conjugate_type Conjugate(
         SmallMatrixView<T,M,N,Si,Sj,A> m)
     { return m.conjugate(); }
 
-    template <class T, int M, int N, int A0, int A1>
-    TMV_INLINE typename SmallMatrix<T,M,N,A0,A1>::transpose_type Transpose(
-        SmallMatrix<T,M,N,A0,A1>& m)
+    template <class T, int M, int N, int A>
+    TMV_INLINE typename SmallMatrix<T,M,N,A>::transpose_type Transpose(
+        SmallMatrix<T,M,N,A>& m)
     { return m.transpose(); }
     template <class T, int M, int N, int Si, int Sj, int A>
     TMV_INLINE typename SmallMatrixView<T,M,N,Si,Sj,A>::transpose_type Transpose(
         SmallMatrixView<T,M,N,Si,Sj,A> m)
     { return m.transpose(); }
 
-    template <class T, int M, int N, int A0, int A1>
-    TMV_INLINE typename SmallMatrix<T,M,N,A0,A1>::adjoint_type Adjoint(
-        SmallMatrix<T,M,N,A0,A1>& m)
+    template <class T, int M, int N, int A>
+    TMV_INLINE typename SmallMatrix<T,M,N,A>::adjoint_type Adjoint(
+        SmallMatrix<T,M,N,A>& m)
     { return m.adjoint(); }
     template <class T, int M, int N, int Si, int Sj, int A>
     TMV_INLINE typename SmallMatrixView<T,M,N,Si,Sj,A>::adjoint_type Adjoint(
@@ -1286,10 +1287,9 @@ namespace tmv {
     // TMV_Text
     //
 
-    template <class T, int M, int N, int A0, int A1>
-    inline std::string TMV_Text(const SmallMatrix<T,M,N,A0,A1>& m)
+    template <class T, int M, int N, int A>
+    inline std::string TMV_Text(const SmallMatrix<T,M,N,A>& m)
     {
-        const int A = A0 | A1;
         std::ostringstream s;
         s << "SmallMatrix<"<<TMV_Text(T());
         s << ','<<M<<','<<N;

@@ -84,15 +84,15 @@ namespace tmv {
 
     // The following all derive from BaseMatrix_Band or BaseMatrix_Band_Mutable.
     // See TMV_BandMatrix.h and TMV_SmallBandMatrix.h for their definitions:
-    template <class T, int A=0, int A2=0>
+    template <class T, int A=0>
     class BandMatrix;
     template <class T, int A=0>
     class ConstBandMatrixView;
     template <class T, int A=0>
     class BandMatrixView;
-    template <class T, int LO, int HI, int A=0, int A2=0> 
+    template <class T, int LO, int HI, int A=0>
     class ThinBandMatrix;
-    template <class T, int M, int N, int LO, int HI, int A=0, int A2=0> 
+    template <class T, int M, int N, int LO, int HI, int A=0>
     class SmallBandMatrix;
     template <class T, int M, int N, int LO, int HI, int Si=Unknown, int Sj=Unknown, int A=0>
     class ConstSmallBandMatrixView;
