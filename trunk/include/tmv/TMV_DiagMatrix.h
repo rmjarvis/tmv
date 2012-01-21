@@ -530,7 +530,8 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        ~ConstDiagMatrixView() {
+        ~ConstDiagMatrixView() 
+        {
 #ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
@@ -731,7 +732,8 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        ~DiagMatrixView() {
+        ~DiagMatrixView() 
+        {
 #ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif

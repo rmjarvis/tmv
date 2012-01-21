@@ -488,9 +488,9 @@ namespace tmv {
         return reader.getis();
     }
 
-    template <class T, int A0, int A1>
+    template <class T, int A>
     static std::istream& operator>>(
-        const TMV_Reader& reader, BandMatrix<T,A0,A1>& m)
+        const TMV_Reader& reader, BandMatrix<T,A>& m)
     {
         std::string exp,got;
         if (!reader.readCode("B",exp,got)) {
@@ -519,8 +519,8 @@ namespace tmv {
         return reader.getis();
     }
 
-    template <class T, int A0, int A1>
-    std::istream& operator>>(std::istream& is, BandMatrix<T,A0,A1>& m)
+    template <class T, int A>
+    std::istream& operator>>(std::istream& is, BandMatrix<T,A>& m)
     { return is >> IOStyle() >> m; }
 
     template <class T, int A>

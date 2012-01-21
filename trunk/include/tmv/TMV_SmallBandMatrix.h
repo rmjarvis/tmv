@@ -49,16 +49,15 @@
 
 namespace tmv {
 
-    template <class T, int M, int N, int LO, int HI, int A0, int A1>
-    struct Traits<SmallBandMatrix<T,M,N,LO,HI,A0,A1> >
+    template <class T, int M, int N, int LO, int HI, int A0>
+    struct Traits<SmallBandMatrix<T,M,N,LO,HI,A0> >
     {
         typedef typename Traits<T>::real_type real_type;
 
-        enum { A01 = A0 | A1 };
-        enum { A = (A01 & ~NoDivider & ~NoAlias) | (
-                ((Attrib<A01>::rowmajor || Attrib<A01>::diagmajor) ? 
+        enum { A = (A0 & ~NoDivider & ~NoAlias) | (
+                ((Attrib<A0>::rowmajor || Attrib<A0>::diagmajor) ? 
                  0 : ColMajor) |
-                ( Attrib<A01>::withdivider ? 0 : NoDivider ) ) };
+                ( Attrib<A0>::withdivider ? 0 : NoDivider ) ) };
         enum { okA = (
                 !Attrib<A>::conj &&
                 (Attrib<A>::rowmajor || Attrib<A>::colmajor || 
@@ -85,10 +84,10 @@ namespace tmv {
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef SmallBandMatrix<T,M,N,LO,HI,A0,A1> type;
+        typedef SmallBandMatrix<T,M,N,LO,HI,A0> type;
         typedef const type& calc_type;
         typedef const type& eval_type;
-        typedef SmallBandMatrix<T,M,N,LO,HI,A01> copy_type;
+        typedef SmallBandMatrix<T,M,N,LO,HI,A0> copy_type;
 
         enum { _colsize = M };
         enum { _rowsize = N };
@@ -277,14 +276,14 @@ namespace tmv {
         typedef SmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,An|CheckAlias> alias_type;
     };
 
-    template <class T, int M, int N, int LO, int HI, int A0, int A1>
+    template <class T, int M, int N, int LO, int HI, int A>
     class SmallBandMatrix : 
-        public BaseMatrix_Band_Mutable<SmallBandMatrix<T,M,N,LO,HI,A0,A1> >,
-        public BandMatrixDivHelper<SmallBandMatrix<T,M,N,LO,HI,A0,A1> >
+        public BaseMatrix_Band_Mutable<SmallBandMatrix<T,M,N,LO,HI,A> >,
+        public BandMatrixDivHelper<SmallBandMatrix<T,M,N,LO,HI,A> >
     {
     public:
 
-        typedef SmallBandMatrix<T,M,N,LO,HI,A0,A1> type;
+        typedef SmallBandMatrix<T,M,N,LO,HI,A> type;
         typedef BaseMatrix_Band_Mutable<type> base_mut;
 
         typedef typename Traits<T>::real_type real_type;
@@ -545,18 +544,17 @@ namespace tmv {
 
     }; // SmallBandMatrix
 
-    template <class T, int LO, int HI, int A0, int A1>
-    struct Traits<ThinBandMatrix<T,LO,HI,A0,A1> >
+    template <class T, int LO, int HI, int A0>
+    struct Traits<ThinBandMatrix<T,LO,HI,A0> >
     {
         typedef typename Traits<T>::real_type real_type;
 
-        enum { A01 = A0 | A1 };
-        enum { A = (A01 & ~NoDivider & ~NoAlias) | (
-                ((Attrib<A01>::rowmajor || Attrib<A01>::diagmajor) ? 
+        enum { A = (A0 & ~NoDivider & ~NoAlias) | (
+                ((Attrib<A0>::rowmajor || Attrib<A0>::diagmajor) ? 
                  0 : ColMajor) |
                 ( !Traits<real_type>::isinst ? NoDivider :
                   Traits<real_type>::isinteger ? NoDivider :
-                  Attrib<A01>::nodivider ? 0 : WithDivider ) )};
+                  Attrib<A0>::nodivider ? 0 : WithDivider ) )};
         enum { okA = (
                 !Attrib<A>::conj &&
                 (Attrib<A>::rowmajor || Attrib<A>::colmajor || 
@@ -583,10 +581,10 @@ namespace tmv {
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef ThinBandMatrix<T,LO,HI,A0,A1> type;
+        typedef ThinBandMatrix<T,LO,HI,A0> type;
         typedef const type& calc_type;
         typedef const type& eval_type;
-        typedef ThinBandMatrix<T,LO,HI,A01> copy_type;
+        typedef ThinBandMatrix<T,LO,HI,A0> copy_type;
 
         enum { _colsize = Unknown };
         enum { _rowsize = Unknown };
@@ -766,14 +764,14 @@ namespace tmv {
     };
 
 
-    template <class T, int LO, int HI, int A0, int A1>
+    template <class T, int LO, int HI, int A>
     class ThinBandMatrix : 
-        public BaseMatrix_Band_Mutable<ThinBandMatrix<T,LO,HI,A0,A1> >,
-        public BandMatrixDivHelper<ThinBandMatrix<T,LO,HI,A0,A1> >
+        public BaseMatrix_Band_Mutable<ThinBandMatrix<T,LO,HI,A> >,
+        public BandMatrixDivHelper<ThinBandMatrix<T,LO,HI,A> >
     {
     public:
 
-        typedef ThinBandMatrix<T,LO,HI,A0,A1> type;
+        typedef ThinBandMatrix<T,LO,HI,A> type;
         typedef BaseMatrix_Band_Mutable<type> base_mut;
         typedef BandMatrixDivHelper<type> divhelper;
 
@@ -1112,15 +1110,15 @@ namespace tmv {
 #ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::destr_value());
 #endif
+            divhelper::resetDivType();
             itscs = cs;
             itsrs = rs;
-            divhelper::resetDivType();
             linsize = BandStorageLength(_stor,itscs,itsrs,LO,HI);
-            itsm1.resize(linsize);
-            itsm = itsm1.get() - _diagmajor ? LO*itssi : 0;
             itssi = _rowmajor ? LO+HI : _colmajor ? 1 :
                 rs >= cs ? 1-cs : -rs;
             itssj = _rowmajor ? 1 : _colmajor ? LO+HI : -itssi+1;
+            itsm1.resize(linsize);
+            itsm = itsm1.get() - _diagmajor ? LO*itssi : 0;
 #ifdef TMV_EXTRA_DEBUG
             this->setAllTo(Traits<T>::constr_value());
 #endif
@@ -1483,7 +1481,8 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        TMV_INLINE ~ConstSmallBandMatrixView() {
+        TMV_INLINE ~ConstSmallBandMatrixView() 
+        {
 #ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
@@ -1902,7 +1901,8 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        TMV_INLINE ~SmallBandMatrixView() {
+        TMV_INLINE ~SmallBandMatrixView() 
+        {
 #ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
@@ -2320,9 +2320,9 @@ namespace tmv {
     // Swap
     //
 
-    template <class T, int LO, int HI, int A0, int A1>
+    template <class T, int LO, int HI, int A>
     TMV_INLINE void Swap(
-        ThinBandMatrix<T,LO,HI,A0,A1>& m1, ThinBandMatrix<T,LO,HI,A0,A1>& m2)
+        ThinBandMatrix<T,LO,HI,A>& m1, ThinBandMatrix<T,LO,HI,A>& m2)
     { m1.swapWith(m2); }
     template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A, class MM>
     TMV_INLINE void Swap(
@@ -2355,39 +2355,39 @@ namespace tmv {
     // Conjugate, Transpose, Adjoint
     //
 
-    template <class T, int M, int N, int LO, int HI, int A0, int A1>
-    TMV_INLINE typename SmallBandMatrix<T,M,N,LO,HI,A0,A1>::conjugate_type 
-    Conjugate(SmallBandMatrix<T,M,N,LO,HI,A0,A1>& m)
+    template <class T, int M, int N, int LO, int HI, int A>
+    TMV_INLINE typename SmallBandMatrix<T,M,N,LO,HI,A>::conjugate_type 
+    Conjugate(SmallBandMatrix<T,M,N,LO,HI,A>& m)
     { return m.conjugate(); }
-    template <class T, int LO, int HI, int A0, int A1>
-    TMV_INLINE typename ThinBandMatrix<T,LO,HI,A0,A1>::conjugate_type 
-    Conjugate(ThinBandMatrix<T,LO,HI,A0,A1>& m)
+    template <class T, int LO, int HI, int A>
+    TMV_INLINE typename ThinBandMatrix<T,LO,HI,A>::conjugate_type 
+    Conjugate(ThinBandMatrix<T,LO,HI,A>& m)
     { return m.conjugate(); }
     template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
     TMV_INLINE typename SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A>::conjugate_type
     Conjugate(SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m)
     { return m.conjugate(); }
 
-    template <class T, int M, int N, int LO, int HI, int A0, int A1>
-    TMV_INLINE typename SmallBandMatrix<T,M,N,LO,HI,A0,A1>::transpose_type 
-    Transpose(SmallBandMatrix<T,M,N,LO,HI,A0,A1>& m)
+    template <class T, int M, int N, int LO, int HI, int A>
+    TMV_INLINE typename SmallBandMatrix<T,M,N,LO,HI,A>::transpose_type 
+    Transpose(SmallBandMatrix<T,M,N,LO,HI,A>& m)
     { return m.transpose(); }
-    template <class T, int LO, int HI, int A0, int A1>
-    TMV_INLINE typename ThinBandMatrix<T,LO,HI,A0,A1>::transpose_type 
-    Transpose(ThinBandMatrix<T,LO,HI,A0,A1>& m)
+    template <class T, int LO, int HI, int A>
+    TMV_INLINE typename ThinBandMatrix<T,LO,HI,A>::transpose_type 
+    Transpose(ThinBandMatrix<T,LO,HI,A>& m)
     { return m.transpose(); }
     template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
     TMV_INLINE typename SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A>::transpose_type
     Transpose(SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m)
     { return m.transpose(); }
 
-    template <class T, int M, int N, int LO, int HI, int A0, int A1>
-    TMV_INLINE typename SmallBandMatrix<T,M,N,LO,HI,A0,A1>::adjoint_type 
-    Adjoint(SmallBandMatrix<T,M,N,LO,HI,A0,A1>& m)
+    template <class T, int M, int N, int LO, int HI, int A>
+    TMV_INLINE typename SmallBandMatrix<T,M,N,LO,HI,A>::adjoint_type 
+    Adjoint(SmallBandMatrix<T,M,N,LO,HI,A>& m)
     { return m.adjoint(); }
-    template <class T, int LO, int HI, int A0, int A1>
-    TMV_INLINE typename ThinBandMatrix<T,LO,HI,A0,A1>::adjoint_type Adjoint(
-        ThinBandMatrix<T,LO,HI,A0,A1>& m)
+    template <class T, int LO, int HI, int A>
+    TMV_INLINE typename ThinBandMatrix<T,LO,HI,A>::adjoint_type Adjoint(
+        ThinBandMatrix<T,LO,HI,A>& m)
     { return m.adjoint(); }
     template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
     TMV_INLINE typename SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A>::adjoint_type 
@@ -2399,11 +2399,9 @@ namespace tmv {
     // TMV_Text 
     //
 
-    template <class T, int M, int N, int LO, int HI, int A0, int A1>
-    inline std::string TMV_Text(
-        const SmallBandMatrix<T,M,N,LO,HI,A0,A1>& m)
+    template <class T, int M, int N, int LO, int HI, int A>
+    inline std::string TMV_Text(const SmallBandMatrix<T,M,N,LO,HI,A>& m)
     {
-        const int A = A0 | A1;
         std::ostringstream s;
         s << "SmallBandMatrix<"<<TMV_Text(T());
         s << ','<<M<<','<<N<<','<<LO<<','<<HI;
@@ -2414,11 +2412,9 @@ namespace tmv {
         return s.str();
     }
 
-    template <class T, int LO, int HI, int A0, int A1>
-    inline std::string TMV_Text(
-        const ThinBandMatrix<T,LO,HI,A0,A1>& m)
+    template <class T, int LO, int HI, int A>
+    inline std::string TMV_Text(const ThinBandMatrix<T,LO,HI,A>& m)
     {
-        const int A = A0 | A1;
         std::ostringstream s;
         s << "ThinBandMatrix<"<<TMV_Text(T());
         s << ','<<LO<<','<<HI;

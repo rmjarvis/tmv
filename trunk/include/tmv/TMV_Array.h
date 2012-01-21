@@ -247,7 +247,9 @@ namespace tmv
         }
 #ifdef TMV_INITIALIZE_NAN
         void fill_with(T x)
-        { for(int i=0;i<_n;++i) get()[i] = x; }
+        { 
+            for(int i=0;i<_n;++i) get()[i] = x; 
+        }
 #endif
 
         TMV_INLINE T* get() { return p.get(); }
@@ -294,7 +296,9 @@ namespace tmv
 
 #ifdef TMV_INITIALIZE_NAN
         void fill_with(std::complex<RT> x)
-        { for(int i=0;i<_n;++i) get()[i] = x; }
+        {
+            for(int i=0;i<_n;++i) get()[i] = x; 
+        }
 #endif
 
         TMV_INLINE T& operator*() { return *get(); }

@@ -689,17 +689,16 @@ namespace tmv {
         public MatrixDivHelper1<M,Traits<M>::_hasdivider>
     {};
 
-    template <class T, int A0, int A1>
-    struct Traits<Matrix<T,A0,A1> >
+    template <class T, int A0>
+    struct Traits<Matrix<T,A0> >
     {
         typedef typename Traits<T>::real_type real_type;
 
-        enum { A01 = A0 | A1 };
-        enum { A = (A01 & ~CheckAlias) | (
-                (Attrib<A01>::rowmajor ? 0 : ColMajor) |
+        enum { A = (A0 & ~CheckAlias) | (
+                (Attrib<A0>::rowmajor ? 0 : ColMajor) |
                 ( !Traits<real_type>::isinst ? NoDivider :
                   Traits<real_type>::isinteger ? NoDivider :
-                  Attrib<A01>::nodivider ? 0 : WithDivider ) )};
+                  Attrib<A0>::nodivider ? 0 : WithDivider ) )};
         enum { okA = (
                 !Attrib<A>::conj &&
                 (Attrib<A>::rowmajor || Attrib<A>::colmajor) &&
@@ -724,10 +723,10 @@ namespace tmv {
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef Matrix<T,A0,A1> type;
+        typedef Matrix<T,A0> type;
         typedef const type& calc_type;
         typedef const type& eval_type;
-        typedef Matrix<T,A01> copy_type;
+        typedef Matrix<T,A0> copy_type;
 
         enum { _colsize = Unknown };
         enum { _rowsize = Unknown };
@@ -884,14 +883,14 @@ namespace tmv {
         typedef MatrixView<T,An> alias_type;
     };
 
-    template <class T, int A0, int A1>
+    template <class T, int A>
     class Matrix : 
-        public BaseMatrix_Rec_Mutable<Matrix<T,A0,A1> >,
-        public MatrixDivHelper<Matrix<T,A0,A1> >
+        public BaseMatrix_Rec_Mutable<Matrix<T,A> >,
+        public MatrixDivHelper<Matrix<T,A> >
     {
     public:
 
-        typedef Matrix<T,A0,A1> type;
+        typedef Matrix<T,A> type;
         typedef BaseMatrix_Rec_Mutable<type> base_mut;
         typedef MatrixDivHelper<type> divhelper;
 
@@ -1277,7 +1276,8 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        TMV_INLINE ~ConstMatrixView() {
+        TMV_INLINE ~ConstMatrixView() 
+        {
 #ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
@@ -1578,7 +1578,8 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        TMV_INLINE ~MatrixView() {
+        TMV_INLINE ~MatrixView() 
+        {
 #ifdef TMV_EXTRA_DEBUG
             itsm = 0; 
 #endif
@@ -1690,8 +1691,8 @@ namespace tmv {
     // Swap
     //
 
-    template <class T, int A0, int A1>
-    TMV_INLINE void Swap(Matrix<T,A0,A1>& m1, Matrix<T,A0,A1>& m2)
+    template <class T, int A>
+    TMV_INLINE void Swap(Matrix<T,A>& m1, Matrix<T,A>& m2)
     { m1.swapWith(m2); }
     template <class M, class T, int A>
     TMV_INLINE void Swap(
@@ -1710,27 +1711,27 @@ namespace tmv {
     // Conjugate, Transpose, Adjoint
     //
 
-    template <class T, int A0, int A1>
-    TMV_INLINE typename Matrix<T,A0,A1>::conjugate_type Conjugate(
-        Matrix<T,A0,A1>& m)
+    template <class T, int A>
+    TMV_INLINE typename Matrix<T,A>::conjugate_type Conjugate(
+        Matrix<T,A>& m)
     { return m.conjugate(); }
     template <class T, int A>
     TMV_INLINE typename MatrixView<T,A>::conjugate_type Conjugate(
         MatrixView<T,A> m)
     { return m.conjugate(); }
 
-    template <class T, int A0, int A1>
-    TMV_INLINE typename Matrix<T,A0,A1>::transpose_type Transpose(
-        Matrix<T,A0,A1>& m)
+    template <class T, int A>
+    TMV_INLINE typename Matrix<T,A>::transpose_type Transpose(
+        Matrix<T,A>& m)
     { return m.transpose(); }
     template <class T, int A>
     TMV_INLINE typename MatrixView<T,A>::transpose_type Transpose(
         MatrixView<T,A> m)
     { return m.transpose(); }
 
-    template <class T, int A0, int A1>
-    TMV_INLINE typename Matrix<T,A0,A1>::adjoint_type Adjoint(
-        Matrix<T,A0,A1>& m)
+    template <class T, int A>
+    TMV_INLINE typename Matrix<T,A>::adjoint_type Adjoint(
+        Matrix<T,A>& m)
     { return m.adjoint(); }
     template <class T, int A>
     TMV_INLINE typename MatrixView<T,A>::adjoint_type Adjoint(
@@ -1742,10 +1743,9 @@ namespace tmv {
     // TMV_Text 
     //
 
-    template <class T, int A0, int A1>
-    inline std::string TMV_Text(const Matrix<T,A0,A1>& m)
+    template <class T, int A>
+    inline std::string TMV_Text(const Matrix<T,A>& m)
     {
-        const int A = A0 | A1;
         std::ostringstream s;
         s << "Matrix<"<<TMV_Text(T());
         s << ","<<Attrib<A>::text()<<">";

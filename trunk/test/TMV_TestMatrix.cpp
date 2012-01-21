@@ -13,7 +13,7 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_1()
     const int N = 10;
 
     tmv::Matrix<T,S> m(M,N);
-    tmv::Matrix<T,S,tmv::FortranStyle> mf(M,N);
+    tmv::Matrix<T,S|tmv::FortranStyle> mf(M,N);
     Assert(m.colsize() == size_t(M) && m.rowsize() == size_t(N),
            "Creating Matrix(M,N)");
     Assert(m.colsize() == size_t(M) && m.rowsize() == size_t(N),
@@ -143,7 +143,7 @@ template <class T, tmv::StorageType S> static void TestBasicMatrix_2()
     const int N = 10;
 
     tmv::Matrix<T,S> m(M,N);
-    tmv::Matrix<T,S,tmv::FortranStyle> mf(M,N);
+    tmv::Matrix<T,S|tmv::FortranStyle> mf(M,N);
 
     for (int i=0, k=1; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
         m(i,j) = T(k);

@@ -101,13 +101,13 @@ namespace tmv {
 
     // The following all derive from BaseMatrix_Rec or BaseMatrix_Rec_Mutable.
     // See TMV_Matrix.h and TMV_SmallMatrix.h for their definitions:
-    template <class T, int A=0, int A2=0>
+    template <class T, int A=0>
     class Matrix;
     template <class T, int A=0>
     class ConstMatrixView;
     template <class T, int A=0>
     class MatrixView;
-    template <class T, int M, int N, int A=0, int A2=0> 
+    template <class T, int M, int N, int A=0>
     class SmallMatrix;
     template <class T, int M, int N, int Si=Unknown, int Sj=Unknown, int A=0>
     class ConstSmallMatrixView;

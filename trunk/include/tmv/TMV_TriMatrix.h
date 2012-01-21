@@ -519,15 +519,14 @@ namespace tmv {
         }
     };
 
-    template <class T, int A0, int A1, int A2>
-    struct Traits<UpperTriMatrix<T,A0,A1,A2> >
+    template <class T, int A0>
+    struct Traits<UpperTriMatrix<T,A0> >
     {
         typedef typename Traits<T>::real_type real_type;
 
-        enum { A012 = A0 | A1 | A2 };
-        enum { A = (A012 & ~NoDivider & ~CheckAlias) | (
-                ( Attrib<A012>::rowmajor ? 0 : ColMajor ) |
-                ( Attrib<A012>::unitdiag ? 0 : NonUnitDiag ) )};
+        enum { A = (A0 & ~NoDivider & ~CheckAlias) | (
+                ( Attrib<A0>::rowmajor ? 0 : ColMajor ) |
+                ( Attrib<A0>::unitdiag ? 0 : NonUnitDiag ) )};
         enum { okA = (
                 !Attrib<A>::conj &&
                 (Attrib<A>::rowmajor || Attrib<A>::colmajor) &&
@@ -548,10 +547,10 @@ namespace tmv {
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef UpperTriMatrix<T,A0,A1,A2> type;
+        typedef UpperTriMatrix<T,A0> type;
         typedef const type& calc_type;
         typedef const type& eval_type;
-        typedef UpperTriMatrix<T,A012> copy_type;
+        typedef UpperTriMatrix<T,A0> copy_type;
 
         enum { _colsize = Unknown };
         enum { _rowsize = Unknown };
@@ -673,14 +672,12 @@ namespace tmv {
         typedef UpperTriMatrixView<T,An> alias_type;
     };
 
-    template <class T, int A0, int A1, int A2>
+    template <class T, int A>
     class UpperTriMatrix : 
-        public BaseMatrix_Tri_Mutable<UpperTriMatrix<T,A0,A1,A2> >
+        public BaseMatrix_Tri_Mutable<UpperTriMatrix<T,A> >
     {
     public:
-        enum { A = A0 | A1 | A2 };
-
-        typedef UpperTriMatrix<T,A0,A1,A2> type;
+        typedef UpperTriMatrix<T,A> type;
         typedef BaseMatrix_Tri_Mutable<type> base_mut;
         typedef typename Traits<type>::reference reference;
 
@@ -1089,7 +1086,8 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        ~ConstUpperTriMatrixView() {
+        ~ConstUpperTriMatrixView() 
+        {
 #ifdef TMV_EXTRA_DEBUG
             itsm = 0;
 #endif
@@ -1385,7 +1383,8 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        ~UpperTriMatrixView() {
+        ~UpperTriMatrixView() 
+        {
 #ifdef TMV_EXTRA_DEBUG
             itsm = 0;
 #endif
@@ -1467,15 +1466,14 @@ namespace tmv {
 
     }; // UpperTriMatrixView
 
-    template <class T, int A0, int A1, int A2>
-    struct Traits<LowerTriMatrix<T,A0,A1,A2> >
+    template <class T, int A0>
+    struct Traits<LowerTriMatrix<T,A0> >
     {
         typedef typename Traits<T>::real_type real_type;
 
-        enum { A012 = A0 | A1 | A2 };
-        enum { A = (A012 & ~NoDivider & ~CheckAlias) | (
-                ( Attrib<A012>::rowmajor ? 0 : ColMajor ) |
-                ( Attrib<A012>::unitdiag ? 0 : NonUnitDiag ) )};
+        enum { A = (A0 & ~NoDivider & ~CheckAlias) | (
+                ( Attrib<A0>::rowmajor ? 0 : ColMajor ) |
+                ( Attrib<A0>::unitdiag ? 0 : NonUnitDiag ) )};
         enum { okA = (
                 !Attrib<A>::conj &&
                 (Attrib<A>::rowmajor || Attrib<A>::colmajor) &&
@@ -1496,10 +1494,10 @@ namespace tmv {
         enum { isreal = Traits<T>::isreal };
         enum { iscomplex = Traits<T>::iscomplex };
 
-        typedef LowerTriMatrix<T,A0,A1,A2> type;
+        typedef LowerTriMatrix<T,A0> type;
         typedef const type& calc_type;
         typedef const type& eval_type;
-        typedef LowerTriMatrix<T,A012> copy_type;
+        typedef LowerTriMatrix<T,A0> copy_type;
 
         enum { _colsize = Unknown };
         enum { _rowsize = Unknown };
@@ -1621,12 +1619,12 @@ namespace tmv {
         typedef LowerTriMatrixView<T,An> alias_type;
     };
 
-    template <class T, int A0, int A1, int A2>
+    template <class T, int A>
     class LowerTriMatrix : 
-        public BaseMatrix_Tri_Mutable<LowerTriMatrix<T,A0,A1,A2> >
+        public BaseMatrix_Tri_Mutable<LowerTriMatrix<T,A> >
     {
     public:
-        typedef LowerTriMatrix<T,A0,A1,A2> type;
+        typedef LowerTriMatrix<T,A> type;
         typedef BaseMatrix_Tri_Mutable<type> base_mut;
         typedef typename Traits<type>::reference reference;
 
@@ -2035,7 +2033,8 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        ~ConstLowerTriMatrixView() {
+        ~ConstLowerTriMatrixView() 
+        {
 #ifdef TMV_EXTRA_DEBUG
             itsm = 0;
 #endif
@@ -2331,7 +2330,8 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        ~LowerTriMatrixView() {
+        ~LowerTriMatrixView() 
+        {
 #ifdef TMV_EXTRA_DEBUG
             itsm = 0;
 #endif
@@ -2660,9 +2660,9 @@ namespace tmv {
     // Swap
     //
 
-    template <class T, int A0, int A1, int A2>
+    template <class T, int A>
     TMV_INLINE void Swap(
-        UpperTriMatrix<T,A0,A1,A2>& m1, UpperTriMatrix<T,A0,A1,A2>& m2)
+        UpperTriMatrix<T,A>& m1, UpperTriMatrix<T,A>& m2)
     { m1.swapWith(m2); }
     template <class M, class T, int A>
     TMV_INLINE void Swap(
@@ -2677,9 +2677,9 @@ namespace tmv {
         UpperTriMatrixView<T,A1> m1, UpperTriMatrixView<T,A2> m2)
     { DoSwap(m1,m2); }
 
-    template <class T, int A0, int A1, int A2>
+    template <class T, int A>
     TMV_INLINE void Swap(
-        LowerTriMatrix<T,A0,A1,A2>& m1, LowerTriMatrix<T,A0,A1,A2>& m2)
+        LowerTriMatrix<T,A>& m1, LowerTriMatrix<T,A>& m2)
     { m1.swapWith(m2); }
     template <class M, class T, int A>
     TMV_INLINE void Swap(
@@ -2699,54 +2699,54 @@ namespace tmv {
     // Conjugate, Transpose, Adjoint
     //
 
-    template <class T, int A0, int A1, int A2>
-    TMV_INLINE typename UpperTriMatrix<T,A0,A1,A2>::conjugate_type Conjugate(
-        UpperTriMatrix<T,A0,A1,A2>& m)
+    template <class T, int A>
+    TMV_INLINE typename UpperTriMatrix<T,A>::conjugate_type Conjugate(
+        UpperTriMatrix<T,A>& m)
     { return m.conjugate(); }
     template <class T, int A>
     TMV_INLINE typename UpperTriMatrixView<T,A>::conjugate_type Conjugate(
         UpperTriMatrixView<T,A> m)
     { return m.conjugate(); }
 
-    template <class T, int A0, int A1, int A2>
-    TMV_INLINE typename UpperTriMatrix<T,A0,A1,A2>::transpose_type Transpose(
-        UpperTriMatrix<T,A0,A1,A2>& m)
+    template <class T, int A>
+    TMV_INLINE typename UpperTriMatrix<T,A>::transpose_type Transpose(
+        UpperTriMatrix<T,A>& m)
     { return m.transpose(); }
     template <class T, int A>
     TMV_INLINE typename UpperTriMatrixView<T,A>::transpose_type Transpose(
         UpperTriMatrixView<T,A> m)
     { return m.transpose(); }
 
-    template <class T, int A0, int A1, int A2>
-    TMV_INLINE typename UpperTriMatrix<T,A0,A1,A2>::adjoint_type Adjoint(
-        UpperTriMatrix<T,A0,A1,A2>& m)
+    template <class T, int A>
+    TMV_INLINE typename UpperTriMatrix<T,A>::adjoint_type Adjoint(
+        UpperTriMatrix<T,A>& m)
     { return m.adjoint(); }
     template <class T, int A>
     TMV_INLINE typename UpperTriMatrixView<T,A>::adjoint_type Adjoint(
         UpperTriMatrixView<T,A> m)
     { return m.adjoint(); }
 
-    template <class T, int A0, int A1, int A2>
-    TMV_INLINE typename LowerTriMatrix<T,A0,A1,A2>::conjugate_type Conjugate(
-        LowerTriMatrix<T,A0,A1,A2>& m)
+    template <class T, int A>
+    TMV_INLINE typename LowerTriMatrix<T,A>::conjugate_type Conjugate(
+        LowerTriMatrix<T,A>& m)
     { return m.conjugate(); }
     template <class T, int A>
     TMV_INLINE typename LowerTriMatrixView<T,A>::conjugate_type Conjugate(
         LowerTriMatrixView<T,A> m)
     { return m.conjugate(); }
 
-    template <class T, int A0, int A1, int A2>
-    TMV_INLINE typename LowerTriMatrix<T,A0,A1,A2>::transpose_type Transpose(
-        LowerTriMatrix<T,A0,A1,A2>& m)
+    template <class T, int A>
+    TMV_INLINE typename LowerTriMatrix<T,A>::transpose_type Transpose(
+        LowerTriMatrix<T,A>& m)
     { return m.transpose(); }
     template <class T, int A>
     TMV_INLINE typename LowerTriMatrixView<T,A>::transpose_type Transpose(
         LowerTriMatrixView<T,A> m)
     { return m.transpose(); }
 
-    template <class T, int A0, int A1, int A2>
-    TMV_INLINE typename LowerTriMatrix<T,A0,A1,A2>::adjoint_type Adjoint(
-        LowerTriMatrix<T,A0,A1,A2>& m)
+    template <class T, int A>
+    TMV_INLINE typename LowerTriMatrix<T,A>::adjoint_type Adjoint(
+        LowerTriMatrix<T,A>& m)
     { return m.adjoint(); }
     template <class T, int A>
     TMV_INLINE typename LowerTriMatrixView<T,A>::adjoint_type Adjoint(
@@ -2758,10 +2758,9 @@ namespace tmv {
     // TMV_Text 
     //
 
-    template <class T, int A0, int A1, int A2>
-    inline std::string TMV_Text(const UpperTriMatrix<T,A0,A1,A2>& m)
+    template <class T, int A>
+    inline std::string TMV_Text(const UpperTriMatrix<T,A>& m)
     {
-        const int A = A0 | A1 | A2;
         std::ostringstream s;
         s << "UpperTriMatrix<"<<TMV_Text(T());
         s << ","<<Attrib<A>::text()<<">";
@@ -2792,10 +2791,9 @@ namespace tmv {
         return s.str();
     }
 
-    template <class T, int A0, int A1, int A2>
-    inline std::string TMV_Text(const LowerTriMatrix<T,A0,A1,A2>& m)
+    template <class T, int A>
+    inline std::string TMV_Text(const LowerTriMatrix<T,A>& m)
     {
-        const int A = A0 | A1 | A2;
         std::ostringstream s;
         s << "LowerTriMatrix<"<<TMV_Text(T());
         s << ","<<Attrib<A>::text()<<">";

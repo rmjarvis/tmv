@@ -338,10 +338,10 @@ static void TestSquareDiv(tmv::DivType dt)
 
     TestMatrixDivArith2(dt,a1v,a2v,c1v,c2v,"Square"); 
 #if (XTEST & 32)
-    tmv::Matrix<T,stor,tmv::FortranStyle> a1f = a1;
-    tmv::Matrix<T,stor,tmv::FortranStyle> a2f = a2;
-    tmv::Matrix<std::complex<T>,stor,tmv::FortranStyle> c1f = c1;
-    tmv::Matrix<std::complex<T>,stor,tmv::FortranStyle> c2f = c2;
+    tmv::Matrix<T,stor|tmv::FortranStyle> a1f = a1;
+    tmv::Matrix<T,stor|tmv::FortranStyle> a2f = a2;
+    tmv::Matrix<std::complex<T>,stor|tmv::FortranStyle> c1f = c1;
+    tmv::Matrix<std::complex<T>,stor|tmv::FortranStyle> c2f = c2;
     tmv::MatrixView<T,tmv::WithDivider|tmv::FortranStyle> a1fv = a1f.view();
     tmv::MatrixView<T,tmv::WithDivider|tmv::FortranStyle> a2fv = a2f.view();
     tmv::MatrixView<std::complex<T>,tmv::WithDivider|tmv::FortranStyle> c1fv = 
@@ -606,7 +606,7 @@ static void TestNonSquareDiv(tmv::DivType dt)
     // Test QR Update/Downdate:
 
     tmv::Matrix<std::complex<T>,stor> q30 = a;
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag,stor> r30(10);
+    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag|stor> r30(10);
     QR_Decompose(q30.view(),r30.view());
     Assert(Norm(q30*r30-a) < eps*Norm(a),"QR_Decompose");
     Assert(Norm(r30.adjoint()*r30-a.adjoint()*a) < eps*r30.normSq(),
@@ -645,7 +645,7 @@ static void TestNonSquareDiv(tmv::DivType dt)
     rx = r10;
 
     tmv::Matrix<std::complex<T>,stor> q29 = a.rowRange(0,29);
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag,stor> r29(10,10);
+    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag|stor> r29(10,10);
     QR_Decompose(q29.view(),r29.view());
     tmv::Vector<std::complex<T> > a29 = a.row(29);
     rx = r30;
@@ -662,7 +662,7 @@ static void TestNonSquareDiv(tmv::DivType dt)
     // Test with some identical eigenvalues.
     // First make an arbitrary unitary matrix:
     tmv::Matrix<std::complex<T>,stor> q = a;
-    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag,stor> r(10);
+    tmv::UpperTriMatrix<std::complex<T>,tmv::NonUnitDiag|stor> r(10);
     q.divideUsing(dt);
     q.saveDiv();
     QR_Decompose(q.view(),r.view());

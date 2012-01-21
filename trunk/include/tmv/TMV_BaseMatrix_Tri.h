@@ -21,26 +21,26 @@ namespace tmv {
     template <class M>
     class BaseMatrix_Tri_Mutable;
 
-    template <class T, int A=0, int A1=0, int A2=0>
+    template <class T, int A=0>
     class UpperTriMatrix;
     template <class T, int A=0>
     class ConstUpperTriMatrixView;
     template <class T, int A=0>
     class UpperTriMatrixView;
-    template <class T, int N, int A=0, int A1=0, int A2=0>
+    template <class T, int N, int A=0>
     class SmallUpperTriMatrix;
     template <class T, int N, int Si=Unknown, int Sj=Unknown, int A=0>
     class ConstSmallUpperTriMatrixView;
     template <class T, int N, int Si=Unknown, int Sj=Unknown, int A=0>
     class SmallUpperTriMatrixView;
 
-    template <class T, int A=0, int A1=0, int A2=0>
+    template <class T, int A=0>
     class LowerTriMatrix;
     template <class T, int A=0>
     class ConstLowerTriMatrixView;
     template <class T, int A=0>
     class LowerTriMatrixView;
-    template <class T, int N, int A=0, int A1=0, int A2=0>
+    template <class T, int N, int A=0>
     class SmallLowerTriMatrix;
     template <class T, int N, int Si=Unknown, int Sj=Unknown, int A=0>
     class ConstSmallLowerTriMatrixView;

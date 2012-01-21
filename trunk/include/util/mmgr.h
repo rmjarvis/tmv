@@ -31,47 +31,47 @@ typedef	struct tag_au
 	void		*reportedAddress;
 	char		sourceFile[40];
 	char		sourceFunc[40];
-	unsigned int	sourceLine;
-	unsigned int	allocationType;
+	size_t	sourceLine;
+	size_t	allocationType;
 	bool		breakOnDealloc;
 	bool		breakOnRealloc;
-	unsigned int	allocationNumber;
+	size_t	allocationNumber;
 	struct tag_au	*next;
 	struct tag_au	*prev;
 } sAllocUnit;
 
 typedef	struct
 {
-	unsigned int	totalReportedMemory;
-	unsigned int	totalActualMemory;
-	unsigned int	peakReportedMemory;
-	unsigned int	peakActualMemory;
-	unsigned int	accumulatedReportedMemory;
-	unsigned int	accumulatedActualMemory;
-	unsigned int	accumulatedAllocUnitCount;
-	unsigned int	totalAllocUnitCount;
-	unsigned int	peakAllocUnitCount;
+	size_t	totalReportedMemory;
+	size_t	totalActualMemory;
+	size_t	peakReportedMemory;
+	size_t	peakActualMemory;
+	size_t	accumulatedReportedMemory;
+	size_t	accumulatedActualMemory;
+	size_t	accumulatedAllocUnitCount;
+	size_t	totalAllocUnitCount;
+	size_t	peakAllocUnitCount;
 } sMStats;
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 // External constants
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-extern	const	unsigned int	m_alloc_unknown;
-extern	const	unsigned int	m_alloc_new;
-extern	const	unsigned int	m_alloc_new_array;
-extern	const	unsigned int	m_alloc_malloc;
-extern	const	unsigned int	m_alloc_calloc;
-extern	const	unsigned int	m_alloc_realloc;
-extern	const	unsigned int	m_alloc_delete;
-extern	const	unsigned int	m_alloc_delete_array;
-extern	const	unsigned int	m_alloc_free;
+extern	const	size_t	m_alloc_unknown;
+extern	const	size_t	m_alloc_new;
+extern	const	size_t	m_alloc_new_array;
+extern	const	size_t	m_alloc_malloc;
+extern	const	size_t	m_alloc_calloc;
+extern	const	size_t	m_alloc_realloc;
+extern	const	size_t	m_alloc_delete;
+extern	const	size_t	m_alloc_delete_array;
+extern	const	size_t	m_alloc_free;
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 // Used by the macros
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-void		m_setOwner(const char *file, const unsigned int line, const char *func);
+void		m_setOwner(const char *file, const size_t line, const char *func);
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 // Allocation breakpoints
@@ -84,12 +84,12 @@ bool		&m_breakOnDealloc(void *reportedAddress);
 // The meat of the memory tracking software
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-void		*m_allocator(const char *sourceFile, const unsigned int sourceLine, const char *sourceFunc,
-			     const unsigned int allocationType, const size_t reportedSize);
-void		*m_reallocator(const char *sourceFile, const unsigned int sourceLine, const char *sourceFunc,
-			       const unsigned int reallocationType, const size_t reportedSize, void *reportedAddress);
-void		m_deallocator(const char *sourceFile, const unsigned int sourceLine, const char *sourceFunc,
-			      const unsigned int deallocationType, const void *reportedAddress);
+void		*m_allocator(const char *sourceFile, const size_t sourceLine, const char *sourceFunc,
+			     const size_t allocationType, const size_t reportedSize);
+void		*m_reallocator(const char *sourceFile, const size_t sourceLine, const char *sourceFunc,
+			       const size_t reallocationType, const size_t reportedSize, void *reportedAddress);
+void		m_deallocator(const char *sourceFile, const size_t sourceLine, const char *sourceFunc,
+			      const size_t deallocationType, const void *reportedAddress);
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 // Utilitarian functions
@@ -103,8 +103,8 @@ bool		m_validateAllAllocUnits();
 // Unused RAM calculations
 // ---------------------------------------------------------------------------------------------------------------------------------
 
-unsigned int	m_calcUnused(const sAllocUnit *allocUnit);
-unsigned int	m_calcAllUnused();
+size_t	m_calcUnused(const sAllocUnit *allocUnit);
+size_t	m_calcAllUnused();
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 // Logging and reporting
@@ -113,6 +113,7 @@ unsigned int	m_calcAllUnused();
 void		m_dumpAllocUnit(const sAllocUnit *allocUnit, const char *prefix = "");
 void		m_dumpMemoryReport(const char *filename = "memreport.log", const bool overwrite = true);
 sMStats		m_getMemoryStatistics();
+void		m_extra_log(const char *text);
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 // Variations of global operators new & delete
