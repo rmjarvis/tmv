@@ -408,7 +408,6 @@ static void TestSmallVectorArith()
     TestVectorArith2(a,ca,bf,cbf,"SmallVector CF");
     TestVectorArith2(af,caf,b,cb,"SmallVector FC");
 
-#ifndef NOMIX_SMALL
     tmv::VectorView<T> av = a.view();
     tmv::VectorView<CT > cav = ca.view();
     tmv::VectorView<T> bv = b.view();
@@ -416,7 +415,6 @@ static void TestSmallVectorArith()
 
     TestVectorArith2(av,cav,b,cb,"SmallVector/Vector");
     TestVectorArith2(a,ca,bv,cbv,"Vector/SmallVector");
-#endif
 }
 
 template <class T> 

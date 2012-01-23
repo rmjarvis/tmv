@@ -87,8 +87,7 @@ int main() try
   //! (  2.22045e-16  -2.22045e-16  -2.22045e-16  1  )
   // This is a case where it can be useful to see the 
   // matrix elements that are larger than some threshold value:
-  std::cout<<"Ainv*A = \n";
-  (A2inv*A2).write(std::cout,1.e-8);
+  std::cout<<"Ainv*A = \n" << tmv::ThreshIO(1.e-8) << (A2inv*A2) << std::endl;
   //! Ainv*A = 
   //! 4  4
   //! (  1  0  0  0  )

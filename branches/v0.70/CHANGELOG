@@ -25,9 +25,16 @@ probably less of an issue for most people, but you should look through
 this file carefully to see if any other changes might require some
 of your code to be modified.  It might be a bit of work to covert your 
 code to this version, and I apologize for that, but my hope is that the 
-UI will be pretty stable after this release.  I don't foresee any other
-big changes to the UI coming down the pike, even with the upcoming 
-redesigned back end that I've been advertising for a while now.
+UI will be pretty stable after this release.
+
+The only other big change in the UI that I think is coming is that I'm 
+planning on getting rid of the "Gen" classes as base classes to
+the various matrix and vector classes.  But the workarounds for that 
+change don't apply yet, so I have to hold off on describing that change
+until I release the version with the redesigned back end.
+(I know I've been advertising the redesign for a while now.
+It might be ready sometime in the next year, I hope.)
+
 
 Changed and Deprecated features:
 
@@ -134,6 +141,38 @@ Changed and Deprecated features:
    this release does not have any new functionality with respect to the
    attributes.  It only effects the change in the UI.
    
+- Removed the functions read, write and writeCompact, and replaced them 
+   with a more streamlined I/O interface. Now there are objects that act 
+   like stream manipulators to control how the next TMV object should be 
+   written or read:
+
+   os << m;
+   os << tmv::CompactIO() << m;
+   os << tmv::ThreshIO(1.e-8) << m;
+   is >> m;
+   is >> tmv::CompactIO() >> m;
+
+   The first line outputs the matrix in the same format as previous versions 
+   used.  This format is the same regardless of whether it is a regular 
+   Matrix or one of the special varieties.  
+
+   The next line replaces the old command m.writeCompact(os).  I also changed 
+   the "compact" style to be more compact than before (which means that it is 
+   not backwards compatible with files written by older versions of TMV). 
+
+   The third line replaces the old m.write(os,1.e-8) to clip all small values 
+   to 0, which is useful when rounding errors are expected to produce many 
+   values near 0.  
+
+   And the last two lines show how to read the matrix in either regular or 
+   compact format.  This is also not backwards compatible with old code, since 
+   is >> m used to implicitly expect compact format for the special matrix 
+   varieties.  Now special matrices can be read in either format, and the 
+   compact style needs to be explicitly specified.  
+
+   There is a lot more to the new I/O style than just these.  See the
+   documentation for details about the new features.
+
 -- Removed the auto_ptr read functions.  This notation was cumbersome,
    and since all matrices can be resized now (feature added in v0.65),
    there is no need for it anymore.  The auto_ptr was really just a 
@@ -151,24 +190,7 @@ Changed and Deprecated features:
    [... Use matrix as m ... ]
 
 -- Changed the compact I/O style. Now there are no parentheses,
-   and all the elements are on one line.  The order of the elements is the 
-   same as for the below (new) comma-initialization.  i.e. the rowmajor
-   order of all elements in the band or upper triangle or whatever shape
-   matrix we are reading/writing.
-
--- Removed the functions read, write and writeCompact, and replaced them 
-   with a more streamlined I/O interface. Now there are objects that act 
-   like stream manipulators to control how the next TMV object should be 
-   written or read:
-
-   os << m;
-   os << tmv::CompactIO() << m;
-   os << tmv::ThreshIO(1.e-8) << m;
-   is >> m;
-   is >> tmv::CompactIO() >> m;
-
-   There is a lot more to the new I/O style than just these.  See the
-   documentation for details about the new features.
+   and all the elements are on one line.
 
 -- Removed the ElementProd and AddElementProd functions.
    The equivalent behavior is now done with a new operator ElemProd(a,b)
@@ -224,11 +246,12 @@ Changed and Deprecated features:
    are nonnegative, rather than trying to allocate the incorrectly huge 
    amount of memory.  This seems like safer behavior.
 
-   The only other place where this might matter is that the return type o
-   f functions like m.colsize() now return an int rather than a size_t.  
-   So if you do any comparisons like while(i < m.colsize()) and you compile 
-   with g++ -Wall, you'll want i to be a signed integer type to avoid g++'s 
-   warning about comparing signed and unsigned types.
+   The only other place where this might matter is that the return type of
+   functions like m.colsize() now return an int rather than a size_t.  
+   So if you do any comparisons with one of these values, such as 
+   while(i < m.colsize()) and you compile with g++ -Wall, you'll want i 
+   to be a signed integer type to avoid g++'s warning about comparing 
+   signed and unsigned types.
 
 -- Changed the svd().getV() method to svd().getVt() to conform to the 
    usual definition of the SVD: A = U * S * Vt.  The underlying matrix
@@ -237,6 +260,28 @@ Changed and Deprecated features:
    of the SVD, I'm admitting the point that _everyone_ else seems
    to use this definition.  So no point in me trying to get TMV users
    to use my preferred definition: A = U * S * V.
+
+-- Changed what "const" in front of a VectorView, MatrixView, etc. means 
+   for the mutability of the view.  Now a const VectorView works the same 
+   as a ConstVectorView.  That is, it is no longer able to modify the 
+   underlying data.
+
+   The main way this might impact some users is if you have written a 
+   function that can take a mutable View object as a parameter, you 
+   should not pass it by const reference anymore.  You should pass it by 
+   value instead now.  E.g.
+
+   void DoSomethingTo(VectorView<double> v);
+
+   rather than
+
+   void DoSomethingTo(const VectorView<double>& v);
+
+   Then code like
+
+   DoSomethingTo(m.row(3));
+
+   will still work as before.
 
 -- Changed the default behavior to not output warnings.  To turn it on,
    you need to explicitly use tmv::WriteWarningsTo(&std::cerr) (or whatever
@@ -344,8 +389,23 @@ New features:
 
 Bug fixes:
 
+-- Added <cstddef> to TMV's includes.
+   This is required by g++ 4.6 for the ptrdiff_t type.
+
 -- Added support for the clang++ compiler.  This didn't require much editing, 
    but it did complain about a couple things that had passed muster with the 
    other compilers I had used.
+
+-- Fixed an error in the TMV_VERSION_AT_LEAST marco.  The old version was
+   actually backwards. i.e. it returned whether the library's version was
+   equal to or _earlier_ than the provided values, rather than equal or later.
+   The workaround if you need to check versions before 0.70 is to use
+   #if TMV_MINOR_VERSION >= 70 
+   to correctly exclude v0.65 and earlier versions, rather than 
+   #if TMV_VERSION_AT_LEAST(0,70)
+   which will incorrectly allow v0.65 and earlier through.  This workaround
+   will work until the TMV_MAJOR_VERSION value jumps up to 1, at which
+   point hopefully nobody will need to be checking for versions earlier than
+   v0.70 anyway.
 
 

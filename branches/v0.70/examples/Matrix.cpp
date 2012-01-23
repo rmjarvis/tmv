@@ -41,8 +41,10 @@ int main() try
   //! (  2  2  2  )
 
   // Create from given elements in a C array;
-  double mm[12] = {1,2,3,4, 5,6,7,8, 9,10,11,12};
-  tmv::Matrix<double> m3(4,3,mm); // Default order is ColMajor
+  // First in column major order:
+  double mm[12] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+  tmv::Matrix<double,tmv::ColMajor> m3(4,3); 
+  std::copy(mm,mm+12,m3.colmajor_begin());
   std::cout<<"m3 (ColMajor) = \n"<<m3<<std::endl;
   //! m3 (ColMajor) = 
   //! 4  3
@@ -51,9 +53,11 @@ int main() try
   //! (  3  7  11  )
   //! (  4  8  12  )
 
-  tmv::Matrix<double,tmv::RowMajor> m4(4,3,mm);
-  std::cout<<"m4 (RowMajor) = \n"<<m4<<std::endl;
-  //! m4 (RowMajor) = 
+  // Can also iterate in row major order, even if the matrix is
+  // declared to be ColMajor:
+  std::copy(mm,mm+12,m3.rowmajor_begin());
+  std::cout<<"m3 (RowMajor) = \n"<<m3<<std::endl;
+  //! m3 (RowMajor) = 
   //! 4  3
   //! (  1  2  3  )
   //! (  4  5  6  )
@@ -61,38 +65,27 @@ int main() try
   //! (  10  11  12  )
 
   // Initialize with comma-delimited list.
-  // Note that this is more intuitive with RowMajor Storage
-  m3 <<
-      2, -5,  1, -3, 
-     -4,  8, -7,  1,
-     -1,  2,  4,  0;
-  std::cout<<"m3 (ColMajor) => \n"<<m3<<std::endl;
-  //! m3 (ColMajor) => 
-  //! 4  3
-  //! (  2  -4  -1  )
-  //! (  -5  8  2  )
-  //! (  1  -7  4  )
-  //! (  -3  1  0  )
-
+  tmv::Matrix<double,tmv::RowMajor> m4(4,3); 
   m4 <<
       2, -4,  1,
      -5,  8,  2,
       1, -7,  4,
      -3,  1,  0;
-  std::cout<<"m4 (RowMajor) => \n"<<m4<<std::endl;
-  //! m4 (RowMajor) => 
+  std::cout<<"m4 = \n"<<m4<<std::endl;
+  //! m4 = 
   //! 4  3
   //! (  2  -4  1  )
   //! (  -5  8  2  )
   //! (  1  -7  4  )
   //! (  -3  1  0  )
-
-  // Create from STL vector of vectors
-  std::vector<std::vector<double> > mm2(3,std::vector<double>(3));
-  for(size_t i=0;i<3;i++) 
-    for(size_t j=0;j<3;j++) 
-      mm2[i][j] = 2.*i+j-3.*i*j;
-  tmv::Matrix<double> m5(mm2); 
+  
+  // The elements are always taken to be listed in row-major order, 
+  // even if the matrix is declared as ColMajor:
+  tmv::Matrix<double,tmv::ColMajor> m5(3,3); 
+  m5 <<
+      0,  1,  2, 
+      2,  0, -2,
+      4, -1, -6;
   std::cout<<"m5 = \n"<<m5<<std::endl;
   //! m5 = 
   //! 3  3
@@ -106,12 +99,6 @@ int main() try
   std::cout<<"Norm1(m1) = "<<Norm1(m1)<<std::endl;
   //! Norm1(m1) = 52
   std::cout<<"Norm2(m1) = "<<Norm2(m1)<<std::endl;
-  //! Norm2(m1) = Warning:
-  //! Calling Matrix::Norm2 without previously calling DivideUsing(SV)
-  //! 36.452
-  // This is potentially inefficient, especially for large matrices.
-  // To avoid the warning, you can use:
-  std::cout<<"m1.doNorm2() = "<<m1.doNorm2()<<std::endl;
   //! Norm2(m1) = 36.452
   std::cout<<"NormInf(m1) = "<<NormInf(m1)<<std::endl;
   //! NormInf(m1) = 39
@@ -195,7 +182,7 @@ int main() try
 
   // Fortran Indexing:
 
-  tmv::Matrix<double,tmv::ColMajor,tmv::FortranStyle> fm1 = m1;
+  tmv::Matrix<double,tmv::FortranStyle> fm1 = m1;
   std::cout<<"fm1 = m1 = \n"<<fm1<<std::endl;
   //! fm1 = m1 = 
   //! 4  3

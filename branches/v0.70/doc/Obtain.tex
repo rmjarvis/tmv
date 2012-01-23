@@ -53,19 +53,13 @@ in the top directory.
 It is available for free from \url{http://www.scons.org/}.  (It is a
 very quick installation if you have Python installed.)
 
-With the version 0.62 release of TMV, I introduced a new installation method using SCons.  
-For that 
-release it was considered an alternative method, since it was brand new.  It has worked very well and has allowed very nice automatic behavior as far as finding BLAS libraries on your system fairly painlessly.  
-SCons has worked well on every system I've used it on, and since nobody has mentioned having any significant problems with it, I'm making it the only supported installation method starting with version 0.70.
-
-If you have do have any trouble installing with SCons, please let me know about 
-the problem you are having either at \mygroup\ or \myissues.
-
 \end{enumerate}
 
 \subsection{Installing the TMV library}
-\label{Install}
+\label{Install_Install}
 \index{Installation}
+
+\begin{enumerate}
 
 \item Type \\
 \texttt{scons [Optional flags -- see below]}
@@ -218,7 +212,7 @@ supports it.  So the default is to use the flag \texttt{-msse2}, but you can dis
 is treated as a bit set, with each non-zero bit turning on particular tests.  Type ``\tt{scons -h}'' for 
 more information.
 \item \texttt{MEM\_TEST=false} specifies whether to include extra memory tests in the library and test suite.
-\item \texttt{USE\_STEGR=true} specifies whether to use the LAPACK algorithm called
+\item \texttt{USE\_STEGR=false} specifies whether to use the LAPACK algorithm called
 \tt{dstegr} (or \tt{sstegr} for \tt{<float>}) for symmetric
 eigenvector calculation.  If it is false, the divide-and-conquer algorithm,
 named \tt{dstedc} (or \tt{sstedc}) will be used instead.
@@ -226,6 +220,9 @@ named \tt{dstedc} (or \tt{sstedc}) will be used instead.
 \index{Eigenvalues!LAPACK ?stegr}
 \index{Warnings!LAPACK ?stegr}
 \index{LAPACK!dstegr/sstegr issues}
+
+I've had trouble with the LAPACK \tt{?stegr} algorithms on a number of systems.  Mostly, it doesn't always deal with \tt{nan}'s and \tt{inf}'s very well.  The documentation for it says:
+{\sc ?stegr works only on machines which follow IEEE-754 floating-point standard in their handling of infinities and NaNs. Normal execution of ?stegr may create NaNs and infinities and hence may abort due to a floating point exception in environments which do not conform to the IEEE-754 standard.}  I haven't had any aborts, just things like \tt{nan}s in the output and such, but I guess these systems must not conform to IEEE-754.  If you think your system is conforming, and you want to enable \tt{stegr}, go ahead and set \tt{USE_STEGR} to \tt{true}.
 \item
 \texttt{USE\_GEQP3=true} specifies whether to use the LAPACK algorithm called
 \tt{dgeqp3} (or its variants) for the strict QRP decomposition.  If it is false,
@@ -235,13 +232,9 @@ the native TMV code will be used instead.
 \item \texttt{SMALL\_TESTS=false} specifies whether to make the smaller test suite programs: \texttt{tmvtest1a}, \texttt{tmvtest1b}, etc. 
 \item \texttt{WARN=false} specifies whether to have the compiler report warning (with -Wall or
 something similar).
-\item \texttt{NOMIX\_SMALL=false} specifies whether to avoid mixing Small and regular arithmetic.  
-(This is automatically selected if GotoBLAS is being used.)
 \item \texttt{CACHE\_LIB=true} specifies whether to cache the results of the library checks.  
-Scons is pretty good at only recompiling what needs to be recompiled based on what options or files you have changed.  However, it is not good at detecting when changed options might change the results of a BLAS or LAPACK library check.  So if you add new paths for it to search, or even more so, if you change the names or locations of libraries on your system, then you should set \tt{CACHE\_LIB=false} to force scons to redo the BLAS and LAPACK checks each time.
-\item \texttt{WITH\_UPS=false} specifies whether to install TMV information for ups into the \tt{PREFIX/ups} directory.
-\item \texttt{TEST\_DEPRECATED=false} specifies whether to use the old deprecated method
-names in the test suite.
+Scons is pretty good at only recompiling what needs to be recompiled based on what options or files you have changed.  However, it is not good at detecting when changed options might change the results of a BLAS or LAPACK library check.  So if you add new paths for it to search, or even moreso, if you change the names or locations of libraries on your system, then you should set \tt{CACHE\_LIB=false} to force scons to redo the BLAS and LAPACK checks each time.
+\item \texttt{WITH\_UPS=false} specifies whether to install TMV information for \tt{ups} into the \tt{PREFIX/ups} directory.
 \end{itemize}
 
 When SCons starts up, it will look through the standard paths, along with any extra paths you have
@@ -341,8 +334,8 @@ computer so that you can automatically get the linkage correct according to what
 you decide to use when installing TMV.  This is especially useful on systems where a
 system administrator installs the library, which is then used by many users.  
 
-You can have your makefiles or SConstruct files read this file as described above.
-The \tt{examples} directory has a makefile that uses the above lines
+You can have your \tt{makefile}s or \tt{SConstruct} files read this file as described above.
+The \tt{examples} directory has a \tt{makefile} that uses the above lines
 (using the local \tt{share} directory rather than the installed location)
 that you can look at as a example.
 
@@ -373,7 +366,7 @@ called \texttt{tmv\tmvversion} which has all of the source code and other files 
 Start Microsoft Visual C++.  
 
 I have Visual C++ 2008 Express Edition, so all instructions below
-about menus and such refer that that edition.  I would assume that other editions have their 
+about menus and such refer that that edition.  Other editions probably have their 
 menus arranged similarly, but there may be some differences.
 
 \item
@@ -531,13 +524,13 @@ you can automatically use whatever BLAS libraries
 TMV found and compiled against by reading the file
 \tt{/usr/local/share/tmv-link} (or \tt{PREFIX/share/tmv-link}) and using that
 for your linking flags.  
-You can use this file in a makefile by writing 
+You can use this file in a \tt{makefile} by writing 
 something like the following:
 \begin{verbatim}
 TMVLINK := $(shell cat /usr/local/share/tmv-link)
 LIBS = $(TMVLINK) [... other libs ...]
 \end{verbatim}
-Or if you are using SConstruct, you can do something like
+Or in a \tt{SConstruct} file, you can do something like
 \begin{verbatim}
 env.MergeFlags(open('/usr/local/share/tmv-link').read())
 \end{verbatim}

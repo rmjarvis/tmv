@@ -671,27 +671,23 @@ Invalid for \tt{T = complex<int>}.
 \begin{tmvcode}
 RT m.norm2() const
 RT Norm2(m)
-RT m.doNorm2() const
 \end{tmvcode}
 \index{Matrix!Methods!norm2}
-\index{Matrix!Methods!doNorm2}
 \index{Matrix!Functions of!Norm2}
 The 2-norm of \tt{m}: $||m||_2 =$ the largest singular value of $m$, which
 is also the square root of the largest eigenvalue of $(m^\dagger m)$.  
 
 This function can be fairly expensive if you have not
-already performed an SV decomposition of \tt{m}, so the first two versions
-output a warning to \tt{stdout} if there is no SV decomposition already set.
+already performed an SV decomposition of \tt{m}.  If you are using 
+\tt{SV} for division (using \tt{DivideUsing(tmv::SV)}), and the decomposition
+has already been performed, then this function will be very fast, since it
+can use the existing decomposition.  
 
-If you understand that you are asking TMV to perform an SV decomposition
-to calculate $||m||_2$, and you are ok with it, you can either change the warning
-behavior -- see \S\ref{Warnings} for how to do this --
-or you can just call \tt{doNorm2()} instead, which will do the 
-necessary SV decomposition without any warnings.
-
-In fact, if you are not going to need the decomposition for anything else,
-then \tt{m.doNorm2()} will be faster than \tt{m.svd(), m.norm2()}, because the 
-former will not bother to accumulate the singular vectors.
+If you are not using \tt{SV} for division, then this function is fairly
+expensive, scaling as $O(N^3)$, rather than $O(N^2)$ like most other norms.
+However, it won't bother accumulating the singular vectors, so it will 
+be significantly faster than doing the full decomposition that would be
+used for division.
 
 Invalid for \tt{T = int} or \tt{complex<int>}.
 

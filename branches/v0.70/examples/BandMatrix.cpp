@@ -49,8 +49,9 @@ int main() try
   //!  (  0  0  0  0  2  2  2  2  )
 
   // Create from given elements:
-  double mm[21] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21};
-  tmv::BandMatrix<double> m4(6,6,2,1,mm); // Default order is ColMajor
+  double mm[20] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+  tmv::BandMatrix<double,tmv::ColMajor> m4(6,6,2,1);
+  std::copy(mm,mm+20,m4.colmajor_begin());
   std::cout<<"m4 (ColMajor) = \n"<<m4<<std::endl;
   //!  m4 (ColMajor) = 
   //!  6 6
@@ -60,7 +61,8 @@ int main() try
   //!  (  0  7  10  13  16  0  )
   //!  (  0  0  11  14  17  20  )
   //!  (  0  0  0  15  18  21  )
-  tmv::BandMatrix<double,tmv::RowMajor> m5(6,6,2,1,mm);
+  tmv::BandMatrix<double,tmv::RowMajor> m5(6,6,2,1);
+  std::copy(mm,mm+20,m5.rowmajor_begin());
   std::cout<<"m5 (RowMajor) = \n"<<m5<<std::endl;
   //!  m5 (RowMajor) = 
   //!  6 6
@@ -70,7 +72,8 @@ int main() try
   //!  (  0  11  12  13  14  0  )
   //!  (  0  0  15  16  17  18  )
   //!  (  0  0  0  19  20  21  )
-  tmv::BandMatrix<double,tmv::DiagMajor> m6(6,6,2,1,mm);
+  tmv::BandMatrix<double,tmv::DiagMajor> m6(6,6,2,1);
+  std::copy(mm,mm+20,m6.diagmajor_begin());
   std::cout<<"m6 (DiagMajor) = \n"<<m6<<std::endl;
   //!  m6 (DiagMajor) = 
   //!  6 6
@@ -149,11 +152,7 @@ int main() try
   std::cout<<"Norm1(m1) = "<<Norm1(m1)<<std::endl;
   //!  Norm1(m1) = 30
   std::cout<<"Norm2(m1) = "<<Norm2(m1)<<std::endl;
-  //!  Norm2(m1) = Warning:
-  //!  Calling BandMatrix::Norm2 without previously calling DivideUsing(SV)
-  //!  24.0314
-  std::cout<<"m1.doNorm2() = "<<m1.doNorm2()<<std::endl;
-  //!  m1.doNorm2() = 24.0314
+  //!  Norm2(m1) = 24.0314
   std::cout<<"NormInf(m1) = "<<NormInf(m1)<<std::endl;
   //!  NormInf(m1) = 28
   std::cout<<"NormF(m1) = "<<NormF(m1)<<" = "<<Norm(m1)<<std::endl;
@@ -239,7 +238,7 @@ int main() try
 
   // Fortran Indexing:
 
-  tmv::BandMatrix<double,tmv::ColMajor,tmv::FortranStyle> fm1 = m1;
+  tmv::BandMatrix<double,tmv::FortranStyle> fm1 = m1;
   std::cout<<"fm1 = m1 = \n"<<fm1<<std::endl;
   //!  fm1 = m1 = 
   //!  6 6

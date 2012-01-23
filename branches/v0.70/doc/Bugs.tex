@@ -11,14 +11,32 @@
 
 I have tested the code using the following compilers:\\
 $\quad$\\
-GNU's g++ -- versions 3.4.6, 4.1.2, 4.3.3, 4.4.4 and 4.5.0 \\
-% chimaera, bach, susi g++-4.3.3, Flute g++-fsf-4.4 Flute g++-4
+% Done:
+% Flute: clang++ 3.1 NO BLAS
+% Flute: Apple g++ 4.0.1 NO BLAS
+% Flute: Apple g++ 4.2.1 NO BLAS
+% Flute: g++ 4.4.6 NO BLAS
+% Flute: g++ 4.5.3 NO BLAS
+% Flute: g++ 4.6.2 NO BLAS, GOTO2
+% bnl: g++ 4.3.2 FBLAS, NO BLAS
+% bnl: g++ 4.1.2 NO BLAS
+% apu: icpc 10.1 MKL BLAS, MKL LAPACK
+% chimaera: pgCC 6.1 NO BLAS ACML LAPACK
+% chimaera: g++ 3.4.6 NO BLAS, ATLAS+FLAPACK, 
+% queenbee: icpc 11.1 FBLAS, MKL BLAS, MKL LAPACK
+% queenbee: g++ 3.4.6 MKL LAPACK 
+% susi: g++ 4.4.5 NO BLAS
+% 
+GNU's g++ -- versions 3.4.6, 4.1.2, 4.3.2, 4.4.6, 4.5.3, 4.6.2 \\
+% chimaera, bach g++41, bach g++, Flute g++-fsf-4.4, Flute g++-fsf-4.5, Flute g++-fsf-4.6
 Apple's g++ -- version 4.0.1, 4.2.1 \\
-% Flute g++-4.0, g++
-Intel's icpc -- versions 10.1, 11.1\\
-% apu, abe
+% Flute g++-4.0, g++-4.2
+Intel's icpc -- versions 10.1, 11.1, 12.0\\
+% apu, queenbee, susi
 Portland's pgCC -- version 6.1\\
 % chimaera
+LLVM's clang++ -- version 3.1\\
+% Flute
 Microsoft's cl -- Visual C++ 2008 Express Edition\\
 % Sousaphone
 \index{Installation!g++}

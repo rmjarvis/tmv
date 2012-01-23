@@ -47,7 +47,8 @@ int main() try
   // Create from given elements:
   double mm[25] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
     16,17,18,19,20,21,22,23,24,25};
-  tmv::SymMatrix<double> m3(5,mm); // Default storage is Upper, ColMajor
+  tmv::SymMatrix<double> m3(5); // Default storage is Upper, ColMajor
+
   std::cout<<"m3 (Upper, ColMajor) = \n"<<m3<<std::endl;
   //!  m3 (Upper, ColMajor) = 
   //!  5 5
@@ -109,11 +110,7 @@ int main() try
   std::cout<<"Norm1(m1) = "<<Norm1(m1)<<std::endl;
   //!  Norm1(m1) = 32
   std::cout<<"Norm2(m1) = "<<Norm2(m1)<<std::endl;
-  //!  Norm2(m1) = Warning:
-  //!  Calling SymMatrix::Norm2 without previously calling DivideUsing(SV)
-  //!  24.4968
-  std::cout<<"m1.doNorm2() = "<<m1.doNorm2()<<std::endl;
-  //!  m1.doNorm2() = 24.4968
+  //!  Norm2(m1) = 24.4968
   std::cout<<"NormInf(m1) = "<<NormInf(m1)<<std::endl;
   //!  NormInf(m1) = 32
   std::cout<<"NormF(m1) = "<<NormF(m1);

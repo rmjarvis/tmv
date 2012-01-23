@@ -146,8 +146,8 @@ namespace tmv {
 #define TMV_MAJOR_VERSION 0
 #define TMV_MINOR_VERSION 70
 #define TMV_VERSION_AT_LEAST(major,minor) \
-    ( (major > TMV_MAJOR_VERSION) || \
-      (major == TMV_MAJOR_VERSION && minor >= TMV_MINOR_VERSION) )
+    ( (TMV_MAJOR_VERSION > major) || \
+      (TMV_MAJOR_VERSION == major && TMV_MINOR_VERSION >= minor) )
 
     // Attributes are stored as a binary field, so they can be |'ed
     // together to calculate the full set of attributes.

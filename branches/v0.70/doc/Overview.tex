@@ -213,7 +213,7 @@ For the combinations of types for which there are existing BLAS
 routines, the code can call the optimized BLAS routines instead of its own 
 code.  For other combinations (or for user defined types like 
 \tt{MyQuadPrecisionType} or somesuch), 
-TMV has a native implementation that is uses instead, 
+TMV has a native implementation that it uses instead, 
 using blocking and recursive techniques to make the code fairly fast on modern CPUs.
 
 This feature can be turned off at compile time if desired 
@@ -241,13 +241,6 @@ slightly faster on modern machines with good compilers.
 So if you don't want to deal with getting LAPACK
 up and running, it won't generally be too bad, speedwise, 
 to leave the LAPACK calls turned off.
-
-The only real exception to this statement
-is the eigenvector calculation for a hermitian matrix.  I have not yet 
-implemented the new RRR
-(Relatively Robust Representation) algorithm by Dhillon.  So if your program is
-spending a significant amount of time calculating eigenvectors of large symmetric matrices,
-it may be worth having TMV call the LAPACK routines.
 
 Also, it is worth noting that many LAPACK libraries are not thread safe.
 So if your main program uses multiple threads, and you aren't sure whether

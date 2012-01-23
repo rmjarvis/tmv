@@ -5,7 +5,6 @@
 //              such as += x, etc.
 // NODIV        Don't do Det, Norm2, etc.
 // NOSV         Only skip division stuff that requires SVD, like Norm2.
-// NOMIX        Don't do arithmetic that mixes with regular Vector/Matrix.
 // ALIASOK      Include alised arithmetic, like m = m + x.
 // SYMOPROD     Require outer product statements to be symmetric (v1 ^ v1).
 // NOADDEQ      Skip m += m2 and similar.
