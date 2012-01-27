@@ -2,7 +2,7 @@
 
 #define DefInv(T,T1) \
 template void LU_Inverse(const GenBandMatrix<T1 >& LUx, \
-      const int* p, const MatrixView<T >& minv); \
+      const int* p, MatrixView<T > minv); \
 
 DefInv(T,T)
 #ifdef INST_COMPLEX
@@ -14,7 +14,7 @@ DefInv(CT,CT)
 
 #undef DefInv
 #define DefInv(T) \
-template void TriInverse(const UpperTriMatrixView<T >& minv, int nhi); \
+template void TriInverse(UpperTriMatrixView<T > minv, int nhi); \
 
 DefInv(T)
 #ifdef INST_COMPLEX

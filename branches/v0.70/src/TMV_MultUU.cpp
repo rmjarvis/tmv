@@ -62,7 +62,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void RRMultEqMM(
-        T alpha, const GenUpperTriMatrix<Ta>& A, const UpperTriMatrixView<T>& B)
+        T alpha, const GenUpperTriMatrix<Ta>& A, UpperTriMatrixView<T> B)
     {
         TMVAssert(A.isrm());
         TMVAssert(B.isrm());
@@ -103,7 +103,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void CRMultEqMM(
-        T alpha, const GenUpperTriMatrix<Ta>& A, const UpperTriMatrixView<T>& B)
+        T alpha, const GenUpperTriMatrix<Ta>& A, UpperTriMatrixView<T> B)
     {
         TMVAssert(A.iscm());
         TMVAssert(B.isrm());
@@ -141,7 +141,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void CMultEqMM(
-        T alpha, const GenUpperTriMatrix<Ta>& A, const UpperTriMatrixView<T>& B)
+        T alpha, const GenUpperTriMatrix<Ta>& A, UpperTriMatrixView<T> B)
     {
         TMVAssert(B.iscm());
         TMVAssert(A.size() == B.size());
@@ -204,7 +204,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void MultEqMM(T alpha,
-              const GenUpperTriMatrix<Ta>& A, const UpperTriMatrixView<T>& B)
+              const GenUpperTriMatrix<Ta>& A, UpperTriMatrixView<T> B)
         // B = alpha * A * B
     {
         TMVAssert(A.size() == B.size());
@@ -302,7 +302,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void RRMultEqMM(
-        T alpha, const GenLowerTriMatrix<Ta>& A, const LowerTriMatrixView<T>& B)
+        T alpha, const GenLowerTriMatrix<Ta>& A, LowerTriMatrixView<T> B)
     {
         //cout<<"RRMultEqMM Lower\n";
         TMVAssert(A.isrm());
@@ -343,7 +343,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void CRMultEqMM(
-        T alpha, const GenLowerTriMatrix<Ta>& A, const LowerTriMatrixView<T>& B)
+        T alpha, const GenLowerTriMatrix<Ta>& A, LowerTriMatrixView<T> B)
     {
         TMVAssert(A.iscm());
         TMVAssert(B.isrm());
@@ -379,7 +379,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void CMultEqMM(
-        T alpha, const GenLowerTriMatrix<Ta>& A, const LowerTriMatrixView<T>& B)
+        T alpha, const GenLowerTriMatrix<Ta>& A, LowerTriMatrixView<T> B)
     {
         TMVAssert(B.iscm());
         TMVAssert(A.size() == B.size());
@@ -402,7 +402,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void MultEqMM(T alpha,
-              const GenLowerTriMatrix<Ta>& A, const LowerTriMatrixView<T>& B)
+              const GenLowerTriMatrix<Ta>& A, LowerTriMatrixView<T> B)
         // B = alpha * A * B
     {
         TMVAssert(A.size() == B.size());
@@ -501,7 +501,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static void RRAddMultMM(
         T alpha, const GenUpperTriMatrix<Ta>& A, 
-        const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C)
+        const GenUpperTriMatrix<Tb>& B, UpperTriMatrixView<T> C)
     {
         TMVAssert(A.isrm());
         TMVAssert(B.isrm());
@@ -545,7 +545,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static void CRAddMultMM(
         T alpha, const GenUpperTriMatrix<Ta>& A, const GenUpperTriMatrix<Tb>& B,
-        const UpperTriMatrixView<T>& C)
+        UpperTriMatrixView<T> C)
     {
         TMVAssert(A.iscm());
         TMVAssert(B.isrm());
@@ -595,7 +595,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static void CAddMultMM(
         T alpha, const GenUpperTriMatrix<Ta>& A, const GenUpperTriMatrix<Tb>& B,
-        const UpperTriMatrixView<T>& C)
+        UpperTriMatrixView<T> C)
     {
         TMVAssert(B.iscm());
         TMVAssert(C.iscm());
@@ -636,7 +636,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static void AddMultMM(
         T alpha, const GenUpperTriMatrix<Ta>& A,
-        const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C)
+        const GenUpperTriMatrix<Tb>& B, UpperTriMatrixView<T> C)
         // C += alpha * A * B
     {
         TMVAssert(A.size() == B.size());
@@ -714,7 +714,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void TempMultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A, 
-        const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C)
+        const GenUpperTriMatrix<Tb>& B, UpperTriMatrixView<T> C)
         // C (+)= alpha * A * B
     { 
         if (B.isrm()) {
@@ -747,7 +747,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C)
+        const GenUpperTriMatrix<Tb>& B, UpperTriMatrixView<T> C)
         // C (+)= alpha * A * B
     { 
 #ifdef XDEBUG

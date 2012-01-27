@@ -3,8 +3,8 @@
 
 #define DefSVD(RT,T,Td)\
 template void Tridiagonalize( \
-    const SymMatrixView<T >& A, const VectorView<T >& beta, \
-    const VectorView<Td >& D, const VectorView<RT>& E, T& signdet); \
+    SymMatrixView<T > A, VectorView<T > beta, \
+    VectorView<Td > D, VectorView<RT> E, T& signdet); \
 
 DefSVD(T,T,T)
 #ifdef INST_COMPLEX

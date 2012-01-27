@@ -26,17 +26,16 @@
   template RT GenSymMatrix<T >::doCondition() const; \
   template QuotXS<T,T > GenSymMatrix<T >::QInverse() const; \
   template T GenSymMatrix<T >::cref(int i, int j) const; \
-  template const SymMatrixView<T,CStyle>&  \
-      SymMatrixView<T,CStyle>::swapRowsCols(int i1, int i2) const;\
-  template const SymMatrixView<T,CStyle>&  \
-      SymMatrixView<T,CStyle>::permuteRowsCols(const int* p, \
-      int i1, int i2) const; \
-  template const SymMatrixView<T,CStyle>& \
-      SymMatrixView<T,CStyle>::reversePermuteRowsCols(const int* p, \
-      int i1, int i2) const; \
+  template SymMatrixView<T,CStyle>&  \
+      SymMatrixView<T,CStyle>::swapRowsCols(int i1, int i2);\
+  template SymMatrixView<T,CStyle>&  \
+      SymMatrixView<T,CStyle>::permuteRowsCols(const int* p, int i1, int i2); \
+  template SymMatrixView<T,CStyle>& \
+      SymMatrixView<T,CStyle>::reversePermuteRowsCols( \
+      const int* p, int i1, int i2); \
   template void GenSymMatrix<T >::write(const TMV_Writer& writer) const; \
-  template void SymMatrixView<T,CStyle>::read(const TMV_Reader& reader) const; \
-  template Ref SymMatrixView<T,CStyle>::ref(int i, int j) const; \
+  template void SymMatrixView<T,CStyle>::read(const TMV_Reader& reader); \
+  template Ref SymMatrixView<T,CStyle>::ref(int i, int j); \
 
 Def1(T,T,T&)
 #ifdef INST_COMPLEX
@@ -65,7 +64,7 @@ Def1b(T,CT)
 
 #define Def2(T1,T2) \
   template void GenSymMatrix<T1 >::doMakeInverse( \
-      const SymMatrixView<T2 >& sinv) const; \
+      SymMatrixView<T2 > sinv) const; \
 
 Def2(T,T)
 #ifdef INST_COMPLEX

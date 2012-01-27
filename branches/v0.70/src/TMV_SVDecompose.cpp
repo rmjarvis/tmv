@@ -61,7 +61,7 @@ namespace tmv {
 
     template <class T> 
     static inline void DoSVDecomposeFromBidiagonal_NZ(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> Vt,
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt,
         bool UisI, bool VisI)
     {
         SV_DecomposeFromBidiagonal_DC<T>(U,D,E,Vt,UisI,VisI); 
@@ -71,7 +71,7 @@ namespace tmv {
 
     template <class T> 
     void DoSVDecomposeFromBidiagonal(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> Vt,
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt,
         bool UisI, bool VisI)
     {
         const int N = D.size();
@@ -162,8 +162,8 @@ namespace tmv {
 
     template <class T> 
     static void NonLapSVDecomposeFromBidiagonal(
-        MVP<T> U, const VectorView<RT>& D, 
-        const VectorView<RT>& E, MVP<T> Vt, bool setUV)
+        MVP<T> U, VectorView<RT> D, 
+        VectorView<RT> E, MVP<T> Vt, bool setUV)
     {
 #ifdef XDEBUG
         dbgcout<<"Start Decompose from Bidiag (NonLap):\n";
@@ -262,14 +262,14 @@ namespace tmv {
 #ifdef LAP 
     template <class T> 
     static inline void LapSVDecomposeFromBidiagonal(
-        MVP<T> U, const VectorView<RT>& D, 
-        const VectorView<RT>& E, MVP<T> Vt, bool setUV)
+        MVP<T> U, VectorView<RT> D, 
+        VectorView<RT> E, MVP<T> Vt, bool setUV)
     { NonLapSVDecomposeFromBidiagonal<T>(U,D,E,Vt,setUV); }
 #ifdef INST_DOUBLE
     template <> 
     void LapSVDecomposeFromBidiagonal(
-        MVP<double> U, const VectorView<double>& D, 
-        const VectorView<double>& E, MVP<double> Vt, bool setUV)
+        MVP<double> U, VectorView<double> D, 
+        VectorView<double> E, MVP<double> Vt, bool setUV)
     {
         TMVAssert(D.size() == E.size()+1);
         TMVAssert(D.ct()==NonConj);
@@ -391,8 +391,8 @@ namespace tmv {
     }
     template <> 
     void LapSVDecomposeFromBidiagonal(
-        MVP<std::complex<double> > U, const VectorView<double>& D, 
-        const VectorView<double>& E, MVP<std::complex<double> > Vt, 
+        MVP<std::complex<double> > U, VectorView<double> D, 
+        VectorView<double> E, MVP<std::complex<double> > Vt, 
         bool setUV)
     {
         TMVAssert(D.size() == E.size()+1);
@@ -479,8 +479,8 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     void LapSVDecomposeFromBidiagonal(
-        MVP<float> U, const VectorView<float>& D, 
-        const VectorView<float>& E, MVP<float> Vt, bool setUV)
+        MVP<float> U, VectorView<float> D, 
+        VectorView<float> E, MVP<float> Vt, bool setUV)
     {
         TMVAssert(D.size() == E.size()+1);
         TMVAssert(D.ct()==NonConj);
@@ -581,8 +581,8 @@ namespace tmv {
     }
     template <> 
     void LapSVDecomposeFromBidiagonal(
-        MVP<std::complex<float> > U, const VectorView<float>& D, 
-        const VectorView<float>& E, MVP<std::complex<float> > Vt, 
+        MVP<std::complex<float> > U, VectorView<float> D, 
+        VectorView<float> E, MVP<std::complex<float> > Vt, 
         bool setUV)
     {
         TMVAssert(D.size() == E.size()+1);
@@ -656,8 +656,8 @@ namespace tmv {
 
     template <class T> 
     void SV_DecomposeFromBidiagonal(
-        MVP<T> U, const VectorView<RT>& D, 
-        const VectorView<RT>& E, MVP<T> Vt, bool setUV)
+        MVP<T> U, VectorView<RT> D, 
+        VectorView<RT> E, MVP<T> Vt, bool setUV)
     {
 #ifdef XDEBUG
         Matrix<RT> B(D.size(),D.size(),RT(0));
@@ -755,7 +755,7 @@ namespace tmv {
 
     template <class T> 
     void SV_Decompose(
-        const MatrixView<T>& U, const DiagMatrixView<RT>& S, 
+        MatrixView<T> U, DiagMatrixView<RT> S, 
         MVP<T> Vt, RT& logdet, T& signdet, bool StoreU)
     {
 #ifdef XDEBUG
@@ -883,8 +883,8 @@ namespace tmv {
     //
     template <class T> 
     void SV_Decompose(
-        const MatrixView<T>& U, const DiagMatrixView<RT>& SS, 
-        const MatrixView<T>& Vt, bool StoreU)
+        MatrixView<T> U, DiagMatrixView<RT> SS, 
+        MatrixView<T> Vt, bool StoreU)
     {
         TMVAssert(U.colsize() >= U.rowsize());
         TMVAssert(SS.size() == U.rowsize());
@@ -911,7 +911,7 @@ namespace tmv {
 
     template <class T> 
     void SV_Decompose(
-        const MatrixView<T>& U, const DiagMatrixView<RT>& SS, bool StoreU)
+        MatrixView<T> U, DiagMatrixView<RT> SS, bool StoreU)
     {
         TMVAssert(U.colsize() >= U.rowsize());
         TMVAssert(SS.size() == U.rowsize());

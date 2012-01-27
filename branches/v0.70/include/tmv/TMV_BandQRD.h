@@ -57,13 +57,30 @@ namespace tmv {
     // Also, A must have A.nrows() >= A.ncols()
     template <class T> 
     void QR_Decompose(
-        const GenBandMatrix<T>& A, const MatrixView<T>& Q,
-        const BandMatrixView<T>& R);
+        const GenBandMatrix<T>& A, MatrixView<T> Q, BandMatrixView<T> R);
 
     // The same, but don't return Q
     template <class T> 
-    void QR_Decompose(
-        const GenBandMatrix<T>& A, const BandMatrixView<T>& R);
+    void QR_Decompose(const GenBandMatrix<T>& A, BandMatrixView<T> R);
+
+    template <class T, int A2> 
+    inline void QR_Decompose(
+        const GenBandMatrix<T>& A, MatrixView<T> Q, BandMatrix<T,A2>& R)
+    { QR_Decompose(A,Q,R.view()); }
+
+    template <class T, int A1> 
+    inline void QR_Decompose(
+        const GenBandMatrix<T>& A, Matrix<T,A1>& Q, BandMatrixView<T> R)
+    { QR_Decompose(A,Q.view(),R); }
+
+    template <class T, int A1, int A2> 
+    inline void QR_Decompose(
+        const GenBandMatrix<T>& A, Matrix<T,A1>& Q, BandMatrix<T,A2>& R)
+    { QR_Decompose(A,Q.view(),R.view()); }
+
+    template <class T, int A2> 
+    inline void QR_Decompose(const GenBandMatrix<T>& A, BandMatrix<T,A2>& R)
+    { QR_Decompose(A,R.view()); }
 
     template <class T> 
     class BandQRDiv : public Divider<T> 
@@ -83,15 +100,15 @@ namespace tmv {
         //
 
         template <class T1> 
-        void doLDivEq(const MatrixView<T1>& m) const;
+        void doLDivEq(MatrixView<T1> m) const;
         template <class T1> 
-        void doRDivEq(const MatrixView<T1>& m) const;
+        void doRDivEq(MatrixView<T1> m) const;
         template <class T1, class T2> 
         void doLDiv(
-            const GenMatrix<T1>& m, const MatrixView<T2>& x) const;
+            const GenMatrix<T1>& m, MatrixView<T2> x) const;
         template <class T1, class T2> 
         void doRDiv(
-            const GenMatrix<T1>& m, const MatrixView<T2>& x) const;
+            const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
         //
         // Determinant, Inverse
@@ -100,8 +117,8 @@ namespace tmv {
         T det() const;
         TMV_RealType(T) logDet(T* sign) const;
         template <class T1> 
-        void doMakeInverse(const MatrixView<T1>& minv) const;
-        void doMakeInverseATA(const MatrixView<T>& minv) const;
+        void doMakeInverse(MatrixView<T1> minv) const;
+        void doMakeInverseATA(MatrixView<T> minv) const;
         bool isSingular() const;
 
 #include "tmv/TMV_AuxAllDiv.h"

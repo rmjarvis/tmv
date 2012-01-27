@@ -261,6 +261,28 @@ Changed and Deprecated features:
    to use this definition.  So no point in me trying to get TMV users
    to use my preferred definition: A = U * S * V.
 
+-- Changed the mechanism for switching from the "Loose QRP" to the "Strict 
+   QRP" algorithm (and back).  It used to be a global bool variable, called
+
+   bool tmv::QRPDiv<T>::StrictQRP
+
+   which was initially false, but which you could set to true.
+   Now you should set the equivalent of this variable with the function
+
+   tmv::UseStrictQRP();
+
+   to start using the Strict QRP algorithm and
+
+   tmv::UseStrictQRP(false);
+
+   to stop using it.  You can access the current state of the variable with
+
+   bool tmv::QRP_IsStrict()
+
+   The only functionality difference with the new interface is that now there
+   is only one variable for all types, rather than a different one for each
+   type T.
+
 -- Changed what "const" in front of a VectorView, MatrixView, etc. means 
    for the mutability of the view.  Now a const VectorView works the same 
    as a ConstVectorView.  That is, it is no longer able to modify the 
@@ -377,6 +399,11 @@ New features:
    LowerTriMatrixView, DiagMatrixView, BandMatrixView, SymMatrixView, or 
    SymBandMatrixView specifying the memory address of m(0,0) and the step 
    size in each direction.
+
+-- Changed the definitions of the various decomposition functions
+   to accept either views (as before) or regular Matrix, Vector, etc. 
+   objects.  So, you no longer need to call these with m.view()
+   as you had to before.
 
 -- Added default constructors to Vector, Matrix and all the special matrix 
    classes.  These construct a zero-sized matrix, so normally you would want

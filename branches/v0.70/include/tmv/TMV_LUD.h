@@ -86,15 +86,16 @@ namespace tmv {
     // L is returned as A.lowerTri(UnitDiag).
     // U is returned as A.upperTri(NonUnitDiag).
     template <class T> 
-    void LU_Decompose(const MatrixView<T>& A, int* P);
-
-    template <class T> 
-    void LU_Decompose(const MatrixView<T>& A, int* P, int& detp);
+    void LU_Decompose(MatrixView<T> A, int* P);
 
     class Permutation;
 
     template <class T> 
-    void LU_Decompose(const MatrixView<T>& A, Permutation& P);
+    void LU_Decompose(MatrixView<T> A, Permutation& P);
+
+    template <class T, int A1> 
+    inline void LU_Decompose(Matrix<T,A1>& A, Permutation& P)
+    { LU_Decompose(A.view(),P); }
 
     template <class T> 
     class LUDiv : public Divider<T> 
@@ -114,16 +115,16 @@ namespace tmv {
         //
 
         template <class T1> 
-        void doLDivEq(const MatrixView<T1>& m) const;
+        void doLDivEq(MatrixView<T1> m) const;
 
         template <class T1> 
-        void doRDivEq(const MatrixView<T1>& m) const;
+        void doRDivEq(MatrixView<T1> m) const;
 
         template <class T1, class T2> 
-        void doLDiv(const GenMatrix<T1>& m1, const MatrixView<T2>& m0) const;
+        void doLDiv(const GenMatrix<T1>& m1, MatrixView<T2> m0) const;
 
         template <class T1, class T2> 
-        void doRDiv(const GenMatrix<T1>& m1, const MatrixView<T2>& m0) const;
+        void doRDiv(const GenMatrix<T1>& m1, MatrixView<T2> m0) const;
 
 #include "tmv/TMV_AuxAllDiv.h"
 
@@ -136,9 +137,9 @@ namespace tmv {
         TMV_RealType(T) logDet(T* sign) const;
 
         template <class T1> 
-        void doMakeInverse(const MatrixView<T1>& minv) const;
+        void doMakeInverse(MatrixView<T1> minv) const;
 
-        void doMakeInverseATA(const MatrixView<T>& minv) const;
+        void doMakeInverseATA(MatrixView<T> minv) const;
 
         bool isSingular() const;
 

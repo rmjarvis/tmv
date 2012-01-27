@@ -41,68 +41,67 @@ namespace tmv {
     template <class T> 
     struct MVP 
     {
-        MVP(const MatrixView<T>& m) : mp(&m) {}
-        MVP(const MatrixView<T>* m) : mp(m) {}
+        MVP(MatrixView<T> m) : mp(&m) {}
+        MVP(MatrixView<T>* m) : mp(m) {}
         MVP(int) : mp(0) {}
-        operator const MatrixView<T>*() { return mp; }
-        const MatrixView<T>* operator->() { return mp; }
-        const MatrixView<T>& operator*() { return *mp; }
+        operator MatrixView<T>*() { return mp; }
+        MatrixView<T>* operator->() { return mp; }
+        MatrixView<T> operator*() { return *mp; }
 
-        const MatrixView<T>* mp;
+        MatrixView<T>* mp;
     };
 
     template <class T> 
     void SV_Decompose(
-        const MatrixView<T>& U, const DiagMatrixView<RT>& S, 
+        MatrixView<T> U, DiagMatrixView<RT> S, 
         MVP<T> Vt, RT& logdet, T& signdet, bool StoreU=false);
 
     template <class T, class Tm, class Tx> 
     void SV_LDiv(
         const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
         const GenMatrix<T>& Vt, int kmax,
-        const GenMatrix<Tm>& m, const MatrixView<Tx>& x);
+        const GenMatrix<Tm>& m, MatrixView<Tx> x);
     template <class T, class Tm, class Tx> 
     void SV_RDiv(
         const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
         const GenMatrix<T>& Vt, int kmax,
-        const GenMatrix<Tm>& m, const MatrixView<Tx>& x);
+        const GenMatrix<Tm>& m, MatrixView<Tx> x);
 
 
     template <class T> 
     void Bidiagonalize(
-        const MatrixView<T>& A, const VectorView<T>& Ubeta,
-        const VectorView<T>& Vtbeta, const VectorView<RT>& D,
-        const VectorView<RT>& E, T& signdet);
+        MatrixView<T> A, VectorView<T> Ubeta,
+        VectorView<T> Vtbeta, VectorView<RT> D, VectorView<RT> E, T& signdet);
 
     template <class T> 
     void BidiagonalChopSmallElements(
-        const VectorView<T>& D, const VectorView<T>& E, bool* zd=0);
+        VectorView<T> D, VectorView<T> E, bool* zd=0);
 
     template <class T> 
     void BidiagonalZeroFirstRow(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E);
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E);
 
     template <class T> 
     void BidiagonalZeroLastCol(
-        const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> Vt);
+        VectorView<RT> D, VectorView<RT> E, MVP<T> Vt);
 
     template <class T> 
     void SV_DecomposeFromBidiagonal(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> Vt,
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt,
         bool SetUV=false);
 
     template <class T> 
     void DoSVDecomposeFromBidiagonal(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> Vt,
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt,
         bool UisI, bool VisI);
 
     template <class T> 
     void SV_DecomposeFromBidiagonal_QR(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> Vt);
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt);
 
     template <class T> 
     void SV_DecomposeFromBidiagonal_DC(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> Vt,
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt,
         bool UisI, bool VisI);
 
     template <class T> 
@@ -124,28 +123,28 @@ namespace tmv {
     inline void CallSV_LDiv(
         Tx , const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
         const GenMatrix<T>& Vt, int kmax,
-        const GenMatrix<Tm>& m, const MatrixView<Tx>& x)
+        const GenMatrix<Tm>& m, MatrixView<Tx> x)
     { SV_LDiv(U,S,Vt,kmax,m,x); }
 
     template <class T, class Tm, class Tx>
     inline void CallSV_LDiv(
         Tx , const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
         const GenMatrix<T>& Vt, int kmax,
-        const GenMatrix<Tm>& m, const MatrixView<CTx>& x)
+        const GenMatrix<Tm>& m, MatrixView<CTx> x)
     { SV_LDiv(U,S,Vt,kmax,m,x); }
    
     template <class T, class Tm, class Tx>
     inline void CallSV_RDiv(
         Tx , const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
         const GenMatrix<T>& Vt, int kmax,
-        const GenMatrix<Tm>& m, const MatrixView<Tx>& x)
+        const GenMatrix<Tm>& m, MatrixView<Tx> x)
     { SV_RDiv(U,S,Vt,kmax,m,x); }
    
     template <class T, class Tm, class Tx>
     inline void CallSV_RDiv(
         Tx , const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
         const GenMatrix<T>& Vt, int kmax,
-        const GenMatrix<Tm>& m, const MatrixView<CTx>& x)
+        const GenMatrix<Tm>& m, MatrixView<CTx> x)
     { SV_RDiv(U,S,Vt,kmax,m,x); }
    
 #undef CTx
@@ -158,37 +157,37 @@ namespace tmv {
     inline void CallSV_LDiv(
         CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
         const GenMatrix<CT>& , int ,
-        const GenMatrix<CT>& , const MatrixView<T>& )
+        const GenMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void CallSV_LDiv(
         CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
         const GenMatrix<CT>& , int ,
-        const GenMatrix<T>& , const MatrixView<T>& )
+        const GenMatrix<T>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void CallSV_LDiv(
         CT , const GenMatrix<T>& , const GenDiagMatrix<T>& ,
         const GenMatrix<T>& , int ,
-        const GenMatrix<CT>& , const MatrixView<T>& )
+        const GenMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void CallSV_RDiv(
         CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
         const GenMatrix<CT>& , int ,
-        const GenMatrix<CT>& , const MatrixView<T>& )
+        const GenMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void CallSV_RDiv(
         CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
         const GenMatrix<CT>& , int ,
-        const GenMatrix<T>& , const MatrixView<T>& )
+        const GenMatrix<T>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void CallSV_RDiv(
         CT , const GenMatrix<T>& , const GenDiagMatrix<T>& ,
         const GenMatrix<T>& , int ,
-        const GenMatrix<CT>& , const MatrixView<T>& )
+        const GenMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
 #undef CT

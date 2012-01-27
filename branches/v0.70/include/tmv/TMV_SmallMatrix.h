@@ -518,18 +518,18 @@ namespace tmv {
         inline QuotXm_1<T,T,M,N,A> inverse() const
         { return QuotXm_1<T,T,M,N,A>(T(1),*this); }
 
-        inline void makeInverse(const MatrixView<T>& minv) const
+        inline void makeInverse(MatrixView<T> minv) const
         { view().makeInverse(minv); }
 
         template <class T1> 
-        inline void makeInverse(const MatrixView<T1>& minv) const
+        inline void makeInverse(MatrixView<T1> minv) const
         { view().makeInverse(minv); }
 
         template <class T2, int A2> 
         inline void makeInverse(Matrix<T2,A2>& minv) const
         { view().makeInverse(minv); }
 
-        inline void makeInverseATA(const MatrixView<T>& ata) const
+        inline void makeInverseATA(MatrixView<T> ata) const
         { view().makeInverseATA(ata); }
 
         template <int A2> 

@@ -3,13 +3,13 @@
 
 #define DefDivEq(T,T1)\
 template void CH_LDivEq(const GenSymBandMatrix<T1 >& LL,\
-    const MatrixView<T >& b); \
+    MatrixView<T > b); \
 template void CH_RDivEq(const GenSymBandMatrix<T1 >& LL,\
-    const MatrixView<T >& b); \
+    MatrixView<T > b); \
 template void LDL_LDivEq(const GenSymBandMatrix<T1 >& LL,\
-    const MatrixView<T >& b); \
+    MatrixView<T > b); \
 template void LDL_RDivEq(const GenSymBandMatrix<T1 >& LL,\
-    const MatrixView<T >& b); \
+    MatrixView<T > b); \
 
 DefDivEq(T,T)
 #ifdef INST_COMPLEX

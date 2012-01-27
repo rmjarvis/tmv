@@ -66,7 +66,7 @@ namespace tmv {
 
     template <class T> 
     void BidiagonalChopSmallElements(
-        const VectorView<T>& D, const VectorView<T>& E, bool* zd)
+        VectorView<T> D, VectorView<T> E, bool* zd)
     {
         // This routines sets to 0 any elements in D,E which
         // are essentially 0, given the machine precision:
@@ -128,7 +128,7 @@ namespace tmv {
 
     template <class T> 
     void BidiagonalZeroFirstRow(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E)
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E)
     {
         // Input D,E form an N+1 x N bidiagonal matrix
         // (eg. for N = 4)
@@ -179,7 +179,7 @@ namespace tmv {
 
     template <class T> 
     void BidiagonalZeroLastCol(
-        const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> Vt)
+        VectorView<RT> D, VectorView<RT> E, MVP<T> Vt)
     {
         // Input D,E form an N x N+1 bidiagonal matrix
         // (eg. for N = 4)
@@ -228,7 +228,7 @@ namespace tmv {
 
     template <class T> 
     static RT BidiagonalTrailingEigenValue(
-        const VectorView<T>& D, const VectorView<T>& E)
+        VectorView<T> D, VectorView<T> E)
     {
         // Return the Wilkinson choice for an eigenvalue of T = BtB, namely
         // the eigenvalue of the trailing 2x2 block of T which is closer
@@ -274,7 +274,7 @@ namespace tmv {
 
     template <class T> 
     static void ReduceBidiagonal22(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> Vt)
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt)
     {
         // Find Givens rotations which diagonalize 2x2 matrix exactly:
         //
@@ -606,7 +606,7 @@ namespace tmv {
 
     template <class T> 
     static void ReduceBidiagonal(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> Vt)
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt)
     {
 #ifdef XDEBUG
         dbgcout<<"Start Reduce Bidiagonal QR:\n";
@@ -746,7 +746,7 @@ namespace tmv {
 
     template <class T> 
     void SV_DecomposeFromBidiagonal_QR(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> Vt)
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt)
     {
 #ifdef XDEBUG
         dbgcout<<"Start Decompose from Bidiagonal QR:\n";

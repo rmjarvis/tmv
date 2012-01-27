@@ -73,9 +73,9 @@ namespace tmv {
 
     template <class T> 
     static void MakeTridiagReal(
-        const VectorView<T>& Udiag, 
+        VectorView<T> Udiag, 
         const GenVector<T>& cD, const GenVector<T>& cE,
-        const VectorView<T>& D, const VectorView<T>& E)
+        VectorView<T> D, VectorView<T> E)
     {
         TMVAssert(cD.size() == D.size());
         TMVAssert(cE.size() == E.size());
@@ -89,10 +89,10 @@ namespace tmv {
 
     template <class T> 
     static void MakeTridiagReal(
-        const VectorView<std::complex<T> >& Udiag, 
+        VectorView<std::complex<T> > Udiag, 
         const GenVector<std::complex<T> >& cD,
         const GenVector<std::complex<T> >& cE,
-        const VectorView<T>& D, const VectorView<T>& E)
+        VectorView<T> D, VectorView<T> E)
     {
         // The complexity of D determines whether the original 
         // SymBandMatrix was hermitian or symmetric.
@@ -132,10 +132,10 @@ namespace tmv {
 
     template <class T> 
     static inline void MakeTridiagReal(
-        const VectorView<std::complex<T> >& , 
+        VectorView<std::complex<T> > , 
         const GenVector<std::complex<T> >& ,
         const GenVector<std::complex<T> >& ,
-        const VectorView<std::complex<T> >& , const VectorView<T>& ) 
+        VectorView<std::complex<T> > , VectorView<T> ) 
     {
         // This one is the symmetric case, which should never get called.
         TMVAssert(TMV_FALSE); 
@@ -144,7 +144,7 @@ namespace tmv {
     template <class T, class Td> 
     static void NonLapTridiagonalize(
         const GenSymBandMatrix<T>& A, MVP<T> U,
-        const VectorView<Td>& D, const VectorView<RT>& E, T& signdet)
+        VectorView<Td> D, VectorView<RT> E, T& signdet)
     {
         // Decompose A into U T Ut
         // The Tridiagonal Matrix T is stored as two vectors: D, E
@@ -252,13 +252,13 @@ namespace tmv {
     template <class T, class Td> 
     static inline void LapTridiagonalize(
         const GenSymBandMatrix<T>& A, MVP<T> U,
-        const VectorView<Td>& D, const VectorView<RT>& E, T& signdet)
+        VectorView<Td> D, VectorView<RT> E, T& signdet)
     { NonLapTridiagonalize(A,U,D,E,signdet); }
 #ifdef INST_DOUBLE
     template <> 
     void LapTridiagonalize(
         const GenSymBandMatrix<double>& A, MVP<double> U,
-        const VectorView<double>& D, const VectorView<double>& E, double& )
+        VectorView<double> D, VectorView<double> E, double& )
     {
         TMVAssert(A.nlo() > 1);
         TMVAssert(A.size() > A.nlo());
@@ -300,7 +300,7 @@ namespace tmv {
     void LapTridiagonalize(
         const GenSymBandMatrix<std::complex<double> >& A,
         MVP<std::complex<double> > U,
-        const VectorView<double>& D, const VectorView<double>& E, 
+        VectorView<double> D, VectorView<double> E, 
         std::complex<double>& )
     {
         TMVAssert(A.isherm());
@@ -345,7 +345,7 @@ namespace tmv {
     template <> 
     void LapTridiagonalize(
         const GenSymBandMatrix<float>& A, MVP<float> U,
-        const VectorView<float>& D, const VectorView<float>& E, float& )
+        VectorView<float> D, VectorView<float> E, float& )
     {
         TMVAssert(A.nlo() > 1);
         TMVAssert(A.size() > A.nlo());
@@ -387,7 +387,7 @@ namespace tmv {
     void LapTridiagonalize(
         const GenSymBandMatrix<std::complex<float> >& A,
         MVP<std::complex<float> > U,
-        const VectorView<float>& D, const VectorView<float>& E, 
+        VectorView<float> D, VectorView<float> E, 
         std::complex<float>& )
     {
         TMVAssert(A.isherm());
@@ -433,7 +433,7 @@ namespace tmv {
     template <class T, class Td> 
     static void Tridiagonalize(
         const GenSymBandMatrix<T>& A, MVP<T> U,
-        const VectorView<Td>& D, const VectorView<RT>& E, T& signdet)
+        VectorView<Td> D, VectorView<RT> E, T& signdet)
     {
         TMVAssert(A.nlo() > 0);
         TMVAssert(A.size() == D.size());
@@ -513,7 +513,7 @@ namespace tmv {
 
     template <class T> 
     void UnsortedEigen(
-        const GenSymBandMatrix<T>& A, MVP<T> U, const VectorView<RT>& SS)
+        const GenSymBandMatrix<T>& A, MVP<T> U, VectorView<RT> SS)
     {
         TMVAssert(A.size() > 0);
         TMVAssert(A.isherm());
@@ -575,7 +575,7 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenSymBandMatrix<T>& A,
-        MVP<T> U, const DiagMatrixView<RT>& SS, MVP<T> Vt, 
+        MVP<T> U, DiagMatrixView<RT> SS, MVP<T> Vt, 
         RT& logdet, T& signdet)
     {
         TMVAssert(A.size() > 0);
@@ -691,8 +691,8 @@ namespace tmv {
 
     template <class T> 
     void Eigen(
-        const GenSymBandMatrix<T>& A, const MatrixView<T>& U,
-        const VectorView<RT>& SS)
+        const GenSymBandMatrix<T>& A, MatrixView<T> U,
+        VectorView<RT> SS)
     {
         TMVAssert(SS.size() == A.size());
         TMVAssert(U.colsize() == A.size());
@@ -719,8 +719,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void Eigen(
-        const GenSymBandMatrix<T>& A, const VectorView<RT>& SS)
+    void Eigen(const GenSymBandMatrix<T>& A, VectorView<RT> SS)
     {
         TMVAssert(SS.size() == A.size());
         if (A.isconj()) {
@@ -735,8 +734,8 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenSymBandMatrix<T>& A,
-        const MatrixView<T>& U, const DiagMatrixView<RT>& SS,
-        const MatrixView<T>& Vt)
+        MatrixView<T> U, DiagMatrixView<RT> SS,
+        MatrixView<T> Vt)
     {
         TMVAssert(U.colsize() == A.size());
         TMVAssert(U.rowsize() == A.size());
@@ -795,7 +794,7 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenSymBandMatrix<T>& A,
-        const MatrixView<T>& U, const DiagMatrixView<RT>& SS)
+        MatrixView<T> U, DiagMatrixView<RT> SS)
     {
         TMVAssert(U.colsize() == A.size());
         TMVAssert(U.rowsize() == A.size());
@@ -826,7 +825,7 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenSymBandMatrix<T>& A,
-        const DiagMatrixView<RT>& SS, const MatrixView<T>& Vt)
+        DiagMatrixView<RT> SS, MatrixView<T> Vt)
     {
         TMVAssert(SS.size() == A.size());
         TMVAssert(Vt.colsize() == A.size());
@@ -838,7 +837,7 @@ namespace tmv {
 
     template <class T> 
     void SV_Decompose(
-        const GenSymBandMatrix<T>& A, const DiagMatrixView<RT>& SS)
+        const GenSymBandMatrix<T>& A, DiagMatrixView<RT> SS)
     {
         TMVAssert(SS.size() == A.size());
 
@@ -855,7 +854,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void SquareRoot(const GenSymBandMatrix<T>& A, const SymMatrixView<T>& SS)
+    void SquareRoot(const GenSymBandMatrix<T>& A, SymMatrixView<T> SS)
     {
         TMVAssert(A.isherm());
         TMVAssert(SS.isherm());

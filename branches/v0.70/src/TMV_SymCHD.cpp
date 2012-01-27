@@ -101,14 +101,14 @@ namespace tmv {
     HermCHDiv<T>::~HermCHDiv() {}
 
     template <class T> template <class T1> 
-    void HermCHDiv<T>::doLDivEq(const MatrixView<T1>& m) const
+    void HermCHDiv<T>::doLDivEq(MatrixView<T1> m) const
     {
         TMVAssert(pimpl->LLx.size() == m.colsize());
         CH_LDivEq(pimpl->LLx,m);
     }
 
     template <class T> template <class T1> 
-    void HermCHDiv<T>::doRDivEq(const MatrixView<T1>& m) const
+    void HermCHDiv<T>::doRDivEq(MatrixView<T1> m) const
     {
         TMVAssert(pimpl->LLx.size() == m.rowsize());
         CH_RDivEq(pimpl->LLx,m);
@@ -116,7 +116,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void HermCHDiv<T>::doLDiv(
-        const GenMatrix<T1>& m1, const MatrixView<T2>& m0) const
+        const GenMatrix<T1>& m1, MatrixView<T2> m0) const
     {
         TMVAssert(m1.colsize() == m0.colsize());
         TMVAssert(m1.rowsize() == m0.rowsize());
@@ -126,7 +126,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void HermCHDiv<T>::doRDiv(
-        const GenMatrix<T1>& m1, const MatrixView<T2>& m0) const
+        const GenMatrix<T1>& m1, MatrixView<T2> m0) const
     {
         TMVAssert(m1.colsize() == m0.colsize());
         TMVAssert(m1.rowsize() == m0.rowsize());
@@ -166,7 +166,7 @@ namespace tmv {
     }                  
 
     template <class T> template <class T1> 
-    void HermCHDiv<T>::doMakeInverse(const SymMatrixView<T1>& sinv) const
+    void HermCHDiv<T>::doMakeInverse(SymMatrixView<T1> sinv) const
     {
         TMVAssert(sinv.size() == pimpl->LLx.size());
         TMVAssert(sinv.isherm());
@@ -174,7 +174,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void HermCHDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
+    void HermCHDiv<T>::doMakeInverse(MatrixView<T1> minv) const
     {
         TMVAssert(minv.colsize() == pimpl->LLx.size());
         TMVAssert(minv.rowsize() == pimpl->LLx.size());
@@ -186,7 +186,7 @@ namespace tmv {
     }
 
     template <class T>
-    void HermCHDiv<T>::doMakeInverseATA(const MatrixView<T>& ata) const
+    void HermCHDiv<T>::doMakeInverseATA(MatrixView<T> ata) const
     {
         // ata = (At A)^-1 = A^-1 (A^-1)t
         //     = A^-1 A^-1

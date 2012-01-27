@@ -68,7 +68,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void RRowMultMM(
         const T alpha, const GenSymMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.size() == C.colsize());
         TMVAssert(A.size() == B.colsize());
@@ -91,7 +91,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void CRowMultMM(
         const T alpha, const GenSymMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.size() == C.colsize());
         TMVAssert(A.size() == B.colsize());
@@ -114,7 +114,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static inline void RowMultMM(
         const T alpha, const GenSymMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         if (A.iscm()) CRowMultMM<add>(alpha,A,B,C);
         else RRowMultMM<add>(alpha,A,B,C);
@@ -123,7 +123,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void ColMultMM(
         const T alpha, const GenSymMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.size() == C.colsize());
         TMVAssert(A.size() == B.colsize());
@@ -144,7 +144,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void RecursiveMultMM(
         const T alpha, const GenSymMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.size() == C.colsize());
         TMVAssert(A.size() == B.colsize());
@@ -191,7 +191,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void NonBlasMultMM(
         const T alpha, const GenSymMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.size() == C.colsize());
         TMVAssert(A.size() == B.colsize());
@@ -214,7 +214,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static inline void BlasMultMM(
         const T alpha, const GenSymMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const int beta, const MatrixView<T>& C)
+        const int beta, MatrixView<T> C)
     { 
         if (beta == 1) NonBlasMultMM<true>(alpha,A,B,C); 
         else NonBlasMultMM<false>(alpha,A,B,C); 
@@ -223,7 +223,7 @@ namespace tmv {
     template <> 
     void BlasMultMM(
         const double alpha, const GenSymMatrix<double>& A,
-        const GenMatrix<double>& B, const int beta, const MatrixView<double>& C)
+        const GenMatrix<double>& B, const int beta, MatrixView<double> C)
     {
         int m = C.iscm() ? C.colsize() : C.rowsize();
         int n = C.iscm() ? C.rowsize() : C.colsize();
@@ -244,7 +244,7 @@ namespace tmv {
         std::complex<double> alpha,
         const GenSymMatrix<std::complex<double> >& A,
         const GenMatrix<std::complex<double> >& B,
-        const int beta, const MatrixView<std::complex<double> >& C)
+        const int beta, MatrixView<std::complex<double> > C)
     {
         int m = C.iscm() ? C.colsize() : C.rowsize();
         int n = C.iscm() ? C.rowsize() : C.colsize();
@@ -275,7 +275,7 @@ namespace tmv {
     template <> 
     void BlasMultMM(
         const float alpha, const GenSymMatrix<float>& A,
-        const GenMatrix<float>& B, const int beta, const MatrixView<float>& C)
+        const GenMatrix<float>& B, const int beta, MatrixView<float> C)
     {
         int m = C.iscm() ? C.colsize() : C.rowsize();
         int n = C.iscm() ? C.rowsize() : C.colsize();
@@ -296,7 +296,7 @@ namespace tmv {
         std::complex<float> alpha,
         const GenSymMatrix<std::complex<float> >& A,
         const GenMatrix<std::complex<float> >& B,
-        const int beta, const MatrixView<std::complex<float> >& C)
+        const int beta, MatrixView<std::complex<float> > C)
     {
         int m = C.iscm() ? C.colsize() : C.rowsize();
         int n = C.iscm() ? C.rowsize() : C.colsize();
@@ -327,7 +327,7 @@ namespace tmv {
     static void BlasMultMM(
         const std::complex<T> alpha,
         const GenSymMatrix<std::complex<T> >& A, const GenMatrix<T>& B,
-        const int beta, const MatrixView<std::complex<T> >& C)
+        const int beta, MatrixView<std::complex<T> > C)
     {
         if (TMV_IMAG(alpha) == T(0)) {
             SymMatrix<T,Lower|ColMajor> A1 = A.realPart();
@@ -384,7 +384,7 @@ namespace tmv {
     static void BlasMultMM(
         const std::complex<T> alpha,
         const GenSymMatrix<T>& A, const GenMatrix<std::complex<T> >& B,
-        const int beta, const MatrixView<std::complex<T> >& C)
+        const int beta, MatrixView<std::complex<T> > C)
     {
         if (TMV_IMAG(alpha) == T(0)) {
             Matrix<T,ColMajor> B1 = B.realPart();
@@ -416,7 +416,7 @@ namespace tmv {
     static void BlasMultMM(
         const std::complex<T> alpha,
         const GenSymMatrix<T>& A, const GenMatrix<T>& B,
-        const int beta, const MatrixView<std::complex<T> >& C)
+        const int beta, MatrixView<std::complex<T> > C)
     {
         Matrix<T,ColMajor> C1 = A*B;
         if (beta == 0) C = alpha*C1;
@@ -427,7 +427,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void DoMultMM(
         const T alpha, const GenSymMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.size() == C.colsize());
         TMVAssert(A.size() == B.colsize());
@@ -541,7 +541,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void FullTempMultMM(
         const T alpha, const GenSymMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         if (C.isrm()) {
             Matrix<T,RowMajor> C2(C.colsize(),C.rowsize());
@@ -559,7 +559,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void BlockTempMultMM(
         const T alpha, const GenSymMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         const int N = C.rowsize();
         for(int j=0;j<N;) {
@@ -588,7 +588,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenSymMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     // C (+)= alpha * A * B
     {
         TMVAssert(A.size() == C.colsize());
@@ -640,7 +640,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void BlockTempMultMM(
         const T alpha, const GenSymMatrix<Ta>& A, const GenSymMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.size() == B.size());
         TMVAssert(A.size() == C.colsize());
@@ -688,7 +688,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void FullTempMultMM(
         const T alpha, const GenSymMatrix<Ta>& A, const GenSymMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         if (C.isrm()) {
             Matrix<T,RowMajor> C2(C.colsize(),C.rowsize());
@@ -706,7 +706,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenSymMatrix<Ta>& A,
-        const GenSymMatrix<Tb>& B, const MatrixView<T>& C)
+        const GenSymMatrix<Tb>& B, MatrixView<T> C)
     // C (+)= alpha * A * B
     {
         TMVAssert(A.size() == B.size());

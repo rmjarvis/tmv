@@ -43,7 +43,7 @@ namespace tmv {
     template <class T, class T1, class T2> 
     void QR_LDiv(
         const GenMatrix<T1>& QRx, const GenVector<T1>& beta, const int* P,
-        const GenMatrix<T2>& m, const MatrixView<T>& x, int N1)
+        const GenMatrix<T2>& m, MatrixView<T> x, int N1)
     {
         TMVAssert(QRx.colsize() >= QRx.rowsize());
         TMVAssert(beta.size() == QRx.rowsize());
@@ -111,7 +111,7 @@ namespace tmv {
     template <class T, class T1> 
     void QR_LDivEq(
         const GenMatrix<T1>& QRx, const GenVector<T1>& beta, const int* P,
-        const MatrixView<T>& m, int N1)
+        MatrixView<T> m, int N1)
     {
         TMVAssert(QRx.colsize() == QRx.rowsize());
         TMVAssert(beta.size() == QRx.rowsize());
@@ -136,7 +136,7 @@ namespace tmv {
     template <class T, class T1, class T2> 
     void QR_RDiv(
         const GenMatrix<T1>& QRx, const GenVector<T1>& beta, const int* P,
-        const GenMatrix<T2>& m, const MatrixView<T>& x, int N1)
+        const GenMatrix<T2>& m, MatrixView<T> x, int N1)
     {
         TMVAssert(QRx.colsize() >= QRx.rowsize());
         TMVAssert(beta.size() == QRx.rowsize());
@@ -182,7 +182,7 @@ namespace tmv {
     template <class T, class T1> 
     void QR_RDivEq(
         const GenMatrix<T1>& QRx, const GenVector<T1>& beta, const int* P,
-        const MatrixView<T>& m, int N1)
+        MatrixView<T> m, int N1)
     {
         TMVAssert(QRx.colsize() == QRx.rowsize());
         TMVAssert(beta.size() == QRx.rowsize());

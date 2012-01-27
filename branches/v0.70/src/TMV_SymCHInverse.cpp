@@ -50,7 +50,7 @@ using std::endl;
 namespace tmv {
 
     template <class T> 
-    static void NonLapCHInverse(const SymMatrixView<T>& sinv)
+    static void NonLapCHInverse(SymMatrixView<T> sinv)
     {
         TMVAssert(sinv.isherm());
         // inv = (L Lt)^-1 = Lt^-1 L^-1
@@ -61,11 +61,11 @@ namespace tmv {
 
 #ifdef ALAP
     template <class T> 
-    static inline void LapCHInverse(const SymMatrixView<T>& sinv)
+    static inline void LapCHInverse(SymMatrixView<T> sinv)
     { NonLapCHInverse(sinv); }
 #ifdef INST_DOUBLE
     template <> 
-    void LapCHInverse(const SymMatrixView<double>& sinv)
+    void LapCHInverse(SymMatrixView<double> sinv)
     {
         TMVAssert(sinv.isherm());
         TMVAssert(sinv.iscm());
@@ -78,8 +78,7 @@ namespace tmv {
         LAP_Results("dpotri");
     }
     template <> 
-    void LapCHInverse(
-        const SymMatrixView<std::complex<double> >& sinv)
+    void LapCHInverse(SymMatrixView<std::complex<double> > sinv)
     {
         TMVAssert(sinv.isherm());
         TMVAssert(sinv.iscm());
@@ -94,7 +93,7 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <> 
-    void LapCHInverse(const SymMatrixView<float>& sinv)
+    void LapCHInverse(SymMatrixView<float> sinv)
     {
         TMVAssert(sinv.isherm());
         TMVAssert(sinv.iscm());
@@ -107,8 +106,7 @@ namespace tmv {
         LAP_Results("spotri");
     }
     template <> 
-    void LapCHInverse(
-        const SymMatrixView<std::complex<float> >& sinv)
+    void LapCHInverse(SymMatrixView<std::complex<float> > sinv)
     {
         TMVAssert(sinv.isherm());
         TMVAssert(sinv.iscm());
@@ -124,7 +122,7 @@ namespace tmv {
 #endif // LAP
 
     template <class T, class T1> 
-    void CH_Inverse(const GenSymMatrix<T1>& LLx, const SymMatrixView<T>& sinv) 
+    void CH_Inverse(const GenSymMatrix<T1>& LLx, SymMatrixView<T> sinv) 
     {
         TMVAssert(LLx.size() == sinv.size());
 

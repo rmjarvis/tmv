@@ -100,7 +100,7 @@ namespace tmv {
     LUDiv<T>::~LUDiv() {}
 
     template <class T> template <class T1> 
-    void LUDiv<T>::doLDivEq(const MatrixView<T1>& m) const
+    void LUDiv<T>::doLDivEq(MatrixView<T1> m) const
     {
         TMVAssert(pimpl->LUx.colsize() == m.colsize());
         if (pimpl->istrans) 
@@ -110,7 +110,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void LUDiv<T>::doRDivEq(const MatrixView<T1>& m) const
+    void LUDiv<T>::doRDivEq(MatrixView<T1> m) const
     {
         TMVAssert(pimpl->LUx.colsize() == m.rowsize());
         if (pimpl->istrans) 
@@ -121,7 +121,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void LUDiv<T>::doLDiv(
-        const GenMatrix<T1>& m1, const MatrixView<T2>& m0) const
+        const GenMatrix<T1>& m1, MatrixView<T2> m0) const
     {
         TMVAssert(m1.colsize() == m0.colsize());
         TMVAssert(m1.rowsize() == m0.rowsize());
@@ -131,7 +131,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void LUDiv<T>::doRDiv(
-        const GenMatrix<T1>& m1, const MatrixView<T2>& m0) const
+        const GenMatrix<T1>& m1, MatrixView<T2> m0) const
     {
         TMVAssert(m1.colsize() == m0.colsize());
         TMVAssert(m1.rowsize() == m0.rowsize());
@@ -166,7 +166,7 @@ namespace tmv {
     }                  
 
     template <class T> template <class T1> 
-    void LUDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
+    void LUDiv<T>::doMakeInverse(MatrixView<T1> minv) const
     {
         TMVAssert(minv.colsize() == pimpl->LUx.colsize());
         TMVAssert(minv.rowsize() == pimpl->LUx.colsize());
@@ -179,7 +179,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void LUDiv<T>::doMakeInverseATA(const MatrixView<T>& ata) const
+    void LUDiv<T>::doMakeInverseATA(MatrixView<T> ata) const
     {
         TMVAssert(ata.colsize() == pimpl->LUx.colsize());
         TMVAssert(ata.rowsize() == pimpl->LUx.colsize());

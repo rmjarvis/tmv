@@ -2,7 +2,7 @@
 #define CT std::complex<T>
 
 #define DefInv(T) \
-template void TriInverse(const UpperTriMatrixView<T >& minv); \
+template void TriInverse(UpperTriMatrixView<T > minv); \
 
 DefInv(T)
 #ifdef INST_COMPLEX

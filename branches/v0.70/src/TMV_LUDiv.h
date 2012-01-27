@@ -37,31 +37,31 @@ namespace tmv {
 
     template <class T, class T1> 
     void LU_LDivEq(
-        const GenMatrix<T1>& LUx, const int* P, const MatrixView<T>& m);
+        const GenMatrix<T1>& LUx, const int* P, MatrixView<T> m);
 
     template <class T, class T1> 
     void LU_RDivEq(
-        const GenMatrix<T1>& LUx, const int* P, const MatrixView<T>& m);
+        const GenMatrix<T1>& LUx, const int* P, MatrixView<T> m);
 
     template <class T, class T1> 
     void LU_Inverse(
-        const GenMatrix<T1>& LUx, const int* P, const MatrixView<T>& m);
+        const GenMatrix<T1>& LUx, const int* P, MatrixView<T> m);
 
     // Specialize disallowed complex combinations:
 #define CT std::complex<T>
     template <class T> 
     inline void LU_LDivEq(
-        const GenMatrix<CT>& , const int* , const MatrixView<T>& )
+        const GenMatrix<CT>& , const int* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <class T> 
     inline void LU_RDivEq(
-        const GenMatrix<CT>& , const int* , const MatrixView<T>& )
+        const GenMatrix<CT>& , const int* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <class T> 
     inline void LU_Inverse(
-        const GenMatrix<CT>& , const int* , const MatrixView<T>& )
+        const GenMatrix<CT>& , const int* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 #undef CT
 

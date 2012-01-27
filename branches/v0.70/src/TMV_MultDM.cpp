@@ -49,7 +49,7 @@ namespace tmv {
 
     template <bool rm, bool ca, class T, class Ta> 
     static void RowMultEqMM(
-        const GenDiagMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenDiagMatrix<Ta>& A, MatrixView<T> B)
     {
         // B = A * B
         // Bij = Ai * Bij
@@ -101,7 +101,7 @@ namespace tmv {
 
     template <bool cm, bool ca, class T, class Ta> 
     static void DoColMultEqMM(
-        const GenDiagMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenDiagMatrix<Ta>& A, MatrixView<T> B)
     {
         // B = A * B 
         // Bij = Ai * Bij
@@ -136,7 +136,7 @@ namespace tmv {
 
     template <bool cm, bool ca, class T, class Ta> 
     static inline void ColMultEqMM(
-        const GenDiagMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenDiagMatrix<Ta>& A, MatrixView<T> B)
     {
         if (A.diag().step() == 1)
             DoColMultEqMM<cm,ca>(A,B);
@@ -149,7 +149,7 @@ namespace tmv {
     template <class T, class Ta> 
     void MultEqMM(
         const T alpha,
-        const GenDiagMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenDiagMatrix<Ta>& A, MatrixView<T> B)
     // B = alpha * A * B
     {
         TMVAssert(A.size() == B.colsize());
@@ -213,7 +213,7 @@ namespace tmv {
     template <bool rm, bool ca, bool cb, class T, class Ta, class Tb>
     static void DoRowAddMultMM(
         const GenDiagMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         // C += A * B
         // Cij += Ai * Bij
@@ -267,7 +267,7 @@ namespace tmv {
     template <bool rm, bool ca, class T, class Ta, class Tb>
     static inline void RowAddMultMM(
         const GenDiagMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         if (B.isconj()) DoRowAddMultMM<rm,ca,true>(A,B,C);
         else DoRowAddMultMM<rm,ca,false>(A,B,C);
@@ -276,7 +276,7 @@ namespace tmv {
     template <bool cm, bool ca, bool cb, class T, class Ta, class Tb> 
     static void DoColAddMultMM(
         const GenDiagMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         // C += A * B 
         // Cij = Ai * Bij
@@ -318,7 +318,7 @@ namespace tmv {
     template <bool cm, bool ca, class T, class Ta, class Tb> 
     static void ColAddMultMM(
         const GenDiagMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     { 
         if (A.diag().step() == 1)
             if (B.isconj())
@@ -337,7 +337,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static void AddMultMM(const T alpha,
                           const GenDiagMatrix<Ta>& A, const GenMatrix<Tb>& B,
-                          const MatrixView<T>& C)
+                          MatrixView<T> C)
     // C += alpha * A * B
     {
         TMVAssert(A.size() == B.colsize());
@@ -419,7 +419,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenDiagMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     // C (+)= alpha * A * B
     {
         TMVAssert(A.size() == B.colsize());

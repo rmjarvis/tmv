@@ -64,7 +64,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void DoMultMM(
         const T alpha, const GenSymBandMatrix<Ta>& A,
-        const GenBandMatrix<Tb>& B, const BandMatrixView<T>& C)
+        const GenBandMatrix<Tb>& B, BandMatrixView<T> C)
     {
         TMVAssert(A.size() == C.colsize());
         TMVAssert(A.size() == B.colsize());
@@ -106,7 +106,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void TempMultMM(
         const T alpha, const GenSymBandMatrix<Ta>& A,
-        const GenBandMatrix<Tb>& B, const BandMatrixView<T>& C)
+        const GenBandMatrix<Tb>& B, BandMatrixView<T> C)
     {
         if (C.isrm()) {
             BandMatrix<T,RowMajor> C2(C.colsize(),C.rowsize(),C.nlo(),C.nhi());
@@ -129,7 +129,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenSymBandMatrix<Ta>& A,
-        const GenBandMatrix<Tb>& B, const BandMatrixView<T>& C)
+        const GenBandMatrix<Tb>& B, BandMatrixView<T> C)
         // C (+)= alpha * A * B
     {
         TMVAssert(A.size() == C.colsize());
@@ -180,7 +180,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenSymBandMatrix<Ta>& A, 
-        const GenSymBandMatrix<Tb>& B, const BandMatrixView<T>& C)
+        const GenSymBandMatrix<Tb>& B, BandMatrixView<T> C)
         // C (+)= alpha * A * B
     {
         TMVAssert(A.size() == C.colsize());

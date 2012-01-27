@@ -3,7 +3,7 @@
 
 #define Def1(RT,T,Ref) \
   template T GenSymBandMatrix<T >::cref(int i, int j) const; \
-  template Ref SymBandMatrixView<T,CStyle>::ref(int i, int j) const; \
+  template Ref SymBandMatrixView<T,CStyle>::ref(int i, int j); \
   template bool GenSymBandMatrix<T >::hasSubMatrix( \
       int i1, int i2, int j1, int j2, int is, int js) const; \
   template bool GenSymBandMatrix<T >::hasSubBandMatrix( \
@@ -36,7 +36,7 @@
   template RT GenSymBandMatrix<T >::doCondition() const; \
   template QuotXsB<T,T > GenSymBandMatrix<T >::QInverse() const; \
   template void GenSymBandMatrix<T >::write(const TMV_Writer& writer) const; \
-  template void SymBandMatrixView<T,CStyle>::read(const TMV_Reader& reader) const; \
+  template void SymBandMatrixView<T,CStyle>::read(const TMV_Reader& reader); \
   template SymBandMatrix<T,Upper|DiagMajor> SymTriDiagMatrix( \
       const GenVector<T >& v1, const GenVector<T >& v2); \
   template HermBandMatrix<T,Upper|DiagMajor> HermTriDiagMatrix( \
@@ -72,7 +72,7 @@ Def1b(T,CT)
 
 #define Def2(T1,T2) \
   template void GenSymBandMatrix<T1 >::doMakeInverse( \
-      const SymMatrixView<T2 >& sinv) const; \
+      SymMatrixView<T2 > sinv) const; \
 
 Def2(T,T)
 #ifdef INST_COMPLEX

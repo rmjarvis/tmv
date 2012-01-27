@@ -3,9 +3,9 @@
 
 #define DefR1(T,Tx,Ty)\
   template void Rank1Update<true>(const T alpha,const GenVector<Tx >& x, \
-      const GenVector<Ty >& y, const MatrixView<T >& A); \
+      const GenVector<Ty >& y, MatrixView<T > A); \
   template void Rank1Update<false>(const T alpha,const GenVector<Tx >& x, \
-      const GenVector<Ty >& y, const MatrixView<T >& A); \
+      const GenVector<Ty >& y, MatrixView<T > A); \
 
 DefR1(T,T,T)
 #ifdef INST_COMPLEX

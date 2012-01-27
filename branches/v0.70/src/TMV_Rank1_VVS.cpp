@@ -59,7 +59,7 @@ namespace tmv {
 
     template <bool a1, bool cx, bool ha, bool rm, bool add, class T, class Tx, class Ta> 
     static void RowRank1Update(
-        const Ta alpha, const GenVector<Tx>& x, const SymMatrixView<T>& A)
+        const Ta alpha, const GenVector<Tx>& x, SymMatrixView<T> A)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
@@ -152,7 +152,7 @@ namespace tmv {
 
     template <bool a1, bool cx, bool ha, bool cm, bool add, class T, class Tx, class Ta> 
     static void ColRank1Update(
-        const Ta alpha, const GenVector<Tx>& x, const SymMatrixView<T>& A)
+        const Ta alpha, const GenVector<Tx>& x, SymMatrixView<T> A)
     {
         TMVAssert(x.step()==1);
         TMVAssert(x.size() > 0);
@@ -229,7 +229,7 @@ namespace tmv {
 
     template <bool a1, bool cx, bool add, class T, class Ta, class Tx>
     static void DoRank1Update(
-        const Ta alpha, const GenVector<Tx>& x, const SymMatrixView<T>& A)
+        const Ta alpha, const GenVector<Tx>& x, SymMatrixView<T> A)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(x.size() > 0);
@@ -251,7 +251,7 @@ namespace tmv {
 
     template <bool add, class T, class Tx> 
     static void NonBlasRank1Update(
-        const T alpha, const GenVector<Tx>& x, const SymMatrixView<T>& A)
+        const T alpha, const GenVector<Tx>& x, SymMatrixView<T> A)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(alpha != T(0));
@@ -296,13 +296,13 @@ namespace tmv {
 #ifdef BLAS
     template <class T, class Tx> 
     static inline void BlasRank1Update(
-        const T alpha, const GenVector<Tx>& x, const SymMatrixView<T>& A)
+        const T alpha, const GenVector<Tx>& x, SymMatrixView<T> A)
     { NonBlasRank1Update<true>(alpha,x,A); }
 #ifdef INST_DOUBLE
     template <> 
     void BlasRank1Update(
         const double alpha, const GenVector<double>& x,
-        const SymMatrixView<double>& A)
+        SymMatrixView<double> A)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(alpha != 0.);
@@ -326,7 +326,7 @@ namespace tmv {
     void BlasRank1Update(
         const std::complex<double> alpha,
         const GenVector<std::complex<double> >& x, 
-        const SymMatrixView<std::complex<double> >& A)
+        SymMatrixView<std::complex<double> > A)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(alpha != 0.);
@@ -390,7 +390,7 @@ namespace tmv {
     void BlasRank1Update(
         const std::complex<double> alpha,
         const GenVector<double>& x, 
-        const SymMatrixView<std::complex<double> >& A)
+        SymMatrixView<std::complex<double> > A)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(alpha != 0.);
@@ -409,7 +409,7 @@ namespace tmv {
     template <> 
     void BlasRank1Update(
         const float alpha, const GenVector<float>& x,
-        const SymMatrixView<float>& A)
+        SymMatrixView<float> A)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(alpha != 0.);
@@ -433,7 +433,7 @@ namespace tmv {
     void BlasRank1Update(
         const std::complex<float> alpha,
         const GenVector<std::complex<float> >& x, 
-        const SymMatrixView<std::complex<float> >& A)
+        SymMatrixView<std::complex<float> > A)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(alpha != 0.F);
@@ -497,7 +497,7 @@ namespace tmv {
     void BlasRank1Update(
         const std::complex<float> alpha,
         const GenVector<float>& x, 
-        const SymMatrixView<std::complex<float> >& A)
+        SymMatrixView<std::complex<float> > A)
     {
         TMVAssert(A.size() == x.size());
         TMVAssert(alpha != 0.F);
@@ -516,7 +516,7 @@ namespace tmv {
 
     template <bool add, class T, class Tx> 
     void Rank1Update(
-        const T alpha, const GenVector<Tx>& x, const SymMatrixView<T>& A)
+        const T alpha, const GenVector<Tx>& x, SymMatrixView<T> A)
     // A (+)= alpha * x * xT
     {
 #ifdef XDEBUG

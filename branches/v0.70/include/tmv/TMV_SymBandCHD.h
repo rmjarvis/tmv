@@ -53,11 +53,28 @@ namespace tmv {
     // Decompose A into L*Lt.
     // On output, L = A.lowerBand().
     template <class T> 
-    void CH_Decompose(const SymBandMatrixView<T>& A);
+    void CH_Decompose(SymBandMatrixView<T> A);
 
     // Decompose Tridiagonal A into L D Lt
     template <class T> 
-    void LDL_Decompose(const SymBandMatrixView<T>& A);
+    void LDL_Decompose(SymBandMatrixView<T> A);
+
+    template <class T, int A1> 
+    inline void CH_Decompose(HermBandMatrix<T,A1>& A)
+    { CH_Decompose(A.view()); }
+
+    template <class T, int A1> 
+    inline void CH_Decompose(SymBandMatrix<T,A1>& A)
+    { CH_Decompose(A.view()); }
+
+    template <class T, int A1> 
+    inline void LDL_Decompose(HermBandMatrix<T,A1>& A)
+    { LDL_Decompose(A.view()); }
+
+    template <class T, int A1> 
+    inline void LDL_Decompose(SymBandMatrix<T,A1>& A)
+    { LDL_Decompose(A.view()); }
+
 
     template <class T> 
     class HermBandCHDiv : public SymDivider<T> 
@@ -77,13 +94,13 @@ namespace tmv {
         //
 
         template <class T1> 
-        void doLDivEq(const MatrixView<T1>& m) const;
+        void doLDivEq(MatrixView<T1> m) const;
         template <class T1> 
-        void doRDivEq(const MatrixView<T1>& m) const;
+        void doRDivEq(MatrixView<T1> m) const;
         template <class T1, class T2> 
-        void doLDiv(const GenMatrix<T1>& m1, const MatrixView<T2>& m0) const;
+        void doLDiv(const GenMatrix<T1>& m1, MatrixView<T2> m0) const;
         template <class T1, class T2> 
-        void doRDiv(const GenMatrix<T1>& m1, const MatrixView<T2>& m0) const;
+        void doRDiv(const GenMatrix<T1>& m1, MatrixView<T2> m0) const;
 
         //
         // Determinant, Inverse
@@ -92,24 +109,22 @@ namespace tmv {
         T det() const;
         TMV_RealType(T) logDet(T* sign) const;
         template <class T1> 
-        void doMakeInverse(const MatrixView<T1>& minv) const;
+        void doMakeInverse(MatrixView<T1> minv) const;
         template <class T1> 
-        void doMakeInverse(const SymMatrixView<T1>& minv) const;
-        inline void makeInverse(
-            const SymMatrixView<TMV_RealType(T)>& sinv) const
+        void doMakeInverse(SymMatrixView<T1> minv) const;
+        inline void makeInverse(SymMatrixView<TMV_RealType(T)> sinv) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(sinv.size() == colsize());
             doMakeInverse(sinv);
         }
-        inline void makeInverse(
-            const SymMatrixView<TMV_ComplexType(T)>& sinv) const
+        inline void makeInverse(SymMatrixView<TMV_ComplexType(T)> sinv) const
         {
             TMVAssert(sinv.size() == colsize());
             TMVAssert(sinv.isherm());
             doMakeInverse(sinv);
         }
-        void doMakeInverseATA(const MatrixView<T>& minv) const;
+        void doMakeInverseATA(MatrixView<T> minv) const;
         bool isSingular() const;
 
 #include "tmv/TMV_AuxAllDiv.h"

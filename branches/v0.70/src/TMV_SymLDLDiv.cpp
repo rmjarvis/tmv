@@ -105,7 +105,7 @@ namespace tmv {
     template <class T, class T1> 
     void LDL_LDivEq(
         const GenSymMatrix<T1>& LL, const GenVector<T1>& xD, const int* P, 
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         // Solve P L D Lt Pt x = m:
         TMVAssert(LL.size() == m.colsize());
@@ -162,7 +162,7 @@ namespace tmv {
     template <class T, class T1> 
     void LDL_RDivEq(
         const GenSymMatrix<T1>& LL, const GenVector<T1>& xD, const int* P, 
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         // Solve x P L D Lt Pt = m:
         // P L Dt Lt Pt xt = mt

@@ -73,7 +73,7 @@ namespace tmv {
 
     template <class T, int A>
     typename SymMatrixView<T,A>::reference SymMatrixView<T,A>::ref(
-        int i, int j) const
+        int i, int j)
     {
         if ((uplo() == Upper && i<=j) || (uplo() == Lower && i>=j)) {
             T* mi = ptr() + i*stepi() + j*stepj();
@@ -129,7 +129,7 @@ namespace tmv {
     { return QuotXS<T,T>(T(1),*this); }
 
     template <class T> template <class T1> 
-    void GenSymMatrix<T>::doMakeInverse(const SymMatrixView<T1>& sinv) const
+    void GenSymMatrix<T>::doMakeInverse(SymMatrixView<T1> sinv) const
     {
         TMVAssert(issym() == sinv.issym());
         TMVAssert(isherm() == sinv.isherm());
@@ -467,8 +467,7 @@ namespace tmv {
     //
 
     template <class T, int A>
-    const SymMatrixView<T,A>& SymMatrixView<T,A>::swapRowsCols(
-        int i1, int i2) const
+    SymMatrixView<T,A>& SymMatrixView<T,A>::swapRowsCols(int i1, int i2)
     {
         TMVAssert(i1<size());
         TMVAssert(i2<size());
@@ -507,8 +506,8 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const SymMatrixView<T,A>& SymMatrixView<T,A>::permuteRowsCols(
-        const int* p, int i1, int i2) const
+    SymMatrixView<T,A>& SymMatrixView<T,A>::permuteRowsCols(
+        const int* p, int i1, int i2) 
     {
         const int* pi = p+i1;
         for(int i=i1;i<i2;++i,++pi) {
@@ -519,8 +518,8 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const SymMatrixView<T,A>& SymMatrixView<T,A>::reversePermuteRowsCols(
-        const int* p, int i1, int i2) const
+    SymMatrixView<T,A>& SymMatrixView<T,A>::reversePermuteRowsCols(
+        const int* p, int i1, int i2)
     {
         const int* pi = p+i2;
         for(int i=i2;i>i1;) {
@@ -1100,8 +1099,7 @@ namespace tmv {
 #endif
 
     template <class T>
-    static void FinishRead(
-        const TMV_Reader& reader, const SymMatrixView<T>& m) 
+    static void FinishRead(const TMV_Reader& reader, SymMatrixView<T> m) 
     {
         const int N = m.size();
         std::string exp, got;
@@ -1327,7 +1325,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    void SymMatrixView<T,A>::read(const TMV_Reader& reader) const
+    void SymMatrixView<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
         if (!reader.readCode(issym()?"S":"H",exp,got) && 

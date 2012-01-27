@@ -3,9 +3,9 @@
 
 #define DefDivEq(T,T1)\
 template void TriLDivEq(const GenUpperTriMatrix<T1 >& A, \
-    const UpperTriMatrixView<T >& m); \
+    UpperTriMatrixView<T > m); \
 template void TriLDivEq(const GenLowerTriMatrix<T1 >& A, \
-    const LowerTriMatrixView<T >& m); \
+    LowerTriMatrixView<T > m); \
 
 DefDivEq(T,T)
 #ifdef INST_COMPLEX

@@ -41,48 +41,48 @@ namespace tmv {
 
     template <class T, class Td> 
     void Tridiagonalize(
-        const SymMatrixView<T>& A, const VectorView<T>& beta,
-        const VectorView<Td>& D, const VectorView<RT>& E, T& signdet);
+        SymMatrixView<T> A, VectorView<T> beta,
+        VectorView<Td> D, VectorView<RT> E, T& signdet);
 
     template <class T> 
     void EigenFromTridiagonal(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E);
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E);
 
     template <class T> 
-    void UnsortedHermEigen(const MatrixView<T>& U, const VectorView<RT>& S);
+    void UnsortedHermEigen(MatrixView<T> U, VectorView<RT> S);
     template <class T> 
-    void UnsortedEigen(const SymMatrixView<T>& A, const VectorView<RT>& S);
+    void UnsortedEigen(SymMatrixView<T> A, VectorView<RT> S);
 
     template <class T> 
-    void HermSV_Decompose(const MatrixView<T>& U, const DiagMatrixView<RT>& S);
+    void HermSV_Decompose(MatrixView<T> U, DiagMatrixView<RT> S);
     template <class T> 
     void SymSV_Decompose(
-        const MatrixView<T>& U,
-        const DiagMatrixView<RT>& S, MVP<T> Vt, RT& logdet, T& signdet);
+        MatrixView<T> U,
+        DiagMatrixView<RT> S, MVP<T> Vt, RT& logdet, T& signdet);
     template <class T> 
     void SV_Decompose(
-        const SymMatrixView<T>& A, const DiagMatrixView<RT>& S, MVP<T> Vt);
+        SymMatrixView<T> A, DiagMatrixView<RT> S, MVP<T> Vt);
 
     template <class T, class T1> 
     void HermSV_Inverse(
         const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S, 
-        int kmax, const SymMatrixView<T>& sinv);
+        int kmax, SymMatrixView<T> sinv);
     template <class T, class T1> 
     void SymSV_Inverse(
         const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S,
-        const GenMatrix<T1>& Vt, int kmax, const SymMatrixView<T>& sinv);
+        const GenMatrix<T1>& Vt, int kmax, SymMatrixView<T> sinv);
 
     template <class T> 
     void HermTridiagonalChopSmallElements(
-        const VectorView<T>& D, const VectorView<T>& E);
+        VectorView<T> D, VectorView<T> E);
 
     template <class T> 
     void EigenFromTridiagonal_QR(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E);
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E);
 
     template <class T> 
     void EigenFromTridiagonal_DC(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, bool UisI);
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E, bool UisI);
 
     template <class T> 
     void FindDCEigenValues(
@@ -102,37 +102,37 @@ namespace tmv {
     template <class T, class T1> 
     inline void CallHermSV_Inverse(
         T , const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S,
-        int kmax, const SymMatrixView<T>& sinv)
+        int kmax, SymMatrixView<T> sinv)
     { HermSV_Inverse(U,S,kmax,sinv); }
 
     template <class T, class T1> 
     inline void CallHermSV_Inverse(
         T , const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S, 
-        int kmax, const SymMatrixView<CT>& sinv)
+        int kmax, SymMatrixView<CT> sinv)
     { HermSV_Inverse(U,S,kmax,sinv); }
 
     template <class T, class T1> 
     inline void CallSymSV_Inverse(
         T , const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S,
-        const GenMatrix<T1>& Vt, int kmax, const SymMatrixView<T>& sinv)
+        const GenMatrix<T1>& Vt, int kmax, SymMatrixView<T> sinv)
     { SymSV_Inverse(U,S,Vt,kmax,sinv); }
 
     template <class T, class T1> 
     inline void CallSymSV_Inverse(
         T , const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S,
-        const GenMatrix<T1>& Vt, int kmax, const SymMatrixView<CT>& sinv)
+        const GenMatrix<T1>& Vt, int kmax, SymMatrixView<CT> sinv)
     { SymSV_Inverse(U,S,Vt,kmax,sinv); }
 
     // Specialize disallowed complex combinations:
     template <class T>
     inline void CallHermSV_Inverse(
         CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& , 
-        int , const SymMatrixView<T>& )
+        int , SymMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void CallSymSV_Inverse(
         CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
-        const GenMatrix<CT>& , int , const SymMatrixView<T>& )
+        const GenMatrix<CT>& , int , SymMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
 #undef CT

@@ -220,13 +220,13 @@ void TestHermBandDecomp()
 
 #if (XTEST & 16)
             tmv::HermBandMatrix<T,uplo|stor> m2 = m;
-            CH_Decompose(m2.view());
+            CH_Decompose(m2);
             L = m2.lowerBand();
             LLt = L*L.adjoint();
             Assert(Norm(m-LLt) <= eps*normm,"HermBand CH2");
 
             tmv::HermBandMatrix<CT,uplo|stor> c2 = c;
-            CH_Decompose(c2.view());
+            CH_Decompose(c2);
             cL = c2.lowerBand();
             cLLt = cL*cL.adjoint();
             Assert(Norm(c-cLLt) <= ceps*normc,"HermBand C CH2");
@@ -270,7 +270,7 @@ void TestHermBandDecomp()
 
 #if (XTEST & 16)
                 tmv::HermBandMatrix<T,uplo|stor> m2 = m;
-                LDL_Decompose(m2.view());
+                LDL_Decompose(m2);
                 (L = m2.lowerBand()).diag().setAllTo(T(1));
                 D = DiagMatrixViewOf(m2.diag());
                 LDL = L*D*L.adjoint();
@@ -288,7 +288,7 @@ void TestHermBandDecomp()
                 Assert(Norm(m-LDL) <= eps*normm,"HermBand LDL2 Alt");
 
                 tmv::HermBandMatrix<CT,uplo|stor> c2 = c;
-                LDL_Decompose(c2.view());
+                LDL_Decompose(c2);
                 (cL = c2.lowerBand()).diag().setAllTo(T(1));
                 cD = DiagMatrixViewOf(c2.diag());
                 cLDL = cL*cD*cL.adjoint();
@@ -357,21 +357,21 @@ void TestHermBandDecomp()
             tmv::Matrix<T> U2(N,N);
             tmv::DiagMatrix<T> S2(N);
             tmv::Matrix<T> Vt2(N,N);
-            SV_Decompose(m,U2.view(),S2.view(),Vt2.view());
+            SV_Decompose(m,U2,S2,Vt2);
             if (showacc) {
                 std::cout<<"Norm(m-U*S*Vt) = "<<Norm(m-U2*S2*Vt2)<<std::endl;
                 std::cout<<"eps * normm = "<<eps*normm<<std::endl;
             }
             Assert(Norm(m-U2*S2*Vt2) <= eps*normm,"HermBand SV2");
 
-            SV_Decompose(m,S2.view());
+            SV_Decompose(m,S2);
             Assert(Norm(S2-S) <= eps*normm,"HermBand SV3");
-            SV_Decompose(m,U2.view(),S2.view());
+            SV_Decompose(m,U2,S2);
             Assert(Norm(S2-S) <= eps*normm,"HermBand SV4 S");
             Assert(Norm((m/x)*tmv::Matrix<T>(m.adjoint()/x)-
                         U2*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*U2.adjoint()) <= 
                    eps*(normm/x)*(normm/x),"HermBand SV4 U");
-            SV_Decompose(m,S2.view(),Vt2.view());
+            SV_Decompose(m,S2,Vt2);
             Assert(Norm(S2-S) <= eps*normm,"HermBand SV5 S");
             Assert(Norm((m.adjoint()/x)*tmv::Matrix<T>(m/x)-
                         Vt2.adjoint()*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*Vt2) <= 
@@ -380,30 +380,30 @@ void TestHermBandDecomp()
             tmv::Matrix<CT> cU2(N,N);
             tmv::DiagMatrix<T> cS2(N);
             tmv::Matrix<CT> cVt2(N,N);
-            SV_Decompose(c,cU2.view(),cS2.view(),cVt2.view());
+            SV_Decompose(c,cU2,cS2,cVt2);
             Assert(Norm(c-cU2*cS2*cVt2) <= ceps*normc,"HermBand C SV2");
 
-            SV_Decompose(c,cS2.view());
+            SV_Decompose(c,cS2);
             Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV3");
-            SV_Decompose(c,cU2.view(),cS2.view());
+            SV_Decompose(c,cU2,cS2);
             Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV4 S");
             Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
                         cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <= 
                    ceps*(normc/x)*(normc/x),"HermBand C SV4 U");
-            SV_Decompose(c,cS2.view(),cVt2.view());
+            SV_Decompose(c,cS2,cVt2);
             Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV5 S");
             Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
                         cVt2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cVt2) <= 
                    ceps*(normc/x)*(normc/x),"Herm C SV5 Vt");
 
-            SV_Decompose(c.conjugate(),cS2.view());
+            SV_Decompose(c.conjugate(),cS2);
             Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV6");
-            SV_Decompose(c.conjugate(),cU2.view(),cS2.view());
+            SV_Decompose(c.conjugate(),cU2,cS2);
             Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV7 S");
             Assert(Norm(tmv::Matrix<CT>(c.conjugate()/x)*tmv::Matrix<CT>(c.transpose()/x)-
                         cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <=
                    ceps*(normc/x)*(normc/x),"HermBand C SV7 U");
-            SV_Decompose(c.conjugate(),cU2.conjugate(),cS2.view());
+            SV_Decompose(c.conjugate(),cU2.conjugate(),cS2);
             Assert(Norm(cS2-cS) <= ceps*normc,"HermBand C SV8 S");
             Assert(Norm(tmv::Matrix<CT>(c.conjugate()/x)*tmv::Matrix<CT>(c.transpose()/x)-
                         cU2.conjugate()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.transpose()) <=
@@ -417,30 +417,30 @@ void TestHermBandDecomp()
             if (showstartdone) std::cout<<"Eigen"<<std::endl;
             tmv::Matrix<T> V(N,N);
             tmv::Vector<T> L(N);
-            Eigen(m,V.view(),L.view());
+            Eigen(m,V,L);
             Assert(Norm(m*V-V*DiagMatrixViewOf(L)) <= eps*normm,
                    "HermBand Eigen");
 
             tmv::Matrix<CT> cV(N,N);
             tmv::Vector<T> cL(N);
-            Eigen(c,cV.view(),cL.view());
+            Eigen(c,cV,cL);
             Assert(Norm(c*cV-cV*DiagMatrixViewOf(cL)) <= ceps*normc,
                    "HermBand C Eigen");
 
 #if (XTEST & 16)
             tmv::Vector<T> L2(N);
-            Eigen(m,L2.view());
+            Eigen(m,L2);
             Assert(Norm(L2-L) <= eps*normm,"HermBand Eigen2");
 
             tmv::Vector<T> cL2(N);
-            Eigen(c,cL2.view());
+            Eigen(c,cL2);
             Assert(Norm(cL2-cL) <= ceps*normc,"HermBand C Eigen2");
 
-            Eigen(c,cV.conjugate(),cL.view());
+            Eigen(c,cV.conjugate(),cL);
             Assert(Norm(c*cV.conjugate()-cV.conjugate()*DiagMatrixViewOf(cL)) 
                    <= ceps*normc,"HermBand C Eigen3");
 
-            Eigen(c.conjugate(),cL2.view());
+            Eigen(c.conjugate(),cL2);
             Assert(Norm(cL2-cL) <= ceps*normc,"HermBand C Eigen4");
 #endif
             std::cout<<"."; std::cout.flush();
@@ -456,11 +456,11 @@ void TestHermBandDecomp()
 #endif
                 if (showstartdone) std::cout<<"Square Root"<<std::endl;
                 tmv::HermMatrix<T,uplo|stor> S(N);
-                SquareRoot(m,S.view());
+                SquareRoot(m,S);
                 Assert(Norm(m-S*S) <= eps*normm,"HermBand Square Root");
 
                 tmv::HermMatrix<CT,uplo|stor> cS(N);
-                SquareRoot(c,cS.view());
+                SquareRoot(c,cS);
                 Assert(Norm(c-cS*cS) <= eps*normc,"HermBand C Square Root");
 
 #if (XTEST & 16)
@@ -476,7 +476,7 @@ void TestHermBandDecomp()
                 Assert(Norm(c-cS.adjoint()*cS.adjoint()) <= ceps*normc,
                        "HermBand C Square Root4");
 
-                SquareRoot(c.conjugate(),cS.view());
+                SquareRoot(c.conjugate(),cS);
                 Assert(Norm(c.conjugate()-cS*cS) <= ceps*normc,
                        "HermBand C Square Root5");
 
@@ -693,7 +693,7 @@ void TestSymBandDecomp()
             tmv::BandMatrix<T> LDL(N,N,1,1);
 
             tmv::SymBandMatrix<T,uplo|stor> m2 = m;
-            LDL_Decompose(m2.view());
+            LDL_Decompose(m2);
             (L = m2.lowerBand()).diag().setAllTo(T(1));
             D = DiagMatrixViewOf(m2.diag());
             LDL = L*D*L.transpose();
@@ -717,7 +717,7 @@ void TestSymBandDecomp()
             tmv::BandMatrix<CT> cLDL(N,N,nlo,nlo);
 
             tmv::SymBandMatrix<CT,uplo|stor> c2 = c;
-            LDL_Decompose(c2.view());
+            LDL_Decompose(c2);
             (cL = c2.lowerBand()).diag().setAllTo(T(1));
             cD = DiagMatrixViewOf(c2.diag());
             cLDL = cL*cD*cL.transpose();
@@ -766,17 +766,17 @@ void TestSymBandDecomp()
             tmv::Matrix<T> U2(N,N);
             tmv::DiagMatrix<T> S2(N);
             tmv::Matrix<T> Vt2(N,N);
-            SV_Decompose(m,U2.view(),S2.view(),Vt2.view());
+            SV_Decompose(m,U2,S2,Vt2);
             Assert(Norm(m-U2*S2*Vt2) <= eps*normm,"SymBand SV2");
 
-            SV_Decompose(m,S2.view());
+            SV_Decompose(m,S2);
             Assert(Norm(S2-S) <= eps*normm,"SymBand SV3");
-            SV_Decompose(m,U2.view(),S2.view());
+            SV_Decompose(m,U2,S2);
             Assert(Norm(S2-S) <= eps*normm,"SymBand SV4 S");
             Assert(Norm((m/x)*tmv::Matrix<T>(m.transpose()/x)-
                         U2*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*U2.transpose()) <=
                    eps*(normm/x)*(normm/x),"SymBand SV4 U");
-            SV_Decompose(m,S2.view(),Vt2.view());
+            SV_Decompose(m,S2,Vt2);
             Assert(Norm(S2-S) <= eps*normm,"SymBand SV5 S");
             Assert(Norm((m.adjoint()/x)*tmv::Matrix<T>(m/x)-
                         Vt2.adjoint()*(S2/x)*tmv::DiagMatrix<T>(S2/x)*Vt2) <= 
@@ -785,30 +785,30 @@ void TestSymBandDecomp()
             tmv::Matrix<CT> cU2(N,N);
             tmv::DiagMatrix<T> cS2(N);
             tmv::Matrix<CT> cVt2(N,N);
-            SV_Decompose(c,cU2.view(),cS2.view(),cVt2.view());
+            SV_Decompose(c,cU2,cS2,cVt2);
             Assert(Norm(c-cU2*cS2*cVt2) <= ceps*normc,"SymBand C SV2");
 
-            SV_Decompose(c,cS2.view());
+            SV_Decompose(c,cS2);
             Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV3");
-            SV_Decompose(c,cU2.view(),cS2.view());
+            SV_Decompose(c,cU2,cS2);
             Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV4 S");
             Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
                         cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <=
                    ceps*(normc/x)*(normc/x),"SymBand C SV4 U");
-            SV_Decompose(c,cS2.view(),cVt2.view());
+            SV_Decompose(c,cS2,cVt2);
             Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV5 S");
             Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
                         cVt2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cVt2) <= 
                    ceps*(normc/x)*(normc/x),"SymBand C SV5 Vt");
 
-            SV_Decompose(c.conjugate(),cS2.view());
+            SV_Decompose(c.conjugate(),cS2);
             Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV6");
-            SV_Decompose(c.conjugate(),cU2.view(),cS2.view());
+            SV_Decompose(c.conjugate(),cU2,cS2);
             Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV7 S");
             Assert(Norm(tmv::Matrix<CT>(c.conjugate()/x)*tmv::Matrix<CT>(c.transpose()/x)-
                         cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <=
                    ceps*(normc/x)*(normc/x),"SymBand C SV7 U");
-            SV_Decompose(c.conjugate(),cU2.conjugate(),cS2.view());
+            SV_Decompose(c.conjugate(),cU2.conjugate(),cS2);
             Assert(Norm(cS2-cS) <= ceps*normc,"SymBand C SV8 S");
             Assert(Norm(tmv::Matrix<CT>(c.conjugate()/x)*tmv::Matrix<CT>(c.transpose()/x)-
                         cU2.conjugate()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.transpose()) <=

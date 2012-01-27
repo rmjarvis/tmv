@@ -461,7 +461,7 @@ namespace tmv {
             } else return false;
         }
 
-        inline void assignToM(const MatrixView<RT>& m2) const
+        inline void assignToM(MatrixView<RT> m2) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m2.colsize() == size());
@@ -473,7 +473,7 @@ namespace tmv {
             }
         }
 
-        inline void assignToM(const MatrixView<CT>& m2) const
+        inline void assignToM(MatrixView<CT> m2) const
         {
             TMVAssert(m2.colsize() == size());
             TMVAssert(m2.rowsize() == size());
@@ -484,7 +484,7 @@ namespace tmv {
             }
         }
 
-        inline void assignToD(const DiagMatrixView<RT>& m2) const
+        inline void assignToD(DiagMatrixView<RT> m2) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m2.size() == size());
@@ -492,7 +492,7 @@ namespace tmv {
             m2.diag() = diag();
         }
 
-        inline void assignToD(const DiagMatrixView<CT>& m2) const
+        inline void assignToD(DiagMatrixView<CT> m2) const
         {
             TMVAssert(m2.size() == size());
             TMVAssert(nlo() == 0);
@@ -500,7 +500,7 @@ namespace tmv {
             if (!issym()) m2.diag().imagPart().setZero();
         }
 
-        inline void assignToB(const BandMatrixView<RT>& m2) const
+        inline void assignToB(BandMatrixView<RT> m2) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m2.colsize() == size());
@@ -514,7 +514,7 @@ namespace tmv {
             if (m2.nhi() > nlo()) m2.diagRange(nlo()+1,m2.nhi()+1).setZero();
         }
 
-        inline void assignToB(const BandMatrixView<CT>& m2) const
+        inline void assignToB(BandMatrixView<CT> m2) const
         {
             TMVAssert(m2.colsize() == size());
             TMVAssert(m2.rowsize() == size());
@@ -535,7 +535,7 @@ namespace tmv {
             if (m2.nhi() > nlo()) m2.diagRange(nlo()+1,m2.nhi()+1).setZero();
         }
 
-        inline void assignToS(const SymMatrixView<RT>& m2) const
+        inline void assignToS(SymMatrixView<RT> m2) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m2.size() == size());
@@ -543,7 +543,7 @@ namespace tmv {
             if (size() > nlo()+1) m2.upperTri().offDiag(nlo()+1).setZero();
         }
 
-        inline void assignToS(const SymMatrixView<CT>& m2) const
+        inline void assignToS(SymMatrixView<CT> m2) const
         {
             TMVAssert(m2.size() == size());
             TMVAssert(m2.sym() == sym());
@@ -552,7 +552,7 @@ namespace tmv {
             if (size() > nlo()+1) m2.upperTri().offDiag(nlo()+1).setZero();
         }
 
-        inline void assignTosB(const SymBandMatrixView<RT>& m2) const
+        inline void assignTosB(SymBandMatrixView<RT> m2) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m2.size() == size());
@@ -562,7 +562,7 @@ namespace tmv {
             if (m2.nlo() > nlo()) m2.diagRange(-m2.nlo(),-nlo()).setZero();
         }
 
-        inline void assignTosB(const SymBandMatrixView<CT>& m2) const
+        inline void assignTosB(SymBandMatrixView<CT> m2) const
         {
             TMVAssert(m2.size() == size());
             TMVAssert(m2.nlo() >= nlo());
@@ -928,10 +928,10 @@ namespace tmv {
         }
 
         template <class T1> 
-        void doMakeInverse(const SymMatrixView<T1>& sinv) const;
+        void doMakeInverse(SymMatrixView<T1> sinv) const;
 
         template <class T1> 
-        inline void makeInverse(const SymMatrixView<T1>& minv) const
+        inline void makeInverse(SymMatrixView<T1> minv) const
         {
             TMVAssert(minv.size() == size());
             TMVAssert(isherm() == minv.isherm());
@@ -953,11 +953,11 @@ namespace tmv {
             makeInverse(sinv.view()); 
         }
 
-        inline void makeInverse(const MatrixView<T>& minv) const
+        inline void makeInverse(MatrixView<T> minv) const
         { DivHelper<T>::makeInverse(minv); }
 
         template <class T1> 
-        inline void makeInverse(const MatrixView<T1>& minv) const
+        inline void makeInverse(MatrixView<T1> minv) const
         { DivHelper<T>::makeInverse(minv); }
 
         template <class T1, int A>
@@ -1377,6 +1377,15 @@ namespace tmv {
         typedef SymMatrixView<T,A> sym_type;
         typedef BandMatrixView<T,A> band_type;
         typedef SymBandMatrixView<RT,A> realpart_type;
+        typedef ConstSymBandMatrixView<T,A> const_view_type;
+        typedef view_type const_transpose_type;
+        typedef view_type const_conjugate_type;
+        typedef view_type const_adjoint_type;
+        typedef ConstVectorView<T,A> const_vec_type;
+        typedef ConstMatrixView<T,A> const_rec_type;
+        typedef ConstSymMatrixView<T,A> const_sym_type;
+        typedef ConstBandMatrixView<T,A> const_band_type;
+        typedef ConstSymBandMatrixView<RT,A> const_realpart_type;
         typedef typename RefHelper<T>::reference reference;
 
         //
@@ -1414,7 +1423,7 @@ namespace tmv {
         // Op=
         //
 
-        inline const type& operator=(const type& m2) const
+        inline type& operator=(const type& m2)
         {
             TMVAssert(size() == m2.size());
             TMVAssert(isReal(T()) || m2.sym() == sym());
@@ -1426,19 +1435,7 @@ namespace tmv {
             return *this;
         }
 
-        inline const type& operator=(const type& m2) 
-        {
-            TMVAssert(size() == m2.size());
-            TMVAssert(isReal(T()) || m2.sym() == sym());
-            TMVAssert(nlo() >= m2.nlo());
-            if (!this->isSameAs(m2)) {
-                upperBand() = m2.upperBand();
-                if (nlo() > m2.nlo()) diagRange(-nlo(),-m2.nlo()).setZero();
-            }
-            return *this;
-        }
-
-        inline const type& operator=(const GenSymBandMatrix<RT>& m2) const
+        inline type& operator=(const GenSymBandMatrix<RT>& m2)
         {
             TMVAssert(size() == m2.size());
             TMVAssert(nlo() >= m2.nlo());
@@ -1446,7 +1443,7 @@ namespace tmv {
             return *this; 
         }
 
-        inline const type& operator=(const GenSymBandMatrix<CT>& m2) const
+        inline type& operator=(const GenSymBandMatrix<CT>& m2)
         {
             TMVAssert(isComplex(T()));
             TMVAssert(size() == m2.size());
@@ -1457,7 +1454,7 @@ namespace tmv {
         }
 
         template <class T2> 
-        inline const type& operator=(const GenSymBandMatrix<T2>& m2) const
+        inline type& operator=(const GenSymBandMatrix<T2>& m2)
         {
             TMVAssert(size() == m2.size());
             TMVAssert(isComplex(T()) || isReal(T2()));
@@ -1468,22 +1465,20 @@ namespace tmv {
             return *this; 
         }
 
-        inline const type& operator=(const T& x) const 
+        inline type& operator=(const T& x) 
         {
             TMVAssert(issym() || TMV_IMAG(x) == RT(0));
             return setToIdentity(x); 
         }
 
-        inline const type& operator=(
-            const AssignableToSymBandMatrix<RT>& m2) const
+        inline type& operator=(const AssignableToSymBandMatrix<RT>& m2)
         {
             TMVAssert(size() == m2.size());
             m2.assignTosB(view());
             return *this;
         }
 
-        inline const type& operator=(
-            const AssignableToSymBandMatrix<CT>& m2) const
+        inline type& operator=(const AssignableToSymBandMatrix<CT>& m2)
         {
             TMVAssert(isComplex(T()));
             TMVAssert(size() == m2.size());
@@ -1492,7 +1487,7 @@ namespace tmv {
             return *this;
         }
 
-        inline const type& operator=(const GenDiagMatrix<RT>& m2) const
+        inline type& operator=(const GenDiagMatrix<RT>& m2)
         {
             TMVAssert(size() == m2.size());
             m2.assignToD(DiagMatrixViewOf(diag()));
@@ -1500,7 +1495,7 @@ namespace tmv {
             return *this;
         }
 
-        inline const type& operator=(const GenDiagMatrix<CT>& m2) const
+        inline type& operator=(const GenDiagMatrix<CT>& m2)
         {
             TMVAssert(isComplex(T()));
             TMVAssert(size() == m2.size());
@@ -1514,7 +1509,7 @@ namespace tmv {
         // Access
         //
 
-        inline reference operator()(int i,int j) const 
+        inline reference operator()(int i,int j) 
         {
             TMVAssert(i>=0 && i<size());
             TMVAssert(j>=0 && j<size());
@@ -1522,7 +1517,7 @@ namespace tmv {
             return ref(i,j); 
         }
 
-        inline vec_type row(int i, int j1, int j2) const 
+        inline vec_type row(int i, int j1, int j2) 
         {
             TMVAssert(i>=0 && i<size());
             TMVAssert(j1>=0 && j1-j2<=0 && j2<=size());
@@ -1538,7 +1533,7 @@ namespace tmv {
                     issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline vec_type col(int j, int i1, int i2) const
+        inline vec_type col(int j, int i1, int i2)
         {
             TMVAssert(j>=0 && j<size());
             TMVAssert(i1>=0 && i1-i2<=0 && i2<=size());
@@ -1554,11 +1549,11 @@ namespace tmv {
                     issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline vec_type diag() const
+        inline vec_type diag()
         { return vec_type(
                 ptr(),size(),stepi()+stepj(),ct() TMV_FIRSTLAST); }
 
-        inline vec_type diag(int i) const
+        inline vec_type diag(int i)
         {
             TMVAssert(i>=-nlo() && i<=nlo());
             TMVAssert(i>=-size() && i<=size()); 
@@ -1584,7 +1579,7 @@ namespace tmv {
                         diagstep(),ct() TMV_FIRSTLAST); 
         }
 
-        inline vec_type diag(int i, int j1, int j2) const
+        inline vec_type diag(int i, int j1, int j2)
         {
             TMVAssert(i>=-nlo() && i<=nlo());
             TMVAssert(i>=-size() && i<=size()); 
@@ -1611,35 +1606,49 @@ namespace tmv {
                         diagstep(),ct() TMV_FIRSTLAST); 
         }
 
+
+        inline T operator()(int i,int j) const 
+        { return base::operator()(i,j); }
+        inline vec_type row(int i, int j1, int j2) const 
+        { return base::row(i,j1,j2); }
+        inline vec_type col(int j, int i1, int i2) const
+        { return base::row(j,i1,i2); }
+        inline vec_type diag() const
+        { return base::diag(); }
+        inline vec_type diag(int i) const
+        { return base::diag(i); }
+        inline vec_type diag(int i, int j1, int j2) const
+        { return base::diag(i,j1,j2); }
+
         //
         // Modifying Functions
         //
 
-        inline const type& setZero() const 
+        inline type& setZero() 
         { upperBand().setZero(); return *this; }
 
-        inline const type& setAllTo(const T& x) const
+        inline type& setAllTo(const T& x)
         {
             TMVAssert(TMV_IMAG(x)==RT(0) || this->issym());
             upperBand().setAllTo(x); return *this; 
         }
 
-        inline const type& addToAll(const T& x) const
+        inline type& addToAll(const T& x)
         {
             TMVAssert(TMV_IMAG(x)==RT(0) || this->issym());
             upperBand().addToAll(x); return *this; 
         }
 
-        inline const type& clip(RT thresh) const
+        inline type& clip(RT thresh)
         { upperBand().clip(thresh); return *this; }
 
-        inline const type& transposeSelf() const
+        inline type& transposeSelf()
         { if (!this->issym()) upperBand().conjugateSelf(); return *this; }
 
-        inline const type& conjugateSelf() const
+        inline type& conjugateSelf()
         { if (isComplex(T())) upperBand().conjugateSelf(); return *this; }
 
-        inline const type& setToIdentity(const T& x=T(1)) const
+        inline type& setToIdentity(const T& x=T(1))
         {
             TMVAssert(TMV_IMAG(x)==RT(0) || this->issym());
             setZero(); diag().setAllTo(x); return *this; 
@@ -1649,7 +1658,7 @@ namespace tmv {
         // SubMatrix
         //
 
-        inline rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        inline rec_type subMatrix(int i1, int i2, int j1, int j2)
         {
             TMVAssert(base::hasSubMatrix(i1,i2,j1,j2,1,1));
             if ( (uplo()==Upper && i2-j1<=1) || (uplo()==Lower && j2-i1<=1) )
@@ -1664,7 +1673,7 @@ namespace tmv {
         }
 
         inline rec_type subMatrix(
-            int i1, int i2, int j1, int j2, int istep, int jstep) const
+            int i1, int i2, int j1, int j2, int istep, int jstep)
         {
             TMVAssert(base::hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             if ( (uplo()==Upper && i2-j1<=istep) || 
@@ -1682,7 +1691,7 @@ namespace tmv {
         }
 
         inline band_type subBandMatrix(
-            int i1, int i2, int j1, int j2, int newnlo, int newnhi) const
+            int i1, int i2, int j1, int j2, int newnlo, int newnhi)
         {
             TMVAssert(base::hasSubBandMatrix(
                     i1,i2,j1,j2,newnlo,newnhi,1,1));
@@ -1700,8 +1709,7 @@ namespace tmv {
                     TMV_FIRSTLAST);
         }
 
-        inline band_type subBandMatrix(
-            int i1, int i2, int j1, int j2) const
+        inline band_type subBandMatrix(int i1, int i2, int j1, int j2)
         {
             const int newnlo = TMV_MIN(nlo()+j1-i1,i2-i1-1);
             const int newnhi = TMV_MIN(nlo()+i1-j1,j2-j1-1);
@@ -1710,7 +1718,7 @@ namespace tmv {
 
         inline band_type subBandMatrix(
             int i1, int i2, int j1, int j2, int newnlo, int newnhi,
-            int istep, int jstep) const
+            int istep, int jstep)
         {
             TMVAssert(base::hasSubBandMatrix(
                     i1,i2,j1,j2,newnlo,newnhi,istep,jstep));
@@ -1733,8 +1741,7 @@ namespace tmv {
             }
         }
 
-        inline vec_type subVector(
-            int i, int j, int istep, int jstep, int n) const
+        inline vec_type subVector(int i, int j, int istep, int jstep, int n)
         {
             TMVAssert(base::hasSubVector(i,j,istep,jstep,n));
             if ((i-j<=0 && uplo()==Upper) || (j-i<=0 && uplo()==Lower))
@@ -1748,7 +1755,7 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline sym_type subSymMatrix(int i1, int i2) const
+        inline sym_type subSymMatrix(int i1, int i2)
         {
             TMVAssert(base::hasSubSymMatrix(i1,i2,1));
             return sym_type(
@@ -1756,7 +1763,7 @@ namespace tmv {
                 stepi(),stepj(),sym(),uplo(),ct() TMV_FIRSTLAST);
         }
 
-        inline sym_type subSymMatrix(int i1, int i2, int istep) const
+        inline sym_type subSymMatrix(int i1, int i2, int istep)
         {
             TMVAssert(base::hasSubSymMatrix(i1,i2,istep));
             return sym_type(
@@ -1765,7 +1772,7 @@ namespace tmv {
                 ct() TMV_FIRSTLAST);
         }
 
-        inline view_type subSymBandMatrix(int i1, int i2, int newnlo) const
+        inline view_type subSymBandMatrix(int i1, int i2, int newnlo)
         {
             TMVAssert(base::hasSubSymBandMatrix(i1,i2,newnlo,1));
             return view_type(
@@ -1774,11 +1781,11 @@ namespace tmv {
                 TMV_FIRSTLAST);
         }
 
-        inline view_type subSymBandMatrix(int i1, int i2) const
+        inline view_type subSymBandMatrix(int i1, int i2)
         { return subSymBandMatrix(i1,i2,TMV_MIN(this->nlo(),i2-i1-1)); }
 
         inline view_type subSymBandMatrix(
-            int i1, int i2, int newnlo, int istep) const
+            int i1, int i2, int newnlo, int istep)
         {
             TMVAssert(base::hasSubSymBandMatrix(i1,i2,newnlo,istep));
             return view_type(
@@ -1787,7 +1794,7 @@ namespace tmv {
                 sym(),uplo(),ct() TMV_FIRSTLAST);
         }
 
-        inline band_type diagRange(int k1, int k2) const
+        inline band_type diagRange(int k1, int k2)
         {
             TMVAssert(k1>=-nlo() && k1<k2 && k2<=nlo()+1);
             TMVAssert(k2 <= 1 || k1 >= 0);
@@ -1820,7 +1827,7 @@ namespace tmv {
             }
         }
 
-        inline view_type symDiagRange(int newnlo) const
+        inline view_type symDiagRange(int newnlo)
         {
             TMVAssert(newnlo>=0 && newnlo <= nlo());
             return view_type(
@@ -1829,7 +1836,7 @@ namespace tmv {
                 TMV_FIRSTLAST);
         }
 
-        inline band_type upperBand() const
+        inline band_type upperBand()
         {
             if (uplo() == Upper)
                 return band_type(
@@ -1841,7 +1848,7 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline band_type upperBandOff() const
+        inline band_type upperBandOff()
         {
             TMVAssert(size()>0);
             TMVAssert(nlo()>0);
@@ -1856,7 +1863,7 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline band_type lowerBand() const
+        inline band_type lowerBand()
         {
             if (uplo() == Lower)
                 return band_type(
@@ -1868,7 +1875,7 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline band_type lowerBandOff() const
+        inline band_type lowerBandOff()
         {
             TMVAssert(size()>0);
             TMVAssert(nlo()>0);
@@ -1883,7 +1890,7 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline realpart_type realPart() const
+        inline realpart_type realPart()
         {
             return realpart_type(
                 reinterpret_cast<RT*>(ptr()),size(),nlo(),
@@ -1897,7 +1904,7 @@ namespace tmv {
             );
         }
 
-        inline realpart_type imagPart() const
+        inline realpart_type imagPart()
         {
             TMVAssert(isComplex(T()));
             TMVAssert(this->issym());
@@ -1912,24 +1919,24 @@ namespace tmv {
             );
         }
 
-        inline view_type view() const
+        inline view_type view()
         { return *this; }
 
-        inline view_type transpose() const
+        inline view_type transpose()
         {
             return view_type(
                 ptr(),size(),nlo(), stepj(),stepi(),diagstep(),
                 sym(),TMV_UTransOf(uplo()),ct() TMV_FIRSTLAST);
         }
 
-        inline view_type conjugate() const
+        inline view_type conjugate()
         {
             return view_type(
                 ptr(),size(),nlo(), stepi(),stepj(),diagstep(),
                 sym(),uplo(),TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline view_type adjoint() const
+        inline view_type adjoint()
         {
             return view_type(
                 ptr(),size(),nlo(), stepj(),stepi(),diagstep(),
@@ -1937,16 +1944,70 @@ namespace tmv {
                 TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
+        inline const_rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        { return base::subMatrix(i1,i2,j1,j2); }
+        inline const_rec_type subMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) const
+        { return base::subMatrix(i1,i2,j1,j2,istep,jstep); }
+        inline const_band_type subBandMatrix(
+            int i1, int i2, int j1, int j2, int newnlo, int newnhi) const
+        { return base::subBandMatrix(i1,i2,j1,j2,newnlo,newnhi); }
+        inline const_band_type subBandMatrix(
+            int i1, int i2, int j1, int j2) const
+        { return base::subBandMatrix(i1,i2,j1,j2); }
+        inline const_band_type subBandMatrix(
+            int i1, int i2, int j1, int j2, int newnlo, int newnhi,
+            int istep, int jstep) const
+        { return base::subBandMatrix(i1,i2,j1,j2,newnlo,newnhi,istep,jstep); }
+        inline const_vec_type subVector(
+            int i, int j, int istep, int jstep, int n) const
+        { return base::subVector(i,j,istep,jstep,n); }
+        inline const_sym_type subSymMatrix(int i1, int i2) const
+        { return base::subSymMatrix(i1,i2); }
+        inline const_sym_type subSymMatrix(int i1, int i2, int istep) const
+        { return base::subSymMatrix(i1,i2,istep); }
+        inline const_view_type subSymBandMatrix(int i1, int i2, int newnlo) const
+        { return base::subSymBandMatrix(i1,i2,newnlo); }
+        inline const_view_type subSymBandMatrix(int i1, int i2) const
+        { return base::subSymBandMatrix(i1,i2); }
+        inline const_view_type subSymBandMatrix(
+            int i1, int i2, int newnlo, int istep) const
+        { return base::subSymBandMatrix(i1,i2,newnlo,istep); }
+        inline const_band_type diagRange(int k1, int k2) const
+        { return base::diagRange(k1,k2); }
+        inline const_view_type symDiagRange(int newnlo) const
+        { return base::symDiagRange(newnlo); }
+        inline const_band_type upperBand() const
+        { return base::upperBand(); }
+        inline const_band_type upperBandOff() const
+        { return base::upperBandOff(); }
+        inline const_band_type lowerBand() const
+        { return base::lowerBand(); }
+        inline const_band_type lowerBandOff() const
+        { return base::lowerBandOff(); }
+        inline const_realpart_type realPart() const
+        { return base::realPart(); }
+        inline const_realpart_type imagPart() const
+        { return base::imagPart(); }
+        inline const_view_type view() const
+        { return base::view(); }
+        inline const_view_type transpose() const
+        { return base::transpose(); }
+        inline const_view_type conjugate() const
+        { return base::conjugate(); }
+        inline const_view_type adjoint() const
+        { return base::adjoint(); }
+
         //
         // I/O
         //
 
-        void read(const TMV_Reader& reader) const;
+        void read(const TMV_Reader& reader);
 
         inline int size() const { return itss; }
         inline int nlo() const { return itslo; }
         inline const T* cptr() const { return itsm; }
-        inline T* ptr() const { return itsm; }
+        inline T* ptr() { return itsm; }
         inline int stepi() const { return itssi; }
         inline int stepj() const { return itssj; }
         inline int diagstep() const { return itssd; }
@@ -1957,7 +2018,7 @@ namespace tmv {
         using base::iscm;
         using base::isrm;
 
-        reference ref(int i, int j) const;
+        reference ref(int i, int j);
 
     protected :
 
@@ -1993,17 +2054,26 @@ namespace tmv {
         typedef TMV_ComplexType(T) CT;
         typedef SymBandMatrixView<T,FortranStyle> type;
         typedef GenSymBandMatrix<T> base;
+        typedef SymBandMatrixView<T,CStyle> c_type;
         typedef ConstSymBandMatrixView<T,FortranStyle> const_type;
         typedef SymBandMatrixView<T,FortranStyle> view_type;
         typedef view_type transpose_type;
         typedef view_type conjugate_type;
         typedef view_type adjoint_type;
-        typedef SymBandMatrixView<T,CStyle> c_type;
         typedef VectorView<T,FortranStyle> vec_type;
         typedef MatrixView<T,FortranStyle> rec_type;
         typedef SymMatrixView<T,FortranStyle> sym_type;
         typedef BandMatrixView<T,FortranStyle> band_type;
         typedef SymBandMatrixView<RT,FortranStyle> realpart_type;
+        typedef ConstSymBandMatrixView<T,FortranStyle> const_view_type;
+        typedef const_view_type const_transpose_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_adjoint_type;
+        typedef ConstVectorView<T,FortranStyle> const_vec_type;
+        typedef ConstMatrixView<T,FortranStyle> const_rec_type;
+        typedef ConstSymMatrixView<T,FortranStyle> const_sym_type;
+        typedef ConstBandMatrixView<T,FortranStyle> const_band_type;
+        typedef ConstSymBandMatrixView<RT,FortranStyle> const_realpart_type;
         typedef typename RefHelper<T>::reference reference;
 
         //
@@ -2027,56 +2097,48 @@ namespace tmv {
         // Op=
         //
 
-        inline const type& operator=(const type& m2) const
+        inline type& operator=(const type& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const type& m2) 
+        inline type& operator=(const c_type& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const c_type& m2) const
+        inline type& operator=(const GenSymBandMatrix<RT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const c_type& m2)
-        { c_type::operator=(m2); return *this; }
-
-        inline const type& operator=(const GenSymBandMatrix<RT>& m2) const
-        { c_type::operator=(m2); return *this; }
-
-        inline const type& operator=(const GenSymBandMatrix<CT>& m2) const
+        inline type& operator=(const GenSymBandMatrix<CT>& m2)
         { c_type::operator=(m2); return *this; }
 
         template <class T2> 
-        inline const type& operator=(const GenSymBandMatrix<T2>& m2) const
+        inline type& operator=(const GenSymBandMatrix<T2>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const T& x) const 
+        inline type& operator=(const T& x) 
         { c_type::operator=(x); return *this; }
 
-        inline const type& operator=(
-            const AssignableToSymBandMatrix<RT>& m2) const
+        inline type& operator=(const AssignableToSymBandMatrix<RT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(
-            const AssignableToSymBandMatrix<CT>& m2) const
+        inline type& operator=(const AssignableToSymBandMatrix<CT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const GenDiagMatrix<RT>& m2) const
+        inline type& operator=(const GenDiagMatrix<RT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const GenDiagMatrix<CT>& m2) const
+        inline type& operator=(const GenDiagMatrix<CT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const GenBandMatrix<RT>& m2) const
+        inline type& operator=(const GenBandMatrix<RT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const GenBandMatrix<CT>& m2) const
+        inline type& operator=(const GenBandMatrix<CT>& m2)
         { c_type::operator=(m2); return *this; }
 
         //
         // Access
         //
 
-        inline reference operator()(int i,int j) const 
+        inline reference operator()(int i,int j) 
         {
             TMVAssert(i>0 && i<=this->size());
             TMVAssert(j>0 && j<=this->size());
@@ -2084,7 +2146,7 @@ namespace tmv {
             return c_type::ref(i-1,j-1); 
         }
 
-        inline vec_type row(int i, int j1, int j2) const 
+        inline vec_type row(int i, int j1, int j2) 
         {
             TMVAssert(i>0 && i<=this->size());
             TMVAssert(j1>0 && j1-j2<=0 && j2<=this->size());
@@ -2093,7 +2155,7 @@ namespace tmv {
             return c_type::row(i-1,j1-1,j2);
         }
 
-        inline vec_type col(int j, int i1, int i2) const
+        inline vec_type col(int j, int i1, int i2)
         {
             TMVAssert(j>0 && j<=this->size());
             TMVAssert(i1>0 && i1-i2<=0 && i2<=this->size());
@@ -2102,13 +2164,54 @@ namespace tmv {
             return c_type::col(j-1,i1-1,i2);
         }
 
-        inline vec_type diag() const
+        inline vec_type diag()
         { return c_type::diag(); }
 
-        inline vec_type diag(int i) const
+        inline vec_type diag(int i)
         { return c_type::diag(i); }
 
-        inline vec_type diag(int i, int j1, int j2) const
+        inline vec_type diag(int i, int j1, int j2)
+        {
+            TMVAssert(i>=-this->nlo() && i<=this->nlo());
+            TMVAssert(i>=-this->size() && i<=this->size()); 
+            TMVAssert(j1>0 && j1-j2<=0 && j2<=this->size()-std::abs(i));
+            return c_type::diag(i,j1-1,j2); 
+        }
+
+
+        inline T operator()(int i,int j) const 
+        {
+            TMVAssert(i>0 && i<=this->size());
+            TMVAssert(j>0 && j<=this->size());
+            TMVAssert(this->okij(i-1,j-1));
+            return c_type::cref(i-1,j-1); 
+        }
+
+        inline const_vec_type row(int i, int j1, int j2) const 
+        {
+            TMVAssert(i>0 && i<=this->size());
+            TMVAssert(j1>0 && j1-j2<=0 && j2<=this->size());
+            TMVAssert(this->okij(i-1,j1-1));
+            TMVAssert(this->okij(i-1,j2-1));
+            return c_type::row(i-1,j1-1,j2);
+        }
+
+        inline const_vec_type col(int j, int i1, int i2) const
+        {
+            TMVAssert(j>0 && j<=this->size());
+            TMVAssert(i1>0 && i1-i2<=0 && i2<=this->size());
+            TMVAssert(this->okij(i1-1,j-1));
+            TMVAssert(this->okij(i2-1,j-1));
+            return c_type::col(j-1,i1-1,i2);
+        }
+
+        inline const_vec_type diag() const
+        { return c_type::diag(); }
+
+        inline const_vec_type diag(int i) const
+        { return c_type::diag(i); }
+
+        inline const_vec_type diag(int i, int j1, int j2) const
         {
             TMVAssert(i>=-this->nlo() && i<=this->nlo());
             TMVAssert(i>=-this->size() && i<=this->size()); 
@@ -2120,25 +2223,25 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline const type& setZero() const 
+        inline type& setZero() 
         { c_type::setZero(); return *this; }
 
-        inline const type& setAllTo(const T& x) const
+        inline type& setAllTo(const T& x)
         { c_type::setAllTo(x); return *this; }
 
-        inline const type& addToAll(const T& x) const
+        inline type& addToAll(const T& x)
         { c_type::addToAll(x); return *this; }
 
-        inline const type& clip(RT thresh) const
+        inline type& clip(RT thresh)
         { c_type::clip(thresh); return *this; }
 
-        inline const type& conjugateSelf() const
+        inline type& conjugateSelf()
         { c_type::conjugateSelf(); return *this; }
 
-        inline const type& transposeSelf() const
+        inline type& transposeSelf()
         { c_type::transposeSelf(); return *this; }
 
-        inline const type& setToIdentity(const T& x=T(1)) const
+        inline type& setToIdentity(const T& x=T(1))
         { c_type::setToIdentity(x); return *this; }
 
         //
@@ -2146,35 +2249,35 @@ namespace tmv {
         //
 
         inline bool hasSubMatrix(
-            int i1, int i2, int j1, int j2, int istep, int jstep) const
+            int i1, int i2, int j1, int j2, int istep, int jstep)
         { return const_type(*this).hasSubMatrix(i1,i2,j1,j2,istep,jstep); }
 
         inline bool hasSubBandMatrix(
             int i1, int i2, int j1, int j2, int lo, int hi, 
-            int istep, int jstep) const
+            int istep, int jstep)
         {
             return const_type(*this).hasSubBandMatrix(
                 i1,i2,j1,j2,lo,hi,istep,jstep); 
         }
 
         inline bool hasSubVector (
-            int i, int j, int istep, int jstep, int n) const
+            int i, int j, int istep, int jstep, int n)
         { return const_type(*this).hasSubVector(i,j,istep,jstep,n); }
 
-        inline bool hasSubSymMatrix(int i1, int i2, int istep) const
+        inline bool hasSubSymMatrix(int i1, int i2, int istep)
         { return const_type(*this).hasSubSymMatrix(i1,i2,istep); }
 
-        inline bool hasSubSymBandMatrix(int i1, int i2, int lo, int istep) const
+        inline bool hasSubSymBandMatrix(int i1, int i2, int lo, int istep)
         { return const_type(*this).hasSubSymMatrix(i1,i2,lo,istep); }
 
-        inline rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        inline rec_type subMatrix(int i1, int i2, int j1, int j2)
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
             return c_type::subMatrix(i1-1,i2,j1-1,j2);
         }
 
         inline rec_type subMatrix(
-            int i1, int i2, int j1, int j2, int istep, int jstep) const
+            int i1, int i2, int j1, int j2, int istep, int jstep)
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             return c_type::subMatrix(
@@ -2182,14 +2285,13 @@ namespace tmv {
         }
 
         inline band_type subBandMatrix(
-            int i1, int i2, int j1, int j2, int lo, int hi) const
+            int i1, int i2, int j1, int j2, int lo, int hi)
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,lo,hi,1,1));
             return c_type::subBandMatrix(i1-1,i2,j1-1,j2,lo,hi);
         }
 
-        inline band_type subBandMatrix(
-            int i1, int i2, int j1, int j2) const
+        inline band_type subBandMatrix(int i1, int i2, int j1, int j2)
         {
             const int newnlo = TMV_MIN(this->nlo()+j1-i1,i2-i1);
             const int newnhi = TMV_MIN(this->nlo()+i1-j1,j2-j1);
@@ -2198,6 +2300,113 @@ namespace tmv {
 
         inline band_type subBandMatrix(
             int i1, int i2, int j1, int j2, int lo, int hi, 
+            int istep, int jstep)
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,lo,hi,istep,jstep));
+            return c_type::subBandMatrix(
+                i1-1,i2-1+istep,j1-1,j2-1+jstep,lo,hi,istep,jstep);
+        }
+
+        inline vec_type subVector(int i, int j, int istep, int jstep, int n)
+        {
+            TMVAssert(hasSubVector(i,j,istep,jstep,n));
+            return c_type::subVector(i-1,j-1,istep,jstep,n);
+        }
+
+        inline sym_type subSymMatrix(int i1, int i2)
+        {
+            TMVAssert(hasSubSymMatrix(i1,i2,1));
+            return c_type::subSymMatrix(i1-1,i2);
+        }
+
+        inline sym_type subSymMatrix(int i1, int i2, int istep)
+        {
+            TMVAssert(hasSubSymMatrix(i1,i2,istep));
+            return c_type::subSymMatrix(i1-1,i2-1+istep,istep);
+        }
+
+        inline view_type subSymBandMatrix(int i1, int i2, int lo)
+        {
+            TMVAssert(hasSubSymBandMatrix(i1,i2,lo,1));
+            return c_type::subSymBandMatrix(i1-1,i2,lo);
+        }
+
+        inline view_type subSymBandMatrix(int i1, int i2)
+        { return subSymBandMatrix(i1,i2,TMV_MIN(this->nlo(),i2-i1)); }
+
+        inline sym_type subSymMatrix(int i1, int i2, int lo, int istep)
+        {
+            TMVAssert(hasSubSymMatrix(i1,i2,lo,istep));
+            return c_type::subSymMatrix(i1-1,i2-1+istep,lo,istep);
+        }
+
+        inline band_type diagRange(int k1, int k2)
+        { return c_type::diagRange(k1,k2); }
+
+        inline view_type symDiagRange(int newnlo)
+        { return c_type::symDiagRange(newnlo); }
+
+        inline band_type upperBand()
+        { return c_type::upperBand(); }
+
+        inline band_type upperBandOff()
+        { return c_type::upperBandOff(); }
+
+        inline band_type lowerBand()
+        { return c_type::lowerBand(); }
+
+        inline band_type lowerBandOff()
+        { return c_type::lowerBandOff(); }
+
+        inline realpart_type realPart()
+        { return c_type::realPart(); }
+
+        inline realpart_type imagPart()
+        { return c_type::imagPart(); }
+
+        inline view_type view()
+        { return c_type::view(); }
+
+        inline view_type transpose()
+        { return c_type::transpose(); }
+
+        inline view_type conjugate()
+        { return c_type::conjugate(); }
+
+        inline view_type adjoint()
+        { return c_type::adjoint(); }
+
+        inline const_rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
+            return c_type::subMatrix(i1-1,i2,j1-1,j2);
+        }
+
+        inline const_rec_type subMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) const
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
+            return c_type::subMatrix(
+                i1-1,i2-1+istep,j1-1,j2-1+jstep,istep,jstep);
+        }
+
+        inline const_band_type subBandMatrix(
+            int i1, int i2, int j1, int j2, int lo, int hi) const
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,lo,hi,1,1));
+            return c_type::subBandMatrix(i1-1,i2,j1-1,j2,lo,hi);
+        }
+
+        inline const_band_type subBandMatrix(
+            int i1, int i2, int j1, int j2) const
+        {
+            const int newnlo = TMV_MIN(this->nlo()+j1-i1,i2-i1);
+            const int newnhi = TMV_MIN(this->nlo()+i1-j1,j2-j1);
+            return subBandMatrix(i1,i2,j1,j2,newnlo,newnhi);
+        }
+
+        inline const_band_type subBandMatrix(
+            int i1, int i2, int j1, int j2, int lo, int hi, 
             int istep, int jstep) const
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,lo,hi,istep,jstep));
@@ -2205,74 +2414,75 @@ namespace tmv {
                 i1-1,i2-1+istep,j1-1,j2-1+jstep,lo,hi,istep,jstep);
         }
 
-        inline vec_type subVector(
+        inline const_vec_type subVector(
             int i, int j, int istep, int jstep, int n) const
         {
             TMVAssert(hasSubVector(i,j,istep,jstep,n));
             return c_type::subVector(i-1,j-1,istep,jstep,n);
         }
 
-        inline sym_type subSymMatrix(int i1, int i2) const
+        inline const_sym_type subSymMatrix(int i1, int i2) const
         {
             TMVAssert(hasSubSymMatrix(i1,i2,1));
             return c_type::subSymMatrix(i1-1,i2);
         }
 
-        inline sym_type subSymMatrix(int i1, int i2, int istep) const
+        inline const_sym_type subSymMatrix(int i1, int i2, int istep) const
         {
             TMVAssert(hasSubSymMatrix(i1,i2,istep));
             return c_type::subSymMatrix(i1-1,i2-1+istep,istep);
         }
 
-        inline view_type subSymBandMatrix(int i1, int i2, int lo) const
+        inline const_view_type subSymBandMatrix(int i1, int i2, int lo) const
         {
             TMVAssert(hasSubSymBandMatrix(i1,i2,lo,1));
             return c_type::subSymBandMatrix(i1-1,i2,lo);
         }
 
-        inline view_type subSymBandMatrix(int i1, int i2) const
+        inline const_view_type subSymBandMatrix(int i1, int i2) const
         { return subSymBandMatrix(i1,i2,TMV_MIN(this->nlo(),i2-i1)); }
 
-        inline sym_type subSymMatrix(int i1, int i2, int lo, int istep) const
+        inline const_sym_type subSymMatrix(
+            int i1, int i2, int lo, int istep) const
         {
             TMVAssert(hasSubSymMatrix(i1,i2,lo,istep));
             return c_type::subSymMatrix(i1-1,i2-1+istep,lo,istep);
         }
 
-        inline band_type diagRange(int k1, int k2) const
+        inline const_band_type diagRange(int k1, int k2) const
         { return c_type::diagRange(k1,k2); }
 
-        inline view_type symDiagRange(int newnlo) const
+        inline const_view_type symDiagRange(int newnlo) const
         { return c_type::symDiagRange(newnlo); }
 
-        inline band_type upperBand() const
+        inline const_band_type upperBand() const
         { return c_type::upperBand(); }
 
-        inline band_type upperBandOff() const
+        inline const_band_type upperBandOff() const
         { return c_type::upperBandOff(); }
 
-        inline band_type lowerBand() const
+        inline const_band_type lowerBand() const
         { return c_type::lowerBand(); }
 
-        inline band_type lowerBandOff() const
+        inline const_band_type lowerBandOff() const
         { return c_type::lowerBandOff(); }
 
-        inline realpart_type realPart() const
+        inline const_realpart_type realPart() const
         { return c_type::realPart(); }
 
-        inline realpart_type imagPart() const
+        inline const_realpart_type imagPart() const
         { return c_type::imagPart(); }
 
-        inline view_type view() const
+        inline const_view_type view() const
         { return c_type::view(); }
 
-        inline view_type transpose() const
+        inline const_view_type transpose() const
         { return c_type::transpose(); }
 
-        inline view_type conjugate() const
+        inline const_view_type conjugate() const
         { return c_type::conjugate(); }
 
-        inline view_type adjoint() const
+        inline const_view_type adjoint() const
         { return c_type::adjoint(); }
 
     }; // FortranStyle SymBandMatrixView
@@ -4785,7 +4995,7 @@ namespace tmv {
 
     template <class T, int A> 
     inline SymBandMatrixView<T,A> SymBandMatrixViewOf(
-        const MatrixView<T,A>& m, UpLoType uplo, int nlo)
+        MatrixView<T,A> m, UpLoType uplo, int nlo)
     {
         TMVAssert(m.colsize()==m.rowsize());
         return SymBandMatrixView<T,A>(
@@ -4849,7 +5059,7 @@ namespace tmv {
 
     template <class T, int A> 
     inline SymBandMatrixView<T,A> HermBandMatrixViewOf(
-        const MatrixView<T,A>& m, UpLoType uplo, int nlo)
+        MatrixView<T,A> m, UpLoType uplo, int nlo)
     {
         TMVAssert(m.colsize()==m.rowsize());
 #ifdef TMV_EXTRA_DEBUG
@@ -4913,7 +5123,7 @@ namespace tmv {
 
     template <class T, int A> 
     inline SymBandMatrixView<T,A> SymBandMatrixViewOf(
-        const BandMatrixView<T,A>& m, UpLoType uplo, int nlo=-1)
+        BandMatrixView<T,A> m, UpLoType uplo, int nlo=-1)
     {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
@@ -4982,7 +5192,7 @@ namespace tmv {
 
     template <class T, int A> 
     inline SymBandMatrixView<T,A> HermBandMatrixViewOf(
-        const BandMatrixView<T,A>& m, UpLoType uplo, int nlo=-1)
+        BandMatrixView<T,A> m, UpLoType uplo, int nlo=-1)
     {
         if (nlo<0) nlo = (uplo==Upper?m.nhi():m.nlo());
         TMVAssert(m.colsize()==m.rowsize());
@@ -5051,7 +5261,7 @@ namespace tmv {
 
     template <class T, int A> 
     inline SymBandMatrixView<T,A> SymBandMatrixViewOf(
-        const SymMatrixView<T,A>& m, int nlo)
+        SymMatrixView<T,A> m, int nlo)
     {
         return SymBandMatrixView<T,A>(
             m.ptr(),m.colsize(),nlo,
@@ -5121,7 +5331,7 @@ namespace tmv {
 
     template <class T, int A> 
     inline SymBandMatrixView<T,A> HermBandMatrixViewOf(
-        const SymMatrixView<T,A>& m, int nlo)
+        SymMatrixView<T,A> m, int nlo)
     {
         TMVAssert(m.isherm());
         return SymBandMatrixView<T,A>(
@@ -5294,7 +5504,7 @@ namespace tmv {
 
     template <class T> 
     inline void Swap(
-        const SymBandMatrixView<T>& m1, const SymBandMatrixView<T>& m2)
+        SymBandMatrixView<T> m1, SymBandMatrixView<T> m2)
     {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.nlo() == m2.nlo());
@@ -5305,12 +5515,12 @@ namespace tmv {
 
     template <class T, int A>
     inline void Swap(
-        const SymBandMatrixView<T>& m1, SymBandMatrix<T,A>& m2)
+        SymBandMatrixView<T> m1, SymBandMatrix<T,A>& m2)
     { Swap(m1,m2.view()); }
 
     template <class T, int A>
     inline void Swap(
-        SymBandMatrix<T,A>& m1, const SymBandMatrixView<T>& m2)
+        SymBandMatrix<T,A>& m1, SymBandMatrixView<T> m2)
     { Swap(m1.view(),m2); }
 
     template <class T, int A1, int A2>
@@ -5320,12 +5530,12 @@ namespace tmv {
 
     template <class T, int A>
     inline void Swap(
-        const SymBandMatrixView<T>& m1, HermBandMatrix<T,A>& m2)
+        SymBandMatrixView<T> m1, HermBandMatrix<T,A>& m2)
     { Swap(m1,m2.view()); }
 
     template <class T, int A>
     inline void Swap(
-        HermBandMatrix<T,A>& m1, const SymBandMatrixView<T>& m2)
+        HermBandMatrix<T,A>& m1, SymBandMatrixView<T> m2)
     { Swap(m1.view(),m2); }
 
     template <class T, int A1, int A2>
@@ -5353,7 +5563,7 @@ namespace tmv {
     { return m.transpose(); }
 
     template <class T, int A> 
-    inline SymBandMatrixView<T,A> Transpose(const SymBandMatrixView<T,A>& m)
+    inline SymBandMatrixView<T,A> Transpose(SymBandMatrixView<T,A> m)
     { return m.transpose(); }
 
     template <class T, int A>
@@ -5374,7 +5584,7 @@ namespace tmv {
     { return m.conjugate(); }
 
     template <class T, int A> 
-    inline SymBandMatrixView<T,A> Conjugate(const SymBandMatrixView<T,A>& m)
+    inline SymBandMatrixView<T,A> Conjugate(SymBandMatrixView<T,A> m)
     { return m.conjugate(); }
 
     template <class T, int A>
@@ -5395,7 +5605,7 @@ namespace tmv {
     { return m.adjoint(); }
 
     template <class T, int A> 
-    inline SymBandMatrixView<T,A> Adjoint(const SymBandMatrixView<T,A>& m)
+    inline SymBandMatrixView<T,A> Adjoint(SymBandMatrixView<T,A> m)
     { return m.adjoint(); }
 
     template <class T, int A>
@@ -5452,7 +5662,7 @@ namespace tmv {
 
     template <class T>
     inline std::istream& operator>>(
-        std::istream& is, const SymBandMatrixView<T>& m)
+        std::istream& is, SymBandMatrixView<T> m)
     { return is >> IOStyle() >> m; }
 
     template <class T, int A>
@@ -5465,7 +5675,7 @@ namespace tmv {
 
     template <class T>
     inline std::istream& operator>>(
-        const TMV_Reader& reader, const SymBandMatrixView<T>& m)
+        const TMV_Reader& reader, SymBandMatrixView<T> m)
     { m.read(reader); return reader.getis(); }
 
     template <class T, int A>

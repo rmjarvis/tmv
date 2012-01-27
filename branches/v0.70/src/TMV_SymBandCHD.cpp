@@ -123,7 +123,7 @@ namespace tmv {
     HermBandCHDiv<T>::~HermBandCHDiv() {}
 
     template <class T> template <class T1> 
-    void HermBandCHDiv<T>::doLDivEq(const MatrixView<T1>& m) const
+    void HermBandCHDiv<T>::doLDivEq(MatrixView<T1> m) const
     {
         TMVAssert(pimpl->LLx.size() == m.colsize());
         if (pimpl->LLx.nlo() > 1)
@@ -135,7 +135,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void HermBandCHDiv<T>::doRDivEq(const MatrixView<T1>& m) const
+    void HermBandCHDiv<T>::doRDivEq(MatrixView<T1> m) const
     {
         TMVAssert(pimpl->LLx.size() == m.rowsize());
         if (pimpl->LLx.nlo() > 1)
@@ -148,7 +148,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void HermBandCHDiv<T>::doLDiv(
-        const GenMatrix<T1>& m1, const MatrixView<T2>& m0) const
+        const GenMatrix<T1>& m1, MatrixView<T2> m0) const
     {
         TMVAssert(m1.colsize() == m0.colsize());
         TMVAssert(m1.rowsize() == m0.rowsize());
@@ -163,7 +163,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void HermBandCHDiv<T>::doRDiv(
-        const GenMatrix<T1>& m1, const MatrixView<T2>& m0) const
+        const GenMatrix<T1>& m1, MatrixView<T2> m0) const
     {
         TMVAssert(m1.colsize() == m0.colsize());
         TMVAssert(m1.rowsize() == m0.rowsize());
@@ -208,7 +208,7 @@ namespace tmv {
     }                  
 
     template <class T> template <class T1> 
-    void HermBandCHDiv<T>::doMakeInverse(const SymMatrixView<T1>& sinv) const
+    void HermBandCHDiv<T>::doMakeInverse(SymMatrixView<T1> sinv) const
     {
         TMVAssert(sinv.size() == pimpl->LLx.size());
         TMVAssert(sinv.isherm());
@@ -221,7 +221,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void HermBandCHDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
+    void HermBandCHDiv<T>::doMakeInverse(MatrixView<T1> minv) const
     {
         TMVAssert(minv.colsize() == pimpl->LLx.size());
         TMVAssert(minv.rowsize() == pimpl->LLx.size());
@@ -234,7 +234,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void HermBandCHDiv<T>::doMakeInverseATA(const MatrixView<T>& ata) const
+    void HermBandCHDiv<T>::doMakeInverseATA(MatrixView<T> ata) const
     {
         // ata = (At A)^-1 = A^-1 (A^-1)t
         //     = A^-1 A^-1

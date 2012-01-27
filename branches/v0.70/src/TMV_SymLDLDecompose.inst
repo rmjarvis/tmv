@@ -2,10 +2,10 @@
 #define CT std::complex<T>
 
 #define DefLUD(RT,T)\
-template void LDL_Decompose(const SymMatrixView<T >& A, \
-    const VectorView<T >& xD, int* P, RT& ld, T& sd); \
-template void LDL_Decompose(const SymMatrixView<T >& A, \
-    const SymBandMatrixView<T >& D, int* P); \
+template void LDL_Decompose(SymMatrixView<T > A, \
+    VectorView<T > xD, int* P, RT& ld, T& sd); \
+template void LDL_Decompose(SymMatrixView<T > A, \
+    SymBandMatrixView<T > D, int* P); \
 
 DefLUD(T,T)
 #ifdef INST_COMPLEX

@@ -23,7 +23,7 @@
   template T DivHelper<T >::doDet() const; \
   template RT DivHelper<T >::doLogDet(T* sign) const; \
   template void DivHelper<T >::doMakeInverseATA( \
-      const MatrixView<T >& m2) const; \
+      MatrixView<T > m2) const; \
   template bool DivHelper<T >::doIsSingular() const; \
   template RT DivHelper<T >::doNorm2() const; \
   template RT DivHelper<T >::doCondition() const; \
@@ -37,11 +37,11 @@ Def1(T,CT)
 #undef Def1
 
 #define Def2(T,T1) \
-  template void DivHelper<T >::doMakeInverse(const MatrixView<T1 >& m) const; \
-  template void DivHelper<T >::doLDivEq(const VectorView<T1 >& v) const; \
-  template void DivHelper<T >::doRDivEq(const VectorView<T1 >& v) const; \
-  template void DivHelper<T >::doLDivEq(const MatrixView<T1 >& m) const; \
-  template void DivHelper<T >::doRDivEq(const MatrixView<T1 >& m) const; \
+  template void DivHelper<T >::doMakeInverse(MatrixView<T1 > m) const; \
+  template void DivHelper<T >::doLDivEq(VectorView<T1 > v) const; \
+  template void DivHelper<T >::doRDivEq(VectorView<T1 > v) const; \
+  template void DivHelper<T >::doLDivEq(MatrixView<T1 > m) const; \
+  template void DivHelper<T >::doRDivEq(MatrixView<T1 > m) const; \
 
 Def2(T,T)
 #ifdef INST_COMPLEX
@@ -53,19 +53,19 @@ Def2(CT,CT)
 
 #define Def2(T,T1) \
   template <> template <> void DivHelper<T >::doMakeInverse( \
-      const MatrixView<T1 >& ) const \
+      MatrixView<T1 > ) const \
   { TMVAssert(TMV_FALSE); } \
   template <> template <> void DivHelper<T >::doLDivEq( \
-      const VectorView<T1 >& ) const \
+      VectorView<T1 > ) const \
   { TMVAssert(TMV_FALSE); } \
   template <> template <> void DivHelper<T >::doRDivEq( \
-      const VectorView<T1 >& ) const \
+      VectorView<T1 > ) const \
   { TMVAssert(TMV_FALSE); } \
   template <> template <> void DivHelper<T >::doLDivEq( \
-      const MatrixView<T1 >& ) const \
+      MatrixView<T1 > ) const \
   { TMVAssert(TMV_FALSE); } \
   template <> template <> void DivHelper<T >::doRDivEq( \
-      const MatrixView<T1 >& ) const \
+      MatrixView<T1 > ) const \
   { TMVAssert(TMV_FALSE); } \
 
 #ifdef INST_COMPLEX
@@ -76,13 +76,13 @@ Def2(CT,T)
 
 #define Def3(T,T1,T2) \
   template void DivHelper<T >::doLDiv(const GenVector<T1 >& v1, \
-      const VectorView<T2 >& v2) const; \
+      VectorView<T2 > v2) const; \
   template void DivHelper<T >::doRDiv(const GenVector<T1 >& v1, \
-      const VectorView<T2 >& v2) const; \
+      VectorView<T2 > v2) const; \
   template void DivHelper<T >::doLDiv(const GenMatrix<T1 >& v1, \
-      const MatrixView<T2 >& v2) const; \
+      MatrixView<T2 > v2) const; \
   template void DivHelper<T >::doRDiv(const GenMatrix<T1 >& v1, \
-      const MatrixView<T2 >& v2) const; \
+      MatrixView<T2 > v2) const; \
 
 Def3(T,T,T)
 #ifdef INST_COMPLEX
@@ -96,16 +96,16 @@ Def3(CT,CT,CT)
 
 #define Def3(T,T1,T2) \
   template <> template <> void DivHelper<T >::doLDiv(const GenVector<T1 >& , \
-      const VectorView<T2 >& ) const \
+      VectorView<T2 > ) const \
   { TMVAssert(TMV_FALSE); } \
   template <> template <> void DivHelper<T >::doRDiv(const GenVector<T1 >& , \
-      const VectorView<T2 >& ) const \
+      VectorView<T2 > ) const \
   { TMVAssert(TMV_FALSE); } \
   template <> template <> void DivHelper<T >::doLDiv(const GenMatrix<T1 >& , \
-      const MatrixView<T2 >& ) const \
+      MatrixView<T2 > ) const \
   { TMVAssert(TMV_FALSE); } \
   template <> template <> void DivHelper<T >::doRDiv(const GenMatrix<T1 >& , \
-      const MatrixView<T2 >& ) const \
+      MatrixView<T2 > ) const \
   { TMVAssert(TMV_FALSE); } \
 
 #ifdef INST_COMPLEX

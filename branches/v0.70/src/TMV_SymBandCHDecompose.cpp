@@ -62,7 +62,7 @@ namespace tmv {
     //
 
     template <bool cm, class T> 
-    static void DoNonLapCH_Decompose(const SymBandMatrixView<T>& A)
+    static void DoNonLapCH_Decompose(SymBandMatrixView<T> A)
     {
         // Cholesky decompostion for a banded Hermitian matrix follows the 
         // same structure as a regular Cholesky decomposition, but we 
@@ -81,7 +81,7 @@ namespace tmv {
         //cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
 #endif
 
-        const VectorView<TMV_RealType(T)> Adiag = A.diag().realPart();
+        VectorView<TMV_RealType(T)> Adiag = A.diag().realPart();
         const int nlo = A.nlo();
 
         if (nlo == 0) {
@@ -196,7 +196,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static inline void NonLapCH_Decompose(const SymBandMatrixView<T>& A)
+    static inline void NonLapCH_Decompose(SymBandMatrixView<T> A)
     {
         TMVAssert(A.iscm() || A.isrm());
         if (A.iscm()) DoNonLapCH_Decompose<true>(A);
@@ -204,7 +204,7 @@ namespace tmv {
     }
 
     template <bool dm, class T> 
-    static void NonLapLDL_Decompose(const SymBandMatrixView<T>& A)
+    static void NonLapLDL_Decompose(SymBandMatrixView<T> A)
     {
         // For tridiagonal Hermitian band matrices, the sqrt can 
         // become a significant fraction of the calculation.
@@ -309,7 +309,7 @@ namespace tmv {
 
     // Same thing, but A is symmetric, rather than hermitian
     template <bool dm, class T> 
-    static void SymLDL_Decompose(const SymBandMatrixView<T>& A)
+    static void SymLDL_Decompose(SymBandMatrixView<T> A)
     {
         TMVAssert(A.uplo() == Lower);
         TMVAssert(dm == A.isdm());
@@ -388,14 +388,14 @@ namespace tmv {
 
 #ifdef LAP
     template <class T> 
-    static inline void LapCH_Decompose(const SymBandMatrixView<T>& A)
+    static inline void LapCH_Decompose(SymBandMatrixView<T> A)
     { NonLapCH_Decompose(A); }
     template <class T> 
-    static inline void LapLDL_Decompose(const SymBandMatrixView<T>& A)
+    static inline void LapLDL_Decompose(SymBandMatrixView<T> A)
     { NonLapLDL_Decompose<true>(A); }
 #ifdef INST_DOUBLE
     template <> 
-    void LapCH_Decompose(const SymBandMatrixView<double>& A)
+    void LapCH_Decompose(SymBandMatrixView<double> A)
     {
         int n = A.size();
         int kl = A.nlo();
@@ -417,7 +417,7 @@ namespace tmv {
         LAP_Results("dpbtrf");
     }
     template <> 
-    void LapCH_Decompose(const SymBandMatrixView<std::complex<double> >& A)
+    void LapCH_Decompose(SymBandMatrixView<std::complex<double> > A)
     {
         int n = A.size();
         int kl = A.nlo();
@@ -439,7 +439,7 @@ namespace tmv {
         LAP_Results("zpbtrf");
     }
     template <> 
-    void LapLDL_Decompose(const SymBandMatrixView<double>& A)
+    void LapLDL_Decompose(SymBandMatrixView<double> A)
     {
         TMVAssert(A.uplo() == Lower);
         TMVAssert(A.isdm() && A.nlo()==1);
@@ -460,7 +460,7 @@ namespace tmv {
         LAP_Results("dpttrf");
     }
     template <> 
-    void LapLDL_Decompose(const SymBandMatrixView<std::complex<double> >& A)
+    void LapLDL_Decompose(SymBandMatrixView<std::complex<double> > A)
     {
         TMVAssert(A.uplo() == Lower);
         TMVAssert(A.isdm() && A.nlo()==1);
@@ -487,7 +487,7 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <> 
-    void LapLDL_Decompose(const SymBandMatrixView<float>& A)
+    void LapLDL_Decompose(SymBandMatrixView<float> A)
     {
         TMVAssert(A.uplo() == Lower);
         TMVAssert(A.isdm() && A.nlo()==1);
@@ -508,7 +508,7 @@ namespace tmv {
         LAP_Results("spttrf");
     }
     template <> 
-    void LapLDL_Decompose(const SymBandMatrixView<std::complex<float> >& A)
+    void LapLDL_Decompose(SymBandMatrixView<std::complex<float> > A)
     {
         TMVAssert(A.uplo() == Lower);
         TMVAssert(A.isdm() && A.nlo()==1);
@@ -532,7 +532,7 @@ namespace tmv {
         LAP_Results("cpttrf");
     }
     template <> 
-    void LapCH_Decompose(const SymBandMatrixView<float>& A)
+    void LapCH_Decompose(SymBandMatrixView<float> A)
     {
         int n = A.size();
         int kl = A.nlo();
@@ -554,7 +554,7 @@ namespace tmv {
         LAP_Results("spbtrf");
     }
     template <> 
-    void LapCH_Decompose(const SymBandMatrixView<std::complex<float> >& A)
+    void LapCH_Decompose(SymBandMatrixView<std::complex<float> > A)
     {
         int n = A.size();
         int kl = A.nlo();
@@ -579,7 +579,7 @@ namespace tmv {
 #endif // LAP
 
     template <class T> 
-    void LDL_Decompose(const SymBandMatrixView<T>& A)
+    void LDL_Decompose(SymBandMatrixView<T> A)
     {
         TMVAssert(A.nlo() == 1);
 
@@ -606,7 +606,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void CH_Decompose(const SymBandMatrixView<T>& A)
+    void CH_Decompose(SymBandMatrixView<T> A)
     {
         TMVAssert(isReal(T()) || A.isherm());
         TMVAssert(A.iscm() || A.isrm());

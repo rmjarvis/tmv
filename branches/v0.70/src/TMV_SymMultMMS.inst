@@ -3,9 +3,9 @@
 
 #define DefMM(T,Tx,Ty)\
   template void SymMultMM<true>(const T alpha,const GenMatrix<Tx >& x, \
-      const GenMatrix<Ty >& y, const SymMatrixView<T >& A); \
+      const GenMatrix<Ty >& y, SymMatrixView<T > A); \
   template void SymMultMM<false>(const T alpha,const GenMatrix<Tx >& x, \
-      const GenMatrix<Ty >& y, const SymMatrixView<T >& A); \
+      const GenMatrix<Ty >& y, SymMatrixView<T > A); \
 
 DefMM(T,T,T)
 #ifdef INST_COMPLEX

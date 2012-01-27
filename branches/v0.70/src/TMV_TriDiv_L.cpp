@@ -62,7 +62,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void RowTriLDivEq(
-        const GenUpperTriMatrix<Ta>& A, const UpperTriMatrixView<T>& B)
+        const GenUpperTriMatrix<Ta>& A, UpperTriMatrixView<T> B)
     // B = A^-1 * B
     // where A is a triangle matrix
     {
@@ -99,7 +99,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void ColTriLDivEq(
-        const GenUpperTriMatrix<Ta>& A, const UpperTriMatrixView<T>& B)
+        const GenUpperTriMatrix<Ta>& A, UpperTriMatrixView<T> B)
     // B = A^-1 * B
     // where A is a triangle matrix
     {
@@ -142,7 +142,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void RowTriLDivEq(
-        const GenLowerTriMatrix<Ta>& A, const LowerTriMatrixView<T>& B)
+        const GenLowerTriMatrix<Ta>& A, LowerTriMatrixView<T> B)
     // B = A^-1 * B
     // where A is a triangle matrix
     {
@@ -178,7 +178,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void ColTriLDivEq(
-        const GenLowerTriMatrix<Ta>& A, const LowerTriMatrixView<T>& B)
+        const GenLowerTriMatrix<Ta>& A, LowerTriMatrixView<T> B)
     // B = A^-1 * B
     // where A is a triangle matrix
     {
@@ -220,7 +220,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void DoTriLDivEq(
-        const GenUpperTriMatrix<Ta>& A, const UpperTriMatrixView<T>& B)
+        const GenUpperTriMatrix<Ta>& A, UpperTriMatrixView<T> B)
     {
         TMVAssert(A.size() == B.size());
         TMVAssert(!B.isunit() || A.isunit());
@@ -264,7 +264,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     void TriLDivEq(
-        const GenUpperTriMatrix<Ta>& A, const UpperTriMatrixView<T>& B)
+        const GenUpperTriMatrix<Ta>& A, UpperTriMatrixView<T> B)
     // B = A^-1 * B
     // where A is a triangle matrix
     {
@@ -293,7 +293,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void DoTriLDivEq(
-        const GenLowerTriMatrix<Ta>& A, const LowerTriMatrixView<T>& B)
+        const GenLowerTriMatrix<Ta>& A, LowerTriMatrixView<T> B)
     {
         TMVAssert(A.size() == B.size());
         TMVAssert(!B.isunit() || A.isunit());
@@ -337,7 +337,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     void TriLDivEq(
-        const GenLowerTriMatrix<Ta>& A, const LowerTriMatrixView<T>& B)
+        const GenLowerTriMatrix<Ta>& A, LowerTriMatrixView<T> B)
     // B = A^-1 * B
     // where A is a triangle matrix
     {

@@ -39,17 +39,17 @@ namespace tmv {
     template <class T, class T1> 
     void LDL_LDivEq(
         const GenSymMatrix<T1>& L, const GenVector<T1>& xD,
-        const int* P, const MatrixView<T>& m);
+        const int* P, MatrixView<T> m);
     template <class T, class T1> 
     void LDL_RDivEq(
         const GenSymMatrix<T1>& L, const GenVector<T1>& xD,
-        const int* P, const MatrixView<T>& m);
+        const int* P, MatrixView<T> m);
 
     // This is in TMV_SymLDLInverse.cpp:
     template <class T, class T1> 
     void LDL_Inverse(
         const GenSymMatrix<T>& L, const GenVector<T>& xD,
-        const int* P, const SymMatrixView<T1>& sinv);
+        const int* P, SymMatrixView<T1> sinv);
 
     // A quick helper class
     template <bool herm, class T>
@@ -78,11 +78,11 @@ namespace tmv {
     template <bool herm, class T, class T1> 
     void PseudoDiag_LDivEq(
         const GenVector<T1>& D, const GenVector<T1>& xD, 
-        const MatrixView<T>& m);
+        MatrixView<T> m);
     template <bool herm, class T, class T1> 
     void PseudoDiag_LMultEq(
         const GenVector<T1>& D, const GenVector<T1>& xD, 
-        const MatrixView<T>& m);
+        MatrixView<T> m);
 
     // Specialize disallowed complex combinations:
 #define CT std::complex<T>
@@ -90,28 +90,28 @@ namespace tmv {
     template <class T>
     inline void LDL_LDivEq(
         const GenSymMatrix<CT>& , const GenVector<CT>& ,
-        const int* , const MatrixView<T>& )
+        const int* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void LDL_RDivEq(
         const GenSymMatrix<CT>& , const GenVector<CT>& ,
-        const int* , const MatrixView<T>& )
+        const int* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void LDL_Inverse(
         const GenSymMatrix<CT>& , const GenVector<CT>& ,
-        const int* , const SymMatrixView<T>& )
+        const int* , SymMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <bool herm, class T>
     inline void PseudoDiag_LDivEq(
         const GenVector<CT>& , const GenVector<CT>& , 
-        const MatrixView<T>& )
+        MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <bool herm, class T>
     inline void PseudoDiag_LMultEq(
         const GenVector<CT>& , const GenVector<CT>& , 
-        const MatrixView<T>& )
+        MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
 #undef CT

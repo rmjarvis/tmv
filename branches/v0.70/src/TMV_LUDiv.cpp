@@ -55,7 +55,7 @@ namespace tmv {
 
     template <class T, class T1> 
     static void NonLapLULDivEq(
-        const GenMatrix<T1>& LUx, const MatrixView<T>& m)
+        const GenMatrix<T1>& LUx, MatrixView<T> m)
     {
         // Solve L U x = m:
         TMVAssert(LUx.isSquare());
@@ -69,12 +69,12 @@ namespace tmv {
     // ALAP, not LAP, since ATLAS has these routines
     template <class T, class T1> 
     static inline void LapLULDivEq(
-        const GenMatrix<T1>& LUx, const MatrixView<T>& m)
+        const GenMatrix<T1>& LUx, MatrixView<T> m)
     { NonLapLULDivEq(LUx,m); }
 #ifdef INST_DOUBLE
     template <> 
     void LapLULDivEq(
-        const GenMatrix<double>& LUx, const MatrixView<double>& m)
+        const GenMatrix<double>& LUx, MatrixView<double> m)
     {
         TMVAssert(LUx.isSquare());
         TMVAssert(LUx.rowsize() == m.colsize());
@@ -101,7 +101,7 @@ namespace tmv {
     template <> 
     void LapLULDivEq(
         const GenMatrix<std::complex<double> >& LUx,
-        const MatrixView<std::complex<double> >& m)
+        MatrixView<std::complex<double> > m)
     {
         TMVAssert(LUx.isSquare());
         TMVAssert(LUx.rowsize() == m.colsize());
@@ -129,7 +129,7 @@ namespace tmv {
 #ifdef INST_FLOAT
 #ifndef MKL
     template <> 
-    void LapLULDivEq(const GenMatrix<float>& LUx, const MatrixView<float>& m)
+    void LapLULDivEq(const GenMatrix<float>& LUx, MatrixView<float> m)
     {
         TMVAssert(LUx.isSquare());
         TMVAssert(LUx.rowsize() == m.colsize());
@@ -156,7 +156,7 @@ namespace tmv {
     template <> 
     void LapLULDivEq(
         const GenMatrix<std::complex<float> >& LUx,
-        const MatrixView<std::complex<float> >& m)
+        MatrixView<std::complex<float> > m)
     {
         TMVAssert(LUx.isSquare());
         TMVAssert(LUx.rowsize() == m.colsize());
@@ -186,7 +186,7 @@ namespace tmv {
 
     template <class T, class T1> 
     void LU_LDivEq(
-        const GenMatrix<T1>& LUx, const int* P, const MatrixView<T>& m)
+        const GenMatrix<T1>& LUx, const int* P, MatrixView<T> m)
     {
         TMVAssert(m.colsize() == LUx.rowsize()); 
         TMVAssert(LUx.rowsize() == LUx.colsize());
@@ -233,7 +233,7 @@ namespace tmv {
 
     template <class T, class T1> 
     static void NonLapLURDivEq(
-        const GenMatrix<T1>& LUx, const MatrixView<T>& m)
+        const GenMatrix<T1>& LUx, MatrixView<T> m)
     {
         TMVAssert(LUx.isSquare());
         TMVAssert(LUx.rowsize() == m.rowsize());
@@ -246,12 +246,12 @@ namespace tmv {
 #ifdef ALAP
     template <class T, class T1> 
     static inline void LapLURDivEq(
-        const GenMatrix<T1>& LUx, const MatrixView<T>& m)
+        const GenMatrix<T1>& LUx, MatrixView<T> m)
     { NonLapLURDivEq(LUx,m); }
 #ifdef INST_DOUBLE
     template <> 
     void LapLURDivEq(
-        const GenMatrix<double>& LUx, const MatrixView<double>& m)
+        const GenMatrix<double>& LUx, MatrixView<double> m)
     {
         TMVAssert(LUx.isSquare());
         TMVAssert(LUx.rowsize() == m.rowsize());
@@ -278,7 +278,7 @@ namespace tmv {
     template <> 
     void LapLURDivEq(
         const GenMatrix<std::complex<double> >& LUx,
-        const MatrixView<std::complex<double> >& m)
+        MatrixView<std::complex<double> > m)
     {
         TMVAssert(LUx.isSquare());
         TMVAssert(LUx.rowsize() == m.rowsize());
@@ -306,7 +306,7 @@ namespace tmv {
 #ifndef MKL
     template <> 
     void LapLURDivEq(
-        const GenMatrix<float>& LUx, const MatrixView<float>& m)
+        const GenMatrix<float>& LUx, MatrixView<float> m)
     {
         TMVAssert(LUx.isSquare());
         TMVAssert(LUx.rowsize() == m.rowsize());
@@ -333,7 +333,7 @@ namespace tmv {
     template <> 
     void LapLURDivEq(
         const GenMatrix<std::complex<float> >& LUx,
-        const MatrixView<std::complex<float> >& m)
+        MatrixView<std::complex<float> > m)
     {
         TMVAssert(LUx.isSquare());
         TMVAssert(LUx.rowsize() == m.rowsize());
@@ -362,7 +362,7 @@ namespace tmv {
 
     template <class T, class T1> 
     void LU_RDivEq(
-        const GenMatrix<T1>& LUx, const int* P, const MatrixView<T>& m)
+        const GenMatrix<T1>& LUx, const int* P, MatrixView<T> m)
         // Solve x P L U = m:
     {
 #ifdef XDEBUG

@@ -58,7 +58,7 @@ namespace tmv {
 
     template <class T> 
     static void NonBlockHessenberg(
-        const MatrixView<T>& A, const VectorView<T>& Ubeta)
+        MatrixView<T> A, VectorView<T> Ubeta)
     {
 #ifdef XDEBUG
         cout<<"Start NonBlock Hessenberg Reduction: A = "<<A<<endl;
@@ -117,7 +117,7 @@ namespace tmv {
 
     template <class T> 
     static void BlockHessenberg(
-        const MatrixView<T>& A, const VectorView<T>& Ubeta)
+        MatrixView<T> A, VectorView<T> Ubeta)
     {
         // Much like the block version of Bidiagonalize, we try to maintain
         // the operation of several successive Householder matrices in
@@ -276,7 +276,7 @@ namespace tmv {
 
     template <class T> 
     static inline void NonLapHessenberg(
-        const MatrixView<T>& A, const VectorView<T>& Ubeta)
+        MatrixView<T> A, VectorView<T> Ubeta)
     {
         TMVAssert(A.rowsize() == A.colsize());
         TMVAssert(A.rowsize() > 0);
@@ -293,11 +293,11 @@ namespace tmv {
 #ifdef LAP
     template <class T> 
     static inline void LapHessenberg(
-        const MatrixView<T>& A, const VectorView<T>& Ubeta)
+        MatrixView<T> A, VectorView<T> Ubeta)
     { NonLapHessenberg(A,Ubeta,Vbeta,D,E,det); }
 #ifdef INST_DOUBLE
     template <> void LapHessenberg(
-        const MatrixView<double>& A, const VectorView<double>& Ubeta)
+        MatrixView<double> A, VectorView<double> Ubeta)
     {
         TMVAssert(A.iscm());
         TMVAssert(A.colsize() == A.rowsize());
@@ -323,8 +323,8 @@ namespace tmv {
 #endif
     }
     template <> void LapHessenberg(
-        const MatrixView<std::complex<double> >& A, 
-        const VectorView<std::complex<double> >& Ubeta)
+        MatrixView<std::complex<double> > A, 
+        VectorView<std::complex<double> > Ubeta)
     {
         TMVAssert(A.iscm());
         TMVAssert(A.colsize() == A.rowsize());
@@ -353,7 +353,7 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <> void LapHessenberg(
-        const MatrixView<float>& A, const VectorView<float>& Ubeta)
+        MatrixView<float> A, VectorView<float> Ubeta)
     {
         TMVAssert(A.iscm());
         TMVAssert(A.colsize() == A.rowsize());
@@ -379,8 +379,8 @@ namespace tmv {
 #endif
     }
     template <> void LapHessenberg(
-        const MatrixView<std::complex<float> >& A, 
-        const VectorView<std::complex<float> >& Ubeta) 
+        MatrixView<std::complex<float> > A, 
+        VectorView<std::complex<float> > Ubeta) 
     {
         TMVAssert(A.iscm());
         TMVAssert(A.colsize() >= A.rowsize());
@@ -411,7 +411,7 @@ namespace tmv {
 
     template <class T> 
     static inline void Hessenberg(
-        const MatrixView<T>& A, const VectorView<T>& Ubeta)
+        MatrixView<T> A, VectorView<T> Ubeta)
     {
         TMVAssert(A.colsize() == A.rowsize());
         TMVAssert(Ubeta.size() == A.rowsize()-1);

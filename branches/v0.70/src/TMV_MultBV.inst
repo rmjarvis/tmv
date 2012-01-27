@@ -18,9 +18,9 @@ Def1(CT)
 
 #define DefMV(T,Ta,Tx)\
   template void MultMV<true>(const T alpha, const GenBandMatrix<Ta >& A, \
-      const GenVector<Tx >& x, const VectorView<T >& y); \
+      const GenVector<Tx >& x, VectorView<T > y); \
   template void MultMV<false>(const T alpha, const GenBandMatrix<Ta >& A, \
-      const GenVector<Tx >& x, const VectorView<T >& y); \
+      const GenVector<Tx >& x, VectorView<T > y); \
 
 DefMV(T,T,T)
 #ifdef INST_COMPLEX

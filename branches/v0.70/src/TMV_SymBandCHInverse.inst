@@ -2,9 +2,9 @@
 
 #define DefInv(T,T1) \
 template void CH_Inverse(const GenSymBandMatrix<T1 >& m, \
-    const SymMatrixView<T >& sinv); \
+    SymMatrixView<T > sinv); \
 template void LDL_Inverse(const GenSymBandMatrix<T1 >& m, \
-    const SymMatrixView<T >& sinv); \
+    SymMatrixView<T > sinv); \
     
 DefInv(T,T)
 #ifdef INST_COMPLEX

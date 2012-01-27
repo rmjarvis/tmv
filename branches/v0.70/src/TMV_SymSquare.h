@@ -38,7 +38,7 @@
 namespace tmv {
 
     template <bool herm, class T> 
-    void SymSquare(const MatrixView<T>& A);
+    void SymSquare(MatrixView<T> A);
 
 }
 

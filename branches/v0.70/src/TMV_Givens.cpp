@@ -166,7 +166,7 @@ namespace tmv {
 
     template <bool c0, class T, class Tx> 
     static void NonBlasGivensMult(
-        RT c, T s, const VectorView<Tx>& v1, const VectorView<Tx>& v2)
+        RT c, T s, VectorView<Tx> v1, VectorView<Tx> v2)
     {
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() > 0);
@@ -208,7 +208,7 @@ namespace tmv {
 
     template <class T, class Tx> 
     static void DoGivensMult(
-        RT c, T s, const VectorView<Tx>& v1, const VectorView<Tx>& v2)
+        RT c, T s, VectorView<Tx> v1, VectorView<Tx> v2)
     {
         if (v1.isconj()) NonBlasGivensMult<true>(c,s,v1,v2); 
         else NonBlasGivensMult<false>(c,s,v1,v2); 
@@ -218,7 +218,7 @@ namespace tmv {
 #ifdef INST_DOUBLE
     static void DoGivensMult(
         double c, double s,
-        const VectorView<double>& v1, const VectorView<double>& v2)
+        VectorView<double> v1, VectorView<double> v2)
     { 
         TMVAssert(v1.size()==v2.size());
         TMVAssert(v1.ct()==NonConj);
@@ -237,8 +237,8 @@ namespace tmv {
 #ifdef BLASZDROT
     static void DoGivensMult(
         double c, double s,
-        const VectorView<std::complex<double> >& v1,
-        const VectorView<std::complex<double> >& v2)
+        VectorView<std::complex<double> > v1,
+        VectorView<std::complex<double> > v2)
     { 
         TMVAssert(v1.size()==v2.size());
         TMVAssert(v1.ct()==NonConj);
@@ -258,8 +258,8 @@ namespace tmv {
 #ifdef ELAP
     static void DoGivensMult(
         double c, std::complex<double> s,
-        const VectorView<std::complex<double> >& v1,
-        const VectorView<std::complex<double> >& v2)
+        VectorView<std::complex<double> > v1,
+        VectorView<std::complex<double> > v2)
     {
         TMVAssert(v1.size()==v2.size());
         TMVAssert(v1.ct()==NonConj);
@@ -279,7 +279,7 @@ namespace tmv {
 #ifdef INST_FLOAT
     static void DoGivensMult(
         float c, float s,
-        const VectorView<float>& v1, const VectorView<float>& v2)
+        VectorView<float> v1, VectorView<float> v2)
     { 
         TMVAssert(v1.size()==v2.size());
         TMVAssert(v1.ct()==NonConj);
@@ -298,8 +298,8 @@ namespace tmv {
 #ifdef BLASZDROT
     static void DoGivensMult(
         float c, float s,
-        const VectorView<std::complex<float> >& v1,
-        const VectorView<std::complex<float> >& v2)
+        VectorView<std::complex<float> > v1,
+        VectorView<std::complex<float> > v2)
     { 
         TMVAssert(v1.size()==v2.size());
         TMVAssert(v1.ct()==NonConj);
@@ -319,8 +319,8 @@ namespace tmv {
 #ifdef ELAP
     static void DoGivensMult(
         float c, std::complex<float> s,
-        const VectorView<std::complex<float> >& v1,
-        const VectorView<std::complex<float> >& v2)
+        VectorView<std::complex<float> > v1,
+        VectorView<std::complex<float> > v2)
     {
         TMVAssert(v1.size()==v2.size());
         TMVAssert(v1.ct()==NonConj);
@@ -341,7 +341,7 @@ namespace tmv {
 
     template <class T, class Tx> 
     void GivensMult(
-        RT c, T s, const VectorView<Tx>& v1, const VectorView<Tx>& v2)
+        RT c, T s, VectorView<Tx> v1, VectorView<Tx> v2)
     { 
         TMVAssert(v1.size() == v2.size());
         TMVAssert(!v1.isSameAs(v2));

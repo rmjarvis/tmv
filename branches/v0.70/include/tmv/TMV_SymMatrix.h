@@ -445,7 +445,7 @@ namespace tmv {
             } else return false;
         }
 
-        inline void assignToM(const MatrixView<RT>& m2) const
+        inline void assignToM(MatrixView<RT> m2) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m2.colsize() == size());
@@ -456,7 +456,7 @@ namespace tmv {
                     m2.upperTri().offDiag().transpose();
         }
 
-        inline void assignToM(const MatrixView<CT>& m2) const
+        inline void assignToM(MatrixView<CT> m2) const
         {
             TMVAssert(m2.colsize() == size());
             TMVAssert(m2.rowsize() == size());
@@ -474,14 +474,14 @@ namespace tmv {
             }
         }
 
-        inline void assignToS(const SymMatrixView<RT>& m2) const
+        inline void assignToS(SymMatrixView<RT> m2) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m2.size() == size());
             if (!isSameAs(m2)) m2.upperTri() = upperTri(); 
         }
 
-        inline void assignToS(const SymMatrixView<CT>& m2) const
+        inline void assignToS(SymMatrixView<CT> m2) const
         {
             TMVAssert(m2.size() == size());
             TMVAssert(isReal(T()) || m2.sym() == sym());
@@ -714,10 +714,10 @@ namespace tmv {
         }
 
         template <class T1> 
-        void doMakeInverse(const SymMatrixView<T1>& sinv) const;
+        void doMakeInverse(SymMatrixView<T1> sinv) const;
 
         template <class T1> 
-        inline void makeInverse(const SymMatrixView<T1>& minv) const
+        inline void makeInverse(SymMatrixView<T1> minv) const
         {
             TMVAssert(minv.size() == size());
             TMVAssert(isherm() == minv.isherm());
@@ -725,11 +725,11 @@ namespace tmv {
             doMakeInverse(minv);
         }
 
-        inline void makeInverse(const MatrixView<T>& minv) const
+        inline void makeInverse(MatrixView<T> minv) const
         { DivHelper<T>::makeInverse(minv); }
 
         template <class T1> 
-        inline void makeInverse(const MatrixView<T1>& minv) const
+        inline void makeInverse(MatrixView<T1> minv) const
         { DivHelper<T>::makeInverse(minv); }
 
         template <class T1, int A>
@@ -1090,6 +1090,15 @@ namespace tmv {
         typedef UpperTriMatrixView<T,A> uppertri_type;
         typedef LowerTriMatrixView<T,A> lowertri_type;
         typedef SymMatrixView<RT,A> realpart_type;
+        typedef ConstSymMatrixView<T,A> const_view_type;
+        typedef const_view_type const_transpose_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_adjoint_type;
+        typedef ConstVectorView<T,A> const_vec_type;
+        typedef ConstMatrixView<T,A> const_rec_type;
+        typedef ConstUpperTriMatrixView<T,A> const_uppertri_type;
+        typedef ConstLowerTriMatrixView<T,A> const_lowertri_type;
+        typedef ConstSymMatrixView<RT,A> const_realpart_type;
         typedef typename RefHelper<T>::reference reference;
 
         //
@@ -1123,7 +1132,7 @@ namespace tmv {
         // Op=
         //
 
-        inline const type& operator=(const type& m2) const
+        inline type& operator=(const type& m2)
         { 
             TMVAssert(size() == m2.size());
             TMVAssert(isReal(T()) || m2.sym() == sym());
@@ -1131,22 +1140,14 @@ namespace tmv {
             return *this; 
         }
 
-        inline const type& operator=(const type& m2)
-        { 
-            TMVAssert(size() == m2.size());
-            TMVAssert(isReal(T()) || m2.sym() == sym());
-            if (!this->isSameAs(m2)) upperTri() = m2.upperTri(); 
-            return *this; 
-        }
-
-        inline const type& operator=(const GenSymMatrix<RT>& m2) const
+        inline type& operator=(const GenSymMatrix<RT>& m2)
         { 
             TMVAssert(size() == m2.size());
             m2.assignToS(*this);
             return *this; 
         }
 
-        inline const type& operator=(const GenSymMatrix<CT>& m2) const
+        inline type& operator=(const GenSymMatrix<CT>& m2)
         { 
             TMVAssert(isComplex(T()));
             TMVAssert(size() == m2.size());
@@ -1156,7 +1157,7 @@ namespace tmv {
         }
 
         template <class T2> 
-        inline const type& operator=(const GenSymMatrix<T2>& m2) const
+        inline type& operator=(const GenSymMatrix<T2>& m2)
         { 
             TMVAssert(size() == m2.size());
             TMVAssert(isComplex(T()) || isReal(T2()));
@@ -1165,20 +1166,20 @@ namespace tmv {
             return *this; 
         }
 
-        inline const type& operator=(const T& x) const 
+        inline type& operator=(const T& x) 
         { 
             TMVAssert(issym() || TMV_IMAG(x) == RT(0));
             return setToIdentity(x); 
         }
 
-        inline const type& operator=(const AssignableToSymMatrix<RT>& m2) const
+        inline type& operator=(const AssignableToSymMatrix<RT>& m2)
         { 
             TMVAssert(size() == m2.size());
             m2.assignToS(view());
             return *this;
         }
 
-        inline const type& operator=(const AssignableToSymMatrix<CT>& m2) const
+        inline type& operator=(const AssignableToSymMatrix<CT>& m2)
         { 
             TMVAssert(isComplex(T()));
             TMVAssert(size() == m2.size());
@@ -1187,7 +1188,7 @@ namespace tmv {
             return *this;
         }
 
-        inline const type& operator=(const GenDiagMatrix<RT>& m2) const
+        inline type& operator=(const GenDiagMatrix<RT>& m2)
         { 
             TMVAssert(size() == m2.size());
             m2.assignToD(DiagMatrixViewOf(diag()));
@@ -1195,7 +1196,7 @@ namespace tmv {
             return *this;
         }
 
-        inline const type& operator=(const GenDiagMatrix<CT>& m2) const
+        inline type& operator=(const GenDiagMatrix<CT>& m2)
         { 
             TMVAssert(isComplex(T()));
             TMVAssert(size() == m2.size());
@@ -1207,7 +1208,7 @@ namespace tmv {
         }
 
         template <class T2> 
-        inline const type& operator=(const OProdVV<RT,T2,T2>& opvv) const
+        inline type& operator=(const OProdVV<RT,T2,T2>& opvv)
         {
             TMVAssert(size() == opvv.colsize());
             TMVAssert(size() == opvv.rowsize());
@@ -1219,7 +1220,7 @@ namespace tmv {
         }
 
         template <class T2> 
-        inline const type& operator=(const OProdVV<CT,T2,T2>& opvv) const
+        inline type& operator=(const OProdVV<CT,T2,T2>& opvv)
         {
             TMVAssert(isComplex(T()));
             TMVAssert(size() == opvv.colsize());
@@ -1232,7 +1233,7 @@ namespace tmv {
         }
 
         template <class T2> 
-        inline const type& operator=(const ProdMM<RT,T2,T2>& pmm) const
+        inline type& operator=(const ProdMM<RT,T2,T2>& pmm)
         {
             TMVAssert(size() == pmm.colsize());
             TMVAssert(size() == pmm.rowsize());
@@ -1244,7 +1245,7 @@ namespace tmv {
         }
 
         template <class T2> 
-        inline const type& operator=(const ProdMM<CT,T2,T2>& pmm) const
+        inline type& operator=(const ProdMM<CT,T2,T2>& pmm)
         {
             TMVAssert(isComplex(T()));
             TMVAssert(size() == pmm.colsize());
@@ -1257,7 +1258,7 @@ namespace tmv {
         }
 
         template <class T2> 
-        inline const type& operator=(const ProdUL<RT,T2,T2>& pmm) const
+        inline type& operator=(const ProdUL<RT,T2,T2>& pmm)
         {
             TMVAssert(size() == pmm.colsize());
             TMVAssert(size() == pmm.rowsize());
@@ -1269,7 +1270,7 @@ namespace tmv {
         }
 
         template <class T2> 
-        inline const type& operator=(const ProdUL<CT,T2,T2>& pmm) const
+        inline type& operator=(const ProdUL<CT,T2,T2>& pmm)
         {
             TMVAssert(isComplex(T()));
             TMVAssert(size() == pmm.colsize());
@@ -1282,7 +1283,7 @@ namespace tmv {
         }
 
         template <class T2> 
-        inline const type& operator=(const ProdLU<RT,T2,T2>& pmm) const
+        inline type& operator=(const ProdLU<RT,T2,T2>& pmm)
         {
             TMVAssert(size() == pmm.colsize());
             TMVAssert(size() == pmm.rowsize());
@@ -1294,7 +1295,7 @@ namespace tmv {
         }
 
         template <class T2> 
-        inline const type& operator=(const ProdLU<CT,T2,T2>& pmm) const
+        inline type& operator=(const ProdLU<CT,T2,T2>& pmm)
         {
             TMVAssert(isComplex(T()));
             TMVAssert(size() == pmm.colsize());
@@ -1311,14 +1312,14 @@ namespace tmv {
         // Access
         //
 
-        inline reference operator()(int i,int j) const 
+        inline reference operator()(int i,int j) 
         {
             TMVAssert(i>=0 && i<size());
             TMVAssert(j>=0 && j<size());
             return ref(i,j); 
         }
 
-        inline vec_type row(int i, int j1, int j2) const 
+        inline vec_type row(int i, int j1, int j2) 
         { 
             TMVAssert(i>=0 && i<size());
             TMVAssert(j1>=0 && j1-j2<=0 && j2<=size());
@@ -1332,7 +1333,7 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline vec_type col(int j, int i1, int i2) const
+        inline vec_type col(int j, int i1, int i2)
         {
             TMVAssert(j>=0 && j<size());
             TMVAssert(i1>=0 && i1-i2<=0 && i2<=size());
@@ -1346,10 +1347,10 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline vec_type diag() const
+        inline vec_type diag()
         { return vec_type(ptr(),size(),stepi()+stepj(),ct() TMV_FIRSTLAST); }
 
-        inline vec_type diag(int i) const
+        inline vec_type diag(int i)
         {
             TMVAssert(i>=-size() && i<=size()); 
             if (i>=0)
@@ -1374,7 +1375,7 @@ namespace tmv {
                         stepi()+stepj(),ct() TMV_FIRSTLAST); 
         }
 
-        inline vec_type diag(int i, int j1, int j2) const
+        inline vec_type diag(int i, int j1, int j2)
         {
             TMVAssert(i>=-size() && i<=size()); 
             TMVAssert(j1>=0 && j1-j2<=0 && j2<=size()-std::abs(i));
@@ -1399,57 +1400,71 @@ namespace tmv {
                         TMV_FIRSTLAST); 
         }
 
+
+        inline T operator()(int i,int j) const 
+        { return base::operator()(i,j); }
+        inline const_vec_type row(int i, int j1, int j2) const 
+        { return base::row(i,j1,j2); }
+        inline const_vec_type col(int j, int i1, int i2) const
+        { return base::col(j,i1,i2); }
+        inline const_vec_type diag() const
+        { return base::diag(); }
+        inline const_vec_type diag(int i) const
+        { return base::diag(i); }
+        inline const_vec_type diag(int i, int j1, int j2) const
+        { return base::diag(i,j1,j2); }
+
         //
         // Modifying Functions
         //
 
-        inline const type& setZero() const 
+        inline type& setZero() 
         { upperTri().setZero(); return *this; }
 
-        inline const type& setAllTo(const T& x) const
+        inline type& setAllTo(const T& x)
         { 
             TMVAssert(TMV_IMAG(x)==RT(0) || this->issym());
             upperTri().setAllTo(x); return *this; 
         }
 
-        inline const type& addToAll(const T& x) const
+        inline type& addToAll(const T& x)
         { 
             TMVAssert(TMV_IMAG(x)==RT(0) || this->issym());
             upperTri().addToAll(x); return *this; 
         }
 
-        inline const type& clip(RT thresh) const
+        inline type& clip(RT thresh)
         { upperTri().clip(thresh); return *this; }
 
-        inline const type& transposeSelf() const
+        inline type& transposeSelf()
         { if (!this->issym()) upperTri().conjugateSelf(); return *this; }
 
-        inline const type& conjugateSelf() const
+        inline type& conjugateSelf()
         { if (isComplex(T())) upperTri().conjugateSelf(); return *this; }
 
-        inline const type& setToIdentity(const T& x=T(1)) const
+        inline type& setToIdentity(const T& x=T(1))
         { 
             TMVAssert(TMV_IMAG(x)==RT(0) || this->issym());
             setZero(); diag().setAllTo(x); return *this; 
         }
 
-        const type& swapRowsCols(int i1, int i2) const;
+        type& swapRowsCols(int i1, int i2);
 
-        const type& permuteRowsCols(const int* p, int i1, int i2) const;
+        type& permuteRowsCols(const int* p, int i1, int i2);
 
-        const type& reversePermuteRowsCols(const int* p, int i1, int i2) const;
+        type& reversePermuteRowsCols(const int* p, int i1, int i2);
 
-        inline const type& permuteRowsCols(const int* p) const
+        inline type& permuteRowsCols(const int* p)
         { return permuteRowsCols(p,0,size()); }
 
-        inline const type& reversePermuteRowsCols(const int* p) const
+        inline type& reversePermuteRowsCols(const int* p)
         { return reversePermuteRowsCols(p,0,size()); }
 
         //
         // subMatrix
         //
 
-        inline rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        inline rec_type subMatrix(int i1, int i2, int j1, int j2)
         {
             TMVAssert(base::hasSubMatrix(i1,i2,j1,j2,1,1));
             if ( (uplo()==Upper && i2-j1<=1) || 
@@ -1464,7 +1479,7 @@ namespace tmv {
         }
 
         inline rec_type subMatrix(
-            int i1, int i2, int j1, int j2, int istep, int jstep) const
+            int i1, int i2, int j1, int j2, int istep, int jstep)
         {
             TMVAssert(base::hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             if ( (uplo()==Upper && i2-j1<=istep) || 
@@ -1480,8 +1495,7 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline vec_type subVector(int i, int j,
-                                  int istep, int jstep, int n) const
+        inline vec_type subVector(int i, int j, int istep, int jstep, int n)
         {
             TMVAssert(base::hasSubVector(i,j,istep,jstep,n));
             if ((i-j<=0 && uplo()==Upper) || (j-i<=0 && uplo()==Lower))
@@ -1494,7 +1508,7 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline view_type subSymMatrix(int i1, int i2) const
+        inline view_type subSymMatrix(int i1, int i2)
         {
             TMVAssert(base::hasSubSymMatrix(i1,i2,1));
             return view_type(
@@ -1502,7 +1516,7 @@ namespace tmv {
                 stepi(),stepj(),sym(),uplo(),ct() TMV_FIRSTLAST);
         }
 
-        inline view_type subSymMatrix(int i1, int i2, int istep) const
+        inline view_type subSymMatrix(int i1, int i2, int istep)
         {
             TMVAssert(base::hasSubSymMatrix(i1,i2,istep));
             return view_type(
@@ -1510,7 +1524,7 @@ namespace tmv {
                 istep*stepi(),istep*stepj(),sym(),uplo(), ct() TMV_FIRSTLAST);
         }
 
-        inline uppertri_type upperTri(DiagType dt = NonUnitDiag) const
+        inline uppertri_type upperTri(DiagType dt = NonUnitDiag)
         {
             if (uplo() == Upper)
                 return uppertri_type(
@@ -1521,7 +1535,7 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline uppertri_type unitUpperTri() const
+        inline uppertri_type unitUpperTri()
         {
             if (uplo() == Upper)
                 return uppertri_type(
@@ -1532,7 +1546,7 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline lowertri_type lowerTri(DiagType dt = NonUnitDiag) const
+        inline lowertri_type lowerTri(DiagType dt = NonUnitDiag)
         {
             if (uplo() == Lower)
                 return lowertri_type(
@@ -1543,7 +1557,7 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline lowertri_type unitLowerTri() const
+        inline lowertri_type unitLowerTri()
         {
             if (uplo() == Lower)
                 return lowertri_type(
@@ -1554,7 +1568,7 @@ namespace tmv {
                     this->issym()?ct():TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline realpart_type realPart() const
+        inline realpart_type realPart()
         {
             return realpart_type(
                 reinterpret_cast<RT*>(ptr()),size(),
@@ -1567,7 +1581,7 @@ namespace tmv {
             );
         }
 
-        inline realpart_type imagPart() const
+        inline realpart_type imagPart()
         {
             TMVAssert(isComplex(T()));
             TMVAssert(this->issym());
@@ -1581,39 +1595,72 @@ namespace tmv {
             );
         }
 
-        inline view_type view() const
+        inline view_type view()
         { return *this; }
 
-        inline view_type transpose() const
+        inline view_type transpose()
         {
             return view_type(
                 ptr(),size(),stepj(),stepi(),sym(),TMV_UTransOf(uplo()),ct() 
                 TMV_FIRSTLAST);
         }
 
-        inline view_type conjugate() const
+        inline view_type conjugate()
         {
             return view_type(
                 ptr(),size(),stepi(),stepj(),sym(),uplo(),TMV_ConjOf(T,ct()) 
                 TMV_FIRSTLAST);
         }
 
-        inline view_type adjoint() const
+        inline view_type adjoint()
         {
             return view_type(
                 ptr(),size(),stepj(),stepi(),sym(),TMV_UTransOf(uplo()),
                 TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
+        inline const_rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        { return base::subMatrix(i1,i2,j1,j2); }
+        inline const_rec_type subMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) const
+        { return base::subMatrix(i1,i2,j1,j2,istep,jstep); }
+        inline const_vec_type subVector(
+            int i, int j, int istep, int jstep, int n) const
+        { return base::subVector(i,j,istep,jstep,n); }
+        inline const_view_type subSymMatrix(int i1, int i2) const
+        { return base::subSymMatrix(i1,i2); }
+        inline const_view_type subSymMatrix(int i1, int i2, int istep) const
+        { return base::subSymMatrix(i1,i2,istep); }
+        inline const_uppertri_type upperTri(DiagType dt = NonUnitDiag) const
+        { return base::upperTri(dt); }
+        inline const_uppertri_type unitUpperTri() const
+        { return base::unitUpperTri(); }
+        inline const_lowertri_type lowerTri(DiagType dt = NonUnitDiag) const
+        { return base::lowerTri(dt); }
+        inline const_lowertri_type unitLowerTri() const
+        { return base::unitLowerTri(); }
+        inline const_realpart_type realPart() const
+        { return base::realPart(); }
+        inline const_realpart_type imagPart() const
+        { return base::imagPart(); }
+        inline const_view_type view() const
+        { return base::view(); }
+        inline const_view_type transpose() const
+        { return base::transpose(); }
+        inline const_view_type conjugate() const
+        { return base::conjugate(); }
+        inline const_view_type adjoint() const
+        { return base::adjoint(); }
+
         //
         // I/O
         //
 
-        void read(const TMV_Reader& reader) const;
+        void read(const TMV_Reader& reader);
 
         inline int size() const { return itss; }
         inline const T* cptr() const { return itsm; }
-        inline T* ptr() const { return itsm; }
+        inline T* ptr() { return itsm; }
         inline int stepi() const { return itssi; }
         inline int stepj() const { return itssj; }
         inline SymType sym() const { return itssym; }
@@ -1622,7 +1669,7 @@ namespace tmv {
         using base::issym;
         using base::isherm;
 
-        reference ref(int i, int j) const;
+        reference ref(int i, int j);
 
     protected :
 
@@ -1663,6 +1710,15 @@ namespace tmv {
         typedef UpperTriMatrixView<T,FortranStyle> uppertri_type;
         typedef LowerTriMatrixView<T,FortranStyle> lowertri_type;
         typedef SymMatrixView<RT,FortranStyle> realpart_type;
+        typedef ConstSymMatrixView<T,FortranStyle> const_view_type;
+        typedef const_view_type const_transpose_type;
+        typedef const_view_type const_conjugate_type;
+        typedef const_view_type const_adjoint_type;
+        typedef ConstVectorView<T,FortranStyle> const_vec_type;
+        typedef ConstMatrixView<T,FortranStyle> const_rec_type;
+        typedef ConstUpperTriMatrixView<T,FortranStyle> const_uppertri_type;
+        typedef ConstLowerTriMatrixView<T,FortranStyle> const_lowertri_type;
+        typedef ConstSymMatrixView<RT,FortranStyle> const_realpart_type;
         typedef ConstSymMatrixView<T,FortranStyle> const_type;
         typedef typename RefHelper<T>::reference reference;
 
@@ -1687,57 +1743,51 @@ namespace tmv {
         // Op=
         //
 
-        inline const type& operator=(const type& m2) const
+        inline type& operator=(const type& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const type& m2)
+        inline type& operator=(const c_type& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const c_type& m2) const
+        inline type& operator=(const GenSymMatrix<RT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const c_type& m2)
-        { c_type::operator=(m2); return *this; }
-
-        inline const type& operator=(const GenSymMatrix<RT>& m2) const
-        { c_type::operator=(m2); return *this; }
-
-        inline const type& operator=(const GenSymMatrix<CT>& m2) const
+        inline type& operator=(const GenSymMatrix<CT>& m2)
         { c_type::operator=(m2); return *this; }
 
         template <class T2> 
-        inline const type& operator=(const GenSymMatrix<T2>& m2) const
+        inline type& operator=(const GenSymMatrix<T2>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const T& x) const 
+        inline type& operator=(const T& x) 
         { c_type::operator=(x); return *this; }
 
-        inline const type& operator=(const AssignableToSymMatrix<RT>& m2) const
+        inline type& operator=(const AssignableToSymMatrix<RT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const AssignableToSymMatrix<CT>& m2) const
+        inline type& operator=(const AssignableToSymMatrix<CT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const GenDiagMatrix<RT>& m2) const
+        inline type& operator=(const GenDiagMatrix<RT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const GenDiagMatrix<CT>& m2) const
+        inline type& operator=(const GenDiagMatrix<CT>& m2)
         { c_type::operator=(m2); return *this; }
 
         template <class T2>
-        inline const type& operator=(const OProdVV<T,T2,T2>& opvv) const
+        inline type& operator=(const OProdVV<T,T2,T2>& opvv)
         { c_type::operator=(opvv); return *this; }
 
         template <class T2>
-        inline const type& operator=(const ProdMM<T,T2,T2>& pmm) const
+        inline type& operator=(const ProdMM<T,T2,T2>& pmm)
         { c_type::operator=(pmm); return *this; }
 
         template <class T2>
-        inline const type& operator=(const ProdLU<T,T2,T2>& pmm) const
+        inline type& operator=(const ProdLU<T,T2,T2>& pmm)
         { c_type::operator=(pmm); return *this; }
 
         template <class T2>
-        inline const type& operator=(const ProdUL<T,T2,T2>& pmm) const
+        inline type& operator=(const ProdUL<T,T2,T2>& pmm)
         { c_type::operator=(pmm); return *this; }
 
 
@@ -1745,34 +1795,68 @@ namespace tmv {
         // Access
         //
 
-        inline reference operator()(int i,int j) const 
+        inline reference operator()(int i,int j) 
         {
             TMVAssert(i>0 && i<=this->size());
             TMVAssert(j>0 && j<=this->size());
             return c_type::ref(i-1,j-1); 
         }
 
-        inline vec_type row(int i, int j1, int j2) const 
+        inline vec_type row(int i, int j1, int j2) 
         { 
             TMVAssert(i>0 && i<=this->size());
             TMVAssert(j1>0 && j1-j2<=0 && j2<=this->size());
             return c_type::row(i-1,j1-1,j2);
         }
 
-        inline vec_type col(int j, int i1, int i2) const
+        inline vec_type col(int j, int i1, int i2)
         {
             TMVAssert(j>0 && j<=this->size());
             TMVAssert(i1>0 && i1-i2<=0 && i2<=this->size());
             return c_type::col(j-1,i1-1,i2);
         }
 
-        inline vec_type diag() const
+        inline vec_type diag()
         { return c_type::diag(); }
 
-        inline vec_type diag(int i) const
+        inline vec_type diag(int i)
         { return c_type::diag(i); }
 
-        inline vec_type diag(int i, int j1, int j2) const
+        inline vec_type diag(int i, int j1, int j2)
+        {
+            TMVAssert(j1>0);
+            return c_type::diag(i,j1-1,j2); 
+        }
+
+
+        inline T operator()(int i,int j) const 
+        {
+            TMVAssert(i>0 && i<=this->size());
+            TMVAssert(j>0 && j<=this->size());
+            return c_type::cref(i-1,j-1); 
+        }
+
+        inline const_vec_type row(int i, int j1, int j2) const 
+        { 
+            TMVAssert(i>0 && i<=this->size());
+            TMVAssert(j1>0 && j1-j2<=0 && j2<=this->size());
+            return c_type::row(i-1,j1-1,j2);
+        }
+
+        inline const_vec_type col(int j, int i1, int i2) const
+        {
+            TMVAssert(j>0 && j<=this->size());
+            TMVAssert(i1>0 && i1-i2<=0 && i2<=this->size());
+            return c_type::col(j-1,i1-1,i2);
+        }
+
+        inline const_vec_type diag() const
+        { return c_type::diag(); }
+
+        inline const_vec_type diag(int i) const
+        { return c_type::diag(i); }
+
+        inline const_vec_type diag(int i, int j1, int j2) const
         {
             TMVAssert(j1>0);
             return c_type::diag(i,j1-1,j2); 
@@ -1782,28 +1866,28 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline const type& setZero() const 
+        inline type& setZero() 
         { c_type::setZero(); return *this; }
 
-        inline const type& setAllTo(const T& x) const
+        inline type& setAllTo(const T& x)
         { c_type::setAllTo(x); return *this; }
 
-        inline const type& addToAll(const T& x) const
+        inline type& addToAll(const T& x)
         { c_type::addToAll(x); return *this; }
 
-        inline const type& clip(RT thresh) const
+        inline type& clip(RT thresh)
         { c_type::clip(thresh); return *this; }
 
-        inline const type& conjugateSelf() const
+        inline type& conjugateSelf()
         { c_type::conjugateSelf(); return *this; }
 
-        inline const type& transposeSelf() const
+        inline type& transposeSelf()
         { c_type::transposeSelf(); return *this; }
 
-        inline const type& setToIdentity(const T& x=T(1)) const
+        inline type& setToIdentity(const T& x=T(1))
         { c_type::setToIdentity(x); return *this; }
 
-        inline const type& swapRowsCols(int i1, int i2) const
+        inline type& swapRowsCols(int i1, int i2)
         {
             TMVAssert(i1>0 && i1<=this->size());
             TMVAssert(i2>0 && i2<=this->size());
@@ -1811,26 +1895,24 @@ namespace tmv {
             return *this; 
         }
 
-        inline const type& permuteRowsCols(
-            const int* p, int i1, int i2) const
+        inline type& permuteRowsCols(const int* p, int i1, int i2)
         {
             TMVAssert(i1>0 && i1-i2<=0 && i2<=this->size());
             c_type::permuteRowsCols(p,i1-1,i2); 
             return *this; 
         }
 
-        inline const type& reversePermuteRowsCols(
-            const int* p, int i1, int i2) const
+        inline type& reversePermuteRowsCols(const int* p, int i1, int i2)
         {
             TMVAssert(i1>0 && i1-i2<=0 && i2<=this->size());
             c_type::reversePermuteRowsCols(p,i1-1,i2); 
             return *this; 
         }
 
-        inline const type& permuteRowsCols(const int* p) const
+        inline type& permuteRowsCols(const int* p)
         { c_type::permuteRowsCols(p); return *this; }
 
-        inline const type& reversePermuteRowsCols(const int* p) const
+        inline type& reversePermuteRowsCols(const int* p)
         { c_type::reversePermuteRowsCols(p); return *this; }
 
         //
@@ -1857,6 +1939,62 @@ namespace tmv {
         }
 
         inline rec_type subMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep)
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
+            return c_type::subMatrix(
+                i1-1,i2-1+istep,j1-1,j2-1+jstep,istep,jstep);
+        }
+
+        inline vec_type subVector(int i, int j, int istep, int jstep, int n)
+        {
+            TMVAssert(hasSubVector(i,j,istep,jstep,n));
+            return c_type::subVector(i-1,j-1,istep,jstep,n);
+        }
+
+        inline view_type subSymMatrix(int i1, int i2)
+        {
+            TMVAssert(hasSubSymMatrix(i1,i2,1));
+            return c_type::subSymMatrix(i1-1,i2);
+        }
+
+        inline view_type subSymMatrix(int i1, int i2, int istep)
+        {
+            TMVAssert(hasSubSymMatrix(i1,i2,istep));
+            return c_type::subSymMatrix(i1-1,i2-1+istep,istep);
+        }
+
+        inline uppertri_type upperTri(DiagType dt = NonUnitDiag)
+        { return c_type::upperTri(dt); }
+
+        inline uppertri_type unitUpperTri()
+        { return c_type::unitUpperTri(); }
+
+        inline lowertri_type lowerTri(DiagType dt = NonUnitDiag)
+        { return c_type::lowerTri(dt); }
+
+        inline lowertri_type unitLowerTri()
+        { return c_type::unitLowerTri(); }
+
+        inline realpart_type realPart()
+        { return c_type::realPart(); }
+
+        inline realpart_type imagPart()
+        { return c_type::imagPart(); }
+
+        inline view_type view()
+        { return c_type::view(); }
+
+        inline view_type transpose()
+        { return c_type::transpose(); }
+
+        inline view_type conjugate()
+        { return c_type::conjugate(); }
+
+        inline view_type adjoint()
+        { return c_type::adjoint(); }
+
+        inline const_rec_type subMatrix(
             int i1, int i2, int j1, int j2, int istep, int jstep) const
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
@@ -1864,53 +2002,53 @@ namespace tmv {
                 i1-1,i2-1+istep,j1-1,j2-1+jstep,istep,jstep);
         }
 
-        inline vec_type subVector(
+        inline const_vec_type subVector(
             int i, int j, int istep, int jstep, int n) const
         {
             TMVAssert(hasSubVector(i,j,istep,jstep,n));
             return c_type::subVector(i-1,j-1,istep,jstep,n);
         }
 
-        inline view_type subSymMatrix(int i1, int i2) const
+        inline const_view_type subSymMatrix(int i1, int i2) const
         {
             TMVAssert(hasSubSymMatrix(i1,i2,1));
             return c_type::subSymMatrix(i1-1,i2);
         }
 
-        inline view_type subSymMatrix(int i1, int i2, int istep) const
+        inline const_view_type subSymMatrix(int i1, int i2, int istep) const
         {
             TMVAssert(hasSubSymMatrix(i1,i2,istep));
             return c_type::subSymMatrix(i1-1,i2-1+istep,istep);
         }
 
-        inline uppertri_type upperTri(DiagType dt = NonUnitDiag) const
+        inline const_uppertri_type upperTri(DiagType dt = NonUnitDiag) const
         { return c_type::upperTri(dt); }
 
-        inline uppertri_type unitUpperTri() const
+        inline const_uppertri_type unitUpperTri() const
         { return c_type::unitUpperTri(); }
 
-        inline lowertri_type lowerTri(DiagType dt = NonUnitDiag) const
+        inline const_lowertri_type lowerTri(DiagType dt = NonUnitDiag) const
         { return c_type::lowerTri(dt); }
 
-        inline lowertri_type unitLowerTri() const
+        inline const_lowertri_type unitLowerTri() const
         { return c_type::unitLowerTri(); }
 
-        inline realpart_type realPart() const
+        inline const_realpart_type realPart() const
         { return c_type::realPart(); }
 
-        inline realpart_type imagPart() const
+        inline const_realpart_type imagPart() const
         { return c_type::imagPart(); }
 
-        inline view_type view() const
+        inline const_view_type view() const
         { return c_type::view(); }
 
-        inline view_type transpose() const
+        inline const_view_type transpose() const
         { return c_type::transpose(); }
 
-        inline view_type conjugate() const
+        inline const_view_type conjugate() const
         { return c_type::conjugate(); }
 
-        inline view_type adjoint() const
+        inline const_view_type adjoint() const
         { return c_type::adjoint(); }
 
     }; // FortranStyle SymMatrixView
@@ -3825,7 +3963,7 @@ namespace tmv {
 
     template <class T, int A> 
     inline SymMatrixView<T,A> SymMatrixViewOf(
-        const MatrixView<T,A>& m, UpLoType uplo)
+        MatrixView<T,A> m, UpLoType uplo)
     { 
         TMVAssert(m.colsize()==m.rowsize());
         return SymMatrixView<T,A>(
@@ -3878,7 +4016,7 @@ namespace tmv {
 
     template <class T, int A> 
     inline SymMatrixView<T,A> HermMatrixViewOf(
-        const MatrixView<T,A>& m, UpLoType uplo)
+        MatrixView<T,A> m, UpLoType uplo)
     { 
         TMVAssert(m.colsize()==m.rowsize());
         TMVAssert(isReal(T()) || 
@@ -3988,7 +4126,7 @@ namespace tmv {
     //
 
     template <class T> 
-    inline void Swap(const SymMatrixView<T>& m1, const SymMatrixView<T>& m2)
+    inline void Swap(SymMatrixView<T> m1, SymMatrixView<T> m2)
     { 
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.issym() == m2.issym());
@@ -3997,11 +4135,11 @@ namespace tmv {
     }
 
     template <class T, int A>
-    inline void Swap(const SymMatrixView<T>& m1, SymMatrix<T,A>& m2)
+    inline void Swap(SymMatrixView<T> m1, SymMatrix<T,A>& m2)
     { Swap(m1,m2.view()); }
 
     template <class T, int A>
-    inline void Swap(SymMatrix<T,A>& m1, const SymMatrixView<T>& m2)
+    inline void Swap(SymMatrix<T,A>& m1, SymMatrixView<T> m2)
     { Swap(m1.view(),m2); }
 
     template <class T, int A1, int A2>
@@ -4009,11 +4147,11 @@ namespace tmv {
     { Swap(m1.view(),m2.view()); }
 
     template <class T, int A>
-    inline void Swap(const SymMatrixView<T>& m1, HermMatrix<T,A>& m2)
+    inline void Swap(SymMatrixView<T> m1, HermMatrix<T,A>& m2)
     { Swap(m1,m2.view()); }
 
     template <class T, int A>
-    inline void Swap(HermMatrix<T,A>& m1, const SymMatrixView<T>& m2)
+    inline void Swap(HermMatrix<T,A>& m1, SymMatrixView<T> m2)
     { Swap(m1.view(),m2); }
 
     template <class T, int A1, int A2>
@@ -4045,7 +4183,7 @@ namespace tmv {
     { return m.transpose(); }
 
     template <class T, int A> 
-    inline SymMatrixView<T,A> Transpose(const SymMatrixView<T,A>& m)
+    inline SymMatrixView<T,A> Transpose(SymMatrixView<T,A> m)
     { return m.transpose(); }
 
     template <class T, int A>
@@ -4075,7 +4213,7 @@ namespace tmv {
     { return m.conjugate(); }
 
     template <class T, int A> 
-    inline SymMatrixView<T,A> Conjugate(const SymMatrixView<T,A>& m)
+    inline SymMatrixView<T,A> Conjugate(SymMatrixView<T,A> m)
     { return m.conjugate(); }
 
     template <class T, int A>
@@ -4105,7 +4243,7 @@ namespace tmv {
     { return m.adjoint(); }
 
     template <class T, int A> 
-    inline SymMatrixView<T,A> Adjoint(const SymMatrixView<T,A>& m)
+    inline SymMatrixView<T,A> Adjoint(SymMatrixView<T,A> m)
     { return m.adjoint(); }
 
     template <class T, int A>
@@ -4164,8 +4302,7 @@ namespace tmv {
     //
 
     template <class T>
-    inline std::istream& operator>>(
-        std::istream& is, const SymMatrixView<T>& m)
+    inline std::istream& operator>>(std::istream& is, SymMatrixView<T> m)
     { return is >> IOStyle() >> m; }
 
     template <class T, int A>
@@ -4178,7 +4315,7 @@ namespace tmv {
 
     template <class T>
     inline std::istream& operator>>(
-        const TMV_Reader& reader, const SymMatrixView<T>& m)
+        const TMV_Reader& reader, SymMatrixView<T> m)
     { m.read(reader); return reader.getis(); }
 
     template <class T, int A>

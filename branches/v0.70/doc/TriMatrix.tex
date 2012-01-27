@@ -9,27 +9,14 @@ The \tt{UpperTriMatrix} class is our upper triangle matrix class, which is non-z
 only on the main diagonal and above.  \tt{LowerTriMatrix} is our class for lower
 triangle matrices, which are non-zero only on the main diagonal and below.
 
-The class \tt{UpperTriMatrix} inherits from \tt{GenUpperTriMatrix}, 
-and the class \tt{LowerTriMatrix}
-inherits from \tt{GenLowerTriMatrix}, both of
-which in turn inherit from \tt{BaseMatrix}.  
-The various views and composite classes described below
-also inherit from \tt{GenUpperTriMatrix} and \tt{GenLowerTriMatrix} 
-as appropriate.
-\index{UpperTriMatrix!UpperTriMatrixView}
-\index{UpperTriMatrix!ConstUpperTriMatrixView}
-\index{UpperTriMatrix!GenUpperTriMatrix}
-\index{UpperTriMatrix!UpperTriMatrixComposite}
-\index{BaseMatrix}
-
 In addition to the data type template parameter (indicated here by \tt{T} as usual),
 there is also a second template parameter that specifies attributes of the
 \tt{UpperTriMatrix} or \tt{LowerTriMatrix}.  The attributes that are allowed are:
-\begin{itemize}
-\item \tt{CStyle} or \tt{FortranStyle}
-\item \tt{ColMajor} or \tt{RowMajor}
-\item \tt{NonUnitDiag} or \tt{UnitDiag}
-\end{itemize}
+\begin{description} \itemsep -2pt
+\item[$\bullet$] \tt{CStyle} or \tt{FortranStyle}
+\item[$\bullet$] \tt{ColMajor} or \tt{RowMajor}
+\item[$\bullet$] \tt{NonUnitDiag} or \tt{UnitDiag}
+\end{description}
 The final option refers to whether the elements on the diagonal should be 
 taken to be all 1's (\tt{UnitDiag}) rather than what is actually stored 
 in memory (\tt{NonUnitDiag}).
@@ -85,8 +72,8 @@ Makes an \tt{n} $\times$ \tt{n} \tt{UpperTriMatrix} with all values equal to \tt
 
 \item 
 \begin{tmvcode}
-tmv::UpperTriMatrix<T,A> U(const GenMatrix<T>& m)
-tmv::UpperTriMatrix<T,A> U(const GenUperTriMatrix<T>& U2)
+tmv::UpperTriMatrix<T,A> U(const Matrix<T>& m)
+tmv::UpperTriMatrix<T,A> U(const UperTriMatrix<T>& U2)
 \end{tmvcode}
 Make an \tt{UpperTriMatrix} which copies the corresponding values of
 \tt{U2}.  Note that the second allows the attributes to be different.
@@ -97,7 +84,7 @@ to \tt{NonUnitDiag} will put actual 1's into memory along the diagonal.
 
 \item
 \begin{tmvcode}
-tmv::UpperTriMatrix<T,A> U1(const GenUpperTriMatrix<T2>& U2)
+tmv::UpperTriMatrix<T,A> U1(const UpperTriMatrix<T2>& U2)
 U1 = U2
 \end{tmvcode}
 Copy the \tt{UpperTriMatrix U2}, which may be of any type \tt{T2} so long

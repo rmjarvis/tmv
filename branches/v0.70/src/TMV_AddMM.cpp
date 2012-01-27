@@ -54,7 +54,7 @@ namespace tmv {
 
     template <bool rm, bool a1, bool ca, class T, class T1, class T2> 
     static void DoRowAddMM(
-        const T1 alpha, const GenMatrix<T2>& A, const MatrixView<T>& B)
+        const T1 alpha, const GenMatrix<T2>& A, MatrixView<T> B)
     {
         TMVAssert(A.colsize() == B.colsize());
         TMVAssert(A.rowsize() == B.rowsize());
@@ -92,7 +92,7 @@ namespace tmv {
 
     template <bool rm, class T, class Ta> 
     static void rowAddMM(
-        const T alpha, const GenMatrix<Ta>& A, const MatrixView<T>& B)
+        const T alpha, const GenMatrix<Ta>& A, MatrixView<T> B)
     { 
         if (TMV_IMAG(alpha) == TMV_RealType(T)(0))
             if (TMV_REAL(alpha) == TMV_RealType(T)(1))
@@ -108,7 +108,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void DoAddMM(
-        const T alpha, const GenMatrix<Ta>& A, const MatrixView<T>& B)
+        const T alpha, const GenMatrix<Ta>& A, MatrixView<T> B)
     { 
         TMVAssert(A.colsize() == B.colsize());
         TMVAssert(A.rowsize() == B.rowsize());
@@ -142,7 +142,7 @@ namespace tmv {
     }
 
     template <class T, class Ta> 
-    void AddMM(const T alpha, const GenMatrix<Ta>& A, const MatrixView<T>& B)
+    void AddMM(const T alpha, const GenMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(A.colsize() == B.colsize());
         TMVAssert(A.rowsize() == B.rowsize());
@@ -195,7 +195,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     void AddMM(
         const T alpha, const GenMatrix<Ta>& A,
-        const T beta, const GenMatrix<Tb>& B, const MatrixView<T>& C)
+        const T beta, const GenMatrix<Tb>& B, MatrixView<T> C)
     {
         TMVAssert(A.colsize() == B.colsize());
         TMVAssert(A.rowsize() == B.rowsize());

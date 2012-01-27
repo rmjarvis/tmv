@@ -55,7 +55,7 @@ namespace tmv {
     template <class T, class Ta> 
     void AddMM(
         const T alpha, const GenSymBandMatrix<Ta>& A,
-        const BandMatrixView<T>& B)
+        BandMatrixView<T> B)
     {
 #ifdef XDEBUG
         Matrix<Ta> A0 = A;
@@ -109,7 +109,7 @@ namespace tmv {
     void AddMM(
         const T alpha, const GenSymBandMatrix<Ta>& A,
         const T beta, const GenSymBandMatrix<Tb>& B,
-        const BandMatrixView<T>& C)
+        BandMatrixView<T> C)
     { 
 #ifdef XDEBUG
         Matrix<Ta> A0 = A;
@@ -163,7 +163,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     void AddMM(
         const T alpha, const GenSymBandMatrix<Ta>& A,
-        const T beta, const GenSymBandMatrix<Tb>& B, const MatrixView<T>& C)
+        const T beta, const GenSymBandMatrix<Tb>& B, MatrixView<T> C)
     { 
 #ifdef XDEBUG
         Matrix<Ta> A0 = A;
@@ -209,7 +209,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     void AddMM(
         const T alpha, const GenSymBandMatrix<Ta>& A,
-        const T beta, const GenBandMatrix<Tb>& B, const BandMatrixView<T>& C)
+        const T beta, const GenBandMatrix<Tb>& B, BandMatrixView<T> C)
     { 
 #ifdef XDEBUG
         Matrix<Ta> A0 = A;
@@ -271,7 +271,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     void AddMM(
         const T alpha, const GenSymBandMatrix<Ta>& A,
-        const T beta, const GenMatrix<Tb>& B, const MatrixView<T>& C)
+        const T beta, const GenMatrix<Tb>& B, MatrixView<T> C)
     { 
 #ifdef XDEBUG
         Matrix<Ta> A0 = A;

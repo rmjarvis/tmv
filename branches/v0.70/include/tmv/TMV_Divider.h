@@ -111,7 +111,7 @@ namespace tmv {
 
         virtual T det() const =0;
         virtual RT logDet(T* sign) const =0;
-        virtual void makeInverseATA(const MatrixView<T>& minv) const =0;
+        virtual void makeInverseATA(MatrixView<T> minv) const =0;
         virtual bool isSingular() const =0;
         virtual inline RT norm2() const 
         { TMVAssert(TMV_FALSE); return RT(0); }
@@ -119,19 +119,17 @@ namespace tmv {
         { TMVAssert(TMV_FALSE); return RT(0); }
 
 #define DefDivEq(T) \
-        virtual void LDivEq(const MatrixView<T>&) const =0; \
-        virtual void RDivEq(const MatrixView<T>&) const =0; \
-        virtual void makeInverse(const MatrixView<T>& minv) const =0 
+        virtual void LDivEq(MatrixView<T>) const =0; \
+        virtual void RDivEq(MatrixView<T>) const =0; \
+        virtual void makeInverse(MatrixView<T> minv) const =0 
 
         DefDivEq(RT);
         DefDivEq(CT);
 #undef DefDivEq
 
 #define DefDiv(T1,T2) \
-        virtual void LDiv(const GenMatrix<T1>& b, \
-                          const MatrixView<T2>& x) const =0; \
-        virtual void RDiv(const GenMatrix<T1>& b, \
-                          const MatrixView<T2>& x) const =0 
+        virtual void LDiv(const GenMatrix<T1>& b, MatrixView<T2> x) const =0; \
+        virtual void RDiv(const GenMatrix<T1>& b, MatrixView<T2> x) const =0 
 
         DefDiv(RT,RT);
         DefDiv(RT,CT);

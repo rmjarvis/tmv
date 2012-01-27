@@ -91,8 +91,8 @@ namespace tmv {
         inline bool isSquare() const 
         { return colsize() == rowsize(); }
 
-        virtual void assignToM(const MatrixView<RT>& m) const = 0; 
-        virtual void assignToM(const MatrixView<CT>& m) const = 0; 
+        virtual void assignToM(MatrixView<RT> m) const = 0; 
+        virtual void assignToM(MatrixView<CT> m) const = 0; 
 
         virtual inline ~AssignableToMatrix() {}
     };
@@ -172,7 +172,7 @@ namespace tmv {
             return doLogDet(sign); 
         }
 
-        void makeInverse(const MatrixView<T>& minv) const
+        void makeInverse(MatrixView<T> minv) const
         {
             TMVAssert(minv.colsize() == rowsize());
             TMVAssert(minv.rowsize() == colsize());
@@ -180,7 +180,7 @@ namespace tmv {
         }
 
         template <class T1> 
-        inline void makeInverse(const MatrixView<T1>& minv) const
+        inline void makeInverse(MatrixView<T1> minv) const
         {
             TMVAssert(minv.colsize() == rowsize());
             TMVAssert(minv.rowsize() == colsize());
@@ -195,7 +195,7 @@ namespace tmv {
             doMakeInverse(minv.view());
         }
 
-        inline void makeInverseATA(const MatrixView<T>& ata) const
+        inline void makeInverseATA(MatrixView<T> ata) const
         { 
             TMVAssert(ata.colsize() == 
                       (rowsize() < colsize() ? rowsize() : colsize()));
@@ -231,7 +231,7 @@ namespace tmv {
 
         // m^-1 * v -> v
         template <class T1> 
-        inline void LDivEq(const VectorView<T1>& v) const 
+        inline void LDivEq(VectorView<T1> v) const 
         {
             TMVAssert(colsize() == rowsize());
             TMVAssert(colsize() == v.size());
@@ -239,7 +239,7 @@ namespace tmv {
         }
 
         template <class T1> 
-        inline void LDivEq(const MatrixView<T1>& m) const 
+        inline void LDivEq(MatrixView<T1> m) const 
         { 
             TMVAssert(colsize() == rowsize());
             TMVAssert(colsize() == m.colsize());
@@ -248,7 +248,7 @@ namespace tmv {
 
         // v * m^-1 -> v
         template <class T1> 
-        inline void RDivEq(const VectorView<T1>& v) const 
+        inline void RDivEq(VectorView<T1> v) const 
         { 
             TMVAssert(colsize() == rowsize());
             TMVAssert(colsize() == v.size());
@@ -256,7 +256,7 @@ namespace tmv {
         }
 
         template <class T1> 
-        inline void RDivEq(const MatrixView<T1>& m) const 
+        inline void RDivEq(MatrixView<T1> m) const 
         { 
             TMVAssert(colsize() == rowsize());
             TMVAssert(colsize() == m.rowsize());
@@ -266,7 +266,7 @@ namespace tmv {
         // m^-1 * v1 -> v0
         template <class T1, class T0> 
         inline void LDiv(
-            const GenVector<T1>& v1, const VectorView<T0>& v0) const
+            const GenVector<T1>& v1, VectorView<T0> v0) const
         { 
             TMVAssert(rowsize() == v0.size());
             TMVAssert(colsize() == v1.size());
@@ -275,7 +275,7 @@ namespace tmv {
 
         template <class T1, class T0> 
         inline void LDiv(
-            const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
+            const GenMatrix<T1>& m1, MatrixView<T0> m0) const
         { 
             TMVAssert(rowsize() == m0.colsize());
             TMVAssert(colsize() == m1.colsize());
@@ -286,7 +286,7 @@ namespace tmv {
         // v1 * m^-1 -> v0
         template <class T1, class T0> 
         inline void RDiv(
-            const GenVector<T1>& v1, const VectorView<T0>& v0) const
+            const GenVector<T1>& v1, VectorView<T0> v0) const
         { 
             TMVAssert(rowsize() == v1.size());
             TMVAssert(colsize() == v0.size());
@@ -295,7 +295,7 @@ namespace tmv {
 
         template <class T1, class T0> 
         inline void RDiv(
-            const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
+            const GenMatrix<T1>& m1, MatrixView<T0> m0) const
         { 
             TMVAssert(rowsize() == m1.rowsize());
             TMVAssert(colsize() == m0.rowsize());
@@ -347,31 +347,31 @@ namespace tmv {
         T doDet() const;
         RT doLogDet(T* sign) const;
         template <class T1> 
-        void doMakeInverse(const MatrixView<T1>& minv) const;
-        void doMakeInverseATA(const MatrixView<T>& minv) const;
+        void doMakeInverse(MatrixView<T1> minv) const;
+        void doMakeInverseATA(MatrixView<T> minv) const;
         bool doIsSingular() const;
         RT doNorm2() const;
         RT doCondition() const;
         template <class T1> 
-        void doLDivEq(const VectorView<T1>& v) const;
+        void doLDivEq(VectorView<T1> v) const;
         template <class T1> 
-        void doLDivEq(const MatrixView<T1>& m) const;
+        void doLDivEq(MatrixView<T1> m) const;
         template <class T1> 
-        void doRDivEq(const VectorView<T1>& v) const;
+        void doRDivEq(VectorView<T1> v) const;
         template <class T1> 
-        void doRDivEq(const MatrixView<T1>& m) const;
+        void doRDivEq(MatrixView<T1> m) const;
         template <class T1, class T0> 
         void doLDiv(
-            const GenVector<T1>& v1, const VectorView<T0>& v0) const;
+            const GenVector<T1>& v1, VectorView<T0> v0) const;
         template <class T1, class T0> 
         void doLDiv(
-            const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const;
+            const GenMatrix<T1>& m1, MatrixView<T0> m0) const;
         template <class T1, class T0> 
         void doRDiv(
-            const GenVector<T1>& v1, const VectorView<T0>& v0) const;
+            const GenVector<T1>& v1, VectorView<T0> v0) const;
         template <class T1, class T0> 
         void doRDiv(
-            const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const;
+            const GenMatrix<T1>& m1, MatrixView<T0> m0) const;
 
     }; // DivHelper
 

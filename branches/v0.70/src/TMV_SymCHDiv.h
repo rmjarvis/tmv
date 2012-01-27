@@ -36,13 +36,13 @@
 namespace tmv {
 
     template <class T, class T1> 
-    void CH_LDivEq(const GenSymMatrix<T1>& L, const MatrixView<T>& m);
+    void CH_LDivEq(const GenSymMatrix<T1>& L, MatrixView<T> m);
 
     template <class T, class T1> 
-    void CH_RDivEq(const GenSymMatrix<T1>& L, const MatrixView<T>& m);
+    void CH_RDivEq(const GenSymMatrix<T1>& L, MatrixView<T> m);
 
     template <class T, class T1> 
-    void CH_Inverse(const GenSymMatrix<T1>& LLx, const SymMatrixView<T>& sinv);
+    void CH_Inverse(const GenSymMatrix<T1>& LLx, SymMatrixView<T> sinv);
 
 #ifndef NOTHROW
     template <class T> 
@@ -91,16 +91,15 @@ namespace tmv {
 #define CT std::complex<T>
 
     template <class T>
-    inline void CH_LDivEq(const GenSymMatrix<CT>& , const MatrixView<T>& )
+    inline void CH_LDivEq(const GenSymMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <class T>
-    inline void CH_RDivEq(const GenSymMatrix<CT>& , const MatrixView<T>& )
+    inline void CH_RDivEq(const GenSymMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <class T>
-    inline void CH_Inverse(
-        const GenSymMatrix<CT>& , const SymMatrixView<T>& )
+    inline void CH_Inverse(const GenSymMatrix<CT>& , SymMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
 #undef CT

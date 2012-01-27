@@ -71,7 +71,7 @@ namespace tmv {
     //
 
     template <bool cm, class T> 
-    static void NonBlockCH_Decompose(const SymMatrixView<T>& A)
+    static void NonBlockCH_Decompose(SymMatrixView<T> A)
     {
         // Cholesky Decompostion is basically a simpler version of LU Decomp,
         // since U is just Lt for Hermitian matrices.  Cholesky cannot
@@ -147,7 +147,7 @@ namespace tmv {
         }
 #endif
 
-        const VectorView<RT> Adiag = A.realPart().diag();
+        VectorView<RT> Adiag = A.realPart().diag();
         if (cm) {
             RT* Ajj= Adiag.ptr();
             const int ds = Adiag.step();
@@ -237,7 +237,7 @@ namespace tmv {
     }
 
     template <bool cm, class T> 
-    static void BlockCH_Decompose(const SymMatrixView<T>& A)
+    static void BlockCH_Decompose(SymMatrixView<T> A)
     {
         // If A is large, we can take advantage of Blas Level 3 speed
         // by partitioning the matrix into blocks.
@@ -314,7 +314,7 @@ namespace tmv {
     }
 
     template <bool cm, class T> 
-    static void RecursiveCH_Decompose(const SymMatrixView<T>& A)
+    static void RecursiveCH_Decompose(SymMatrixView<T> A)
     {
 #ifdef XDEBUG
         cout<<"Start Recursive CH_Decomp: A = "<<TMV_Text(A)<<"  "<<A<<endl;
@@ -424,7 +424,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static void NonLapCH_Decompose(const SymMatrixView<T>& A)
+    static void NonLapCH_Decompose(SymMatrixView<T> A)
     {
         TMVAssert(A.uplo() == Lower);
         TMVAssert(A.isrm() || A.iscm());
@@ -439,11 +439,11 @@ namespace tmv {
 
 #ifdef ALAP
     template <class T> 
-    static inline void LapCH_Decompose(const SymMatrixView<T>& A)
+    static inline void LapCH_Decompose(SymMatrixView<T> A)
     { NonLapCH_Decompose(A); }
 #ifdef INST_DOUBLE
     template <> 
-    void LapCH_Decompose(const SymMatrixView<double>& A)
+    void LapCH_Decompose(SymMatrixView<double> A)
     {
         TMVAssert(A.uplo() == Lower);
         TMVAssert(A.iscm() || A.isrm());
@@ -466,8 +466,7 @@ namespace tmv {
         LAP_Results("dpotrf");
     }
     template <> 
-    void LapCH_Decompose(
-        const SymMatrixView<std::complex<double> >& A)
+    void LapCH_Decompose(SymMatrixView<std::complex<double> > A)
     {
         TMVAssert(A.uplo() == Lower);
         TMVAssert(A.iscm() || A.isrm());
@@ -492,7 +491,7 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <> 
-    void LapCH_Decompose(const SymMatrixView<float>& A)
+    void LapCH_Decompose(SymMatrixView<float> A)
     {
         TMVAssert(A.uplo() == Lower);
         TMVAssert(A.iscm() || A.isrm());
@@ -514,8 +513,7 @@ namespace tmv {
         LAP_Results("spotrf");
     }
     template <> 
-    void LapCH_Decompose(
-        const SymMatrixView<std::complex<float> >& A)
+    void LapCH_Decompose(SymMatrixView<std::complex<float> > A)
     {
         TMVAssert(A.uplo() == Lower);
         TMVAssert(A.iscm() || A.isrm());
@@ -541,7 +539,7 @@ namespace tmv {
 #endif // ALAP
 
     template <class T> 
-    void CH_Decompose(const SymMatrixView<T>& A)
+    void CH_Decompose(SymMatrixView<T> A)
     {
         TMVAssert(isReal(T()) || A.isherm());
         TMVAssert(A.isrm() || A.iscm());

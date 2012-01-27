@@ -3,9 +3,9 @@
 
 #define DefMV(T,Ta,Tb)\
 template void AddMM(const T alpha, const GenSymBandMatrix<Ta >& A, \
-    const T beta, const GenBandMatrix<Tb >& B, const BandMatrixView<T >& C); \
+    const T beta, const GenBandMatrix<Tb >& B, BandMatrixView<T > C); \
 template void AddMM(const T alpha, const GenSymBandMatrix<Ta >& A, \
-    const T beta, const GenMatrix<Tb >& B, const MatrixView<T >& C); \
+    const T beta, const GenMatrix<Tb >& B, MatrixView<T > C); \
 
 
 DefMV(T,T,T)
@@ -20,7 +20,7 @@ DefMV(CT,CT,CT)
 
 #define DefAdd(T,Ta) \
 template void AddMM(const T alpha, const GenSymBandMatrix<Ta >& A, \
-    const BandMatrixView<T >& B); \
+    BandMatrixView<T > B); \
 
 DefAdd(T,T)
 #ifdef INST_COMPLEX
@@ -33,10 +33,10 @@ DefAdd(CT,CT)
 #define DefAdd(T,Ta,Tb) \
 template void AddMM(const T alpha, const GenSymBandMatrix<Ta >& A, \
     const T beta, const GenSymBandMatrix<Tb >& B, \
-    const BandMatrixView<T >& C); \
+    BandMatrixView<T > C); \
 template void AddMM(const T alpha, const GenSymBandMatrix<Ta >& A, \
     const T beta, const GenSymBandMatrix<Tb >& B, \
-    const MatrixView<T >& C); \
+    MatrixView<T > C); \
 
 DefAdd(T,T,T)
 #ifdef INST_COMPLEX

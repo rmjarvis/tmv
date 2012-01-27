@@ -2,7 +2,7 @@
 
 #define DefInv(T,T1) \
 template void LU_Inverse(const GenMatrix<T1 >& LUx, const int* P, \
-    const MatrixView<T >& minv); \
+    MatrixView<T > minv); \
 
 DefInv(T,T)
 #ifdef INST_COMPLEX

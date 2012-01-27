@@ -8,9 +8,9 @@ template int SymBandMatrixComposite<T >::diagstep() const;
 
 #define DefMV(T,Ta,Tb)\
 template void MultMV<true>(const T alpha, const GenSymBandMatrix<Ta >& A, \
-    const GenVector<Tb >& x, const VectorView<T >& y);  \
+    const GenVector<Tb >& x, VectorView<T > y);  \
 template void MultMV<false>(const T alpha, const GenSymBandMatrix<Ta >& A, \
-    const GenVector<Tb >& x, const VectorView<T >& y);  \
+    const GenVector<Tb >& x, VectorView<T > y);  \
 
 
 DefMV(T,T,T)

@@ -3,25 +3,25 @@
 
 #define DefSVD(RT,T)\
 template void UnsortedEigen(const GenSymBandMatrix<T >& A, \
-    MVP<T > U, const VectorView<RT >& S); \
+    MVP<T > U, VectorView<RT > S); \
 template void SV_Decompose(const GenSymBandMatrix<T >& A, \
-    MVP<T > U, const DiagMatrixView<RT >& S,  \
+    MVP<T > U, DiagMatrixView<RT > S,  \
     MVP<T > V, RT& ld, T& sd); \
 template void SV_Decompose(const GenSymBandMatrix<T >& A, \
-    const MatrixView<T >& U, const DiagMatrixView<RT >& S, \
-    const MatrixView<T >& V); \
+    MatrixView<T > U, DiagMatrixView<RT > S, \
+    MatrixView<T > V); \
 template void SV_Decompose(const GenSymBandMatrix<T >& A, \
-    const MatrixView<T >& U, const DiagMatrixView<RT >& S); \
+    MatrixView<T > U, DiagMatrixView<RT > S); \
 template void SV_Decompose(const GenSymBandMatrix<T >& A, \
-    const DiagMatrixView<RT >& S, const MatrixView<T >& V); \
+    DiagMatrixView<RT > S, MatrixView<T > V); \
 template void SV_Decompose(const GenSymBandMatrix<T >& A, \
-    const DiagMatrixView<RT >& S); \
+    DiagMatrixView<RT > S); \
 template void Eigen(const GenSymBandMatrix<T >& A, \
-    const MatrixView<T >& U, const VectorView<RT >& S); \
+    MatrixView<T > U, VectorView<RT > S); \
 template void Eigen(const GenSymBandMatrix<T >& A, \
-    const VectorView<RT >& S); \
+    VectorView<RT > S); \
 template void SquareRoot(const GenSymBandMatrix<T >& A, \
-    const SymMatrixView<T >& S); \
+    SymMatrixView<T > S); \
 
 DefSVD(T,T)
 #ifdef INST_COMPLEX

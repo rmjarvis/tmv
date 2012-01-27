@@ -3,9 +3,9 @@
 
 #define DefMM(T,Ta,Tb)\
   template void OpenMPMultMM<true>(const T alpha,const GenMatrix<Ta >& A, \
-      const GenMatrix<Tb >& B, const MatrixView<T >& C); \
+      const GenMatrix<Tb >& B, MatrixView<T > C); \
   template void OpenMPMultMM<false>(const T alpha,const GenMatrix<Ta >& A, \
-      const GenMatrix<Tb >& B, const MatrixView<T >& C); \
+      const GenMatrix<Tb >& B, MatrixView<T > C); \
 
 #ifndef INST_SKIP_BLAS
 DefMM(T,T,T)

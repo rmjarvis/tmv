@@ -78,7 +78,7 @@ namespace tmv
 
     template <class T> 
     static void NonBlockQRPDecompose(
-        const MatrixView<T>& A, const VectorView<T>& beta, int* P, T& det,
+        MatrixView<T> A, VectorView<T> beta, int* P, T& det,
         bool strict)
     {
 #ifdef XDEBUG
@@ -234,7 +234,7 @@ namespace tmv
 
     template <class T> 
     static void StrictBlockQRPDecompose(
-        const MatrixView<T>& A, const VectorView<T>& beta, int* P, T& det)
+        MatrixView<T> A, VectorView<T> beta, int* P, T& det)
     {
         // Decompose A (input as A) into A = Q R P
         // where Q is unitary, R is upper triangular, and P is a permutation
@@ -414,7 +414,7 @@ namespace tmv
     template <class T> 
     static void moveLowColsToEnd(
         Vector<RT>& colnormsq, RT thresh, int j1, int& j2, int& j3,
-        const MatrixView<T>& A, int* P)
+        MatrixView<T> A, int* P)
     {
         // Move all columns of A (whose norms are in colnormsq) with norms
         // less than thresh to the end.  j1 is the first column we need to 
@@ -461,7 +461,7 @@ namespace tmv
 
     template <class T> 
     static void LooseBlockQRPDecompose(
-        const MatrixView<T>& A, const VectorView<T>& beta, int* P, T& det)
+        MatrixView<T> A, VectorView<T> beta, int* P, T& det)
     {
         // Decompose A (input as A) into A = Q R P
         // where Q is unitary, R is upper triangular, and P is a permutation
@@ -744,8 +744,8 @@ namespace tmv
 
     template <class T> 
     static inline void NonLapQRPDecompose(
-        const MatrixView<T>& A,
-        const VectorView<T>& beta, int* P, T& det, bool strict)
+        MatrixView<T> A,
+        VectorView<T> beta, int* P, T& det, bool strict)
     {
         // Decompose A (input as A) into A = Q R P
         // where Q is unitary, R is upper triangular, and P is a permutation
@@ -772,14 +772,12 @@ namespace tmv
 #ifdef LAP
     template <class T> 
     static inline void LapQRPDecompose(
-        const MatrixView<T>& A,
-        const VectorView<T>& beta, int* P, T& det)
+        MatrixView<T> A, VectorView<T> beta, int* P, T& det)
     { NonLapQRPDecompose(A,beta,P,det,true); }
 #ifdef INST_DOUBLE
     template <> 
     void LapQRPDecompose(
-        const MatrixView<double>& A,
-        const VectorView<double>& beta, int* P, double& det)
+        MatrixView<double> A, VectorView<double> beta, int* P, double& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(A.rowsize() > 0);
@@ -844,8 +842,8 @@ namespace tmv
     }
     template <> 
     void LapQRPDecompose(
-        const MatrixView<std::complex<double> >& A,
-        const VectorView<std::complex<double> >& beta, int* P,
+        MatrixView<std::complex<double> > A,
+        VectorView<std::complex<double> > beta, int* P,
         std::complex<double>& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
@@ -922,8 +920,7 @@ namespace tmv
 #ifdef INST_FLOAT
     template <> 
     void LapQRPDecompose(
-        const MatrixView<float>& A,
-        const VectorView<float>& beta, int* P, float& det)
+        MatrixView<float> A, VectorView<float> beta, int* P, float& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(A.rowsize() > 0);
@@ -988,8 +985,8 @@ namespace tmv
     }
     template <> 
     void LapQRPDecompose(
-        const MatrixView<std::complex<float> >& A,
-        const VectorView<std::complex<float> >& beta, int* P,
+        MatrixView<std::complex<float> > A,
+        VectorView<std::complex<float> > beta, int* P,
         std::complex<float>& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
@@ -1067,8 +1064,7 @@ namespace tmv
 
     template <class T> 
     void QRP_Decompose(
-        const MatrixView<T>& A,
-        const VectorView<T>& beta, int* P, T& det, bool strict)
+        MatrixView<T> A, VectorView<T> beta, int* P, T& det, bool strict)
     {
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(A.rowsize() == beta.size());
@@ -1147,8 +1143,7 @@ namespace tmv
 
     template <class T> 
     void QRP_Decompose(
-        const MatrixView<T>& Q, const UpperTriMatrixView<T>& R, int* P,
-        bool strict)
+        MatrixView<T> Q, UpperTriMatrixView<T> R, int* P, bool strict)
     {
         // Decompose A (input as Q) into A = Q R P
         // where Q is unitary, R is upper triangular, and P is a permutation
@@ -1179,7 +1174,7 @@ namespace tmv
     }
 
     template <class T> 
-    void QRP_Decompose(const MatrixView<T>& A, bool strict)
+    void QRP_Decompose(MatrixView<T> A, bool strict)
     {
         // Decompose A into Q R P, but don't keep Q or P.
         // R is returned as A.upperTri().

@@ -76,14 +76,14 @@ namespace tmv {
     HermSVDiv<T>::~HermSVDiv() {}
 
     template <class T> template <class T1> 
-    void HermSVDiv<T>::doLDivEq(const MatrixView<T1>& m) const
+    void HermSVDiv<T>::doLDivEq(MatrixView<T1> m) const
     {
         TMVAssert(m.colsize() == colsize());
         CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->U.adjoint(),pimpl->kmax,m,m);
     }
 
     template <class T> template <class T1> 
-    void HermSVDiv<T>::doRDivEq(const MatrixView<T1>& m) const
+    void HermSVDiv<T>::doRDivEq(MatrixView<T1> m) const
     {
         TMVAssert(m.rowsize() == rowsize());
         CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->U.adjoint(),pimpl->kmax,m,m);
@@ -91,7 +91,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void HermSVDiv<T>::doLDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         TMVAssert(m.rowsize() == x.rowsize());
         TMVAssert(m.colsize() == colsize());
@@ -101,7 +101,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void HermSVDiv<T>::doRDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         TMVAssert(m.colsize() == x.colsize());
         TMVAssert(m.rowsize() == rowsize());
@@ -131,7 +131,7 @@ namespace tmv {
         return pimpl->logdet;  
     }                  
     template <class T> template <class T1> 
-    void HermSVDiv<T>::doMakeInverse(const SymMatrixView<T1>& sinv) const
+    void HermSVDiv<T>::doMakeInverse(SymMatrixView<T1> sinv) const
     {
         TMVAssert(sinv.size() == pimpl->S.size());
         TMVAssert(sinv.isherm());
@@ -139,7 +139,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1>  
-    void HermSVDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
+    void HermSVDiv<T>::doMakeInverse(MatrixView<T1> minv) const
     { 
         // A^-1 = U S^-1 Ut
         CallHermSV_Inverse(
@@ -149,7 +149,7 @@ namespace tmv {
     }
 
     template <class T>
-    void HermSVDiv<T>::doMakeInverseATA(const MatrixView<T>& minv) const
+    void HermSVDiv<T>::doMakeInverseATA(MatrixView<T> minv) const
     {
         // A = U S Ut
         // At = U S Ut
@@ -304,14 +304,14 @@ namespace tmv {
     SymSVDiv<T>::~SymSVDiv() {}
 
     template <class T> template <class T1> 
-    void SymSVDiv<T>::doLDivEq(const MatrixView<T1>& m) const
+    void SymSVDiv<T>::doLDivEq(MatrixView<T1> m) const
     {
         TMVAssert(m.colsize() == pimpl->U.colsize());
         CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,m);
     }
 
     template <class T> template <class T1> 
-    void SymSVDiv<T>::doRDivEq(const MatrixView<T1>& m) const
+    void SymSVDiv<T>::doRDivEq(MatrixView<T1> m) const
     {
         TMVAssert(m.rowsize() == pimpl->U.rowsize());
         CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,m);
@@ -319,7 +319,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void SymSVDiv<T>::doLDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         TMVAssert(m.rowsize() == x.rowsize());
         TMVAssert(m.colsize() == colsize());
@@ -329,7 +329,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void SymSVDiv<T>::doRDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         TMVAssert(m.colsize() == x.colsize());
         TMVAssert(m.rowsize() == rowsize());
@@ -352,7 +352,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void SymSVDiv<T>::doMakeInverse(const SymMatrixView<T1>& sinv) const
+    void SymSVDiv<T>::doMakeInverse(SymMatrixView<T1> sinv) const
     {
         TMVAssert(sinv.size() == pimpl->S.size());
         TMVAssert(sinv.issym());
@@ -360,7 +360,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1>  
-    void SymSVDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
+    void SymSVDiv<T>::doMakeInverse(MatrixView<T1> minv) const
     { 
         CallSymSV_Inverse(
             T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,
@@ -370,7 +370,7 @@ namespace tmv {
     }
 
     template <class T>
-    void SymSVDiv<T>::doMakeInverseATA(const MatrixView<T>& minv) const
+    void SymSVDiv<T>::doMakeInverseATA(MatrixView<T> minv) const
     {
         // A = U S Vt
         // At = V S Ut

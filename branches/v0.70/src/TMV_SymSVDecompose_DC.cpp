@@ -789,14 +789,14 @@ namespace tmv {
 
     template <class T> 
     static void SmallProblem(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E)
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E)
     {
         if (E.size() > 0) EigenFromTridiagonal_QR(U,D,E);
     }
 
     template <class T> 
     void EigenFromTridiagonal_DC(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, bool UisI)
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E, bool UisI)
     {
         // Solve the SVD of unreduced Tridiagonal Matrix T (given by D,E).
         // Note: the input T must be unreduced - ie. all off-diagonal entries 

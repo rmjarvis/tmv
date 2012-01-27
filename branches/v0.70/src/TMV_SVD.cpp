@@ -104,7 +104,7 @@ namespace tmv {
     SVDiv<T>::~SVDiv() {}
 
     template <class T> template <class T1> 
-    void SVDiv<T>::doLDivEq(const MatrixView<T1>& m) const
+    void SVDiv<T>::doLDivEq(MatrixView<T1> m) const
     {
         TMVAssert(m.colsize() == colsize());
         TMVAssert(m.colsize() == rowsize());
@@ -116,7 +116,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void SVDiv<T>::doRDivEq(const MatrixView<T1>& m) const
+    void SVDiv<T>::doRDivEq(MatrixView<T1> m) const
     {
         TMVAssert(m.rowsize() == colsize());
         TMVAssert(m.rowsize() == rowsize());
@@ -129,7 +129,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1, class T2> 
-    void SVDiv<T>::doLDiv(const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+    void SVDiv<T>::doLDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         TMVAssert(m.rowsize() == x.rowsize());
         TMVAssert(m.colsize() == colsize());
@@ -142,7 +142,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1, class T2> 
-    void SVDiv<T>::doRDiv(const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+    void SVDiv<T>::doRDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         TMVAssert(m.colsize() == x.colsize());
         TMVAssert(m.rowsize() == rowsize());
@@ -170,7 +170,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void SVDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
+    void SVDiv<T>::doMakeInverse(MatrixView<T1> minv) const
     { 
         if (pimpl->istrans) {
             // A^-1 = (V S^-1 Ut)T = U* S^-1 Vt*
@@ -188,7 +188,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void SVDiv<T>::doMakeInverseATA(const MatrixView<T>& minv) const
+    void SVDiv<T>::doMakeInverseATA(MatrixView<T> minv) const
     {
         // A = U S Vt
         // At = V S Ut

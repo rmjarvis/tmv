@@ -65,7 +65,7 @@ namespace tmv {
 
     template <class T> 
     static void DoEigenFromTridiagonal_NZ(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E)
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E)
     { 
         EigenFromTridiagonal_DC(U,D,E,false);
         //EigenFromTridiagonal_QR(U,D,E); 
@@ -73,7 +73,7 @@ namespace tmv {
 
     template <class T> 
     static void NonLapEigenFromTridiagonal(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E)
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E)
     {
         TMVAssert(D.size() == E.size()+1);
         if (U) {
@@ -112,13 +112,13 @@ namespace tmv {
 #ifdef LAP 
     template <class T> 
     static inline void LapEigenFromTridiagonal(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E)
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E)
     { NonLapEigenFromTridiagonal(U,D,E); }
 
 #ifdef INST_DOUBLE
     static void AltLapEigenFromTridiagonal(
-        MVP<double> U, const VectorView<double>& D, 
-        const VectorView<double>& E)
+        MVP<double> U, VectorView<double> D, 
+        VectorView<double> E)
     {
         //std::cout<<"AltLapEigen double\n";
         TMVAssert(D.size() == E.size()+1);
@@ -210,8 +210,8 @@ namespace tmv {
         }
     }
     static void AltLapEigenFromTridiagonal(
-        MVP<std::complex<double> > U, const VectorView<double>& D, 
-        const VectorView<double>& E)
+        MVP<std::complex<double> > U, VectorView<double> D, 
+        VectorView<double> E)
     {
         //std::cout<<"AltLapEigen complex double\n";
         TMVAssert(D.size() == E.size()+1);
@@ -305,8 +305,8 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     static void AltLapEigenFromTridiagonal(
-        MVP<float> U, const VectorView<float>& D, 
-        const VectorView<float>& E)
+        MVP<float> U, VectorView<float> D, 
+        VectorView<float> E)
     {
         //std::cout<<"AltLapEigen float\n";
         TMVAssert(D.size() == E.size()+1);
@@ -398,8 +398,8 @@ namespace tmv {
         }
     }
     static void AltLapEigenFromTridiagonal(
-        MVP<std::complex<float> > U, const VectorView<float>& D, 
-        const VectorView<float>& E)
+        MVP<std::complex<float> > U, VectorView<float> D, 
+        VectorView<float> E)
     {
         //std::cout<<"AltLapEigen complex float\n";
         TMVAssert(D.size() == E.size()+1);
@@ -495,33 +495,33 @@ namespace tmv {
 #ifdef INST_DOUBLE
     template <> 
     inline void LapEigenFromTridiagonal(
-        MVP<double> U, const VectorView<double>& D, 
-        const VectorView<double>& E)
+        MVP<double> U, VectorView<double> D, 
+        VectorView<double> E)
     { AltLapEigenFromTridiagonal(U,D,E); }
     template <> 
     inline void LapEigenFromTridiagonal(
-        MVP<std::complex<double> > U, const VectorView<double>& D, 
-        const VectorView<double>& E)
+        MVP<std::complex<double> > U, VectorView<double> D, 
+        VectorView<double> E)
     { AltLapEigenFromTridiagonal(U,D,E); }
 #endif
 #ifdef INST_FLOAT
     template <> 
     inline void LapEigenFromTridiagonal(
-        MVP<float> U, const VectorView<float>& D, 
-        const VectorView<float>& E)
+        MVP<float> U, VectorView<float> D, 
+        VectorView<float> E)
     { AltLapEigenFromTridiagonal(U,D,E); }
     template <> 
     inline void LapEigenFromTridiagonal(
-        MVP<std::complex<float> > U, const VectorView<float>& D, 
-        const VectorView<float>& E)
+        MVP<std::complex<float> > U, VectorView<float> D, 
+        VectorView<float> E)
     { AltLapEigenFromTridiagonal(U,D,E); }
 #endif
 #else // normal stegr implementaion
 #ifdef INST_DOUBLE
     template <> 
     void LapEigenFromTridiagonal(
-        MVP<double> U, const VectorView<double>& D, 
-        const VectorView<double>& E)
+        MVP<double> U, VectorView<double> D, 
+        VectorView<double> E)
     {
         //std::cout<<"Regular LapEigen double\n";
         TMVAssert(D.size() == E.size()+1);
@@ -625,8 +625,8 @@ namespace tmv {
     }
     template <> 
     void LapEigenFromTridiagonal(
-        MVP<std::complex<double> > U, const VectorView<double>& D, 
-        const VectorView<double>& E)
+        MVP<std::complex<double> > U, VectorView<double> D, 
+        VectorView<double> E)
     {
         //std::cout<<"Regular LapEigen complex double\n";
         TMVAssert(D.size() == E.size()+1);
@@ -714,8 +714,8 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     void LapEigenFromTridiagonal(
-        MVP<float> U, const VectorView<float>& D, 
-        const VectorView<float>& E)
+        MVP<float> U, VectorView<float> D, 
+        VectorView<float> E)
     {
         //std::cout<<"Regular LapEigen float\n";
         TMVAssert(D.size() == E.size()+1);
@@ -793,8 +793,8 @@ namespace tmv {
     }
     template <> 
     void LapEigenFromTridiagonal(
-        MVP<std::complex<float> > U, const VectorView<float>& D, 
-        const VectorView<float>& E)
+        MVP<std::complex<float> > U, VectorView<float> D, 
+        VectorView<float> E)
     {
         //std::cout<<"Regular LapEigen complex float\n";
         TMVAssert(D.size() == E.size()+1);
@@ -876,7 +876,7 @@ namespace tmv {
 
     template <class T> 
     void EigenFromTridiagonal(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E)
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E)
     {
         TMVAssert(D.size() == E.size()+1);
         TMVAssert(D.ct()==NonConj);
@@ -984,7 +984,7 @@ namespace tmv {
 
     template <class T> 
     void UnsortedHermEigen(
-        const MatrixView<T>& U, const VectorView<RT>& SS)
+        MatrixView<T> U, VectorView<RT> SS)
     {
 #ifdef XDEBUG
         Matrix<T> A0 = U;
@@ -1060,7 +1060,7 @@ namespace tmv {
     // This version does not accumulate U
     template <class T> 
     void UnsortedEigen(
-        const SymMatrixView<T>& A, const VectorView<RT>& SS)
+        SymMatrixView<T> A, VectorView<RT> SS)
     {
         TMVAssert(SS.size() == A.size());
 
@@ -1085,7 +1085,7 @@ namespace tmv {
 
     template <class T> 
     void HermSV_Decompose(
-        const MatrixView<T>& U, const DiagMatrixView<RT>& SS)
+        MatrixView<T> U, DiagMatrixView<RT> SS)
     {
         TMVAssert(U.rowsize() == SS.size());
         TMVAssert(U.colsize() == SS.size());
@@ -1126,7 +1126,7 @@ namespace tmv {
 
     template <class T> 
     void SymSV_Decompose(
-        const MatrixView<T>& U, const DiagMatrixView<RT>& SS, 
+        MatrixView<T> U, DiagMatrixView<RT> SS, 
         MVP<T> Vt, RT& logdet, T& signdet)
     {
         TMVAssert(U.rowsize() == SS.size());
@@ -1213,7 +1213,7 @@ namespace tmv {
     // This version does not accumulate U or Vt
     template <class T> 
     void SV_Decompose(
-        const SymMatrixView<T>& A, const DiagMatrixView<RT>& SS)
+        SymMatrixView<T> A, DiagMatrixView<RT> SS)
     {
         TMVAssert(SS.size() == A.size());
 
@@ -1249,8 +1249,8 @@ namespace tmv {
 
     template <class T> 
     void Eigen(
-        const GenSymMatrix<T>& A, const MatrixView<T>& U,
-        const VectorView<RT>& SS)
+        const GenSymMatrix<T>& A, MatrixView<T> U,
+        VectorView<RT> SS)
     {
         TMVAssert(A.isherm());
         TMVAssert(A.size() == SS.size());
@@ -1268,7 +1268,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void Eigen(const GenSymMatrix<T>& A, const VectorView<RT>& SS)
+    void Eigen(const GenSymMatrix<T>& A, VectorView<RT> SS)
     {
         TMVAssert(A.isherm());
         TMVAssert(A.size() == SS.size());
@@ -1280,8 +1280,8 @@ namespace tmv {
 
     template <class T> 
     void SV_Decompose(
-        const GenSymMatrix<T>& A, const MatrixView<T>& U,
-        const DiagMatrixView<RT>& SS, const MatrixView<T>& Vt)
+        const GenSymMatrix<T>& A, MatrixView<T> U,
+        DiagMatrixView<RT> SS, MatrixView<T> Vt)
     {
         TMVAssert(A.size() == U.colsize());
         TMVAssert(A.size() == U.rowsize());
@@ -1321,7 +1321,7 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenSymMatrix<T>& A,
-        const MatrixView<T>& U, const DiagMatrixView<RT>& SS)
+        MatrixView<T> U, DiagMatrixView<RT> SS)
     {
         TMVAssert(A.size() == U.colsize());
         TMVAssert(A.size() == U.rowsize());
@@ -1346,7 +1346,7 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenSymMatrix<T>& A,
-        const DiagMatrixView<RT>& SS, const MatrixView<T>& Vt)
+        DiagMatrixView<RT> SS, MatrixView<T> Vt)
     {
         TMVAssert(A.size() == SS.size());
         TMVAssert(A.size() == Vt.colsize());
@@ -1357,7 +1357,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void PolarDecompose(const MatrixView<T>& U, const SymMatrixView<T>& P)
+    void PolarDecompose(MatrixView<T> U, SymMatrixView<T> P)
     {
         // Decompose A = UP
         // A is input in the place of U.
@@ -1410,8 +1410,7 @@ namespace tmv {
 
     template <class T> 
     void PolarDecompose(
-        const GenBandMatrix<T>& A,
-        const MatrixView<T>& U, const SymMatrixView<T>& P)
+        const GenBandMatrix<T>& A, MatrixView<T> U, SymMatrixView<T> P)
     {
         Matrix<T> Vt(A.rowsize(),A.rowsize());
         DiagMatrix<RT> S(A.rowsize());
@@ -1442,7 +1441,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void SquareRoot(const SymMatrixView<T>& A)
+    void SquareRoot(SymMatrixView<T> A)
     {
         TMVAssert(A.isherm());
         // A -> A^1/2

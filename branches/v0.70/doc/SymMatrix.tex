@@ -11,18 +11,6 @@ one for which $m = m^T$.  We also have a class called
 is one for which $m = m^\dagger$.  The two are exactly the same 
 if \tt{T} is real, but for complex \tt{T}, they are different.
 
-Both classes inherit from \tt{GenSymMatrix},
-which has an internal parameter to keep track
-of whether it is symmetric or hermitian.
-\tt{GenSymMatrix} in turn inherits from \tt{BaseMatrix}.  
-The various views and composite classes described below 
-also inherit from \tt{GenSymMatrix}.
-\index{SymMatrix!SymMatrixView}
-\index{SymMatrix!ConstSymMatrixView}
-\index{SymMatrix!GenSymMatrix}
-\index{SymMatrix!SymMatrixComposite}
-\index{BaseMatrix}
-
 One general caveat about complex \tt{HermMatrix} calculations is that the diagonal
 elements should all be real.  Some calculations assume this, and only 
 use the real part of the diagonal elements.  Other calculations use the 
@@ -40,11 +28,11 @@ All the \tt{SymMatrix} and \tt{HermMatrix} routines are included by:
 In addition to the data type template parameter (indicated here by \tt{T} as usual),
 there is also a second template parameter that specifies attributes of the
 \tt{SymMatrix} or \tt{HermMatrix}.  The attributes that are allowed are:
-\begin{itemize}
-\item \tt{CStyle} or \tt{FortranStyle}
-\item \tt{ColMajor}, \tt{RowMajor} or \tt{DiagMajor}
-\item \tt{Upper} or \tt{Lower}
-\end{itemize}
+\begin{description} \itemsep -2pt
+\item[$\bullet$] \tt{CStyle} or \tt{FortranStyle}
+\item[$\bullet$] \tt{ColMajor} or \tt{RowMajor}
+\item[$\bullet$] \tt{Upper} or \tt{Lower}
+\end{description}
 The final option refers to which triangle the data are actually stored in, 
 since the
 other half of the values are identical, so we do not need to reference them.
@@ -109,24 +97,22 @@ For the \tt{HermMatrix} version of this, \tt{x} must be real.
 
 \item 
 \begin{tmvcode}
-tmv::SymMatrix<T,A> s(const GenMatrix<T>& m)
-tmv::HermMatrix<T,A> h(const GenMatrix<T>& m)
-tmv::SymMatrix<T,A> s(const GenDiagMatrix<T>& d)
-tmv::HermMatrix<T,A> h(const GenDiagMatrix<T>& d)
+tmv::SymMatrix<T,A> s(const Matrix<T>& m)
+tmv::HermMatrix<T,A> h(const Matrix<T>& m)
+tmv::SymMatrix<T,A> s(const DiagMatrix<T>& d)
+tmv::HermMatrix<T,A> h(const DiagMatrix<T>& d)
 \end{tmvcode}
 Makes a \tt{SymMatrix} or \tt{HermMatrix} which copies the corresponding values of \tt{m}.
 
 \item
 \begin{tmvcode}
-tmv::SymMatrix<T,A> s1(const GenSymMatrix<T2>& s2)
-tmv::HermMatrix<T,A> h1(const GenSymMatrix<T2>& s2)
+tmv::SymMatrix<T,A> s1(const SymMatrix<T2>& s2)
+tmv::HermMatrix<T,A> h1(const HermMatrix<T2>& h2)
 s1 = s2
 \end{tmvcode}
-Copy the \tt{GenSymMatrix s2}, which may be of any type \tt{T2} so long
+Copy \tt{s2} or \tt{h2} respectively, which may be of any type \tt{T2} so long
 as values of type \tt{T2} are convertible into type \tt{T}.
 The assignment operator has the same flexibility.
-If \tt{T} and \tt{T2} are complex, then \tt{m1} and \tt{m2} need to be
-either both symmetric or both hermitian.
 
 \item
 \begin{tmvcode}
@@ -471,14 +457,20 @@ s [+-]= L * L.transpose()
 \index{SymMatrix!Arithmetic!rank-k update}
 For outer products, both \tt{v}'s need to be the same actual data.  If \tt{s}
 is complex hermitian, then it should actually be 
-%\tt{s = v \caret v.conjugate()}.
 \tt{s = v ^ v.conjugate()}.
 Likewise for the next three (called ``rank-k updates''), the \tt{m}'s, \tt{L}'s and
 \tt{U}'s need to be the
 same data, and for a complex hermitian matrix, \tt{transpose()}
 should be replaced with \tt{adjoint()}.
 
-There is a minor issue with \tt{SymMatrix} arithmetic that is
+\subsection{Delayed Evaluation}
+
+As usual, the above arithmetic operations try to delay the evaluation 
+of the expression until the storage location is known.  Only if the 
+expression gets sufficiently complicated will TMV use a temporary
+object to store an intermediate result.
+
+However, there is a minor issue with \tt{SymMatrix} arithmetic that is
 worth knowing about.
 Because TMV uses the same base class for both hermitian and symmetric
 matrices, the compiler cannot tell the difference between them in arithmetic
@@ -486,23 +478,16 @@ operations.
 This can become an issue when doing complicated arithmetic operations
 with complex hermitian or symmetric matrices.
 
-Some operations with a \tt{GenSymMatrix}, as far as the compiler can tell, may or may
-not result in another \tt{SymMatrix}.  For example, a complex scalar times a complex 
-\tt{HermMatrix} is not hermitian (or symmetric), but a complex scalar times a \tt{SymMatrix}
-is still symmetric.
-Likewise the sum of two \tt{GenSymMatrix}es may or may not be hermitian or symmetric.
-
-So the complex \tt{SymMatrixComposite} class\footnote{
-Note: all of these comments only apply to \underline{complex} \tt{SymMatrix} and \tt{HermMatrix}
-arithmetic.  The real version of the \tt{SymMatrixComposite} does derive from
-\tt{GenSymMatrix}, since there is no ambiguity in that case.},
-which is the return type of these and similar operations, 
-is derived from \tt{GenMatrix}
-rather than from \tt{GenSymMatrix}.  This means that if you let it
-self-instantiate, rather than assign it to a \tt{SymMatrix}, it will 
-instantiate as a regular \tt{Matrix}.  However, it is assignable to a \tt{SymMatrix},
-despite deriving from \tt{GenMatrix},
-so if your operation should be allowed, then the assignment will work fine.
+Because of a deficiency in the way TMV currently keeps track of the 
+arithmetic operators, For some operations, the compiler cannot tell whether the result is
+necessarily another \tt{SymMatrix} or whether it is merely a regular
+\tt{Matrix}.
+For example, a complex scalar times a complex \tt{HermMatrix} is not 
+hermitian (or symmetric), but a complex scalar times a \tt{SymMatrix}
+is still symmetric.  However, since the base classes are the same, and the 
+arithmetic is done in terms of the base classes, the compiler cannot
+figure out whether the result is symmetric.
+Likewise the sum of a complex \tt{SymMatrix} and a complex \tt{HermMatrix} is not hermitian or symmetric.
 
 Most of the time, this won't matter, since
 you will generally assign the result to either a \tt{SymMatrix} or a \tt{Matrix}
@@ -534,6 +519,10 @@ any instantiation:
 s3 += x*s1;
 s3 += s2;
 \end{tmvcode}
+
+The forthcoming version 0.90 which is currently in development has a 
+more sophisticated way of determining how to instantiate a composite object,
+which will fix this problem.
 
 \subsection{Division}
 \index{SymMatrix!Arithmetic!division}
@@ -748,10 +737,10 @@ any corresponding shorthand with the usual arithmetic operators.
 
 The first two are:
 \begin{tmvcode}
-tmv::Rank2Update<bool add>(T x, const GenVector<T1>& v1, 
-      const GenVector<T2>& v2, const SymMatrixView<T>& s)
-tmv::Rank2KUpdate<bool add>(T x, const GenMatrix<T1>& m1, 
-      const GenMatrix<T2>& m2, const SymMatrixView<T>& s)
+tmv::Rank2Update<bool add>(T x, const ConstVectorView<T1>& v1, 
+      const ConstVectorView<T2>& v2, SymMatrixView<T> s)
+tmv::Rank2KUpdate<bool add>(T x, const ConstMatrixView<T1>& m1, 
+      const ConstMatrixView<T2>& m2, SymMatrixView<T> s)
 \end{tmvcode}
 They are similar to the \tt{Rank1Update} and \tt{RankKUpdate} routines,
 which are implemented in TMV with the expressions 
@@ -780,8 +769,8 @@ call the routines explicitly.
 
 The other routine is:
 \begin{tmvcode}
-tmv::SymMultMM<bool add>(T x, const GenMatrix<T>& m1, 
-      const GenMatrix<T>& m2, const SymMatrixView<T>& s)
+tmv::SymMultMM<bool add>(T x, const ConstMatrixView<T>& m1, 
+      const ConstMatrixView<T>& m2, SymMatrixView<T> s)
 \end{tmvcode}
 This calculates the usual generalized matrix product:
 \tt{s (+=) x * m1 * m2}, but it basically

@@ -8,22 +8,12 @@ The \tt{DiagMatrix} class is our diagonal matrix class.
 A diagonal matrix is only non-zero
 along the main diagonal of the matrix.  
 
-The class \tt{DiagMatrix} inherits from \tt{GenDiagMatrix},
-which in turn inherits from \tt{BaseMatrix}.
-The various views and composite classes described below
-also inherit from \tt{GenDiagMatrix}.
-\index{DiagMatrix!DiagMatrixView}
-\index{DiagMatrix!ConstDiagMatrixView}
-\index{DiagMatrix!GenDiagMatrix}
-\index{DiagMatrix!DiagMatrixComposite}
-\index{BaseMatrix}
-
 In addition to the data type template parameter (indicated here by \tt{T} as usual),
 there is also a second template parameter that specifies attributes of the
 \tt{DiagMatrix}.  The only attributes that are allowed are:
-\begin{itemize}
-\item \tt{CStyle} or \tt{FortranStyle}
-\end{itemize}
+\begin{description} \itemsep -2pt
+\item[$\bullet$] \tt{CStyle} or \tt{FortranStyle}
+\end{description}
 which work basically the same way as for a \tt{Vector}.
 The default value is \tt{CStyle}.
 
@@ -68,19 +58,19 @@ Makes an \tt{n} $\times$ \tt{n} \tt{DiagMatrix} with all values along the diagon
 
 \item
 \begin{tmvcode}
-tmv::DiagMatrix<T,A> d(const GenVector<T>& v)
+tmv::DiagMatrix<T,A> d(const Vector<T>& v)
 \end{tmvcode}
 Makes a \tt{DiagMatrix} with \tt{v} as the diagonal.
 
 \item 
 \begin{tmvcode}
-tmv::DiagMatrix<T,A> d(const GenMatrix<T>& m)
+tmv::DiagMatrix<T,A> d(const Matrix<T>& m)
 \end{tmvcode}
 Makes a \tt{DiagMatrix} with the diagonal of \tt{m} as the diagonal.
 
 \item
 \begin{tmvcode}
-tmv::DiagMatrix<T,A> d1(const GenDiagMatrix<T2>& d2)
+tmv::DiagMatrix<T,A> d1(const DiagMatrix<T2>& d2)
 d1 = d2
 \end{tmvcode}
 Copy the \tt{DiagMatrix d2}, which may be of any type \tt{T2} so long

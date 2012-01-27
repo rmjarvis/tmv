@@ -10,18 +10,6 @@ Our \tt{Vector} class name is capitalized, while the STL \tt{vector} is not.
 If this is not enough of a difference for you, and you are using both extensively in your code,
 we recommend keeping the full \tt{tmv::Vector} designation for ours and \tt{std::vector}
 for theirs to distinguish them.  Or you might want to \tt{typedef tmv::Vector} to some other name that you prefer.}.
-\tt{Vector} inherits from its base class \tt{GenVector} (i.e. ``generic vector'').
-Most operations that do not 
-modify the data are actually defined in \tt{GenVector} rather than \tt{Vector}, although
-some routines are overridden in \tt{Vector} for speed reasons.  
-
-The other classes that inherit from \tt{GenVector} are \tt{VectorView}, 
-\tt{ConstVectorView} (both described in more detail in \S\ref{Vector_Views}), and
-\tt{VectorComposite}, which is the base class for all arithmetic operations that
-return a (logical) \tt{Vector}.  This means that any of these other objects can be used
-any time a \tt{Vector} can be used in a non-assignable capacity.  For example,
-\tt{Norm(v1+m*v2)} is completely valid, and will automatically create the necessary
-temporary \tt{Vector} to store the result of the mathematical operation in the parentheses.
 
 The \tt{Vector} class is templated with two template arguments.  The first one is the type of
 the data, which we call \tt{T} below.
@@ -85,7 +73,7 @@ indicate which element is meant by \tt{v(i)}.  Again, if it is omitted,
 
 \item
 \begin{tmvcode}
-tmv::Vector<T,A> v1(const tmv::GenVector<T2>& v2)
+tmv::Vector<T,A> v1(const tmv::Vector<T2>& v2)
 v1 = v2
 \end{tmvcode}
 Copy the \tt{Vector v2}, which may be of any type \tt{T2} so long
@@ -139,7 +127,7 @@ element is \tt{v(0)}, and the last element is \tt{v(n-1)}.
 With \tt{A = FortranStyle}, they are \tt{v(1)} and \tt{v(n)}.
 
 If \tt{v} is a 
-\tt{const Vector}, a \tt{ConstVectorView}, or a \tt{GenVector}, 
+\tt{const Vector} or a \tt{ConstVectorView},
 then the return type is just the value, not a reference.
 
 If \tt{v} is a 
@@ -230,10 +218,13 @@ std::copy(var,var+5,v.begin());
 This works, but it seems a bit inefficient to use a temporary variable.
 The better way to do this with TMV is to initialize the \tt{Vector} with the \tt{<<} operator, analogous to the \tt{<<} syntax for \tt{std::ostream}.
 The idea is that we are sending information into the \tt{Vector}.  
-After the initial \tt{<<}, the elements are separated by commas.
+After the initial \tt{<<}, the elements are separated by either more \tt{<<}'s or commas.\footnote{
+I tend to prefer the commas, but using the \tt{<<} operator between each element would
+match the analogy with \tt{ostream} better.}
 \begin{tmvcode}
 tmv::Vector<double> v(5);
 v << 1.2, 3.2, -9.2, -1, 3.3;
+v << 1.2 << 3.2 << -9.2 << -1 << 3.3;
 \end{tmvcode}
 \index{Vector!List initialization}
 There must be precisely as many values as there are elements in the \tt{Vector},
@@ -320,7 +311,7 @@ standard template library.
 The following methods return views to portions of a \tt{Vector}.
 If \tt{v} is either a (non-\tt{const}) \tt{Vector}
 or a \tt{VectorView}, then a \tt{VectorView} is returned.
-If \tt{v} is a \tt{const Vector}, a \tt{ConstVectorView}, or any other \tt{GenVector},
+If \tt{v} is a \tt{const Vector} or a \tt{ConstVectorView},
 then a \tt{ConstVectorView} is returned.  
 
 \begin{itemize}
@@ -391,16 +382,6 @@ double foo(tmv::Vector<double>& v)
 { return foo(v.view()); }
 \end{tmvcode}
 
-If you are not going to be modifying \tt{v} in the function, you only need to
-write one function, and you should use the base class \tt{GenVector} 
-for the argument type:
-\begin{tmvcode}
-double foo(const tmv::GenVector<double>& v)
-{ ... [doesn't modify v] ... }
-\end{tmvcode}
-The arguments could then be a \tt{const Vector}, a \tt{ConstVectorView},
-or even a \tt{VectorComposite}.
-
 \item
 \begin{tmvcode}
 v.cView()
@@ -440,9 +421,11 @@ length of \tt{v} and also has unit step.
 \index{Vector!Functions of}
 \label{Vector_Functions}
 
-Functions that do not modify the \tt{Vector} are defined in 
-\tt{GenVector}, and so can be used for any type derived from \tt{GenVector}:
-\tt{Vector, ConstVectorView, VectorView,} or \tt{VectorComposite}.
+Functions that do not modify the \tt{Vector} 
+can take as their argument either a regular \tt{Vector} or either
+kind of \tt{View}.  You may even pass it an arithmetic expression that is
+assignable to a \tt{Vector}, and TMV will automatically create the 
+necessary temporary storage for the result.  (e.g. \tt{Norm(v1-5*v2)}.)
 
 Functions that modify the \tt{Vector} are only defined for 
 \tt{Vector} and \tt{VectorView}.
@@ -461,7 +444,7 @@ For example, the expressions:
 double normv = v.norm();
 double normv = Norm(v);
 \end{tmvcode}
-are equivalent.  In either case, \tt{v} can be any \tt{GenVector}.
+are equivalent.
 Also, several of the functions below have multiple equivalent names.  For example,
 \tt{norm1} and \tt{sumAbsElements} are equivalent, so you can use whichever one is
 clearer to you in your situation.  And just to remind you, \tt{RT} refers to the 
@@ -781,7 +764,9 @@ following list, I use \tt{x} for a scalar of type \tt{T} or \tt{RT}, and
 \tt{v} for a \tt{Vector}.  When there are two \tt{Vector}s
 listed, they may either be both of the same type \tt{T}, or one may be of type 
 \tt{T} and the other of \tt{complex<T>}.  Whenever \tt{v} is an lvalue,
-if may be either a \tt{Vector} or a \tt{VectorView}.  Otherwise, it may be any \tt{GenVector}.
+if may be either a \tt{Vector} or a \tt{VectorView}.  Otherwise it can
+be a \tt{Vector}, either kind of view, or even a more complicated
+expression that evaluates to a \tt{Vector}.
 
 Also, I use the notation \tt{[+-]} to mean either \tt{+} or \tt{-}, since
 the syntax is generally the same for these operators.
@@ -801,7 +786,7 @@ v2 = -v1;
 v2 = x * v1;
 v2 = v1 [*/] x;
 \end{tmvcode}
-Assign a multiple of one \tt{Vector} to another vector.  It is permissible for both vectors to be the same thing (or aliases to the same memory), in which case the \tt{Vector} will be modified in place.
+Assign a multiple of one \tt{Vector} to another \tt{Vector}.  It is permissible for both vectors to be the same thing (or aliases to the same memory), in which case the \tt{Vector} will be modified in place.
 
 \item
 \begin{tmvcode}
@@ -818,7 +803,6 @@ v3 = v1 [+-] v2;
 v3 = x1 * v1 [+-] x2 * v2;
 \end{tmvcode}
 Assign a sum or difference of two \tt{Vectors} (or scalings thereof) to a third \tt{Vector}.
-The right hand side of these (and of the above as well) return a \tt{VectorComposite} object that just keeps track of what operation should be done.  Only when this gets assigned to the \tt{Vector} or \tt{VectorView} on the left hand side does it do the actual calculation.  In other words, TMV delays the evaluation until there is a place to store the result.
 
 \item
 \begin{tmvcode}
@@ -847,7 +831,7 @@ There is also a third kind of product that TMV implements, namely an element-by-
 v = ElemProd(v,w);
 \end{tmvcode}
 
-The \tt{ElemProd} function returns a \tt{VectorComposite} object that can be used as part of more complicated arithmetic statements.  e.g.
+The \tt{ElemProd} function returns a composite object that can be used as part of more complicated arithmetic statements.  e.g.
 \begin{tmvcode}
 v += 5*ElemProd(w,v) - 6*w;
 \end{tmvcode}
@@ -860,9 +844,9 @@ v += 5*DiagMatrixViewOf(w)*v - 6*w;
 respectively.  Depending on you preference and the meanings of your vectors,
 these statements may or may not be clearer as to what you are doing.
 
-\subsubsection{Subroutines}
+\subsubsection{Delayed evaluation}
 
-Each of the above equations use deferred calculation so that the sum or product is not calculated
+Each of the above arithmetic operations use delayed evaluation so that the sum or product is not calculated
 until the storage is known.  The equations can even be a bit more complicated without 
 requiring a temporary.  Here are some equations that do not require a temporary 
 \tt{Vector} for the calculation:
@@ -873,69 +857,36 @@ v2 += x1*(x2*(-v1));
 v2 -= x1*(v1/=x2);
 \end{tmvcode}
 
+TMV does this by creating composite objects that merely keep track of the
+arithmetic operation that is to be done, and then calls a function to do
+the calculations when that object is assigned to a \tt{Vector} or
+\tt{VectorView}.
+If you try to use one of these composite objects in a way that TMV
+doesn't know how to deal with directly (e.g. in a more compilicated 
+arithmetic expression), it will instantiate a temporary
+\tt{Vector} to store the result, and then use that in the next calculation.
+Usually, this is the appropriate behavior, but in some cases, it might
+be a bit inefficient, so it might be better to break up the calculation 
+into smaller pieces.  For example,
+\begin{tmvcode}
+v1 += x*(v1+v2+v3) + (x*v3-v4);
+\end{tmvcode}
+will produce the correct answer; however, it will use several temporaries.
+If you want to avoid the temporaries, you would want to break up the
+calculation into
+\begin{tmvcode}
+v1 *= x+1;
+v1 += x*v2;
+v1 += 2*x*v3;
+v1 -= v4;
+\end{tmvcode}
+
 The limit to how complicated the right hand side can be without using a 
 temporary is set by the 
-functions that the code eventually calls to perform the calculation.  
-While you shouldn't ever
-need to use these directly, it may help you understand when the code will require 
-temporary \tt{Vector}s.  If you do use these, note that the vectors being modified
-are given as \tt{VectorView}s, rather than \tt{Vector}s.  So you would need to 
-call them with \tt{v.view()} if \tt{v} is a \tt{Vector}.
-
-\begin{itemize}
-
-\item
-\begin{tmvcode}
-MultXV(T x, const VectorView<T>& v)
-\end{tmvcode}
-\index{Vector!Arithmetic!MultXV function}
-Performs the calculation $v = x \cdot v$.
-
-\item
-\begin{tmvcode}
-MultXV(T x, const GenVector<T1>& v1, const VectorView<T>& v2)
-\end{tmvcode}
-\index{Vector!Arithmetic!MultXV function}
-Performs the calculation $v_2 = x \cdot v_1$.
-
-\item
-\begin{tmvcode}
-AddVV(T x, const GenVector<T1>& v1, const VectorView<T>& v2)
-\end{tmvcode}
-\index{Vector!Arithmetic!AddVV function}
-Performs the calculation $v_2 = v_2 + x \cdot v_1$.
-
-\item
-\begin{tmvcode}
-AddVV(T x1, const GenVector<T1>& v1, T x2, const GenVector<T2>& v2,
-      const VectorView<T>& v3)
-\end{tmvcode}
-\index{Vector!Arithmetic!AddVV function}
-Performs the calculation $v_3 = x_1 \cdot v_1 + x_2 \cdot v_2$.
-
-\item
-\begin{tmvcode}
-T MultVV(const GenVector<T>& v1, const GenVector<T2>& v2)
-\end{tmvcode}
-\index{Vector!Arithmetic!MultVV function}
-Performs the calculation $v_1 \cdot v_2$.
-
-\item
-\begin{tmvcode}
-ElemMult<bool add>(T x, const GenVector<T1>& v1, 
-      const GenVector<T2>& v2, const VectorView<T>& v3)
-\end{tmvcode}
-Performs the calculation $v_3(i) = [v_3(i) \;+\;]  ~ x \cdot v_1(i) \cdot v_2(i)$ for all $i = 0..N$ where $N$ is the size of the vectors where the result is added to $v_3(i)$ if \tt{add = true} and just assigned to it if \tt{add = false}.
-
-\end{itemize}
-
-More complicated arithmetic equations such as
-\begin{tmvcode}
-v1 += x*(v1+v2+v3) + (x*v3-v1) 
-\end{tmvcode}
-will require one or more temporary vectors, and so may be less efficient than 
-you might like, but the code should return the correct result, no matter
-how complicated the equation is.
+functions that the code eventually calls to perform the calculation, 
+but generally speaking, you can assume that scalings will always be
+delayed, and other than that you can have a single operator acting on 
+two \tt{Vector}s.
 
 \subsection{I/O}
 \index{Vector!I/O}
@@ -986,7 +937,7 @@ V n v(0) v(1) v(2) ... v(3)
 \end{tmvcode}
 The compact I/O is more useful for some of the special matrix varieties where it can skip 
 some zeros that would otherwise be printed and output extra information that might be required
-to resize the matrix correctly.
+to resize the matrix correctly on input.
 
 See \S\ref{IOStyle} for more information about specifying custom I/O styles, including
 features like using brackets instead of parentheses, or putting commas between elements,
@@ -1018,7 +969,7 @@ The second template parameter is the step size between successive elements, if k
 
 The third template parameter must be either \tt{tmv::NonConj} or \tt{tmv::Conj} and indicates whether the values being iterated over are the actual values in memory or their conjugates, respectively.
 
-These types can be worth using explicitly if you want to be optimize code that uses iterators of \tt{VectorView}s.
+These types can be worth using explicitly if you want to optimize code that uses iterators of \tt{VectorView}s.
 This is because their iterators always use \tt{tmv::Unknown} as the step parameter.  For complex \tt{VectorView}s, it is even worse, since the possible conjugation is also a run-time variable.  These use a different type that allows for the variable conjugation possibility:
 \begin{tmvcode}
 tmv::VarConjIter<T>
@@ -1068,8 +1019,8 @@ essentially all the same methods, functions, and arithmetic operators.
 
 The template argument \tt{N} below is an integer and
 represent the size of the vector.
-The Attributes template argument 
- \tt{A} may be either \tt{tmv::CStyle} or
+The final template argument 
+ \tt{A} specifies the known attributes.  It may be either \tt{tmv::CStyle} or
 \tt{tmv::FortranStyle} and has the same meanings as 
 for a regular \tt{Vector}. The default is \tt{CStyle} if it is omitted.
 
@@ -1089,7 +1040,7 @@ Makes a \tt{SmallVector} with all values equal to \tt{x}.
 
 \item 
 \begin{tmvcode}
-tmv::SmallVector<T,N,A> v1(const GenVector<T>& v2)
+tmv::SmallVector<T,N,A> v1(const Vector<T>& v2)
 \end{tmvcode}
 Makes a \tt{SmallVector} from a regular \tt{Vector}.
 
@@ -1142,7 +1093,6 @@ function methods as the regular \tt{Vector}.
 Likewise, the syntax of the
 arithmetic is identical.  There are only a few methods that 
 are not done inline.  
-
 First, reading \tt{SmallVector} from a file 
 uses the regular
 \tt{Vector} I/O methods.  

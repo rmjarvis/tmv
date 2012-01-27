@@ -2,7 +2,7 @@
 #define CT std::complex<T>
 
 #define DefCHD(T)\
-template void CH_Decompose(const SymMatrixView<T >& A); \
+template void CH_Decompose(SymMatrixView<T > A); \
 
 DefCHD(T)
 #ifdef INST_COMPLEX

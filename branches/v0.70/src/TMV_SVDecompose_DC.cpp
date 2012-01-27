@@ -894,7 +894,7 @@ namespace tmv {
 
     template <class T> 
     static void SmallProblem(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> Vt)
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt)
     {
         dbgcout<<"Start SmallProblem: N = "<<D.size()<<std::endl;
         if (E.size() > 0)
@@ -912,7 +912,7 @@ namespace tmv {
 
     template <class T> 
     void SV_DecomposeFromBidiagonal_DC(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E, MVP<T> Vt,
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt,
         bool UisI, bool VisI)
     {
         // For these comments, I will use FortranStyle notation,

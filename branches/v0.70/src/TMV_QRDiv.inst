@@ -3,10 +3,10 @@
 #define DefDivEq(T,T1)\
 template void QR_LDivEq(const GenMatrix<T1 >& QRx,\
     const GenVector<T1 >& beta, const int* P, \
-    const MatrixView<T >& m, int N1); \
+    MatrixView<T > m, int N1); \
 template void QR_RDivEq(const GenMatrix<T1 >& QRx,\
     const GenVector<T1 >& beta, const int* P, \
-    const MatrixView<T >& m, int N1); \
+    MatrixView<T > m, int N1); \
 
 DefDivEq(T,T)
 #ifdef INST_COMPLEX
@@ -19,10 +19,10 @@ DefDivEq(CT,CT)
 #define DefDiv(T,T1,T2)\
 template void QR_LDiv(const GenMatrix<T1 >& QRx,\
     const GenVector<T1 >& beta, const int* P, \
-    const GenMatrix<T2 >& m, const MatrixView<T >& x, int N1); \
+    const GenMatrix<T2 >& m, MatrixView<T > x, int N1); \
 template void QR_RDiv(const GenMatrix<T1 >& QRx,\
     const GenVector<T1 >& beta, const int* P, \
-    const GenMatrix<T2 >& m, const MatrixView<T >& x, int N1); \
+    const GenMatrix<T2 >& m, MatrixView<T > x, int N1); \
 
 DefDiv(T,T,T)
 #ifdef INST_COMPLEX

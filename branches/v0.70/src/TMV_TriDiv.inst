@@ -16,12 +16,12 @@ Def1(CT)
 #define Def1b(T) \
   template T GenUpperTriMatrix<T >::det() const; \
   template T GenLowerTriMatrix<T >::det() const; \
-  template const UpperTriMatrixView<T,CStyle>& \
-      UpperTriMatrixView<T,CStyle>::invertSelf() const; \
+  template UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::invertSelf(); \
   template void GenUpperTriMatrix<T >::doMakeInverseATA( \
-      const MatrixView<T >& ) const; \
+      MatrixView<T > ) const; \
   template void GenLowerTriMatrix<T >::doMakeInverseATA( \
-      const MatrixView<T >& ) const; \
+      MatrixView<T > ) const; \
 
 Def1b(T)
 #ifdef INST_COMPLEX
@@ -33,21 +33,21 @@ Def1b(CT)
 
 #define DefDivEq(T,T1) \
   template void GenUpperTriMatrix<T >::doLDivEq( \
-      const VectorView<T1 >& m) const;\
+      VectorView<T1 > m) const;\
   template void GenUpperTriMatrix<T >::doLDivEq( \
-      const MatrixView<T1 >& m) const;\
+      MatrixView<T1 > m) const;\
   template void GenUpperTriMatrix<T >::doLDivEq( \
-      const UpperTriMatrixView<T1 >& m) const;\
+      UpperTriMatrixView<T1 > m) const;\
   template void GenUpperTriMatrix<T >::doMakeInverse( \
-      const UpperTriMatrixView<T1 >& m) const;\
+      UpperTriMatrixView<T1 > m) const;\
   template void GenUpperTriMatrix<T >::doMakeInverse( \
-      const MatrixView<T1 >& m) const;\
+      MatrixView<T1 > m) const;\
   template void GenLowerTriMatrix<T >::doLDivEq( \
-      const VectorView<T1 >& m) const;\
+      VectorView<T1 > m) const;\
   template void GenLowerTriMatrix<T >::doLDivEq( \
-      const MatrixView<T1 >& m) const;\
+      MatrixView<T1 > m) const;\
   template void GenLowerTriMatrix<T >::doLDivEq( \
-      const LowerTriMatrixView<T1 >& m) const;\
+      LowerTriMatrixView<T1 > m) const;\
 
 DefDivEq(T,T)
 #ifdef INST_COMPLEX
@@ -59,28 +59,28 @@ DefDivEq(CT,CT)
 
 #define DefDivEq(T,T1) \
   template <> template <> void GenUpperTriMatrix<T >::doLDivEq( \
-      const VectorView<T1 >& ) const\
+      VectorView<T1 > ) const\
       { TMVAssert(TMV_FALSE); }\
   template <> template <> void GenUpperTriMatrix<T >::doLDivEq( \
-      const MatrixView<T1 >& ) const\
+      MatrixView<T1 > ) const\
       { TMVAssert(TMV_FALSE); }\
   template <> template <> void GenUpperTriMatrix<T >::doLDivEq( \
-      const UpperTriMatrixView<T1 >& ) const\
+      UpperTriMatrixView<T1 > ) const\
       { TMVAssert(TMV_FALSE); }\
   template <> template <> void GenUpperTriMatrix<T >::doMakeInverse( \
-      const UpperTriMatrixView<T1 >& ) const\
+      UpperTriMatrixView<T1 > ) const\
       { TMVAssert(TMV_FALSE); }\
   template <> template <> void GenUpperTriMatrix<T >::doMakeInverse( \
-      const MatrixView<T1 >& ) const\
+      MatrixView<T1 > ) const\
       { TMVAssert(TMV_FALSE); }\
   template <> template <> void GenLowerTriMatrix<T >::doLDivEq( \
-      const VectorView<T1 >& ) const\
+      VectorView<T1 > ) const\
       { TMVAssert(TMV_FALSE); }\
   template <> template <> void GenLowerTriMatrix<T >::doLDivEq( \
-      const MatrixView<T1 >& ) const\
+      MatrixView<T1 > ) const\
       { TMVAssert(TMV_FALSE); }\
   template <> template <> void GenLowerTriMatrix<T >::doLDivEq( \
-      const LowerTriMatrixView<T1 >& ) const\
+      LowerTriMatrixView<T1 > ) const\
       { TMVAssert(TMV_FALSE); }\
 
 #ifdef INST_COMPLEX
@@ -91,19 +91,19 @@ DefDivEq(CT,T)
 
 #define DefDiv(T,T1,T0) \
   template void GenUpperTriMatrix<T >::doLDiv( \
-      const GenVector<T1 >& m1, const VectorView<T0 >& m0) const;\
+      const GenVector<T1 >& m1, VectorView<T0 > m0) const;\
   template void GenUpperTriMatrix<T >::doLDiv( \
-      const GenMatrix<T1 >& m1, const MatrixView<T0 >& m0) const;\
+      const GenMatrix<T1 >& m1, MatrixView<T0 > m0) const;\
   template void GenUpperTriMatrix<T >::doLDiv( \
       const GenUpperTriMatrix<T1 >& m1, \
-      const UpperTriMatrixView<T0 >& m0) const;\
+      UpperTriMatrixView<T0 > m0) const;\
   template void GenLowerTriMatrix<T >::doLDiv( \
-      const GenVector<T1 >& m1, const VectorView<T0 >& m0) const;\
+      const GenVector<T1 >& m1, VectorView<T0 > m0) const;\
   template void GenLowerTriMatrix<T >::doLDiv( \
-      const GenMatrix<T1 >& m1, const MatrixView<T0 >& m0) const;\
+      const GenMatrix<T1 >& m1, MatrixView<T0 > m0) const;\
   template void GenLowerTriMatrix<T >::doLDiv( \
       const GenLowerTriMatrix<T1 >& m1, \
-      const LowerTriMatrixView<T0 >& m0) const;\
+      LowerTriMatrixView<T0 > m0) const;\
 
 DefDiv(T,T,T)
 #ifdef INST_COMPLEX
@@ -117,24 +117,24 @@ DefDiv(CT,CT,CT)
 
 #define DefDiv(T,T1,T0)\
   template <> template <> void GenUpperTriMatrix<T >::doLDiv( \
-      const GenVector<T1 >& , const VectorView<T0 >& ) const\
+      const GenVector<T1 >& , VectorView<T0 > ) const\
       { TMVAssert(TMV_FALSE); }\
   template <> template <> void GenUpperTriMatrix<T >::doLDiv( \
-      const GenMatrix<T1 >& , const MatrixView<T0 >& ) const\
+      const GenMatrix<T1 >& , MatrixView<T0 > ) const\
       { TMVAssert(TMV_FALSE); }\
   template <> template <> void GenUpperTriMatrix<T >::doLDiv( \
       const GenUpperTriMatrix<T1 >& , \
-      const UpperTriMatrixView<T0 >& ) const\
+      UpperTriMatrixView<T0 > ) const\
       { TMVAssert(TMV_FALSE); }\
   template <> template <> void GenLowerTriMatrix<T >::doLDiv( \
-      const GenVector<T1 >& , const VectorView<T0 >& ) const\
+      const GenVector<T1 >& , VectorView<T0 > ) const\
       { TMVAssert(TMV_FALSE); }\
   template <> template <> void GenLowerTriMatrix<T >::doLDiv( \
-      const GenMatrix<T1 >& , const MatrixView<T0 >& ) const\
+      const GenMatrix<T1 >& , MatrixView<T0 > ) const\
       { TMVAssert(TMV_FALSE); }\
   template <> template <> void GenLowerTriMatrix<T >::doLDiv( \
       const GenLowerTriMatrix<T1 >& , \
-      const LowerTriMatrixView<T0 >& ) const\
+      LowerTriMatrixView<T0 > ) const\
       { TMVAssert(TMV_FALSE); }\
 
 #ifdef INST_COMPLEX

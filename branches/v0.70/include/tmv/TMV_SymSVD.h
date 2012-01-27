@@ -49,33 +49,157 @@ namespace tmv {
     template <class T> 
     void Eigen(
         const GenSymMatrix<T>& A,
-        const MatrixView<T>& V, const VectorView<TMV_RealType(T)>& lambda);
+        MatrixView<T> V, VectorView<TMV_RealType(T)> lambda);
 
     // The same, but don't return V
     template <class T> 
-    void Eigen(
-        const GenSymMatrix<T>& A, const VectorView<TMV_RealType(T)>& lambda);
+    void Eigen(const GenSymMatrix<T>& A, VectorView<TMV_RealType(T)> lambda);
 
     // Decompose A into U S Vt
     template <class T> 
     void SV_Decompose(
-        const GenSymMatrix<T>& A, const MatrixView<T>& U,
-        const DiagMatrixView<TMV_RealType(T)>& S, const MatrixView<T>& Vt);
+        const GenSymMatrix<T>& A, MatrixView<T> U,
+        DiagMatrixView<TMV_RealType(T)> S, MatrixView<T> Vt);
 
     // The same, but don't return U and/or Vt
     template <class T> 
     void SV_Decompose(
         const GenSymMatrix<T>& A, 
-        const MatrixView<T>& U, const DiagMatrixView<TMV_RealType(T)>& S);
+        MatrixView<T> U, DiagMatrixView<TMV_RealType(T)> S);
     template <class T> 
     void SV_Decompose(
         const GenSymMatrix<T>& A,
-        const DiagMatrixView<TMV_RealType(T)>& S, const MatrixView<T>& Vt);
+        DiagMatrixView<TMV_RealType(T)> S, MatrixView<T> Vt);
     // For this last one, A is junk on output.
     template <class T> 
     void SV_Decompose(
-        const SymMatrixView<T>& A, const DiagMatrixView<TMV_RealType(T)>& S);
+        SymMatrixView<T> A, DiagMatrixView<TMV_RealType(T)> S);
 
+    template <class T, int A2> 
+    inline void Eigen(
+        const GenSymMatrix<T>& A,
+        MatrixView<T> V, Vector<TMV_RealType(T),A2>& lambda)
+    { Eigen(A,V,lambda.view()); }
+
+    template <class T, int A1> 
+    inline void Eigen(
+        const GenSymMatrix<T>& A,
+        Matrix<T,A1>& V, VectorView<TMV_RealType(T)> lambda)
+    { Eigen(A,V.view(),lambda); }
+
+    template <class T, int A1, int A2> 
+    inline void Eigen(
+        const GenSymMatrix<T>& A,
+        Matrix<T,A1>& V, Vector<TMV_RealType(T),A2>& lambda)
+    { Eigen(A,V.view(),lambda.view()); }
+
+    template <class T, int A2> 
+    inline void Eigen(
+        const GenSymMatrix<T>& A, Vector<TMV_RealType(T),A2>& lambda)
+    { Eigen(A,lambda.view()); }
+
+    template <class T, int A3> 
+    inline void SV_Decompose(
+        const GenSymMatrix<T>& A, MatrixView<T> U,
+        DiagMatrixView<TMV_RealType(T)> S, Matrix<T,A3>& Vt)
+    { SV_Decompose(A,U,S,Vt.view()); }
+
+    template <class T, int A2> 
+    inline void SV_Decompose(
+        const GenSymMatrix<T>& A, MatrixView<T> U,
+        DiagMatrix<TMV_RealType(T),A2>& S, MatrixView<T> Vt)
+    { SV_Decompose(A,U,S.view(),Vt); }
+
+    template <class T, int A2, int A3> 
+    inline void SV_Decompose(
+        const GenSymMatrix<T>& A, MatrixView<T> U,
+        DiagMatrix<TMV_RealType(T),A2>& S, Matrix<T,A3>& Vt)
+    { SV_Decompose(A,U,S.view(),Vt.view()); }
+
+    template <class T, int A1> 
+    inline void SV_Decompose(
+        const GenSymMatrix<T>& A, Matrix<T,A1>& U,
+        DiagMatrixView<TMV_RealType(T)> S, MatrixView<T> Vt)
+    { SV_Decompose(A,U.view(),S,Vt); }
+
+    template <class T, int A1, int A3> 
+    inline void SV_Decompose(
+        const GenSymMatrix<T>& A, Matrix<T,A1>& U,
+        DiagMatrixView<TMV_RealType(T)> S, Matrix<T,A3>& Vt)
+    { SV_Decompose(A,U.view(),S,Vt.view()); }
+
+    template <class T, int A1, int A2> 
+    inline void SV_Decompose(
+        const GenSymMatrix<T>& A, Matrix<T,A1>& U,
+        DiagMatrix<TMV_RealType(T),A2>& S, MatrixView<T> Vt)
+    { SV_Decompose(A,U.view(),S.view(),Vt); }
+
+    template <class T, int A1, int A2, int A3> 
+    inline void SV_Decompose(
+        const GenSymMatrix<T>& A, Matrix<T,A1>& U,
+        DiagMatrix<TMV_RealType(T),A2>& S, Matrix<T,A3>& Vt)
+    { SV_Decompose(A,U.view(),S.view(),Vt.view()); }
+
+    template <class T, int A2> 
+    inline void SV_Decompose(
+        const GenSymMatrix<T>& A, 
+        MatrixView<T> U, DiagMatrix<TMV_RealType(T),A2>& S)
+    { SV_Decompose(A,U,S.view()); }
+
+    template <class T, int A1> 
+    inline void SV_Decompose(
+        const GenSymMatrix<T>& A, 
+        Matrix<T,A1>& U, DiagMatrixView<TMV_RealType(T)> S)
+    { SV_Decompose(A,U.view(),S); }
+
+    template <class T, int A1, int A2> 
+    inline void SV_Decompose(
+        const GenSymMatrix<T>& A, 
+        Matrix<T,A1>& U, DiagMatrix<TMV_RealType(T),A2>& S)
+    { SV_Decompose(A,U.view(),S.view()); }
+
+    template <class T, int A3> 
+    inline void SV_Decompose(
+        const GenSymMatrix<T>& A,
+        DiagMatrixView<TMV_RealType(T)> S, Matrix<T,A3>& Vt)
+    { SV_Decompose(A,S,Vt.view()); }
+
+    template <class T, int A2> 
+    inline void SV_Decompose(
+        const GenSymMatrix<T>& A,
+        DiagMatrix<TMV_RealType(T),A2>& S, MatrixView<T> Vt)
+    { SV_Decompose(A,S.view(),Vt); }
+
+    template <class T, int A2, int A3> 
+    inline void SV_Decompose(
+        const GenSymMatrix<T>& A,
+        DiagMatrix<TMV_RealType(T),A2>& S, Matrix<T,A3>& Vt)
+    { SV_Decompose(A,S.view(),Vt.view()); }
+
+    template <class T, int A2> 
+    inline void SV_Decompose(
+        SymMatrixView<T> A, DiagMatrix<TMV_RealType(T),A2>& S)
+    { SV_Decompose(A,S.view()); }
+
+    template <class T, int A1> 
+    inline void SV_Decompose(
+        SymMatrix<T,A1>& A, DiagMatrixView<TMV_RealType(T)> S)
+    { SV_Decompose(A.view(),S); }
+
+    template <class T, int A1> 
+    inline void SV_Decompose(
+        HermMatrix<T,A1>& A, DiagMatrixView<TMV_RealType(T)> S)
+    { SV_Decompose(A.view(),S); }
+
+    template <class T, int A1, int A2> 
+    inline void SV_Decompose(
+        SymMatrix<T,A1>& A, DiagMatrix<TMV_RealType(T),A2>& S)
+    { SV_Decompose(A.view(),S.view()); }
+
+    template <class T, int A1, int A2> 
+    inline void SV_Decompose(
+        HermMatrix<T,A1>& A, DiagMatrix<TMV_RealType(T),A2>& S)
+    { SV_Decompose(A.view(),S.view()); }
 
     template <class T> 
     class HermSVDiv : public SymDivider<T> 
@@ -95,16 +219,16 @@ namespace tmv {
         //
 
         template <class T1> 
-        void doLDivEq(const MatrixView<T1>& m) const;
+        void doLDivEq(MatrixView<T1> m) const;
 
         template <class T1> 
-        void doRDivEq(const MatrixView<T1>& m) const;
+        void doRDivEq(MatrixView<T1> m) const;
 
         template <class T1, class T2> 
-        void doLDiv(const GenMatrix<T1>& m, const MatrixView<T2>& x) const;
+        void doLDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
         template <class T1, class T2> 
-        void doRDiv(const GenMatrix<T1>& m, const MatrixView<T2>& x) const;
+        void doRDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
         //
         // Determinant, Inverse
@@ -114,26 +238,26 @@ namespace tmv {
         TMV_RealType(T) logDet(T* sign) const;
 
         template <class T1> 
-        void doMakeInverse(const MatrixView<T1>& minv) const;
+        void doMakeInverse(MatrixView<T1> minv) const;
 
         template <class T1> 
-        void doMakeInverse(const SymMatrixView<T1>& sinv) const;
+        void doMakeInverse(SymMatrixView<T1> sinv) const;
 
         inline void makeInverse(
-            const SymMatrixView<TMV_RealType(T)>& sinv) const
+            SymMatrixView<TMV_RealType(T)> sinv) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(sinv.size() == colsize());
             doMakeInverse(sinv);
         }
         inline void makeInverse(
-            const SymMatrixView<TMV_ComplexType(T)>& sinv) const
+            SymMatrixView<TMV_ComplexType(T)> sinv) const
         {
             TMVAssert(sinv.size() == colsize());
             TMVAssert(sinv.isherm());
             doMakeInverse(sinv);
         }
-        void doMakeInverseATA(const MatrixView<T>& minv) const;
+        void doMakeInverseATA(MatrixView<T> minv) const;
         bool isSingular() const;
         TMV_RealType(T) norm2() const;
         TMV_RealType(T) condition() const;
@@ -191,16 +315,16 @@ namespace tmv {
         //
 
         template <class T1> 
-        void doLDivEq(const MatrixView<T1>& m) const;
+        void doLDivEq(MatrixView<T1> m) const;
 
         template <class T1> 
-        void doRDivEq(const MatrixView<T1>& m) const;
+        void doRDivEq(MatrixView<T1> m) const;
 
         template <class T1, class T2> 
-        void doLDiv(const GenMatrix<T1>& m, const MatrixView<T2>& x) const;
+        void doLDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
         template <class T1, class T2> 
-        void doRDiv(const GenMatrix<T1>& m, const MatrixView<T2>& x) const;
+        void doRDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
 #include "tmv/TMV_AuxAllDiv.h"
 
@@ -211,26 +335,26 @@ namespace tmv {
         T det() const;
         TMV_RealType(T) logDet(T* sign) const;
         template <class T1> 
-        void doMakeInverse(const MatrixView<T1>& minv) const;
+        void doMakeInverse(MatrixView<T1> minv) const;
 
         template <class T1> 
-        void doMakeInverse(const SymMatrixView<T1>& sinv) const;
+        void doMakeInverse(SymMatrixView<T1> sinv) const;
 
         inline void makeInverse(
-            const SymMatrixView<TMV_RealType(T)>& sinv) const
+            SymMatrixView<TMV_RealType(T)> sinv) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(sinv.size() == colsize());
             doMakeInverse(sinv);
         }
         inline void makeInverse(
-            const SymMatrixView<TMV_ComplexType(T)>& sinv) const
+            SymMatrixView<TMV_ComplexType(T)> sinv) const
         {
             TMVAssert(sinv.size() == colsize());
             TMVAssert(sinv.issym());
             doMakeInverse(sinv);
         }
-        void doMakeInverseATA(const MatrixView<T>& minv) const;
+        void doMakeInverseATA(MatrixView<T> minv) const;
 
         bool isSingular() const;
         TMV_RealType(T) norm2() const;

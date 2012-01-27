@@ -105,21 +105,21 @@ namespace tmv {
     SymLDLDiv<T>::~SymLDLDiv() {}
 
     template <class T> template <class T1> 
-    void SymLDLDiv<T>::doLDivEq(const MatrixView<T1>& m) const
+    void SymLDLDiv<T>::doLDivEq(MatrixView<T1> m) const
     { LDL_LDivEq(pimpl->LLx,pimpl->xD,pimpl->P.getValues(),m); }
 
     template <class T> template <class T1> 
-    void SymLDLDiv<T>::doRDivEq(const MatrixView<T1>& m) const
+    void SymLDLDiv<T>::doRDivEq(MatrixView<T1> m) const
     { LDL_RDivEq(pimpl->LLx,pimpl->xD,pimpl->P.getValues(),m); }
 
     template <class T> template <class T1, class T2> 
     void SymLDLDiv<T>::doLDiv(
-        const GenMatrix<T1>& m1, const MatrixView<T2>& m0) const
+        const GenMatrix<T1>& m1, MatrixView<T2> m0) const
     { LDL_LDivEq(pimpl->LLx,pimpl->xD,pimpl->P.getValues(),m0=m1); }
 
     template <class T> template <class T1, class T2> 
     void SymLDLDiv<T>::doRDiv(
-        const GenMatrix<T1>& m1, const MatrixView<T2>& m0) const
+        const GenMatrix<T1>& m1, MatrixView<T2> m0) const
     { LDL_RDivEq(pimpl->LLx,pimpl->xD,pimpl->P.getValues(),m0=m1); }
 
     template <class T>
@@ -137,7 +137,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void SymLDLDiv<T>::doMakeInverse(const SymMatrixView<T1>& sinv) const
+    void SymLDLDiv<T>::doMakeInverse(SymMatrixView<T1> sinv) const
     { 
         TMVAssert(isReal(T()) || issym() == sinv.issym());
         TMVAssert(isReal(T()) || isherm() == sinv.isherm());
@@ -145,7 +145,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void SymLDLDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
+    void SymLDLDiv<T>::doMakeInverse(MatrixView<T1> minv) const
     {
         if (pimpl->LLx.isherm()) {
             if (isComplex(T1())) minv.diag().imagPart().setZero();
@@ -162,7 +162,7 @@ namespace tmv {
     }
 
     template <class T>
-    void SymLDLDiv<T>::doMakeInverseATA(const MatrixView<T>& ata) const
+    void SymLDLDiv<T>::doMakeInverseATA(MatrixView<T> ata) const
     {
         TMVAssert(ata.colsize() == pimpl->LLx.size());
         TMVAssert(ata.rowsize() == pimpl->LLx.size());

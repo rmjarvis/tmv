@@ -607,7 +607,7 @@ namespace tmv {
                 );
         }
 
-        inline void assignToM(const MatrixView<RT>& m2) const
+        inline void assignToM(MatrixView<RT> m2) const
         {
             TMVAssert(m2.colsize() == size());
             TMVAssert(m2.rowsize() == size());
@@ -617,7 +617,7 @@ namespace tmv {
             if (size() > 0) m2.lowerTri().offDiag().setZero();
         }
 
-        inline void assignToM(const MatrixView<CT>& m2) const
+        inline void assignToM(MatrixView<CT> m2) const
         {
             TMVAssert(m2.colsize() == size());
             TMVAssert(m2.rowsize() == size());
@@ -626,7 +626,7 @@ namespace tmv {
             if (size() > 0) m2.lowerTri().offDiag().setZero();
         }
 
-        inline void assignToU(const UpperTriMatrixView<RT>& m2) const
+        inline void assignToU(UpperTriMatrixView<RT> m2) const
         { 
             TMVAssert(m2.size() == size());
             TMVAssert(isunit() || !m2.isunit());
@@ -634,7 +634,7 @@ namespace tmv {
             if (!isSameAs(m2)) Copy(*this,m2); 
         }
 
-        inline void assignToU(const UpperTriMatrixView<CT>& m2) const
+        inline void assignToU(UpperTriMatrixView<CT> m2) const
         { 
             TMVAssert(m2.size() == size());
             TMVAssert(isunit() || !m2.isunit());
@@ -836,12 +836,12 @@ namespace tmv {
         bool isSingular() const { return det() == T(0); }
 
         template <class T1> 
-        void doMakeInverse(const UpperTriMatrixView<T1>& minv) const;
+        void doMakeInverse(UpperTriMatrixView<T1> minv) const;
         template <class T1> 
-        void doMakeInverse(const MatrixView<T1>& minv) const;
-        void doMakeInverseATA(const MatrixView<T>& ata) const;
+        void doMakeInverse(MatrixView<T1> minv) const;
+        void doMakeInverseATA(MatrixView<T> ata) const;
 
-        inline void makeInverse(const MatrixView<T>& minv) const
+        inline void makeInverse(MatrixView<T> minv) const
         {
             TMVAssert(minv.colsize() == size());
             TMVAssert(minv.rowsize() == size());
@@ -849,7 +849,7 @@ namespace tmv {
         }
 
         template <class T1> 
-        inline void makeInverse(const MatrixView<T1>& minv) const
+        inline void makeInverse(MatrixView<T1> minv) const
         {
             TMVAssert(minv.colsize() == size());
             TMVAssert(minv.rowsize() == size());
@@ -857,7 +857,7 @@ namespace tmv {
         }
 
         template <class T1> 
-        inline void makeInverse(const UpperTriMatrixView<T1>& minv) const
+        inline void makeInverse(UpperTriMatrixView<T1> minv) const
         {
             TMVAssert(minv.size() == size());
             doMakeInverse(minv);
@@ -867,7 +867,7 @@ namespace tmv {
         inline QuotXU<T,T> inverse() const
         { return QInverse(); }
 
-        inline void makeInverseATA(const MatrixView<T>& ata) const
+        inline void makeInverseATA(MatrixView<T> ata) const
         {
             TMVAssert(ata.colsize() == size());
             TMVAssert(ata.rowsize() == size());
@@ -900,51 +900,51 @@ namespace tmv {
         //
 
         template <class T1> 
-        void doLDivEq(const VectorView<T1>& v) const;
+        void doLDivEq(VectorView<T1> v) const;
         template <class T1, class T0> 
-        void doLDiv(const GenVector<T1>& v1, const VectorView<T0>& v0) const;
+        void doLDiv(const GenVector<T1>& v1, VectorView<T0> v0) const;
         template <class T1> 
-        void doLDivEq(const MatrixView<T1>& m) const;
+        void doLDivEq(MatrixView<T1> m) const;
         template <class T1, class T0> 
-        void doLDiv(const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const;
+        void doLDiv(const GenMatrix<T1>& m1, MatrixView<T0> m0) const;
         template <class T1> 
-        void doLDivEq(const UpperTriMatrixView<T1>& m) const;
+        void doLDivEq(UpperTriMatrixView<T1> m) const;
         template <class T1, class T0> 
         void doLDiv(
             const GenUpperTriMatrix<T1>& m1,
-            const UpperTriMatrixView<T0>& m0) const;
+            UpperTriMatrixView<T0> m0) const;
 
         template <class T1> 
-        inline void LDivEq(const VectorView<T1>& v) const
+        inline void LDivEq(VectorView<T1> v) const
         { 
             TMVAssert(v.size() == size());
             doLDivEq(v);
         }
         template <class T1, class T0> 
         inline void LDiv(
-            const GenVector<T1>& v1, const VectorView<T0>& v0) const
+            const GenVector<T1>& v1, VectorView<T0> v0) const
         { 
             TMVAssert(v0.size() == size());
             TMVAssert(v1.size() == size());
             doLDiv(v1,v0);
         }
         template <class T1> 
-        inline void RDivEq(const VectorView<T1>& v) const
+        inline void RDivEq(VectorView<T1> v) const
         { transpose().LDivEq(v); }
         template <class T1, class T0> 
         inline void RDiv(
-            const GenVector<T1>& v1, const VectorView<T0>& v0) const
+            const GenVector<T1>& v1, VectorView<T0> v0) const
         { transpose().LDiv(v1,v0); }
 
         template <class T1> 
-        inline void LDivEq(const MatrixView<T1>& m) const
+        inline void LDivEq(MatrixView<T1> m) const
         { 
             TMVAssert(m.colsize() == size());
             doLDivEq(m);
         }
         template <class T1, class T0> 
         inline void LDiv(
-            const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
+            const GenMatrix<T1>& m1, MatrixView<T0> m0) const
         { 
             TMVAssert(m0.colsize() == size());
             TMVAssert(m1.colsize() == size());
@@ -952,15 +952,15 @@ namespace tmv {
             doLDiv(m1,m0);
         }
         template <class T1> 
-        inline void RDivEq(const MatrixView<T1>& m) const
+        inline void RDivEq(MatrixView<T1> m) const
         { transpose().LDivEq(m.transpose()); }
         template <class T1, class T0> 
         inline void RDiv(
-            const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
+            const GenMatrix<T1>& m1, MatrixView<T0> m0) const
         { transpose().LDiv(m1.transpose(),m0.transpose()); }
 
         template <class T1> 
-        inline void LDivEq(const UpperTriMatrixView<T1>& m) const
+        inline void LDivEq(UpperTriMatrixView<T1> m) const
         { 
             TMVAssert(m.colsize() == size());
             doLDivEq(m);
@@ -968,19 +968,19 @@ namespace tmv {
         template <class T1, class T0> 
         inline void LDiv(
             const GenUpperTriMatrix<T1>& m1,
-            const UpperTriMatrixView<T0>& m0) const
+            UpperTriMatrixView<T0> m0) const
         { 
             TMVAssert(m0.size() == size());
             TMVAssert(m1.size() == size());
             doLDiv(m1,m0);
         }
         template <class T1> 
-        inline void RDivEq(const UpperTriMatrixView<T1>& m) const
+        inline void RDivEq(UpperTriMatrixView<T1> m) const
         { transpose().LDivEq(m.transpose()); }
         template <class T1, class T0> 
         inline void RDiv(
             const GenUpperTriMatrix<T1>& m1,
-            const UpperTriMatrixView<T0>& m0) const
+            UpperTriMatrixView<T0> m0) const
         { transpose().LDiv(m1.transpose(),m0.transpose()); }
 
         // For easier compatibility with regular matrices:
@@ -1151,13 +1151,13 @@ namespace tmv {
                          stepi()==m2.stepi() && stepj()==m2.stepj());
         }
 
-        inline void assignToM(const MatrixView<RT>& m2) const
+        inline void assignToM(MatrixView<RT> m2) const
         { transpose().assignToM(m2.transpose()); }
-        inline void assignToM(const MatrixView<CT>& m2) const
+        inline void assignToM(MatrixView<CT> m2) const
         { transpose().assignToM(m2.transpose()); }
-        inline void assignToL(const LowerTriMatrixView<RT>& m2) const
+        inline void assignToL(LowerTriMatrixView<RT> m2) const
         { transpose().assignToU(m2.transpose()); }
-        inline void assignToL(const LowerTriMatrixView<CT>& m2) const
+        inline void assignToL(LowerTriMatrixView<CT> m2) const
         { transpose().assignToU(m2.transpose()); }
 
         //
@@ -1375,13 +1375,13 @@ namespace tmv {
         { return QInverse(); }
 
         template <class T1> 
-        inline void makeInverse(const LowerTriMatrixView<T1>& minv) const
+        inline void makeInverse(LowerTriMatrixView<T1> minv) const
         {
             TMVAssert(minv.size() == size());
             transpose().makeInverse(minv.transpose());
         }
 
-        inline void makeInverse(const MatrixView<T>& minv) const
+        inline void makeInverse(MatrixView<T> minv) const
         {
             TMVAssert(minv.colsize() == size());
             TMVAssert(minv.rowsize() == size());
@@ -1389,16 +1389,16 @@ namespace tmv {
         }
 
         template <class T1> 
-        inline void makeInverse(const MatrixView<T1>& minv) const
+        inline void makeInverse(MatrixView<T1> minv) const
         {
             TMVAssert(minv.colsize() == size());
             TMVAssert(minv.rowsize() == size());
             transpose().makeInverse(minv.transpose());
         }
 
-        void doMakeInverseATA(const MatrixView<T>& minv) const;
+        void doMakeInverseATA(MatrixView<T> minv) const;
 
-        inline void makeInverseATA(const MatrixView<T>& ata) const
+        inline void makeInverseATA(MatrixView<T> ata) const
         {
             TMVAssert(ata.colsize() == size());
             TMVAssert(ata.rowsize() == size());
@@ -1431,51 +1431,49 @@ namespace tmv {
         //
 
         template <class T1> 
-        void doLDivEq(const VectorView<T1>& v) const;
+        void doLDivEq(VectorView<T1> v) const;
         template <class T1, class T0> 
-        void doLDiv(const GenVector<T1>& v1, const VectorView<T0>& v0) const;
+        void doLDiv(const GenVector<T1>& v1, VectorView<T0> v0) const;
         template <class T1> 
-        void doLDivEq(const MatrixView<T1>& m) const;
+        void doLDivEq(MatrixView<T1> m) const;
         template <class T1, class T0> 
-        void doLDiv(const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const;
+        void doLDiv(const GenMatrix<T1>& m1, MatrixView<T0> m0) const;
         template <class T1> 
-        void doLDivEq(const LowerTriMatrixView<T1>& m) const;
+        void doLDivEq(LowerTriMatrixView<T1> m) const;
         template <class T1, class T0> 
         void doLDiv(
             const GenLowerTriMatrix<T1>& m1,
-            const LowerTriMatrixView<T0>& m0) const;
+            LowerTriMatrixView<T0> m0) const;
 
         template <class T1> 
-        inline void LDivEq(const VectorView<T1>& v) const
+        inline void LDivEq(VectorView<T1> v) const
         { 
             TMVAssert(v.size() == size());
             doLDivEq(v);
         }
         template <class T1, class T0> 
-        inline void LDiv(
-            const GenVector<T1>& v1, const VectorView<T0>& v0) const
+        inline void LDiv(const GenVector<T1>& v1, VectorView<T0> v0) const
         { 
             TMVAssert(v0.size() == size());
             TMVAssert(v1.size() == size());
             doLDiv(v1,v0);
         }
         template <class T1> 
-        inline void RDivEq(const VectorView<T1>& v) const
+        inline void RDivEq(VectorView<T1> v) const
         { transpose().LDivEq(v); }
         template <class T1, class T0> 
-        inline void RDiv(
-            const GenVector<T1>& v1, const VectorView<T0>& v0) const
+        inline void RDiv(const GenVector<T1>& v1, VectorView<T0> v0) const
         { transpose().LDiv(v1,v0); }
 
         template <class T1> 
-        inline void LDivEq(const MatrixView<T1>& m) const
+        inline void LDivEq(MatrixView<T1> m) const
         { 
             TMVAssert(m.colsize() == size());
             doLDivEq(m);
         }
         template <class T1, class T0> 
         inline void LDiv(
-            const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
+            const GenMatrix<T1>& m1, MatrixView<T0> m0) const
         { 
             TMVAssert(m0.colsize() == size());
             TMVAssert(m1.colsize() == size());
@@ -1483,15 +1481,15 @@ namespace tmv {
             doLDiv(m1,m0);
         }
         template <class T1> 
-        inline void RDivEq(const MatrixView<T1>& m) const
+        inline void RDivEq(MatrixView<T1> m) const
         { transpose().LDivEq(m.transpose()); }
         template <class T1, class T0> 
         inline void RDiv(
-            const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
+            const GenMatrix<T1>& m1, MatrixView<T0> m0) const
         { transpose().LDiv(m1.transpose(),m0.transpose()); }
 
         template <class T1> 
-        inline void LDivEq(const LowerTriMatrixView<T1>& m) const
+        inline void LDivEq(LowerTriMatrixView<T1> m) const
         { 
             TMVAssert(m.colsize() == size());
             doLDivEq(m);
@@ -1499,19 +1497,19 @@ namespace tmv {
         template <class T1, class T0> 
         inline void LDiv(
             const GenLowerTriMatrix<T1>& m1,
-            const LowerTriMatrixView<T0>& m0) const
+            LowerTriMatrixView<T0> m0) const
         { 
             TMVAssert(m0.size() == size());
             TMVAssert(m1.size() == size());
             doLDiv(m1,m0);
         }
         template <class T1> 
-        inline void RDivEq(const LowerTriMatrixView<T1>& m) const
+        inline void RDivEq(LowerTriMatrixView<T1> m) const
         { transpose().LDivEq(m.transpose()); }
         template <class T1, class T0> 
         inline void RDiv(
             const GenLowerTriMatrix<T1>& m1,
-            const LowerTriMatrixView<T0>& m0) const
+            LowerTriMatrixView<T0> m0) const
         { transpose().LDiv(m1.transpose(),m0.transpose()); }
 
 
@@ -1728,22 +1726,22 @@ namespace tmv {
 
         inline T operator()(int i, int j) const
         {
-            TMVAssert(i>0 && i<=size());
-            TMVAssert(j>0 && j<=size());
-            return cref(i-1,j-1);
+            TMVAssert(i>0 && i<=c_type::size());
+            TMVAssert(j>0 && j<=c_type::size());
+            return c_type::cref(i-1,j-1);
         }
 
         inline const_vec_type row(int i, int j1, int j2) const 
         { 
-            TMVAssert(i>0 && i<=size());
-            TMVAssert(j1>0 && j1<=j2 && j2<=size());
+            TMVAssert(i>0 && i<=c_type::size());
+            TMVAssert(j1>0 && j1<=j2 && j2<=c_type::size());
             return base::row(i-1,j1-1,j2);
         }
 
         inline const_vec_type col(int j, int i1, int i2) const
         {
-            TMVAssert(j>0 && j<=size());
-            TMVAssert(i1>0 && i1<=i2 && i2<=size());
+            TMVAssert(j>0 && j<=c_type::size());
+            TMVAssert(i1>0 && i1<=i2 && i2<=c_type::size());
             return base::col(j-1,i1-1,i2);
         }
 
@@ -1831,15 +1829,6 @@ namespace tmv {
         inline const_lowertri_type adjoint() const
         { return base::adjoint(); }
 
-        using c_type::size;
-        using base::isunit;
-
-        using c_type::cref;
-
-    protected :
-
-        using base::okij;
-
     private :
 
         type& operator=(const type&);
@@ -1886,22 +1875,22 @@ namespace tmv {
 
         inline T operator()(int i, int j) const
         {
-            TMVAssert(i>0 && i<=size());
-            TMVAssert(j>0 && j<=size());
-            return cref(i-1,j-1);
+            TMVAssert(i>0 && i<=c_type::size());
+            TMVAssert(j>0 && j<=c_type::size());
+            return c_type::cref(i-1,j-1);
         }
 
         inline const_vec_type row(int i, int j1, int j2) const 
         { 
-            TMVAssert(i>0 && i<=size());
-            TMVAssert(j1>0 && j1<=j2 && j2<=size());
+            TMVAssert(i>0 && i<=c_type::size());
+            TMVAssert(j1>0 && j1<=j2 && j2<=c_type::size());
             return base::row(i-1,j1-1,j2);
         }
 
         inline const_vec_type col(int j, int i1, int i2) const
         {
-            TMVAssert(j>0 && j<=size());
-            TMVAssert(i1>0 && i1<=i2 && i2<=size());
+            TMVAssert(j>0 && j<=c_type::size());
+            TMVAssert(i1>0 && i1<=i2 && i2<=c_type::size());
             return base::col(j-1,i1-1,i2);
         }
 
@@ -1992,15 +1981,6 @@ namespace tmv {
         inline const_uppertri_type adjoint() const
         { return base::adjoint(); }
 
-        using c_type::size;
-        using base::isunit;
-
-        using c_type::cref;
-
-    protected :
-
-        using base::okij;
-
     private :
 
         type& operator=(const type&);
@@ -2025,9 +2005,20 @@ namespace tmv {
         typedef MatrixView<T,A> rec_type;
         typedef VectorView<T,A> vec_type;
         typedef UpperTriMatrixView<RT,A> realpart_type;
+        typedef ConstLowerTriMatrixView<T,A> const_lowertri_type;
+        typedef ConstUpperTriMatrixView<T,A> const_uppertri_type;
+        typedef const_uppertri_type const_view_type;
+        typedef const_lowertri_type const_transpose_type;
+        typedef const_uppertri_type const_conjugate_type;
+        typedef const_lowertri_type const_adjoint_type;
+        typedef ConstMatrixView<T,A> const_rec_type;
+        typedef ConstVectorView<T,A> const_vec_type;
+        typedef ConstUpperTriMatrixView<RT,A> const_realpart_type;
         typedef TriRef<T,true> reference;
-        typedef RMIt<const type> rowmajor_iterator;
-        typedef CMIt<const type> colmajor_iterator;
+        typedef RMIt<type> rowmajor_iterator;
+        typedef CMIt<type> colmajor_iterator;
+        typedef RMIt<const type> const_rowmajor_iterator;
+        typedef CMIt<const type> const_colmajor_iterator;
 
         //
         // Constructors
@@ -2057,28 +2048,21 @@ namespace tmv {
         // Op=
         //
 
-        inline const type& operator=(const type& m2) const
+        inline type& operator=(const type& m2)
         {
             TMVAssert(size() == m2.size());
             m2.assignToU(*this);
             return *this; 
         }
 
-        inline const type& operator=(const type& m2)
-        {
-            TMVAssert(size() == m2.size());
-            m2.assignToU(*this);
-            return *this; 
-        }
-
-        inline const type& operator=(const GenUpperTriMatrix<RT>& m2) const
+        inline type& operator=(const GenUpperTriMatrix<RT>& m2)
         { 
             TMVAssert(size() == m2.size());
             m2.assignToU(*this);
             return *this; 
         }
 
-        inline const type& operator=(const GenUpperTriMatrix<CT>& m2) const
+        inline type& operator=(const GenUpperTriMatrix<CT>& m2)
         { 
             TMVAssert(size() == m2.size());
             TMVAssert(isComplex(T()));
@@ -2086,7 +2070,7 @@ namespace tmv {
             return *this; 
         }
 
-        inline const type& operator=(const GenDiagMatrix<RT>& m2) const
+        inline type& operator=(const GenDiagMatrix<RT>& m2)
         { 
             TMVAssert(size() == m2.size());
             m2.assignToD(DiagMatrixViewOf(diag()));
@@ -2094,7 +2078,7 @@ namespace tmv {
             return *this; 
         }
 
-        inline const type& operator=(const GenDiagMatrix<CT>& m2) const
+        inline type& operator=(const GenDiagMatrix<CT>& m2)
         { 
             TMVAssert(size() == m2.size());
             TMVAssert(isComplex(T()));
@@ -2104,7 +2088,7 @@ namespace tmv {
         }
 
         template <class T2> 
-        inline const type& operator=(const GenUpperTriMatrix<T2>& m2) const
+        inline type& operator=(const GenUpperTriMatrix<T2>& m2)
         { 
             TMVAssert(size() == m2.size());
             TMVAssert(isReal(T2()) || isComplex(T()));
@@ -2113,11 +2097,10 @@ namespace tmv {
             return *this; 
         }
 
-        inline const type& operator=(const T& x) const 
+        inline type& operator=(const T& x) 
         { TMVAssert(!isunit() || x==T(1)); return setToIdentity(x); }
 
-        inline const type& operator=(
-            const AssignableToUpperTriMatrix<RT>& m2) const
+        inline type& operator=(const AssignableToUpperTriMatrix<RT>& m2)
         { 
             TMVAssert(size() == m2.size());
             TMVAssert(!(m2.dt()==NonUnitDiag && dt()==UnitDiag));
@@ -2125,8 +2108,7 @@ namespace tmv {
             return *this;
         }
 
-        inline const type& operator=(
-            const AssignableToUpperTriMatrix<CT>& m2) const
+        inline type& operator=(const AssignableToUpperTriMatrix<CT>& m2)
         { 
             TMVAssert(size() == m2.size());
             TMVAssert(isComplex(T()));
@@ -2136,7 +2118,7 @@ namespace tmv {
         }
 
         typedef ListAssigner<T,rowmajor_iterator> MyListAssigner;
-        inline MyListAssigner operator<<(const T& x) const
+        inline MyListAssigner operator<<(const T& x)
         { return MyListAssigner(rowmajor_begin(),size()*(size()+1)/2,x); }
 
 
@@ -2144,7 +2126,7 @@ namespace tmv {
         // Access
         //
 
-        inline reference operator()(int i,int j) const 
+        inline reference operator()(int i,int j) 
         {
             TMVAssert(i>=0 && i<size());
             TMVAssert(j>=0 && j<size());
@@ -2152,7 +2134,7 @@ namespace tmv {
             return ref(i,j); 
         }
 
-        inline vec_type row(int i, int j1, int j2) const 
+        inline vec_type row(int i, int j1, int j2) 
         { 
             TMVAssert(i>=0 && i<size());
             TMVAssert(j1>=0 && j1<=j2 && j2<=size());
@@ -2161,7 +2143,7 @@ namespace tmv {
                 ptr()+i*stepi()+j1*stepj(),j2-j1,stepj(),ct() TMV_FIRSTLAST); 
         }
 
-        inline vec_type col(int j, int i1, int i2) const
+        inline vec_type col(int j, int i1, int i2)
         {
             TMVAssert(j>=0 && j<size());
             TMVAssert(i1>=0 && i1<=i2 && i2<=size());
@@ -2170,14 +2152,14 @@ namespace tmv {
                 ptr()+i1*stepi()+j*stepj(),i2-i1,stepi(),ct() TMV_FIRSTLAST); 
         }
 
-        inline vec_type diag() const
+        inline vec_type diag()
         {
             TMVAssert(!isunit());
             return vec_type(
                 ptr(),size(),stepi()+stepj(),ct() TMV_FIRSTLAST); 
         }
 
-        inline vec_type diag(int i) const
+        inline vec_type diag(int i)
         {
             TMVAssert(isunit() ? i>0 : i>=0);
             TMVAssert(i<=size()); 
@@ -2186,7 +2168,7 @@ namespace tmv {
                 TMV_FIRSTLAST);
         }
 
-        inline vec_type diag(int i, int j1, int j2) const
+        inline vec_type diag(int i, int j1, int j2)
         {
             TMVAssert(isunit() ? i>0 : i>=0);
             TMVAssert(i<=size()); 
@@ -2196,23 +2178,37 @@ namespace tmv {
                 ptr()+i*stepj()+j1*ds,j2-j1,ds,ct() TMV_FIRSTLAST);
         }
 
+        // Repeat const versions
+        inline T operator()(int i,int j) const 
+        { return base::operator()(i,j); }
+        inline const_vec_type row(int i, int j1, int j2) const 
+        { return base::row(i,j1,j2); }
+        inline const_vec_type col(int j, int i1, int i2) const
+        { return base::col(j,i1,i2); }
+        inline const_vec_type diag() const
+        { return base::diag(); }
+        inline const_vec_type diag(int i) const
+        { return base::diag(i); }
+        inline const_vec_type diag(int i, int j1, int j2) const
+        { return base::diag(i,j1,j2); }
+
         //
         // Modifying Functions
         //
 
-        const type& setZero() const;
+        type& setZero();
 
-        const type& setAllTo(const T& x) const;
+        type& setAllTo(const T& x);
 
-        const type& addToAll(const T& x) const;
+        type& addToAll(const T& x);
 
-        const type& clip(RT thresh) const;
+        type& clip(RT thresh);
 
-        const type& conjugateSelf() const;
+        type& conjugateSelf();
 
-        const type& invertSelf() const;
+        type& invertSelf();
 
-        const type& setToIdentity(const T& x=T(1)) const;
+        type& setToIdentity(const T& x=T(1));
 
         //
         // subMatrix
@@ -2222,21 +2218,21 @@ namespace tmv {
         using base::hasSubVector;
         using base::hasSubTriMatrix;
 
-        inline rec_type cSubMatrix(int i1, int i2, int j1, int j2) const
+        inline rec_type cSubMatrix(int i1, int i2, int j1, int j2)
         {
             return rec_type(
                 ptr()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, stepi(),stepj(),ct() TMV_FIRSTLAST );
         }
 
-        inline rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        inline rec_type subMatrix(int i1, int i2, int j1, int j2)
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
             return cSubMatrix(i1,i2,j1,j2);
         }
 
         inline rec_type cSubMatrix(
-            int i1, int i2, int j1, int j2, int istep, int jstep) const
+            int i1, int i2, int j1, int j2, int istep, int jstep)
         {
             return rec_type(
                 ptr()+i1*stepi()+j1*stepj(),
@@ -2245,14 +2241,14 @@ namespace tmv {
         }
 
         inline rec_type subMatrix(
-            int i1, int i2, int j1, int j2, int istep, int jstep) const
+            int i1, int i2, int j1, int j2, int istep, int jstep)
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             return cSubMatrix(i1,i2,j1,j2,istep,jstep);
         }
 
         inline vec_type cSubVector(
-            int i, int j, int istep, int jstep, int size) const
+            int i, int j, int istep, int jstep, int size)
         {
             return vec_type(
                 ptr()+i*stepi()+j*stepj(),size,
@@ -2260,27 +2256,27 @@ namespace tmv {
         }
 
         inline vec_type subVector(
-            int i, int j, int istep, int jstep, int size) const
+            int i, int j, int istep, int jstep, int size)
         {
             TMVAssert(size >= 0);
             TMVAssert(hasSubVector(i,j,istep,jstep,size));
             return cSubVector(i,j,istep,jstep,size);
         }
 
-        inline uppertri_type cSubTriMatrix(int i1, int i2) const
+        inline uppertri_type cSubTriMatrix(int i1, int i2)
         {
             return uppertri_type(
                 ptr()+i1*(stepi()+stepj()),i2-i1,
                 stepi(),stepj(),dt(),ct() TMV_FIRSTLAST);
         }
 
-        inline uppertri_type subTriMatrix(int i1, int i2) const
+        inline uppertri_type subTriMatrix(int i1, int i2)
         {
             TMVAssert(hasSubTriMatrix(i1,i2,1));
             return cSubTriMatrix(i1,i2);
         }
 
-        inline uppertri_type cSubTriMatrix(int i1, int i2, int istep) const
+        inline uppertri_type cSubTriMatrix(int i1, int i2, int istep)
         {
             return uppertri_type(
                 ptr()+i1*(stepi()+stepj()),
@@ -2288,13 +2284,13 @@ namespace tmv {
                 TMV_FIRSTLAST);
         }
 
-        inline uppertri_type subTriMatrix(int i1, int i2, int istep) const
+        inline uppertri_type subTriMatrix(int i1, int i2, int istep)
         {
             TMVAssert(hasSubTriMatrix(i1,i2,istep));
             return cSubTriMatrix(i1,i2,istep);
         }
 
-        inline uppertri_type offDiag(int noff=1) const
+        inline uppertri_type offDiag(int noff=1)
         {
             TMVAssert(noff >= 1);
             TMVAssert(noff <= size());
@@ -2303,7 +2299,7 @@ namespace tmv {
                 stepi(),stepj(),NonUnitDiag,ct() TMV_FIRSTLAST);
         }
 
-        inline realpart_type realPart() const
+        inline realpart_type realPart()
         {
             return realpart_type(
                 reinterpret_cast<RT*>(ptr()), size(),
@@ -2316,7 +2312,7 @@ namespace tmv {
             );
         }
 
-        inline realpart_type imagPart() const
+        inline realpart_type imagPart()
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
@@ -2330,44 +2326,86 @@ namespace tmv {
             );
         }
 
-        inline uppertri_type view() const
+        inline uppertri_type view()
         { return *this; }
 
-        inline uppertri_type viewAsUnitDiag() const
+        inline uppertri_type viewAsUnitDiag()
         { 
             return uppertri_type(
                 ptr(),size(),stepi(),stepj(),UnitDiag,ct() TMV_FIRSTLAST);
         }
 
-        inline lowertri_type transpose() const
+        inline lowertri_type transpose()
         {
             return lowertri_type(
                 ptr(),size(),stepj(),stepi(),dt(),ct() TMV_FIRSTLAST);
         }
 
-        inline uppertri_type conjugate() const
+        inline uppertri_type conjugate()
         {
             return uppertri_type(
                 ptr(),size(),stepi(),stepj(),dt(),TMV_ConjOf(T,ct()) 
                 TMV_FIRSTLAST);
         }
 
-        inline lowertri_type adjoint() const
+        inline lowertri_type adjoint()
         {
             return lowertri_type(
                 ptr(),size(),stepj(),stepi(),dt(),TMV_ConjOf(T,ct()) 
                 TMV_FIRSTLAST);
         }
 
+
+        inline const_rec_type cSubMatrix(int i1, int i2, int j1, int j2) const
+        { return base::cSubMatrix(i1,i2,j1,j2); }
+        inline const_rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        { return base::subMatrix(i1,i2,j1,j2); }
+        inline const_rec_type cSubMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) const
+        { return base::cSubMatrix(i1,i2,j1,j2,istep,jstep); }
+        inline const_rec_type subMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) const
+        { return base::subMatrix(i1,i2,j1,j2,istep,jstep); }
+        inline const_vec_type cSubVector(
+            int i, int j, int istep, int jstep, int size) const
+        { return base::cSubVector(i,j,istep,jstep,size); }
+        inline const_vec_type subVector(
+            int i, int j, int istep, int jstep, int size) const
+        { return base::subVector(i,j,istep,jstep,size); }
+        inline const_uppertri_type cSubTriMatrix(int i1, int i2) const
+        { return base::cSubTriMatrix(i1,i2); }
+        inline const_uppertri_type subTriMatrix(int i1, int i2) const
+        { return base::subTriMatrix(i1,i2); }
+        inline const_uppertri_type cSubTriMatrix(int i1, int i2, int istep) const
+        { return base::cSubTriMatrix(i1,i2,istep); }
+        inline const_uppertri_type subTriMatrix(int i1, int i2, int istep) const
+        { return base::subTriMatrix(i1,i2,istep); }
+        inline const_uppertri_type offDiag(int noff=1) const
+        { return base::offDiag(noff); }
+        inline const_realpart_type realPart() const
+        { return base::realPart(); }
+        inline const_realpart_type imagPart() const
+        { return base::imagPart(); }
+        inline const_uppertri_type view() const
+        { return base::view(); }
+        inline const_uppertri_type viewAsUnitDiag() const
+        { return base::viewAsUnitDiag(); }
+        inline const_lowertri_type transpose() const
+        { return base::transpose(); }
+        inline const_uppertri_type conjugate() const
+        { return base::conjugate(); }
+        inline const_lowertri_type adjoint() const
+        { return base::adjoint(); }
+
         //
         // I/O
         //
 
-        void read(const TMV_Reader& reader) const;
+        void read(const TMV_Reader& reader);
 
         inline int size() const { return itss; }
         inline const T* cptr() const { return itsm; }
-        inline T* ptr() const { return itsm; }
+        inline T* ptr() { return itsm; }
         inline int stepi() const { return itssi; }
         inline int stepj() const { return itssj; }
         using base::isconj;
@@ -2377,21 +2415,31 @@ namespace tmv {
         inline DiagType dt() const { return itsdiag; }
         inline ConjType ct() const { return itsct; }
 
-        inline reference ref(int i, int j) const
+        inline reference ref(int i, int j)
         {
             T* mi = ptr() + i*stepi() + j*stepj();
             return reference(isunit() && i==j,*mi,ct());
         }
 
-        inline rowmajor_iterator rowmajor_begin() const
+        inline rowmajor_iterator rowmajor_begin()
         { return rowmajor_iterator(this,0,0); }
-        inline rowmajor_iterator rowmajor_end() const
+        inline rowmajor_iterator rowmajor_end()
         { return rowmajor_iterator(this,size(),size()); }
 
-        inline colmajor_iterator colmajor_begin() const
+        inline colmajor_iterator colmajor_begin()
         { return colmajor_iterator(this,0,0); }
-        inline colmajor_iterator colmajor_end() const
+        inline colmajor_iterator colmajor_end()
         { return colmajor_iterator(this,0,size()); }
+
+        inline const_rowmajor_iterator rowmajor_begin() const
+        { return const_rowmajor_iterator(this,0,0); }
+        inline const_rowmajor_iterator rowmajor_end() const
+        { return const_rowmajor_iterator(this,size(),size()); }
+
+        inline const_colmajor_iterator colmajor_begin() const
+        { return const_colmajor_iterator(this,0,0); }
+        inline const_colmajor_iterator colmajor_end() const
+        { return const_colmajor_iterator(this,0,size()); }
 
 
     protected :
@@ -2431,9 +2479,20 @@ namespace tmv {
         typedef MatrixView<T,A> rec_type;
         typedef VectorView<T,A> vec_type;
         typedef LowerTriMatrixView<RT,A> realpart_type;
+        typedef ConstUpperTriMatrixView<T,A> const_uppertri_type;
+        typedef ConstLowerTriMatrixView<T,A> const_lowertri_type;
+        typedef const_lowertri_type const_view_type;
+        typedef const_uppertri_type const_transpose_type;
+        typedef const_lowertri_type const_conjugate_type;
+        typedef const_uppertri_type const_adjoint_type;
+        typedef ConstMatrixView<T,A> const_rec_type;
+        typedef ConstVectorView<T,A> const_vec_type;
+        typedef ConstLowerTriMatrixView<RT,A> const_realpart_type;
         typedef TriRef<T,true> reference;
-        typedef RMIt<const type> rowmajor_iterator;
-        typedef CMIt<const type> colmajor_iterator;
+        typedef RMIt<type> rowmajor_iterator;
+        typedef CMIt<type> colmajor_iterator;
+        typedef RMIt<const type> const_rowmajor_iterator;
+        typedef CMIt<const type> const_colmajor_iterator;
 
         //
         // Constructors
@@ -2462,28 +2521,21 @@ namespace tmv {
         // Op=
         //
 
-        inline const type& operator=(const type& m2) const
+        inline type& operator=(const type& m2)
         {
             TMVAssert(size() == m2.size());
             m2.assignToL(*this);
             return *this; 
         }
 
-        inline const type& operator=(const type& m2) 
+        inline type& operator=(const GenLowerTriMatrix<RT>& m2)
         {
             TMVAssert(size() == m2.size());
             m2.assignToL(*this);
             return *this; 
         }
 
-        inline const type& operator=(const GenLowerTriMatrix<RT>& m2) const
-        {
-            TMVAssert(size() == m2.size());
-            m2.assignToL(*this);
-            return *this; 
-        }
-
-        inline const type& operator=(const GenLowerTriMatrix<CT>& m2) const
+        inline type& operator=(const GenLowerTriMatrix<CT>& m2)
         {
             TMVAssert(size() == m2.size());
             TMVAssert(isComplex(T()));
@@ -2491,14 +2543,14 @@ namespace tmv {
             return *this; 
         }
 
-        inline const type& operator=(const GenDiagMatrix<RT>& m2) const
+        inline type& operator=(const GenDiagMatrix<RT>& m2)
         { 
             TMVAssert(size() == m2.size());
             transpose() = m2;
             return *this; 
         }
 
-        inline const type& operator=(const GenDiagMatrix<CT>& m2) const
+        inline type& operator=(const GenDiagMatrix<CT>& m2)
         { 
             TMVAssert(size() == m2.size());
             TMVAssert(isComplex(T()));
@@ -2507,7 +2559,7 @@ namespace tmv {
         }
 
         template <class T2> 
-        inline const type& operator=(const GenLowerTriMatrix<T2>& m2) const
+        inline type& operator=(const GenLowerTriMatrix<T2>& m2)
         { 
             TMVAssert(size() == m2.size());
             TMVAssert(!isunit() || m2.isunit());
@@ -2515,14 +2567,13 @@ namespace tmv {
             return *this; 
         }
 
-        inline const type& operator=(const T& x) const 
+        inline type& operator=(const T& x) 
         { 
             TMVAssert(!isunit()); 
             return setToIdentity(x); 
         }
 
-        inline const type& operator=(
-            const AssignableToLowerTriMatrix<RT>& m2) const
+        inline type& operator=(const AssignableToLowerTriMatrix<RT>& m2)
         { 
             TMVAssert(size() == m2.size());
             TMVAssert(!(m2.dt()==NonUnitDiag && dt()==UnitDiag));
@@ -2530,8 +2581,7 @@ namespace tmv {
             return *this;
         }
 
-        inline const type& operator=(
-            const AssignableToLowerTriMatrix<CT>& m2) const
+        inline type& operator=(const AssignableToLowerTriMatrix<CT>& m2)
         { 
             TMVAssert(size() == m2.size());
             TMVAssert(isComplex(T()));
@@ -2541,14 +2591,14 @@ namespace tmv {
         }
 
         typedef ListAssigner<T,rowmajor_iterator> MyListAssigner;
-        inline MyListAssigner operator<<(const T& x) const
+        inline MyListAssigner operator<<(const T& x)
         { return MyListAssigner(rowmajor_begin(),size()*(size()+1)/2,x); }
 
         //
         // Access
         //
 
-        inline reference operator()(int i,int j) const 
+        inline reference operator()(int i,int j) 
         {
             TMVAssert(i>=0 && i<size());
             TMVAssert(j>=0 && j<size());
@@ -2556,7 +2606,7 @@ namespace tmv {
             return ref(i,j); 
         }
 
-        inline vec_type row(int i, int j1, int j2) const 
+        inline vec_type row(int i, int j1, int j2) 
         { 
             TMVAssert(i>=0 && i<size());
             TMVAssert(j1>=0 && j1<=j2 && j2<=size());
@@ -2565,7 +2615,7 @@ namespace tmv {
                 ptr()+i*stepi()+j1*stepj(),j2-j1,stepj(),ct() TMV_FIRSTLAST); 
         }
 
-        inline vec_type col(int j, int i1, int i2) const
+        inline vec_type col(int j, int i1, int i2)
         {
             TMVAssert(j>=0 && j<size());
             TMVAssert(i1>=0 && i1<=i2 && i2<=size());
@@ -2574,14 +2624,14 @@ namespace tmv {
                 ptr()+i1*stepi()+j*stepj(),i2-i1,stepi(),ct() TMV_FIRSTLAST); 
         }
 
-        inline vec_type diag() const
+        inline vec_type diag()
         {
             TMVAssert(!isunit());
             return vec_type(
                 ptr(),size(),stepi()+stepj(),ct() TMV_FIRSTLAST); 
         }
 
-        inline vec_type diag(int i) const
+        inline vec_type diag(int i)
         {
             TMVAssert(i>=-size()); 
             TMVAssert(isunit() ? i<0 : i<=0);
@@ -2589,7 +2639,7 @@ namespace tmv {
                 ptr()-i*stepi(),size()+i,stepi()+stepj(),ct() TMV_FIRSTLAST);
         }
 
-        inline vec_type diag(int i, int j1, int j2) const
+        inline vec_type diag(int i, int j1, int j2)
         {
             TMVAssert(i>=-size()); 
             TMVAssert(isunit() ? i<0 : i<=0);
@@ -2599,29 +2649,42 @@ namespace tmv {
                 ptr()-i*stepi()+j1*ds,j2-j1,ds,ct() TMV_FIRSTLAST);
         }
 
+        inline T operator()(int i,int j) const 
+        { return base::operator()(i,j); }
+        inline const_vec_type row(int i, int j1, int j2) const 
+        { return base::row(i,j1,j2); }
+        inline const_vec_type col(int j, int i1, int i2) const
+        { return base::col(j,i1,i2); }
+        inline const_vec_type diag() const
+        { return base::diag(); }
+        inline const_vec_type diag(int i) const
+        { return base::diag(i); }
+        inline const_vec_type diag(int i, int j1, int j2) const
+        { return base::diag(i,j1,j2); }
+
         //
         // Modifying Functions
         //
 
-        inline const type& setZero() const 
+        inline type& setZero() 
         { transpose().setZero(); return *this; }
 
-        inline const type& setAllTo(const T& x) const
+        inline type& setAllTo(const T& x)
         { transpose().setAllTo(x); return *this; }
 
-        inline const type& addToAll(const T& x) const
+        inline type& addToAll(const T& x)
         { transpose().addToAll(x); return *this; }
 
-        inline const type& clip(RT thresh) const
+        inline type& clip(RT thresh)
         { transpose().clip(thresh); return *this; }
 
-        inline const type& conjugateSelf() const
+        inline type& conjugateSelf()
         { transpose().conjugateSelf(); return *this; }
 
-        inline const type& invertSelf() const
+        inline type& invertSelf()
         { transpose().invertSelf(); return *this; }
 
-        inline const type& setToIdentity(const T& x=T(1)) const
+        inline type& setToIdentity(const T& x=T(1))
         { transpose().setToIdentity(x); return *this; }
 
         //
@@ -2632,21 +2695,21 @@ namespace tmv {
         using base::hasSubVector;
         using base::hasSubTriMatrix;
 
-        inline rec_type cSubMatrix(int i1, int i2, int j1, int j2) const
+        inline rec_type cSubMatrix(int i1, int i2, int j1, int j2)
         {
             return rec_type(
                 ptr()+i1*stepi()+j1*stepj(),
                 i2-i1, j2-j1, stepi(),stepj(),ct() TMV_FIRSTLAST );
         }
 
-        inline rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        inline rec_type subMatrix(int i1, int i2, int j1, int j2)
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
             return cSubMatrix(i1,i2,j1,j2);
         }
 
         inline rec_type cSubMatrix(
-            int i1, int i2, int j1, int j2, int istep, int jstep) const
+            int i1, int i2, int j1, int j2, int istep, int jstep)
         {
             return rec_type(
                 ptr()+i1*stepi()+j1*stepj(),
@@ -2655,14 +2718,14 @@ namespace tmv {
         }
 
         inline rec_type subMatrix(
-            int i1, int i2, int j1, int j2, int istep, int jstep) const
+            int i1, int i2, int j1, int j2, int istep, int jstep)
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             return cSubMatrix(i1,i2,j1,j2,istep,jstep);
         }
 
         inline vec_type cSubVector(
-            int i, int j, int istep, int jstep, int size) const
+            int i, int j, int istep, int jstep, int size)
         {
             return vec_type(
                 ptr()+i*stepi()+j*stepj(),size,
@@ -2670,27 +2733,27 @@ namespace tmv {
         }
 
         inline vec_type subVector(
-            int i, int j, int istep, int jstep, int size) const
+            int i, int j, int istep, int jstep, int size)
         {
             TMVAssert(size >= 0);
             TMVAssert(hasSubVector(i,j,istep,jstep,size));
             return cSubVector(i,j,istep,jstep,size);
         }
 
-        inline lowertri_type cSubTriMatrix(int i1, int i2) const
+        inline lowertri_type cSubTriMatrix(int i1, int i2)
         {
             return lowertri_type(
                 ptr()+i1*(stepi()+stepj()),
                 i2-i1,stepi(),stepj(),dt(),ct() TMV_FIRSTLAST);
         }
 
-        inline lowertri_type subTriMatrix(int i1, int i2) const
+        inline lowertri_type subTriMatrix(int i1, int i2)
         {
             TMVAssert(hasSubTriMatrix(i1,i2,1));
             return cSubTriMatrix(i1,i2);
         }
 
-        inline lowertri_type cSubTriMatrix(int i1, int i2, int istep) const
+        inline lowertri_type cSubTriMatrix(int i1, int i2, int istep)
         {
             return lowertri_type(
                 ptr()+i1*(stepi()+stepj()),
@@ -2698,13 +2761,13 @@ namespace tmv {
                 TMV_FIRSTLAST);
         }
 
-        inline lowertri_type subTriMatrix(int i1, int i2, int istep) const
+        inline lowertri_type subTriMatrix(int i1, int i2, int istep)
         {
             TMVAssert(hasSubTriMatrix(i1,i2,istep));
             return cSubTriMatrix(i1,i2,istep);
         }
 
-        inline lowertri_type offDiag(int noff=1) const
+        inline lowertri_type offDiag(int noff=1)
         {
             TMVAssert(noff >= 1);
             TMVAssert(noff <= size());
@@ -2713,7 +2776,7 @@ namespace tmv {
                 stepi(),stepj(),NonUnitDiag,ct() TMV_FIRSTLAST);
         }
 
-        inline realpart_type realPart() const
+        inline realpart_type realPart()
         {
             return realpart_type(
                 reinterpret_cast<RT*>(ptr()), size(),
@@ -2726,7 +2789,7 @@ namespace tmv {
             );
         }
 
-        inline realpart_type imagPart() const
+        inline realpart_type imagPart()
         {
             TMVAssert(isComplex(T()));
             TMVAssert(!isunit());
@@ -2740,31 +2803,31 @@ namespace tmv {
             );
         }
 
-        inline lowertri_type view() const
+        inline lowertri_type view()
         { return *this; }
 
-        inline lowertri_type viewAsUnitDiag() const
+        inline lowertri_type viewAsUnitDiag()
         {
             return lowertri_type(
                 ptr(),size(),
                 stepi(),stepj(),UnitDiag,ct() TMV_FIRSTLAST);
         }
 
-        inline uppertri_type transpose() const
+        inline uppertri_type transpose()
         {
             return uppertri_type(
                 ptr(),size(),
                 stepj(),stepi(),dt(),ct() TMV_FIRSTLAST);
         }
 
-        inline lowertri_type conjugate() const
+        inline lowertri_type conjugate()
         {
             return lowertri_type(
                 ptr(),size(),
                 stepi(),stepj(),dt(),TMV_ConjOf(T,ct()) TMV_FIRSTLAST);
         }
 
-        inline uppertri_type adjoint() const
+        inline uppertri_type adjoint()
         {
             return uppertri_type(
                 ptr(),size(),
@@ -2772,15 +2835,56 @@ namespace tmv {
                 TMV_FIRSTLAST);
         }
 
+        inline const_rec_type cSubMatrix(int i1, int i2, int j1, int j2) const
+        { return base::cSubMatrix(i1,i2,j1,j2); }
+        inline const_rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        { return base::subMatrix(i1,i2,j1,j2); }
+        inline const_rec_type cSubMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) const
+        { return base::cSubMatrix(i1,i2,j1,j2,istep,jstep); }
+        inline const_rec_type subMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) const
+        { return base::subMatrix(i1,i2,j1,j2,istep,jstep); }
+        inline const_vec_type cSubVector(
+            int i, int j, int istep, int jstep, int size) const
+        { return base::cSubVector(i,j,istep,jstep,size); }
+        inline const_vec_type subVector(
+            int i, int j, int istep, int jstep, int size) const
+        { return base::subVector(i,j,istep,jstep,size); }
+        inline const_lowertri_type cSubTriMatrix(int i1, int i2) const
+        { return base::cSubTriMatrix(i1,i2); }
+        inline const_lowertri_type subTriMatrix(int i1, int i2) const
+        { return base::subTriMatrix(i1,i2); }
+        inline const_lowertri_type cSubTriMatrix(int i1, int i2, int istep) const
+        { return base::cSubTriMatrix(i1,i2,istep); }
+        inline const_lowertri_type subTriMatrix(int i1, int i2, int istep) const
+        { return base::subTriMatrix(i1,i2,istep); }
+        inline const_lowertri_type offDiag(int noff=1) const
+        { return base::offDiag(noff); }
+        inline const_realpart_type realPart() const
+        { return base::realPart(); }
+        inline const_realpart_type imagPart() const
+        { return base::imagPart(); }
+        inline const_lowertri_type view() const
+        { return base::view(); }
+        inline const_lowertri_type viewAsUnitDiag() const
+        { return base::viewAsUnitDiag(); }
+        inline const_uppertri_type transpose() const
+        { return base::transpose(); }
+        inline const_lowertri_type conjugate() const
+        { return base::conjugate(); }
+        inline const_uppertri_type adjoint() const
+        { return base::adjoint(); }
+
         //
         // I/O
         //
 
-        void read(const TMV_Reader& reader) const;
+        void read(const TMV_Reader& reader);
 
         inline int size() const { return itss; }
         inline const T* cptr() const { return itsm; }
-        inline T* ptr() const { return itsm; }
+        inline T* ptr() { return itsm; }
         inline int stepi() const { return itssi; }
         inline int stepj() const { return itssj; }
         using base::isconj;
@@ -2790,21 +2894,31 @@ namespace tmv {
         inline DiagType dt() const { return itsdiag; }
         inline ConjType ct() const { return itsct; }
 
-        inline reference ref(int i, int j) const
+        inline reference ref(int i, int j)
         {
             T* mi = ptr() + i*stepi() + j*stepj();
             return reference(isunit() && i==j,*mi,ct());
         }
 
-        inline rowmajor_iterator rowmajor_begin() const
+        inline rowmajor_iterator rowmajor_begin()
         { return rowmajor_iterator(this,0,0); }
-        inline rowmajor_iterator rowmajor_end() const
+        inline rowmajor_iterator rowmajor_end()
         { return rowmajor_iterator(this,size(),0); }
 
-        inline colmajor_iterator colmajor_begin() const
+        inline colmajor_iterator colmajor_begin()
         { return colmajor_iterator(this,0,0); }
-        inline colmajor_iterator colmajor_end() const
+        inline colmajor_iterator colmajor_end()
         { return colmajor_iterator(this,size(),size()); }
+
+        inline const_rowmajor_iterator rowmajor_begin() const
+        { return const_rowmajor_iterator(this,0,0); }
+        inline const_rowmajor_iterator rowmajor_end() const
+        { return const_rowmajor_iterator(this,size(),0); }
+
+        inline const_colmajor_iterator colmajor_begin() const
+        { return const_colmajor_iterator(this,0,0); }
+        inline const_colmajor_iterator colmajor_end() const
+        { return const_colmajor_iterator(this,size(),size()); }
 
 
     protected :
@@ -2847,6 +2961,15 @@ namespace tmv {
         typedef MatrixView<T,FortranStyle> rec_type;
         typedef VectorView<T,FortranStyle> vec_type;
         typedef UpperTriMatrixView<RT,FortranStyle> realpart_type;
+        typedef ConstLowerTriMatrixView<T,FortranStyle> const_lowertri_type;
+        typedef ConstUpperTriMatrixView<T,FortranStyle> const_uppertri_type;
+        typedef const_uppertri_type const_view_type;
+        typedef const_lowertri_type const_transpose_type;
+        typedef const_uppertri_type const_conjugate_type;
+        typedef const_lowertri_type const_adjoint_type;
+        typedef ConstMatrixView<T,FortranStyle> const_rec_type;
+        typedef ConstVectorView<T,FortranStyle> const_vec_type;
+        typedef ConstUpperTriMatrixView<RT,FortranStyle> const_realpart_type;
         typedef TriRef<T,true> reference;
 
         //
@@ -2869,82 +2992,108 @@ namespace tmv {
         // Op=
         //
 
-        inline const type& operator=(const type& m2) const
+        inline type& operator=(const type& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const type& m2) 
+        inline type& operator=(const c_type& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const c_type& m2) const
+        inline type& operator=(const GenUpperTriMatrix<RT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const c_type& m2)
+        inline type& operator=(const GenUpperTriMatrix<CT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const GenUpperTriMatrix<RT>& m2) const
+        inline type& operator=(const GenDiagMatrix<RT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const GenUpperTriMatrix<CT>& m2) const
-        { c_type::operator=(m2); return *this; }
-
-        inline const type& operator=(const GenDiagMatrix<RT>& m2) const
-        { c_type::operator=(m2); return *this; }
-
-        inline const type& operator=(const GenDiagMatrix<CT>& m2) const
+        inline type& operator=(const GenDiagMatrix<CT>& m2)
         { c_type::operator=(m2); return *this; }
 
         template <class T2> 
-        inline const type& operator=(const GenUpperTriMatrix<T2>& m2) const
+        inline type& operator=(const GenUpperTriMatrix<T2>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const T& x) const 
+        inline type& operator=(const T& x) 
         { c_type::operator=(x); return *this; }
 
-        inline const type& operator=(
-            const AssignableToUpperTriMatrix<RT>& m2) const
+        inline type& operator=(const AssignableToUpperTriMatrix<RT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(
-            const AssignableToUpperTriMatrix<CT>& m2) const
+        inline type& operator=(const AssignableToUpperTriMatrix<CT>& m2)
         { c_type::operator=(m2); return *this; }
 
         typedef typename c_type::MyListAssigner MyListAssigner;
-        inline MyListAssigner operator<<(const T& x) const
+        inline MyListAssigner operator<<(const T& x)
         { return c_type::operator<<(x); }
 
         //
         // Access
         //
 
-        inline reference operator()(int i,int j) const 
+        inline reference operator()(int i,int j) 
         { 
-            TMVAssert(i>0 && i <= size());
-            TMVAssert(j>0 && j <= size());
+            TMVAssert(i>0 && i <= c_type::size());
+            TMVAssert(j>0 && j <= c_type::size());
             TMVAssert(i<=j);
-            return ref(i-1,j-1); 
+            return c_type::ref(i-1,j-1); 
         }
 
-        inline vec_type row(int i, int j1, int j2) const 
+        inline vec_type row(int i, int j1, int j2) 
         { 
-            TMVAssert(i>0 && i<=size());
-            TMVAssert(j1>0 && j1<=j2 && j2<=size());
+            TMVAssert(i>0 && i<=c_type::size());
+            TMVAssert(j1>0 && j1<=j2 && j2<=c_type::size());
             return c_type::row(i-1,j1-1,j2);
         }
 
-        inline vec_type col(int j, int i1, int i2) const
+        inline vec_type col(int j, int i1, int i2)
         {
-            TMVAssert(j>0 && j<=size());
-            TMVAssert(i1>0 && i1<=i2 && i2<=size());
+            TMVAssert(j>0 && j<=c_type::size());
+            TMVAssert(i1>0 && i1<=i2 && i2<=c_type::size());
             return c_type::col(j-1,i1-1,i2);
         }
 
-        inline vec_type diag() const
+        inline vec_type diag()
         { return c_type::diag(); }
 
-        inline vec_type diag(int i) const
+        inline vec_type diag(int i)
         { return c_type::diag(i); }
 
-        inline vec_type diag(int i, int j1, int j2) const
+        inline vec_type diag(int i, int j1, int j2)
+        {
+            TMVAssert(j1>0);
+            return c_type::diag(i,j1-1,j2); 
+        }
+
+        inline T operator()(int i,int j) const 
+        { 
+            TMVAssert(i>0 && i <= c_type::size());
+            TMVAssert(j>0 && j <= c_type::size());
+            TMVAssert(i<=j);
+            return c_type::cref(i-1,j-1); 
+        }
+
+        inline const_vec_type row(int i, int j1, int j2) const 
+        { 
+            TMVAssert(i>0 && i<=c_type::size());
+            TMVAssert(j1>0 && j1<=j2 && j2<=c_type::size());
+            return c_type::row(i-1,j1-1,j2);
+        }
+
+        inline const_vec_type col(int j, int i1, int i2) const
+        {
+            TMVAssert(j>0 && j<=c_type::size());
+            TMVAssert(i1>0 && i1<=i2 && i2<=c_type::size());
+            return c_type::col(j-1,i1-1,i2);
+        }
+
+        inline const_vec_type diag() const
+        { return c_type::diag(); }
+
+        inline const_vec_type diag(int i) const
+        { return c_type::diag(i); }
+
+        inline const_vec_type diag(int i, int j1, int j2) const
         {
             TMVAssert(j1>0);
             return c_type::diag(i,j1-1,j2); 
@@ -2954,25 +3103,25 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline const type& setZero() const 
+        inline type& setZero() 
         { c_type::setZero(); return *this; }
 
-        inline const type& setAllTo(const T& x) const
+        inline type& setAllTo(const T& x)
         { c_type::setAllTo(x); return *this; }
 
-        inline const type& addToAll(const T& x) const
+        inline type& addToAll(const T& x)
         { c_type::addToAll(x); return *this; }
 
-        inline const type& clip(RT thresh) const
+        inline type& clip(RT thresh)
         { c_type::clip(thresh); return *this; }
 
-        inline const type& conjugateSelf() const
+        inline type& conjugateSelf()
         { c_type::conjugateSelf(); return *this; }
 
-        inline const type& invertSelf() const
+        inline type& invertSelf()
         { c_type::invertSelf(); return *this; }
 
-        inline const type& setToIdentity(const T& x=T(1)) const
+        inline type& setToIdentity(const T& x=T(1))
         { c_type::setToIdentity(x); return *this; }
 
         //
@@ -2990,14 +3139,14 @@ namespace tmv {
         inline bool hasSubTriMatrix(int i1, int i2, int istep) const
         { return const_type(*this).hasSubTriMatrix(i1,i2,istep); }
 
-        inline rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        inline rec_type subMatrix(int i1, int i2, int j1, int j2)
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
             return c_type::cSubMatrix(i1-1,i2,j1-1,j2);
         }
 
         inline rec_type subMatrix(
-            int i1, int i2, int j1, int j2, int istep, int jstep) const
+            int i1, int i2, int j1, int j2, int istep, int jstep)
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             return c_type::cSubMatrix(
@@ -3005,57 +3154,112 @@ namespace tmv {
         }
 
         inline vec_type subVector(
+            int i, int j, int istep, int jstep, int s)
+        {
+            TMVAssert(hasSubVector(i,j,istep,jstep,s));
+            return c_type::cSubVector(i-1,j-1,istep,jstep,s);
+        }
+
+        inline uppertri_type subTriMatrix(int i1, int i2)
+        {
+            TMVAssert(hasSubTriMatrix(i1,i2,1));
+            return c_type::cSubTriMatrix(i1-1,i2);
+        }
+
+        inline uppertri_type subTriMatrix(int i1, int i2, int istep)
+        {
+            TMVAssert(hasSubTriMatrix(i1,i2,istep));
+            return c_type::cSubTriMatrix(i1-1,i2-1+istep,istep);
+        }
+
+        inline uppertri_type offDiag(int noff=1)
+        {
+            TMVAssert(noff >= 1);
+            TMVAssert(noff <= c_type::size());
+            return c_type::offDiag(noff);
+        }
+
+        inline realpart_type realPart()
+        { return c_type::realPart(); }
+
+        inline realpart_type imagPart()
+        { return c_type::imagPart(); }
+
+        inline uppertri_type view()
+        { return *this; }
+
+        inline uppertri_type viewAsUnitDiag()
+        { return c_type::viewAsUnitDiag(); }
+
+        inline lowertri_type transpose()
+        { return c_type::transpose(); }
+
+        inline uppertri_type conjugate()
+        { return c_type::conjugate(); }
+
+        inline lowertri_type adjoint()
+        { return c_type::adjoint(); }
+
+        inline const_rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
+            return c_type::cSubMatrix(i1-1,i2,j1-1,j2);
+        }
+
+        inline const_rec_type subMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) const
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
+            return c_type::cSubMatrix(
+                i1-1,i2-1+istep,j1-1,j2-1+jstep,istep,jstep);
+        }
+
+        inline const_vec_type subVector(
             int i, int j, int istep, int jstep, int s) const
         {
             TMVAssert(hasSubVector(i,j,istep,jstep,s));
             return c_type::cSubVector(i-1,j-1,istep,jstep,s);
         }
 
-        inline uppertri_type subTriMatrix(int i1, int i2) const
+        inline const_uppertri_type subTriMatrix(int i1, int i2) const
         {
             TMVAssert(hasSubTriMatrix(i1,i2,1));
             return c_type::cSubTriMatrix(i1-1,i2);
         }
 
-        inline uppertri_type subTriMatrix(int i1, int i2, int istep) const
+        inline const_uppertri_type subTriMatrix(int i1, int i2, int istep) const
         {
             TMVAssert(hasSubTriMatrix(i1,i2,istep));
             return c_type::cSubTriMatrix(i1-1,i2-1+istep,istep);
         }
 
-        inline uppertri_type offDiag(int noff=1) const
+        inline const_uppertri_type offDiag(int noff=1) const
         {
             TMVAssert(noff >= 1);
-            TMVAssert(noff <= size());
+            TMVAssert(noff <= c_type::size());
             return c_type::offDiag(noff);
         }
 
-        inline realpart_type realPart() const
+        inline const_realpart_type realPart() const
         { return c_type::realPart(); }
 
-        inline realpart_type imagPart() const
+        inline const_realpart_type imagPart() const
         { return c_type::imagPart(); }
 
-        inline uppertri_type view() const
+        inline const_uppertri_type view() const
         { return *this; }
 
-        inline uppertri_type viewAsUnitDiag() const
+        inline const_uppertri_type viewAsUnitDiag() const
         { return c_type::viewAsUnitDiag(); }
 
-        inline lowertri_type transpose() const
+        inline const_lowertri_type transpose() const
         { return c_type::transpose(); }
 
-        inline uppertri_type conjugate() const
+        inline const_uppertri_type conjugate() const
         { return c_type::conjugate(); }
 
-        inline lowertri_type adjoint() const
+        inline const_lowertri_type adjoint() const
         { return c_type::adjoint(); }
-
-        using c_type::size;
-        using c_type::ref;
-
-    protected :
-        using base::okij;
 
     }; // FortranStyle UpperTriMatrixView
 
@@ -3080,6 +3284,15 @@ namespace tmv {
         typedef MatrixView<T,FortranStyle> rec_type;
         typedef VectorView<T,FortranStyle> vec_type;
         typedef LowerTriMatrixView<RT,FortranStyle> realpart_type;
+        typedef ConstUpperTriMatrixView<T,FortranStyle> const_uppertri_type;
+        typedef ConstLowerTriMatrixView<T,FortranStyle> const_lowertri_type;
+        typedef const_lowertri_type const_view_type;
+        typedef const_uppertri_type const_transpose_type;
+        typedef const_lowertri_type const_conjugate_type;
+        typedef const_uppertri_type const_adjoint_type;
+        typedef ConstMatrixView<T,FortranStyle> const_rec_type;
+        typedef ConstVectorView<T,FortranStyle> const_vec_type;
+        typedef ConstLowerTriMatrixView<RT,FortranStyle> const_realpart_type;
         typedef TriRef<T,true> reference;
 
         //
@@ -3102,82 +3315,108 @@ namespace tmv {
         // Op=
         //
 
-        inline const type& operator=(const type& m2) const
+        inline type& operator=(const type& m2) 
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const type& m2) 
+        inline type& operator=(const c_type& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const c_type& m2) const
+        inline type& operator=(const GenLowerTriMatrix<RT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const c_type& m2)
+        inline type& operator=(const GenLowerTriMatrix<CT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const GenLowerTriMatrix<RT>& m2) const
+        inline type& operator=(const GenDiagMatrix<RT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const GenLowerTriMatrix<CT>& m2) const
-        { c_type::operator=(m2); return *this; }
-
-        inline const type& operator=(const GenDiagMatrix<RT>& m2) const
-        { c_type::operator=(m2); return *this; }
-
-        inline const type& operator=(const GenDiagMatrix<CT>& m2) const
+        inline type& operator=(const GenDiagMatrix<CT>& m2)
         { c_type::operator=(m2); return *this; }
 
         template <class T2> 
-        inline const type& operator=(const GenLowerTriMatrix<T2>& m2) const
+        inline type& operator=(const GenLowerTriMatrix<T2>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(const T& x) const 
+        inline type& operator=(const T& x) 
         { c_type::operator=(x); return *this; }
 
-        inline const type& operator=(
-            const AssignableToLowerTriMatrix<RT>& m2) const
+        inline type& operator=(const AssignableToLowerTriMatrix<RT>& m2)
         { c_type::operator=(m2); return *this; }
 
-        inline const type& operator=(
-            const AssignableToLowerTriMatrix<CT>& m2) const
+        inline type& operator=(const AssignableToLowerTriMatrix<CT>& m2)
         { c_type::operator=(m2); return *this; }
 
         typedef typename c_type::MyListAssigner MyListAssigner;
-        inline MyListAssigner operator<<(const T& x) const
+        inline MyListAssigner operator<<(const T& x)
         { return c_type::operator<<(x); }
 
         //
         // Access
         //
 
-        inline reference operator()(int i,int j) const 
+        inline reference operator()(int i,int j) 
         { 
-            TMVAssert(i>0 && i <= size());
-            TMVAssert(j>0 && j <= size());
+            TMVAssert(i>0 && i <= c_type::size());
+            TMVAssert(j>0 && j <= c_type::size());
             TMVAssert(i>=j);
-            return ref(i-1,j-1); 
+            return c_type::ref(i-1,j-1); 
         }
 
-        inline vec_type row(int i, int j1, int j2) const 
+        inline vec_type row(int i, int j1, int j2) 
         { 
-            TMVAssert(i>0 && i<=size());
-            TMVAssert(j1>0 && j1<=j2 && j2<=size());
+            TMVAssert(i>0 && i<=c_type::size());
+            TMVAssert(j1>0 && j1<=j2 && j2<=c_type::size());
             return c_type::row(i-1,j1-1,j2);
         }
 
-        inline vec_type col(int j, int i1, int i2) const
+        inline vec_type col(int j, int i1, int i2)
         {
-            TMVAssert(j>0 && j<=size());
-            TMVAssert(i1>0 && i1<=i2 && i2<=size());
+            TMVAssert(j>0 && j<=c_type::size());
+            TMVAssert(i1>0 && i1<=i2 && i2<=c_type::size());
             return c_type::col(j-1,i1-1,i2);
         }
 
-        inline vec_type diag() const
+        inline vec_type diag()
         { return c_type::diag(); }
 
-        inline vec_type diag(int i) const
+        inline vec_type diag(int i)
         { return c_type::diag(i); }
 
-        inline vec_type diag(int i, int j1, int j2) const
+        inline vec_type diag(int i, int j1, int j2)
+        {
+            TMVAssert(j1>0);
+            return c_type::diag(i,j1-1,j2); 
+        }
+
+        inline T operator()(int i,int j) const 
+        { 
+            TMVAssert(i>0 && i <= c_type::size());
+            TMVAssert(j>0 && j <= c_type::size());
+            TMVAssert(i>=j);
+            return c_type::ref(i-1,j-1); 
+        }
+
+        inline const_vec_type row(int i, int j1, int j2) const 
+        { 
+            TMVAssert(i>0 && i<=c_type::size());
+            TMVAssert(j1>0 && j1<=j2 && j2<=c_type::size());
+            return c_type::row(i-1,j1-1,j2);
+        }
+
+        inline const_vec_type col(int j, int i1, int i2) const
+        {
+            TMVAssert(j>0 && j<=c_type::size());
+            TMVAssert(i1>0 && i1<=i2 && i2<=c_type::size());
+            return c_type::col(j-1,i1-1,i2);
+        }
+
+        inline const_vec_type diag() const
+        { return c_type::diag(); }
+
+        inline const_vec_type diag(int i) const
+        { return c_type::diag(i); }
+
+        inline const_vec_type diag(int i, int j1, int j2) const
         {
             TMVAssert(j1>0);
             return c_type::diag(i,j1-1,j2); 
@@ -3187,25 +3426,25 @@ namespace tmv {
         // Modifying Functions
         //
 
-        inline const type& setZero() const 
+        inline type& setZero() 
         { c_type::setZero(); return *this; }
 
-        inline const type& setAllTo(const T& x) const
+        inline type& setAllTo(const T& x)
         { c_type::setAllTo(x); return *this; }
 
-        inline const type& addToAll(const T& x) const
+        inline type& addToAll(const T& x)
         { c_type::addToAll(x); return *this; }
 
-        inline const type& clip(RT thresh) const
+        inline type& clip(RT thresh)
         { c_type::clip(thresh); return *this; }
 
-        inline const type& conjugateSelf() const
+        inline type& conjugateSelf()
         { c_type::conjugateSelf(); return *this; }
 
-        inline const type& invertSelf() const
+        inline type& invertSelf()
         { c_type::invertSelf(); return *this; }
 
-        inline const type& setToIdentity(const T& x=T(1)) const
+        inline type& setToIdentity(const T& x=T(1))
         { c_type::setToIdentity(x); return *this; }
 
         //
@@ -3223,14 +3462,14 @@ namespace tmv {
         inline bool hasSubTriMatrix(int i1, int i2, int istep) const
         { return const_type(*this).hasSubTriMatrix(i1,i2,istep); }
 
-        inline rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        inline rec_type subMatrix(int i1, int i2, int j1, int j2)
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
             return c_type::cSubMatrix(i1-1,i2,j1-1,j2);
         }
 
         inline rec_type subMatrix(
-            int i1, int i2, int j1, int j2, int istep, int jstep) const
+            int i1, int i2, int j1, int j2, int istep, int jstep)
         {
             TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
             return c_type::cSubMatrix(
@@ -3238,57 +3477,112 @@ namespace tmv {
         }
 
         inline vec_type subVector(
+            int i, int j, int istep, int jstep, int s)
+        {
+            TMVAssert(hasSubVector(i,j,istep,jstep,s));
+            return c_type::cSubVector(i-1,j-1,istep,jstep,s);
+        }
+
+        inline lowertri_type subTriMatrix(int i1, int i2)
+        {
+            TMVAssert(hasSubTriMatrix(i1,i2,1));
+            return c_type::cSubTriMatrix(i1-1,i2);
+        }
+
+        inline lowertri_type subTriMatrix(int i1, int i2, int istep)
+        {
+            TMVAssert(hasSubTriMatrix(i1,i2,istep));
+            return c_type::cSubTriMatrix(i1-1,i2-1+istep,istep);
+        }
+
+        inline lowertri_type offDiag(int noff=1)
+        {
+            TMVAssert(noff >= 1);
+            TMVAssert(noff <= c_type::size());
+            return c_type::offDiag(noff);
+        }
+
+        inline realpart_type realPart()
+        { return c_type::realPart(); }
+
+        inline realpart_type imagPart()
+        { return c_type::imagPart(); }
+
+        inline lowertri_type view()
+        { return *this; }
+
+        inline lowertri_type viewAsUnitDiag()
+        { return c_type::viewAsUnitDiag(); }
+
+        inline uppertri_type transpose()
+        { return c_type::transpose(); }
+
+        inline lowertri_type conjugate()
+        { return c_type::conjugate(); }
+
+        inline uppertri_type adjoint()
+        { return c_type::adjoint(); }
+
+        inline const_rec_type subMatrix(int i1, int i2, int j1, int j2) const
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,1,1));
+            return c_type::cSubMatrix(i1-1,i2,j1-1,j2);
+        }
+
+        inline const_rec_type subMatrix(
+            int i1, int i2, int j1, int j2, int istep, int jstep) const
+        {
+            TMVAssert(hasSubMatrix(i1,i2,j1,j2,istep,jstep));
+            return c_type::cSubMatrix(
+                i1-1,i2-1+istep,j1-1,j2-1+jstep,istep,jstep);
+        }
+
+        inline const_vec_type subVector(
             int i, int j, int istep, int jstep, int s) const
         {
             TMVAssert(hasSubVector(i,j,istep,jstep,s));
             return c_type::cSubVector(i-1,j-1,istep,jstep,s);
         }
 
-        inline lowertri_type subTriMatrix(int i1, int i2) const
+        inline const_lowertri_type subTriMatrix(int i1, int i2) const
         {
             TMVAssert(hasSubTriMatrix(i1,i2,1));
             return c_type::cSubTriMatrix(i1-1,i2);
         }
 
-        inline lowertri_type subTriMatrix(int i1, int i2, int istep) const
+        inline const_lowertri_type subTriMatrix(int i1, int i2, int istep) const
         {
             TMVAssert(hasSubTriMatrix(i1,i2,istep));
             return c_type::cSubTriMatrix(i1-1,i2-1+istep,istep);
         }
 
-        inline lowertri_type offDiag(int noff=1) const
+        inline const_lowertri_type offDiag(int noff=1) const
         {
             TMVAssert(noff >= 1);
-            TMVAssert(noff <= size());
+            TMVAssert(noff <= c_type::size());
             return c_type::offDiag(noff);
         }
 
-        inline realpart_type realPart() const
+        inline const_realpart_type realPart() const
         { return c_type::realPart(); }
 
-        inline realpart_type imagPart() const
+        inline const_realpart_type imagPart() const
         { return c_type::imagPart(); }
 
-        inline lowertri_type view() const
+        inline const_lowertri_type view() const
         { return *this; }
 
-        inline lowertri_type viewAsUnitDiag() const
+        inline const_lowertri_type viewAsUnitDiag() const
         { return c_type::viewAsUnitDiag(); }
 
-        inline uppertri_type transpose() const
+        inline const_uppertri_type transpose() const
         { return c_type::transpose(); }
 
-        inline lowertri_type conjugate() const
+        inline const_lowertri_type conjugate() const
         { return c_type::conjugate(); }
 
-        inline uppertri_type adjoint() const
+        inline const_uppertri_type adjoint() const
         { return c_type::adjoint(); }
-
-        using c_type::size;
-        using c_type::ref;
-
-    protected :
-        using base::okij;
 
     }; // FortranStyle LowerTriMatrixView
 
@@ -5045,7 +5339,7 @@ namespace tmv {
 
     template <class T1, class T2> 
     inline void nonUnitDiagCopy(
-        const GenUpperTriMatrix<T1>& m1, const UpperTriMatrixView<T2>& m2)
+        const GenUpperTriMatrix<T1>& m1, UpperTriMatrixView<T2> m2)
     {
         TMVAssert(isReal(T1()) || isComplex(T2()));
         TMVAssert(m1.size() == m2.size());
@@ -5063,7 +5357,7 @@ namespace tmv {
 
     template <class T1, class T2> 
     inline void Copy(
-        const GenUpperTriMatrix<T1>& m1, const UpperTriMatrixView<T2>& m2)
+        const GenUpperTriMatrix<T1>& m1, UpperTriMatrixView<T2> m2)
     {
         TMVAssert(isReal(T1()) || isComplex(T2()));
         TMVAssert(m1.size() == m2.size());
@@ -5086,11 +5380,11 @@ namespace tmv {
 
     template <class T> 
     void Swap(
-        const UpperTriMatrixView<T>& m1, const UpperTriMatrixView<T>& m2);
+        UpperTriMatrixView<T> m1, UpperTriMatrixView<T> m2);
 
     template <class T, int A>
     inline void Swap(
-        const UpperTriMatrixView<T>& m1, UpperTriMatrix<T,A>& m2)
+        UpperTriMatrixView<T> m1, UpperTriMatrix<T,A>& m2)
     {
         TMVAssert(m1.isunit() == m2.isunit());
         Swap(m1,m2.view()); 
@@ -5098,7 +5392,7 @@ namespace tmv {
 
     template <class T, int A>
     inline void Swap(
-        UpperTriMatrix<T,A>& m1, const UpperTriMatrixView<T>& m2)
+        UpperTriMatrix<T,A>& m1, UpperTriMatrixView<T> m2)
     {
         TMVAssert(m1.isunit() == m2.isunit());
         Swap(m1.view(),m2); 
@@ -5114,17 +5408,17 @@ namespace tmv {
 
     template <class T> 
     inline void Swap(
-        const LowerTriMatrixView<T>& m1, const LowerTriMatrixView<T>& m2)
+        LowerTriMatrixView<T> m1, LowerTriMatrixView<T> m2)
     { Swap(m1.transpose(),m2.transpose()); }
 
     template <class T, int A>
     inline void Swap(
-        const LowerTriMatrixView<T>& m1, LowerTriMatrix<T,A>& m2)
+        LowerTriMatrixView<T> m1, LowerTriMatrix<T,A>& m2)
     { Swap(m1.transpose(),m2.transpose()); }
 
     template <class T, int A>
     inline void Swap(
-        LowerTriMatrix<T,A>& m1, const LowerTriMatrixView<T>& m2)
+        LowerTriMatrix<T,A>& m1, LowerTriMatrixView<T> m2)
     { Swap(m1.transpose(),m2.transpose()); }
 
     template <class T, int A1, int A2>
@@ -5163,10 +5457,10 @@ namespace tmv {
     { return m.transpose(); }
 
     template <class T, int A> 
-    inline LowerTriMatrixView<T,A> Transpose(const UpperTriMatrixView<T,A>& m)
+    inline LowerTriMatrixView<T,A> Transpose(UpperTriMatrixView<T,A> m)
     { return m.transpose(); }
     template <class T, int A> 
-    inline UpperTriMatrixView<T,A> Transpose(const LowerTriMatrixView<T,A>& m)
+    inline UpperTriMatrixView<T,A> Transpose(LowerTriMatrixView<T,A> m)
     { return m.transpose(); }
 
     template <class T, int A>
@@ -5204,10 +5498,10 @@ namespace tmv {
     { return m.conjugate(); }
 
     template <class T, int A> 
-    inline UpperTriMatrixView<T,A> Conjugate(const UpperTriMatrixView<T,A>& m)
+    inline UpperTriMatrixView<T,A> Conjugate(UpperTriMatrixView<T,A> m)
     { return m.conjugate(); }
     template <class T, int A> 
-    inline LowerTriMatrixView<T,A> Conjugate(const LowerTriMatrixView<T,A>& m)
+    inline LowerTriMatrixView<T,A> Conjugate(LowerTriMatrixView<T,A> m)
     { return m.conjugate(); }
 
     template <class T, int A>
@@ -5245,10 +5539,10 @@ namespace tmv {
     { return m.adjoint(); }
 
     template <class T, int A> 
-    inline LowerTriMatrixView<T,A> Adjoint(const UpperTriMatrixView<T,A>& m)
+    inline LowerTriMatrixView<T,A> Adjoint(UpperTriMatrixView<T,A> m)
     { return m.adjoint(); }
     template <class T, int A> 
-    inline UpperTriMatrixView<T,A> Adjoint(const LowerTriMatrixView<T,A>& m)
+    inline UpperTriMatrixView<T,A> Adjoint(LowerTriMatrixView<T,A> m)
     { return m.adjoint(); }
 
     template <class T, int A>
@@ -5344,7 +5638,7 @@ namespace tmv {
 
     template <class T>
     inline std::istream& operator>>(
-        std::istream& is, const UpperTriMatrixView<T>& m)
+        std::istream& is, UpperTriMatrixView<T> m)
     { return is >> IOStyle() >> m; }
 
     template <class T, int A>
@@ -5353,7 +5647,7 @@ namespace tmv {
 
     template <class T>
     inline std::istream& operator>>(
-        std::istream& is, const LowerTriMatrixView<T>& m)
+        std::istream& is, LowerTriMatrixView<T> m)
     { return is >> IOStyle() >> m; }
 
     template <class T, int A>
@@ -5362,7 +5656,7 @@ namespace tmv {
 
     template <class T>
     inline std::istream& operator>>(
-        const TMV_Reader& reader, const UpperTriMatrixView<T>& m)
+        const TMV_Reader& reader, UpperTriMatrixView<T> m)
     { m.read(reader); return reader.getis(); }
 
     template <class T, int A>
@@ -5372,7 +5666,7 @@ namespace tmv {
 
     template <class T>
     inline std::istream& operator>>(
-        const TMV_Reader& reader, const LowerTriMatrixView<T>& m)
+        const TMV_Reader& reader, LowerTriMatrixView<T> m)
     { m.read(reader); return reader.getis(); }
 
     template <class T, int A>

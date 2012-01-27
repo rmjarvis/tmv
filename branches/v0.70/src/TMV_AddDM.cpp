@@ -41,7 +41,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     void AddMM(
         const T alpha, const GenDiagMatrix<Ta>& A,
-        const T beta, const GenMatrix<Tb>& B, const MatrixView<T>& C)
+        const T beta, const GenMatrix<Tb>& B, MatrixView<T> C)
         // C = alpha*A + beta*B
     {
         TMVAssert(A.size() == B.colsize());

@@ -3,13 +3,13 @@
 
 #define DefMM(T,Ta,Tb)\
   template void MultMM<true>(const T alpha, const GenSymBandMatrix<Ta >& A, \
-      const GenSymBandMatrix<Tb >& B, const BandMatrixView<T >& C);  \
+      const GenSymBandMatrix<Tb >& B, BandMatrixView<T > C);  \
   template void MultMM<true>(const T alpha, const GenSymBandMatrix<Ta >& A, \
-      const GenBandMatrix<Tb >& B, const BandMatrixView<T >& C);  \
+      const GenBandMatrix<Tb >& B, BandMatrixView<T > C);  \
   template void MultMM<false>(const T alpha, const GenSymBandMatrix<Ta >& A, \
-      const GenSymBandMatrix<Tb >& B, const BandMatrixView<T >& C);  \
+      const GenSymBandMatrix<Tb >& B, BandMatrixView<T > C);  \
   template void MultMM<false>(const T alpha, const GenSymBandMatrix<Ta >& A, \
-      const GenBandMatrix<Tb >& B, const BandMatrixView<T >& C);  \
+      const GenBandMatrix<Tb >& B, BandMatrixView<T > C);  \
       
 DefMM(T,T,T)
 #ifdef INST_COMPLEX

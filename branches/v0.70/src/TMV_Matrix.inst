@@ -22,27 +22,23 @@
   template RT GenMatrix<T >::doCondition() const; \
   template QuotXM<T,T > GenMatrix<T >::QInverse() const; \
   template void GenMatrix<T >::write(const TMV_Writer& writer) const; \
-  template void MatrixView<T,CStyle>::read(const TMV_Reader& reader) const; \
+  template void MatrixView<T,CStyle>::read(const TMV_Reader& reader); \
   template T GenMatrix<T >::cref(int i, int j) const; \
-  template void Swap(const MatrixView<T >& m1, const MatrixView<T >& m2); \
-  template void DoCopySameType(const GenMatrix<T >& m1, \
-      const MatrixView<T >& m2);  \
-  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::clip( \
-      RT thresh) const; \
-  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::setZero() const; \
-  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::setAllTo( \
-      const T& x) const; \
-  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::addToAll( \
-      const T& x) const; \
-  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::transposeSelf() const; \
-  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::conjugateSelf() const; \
-  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::setToIdentity( \
-      const T& x) const; \
-  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::permuteRows( \
-      const int* p, int i1, int i2) const; \
-  template const MatrixView<T,CStyle>& MatrixView<T,CStyle>::reversePermuteRows( \
-      const int* p, int i1, int i2) const; \
-  template Ref MatrixView<T,CStyle>::ref(int i, int j) const; \
+  template void Swap(MatrixView<T > m1, MatrixView<T > m2); \
+  template void DoCopySameType(const GenMatrix<T >& m1, MatrixView<T > m2);  \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::clip(RT thresh); \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::setZero(); \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::setAllTo(const T& x); \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::addToAll(const T& x); \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::transposeSelf(); \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::conjugateSelf(); \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::setToIdentity( \
+      const T& x); \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::permuteRows( \
+      const int* p, int i1, int i2); \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::reversePermuteRows( \
+      const int* p, int i1, int i2); \
+  template Ref MatrixView<T,CStyle>::ref(int i, int j); \
 
 Def1(T,T,T&)
 #ifdef INST_COMPLEX

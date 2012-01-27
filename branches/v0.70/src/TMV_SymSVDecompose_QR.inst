@@ -3,7 +3,7 @@
 
 #define DefSVD(RT,T)\
 template void EigenFromTridiagonal_QR(MVP<T > U, \
-    const VectorView<RT >& D, const VectorView<RT >& E); \
+    VectorView<RT > D, VectorView<RT > E); \
 
 DefSVD(T,T)
 #ifdef INST_COMPLEX
@@ -13,7 +13,7 @@ DefSVD(T,CT)
 #undef DefSVD
 
 template void HermTridiagonalChopSmallElements( 
-    const VectorView<T >& D, const VectorView<T >& E); 
+    VectorView<T > D, VectorView<T > E); 
 
 #undef CT
 

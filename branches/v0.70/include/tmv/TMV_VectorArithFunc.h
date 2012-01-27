@@ -42,19 +42,19 @@ namespace tmv {
 
     // v *= x
     template <class T> 
-    void MultXV(const T x, const VectorView<T>& v2);
+    void MultXV(const T x, VectorView<T> v2);
     // v2 = x * v1
     template <class T, class T1> 
-    void MultXV(const T x, const GenVector<T1>& v1, const VectorView<T>& v2);
+    void MultXV(const T x, const GenVector<T1>& v1, VectorView<T> v2);
 
     // v2 += x * v1
     template <class T, class T1> 
-    void AddVV(const T x, const GenVector<T1>& v1, const VectorView<T>& v2);
+    void AddVV(const T x, const GenVector<T1>& v1, VectorView<T> v2);
     // v3 = x1 * v1 + x2 * v2
     template <class T, class T1, class T2> 
     void AddVV(
         const T x1, const GenVector<T1>& v1,
-        const T x2, const GenVector<T2>& v2, const VectorView<T>& v3);
+        const T x2, const GenVector<T2>& v2, VectorView<T> v3);
 
     // v1 * v2 (dot product)
     // Note: the return type is the type of the first vector
@@ -65,7 +65,7 @@ namespace tmv {
     template <bool add, class T, class Tx, class Ty> 
     void ElemMultVV(
         const T alpha, const GenVector<Tx>& x,
-        const GenVector<Ty>& y, const VectorView<T>& z);
+        const GenVector<Ty>& y, VectorView<T> z);
 
     template <class T> 
     class VectorComposite : public GenVector<T>
@@ -87,26 +87,26 @@ namespace tmv {
 
     // Specialize allowed complex combinations:
     template <class T> 
-    inline void MultXV(const T x, const VectorView<CT>& v2)
+    inline void MultXV(const T x, VectorView<CT> v2)
     { MultXV(CT(x),v2); }
     template <class T, class T1> 
     inline void MultXV(
-        const T x, const GenVector<T1>& v1, const VectorView<CT>& v2)
+        const T x, const GenVector<T1>& v1, VectorView<CT> v2)
     { MultXV(CT(x),v1,v2); }
 
     template <class T, class T1> 
     inline void AddVV(
-        const T x, const GenVector<T1>& v1, const VectorView<CT>& v2)
+        const T x, const GenVector<T1>& v1, VectorView<CT> v2)
     { AddVV(CT(x),v1,v2); }
     template <class T, class T1, class T2> 
     inline void AddVV(
         const T x1, const GenVector<T1>& v1,
-        const T x2, const GenVector<T2>& v2, const VectorView<CT>& v3)
+        const T x2, const GenVector<T2>& v2, VectorView<CT> v3)
     { AddVV(CT(x1),v1,CT(x2),v2,v3); }
     template <class T> 
     inline void AddVV(
         const CT x1, const GenVector<CT>& v1,
-        const CT x2, const GenVector<T>& v2, const VectorView<CT>& v3)
+        const CT x2, const GenVector<T>& v2, VectorView<CT> v3)
     { AddVV(x2,v2,x1,v1,v3); }
 
     template <class T> 
@@ -116,32 +116,32 @@ namespace tmv {
     template <bool add, class T, class Tx, class Ty> 
     inline void ElemMultVV(
         const T alpha, const GenVector<Tx>& x,
-        const GenVector<Ty>& y, const VectorView<CT>& z)
+        const GenVector<Ty>& y, VectorView<CT> z)
     { ElemMultVV<add>(CT(alpha),x,y,z); }
 
     // Specialize disallowed complex combinations:
     template <class T> 
-    inline void MultXV(const CT , const VectorView<T>& )
+    inline void MultXV(const CT , VectorView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T, class Ta> 
     inline void MultXV(
-        const CT , const GenVector<Ta>& , const VectorView<T>& )
+        const CT , const GenVector<Ta>& , VectorView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <class T, class T1> 
     inline void AddVV(
-        const CT , const GenVector<T1>& , const VectorView<T>& )
+        const CT , const GenVector<T1>& , VectorView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T, class Ta, class Tb> 
     inline void AddVV(
         const CT , const GenVector<Ta>& ,
-        const CT , const GenVector<Tb>& , const VectorView<T>& )
+        const CT , const GenVector<Tb>& , VectorView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <bool add, class T, class Ta, class Tb> 
     inline void ElemMultVV(
         const CT , const GenVector<Ta>& , const GenVector<Tb>& ,
-        const VectorView<T>& )
+        VectorView<T> )
     { TMVAssert(TMV_FALSE); }
 
 } // namespace tmv

@@ -71,7 +71,7 @@ namespace tmv {
 
     template <class T, int A>
     typename SymBandMatrixView<T,A>::reference SymBandMatrixView<T,A>::ref(
-        int i, int j) const
+        int i, int j)
     {
         if ((uplo() == Upper && i<=j) || (uplo() == Lower && i>=j)) {
             T* mi = ptr() + i*stepi() + j*stepj();
@@ -170,7 +170,7 @@ namespace tmv {
     { return QuotXsB<T,T>(T(1),*this); }
 
     template <class T> template <class T1> 
-    void GenSymBandMatrix<T>::doMakeInverse(const SymMatrixView<T1>& sinv) const
+    void GenSymBandMatrix<T>::doMakeInverse(SymMatrixView<T1> sinv) const
     {
         TMVAssert(issym() == sinv.issym());
         TMVAssert(isherm() == sinv.isherm());
@@ -1412,8 +1412,7 @@ namespace tmv {
 #endif
 
     template <class T>
-    static void FinishRead(
-        const TMV_Reader& reader, const SymBandMatrixView<T>& m) 
+    static void FinishRead(const TMV_Reader& reader, SymBandMatrixView<T> m) 
     {
         const int N = m.size();
         int j1=0;
@@ -1731,7 +1730,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    void SymBandMatrixView<T,A>::read(const TMV_Reader& reader) const
+    void SymBandMatrixView<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
         if (!reader.readCode(issym()?"sB":"hB",exp,got) && 

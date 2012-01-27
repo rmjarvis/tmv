@@ -58,13 +58,13 @@ public:
     inline T getX() const { return x; }
     inline const GENMATRIX<T1>& getM() const { return m; }
     inline const GenVector<T2>& getV() const { return v; }
-    inline void assignToV(const VectorView<TMV_RealType(T)>& v0) const
+    inline void assignToV(VectorView<TMV_RealType(T)> v0) const
     {
         TMVAssert(isReal(T()));
         TMVAssert(v0.size() == size());
         MultMV<false>(x,m,v,v0);
     }
-    inline void assignToV(const VectorView<TMV_ComplexType(T)>& v0) const
+    inline void assignToV(VectorView<TMV_ComplexType(T)> v0) const
     {
         TMVAssert(v0.size() == size());
         MultMV<false>(TMV_ComplexType(T)(x),m,v,v0);
@@ -76,23 +76,23 @@ private:
 };
 
 template <class T, class T1, class T2> 
-inline const VectorView<T>& operator+=(
-    const VectorView<T>& v, const PRODMV<T,T1,T2>& pmv)
+inline VectorView<T> operator+=(
+    VectorView<T> v, const PRODMV<T,T1,T2>& pmv)
 { MultMV<true>(pmv.getX(),pmv.getM(),pmv.getV(),v); return v; }
 
 template <class T> 
-inline const VectorView<CT>& operator+=(
-    const VectorView<CT>& v, const PRODMV<T,T,T>& pmv)
+inline VectorView<CT> operator+=(
+    VectorView<CT> v, const PRODMV<T,T,T>& pmv)
 { MultMV<true>(CT(pmv.getX()),pmv.getM(),pmv.getV(),v); return v; }
 
 template <class T, class T1, class T2> 
-inline const VectorView<T>& operator-=(
-    const VectorView<T>& v, const PRODMV<T,T1,T2>& pmv)
+inline VectorView<T> operator-=(
+    VectorView<T> v, const PRODMV<T,T1,T2>& pmv)
 { MultMV<true>(-pmv.getX(), pmv.getM(), pmv.getV(), v); return v; }
 
 template <class T> 
-inline const VectorView<CT>& operator-=(
-    const VectorView<CT>& v, const PRODMV<T,T,T>& pmv)
+inline VectorView<CT> operator-=(
+    VectorView<CT> v, const PRODMV<T,T,T>& pmv)
 { MultMV<true>(CT(-pmv.getX()),pmv.getM(),pmv.getV(),v); return v; }
 
 
@@ -108,13 +108,13 @@ public:
     inline T getX() const { return x; }
     inline const GenVector<T1>& getV() const { return v; }
     inline const GENMATRIX<T2>& getM() const { return m; }
-    inline void assignToV(const VectorView<TMV_RealType(T)>& v0) const
+    inline void assignToV(VectorView<TMV_RealType(T)> v0) const
     {
         TMVAssert(isReal(T()));
         TMVAssert(v0.size() == size());
         MultMV<false>(x,m.transpose(),v,v0);
     }
-    inline void assignToV(const VectorView<TMV_ComplexType(T)>& v0) const
+    inline void assignToV(VectorView<TMV_ComplexType(T)> v0) const
     {
         TMVAssert(v0.size() == size());
         MultMV<false>(TMV_ComplexType(T)(x),m.transpose(),v,v0);
@@ -126,33 +126,33 @@ private:
 };
 
 template <class T> 
-inline const VectorView<T>& operator*=(
-    const VectorView<T>& v, const GENMATRIX<T>& m)
+inline VectorView<T> operator*=(
+    VectorView<T> v, const GENMATRIX<T>& m)
 { MultMV<false>(T(1),m.transpose(),v,v); return v; }
 
 template <class T> 
-inline const VectorView<CT>& operator*=(
-    const VectorView<CT>& v, const GENMATRIX<T>& m)
+inline VectorView<CT> operator*=(
+    VectorView<CT> v, const GENMATRIX<T>& m)
 { MultMV<false>(T(1),m.transpose(),v,v); return v; }
 
 template <class T, class T1, class T2> 
-inline const VectorView<T>& operator+=(
-    const VectorView<T>& v, const PRODVM<T,T1,T2>& pmv)
+inline VectorView<T> operator+=(
+    VectorView<T> v, const PRODVM<T,T1,T2>& pmv)
 { MultMV<true>(pmv.getX(),pmv.getM().transpose(),pmv.getV(),v); return v; }
 
 template <class T> 
-inline const VectorView<CT>& operator+=(
-    const VectorView<CT>& v, const PRODVM<T,T,T>& pmv)
+inline VectorView<CT> operator+=(
+    VectorView<CT> v, const PRODVM<T,T,T>& pmv)
 { MultMV<true>(pmv.getX(),pmv.getM().transpose(),pmv.getV(),v); return v; }
 
 template <class T, class T1, class T2> 
-inline const VectorView<T>& operator-=(
-    const VectorView<T>& v, const PRODVM<T,T1,T2>& pmv)
+inline VectorView<T> operator-=(
+    VectorView<T> v, const PRODVM<T,T1,T2>& pmv)
 { MultMV<true>(-pmv.getX(), pmv.getM().transpose(), pmv.getV(), v); return v; }
 
 template <class T> 
-inline const VectorView<CT>& operator-=(
-    const VectorView<CT>& v, const PRODVM<T,T,T>& pmv)
+inline VectorView<CT> operator-=(
+    VectorView<CT> v, const PRODVM<T,T,T>& pmv)
 { MultMV<true>(-pmv.getX(),pmv.getM().transpose(),pmv.getV(),v); return v; }
 
 
@@ -208,14 +208,14 @@ public:
     inline T getX() const { return x; }
     inline const GenVector<T1>& getV() const { return v; }
     inline const GENMATRIX<T2>& getM() const { return m; }
-    inline void assignToV(const VectorView<TMV_RealType(T)>& v0) const
+    inline void assignToV(VectorView<TMV_RealType(T)> v0) const
     {
         TMVAssert(isReal(T()));
         TMVAssert(v0.size() == size());
         m.LDiv(v,v0);
         if (x != T(1)) v0 *= TMV_REAL(x);
     }
-    inline void assignToV(const VectorView<TMV_ComplexType(T)>& v0) const
+    inline void assignToV(VectorView<TMV_ComplexType(T)> v0) const
     {
         TMVAssert(v0.size() == size());
         m.LDiv(v,v0);
@@ -239,14 +239,14 @@ public:
     inline T getX() const { return x; }
     inline const GenVector<T1>& getV() const { return v; }
     inline const GENMATRIX<T2>& getM() const { return m; }
-    inline void assignToV(const VectorView<TMV_RealType(T)>& v0) const
+    inline void assignToV(VectorView<TMV_RealType(T)> v0) const
     {
         TMVAssert(isReal(T()));
         TMVAssert(v0.size() == size());
         m.RDiv(v,v0);
         if (x != T(1)) v0 *= TMV_REAL(x);
     }
-    inline void assignToV(const VectorView<TMV_ComplexType(T)>& v0) const
+    inline void assignToV(VectorView<TMV_ComplexType(T)> v0) const
     {
         TMVAssert(v0.size() == size());
         m.RDiv(v,v0);
@@ -259,8 +259,8 @@ private:
 };
 
 template <class T> 
-inline const VectorView<T>& operator/=(
-    const VectorView<T>& v, const GENMATRIX<T>& m)
+inline VectorView<T> operator/=(
+    VectorView<T> v, const GENMATRIX<T>& m)
 { 
     TMVAssert(m.isSquare());
     TMVAssert(m.rowsize() == v.size());
@@ -269,8 +269,8 @@ inline const VectorView<T>& operator/=(
 }
 
 template <class T> 
-inline const VectorView<CT>& operator/=(
-    const VectorView<CT>& v, const GENMATRIX<T>& m)
+inline VectorView<CT> operator/=(
+    VectorView<CT> v, const GENMATRIX<T>& m)
 {
     TMVAssert(m.isSquare());
     TMVAssert(m.rowsize() == v.size());
@@ -279,8 +279,8 @@ inline const VectorView<CT>& operator/=(
 }
 
 template <class T> 
-inline const VectorView<T>& operator%=(
-    const VectorView<T>& v, const GENMATRIX<T>& m)
+inline VectorView<T> operator%=(
+    VectorView<T> v, const GENMATRIX<T>& m)
 {
     TMVAssert(m.isSquare());
     TMVAssert(m.rowsize() == v.size());
@@ -289,8 +289,8 @@ inline const VectorView<T>& operator%=(
 }
 
 template <class T> 
-inline const VectorView<CT>& operator%=(
-    const VectorView<CT>& v, const GENMATRIX<T>& m)
+inline VectorView<CT> operator%=(
+    VectorView<CT> v, const GENMATRIX<T>& m)
 { 
     TMVAssert(m.isSquare());
     TMVAssert(m.rowsize() == v.size());
@@ -299,8 +299,8 @@ inline const VectorView<CT>& operator%=(
 }
 
 template <class T, class Tm> 
-inline const VectorView<T>& operator*=(
-    const VectorView<T>& v, const QUOTXM<T,Tm>& qxm)
+inline VectorView<T> operator*=(
+    VectorView<T> v, const QUOTXM<T,Tm>& qxm)
 {
     TMVAssert(qxm.getM().isSquare());
     TMVAssert(qxm.getM().rowsize() == v.size());
@@ -310,8 +310,8 @@ inline const VectorView<T>& operator*=(
 }
 
 template <class T> 
-inline const VectorView<CT>& operator*=(
-    const VectorView<CT>& v, const QUOTXM<T,T>& qxm)
+inline VectorView<CT> operator*=(
+    VectorView<CT> v, const QUOTXM<T,T>& qxm)
 {
     TMVAssert(qxm.getM().isSquare());
     TMVAssert(qxm.getM().rowsize() == v.size());

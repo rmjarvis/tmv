@@ -83,7 +83,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tx> 
     static void DoUnitAMultMV(
         const GenSymMatrix<Ta>& A, const GenVector<Tx>& x,
-        const VectorView<T>& y)
+        VectorView<T> y)
     {
         const int N = A.size();
         if (add) y += A.lowerTri() * x;
@@ -96,7 +96,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tx> 
     static void UnitAMultMV(
         const GenSymMatrix<Ta>& A, const GenVector<Tx>& x,
-        const VectorView<T>& y)
+        VectorView<T> y)
     {
         // Check for 0's in the beginning or end of x:
         //      [ A11 A12 A13 ] [ 0 ]          [ A12 ]
@@ -129,7 +129,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tx> 
     static void NonBlasMultMV(
         const T alpha, const GenSymMatrix<Ta>& A, const GenVector<Tx>& x,
-        const VectorView<T>& y)
+        VectorView<T> y)
     // y (+)= alpha * A * x
     {
         TMVAssert(A.size() == x.size());
@@ -185,7 +185,7 @@ namespace tmv {
     template <class T, class Ta, class Tx> 
     static inline void BlasMultMV(
         const T alpha, const GenSymMatrix<Ta>& A,
-        const GenVector<Tx>& x, int beta, const VectorView<T>& y)
+        const GenVector<Tx>& x, int beta, VectorView<T> y)
     { 
         if (beta==1) NonBlasMultMV<true>(alpha,A,x,y); 
         else NonBlasMultMV<false>(alpha,A,x,y); 
@@ -195,7 +195,7 @@ namespace tmv {
     void BlasMultMV(
         const double alpha,
         const GenSymMatrix<double>& A, const GenVector<double>& x,
-        int beta, const VectorView<double>& y)
+        int beta, VectorView<double> y)
     {
         int n = A.size();
         int lda = A.stepj();
@@ -218,7 +218,7 @@ namespace tmv {
         const std::complex<double> alpha,
         const GenSymMatrix<std::complex<double> >& A,
         const GenVector<std::complex<double> >& x,
-        int beta, const VectorView<std::complex<double> >& y)
+        int beta, VectorView<std::complex<double> > y)
     {
         if (A.isherm()) {
             int n = A.size();
@@ -266,14 +266,14 @@ namespace tmv {
         const std::complex<double> alpha,
         const GenSymMatrix<std::complex<double> >& A,
         const GenVector<double>& x,
-        int beta, const VectorView<std::complex<double> >& y)
+        int beta, VectorView<std::complex<double> > y)
     { BlasMultMV(alpha,A,Vector<std::complex<double> >(x),beta,y); }
     template <> 
     void BlasMultMV(
         const std::complex<double> alpha,
         const GenSymMatrix<double>& A,
         const GenVector<std::complex<double> >& x,
-        int beta, const VectorView<std::complex<double> >& y)
+        int beta, VectorView<std::complex<double> > y)
     {
         if (beta == 0) {
             int n = A.size();
@@ -330,7 +330,7 @@ namespace tmv {
         const std::complex<double> alpha,
         const GenSymMatrix<double>& A,
         const GenVector<double>& x,
-        int beta, const VectorView<std::complex<double> >& y)
+        int beta, VectorView<std::complex<double> > y)
     {
         int n = A.size();
         int lda = A.stepj();
@@ -365,7 +365,7 @@ namespace tmv {
     void BlasMultMV(
         const float alpha,
         const GenSymMatrix<float>& A, const GenVector<float>& x,
-        int beta, const VectorView<float>& y)
+        int beta, VectorView<float> y)
     {
         int n = A.size();
         int lda = A.stepj();
@@ -388,7 +388,7 @@ namespace tmv {
         const std::complex<float> alpha,
         const GenSymMatrix<std::complex<float> >& A,
         const GenVector<std::complex<float> >& x,
-        int beta, const VectorView<std::complex<float> >& y)
+        int beta, VectorView<std::complex<float> > y)
     {
         if (A.isherm()) {
             int n = A.size();
@@ -436,14 +436,14 @@ namespace tmv {
         const std::complex<float> alpha,
         const GenSymMatrix<std::complex<float> >& A,
         const GenVector<float>& x,
-        int beta, const VectorView<std::complex<float> >& y)
+        int beta, VectorView<std::complex<float> > y)
     { BlasMultMV(alpha,A,Vector<std::complex<float> >(x),beta,y); }
     template <> 
     void BlasMultMV(
         const std::complex<float> alpha,
         const GenSymMatrix<float>& A,
         const GenVector<std::complex<float> >& x,
-        int beta, const VectorView<std::complex<float> >& y)
+        int beta, VectorView<std::complex<float> > y)
     {
         if (beta == 0) {
             int n = A.size();
@@ -500,7 +500,7 @@ namespace tmv {
         const std::complex<float> alpha,
         const GenSymMatrix<float>& A,
         const GenVector<float>& x,
-        int beta, const VectorView<std::complex<float> >& y)
+        int beta, VectorView<std::complex<float> > y)
     {
         int n = A.size();
         int lda = A.stepj();
@@ -535,7 +535,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tx> 
     static void DoMultMV(
         const T alpha, const GenSymMatrix<Ta>& A,
-        const GenVector<Tx>& x, const VectorView<T>& y)
+        const GenVector<Tx>& x, VectorView<T> y)
     {
         TMVAssert(A.rowsize() == x.size());
         TMVAssert(A.colsize() == y.size());
@@ -630,7 +630,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tx> 
     void MultMV(
         const T alpha, const GenSymMatrix<Ta>& A, const GenVector<Tx>& x,
-        const VectorView<T>& y)
+        VectorView<T> y)
     // y (+)= alpha * A * x
     { 
         TMVAssert(A.rowsize() == x.size());

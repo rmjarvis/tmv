@@ -63,7 +63,7 @@ namespace tmv {
 
     template <bool cx, bool cy, bool cm, bool add, class T, class Tx, class Ty> 
     static void ColRank1Update(
-        const GenVector<Tx>& x, const GenVector<Ty>& y, const MatrixView<T>& A)
+        const GenVector<Tx>& x, const GenVector<Ty>& y, MatrixView<T> A)
     {
         TMVAssert(A.colsize() == x.size());
         TMVAssert(A.rowsize() == y.size());
@@ -116,7 +116,7 @@ namespace tmv {
     template <bool cx, bool add, class T, class Tx, class Ty> 
     static void UnitARank1Update(
         const GenVector<Tx>& x,
-        const GenVector<Ty>& y, const MatrixView<T>& A)
+        const GenVector<Ty>& y, MatrixView<T> A)
     {
         TMVAssert(A.colsize() == x.size());
         TMVAssert(A.rowsize() == y.size());
@@ -141,7 +141,7 @@ namespace tmv {
     template <bool add, class T, class Tx, class Ty> 
     static void NonBlasRank1Update(
         const T alpha, const GenVector<Tx>& x,
-        const GenVector<Ty>& y, const MatrixView<T>& A)
+        const GenVector<Ty>& y, MatrixView<T> A)
     {
         TMVAssert(A.colsize() == x.size());
         TMVAssert(A.rowsize() == y.size());
@@ -180,13 +180,13 @@ namespace tmv {
     template <class T, class Tx, class Ty> 
     static inline void BlasRank1Update(
         const T alpha, const GenVector<Tx>& x,
-        const GenVector<Ty>& y, const MatrixView<T>& A)
+        const GenVector<Ty>& y, MatrixView<T> A)
     { NonBlasRank1Update<true>(alpha,x,y,A); }
 #ifdef INST_DOUBLE
     template <> 
     void BlasRank1Update(
         const double alpha, const GenVector<double>& x,
-        const GenVector<double>& y, const MatrixView<double>& A)
+        const GenVector<double>& y, MatrixView<double> A)
     {
         TMVAssert(A.colsize() == x.size());
         TMVAssert(A.rowsize() == y.size());
@@ -220,7 +220,7 @@ namespace tmv {
         const std::complex<double> alpha,
         const GenVector<std::complex<double> >& x, 
         const GenVector<std::complex<double> >& y,
-        const MatrixView<std::complex<double> >& A)
+        MatrixView<std::complex<double> > A)
     {
         TMVAssert(A.colsize() == x.size());
         TMVAssert(A.rowsize() == y.size());
@@ -276,7 +276,7 @@ namespace tmv {
         const std::complex<double> alpha,
         const GenVector<double>& x, 
         const GenVector<std::complex<double> >& y,
-        const MatrixView<std::complex<double> >& A)
+        MatrixView<std::complex<double> > A)
     {
         // A += a * x ^ y
         // (Ar + I Ai) += (ar + I ai) * x ^ (yr + I yi)
@@ -327,7 +327,7 @@ namespace tmv {
         const std::complex<double> alpha,
         const GenVector<std::complex<double> >& x,
         const GenVector<double>& y, 
-        const MatrixView<std::complex<double> >& A)
+        MatrixView<std::complex<double> > A)
     {
         TMVAssert(A.colsize() == x.size());
         TMVAssert(A.rowsize() == y.size());
@@ -369,7 +369,7 @@ namespace tmv {
     void BlasRank1Update(
         const std::complex<double> alpha,
         const GenVector<double>& x, const GenVector<double>& y, 
-        const MatrixView<std::complex<double> >& A)
+        MatrixView<std::complex<double> > A)
     {
         // A += a * x ^ y
         // (Ar + I Ai) += (ar + I ai) * x ^ y
@@ -410,7 +410,7 @@ namespace tmv {
     template <> 
     void BlasRank1Update(
         const float alpha, const GenVector<float>& x,
-        const GenVector<float>& y, const MatrixView<float>& A)
+        const GenVector<float>& y, MatrixView<float> A)
     {
         TMVAssert(A.colsize() == x.size());
         TMVAssert(A.rowsize() == y.size());
@@ -444,7 +444,7 @@ namespace tmv {
         const std::complex<float> alpha,
         const GenVector<std::complex<float> >& x, 
         const GenVector<std::complex<float> >& y,
-        const MatrixView<std::complex<float> >& A)
+        MatrixView<std::complex<float> > A)
     {
         TMVAssert(A.colsize() == x.size());
         TMVAssert(A.rowsize() == y.size());
@@ -500,7 +500,7 @@ namespace tmv {
         const std::complex<float> alpha,
         const GenVector<float>& x, 
         const GenVector<std::complex<float> >& y,
-        const MatrixView<std::complex<float> >& A)
+        MatrixView<std::complex<float> > A)
     {
         // A += a * x ^ y
         // (Ar + I Ai) += (ar + I ai) * x ^ (yr + I yi)
@@ -551,7 +551,7 @@ namespace tmv {
         const std::complex<float> alpha,
         const GenVector<std::complex<float> >& x,
         const GenVector<float>& y, 
-        const MatrixView<std::complex<float> >& A)
+        MatrixView<std::complex<float> > A)
     {
         TMVAssert(A.colsize() == x.size());
         TMVAssert(A.rowsize() == y.size());
@@ -593,7 +593,7 @@ namespace tmv {
     void BlasRank1Update(
         const std::complex<float> alpha,
         const GenVector<float>& x, const GenVector<float>& y, 
-        const MatrixView<std::complex<float> >& A)
+        MatrixView<std::complex<float> > A)
     {
         // A += a * x ^ y
         // (Ar + I Ai) += (ar + I ai) * x ^ y
@@ -635,7 +635,7 @@ namespace tmv {
     template <bool add, class T, class Tx, class Ty> 
     void Rank1Update(
         const T alpha, const GenVector<Tx>& x,
-        const GenVector<Ty>& y, const MatrixView<T>& A)
+        const GenVector<Ty>& y, MatrixView<T> A)
         // A (+)= alpha * x * yT
     {
 #ifdef XDEBUG

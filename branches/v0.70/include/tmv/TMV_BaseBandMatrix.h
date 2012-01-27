@@ -65,7 +65,7 @@ namespace tmv {
     int BandNumElements(int cs, int rs, int lo, int hi);
 
     template <class T1, class T2> 
-    void Copy(const GenBandMatrix<T1>& m1, const BandMatrixView<T2>& m2);
+    void Copy(const GenBandMatrix<T1>& m1, BandMatrixView<T2> m2);
 
     template <class T> 
     struct AssignableToBandMatrix : virtual public AssignableToMatrix<T>
@@ -74,8 +74,8 @@ namespace tmv {
         typedef TMV_ComplexType(T) CT;
         virtual int nlo() const = 0;
         virtual int nhi() const = 0;
-        virtual void assignToB(const BandMatrixView<RT>& m) const = 0;
-        virtual void assignToB(const BandMatrixView<CT>& m) const = 0;
+        virtual void assignToB(BandMatrixView<RT> m) const = 0;
+        virtual void assignToB(BandMatrixView<CT> m) const = 0;
         virtual inline ~AssignableToBandMatrix() {}
     };
 

@@ -3,7 +3,7 @@
 
 #define DefSVD(RT,T)\
 template void EigenFromTridiagonal_DC(MVP<T > U, \
-    const VectorView<RT >& D, const VectorView<RT >& E, bool UisI); \
+    VectorView<RT > D, VectorView<RT > E, bool UisI); \
 
 DefSVD(T,T)
 #ifdef INST_COMPLEX

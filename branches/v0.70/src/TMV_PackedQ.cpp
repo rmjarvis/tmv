@@ -65,7 +65,7 @@ namespace tmv {
     template <class T, class T1> 
     static void NonBlockQLDivEq(
         const GenMatrix<T1>& Q, const GenVector<T1>& beta,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
@@ -88,7 +88,7 @@ namespace tmv {
     template <class T, class T1> 
     static void BlockQLDivEq(
         const GenMatrix<T1>& Q, const GenVector<T1>& beta,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
@@ -134,7 +134,7 @@ namespace tmv {
     template <class T, class T1> 
     static void NonLapQLDivEq(
         const GenMatrix<T1>& Q, const GenVector<T1>& beta,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
@@ -151,13 +151,13 @@ namespace tmv {
     template <class T, class T1> 
     static inline void LapQLDivEq(
         const GenMatrix<T1>& Q, const GenVector<T1>& beta,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     { NonLapQLDivEq(Q,beta,m); }
 #ifdef INST_DOUBLE
     template <> 
     void LapQLDivEq(
         const GenMatrix<double>& Q,
-        const GenVector<double>& beta, const MatrixView<double>& x)
+        const GenVector<double>& beta, MatrixView<double> x)
     {
         int ldx = BlasIsCM(x) ? x.stepj() : x.stepi();
         int m = BlasIsCM(x) ? x.colsize() : x.rowsize();
@@ -235,7 +235,7 @@ namespace tmv {
     void LapQLDivEq(
         const GenMatrix<std::complex<double> >& Q,
         const GenVector<std::complex<double> >& beta,
-        const MatrixView<std::complex<double> >& x)
+        MatrixView<std::complex<double> > x)
     {
         int k = Q.rowsize();
         if (BlasIsCM(Q)) {
@@ -322,7 +322,7 @@ namespace tmv {
     template <> 
     void LapQLDivEq(
         const GenMatrix<float>& Q,
-        const GenVector<float>& beta, const MatrixView<float>& x)
+        const GenVector<float>& beta, MatrixView<float> x)
     {
         int ldx = BlasIsCM(x) ? x.stepj() : x.stepi();
         int m = BlasIsCM(x) ? x.colsize() : x.rowsize();
@@ -400,7 +400,7 @@ namespace tmv {
     void LapQLDivEq(
         const GenMatrix<std::complex<float> >& Q,
         const GenVector<std::complex<float> >& beta,
-        const MatrixView<std::complex<float> >& x)
+        MatrixView<std::complex<float> > x)
     {
         int k = Q.rowsize();
         if (BlasIsCM(Q)) {
@@ -488,7 +488,7 @@ namespace tmv {
     template <class T, class T1> 
     void Q_LDivEq(
         const GenMatrix<T1>& Q, const GenVector<T1>& beta,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(beta.size() == Q.rowsize());
@@ -570,7 +570,7 @@ namespace tmv {
     template <class T, class T1> 
     static void NonBlockQRDivEq(
         const GenMatrix<T1>& Q, const GenVector<T1>& beta,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(beta.size() == Q.rowsize());
@@ -594,7 +594,7 @@ namespace tmv {
     template <class T, class T1> 
     static void BlockQRDivEq(
         const GenMatrix<T1>& Q, const GenVector<T1>& beta,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
@@ -638,7 +638,7 @@ namespace tmv {
     template <class T, class T1> 
     static void NonLapQRDivEq(
         const GenMatrix<T1>& Q, const GenVector<T1>& beta,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
@@ -656,13 +656,13 @@ namespace tmv {
     template <class T, class T1> 
     static inline void LapQRDivEq(
         const GenMatrix<T1>& Q, const GenVector<T1>& beta,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     { NonLapQRDivEq(Q,beta,m); }
 #ifdef INST_DOUBLE
     template <> 
     void LapQRDivEq(
         const GenMatrix<double>& Q,
-        const GenVector<double>& beta, const MatrixView<double>& x)
+        const GenVector<double>& beta, MatrixView<double> x)
     {
         int ldx = BlasIsCM(x) ? x.stepj() : x.stepi();
         int m = BlasIsCM(x) ? x.colsize() : x.rowsize();
@@ -740,7 +740,7 @@ namespace tmv {
     void LapQRDivEq(
         const GenMatrix<std::complex<double> >& Q,
         const GenVector<std::complex<double> >& beta,
-        const MatrixView<std::complex<double> >& x)
+        MatrixView<std::complex<double> > x)
     {
         int k = Q.rowsize();
         if (BlasIsCM(Q)) {
@@ -827,7 +827,7 @@ namespace tmv {
     template <> 
     void LapQRDivEq(
         const GenMatrix<float>& Q,
-        const GenVector<float>& beta, const MatrixView<float>& x)
+        const GenVector<float>& beta, MatrixView<float> x)
     {
         int ldx = BlasIsCM(x) ? x.stepj() : x.stepi();
         int m = BlasIsCM(x) ? x.colsize() : x.rowsize();
@@ -905,7 +905,7 @@ namespace tmv {
     void LapQRDivEq(
         const GenMatrix<std::complex<float> >& Q,
         const GenVector<std::complex<float> >& beta,
-        const MatrixView<std::complex<float> >& x)
+        MatrixView<std::complex<float> > x)
     {
         int k = Q.rowsize();
         if (BlasIsCM(Q)) {
@@ -993,7 +993,7 @@ namespace tmv {
     template <class T, class T1> 
     void Q_RDivEq(
         const GenMatrix<T1>& Q, const GenVector<T1>& beta,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(beta.size() == Q.rowsize());
@@ -1056,7 +1056,7 @@ namespace tmv {
     template <class T> 
     static void unpack(
         const GenMatrix<T>& Q, const GenVector<T>& beta,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         if ( BlasIsRM(m) || BlasIsCM(m) ){
             m = Q;
@@ -1071,7 +1071,7 @@ namespace tmv {
     template <class T, class T1> 
     static void unpack(
         const GenMatrix<T>& Q, const GenVector<T>& beta,
-        const MatrixView<T1>& m)
+        MatrixView<T1> m)
     {
         Matrix<T> m1 = Q;
         GetQFromQR(m1.view(),beta);
@@ -1079,11 +1079,11 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void PackedQ<T>::doAssignToM(const MatrixView<T1>& m) const
+    void PackedQ<T>::doAssignToM(MatrixView<T1> m) const
     { unpack(Q,beta,m); }
 
     template <class T> template <class T1> 
-    void PackedQ<T>::LDivEq(const VectorView<T1>& v) const
+    void PackedQ<T>::LDivEq(VectorView<T1> v) const
     {
         TMVAssert(Q.colsize() == Q.rowsize());
         TMVAssert(beta.size() == Q.rowsize());
@@ -1096,7 +1096,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void PackedQ<T>::RDivEq(const VectorView<T1>& v) const
+    void PackedQ<T>::RDivEq(VectorView<T1> v) const
     {
         TMVAssert(Q.colsize() == Q.rowsize());
         TMVAssert(beta.size() == Q.rowsize());
@@ -1110,7 +1110,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void PackedQ<T>::LDiv(
-        const GenVector<T1>& v, const VectorView<T2>& x) const
+        const GenVector<T1>& v, VectorView<T2> x) const
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(beta.size() == Q.rowsize());
@@ -1133,7 +1133,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void PackedQ<T>::RDiv(
-        const GenVector<T1>& v, const VectorView<T2>& x) const
+        const GenVector<T1>& v, VectorView<T2> x) const
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(beta.size() == Q.rowsize());
@@ -1148,7 +1148,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void PackedQ<T>::LDivEq(const MatrixView<T1>& m) const
+    void PackedQ<T>::LDivEq(MatrixView<T1> m) const
     {
         TMVAssert(Q.colsize() == Q.rowsize());
         TMVAssert(beta.size() == Q.rowsize());
@@ -1161,7 +1161,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void PackedQ<T>::RDivEq(const MatrixView<T1>& m) const
+    void PackedQ<T>::RDivEq(MatrixView<T1> m) const
     {
         TMVAssert(Q.colsize() == Q.rowsize());
         TMVAssert(beta.size() == Q.rowsize());
@@ -1174,7 +1174,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void PackedQ<T>::LDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(beta.size() == Q.rowsize());
@@ -1198,7 +1198,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void PackedQ<T>::RDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(beta.size() == Q.rowsize());

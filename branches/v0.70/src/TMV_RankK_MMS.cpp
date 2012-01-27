@@ -68,7 +68,7 @@ namespace tmv {
 
     template <bool ha, bool a1, bool add, class T, class Tx> 
     static void RecursiveRankKUpdate(
-        const T alpha, const GenMatrix<Tx>& x, const SymMatrixView<T>& A)
+        const T alpha, const GenMatrix<Tx>& x, SymMatrixView<T> A)
     {
         TMVAssert(A.size() == x.colsize());
         TMVAssert(alpha != T(0));
@@ -152,7 +152,7 @@ namespace tmv {
 
     template <bool cm, bool ha, bool a1, bool add, class T, class Tx> 
     static void RecursiveInPlaceRankKUpdate(
-        const T alpha, const GenMatrix<Tx>& x, const SymMatrixView<T>& A)
+        const T alpha, const GenMatrix<Tx>& x, SymMatrixView<T> A)
     {
         TMVAssert(SameStorage(x,A));
         TMVAssert(A.size() > 0);
@@ -218,7 +218,7 @@ namespace tmv {
 
     template <bool add, class T, class Tx> 
     static void InPlaceRankKUpdate(
-        const T alpha, const GenMatrix<Tx>& x, const SymMatrixView<T>& A)
+        const T alpha, const GenMatrix<Tx>& x, SymMatrixView<T> A)
     {
         TMVAssert(A.uplo() == Lower);
         if (A.iscm()) {
@@ -258,7 +258,7 @@ namespace tmv {
 
     template <bool add, class T, class Tx> 
     static void NonBlasRankKUpdate(
-        const T alpha, const GenMatrix<Tx>& x, const SymMatrixView<T>& A)
+        const T alpha, const GenMatrix<Tx>& x, SymMatrixView<T> A)
     {
         if (A.uplo() == Upper) {
             return NonBlasRankKUpdate<add>(
@@ -302,14 +302,13 @@ namespace tmv {
 #ifdef BLAS
     template <class T, class Tx> 
     static inline void BlasRankKUpdate(
-        const T alpha, const GenMatrix<Tx>& x,
-        const SymMatrixView<T>& A)
+        const T alpha, const GenMatrix<Tx>& x, SymMatrixView<T> A)
     { NonBlasRankKUpdate<true>(alpha,x,A); }
 #ifdef INST_DOUBLE
     template <> 
     void BlasRankKUpdate(
         const double alpha, const GenMatrix<double>& x,
-        const SymMatrixView<double>& A)
+        SymMatrixView<double> A)
     {
         int n = A.size();
         int k = x.rowsize();
@@ -326,7 +325,7 @@ namespace tmv {
     void BlasRankKUpdate(
         const std::complex<double> alpha,
         const GenMatrix<std::complex<double> >& x, 
-        const SymMatrixView<std::complex<double> >& A)
+        SymMatrixView<std::complex<double> > A)
     {
         int n = A.size();
         int k = x.rowsize();
@@ -353,7 +352,7 @@ namespace tmv {
     void BlasRankKUpdate(
         const std::complex<double> alpha,
         const GenMatrix<double>& x, 
-        const SymMatrixView<std::complex<double> >& A)
+        SymMatrixView<std::complex<double> > A)
     {
         SymMatrix<double,Lower|ColMajor> A1(A.size(),0.);
         BlasRankKUpdate(1.,x,A1.view());
@@ -363,8 +362,7 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     void BlasRankKUpdate(
-        const float alpha, const GenMatrix<float>& x,
-        const SymMatrixView<float>& A)
+        const float alpha, const GenMatrix<float>& x, SymMatrixView<float> A)
     {
         int n = A.size();
         int k = x.rowsize();
@@ -381,7 +379,7 @@ namespace tmv {
     void BlasRankKUpdate(
         const std::complex<float> alpha,
         const GenMatrix<std::complex<float> >& x, 
-        const SymMatrixView<std::complex<float> >& A)
+        SymMatrixView<std::complex<float> > A)
     {
         int n = A.size();
         int k = x.rowsize();
@@ -408,7 +406,7 @@ namespace tmv {
     void BlasRankKUpdate(
         const std::complex<float> alpha,
         const GenMatrix<float>& x, 
-        const SymMatrixView<std::complex<float> >& A)
+        SymMatrixView<std::complex<float> > A)
     {
         SymMatrix<float,Lower|ColMajor> A1(A.size(),0.F);
         BlasRankKUpdate(1.F,x,A1.view());
@@ -419,7 +417,7 @@ namespace tmv {
 
     template <bool add, class T, class Tx> 
     void RankKUpdate(
-        const T alpha, const GenMatrix<Tx>& x, const SymMatrixView<T>& A)
+        const T alpha, const GenMatrix<Tx>& x, SymMatrixView<T> A)
     // A (+)= alpha * x * xT
     {
 #ifdef XDEBUG

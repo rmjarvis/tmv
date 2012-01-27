@@ -90,10 +90,13 @@
 //
 // You can control whether QRP does a strict reordering so that the 
 // diagonal elements of R are in decreasing order of absolute value 
-// (which I call StrictQRP), or whether they are just reordered well
-// enough to put the correct zeros at the end (which I call LooseQRP) using
-// the global variable tmv::StrictQRP.  The default value is false, which
-// is faster, but possibly less accurate for some matrices.
+// (which I call Strict QRP), or whether they are just reordered well
+// enough to put the correct zeros at the end (which I call Loose QRP) using
+// the function tmv::UseStrictQRP();
+// To turn the strict algorithm back off, use tmv::UseStrictQRP(false);
+// The Loose QRP algorithm is faster and seems to be good enough for
+// all the singular matrices I've tried it on, but someone might have a
+// need for the strict behavior.
 //
 
 
@@ -110,38 +113,75 @@ namespace tmv {
     // Decompose A (input as Q) into Q R P.
     template <class T> 
     void QRP_Decompose(
-        const MatrixView<T>& Q, const UpperTriMatrixView<T>& R,
-        int* P, bool strict=false);
+        MatrixView<T> Q, UpperTriMatrixView<T> R, int* P, bool strict);
 
     template <class T> 
     void QRP_Decompose(
-        const MatrixView<T>& QRx, const VectorView<T>& beta,
-        int* P, T& signdet, bool strict=false);
+        MatrixView<T> QRx, VectorView<T> beta, int* P, T& signdet, bool strict);
 
     class Permutation;
 
+    // Default value of strict=false is given in TMV_Permutation.h 
+    // for these next two functions.
     template <class T> 
     void QRP_Decompose(
-        const MatrixView<T>& Q, const UpperTriMatrixView<T>& R,
-        Permutation& P, bool strict);
+        MatrixView<T> Q, UpperTriMatrixView<T> R, Permutation& P, bool strict);
 
     template <class T> 
     void QRP_Decompose(
-        const MatrixView<T>& QRx, const VectorView<T>& beta,
-        Permutation& P, T& signdet, bool strict);
+        MatrixView<T> QRx, VectorView<T> beta, Permutation& P, T& signdet,
+        bool strict);
 
     // Decompose A into Q R P, but don't return Q or P.
     // R is returned as A.upperTri().
     template <class T> 
-    void QRP_Decompose(const MatrixView<T>& A, bool strict=false);
+    void QRP_Decompose(MatrixView<T> A, bool strict=false);
+
+    template <class T, int A2> 
+    inline void QRP_Decompose(
+        MatrixView<T> Q, UpperTriMatrix<T,A2>& R, Permutation& P,
+        bool strict=false)
+    { QRP_Decompose(Q,R.view(),P,strict); }
+
+    template <class T, int A1> 
+    inline void QRP_Decompose(
+        Matrix<T,A1>& Q, UpperTriMatrixView<T> R, Permutation& P,
+        bool strict=false)
+    { QRP_Decompose(Q.view(),R,P,strict); }
+
+    template <class T, int A1, int A2> 
+    inline void QRP_Decompose(
+        Matrix<T,A1>& Q, UpperTriMatrix<T,A2>& R, Permutation& P,
+        bool strict=false)
+    { QRP_Decompose(Q.view(),R.view(),P,strict); }
+
+    template <class T, int A1> 
+    inline void QRP_Decompose(Matrix<T,A1>& A, bool strict=false)
+    { QRP_Decompose(A.view(),strict); }
+
+    struct QRP_StrictSingleton
+    {
+        // Technically, I think this isn't thread safe, but I'd be 
+        // pretty shocked if people were having multiple threads
+        // call this funtion at the same time.
+        static inline bool& inst()
+        {
+            static bool strict;
+            return strict;
+        }
+    };
+
+    inline void UseStrictQRP(bool newstrict=true)
+    { QRP_StrictSingleton::inst() = newstrict; }
+
+    inline bool QRP_IsStrict()
+    { return QRP_StrictSingleton::inst(); }
 
     template <class T> 
     class QRPDiv : public Divider<T> 
     {
 
     public :
-
-        static bool StrictQRP;
 
         //
         // Constructors
@@ -155,16 +195,16 @@ namespace tmv {
         //
 
         template <class T1> 
-        void doLDivEq(const MatrixView<T1>& m) const;
+        void doLDivEq(MatrixView<T1> m) const;
 
         template <class T1> 
-        void doRDivEq(const MatrixView<T1>& m) const;
+        void doRDivEq(MatrixView<T1> m) const;
 
         template <class T1, class T2> 
-        void doLDiv(const GenMatrix<T1>& m, const MatrixView<T2>& x) const;
+        void doLDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
         template <class T1, class T2> 
-        void doRDiv(const GenMatrix<T1>& m, const MatrixView<T2>& x) const;
+        void doRDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
         //
         // Determinant, Inverse
@@ -173,8 +213,8 @@ namespace tmv {
         T det() const;
         TMV_RealType(T) logDet(T* sign) const;
         template <class T1> 
-        void doMakeInverse(const MatrixView<T1>& minv) const;
-        void doMakeInverseATA(const MatrixView<T>& minv) const;
+        void doMakeInverse(MatrixView<T1> minv) const;
+        void doMakeInverseATA(MatrixView<T> minv) const;
         bool isSingular() const;
 
 #include "tmv/TMV_AuxAllDiv.h"

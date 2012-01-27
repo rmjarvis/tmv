@@ -64,7 +64,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void RRMultEqMM(
-        T alpha, const GenUpperTriMatrix<Ta>& A, const MatrixView<T>& B)
+        T alpha, const GenUpperTriMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(A.isrm());
         TMVAssert(B.isrm());
@@ -92,7 +92,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void CRMultEqMM(
-        T alpha, const GenUpperTriMatrix<Ta>& A, const MatrixView<T>& B)
+        T alpha, const GenUpperTriMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(A.iscm());
         TMVAssert(B.isrm());
@@ -119,7 +119,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void CMultEqMM(
-        T alpha, const GenUpperTriMatrix<Ta>& A, const MatrixView<T>& B)
+        T alpha, const GenUpperTriMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(A.size() == B.colsize());
         TMVAssert(B.rowsize()>0);
@@ -135,7 +135,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void NonBlasMultEqMM(
-        T alpha, const GenUpperTriMatrix<Ta>& A, const MatrixView<T>& B)
+        T alpha, const GenUpperTriMatrix<Ta>& A, MatrixView<T> B)
     // B = alpha * A * B
     {
         TMVAssert(A.size() == B.colsize());
@@ -200,7 +200,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void RRMultEqMM(
-        T alpha, const GenLowerTriMatrix<Ta>& A, const MatrixView<T>& B)
+        T alpha, const GenLowerTriMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(A.isrm());
         TMVAssert(B.isrm());
@@ -228,7 +228,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void CRMultEqMM(
-        T alpha, const GenLowerTriMatrix<Ta>& A, const MatrixView<T>& B)
+        T alpha, const GenLowerTriMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(A.iscm());
         TMVAssert(B.isrm());
@@ -257,7 +257,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void CMultEqMM(
-        T alpha, const GenLowerTriMatrix<Ta>& A, const MatrixView<T>& B)
+        T alpha, const GenLowerTriMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(A.size() == B.colsize());
         TMVAssert(B.rowsize()>0);
@@ -273,7 +273,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void NonBlasMultEqMM(
-        T alpha, const GenLowerTriMatrix<Ta>& A, const MatrixView<T>& B)
+        T alpha, const GenLowerTriMatrix<Ta>& A, MatrixView<T> B)
     // B = alpha * A * B
     {
         TMVAssert(A.size() == B.colsize());
@@ -318,17 +318,17 @@ namespace tmv {
 #ifdef BLAS
     template <class T, class Ta> 
     static inline void BlasMultEqMM(
-        T alpha, const GenUpperTriMatrix<Ta>& A, const MatrixView<T>& B)
+        T alpha, const GenUpperTriMatrix<Ta>& A, MatrixView<T> B)
     { NonBlasMultEqMM(alpha,A,B); }
     template <class T, class Ta> 
     static inline void BlasMultEqMM(
-        T alpha, const GenLowerTriMatrix<Ta>& A, const MatrixView<T>& B)
+        T alpha, const GenLowerTriMatrix<Ta>& A, MatrixView<T> B)
     { NonBlasMultEqMM(alpha,A,B); }
 #ifdef INST_DOUBLE
     template <> 
     void BlasMultEqMM(
         double alpha, const GenUpperTriMatrix<double>& A, 
-        const MatrixView<double>& B)
+        MatrixView<double> B)
     {
         int m=BlasIsCM(B)?B.colsize():B.rowsize();
         int n=BlasIsCM(B)?B.rowsize():B.colsize();
@@ -346,7 +346,7 @@ namespace tmv {
     template <> 
     void BlasMultEqMM(
         double alpha, const GenLowerTriMatrix<double>& A, 
-        const MatrixView<double>& B)
+        MatrixView<double> B)
     {
         int m=BlasIsCM(B)?B.colsize():B.rowsize();
         int n=BlasIsCM(B)?B.rowsize():B.colsize();
@@ -365,7 +365,7 @@ namespace tmv {
     void BlasMultEqMM(
         std::complex<double> alpha,
         const GenUpperTriMatrix<std::complex<double> >& A,
-        const MatrixView<std::complex<double> >& B)
+        MatrixView<std::complex<double> > B)
     {
         int m=BlasIsCM(B)?B.colsize():B.rowsize();
         int n=BlasIsCM(B)?B.rowsize():B.colsize();
@@ -395,7 +395,7 @@ namespace tmv {
     void BlasMultEqMM(
         std::complex<double> alpha,
         const GenLowerTriMatrix<std::complex<double> >& A,
-        const MatrixView<std::complex<double> >& B)
+        MatrixView<std::complex<double> > B)
     {
         int m=BlasIsCM(B)?B.colsize():B.rowsize();
         int n=BlasIsCM(B)?B.rowsize():B.colsize();
@@ -424,7 +424,7 @@ namespace tmv {
     template <> 
     void BlasMultEqMM(
         std::complex<double> alpha, const GenUpperTriMatrix<double>& A,
-        const MatrixView<std::complex<double> >& B)
+        MatrixView<std::complex<double> > B)
     {
         // The four possibilities from cm or rm are:
         //   A    B      L/R     op(A) 
@@ -453,7 +453,7 @@ namespace tmv {
     template <> 
     void BlasMultEqMM(
         std::complex<double> alpha, const GenLowerTriMatrix<double>& A,
-        const MatrixView<std::complex<double> >& B)
+        MatrixView<std::complex<double> > B)
     {
         Matrix<double,ColMajor> B1 = B.realPart();
         BlasMultEqMM(1.,A,B1.view());
@@ -468,7 +468,7 @@ namespace tmv {
     template <> 
     void BlasMultEqMM(
         float alpha, const GenUpperTriMatrix<float>& A, 
-        const MatrixView<float>& B)
+        MatrixView<float> B)
     {
         int m=BlasIsCM(B)?B.colsize():B.rowsize();
         int n=BlasIsCM(B)?B.rowsize():B.colsize();
@@ -486,7 +486,7 @@ namespace tmv {
     template <> 
     void BlasMultEqMM(
         float alpha, const GenLowerTriMatrix<float>& A, 
-        const MatrixView<float>& B)
+        MatrixView<float> B)
     {
         int m=BlasIsCM(B)?B.colsize():B.rowsize();
         int n=BlasIsCM(B)?B.rowsize():B.colsize();
@@ -505,7 +505,7 @@ namespace tmv {
     void BlasMultEqMM(
         std::complex<float> alpha,
         const GenUpperTriMatrix<std::complex<float> >& A,
-        const MatrixView<std::complex<float> >& B)
+        MatrixView<std::complex<float> > B)
     {
         int m=BlasIsCM(B)?B.colsize():B.rowsize();
         int n=BlasIsCM(B)?B.rowsize():B.colsize();
@@ -535,7 +535,7 @@ namespace tmv {
     void BlasMultEqMM(
         std::complex<float> alpha,
         const GenLowerTriMatrix<std::complex<float> >& A,
-        const MatrixView<std::complex<float> >& B)
+        MatrixView<std::complex<float> > B)
     {
         int m=BlasIsCM(B)?B.colsize():B.rowsize();
         int n=BlasIsCM(B)?B.rowsize():B.colsize();
@@ -564,7 +564,7 @@ namespace tmv {
     template <> 
     void BlasMultEqMM(
         std::complex<float> alpha, const GenUpperTriMatrix<float>& A,
-        const MatrixView<std::complex<float> >& B)
+        MatrixView<std::complex<float> > B)
     {
         Matrix<float,ColMajor> B1 = B.realPart();
         BlasMultEqMM(1.F,A,B1.view());
@@ -577,7 +577,7 @@ namespace tmv {
     template <> 
     void BlasMultEqMM(
         std::complex<float> alpha, const GenLowerTriMatrix<float>& A,
-        const MatrixView<std::complex<float> >& B)
+        MatrixView<std::complex<float> > B)
     {
         Matrix<float,ColMajor> B1 = B.realPart();
         BlasMultEqMM(1.F,A,B1.view());
@@ -592,7 +592,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void MultEqMM(
-        T alpha, const GenUpperTriMatrix<Ta>& A, const MatrixView<T>& B)
+        T alpha, const GenUpperTriMatrix<Ta>& A, MatrixView<T> B)
     {
 #ifdef XDEBUG
         cout<<"MultEqMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
@@ -644,7 +644,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void MultEqMM(
-        T alpha, const GenLowerTriMatrix<Ta>& A, const MatrixView<T>& B)
+        T alpha, const GenLowerTriMatrix<Ta>& A, MatrixView<T> B)
     {
 #ifdef XDEBUG
         cout<<"MultEqMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
@@ -701,7 +701,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static void RRAddMultMM(
         T alpha, const GenUpperTriMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.isrm());
         TMVAssert(C.isrm());
@@ -724,7 +724,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static void CRAddMultMM(
         T alpha, const GenUpperTriMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.iscm());
         TMVAssert(B.isrm());
@@ -754,7 +754,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static void CAddMultMM(
         T alpha, const GenUpperTriMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.size() == B.colsize());
         TMVAssert(A.size() == C.colsize());
@@ -773,7 +773,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static void AddMultMM(
         T alpha, const GenUpperTriMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     // C += alpha * A * B
     {
         TMVAssert(A.size() == B.colsize());
@@ -856,7 +856,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static void RRAddMultMM(
         T alpha, const GenLowerTriMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.isrm());
         TMVAssert(C.isrm());
@@ -876,7 +876,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static void CRAddMultMM(
         T alpha, const GenLowerTriMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.iscm());
         TMVAssert(B.isrm());
@@ -896,7 +896,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static void CAddMultMM(
         T alpha, const GenLowerTriMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.size() == B.colsize());
         TMVAssert(A.size() == C.colsize());
@@ -915,7 +915,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static void AddMultMM(
         T alpha, const GenLowerTriMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     // C += alpha * A * B
     {
         TMVAssert(A.size() == B.colsize());
@@ -995,7 +995,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void BlockTempMultMM(
         T alpha, const GenUpperTriMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     // C (+)= alpha * A * B
     { 
         const int N = C.rowsize();
@@ -1019,7 +1019,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void FullTempMultMM(
         T alpha, const GenUpperTriMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     // C (+)= alpha * A * B
     { 
         if (B.isrm()) {
@@ -1038,7 +1038,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         T alpha, const GenUpperTriMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
         // C (+)= alpha * A * B
     { 
 #ifdef XDEBUG
@@ -1095,7 +1095,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void FullTempMultMM(
         T alpha, const GenLowerTriMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     // C (+)= alpha * A * B
     { 
         if (B.isrm()) {
@@ -1114,7 +1114,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void BlockTempMultMM(
         T alpha, const GenLowerTriMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     // C (+)= alpha * A * B
     { 
         const int N = C.rowsize();
@@ -1138,7 +1138,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         T alpha, const GenLowerTriMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     // C (+)= alpha * A * B
     { 
 #ifdef XDEBUG

@@ -81,8 +81,8 @@ namespace tmv {
         inline bool issym() const { return isReal(T()) || (sym() == Sym); }
         inline bool isherm() const 
         { return isReal(T()) || (sym() == Herm); }
-        virtual void assignToS(const SymMatrixView<RT>& m) const = 0;
-        virtual void assignToS(const SymMatrixView<CT>& m) const = 0;
+        virtual void assignToS(SymMatrixView<RT> m) const = 0;
+        virtual void assignToS(SymMatrixView<CT> m) const = 0;
         virtual inline ~AssignableToSymMatrix() {}
     };
 

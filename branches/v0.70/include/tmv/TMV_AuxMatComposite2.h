@@ -61,13 +61,13 @@ public:
     inline T getX() const { return x; }
     inline const GENMATRIX1<T1>& getM1() const { return m1; }
     inline const GenMatrix<T2>& getM2() const { return m2; }
-    inline void assignToM(const MatrixView<TMV_RealType(T)>& m0) const
+    inline void assignToM(MatrixView<TMV_RealType(T)> m0) const
     {
         TMVAssert(isReal(T()));
         TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());
         MultMM<false>(x, m1, m2, m0);
     }
-    inline void assignToM(const MatrixView<TMV_ComplexType(T)>& m0) const
+    inline void assignToM(MatrixView<TMV_ComplexType(T)> m0) const
     {
         TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());
         MultMM<false>(x, m1, m2, m0);
@@ -79,8 +79,8 @@ private:
 };
 
 template <class T, class T2, class T3> 
-inline const MatrixView<T>& operator+=(
-    const MatrixView<T>& m, const PRODMM<T,T2,T3>& pmm)
+inline MatrixView<T> operator+=(
+    MatrixView<T> m, const PRODMM<T,T2,T3>& pmm)
 {
     TMVAssert(m.colsize() == pmm.colsize());
     TMVAssert(m.rowsize() == pmm.rowsize());
@@ -89,8 +89,8 @@ inline const MatrixView<T>& operator+=(
 }
 
 template <class T> 
-inline const MatrixView<CT>& operator+=(
-    const MatrixView<CT>& m, const PRODMM<T,T,T>& pmm)
+inline MatrixView<CT> operator+=(
+    MatrixView<CT> m, const PRODMM<T,T,T>& pmm)
 {
     TMVAssert(m.colsize() == pmm.colsize());
     TMVAssert(m.rowsize() == pmm.rowsize());
@@ -99,8 +99,8 @@ inline const MatrixView<CT>& operator+=(
 }
 
 template <class T, class T2, class T3> 
-inline const MatrixView<T>& operator-=(
-    const MatrixView<T>& m, const PRODMM<T,T2,T3>& pmm)
+inline MatrixView<T> operator-=(
+    MatrixView<T> m, const PRODMM<T,T2,T3>& pmm)
 {
     TMVAssert(m.colsize() == pmm.colsize());
     TMVAssert(m.rowsize() == pmm.rowsize());
@@ -109,8 +109,8 @@ inline const MatrixView<T>& operator-=(
 }
 
 template <class T> 
-inline const MatrixView<CT>& operator-=(
-    const MatrixView<CT>& m, const PRODMM<T,T,T>& pmm)
+inline MatrixView<CT> operator-=(
+    MatrixView<CT> m, const PRODMM<T,T,T>& pmm)
 {
     TMVAssert(m.colsize() == pmm.colsize());
     TMVAssert(m.rowsize() == pmm.rowsize());

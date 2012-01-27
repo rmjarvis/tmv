@@ -47,9 +47,6 @@ namespace tmv {
 #define RT TMV_RealType(T)
 
     template <class T> 
-    bool QRPDiv<T>::StrictQRP = false;
-
-    template <class T> 
     struct QRPDiv<T>::QRPDiv_Impl
     {
     public :
@@ -99,8 +96,9 @@ namespace tmv {
             if (inplace) TMVAssert(A == pimpl->QRx); 
             else pimpl->QRx = A;
         }
-        QRP_Decompose(pimpl->QRx,pimpl->beta.view(),pimpl->P,pimpl->signdet,
-                      StrictQRP);
+        QRP_Decompose(
+            pimpl->QRx,pimpl->beta.view(),pimpl->P,pimpl->signdet,
+            QRP_IsStrict());
         int sd = pimpl->QRx.diag().step();
         TMVAssert(pimpl->N1>0);
         const T* endofdiag = pimpl->QRx.diag().cptr() + (pimpl->N1-1)*sd;
@@ -114,19 +112,20 @@ namespace tmv {
     QRPDiv<T>::~QRPDiv() {}
 
     template <class T> template <class T1> 
-    void QRPDiv<T>::doLDivEq(const MatrixView<T1>& m) const
+    void QRPDiv<T>::doLDivEq(MatrixView<T1> m) const
     {
         TMVAssert(pimpl->QRx.isSquare());
         TMVAssert(m.colsize() == pimpl->QRx.colsize());
         if (pimpl->istrans) 
-            QR_LDivEq(pimpl->QRx,pimpl->beta,pimpl->P.getValues(),m.transpose(),
-                      pimpl->N1);
+            QR_LDivEq(
+                pimpl->QRx,pimpl->beta,pimpl->P.getValues(),m.transpose(),
+                pimpl->N1);
         else 
             QR_LDivEq(pimpl->QRx,pimpl->beta,pimpl->P.getValues(),m,pimpl->N1);
     }
 
     template <class T> template <class T1> 
-    void QRPDiv<T>::doRDivEq(const MatrixView<T1>& m) const
+    void QRPDiv<T>::doRDivEq(MatrixView<T1> m) const
     {
         TMVAssert(pimpl->QRx.isSquare());
         TMVAssert(m.rowsize() == pimpl->QRx.rowsize());
@@ -139,7 +138,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void QRPDiv<T>::doLDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         TMVAssert(m.rowsize() == x.rowsize());
         TMVAssert(m.colsize() == (pimpl->istrans ? pimpl->QRx.rowsize() :
@@ -155,7 +154,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void QRPDiv<T>::doRDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         TMVAssert(m.colsize() == x.colsize());
         TMVAssert(m.rowsize() == (pimpl->istrans ? pimpl->QRx.colsize() :
@@ -195,7 +194,7 @@ namespace tmv {
     }                  
 
     template <class T> template <class T1> 
-    void QRPDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
+    void QRPDiv<T>::doMakeInverse(MatrixView<T1> minv) const
     {
         if (pimpl->istrans)
             QR_Inverse(pimpl->QRx,pimpl->beta,pimpl->P.getValues(),
@@ -206,7 +205,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void QRPDiv<T>::doMakeInverseATA(const MatrixView<T>& ata) const
+    void QRPDiv<T>::doMakeInverseATA(MatrixView<T> ata) const
     {
         // At A = Pt Rt R P
         // (At A)^-1 = (Pt Rt R P)^-1 = Pt R^-1 R^-1t P

@@ -113,7 +113,7 @@
 namespace tmv {
 
     template <class T> 
-    T HouseholderReflect(T& x0, const VectorView<T>& x, T& det);
+    T HouseholderReflect(T& x0, VectorView<T> x, T& det);
     // Finds the Householder matrix H which rotates (x0,x) into y e0.
     // The vector v of the Householder matrix is stored
     // in x, except for the first element, which is 1.
@@ -121,12 +121,12 @@ namespace tmv {
 
 #if 0
     template <class T> 
-    T HouseholderReflect(ConjRef<T> x0, const VectorView<T>& x, T& det);
+    T HouseholderReflect(ConjRef<T> x0, VectorView<T> x, T& det);
     template <class T> 
-    T HouseholderReflect(VarConjRef<T> x0, const VectorView<T>& x, T& det);
+    T HouseholderReflect(VarConjRef<T> x0, VectorView<T> x, T& det);
 #else
     template <class T> 
-    inline T HouseholderReflect(ConjRef<T> x0, const VectorView<T>& x, T& det)
+    inline T HouseholderReflect(ConjRef<T> x0, VectorView<T> x, T& det)
     {
         x0.getRef() = TMV_CONJ(x0.getRef());
         return HouseholderReflect(x0.getRef(),x,det);
@@ -136,7 +136,7 @@ namespace tmv {
 
     template <class T> 
     inline T HouseholderReflect(
-        VarConjRef<T> x0, const VectorView<T>& x, T& det)
+        VarConjRef<T> x0, VectorView<T> x, T& det)
     {
         if (x0.isconj()) x0.getRef() = TMV_CONJ(x0.getRef());
         return HouseholderReflect(x0.getRef(),x,det);
@@ -144,10 +144,10 @@ namespace tmv {
 #endif
 
     template <class T> 
-    T HouseholderReflect(const VectorView<T>& x, T& det);
+    T HouseholderReflect(VectorView<T> x, T& det);
 
     template <class T> 
-    T HouseholderReflect(const MatrixView<T>& m, T& det);
+    T HouseholderReflect(MatrixView<T> m, T& det);
     // Multiplies m by a Householder matrix H which rotates
     // the first column into y e0.
     // The vector v of the  Householder matrix is stored
@@ -157,7 +157,7 @@ namespace tmv {
     // (For the first column, this menas that y is the new first element.)
 
     template <class T> 
-    bool HouseholderUnReflect(T& y, const VectorView<T>& x, T& beta);
+    bool HouseholderUnReflect(T& y, VectorView<T> x, T& beta);
     // This is similar, except that the roles of y and x0 are swapped.
     // That is, the final rotated vector y e0 is presumed known, as is 
     // the bulk of the input vector.  
@@ -168,13 +168,13 @@ namespace tmv {
     // The return value is true if successful, false if |y| < |x|.
 #if 0
     template <class T> 
-    bool HouseholderUnReflect(ConjRef<T> y, const VectorView<T>& x, T& beta);
+    bool HouseholderUnReflect(ConjRef<T> y, VectorView<T> x, T& beta);
     template <class T> 
-    bool HouseholderUnReflect(VarConjRef<T> y, const VectorView<T>& x, T& beta);
+    bool HouseholderUnReflect(VarConjRef<T> y, VectorView<T> x, T& beta);
 #else
     template <class T> 
     inline bool HouseholderUnReflect(
-        ConjRef<T> x0, const VectorView<T>& x, T& beta)
+        ConjRef<T> x0, VectorView<T> x, T& beta)
     {
         TMVAssert(TMV_IMAG(x0.getRef()) == TMV_RealType(T)(0));
         return HouseholderUnReflect(x0.getRef(),x,beta);
@@ -182,7 +182,7 @@ namespace tmv {
 
     template <class T> 
     inline bool HouseholderUnReflect(
-        VarConjRef<T> x0, const VectorView<T>& x, T& beta)
+        VarConjRef<T> x0, VectorView<T> x, T& beta)
     {
         TMVAssert(TMV_IMAG(x0.getRef()) == TMV_RealType(T)(0));
         return HouseholderUnReflect(x0.getRef(),x,beta);
@@ -192,7 +192,7 @@ namespace tmv {
     template <class T1, class T2> 
     void HouseholderLMult(
         const GenVector<T1>& v, T1 beta,
-        const VectorView<T2>& m0, const MatrixView<T2>& mx);
+        VectorView<T2> m0, MatrixView<T2> mx);
     // The input vector, v, is taken to be the vector for a  
     // Householder matrix, H.  This routine takes 
     // ( m0 ) <- H ( m0 ) = [ ( m0 ) - beta ( 1 ) ( 1 vt ) ( m0 ) ]
@@ -203,23 +203,23 @@ namespace tmv {
 
     template <class T1, class T2> 
     void HouseholderLMult(
-        const GenVector<T1>& v, T1 beta, const MatrixView<T2>& m);
+        const GenVector<T1>& v, T1 beta, MatrixView<T2> m);
 
     template <class T> 
-    void HouseholderUnpack(T& v0, const VectorView<T>& v, T beta);
+    void HouseholderUnpack(T& v0, VectorView<T> v, T beta);
     // The input vector, v, is taken to be the vector for a  Householder 
     // matrix, H. 
     // (v0,v) is set to Ht times e0.
 
 #if 0
     template <class T> 
-    void HouseholderUnpack(ConjRef<T> v0, const VectorView<T>& v, T beta);
+    void HouseholderUnpack(ConjRef<T> v0, VectorView<T> v, T beta);
     template <class T> 
-    void HouseholderUnpack(VarConjRef<T> v0, const VectorView<T>& v, T beta);
+    void HouseholderUnpack(VarConjRef<T> v0, VectorView<T> v, T beta);
 #else
     template <class T> 
     inline void HouseholderUnpack(
-        ConjRef<T> v0, const VectorView<T>& v, T beta)
+        ConjRef<T> v0, VectorView<T> v, T beta)
     {
         T vv = v0;
         HouseholderUnpack(vv,v,beta);
@@ -228,7 +228,7 @@ namespace tmv {
 
     template <class T> 
     inline void HouseholderUnpack(
-        VarConjRef<T> v0, const VectorView<T>& v, T beta)
+        VarConjRef<T> v0, VectorView<T> v, T beta)
     {
         if (v0.isconj()) {
             T vv = v0;
@@ -241,7 +241,7 @@ namespace tmv {
 #endif
 
     template <class T> 
-    void HouseholderUnpack(const MatrixView<T>& m, T beta);
+    void HouseholderUnpack(MatrixView<T> m, T beta);
     // The input matrix is taken to have a Householder vector
     // stored in the first column (not including the first element). 
     // This routine multiplies the rest of the matrix by the Householder 
@@ -250,7 +250,7 @@ namespace tmv {
 
     template <class T> 
     void BlockHouseholderAugment(
-        const GenMatrix<T>& Y, const UpperTriMatrixView<T>& Z, T beta);
+        const GenMatrix<T>& Y, UpperTriMatrixView<T> Z, T beta);
     // All but the last columns of the input matrices, Y,Z are such that
     // I - Y'Z'Y't is a Block Householder matrix (the product of several
     // individual Householder matrices).
@@ -260,7 +260,7 @@ namespace tmv {
 
     template <class T> 
     void BlockHouseholderMakeZ(
-        const GenMatrix<T>& Y, const UpperTriMatrixView<T>& Z,
+        const GenMatrix<T>& Y, UpperTriMatrixView<T> Z,
         const GenVector<T>& beta);
     // This routine calculates the Z component of the BlockHouseholder
     // formulation for Q.  Y contains the v's for the Householder matrices,
@@ -277,7 +277,7 @@ namespace tmv {
     template <class T, class T2> 
     void BlockHouseholderLMult(
         const GenMatrix<T>& Y, const GenUpperTriMatrix<T>& Z,
-        const MatrixView<T2>& m);
+        MatrixView<T2> m);
     // The input Y,Z are such that (I - YZYt) is a block Householder matrix.
     // The upper square portion of Y is taken to be unit lower triangular.
     // ie. the diagonal and upper triangular portion are not referenced.
@@ -285,13 +285,13 @@ namespace tmv {
     template <class T, class T2> 
     void BlockHouseholderLDiv(
         const GenMatrix<T>& Y, const GenUpperTriMatrix<T>& Z,
-        const MatrixView<T2>& m);
+        MatrixView<T2> m);
     // As above, but m <- (I - YZYt)^-1 m 
 
     template <class T> 
     void BlockHouseholderUnpack(
-        const MatrixView<T>& Y, const GenUpperTriMatrix<T>& Z,
-        const MatrixView<T>& m);
+        MatrixView<T> Y, const GenUpperTriMatrix<T>& Z,
+        MatrixView<T> m);
     // This routine multiplies the rest of the matrix by the 
     // BlockHouseholder matrix Ht, defined by Y,Z.
     // Then Y is unpacked in place.

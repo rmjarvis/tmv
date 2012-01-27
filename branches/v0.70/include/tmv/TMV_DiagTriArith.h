@@ -61,7 +61,7 @@ namespace tmv {
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
         inline const GenUpperTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToU(const UpperTriMatrixView<real_type>& m0) const
+        inline void assignToU(UpperTriMatrixView<real_type> m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
@@ -75,7 +75,7 @@ namespace tmv {
                 AddVV(x1,m1.diag(),m0.diag());
             }
         }
-        inline void assignToU(const UpperTriMatrixView<complex_type>& m0) const
+        inline void assignToU(UpperTriMatrixView<complex_type> m0) const
         { 
             TMVAssert(m0.size() == size());
             TMVAssert(m0.dt() == dt());
@@ -96,8 +96,8 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const UpperTriMatrixView<T>& operator+=(
-        const UpperTriMatrixView<T>& m1, const GenDiagMatrix<T>& m2) 
+    inline UpperTriMatrixView<T> operator+=(
+        UpperTriMatrixView<T> m1, const GenDiagMatrix<T>& m2) 
     {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(!m1.isunit());
@@ -106,8 +106,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator+=(
-        const UpperTriMatrixView<CT>& m1, const GenDiagMatrix<T>& m2) 
+    inline UpperTriMatrixView<CT> operator+=(
+        UpperTriMatrixView<CT> m1, const GenDiagMatrix<T>& m2) 
     { 
         TMVAssert(m1.size() == m2.size());
         TMVAssert(!m1.isunit());
@@ -116,8 +116,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<T>& operator-=(
-        const UpperTriMatrixView<T>& m1, const GenDiagMatrix<T>& m2) 
+    inline UpperTriMatrixView<T> operator-=(
+        UpperTriMatrixView<T> m1, const GenDiagMatrix<T>& m2) 
     { 
         TMVAssert(m1.size() == m2.size());
         TMVAssert(!m1.isunit());
@@ -126,8 +126,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator-=(
-        const UpperTriMatrixView<CT>& m1, const GenDiagMatrix<T>& m2) 
+    inline UpperTriMatrixView<CT> operator-=(
+        UpperTriMatrixView<CT> m1, const GenDiagMatrix<T>& m2) 
     { 
         TMVAssert(m1.size() == m2.size());
         TMVAssert(!m1.isunit());
@@ -136,8 +136,8 @@ namespace tmv {
     }
 
     template <class T, class T2> 
-    inline const UpperTriMatrixView<T>& operator+=(
-        const UpperTriMatrixView<T>& m, const ProdXD<T,T2>& pxm)
+    inline UpperTriMatrixView<T> operator+=(
+        UpperTriMatrixView<T> m, const ProdXD<T,T2>& pxm)
     {
         TMVAssert(m.size() == pxm.size());
         TMVAssert(!m.isunit());
@@ -146,8 +146,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator+=(
-        const UpperTriMatrixView<CT>& m, const ProdXD<T,T>& pxm)
+    inline UpperTriMatrixView<CT> operator+=(
+        UpperTriMatrixView<CT> m, const ProdXD<T,T>& pxm)
     {
         TMVAssert(m.size() == pxm.size());
         TMVAssert(!m.isunit());
@@ -156,8 +156,8 @@ namespace tmv {
     }
 
     template <class T, class T2> 
-    inline const UpperTriMatrixView<T>& operator-=(
-        const UpperTriMatrixView<T>& m, const ProdXD<T,T2>& pxm)
+    inline UpperTriMatrixView<T> operator-=(
+        UpperTriMatrixView<T> m, const ProdXD<T,T2>& pxm)
     {
         TMVAssert(m.size() == pxm.size());
         TMVAssert(!m.isunit());
@@ -166,8 +166,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator-=(
-        const UpperTriMatrixView<CT>& m, const ProdXD<T,T>& pxm)
+    inline UpperTriMatrixView<CT> operator-=(
+        UpperTriMatrixView<CT> m, const ProdXD<T,T>& pxm)
     {
         TMVAssert(m.size() == pxm.size());
         TMVAssert(!m.isunit());
@@ -193,7 +193,7 @@ namespace tmv {
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
         inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToL(const LowerTriMatrixView<real_type>& m0) const
+        inline void assignToL(LowerTriMatrixView<real_type> m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
@@ -207,7 +207,7 @@ namespace tmv {
                 AddVV(x1,m1.diag(),m0.diag());
             }
         }
-        inline void assignToL(const LowerTriMatrixView<complex_type>& m0) const
+        inline void assignToL(LowerTriMatrixView<complex_type> m0) const
         { 
             TMVAssert(m0.size() == size());
             TMVAssert(m0.dt() == dt());
@@ -228,8 +228,8 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const LowerTriMatrixView<T>& operator+=(
-        const LowerTriMatrixView<T>& m1, const GenDiagMatrix<T>& m2) 
+    inline LowerTriMatrixView<T> operator+=(
+        LowerTriMatrixView<T> m1, const GenDiagMatrix<T>& m2) 
     {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(!m1.isunit());
@@ -238,8 +238,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<CT>& operator+=(
-        const LowerTriMatrixView<CT>& m1, const GenDiagMatrix<T>& m2) 
+    inline LowerTriMatrixView<CT> operator+=(
+        LowerTriMatrixView<CT> m1, const GenDiagMatrix<T>& m2) 
     { 
         TMVAssert(m1.size() == m2.size());
         TMVAssert(!m1.isunit());
@@ -248,8 +248,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<T>& operator-=(
-        const LowerTriMatrixView<T>& m1, const GenDiagMatrix<T>& m2) 
+    inline LowerTriMatrixView<T> operator-=(
+        LowerTriMatrixView<T> m1, const GenDiagMatrix<T>& m2) 
     { 
         TMVAssert(m1.size() == m2.size());
         TMVAssert(!m1.isunit());
@@ -258,8 +258,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<CT>& operator-=(
-        const LowerTriMatrixView<CT>& m1, const GenDiagMatrix<T>& m2) 
+    inline LowerTriMatrixView<CT> operator-=(
+        LowerTriMatrixView<CT> m1, const GenDiagMatrix<T>& m2) 
     { 
         TMVAssert(m1.size() == m2.size());
         TMVAssert(!m1.isunit());
@@ -268,8 +268,8 @@ namespace tmv {
     }
 
     template <class T, class T2> 
-    inline const LowerTriMatrixView<T>& operator+=(
-        const LowerTriMatrixView<T>& m, const ProdXD<T,T2>& pxm)
+    inline LowerTriMatrixView<T> operator+=(
+        LowerTriMatrixView<T> m, const ProdXD<T,T2>& pxm)
     {
         TMVAssert(m.size() == pxm.size());
         TMVAssert(!m.isunit());
@@ -278,8 +278,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<CT>& operator+=(
-        const LowerTriMatrixView<CT>& m, const ProdXD<T,T>& pxm)
+    inline LowerTriMatrixView<CT> operator+=(
+        LowerTriMatrixView<CT> m, const ProdXD<T,T>& pxm)
     {
         TMVAssert(m.size() == pxm.size());
         TMVAssert(!m.isunit());
@@ -288,8 +288,8 @@ namespace tmv {
     }
 
     template <class T, class T2> 
-    inline const LowerTriMatrixView<T>& operator-=(
-        const LowerTriMatrixView<T>& m, const ProdXD<T,T2>& pxm)
+    inline LowerTriMatrixView<T> operator-=(
+        LowerTriMatrixView<T> m, const ProdXD<T,T2>& pxm)
     {
         TMVAssert(m.size() == pxm.size());
         TMVAssert(!m.isunit());
@@ -298,8 +298,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<CT>& operator-=(
-        const LowerTriMatrixView<CT>& m, const ProdXD<T,T>& pxm)
+    inline LowerTriMatrixView<CT> operator-=(
+        LowerTriMatrixView<CT> m, const ProdXD<T,T>& pxm)
     {
         TMVAssert(m.size() == pxm.size());
         TMVAssert(!m.isunit());
@@ -349,14 +349,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
         inline const GenUpperTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToU(const UpperTriMatrixView<real_type>& m0) const
+        inline void assignToU(UpperTriMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(m0.dt() == dt());
             MultMM<false>(x,m1,m2,m0);
         }
-        inline void assignToU(const UpperTriMatrixView<complex_type>& m0) const
+        inline void assignToU(UpperTriMatrixView<complex_type> m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(m0.dt() == dt());
@@ -385,14 +385,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
-        inline void assignToU(const UpperTriMatrixView<real_type>& m0) const
+        inline void assignToU(UpperTriMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(m0.dt() == dt());
             MultMM<false>(x,m1,m2,m0);
         }
-        inline void assignToU(const UpperTriMatrixView<complex_type>& m0) const
+        inline void assignToU(UpperTriMatrixView<complex_type> m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(m0.dt() == dt());
@@ -405,8 +405,8 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const UpperTriMatrixView<T>& operator*=(
-        const UpperTriMatrixView<T>& m1, const GenDiagMatrix<T>& m2)
+    inline UpperTriMatrixView<T> operator*=(
+        UpperTriMatrixView<T> m1, const GenDiagMatrix<T>& m2)
     { 
         TMVAssert(!m1.isunit());
         TMVAssert(m1.size() == m2.size());
@@ -415,8 +415,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator*=(
-        const UpperTriMatrixView<CT>& m1, const GenDiagMatrix<T>& m2)
+    inline UpperTriMatrixView<CT> operator*=(
+        UpperTriMatrixView<CT> m1, const GenDiagMatrix<T>& m2)
     { 
         TMVAssert(!m1.isunit());
         TMVAssert(m1.size() == m2.size());
@@ -425,8 +425,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const UpperTriMatrixView<T>& operator+=(
-        const UpperTriMatrixView<T>& m, const ProdDU<T,T1,T2>& pmm)
+    inline UpperTriMatrixView<T> operator+=(
+        UpperTriMatrixView<T> m, const ProdDU<T,T1,T2>& pmm)
     {
         TMVAssert(!m.isunit());
         TMVAssert(m.size() == pmm.size());
@@ -435,8 +435,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator+=(
-        const UpperTriMatrixView<CT>& m, const ProdDU<T,T,T>& pmm)
+    inline UpperTriMatrixView<CT> operator+=(
+        UpperTriMatrixView<CT> m, const ProdDU<T,T,T>& pmm)
     {
         TMVAssert(!m.isunit());
         TMVAssert(m.size() == pmm.size());
@@ -445,8 +445,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const UpperTriMatrixView<T>& operator-=(
-        const UpperTriMatrixView<T>& m, const ProdDU<T,T1,T2>& pmm)
+    inline UpperTriMatrixView<T> operator-=(
+        UpperTriMatrixView<T> m, const ProdDU<T,T1,T2>& pmm)
     { 
         TMVAssert(!m.isunit());
         TMVAssert(m.size() == pmm.size());
@@ -455,8 +455,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator-=(
-        const UpperTriMatrixView<CT>& m, const ProdDU<T,T,T>& pmm)
+    inline UpperTriMatrixView<CT> operator-=(
+        UpperTriMatrixView<CT> m, const ProdDU<T,T,T>& pmm)
     { 
         TMVAssert(!m.isunit());
         TMVAssert(m.size() == pmm.size());
@@ -465,8 +465,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const UpperTriMatrixView<T>& operator+=(
-        const UpperTriMatrixView<T>& m, const ProdUD<T,T1,T2>& pmm)
+    inline UpperTriMatrixView<T> operator+=(
+        UpperTriMatrixView<T> m, const ProdUD<T,T1,T2>& pmm)
     { 
         TMVAssert(!m.isunit());
         TMVAssert(m.size() == pmm.size());
@@ -475,8 +475,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator+=(
-        const UpperTriMatrixView<CT>& m, const ProdUD<T,T,T>& pmm)
+    inline UpperTriMatrixView<CT> operator+=(
+        UpperTriMatrixView<CT> m, const ProdUD<T,T,T>& pmm)
     { 
         TMVAssert(!m.isunit());
         TMVAssert(m.size() == pmm.size());
@@ -485,8 +485,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const UpperTriMatrixView<T>& operator-=(
-        const UpperTriMatrixView<T>& m, const ProdUD<T,T1,T2>& pmm)
+    inline UpperTriMatrixView<T> operator-=(
+        UpperTriMatrixView<T> m, const ProdUD<T,T1,T2>& pmm)
     { 
         TMVAssert(!m.isunit());
         TMVAssert(m.size() == pmm.size());
@@ -495,8 +495,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator-=(
-        const UpperTriMatrixView<CT>& m, const ProdUD<T,T,T>& pmm)
+    inline UpperTriMatrixView<CT> operator-=(
+        UpperTriMatrixView<CT> m, const ProdUD<T,T,T>& pmm)
     { 
         TMVAssert(!m.isunit());
         TMVAssert(m.size() == pmm.size());
@@ -521,14 +521,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
         inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToL(const LowerTriMatrixView<real_type>& m0) const
+        inline void assignToL(LowerTriMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(m0.dt() == dt());
             MultMM<false>(x,m1,m2,m0);
         }
-        inline void assignToL(const LowerTriMatrixView<complex_type>& m0) const
+        inline void assignToL(LowerTriMatrixView<complex_type> m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(m0.dt() == dt());
@@ -557,14 +557,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
-        inline void assignToL(const LowerTriMatrixView<real_type>& m0) const
+        inline void assignToL(LowerTriMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(m0.dt() == dt());
             MultMM<false>(x,m1,m2,m0);
         }
-        inline void assignToL(const LowerTriMatrixView<complex_type>& m0) const
+        inline void assignToL(LowerTriMatrixView<complex_type> m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(m0.dt() == dt());
@@ -577,8 +577,8 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const LowerTriMatrixView<T>& operator*=(
-        const LowerTriMatrixView<T>& m1, const GenDiagMatrix<T>& m2)
+    inline LowerTriMatrixView<T> operator*=(
+        LowerTriMatrixView<T> m1, const GenDiagMatrix<T>& m2)
     { 
         TMVAssert(!m1.isunit());
         TMVAssert(m1.size() == m2.size());
@@ -587,8 +587,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<CT>& operator*=(
-        const LowerTriMatrixView<CT>& m1, const GenDiagMatrix<T>& m2)
+    inline LowerTriMatrixView<CT> operator*=(
+        LowerTriMatrixView<CT> m1, const GenDiagMatrix<T>& m2)
     { 
         TMVAssert(!m1.isunit());
         TMVAssert(m1.size() == m2.size());
@@ -597,8 +597,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const LowerTriMatrixView<T>& operator+=(
-        const LowerTriMatrixView<T>& m, const ProdDL<T,T1,T2>& pmm)
+    inline LowerTriMatrixView<T> operator+=(
+        LowerTriMatrixView<T> m, const ProdDL<T,T1,T2>& pmm)
     { 
         TMVAssert(!m.isunit());
         TMVAssert(m.size() == pmm.size());
@@ -607,48 +607,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<CT>& operator+=(
-        const LowerTriMatrixView<CT>& m, const ProdDL<T,T,T>& pmm)
-    { 
-        TMVAssert(!m.isunit());
-        TMVAssert(m.size() == pmm.size());
-        MultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-        return m; 
-    }
-
-    template <class T, class T1, class T2> 
-    inline const LowerTriMatrixView<T>& operator-=(
-        const LowerTriMatrixView<T>& m, const ProdDL<T,T1,T2>& pmm)
-    { 
-        TMVAssert(!m.isunit());
-        TMVAssert(m.size() == pmm.size());
-        MultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-        return m; 
-    }
-
-    template <class T> 
-    inline const LowerTriMatrixView<CT>& operator-=(
-        const LowerTriMatrixView<CT>& m, const ProdDL<T,T,T>& pmm)
-    { 
-        TMVAssert(!m.isunit());
-        TMVAssert(m.size() == pmm.size());
-        MultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-        return m; 
-    }
-
-    template <class T, class T1, class T2> 
-    inline const LowerTriMatrixView<T>& operator+=(
-        const LowerTriMatrixView<T>& m, const ProdLD<T,T1,T2>& pmm)
-    { 
-        TMVAssert(!m.isunit());
-        TMVAssert(m.size() == pmm.size());
-        MultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
-        return m; 
-    }
-
-    template <class T> 
-    inline const LowerTriMatrixView<CT>& operator+=(
-        const LowerTriMatrixView<CT>& m, const ProdLD<T,T,T>& pmm)
+    inline LowerTriMatrixView<CT> operator+=(
+        LowerTriMatrixView<CT> m, const ProdDL<T,T,T>& pmm)
     { 
         TMVAssert(!m.isunit());
         TMVAssert(m.size() == pmm.size());
@@ -657,8 +617,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const LowerTriMatrixView<T>& operator-=(
-        const LowerTriMatrixView<T>& m, const ProdLD<T,T1,T2>& pmm)
+    inline LowerTriMatrixView<T> operator-=(
+        LowerTriMatrixView<T> m, const ProdDL<T,T1,T2>& pmm)
     { 
         TMVAssert(!m.isunit());
         TMVAssert(m.size() == pmm.size());
@@ -667,8 +627,48 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<CT>& operator-=(
-        const LowerTriMatrixView<CT>& m, const ProdLD<T,T,T>& pmm)
+    inline LowerTriMatrixView<CT> operator-=(
+        LowerTriMatrixView<CT> m, const ProdDL<T,T,T>& pmm)
+    { 
+        TMVAssert(!m.isunit());
+        TMVAssert(m.size() == pmm.size());
+        MultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T, class T1, class T2> 
+    inline LowerTriMatrixView<T> operator+=(
+        LowerTriMatrixView<T> m, const ProdLD<T,T1,T2>& pmm)
+    { 
+        TMVAssert(!m.isunit());
+        TMVAssert(m.size() == pmm.size());
+        MultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T> 
+    inline LowerTriMatrixView<CT> operator+=(
+        LowerTriMatrixView<CT> m, const ProdLD<T,T,T>& pmm)
+    { 
+        TMVAssert(!m.isunit());
+        TMVAssert(m.size() == pmm.size());
+        MultMM<true>(pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T, class T1, class T2> 
+    inline LowerTriMatrixView<T> operator-=(
+        LowerTriMatrixView<T> m, const ProdLD<T,T1,T2>& pmm)
+    { 
+        TMVAssert(!m.isunit());
+        TMVAssert(m.size() == pmm.size());
+        MultMM<true>(-pmm.getX(),pmm.getM1(),pmm.getM2(),m); 
+        return m; 
+    }
+
+    template <class T> 
+    inline LowerTriMatrixView<CT> operator-=(
+        LowerTriMatrixView<CT> m, const ProdLD<T,T,T>& pmm)
     { 
         TMVAssert(!m.isunit());
         TMVAssert(m.size() == pmm.size());
@@ -740,14 +740,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
-        inline void assignToU(const UpperTriMatrixView<real_type>& m0) const
+        inline void assignToU(UpperTriMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit());
             MultMM<false>(x,DiagMatrix<T2>(m2.inverse()),m1,m0);
         }
-        inline void assignToU(const UpperTriMatrixView<complex_type>& m0) const
+        inline void assignToU(UpperTriMatrixView<complex_type> m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit());
@@ -776,14 +776,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
-        inline void assignToU(const UpperTriMatrixView<real_type>& m0) const
+        inline void assignToU(UpperTriMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit());
             MultMM<false>(x,m1,DiagMatrix<T2>(m2.inverse()),m0);
         }
-        inline void assignToU(const UpperTriMatrixView<complex_type>& m0) const
+        inline void assignToU(UpperTriMatrixView<complex_type> m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit());
@@ -796,23 +796,23 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const UpperTriMatrixView<T>& operator/=(
-        const UpperTriMatrixView<T>& m1, const GenDiagMatrix<T>& m2)
+    inline UpperTriMatrixView<T> operator/=(
+        UpperTriMatrixView<T> m1, const GenDiagMatrix<T>& m2)
     { MultMM<false>(T(1),DiagMatrix<T>(m2.inverse()),m1,m1); return m1; }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator/=(
-        const UpperTriMatrixView<CT>& m1, const GenDiagMatrix<T>& m2)
+    inline UpperTriMatrixView<CT> operator/=(
+        UpperTriMatrixView<CT> m1, const GenDiagMatrix<T>& m2)
     { MultMM<false>(T(1),DiagMatrix<T>(m2.inverse()),m1,m1); return m1; }
 
     template <class T> 
-    inline const UpperTriMatrixView<T>& operator%=(
-        const UpperTriMatrixView<T>& m1, const GenDiagMatrix<T>& m2)
+    inline UpperTriMatrixView<T> operator%=(
+        UpperTriMatrixView<T> m1, const GenDiagMatrix<T>& m2)
     { MultMM<false>(T(1),m1,DiagMatrix<T>(m2.inverse()),m1); return m1; }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator%=(
-        const UpperTriMatrixView<CT>& m1, const GenDiagMatrix<T>& m2)
+    inline UpperTriMatrixView<CT> operator%=(
+        UpperTriMatrixView<CT> m1, const GenDiagMatrix<T>& m2)
     { MultMM<false>(T(1),m1,DiagMatrix<T>(m2.inverse()),m1); return m1; }
 
 
@@ -833,14 +833,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
-        inline void assignToL(const LowerTriMatrixView<real_type>& m0) const
+        inline void assignToL(LowerTriMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit());
             MultMM<false>(x,DiagMatrix<T2>(m2.inverse()),m1,m0);
         }
-        inline void assignToL(const LowerTriMatrixView<complex_type>& m0) const
+        inline void assignToL(LowerTriMatrixView<complex_type> m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit());
@@ -869,14 +869,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
-        inline void assignToL(const LowerTriMatrixView<real_type>& m0) const
+        inline void assignToL(LowerTriMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit());
             MultMM<false>(x,m1,DiagMatrix<T2>(m2.inverse()),m0);
         }
-        inline void assignToL(const LowerTriMatrixView<complex_type>& m0) const
+        inline void assignToL(LowerTriMatrixView<complex_type> m0) const
         {
             TMVAssert(m0.size() == size());
             TMVAssert(!m0.isunit());
@@ -889,23 +889,23 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const LowerTriMatrixView<T>& operator/=(
-        const LowerTriMatrixView<T>& m1, const GenDiagMatrix<T>& m2)
+    inline LowerTriMatrixView<T> operator/=(
+        LowerTriMatrixView<T> m1, const GenDiagMatrix<T>& m2)
     { MultMM<false>(T(1),DiagMatrix<T>(m2.inverse()),m1,m1); return m1; }
 
     template <class T> 
-    inline const LowerTriMatrixView<CT>& operator/=(
-        const LowerTriMatrixView<CT>& m1, const GenDiagMatrix<T>& m2)
+    inline LowerTriMatrixView<CT> operator/=(
+        LowerTriMatrixView<CT> m1, const GenDiagMatrix<T>& m2)
     { MultMM<false>(T(1),DiagMatrix<T>(m2.inverse()),m1,m1); return m1; }
 
     template <class T> 
-    inline const LowerTriMatrixView<T>& operator%=(
-        const LowerTriMatrixView<T>& m1, const GenDiagMatrix<T>& m2)
+    inline LowerTriMatrixView<T> operator%=(
+        LowerTriMatrixView<T> m1, const GenDiagMatrix<T>& m2)
     { MultMM<false>(T(1),m1,DiagMatrix<T>(m2.inverse()),m1); return m1; }
 
     template <class T> 
-    inline const LowerTriMatrixView<CT>& operator%=(
-        const LowerTriMatrixView<CT>& m1, const GenDiagMatrix<T>& m2)
+    inline LowerTriMatrixView<CT> operator%=(
+        LowerTriMatrixView<CT> m1, const GenDiagMatrix<T>& m2)
     { MultMM<false>(T(1),m1,DiagMatrix<T>(m2.inverse()),m1); return m1; }
 
 

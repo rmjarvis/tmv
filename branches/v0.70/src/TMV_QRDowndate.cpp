@@ -89,8 +89,7 @@ namespace tmv {
 #endif
 
     template <class T> 
-    static void NonBlockQRDowndate(
-        const UpperTriMatrixView<T>& R, const MatrixView<T>& A)
+    static void NonBlockQRDowndate(UpperTriMatrixView<T> R, MatrixView<T> A)
     {
         TMVAssert(A.rowsize() == R.size());
         TMVAssert(A.rowsize() > 0);
@@ -110,7 +109,7 @@ namespace tmv {
 
         for(int j=0;j<N;++j,Rdiag+=ds) {
             // Apply the Householder Reflection for this column
-            const VectorView<T> v = A.col(j);
+            VectorView<T> v = A.col(j);
             T beta;
             if (!(HouseholderUnReflect(*Rdiag,v,beta))) {
 #ifdef NOTHROW
@@ -138,8 +137,8 @@ namespace tmv {
 
     template <class T> 
     static void RecursiveQRDowndate(
-        const UpperTriMatrixView<T>& R, const MatrixView<T>& A,
-        const UpperTriMatrixView<T>& Z, bool makeZ)
+        UpperTriMatrixView<T> R, MatrixView<T> A,
+        UpperTriMatrixView<T> Z, bool makeZ)
     {
         TMVAssert(A.rowsize() == R.size());
         TMVAssert(A.rowsize() > 0);
@@ -273,8 +272,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static void BlockQRDowndate(
-        const UpperTriMatrixView<T>& R, const MatrixView<T>& A)
+    static void BlockQRDowndate(UpperTriMatrixView<T> R, MatrixView<T> A)
     {
         TMVAssert(A.rowsize() == R.size());
         TMVAssert(A.rowsize() > 0);
@@ -324,8 +322,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void QR_Downdate(
-        const UpperTriMatrixView<T>& R, const MatrixView<T>& A)
+    void QR_Downdate(UpperTriMatrixView<T> R, MatrixView<T> A)
     {
         TMVAssert(A.rowsize() == R.size());
         TMVAssert(R.ct() == NonConj);

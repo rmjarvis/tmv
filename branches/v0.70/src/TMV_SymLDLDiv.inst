@@ -4,10 +4,10 @@
 #define DefDivEq(T,T1)\
   template void LDL_LDivEq(const GenSymMatrix<T1 >& L,  \
       const GenVector<T1 >& xD, const int* P, \
-      const MatrixView<T >& m); \
+      MatrixView<T > m); \
   template void LDL_RDivEq(const GenSymMatrix<T1 >& L,  \
       const GenVector<T1 >& xD, const int* P, \
-      const MatrixView<T >& m); \
+      MatrixView<T > m); \
 
 DefDivEq(T,T)
 #ifdef INST_COMPLEX

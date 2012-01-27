@@ -224,7 +224,7 @@ namespace tmv {
     BandLUDiv<T>::~BandLUDiv() {}
 
     template <class T> template <class T1> 
-    void BandLUDiv<T>::doLDivEq(const MatrixView<T1>& m) const
+    void BandLUDiv<T>::doLDivEq(MatrixView<T1> m) const
     {
         if (pimpl->istrans) 
             LU_RDivEq(pimpl->LUx,pimpl->P.getValues(),m.transpose());
@@ -232,7 +232,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void BandLUDiv<T>::doRDivEq(const MatrixView<T1>& m) const
+    void BandLUDiv<T>::doRDivEq(MatrixView<T1> m) const
     {
         if (pimpl->istrans) 
             LU_LDivEq(pimpl->LUx,pimpl->P.getValues(),m.transpose());
@@ -241,7 +241,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void BandLUDiv<T>::doLDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         if (pimpl->istrans) 
             LU_RDivEq(pimpl->LUx,pimpl->P.getValues(),(x=m).transpose());
@@ -250,7 +250,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void BandLUDiv<T>::doRDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         if (pimpl->istrans) 
             LU_LDivEq(pimpl->LUx,pimpl->P.getValues(),(x=m).transpose());
@@ -283,7 +283,7 @@ namespace tmv {
     }                  
 
     template <class T> template <class T1> 
-    void BandLUDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
+    void BandLUDiv<T>::doMakeInverse(MatrixView<T1> minv) const
     {
         if (pimpl->istrans)
             LU_Inverse(pimpl->LUx,pimpl->P.getValues(),minv.transpose());
@@ -292,7 +292,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void BandLUDiv<T>::doMakeInverseATA(const MatrixView<T>& ata) const
+    void BandLUDiv<T>::doMakeInverseATA(MatrixView<T> ata) const
     {
         // See corresponding routine in TMV_LUD.cpp
         if (pimpl->istrans) {

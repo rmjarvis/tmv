@@ -67,9 +67,9 @@ namespace tmv {
 
     template <class T> 
     static void NonBlockBidiagonalize(
-        const MatrixView<T>& A, const VectorView<T>& Ubeta,
-        const VectorView<T>& Vtbeta, const VectorView<RT>& D,
-        const VectorView<RT>& E, T& signdet)
+        MatrixView<T> A, VectorView<T> Ubeta,
+        VectorView<T> Vtbeta, VectorView<RT> D,
+        VectorView<RT> E, T& signdet)
     {
 #ifdef XDEBUG
         //cout<<"Start NonBlockBidiag: A = "<<A<<endl;
@@ -155,9 +155,9 @@ namespace tmv {
 
     template <class T> 
     static void BlockBidiagonalize(
-        const MatrixView<T>& A, const VectorView<T>& Ubeta,
-        const VectorView<T>& Vtbeta, const VectorView<RT>& D,
-        const VectorView<RT>& E, T& signdet)
+        MatrixView<T> A, VectorView<T> Ubeta,
+        VectorView<T> Vtbeta, VectorView<RT> D,
+        VectorView<RT> E, T& signdet)
     {
         // Normally we keep the Z matrix for block Householder matrices where 
         // the block Householder is I - YZYt (and Z is upper triangular).
@@ -432,9 +432,9 @@ namespace tmv {
 
     template <class T> 
     static inline void NonLapBidiagonalize(
-        const MatrixView<T>& A, const VectorView<T>& Ubeta,
-        const VectorView<T>& Vtbeta, const VectorView<RT>& D,
-        const VectorView<RT>& E, T& signdet)
+        MatrixView<T> A, VectorView<T> Ubeta,
+        VectorView<T> Vtbeta, VectorView<RT> D,
+        VectorView<RT> E, T& signdet)
     {
         TMVAssert(A.rowsize() <= A.colsize());
         TMVAssert(A.rowsize() > 0);
@@ -452,16 +452,16 @@ namespace tmv {
 #ifdef LAP
     template <class T> 
     static inline void LapBidiagonalize(
-        const MatrixView<T>& A, const VectorView<T>& Ubeta,
-        const VectorView<T>& Vtbeta, const VectorView<RT>& D,
-        const VectorView<RT>& E, T& signdet)
+        MatrixView<T> A, VectorView<T> Ubeta,
+        VectorView<T> Vtbeta, VectorView<RT> D,
+        VectorView<RT> E, T& signdet)
     { NonLapBidiagonalize(A,Ubeta,Vtbeta,D,E,signdet); }
 #ifdef INST_DOUBLE
     template <> 
     void LapBidiagonalize(
-        const MatrixView<double>& A, const VectorView<double>& Ubeta,
-        const VectorView<double>& Vtbeta, const VectorView<double>& D,
-        const VectorView<double>& E, double& signdet)
+        MatrixView<double> A, VectorView<double> Ubeta,
+        VectorView<double> Vtbeta, VectorView<double> D,
+        VectorView<double> E, double& signdet)
     {
         //std::cout<<"LapBidiagonalize double"<<std::endl;
         TMVAssert(A.iscm());
@@ -525,10 +525,10 @@ namespace tmv {
     }
     template <> 
     void LapBidiagonalize(
-        const MatrixView<std::complex<double> >& A, 
-        const VectorView<std::complex<double> >& Ubeta, 
-        const VectorView<std::complex<double> >& Vtbeta,
-        const VectorView<double>& D, const VectorView<double>& E,
+        MatrixView<std::complex<double> > A, 
+        VectorView<std::complex<double> > Ubeta, 
+        VectorView<std::complex<double> > Vtbeta,
+        VectorView<double> D, VectorView<double> E,
         std::complex<double>& signdet)
     {
         //std::cout<<"LapBidiagonalize complex double"<<std::endl;
@@ -595,9 +595,9 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     void LapBidiagonalize(
-        const MatrixView<float>& A, const VectorView<float>& Ubeta,
-        const VectorView<float>& Vtbeta, const VectorView<float>& D,
-        const VectorView<float>& E, float& signdet)
+        MatrixView<float> A, VectorView<float> Ubeta,
+        VectorView<float> Vtbeta, VectorView<float> D,
+        VectorView<float> E, float& signdet)
     {
         //std::cout<<"LapBidiagonalize float"<<std::endl;
         TMVAssert(A.iscm());
@@ -658,10 +658,10 @@ namespace tmv {
     }
     template <> 
     void LapBidiagonalize(
-        const MatrixView<std::complex<float> >& A, 
-        const VectorView<std::complex<float> >& Ubeta, 
-        const VectorView<std::complex<float> >& Vtbeta,
-        const VectorView<float>& D, const VectorView<float>& E,
+        MatrixView<std::complex<float> > A, 
+        VectorView<std::complex<float> > Ubeta, 
+        VectorView<std::complex<float> > Vtbeta,
+        VectorView<float> D, VectorView<float> E,
         std::complex<float>& signdet)
     {
         //std::cout<<"LapBidiagonalize complex float"<<std::endl;
@@ -734,9 +734,9 @@ namespace tmv {
 
     template <class T> 
     void Bidiagonalize(
-        const MatrixView<T>& A, const VectorView<T>& Ubeta,
-        const VectorView<T>& Vtbeta, const VectorView<RT>& D,
-        const VectorView<RT>& E, T& signdet)
+        MatrixView<T> A, VectorView<T> Ubeta,
+        VectorView<T> Vtbeta, VectorView<RT> D,
+        VectorView<RT> E, T& signdet)
     {
 #ifdef XDEBUG
         std::cout<<"Start Bidiagonalize:\n";

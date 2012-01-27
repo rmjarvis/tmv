@@ -3,7 +3,7 @@
 
 #define DefSymMult(T,T1)\
 template void HouseholderLRMult(const GenVector<T1 >& v, T1 beta, \
-    const SymMatrixView<T >& m); \
+    SymMatrixView<T > m); \
 
 DefSymMult(T,T)
 #ifdef INST_COMPLEX

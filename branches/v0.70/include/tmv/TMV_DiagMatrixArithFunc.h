@@ -44,64 +44,64 @@ namespace tmv {
     template <bool add, class T, class Ta,  class Tx> 
     void MultMV(
         const T alpha, const GenDiagMatrix<Ta>& A,
-        const GenVector<Tx>& x, const VectorView<T>& y);
+        const GenVector<Tx>& x, VectorView<T> y);
 
     // B += alpha * A 
     template <class T, class Ta> 
     inline void AddMM(
-        const T alpha, const GenDiagMatrix<Ta>& A, const DiagMatrixView<T>& B)
+        const T alpha, const GenDiagMatrix<Ta>& A, DiagMatrixView<T> B)
     { AddVV(alpha,A.diag(),B.diag()); }
 
     template <class T, class Ta> 
     inline void AddMM(
-        const T alpha, const GenDiagMatrix<Ta>& A, const MatrixView<T>& B)
+        const T alpha, const GenDiagMatrix<Ta>& A, MatrixView<T> B)
     { AddVV(alpha,A.diag(),B.diag()); }
 
     // C = alpha * A + beta * B
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenDiagMatrix<Ta>& A, 
-        const T beta, const GenDiagMatrix<Tb>& B, const DiagMatrixView<T>& C)
+        const T beta, const GenDiagMatrix<Tb>& B, DiagMatrixView<T> C)
     { AddVV(alpha,A.diag(),beta,B.diag(),C.diag()); }
 
     template <class T, class Ta, class Tb> 
     void AddMM(
         const T alpha, const GenDiagMatrix<Ta>& A, 
-        const T beta, const GenMatrix<Tb>& B, const MatrixView<T>& C);
+        const T beta, const GenMatrix<Tb>& B, MatrixView<T> C);
 
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenMatrix<Ta>& A, 
-        const T beta, const GenDiagMatrix<Tb>& B, const MatrixView<T>& C)
+        const T beta, const GenDiagMatrix<Tb>& B, MatrixView<T> C)
     { AddMM(beta,B,alpha,A,C); }
 
     // C (+)= alpha * A * B
     template <class T, class Ta> 
     void MultEqMM(
         const T alpha,
-        const GenDiagMatrix<Ta>& A, const MatrixView<T>& B);
+        const GenDiagMatrix<Ta>& A, MatrixView<T> B);
 
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenDiagMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C);
+        MatrixView<T> C);
 
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenDiagMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     { MultMM<add>(alpha,B,A.transpose(),C.transpose()); }
 
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const T alpha, const GenDiagMatrix<Ta>& A, const GenDiagMatrix<Tb>& B,
-        const DiagMatrixView<T>& C)
+        DiagMatrixView<T> C)
     { MultMV<add>(alpha,A,B.diag(),C.diag()); }
 
     template <bool add, class T, class Ta, class Tb> 
     inline void ElemMultMM(
         const T alpha, const GenDiagMatrix<Ta>& A, const GenDiagMatrix<Tb>& B,
-        const DiagMatrixView<T>& C)
+        DiagMatrixView<T> C)
     { ElemMultVV<add>(alpha,A.diag(),B.diag(),C.diag()); }
 
     template <class T> 
@@ -123,113 +123,113 @@ namespace tmv {
     template <bool add, class T, class Ta,  class Tx> 
     inline void MultMV(
         const T alpha, const GenDiagMatrix<Ta>& A,
-        const GenVector<Tx>& x, const VectorView<CT>& y)
+        const GenVector<Tx>& x, VectorView<CT> y)
     { MultMV<add>(CT(alpha),A,x,y); }
 
     template <class T, class Ta> 
     inline void AddMM(
-        const T alpha, const GenDiagMatrix<Ta>& A, const DiagMatrixView<CT>& B)
+        const T alpha, const GenDiagMatrix<Ta>& A, DiagMatrixView<CT> B)
     { AddMM(CT(alpha),A,B); }
 
     template <class T, class Ta> 
     inline void AddMM(
-        const T alpha, const GenDiagMatrix<Ta>& A, const MatrixView<CT>& B)
+        const T alpha, const GenDiagMatrix<Ta>& A, MatrixView<CT> B)
     { AddMM(CT(alpha),A,B); }
 
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenDiagMatrix<Ta>& A, 
-        const T beta, const GenDiagMatrix<Tb>& B, const DiagMatrixView<CT>& C)
+        const T beta, const GenDiagMatrix<Tb>& B, DiagMatrixView<CT> C)
     { AddMM(CT(alpha),A,CT(beta),B,C); }
 
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenDiagMatrix<Ta>& A, 
-        const T beta, const GenMatrix<Tb>& B, const MatrixView<CT>& C)
+        const T beta, const GenMatrix<Tb>& B, MatrixView<CT> C)
     { AddMM(CT(alpha),A,CT(beta),B,C); }
 
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenMatrix<Ta>& A, 
-        const T beta, const GenDiagMatrix<Tb>& B, const MatrixView<CT>& C)
+        const T beta, const GenDiagMatrix<Tb>& B, MatrixView<CT> C)
     { AddMM(CT(alpha),A,CT(beta),B,C); }
 
     template <class T, class Ta> 
     inline void MultEqMM(const T alpha,
-                         const GenDiagMatrix<Ta>& A, const MatrixView<CT>& B)
+                         const GenDiagMatrix<Ta>& A, MatrixView<CT> B)
     { MultEqMM(CT(alpha),A,B); }
 
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const T alpha, const GenDiagMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<CT>& C)
+        MatrixView<CT> C)
     { MultMM<add>(CT(alpha),A,B,C); }
 
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenDiagMatrix<Tb>& B,
-        const MatrixView<CT>& C)
+        MatrixView<CT> C)
     { MultMM<add>(CT(alpha),A,B,C); }
 
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const T alpha, const GenDiagMatrix<Ta>& A, const GenDiagMatrix<Tb>& B,
-        const DiagMatrixView<CT>& C)
+        DiagMatrixView<CT> C)
     { MultMM<add>(CT(alpha),A,B,C); }
 
     template <bool add, class T, class Ta, class Tb> 
     inline void ElemMultMM(
         const T alpha, const GenDiagMatrix<Ta>& A, const GenDiagMatrix<Tb>& B,
-        const DiagMatrixView<CT>& C)
+        DiagMatrixView<CT> C)
     { ElemMultMM<add>(CT(alpha),A,B,C); }
 
     // Specialize disallowed complex combinations:
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMV(
         const CT , const GenDiagMatrix<Ta>& ,
-        const GenVector<Tb>& , const VectorView<T>& )
+        const GenVector<Tb>& , VectorView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const CT , const GenDiagMatrix<Ta>& , 
-        const CT , const GenDiagMatrix<Ta>& , const DiagMatrixView<T>& )
+        const CT , const GenDiagMatrix<Ta>& , DiagMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const CT , const GenDiagMatrix<Ta>& , 
-        const CT , const GenMatrix<Tb>& , const MatrixView<T>& )
+        const CT , const GenMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const CT , const GenMatrix<Ta>& , 
-        const CT , const GenDiagMatrix<Tb>& , const MatrixView<T>& )
+        const CT , const GenDiagMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const CT , const GenDiagMatrix<Ta>& , const GenMatrix<Tb>& ,
-        const MatrixView<T>& )
+        MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const CT , const GenMatrix<Ta>& , const GenDiagMatrix<Tb>& ,
-        const MatrixView<T>& )
+        MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const CT , const GenDiagMatrix<Ta>& , const GenDiagMatrix<Tb>& ,
-        const DiagMatrixView<T>& )
+        DiagMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <bool add, class T, class Ta, class Tb> 
     inline void ElemMultMM(
         const CT , const GenDiagMatrix<Ta>& , const GenDiagMatrix<Tb>& ,
-        const DiagMatrixView<T>& )
+        DiagMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
 }

@@ -60,7 +60,7 @@ namespace tmv {
 
     template <class T> 
     static void NonBlockGetQFromQR(
-        const MatrixView<T>& Q, const GenVector<T>& beta)
+        MatrixView<T> Q, const GenVector<T>& beta)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
@@ -84,7 +84,7 @@ namespace tmv {
 
     template <class T> 
     static void BlockGetQFromQR(
-        const MatrixView<T>& Q, const GenVector<T>& beta)
+        MatrixView<T> Q, const GenVector<T>& beta)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
@@ -120,7 +120,7 @@ namespace tmv {
 
     template <class T> 
     static inline void NonLapGetQFromQR(
-        const MatrixView<T>& Q, const GenVector<T>& beta)
+        MatrixView<T> Q, const GenVector<T>& beta)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
@@ -133,12 +133,12 @@ namespace tmv {
 #ifdef LAP
     template <class T> 
     static inline void LapGetQFromQR(
-        const MatrixView<T>& Q, const GenVector<T>& beta)
+        MatrixView<T> Q, const GenVector<T>& beta)
     { NonLapGetQFromQR(Q,beta); }
 #ifdef INST_DOUBLE
     template <> 
     void LapGetQFromQR(
-        const MatrixView<double>& Q, const GenVector<double>& beta)
+        MatrixView<double> Q, const GenVector<double>& beta)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
@@ -205,7 +205,7 @@ namespace tmv {
     }
     template <> 
     void LapGetQFromQR(
-        const MatrixView<std::complex<double> >& Q,
+        MatrixView<std::complex<double> > Q,
         const GenVector<std::complex<double> >& beta)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
@@ -280,7 +280,7 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     void LapGetQFromQR(
-        const MatrixView<float>& Q, const GenVector<float>& beta)
+        MatrixView<float> Q, const GenVector<float>& beta)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
@@ -347,7 +347,7 @@ namespace tmv {
     }
     template <> 
     void LapGetQFromQR(
-        const MatrixView<std::complex<float> >& Q,
+        MatrixView<std::complex<float> > Q,
         const GenVector<std::complex<float> >& beta)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
@@ -422,7 +422,7 @@ namespace tmv {
 #endif
 
     template <class T> 
-    void GetQFromQR(const MatrixView<T>& Q, const GenVector<T>& beta)
+    void GetQFromQR(MatrixView<T> Q, const GenVector<T>& beta)
     {
         // Extract the Q matrix from a packed Q matrix
         TMVAssert(Q.colsize() >= Q.rowsize());

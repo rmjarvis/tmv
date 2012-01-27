@@ -3,9 +3,9 @@
 
 #define DefR1(T,Tx)\
   template void RankKUpdate<true>(const T alpha, \
-      const GenUpperTriMatrix<Tx >& x, const SymMatrixView<T >& A); \
+      const GenUpperTriMatrix<Tx >& x, SymMatrixView<T > A); \
   template void RankKUpdate<false>(const T alpha, \
-      const GenUpperTriMatrix<Tx >& x, const SymMatrixView<T >& A); \
+      const GenUpperTriMatrix<Tx >& x, SymMatrixView<T > A); \
 
 DefR1(T,T)
 #ifdef INST_COMPLEX

@@ -50,7 +50,7 @@ using std::endl;
 namespace tmv {
 
     template <class T> 
-    static void NonLapLUInverse(const MatrixView<T>& minv)
+    static void NonLapLUInverse(MatrixView<T> minv)
     {
         // m = P L U
         // m^-1 = U^-1 L^-1 Pt
@@ -70,11 +70,11 @@ namespace tmv {
 
 #ifdef ALAP
     template <class T> 
-    static inline void LapLUInverse(const MatrixView<T>& minv)
+    static inline void LapLUInverse(MatrixView<T> minv)
     { NonLapLUInverse(minv); }
 #ifdef INST_DOUBLE
     template <> 
-    void LapLUInverse(const MatrixView<double>& minv)
+    void LapLUInverse(MatrixView<double> minv)
     {
         TMVAssert(minv.isSquare());
         TMVAssert(minv.iscm());
@@ -112,7 +112,7 @@ namespace tmv {
 #endif
     }
     template <> 
-    void LapLUInverse(const MatrixView<std::complex<double> >& minv)
+    void LapLUInverse(MatrixView<std::complex<double> > minv)
     {
         TMVAssert(minv.isSquare());
         TMVAssert(minv.iscm());
@@ -152,7 +152,7 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <> 
-    void LapLUInverse(const MatrixView<float>& minv)
+    void LapLUInverse(MatrixView<float> minv)
     {
         TMVAssert(minv.isSquare());
         TMVAssert(minv.iscm());
@@ -190,7 +190,7 @@ namespace tmv {
 #endif
     }
     template <> 
-    void LapLUInverse(const MatrixView<std::complex<float> >& minv)
+    void LapLUInverse(MatrixView<std::complex<float> > minv)
     {
         TMVAssert(minv.isSquare());
         TMVAssert(minv.iscm());
@@ -232,7 +232,7 @@ namespace tmv {
 
     template <class T, class T1> 
     void LU_Inverse(
-        const GenMatrix<T1>& LUx, const int* P, const MatrixView<T>& minv)
+        const GenMatrix<T1>& LUx, const int* P, MatrixView<T> minv)
     {
         //std::cout<<"Start LU_Inverse"<<std::endl;
         //std::cout<<"LUx = "<<LUx<<std::endl;

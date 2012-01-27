@@ -79,13 +79,13 @@ namespace tmv {
         inline int size() const { return v.size(); }
         inline T getX() const { return x; }
         inline const GenVector<Tv>& getV() const { return v; }
-        inline void assignToV(const VectorView<real_type>& v0) const
+        inline void assignToV(VectorView<real_type> v0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(v0.size() == size());
             MultXV(x,v,v0);
         }
-        inline void assignToV(const VectorView<complex_type>& v0) const
+        inline void assignToV(VectorView<complex_type> v0) const
         {
             TMVAssert(v0.size() == size());
             MultXV(x,v,v0);
@@ -96,35 +96,35 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const VectorView<T>& operator*=(const VectorView<T>& v1, T x2)
+    inline VectorView<T> operator*=(VectorView<T> v1, T x2)
     { MultXV(x2,v1); return v1; }
 
     template <class T> 
-    inline const VectorView<CT>& operator*=(const VectorView<CT>& v1, T x2)
+    inline VectorView<CT> operator*=(VectorView<CT> v1, T x2)
     { MultXV(T(x2),v1); return v1; }
 
     template <class T> 
-    inline const VectorView<CT>& operator*=(const VectorView<CT>& v1, CCT x2)
+    inline VectorView<CT> operator*=(VectorView<CT> v1, CCT x2)
     { MultXV(CT(x2),v1); return v1; }
 
     template <class T> 
-    inline const VectorView<CT>& operator*=(const VectorView<CT>& v1, VCT x2)
+    inline VectorView<CT> operator*=(VectorView<CT> v1, VCT x2)
     { MultXV(CT(x2),v1); return v1; }
 
     template <class T> 
-    inline const VectorView<T>& operator/=(const VectorView<T>& v1, T x2)
+    inline VectorView<T> operator/=(VectorView<T> v1, T x2)
     { MultXV(TMV_InverseOf(x2),v1); return v1; }
 
     template <class T> 
-    inline const VectorView<CT>& operator/=(const VectorView<CT>& v1, T x2)
+    inline VectorView<CT> operator/=(VectorView<CT> v1, T x2)
     { MultXV(TMV_InverseOf(x2),v1); return v1; }
 
     template <class T> 
-    inline const VectorView<CT>& operator/=(const VectorView<CT>& v1, CCT x2)
+    inline VectorView<CT> operator/=(VectorView<CT> v1, CCT x2)
     { MultXV(TMV_InverseOf(CT(x2)),v1); return v1; }
 
     template <class T> 
-    inline const VectorView<CT>& operator/=(const VectorView<CT>& v1, VCT x2)
+    inline VectorView<CT> operator/=(VectorView<CT> v1, VCT x2)
     { MultXV(TMV_InverseOf(CT(x2)),v1); return v1; }
 
 #define GENMATRIX GenVector
@@ -155,13 +155,13 @@ namespace tmv {
         inline const GenVector<T1>& getV1() const { return v1; }
         inline T getX2() const { return x2; }
         inline const GenVector<T2>& getV2() const { return v2; }
-        inline void assignToV(const VectorView<real_type>& v0) const
+        inline void assignToV(VectorView<real_type> v0) const
         {
             TMVAssert(v0.size() == v1.size());
             TMVAssert(isReal(T()));
             AddVV(x1,v1,x2,v2,v0);
         }
-        inline void assignToV(const VectorView<complex_type>& v0) const
+        inline void assignToV(VectorView<complex_type> v0) const
         {
             TMVAssert(v0.size() == v1.size());
             AddVV(x1,v1,x2,v2,v0);
@@ -175,8 +175,7 @@ namespace tmv {
 
     // v+=v
     template <class T> 
-    inline const VectorView<T>& operator+=(
-        const VectorView<T>& v1, const GenVector<T>& v2) 
+    inline VectorView<T> operator+=(VectorView<T> v1, const GenVector<T>& v2) 
     { 
         TMVAssert(v1.size() == v2.size());
         AddVV(T(1),v2,v1); 
@@ -184,8 +183,7 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const VectorView<CT>& operator+=(
-        const VectorView<CT>& v1, const GenVector<T>& v2) 
+    inline VectorView<CT> operator+=(VectorView<CT> v1, const GenVector<T>& v2) 
     {
         TMVAssert(v1.size() == v2.size());
         AddVV(T(1),v2,v1); 
@@ -194,8 +192,7 @@ namespace tmv {
 
     // v-=v
     template <class T> 
-    inline const VectorView<T>& operator-=(
-        const VectorView<T>& v1, const GenVector<T>& v2)
+    inline VectorView<T> operator-=(VectorView<T> v1, const GenVector<T>& v2)
     {
         TMVAssert(v1.size() == v2.size());
         AddVV(T(-1),v2,v1); 
@@ -203,8 +200,7 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const VectorView<CT>& operator-=(
-        const VectorView<CT>& v1, const GenVector<T>& v2) 
+    inline VectorView<CT> operator-=(VectorView<CT> v1, const GenVector<T>& v2) 
     {
         TMVAssert(v1.size() == v2.size());
         AddVV(T(-1),v2,v1); 
@@ -213,8 +209,7 @@ namespace tmv {
 
     // v+=(x*v)
     template <class T, class T2> 
-    inline const VectorView<T>& operator+=(
-        const VectorView<T>& v, const ProdXV<T,T2>& pxv)
+    inline VectorView<T> operator+=(VectorView<T> v, const ProdXV<T,T2>& pxv)
     {
         TMVAssert(v.size() == pxv.size());
         AddVV(pxv.getX(),pxv.getV(),v);
@@ -222,8 +217,7 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const VectorView<CT>& operator+=(
-        const VectorView<CT>& v, const ProdXV<T,T>& pxv)
+    inline VectorView<CT> operator+=(VectorView<CT> v, const ProdXV<T,T>& pxv)
     {
         TMVAssert(v.size() == pxv.size());
         AddVV(pxv.getX(),pxv.getV(),v);
@@ -232,8 +226,7 @@ namespace tmv {
 
     // v-=(x*v)
     template <class T, class T2> 
-    inline const VectorView<T>& operator-=(
-        const VectorView<T>& v, const ProdXV<T,T2>& pxv)
+    inline VectorView<T> operator-=(VectorView<T> v, const ProdXV<T,T2>& pxv)
     {
         TMVAssert(v.size() == pxv.size());
         AddVV(-pxv.getX(),pxv.getV(),v);
@@ -241,8 +234,7 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const VectorView<CT>& operator-=(
-        const VectorView<CT>& v, const ProdXV<T,T>& pxv)
+    inline VectorView<CT> operator-=(VectorView<CT> v, const ProdXV<T,T>& pxv)
     {
         TMVAssert(v.size() == pxv.size());
         AddVV(-pxv.getX(),pxv.getV(),v);
@@ -379,13 +371,13 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV1() const { return v1; }
         inline const GenVector<T2>& getV2() const { return v2; }
-        inline void assignToV(const VectorView<real_type>& v0) const
+        inline void assignToV(VectorView<real_type> v0) const
         {
             TMVAssert(v0.size() == v1.size());
             TMVAssert(isReal(T()));
             ElemMultVV<false>(x,v1,v2,v0);
         }
-        inline void assignToV(const VectorView<complex_type>& v0) const
+        inline void assignToV(VectorView<complex_type> v0) const
         {
             TMVAssert(v0.size() == v1.size());
             ElemMultVV<false>(x,v1,v2,v0);
@@ -397,8 +389,8 @@ namespace tmv {
     };
 
     template <class T, class T2, class T3> 
-    inline const VectorView<T>& operator+=(
-        const VectorView<T>& v, const ElemProdVV<T,T2,T3>& pvv)
+    inline VectorView<T> operator+=(
+        VectorView<T> v, const ElemProdVV<T,T2,T3>& pvv)
     { 
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(pvv.getX(),pvv.getV1(),pvv.getV2(),v); 
@@ -406,8 +398,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const VectorView<CT>& operator+=(
-        const VectorView<CT>& v, const ElemProdVV<T,T,T>& pvv)
+    inline VectorView<CT> operator+=(
+        VectorView<CT> v, const ElemProdVV<T,T,T>& pvv)
     { 
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(pvv.getX(),pvv.getV1(),pvv.getV2(),v); 
@@ -415,8 +407,8 @@ namespace tmv {
     }
 
     template <class T, class T2, class T3> 
-    inline const VectorView<T>& operator-=(
-        const VectorView<T>& v, const ElemProdVV<T,T2,T3>& pvv)
+    inline VectorView<T> operator-=(
+        VectorView<T> v, const ElemProdVV<T,T2,T3>& pvv)
     { 
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(-pvv.getX(),pvv.getV1(),pvv.getV2(),v); 
@@ -424,8 +416,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const VectorView<CT>& operator-=(
-        const VectorView<CT>& v, const ElemProdVV<T,T,T>& pvv)
+    inline VectorView<CT> operator-=(
+        VectorView<CT> v, const ElemProdVV<T,T,T>& pvv)
     {
         TMVAssert(v.size() == pvv.size());
         ElemMultVV<true>(-pvv.getX(),pvv.getV1(),pvv.getV2(),v); 

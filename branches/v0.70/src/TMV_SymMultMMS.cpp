@@ -66,7 +66,7 @@ namespace tmv {
     template <bool ha, bool a1, bool add, class T, class Tx, class Ty> 
     static void RecursiveSymMultMM(
         const T alpha, const GenMatrix<Tx>& x, const GenMatrix<Ty>& y,
-        const SymMatrixView<T>& A)
+        SymMatrixView<T> A)
     {
         TMVAssert(A.size() == x.colsize());
         TMVAssert(A.size() == y.rowsize());
@@ -144,7 +144,7 @@ namespace tmv {
     template <bool ha, bool a1, bool add, class T, class Tx, class Ty> 
     static void RecursiveInPlaceSymMultMM(
         const T alpha, const GenMatrix<Tx>& x, const GenMatrix<Ty>& y,
-        const SymMatrixView<T>& A)
+        SymMatrixView<T> A)
     {
         TMVAssert(SameStorage(x,A) || SameStorage(y,A));
         TMVAssert(A.size() > 0);
@@ -203,7 +203,7 @@ namespace tmv {
     template <bool add, class T, class Tx, class Ty> 
     static inline void InPlaceSymMultMM(
         const T alpha, const GenMatrix<Tx>& x, const GenMatrix<Ty>& y,
-        const SymMatrixView<T>& A)
+        SymMatrixView<T> A)
     {
         if (A.isherm())
             if (alpha == T(1))
@@ -220,7 +220,7 @@ namespace tmv {
     template <bool add, class T, class Tx, class Ty> 
     static void DoSymMultMM(
         const T alpha, const GenMatrix<Tx>& x, const GenMatrix<Ty>& y,
-        const SymMatrixView<T>& A)
+        SymMatrixView<T> A)
     { 
         if (SameStorage(x,A) || SameStorage(y,A)) {
             const int N = A.size();
@@ -285,7 +285,7 @@ namespace tmv {
     template <bool add, class T, class Tx, class Ty> 
     void SymMultMM(
         const T alpha, const GenMatrix<Tx>& x, const GenMatrix<Ty>& y,
-        const SymMatrixView<T>& A)
+        SymMatrixView<T> A)
     // A (+)= alpha * x * y
     {
         TMVAssert(A.size() == x.colsize());

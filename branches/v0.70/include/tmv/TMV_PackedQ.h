@@ -52,14 +52,14 @@ namespace tmv {
         inline StorageType stor() const { return ColMajor; }
         inline const GenMatrix<T>& getQ() const { return Q; }
         inline const GenVector<T>& getBeta() const { return beta; }
-        inline void assignToM(const MatrixView<TMV_RealType(T)>& m0) const
+        inline void assignToM(MatrixView<TMV_RealType(T)> m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
             doAssignToM(m0);
         }
 
-        inline void assignToM(const MatrixView<TMV_ComplexType(T)>& m0) const
+        inline void assignToM(MatrixView<TMV_ComplexType(T)> m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -68,73 +68,73 @@ namespace tmv {
 
         // v = Qt v
         template <class T1> 
-        void LDivEq(const VectorView<T1>& v) const;
+        void LDivEq(VectorView<T1> v) const;
 
         // v = v Qt
         template <class T1> 
-        void RDivEq(const VectorView<T1>& v) const;
+        void RDivEq(VectorView<T1> v) const;
 
         // x = Qt v
         template <class T1, class T2> 
-        void LDiv(const GenVector<T1>& v, const VectorView<T2>& x) const;
+        void LDiv(const GenVector<T1>& v, VectorView<T2> x) const;
         // x = v Qt
         template <class T1, class T2> 
-        void RDiv(const GenVector<T1>& v, const VectorView<T2>& x) const;
+        void RDiv(const GenVector<T1>& v, VectorView<T2> x) const;
 
         // m = Qt m
         template <class T1> 
-        void LDivEq(const MatrixView<T1>& m) const;
+        void LDivEq(MatrixView<T1> m) const;
 
         // m = m Qt
         template <class T1> 
-        void RDivEq(const MatrixView<T1>& m) const;
+        void RDivEq(MatrixView<T1> m) const;
 
         // x = Qt m
         template <class T1, class T2> 
-        void LDiv(const GenMatrix<T1>& m, const MatrixView<T2>& x) const;
+        void LDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
         // x = m Qt
         template <class T1, class T2> 
-        void RDiv(const GenMatrix<T1>& m, const MatrixView<T2>& x) const;
+        void RDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
         // v = Q v
         template <class T1> 
-        inline void LMultEq(const VectorView<T1>& v) const
+        inline void LMultEq(VectorView<T1> v) const
         { RDivEq(v.conjugate()); }
 
         // v = v Q
         template <class T1> 
-        inline void RMultEq(const VectorView<T1>& v) const
+        inline void RMultEq(VectorView<T1> v) const
         { LDivEq(v.conjugate()); }
 
         // x = Q v
         template <class T1, class T2> 
-        inline void LMult(const GenVector<T1>& v, const VectorView<T2>& x) const
+        inline void LMult(const GenVector<T1>& v, VectorView<T2> x) const
         { RDiv(v.conjugate(),x.conjugate()); }
 
         // x = v Q
         template <class T1, class T2> 
-        inline void RMult(const GenVector<T1>& v, const VectorView<T2>& x) const
+        inline void RMult(const GenVector<T1>& v, VectorView<T2> x) const
         { LDiv(v.conjugate(),x.conjugate()); }
 
         // m = Q m
         template <class T1> 
-        inline void LMultEq(const MatrixView<T1>& m) const
+        inline void LMultEq(MatrixView<T1> m) const
         { RDivEq(m.adjoint()); }
 
         // m = m Q
         template <class T1> 
-        inline void RMultEq(const MatrixView<T1>& m) const
+        inline void RMultEq(MatrixView<T1> m) const
         { LDivEq(m.adjoint()); }
 
         // x = Q m
         template <class T1, class T2> 
-        inline void LMult(const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        inline void LMult(const GenMatrix<T1>& m, MatrixView<T2> x) const
         { RDiv(m.adjoint(),x.adjoint()); }
 
         // x = m Q
         template <class T1, class T2> 
-        inline void RMult(const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        inline void RMult(const GenMatrix<T1>& m, MatrixView<T2> x) const
         { LDiv(m.adjoint(),x.adjoint()); }
 
     private : 
@@ -143,7 +143,7 @@ namespace tmv {
         const tmv::GenVector<T>& beta;
 
         template <class T1> 
-        void doAssignToM(const MatrixView<T1>& m0) const;
+        void doAssignToM(MatrixView<T1> m0) const;
 
     };
 
@@ -159,13 +159,13 @@ namespace tmv {
         inline StorageType stor() const { return ColMajor; }
         inline T getX() const { return x; }
         inline const PackedQ<Tm>& getQ() const { return q; }
-        inline void assignToM(const MatrixView<TMV_RealType(T)>& m0) const
+        inline void assignToM(MatrixView<TMV_RealType(T)> m0) const
         {
             TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());
             TMVAssert(isReal(T()));
             MultXM(x,m0=q);
         }
-        inline void assignToM(const MatrixView<TMV_ComplexType(T)>& m0) const
+        inline void assignToM(MatrixView<TMV_ComplexType(T)> m0) const
         {
             TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());
             MultXM(x,m0=q);
@@ -193,13 +193,13 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const PackedQ<T1>& getQ() const { return q; }
         inline const GenVector<T2>& getV() const { return v; }
-        inline void assignToV(const VectorView<TMV_RealType(T)>& v0) const
+        inline void assignToV(VectorView<TMV_RealType(T)> v0) const
         { 
             TMVAssert(v0.size() == size());
             TMVAssert(isReal(T()));
             q.LMult(v,v0);
         }
-        inline void assignToV(const VectorView<TMV_ComplexType(T)>& v0) const
+        inline void assignToV(VectorView<TMV_ComplexType(T)> v0) const
         {
             TMVAssert(v0.size() == size());
             q.LMult(v,v0);
@@ -222,13 +222,13 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV() const { return v; }
         inline const PackedQ<T2>& getQ() const { return q; }
-        inline void assignToV(const VectorView<TMV_RealType(T)>& v0) const
+        inline void assignToV(VectorView<TMV_RealType(T)> v0) const
         { 
             TMVAssert(v0.size() == size());
             TMVAssert(isReal(T()));
             q.RMult(v,v0);
         }
-        inline void assignToV(const VectorView<TMV_ComplexType(T)>& v0) const
+        inline void assignToV(VectorView<TMV_ComplexType(T)> v0) const
         {
             TMVAssert(v0.size() == size());
             q.RMult(v,v0);
@@ -240,8 +240,8 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const VectorView<T>& operator*=(
-        const VectorView<T>& v, const PackedQ<T>& m)
+    inline VectorView<T> operator*=(
+        VectorView<T> v, const PackedQ<T>& m)
     {
         TMVAssert(v.size() == m.colsize());
         MultMV<false>(T(1),m.transpose(),v,v);
@@ -249,8 +249,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const VectorView<CT>& operator*=(
-        const VectorView<CT>& v, const PackedQ<T>& m)
+    inline VectorView<CT> operator*=(
+        VectorView<CT> v, const PackedQ<T>& m)
     {
         TMVAssert(v.size() == m.colsize());
         MultMV<false>(T(1),m.transpose(),v,v);
@@ -258,8 +258,8 @@ namespace tmv {
     }
 
     template <class T, class T2> 
-    inline const VectorView<T>& operator*=(
-        const VectorView<T>& v, const ProdXpQ<T,T2>& pxq)
+    inline VectorView<T> operator*=(
+        VectorView<T> v, const ProdXpQ<T,T2>& pxq)
     {
         TMVAssert(pxq.colsize()==pxq.rowsize());
         TMVAssert(v.size()==pxq.rowsize());
@@ -269,8 +269,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const VectorView<CT>& operator*=(
-        const VectorView<CT>& v, const ProdXpQ<T,T>& pxq)
+    inline VectorView<CT> operator*=(
+        VectorView<CT> v, const ProdXpQ<T,T>& pxq)
     {
         TMVAssert(pxq.colsize()==pxq.rowsize());
         TMVAssert(v.size()==pxq.rowsize());
@@ -327,14 +327,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const PackedQ<T1>& getQ() const { return q; }
         inline const GenMatrix<T2>& getM() const { return m; }
-        inline void assignToM(const MatrixView<TMV_RealType(T)>& m0) const
+        inline void assignToM(MatrixView<TMV_RealType(T)> m0) const
         { 
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
             TMVAssert(isReal(T()));
             q.LMult(m,m0);
         }
-        inline void assignToM(const MatrixView<TMV_ComplexType(T)>& m0) const
+        inline void assignToM(MatrixView<TMV_ComplexType(T)> m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -359,14 +359,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM() const { return m; }
         inline const PackedQ<T2>& getQ() const { return q; }
-        inline void assignToM(const MatrixView<TMV_RealType(T)>& m0) const
+        inline void assignToM(MatrixView<TMV_RealType(T)> m0) const
         { 
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
             TMVAssert(isReal(T()));
             q.RMult(m,m0);
         }
-        inline void assignToM(const MatrixView<TMV_ComplexType(T)>& m0) const
+        inline void assignToM(MatrixView<TMV_ComplexType(T)> m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -379,8 +379,8 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const MatrixView<T>& operator*=(
-        const MatrixView<T>& m, const PackedQ<T>& q)
+    inline MatrixView<T> operator*=(
+        MatrixView<T> m, const PackedQ<T>& q)
     {
         TMVAssert(q.colsize()==q.rowsize());
         TMVAssert(m.rowsize()==q.rowsize());
@@ -389,8 +389,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const MatrixView<CT>& operator*=(
-        const MatrixView<CT>& m, const PackedQ<T>& q)
+    inline MatrixView<CT> operator*=(
+        MatrixView<CT> m, const PackedQ<T>& q)
     {
         TMVAssert(q.colsize()==q.rowsize());
         TMVAssert(m.rowsize()==q.rowsize());
@@ -399,8 +399,8 @@ namespace tmv {
     }
 
     template <class T, class T2> 
-    inline const MatrixView<T>& operator*=(
-        const MatrixView<T>& m, const ProdXpQ<T,T2>& pxq)
+    inline MatrixView<T> operator*=(
+        MatrixView<T> m, const ProdXpQ<T,T2>& pxq)
     {
         TMVAssert(pxq.colsize()==pxq.rowsize());
         TMVAssert(m.rowsize()==pxq.rowsize());
@@ -410,8 +410,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const MatrixView<CT>& operator*=(
-        const MatrixView<CT>& m, const ProdXpQ<T,T>& pxq)
+    inline MatrixView<CT> operator*=(
+        MatrixView<CT> m, const ProdXpQ<T,T>& pxq)
     {
         TMVAssert(pxq.colsize()==pxq.rowsize());
         TMVAssert(m.rowsize()==pxq.rowsize());
@@ -465,14 +465,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV() const { return v; }
         inline const PackedQ<T2>& getQ() const { return q; }
-        inline void assignToV(const VectorView<TMV_RealType(T)>& v0) const
+        inline void assignToV(VectorView<TMV_RealType(T)> v0) const
         {
             TMVAssert(v0.size() == size());
             TMVAssert(isReal(T()));
             q.LDiv(v,v0);
             MultXV(x,v0);
         }
-        inline void assignToV(const VectorView<TMV_ComplexType(T)>& v0) const
+        inline void assignToV(VectorView<TMV_ComplexType(T)> v0) const
         {
             TMVAssert(v0.size() == size());
             q.LDiv(v,v0);
@@ -496,14 +496,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV() const { return v; }
         inline const PackedQ<T2>& getQ() const { return q; }
-        inline void assignToV(const VectorView<TMV_RealType(T)>& v0) const
+        inline void assignToV(VectorView<TMV_RealType(T)> v0) const
         {
             TMVAssert(v0.size() == size());
             TMVAssert(isReal(T()));
             q.RDiv(v,v0);
             MultXV(x,v0);
         }
-        inline void assignToV(const VectorView<TMV_ComplexType(T)>& v0) const
+        inline void assignToV(VectorView<TMV_ComplexType(T)> v0) const
         {
             TMVAssert(v0.size() == size());
             q.RDiv(v,v0);
@@ -516,8 +516,8 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const VectorView<T>& operator/=(
-        const VectorView<T>& v, const PackedQ<T>& q)
+    inline VectorView<T> operator/=(
+        VectorView<T> v, const PackedQ<T>& q)
     {
         TMVAssert(q.colsize() == q.rowsize());
         TMVAssert(q.rowsize() == v.size());
@@ -526,8 +526,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const VectorView<CT>& operator/=(
-        const VectorView<CT>& v, const PackedQ<T>& q)
+    inline VectorView<CT> operator/=(
+        VectorView<CT> v, const PackedQ<T>& q)
     {
         TMVAssert(q.colsize() == q.rowsize());
         TMVAssert(q.rowsize() == v.size());
@@ -536,8 +536,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const VectorView<T>& operator%=(
-        const VectorView<T>& v, const PackedQ<T>& q)
+    inline VectorView<T> operator%=(
+        VectorView<T> v, const PackedQ<T>& q)
     {
         TMVAssert(q.colsize() == q.rowsize());
         TMVAssert(q.rowsize() == v.size());
@@ -546,8 +546,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const VectorView<CT>& operator%=(
-        const VectorView<CT>& v, const PackedQ<T>& q)
+    inline VectorView<CT> operator%=(
+        VectorView<CT> v, const PackedQ<T>& q)
     {
         TMVAssert(q.colsize() == q.rowsize());
         TMVAssert(q.rowsize() == v.size());
@@ -584,14 +584,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM() const { return m; }
         inline const PackedQ<T2>& getQ() const { return q; }
-        inline void assignToM(const MatrixView<TMV_RealType(T)>& m0) const
+        inline void assignToM(MatrixView<TMV_RealType(T)> m0) const
         {
             TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());
             TMVAssert(isReal(T()));
             q.LDiv(m,m0);
             MultXM(x,m0);
         }
-        inline void assignToM(const MatrixView<TMV_ComplexType(T)>& m0) const
+        inline void assignToM(MatrixView<TMV_ComplexType(T)> m0) const
         {
             TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());
             q.LDiv(m,m0);
@@ -618,14 +618,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM() const { return m; }
         inline const PackedQ<T2>& getQ() const { return q; }
-        inline void assignToM(const MatrixView<TMV_RealType(T)>& m0) const
+        inline void assignToM(MatrixView<TMV_RealType(T)> m0) const
         {
             TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());
             TMVAssert(isReal(T()));
             q.RDiv(m,m0);
             MultXM(x,m0);
         }
-        inline void assignToM(const MatrixView<TMV_ComplexType(T)>& m0) const
+        inline void assignToM(MatrixView<TMV_ComplexType(T)> m0) const
         {
             TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());
             q.RDiv(m,m0);
@@ -638,8 +638,8 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const MatrixView<T>& operator/=(
-        const MatrixView<T>& m, const PackedQ<T>& q)
+    inline MatrixView<T> operator/=(
+        MatrixView<T> m, const PackedQ<T>& q)
     {
         TMVAssert(q.colsize() == q.rowsize());
         TMVAssert(m.colsize() == q.rowsize());
@@ -648,8 +648,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const MatrixView<CT>& operator/=(
-        const MatrixView<CT>& m, const PackedQ<T>& q)
+    inline MatrixView<CT> operator/=(
+        MatrixView<CT> m, const PackedQ<T>& q)
     {
         TMVAssert(q.colsize() == q.rowsize());
         TMVAssert(m.colsize() == q.rowsize());
@@ -658,8 +658,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const MatrixView<T>& operator%=(
-        const MatrixView<T>& m, const PackedQ<T>& q)
+    inline MatrixView<T> operator%=(
+        MatrixView<T> m, const PackedQ<T>& q)
     {
         TMVAssert(q.colsize() == q.rowsize());
         TMVAssert(m.rowsize() == q.rowsize());
@@ -668,8 +668,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const MatrixView<CT>& operator%=(
-        const MatrixView<CT>& m, const PackedQ<T>& q)
+    inline MatrixView<CT> operator%=(
+        MatrixView<CT> m, const PackedQ<T>& q)
     {
         TMVAssert(q.colsize() == q.rowsize());
         TMVAssert(m.rowsize() == q.rowsize());

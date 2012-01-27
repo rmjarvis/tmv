@@ -53,7 +53,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void rowMajorMultXM(
-        const Ta alpha, const MatrixView<T>& A)
+        const Ta alpha, MatrixView<T> A)
     {
         TMVAssert(A.isrm());
         TMVAssert(A.ct() == NonConj);
@@ -80,7 +80,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void MultXM(const T alpha, const MatrixView<T>& A)
+    void MultXM(const T alpha, MatrixView<T> A)
     // A = alpha * A
     {
 #ifdef XDEBUG
@@ -135,7 +135,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void ElemMultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == C.rowsize());

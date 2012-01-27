@@ -55,7 +55,7 @@ namespace tmv {
 
     template <class T> 
     void HermTridiagonalChopSmallElements(
-        const VectorView<T>& D, const VectorView<T>& E)
+        VectorView<T> D, VectorView<T> E)
     {
         // This routines sets to 0 any elements in E or D which
         // are essentially 0, given the machine precision:
@@ -90,7 +90,7 @@ namespace tmv {
 
     template <class T> 
     static T TridiagonalTrailingEigenValue(
-        const VectorView<T>& D, const VectorView<T>& E)
+        VectorView<T> D, VectorView<T> E)
     {
         // Return the Wilkinson choice for an eigenvalue of T, namely
         // the eigenvalue of the trailing 2x2 block of T which is closer
@@ -127,7 +127,7 @@ namespace tmv {
 
     template <class T> 
     static void ReduceHermTridiagonal(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E)
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E)
     {
         // Reduce the superdiagonal elements of unreduced HermTridiagonal Matrix T 
         // (given by D,E) while maintaining U B Ut. 
@@ -258,7 +258,7 @@ namespace tmv {
 
     template <class T> 
     void EigenFromTridiagonal_QR(
-        MVP<T> U, const VectorView<RT>& D, const VectorView<RT>& E)
+        MVP<T> U, VectorView<RT> D, VectorView<RT> E)
     {
         const int N = D.size();
         if (N <= 1) return;

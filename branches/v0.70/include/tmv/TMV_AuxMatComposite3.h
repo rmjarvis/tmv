@@ -57,14 +57,14 @@ public:
     inline StorageType stor() const { return ColMajor; }
     inline T getX() const { return x; }
     inline const GENMATRIX2<Tm>& getM() const { return m; }
-    inline void assignToM(const MatrixView<TMV_RealType(T)>& m0) const
+    inline void assignToM(MatrixView<TMV_RealType(T)> m0) const
     {
         TMVAssert(isReal(T()));
         TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());
         m.makeInverse(m0);
         MultXM(x,m0);
     }
-    inline void assignToM(const MatrixView<TMV_ComplexType(T)>& m0) const
+    inline void assignToM(MatrixView<TMV_ComplexType(T)> m0) const
     {
         TMVAssert(m0.colsize() == colsize() && m0.rowsize() == rowsize());
         m.makeInverse(m0);

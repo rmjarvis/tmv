@@ -83,7 +83,7 @@ namespace tmv {
 
     template <class T, class T1ab, class T1c> 
     static void LMultEq_2x2(
-        T1ab a, T1ab b, T1c c, T1c cc, const MatrixView<T>& m)
+        T1ab a, T1ab b, T1c c, T1c cc, MatrixView<T> m)
     {
         // Solve m <- [ a  cc ] m 
         //            [ c  b  ]
@@ -119,7 +119,7 @@ namespace tmv {
     }
 
     template <bool herm, class T, class T1> 
-    static void SymLMultEq_2x2(T1 a, T1 b, T1 c, const MatrixView<T>& m)
+    static void SymLMultEq_2x2(T1 a, T1 b, T1 c, MatrixView<T> m)
     {
         //cout<<"SymLMultEq_2x2: m = "<<TMV_Text(m)<<"  "<<m<<endl;
         TMVAssert(m.colsize() == 2);
@@ -138,7 +138,7 @@ namespace tmv {
     }
 
     template <bool herm, class T, class T1> 
-    static void SymRMultEq_2x2(T1 a, T1 b, T1 c, const MatrixView<T>& m)
+    static void SymRMultEq_2x2(T1 a, T1 b, T1 c, MatrixView<T> m)
     {
         TMVAssert(m.rowsize() == 2);
         if (herm)
@@ -158,7 +158,7 @@ namespace tmv {
     template <bool herm, class T, class T1> 
     void PseudoDiag_LDivEq(
         const GenVector<T1>& D, const GenVector<T1>& xD,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(D.size() == m.colsize());
         TMVAssert(xD.size()+1 == m.colsize());
@@ -216,7 +216,7 @@ namespace tmv {
     template <bool herm, class T, class T1> 
     void PseudoDiag_LMultEq(
         const GenVector<T1>& D, const GenVector<T1>& xD,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(D.size() == m.colsize());
         TMVAssert(xD.size()+1 == m.colsize());

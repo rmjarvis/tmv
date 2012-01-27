@@ -10,15 +10,6 @@ the properties of SymMatrix and BandMatrix; it has a banded structure and
 $m = m^T$.  Likewise \tt{HermBandMatrix} is our hermitian band matrix for
 which $m = m^\dagger$.
 
-Both classes inherit from \tt{GenSymBandMatrix}, which in turn inherits from 
-\tt{BaseMatrix}.  The various views and composite classes described below 
-also inherit from \tt{GenSymBandMatrix}.
-\index{SymBandMatrix!SymBandMatrixView}
-\index{SymBandMatrix!ConstSymBandMatrixView}
-\index{SymBandMatrix!GenSymBandMatrix}
-\index{SymBandMatrix!SymBandMatrixComposite}
-\index{BaseMatrix}
-
 As with the documentation for \tt{SymMatrix}/\tt{HermMatrix}, the descriptions
 below will only be written for \tt{SymBandMatrix} with the implication
 that a \tt{HermBandMatrix} has the same functionality, but with the calculations
@@ -41,11 +32,11 @@ All the \tt{SymBandMatrix} and \tt{HermBandMatrix} routines are included by:
 In addition to the data type template parameter (indicated here by \tt{T} as usual),
 there is also a second template parameter that specifies attributes of the
 \tt{SymBandMatrix} or \tt{HermBandMatrix}.  The attributes that are allowed are:
-\begin{itemize}
-\item \tt{CStyle} or \tt{FortranStyle}
-\item \tt{ColMajor}, \tt{RowMajor} or \tt{DiagMajor}
-\item \tt{Upper} or \tt{Lower}
-\end{itemize}
+\begin{description} \itemsep -2pt
+\item[$\bullet$] \tt{CStyle} or \tt{FortranStyle}
+\item[$\bullet$] \tt{ColMajor}, \tt{RowMajor} or \tt{DiagMajor}
+\item[$\bullet$] \tt{Upper} or \tt{Lower}
+\end{description}
 The default attributes are \tt{CStyle}, \tt{ColMajor} and \tt{Lower}.
 
 The storage size required is the same as for the \tt{BandMatrix} of
@@ -110,10 +101,10 @@ and with all values equal to \tt{x}.
 
 \item 
 \begin{tmvcode}
-tmv::SymBandMatrix<T,A> sb(const GenMatrix<T>& m, int nlo)
-tmv::SymBandMatrix<T,A> sb(const GenSymMatrix<T>& m, int nlo)
-tmv::SymBandMatrix<T,A> sb(const GenBandMatrix<T>& m, int nlo)
-tmv::SymBandMatrix<T,A> sb(const GenSymBandMatrix<T>& m, int nlo)
+tmv::SymBandMatrix<T,A> sb(const Matrix<T>& m, int nlo)
+tmv::SymBandMatrix<T,A> sb(const SymMatrix<T>& m, int nlo)
+tmv::SymBandMatrix<T,A> sb(const BandMatrix<T>& m, int nlo)
+tmv::SymBandMatrix<T,A> sb(const SymBandMatrix<T>& m, int nlo)
 \end{tmvcode}
 Makes a \tt{SymBandMatrix} which copies the corresponding values of \tt{m}.  
 For the last two, \tt{nlo} must not be larger than the number of upper
@@ -122,14 +113,14 @@ or lower bands in \tt{m}.  There are similar constructors for \tt{HermBandMatrix
 \item
 \begin{tmvcode}
 tmv::SymBandMatrix<T,DiagMajor> sb = SymTriDiagMatrix(
-      const GenVector<T>& v1, const GenVector<T>& v2)
+      const Vector<T>& v1, const Vector<T>& v2)
 tmv::SymBandMatrix<T,DiagMajor> sb = SymTriDiagMatrix(
-      const GenVector<T>& v1, const GenVector<T>& v2)
+      const Vector<T>& v1, const Vector<T>& v2)
 tmv::HermBandMatrix<T,DiagMajor> hb = HermTriDiagMatrix(
-      const GenVector<T>& v1, const GenVector<T>& v2, 
+      const Vector<T>& v1, const Vector<T>& v2, 
       UpLoType uplo)
 tmv::HermBandMatrix<T,DiagMajor> hb = HermTriDiagMatrix(
-      const GenVector<T>& v1, const GenVector<T>& v2, 
+      const Vector<T>& v1, const Vector<T>& v2, 
       UpLoType uplo)
 \end{tmvcode}
 \index{SymBandMatrix!Constructors!SymTriDiagMatrix}
@@ -147,7 +138,7 @@ whether \tt{v2} should be used as the upper or lower off-diagonal
 
 \item
 \begin{tmvcode}
-tmv::SymBandMatrix<T,A> sb1(const GenSymBandMatrix<T2>& sb2)
+tmv::SymBandMatrix<T,A> sb1(const SymBandMatrix<T2>& sb2)
 sb1 = sb2
 \end{tmvcode}
 Copy the \tt{SymBandMatrix m2}, which may be of any type \tt{T2} so long
@@ -525,7 +516,7 @@ banded LU algorithm is limited to 3*\tt{nlo}+1 bands.
 
 To access this decomposition, use:
 \begin{tmvcode}
-bool sb.lud().IsTrans()
+bool sb.lud().isTrans()
 tmv::LowerTriMatrix<T,UnitDiag> sb.lud().getL()
 tmv::ConstBandMatrixView<T> sb.lud().getU()
 Permutation sb.lud().getP()
@@ -537,7 +528,7 @@ The following should result in a matrix numerically very close to \tt{sb}.
 \begin{tmvcode}
 tmv::Matrix<T> m2(sb.nrows(),sb.ncols);
 tmv::MatrixView<T> m2v = 
-      sb.lud().IsTrans() ? m2.transpose() : m2.view();
+      sb.lud().isTrans() ? m2.transpose() : m2.view();
 m2v = sb.lud().getP() * sb.lud().getL() * sb.lud().getU();
 \end{tmvcode}
 

@@ -72,7 +72,7 @@ namespace tmv {
 
     template <bool rm, bool ca, bool ua, class T, class Ta> 
     static void DoRowUpperTriLDivEq(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& b)
+        const GenBandMatrix<Ta>& A, VectorView<T> b)
     {
         TMVAssert(b.step()==1);
         TMVAssert(A.isSquare());
@@ -146,7 +146,7 @@ namespace tmv {
 
     template <bool rm, bool ua, class T, class Ta> 
     static inline void RowUpperTriLDivEq(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& b)
+        const GenBandMatrix<Ta>& A, VectorView<T> b)
     {
         if (A.isconj())
             DoRowUpperTriLDivEq<rm,true,ua>(A,b);
@@ -156,7 +156,7 @@ namespace tmv {
 
     template <bool cm, bool ca, bool ua, class T, class Ta> 
     static void DoColUpperTriLDivEq(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& b)
+        const GenBandMatrix<Ta>& A, VectorView<T> b)
     {
         TMVAssert(b.step()==1);
         TMVAssert(A.isSquare());
@@ -238,7 +238,7 @@ namespace tmv {
 
     template <bool cm, bool ua, class T, class Ta> 
     static inline void ColUpperTriLDivEq(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& b)
+        const GenBandMatrix<Ta>& A, VectorView<T> b)
     {
         if (A.isconj())
             DoColUpperTriLDivEq<cm,true,ua>(A,b);
@@ -248,7 +248,7 @@ namespace tmv {
 
     template <bool rm, bool ca, bool ua, class T, class Ta> 
     static void DoRowLowerTriLDivEq(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& b)
+        const GenBandMatrix<Ta>& A, VectorView<T> b)
     {
         TMVAssert(b.step()==1);
         TMVAssert(A.isSquare());
@@ -324,7 +324,7 @@ namespace tmv {
 
     template <bool rm, bool ua, class T, class Ta> 
     static inline void RowLowerTriLDivEq(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& b)
+        const GenBandMatrix<Ta>& A, VectorView<T> b)
     {
         if (A.isconj())
             DoRowLowerTriLDivEq<rm,true,ua>(A,b);
@@ -334,7 +334,7 @@ namespace tmv {
 
     template <bool cm, bool ca, bool ua, class T, class Ta> 
     static void DoColLowerTriLDivEq(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& b)
+        const GenBandMatrix<Ta>& A, VectorView<T> b)
     {
         TMVAssert(b.step()==1);
         TMVAssert(A.isSquare());
@@ -405,7 +405,7 @@ namespace tmv {
 
     template <bool rm, bool ua, class T, class Ta> 
     static inline void ColLowerTriLDivEq(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& b)
+        const GenBandMatrix<Ta>& A, VectorView<T> b)
     {
         if (A.isconj())
             DoColLowerTriLDivEq<rm,true,ua>(A,b);
@@ -415,7 +415,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void UpperTriLDivEq(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& b, DiagType dt)
+        const GenBandMatrix<Ta>& A, VectorView<T> b, DiagType dt)
     {
         TMVAssert(A.nlo() == 0);
         if (A.nhi() == 0) {
@@ -434,7 +434,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void LowerTriLDivEq(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& b, DiagType dt)
+        const GenBandMatrix<Ta>& A, VectorView<T> b, DiagType dt)
     {
         TMVAssert(A.nhi() == 0);
         if (A.nlo() == 0) {
@@ -453,7 +453,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void NonBlasTriLDivEq(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& b, DiagType dt)
+        const GenBandMatrix<Ta>& A, VectorView<T> b, DiagType dt)
     {
         //cout<<"Start NonBlasTriLDvEq\n";
         // Solve A x = y  where A is an upperor lower band triangle matrix
@@ -500,12 +500,12 @@ namespace tmv {
 #ifdef BLAS
     template <class T, class Ta> 
     static inline void BlasTriLDivEq(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& b, DiagType dt)
+        const GenBandMatrix<Ta>& A, VectorView<T> b, DiagType dt)
     { NonBlasTriLDivEq(A,b,dt); }
 #ifdef INST_DOUBLE
     template <> 
     void BlasTriLDivEq(
-        const GenBandMatrix<double>& A, const VectorView<double>& b,
+        const GenBandMatrix<double>& A, VectorView<double> b,
         DiagType dt)
     {
         int n = A.colsize();
@@ -525,7 +525,7 @@ namespace tmv {
     template <> 
     void BlasTriLDivEq(
         const GenBandMatrix<std::complex<double> >& A,
-        const VectorView<std::complex<double> >& b, DiagType dt)
+        VectorView<std::complex<double> > b, DiagType dt)
     {
         int n = A.colsize();
         int kd = A.nlo()==0 ? A.nhi() : A.nlo();
@@ -562,7 +562,7 @@ namespace tmv {
     template <> 
     void BlasTriLDivEq(
         const GenBandMatrix<double>& A, 
-        const VectorView<std::complex<double> >& b, DiagType dt)
+        VectorView<std::complex<double> > b, DiagType dt)
     {
         int n = A.colsize();
         int kd = A.nlo()==0 ? A.nhi() : A.nlo();
@@ -588,7 +588,7 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     void BlasTriLDivEq(
-        const GenBandMatrix<float>& A, const VectorView<float>& b, DiagType dt)
+        const GenBandMatrix<float>& A, VectorView<float> b, DiagType dt)
     {
         int n = A.colsize();
         int kd = A.nlo()==0 ? A.nhi() : A.nlo();
@@ -607,7 +607,7 @@ namespace tmv {
     template <> 
     void BlasTriLDivEq(
         const GenBandMatrix<std::complex<float> >& A,
-        const VectorView<std::complex<float> >& b, DiagType dt)
+        VectorView<std::complex<float> > b, DiagType dt)
     {
         int n = A.colsize();
         int kd = A.nlo()==0 ? A.nhi() : A.nlo();
@@ -644,7 +644,7 @@ namespace tmv {
     template <> 
     void BlasTriLDivEq(
         const GenBandMatrix<float>& A, 
-        const VectorView<std::complex<float> >& b, DiagType dt)
+        VectorView<std::complex<float> > b, DiagType dt)
     {
         int n = A.colsize();
         int kd = A.nlo()==0 ? A.nhi() : A.nlo();
@@ -671,7 +671,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     void TriLDivEq(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& b, DiagType dt)
+        const GenBandMatrix<Ta>& A, VectorView<T> b, DiagType dt)
     {
 #ifdef XDEBUG
         Vector<T> b0 = b;

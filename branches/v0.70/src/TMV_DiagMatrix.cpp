@@ -157,7 +157,7 @@ namespace tmv {
 #endif
 
     template <class T, int A>
-    const DiagMatrixView<T,A>& DiagMatrixView<T,A>::invertSelf() const
+    DiagMatrixView<T,A>& DiagMatrixView<T,A>::invertSelf() 
     {
         T* di = diag().ptr();
         const int dstep = diag().step();
@@ -200,17 +200,16 @@ namespace tmv {
 
 #ifdef INST_INT
     template <>
-    const DiagMatrixView<int,CStyle>& 
-        DiagMatrixView<int,CStyle>::invertSelf() const
+    DiagMatrixView<int,CStyle>& DiagMatrixView<int,CStyle>::invertSelf() const
     { TMVAssert(TMV_FALSE); return *this; }
     template <>
-    const DiagMatrixView<std::complex<int>,CStyle>& 
+    DiagMatrixView<std::complex<int>,CStyle>&
         DiagMatrixView<std::complex<int>,CStyle>::invertSelf() const
     { TMVAssert(TMV_FALSE); return *this; }
 #endif
 
     template <class T> template <class T1> 
-    void GenDiagMatrix<T>::doMakeInverse(const MatrixView<T1>& minv) const
+    void GenDiagMatrix<T>::doMakeInverse(MatrixView<T1> minv) const
     {
         bool ss = SameStorage(diag(),minv);
         if (!ss) minv.setZero();
@@ -223,30 +222,30 @@ namespace tmv {
 
 #ifdef INST_INT
     template <> template <class T1>
-    void GenDiagMatrix<int>::doMakeInverse(const MatrixView<T1>& ) const
+    void GenDiagMatrix<int>::doMakeInverse(MatrixView<T1> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T1>
     void GenDiagMatrix<std::complex<int> >::doMakeInverse(
-        const MatrixView<T1>& ) const
+        MatrixView<T1> ) const
     { TMVAssert(TMV_FALSE); }
 #endif
 
     template <class T> template <class T1> 
-    void GenDiagMatrix<T>::doMakeInverse(const DiagMatrixView<T1>& minv) const
+    void GenDiagMatrix<T>::doMakeInverse(DiagMatrixView<T1> minv) const
     { (minv = *this).invertSelf(); }
 
 #ifdef INST_INT
     template <> template <class T1>
-    void GenDiagMatrix<int>::doMakeInverse(const DiagMatrixView<T1>& ) const
+    void GenDiagMatrix<int>::doMakeInverse(DiagMatrixView<T1> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T1>
     void GenDiagMatrix<std::complex<int> >::doMakeInverse(
-        const DiagMatrixView<T1>& ) const
+        DiagMatrixView<T1> ) const
     { TMVAssert(TMV_FALSE); }
 #endif
 
     template <class T>
-    void GenDiagMatrix<T>::doMakeInverseATA(const DiagMatrixView<T>& ata) const
+    void GenDiagMatrix<T>::doMakeInverseATA(DiagMatrixView<T> ata) const
     {
         makeInverse(ata);
         T* mi = ata.diag().ptr();
@@ -273,16 +272,16 @@ namespace tmv {
 #ifdef INST_INT
     template <> 
     void GenDiagMatrix<int>::doMakeInverseATA(
-        const DiagMatrixView<int>& ) const
+        DiagMatrixView<int> ) const
     { TMVAssert(TMV_FALSE); }
     template <> 
     void GenDiagMatrix<std::complex<int> >::doMakeInverseATA(
-        const DiagMatrixView<std::complex<int> >& ) const
+        DiagMatrixView<std::complex<int> > ) const
     { TMVAssert(TMV_FALSE); }
 #endif
 
     template <class T>
-    void GenDiagMatrix<T>::doMakeInverseATA(const MatrixView<T>& ata) const
+    void GenDiagMatrix<T>::doMakeInverseATA(MatrixView<T> ata) const
     {
         ata.setZero();
         makeInverseATA(DiagMatrixViewOf(ata.diag()));
@@ -290,11 +289,11 @@ namespace tmv {
 
 #ifdef INST_INT
     template <> 
-    void GenDiagMatrix<int>::doMakeInverseATA(const MatrixView<int>& ) const
+    void GenDiagMatrix<int>::doMakeInverseATA(MatrixView<int> ) const
     { TMVAssert(TMV_FALSE); }
     template <> 
     void GenDiagMatrix<std::complex<int> >::doMakeInverseATA(
-        const MatrixView<std::complex<int> >& ) const
+        MatrixView<std::complex<int> > ) const
     { TMVAssert(TMV_FALSE); }
 #endif
 
@@ -306,7 +305,7 @@ namespace tmv {
 
     template <bool cd, class T, class Td> 
     static void DoDiagLDivEq1(
-        const GenDiagMatrix<Td>& d, const VectorView<T>& v)
+        const GenDiagMatrix<Td>& d, VectorView<T> v)
     {
         TMVAssert(v.size() == d.size());
         TMVAssert(v.ct()==NonConj);
@@ -354,14 +353,14 @@ namespace tmv {
 
     template <class T, class Td> 
     static inline void DoDiagLDivEq(
-        const GenDiagMatrix<Td>& d, const VectorView<T>& v)
+        const GenDiagMatrix<Td>& d, VectorView<T> v)
     { 
         if (d.diag().isconj()) DoDiagLDivEq1<true>(d,v);
         else DoDiagLDivEq1<false>(d,v);
     }
 
     template <class T> template <class T1> 
-    void GenDiagMatrix<T>::doLDivEq(const VectorView<T1>& v) const
+    void GenDiagMatrix<T>::doLDivEq(VectorView<T1> v) const
     {
 #ifdef XDEBUG
         DiagMatrix<T> d0(*this);
@@ -390,17 +389,17 @@ namespace tmv {
 
 #ifdef INST_INT
     template <> template <class T1>
-    void GenDiagMatrix<int>::doLDivEq(const VectorView<T1>& ) const
+    void GenDiagMatrix<int>::doLDivEq(VectorView<T1> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T1>
     void GenDiagMatrix<std::complex<int> >::doLDivEq(
-        const VectorView<T1>& ) const
+        VectorView<T1> ) const
     { TMVAssert(TMV_FALSE); }
 #endif
 
     template <class T> template <class T1, class T0> 
     void GenDiagMatrix<T>::doLDiv(
-        const GenVector<T1>& v1, const VectorView<T0>& v0) const
+        const GenVector<T1>& v1, VectorView<T0> v0) const
     {
         TMVAssert(v1.size() == size());
         TMVAssert(v0.size() == size());
@@ -415,17 +414,17 @@ namespace tmv {
 #ifdef INST_INT
     template <> template <class T1, class T0>
     void GenDiagMatrix<int>::doLDiv(
-        const GenVector<T1>& , const VectorView<T0>& ) const
+        const GenVector<T1>& , VectorView<T0> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T1, class T0>
     void GenDiagMatrix<std::complex<int> >::doLDiv(
-        const GenVector<T1>& , const VectorView<T0>& ) const
+        const GenVector<T1>& , VectorView<T0> ) const
     { TMVAssert(TMV_FALSE); }
 #endif
 
     template <bool rm, bool cd, class T, class Td> 
     static void RowDiagLDivEq(
-        const GenDiagMatrix<Td>& d, const MatrixView<T>& m)
+        const GenDiagMatrix<Td>& d, MatrixView<T> m)
     {
         TMVAssert(d.size() == m.colsize());
         TMVAssert(m.rowsize() > 0);
@@ -466,7 +465,7 @@ namespace tmv {
 
     template <bool cm, bool cd, class T, class Td> 
     static void ColDiagLDivEq(
-        const GenDiagMatrix<Td>& d, const MatrixView<T>& m)
+        const GenDiagMatrix<Td>& d, MatrixView<T> m)
     {
         TMVAssert(d.size() == m.colsize());
         TMVAssert(m.rowsize() > 0);
@@ -518,7 +517,7 @@ namespace tmv {
 
     template <class T, class Td> 
     static void DoDiagLDivEq(
-        const GenDiagMatrix<Td>& d, const MatrixView<T>& m)
+        const GenDiagMatrix<Td>& d, MatrixView<T> m)
     {
         if (d.diag().isconj())
             if (m.isrm()) RowDiagLDivEq<true,true>(d,m);
@@ -533,7 +532,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void GenDiagMatrix<T>::doLDivEq(const MatrixView<T1>& m) const
+    void GenDiagMatrix<T>::doLDivEq(MatrixView<T1> m) const
     {
         TMVAssert(size() == m.colsize());
 
@@ -563,17 +562,16 @@ namespace tmv {
 
 #ifdef INST_INT
     template <> template <class T1>
-    void GenDiagMatrix<int>::doLDivEq(const MatrixView<T1>& ) const
+    void GenDiagMatrix<int>::doLDivEq(MatrixView<T1> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T1>
-    void GenDiagMatrix<std::complex<int> >::doLDivEq(
-        const MatrixView<T1>& ) const
+    void GenDiagMatrix<std::complex<int> >::doLDivEq(MatrixView<T1> ) const
     { TMVAssert(TMV_FALSE); }
 #endif
 
     template <class T> template <class T1, class T0> 
     void GenDiagMatrix<T>::doLDiv(
-        const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
+        const GenMatrix<T1>& m1, MatrixView<T0> m0) const
     {
         TMVAssert(m1.rowsize() == m0.rowsize());
         TMVAssert(m1.colsize() == size());
@@ -589,11 +587,11 @@ namespace tmv {
 #ifdef INST_INT
     template <> template <class T1, class T0>
     void GenDiagMatrix<int>::doLDiv(
-        const GenMatrix<T1>& , const MatrixView<T0>& ) const
+        const GenMatrix<T1>& , MatrixView<T0> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T1, class T0>
     void GenDiagMatrix<std::complex<int> >::doLDiv(
-        const GenMatrix<T1>& , const MatrixView<T0>& ) const
+        const GenMatrix<T1>& , MatrixView<T0> ) const
     { TMVAssert(TMV_FALSE); }
 #endif
 
@@ -717,8 +715,7 @@ namespace tmv {
 #endif
 
     template <class T> 
-    static void FinishRead(
-        const TMV_Reader& reader, const DiagMatrixView<T>& m)
+    static void FinishRead(const TMV_Reader& reader, DiagMatrixView<T> m)
     {
         const int N = m.size();
         std::string exp, got;
@@ -884,7 +881,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    void DiagMatrixView<T,A>::read(const TMV_Reader& reader) const
+    void DiagMatrixView<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
         if (!reader.readCode("D",exp,got)) {

@@ -39,7 +39,7 @@ namespace tmv {
     template <class T, class T1> 
     void QR_Inverse(
         const GenMatrix<T1>& QRx, const GenVector<T1>& beta, const int* P,
-        const MatrixView<T>& minv, int N1)
+        MatrixView<T> minv, int N1)
     {
         // minv = Pt R^-1 Qt
         TMVAssert(minv.colsize() == QRx.rowsize());

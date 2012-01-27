@@ -44,7 +44,7 @@ namespace tmv {
     template <class T, class T2> 
     inline void AddMM(
         const T x2, const GenUpperTriMatrix<T2>& m2,
-        const BandMatrixView<T>& m1)
+        BandMatrixView<T> m1)
     {
         if (m2.isunit()) {
             if (m2.size() > 1)
@@ -59,7 +59,7 @@ namespace tmv {
     template <class T, class T2> 
     inline void AddMM(
         const T x2, const GenLowerTriMatrix<T2>& m2,
-        const BandMatrixView<T>& m1)
+        BandMatrixView<T> m1)
     {
         if (m2.isunit()) {
             if (m2.size() > 1)
@@ -74,7 +74,7 @@ namespace tmv {
     template <bool add, class T, class T1, class T2> 
     inline void MultMM(
         const T x, const GenUpperTriMatrix<T1>& m1,
-        const GenBandMatrix<T2>& m2, const BandMatrixView<T>& m0)
+        const GenBandMatrix<T2>& m2, BandMatrixView<T> m0)
     { 
         if (m1.isunit()) {
             UpperTriMatrix<T1,NonUnitDiag|RowMajor> m1x = m1;
@@ -86,7 +86,7 @@ namespace tmv {
     template <bool add, class T, class T1, class T2> 
     inline void MultMM(
         const T x, const GenBandMatrix<T1>& m1,
-        const GenUpperTriMatrix<T2>& m2, const BandMatrixView<T>& m0)
+        const GenUpperTriMatrix<T2>& m2, BandMatrixView<T> m0)
     { 
         if (m2.isunit()) {
             UpperTriMatrix<T2,NonUnitDiag|RowMajor> m2x = m2;
@@ -98,7 +98,7 @@ namespace tmv {
     template <bool add, class T, class T1, class T2> 
     inline void MultMM(
         const T x, const GenLowerTriMatrix<T1>& m1,
-        const GenBandMatrix<T2>& m2, const BandMatrixView<T>& m0)
+        const GenBandMatrix<T2>& m2, BandMatrixView<T> m0)
     { 
         if (m1.isunit()) {
             LowerTriMatrix<T1,NonUnitDiag|RowMajor> m1x = m1;
@@ -110,7 +110,7 @@ namespace tmv {
     template <bool add, class T, class T1, class T2> 
     inline void MultMM(
         const T x, const GenBandMatrix<T1>& m1,
-        const GenLowerTriMatrix<T2>& m2, const BandMatrixView<T>& m0)
+        const GenLowerTriMatrix<T2>& m2, BandMatrixView<T> m0)
     { 
         if (m2.isunit()) {
             LowerTriMatrix<T2,NonUnitDiag|RowMajor> m2x = m2;
@@ -123,63 +123,63 @@ namespace tmv {
     template <class T, class T2> 
     inline void AddMM(
         const T x2, const GenUpperTriMatrix<T2>& m2,
-        const BandMatrixView<CT>& m1)
+        BandMatrixView<CT> m1)
     { AddMM(CT(x2),m2,m1); }
     template <class T, class T2> 
     inline void AddMM(
         const T x2, const GenLowerTriMatrix<T2>& m2,
-        const BandMatrixView<CT>& m1)
+        BandMatrixView<CT> m1)
     { AddMM(CT(x2),m2,m1); }
 
     template <class T, class T2> 
     inline void AddMM(
-        const CT , const GenUpperTriMatrix<T2>& , const BandMatrixView<T>& )
+        const CT , const GenUpperTriMatrix<T2>& , BandMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T, class T2> 
     inline void AddMM(
-        const CT , const GenLowerTriMatrix<T2>& , const BandMatrixView<T>& )
+        const CT , const GenLowerTriMatrix<T2>& , BandMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <bool add, class T, class T1, class T2> 
     inline void MultMM(
         const T x, const GenUpperTriMatrix<T1>& m1,
-        const GenBandMatrix<T2>& m2, const BandMatrixView<CT>& m0)
+        const GenBandMatrix<T2>& m2, BandMatrixView<CT> m0)
     { MultMM<add>(CT(x),m1,m2,m0); }
     template <bool add, class T, class T1, class T2> 
     inline void MultMM(
         const T x, const GenBandMatrix<T1>& m1,
-        const GenUpperTriMatrix<T2>& m2, const BandMatrixView<CT>& m0)
+        const GenUpperTriMatrix<T2>& m2, BandMatrixView<CT> m0)
     { MultMM<add>(CT(x),m1,m2,m0); }
     template <bool add, class T, class T1, class T2> 
     inline void MultMM(
         const T x, const GenLowerTriMatrix<T1>& m1,
-        const GenBandMatrix<T2>& m2, const BandMatrixView<CT>& m0)
+        const GenBandMatrix<T2>& m2, BandMatrixView<CT> m0)
     { MultMM<add>(CT(x),m1,m2,m0); }
     template <bool add, class T, class T1, class T2> 
     inline void MultMM(
         const T x, const GenBandMatrix<T1>& m1,
-        const GenLowerTriMatrix<T2>& m2, const BandMatrixView<CT>& m0)
+        const GenLowerTriMatrix<T2>& m2, BandMatrixView<CT> m0)
     { MultMM<add>(CT(x),m1,m2,m0); }
 
     template <bool add, class T, class T1, class T2> 
     inline void MultMM(
         const CT , const GenUpperTriMatrix<T1>& ,
-        const GenBandMatrix<T2>& , const BandMatrixView<T>& )
+        const GenBandMatrix<T2>& , BandMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <bool add, class T, class T1, class T2> 
     inline void MultMM(
         const CT , const GenBandMatrix<T1>& ,
-        const GenUpperTriMatrix<T2>& , const BandMatrixView<T>& )
+        const GenUpperTriMatrix<T2>& , BandMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <bool add, class T, class T1, class T2> 
     inline void MultMM(
         const CT , const GenLowerTriMatrix<T1>& ,
-        const GenBandMatrix<T2>& , const BandMatrixView<T>& )
+        const GenBandMatrix<T2>& , BandMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <bool add, class T, class T1, class T2> 
     inline void MultMM(
         const CT , const GenBandMatrix<T1>& ,
-        const GenLowerTriMatrix<T2>& , const BandMatrixView<T>& )
+        const GenLowerTriMatrix<T2>& , BandMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
 }

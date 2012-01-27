@@ -25,22 +25,22 @@
   template RT GenUpperTriMatrix<T >::normInf() const; \
   template RT GenUpperTriMatrix<T >::maxAbsElement() const; \
   template RT GenUpperTriMatrix<T >::maxAbs2Element() const; \
-  template const UpperTriMatrixView<T,CStyle>& \
-      UpperTriMatrixView<T,CStyle>::setZero() const; \
-  template const UpperTriMatrixView<T,CStyle>& \
-      UpperTriMatrixView<T,CStyle>::setAllTo(const T& x) const; \
-  template const UpperTriMatrixView<T,CStyle>& \
-      UpperTriMatrixView<T,CStyle>::addToAll(const T& x) const; \
-  template const UpperTriMatrixView<T,CStyle>& \
-      UpperTriMatrixView<T,CStyle>::clip(RT t) const; \
-  template const UpperTriMatrixView<T,CStyle>& \
-      UpperTriMatrixView<T,CStyle>::conjugateSelf() const; \
-  template const UpperTriMatrixView<T,CStyle>& \
-      UpperTriMatrixView<T,CStyle>::setToIdentity(const T& x) const; \
+  template UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::setZero(); \
+  template UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::setAllTo(const T& x); \
+  template UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::addToAll(const T& x); \
+  template UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::clip(RT t); \
+  template UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::conjugateSelf(); \
+  template UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::setToIdentity(const T& x); \
   template void GenUpperTriMatrix<T >::write(const TMV_Writer& writer) const; \
   template void GenLowerTriMatrix<T >::write(const TMV_Writer& writer) const; \
-  template void UpperTriMatrixView<T,CStyle>::read(const TMV_Reader& reader) const; \
-  template void LowerTriMatrixView<T,CStyle>::read(const TMV_Reader& reader) const; \
+  template void UpperTriMatrixView<T,CStyle>::read(const TMV_Reader& reader); \
+  template void LowerTriMatrixView<T,CStyle>::read(const TMV_Reader& reader); \
 
 Def1(T,T)
 #ifdef INST_COMPLEX

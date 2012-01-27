@@ -4,7 +4,7 @@
 #define Def1(RT,T) \
   template QuotXD<T,T > GenDiagMatrix<T >::QInverse() const; \
   template void GenDiagMatrix<T >::write(const TMV_Writer& writer) const; \
-  template void DiagMatrixView<T,CStyle>::read(const TMV_Reader& reader) const; \
+  template void DiagMatrixView<T,CStyle>::read(const TMV_Reader& reader); \
 
 Def1(T,T)
 #ifdef INST_COMPLEX
@@ -17,11 +17,9 @@ Def1(T,CT)
 #define Def1b(RT,T) \
   template T GenDiagMatrix<T >::det() const; \
   template RT GenDiagMatrix<T >::logDet(T* sign) const; \
-  template const DiagMatrixView<T,CStyle>& \
-      DiagMatrixView<T,CStyle>::invertSelf() const; \
-  template void GenDiagMatrix<T >::doMakeInverseATA( \
-      const DiagMatrixView<T >& ) const; \
-  template void GenDiagMatrix<T >::doMakeInverseATA(const MatrixView<T >& ) const; \
+  template DiagMatrixView<T,CStyle>& DiagMatrixView<T,CStyle>::invertSelf(); \
+  template void GenDiagMatrix<T >::doMakeInverseATA(DiagMatrixView<T > ) const;\
+  template void GenDiagMatrix<T >::doMakeInverseATA(MatrixView<T > ) const; \
 
 Def1b(T,T)
 #ifdef INST_COMPLEX
@@ -44,11 +42,10 @@ Def2(CT,FortranStyle)
 #undef Def2
 
 #define Def3(T,T1) \
-  template void GenDiagMatrix<T >::doLDivEq(const VectorView<T1 >& ) const;\
-  template void GenDiagMatrix<T >::doLDivEq(const MatrixView<T1 >& ) const;\
-  template void GenDiagMatrix<T >::doMakeInverse( \
-      const DiagMatrixView<T1 >& m) const;\
-  template void GenDiagMatrix<T >::doMakeInverse(const MatrixView<T1 >& m) const;\
+  template void GenDiagMatrix<T >::doLDivEq(VectorView<T1 > ) const;\
+  template void GenDiagMatrix<T >::doLDivEq(MatrixView<T1 > ) const;\
+  template void GenDiagMatrix<T >::doMakeInverse(DiagMatrixView<T1 > m) const;\
+  template void GenDiagMatrix<T >::doMakeInverse(MatrixView<T1 > m) const;\
 
 Def3(T,T)
 #ifdef INST_COMPLEX
@@ -60,16 +57,16 @@ Def3(CT,CT)
 
 #define Def3a(T,T1) \
   template <> template <> void GenDiagMatrix<T >::doLDivEq(\
-      const VectorView<T1 >& ) const\
+      VectorView<T1 > ) const\
   { TMVAssert(TMV_FALSE); } \
   template <> template <> void GenDiagMatrix<T >::doLDivEq(\
-      const MatrixView<T1 >& ) const\
+      MatrixView<T1 > ) const\
   { TMVAssert(TMV_FALSE); } \
   template <> template <> void GenDiagMatrix<T >::doMakeInverse( \
-      const DiagMatrixView<T1 >& ) const\
+      DiagMatrixView<T1 > ) const\
   { TMVAssert(TMV_FALSE); } \
   template <> template <> void GenDiagMatrix<T >::doMakeInverse( \
-      const MatrixView<T1 >& ) const\
+      MatrixView<T1 > ) const\
   { TMVAssert(TMV_FALSE); } \
 
 #ifdef INST_COMPLEX
@@ -80,9 +77,9 @@ Def3a(CT,T)
 
 #define Def4(T,T1,T0) \
   template void GenDiagMatrix<T >::doLDiv( \
-      const GenVector<T1 >& , const VectorView<T0 >& ) const;\
+      const GenVector<T1 >& , VectorView<T0 > ) const;\
   template void GenDiagMatrix<T >::doLDiv( \
-      const GenMatrix<T1 >& , const MatrixView<T0 >& ) const;\
+      const GenMatrix<T1 >& , MatrixView<T0 > ) const;\
 
 Def4(T,T,T)
 #ifdef INST_COMPLEX
@@ -96,10 +93,10 @@ Def4(CT,CT,CT)
 
 #define Def4a(T,T1,T0) \
   template <> template <> void GenDiagMatrix<T >::doLDiv( \
-      const GenVector<T1 >& , const VectorView<T0 >& ) const\
+      const GenVector<T1 >& , VectorView<T0 > ) const\
       { TMVAssert(TMV_FALSE); } \
   template <> template <> void GenDiagMatrix<T >::doLDiv( \
-      const GenMatrix<T1 >& , const MatrixView<T0 >& ) const\
+      const GenMatrix<T1 >& , MatrixView<T0 > ) const\
       { TMVAssert(TMV_FALSE); } \
 
 #ifdef INST_COMPLEX

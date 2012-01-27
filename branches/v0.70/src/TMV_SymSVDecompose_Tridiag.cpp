@@ -62,8 +62,8 @@ namespace tmv {
 
     template <class T, class Td> 
     static void NonBlockTridiagonalize(
-        const SymMatrixView<T>& A, const VectorView<T>& beta,
-        const VectorView<Td>& D, const VectorView<RT>& E, 
+        SymMatrixView<T> A, VectorView<T> beta,
+        VectorView<Td> D, VectorView<RT> E, 
         T& signdet, int j1=0)
     {
         // Decompose A into U T Ut
@@ -106,8 +106,8 @@ namespace tmv {
 
     template <class T, class Td> 
     static void BlockTridiagonalize(
-        const SymMatrixView<T>& A, const VectorView<T>& beta,
-        const VectorView<Td>& D, const VectorView<RT>& E, T& signdet)
+        SymMatrixView<T> A, VectorView<T> beta,
+        VectorView<Td> D, VectorView<RT> E, T& signdet)
     {
         // The block version here is basically the same as the block
         // version of Bidiagonalization for normal matrices.  We have the 
@@ -239,8 +239,8 @@ namespace tmv {
 
     template <class T, class Td> 
     static inline void NonLapTridiagonalize(
-        const SymMatrixView<T>& A, const VectorView<T>& beta,
-        const VectorView<Td>& D, const VectorView<RT>& E, T& signdet)
+        SymMatrixView<T> A, VectorView<T> beta,
+        VectorView<Td> D, VectorView<RT> E, T& signdet)
     {
         if (A.size() >= SYM_TRIDIAG_BLOCKSIZE*2)
             BlockTridiagonalize(A,beta,D,E,signdet);
@@ -251,14 +251,14 @@ namespace tmv {
 #ifdef LAP
     template <class T, class Td> 
     static inline void LapTridiagonalize(
-        const SymMatrixView<T>& A, const VectorView<T>& beta,
-        const VectorView<Td>& D, const VectorView<RT>& E, T& signdet)
+        SymMatrixView<T> A, VectorView<T> beta,
+        VectorView<Td> D, VectorView<RT> E, T& signdet)
     { NonLapTridiagonalize(A,beta.subVector(0,A.size()-1),D,E,signdet); }
 #ifdef INST_DOUBLE
     template <> 
     void LapTridiagonalize(
-        const SymMatrixView<double>& A, const VectorView<double>& beta,
-        const VectorView<double>& D, const VectorView<double>& E, double& )
+        SymMatrixView<double> A, VectorView<double> beta,
+        VectorView<double> D, VectorView<double> E, double& )
     {
         TMVAssert(A.iscm());
         TMVAssert(A.uplo() == Lower);
@@ -308,9 +308,9 @@ namespace tmv {
     }
     template <> 
     void LapTridiagonalize(
-        const SymMatrixView<std::complex<double> >& A,
-        const VectorView<std::complex<double> >& beta,
-        const VectorView<double>& D, const VectorView<double>& E, 
+        SymMatrixView<std::complex<double> > A,
+        VectorView<std::complex<double> > beta,
+        VectorView<double> D, VectorView<double> E, 
         std::complex<double>& )
     {
         //std::cout<<"Start LapTridiagonalize:\n";
@@ -379,8 +379,8 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     void LapTridiagonalize(
-        const SymMatrixView<float>& A, const VectorView<float>& beta,
-        const VectorView<float>& D, const VectorView<float>& E, float& )
+        SymMatrixView<float> A, VectorView<float> beta,
+        VectorView<float> D, VectorView<float> E, float& )
     {
         TMVAssert(A.iscm());
         TMVAssert(A.uplo() == Lower);
@@ -430,9 +430,9 @@ namespace tmv {
     }
     template <> 
     void LapTridiagonalize(
-        const SymMatrixView<std::complex<float> >& A,
-        const VectorView<std::complex<float> >& beta,
-        const VectorView<float>& D, const VectorView<float>& E, 
+        SymMatrixView<std::complex<float> > A,
+        VectorView<std::complex<float> > beta,
+        VectorView<float> D, VectorView<float> E, 
         std::complex<float>& )
     {
         TMVAssert(A.iscm());
@@ -498,8 +498,8 @@ namespace tmv {
 
     template <class T, class Td> 
     void Tridiagonalize(
-        const SymMatrixView<T>& A, const VectorView<T>& beta,
-        const VectorView<Td>& D, const VectorView<RT>& E, T& signdet)
+        SymMatrixView<T> A, VectorView<T> beta,
+        VectorView<Td> D, VectorView<RT> E, T& signdet)
     {
 #ifdef XDEBUG
         cout<<"Start Tridiagonalize: \n";

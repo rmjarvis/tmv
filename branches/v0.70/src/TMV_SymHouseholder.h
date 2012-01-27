@@ -39,7 +39,7 @@ namespace tmv {
 
     template <class T1, class T2> 
     void HouseholderLRMult(
-        const GenVector<T1>& v, T1 beta, const SymMatrixView<T2>& M);
+        const GenVector<T1>& v, T1 beta, SymMatrixView<T2> M);
     // The input vector, v, is taken to be the vector for a  
     // Householder matrix, H.  This routine takes M <- H M Ht
     // if M is Hermitian or H M HT if M is symmetric.

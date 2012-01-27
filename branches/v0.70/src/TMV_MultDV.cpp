@@ -60,7 +60,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tx> 
     void MultMV(
         const T alpha, const GenDiagMatrix<Ta>& A, const GenVector<Tx>& x,
-        const VectorView<T>& y)
+        VectorView<T> y)
         // y (+)= alpha * A * x 
         // yi (+)= alpha * Ai * xi
     {

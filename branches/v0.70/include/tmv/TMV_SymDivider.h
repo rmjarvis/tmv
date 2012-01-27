@@ -58,8 +58,8 @@ namespace tmv {
         virtual ~SymDivider() {}
 
         using Divider<T>::makeInverse;
-        virtual void makeInverse(const SymMatrixView<RT>& sinv) const =0;
-        virtual void makeInverse(const SymMatrixView<CT>& sinv) const =0;
+        virtual void makeInverse(SymMatrixView<RT> sinv) const =0;
+        virtual void makeInverse(SymMatrixView<CT> sinv) const =0;
     };
 
     template <class T> 

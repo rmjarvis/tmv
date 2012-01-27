@@ -154,8 +154,7 @@ namespace tmv {
 
     template <class Tg, class T> 
     void GivensMult(
-        TMV_RealType(Tg) c, Tg s,
-        const VectorView<T>& v0, const VectorView<T>& v1);
+        TMV_RealType(Tg) c, Tg s, VectorView<T> v0, VectorView<T> v1);
 
     // Do: [ d0 e0* ] <- [  c  s ] [ d0 e0* ] [ c  -s ]
     //     [ e0 d1  ]    [ -s* c ] [ e0 d1  ] [ s*  c ]
@@ -209,20 +208,20 @@ namespace tmv {
         { GivensMult(c,TMV_CONJ(s),x,y); }
 
         template <class T2> 
-        inline void mult(const VectorView<T2>& v) const
+        inline void mult(VectorView<T2> v) const
         { TMVAssert(v.size()==2); GivensMult(c,s,v(0),v(1)); }
         template <class T2> 
-        inline void conjMult(const VectorView<T2>& v) const
+        inline void conjMult(VectorView<T2> v) const
         { TMVAssert(v.size()==2); GivensMult(c,TMV_CONJ(s),v(0),v(1)); }
 
         template <class T2> 
-        inline void mult(const MatrixView<T2>& m) const
+        inline void mult(MatrixView<T2> m) const
         { 
             TMVAssert(m.colsize()==2);
             GivensMult(c,s,m.row(0),m.row(1));
         }
         template <class T2> 
-        inline void conjMult(const MatrixView<T2>& m) const
+        inline void conjMult(MatrixView<T2> m) const
         { 
             TMVAssert(m.colsize()==2);
             GivensMult(c,TMV_CONJ(s),m.row(0),m.row(1));

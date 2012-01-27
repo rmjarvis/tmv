@@ -67,7 +67,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void RowTriLDivEq(
-        const GenUpperTriMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenUpperTriMatrix<Ta>& A, MatrixView<T> B)
     {
         // Solve A X = B  where A is an upper triangle matrix
         const int N = A.size();
@@ -100,7 +100,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void ColTriLDivEq(
-        const GenUpperTriMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenUpperTriMatrix<Ta>& A, MatrixView<T> B)
     {
         // Solve A X = B  where A is an upper triangle matrix
         const int N = A.size();
@@ -133,7 +133,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void RowTriLDivEq(
-        const GenLowerTriMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenLowerTriMatrix<Ta>& A, MatrixView<T> B)
     {
         // Solve A X = B  where A is a lower triangle matrix
         const int N = A.size();
@@ -166,7 +166,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void ColTriLDivEq(
-        const GenLowerTriMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenLowerTriMatrix<Ta>& A, MatrixView<T> B)
     {
         // Solve A X = B  where A is a lower triangle matrix
         const int N = A.size();
@@ -199,7 +199,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void NonBlasTriLDivEq(
-        const GenUpperTriMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenUpperTriMatrix<Ta>& A, MatrixView<T> B)
     // B = A^-1 * B
     // where A is a triangle matrix
     {
@@ -238,7 +238,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void NonBlasTriLDivEq(
-        const GenLowerTriMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenLowerTriMatrix<Ta>& A, MatrixView<T> B)
     // B = A^-1 * B
     // where A is a triangle matrix
     {
@@ -278,16 +278,16 @@ namespace tmv {
 #ifdef BLAS
     template <class T, class Ta> 
     static inline void BlasTriLDivEq(
-        const GenUpperTriMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenUpperTriMatrix<Ta>& A, MatrixView<T> B)
     { NonBlasTriLDivEq(A,B); }
     template <class T, class Ta> 
     static inline void BlasTriLDivEq(
-        const GenLowerTriMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenLowerTriMatrix<Ta>& A, MatrixView<T> B)
     { NonBlasTriLDivEq(A,B); }
 #ifdef INST_DOUBLE
     template <> 
     void BlasTriLDivEq(
-        const GenUpperTriMatrix<double>& A, const MatrixView<double>& B)
+        const GenUpperTriMatrix<double>& A, MatrixView<double> B)
     {
         int m=BlasIsCM(B)?B.colsize():B.rowsize();
         int n=BlasIsCM(B)?B.rowsize():B.colsize();
@@ -305,7 +305,7 @@ namespace tmv {
     }
     template <> 
     void BlasTriLDivEq(
-        const GenLowerTriMatrix<double>& A, const MatrixView<double>& B)
+        const GenLowerTriMatrix<double>& A, MatrixView<double> B)
     {
         int m=BlasIsCM(B)?B.colsize():B.rowsize();
         int n=BlasIsCM(B)?B.rowsize():B.colsize();
@@ -324,7 +324,7 @@ namespace tmv {
     template <> 
     void BlasTriLDivEq(
         const GenUpperTriMatrix<std::complex<double> >& A,
-        const MatrixView<std::complex<double> >& B)
+        MatrixView<std::complex<double> > B)
     {
         int m=BlasIsCM(B)?B.colsize():B.rowsize();
         int n=BlasIsCM(B)?B.rowsize():B.colsize();
@@ -353,7 +353,7 @@ namespace tmv {
     template <> 
     void BlasTriLDivEq(
         const GenLowerTriMatrix<std::complex<double> >& A,
-        const MatrixView<std::complex<double> >& B)
+        MatrixView<std::complex<double> > B)
     {
         int m=BlasIsCM(B)?B.colsize():B.rowsize();
         int n=BlasIsCM(B)?B.rowsize():B.colsize();
@@ -382,7 +382,7 @@ namespace tmv {
     template <> 
     void BlasTriLDivEq(
         const GenUpperTriMatrix<double>& A,
-        const MatrixView<std::complex<double> >& B)
+        MatrixView<std::complex<double> > B)
     {
         if (BlasIsRM(B)) {
             int m=2*B.rowsize();
@@ -410,7 +410,7 @@ namespace tmv {
     template <> 
     void BlasTriLDivEq(
         const GenLowerTriMatrix<double>& A,
-        const MatrixView<std::complex<double> >& B)
+        MatrixView<std::complex<double> > B)
     {
         if (BlasIsRM(B)) {
             int m=2*B.rowsize();
@@ -439,7 +439,7 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     void BlasTriLDivEq(
-        const GenUpperTriMatrix<float>& A, const MatrixView<float>& B)
+        const GenUpperTriMatrix<float>& A, MatrixView<float> B)
     {
         int m=BlasIsCM(B)?B.colsize():B.rowsize();
         int n=BlasIsCM(B)?B.rowsize():B.colsize();
@@ -457,7 +457,7 @@ namespace tmv {
     }
     template <> 
     void BlasTriLDivEq(
-        const GenLowerTriMatrix<float>& A, const MatrixView<float>& B)
+        const GenLowerTriMatrix<float>& A, MatrixView<float> B)
     {
         int m=BlasIsCM(B)?B.colsize():B.rowsize();
         int n=BlasIsCM(B)?B.rowsize():B.colsize();
@@ -476,7 +476,7 @@ namespace tmv {
     template <> 
     void BlasTriLDivEq(
         const GenUpperTriMatrix<std::complex<float> >& A,
-        const MatrixView<std::complex<float> >& B)
+        MatrixView<std::complex<float> > B)
     {
         int m=BlasIsCM(B)?B.colsize():B.rowsize();
         int n=BlasIsCM(B)?B.rowsize():B.colsize();
@@ -505,7 +505,7 @@ namespace tmv {
     template <> 
     void BlasTriLDivEq(
         const GenLowerTriMatrix<std::complex<float> >& A,
-        const MatrixView<std::complex<float> >& B)
+        MatrixView<std::complex<float> > B)
     {
         int m=BlasIsCM(B)?B.colsize():B.rowsize();
         int n=BlasIsCM(B)?B.rowsize():B.colsize();
@@ -534,7 +534,7 @@ namespace tmv {
     template <> 
     void BlasTriLDivEq(
         const GenUpperTriMatrix<float>& A,
-        const MatrixView<std::complex<float> >& B)
+        MatrixView<std::complex<float> > B)
     {
         if (BlasIsRM(B)) {
             int m=2*B.rowsize();
@@ -562,7 +562,7 @@ namespace tmv {
     template <> 
     void BlasTriLDivEq(
         const GenLowerTriMatrix<float>& A,
-        const MatrixView<std::complex<float> >& B)
+        MatrixView<std::complex<float> > B)
     {
         if (BlasIsRM(B)) {
             int m=2*B.rowsize();
@@ -592,7 +592,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     void TriLDivEq(
-        const GenUpperTriMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenUpperTriMatrix<Ta>& A, MatrixView<T> B)
     {
 #ifdef XDEBUG
         Matrix<Ta> A0(A);
@@ -656,7 +656,7 @@ namespace tmv {
     }
 
     template <class T, class Ta> 
-    void TriLDivEq(const GenLowerTriMatrix<Ta>& A, const MatrixView<T>& B)
+    void TriLDivEq(const GenLowerTriMatrix<Ta>& A, MatrixView<T> B)
     {
 #ifdef XDEBUG
         Matrix<Ta> A0(A);

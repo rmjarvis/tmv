@@ -122,7 +122,7 @@ namespace tmv {
         inline SymType sym() const { return m.issym() ? Sym : Herm; }
         inline T getX() const { return x; }
         inline const GenSymMatrix<Tm>& getM() const { return m; }
-        inline void assignToM(const MatrixView<real_type>& m0) const
+        inline void assignToM(MatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == m.size());
@@ -132,7 +132,7 @@ namespace tmv {
                 m0.lowerTri().offDiag() = m.lowerTri().offDiag();
             MultXM(x,m0);
         }
-        inline void assignToM(const MatrixView<complex_type>& m0) const
+        inline void assignToM(MatrixView<complex_type> m0) const
         {
             TMVAssert(m0.colsize() == m.size());
             TMVAssert(m0.rowsize() == m.size());
@@ -141,7 +141,7 @@ namespace tmv {
                 m0.lowerTri().offDiag() = m.lowerTri().offDiag();
             MultXM(x,m0);
         }
-        inline void assignToS(const SymMatrixView<real_type>& m0) const
+        inline void assignToS(SymMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m.issym() || TMV_IMAG(x)==real_type(0) ); 
@@ -149,7 +149,7 @@ namespace tmv {
             TMVAssert(isReal(Tm()) || m0.issym() == m.issym());
             MultXM(x,m0=m);
         }
-        inline void assignToS(const SymMatrixView<complex_type>& m0) const
+        inline void assignToS(SymMatrixView<complex_type> m0) const
         {
             TMVAssert(m.issym() || TMV_IMAG(x)==real_type(0) ); 
             TMVAssert(m0.size() == m.size());
@@ -163,7 +163,7 @@ namespace tmv {
 
     // m*=x
     template <class T> 
-    inline const SymMatrixView<T>& operator*=(const SymMatrixView<T>& m, T x) 
+    inline SymMatrixView<T> operator*=(SymMatrixView<T> m, T x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
         MultXM(x,m);
@@ -171,14 +171,14 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator*=(const SymMatrixView<CT>& m, T x) 
+    inline SymMatrixView<CT> operator*=(SymMatrixView<CT> m, T x) 
     { 
         MultXM(x,m);
         return m;
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator*=(const SymMatrixView<CT>& m, CCT x) 
+    inline SymMatrixView<CT> operator*=(SymMatrixView<CT> m, CCT x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
         MultXM(CT(x),m);
@@ -186,7 +186,7 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator*=(const SymMatrixView<CT>& m, VCT x) 
+    inline SymMatrixView<CT> operator*=(SymMatrixView<CT> m, VCT x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
         MultXM(CT(x),m);
@@ -195,7 +195,7 @@ namespace tmv {
 
     // m/=x
     template <class T> 
-    inline const SymMatrixView<T>& operator/=(const SymMatrixView<T>& m, T x) 
+    inline SymMatrixView<T> operator/=(SymMatrixView<T> m, T x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
         MultXM(TMV_InverseOf(x),m); 
@@ -203,15 +203,15 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator/=(const SymMatrixView<CT>& m, T x) 
+    inline SymMatrixView<CT> operator/=(SymMatrixView<CT> m, T x) 
     { 
         MultXM(TMV_InverseOf(x),m); 
         return m;
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator/=(
-        const SymMatrixView<CT>& m, CCT x) 
+    inline SymMatrixView<CT> operator/=(
+        SymMatrixView<CT> m, CCT x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
         MultXM(TMV_InverseOf(CT(x)),m); 
@@ -219,8 +219,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator/=(
-        const SymMatrixView<CT>& m, VCT x) 
+    inline SymMatrixView<CT> operator/=(
+        SymMatrixView<CT> m, VCT x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
         MultXM(TMV_InverseOf(CT(x)),m); 
@@ -251,7 +251,7 @@ namespace tmv {
         inline T getX1() const { return x1; }
         inline const GenSymMatrix<Tm>& getM() const { return m; }
         inline T getX2() const { return x2; }
-        inline void assignToM(const MatrixView<real_type>& m0) const
+        inline void assignToM(MatrixView<real_type> m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == m.size());
@@ -259,14 +259,14 @@ namespace tmv {
             MultXM(x1,m0=m);
             m0.diag().addToAll(TMV_REAL(x2));
         } 
-        inline void assignToM(const MatrixView<complex_type>& m0) const
+        inline void assignToM(MatrixView<complex_type> m0) const
         { 
             TMVAssert(m0.colsize() == m.size());
             TMVAssert(m0.rowsize() == m.size());
             MultXM(x1,m0=m);
             m0.diag().addToAll(complex_type(x2));
         } 
-        inline void assignToS(const SymMatrixView<real_type>& m0) const
+        inline void assignToS(SymMatrixView<real_type> m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(isReal(Tm()) || m0.issym() == m.issym());
@@ -276,7 +276,7 @@ namespace tmv {
             MultXM(x1,m0=m);
             m0.diag().addToAll(TMV_REAL(x2));
         }
-        inline void assignToS(const SymMatrixView<complex_type>& m0) const
+        inline void assignToS(SymMatrixView<complex_type> m0) const
         { 
             TMVAssert(isReal(Tm()) || m0.issym() == m.issym());
             TMVAssert(m.issym() || TMV_IMAG(x1)==real_type(0));
@@ -293,7 +293,7 @@ namespace tmv {
 
     // m+=x
     template <class T> 
-    inline const SymMatrixView<T>& operator+=(const SymMatrixView<T>& m, T x) 
+    inline SymMatrixView<T> operator+=(SymMatrixView<T> m, T x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
         m.diag().addToAll(x);
@@ -301,15 +301,15 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator+=(const SymMatrixView<CT>& m, T x) 
+    inline SymMatrixView<CT> operator+=(SymMatrixView<CT> m, T x) 
     { 
         m.diag().addToAll(CT(x));
         return m; 
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator+=(
-        const SymMatrixView<CT>& m, CCT x) 
+    inline SymMatrixView<CT> operator+=(
+        SymMatrixView<CT> m, CCT x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == T(0));
         m.diag().addToAll(CT(x));
@@ -317,8 +317,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator+=(
-        const SymMatrixView<CT>& m, VCT x) 
+    inline SymMatrixView<CT> operator+=(
+        SymMatrixView<CT> m, VCT x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == T(0));
         m.diag().addToAll(CT(x));
@@ -327,7 +327,7 @@ namespace tmv {
 
     // m-=x
     template <class T> 
-    inline const SymMatrixView<T>& operator-=(const SymMatrixView<T>& m, T x) 
+    inline SymMatrixView<T> operator-=(SymMatrixView<T> m, T x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == TMV_RealType(T)(0));
         m.diag().addToAll(-x);
@@ -335,15 +335,15 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator-=(const SymMatrixView<CT>& m, T x) 
+    inline SymMatrixView<CT> operator-=(SymMatrixView<CT> m, T x) 
     { 
         m.diag().addToAll(CT(-x));
         return m; 
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator-=(
-        const SymMatrixView<CT>& m, CCT x) 
+    inline SymMatrixView<CT> operator-=(
+        SymMatrixView<CT> m, CCT x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == T(0));
         m.diag().addToAll(-CT(x));
@@ -351,8 +351,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator-=(
-        const SymMatrixView<CT>& m, VCT x) 
+    inline SymMatrixView<CT> operator-=(
+        SymMatrixView<CT> m, VCT x) 
     { 
         TMVAssert(m.issym() || TMV_IMAG(x) == T(0));
         m.diag().addToAll(-CT(x));
@@ -390,20 +390,20 @@ namespace tmv {
         inline const GenSymMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
         inline const GenSymMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<real_type>& m0) const
+        inline void assignToM(MatrixView<real_type> m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
             AddMM(x1,m1,x2,m2,m0);
         } 
-        inline void assignToM(const MatrixView<complex_type>& m0) const
+        inline void assignToM(MatrixView<complex_type> m0) const
         { 
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
             AddMM(x1,m1,x2,m2,m0);
         } 
-        inline void assignToS(const SymMatrixView<real_type>& m0) const
+        inline void assignToS(SymMatrixView<real_type> m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(isReal(T1()) || isReal(T2()) || m1.sym() == m2.sym());
@@ -414,7 +414,7 @@ namespace tmv {
             TMVAssert(m0.issym() || TMV_IMAG(x2) == real_type(0));
             AddMM(x1,m1,x2,m2,m0);
         }
-        inline void assignToS(const SymMatrixView<complex_type>& m0) const
+        inline void assignToS(SymMatrixView<complex_type> m0) const
         { 
             TMVAssert(isReal(T1()) || isReal(T2()) || m1.sym() == m2.sym());
             TMVAssert(m0.size() == m1.size());
@@ -432,8 +432,8 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const SymMatrixView<T>& operator+=(
-        const SymMatrixView<T>& m1, const GenSymMatrix<T>& m2) 
+    inline SymMatrixView<T> operator+=(
+        SymMatrixView<T> m1, const GenSymMatrix<T>& m2) 
     { 
         TMVAssert(m1.size() == m2.size());
         TMVAssert(isReal(T()) || m1.sym() == m2.sym());
@@ -441,16 +441,16 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator+=(
-        const SymMatrixView<CT>& m1, const GenSymMatrix<T>& m2) 
+    inline SymMatrixView<CT> operator+=(
+        SymMatrixView<CT> m1, const GenSymMatrix<T>& m2) 
     { 
         TMVAssert(m1.size() == m2.size());
         AddMM(T(1),m2,m1); return m1; 
     }
 
     template <class T> 
-    inline const SymMatrixView<T>& operator-=(
-        const SymMatrixView<T>& m1, const GenSymMatrix<T>& m2) 
+    inline SymMatrixView<T> operator-=(
+        SymMatrixView<T> m1, const GenSymMatrix<T>& m2) 
     { 
         TMVAssert(m1.size() == m2.size());
         TMVAssert(isReal(T()) || m1.sym() == m2.sym());
@@ -458,16 +458,16 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator-=(
-        const SymMatrixView<CT>& m1, const GenSymMatrix<T>& m2) 
+    inline SymMatrixView<CT> operator-=(
+        SymMatrixView<CT> m1, const GenSymMatrix<T>& m2) 
     { 
         TMVAssert(m1.size() == m2.size());
         AddMM(T(-1),m2,m1); return m1; 
     }
 
     template <class T, class T2> 
-    inline const SymMatrixView<T>& operator+=(
-        const SymMatrixView<T>& m, const ProdXS<T,T2>& pxm)
+    inline SymMatrixView<T> operator+=(
+        SymMatrixView<T> m, const ProdXS<T,T2>& pxm)
     {
         TMVAssert(m.size() == pxm.size());
         TMVAssert(isReal(T2()) || m.issym() == pxm.getM().issym());
@@ -477,8 +477,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator+=(
-        const SymMatrixView<CT>& m, const ProdXS<T,T>& pxm)
+    inline SymMatrixView<CT> operator+=(
+        SymMatrixView<CT> m, const ProdXS<T,T>& pxm)
     {
         TMVAssert(m.size() == pxm.size());
         AddMM(pxm.getX(),pxm.getM(),m);
@@ -486,8 +486,8 @@ namespace tmv {
     }
 
     template <class T, class T2> 
-    inline const SymMatrixView<T>& operator-=(
-        const SymMatrixView<T>& m, const ProdXS<T,T2>& pxm)
+    inline SymMatrixView<T> operator-=(
+        SymMatrixView<T> m, const ProdXS<T,T2>& pxm)
     {
         TMVAssert(m.size() == pxm.size());
         TMVAssert(isReal(T2()) || m.issym() == pxm.getM().issym());
@@ -497,8 +497,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator-=(
-        const SymMatrixView<CT>& m, const ProdXS<T,T>& pxm)
+    inline SymMatrixView<CT> operator-=(
+        SymMatrixView<CT> m, const ProdXS<T,T>& pxm)
     {
         TMVAssert(m.size() == pxm.size());
         AddMM(-pxm.getX(),pxm.getM(),m);
@@ -539,14 +539,14 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenSymMatrix<T1>& getM1() const { return m1; }
         inline const GenSymMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<real_type>& m0) const
+        inline void assignToM(MatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
             MultMM<false>(x,m1,m2,m0);
         }
-        inline void assignToM(const MatrixView<complex_type>& m0) const
+        inline void assignToM(MatrixView<complex_type> m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -559,8 +559,8 @@ namespace tmv {
     };
 
     template <class T, class T1, class T2> 
-    inline const MatrixView<T>& operator+=(
-        const MatrixView<T>& m, const ProdSS<T,T1,T2>& pmm)
+    inline MatrixView<T> operator+=(
+        MatrixView<T> m, const ProdSS<T,T1,T2>& pmm)
     {
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -569,8 +569,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const MatrixView<CT>& operator+=(
-        const MatrixView<CT>& m, const ProdSS<T,T,T>& pmm)
+    inline MatrixView<CT> operator+=(
+        MatrixView<CT> m, const ProdSS<T,T,T>& pmm)
     {
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -579,8 +579,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const MatrixView<T>& operator-=(
-        const MatrixView<T>& m, const ProdSS<T,T1,T2>& pmm)
+    inline MatrixView<T> operator-=(
+        MatrixView<T> m, const ProdSS<T,T1,T2>& pmm)
     { 
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -589,8 +589,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const MatrixView<CT>& operator-=(
-        const MatrixView<CT>& m, const ProdSS<T,T,T>& pmm)
+    inline MatrixView<CT> operator-=(
+        MatrixView<CT> m, const ProdSS<T,T,T>& pmm)
     { 
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -633,7 +633,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenSymMatrix<T1>& getM1() const { return m1; }
         inline const GenSymMatrix<T2>& getM2() const { return m2; }
-        inline void assignToM(const MatrixView<real_type>& m0) const
+        inline void assignToM(MatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == size());
@@ -645,7 +645,7 @@ namespace tmv {
                     m0.lowerTri().offDiag()); 
             }
         } 
-        inline void assignToM(const MatrixView<complex_type>& m0) const
+        inline void assignToM(MatrixView<complex_type> m0) const
         { 
             TMVAssert(m0.colsize() == size());
             TMVAssert(m0.rowsize() == size());
@@ -656,7 +656,7 @@ namespace tmv {
                     m0.lowerTri().offDiag()); 
             }
         } 
-        inline void assignToS(const SymMatrixView<real_type>& m0) const
+        inline void assignToS(SymMatrixView<real_type> m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(isReal(T1()) || isReal(T2()) || m1.sym() == m2.sym());
@@ -666,7 +666,7 @@ namespace tmv {
             TMVAssert(m0.issym() || TMV_IMAG(x) == real_type(0));
             ElemMultMM<false>(x,m1.upperTri(),m2.upperTri(),m0.upperTri()); 
         }
-        inline void assignToS(const SymMatrixView<complex_type>& m0) const
+        inline void assignToS(SymMatrixView<complex_type> m0) const
         { 
             TMVAssert(isReal(T1()) || isReal(T2()) || m1.sym() == m2.sym());
             TMVAssert(m0.size() == m1.size());
@@ -682,8 +682,8 @@ namespace tmv {
     };
 
     template <class T, class T1, class T2> 
-    inline const SymMatrixView<T>& operator+=(
-        const SymMatrixView<T>& m, const ElemProdSS<T,T1,T2>& pmm)
+    inline SymMatrixView<T> operator+=(
+        SymMatrixView<T> m, const ElemProdSS<T,T1,T2>& pmm)
     {
         TMVAssert(isReal(T1()) || isReal(T2()) || 
                   pmm.getM1().sym() == pmm.getM2().sym());
@@ -699,8 +699,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator+=(
-        const SymMatrixView<CT>& m, const ElemProdSS<T,T,T>& pmm)
+    inline SymMatrixView<CT> operator+=(
+        SymMatrixView<CT> m, const ElemProdSS<T,T,T>& pmm)
     {
         TMVAssert(m.size() == pmm.size());
         TMVAssert(m.issym() || TMV_IMAG(pmm.getX()) == T(0));
@@ -711,8 +711,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const SymMatrixView<T>& operator-=(
-        const SymMatrixView<T>& m, const ElemProdSS<T,T1,T2>& pmm)
+    inline SymMatrixView<T> operator-=(
+        SymMatrixView<T> m, const ElemProdSS<T,T1,T2>& pmm)
     { 
         TMVAssert(isReal(T1()) || isReal(T2()) || 
                   pmm.getM1().sym() == pmm.getM2().sym());
@@ -728,8 +728,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator-=(
-        const SymMatrixView<CT>& m, const ElemProdSS<T,T,T>& pmm)
+    inline SymMatrixView<CT> operator-=(
+        SymMatrixView<CT> m, const ElemProdSS<T,T,T>& pmm)
     { 
         TMVAssert(m.size() == pmm.size());
         TMVAssert(m.issym() || TMV_IMAG(pmm.getX()) == T(0));
@@ -762,8 +762,8 @@ namespace tmv {
 
     // m += (x*v^v)
     template <class T, class Tv> 
-    inline const SymMatrixView<T>& operator+=(
-        const SymMatrixView<T>& m0, const OProdVV<T,Tv,Tv>& opvv)
+    inline SymMatrixView<T> operator+=(
+        SymMatrixView<T> m0, const OProdVV<T,Tv,Tv>& opvv)
     {
         TMVAssert(m0.size() == opvv.colsize());
         TMVAssert(m0.size() == opvv.rowsize());
@@ -774,8 +774,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator+=(
-        const SymMatrixView<CT>& m0, const OProdVV<T,T,T>& opvv)
+    inline SymMatrixView<CT> operator+=(
+        SymMatrixView<CT> m0, const OProdVV<T,T,T>& opvv)
     {
         TMVAssert(m0.size() == opvv.colsize());
         TMVAssert(m0.size() == opvv.rowsize());
@@ -786,8 +786,8 @@ namespace tmv {
 
     // m -= (x*v^v)
     template <class T, class Tv> 
-    inline const SymMatrixView<T>& operator-=(
-        const SymMatrixView<T>& m0, const OProdVV<T,Tv,Tv>& opvv)
+    inline SymMatrixView<T> operator-=(
+        SymMatrixView<T> m0, const OProdVV<T,Tv,Tv>& opvv)
     {
         TMVAssert(m0.size() == opvv.colsize());
         TMVAssert(m0.size() == opvv.rowsize());
@@ -798,8 +798,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator-=(
-        const SymMatrixView<CT>& m0, const OProdVV<T,T,T>& opvv)
+    inline SymMatrixView<CT> operator-=(
+        SymMatrixView<CT> m0, const OProdVV<T,T,T>& opvv)
     {
         TMVAssert(m0.size() == opvv.colsize());
         TMVAssert(m0.size() == opvv.rowsize());
@@ -814,8 +814,8 @@ namespace tmv {
 
     // m += (x*m*mt)
     template <class T, class Tm> 
-    inline const SymMatrixView<T>& operator+=(
-        const SymMatrixView<T>& m0, const ProdMM<T,Tm,Tm>& opmm)
+    inline SymMatrixView<T> operator+=(
+        SymMatrixView<T> m0, const ProdMM<T,Tm,Tm>& opmm)
     {
         TMVAssert(m0.size() == opmm.colsize());
         TMVAssert(m0.size() == opmm.rowsize());
@@ -828,8 +828,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator+=(
-        const SymMatrixView<CT>& m0, const ProdMM<T,T,T>& opmm)
+    inline SymMatrixView<CT> operator+=(
+        SymMatrixView<CT> m0, const ProdMM<T,T,T>& opmm)
     {
         TMVAssert(m0.size() == opmm.colsize());
         TMVAssert(m0.size() == opmm.rowsize());
@@ -839,8 +839,8 @@ namespace tmv {
     }
 
     template <class T, class Tm> 
-    inline const SymMatrixView<T>& operator+=(
-        const SymMatrixView<T>& m0, const ProdLU<T,Tm,Tm>& opmm)
+    inline SymMatrixView<T> operator+=(
+        SymMatrixView<T> m0, const ProdLU<T,Tm,Tm>& opmm)
     {
         TMVAssert(m0.size() == opmm.colsize());
         TMVAssert(m0.size() == opmm.rowsize());
@@ -853,8 +853,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator+=(
-        const SymMatrixView<CT>& m0, const ProdLU<T,T,T>& opmm)
+    inline SymMatrixView<CT> operator+=(
+        SymMatrixView<CT> m0, const ProdLU<T,T,T>& opmm)
     {
         TMVAssert(m0.size() == opmm.colsize());
         TMVAssert(m0.size() == opmm.rowsize());
@@ -864,8 +864,8 @@ namespace tmv {
     }
 
     template <class T, class Tm> 
-    inline const SymMatrixView<T>& operator+=(
-        const SymMatrixView<T>& m0, const ProdUL<T,Tm,Tm>& opmm)
+    inline SymMatrixView<T> operator+=(
+        SymMatrixView<T> m0, const ProdUL<T,Tm,Tm>& opmm)
     {
         TMVAssert(m0.size() == opmm.colsize());
         TMVAssert(m0.size() == opmm.rowsize());
@@ -878,8 +878,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator+=(
-        const SymMatrixView<CT>& m0, const ProdUL<T,T,T>& opmm)
+    inline SymMatrixView<CT> operator+=(
+        SymMatrixView<CT> m0, const ProdUL<T,T,T>& opmm)
     {
         TMVAssert(m0.size() == opmm.colsize());
         TMVAssert(m0.size() == opmm.rowsize());
@@ -890,8 +890,8 @@ namespace tmv {
 
     // m -= (x*m*mt)
     template <class T, class Tm> 
-    inline const SymMatrixView<T>& operator-=(
-        const SymMatrixView<T>& m0, const ProdMM<T,Tm,Tm>& opmm)
+    inline SymMatrixView<T> operator-=(
+        SymMatrixView<T> m0, const ProdMM<T,Tm,Tm>& opmm)
     {
         TMVAssert(m0.size() == opmm.colsize());
         TMVAssert(m0.size() == opmm.rowsize());
@@ -904,8 +904,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator-=(
-        const SymMatrixView<CT>& m0, const ProdMM<T,T,T>& opmm)
+    inline SymMatrixView<CT> operator-=(
+        SymMatrixView<CT> m0, const ProdMM<T,T,T>& opmm)
     {
         TMVAssert(m0.size() == opmm.colsize());
         TMVAssert(m0.size() == opmm.rowsize());
@@ -915,8 +915,8 @@ namespace tmv {
     }
 
     template <class T, class Tm> 
-    inline const SymMatrixView<T>& operator-=(
-        const SymMatrixView<T>& m0, const ProdUL<T,Tm,Tm>& opmm)
+    inline SymMatrixView<T> operator-=(
+        SymMatrixView<T> m0, const ProdUL<T,Tm,Tm>& opmm)
     {
         TMVAssert(m0.size() == opmm.colsize());
         TMVAssert(m0.size() == opmm.rowsize());
@@ -929,8 +929,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator-=(
-        const SymMatrixView<CT>& m0, const ProdUL<T,T,T>& opmm)
+    inline SymMatrixView<CT> operator-=(
+        SymMatrixView<CT> m0, const ProdUL<T,T,T>& opmm)
     {
         TMVAssert(m0.size() == opmm.colsize());
         TMVAssert(m0.size() == opmm.rowsize());
@@ -940,8 +940,8 @@ namespace tmv {
     }
 
     template <class T, class Tm> 
-    inline const SymMatrixView<T>& operator-=(
-        const SymMatrixView<T>& m0, const ProdLU<T,Tm,Tm>& opmm)
+    inline SymMatrixView<T> operator-=(
+        SymMatrixView<T> m0, const ProdLU<T,Tm,Tm>& opmm)
     {
         TMVAssert(m0.size() == opmm.colsize());
         TMVAssert(m0.size() == opmm.rowsize());
@@ -954,8 +954,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const SymMatrixView<CT>& operator-=(
-        const SymMatrixView<CT>& m0, const ProdLU<T,T,T>& opmm)
+    inline SymMatrixView<CT> operator-=(
+        SymMatrixView<CT> m0, const ProdLU<T,T,T>& opmm)
     {
         TMVAssert(m0.size() == opmm.colsize());
         TMVAssert(m0.size() == opmm.rowsize());

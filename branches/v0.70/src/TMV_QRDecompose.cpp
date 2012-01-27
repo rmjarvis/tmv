@@ -65,7 +65,7 @@ namespace tmv {
 
     template <class T> 
     static void NonBlockQRDecompose(
-        const MatrixView<T>& A, const VectorView<T>& beta, T& det)
+        MatrixView<T> A, VectorView<T> beta, T& det)
     {
 #ifdef XDEBUG
         cout<<"Start NonBlockQRDecompose\n";
@@ -121,7 +121,7 @@ namespace tmv {
 
     template <class T> 
     static void RecursiveQRDecompose(
-        const MatrixView<T>& A, const UpperTriMatrixView<T>& Z, T& det,
+        MatrixView<T> A, UpperTriMatrixView<T> Z, T& det,
         bool makeZ)
     {
 #ifdef XDEBUG
@@ -193,7 +193,7 @@ namespace tmv {
 
     template <class T> 
     static void BlockQRDecompose(
-        const MatrixView<T>& A, const VectorView<T>& beta, T& det)
+        MatrixView<T> A, VectorView<T> beta, T& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(A.rowsize() == beta.size());
@@ -255,7 +255,7 @@ namespace tmv {
 
     template <class T> 
     static void NonLapQRDecompose(
-        const MatrixView<T>& A, const VectorView<T>& beta, T& det)
+        MatrixView<T> A, VectorView<T> beta, T& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(A.rowsize() == beta.size());
@@ -277,13 +277,13 @@ namespace tmv {
 #ifdef LAP
     template <class T> 
     static inline void LapQRDecompose(
-        const MatrixView<T>& A, const VectorView<T>& beta, T& det)
+        MatrixView<T> A, VectorView<T> beta, T& det)
     { NonLapQRDecompose(A,beta,det); }
 #ifdef INST_DOUBLE
     template <> 
     void LapQRDecompose(
-        const MatrixView<double>& A,
-        const VectorView<double>& beta, double& det)
+        MatrixView<double> A,
+        VectorView<double> beta, double& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(A.rowsize() == beta.size());
@@ -358,8 +358,8 @@ namespace tmv {
     }
     template <> 
     void LapQRDecompose(
-        const MatrixView<std::complex<double> >& A,
-        const VectorView<std::complex<double> >& beta,
+        MatrixView<std::complex<double> > A,
+        VectorView<std::complex<double> > beta,
         std::complex<double>& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
@@ -445,8 +445,8 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     void LapQRDecompose(
-        const MatrixView<float>& A,
-        const VectorView<float>& beta, float& det)
+        MatrixView<float> A,
+        VectorView<float> beta, float& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(A.rowsize() == beta.size());
@@ -521,8 +521,8 @@ namespace tmv {
     }
     template <> 
     void LapQRDecompose(
-        const MatrixView<std::complex<float> >& A,
-        const VectorView<std::complex<float> >& beta, std::complex<float>& det)
+        MatrixView<std::complex<float> > A,
+        VectorView<std::complex<float> > beta, std::complex<float>& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(A.rowsize() == beta.size());
@@ -603,7 +603,7 @@ namespace tmv {
 #endif
 
     template <class T> 
-    void QR_Decompose(const MatrixView<T>& A, const VectorView<T>& beta, T& det)
+    void QR_Decompose(MatrixView<T> A, VectorView<T> beta, T& det)
     {
 #ifdef XDEBUG
         cout<<"Start QR_Decompose\n";
@@ -662,7 +662,7 @@ namespace tmv {
 
     template <class T> 
     void QR_Decompose(
-        const MatrixView<T>& Q, const UpperTriMatrixView<T>& R, T& det)
+        MatrixView<T> Q, UpperTriMatrixView<T> R, T& det)
     {
         // Decompose A (input as Q) into A = Q R 
         // where Q is unitary and R is upper triangular
@@ -680,7 +680,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void QR_Decompose(const MatrixView<T>& Q, const UpperTriMatrixView<T>& R)
+    void QR_Decompose(MatrixView<T> Q, UpperTriMatrixView<T> R)
     {
         T d(0);
         if (Q.isconj()) {
@@ -701,7 +701,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void QR_Decompose(const MatrixView<T>& A)
+    void QR_Decompose(MatrixView<T> A)
     {
         // Decompose A into Q R, but ignore Q.
         // On output, R is A.upperTri()

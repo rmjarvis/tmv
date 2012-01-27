@@ -16,16 +16,6 @@ Throughout, we use \tt{nlo} to refer to the number of sub-diagonals
 in the \tt{BandMatrix}, and \tt{nhi} to refer to the number of super-diagonals
 (above the main diagonal).
 
-\tt{BandMatrix} inherits from \tt{GenBandMatrix}, which in turn inherits from
-\tt{BaseMatrix}.  
-The various views and composite classes described below 
-also inherit from \tt{GenBandMatrix}.
-\index{BandMatrix!BandMatrixView}
-\index{BandMatrix!ConstBandMatrixView}
-\index{BandMatrix!GenBandMatrix}
-\index{BandMatrix!BandMatrixComposite}
-\index{BaseMatrix}
-
 All the \tt{BandMatrix} routines are included by:
 \begin{tmvcode}
 #include "TMV_Band.h"
@@ -35,10 +25,10 @@ All the \tt{BandMatrix} routines are included by:
 In addition to the data type template parameter (indicated here by \tt{T} as usual),
 there is also a second template parameter that specifies attributes of the
 \tt{BandMatrix}.  The attributes that are allowed are:
-\begin{itemize}
-\item \tt{CStyle} or \tt{FortranStyle}
-\item \tt{ColMajor}, \tt{RowMajor} or \tt{DiagMajor}
-\end{itemize}
+\begin{description} \itemsep -2pt
+\item[$\bullet$] \tt{CStyle} or \tt{FortranStyle}
+\item[$\bullet$] \tt{ColMajor} or \tt{RowMajor}
+\end{description}
 For this class, we have the additional storage possibility: \tt{DiagMajor},
 which has unit step along the diagonals.  It stores the values in memory
 starting with the lowest sub-diagonal and progressing up to the highest
@@ -141,10 +131,10 @@ Makes a \tt{BandMatrix} with all values equal to \tt{x}.
 
 \item 
 \begin{tmvcode}
-tmv::BandMatrix<T,A> b(const GenMatrix<T>& m, int nlo, int nhi)
-tmv::BandMatrix<T,A> b(const GenBandMatrix<T>& m, int nlo, int nhi)
-tmv::BandMatrix<T,A> b(const GenUpperTriMatrix<T>& m, int nhi)
-tmv::BandMatrix<T,A> b(const GenLowerTriMatrix<T>& m, int nlo)
+tmv::BandMatrix<T,A> b(const Matrix<T>& m, int nlo, int nhi)
+tmv::BandMatrix<T,A> b(const BandMatrix<T>& m, int nlo, int nhi)
+tmv::BandMatrix<T,A> b(const UpperTriMatrix<T>& m, int nhi)
+tmv::BandMatrix<T,A> b(const LowerTriMatrix<T>& m, int nlo)
 \end{tmvcode}
 Make a \tt{BandMatrix} the same size as \tt{m}, which copies the values of \tt{m}
 that are within the band defined by \tt{nlo} and \tt{nhi}
@@ -154,12 +144,12 @@ For the last two, \tt{nlo} and \tt{nhi} (respectively) are taken to be $0$.
 \item
 \begin{tmvcode}
 tmv::BandMatrix<T,tmv::DiagMajor> m = UpperBiDiagMatrix(
-      const GenVector<T>& v1, const GenVector<T>& v2)
+      const Vector<T>& v1, const Vector<T>& v2)
 tmv::BandMatrix<T,tmv::DiagMajor> m = LowerBiDiagMatrix(
-      const GenVector<T>& v1, const GenVector<T>& v2)
+      const Vector<T>& v1, const Vector<T>& v2)
 tmv::BandMatrix<T,tmv::DiagMajor> m = TriDiagMatrix(
-      const GenVector<T>& v1,  const GenVector<T>& v2, 
-      const GenVector<T>& v3)
+      const Vector<T>& v1,  const Vector<T>& v2, 
+      const Vector<T>& v3)
 \end{tmvcode}
 \index{BandMatrix!Constructors!UpperBiDiagMatrix}
 \index{BandMatrix!Constructors!LowerBiDiagMatrix}
@@ -169,7 +159,7 @@ Shorthand to create bi- or tri-diagonal \tt{BandMatrix}es if you already have th
 
 \item
 \begin{tmvcode}
-tmv::BandMatrix<T,A> b1(const GenBandMatrix<T2>& b2)
+tmv::BandMatrix<T,A> b1(const BandMatrix<T2>& b2)
 b1 = b2
 \end{tmvcode}
 Copy the \tt{BandMatrix b2}, which may be of any type \tt{T2} so long
@@ -623,7 +613,7 @@ from all of this finagling, so unless you are really memory starved, it's probab
 
 To access this decomposition, use:
 \begin{tmvcode}
-bool b.lud().IsTrans()
+bool b.lud().isTrans()
 tmv::LowerTriMatrix<T,UnitDiag> b.lud().getL()
 tmv::ConstBandMatrixView<T> b.lud().getU()
 Permutation b.lud().getP()
@@ -634,7 +624,7 @@ Permutation b.lud().getP()
 The following should result in a matrix numerically very close to \tt{b}.
 \begin{tmvcode}
 tmv::Matrix<T> m2 = b.lud().getP() * b.lud().getL() * b.lud().getU();
-if (b.lud().IsTrans()) m2.transposeSelf();
+if (b.lud().isTrans()) m2.transposeSelf();
 \end{tmvcode}
 
 \item
@@ -649,7 +639,7 @@ I have not yet made a version of the \tt{PackedQ} class for \tt{BandMatrix}.
 So unfortunately, here \tt{getQ()} creates the matrix directly and is thus
 rather inefficient.}
 \begin{tmvcode}
-bool b.qrd().IsTrans()
+bool b.qrd().isTrans()
 tmv::Matrix<T> b.qrd().getQ()
 tmv::ConstBandMatrixView<T> b.qrd().getR()
 \end{tmvcode}
@@ -660,7 +650,7 @@ The following should result in a matrix numerically very close to \tt{b}.
 \begin{tmvcode}
 tmv::Matrix<T> m2(b.nrows,b.ncols);
 tmv::MatrixView<T> m2v = 
-      b.qrd().IsTrans() ? b2.transpose() : b2.view();
+      b.qrd().isTrans() ? b2.transpose() : b2.view();
 m2v = b.qrd().getQ() * b.qrd().getR();
 \end{tmvcode}
 

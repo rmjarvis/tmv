@@ -4,32 +4,14 @@
 \index{Matrix}
 \label{Matrix}
 
-The \tt{Matrix} class is our dense matrix class.  It inherits from \tt{GenMatrix},
-which has the definitions of all the methods that 
-do not modify the \tt{Matrix}.
-
-The other classes that inherit from \tt{GenMatrix} are \tt{ConstMatrixView},
-\tt{MatrixView} (see \S\ref{Matrix_Views} below), and \tt{MatrixComposite}, which 
-is the base class for the various arithmetic operations that return a 
-(logical) \tt{Matrix}.  
-\index{Matrix!MatrixView}
-\index{Matrix!ConstMatrixView}
-\index{Matrix!GenMatrix}
-\index{Matrix!MatrixComposite}
-
-\tt{GenMatrix} in turn inherits from \tt{BaseMatrix}.  All of the various
-special \tt{Matrix} classes also inherit from \tt{BaseMatrix}.
-\tt{BaseMatrix} has virtual declarations for the functions that can be 
-performed on any kind of \tt{Matrix} regardless of its structure or sparsity.
-\index{BaseMatrix}
-
-In addition to the data type template parameter (indicated here by \tt{T} as usual),
+The \tt{Matrix} class is our dense matrix class. 
+In addition to the data type template parameter (indicated here by \tt{T} as before),
 there is also a second template parameter that specifies attributes of the
 \tt{Matrix}.  The two attributes that are allowed are:
-\begin{itemize}
-\item \tt{CStyle} or \tt{FortranStyle}
-\item \tt{ColMajor} or \tt{RowMajor}
-\end{itemize}
+\begin{description} \itemsep -2pt
+\item[$\bullet$] \tt{CStyle} or \tt{FortranStyle}
+\item[$\bullet$] \tt{ColMajor} or \tt{RowMajor}
+\end{description}
 
 With C-style indexing, the upper-left element of an $M \times N$ \tt{Matrix} is
 \tt{m(0,0)}, the lower-left is \tt{m(M-1,0)}, the upper-right is \tt{m(0,N-1)},
@@ -59,11 +41,11 @@ tmv::Matrix<double,tmv::RowMajor> m2;
 If you want to specify both, then the two values are combined with the 
 bit-wise or operator (\tt{|}):
 \begin{tmvcode}
-tmv::Matrix<double,tmv::FortranStyle | tmv::RowMajor> m3;
+tmv::Matrix<double,tmv::FortranStyle|tmv::RowMajor> m3;
 \end{tmvcode}
 Other special matrix types will have the possibility of still more 
-attributes, which act the same way.  You only need to specify ones that
-aren't the default, and you specify multiple values by using the \tt{|} 
+attributes, which act the same way: You only need to specify ones that
+aren't the default, and multiple values are combined with the \tt{|} 
 operator.
 
 All views of a \tt{Matrix} keep the same indexing style as the original unless you
@@ -90,7 +72,7 @@ Attributes parameter may be omitted, in which case \tt{CStyle|ColMajor} is assum
 tmv::Matrix<T,A> m()
 \end{tmvcode}
 Makes a \tt{Matrix} with zero size.  You would normally use the \tt{resize} function later to
-change the size to some useful value.
+change the size to something useful.
 
 \item 
 \begin{tmvcode}
@@ -109,7 +91,7 @@ values equal to \tt{x}
 
 \item
 \begin{tmvcode}
-tmv::Matrix<T,index> m1(const GenMatrix<T2>& m2)
+tmv::Matrix<T,A> m1(const Matrix<T2>& m2)
 m1 = m2
 \end{tmvcode}
 Copy the \tt{Matrix m2}, which may be of any type \tt{T2} so long
@@ -118,22 +100,24 @@ The assignment operator has the same flexibility.
 
 \item
 \begin{tmvcode}
-tmv::MatrixView<T,index> m = 
+tmv::MatrixView<T,A> m = 
       tmv::MatrixViewOf(T* mm, int nrows, int ncols, 
       StorageType stor)
-tmv::ConstMatrixView<T,index> m = 
+tmv::ConstMatrixView<T,A> m = 
       tmv::MatrixViewOf(const T* mm, int nrows, int ncols, 
       StorageType stor)
-tmv::MatrixView<T,index> m = 
+tmv::MatrixView<T,A> m = 
       tmv::MatrixViewOf(T* mm, int nrows, int ncols, 
       int stepi, int stepj)
-tmv::ConstMatrixView<T,index> m = 
+tmv::ConstMatrixView<T,A> m = 
       tmv::MatrixViewOf(const T* mm, int nrows, int ncols, 
       int stepi, int stepj)
 \end{tmvcode}
 \index{Matrix!View of raw memory}
 Makes a \tt{MatrixView} (see \S\ref{Matrix_Views} below) that refers to the exact
-elements of \tt{mm}, not copying them to new storage.  The first two versions
+elements of \tt{mm}, not copying them to new storage. 
+
+The first two versions
 indicate the ordering of the elements using the normal \tt{StorageType}
 designation, which must be either \tt{RowMajor} or \tt{ColMajor}.
   
@@ -180,7 +164,7 @@ There must be precisely as many values as there are elements in the \tt{Matrix},
 or a \tt{tmv::ReadError} will be thrown.
 \index{Exceptions!ReadError}
 
-This initialization list is always in RowMajor order, regardless of the storage order of the 
+This initialization list is always in row-major order, regardless of the storage order of the 
 matrix in memory.  That way, the elements in the list appear in the same order as the 
 real matrix.  If the \tt{Matrix} uses \tt{ColMajor} storage, then the assignment is somewhat
 less efficient, but since the initialization is almost never a time-critical part of the code, 
@@ -197,6 +181,7 @@ m.subMatrix(2,4,2,4) << // Lower right corner
     2,  3, 
     5,  1;
 \end{tmvcode}
+Note: As with \tt{Vector} initialization, it is also permissible to use more \tt{<<} operators instead of commas between the elements.  I prefer the comma notation, but using \tt{<<} between the elements matches the analogy with \tt{ostream} better, so that is also allowed.
 
 \subsection{Access}
 \index{Matrix!Access methods}
@@ -215,15 +200,15 @@ int m.rowsize() const
 \index{Matrix!Methods!colsize}
 \index{Matrix!Methods!rowsize}
 Returns the size of each dimension of \tt{m}.  \tt{nrows()} and \tt{colsize()} are equivalent.
-Likewise \tt{ncols} and \tt{rowsize()} are equivalent.
+Likewise \tt{ncols()} and \tt{rowsize()} are equivalent.
 
 \item
 \begin{tmvcode}
 T m(int i, int j) const
-T m[int i][int j] const
+T m[i][j] const
 T m.cref(int i, int j) const
 Matrix<T>::reference m(int i, int j)
-Matrix<T>::reference m[int i][int j]
+Matrix<T>::reference m[i][j]
 Matrix<T>::reference m.ref(int i,int j)
 \end{tmvcode}
 \index{Matrix!Methods!operator()}
@@ -244,7 +229,7 @@ With Fortran-style indexing, these four elements would instead be
 respectively.
 
 If \tt{m} is a 
-\tt{const Matrix}, a \tt{ConstMatrixView}, or a \tt{GenMatrix}, 
+\tt{const Matrix} or a \tt{ConstMatrixView}
 then the return type is just the value, not a reference.
 
 If \tt{m} is a 
@@ -446,15 +431,10 @@ a \tt{Matrix}:
 The first is only allowed to view,
 not modify, the original elements.  The second is allowed to modify them.
 
-It is worth pointing out again that a 
-\tt{const MatrixView} is still mutable, just like a \tt{const VectorView}.
-The \tt{const} just means that you cannot change which elements
-the view references.
-
 The following methods return views to portions of a \tt{Matrix}.
 If \tt{m} is either a (non-\tt{const}) \tt{Matrix}
 or a \tt{MatrixView}, then a \tt{MatrixView} is returned.
-If \tt{m} is a \tt{const Matrix}, \tt{ConstMatrixView}, or any other \tt{GenMatrix},
+If \tt{m} is a \tt{const Matrix} or a \tt{ConstMatrixView},
 then a \tt{ConstMatrixView} will be returned. 
 
 \begin{itemize}
@@ -517,16 +497,20 @@ m.colPair(i1,i2)
 \index{Matrix!Methods!rowPair}
 \index{Matrix!Methods!colPair}
 Another common submatrix is to select a pair of rows or columns, not 
-necessarily adjacent to each other.  These are short hand for:
+necessarily adjacent to each other.  These return a $2\times N$ and an $M\times 2$
+submarix respectively with just the rows or columns indicated.
+
+While it may not be overly enlightening, we also note that they can be considered short hand for:
 \begin{tmvcode}
 m.subMatrix(i1,i2+(i2-i1),0,ncols,i2-i1,1)
 m.subMatrix(0,nrows,j1,j2+(j2-j1),1,j2-j1)
 \end{tmvcode}
-respectively.  The equivalent in Fortran-style indexing would be:
+in the C-style notation or 
 \begin{tmvcode}
 m.subMatrix(i1,i2,1,ncols,i2-i1,1)
 m.subMatrix(1,nrows,j1,j2,1,j2-j1).
 \end{tmvcode}
+in the Fortran-style notation.
 
 \item
 \begin{tmvcode}
@@ -608,11 +592,13 @@ declares whether the diagonal elements are treated as all $1$s
 (\tt{dt = UnitDiag}) or as their actual values (\tt{dt = NonUnitDiag}). 
 See \S\ref{TriMatrix} for more details about this parameter and
 triangular matrices in general.
-For now, the latter two versions are equivalent to \tt{m.upperTri(UnitDiag)} and 
+
+The latter two versions are equivalent to \tt{m.upperTri(UnitDiag)} and 
 \tt{m.lowerTri(UnitDiag)} respectively.  However, future versions of TMV
 (specifically version 0.90, which is in development) will be able to exploit
 the compile-time knowledge of \tt{dt} to make this more efficient.
 
+\item
 \begin{tmvcode}
 tmv::VectorView<T> m.linearView()
 tmv::ConstVectorView<T> m.constLinearView()
@@ -622,7 +608,8 @@ bool m.canLinearize()
 \index{Matrix!Methods!linearView}
 \index{Matrix!Methods!constLinearView}
 \index{Matrix!Methods!canLinearize}
-These return a view to the elements of a \tt{Matrix} as a single vector.  It is always allowed for an actual \tt{Matrix}.  For a \tt{MatrixView} (or \tt{ConstMatrixView}), it is only allowed if all of the elements in the view are in one contiguous block of memory.  The helper function \tt{m.canLinearize()} returns whether or not the first two methods will work.
+These return a view to the elements of a \tt{Matrix} as a single vector.  It is only valid if all the elements are stored contiguously in memory.
+It is always allowed for an actual \tt{Matrix}.  For a \tt{MatrixView} (or \tt{ConstMatrixView}), it is only allowed if all of the elements in the view are in one contiguous block of memory.  The helper function \tt{m.canLinearize()} returns whether or not the first two methods will work.
 
 \end{itemize}
 
@@ -630,9 +617,11 @@ These return a view to the elements of a \tt{Matrix} as a single vector.  It is 
 \index{Matrix!Functions of}
 \label{Matrix_Functions}
 
-Functions that do not modify the \tt{Matrix} are defined in 
-\tt{GenMatrix}, and so can be used for any type derived from \tt{GenMatrix}:
-\tt{Matrix}, \tt{ConstMatrixView}, \tt{MatrixView}, or \tt{MatrixComposite}.
+Functions that do not modify the \tt{Matrix} 
+can take as their argument either a regular \tt{Matrix} or either kind
+of \tt{View}.  You may even pass it an arithmetic expression that is
+assignable to a \tt{Matrix}, and TMV will automatically create the 
+necessary temporary storage for teh result.  (e.g. \tt{Norm(m1-m2*m3)}.)
 Functions that modify the \tt{Matrix} are only defined for 
 \tt{Matrix} and \tt{MatrixView}.
 
@@ -648,7 +637,6 @@ Each of the following functions can be written in two ways,
 either as a method or a function.
 For example, the expressions \tt{m.norm()} and \tt{Norm(m)}
 are equivalent.  
-In each case, \tt{m} can be any \tt{GenMatrix<T>}.
 As a reminder, \tt{RT} refers to the real type associated with \tt{T}.
 In other words, \tt{T} is either the same as \tt{RT} or it is
 \tt{std::complex<RT>}.
@@ -677,17 +665,16 @@ RT Norm2(m)
 The 2-norm of \tt{m}: $||m||_2 =$ the largest singular value of $m$, which
 is also the square root of the largest eigenvalue of $(m^\dagger m)$.  
 
-This function can be fairly expensive if you have not
-already performed an SV decomposition of \tt{m}.  If you are using 
+If you are using 
 \tt{SV} for division (using \tt{DivideUsing(tmv::SV)}), and the decomposition
 has already been performed, then this function will be very fast, since it
 can use the existing decomposition.  
 
 If you are not using \tt{SV} for division, then this function is fairly
-expensive, scaling as $O(N^3)$, rather than $O(N^2)$ like most other norms.
+expensive, scaling as $O(N^2 log(N))$, rather than $O(N^2)$ like most other norms.
 However, it won't bother accumulating the singular vectors, so it will 
 be significantly faster than doing the full decomposition that would be
-used for division.
+used for division, which takes $O(N^3)$ time.
 
 Invalid for \tt{T = int} or \tt{complex<int>}.
 
@@ -733,7 +720,7 @@ The square of the Frobenius norm of \tt{m}:
 $(||m||_F)^2 = \sum_{i,j} |m(i,j)|^2$.
 
 In the method version of this function, you may provide an optional scale factor,
-in which case the return value is equal to \tt{NormSq(scale*v)} instead, 
+in which case the return value is equal to \tt{NormSq(scale*v)}, 
 which can help avoid underflow or overflow problems.
 
 \item
@@ -870,8 +857,8 @@ on pseudo-inverses and singular matrices for more details.
 
 Note that the first two forms do not actually require a 
 temporary (despite appearances), so they are just as efficient as the third version.
-This is because \tt{m.inverse()} actually returns an object whose type is derived from
-\tt{MatrixComposite}.  The calculation of the inverse is then delayed 
+This is because \tt{m.inverse()} actually returns a composite object
+that delays the calculation of the inverse
 until there is a place to store the result.
 
 Invalid for \tt{T = int} or \tt{complex<int>}.
@@ -881,7 +868,7 @@ Invalid for \tt{T = int} or \tt{complex<int>}.
 void m.makeInverseATA(Matrix<T>& cov) const
 \end{tmvcode}
 \index{Matrix!Methods!makeInverseATA}
-Set \tt{cov} to be $(m^\dagger m)^{-1}$.  
+Set \tt{cov} to be $(m^\dagger m)^{-1}$ if \tt{m} has at least as many rows as columns.
 
 If \tt{m} has more rows than columns, then using it to solve a system of equations
 really amounts to finding the least-square solution, since there is (typically) no
@@ -896,6 +883,9 @@ Thus this function is provided, which sets the
 argument \tt{cov} to the equivalent of \tt{Inverse(m.adjoint()*m)}, 
 but generally does so much more efficiently than doing this explicitly, 
 and also probably more accurately.
+
+If \tt{m} has more columns than rows, then the return value will instead be
+$(m m^\dagger)^{-1}$.  
 
 Invalid for \tt{T = int} or \tt{complex<int>}.
 
@@ -1008,8 +998,10 @@ Same as above, but performing the a series of \tt{swapCols} commands.
 Swap(m1,m2)
 \end{tmvcode}
 \index{Matrix!Functions of!Swap}
-Swap the corresponding elements of \tt{m1} and \tt{m2}.  Note that this does physically
-swap the data elements, not just some pointers to the data, so it takes $O(N^2)$ time.
+Swap the corresponding elements of \tt{m1} and \tt{m2}.  If \tt{m1} and \tt{m2} are both
+regular \tt{Matrix} objects, then this only takes $O(1)$ time, since it just swaps pointers to 
+the data.  However if either of them are a \tt{MatrixView}, then it has to directly
+swap the corresponding data elements, so it takes $O(N^2)$ time.
 
 \end{itemize}
 
@@ -1023,43 +1015,96 @@ We'll start with the simple operators that require little explanation aside from
 notation: 
 \tt{x} is a scalar, \tt{v} is a \tt{Vector}, and \tt{m} is a \tt{Matrix}.  As a reminder,
 the notation \tt{[+-]} is used to indicate either \tt{+} or \tt{-}.  Likewise for \tt{[*/]}.
+
+\begin{itemize}
+
+\item
+\begin{tmvcode}
+m [*/]= x
+\end{tmvcode}
+Scale the \tt{Matrix m} by the scalar value \tt{x}.
+
+\item
 \begin{tmvcode}
 m2 = -m1
 m2 = x * m1
 m2 = m1 [*/] x
-m3 = m1 [+-] m2
-m [*/]= x
+\end{tmvcode}
+Assign a multiple of one \tt{Matrix} to another \tt{Matrix}.  It is permissible for both vectors to be the same thing (or aliases to the same memory), in which case the \tt{Vector} will be modified in place.
+
+\item
+\begin{tmvcode}
 m2 [+-]= m1
+m2 [+-]= -m1
+m2 [+-]= x * m1
+m2 [+-]= m1 [*/] x
+\end{tmvcode}
+Add one \tt{Matrix} (or some multiple of it) to another \tt{Matrix}.
+
+\item
+\begin{tmvcode}
+m3 = m1 [+-] m2
+m3 = x1 * m1 [+-] x2 * m2
+\end{tmvcode}
+Assign a sum or difference of two \tt{Matrix}es (or scalings thereof) to a third \tt{Matrix}.
+
+\item
+\begin{tmvcode}
 v2 = m * v1
+v2 = x * m * v1
+v2 [+-]= m * v1
+v2 [+-]= x * m * v1
+\end{tmvcode}
+Multiply a \tt{Matrix} by a \tt{Vector}, possibly with a scaling.  The \tt{Vectors} are taken to be oriented as column vectors.
+
+\item
+\begin{tmvcode}
 v2 = v1 * m
+v2 = x * v1 * m
+v2 [+-]= v1 * m
+v2 [+-]= x * v1 * m
 v *= m
+\end{tmvcode}
+Multiply a \tt{Vector} by a \tt{Matrix}, possibly with a scaling.  The \tt{Vectors} are taken to be oriented as row vectors.  For the final line, TMV will automatically create the necessary temporary \tt{Vector}.
+
+\item
+\begin{tmvcode}
 m3 = m1 * m2
+m3 = x * m1 * m2
+m3 [+-]= m1 * m2
+m3 [+-]= x * m1 * m2
 m2 *= m1
 \end{tmvcode}
+Multiply two \tt{Matrix}es, possibly with a scaling.  For the final line, TMV will automatically create the necessary temporary \tt{Matrix}.
 
-Note that the orientation of a vector is inferred from context.  \tt{m*v} involves a 
-column vector, and \tt{v*m} involves a row vector.
-
-It is sometimes convenient to be able to treat scalars as the scalar times an
-identity matrix.  So the following operations are allowed and use that convention:
+\item
 \begin{tmvcode}
 m2 = m1 [+-] x
 m2 = x [+-] m1
 m [+-]= x
 m = x
 \end{tmvcode}
+It is sometimes convenient to be able to treat scalars as the scalar times an
+identity matrix.  So these operations are allowed and use that convention taking \tt{x} to be
+\tt{x} times an identity matrix the same size as the other \tt{Matrix}es in the equation.
+
 For example, you could check if a matrix is numerically close to the identity matrix 
 with:
 \begin{tmvcode}
 if (Norm(m-1.) < 1.e-8) { ... }
 \end{tmvcode}
 
+\end{itemize}
+
+
 \subsubsection{Outer Products}
 \label{outerproduct}
 
 For the product of two vectors, there are two orientation choices that make sense mathematically.
 It could mean a row vector times a column vector, which is called the inner product.
-Or it could mean a column vector times a row vector, which is called the outer product.
+Or it could mean a column vector times a row vector, which is called the outer product.\footnote{
+We also discussed a third possibility in \S\ref{VectorElementProd} of multiplying the 
+corresponding elements.}
 We chose to let \tt{v1*v2} indicate the inner product, since this is far more common.
 For the outer product, we use a different symbol:
 \begin{tmvcode}
@@ -1095,87 +1140,33 @@ Of course, one of the matrices on the right can be the same as the matrix on the
 \begin{tmvcode}
 m = ElemProd(m,m2);
 \end{tmvcode}
-The return value of the \tt{ElemProd} function is a \tt{MatrixComposite} object, so it can be used in more complicated arithmetic expressions just like any other arithmetic operator.
+The return value of the \tt{ElemProd} function is a composite object, so it can be used in more complicated arithmetic expressions just like any other arithmetic operator.
 
-\subsubsection{Subroutines}
+\subsubsection{Delayed Evaluation}
 
-As with \tt{Vector}s, we try to defer calculations until we have a place to store them.
-So \tt{m*v} returns an object that can be assigned to a \tt{Vector},
-but hasn't performed the calculation yet.  
+As with \tt{Vector}s, the above arithmetic operations delay the evaluation of any arithmetic
+expression until we have a place to store the result.
+So \tt{m*v} returns an object that can be assigned to a \tt{Vector} or 
+\tt{VectorView},
+but hasn't performed the calculation yet.  Likewise \tt{v\^v} and \tt{m*m} return objects that can be assigned to a \tt{Matrix} or \tt{MatrixView}.
 
-The limit to how complicated an expression can be without resorting to a temporary object
-is set by the 
-functions that the code eventually calls to perform the calculation.  
-While you shouldn't ever
-need to use these directly, it may help you understand when the code will create a
-temporary \tt{Matrix}\footnote{If you do use these, note that the last parameters are
-\tt{MatrixView}s, rather than \tt{Matrix}es.  So you would need to 
-call them with \tt{m.view()} if \tt{m} is a \tt{Matrix}.  (For \tt{MultMV},
-it would be \tt{v.view()}.)}.
-
-\begin{itemize}
-
-\item
+Generally, if you limit the calculation to a single operator between
+two \tt{Matrix} or \tt{Vector} objects, possibly with some scalings of these
+objects, then no temporary will be required.  Here are some examples that
+do not require temporaries:
 \begin{tmvcode}
-MultXM(T x, const MatrixView<T>& m)
+v1 += x*m*v2;
+m -= (x1*v1) ^ (v2*=x2)
+m1 = m2 * (x*m3)
 \end{tmvcode}
-\index{Matrix!Arithmetic!MultXM function}
-Performs the calculation $m = x \cdot m$.
 
-\item
-\begin{tmvcode}
-MultMV<bool add>(T x, const GenMatrix<T1>& m, 
-      const GenVector<T2>& v1, const VectorView<T>& v2)
-\end{tmvcode}
-\index{Matrix!Arithmetic!MultMV function}
-Performs the calculation $v_2 =  [v_2 \;+\;] ~ x \cdot m \cdot v_1$ 
-where the result is added to $v_2$ if \tt{add = true} and just assigned to it if \tt{add = false}.
-
-\item
-\begin{tmvcode}
-AddMM(T x, const GenMatrix<T1>& m1, const MatrixView<T>& m2)
-\end{tmvcode}
-\index{Matrix!Arithmetic!AddMM function}
-Performs the calculation $m_2 = m_2 + x \cdot m_1$.
-
-\item
-\begin{tmvcode}
-AddMM(T x1, const GenMatrix<T1>& m1, T x2, const GenMatrix<T2>& m2,
-      const MatrixView<T>& m3)
-\end{tmvcode}
-\index{Matrix!Arithmetic!AddMM function}
-Performs the calculation $m_3 = x_1 \cdot m_1 + x_2 \cdot m_2$.
-
-\item
-\begin{tmvcode}
-MultMM<bool add>(T x, const GenMatrix<T1>& m1, 
-      const GenMatrix<T2>& m2, const MatrixView<T>& m3)
-\end{tmvcode}
-\index{Matrix!Arithmetic!MultMM function}
-Performs the calculation $m_3 = [m_3 \;+\;] ~ x \cdot m_1 \cdot m_2$
-where the result is added to $m_3$ if \tt{add = true} and just assigned to it if \tt{add = false}.
-
-\item
-\begin{tmvcode}
-Rank1Update<bool add>(T x, const GenVector<T1>& v1, 
-      const GenVector<T2>& v2, const MatrixView<T>& m)
-\end{tmvcode}
-\index{Matrix!Arithmetic!Rank1Update function}
-\index{Matrix!Arithmetic!rank-1 update}
-Performs the calculation 
-$m(i,j) = [m(i,j) \;+\;] ~ x \cdot v_1(i) \cdot v_2(j)$ for each element in the matrix
-where the result is added to $m(i,j)$ if \tt{add = true} and just assigned to it if \tt{add = false}.
-
-\item
-\begin{tmvcode}
-ElemMultMM<bool add>(T x, const GenMatrix<T1>& m1, 
-      const GenMatrix<T2>& m2, const MatrixView<T>& m3)
-\end{tmvcode}
-\index{Matrix!Arithmetic!MultMM function}
-Performs the calculation $m_3(i,j) = [m_3(i,j) \;+\;] ~ x \cdot m_1(i,j) \cdot m_2(i,j)$ 
-where the result is added to $m_3(i,j)$ if \tt{add = true} and just assigned to it if \tt{add = false}.
-
-\end{itemize}
+If you make the 
+equation more complicated, TMV may create one or more temporary objects
+to store intermediate values.  Depending on your needs, this might be 
+inefficient, so you might want to split up complicated expressions into 
+smaller pieces that don't require temporaries.  However, no matter how
+complicated you make the expression, TMV should always calculate the 
+correct result.
 
 \subsection{Matrix division}
 \index{Matrix!Arithmetic!division}
@@ -1258,7 +1249,7 @@ is used to calculate \tt{v2} and \tt{v3}.
 
 If $A$ is not square, then the equation $A x = b$ does not have a unique solution.
 If $A$ has more rows than columns, then there is in general no solution.
-And if $A$ has more columns than rows, then there are an infinite 
+And if $A$ has more columns than rows, then there are (usually) an infinite 
 number of solutions.  
 
 The former case is more common and represents an overdetermined system of 
@@ -1273,27 +1264,26 @@ can be written as
 $y = c + dx + ex^2$.  Furthermore, assume that each
 $y_i$ value has a measurement error of $s_i$.  Then the rows of $A$ should
 be set to: $( ~1/s_i \quad x_i/s_i \quad x_i^2/s_i ~ )$.  The corresponding
-element of the vector $b$ shoudl be $( ~ y_i/s_i ~ )$.  It is easily verified that
+element of the vector $b$ should be $( ~ y_i/s_i ~ )$.  It is easily verified that
 $||b-Ax||_2^2$ is the normal $\chi^2$ expression.
 The solution returned by
 \tt{x = b/A} would then be the least-square fit solution: $(~c \quad d \quad e~)$,
 which would be the solution which minimizes $\chi^2$.
 
-The underdetermined case is not so common, but can still be defined reasonably.  
-As mentioned above, there are infinitely many solutions to such an equation, so the
+The underdetermined case is not so common, but it can still be defined reasonably.  
+As mentioned above, there are usually infinitely many solutions to such an equation, so the
 value returned by \tt{x = b/A} in this case is the value of \tt{x} that satisfies the 
 equation and has minimum 2-norm, $||x||_2$.
 
 When you have calculated a least-square solution for \tt{x}, it is common to want 
 to know the covariance matrix of the returned values.  It turns out that this
-matrix is $(A^\dagger A)^{-1}$.  It is not very efficient to calculate this matrix
-explicitly and then invert it.  But once you have calculated the decomposition
-needed for the division, it is quite easy.  So we provide the routine 
+matrix is $(A^\dagger A)^{-1}$.  Furthermore, once you have calculated the decomposition
+needed for the division, it is quite easy to do this calculation as well.  So we provide the routine 
 \begin{tmvcode}
 A.makeInverseATA(Matrix<T>& cov)
 \end{tmvcode}
 to perform the calculation efficiently.  (Make sure you save the decomposition with 
-\tt{A.saveDiv()} - see \S\ref{Matrix_Division_Efficiency} for more about this.)
+\tt{A.saveDiv()} -- see \S\ref{Matrix_Division_Efficiency} for more about this.)
 
 \subsubsection{Decompositions}
 \index{Matrix!Decompositions}
@@ -1348,17 +1338,32 @@ slower than a simple QR decomposition, but it is numerically more stable if
 $A$ is singular, or nearly so.  
 (Singular matrices are discussed in more detail in \S\ref{Matrix_Division_Singular}.)
 
-There are two slightly different algorithms for doing a QRP decomposition, controlled by a global
-\tt{bool} variable: \tt{tmv::QRPDiv<T>::StrictQRP}.
-If this is set to true, then the decomposition will make the diagonal elements
+There are two slightly different algorithms for doing a QRP decomposition
+that I call Strict QRP and Loose QRP.  The Strict QRP algorithm 
+will make the diagonal elements
 of $R$ be strictly decreasing (in absolute value) from upper-left to lower-right.
+This is the usual formulation that you might see described in books on linear algebra algorithms.
 
-If it is false, however (the default), then there will be no diagonal element
-of $R$ below and to the right of one which is \underline{much} smaller in absolute value,
-where ``much'' means the ratio will be at most $\epsilon^{1/4}$, where 
+The Loose QRP algorithm is a modification to the usual algorithm that only guarantees that there will be no diagonal element
+of $R$ below and to the right of one which is \underline{much} smaller in absolute value.
+Here ``much'' means the ratio will be at most $\epsilon^{1/4}$, where 
 $\epsilon$ is the machine precision for the type in question.  This restriction
 is almost always sufficient to make the decomposition useful for singular or nearly
-singular matrices, and it is much faster than the strict algorithm.
+singular matrices, and it is much faster than the Strict QRP algorithm.
+
+The default algorithm is the Loose QRP algorithm.  If you want to switch to the Strict QRP
+algorithm, use the function
+\begin{tmvcode}
+tmv::UseStrictQRP();
+\end{tmvcode}
+To return back to the Loose QRP algorithm, use
+\begin{tmvcode}
+tmv::UseStrictQRP(false);
+\end{tmvcode}
+And finally, you can query whether TMV is currently set to use Strict QRP with
+\begin{tmvcode}
+bool tmv::QRP_IsStrict();
+\end{tmvcode}
 
 \item
 \textbf{Singular Value Decomposition}: 
@@ -1407,7 +1412,7 @@ $X$ is the true pseudo-inverse and all four equations are satisfied.
 
 For singular matrices, QR will fail to give a good pseudo-inverse (and may throw the
 \tt{tmv::Singular} exception - c.f. \S\ref{Exceptions}), QRP will be close to correct
-(again failing only the last equation) and will not throw an exception, and SV will be correct.
+(again failing only the last equation) and will not throw an exception.  SV will again be correct.
 \index{Exceptions!Singular}
 
 \subsubsection{Efficiency issues}
@@ -1587,21 +1592,21 @@ For the LU decomposition, we have:
 tmv::ConstLowerTriMatrixView<T> m.lud().getL()
 tmv::ConstUpperTriMatrixView<T> m.lud().getU()
 Permutation m.lud().getP()
-bool m.lud().IsTrans()
+bool m.lud().isTrans()
 \end{tmvcode}
 \index{Matrix!Methods!lud}
 \index{Matrix!LU decomposition}
 \index{LU Decomposition!Matrix}
 \tt{getL()} and \tt{getU()} return $L$ and $U$.
 \tt{getP()} returns the permutation, $P$.
-Finally, \tt{IsTrans()} returns whether
+Finally, \tt{isTrans()} returns whether
 the product $PLU$ is equal to \tt{m} or \tt{m.transpose()}.  
 
 The following should result in a \tt{Matrix m2}, which is numerically very close to
 the original \tt{Matrix m}:
 \begin{tmvcode}
 tmv::Matrix<T> m2 = m.lud().getP() * m.lud().getL() * m.lud().getU();
-if (m.lud().IsTrans()) m2.transposeSelf();
+if (m.lud().isTrans()) m2.transposeSelf();
 \end{tmvcode}
 
 \item
@@ -1609,13 +1614,13 @@ For the QR decomposition, we have:
 \begin{tmvcode}
 tmv::PackedQ<T> m.qrd().getQ();
 tmv::ConstUpperTriMatrix<T> m.qrd().getR();
-bool m.qrd().IsTrans();
+bool m.qrd().isTrans();
 \end{tmvcode}
 \index{Matrix!Methods!qrd}
 \index{Matrix!QR decomposition}
 \index{QR Decomposition!Matrix}
 \tt{getQ()} and \tt{getR()} return $Q$ and $R$.  
-\tt{IsTrans()} returns whether
+\tt{isTrans()} returns whether
 the decomposition is equal to \tt{m} or \tt{m.transpose()}.  
 
 Note: the \tt{PackedQ} class is convertible into a regular \tt{Matrix}, but if you are doing 
@@ -1627,7 +1632,7 @@ the original \tt{Matrix m}:
 \begin{tmvcode}
 tmv::Matrix<T> m2(m.nrows(),m.ncols());
 tmv::MatrixView<T> m2v = 
-      m.qrd().IsTrans() ? m2.transpose() : m2.view();
+      m.qrd().isTrans() ? m2.transpose() : m2.view();
 m2v = m.qrd().getQ() * m.qrd().getR();
 \end{tmvcode}
 
@@ -1637,14 +1642,14 @@ For the QRP decomposition, we have:
 tmv::PackedQ<T> m.qrpd().getQ()
 tmv::ConstUpperTriMatrixView<T> m.qrpd().getR()
 Permutation m.qrpd().getP()
-bool m.qrpd().IsTrans()
+bool m.qrpd().isTrans()
 \end{tmvcode}
 \index{Matrix!Methods!qrpd}
 \index{Matrix!QRP decomposition}
 \index{QRP Decomposition!Matrix}
 \tt{getQ()} and \tt{getR()} return $Q$ and $R$.
 \tt{getP()} returns the permutation, $P$.
-\tt{IsTrans()} returns whether
+\tt{isTrans()} returns whether
 the decomposition is equal to \tt{m} or \tt{m.transpose()}.  
 
 The following should result in a \tt{Matrix m2}, which is numerically very close to
@@ -1652,7 +1657,7 @@ the original \tt{Matrix m}:
 \begin{tmvcode}
 tmv::Matrix<T> m2(m.nrows(),m.ncols());
 tmv::MatrixView<T> m2v = 
-      m.qrpd().IsTrans() ? m2.transpose() : m2.view();
+      m.qrpd().isTrans() ? m2.transpose() : m2.view();
 m2v = m.qrpd().getQ() * m.qrpd().getR() * m.qrpd().getP();
 \end{tmvcode}
 
@@ -1666,7 +1671,7 @@ tmv::ConstMatrixView<T> m.svd().getVt()
 \index{Matrix!Methods!svd}
 \index{Matrix!Singular value decomposition}
 \index{Singular Value Decomposition!Matrix}
-\tt{getU()}, \tt{getS()}, and \tt{getVt()} return $U$, $S$, and $V^\dagger$.
+\tt{getU()}, \tt{getS()}, and \tt{getVt()} return $U$, $S$, and $V^\dagger$.  Note that if you would prefer to get the $V$ matrix, you need to write \tt{V = m.svd().getVt().adjoint()}.  I find it simpler to deal with the $V^\dagger$ matrix directly, rather than $V$.  The adjoint just makes the algorithms more confusing in my opinion, so the TMV algorithms all work in terms of \tt{Vt} $= V^\dagger$.  That's why this is the natural matrix to return to the user with a \tt{getVt} method.
 
 The following should result in a \tt{Matrix m2}
 that is numerically very close to the original \tt{Matrix m}:
@@ -1716,7 +1721,7 @@ the method
 bool m.isSingular()
 \end{tmvcode}
 \index{Matrix!Methods!isSingular}
-which basically just returns whether \tt{m.det() == 0}.  But this will not
+which basically just returns whether \tt{m.det() == 0} (although it generally doesn't actually have to calculate the determinant to determine whether it is 0).  But this will not
 tell you if a matrix is merely close to singular, so it does not guard 
 against unreliable results.
 
@@ -1728,13 +1733,11 @@ potential problems with a singular matrix.
 First, the so-called ``singular values'', which are the elements of the
 diagonal $S$ matrix, tell you how close the matrix is to being singular.
 Specifically, if the ratio of the smallest and the largest singular values,
-$S(N-1)/S(0)$, is close to the machine precision, $\epsilon$, for the 
+$S(N-1)/S(0)$, is close to the machine precision, $\epsilon$
+\footnote{Note: the value of $\epsilon$ is accessible with:
+\tt{std::numeric_limits<T>::epsilon()}.}, for the 
 underlying type (\tt{double}, \tt{float}, etc.),
 then the matrix is singular, or effectively so.
-Note: the value of $\epsilon$ is accessible with:
-\begin{tmvcode}
-std::numeric_limits<T>::epsilon()
-\end{tmvcode}
 
 The inverse of this ratio, $S(0)/S(N-1)$, is known as the ``condition'' of the matrix
 (specifically the 2-condition, or $\kappa_2$), which can be obtained by:
@@ -1747,7 +1750,6 @@ less reliable any calculation would be.
 
 So, how does SVD help in this situation?  (So far we have diagnosed
 the possible problem, but not fixed it.)
-
 Well, we need to figure out what solution we want from a singular matrix.
 If the matrix is singular, then there are not necessarily any solutions
 to $A x = b$.  Furthermore, if we are looking for a least squares solution 
@@ -1864,9 +1866,10 @@ would produce the output:
 \begin{tmvcode}
 M nrows ncols m(0,0) m(0,1) m(0,2) ... m(nrows-1,ncols-1)
 \end{tmvcode}
+Note the \tt{M} at the start of the line.  Each kind of special matrix will use a different letter (or sometimes 2 letters) to indicate what kind of information follows on the rest of the line, since most special matrices will not need to write out every single value to fully define the matrix.  So the initial character (or string) specifies the compact I/O format that follows.
 
 See \S\ref{IOStyle} for more information about specifying custom I/O styles, including
-features like using brackets instead of parentheses, or putting commas between elements,
+features like using brackets instead of parentheses, putting commas between elements,
 or specifying an output precision.  
 
 \subsection{Small matrices}
@@ -1893,14 +1896,7 @@ rather than normal parameters.  This allows the compiler to easily optimize
 simple calculations that might only be 2 or 3 arithmetic operations, which
 may significantly speed up your code.
 
-All the \tt{SmallMatrix} and \tt{SmallVector} routines are included by:
-\begin{tmvcode}
-#include "TMV_Small.h"
-\end{tmvcode}
-\index{TMV\_Small.h}
-
-\tt{SmallMatrix} does not inherit from the regular \tt{Matrix} class, 
-but it does have 
+\tt{SmallMatrix} does not inherit from the regular \tt{Matrix} class, because the virtual functions can even be a performance problem for a \tt{SmallMatrix}.  However, it does have
 essentially all the same methods, functions, and arithmetic operators. 
 
 \subsubsection{Constructors}
@@ -1911,10 +1907,10 @@ The template arguments \tt{M} and \tt{N} below are both integers and
 represent the size of the matrix.
 The template argument \tt{A} can be used to specify the same attributes
 as for a regular \tt{Matrix}, namely either \tt{tmv::RowMajor} or
-\tt{tmv::ColMajor}, either \tt{tmv::CStyle} or
+\tt{tmv::ColMajor} and either \tt{tmv::CStyle} or
 \tt{tmv::FortranStyle}.  These both have the same meanings as they do 
 for a regular \tt{Matrix}. The defaults are \tt{ColMajor} and \tt{CStyle} if 
-note otherwise specified.
+not otherwise specified.
 
 \begin{itemize}
 \item 
@@ -1930,17 +1926,11 @@ tmv::SmallMatrix<T,M,N,A> m(T x)
 \end{tmvcode}
 Makes an \tt{M} $\times$ \tt{N} \tt{SmallMatrix} with all values equal to \tt{x}.
 
-\item
-\begin{tmvcode}
-tmv::SmallMatrix<T,M,N,A> m(const T* vv)
-\end{tmvcode}
-Makes an \tt{M} $\times$ \tt{N} \tt{SmallMatrix} with values copied from vv.
-
 \item 
 \begin{tmvcode}
-tmv::SmallMatrix<T,M,N,A> m1(const GenMatrix<T>& m2)
+tmv::SmallMatrix<T,M,N,A> m1(const Matrix<T>& m2)
 \end{tmvcode}
-Makes an \tt{M} $\times$ \tt{N} \tt{SmallMatrix} from a regular \tt{Matrix}.
+Makes an \tt{M} $\times$ \tt{N} \tt{SmallMatrix} copy of a regular \tt{Matrix}.
 
 \item
 \begin{tmvcode}
@@ -1959,7 +1949,7 @@ m << m00 , m01 , m02 ...
      ...
 \end{tmvcode}
 Initialize the \tt{SmallMatrix m} with a list of values.  The elements should be listed in 
-rowmajor order, but they will be assigned to the correct places in the matrix, even if the 
+row-major order, but they will be assigned to the correct places in the matrix, even if the 
 matrix does not have \tt{RowMajor} storage.
 \index{Matrix!List initialization}
 
@@ -2000,15 +1990,9 @@ will both be done inline, even though \tt{m1.transpose()} is not a \tt{SmallMatr
 \index{SmallMatrix!Functions of}
 \label{SmallMatrix_Functions}
 
-\tt{SmallMatrix} has exactly the same
-function methods as the regular \tt{Matrix}.  
-(See \ref{Matrix_Functions}.)
-Likewise, the syntax of the
-arithmetic is identical. 
-
-The only things that don't take into account the 
-compile-time knowledge of the size are the I/O methods:
-reading from or writing to a file.
+\tt{SmallMatrix} has exactly the same function methods as the regular \tt{Matrix}.  
+(See \ref{Matrix_Functions}.) Likewise, the syntax of the arithmetic is identical. 
+The only things that don't take into account the compile-time knowledge of the size are the I/O methods: reading from or writing to a file.
 
 \subsubsection{Limitations}
 \index{SmallMatrix!Limitations}
@@ -2036,7 +2020,7 @@ the objects in an arithmetic statement use the same memory.
 Then it uses the correct algorithm to deal with it 
 correctly.  
 
-This alias checking is fairly expensive for small matrices, so we don't do it if
+This alias checking is relatively expensive for small matrices, so we don't do it if
 \tt{m} and \tt{v} are a \tt{SmallMatrix} and a \tt{SmallVector}.  
 
 If you need to perform this operation you can write:
@@ -2044,31 +2028,6 @@ If you need to perform this operation you can write:
 v = m * tmv::SmallVector<N>(v);
 \end{tmvcode}
 to create a temporary copy of the vector on the right hand side. 
-
-\item
-\textbf{No virtual functions}
-
-The vtable required for \tt{SmallMatrix} to use virtual functions is potentially a 
-detriment to performance, so we don't have any virtual functions in either \tt{SmallVector}
-or \tt{SmallMatrix}. 
-
-A consequence of this decision is that the \tt{SmallMatrix} class is not in the usual
-class hierarchy.  It
-does not inherit from either \tt{GenMatrix} or \tt{BaseMatrix} or even \tt{AssignableToMatrix}, 
-since they have virtual functions.  
-Likewise, \tt{SmallVector} does not inherit from \tt{GenVector} or \tt{AssignableToVector}.
-
-If you want to view a \tt{SmallMatrix} as a \tt{GenMatrix}, you can type
-\begin{tmvcode}
-ConstMatrixView<T> mv = m.view();
-\end{tmvcode}
-and use \tt{mv} wherever you need a \tt{GenMatrix}.  Of course, you will lose the 
-inlining advantages of a \tt{SmallMatrix}, but sometimes that is what you need.
-\index{SmallVector!Views}
-\index{SmallMatrix!Views}
-
-Similarly, a non-\tt{const} \tt{SmallMatrix} can be viewed as a \tt{MatrixView}
-with the same method.
 
 \item
 \textbf{Views are not ``\tt{Small}''}

@@ -63,7 +63,7 @@ namespace tmv {
 
     template <class T, int A>
     typename BandMatrixView<T,A>::reference BandMatrixView<T,A>::ref(
-        int i, int j) const
+        int i, int j) 
     {
         T* mi = ptr()+i*stepi()+j*stepj();
         return RefHelper<T>::makeRef(mi,ct());
@@ -1184,7 +1184,7 @@ namespace tmv {
     //
 
     template <class T, int A>
-    const BandMatrixView<T,A>& BandMatrixView<T,A>::clip(RT thresh) const
+    BandMatrixView<T,A>& BandMatrixView<T,A>::clip(RT thresh) 
     {
         if (this->canLinearize()) linearView().clip(thresh);
         else {
@@ -1220,7 +1220,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const BandMatrixView<T,A>& BandMatrixView<T,A>::setZero() const
+    BandMatrixView<T,A>& BandMatrixView<T,A>::setZero() 
     {
         if (this->canLinearize()) linearView().setZero();
         else {
@@ -1256,7 +1256,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const BandMatrixView<T,A>& BandMatrixView<T,A>::setAllTo(const T& x) const
+    BandMatrixView<T,A>& BandMatrixView<T,A>::setAllTo(const T& x) 
     {
         if (this->canLinearize()) linearView().setAllTo(x);
         else {
@@ -1292,7 +1292,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const BandMatrixView<T,A>& BandMatrixView<T,A>::addToAll(const T& x) const
+    BandMatrixView<T,A>& BandMatrixView<T,A>::addToAll(const T& x) 
     {
         if (this->canLinearize()) linearView().addToAll(x);
         else {
@@ -1328,7 +1328,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    void BandMatrixView<T,A>::doTransposeSelf() const
+    void BandMatrixView<T,A>::doTransposeSelf() 
     {
         TMVAssert(colsize() == rowsize());
         TMVAssert(nlo() == nhi());
@@ -1336,7 +1336,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const BandMatrixView<T,A>& BandMatrixView<T,A>::conjugateSelf() const
+    BandMatrixView<T,A>& BandMatrixView<T,A>::conjugateSelf() 
     {
         if (this->canLinearize()) linearView().conjugateSelf();
         else {
@@ -1448,7 +1448,7 @@ namespace tmv {
     //
 
     template <class T> 
-    void Swap(const BandMatrixView<T>& m1, const BandMatrixView<T>& m2)
+    void Swap(BandMatrixView<T> m1, BandMatrixView<T> m2)
     {
         TMVAssert2(m1.colsize() == m2.colsize());
         TMVAssert2(m1.rowsize() == m2.rowsize());
@@ -1683,8 +1683,7 @@ namespace tmv {
 #endif
 
     template <class T>
-    static void FinishRead(
-        const TMV_Reader& reader, const BandMatrixView<T>& m)
+    static void FinishRead(const TMV_Reader& reader, BandMatrixView<T> m)
     {
         const int M = m.colsize();
         const int N = m.rowsize();
@@ -1844,7 +1843,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    void BandMatrixView<T,A>::read(const TMV_Reader& reader) const
+    void BandMatrixView<T,A>::read(const TMV_Reader& reader) 
     {
         std::string exp,got;
         if (!reader.readCode("B",exp,got)) {

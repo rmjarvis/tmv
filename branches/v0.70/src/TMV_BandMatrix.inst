@@ -26,20 +26,19 @@
   template RT GenBandMatrix<T >::doCondition() const; \
   template QuotXB<T,T > GenBandMatrix<T >::QInverse() const; \
   template T GenBandMatrix<T >::cref(int i, int j) const; \
-  template const BandMatrixView<T,CStyle>&  \
-      BandMatrixView<T,CStyle>::clip(RT thresh) const; \
-  template const BandMatrixView<T,CStyle>&  \
-      BandMatrixView<T,CStyle>::setAllTo(const T& x) const; \
-  template const BandMatrixView<T,CStyle>&  \
-      BandMatrixView<T,CStyle>::addToAll(const T& x) const; \
-  template const BandMatrixView<T,CStyle>&  \
-      BandMatrixView<T,CStyle>::setZero() const; \
-  template const BandMatrixView<T,CStyle>&  \
-      BandMatrixView<T,CStyle>::conjugateSelf() const; \
-  template void BandMatrixView<T,CStyle>::doTransposeSelf() const; \
-  template Ref BandMatrixView<T,CStyle>::ref(int i, int j) const; \
-  template void Swap(const BandMatrixView<T >& m1, \
-      const BandMatrixView<T >& m2); \
+  template BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::clip(RT thresh); \
+  template BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::setAllTo(const T& x); \
+  template BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::addToAll(const T& x); \
+  template BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::setZero(); \
+  template BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::conjugateSelf(); \
+  template void BandMatrixView<T,CStyle>::doTransposeSelf(); \
+  template Ref BandMatrixView<T,CStyle>::ref(int i, int j); \
+  template void Swap(BandMatrixView<T > m1, BandMatrixView<T > m2); \
   template BandMatrix<T,DiagMajor> UpperBiDiagMatrix( \
       const GenVector<T >& v1, const GenVector<T >& v2); \
   template BandMatrix<T,DiagMajor> LowerBiDiagMatrix( \
@@ -50,7 +49,7 @@
   template bool ConstBandMatrixView<T >::canLinearize() const; \
   template bool BandMatrixView<T >::canLinearize() const; \
   template void GenBandMatrix<T >::write(const TMV_Writer& writer) const; \
-  template void BandMatrixView<T >::read(const TMV_Reader& reader) const; \
+  template void BandMatrixView<T >::read(const TMV_Reader& reader); \
 
 Def1(T,T,T&)
 #ifdef INST_COMPLEX

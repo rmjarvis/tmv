@@ -17,26 +17,26 @@
   template RT GenVector<T >::minAbs2Element(int* iminout) const; \
   template RT GenVector<T >::maxAbs2Element(int* imaxout) const; \
   template T GenVector<T >::cref(int i) const; \
-  template Ref VectorView<T,CStyle>::ref(int i) const; \
-  template const VectorView<T,CStyle>& VectorView<T,CStyle>::setZero() const; \
-  template const VectorView<T,CStyle>& VectorView<T,CStyle>::setAllTo( \
-      const T& x) const; \
-  template const VectorView<T,CStyle>& VectorView<T,CStyle>::addToAll( \
-      const T& x) const; \
-  template const VectorView<T,CStyle>& VectorView<T,CStyle>::conjugateSelf() const; \
-  template const VectorView<T,CStyle>& VectorView<T,CStyle>::DoBasis(int i) const; \
-  template const VectorView<T,CStyle>& VectorView<T,CStyle>::DoSwap( \
-      int i1, int i2) const; \
-  template const VectorView<T,CStyle>& VectorView<T,CStyle>::DoPermute( \
-      const int* p, int i1, int i2) const; \
-  template const VectorView<T,CStyle>& VectorView<T,CStyle>::DoReversePermute( \
-      const int* p, int i1, int i2) const; \
-  template const VectorView<T,CStyle>& VectorView<T,CStyle>::reverseSelf() const; \
-  template const VectorView<T,CStyle>& VectorView<T,CStyle>::sort( \
-      int* p, ADType ad, CompType comp) const; \
+  template Ref VectorView<T,CStyle>::ref(int i); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::setZero(); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::setAllTo( \
+      const T& x); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::addToAll( \
+      const T& x); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::conjugateSelf(); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::DoBasis(int i); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::DoSwap( \
+      int i1, int i2); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::DoPermute( \
+      const int* p, int i1, int i2); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::DoReversePermute( \
+      const int* p, int i1, int i2); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::reverseSelf(); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::sort( \
+      int* p, ADType ad, CompType comp); \
   template void GenVector<T >::write(const TMV_Writer& writer) const; \
-  template void VectorView<T,CStyle>::read(const TMV_Reader& reader) const; \
-  template void Swap(const VectorView<T >& v1, const VectorView<T >& v2); \
+  template void VectorView<T,CStyle>::read(const TMV_Reader& reader); \
+  template void Swap(VectorView<T > v1, VectorView<T > v2); \
 
 Def1(T,T,T&)
 #ifdef INST_COMPLEX
@@ -46,8 +46,7 @@ Def1(T,CT,VarConjRef<CT >)
 #undef Def1
 
 #define Def1a(RT,T) \
-  template const VectorView<T,CStyle>& VectorView<T,CStyle>::clip( \
-      RT thresh) const; \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::clip(RT thresh); \
       
 Def1a(T,T)
 #ifndef TISINT
@@ -99,7 +98,7 @@ Def3(CT,CT)
 #ifndef INST_SKIP_BLAS
 #define Def4(T) \
   template void DoCopySameType<T >(const GenVector<T >& v1, \
-      const VectorView<T >& v2); \
+      VectorView<T > v2); \
 
 Def4(T)
 #ifdef INST_COMPLEX

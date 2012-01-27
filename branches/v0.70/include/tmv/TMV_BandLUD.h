@@ -63,24 +63,44 @@ namespace tmv {
     // U should be NonUnitDiag.
     template <class T> 
     void LU_Decompose(
-        const GenBandMatrix<T>& A, const LowerTriMatrixView<T>& L,
-        const BandMatrixView<T>& U, int* P);
+        const GenBandMatrix<T>& A, LowerTriMatrixView<T> L,
+        BandMatrixView<T> U, int* P);
 
     // Do the decomposition in compressed form.
     template <class T> 
-    void LU_Decompose(
-        const BandMatrixView<T>& LUx, int* P, int& signdet, int Anhi);
+    void LU_Decompose(BandMatrixView<T> LUx, int* P, int Anhi);
 
     class Permutation;
 
     template <class T> 
     void LU_Decompose(
-        const GenBandMatrix<T>& A, const LowerTriMatrixView<T>& L,
-        const BandMatrixView<T>& U, Permutation& P);
+        const GenBandMatrix<T>& A, LowerTriMatrixView<T> L,
+        BandMatrixView<T> U, Permutation& P);
 
     template <class T> 
-    void LU_Decompose(
-        const BandMatrixView<T>& LUx, Permutation& P, int Anhi);
+    void LU_Decompose(BandMatrixView<T> LUx, Permutation& P, int Anhi);
+    
+    template <class T, int A1> 
+    inline void LU_Decompose(
+        const GenBandMatrix<T>& A, LowerTriMatrix<T,A1>& L,
+        BandMatrixView<T> U, Permutation& P)
+    { LU_Decompose(A,L.view(),U,P); }
+
+    template <class T, int A2> 
+    inline void LU_Decompose(
+        const GenBandMatrix<T>& A, LowerTriMatrixView<T> L,
+        BandMatrix<T,A2>& U, Permutation& P)
+    { LU_Decompose(A,L,U.view(),P); }
+
+    template <class T, int A1, int A2> 
+    inline void LU_Decompose(
+        const GenBandMatrix<T>& A, LowerTriMatrix<T,A1>& L,
+        BandMatrix<T,A2>& U, Permutation& P)
+    { LU_Decompose(A,L.view(),U.view(),P); }
+
+    template <class T, int A1> 
+    inline void LU_Decompose(BandMatrix<T,A1>& LUx, Permutation& P, int Anhi)
+    { LU_Decompose(LUx.view(),P,Anhi); }
     
     template <class T> 
     class BandLUDiv : public Divider<T> 
@@ -102,15 +122,15 @@ namespace tmv {
 
 
         template <class T1> 
-        void doLDivEq(const MatrixView<T1>& m) const;
+        void doLDivEq(MatrixView<T1> m) const;
         template <class T1> 
-        void doRDivEq(const MatrixView<T1>& m) const;
+        void doRDivEq(MatrixView<T1> m) const;
         template <class T1, class T2> 
         void doLDiv(
-            const GenMatrix<T1>& m, const MatrixView<T2>& x) const;
+            const GenMatrix<T1>& m, MatrixView<T2> x) const;
         template <class T1, class T2> 
         void doRDiv(
-            const GenMatrix<T1>& m, const MatrixView<T2>& x) const;
+            const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
         //
         // Determinant, Inverse
@@ -119,8 +139,8 @@ namespace tmv {
         T det() const;
         TMV_RealType(T) logDet(T* sign) const;
         template <class T1> 
-        void doMakeInverse(const MatrixView<T1>& minv) const;
-        void doMakeInverseATA(const MatrixView<T>& minv) const;
+        void doMakeInverse(MatrixView<T1> minv) const;
+        void doMakeInverseATA(MatrixView<T> minv) const;
         bool isSingular() const;
 
 #include "tmv/TMV_AuxAllDiv.h"

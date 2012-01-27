@@ -56,7 +56,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void NonBlasMultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -113,13 +113,13 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static inline void BlasMultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     { NonBlasMultMM<true>(alpha,A,B,C); }
 #ifdef INST_DOUBLE
     template <> 
     void BlasMultMM(
         const double alpha, const GenMatrix<double>& A,
-        const GenMatrix<double>& B, const MatrixView<double>& C)
+        const GenMatrix<double>& B, MatrixView<double> C)
     {
         int m = C.colsize();
         int n = C.rowsize();
@@ -140,7 +140,7 @@ namespace tmv {
         const std::complex<double> alpha,
         const GenMatrix<std::complex<double> >& A,
         const GenMatrix<std::complex<double> >& B,
-        const MatrixView<std::complex<double> >& C)
+        MatrixView<std::complex<double> > C)
     {
         if (BlasIsCM(A) && A.isconj()) {
             Matrix<std::complex<double>,ColMajor> AA = alpha*A;
@@ -169,7 +169,7 @@ namespace tmv {
         const std::complex<double> alpha,
         const GenMatrix<std::complex<double> >& A,
         const GenMatrix<double>& B,
-        const MatrixView<std::complex<double> >& C)
+        MatrixView<std::complex<double> > C)
     {
         if (BlasIsCM(A) && ((!A.isconj() && TMV_IMAG(alpha)==0.))) {
             int m = 2*C.colsize();
@@ -216,7 +216,7 @@ namespace tmv {
         const std::complex<double> alpha,
         const GenMatrix<double>& A,
         const GenMatrix<std::complex<double> >& B,
-        const MatrixView<std::complex<double> >& C)
+        MatrixView<std::complex<double> > C)
     {
         if (TMV_IMAG(alpha) == 0.) {
             Matrix<double,ColMajor> B1 = B.realPart();
@@ -244,7 +244,7 @@ namespace tmv {
     void BlasMultMM(
         const std::complex<double> alpha,
         const GenMatrix<double>& A, const GenMatrix<double>& B,
-        const MatrixView<std::complex<double> >& C)
+        MatrixView<std::complex<double> > C)
     {
         Matrix<double,ColMajor> C1 = A*B;
         C += alpha*C1;
@@ -254,7 +254,7 @@ namespace tmv {
     template <> 
     void BlasMultMM(
         const float alpha, const GenMatrix<float>& A,
-        const GenMatrix<float>& B, const MatrixView<float>& C)
+        const GenMatrix<float>& B, MatrixView<float> C)
     {
         int m = C.colsize();
         int n = C.rowsize();
@@ -285,7 +285,7 @@ namespace tmv {
         const std::complex<float> alpha,
         const GenMatrix<std::complex<float> >& A,
         const GenMatrix<std::complex<float> >& B,
-        const MatrixView<std::complex<float> >& C)
+        MatrixView<std::complex<float> > C)
     {
         if (BlasIsCM(A) && A.isconj()) {
             Matrix<std::complex<float> > AA = alpha*A;
@@ -315,7 +315,7 @@ namespace tmv {
     void BlasMultMM(
         const std::complex<float> alpha,
         const GenMatrix<std::complex<float> >& A, const GenMatrix<float>& B,
-        const MatrixView<std::complex<float> >& C)
+        MatrixView<std::complex<float> > C)
     {
         if (BlasIsCM(A) && !A.isconj() && (TMV_IMAG(alpha)==0.F)) {
             int m = 2*C.colsize();
@@ -362,7 +362,7 @@ namespace tmv {
         const std::complex<float> alpha,
         const GenMatrix<float>& A,
         const GenMatrix<std::complex<float> >& B,
-        const MatrixView<std::complex<float> >& C)
+        MatrixView<std::complex<float> > C)
     {
         if (TMV_IMAG(alpha) == 0.F) {
             Matrix<float,ColMajor> B1 = B.realPart();
@@ -390,7 +390,7 @@ namespace tmv {
     void BlasMultMM(
         const std::complex<float> alpha,
         const GenMatrix<float>& A, const GenMatrix<float>& B,
-        const MatrixView<std::complex<float> >& C)
+        MatrixView<std::complex<float> > C)
     {
         Matrix<float,ColMajor> C1 = A*B;
         C += alpha*C1;
@@ -401,7 +401,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void DoMultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
 #ifdef BLAS
         if (!add) C.setZero();
@@ -414,7 +414,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
         // C (+)= alpha * A * B
     {
         TMVAssert(A.colsize() == C.colsize());

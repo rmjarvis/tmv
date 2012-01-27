@@ -54,7 +54,7 @@ namespace tmv {
     //
 
     template <class T, class T1> 
-    static void RowMajorMultXM(const T1 alpha, const UpperTriMatrixView<T>& A)
+    static void RowMajorMultXM(const T1 alpha, UpperTriMatrixView<T> A)
     {
         TMVAssert(A.isrm());
         TMVAssert(!A.isunit());
@@ -80,7 +80,7 @@ namespace tmv {
     }
 
     template <class T, class T1> 
-    static void ColMajorMultXM(const T1 alpha, const UpperTriMatrixView<T>& A)
+    static void ColMajorMultXM(const T1 alpha, UpperTriMatrixView<T> A)
     {
         TMVAssert(A.iscm());
         TMVAssert(!A.isunit());
@@ -106,7 +106,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void MultXM(const T alpha, const UpperTriMatrixView<T>& A)
+    void MultXM(const T alpha, UpperTriMatrixView<T> A)
     // A = alpha * A
     {
 #ifdef XDEBUG
@@ -153,7 +153,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void ElemMultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C)
+        const GenUpperTriMatrix<Tb>& B, UpperTriMatrixView<T> C)
     {
         //std::cout<<"Start ElemMultMM:\n";
         //std::cout<<"add = "<<add<<std::endl;

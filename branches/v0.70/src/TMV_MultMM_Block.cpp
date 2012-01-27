@@ -45,7 +45,7 @@ namespace tmv {
     template <class RT, class T, class Func>
     static void SingleBlockMultMM(
         bool add, const T& x, const GenMatrix<RT>& A,
-        const GenMatrix<RT>& B, const MatrixView<T>& C,
+        const GenMatrix<RT>& B, MatrixView<T> C,
         const int i1, const int j1, const int i2, const int j2,
         const int MB, const int NB, const int KB,
         const int size1, const int size2, const int size3,
@@ -183,7 +183,7 @@ namespace tmv {
     template <class RT, class T>
     static void DoBlockMultMM(
         bool add, const T& x, const GenMatrix<RT>& A,
-        const GenMatrix<RT>& B, const MatrixView<T>& C)
+        const GenMatrix<RT>& B, MatrixView<T> C)
     {
         const int M = C.colsize();
         const int N = C.rowsize();
@@ -346,7 +346,7 @@ namespace tmv {
     template <class RT>
     static void DoBlockMultMM(
         bool add, const CT x, const GenMatrix<RT>& A,
-        const GenMatrix<CT>& B, const MatrixView<CT>& C)
+        const GenMatrix<CT>& B, MatrixView<CT> C)
     {
         bool Bc = B.isconj();
         if (TMV_IMAG(x) == RT(0)) {
@@ -362,7 +362,7 @@ namespace tmv {
     template <class RT>
     static void DoBlockMultMM(
         bool add, const CT x, const GenMatrix<CT>& A,
-        const GenMatrix<RT>& B, const MatrixView<CT>& C)
+        const GenMatrix<RT>& B, MatrixView<CT> C)
     {
         bool Ac = A.isconj();
         if (TMV_IMAG(x) == RT(0)) {
@@ -378,7 +378,7 @@ namespace tmv {
     template <class RT>
     static void DoBlockMultMM(
         bool add, const CT x, const GenMatrix<CT>& A,
-        const GenMatrix<CT>& B, const MatrixView<CT>& C)
+        const GenMatrix<CT>& B, MatrixView<CT> C)
     {
         bool Ac = A.isconj();
         bool Bc = B.isconj();
@@ -405,7 +405,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb>
     void BlockMultMM(
         const T x, const GenMatrix<Ta>& A,
-        const GenMatrix<Tb>& B, const MatrixView<T>& C)
+        const GenMatrix<Tb>& B, MatrixView<T> C)
     { 
         try {
             DoBlockMultMM(add,x,A,B,C); 

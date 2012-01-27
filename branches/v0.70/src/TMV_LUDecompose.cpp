@@ -67,8 +67,7 @@ namespace tmv {
     //
 
     template <class T> 
-    static void NonBlockLUDecompose(
-        const MatrixView<T>& A, int* P, int& detp)
+    static void NonBlockLUDecompose(MatrixView<T> A, int* P)
     {
         // LU Decompostion with partial pivoting.
         //
@@ -186,7 +185,6 @@ namespace tmv {
                 TMVAssert(j < A.colsize());
                 A.swapRows(ip,j);  // This does both Lkb and A'
                 *Pj = ip;
-                detp = -detp;
                 //std::cout<<"swapped rows\n";
             } else *Pj = j;
 
@@ -227,8 +225,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static void RecursiveLUDecompose(
-        const MatrixView<T>& A, int* P, int& detp)
+    static void RecursiveLUDecompose(MatrixView<T> A, int* P)
     {
         //std::cout<<"Start recursive LU: A = "<<A<<std::endl;
         // The recursive LU algorithm is similar to the block algorithm, except 
@@ -240,8 +237,7 @@ namespace tmv {
         Matrix<T> A_0 = A;
         Matrix<T,ColMajor> A2 = A;
         std::vector<int> P2(A.colsize());
-        int detp2=1;
-        NonBlockLUDecompose(A2.view(),&P2[0],detp2);
+        NonBlockLUDecompose(A2.view(),&P2[0]);
 #endif
 
         typedef TMV_RealType(T) RT;
@@ -266,7 +262,7 @@ namespace tmv {
             MatrixView<T> A11 = A1.rowRange(N1,M);
 
             // Decompose left half into PLU
-            RecursiveLUDecompose(A0,P,detp);
+            RecursiveLUDecompose(A0,P);
 
             // Apply the permutation to the right half of the matrix
             A1.permuteRows(P,0,N1);
@@ -278,13 +274,13 @@ namespace tmv {
             A11 -= A10 * A01;
 
             // Decompose A~ into PLU
-            RecursiveLUDecompose(A11,P+N1,detp);
+            RecursiveLUDecompose(A11,P+N1);
             for(int i=N1;i<R;++i) P[i]+=N1;
 
             // Apply the new permutations to the left half
             A0.permuteRows(P,N1,R);
         } else if (LU_BLOCKSIZE2 > 2 && R > 2) {
-            NonBlockLUDecompose(A,P,detp);
+            NonBlockLUDecompose(A,P);
         } else if (R == 2) {
             //std::cout<<"R == 2\n";
             // Same as NonBlock version, but with R==2 hard coded
@@ -309,7 +305,6 @@ namespace tmv {
                 if (ip0 != 0) {
                     A0.swap(ip0,0);
                     A1.swap(ip0,0);
-                    detp = -detp;
                 } 
 
                 // A0.subVector(1,M) /= A00;
@@ -352,7 +347,6 @@ namespace tmv {
                 if (ip1 != 1) {
                     A1.swap(ip1,1);
                     A0.swap(ip1,1);
-                    detp = -detp;
                 } 
 
                 //A1.subVector(2,M) /= A1(1);
@@ -391,7 +385,6 @@ namespace tmv {
             if (piv != RT(0)) {
                 if (*P != 0) {
                     A0.swap(*P,0);
-                    detp = -detp;
                 }
                 //std::cout<<"A0(1:M) /= "<<*A0.cptr()<<std::endl;
                 A0.subVector(1,M) /= (*A0.cptr());
@@ -424,22 +417,21 @@ namespace tmv {
     }
 
     template <class T> 
-    static inline void NonLapLUDecompose(
-        const MatrixView<T>& A, int* P, int& detp)
+    static inline void NonLapLUDecompose(MatrixView<T> A, int* P)
     {
         TMVAssert(A.ct()==NonConj);
         TMVAssert(A.iscm());
 
-        RecursiveLUDecompose(A,P,detp);
+        RecursiveLUDecompose(A,P);
     }
 
 #ifdef ALAP
     template <class T> 
-    static void LapLUDecompose(const MatrixView<T>& A, int* P, int& detp)
-    { NonLapLUDecompose(A,P,detp); }
+    static void LapLUDecompose(MatrixView<T> A, int* P)
+    { NonLapLUDecompose(A,P); }
 #ifdef INST_DOUBLE
     template <> 
-    void LapLUDecompose(const MatrixView<double>& A, int* P, int& detp)
+    void LapLUDecompose(MatrixView<double> A, int* P)
     {
         TMVAssert(A.iscm());
         TMVAssert(A.ct()==NonConj);
@@ -454,12 +446,10 @@ namespace tmv {
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
-            if (P[i]!=i) detp = -detp;
         }
     }
     template <> 
-    void LapLUDecompose(
-        const MatrixView<std::complex<double> >& A, int* P, int& detp)
+    void LapLUDecompose(MatrixView<std::complex<double> > A, int* P)
     {
         TMVAssert(A.iscm());
         TMVAssert(A.ct()==NonConj);
@@ -474,7 +464,6 @@ namespace tmv {
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
-            if (P[i]!=i) detp = -detp;
         }
     }
 #endif
@@ -485,7 +474,7 @@ namespace tmv {
     // Try reducing KMP_STACKSIZE or increasing the shell stack limit.
     // So I'm cutting it out for MKL compilations
     template <> 
-    void LapLUDecompose(const MatrixView<float>& A, int* P, int& detp)
+    void LapLUDecompose(MatrixView<float> A, int* P)
     {
         TMVAssert(A.iscm());
         TMVAssert(A.ct()==NonConj);
@@ -500,12 +489,10 @@ namespace tmv {
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
-            if (P[i]!=i) detp = -detp;
         }
     }
     template <> 
-    void LapLUDecompose(
-        const MatrixView<std::complex<float> >& A, int* P, int& detp)
+    void LapLUDecompose(MatrixView<std::complex<float> > A, int* P)
     {
         TMVAssert(A.iscm());
         TMVAssert(A.ct()==NonConj);
@@ -520,7 +507,6 @@ namespace tmv {
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
-            if (P[i]!=i) detp = -detp;
         }
     }
 #endif // MKL
@@ -528,22 +514,31 @@ namespace tmv {
 #endif // ALAP
 
     template <class T> 
-    void LU_Decompose(const MatrixView<T>& A, int* P, int& detp)
+    void LU_Decompose(MatrixView<T> A, int* P)
     {
 #ifdef XDEBUG
         std::cout<<"Start LUDecompose:"<<std::endl;
         std::cout<<"A = "<<A<<std::endl;
         Matrix<T> A0 = A;
 #endif
-        TMVAssert(A.ct()==NonConj);
-        TMVAssert(A.iscm());
-
-        if (A.colsize() > 0 && A.rowsize() > 0) {
+        if (A.isconj()) {
+            LU_Decompose(A.conjugate(),P);
+        } else if (A.iscm()) {
+            if (A.colsize() > 0 && A.rowsize() > 0) {
 #ifdef ALAP
-            LapLUDecompose(A,P,detp);
+                LapLUDecompose(A,P);
 #else
-            NonLapLUDecompose(A,P,detp);
+                NonLapLUDecompose(A,P);
 #endif
+            }
+        } else if (A.isrm()) {
+            A.transposeSelf();
+            LU_Decompose(A.transpose(),P);
+            A.transposeSelf();
+        } else {
+            Matrix<T,tmv::ColMajor> Ac = A;
+            LU_Decompose(Ac.view(),P);
+            A = Ac;
         }
 #ifdef XDEBUG
         std::cout<<"A => "<<A<<std::endl;
@@ -563,22 +558,6 @@ namespace tmv {
             abort();
         }
 #endif
-    }
-
-    template <class T> 
-    void LU_Decompose(const MatrixView<T>& A, int* P)
-    { 
-        if (A.isconj()) LU_Decompose(A.conjugate(),P);
-        else {
-            int d=0;
-            if (A.isrm()) {
-                A.transposeSelf();
-                LU_Decompose(A.transpose(),P,d);
-                A.transposeSelf();
-            } else {
-                LU_Decompose(A,P,d); 
-            }
-        }
     }
 
 #ifdef INST_INT

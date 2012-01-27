@@ -67,7 +67,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    typename MatrixView<T,A>::reference MatrixView<T,A>::ref(int i, int j) const
+    typename MatrixView<T,A>::reference MatrixView<T,A>::ref(int i, int j) 
     {
         T* mi = ptr() + i*itssi + j*stepj();
         return RefHelper<T>::makeRef(mi,ct());
@@ -766,7 +766,7 @@ namespace tmv {
     //
 
     template <class T, int A>
-    const MatrixView<T,A>& MatrixView<T,A>::clip(RT thresh) const
+    MatrixView<T,A>& MatrixView<T,A>::clip(RT thresh) 
     {
         TMVAssert(A==CStyle);
         if (this->canLinearize()) linearView().clip(thresh);
@@ -783,7 +783,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const MatrixView<T,A>& MatrixView<T,A>::setZero() const
+    MatrixView<T,A>& MatrixView<T,A>::setZero() 
     {
         TMVAssert(A==CStyle);
         if (this->canLinearize()) linearView().setZero();
@@ -800,7 +800,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const MatrixView<T,A>& MatrixView<T,A>::setAllTo(const T& x) const
+    MatrixView<T,A>& MatrixView<T,A>::setAllTo(const T& x) 
     {
         TMVAssert(A==CStyle);
         if (this->canLinearize()) linearView().setAllTo(x);
@@ -817,7 +817,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const MatrixView<T,A>& MatrixView<T,A>::addToAll(const T& x) const
+    MatrixView<T,A>& MatrixView<T,A>::addToAll(const T& x) 
     {
         TMVAssert(A==CStyle);
         if (this->canLinearize()) linearView().addToAll(x);
@@ -834,7 +834,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const MatrixView<T,A>& MatrixView<T,A>::transposeSelf() const
+    MatrixView<T,A>& MatrixView<T,A>::transposeSelf() 
     {
         TMVAssert(A==CStyle);
         TMVAssert(colsize() == rowsize());
@@ -844,7 +844,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const MatrixView<T,A>& MatrixView<T,A>::conjugateSelf() const
+    MatrixView<T,A>& MatrixView<T,A>::conjugateSelf() 
     {
         TMVAssert(A==CStyle);
         if (isComplex(T())) {
@@ -863,7 +863,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const MatrixView<T,A>& MatrixView<T,A>::setToIdentity(const T& x) const 
+    MatrixView<T,A>& MatrixView<T,A>::setToIdentity(const T& x) 
     {
         TMVAssert(A==CStyle);
         TMVAssert(colsize() == rowsize());
@@ -873,8 +873,8 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const MatrixView<T,A>& MatrixView<T,A>::permuteRows(
-        const int* p, int i1, int i2) const
+    MatrixView<T,A>& MatrixView<T,A>::permuteRows(
+        const int* p, int i1, int i2) 
     {
         TMVAssert(A==CStyle);
         TMVAssert(i2<=colsize());
@@ -908,8 +908,8 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const MatrixView<T,A>& MatrixView<T,A>::reversePermuteRows(
-        const int* p, int i1, int i2) const
+    MatrixView<T,A>& MatrixView<T,A>::reversePermuteRows(
+        const int* p, int i1, int i2) 
     {
         TMVAssert(A==CStyle);
         TMVAssert(i2<=colsize());
@@ -944,7 +944,7 @@ namespace tmv {
     //
 
     template <class T>
-    static void NonLapCopy(const GenMatrix<T>& m1, const MatrixView<T>& m2)
+    static void NonLapCopy(const GenMatrix<T>& m1, MatrixView<T> m2)
     {
         TMVAssert(m2.rowsize() == m1.rowsize());
         TMVAssert(m2.colsize() == m1.colsize());
@@ -979,11 +979,11 @@ namespace tmv {
     }
 #ifdef ELAP
     template <class T>
-    static inline void LapCopy(const GenMatrix<T>& m1, const MatrixView<T>& m2)
+    static inline void LapCopy(const GenMatrix<T>& m1, MatrixView<T> m2)
     { NonLapCopy(m1,m2); }
 #ifdef INST_DOUBLE
     template <>
-    void LapCopy(const GenMatrix<double>& m1, const MatrixView<double>& m2)
+    void LapCopy(const GenMatrix<double>& m1, MatrixView<double> m2)
     {
         TMVAssert(m2.rowsize() == m1.rowsize());
         TMVAssert(m2.colsize() == m1.colsize());
@@ -1001,7 +1001,7 @@ namespace tmv {
     template <>
     void LapCopy(
         const GenMatrix<std::complex<double> >& m1,
-        const MatrixView<std::complex<double> >& m2)
+        MatrixView<std::complex<double> > m2)
     {
         TMVAssert(m2.rowsize() == m1.rowsize());
         TMVAssert(m2.colsize() == m1.colsize());
@@ -1021,7 +1021,7 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <>
-    void LapCopy(const GenMatrix<float>& m1, const MatrixView<float>& m2)
+    void LapCopy(const GenMatrix<float>& m1, MatrixView<float> m2)
     {
         TMVAssert(m2.rowsize() == m1.rowsize());
         TMVAssert(m2.colsize() == m1.colsize());
@@ -1039,7 +1039,7 @@ namespace tmv {
     template <>
     void LapCopy(
         const GenMatrix<std::complex<float> >& m1,
-        const MatrixView<std::complex<float> >& m2)
+        MatrixView<std::complex<float> > m2)
     {
         TMVAssert(m2.rowsize() == m1.rowsize());
         TMVAssert(m2.colsize() == m1.colsize());
@@ -1059,7 +1059,7 @@ namespace tmv {
 #endif
 #endif
     template <class T>
-    void DoCopySameType(const GenMatrix<T>& m1, const MatrixView<T>& m2)
+    void DoCopySameType(const GenMatrix<T>& m1, MatrixView<T> m2)
     {
         TMVAssert(m2.rowsize() == m1.rowsize());
         TMVAssert(m2.colsize() == m1.colsize());
@@ -1082,7 +1082,7 @@ namespace tmv {
     //
 
     template <class T>
-    void Swap(const MatrixView<T>& m1, const MatrixView<T>& m2)
+    void Swap(MatrixView<T> m1, MatrixView<T> m2)
     {
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
@@ -1239,7 +1239,7 @@ namespace tmv {
 #endif
 
     template <class T>
-    static void FinishRead(const TMV_Reader& reader, const MatrixView<T>& m) 
+    static void FinishRead(const TMV_Reader& reader, MatrixView<T> m) 
     {
         const int M = m.colsize();
         const int N = m.rowsize();
@@ -1337,7 +1337,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    void MatrixView<T,A>::read(const TMV_Reader& reader) const
+    void MatrixView<T,A>::read(const TMV_Reader& reader) 
     {
         std::string exp,got;
         if (!reader.readCode("M",exp,got)) {

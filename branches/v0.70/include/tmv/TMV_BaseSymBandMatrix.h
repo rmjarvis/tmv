@@ -75,8 +75,8 @@ namespace tmv {
     {
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
-        virtual void assignTosB(const SymBandMatrixView<RT>& m) const = 0;
-        virtual void assignTosB(const SymBandMatrixView<CT>& m) const = 0;
+        virtual void assignTosB(SymBandMatrixView<RT> m) const = 0;
+        virtual void assignTosB(SymBandMatrixView<CT> m) const = 0;
         virtual inline ~AssignableToSymBandMatrix() {}
     };
 

@@ -68,7 +68,7 @@ namespace tmv {
     template <bool ha, bool a1, bool add, class T, class Tx, class Ty> 
     static void RecursiveRank2KUpdate(
         const T alpha, const GenMatrix<Tx>& x, const GenMatrix<Ty>& y,
-        const SymMatrixView<T>& A)
+        SymMatrixView<T> A)
     {
         TMVAssert(A.size() == x.colsize());
         TMVAssert(A.size() == y.colsize());
@@ -166,7 +166,7 @@ namespace tmv {
     template <bool ha, bool a1, bool add, class T, class Tx, class Ty> 
     static void RecursiveInPlaceRank2KUpdate(
         const T alpha, const GenMatrix<Tx>& x, const GenMatrix<Ty>& y,
-        const SymMatrixView<T>& A)
+        SymMatrixView<T> A)
     {
         TMVAssert(SameStorage(x,A) || SameStorage(y,A));
         TMVAssert(A.size() > 0);
@@ -228,7 +228,7 @@ namespace tmv {
     template <bool add, class T, class Tx, class Ty> 
     static inline void InPlaceRank2KUpdate(
         const T alpha, const GenMatrix<Tx>& x, const GenMatrix<Ty>& y,
-        const SymMatrixView<T>& A)
+        SymMatrixView<T> A)
     {
         TMVAssert(SameStorage(x,A) || SameStorage(y,A));
         TMVAssert(A.size() > 0);
@@ -249,7 +249,7 @@ namespace tmv {
     template <bool add, class T, class Tx, class Ty> 
     static void NonBlasRank2KUpdate(
         const T alpha, const GenMatrix<Tx>& x, const GenMatrix<Ty>& y,
-        const SymMatrixView<T>& A)
+        SymMatrixView<T> A)
     { 
         if (A.uplo() == Upper)
             return NonBlasRank2KUpdate<add>(
@@ -362,14 +362,14 @@ namespace tmv {
     template <class T, class Tx, class Ty> 
     static inline void BlasRank2KUpdate(
         const T alpha, const GenMatrix<Tx>& x, const GenMatrix<Ty>& y,
-        const SymMatrixView<T>& A)
+        SymMatrixView<T> A)
     { NonBlasRank2KUpdate<true>(alpha,x,y,A); }
 #ifdef INST_DOUBLE
     template <> 
     void BlasRank2KUpdate(
         const double alpha, const GenMatrix<double>& x,
         const GenMatrix<double>& y, 
-        const SymMatrixView<double>& A)
+        SymMatrixView<double> A)
     {
         int n=A.size();
         int k=x.rowsize();
@@ -388,7 +388,7 @@ namespace tmv {
         const std::complex<double> alpha,
         const GenMatrix<std::complex<double> >& x, 
         const GenMatrix<std::complex<double> >& y,
-        const SymMatrixView<std::complex<double> >& A)
+        SymMatrixView<std::complex<double> > A)
     {
         int n=A.size();
         int k=x.rowsize();
@@ -417,7 +417,7 @@ namespace tmv {
         const std::complex<double> alpha, 
         const GenMatrix<std::complex<double> >& x,
         const GenMatrix<double>& y, 
-        const SymMatrixView<std::complex<double> >& A)
+        SymMatrixView<std::complex<double> > A)
     {
         Matrix<double,ColMajor> x1 = x.realPart();
         SymMatrix<double,Lower|ColMajor> A1(A.size(),0.);
@@ -431,7 +431,7 @@ namespace tmv {
     void BlasRank2KUpdate(
         const std::complex<double> alpha, const GenMatrix<double>& x,
         const GenMatrix<std::complex<double> >& y, 
-        const SymMatrixView<std::complex<double> >& A)
+        SymMatrixView<std::complex<double> > A)
     {
         Matrix<double,RowMajor> y1 = y.realPart();
         SymMatrix<double,Lower|ColMajor> A1(A.size(),0.);
@@ -445,7 +445,7 @@ namespace tmv {
     void BlasRank2KUpdate(
         const std::complex<double> alpha, const GenMatrix<double>& x,
         const GenMatrix<double>& y, 
-        const SymMatrixView<std::complex<double> >& A)
+        SymMatrixView<std::complex<double> > A)
     {
         SymMatrix<double,Lower|ColMajor> A1(A.size(),0.);
         BlasRank2KUpdate(1.,x,y,A1.view());
@@ -457,7 +457,7 @@ namespace tmv {
     void BlasRank2KUpdate(
         const float alpha, const GenMatrix<float>& x,
         const GenMatrix<float>& y, 
-        const SymMatrixView<float>& A)
+        SymMatrixView<float> A)
     {
         int n=A.size();
         int k=x.rowsize();
@@ -476,7 +476,7 @@ namespace tmv {
         const std::complex<float> alpha,
         const GenMatrix<std::complex<float> >& x, 
         const GenMatrix<std::complex<float> >& y,
-        const SymMatrixView<std::complex<float> >& A)
+        SymMatrixView<std::complex<float> > A)
     {
         int n=A.size();
         int k=x.rowsize();
@@ -505,7 +505,7 @@ namespace tmv {
         const std::complex<float> alpha, 
         const GenMatrix<std::complex<float> >& x,
         const GenMatrix<float>& y, 
-        const SymMatrixView<std::complex<float> >& A)
+        SymMatrixView<std::complex<float> > A)
     {
         Matrix<float,ColMajor> x1 = x.realPart();
         SymMatrix<float,Lower|ColMajor> A1(A.size(),0.F);
@@ -519,7 +519,7 @@ namespace tmv {
     void BlasRank2KUpdate(
         const std::complex<float> alpha, const GenMatrix<float>& x,
         const GenMatrix<std::complex<float> >& y, 
-        const SymMatrixView<std::complex<float> >& A)
+        SymMatrixView<std::complex<float> > A)
     {
         Matrix<float,RowMajor> y1 = y.realPart();
         SymMatrix<float,Lower|ColMajor> A1(A.size(),0.F);
@@ -533,7 +533,7 @@ namespace tmv {
     void BlasRank2KUpdate(
         const std::complex<float> alpha, const GenMatrix<float>& x,
         const GenMatrix<float>& y, 
-        const SymMatrixView<std::complex<float> >& A)
+        SymMatrixView<std::complex<float> > A)
     {
         SymMatrix<float,Lower|ColMajor> A1(A.size(),0.F);
         BlasRank2KUpdate(1.F,x,y,A1.view());
@@ -545,7 +545,7 @@ namespace tmv {
     template <bool add, class T, class Tx, class Ty> 
     void Rank2KUpdate(
         const T alpha, const GenMatrix<Tx>& x, const GenMatrix<Ty>& y,
-        const SymMatrixView<T>& A)
+        SymMatrixView<T> A)
     // if A is sym:  A (+)= alpha * (x ^ y + y ^ x)
     // if A is herm: A (+)= alpha * x ^ y* + conj(alpha) * y ^ x*
     {

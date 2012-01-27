@@ -62,7 +62,7 @@ namespace tmv {
 #endif
 
     template <class T> 
-    static void DoCHInverse(const SymMatrixView<T>& sinv, int nlo)
+    static void DoCHInverse(SymMatrixView<T> sinv, int nlo)
     {
         TMVAssert(sinv.isherm());
         // inv = (L Lt)^-1 = Lt^-1 L^-1
@@ -73,8 +73,7 @@ namespace tmv {
 
     template <class T> 
     static void SimpleLDLt_AddXtDX(
-        const SymMatrixView<T>& sinv, 
-        const GenMatrix<T>& X, const GenDiagMatrix<T>& D)
+        SymMatrixView<T> sinv, const GenMatrix<T>& X, const GenDiagMatrix<T>& D)
     {
         const int N = D.size();
         if (N==1) {
@@ -87,7 +86,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static void SimpleLDLt_CombineInverse(const SymMatrixView<T>& sinv)
+    static void SimpleLDLt_CombineInverse(SymMatrixView<T> sinv)
     {
         // This is basically the same algorithm as the LDLt_CombineInverse
         // in TMV_SymLDLInverse.cpp for the Bunch-Kaufman inverse.
@@ -113,7 +112,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static void DoLDL_Inverse(const SymMatrixView<T>& sinv)
+    static void DoLDL_Inverse(SymMatrixView<T> sinv)
     {
         LowerTriMatrixView<T> L = sinv.lowerTri(UnitDiag);
         DiagMatrixView<T> D(sinv.diag());
@@ -124,7 +123,7 @@ namespace tmv {
 
     template <class T, class T1> 
     void CH_Inverse(
-        const GenSymBandMatrix<T1>& LLx, const SymMatrixView<T>& sinv) 
+        const GenSymBandMatrix<T1>& LLx, SymMatrixView<T> sinv) 
     {
         TMVAssert(LLx.size() == sinv.size());
 
@@ -167,7 +166,7 @@ namespace tmv {
 
     template <class T, class T1> 
     void LDL_Inverse(
-        const GenSymBandMatrix<T1>& LLx, const SymMatrixView<T>& sinv) 
+        const GenSymBandMatrix<T1>& LLx, SymMatrixView<T> sinv) 
     {
         TMVAssert(LLx.size() == sinv.size());
         TMVAssert(LLx.nlo() == 1);

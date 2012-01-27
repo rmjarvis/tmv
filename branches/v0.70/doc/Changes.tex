@@ -28,13 +28,15 @@ of your code to be modified.  It might be a bit of work to covert your
 code to this version, and I apologize for that, but my hope is that the 
 user interface will be pretty stable after this release.
 
-The only other big change in the UI that I think is coming is that I'm 
-planning on getting rid of the ``\tt{Gen}'' classes as base classes to
-the various matrix and vector classes.  But the workarounds for that 
-change don't apply yet, so I have to hold off on describing that change
-until I release the version with the redesigned back end.
+I don't think there are any more big changes in the UI coming down the 
+pike, even with the big redesign that I'm calling versin 0.90.
 (I know I've been advertising the redesign for a while now.
 It might be ready sometime in the next year, I hope.)
+That version will change the base classes of the TMV objects, so if
+you use any of them directly (e.g. the various ``\tt{Gen}'' classes)  
+then those will go away at that point.  I've already removed mentions of
+them from the documentation, so they are officially deprecated, but 
+code that uses them will continue to work with this version.
 
 Here is a list of the changes from version \prevtmvversion\ to \tmvversion.  
 Whenever a change is not backward compatible, meaning that code using the previous version might be broken, I mark the item with a $\times$ bullet rather than the usual $\bullet$ to indicate this.  
@@ -235,6 +237,9 @@ Removed the routines that returned pointers to a \tt{BaseMatrix} created with \t
 
 There are no simple workarounds for this lost functionality, so if you were using these functions and are sorry to see them go, or if you are otherwise using the virtual functionality (e.g. putting pointers to a bunch of disparate \tt{BaseMatrix} objects into a \tt{std::vector} or other container class), let me know what your use case is (at \mygroup) and we can try to figure out how best to incorporate your needs in the next version and in the version 0.90 redesign.
 
+In addition, version 0.90 will also get rid of all the ``\tt{Gen}'' classes,
+so if you use any of those in your code, you might want to take the opportunity to change that as well.  In most cases, you can use a \tt{Const} \tt{View} instead, which will do essentially the same thing.
+
 \item[$\times$]
 Changed the second template parameter of \tt{VIt} and \tt{CVIt} from either \tt{Step} or \tt{Unit} to the actual step size between elements, if known.  If the step size is not known at compile time, you can use the special value \tt{tmv::Unknown}, and the value will be determined at run time with a variable.  This allows the user more flexibility for optimizing code.  For example, if you want to iterate over the real values of a complex vector, you could explicitly set the step size to 2, so the compiler could know it at compile time, rather than run time.
 \begin{tmvcode}
@@ -265,7 +270,30 @@ definition of the SVD, I'm admitting the point that {\em everyone} else
 seems to use this definition.  So no point in me trying to get TMV users
 to use my preferred definition: $A = U S V$.
 
-\item
+\item[$\times$]
+Changed the mechanism for switching from the "Loose QRP" to the "Strict QRP"
+algorithm (and back).  It used to be a global \tt{bool} variable, called
+\begin{tmvcode}
+bool tmv::QRPDiv<T>::StrictQRP
+\end{tmvcode}
+which was initially \tt{false}, but which you could set to \tt{true}.
+Now you should set the equivalent of this variable with the function
+\begin{tmvcode}
+tmv::UseStrictQRP();
+\end{tmvcode}
+to start using the Strict QRP algorithm and
+\begin{tmvcode}
+tmv::UseStrictQRP(false);
+\end{tmvcode}
+to stop using it.  You can access the current state of the variable with
+\begin{tmvcode}
+bool tmv::QRP_IsStrict()
+\end{tmvcode}
+The only functionality difference with the new interface is that now there
+is only one variable for all types, rather than a different one for each
+type \tt{T}.
+
+\item[$\times$]
 Changed what ``\tt{const}'' in front of a \tt{VectorView},
 \tt{MatrixView}, etc. means for the mutability of the view. 
 Now a \tt{const VectorView} works the same as a 
@@ -286,6 +314,12 @@ Then code like
 DoSomethingTo(m.row(3));
 \end{tmvcode}
 will still work as before.
+
+\item
+Changed the definitions of the various decomposition functions
+to accept either views (as before) or regular \tt{Matrix}, \tt{Vector},
+etc. objects.  So, you no longer need to call these with \tt{m.view()}
+as you had to before.
 
 \item
 Fixed an error in the \tt{TMV\_VERSION\_AT\_LEAST} marco.  The old version was actually backwards.  It returned whether the library's version was equal to or {\em earlier} than the provided values, rather than equal or later.  The workaround if you need to check for versions before 0.70 is to use 

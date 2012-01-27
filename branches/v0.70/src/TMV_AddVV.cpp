@@ -53,7 +53,7 @@ namespace tmv {
 
     template <bool c1, class T, class Tx, class T1> 
     static void NonBlasAddVV(
-        const Tx x, const GenVector<T1>& v1, const VectorView<T>& v2)
+        const Tx x, const GenVector<T1>& v1, VectorView<T> v2)
     {
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v2.size()>0);
@@ -168,7 +168,7 @@ namespace tmv {
 
     template <class T, class T1> 
     static void DoAddVV(
-        const T x, const GenVector<T1>& v1, const VectorView<T>& v2)
+        const T x, const GenVector<T1>& v1, VectorView<T> v2)
     {
         if (TMV_IMAG(x) == TMV_RealType(T)(0))
             if (v1.isconj()) NonBlasAddVV<true>(TMV_REAL(x),v1,v2); 
@@ -183,7 +183,7 @@ namespace tmv {
     template <> 
     void DoAddVV(
         const double x,
-        const GenVector<double>& v1, const VectorView<double>& v2)
+        const GenVector<double>& v1, VectorView<double> v2)
     { 
         int n=v2.size();
         int s1=v1.step();
@@ -199,7 +199,7 @@ namespace tmv {
     void DoAddVV(
         const std::complex<double> x, 
         const GenVector<std::complex<double> >& v1, 
-        const VectorView<std::complex<double> >& v2)
+        VectorView<std::complex<double> > v2)
     { 
         int n=v2.size();
         int s1=v1.step();
@@ -215,7 +215,7 @@ namespace tmv {
     void DoAddVV(
         const std::complex<double> x, 
         const GenVector<double>& v1, 
-        const VectorView<std::complex<double> >& v2)
+        VectorView<std::complex<double> > v2)
     { 
         double xr = TMV_REAL(x);
         double xi = TMV_IMAG(x);
@@ -240,7 +240,7 @@ namespace tmv {
     template <> 
     void DoAddVV(
         const float x,
-        const GenVector<float>& v1, const VectorView<float>& v2)
+        const GenVector<float>& v1, VectorView<float> v2)
     { 
         int n=v2.size();
         int s1=v1.step();
@@ -256,7 +256,7 @@ namespace tmv {
     void DoAddVV(
         const std::complex<float> x, 
         const GenVector<std::complex<float> >& v1, 
-        const VectorView<std::complex<float> >& v2)
+        VectorView<std::complex<float> > v2)
     { 
         int n=v2.size();
         int s1=v1.step();
@@ -272,7 +272,7 @@ namespace tmv {
     void DoAddVV(
         const std::complex<float> x, 
         const GenVector<float>& v1, 
-        const VectorView<std::complex<float> >& v2)
+        VectorView<std::complex<float> > v2)
     { 
         float xr = TMV_REAL(x);
         float xi = TMV_IMAG(x);
@@ -296,7 +296,7 @@ namespace tmv {
 #endif // BLAS
 
     template <class T, class T1> 
-    void AddVV(const T x, const GenVector<T1>& v1, const VectorView<T>& v2)
+    void AddVV(const T x, const GenVector<T1>& v1, VectorView<T> v2)
     { 
         TMVAssert(v1.size() == v2.size()); 
         TMVAssert(v2.step() != 0 || v1.step() == 0 || v2.size() <= 1);
@@ -346,7 +346,7 @@ namespace tmv {
     template <class T, class T1, class T2> 
     void AddVV(
         const T x1, const GenVector<T1>& v1,
-        const T x2, const GenVector<T2>& v2, const VectorView<T>& v3)
+        const T x2, const GenVector<T2>& v2, VectorView<T> v3)
     { 
         TMVAssert(v2.size() == v1.size()); 
         TMVAssert(v3.size() == v1.size()); 

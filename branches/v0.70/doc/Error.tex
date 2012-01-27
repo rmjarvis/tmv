@@ -121,9 +121,8 @@ For example, the fastest algorithm for determining whether a matrix is
 (at least numerically) positive definite is to try the Cholesky decomposition
 and catch this exception.  To wit:
 \begin{tmvcode}
-bool IsPosDef(const tmv::GenSymMatrix<T>& m)
+bool IsPosDef(const tmv::HermMatrix<T>& m)
 {
-    assert(m.isherm());
     try {
         m.view().chd();
     } catch (tmv::NonPosDef) {

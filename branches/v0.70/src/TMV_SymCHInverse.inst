@@ -1,8 +1,7 @@
 #define CT std::complex<T>
 
 #define DefInv(T,T1) \
-template void CH_Inverse(const GenSymMatrix<T1 >& m, \
-    const SymMatrixView<T >& sinv); \
+template void CH_Inverse(const GenSymMatrix<T1 >& m, SymMatrixView<T > sinv); \
     
 DefInv(T,T)
 #ifdef INST_COMPLEX

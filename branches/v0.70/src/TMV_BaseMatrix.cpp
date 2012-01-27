@@ -66,11 +66,11 @@ namespace tmv {
 
     template <class T, class T1> 
     static inline void DoMakeInverse1(
-        const Divider<T>& div, const MatrixView<T1>& minv)
+        const Divider<T>& div, MatrixView<T1> minv)
     { div.makeInverse(minv); }
 
     template <class T> template <class T1> 
-    void DivHelper<T>::doMakeInverse(const MatrixView<T1>& minv) const
+    void DivHelper<T>::doMakeInverse(MatrixView<T1> minv) const
     {
         TMVAssert(minv.colsize() == rowsize());
         TMVAssert(minv.rowsize() == colsize());
@@ -80,7 +80,7 @@ namespace tmv {
     }
 
     template <class T>
-    void DivHelper<T>::doMakeInverseATA(const MatrixView<T>& minv) const
+    void DivHelper<T>::doMakeInverseATA(MatrixView<T> minv) const
     {
         TMVAssert(minv.colsize() == TMV_MIN(rowsize(),colsize()));
         TMVAssert(minv.rowsize() == TMV_MIN(rowsize(),colsize()));
@@ -116,28 +116,28 @@ namespace tmv {
 
     template <class T, class T1> 
     static inline void DoRDivEq1(
-        const Divider<T>& div, const MatrixView<T1>& m0)
+        const Divider<T>& div, MatrixView<T1> m0)
     { div.RDivEq(m0); }
 
     template <class T, class T1> 
     static inline void DoLDivEq1(
-        const Divider<T>& div, const MatrixView<T1>& m0)
+        const Divider<T>& div, MatrixView<T1> m0)
     { div.LDivEq(m0); }
 
     template <class T, class T1, class T0> 
     static inline void DoLDiv1(
         const Divider<T>& div,
-        const GenMatrix<T1>& m1, const MatrixView<T0>& m0)
+        const GenMatrix<T1>& m1, MatrixView<T0> m0)
     { div.LDiv(m1,m0); }
 
     template <class T, class T1, class T0> 
     static inline void DoRDiv1(
         const Divider<T>& div,
-        const GenMatrix<T1>& m1, const MatrixView<T0>& m0)
+        const GenMatrix<T1>& m1, MatrixView<T0> m0)
     { div.RDiv(m1,m0); }
 
     template <class T> template <class T1> 
-    void DivHelper<T>::doLDivEq(const VectorView<T1>& v) const
+    void DivHelper<T>::doLDivEq(VectorView<T1> v) const
     {
         TMVAssert(colsize() == rowsize());
         TMVAssert(colsize() == v.size());
@@ -147,7 +147,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void DivHelper<T>::doLDivEq(const MatrixView<T1>& m) const
+    void DivHelper<T>::doLDivEq(MatrixView<T1> m) const
     {
         TMVAssert(colsize() == rowsize());
         TMVAssert(colsize() == m.colsize());
@@ -157,7 +157,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void DivHelper<T>::doRDivEq(const VectorView<T1>& v) const
+    void DivHelper<T>::doRDivEq(VectorView<T1> v) const
     {
         TMVAssert(colsize() == rowsize());
         TMVAssert(colsize() == v.size());
@@ -167,7 +167,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void DivHelper<T>::doRDivEq(const MatrixView<T1>& m) const
+    void DivHelper<T>::doRDivEq(MatrixView<T1> m) const
     {
         TMVAssert(colsize() == rowsize());
         TMVAssert(colsize() == m.rowsize());
@@ -178,7 +178,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T0> 
     void DivHelper<T>::doLDiv(
-        const GenVector<T1>& v1, const VectorView<T0>& v0) const
+        const GenVector<T1>& v1, VectorView<T0> v0) const
     {
         TMVAssert(rowsize() == v0.size());
         TMVAssert(colsize() == v1.size());
@@ -189,7 +189,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T0> 
     void DivHelper<T>::doLDiv(
-        const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
+        const GenMatrix<T1>& m1, MatrixView<T0> m0) const
     {
         TMVAssert(rowsize() == m0.colsize());
         TMVAssert(colsize() == m1.colsize());
@@ -201,7 +201,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T0> 
     void DivHelper<T>::doRDiv(
-        const GenVector<T1>& v1, const VectorView<T0>& v0) const
+        const GenVector<T1>& v1, VectorView<T0> v0) const
     {
         TMVAssert(rowsize() == v1.size());
         TMVAssert(colsize() == v0.size());
@@ -212,7 +212,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T0> 
     void DivHelper<T>::doRDiv(
-        const GenMatrix<T1>& m1, const MatrixView<T0>& m0) const
+        const GenMatrix<T1>& m1, MatrixView<T0> m0) const
     {
         TMVAssert(rowsize() == m1.rowsize());
         TMVAssert(colsize() == m0.rowsize());

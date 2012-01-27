@@ -3,13 +3,13 @@
 
 #define DefMM(T,Ta,Tb)\
   template void MultMM<true>(const T alpha, const GenSymMatrix<Ta >& A, \
-      const GenMatrix<Tb >& B, const MatrixView<T >& C);  \
+      const GenMatrix<Tb >& B, MatrixView<T > C);  \
   template void MultMM<false>(const T alpha, const GenSymMatrix<Ta >& A, \
-      const GenMatrix<Tb >& B, const MatrixView<T >& C);  \
+      const GenMatrix<Tb >& B, MatrixView<T > C);  \
   template void MultMM<true>(const T alpha, const GenSymMatrix<Ta >& A, \
-      const GenSymMatrix<Tb >& B, const MatrixView<T >& C);  \
+      const GenSymMatrix<Tb >& B, MatrixView<T > C);  \
   template void MultMM<false>(const T alpha, const GenSymMatrix<Ta >& A, \
-      const GenSymMatrix<Tb >& B, const MatrixView<T >& C);  \
+      const GenSymMatrix<Tb >& B, MatrixView<T > C);  \
       
 DefMM(T,T,T)
 #ifdef INST_COMPLEX

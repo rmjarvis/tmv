@@ -44,7 +44,7 @@ namespace tmv {
     //
 
     template <class T, class T1> 
-    void CH_LDivEq(const GenSymMatrix<T1>& LL, const MatrixView<T>& m)
+    void CH_LDivEq(const GenSymMatrix<T1>& LL, MatrixView<T> m)
     {
         TMVAssert(LL.size() == m.colsize());
         // m = (LLt)^-1 m
@@ -58,7 +58,7 @@ namespace tmv {
     //
 
     template <class T, class T1> 
-    void CH_RDivEq(const GenSymMatrix<T1>& LL, const MatrixView<T>& m)
+    void CH_RDivEq(const GenSymMatrix<T1>& LL, MatrixView<T> m)
     {
         TMVAssert(LL.size() == m.rowsize());
         // m = m (LLt)^-1 

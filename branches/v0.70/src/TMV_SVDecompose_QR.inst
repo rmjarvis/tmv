@@ -3,13 +3,13 @@
 
 #define DefSVD(RT,T)\
 template void SV_DecomposeFromBidiagonal_QR(MVP<T > U, \
-    const VectorView<RT >& D, const VectorView<RT >& E, MVP<T > V); \
+    VectorView<RT > D, VectorView<RT > E, MVP<T > V); \
 template void BidiagonalChopSmallElements( \
-    const VectorView<T >& D, const VectorView<T >& E, bool* zd); \
+    VectorView<T > D, VectorView<T > E, bool* zd); \
 template void BidiagonalZeroFirstRow( \
-    MVP<T > U, const VectorView<RT >& D,  const VectorView<RT >& E); \
+    MVP<T > U, VectorView<RT > D,  VectorView<RT > E); \
 template void BidiagonalZeroLastCol( \
-    const VectorView<RT >& D, const VectorView<RT >& E, MVP<T > V); \
+    VectorView<RT > D, VectorView<RT > E, MVP<T > V); \
 
 DefSVD(T,T)
 #ifdef INST_COMPLEX

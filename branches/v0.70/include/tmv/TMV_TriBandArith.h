@@ -66,7 +66,7 @@ namespace tmv {
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
         inline const GenBandMatrix<T2>& getM2() const { return m2; }
-        inline void assignToB(const BandMatrixView<real_type>& m0) const
+        inline void assignToB(BandMatrixView<real_type> m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -87,7 +87,7 @@ namespace tmv {
                 AddMM(x2,m2,m0);
             }
         }
-        inline void assignToB(const BandMatrixView<complex_type>& m0) const
+        inline void assignToB(BandMatrixView<complex_type> m0) const
         { 
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -115,8 +115,8 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const BandMatrixView<T>& operator+=(
-        const BandMatrixView<T>& m1, const GenUpperTriMatrix<T>& m2) 
+    inline BandMatrixView<T> operator+=(
+        BandMatrixView<T> m1, const GenUpperTriMatrix<T>& m2) 
     {
         TMVAssert(m1.colsize() == m2.size());
         TMVAssert(m1.rowsize() == m2.size());
@@ -126,8 +126,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator+=(
-        const BandMatrixView<CT>& m1, const GenUpperTriMatrix<T>& m2) 
+    inline BandMatrixView<CT> operator+=(
+        BandMatrixView<CT> m1, const GenUpperTriMatrix<T>& m2) 
     { 
         TMVAssert(m1.colsize() == m2.size());
         TMVAssert(m1.rowsize() == m2.size());
@@ -137,8 +137,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<T>& operator-=(
-        const BandMatrixView<T>& m1, const GenUpperTriMatrix<T>& m2) 
+    inline BandMatrixView<T> operator-=(
+        BandMatrixView<T> m1, const GenUpperTriMatrix<T>& m2) 
     { 
         TMVAssert(m1.colsize() == m2.size());
         TMVAssert(m1.rowsize() == m2.size());
@@ -148,8 +148,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator-=(
-        const BandMatrixView<CT>& m1, const GenUpperTriMatrix<T>& m2) 
+    inline BandMatrixView<CT> operator-=(
+        BandMatrixView<CT> m1, const GenUpperTriMatrix<T>& m2) 
     { 
         TMVAssert(m1.colsize() == m2.size());
         TMVAssert(m1.rowsize() == m2.size());
@@ -159,8 +159,8 @@ namespace tmv {
     }
 
     template <class T, class T2> 
-    inline const BandMatrixView<T>& operator+=(
-        const BandMatrixView<T>& m, const ProdXU<T,T2>& pxm)
+    inline BandMatrixView<T> operator+=(
+        BandMatrixView<T> m, const ProdXU<T,T2>& pxm)
     {
         TMVAssert(m.colsize() == pxm.size());
         TMVAssert(m.rowsize() == pxm.size());
@@ -170,8 +170,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator+=(
-        const BandMatrixView<CT>& m, const ProdXU<T,T>& pxm)
+    inline BandMatrixView<CT> operator+=(
+        BandMatrixView<CT> m, const ProdXU<T,T>& pxm)
     {
         TMVAssert(m.colsize() == pxm.size());
         TMVAssert(m.rowsize() == pxm.size());
@@ -181,8 +181,8 @@ namespace tmv {
     }
 
     template <class T, class T2> 
-    inline const BandMatrixView<T>& operator-=(
-        const BandMatrixView<T>& m, const ProdXU<T,T2>& pxm)
+    inline BandMatrixView<T> operator-=(
+        BandMatrixView<T> m, const ProdXU<T,T2>& pxm)
     {
         TMVAssert(m.colsize() == pxm.size());
         TMVAssert(m.rowsize() == pxm.size());
@@ -192,8 +192,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator-=(
-        const BandMatrixView<CT>& m, const ProdXU<T,T>& pxm)
+    inline BandMatrixView<CT> operator-=(
+        BandMatrixView<CT> m, const ProdXU<T,T>& pxm)
     {
         TMVAssert(m.colsize() == pxm.size());
         TMVAssert(m.rowsize() == pxm.size());
@@ -203,8 +203,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<T>& operator+=(
-        const UpperTriMatrixView<T>& m1, const GenBandMatrix<T>& m2) 
+    inline UpperTriMatrixView<T> operator+=(
+        UpperTriMatrixView<T> m1, const GenBandMatrix<T>& m2) 
     {
         TMVAssert(m2.colsize() == m1.size());
         TMVAssert(m2.rowsize() == m1.size());
@@ -215,8 +215,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator+=(
-        const UpperTriMatrixView<CT>& m1, const GenBandMatrix<T>& m2) 
+    inline UpperTriMatrixView<CT> operator+=(
+        UpperTriMatrixView<CT> m1, const GenBandMatrix<T>& m2) 
     {
         TMVAssert(m2.colsize() == m1.size());
         TMVAssert(m2.rowsize() == m1.size());
@@ -227,8 +227,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<T>& operator-=(
-        const UpperTriMatrixView<T>& m1, const GenBandMatrix<T>& m2) 
+    inline UpperTriMatrixView<T> operator-=(
+        UpperTriMatrixView<T> m1, const GenBandMatrix<T>& m2) 
     {
         TMVAssert(m2.colsize() == m1.size());
         TMVAssert(m2.rowsize() == m1.size());
@@ -239,8 +239,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator-=(
-        const UpperTriMatrixView<CT>& m1, const GenBandMatrix<T>& m2) 
+    inline UpperTriMatrixView<CT> operator-=(
+        UpperTriMatrixView<CT> m1, const GenBandMatrix<T>& m2) 
     {
         TMVAssert(m2.colsize() == m1.size());
         TMVAssert(m2.rowsize() == m1.size());
@@ -251,8 +251,8 @@ namespace tmv {
     }
 
     template <class T, class T2> 
-    inline const UpperTriMatrixView<T>& operator+=(
-        const UpperTriMatrixView<T>& m, const ProdXB<T,T2>& pxm)
+    inline UpperTriMatrixView<T> operator+=(
+        UpperTriMatrixView<T> m, const ProdXB<T,T2>& pxm)
     {
         TMVAssert(m.size() == pxm.colsize());
         TMVAssert(m.size() == pxm.rowsize());
@@ -263,8 +263,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator+=(
-        const UpperTriMatrixView<CT>& m, const ProdXB<T,T>& pxm)
+    inline UpperTriMatrixView<CT> operator+=(
+        UpperTriMatrixView<CT> m, const ProdXB<T,T>& pxm)
     {
         TMVAssert(m.size() == pxm.colsize());
         TMVAssert(m.size() == pxm.rowsize());
@@ -275,8 +275,8 @@ namespace tmv {
     }
 
     template <class T, class T2> 
-    inline const UpperTriMatrixView<T>& operator-=(
-        const UpperTriMatrixView<T>& m, const ProdXB<T,T2>& pxm)
+    inline UpperTriMatrixView<T> operator-=(
+        UpperTriMatrixView<T> m, const ProdXB<T,T2>& pxm)
     {
         TMVAssert(m.size() == pxm.colsize());
         TMVAssert(m.size() == pxm.rowsize());
@@ -287,8 +287,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator-=(
-        const UpperTriMatrixView<CT>& m, const ProdXB<T,T>& pxm)
+    inline UpperTriMatrixView<CT> operator-=(
+        UpperTriMatrixView<CT> m, const ProdXB<T,T>& pxm)
     {
         TMVAssert(m.size() == pxm.colsize());
         TMVAssert(m.size() == pxm.rowsize());
@@ -321,7 +321,7 @@ namespace tmv {
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
         inline const GenBandMatrix<T2>& getM2() const { return m2; }
-        inline void assignToB(const BandMatrixView<real_type>& m0) const
+        inline void assignToB(BandMatrixView<real_type> m0) const
         { 
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -342,7 +342,7 @@ namespace tmv {
                 AddMM(x2,m2,m0);
             }
         }
-        inline void assignToB(const BandMatrixView<complex_type>& m0) const
+        inline void assignToB(BandMatrixView<complex_type> m0) const
         { 
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -370,8 +370,8 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const BandMatrixView<T>& operator+=(
-        const BandMatrixView<T>& m1, const GenLowerTriMatrix<T>& m2) 
+    inline BandMatrixView<T> operator+=(
+        BandMatrixView<T> m1, const GenLowerTriMatrix<T>& m2) 
     {
         TMVAssert(m1.colsize() == m2.size());
         TMVAssert(m1.rowsize() == m2.size());
@@ -381,8 +381,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator+=(
-        const BandMatrixView<CT>& m1, const GenLowerTriMatrix<T>& m2) 
+    inline BandMatrixView<CT> operator+=(
+        BandMatrixView<CT> m1, const GenLowerTriMatrix<T>& m2) 
     { 
         TMVAssert(m1.colsize() == m2.size());
         TMVAssert(m1.rowsize() == m2.size());
@@ -392,8 +392,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<T>& operator-=(
-        const BandMatrixView<T>& m1, const GenLowerTriMatrix<T>& m2) 
+    inline BandMatrixView<T> operator-=(
+        BandMatrixView<T> m1, const GenLowerTriMatrix<T>& m2) 
     { 
         TMVAssert(m1.colsize() == m2.size());
         TMVAssert(m1.rowsize() == m2.size());
@@ -403,8 +403,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator-=(
-        const BandMatrixView<CT>& m1, const GenLowerTriMatrix<T>& m2) 
+    inline BandMatrixView<CT> operator-=(
+        BandMatrixView<CT> m1, const GenLowerTriMatrix<T>& m2) 
     { 
         TMVAssert(m1.colsize() == m2.size());
         TMVAssert(m1.rowsize() == m2.size());
@@ -414,8 +414,8 @@ namespace tmv {
     }
 
     template <class T, class T2> 
-    inline const BandMatrixView<T>& operator+=(
-        const BandMatrixView<T>& m, const ProdXL<T,T2>& pxm)
+    inline BandMatrixView<T> operator+=(
+        BandMatrixView<T> m, const ProdXL<T,T2>& pxm)
     {
         TMVAssert(m.colsize() == pxm.size());
         TMVAssert(m.rowsize() == pxm.size());
@@ -425,8 +425,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator+=(
-        const BandMatrixView<CT>& m, const ProdXL<T,T>& pxm)
+    inline BandMatrixView<CT> operator+=(
+        BandMatrixView<CT> m, const ProdXL<T,T>& pxm)
     {
         TMVAssert(m.colsize() == pxm.size());
         TMVAssert(m.rowsize() == pxm.size());
@@ -436,8 +436,8 @@ namespace tmv {
     }
 
     template <class T, class T2> 
-    inline const BandMatrixView<T>& operator-=(
-        const BandMatrixView<T>& m, const ProdXL<T,T2>& pxm)
+    inline BandMatrixView<T> operator-=(
+        BandMatrixView<T> m, const ProdXL<T,T2>& pxm)
     {
         TMVAssert(m.colsize() == pxm.size());
         TMVAssert(m.rowsize() == pxm.size());
@@ -447,8 +447,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator-=(
-        const BandMatrixView<CT>& m, const ProdXL<T,T>& pxm)
+    inline BandMatrixView<CT> operator-=(
+        BandMatrixView<CT> m, const ProdXL<T,T>& pxm)
     {
         TMVAssert(m.colsize() == pxm.size());
         TMVAssert(m.rowsize() == pxm.size());
@@ -458,8 +458,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<T>& operator+=(
-        const LowerTriMatrixView<T>& m1, const GenBandMatrix<T>& m2) 
+    inline LowerTriMatrixView<T> operator+=(
+        LowerTriMatrixView<T> m1, const GenBandMatrix<T>& m2) 
     {
         TMVAssert(m2.colsize() == m1.size());
         TMVAssert(m2.rowsize() == m1.size());
@@ -470,8 +470,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<CT>& operator+=(
-        const LowerTriMatrixView<CT>& m1, const GenBandMatrix<T>& m2) 
+    inline LowerTriMatrixView<CT> operator+=(
+        LowerTriMatrixView<CT> m1, const GenBandMatrix<T>& m2) 
     {
         TMVAssert(m2.colsize() == m1.size());
         TMVAssert(m2.rowsize() == m1.size());
@@ -482,8 +482,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<T>& operator-=(
-        const LowerTriMatrixView<T>& m1, const GenBandMatrix<T>& m2) 
+    inline LowerTriMatrixView<T> operator-=(
+        LowerTriMatrixView<T> m1, const GenBandMatrix<T>& m2) 
     {
         TMVAssert(m2.colsize() == m1.size());
         TMVAssert(m2.rowsize() == m1.size());
@@ -494,8 +494,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<CT>& operator-=(
-        const LowerTriMatrixView<CT>& m1, const GenBandMatrix<T>& m2) 
+    inline LowerTriMatrixView<CT> operator-=(
+        LowerTriMatrixView<CT> m1, const GenBandMatrix<T>& m2) 
     {
         TMVAssert(m2.colsize() == m1.size());
         TMVAssert(m2.rowsize() == m1.size());
@@ -506,8 +506,8 @@ namespace tmv {
     }
 
     template <class T, class T2> 
-    inline const LowerTriMatrixView<T>& operator+=(
-        const LowerTriMatrixView<T>& m, const ProdXB<T,T2>& pxm)
+    inline LowerTriMatrixView<T> operator+=(
+        LowerTriMatrixView<T> m, const ProdXB<T,T2>& pxm)
     {
         TMVAssert(m.size() == pxm.colsize());
         TMVAssert(m.size() == pxm.rowsize());
@@ -518,8 +518,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<CT>& operator+=(
-        const LowerTriMatrixView<CT>& m, const ProdXB<T,T>& pxm)
+    inline LowerTriMatrixView<CT> operator+=(
+        LowerTriMatrixView<CT> m, const ProdXB<T,T>& pxm)
     {
         TMVAssert(m.size() == pxm.colsize());
         TMVAssert(m.size() == pxm.rowsize());
@@ -530,8 +530,8 @@ namespace tmv {
     }
 
     template <class T, class T2> 
-    inline const LowerTriMatrixView<T>& operator-=(
-        const LowerTriMatrixView<T>& m, const ProdXB<T,T2>& pxm)
+    inline LowerTriMatrixView<T> operator-=(
+        LowerTriMatrixView<T> m, const ProdXB<T,T2>& pxm)
     {
         TMVAssert(m.size() == pxm.colsize());
         TMVAssert(m.size() == pxm.rowsize());
@@ -542,8 +542,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<CT>& operator-=(
-        const LowerTriMatrixView<CT>& m, const ProdXB<T,T>& pxm)
+    inline LowerTriMatrixView<CT> operator-=(
+        LowerTriMatrixView<CT> m, const ProdXB<T,T>& pxm)
     {
         TMVAssert(m.size() == pxm.colsize());
         TMVAssert(m.size() == pxm.rowsize());
@@ -599,7 +599,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
         inline const GenBandMatrix<T2>& getM2() const { return m2; }
-        inline void assignToB(const BandMatrixView<real_type>& m0) const
+        inline void assignToB(BandMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -608,7 +608,7 @@ namespace tmv {
             TMVAssert(m0.nlo() >= nlo());
             MultMM<false>(x,m1,m2,m0);
         }
-        inline void assignToB(const BandMatrixView<complex_type>& m0) const
+        inline void assignToB(BandMatrixView<complex_type> m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -642,7 +642,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenBandMatrix<T1>& getM1() const { return m1; }
         inline const GenUpperTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToB(const BandMatrixView<real_type>& m0) const
+        inline void assignToB(BandMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -651,7 +651,7 @@ namespace tmv {
             TMVAssert(m0.nlo() >= nlo());
             MultMM<false>(x,m1,m2,m0);
         }
-        inline void assignToB(const BandMatrixView<complex_type>& m0) const
+        inline void assignToB(BandMatrixView<complex_type> m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -666,8 +666,8 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const BandMatrixView<T>& operator*=(
-        const BandMatrixView<T>& m1, const GenUpperTriMatrix<T>& m2)
+    inline BandMatrixView<T> operator*=(
+        BandMatrixView<T> m1, const GenUpperTriMatrix<T>& m2)
     { 
         TMVAssert(m1.rowsize() == m2.size());
         TMVAssert(m1.nhi() == m2.size()-1);
@@ -676,8 +676,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator*=(
-        const BandMatrixView<CT>& m1, const GenUpperTriMatrix<T>& m2)
+    inline BandMatrixView<CT> operator*=(
+        BandMatrixView<CT> m1, const GenUpperTriMatrix<T>& m2)
     {
         TMVAssert(m1.rowsize() == m2.size());
         TMVAssert(m1.nhi() == m2.size()-1);
@@ -686,8 +686,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const BandMatrixView<T>& operator+=(
-        const BandMatrixView<T>& m, const ProdUB<T,T1,T2>& pmm)
+    inline BandMatrixView<T> operator+=(
+        BandMatrixView<T> m, const ProdUB<T,T1,T2>& pmm)
     { 
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -698,8 +698,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator+=(
-        const BandMatrixView<CT>& m, const ProdUB<T,T,T>& pmm)
+    inline BandMatrixView<CT> operator+=(
+        BandMatrixView<CT> m, const ProdUB<T,T,T>& pmm)
     { 
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -710,8 +710,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const BandMatrixView<T>& operator-=(
-        const BandMatrixView<T>& m, const ProdUB<T,T1,T2>& pmm)
+    inline BandMatrixView<T> operator-=(
+        BandMatrixView<T> m, const ProdUB<T,T1,T2>& pmm)
     { 
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -722,8 +722,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator-=(
-        const BandMatrixView<CT>& m, const ProdUB<T,T,T>& pmm)
+    inline BandMatrixView<CT> operator-=(
+        BandMatrixView<CT> m, const ProdUB<T,T,T>& pmm)
     { 
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -734,8 +734,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const BandMatrixView<T>& operator+=(
-        const BandMatrixView<T>& m, const ProdBU<T,T1,T2>& pmm)
+    inline BandMatrixView<T> operator+=(
+        BandMatrixView<T> m, const ProdBU<T,T1,T2>& pmm)
     { 
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -746,8 +746,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator+=(
-        const BandMatrixView<CT>& m, const ProdBU<T,T,T>& pmm)
+    inline BandMatrixView<CT> operator+=(
+        BandMatrixView<CT> m, const ProdBU<T,T,T>& pmm)
     { 
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -758,8 +758,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const BandMatrixView<T>& operator-=(
-        const BandMatrixView<T>& m, const ProdBU<T,T1,T2>& pmm)
+    inline BandMatrixView<T> operator-=(
+        BandMatrixView<T> m, const ProdBU<T,T1,T2>& pmm)
     {
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -770,8 +770,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator-=(
-        const BandMatrixView<CT>& m, const ProdBU<T,T,T>& pmm)
+    inline BandMatrixView<CT> operator-=(
+        BandMatrixView<CT> m, const ProdBU<T,T,T>& pmm)
     {
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -782,8 +782,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<T>& operator*=(
-        const UpperTriMatrixView<T>& m1, const GenBandMatrix<T>& m2)
+    inline UpperTriMatrixView<T> operator*=(
+        UpperTriMatrixView<T> m1, const GenBandMatrix<T>& m2)
     { 
         TMVAssert(m2.colsize() == m1.size());
         TMVAssert(m2.rowsize() == m1.size());
@@ -794,8 +794,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator*=(
-        const UpperTriMatrixView<CT>& m1, const GenBandMatrix<T>& m2)
+    inline UpperTriMatrixView<CT> operator*=(
+        UpperTriMatrixView<CT> m1, const GenBandMatrix<T>& m2)
     { 
         TMVAssert(m2.colsize() == m1.size());
         TMVAssert(m2.rowsize() == m1.size());
@@ -806,8 +806,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const UpperTriMatrixView<T>& operator+=(
-        const UpperTriMatrixView<T>& m, const ProdUB<T,T1,T2>& pmm)
+    inline UpperTriMatrixView<T> operator+=(
+        UpperTriMatrixView<T> m, const ProdUB<T,T1,T2>& pmm)
     { 
         TMVAssert(m.size() == pmm.colsize());
         TMVAssert(m.size() == pmm.rowsize());
@@ -819,60 +819,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator+=(
-        const UpperTriMatrixView<CT>& m, const ProdUB<T,T,T>& pmm)
-    { 
-        TMVAssert(m.size() == pmm.colsize());
-        TMVAssert(m.size() == pmm.rowsize());
-        TMVAssert(pmm.nlo() == 0);
-        TMVAssert(!m.isunit());
-        MultMM<true>(
-            pmm.getX(),pmm.getM1(),pmm.getM2(),BandMatrixViewOf(m));
-        return m; 
-    }
-
-    template <class T, class T1, class T2> 
-    inline const UpperTriMatrixView<T>& operator-=(
-        const UpperTriMatrixView<T>& m, const ProdUB<T,T1,T2>& pmm)
-    { 
-        TMVAssert(m.size() == pmm.colsize());
-        TMVAssert(m.size() == pmm.rowsize());
-        TMVAssert(pmm.nlo() == 0);
-        TMVAssert(!m.isunit());
-        MultMM<true>(
-            -pmm.getX(),pmm.getM1(),pmm.getM2(),BandMatrixViewOf(m));
-        return m; 
-    }
-
-    template <class T> 
-    inline const UpperTriMatrixView<CT>& operator-=(
-        const UpperTriMatrixView<CT>& m, const ProdUB<T,T,T>& pmm)
-    { 
-        TMVAssert(m.size() == pmm.colsize());
-        TMVAssert(m.size() == pmm.rowsize());
-        TMVAssert(pmm.nlo() == 0);
-        TMVAssert(!m.isunit());
-        MultMM<true>(
-            -pmm.getX(),pmm.getM1(),pmm.getM2(),BandMatrixViewOf(m));
-        return m; 
-    }
-
-    template <class T, class T1, class T2> 
-    inline const UpperTriMatrixView<T>& operator+=(
-        const UpperTriMatrixView<T>& m, const ProdBU<T,T1,T2>& pmm)
-    { 
-        TMVAssert(m.size() == pmm.colsize());
-        TMVAssert(m.size() == pmm.rowsize());
-        TMVAssert(pmm.nlo() == 0);
-        TMVAssert(!m.isunit());
-        MultMM<true>(
-            pmm.getX(),pmm.getM1(),pmm.getM2(),BandMatrixViewOf(m));
-        return m; 
-    }
-
-    template <class T> 
-    inline const UpperTriMatrixView<CT>& operator+=(
-        const UpperTriMatrixView<CT>& m, const ProdBU<T,T,T>& pmm)
+    inline UpperTriMatrixView<CT> operator+=(
+        UpperTriMatrixView<CT> m, const ProdUB<T,T,T>& pmm)
     { 
         TMVAssert(m.size() == pmm.colsize());
         TMVAssert(m.size() == pmm.rowsize());
@@ -884,8 +832,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const UpperTriMatrixView<T>& operator-=(
-        const UpperTriMatrixView<T>& m, const ProdBU<T,T1,T2>& pmm)
+    inline UpperTriMatrixView<T> operator-=(
+        UpperTriMatrixView<T> m, const ProdUB<T,T1,T2>& pmm)
     { 
         TMVAssert(m.size() == pmm.colsize());
         TMVAssert(m.size() == pmm.rowsize());
@@ -897,8 +845,60 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const UpperTriMatrixView<CT>& operator-=(
-        const UpperTriMatrixView<CT>& m, const ProdBU<T,T,T>& pmm)
+    inline UpperTriMatrixView<CT> operator-=(
+        UpperTriMatrixView<CT> m, const ProdUB<T,T,T>& pmm)
+    { 
+        TMVAssert(m.size() == pmm.colsize());
+        TMVAssert(m.size() == pmm.rowsize());
+        TMVAssert(pmm.nlo() == 0);
+        TMVAssert(!m.isunit());
+        MultMM<true>(
+            -pmm.getX(),pmm.getM1(),pmm.getM2(),BandMatrixViewOf(m));
+        return m; 
+    }
+
+    template <class T, class T1, class T2> 
+    inline UpperTriMatrixView<T> operator+=(
+        UpperTriMatrixView<T> m, const ProdBU<T,T1,T2>& pmm)
+    { 
+        TMVAssert(m.size() == pmm.colsize());
+        TMVAssert(m.size() == pmm.rowsize());
+        TMVAssert(pmm.nlo() == 0);
+        TMVAssert(!m.isunit());
+        MultMM<true>(
+            pmm.getX(),pmm.getM1(),pmm.getM2(),BandMatrixViewOf(m));
+        return m; 
+    }
+
+    template <class T> 
+    inline UpperTriMatrixView<CT> operator+=(
+        UpperTriMatrixView<CT> m, const ProdBU<T,T,T>& pmm)
+    { 
+        TMVAssert(m.size() == pmm.colsize());
+        TMVAssert(m.size() == pmm.rowsize());
+        TMVAssert(pmm.nlo() == 0);
+        TMVAssert(!m.isunit());
+        MultMM<true>(
+            pmm.getX(),pmm.getM1(),pmm.getM2(),BandMatrixViewOf(m));
+        return m; 
+    }
+
+    template <class T, class T1, class T2> 
+    inline UpperTriMatrixView<T> operator-=(
+        UpperTriMatrixView<T> m, const ProdBU<T,T1,T2>& pmm)
+    { 
+        TMVAssert(m.size() == pmm.colsize());
+        TMVAssert(m.size() == pmm.rowsize());
+        TMVAssert(pmm.nlo() == 0);
+        TMVAssert(!m.isunit());
+        MultMM<true>(
+            -pmm.getX(),pmm.getM1(),pmm.getM2(),BandMatrixViewOf(m));
+        return m; 
+    }
+
+    template <class T> 
+    inline UpperTriMatrixView<CT> operator-=(
+        UpperTriMatrixView<CT> m, const ProdBU<T,T,T>& pmm)
     { 
         TMVAssert(m.size() == pmm.colsize());
         TMVAssert(m.size() == pmm.rowsize());
@@ -929,7 +929,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
         inline const GenBandMatrix<T2>& getM2() const { return m2; }
-        inline void assignToB(const BandMatrixView<real_type>& m0) const
+        inline void assignToB(BandMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -938,7 +938,7 @@ namespace tmv {
             TMVAssert(m0.nlo() >= nlo());
             MultMM<false>(x,m1,m2,m0);
         }
-        inline void assignToB(const BandMatrixView<complex_type>& m0) const
+        inline void assignToB(BandMatrixView<complex_type> m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -972,7 +972,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenBandMatrix<T1>& getM1() const { return m1; }
         inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToB(const BandMatrixView<real_type>& m0) const
+        inline void assignToB(BandMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -981,7 +981,7 @@ namespace tmv {
             TMVAssert(m0.nlo() >= nlo());
             MultMM<false>(x,m1,m2,m0);
         }
-        inline void assignToB(const BandMatrixView<complex_type>& m0) const
+        inline void assignToB(BandMatrixView<complex_type> m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -996,8 +996,8 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const BandMatrixView<T>& operator*=(
-        const BandMatrixView<T>& m1, const GenLowerTriMatrix<T>& m2)
+    inline BandMatrixView<T> operator*=(
+        BandMatrixView<T> m1, const GenLowerTriMatrix<T>& m2)
     { 
         TMVAssert(m1.rowsize() == m2.size());
         TMVAssert(m1.nlo() == m2.size()-1);
@@ -1006,8 +1006,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator*=(
-        const BandMatrixView<CT>& m1, const GenLowerTriMatrix<T>& m2)
+    inline BandMatrixView<CT> operator*=(
+        BandMatrixView<CT> m1, const GenLowerTriMatrix<T>& m2)
     {
         TMVAssert(m1.rowsize() == m2.size());
         TMVAssert(m1.nlo() == m2.size()-1);
@@ -1016,8 +1016,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const BandMatrixView<T>& operator+=(
-        const BandMatrixView<T>& m, const ProdLB<T,T1,T2>& pmm)
+    inline BandMatrixView<T> operator+=(
+        BandMatrixView<T> m, const ProdLB<T,T1,T2>& pmm)
     { 
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -1028,8 +1028,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator+=(
-        const BandMatrixView<CT>& m, const ProdLB<T,T,T>& pmm)
+    inline BandMatrixView<CT> operator+=(
+        BandMatrixView<CT> m, const ProdLB<T,T,T>& pmm)
     { 
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -1040,8 +1040,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const BandMatrixView<T>& operator-=(
-        const BandMatrixView<T>& m, const ProdLB<T,T1,T2>& pmm)
+    inline BandMatrixView<T> operator-=(
+        BandMatrixView<T> m, const ProdLB<T,T1,T2>& pmm)
     { 
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -1052,8 +1052,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator-=(
-        const BandMatrixView<CT>& m, const ProdLB<T,T,T>& pmm)
+    inline BandMatrixView<CT> operator-=(
+        BandMatrixView<CT> m, const ProdLB<T,T,T>& pmm)
     { 
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -1064,8 +1064,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const BandMatrixView<T>& operator+=(
-        const BandMatrixView<T>& m, const ProdBL<T,T1,T2>& pmm)
+    inline BandMatrixView<T> operator+=(
+        BandMatrixView<T> m, const ProdBL<T,T1,T2>& pmm)
     { 
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -1076,8 +1076,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator+=(
-        const BandMatrixView<CT>& m, const ProdBL<T,T,T>& pmm)
+    inline BandMatrixView<CT> operator+=(
+        BandMatrixView<CT> m, const ProdBL<T,T,T>& pmm)
     { 
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -1088,8 +1088,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const BandMatrixView<T>& operator-=(
-        const BandMatrixView<T>& m, const ProdBL<T,T1,T2>& pmm)
+    inline BandMatrixView<T> operator-=(
+        BandMatrixView<T> m, const ProdBL<T,T1,T2>& pmm)
     {
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -1100,8 +1100,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator-=(
-        const BandMatrixView<CT>& m, const ProdBL<T,T,T>& pmm)
+    inline BandMatrixView<CT> operator-=(
+        BandMatrixView<CT> m, const ProdBL<T,T,T>& pmm)
     {
         TMVAssert(m.colsize() == pmm.colsize());
         TMVAssert(m.rowsize() == pmm.rowsize());
@@ -1112,8 +1112,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<T>& operator*=(
-        const LowerTriMatrixView<T>& m1, const GenBandMatrix<T>& m2)
+    inline LowerTriMatrixView<T> operator*=(
+        LowerTriMatrixView<T> m1, const GenBandMatrix<T>& m2)
     { 
         TMVAssert(m2.colsize() == m1.size());
         TMVAssert(m2.rowsize() == m1.size());
@@ -1124,8 +1124,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<CT>& operator*=(
-        const LowerTriMatrixView<CT>& m1, const GenBandMatrix<T>& m2)
+    inline LowerTriMatrixView<CT> operator*=(
+        LowerTriMatrixView<CT> m1, const GenBandMatrix<T>& m2)
     { 
         TMVAssert(m2.colsize() == m1.size());
         TMVAssert(m2.rowsize() == m1.size());
@@ -1136,8 +1136,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const LowerTriMatrixView<T>& operator+=(
-        const LowerTriMatrixView<T>& m, const ProdLB<T,T1,T2>& pmm)
+    inline LowerTriMatrixView<T> operator+=(
+        LowerTriMatrixView<T> m, const ProdLB<T,T1,T2>& pmm)
     { 
         TMVAssert(m.size() == pmm.colsize());
         TMVAssert(m.size() == pmm.rowsize());
@@ -1149,60 +1149,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<CT>& operator+=(
-        const LowerTriMatrixView<CT>& m, const ProdLB<T,T,T>& pmm)
-    { 
-        TMVAssert(m.size() == pmm.colsize());
-        TMVAssert(m.size() == pmm.rowsize());
-        TMVAssert(pmm.nhi() == 0);
-        TMVAssert(!m.isunit());
-        MultMM<true>(
-            pmm.getX(),pmm.getM1(),pmm.getM2(),BandMatrixViewOf(m)); 
-        return m; 
-    }
-
-    template <class T, class T1, class T2> 
-    inline const LowerTriMatrixView<T>& operator-=(
-        const LowerTriMatrixView<T>& m, const ProdLB<T,T1,T2>& pmm)
-    { 
-        TMVAssert(m.size() == pmm.colsize());
-        TMVAssert(m.size() == pmm.rowsize());
-        TMVAssert(pmm.nhi() == 0);
-        TMVAssert(!m.isunit());
-        MultMM<true>(
-            -pmm.getX(),pmm.getM1(),pmm.getM2(),BandMatrixViewOf(m)); 
-        return m; 
-    }
-
-    template <class T> 
-    inline const LowerTriMatrixView<CT>& operator-=(
-        const LowerTriMatrixView<CT>& m, const ProdLB<T,T,T>& pmm)
-    { 
-        TMVAssert(m.size() == pmm.colsize());
-        TMVAssert(m.size() == pmm.rowsize());
-        TMVAssert(pmm.nhi() == 0);
-        TMVAssert(!m.isunit());
-        MultMM<true>(
-            -pmm.getX(),pmm.getM1(),pmm.getM2(),BandMatrixViewOf(m)); 
-        return m; 
-    }
-
-    template <class T, class T1, class T2> 
-    inline const LowerTriMatrixView<T>& operator+=(
-        const LowerTriMatrixView<T>& m, const ProdBL<T,T1,T2>& pmm)
-    { 
-        TMVAssert(m.size() == pmm.colsize());
-        TMVAssert(m.size() == pmm.rowsize());
-        TMVAssert(pmm.nhi() == 0);
-        TMVAssert(!m.isunit());
-        MultMM<true>(
-            pmm.getX(),pmm.getM1(),pmm.getM2(),BandMatrixViewOf(m)); 
-        return m; 
-    }
-
-    template <class T> 
-    inline const LowerTriMatrixView<CT>& operator+=(
-        const LowerTriMatrixView<CT>& m, const ProdBL<T,T,T>& pmm)
+    inline LowerTriMatrixView<CT> operator+=(
+        LowerTriMatrixView<CT> m, const ProdLB<T,T,T>& pmm)
     { 
         TMVAssert(m.size() == pmm.colsize());
         TMVAssert(m.size() == pmm.rowsize());
@@ -1214,8 +1162,8 @@ namespace tmv {
     }
 
     template <class T, class T1, class T2> 
-    inline const LowerTriMatrixView<T>& operator-=(
-        const LowerTriMatrixView<T>& m, const ProdBL<T,T1,T2>& pmm)
+    inline LowerTriMatrixView<T> operator-=(
+        LowerTriMatrixView<T> m, const ProdLB<T,T1,T2>& pmm)
     { 
         TMVAssert(m.size() == pmm.colsize());
         TMVAssert(m.size() == pmm.rowsize());
@@ -1227,8 +1175,60 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const LowerTriMatrixView<CT>& operator-=(
-        const LowerTriMatrixView<CT>& m, const ProdBL<T,T,T>& pmm)
+    inline LowerTriMatrixView<CT> operator-=(
+        LowerTriMatrixView<CT> m, const ProdLB<T,T,T>& pmm)
+    { 
+        TMVAssert(m.size() == pmm.colsize());
+        TMVAssert(m.size() == pmm.rowsize());
+        TMVAssert(pmm.nhi() == 0);
+        TMVAssert(!m.isunit());
+        MultMM<true>(
+            -pmm.getX(),pmm.getM1(),pmm.getM2(),BandMatrixViewOf(m)); 
+        return m; 
+    }
+
+    template <class T, class T1, class T2> 
+    inline LowerTriMatrixView<T> operator+=(
+        LowerTriMatrixView<T> m, const ProdBL<T,T1,T2>& pmm)
+    { 
+        TMVAssert(m.size() == pmm.colsize());
+        TMVAssert(m.size() == pmm.rowsize());
+        TMVAssert(pmm.nhi() == 0);
+        TMVAssert(!m.isunit());
+        MultMM<true>(
+            pmm.getX(),pmm.getM1(),pmm.getM2(),BandMatrixViewOf(m)); 
+        return m; 
+    }
+
+    template <class T> 
+    inline LowerTriMatrixView<CT> operator+=(
+        LowerTriMatrixView<CT> m, const ProdBL<T,T,T>& pmm)
+    { 
+        TMVAssert(m.size() == pmm.colsize());
+        TMVAssert(m.size() == pmm.rowsize());
+        TMVAssert(pmm.nhi() == 0);
+        TMVAssert(!m.isunit());
+        MultMM<true>(
+            pmm.getX(),pmm.getM1(),pmm.getM2(),BandMatrixViewOf(m)); 
+        return m; 
+    }
+
+    template <class T, class T1, class T2> 
+    inline LowerTriMatrixView<T> operator-=(
+        LowerTriMatrixView<T> m, const ProdBL<T,T1,T2>& pmm)
+    { 
+        TMVAssert(m.size() == pmm.colsize());
+        TMVAssert(m.size() == pmm.rowsize());
+        TMVAssert(pmm.nhi() == 0);
+        TMVAssert(!m.isunit());
+        MultMM<true>(
+            -pmm.getX(),pmm.getM1(),pmm.getM2(),BandMatrixViewOf(m)); 
+        return m; 
+    }
+
+    template <class T> 
+    inline LowerTriMatrixView<CT> operator-=(
+        LowerTriMatrixView<CT> m, const ProdBL<T,T,T>& pmm)
     { 
         TMVAssert(m.size() == pmm.colsize());
         TMVAssert(m.size() == pmm.rowsize());
@@ -1307,7 +1307,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenBandMatrix<T1>& getM1() const { return m1; }
         inline const GenUpperTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToB(const BandMatrixView<real_type>& m0) const
+        inline void assignToB(BandMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -1317,7 +1317,7 @@ namespace tmv {
             UpperTriMatrix<T2> m2inv(m2.inverse());
             MultMM<false>(x,BandMatrixViewOf(m2inv),m1,m0);
         }
-        inline void assignToB(const BandMatrixView<complex_type>& m0) const
+        inline void assignToB(BandMatrixView<complex_type> m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -1352,7 +1352,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenBandMatrix<T1>& getM1() const { return m1; }
         inline const GenUpperTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToB(const BandMatrixView<real_type>& m0) const
+        inline void assignToB(BandMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -1362,7 +1362,7 @@ namespace tmv {
             UpperTriMatrix<T2> m2inv(m2.inverse());
             MultMM<false>(x,m1,BandMatrixViewOf(m2inv),m0);
         }
-        inline void assignToB(const BandMatrixView<complex_type>& m0) const
+        inline void assignToB(BandMatrixView<complex_type> m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -1378,8 +1378,8 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const BandMatrixView<T>& operator/=(
-        const BandMatrixView<T>& m1, const GenUpperTriMatrix<T>& m2)
+    inline BandMatrixView<T> operator/=(
+        BandMatrixView<T> m1, const GenUpperTriMatrix<T>& m2)
     { 
         TMVAssert(m1.colsize() == m2.size());
         TMVAssert(m1.nhi() == m2.size()-1);
@@ -1389,8 +1389,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator/=(
-        const BandMatrixView<CT>& m1, const GenUpperTriMatrix<T>& m2)
+    inline BandMatrixView<CT> operator/=(
+        BandMatrixView<CT> m1, const GenUpperTriMatrix<T>& m2)
     { 
         TMVAssert(m1.colsize() == m2.size());
         TMVAssert(m1.nhi() == m2.size()-1);
@@ -1400,8 +1400,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<T>& operator%=(
-        const BandMatrixView<T>& m1, const GenUpperTriMatrix<T>& m2)
+    inline BandMatrixView<T> operator%=(
+        BandMatrixView<T> m1, const GenUpperTriMatrix<T>& m2)
     {
         TMVAssert(m1.rowsize() == m2.size());
         TMVAssert(m1.nhi() == m2.size()-1);
@@ -1411,8 +1411,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator%=(
-        const BandMatrixView<CT>& m1, const GenUpperTriMatrix<T>& m2)
+    inline BandMatrixView<CT> operator%=(
+        BandMatrixView<CT> m1, const GenUpperTriMatrix<T>& m2)
     {
         TMVAssert(m1.rowsize() == m2.size());
         TMVAssert(m1.nhi() == m2.size()-1);
@@ -1441,7 +1441,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenBandMatrix<T1>& getM1() const { return m1; }
         inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToB(const BandMatrixView<real_type>& m0) const
+        inline void assignToB(BandMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -1451,7 +1451,7 @@ namespace tmv {
             LowerTriMatrix<T2> m2inv(m2.inverse());
             MultMM<false>(x,BandMatrixViewOf(m2inv),m1,m0);
         }
-        inline void assignToB(const BandMatrixView<complex_type>& m0) const
+        inline void assignToB(BandMatrixView<complex_type> m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -1486,7 +1486,7 @@ namespace tmv {
         inline T getX() const { return x; }
         inline const GenBandMatrix<T1>& getM1() const { return m1; }
         inline const GenLowerTriMatrix<T2>& getM2() const { return m2; }
-        inline void assignToB(const BandMatrixView<real_type>& m0) const
+        inline void assignToB(BandMatrixView<real_type> m0) const
         {
             TMVAssert(isReal(T()));
             TMVAssert(m0.colsize() == colsize());
@@ -1496,7 +1496,7 @@ namespace tmv {
             LowerTriMatrix<T2> m2inv(m2.inverse());
             MultMM<false>(x,m1,BandMatrixViewOf(m2inv),m0);
         }
-        inline void assignToB(const BandMatrixView<complex_type>& m0) const
+        inline void assignToB(BandMatrixView<complex_type> m0) const
         {
             TMVAssert(m0.colsize() == colsize());
             TMVAssert(m0.rowsize() == rowsize());
@@ -1512,8 +1512,8 @@ namespace tmv {
     };
 
     template <class T> 
-    inline const BandMatrixView<T>& operator/=(
-        const BandMatrixView<T>& m1, const GenLowerTriMatrix<T>& m2)
+    inline BandMatrixView<T> operator/=(
+        BandMatrixView<T> m1, const GenLowerTriMatrix<T>& m2)
     { 
         TMVAssert(m1.colsize() == m2.size());
         TMVAssert(m1.nlo() == m2.size()-1);
@@ -1523,8 +1523,8 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator/=(
-        const BandMatrixView<CT>& m1, const GenLowerTriMatrix<T>& m2)
+    inline BandMatrixView<CT> operator/=(
+        BandMatrixView<CT> m1, const GenLowerTriMatrix<T>& m2)
     { 
         TMVAssert(m1.colsize() == m2.size());
         TMVAssert(m1.nlo() == m2.size()-1);
@@ -1534,26 +1534,24 @@ namespace tmv {
     }
 
     template <class T> 
-    inline const BandMatrixView<T>& operator%=(
-        const BandMatrixView<T>& m1, const GenLowerTriMatrix<T>& m2)
+    inline BandMatrixView<T> operator%=(
+        BandMatrixView<T> m1, const GenLowerTriMatrix<T>& m2)
     {
         TMVAssert(m1.rowsize() == m2.size());
         TMVAssert(m1.nlo() == m2.size()-1);
         MultMM<false>(
-            T(1),m1,BandMatrixViewOf(LowerTriMatrix<T>(m2.inverse())),
-                      m1); 
+            T(1),m1,BandMatrixViewOf(LowerTriMatrix<T>(m2.inverse())),m1); 
         return m1;
     }
 
     template <class T> 
-    inline const BandMatrixView<CT>& operator%=(
-        const BandMatrixView<CT>& m1, const GenLowerTriMatrix<T>& m2)
+    inline BandMatrixView<CT> operator%=(
+        BandMatrixView<CT> m1, const GenLowerTriMatrix<T>& m2)
     {
         TMVAssert(m1.rowsize() == m2.size());
         TMVAssert(m1.nlo() == m2.size()-1);
         MultMM<false>(
-            T(1),m1,BandMatrixViewOf(LowerTriMatrix<T>(m2.inverse())),
-                      m1); 
+            T(1),m1,BandMatrixViewOf(LowerTriMatrix<T>(m2.inverse())),m1); 
         return m1;
     }
 

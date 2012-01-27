@@ -49,20 +49,20 @@ namespace tmv {
     { return QuotXL<T,T>(T(1),*this); }
 
     template <class T> template <class T2> 
-    void GenUpperTriMatrix<T>::doLDivEq(const VectorView<T2>& v) const
+    void GenUpperTriMatrix<T>::doLDivEq(VectorView<T2> v) const
     { TriLDivEq(*this,v); }
 
     template <class T> template <class T2> 
-    void GenUpperTriMatrix<T>::doLDivEq(const MatrixView<T2>& m) const
+    void GenUpperTriMatrix<T>::doLDivEq(MatrixView<T2> m) const
     { TriLDivEq(*this,m); }
 
     template <class T> template <class T2> 
-    void GenUpperTriMatrix<T>::doLDivEq(const UpperTriMatrixView<T2>& m) const
+    void GenUpperTriMatrix<T>::doLDivEq(UpperTriMatrixView<T2> m) const
     { TriLDivEq(*this,m); }
 
     template <class T> template <class T1, class T2> 
     void GenUpperTriMatrix<T>::doLDiv(
-        const GenVector<T1>& v1, const VectorView<T2>& v2) const
+        const GenVector<T1>& v1, VectorView<T2> v2) const
     {
         if (SameStorage(*this,v1)) {
             Vector<T2> temp = v1;
@@ -75,7 +75,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void GenUpperTriMatrix<T>::doLDiv(
-        const GenMatrix<T1>& m1, const MatrixView<T2>& m2) const
+        const GenMatrix<T1>& m1, MatrixView<T2> m2) const
     {
         if (SameStorage(*this,m2)) {
             if (m2.isrm()) {
@@ -95,7 +95,7 @@ namespace tmv {
     template <class T> template <class T1, class T2> 
     void GenUpperTriMatrix<T>::doLDiv(
         const GenUpperTriMatrix<T1>& m1, 
-        const UpperTriMatrixView<T2>& m2) const
+        UpperTriMatrixView<T2> m2) const
     {
         if (SameStorage(*this,m2)) {
             if (m2.isrm()) {
@@ -113,20 +113,20 @@ namespace tmv {
     }
 
     template <class T> template <class T2> 
-    void GenLowerTriMatrix<T>::doLDivEq(const VectorView<T2>& v) const
+    void GenLowerTriMatrix<T>::doLDivEq(VectorView<T2> v) const
     { TriLDivEq(*this,v); }
 
     template <class T> template <class T2> 
-    void GenLowerTriMatrix<T>::doLDivEq(const MatrixView<T2>& m) const
+    void GenLowerTriMatrix<T>::doLDivEq(MatrixView<T2> m) const
     { TriLDivEq(*this,m); }
 
     template <class T> template <class T2> 
-    void GenLowerTriMatrix<T>::doLDivEq(const LowerTriMatrixView<T2>& m) const
+    void GenLowerTriMatrix<T>::doLDivEq(LowerTriMatrixView<T2> m) const
     { TriLDivEq(*this,m); }
 
     template <class T> template <class T1, class T2> 
     void GenLowerTriMatrix<T>::doLDiv(
-        const GenVector<T1>& v1, const VectorView<T2>& v2) const
+        const GenVector<T1>& v1, VectorView<T2> v2) const
     {
         if (SameStorage(*this,v2)) {
             Vector<T2> temp = v1;
@@ -139,7 +139,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void GenLowerTriMatrix<T>::doLDiv(
-        const GenMatrix<T1>& m1, const MatrixView<T2>& m2) const
+        const GenMatrix<T1>& m1, MatrixView<T2> m2) const
     {
         if (SameStorage(*this,m2)) {
             if (m2.isrm()) {
@@ -159,7 +159,7 @@ namespace tmv {
     template <class T> template <class T1, class T2> 
     void GenLowerTriMatrix<T>::doLDiv(
         const GenLowerTriMatrix<T1>& m1,
-        const LowerTriMatrixView<T2>& m2) const
+        LowerTriMatrixView<T2> m2) const
     {
         if (SameStorage(*this,m2)) {
             if (m2.isrm()) {
@@ -192,14 +192,14 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::invertSelf() const
+    UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::invertSelf()
     {
         TriInverse(*this);
         return *this;
     }
 
     template <class T> template <class T1> 
-    void GenUpperTriMatrix<T>::doMakeInverse(const MatrixView<T1>& minv) const
+    void GenUpperTriMatrix<T>::doMakeInverse(MatrixView<T1> minv) const
     {
         bool ss = SameStorage(*this,minv);
 
@@ -213,16 +213,14 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void GenUpperTriMatrix<T>::doMakeInverse(
-        const UpperTriMatrixView<T1>& minv) const
+    void GenUpperTriMatrix<T>::doMakeInverse(UpperTriMatrixView<T1> minv) const
     {
         minv = *this;
         minv.invertSelf();
     }
 
     template <class T> 
-    void GenUpperTriMatrix<T>::doMakeInverseATA(
-        const MatrixView<T>& minv) const
+    void GenUpperTriMatrix<T>::doMakeInverseATA(MatrixView<T> minv) const
     {
         TMVAssert(minv.colsize() == size());
         TMVAssert(minv.rowsize() == size());
@@ -234,8 +232,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void GenLowerTriMatrix<T>::doMakeInverseATA(
-        const MatrixView<T>& minv) const
+    void GenLowerTriMatrix<T>::doMakeInverseATA(MatrixView<T> minv) const
     {
         TMVAssert(minv.colsize() == size());
         TMVAssert(minv.rowsize() == size());
@@ -248,111 +245,107 @@ namespace tmv {
 
 #ifdef INST_INT
     template <> template <class T2> 
-    void GenUpperTriMatrix<int>::doLDivEq(const VectorView<T2>& ) const
+    void GenUpperTriMatrix<int>::doLDivEq(VectorView<T2> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T2> 
-    void GenUpperTriMatrix<std::complex<int> >::doLDivEq(
-        const VectorView<T2>& ) const
-    { TMVAssert(TMV_FALSE); }
-
-    template <> template <class T2> 
-    void GenUpperTriMatrix<int>::doLDivEq(const MatrixView<T2>& ) const
-    { TMVAssert(TMV_FALSE); }
-    template <> template <class T2> 
-    void GenUpperTriMatrix<std::complex<int> >::doLDivEq(
-        const MatrixView<T2>& ) const
+    void GenUpperTriMatrix<std::complex<int> >::doLDivEq(VectorView<T2> ) const
     { TMVAssert(TMV_FALSE); }
 
     template <> template <class T2> 
-    void GenUpperTriMatrix<int>::doLDivEq(
-        const UpperTriMatrixView<T2>& ) const
+    void GenUpperTriMatrix<int>::doLDivEq(MatrixView<T2> ) const
+    { TMVAssert(TMV_FALSE); }
+    template <> template <class T2> 
+    void GenUpperTriMatrix<std::complex<int> >::doLDivEq(MatrixView<T2> ) const
+    { TMVAssert(TMV_FALSE); }
+
+    template <> template <class T2> 
+    void GenUpperTriMatrix<int>::doLDivEq(UpperTriMatrixView<T2> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T2> 
     void GenUpperTriMatrix<std::complex<int> >::doLDivEq(
-        const UpperTriMatrixView<T2>& ) const
+        UpperTriMatrixView<T2> ) const
     { TMVAssert(TMV_FALSE); }
 
     template <> template <class T1, class T2> 
     void GenUpperTriMatrix<int>::doLDiv(
-        const GenVector<T1>& , const VectorView<T2>& ) const
+        const GenVector<T1>& , VectorView<T2> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T1, class T2> 
     void GenUpperTriMatrix<std::complex<int> >::doLDiv(
-        const GenVector<T1>& , const VectorView<T2>& ) const
+        const GenVector<T1>& , VectorView<T2> ) const
     { TMVAssert(TMV_FALSE); }
 
     template <> template <class T1, class T2> 
     void GenUpperTriMatrix<int>::doLDiv(
-        const GenMatrix<T1>& , const MatrixView<T2>& ) const
+        const GenMatrix<T1>& , MatrixView<T2> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T1, class T2> 
     void GenUpperTriMatrix<std::complex<int> >::doLDiv(
-        const GenMatrix<T1>& , const MatrixView<T2>& ) const
+        const GenMatrix<T1>& , MatrixView<T2> ) const
     { TMVAssert(TMV_FALSE); }
 
     template <> template <class T1, class T2> 
     void GenUpperTriMatrix<int>::doLDiv(
         const GenUpperTriMatrix<T1>& , 
-        const UpperTriMatrixView<T2>& ) const
+        UpperTriMatrixView<T2> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T1, class T2> 
     void GenUpperTriMatrix<std::complex<int> >::doLDiv(
         const GenUpperTriMatrix<T1>& , 
-        const UpperTriMatrixView<T2>& ) const
+        UpperTriMatrixView<T2> ) const
     { TMVAssert(TMV_FALSE); }
 
     template <> template <class T2> 
-    void GenLowerTriMatrix<int>::doLDivEq(const VectorView<T2>& ) const
+    void GenLowerTriMatrix<int>::doLDivEq(VectorView<T2> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T2> 
     void GenLowerTriMatrix<std::complex<int> >::doLDivEq(
-        const VectorView<T2>& ) const
+        VectorView<T2> ) const
     { TMVAssert(TMV_FALSE); }
 
     template <> template <class T2> 
-    void GenLowerTriMatrix<int>::doLDivEq(const MatrixView<T2>& ) const
+    void GenLowerTriMatrix<int>::doLDivEq(MatrixView<T2> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T2> 
     void GenLowerTriMatrix<std::complex<int> >::doLDivEq(
-        const MatrixView<T2>& ) const
+        MatrixView<T2> ) const
     { TMVAssert(TMV_FALSE); }
 
     template <> template <class T2> 
-    void GenLowerTriMatrix<int>::doLDivEq(
-        const LowerTriMatrixView<T2>& ) const
+    void GenLowerTriMatrix<int>::doLDivEq(LowerTriMatrixView<T2> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T2> 
     void GenLowerTriMatrix<std::complex<int> >::doLDivEq(
-        const LowerTriMatrixView<T2>& ) const
+        LowerTriMatrixView<T2> ) const
     { TMVAssert(TMV_FALSE); }
 
     template <> template <class T1, class T2> 
     void GenLowerTriMatrix<int>::doLDiv(
-        const GenVector<T1>& , const VectorView<T2>& ) const
+        const GenVector<T1>& , VectorView<T2> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T1, class T2> 
     void GenLowerTriMatrix<std::complex<int> >::doLDiv(
-        const GenVector<T1>& , const VectorView<T2>& ) const
+        const GenVector<T1>& , VectorView<T2> ) const
     { TMVAssert(TMV_FALSE); }
 
     template <> template <class T1, class T2> 
     void GenLowerTriMatrix<int>::doLDiv(
-        const GenMatrix<T1>& , const MatrixView<T2>& ) const
+        const GenMatrix<T1>& , MatrixView<T2> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T1, class T2> 
     void GenLowerTriMatrix<std::complex<int> >::doLDiv(
-        const GenMatrix<T1>& , const MatrixView<T2>& ) const
+        const GenMatrix<T1>& , MatrixView<T2> ) const
     { TMVAssert(TMV_FALSE); }
 
     template <> template <class T1, class T2> 
     void GenLowerTriMatrix<int>::doLDiv(
         const GenLowerTriMatrix<T1>& ,
-        const LowerTriMatrixView<T2>& ) const
+        LowerTriMatrixView<T2> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T1, class T2> 
     void GenLowerTriMatrix<std::complex<int> >::doLDiv(
         const GenLowerTriMatrix<T1>& ,
-        const LowerTriMatrixView<T2>& ) const
+        LowerTriMatrixView<T2> ) const
     { TMVAssert(TMV_FALSE); }
 
     template <> 
@@ -364,48 +357,44 @@ namespace tmv {
     { TMVAssert(TMV_FALSE); return 0; }
 
     template <>
-    const UpperTriMatrixView<int,CStyle>& 
+    UpperTriMatrixView<int,CStyle> 
     UpperTriMatrixView<int,CStyle>::invertSelf() const
     { TMVAssert(TMV_FALSE); return *this; }
     template <>
-    const UpperTriMatrixView<std::complex<int>,CStyle>& 
+    UpperTriMatrixView<std::complex<int>,CStyle> 
     UpperTriMatrixView<std::complex<int>,CStyle>::invertSelf() const
     { TMVAssert(TMV_FALSE); return *this; }
 
     template <> template <class T1> 
-    void GenUpperTriMatrix<int>::doMakeInverse(
-        const MatrixView<T1>& ) const
+    void GenUpperTriMatrix<int>::doMakeInverse(MatrixView<T1> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T1> 
     void GenUpperTriMatrix<std::complex<int> >::doMakeInverse(
-        const MatrixView<T1>& ) const
+        MatrixView<T1> ) const
     { TMVAssert(TMV_FALSE); }
 
     template <> template <class T1> 
-    void GenUpperTriMatrix<int>::doMakeInverse(
-        const UpperTriMatrixView<T1>& ) const
+    void GenUpperTriMatrix<int>::doMakeInverse(UpperTriMatrixView<T1> ) const
     { TMVAssert(TMV_FALSE); }
     template <> template <class T1> 
     void GenUpperTriMatrix<std::complex<int> >::doMakeInverse(
-        const UpperTriMatrixView<T1>& ) const
+        UpperTriMatrixView<T1> ) const
     { TMVAssert(TMV_FALSE); }
 
     template <> 
-    void GenUpperTriMatrix<int>::doMakeInverseATA(
-        const MatrixView<int>& ) const
+    void GenUpperTriMatrix<int>::doMakeInverseATA(MatrixView<int> ) const
     { TMVAssert(TMV_FALSE); }
     template <> 
     void GenUpperTriMatrix<std::complex<int> >::doMakeInverseATA(
-        const MatrixView<std::complex<int> >& ) const
+        MatrixView<std::complex<int> > ) const
     { TMVAssert(TMV_FALSE); }
 
     template <> 
-    void GenLowerTriMatrix<int>::doMakeInverseATA(
-        const MatrixView<int>& ) const
+    void GenLowerTriMatrix<int>::doMakeInverseATA(MatrixView<int> ) const
     { TMVAssert(TMV_FALSE); }
     template <> 
     void GenLowerTriMatrix<std::complex<int> >::doMakeInverseATA(
-        const MatrixView<std::complex<int> >& ) const
+        MatrixView<std::complex<int> > ) const
     { TMVAssert(TMV_FALSE); }
 #endif
 

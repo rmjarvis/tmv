@@ -73,7 +73,7 @@ namespace tmv {
     // row major version where A is decomposed into Lt D L rather than L D Lt.
     template <bool herm, class T> 
     static void NonBlockLDL_Decompose(
-        const SymMatrixView<T>& A, const VectorView<T>& xD, 
+        SymMatrixView<T> A, VectorView<T> xD, 
         int* P, RT& logdet, T& signdet, int j1=0)
     {
         // Bunch-Kaufman algorithm for LDL Decomposition of a symmetric matrix.
@@ -431,7 +431,7 @@ namespace tmv {
 
     template <bool herm, class T> 
     static void BlockLDL_Decompose(
-        const SymMatrixView<T>& A, const VectorView<T>& xD, 
+        SymMatrixView<T> A, VectorView<T> xD, 
         int* P, RT& logdet, T& signdet)
     {
         // Blocked version with level 3 calls
@@ -777,7 +777,7 @@ namespace tmv {
 
     template <bool herm, class T> 
     static void NonLapLDL_Decompose(
-        const SymMatrixView<T>& A, const VectorView<T>& xD, 
+        SymMatrixView<T> A, VectorView<T> xD, 
         int* P, RT& logdet, T& signdet)
     {
         TMVAssert(A.size()>0);
@@ -798,7 +798,7 @@ namespace tmv {
 #ifdef LAP
     template <class T> 
     static inline void LapLDL_Decompose(
-        const SymMatrixView<T>& A, const VectorView<T>& xD,
+        SymMatrixView<T> A, VectorView<T> xD,
         int* P, RT& logdet, T& signdet)
     { 
         if (A.isherm())
@@ -809,7 +809,7 @@ namespace tmv {
 #ifdef INST_DOUBLE
     template <> 
     void LapLDL_Decompose(
-        const SymMatrixView<double>& A, const VectorView<double>& xD,
+        SymMatrixView<double> A, VectorView<double> xD,
         int* P, double& logdet, double& signdet)
     {
         TMVAssert(A.size()>0);
@@ -909,8 +909,8 @@ namespace tmv {
     }
     template <> 
     void LapLDL_Decompose(
-        const SymMatrixView<std::complex<double> >& A,
-        const VectorView<std::complex<double> >& xD,
+        SymMatrixView<std::complex<double> > A,
+        VectorView<std::complex<double> > xD,
         int* P, double& logdet, std::complex<double>& signdet)
     {
         TMVAssert(A.size()>0);
@@ -1058,7 +1058,7 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     void LapLDL_Decompose(
-        const SymMatrixView<float>& A, const VectorView<float>& xD,
+        SymMatrixView<float> A, VectorView<float> xD,
         int* P, float& logdet, float& signdet)
     {
         TMVAssert(A.size()>0);
@@ -1153,8 +1153,8 @@ namespace tmv {
     }
     template <> 
     void LapLDL_Decompose(
-        const SymMatrixView<std::complex<float> >& A,
-        const VectorView<std::complex<float> >& xD,
+        SymMatrixView<std::complex<float> > A,
+        VectorView<std::complex<float> > xD,
         int* P, float& logdet, std::complex<float>& signdet)
     {
         TMVAssert(A.size()>0);
@@ -1302,7 +1302,7 @@ namespace tmv {
 
     template <class T> 
     void LDL_Decompose(
-        const SymMatrixView<T>& A, const VectorView<T>& xD, 
+        SymMatrixView<T> A, VectorView<T> xD, 
         int* P, RT& logdet, T& signdet)
     {
         TMVAssert(A.size() > 0);
@@ -1407,7 +1407,7 @@ namespace tmv {
 
     template <class T> 
     void LDL_Decompose(
-        const SymMatrixView<T>& A, const SymBandMatrixView<T>& D, int* P)
+        SymMatrixView<T> A, SymBandMatrixView<T> D, int* P)
     {
 #ifdef XDEBUG
         Matrix<T> A0 = A;

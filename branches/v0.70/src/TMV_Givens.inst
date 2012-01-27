@@ -11,8 +11,8 @@ DefGiv1(CT)
   
 #define DefGiv2(RT,Ts,T) \
   template void GivensMult(RT c, Ts s, T& x, T& y); \
-  template void GivensMult(RT c, Ts s, const VectorView<T >& v0, \
-      const VectorView<T >& v1); \
+  template void GivensMult(RT c, Ts s, VectorView<T > v0, \
+      VectorView<T > v1); \
   template void GivensSymMult(RT c, Ts s, T& x, T& y, T& z); \
   template void GivensHermMult(RT c, Ts s, T& x, T& y, T& z); \
 

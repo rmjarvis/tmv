@@ -34,19 +34,19 @@
 #define CT TMV_ComplexType(T)
 
 #define DefDivEq(T) \
-    inline void LDivEq(const MatrixView<T>& m) const \
+    inline void LDivEq(MatrixView<T> m) const \
 { \
     TMVAssert(colsize() == rowsize()); \
     TMVAssert(m.colsize() == colsize()); \
     doLDivEq(m);  \
 } \
-inline void RDivEq(const MatrixView<T>& m) const \
+inline void RDivEq(MatrixView<T> m) const \
 { \
     TMVAssert(colsize() == rowsize()); \
     TMVAssert(m.rowsize() == rowsize()); \
     doRDivEq(m); \
 } \
-inline void makeInverse(const MatrixView<T>& minv) const \
+inline void makeInverse(MatrixView<T> minv) const \
 { \
     TMVAssert(minv.rowsize() == colsize()); \
     TMVAssert(minv.colsize() == rowsize()); \
@@ -59,14 +59,14 @@ DefDivEq(CT);
 #undef DefDivEq
 
 #define DefDiv(T1,T2) \
-    inline void LDiv(const GenMatrix<T1>& m1, const MatrixView<T2>& m0) const \
+    inline void LDiv(const GenMatrix<T1>& m1, MatrixView<T2> m0) const \
 { \
     TMVAssert(m0.rowsize() == m1.rowsize()); \
     TMVAssert(m0.colsize() == rowsize()); \
     TMVAssert(m1.colsize() == colsize()); \
     doLDiv(m1,m0); \
 } \
-inline void RDiv(const GenMatrix<T1>& m1, const MatrixView<T2>& m0) const \
+inline void RDiv(const GenMatrix<T1>& m1, MatrixView<T2> m0) const \
 { \
     TMVAssert(m0.colsize() == m1.colsize()); \
     TMVAssert(m1.rowsize() == rowsize()); \
@@ -81,7 +81,7 @@ DefDiv(CT,CT);
 #undef RT
 #undef CT
 
-inline void makeInverseATA(const MatrixView<T>& minv) const
+inline void makeInverseATA(MatrixView<T> minv) const
 {
     if (colsize() < rowsize()) {
         TMVAssert(minv.rowsize() == colsize());

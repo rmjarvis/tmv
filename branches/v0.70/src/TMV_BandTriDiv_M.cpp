@@ -57,7 +57,7 @@ namespace tmv {
 
     template <bool ua, class T, class Ta> 
     static void RowUpperTriLDivEq(
-        const GenBandMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenBandMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(B.isrm());
         TMVAssert(A.isSquare());
@@ -96,7 +96,7 @@ namespace tmv {
 
     template <bool ua, class T, class Ta> 
     static void ColUpperTriLDivEq(
-        const GenBandMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenBandMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(B.isrm());
         TMVAssert(A.isSquare());
@@ -136,7 +136,7 @@ namespace tmv {
 
     template <bool ua, class T, class Ta> 
     static void RowLowerTriLDivEq(
-        const GenBandMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenBandMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(B.isrm());
         TMVAssert(A.isSquare());
@@ -176,7 +176,7 @@ namespace tmv {
 
     template <bool ua, class T, class Ta> 
     static void ColLowerTriLDivEq(
-        const GenBandMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenBandMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(B.isrm());
         TMVAssert(A.isSquare());
@@ -215,7 +215,7 @@ namespace tmv {
 
     template <bool ua, class T, class Ta> 
     static void NonLapTriLDivEq(
-        const GenBandMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenBandMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(A.isSquare());
         TMVAssert(B.colsize() == A.colsize());
@@ -246,14 +246,14 @@ namespace tmv {
 #ifdef LAP
     template <class T, class Ta> 
     static inline void LapTriLDivEq(
-        const GenBandMatrix<Ta>& A, const MatrixView<T>& B, DiagType dt)
+        const GenBandMatrix<Ta>& A, MatrixView<T> B, DiagType dt)
     { 
         if (dt == UnitDiag) NonLapTriLDivEq<true>(A,B);
         else NonLapTriLDivEq<false>(A,B);
     }
 #ifdef INST_DOUBLE
     template <> void LapTriLDivEq(
-        const GenBandMatrix<double>& A, const MatrixView<double>& B, DiagType dt)
+        const GenBandMatrix<double>& A, MatrixView<double> B, DiagType dt)
     {
         TMVAssert(A.isSquare());
         TMVAssert(B.colsize() == A.colsize());
@@ -283,7 +283,7 @@ namespace tmv {
     }
     template <> void LapTriLDivEq(
         const GenBandMatrix<std::complex<double> >& A,
-        const MatrixView<std::complex<double> >& B, DiagType dt)
+        MatrixView<std::complex<double> > B, DiagType dt)
     {
         TMVAssert(A.isSquare());
         TMVAssert(B.colsize() == A.colsize());
@@ -324,7 +324,7 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <> void LapTriLDivEq(
-        const GenBandMatrix<float>& A, const MatrixView<float>& B, DiagType dt)
+        const GenBandMatrix<float>& A, MatrixView<float> B, DiagType dt)
     {
         TMVAssert(A.isSquare());
         TMVAssert(B.colsize() == A.colsize());
@@ -354,7 +354,7 @@ namespace tmv {
     }
     template <> void LapTriLDivEq(
         const GenBandMatrix<std::complex<float> >& A,
-        const MatrixView<std::complex<float> >& B, DiagType dt)
+        MatrixView<std::complex<float> > B, DiagType dt)
     {
         TMVAssert(A.isSquare());
         TMVAssert(B.colsize() == A.colsize());
@@ -396,7 +396,7 @@ namespace tmv {
 #endif // LAP
 
     template <class T, class Ta> void TriLDivEq(
-        const GenBandMatrix<Ta>& A, const MatrixView<T>& B, DiagType dt)
+        const GenBandMatrix<Ta>& A, MatrixView<T> B, DiagType dt)
     {
 #ifdef XDEBUG
         Matrix<T> B0 = B;

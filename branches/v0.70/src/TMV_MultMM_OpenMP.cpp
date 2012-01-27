@@ -41,7 +41,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void OpenMPMultMM(
         const T x, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         const int M = C.colsize();
         const int N = C.rowsize();

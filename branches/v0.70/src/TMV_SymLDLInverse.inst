@@ -3,8 +3,7 @@
 
 #define DefInv(T,T1) \
 template void LDL_Inverse(const GenSymMatrix<T1 >& L, \
-  const GenVector<T1 >& xD, const int* P,  \
-  const SymMatrixView<T >& sinv); \
+    const GenVector<T1 >& xD, const int* P, SymMatrixView<T > sinv); \
 
 DefInv(T,T)
 #ifdef INST_COMPLEX

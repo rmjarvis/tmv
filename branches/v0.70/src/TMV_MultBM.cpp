@@ -63,7 +63,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void RowMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -95,7 +95,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void OPMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -124,7 +124,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void ColMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -144,7 +144,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void NonLapTriDiagMultMM(
         const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -181,13 +181,13 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static inline void LapTriDiagMultMM(
         const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B, 
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     { NonLapTriDiagMultMM<true>(A,B,C); }
 #ifdef INST_DOUBLE
     template <> 
     void LapTriDiagMultMM(
         const GenBandMatrix<double>& A, const GenMatrix<double>& B,
-        const MatrixView<double>& C)
+        MatrixView<double> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -221,7 +221,7 @@ namespace tmv {
     void LapTriDiagMultMM(
         const GenBandMatrix<std::complex<double> >& A, 
         const GenMatrix<std::complex<double> >& B,
-        const MatrixView<std::complex<double> >& C)
+        MatrixView<std::complex<double> > C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -255,7 +255,7 @@ namespace tmv {
     template <> 
     void LapTriDiagMultMM(
         const GenBandMatrix<float>& A, const GenMatrix<float>& B,
-        const MatrixView<float>& C)
+        MatrixView<float> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -289,7 +289,7 @@ namespace tmv {
     void LapTriDiagMultMM(
         const GenBandMatrix<std::complex<float> >& A, 
         const GenMatrix<std::complex<float> >& B,
-        const MatrixView<std::complex<float> >& C)
+        MatrixView<std::complex<float> > C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -324,7 +324,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static inline void DoTriDiagMultMM(
         const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
 #ifdef ELAP
         if (A.isSquare() && B.iscm() && C.iscm() && B.isconj() == C.isconj()) {
@@ -338,7 +338,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void TriDiagMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         if (alpha == T(1) && A.isdm()) {
             if (A.isconj()) 
@@ -358,7 +358,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void DoMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
 #ifdef XDEBUG
         //cout<<"Start DoMultMM:\n";
@@ -417,7 +417,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void FullTempMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         if (C.isrm()) {
             Matrix<T,RowMajor> C2(C.colsize(),C.rowsize());
@@ -435,7 +435,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void BlockTempMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         const int N = C.rowsize();
         for (int j=0;j<N;) {
@@ -464,7 +464,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(const T alpha,
                 const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
-                const MatrixView<T>& C)
+                MatrixView<T> C)
     // C (+)= alpha * A * B
     {
         TMVAssert(A.colsize() == C.colsize());

@@ -73,27 +73,27 @@ namespace tmv {
 #endif
 
     template <class T, class T1> 
-    void TriLDivEq(const GenUpperTriMatrix<T1>& A, const VectorView<T>& v);
+    void TriLDivEq(const GenUpperTriMatrix<T1>& A, VectorView<T> v);
 
     template <class T, class T1> 
-    void TriLDivEq(const GenLowerTriMatrix<T1>& A, const VectorView<T>& v);
+    void TriLDivEq(const GenLowerTriMatrix<T1>& A, VectorView<T> v);
 
     template <class T, class T1> 
-    void TriLDivEq(const GenUpperTriMatrix<T1>& A, const MatrixView<T>& m);
+    void TriLDivEq(const GenUpperTriMatrix<T1>& A, MatrixView<T> m);
 
     template <class T, class T1> 
-    void TriLDivEq(const GenLowerTriMatrix<T1>& A, const MatrixView<T>& m);
-
-    template <class T, class T1> 
-    void TriLDivEq(
-        const GenUpperTriMatrix<T1>& A, const UpperTriMatrixView<T>& m);
+    void TriLDivEq(const GenLowerTriMatrix<T1>& A, MatrixView<T> m);
 
     template <class T, class T1> 
     void TriLDivEq(
-        const GenLowerTriMatrix<T1>& A, const LowerTriMatrixView<T>& m);
+        const GenUpperTriMatrix<T1>& A, UpperTriMatrixView<T> m);
+
+    template <class T, class T1> 
+    void TriLDivEq(
+        const GenLowerTriMatrix<T1>& A, LowerTriMatrixView<T> m);
 
     template <class T> 
-    void TriInverse(const UpperTriMatrixView<T>& minv);
+    void TriInverse(UpperTriMatrixView<T> minv);
 
 } // namespace mv
 

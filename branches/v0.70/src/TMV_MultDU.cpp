@@ -52,7 +52,7 @@ namespace tmv {
     template <bool a1, bool ca, class T, class T1,  class Ta> 
     static void DoMultEqMM(
         const T1 alpha, const GenDiagMatrix<Ta>& A,
-        const UpperTriMatrixView<T>& B)
+        UpperTriMatrixView<T> B)
     {
         TMVAssert(A.size() == B.size());
         TMVAssert(A.size() > 0);
@@ -92,7 +92,7 @@ namespace tmv {
     template <class T, class Ta> 
     static void MultEqMM(
         const T alpha, const GenDiagMatrix<Ta>& A,
-        const UpperTriMatrixView<T>& B)
+        UpperTriMatrixView<T> B)
     // B = alpha * A * B
     {
         TMVAssert(A.size() == B.size());
@@ -142,7 +142,7 @@ namespace tmv {
     template <bool a1, bool ca, bool ub, bool cb, class T, class T1, class Ta, class Tb> 
     static void DoAddMultMM(
         const T1 alpha, const GenDiagMatrix<Ta>& A,
-        const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C)
+        const GenUpperTriMatrix<Tb>& B, UpperTriMatrixView<T> C)
     {
         TMVAssert(A.size() == B.size());
         TMVAssert(A.size() == C.size());
@@ -193,7 +193,7 @@ namespace tmv {
     template <bool a1, bool ca, class T, class T1, class Ta, class Tb> 
     static inline void DoAddMultMMa(
         const T1 alpha, const GenDiagMatrix<Ta>& A,
-        const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C)
+        const GenUpperTriMatrix<Tb>& B, UpperTriMatrixView<T> C)
     {
         if (B.isunit())
             if (B.isconj()) DoAddMultMM<a1,ca,true,true>(alpha,A,B,C);
@@ -206,7 +206,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static void AddMultMM(
         const T alpha, const GenDiagMatrix<Ta>& A,
-        const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C)
+        const GenUpperTriMatrix<Tb>& B, UpperTriMatrixView<T> C)
     // C += alpha * A * B
     {
         TMVAssert(A.size() == B.size());
@@ -264,7 +264,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenDiagMatrix<Ta>& A,
-        const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C)
+        const GenUpperTriMatrix<Tb>& B, UpperTriMatrixView<T> C)
     // C (+)= alpha * A * B
     {
         TMVAssert(A.size() == B.size());
@@ -325,7 +325,7 @@ namespace tmv {
     template <bool a1, bool ca, class T, class T1,  class Ta> 
     static void DoMultEqMM(
         const T1 alpha, const GenDiagMatrix<Ta>& A,
-        const LowerTriMatrixView<T>& B)
+        LowerTriMatrixView<T> B)
     {
         TMVAssert(A.size() == B.size());
         TMVAssert(A.size() > 0);
@@ -365,7 +365,7 @@ namespace tmv {
     template <class T, class Ta> 
     static void MultEqMM(
         const T alpha, const GenDiagMatrix<Ta>& A,
-        const LowerTriMatrixView<T>& B)
+        LowerTriMatrixView<T> B)
     // B = alpha * A * B
     {
         TMVAssert(A.size() == B.size());
@@ -415,7 +415,7 @@ namespace tmv {
     template <bool a1, bool ca, bool ub, bool cb, class T, class T1, class Ta, class Tb> 
     static void DoAddMultMM(
         const T1 alpha, const GenDiagMatrix<Ta>& A,
-        const GenLowerTriMatrix<Tb>& B, const LowerTriMatrixView<T>& C)
+        const GenLowerTriMatrix<Tb>& B, LowerTriMatrixView<T> C)
     {
         TMVAssert(A.size() == B.size());
         TMVAssert(A.size() == C.size());
@@ -466,7 +466,7 @@ namespace tmv {
     template <bool a1, bool ca, class T, class T1, class Ta, class Tb> 
     static inline void DoAddMultMMa(
         const T1 alpha, const GenDiagMatrix<Ta>& A,
-        const GenLowerTriMatrix<Tb>& B, const LowerTriMatrixView<T>& C)
+        const GenLowerTriMatrix<Tb>& B, LowerTriMatrixView<T> C)
     {
         if (B.isunit())
             if (B.isconj()) DoAddMultMM<a1,ca,true,true>(alpha,A,B,C);
@@ -479,7 +479,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     static void AddMultMM(
         const T alpha, const GenDiagMatrix<Ta>& A,
-        const GenLowerTriMatrix<Tb>& B, const LowerTriMatrixView<T>& C)
+        const GenLowerTriMatrix<Tb>& B, LowerTriMatrixView<T> C)
     // C += alpha * A * B
     {
         TMVAssert(A.size() == B.size());
@@ -537,7 +537,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenDiagMatrix<Ta>& A,
-        const GenLowerTriMatrix<Tb>& B, const LowerTriMatrixView<T>& C)
+        const GenLowerTriMatrix<Tb>& B, LowerTriMatrixView<T> C)
     // C (+)= alpha * A * B
     {
         TMVAssert(A.size() == B.size());

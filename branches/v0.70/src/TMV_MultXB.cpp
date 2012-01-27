@@ -51,7 +51,7 @@ namespace tmv {
     //
 
     template <class T> 
-    void MultXM(const T alpha, const BandMatrixView<T>& A)
+    void MultXM(const T alpha, BandMatrixView<T> A)
     {
 #ifdef XDEBUG
         Matrix<T> A0 = A;
@@ -79,7 +79,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void ElemMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenBandMatrix<Tb>& B,
-        const BandMatrixView<T>& C)
+        BandMatrixView<T> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == C.rowsize());

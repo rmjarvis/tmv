@@ -44,126 +44,126 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tx> 
     void MultMV(
         const T alpha, const GenUpperTriMatrix<Ta>& A, 
-        const GenVector<Tx>& x, const VectorView<T>& y);
+        const GenVector<Tx>& x, VectorView<T> y);
     template <bool add, class T, class Ta, class Tx> 
     void MultMV(
         const T alpha, const GenLowerTriMatrix<Ta>& A, 
-        const GenVector<Tx>& x, const VectorView<T>& y);
+        const GenVector<Tx>& x, VectorView<T> y);
 
     // A = alpha * A
     template <class T> 
-    void MultXM(const T alpha, const UpperTriMatrixView<T>& A);
+    void MultXM(const T alpha, UpperTriMatrixView<T> A);
     template <class T> 
-    inline void MultXM(const T alpha, const LowerTriMatrixView<T>& A)
+    inline void MultXM(const T alpha, LowerTriMatrixView<T> A)
     { MultXM(alpha,A.transpose()); }
 
     // B += alpha * A
     template <class T, class Ta> 
     void AddMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const UpperTriMatrixView<T>& B);
+        UpperTriMatrixView<T> B);
     template <class T, class Ta> 
     inline void AddMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A,
-        const LowerTriMatrixView<T>& B)
+        LowerTriMatrixView<T> B)
     { AddMM(alpha,A.transpose(),B.transpose()); }
     template <class T, class Ta> 
     inline void AddMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const MatrixView<T>& B)
+        MatrixView<T> B)
     { AddMM(alpha,A,B.upperTri()); }
     template <class T, class Ta> 
     inline void AddMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A,
-        const MatrixView<T>& B)
+        MatrixView<T> B)
     { AddMM(alpha,A.transpose(),B.lowerTri().transpose()); }
     // C = alpha * A + beta * B
     template <class T, class Ta, class Tb> 
     void AddMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
         const T beta, const GenUpperTriMatrix<Tb>& B, 
-        const UpperTriMatrixView<T>& C);
+        UpperTriMatrixView<T> C);
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A,
         const T beta, const GenLowerTriMatrix<Tb>& B, 
-        const LowerTriMatrixView<T>& C)
+        LowerTriMatrixView<T> C)
     { AddMM(alpha,A.transpose(),beta,B.transpose(),C.transpose()); }
     template <class T, class Ta, class Tb> 
     void AddMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const T beta, const GenMatrix<Tb>& B, const MatrixView<T>& C);
+        const T beta, const GenMatrix<Tb>& B, MatrixView<T> C);
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenMatrix<Ta>& A,
-        const T beta, const GenUpperTriMatrix<Tb>& B, const MatrixView<T>& C)
+        const T beta, const GenUpperTriMatrix<Tb>& B, MatrixView<T> C)
     { AddMM(beta,B,alpha,A,C); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A,
-        const T beta, const GenMatrix<Tb>& B, const MatrixView<T>& C)
+        const T beta, const GenMatrix<Tb>& B, MatrixView<T> C)
     { AddMM(alpha,A.transpose(),beta,B.transpose(),C.transpose()); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenMatrix<Ta>& A,
-        const T beta, const GenLowerTriMatrix<Tb>& B, const MatrixView<T>& C)
+        const T beta, const GenLowerTriMatrix<Tb>& B, MatrixView<T> C)
     { AddMM(beta,B.transpose(),alpha,A.transpose(),C.transpose()); }
     template <class T, class Ta, class Tb> 
     void AddMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const T beta, const GenLowerTriMatrix<Tb>& B, const MatrixView<T>& C);
+        const T beta, const GenLowerTriMatrix<Tb>& B, MatrixView<T> C);
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A,
-        const T beta, const GenUpperTriMatrix<Tb>& B, const MatrixView<T>& C)
+        const T beta, const GenUpperTriMatrix<Tb>& B, MatrixView<T> C)
     { AddMM(beta,B,alpha,A,C); }
 
     // C (+)= alpha * A * B
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A, 
-        const GenMatrix<Tb>& B, const MatrixView<T>& C);
+        const GenMatrix<Tb>& B, MatrixView<T> C);
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A, 
-        const GenMatrix<Tb>& B, const MatrixView<T>& C);
+        const GenMatrix<Tb>& B, MatrixView<T> C);
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const T alpha, const GenMatrix<Ta>& A, 
-        const GenUpperTriMatrix<Tb>& B, const MatrixView<T>& C)
+        const GenUpperTriMatrix<Tb>& B, MatrixView<T> C)
     { MultMM<add>(alpha,B.transpose(),A.transpose(),C.transpose()); }
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const T alpha, const GenMatrix<Ta>& A, 
-        const GenLowerTriMatrix<Tb>& B, const MatrixView<T>& C)
+        const GenLowerTriMatrix<Tb>& B, MatrixView<T> C)
     { MultMM<add>(alpha,B.transpose(),A.transpose(),C.transpose()); }
 
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A, 
-        const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C);
+        const GenUpperTriMatrix<Tb>& B, UpperTriMatrixView<T> C);
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A, 
-        const GenLowerTriMatrix<Tb>& B, const MatrixView<T>& C);
+        const GenLowerTriMatrix<Tb>& B, MatrixView<T> C);
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A, 
-        const GenUpperTriMatrix<Tb>& B, const MatrixView<T>& C);
+        const GenUpperTriMatrix<Tb>& B, MatrixView<T> C);
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A, 
-        const GenLowerTriMatrix<Tb>& B, const LowerTriMatrixView<T>& C)
+        const GenLowerTriMatrix<Tb>& B, LowerTriMatrixView<T> C)
     { MultMM<add>(alpha,B.transpose(),A.transpose(),C.transpose()); }
 
     template <bool add, class T, class Ta, class Tb> 
     void ElemMultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<T>& C);
+        const GenUpperTriMatrix<Tb>& B, UpperTriMatrixView<T> C);
     template <bool add, class T, class Ta, class Tb> 
     inline void ElemMultMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A,
-        const GenLowerTriMatrix<Tb>& B, const LowerTriMatrixView<T>& C)
+        const GenLowerTriMatrix<Tb>& B, LowerTriMatrixView<T> C)
     { ElemMultMM<add>(alpha,A.transpose(),B.transpose(),C.transpose()); }
 
     template <class T> 
@@ -204,267 +204,267 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tx> 
     inline void MultMV(
         const T alpha, const GenUpperTriMatrix<Ta>& A, 
-        const GenVector<Tx>& x, const VectorView<CT>& y)
+        const GenVector<Tx>& x, VectorView<CT> y)
     { MultMV<add>(CT(alpha),A,x,y); }
     template <bool add, class T, class Ta, class Tx> 
     inline void MultMV(
         const T alpha, const GenLowerTriMatrix<Ta>& A, 
-        const GenVector<Tx>& x, const VectorView<CT>& y)
+        const GenVector<Tx>& x, VectorView<CT> y)
     { MultMV<add>(CT(alpha),A,x,y); }
 
     template <class T> 
-    inline void MultXM(const T alpha, const UpperTriMatrixView<CT>& A)
+    inline void MultXM(const T alpha, UpperTriMatrixView<CT> A)
     { MultXM(CT(alpha),A); }
     template <class T> 
-    inline void MultXM(const T alpha, const LowerTriMatrixView<CT>& A)
+    inline void MultXM(const T alpha, LowerTriMatrixView<CT> A)
     { MultXM(CT(alpha),A); }
 
     template <class T, class Ta> 
     inline void AddMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const UpperTriMatrixView<CT>& B)
+        UpperTriMatrixView<CT> B)
     { AddMM(CT(alpha),A,B); }
     template <class T, class Ta> 
     inline void AddMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A,
-        const LowerTriMatrixView<CT>& B)
+        LowerTriMatrixView<CT> B)
     { AddMM(CT(alpha),A,B); }
     template <class T, class Ta> 
     inline void AddMM(
-        const T alpha, const GenUpperTriMatrix<Ta>& A, const MatrixView<CT>& B)
+        const T alpha, const GenUpperTriMatrix<Ta>& A, MatrixView<CT> B)
     { AddMM(CT(alpha),A,B); }
     template <class T, class Ta> 
     inline void AddMM(
-        const T alpha, const GenLowerTriMatrix<Ta>& A, const MatrixView<CT>& B)
+        const T alpha, const GenLowerTriMatrix<Ta>& A, MatrixView<CT> B)
     { AddMM(CT(alpha),A,B); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
         const T beta, const GenUpperTriMatrix<Tb>& B, 
-        const UpperTriMatrixView<CT>& C)
+        UpperTriMatrixView<CT> C)
     { AddMM(CT(alpha),A,CT(beta),B,C); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A,
         const T beta, const GenLowerTriMatrix<Tb>& B, 
-        const LowerTriMatrixView<CT>& C)
+        LowerTriMatrixView<CT> C)
     { AddMM(CT(alpha),A,CT(beta),B,C); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const T beta, const GenMatrix<Tb>& B, const MatrixView<CT>& C)
+        const T beta, const GenMatrix<Tb>& B, MatrixView<CT> C)
     { AddMM(CT(alpha),A,CT(beta),B,C); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenMatrix<Ta>& A,
-        const T beta, const GenUpperTriMatrix<Tb>& B, const MatrixView<CT>& C)
+        const T beta, const GenUpperTriMatrix<Tb>& B, MatrixView<CT> C)
     { AddMM(CT(alpha),A,CT(beta),B,C); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A,
-        const T beta, const GenMatrix<Tb>& B, const MatrixView<CT>& C)
+        const T beta, const GenMatrix<Tb>& B, MatrixView<CT> C)
     { AddMM(CT(alpha),A,CT(beta),B,C); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenMatrix<Ta>& A,
-        const T beta, const GenLowerTriMatrix<Tb>& B, const MatrixView<CT>& C)
+        const T beta, const GenLowerTriMatrix<Tb>& B, MatrixView<CT> C)
     { AddMM(CT(alpha),A,CT(beta),B,C); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const T beta, const GenLowerTriMatrix<Tb>& B, const MatrixView<CT>& C)
+        const T beta, const GenLowerTriMatrix<Tb>& B, MatrixView<CT> C)
     { AddMM(CT(alpha),A,CT(beta),B,C); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A,
-        const T beta, const GenUpperTriMatrix<Tb>& B, const MatrixView<CT>& C)
+        const T beta, const GenUpperTriMatrix<Tb>& B, MatrixView<CT> C)
     { AddMM(CT(alpha),A,CT(beta),B,C); }
     template <class T> 
     inline void AddMM(
         const CT alpha, const GenUpperTriMatrix<CT>& A,
         const CT beta, const GenUpperTriMatrix<T>& B,
-        const UpperTriMatrixView<CT>& C)
+        UpperTriMatrixView<CT> C)
     { AddMM(beta,B,alpha,A,C); }
 
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A, 
-        const GenMatrix<Tb>& B, const MatrixView<CT>& C)
+        const GenMatrix<Tb>& B, MatrixView<CT> C)
     { MultMM<add>(CT(alpha),A,B,C); }
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A, 
-        const GenMatrix<Tb>& B, const MatrixView<CT>& C)
+        const GenMatrix<Tb>& B, MatrixView<CT> C)
     { MultMM<add>(CT(alpha),A,B,C); }
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const T alpha, const GenMatrix<Ta>& A, 
-        const GenUpperTriMatrix<Tb>& B, const MatrixView<CT>& C)
+        const GenUpperTriMatrix<Tb>& B, MatrixView<CT> C)
     { MultMM<add>(CT(alpha),A,B,C); }
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const T alpha, const GenMatrix<Ta>& A, 
-        const GenLowerTriMatrix<Tb>& B, const MatrixView<CT>& C)
+        const GenLowerTriMatrix<Tb>& B, MatrixView<CT> C)
     { MultMM<add>(CT(alpha),A,B,C); }
 
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A, 
-        const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<CT>& C)
+        const GenUpperTriMatrix<Tb>& B, UpperTriMatrixView<CT> C)
     { MultMM<add>(CT(alpha),A,B,C); }
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A, 
-        const GenLowerTriMatrix<Tb>& B, const MatrixView<CT>& C)
+        const GenLowerTriMatrix<Tb>& B, MatrixView<CT> C)
     { MultMM<add>(CT(alpha),A,B,C); }
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A, 
-        const GenUpperTriMatrix<Tb>& B, const MatrixView<CT>& C)
+        const GenUpperTriMatrix<Tb>& B, MatrixView<CT> C)
     { MultMM<add>(CT(alpha),A,B,C); }
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A, 
-        const GenLowerTriMatrix<Tb>& B, const LowerTriMatrixView<CT>& C)
+        const GenLowerTriMatrix<Tb>& B, LowerTriMatrixView<CT> C)
     { MultMM<add>(CT(alpha),A,B,C); }
 
     template <bool add, class T, class Ta, class Tb> 
     inline void ElemMultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const GenUpperTriMatrix<Tb>& B, const UpperTriMatrixView<CT>& C)
+        const GenUpperTriMatrix<Tb>& B, UpperTriMatrixView<CT> C)
     { ElemMultMM<add>(CT(alpha),A,B,C); }
     template <bool add, class T, class Ta, class Tb> 
     inline void ElemMultMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A,
-        const GenLowerTriMatrix<Tb>& B, const LowerTriMatrixView<CT>& C)
+        const GenLowerTriMatrix<Tb>& B, LowerTriMatrixView<CT> C)
     { ElemMultMM<add>(CT(alpha),A,B,C); }
 
     // Specialize disallowed complex combinations:
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMV(
         const CT , const GenUpperTriMatrix<Ta>& , 
-        const GenVector<Tb>& , const VectorView<T>& )
+        const GenVector<Tb>& , VectorView<T> )
     { TMVAssert(TMV_FALSE); }
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMV(
         const CT , const GenLowerTriMatrix<Ta>& , 
-        const GenVector<Tb>& , const VectorView<T>& )
+        const GenVector<Tb>& , VectorView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <class T> 
-    inline void MultXM(const CT , const UpperTriMatrixView<T>& )
+    inline void MultXM(const CT , UpperTriMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T> 
-    inline void MultXM(const CT , const LowerTriMatrixView<T>& )
+    inline void MultXM(const CT , LowerTriMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <class T, class Ta> 
     inline void AddMM(
-        const CT , const GenUpperTriMatrix<Ta>& , const UpperTriMatrixView<T>& )
+        const CT , const GenUpperTriMatrix<Ta>& , UpperTriMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T, class Ta> 
     inline void AddMM(
-        const CT , const GenLowerTriMatrix<Ta>& , const LowerTriMatrixView<T>& )
+        const CT , const GenLowerTriMatrix<Ta>& , LowerTriMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T, class Ta> 
     inline void AddMM(
-        const CT , const GenUpperTriMatrix<Ta>& , const MatrixView<T>& )
+        const CT , const GenUpperTriMatrix<Ta>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T, class Ta> 
     inline void AddMM(
-        const CT , const GenLowerTriMatrix<Ta>& , const MatrixView<T>& )
+        const CT , const GenLowerTriMatrix<Ta>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const CT , const GenUpperTriMatrix<Ta>& ,
-        const CT , const GenUpperTriMatrix<Tb>& , const UpperTriMatrixView<T>& )
+        const CT , const GenUpperTriMatrix<Tb>& , UpperTriMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const CT , const GenLowerTriMatrix<Ta>& ,
-        const CT , const GenLowerTriMatrix<Tb>& , const LowerTriMatrixView<T>& )
+        const CT , const GenLowerTriMatrix<Tb>& , LowerTriMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const CT , const GenMatrix<Ta>& ,
-        const CT , const GenUpperTriMatrix<Tb>& , const MatrixView<T>& )
+        const CT , const GenUpperTriMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const CT , const GenMatrix<Ta>& ,
-        const CT , const GenLowerTriMatrix<Tb>& , const MatrixView<T>& )
+        const CT , const GenLowerTriMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const CT , const GenUpperTriMatrix<Ta>& ,
-        const CT , const GenMatrix<Tb>& , const MatrixView<T>& )
+        const CT , const GenMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const CT , const GenLowerTriMatrix<Ta>& ,
-        const CT , const GenMatrix<Tb>& , const MatrixView<T>& )
+        const CT , const GenMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const CT , const GenUpperTriMatrix<Ta>& ,
-        const CT , const GenLowerTriMatrix<Tb>& , const MatrixView<T>& )
+        const CT , const GenLowerTriMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T, class Ta, class Tb> 
     inline void AddMM(
         const CT , const GenLowerTriMatrix<Ta>& ,
-        const CT , const GenUpperTriMatrix<Tb>& , const MatrixView<T>& )
+        const CT , const GenUpperTriMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const CT , const GenUpperTriMatrix<Ta>& , 
-        const GenMatrix<Tb>& , const MatrixView<T>& )
+        const GenMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const CT , const GenMatrix<Ta>& , 
-        const GenUpperTriMatrix<Tb>& , const MatrixView<T>& )
+        const GenUpperTriMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const CT , const GenUpperTriMatrix<Ta>& , 
-        const GenUpperTriMatrix<Tb>& , const UpperTriMatrixView<T>& )
+        const GenUpperTriMatrix<Tb>& , UpperTriMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const CT , const GenLowerTriMatrix<Ta>& , 
-        const GenMatrix<Tb>& , const MatrixView<T>& )
+        const GenMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const CT , const GenMatrix<Ta>& , 
-        const GenLowerTriMatrix<Tb>& , const MatrixView<T>& )
+        const GenLowerTriMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const CT , const GenLowerTriMatrix<Ta>& , 
-        const GenLowerTriMatrix<Tb>& , const LowerTriMatrixView<T>& )
+        const GenLowerTriMatrix<Tb>& , LowerTriMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const CT , const GenUpperTriMatrix<Ta>& , 
-        const GenLowerTriMatrix<Tb>& , const MatrixView<T>& )
+        const GenLowerTriMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <bool add, class T, class Ta, class Tb> 
     inline void MultMM(
         const CT , const GenLowerTriMatrix<Ta>& , 
-        const GenUpperTriMatrix<Tb>& , const MatrixView<T>& )
+        const GenUpperTriMatrix<Tb>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <bool add, class T, class Ta, class Tb> 
     inline void ElemMultMM(
         const CT , const GenUpperTriMatrix<Ta>& , 
-        const GenUpperTriMatrix<Tb>& , const UpperTriMatrixView<T>& )
+        const GenUpperTriMatrix<Tb>& , UpperTriMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <bool add, class T, class Ta, class Tb> 
     inline void ElemMultMM(
         const CT , const GenLowerTriMatrix<Ta>& , 
-        const GenLowerTriMatrix<Tb>& , const LowerTriMatrixView<T>& )
+        const GenLowerTriMatrix<Tb>& , LowerTriMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
 } // namespace tmv

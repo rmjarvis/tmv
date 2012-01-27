@@ -65,7 +65,7 @@ namespace tmv {
     template <bool ha, bool uu, bool a1, class T, class TL> 
     static void RecursiveRankKUpdate(
         const T alpha, const GenLowerTriMatrix<TL>& L,
-        const SymMatrixView<T>& A)
+        SymMatrixView<T> A)
     {
         TMVAssert(A.size() == L.size());
         TMVAssert(alpha != T(0));
@@ -121,7 +121,7 @@ namespace tmv {
     template <bool a1, class T, class TL> 
     static inline void DoRankKUpdate(
         const T alpha, const GenLowerTriMatrix<TL>& L,
-        const SymMatrixView<T>& A)
+        SymMatrixView<T> A)
     {
         if (A.isherm())
             if (L.isunit())
@@ -136,7 +136,7 @@ namespace tmv {
     }
 
     template <bool ha, class T> 
-    static void RecursiveSetLLt(const SymMatrixView<T>& A)
+    static void RecursiveSetLLt(SymMatrixView<T> A)
     {
         TMVAssert(A.ct() == NonConj);
         TMVAssert(A.uplo() == Lower);
@@ -174,7 +174,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static inline void setLLt(const SymMatrixView<T>& A)
+    static inline void setLLt(SymMatrixView<T> A)
     {
         if (A.isherm()) RecursiveSetLLt<true>(A);
         else RecursiveSetLLt<false>(A);
@@ -182,8 +182,7 @@ namespace tmv {
 
     template <bool add, class T, class TL> 
     void RankKUpdate(
-        const T alpha, const GenLowerTriMatrix<TL>& L, 
-        const SymMatrixView<T>& A)
+        const T alpha, const GenLowerTriMatrix<TL>& L, SymMatrixView<T> A)
         // A = A + alpha * L * LT
     {
 #ifdef XDEBUG

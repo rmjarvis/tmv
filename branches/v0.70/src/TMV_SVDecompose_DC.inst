@@ -3,7 +3,7 @@
 
 #define DefSVD(RT,T)\
 template void SV_DecomposeFromBidiagonal_DC(MVP<T > U, \
-    const VectorView<RT >& D, const VectorView<RT >& E, MVP<T > V, \
+    VectorView<RT > D, VectorView<RT > E, MVP<T > V, \
     bool UisI, bool VisI); \
    
 

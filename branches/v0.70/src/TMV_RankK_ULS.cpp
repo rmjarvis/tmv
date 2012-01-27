@@ -65,7 +65,7 @@ namespace tmv {
     template <bool ha, bool uu, bool a1, class T, class TU> 
     static void RecursiveRankKUpdate(
         const T alpha, const GenUpperTriMatrix<TU>& U,
-        const SymMatrixView<T>& A)
+        SymMatrixView<T> A)
     {
         TMVAssert(A.size() == U.size());
         TMVAssert(alpha != T(0));
@@ -120,7 +120,7 @@ namespace tmv {
 
     template <bool a1, class T, class TU> 
     static inline void DoRankKUpdate(
-        const T alpha, const GenUpperTriMatrix<TU>& U, const SymMatrixView<T>& A)
+        const T alpha, const GenUpperTriMatrix<TU>& U, SymMatrixView<T> A)
     {
         if (A.isherm())
             if (U.isunit())
@@ -135,7 +135,7 @@ namespace tmv {
     }
 
     template <bool sa, class T> 
-    static void RecursiveSetUUt(const SymMatrixView<T>& A)
+    static void RecursiveSetUUt(SymMatrixView<T> A)
     {
         TMVAssert(A.ct() == NonConj);
         TMVAssert(A.uplo() == Upper);
@@ -180,11 +180,11 @@ namespace tmv {
 
 #ifdef AELAP
     template <class T> 
-    static inline void LapSetUUt(const SymMatrixView<T>& A)
+    static inline void LapSetUUt(SymMatrixView<T> A)
     { RecursiveSetUUt<true>(A); }
 #ifdef INST_DOUBLE
     template<> 
-    void LapSetUUt(const SymMatrixView<double>& A)
+    void LapSetUUt(SymMatrixView<double> A)
     {
         int n = A.size();
         int lda = A.iscm() ? A.stepj() : A.stepi();
@@ -194,7 +194,7 @@ namespace tmv {
         LAP_Results("dlauum");
     }
     template<> 
-    void LapSetUUt(const SymMatrixView<std::complex<double> >& A)
+    void LapSetUUt(SymMatrixView<std::complex<double> > A)
     {
         int n = A.size();
         int lda = A.iscm() ? A.stepj() : A.stepi();
@@ -206,7 +206,7 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template<> 
-    void LapSetUUt(const SymMatrixView<float>& A)
+    void LapSetUUt(SymMatrixView<float> A)
     {
         int n = A.size();
         int lda = A.iscm() ? A.stepj() : A.stepi();
@@ -216,7 +216,7 @@ namespace tmv {
         LAP_Results("slauum");
     }
     template<> 
-    void LapSetUUt(const SymMatrixView<std::complex<float> >& A)
+    void LapSetUUt(SymMatrixView<std::complex<float> > A)
     {
         int n = A.size();
         int lda = A.iscm() ? A.stepj() : A.stepi();
@@ -229,7 +229,7 @@ namespace tmv {
 #endif // AELAP
 
     template <class T> 
-    static inline void setUUt(const SymMatrixView<T>& A)
+    static inline void setUUt(SymMatrixView<T> A)
     {
 #ifdef AELAP
         if (A.issym() && 
@@ -243,8 +243,7 @@ namespace tmv {
 
     template <bool add, class T, class TU> 
     void RankKUpdate(
-        const T alpha, const GenUpperTriMatrix<TU>& U,
-        const SymMatrixView<T>& A)
+        const T alpha, const GenUpperTriMatrix<TU>& U, SymMatrixView<T> A)
     // A = A + alpha * U * UT
     {
 #ifdef XDEBUG

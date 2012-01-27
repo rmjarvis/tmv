@@ -60,7 +60,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void DoMultMM(
         const T alpha, const GenSymBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.size() == C.colsize());
         TMVAssert(A.size() == B.colsize());
@@ -82,7 +82,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void FullTempMultMM(
         const T alpha, const GenSymBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         if (C.isrm()) {
             Matrix<T,RowMajor> C2(C.colsize(),C.rowsize());
@@ -100,7 +100,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void BlockTempMultMM(
         const T alpha, const GenSymBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         const int N = C.rowsize();
         for(int j=0;j<N;) {
@@ -129,7 +129,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenSymBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
         // C (+)= alpha * A * B
     {
         TMVAssert(A.size() == C.colsize());

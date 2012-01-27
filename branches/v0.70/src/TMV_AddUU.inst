@@ -3,7 +3,7 @@
 
 #define DefAdd(T,Ta)\
   template void AddMM(const T alpha, const GenUpperTriMatrix<Ta >& A, \
-      const UpperTriMatrixView<T >& B); \
+      UpperTriMatrixView<T > B); \
 
 DefAdd(T,T)
 #ifdef INST_COMPLEX
@@ -16,7 +16,7 @@ DefAdd(CT,CT)
 #define DefAdd2(T,Ta,Tb)\
   template void AddMM(const T alpha, const GenUpperTriMatrix<Ta >& A, \
       const T beta, const GenUpperTriMatrix<Tb >& B, \
-      const UpperTriMatrixView<T >& C); \
+      UpperTriMatrixView<T > C); \
 
 DefAdd2(T,T,T)
 #ifdef INST_COMPLEX
@@ -29,10 +29,10 @@ DefAdd2(CT,CT,CT)
 
 #define DefAdd2(T,Ta,Tb)\
   template void AddMM(const T alpha, const GenUpperTriMatrix<Ta >& A, \
-      const T beta, const GenMatrix<Tb >& B, const MatrixView<T >& C); \
+      const T beta, const GenMatrix<Tb >& B, MatrixView<T > C); \
   template void AddMM(const T alpha, const GenUpperTriMatrix<Ta >& A, \
       const T beta, const GenLowerTriMatrix<Tb >& B, \
-      const MatrixView<T >& C); \
+      MatrixView<T > C); \
 
 DefAdd2(T,T,T)
 #ifdef INST_COMPLEX

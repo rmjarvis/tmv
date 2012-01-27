@@ -39,12 +39,12 @@ namespace tmv {
     template <class T> 
     void UnsortedEigen(
         const GenSymBandMatrix<T>& A, 
-        MVP<T> U, const VectorView<TMV_RealType(T)>& S);
+        MVP<T> U, VectorView<TMV_RealType(T)> S);
 
     template <class T> 
     void SV_Decompose(
         const GenSymBandMatrix<T>& A,
-        MVP<T> U, const DiagMatrixView<TMV_RealType(T)>& S, MVP<T> Vt, 
+        MVP<T> U, DiagMatrixView<TMV_RealType(T)> S, MVP<T> Vt, 
         TMV_RealType(T)& logdet, T& signdet);
 }
 

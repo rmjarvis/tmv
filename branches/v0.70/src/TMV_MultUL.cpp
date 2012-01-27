@@ -62,7 +62,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void ColMultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const GenLowerTriMatrix<Tb>& B, const MatrixView<T>& C)
+        const GenLowerTriMatrix<Tb>& B, MatrixView<T> C)
     {
 #ifdef XDEBUG
         //cout<<"MultMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
@@ -86,7 +86,7 @@ namespace tmv {
         TMVAssert(A.size() > 0);
         TMVAssert(alpha != T(0));
         TMVAssert(C.ct() == NonConj);
-        TMVAssert(!C.isrm());
+        TMVAssert(!C.isrm() || C.iscm());
         TMVAssert(!C.isconj());
         const int N = A.size();
 
@@ -249,7 +249,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void DoMultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const GenLowerTriMatrix<Tb>& B, const MatrixView<T>& C)
+        const GenLowerTriMatrix<Tb>& B, MatrixView<T> C)
     // C (+)= alpha * A * B
     // This is designed to work even if A,B are in same storage as C
     {
@@ -275,8 +275,8 @@ namespace tmv {
 
         if (N <= TRI_MM_BLOCKSIZE2) {
             if (C.isrm()) 
-                ColMultMM<add>(alpha,B.transpose(),A.transpose(),
-                               C.transpose());
+                ColMultMM<add>(
+                    alpha,B.transpose(),A.transpose(),C.transpose());
             else ColMultMM<add>(alpha,A,B,C);
         } else {
             int k = N/2;
@@ -340,7 +340,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A,
-        const GenLowerTriMatrix<Tb>& B, const MatrixView<T>& C)
+        const GenLowerTriMatrix<Tb>& B, MatrixView<T> C)
     {
 #ifdef XDEBUG
         //cout<<"MultMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
@@ -363,8 +363,8 @@ namespace tmv {
             if (!add) C.setZero();
         }
         else if (C.isconj()) 
-            DoMultMM<add>(TMV_CONJ(alpha),A.conjugate(),B.conjugate(),
-                          C.conjugate());
+            DoMultMM<add>(
+                TMV_CONJ(alpha),A.conjugate(),B.conjugate(),C.conjugate());
         else
             DoMultMM<add>(alpha,A,B,C);
 
@@ -394,7 +394,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void ColMultMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A,
-        const GenUpperTriMatrix<Tb>& B, const MatrixView<T>& C)
+        const GenUpperTriMatrix<Tb>& B, MatrixView<T> C)
     {
 #ifdef XDEBUG
         //cout<<"MultMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
@@ -417,8 +417,7 @@ namespace tmv {
             if (A.isrm()) {
                 LowerTriMatrix<Ta,NonUnitDiag|RowMajor> A2 = A;
                 ColMultMM<add>(alpha,A2,B,C);
-            }
-            else {
+            } else {
                 LowerTriMatrix<Ta,NonUnitDiag|ColMajor> A2 = A;
                 ColMultMM<add>(alpha,A2,B,C);
             }
@@ -592,7 +591,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void DoMultMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A,
-        const GenUpperTriMatrix<Tb>& B, const MatrixView<T>& C)
+        const GenUpperTriMatrix<Tb>& B, MatrixView<T> C)
     // C (+)= alpha * A * B
     // This is designed to work even if A,B are in same storage as C
     {
@@ -618,8 +617,8 @@ namespace tmv {
 
         if (N <= TRI_MM_BLOCKSIZE2) {
             if (C.isrm()) 
-                ColMultMM<add>(alpha,B.transpose(),A.transpose(),
-                               C.transpose());
+                ColMultMM<add>(
+                    alpha,B.transpose(),A.transpose(),C.transpose());
             else
                 ColMultMM<add>(alpha,A,B,C);
         } else {
@@ -684,7 +683,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenLowerTriMatrix<Ta>& A,
-        const GenUpperTriMatrix<Tb>& B, const MatrixView<T>& C)
+        const GenUpperTriMatrix<Tb>& B, MatrixView<T> C)
     {
 #ifdef XDEBUG
         //cout<<"MultMM: "<<alpha<<"  "<<TMV_Text(A)<<"  "<<A<<"  "<<TMV_Text(B)<<"  "<<B<<endl;
@@ -706,8 +705,8 @@ namespace tmv {
         else if (alpha == T(0)) {
             if (!add) C.setZero();
         } else if (C.isconj()) {
-            DoMultMM<add>(TMV_CONJ(alpha),A.conjugate(),B.conjugate(),
-                          C.conjugate());
+            DoMultMM<add>(
+                TMV_CONJ(alpha),A.conjugate(),B.conjugate(),C.conjugate());
         } else {
             DoMultMM<add>(alpha,A,B,C);
         }

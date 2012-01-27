@@ -18,13 +18,13 @@ Def1(CT)
 
 #define DefMV(T,Ta,Tx)\
   template void MultMV<true>(const T alpha, const GenUpperTriMatrix<Ta >& A, \
-      const GenVector<Tx >& x, const VectorView<T >& y);  \
+      const GenVector<Tx >& x, VectorView<T > y);  \
   template void MultMV<false>(const T alpha, const GenUpperTriMatrix<Ta >& A, \
-      const GenVector<Tx >& x, const VectorView<T >& y);  \
+      const GenVector<Tx >& x, VectorView<T > y);  \
   template void MultMV<true>(const T alpha, const GenLowerTriMatrix<Ta >& A, \
-      const GenVector<Tx >& x, const VectorView<T >& y);  \
+      const GenVector<Tx >& x, VectorView<T > y);  \
   template void MultMV<false>(const T alpha, const GenLowerTriMatrix<Ta >& A, \
-      const GenVector<Tx >& x, const VectorView<T >& y);  \
+      const GenVector<Tx >& x, VectorView<T > y);  \
 
 
 DefMV(T,T,T)
@@ -39,9 +39,9 @@ DefMV(CT,CT,CT)
 
 #define DefMultEq(T,Ta)\
   template void MultEqMV(const GenUpperTriMatrix<Ta >& A, \
-      const VectorView<T >& x);  \
+      VectorView<T > x);  \
   template void MultEqMV(const GenLowerTriMatrix<Ta >& A, \
-      const VectorView<T >& x);  \
+      VectorView<T > x);  \
 
 DefMultEq(T,T)
 #ifdef INST_COMPLEX

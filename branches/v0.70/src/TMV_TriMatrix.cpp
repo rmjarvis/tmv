@@ -792,7 +792,7 @@ namespace tmv {
     //
 
     template <class T, int A>
-    const UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::setZero() const
+    UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::setZero()
     {
         const int N = size();
 
@@ -810,8 +810,7 @@ namespace tmv {
     } 
 
     template <class T, int A>
-    const UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::setAllTo(
-        const T& x) const
+    UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::setAllTo(const T& x)
     {
         const int N = size();
 
@@ -829,8 +828,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::addToAll(
-        const T& x) const
+    UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::addToAll(const T& x) 
     {
         TMVAssert(!isunit());
         const int N = size();
@@ -843,8 +841,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::clip(
-        RT thresh) const
+    UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::clip(RT thresh) 
     {
         const int N = size();
 
@@ -862,7 +859,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::conjugateSelf() const
+    UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::conjugateSelf() 
     {
         const int N = size();
 
@@ -882,8 +879,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::setToIdentity(
-        const T& x) const 
+    UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::setToIdentity(const T& x) 
     {
         TMVAssert(!isunit() || x==T(1));
         setZero();
@@ -896,7 +892,7 @@ namespace tmv {
     //
 
     template <class T>
-    void Swap(const UpperTriMatrixView<T>& m1, const UpperTriMatrixView<T>& m2)
+    void Swap(UpperTriMatrixView<T> m1, UpperTriMatrixView<T> m2)
     {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.dt() == m2.dt());
@@ -1074,8 +1070,7 @@ namespace tmv {
 #endif
 
     template <class T> 
-    static void FinishRead(
-        const TMV_Reader& reader, const UpperTriMatrixView<T>& m)
+    static void FinishRead(const TMV_Reader& reader, UpperTriMatrixView<T> m)
     {
         const int N = m.size();
         std::string exp, got;
@@ -1226,7 +1221,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    void UpperTriMatrixView<T,A>::read(const TMV_Reader& reader) const
+    void UpperTriMatrixView<T,A>::read(const TMV_Reader& reader) 
     {
         std::string exp,got;
         if (!reader.readCode("U",exp,got)) {
@@ -1401,8 +1396,7 @@ namespace tmv {
 #endif
 
     template <class T> 
-    static void FinishRead(
-        const TMV_Reader& reader, const LowerTriMatrixView<T>& m)
+    static void FinishRead(const TMV_Reader& reader, LowerTriMatrixView<T> m)
     {
         const int N = m.size();
         std::string exp, got;
@@ -1553,7 +1547,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    void LowerTriMatrixView<T,A>::read(const TMV_Reader& reader) const
+    void LowerTriMatrixView<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
         if (!reader.readCode("L",exp,got)) {

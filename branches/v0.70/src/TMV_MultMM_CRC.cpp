@@ -95,7 +95,7 @@ namespace tmv {
     template <bool add, bool ca, bool cb, class T, class Ta, class Tb> 
     static void DoCRCMultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         TMVAssert(A.colsize() == C.colsize());
         TMVAssert(A.rowsize() == B.colsize());
@@ -131,7 +131,7 @@ namespace tmv {
 
     template <bool add, class T, class Ta, class Tb> void CRCMultMM(
         const T alpha, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
-        const MatrixView<T>& C)
+        MatrixView<T> C)
     {
         if (A.isconj())
             if (B.isconj())

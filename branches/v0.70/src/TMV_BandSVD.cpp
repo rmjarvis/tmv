@@ -87,7 +87,7 @@ namespace tmv {
     BandSVDiv<T>::~BandSVDiv() {}
 
     template <class T> template <class T1> 
-    void BandSVDiv<T>::doLDivEq(const MatrixView<T1>& m) const
+    void BandSVDiv<T>::doLDivEq(MatrixView<T1> m) const
     {
         TMVAssert(m.colsize() == rowsize());
         TMVAssert(m.colsize() == colsize());
@@ -99,7 +99,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void BandSVDiv<T>::doRDivEq(const MatrixView<T1>& m) const
+    void BandSVDiv<T>::doRDivEq(MatrixView<T1> m) const
     {
         TMVAssert(m.rowsize() == rowsize());
         TMVAssert(m.rowsize() == colsize());
@@ -112,7 +112,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void BandSVDiv<T>::doLDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         TMVAssert(m.rowsize() == x.rowsize());
         TMVAssert(m.colsize() == colsize());
@@ -126,7 +126,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void BandSVDiv<T>::doRDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         TMVAssert(m.colsize() == x.colsize());
         TMVAssert(m.rowsize() == rowsize());
@@ -153,7 +153,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void BandSVDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
+    void BandSVDiv<T>::doMakeInverse(MatrixView<T1> minv) const
     { 
         if (pimpl->istrans) {
             Matrix<T,ColMajor> SinvVt = 
@@ -169,7 +169,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void BandSVDiv<T>::doMakeInverseATA(const MatrixView<T>& minv) const
+    void BandSVDiv<T>::doMakeInverseATA(MatrixView<T> minv) const
     {
         Matrix<T,ColMajor> SinvVt = 
             pimpl->Vt.rowRange(0,pimpl->kmax) /

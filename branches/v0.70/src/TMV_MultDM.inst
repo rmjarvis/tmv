@@ -3,9 +3,9 @@
 
 #define DefMV(T,Ta,Tb)\
   template void MultMM<true>(const T alpha, const GenDiagMatrix<Ta >& A, \
-      const GenMatrix<Tb >& B, const MatrixView<T >& C);  \
+      const GenMatrix<Tb >& B, MatrixView<T > C);  \
   template void MultMM<false>(const T alpha, const GenDiagMatrix<Ta >& A, \
-      const GenMatrix<Tb >& B, const MatrixView<T >& C);  \
+      const GenMatrix<Tb >& B, MatrixView<T > C);  \
 
 DefMV(T,T,T)
 #ifdef INST_COMPLEX

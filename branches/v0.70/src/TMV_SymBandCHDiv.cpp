@@ -42,7 +42,7 @@
 namespace tmv {
 
     template <class T, class T1> 
-    void CH_LDivEq(const GenSymBandMatrix<T1>& LL, const MatrixView<T>& m)
+    void CH_LDivEq(const GenSymBandMatrix<T1>& LL, MatrixView<T> m)
     {
         TMVAssert(LL.size() == m.colsize());
         // m = (LLt)^-1 m
@@ -52,7 +52,7 @@ namespace tmv {
     }
 
     template <class T, class T1> 
-    void LDL_LDivEq(const GenSymBandMatrix<T1>& LL, const MatrixView<T>& m)
+    void LDL_LDivEq(const GenSymBandMatrix<T1>& LL, MatrixView<T> m)
     {
         TMVAssert(LL.size() == m.colsize());
         TMVAssert(LL.nlo() == 1);
@@ -67,7 +67,7 @@ namespace tmv {
     }
 
     template <class T, class T1> 
-    void CH_RDivEq(const GenSymBandMatrix<T1>& LL, const MatrixView<T>& m)
+    void CH_RDivEq(const GenSymBandMatrix<T1>& LL, MatrixView<T> m)
     {
         TMVAssert(LL.size() == m.rowsize());
         // m = m (LLt)^-1
@@ -78,7 +78,7 @@ namespace tmv {
     }
 
     template <class T, class T1> 
-    void LDL_RDivEq(const GenSymBandMatrix<T1>& LL, const MatrixView<T>& m)
+    void LDL_RDivEq(const GenSymBandMatrix<T1>& LL, MatrixView<T> m)
     {
         TMVAssert(LL.size() == m.rowsize());
         TMVAssert(LL.nlo() == 1);

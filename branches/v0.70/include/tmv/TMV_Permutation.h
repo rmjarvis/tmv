@@ -376,7 +376,7 @@ namespace tmv {
         //
         
         template <class T2>
-        inline void assignToM(const MatrixView<T2>& m2) const
+        inline void assignToM(MatrixView<T2> m2) const
         { m2.setToIdentity(); applyOnLeft(m2); }
 
         //
@@ -384,12 +384,12 @@ namespace tmv {
         //
 
         template <class T2>
-        inline void makeInverse(const MatrixView<T2>& minv) const
+        inline void makeInverse(MatrixView<T2> minv) const
         { inverse().assignToM(minv); }
 
         // (PtP)^-1 = P^-1 Pt^-1 = Pt P = I
         template <class T2>
-        inline void makeInverseATA(const MatrixView<T2>& ata) const
+        inline void makeInverseATA(MatrixView<T2> ata) const
         { ata.setToIdentity(); }
 
 
@@ -439,7 +439,7 @@ namespace tmv {
         //
 
         template <class T2>
-        inline void apply(const VectorView<T2>& v2) const
+        inline void apply(VectorView<T2> v2) const
         {
             if (isinv) v2.reversePermute(itsp);
             else v2.permute(itsp);
@@ -450,14 +450,14 @@ namespace tmv {
         //
 
         template <class T2>
-        inline void applyOnLeft(const MatrixView<T2>& m2) const
+        inline void applyOnLeft(MatrixView<T2> m2) const
         {
             if (isinv) m2.reversePermuteRows(itsp);
             else m2.permuteRows(itsp);
         }
 
         template <class T2>
-        inline void applyOnRight(const MatrixView<T2>& m2) const
+        inline void applyOnRight(MatrixView<T2> m2) const
         {
             if (isinv) m2.permuteCols(itsp);
             else m2.reversePermuteCols(itsp);
@@ -471,45 +471,45 @@ namespace tmv {
         friend inline void Swap(Permutation& p1, Permutation& p2);
 
         template <class T, int A>
-        friend inline const VectorView<T,A>& VectorView<T,A>::sort(
-            Permutation& p, ADType ad, CompType comp) const;
+        friend inline VectorView<T,A>& VectorView<T,A>::sort(
+            Permutation& p, ADType ad, CompType comp);
 
         template <class T>
         friend inline void LU_Decompose(
-            const MatrixView<T>& m, Permutation& p);
+            MatrixView<T> m, Permutation& p);
 
         template <class T>
         friend inline void QRP_Decompose(
-            const MatrixView<T>& Q, const UpperTriMatrixView<T>& R,
+            MatrixView<T> Q, UpperTriMatrixView<T> R,
             Permutation& p, bool strict=false);
 
         template <class T>
         friend inline void QRP_Decompose(
-            const MatrixView<T>& QRx, const VectorView<T>& beta,
+            MatrixView<T> QRx, VectorView<T> beta,
             Permutation& p, T& signdet, bool strict=false);
 
         template <class T> 
         friend inline void LU_Decompose(
-            const GenBandMatrix<T>& m, const LowerTriMatrixView<T>& L,
-            const BandMatrixView<T>& U, Permutation& p);
+            const GenBandMatrix<T>& m, LowerTriMatrixView<T> L,
+            BandMatrixView<T> U, Permutation& p);
 
         template <class T> 
         friend inline void LU_Decompose(
-            const BandMatrixView<T>& m, Permutation& p, int nhi);
+            BandMatrixView<T> m, Permutation& p, int nhi);
 
         template <class T>
         friend inline void LDL_Decompose(
-            const SymMatrixView<T>& m, const SymBandMatrixView<T>& D,
+            SymMatrixView<T> m, SymBandMatrixView<T> D,
             Permutation& p);
 
         template <class T>
         friend inline void LDL_Decompose(
-            const SymMatrixView<T>& m, const VectorView<T>& xD,
+            SymMatrixView<T> m, VectorView<T> xD,
             Permutation& p, TMV_RealType(T)& logdet, T& signdet);
 
         template <class T, int A>
         friend inline void DoVectorSort(
-            const VectorView<T,A>& v, Permutation& p,
+            VectorView<T,A> v, Permutation& p,
             ADType ad, CompType comp);
 
         //
@@ -853,8 +853,8 @@ namespace tmv {
     }
 
     template <class T, int A>
-    inline const VectorView<T,A>& VectorView<T,A>::sort(
-        Permutation& p, ADType ad, CompType comp) const
+    inline VectorView<T,A>& VectorView<T,A>::sort(
+        Permutation& p, ADType ad, CompType comp)
     {
         DoVectorSort(*this,p,ad,comp);
         return *this;
@@ -863,18 +863,18 @@ namespace tmv {
 
     template <class T>
     inline void LU_Decompose(
-        const MatrixView<T>& m, Permutation& p)
+        MatrixView<T> m, Permutation& p)
     {
         p.resize(m.colsize());
         p.allocateMem();
-        LU_Decompose(m,p.getMem(),p.itsdet=1);
+        LU_Decompose(m,p.getMem());
         p.isinv = true;
+        p.calcDet();
     }
 
     template <class T>
     inline void QRP_Decompose(
-        const MatrixView<T>& Q, const UpperTriMatrixView<T>& R,
-        Permutation& p, bool strict)
+        MatrixView<T> Q, UpperTriMatrixView<T> R, Permutation& p, bool strict)
     {
         p.resize(Q.rowsize());
         p.allocateMem();
@@ -885,7 +885,7 @@ namespace tmv {
 
     template <class T>
     inline void QRP_Decompose(
-        const MatrixView<T>& QRx, const VectorView<T>& beta,
+        MatrixView<T> QRx, VectorView<T> beta,
         Permutation& p, T& signdet, bool strict)
     {
         p.resize(QRx.rowsize());
@@ -897,8 +897,8 @@ namespace tmv {
 
     template <class T> 
     inline void LU_Decompose(
-        const GenBandMatrix<T>& m, const LowerTriMatrixView<T>& L,
-        const BandMatrixView<T>& U, Permutation& p)
+        const GenBandMatrix<T>& m, LowerTriMatrixView<T> L,
+        BandMatrixView<T> U, Permutation& p)
     {
         p.resize(m.colsize());
         p.allocateMem();
@@ -909,18 +909,18 @@ namespace tmv {
 
     template <class T> 
     inline void LU_Decompose(
-        const BandMatrixView<T>& m, Permutation& p, int nhi)
+        BandMatrixView<T> m, Permutation& p, int nhi)
     {
         p.resize(m.colsize());
         p.allocateMem();
-        LU_Decompose(m,p.getMem(),p.itsdet=1,nhi);
+        LU_Decompose(m,p.getMem(),nhi);
         p.isinv = true;
+        p.calcDet();
     }
 
     template <class T>
     inline void LDL_Decompose(
-        const SymMatrixView<T>& m, const SymBandMatrixView<T>& D,
-        Permutation& p)
+        SymMatrixView<T> m, SymBandMatrixView<T> D, Permutation& p)
     { 
         p.resize(m.colsize());
         p.allocateMem();
@@ -931,7 +931,7 @@ namespace tmv {
 
     template <class T>
     inline void LDL_Decompose(
-        const SymMatrixView<T>& m, const VectorView<T>& xD,
+        SymMatrixView<T> m, VectorView<T> xD,
         Permutation& p, TMV_RealType(T)& logdet, T& signdet)
     {
         p.resize(m.size());
@@ -943,7 +943,7 @@ namespace tmv {
 
     template <class T, int A>
     inline void DoVectorSort(
-        const VectorView<T,A>& v, Permutation& p, ADType ad, CompType comp)
+        VectorView<T,A> v, Permutation& p, ADType ad, CompType comp)
     {
         p.resize(v.size());
         p.allocateMem();

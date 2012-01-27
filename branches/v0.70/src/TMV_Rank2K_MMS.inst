@@ -3,9 +3,9 @@
 
 #define DefR2(T,Tx,Ty)\
   template void Rank2KUpdate<true>(const T alpha,const GenMatrix<Tx >& x, \
-      const GenMatrix<Ty >& y, const SymMatrixView<T >& A); \
+      const GenMatrix<Ty >& y, SymMatrixView<T > A); \
   template void Rank2KUpdate<false>(const T alpha,const GenMatrix<Tx >& x, \
-      const GenMatrix<Ty >& y, const SymMatrixView<T >& A); \
+      const GenMatrix<Ty >& y, SymMatrixView<T > A); \
 
 DefR2(T,T,T)
 #ifdef INST_COMPLEX

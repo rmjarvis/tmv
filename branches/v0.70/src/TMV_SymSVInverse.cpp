@@ -44,7 +44,7 @@ namespace tmv {
     template <class T, class T1> 
     void HermSV_Inverse(
         const GenMatrix<T1>& U, const GenDiagMatrix<TMV_RealType(T1)>& SS,
-        int kmax, const SymMatrixView<T>& sinv)
+        int kmax, SymMatrixView<T> sinv)
     {
         TMVAssert(sinv.isherm());
         Matrix<T,ColMajor> SinvUt = U.adjoint().rowRange(0,kmax) /
@@ -55,7 +55,7 @@ namespace tmv {
     template <class T, class T1> 
     void SymSV_Inverse(
         const GenMatrix<T1>& U, const GenDiagMatrix<TMV_RealType(T1)>& SS, 
-        const GenMatrix<T1>& Vt, int kmax, const SymMatrixView<T>& sinv)
+        const GenMatrix<T1>& Vt, int kmax, SymMatrixView<T> sinv)
     {
         // A = U S Vt
         // A^-1 = V S^-1 Ut

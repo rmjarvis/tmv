@@ -75,7 +75,7 @@ namespace tmv {
 
     template <class T1, class T2> 
     void Copy(
-        const GenUpperTriMatrix<T1>& m1, const UpperTriMatrixView<T2>& m2);
+        const GenUpperTriMatrix<T1>& m1, UpperTriMatrixView<T2> m2);
 
     template <class T> 
     struct AssignableToUpperTriMatrix :
@@ -85,8 +85,8 @@ namespace tmv {
         typedef TMV_ComplexType(T) CT;
         virtual int size() const = 0;
         virtual DiagType dt() const = 0;
-        virtual void assignToU(const UpperTriMatrixView<RT>& m) const = 0;
-        virtual void assignToU(const UpperTriMatrixView<CT>& m) const = 0;
+        virtual void assignToU(UpperTriMatrixView<RT> m) const = 0;
+        virtual void assignToU(UpperTriMatrixView<CT> m) const = 0;
         virtual inline ~AssignableToUpperTriMatrix() {}
     };
 
@@ -98,8 +98,8 @@ namespace tmv {
         typedef TMV_ComplexType(T) CT;
         virtual int size() const = 0;
         virtual DiagType dt() const = 0;
-        virtual void assignToL(const LowerTriMatrixView<RT>& m) const = 0;
-        virtual void assignToL(const LowerTriMatrixView<CT>& m) const = 0;
+        virtual void assignToL(LowerTriMatrixView<RT> m) const = 0;
+        virtual void assignToL(LowerTriMatrixView<CT> m) const = 0;
         virtual inline ~AssignableToLowerTriMatrix() {}
     };
 

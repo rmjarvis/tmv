@@ -58,8 +58,7 @@ namespace tmv {
 #endif
 
     template <bool unit, class T> 
-    static void RecursiveInverse(
-        const UpperTriMatrixView<T>& U)
+    static void RecursiveInverse(UpperTriMatrixView<T> U)
     {
         TMVAssert(U.iscm() || U.isrm());
         TMVAssert(unit == U.isunit());
@@ -104,7 +103,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static inline void NonLapInverse(const UpperTriMatrixView<T>& U)
+    static inline void NonLapInverse(UpperTriMatrixView<T> U)
     {
 #ifndef NOTHROW
         try {
@@ -120,11 +119,11 @@ namespace tmv {
 
 #ifdef ALAP
     template <class T> 
-    static inline void LapInverse(const UpperTriMatrixView<T>& m)
+    static inline void LapInverse(UpperTriMatrixView<T> m)
     { NonLapInverse(m); }
 #ifdef INST_DOUBLE
     template <> 
-    void LapInverse(const UpperTriMatrixView<double>& m)
+    void LapInverse(UpperTriMatrixView<double> m)
     {
         int n = m.size();
         int lda = m.iscm() ? m.stepj() : m.stepi();
@@ -136,7 +135,7 @@ namespace tmv {
     }
     template <> 
     void LapInverse(
-        const UpperTriMatrixView<std::complex<double> >& m)
+        UpperTriMatrixView<std::complex<double> > m)
     {
         int n = m.size();
         int lda = m.iscm() ? m.stepj() : m.stepi();
@@ -149,7 +148,7 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <> 
-    void LapInverse(const UpperTriMatrixView<float>& m)
+    void LapInverse(UpperTriMatrixView<float> m)
     {
         int n = m.size();
         int lda = m.iscm() ? m.stepj() : m.stepi();
@@ -161,7 +160,7 @@ namespace tmv {
     }
     template <> 
     void LapInverse(
-        const UpperTriMatrixView<std::complex<float> >& m)
+        UpperTriMatrixView<std::complex<float> > m)
     {
         int n = m.size();
         int lda = m.iscm() ? m.stepj() : m.stepi();
@@ -175,7 +174,7 @@ namespace tmv {
 #endif // ALaP
 
     template <class T> 
-    void TriInverse(const UpperTriMatrixView<T>& U)
+    void TriInverse(UpperTriMatrixView<T> U)
     {
 #ifdef XDEBUG
         Matrix<T> U0(U);

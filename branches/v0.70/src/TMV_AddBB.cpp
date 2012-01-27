@@ -54,7 +54,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void DoAddMM(
-        const T alpha, const GenBandMatrix<Ta>& A, const BandMatrixView<T>& B)
+        const T alpha, const GenBandMatrix<Ta>& A, BandMatrixView<T> B)
     { 
         TMVAssert(A.colsize() == B.colsize());
         TMVAssert(A.rowsize() == B.rowsize());
@@ -79,7 +79,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     void AddMM(
-        const T alpha, const GenBandMatrix<Ta>& A, const BandMatrixView<T>& B)
+        const T alpha, const GenBandMatrix<Ta>& A, BandMatrixView<T> B)
         // B += alpha * A
     {
 #ifdef XDEBUG
@@ -130,7 +130,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     void AddMM(
         const T alpha, const GenBandMatrix<Ta>& A,
-        const T beta, const GenBandMatrix<Tb>& B, const BandMatrixView<T>& C)
+        const T beta, const GenBandMatrix<Tb>& B, BandMatrixView<T> C)
     {
 #ifdef XDEBUG
         //cout<<"Band AddMM: alpha = "<<alpha<<", beta = "<<beta<<endl;
@@ -198,7 +198,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     void AddMM(
         const T alpha, const GenBandMatrix<Ta>& A,
-        const T beta, const GenMatrix<Tb>& B, const MatrixView<T>& C)
+        const T beta, const GenMatrix<Tb>& B, MatrixView<T> C)
     {
 #ifdef XDEBUG
         //cout<<"Band AddMM: alpha = "<<alpha<<", beta = "<<beta<<endl;

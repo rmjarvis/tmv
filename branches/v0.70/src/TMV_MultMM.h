@@ -39,32 +39,32 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void CCCMultMM(
         const T alpha, const GenMatrix<Ta>& A,
-        const GenMatrix<Tb>& B, const MatrixView<T>& C);
+        const GenMatrix<Tb>& B, MatrixView<T> C);
 
     template <bool add, class T, class Ta, class Tb> 
     void CRCMultMM(
         const T alpha, const GenMatrix<Ta>& A,
-        const GenMatrix<Tb>& B, const MatrixView<T>& C);
+        const GenMatrix<Tb>& B, MatrixView<T> C);
 
     template <bool add, class T, class Ta, class Tb> 
     void RCCMultMM(
         const T alpha, const GenMatrix<Ta>& A,
-        const GenMatrix<Tb>& B, const MatrixView<T>& C);
+        const GenMatrix<Tb>& B, MatrixView<T> C);
 
     template <bool add, class T, class Ta, class Tb> 
     void OpenMPMultMM(
         const T alpha, const GenMatrix<Ta>& A,
-        const GenMatrix<Tb>& B, const MatrixView<T>& C);
+        const GenMatrix<Tb>& B, MatrixView<T> C);
 
     template <bool add, class T, class Ta, class Tb> 
     void BlockMultMM(
         const T alpha, const GenMatrix<Ta>& A,
-        const GenMatrix<Tb>& B, const MatrixView<T>& C);
+        const GenMatrix<Tb>& B, MatrixView<T> C);
 
     template <bool add, class T, class Ta, class Tb> 
     void RecursiveBlockMultMM(
         const T alpha, const GenMatrix<Ta>& A,
-        const GenMatrix<Tb>& B, const MatrixView<T>& C);
+        const GenMatrix<Tb>& B, MatrixView<T> C);
 
 
 }

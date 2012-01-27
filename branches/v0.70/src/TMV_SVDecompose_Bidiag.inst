@@ -3,9 +3,8 @@
 
 #define DefSVD(RT,T)\
 template void Bidiagonalize( \
-    const MatrixView<T >& A, const VectorView<T >& Ubeta, \
-    const VectorView<T >& Vbeta, const VectorView<RT >& D, \
-    const VectorView<RT >& E, T& det); \
+    MatrixView<T > A, VectorView<T > Ubeta, \
+    VectorView<T > Vbeta, VectorView<RT > D, VectorView<RT > E, T& det); \
 
 DefSVD(T,T)
 #ifdef INST_COMPLEX

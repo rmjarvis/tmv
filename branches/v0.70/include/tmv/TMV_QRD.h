@@ -82,24 +82,23 @@ namespace tmv {
     // Decompose A (input as Q) into Q R
     // where Q is unitary and R is upper triangular.
     template <class T> 
-    void QR_Decompose(const MatrixView<T>& Q, const UpperTriMatrixView<T>& R);
+    void QR_Decompose(MatrixView<T> Q, UpperTriMatrixView<T> R);
 
     // Decompose A into Q R, but don't return Q.
     // On output, R is returned as A.upperTri()
     template <class T> 
-    void QR_Decompose(const MatrixView<T>& A);
+    void QR_Decompose(MatrixView<T> A);
 
     // Given that A0 = Q0 R0
     // Find R1, so that [ A0 ] = Q1 R1
     //                  [ A  ] 
     // On input R is R0; on output it is R1.
     template <class T> 
-    void QR_Update(const UpperTriMatrixView<T>& R, const MatrixView<T>& A);
+    void QR_Update(UpperTriMatrixView<T> R, MatrixView<T> A);
 
     // This just adds a single row
     template <class T> 
-    inline void QR_Update(
-        const UpperTriMatrixView<T>& R, const VectorView<T>& z)
+    inline void QR_Update(UpperTriMatrixView<T> R, VectorView<T> z)
     { QR_Update(R,RowVectorViewOf(z)); }
 
     // The opposite of an Update:
@@ -108,13 +107,77 @@ namespace tmv {
     // Find R0, so that A0 = Q0 R0
     // On input R is R1; on output it is R0.
     template <class T> 
-    void QR_Downdate(const UpperTriMatrixView<T>& R, const MatrixView<T>& A);
+    void QR_Downdate(UpperTriMatrixView<T> R, MatrixView<T> A);
 
     // Remove a single row
     template <class T> 
-    inline void QR_Downdate(
-        const UpperTriMatrixView<T>& R, const VectorView<T>& z)
+    inline void QR_Downdate(UpperTriMatrixView<T> R, VectorView<T> z)
     { QR_Downdate(R,RowVectorViewOf(z)); }
+
+
+    template <class T, int A2> 
+    inline void QR_Decompose(MatrixView<T> Q, UpperTriMatrix<T,A2>& R)
+    { QR_Decompose(Q,R.view()); }
+
+    template <class T, int A1> 
+    inline void QR_Decompose(Matrix<T,A1>& Q, UpperTriMatrixView<T> R)
+    { QR_Decompose(Q.view(),R); }
+
+    template <class T, int A1, int A2> 
+    inline void QR_Decompose(Matrix<T,A1>& Q, UpperTriMatrix<T,A2>& R)
+    { QR_Decompose(Q.view(),R.view()); }
+
+    template <class T, int A1> 
+    inline void QR_Decompose(Matrix<T,A1>& A)
+    { QR_Decompose(A.view()); }
+
+    template <class T, int A2> 
+    inline void QR_Update(UpperTriMatrixView<T> R, Matrix<T,A2>& A)
+    { QR_Update(R,A.view()); }
+
+    template <class T, int A1> 
+    inline void QR_Update(UpperTriMatrix<T,A1>& R, MatrixView<T> A)
+    { QR_Update(R.view(),A); }
+
+    template <class T, int A1, int A2> 
+    inline void QR_Update(UpperTriMatrix<T,A1>& R, Matrix<T,A2>& A)
+    { QR_Update(R.view(),A.view()); }
+
+    template <class T, int A2> 
+    inline void QR_Update(UpperTriMatrixView<T> R, Vector<T,A2>& A)
+    { QR_Update(R,A.view()); }
+
+    template <class T, int A1> 
+    inline void QR_Update(UpperTriMatrix<T,A1>& R, VectorView<T> A)
+    { QR_Update(R.view(),A); }
+
+    template <class T, int A1, int A2> 
+    inline void QR_Update(UpperTriMatrix<T,A1>& R, Vector<T,A2>& A)
+    { QR_Update(R.view(),A.view()); }
+
+    template <class T, int A2> 
+    inline void QR_Downdate(UpperTriMatrixView<T> R, Matrix<T,A2>& A)
+    { QR_Downdate(R,A.view()); }
+
+    template <class T, int A1> 
+    inline void QR_Downdate(UpperTriMatrix<T,A1>& R, MatrixView<T> A)
+    { QR_Downdate(R.view(),A); }
+
+    template <class T, int A1, int A2> 
+    inline void QR_Downdate(UpperTriMatrix<T,A1>& R, Matrix<T,A2>& A)
+    { QR_Downdate(R.view(),A.view()); }
+
+    template <class T, int A2> 
+    inline void QR_Downdate(UpperTriMatrixView<T> R, Vector<T,A2>& A)
+    { QR_Downdate(R,A.view()); }
+
+    template <class T, int A1> 
+    inline void QR_Downdate(UpperTriMatrix<T,A1>& R, VectorView<T> A)
+    { QR_Downdate(R.view(),A); }
+
+    template <class T, int A1, int A2> 
+    inline void QR_Downdate(UpperTriMatrix<T,A1>& R, Vector<T,A2>& A)
+    { QR_Downdate(R.view(),A.view()); }
 
     template <class T> 
     class PackedQ;
@@ -137,16 +200,16 @@ namespace tmv {
         //
 
         template <class T1> 
-        void doLDivEq(const MatrixView<T1>& m) const;
+        void doLDivEq(MatrixView<T1> m) const;
 
         template <class T1> 
-        void doRDivEq(const MatrixView<T1>& m) const;
+        void doRDivEq(MatrixView<T1> m) const;
 
         template <class T1, class T2> 
-        void doLDiv(const GenMatrix<T1>& m, const MatrixView<T2>& x) const;
+        void doLDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
         template <class T1, class T2> 
-        void doRDiv(const GenMatrix<T1>& m, const MatrixView<T2>& x) const;
+        void doRDiv(const GenMatrix<T1>& m, MatrixView<T2> x) const;
 
 #include "tmv/TMV_AuxAllDiv.h"
 
@@ -157,8 +220,8 @@ namespace tmv {
         T det() const;
         TMV_RealType(T) logDet(T* sign) const;
         template <class T1> 
-        void doMakeInverse(const MatrixView<T1>& minv) const;
-        void doMakeInverseATA(const MatrixView<T>& minv) const;
+        void doMakeInverse(MatrixView<T1> minv) const;
+        void doMakeInverseATA(MatrixView<T> minv) const;
         bool isSingular() const;
 
         //

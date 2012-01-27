@@ -59,7 +59,7 @@ namespace tmv {
 
     template <bool herm, class T> 
     static void LDLt_InvertComponents(
-        const SymMatrixView<T>& sinv, const VectorView<T>& xD)
+        SymMatrixView<T> sinv, VectorView<T> xD)
     {
         TMVAssert(isReal(T()) || herm == sinv.isherm());
         TMVAssert(sinv.uplo() == Lower);
@@ -135,7 +135,7 @@ namespace tmv {
 
     template <bool herm, class T> 
     static void LDLt_AddXtDX(
-        const SymMatrixView<T>& sinv, const GenMatrix<T>& X,
+        SymMatrixView<T> sinv, const GenMatrix<T>& X,
         const GenVector<T>& D, const GenVector<T>& xD)
         // sinv += Xt D X
     {
@@ -194,7 +194,7 @@ namespace tmv {
 
     template <bool herm, class T> 
     static void LDLt_CombineInverse(
-        const SymMatrixView<T>& sinv, const VectorView<T>& xDinv)
+        SymMatrixView<T> sinv, VectorView<T> xDinv)
         // Do LDLt inverse recursively:
         // A = [ L00  0  ] [ D00  0  ] [ L00t L10t ]
         //     [ L10 L11 ] [  0  D11 ] [  0   L11t ]
@@ -297,7 +297,7 @@ namespace tmv {
     template <class T, class T1> 
     void LDL_Inverse(
         const GenSymMatrix<T>& LLx, const GenVector<T>& xD, const int* P,
-        const SymMatrixView<T1>& sinv)
+        SymMatrixView<T1> sinv)
     {
         TMVAssert(sinv.size() == LLx.size());
         TMVAssert(isReal(T()) || LLx.isherm() == sinv.isherm());

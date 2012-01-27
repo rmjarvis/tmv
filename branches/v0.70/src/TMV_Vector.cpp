@@ -99,7 +99,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    typename VectorView<T,A>::reference VectorView<T,A>::ref(int i) const
+    typename VectorView<T,A>::reference VectorView<T,A>::ref(int i)
     {
         T* vi = ptr() + i*step();
         return RefHelper<T>::makeRef(vi,ct());
@@ -899,7 +899,7 @@ namespace tmv {
     //
 
     template <class T, int A>
-    const VectorView<T,A>& VectorView<T,A>::setZero() const
+    VectorView<T,A>& VectorView<T,A>::setZero() 
     {
         if (step() == 1) std::fill_n(ptr(),size(),T(0));
         else setAllTo(T(0));
@@ -914,7 +914,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const VectorView<T,A>& VectorView<T,A>::clip(RT thresh) const
+    VectorView<T,A>& VectorView<T,A>::clip(RT thresh) 
     {
         const int s = step();
         if (s < 0) {
@@ -937,8 +937,8 @@ namespace tmv {
 
 #ifdef INST_INT
     template <>
-    const VectorView<std::complex<int>,CStyle>& 
-    VectorView<std::complex<int>,CStyle>::clip(int ) const
+    VectorView<std::complex<int>,CStyle> 
+    VectorView<std::complex<int>,CStyle>::clip(int ) 
     { TMVAssert(TMV_FALSE); return *this; }
 #endif
 
@@ -947,7 +947,7 @@ namespace tmv {
     { view().clip(thresh); return *this; }
 
     template <class T, int A>
-    const VectorView<T,A>& VectorView<T,A>::setAllTo(const T& x) const
+    VectorView<T,A>& VectorView<T,A>::setAllTo(const T& x) 
     {
         const int s = step();
         if (s < 0) {
@@ -991,7 +991,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const VectorView<T,A>& VectorView<T,A>::addToAll(const T& x) const
+    VectorView<T,A>& VectorView<T,A>::addToAll(const T& x) 
     {
         const int s = step();
         if (s < 0) {
@@ -1027,7 +1027,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static void NonLapConjugate(const VectorView<std::complex<T>,CStyle>& v)
+    static void NonLapConjugate(VectorView<std::complex<T>,CStyle> v)
     {
         TMVAssert(v.step() > 0);
 
@@ -1044,15 +1044,15 @@ namespace tmv {
         }
     }
     template <class T> 
-    static inline void NonLapConjugate(const VectorView<T,CStyle>& ) 
+    static inline void NonLapConjugate(VectorView<T,CStyle> ) 
     {}
 #ifdef ELAP
     template <class T> 
-    static inline void LapConjugate(const VectorView<T,CStyle>& v)
+    static inline void LapConjugate(VectorView<T,CStyle> v)
     { NonLapConjugate(v); }
 #ifdef INST_DOUBLE
     template <> 
-    void LapConjugate(const VectorView<std::complex<double>,CStyle>& v)
+    void LapConjugate(VectorView<std::complex<double>,CStyle> v)
     { 
         int n = v.size();
         int s = v.step();
@@ -1061,7 +1061,7 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <> 
-    void LapConjugate(const VectorView<std::complex<float>,CStyle>& v)
+    void LapConjugate(VectorView<std::complex<float>,CStyle> v)
     {
         int n = v.size();
         int s = v.step();
@@ -1070,7 +1070,7 @@ namespace tmv {
 #endif
 #endif // ELAP
     template <class T, int A>
-    const VectorView<T,A>& VectorView<T,A>::conjugateSelf() const
+    VectorView<T,A>& VectorView<T,A>::conjugateSelf() 
     {
         if (step() < 0) {
             reverse().conjugateSelf();
@@ -1093,7 +1093,7 @@ namespace tmv {
 
 
     template <class T, int A>
-    const VectorView<T,A>& VectorView<T,A>::DoBasis(int i) const
+    VectorView<T,A>& VectorView<T,A>::DoBasis(int i) 
     { 
         TMVAssert(A==CStyle);
         TMVAssert(i < size());
@@ -1118,7 +1118,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const VectorView<T,A>& VectorView<T,A>::DoSwap(int i1, int i2) const
+    VectorView<T,A>& VectorView<T,A>::DoSwap(int i1, int i2) 
     {
         TMVAssert(i1 < size());
         TMVAssert(i2 < size());
@@ -1144,8 +1144,8 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const VectorView<T,A>& VectorView<T,A>::DoPermute(
-        const int* p, int i1, int i2) const
+    VectorView<T,A>& VectorView<T,A>::DoPermute(
+        const int* p, int i1, int i2) 
     { 
         TMVAssert(i2 <= size());
         TMVAssert(i1 <= i2);
@@ -1155,8 +1155,8 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const VectorView<T,A>& VectorView<T,A>::DoReversePermute(
-        const int* p, int i1, int i2) const
+    VectorView<T,A>& VectorView<T,A>::DoReversePermute(
+        const int* p, int i1, int i2) 
     { 
         TMVAssert(i2 <= size());
         TMVAssert(i1 <= i2);
@@ -1166,7 +1166,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    const VectorView<T,A>& VectorView<T,A>::reverseSelf() const
+    VectorView<T,A>& VectorView<T,A>::reverseSelf() 
     {
         const int s = step();
         if (s < 0) reverse().reverseSelf();
@@ -1274,8 +1274,7 @@ namespace tmv {
     };
 
     template <class T, int A>
-    const VectorView<T,A>& VectorView<T,A>::sort(
-        int* p, ADType ad, CompType comp) const
+    VectorView<T,A>& VectorView<T,A>::sort(int* p, ADType ad, CompType comp) 
     {
         if (tmv::Traits<T>::iscomplex) {
             if (std::numeric_limits<T>::is_integer) {
@@ -1322,7 +1321,7 @@ namespace tmv {
     //
 
     template <class T>  
-    void DoCopySameType(const GenVector<T>& v1, const VectorView<T>& v2)
+    void DoCopySameType(const GenVector<T>& v1, VectorView<T> v2)
     {
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v2.size()>0);
@@ -1353,7 +1352,7 @@ namespace tmv {
 #ifdef INST_DOUBLE
     template <> 
     void DoCopySameType(
-        const GenVector<double>& v1, const VectorView<double>& v2)
+        const GenVector<double>& v1, VectorView<double> v2)
     {
         int n=v2.size();
         int s1=v1.step();
@@ -1367,7 +1366,7 @@ namespace tmv {
     template <> 
     void DoCopySameType(
         const GenVector<std::complex<double> >& v1,
-        const VectorView<std::complex<double> >& v2)
+        VectorView<std::complex<double> > v2)
     {
         int n=v2.size();
         int s1=v1.step();
@@ -1382,7 +1381,7 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     void DoCopySameType(
-        const GenVector<float>& v1, const VectorView<float>& v2)
+        const GenVector<float>& v1, VectorView<float> v2)
     {
         int n=v2.size();
         int s1=v1.step();
@@ -1396,7 +1395,7 @@ namespace tmv {
     template <> 
     void DoCopySameType(
         const GenVector<std::complex<float> >& v1,
-        const VectorView<std::complex<float> >& v2)
+        VectorView<std::complex<float> > v2)
     {
         int n=v2.size();
         int s1=v1.step();
@@ -1423,7 +1422,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static void DoSwap(const VectorView<T>& v1, const VectorView<T>& v2)
+    static void DoSwap(VectorView<T> v1, VectorView<T> v2)
     {
         T* v1ptr = v1.ptr();
         T* v2ptr = v2.ptr();
@@ -1448,7 +1447,7 @@ namespace tmv {
 #ifdef BLAS
 #ifdef INST_DOUBLE
     template <> 
-    void DoSwap(const VectorView<double>& v1, const VectorView<double>& v2)
+    void DoSwap(VectorView<double> v1, VectorView<double> v2)
     { 
         int n=v2.size();
         int s1=v1.step();
@@ -1461,8 +1460,8 @@ namespace tmv {
     }
     template <> 
     void DoSwap(
-        const VectorView<std::complex<double> >& v1, 
-        const VectorView<std::complex<double> >& v2)
+        VectorView<std::complex<double> > v1, 
+        VectorView<std::complex<double> > v2)
     { 
         int n=v2.size();
         int s1=v1.step();
@@ -1476,7 +1475,7 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <> 
-    void DoSwap(const VectorView<float>& v1, const VectorView<float>& v2)
+    void DoSwap(VectorView<float> v1, VectorView<float> v2)
     { 
         int n=v2.size();
         int s1=v1.step();
@@ -1489,8 +1488,8 @@ namespace tmv {
     }
     template <> 
     void DoSwap(
-        const VectorView<std::complex<float> >& v1, 
-        const VectorView<std::complex<float> >& v2)
+        VectorView<std::complex<float> > v1, 
+        VectorView<std::complex<float> > v2)
     { 
         int n=v2.size();
         int s1=v1.step();
@@ -1505,7 +1504,7 @@ namespace tmv {
 #endif // BLAS
 
     template <class T> 
-    void Swap(const VectorView<T>& v1, const VectorView<T>& v2)
+    void Swap(VectorView<T> v1, VectorView<T> v2)
     { 
         TMVAssert2(v1.size() == v2.size());
         TMVAssert(v1.step() != 0);
@@ -1648,7 +1647,7 @@ namespace tmv {
 #endif
 
     template <class T>
-    static void FinishRead(const TMV_Reader& reader, const VectorView<T>& v)
+    static void FinishRead(const TMV_Reader& reader, VectorView<T> v)
     {
         const int n = v.size();
         std::string exp, got;
@@ -1719,7 +1718,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    void VectorView<T,A>::read(const TMV_Reader& reader) const
+    void VectorView<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
         if (!reader.readCode("V",exp,got)) {

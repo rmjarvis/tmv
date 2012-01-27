@@ -55,7 +55,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void RowMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenBandMatrix<Tb>& B,
-        const BandMatrixView<T>& C)
+        BandMatrixView<T> C)
     {
 #ifdef XDEBUG
         cout<<"Start RowMultMM"<<std::endl;
@@ -114,7 +114,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void OPMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenBandMatrix<Tb>& B,
-        const BandMatrixView<T>& C)
+        BandMatrixView<T> C)
     {
 #ifdef XDEBUG
         cout<<"Start OPMultMM"<<std::endl;
@@ -156,7 +156,7 @@ namespace tmv {
     template <int alpha, class Ta, class Tb, class Tc> 
     static void DoDiagMultMM(
         const GenBandMatrix<Ta>& A,
-        const GenBandMatrix<Tb>& B, const BandMatrixView<Tc>& C)
+        const GenBandMatrix<Tb>& B, BandMatrixView<Tc> C)
     // C += alpha * A * B
     {
         TMVAssert(A.colsize() == C.colsize());
@@ -367,7 +367,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void DiagMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenBandMatrix<Tb>& B,
-        const BandMatrixView<T>& C)
+        BandMatrixView<T> C)
     // C (+)= alpha * A * B
     {
 #ifdef XDEBUG
@@ -400,7 +400,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void DoMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenBandMatrix<Tb>& B,
-        const BandMatrixView<T>& C)
+        BandMatrixView<T> C)
     {
         //cout<<"Start DoMultMM"<<std::endl;
         //cout<<"A = "<<TMV_Text(A)<<"  "<<A.cptr()<<"  "<<A.nlo()<<','<<A.nhi()<<"  "<<A<<endl;
@@ -473,7 +473,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     static void TempMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenBandMatrix<Tb>& B,
-        const BandMatrixView<T>& C)
+        BandMatrixView<T> C)
     {
         if (C.isrm()) {
             BandMatrix<T,RowMajor> C2(C.colsize(),C.rowsize(),C.nlo(),C.nhi());
@@ -496,7 +496,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tb> 
     void MultMM(
         const T alpha, const GenBandMatrix<Ta>& A,
-        const GenBandMatrix<Tb>& B, const BandMatrixView<T>& C)
+        const GenBandMatrix<Tb>& B, BandMatrixView<T> C)
     // C (+)= alpha * A * B
     {
 #ifdef XDEBUG

@@ -51,7 +51,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     void AddMM(
-        const T alpha, const GenSymMatrix<Ta>& A, const MatrixView<T>& B)
+        const T alpha, const GenSymMatrix<Ta>& A, MatrixView<T> B)
     {
 #ifdef XDEBUG
         Matrix<Ta> A0 = A;
@@ -103,7 +103,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     void AddMM(
         const T alpha, const GenSymMatrix<Ta>& A,
-        const T beta, const GenSymMatrix<Tb>& B, const MatrixView<T>& C)
+        const T beta, const GenSymMatrix<Tb>& B, MatrixView<T> C)
     { 
 #ifdef XDEBUG
         Matrix<Ta> A0 = A;
@@ -157,7 +157,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     void AddMM(
         const T alpha, const GenSymMatrix<Ta>& A,
-        const T beta, const GenMatrix<Tb>& B, const MatrixView<T>& C)
+        const T beta, const GenMatrix<Tb>& B, MatrixView<T> C)
     { 
 #ifdef XDEBUG
         Matrix<Ta> A0 = A;

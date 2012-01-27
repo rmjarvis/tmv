@@ -52,7 +52,7 @@ namespace tmv {
     // MultXV
     // 
     template <class T, class Tx> 
-    static void DoMultXV(const Tx x, const VectorView<T>& v)
+    static void DoMultXV(const Tx x, VectorView<T> v)
     {
         //cout<<"DoMultXV: x = "<<x<<endl;
         TMVAssert(x!=Tx(0));
@@ -98,14 +98,14 @@ namespace tmv {
 #ifdef BLAS
 #ifdef INST_DOUBLE
     template <> 
-    void DoMultXV(const double x, const VectorView<double>& v)
+    void DoMultXV(const double x, VectorView<double> v)
     {
         int n=v.size();
         int s=v.step();
         BLASNAME(dscal) (BLASV(n),BLASV(x),BLASP(v.ptr()),BLASV(s));
     }
     template <> 
-    void DoMultXV(const double x, const VectorView<std::complex<double> >& v)
+    void DoMultXV(const double x, VectorView<std::complex<double> > v)
     {
         int n=v.size();
         int s=v.step();
@@ -114,7 +114,7 @@ namespace tmv {
     template <> 
     void DoMultXV(
         const std::complex<double> x,
-        const VectorView<std::complex<double> >& v)
+        VectorView<std::complex<double> > v)
     { 
         int n=v.size();
         int s=v.step();
@@ -123,14 +123,14 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <> 
-    void DoMultXV(const float x, const VectorView<float>& v)
+    void DoMultXV(const float x, VectorView<float> v)
     {
         int n=v.size();
         int s=v.step();
         BLASNAME(sscal) (BLASV(n),BLASV(x),BLASP(v.ptr()),BLASV(s));
     }
     template <> 
-    void DoMultXV(const float x, const VectorView<std::complex<float> >& v)
+    void DoMultXV(const float x, VectorView<std::complex<float> > v)
     {
         int n=v.size();
         int s=v.step();
@@ -139,7 +139,7 @@ namespace tmv {
     template <> 
     void DoMultXV(
         const std::complex<float> x,
-        const VectorView<std::complex<float> >& v)
+        VectorView<std::complex<float> > v)
     { 
         int n=v.size();
         int s=v.step();
@@ -149,7 +149,7 @@ namespace tmv {
 #endif
 
     template <class T> 
-    void MultXV(const T x, const VectorView<T>& v)
+    void MultXV(const T x, VectorView<T> v)
     { 
 #ifdef XDEBUG
         Vector<T> v0 = v;
@@ -183,7 +183,7 @@ namespace tmv {
 
     template <bool c1, class T, class Tx, class T1> 
     static void DoMultXV(
-        const Tx x, const GenVector<T1>& v1, const VectorView<T>& v2)
+        const Tx x, const GenVector<T1>& v1, VectorView<T> v2)
     {
         TMVAssert(v2.size()==v1.size());
         TMVAssert(v2.size()>0);
@@ -236,7 +236,7 @@ namespace tmv {
     }
 
     template <class T, class T1> 
-    void MultXV(const T x, const GenVector<T1>& v1, const VectorView<T>& v2)
+    void MultXV(const T x, const GenVector<T1>& v1, VectorView<T> v2)
     { 
         TMVAssert(v2.step() != 0 || v1.step() == 0 || v2.size() <= 1);
         TMVAssert(v1.size() == v2.size());
@@ -325,7 +325,7 @@ namespace tmv {
     template <bool add, bool cx, bool cy, class T, class Ta, class Tx, class Ty>
     static void DoElemMultVV(
         const Ta alpha, const GenVector<Tx>& x,
-        const GenVector<Ty>& y, const VectorView<T>& z)
+        const GenVector<Ty>& y, VectorView<T> z)
     // zi += alpha * xi * yi 
     {
         TMVAssert(z.size() == x.size());
@@ -443,7 +443,7 @@ namespace tmv {
     template <bool add, class T, class Tx, class Ty> 
     void ElemMultVV(
         const T alpha, const GenVector<Tx>& x, const GenVector<Ty>& y,
-        const VectorView<T>& z)
+        VectorView<T> z)
     {
         typedef typename Traits<T>::real_type RT;
         TMVAssert(z.size() == x.size());

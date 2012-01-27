@@ -57,7 +57,7 @@ namespace tmv {
     void SV_LDiv(
         const GenMatrix<T>& U, const GenDiagMatrix<RT>& SS, 
         const GenMatrix<T>& Vt, int kmax,
-        const GenMatrix<Tm>& m, const MatrixView<Tx>& x)
+        const GenMatrix<Tm>& m, MatrixView<Tx> x)
     {
         // A x = m
         // U S Vt x = m
@@ -102,7 +102,7 @@ namespace tmv {
     void SV_RDiv(
         const GenMatrix<T>& U, const GenDiagMatrix<RT>& SS, 
         const GenMatrix<T>& Vt, int kmax,
-        const GenMatrix<Tm>& m, const MatrixView<Tx>& x) 
+        const GenMatrix<Tm>& m, MatrixView<Tx> x) 
     {
         // x A = m
         // x U S Vt = m

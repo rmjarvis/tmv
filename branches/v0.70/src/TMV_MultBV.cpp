@@ -123,7 +123,7 @@ namespace tmv {
     template <bool add, bool cx, bool ca, bool rm,  class T, class Ta, class Tx>
     static void RowMultMV(
         const GenBandMatrix<Ta>& A, const GenVector<Tx>& x,
-        const VectorView<T>& y)
+        VectorView<T> y)
     {
         TMVAssert(A.rowsize()==x.size());
         TMVAssert(A.colsize()==y.size());
@@ -186,8 +186,7 @@ namespace tmv {
 
     template <bool add, bool cx, bool ca, bool cm, class T, class Ta, class Tx>
     static void ColMultMV(
-        const GenBandMatrix<Ta>& A,
-        const GenVector<Tx>& x, const VectorView<T> y)
+        const GenBandMatrix<Ta>& A, const GenVector<Tx>& x, VectorView<T> y)
     {
         TMVAssert(A.rowsize() == x.size());
         TMVAssert(A.colsize() == y.size());
@@ -243,7 +242,7 @@ namespace tmv {
     template <bool add, bool cx, bool ca, bool dm, class T, class Ta, class Tx>
     static void DiagMultMV(
         const GenBandMatrix<Ta>& A, const GenVector<Tx>& x,
-        const VectorView<T>& y)
+        VectorView<T> y)
     {
         TMVAssert(A.rowsize() == x.size());
         TMVAssert(A.colsize() == y.size());
@@ -298,7 +297,7 @@ namespace tmv {
     template <bool add, bool cx, class T, class Ta, class Tx> 
     static void UnitAMultMV1(
         const GenBandMatrix<Ta>& A, const GenVector<Tx>& x,
-        const VectorView<T>& y)
+        VectorView<T> y)
     {
         TMVAssert(A.rowsize() == x.size());
         TMVAssert(A.colsize() == y.size());
@@ -335,7 +334,7 @@ namespace tmv {
     template <bool add, bool cx, class T, class Ta, class Tx> 
     static void UnitAMultMV(
         const GenBandMatrix<Ta>& A, const GenVector<Tx>& x,
-        const VectorView<T>& y)
+        VectorView<T> y)
     {
         // Check for 0's in beginning or end of x:
         // y += [ A1 A2 A3 ] [ 0 ]  -->  y += A2 x
@@ -383,7 +382,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tx> 
     static void NonBlasMultMV(
         const T alpha, const GenBandMatrix<Ta>& A, const GenVector<Tx>& x,
-        const VectorView<T>& y)
+        VectorView<T> y)
     // y (+)= alpha * A * x
     {
         TMVAssert(A.rowsize() == x.size());
@@ -464,7 +463,7 @@ namespace tmv {
     template <class T, class Ta, class Tx> 
     static inline void BlasMultMV(
         const T alpha, const GenBandMatrix<Ta>& A,
-        const GenVector<Tx>& x, int beta, const VectorView<T>& y)
+        const GenVector<Tx>& x, int beta, VectorView<T> y)
     { 
         if (beta == 1) NonBlasMultMV<true>(alpha,A,x,y); 
         else NonBlasMultMV<false>(alpha,A,x,y); 
@@ -474,7 +473,7 @@ namespace tmv {
     void BlasMultMV(
         const double alpha,
         const GenBandMatrix<double>& A, const GenVector<double>& x,
-        int beta, const VectorView<double>& y)
+        int beta, VectorView<double> y)
     {
         int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
         int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
@@ -501,7 +500,7 @@ namespace tmv {
         const std::complex<double> alpha,
         const GenBandMatrix<std::complex<double> >& A,
         const GenVector<std::complex<double> >& x,
-        int beta, const VectorView<std::complex<double> >& y)
+        int beta, VectorView<std::complex<double> > y)
     {
         if (x.isconj()
 #ifndef CBLAS
@@ -573,14 +572,14 @@ namespace tmv {
         const std::complex<double> alpha,
         const GenBandMatrix<std::complex<double> >& A,
         const GenVector<double>& x,
-        int beta, const VectorView<std::complex<double> >& y)
+        int beta, VectorView<std::complex<double> > y)
     { BlasMultMV(alpha,A,Vector<std::complex<double> >(x),beta,y); }
     template <> 
     void BlasMultMV(
         const std::complex<double> alpha,
         const GenBandMatrix<double>& A,
         const GenVector<std::complex<double> >& x,
-        int beta, const VectorView<std::complex<double> >& y)
+        int beta, VectorView<std::complex<double> > y)
     {
         if (beta == 0) {
             int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
@@ -647,7 +646,7 @@ namespace tmv {
         const std::complex<double> alpha,
         const GenBandMatrix<double>& A,
         const GenVector<double>& x,
-        int beta, const VectorView<std::complex<double> >& y)
+        int beta, VectorView<std::complex<double> > y)
     {
         int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
         int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
@@ -687,7 +686,7 @@ namespace tmv {
     void BlasMultMV(
         const float alpha,
         const GenBandMatrix<float>& A, const GenVector<float>& x,
-        int beta, const VectorView<float>& y)
+        int beta, VectorView<float> y)
     {
         int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
         int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
@@ -714,7 +713,7 @@ namespace tmv {
         const std::complex<float> alpha,
         const GenBandMatrix<std::complex<float> >& A,
         const GenVector<std::complex<float> >& x,
-        int beta, const VectorView<std::complex<float> >& y)
+        int beta, VectorView<std::complex<float> > y)
     {
         if (x.isconj()
 #ifndef CBLAS
@@ -786,14 +785,14 @@ namespace tmv {
         const std::complex<float> alpha,
         const GenBandMatrix<std::complex<float> >& A,
         const GenVector<float>& x,
-        int beta, const VectorView<std::complex<float> >& y)
+        int beta, VectorView<std::complex<float> > y)
     { BlasMultMV(alpha,A,Vector<std::complex<float> >(x),beta,y); }
     template <> 
     void BlasMultMV(
         const std::complex<float> alpha,
         const GenBandMatrix<float>& A,
         const GenVector<std::complex<float> >& x,
-        int beta, const VectorView<std::complex<float> >& y)
+        int beta, VectorView<std::complex<float> > y)
     {
         if (beta == 0) {
             int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
@@ -860,7 +859,7 @@ namespace tmv {
         const std::complex<float> alpha,
         const GenBandMatrix<float>& A,
         const GenVector<float>& x,
-        int beta, const VectorView<std::complex<float> >& y)
+        int beta, VectorView<std::complex<float> > y)
     {
         int m = BlasIsCM(A) ? A.colsize() : A.rowsize();
         int n = BlasIsCM(A) ? A.rowsize() : A.colsize();
@@ -900,7 +899,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tx> 
     static void DoMultMV(
         const T alpha, const GenBandMatrix<Ta>& A, const GenVector<Tx>& x,
-        const VectorView<T>& y)
+        VectorView<T> y)
     {
         //cout<<"Start DoMultMV\n";
         //cout<<"A = "<<TMV_Text(A)<<"  "<<A.cptr()<<"  "<<A<<endl;
@@ -1007,7 +1006,7 @@ namespace tmv {
 
     template <bool rm, bool ca, class T, class Ta> 
     static void DoRowUpperMultEqMV(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& x)
+        const GenBandMatrix<Ta>& A, VectorView<T> x)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.colsize() == x.size());
@@ -1056,7 +1055,7 @@ namespace tmv {
 
     template <bool rm, class T, class Ta> 
     static inline void RowUpperMultEqMV(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& x)
+        const GenBandMatrix<Ta>& A, VectorView<T> x)
     { 
         if (A.isconj())
             DoRowUpperMultEqMV<rm,true>(A,x);
@@ -1066,7 +1065,7 @@ namespace tmv {
 
     template <bool cm, bool ca, class T, class Ta> 
     static void DoColUpperMultEqMV(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& x)
+        const GenBandMatrix<Ta>& A, VectorView<T> x)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.colsize() == x.size());
@@ -1119,7 +1118,7 @@ namespace tmv {
 
     template <bool cm, class T, class Ta> 
     static inline void ColUpperMultEqMV(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& x)
+        const GenBandMatrix<Ta>& A, VectorView<T> x)
     { 
         if (A.isconj())
             DoColUpperMultEqMV<cm,true>(A,x);
@@ -1129,7 +1128,7 @@ namespace tmv {
 
     template <bool rm, bool ca, class T, class Ta> 
     static void DoRowLowerMultEqMV(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& x)
+        const GenBandMatrix<Ta>& A, VectorView<T> x)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.colsize() == x.size());
@@ -1181,7 +1180,7 @@ namespace tmv {
 
     template <bool rm, class T, class Ta> 
     static inline void RowLowerMultEqMV(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& x)
+        const GenBandMatrix<Ta>& A, VectorView<T> x)
     { 
         if (A.isconj())
             DoRowLowerMultEqMV<rm,true>(A,x);
@@ -1191,7 +1190,7 @@ namespace tmv {
 
     template <bool cm, bool ca, class T, class Ta> 
     static void DoColLowerMultEqMV(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& x)
+        const GenBandMatrix<Ta>& A, VectorView<T> x)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.colsize() == x.size());
@@ -1243,7 +1242,7 @@ namespace tmv {
 
     template <bool cm, class T, class Ta> 
     static inline void ColLowerMultEqMV(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& x)
+        const GenBandMatrix<Ta>& A, VectorView<T> x)
     { 
         if (A.isconj())
             DoColLowerMultEqMV<cm,true>(A,x);
@@ -1253,7 +1252,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static inline void DoUpperMultEqMV(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& x)
+        const GenBandMatrix<Ta>& A, VectorView<T> x)
     // x = A * x
     {
         if (A.isrm()) RowUpperMultEqMV<true>(A,x);
@@ -1263,7 +1262,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static inline void DoLowerMultEqMV(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& x)
+        const GenBandMatrix<Ta>& A, VectorView<T> x)
     {
         if (A.isrm()) RowLowerMultEqMV<true>(A,x);
         else if (A.iscm() && !SameStorage(A,x))
@@ -1273,7 +1272,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void NonBlasUpperMultEqMV(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& x)
+        const GenBandMatrix<Ta>& A, VectorView<T> x)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.colsize() == x.size());
@@ -1342,7 +1341,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void NonBlasLowerMultEqMV(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& x)
+        const GenBandMatrix<Ta>& A, VectorView<T> x)
     // x = A * x
     {
         TMVAssert(A.isSquare());
@@ -1413,7 +1412,7 @@ namespace tmv {
 #ifdef BLAS
     template <class T, class Ta> 
     static inline void BlasMultEqMV(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& x)
+        const GenBandMatrix<Ta>& A, VectorView<T> x)
     { 
         if (A.nlo() == 0) NonBlasUpperMultEqMV(A,x);
         else NonBlasLowerMultEqMV(A,x);
@@ -1421,7 +1420,7 @@ namespace tmv {
 #ifdef INST_DOUBLE
     template <> 
     void BlasMultEqMV( 
-        const GenBandMatrix<double>& A, const VectorView<double>& x)
+        const GenBandMatrix<double>& A, VectorView<double> x)
     {
         bool up = A.nlo()==0;
         int n=A.colsize();
@@ -1440,7 +1439,7 @@ namespace tmv {
     template <> 
     void BlasMultEqMV(
         const GenBandMatrix<std::complex<double> >& A,
-        const VectorView<std::complex<double> >& x)
+        VectorView<std::complex<double> > x)
     {
         bool up = A.nlo()==0;
         int n=A.colsize();
@@ -1476,7 +1475,7 @@ namespace tmv {
     template <> 
     void BlasMultEqMV( 
         const GenBandMatrix<double>& A,
-        const VectorView<std::complex<double> >& x)
+        VectorView<std::complex<double> > x)
     {
         bool up = A.nlo()==0;
         int n=A.colsize();
@@ -1501,7 +1500,7 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     void BlasMultEqMV( 
-        const GenBandMatrix<float>& A, const VectorView<float>& x)
+        const GenBandMatrix<float>& A, VectorView<float> x)
     {
         bool up = A.nlo()==0;
         int n=A.colsize();
@@ -1520,7 +1519,7 @@ namespace tmv {
     template <> 
     void BlasMultEqMV(
         const GenBandMatrix<std::complex<float> >& A,
-        const VectorView<std::complex<float> >& x)
+        VectorView<std::complex<float> > x)
     {
         bool up = A.nlo()==0;
         int n=A.colsize();
@@ -1565,7 +1564,7 @@ namespace tmv {
     template <> 
     void BlasMultEqMV( 
         const GenBandMatrix<float>& A,
-        const VectorView<std::complex<float> >& x)
+        VectorView<std::complex<float> > x)
     {
         bool up = A.nlo()==0;
         int n=A.colsize();
@@ -1591,7 +1590,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void MultEqMV(
-        const GenBandMatrix<Ta>& A, const VectorView<T>& x)
+        const GenBandMatrix<Ta>& A, VectorView<T> x)
     {
 #ifdef XDEBUG
         cout<<"Start MultEqMV\n";
@@ -1643,7 +1642,7 @@ namespace tmv {
     template <bool add, class T, class Ta, class Tx> 
     void MultMV(
         const T alpha, const GenBandMatrix<Ta>& A, const GenVector<Tx>& x,
-        const VectorView<T>& y)
+        VectorView<T> y)
     // y (+)= alpha * A * x
     { 
         TMVAssert(A.rowsize() == x.size());

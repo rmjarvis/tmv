@@ -57,7 +57,7 @@ namespace tmv {
     static void MakeBidiagReal(
         Vector<T>& Udiag, Vector<T>& Vtdiag, 
         const GenVector<T>& cD, const GenVector<T>& cE,
-        const VectorView<T>& D, const VectorView<T>& E, T& )
+        VectorView<T> D, VectorView<T> E, T& )
     {
         TMVAssert(Vtdiag.size() == Udiag.size());
         TMVAssert(cD.size() == D.size());
@@ -78,7 +78,7 @@ namespace tmv {
         Vector<std::complex<T> >& Udiag, Vector<std::complex<T> >& Vtdiag, 
         const GenVector<std::complex<T> >& cD, 
         const GenVector<std::complex<T> >& cE,
-        const VectorView<T>& D, const VectorView<T>& E, 
+        VectorView<T> D, VectorView<T> E, 
         std::complex<T>& signdet)
     {
         TMVAssert(Vtdiag.size() == Udiag.size());
@@ -144,8 +144,8 @@ namespace tmv {
     template <class T> 
     static void NonLapBidiagonalize(
         const GenBandMatrix<T>& A,
-        MVP<T> U, const VectorView<RT>& D,
-        const VectorView<RT>& E, MVP<T> Vt, RT& logdet, T& signdet)
+        MVP<T> U, VectorView<RT> D,
+        VectorView<RT> E, MVP<T> Vt, RT& logdet, T& signdet)
     {
         // Decompose A into U B Vt
         // The Bidiagonal Matrix B is stored as two vectors: D, E
@@ -275,14 +275,14 @@ namespace tmv {
     template <class T> 
     static inline void LapBidiagonalize(
         const GenBandMatrix<T>& A,
-        MVP<T> U, const VectorView<RT>& D,
-        const VectorView<RT>& E, MVP<T> Vt, RT& logdet, T& signdet)
+        MVP<T> U, VectorView<RT> D,
+        VectorView<RT> E, MVP<T> Vt, RT& logdet, T& signdet)
     { NonLapBidiagonalize(A,U,D,E,Vt,logdet,signdet); }
 #ifdef INST_DOUBLE
     template <> 
     void LapBidiagonalize(const GenBandMatrix<double>& A,
-              MVP<double> U, const VectorView<double>& D,
-              const VectorView<double>& E, MVP<double> Vt, 
+              MVP<double> U, VectorView<double> D,
+              VectorView<double> E, MVP<double> Vt, 
               double& logdet, double& signdet)
     {
         TMVAssert(A.rowsize() == A.colsize());
@@ -350,8 +350,8 @@ namespace tmv {
     template <> 
     void LapBidiagonalize(
         const GenBandMatrix<std::complex<double> >& A,
-        MVP<std::complex<double> > U, const VectorView<double>& D,
-        const VectorView<double>& E, MVP<std::complex<double> > Vt, 
+        MVP<std::complex<double> > U, VectorView<double> D,
+        VectorView<double> E, MVP<std::complex<double> > Vt, 
         double& logdet, std::complex<double>& signdet)
     {
         TMVAssert(A.rowsize() == A.colsize());
@@ -420,8 +420,8 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     void LapBidiagonalize(const GenBandMatrix<float>& A,
-              MVP<float> U, const VectorView<float>& D,
-              const VectorView<float>& E, MVP<float> Vt, 
+              MVP<float> U, VectorView<float> D,
+              VectorView<float> E, MVP<float> Vt, 
               float& logdet, float& signdet)
     {
         TMVAssert(A.rowsize() == A.colsize());
@@ -487,8 +487,8 @@ namespace tmv {
     template <> 
     void LapBidiagonalize(
         const GenBandMatrix<std::complex<float> >& A,
-        MVP<std::complex<float> > U, const VectorView<float>& D,
-        const VectorView<float>& E, MVP<std::complex<float> > Vt, 
+        MVP<std::complex<float> > U, VectorView<float> D,
+        VectorView<float> E, MVP<std::complex<float> > Vt, 
         float& logdet, std::complex<float>& signdet)
     {
         TMVAssert(A.rowsize() == A.colsize());
@@ -555,8 +555,8 @@ namespace tmv {
     template <class T> 
     static void Bidiagonalize(
         const GenBandMatrix<T>& A,
-        MVP<T> U, const VectorView<RT>& D,
-        const VectorView<RT>& E, MVP<T> Vt, RT& logdet, T& signdet)
+        MVP<T> U, VectorView<RT> D,
+        VectorView<RT> E, MVP<T> Vt, RT& logdet, T& signdet)
     {
         TMVAssert(A.rowsize() <= A.colsize());
         TMVAssert(A.rowsize() > 0);
@@ -637,7 +637,7 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenBandMatrix<T>& A,
-        MVP<T> U, const DiagMatrixView<RT>& S, MVP<T> Vt, RT& logdet, T& signdet)
+        MVP<T> U, DiagMatrixView<RT> S, MVP<T> Vt, RT& logdet, T& signdet)
     {
         // Decompose A into U S Vt
         // where S is a diagonal real matrix, and U,V are unitary matrices.
@@ -725,8 +725,8 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenBandMatrix<T>& A,
-        const MatrixView<T>& U, const DiagMatrixView<RT>& S, 
-        const MatrixView<T>& Vt)
+        MatrixView<T> U, DiagMatrixView<RT> S, 
+        MatrixView<T> Vt)
     { 
         if (U.isconj()) {
             if (Vt.isconj()) {
@@ -748,7 +748,7 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenBandMatrix<T>& A,
-        const MatrixView<T>& U, const DiagMatrixView<RT>& S)
+        MatrixView<T> U, DiagMatrixView<RT> S)
     {
         if (U.isconj()) {
             SV_Decompose(A.conjugate(),U.conjugate(),S);
@@ -760,7 +760,7 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenBandMatrix<T>& A,
-        const DiagMatrixView<RT>& S, const MatrixView<T>& Vt)
+        DiagMatrixView<RT> S, MatrixView<T> Vt)
     {
         if (Vt.isconj()) {
             SV_Decompose(A.conjugate(),S,Vt.conjugate());
@@ -771,7 +771,7 @@ namespace tmv {
 
     template <class T> 
     void SV_Decompose(
-        const GenBandMatrix<T>& A, const DiagMatrixView<RT>& S)
+        const GenBandMatrix<T>& A, DiagMatrixView<RT> S)
     { RT ld=0; T d=0; SV_Decompose<T>(A,0,S,0,ld,d); }
 
 #undef RT

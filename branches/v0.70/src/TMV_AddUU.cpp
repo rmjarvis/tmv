@@ -55,7 +55,7 @@ namespace tmv {
     template <bool rm, bool a1, bool ca, class T1, class T2, class T3> 
     static void DoRowAddMM(
         const T1 alpha, const GenUpperTriMatrix<T2>& A, 
-        const UpperTriMatrixView<T3>& B)
+        UpperTriMatrixView<T3> B)
     {
         TMVAssert(!A.isunit());
         TMVAssert(!B.isunit());
@@ -90,7 +90,7 @@ namespace tmv {
     template <bool rm, class T, class Ta> 
     static inline void RowAddMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A, 
-        const UpperTriMatrixView<T>& B)
+        UpperTriMatrixView<T> B)
     {
         if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) 
             if (TMV_REAL(alpha) == TMV_RealType(T)(1))
@@ -107,7 +107,7 @@ namespace tmv {
     template <bool cm, bool a1, bool ca, class T1, class T2, class T3> 
     static void DoColAddMM(
         const T1 alpha, const GenUpperTriMatrix<T2>& A, 
-        const UpperTriMatrixView<T3>& B)
+        UpperTriMatrixView<T3> B)
     {
         TMVAssert(!A.isunit());
         TMVAssert(!B.isunit());
@@ -137,7 +137,7 @@ namespace tmv {
     template <bool cm, class T, class Ta> 
     static inline void ColAddMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A, 
-        const UpperTriMatrixView<T>& B)
+        UpperTriMatrixView<T> B)
     {
         if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) 
             if (TMV_REAL(alpha) == TMV_RealType(T)(1))
@@ -153,7 +153,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static inline void DoAddMM(const T alpha,
-              const GenUpperTriMatrix<Ta>& A, const UpperTriMatrixView<T>& B)
+              const GenUpperTriMatrix<Ta>& A, UpperTriMatrixView<T> B)
     { 
         TMVAssert(!B.isunit());
         TMVAssert(A.size() == B.size());
@@ -174,7 +174,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     void AddMM(const T alpha,
-              const GenUpperTriMatrix<Ta>& A, const UpperTriMatrixView<T>& B)
+              const GenUpperTriMatrix<Ta>& A, UpperTriMatrixView<T> B)
         // B += alpha * A
     {
         TMVAssert(!B.isunit());
@@ -221,7 +221,7 @@ namespace tmv {
     void AddMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A, 
         const T beta, const GenUpperTriMatrix<Tb>& B,
-        const UpperTriMatrixView<T>& C)
+        UpperTriMatrixView<T> C)
     {
         TMVAssert(A.size() == B.size());
         TMVAssert(A.size() == C.size());
@@ -307,7 +307,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     void AddMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A, 
-        const T beta, const GenMatrix<Tb>& B, const MatrixView<T>& C)
+        const T beta, const GenMatrix<Tb>& B, MatrixView<T> C)
     {
         TMVAssert(A.size() == B.colsize());
         TMVAssert(A.size() == B.rowsize());
@@ -360,7 +360,7 @@ namespace tmv {
     template <class T, class Ta, class Tb> 
     void AddMM(
         const T alpha, const GenUpperTriMatrix<Ta>& A, 
-        const T beta, const GenLowerTriMatrix<Tb>& B, const MatrixView<T>& C)
+        const T beta, const GenLowerTriMatrix<Tb>& B, MatrixView<T> C)
         // C = alpha * A + beta * B
     {
         TMVAssert(A.size() == B.size());

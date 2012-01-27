@@ -284,7 +284,7 @@ namespace tmv {
     // This isn't really worth inlining.  We just call the regular
     // Reflect function.
     template <class T> 
-    T HouseholderReflect(T& x0, const VectorView<T>& x, T& det);
+    T HouseholderReflect(T& x0, VectorView<T> x, T& det);
 
     // Again, this is just the normal QR_Decompose with everything inlined.
     template <class T, int M, int N> 
