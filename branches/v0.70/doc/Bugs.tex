@@ -283,7 +283,7 @@ guards against overflow and underflow.
 I have found that many LAPACK libraries (especially older installations) 
 are not thread-safe.  So you might get segmentation faults or other strange
 non-repeatable errors at random times when using LAPACK within a multi-threaded
-program.  The solution is to compile TMV without LAPACK (using SCons option
+program.  The solution is to compile TMV without LAPACK (with SCons option
 \tt{WITH_LAPACK=false}).
 
 \end{itemize}

@@ -12,7 +12,7 @@ import sys
 # Subdirectories containing SConscript files.  We always process src but
 # there are some other optional ones
 src_dir = 'src'
-subdirs=['test','examples','bin','share','doc']
+subdirs=['test','examples','bin','share']
 
 # Configurations will be saved here so command line options don't
 # have to be sent more than once
@@ -1169,6 +1169,9 @@ if not GetOption('help'):
 
     if env['WITH_UPS']:
         subdirs += ['ups']
+
+    if 'doc' in COMMAND_LINE_TARGETS: 
+        subdirs += ['doc']
 
     # subdirectores to process.  We process src by default
     script_files = [os.path.join(src_dir,'SConscript')]
