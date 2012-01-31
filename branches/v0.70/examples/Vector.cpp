@@ -1,3 +1,6 @@
+
+#define TMV_EXTRA_DEBUG // To get the 888's below.
+
 #include "TMV.h"
 #include <iostream>
 
@@ -13,10 +16,11 @@ int main() try
     //! v1 = 6 ( 888  888  888  888  888  888 )
 
     // Initialize with STL-compliant iterator
+    srand(51572);
     std::generate(v1.begin(),v1.end(),rand);
     v1 /= double(RAND_MAX);
     std::cout<<"v1 = "<<v1<<std::endl;
-    //! v1 = 6 ( 0.840188  0.394383  0.783099  0.79844  0.911647  0.197551 )
+    //! v1 = 6 ( 0.403622  0.66681  0.0776762  0.504604  0.871968  0.163157 )
 
     // Create with all 2's.
     tmv::Vector<double> v2(6,2.); 
@@ -32,7 +36,7 @@ int main() try
 
     // Initialize with direct access of each element
     tmv::Vector<double> v4(6); 
-    for(size_t i=0;i<v4.size();i++) {
+    for(int i=0;i<v4.size();i++) {
         v4(i) = 2*i+10.;  // Could also use v4[i] instead of v4(i)
     }
     std::cout<<"v4 = "<<v4<<std::endl;
@@ -47,14 +51,14 @@ int main() try
         v4 << 1.2, 9., 12, 2.5;
     } catch (tmv::Error& e) {
         std::cout<<"Caught e = "<<e;
-        //! Caught e = TMV Read Error: Reading from list initialization.
+        //! Caught e = TMV Error: Reading from list initialization.
         //! Reached end of list, but expecting 2 more elements.
     }
     try {
         v4 << 1.2, 9., 12, 2.5, -7.4, 14, 99;
     } catch (tmv::Error& e) {
         std::cout<<"Caught e = "<<e;
-        //! Caught e = TMV Read Error: Reading from list initialization.
+        //! Caught e = TMV Error: Reading from list initialization.
         //! List has more elements than expected.
     }
 
@@ -83,15 +87,16 @@ int main() try
     std::cout<<"|v3("<<i1<<")| = "<<x1<<" is the minimum absolute value\n";
     //! |v3(0)| = 1.1 is the minimum absolute value
     std::cout<<"|v3("<<i2<<")| = "<<x2<<" is the maximum absolute value\n";
-    //! |v3(5)| = 15 is the maximum absolute value
+    //! |v3(2)| = 15 is the maximum absolute value
     std::cout<<"v3("<<i3<<") = "<<x3<<" is the minimum value\n";
-    //! v3(4) = -15 is the minimum value
+    //! v3(2) = -15 is the minimum value
     std::cout<<"v3("<<i4<<") = "<<x4<<" is the maximum value\n";
-    //! v3(5) = 8 is the maximum value
+    //! v3(1) = 8 is the maximum value
 
 
     // Modifications:
 
+    v1 << 1, 2, 4, 8, 16, 32;
     std::cout<<"v1 = "<<v1<<std::endl;
     //! v1 = 6 ( 1  2  4  8  16  32 )
 
@@ -125,7 +130,7 @@ int main() try
     std::cout<<"v3.subVector(0,6,2) = "<<v3.subVector(0,6,2)<<std::endl;
     //! v3.subVector(0,6,2) = 3 ( 1.1  -15  6.3 )
     std::cout<<"v3.reverse() = "<<v3.reverse()<<std::endl;
-    // v3.reverse() = 6 ( -12  6.3  2.5  -15  8  1.1 )
+    //! v3.reverse() = 6 ( -12  6.3  2.5  -15  8  1.1 )
 
     // Views can be initialized with << too.
     v3.reverse() << 1.2, 9., 12, 2.5, -7.4, 14;
@@ -158,7 +163,7 @@ int main() try
     std::cout<<"fv3.subVector(1,3) = "<<fv3.subVector(1,3)<<std::endl;
     //! fv3.subVector(1,3) = 3 ( 64  -29.6  49 )
     std::cout<<"fv3.makeBasis(3) = "<<fv3.makeBasis(3)<<std::endl;
-    //! fv3.makeBasis(2) = 6 ( 0  0  1  0  0  0 )
+    //! fv3.makeBasis(3) = 6 ( 0  0  1  0  0  0 )
 
 
     // Vector arithmetic:
@@ -181,7 +186,7 @@ int main() try
     //! v3 += v4 = 6 ( 129.2  -50.2  110  50.5  76.6  18.8 )
 
     // Get as complicated as you want:
-    std::cout<<"(v1*v2) * v3 + ((-v4 + 4.*v1)*v2) * v2/20. = \n"<<
+    std::cout<<"(v1*v2) * v3 + ((-v4 + 4.*v1)*v2) * v2/20. =\n"<<
         (v1*v2) * v3 + ((-v4 + 4.*v1)*v2) * v2/20.<<std::endl;
     //! (v1*v2) * v3 + ((-v4 + 4.*v1)*v2) * v2/20. =
     //! 6 ( 252.94  -105.86  214.54  95.54  147.74  32.14 )
@@ -195,11 +200,11 @@ int main() try
     // Complex vectors:
 
     tmv::Vector<std::complex<double> > cv4 = v4 * std::complex<double>(1,2);
-    std::cout<<"cv4 = v4 * (1+2i) = \n"<<cv4<<std::endl;
+    std::cout<<"cv4 = v4 * (1+2i) =\n"<<cv4<<std::endl;
     //! cv4 = v4 * (1+2i) =
     //! 6 ( (1.2,2.4)  (9,18)  (12,24)  (2.5,5)  (-7.4,-14.8)  (14,28) )
 
-    std::cout<<"cv4.conjugate() = \n"<<cv4.conjugate()<<std::endl;
+    std::cout<<"cv4.conjugate() =\n"<<cv4.conjugate()<<std::endl;
     //! cv4.conjugate() =
     //! 6 ( (1.2,-2.4)  (9,-18)  (12,-24)  (2.5,-5)  (-7.4,14.8)  (14,-28) )
     std::cout<<"cv4.realPart() = "<<cv4.realPart()<<std::endl;
@@ -250,30 +255,30 @@ int main() try
     std::cout<<"cv4 = "<<cv4<<std::endl;
     //! cv4 = 6 ( (-3,4)  (1,-1)  (-2,0)  (-1,-6)  (7,5)  (3,-1) )
 
-    std::cout<<"cv4.sort(0,Descend,RealComp) = \n"<<
+    std::cout<<"cv4.sort(0,Descend,RealComp) =\n"<<
         cv4.sort(0,tmv::Descend,tmv::RealComp)<<std::endl;
-    //! cv4.sort(0,Descend,RealComp) = 
+    //! cv4.sort(0,Descend,RealComp) =
     //! 6 ( (7,5)  (3,-1)  (1,-1)  (-1,-6)  (-2,0)  (-3,4) )
-    std::cout<<"cv4.sort(0,Ascend,ImagComp) = \n"<<
+    std::cout<<"cv4.sort(0,Ascend,ImagComp) =\n"<<
         cv4.sort(0,tmv::Ascend,tmv::ImagComp)<<std::endl;
     //! cv4.sort(0,Ascend,ImagComp) =
     //! 6 ( (-1,-6)  (3,-1)  (1,-1)  (-2,0)  (-3,4)  (7,5) )
-    std::cout<<"cv4.sort(0,Ascend,AbsComp) = \n"<<
+    std::cout<<"cv4.sort(0,Ascend,AbsComp) =\n"<<
         cv4.sort(0,tmv::Ascend,tmv::AbsComp)<<std::endl;
     //! cv4.sort(0,Ascend,AbsComp) =
     //! 6 ( (1,-1)  (-2,0)  (3,-1)  (-3,4)  (-1,-6)  (7,5) )
-    std::cout<<"cv4.sort(0,Ascend,ArgComp) = \n"<<
+    std::cout<<"cv4.sort(0,Ascend,ArgComp) =\n"<<
         cv4.sort(0,tmv::Ascend,tmv::ArgComp)<<std::endl;
     //! cv4.sort(0,Ascend,ArgComp) =
     //! 6 ( (-1,-6)  (1,-1)  (3,-1)  (7,5)  (-3,4)  (-2,0) )
 
     // The default component for complex vectors is RealComp:
-    std::cout<<"cv4.sort() = \n"<< cv4.sort()<<std::endl;
-    //! cv4.sort() = 
+    std::cout<<"cv4.sort() =\n"<< cv4.sort()<<std::endl;
+    //! cv4.sort() =
     //! 6 ( (-3,4)  (-2,0)  (-1,-6)  (1,-1)  (3,-1)  (7,5) )
 
     return 0;
 } catch (tmv::Error& e) {
-  std::cerr<<e<<std::endl;
-  return 1;
+    std::cerr<<e<<std::endl;
+    return 1;
 }

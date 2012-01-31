@@ -32,10 +32,10 @@ void TestPermutation()
     tmv::Vector<T> v3r(10);
     v3r << 2,6,5,1,4,0,8,9,7,3;
 
-    tmv::Permutation p1(10,pp1,false,det1);
-    tmv::Permutation p2(10,pp2,false,det2);
-    tmv::Permutation p3(10,pp3,false,det3);
-    tmv::Permutation p3i(10,pp3i,true,det3);
+    tmv::Permutation p1(10,pp1,false);
+    tmv::Permutation p2(10,pp2,false);
+    tmv::Permutation p3(10,pp3,false);
+    tmv::Permutation p3i(10,pp3i,true);
 
     tmv::Matrix<T> m1 = p1;
     tmv::Matrix<T> m2 = p2;
@@ -48,10 +48,15 @@ void TestPermutation()
     // Test construction
     //
 
-    Assert(p1.det() == m1.det(),"Identity permutation determinant");
-    Assert(p2.det() == m2.det(),"Reversal permutation determinant");
-    Assert(p3.det() == m3.det(),"Random permutation determinant");
-    Assert(p3i.det() == m3.det(),"Inverse permutation determinant");
+    Assert(p1.det() == det1,"Identity permutation determinant");
+    Assert(p2.det() == det2,"Reversal permutation determinant");
+    Assert(p3.det() == det3,"Random permutation determinant");
+    Assert(p3i.det() == det3,"Inverse permutation determinant");
+
+    Assert(p1.det() == m1.det(),"Identity permutation determinant = m.det");
+    Assert(p2.det() == m2.det(),"Reversal permutation determinant = m.det");
+    Assert(p3.det() == m3.det(),"Random permutation determinant = m.det");
+    Assert(p3i.det() == m3.det(),"Inverse permutation determinant = m.det");
 
     for(int i=0;i<10;++i) for(int j=0;j<10;++j) {
         Assert(p1.cref(i,j) == m1.cref(i,j),"Identity permutation cref");

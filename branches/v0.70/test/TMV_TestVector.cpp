@@ -708,6 +708,7 @@ static void TestVectorIO()
     cv(3) = CT(1.e-30,1.e-30);
     v(8) = T(9.e-3);
     cv(8) = CT(9.e-3,9.e-3);
+    cv(9) = CT(9,9.e-3);
     v(12) = T(0.123456789);
     cv(12) = CT(3.123456789,600.987654321);
 
@@ -722,9 +723,16 @@ static void TestVectorIO()
     tmv::Vector<CT > cv3 = cv;
     v3(3) = T(0);
     cv3(3) = T(0);
-    v3(8) = T(0); // Others, esp. cv3(8), shouldn't get clipped.
+    v3(8) = T(0); 
+    // Others, esp. cv3(8) and cv3(9) shouldn't get clipped.
     Assert(v2 == v3,"Vector clip");
     Assert(cv2 == cv3,"Complex Vector clip");
+    
+    // However, ThreshIO for complex works slightly differently than clip.
+    // It clips _either_ the real or imag component, so now cv2(8) and 
+    // cv2(9) need to be modified.
+    cv2(8) = cv3(8) = T(0);
+    cv2(9) = cv3(9) = T(9);
 
     // Write vectors with 4 different styles
     std::ofstream fout("tmvtest_vector_io.dat");

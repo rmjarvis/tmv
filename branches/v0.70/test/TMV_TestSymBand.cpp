@@ -1601,6 +1601,7 @@ static void TestBasicSymBandMatrix_IO()
     cs(1,3) = ch(3,1) = CT(1.e-30,1.e-30);
     s(5,6) = h(6,5) = T(9.e-3);
     cs(5,6) = ch(6,5) = CT(9.e-3,9.e-3);
+    cs(5,7) = ch(7,5) = CT(9,9.e-3);
     s(4,7) = h(7,4) = T(0.123456789);
     cs(4,7) = ch(7,4) = CT(3.123456789,600.987654321);
 
@@ -1626,6 +1627,12 @@ static void TestBasicSymBandMatrix_IO()
     Assert(cs2 == cs3,"Complex SymBandMatrix clip");
     Assert(h2 == h3,"HermBandMatrix clip");
     Assert(ch2 == ch3,"Complex HermBandMatrix clip");
+
+    // However, ThreshIO for complex works slightly differently than clip.
+    // It clips _either_ the real or imag component, so now cm2(5,6) and
+    // cm2(6,6) need to be modified.
+    cs2(5,6) = cs3(5,6) = ch2(6,5) = ch3(6,5) = T(0);
+    cs2(5,7) = cs3(5,7) = ch2(7,5) = ch3(7,5) = T(9);
 
     // Write matrices with 4 different style
     std::ofstream fout("tmvtest_symbandmatrix_io.dat");

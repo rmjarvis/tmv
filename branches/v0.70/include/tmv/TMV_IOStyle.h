@@ -128,8 +128,15 @@ namespace tmv {
 
         // Helper for dealing with threshold writing.
         template <class T>
-        T outVal(const T& val)
+        T outVal(const T& val) const
         { return (thresh > 0. && TMV_ABS(val) < thresh) ? T(0) : val; }
+
+        template <class T>
+        std::complex<T> outVal(const std::complex<T>& val) const
+        {
+            return thresh > 0. ?
+                std::complex<T>(outVal(real(val)),outVal(imag(val))) : val; 
+        }
 
         // Private constructor with initial default values.
         // (The int is just to make it easy to resolve on the signature.)
@@ -220,7 +227,7 @@ namespace tmv {
 
         template <class T>
         void writeValue(const T& x) const
-        { os << Value((s.thresh > 0. && TMV_ABS(x) < s.thresh) ? T(0) : x); }
+        { os << Value(s.outVal(x)); }
 
         bool isCompact() const
         { return s.usecompact; }

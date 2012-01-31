@@ -172,38 +172,20 @@ The tests
 in \texttt{tmvtest1} are split into \texttt{tmvtest1a}, \texttt{tmvtest1b} and \texttt{tmvtest1c}.
 Likewise \texttt{tmvtest2} has \texttt{a}, \texttt{b} and \texttt{c} versions, and \texttt{tmvtest3}
 has \texttt{a}, \texttt{b}, \texttt{c} and \texttt{d} versions.  These are 
-compiled by typing \texttt{make test1a},~ \texttt{make test1b}, etc.  So if you want
-to run the tests on a machine that can't link the full programs, these
-smaller versions can help.   
-
-With the SCons installation, you can 
-type \texttt{scons test SMALL\_TESTS=true}.  Or you can make them one
+compiled by typing \texttt{scons test SMALL\_TESTS=true}.  Or you can make them one
 at a time by typing \texttt{scons test1a},~ \texttt{scons test1b}, etc.
 
-You might also try testing only one type at a time: First compile with \texttt{-DNO\_INST\_FLOAT},
-and then with \texttt{-DNO\_INST\_DOUBLE} (or with SCons, use \texttt{INST\_FLOAT=false}
-and then \texttt{INST\_FLOAT=true INST\_DOUBLE=false}).  This cuts the size of the executables
+You might also try testing only one type at a time: First compile with \texttt{INST\_FLOAT=false}
+and then \texttt{INST\_FLOAT=true INST\_DOUBLE=false}.  This cuts the size of the executables
 in half, which can also help if the above trick doesn't work.  (I had to do this for test2c on one 
 of my test systems that does not have much memory.)
 \index{Installation!Test suite}
 
-\item {\bf Standard Template Library:}
-In a few places, the TMV code uses standard template library algorithms.
-Normally these work fine, but a couple of the compilers I tested the code on
-didn't seem to have the STL correctly installed. 
-
-Rather than trying to get the sysadmin for these systems to find and fix the problem, 
-I just added an option to compile without some of the problematic STL functions.
-With the option set, it uses a simple median-of-three
-quicksort algorithm, rather than the STL \tt{sort} command, and it reads the strings
-in character by character rather than using the normal string I/O.  
-You can enable this option by compiling with the flag \texttt{-DNOSTL}.  
-
 \item {\bf Non-portable IsNaN():}
-The LAPACK function \tt{sstegr} sometimes produces \tt{nan} values on output.
+The LAPACK function \tt{?stegr} sometimes produces \tt{nan} values on output.
 Apparently there is a bug in at least some distributions of this function.
 Anyway, TMV checks for this and calls the alternative (but slower) function
-\tt{sstedc} instead whenever a \tt{nan} is found.  
+\tt{?stedc} instead whenever a \tt{nan} is found.  
 The problem is that there is no C++ standard way to check
 for a \tt{nan} value.  
 
@@ -217,10 +199,7 @@ However, the provided code did work successfully on all the compilers I
 tested it on, so technically this is not a ``known'' compiler issue, just a 
 potential issue.}.
 
-Alternatively, you can compile with \texttt{-DNOSTEGR} which will always
-use \tt{sstedc} instead of \tt{sstegr} at the expense of a bit of speed.
-Since this is the only place we need to use the \tt{IsNaN} function, that 
-should fix the problem.
+Note that this can only ever be an issue if you specifically request that TMV use the \tt{stegr} algorithm with the SCons option \tt{USE_STEGR=true}.  If you do not do this, then TMV doesn't use the LAPACK \tt{?stegr} functions at all.
 
 \end{itemize}
 
@@ -236,7 +215,7 @@ result for $R$.  The diagonal elements of $R$ are supposed to be monotonically d
 along the diagonal, but sometimes this is not strictly true.  This probably varies among
 implementations, so your version might always succeed.
 
-But if this feature is important to you, then you can compile with the flag \texttt{-DNOGEQP3},
+But if this feature is important to you, then you can compile with \tt{USE_GEQP3=false},
 which will use the native TMV code for strict QRP decomposition for this 
 rather than the LAPACK function (which is called \tt{?geqp3}).
 
@@ -285,16 +264,16 @@ through without errors, then you don't have to worry about it.
 
 If you encounter this problem, which manifests as \tt{tmvtest1} failing in the \tt{<float>} section,
 then I'm afraid the possible solutions are to forego using \tt{Matrix<float>}, switch to another
-BLAS library, or compile TMV without BLAS.
+BLAS library, or compile TMV without BLAS (with SCons option \tt{USE_BLAS=false}).
 
 \item {\bf Overflow and underflow when using LAPACK:}
 \index{LAPACK!Overflow/underflow problems}
 \index{Bugs!nan or inf when using LAPACK}
 The normal distribution of LAPACK algorithms are not as careful as the TMV code when 
 it comes to guarding against overflow and underflow.  As a result, you may find
-matrix decompositions resulting in values with nan or inf when using TMV
-with LAPACK support enabled.  The solution is to compile TMV without the LAPACK
-library (e.g. by using \tt{WITH_LAPACK=false} in the SCons installation method).
+matrix decompositions resulting in values with \tt{nan} or \tt{inf} when using TMV
+with LAPACK support enabled.  The solution if this is a problem for you is to compile TMV without the LAPACK
+library (using the SCons option \tt{WITH_LAPACK=false}).
 This does not generally result in slower code, since the native TMV code is almost always
 as fast (usually using the same algorithm) as the LAPACK distribution, but has better
 guards against overflow and underflow.
@@ -304,8 +283,8 @@ guards against overflow and underflow.
 I have found that many LAPACK libraries (especially older installations) 
 are not thread-safe.  So you might get segmentation faults or other strange
 non-repeatable errors at random times when using LAPACK within a multi-threaded
-program.  The solution is to compile TMV without LAPACK (e.g. by using
-\tt{WITH_LAPACK=false} in the SCons installation method).  
+program.  The solution is to compile TMV without LAPACK (using SCons option
+\tt{WITH_LAPACK=false}).
 
 \end{itemize}
 
@@ -356,8 +335,7 @@ I need to add the non-hermitian routines.
 
 Block-diagonal, generic sparse (probably both
 row-based and column-based), block sparse, symmetric and hermitian block
-diagonal, small symmetric and hermitian...
-Maybe skew-symmetric and skew-hermitian.  Are these worth adding?  Let me know.
+diagonal, etc.  Maybe skew-symmetric and skew-hermitian.  Are these worth adding?  Let me know.
 
 \item
 \textbf{Packed storage}
@@ -365,7 +343,7 @@ Maybe skew-symmetric and skew-hermitian.  Are these worth adding?  Let me know.
 \index{UpperTriMatrix!Packed storage}
 \index{LowerTriMatrix!Packed storage}
 
-Triangle and symmetric matrices. can be stored in (approximately) half the 
+Triangular and symmetric matrices. can be stored in (approximately) half the 
 memory as a full $N \times N$ matrix using what is known as packed storage.  
 There are BLAS routines for dealing with
 these packed storage matrices, but I don't yet have the ability to 
@@ -381,9 +359,10 @@ There is a faster algorithm for calculating eigenvectors of a hermitian
 matrix given the eigenvalues, which uses a technique know as
 a ``Relatively Robust Representation''.  The native TMV
 code does not use this, so it is slower than a compilation which calls
-the LAPACK routine.
+the LAPACK routine (which is only enabled if you use both 
+\tt{WITH_LAPACK=true} and \tt{USE_STEGR=true}).
 I think this is the only routine for which the LAPACK version is still significantly
-faster than the native TMV code.
+faster than the native TMV code.  Although, I do find that many LAPACK distributions have a fairly buggy version of the algorithm that does not deal very well with overflow and underflow, which is why it must be specifically enabled.  Hopefully when I implement this in TMV, I can do a better job in this regard.
 
 \item
 \textbf{Row-major Bunch-Kaufman}
@@ -418,22 +397,10 @@ feature too.  Probably as an option (since most matrices don't need it)
 as something like \tt{m.Equilibrate()} before calling a division routine.
 
 \item
-\textbf{OpenMP}
+\textbf{OpenMP in the SVD algorithm}
 \index{OpenMP}
 
-I have rewritten the basic Matrix product algorithm to exploit multiple threads using 
-OpenMP pragma's.  This gives a good boost in speed for non-BLAS 
-compilations, especially since most of the calculation time for the higher-level
-algorithms is in the MultMM functions.  Also, the SVD divide and conquer
-algorithm uses OpenMP.  
-
-But the SVD only uses half of the potential for OpenMP at the moment.  I need
-to reorganize the algorithm a bit to make it more amenable to being parallelized,
-but it is certainly doable.
-
-The version 0.90 code currently in development also uses OpenMP for
-multiplication and division by triangle matrices on a rectangle matrix.  These 
-algorithms have not been propagated back to the current released version.
+TMV's implementation of the divide-and-conquer SVD algorithm only uses half of the potential for parallelization at the moment.  I need to reorganize the algorithm a bit to make it more amenable to being further parallelized, but it is certainly doable.
 
 \item
 \textbf{Check for memory throws}

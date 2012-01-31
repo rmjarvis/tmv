@@ -91,7 +91,7 @@ values equal to \tt{x}
 
 \item
 \begin{tmvcode}
-tmv::Matrix<T,A> m1(const Matrix<T2>& m2)
+tmv::Matrix<T,A> m1(const Matrix<T2,A2>& m2)
 m1 = m2
 \end{tmvcode}
 Copy the \tt{Matrix m2}, which may be of any type \tt{T2} so long
@@ -1591,7 +1591,7 @@ For the LU decomposition, we have:
 \begin{tmvcode}
 tmv::ConstLowerTriMatrixView<T> m.lud().getL()
 tmv::ConstUpperTriMatrixView<T> m.lud().getU()
-Permutation m.lud().getP()
+const Permutation& m.lud().getP()
 bool m.lud().isTrans()
 \end{tmvcode}
 \index{Matrix!Methods!lud}
@@ -1641,7 +1641,7 @@ For the QRP decomposition, we have:
 \begin{tmvcode}
 tmv::PackedQ<T> m.qrpd().getQ()
 tmv::ConstUpperTriMatrixView<T> m.qrpd().getR()
-Permutation m.qrpd().getP()
+const Permutation& m.qrpd().getP()
 bool m.qrpd().isTrans()
 \end{tmvcode}
 \index{Matrix!Methods!qrpd}
@@ -1849,12 +1849,13 @@ This can be done using
 os << tmv::ThreshIO(thresh) << m;
 \end{tmvcode}
 \index{IOStyle!ThreshIO}
-which is equivalent to
+which writes as 0 any value smaller (in absolute value) than \tt{thresh}.  
+For real \tt{m} it is equivalent to
 \begin{tmvcode}
 os << tmv::Matrix<T>(m).clip(thresh);
 \end{tmvcode}
 \index{Matrix!clip}
-but without requiring the temporary \tt{Matrix}.
+but without requiring the temporary \tt{Matrix}.  For complex \tt{m} it is slightly different, since it separately tests each component of the complex number.  So if \tt{thresh} is \tt{1.e-8}, the complex value \tt{(8,7.5624e-12)} would be writtend \tt{(8,0)}.
 
 There is also a compact I/O format which is mediated by the manipulator
 \tt{tmv::CompactIO()}, which puts everything on one line and skips the parentheses.
@@ -1868,6 +1869,10 @@ M nrows ncols m(0,0) m(0,1) m(0,2) ... m(nrows-1,ncols-1)
 \end{tmvcode}
 Note the \tt{M} at the start of the line.  Each kind of special matrix will use a different letter (or sometimes 2 letters) to indicate what kind of information follows on the rest of the line, since most special matrices will not need to write out every single value to fully define the matrix.  So the initial character (or string) specifies the compact I/O format that follows.
 
+If you want to use a threshold with the compact I/O format, you can do so by writing
+\begin{tmvcode}
+os << tmv::CompactIO().setThresh(thresh) << m;
+\end{tmvcode}
 See \S\ref{IOStyle} for more information about specifying custom I/O styles, including
 features like using brackets instead of parentheses, putting commas between elements,
 or specifying an output precision.  
@@ -2019,10 +2024,8 @@ For a regular \tt{Vector} and \tt{Matrix}, the TMV library checks whether any of
 the objects in an arithmetic statement use the same memory.  
 Then it uses the correct algorithm to deal with it 
 correctly.  
-
 This alias checking is relatively expensive for small matrices, so we don't do it if
 \tt{m} and \tt{v} are a \tt{SmallMatrix} and a \tt{SmallVector}.  
-
 If you need to perform this operation you can write:
 \begin{tmvcode}
 v = m * tmv::SmallVector<N>(v);

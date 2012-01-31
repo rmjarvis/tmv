@@ -446,6 +446,7 @@ static void TestBasicBandMatrix_IO()
     cm(3,1) = CT(1.e-30,1.e-30);
     m(5,6) = T(9.e-3);
     cm(5,6) = CT(9.e-3,9.e-3);
+    cm(6,6) = CT(9,9.e-3);
     m(7,4) = T(0.123456789);
     cm(7,4) = CT(3.123456789,600.987654321);
 
@@ -460,9 +461,16 @@ static void TestBasicBandMatrix_IO()
     tmv::BandMatrix<CT> cm3 = cm;
     m3(3,1) = T(0);
     cm3(3,1) = T(0);
-    m3(5,6) = T(0); // Others, esp. cm3(5,6), shouldn't get clipped.
+    m3(5,6) = T(0); 
+    // Others, esp. cm3(5,6) and cm3(6,6), shouldn't get clipped.
     Assert(m2 == m3,"BandMatrix clip");
     Assert(cm2 == cm3,"Complex BandMatrix clip");
+
+    // However, ThreshIO for complex works slightly differently than clip.
+    // It clips _either_ the real or imag component, so now cm2(5,6) and
+    // cm2(6,6) need to be modified.
+    cm2(5,6) = cm3(5,6) = T(0);
+    cm2(6,6) = cm3(6,6) = T(9);
 
     // Write matrices with 4 different styles
     std::ofstream fout("tmvtest_bandmatrix_io.dat");

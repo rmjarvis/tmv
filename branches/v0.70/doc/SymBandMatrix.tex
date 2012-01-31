@@ -6,7 +6,7 @@
 \label{SymBandMatrix}
 
 The \tt{SymBandMatrix} class is our symmetric band matrix, which combines
-the properties of SymMatrix and BandMatrix; it has a banded structure and
+the properties of \tt{SymMatrix} and \tt{BandMatrix}; it has a banded structure and
 $m = m^T$.  Likewise \tt{HermBandMatrix} is our hermitian band matrix for
 which $m = m^\dagger$.
 
@@ -34,8 +34,8 @@ there is also a second template parameter that specifies attributes of the
 \tt{SymBandMatrix} or \tt{HermBandMatrix}.  The attributes that are allowed are:
 \begin{description} \itemsep -2pt
 \item[$\bullet$] \tt{CStyle} or \tt{FortranStyle}
-\item[$\bullet$] \tt{ColMajor}, \tt{RowMajor} or \tt{DiagMajor}
-\item[$\bullet$] \tt{Upper} or \tt{Lower}
+\item[$\bullet$] \tt{ColMajor}, \tt{RowMajor}, or \tt{DiagMajor}
+\item[$\bullet$] \tt{Lower} or \tt{Upper}
 \end{description}
 The default attributes are \tt{CStyle}, \tt{ColMajor} and \tt{Lower}.
 
@@ -69,7 +69,7 @@ we will explain the difference.
 
 As usual, the optional \tt{A} template argument specifies attributes about
 the \tt{SymBandMatrix}.  The default attributes if not specified are
-\tt{CStyle}, \tt{ColMajor} and \tt{Lower}.
+\tt{CStyle|ColMajor|Lower}.
 
 \begin{itemize}
 
@@ -94,17 +94,17 @@ If extra debugging is turned on (with the compiler flag \tt{-DTMV\_EXTRA\_DEBUG}
 \item
 \begin{tmvcode}
 tmv::SymBandMatrix<T,A> sb(int n, int nlo, T x)
-tmv::HermBandMatrix<T,A> hb(int n, int nlo, T x)
+tmv::HermBandMatrix<T,A> hb(int n, int nlo, RT x)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{SymBandMatrix}  or \tt{HermBandMatrix} with \tt{nlo} off-diagonals
-and with all values equal to \tt{x}.
+and with all values equal to \tt{x}.  For the \tt{HermBandMatrix} version of this, \tt{x} must be real.
 
 \item 
 \begin{tmvcode}
-tmv::SymBandMatrix<T,A> sb(const Matrix<T>& m, int nlo)
-tmv::SymBandMatrix<T,A> sb(const SymMatrix<T>& m, int nlo)
-tmv::SymBandMatrix<T,A> sb(const BandMatrix<T>& m, int nlo)
-tmv::SymBandMatrix<T,A> sb(const SymBandMatrix<T>& m, int nlo)
+tmv::SymBandMatrix<T,A> sb(const Matrix<T,A2>& m, int nlo)
+tmv::SymBandMatrix<T,A> sb(const SymMatrix<T,A2>& m, int nlo)
+tmv::SymBandMatrix<T,A> sb(const BandMatrix<T,A2>& m, int nlo)
+tmv::SymBandMatrix<T,A> sb(const SymBandMatrix<T,A2>& m, int nlo)
 \end{tmvcode}
 Makes a \tt{SymBandMatrix} which copies the corresponding values of \tt{m}.  
 For the last two, \tt{nlo} must not be larger than the number of upper
@@ -138,7 +138,7 @@ whether \tt{v2} should be used as the upper or lower off-diagonal
 
 \item
 \begin{tmvcode}
-tmv::SymBandMatrix<T,A> sb1(const SymBandMatrix<T2>& sb2)
+tmv::SymBandMatrix<T,A> sb1(const SymBandMatrix<T2,A2>& sb2)
 sb1 = sb2
 \end{tmvcode}
 Copy the \tt{SymBandMatrix m2}, which may be of any type \tt{T2} so long
@@ -190,7 +190,8 @@ tmv::ConstSymBandMatrixView<T,A> hb =
 Make a \tt{SymBandMatrixView} of the actual memory elements, \tt{vv}, in either the
 upper or lower band. 
 The length of the data array should be 
-\tt{BandStorageLength(stor,n,n,nlo,0)}.
+\tt{BandStorageLength(stor,n,n,nlo,0)}.  Also, as with the corresponding \tt{BandMatrixViewOf} functions, if \tt{uplo} is \tt{Lower} and \tt{stor} is \tt{DiagMajor} then \tt{vv} should be the memory address of \tt{b(nlo,0)}, not \tt{b(0,0)}.
+
 
 \item
 \begin{tmvcode}
@@ -225,11 +226,8 @@ sb.nrows() = sb.ncols() = sb.colsize() = sb.rowsize() = sb.size()
 sb.nlo() = sb.nhi()
 sb.resize(int new_size, int new_nlo)
 sb(i,j)
-sb.row(int i, int j1, int j2)
-sb.col(int i, int j1, int j2)
-sb.diag()
-sb.diag(int i)
-sb.diag(int i, int k1, int k2)
+sb.cref(i,j)
+sb.ref(i,j)
 \end{tmvcode}
 \index{SymBandMatrix!Methods!nrows}
 \index{SymBandMatrix!Methods!ncols}
@@ -240,12 +238,24 @@ sb.diag(int i, int k1, int k2)
 \index{SymBandMatrix!Methods!nhi}
 \index{SymBandMatrix!Methods!resize}
 \index{SymBandMatrix!Methods!operator()}
+\index{SymBandMatrix!Methods!cref}
+\index{SymBandMatrix!Methods!ref}
+As with a complex \tt{HermMatrix}, a complex \tt{HermBandMatrix} has a special reference type, since it needs to check whether its value is the conjugate of the value actually stored in memory.  This will necessarily be true for values in either the upper or lower band.
+Also, for the mutable \tt{sb(i,j)} version, the position must fall within the
+band.  If \tt{sb} is not mutable, then \tt{sb(i,j)} returns 0 for
+positions outside of the band.
+
+\item
+\begin{tmvcode}
+sb.row(int i, int j1, int j2)
+sb.col(int i, int j1, int j2)
+sb.diag()
+sb.diag(int i)
+sb.diag(int i, int k1, int k2)
+\end{tmvcode}
 \index{SymBandMatrix!Methods!row}
 \index{SymBandMatrix!Methods!col}
 \index{SymBandMatrix!Methods!diag}
-For the mutable \tt{sb(i,j)} version, the position must fall within the
-band.  If \tt{sb} is not mutable, then \tt{sb(i,j)} return 0 for
-positions outside of the band.
 Again, the versions of \tt{row} and \tt{col} with only one argument are
 missing, since the full row or column isn't accessible as a \tt{VectorView}.
 You must specify a valid range within the row or column that you want, 
@@ -447,7 +457,10 @@ Swap(sb1,sb2)
 \index{SymBandMatrix!Methods!conjugateSelf}
 \index{SymBandMatrix!Methods!transposeSelf}
 \index{SymBandMatrix!Functions of!Swap}
-\vspace{12pt}
+As with \tt{SymMatrix}, the method \tt{transposeSelf()} does nothing to a \tt{SymBandMatrix} and is equivalent to
+\tt{conjugateSelf()} for a \tt{HermBandMatrix}.
+
+\vspace{12pt} % I don't know why I need this.  LaTex isn't putting the normal spacing here.
 
 \subsection{Arithmetic}
 \index{SymBandMatrix!Arithmetic}
@@ -519,7 +532,7 @@ To access this decomposition, use:
 bool sb.lud().isTrans()
 tmv::LowerTriMatrix<T,UnitDiag> sb.lud().getL()
 tmv::ConstBandMatrixView<T> sb.lud().getU()
-Permutation sb.lud().getP()
+const Permutation& sb.lud().getP()
 \end{tmvcode}
 \index{SymBandMatrix!Methods!lud}
 \index{SymBandMatrix!LU decomposition}
@@ -561,7 +574,7 @@ DiagMatrix<T> sb.chd().getD()
 \index{SymBandMatrix!Cholesky decomposition}
 \index{Cholesky Decomposition!SymBandMatrix}
 with $L$ being made unit-diagonal or $D$ being set to the identity matrix
-as appropriate.  (Obviously, getL() contains all of the information for the non-tridiagonal
+as appropriate.  (Obviously, \tt{getL()} contains all of the information for the non-tridiagonal
 version.)
 
 The following should result in a matrix numerically very close to \tt{sb}.
@@ -620,13 +633,16 @@ sb.divideInPlace()
 \index{SymBandMatrix!Methods!divIsSet}
 \index{SymBandMatrix!Methods!divideInPlace}
 work the same as for regular \tt{Matrix}es.
-(See \ref{Matrix_Division_Efficiency}.)
+(See \ref{Matrix_Division_Efficiency}.)  However, \tt{divideInPlace} only actually works for the \tt{CH} algorithm.
 
-And the function \tt{sb.det()} (or \tt{sb.logDet()}) calculates the determinant
-using whichever decomposition is currently set with \tt{sb.divideUsing(dt)},
-unless \tt{sb}'s data type is an integer type, in which case Bareiss's algorithm 
+And just as for a regular \tt{Matrix}, the functions \tt{sb.det()}, \tt{sb.logDet()}, and \tt{sb.isSingular()} use whichever decomposition is currently set with \tt{sb.divideUsing(dt)},
+unless \tt{sb}'s data type is an integer type, in which case Bareiss's algorithm for the determinant
 is used.
 \index{SymBandMatrix!Determinant}
+\index{SymBandMatrix|Methods!det}
+\index{SymBandMatrix|Methods!logDet}
+\index{SymBandMatrix|Methods!isSingular}
+
 
 \subsection{I/O}
 \index{SymBandMatrix!I/O}

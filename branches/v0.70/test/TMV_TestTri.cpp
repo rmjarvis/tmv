@@ -937,6 +937,7 @@ static void TestBasicTriMatrix_IO()
     cu(1,3) = cl(3,1) = CT(1.e-30,1.e-30);
     u(5,6) = l(6,5) = T(9.e-3);
     cu(5,6) = cl(6,5) = CT(9.e-3,9.e-3);
+    cu(5,7) = cl(7,5) = CT(9,9.e-3);
     u(4,7) = l(7,4) = T(0.123456789);
     cu(4,7) = cl(7,4) = CT(3.123456789,600.987654321);
 
@@ -962,6 +963,12 @@ static void TestBasicTriMatrix_IO()
     Assert(cu2 == cu3,"Complex UpperTriMatrix clip");
     Assert(l2 == l3,"LowerTriMatrix clip");
     Assert(cl2 == cl3,"Complex LowerTriMatrix clip");
+
+    // However, ThreshIO for complex works slightly differently than clip.
+    // It clips _either_ the real or imag component, so now cu2(5,6) and
+    // cu2(5,7) need to be modified.
+    cu2(5,6) = cu3(5,6) = cl2(6,5) = cl3(6,5) = T(0);
+    cu2(5,7) = cu3(5,7) = cl2(7,5) = cl3(7,5) = T(9);
 
     // Write matrices with 4 different styles
     std::ofstream fout("tmvtest_trimatrix_io.dat");

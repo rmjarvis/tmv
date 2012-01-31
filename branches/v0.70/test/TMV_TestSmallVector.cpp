@@ -436,6 +436,7 @@ static void TestSmallVectorIO()
     cv(3) = CT(1.e-30,1.e-30);
     v(8) = T(9.e-3);
     cv(8) = CT(9.e-3,9.e-3);
+    cv(9) = CT(9,9.e-3);
     v(12) = T(0.123456789);
     cv(12) = CT(3.123456789,600.987654321);
 
@@ -454,6 +455,12 @@ static void TestSmallVectorIO()
     Assert(v2 == v3,"SmallVector clip");
     Assert(cv2 == cv3,"Complex SmallVector clip");
 
+    // However, ThreshIO for complex works slightly differently than clip.
+    // It clips _either_ the real or imag component, so now cv2(8) and 
+    // cv2(9) need to be modified.
+    cv2(8) = cv3(8) = T(0);
+    cv2(9) = cv3(9) = T(9);
+     
     // Write vectors with 4 different styles
     std::ofstream fout("tmvtest_smallvector_io.dat");
     Assert(fout,"Couldn't open tmvtest_smallvector_io.dat for output");

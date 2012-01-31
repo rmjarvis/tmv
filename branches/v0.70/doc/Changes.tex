@@ -28,15 +28,19 @@ of your code to be modified.  It might be a bit of work to covert your
 code to this version, and I apologize for that, but my hope is that the 
 user interface will be pretty stable after this release.
 
-I don't think there are any more big changes in the UI coming down the 
-pike, even with the big redesign that I'm calling versin 0.90.
+There are still a few more changes in the UI that will happen in the 
+big redesign that I'm calling versin 0.90.
 (I know I've been advertising the redesign for a while now.
 It might be ready sometime in the next year, I hope.)
 That version will change the base classes of the TMV objects, so if
 you use any of them directly (e.g. the various ``\tt{Gen}'' classes)  
 then those will go away at that point.  I've already removed mentions of
 them from the documentation, so they are officially deprecated, but 
-code that uses them will continue to work with this version.
+code that uses them will continue to work with this version.  It will
+also keep track of when views are conjugates of the underlying data in
+memory at compile time through the attribute template parameter.  But
+these changes were too difficult to back port into the current design, so
+they'll have to wait until the vesion 0.90 release.
 
 Here is a list of the changes from version \prevtmvversion\ to \tmvversion.  
 Whenever a change is not backward compatible, meaning that code using the previous version might be broken, I mark the item with a $\times$ bullet rather than the usual $\bullet$ to indicate this.  
@@ -134,6 +138,11 @@ sb.lowerBand() <<  8 ,
                        -8 ,  2 ,
                              6 , 10 ;
 \end{tmvcode}
+
+\item
+Turned off error checking for the number of elements for a list 
+initialization when TMV is in non-debugging mode (i.e. either \tt{NDEBUG}
+or \tt{TMV\_NDEBUG} is defined).
 
 \item[$\times$]
 Changed all (non-\tt{Small}) matrix and vector types to only use 2 template
@@ -320,6 +329,11 @@ Changed the definitions of the various decomposition functions
 to accept either views (as before) or regular \tt{Matrix}, \tt{Vector},
 etc. objects.  So, you no longer need to call these with \tt{m.view()}
 as you had to before.
+
+\item
+Removed the \tt{det} argument from the constructor for \tt{Permutation}.
+Also, now the determinant is only calculated if you ask for it, rather 
+than every time you create a \tt{Permutation}.
 
 \item
 Fixed an error in the \tt{TMV\_VERSION\_AT\_LEAST} marco.  The old version was actually backwards.  It returned whether the library's version was equal to or {\em earlier} than the provided values, rather than equal or later.  The workaround if you need to check for versions before 0.70 is to use 

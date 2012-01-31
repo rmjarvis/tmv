@@ -124,12 +124,32 @@ namespace tmv {
     void Rank2Update(
         const T alpha, const GenVector<Tx>& x,
         const GenVector<Ty>& y, SymMatrixView<T> A);
+    template <bool add, class T, class Tx, class Ty, int A3> 
+    inline void Rank2Update(
+        const T alpha, const GenVector<Tx>& x,
+        const GenVector<Ty>& y, SymMatrix<T,A3>& A)
+    { Rank2Update(alpha,x,y,A.view()); }
+    template <bool add, class T, class Tx, class Ty, int A3> 
+    inline void Rank2Update(
+        const T alpha, const GenVector<Tx>& x,
+        const GenVector<Ty>& y, HermMatrix<T,A3>& A)
+    { Rank2Update(alpha,x,y,A.view()); }
 
     // C (+)= alpha * (A * BT + B*AT) (or A*Bt + B*At if C is Herm)
     template <bool add, class T, class Ta, class Tb> 
     void Rank2KUpdate(
         const T alpha, const GenMatrix<Ta>& A,
         const GenMatrix<Tb>& B, SymMatrixView<T> C);
+    template <bool add, class T, class Ta, class Tb, int A3> 
+    inline void Rank2KUpdate(
+        const T alpha, const GenMatrix<Ta>& A,
+        const GenMatrix<Tb>& B, SymMatrix<T,A3>& C)
+    { Rank2KUpdate(alpha,A,B,C.view()); }
+    template <bool add, class T, class Ta, class Tb, int A3> 
+    inline void Rank2KUpdate(
+        const T alpha, const GenMatrix<Ta>& A,
+        const GenMatrix<Tb>& B, HermMatrix<T,A3>& C)
+    { Rank2KUpdate(alpha,A,B,C.view()); }
 
     // C (+)= alpha * A * B
     // This also needs to be called explicitly.
@@ -139,6 +159,16 @@ namespace tmv {
     void SymMultMM(
         const T alpha, const GenMatrix<Ta>& A,
         const GenMatrix<Tb>& B, SymMatrixView<T> C);
+    template <bool add, class T, class Ta, class Tb, int A3> 
+    inline void SymMultMM(
+        const T alpha, const GenMatrix<Ta>& A,
+        const GenMatrix<Tb>& B, SymMatrix<T,A3>& C)
+    { SymMultMM(alpha,A,B,C.view()); }
+    template <bool add, class T, class Ta, class Tb, int A3> 
+    inline void SymMultMM(
+        const T alpha, const GenMatrix<Ta>& A,
+        const GenMatrix<Tb>& B, HermMatrix<T,A3>& C)
+    { SymMultMM(alpha,A,B,C.view()); }
 
     template <class T> 
     class SymMatrixComposite : public GenSymMatrix<T>

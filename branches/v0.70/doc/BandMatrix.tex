@@ -27,7 +27,7 @@ there is also a second template parameter that specifies attributes of the
 \tt{BandMatrix}.  The attributes that are allowed are:
 \begin{description} \itemsep -2pt
 \item[$\bullet$] \tt{CStyle} or \tt{FortranStyle}
-\item[$\bullet$] \tt{ColMajor} or \tt{RowMajor}
+\item[$\bullet$] \tt{ColMajor}, \tt{RowMajor}, or \tt{DiagMajor}
 \end{description}
 For this class, we have the additional storage possibility: \tt{DiagMajor},
 which has unit step along the diagonals.  It stores the values in memory
@@ -65,8 +65,8 @@ matrices, the formula is more complicated, and changes slightly between the
 three storages.
 If you want to know the memory used by a \tt{BandMatrix}, we provide the routine:
 \begin{tmvcode}
-int BandStorageLength(StorageType stor, int nrows, int ncols, 
-        int nlo, int nhi)
+int BandStorageLength(StorageType stor, int nrows, int ncols, int nlo, 
+      int nhi)
 \end{tmvcode}
 \index{BandMatrix!Memory usage}
 \index{BandMatrix!BandStorageLength}
@@ -81,8 +81,8 @@ all three to see which is fastest for the operations you are using.
 Second, notice that the \tt{DiagMajor} storage doesn't start with the 
 upper left element as usual.
 Rather, it starts at the start of the lowest sub-diagonal.  
-So for the constructors that 
-take the matrix information from an array (\tt{T*} or \tt{vector<T>}), 
+This mostly just impacts the \tt{BandMatrixViewOf} function.  If the storage is 
+given as \tt{DiagMajor}, then
 the start of the array needs to be at the start of the lowest sub-diagonal.  
 
 Most functions and methods for \tt{BandMatrix} 
@@ -101,7 +101,7 @@ we will explain the difference.
 
 As usual, the optional \tt{A} template argument specifies attributes about
 the \tt{DiagMatrix}.  The default attributes if not specified are
-\tt{CStyle} and \tt{ColMajor}.
+\tt{CStyle|ColMajor}.
 
 \begin{itemize}
 
@@ -114,8 +114,7 @@ change the size to some useful value.
 
 \item 
 \begin{tmvcode}
-tmv::BandMatrix<T,A> b(int nrows, int ncols, 
-      int nlo, int nhi)
+tmv::BandMatrix<T,A> b(int nrows, int ncols, int nlo, int nhi)
 \end{tmvcode}
 Makes a \tt{BandMatrix} with \tt{nrows} rows, \tt{ncols} columns, 
 \tt{nlo} sub-diagonals,
@@ -124,17 +123,16 @@ If extra debugging is turned on (with the compiler flag \tt{-DTMV\_EXTRA\_DEBUG}
 
 \item
 \begin{tmvcode}
-tmv::BandMatrix<T,A> b(int nrows, int ncols, 
-      int nlo, int nhi, T x)
+tmv::BandMatrix<T,A> b(int nrows, int ncols, int nlo, int nhi, T x)
 \end{tmvcode}
 Makes a \tt{BandMatrix} with all values equal to \tt{x}.
 
 \item 
 \begin{tmvcode}
-tmv::BandMatrix<T,A> b(const Matrix<T>& m, int nlo, int nhi)
-tmv::BandMatrix<T,A> b(const BandMatrix<T>& m, int nlo, int nhi)
-tmv::BandMatrix<T,A> b(const UpperTriMatrix<T>& m, int nhi)
-tmv::BandMatrix<T,A> b(const LowerTriMatrix<T>& m, int nlo)
+tmv::BandMatrix<T,A> b(const Matrix<T,A2>& m, int nlo, int nhi)
+tmv::BandMatrix<T,A> b(const BandMatrix<T,A2>& m, int nlo, int nhi)
+tmv::BandMatrix<T,A> b(const UpperTriMatrix<T,A2>& m, int nhi)
+tmv::BandMatrix<T,A> b(const LowerTriMatrix<T,A2>& m, int nlo)
 \end{tmvcode}
 Make a \tt{BandMatrix} the same size as \tt{m}, which copies the values of \tt{m}
 that are within the band defined by \tt{nlo} and \tt{nhi}
@@ -148,8 +146,7 @@ tmv::BandMatrix<T,tmv::DiagMajor> m = UpperBiDiagMatrix(
 tmv::BandMatrix<T,tmv::DiagMajor> m = LowerBiDiagMatrix(
       const Vector<T>& v1, const Vector<T>& v2)
 tmv::BandMatrix<T,tmv::DiagMajor> m = TriDiagMatrix(
-      const Vector<T>& v1,  const Vector<T>& v2, 
-      const Vector<T>& v3)
+      const Vector<T>& v1,  const Vector<T>& v2, const Vector<T>& v3)
 \end{tmvcode}
 \index{BandMatrix!Constructors!UpperBiDiagMatrix}
 \index{BandMatrix!Constructors!LowerBiDiagMatrix}
@@ -159,7 +156,7 @@ Shorthand to create bi- or tri-diagonal \tt{BandMatrix}es if you already have th
 
 \item
 \begin{tmvcode}
-tmv::BandMatrix<T,A> b1(const BandMatrix<T2>& b2)
+tmv::BandMatrix<T,A> b1(const BandMatrix<T2,A2>& b2)
 b1 = b2
 \end{tmvcode}
 Copy the \tt{BandMatrix b2}, which may be of any type \tt{T2} so long
@@ -236,6 +233,7 @@ tmv::ConstBandMatrixView<T> b =
 \end{tmvcode}
 \index{BandMatrix!View of raw memory}
 Make a \tt{BandMatrixView} of the actual memory elements, \tt{vv}.
+The length of the data array should be \tt{BandStorageLength(stor,ncols,nrows,nlo,nhi)}.  
 One important point: The \tt{DiagMajor} storage order starts at the beginning of the lowest sub-diagonal, so
 \tt{vv} is the memory address of \tt{b(nlo,0)}, not \tt{b(0,0)}.
 
@@ -268,11 +266,8 @@ b.nrows() = b.colsize()
 b.ncols() = b.rowsize()
 b.resize(int new_nrows, int new_ncols, int new_nlo, int new_nhi)
 b(i,j)
-b.row(int i, int j1, int j2)
-b.col(int i, int j1, int j2)
-b.diag()
-b.diag(int i)
-b.diag(int i, int k1, int k2)
+b.cref(i,j)
+b.ref(i,j)
 \end{tmvcode}
 \index{BandMatrix!Methods!nrows}
 \index{BandMatrix!Methods!ncols}
@@ -280,12 +275,23 @@ b.diag(int i, int k1, int k2)
 \index{BandMatrix!Methods!colsize}
 \index{BandMatrix!Methods!resize}
 \index{BandMatrix!Methods!operator()}
-\index{BandMatrix!Methods!row}
-\index{BandMatrix!Methods!col}
-\index{BandMatrix!Methods!diag}
+\index{BandMatrix!Methods!cref}
+\index{BandMatrix!Methods!ref}
 For the mutable \tt{b(i,j)} version, the position must fall within the
 band.  If \tt{b} is not mutable, then \tt{b(i,j)} return 0 for
 positions outside of the band.
+
+\item
+\begin{tmvcode}
+b.row(int i, int j1, int j2)
+b.col(int j, int i1, int i2)
+b.diag()
+b.diag(int i)
+b.diag(int i, int k1, int k2)
+\end{tmvcode}
+\index{BandMatrix!Methods!row}
+\index{BandMatrix!Methods!col}
+\index{BandMatrix!Methods!diag}
 The versions of \tt{row} and \tt{col} with only one argument are
 missing, since the full row or column isn't accessible as a \tt{VectorView}.
 You must specify a valid range within the row or column that you want, 
@@ -322,7 +328,7 @@ BandMatrix<T>::diagmajor_iterator b.diagmajor_end()
 BandMatrix<T>::const_diagmajor_iterator b.diagmajor_begin() const
 BandMatrix<T>::const_diagmajor_iterator b.diagmajor_end() const
 \end{tmvcode}
-Here we have added a new set of iterators that traverse the matrix in diagonal-major order.  Unlike the others, they do not start with $m(0,0)$.  They instead start at the beginning of the lowest subdiagonal in the band and proceed up to the highest super-diagonal.
+Here we have added a new set of iterators that traverse the matrix in diagonal-major order.  Unlike the others, they do not start with $m(0,0)$.  They instead start at the beginning of the lowest subdiagonal in the band and proceed up to the highest super-diagonal.  Note: If you want to iterate along the diagonals starting with the highest super-diagonal and proceeding down, you can use \tt{b.transpose().diagmajor_begin()}.
 
 \item
 \begin{tmvcode}
@@ -384,7 +390,7 @@ version also allows a non-unit step in each direction.
 
 For example, if \tt{b} is a $6 \times 6$ \tt{BandMatrix} with 2 sub-diagonals and 
 3 super-diagonals
-(like our example above), the 3 super-diagonals may be viewed with \tt{b.subBandMatrix(0,5,1,6,0,2)}.
+(like our example above), the 3 super-diagonals may be viewed with \tt{b.subBandMatrix(0,5,1,6,0,2)} with \tt{CStyle} indexing or \tt{b.subBandMatrix(1,5,2,6,0,2)} with \tt{FortranStyle} indexing.
 
 \item
 \begin{tmvcode}
@@ -400,7 +406,7 @@ columns or diagonals that
 appear within the original banded structure.  For our example of viewing just
 the super-diagonals of a $6 \times 6$ \tt{BandMatrix} with 2 sub- and 
 3 super-diagonals, we
-could instead use \tt{b.diagRange(1,4)}.  The last 3 rows would be \tt{b.rowRange(3,6)}.
+could instead use \tt{b.diagRange(1,4)} with \tt{CStyle} indexing or \tt{b.diagRange(1,3)} with \tt{FortranStyle} indexing.  The last 3 rows would be \tt{b.rowRange(3,6)} or \tt{b.rowRange(4,6)} respectively.
 Note that this wold be a $3 \times 5$ matrix with 0 sub-diagonals and 
 4 super-diagonals.
 These routines calculate the appropriate changes in the size and shape to include
@@ -416,8 +422,7 @@ b.lowerBand()
 These return a \tt{BandMatrixView} including the main diagonal and either the
 super- or sub-diagonals.  The size
 is set automatically to include the entire band.  (This is only
-non-trivial for non-square band matrices.)  They are equivalent to
-\tt{b.diagRange(0,b.nhi()+1)} and \tt{b.diagRange(-b.nlo(),1)} respectively.
+non-trivial for non-square band matrices.)  
 
 \item
 \begin{tmvcode}
@@ -427,8 +432,7 @@ b.lowerBandOff()
 \index{BandMatrix!Methods!upperBandOff}
 \index{BandMatrix!Methods!lowerBandOff}
 These return a \tt{BandMatrixView} of only the off-diagonals of either the
-upper or lower half of the matrix.  They are equivalent to
-\tt{b.diagRange(1,b.nhi()+1)} and \tt{b.diagRange(-b.nlo(),0)} respectively.  
+upper or lower half of the matrix.  
 They are inspired by analogy with the combination \tt{m.upperTri().offDiag()}.
 Since \tt{BandMatrix} does not have the method \tt{offDiag}, these provide
 the same functionality.
@@ -585,7 +589,7 @@ m = x [/%] b
 v [/%]= b
 m [/%]= b
 \end{tmvcode}
-\tt{BandMatrix} has three possible choices for the division decomposition:
+\tt{BandMatrix} has three possible choices for the decomposition to use for division:
 \begin{enumerate}
 \item
 \tt{b.divideUsing(tmv::LU)} does a normal LU decomposition,
@@ -610,13 +614,14 @@ with the smaller of
 Then you can use \tt{BandMatrixViewOf} to view the portion you want, transposing it if
 necessary.  On the other hand, you are probably not going to get much of a speed gain 
 from all of this finagling, so unless you are really memory starved, it's probably not worth it.
+\index{BandMatrix!Methods!divideInPlace}
 
 To access this decomposition, use:
 \begin{tmvcode}
 bool b.lud().isTrans()
 tmv::LowerTriMatrix<T,UnitDiag> b.lud().getL()
 tmv::ConstBandMatrixView<T> b.lud().getU()
-Permutation b.lud().getP()
+const Permutation& b.lud().getP()
 \end{tmvcode}
 \index{BandMatrix!Methods!lud}
 \index{BandMatrix!LU decomposition}
@@ -631,8 +636,9 @@ if (b.lud().isTrans()) m2.transposeSelf();
 \tt{b.divideUsing(tmv::QR)} will perform a QR decomposition.  
 This is the default method for a non-square \tt{BandMatrix}.
 
-The same kind of convolutions need to be done to perform this in place as 
-for the LU decomposition.
+The same kind of machinations need to be done to perform this in place as 
+for the LU decomposition except that the wider matrix you provide should have at least as many rows as columns.  Only if the matrix is square should you make sure that the number of subdiagonals is the smaller of \{\tt{nlo}, \tt{nhi}\}.
+\index{BandMatrix!Methods!divideInPlace}
 
 To access this decomposition, use:\footnote{
 I have not yet made a version of the \tt{PackedQ} class for \tt{BandMatrix}.
@@ -658,6 +664,7 @@ m2v = b.qrd().getQ() * b.qrd().getR();
 \tt{b.divideUsing(tmv::SV)} will perform a singular value decomposition.
 
 This cannot be done in place.
+\index{BandMatrix!Methods!divideInPlace}
 
 To access this decomposition, use:
 \begin{tmvcode}
@@ -688,22 +695,22 @@ b.setDiv()
 b.resetDiv()
 b.unsetDiv()
 bool b.divIsSet()
-b.divideInPlace()
 \end{tmvcode}
 \index{BandMatrix!Methods!saveDiv}
 \index{BandMatrix!Methods!setDiv}
 \index{BandMatrix!Methods!resetDiv}
 \index{BandMatrix!Methods!unsetDiv}
 \index{BandMatrix!Methods!divIsSet}
-\index{BandMatrix!Methods!divideInPlace}
 work the same as for regular \tt{Matrix}es.
 (See \ref{Matrix_Division_Efficiency}.)
 
-And the function \tt{b.det()} (or \tt{b.logDet()}) calculates the determinant
-using whichever decomposition is currently set with \tt{b.divideUsing(dt)},
-unless \tt{b}'s data type is an integer type, in which case Bareiss's algorithm 
+And just as for a regular \tt{Matrix}, the functions \tt{b.det()}, \tt{b.logDet()}, and \tt{b.isSingular()} use whichever decomposition is currently set with \tt{b.divideUsing(dt)},
+unless \tt{b}'s data type is an integer type, in which case Bareiss's algorithm for the determinant
 is used.
 \index{BandMatrix!Determinant}
+\index{BandMatrix|Methods!det}
+\index{BandMatrix|Methods!logDet}
+\index{BandMatrix|Methods!isSingular}
 
 \subsection{I/O}
 \index{BandMatrix!I/O}

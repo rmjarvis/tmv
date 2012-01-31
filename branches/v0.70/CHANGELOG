@@ -27,14 +27,18 @@ of your code to be modified.  It might be a bit of work to covert your
 code to this version, and I apologize for that, but my hope is that the 
 UI will be pretty stable after this release.
 
-The only other big change in the UI that I think is coming is that I'm 
-planning on getting rid of the "Gen" classes as base classes to
-the various matrix and vector classes.  But the workarounds for that 
-change don't apply yet, so I have to hold off on describing that change
-until I release the version with the redesigned back end.
-(I know I've been advertising the redesign for a while now.
-It might be ready sometime in the next year, I hope.)
-
+There are still a few more changes in the UI that will happen in the big 
+redesign that I'm calling versin 0.90.  (I know I've been advertising the 
+redesign for a while now. It might be ready sometime in the next year, I 
+hope.) That version will change the base classes of the TMV objects, so if
+you use any of them directly (e.g. the various "Gen" classes)  then those 
+will go away at that point.  I've already removed mentions of them from the 
+documentation, so they are officially deprecated, but code that uses them 
+will continue to work with this version.  It will also keep track of when 
+views are conjugates of the underlying data in memory at compile time 
+through the attribute template parameter.  But these changes were too 
+difficult to back port into the current design, so they'll have to wait 
+until the vesion 0.90 release.
 
 Changed and Deprecated features:
 
@@ -305,6 +309,10 @@ Changed and Deprecated features:
 
    will still work as before.
 
+-- Removed the det argument from the constructor for Permutation.
+   Also, now the determinant is only calculated if you ask for it, rather 
+   than every time you create a Permutation.
+
 -- Changed the default behavior to not output warnings.  To turn it on,
    you need to explicitly use tmv::WriteWarningsTo(&std::cerr) (or whatever
    stream you want to write the warnings to).
@@ -387,6 +395,10 @@ New features:
                           -8 ,  2 ,
                                 6 , 10 ;
  
+-- Turned off error checking for the number of elements for a list 
+   initialization when TMV is in non-debugging mode (i.e. either NDEBUG 
+   or TMV_NDEBUG is defined).
+
 -- Added compact I/O for regular Matrix and Vector objects.  Since the compact 
    format changed to avoid the parentheses and commas, it makes sense
    to add this functionality to Matrix and Vector as well.
@@ -412,7 +424,6 @@ New features:
 
 -- Added a warning for when MultMM catches a std::bad_alloc exception
    and reverts to using a simpler algorithm that doesn't allocate memory.
-
 
 Bug fixes:
 

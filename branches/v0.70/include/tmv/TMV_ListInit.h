@@ -47,7 +47,7 @@ namespace tmv {
         inline ListReadError(int nLeft) : n(nLeft) {}
         inline void write(std::ostream& os) const throw()
         {
-            os<<"TMV Read Error: Reading from list initialization.\n";
+            os<<"TMV Error: Reading from list initialization.\n";
             if (n == 0)
                 os<<"List has more elements than expected.\n";
             else
@@ -67,7 +67,9 @@ namespace tmv {
         ListAssigner(IT ptr, int nLeft, const T& x) : 
             _ptr(ptr), _nLeft(nLeft), _isLast(false)
         {
+#ifdef TMV_DEBUG
             if (_nLeft == 0) throw ListReadError(0);
+#endif
             TMVAssert(_nLeft > 0);
             *_ptr++ = x;
             --_nLeft;
@@ -78,11 +80,17 @@ namespace tmv {
         { rhs._isLast = false; }
 
         ~ListAssigner()
-        { if (_nLeft > 0 && _isLast) throw ListReadError(_nLeft); }
+        { 
+#ifdef TMV_DEBUG
+            if (_nLeft > 0 && _isLast) throw ListReadError(_nLeft); 
+#endif
+        }
 
         ListAssigner<T,IT> operator,(const T& x)
         {
+#ifdef TMV_DEBUG
             if (_nLeft == 0) throw ListReadError(0);
+#endif
             TMVAssert( _nLeft > 0 );
             *_ptr++ = x;
             _isLast = false;

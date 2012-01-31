@@ -72,12 +72,10 @@
 //    Permutation(int n)
 //        Make an identity Permutation of size n.
 //
-//    Permutation(int n, const int* pp, bool isinv, int det)
+//    Permutation(int n, const int* pp, bool isinv)
 //        Make a Permutation P from array pp.
 //        If isinv = false, then the swaps are applied in order from the 
 //        left to the rows of m.  If isinv = true, then in reverse order.
-//        If det is given, it is taken to be the determinant of P. 
-//        If it is omitted, the determinant will be calculated.
 //
 // Access Functions
 //
@@ -109,8 +107,7 @@
 //       to figure out.  O(N).
 //
 //    p.det() const
-//       This is also O(N) to calculate, but it is calculated during
-//       the creation of the permutation, so actually O(1) here.
+//       This is also O(N) to calculate.
 //    
 //
 // Mutable functions
@@ -182,28 +179,18 @@ namespace tmv {
         //
 
         explicit Permutation(int n=0) :
-            itsn(n), itsmem(n), itsp(itsmem.get()),
-            isinv(false), itsdet(1) 
+            itsn(n), itsmem(n), itsp(itsmem.get()), isinv(false)
         {
             TMVAssert(n >= 0);
             for(int i=0;i<itsn;++i) itsmem[i] = i; 
         }
 
-        Permutation(int n, const int* p, bool _isinv, int d) :
-            itsn(n), itsp(p), isinv(_isinv), itsdet(d) 
+        Permutation(int n, const int* p, bool _isinv=false) :
+            itsn(n), itsp(p), isinv(_isinv)
         { TMVAssert(n >= 0); }
 
-        // if det is unknown, calculate it now.
-        Permutation(int n, const int* p, bool _isinv=false) :
-            itsn(n), itsp(p), isinv(_isinv), itsdet(1) 
-        {
-            TMVAssert(n >= 0);
-            calcDet(); 
-        }
-
         Permutation(const Permutation& rhs) :
-            itsn(rhs.itsn), itsp(rhs.itsp),
-            isinv(rhs.isinv), itsdet(rhs.itsdet) {}
+            itsn(rhs.itsn), itsp(rhs.itsp), isinv(rhs.isinv) {}
 
         ~Permutation() {}
 
@@ -213,7 +200,6 @@ namespace tmv {
             itsn = rhs.itsn;
             itsp = rhs.itsp;
             isinv = rhs.isinv;
-            itsdet = rhs.itsdet;
             return *this;
         }
 
@@ -277,16 +263,20 @@ namespace tmv {
         //
 
         inline Permutation inverse() const
-        { return Permutation(itsn,itsp,!isinv,itsdet); }
+        { return Permutation(itsn,itsp,!isinv); }
 
         inline Permutation transpose() const
         { return inverse(); }
 
         inline int det() const
-        { return itsdet; }
+        {
+            int d = 1; 
+            for(int i=0;i<itsn;++i) if (itsp[i] != i) d = -d; 
+            return d;
+        }
 
         inline int logDet(int* sign=0) const
-        { if(sign) *sign = itsdet; return 0; }
+        { if(sign) *sign = det(); return 0; }
 
         inline int trace() const
         {
@@ -360,7 +350,6 @@ namespace tmv {
             allocateMem();
             for(int i=0;i<itsn;++i) itsmem[i] = i;
             isinv = false;
-            itsdet = 1;
             return *this;
         }
 
@@ -535,7 +524,6 @@ namespace tmv {
             }
             itsn = n;
             isinv = false;
-            itsdet = 1;
         }
 
 
@@ -545,7 +533,6 @@ namespace tmv {
         AlignedArray<int> itsmem;
         const int* itsp;
         bool isinv;
-        int itsdet; // det = 1 or -1
 
         inline void makeIndex(int* index) const
         {
@@ -587,14 +574,6 @@ namespace tmv {
             for(int i=0;i<itsn;++i) itsmem[i] = orig.itsp[i];
             itsp = itsmem.get();
             isinv = orig.isinv;
-            itsdet = orig.itsdet;
-        }
-
-        inline void calcDet() 
-        {
-            itsdet = 1; 
-            for(int i=0;i<itsn;++i) 
-                if (itsp[i] != i) itsdet = -itsdet; 
         }
 
         inline int* getMem() 
@@ -828,7 +807,6 @@ namespace tmv {
             throw PermutationReadError(itsn,*this,reader.getis(),exp,got);
 #endif
         }
-        calcDet();
     }
 
     inline std::istream& operator>>(
@@ -849,7 +827,6 @@ namespace tmv {
         p1.itsmem.swapWith(p2.itsmem);
         TMV_SWAP(p1.itsp,p2.itsp);
         TMV_SWAP(p1.isinv,p2.isinv);
-        TMV_SWAP(p1.itsdet,p2.itsdet);
     }
 
     template <class T, int A>
@@ -869,7 +846,6 @@ namespace tmv {
         p.allocateMem();
         LU_Decompose(m,p.getMem());
         p.isinv = true;
-        p.calcDet();
     }
 
     template <class T>
@@ -880,7 +856,6 @@ namespace tmv {
         p.allocateMem();
         QRP_Decompose(Q,R,p.getMem(),strict);
         p.isinv = false; 
-        p.calcDet();
     }
 
     template <class T>
@@ -892,7 +867,6 @@ namespace tmv {
         p.allocateMem();
         QRP_Decompose(QRx,beta,p.getMem(),signdet,strict);
         p.isinv = false; 
-        p.calcDet();
     }
 
     template <class T> 
@@ -904,7 +878,6 @@ namespace tmv {
         p.allocateMem();
         LU_Decompose(m,L,U,p.getMem());
         p.isinv = true;
-        p.calcDet();
     }
 
     template <class T> 
@@ -915,7 +888,6 @@ namespace tmv {
         p.allocateMem();
         LU_Decompose(m,p.getMem(),nhi);
         p.isinv = true;
-        p.calcDet();
     }
 
     template <class T>
@@ -926,7 +898,6 @@ namespace tmv {
         p.allocateMem();
         LDL_Decompose(m,D,p.getMem());
         p.isinv = true;
-        p.calcDet();
     }
 
     template <class T>
@@ -938,7 +909,6 @@ namespace tmv {
         p.allocateMem();
         LDL_Decompose(m,xD,p.getMem(),logdet,signdet);
         p.isinv = true;
-        p.calcDet();
     }
 
     template <class T, int A>
@@ -948,7 +918,6 @@ namespace tmv {
         p.resize(v.size());
         p.allocateMem();
         v.sort(p.getMem(),ad,comp);
-        p.calcDet();
         p.isinv = false;
     }
 

@@ -261,6 +261,7 @@ static void TestBasicDiagMatrix_IO()
     cm(3) = CT(1.e-30,1.e-30);
     m(5) = T(9.e-3);
     cm(5) = CT(9.e-3,9.e-3);
+    cm(6) = CT(9,9.e-3);
     m(7) = T(0.123456789);
     cm(7) = CT(3.123456789,600.987654321);
 
@@ -275,9 +276,16 @@ static void TestBasicDiagMatrix_IO()
     tmv::DiagMatrix<CT> cm3 = cm;
     m3(3) = T(0);
     cm3(3) = T(0);
-    m3(5) = T(0); // Others, esp. cm3(5,6), shouldn't get clipped.
+    m3(5) = T(0); 
+    // Others, esp. cm3(5) and cm3(6), shouldn't get clipped.
     Assert(m2 == m3,"DiagMatrix clip");
     Assert(cm2 == cm3,"Complex DiagMatrix clip");
+
+    // However, ThreshIO for complex works slightly differently than clip.
+    // It clips _either_ the real or imag component, so now cm2(5) and
+    // cm2(6) need to be modified.
+    cm2(5) = cm3(5) = T(0);
+    cm2(6) = cm3(6) = T(9);
 
     // Write matrices with 4 different styles
     std::ofstream fout("tmvtest_diagmatrix_io.dat");

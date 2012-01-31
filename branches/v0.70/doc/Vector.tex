@@ -73,7 +73,7 @@ indicate which element is meant by \tt{v(i)}.  Again, if it is omitted,
 
 \item
 \begin{tmvcode}
-tmv::Vector<T,A> v1(const tmv::Vector<T2>& v2)
+tmv::Vector<T,A> v1(const tmv::Vector<T2,A2>& v2)
 v1 = v2
 \end{tmvcode}
 Copy the \tt{Vector v2}, which may be of any type \tt{T2} so long
@@ -228,7 +228,8 @@ v << 1.2 << 3.2 << -9.2 << -1 << 3.3;
 \end{tmvcode}
 \index{Vector!List initialization}
 There must be precisely as many values as there are elements in the \tt{Vector},
-or a \tt{tmv::ReadError} will be thrown.
+or a \tt{tmv::ReadError} will be thrown, although unlike most \tt{ReadError}s this is only 
+checked when TMV is in debugging mode (i.e. not compiled with \tt{-DNDEBUG} or \tt{-DTMV_NDEBUG}).
 \index{Exceptions!ReadError}
 
 One advantage of this method for initialization is that the values do not need to be simple numbers.
@@ -917,12 +918,13 @@ This can be done using an equivalent of a stream manipulator:
 os << tmv::ThreshIO(thresh) << v;
 \end{tmvcode}
 \index{IOStyle!ThreshIO}
-which is equivalent to
+which writes as 0 any value smaller (in absolute value) than \tt{thresh}.  
+For real \tt{v} it is equivalent to
 \begin{tmvcode}
 os << tmv::Vector<T>(v).clip(thresh);
 \end{tmvcode}
 \index{Vector!clip}
-but without requiring the temporary \tt{Vector}.
+but without requiring the temporary \tt{Vector}.  For complex \tt{v} it is slightly different, since it separately tests each component of the complex number.  So if \tt{thresh} is \tt{1.e-8}, the complex value \tt{(8,7.5624e-12)} would be writtend \tt{(8,0)}.
 
 There is also a compact I/O format which is mediated by the manipulator
 \tt{tmv::CompactIO()}.  For \tt{Vector} it doesn't make much difference, basically
@@ -988,13 +990,12 @@ an iterator with that step size will iterate faster, especially if that step siz
 
 All of these conversions can be done seamlessly through assignments.  E.g.
 \begin{tmvcode}
-if (v.step() == 1) {
+if (v.step() == 1)
     for(VIt<float,1,NonConj> it = v.begin(); it != v.end(); ++it)
         (*it) = sqrt(*it);
-} else {
+else 
     for(VIt<float,Unknown,NonConj> it = v.begin(); it != v.end(); ++it)
         (*it) = sqrt(*it);
-}
 \end{tmvcode}
 
 \subsection{Small vectors}
