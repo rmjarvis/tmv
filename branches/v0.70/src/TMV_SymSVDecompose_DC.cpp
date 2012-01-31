@@ -1115,7 +1115,8 @@ namespace tmv {
                 // avoid issues with underflow/overflow:
                 RT scale = TMV_MAX(zN.maxAbsElement(),TMV_SQRT(TMV_ABS(DN[N-1])));
                 dbgcout<<"scale = "<<scale<<std::endl;
-                DN /= scale*scale;
+                DN /= scale; 
+                DN /= scale; // Better than DN /= scale*scale in case overflow.
                 zN /= scale;
                 dbgcout<<"After scale: DN = "<<DN<<std::endl;
                 dbgcout<<"zN = "<<zN<<std::endl;
@@ -1179,7 +1180,8 @@ namespace tmv {
 
                 // Done.  Copy S to D and undo scaling
                 dbgcout<<"before copy S: D = "<<D<<endl;
-                DN = scale * scale * S;
+                DN = scale * S;
+                DN *= scale;  // Again, two steps in case scale*scale overflows
 
                 dbgcout<<"Done D = "<<D<<endl;
 #ifdef XDEBUG

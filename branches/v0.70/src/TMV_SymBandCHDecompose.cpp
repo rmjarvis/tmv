@@ -203,7 +203,7 @@ namespace tmv {
         else DoNonLapCH_Decompose<false>(A);
     }
 
-    template <bool dm, class T> 
+    template <class T> 
     static void NonLapLDL_Decompose(SymBandMatrixView<T> A)
     {
         // For tridiagonal Hermitian band matrices, the sqrt can 
@@ -229,7 +229,6 @@ namespace tmv {
         // where Axx' = Dx is the sub-matrix for the next step.
         //
         TMVAssert(A.uplo() == Lower);
-        TMVAssert(dm == A.isdm());
         TMVAssert(A.ct() == NonConj);
         TMVAssert(A.isherm());
         TMVAssert(A.nlo() == 1);
@@ -240,37 +239,43 @@ namespace tmv {
         //cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
 #endif
 
-        const int Dstep = dm ? 0 : A.diag().realPart().step();
-        const int Lstep = dm ? 0 : A.diag().step();
         TMV_RealType(T)* Dj = A.realPart().ptr();
         T* Lj = A.diag(-1).ptr();
 
-        for(int j=0;j<N-1;++j) {
-#ifdef TMVFLDEBUG
-            TMVAssert(Lj >= A._first);
-            TMVAssert(Lj < A._last);
-            TMVAssert(Dj >= A.realPart()._first);
-            TMVAssert(Dj < A.realPart()._last);
-#endif
-            T Ax0 = *Lj;
-            if (*Dj == TMV_RealType(T)(0))  {
+        if (A.isdm()) {
+            for(int j=0;j<N-1;++j) {
+                T Ax0 = *Lj;
+                if (*Dj == TMV_RealType(T)(0))  {
 #ifdef NOTHROW
-                std::cerr<<"Non Posdef HermBandMatrix found\n"; 
-                exit(1); 
+                    std::cerr<<"Non Posdef HermBandMatrix found\n"; 
+                    exit(1); 
 #else
-                throw NonPosDefHermBandLDL<T>(A);
+                    throw NonPosDefHermBandLDL<T>(A);
 #endif
+                }
+                *Lj /= *Dj;
+                if (isReal(T())) ++Dj; else Dj+=2;
+                *Dj -= TMV_REAL(TMV_CONJ(*Lj) * Ax0);
+                ++Lj;
             }
-            *Lj /= *Dj;
-            if (dm) { if (isReal(T())) ++Dj; else Dj+=2; }
-            else Dj += Dstep;
-#ifdef TMVFLDEBUG
-            TMVAssert(Dj >= A.realPart()._first);
-            TMVAssert(Dj < A.realPart()._last);
+        } else {
+            const int Dstep = A.diag().realPart().step();
+            const int Lstep = A.diag().step();
+            for(int j=0;j<N-1;++j) {
+                T Ax0 = *Lj;
+                if (*Dj == TMV_RealType(T)(0))  {
+#ifdef NOTHROW
+                    std::cerr<<"Non Posdef HermBandMatrix found\n"; 
+                    exit(1); 
+#else
+                    throw NonPosDefHermBandLDL<T>(A);
 #endif
-            *Dj -= TMV_REAL(TMV_CONJ(*Lj) * Ax0);
-            if (dm) ++Lj;
-            else Lj += Lstep;
+                }
+                *Lj /= *Dj;
+                Dj += Dstep;
+                *Dj -= TMV_REAL(TMV_CONJ(*Lj) * Ax0);
+                Lj += Lstep;
+            }
         }
         if (*Dj == TMV_RealType(T)(0))  {
 #ifdef NOTHROW
@@ -308,11 +313,10 @@ namespace tmv {
     }
 
     // Same thing, but A is symmetric, rather than hermitian
-    template <bool dm, class T> 
+    template <class T> 
     static void SymLDL_Decompose(SymBandMatrixView<T> A)
     {
         TMVAssert(A.uplo() == Lower);
-        TMVAssert(dm == A.isdm());
         TMVAssert(A.ct() == NonConj);
         TMVAssert(A.issym());
         TMVAssert(A.nlo() == 1);
@@ -323,16 +327,11 @@ namespace tmv {
         //cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
 #endif
 
-        int step = dm ? 0 : A.diagstep();
         T* Dj = A.ptr();
         T* Lj = A.diag(-1).ptr();
 
-        for(int j=0;j<N-1;++j) {
+        if (A.isdm()) {
             T Ax0 = *Lj;
-#ifdef TMVFLDEBUG
-            TMVAssert(Lj >= A._first);
-            TMVAssert(Lj < A._last);
-#endif
             if (*Dj == T(0))  {
 #ifdef NOTHROW
                 std::cerr<<"Non Posdef HermBandMatrix found\n"; 
@@ -342,15 +341,26 @@ namespace tmv {
 #endif
             }
             *Lj /= *Dj;
-            if (dm) ++Dj;
-            else Dj += step;
-#ifdef TMVFLDEBUG
-            TMVAssert(Dj >= A._first);
-            TMVAssert(Dj < A._last);
-#endif
+            ++Dj;
             *Dj -= *Lj * Ax0;
-            if (dm) ++Lj;
-            else Lj += step;
+            ++Lj;
+        } else {
+            int step = A.diagstep();
+            for(int j=0;j<N-1;++j) {
+                T Ax0 = *Lj;
+                if (*Dj == T(0))  {
+#ifdef NOTHROW
+                    std::cerr<<"Non Posdef HermBandMatrix found\n"; 
+                    exit(1); 
+#else
+                    throw NonPosDefSymBandLDL<T>(A);
+#endif
+                }
+                *Lj /= *Dj;
+                Dj += step;
+                *Dj -= *Lj * Ax0;
+                Lj += step;
+            }
         }
         if (*Dj == T(0))  {
 #ifdef NOTHROW
@@ -392,7 +402,7 @@ namespace tmv {
     { NonLapCH_Decompose(A); }
     template <class T> 
     static inline void LapLDL_Decompose(SymBandMatrixView<T> A)
-    { NonLapLDL_Decompose<true>(A); }
+    { NonLapLDL_Decompose(A); }
 #ifdef INST_DOUBLE
     template <> 
     void LapCH_Decompose(SymBandMatrixView<double> A)
@@ -595,12 +605,10 @@ namespace tmv {
                     A = A2;
                 }
 #else
-                if (A.isdm()) NonLapLDL_Decompose<true>(A);
-                else NonLapLDL_Decompose<false>(A);
+                NonLapLDL_Decompose(A);
 #endif
             } else {
-                if (A.isdm()) SymLDL_Decompose<true>(A);
-                else SymLDL_Decompose<false>(A);
+                SymLDL_Decompose(A);
             }
         }
     }

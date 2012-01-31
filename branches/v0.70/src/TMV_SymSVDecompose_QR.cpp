@@ -40,8 +40,9 @@
 #include "TMV_Givens.h"
 
 #ifdef XDEBUG
-#define THRESH 1.e-10
+#define THRESH 1.e-5
 #include "tmv/TMV_MatrixArith.h"
+#include "tmv/TMV_VectorArith.h"
 #include "tmv/TMV_DiagMatrixArith.h"
 #include <iostream>
 using std::cout;
@@ -66,23 +67,38 @@ namespace tmv {
         TMVAssert(D.step() == 1);
         TMVAssert(E.step() == 1);
         T eps = TMV_Epsilon<T>();
+        T sqrteps = TMV_SQRT(eps);
 
         T* Di = D.ptr();
         T* Ei = E.ptr();
-        if (TMV_Underflow(*Di)) { *Di = T(0); }
+        if (TMV_Underflow(*Di)) {
+            *Di = T(0); 
+        }
         ++Di;
         for(int k=E.size();k>0;--k,++Di,++Ei) {
 #ifdef TMVFLDEBUG
             TMVAssert(Di >= D._first);
             TMVAssert(Di < D._last);
 #endif
-            if (TMV_Underflow(*Di)) { *Di = T(0); }
+            if (TMV_Underflow(*Di)) { 
+                *Di = T(0); 
+            }
 #ifdef TMVFLDEBUG
             TMVAssert(Ei >= E._first);
             TMVAssert(Ei < E._last);
 #endif
             if ( !(TMV_ABS(*Ei) > eps*(TMV_ABS(*Di)+TMV_ABS(*(Di-1)))) ||
                  TMV_Underflow(*Ei) ) {
+                *Ei = T(0);
+            }
+            // This next one guards against smallish E values that 
+            // underflow when you create (E0/mu) * (D0-D1)
+            // This uses Di + Di-1 rather than mu, but that should be 
+            // good enough.
+            // Without this check, ReduceHermTridiagonal can not reduce
+            // and go into an infinite loop.
+            if ( TMV_ABS(*Ei) < sqrteps*(TMV_ABS(*Di)+TMV_ABS(*(Di-1))) &&
+                 TMV_Underflow(*Ei * ((*Di - *(Di-1)) / (*Di + *(Di-1))))) {
                 *Ei = T(0);
             }
         }
@@ -144,8 +160,10 @@ namespace tmv {
         std::cout<<"D = "<<D<<std::endl;
         std::cout<<"E = "<<E<<std::endl;
         Matrix<RT> TT(N,N,RT(0));
-        TT.diag() = D;
-        TT.diag(1) = TT.diag(-1) = E;
+        Vector<RT> D0 = D;
+        Vector<RT> E0 = E;
+        TT.diag() = D0;
+        TT.diag(1) = TT.diag(-1) = E0;
         const int M = U ? U->colsize() : 0;
         Matrix<T> A0(M,M);
         if (U) {
@@ -205,8 +223,11 @@ namespace tmv {
         std::cout<<"mu = "<<mu<<std::endl;
 #endif
         RT y = *Di - mu;  // = T00 - mu
+        //std::cout<<"y = "<<y<<std::endl;
         RT x = *Ei;       // = T10
+        //std::cout<<"x = "<<x<<std::endl;
         Givens<RT> G = GivensRotate(y,x);
+        //std::cout<<"Rotated y,x => "<<y<<','<<x<<std::endl;
         for(int i=0;;++i,++Di,++Ei) {
 #ifdef TMVFLDEBUG
             TMVAssert(Di >= D._first);
@@ -217,11 +238,7 @@ namespace tmv {
             TMVAssert(Ei < E._last);
 #endif
             G.symMult(*Di,*(Di+1),*Ei);
-            //RT Ei2 = *Ei; // = T01
-            //G.mult(*Di,*Ei);
-            //G.mult(Ei2,*(Di+1));
-            //G.mult(*Di,Ei2);
-            //G.mult(*Ei,*(++Di));
+            //std::cout<<"Di,Dip1,Ei => "<<*Di<<','<<*(Di+1)<<','<<*Ei<<std::endl;
             if (U) G.mult(U->colPair(i,i+1).transpose());
             if (i==N-2) break;
             TMVAssert(x==RT(0));
@@ -230,7 +247,9 @@ namespace tmv {
             TMVAssert(Ei+1 < E._last);
 #endif
             G.mult(x,*(Ei+1));
+            //std::cout<<"x,Eip1 => "<<x<<','<<*(Ei+1)<<std::endl;
             G = GivensRotate(*Ei,x);
+            //std::cout<<"Rotated Ei,x => "<<*Ei<<','<<x<<std::endl;
         }
 #ifdef XDEBUG
         if (U) {
@@ -244,7 +263,7 @@ namespace tmv {
             //std::cout<<"A0 = "<<A0<<std::endl;
             //std::cout<<"A2-A0 = "<<A2-A0<<std::endl;
             std::cout<<"Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
-            if (!(Norm(A2-A0) < THRESH*Norm(A0))) {
+            if (!(Norm(A2-A0) <= THRESH*Norm(A0))) {
                 cerr<<"Reduce Tridiagonal:\n";
                 cerr<<"A0 = "<<A0<<endl;
                 cerr<<"A2 = "<<A2<<endl;
@@ -253,6 +272,15 @@ namespace tmv {
                 abort();
             }
         } 
+        if (Norm(D-D0) + Norm(E-E0) == RT(0)) {
+            cerr<<"ReduceBidiagonal didn't reduce:\n";
+            cerr<<"input D = "<<D0<<endl;
+            cerr<<"input E = "<<E0<<endl;
+            cerr<<"output D = "<<D<<endl;
+            cerr<<"output E = "<<E<<endl;
+            cerr<<"mu = "<<mu<<endl;
+            abort();
+        }
 #endif
     }
 
@@ -316,7 +344,7 @@ namespace tmv {
             Matrix<T> A2 = *U * TT * U->adjoint();
             std::cout<<"Done QR: Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
             std::cout<<"cf. Norm(A0) = "<<Norm(A0)<<std::endl;
-            if (!(Norm(A2-A0) < THRESH*Norm(A0))) {
+            if (!(Norm(A2-A0) <= THRESH*Norm(A0))) {
                 cerr<<"Decompose from Tridiagonal QR:\n";
                 cerr<<"A0 = "<<A0<<endl;
                 cerr<<"A2 = "<<A2<<endl;

@@ -101,7 +101,7 @@ namespace tmv {
             TMVAssert(Ei >= E._first);
             TMVAssert(Ei < E._last);
 #endif
-            // Do it as !(|e| > eps (|d1| + |d2|)) to nan's will get set to 
+            // Do it as !(|e| > eps (|d1| + |d2|)) so nan's will get set to 
             // zero too and not iterate forever.
             if ( !(TMV_MAXABS(*Ei) > eps*(TMV_MAXABS(*Di)+TMV_MAXABS(*(Di-1))))
                  || TMV_Underflow(*Ei) ) {
@@ -702,7 +702,7 @@ namespace tmv {
             G.mult(x,*(++Di)); // x = B(i,i-1)
             dbgcout<<"x,D -> "<<x<<','<<*Di<<std::endl;
             G = GivensRotate(*(Di-1),x);
-            dbgcout<<"Rotatedi D,x => "<<*(Di-1)<<','<<x<<std::endl;
+            dbgcout<<"Rotated D,x => "<<*(Di-1)<<','<<x<<std::endl;
             G.mult(*Ei,*Di);
             dbgcout<<"E,D -> "<<*Ei<<','<<*Di<<std::endl;
             if (U) G.conjMult(U->colPair(i-1,i).transpose());
@@ -711,7 +711,7 @@ namespace tmv {
                 G.mult(x,*(++Ei)); // x = B(i-1,i+1)
                 dbgcout<<"x,E -> "<<i<<','<<*Ei<<std::endl;
                 G = GivensRotate(*(Ei-1),x);
-                dbgcout<<"Rotatedi E,x => "<<*(Ei-1)<<','<<x<<std::endl;
+                dbgcout<<"Rotated E,x => "<<*(Ei-1)<<','<<x<<std::endl;
             }
         }
 #ifdef XDEBUG

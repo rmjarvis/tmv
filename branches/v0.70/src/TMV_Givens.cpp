@@ -79,7 +79,7 @@ namespace tmv {
                     // r = f
                     T s = TMV_CONJ(y)/TMV_CONJ(x);
                     y = RT(0);
-                    //std::cout<<"Simple3: return 0,"<<s<<std::endl;
+                    //std::cout<<"Simple3: return 1,"<<s<<std::endl;
                     return Givens<T>(RT(1),s);
                 } else {
                     // c = 1/sqrt(1+|y/x|^2)
@@ -377,10 +377,10 @@ namespace tmv {
         // e0' = e0 - 2s* Re(s e0) + c s* (d1-d0)
         // d1' = d1 - 2c Re(s e0) - |s|^2 (d1-d0)
 
-        RT s2 = TMV_NORM(s);
         TMV_RealType(Tx) Rese0 = TMV_REAL(s*e0);
         Tx d1md0 = d1-d0;
-        Tx dd = RT(2)*c*Rese0 + s2*d1md0;
+        // Note: s might be very small, so explicitly form |s|^2.
+        Tx dd = RT(2)*c*Rese0 + (s*d1md0)*TMV_CONJ(s);
         d0 += dd;
         d1 -= dd;
         e0 += TMV_CONJ(s)*(c*d1md0 - RT(2)*Rese0);
@@ -394,10 +394,9 @@ namespace tmv {
         // e0' = e0 - 2|s|^2 e0 + c (s d1 - s* d0)
         // d1' = d1 - 2c (s e0) - s^2 (d1-d0)
 
-        T s2 = s*s;
         Tx se0 = s*e0;
         Tx d1md0 = d1-d0;
-        Tx dd = RT(2)*c*se0 + s2*d1md0;
+        Tx dd = RT(2)*c*se0 + (s*d1md0)*s;
         d0 += dd;
         d1 -= dd;
         if (isReal(T()))
