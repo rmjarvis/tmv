@@ -937,7 +937,7 @@ namespace tmv {
 
 #ifdef INST_INT
     template <>
-    VectorView<std::complex<int>,CStyle> 
+    VectorView<std::complex<int>,CStyle>&
     VectorView<std::complex<int>,CStyle>::clip(int ) 
     { TMVAssert(TMV_FALSE); return *this; }
 #endif

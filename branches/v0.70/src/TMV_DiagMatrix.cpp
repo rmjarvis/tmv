@@ -200,11 +200,11 @@ namespace tmv {
 
 #ifdef INST_INT
     template <>
-    DiagMatrixView<int,CStyle>& DiagMatrixView<int,CStyle>::invertSelf() const
+    DiagMatrixView<int,CStyle>& DiagMatrixView<int,CStyle>::invertSelf()
     { TMVAssert(TMV_FALSE); return *this; }
     template <>
     DiagMatrixView<std::complex<int>,CStyle>&
-        DiagMatrixView<std::complex<int>,CStyle>::invertSelf() const
+        DiagMatrixView<std::complex<int>,CStyle>::invertSelf()
     { TMVAssert(TMV_FALSE); return *this; }
 #endif
 

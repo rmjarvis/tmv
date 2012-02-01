@@ -357,12 +357,12 @@ namespace tmv {
     { TMVAssert(TMV_FALSE); return 0; }
 
     template <>
-    UpperTriMatrixView<int,CStyle> 
-    UpperTriMatrixView<int,CStyle>::invertSelf() const
+    UpperTriMatrixView<int,CStyle>&
+    UpperTriMatrixView<int,CStyle>::invertSelf()
     { TMVAssert(TMV_FALSE); return *this; }
     template <>
-    UpperTriMatrixView<std::complex<int>,CStyle> 
-    UpperTriMatrixView<std::complex<int>,CStyle>::invertSelf() const
+    UpperTriMatrixView<std::complex<int>,CStyle>&
+    UpperTriMatrixView<std::complex<int>,CStyle>::invertSelf()
     { TMVAssert(TMV_FALSE); return *this; }
 
     template <> template <class T1> 
