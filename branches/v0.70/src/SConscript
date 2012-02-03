@@ -35,6 +35,19 @@ sblib_noint_files= band_noint + sym_noint + symband_noint
 sblib_omp_noint_files= sym_omp_noint
 sblib_stegr_files= sym_stegr
 
+all_source_files = \
+        basic + basic_noint + basic_omp + basic_omp_noint + basic_geqp3 + \
+	diag + tri + tri_noint + \
+	band + band_noint + \
+	sym + sym_noint + sym_omp_noint + sym_stegr + \
+	symband + symband_noint
+
+for file in all_source_files:
+    inst = file[0:file.rfind('.')] + '.inst'
+    Depends(file,inst)
+
+
+
 env1 = env.Clone()
 
 if env['MEM_TEST']:
