@@ -1,0 +1,99 @@
+% !TEX root = TMV_Documentation.tex
+
+\section{Eigenvalues and eigenvectors}
+\index{Eigenvalues}
+\label{Eigenvalues}
+
+The eigenvalues of a matrix are important quantities in many matrix applications.
+A number, $\lambda$, is an eigenvalue of a square matrix, $A$, if for some
+non-zero vector $v$,
+\begin{equation*}
+A v = \lambda v
+\end{equation*}
+in which case $v$ is the called an eigenvector corresponding to the eigenvalue $\lambda$.
+Since any arbitrary multiple of $v$ also satisfies this equation, it is common practice
+to scale the eigenvectors so that $||v||_2 = 1$.
+If $v_1$ and $v_2$ are eigenvectors whose eigenvalues are 
+$\lambda_1 \neq \lambda_2$, then $v_1$ and $v_2$ are linearly independent.
+
+The above equation implies that 
+\begin{align*}
+A v - \lambda v &= 0 \\
+(A - \lambda I) v &= 0 \\
+\det(A-\lambda I) &= 0 \quad (\text{or} ~~ v = 0)
+\end{align*}
+If $A$ is an $N \times N$ matrix, then the last expression is called the characteristic
+equation of $A$ and the left hand side is a polynomial of degree $N$.
+Thus, it has potentially $N$ solutions.  
+Note that, even for real matrices, the solution may yield complex eigenvalues, in which
+case, the corresponding eigenvectors will also be complex.
+
+If there are solutions to the characteristic equation which are multiple roots, then these
+eigenvalues are said to have a multiplicity greater than $1$.  These eigenvalues 
+may have multiple corresponding eigenvectors.  That is, different values of $v$ 
+(which are not just a multiple of each other) may satisfy the equation $A v = \lambda v$.
+
+The number of independent eigenvectors
+corresponding to an eigenvalue with multiplicity $> 1$ may be less than that multiplicity\footnote{
+The multiplicity of the eigenvalue is often referred to as its algebraic multiplicity.
+The number of corresponding eigenvectors is referred to as its geometric multiplicity.
+So $1 \leq \text{geometric multiplicity} \leq \text{algebraic multiplicity}$.}.  Such eigenvalues
+are called ``defective'', and any matrix with defective eigenvalues is likewise
+called defective.
+
+If $0$ is an eigenvalue, then the matrix $A$ is singular.
+And conversely, singular matrices necessarily have $0$ as one of their eigenvalues.
+
+If we define $\Lambda$ to be a diagonal matrix with the values of $\lambda$ along
+the diagonal, then we have (for non-defective matrices)
+\begin{equation*}
+A V = V \Lambda
+\end{equation*}
+where the columns of $V$ are the eigenvectors.  If $A$ is defective, we can construct
+a $V$ that satisfies this equation too, but some of the columns will have to be all zeros.
+There will be one such column for each missing eigenvector, and the other columns will
+be the eigenvectors.
+
+If $A$ is not defective, then all of the columns of $V$ are linearly independent, which
+implies that $V$ is not singular (i.e. $V$ is ``invertible'').  Then,
+\begin{align*}
+A &= V \Lambda V^{-1}\\
+\Lambda &= V^{-1} A V
+\end{align*}
+This is known as ``diagonalizing'' the matrix $A$.  The determinant and trace are preserved by this procedure, which implies two more properties of eigenvalues:
+\begin{align*}
+\det(A) &= \prod_{k=1}^{N} \lambda_k\\
+\text{tr}(A) &= \sum_{k=1}^{N} \lambda_k
+\end{align*}
+
+If $A$ is a ``normal'' matrix -- which means that $A$ commutes with its adjoint,
+$AA^\dagger = A^\dagger A$ -- then the 
+matrix $V$ is unitary, and $A$ cannot be defective.  
+The most common example of a normal matrix is a hermitian matrix
+(where $A^\dagger = A$), which has
+the additional property that all of the eigenvalues are real\footnote{
+Other examples of normal matrices are unitary matrices ($A^\dagger A = AA^\dagger = I$)
+and skew-hermitian matrices ($A^\dagger = -A$).  However, normal matrices do
+not have to be one of these special types.}.
+
+So far, the TMV library can only find the eigenvalues and eigenvectors 
+of hermitian matrices.  The routines to do so are 
+\begin{tmvcode}
+void Eigen(const HermMatrix<T>& A, Matrix<T>& V, Vector<RT>& lambda)
+void Eigen(const HermBandMatrix<T>& A, Matrix<T>& V, Vector<RT>& lambda)
+\end{tmvcode}
+\index{SymMatrix!Eigenvalues and eigenvectors}
+\index{SymBandMatrix!Eigenvalues and eigenvectors}
+\index{Eigenvalues!SymMatrix}
+\index{Eigenvalues!SymBandMatrix}
+On output, \tt{V.col(i)} is the eigenvector corresponding to each eigenvalue \tt{lambda(i)},
+and \tt{A*V} will be equal to \tt{V*DiagMatrixViewOf(lambda)}.
+
+There are also routines which only find the eigenvalues, which are faster, since they
+do not perform the calculations to determine the eigenvectors:
+\begin{tmvcode}
+void Eigen(const HermMatrix<T>& A, Vector<RT>& lambda)
+void Eigen(const HermBandMatrix<T>& A, Vector<RT>& lambda)
+\end{tmvcode}
+\index{SymMatrix!Eigenvalues and eigenvectors}
+\index{SymBandMatrix!Eigenvalues and eigenvectors}

@@ -1,6 +1,6 @@
 % !TEX root = TMV_Documentation.tex
 
-\section{Known Bugs and Deficiencies}
+\section{Known bugs and deficiencies}
 \label{Bugs}
 \index{Bugs!Known bugs}
 
@@ -42,6 +42,7 @@ Microsoft's cl -- Visual C++ 2008 Express Edition\\
 \index{Installation!g++}
 \index{Installation!icpc}
 \index{Installation!pgCC}
+\index{Installation!clang++}
 \index{Installation!Visual C++}
 
 It should work with any ansi-compliant
@@ -288,7 +289,7 @@ program.  The solution is to compile TMV without LAPACK (with SCons option
 
 \end{itemize}
 
-\subsection{To Do List}
+\subsection{To-do list}
 \label{To_Do_List}
 
 Here is a list of various deficiencies with the current version of the TMV library.
@@ -367,7 +368,7 @@ faster than the native TMV code.  Although, I do find that many LAPACK distribut
 \item
 \textbf{Row-major Bunch-Kaufman}
 \index{SymMatrix!Bunch-Kaufman decomposition}
-\index{Bunch-Kaufman Decomposition!SymMatrix}
+\index{Bunch-Kaufman decomposition!SymMatrix}
 
 The Bunch-Kaufman decomposition for row-major symmetric/hermitian
 matrices is currently $L D L^\dagger$, rather than $L^\dagger D L$.  
@@ -428,3 +429,16 @@ structure, even using the same Bareiss algorithm as I currently use.
 \index{SymBandMatrix!Determinant!integer values}
 
 \end{enumerate}
+
+\subsection{Reporting bugs}
+
+If you find a bug in the TMV library that is not listed above, please let me know.  The preferred way to report a bug is to enter a ticket at \myissues.  You will need to have a Google account, but they are free, so I hope that isn't too much of a hardship.  Click ``New Issue''.  If you aren't logged into your Google account, you'll be asked to log in.  This will bring up a form for you to fill out.  
+
+There are two templates for you to choose from: ``Defect report from user'' and ``Feature request''.  In both cases, you should first enter a summary.  Then there is a text box where you can provide more information.
+
+For a defect report, there are three questions that you should answer to help me understand the problem you are having.  They are pretty self-explanatory, so just do your best to answer them as completely as possible.  Err on the side of providing too much information rather than too little to help me figure out how to reproduce the error.  And if appropriate, please also attach the code you are using, preferably distilled down to as small a program as possible, that produces the error.
+
+A feature request is more open-ended.  Just describe what you would like to see in a future version of TMV in as much detail as you feel is appropriate.
+
+Another option, especially if you aren't sure if what you are seeing is really a bug or not and you want some more informal feedback, is to email the TMV discussion email list at \mygroup.  Either I or someone else on the list may be able to help you figure out the problem.
+

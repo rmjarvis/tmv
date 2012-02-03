@@ -1,6 +1,6 @@
 % !TEX root = TMV_Documentation.tex
 
-\section{Errors and Exceptions}
+\section{Errors and exceptions}
 \index{Exceptions}
 \label{Exceptions}
 
@@ -105,7 +105,7 @@ writing the part of the matrix or vector that was read in successfully.
 
 \subsection{NonPosDef}
 \index{Exceptions!NonPosDef}
-\index{Cholesky Decomposition!NonPosDef exception}
+\index{Cholesky decomposition!NonPosDef exception}
 \label{NonPosDef}
 
 The \tt{tmv::NonPosDef} exception indicates that you tried to do some operation that requires
@@ -147,7 +147,7 @@ matrices \underline{should} be positive definite in exact arithmetic, but you
 want to guard against one failing the Cholesky decomposition due to round-off
 errors.
 
-\index{QR Decomposition!Downdate!NonPosDef exception}
+\index{QR decomposition!Downdate!NonPosDef exception}
 It is also worth mentioning that the routine \tt{QR\_Downdate} described in \S\ref{QRDowndate}
 below will also throw the exception \tt{NonPosDef} when it fails.
 

@@ -486,7 +486,7 @@ I added this reference to the discussion in the documentation about my algorithm
 \item[Version 0.65]
 
 This update primarily fixed some problems for integer matrices.  In addition to some compiler
-errors for some combinations of scons parameters, I also added the ability to calculate the 
+errors for some combinations of SCons parameters, I also added the ability to calculate the 
 determinant of integer matrices.  It had been documented (albeit somewhat poorly) that 
 this would not work for integer matrices.  However, user Ronny Bergmann convinced me that
 it would make sense to include the ability to produce accurate determinants for integer matrices.
@@ -510,7 +510,7 @@ Added \tt{m.unitUpperTri()} and \tt{m.unitLowerTri()} for symmetric/hermitian ma
 Added the \tt{resize} methods to resize an existing vector or matrix, at the request of users Zhaoming Ma and Gary Bernstein.  
 
 \item 
-Added scons option \tt{SHARED=true} to compile as a shared library rather than a static library.
+Added SCons option \tt{SHARED=true} to compile as a shared library rather than a static library.
 
 \item 
 Added the ability to turn off TMV debug statements with \tt{-DTMVNDEBUG}.
@@ -535,7 +535,7 @@ Fixed some places where nan's in the input values could lead to
 infinite loops in certain algorithms. 
 
 \item 
-Fixed a place in the SV Decomposition which could (rarely) go into an infinite loop.
+Fixed a place in the SV decomposition which could (rarely) go into an infinite loop.
 
 \item 
 Made code more robust to broken BLAS distributions that incorrectly multiply the output matrix or vector by the \tt{beta} variable even if it is zero.  This is a problem if there are \tt{nan}'s present in the memory, since multiplies by zero doesn't set the value to zero in that case.  Now we always check for \tt{beta == 0} and zero out the memory if appropriate.

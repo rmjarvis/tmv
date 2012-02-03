@@ -203,10 +203,10 @@ namespace tmv {
         }
                 
         void writeCode(const std::string& code) const
-        { if (s.usecode) os << code << " "; }
+        { if (s.usecode) os << code << s.space; }
 
         void writeSize(int n) const
-        { if (s.writesize) os << n << " "; }
+        { if (s.writesize) os << n << s.space; }
         void writeSimpleSize(int n) const
         { if (s.simplesize) writeSize(n); }
         void writeFullSize(int n) const

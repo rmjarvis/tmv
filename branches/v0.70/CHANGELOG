@@ -124,7 +124,9 @@ Changed and Deprecated features:
 
    This doesn't sound like a very useful change yet.  The advantage is that
    now you can leave out _any_ parameters that you don't want to specify,
-   and the default value would be used.  For example, the default 
+   and the default value would be used.  And for the values you do specify,
+   you can list them in any order now, so you don't have to try to remember 
+   which parameter is supposed to be first.  For example, the default 
    StorageType is ColMajor, so the above declaration could instead be:
 
    tmv::UpperTriMatrix<double,UnitDiag|FortranStyle> U(5);
@@ -166,7 +168,10 @@ Changed and Deprecated features:
 
    The third line replaces the old m.write(os,1.e-8) to clip all small values 
    to 0, which is useful when rounding errors are expected to produce many 
-   values near 0.  
+   values near 0.  Also, now for complex values, the real and imaginary parts 
+   are separately thresholded, so (1,6.535e-17) would be output as (1,0) 
+   if written with tmv::ThreshIO(1.e-8) or some other reasonable threshold 
+   value.
 
    And the last two lines show how to read the matrix in either regular or 
    compact format.  This is also not backwards compatible with old code, since 
@@ -192,9 +197,6 @@ Changed and Deprecated features:
    tmv::Matrix<double> m;
    is >> m;   // m is automatically resized to the correct size.
    [... Use matrix as m ... ]
-
--- Changed the compact I/O style. Now there are no parentheses,
-   and all the elements are on one line.
 
 -- Removed the ElementProd and AddElementProd functions.
    The equivalent behavior is now done with a new operator ElemProd(a,b)
@@ -430,14 +432,19 @@ Bug fixes:
 -- Added <cstddef> to TMV's includes.
    This is required by g++ 4.6 for the ptrdiff_t type.
 
+-- Implemented a workaround for a bug in icpc version 12.0.  
+   It was getting an internal error when compiling TMV_SymCHDecompose.cpp.
+   I don't think what I was doing was wrong, but I reworked the code slightly,
+   and now icpc is able to compile it.
+
 -- Added support for the clang++ compiler.  This didn't require much editing, 
    but it did complain about a couple things that had passed muster with the 
    other compilers I had used.
 
 -- Fixed an error in the TMV_VERSION_AT_LEAST marco.  The old version was
-   actually backwards. i.e. it returned whether the library's version was
-   equal to or _earlier_ than the provided values, rather than equal or later.
-   The workaround if you need to check versions before 0.70 is to use
+   actually backwards.  It mistakenly returned whether the library's version 
+   was equal to or _earlier_ than the provided values, rather than equal or 
+   later.  The workaround if you need to check versions before 0.70 is to use
    #if TMV_MINOR_VERSION >= 70 
    to correctly exclude v0.65 and earlier versions, rather than 
    #if TMV_VERSION_AT_LEAST(0,70)
@@ -446,4 +453,8 @@ Bug fixes:
    point hopefully nobody will need to be checking for versions earlier than
    v0.70 anyway.
 
+-- Fixed a bug where the symmetric SVD algorithm could go into an infinite
+   loop (very rarely -- it required particularly strange properties in the
+   input matrix).
 
+-- Made the Givens rotations a bit more robust to overflow and underflow.

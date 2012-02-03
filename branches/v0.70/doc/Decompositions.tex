@@ -1,0 +1,708 @@
+% !TEX root = TMV_Documentation.tex
+
+\section{Matrix decompositions}
+\label{Decompositions}
+
+While many matrix decompositions are primarily useful for performing matrix division
+(or least-squares pseudo-division), one sometimes wants to perform the decompositions for 
+their own sake.  It is possible to get at the underlying decomposition with the various
+divider accessor routines like \tt{m.lud()}, \tt{m.qrd()}, etc.  However, this is somewhat
+roundabout, and at times inefficient.  So we provide direct ways to perform all of
+the various matrix decompositions that are implemented by the TMV code.
+
+In some cases, the input matrix, which we call \tt{A} below, can also serve as at least part of the output as well.  For example, the LU decomposition can be done in place, so that on output, $L$ and $U$ are the lower and upper portions of \tt{A}.  Whenever this is the case, \tt{A} will be listed as a non-\tt{const} reference, and there will be a line after the function such as \tt{L = A.lowerTri()} to indicate the portion or portions of the decomposition that are output in \tt{A}.
+In other cases, the input matrix is just used as workspace, and it is junk
+on output, in which case, there is no such line following the function.
+If the input matrix is listed as \tt{const}, then it won't be changed on output.
+
+Also, all the matrix parameters that you pass to these functions may be views as well.  If the matrix is listed as a \tt{const} reference then you may use the corresponding \tt{Const} view type.  If it is listed as a non-\tt{const} reference, the you may use the corresponding non-\tt{Const} view type.
+
+Sometimes, only certain parts of a decomposition are wanted.  For example,
+you might want to know the singular values of a matrix, but not care about
+the $U$ and $V$ matrices.  For cases such as this, there are versions
+of the decomposition routines which omit certain output parameters.
+These routines are generally faster than the versions which include all
+output parameters, since they can omit some of the calculations.
+
+None of the decompositions are valid for \tt{T = int} or \tt{complex<int>}.
+
+\subsection[LU decomposition] {LU decomposition \rm (\tt{Matrix}, \tt{BandMatrix})}
+\index{LU decomposition}
+
+$A \rightarrow P L U$ where $L$ is lower triangular, 
+$U$ is upper triangular, and $P$ is a permutation.
+
+\begin{tmvcode}
+void LU_Decompose(Matrix<T>& A, Permutation& P);
+L = A.unitLowerTri();
+U = A.upperTri();
+
+void LU_Decompose(
+      const BandMatrix<T>& A, LowerTriMatrix<T>& L, BandMatrix<T>& U, 
+      Permutation& P);
+\end{tmvcode}
+\index{LU decomposition!Matrix}
+\index{LU decomposition!BandMatrix}
+\index{Matrix!LU decomposition}
+\index{BandMatrix!LU decomposition}
+In the second case, \tt{U} must have \tt{U.nhi() = A.nlo()+A.nhi()},
+and \tt{L} should be \tt{UnitDiag}.
+
+\subsection[Cholesky decomposition] {Cholesky decomposition \rm (\tt{HermMatrix}, \tt{HermBandMatrix})}
+\index{Cholesky decomposition}
+
+$A \rightarrow L L^\dagger$, where $L$ is lower triangular,
+and $A$ is hermitian.
+
+\begin{tmvcode}
+void CH_Decompose(HermMatrix<T>& A);
+L = A.lowerTri();
+
+void CH_Decompose(HermBandMatrix<T>& A);
+L = A.lowerBand();
+\end{tmvcode}
+\index{Cholesky decomposition!SymMatrix}
+\index{Cholesky decomposition!SymBandMatrix}
+\index{SymMatrix!Cholesky decomposition}
+\index{SymBandMatrix!Cholesky decomposition}
+If \tt{T} is real, then \tt{A} may also be a \tt{SymMatrix} or \tt{SymBandMatrix} respectively, since these are also hermitian.
+
+If $A$ is found to be not positive definite, a \tt{NonPosDef} exception is thrown.
+
+\subsection[Bunch-Kaufman decomposition] {Bunch-Kaufman decomposition \rm (\tt{HermMatrix}, \tt{SymMatrix})}
+\index{Bunch-Kaufman decomposition}
+
+$A \rightarrow P L D L^\dagger P^T$ if $A$ is hermitian,
+and $A \rightarrow P L D L^T P^T$ if $A$ is symmetric, where $P$ is a permutation,
+$L$ is lower triangular, and $D$ is hermitian or symmetric tridiagonal (respectively).  
+In fact, $D$ is even more special than that: it is block diagonal with $1 \times 1$
+and $2 \times 2$ blocks,
+which means that there are no two consecutive
+non-zero elements along the off-diagonal.
+
+\begin{tmvcode}
+void LDL_Decompose(SymMatrix<T>& A, SymBandMatrix<T>& D, Permutation& P);
+L = A.unitLowerTri();
+\end{tmvcode}
+\index{Bunch-Kaufman decomposition!SymMatrix}
+\index{SymMatrix!Bunch-Kaufman decomposition}
+
+Note: If you are using LAPACK, rather than the native TMV code, then the 
+\tt{LDL_Decompose} routine throws a
+\tt{tmv::Singular} exception if the matrix is found to be exactly singular.  The LAPACK
+documentation says that the decomposition is supposed to finish successfully, but I have
+not found that to always be true.  So if LAPACK reports that it has found a singular matrix, TMV
+will throw an exception.  The native code will always successfully decompose the matrix.
+\index{Exceptions!Singular}
+\index{LAPACK!Exceptions from LDL\_Decompose}
+
+\subsection[Tridiagonal LDLt decomposition] {Tridiagonal LDL$^\dagger$ decomposition \rm (\tt{HermBandMatrix}, \tt{SymBandMatrix} with \tt{nlo=1})}
+\index{Tridiagonal decomposition}
+
+$A \rightarrow L D L^\dagger$ or $A \rightarrow L D L^T$.
+where this time $D$ is a regular diagonal matrix and $L$ is
+a lower band matrix with a single subdiagonal and all 1's on the diagonal.
+
+It turns out
+that the Bunch-Kaufman algorithm on banded matrices tends to expand the band structure
+without limit because of the pivoting involved, so it is not practical.
+However, with tridiagonal matrices, it is often possible to perform the 
+decomposition without pivoting.  There is then no growth of the band structure,
+but it is not as stable for singular or nearly singular matrices.
+If an exact zero is found on the diagonal along the way
+\tt{tmv::NonPosDef} is thrown.\footnote{
+Note, however, that if $A$ is complex, symmetric - i.e. not hermitian -
+then this doesn't actually mean that $A$ is not positive definite (since such a 
+quality is only defined for hermitian matrices).  Furthermore, 
+hermitian matrices that are not positive definite will probably be decomposed successfully
+without throwing, resulting in D having negative values.
+
+Also, the LAPACK implementation throws an exception for matrices that the native code
+successfully decomposes.  It throws for hermitian matrices whenever they are 
+not positive definite, whereas the native code succeeds for many indefinite matrices.
+}
+\index{Exceptions!NonPosDef}
+\index{LAPACK!Exceptions from LDL\_Decompose}
+
+\begin{tmvcode}
+void LDL_Decompose(HermBandMatrix<T>& A);
+void LDL_Decompose(SymBandMatrix<T>& A);
+L = A.lowerBand();
+L.diag().setAllTo(T(1));
+D = DiagMatrixViewOf(A.diag());
+\end{tmvcode}
+\index{Tridiagonal LDL decomposition!SymBandMatrix}
+\index{SymBandMatrix!Tri-diagonal LDL decomposition}
+
+\subsection[QR decomposition] {QR decomposition \rm (\tt{Matrix}, \tt{BandMatrix})}
+\index{QR decomposition}
+
+$A \rightarrow Q R$, where $Q$ is column-unitary 
+(i.e. $Q^\dagger Q = I$), $R$ is upper triangular, and $A$ is either square or 
+has more rows than columns.
+
+\begin{tmvcode}
+void QR_Decompose(Matrix<T>& A, UpperTriMatrix<T>& R);
+Q = A;
+
+void QR_Decompose(const BandMatrix<T>& A, Matrix<T>& Q, BandMatrix<T>& R);
+\end{tmvcode}
+\index{QR decomposition!Matrix}
+\index{Matrix!QR decomposition}
+\index{QR decomposition!BandMatrix}
+\index{BandMatrix!QR decomposition}
+In the second case, \tt{R} must have \tt{R.nhi()} $>=$ \tt{A.nlo()+A.nhi()}.
+
+If you only need $R$, the following versions are faster, since they do 
+not fully calculate $Q$.
+\begin{tmvcode}
+void QR_Decompose(Matrix<T>& A);
+R = A.upperTri();
+
+void QR_Decompose(const BandMatrix<T>& A, BandMatrix<T>& R);
+\end{tmvcode}
+
+\subsection[QRP decomposition] {QRP decomposition \rm (\tt{Matrix})}
+\index{QRP decomposition}
+
+$A \rightarrow Q R P$, where $Q$ is column-unitary 
+(i.e. $Q^\dagger Q = I$), $R$ is upper triangular, $P$ is a permutation, 
+and $A$ is either square or has more rows than columns.
+
+\begin{tmvcode}
+void QRP_Decompose(
+      Matrix<T>& A, UpperTriMatrix<T>& R, Permutation& P, 
+      bool strict=false);
+Q = A;
+\end{tmvcode}
+\index{QRP decomposition!Matrix}
+\index{Matrix!QRP decomposition}
+
+As discussed in \S\ref{Matrix_Division_Decompositions}, 
+there are two slightly different algorithms for doing a QRP decomposition.  
+If \tt{strict} is \tt{true}, then the diagonal elements
+of $R$ be strictly decreasing (in absolute value) from upper-left to lower-right\footnote{
+\index{QRP decomposition!LAPACK ?geqp3}
+\index{LAPACK!Problems with QRP decomposition}
+If you are using a LAPACK library, you might find that the output $R$ diagonal
+is not always strictly decreasing, although it will usually be close.  If strictly monotonic
+diagonal elements are important for you, you can use the native TMV algorithm instead
+by compiling with the flag \texttt{-DNOGEQP3}. (geqp3 is the name of the LAPACK 
+function that does the QRP decomposition.)}.
+
+If \tt{strict} is \tt{false} (or omitted) however, then the diagonal elements of $R$ will not
+be strictly decreasing.  Rather, there will be no diagonal element
+of $R$ below and to the right of one which is more than a factor of $\epsilon^{1/4}$ 
+smaller in absolute value, where 
+$\epsilon$ is the machine precision.  This restriction
+is almost always sufficient to make the decomposition useful for singular or nearly
+singular matrices, and it is much faster than the strict algorithm for most matrices.
+
+If you only need $R$, the following versions is faster, since it does
+not fully calculate $Q$.
+\begin{tmvcode}
+void QRP_Decompose(Matrix<T>& A, bool strict=false);
+R = A.upperTri();
+\end{tmvcode}
+
+\subsection[Singular value decomposition] {Singular value decomposition \rm (\tt{Matrix}, \tt{BandMatrix}, \tt{SymMatrix}, \tt{HermMatrix},\\ \tt{SymBandMatrix}, \tt{HermBandMatrix})}
+\index{Singular value decomposition}
+
+$A \rightarrow U S V^\dagger$,
+where $U$ is column-unitary (i.e. $U^\dagger U = I$),
+$S$ is real diagonal, $V$ is square unitary, and $A$ is either square or 
+has more rows than columns.
+Note that the functions below do not deal with $V$ directly, they instead return $V^\dagger$
+in the parameter \tt{Vt}.  So on output, \tt{U*S*Vt} will equal the original matrix \tt{A}.  I find this to usually be more convenient, but if you prefer dealing with $V$ directly, you can pass
+\tt{V.adjoint()} as the parameter to these functions.
+
+\begin{tmvcode}
+void SV_Decompose(Matrix<T>& A, DiagMatrix<RT>& S, Matrix<T>& Vt);
+U = A;
+V = Vt.adjoint();
+
+void SV_Decompose(
+      const SymMatrix<T>& A, Matrix<T>& U, DiagMatrix<RT>& S, 
+      Matrix<T>& Vt);
+V = Vt.adjoint();
+
+void SV_Decompose(
+      const HermMatrix<T>& A, Matrix<T>& U, DiagMatrix<RT>& S, 
+      Matrix<T>& Vt);
+V = Vt.adjoint();
+
+void SV_Decompose(
+      const BandMatrix<T>& A, Matrix<T>& U, DiagMatrix<RT>& S, 
+      Matrix<T>& Vt);
+V = Vt.adjoint();
+
+void SV_Decompose(
+      const SymBandMatrix<T>& A, Matrix<T>& U, DiagMatrix<RT>& S, 
+      Matrix<T>& Vt);
+V = Vt.adjoint();
+
+void SV_Decompose(
+      const HermBandMatrix<T>& A, Matrix<T>& U, DiagMatrix<RT>& S, 
+      Matrix<T>& Vt);
+V = Vt.adjoint();
+\end{tmvcode}
+\index{Singular value decomposition!Matrix}
+\index{Singular value decomposition!BandMatrix}
+\index{Singular value decomposition!SymMatrix}
+\index{Singular value decomposition!SymBandMatrix}
+\index{Matrix!Singular value decomposition}
+\index{BandMatrix!Singular value decomposition}
+\index{SymMatrix!Singular value decomposition}
+\index{SymBandMatrix!Singular value decomposition}
+
+The input $A$ matrix must not have more columns than rows.  If you want
+to calculate the SVD of such a matrix, you should decompose $A^T$ instead:
+\begin{tmvcode}
+tmv::Matrix<double> A(nrows,ncols); // ncols > nrows
+// A = ... 
+tmv::Matrix<double> Vt = A;
+tmv::DiagMatrix<double> S(nrows);
+tmv::Matrix<double> U(nrows,nrows);
+SV_Decompose(Vt.transpose(),S.view(),U.transpose());
+// Now A = U * S * Vt
+\end{tmvcode}
+
+If you only need $S$, or $S$ and $V$, or $S$ and $U$, the following 
+versions are faster, since they do
+not fully calculate the omitted matrices.  
+\begin{tmvcode}
+void SV_Decompose(
+      Matrix<T>& A, DiagMatrix<RT>& S, Matrix<T>& Vt, bool StoreU);
+// With StoreU=false, then U != A
+
+void SV_Decompose(Matrix<T>& A, DiagMatrix<RT>& S, bool StoreU);
+if (StoreU) U = A;
+
+void SV_Decompose(SymMatrix<T>& A, DiagMatrix<RT>& S);
+
+void SV_Decompose(HermMatrix<T>& A, DiagMatrix<RT>& S);
+      
+void SV_Decompose(const SymMatrix<T>& A, DiagMatrix<RT>& S, Matrix<T>& Vt);
+      
+void SV_Decompose(
+      const HermMatrix<T>& A, DiagMatrix<RT>& S, Matrix<T>& Vt);
+      
+void SV_Decompose(const SymMatrix<T>& A, Matrix<T>& U, DiagMatrix<RT>& S);
+      
+void SV_Decompose(
+      const HermMatrix<T>& A, Matrix<T>& U, DiagMatrix<RT>& S);
+      
+void SV_Decompose(const BandMatrix<T>& A, DiagMatrix<RT>& S);
+
+void SV_Decompose(
+      const BandMatrix<T>& A, DiagMatrix<RT>& S, Matrix<T>& Vt);
+      
+void SV_Decompose(
+      const BandMatrix<T>& A, Matrix<T>& U, DiagMatrix<RT>& S);
+      
+void SV_Decompose(const SymBandMatrix<T>& A, DiagMatrix<RT>& S);
+      
+void SV_Decompose(const HermBandMatrix<T>& A, DiagMatrix<RT>& S);
+      
+void SV_Decompose(
+      const SymBandMatrix<T>& A, DiagMatrix<RT>& S, Matrix<T>& Vt);
+
+void SV_Decompose(
+      const HermBandMatrix<T>& A, DiagMatrix<RT>& S, Matrix<T>& Vt);
+
+void SV_Decompose(
+      const SymBandMatrix<T>& A, Matrix<T>& U, DiagMatrix<RT>& S);
+
+void SV_Decompose(
+      const HermBandMatrix<T>& A, Matrix<T>& U, DiagMatrix<RT>& S);
+\end{tmvcode}
+
+\subsection[Polar decomposition] {Polar decomposition \rm (\tt{Matrix}, \tt{BandMatrix})}
+\index{Polar decomposition}
+
+$A \rightarrow U P$ where $U$ is unitary and $P$ is positive definite hermitian.
+
+This is similar to polar form of a complex number: $z = r e^{i \theta}$.
+In the matrix version, $P$ acts as $r$, being in some sense the ``magnitude'' 
+of the matrix.  And $U$ acts as $e^{i \theta}$, being a generalized rotation.
+
+\begin{tmvcode}
+void Polar_Decompose(Matrix<T>& A, SymMatrix<T>& P);
+U = A;
+
+void Polar_Decompose(
+      const BandMatrix<T>& A, Matrix<T>& U, SymMatrix<T>& P);
+\end{tmvcode}
+\index{Polar decomposition!Matrix}
+\index{Polar decomposition!BandMatrix}
+\index{Matrix!Polar decomposition}
+\index{BandMatrix!Polar decomposition}
+If \tt{T} is real, then \tt{P} may also be a \tt{SymMatrix}, since it is also hermitian.
+
+\subsection[Matrix square root] {Matrix square root \rm (\tt{HermMatrix}, \tt{HermBandMatrix})}
+
+$A \rightarrow S S$, where $A$ and $S$ are each positive definite hermitian matrices.
+
+\begin{tmvcode}
+void SquareRoot(HermMatrix<T>& A);
+S = A;
+
+void SquareRoot(const HermBandMatrix<T>& A, SymMatrix<T>& S);
+\end{tmvcode}
+\index{SymMatrix!square root}
+\index{SymBandMatrix!square root}
+\index{square root!SymMatrix}
+\index{square root!SymBandMatrix}
+If \tt{T} is real, then \tt{A} and \tt{S} may also be a \tt{SymMatrix} or \tt{SymBandMatrix} as appropriate, since these are also hermitian.
+
+If $A$ is found to be not positive definite, a \tt{NonPosDef} exception is thrown.
+\index{Exceptions!NonPosDef}
+
+\subsection{Update a QR decomposition}
+\index{QR decomposition!Update}
+\label{QRUpdate}
+
+One reason that it can be useful to create and deal with the QR decomposition directly,
+rather than 
+just relying on the division routines is the possibility
+of updating or ``downdating'' the resulting $R$ matrix.  
+
+If you are doing a 
+least-square fit to a large number of linear equations, you can write the system as
+a matrix equation: 
+$A x = b$, where $A$ is a matrix with more rows than columns, and you are seeking,
+not an exact solution for $x$, but rather the value of $x$ which minimizes
+$||b-Ax||_2$.  See \S\ref{Matrix_Division_Leastsquare} for a more in-depth discussion of this topic.
+
+It may be the case that you
+have more rows (i.e. constraints) than would allow the entire matrix to fit in memory.  
+In this case it may be tempting to use the so-called normal equation instead: 
+\begin{align*}
+A^\dagger A x &= A^\dagger b \\
+x & = (A^\dagger A)^{-1} A^\dagger b
+\end{align*}
+This equation theoretically gives the same 
+solution as using the QR decomposition on the original design matrix.
+However, it can be shown that the condition of $A^\dagger A$ is the 
+\underline{square} of the condition of $A$.  Since larger condition values
+lead to larger numerical instabilities and round-off problems, a mildly
+ill-conditioned matrix is made much worse by this procedure.
+
+When all of $A$ fits in memory, the better solution is to use the QR decomposition, $A = QR$,
+to calculate $x$.
+\begin{align*}
+Q R x &= b \\
+x &= R^{-1} Q^\dagger b
+\end{align*}
+In fact, this is the usual behind-the-scenes procedure when you write \tt{x = b/A} in TMV.
+But if $A$ is too large to fit in memory, then so is $Q$.
+
+A compromise solution, which is not quite as good as doing the full QR decomposition,
+but is better than using the normal equation, is to just calculate the $R$ of the
+QR decomposition, and not $Q$.  Then:
+\begin{align*}
+A^\dagger A x &= A^\dagger b \\
+R^\dagger Q^\dagger Q R x = R^\dagger R x &= A^\dagger b \\
+x &= R^{-1} (R^\dagger)^{-1} A^\dagger b
+\end{align*}
+
+Calculating $R$ directly from $A$ is numerically much more stable than 
+calculating it through, say, a Cholesky decomposition of $A^\dagger A$.
+So this method produces a more accurate answer for $x$ than the normal equation does.
+
+But how can $R$ be calculated if we cannot fit all of $A$ into memory at once?
+
+First, we point out a characteristic of unitary matrices that the product 
+of two or more of them is also unitary.  
+This implies that if we can calculate
+something like: $A = Q_0 Q_1 Q_2 ... Q_n R$, then this is the $R$ that we want.
+
+So, consider breaking $A$ into a submatrix, $A_0$, which can fit into memory, 
+plus the remainder, $A_1$, which may or may not.
+\begin{equation*}
+A = \left(\begin{array}{c}A_0 \\A_1\end{array}\right)
+\end{equation*}
+First perform a QR decomposition of $A_0 = Q_0 R_0$.  Then we have:
+\begin{align*}
+A &= \left(\begin{array}{c}Q_0 R_0 \\ A_1 \end{array}\right) \\
+&= \left(\begin{array}{cc}Q_0 & 0 \\ 0 & 1\end{array}\right) 
+      \left(\begin{array}{c}R_0 \\ A_1 \end{array}\right) \\
+&\equiv Q_0^\prime A_1^\prime
+\end{align*}
+
+Assuming that $A_0$ has more rows than columns, 
+then $A_1^\prime$ has fewer rows than
+the original matrix $A$.  So we can iterate this process until the 
+resulting matrix can fit in memory, and we can perform the final QR update
+to get the final value of $R$.
+
+For the numerical reasons mentioned above, 
+the fewer such iterations you do, the better.  So you should try to include as many
+rows of the matrix $A$ as possible in each step, given the amount of memory
+available.
+
+The solution equation, written above, also needs the quantity $A^\dagger b$, which
+can be accumulated in the same blocks:
+\begin{equation*}
+A^\dagger b = A_0^\dagger b_0 + A_1^\dagger b_1 + ....
+\end{equation*}
+This, combined with the calculation of $R$, allows us to determine $x$ using the above formula.
+
+The TMV library includes a command which does the update step of the above procedure
+directly, which is slightly more efficient than explicitly forming the $A_k^\prime$ matrices.
+The commands is
+\begin{tmvcode}
+void QR_Update(UpperTriMatrix<T>& R, Matrix<T>& X)
+\end{tmvcode}
+which updates the value of $R$ such that $R_{\rm out}^\dagger R_{\rm out} =
+R_{\rm in}^\dagger R_{\rm in} + X^\dagger X$.
+(The input matrix \tt{X} is destroyed in the process.)  This is equivalent to the QR
+definition of the update described above.
+
+So the entire process might be coded using TMV as:
+\begin{tmvcode}
+int n_full = nrows_for_full_A_matrix;
+int n_mem = nrows_that_fit_in_memory;
+assert(n_mem <= n_full);
+assert(n_mem > ncols);
+
+tmv::Matrix<double> A(n_mem,ncols); 
+tmv::Vector<double> b(n_mem);
+
+// Import_Ab sets A to the first n_mem rows of the full matrix, 
+// and also sets b to the same components of the full rhs vector.
+// Maybe it reads from a file, or performs a calculation, etc.
+Import_Ab(0,n_mem,A,b);
+
+// x will be the solution to A_full x = b_full when we are done
+// But for now, it is accumulating A_full.transpose() * b_full.
+tmv::Vector<double> x = A.transpose() * b;
+
+// Do the initial QR decomposition:
+QR_Decompose(A.view());
+tmv::UpperTriMatrix<double> R = A.upperTri();
+
+// Iterate until we have done all the rows
+for(int n1=n_mem, n2=n1+n_mem; n2<n_full; n1=n2, n2+=n_mem) {
+    if (n2 > n_full) n2 = n_full;
+
+    // Import the next bit:
+    Import_Ab(n1,n2,A,b);
+
+    // (Usually, A1==A, b1==b, but not the last time through the loop.)
+    tmv::MatrixView<double> A1 = A.rowRange(0,n2-n1);
+    tmv::VectorView<double> b1 = b.subVector(0,n2-n1);
+
+    // Update, x, R:
+    x += A1.transpose() * b1;
+    QR_Update(R,A1);
+}
+
+// Finish the solution:
+x /= R.transpose();
+x /= R;
+\end{tmvcode}
+
+If the update only needs to add a single row, you can also use the form
+\begin{tmvcode}
+void QR_Update(UpperTriMatrix<T>& R, Vector<T>& v)
+\end{tmvcode}
+where \tt{v} is the single row that you want to have added to the matrix.  Again, \tt{v} is destroyed in the process.
+
+\subsection{Downdate a QR decomposition}
+\index{QR decomposition!Downdate}
+\label{QRDowndate}
+
+When performing a least-square fit of some data to a model,
+it is common to do some kind of outlier rejection to remove data that
+seem not to be applicable to the model - things like spurious measurements
+and such.
+For this, we basically want the opposite of a QR update - instead we want to 
+find the QR decomposition that results from
+removing a few rows from $A$.  This is called a QR ``downdate'', and is performed
+using the subroutine:
+\begin{tmvcode}
+void QR_Downdate(UpperTriMatrix<T>& R, Matrix<T>& X)
+\end{tmvcode}
+where \tt{X} represents the rows from the original matrix to remove from the 
+QR decomposition.  (The input matrix \tt{X} is destroyed in the process.)  If you only want to
+remove a single row, you can also use
+\begin{tmvcode}
+void QR_Downdate(UpperTriMatrix<T>& R, Vector<T>& v)
+\end{tmvcode}
+
+It is possible for the downdate to fail (and throw an exception) 
+if the matrix $X$ does not represent rows
+of the matrix that was originally used to create $R$.
+Furthermore,
+with round-off errors, the error may still result with actual rows from the 
+original $A$
+if $R$ gets too close to singular.  In this case, \tt{QR\_Downdate} throws
+a \tt{NonPosDef} exception.  This might seem like a strange choice, but the 
+logic is that $R^\dagger R$ is the Cholesky decomposition of $A^\dagger A$,
+and \tt{QR\_Downdate(R,X)} basically updates $R$ to be the Cholesky decomposition
+of $A^\dagger A - X^\dagger X$.  The procedure fails (and throws) when this latter 
+matrix is found not to be positive definite.
+\index{QR decomposition!Downdate!NonPosDef exception}
+\index{Exceptions!NonPosDef}
+
+It is worth pointing out that the algorithm used in TMV is a new one developed by
+Mike Jarvis.  Most of the texts and online resources that discuss the 
+QR downdate algorithm only explain how to do one row at a time, using a 
+modification of the QR update using Givens rotations.  
+If you are doing many rows, it is common that roundoff errors in such a 
+procedure accumulate sufficiently for the routine to fail.  The TMV algorithm
+instead downdates all of the rows together using a modification of the 
+Householder reflection algorithm for updates.  This algorithm seems to be
+much more stable than ones that use Givens rotations.  
+
+The only references to a similar algorithm that I could find in the literature is 
+described in the paper,
+"Stability Analysis of a Householder-based Algorithm for Downdating the Cholesky Factorization", Bojanczyk and Steinhardt, 1991, Siam J. Sci. Stat. Comput. 12, 6, 
+1255\footnote{
+It seems that this paper has become a bit forgotten.  A recent paper,
+``Efficient Algorithms for Block Downdating of Least Squares Solutions'', Yanev and Kontoghiorghes, 2004, Applied Numerical Mathematics, 49, 3, evaluates
+five algorithms for doing the downdate.  However, all
+of them are block versions of the Given matrix approach.  They do not consider 
+any algorithms that use Householder matrices to do the downdate, and do not reference
+the above paper by Bojanczyk and Steinhardt.  In addition, none of the papers that
+do cite the Bojanczyk and Steinhardt paper seem to be about the general problem 
+of QR (or Cholesky) downdating.
+}.
+This paper describes a similar algorithm to compute the downdated $R$ matrix
+using Householder matrices.  However, the details of the computation are somewhat
+different from the TMV algorithm.  Also, they only consider real matrices, and they 
+do not include the block-householder techniques in their description to employ more
+so-called ``level-3'' matrix operations.
+
+Therefore, I will describe the TMV downdate algorithm here.  I think it is clearer to 
+begin by describing the update algorithm in \S\ref{QRUpdate_Algorithm}, since it 
+is quite similar to the algorithm we use for downdating, but is a bit easier to 
+understand.  Then the downdate algorithm
+is described in \S\ref{QRDowndate_Algorithm}.
+
+\subsubsection{The update algorithm}
+\index{QR decomposition!Update!algorithm}
+\label{QRUpdate_Algorithm}
+
+First lets look at the Householder algorithm for QR update:
+
+Given the initial decomposition $A_0 = Q_0 R_0$, we want to find $R$ such that
+\begin{align*}
+A_1 = \left(\begin{array}{c}A_0 \\ X \end{array}\right) &= Q_1 R_1 \\
+\left(\begin{array}{c}Q_0 R_0 \\ X \end{array}\right) &= Q_1 R_1 \\
+\left(\begin{array}{cc}Q_0 & 0 \\ 0 & 1 \end{array}\right) 
+\left(\begin{array}{c}R_0 \\ X \end{array}\right) &= Q_1 R_1 
+\end{align*}
+So if we perform a QR decomposition: 
+\begin{equation*}
+S \equiv \left(\begin{array}{c}R_0 \\ X \end{array}\right) = Q_S R_S
+\end{equation*}
+Then this is the $R$ we want: $R_1 = R_S$, and 
+\begin{equation*}
+Q_1 = \left(\begin{array}{cc}Q_0 & 0 \\ 0 & 1 \end{array}\right)  Q_S
+\end{equation*}
+
+For the following discussion, let $N$ be the number of rows (and columns) in $R_0$,
+and $M$ be the number of rows in $X$.
+
+To perform the decomposition, we multiply $S$ by a series of Householder reflections
+on the left to zero out each column of $X$ one at a time.  Householder reflections 
+are unitary, so their product in the reverse order is $Q_S$:
+\begin{align*}
+\left(\begin{array}{c}R_1 \\ 0 \end{array}\right) &=
+  H_N H_{N-1} ... H_2 H_1 
+  \left(\begin{array}{c}R_0 \\ A_1 \end{array}\right)  \\
+Q_S &= H_1^\dagger H_2^\dagger ... H_{N-1}^\dagger H_N^\dagger 
+\end{align*}
+
+Householder reflections are defined as $H = I - \beta (x - y e_1)  (x - y e_1)^\dagger$
+where $x$ is a (column) vector, $y$ is a scalar with $|y| = ||x||_2$, $e_1$ is the
+basis vector whose only non-zero element is the first: $e_1(1) = 1$, and
+$\beta = (||x||_2^2 - y^* x(1))^{-1}$.
+They have the useful properties that $H x = y e_1$ and they are unitary:
+$H^\dagger H = H H^\dagger = I$.
+Furthermore, if $\beta$ is real, they are also hermitian: $H = H^\dagger$.
+
+$H_1$ is defined for the vector 
+$x = (R_0(1,1), 0, 0, ... , 0, 0, X(1,1), X(2,1), ... , X(M,1) )$ 
+where the stretch of $0$'s includes a total of $(N-1)$ $0$'s. This value of 
+$x$ completely determines the Householder matrix $H_1$ up to an arbitrary sign
+on either $y$ or $\beta$ (or in general an arbitrary factor $e^{i \theta}$) which is 
+chosen to minimize rounding errors.  The optimal choice is to choose
+$y = -||x||_2\:x(1)/|x(1)|$, which makes $\beta$ real.  
+However, the LAPACK choice is $y = -||x||_2 \:sign(real(x(1)))$, which means
+$\beta$ is complex, and $H$ is not Hermitian\footnote{
+This choice complicates a lot of the calling routines which use
+Householder matrices, since you need to keep track of conjugation of the 
+$\beta$ values.  Since TMV is designed to be able to call LAPACK
+when possible, it is forced to follow the same convention.
+
+In fact, it could be argued that the LAPACK convention is even ``wrong'' in the sense that
+their Householder matrices are not actually ``reflections''.  A reflection is a 
+unitary matrix whose determinant is $-1$.  The determinant of a Householder 
+matrix as defined here is $-\beta^2/|\beta|^2$ which is $-1$ for real $\beta$, 
+but not for complex $\beta$.  But we are stuck with their choice, so we allow $\beta$
+to be complex in this discussion.
+}.
+\index{LAPACK!Householder matrices}
+
+The product $H_1 S$ ``reflects'' the first column
+of $X$ into the first diagonal element of $R_0$.  Because of all the $0$'s, 
+most of $R_0$ is unaffected -- only the first row of $R_0$ and the rest of $X$
+are changed.
+The subsequent Householder reflections are defined similarly, each zeroing out
+a column of $X$, and modifying the corresponding row of $R_0$ and the 
+remaining elements of $X$.
+
+At the end of this procedure, the matrix $R_0$ will be changed into the 
+matrix $R_1$.  If desired, $Q_S$ (and then $Q_1$) 
+may also be calculated in the process, but the 
+TMV implementation of the QR update does not calculate $Q_1$.
+If there is a demand for such a routine, it would not be hard to add it, 
+but I think most applications of the update do not use the $Q$ matrix explicitly.
+
+\subsubsection{The downdate algorithm}
+\index{QR decomposition!Downdate!algorithm}
+\label{QRDowndate_Algorithm}
+
+Given the initial decomposition
+\begin{equation*}
+A_1 = \left(\begin{array}{c}A_0 \\ X \end{array}\right) = Q_1 R_1 
+\end{equation*}
+we want to find $R_0$ such that $A_0 = Q_0 R_0$.
+
+The TMV algorithm to do this essentially performs the same steps as in the update
+algorithm above,
+but instead removes the effect of each $H$ from $R_1$.
+This is easy to
+do if we can determine what each $H$ is, since $H^{-1} = H^\dagger$, so we just
+apply $H^\dagger$ to update each row of $R_1$.  The $X$ update takes
+the regular $H$ matrix, since we need to replicate the steps that we would do
+for an update to keep finding the correct values for the remaining columns of $X$.
+
+All of the values in the vector $x$ needed to define $H_1$ are given, except for the first,
+$R_0(0,0)$.  But this is easy to calculate, since
+\begin{equation*}
+|R_1(0,0)|^2 = |R_0(0,0)|^2 + ||X(1:M,0)||_2^2
+\end{equation*}
+This determines the $x$ vector, which in turn defines $H_1$
+(modulo an arbitrary sign, which again is chosen to minimize rounding errors).
+Thus, we can calculate $H_1$ and apply it as described above.  Each subsequent Householder
+matrix is created and applied similarly for each column of $X$.  When we have finished
+this process, we are left with $R_0$ in the place of $R_1$.
+
+If at any point in the process, we find the calculated $|R_0(k,k)|^2 < 0$, then 
+the algorithm fails.  In the TMV implementation, a \tt{NonPosDef} exception is thrown.
+
+In practice, for both of these algorithms, we actually use a blocked implementation for updating
+the $R$ and $X$ matrices.  We accumulate the effect of the Householder matrices until 
+there are sufficiently many (e.g. 64), at which point we update the appropriate rows of the $R$
+matrix and the rest of $X$.  Implementing this correctly is mostly a matter of keeping track
+of which elements have been updated yet, making sure that whenever an element is used,
+it is already updated, while delaying as much of the calculation as possible in order 
+to make maximum
+use of the so-called ``level-3'' matrix functions, which are the most efficient on modern computers.
+We also make the additional improvement of using a recursive algorithm within each block,
+which gains some additional level-3 operations, for a bit more efficiency.
+

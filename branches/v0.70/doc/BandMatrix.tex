@@ -625,7 +625,7 @@ const Permutation& b.lud().getP()
 \end{tmvcode}
 \index{BandMatrix!Methods!lud}
 \index{BandMatrix!LU decomposition}
-\index{LU Decomposition!BandMatrix}
+\index{LU decomposition!BandMatrix}
 The following should result in a matrix numerically very close to \tt{b}.
 \begin{tmvcode}
 tmv::Matrix<T> m2 = b.lud().getP() * b.lud().getL() * b.lud().getU();
@@ -651,7 +651,7 @@ tmv::ConstBandMatrixView<T> b.qrd().getR()
 \end{tmvcode}
 \index{BandMatrix!Methods!qrd}
 \index{BandMatrix!QR decomposition}
-\index{QR Decomposition!BandMatrix}
+\index{QR decomposition!BandMatrix}
 The following should result in a matrix numerically very close to \tt{b}.
 \begin{tmvcode}
 tmv::Matrix<T> m2(b.nrows,b.ncols);
@@ -674,7 +674,7 @@ tmv::ConstMatrixView<T> b.svd().getVt()
 \end{tmvcode}
 \index{BandMatrix!Methods!svd}
 \index{BandMatrix!Singular value decomposition}
-\index{Singular Value Decomposition!BandMatrix}
+\index{Singular value decomposition!BandMatrix}
 The product of these three
 should result in a matrix numerically very close to \tt{b}.
 

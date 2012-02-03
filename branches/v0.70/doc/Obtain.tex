@@ -1,6 +1,6 @@
 % !TEX root = TMV_Documentation.tex
 
-\section{Obtaining and Compiling the Library}
+\section{Obtaining and compiling the library}
 \index{Installation}
 \label{Install}
 
@@ -216,7 +216,7 @@ more information.
 \tt{dstegr} (or \tt{sstegr} for \tt{<float>}) for symmetric
 eigenvector calculation.  If it is false, the divide-and-conquer algorithm,
 named \tt{dstedc} (or \tt{sstedc}) will be used instead.
-\index{Singular Value Decomposition!LAPACK ?stegr}
+\index{Singular value decomposition!LAPACK ?stegr}
 \index{Eigenvalues!LAPACK ?stegr}
 \index{Warnings!LAPACK ?stegr}
 \index{LAPACK!dstegr/sstegr issues}
@@ -227,13 +227,13 @@ I've had trouble with the LAPACK \tt{?stegr} algorithms on a number of systems. 
 \texttt{USE\_GEQP3=true} specifies whether to use the LAPACK algorithm called
 \tt{dgeqp3} (or its variants) for the strict QRP decomposition.  If it is false,
 the native TMV code will be used instead.
-\index{QRP Decomposition!LAPACK ?geqp3}
+\index{QRP decomposition!LAPACK ?geqp3}
 \index{LAPACK!Problems with QRP decomposition}
 \item \texttt{SMALL\_TESTS=false} specifies whether to make the smaller test suite programs: \texttt{tmvtest1a}, \texttt{tmvtest1b}, etc. 
 \item \texttt{WARN=false} specifies whether to have the compiler report warning (with -Wall or
 something similar).
 \item \texttt{CACHE\_LIB=true} specifies whether to cache the results of the library checks.  
-Scons is pretty good at only recompiling what needs to be recompiled based on what options or files you have changed.  However, it is not good at detecting when changed options might change the results of a BLAS or LAPACK library check.  So if you add new paths for it to search, or even moreso, if you change the names or locations of libraries on your system, then you should set \tt{CACHE\_LIB=false} to force scons to redo the BLAS and LAPACK checks each time.
+Scons is pretty good at only recompiling what needs to be recompiled based on what options or files you have changed.  However, it is not good at detecting when changed options might change the results of a BLAS or LAPACK library check.  So if you add new paths for it to search, or even moreso, if you change the names or locations of libraries on your system, then you should set \tt{CACHE\_LIB=false} to force SCons to redo the BLAS and LAPACK checks each time.
 \item \texttt{WITH\_UPS=false} specifies whether to install TMV information for \tt{ups} into the \tt{PREFIX/ups} directory.
 \end{itemize}
 

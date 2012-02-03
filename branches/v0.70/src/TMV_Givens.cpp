@@ -379,7 +379,7 @@ namespace tmv {
 
         TMV_RealType(Tx) Rese0 = TMV_REAL(s*e0);
         Tx d1md0 = d1-d0;
-        // Note: s might be very small, so explicitly form |s|^2.
+        // Note: s might be very small, so don't explicitly form |s|^2.
         Tx dd = RT(2)*c*Rese0 + (s*d1md0)*TMV_CONJ(s);
         d0 += dd;
         d1 -= dd;

@@ -472,7 +472,7 @@ Likewise for the next three (called ``rank-k updates''), the \tt{m}'s, \tt{L}'s 
 same data, and for a complex hermitian matrix, \tt{transpose()}
 should be replaced with \tt{adjoint()}.
 
-\subsection{Delayed Evaluation}
+\subsection{Delayed evaluation}
 
 As usual, the above arithmetic operations try to delay the evaluation 
 of the expression until the storage location is known.  Only if the 
@@ -569,9 +569,9 @@ BandMatrix<T> s.lud().getD()
 const Permutation& s.lud().getP()
 \end{tmvcode}
 \index{SymMatrix!Methods!lud}
-\index{SymMatrix!LU Decomposition|see{SymMatrix!Bunch-Kaufman decomposition}}
+\index{SymMatrix!LU decomposition|see{SymMatrix!Bunch-Kaufman decomposition}}
 \index{SymMatrix!Bunch-Kaufman decomposition}
-\index{Bunch-Kaufman Decomposition!SymMatrix}
+\index{Bunch-Kaufman decomposition!SymMatrix}
 The following should result in a matrix numerically very close to \tt{s}.
 \begin{tmvcode}
 Matrix<T> m2 = s.lud().getP() * s.lud().getL() * s.lud().getD() * 
@@ -618,7 +618,7 @@ ConstLowerTriMatrixView<T> s.chd().getL()
 \end{tmvcode}
 \index{SymMatrix!Methods!chd}
 \index{SymMatrix!Cholesky decomposition}
-\index{Cholesky Decomposition!SymMatrix}
+\index{Cholesky decomposition!SymMatrix}
 The following should result in a matrix numerically very close to \tt{s}.
 \begin{tmvcode}
 Matrix<T> m2 = s.chd().getL() * s.chd().getL().adjoint()
@@ -650,7 +650,7 @@ Matrix<T> s.svd().getVt()
 \index{SymMatrix!Methods!svd}
 \index{SymMatrix!Methods!symsvd}
 \index{SymMatrix!Singular value decomposition}
-\index{Singular Value Decomposition!SymMatrix}
+\index{Singular value decomposition!SymMatrix}
 The following should result in a matrix numerically very close to \tt{s}.
 \begin{tmvcode}
 Matrix<T> m2 = s.svd().getU() * s.svd().getS() * s.svd().getVt()
@@ -736,7 +736,7 @@ See \S\ref{IOStyle} for more information about specifying custom I/O styles, inc
 features like using brackets instead of parentheses, or putting commas between elements,
 or specifying an output precision.  
 
-\subsection{Other SymMatrix operations}
+\subsection{Other operations}
 \index{SymMatrix!Arithmetic!rank-2 Update}
 \index{SymMatrix!Arithmetic!rank-2k Update}
 \index{SymMatrix!Arithmetic!product of two regular matrices}

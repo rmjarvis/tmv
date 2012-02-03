@@ -536,7 +536,7 @@ const Permutation& sb.lud().getP()
 \end{tmvcode}
 \index{SymBandMatrix!Methods!lud}
 \index{SymBandMatrix!LU decomposition}
-\index{LU Decomposition!SymBandMatrix}
+\index{LU decomposition!SymBandMatrix}
 The following should result in a matrix numerically very close to \tt{sb}.
 \begin{tmvcode}
 tmv::Matrix<T> m2(sb.nrows(),sb.ncols);
@@ -572,7 +572,7 @@ DiagMatrix<T> sb.chd().getD()
 \end{tmvcode}
 \index{SymBandMatrix!Methods!chd}
 \index{SymBandMatrix!Cholesky decomposition}
-\index{Cholesky Decomposition!SymBandMatrix}
+\index{Cholesky decomposition!SymBandMatrix}
 with $L$ being made unit-diagonal or $D$ being set to the identity matrix
 as appropriate.  (Obviously, \tt{getL()} contains all of the information for the non-tridiagonal
 version.)
@@ -596,7 +596,7 @@ Matrix<T> sb.svd().getVt()
 \end{tmvcode}
 \index{SymBandMatrix!Methods!svd}
 \index{SymBandMatrix!Singular value decomposition}
-\index{Singular Value Decomposition!SymBandMatrix}
+\index{Singular value decomposition!SymBandMatrix}
 (As for \tt{SymMatrix}, a complex symmetric matrix needs to use the accessor
 \tt{symsvd()} instead, whose \tt{getS} and \tt{getVt} methods return Views
 rather than instantiated matrices.)

@@ -1,6 +1,6 @@
 % !TEX root = TMV_Documentation.tex
 
-\section{Dense Rectangular Matrices}
+\section{Dense rectangular matrices}
 \index{Matrix}
 \label{Matrix}
 
@@ -627,7 +627,7 @@ Functions that modify the \tt{Matrix} are only defined for
 
 Some functions are invalid if T is \tt{int} or \tt{complex<int>} because they require 
 a \tt{sqrt}, \tt{log} or division.  If called, these functions typically return \tt{0} if there is a return value.
-And if the library is compiled with debugging on (\tt{DEBUG=true} in the scons installation),
+And if the library is compiled with debugging on (using the SCons flag \tt{DEBUG=true}),
 then they will throw a \tt{FailedAssert} exception.  The descriptions for such functions
 will mention if they are invalid for integer types.
 
@@ -1009,7 +1009,7 @@ swap the corresponding data elements, so it takes $O(N^2)$ time.
 \index{Matrix!Arithmetic}
 \label{Matrix_Arithmetic}
 
-\subsubsection{Basic Operators}
+\subsubsection{Basic operators}
 
 We'll start with the simple operators that require little explanation aside from the 
 notation: 
@@ -1097,7 +1097,7 @@ if (Norm(m-1.) < 1.e-8) { ... }
 \end{itemize}
 
 
-\subsubsection{Outer Products}
+\subsubsection{Outer products}
 \label{outerproduct}
 
 For the product of two vectors, there are two orientation choices that make sense mathematically.
@@ -1142,7 +1142,7 @@ m = ElemProd(m,m2);
 \end{tmvcode}
 The return value of the \tt{ElemProd} function is a composite object, so it can be used in more complicated arithmetic expressions just like any other arithmetic operator.
 
-\subsubsection{Delayed Evaluation}
+\subsubsection{Delayed evaluation}
 
 As with \tt{Vector}s, the above arithmetic operations delay the evaluation of any arithmetic
 expression until we have a place to store the result.
@@ -1304,18 +1304,18 @@ non-square matrices.
 
 \begin{enumerate}
 \item
-\textbf{LU Decomposition}: 
+\textbf{LU decomposition}: 
 \index{Matrix!LU decomposition}
-\index{LU Decomposition!Matrix}
+\index{LU decomposition!Matrix}
 (\tt{dt} = \tt{tmv::LU}) $A = P L U$, where $L$ is a lower-triangle 
 matrix with all 1's along the diagonal, $U$ is an upper-triangle matrix, 
 and $P$ is a permutation matrix.  This decomposition is only available for 
 square matrices.
 
 \item
-\textbf{QR Decomposition}: 
+\textbf{QR decomposition}: 
 \index{Matrix!QR decomposition}
-\index{QR Decomposition!Matrix}
+\index{QR decomposition!Matrix}
 (\tt{dt} = \tt{tmv::QR}) $A = Q R$ where $Q$ is a unitary matrix
 and $R$ is an upper-triangle matrix.  (Note: real unitary matrices are
 also known as orthogonal matrices.)  A unitary matrix is such that
@@ -1329,9 +1329,9 @@ only be column-unitary.  That is $Q Q^\dagger \neq I$.
 If $M < N$, then $A^T$ is actually decomposed into $Q R$.
 
 \item
-\textbf{QRP Decomposition}: 
+\textbf{QRP decomposition}: 
 \index{Matrix!QRP decomposition}
-\index{QRP Decomposition!Matrix}
+\index{QRP decomposition!Matrix}
 (\tt{dt} = \tt{tmv::QRP}) $A = Q R P$ where $Q$ is unitary, $R$ is 
 upper-triangle, and $P$ is a permutation.  This decomposition is somewhat
 slower than a simple QR decomposition, but it is numerically more stable if
@@ -1366,9 +1366,9 @@ bool tmv::QRP_IsStrict();
 \end{tmvcode}
 
 \item
-\textbf{Singular Value Decomposition}: 
+\textbf{Singular value decomposition}: 
 \index{Matrix!Singular value decomposition}
-\index{Singular Value Decomposition!Matrix}
+\index{Singular value decomposition!Matrix}
 (\tt{dt} = \tt{tmv::SV}) $A = U S V^\dagger$ where $U$ is unitary
 (or column-unitary if $M > N$), $S$ is diagonal and real, and $V$ is unitary 
 (or column-unitary if $M < N$).  The values of $S$ will be such that all the values will
@@ -1596,7 +1596,7 @@ bool m.lud().isTrans()
 \end{tmvcode}
 \index{Matrix!Methods!lud}
 \index{Matrix!LU decomposition}
-\index{LU Decomposition!Matrix}
+\index{LU decomposition!Matrix}
 \tt{getL()} and \tt{getU()} return $L$ and $U$.
 \tt{getP()} returns the permutation, $P$.
 Finally, \tt{isTrans()} returns whether
@@ -1618,7 +1618,7 @@ bool m.qrd().isTrans();
 \end{tmvcode}
 \index{Matrix!Methods!qrd}
 \index{Matrix!QR decomposition}
-\index{QR Decomposition!Matrix}
+\index{QR decomposition!Matrix}
 \tt{getQ()} and \tt{getR()} return $Q$ and $R$.  
 \tt{isTrans()} returns whether
 the decomposition is equal to \tt{m} or \tt{m.transpose()}.  
@@ -1646,7 +1646,7 @@ bool m.qrpd().isTrans()
 \end{tmvcode}
 \index{Matrix!Methods!qrpd}
 \index{Matrix!QRP decomposition}
-\index{QRP Decomposition!Matrix}
+\index{QRP decomposition!Matrix}
 \tt{getQ()} and \tt{getR()} return $Q$ and $R$.
 \tt{getP()} returns the permutation, $P$.
 \tt{isTrans()} returns whether
@@ -1670,7 +1670,7 @@ tmv::ConstMatrixView<T> m.svd().getVt()
 \end{tmvcode}
 \index{Matrix!Methods!svd}
 \index{Matrix!Singular value decomposition}
-\index{Singular Value Decomposition!Matrix}
+\index{Singular value decomposition!Matrix}
 \tt{getU()}, \tt{getS()}, and \tt{getVt()} return $U$, $S$, and $V^\dagger$.  Note that if you would prefer to get the $V$ matrix, you need to write \tt{V = m.svd().getVt().adjoint()}.  I find it simpler to deal with the $V^\dagger$ matrix directly, rather than $V$.  The adjoint just makes the algorithms more confusing in my opinion, so the TMV algorithms all work in terms of \tt{Vt} $= V^\dagger$.  That's why this is the natural matrix to return to the user with a \tt{getVt} method.
 
 The following should result in a \tt{Matrix m2}
@@ -2056,8 +2056,8 @@ So a square \tt{SmallMatrix} will always use
 LU decomposition, and a non-square one will always use QR decomposition.
 And if you are doing multiple division statements with the same matrix,
 the library will not save the decomposition between statements.  
-\index{LU Decomposition!SmallMatrix}
-\index{QR Decomposition!SmallMatrix}
+\index{LU decomposition!SmallMatrix}
+\index{QR decomposition!SmallMatrix}
 \index{SmallMatrix!LU decomposition}
 \index{SmallMatrix!QR decomposition}
 
