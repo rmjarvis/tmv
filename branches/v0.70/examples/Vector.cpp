@@ -244,9 +244,8 @@ int main() try
     //! Resorted: v4 = 6  ( -7  -2.8  -1.5  0.5  2  5.3 )
 
     // Can sort by other criteria:
-    // (Note: the 0 here is p.  If p=0, then it is not set.)
-    std::cout<<"v4.sort(0,Descend) = "<<v4.sort(0,tmv::Descend)<<std::endl;
-    //! v4.sort(0,Descend) = 6  ( 5.3  2  0.5  -1.5  -2.8  -7 )
+    std::cout<<"v4.sort(Descend) = "<<v4.sort(tmv::Descend)<<std::endl;
+    //! v4.sort(Descend) = 6  ( 5.3  2  0.5  -1.5  -2.8  -7 )
 
     cv4.realPart() << -3,  1, -2, -1,  7,  3;
     cv4.imagPart() <<  4, -1,  0, -6,  5, -1;
@@ -255,21 +254,21 @@ int main() try
     std::cout<<"cv4 = "<<cv4<<std::endl;
     //! cv4 = 6  ( (-3,4)  (1,-1)  (-2,0)  (-1,-6)  (7,5)  (3,-1) )
 
-    std::cout<<"cv4.sort(0,Descend,RealComp) =\n"<<
-        cv4.sort(0,tmv::Descend,tmv::RealComp)<<std::endl;
-    //! cv4.sort(0,Descend,RealComp) =
+    std::cout<<"cv4.sort(Descend,RealComp) =\n"<<
+        cv4.sort(tmv::Descend,tmv::RealComp)<<std::endl;
+    //! cv4.sort(Descend,RealComp) =
     //! 6  ( (7,5)  (3,-1)  (1,-1)  (-1,-6)  (-2,0)  (-3,4) )
-    std::cout<<"cv4.sort(0,Ascend,ImagComp) =\n"<<
-        cv4.sort(0,tmv::Ascend,tmv::ImagComp)<<std::endl;
-    //! cv4.sort(0,Ascend,ImagComp) =
+    std::cout<<"cv4.sort(Ascend,ImagComp) =\n"<<
+        cv4.sort(tmv::Ascend,tmv::ImagComp)<<std::endl;
+    //! cv4.sort(Ascend,ImagComp) =
     //! 6  ( (-1,-6)  (3,-1)  (1,-1)  (-2,0)  (-3,4)  (7,5) )
-    std::cout<<"cv4.sort(0,Ascend,AbsComp) =\n"<<
-        cv4.sort(0,tmv::Ascend,tmv::AbsComp)<<std::endl;
-    //! cv4.sort(0,Ascend,AbsComp) =
+    std::cout<<"cv4.sort(Ascend,AbsComp) =\n"<<
+        cv4.sort(tmv::Ascend,tmv::AbsComp)<<std::endl;
+    //! cv4.sort(Ascend,AbsComp) =
     //! 6  ( (1,-1)  (-2,0)  (3,-1)  (-3,4)  (-1,-6)  (7,5) )
-    std::cout<<"cv4.sort(0,Ascend,ArgComp) =\n"<<
-        cv4.sort(0,tmv::Ascend,tmv::ArgComp)<<std::endl;
-    //! cv4.sort(0,Ascend,ArgComp) =
+    std::cout<<"cv4.sort(Ascend,ArgComp) =\n"<<
+        cv4.sort(tmv::Ascend,tmv::ArgComp)<<std::endl;
+    //! cv4.sort(Ascend,ArgComp) =
     //! 6  ( (-1,-6)  (1,-1)  (3,-1)  (7,5)  (-3,4)  (-2,0) )
 
     // The default component for complex vectors is RealComp:

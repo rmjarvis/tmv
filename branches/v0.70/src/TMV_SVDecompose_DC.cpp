@@ -267,7 +267,7 @@ namespace tmv {
                 if (tau > upperbound) tau = upperbound;
                 // The other times we check this are basically for rounding 
                 // error reasons.
-                // But this time, if f <  0, the solution to the quadratic
+                // But this time, if f < 0, the solution to the quadratic
                 // can really be much > upperbound.  So the check is especially
                 // important in this case.
             } while (false);
@@ -894,7 +894,7 @@ namespace tmv {
 
     template <class T> 
     static void SmallProblem(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt)
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E, MatrixView<T> Vt)
     {
         dbgcout<<"Start SmallProblem: N = "<<D.size()<<std::endl;
         if (E.size() > 0)
@@ -905,14 +905,14 @@ namespace tmv {
         RT* Di = D.ptr();
         for(int i=0;i<N;++i,++Di) if (*Di < 0) {
             *Di = -(*Di);
-            if (Vt) Vt->row(i) = -Vt->row(i);
+            if (Vt.cptr()) Vt.row(i) = -Vt.row(i);
         }
         dbgcout<<"After make all Di positive"<<std::endl;
     }
 
     template <class T> 
     void SV_DecomposeFromBidiagonal_DC(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt,
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E, MatrixView<T> Vt,
         bool UisI, bool VisI)
     {
         // For these comments, I will use FortranStyle notation,
@@ -1035,8 +1035,8 @@ namespace tmv {
 
         TMVAssert(D.size()>0);
         TMVAssert(E.size()+1 == D.size());
-        if (U) TMVAssert(U->rowsize() == D.size()); 
-        if (Vt) TMVAssert(Vt->colsize() == D.size()); 
+        if (U.cptr()) TMVAssert(U.rowsize() == D.size()); 
+        if (Vt.cptr()) TMVAssert(Vt.colsize() == D.size()); 
         TMVAssert(D.step()==1);
         TMVAssert(E.step()==1);
 
@@ -1046,10 +1046,10 @@ namespace tmv {
         dbgcout<<"D0 = "<<D0<<endl;
         Vector<RT> E0 = E;
         dbgcout<<"E0 = "<<E0<<endl;
-        Matrix<T> U0(U?U->colsize():D.size(),D.size());
-        if (U) U0 = *U; else U0.setToIdentity();
-        Matrix<T> Vt0(D.size(),Vt?Vt->rowsize():D.size());
-        if (Vt) Vt0 = *Vt; else Vt0.setToIdentity();
+        Matrix<T> U0(U.cptr()?U.colsize():D.size(),D.size());
+        if (U.cptr()) U0 = U; else U0.setToIdentity();
+        Matrix<T> Vt0(D.size(),Vt.cptr()?Vt.rowsize():D.size());
+        if (Vt.cptr()) Vt0 = Vt; else Vt0.setToIdentity();
         Matrix<T> A0(U0.colsize(),Vt0.rowsize());
         Matrix<T> B0(D.size(),D.size(),RT(0));
         B0.diag() = D;
@@ -1059,9 +1059,9 @@ namespace tmv {
         double normA0 = Norm(A0);
         if (normA0 < 1.) normA0 = 1.;
         dbgcout<<"Norm(A0) = "<<Norm(A0)<<endl;
-        if (U) dbgcout<<"Norm(UtU -1) = "<<Norm(U0.adjoint()*U0-T(1))<<endl;
+        if (U.cptr()) dbgcout<<"Norm(UtU -1) = "<<Norm(U0.adjoint()*U0-T(1))<<endl;
         else dbgcout<<"No input U\n";
-        if (Vt) dbgcout<<"Norm(VtVtt -1) = "<<Norm(Vt0*Vt0.adjoint()-T(1))<<endl;
+        if (Vt.cptr()) dbgcout<<"Norm(VtVtt -1) = "<<Norm(Vt0*Vt0.adjoint()-T(1))<<endl;
         else dbgcout<<"No input Vt\n";
 #endif
 
@@ -1075,7 +1075,7 @@ namespace tmv {
         // and QR is certainly never very much slower than doing 1 or 2 divides,
         // which seems to be optimal for large problems.
         // So I always use QR for the S only calculation.
-        else if (!(U||Vt)) SmallProblem(U,D,E,Vt);
+        else if (!(U.cptr() || Vt.cptr())) SmallProblem(U,D,E,Vt);
 
         else {
             dbgcout<<"N > "<<DC_LIMIT<<endl;
@@ -1087,51 +1087,53 @@ namespace tmv {
             // Do the left sub-problem
             VectorView<RT> D1 = D.subVector(0,K);
             VectorView<RT> E1 = E.subVector(0,K);
-            Matrix<RT,RowMajor> Vt1(K+1,Vt?K+1:1);
-            if (Vt) Vt1.setToIdentity();
+            Matrix<RT,RowMajor> Vt1(K+1,Vt.cptr()?K+1:1);
+            if (Vt.cptr()) Vt1.setToIdentity();
             else Vt1.col(0).makeBasis(K); // only need col(K)
             BidiagonalZeroLastCol<RT>(D1,E1,Vt1.view());
-            if (U) {
+            if (U.cptr()) {
                 Matrix<RT,ColMajor> U1(K,K);
                 U1.setToIdentity();
                 SV_DecomposeFromBidiagonal_DC<RT>(
                     U1.view(),D1,
                     E1.subVector(0,K-1),Vt1.rowRange(0,K),true,false);
-                if (UisI) U->subMatrix(0,K,0,K) = U1;
-                else U->colRange(0,K) *= U1;
+                if (UisI) U.subMatrix(0,K,0,K) = U1;
+                else U.colRange(0,K) *= U1;
             } else {
+                MatrixView<RT> U1(0,0,0,1,0,NonConj);
                 SV_DecomposeFromBidiagonal_DC<RT>(
-                    0,D1,E1.subVector(0,K-1),
+                    U1,D1,E1.subVector(0,K-1),
                     Vt1.rowRange(0,K),false,false);
             }
-            z.subVector(0,K+1) = DK * Vt1.col(Vt ? K : 0);
-            if (Vt) {
-                if (VisI) Vt->subMatrix(0,K+1,0,K+1) = Vt1;
-                else Vt->rowRange(0,K+1) = Vt1 * Vt->rowRange(0,K+1);
+            z.subVector(0,K+1) = DK * Vt1.col(Vt.cptr() ? K : 0);
+            if (Vt.cptr()) {
+                if (VisI) Vt.subMatrix(0,K+1,0,K+1) = Vt1;
+                else Vt.rowRange(0,K+1) = Vt1 * Vt.rowRange(0,K+1);
             }
 
             // Do the right sub-problem
             VectorView<RT> D2 = D.subVector(K+1,N);
             VectorView<RT> E2 = E.subVector(K+1,N-1);
-            Matrix<RT,RowMajor> Vt2(N-K-1,Vt?N-K-1:1);
-            if (Vt) Vt2.setToIdentity();
+            Matrix<RT,RowMajor> Vt2(N-K-1,Vt.cptr()?N-K-1:1);
+            if (Vt.cptr()) Vt2.setToIdentity();
             else Vt2.col(0).makeBasis(0); // only need col(0)
-            if (U) {
+            if (U.cptr()) {
                 Matrix<RT,ColMajor> U2(N-K-1,N-K-1);
                 U2.setToIdentity();
                 SV_DecomposeFromBidiagonal_DC<RT>(
-                    U2.view(),D2,E2,Vt2.view(),true,Vt);
-                if (UisI) U->subMatrix(K+1,N,K+1,N) = U2;
-                else U->colRange(K+1,N) *= U2;
+                    U2.view(),D2,E2,Vt2.view(),true,Vt.cptr());
+                if (UisI) U.subMatrix(K+1,N,K+1,N) = U2;
+                else U.colRange(K+1,N) *= U2;
             } else {
+                MatrixView<RT> U1(0,0,0,1,0,NonConj);
                 SV_DecomposeFromBidiagonal_DC<RT>(
-                    0,D2,E2,Vt2.view(),false,Vt);
+                    U1,D2,E2,Vt2.view(),false,Vt.cptr());
             }
             z.subVector(K+1,N) = EK * Vt2.col(0);
             D(K) = RT(0);
-            if (Vt) {
-                if (VisI) Vt->subMatrix(K+1,N,K+1,N) = Vt2;
-                else Vt->rowRange(K+1,N) = Vt2 * Vt->rowRange(K+1,N);
+            if (Vt.cptr()) {
+                if (VisI) Vt.subMatrix(K+1,N,K+1,N) = Vt2;
+                else Vt.rowRange(K+1,N) = Vt2 * Vt.rowRange(K+1,N);
             }
 #ifdef XDEBUG
             dbgcout<<"Done subproblems (N="<<N<<")\n";
@@ -1140,16 +1142,16 @@ namespace tmv {
             Matrix<RT> M(N,N,RT(0));
             M.diag() = D;
             M.row(K) = z;
-            if (U && Vt) {
+            if (U.cptr() && Vt.cptr()) {
                 //dbgcout<<"M = "<<M<<endl;
-                //dbgcout<<"UMVt = "<<*U * M * *Vt<<endl;
-                dbgcout<<"Norm(UMVt-A0) = "<<Norm(*U * M * *Vt -A0)<<endl;
-                dbgcout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
-                dbgcout<<"Norm(VtV-1) = "<<Norm((*Vt)*Vt->adjoint()-T(1))<<endl;
-                if (Norm(*U*M**Vt-A0) > THRESH*normA0) abort();
+                //dbgcout<<"UMVt = "<<U * M * Vt<<endl;
+                dbgcout<<"Norm(UMVt-A0) = "<<Norm(U * M * Vt -A0)<<endl;
+                dbgcout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;
+                dbgcout<<"Norm(VtV-1) = "<<Norm(Vt*Vt.adjoint()-T(1))<<endl;
+                if (Norm(U*M*Vt-A0) > THRESH*normA0) abort();
 #ifdef TESTUV
-                if (Norm(U->adjoint()*(*U)-T(1)) > THRESH*normA0) abort();
-                if (Norm((*Vt)*Vt->adjoint()-T(1)) > THRESH*normA0) abort();
+                if (Norm(U.adjoint()*U-T(1)) > THRESH*normA0) abort();
+                if (Norm(Vt*Vt.adjoint()-T(1)) > THRESH*normA0) abort();
 #endif
             }
 #endif
@@ -1170,8 +1172,8 @@ namespace tmv {
                     dbgcout<<"Deflate this one.\n";
                     z.swap(i,N-1);
                     D.swap(i,N-1);
-                    if (U) U->swapCols(i,N-1);
-                    if (Vt) Vt->swapRows(i,N-1);
+                    if (U.cptr()) U.swapCols(i,N-1);
+                    if (Vt.cptr()) Vt.swapRows(i,N-1);
                     if (pivot == N-1) pivot = i;
 #ifdef XDEBUG
                     M.swapCols(i,N-1);
@@ -1190,16 +1192,16 @@ namespace tmv {
             dbgcout<<"After deflation\n";
             dbgcout<<"DN = "<<D.subVector(0,N)<<endl;
             dbgcout<<"zN = "<<z.subVector(0,N)<<endl;
-            if (U && Vt) {
+            if (U.cptr() && Vt.cptr()) {
                 //dbgcout<<"M = "<<M<<endl;
-                //dbgcout<<"UMVt = "<<*U * M * *Vt<<endl;
-                dbgcout<<"Norm(UMVt-A0) = "<<Norm(*U * M * *Vt -A0)<<endl;
-                dbgcout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
-                dbgcout<<"Norm(VtV-1) = "<<Norm((*Vt)*Vt->adjoint()-T(1))<<endl;
-                if (Norm(*U*M**Vt-A0) > THRESH*normA0) abort();
+                //dbgcout<<"UMVt = "<<U * M * Vt<<endl;
+                dbgcout<<"Norm(UMVt-A0) = "<<Norm(U * M * Vt -A0)<<endl;
+                dbgcout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;
+                dbgcout<<"Norm(VtV-1) = "<<Norm(Vt*Vt.adjoint()-T(1))<<endl;
+                if (Norm(U*M*Vt-A0) > THRESH*normA0) abort();
 #ifdef TESTUV
-                if (Norm(U->adjoint()*(*U)-T(1)) > THRESH*normA0) abort();
-                if (Norm((*Vt)*Vt->adjoint()-T(1)) > THRESH*normA0) abort();
+                if (Norm(U.adjoint()*U-T(1)) > THRESH*normA0) abort();
+                if (Norm(Vt*Vt.adjoint()-T(1)) > THRESH*normA0) abort();
 #endif
             }
 #endif
@@ -1209,26 +1211,26 @@ namespace tmv {
                 AlignedArray<int> P(N);
                 D.subVector(0,N).sort(P.get(),Ascend);
                 z.subVector(0,N).permute(P.get());
-                if (U) U->colRange(0,N).permuteCols(P.get());
-                if (Vt) Vt->rowRange(0,N).permuteRows(P.get());
+                if (U.cptr()) U.colRange(0,N).permuteCols(P.get());
+                if (Vt.cptr()) Vt.rowRange(0,N).permuteRows(P.get());
 #ifdef XDEBUG
                 dbgcout<<"After sort\n";
                 dbgcout<<"DN = "<<D.subVector(0,N)<<endl;
                 dbgcout<<"zN = "<<z.subVector(0,N)<<endl;
-                if (U && Vt) {
+                if (U.cptr() && Vt.cptr()) {
                     M.colRange(0,N).permuteCols(P.get());
                     M.rowRange(0,N).permuteRows(P.get());
                     //dbgcout<<"M = "<<M<<endl;
-                    //dbgcout<<"U = "<<*U<<endl;
-                    //dbgcout<<"Vt = "<<*Vt<<endl;
-                    //dbgcout<<"UMVt = "<<*U * M * *Vt<<endl;
-                    dbgcout<<"Norm(UMVt-A0) = "<<Norm(*U * M * *Vt -A0)<<endl;
-                    dbgcout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
-                    dbgcout<<"Norm(VtV-1) = "<<Norm((*Vt)*Vt->adjoint()-T(1))<<endl;
-                    if (Norm(*U*M**Vt-A0) > THRESH*normA0) abort();
+                    //dbgcout<<"U = "<<U<<endl;
+                    //dbgcout<<"Vt = "<<Vt<<endl;
+                    //dbgcout<<"UMVt = "<<U * M * Vt<<endl;
+                    dbgcout<<"Norm(UMVt-A0) = "<<Norm(U * M * Vt -A0)<<endl;
+                    dbgcout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;
+                    dbgcout<<"Norm(VtV-1) = "<<Norm(Vt*Vt.adjoint()-T(1))<<endl;
+                    if (Norm(U*M*Vt-A0) > THRESH*normA0) abort();
 #ifdef TESTUV
-                    if (Norm(U->adjoint()*(*U)-T(1)) > THRESH*normA0) abort();
-                    if (Norm((*Vt)*Vt->adjoint()-T(1)) > THRESH*normA0) abort();
+                    if (Norm(U.adjoint()*U-T(1)) > THRESH*normA0) abort();
+                    if (Norm(Vt*Vt.adjoint()-T(1)) > THRESH*normA0) abort();
 #endif
                 }
 #endif
@@ -1245,9 +1247,9 @@ namespace tmv {
                         dbgcout<<"Deflate this pair\n";
                         Givens<RT> G = GivensRotate(z(i-1),z(i));
                         TMVAssert(z(i) == RT(0));
-                        if (Vt) G.mult(Vt->rowPair(i-1,i));
+                        if (Vt.cptr()) G.mult(Vt.rowPair(i-1,i));
                         if (i > 1) {
-                            if (U) G.mult(U->colPair(i-1,i).transpose());
+                            if (U.cptr()) G.mult(U.colPair(i-1,i).transpose());
 #ifdef XDEBUG
                             G.mult(M.colPair(i-1,i).transpose());
                             G.mult(M.rowPair(i-1,i));
@@ -1269,8 +1271,8 @@ namespace tmv {
                         if (i < N-1) {
                             z.swap(i,N-1);
                             D.swap(i,N-1);
-                            if (U) U->swapCols(i,N-1);
-                            if (Vt) Vt->swapRows(i,N-1);
+                            if (U.cptr()) U.swapCols(i,N-1);
+                            if (Vt.cptr()) Vt.swapRows(i,N-1);
 #ifdef XDEBUG
                             M.swapCols(i,N-1);
                             M.swapRows(i,N-1);
@@ -1286,18 +1288,18 @@ namespace tmv {
                 dbgcout<<"After second deflation\n";
                 dbgcout<<"DN = "<<D.subVector(0,N)<<endl;
                 dbgcout<<"zN = "<<z.subVector(0,N)<<endl;
-                if (U && Vt) {
+                if (U.cptr() && Vt.cptr()) {
                     //dbgcout<<"M = "<<M<<endl;
-                    //dbgcout<<"U = "<<*U<<endl;
-                    //dbgcout<<"Vt = "<<*Vt<<endl;
-                    //dbgcout<<"UMVt = "<<*U * M * *Vt<<endl;
-                    dbgcout<<"Norm(UMVt-A0) = "<<Norm(*U * M * *Vt -A0)<<endl;
-                    dbgcout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
-                    dbgcout<<"Norm(VtV-1) = "<<Norm((*Vt)*Vt->adjoint()-T(1))<<endl;
-                    if (Norm(*U*M**Vt-A0) > THRESH*normA0) abort();
+                    //dbgcout<<"U = "<<U<<endl;
+                    //dbgcout<<"Vt = "<<Vt<<endl;
+                    //dbgcout<<"UMVt = "<<U * M * Vt<<endl;
+                    dbgcout<<"Norm(UMVt-A0) = "<<Norm(U * M * Vt -A0)<<endl;
+                    dbgcout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;
+                    dbgcout<<"Norm(VtV-1) = "<<Norm(Vt*Vt.adjoint()-T(1))<<endl;
+                    if (Norm(U*M*Vt-A0) > THRESH*normA0) abort();
 #ifdef TESTUV
-                    if (Norm(U->adjoint()*(*U)-T(1)) > THRESH*normA0) abort();
-                    if (Norm((*Vt)*Vt->adjoint()-T(1)) > THRESH*normA0) abort();
+                    if (Norm(U.adjoint()*U-T(1)) > THRESH*normA0) abort();
+                    if (Norm(Vt*Vt.adjoint()-T(1)) > THRESH*normA0) abort();
 #endif
                 }
 #endif
@@ -1307,27 +1309,27 @@ namespace tmv {
                 if (i_firstswap < N-1) {
                     D.subVector(i_firstswap,N).sort(P.get(),Ascend);
                     z.subVector(i_firstswap,N).permute(P.get());
-                    if (U) U->colRange(i_firstswap,N).permuteCols(P.get());
-                    if (Vt) Vt->rowRange(i_firstswap,N).permuteRows(P.get());
+                    if (U.cptr()) U.colRange(i_firstswap,N).permuteCols(P.get());
+                    if (Vt.cptr()) Vt.rowRange(i_firstswap,N).permuteRows(P.get());
                 }
 #ifdef XDEBUG
                 dbgcout<<"After second sort\n";
                 dbgcout<<"DN = "<<D.subVector(0,N)<<endl;
                 dbgcout<<"zN = "<<z.subVector(0,N)<<endl;
-                if (U && Vt) {
+                if (U.cptr() && Vt.cptr()) {
                     if (i_firstswap < N-1) {
                         M.colRange(i_firstswap,N).permuteCols(P.get());
                         M.rowRange(i_firstswap,N).permuteRows(P.get());
                     }
                     //dbgcout<<"M = "<<M<<endl;
-                    //dbgcout<<"UMVt = "<<*U * M * *Vt<<endl;
-                    dbgcout<<"Norm(UMVt-A0) = "<<Norm(*U * M * *Vt -A0)<<endl;
-                    dbgcout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
-                    dbgcout<<"Norm(VtV-1) = "<<Norm((*Vt)*Vt->adjoint()-T(1))<<endl;
-                    if (Norm(*U*M**Vt-A0) > THRESH*normA0) abort();
+                    //dbgcout<<"UMVt = "<<U * M * Vt<<endl;
+                    dbgcout<<"Norm(UMVt-A0) = "<<Norm(U * M * Vt -A0)<<endl;
+                    dbgcout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;
+                    dbgcout<<"Norm(VtV-1) = "<<Norm(Vt*Vt.adjoint()-T(1))<<endl;
+                    if (Norm(U*M*Vt-A0) > THRESH*normA0) abort();
 #ifdef TESTUV
-                    if (Norm(U->adjoint()*(*U)-T(1)) > THRESH*normA0) abort();
-                    if (Norm((*Vt)*Vt->adjoint()-T(1)) > THRESH*normA0) abort();
+                    if (Norm(U.adjoint()*U-T(1)) > THRESH*normA0) abort();
+                    if (Norm(Vt*Vt.adjoint()-T(1)) > THRESH*normA0) abort();
 #endif
                 }
 #endif
@@ -1351,7 +1353,7 @@ namespace tmv {
                 dbgcout<<"After scale: DN = "<<DN<<std::endl;
                 dbgcout<<"zN = "<<zN<<std::endl;
 
-                if (U || Vt) {
+                if (U.cptr() || Vt.cptr()) {
                     Matrix<RT,ColMajor> W(N,N); // W(i,j) = D(i)-S(j)
                     FindDCSingularValues(S,RT(1),DN,zN,W);
                     dbgcout<<"S = "<<S<<endl;
@@ -1393,22 +1395,22 @@ namespace tmv {
                         for(int i=1;i<N;i++) 
                             yj(i) = (z(i) / diff_j(i)) / (D(i)+S(j));
                     }
-                    if (Vt) {
+                    if (Vt.cptr()) {
                         Vector<RT> normyj(N);
                         for(int j=0;j<N;j++) {
                             W.col(j) /= (normyj(j) = Norm(W.col(j)));
                         }
                         // Vt = Y * Vt
-                        Vt->rowRange(0,N) = W.transpose() * Vt->rowRange(0,N);
-                        if (U) for(int j=0;j<N;j++) W.col(j) *= normyj(j);
+                        Vt.rowRange(0,N) = W.transpose() * Vt.rowRange(0,N);
+                        if (U.cptr()) for(int j=0;j<N;j++) W.col(j) *= normyj(j);
                     }
-                    if (U) {
+                    if (U.cptr()) {
                         // Now convert W from Y.transpose() to X
                         W.row(0).setAllTo(RT(-1));
                         for(int i=1;i<N;i++) W.row(i) *= D(i);
                         for(int j=0;j<N;j++) W.col(j) /= Norm(W.col(j));
                         // U = U * X
-                        U->colRange(0,N) *= W;
+                        U.colRange(0,N) *= W;
                     }
                 } else {
                     FindDCSingularValues(S,RT(1),DN,zN);
@@ -1420,53 +1422,53 @@ namespace tmv {
 
                 dbgcout<<"Done D = "<<D<<endl;
 #ifdef XDEBUG
-                if (U && Vt) {
+                if (U.cptr() && Vt.cptr()) {
                     M.subMatrix(0,N,0,N) = DiagMatrixViewOf(S);
                     //dbgcout<<"M = "<<M<<endl;
-                    //dbgcout<<"UMVt = "<<*U * M * *Vt<<endl;
-                    dbgcout<<"Norm(UMVt-A0) = "<<Norm(*U * M * *Vt -A0)<<endl;
-                    dbgcout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
-                    dbgcout<<"Norm(VtV-1) = "<<Norm((*Vt)*Vt->adjoint()-T(1))<<endl;
-                    if (Norm(*U*M**Vt-A0) > THRESH*normA0) abort();
+                    //dbgcout<<"UMVt = "<<U * M * Vt<<endl;
+                    dbgcout<<"Norm(UMVt-A0) = "<<Norm(U * M * Vt -A0)<<endl;
+                    dbgcout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;
+                    dbgcout<<"Norm(VtV-1) = "<<Norm(Vt*Vt.adjoint()-T(1))<<endl;
+                    if (Norm(U*M*Vt-A0) > THRESH*normA0) abort();
 #ifdef TESTUV
-                    if (Norm(U->adjoint()*(*U)-T(1)) > THRESH*normA0) abort();
-                    if (Norm((*Vt)*Vt->adjoint()-T(1)) > THRESH*normA0) abort();
+                    if (Norm(U.adjoint()*U-T(1)) > THRESH*normA0) abort();
+                    if (Norm(Vt*Vt.adjoint()-T(1)) > THRESH*normA0) abort();
 #endif
                 }
 #endif
             } else if (N==1) {
                 if (D(0) == RT(0)) {
                     D(0) = TMV_ABS(z(0));
-                    if (Vt && z(0) < RT(0)) Vt->row(0) *= RT(-1);
+                    if (Vt.cptr() && z(0) < RT(0)) Vt.row(0) *= RT(-1);
                 }
 #ifdef XDEBUG
-                if (U && Vt) {
+                if (U.cptr() && Vt.cptr()) {
                     M(0,0) = D(0);
                     //dbgcout<<"M = "<<M<<endl;
-                    //dbgcout<<"UMVt = "<<*U * M * *Vt<<endl;
-                    dbgcout<<"Norm(UMVt-A0) = "<<Norm(*U * M * *Vt -A0)<<endl;
-                    dbgcout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
-                    dbgcout<<"Norm(VtV-1) = "<<Norm((*Vt)*Vt->adjoint()-T(1))<<endl;
-                    if (Norm(*U*M**Vt-A0) > THRESH*normA0) abort();
+                    //dbgcout<<"UMVt = "<<U * M * Vt<<endl;
+                    dbgcout<<"Norm(UMVt-A0) = "<<Norm(U * M * Vt -A0)<<endl;
+                    dbgcout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;
+                    dbgcout<<"Norm(VtV-1) = "<<Norm(Vt*Vt.adjoint()-T(1))<<endl;
+                    if (Norm(U*M*Vt-A0) > THRESH*normA0) abort();
 #ifdef TESTUV
-                    if (Norm(U->adjoint()*(*U)-T(1)) > THRESH*normA0) abort();
-                    if (Norm((*Vt)*Vt->adjoint()-T(1)) > THRESH*normA0) abort();
+                    if (Norm(U.adjoint()*U-T(1)) > THRESH*normA0) abort();
+                    if (Norm(Vt*Vt.adjoint()-T(1)) > THRESH*normA0) abort();
 #endif
                 }
 #endif
             }
 #ifdef XDEBUG
-            if (U && Vt) {
+            if (U.cptr() && Vt.cptr()) {
                 M = DiagMatrixViewOf(D);
                 //dbgcout<<"M = "<<M<<endl;
-                //dbgcout<<"UMVt = "<<*U * M * *Vt<<endl;
-                dbgcout<<"Norm(UMVt-A0) = "<<Norm(*U * M * *Vt -A0)<<endl;
-                dbgcout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
-                dbgcout<<"Norm(VtV-1) = "<<Norm((*Vt)*Vt->adjoint()-T(1))<<endl;
-                if (Norm(*U*M**Vt-A0) > THRESH*normA0) abort();
+                //dbgcout<<"UMVt = "<<U * M * Vt<<endl;
+                dbgcout<<"Norm(UMVt-A0) = "<<Norm(U * M * Vt -A0)<<endl;
+                dbgcout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;
+                dbgcout<<"Norm(VtV-1) = "<<Norm(Vt*Vt.adjoint()-T(1))<<endl;
+                if (Norm(U*M*Vt-A0) > THRESH*normA0) abort();
 #ifdef TESTUV
-                if (Norm(U->adjoint()*(*U)-T(1)) > THRESH*normA0) abort();
-                if (Norm((*Vt)*Vt->adjoint()-T(1)) > THRESH*normA0) abort();
+                if (Norm(U.adjoint()*U-T(1)) > THRESH*normA0) abort();
+                if (Norm(Vt*Vt.adjoint()-T(1)) > THRESH*normA0) abort();
 #endif
             }
 #endif
@@ -1476,20 +1478,20 @@ namespace tmv {
         DiagMatrix<RT> S(D);
         Matrix<T> A2(A0.colsize(),A0.rowsize());
         dbgcout<<"S = "<<S.diag()<<endl;
-        if (U && Vt) {
-            A2 = *U * S * *Vt;
+        if (U.cptr() && Vt.cptr()) {
+            A2 = U * S * Vt;
             dbgcout<<"Norm(A2-A0) = "<<Norm(A2-A0)<<endl;
-            dbgcout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
-            dbgcout<<"Norm(VtV-1) = "<<Norm((*Vt)*Vt->adjoint()-T(1))<<endl;
+            dbgcout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;
+            dbgcout<<"Norm(VtV-1) = "<<Norm(Vt*Vt.adjoint()-T(1))<<endl;
             dbgcout<<"THRESH * normA0 = "<<THRESH<<" * "<<normA0<<" = "<<THRESH*normA0<<std::endl;
             if (!(Norm(A2-A0) < THRESH*normA0) 
 #ifdef TESTUV
-                || ( Vt->colsize()>=Vt->rowsize() && 
-                     !(Norm(Vt->adjoint()*(*Vt)-T(1)) < THRESH*normA0) )
-                || ( Vt->rowsize()>=Vt->colsize() && 
-                     !(Norm((*Vt)*Vt->adjoint()-T(1)) < THRESH*normA0) )
-                || ( U->colsize()>=U->rowsize() && 
-                     !(Norm(U->adjoint()*(*U)-T(1)) < THRESH*normA0) ) 
+                || ( Vt.colsize()>=Vt.rowsize() && 
+                     !(Norm(Vt.adjoint()*Vt-T(1)) < THRESH*normA0) )
+                || ( Vt.rowsize()>=Vt.colsize() && 
+                     !(Norm(Vt*Vt.adjoint()-T(1)) < THRESH*normA0) )
+                || ( U.colsize()>=U.rowsize() && 
+                     !(Norm(U.adjoint()*U-T(1)) < THRESH*normA0) ) 
 #endif
             ) {
                 cerr<<"SV_Decompose_DC: \n";
@@ -1503,14 +1505,14 @@ namespace tmv {
                 SmallProblem<T>(
                     U_QR.view(),D_QR.view(),E_QR.view(),Vt_QR.view());
                 cerr<<"QR solution: S = "<<D_QR<<endl;
-                cerr<<"U = "<<*U<<endl;
+                cerr<<"U = "<<U<<endl;
                 cerr<<"QR solution: U = "<<U_QR<<endl;
-                cerr<<"U-U_QR = "<<*U-U_QR<<endl;
-                cerr<<"Norm(U-U_QR) = "<<Norm(*U-U_QR)<<endl; 
-                cerr<<"Vt = "<<*Vt<<endl;
+                cerr<<"U-U_QR = "<<U-U_QR<<endl;
+                cerr<<"Norm(U-U_QR) = "<<Norm(U-U_QR)<<endl; 
+                cerr<<"Vt = "<<Vt<<endl;
                 cerr<<"QR solution: Vt = "<<Vt_QR<<endl;
-                cerr<<"Vt-Vt_QR = "<<*Vt-Vt_QR<<endl;
-                cerr<<"Norm(Vt-Vt_QR) = "<<Norm(*Vt-Vt_QR)<<endl; 
+                cerr<<"Vt-Vt_QR = "<<Vt-Vt_QR<<endl;
+                cerr<<"Norm(Vt-Vt_QR) = "<<Norm(Vt-Vt_QR)<<endl; 
                 cerr<<"UBVt = "<<A0<<endl;
                 cerr<<"USVt = "<<A2<<endl;
                 abort();

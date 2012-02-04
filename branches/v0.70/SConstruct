@@ -131,7 +131,6 @@ opts.Save(config_file,initial_env)
 Help(opts.GenerateHelpText(initial_env))
 
 # This helps us determine of openmp is available
-openmp_minclang_vers = 3.1
 openmp_mingcc_vers = 4.1
 openmp_minicpc_vers = 9.1  # 9.0 is supposed to work but has bugs
 openmp_minpgcc_vers = 6.0
@@ -254,7 +253,7 @@ def AddOpenMPFlag(env):
     Make sure you do this after you have determined the version of
     the compiler.
 
-    clang++ uses -fopemnp
+    clang++ doesn't seem to support openmp yet.
     g++ uses -fopemnp
     icpc uses -openmp
     pgCC uses -mp
@@ -273,13 +272,9 @@ def AddOpenMPFlag(env):
         ldflag = ['-fopenmp']
         xlib = ['pthread']
     elif compiler == 'clang++':
-        if version < openmp_minclang_vers: 
-            print 'No OpenMP support for clangg++ versions before ',openmp_minclang_vers
-            env['WITH_OPENMP'] = False
-            return
-        flag = ['-fopenmp']
-        ldflag = ['-fopenmp']
-        xlib = ['pthread']
+        print 'No OpenMP support for clangg++'
+        env['WITH_OPENMP'] = False
+        return
     elif compiler == 'icpc':
         if version < openmp_minicpc_vers:
             print 'No OpenMP support for icpc versions before ',openmp_minicpc_vers

@@ -39,22 +39,9 @@ namespace tmv {
 #define RT TMV_RealType(T)
 
     template <class T> 
-    struct MVP 
-    {
-        MVP(MatrixView<T> m) : mp(&m) {}
-        MVP(MatrixView<T>* m) : mp(m) {}
-        MVP(int) : mp(0) {}
-        operator MatrixView<T>*() { return mp; }
-        MatrixView<T>* operator->() { return mp; }
-        MatrixView<T> operator*() { return *mp; }
-
-        MatrixView<T>* mp;
-    };
-
-    template <class T> 
     void SV_Decompose(
         MatrixView<T> U, DiagMatrixView<RT> S, 
-        MVP<T> Vt, RT& logdet, T& signdet, bool StoreU=false);
+        MatrixView<T> Vt, RT& logdet, T& signdet, bool StoreU=false);
 
     template <class T, class Tm, class Tx> 
     void SV_LDiv(
@@ -79,29 +66,29 @@ namespace tmv {
 
     template <class T> 
     void BidiagonalZeroFirstRow(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E);
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E);
 
     template <class T> 
     void BidiagonalZeroLastCol(
-        VectorView<RT> D, VectorView<RT> E, MVP<T> Vt);
+        VectorView<RT> D, VectorView<RT> E, MatrixView<T> Vt);
 
     template <class T> 
     void SV_DecomposeFromBidiagonal(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt,
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E, MatrixView<T> Vt,
         bool SetUV=false);
 
     template <class T> 
     void DoSVDecomposeFromBidiagonal(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt,
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E, MatrixView<T> Vt,
         bool UisI, bool VisI);
 
     template <class T> 
     void SV_DecomposeFromBidiagonal_QR(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt);
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E, MatrixView<T> Vt);
 
     template <class T> 
     void SV_DecomposeFromBidiagonal_DC(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt,
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E, MatrixView<T> Vt,
         bool UisI, bool VisI);
 
     template <class T> 

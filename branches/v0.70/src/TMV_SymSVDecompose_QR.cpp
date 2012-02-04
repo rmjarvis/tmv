@@ -143,7 +143,7 @@ namespace tmv {
 
     template <class T> 
     static void ReduceHermTridiagonal(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E)
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E)
     {
         // Reduce the superdiagonal elements of unreduced HermTridiagonal Matrix T 
         // (given by D,E) while maintaining U B Ut. 
@@ -151,7 +151,7 @@ namespace tmv {
         const int N = D.size();
         TMVAssert(N>0);
         TMVAssert(E.size() == N-1);
-        if (U) TMVAssert(U->rowsize() == N); 
+        if (U.cptr()) TMVAssert(U.rowsize() == N); 
         TMVAssert(D.step()==1);
         TMVAssert(E.step()==1);
 
@@ -164,10 +164,10 @@ namespace tmv {
         Vector<RT> E0 = E;
         TT.diag() = D0;
         TT.diag(1) = TT.diag(-1) = E0;
-        const int M = U ? U->colsize() : 0;
+        const int M = U.colsize();
         Matrix<T> A0(M,M);
-        if (U) {
-            A0 = *U * TT * U->adjoint();
+        if (U.cptr()) {
+            A0 = U * TT * U.adjoint();
             //std::cout<<"A0 = "<<A0<<std::endl;
         }
 #endif
@@ -239,7 +239,7 @@ namespace tmv {
 #endif
             G.symMult(*Di,*(Di+1),*Ei);
             //std::cout<<"Di,Dip1,Ei => "<<*Di<<','<<*(Di+1)<<','<<*Ei<<std::endl;
-            if (U) G.mult(U->colPair(i,i+1).transpose());
+            if (U.cptr()) G.mult(U.colPair(i,i+1).transpose());
             if (i==N-2) break;
             TMVAssert(x==RT(0));
 #ifdef TMVFLDEBUG
@@ -252,12 +252,12 @@ namespace tmv {
             //std::cout<<"Rotated Ei,x => "<<*Ei<<','<<x<<std::endl;
         }
 #ifdef XDEBUG
-        if (U) {
+        if (U.cptr()) {
             TT.diag() = D;
             TT.diag(-1) = TT.diag(1) = E;
-            Matrix<T> A2 = *U * TT * U->adjoint();
+            Matrix<T> A2 = U * TT * U.adjoint();
             std::cout<<"Done Reduce Tridiagonal\n";
-            //std::cout<<"U = "<<*U<<std::endl;
+            //std::cout<<"U = "<<U<<std::endl;
             //std::cout<<"TT = "<<TT<<std::endl;
             //std::cout<<"A2 = "<<A2<<std::endl;
             //std::cout<<"A0 = "<<A0<<std::endl;
@@ -267,7 +267,7 @@ namespace tmv {
                 cerr<<"Reduce Tridiagonal:\n";
                 cerr<<"A0 = "<<A0<<endl;
                 cerr<<"A2 = "<<A2<<endl;
-                cerr<<"U = "<<*U<<endl;
+                cerr<<"U = "<<U<<endl;
                 cerr<<"TT = "<<TT<<endl;
                 abort();
             }
@@ -286,7 +286,7 @@ namespace tmv {
 
     template <class T> 
     void EigenFromTridiagonal_QR(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E)
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E)
     {
         const int N = D.size();
         if (N <= 1) return;
@@ -298,16 +298,16 @@ namespace tmv {
         Matrix<RT> TT(N,N,RT(0));
         TT.diag() = D;
         TT.diag(1) = TT.diag(-1) = E;
-        const int M = U ? U->colsize() : 0;
+        const int M = U.colsize();
         Matrix<T> A0(M,M);
-        if (U) {
-            A0 = *U * TT * U->adjoint();
+        if (U.cptr()) {
+            A0 = U * TT * U.adjoint();
             //std::cout<<"A0 = "<<A0<<std::endl;
         }
 #endif
         TMVAssert(D.size() == E.size()+1);
-        if (U) {
-            TMVAssert(U->rowsize() == D.size());
+        if (U.cptr()) {
+            TMVAssert(U.rowsize() == D.size());
         }
 
         // We successively reduce the offdiagonals of T (E) to 0
@@ -325,12 +325,12 @@ namespace tmv {
                 while (p > 0 && (E(p-1) != T(0))) --p; 
                 // Set p such that E(p-1) = 0 and all E(i) with p<=i<q are 
                 // non-zero.
-                if (U) {
+                if (U.cptr()) {
                     ReduceHermTridiagonal<T>(
-                        U->colRange(p,q+1),D.subVector(p,q+1),E.subVector(p,q));
+                        U.colRange(p,q+1),D.subVector(p,q+1),E.subVector(p,q));
                 } else {
                     ReduceHermTridiagonal<T>(
-                        0,D.subVector(p,q+1),E.subVector(p,q));
+                        U,D.subVector(p,q+1),E.subVector(p,q));
                 }
 
                 HermTridiagonalChopSmallElements(
@@ -338,17 +338,17 @@ namespace tmv {
             }
         }
 #ifdef XDEBUG
-        if (U) {
+        if (U.cptr()) {
             TT.diag() = D;
             TT.diag(-1) = TT.diag(1) = E;
-            Matrix<T> A2 = *U * TT * U->adjoint();
+            Matrix<T> A2 = U * TT * U.adjoint();
             std::cout<<"Done QR: Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
             std::cout<<"cf. Norm(A0) = "<<Norm(A0)<<std::endl;
             if (!(Norm(A2-A0) <= THRESH*Norm(A0))) {
                 cerr<<"Decompose from Tridiagonal QR:\n";
                 cerr<<"A0 = "<<A0<<endl;
                 cerr<<"A2 = "<<A2<<endl;
-                cerr<<"U = "<<*U<<endl;
+                cerr<<"U = "<<U<<endl;
                 cerr<<"TT = "<<TT<<endl;
                 abort();
             }

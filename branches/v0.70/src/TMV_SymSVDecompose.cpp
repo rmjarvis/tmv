@@ -65,20 +65,20 @@ namespace tmv {
 
     template <class T> 
     static void DoEigenFromTridiagonal_NZ(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E)
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E)
     { 
-        EigenFromTridiagonal_DC(U,D,E,false);
+        EigenFromTridiagonal_DC(U,D,E,NonConj);
         //EigenFromTridiagonal_QR(U,D,E); 
     }
 
     template <class T> 
     static void NonLapEigenFromTridiagonal(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E)
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E)
     {
         TMVAssert(D.size() == E.size()+1);
-        if (U) {
-            TMVAssert(U->isSquare());
-            TMVAssert(U->rowsize() == D.size());
+        if (U.cptr()) {
+            TMVAssert(U.isSquare());
+            TMVAssert(U.rowsize() == D.size());
         }
 
         const int N = D.size();
@@ -97,12 +97,12 @@ namespace tmv {
                 while (p > 0 && (E(p-1) != T(0))) --p; 
                 // Set p such that E(p-1) = 0 and 
                 // all E(i) with p<=i<q are non-zero.
-                if (U) {
+                if (U.cptr()) {
                     DoEigenFromTridiagonal_NZ<T>(
-                        U->colRange(p,q+1),D.subVector(p,q+1),E.subVector(p,q));
+                        U.colRange(p,q+1),D.subVector(p,q+1),E.subVector(p,q));
                 } else {
                     DoEigenFromTridiagonal_NZ<T>(
-                        0,D.subVector(p,q+1),E.subVector(p,q));
+                        U,D.subVector(p,q+1),E.subVector(p,q));
                 }
                 q = p;
             }
@@ -112,24 +112,24 @@ namespace tmv {
 #ifdef LAP 
     template <class T> 
     static inline void LapEigenFromTridiagonal(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E)
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E)
     { NonLapEigenFromTridiagonal(U,D,E); }
 
 #ifdef INST_DOUBLE
     static void AltLapEigenFromTridiagonal(
-        MVP<double> U, VectorView<double> D, 
+        MatrixView<double> U, VectorView<double> D, 
         VectorView<double> E)
     {
         //std::cout<<"AltLapEigen double\n";
         TMVAssert(D.size() == E.size()+1);
         TMVAssert(D.ct()==NonConj);
         TMVAssert(E.ct()==NonConj);
-        if (U) {
-            TMVAssert(U->colsize() >= U->rowsize());
-            TMVAssert(U->rowsize() == D.size());
+        if (U.cptr()) {
+            TMVAssert(U.colsize() >= U.rowsize());
+            TMVAssert(U.rowsize() == D.size());
         }
         int n = D.size();
-        if (U) {
+        if (U.cptr()) {
             char c = 'I';
             Matrix<double,ColMajor> U1(n,n);
             int ldu = U1.stepj();
@@ -168,7 +168,7 @@ namespace tmv {
 #else
             LAP_Results(int(work[0]),n,n,lwork,"dstedc");
 #endif
-            *U *= U1;
+            U *= U1;
         } else {
             char c = 'N';
             int ldu = n;
@@ -210,19 +210,19 @@ namespace tmv {
         }
     }
     static void AltLapEigenFromTridiagonal(
-        MVP<std::complex<double> > U, VectorView<double> D, 
+        MatrixView<std::complex<double> > U, VectorView<double> D, 
         VectorView<double> E)
     {
         //std::cout<<"AltLapEigen complex double\n";
         TMVAssert(D.size() == E.size()+1);
         TMVAssert(D.ct()==NonConj);
         TMVAssert(E.ct()==NonConj);
-        if (U) {
-            TMVAssert(U->colsize() >= U->rowsize());
-            TMVAssert(U->rowsize() == D.size());
+        if (U.cptr()) {
+            TMVAssert(U.colsize() >= U.rowsize());
+            TMVAssert(U.rowsize() == D.size());
         }
         int n = D.size();
-        if (U) {
+        if (U.cptr()) {
             char c = 'I';
             Matrix<double,ColMajor> U1(n,n);
             int ldu = U1.stepj();
@@ -261,7 +261,7 @@ namespace tmv {
 #else
             LAP_Results(int(work[0]),n,n,lwork,"dstedc");
 #endif
-            *U *= U1;
+            U *= U1;
         } else {
             char c = 'N';
             int ldu = n;
@@ -305,19 +305,19 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     static void AltLapEigenFromTridiagonal(
-        MVP<float> U, VectorView<float> D, 
+        MatrixView<float> U, VectorView<float> D, 
         VectorView<float> E)
     {
         //std::cout<<"AltLapEigen float\n";
         TMVAssert(D.size() == E.size()+1);
         TMVAssert(D.ct()==NonConj);
         TMVAssert(E.ct()==NonConj);
-        if (U) {
-            TMVAssert(U->colsize() >= U->rowsize());
-            TMVAssert(U->rowsize() == D.size());
+        if (U.cptr()) {
+            TMVAssert(U.colsize() >= U.rowsize());
+            TMVAssert(U.rowsize() == D.size());
         }
         int n = D.size();
-        if (U) {
+        if (U.cptr()) {
             char c = 'I';
             Matrix<float,ColMajor> U1(n,n);
             int ldu = U1.stepj();
@@ -356,7 +356,7 @@ namespace tmv {
 #else
             LAP_Results(int(work[0]),n,n,lwork,"sstedc");
 #endif
-            *U *= U1;
+            U *= U1;
         } else {
             char c = 'N';
             int ldu = n;
@@ -398,19 +398,19 @@ namespace tmv {
         }
     }
     static void AltLapEigenFromTridiagonal(
-        MVP<std::complex<float> > U, VectorView<float> D, 
+        MatrixView<std::complex<float> > U, VectorView<float> D, 
         VectorView<float> E)
     {
         //std::cout<<"AltLapEigen complex float\n";
         TMVAssert(D.size() == E.size()+1);
         TMVAssert(D.ct()==NonConj);
         TMVAssert(E.ct()==NonConj);
-        if (U) {
-            TMVAssert(U->colsize() >= U->rowsize());
-            TMVAssert(U->rowsize() == D.size());
+        if (U.cptr()) {
+            TMVAssert(U.colsize() >= U.rowsize());
+            TMVAssert(U.rowsize() == D.size());
         }
         int n = D.size();
-        if (U) {
+        if (U.cptr()) {
             char c = 'I';
             Matrix<float,ColMajor> U1(n,n);
             int ldu = U1.stepj();
@@ -449,7 +449,7 @@ namespace tmv {
 #else
             LAP_Results(int(work[0]),n,n,lwork,"sstedc");
 #endif
-            *U *= U1;
+            U *= U1;
         } else {
             char c = 'N';
             int ldu = n;
@@ -495,24 +495,24 @@ namespace tmv {
 #ifdef INST_DOUBLE
     template <> 
     inline void LapEigenFromTridiagonal(
-        MVP<double> U, VectorView<double> D, 
+        MatrixView<double> U, VectorView<double> D, 
         VectorView<double> E)
     { AltLapEigenFromTridiagonal(U,D,E); }
     template <> 
     inline void LapEigenFromTridiagonal(
-        MVP<std::complex<double> > U, VectorView<double> D, 
+        MatrixView<std::complex<double> > U, VectorView<double> D, 
         VectorView<double> E)
     { AltLapEigenFromTridiagonal(U,D,E); }
 #endif
 #ifdef INST_FLOAT
     template <> 
     inline void LapEigenFromTridiagonal(
-        MVP<float> U, VectorView<float> D, 
+        MatrixView<float> U, VectorView<float> D, 
         VectorView<float> E)
     { AltLapEigenFromTridiagonal(U,D,E); }
     template <> 
     inline void LapEigenFromTridiagonal(
-        MVP<std::complex<float> > U, VectorView<float> D, 
+        MatrixView<std::complex<float> > U, VectorView<float> D, 
         VectorView<float> E)
     { AltLapEigenFromTridiagonal(U,D,E); }
 #endif
@@ -520,17 +520,17 @@ namespace tmv {
 #ifdef INST_DOUBLE
     template <> 
     void LapEigenFromTridiagonal(
-        MVP<double> U, VectorView<double> D, 
+        MatrixView<double> U, VectorView<double> D, 
         VectorView<double> E)
     {
         //std::cout<<"Regular LapEigen double\n";
         TMVAssert(D.size() == E.size()+1);
-        if (U) {
-            TMVAssert(U->colsize() >= U->rowsize());
-            TMVAssert(U->rowsize() == D.size());
+        if (U.cptr()) {
+            TMVAssert(U.colsize() >= U.rowsize());
+            TMVAssert(U.rowsize() == D.size());
         }
         int n = D.size();
-        if (U) {
+        if (U.cptr()) {
             char c1 = 'V';
             char c2 = 'A';
             double junk = 0;
@@ -551,8 +551,8 @@ namespace tmv {
             int liwork = 10*n;
             AlignedArray<int> iwork(liwork);
 #endif
-            //std::cout<<"U size,step = "<<U->colsize()<<" "<<U->rowsize()<<" ";
-            //std::cout<<U->stepi()<<" "<<U->stepj()<<" ";
+            //std::cout<<"U size,step = "<<U.colsize()<<" "<<U.rowsize()<<" ";
+            //std::cout<<U.stepi()<<" "<<U.stepj()<<" ";
             //std::cout<<"U1 size,step = "<<U1.colsize()<<" "<<U1.rowsize()<<" ";
             //std::cout<<U1.stepi()<<" "<<U1.stepj()<<" ";
             //std::cout<<"dstegr:\n";
@@ -618,24 +618,24 @@ namespace tmv {
             }
             LAP_Results("dstegr");
             D = Dout;
-            *U *= U1;
+            U *= U1;
         } else {
             return AltLapEigenFromTridiagonal(U,D,E);
         }
     }
     template <> 
     void LapEigenFromTridiagonal(
-        MVP<std::complex<double> > U, VectorView<double> D, 
+        MatrixView<std::complex<double> > U, VectorView<double> D, 
         VectorView<double> E)
     {
         //std::cout<<"Regular LapEigen complex double\n";
         TMVAssert(D.size() == E.size()+1);
-        if (U) {
-            TMVAssert(U->colsize() >= U->rowsize());
-            TMVAssert(U->rowsize() == D.size());
+        if (U.cptr()) {
+            TMVAssert(U.colsize() >= U.rowsize());
+            TMVAssert(U.rowsize() == D.size());
         }
         int n = D.size();
-        if (U) {
+        if (U.cptr()) {
             char c1 = 'V';
             char c2 = 'A';
             double junk = 0;
@@ -656,8 +656,8 @@ namespace tmv {
             int liwork = 10*n;
             AlignedArray<int> iwork(liwork);
 #endif
-            //std::cout<<"U size,step = "<<U->colsize()<<" "<<U->rowsize()<<" ";
-            //std::cout<<U->stepi()<<" "<<U->stepj()<<" ";
+            //std::cout<<"U size,step = "<<U.colsize()<<" "<<U.rowsize()<<" ";
+            //std::cout<<U.stepi()<<" "<<U.stepj()<<" ";
             //std::cout<<"U1 size,step = "<<U1.colsize()<<" "<<U1.rowsize()<<" ";
             //std::cout<<U1.stepi()<<" "<<U1.stepj()<<" ";
             //std::cout<<"dstegr:\n";
@@ -705,7 +705,7 @@ namespace tmv {
             }
             LAP_Results("dstegr");
             D = Dout;
-            *U *= U1;
+            U *= U1;
         } else {
             return AltLapEigenFromTridiagonal(U,D,E);
         }
@@ -714,17 +714,17 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     void LapEigenFromTridiagonal(
-        MVP<float> U, VectorView<float> D, 
+        MatrixView<float> U, VectorView<float> D, 
         VectorView<float> E)
     {
         //std::cout<<"Regular LapEigen float\n";
         TMVAssert(D.size() == E.size()+1);
-        if (U) {
-            TMVAssert(U->colsize() >= U->rowsize());
-            TMVAssert(U->rowsize() == D.size());
+        if (U.cptr()) {
+            TMVAssert(U.colsize() >= U.rowsize());
+            TMVAssert(U.rowsize() == D.size());
         }
         int n = D.size();
-        if (U) {
+        if (U.cptr()) {
             char c1 = 'V';
             char c2 = 'A';
             float junk = 0;
@@ -786,24 +786,24 @@ namespace tmv {
             }
             LAP_Results("sstegr");
             D = Dout;
-            *U *= U1;
+            U *= U1;
         } else {
             return AltLapEigenFromTridiagonal(U,D,E);
         }
     }
     template <> 
     void LapEigenFromTridiagonal(
-        MVP<std::complex<float> > U, VectorView<float> D, 
+        MatrixView<std::complex<float> > U, VectorView<float> D, 
         VectorView<float> E)
     {
         //std::cout<<"Regular LapEigen complex float\n";
         TMVAssert(D.size() == E.size()+1);
-        if (U) {
-            TMVAssert(U->colsize() >= U->rowsize());
-            TMVAssert(U->rowsize() == D.size());
+        if (U.cptr()) {
+            TMVAssert(U.colsize() >= U.rowsize());
+            TMVAssert(U.rowsize() == D.size());
         }
         int n = D.size();
-        if (U) {
+        if (U.cptr()) {
             char c1 = 'V';
             char c2 = 'A';
             float junk = 0;
@@ -865,7 +865,7 @@ namespace tmv {
             }
             LAP_Results("sstegr");
             D = Dout;
-            *U *= U1;
+            U *= U1;
         } else {
             return AltLapEigenFromTridiagonal(U,D,E);
         }
@@ -876,15 +876,15 @@ namespace tmv {
 
     template <class T> 
     void EigenFromTridiagonal(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E)
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E)
     {
         TMVAssert(D.size() == E.size()+1);
         TMVAssert(D.ct()==NonConj);
         TMVAssert(E.ct()==NonConj);
-        if (U) {
-            TMVAssert(U->colsize() == U->rowsize());
-            TMVAssert(U->rowsize() == D.size());
-            TMVAssert(U->ct()==NonConj);
+        if (U.cptr()) {
+            TMVAssert(U.colsize() == U.rowsize());
+            TMVAssert(U.rowsize() == D.size());
+            TMVAssert(U.ct()==NonConj);
         }
 
         if (D.size() == 0) return;
@@ -893,26 +893,26 @@ namespace tmv {
         std::cout<<"Start EigenFromTridiag\n";
         std::cout<<"D = "<<D<<std::endl;
         std::cout<<"E = "<<E<<std::endl;
-        if (U) { std::cout<<"U = "<<*U<<std::endl; }
+        if (U.cptr()) { std::cout<<"U = "<<U<<std::endl; }
         Matrix<T> A0(D.size(),D.size());
         Vector<RT> D0(D);
         Vector<RT> E0(E);
-        if (U) {
+        if (U.cptr()) {
             Matrix<T> EDE(D.size(),D.size(),T(0));
             EDE.diag(-1) = E;
             EDE.diag(0) = D;
             EDE.diag(1) = E;
-            A0 = *U * EDE * U->adjoint();
+            A0 = U * EDE * U.adjoint();
         }
 #ifdef LAP
         Vector<RT> D2 = D;
         Vector<RT> E2 = E;
         Matrix<T> U2(D.size(),D.size());
-        if (U) { 
-            U2 = *U;
+        if (U.cptr()) { 
+            U2 = U;
             NonLapEigenFromTridiagonal<T>(U2.view(),D2.view(),E2.view());
         } else {
-            NonLapEigenFromTridiagonal<T>(0,D2.view(),E2.view());
+            NonLapEigenFromTridiagonal<T>(U,D2.view(),E2.view());
         }
 #endif // LAP
 #endif // XDEBUG
@@ -944,35 +944,35 @@ namespace tmv {
         // Sort output singular values by absolute value:
         AlignedArray<int> sortp(D.size());
         D.sort(sortp.get(),Descend,AbsComp);
-        if (U) U->permuteCols(sortp.get());
+        if (U.cptr()) U.permuteCols(sortp.get());
 
         // Now undo the scaling
         D *= scale;
 
 #ifdef XDEBUG
-        if (U) {
-            cout<<"Done EigenFromTridiag: Norm(U) = "<<Norm(*U)<<endl;
+        if (U.cptr()) {
+            cout<<"Done EigenFromTridiag: Norm(U) = "<<Norm(U)<<endl;
             cout<<"D = "<<D<<endl;
-            Matrix<T> UDU = *U * DiagMatrixViewOf(D)*U->adjoint();
+            Matrix<T> UDU = U * DiagMatrixViewOf(D)*U.adjoint();
             cout<<"Norm(UDUt) = "<<Norm(UDU)<<endl;
             cout<<"Norm(UDUt-A0) = "<<Norm(UDU-A0)<<endl;
-            cout<<"Norm(U) = "<<Norm(*U)<<endl;
-            cout<<"Norm(UD) = "<<Norm(*U*DiagMatrixViewOf(D))<<endl;
-            cout<<"Norm(A0U) = "<<Norm(A0*(*U))<<endl;
-            cout<<"Norm(UD-A0U) = "<<Norm((*U)*DiagMatrixViewOf(D)-A0*(*U))<<endl;
-            cout<<"Norm(UUt-1) = "<<Norm((*U)*U->adjoint()-T(1))<<endl;
-            cout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
-            cout<<"UUt.diag = "<<(*U)*(U->adjoint()).diag()<<endl;
-            cout<<"UtU.diag = "<<(U->adjoint()*(*U)).diag()<<endl;
+            cout<<"Norm(U) = "<<Norm(U)<<endl;
+            cout<<"Norm(UD) = "<<Norm(U*DiagMatrixViewOf(D))<<endl;
+            cout<<"Norm(A0U) = "<<Norm(A0*U)<<endl;
+            cout<<"Norm(UD-A0U) = "<<Norm(U*DiagMatrixViewOf(D)-A0*U)<<endl;
+            cout<<"Norm(UUt-1) = "<<Norm(U*U.adjoint()-T(1))<<endl;
+            cout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;
+            cout<<"UUt.diag = "<<U*(U.adjoint()).diag()<<endl;
+            cout<<"UtU.diag = "<<(U.adjoint()*U).diag()<<endl;
             if (!(Norm(UDU-A0) < THRESH*Norm(A0))) {
                 cerr<<"EigenFromTridiagonal:\n";
                 cerr<<"D = "<<D0<<endl;
                 cerr<<"E = "<<E0<<endl;
                 cerr<<"Done: D = "<<D<<endl;
-                cerr<<"U = "<<*U<<endl;
+                cerr<<"U = "<<U<<endl;
 #ifdef LAP
                 cerr<<"U2 = "<<U2<<endl;
-                cerr<<"diff = "<<(*U-U2)<<endl;
+                cerr<<"diff = "<<(U-U2)<<endl;
 #endif
                 cerr<<"Norm(UDU-A0) = "<<Norm(UDU-A0)<<endl;
                 cerr<<"Norm(A0) = "<<Norm(A0)<<endl;
@@ -1059,8 +1059,7 @@ namespace tmv {
 
     // This version does not accumulate U
     template <class T> 
-    void UnsortedEigen(
-        SymMatrixView<T> A, VectorView<RT> SS)
+    void UnsortedEigen(SymMatrixView<T> A, VectorView<RT> SS)
     {
         TMVAssert(SS.size() == A.size());
 
@@ -1080,12 +1079,12 @@ namespace tmv {
 #endif
         T signdet(0);
         Tridiagonalize(A,Ubeta.view(),SS,E.view(),signdet);
-        EigenFromTridiagonal<T>(0,SS,E.view());
+        MatrixView<T> U(0,0,0,1,0,NonConj);
+        EigenFromTridiagonal<T>(U,SS,E.view());
     }
 
     template <class T> 
-    void HermSV_Decompose(
-        MatrixView<T> U, DiagMatrixView<RT> SS)
+    void HermSV_Decompose(MatrixView<T> U, DiagMatrixView<RT> SS)
     {
         TMVAssert(U.rowsize() == SS.size());
         TMVAssert(U.colsize() == SS.size());
@@ -1127,15 +1126,15 @@ namespace tmv {
     template <class T> 
     void SymSV_Decompose(
         MatrixView<T> U, DiagMatrixView<RT> SS, 
-        MVP<T> Vt, RT& logdet, T& signdet)
+        MatrixView<T> Vt, RT& logdet, T& signdet)
     {
         TMVAssert(U.rowsize() == SS.size());
         TMVAssert(U.colsize() == SS.size());
         TMVAssert(U.ct() == NonConj);
-        if (Vt) {
-            TMVAssert(Vt->rowsize() == SS.size());
-            TMVAssert(Vt->colsize() == SS.size());
-            TMVAssert(Vt->ct() == NonConj);
+        if (Vt.cptr()) {
+            TMVAssert(Vt.rowsize() == SS.size());
+            TMVAssert(Vt.colsize() == SS.size());
+            TMVAssert(Vt.ct() == NonConj);
         }
         TMVAssert(SS.diag().ct() == NonConj);
 
@@ -1180,29 +1179,29 @@ namespace tmv {
         U.col(0).makeBasis(0);
         U.row(0,1,N).setZero();
         GetQFromQR(U.subMatrix(1,N,1,N),Ubeta.subVector(0,N-1));
-        if (Vt) *Vt = U.transpose();
+        if (Vt.cptr()) Vt = U.transpose();
         Matrix<T,ColMajor> U1(N,N);
         Matrix<T,ColMajor> Vt1(N,N);
         SV_Decompose<T>(B,U1.view(),SS,Vt1.view(),logdet,signdet);
         U = U*U1;
-        if (Vt) *Vt = Vt1*(*Vt);
+        if (Vt.cptr()) Vt = Vt1*Vt;
 
 #ifdef XDEBUG
-        if (Vt) {
-            Matrix<T> A2 = U * SS * (*Vt);
+        if (Vt.cptr()) {
+            Matrix<T> A2 = U * SS * Vt;
             std::cout<<"Done SymSV_Decompose\n";
             std::cout<<"U = "<<U<<endl;
             std::cout<<"SS = "<<SS<<endl;
-            std::cout<<"Vt = "<<*Vt<<endl;
+            std::cout<<"Vt = "<<Vt<<endl;
             std::cout<<"A0 = "<<A0<<endl;
             std::cout<<"A2 = "<<A2<<endl;
             std::cout<<"Norm(A0-A2) = "<<Norm(A0-A2)<<std::endl;
-            if (!(Norm(A0-A2) < THRESH * Norm(U) * Norm(SS) * Norm(*Vt))) {
+            if (!(Norm(A0-A2) < THRESH * Norm(U) * Norm(SS) * Norm(Vt))) {
                 cerr<<"SymSV_Decompose:\n";
                 cerr<<"A = "<<A0<<endl;
                 cerr<<"U = "<<U<<endl;
                 cerr<<"S = "<<SS.diag()<<endl;
-                cerr<<"Vt = "<<*Vt<<endl;
+                cerr<<"Vt = "<<Vt<<endl;
                 cerr<<"USVt = "<<A2<<endl;
                 abort();
             }
@@ -1212,8 +1211,7 @@ namespace tmv {
 
     // This version does not accumulate U or Vt
     template <class T> 
-    void SV_Decompose(
-        SymMatrixView<T> A, DiagMatrixView<RT> SS)
+    void SV_Decompose(SymMatrixView<T> A, DiagMatrixView<RT> SS)
     {
         TMVAssert(SS.size() == A.size());
 
@@ -1243,7 +1241,9 @@ namespace tmv {
             B.diag(1) = E;
 
             RT logdet(0);
-            SV_Decompose<T>(B,0,SS,0,logdet,signdet);
+            MatrixView<T> U(0,0,0,1,0,NonConj);
+            MatrixView<T> Vt(0,0,0,1,0,NonConj);
+            SV_Decompose<T>(B,U,SS,Vt,logdet,signdet);
         }
     }
 
@@ -1320,8 +1320,7 @@ namespace tmv {
 
     template <class T> 
     void SV_Decompose(
-        const GenSymMatrix<T>& A,
-        MatrixView<T> U, DiagMatrixView<RT> SS)
+        const GenSymMatrix<T>& A, MatrixView<T> U, DiagMatrixView<RT> SS)
     {
         TMVAssert(A.size() == U.colsize());
         TMVAssert(A.size() == U.rowsize());
@@ -1338,15 +1337,15 @@ namespace tmv {
             } else {
                 RT ld(0);
                 T d(0);
-                SymSV_Decompose<T>(U,SS,0,ld,d);
+                MatrixView<T> Vt(0,0,0,1,0,NonConj);
+                SymSV_Decompose<T>(U,SS,Vt,ld,d);
             }
         }
     }
 
     template <class T> 
     void SV_Decompose(
-        const GenSymMatrix<T>& A,
-        DiagMatrixView<RT> SS, MatrixView<T> Vt)
+        const GenSymMatrix<T>& A, DiagMatrixView<RT> SS, MatrixView<T> Vt)
     {
         TMVAssert(A.size() == SS.size());
         TMVAssert(A.size() == Vt.colsize());

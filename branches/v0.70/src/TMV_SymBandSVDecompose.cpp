@@ -143,7 +143,7 @@ namespace tmv {
 
     template <class T, class Td> 
     static void NonLapTridiagonalize(
-        const GenSymBandMatrix<T>& A, MVP<T> U,
+        const GenSymBandMatrix<T>& A, MatrixView<T> U,
         VectorView<Td> D, VectorView<RT> E, T& signdet)
     {
         // Decompose A into U T Ut
@@ -156,10 +156,10 @@ namespace tmv {
         TMVAssert(A.nlo() > 0);
         TMVAssert(A.size() > A.nlo());
         TMVAssert(A.uplo() == Lower);
-        if (U) {
-            TMVAssert(U->colsize() == A.colsize());
-            TMVAssert(U->rowsize() == A.colsize());
-            TMVAssert(U->ct() == NonConj);
+        if (U.cptr()) {
+            TMVAssert(U.colsize() == A.colsize());
+            TMVAssert(U.rowsize() == A.colsize());
+            TMVAssert(U.ct() == NonConj);
         }
         TMVAssert(D.size() == A.size());
         TMVAssert(E.size() == A.size()-1);
@@ -177,20 +177,20 @@ namespace tmv {
             } else {
                 MakeTridiagReal(Ud.view(),A.diag(),A.diag(-1),D,E);
             }
-            if (U) {
-                U->setZero();
-                U->diag() = Ud;
+            if (U.cptr()) {
+                U.setZero();
+                U.diag() = Ud;
             }
         } else {
             std::auto_ptr<SymMatrix<T,Lower|ColMajor> > UUS(0);
             std::auto_ptr<HermMatrix<T,Lower|ColMajor> > UUH(0);
             std::auto_ptr<SymMatrixView<T> > U1(0);
-            if (U) {
-                *U = A;
+            if (U.cptr()) {
+                U = A;
                 if (A.issym())
-                    U1.reset(new SymMatrixView<T>(SymMatrixViewOf(*U,Lower)));
+                    U1.reset(new SymMatrixView<T>(SymMatrixViewOf(U,Lower)));
                 else
-                    U1.reset(new SymMatrixView<T>(HermMatrixViewOf(*U,Lower)));
+                    U1.reset(new SymMatrixView<T>(HermMatrixViewOf(U,Lower)));
             } else {
                 if (A.issym()) {
                     UUS.reset(new SymMatrix<T,Lower|ColMajor>(A));
@@ -233,15 +233,15 @@ namespace tmv {
                 TMVAssert(NormInf(U1->diag(-1).imagPart()) == RT(0));
             }
 
-            if (U) {
-                U->upperTri().setZero();
-                U->diag(-1).setZero();
+            if (U.cptr()) {
+                U.upperTri().setZero();
+                U.diag(-1).setZero();
                 for (int j=N-1;j>0;--j) {
                     endcol = vec[j-1];
-                    U->col(j,j+1,endcol) = U->col(j-1,j+1,endcol);
-                    HouseholderUnpack(U->subMatrix(j,endcol,j,N),*(--Ubj));
+                    U.col(j,j+1,endcol) = U.col(j-1,j+1,endcol);
+                    HouseholderUnpack(U.subMatrix(j,endcol,j,N),*(--Ubj));
                 }
-                U->col(0,0,vec[0]).makeBasis(0);
+                U.col(0,0,vec[0]).makeBasis(0);
             }
 
             if (!A.isherm()) signdet *= signdet;
@@ -251,23 +251,23 @@ namespace tmv {
 #ifdef LAP
     template <class T, class Td> 
     static inline void LapTridiagonalize(
-        const GenSymBandMatrix<T>& A, MVP<T> U,
+        const GenSymBandMatrix<T>& A, MatrixView<T> U,
         VectorView<Td> D, VectorView<RT> E, T& signdet)
     { NonLapTridiagonalize(A,U,D,E,signdet); }
 #ifdef INST_DOUBLE
     template <> 
     void LapTridiagonalize(
-        const GenSymBandMatrix<double>& A, MVP<double> U,
+        const GenSymBandMatrix<double>& A, MatrixView<double> U,
         VectorView<double> D, VectorView<double> E, double& )
     {
         TMVAssert(A.nlo() > 1);
         TMVAssert(A.size() > A.nlo());
         TMVAssert(A.uplo() == Lower);
-        if (U) {
-            TMVAssert(U->colsize() == A.colsize());
-            TMVAssert(U->rowsize() == A.colsize());
-            TMVAssert(U->iscm());
-            TMVAssert(U->ct() == NonConj);
+        if (U.cptr()) {
+            TMVAssert(U.colsize() == A.colsize());
+            TMVAssert(U.rowsize() == A.colsize());
+            TMVAssert(U.iscm());
+            TMVAssert(U.ct() == NonConj);
         }
         TMVAssert(D.size() == A.size());
         TMVAssert(E.size() == A.size()-1);
@@ -280,9 +280,9 @@ namespace tmv {
         int kl = A.nlo();
         SymBandMatrix<double,Lower|ColMajor> A2 = A;
         int lda = A2.diagstep();
-        int ldu = U ? U->stepj() : 1;
-        char vect = U ? 'V' : 'N';
-        double* UU = U ? U->ptr() : 0;
+        int ldu = U.stepj():
+        char vect = U.cptr() ? 'V' : 'N';
+        double* UU = U.ptr():
         D.setZero();
         E.setZero();
 #ifndef LAPNOWORK
@@ -299,7 +299,7 @@ namespace tmv {
     template <> 
     void LapTridiagonalize(
         const GenSymBandMatrix<std::complex<double> >& A,
-        MVP<std::complex<double> > U,
+        MatrixView<std::complex<double> > U,
         VectorView<double> D, VectorView<double> E, 
         std::complex<double>& )
     {
@@ -307,11 +307,11 @@ namespace tmv {
         TMVAssert(A.nlo() > 1);
         TMVAssert(A.size() > A.nlo());
         TMVAssert(A.uplo() == Lower);
-        if (U) {
-            TMVAssert(U->colsize() == A.colsize());
-            TMVAssert(U->rowsize() == A.colsize());
-            TMVAssert(U->iscm());
-            TMVAssert(U->ct() == NonConj);
+        if (U.cptr()) {
+            TMVAssert(U.colsize() == A.colsize());
+            TMVAssert(U.rowsize() == A.colsize());
+            TMVAssert(U.iscm());
+            TMVAssert(U.ct() == NonConj);
         }
         TMVAssert(D.size() == A.size());
         TMVAssert(E.size() == A.size()-1);
@@ -324,9 +324,9 @@ namespace tmv {
         int kl = A.nlo();
         HermBandMatrix<std::complex<double>,Lower|ColMajor> A2 = A;
         int lda = A2.diagstep();
-        int ldu = U ? U->stepj() : 1;
-        char vect = U ? 'V' : 'N';
-        std::complex<double>* UU = U ? U->ptr() : 0;
+        int ldu = U.stepj();
+        char vect = U.cptr() ? 'V' : 'N';
+        std::complex<double>* UU = U.ptr();
         D.setZero();
         E.setZero();
 #ifndef LAPNOWORK
@@ -344,17 +344,17 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     void LapTridiagonalize(
-        const GenSymBandMatrix<float>& A, MVP<float> U,
+        const GenSymBandMatrix<float>& A, MatrixView<float> U,
         VectorView<float> D, VectorView<float> E, float& )
     {
         TMVAssert(A.nlo() > 1);
         TMVAssert(A.size() > A.nlo());
         TMVAssert(A.uplo() == Lower);
-        if (U) {
-            TMVAssert(U->colsize() == A.colsize());
-            TMVAssert(U->rowsize() == A.colsize());
-            TMVAssert(U->iscm());
-            TMVAssert(U->ct() == NonConj);
+        if (U.cptr()) {
+            TMVAssert(U.colsize() == A.colsize());
+            TMVAssert(U.rowsize() == A.colsize());
+            TMVAssert(U.iscm());
+            TMVAssert(U.ct() == NonConj);
         }
         TMVAssert(D.size() == A.size());
         TMVAssert(E.size() == A.size()-1);
@@ -367,9 +367,9 @@ namespace tmv {
         int kl = A.nlo();
         SymBandMatrix<float,Lower|ColMajor> A2 = A;
         int lda = A2.diagstep();
-        int ldu = U ? U->stepj() : 1;
-        char vect = U ? 'V' : 'N';
-        float* UU = U ? U->ptr() : 0;
+        int ldu = U.stepj();
+        char vect = U.cptr() ? 'V' : 'N';
+        float* UU = U.ptr();
         D.setZero();
         E.setZero();
 #ifndef LAPNOWORK
@@ -386,7 +386,7 @@ namespace tmv {
     template <> 
     void LapTridiagonalize(
         const GenSymBandMatrix<std::complex<float> >& A,
-        MVP<std::complex<float> > U,
+        MatrixView<std::complex<float> > U,
         VectorView<float> D, VectorView<float> E, 
         std::complex<float>& )
     {
@@ -394,11 +394,11 @@ namespace tmv {
         TMVAssert(A.nlo() > 1);
         TMVAssert(A.size() > A.nlo());
         TMVAssert(A.uplo() == Lower);
-        if (U) {
-            TMVAssert(U->colsize() == A.colsize());
-            TMVAssert(U->rowsize() == A.colsize());
-            TMVAssert(U->iscm());
-            TMVAssert(U->ct() == NonConj);
+        if (U.cptr()) {
+            TMVAssert(U.colsize() == A.colsize());
+            TMVAssert(U.rowsize() == A.colsize());
+            TMVAssert(U.iscm());
+            TMVAssert(U.ct() == NonConj);
         }
         TMVAssert(D.size() == A.size());
         TMVAssert(E.size() == A.size()-1);
@@ -411,9 +411,9 @@ namespace tmv {
         int kl = A.nlo();
         HermBandMatrix<std::complex<float>,Lower|ColMajor> A2 = A;
         int lda = A2.diagstep();
-        int ldu = U ? U->stepj() : 1;
-        char vect = U ? 'V' : 'N';
-        std::complex<float>* UU = U ? U->ptr() : 0;
+        int ldu = U.stepj();
+        char vect = U.cptr() ? 'V' : 'N';
+        std::complex<float>* UU = U.ptr();
         D.setZero();
         E.setZero();
 #ifndef LAPNOWORK
@@ -432,7 +432,7 @@ namespace tmv {
 
     template <class T, class Td> 
     static void Tridiagonalize(
-        const GenSymBandMatrix<T>& A, MVP<T> U,
+        const GenSymBandMatrix<T>& A, MatrixView<T> U,
         VectorView<Td> D, VectorView<RT> E, T& signdet)
     {
         TMVAssert(A.nlo() > 0);
@@ -441,15 +441,15 @@ namespace tmv {
         TMVAssert(D.ct()==NonConj);
         TMVAssert(E.ct()==NonConj);
         TMVAssert(isReal(Td()) || !A.isherm());
-        if (U) {
-            TMVAssert(U->colsize() == D.size());
-            TMVAssert(U->rowsize() == D.size());
+        if (U.cptr()) {
+            TMVAssert(U.colsize() == D.size());
+            TMVAssert(U.rowsize() == D.size());
         }
 
 #ifdef XDEBUG
         cout<<"Start Tridiagonalize: \n";
         cout<<"A = "<<TMV_Text(A)<<endl;
-        if (U) cout<<"U = "<<TMV_Text(*U)<<endl;
+        if (U.cptr()) cout<<"U = "<<TMV_Text(U)<<endl;
         cout<<"D = "<<TMV_Text(D)<<endl;
         cout<<"E = "<<TMV_Text(E)<<endl;
         cout<<"signdet = "<<signdet<<endl;
@@ -463,7 +463,7 @@ namespace tmv {
                 else Tridiagonalize(A.transpose(),U,D,E,signdet);
             } else {
 #ifdef LAP
-                if (A.isherm() && A.nlo() > 1 && (!U || U->iscm())) {
+                if (A.isherm() && A.nlo() > 1 && (!U.cptr() || U.iscm())) {
                     TMVAssert(isReal(Td()));
                     if (D.step() != 1) {
                         Vector<Td> Dx(D.size());
@@ -484,19 +484,19 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        if (U) {
+        if (U.cptr()) {
             const int N = A.size();
             Matrix<T> TT(N,N,T(0));
             TT.diag() = D;
             TT.diag(1) = TT.diag(-1) = E;
-            Matrix<T> A2 = (*U)*TT*(A.isherm() ? U->adjoint() : U->transpose());
+            Matrix<T> A2 = U*TT*(A.isherm() ? U.adjoint() : U.transpose());
             std::cout<<"After Tridiag: Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
-            std::cout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<std::endl;
-            std::cout<<"Norm(UUt-1) = "<<Norm((*U)*U->adjoint()-T(1))<<std::endl;
+            std::cout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<std::endl;
+            std::cout<<"Norm(UUt-1) = "<<Norm(U*U.adjoint()-T(1))<<std::endl;
             if (!(Norm(A2-A0) < 0.001*Norm(A0))) {
                 cerr<<"Tridiagonalize: \n";
                 cerr<<"A0 = "<<TMV_Text(A)<<"  "<<A0<<endl;
-                cerr<<"Done: U = "<<*U<<endl;
+                cerr<<"Done: U = "<<U<<endl;
                 cerr<<"D = "<<D<<endl;
                 cerr<<"E = "<<E<<endl;
                 cerr<<"TT = "<<TT<<endl;
@@ -513,14 +513,14 @@ namespace tmv {
 
     template <class T> 
     void UnsortedEigen(
-        const GenSymBandMatrix<T>& A, MVP<T> U, VectorView<RT> SS)
+        const GenSymBandMatrix<T>& A, MatrixView<T> U, VectorView<RT> SS)
     {
         TMVAssert(A.size() > 0);
         TMVAssert(A.isherm());
-        if (U) {
-            TMVAssert(U->rowsize() == A.size());
-            TMVAssert(U->colsize() == A.size());
-            TMVAssert(U->ct() == NonConj);
+        if (U.cptr()) {
+            TMVAssert(U.rowsize() == A.size());
+            TMVAssert(U.colsize() == A.size());
+            TMVAssert(U.ct() == NonConj);
         }
         TMVAssert(SS.size() == A.size());
         TMVAssert(SS.ct() == NonConj);
@@ -536,7 +536,7 @@ namespace tmv {
 
         if (A.nlo() == 0) {
             SS = A.diag().realPart();
-            if (U) U->setToIdentity();
+            if (U.cptr()) U.setToIdentity();
         } else {
             // First we reduce A to tridiagonal form: A = U * T * Ut
             // using a series of Householder transformations.
@@ -551,19 +551,19 @@ namespace tmv {
         }
 
 #ifdef XDEBUG
-        if (U) {
-            Matrix<T> A2 = (*U) * DiagMatrixViewOf(SS) * U->adjoint();
+        if (U.cptr()) {
+            Matrix<T> A2 = U * DiagMatrixViewOf(SS) * U.adjoint();
             std::cout<<"After UnsortedEigen: Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
-            std::cout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<std::endl;
-            std::cout<<"Norm(UUt-1) = "<<Norm((*U)*U->adjoint()-T(1))<<std::endl;
-            if (!(Norm(A0-A2) < 0.0001 * Norm(*U) * Norm(SS) * Norm(*U))) {
+            std::cout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<std::endl;
+            std::cout<<"Norm(UUt-1) = "<<Norm(U*U.adjoint()-T(1))<<std::endl;
+            if (!(Norm(A0-A2) < 0.0001 * Norm(U) * Norm(SS) * Norm(U))) {
                 cerr<<"Unsorted Eigen:\n";
                 //cerr<<"A = "<<A0<<endl;
-                //cerr<<"U = "<<*U<<endl;
+                //cerr<<"U = "<<U<<endl;
                 cerr<<"S = "<<SS<<endl;
                 cerr<<"A-USUt = "<<Matrix<T>(A0-A2).clip(1.e-5)<<endl;
                 cerr<<"Norm(A0-A2) = "<<Norm(A0-A2)<<endl;
-                cerr<<"Norm(U) = "<<Norm(*U)<<endl;
+                cerr<<"Norm(U) = "<<Norm(U)<<endl;
                 cerr<<"Norm(SS) = "<<Norm(SS)<<endl;
                 cerr<<"Norm(A0) = "<<Norm(A0)<<endl;
                 abort();
@@ -575,19 +575,19 @@ namespace tmv {
     template <class T> 
     void SV_Decompose(
         const GenSymBandMatrix<T>& A,
-        MVP<T> U, DiagMatrixView<RT> SS, MVP<T> Vt, 
+        MatrixView<T> U, DiagMatrixView<RT> SS, MatrixView<T> Vt, 
         RT& logdet, T& signdet)
     {
         TMVAssert(A.size() > 0);
-        if (U) {
-            TMVAssert(U->rowsize() == A.size());
-            TMVAssert(U->colsize() == A.size());
-            TMVAssert(U->ct() == NonConj);
+        if (U.cptr()) {
+            TMVAssert(U.rowsize() == A.size());
+            TMVAssert(U.colsize() == A.size());
+            TMVAssert(U.ct() == NonConj);
         }
-        if (Vt) {
-            TMVAssert(Vt->rowsize() == A.size());
-            TMVAssert(Vt->colsize() == A.size());
-            TMVAssert(Vt->ct() == NonConj);
+        if (Vt.cptr()) {
+            TMVAssert(Vt.rowsize() == A.size());
+            TMVAssert(Vt.colsize() == A.size());
+            TMVAssert(Vt.ct() == NonConj);
         }
         TMVAssert(SS.size() == A.size());
 
@@ -596,23 +596,23 @@ namespace tmv {
 #endif
 
         if (A.isherm()) {
-            if (Vt && !U) {
-                UnsortedEigen<T>(A,Vt->transpose(),SS.diag());
-                Vt->conjugateSelf();
+            if (Vt.cptr() && !U.cptr()) {
+                UnsortedEigen<T>(A,Vt.transpose(),SS.diag());
+                Vt.conjugateSelf();
             } else  {
                 UnsortedEigen<T>(A,U,SS.diag());
             }
-            if (Vt && U) *Vt = U->adjoint();
+            if (Vt.cptr() && U.cptr()) Vt = U.adjoint();
             if (signdet != T(0)) {
                 RT s;
                 logdet += SS.logDet(&s);
                 signdet *= s;
             }
-            if (U || Vt) {
+            if (U.cptr() || Vt.cptr()) {
                 AlignedArray<int> sortp(A.size());
                 SS.diag().sort(sortp.get(),Descend,AbsComp);
-                if (U) U->permuteCols(sortp.get());
-                if (Vt) Vt->permuteRows(sortp.get());
+                if (U.cptr()) U.permuteCols(sortp.get());
+                if (Vt.cptr()) Vt.permuteRows(sortp.get());
             } else {
                 SS.diag().sort(Descend,AbsComp);
             }
@@ -639,12 +639,12 @@ namespace tmv {
                 // The subdiagonal is stored in E.
                 Vector<T> D(N);
                 Vector<RT> E(N-1);
-                if (Vt && !U) {
+                if (Vt.cptr() && !U.cptr()) {
                     Tridiagonalize<T>(
-                        A,Vt->transpose(),D.view(),E.view(),signdet);
+                        A,Vt.transpose(),D.view(),E.view(),signdet);
                 } else {
                     Tridiagonalize<T>(A,U,D.view(),E.view(),signdet);
-                    if (Vt) { TMVAssert(U); *Vt = U->transpose(); }
+                    if (Vt.cptr()) { TMVAssert(U.cptr()); Vt = U.transpose(); }
                 }
 
                 BandMatrix<T,ColMajor> B(N,N,1,1);
@@ -652,36 +652,36 @@ namespace tmv {
                 B.diag(-1) = E;
                 B.diag(1) = E;
 
-                if (U) {
+                if (U.cptr()) {
                     Matrix<T,ColMajor> U1(N,N);
-                    if (Vt) {
+                    if (Vt.cptr()) {
                         Matrix<T,ColMajor> Vt1(N,N);
                         SV_Decompose<T>(B,U1.view(),SS,Vt1.view(),logdet,signdet);
-                        *Vt = Vt1*(*Vt);
+                        Vt = Vt1*Vt;
                     } else {
-                        SV_Decompose<T>(B,U1.view(),SS,0,logdet,signdet);
+                        SV_Decompose<T>(B,U1.view(),SS,Vt,logdet,signdet);
                     }
-                    *U = *U*U1;
+                    U = U*U1;
                 } else {
-                    if (Vt) {
+                    if (Vt.cptr()) {
                         Matrix<T,ColMajor> Vt1(N,N);
-                        SV_Decompose<T>(B,0,SS,Vt1.view(),logdet,signdet);
-                        *Vt = Vt1*(*Vt);
+                        SV_Decompose<T>(B,U,SS,Vt1.view(),logdet,signdet);
+                        Vt = Vt1*Vt;
                     } else {
-                        SV_Decompose<T>(B,0,SS,0,logdet,signdet);
+                        SV_Decompose<T>(B,U,SS,Vt,logdet,signdet);
                     }
                 }
             }
         }
 #ifdef XDEBUG
         if (U&&Vt) {
-            Matrix<T> A2 = (*U) * SS * (*Vt);
-            if (!(Norm(A0-A2) < 0.0001 * Norm(*U) * Norm(SS) * Norm(*Vt))) {
+            Matrix<T> A2 = U * SS * Vt;
+            if (!(Norm(A0-A2) < 0.0001 * Norm(U) * Norm(SS) * Norm(Vt))) {
                 cerr<<"SV_Decompose:\n";
                 cerr<<"A = "<<A0<<endl;
                 cerr<<"U = "<<U<<endl;
                 cerr<<"S = "<<SS<<endl;
-                cerr<<"Vt = "<<*Vt<<endl;
+                cerr<<"Vt = "<<Vt<<endl;
                 cerr<<"USVt = "<<A2<<endl;
                 abort();
             }
@@ -725,7 +725,8 @@ namespace tmv {
         if (A.isconj()) {
             Eigen(A.conjugate(),SS);
         } else {
-            UnsortedEigen<T>(A,0,SS);
+            MatrixView<T> U(0,0,0,1,0,NonConj);
+            UnsortedEigen<T>(A,U,SS);
             SS.sort(Ascend);
         }
     }
@@ -814,18 +815,19 @@ namespace tmv {
             } else {
                 RT ld(0);
                 T d(0);
-                SV_Decompose<T>(A,U,SS,0,ld,d);
-                if (A.isherm()) 
+                MatrixView<T> Vt(0,0,0,1,0,NonConj);
+                SV_Decompose<T>(A,U,SS,Vt,ld,d);
+                if (A.isherm()) {
                     for(int i=0;i<SS.size();i++) if (SS(i) < RT(0)) 
                         SS(i) = -SS(i);
+                }
             }
         }
     }
 
     template <class T> 
     void SV_Decompose(
-        const GenSymBandMatrix<T>& A,
-        DiagMatrixView<RT> SS, MatrixView<T> Vt)
+        const GenSymBandMatrix<T>& A, DiagMatrixView<RT> SS, MatrixView<T> Vt)
     {
         TMVAssert(SS.size() == A.size());
         TMVAssert(Vt.colsize() == A.size());
@@ -846,7 +848,9 @@ namespace tmv {
         } else {
             RT ld(0);
             T d(0);
-            SV_Decompose<T>(A,0,SS,0,ld,d);
+            MatrixView<T> U(0,0,0,1,0,NonConj);
+            MatrixView<T> Vt(0,0,0,1,0,NonConj);
+            SV_Decompose<T>(A,U,SS,Vt,ld,d);
             if (A.isherm()) 
                 for(int i=0;i<SS.size();i++) if (SS(i) < RT(0)) 
                     SS(i) = -SS(i);

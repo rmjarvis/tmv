@@ -3,10 +3,10 @@
 
 #define DefSVD(RT,T)\
 template void UnsortedEigen(const GenSymBandMatrix<T >& A, \
-    MVP<T > U, VectorView<RT > S); \
+    MatrixView<T > U, VectorView<RT > S); \
 template void SV_Decompose(const GenSymBandMatrix<T >& A, \
-    MVP<T > U, DiagMatrixView<RT > S,  \
-    MVP<T > V, RT& ld, T& sd); \
+    MatrixView<T > U, DiagMatrixView<RT > S,  \
+    MatrixView<T > V, RT& ld, T& sd); \
 template void SV_Decompose(const GenSymBandMatrix<T >& A, \
     MatrixView<T > U, DiagMatrixView<RT > S, \
     MatrixView<T > V); \

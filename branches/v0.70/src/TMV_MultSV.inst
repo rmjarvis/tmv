@@ -2,7 +2,6 @@
 #define CT std::complex<T>
 
 // Only the real version of these:
-//template class SymMatrixComposite<T >;
 template const T* SymMatrixComposite<T >::cptr() const; 
 template int SymMatrixComposite<T >::stepi() const; 
 template int SymMatrixComposite<T >::stepj() const; 

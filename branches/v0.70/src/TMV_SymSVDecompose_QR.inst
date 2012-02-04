@@ -2,7 +2,7 @@
 #define CT std::complex<T>
 
 #define DefSVD(RT,T)\
-template void EigenFromTridiagonal_QR(MVP<T > U, \
+template void EigenFromTridiagonal_QR(MatrixView<T > U, \
     VectorView<RT > D, VectorView<RT > E); \
 
 DefSVD(T,T)

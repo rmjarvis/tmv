@@ -128,7 +128,7 @@ namespace tmv {
 
     template <class T> 
     void BidiagonalZeroFirstRow(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E)
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E)
     {
         // Input D,E form an N+1 x N bidiagonal matrix
         // (eg. for N = 4)
@@ -140,7 +140,7 @@ namespace tmv {
         // Zero out the first row maintaining the constancy of U B
         // using Givens transformations.
         TMVAssert(E.size() == D.size());
-        if (U) TMVAssert(U->rowsize() == D.size()+1);
+        if (U.cptr()) TMVAssert(U.rowsize() == D.size()+1);
         TMVAssert(D.step() == 1);
         TMVAssert(E.step() == 1);
 
@@ -172,14 +172,14 @@ namespace tmv {
                     G.mult(*Ei,x);
                 }
                 // Make new U = U Gt
-                if (U) G.conjMult(U->colPair(i+1,0).transpose());
+                if (U.cptr()) G.conjMult(U.colPair(i+1,0).transpose());
             }
         }
     }
 
     template <class T> 
     void BidiagonalZeroLastCol(
-        VectorView<RT> D, VectorView<RT> E, MVP<T> Vt)
+        VectorView<RT> D, VectorView<RT> E, MatrixView<T> Vt)
     {
         // Input D,E form an N x N+1 bidiagonal matrix
         // (eg. for N = 4)
@@ -190,7 +190,7 @@ namespace tmv {
         // Zero out the last col maintaining the constancy of B Vt
         // using Givens transformations.
         TMVAssert(E.size() == D.size());
-        if (Vt) TMVAssert(Vt->colsize() == D.size()+1);
+        if (Vt.cptr()) TMVAssert(Vt.colsize() == D.size()+1);
         TMVAssert(D.step() == 1);
         TMVAssert(E.step() == 1);
 
@@ -221,7 +221,7 @@ namespace tmv {
                     G.mult(*(--Ei),x);
                 }
                 // Make new Vt = G* Vt 
-                if (Vt) G.conjMult(Vt->rowPair(i,N));
+                if (Vt.cptr()) G.conjMult(Vt.rowPair(i,N));
             }
         }
     }
@@ -274,7 +274,7 @@ namespace tmv {
 
     template <class T> 
     static void ReduceBidiagonal22(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt)
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E, MatrixView<T> Vt)
     {
         // Find Givens rotations which diagonalize 2x2 matrix exactly:
         //
@@ -344,8 +344,8 @@ namespace tmv {
 
         TMVAssert(D.size() == 2);
         TMVAssert(E.size() == 1);
-        if (U) TMVAssert(U->rowsize() == 2);
-        if (Vt) TMVAssert(Vt->colsize() == 2);
+        if (U.cptr()) TMVAssert(U.rowsize() == 2);
+        if (Vt.cptr()) TMVAssert(Vt.colsize() == 2);
 
         RT d0 = D(0);
         RT d1 = D(1);
@@ -540,15 +540,16 @@ namespace tmv {
         Matrix<RT> g1(2,2); g1(0,0) = c1; g1(0,1) = s1; g1(1,0) = -s1; g1(1,1) = c1;
         Matrix<RT> g2(2,2); g2(0,0) = c2; g2(0,1) = s2; g2(1,0) = -s2; g2(1,1) = c2;
         Matrix<RT> S = g1 * B * g2;
-        Matrix<T> A(U&&Vt ? U->colsize() : 0, U&&Vt ? Vt->rowsize() : 0);
-        if (U && Vt) A = *U * B * *Vt;
+        Matrix<T> A(U.cptr()&&Vt.cptr() ? U.colsize() : 0, 
+                    U.cptr()&&Vt.cptr() ? Vt.rowsize() : 0);
+        if (U.cptr() && Vt.cptr()) A = U * B * Vt;
         dbgcout<<"c1,s1 = "<<c1<<','<<s1<<std::endl;
         dbgcout<<"c2,s2 = "<<c2<<','<<s2<<std::endl;
         dbgcout<<"Initial B = "<<B<<endl;
         dbgcout<<"g1 = "<<g1<<std::endl;
         dbgcout<<"g2 = "<<g2<<std::endl;
         dbgcout<<"S = g1 B g2 = "<<S<<std::endl;
-        //if (U && Vt) dbgcout<<"Initial UBVt = "<<A<<endl;
+        //if (U.cptr() && Vt.cptr()) dbgcout<<"Initial UBVt = "<<A<<endl;
 #endif
         if (exact) {
             dbgcout<<"Use Exact solution for D,E\n";
@@ -565,19 +566,19 @@ namespace tmv {
             E(0) = c1*s2*d0 + c1*c2*e + s1*c2*d1;
         }
 
-        if (U) {
+        if (U.cptr()) {
             Givens<RT> G1(c1,s1);
-            G1.mult(U->transpose());
+            G1.mult(U.transpose());
         }
-        if (Vt) {
+        if (Vt.cptr()) {
             Givens<RT> G2(c2,-s2);
-            G2.mult(*Vt);
+            G2.mult(Vt);
         }
 #ifdef XDEBUG
-        if (U && Vt) {
+        if (U.cptr() && Vt.cptr()) {
             B.diag() = D;
             B.diag(1) = E;
-            Matrix<T> A2 = *U * B * *Vt;
+            Matrix<T> A2 = U * B * Vt;
             dbgcout<<"Done: B = "<<B<<endl;
             dbgcout<<"B-S = "<<B-S<<endl;
             dbgcout<<"Norm(B-S) = "<<Norm(B-S)<<endl;
@@ -606,7 +607,7 @@ namespace tmv {
 
     template <class T> 
     static void ReduceBidiagonal(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt)
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E, MatrixView<T> Vt)
     {
 #ifdef XDEBUG
         dbgcout<<"Start Reduce Bidiagonal QR:\n";
@@ -617,11 +618,11 @@ namespace tmv {
         Vector<RT> E0 = E;
         B.diag() = D0;
         B.diag(1) = E0;
-        const int M = U&&Vt ? U->colsize() : 0;
-        const int Nx = U&&Vt ? Vt->rowsize() : 0;
+        const int M = U.cptr()&&Vt.cptr() ? U.colsize() : 0;
+        const int Nx = U.cptr()&&Vt.cptr() ? Vt.rowsize() : 0;
         Matrix<T> A0(M,Nx);
-        if (U && Vt) {
-            A0 = (*U) * B * (*Vt);
+        if (U.cptr() && Vt.cptr()) {
+            A0 = U * B * Vt;
             dbgcout<<"A0 = "<<A0<<endl;
         }
 #endif
@@ -631,8 +632,8 @@ namespace tmv {
         const int N = D.size();
         TMVAssert(N>0);
         TMVAssert(E.size() == N-1);
-        if (U) TMVAssert(U->rowsize() == N);
-        if (Vt) TMVAssert(Vt->colsize() == N);
+        if (U.cptr()) TMVAssert(U.rowsize() == N);
+        if (Vt.cptr()) TMVAssert(Vt.colsize() == N);
         TMVAssert(D.step()==1);
         TMVAssert(E.step()==1);
 #ifdef XDEBUG
@@ -697,7 +698,7 @@ namespace tmv {
         for(int i=1;i<N;++i) {
             G.mult(*Di,*Ei);
             dbgcout<<"D,E -> "<<*Di<<','<<*Ei<<std::endl;
-            if (Vt) G.conjMult(Vt->rowPair(i-1,i));
+            if (Vt.cptr()) G.conjMult(Vt.rowPair(i-1,i));
             TMVAssert(x==RT(0));
             G.mult(x,*(++Di)); // x = B(i,i-1)
             dbgcout<<"x,D -> "<<x<<','<<*Di<<std::endl;
@@ -705,7 +706,7 @@ namespace tmv {
             dbgcout<<"Rotated D,x => "<<*(Di-1)<<','<<x<<std::endl;
             G.mult(*Ei,*Di);
             dbgcout<<"E,D -> "<<*Ei<<','<<*Di<<std::endl;
-            if (U) G.conjMult(U->colPair(i-1,i).transpose());
+            if (U.cptr()) G.conjMult(U.colPair(i-1,i).transpose());
             if (i < N-1) {
                 TMVAssert(x==RT(0));
                 G.mult(x,*(++Ei)); // x = B(i-1,i+1)
@@ -715,20 +716,20 @@ namespace tmv {
             }
         }
 #ifdef XDEBUG
-        if (U && Vt) {
+        if (U.cptr() && Vt.cptr()) {
             B.diag() = D;
             B.diag(1) = E;
-            Matrix<T> AA = (*U) * B * (*Vt);
+            Matrix<T> AA = U * B * Vt;
             if (!(Norm(A0-AA) < THRESH*Norm(A0))) {
                 cerr<<"ReduceBidiagonal: \n";
                 cerr<<"input D = "<<D0<<endl;
                 cerr<<"input E = "<<E0<<endl;
                 cerr<<"UBVt = "<<A0<<endl;
                 cerr<<"UBVt => "<<AA<<endl;
-                cerr<<"U = "<<*U<<endl;
+                cerr<<"U = "<<U<<endl;
                 cerr<<"D = "<<D<<endl;
                 cerr<<"E = "<<E<<endl;
-                cerr<<"Vt = "<<*Vt<<endl;
+                cerr<<"Vt = "<<Vt<<endl;
                 abort();
             }
         }
@@ -746,22 +747,22 @@ namespace tmv {
 
     template <class T> 
     void SV_DecomposeFromBidiagonal_QR(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E, MVP<T> Vt)
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E, MatrixView<T> Vt)
     {
 #ifdef XDEBUG
         dbgcout<<"Start Decompose from Bidiagonal QR:\n";
-        //if (U) dbgcout<<"U = "<<*U<<endl;
-        //if (Vt) dbgcout<<"Vt = "<<*Vt<<endl;
+        //if (U.cptr()) dbgcout<<"U = "<<U<<endl;
+        //if (Vt.cptr()) dbgcout<<"Vt = "<<Vt<<endl;
         dbgcout<<"D = "<<D<<endl;
         dbgcout<<"E = "<<E<<endl;
         Matrix<RT> B(D.size(),D.size(),RT(0));
         B.diag() = D;
         B.diag(1) = E;
-        const int M = U&&Vt ? U->colsize() : 0;
-        const int Nx = U&&Vt ? Vt->rowsize() : 0;
+        const int M = U.cptr()&&Vt.cptr() ? U.colsize() : 0;
+        const int Nx = U.cptr()&&Vt.cptr() ? Vt.rowsize() : 0;
         Matrix<T> A0(M,Nx);
-        if (U && Vt) {
-            A0 = (*U) * B * (*Vt);
+        if (U.cptr() && Vt.cptr()) {
+            A0 = U * B * Vt;
             dbgcout<<"A0 = "<<A0<<endl;
         }
 #endif
@@ -770,8 +771,8 @@ namespace tmv {
         if (N <= 1) return;
 
         TMVAssert(D.size() == E.size()+1);
-        if (U) TMVAssert(U->rowsize() == D.size());
-        if (Vt) TMVAssert(Vt->colsize() == D.size());
+        if (U.cptr()) TMVAssert(U.rowsize() == D.size());
+        if (Vt.cptr()) TMVAssert(Vt.colsize() == D.size());
 #ifdef XDEBUG
         TMVAssert(D.minAbs2Element() > RT(0));
         TMVAssert(E.minAbs2Element() > RT(0));
@@ -794,19 +795,19 @@ namespace tmv {
                 // Set p such that E(p-1) = 0 and all E(i) with p<=i<q are 
                 // non-zero.
 
-                if (U) {
-                    if (Vt) ReduceBidiagonal<T>(
-                        U->colRange(p,q+1),D.subVector(p,q+1),
-                        E.subVector(p,q),Vt->rowRange(p,q+1));
+                if (U.cptr()) {
+                    if (Vt.cptr()) ReduceBidiagonal<T>(
+                        U.colRange(p,q+1),D.subVector(p,q+1),
+                        E.subVector(p,q),Vt.rowRange(p,q+1));
                     else ReduceBidiagonal<T>(
-                        U->colRange(p,q+1),D.subVector(p,q+1),
-                        E.subVector(p,q),0);
+                        U.colRange(p,q+1),D.subVector(p,q+1),
+                        E.subVector(p,q),Vt);
                 } else {
-                    if (Vt) ReduceBidiagonal<T>(
-                        0,D.subVector(p,q+1),
-                        E.subVector(p,q),Vt->rowRange(p,q+1));
+                    if (Vt.cptr()) ReduceBidiagonal<T>(
+                        U,D.subVector(p,q+1),
+                        E.subVector(p,q),Vt.rowRange(p,q+1));
                     else ReduceBidiagonal<T>(
-                        0,D.subVector(p,q+1),E.subVector(p,q),0);
+                        U,D.subVector(p,q+1),E.subVector(p,q),Vt);
                 }
 
                 bool newzeroD = false;
@@ -827,41 +828,41 @@ namespace tmv {
                 // If we have, we need to go back to the original calling 
                 // routine, which deals with them.
                 if (newzeroD) {
-                    if (U) {
-                        if (Vt) DoSVDecomposeFromBidiagonal<T>(
-                            U->colRange(p,q+1),D.subVector(p,q+1),
-                            E.subVector(p,q),Vt->rowRange(p,q+1),false,false);
+                    if (U.cptr()) {
+                        if (Vt.cptr()) DoSVDecomposeFromBidiagonal<T>(
+                            U.colRange(p,q+1),D.subVector(p,q+1),
+                            E.subVector(p,q),Vt.rowRange(p,q+1),false,false);
                         else DoSVDecomposeFromBidiagonal<T>(
-                            U->colRange(p,q+1),D.subVector(p,q+1),
-                            E.subVector(p,q),0,false,false);
+                            U.colRange(p,q+1),D.subVector(p,q+1),
+                            E.subVector(p,q),Vt,false,false);
                     } else {
-                        if (Vt) DoSVDecomposeFromBidiagonal<T>(
-                            0,D.subVector(p,q+1),
-                            E.subVector(p,q),Vt->rowRange(p,q+1),false,false);
+                        if (Vt.cptr()) DoSVDecomposeFromBidiagonal<T>(
+                            U,D.subVector(p,q+1),
+                            E.subVector(p,q),Vt.rowRange(p,q+1),false,false);
                         else DoSVDecomposeFromBidiagonal<T>(
-                            0,D.subVector(p,q+1),
-                            E.subVector(p,q),0,false,false);
+                            U,D.subVector(p,q+1),
+                            E.subVector(p,q),Vt,false,false);
                     }
                     q = p;
                 }
             }
         }
 #ifdef XDEBUG
-        if (U && Vt) {
-            Matrix<T> AA = (*U) * DiagMatrixViewOf(D) * (*Vt);
+        if (U.cptr() && Vt.cptr()) {
+            Matrix<T> AA = U * DiagMatrixViewOf(D) * Vt;
             dbgcout<<"Done QR Norm(A0-AA) = "<<Norm(A0-AA)<<endl;
-            dbgcout<<"Norm(UtU-1) = "<<Norm(U->adjoint()*(*U)-T(1))<<endl;
-            dbgcout<<"Norm(VtV-1) = "<<Norm((*Vt)*Vt->adjoint()-T(1))<<endl;
-            dbgcout<<"Norm(VVt-1) = "<<Norm(Vt->adjoint()*(*Vt)-T(1))<<endl;
-            dbgcout<<"U = "<<*U<<std::endl;
+            dbgcout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<endl;
+            dbgcout<<"Norm(VtV-1) = "<<Norm(Vt*Vt.adjoint()-T(1))<<endl;
+            dbgcout<<"Norm(VVt-1) = "<<Norm(Vt.adjoint()*Vt-T(1))<<endl;
+            dbgcout<<"U = "<<U<<std::endl;
             dbgcout<<"S = "<<D<<std::endl;
-            dbgcout<<"Vt = "<<*Vt<<std::endl;
+            dbgcout<<"Vt = "<<Vt<<std::endl;
             if (!(Norm(A0-AA) < THRESH*Norm(A0))) {
                 cerr<<"SV_DecomposeFromBidiagonal QR: \n";
                 cerr<<"UBVt = "<<A0<<endl;
                 cerr<<"USVt = "<<AA<<endl;
-                //cerr<<"U = "<<*U<<endl;
-                //cerr<<"Vt = "<<*Vt<<endl;
+                //cerr<<"U = "<<U<<endl;
+                //cerr<<"Vt = "<<Vt<<endl;
                 cerr<<"input B = "<<B<<endl;
                 cerr<<"S = "<<D<<endl;
                 dbgcout<<"Norm(UBVt-USVt) = "<<Norm(A0-AA)<<endl;

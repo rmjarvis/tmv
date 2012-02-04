@@ -35,17 +35,6 @@ sblib_noint_files= band_noint + sym_noint + symband_noint
 sblib_omp_noint_files= sym_omp_noint
 sblib_stegr_files= sym_stegr
 
-all_source_files = \
-        basic + basic_noint + basic_omp + basic_omp_noint + basic_geqp3 + \
-	diag + tri + tri_noint + \
-	band + band_noint + \
-	sym + sym_noint + sym_omp_noint + sym_stegr + \
-	symband + symband_noint
-
-for file in all_source_files:
-    inst = file[0:file.rfind('.')] + '.inst'
-    Depends(file,inst)
-
 
 
 env1 = env.Clone()
@@ -137,6 +126,18 @@ else:
                                obj_sblib + obj_noint_sblib +
                                obj_omp_noint_sblib + obj_stegr_sblib)
 
+all_obj_files = \
+    obj_lib + obj_noint_lib + obj_omp_lib + \
+    obj_omp_noint_lib + obj_geqp3_lib + \
+    obj_sblib + obj_noint_sblib + \
+    obj_omp_noint_sblib + obj_stegr_sblib
+
+# Note: this next bit depends on the object files being in the src directory.
+# If this ever changes, I'll need to do something different to get the name
+# of the corresponding inst file.
+for objfile in all_obj_files:
+    inst = os.path.splitext(str(objfile))[0] + '.inst'
+    Depends(objfile,inst)
 
 env.Alias(target='lib', source=lib)
 env.Alias(target='sblib', source=sblib)

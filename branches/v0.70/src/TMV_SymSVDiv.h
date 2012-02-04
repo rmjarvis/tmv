@@ -46,7 +46,7 @@ namespace tmv {
 
     template <class T> 
     void EigenFromTridiagonal(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E);
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E);
 
     template <class T> 
     void UnsortedHermEigen(MatrixView<T> U, VectorView<RT> S);
@@ -58,10 +58,10 @@ namespace tmv {
     template <class T> 
     void SymSV_Decompose(
         MatrixView<T> U,
-        DiagMatrixView<RT> S, MVP<T> Vt, RT& logdet, T& signdet);
+        DiagMatrixView<RT> S, MatrixView<T> Vt, RT& logdet, T& signdet);
     template <class T> 
     void SV_Decompose(
-        SymMatrixView<T> A, DiagMatrixView<RT> S, MVP<T> Vt);
+        SymMatrixView<T> A, DiagMatrixView<RT> S, MatrixView<T> Vt);
 
     template <class T, class T1> 
     void HermSV_Inverse(
@@ -78,11 +78,11 @@ namespace tmv {
 
     template <class T> 
     void EigenFromTridiagonal_QR(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E);
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E);
 
     template <class T> 
     void EigenFromTridiagonal_DC(
-        MVP<T> U, VectorView<RT> D, VectorView<RT> E, bool UisI);
+        MatrixView<T> U, VectorView<RT> D, VectorView<RT> E, bool UisI);
 
     template <class T> 
     void FindDCEigenValues(
