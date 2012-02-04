@@ -1738,8 +1738,8 @@ namespace tmv {
     {
         std::string exp,got;
         bool ok = isReal(T()) ? 
-            reader.readCode("S","H",exp,got) : 
-            reader.readCode(issym()?"S":"H",exp,got);
+            reader.readCode("sB","hB",exp,got) : 
+            reader.readCode(issym()?"sB":"hB",exp,got);
         if (!ok) {
 #ifdef NOTHROW
             std::cerr<<"SymBandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
