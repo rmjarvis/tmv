@@ -280,9 +280,9 @@ namespace tmv {
         int kl = A.nlo();
         SymBandMatrix<double,Lower|ColMajor> A2 = A;
         int lda = A2.diagstep();
-        int ldu = U.stepj():
+        int ldu = U.stepj();
         char vect = U.cptr() ? 'V' : 'N';
-        double* UU = U.ptr():
+        double* UU = U.ptr();
         D.setZero();
         E.setZero();
 #ifndef LAPNOWORK
