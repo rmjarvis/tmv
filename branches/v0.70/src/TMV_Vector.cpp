@@ -92,14 +92,14 @@ namespace tmv {
     //
 
     template <class T> 
-    T GenVector<T>::cref(int i) const
+    T GenVector<T>::cref(ptrdiff_t i) const
     {
         const T* vi = cptr() + i*step();
         return (ct() == Conj) ? TMV_CONJ(*vi) : *vi;
     }
 
     template <class T, int A>
-    typename VectorView<T,A>::reference VectorView<T,A>::ref(int i)
+    typename VectorView<T,A>::reference VectorView<T,A>::ref(ptrdiff_t i)
     {
         T* vi = ptr() + i*step();
         return RefHelper<T>::makeRef(vi,ct());
@@ -109,7 +109,7 @@ namespace tmv {
     // hasSubVector
     //
     template <class T> 
-    bool GenVector<T>::hasSubVector(int i1, int i2, int istep) const
+    bool GenVector<T>::hasSubVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
     {
         if (i1==i2) return true;  // no elements
         bool ok = true;
@@ -141,7 +141,7 @@ namespace tmv {
 
     template <class T> 
     bool ConstVectorView<T,FortranStyle>::hasSubVector(
-        int i1, int i2, int istep) const
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
     {
         if (i1==i2) return true;  // no elements
         bool ok = true;
@@ -179,16 +179,16 @@ namespace tmv {
     {
         if (size() == 0) return RT(0);
 
-        const int s = step();
+        const ptrdiff_t s = step();
         if (s == 1) {
             if (isComplex(T())) return flatten().normSq(scale);
             else {
                 RT sum(0);
                 const T* p = cptr();
                 if (scale == RT(1)) 
-                    for(int i=size();i>0;--i,++p) sum += TMV_NORM(*p);
+                    for(ptrdiff_t i=size();i>0;--i,++p) sum += TMV_NORM(*p);
                 else
-                    for(int i=size();i>0;--i,++p) sum += TMV_NORM(scale* (*p));
+                    for(ptrdiff_t i=size();i>0;--i,++p) sum += TMV_NORM(scale* (*p));
                 return sum;
             }
         } else if (s < 0) {
@@ -199,9 +199,9 @@ namespace tmv {
             RT sum(0);
             const T* p = cptr();
             if (scale == RT(1))
-                for(int i=size();i>0;--i,p+=s) sum += TMV_NORM(*p);
+                for(ptrdiff_t i=size();i>0;--i,p+=s) sum += TMV_NORM(*p);
             else
-                for(int i=size();i>0;--i,p+=s) sum += TMV_NORM(scale* (*p));
+                for(ptrdiff_t i=size();i>0;--i,p+=s) sum += TMV_NORM(scale* (*p));
             return sum;
         }
     }
@@ -302,11 +302,11 @@ namespace tmv {
     {
         if (size() == 0) return T(0);
 
-        const int s = step();
+        const ptrdiff_t s = step();
         if (s == 1) {
             T sum(0);
             const T* p = cptr();
-            for(int i=size();i>0;--i,++p) sum += *p;
+            for(ptrdiff_t i=size();i>0;--i,++p) sum += *p;
             return this->isconj() ? TMV_CONJ(sum) : sum;
         } else if (s < 0) {
             return reverse().sumElements();
@@ -315,7 +315,7 @@ namespace tmv {
         } else {
             T sum(0);
             const T* p = cptr();
-            for(int i=size();i>0;--i,p+=s) sum += *p;
+            for(ptrdiff_t i=size();i>0;--i,p+=s) sum += *p;
             return this->isconj() ? TMV_CONJ(sum) : sum;
         }
     }
@@ -324,13 +324,13 @@ namespace tmv {
     static RT DoSumAbsElements(const GenVector<T>& v)
     {
         TMVAssert(v.step() > 0);
-        const int s = v.step();
+        const ptrdiff_t s = v.step();
         RT sum(0);
         const T* p = v.cptr();
         if (s == 1) {
-            for(int i=v.size();i>0;--i,++p) sum += TMV_ABS(*p);
+            for(ptrdiff_t i=v.size();i>0;--i,++p) sum += TMV_ABS(*p);
         } else {
-            for(int i=v.size();i>0;--i,p+=s) sum += TMV_ABS(*p);
+            for(ptrdiff_t i=v.size();i>0;--i,p+=s) sum += TMV_ABS(*p);
         }
         return sum;
     }
@@ -390,10 +390,10 @@ namespace tmv {
         TMVAssert(v.step() > 0);
         if (v.step() == 1) return DoSumAbsElements(v.flatten());
         else {
-            const int s = v.step();
+            const ptrdiff_t s = v.step();
             T sum(0);
             const std::complex<T>* p = v.cptr();
-            for(int i=v.size();i>0;--i,p+=s) sum += TMV_ABS2(*p);
+            for(ptrdiff_t i=v.size();i>0;--i,p+=s) sum += TMV_ABS2(*p);
             return sum;
         }
     }
@@ -432,19 +432,19 @@ namespace tmv {
     //
 
     template <class T> 
-    static T FindMinElement(const GenVector<T>& v, int& imin)
+    static T FindMinElement(const GenVector<T>& v, ptrdiff_t& imin)
     {
         TMVAssert(v.size() > 0);
         TMVAssert(v.step() > 0);
 
         const T* p = v.cptr();
-        const int s = v.step();
+        const ptrdiff_t s = v.step();
         T min = *p;
         imin = 0;
-        int i=1;
+        ptrdiff_t i=1;
         if (s == 1) {
             ++p;
-            for(int k=v.size()-1;k>0; --k,++p,++i) {
+            for(ptrdiff_t k=v.size()-1;k>0; --k,++p,++i) {
                 if (TMV_REAL(*p) < TMV_REAL(min)) {
                     min = *p;
                     imin = i;
@@ -452,7 +452,7 @@ namespace tmv {
             }
         } else {
             p += s;
-            for(int k=v.size()-1;k>0; --k,p+=s,++i) {
+            for(ptrdiff_t k=v.size()-1;k>0; --k,p+=s,++i) {
                 if (TMV_REAL(*p) < TMV_REAL(min)) {
                     min = *p;
                     imin = i;
@@ -462,19 +462,19 @@ namespace tmv {
         return v.isconj() ? TMV_CONJ(min) : min;
     }
     template <class T> 
-    static T FindMaxElement(const GenVector<T>& v, int& imax)
+    static T FindMaxElement(const GenVector<T>& v, ptrdiff_t& imax)
     {
         TMVAssert(v.size() > 0);
         TMVAssert(v.step() > 0);
 
         const T* p = v.cptr();
-        const int s = v.step();
+        const ptrdiff_t s = v.step();
         T max = *p;
         imax = 0;
-        int i=1;
+        ptrdiff_t i=1;
         if (s == 1) {
             ++p;
-            for(int k=v.size()-1;k>0; --k,++p,++i) {
+            for(ptrdiff_t k=v.size()-1;k>0; --k,++p,++i) {
                 if (TMV_REAL(*p) > TMV_REAL(max)) {
                     max = *p;
                     imax = i;
@@ -482,7 +482,7 @@ namespace tmv {
             }
         } else {
             p += s;
-            for(int k=v.size()-1;k>0; --k,p+=s,++i) {
+            for(ptrdiff_t k=v.size()-1;k>0; --k,p+=s,++i) {
                 if (TMV_REAL(*p) > TMV_REAL(max)) {
                     max = *p;
                     imax = i;
@@ -492,19 +492,19 @@ namespace tmv {
         return v.isconj() ? TMV_CONJ(max) : max;
     }
     template <class T> 
-    static RT FindMaxAbsElement(const GenVector<T>& v, int& imax)
+    static RT FindMaxAbsElement(const GenVector<T>& v, ptrdiff_t& imax)
     {
         TMVAssert(v.size() > 0);
         TMVAssert(v.step() > 0);
 
         const T* p = v.cptr();
-        const int s = v.step();
+        const ptrdiff_t s = v.step();
         RT max = TMV_ABS(*p);
         imax = 0;
-        int i=1;
+        ptrdiff_t i=1;
         if (s == 1) {
             ++p;
-            for(int k=v.size()-1;k>0; --k,++p,++i) {
+            for(ptrdiff_t k=v.size()-1;k>0; --k,++p,++i) {
                 RT absval = TMV_ABS(*p);
                 if (absval > max) { 
                     max = absval; 
@@ -513,7 +513,7 @@ namespace tmv {
             }
         } else {
             p += s;
-            for(int k=v.size()-1;k>0; --k,p+=s,++i) {
+            for(ptrdiff_t k=v.size()-1;k>0; --k,p+=s,++i) {
                 RT absval = TMV_ABS(*p);
                 if (absval > max) { 
                     max = absval; 
@@ -524,19 +524,19 @@ namespace tmv {
         return max;
     }
     template <class T> 
-    static RT FindMinAbsElement(const GenVector<T>& v, int& imin)
+    static RT FindMinAbsElement(const GenVector<T>& v, ptrdiff_t& imin)
     {
         TMVAssert(v.size() > 0);
         TMVAssert(v.step() > 0);
 
         const T* p = v.cptr();
-        const int s = v.step();
+        const ptrdiff_t s = v.step();
         RT min = TMV_ABS(*p);
         imin = 0;
-        int i=1;
+        ptrdiff_t i=1;
         if (s == 1) {
             ++p;
-            for(int k=v.size()-1;k>0; --k,++p,++i) {
+            for(ptrdiff_t k=v.size()-1;k>0; --k,++p,++i) {
                 RT absval = TMV_ABS(*p);
                 if (absval < min) {
                     min = absval; 
@@ -545,7 +545,7 @@ namespace tmv {
             }
         } else {
             p += s;
-            for(int k=v.size()-1;k>0; --k,p+=s,++i) {
+            for(ptrdiff_t k=v.size()-1;k>0; --k,p+=s,++i) {
                 RT absval = TMV_ABS(*p);
                 if (absval < min) {
                     min = absval; 
@@ -557,19 +557,19 @@ namespace tmv {
     }
 
     template <class T> 
-    static RT FindMaxAbs2Element(const GenVector<T>& v, int& imax)
+    static RT FindMaxAbs2Element(const GenVector<T>& v, ptrdiff_t& imax)
     {
         TMVAssert(v.size() > 0);
         TMVAssert(v.step() > 0);
 
         const T* p = v.cptr();
-        const int s = v.step();
+        const ptrdiff_t s = v.step();
         RT max = TMV_ABS2(*p);
         imax = 0;
-        int i=1;
+        ptrdiff_t i=1;
         if (s == 1) {
             ++p;
-            for(int k=v.size()-1;k>0; --k,++p,++i) {
+            for(ptrdiff_t k=v.size()-1;k>0; --k,++p,++i) {
                 RT absval = TMV_ABS2(*p);
                 if (absval > max) { 
                     max = absval; 
@@ -578,7 +578,7 @@ namespace tmv {
             }
         } else {
             p += s;
-            for(int k=v.size()-1;k>0; --k,p+=s,++i) {
+            for(ptrdiff_t k=v.size()-1;k>0; --k,p+=s,++i) {
                 RT absval = TMV_ABS2(*p);
                 if (absval > max) { 
                     max = absval; 
@@ -589,19 +589,19 @@ namespace tmv {
         return max;
     }
     template <class T> 
-    static RT FindMinAbs2Element(const GenVector<T>& v, int& imin)
+    static RT FindMinAbs2Element(const GenVector<T>& v, ptrdiff_t& imin)
     {
         TMVAssert(v.size() > 0);
         TMVAssert(v.step() > 0);
 
         const T* p = v.cptr();
-        const int s = v.step();
+        const ptrdiff_t s = v.step();
         RT min = TMV_ABS2(*p);
         imin = 0;
-        int i=1;
+        ptrdiff_t i=1;
         if (s == 1) {
             ++p;
-            for(int k=v.size()-1;k>0; --k,++p,++i) {
+            for(ptrdiff_t k=v.size()-1;k>0; --k,++p,++i) {
                 RT absval = TMV_ABS2(*p);
                 if (absval < min) {
                     min = absval; 
@@ -610,7 +610,7 @@ namespace tmv {
             }
         } else {
             p += s;
-            for(int k=v.size()-1;k>0; --k,p+=s,++i) {
+            for(ptrdiff_t k=v.size()-1;k>0; --k,p+=s,++i) {
                 RT absval = TMV_ABS2(*p);
                 if (absval < min) {
                     min = absval; 
@@ -624,7 +624,7 @@ namespace tmv {
     // These return values seem to work, so I don't guard this segment 
     // with BLASNORETURN
 #ifdef INST_DOUBLE
-    static double FindMaxAbsElement(const GenVector<double>& v, int& imax)
+    static double FindMaxAbsElement(const GenVector<double>& v, ptrdiff_t& imax)
     {
         int n=v.size();
         int s=v.step();
@@ -639,10 +639,10 @@ namespace tmv {
         TMVAssert(imax < v.size());
         return TMV_ABS(v[imax]);
     }
-    static double FindMaxAbs2Element(const GenVector<double>& v, int& imax)
+    static double FindMaxAbs2Element(const GenVector<double>& v, ptrdiff_t& imax)
     { return FindMaxAbsElement(v,imax); }
     static double FindMaxAbs2Element(
-        const GenVector<std::complex<double> >& v, int& imax)
+        const GenVector<std::complex<double> >& v, ptrdiff_t& imax)
     {
         int n=v.size();
         int s=v.step();
@@ -655,7 +655,7 @@ namespace tmv {
         return TMV_ABS2(v[imax]);
     }
 #ifdef BLASIDAMIN
-    static double FindMinAbsElement(const GenVector<double>& v, int& imin)
+    static double FindMinAbsElement(const GenVector<double>& v, ptrdiff_t& imin)
     {
         int n=v.size();
         int s=v.step();
@@ -667,10 +667,10 @@ namespace tmv {
         TMVAssert(imin < v.size());
         return TMV_ABS(v[imin]);
     }
-    static double FindMinAbs2Element(const GenVector<double>& v, int& imin)
+    static double FindMinAbs2Element(const GenVector<double>& v, ptrdiff_t& imin)
     { return FindMinAbsElement(v,imin); }
     static double FindMinAbs2Element(
-        const GenVector<std::complex<double> >& v, int& imin)
+        const GenVector<std::complex<double> >& v, ptrdiff_t& imin)
     {
         int n=v.size();
         int s=v.step();
@@ -685,7 +685,7 @@ namespace tmv {
 #endif // BLASIDAMIN
 #endif
 #ifdef INST_FLOAT
-    static float FindMaxAbsElement(const GenVector<float>& v, int& imax)
+    static float FindMaxAbsElement(const GenVector<float>& v, ptrdiff_t& imax)
     {
         int n=v.size();
         int s=v.step();
@@ -697,10 +697,10 @@ namespace tmv {
         TMVAssert(imax < v.size());
         return TMV_ABS(v[imax]);
     }
-    static float FindMaxAbs2Element(const GenVector<float>& v, int& imax)
+    static float FindMaxAbs2Element(const GenVector<float>& v, ptrdiff_t& imax)
     { return FindMaxAbsElement(v,imax); }
     static float FindMaxAbs2Element(
-        const GenVector<std::complex<float> >& v, int& imax)
+        const GenVector<std::complex<float> >& v, ptrdiff_t& imax)
     {
         int n=v.size();
         int s=v.step();
@@ -713,7 +713,7 @@ namespace tmv {
         return TMV_ABS2(v[imax]);
     }
 #ifdef BLASIDAMIN
-    static float FindMinAbsElement(const GenVector<float>& v, int& imin)
+    static float FindMinAbsElement(const GenVector<float>& v, ptrdiff_t& imin)
     {
         int n=v.size();
         int s=v.step();
@@ -725,10 +725,10 @@ namespace tmv {
         TMVAssert(imin < v.size());
         return TMV_ABS(v[imin]);
     }
-    static float FindMinAbs2Element(const GenVector<float>& v, int& imin)
+    static float FindMinAbs2Element(const GenVector<float>& v, ptrdiff_t& imin)
     { return FindMinAbsElement(v,imin); }
     static float FindMinAbs2Element(
-        const GenVector<std::complex<float> >& v, int& imin)
+        const GenVector<std::complex<float> >& v, ptrdiff_t& imin)
     {
         int n=v.size();
         int s=v.step();
@@ -746,22 +746,22 @@ namespace tmv {
 
 #ifdef INST_INT
     static int FindMinAbsElement(
-        const GenVector<std::complex<int> >& , int& imax)
+        const GenVector<std::complex<int> >& , ptrdiff_t& imax)
     { TMVAssert(TMV_FALSE); imax=0; return 0; }
     static int FindMaxAbsElement(
-        const GenVector<std::complex<int> >& , int& imin)
+        const GenVector<std::complex<int> >& , ptrdiff_t& imin)
     { TMVAssert(TMV_FALSE); imin=0; return 0; }
 #endif
 
     template <class T> 
-    T GenVector<T>::minElement(int* iminout) const
+    T GenVector<T>::minElement(ptrdiff_t* iminout) const
     {
         if (size() == 0) {
             if (iminout) *iminout = -1;
             return T(0);
         }
         if (step() > 0) {
-            int imin;
+            ptrdiff_t imin;
             T min = FindMinElement(*this,imin);
             TMVAssert(imin < size());
             if (iminout) *iminout = imin;
@@ -776,14 +776,14 @@ namespace tmv {
         }
     }
     template <class T> 
-    T GenVector<T>::maxElement(int* imaxout) const
+    T GenVector<T>::maxElement(ptrdiff_t* imaxout) const
     {
         if (size() == 0) {
             if (imaxout) *imaxout = -1;
             return T(0);
         }
         if (step() > 0) {
-            int imax;
+            ptrdiff_t imax;
             T max = FindMaxElement(*this,imax);
             TMVAssert(imax < size());
             if (imaxout) *imaxout = imax;
@@ -799,14 +799,14 @@ namespace tmv {
     }
 
     template <class T> 
-    RT GenVector<T>::minAbsElement(int* iminout) const
+    RT GenVector<T>::minAbsElement(ptrdiff_t* iminout) const
     {
         if (size() == 0) {
             if (iminout) *iminout = -1;
             return RT(0);
         }
         if (step() > 0) {
-            int imin;
+            ptrdiff_t imin;
             RT min = FindMinAbsElement(*this,imin);
             TMVAssert(imin < size());
             if (iminout) *iminout = imin;
@@ -821,14 +821,14 @@ namespace tmv {
         }
     }
     template <class T> 
-    RT GenVector<T>::maxAbsElement(int* imaxout) const
+    RT GenVector<T>::maxAbsElement(ptrdiff_t* imaxout) const
     {
         if (size() == 0) {
             if (imaxout) *imaxout = -1;
             return RT(0);
         }
         if (step() > 0) {
-            int imax;
+            ptrdiff_t imax;
             RT max = FindMaxAbsElement(*this,imax);
             TMVAssert(imax < size());
             if (imaxout) *imaxout = imax;
@@ -844,14 +844,14 @@ namespace tmv {
     }
 
     template <class T> 
-    RT GenVector<T>::minAbs2Element(int* iminout) const
+    RT GenVector<T>::minAbs2Element(ptrdiff_t* iminout) const
     {
         if (size() == 0) {
             if (iminout) *iminout = -1;
             return RT(0);
         }
         if (step() > 0) {
-            int imin;
+            ptrdiff_t imin;
             RT min = FindMinAbs2Element(*this,imin);
             TMVAssert(imin < size());
             if (iminout) *iminout = imin;
@@ -866,14 +866,14 @@ namespace tmv {
         }
     }
     template <class T> 
-    RT GenVector<T>::maxAbs2Element(int* imaxout) const
+    RT GenVector<T>::maxAbs2Element(ptrdiff_t* imaxout) const
     {
         if (size() == 0) {
             if (imaxout) *imaxout = -1;
             return RT(0);
         }
         if (step() > 0) {
-            int imax;
+            ptrdiff_t imax;
             RT max = FindMaxAbs2Element(*this,imax);
             TMVAssert(imax < size());
             if (imaxout) *imaxout = imax;
@@ -916,7 +916,7 @@ namespace tmv {
     template <class T, int A>
     VectorView<T,A>& VectorView<T,A>::clip(RT thresh) 
     {
-        const int s = step();
+        const ptrdiff_t s = step();
         if (s < 0) {
             reverse().clip(thresh);
         } else if (s == 0) {
@@ -925,10 +925,10 @@ namespace tmv {
             T* p = ptr();
 
             if (s == 1) {
-                for(int i=size();i>0;--i,++p) 
+                for(ptrdiff_t i=size();i>0;--i,++p) 
                     if (TMV_ABS(*p) < thresh) *p = T(0);
             } else {
-                for(int i=size();i>0;--i,p+=s) 
+                for(ptrdiff_t i=size();i>0;--i,p+=s) 
                     if (TMV_ABS(*p) < thresh) *p = T(0);
             }
         }
@@ -949,7 +949,7 @@ namespace tmv {
     template <class T, int A>
     VectorView<T,A>& VectorView<T,A>::setAllTo(const T& x) 
     {
-        const int s = step();
+        const ptrdiff_t s = step();
         if (s < 0) {
             reverse().setAllTo(x);
         } else if (s == 0) {
@@ -963,7 +963,7 @@ namespace tmv {
         } else {
             T* p = ptr();
             if (this->isconj()) {
-                for(int i=size();i>0;--i,p+=s) {
+                for(ptrdiff_t i=size();i>0;--i,p+=s) {
 #ifdef TMVFLDEBUG
                     TMVAssert(p >= _first);
                     TMVAssert(p < _last);
@@ -971,7 +971,7 @@ namespace tmv {
                     *p = TMV_CONJ(x); 
                 }
             } else {
-                for(int i=size();i>0;--i,p+=s) {
+                for(ptrdiff_t i=size();i>0;--i,p+=s) {
 #ifdef TMVFLDEBUG
                     TMVAssert(p >= _first);
                     TMVAssert(p < _last);
@@ -993,7 +993,7 @@ namespace tmv {
     template <class T, int A>
     VectorView<T,A>& VectorView<T,A>::addToAll(const T& x) 
     {
-        const int s = step();
+        const ptrdiff_t s = step();
         if (s < 0) {
             reverse().addToAll(x);
         } else if (s == 0) {
@@ -1003,15 +1003,15 @@ namespace tmv {
 
             if (this->isconj()) {
                 if (s == 1) {
-                    for(int i=size();i>0;--i,++p) *p += TMV_CONJ(x); 
+                    for(ptrdiff_t i=size();i>0;--i,++p) *p += TMV_CONJ(x); 
                 } else {
-                    for(int i=size();i>0;--i,p+=s) *p += TMV_CONJ(x); 
+                    for(ptrdiff_t i=size();i>0;--i,p+=s) *p += TMV_CONJ(x); 
                 }
             } else {
                 if (s == 1) {
-                    for(int i=size();i>0;--i,++p) *p += x; 
+                    for(ptrdiff_t i=size();i>0;--i,++p) *p += x; 
                 } else {
-                    for(int i=size();i>0;--i,p+=s) *p += x; 
+                    for(ptrdiff_t i=size();i>0;--i,p+=s) *p += x; 
                 }
             }
         }
@@ -1022,7 +1022,7 @@ namespace tmv {
     Vector<T,A>& Vector<T,A>::addToAll(const T& x)
     {
         T* p = ptr();
-        for(int i=size();i>0;--i,++p) *p += x;
+        for(ptrdiff_t i=size();i>0;--i,++p) *p += x;
         return *this;
     }
 
@@ -1035,12 +1035,12 @@ namespace tmv {
         p++;
 
         if (v.step() == 1) {
-            for(int i=v.size();i>0;--i,p+=2) *p = -(*p);
+            for(ptrdiff_t i=v.size();i>0;--i,p+=2) *p = -(*p);
         } else if (v.step() == 0) {
             *p = -*p;
         } else {
-            const int s = 2*v.step();
-            for(int i=v.size();i>0;--i,p+=s) *p = -(*p);
+            const ptrdiff_t s = 2*v.step();
+            for(ptrdiff_t i=v.size();i>0;--i,p+=s) *p = -(*p);
         }
     }
     template <class T> 
@@ -1054,8 +1054,8 @@ namespace tmv {
     template <> 
     void LapConjugate(VectorView<std::complex<double>,CStyle> v)
     { 
-        int n = v.size();
-        int s = v.step();
+        ptrdiff_t n = v.size();
+        ptrdiff_t s = v.step();
         LAPNAME(zlacgv) (LAPV(n),LAPP(v.ptr()),LAPV(s)); 
     }
 #endif
@@ -1063,8 +1063,8 @@ namespace tmv {
     template <> 
     void LapConjugate(VectorView<std::complex<float>,CStyle> v)
     {
-        int n = v.size();
-        int s = v.step();
+        ptrdiff_t n = v.size();
+        ptrdiff_t s = v.step();
         LAPNAME(clacgv) (LAPV(n),LAPP(v.ptr()),LAPV(s)); 
     }
 #endif
@@ -1093,7 +1093,7 @@ namespace tmv {
 
 
     template <class T, int A>
-    VectorView<T,A>& VectorView<T,A>::DoBasis(int i) 
+    VectorView<T,A>& VectorView<T,A>::DoBasis(ptrdiff_t i) 
     { 
         TMVAssert(A==CStyle);
         TMVAssert(i < size());
@@ -1103,7 +1103,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    Vector<T,A>& Vector<T,A>::DoBasis(int i)
+    Vector<T,A>& Vector<T,A>::DoBasis(ptrdiff_t i)
     {
         if (A == CStyle) {
             TMVAssert(i<size()); 
@@ -1111,20 +1111,20 @@ namespace tmv {
             TMVAssert(i>0 && i<=size()); 
         }
 
-        const int ix = (A==CStyle ? i : i-1);
+        const ptrdiff_t ix = (A==CStyle ? i : i-1);
         setZero();
         ref(ix) = T(1);
         return *this;
     }
 
     template <class T, int A>
-    VectorView<T,A>& VectorView<T,A>::DoSwap(int i1, int i2) 
+    VectorView<T,A>& VectorView<T,A>::DoSwap(ptrdiff_t i1, ptrdiff_t i2) 
     {
         TMVAssert(i1 < size());
         TMVAssert(i2 < size());
         TMVAssert(A==CStyle);
         if (i1 != i2) {
-            const int s = step();
+            const ptrdiff_t s = step();
             if (s == 1) TMV_SWAP(*(ptr()+i1),*(ptr()+i2));
             else TMV_SWAP(*(ptr()+i1*s),*(ptr()+i2*s));
         }
@@ -1132,7 +1132,7 @@ namespace tmv {
     }
 
     template <class T, int A>
-    Vector<T,A>& Vector<T,A>::DoSwap(int i1, int i2)
+    Vector<T,A>& Vector<T,A>::DoSwap(ptrdiff_t i1, ptrdiff_t i2)
     {
         TMVAssert(i1 < size());
         TMVAssert(i2 < size());
@@ -1145,30 +1145,30 @@ namespace tmv {
 
     template <class T, int A>
     VectorView<T,A>& VectorView<T,A>::DoPermute(
-        const int* p, int i1, int i2) 
+        const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
     { 
         TMVAssert(i2 <= size());
         TMVAssert(i1 <= i2);
         TMVAssert(A==CStyle);
-        for(int i=i1;i<i2;++i) DoSwap(i,p[i]);
+        for(ptrdiff_t i=i1;i<i2;++i) DoSwap(i,p[i]);
         return *this; 
     }
 
     template <class T, int A>
     VectorView<T,A>& VectorView<T,A>::DoReversePermute(
-        const int* p, int i1, int i2) 
+        const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
     { 
         TMVAssert(i2 <= size());
         TMVAssert(i1 <= i2);
         TMVAssert(A==CStyle);
-        for(int i=i2;i>i1;) { --i; DoSwap(i,p[i]); }
+        for(ptrdiff_t i=i2;i>i1;) { --i; DoSwap(i,p[i]); }
         return *this; 
     }
 
     template <class T, int A>
     VectorView<T,A>& VectorView<T,A>::reverseSelf() 
     {
-        const int s = step();
+        const ptrdiff_t s = step();
         if (s < 0) reverse().reverseSelf();
         else if (s > 0) {
             T* p1 = ptr();
@@ -1186,13 +1186,13 @@ namespace tmv {
     private :
 
         RT itsvalue;
-        int itsi;
+        ptrdiff_t itsi;
 
     public :
 
         VTIndex() : itsvalue(RT(0)), itsi(0) {}
 
-        VTIndex(T val, int i, ADType ad, CompType comp) : 
+        VTIndex(T val, ptrdiff_t i, ADType ad, CompType comp) : 
             itsvalue(0), itsi(i)
         {
             bool neg = ad==Descend;
@@ -1216,11 +1216,11 @@ namespace tmv {
 
         // Use default copy, op=, destructor
 
-        int getI() const { return itsi; }
+        ptrdiff_t getI() const { return itsi; }
         RT getVal() const { return itsvalue; }
         bool operator<(const VTIndex& rhs) const
         { return itsvalue < rhs.itsvalue; }
-        operator int() const { return itsi; }
+        operator ptrdiff_t() const { return itsi; }
 
     };
 
@@ -1274,7 +1274,7 @@ namespace tmv {
     };
 
     template <class T, int A>
-    VectorView<T,A>& VectorView<T,A>::sort(int* p, ADType ad, CompType comp) 
+    VectorView<T,A>& VectorView<T,A>::sort(ptrdiff_t* p, ADType ad, CompType comp) 
     {
         if (tmv::Traits<T>::iscomplex) {
             if (std::numeric_limits<T>::is_integer) {
@@ -1285,8 +1285,8 @@ namespace tmv {
         }
         if (p) {
             std::vector<VTIndex<T> > newindex(size());
-            const int N = size();
-            for(int i=0;i<N;++i) newindex[i] = VTIndex<T>(ref(i),i,ad,comp);
+            const ptrdiff_t N = size();
+            for(ptrdiff_t i=0;i<N;++i) newindex[i] = VTIndex<T>(ref(i),i,ad,comp);
             std::sort(newindex.begin(),newindex.end());
             ConvertIndexToPermute(size(),newindex,p);
             permute(p);
@@ -1307,7 +1307,7 @@ namespace tmv {
     //
 
     template <class T, int A>
-    Vector<T,A> DoBasisVector(int n, int i)
+    Vector<T,A> DoBasisVector(ptrdiff_t n, ptrdiff_t i)
     {
         if (A == CStyle) { TMVAssert(i<n); }
         else { TMVAssert(i>0 && i<=n); }
@@ -1333,13 +1333,13 @@ namespace tmv {
         TMVAssert(!v2.isSameAs(v1));
         const T* v1ptr = v1.cptr();
         T* v2ptr = v2.ptr();
-        const int step1 = v1.step();
-        const int step2 = v2.step();
+        const ptrdiff_t step1 = v1.step();
+        const ptrdiff_t step2 = v2.step();
 
         if (step1 == 1 && step2 == 1) {
             std::copy(v1ptr,v1ptr+v2.size(),v2ptr);
         } else {
-            for(int i=v2.size();i>0;--i,v1ptr+=step1,v2ptr+=step2) {
+            for(ptrdiff_t i=v2.size();i>0;--i,v1ptr+=step1,v2ptr+=step2) {
 #ifdef TMVFLDEBUG
                 TMVAssert(v2ptr >= v2._first);
                 TMVAssert(v2ptr < v2._last);
@@ -1426,22 +1426,22 @@ namespace tmv {
     {
         T* v1ptr = v1.ptr();
         T* v2ptr = v2.ptr();
-        const int step1 = v1.step();
-        const int step2 = v2.step();
+        const ptrdiff_t step1 = v1.step();
+        const ptrdiff_t step2 = v2.step();
 
         if (v1.isconj())
             if (step1 == 1 && step2 == 1)
-                for(int i=v2.size();i>0;--i,++v1ptr,++v2ptr) 
+                for(ptrdiff_t i=v2.size();i>0;--i,++v1ptr,++v2ptr) 
                     conjswap(*v1ptr,*v2ptr); 
             else
-                for(int i=v2.size();i>0;--i,v1ptr+=step1,v2ptr+=step2) 
+                for(ptrdiff_t i=v2.size();i>0;--i,v1ptr+=step1,v2ptr+=step2) 
                     conjswap(*v1ptr,*v2ptr); 
         else
             if (step1 == 1 && step2 == 1)
-                for(int i=v2.size();i>0;--i,++v1ptr,++v2ptr) 
+                for(ptrdiff_t i=v2.size();i>0;--i,++v1ptr,++v2ptr) 
                     TMV_SWAP(*v1ptr,*v2ptr); 
             else
-                for(int i=v2.size();i>0;--i,v1ptr+=step1,v2ptr+=step2) 
+                for(ptrdiff_t i=v2.size();i>0;--i,v1ptr+=step1,v2ptr+=step2) 
                     TMV_SWAP(*v1ptr,*v2ptr); 
     }
 #ifdef BLAS
@@ -1530,23 +1530,23 @@ namespace tmv {
         else {
             const T1* v1ptr = v1.cptr();
             const T2* v2ptr = v2.cptr();
-            const int step1 = v1.step();
-            const int step2 = v2.step();
+            const ptrdiff_t step1 = v1.step();
+            const ptrdiff_t step2 = v2.step();
 
             if (v1.isconj() == v2.isconj()) {
                 if (step1 == 1 && step2 == 1) {
-                    for(int i=v2.size();i>0;--i,++v1ptr,++v2ptr)
+                    for(ptrdiff_t i=v2.size();i>0;--i,++v1ptr,++v2ptr)
                         if ( *v1ptr != *v2ptr ) return false;
                 } else {
-                    for(int i=v2.size();i>0;--i,v1ptr+=step1,v2ptr+=step2)
+                    for(ptrdiff_t i=v2.size();i>0;--i,v1ptr+=step1,v2ptr+=step2)
                         if ( *v1ptr != *v2ptr ) return false;
                 }
             } else {
                 if (step1 == 1 && step2 == 1) {
-                    for(int i=v2.size();i>0;--i,++v1ptr,++v2ptr)
+                    for(ptrdiff_t i=v2.size();i>0;--i,++v1ptr,++v2ptr)
                         if ( *v1ptr != TMV_CONJ(*v2ptr) ) return false;
                 } else {
-                    for(int i=v2.size();i>0;--i,v1ptr+=step1,v2ptr+=step2)
+                    for(ptrdiff_t i=v2.size();i>0;--i,v1ptr+=step1,v2ptr+=step2)
                         if ( *v1ptr != TMV_CONJ(*v2ptr) ) return false;
                 }
             }
@@ -1561,12 +1561,12 @@ namespace tmv {
     template <class T> 
     void GenVector<T>::write(const TMV_Writer& writer) const
     {
-        const int N = size();
+        const ptrdiff_t N = size();
         writer.begin();
         writer.writeCode("V");
         writer.writeSize(N);
         writer.writeLParen();
-        for(int i=0;i<N;++i) {
+        for(ptrdiff_t i=0;i<N;++i) {
             if (i > 0) writer.writeSpace();
             writer.writeValue(cref(i));
         }
@@ -1580,9 +1580,9 @@ namespace tmv {
     {
     public :
         Vector<T> v;
-        int i;
+        ptrdiff_t i;
         std::string exp,got;
-        int s;
+        ptrdiff_t s;
         bool is, iseof, isbad;
 
         VectorReadError(std::istream& _is) throw():
@@ -1596,18 +1596,18 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
         VectorReadError(
-            int _i, const GenVector<T>& _v, std::istream& _is) throw():
+            ptrdiff_t _i, const GenVector<T>& _v, std::istream& _is) throw():
             ReadError("Vector"),
             v(_v), i(_i), s(v.size()),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         VectorReadError(
-            int _i, const GenVector<T>& _v, std::istream& _is,
+            ptrdiff_t _i, const GenVector<T>& _v, std::istream& _is,
             const std::string& _e, const std::string& _g) throw():
             ReadError("Vector"),
             v(_v), i(_i), exp(_e), got(_g), s(v.size()),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         VectorReadError(
-            const GenVector<T>& _v, std::istream& _is, int _s) throw():
+            const GenVector<T>& _v, std::istream& _is, ptrdiff_t _s) throw():
             ReadError("Vector"),
             v(_v), i(0), s(_s),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
@@ -1639,7 +1639,7 @@ namespace tmv {
             if (v.size() > 0) {
                 os<<"The portion of the Vector which was successfully read is: \n";
                 os<<"(";
-                for(int ii=0;ii<i;++ii) os<<' '<<v.cref(ii)<<' ';
+                for(ptrdiff_t ii=0;ii<i;++ii) os<<' '<<v.cref(ii)<<' ';
                 os<<")\n";
             }
         }
@@ -1649,7 +1649,7 @@ namespace tmv {
     template <class T>
     static void FinishRead(const TMV_Reader& reader, VectorView<T> v)
     {
-        const int n = v.size();
+        const ptrdiff_t n = v.size();
         std::string exp, got;
         T temp;
         if (!reader.readLParen(exp,got)) {
@@ -1660,7 +1660,7 @@ namespace tmv {
             throw VectorReadError<T>(0,v,reader.getis(),exp,got);
 #endif
         }
-        for(int i=0;i<n;++i) {
+        for(ptrdiff_t i=0;i<n;++i) {
             if (i>0) {
                 if (!reader.readSpace(exp,got)) {
 #ifdef NOTHROW
@@ -1703,7 +1703,7 @@ namespace tmv {
             throw VectorReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int n=size();
+        ptrdiff_t n=size();
         if (!reader.readSize(n,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"Vector Read Error: reading size\n";
@@ -1729,7 +1729,7 @@ namespace tmv {
             throw VectorReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int n=size();
+        ptrdiff_t n=size();
         if (!reader.readSize(n,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"Vector Read Error: reading size\n";

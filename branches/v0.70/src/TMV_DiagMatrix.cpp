@@ -69,11 +69,11 @@ namespace tmv {
     RT GenDiagMatrix<T>::logDet(T* sign) const
     {
         const T* di = diag().cptr();
-        const int ds = diag().step();
+        const ptrdiff_t ds = diag().step();
         T s(1);
         RT logdet(0);
         if (ds == 1) {
-            for(int i=size();i>0;--i,++di) {
+            for(ptrdiff_t i=size();i>0;--i,++di) {
                 if (*di == T(0)) { 
                     logdet = TMV_LOG(TMV_REAL(*di));
                     s = T(0); 
@@ -84,7 +84,7 @@ namespace tmv {
                 }
             }
         } else {
-            for(int i=size();i>0;--i,di+=ds) {
+            for(ptrdiff_t i=size();i>0;--i,di+=ds) {
                 if (*di == T(0)) { 
                     logdet = TMV_LOG(TMV_REAL(*di));
                     s = T(0); 
@@ -107,12 +107,12 @@ namespace tmv {
     int GenDiagMatrix<int>::det() const
     {
         const int* di = diag().cptr();
-        const int ds = diag().step();
+        const ptrdiff_t ds = diag().step();
         int det(1);
         if (ds == 1) {
-            for(int i=size();i>0;--i,++di) det *= *di;
+            for(ptrdiff_t i=size();i>0;--i,++di) det *= *di;
         } else {
-            for(int i=size();i>0;--i,di+=ds) det *= *di;
+            for(ptrdiff_t i=size();i>0;--i,di+=ds) det *= *di;
         }
         return det;
     }
@@ -120,12 +120,12 @@ namespace tmv {
     std::complex<int> GenDiagMatrix<std::complex<int> >::det() const
     {
         const std::complex<int>* di = diag().cptr();
-        const int ds = diag().step();
+        const ptrdiff_t ds = diag().step();
         std::complex<int> det(1);
         if (ds == 1) {
-            for(int i=size();i>0;--i,++di) det *= *di;
+            for(ptrdiff_t i=size();i>0;--i,++di) det *= *di;
         } else {
-            for(int i=size();i>0;--i,di+=ds) det *= *di;
+            for(ptrdiff_t i=size();i>0;--i,di+=ds) det *= *di;
         }
         return diag().isconj() ? TMV_CONJ(det) : det;
     }
@@ -160,10 +160,10 @@ namespace tmv {
     DiagMatrixView<T,A>& DiagMatrixView<T,A>::invertSelf() 
     {
         T* di = diag().ptr();
-        const int dstep = diag().step();
+        const ptrdiff_t dstep = diag().step();
 
         if (dstep == 1) {
-            for(int i=size();i>0;--i,++di) {
+            for(ptrdiff_t i=size();i>0;--i,++di) {
                 if (*di == T(0)) {
 #ifdef NOTHROW
                     std::cerr<<"Singular DiagMatrix found\n";
@@ -179,7 +179,7 @@ namespace tmv {
                 *di = TMV_InverseOf(*di);
             }
         } else {
-            for(int i=size();i>0;--i,di+=dstep) {
+            for(ptrdiff_t i=size();i>0;--i,di+=dstep) {
                 if (*di == T(0)) {
 #ifdef NOTHROW
                     std::cerr<<"Singular DiagMatrix found\n";
@@ -249,9 +249,9 @@ namespace tmv {
     {
         makeInverse(ata);
         T* mi = ata.diag().ptr();
-        const int ds = ata.diag().step();
+        const ptrdiff_t ds = ata.diag().step();
         if (ds==1) {
-            for(int i=size();i>0;--i,++mi) {
+            for(ptrdiff_t i=size();i>0;--i,++mi) {
 #ifdef TMVFLDEBUG
                 TMVAssert(mi >= ata.diag()._first);
                 TMVAssert(mi < ata.diag()._last);
@@ -259,7 +259,7 @@ namespace tmv {
                 *mi = TMV_NORM(*mi);
             }
         } else {
-            for(int i=size();i>0;--i,mi+=ds) {
+            for(ptrdiff_t i=size();i>0;--i,mi+=ds) {
 #ifdef TMVFLDEBUG
                 TMVAssert(mi >= ata.diag()._first);
                 TMVAssert(mi < ata.diag()._last);
@@ -313,11 +313,11 @@ namespace tmv {
 
         const Td* di = d.diag().cptr();
         T* vi = v.ptr();
-        const int dstep = d.diag().step();
-        const int vstep = v.step();
+        const ptrdiff_t dstep = d.diag().step();
+        const ptrdiff_t vstep = v.step();
 
         if (dstep == 1 && vstep == 1) {
-            for(int i=v.size();i>0;--i,++di,++vi) {
+            for(ptrdiff_t i=v.size();i>0;--i,++di,++vi) {
 #ifdef TMVFLDEBUG
                 TMVAssert(vi >= v._first);
                 TMVAssert(vi < v._last);
@@ -333,7 +333,7 @@ namespace tmv {
                 *vi = TMV_Divide(*vi,(cd?TMV_CONJ(*di):*di));
             }
         } else {
-            for(int i=v.size();i>0;--i,di+=dstep,vi+=vstep) {
+            for(ptrdiff_t i=v.size();i>0;--i,di+=dstep,vi+=vstep) {
 #ifdef TMVFLDEBUG
                 TMVAssert(vi >= v._first);
                 TMVAssert(vi < v._last);
@@ -435,13 +435,13 @@ namespace tmv {
 
         const Td* di = d.diag().cptr();
         T* mrowi = m.ptr();
-        const int dstep = d.diag().step();
-        const int stepj = m.stepj();
-        const int stepi = m.stepi();
-        const int M = m.colsize();
-        const int N = m.rowsize();
+        const ptrdiff_t dstep = d.diag().step();
+        const ptrdiff_t stepj = m.stepj();
+        const ptrdiff_t stepi = m.stepi();
+        const ptrdiff_t M = m.colsize();
+        const ptrdiff_t N = m.rowsize();
 
-        for(int i=M;i>0;--i,di+=dstep,mrowi+=stepi) {
+        for(ptrdiff_t i=M;i>0;--i,di+=dstep,mrowi+=stepi) {
             T* mij = mrowi;
             if (*di == Td(0)) {
 #ifdef NOTHROW
@@ -452,7 +452,7 @@ namespace tmv {
 #endif
             } else {
                 Td invdi = TMV_InverseOf(cd?TMV_CONJ(*di):*di);
-                for(int j=N;j>0;--j,(rm?++mij:mij+=stepj)) {
+                for(ptrdiff_t j=N;j>0;--j,(rm?++mij:mij+=stepj)) {
 #ifdef TMVFLDEBUG
                     TMVAssert(mij >= m._first);
                     TMVAssert(mij < m._last);
@@ -476,11 +476,11 @@ namespace tmv {
 
         DiagMatrix<Td> invd(d.size());
         const Td* di = d.diag().cptr();
-        const int step = d.diag().step();
+        const ptrdiff_t step = d.diag().step();
         Td* invdi = invd.diag().ptr();
 
         if (step == 1) {
-            for(int i=d.size();i>0;--i,++di,++invdi) {
+            for(ptrdiff_t i=d.size();i>0;--i,++di,++invdi) {
                 if (*di == Td(0)) {
 #ifdef NOTHROW
                     std::cerr<<"Singular DiagMatrix found\n";
@@ -496,7 +496,7 @@ namespace tmv {
                 *invdi = TMV_InverseOf(cd?TMV_CONJ(*di):*di);
             }
         } else {
-            for(int i=d.size();i>0;--i,di+=step,++invdi) {
+            for(ptrdiff_t i=d.size();i>0;--i,di+=step,++invdi) {
                 if (*di == Td(0)) {
 #ifdef NOTHROW
                     std::cerr<<"Singular DiagMatrix found\n";
@@ -600,16 +600,16 @@ namespace tmv {
     template <class T>
     void GenDiagMatrix<T>::write(const TMV_Writer& writer) const
     {
-        const int N = size();
+        const ptrdiff_t N = size();
         writer.begin();
         writer.writeCode("D");
         writer.writeSize(N);
         writer.writeSimpleSize(N);
         writer.writeStart();
-        for(int i=0;i<N;++i) {
+        for(ptrdiff_t i=0;i<N;++i) {
             writer.writeLParen();
             if (!writer.isCompact()) {
-                for(int j=0;j<i;++j) {
+                for(ptrdiff_t j=0;j<i;++j) {
                     if (j > 0) writer.writeSpace();
                     writer.writeValue(T(0));
                 }
@@ -617,7 +617,7 @@ namespace tmv {
             }
             writer.writeValue(diag().cref(i));
             if (!writer.isCompact()) {
-                for(int j=i+1;j<N;++j) {
+                for(ptrdiff_t j=i+1;j<N;++j) {
                     writer.writeSpace();
                     writer.writeValue(T(0));
                 }
@@ -635,9 +635,9 @@ namespace tmv {
     {
     public :
         DiagMatrix<T> m;
-        int i,j;
+        ptrdiff_t i,j;
         std::string exp,got;
-        int s;
+        ptrdiff_t s;
         T v1;
         bool is, iseof, isbad;
 
@@ -653,18 +653,18 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
         DiagMatrixReadError(
-            int _i, int _j, const GenDiagMatrix<T>& _m, std::istream& _is,
+            ptrdiff_t _i, ptrdiff_t _j, const GenDiagMatrix<T>& _m, std::istream& _is,
             const std::string& _e, const std::string& _g) throw() :
             ReadError("DiagMatrix."),
             m(_m), i(_i), j(_j), exp(_e), got(_g), s(m.size()), v1(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         DiagMatrixReadError(
-            const GenDiagMatrix<T>& _m, std::istream& _is, int _s) throw() :
+            const GenDiagMatrix<T>& _m, std::istream& _is, ptrdiff_t _s) throw() :
             ReadError("DiagMatrix."),
             m(_m), i(0), j(0), s(_s), v1(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         DiagMatrixReadError(
-            int _i, int _j, const GenDiagMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenDiagMatrix<T>& _m,
             std::istream& _is, T _v1=0) throw() :
             ReadError("DiagMatrix."),
             m(_m), i(_i), j(_j), s(m.size()), v1(_v1),
@@ -700,14 +700,14 @@ namespace tmv {
             if (m.size() > 0) {
                 os<<"The portion of the DiagMatrix which was successfully "
                     "read is: \n";
-                const int N = m.size();
-                for(int ii=0;ii<i;++ii) {
+                const ptrdiff_t N = m.size();
+                for(ptrdiff_t ii=0;ii<i;++ii) {
                     os<<"( ";
-                    for(int jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
+                    for(ptrdiff_t jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
                     os<<" )\n";
                 }
                 os<<"( ";
-                for(int jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
+                for(ptrdiff_t jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
                 os<<" )\n";
             }
         }
@@ -717,7 +717,7 @@ namespace tmv {
     template <class T> 
     static void FinishRead(const TMV_Reader& reader, DiagMatrixView<T> m)
     {
-        const int N = m.size();
+        const ptrdiff_t N = m.size();
         std::string exp, got;
         T temp;
         if (!reader.readStart(exp,got)) {
@@ -728,7 +728,7 @@ namespace tmv {
             throw DiagMatrixReadError<T>(0,0,m,reader.getis(),exp,got);
 #endif
         }
-        for(int i=0;i<N;++i) {
+        for(ptrdiff_t i=0;i<N;++i) {
             if (!reader.readLParen(exp,got)) {
 #ifdef NOTHROW
                 std::cerr<<"DiagMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -738,7 +738,7 @@ namespace tmv {
 #endif
             }
             if (!reader.isCompact()) {
-                for(int j=0;j<i;++j) {
+                for(ptrdiff_t j=0;j<i;++j) {
                     if (j>0 && !reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                         std::cerr<<"DiagMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -783,7 +783,7 @@ namespace tmv {
             }
             m.diag().ref(i) = temp;
             if (!reader.isCompact()) {
-                for(int j=i+1;j<N;++j) {
+                for(ptrdiff_t j=i+1;j<N;++j) {
                     if (!reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                         std::cerr<<"DiagMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -849,7 +849,7 @@ namespace tmv {
             throw DiagMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int s=size();
+        ptrdiff_t s=size();
         if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"DiagMatrix Read Error: reading size\n";
@@ -892,7 +892,7 @@ namespace tmv {
             throw DiagMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int s=size();
+        ptrdiff_t s=size();
         if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"DiagMatrix Read Error: reading size\n";

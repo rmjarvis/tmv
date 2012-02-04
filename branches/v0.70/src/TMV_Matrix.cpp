@@ -60,14 +60,14 @@ namespace tmv {
     //
 
     template <class T>
-    T GenMatrix<T>::cref(int i, int j) const
+    T GenMatrix<T>::cref(ptrdiff_t i, ptrdiff_t j) const
     {
         const T* mi = cptr() + i*stepi() + j*stepj();
         return isconj() ? TMV_CONJ(*mi) : *mi;
     }
 
     template <class T, int A>
-    typename MatrixView<T,A>::reference MatrixView<T,A>::ref(int i, int j) 
+    typename MatrixView<T,A>::reference MatrixView<T,A>::ref(ptrdiff_t i, ptrdiff_t j) 
     {
         T* mi = ptr() + i*itssi + j*stepj();
         return RefHelper<T>::makeRef(mi,ct());
@@ -173,7 +173,7 @@ namespace tmv {
 
     template <class T>
     bool GenMatrix<T>::hasSubMatrix(
-        int i1, int i2, int j1, int j2, int istep, int jstep) const
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const
     {
         if (i1==i2 || j1==j2) return true; // no elements, so whatever...
         bool ok = true;
@@ -228,7 +228,7 @@ namespace tmv {
 
     template <class T>
     bool GenMatrix<T>::hasSubVector(
-        int i, int j, int istep, int jstep, int size) const 
+        ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t size) const 
     {
         if (size==0) return true;
         bool ok = true;
@@ -245,8 +245,8 @@ namespace tmv {
             ok = false;
             std::cerr<<"j ("<<j<<") must be in 0 -- "<<rowsize()-1<<std::endl;
         }
-        int i2 = i+istep*(size-1);
-        int j2 = j+jstep*(size-1);
+        ptrdiff_t i2 = i+istep*(size-1);
+        ptrdiff_t j2 = j+jstep*(size-1);
         if (i2 < 0 || i2 >= colsize()) {
             ok = false;
             std::cerr<<"last element's i ("<<i2<<") must be in 0 -- ";
@@ -262,7 +262,7 @@ namespace tmv {
 
     template <class T>
     bool ConstMatrixView<T,FortranStyle>::hasSubMatrix(
-        int i1, int i2, int j1, int j2, int istep, int jstep) const
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const
     {
         if (i1==i2 || j1==j2) return true; // no elements, so whatever...
         bool ok = true;
@@ -317,7 +317,7 @@ namespace tmv {
 
     template <class T>
     bool ConstMatrixView<T,FortranStyle>::hasSubVector(
-        int i, int j, int istep, int jstep, int size) const 
+        ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t size) const 
     {
         if (size==0) return true;
         bool ok = true;
@@ -334,8 +334,8 @@ namespace tmv {
             ok = false;
             std::cerr<<"j ("<<j<<") must be in 1 -- "<<this->rowsize()<<std::endl;
         }
-        int i2 = i+istep*(size-1);
-        int j2 = j+jstep*(size-1);
+        ptrdiff_t i2 = i+istep*(size-1);
+        ptrdiff_t j2 = j+jstep*(size-1);
         if (i2 < 1 || i2 > this->colsize()) {
             ok = false;
             std::cerr<<"last element's i ("<<i2<<") must be in 1 -- ";
@@ -399,11 +399,11 @@ namespace tmv {
         else {
             T sum(0);
             if (iscm()) {
-                const int N = rowsize();
-                for(int j=0;j<N;++j) sum += col(j).sumElements();
+                const ptrdiff_t N = rowsize();
+                for(ptrdiff_t j=0;j<N;++j) sum += col(j).sumElements();
             } else {
-                const int M = colsize();
-                for(int i=0;i<M;++i) sum += row(i).sumElements();
+                const ptrdiff_t M = colsize();
+                for(ptrdiff_t i=0;i<M;++i) sum += row(i).sumElements();
             }
             return sum;
         }
@@ -416,11 +416,11 @@ namespace tmv {
         else {
             RT sum(0);
             if (m.iscm()) {
-                const int N = m.rowsize();
-                for(int j=0;j<N;++j) sum += m.col(j).sumAbsElements();
+                const ptrdiff_t N = m.rowsize();
+                for(ptrdiff_t j=0;j<N;++j) sum += m.col(j).sumAbsElements();
             } else {
-                const int M = m.colsize();
-                for(int i=0;i<M;++i) sum += m.row(i).sumAbsElements();
+                const ptrdiff_t M = m.colsize();
+                for(ptrdiff_t i=0;i<M;++i) sum += m.row(i).sumAbsElements();
             }
             return sum;
         }
@@ -433,11 +433,11 @@ namespace tmv {
         else {
             RT sum(0);
             if (m.iscm()) {
-                const int N = m.rowsize();
-                for(int j=0;j<N;++j) sum += m.col(j).sumAbs2Elements();
+                const ptrdiff_t N = m.rowsize();
+                for(ptrdiff_t j=0;j<N;++j) sum += m.col(j).sumAbs2Elements();
             } else {
-                const int M = m.colsize();
-                for(int i=0;i<M;++i) sum += m.row(i).sumAbs2Elements();
+                const ptrdiff_t M = m.colsize();
+                for(ptrdiff_t i=0;i<M;++i) sum += m.row(i).sumAbs2Elements();
             }
             return sum;
         }
@@ -463,11 +463,11 @@ namespace tmv {
         else {
             RT sum(0);
             if (isrm()) {
-                const int M = colsize();
-                for(int i=0;i<M;++i) sum += row(i).normSq(scale);
+                const ptrdiff_t M = colsize();
+                for(ptrdiff_t i=0;i<M;++i) sum += row(i).normSq(scale);
             } else {
-                const int N = rowsize();
-                for(int j=0;j<N;++j) sum += col(j).normSq(scale);
+                const ptrdiff_t N = rowsize();
+                for(ptrdiff_t j=0;j<N;++j) sum += col(j).normSq(scale);
             }
             return sum;
         }
@@ -480,14 +480,14 @@ namespace tmv {
         else {
             RT max(0);
             if (m.iscm()) {
-                const int N = m.rowsize();
-                for(int j=0;j<N;++j) {
+                const ptrdiff_t N = m.rowsize();
+                for(ptrdiff_t j=0;j<N;++j) {
                     RT temp = m.col(j).normInf();
                     if (temp > max) max = temp;
                 }
             } else {
-                const int M = m.colsize();
-                for(int i=0;i<M;++i) {
+                const ptrdiff_t M = m.colsize();
+                for(ptrdiff_t i=0;i<M;++i) {
                     RT temp = m.row(i).normInf();
                     if (temp > max) max = temp;
                 }
@@ -503,14 +503,14 @@ namespace tmv {
         else {
             RT max(0);
             if (m.iscm()) {
-                const int N = m.rowsize();
-                for(int j=0;j<N;++j) {
+                const ptrdiff_t N = m.rowsize();
+                for(ptrdiff_t j=0;j<N;++j) {
                     RT temp = m.col(j).maxAbs2Element();
                     if (temp > max) max = temp;
                 }
             } else {
-                const int M = m.colsize();
-                for(int i=0;i<M;++i) {
+                const ptrdiff_t M = m.colsize();
+                for(ptrdiff_t i=0;i<M;++i) {
                     RT temp = m.row(i).maxAbs2Element();
                     if (temp > max) max = temp;
                 }
@@ -523,8 +523,8 @@ namespace tmv {
     static RT NonLapNorm1(const GenMatrix<T>& m)
     {
         RT max(0);
-        const int N = m.rowsize();
-        for(int j=0;j<N;++j) {
+        const ptrdiff_t N = m.rowsize();
+        for(ptrdiff_t j=0;j<N;++j) {
             RT temp = m.col(j).norm1();
             if (temp > max) max = temp;
         }
@@ -772,11 +772,11 @@ namespace tmv {
         if (this->canLinearize()) linearView().clip(thresh);
         else {
             if (this->isrm()) {
-                const int M = colsize();
-                for(int i=0;i<M;++i) row(i).clip(thresh);
+                const ptrdiff_t M = colsize();
+                for(ptrdiff_t i=0;i<M;++i) row(i).clip(thresh);
             } else {
-                const int N = rowsize();
-                for(int j=0;j<N;++j) col(j).clip(thresh);
+                const ptrdiff_t N = rowsize();
+                for(ptrdiff_t j=0;j<N;++j) col(j).clip(thresh);
             }
         }
         return *this; 
@@ -789,11 +789,11 @@ namespace tmv {
         if (this->canLinearize()) linearView().setZero();
         else {
             if (this->isrm()) {
-                const int M = colsize();
-                for(int i=0;i<M;++i) row(i).setZero();
+                const ptrdiff_t M = colsize();
+                for(ptrdiff_t i=0;i<M;++i) row(i).setZero();
             } else {
-                const int N = rowsize();
-                for(int j=0;j<N;++j) col(j).setZero();
+                const ptrdiff_t N = rowsize();
+                for(ptrdiff_t j=0;j<N;++j) col(j).setZero();
             }
         }
         return *this; 
@@ -806,11 +806,11 @@ namespace tmv {
         if (this->canLinearize()) linearView().setAllTo(x);
         else {
             if (this->isrm()) {
-                const int M = colsize();
-                for(int i=0;i<M;++i) row(i).setAllTo(x); 
+                const ptrdiff_t M = colsize();
+                for(ptrdiff_t i=0;i<M;++i) row(i).setAllTo(x); 
             } else  {
-                const int N = rowsize();
-                for(int j=0;j<N;++j) col(j).setAllTo(x); 
+                const ptrdiff_t N = rowsize();
+                for(ptrdiff_t j=0;j<N;++j) col(j).setAllTo(x); 
             }
         }
         return *this; 
@@ -823,11 +823,11 @@ namespace tmv {
         if (this->canLinearize()) linearView().addToAll(x);
         else {
             if (this->isrm()) {
-                const int M = colsize();
-                for(int i=0;i<M;++i) row(i).addToAll(x); 
+                const ptrdiff_t M = colsize();
+                for(ptrdiff_t i=0;i<M;++i) row(i).addToAll(x); 
             } else  {
-                const int N = rowsize();
-                for(int j=0;j<N;++j) col(j).addToAll(x); 
+                const ptrdiff_t N = rowsize();
+                for(ptrdiff_t j=0;j<N;++j) col(j).addToAll(x); 
             }
         }
         return *this; 
@@ -838,8 +838,8 @@ namespace tmv {
     {
         TMVAssert(A==CStyle);
         TMVAssert(colsize() == rowsize());
-        const int M = colsize();
-        for(int i=1;i<M;++i) Swap(row(i,0,i),col(i,0,i));
+        const ptrdiff_t M = colsize();
+        for(ptrdiff_t i=1;i<M;++i) Swap(row(i,0,i),col(i,0,i));
         return *this; 
     }
 
@@ -851,11 +851,11 @@ namespace tmv {
             if (this->canLinearize()) linearView().conjugateSelf();
             else {
                 if (this->isrm()) {
-                    const int M = colsize();
-                    for(int i=0;i<M;++i) row(i).conjugateSelf();
+                    const ptrdiff_t M = colsize();
+                    for(ptrdiff_t i=0;i<M;++i) row(i).conjugateSelf();
                 } else  {
-                    const int N = rowsize();
-                    for(int j=0;j<N;++j) col(j).conjugateSelf();
+                    const ptrdiff_t N = rowsize();
+                    for(ptrdiff_t j=0;j<N;++j) col(j).conjugateSelf();
                 }
             }
         }
@@ -874,7 +874,7 @@ namespace tmv {
 
     template <class T, int A>
     MatrixView<T,A>& MatrixView<T,A>::permuteRows(
-        const int* p, int i1, int i2) 
+        const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
     {
         TMVAssert(A==CStyle);
         TMVAssert(i2<=colsize());
@@ -884,13 +884,13 @@ namespace tmv {
         // quite a bit for large matrices.  On my machine where BLOCKSIZE=64
         // is optimal for most routines, blocks of 32 were optimal here,
         // so I use BLOCKSIZE/2 in general.
-        const int N = rowsize();
-        const int Nx = N/PERM_BLOCKSIZE*PERM_BLOCKSIZE;
+        const ptrdiff_t N = rowsize();
+        const ptrdiff_t Nx = N/PERM_BLOCKSIZE*PERM_BLOCKSIZE;
         if (Nx != 0) {
-            for(int j=0;j<Nx;) {
-                int j2 = j+PERM_BLOCKSIZE;
-                const int* pi = p+i1;
-                for(int i=i1;i<i2;++i,++pi) {
+            for(ptrdiff_t j=0;j<Nx;) {
+                ptrdiff_t j2 = j+PERM_BLOCKSIZE;
+                const ptrdiff_t* pi = p+i1;
+                for(ptrdiff_t i=i1;i<i2;++i,++pi) {
                     TMVAssert(*pi < colsize());
                     colRange(j,j2).swapRows(i,*pi);
                 }
@@ -898,8 +898,8 @@ namespace tmv {
             }
         }
         if (Nx != N) {
-            const int* pi = p+i1;
-            for(int i=i1;i<i2;++i,++pi) {
+            const ptrdiff_t* pi = p+i1;
+            for(ptrdiff_t i=i1;i<i2;++i,++pi) {
                 TMVAssert(*pi < colsize());
                 colRange(Nx,N).swapRows(i,*pi);
             }
@@ -909,18 +909,18 @@ namespace tmv {
 
     template <class T, int A>
     MatrixView<T,A>& MatrixView<T,A>::reversePermuteRows(
-        const int* p, int i1, int i2) 
+        const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
     {
         TMVAssert(A==CStyle);
         TMVAssert(i2<=colsize());
         TMVAssert(i1<=i2);
-        const int N = rowsize();
-        const int Nx = N/PERM_BLOCKSIZE*PERM_BLOCKSIZE;
+        const ptrdiff_t N = rowsize();
+        const ptrdiff_t Nx = N/PERM_BLOCKSIZE*PERM_BLOCKSIZE;
         if (Nx != 0) {
-            for(int j=0;j<Nx;) {
-                int j2 = j+PERM_BLOCKSIZE;
-                const int* pi = p+i2;
-                for(int i=i2;i>i1;) {
+            for(ptrdiff_t j=0;j<Nx;) {
+                ptrdiff_t j2 = j+PERM_BLOCKSIZE;
+                const ptrdiff_t* pi = p+i2;
+                for(ptrdiff_t i=i2;i>i1;) {
                     --i; --pi;
                     TMVAssert(*pi < colsize());
                     colRange(j,j2).swapRows(i,*pi);
@@ -929,8 +929,8 @@ namespace tmv {
             }
         }
         if (Nx != N) {
-            const int* pi = p+i2;
-            for(int i=i2;i>i1;) {
+            const ptrdiff_t* pi = p+i2;
+            for(ptrdiff_t i=i2;i>i1;) {
                 --i; --pi;
                 TMVAssert(*pi < colsize());
                 colRange(Nx,N).swapRows(i,*pi);
@@ -950,30 +950,30 @@ namespace tmv {
         TMVAssert(m2.colsize() == m1.colsize());
         TMVAssert(m1.ct()==NonConj);
         TMVAssert(m2.ct()==NonConj);
-        const int M = m2.colsize();
-        const int N = m2.rowsize();
+        const ptrdiff_t M = m2.colsize();
+        const ptrdiff_t N = m2.rowsize();
 
         if (m1.iscm() && m2.iscm()) {
             const T* p1 = m1.cptr();
             T* p2 = m2.ptr();
-            const int s1 = m1.stepj();
-            const int s2 = m2.stepj();
-            for(int j=0;j<N;++j,p1+=s1,p2+=s2) {
+            const ptrdiff_t s1 = m1.stepj();
+            const ptrdiff_t s2 = m2.stepj();
+            for(ptrdiff_t j=0;j<N;++j,p1+=s1,p2+=s2) {
                 std::copy(p1,p1+M,p2);
             }
         } else if (M > N) {
             if (shouldReverse(m1.stepi(),m2.stepi()))
-                for(int j=0;j<N;++j) 
+                for(ptrdiff_t j=0;j<N;++j) 
                     DoCopySameType(m1.col(j).reverse(),m2.col(j).reverse());
             else
-                for(int j=0;j<N;++j) 
+                for(ptrdiff_t j=0;j<N;++j) 
                     DoCopySameType(m1.col(j),m2.col(j));
         } else {
             if (shouldReverse(m1.stepj(),m2.stepj()))
-                for(int i=0;i<M;++i) 
+                for(ptrdiff_t i=0;i<M;++i) 
                     DoCopySameType(m1.row(i).reverse(),m2.row(i).reverse());
             else
-                for(int i=0;i<M;++i) 
+                for(ptrdiff_t i=0;i<M;++i) 
                     DoCopySameType(m1.row(i),m2.row(i));
         }
     }
@@ -1093,11 +1093,11 @@ namespace tmv {
             Swap(m1.linearView(),m2.linearView());
         } else {
             if (m1.isrm() && m2.isrm()) {
-                const int M = m1.colsize();
-                for(int i=0;i<M;++i) Swap(m1.row(i),m2.row(i)); 
+                const ptrdiff_t M = m1.colsize();
+                for(ptrdiff_t i=0;i<M;++i) Swap(m1.row(i),m2.row(i)); 
             } else {
-                const int N = m1.rowsize();
-                for(int j=0;j<N;++j) Swap(m1.col(j),m2.col(j)); 
+                const ptrdiff_t N = m1.rowsize();
+                for(ptrdiff_t j=0;j<N;++j) Swap(m1.col(j),m2.col(j)); 
             }
         }
     }
@@ -1116,8 +1116,8 @@ namespace tmv {
                  m1.canLinearize() && m2.canLinearize())
             return m1.constLinearView() == m2.constLinearView();
         else {
-            const int M = m1.colsize();
-            for(int i=0;i<M;++i) 
+            const ptrdiff_t M = m1.colsize();
+            for(ptrdiff_t i=0;i<M;++i) 
                 if (m1.row(i) != m2.row(i)) return false;
             return true;  
         }
@@ -1130,16 +1130,16 @@ namespace tmv {
     template <class T>
     void GenMatrix<T>::write(const TMV_Writer& writer) const
     {
-        const int M = colsize();
-        const int N = rowsize();
+        const ptrdiff_t M = colsize();
+        const ptrdiff_t N = rowsize();
         writer.begin();
         writer.writeCode("M");
         writer.writeSize(M);
         writer.writeSize(N);
         writer.writeStart();
-        for(int i=0;i<M;++i) {
+        for(ptrdiff_t i=0;i<M;++i) {
             writer.writeLParen();
-            for(int j=0;j<N;++j) {
+            for(ptrdiff_t j=0;j<N;++j) {
                 if (j > 0) writer.writeSpace();
                 writer.writeValue(cref(i,j));
             }
@@ -1156,9 +1156,9 @@ namespace tmv {
     {
     public :
         Matrix<T> m;
-        int i,j;
+        ptrdiff_t i,j;
         std::string exp,got;
-        int cs,rs;
+        ptrdiff_t cs,rs;
         bool is,iseof,isbad;
 
         MatrixReadError(std::istream& _is) throw() :
@@ -1173,13 +1173,13 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
         MatrixReadError(
-            int _i, int _j, const GenMatrix<T>& _m, std::istream& _is) throw() :
+            ptrdiff_t _i, ptrdiff_t _j, const GenMatrix<T>& _m, std::istream& _is) throw() :
             ReadError("Matrix."),
             m(_m), i(_i), j(_j),
             cs(m.colsize()), rs(m.rowsize()),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         MatrixReadError(
-            int _i, int _j, const GenMatrix<T>& _m, std::istream& _is, 
+            ptrdiff_t _i, ptrdiff_t _j, const GenMatrix<T>& _m, std::istream& _is, 
             const std::string& _e, const std::string& _g) throw() :
             ReadError("Matrix."),
             m(_m), i(_i), j(_j), exp(_e), got(_g),
@@ -1187,7 +1187,7 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         MatrixReadError(
             const GenMatrix<T>& _m,
-            std::istream& _is, int _cs, int _rs) throw() :
+            std::istream& _is, ptrdiff_t _cs, ptrdiff_t _rs) throw() :
             ReadError("Matrix."),
             m(_m), i(0), j(0), cs(_cs), rs(_rs),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
@@ -1222,16 +1222,16 @@ namespace tmv {
                 }
             }
             if (m.colsize() > 0 || m.rowsize() > 0) {
-                const int N = m.rowsize();
+                const ptrdiff_t N = m.rowsize();
                 os<<"The portion of the Matrix which was successfully "
                     "read is: \n";
-                for(int ii=0;ii<i;++ii) {
+                for(ptrdiff_t ii=0;ii<i;++ii) {
                     os<<"( ";
-                    for(int jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
+                    for(ptrdiff_t jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
                     os<<" )\n";
                 }
                 os<<"( ";
-                for(int jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
+                for(ptrdiff_t jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
                 os<<" )\n";
             }
         }
@@ -1241,8 +1241,8 @@ namespace tmv {
     template <class T>
     static void FinishRead(const TMV_Reader& reader, MatrixView<T> m) 
     {
-        const int M = m.colsize();
-        const int N = m.rowsize();
+        const ptrdiff_t M = m.colsize();
+        const ptrdiff_t N = m.rowsize();
         std::string exp, got;
         T temp;
         if (!reader.readStart(exp,got)) {
@@ -1253,7 +1253,7 @@ namespace tmv {
             throw MatrixReadError<T>(0,0,m,reader.getis(),exp,got);
 #endif
         }
-        for(int i=0;i<M;++i) {
+        for(ptrdiff_t i=0;i<M;++i) {
             if (!reader.readLParen(exp,got)) {
 #ifdef NOTHROW
                 std::cerr<<"Matrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -1262,7 +1262,7 @@ namespace tmv {
                 throw MatrixReadError<T>(i,0,m,reader.getis(),exp,got);
 #endif
             }        
-            for(int j=0;j<N;++j) {
+            for(ptrdiff_t j=0;j<N;++j) {
                 if (j>0) {
                     if (!reader.readSpace(exp,got)) {
 #ifdef NOTHROW
@@ -1322,7 +1322,7 @@ namespace tmv {
             throw MatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int cs=colsize(), rs=rowsize();
+        ptrdiff_t cs=colsize(), rs=rowsize();
         if (!reader.readSize(cs,exp,got) || 
             !reader.readSize(rs,exp,got)) {
 #ifdef NOTHROW
@@ -1349,7 +1349,7 @@ namespace tmv {
             throw MatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int cs=colsize(), rs=rowsize();
+        ptrdiff_t cs=colsize(), rs=rowsize();
         if (!reader.readSize(cs,exp,got) || 
             !reader.readSize(rs,exp,got)) {
 #ifdef NOTHROW

@@ -61,8 +61,8 @@ namespace tmv {
     template <class T, class Tm> 
     class QuotXB;
 
-    int BandStorageLength(StorageType s, int cs, int rs, int lo, int hi);
-    int BandNumElements(int cs, int rs, int lo, int hi);
+    ptrdiff_t BandStorageLength(StorageType s, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, ptrdiff_t hi);
+    ptrdiff_t BandNumElements(ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, ptrdiff_t hi);
 
     template <class T1, class T2> 
     void Copy(const GenBandMatrix<T1>& m1, BandMatrixView<T2> m2);
@@ -72,8 +72,8 @@ namespace tmv {
     {
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
-        virtual int nlo() const = 0;
-        virtual int nhi() const = 0;
+        virtual ptrdiff_t nlo() const = 0;
+        virtual ptrdiff_t nhi() const = 0;
         virtual void assignToB(BandMatrixView<RT> m) const = 0;
         virtual void assignToB(BandMatrixView<CT> m) const = 0;
         virtual inline ~AssignableToBandMatrix() {}

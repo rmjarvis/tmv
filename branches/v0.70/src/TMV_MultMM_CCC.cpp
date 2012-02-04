@@ -42,9 +42,9 @@ namespace tmv {
 
     template <bool ca, class T, class Ta, class Tb> 
     static void ColMult(
-        int M, const Tb b00, const Ta* A, T* C)
+        ptrdiff_t M, const Tb b00, const Ta* A, T* C)
     {
-        for(int i=M/8;i;--i) {
+        for(ptrdiff_t i=M/8;i;--i) {
             C[0] += (ca ? TMV_CONJ(A[0]) : A[0]) * b00;
             C[1] += (ca ? TMV_CONJ(A[1]) : A[1]) * b00;
             C[2] += (ca ? TMV_CONJ(A[2]) : A[2]) * b00;
@@ -77,16 +77,16 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb> 
     static void RecursiveCCCMultMM(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const Ta* A, const Tb* B, T* C,
-        const int Ask, const int Bsj, const int Csj)
+        const ptrdiff_t Ask, const ptrdiff_t Bsj, const ptrdiff_t Csj)
     {
         if (K > N) {
-            int K1 = K/2;
+            ptrdiff_t K1 = K/2;
             RecursiveCCCMultMM<ca,cb>(M,N,K1,A,B,C,Ask,Bsj,Csj);
             RecursiveCCCMultMM<ca,cb>(M,N,K-K1,A+K1*Ask,B+K1,C,Ask,Bsj,Csj);
         } else if (N > 1) {
-            int N1 = N/2;
+            ptrdiff_t N1 = N/2;
             RecursiveCCCMultMM<ca,cb>(M,N1,K,A,B,C,Ask,Bsj,Csj);
             RecursiveCCCMultMM<ca,cb>(M,N-N1,K,A,B+N1*Bsj,C+N1*Csj,Ask,Bsj,Csj);
         } else {
@@ -113,18 +113,18 @@ namespace tmv {
         TMVAssert(B.iscm());
         TMVAssert(C.iscm());
 
-        const int M = C.colsize();
-        const int N = C.rowsize();
-        const int K = A.rowsize();
-        const int Ask = A.stepj();
-        const int Bsj = B.stepj();
+        const ptrdiff_t M = C.colsize();
+        const ptrdiff_t N = C.rowsize();
+        const ptrdiff_t K = A.rowsize();
+        const ptrdiff_t Ask = A.stepj();
+        const ptrdiff_t Bsj = B.stepj();
 
         const Ta* Ap = A.cptr();
         const Tb* Bp = B.cptr();
 
         Matrix<T,ColMajor> Ctemp(M,N,T(0));
         T* Ct = Ctemp.ptr();
-        const int Ctsj = Ctemp.stepj();
+        const ptrdiff_t Ctsj = Ctemp.stepj();
         RecursiveCCCMultMM<ca,cb>(M,N,K,Ap,Bp,Ct, Ask,Bsj,Ctsj);
         if (alpha != T(1)) Ctemp *= alpha;
         if (add) C += Ctemp;

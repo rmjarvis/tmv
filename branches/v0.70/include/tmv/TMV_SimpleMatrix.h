@@ -92,7 +92,7 @@ namespace tmv {
 
         inline SimpleMatrix() : linsize(0), itsm(0), itscs(0), itsrs(0) {}
 
-        inline SimpleMatrix(int cs, int rs) :
+        inline SimpleMatrix(ptrdiff_t cs, ptrdiff_t rs) :
             linsize((cs)*(rs)), 
             itsm(linsize), itscs(cs), itsrs(rs) 
         {
@@ -106,7 +106,7 @@ namespace tmv {
             linsize(m2.linsize), itsm(linsize),
             itscs(m2.itscs), itsrs(m2.itsrs)
         { 
-            for(int i=0;i<linsize;++i) itsm[i] = m2.itsm[i];
+            for(ptrdiff_t i=0;i<linsize;++i) itsm[i] = m2.itsm[i];
         }
 
         template <class M2>
@@ -114,7 +114,7 @@ namespace tmv {
             linsize((m2.colsize())*(m2.rowsize())), 
             itsm(linsize), itscs(m2.colsize()), itsrs(m2.rowsize()) 
         { 
-            for(int i=0;i<itscs;++i) for(int j=0;j<itsrs;++j) 
+            for(ptrdiff_t i=0;i<itscs;++i) for(ptrdiff_t j=0;j<itsrs;++j) 
                 ref(i,j) = m2.cref(i,j);
         }
 
@@ -132,14 +132,14 @@ namespace tmv {
 
         inline type& operator=(const type& m2)
         { 
-            for(int i=0;i<linsize;++i) itsm[i] = m2.itsm[i];
+            for(ptrdiff_t i=0;i<linsize;++i) itsm[i] = m2.itsm[i];
             return *this; 
         }
 
         template <class M2>
         inline type& operator=(const M2& m2)
         { 
-            for(int i=0;i<itscs;++i) for(int j=0;j<itsrs;++j) 
+            for(ptrdiff_t i=0;i<itscs;++i) for(ptrdiff_t j=0;j<itsrs;++j) 
                 ref(i,j) = m2.cref(i,j);
             return *this; 
         }
@@ -152,14 +152,14 @@ namespace tmv {
         // Access
         //
 
-        inline T operator()(int i,int j) const
+        inline T operator()(ptrdiff_t i,ptrdiff_t j) const
         { 
             TMVAssert(i>=0 && i<itscs);
             TMVAssert(j>=0 && j<itsrs);
             return cref(i,j); 
         }
 
-        inline T& operator()(int i,int j) 
+        inline T& operator()(ptrdiff_t i,ptrdiff_t j) 
         { 
             TMVAssert(i>=0 && i<itscs);
             TMVAssert(j>=0 && j<itsrs);
@@ -174,28 +174,28 @@ namespace tmv {
         { 
             TMVAssert(itscs == itsrs);
             T sum(0);
-            for(int i=0; i<itsrs; ++i) sum += cref(i,i);
+            for(ptrdiff_t i=0; i<itsrs; ++i) sum += cref(i,i);
             return sum;
         }
 
         inline T sumElements() const
         {
             T sum(0);
-            for(int i=0;i<linsize;++i) sum += itsm[i];
+            for(ptrdiff_t i=0;i<linsize;++i) sum += itsm[i];
             return sum;
         }
 
         inline RT sumAbsElements() const
         {
             RT sum(0);
-            for(int i=0;i<linsize;++i) sum += TMV_ABS(itsm[i]);
+            for(ptrdiff_t i=0;i<linsize;++i) sum += TMV_ABS(itsm[i]);
             return sum;
         }
 
         inline RT sumAbs2Elements() const
         {
             RT sum(0);
-            for(int i=0;i<linsize;++i) sum += TMV_ABS2(itsm[i]);
+            for(ptrdiff_t i=0;i<linsize;++i) sum += TMV_ABS2(itsm[i]);
             return sum;
         }
 
@@ -212,18 +212,18 @@ namespace tmv {
         { 
             RT sum(0);
             if (scale == RT(1))
-                for(int i=0;i<linsize;++i) sum += TMV_NORM(itsm[i]);
+                for(ptrdiff_t i=0;i<linsize;++i) sum += TMV_NORM(itsm[i]);
             else
-                for(int i=0;i<linsize;++i) sum += TMV_NORM(itsm[i]*scale);
+                for(ptrdiff_t i=0;i<linsize;++i) sum += TMV_NORM(itsm[i]*scale);
             return sum;
         }
 
         inline RT norm1() const
         {
             RT max(0);
-            for(int j=0;j<itsrs;++j) {
+            for(ptrdiff_t j=0;j<itsrs;++j) {
                 RT temp(0);
-                for(int i=0;i<itscs;++i) temp += TMV_ABS(cref(i,j));
+                for(ptrdiff_t i=0;i<itscs;++i) temp += TMV_ABS(cref(i,j));
                 if (temp > max) max = temp;
             }
             return max;
@@ -233,9 +233,9 @@ namespace tmv {
         inline RT normInf() const
         {
             RT max(0);
-            for(int i=0;i<itscs;++i) {
+            for(ptrdiff_t i=0;i<itscs;++i) {
                 RT temp(0);
-                for(int j=0;j<itsrs;++j) temp += TMV_ABS(cref(i,j));
+                for(ptrdiff_t j=0;j<itsrs;++j) temp += TMV_ABS(cref(i,j));
                 if (temp > max) max = temp;
             }
             return max;
@@ -245,7 +245,7 @@ namespace tmv {
         inline RT maxAbsElement() const
         {
             RT max(0);
-            for(int i=0;i<linsize;++i) {
+            for(ptrdiff_t i=0;i<linsize;++i) {
                 RT temp = TMV_ABS(itsm[i]);
                 if (temp > max) max = temp;
             }
@@ -256,7 +256,7 @@ namespace tmv {
         inline RT maxAbs2Element() const
         {
             RT max(0);
-            for(int i=0;i<linsize;++i) {
+            for(ptrdiff_t i=0;i<linsize;++i) {
                 RT temp = TMV_ABS2(itsm[i]);
                 if (temp > max) max = temp;
             }
@@ -270,41 +270,41 @@ namespace tmv {
 
         inline type& setZero() 
         { 
-            for(int i=0;i<linsize;++i) itsm[i] = T(0);
+            for(ptrdiff_t i=0;i<linsize;++i) itsm[i] = T(0);
             return *this;
         }
 
         inline type& clip(RT thresh)
         { 
-            for(int i=0;i<linsize;++i) 
+            for(ptrdiff_t i=0;i<linsize;++i) 
                 if (TMV_ABS(itsm[i]) < thresh) itsm[i] = T(0);
             return *this;
         }
 
         inline type& setAllTo(const T& x) 
         {
-            for(int i=0;i<linsize;++i) itsm[i] = x;
+            for(ptrdiff_t i=0;i<linsize;++i) itsm[i] = x;
             return *this;
         }
 
         inline type& addToAll(const T& x) 
         {
-            for(int i=0;i<linsize;++i) itsm[i] += x;
+            for(ptrdiff_t i=0;i<linsize;++i) itsm[i] += x;
             return *this;
         }
 
         inline type& transposeSelf() 
         {
             TMVAssert(itscs == itsrs);
-            for(int i=1; i<itscs; ++i) 
-                for(int j=0; j<i; ++j) TMV_SWAP(ref(i,j),ref(j,i));
+            for(ptrdiff_t i=1; i<itscs; ++i) 
+                for(ptrdiff_t j=0; j<i; ++j) TMV_SWAP(ref(i,j),ref(j,i));
             return *this;
         }
 
         inline type& conjugateSelf() 
         {
             if (isComplex(T())) {
-                for(int i=0;i<linsize;++i) itsm[i] = TMV_CONJ(itsm[i]);
+                for(ptrdiff_t i=0;i<linsize;++i) itsm[i] = TMV_CONJ(itsm[i]);
             }
             return *this;
         }
@@ -313,25 +313,25 @@ namespace tmv {
         { 
             TMVAssert(itscs == itsrs);
             setZero();
-            for(int i=0; i<itsrs; ++i) ref(i,i) = T(1);
+            for(ptrdiff_t i=0; i<itsrs; ++i) ref(i,i) = T(1);
             return *this;
         }
 
-        inline type& swapRows(int i1, int i2)
+        inline type& swapRows(ptrdiff_t i1, ptrdiff_t i2)
         {
             TMVAssert(i1 >= 0 && i1 < itscs);
             TMVAssert(i2 >= 0 && i2 < itscs);
             if (i1 != i2)
-                for(int j=0; j<itsrs; ++j) TMV_SWAP(ref(i1,j),ref(i2,j));
+                for(ptrdiff_t j=0; j<itsrs; ++j) TMV_SWAP(ref(i1,j),ref(i2,j));
             return *this;
         }
 
-        inline type& swapCols(int j1, int j2)
+        inline type& swapCols(ptrdiff_t j1, ptrdiff_t j2)
         {
             TMVAssert(j1 >= 0 && j1 < itsrs);
             TMVAssert(j2 >= 0 && j2 < itsrs);
             if (j1 != j2)
-                for(int i=0; i<itscs; ++i) TMV_SWAP(ref(i,j1),ref(i,j2));
+                for(ptrdiff_t i=0; i<itscs; ++i) TMV_SWAP(ref(i,j1),ref(i,j2));
             return *this;
         }
 
@@ -342,31 +342,31 @@ namespace tmv {
         inline void write(std::ostream& os) const
         { 
             os << itscs <<"  "<< itsrs <<std::endl;
-            for(int i=0;i<itscs;++i) {
+            for(ptrdiff_t i=0;i<itscs;++i) {
                 os << "( ";
-                for(int j=0;j<itsrs;++j) os << ' '<<cref(i,j)<<' ';
+                for(ptrdiff_t j=0;j<itsrs;++j) os << ' '<<cref(i,j)<<' ';
                 os << " )\n";
             }
         }
 
-        inline int colsize() const { return itscs; }
-        inline int rowsize() const { return itsrs; }
+        inline ptrdiff_t colsize() const { return itscs; }
+        inline ptrdiff_t rowsize() const { return itsrs; }
         inline bool isSquare() const { return itscs == itsrs; }
-        inline int stepi() const { return 1; }
-        inline int stepj() const { return itscs; }
+        inline ptrdiff_t stepi() const { return 1; }
+        inline ptrdiff_t stepj() const { return itscs; }
         inline bool isrm() const { return false; }
         inline bool iscm() const { return true; }
         inline bool isconj() const { return false; }
         inline ConjType ct() const { return NonConj; }
-        inline int ls() const { return linsize; }
+        inline ptrdiff_t ls() const { return linsize; }
         inline const T* cptr() const { return itsm; }
         inline T* ptr() { return itsm; }
 
-        inline T cref(int i, int j) const { return itsm[j*itscs+i]; }
+        inline T cref(ptrdiff_t i, ptrdiff_t j) const { return itsm[j*itscs+i]; }
 
-        inline T& ref(int i, int j) { return itsm[j*itscs+i]; }
+        inline T& ref(ptrdiff_t i, ptrdiff_t j) { return itsm[j*itscs+i]; }
 
-        inline void resize(int cs, int rs)
+        inline void resize(ptrdiff_t cs, ptrdiff_t rs)
         {
             TMVAssert(cs >= 0 && rs >= 0);
             linsize = cs*rs;
@@ -380,10 +380,10 @@ namespace tmv {
 
     protected :
 
-        int linsize;
+        ptrdiff_t linsize;
         AlignedArray<T> itsm;
-        int itscs;
-        int itsrs;
+        ptrdiff_t itscs;
+        ptrdiff_t itsrs;
 
     }; // SimpleMatrix
 

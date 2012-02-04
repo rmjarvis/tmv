@@ -77,7 +77,7 @@ namespace tmv {
         virtual inline ~VectorComposite() {}
 
         const T* cptr() const;
-        inline int step() const { return 1; }
+        inline ptrdiff_t step() const { return 1; }
         inline ConjType ct() const { return NonConj; }
         inline bool isconj() const { return false; }
 

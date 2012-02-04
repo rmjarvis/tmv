@@ -181,11 +181,11 @@ namespace tmv {
 
         Tx* v1ptr = v1.ptr();
         Tx* v2ptr = v2.ptr();
-        const int step0 = v1.step();
-        const int step1 = v2.step();
+        const ptrdiff_t step0 = v1.step();
+        const ptrdiff_t step1 = v2.step();
 
         if (step0 == 1 && step1 == 1)
-            for(int i=v1.size();i>0;--i,++v1ptr,++v2ptr) {
+            for(ptrdiff_t i=v1.size();i>0;--i,++v1ptr,++v2ptr) {
 #ifdef TMVFLDEBUG
                 TMVAssert(v1ptr >= v1._first);
                 TMVAssert(v1ptr < v1._last);
@@ -195,7 +195,7 @@ namespace tmv {
                 GivensMult(c,s,*v1ptr,*v2ptr); 
             }
         else
-            for(int i=v1.size();i>0;--i,v1ptr+=step0,v2ptr+=step1) {
+            for(ptrdiff_t i=v1.size();i>0;--i,v1ptr+=step0,v2ptr+=step1) {
 #ifdef TMVFLDEBUG
                 TMVAssert(v1ptr >= v1._first);
                 TMVAssert(v1ptr < v1._last);
@@ -223,9 +223,9 @@ namespace tmv {
         TMVAssert(v1.size()==v2.size());
         TMVAssert(v1.ct()==NonConj);
         TMVAssert(v2.ct()==NonConj);
-        int n=v1.size();
-        int s1=v1.step();
-        int s2=v2.step();
+        ptrdiff_t n=v1.size();
+        ptrdiff_t s1=v1.step();
+        ptrdiff_t s2=v2.step();
         double* v1p = v1.ptr();
         if (s1<0) v1p += (n-1)*s1;
         double* v2p = v2.ptr();

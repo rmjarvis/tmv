@@ -682,7 +682,7 @@ namespace tmv {
     template <int S>
     struct CheckedInt
     {
-        CheckedInt(int s) {
+        CheckedInt(ptrdiff_t s) {
 #ifdef TMV_DEBUG
             if (s != S) {
                 std::cerr<<"Mismatched CheckInt:\n";
@@ -692,14 +692,14 @@ namespace tmv {
 #endif
             TMVAssert(s == S);
         }
-        operator int() const { return S; }
+        operator ptrdiff_t() const { return S; }
     };
     template <>
     struct CheckedInt<Unknown>
     {
-        int step;
-        CheckedInt(int s) : step(s) {}
-        operator int() const { return step; }
+        ptrdiff_t step;
+        CheckedInt(ptrdiff_t s) : step(s) {}
+        operator ptrdiff_t() const { return step; }
         ~CheckedInt() {}
     };
 

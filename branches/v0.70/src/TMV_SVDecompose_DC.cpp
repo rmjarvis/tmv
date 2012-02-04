@@ -119,7 +119,7 @@ namespace tmv {
 
     template <class T> 
     static T FindDCSingularValue(
-        const int k, const int N, const T rho, const T* D, const T* z, 
+        const ptrdiff_t k, const ptrdiff_t N, const T rho, const T* D, const T* z, 
         const T* zsq, const T normsqz, T* diff, T* sum)
     {
         dbgcout<<"start FindDCV: k = "<<k<<endl;
@@ -136,7 +136,7 @@ namespace tmv {
         // http://www.netlib.org/lapack/lawnspdf/lawn89.pdf
         //
         const T eps = TMV_Epsilon<T>();
-        const int TMV_MAXITER = 100;
+        const ptrdiff_t TMV_MAXITER = 100;
 
         dbgcout<<"k = "<<k<<endl;
         if (k<N-1) {
@@ -156,7 +156,7 @@ namespace tmv {
         // Most of the routine is the same for k=N-1 as for the normal
         // case, but there are some lines where the normal case uses
         // k, but when k==N-1, I need k-1.  So I use kk for these.
-        int kk = k < N-1 ? k : k-1;
+        ptrdiff_t kk = k < N-1 ? k : k-1;
 
         // First we need an initial guess for s_k 
         dbgcout<<"D[kk+1]-D[kk] = "<<D[kk+1]-D[kk]<<endl;
@@ -170,9 +170,9 @@ namespace tmv {
         T s = D[k] + t;
         dbgcout<<"Initial s = "<<s<<" = "<<D[k]<<" + "<<t<<std::endl;
 
-        for(int j=0;j<N;j++) sum[j] = D[j]+s; 
-        for(int j=0;j<N;j++) diff[j] = D[j]-D[k]; 
-        for(int j=0;j<N;j++) diff[j] -= t; 
+        for(ptrdiff_t j=0;j<N;j++) sum[j] = D[j]+s; 
+        for(ptrdiff_t j=0;j<N;j++) diff[j] = D[j]-D[k]; 
+        for(ptrdiff_t j=0;j<N;j++) diff[j] -= t; 
 
         // Let c = f(s) - z_k^2/(D_k^2-s^2) - z_k+1^2/(D_k+1^2-s^2)
         // i.e. c is f(s) without the two terms for the poles that
@@ -182,12 +182,12 @@ namespace tmv {
         // Note: for k==N-1, the two poles do not bracket the root, but 
         // we proceed similarly anyway.
         T psi(0);
-        for(int j=0;j<kk;j++) {
+        for(ptrdiff_t j=0;j<kk;j++) {
             psi += (zsq[j] / sum[j]) / diff[j];
             //dbgcout<<"psi += "<<zsq[j]<<" / ("<<diff[j]<<" * "<<sum[k]<<") = "<<psi<<endl;
         }
         T phi(0);
-        for(int j=N-1;j>kk+1;j--) {
+        for(ptrdiff_t j=N-1;j>kk+1;j--) {
             phi += (zsq[j] / sum[j]) / diff[j];
             //dbgcout<<"phi += "<<zsq[j]<<" / ("<<diff[j]<<" * "<<sum[k]<<") = "<<phi<<endl;
         }
@@ -203,7 +203,7 @@ namespace tmv {
         dbgcout<<"f("<<tau<<") = "<<f<<endl;
 
         T lowerbound, upperbound; // the allowed range for solution tau
-        int k1; // The index of the pole closest to the root
+        ptrdiff_t k1; // The index of the pole closest to the root
         if (k < N-1) {
             dbgcout<<"k < N-1\n";
             if (f >= T(0)) { // D_k < s_k < s
@@ -284,9 +284,9 @@ namespace tmv {
         // but some compilers do optimizations that lose accuracy 
         // and can end up with diff = 0.
         // So need to do this in two steps.
-        for(int j=0;j<N;j++) sum[j] = D[j]+s;
-        for(int j=0;j<N;j++) diff[j] = D[j]-D[k1];
-        for(int j=0;j<N;j++) diff[j] -= t; 
+        for(ptrdiff_t j=0;j<N;j++) sum[j] = D[j]+s;
+        for(ptrdiff_t j=0;j<N;j++) diff[j] = D[j]-D[k1];
+        for(ptrdiff_t j=0;j<N;j++) diff[j] -= t; 
 
         // Define f(s) = rho + psi(s) + z_k1^2/(D_k1^2-s^2) + phi(s)
         // psi(s) = Sum_k=1..k1-1 z_k^2/(D_k^2-s^2)
@@ -304,17 +304,17 @@ namespace tmv {
         T psix=0, phix=0, dpsix=0, dphix=0;
 
         T f1 = f;
-        for(int iter = 0; iter < TMV_MAXITER; iter++) {
+        for(ptrdiff_t iter = 0; iter < TMV_MAXITER; iter++) {
             // Calculate psi, phi
             psi = phi = e = dpsi = dphi = T(0);
-            for(int j=0;j<k1;j++) {
+            for(ptrdiff_t j=0;j<k1;j++) {
                 T temp = (z[j] / sum[j]) / diff[j];
                 psix = psi; dpsix = dpsi;
                 psi += z[j] * temp;
                 dpsi += temp * temp;
                 e -= psi;
             }
-            for(int j=N-1;j>k1;j--) {
+            for(ptrdiff_t j=N-1;j>k1;j--) {
                 T temp = (z[j] / sum[j]) / diff[j];
                 phix = phi; dphix = dphi;
                 phi += z[j] * temp;
@@ -390,12 +390,12 @@ namespace tmv {
             dt /= s + TMV_SQRT(s*s+dt);
             t += dt;
             s += dt;
-            for(int j=0;j<N;j++) sum[j] = D[j]+s;
+            for(ptrdiff_t j=0;j<N;j++) sum[j] = D[j]+s;
             if (TMV_ABS(s) < TMV_ABS(dt)) {
                 dbgcout<<"Need to redo the diff calculations\n";
-                for(int j=0;j<N;j++) diff[j] = D[j]-s; 
+                for(ptrdiff_t j=0;j<N;j++) diff[j] = D[j]-s; 
             } else  {
-                for(int j=0;j<N;j++) diff[j] -= dt; 
+                for(ptrdiff_t j=0;j<N;j++) diff[j] -= dt; 
             }
 
             if (iter == TMV_MAXITER-1) {
@@ -412,7 +412,7 @@ namespace tmv {
         if (threepoles) dbgcout<<"USE THREE POLES\n";
 
         bool last = false;
-        for(int iter = 0; iter < TMV_MAXITER; iter++) {
+        for(ptrdiff_t iter = 0; iter < TMV_MAXITER; iter++) {
             dbgcout<<"k = "<<k<<", loop 2: iter = "<<iter<<std::endl;
             dbgcout<<"Main iter = "<<iter<<", f = "<<f<<
                 ", eps*e = "<<eps*e<<endl;
@@ -571,7 +571,7 @@ namespace tmv {
                 // if f > 0, then deta needs to be negative
                 // if f < 0, then deta needs to be positive
                 // This dictates which bound is the one to use for eta2
-                // In below iteration, we maintain h(eta2) * h(eta) < 0
+                // In below iteration, we maptrdiff_tain h(eta2) * h(eta) < 0
                 T eta2 = (f>0) ? mineta : maxeta;
                 dbgcout<<"eta2 = "<<eta2<<endl;
                 T h2 = ((c*eta2 - a)*eta2 + b)*eta2 + g;
@@ -590,7 +590,7 @@ namespace tmv {
                     dbgcout<<"h(eta2) = h2 = "<<h2<<endl;
                     dbgcout<<"Same sign, so use Newton\n";
                     eta = (-f/df)/d2;
-                } else for(int iter3 = 0; iter3 < TMV_MAXITER; iter3++) {
+                } else for(ptrdiff_t iter3 = 0; iter3 < TMV_MAXITER; iter3++) {
                     dbgcout<<"iter3 = "<<iter3<<", eta = "<<eta<<
                         "  h = "<<h<<endl;
                     dbgcout<<"eta2 = "<<eta2<<"  h2 = "<<h2<<endl;
@@ -705,14 +705,14 @@ namespace tmv {
             eta /= s + TMV_SQRT(s*s+eta);
             t += eta;
             s += eta;
-            for(int j=0;j<N;j++) sum[j] = D[j]+s;
+            for(ptrdiff_t j=0;j<N;j++) sum[j] = D[j]+s;
             if (TMV_ABS(s) < TMV_ABS(eta)) {
                 // Then the iterative adjustment to diff isn't going to 
-                // maintain the accuracy we need.
+                // maptrdiff_tain the accuracy we need.
                 dbgcout<<"Need to redo the diff calculations\n";
-                for(int j=0;j<N;j++) diff[j] = D[j]-s; 
+                for(ptrdiff_t j=0;j<N;j++) diff[j] = D[j]-s; 
             } else {
-                for(int j=0;j<N;j++) diff[j] -= eta; 
+                for(ptrdiff_t j=0;j<N;j++) diff[j] -= eta; 
             }
 
             if (last) break;
@@ -721,7 +721,7 @@ namespace tmv {
             psi = T(0);
             dpsi = T(0);
             e = T(0);
-            for(int j=0;j<k1;j++) {
+            for(ptrdiff_t j=0;j<k1;j++) {
                 T temp = (z[j] / sum[j]) / diff[j];
                 psix = psi; dpsix = dpsi;
                 psi += z[j] * temp;
@@ -730,7 +730,7 @@ namespace tmv {
             }
             phi = T(0);
             dphi = T(0);
-            for(int j=N-1;j>k1;j--) {
+            for(ptrdiff_t j=N-1;j>k1;j--) {
                 T temp = (z[j] / sum[j]) / diff[j];
                 phix = phi; dphix = dphi;
                 phi += z[j] * temp;
@@ -782,7 +782,7 @@ namespace tmv {
         // f(s) = rho + Sum_i=1..N z_i^2/(D_i^2-s^2)
         T ff = rho;
         dbgcout<<"f(s) = "<<rho<<" + ";
-        for(int j=0;j<N;j++) {
+        for(ptrdiff_t j=0;j<N;j++) {
             dbgcout<<(z[j]/diff[j])*(z[j]/sum[j])<<" + ";
             ff += (z[j]/diff[j])*(z[j]/sum[j]);
         }
@@ -807,9 +807,9 @@ namespace tmv {
         TMVAssert(S.size() == diffmat.colsize());
         TMVAssert(S.size() == diffmat.rowsize());
 
-        const int N = S.size();
+        const ptrdiff_t N = S.size();
         Vector<T> zsq(N);
-        for(int j=0;j<N;j++) zsq[j] = z[j]*z[j];
+        for(ptrdiff_t j=0;j<N;j++) zsq[j] = z[j]*z[j];
         const T normsqz = zsq.sumElements();
 
 #ifdef _OPENMP
@@ -819,7 +819,7 @@ namespace tmv {
             Vector<T> sum(N);
             T Sk;
 #pragma omp for
-            for(int k=0;k<N;k++) {
+            for(ptrdiff_t k=0;k<N;k++) {
                 Sk = FindDCSingularValue(
                     k,N,rho,D.cptr(),z.cptr(),
                     zsq.cptr(),normsqz,diff.ptr(),sum.ptr());
@@ -834,7 +834,7 @@ namespace tmv {
         }
 #else
         Vector<T> sum(N);
-        for(int k=0;k<N;k++) {
+        for(ptrdiff_t k=0;k<N;k++) {
             S[k] = FindDCSingularValue(
                 k,N,rho,D.cptr(),z.cptr(),
                 zsq.cptr(),normsqz,diffmat.col(k).ptr(),sum.ptr());
@@ -854,9 +854,9 @@ namespace tmv {
         TMVAssert(S.size() == D.size());
         TMVAssert(S.size() == z.size());
 
-        const int N = S.size();
+        const ptrdiff_t N = S.size();
         Vector<T> zsq(N);
-        for(int j=0;j<N;j++) zsq[j] = z[j]*z[j];
+        for(ptrdiff_t j=0;j<N;j++) zsq[j] = z[j]*z[j];
         T normsqz = zsq.sumElements();
 
 #ifdef _OPENMP
@@ -868,7 +868,7 @@ namespace tmv {
 #ifdef _OPENMP
 #pragma omp for
 #endif
-            for(int k=0;k<N;k++) {
+            for(ptrdiff_t k=0;k<N;k++) {
                 Sk = FindDCSingularValue(
                     k,N,rho,D.cptr(),z.cptr(),
                     zsq.cptr(),normsqz,diff.ptr(),sum.ptr());
@@ -883,7 +883,7 @@ namespace tmv {
 #else
         Vector<T> diff(N);
         Vector<T> sum(N);
-        for(int k=0;k<N;k++) {
+        for(ptrdiff_t k=0;k<N;k++) {
             S[k] = FindDCSingularValue(
                 k,N,rho,D.cptr(),z.cptr(),
                 zsq.cptr(),normsqz,diff.ptr(),sum.ptr());
@@ -901,9 +901,9 @@ namespace tmv {
             SV_DecomposeFromBidiagonal_QR(U,D,E,Vt);
         dbgcout<<"After QR"<<std::endl;
         // Make all of the singular values positive
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
         RT* Di = D.ptr();
-        for(int i=0;i<N;++i,++Di) if (*Di < 0) {
+        for(ptrdiff_t i=0;i<N;++i,++Di) if (*Di < 0) {
             *Di = -(*Di);
             if (Vt.cptr()) Vt.row(i) = -Vt.row(i);
         }
@@ -1065,7 +1065,7 @@ namespace tmv {
         else dbgcout<<"No input Vt\n";
 #endif
 
-        int N = D.size();
+        ptrdiff_t N = D.size();
         // If N is too small, use the QR method
         if (N <= DC_LIMIT) SmallProblem(U,D,E,Vt);
 
@@ -1079,7 +1079,7 @@ namespace tmv {
 
         else {
             dbgcout<<"N > "<<DC_LIMIT<<endl;
-            int K = (N-1)/2;
+            ptrdiff_t K = (N-1)/2;
             const RT DK = D(K);
             const RT EK = E(K);
             Vector<RT> z(N,RT(0));
@@ -1162,8 +1162,8 @@ namespace tmv {
             RT tol = eps*norminf;
             dbgcout<<"tol = "<<tol<<endl;
             dbgcout<<"Initially D("<<K<<") = "<<D(K)<<std::endl;
-            int pivot = K;
-            for(int i=0;i<N-1;i++) {
+            ptrdiff_t pivot = K;
+            for(ptrdiff_t i=0;i<N-1;i++) {
                 dbgcout<<"D("<<i<<") = "<<D(i)<<std::endl;
                 dbgcout<<"z("<<i<<") = "<<z(i)<<std::endl;
                 dbgcout<<"pivot = "<<pivot<<"  "<<D(pivot)<<std::endl;
@@ -1208,7 +1208,7 @@ namespace tmv {
 
             if (N > 1) {
                 // Sort the inner matrix so z is in the first row, D are increasing
-                AlignedArray<int> P(N);
+                AlignedArray<ptrdiff_t> P(N);
                 D.subVector(0,N).sort(P.get(),Ascend);
                 z.subVector(0,N).permute(P.get());
                 if (U.cptr()) U.colRange(0,N).permuteCols(P.get());
@@ -1236,10 +1236,10 @@ namespace tmv {
 #endif
 
                 // Check for deflation step 2:
-                int i_firstswap = N;
+                ptrdiff_t i_firstswap = N;
                 tol = eps*D(N-1);
                 dbgcout<<"tol = "<<tol<<std::endl;
-                for(int i=N-1;i>0;--i) {
+                for(ptrdiff_t i=N-1;i>0;--i) {
                     dbgcout<<"D("<<i-1<<") = "<<D(i-1)<<std::endl;
                     dbgcout<<"D("<<i<<") = "<<D(i)<<std::endl;
                     dbgcout<<"diff = "<<TMV_ABS(D(i) - D(i-1))<<std::endl;
@@ -1363,14 +1363,14 @@ namespace tmv {
                     //             prod_1..i-1 (sk^2-di^2)/(dk^2-di^2) *
                     //             prod_i..N-1 (sk^2-di^2)/(dk+1^2-di^2) ) 
                     //        * sign(z_i)
-                    for(int i=0;i<N;i++) {
+                    for(ptrdiff_t i=0;i<N;i++) {
                         RT di = D(i);
                         RT prod = -W(i,N-1)*(S(N-1) + di);
-                        for(int k=0;k<i;k++) {
+                        for(ptrdiff_t k=0;k<i;k++) {
                             prod *= -W(i,k)/(D(k)-di);
                             prod *= (S(k)+di)/(D(k)+di);
                         }
-                        for(int k=i+1;k<N;k++) {
+                        for(ptrdiff_t k=i+1;k<N;k++) {
                             prod *= -W(i,k-1)/(D(k)-di);
                             prod *= (S(k-1)+di)/(D(k)+di);
                         }
@@ -1388,27 +1388,27 @@ namespace tmv {
 
                     // Currently W(i,j) = di-sj
                     // First convert it to Y.transpose()
-                    for(int j=0;j<N;j++) {
+                    for(ptrdiff_t j=0;j<N;j++) {
                         VectorView<RT> yj = W.col(j);
                         Vector<RT> diff_j = yj; // copy current values
                         yj(0) = -z(0)/(S(j)*S(j));
-                        for(int i=1;i<N;i++) 
+                        for(ptrdiff_t i=1;i<N;i++) 
                             yj(i) = (z(i) / diff_j(i)) / (D(i)+S(j));
                     }
                     if (Vt.cptr()) {
                         Vector<RT> normyj(N);
-                        for(int j=0;j<N;j++) {
+                        for(ptrdiff_t j=0;j<N;j++) {
                             W.col(j) /= (normyj(j) = Norm(W.col(j)));
                         }
                         // Vt = Y * Vt
                         Vt.rowRange(0,N) = W.transpose() * Vt.rowRange(0,N);
-                        if (U.cptr()) for(int j=0;j<N;j++) W.col(j) *= normyj(j);
+                        if (U.cptr()) for(ptrdiff_t j=0;j<N;j++) W.col(j) *= normyj(j);
                     }
                     if (U.cptr()) {
                         // Now convert W from Y.transpose() to X
                         W.row(0).setAllTo(RT(-1));
-                        for(int i=1;i<N;i++) W.row(i) *= D(i);
-                        for(int j=0;j<N;j++) W.col(j) /= Norm(W.col(j));
+                        for(ptrdiff_t i=1;i<N;i++) W.row(i) *= D(i);
+                        for(ptrdiff_t j=0;j<N;j++) W.col(j) /= Norm(W.col(j));
                         // U = U * X
                         U.colRange(0,N) *= W;
                     }

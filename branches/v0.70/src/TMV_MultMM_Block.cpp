@@ -46,12 +46,12 @@ namespace tmv {
     static void SingleBlockMultMM(
         bool add, const T& x, const GenMatrix<RT>& A,
         const GenMatrix<RT>& B, MatrixView<T> C,
-        const int i1, const int j1, const int i2, const int j2,
-        const int MB, const int NB, const int KB,
-        const int size1, const int size2, const int size3,
+        const ptrdiff_t i1, const ptrdiff_t j1, const ptrdiff_t i2, const ptrdiff_t j2,
+        const ptrdiff_t MB, const ptrdiff_t NB, const ptrdiff_t KB,
+        const ptrdiff_t size1, const ptrdiff_t size2, const ptrdiff_t size3,
         RT* Ap, RT* Bp, RT* Cp, bool firstA, bool firstB, 
         Func* myprod, Func* mycleanup,
-        const int K, const int Kc, const int Kd)
+        const ptrdiff_t K, const ptrdiff_t Kc, const ptrdiff_t Kd)
     {
         //std::cout<<"Start SingleBlockMultMM:\n";
         //std::cout<<"i = "<<i1<<','<<i2<<"  j = "<<j1<<','<<j2<<std::endl;
@@ -66,8 +66,8 @@ namespace tmv {
         VectorView<RT>(Cp,size3,1,NonConj 
                        TMV_FIRSTLAST1(Cp,Cp+size3)).setZero();
 
-        int k1 = 0;
-        for (int k2=KB;k2<=K;k1=k2,k2+=KB,Ap+=size1,Bp+=size2) {
+        ptrdiff_t k1 = 0;
+        for (ptrdiff_t k2=KB;k2<=K;k1=k2,k2+=KB,Ap+=size1,Bp+=size2) {
             //std::cout<<"Ax: "<<Ap<<"..."<<Ap+MB*KB<<std::endl;
             //std::cout<<"Bx: "<<Bp<<"..."<<Bp+NB*KB<<std::endl;
             MatrixView<RT> Ax(Ap,MB,KB,KB,1,NonConj,MB*KB 
@@ -107,7 +107,7 @@ namespace tmv {
     struct BlockHelper
     {
         typedef void KernelMultMMFunc(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const T* A, const T* B, T* C);
 
         enum { KB = 16 };
@@ -120,7 +120,7 @@ namespace tmv {
         { return &call_multmm_M_16_16<T>; }
         static KernelMultMMFunc* getProdFuncC() 
         { return &call_multmm_M_N_K<T>; }
-        static int RoundUp(int x) { return x; }
+        static ptrdiff_t RoundUp(ptrdiff_t x) { return x; }
     };
 
 #ifndef BLAS
@@ -131,7 +131,7 @@ namespace tmv {
     {
         typedef double T;
         typedef void KernelMultMMFunc(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const T* A, const T* B, T* C);
 
         enum { KB = 32 };
@@ -144,7 +144,7 @@ namespace tmv {
         { return &call_multmm_M_16_32<T>; }
         static KernelMultMMFunc* getProdFuncC() 
         { return &call_multmm_M_N_K<T>; }
-        static int RoundUp(int x) 
+        static ptrdiff_t RoundUp(ptrdiff_t x) 
         { return (x == 0 ? 0 : (((x-1)>>1)+1)<<1); }
     };
 #endif
@@ -156,7 +156,7 @@ namespace tmv {
     {
         typedef float T;
         typedef void KernelMultMMFunc(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const T* A, const T* B, T* C);
 
         enum { KB = 64 };
@@ -169,7 +169,7 @@ namespace tmv {
         { return &call_multmm_M_16_64<T>; }
         static KernelMultMMFunc* getProdFuncC() 
         { return &call_multmm_M_N_K<T>; }
-        static int RoundUp(int x) 
+        static ptrdiff_t RoundUp(ptrdiff_t x) 
         { return (x == 0 ? 0 : (((x-1)>>2)+1)<<2); }
     };
 #endif
@@ -185,12 +185,12 @@ namespace tmv {
         bool add, const T& x, const GenMatrix<RT>& A,
         const GenMatrix<RT>& B, MatrixView<T> C)
     {
-        const int M = C.colsize();
-        const int N = C.rowsize();
-        const int K = A.rowsize();
+        const ptrdiff_t M = C.colsize();
+        const ptrdiff_t N = C.rowsize();
+        const ptrdiff_t K = A.rowsize();
 
-        const int KB = BlockHelper<RT>::KB;
-        const int lgKB = BlockHelper<RT>::lgKB;
+        const ptrdiff_t KB = BlockHelper<RT>::KB;
+        const ptrdiff_t lgKB = BlockHelper<RT>::lgKB;
 
         typedef typename BlockHelper<RT>::KernelMultMMFunc Func;
         Func* prod = BlockHelper<RT>::getProdFunc();
@@ -201,25 +201,25 @@ namespace tmv {
         Func* cleanup = &call_multmm_16_16_K<RT>;
         Func* cleanupabc = &call_multmm_M_N_K<RT>;
 
-        const int Mb = (M>>4); // = M/16
-        const int Nb = (N>>4); // = N/16
-        const int Kb = (K>>lgKB); // = K/KB
-        const int Ma = (Mb<<4); // = M/16*16
-        const int Na = (Nb<<4); // = N/16*16
-        const int Ka = (Kb<<lgKB); // = K/KB*KB
-        const int Mc = M-Ma; // = M%16
-        const int Nc = N-Na; // = N%16
-        const int Kc = K-Ka; // = K%KB
-        const int Kd = BlockHelper<RT>::RoundUp(Kc);
+        const ptrdiff_t Mb = (M>>4); // = M/16
+        const ptrdiff_t Nb = (N>>4); // = N/16
+        const ptrdiff_t Kb = (K>>lgKB); // = K/KB
+        const ptrdiff_t Ma = (Mb<<4); // = M/16*16
+        const ptrdiff_t Na = (Nb<<4); // = N/16*16
+        const ptrdiff_t Ka = (Kb<<lgKB); // = K/KB*KB
+        const ptrdiff_t Mc = M-Ma; // = M%16
+        const ptrdiff_t Nc = N-Na; // = N%16
+        const ptrdiff_t Kc = K-Ka; // = K%KB
+        const ptrdiff_t Kd = BlockHelper<RT>::RoundUp(Kc);
         // = Kc rounded up to multiple of 2 or 4 as required for SSE commands
-        const int Ktot_d = (Kb<<lgKB) + Kd;
+        const ptrdiff_t Ktot_d = (Kb<<lgKB) + Kd;
         TMVAssert(Ktot_d == BlockHelper<RT>::RoundUp(K));
 
-        const int size1 = 16*KB;
-        const int size1y = Mc*KB;
-        const int size2 = 16*KB;
-        const int size2y = Nc*KB;
-        const int size3 = 16*16;
+        const ptrdiff_t size1 = 16*KB;
+        const ptrdiff_t size1y = Mc*KB;
+        const ptrdiff_t size2 = 16*KB;
+        const ptrdiff_t size2y = Nc*KB;
+        const ptrdiff_t size3 = 16*16;
 
         AlignedArray<RT> C_temp(size3);
         RT*const Cp = C_temp;
@@ -232,11 +232,11 @@ namespace tmv {
             AlignedArray<RT> B_temp(16*Ktot_d);
             RT*const Ap0 = A_temp;
             RT*const Bp0 = B_temp;
-            const int fullsize1 = 16*Ktot_d;
+            const ptrdiff_t fullsize1 = 16*Ktot_d;
 
-            for(int j=0;j<Nb;++j) {
+            for(ptrdiff_t j=0;j<Nb;++j) {
                 RT* Ap = Ap0;
-                for(int i=0;i<Mb;++i) {
+                for(ptrdiff_t i=0;i<Mb;++i) {
                     SingleBlockMultMM(
                         add,x,A,B,C,
                         i*16,j*16,(i+1)*16,(j+1)*16,
@@ -260,7 +260,7 @@ namespace tmv {
             }
             if (Nc) {
                 RT* Ap = Ap0;
-                for(int i=0;i<Mb;++i) {
+                for(ptrdiff_t i=0;i<Mb;++i) {
                     SingleBlockMultMM(
                         add,x,A,B,C,
                         i*16,Na,(i+1)*16,N,
@@ -288,11 +288,11 @@ namespace tmv {
             AlignedArray<RT> B_temp(N*Ktot_d);
             RT*const Ap0 = A_temp;
             RT*const Bp0 = B_temp;
-            const int fullsize2 = 16*Ktot_d;
+            const ptrdiff_t fullsize2 = 16*Ktot_d;
 
-            for(int i=0;i<Mb;++i) {
+            for(ptrdiff_t i=0;i<Mb;++i) {
                 RT* Bp = Bp0;
-                for(int j=0;j<Nb;++j) {
+                for(ptrdiff_t j=0;j<Nb;++j) {
                     SingleBlockMultMM(
                         add,x,A,B,C,
                         i*16,j*16,(i+1)*16,(j+1)*16,
@@ -316,7 +316,7 @@ namespace tmv {
             }
             if (Mc) {
                 RT* Bp = Bp0;
-                for(int j=0;j<Nb;++j) {
+                for(ptrdiff_t j=0;j<Nb;++j) {
                     SingleBlockMultMM(
                         add,x,A,B,C,
                         Ma,j*16,M,(j+1)*16,
@@ -428,12 +428,12 @@ namespace tmv {
                     // need to do some copying.  But since we have
                     // had a bad_alloc already, we only allocate 
                     // new storage in thin slices (width = 16)
-                    int N=B.rowsize();
+                    ptrdiff_t N=B.rowsize();
                     if (N > 16) {
-                        int K=B.colsize();
+                        ptrdiff_t K=B.colsize();
                         Matrix<T,ColMajor> B1(K,16);
-                        int j1=0;
-                        for (int j2=16;j2<N;j1=j2,j2+=16) {
+                        ptrdiff_t j1=0;
+                        for (ptrdiff_t j2=16;j2<N;j1=j2,j2+=16) {
                             B1 = B.colRange(j1,j2);
                             RCCMultMM<add>(x,A,B1,C.colRange(j1,j2));
                         }

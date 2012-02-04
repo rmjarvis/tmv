@@ -53,7 +53,7 @@ namespace tmv {
         inline SmallVectorComposite(const SmallVectorComposite<T,N>&) {}
         virtual inline ~SmallVectorComposite() {}
 
-        inline int size() const { return N; }
+        inline ptrdiff_t size() const { return N; }
         virtual void assignTov(SmallVector<real_type,N,CStyle>& v) const = 0;
         virtual void assignTov(SmallVector<TMV_ComplexType(T),N,CStyle>& v) const = 0;
         virtual void assignTov(SmallVector<real_type,N,FortranStyle>& v) const = 0;
@@ -464,7 +464,7 @@ namespace tmv {
             T _x1, const GenVector<T1>& _v1, 
             T _x2, const SmallVector<T2,N,A>& _v2) :
             x1(_x1),v1(_v1),x2(_x2), v2(_v2) { TMVAssert(v1.size() == N); }
-        inline int size() const { return N; }
+        inline ptrdiff_t size() const { return N; }
         inline T getX1() const { return x1; }
         inline const GenVector<T1>& getV1() const { return v1; }
         inline T getX2() const { return x2; }
@@ -530,7 +530,7 @@ namespace tmv {
             T _x1, const SmallVector<T1,N,A>& _v1, 
             T _x2, const GenVector<T2>& _v2) :
             x1(_x1),v1(_v1),x2(_x2), v2(_v2) { TMVAssert(v2.size() == N); }
-        inline int size() const { return N; }
+        inline ptrdiff_t size() const { return N; }
         inline T getX1() const { return x1; }
         inline const SmallVector<T1,N,A>& getV1() const { return v1; }
         inline T getX2() const { return x2; }
@@ -903,7 +903,7 @@ namespace tmv {
             T _x, const SmallVector<T1,N,A1>& _v1, 
             const SmallVector<T2,N,A2>& _v2) :
             x(_x),v1(_v1),v2(_v2) {}
-        inline int size() const { return N; }
+        inline ptrdiff_t size() const { return N; }
         inline T getX() const { return x; }
         inline const SmallVector<T1,N,A1>& getV1() const { return v1; }
         inline const SmallVector<T2,N,A2>& getV2() const { return v2; }
@@ -930,7 +930,7 @@ namespace tmv {
         inline ElemProdVv(
             T _x, const GenVector<T1>& _v1, const SmallVector<T2,N,A>& _v2) :
             x(_x),v1(_v1),v2(_v2) { TMVAssert(v1.size() == N); }
-        inline int size() const { return N; }
+        inline ptrdiff_t size() const { return N; }
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV1() const { return v1; }
         inline const SmallVector<T2,N,A>& getV2() const { return v2; }
@@ -957,7 +957,7 @@ namespace tmv {
         inline ElemProdvV(
             T _x, const SmallVector<T1,N,A>& _v1, const GenVector<T2>& _v2) :
             x(_x),v1(_v1),v2(_v2) { TMVAssert(v2.size() == N); }
-        inline int size() const { return N; }
+        inline ptrdiff_t size() const { return N; }
         inline T getX() const { return x; }
         inline const SmallVector<T1,N,A>& getV1() const { return v1; }
         inline const GenVector<T2>& getV2() const { return v2; }
@@ -1588,6 +1588,164 @@ namespace tmv {
             return v1.getX()*v2.getX()*MultVV(v2.getV(),v1.getV().view());
     }
 
+    // 
+    // P * v
+    //
+
+    template <class T, int N, int A>
+    class ProdPv : public VectorComposite<T>
+    {
+    public:
+        typedef typename Traits<T>::real_type real_type;
+        typedef typename Traits<T>::complex_type complex_type;
+        inline ProdPv(const Permutation& _p, const SmallVector<T,N,A>& _v) :
+            p(_p), v(_v)
+        { TMVAssert(v.size()==p.rowsize()); }
+        inline ptrdiff_t size() const { return N; }
+        inline const Permutation& getP() const { return p; }
+        inline const SmallVector<T,N,A>& getV() const { return v; }
+        inline void assignToV(VectorView<TMV_RealType(T)> v0) const
+        {
+            TMVAssert(v0.size() == size());
+            TMVAssert(isReal(T()));
+            p.apply(v0=v);
+        }
+        inline void assignToV(VectorView<TMV_ComplexType(T)> v0) const
+        {
+            TMVAssert(v0.size() == size());
+            p.apply(v0=v);
+        }
+    private:
+        const Permutation& p;
+        const SmallVector<T,N,A>& v;
+    };
+
+    template <class T, int N, int A>
+    class ProdvP : public VectorComposite<T>
+    {
+    public:
+        inline ProdvP(const SmallVector<T,N,A>& _v, const Permutation& _p) :
+            v(_v), p(_p)
+        { TMVAssert(v.size()==p.colsize()); }
+        inline ptrdiff_t size() const { return p.rowsize(); }
+        inline const SmallVector<T,N,A>& getV() const { return v; }
+        inline const Permutation& getP() const { return p; }
+        inline void assignToV(VectorView<TMV_RealType(T)> v0) const
+        {
+            TMVAssert(v0.size() == size());
+            TMVAssert(isReal(T()));
+            p.inverse().apply(v0=v);
+        }
+        inline void assignToV(VectorView<TMV_ComplexType(T)> v0) const
+        {
+            TMVAssert(v0.size() == size());
+            p.inverse().apply(v0=v);
+        }
+    private:
+        const SmallVector<T,N,A>& v;
+        const Permutation& p;
+    };
+
+    template <class T, int N, int A>
+    inline ProdvP<T,N,A> operator*(
+        const SmallVector<T,N,A>& v, const Permutation& p)
+    { return ProdvP<T,N,A>(v,p); }
+
+    template <class T, int N, int A>
+    inline ProdPv<T,N,A> operator*(
+        const Permutation& p, const SmallVector<T,N,A>& v)
+    { return ProdPv<T,N,A>(p,v); }
+
+    template <class T, int N, int A>
+    inline SmallVector<T,N,A>& operator*=(
+        SmallVector<T,N,A>& v, const Permutation& p)
+    {
+        TMVAssert(v.size() == p.colsize());
+        p.inverse().apply(v);
+        return v;
+    }
+
+    template <class T, int N, int A>
+    class QuotvP : public VectorComposite<T>
+    {
+    public:
+        inline QuotvP(const SmallVector<T,N,A>& _v, const Permutation& _p) :
+            v(_v), p(_p)
+        { TMVAssert(v.size()==p.colsize()); }
+        inline ptrdiff_t size() const { return p.rowsize(); }
+        inline const SmallVector<T,N,A>& getV() const { return v; }
+        inline const Permutation& getP() const { return p; }
+        inline void assignToV(VectorView<TMV_RealType(T)> v0) const
+        {
+            TMVAssert(v0.size() == size());
+            TMVAssert(isReal(T()));
+            p.inverse().apply(v0=v);
+        }
+        inline void assignToV(VectorView<TMV_ComplexType(T)> v0) const
+        {
+            TMVAssert(v0.size() == size());
+            p.inverse().apply(v0=v);
+        }
+    private:
+        const SmallVector<T,N,A>& v;
+        const Permutation& p;
+    };
+
+    template <class T, int N, int A>
+    class RQuotvP : public VectorComposite<T>
+    {
+    public:
+        inline RQuotvP(const SmallVector<T,N,A>& _v, const Permutation& _p) :
+            v(_v), p(_p)
+        { TMVAssert(v.size()==p.colsize()); }
+        inline ptrdiff_t size() const { return p.rowsize(); }
+        inline const SmallVector<T,N,A>& getV() const { return v; }
+        inline const Permutation& getP() const { return p; }
+        inline void assignToV(VectorView<TMV_RealType(T)> v0) const
+        {
+            TMVAssert(v0.size() == size());
+            TMVAssert(isReal(T()));
+            p.apply(v0=v);
+        }
+        inline void assignToV(VectorView<TMV_ComplexType(T)> v0) const
+        {
+            TMVAssert(v0.size() == size());
+            p.apply(v0=v);
+        }
+    private:
+        const SmallVector<T,N,A>& v;
+        const Permutation& p;
+    };
+
+    template <class T, int N, int A>
+    inline QuotvP<T,N,A> operator/(
+        const SmallVector<T,N,A>& v, const Permutation& p)
+    { return QuotvP<T,N,A>(v,p); }
+
+    template <class T, int N, int A>
+    inline SmallVector<T,N,A>& operator/=(
+        SmallVector<T,N,A>& v, const Permutation& p)
+    {
+        TMVAssert(p.colsize() == p.rowsize());
+        TMVAssert(p.rowsize() == v.size());
+        p.inverse().apply(v);
+        return v;
+    }
+
+    template <class T, int N, int A>
+    inline RQuotvP<T,N,A> operator%(
+        const SmallVector<T,N,A>& v, const Permutation& p)
+    { return RQuotvP<T,N,A>(v,p); }
+
+    template <class T, int N, int A>
+    inline SmallVector<T,N,A>& operator%=(
+        SmallVector<T,N,A>& v, const Permutation& p)
+    {
+        TMVAssert(p.colsize() == p.rowsize());
+        TMVAssert(p.rowsize() == v.size());
+        p.apply(v);
+        return v;
+    }
 
 } // namespace tmv
 

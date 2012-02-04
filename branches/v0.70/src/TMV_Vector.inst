@@ -2,38 +2,38 @@
 #define CT std::complex<T>
 
 #define Def1(RT,T,Ref) \
-  template bool GenVector<T >::hasSubVector(int i1, int i2, int istep) const; \
+  template bool GenVector<T >::hasSubVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const; \
   template bool ConstVectorView<T,FortranStyle>::hasSubVector( \
-      int i1, int i2, int istep) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const; \
   template RT GenVector<T >::normSq(const RT scale) const; \
   template RT GenVector<T >::norm2() const; \
   template T GenVector<T >::sumElements() const; \
   template RT GenVector<T >::sumAbsElements() const; \
   template RT GenVector<T >::sumAbs2Elements() const; \
-  template T GenVector<T >::minElement(int* iminout) const; \
-  template T GenVector<T >::maxElement(int* imaxout) const; \
-  template RT GenVector<T >::minAbsElement(int* iminout) const; \
-  template RT GenVector<T >::maxAbsElement(int* imaxout) const; \
-  template RT GenVector<T >::minAbs2Element(int* iminout) const; \
-  template RT GenVector<T >::maxAbs2Element(int* imaxout) const; \
-  template T GenVector<T >::cref(int i) const; \
-  template Ref VectorView<T,CStyle>::ref(int i); \
+  template T GenVector<T >::minElement(ptrdiff_t* iminout) const; \
+  template T GenVector<T >::maxElement(ptrdiff_t* imaxout) const; \
+  template RT GenVector<T >::minAbsElement(ptrdiff_t* iminout) const; \
+  template RT GenVector<T >::maxAbsElement(ptrdiff_t* imaxout) const; \
+  template RT GenVector<T >::minAbs2Element(ptrdiff_t* iminout) const; \
+  template RT GenVector<T >::maxAbs2Element(ptrdiff_t* imaxout) const; \
+  template T GenVector<T >::cref(ptrdiff_t i) const; \
+  template Ref VectorView<T,CStyle>::ref(ptrdiff_t i); \
   template VectorView<T,CStyle>& VectorView<T,CStyle>::setZero(); \
   template VectorView<T,CStyle>& VectorView<T,CStyle>::setAllTo( \
       const T& x); \
   template VectorView<T,CStyle>& VectorView<T,CStyle>::addToAll( \
       const T& x); \
   template VectorView<T,CStyle>& VectorView<T,CStyle>::conjugateSelf(); \
-  template VectorView<T,CStyle>& VectorView<T,CStyle>::DoBasis(int i); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::DoBasis(ptrdiff_t i); \
   template VectorView<T,CStyle>& VectorView<T,CStyle>::DoSwap( \
-      int i1, int i2); \
+      ptrdiff_t i1, ptrdiff_t i2); \
   template VectorView<T,CStyle>& VectorView<T,CStyle>::DoPermute( \
-      const int* p, int i1, int i2); \
+      const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2); \
   template VectorView<T,CStyle>& VectorView<T,CStyle>::DoReversePermute( \
-      const int* p, int i1, int i2); \
+      const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2); \
   template VectorView<T,CStyle>& VectorView<T,CStyle>::reverseSelf(); \
   template VectorView<T,CStyle>& VectorView<T,CStyle>::sort( \
-      int* p, ADType ad, CompType comp); \
+      ptrdiff_t* p, ADType ad, CompType comp); \
   template void GenVector<T >::write(const TMV_Writer& writer) const; \
   template void VectorView<T,CStyle>::read(const TMV_Reader& reader); \
   template void Swap(VectorView<T > v1, VectorView<T > v2); \
@@ -68,10 +68,10 @@ Def1a(T,CT)
   template Vector<T,A>& Vector<T,A>::setAllTo(const T& x); \
   template Vector<T,A>& Vector<T,A>::addToAll(const T& x); \
   template Vector<T,A>& Vector<T,A>::conjugateSelf(); \
-  template Vector<T,A>& Vector<T,A>::DoBasis(int i); \
-  template Vector<T,A>& Vector<T,A>::DoSwap(int i1, int i2); \
+  template Vector<T,A>& Vector<T,A>::DoBasis(ptrdiff_t i); \
+  template Vector<T,A>& Vector<T,A>::DoSwap(ptrdiff_t i1, ptrdiff_t i2); \
   template void Vector<T,A>::read(const TMV_Reader& reader); \
-  template Vector<T,A> DoBasisVector(int,int); \
+  template Vector<T,A> DoBasisVector(ptrdiff_t,ptrdiff_t); \
 
 Def2(T,T,CStyle)
 Def2(T,T,FortranStyle)

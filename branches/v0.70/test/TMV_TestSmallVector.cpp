@@ -51,7 +51,7 @@ static void TestSmallVectorReal()
     v(23) = T(10*N);
     v(42) = T(1)/T(4);
     v(15) = T(-20*N);
-    int imax,imin;
+    ptrdiff_t imax,imin;
     Assert(v.maxAbsElement(&imax) == T(20*N),
            "MaxAbsElement of SmallVector did not return correct value");
     Assert(imax == 15,
@@ -170,27 +170,29 @@ static void TestSmallVectorReal()
         -120,140,330,10,-93,-39,49,100,-310,1;
 
     tmv::SmallVector<T,NN> origw = w;
-    int perm[NN];
+    tmv::Permutation p;
 
     if (showacc)
         std::cout<<"unsorted w = "<<w<<std::endl;
-    w.sort(perm);
+    w.sort(p);
     for(int i=1;i<NN;++i) {
         Assert(w(i-1) <= w(i),"Sort real SmallVector");
     }
     if (showacc)
         std::cout<<"sorted w = "<<w<<std::endl;
 
-    w.sort(0);
-    w.reversePermute(perm);
+    w.sort();
+    if (showacc)
+        std::cout<<"after w.sort(): w = "<<w<<std::endl;
+    w = p.inverse() * w;
     if (showacc)
         std::cout<<"Reverse permuted w = "<<w<<std::endl;
     Assert(w==origw,"Reverse permute sorted SmallVector = orig");
-    w.sort(0);
-    origw.permute(perm);
+    w.sort();
+    tmv::SmallVector<T,NN> w2 = p * origw;
     if (showacc)
-        std::cout<<"Sort permuted w = "<<origw<<std::endl;
-    Assert(w==origw,"Permute SmallVector = sorted SmallVector");
+        std::cout<<"Sort permuted w = "<<w2<<std::endl;
+    Assert(w==w2,"Permute SmallVector = sorted SmallVector");
 }
 
 template <class T> 
@@ -239,7 +241,7 @@ static void TestSmallVectorComplex()
     v3(23) = CT(40*N,9*N);
     v3(42) = CT(0,1);
     v3(15) = CT(-32*N,24*N);
-    int imax,imin;
+    ptrdiff_t imax,imin;
     if (showacc) {
         std::cout<<"v = "<<v3<<std::endl;
         std::cout<<"v.MaxAbs = "<<v3.maxAbsElement(&imax)<<std::endl;
@@ -360,22 +362,22 @@ static void TestSmallVectorComplex()
     w.imagPart() = iw;
 
     tmv::SmallVector<CT,NN> origw = w;
-    int perm[NN];
+    tmv::Permutation p;
 
     if (showacc)
         std::cout<<"unsorted w = "<<w<<std::endl;
-    w.sort(perm);
+    w.sort(p);
     for(int i=1;i<NN;++i) {
         Assert(real(w(i-1)) <= real(w(i)),"Sort complex SmallVector");
     }
     if (showacc)
         std::cout<<"sorted w = "<<w<<std::endl;
 
-    w.reversePermute(perm);
+    w = p.inverse() * w;
     Assert(w==origw,"Reverse permute sorted SmallVector = orig");
-    w.sort(0);
-    origw.permute(perm);
-    Assert(w==origw,"Permute SmallVector = sorted SmallVector");
+    w.sort();
+    tmv::SmallVector<CT,NN> w2 = p * origw;
+    Assert(w==w2,"Permute SmallVector = sorted SmallVector");
 }
 
 template <class T> 

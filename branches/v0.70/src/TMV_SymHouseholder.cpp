@@ -62,7 +62,7 @@ namespace tmv {
         //        = m - beta v vt m - beta m v* vT + beta^2 v vt m v* vT
         //        = m - beta v (mv*)T - beta (mv*) vT + (beta^2 vt (mv*)) v vT
         //
-        int N = m.size();
+        ptrdiff_t N = m.size();
         if (N > 0 && beta != T1(0)) {
             // Normally, I take the unit first element of v to be implicit, 
             // but this calculation is more complicated, so for now I just 

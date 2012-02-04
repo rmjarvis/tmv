@@ -73,7 +73,7 @@ namespace tmv {
         if (add) C += alpha * A.lowerBand() * B;
         else C = alpha * A.lowerBand() * B;
 
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
         if (N > 1 && A.nlo() > 0) {
             C.rowRange(0,N-1) += A.upperBandOff() * B.rowRange(1,N);
         }
@@ -102,9 +102,9 @@ namespace tmv {
         const T alpha, const GenSymBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
         MatrixView<T> C)
     {
-        const int N = C.rowsize();
-        for(int j=0;j<N;) {
-            int j2 = TMV_MIN(N,j+SYM_MM_BLOCKSIZE);
+        const ptrdiff_t N = C.rowsize();
+        for(ptrdiff_t j=0;j<N;) {
+            ptrdiff_t j2 = TMV_MIN(N,j+SYM_MM_BLOCKSIZE);
             if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                 if (C.isrm()) {
                     Matrix<Tb,RowMajor> B2 = TMV_REAL(alpha) * B.colRange(j,j2);

@@ -510,8 +510,8 @@ namespace tmv {
         TMVAssert(Y.rowsize() > 0);
         TMVAssert(Y.colsize() > 0);
         TMVAssert(!Z.isconj());
-        int M = Y.colsize();
-        int N = Y.rowsize()-1; // # of cols already computed
+        ptrdiff_t M = Y.colsize();
+        ptrdiff_t N = Y.rowsize()-1; // # of cols already computed
 #ifdef XDEBUG
         Matrix<T> Y0(Y);
         Y0.upperTri().setToIdentity();
@@ -594,7 +594,7 @@ namespace tmv {
         Vector<T> beta0 = beta;
         Matrix<T> Htot(Y.colsize(),Y.colsize());
         Htot.setToIdentity();
-        for(int i=0;i<Y.rowsize();i++) {
+        for(ptrdiff_t i=0;i<Y.rowsize();i++) {
             Matrix<T> H(Y.colsize(),Y.colsize());
             H.setToIdentity();
             H.subMatrix(i,Y.colsize(),i,Y.colsize()) -= beta(i) * 
@@ -604,8 +604,8 @@ namespace tmv {
         }
 #endif
 
-        const int M = Y.colsize();
-        const int N = Y.rowsize();
+        const ptrdiff_t M = Y.colsize();
+        const ptrdiff_t N = Y.rowsize();
 
         if (N==1) {
             // I - Y Z Yt = I - beta* v vt
@@ -669,7 +669,7 @@ namespace tmv {
             // Z(0,1) = -Z(0,0)*Z(1,1)*temp;
             *Z01 = -cb0*cb1*temp;
         } else {
-            int j1 = (N+1)/2;
+            ptrdiff_t j1 = (N+1)/2;
             ConstMatrixView<T> Y1 = Y.colRange(0,j1);
             UpperTriMatrixView<T> Z1 = Z.subTriMatrix(0,j1);
             ConstVectorView<T> beta1 = beta.subVector(0,j1);
@@ -740,8 +740,8 @@ namespace tmv {
         Matrix<T2> Hm = H*m0;
 #endif
 
-        int M = Y.colsize();
-        int N = Y.rowsize();
+        ptrdiff_t M = Y.colsize();
+        ptrdiff_t N = Y.rowsize();
 
         if (m.iscm()) {
             Matrix<T2,ColMajor> ZYtm = 
@@ -792,8 +792,8 @@ namespace tmv {
         Matrix<T2> Hm = Hinv*m0;
 #endif
 
-        int M = Y.colsize();
-        int N = Y.rowsize();
+        ptrdiff_t M = Y.colsize();
+        ptrdiff_t N = Y.rowsize();
 
         if (m.isrm()) {
             Matrix<T2,RowMajor> ZtYtm = 
@@ -837,8 +837,8 @@ namespace tmv {
         TMVAssert(Y.colsize() == m.colsize());
         TMVAssert(Y.rowsize() == Z.size());
 
-        int M = Y.colsize();
-        int N = Y.rowsize();
+        ptrdiff_t M = Y.colsize();
+        ptrdiff_t N = Y.rowsize();
 
         // Multiply the rest of m by Ht
         BlockHouseholderLMult(Y,Z,m);

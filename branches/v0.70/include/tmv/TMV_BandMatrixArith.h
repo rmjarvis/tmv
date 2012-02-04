@@ -102,10 +102,10 @@ namespace tmv {
 
         inline ProdXB(const T _x, const GenBandMatrix<Tm>& _m) :
             x(_x), m(_m) {}
-        inline int colsize() const { return m.colsize(); }
-        inline int rowsize() const { return m.rowsize(); }
-        inline int nlo() const { return m.nlo(); }
-        inline int nhi() const { return m.nhi(); }
+        inline ptrdiff_t colsize() const { return m.colsize(); }
+        inline ptrdiff_t rowsize() const { return m.rowsize(); }
+        inline ptrdiff_t nlo() const { return m.nlo(); }
+        inline ptrdiff_t nhi() const { return m.nhi(); }
         inline T getX() const { return x; }
         inline const GenBandMatrix<Tm>& getM() const { return m; }
         inline void assignToB(BandMatrixView<real_type> m0) const
@@ -193,10 +193,10 @@ namespace tmv {
         inline SumBX(T _x1, const GenBandMatrix<Tm>& _m, T _x2) :
             x1(_x1), m(_m), x2(_x2)
         { TMVAssert(m.isSquare()); }
-        inline int colsize() const { return m.colsize(); }
-        inline int rowsize() const { return m.rowsize(); }
-        inline int nlo() const { return m.nlo(); }
-        inline int nhi() const { return m.nhi(); }
+        inline ptrdiff_t colsize() const { return m.colsize(); }
+        inline ptrdiff_t rowsize() const { return m.rowsize(); }
+        inline ptrdiff_t nlo() const { return m.nlo(); }
+        inline ptrdiff_t nhi() const { return m.nhi(); }
         inline T getX1() const { return x1; }
         inline const GenBandMatrix<Tm>& getM() const { return m; }
         inline T getX2() const { return x2; }
@@ -319,10 +319,10 @@ namespace tmv {
             TMVAssert(m1.rowsize() == m2.rowsize()); 
             TMVAssert(m1.colsize() == m2.colsize()); 
         }
-        inline int colsize() const { return m1.colsize(); }
-        inline int rowsize() const { return m1.rowsize(); }
-        inline int nlo() const { return TMV_MAX(m1.nlo(),m2.nlo()); }
-        inline int nhi() const { return TMV_MAX(m1.nhi(),m2.nhi()); }
+        inline ptrdiff_t colsize() const { return m1.colsize(); }
+        inline ptrdiff_t rowsize() const { return m1.rowsize(); }
+        inline ptrdiff_t nlo() const { return TMV_MAX(m1.nlo(),m2.nlo()); }
+        inline ptrdiff_t nhi() const { return TMV_MAX(m1.nhi(),m2.nhi()); }
         inline T getX1() const { return x1; }
         inline const GenBandMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
@@ -472,11 +472,11 @@ namespace tmv {
             const GenBandMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.rowsize() == m2.colsize()); }
-        inline int colsize() const { return m1.colsize(); }
-        inline int rowsize() const { return m2.rowsize(); }
-        inline int nlo() const 
+        inline ptrdiff_t colsize() const { return m1.colsize(); }
+        inline ptrdiff_t rowsize() const { return m2.rowsize(); }
+        inline ptrdiff_t nlo() const 
         { return TMV_MIN(colsize()-1,m1.nlo()+m2.nlo()); }
-        inline int nhi() const 
+        inline ptrdiff_t nhi() const 
         { return TMV_MIN(rowsize()-1,m1.nhi()+m2.nhi()); }
         inline T getX() const { return x; }
         inline const GenBandMatrix<T1>& getM1() const { return m1; }
@@ -644,10 +644,10 @@ namespace tmv {
             TMVAssert(m1.rowsize() == m2.rowsize()); 
             TMVAssert(m1.colsize() == m2.colsize()); 
         }
-        inline int colsize() const { return m1.colsize(); }
-        inline int rowsize() const { return m1.rowsize(); }
-        inline int nlo() const { return TMV_MIN(m1.nlo(),m2.nlo()); }
-        inline int nhi() const { return TMV_MIN(m1.nhi(),m2.nhi()); }
+        inline ptrdiff_t colsize() const { return m1.colsize(); }
+        inline ptrdiff_t rowsize() const { return m1.rowsize(); }
+        inline ptrdiff_t nlo() const { return TMV_MIN(m1.nlo(),m2.nlo()); }
+        inline ptrdiff_t nhi() const { return TMV_MIN(m1.nhi(),m2.nhi()); }
         inline T getX() const { return x; }
         inline const GenBandMatrix<T1>& getM1() const { return m1; }
         inline const GenBandMatrix<T2>& getM2() const { return m2; }

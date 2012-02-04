@@ -627,7 +627,7 @@ namespace tmv {
             return *this;
         }
 
-        inline type& permuteRows(const int* p, int i1, int i2)
+        inline type& permuteRows(const ptrdiff_t* p, int i1, int i2)
         {
             if (I == int(CStyle)) {
                 TMVAssert(i1 >= 0 && i1 <= i2 && i2 <= M);
@@ -639,10 +639,10 @@ namespace tmv {
             return *this;
         }
 
-        inline type& permuteRows(const int* p)
+        inline type& permuteRows(const ptrdiff_t* p)
         { permuteRows(p,I==int(CStyle)?0:1,M); return *this; }
 
-        inline type& permuteCols(const int* p, int j1, int j2)
+        inline type& permuteCols(const ptrdiff_t* p, int j1, int j2)
         {
             if (I == int(CStyle)) {
                 TMVAssert(j1 >= 0 && j1 <= j2 && j2 <= N);
@@ -654,10 +654,10 @@ namespace tmv {
             return *this;
         }
 
-        inline type& permuteCols(const int* p)
+        inline type& permuteCols(const ptrdiff_t* p)
         { permuteCols(p,I==int(CStyle)?0:1,N); return *this; }
 
-        inline type& reversePermuteRows(const int* p, int i1, int i2)
+        inline type& reversePermuteRows(const ptrdiff_t* p, int i1, int i2)
         {
             if (I == int(CStyle)) {
                 TMVAssert(i1 >= 0 && i1 <= i2 && i2 <= M);
@@ -669,10 +669,10 @@ namespace tmv {
             return *this;
         }
 
-        inline type& reversePermuteRows(const int* p)
+        inline type& reversePermuteRows(const ptrdiff_t* p)
         { reversePermuteRows(p,I==int(CStyle)?0:1,M); return *this; }
 
-        inline type& reversePermuteCols(const int* p, int j1, int j2)
+        inline type& reversePermuteCols(const ptrdiff_t* p, int j1, int j2)
         {
             if (I == int(CStyle)) {
                 TMVAssert(j1 >= 0 && j1 <= j2 && j2 <= N);
@@ -684,7 +684,7 @@ namespace tmv {
             return *this;
         }
 
-        inline type& reversePermuteCols(const int* p)
+        inline type& reversePermuteCols(const ptrdiff_t* p)
         { reversePermuteCols(p,I==int(CStyle)?0:1,N); return *this; }
 
         //

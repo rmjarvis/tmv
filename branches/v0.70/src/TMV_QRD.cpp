@@ -256,11 +256,11 @@ namespace tmv {
     }
 
     template <class T> 
-    int QRDiv<T>::colsize() const
+    ptrdiff_t QRDiv<T>::colsize() const
     { return pimpl->istrans ? pimpl->QRx.rowsize() : pimpl->QRx.colsize(); }
 
     template <class T> 
-    int QRDiv<T>::rowsize() const
+    ptrdiff_t QRDiv<T>::rowsize() const
     { return pimpl->istrans ? pimpl->QRx.colsize() : pimpl->QRx.rowsize(); }
 
 #ifdef INST_INT

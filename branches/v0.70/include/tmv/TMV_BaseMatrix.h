@@ -82,11 +82,11 @@ namespace tmv {
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
 
-        virtual int colsize() const = 0;
-        virtual int rowsize() const = 0;
-        inline int ncols() const 
+        virtual ptrdiff_t colsize() const = 0;
+        virtual ptrdiff_t rowsize() const = 0;
+        inline ptrdiff_t ncols() const 
         { return rowsize(); }
-        inline int nrows() const 
+        inline ptrdiff_t nrows() const 
         { return colsize(); }
         inline bool isSquare() const 
         { return colsize() == rowsize(); }

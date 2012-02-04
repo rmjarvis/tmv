@@ -85,11 +85,11 @@ namespace tmv {
         // where Q is unitary, and R is upper triangular
         // Q and R are stored in the same matrix (output of A), 
         // with the beta's for the Householder matrices returned in beta.
-        const int M = A.colsize();
-        const int N = A.rowsize();
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t N = A.rowsize();
 
         T* bj = beta.ptr();
-        for(int j=0;j<N;++j,++bj) {
+        for(ptrdiff_t j=0;j<N;++j,++bj) {
             // Apply the Householder Reflection for this column
 #ifdef TMVFLDEBUG
             TMVAssert(bj >= beta._first);
@@ -146,8 +146,8 @@ namespace tmv {
         // after this call, setting makeZ to false will speed it up slightly.
         // (In either case, the diagonal of Z is correctly set to be 
         // beta.conjugate().)
-        const int M = A.colsize();
-        const int N = A.rowsize();
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t N = A.rowsize();
 
         if (N==1) {
             T b = HouseholderReflect(A.col(0),det);
@@ -169,7 +169,7 @@ namespace tmv {
                 *Z01 = -TMV_CONJ(b0*b1)*temp;
             }
         } else {
-            int j1 = (N+1)/2;
+            ptrdiff_t j1 = (N+1)/2;
             MatrixView<T> A1 = A.colRange(0,j1);
             UpperTriMatrixView<T> Z1 = Z.subTriMatrix(0,j1);
             RecursiveQRDecompose(A1,Z1,det,true);
@@ -209,13 +209,13 @@ namespace tmv {
         cout<<"Norm(beta) = "<<Norm(A)<<endl;
         Matrix<T> A0(A);
 #endif
-        const int M = A.colsize();
-        const int N = A.rowsize();
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t N = A.rowsize();
 
         UpperTriMatrix<T,NonUnitDiag|ColMajor> BaseZ(
-            TMV_MIN(QR_BLOCKSIZE,N));
-        for(int j1=0;j1<N;) {
-            int j2 = TMV_MIN(N,j1+QR_BLOCKSIZE);
+            TMV_MIN(QR_BLOCKSIZE,int(N)));
+        for(ptrdiff_t j1=0;j1<N;) {
+            ptrdiff_t j2 = TMV_MIN(N,j1+QR_BLOCKSIZE);
             MatrixView<T> A1 = A.subMatrix(j1,M,j1,j2);
             UpperTriMatrixView<T> Z = BaseZ.subTriMatrix(0,j2-j1);
 

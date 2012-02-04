@@ -3,17 +3,17 @@
 
 #define Def1(RT,T,Ref) \
   template bool GenSymMatrix<T >::hasSubMatrix( \
-      int i1, int i2, int j1, int j2, int is, int js) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t is, ptrdiff_t js) const; \
   template bool GenSymMatrix<T >::hasSubVector( \
-      int i, int j, int is, int js, int s) const; \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t is, ptrdiff_t js, ptrdiff_t s) const; \
   template bool GenSymMatrix<T >::hasSubSymMatrix( \
-      int i1, int i2, int is) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t is) const; \
   template bool ConstSymMatrixView<T,FortranStyle>::hasSubMatrix( \
-      int i1, int i2, int j1, int j2, int is, int js) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t is, ptrdiff_t js) const; \
   template bool ConstSymMatrixView<T,FortranStyle>::hasSubVector( \
-      int i, int j, int is, int js, int s) const; \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t is, ptrdiff_t js, ptrdiff_t s) const; \
   template bool ConstSymMatrixView<T,FortranStyle>::hasSubSymMatrix( \
-      int i1, int i2, int is) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t is) const; \
   template T GenSymMatrix<T >::sumElements() const; \
   template RT GenSymMatrix<T >::sumAbsElements() const; \
   template RT GenSymMatrix<T >::sumAbs2Elements() const; \
@@ -25,17 +25,17 @@
   template RT GenSymMatrix<T >::doNorm2() const; \
   template RT GenSymMatrix<T >::doCondition() const; \
   template QuotXS<T,T > GenSymMatrix<T >::QInverse() const; \
-  template T GenSymMatrix<T >::cref(int i, int j) const; \
+  template T GenSymMatrix<T >::cref(ptrdiff_t i, ptrdiff_t j) const; \
   template SymMatrixView<T,CStyle>&  \
-      SymMatrixView<T,CStyle>::swapRowsCols(int i1, int i2);\
+      SymMatrixView<T,CStyle>::swapRowsCols(ptrdiff_t i1, ptrdiff_t i2);\
   template SymMatrixView<T,CStyle>&  \
-      SymMatrixView<T,CStyle>::permuteRowsCols(const int* p, int i1, int i2); \
+      SymMatrixView<T,CStyle>::permuteRowsCols(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2); \
   template SymMatrixView<T,CStyle>& \
       SymMatrixView<T,CStyle>::reversePermuteRowsCols( \
-      const int* p, int i1, int i2); \
+      const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2); \
   template void GenSymMatrix<T >::write(const TMV_Writer& writer) const; \
   template void SymMatrixView<T,CStyle>::read(const TMV_Reader& reader); \
-  template Ref SymMatrixView<T,CStyle>::ref(int i, int j); \
+  template Ref SymMatrixView<T,CStyle>::ref(ptrdiff_t i, ptrdiff_t j); \
 
 Def1(T,T,T&)
 #ifdef INST_COMPLEX

@@ -47,29 +47,29 @@ namespace tmv {
 
     template <class T, class T1> 
     void LU_PackedPL_Unpack(
-        const GenBandMatrix<T1>& LUx, const int* p,
+        const GenBandMatrix<T1>& LUx, const ptrdiff_t* p,
         LowerTriMatrixView<T> m);
 
     template <class T, class T1> 
     void LU_PackedPL_LDivEq(
-        const GenBandMatrix<T1>& LUx, const int* p, MatrixView<T> m);
+        const GenBandMatrix<T1>& LUx, const ptrdiff_t* p, MatrixView<T> m);
     template <class T, class T1> 
     void LU_PackedPL_RDivEq(
-        const GenBandMatrix<T1>& LUx, const int* p, MatrixView<T> m);
+        const GenBandMatrix<T1>& LUx, const ptrdiff_t* p, MatrixView<T> m);
 
     template <class T, class T1> 
     void LU_LDivEq(
-        const GenBandMatrix<T1>& LUx, const int* p, MatrixView<T> m);
+        const GenBandMatrix<T1>& LUx, const ptrdiff_t* p, MatrixView<T> m);
     template <class T, class T1> 
     void LU_RDivEq(
-        const GenBandMatrix<T1>& LUx, const int* p, MatrixView<T> m);
+        const GenBandMatrix<T1>& LUx, const ptrdiff_t* p, MatrixView<T> m);
 
     template <class T, class T1> 
     void LU_Inverse(
-        const GenBandMatrix<T1>& LUx, const int* p, MatrixView<T> m);
+        const GenBandMatrix<T1>& LUx, const ptrdiff_t* p, MatrixView<T> m);
 
     template <class T> 
-    void TriInverse(UpperTriMatrixView<T> U, int nhi);
+    void TriInverse(UpperTriMatrixView<T> U, ptrdiff_t nhi);
 
 #ifndef NOTHROW
     template <class T> 
@@ -125,31 +125,31 @@ namespace tmv {
 
     template <class T>
     inline void LU_PackedPL_Unpack(
-        const GenBandMatrix<CT>& , const int* ,
+        const GenBandMatrix<CT>& , const ptrdiff_t* ,
         LowerTriMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <class T>
     inline void LU_PackedPL_LDivEq(
-        const GenBandMatrix<CT>& , const int* , MatrixView<T> )
+        const GenBandMatrix<CT>& , const ptrdiff_t* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void LU_PackedPL_RDivEq(
-        const GenBandMatrix<CT>& , const int* , MatrixView<T> )
+        const GenBandMatrix<CT>& , const ptrdiff_t* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <class T>
     inline void LU_LDivEq(
-        const GenBandMatrix<CT>& , const int* , MatrixView<T> )
+        const GenBandMatrix<CT>& , const ptrdiff_t* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void LU_RDivEq(
-        const GenBandMatrix<CT>& , const int* , MatrixView<T> )
+        const GenBandMatrix<CT>& , const ptrdiff_t* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <class T>
     inline void LU_Inverse(
-        const GenBandMatrix<CT>& , const int* , MatrixView<T> )
+        const GenBandMatrix<CT>& , const ptrdiff_t* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
 #undef CT

@@ -228,7 +228,7 @@ namespace tmv {
         typedef T* pointer;
         typedef typename AuxRef<T,C>::reference reference;
 
-        VIt(T* inp, int step) : p(inp), s(step) {}
+        VIt(T* inp, ptrdiff_t step) : p(inp), s(step) {}
         explicit VIt(T* inp) : p(inp), s(S) 
         { TMVAssert(S != Unknown); }
         VIt(const type& rhs) : p(rhs.get()), s(rhs.step()) {}
@@ -246,7 +246,7 @@ namespace tmv {
         ~VIt() {}
 
         T* get() const { return p; }
-        int step() const { return s; }
+        ptrdiff_t step() const { return s; }
 
         bool operator==(const type& rhs) const 
         { return p == rhs.get(); }
@@ -264,18 +264,18 @@ namespace tmv {
         type operator--(int) 
         { type p2 = *this; p-=step(); return p2; }
 
-        type& operator+=(int n) { p += n*step(); return *this; }
-        type& operator-=(int n) { p -= n*step(); return *this; }
-        type operator+(int n) const 
+        type& operator+=(ptrdiff_t n) { p += n*step(); return *this; }
+        type& operator-=(ptrdiff_t n) { p -= n*step(); return *this; }
+        type operator+(ptrdiff_t n) const 
         { return type(p+n*step(),step()); }
-        type operator-(int n) const 
+        type operator-(ptrdiff_t n) const 
         { return type(p-n*step(),step()); }
-        type& shiftP(int n) { p += n; return *this; }
+        type& shiftP(ptrdiff_t n) { p += n; return *this; }
 
         ptrdiff_t operator-(const type& rhs) const 
         { return (p-rhs.get())/step(); }
 
-        reference operator[](int n) const 
+        reference operator[](ptrdiff_t n) const 
         { return reference(p[n*step()]); }
 
         typedef VIt<T,S,NonConj> nonconj_type;
@@ -304,7 +304,7 @@ namespace tmv {
         typedef const T* pointer;
         typedef const T& reference;
 
-        CVIt(const T* inp, int step) : p(inp), s(step) {}
+        CVIt(const T* inp, ptrdiff_t step) : p(inp), s(step) {}
         explicit CVIt(const T* inp) : p(inp), s(S) 
         { TMVAssert(S != Unknown); }
         CVIt(const type& rhs) : p(rhs.get()), s(rhs.step()) {}
@@ -331,7 +331,7 @@ namespace tmv {
         ~CVIt() {}
 
         const T* get() const { return p; }
-        int step() const { return s; }
+        ptrdiff_t step() const { return s; }
 
         bool operator==(const type& rhs) const 
         { return p == rhs.get(); }
@@ -349,18 +349,18 @@ namespace tmv {
         type operator--(int) 
         { type p2 = *this; p-=step(); return p2; }
 
-        type& operator+=(int n) { p += n*step(); return *this; }
-        type& operator-=(int n) { p -= n*step(); return *this; }
-        type operator+(int n) const 
+        type& operator+=(ptrdiff_t n) { p += n*step(); return *this; }
+        type& operator-=(ptrdiff_t n) { p -= n*step(); return *this; }
+        type operator+(ptrdiff_t n) const 
         { return type(p+n*step(),step()); }
-        type operator-(int n) const 
+        type operator-(ptrdiff_t n) const 
         { return type(p-n*step(),step()); }
-        type& shiftP(int n) { p += n; return *this; }
+        type& shiftP(ptrdiff_t n) { p += n; return *this; }
 
         ptrdiff_t operator-(const type& rhs) const 
         { return (p-rhs.get())/step(); }
 
-        T operator[](int n) const 
+        T operator[](ptrdiff_t n) const 
         { return DoConj<C>(p[n*step()]); }
 
         typedef CVIt<T,S,NonConj> nonconj_type;
@@ -378,10 +378,10 @@ namespace tmv {
     };
 
     template <class T, int S, ConjType C>
-    inline CVIt<T,S,C> operator+(int i, const CVIt<T,S,C>& it)
+    inline CVIt<T,S,C> operator+(ptrdiff_t i, const CVIt<T,S,C>& it)
     { return it + i; }
     template <class T, int S, ConjType C>
-    inline VIt<T,S,C> operator+(int i, const VIt<T,S,C>& it)
+    inline VIt<T,S,C> operator+(ptrdiff_t i, const VIt<T,S,C>& it)
     { return it + i; }
 
 
@@ -623,7 +623,7 @@ namespace tmv {
     public :
 
         VarConjIter() : p(0), s(0), c(NonConj) TMV_DEFFIRSTLAST(0,0) {}
-        VarConjIter(CT* inp, int instep, ConjType inc 
+        VarConjIter(CT* inp, ptrdiff_t instep, ConjType inc 
               TMV_PARAMFIRSTLAST(CT) ) : 
             p(inp), s(instep), c(inc) TMV_DEFFIRSTLAST(_first,_last) {}
         VarConjIter(const VarConjIter<CT >& rhs) : 
@@ -640,7 +640,7 @@ namespace tmv {
         ~VarConjIter() {}
 
         CT* getP() const { return p; }
-        int step() const { return s; }
+        ptrdiff_t step() const { return s; }
         ConjType getC() const { return c; }
 
         inline bool operator==(const VarConjIter<CT >& rhs) const 
@@ -670,13 +670,13 @@ namespace tmv {
         inline VarConjIter<CT > operator--(int) 
         { VarConjIter<CT > p2 = *this; p-=s; return p2; }
 
-        inline VarConjIter<CT >& operator+=(int n) 
+        inline VarConjIter<CT >& operator+=(ptrdiff_t n) 
         { if(s==1) ++p; else p += n*s; return *this; }
-        inline VarConjIter<CT >& operator-=(int n) 
+        inline VarConjIter<CT >& operator-=(ptrdiff_t n) 
         { if(s==1) --p; else p -= n*s; return *this; }
-        inline VarConjIter<CT > operator+(int n) const 
+        inline VarConjIter<CT > operator+(ptrdiff_t n) const 
         { return VarConjIter<CT >(s==1?p+n:p+n*s,s,c TMV_FIRSTLAST ); }
-        inline VarConjIter<CT > operator-(int n) const 
+        inline VarConjIter<CT > operator-(ptrdiff_t n) const 
         { return VarConjIter<CT >(s==1?p-n:p-n*s,s,c TMV_FIRSTLAST ); }
 
         inline ptrdiff_t operator-(const VarConjIter<CT >& rhs) const 
@@ -686,7 +686,7 @@ namespace tmv {
             return s==1 ? p-rhs.p : (p-rhs.p)/s; 
         }
 
-        inline VarConjRef<CT > operator[](int n) const
+        inline VarConjRef<CT > operator[](ptrdiff_t n) const
         {
 #ifdef TMVFLDEBUG
             CT* pn = s==1 ? p+n : p+n*s;
@@ -711,7 +711,7 @@ namespace tmv {
     private :
 
         CT* p;
-        const int s;
+        const ptrdiff_t s;
         ConjType c;
 
 #ifdef TMVFLDEBUG
@@ -727,7 +727,7 @@ namespace tmv {
     public :
 
         CVarConjIter() : p(0), s(0), c(NonConj) {}
-        CVarConjIter(const CT* inp, int instep, ConjType inc) :
+        CVarConjIter(const CT* inp, ptrdiff_t instep, ConjType inc) :
             p(inp), s(instep), c(inc) {}
         CVarConjIter(const CVarConjIter<CT >& rhs) : 
             p(rhs.p), s(rhs.s), c(rhs.c) {}
@@ -750,7 +750,7 @@ namespace tmv {
         ~CVarConjIter() {}
 
         const CT* getP() const { return p; }
-        int step() const { return s; }
+        ptrdiff_t step() const { return s; }
         ConjType getC() const { return c; }
 
         inline bool operator==(const CVarConjIter<CT >& rhs) const 
@@ -770,13 +770,13 @@ namespace tmv {
         inline CVarConjIter<CT > operator--(int) 
         { CVarConjIter<CT > p2 = *this; p-=s; return p2; }
 
-        inline CVarConjIter<CT >& operator+=(int n) 
+        inline CVarConjIter<CT >& operator+=(ptrdiff_t n) 
         { if(s==1) ++p; else p += n*s; return *this; }
-        inline CVarConjIter<CT >& operator-=(int n) 
+        inline CVarConjIter<CT >& operator-=(ptrdiff_t n) 
         { if(s==1) --p; else p -= n*s; return *this; }
-        inline CVarConjIter<CT > operator+(int n) const 
+        inline CVarConjIter<CT > operator+(ptrdiff_t n) const 
         { return CVarConjIter<CT >(s==1?p+n:p+n*s,s,c); }
-        inline CVarConjIter<CT > operator-(int n) const 
+        inline CVarConjIter<CT > operator-(ptrdiff_t n) const 
         { return CVarConjIter<CT >(s==1?p-n:p-n*s,s,c); }
 
         inline ptrdiff_t operator-(const CVarConjIter<CT >& rhs) const 
@@ -786,7 +786,7 @@ namespace tmv {
             return s==1 ? p-rhs.p : (p-rhs.p)/s; 
         }
 
-        inline CT operator[](int n) const 
+        inline CT operator[](ptrdiff_t n) const 
         { return c==Conj ? std::conj(*(p+(s==1?n:n*s))) : *(p+(s==1?n:n*s)); }
 
         typedef std::random_access_iterator_tag   iterator_category;
@@ -798,7 +798,7 @@ namespace tmv {
     private :
 
         const CT* p;
-        const int s;
+        const ptrdiff_t s;
         ConjType c;
     };
 
@@ -809,9 +809,9 @@ namespace tmv {
         typedef VIt<T,Unknown,NonConj> iterator;
         typedef CVIt<T,Unknown,NonConj> const_iterator;
         static reference makeRef(T* p, ConjType ) { return *p; }
-        static iterator makeIter(T* p, int s, ConjType ) 
+        static iterator makeIter(T* p, ptrdiff_t s, ConjType ) 
         { return iterator(p,s); }
-        static const_iterator makeIter(const T* p, int s, ConjType ) 
+        static const_iterator makeIter(const T* p, ptrdiff_t s, ConjType ) 
         { return const_iterator(p,s); }
     };
 
@@ -823,9 +823,9 @@ namespace tmv {
         typedef VarConjIter<T>  iterator;
         typedef CVarConjIter<T> const_iterator;
         static reference makeRef(T* p, ConjType c) { return reference(*p,c); }
-        static iterator makeIter(T* p, int s, ConjType c) 
+        static iterator makeIter(T* p, ptrdiff_t s, ConjType c) 
         { return iterator(p,s,c); }
-        static const_iterator makeIter(const T* p, int s, ConjType c) 
+        static const_iterator makeIter(const T* p, ptrdiff_t s, ConjType c) 
         { return const_iterator(p,s,c); }
     };
 

@@ -81,7 +81,7 @@ namespace tmv {
             TMVAssert(U.rowsize() == D.size());
         }
 
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
 
         // E may have zeros on entry.
         // This routine finds subproblems in which E is fully non-zero.
@@ -90,10 +90,10 @@ namespace tmv {
         HermTridiagonalChopSmallElements(D,E);
 
         // Find sub-problems to solve:
-        for(int q = N-1; q>0; ) {
+        for(ptrdiff_t q = N-1; q>0; ) {
             if (E(q-1) == T(0)) --q;
             else {
-                int p=q-1;
+                ptrdiff_t p=q-1;
                 while (p > 0 && (E(p-1) != T(0))) --p; 
                 // Set p such that E(p-1) = 0 and 
                 // all E(i) with p<=i<q are non-zero.
@@ -942,7 +942,7 @@ namespace tmv {
         // V = U relationship.  So just keep that in mind later when we use S.
 
         // Sort output singular values by absolute value:
-        AlignedArray<int> sortp(D.size());
+        AlignedArray<ptrdiff_t> sortp(D.size());
         D.sort(sortp.get(),Descend,AbsComp);
         if (U.cptr()) U.permuteCols(sortp.get());
 
@@ -1004,7 +1004,7 @@ namespace tmv {
 
         TMVAssert(U.ct() == NonConj);
 
-        const int N = U.colsize();
+        const ptrdiff_t N = U.colsize();
         if (N == 0) return;
 
         // First we reduce A to tridiagonal form: A = U * T * Ut
@@ -1022,7 +1022,7 @@ namespace tmv {
             HermMatrixViewOf(U,Lower),Ubeta.view(),SS,E.view(),signdet);
 
         // Now U stores Householder vectors for U in lower diagonal columns.
-        for(int j=N-1;j>0;--j) U.col(j,j,N) = U.col(j-1,j,N);
+        for(ptrdiff_t j=N-1;j>0;--j) U.col(j,j,N) = U.col(j-1,j,N);
         U.col(0).makeBasis(0);
         U.row(0,1,N).setZero();
         GetQFromQR(U.subMatrix(1,N,1,N),Ubeta.subVector(0,N-1));
@@ -1068,7 +1068,7 @@ namespace tmv {
         TMVAssert(A.uplo() == Lower);
         TMVAssert(A.ct() == NonConj);
 
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
         if (N == 0) return;
 
         Vector<RT> E(N-1);
@@ -1100,7 +1100,7 @@ namespace tmv {
 #endif
 
         UnsortedHermEigen(U,SS.diag());
-        AlignedArray<int> sortp(SS.size());
+        AlignedArray<ptrdiff_t> sortp(SS.size());
         SS.diag().sort(sortp.get(),Descend,AbsComp);
         U.permuteCols(sortp.get());
 
@@ -1151,7 +1151,7 @@ namespace tmv {
         // where S is a diagonal real matrix, and U,Vt are unitary matrices.
         // U,S,Vt are N x N
         // If Vt = 0, then U,Vt are not formed.  Only S,det are accurate on return.
-        const int N = U.colsize();
+        const ptrdiff_t N = U.colsize();
         if (N == 0) return;
 
         // First we reduce A to tridiagonal form: A = U * T * UT
@@ -1175,7 +1175,7 @@ namespace tmv {
         B.diag(-1) = E;
         B.diag(1) = E;
 
-        for(int j=N-1;j>0;--j) U.col(j,j,N) = U.col(j-1,j,N);
+        for(ptrdiff_t j=N-1;j>0;--j) U.col(j,j,N) = U.col(j-1,j,N);
         U.col(0).makeBasis(0);
         U.row(0,1,N).setZero();
         GetQFromQR(U.subMatrix(1,N,1,N),Ubeta.subVector(0,N-1));
@@ -1217,13 +1217,13 @@ namespace tmv {
 
         if (A.isherm()) {
             UnsortedEigen(A,SS.diag());
-            for(int i=0;i<SS.size();i++) if (SS(i) < RT(0)) {
+            for(ptrdiff_t i=0;i<SS.size();i++) if (SS(i) < RT(0)) {
                 SS(i) = -SS(i);
             }
             SS.diag().sort(Descend);
         } else {
             TMVAssert(isComplex(T()));
-            const int N = A.size();
+            const ptrdiff_t N = A.size();
             if (N == 0) return;
             Vector<T> D(N);
             Vector<RT> E(N-1);
@@ -1261,7 +1261,7 @@ namespace tmv {
         else {
             U.lowerTri() = A.lowerTri();
             UnsortedHermEigen(U,SS);
-            AlignedArray<int> sortp(A.size());
+            AlignedArray<ptrdiff_t> sortp(A.size());
             SS.sort(sortp.get(),Ascend);
             U.permuteCols(sortp.get());
         }
@@ -1305,7 +1305,7 @@ namespace tmv {
                 if (A.isherm()) {
                     HermSV_Decompose<T>(U,SS);
                     Vt = U.adjoint();
-                    for(int i=0;i<SS.size();i++) if (SS(i) < RT(0)) {
+                    for(ptrdiff_t i=0;i<SS.size();i++) if (SS(i) < RT(0)) {
                         SS(i) = -SS(i);
                         Vt.row(i) = -Vt.row(i);
                     }
@@ -1331,7 +1331,7 @@ namespace tmv {
             U.lowerTri() = A.lowerTri();
             if (A.isherm()) {
                 HermSV_Decompose<T>(U,SS);
-                for(int i=0;i<SS.size();i++) if (SS(i) < RT(0)) {
+                for(ptrdiff_t i=0;i<SS.size();i++) if (SS(i) < RT(0)) {
                     SS(i) = -SS(i);
                 }
             } else {
@@ -1384,7 +1384,7 @@ namespace tmv {
         SV_Decompose(U.view(),S.view(),Vt.view(),true);
         //std::cout<<"S = "<<S.diag()<<std::endl;
         RT thresh = TMV_Epsilon<T>()*S.size()*S(0);
-        for(int i=0;i<S.size();i++) if (S(i) < thresh) S(i) = RT(0);
+        for(ptrdiff_t i=0;i<S.size();i++) if (S(i) < thresh) S(i) = RT(0);
         //std::cout<<"S => "<<S.diag()<<std::endl;
         U *= Vt;
         Matrix<T> VS = Vt.adjoint() * S;
@@ -1452,7 +1452,7 @@ namespace tmv {
         Matrix<T> V(A.size(),A.size());
         DiagMatrix<RT> D(A.size());
         Eigen(A,V.view(),D.diag());
-        for(int i=0;i<A.size();i++) {
+        for(ptrdiff_t i=0;i<A.size();i++) {
             if (D(i) < RT(0)) {
 #ifdef NOTHROW
                 std::cerr<<"Non PosDef SymMatrix found in SquareRoot\n"; 

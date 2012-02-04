@@ -55,7 +55,7 @@ namespace tmv {
             T _x2, const GenUpperTriMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
-        inline int size() const { return m1.size(); }
+        inline ptrdiff_t size() const { return m1.size(); }
         inline DiagType dt() const { return NonUnitDiag; }
         inline T getX1() const { return x1; }
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
@@ -187,7 +187,7 @@ namespace tmv {
             T _x2, const GenLowerTriMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
-        inline int size() const { return m1.size(); }
+        inline ptrdiff_t size() const { return m1.size(); }
         inline DiagType dt() const { return NonUnitDiag; }
         inline T getX1() const { return x1; }
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
@@ -344,7 +344,7 @@ namespace tmv {
             const GenUpperTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
-        inline int size() const { return m1.size(); }
+        inline ptrdiff_t size() const { return m1.size(); }
         inline DiagType dt() const { return NonUnitDiag; }
         inline T getX() const { return x; }
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
@@ -380,7 +380,7 @@ namespace tmv {
             const GenDiagMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
-        inline int size() const { return m1.size(); }
+        inline ptrdiff_t size() const { return m1.size(); }
         inline DiagType dt() const { return NonUnitDiag; }
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
@@ -516,7 +516,7 @@ namespace tmv {
             const GenLowerTriMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
-        inline int size() const { return m1.size(); }
+        inline ptrdiff_t size() const { return m1.size(); }
         inline DiagType dt() const { return NonUnitDiag; }
         inline T getX() const { return x; }
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
@@ -552,7 +552,7 @@ namespace tmv {
             const GenDiagMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
-        inline int size() const { return m1.size(); }
+        inline ptrdiff_t size() const { return m1.size(); }
         inline DiagType dt() const { return NonUnitDiag; }
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
@@ -735,7 +735,7 @@ namespace tmv {
             const GenDiagMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
-        inline int size() const { return m1.size(); }
+        inline ptrdiff_t size() const { return m1.size(); }
         inline DiagType dt() const { return NonUnitDiag; }
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
@@ -771,7 +771,7 @@ namespace tmv {
             const GenDiagMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
-        inline int size() const { return m1.size(); }
+        inline ptrdiff_t size() const { return m1.size(); }
         inline DiagType dt() const { return NonUnitDiag; }
         inline T getX() const { return x; }
         inline const GenUpperTriMatrix<T1>& getM1() const { return m1; }
@@ -828,7 +828,7 @@ namespace tmv {
             const GenDiagMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
-        inline int size() const { return m1.size(); }
+        inline ptrdiff_t size() const { return m1.size(); }
         inline DiagType dt() const { return NonUnitDiag; }
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }
@@ -864,7 +864,7 @@ namespace tmv {
             const GenDiagMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
-        inline int size() const { return m1.size(); }
+        inline ptrdiff_t size() const { return m1.size(); }
         inline DiagType dt() const { return NonUnitDiag; }
         inline T getX() const { return x; }
         inline const GenLowerTriMatrix<T1>& getM1() const { return m1; }

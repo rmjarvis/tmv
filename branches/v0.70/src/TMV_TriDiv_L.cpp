@@ -71,17 +71,17 @@ namespace tmv {
         TMVAssert(!B.isunit() || A.isunit());
         TMVAssert(B.size()>0);
         TMVAssert(B.ct() == NonConj);
-        const int N = B.size();
+        const ptrdiff_t N = B.size();
 
         if (A.isunit()) {
-            for(int i=N-1; i>=0; --i) 
+            for(ptrdiff_t i=N-1; i>=0; --i) 
                 B.row(i,i+1,N) -= A.row(i,i+1,N) * B.subTriMatrix(i+1,N);
         } else {
             TMVAssert(!B.isunit());
-            const int Ads = A.stepi()+A.stepj();
+            const ptrdiff_t Ads = A.stepi()+A.stepj();
             const Ta* Aii = A.cptr() + (N-1)*Ads;
-            int len=1;
-            for(int i=N-1; i>=0; --i,Aii-=Ads,++len) {
+            ptrdiff_t len=1;
+            for(ptrdiff_t i=N-1; i>=0; --i,Aii-=Ads,++len) {
                 B.row(i,i+1,N) -= A.row(i,i+1,N) * B.subTriMatrix(i+1,N);
                 if (*Aii==Ta(0)) {
 #ifdef NOTHROW
@@ -108,23 +108,23 @@ namespace tmv {
         TMVAssert(!B.isunit() || A.isunit());
         TMVAssert(B.size()>0);
         TMVAssert(B.ct() == NonConj);
-        const int N = B.size();
+        const ptrdiff_t N = B.size();
 
         if (A.isunit()) {
             if (B.isunit()) 
-                for(int j=N-1; j>=0; --j) {
+                for(ptrdiff_t j=N-1; j>=0; --j) {
                     B.subMatrix(0,j,j+1,N) -= A.col(j,0,j) ^ B.row(j,j+1,N);
                     B.col(j,0,j) -= A.col(j,0,j);
                 }
             else
-                for(int j=N-1; j>=0; --j) 
+                for(ptrdiff_t j=N-1; j>=0; --j) 
                     B.subMatrix(0,j,j,N) -= A.col(j,0,j) ^ B.row(j,j,N);
         } else {
             TMVAssert(!B.isunit());
-            const int Ads = A.stepi()+A.stepj();
+            const ptrdiff_t Ads = A.stepi()+A.stepj();
             const Ta* Ajj = A.cptr() + (N-1)*Ads;
-            int len=1;
-            for(int j=N-1; j>=0; --j,Ajj-=Ads,++len) {
+            ptrdiff_t len=1;
+            for(ptrdiff_t j=N-1; j>=0; --j,Ajj-=Ads,++len) {
                 if (*Ajj==Ta(0)) {
 #ifdef NOTHROW
                     std::cerr<<"Singular UpperTriMatrix found\n"; 
@@ -151,16 +151,16 @@ namespace tmv {
         TMVAssert(!B.isunit() || A.isunit());
         TMVAssert(B.size()>0);
         TMVAssert(B.ct() == NonConj);
-        const int N = B.size();
+        const ptrdiff_t N = B.size();
 
         if (A.isunit()) {
-            for(int i=0;i<N;++i) 
+            for(ptrdiff_t i=0;i<N;++i) 
                 B.row(i,0,i) -= A.row(i,0,i) * B.subTriMatrix(0,i);
         } else {
             TMVAssert(!B.isunit());
-            const int Ads = A.stepi()+A.stepj();
+            const ptrdiff_t Ads = A.stepi()+A.stepj();
             const Ta* Aii = A.cptr();
-            for(int i=0;i<N;++i,Aii+=Ads) {
+            for(ptrdiff_t i=0;i<N;++i,Aii+=Ads) {
                 B.row(i,0,i) -= A.row(i,0,i) * B.subTriMatrix(0,i);
                 if (*Aii==Ta(0)) {
 #ifdef NOTHROW
@@ -187,22 +187,22 @@ namespace tmv {
         TMVAssert(!B.isunit() || A.isunit());
         TMVAssert(B.size()>0);
         TMVAssert(B.ct() == NonConj);
-        const int N = B.size();
+        const ptrdiff_t N = B.size();
 
         if (A.isunit()) {
             if (B.isunit())
-                for(int j=0;j<N;++j) {
+                for(ptrdiff_t j=0;j<N;++j) {
                     B.col(j,j+1,N) -= A.col(j,j+1,N);
                     B.subMatrix(j+1,N,0,j) -= A.col(j,j+1,N) ^ B.row(j,0,j);
                 }
             else
-                for(int j=0;j<N;++j) 
+                for(ptrdiff_t j=0;j<N;++j) 
                     B.subMatrix(j+1,N,0,j+1) -= A.col(j,j+1,N) ^ B.row(j,0,j+1);
         } else {
             TMVAssert(!B.isunit());
-            const int Ads = A.stepi()+A.stepj();
+            const ptrdiff_t Ads = A.stepi()+A.stepj();
             const Ta* Ajj = A.cptr();
-            for(int j=0;j<N;++j,Ajj+=Ads) {
+            for(ptrdiff_t j=0;j<N;++j,Ajj+=Ads) {
                 if (*Ajj==Ta(0)) {
 #ifdef NOTHROW
                     std::cerr<<"Singular LowerTriMatrix found\n"; 
@@ -227,8 +227,8 @@ namespace tmv {
         TMVAssert(B.size()>0);
         TMVAssert(B.ct() == NonConj);
 
-        const int nb = TRI_DIV_BLOCKSIZE;
-        const int N = B.size();
+        const ptrdiff_t nb = TRI_DIV_BLOCKSIZE;
+        const ptrdiff_t N = B.size();
 
         if (N <= TRI_DIV_BLOCKSIZE2) {
             if (B.isrm()) {
@@ -236,16 +236,16 @@ namespace tmv {
                 else ColTriLDivEq(A,B);
             } else {
                 if (B.isunit())
-                    for(int j=0;j<N;++j) {
+                    for(ptrdiff_t j=0;j<N;++j) {
                         B.col(j,0,j) -= A.col(j,0,j);
                         TriLDivEq(A.subTriMatrix(0,j),B.col(j,0,j));
                     }
                 else // B is NonUnitDiag
-                    for(int j=0;j<N;++j)
+                    for(ptrdiff_t j=0;j<N;++j)
                         TriLDivEq(A.subTriMatrix(0,j+1),B.col(j,0,j+1));
             }
         } else {
-            int k = N/2;
+            ptrdiff_t k = N/2;
             if (k > nb) k = k/nb*nb;
 
             ConstUpperTriMatrixView<Ta> A00 = A.subTriMatrix(0,k);
@@ -300,8 +300,8 @@ namespace tmv {
         TMVAssert(B.size()>0);
         TMVAssert(B.ct() == NonConj);
 
-        const int nb = TRI_DIV_BLOCKSIZE;
-        const int N = B.size();
+        const ptrdiff_t nb = TRI_DIV_BLOCKSIZE;
+        const ptrdiff_t N = B.size();
 
         if (N <= TRI_DIV_BLOCKSIZE2) {
             if (B.isrm()) {
@@ -309,16 +309,16 @@ namespace tmv {
                 else ColTriLDivEq(A,B);
             } else {
                 if (B.isunit())
-                    for(int j=0;j<N;++j) {
+                    for(ptrdiff_t j=0;j<N;++j) {
                         B.col(j,j+1,N) -= A.col(j,j+1,N);
                         TriLDivEq(A.subTriMatrix(j+1,N),B.col(j,j+1,N));
                     }
                 else // B is NonUnitDiag
-                    for(int j=0;j<N;++j)
+                    for(ptrdiff_t j=0;j<N;++j)
                         TriLDivEq(A.subTriMatrix(j,N),B.col(j,j,N));
             }
         } else {
-            int k = N/2;
+            ptrdiff_t k = N/2;
             if (k > nb) k = k/nb*nb;
 
             ConstLowerTriMatrixView<Ta> A00 = A.subTriMatrix(0,k);

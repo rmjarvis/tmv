@@ -67,16 +67,16 @@ namespace tmv {
 
         const T1* v1ptr = v1.cptr();
         T* v2ptr = v2.ptr();
-        const int s1 = v1.step();
-        const int s2 = v2.step();
-        const int N = v2.size();
+        const ptrdiff_t s1 = v1.step();
+        const ptrdiff_t s2 = v2.step();
+        const ptrdiff_t N = v2.size();
 
         if (s1 == 1 && s2 == 1) {
-            const int N1 = N/4;
-            const int N2 = N-4*N1;
+            const ptrdiff_t N1 = N/4;
+            const ptrdiff_t N2 = N-4*N1;
             if (N1) {
                 if (x == Tx(1)) {
-                    for(int i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
+                    for(ptrdiff_t i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
 #ifdef TMVFLDEBUG
                         TMVAssert(v2ptr >= v2._first);
                         TMVAssert(v2ptr+3 < v2._last);
@@ -87,7 +87,7 @@ namespace tmv {
                         v2ptr[3] += (c1 ? TMV_CONJ(v1ptr[3]) : v1ptr[3]);
                     }
                 } else if (x == Tx(-1)) {
-                    for(int i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
+                    for(ptrdiff_t i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
 #ifdef TMVFLDEBUG
                         TMVAssert(v2ptr >= v2._first);
                         TMVAssert(v2ptr+3 < v2._last);
@@ -98,7 +98,7 @@ namespace tmv {
                         v2ptr[3] -= (c1 ? TMV_CONJ(v1ptr[3]) : v1ptr[3]);
                     }
                 } else {
-                    for(int i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
+                    for(ptrdiff_t i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
 #ifdef TMVFLDEBUG
                         TMVAssert(v2ptr >= v2._first);
                         TMVAssert(v2ptr+3 < v2._last);
@@ -112,7 +112,7 @@ namespace tmv {
             }
             if (N2) {
                 if (x == Tx(1)) {
-                    for(int i=N2;i>0;--i,++v1ptr,++v2ptr) {
+                    for(ptrdiff_t i=N2;i>0;--i,++v1ptr,++v2ptr) {
 #ifdef TMVFLDEBUG
                         TMVAssert(v2ptr >= v2._first);
                         TMVAssert(v2ptr < v2._last);
@@ -120,7 +120,7 @@ namespace tmv {
                         *v2ptr += (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                     }
                 } else if (x == Tx(-1)) {
-                    for(int i=N2;i>0;--i,++v1ptr,++v2ptr) {
+                    for(ptrdiff_t i=N2;i>0;--i,++v1ptr,++v2ptr) {
 #ifdef TMVFLDEBUG
                         TMVAssert(v2ptr >= v2._first);
                         TMVAssert(v2ptr < v2._last);
@@ -128,7 +128,7 @@ namespace tmv {
                         *v2ptr -= (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                     }
                 } else {
-                    for(int i=N2;i>0;--i,++v1ptr,++v2ptr) {
+                    for(ptrdiff_t i=N2;i>0;--i,++v1ptr,++v2ptr) {
 #ifdef TMVFLDEBUG
                         TMVAssert(v2ptr >= v2._first);
                         TMVAssert(v2ptr < v2._last);
@@ -139,7 +139,7 @@ namespace tmv {
             }
         } else {
             if (x == Tx(1)) {
-                for(int i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2) {
+                for(ptrdiff_t i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2) {
 #ifdef TMVFLDEBUG
                     TMVAssert(v2ptr >= v2._first);
                     TMVAssert(v2ptr < v2._last);
@@ -147,7 +147,7 @@ namespace tmv {
                     *v2ptr += (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                 }
             } else if (x == Tx(-1)) {
-                for(int i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2) {
+                for(ptrdiff_t i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2) {
 #ifdef TMVFLDEBUG
                     TMVAssert(v2ptr >= v2._first);
                     TMVAssert(v2ptr < v2._last);
@@ -155,7 +155,7 @@ namespace tmv {
                     *v2ptr -= (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
                 }
             } else {
-                for(int i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2) {
+                for(ptrdiff_t i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2) {
 #ifdef TMVFLDEBUG
                     TMVAssert(v2ptr >= v2._first);
                     TMVAssert(v2ptr < v2._last);
@@ -307,7 +307,7 @@ namespace tmv {
         std::cout<<"v2 = "<<TMV_Text(v2)<<" step "<<v2.step()<<"  "<<v2<<endl;
         Vector<T> v0 = v2;
         Vector<T> vx = v2;
-        for(int i=0;i<v2.size();i++) vx(i) += x * v1(i);
+        for(ptrdiff_t i=0;i<v2.size();i++) vx(i) += x * v1(i);
 #endif
 
         if (v2.size() > 0 && x != T(0)) {
@@ -329,7 +329,7 @@ namespace tmv {
 #ifdef XDEBUG
         std::cout<<"v2 => "<<v2<<std::endl;
         Vector<T> diff(v2.size());
-        for(int i=0;i<v2.size();i++) diff(i) = vx(i) - v2(i);
+        for(ptrdiff_t i=0;i<v2.size();i++) diff(i) = vx(i) - v2(i);
         std::cout<<"diff => "<<diff<<std::endl;
         if (Norm(diff) > 0.001*TMV_ABS(x)*(Norm(v1)+Norm(v0))) {
             cerr<<"AddVV: x = "<<x<<endl;
@@ -361,7 +361,7 @@ namespace tmv {
         Vector<T> v10 = v1;
         Vector<T> v20 = v2;
         Vector<T> vx = v2;
-        for(int i=0;i<vx.size();i++) {
+        for(ptrdiff_t i=0;i<vx.size();i++) {
             vx(i) *= x2;
             vx(i) += x1*v1(i);
         }
@@ -387,7 +387,7 @@ namespace tmv {
 #ifdef XDEBUG
         std::cout<<"v3 => "<<v3<<std::endl;
         Vector<T> diff(v3.size());
-        for(int i=0;i<v3.size();i++) diff(i) = vx(i) - v3(i);
+        for(ptrdiff_t i=0;i<v3.size();i++) diff(i) = vx(i) - v3(i);
         std::cout<<"diff = "<<diff<<std::endl;
         if (Norm(diff) > 0.001*(
                 x1==T(0)?TMV_RealType(T)(0):(TMV_ABS(x1)*Norm(v10)) +

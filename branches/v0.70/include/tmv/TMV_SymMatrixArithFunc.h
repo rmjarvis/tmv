@@ -180,8 +180,8 @@ namespace tmv {
 
         // Definitions are in TMV_MultSV.cpp
         const T* cptr() const;
-        int stepi() const;
-        int stepj() const;
+        ptrdiff_t stepi() const;
+        ptrdiff_t stepj() const;
 
         inline SymType sym() const { return Sym; }
         inline UpLoType uplo() const { return Lower; }
@@ -200,8 +200,8 @@ namespace tmv {
     {
     public :
 
-        inline int colsize() const { return this->size(); }
-        inline int rowsize() const { return this->size(); }
+        inline ptrdiff_t colsize() const { return this->size(); }
+        inline ptrdiff_t rowsize() const { return this->size(); }
 
         inline void assignToM(MatrixView<TMV_RealType(T)> m0) const
         { MatrixComposite<CT>::assignToM(m0); }

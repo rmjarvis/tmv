@@ -67,8 +67,8 @@ public:
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize()); 
     }
-    inline int colsize() const { return m1.colsize(); }
-    inline int rowsize() const { return m1.rowsize(); }
+    inline ptrdiff_t colsize() const { return m1.colsize(); }
+    inline ptrdiff_t rowsize() const { return m1.rowsize(); }
     inline T getX1() const { return x1; }
     inline const GenMatrix<T1>& getM1() const { return m1; }
     inline T getX2() const { return x2; }
@@ -189,8 +189,8 @@ public:
         const T _x, const GenMatrix<T1>& _m1, 
         const GENMATRIX2<T2>& _m2) : x(_x), m1(_m1), m2(_m2)
     { TMVAssert(m1.rowsize() == m2.colsize()) ; }
-    inline int colsize() const { return m1.colsize(); }
-    inline int rowsize() const { return m2.rowsize(); }
+    inline ptrdiff_t colsize() const { return m1.colsize(); }
+    inline ptrdiff_t rowsize() const { return m2.rowsize(); }
     inline T getX() const { return x; }
     inline const GenMatrix<T1>& getM1() const { return m1; }
     inline const GENMATRIX2<T2>& getM2() const { return m2; }
@@ -308,8 +308,8 @@ public:
         const T _x, const GenMatrix<T1>& _m1, const GENMATRIX2<T2>& _m2) :
         x(_x), m1(_m1), m2(_m2)
     { TMVAssert( m1.colsize() == m2.colsize() ); }
-    inline int colsize() const { return m2.rowsize(); }
-    inline int rowsize() const { return m1.rowsize(); }
+    inline ptrdiff_t colsize() const { return m2.rowsize(); }
+    inline ptrdiff_t rowsize() const { return m1.rowsize(); }
     inline T getX() const { return x; }
     inline const GenMatrix<T1>& getM1() const { return m1; }
     inline const GENMATRIX2<T2>& getM2() const { return m2; }
@@ -357,8 +357,8 @@ public:
         const T _x, const GenMatrix<T1>& _m1, const GENMATRIX2<T2>& _m2) :
         x(_x), m1(_m1), m2(_m2)
     { TMVAssert( m1.rowsize() == m2.rowsize() ); }
-    inline int colsize() const { return m1.colsize(); }
-    inline int rowsize() const { return m2.colsize(); }
+    inline ptrdiff_t colsize() const { return m1.colsize(); }
+    inline ptrdiff_t rowsize() const { return m2.colsize(); }
     inline T getX() const { return x; }
     inline const GenMatrix<T1>& getM1() const { return m1; }
     inline const GENMATRIX2<T2>& getM2() const { return m2; }

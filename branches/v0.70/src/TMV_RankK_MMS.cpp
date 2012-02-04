@@ -80,7 +80,7 @@ namespace tmv {
         TMVAssert(ha == A.isherm());
         TMVAssert(a1 == (alpha == T(1)));
 
-        int N = A.size();
+        ptrdiff_t N = A.size();
 
         if (N <= SYM_RK_BLOCKSIZE2) {
             if (N == 1) {
@@ -107,7 +107,7 @@ namespace tmv {
             } else {
                 if (x.isrm()) {
                     if (A.isrm()) {
-                        for (int i=0;i<N;++i) {
+                        for (ptrdiff_t i=0;i<N;++i) {
                             if (add)
                                 A.row(i,0,i+1) += alpha * x.row(i) * 
                                     (ha ?
@@ -120,7 +120,7 @@ namespace tmv {
                                      x.rowRange(0,i+1).transpose());
                         }
                     } else {
-                        for (int j=0;j<N;++j) {
+                        for (ptrdiff_t j=0;j<N;++j) {
                             if (add)
                                 A.col(j,j,N) += alpha * x.rowRange(j,N) * 
                                     (ha ? x.row(j).conjugate() : x.row(j));
@@ -130,14 +130,14 @@ namespace tmv {
                         }
                     }
                 } else { // x not row major
-                    const int K = x.rowsize();
-                    for (int i=0;i<K;i++)
+                    const ptrdiff_t K = x.rowsize();
+                    for (ptrdiff_t i=0;i<K;i++)
                         Rank1Update<add>(alpha,x.col(i),A);
                 }
             }
         } else {
-            int k = N/2;
-            const int nb = SYM_RK_BLOCKSIZE;
+            ptrdiff_t k = N/2;
+            const ptrdiff_t nb = SYM_RK_BLOCKSIZE;
             if (k > nb) k = k/nb*nb;
             RecursiveRankKUpdate<ha,a1,add>(
                 alpha,x.rowRange(0,k),A.subSymMatrix(0,k));
@@ -162,7 +162,7 @@ namespace tmv {
         TMVAssert(ha == A.isherm());
         TMVAssert(a1 == (alpha == T(1)));
 
-        int N = A.size();
+        ptrdiff_t N = A.size();
         if (N == 1) {
             Tx x00 = x(0,0);
             if (ha) {
@@ -193,7 +193,7 @@ namespace tmv {
             // Note that there is no order to do these in which overwriting A??
             // won't screw up an x?? which is needed later.
             // Need a temporary.  I choose A10, but it doesn't much matter.
-            const int k = N/2;
+            const ptrdiff_t k = N/2;
             const ConstMatrixView<Tx> x00 = x.subMatrix(0,k,0,k);
             const ConstMatrixView<Tx> x10 = x.subMatrix(k,N,0,k);
             const ConstMatrixView<Tx> x01 = x.subMatrix(0,k,k,N);
@@ -267,9 +267,9 @@ namespace tmv {
             return NonBlasRankKUpdate<add>(
                 TMV_CONJ(alpha),x.conjugate(),A.conjugate());
         } else if (SameStorage(x,A)) {
-            const int N = A.size();
+            const ptrdiff_t N = A.size();
             TMVAssert(x.colsize() == N);
-            const int K = x.rowsize();
+            const ptrdiff_t K = x.rowsize();
             if (K >= N) {
                 InPlaceRankKUpdate<add>(alpha,x.colRange(0,N),A);
                 if (K > N) NonBlasRankKUpdate<add>(alpha,x.colRange(N,K),A);

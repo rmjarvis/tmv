@@ -213,7 +213,7 @@ namespace tmv {
         TMVAssert(minv.colsize() == pimpl->QRx.rowsize());
         TMVAssert(minv.rowsize() == pimpl->QRx.rowsize());
         TMVAssert(pimpl->QRx.colsize() >= pimpl->QRx.rowsize());
-        const int N = pimpl->QRx.rowsize();
+        const ptrdiff_t N = pimpl->QRx.rowsize();
         // At A = Rt R
         // (At A)^-1 = (Rt R)^-1 = R^-1 Rt^-1
         UpperTriMatrixView<T> Rinv = minv.upperTri();
@@ -235,15 +235,15 @@ namespace tmv {
 
     template <class T> 
     void GetQFromBandQR(
-        MatrixView<T> Q, const GenVector<T>& Qbeta, const int nlo) 
+        MatrixView<T> Q, const GenVector<T>& Qbeta, const ptrdiff_t nlo) 
     {
         // Extract the Q matrix from a combined QRx matrix
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Qbeta.size() == Q.rowsize());
-        const int M = Q.colsize();
-        const int N = Q.rowsize();
+        const ptrdiff_t M = Q.colsize();
+        const ptrdiff_t N = Q.rowsize();
         Q.upperTri().setZero();
-        for(int j=N-1;j>=0;j--) {
+        for(ptrdiff_t j=N-1;j>=0;j--) {
             if (j+nlo+1 > M)
                 HouseholderUnpack(Q.subMatrix(j,M,j,N),Qbeta(j));
             else
@@ -300,11 +300,11 @@ namespace tmv {
     }
 
     template <class T> 
-    int BandQRDiv<T>::colsize() const
+    ptrdiff_t BandQRDiv<T>::colsize() const
     { return pimpl->istrans ? pimpl->QRx.rowsize() : pimpl->QRx.colsize(); }
 
     template <class T> 
-    int BandQRDiv<T>::rowsize() const
+    ptrdiff_t BandQRDiv<T>::rowsize() const
     { return pimpl->istrans ? pimpl->QRx.colsize() : pimpl->QRx.rowsize(); }
 
 #ifdef INST_INT

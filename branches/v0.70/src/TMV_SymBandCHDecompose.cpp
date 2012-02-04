@@ -74,7 +74,7 @@ namespace tmv {
         TMVAssert(isReal(T()) || A.isherm());
         TMVAssert(A.iscm() || A.isrm());
         TMVAssert(cm == A.iscm());
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
 #ifdef XDEBUG
         Matrix<T> A0(A);
         //cout<<"CHDecompose:\n";
@@ -82,12 +82,12 @@ namespace tmv {
 #endif
 
         VectorView<TMV_RealType(T)> Adiag = A.diag().realPart();
-        const int nlo = A.nlo();
+        const ptrdiff_t nlo = A.nlo();
 
         if (nlo == 0) {
             TMV_RealType(T)* Ajj= Adiag.ptr();
-            const int ds = Adiag.step();
-            for(int j=0;j<N;++j,Ajj+=ds) {
+            const ptrdiff_t ds = Adiag.step();
+            for(ptrdiff_t j=0;j<N;++j,Ajj+=ds) {
 #ifdef TMVFLDEBUG
                 TMVAssert(Ajj >= A.realPart()._first);
                 TMVAssert(Ajj < A.realPart()._last);
@@ -104,9 +104,9 @@ namespace tmv {
             }
         } else if (cm) {
             TMV_RealType(T)* Ajj= Adiag.ptr();
-            const int ds = Adiag.step();
-            int endcol = nlo+1;
-            for(int j=0;j<N-1;++j,Ajj+=ds) {
+            const ptrdiff_t ds = Adiag.step();
+            ptrdiff_t endcol = nlo+1;
+            for(ptrdiff_t j=0;j<N-1;++j,Ajj+=ds) {
 #ifdef TMVFLDEBUG
                 TMVAssert(Ajj >= A.realPart()._first);
                 TMVAssert(Ajj < A.realPart()._last);
@@ -140,8 +140,8 @@ namespace tmv {
             *Ajj = TMV_SQRT(*Ajj);
         } else {
             TMV_RealType(T)* Aii = Adiag.ptr();
-            const int ds = Adiag.step();
-            int startrow = 0;
+            const ptrdiff_t ds = Adiag.step();
+            ptrdiff_t startrow = 0;
 #ifdef TMVFLDEBUG
             TMVAssert(Aii >= A.realPart()._first);
             TMVAssert(Aii < A.realPart()._last);
@@ -155,7 +155,7 @@ namespace tmv {
 #endif
             }
             *Aii = TMV_SQRT(*Aii);
-            for(int i=1;i<N;++i) {
+            for(ptrdiff_t i=1;i<N;++i) {
                 if (i > nlo) ++startrow;
                 Aii+=ds;
                 A.row(i,startrow,i) %= 
@@ -232,7 +232,7 @@ namespace tmv {
         TMVAssert(A.ct() == NonConj);
         TMVAssert(A.isherm());
         TMVAssert(A.nlo() == 1);
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
 #ifdef XDEBUG
         Matrix<T> A0(A);
         //cout<<"LDLDecompose:\n";
@@ -243,7 +243,7 @@ namespace tmv {
         T* Lj = A.diag(-1).ptr();
 
         if (A.isdm()) {
-            for(int j=0;j<N-1;++j) {
+            for(ptrdiff_t j=0;j<N-1;++j) {
                 T Ax0 = *Lj;
                 if (*Dj == TMV_RealType(T)(0))  {
 #ifdef NOTHROW
@@ -259,9 +259,9 @@ namespace tmv {
                 ++Lj;
             }
         } else {
-            const int Dstep = A.diag().realPart().step();
-            const int Lstep = A.diag().step();
-            for(int j=0;j<N-1;++j) {
+            const ptrdiff_t Dstep = A.diag().realPart().step();
+            const ptrdiff_t Lstep = A.diag().step();
+            for(ptrdiff_t j=0;j<N-1;++j) {
                 T Ax0 = *Lj;
                 if (*Dj == TMV_RealType(T)(0))  {
 #ifdef NOTHROW
@@ -320,7 +320,7 @@ namespace tmv {
         TMVAssert(A.ct() == NonConj);
         TMVAssert(A.issym());
         TMVAssert(A.nlo() == 1);
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
 #ifdef XDEBUG
         Matrix<T> A0(A);
         //cout<<"SymLDLDecompose:\n";
@@ -345,8 +345,8 @@ namespace tmv {
             *Dj -= *Lj * Ax0;
             ++Lj;
         } else {
-            int step = A.diagstep();
-            for(int j=0;j<N-1;++j) {
+            ptrdiff_t step = A.diagstep();
+            for(ptrdiff_t j=0;j<N-1;++j) {
                 T Ax0 = *Lj;
                 if (*Dj == T(0))  {
 #ifdef NOTHROW

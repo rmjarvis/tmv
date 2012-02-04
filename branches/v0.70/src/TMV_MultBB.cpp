@@ -71,23 +71,23 @@ namespace tmv {
         TMVAssert(C.colsize() > 0);
         TMVAssert(C.ct()==NonConj);
 
-        int m1=0;
-        int n=A.nlo();
-        int m2=A.nhi()+1;
+        ptrdiff_t m1=0;
+        ptrdiff_t n=A.nlo();
+        ptrdiff_t m2=A.nhi()+1;
 
-        int j1=0;
-        int j2=C.nhi()+1;
-        int k=C.nlo();
+        ptrdiff_t j1=0;
+        ptrdiff_t j2=C.nhi()+1;
+        ptrdiff_t k=C.nlo();
 
-        const int M = C.colsize();
-        const int N = C.rowsize();
-        const int K = A.rowsize();
+        const ptrdiff_t M = C.colsize();
+        const ptrdiff_t N = C.rowsize();
+        const ptrdiff_t K = A.rowsize();
 
-        int k2=N-B.nhi();
+        ptrdiff_t k2=N-B.nhi();
 
-        int subnlo = TMV_MIN(A.nhi(),B.nlo());
-        int subnhi = B.nhi();
-        for(int i=0;i<M; ++i) {
+        ptrdiff_t subnlo = TMV_MIN(A.nhi(),B.nlo());
+        ptrdiff_t subnhi = B.nhi();
+        for(ptrdiff_t i=0;i<M; ++i) {
             //C.row(i,j1,j2) (+)= alpha * A.row(i,m1,m2) * 
             //    B.subBandMatrix(m1,m2,j1,j2,subnlo,subnhi);
             MultMV<add>(alpha,
@@ -130,19 +130,19 @@ namespace tmv {
         TMVAssert(C.colsize() > 0);
         TMVAssert(C.ct()==NonConj);
 
-        int i1=0;
-        int k=A.nhi();
-        int i2=A.nlo()+1;
+        ptrdiff_t i1=0;
+        ptrdiff_t k=A.nhi();
+        ptrdiff_t i2=A.nlo()+1;
 
-        int m1=0;
-        int n=B.nlo();
-        int m2=B.nhi()+1;
-        const int M = C.colsize();
-        const int N = C.rowsize();
-        const int K = A.rowsize();
+        ptrdiff_t m1=0;
+        ptrdiff_t n=B.nlo();
+        ptrdiff_t m2=B.nhi()+1;
+        const ptrdiff_t M = C.colsize();
+        const ptrdiff_t N = C.rowsize();
+        const ptrdiff_t K = A.rowsize();
 
         if (!add) C.setZero();
-        for(int j=0;j<K; ++j) {
+        for(ptrdiff_t j=0;j<K; ++j) {
             C.subMatrix(i1,i2,m1,m2) += alpha * A.col(j,i1,i2) ^ B.row(j,m1,m2);
             if (k>0) --k; else ++i1;
             if (i2<M) ++i2;
@@ -176,37 +176,37 @@ namespace tmv {
         // j?A = i?B
         // j?B = j?C
 
-        const int M = C.colsize();
-        const int N = C.rowsize();
-        const int K = A.rowsize();
-        for(int kA=-A.nlo();kA<=A.nhi();++kA) {
-            int kC = kA-B.nlo();
-            int kB1 = -B.nlo();
+        const ptrdiff_t M = C.colsize();
+        const ptrdiff_t N = C.rowsize();
+        const ptrdiff_t K = A.rowsize();
+        for(ptrdiff_t kA=-A.nlo();kA<=A.nhi();++kA) {
+            ptrdiff_t kC = kA-B.nlo();
+            ptrdiff_t kB1 = -B.nlo();
             if (kC < -C.nlo()) { kC = -C.nlo(); kB1 = kC-kA; }
 
-            int m1A = kA < 0 ? -kB1 : kC < 0 ? -kC : 0;
-            int m1B = kC < 0 ? 0 : kC;
-            int m1C = 0;
-            //int i1B = kC < 0 ? B.nlo() : kA; // = j1A
-            //int i1C = kC < 0 ? -kC : 0; // = i1A
-            //int j1C = kC < 0 ? 0 : kC;  // = j1B
+            ptrdiff_t m1A = kA < 0 ? -kB1 : kC < 0 ? -kC : 0;
+            ptrdiff_t m1B = kC < 0 ? 0 : kC;
+            ptrdiff_t m1C = 0;
+            //ptrdiff_t i1B = kC < 0 ? B.nlo() : kA; // = j1A
+            //ptrdiff_t i1C = kC < 0 ? -kC : 0; // = i1A
+            //ptrdiff_t j1C = kC < 0 ? 0 : kC;  // = j1B
 
-            int len = kC < 0 ?
+            ptrdiff_t len = kC < 0 ?
                 TMV_MIN(TMV_MIN(N,M+kC),K+kB1) :
                 TMV_MIN(TMV_MIN(N-kC,M),K-kA);
 
-            int m2C = len;
-            int m2A = kC < 0 ? m1A + m2C : m2C;
-            int m2B = kC < 0 ? m2C : m1B + m2C;
-            //int i2B = i1B + m2C;
-            //int i2C = i1C + m2C;
-            //int j2C = j1C + m2C;
-            int j2C = kC < 0 ? m2C : m2C + kC;
+            ptrdiff_t m2C = len;
+            ptrdiff_t m2A = kC < 0 ? m1A + m2C : m2C;
+            ptrdiff_t m2B = kC < 0 ? m2C : m1B + m2C;
+            //ptrdiff_t i2B = i1B + m2C;
+            //ptrdiff_t i2C = i1C + m2C;
+            //ptrdiff_t j2C = j1C + m2C;
+            ptrdiff_t j2C = kC < 0 ? m2C : m2C + kC;
             //TMVAssert(i2B <= K);
             //TMVAssert(i2C <= M);
             TMVAssert(j2C <= N);
 
-            for(int kB=kB1;kB<=B.nhi();++kB,++kC) {
+            for(ptrdiff_t kB=kB1;kB<=B.nhi();++kB,++kC) {
                 if (kC > C.nhi()) break;
                 // C.diag(kC,m1C,m2C) += alpha * DiagMatrixViewOf(A.diag(kA,m1A,m2A))
                 //      * B.diag(kB,m1B,m2B);
@@ -546,8 +546,8 @@ namespace tmv {
                 MultMM<add>(alpha,A,BB,CC);
                 if (!add) C.colRange(B.colsize()+B.nhi(),B.rowsize()).setZero();
             } else {
-                int nhi = TMV_MIN((C.rowsize()-1),A.nhi()+B.nhi());
-                int nlo = TMV_MIN((C.colsize()-1),A.nlo()+B.nlo());
+                ptrdiff_t nhi = TMV_MIN((C.rowsize()-1),A.nhi()+B.nhi());
+                ptrdiff_t nlo = TMV_MIN((C.colsize()-1),A.nlo()+B.nlo());
                 if (C.nhi() > nhi || C.nlo() > nlo) {
                     MultMM<add>(alpha,A,B,C.diagRange(-nlo,nhi+1));
                     if (!add) {

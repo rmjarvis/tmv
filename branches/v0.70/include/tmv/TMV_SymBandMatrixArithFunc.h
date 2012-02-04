@@ -139,9 +139,9 @@ namespace tmv {
 
         // Definitions are in TMV_MultsBV.cpp
         const T* cptr() const;
-        int stepi() const;
-        int stepj() const;
-        int diagstep() const;
+        ptrdiff_t stepi() const;
+        ptrdiff_t stepj() const;
+        ptrdiff_t diagstep() const;
 
         inline SymType sym() const { return Sym; }
         inline UpLoType uplo() const { return Lower; }
@@ -164,13 +164,13 @@ namespace tmv {
         // Need to respecify that size() is pure virtual here, 
         // since GenBandMatrix defines size for compaibility
         // with AssignableToDiagMatrix, etc.
-        virtual int size() const = 0;
+        virtual ptrdiff_t size() const = 0;
 
         using AssignableToSymMatrix<CT>::sym;
         using AssignableToBandMatrix<CT>::nlo;
-        inline int nhi() const { return nlo(); }
-        inline int colsize() const { return size(); }
-        inline int rowsize() const { return size(); }
+        inline ptrdiff_t nhi() const { return nlo(); }
+        inline ptrdiff_t colsize() const { return size(); }
+        inline ptrdiff_t rowsize() const { return size(); }
 
         inline void assignToS(SymMatrixView<T> m0) const
         {

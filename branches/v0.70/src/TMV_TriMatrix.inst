@@ -3,17 +3,17 @@
 
 #define Def1(T,RT) \
   template bool GenUpperTriMatrix<T >::hasSubMatrix( \
-      int i1, int i2, int j1, int j2, int istep, int jstep) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const; \
   template bool GenUpperTriMatrix<T >::hasSubVector( \
-      int i, int j, int istep, int jstep, int size) const; \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t size) const; \
   template bool GenUpperTriMatrix<T >::hasSubTriMatrix( \
-      int i1, int i2, int istep) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const; \
   template bool ConstUpperTriMatrixView<T,FortranStyle>::hasSubMatrix( \
-      int i1, int i2, int j1, int j2, int istep, int jstep) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const; \
   template bool ConstUpperTriMatrixView<T,FortranStyle>::hasSubVector( \
-      int i, int j, int istep, int jstep, int size) const; \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t size) const; \
   template bool ConstUpperTriMatrixView<T,FortranStyle>::hasSubTriMatrix( \
-      int i1, int i2, int istep) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const; \
   template T GenUpperTriMatrix<T >::sumElements() const; \
   template RT GenUpperTriMatrix<T >::sumAbsElements() const; \
   template RT GenUpperTriMatrix<T >::sumAbs2Elements() const; \

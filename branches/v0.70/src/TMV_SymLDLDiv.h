@@ -39,17 +39,17 @@ namespace tmv {
     template <class T, class T1> 
     void LDL_LDivEq(
         const GenSymMatrix<T1>& L, const GenVector<T1>& xD,
-        const int* P, MatrixView<T> m);
+        const ptrdiff_t* P, MatrixView<T> m);
     template <class T, class T1> 
     void LDL_RDivEq(
         const GenSymMatrix<T1>& L, const GenVector<T1>& xD,
-        const int* P, MatrixView<T> m);
+        const ptrdiff_t* P, MatrixView<T> m);
 
     // This is in TMV_SymLDLInverse.cpp:
     template <class T, class T1> 
     void LDL_Inverse(
         const GenSymMatrix<T>& L, const GenVector<T>& xD,
-        const int* P, SymMatrixView<T1> sinv);
+        const ptrdiff_t* P, SymMatrixView<T1> sinv);
 
     // A quick helper class
     template <bool herm, class T>
@@ -90,17 +90,17 @@ namespace tmv {
     template <class T>
     inline void LDL_LDivEq(
         const GenSymMatrix<CT>& , const GenVector<CT>& ,
-        const int* , MatrixView<T> )
+        const ptrdiff_t* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void LDL_RDivEq(
         const GenSymMatrix<CT>& , const GenVector<CT>& ,
-        const int* , MatrixView<T> )
+        const ptrdiff_t* , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void LDL_Inverse(
         const GenSymMatrix<CT>& , const GenVector<CT>& ,
-        const int* , SymMatrixView<T> )
+        const ptrdiff_t* , SymMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
     template <bool herm, class T>

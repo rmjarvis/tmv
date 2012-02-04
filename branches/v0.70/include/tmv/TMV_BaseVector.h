@@ -61,7 +61,7 @@ namespace tmv {
     template <class T> 
     struct AssignableToVector
     {
-        virtual int size() const = 0;
+        virtual ptrdiff_t size() const = 0;
         virtual void assignToV(VectorView<TMV_RealType(T)> rhs) const = 0;
         virtual void assignToV(VectorView<TMV_ComplexType(T)> rhs) const = 0;
         virtual inline ~AssignableToVector() {}

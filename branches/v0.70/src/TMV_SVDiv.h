@@ -46,12 +46,12 @@ namespace tmv {
     template <class T, class Tm, class Tx> 
     void SV_LDiv(
         const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
-        const GenMatrix<T>& Vt, int kmax,
+        const GenMatrix<T>& Vt, ptrdiff_t kmax,
         const GenMatrix<Tm>& m, MatrixView<Tx> x);
     template <class T, class Tm, class Tx> 
     void SV_RDiv(
         const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
-        const GenMatrix<T>& Vt, int kmax,
+        const GenMatrix<T>& Vt, ptrdiff_t kmax,
         const GenMatrix<Tm>& m, MatrixView<Tx> x);
 
 
@@ -109,28 +109,28 @@ namespace tmv {
     template <class T, class Tm, class Tx>
     inline void CallSV_LDiv(
         Tx , const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
-        const GenMatrix<T>& Vt, int kmax,
+        const GenMatrix<T>& Vt, ptrdiff_t kmax,
         const GenMatrix<Tm>& m, MatrixView<Tx> x)
     { SV_LDiv(U,S,Vt,kmax,m,x); }
 
     template <class T, class Tm, class Tx>
     inline void CallSV_LDiv(
         Tx , const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
-        const GenMatrix<T>& Vt, int kmax,
+        const GenMatrix<T>& Vt, ptrdiff_t kmax,
         const GenMatrix<Tm>& m, MatrixView<CTx> x)
     { SV_LDiv(U,S,Vt,kmax,m,x); }
    
     template <class T, class Tm, class Tx>
     inline void CallSV_RDiv(
         Tx , const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
-        const GenMatrix<T>& Vt, int kmax,
+        const GenMatrix<T>& Vt, ptrdiff_t kmax,
         const GenMatrix<Tm>& m, MatrixView<Tx> x)
     { SV_RDiv(U,S,Vt,kmax,m,x); }
    
     template <class T, class Tm, class Tx>
     inline void CallSV_RDiv(
         Tx , const GenMatrix<T>& U, const GenDiagMatrix<RT>& S,
-        const GenMatrix<T>& Vt, int kmax,
+        const GenMatrix<T>& Vt, ptrdiff_t kmax,
         const GenMatrix<Tm>& m, MatrixView<CTx> x)
     { SV_RDiv(U,S,Vt,kmax,m,x); }
    
@@ -143,37 +143,37 @@ namespace tmv {
     template <class T>
     inline void CallSV_LDiv(
         CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
-        const GenMatrix<CT>& , int ,
+        const GenMatrix<CT>& , ptrdiff_t ,
         const GenMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void CallSV_LDiv(
         CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
-        const GenMatrix<CT>& , int ,
+        const GenMatrix<CT>& , ptrdiff_t ,
         const GenMatrix<T>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void CallSV_LDiv(
         CT , const GenMatrix<T>& , const GenDiagMatrix<T>& ,
-        const GenMatrix<T>& , int ,
+        const GenMatrix<T>& , ptrdiff_t ,
         const GenMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void CallSV_RDiv(
         CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
-        const GenMatrix<CT>& , int ,
+        const GenMatrix<CT>& , ptrdiff_t ,
         const GenMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void CallSV_RDiv(
         CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
-        const GenMatrix<CT>& , int ,
+        const GenMatrix<CT>& , ptrdiff_t ,
         const GenMatrix<T>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void CallSV_RDiv(
         CT , const GenMatrix<T>& , const GenDiagMatrix<T>& ,
-        const GenMatrix<T>& , int ,
+        const GenMatrix<T>& , ptrdiff_t ,
         const GenMatrix<CT>& , MatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 

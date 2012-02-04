@@ -76,7 +76,7 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline ProdXV(T _x, const GenVector<Tv>& _v) : x(_x), v(_v) {}
-        inline int size() const { return v.size(); }
+        inline ptrdiff_t size() const { return v.size(); }
         inline T getX() const { return x; }
         inline const GenVector<Tv>& getV() const { return v; }
         inline void assignToV(VectorView<real_type> v0) const
@@ -150,7 +150,7 @@ namespace tmv {
             T _x2, const GenVector<T2>& _v2) :
             x1(_x1),v1(_v1),x2(_x2), v2(_v2)
         { TMVAssert(v1.size() == v2.size()); }
-        inline int size() const { return v1.size(); }
+        inline ptrdiff_t size() const { return v1.size(); }
         inline T getX1() const { return x1; }
         inline const GenVector<T1>& getV1() const { return v1; }
         inline T getX2() const { return x2; }
@@ -367,7 +367,7 @@ namespace tmv {
             T _x, const GenVector<T1>& _v1, const GenVector<T2>& _v2) :
             x(_x), v1(_v1), v2(_v2)
         { TMVAssert(v1.size() == v2.size()); }
-        inline int size() const { return v1.size(); }
+        inline ptrdiff_t size() const { return v1.size(); }
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV1() const { return v1; }
         inline const GenVector<T2>& getV2() const { return v2; }

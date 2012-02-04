@@ -58,7 +58,7 @@ namespace tmv {
     {
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
-        virtual int size() const = 0;
+        virtual ptrdiff_t size() const = 0;
         virtual void assignToD(DiagMatrixView<RT> m) const = 0;
         virtual void assignToD(DiagMatrixView<CT> m) const = 0;
         virtual inline ~AssignableToDiagMatrix() {}

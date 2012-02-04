@@ -392,7 +392,7 @@ namespace tmv {
             return sum;
         }
 
-        inline T minElement(int* iminout=0) const
+        inline T minElement(ptrdiff_t* iminout=0) const
         {
             T min = N>0 ? itsv[0] : T(0);
             if (iminout) *iminout = 0;
@@ -406,7 +406,7 @@ namespace tmv {
             return min;
         }
 
-        inline T maxElement(int* imaxout=0) const
+        inline T maxElement(ptrdiff_t* imaxout=0) const
         {
             T max = N>0 ? itsv[0] : T(0);
             if (imaxout) *imaxout = 0;
@@ -420,7 +420,7 @@ namespace tmv {
             return  max;
         }
 
-        inline RT minAbsElement(int* iminout=0) const
+        inline RT minAbsElement(ptrdiff_t* iminout=0) const
         {
             RT min = N>0 ? TMV_ABS(itsv[0]) : RT(0);
             if (iminout) *iminout = 0;
@@ -435,7 +435,7 @@ namespace tmv {
             return min;
         }
 
-        inline RT maxAbsElement(int* imaxout=0) const
+        inline RT maxAbsElement(ptrdiff_t* imaxout=0) const
         {
             RT max = N>0 ? TMV_ABS(itsv[0]) : RT(0);
             if (imaxout) *imaxout = 0;
@@ -450,7 +450,7 @@ namespace tmv {
             return max;
         }
 
-        inline RT minAbs2Element(int* iminout=0) const
+        inline RT minAbs2Element(ptrdiff_t* iminout=0) const
         {
             RT min = N>0 ? TMV_ABS2(itsv[0]) : RT(0);
             if (iminout) *iminout = 0;
@@ -465,7 +465,7 @@ namespace tmv {
             return min;
         }
 
-        inline RT maxAbs2Element(int* imaxout=0) const
+        inline RT maxAbs2Element(ptrdiff_t* imaxout=0) const
         {
             RT max = N>0 ? TMV_ABS2(itsv[0]) : RT(0);
             if (imaxout) *imaxout = 0;
@@ -544,7 +544,7 @@ namespace tmv {
             return *this;
         }
 
-        inline type& permute(const int* p, int i1, int i2) 
+        inline type& permute(const ptrdiff_t* p, int i1, int i2) 
         {
             if (A == int(CStyle)) {
                 TMVAssert(i1>=0 && i1<=i2 && i2<=N);
@@ -556,11 +556,10 @@ namespace tmv {
             return *this;
         }
 
-        inline type& permute(const int* p) 
+        inline type& permute(const ptrdiff_t* p) 
         { return permute(p,A==int(CStyle)?0:1,N); }
 
-        inline type& reversePermute(
-            const int* p, int i1, int i2)
+        inline type& reversePermute(const ptrdiff_t* p, int i1, int i2)
         {
             if (A == int(CStyle)) {
                 TMVAssert(i1>=0 && i1<=i2 && i2<=N);
@@ -572,7 +571,7 @@ namespace tmv {
             return *this;
         }
 
-        inline type& reversePermute(const int* p)
+        inline type& reversePermute(const ptrdiff_t* p)
         { return reversePermute(p,A==int(CStyle)?0:1,N); }
 
         inline type& reverseSelf()
@@ -581,8 +580,16 @@ namespace tmv {
             return *this;
         }
 
-        inline type& sort(int* P, ADType ad=Ascend, CompType comp=RealComp)
+        inline type& sort(
+            ptrdiff_t* p, ADType ad=Ascend, CompType comp=RealComp)
+        { view().sort(p,ad,comp); return *this; }
+
+        inline type& sort(
+            Permutation& P, ADType ad=Ascend, CompType comp=RealComp)
         { view().sort(P,ad,comp); return *this; }
+
+        inline type& sort(ADType ad=Ascend, CompType comp=RealComp)
+        { view().sort(ad,comp); return *this; }
 
         //
         // subVector

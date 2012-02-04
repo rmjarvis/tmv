@@ -54,7 +54,7 @@ public:
         const T _x, const GENMATRIX<T1>& _m, const GenVector<T2>& _v) :
         x(_x), m(_m), v(_v)
     { TMVAssert(v.size()==m.rowsize()); }
-    inline int size() const { return m.colsize(); }
+    inline ptrdiff_t size() const { return m.colsize(); }
     inline T getX() const { return x; }
     inline const GENMATRIX<T1>& getM() const { return m; }
     inline const GenVector<T2>& getV() const { return v; }
@@ -104,7 +104,7 @@ public:
         const T _x, const GenVector<T1>& _v, const GENMATRIX<T2>& _m) :
         x(_x), v(_v), m(_m)
     { TMVAssert(v.size()==m.colsize()); }
-    inline int size() const { return m.rowsize(); }
+    inline ptrdiff_t size() const { return m.rowsize(); }
     inline T getX() const { return x; }
     inline const GenVector<T1>& getV() const { return v; }
     inline const GENMATRIX<T2>& getM() const { return m; }
@@ -204,7 +204,7 @@ public:
         const T _x, const GenVector<T1>& _v, const GENMATRIX<T2>& _m) :
         x(_x), v(_v), m(_m)
     { TMVAssert(v.size()==m.colsize()); }
-    inline int size() const { return m.rowsize(); }
+    inline ptrdiff_t size() const { return m.rowsize(); }
     inline T getX() const { return x; }
     inline const GenVector<T1>& getV() const { return v; }
     inline const GENMATRIX<T2>& getM() const { return m; }
@@ -235,7 +235,7 @@ public:
         const T _x, const GenVector<T1>& _v, const GENMATRIX<T2>& _m) :
         x(_x), v(_v), m(_m)
     { TMVAssert(v.size()==m.rowsize()); }
-    inline int size() const { return m.colsize(); }
+    inline ptrdiff_t size() const { return m.colsize(); }
     inline T getX() const { return x; }
     inline const GenVector<T1>& getV() const { return v; }
     inline const GENMATRIX<T2>& getM() const { return m; }

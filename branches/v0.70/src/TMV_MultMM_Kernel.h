@@ -57,7 +57,7 @@ namespace tmv {
         T C00, C01, C10, C11;
         T c00, c01, c10, c11;
 
-        int i2,j2;
+        ptrdiff_t i2,j2;
 
         j2 = 8; do {
             b0 = B0[0]; 
@@ -271,11 +271,11 @@ namespace tmv {
     }
     template <class T>
     static void generic_multmm_M_16_16(
-        const int M, const T* A0, const T* B0, T* C0)
+        const ptrdiff_t M, const T* A0, const T* B0, T* C0)
     {
-        const int M_4 = M>>2; // M_4 = M/4
-        const int Mc = M-(M_4<<2); // Mc = M%4
-        const int Mx16 = M<<4; // = M*16
+        const ptrdiff_t M_4 = M>>2; // M_4 = M/4
+        const ptrdiff_t Mc = M-(M_4<<2); // Mc = M%4
+        const ptrdiff_t Mx16 = M<<4; // = M*16
 
         T a0, a1;
         T b0, b1;
@@ -284,7 +284,7 @@ namespace tmv {
 
         T* C1 = C0 + M;
 
-        int j,i;
+        ptrdiff_t j,i;
 
         j = 8; do {
             b0 = B0[0]; 
@@ -583,17 +583,17 @@ namespace tmv {
     }
     template <class T>
     static void generic_multmm_16_N_16(
-        const int N, const T* A0, const T* B0, T* C0)
+        const ptrdiff_t N, const T* A0, const T* B0, T* C0)
     {
-        const int N_2 = N>>1; // N_2 = N/2
-        const int Nc = N-(N_2<<1); // Nc = N%2
+        const ptrdiff_t N_2 = N>>1; // N_2 = N/2
+        const ptrdiff_t Nc = N-(N_2<<1); // Nc = N%2
 
         T a0, a1;
         T b0, b1;
         T C00, C01, C10, C11;
         T c00, c01, c10, c11;
 
-        int j,i;
+        ptrdiff_t j,i;
 
         j = N_2; if (j) do {
             b0 = B0[0]; 
@@ -975,17 +975,17 @@ namespace tmv {
     }
     template <class T>
     static void generic_multmm_16_16_K(
-        const int K, const T* A0, const T* B0, T* C0)
+        const ptrdiff_t K, const T* A0, const T* B0, T* C0)
     {
         TMVAssert(K > 0);
-        const int K_4 = (K-1)>>2; // K_4 = (K-1)/4 
+        const ptrdiff_t K_4 = (K-1)>>2; // K_4 = (K-1)/4 
         // The K-1 here  ^^^ is to make sure Kc > 0, since the regular
         // loop accesses memory past the end, so we use the Kc loop
         // to make sure that doesn't lead to a seg fault.
-        const int Kc = K-(K_4<<2); // = K % 4
-        const int Kcm1 = Kc-1;
-        const int Kx16 = K<<4; // = K * 16
-        const int Kx2 = K<<1; // = K * 2
+        const ptrdiff_t Kc = K-(K_4<<2); // = K % 4
+        const ptrdiff_t Kcm1 = Kc-1;
+        const ptrdiff_t Kx16 = K<<4; // = K * 16
+        const ptrdiff_t Kx2 = K<<1; // = K * 2
 
         T a0, a1;
         T b0, b1;
@@ -996,7 +996,7 @@ namespace tmv {
         const T* B1 = B0 + K;
         T* C1 = C0 + 16;
 
-        int j,i,k;
+        ptrdiff_t j,i,k;
 
         j = 8; do {
             i = 8; do {
@@ -1047,25 +1047,25 @@ namespace tmv {
     }
     template <class T>
     static void generic_multmm_M_N_K(
-        const int M, const int N, const int K, const int Kd,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K, const ptrdiff_t Kd,
         const T* A0, const T* B0, T* C0)
     {
-        const int M_2 = M>>1; // M_2 = M/2
-        const int Mb = M_2<<1; // Mb = 2*(M/2)
-        const int Mc = M-Mb; // Mc = M%2
+        const ptrdiff_t M_2 = M>>1; // M_2 = M/2
+        const ptrdiff_t Mb = M_2<<1; // Mb = 2*(M/2)
+        const ptrdiff_t Mc = M-Mb; // Mc = M%2
 
-        const int N_2 = N>>1; // N_2 = N/2
-        const int Nc = N-(N_2<<1); // Nc = N%2
+        const ptrdiff_t N_2 = N>>1; // N_2 = N/2
+        const ptrdiff_t Nc = N-(N_2<<1); // Nc = N%2
 
-        const int K_4 = (K-1)>>2; // K_4 = (K-1)/4 
+        const ptrdiff_t K_4 = (K-1)>>2; // K_4 = (K-1)/4 
         // The K-1 here  ^^^ is to make sure Kc > 0, since the regular
         // loop accesses memory past the end, so we use the Kc loop
         // to make sure that doesn't lead to a seg fault.
-        const int Kc = K-(K_4<<2); // = K % 4
-        const int Kcm1 = Kc-1;
-        const int KdxMb = Kd*Mb; // = Kd * Mb
-        const int Kdx2 = Kd<<1; // = Kd * 2
-        const int Kdx2mK = Kdx2-K; // = Kd * 2 - K
+        const ptrdiff_t Kc = K-(K_4<<2); // = K % 4
+        const ptrdiff_t Kcm1 = Kc-1;
+        const ptrdiff_t KdxMb = Kd*Mb; // = Kd * Mb
+        const ptrdiff_t Kdx2 = Kd<<1; // = Kd * 2
+        const ptrdiff_t Kdx2mK = Kdx2-K; // = Kd * 2 - K
 
 
         T a0, a1;
@@ -1077,7 +1077,7 @@ namespace tmv {
         const T* B1 = B0 + Kd;
         T* C1 = C0 + M;
 
-        int j,i,k;
+        ptrdiff_t j,i,k;
 
         j = N_2; if (j) do {
             i = M_2; if (i) do {
@@ -1214,31 +1214,31 @@ namespace tmv {
     // as necessary depending on the INST_* definitions.
     template <class T>
     static void multmm_16_16_16(
-        const int , const int , const int ,
+        const ptrdiff_t , const ptrdiff_t , const ptrdiff_t ,
         const T* A0, const T* B0, T* C0)
     { generic_multmm_16_16_16(A0,B0,C0); }
 
     template <class T>
     static void multmm_M_16_16(
-        const int M, const int , const int ,
+        const ptrdiff_t M, const ptrdiff_t , const ptrdiff_t ,
         const T* A0, const T* B0, T* C0)
     { generic_multmm_M_16_16(M,A0,B0,C0); }
 
     template <class T>
     static void multmm_16_N_16(
-        const int , const int N, const int ,
+        const ptrdiff_t , const ptrdiff_t N, const ptrdiff_t ,
         const T* A0, const T* B0, T* C0)
     { generic_multmm_16_N_16(N,A0,B0,C0); }
 
     template <class T>
     static void multmm_16_16_K(
-        const int , const int , const int K,
+        const ptrdiff_t , const ptrdiff_t , const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { generic_multmm_16_16_K(K,A0,B0,C0); }
 
     template <class T>
     static void multmm_M_N_K(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { generic_multmm_M_N_K(M,N,K,K,A0,B0,C0); }
 
@@ -1265,7 +1265,7 @@ namespace tmv {
         const __m128* A0 = (const __m128*) A;
         const __m128* B0 = (const __m128*) B;
 
-        int i2,j2;
+        ptrdiff_t i2,j2;
 
         j2 = 8; do {
             i2 = 4; do {
@@ -1447,16 +1447,16 @@ namespace tmv {
         } while (--j2);
     }
     static void sse_multmm_M_16_64(
-        const int M, const float* A, const float* B, float* C0)
+        const ptrdiff_t M, const float* A, const float* B, float* C0)
     {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const int Mx16 = (M<<4);      // = M*16
-        const int M_4 = M>>2;        // = M/4
-        const int Mc = (M-(M_4<<2)); // = M%4
-        const int Mc1 = Mc>>1;       // = M%4 == 2 or 3
-        const int Mc2 = Mc-(Mc1<<1); // = M%4 == 1 or 3
+        const ptrdiff_t Mx16 = (M<<4);      // = M*16
+        const ptrdiff_t M_4 = M>>2;        // = M/4
+        const ptrdiff_t Mc = (M-(M_4<<2)); // = M%4
+        const ptrdiff_t Mc1 = Mc>>1;       // = M%4 == 2 or 3
+        const ptrdiff_t Mc2 = Mc-(Mc1<<1); // = M%4 == 1 or 3
 
         __m128 C00, C01, C10, C11;
         __m128 c00, c01, c10, c11;
@@ -1466,7 +1466,7 @@ namespace tmv {
         const __m128* B0 = (const __m128*) B;
         float* C1 = C0 + M;
 
-        int i2,j2;
+        ptrdiff_t i2,j2;
 
         j2 = 8; do {
             i2 = M_4; if (i2) do {
@@ -1792,13 +1792,13 @@ namespace tmv {
         } while (--j2);
     }
     static void sse_multmm_16_N_64(
-        const int N, const float* A, const float* B, float* C0)
+        const ptrdiff_t N, const float* A, const float* B, float* C0)
     {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const int N_2 = N>>1;        // = N/2
-        const int Nc = (N-(N_2<<1)); // = N%2
+        const ptrdiff_t N_2 = N>>1;        // = N/2
+        const ptrdiff_t Nc = (N-(N_2<<1)); // = N%2
 
         __m128 C00, C01, C10, C11;
         __m128 c00, c01, c10, c11;
@@ -1807,7 +1807,7 @@ namespace tmv {
         const __m128* A0 = (const __m128*) A;
         const __m128* B0 = (const __m128*) B;
 
-        int i2,j2;
+        ptrdiff_t i2,j2;
 
         j2 = N_2; if (j2) do {
             i2 = 4; do {
@@ -2096,19 +2096,19 @@ namespace tmv {
         }
     }
     static void sse_multmm_16_16_K(
-        const int K, const float* A, const float* B, float* C0)
+        const ptrdiff_t K, const float* A, const float* B, float* C0)
     {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         TMVAssert(K > 0);
-        const int K_4 = K>>2; // K_4 = K/4 
-        const int K_4m2 = K_4-2; 
-        const int Kc = K-(K_4<<2);
-        const int Kd_4 = ((K-1)>>2)+1;  // = Kd/4
-        //const int Kd = Kd_4<<2; // = K rounded up to next multiple of 4
-        const int Kd_2 = Kd_4<<1;  // = Kd/2
-        const int Kd16 = Kd_4<<4; // = (Kd/4) * 16
+        const ptrdiff_t K_4 = K>>2; // K_4 = K/4 
+        const ptrdiff_t K_4m2 = K_4-2; 
+        const ptrdiff_t Kc = K-(K_4<<2);
+        const ptrdiff_t Kd_4 = ((K-1)>>2)+1;  // = Kd/4
+        //const ptrdiff_t Kd = Kd_4<<2; // = K rounded up to next multiple of 4
+        const ptrdiff_t Kd_2 = Kd_4<<1;  // = Kd/2
+        const ptrdiff_t Kd16 = Kd_4<<4; // = (Kd/4) * 16
 
         union ff { __m128 xm; float xf[4]; }; // ff = four floats
         __m128 C00, C01, C10, C11;
@@ -2124,7 +2124,7 @@ namespace tmv {
 
         float* C1 = C0 + 16;
 
-        int j,i,k;
+        ptrdiff_t j,i,k;
 
         if (K_4 >= 2) {
             // this is easier if we know that there are at least two m128's
@@ -2260,57 +2260,57 @@ namespace tmv {
 
 #ifdef __SSE__
     static void multmm_16_16_K(
-        const int , const int , const int K,
+        const ptrdiff_t , const ptrdiff_t , const ptrdiff_t K,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_16_16_K(K,A0,B0,C0); }
 
     static void multmm_M_N_K(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const float* A0, const float* B0, float* C0)
     {
-        const int Kd = (((K-1)>>2)+1)<<2;
+        const ptrdiff_t Kd = (((K-1)>>2)+1)<<2;
         generic_multmm_M_N_K(M,N,K,Kd,A0,B0,C0); 
     }
 
     static void multmm_16_16_64(
-        const int , const int , const int ,
+        const ptrdiff_t , const ptrdiff_t , const ptrdiff_t ,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_16_16_64(A0,B0,C0); }
 
     static void multmm_M_16_64(
-        const int M, const int , const int ,
+        const ptrdiff_t M, const ptrdiff_t , const ptrdiff_t ,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_M_16_64(M,A0,B0,C0); }
 
     static void multmm_16_N_64(
-        const int , const int N, const int ,
+        const ptrdiff_t , const ptrdiff_t N, const ptrdiff_t ,
         const float* A0, const float* B0, float* C0)
     { sse_multmm_16_N_64(N,A0,B0,C0); }
 
 #else
     // If no SSE, then repeat the 16 block version to call generic.
     static void multmm_16_16_16(
-        const int , const int , const int ,
+        const ptrdiff_t , const ptrdiff_t , const ptrdiff_t ,
         const float* A0, const float* B0, float* C0)
     { generic_multmm_16_16_16(A0,B0,C0); }
 
     static void multmm_M_16_16(
-        const int M, const int , const int ,
+        const ptrdiff_t M, const ptrdiff_t , const ptrdiff_t ,
         const float* A0, const float* B0, float* C0)
     { generic_multmm_M_16_16(M,A0,B0,C0); }
 
     static void multmm_16_N_16(
-        const int , const int N, const int ,
+        const ptrdiff_t , const ptrdiff_t N, const ptrdiff_t ,
         const float* A0, const float* B0, float* C0)
     { generic_multmm_16_N_16(N,A0,B0,C0); }
 
     static void multmm_16_16_K(
-        const int , const int , const int K,
+        const ptrdiff_t , const ptrdiff_t , const ptrdiff_t K,
         const float* A0, const float* B0, float* C0)
     { generic_multmm_16_16_K(K,A0,B0,C0); }
 
     static void multmm_M_N_K(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const float* A0, const float* B0, float* C0)
     { generic_multmm_M_N_K(M,N,K,K,A0,B0,C0); }
 
@@ -2339,7 +2339,7 @@ namespace tmv {
         const __m128d* A0 = (const __m128d*) A;
         const __m128d* B0 = (const __m128d*) B;
 
-        int i2,j2;
+        ptrdiff_t i2,j2;
 
         j2 = 8; do {
             i2 = 4; do {
@@ -2521,16 +2521,16 @@ namespace tmv {
         } while (--j2);
     }
     static void sse2_multmm_M_16_32(
-        const int M, const double* A, const double* B, double* C0)
+        const ptrdiff_t M, const double* A, const double* B, double* C0)
     {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const int Mx16 = (M<<4);      // = M*16
-        const int M_4 = M>>2;        // = M/4
-        const int Mc = (M-(M_4<<2)); // = M%4
-        const int Mc1 = Mc>>1;       // = M%4 == 2 or 3
-        const int Mc2 = Mc-(Mc1<<1); // = M%4 == 1 or 3
+        const ptrdiff_t Mx16 = (M<<4);      // = M*16
+        const ptrdiff_t M_4 = M>>2;        // = M/4
+        const ptrdiff_t Mc = (M-(M_4<<2)); // = M%4
+        const ptrdiff_t Mc1 = Mc>>1;       // = M%4 == 2 or 3
+        const ptrdiff_t Mc2 = Mc-(Mc1<<1); // = M%4 == 1 or 3
 
         __m128d C00, C01, C10, C11;
         __m128d c00, c01, c10, c11;
@@ -2540,7 +2540,7 @@ namespace tmv {
         const __m128d* B0 = (const __m128d*) B;
         double* C1 = C0 + M;
 
-        int i2,j2;
+        ptrdiff_t i2,j2;
 
         j2 = 8; do {
             i2 = M_4; if (i2) do {
@@ -2868,13 +2868,13 @@ namespace tmv {
         } while (--j2);
     }
     static void sse2_multmm_16_N_32(
-        const int N, const double* A, const double* B, double* C0)
+        const ptrdiff_t N, const double* A, const double* B, double* C0)
     {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
-        const int N_2 = N>>1;        // = N/2
-        const int Nc = (N-(N_2<<1)); // = N%2
+        const ptrdiff_t N_2 = N>>1;        // = N/2
+        const ptrdiff_t Nc = (N-(N_2<<1)); // = N%2
 
         __m128d C00, C01, C10, C11;
         __m128d c00, c01, c10, c11;
@@ -2883,7 +2883,7 @@ namespace tmv {
         const __m128d* A0 = (const __m128d*) A;
         const __m128d* B0 = (const __m128d*) B;
 
-        int i2,j2;
+        ptrdiff_t i2,j2;
 
         j2 = N_2; if (j2) do {
             i2 = 4; do {
@@ -3172,18 +3172,18 @@ namespace tmv {
         }
     }
     static void sse2_multmm_16_16_K(
-        const int K, const double* A, const double* B, double* C0)
+        const ptrdiff_t K, const double* A, const double* B, double* C0)
     {
         TMVAssert( ((size_t)(A) & 0xf) == 0 );
         TMVAssert( ((size_t)(B) & 0xf) == 0 );
         TMVAssert( ((size_t)(C0) & 0xf) == 0 );
         TMVAssert(K > 0);
-        const int K_2 = K>>1; // K_2 = K/2 
-        const int K_2m2 = K_2-2; 
-        const int Kc = K-(K_2<<1);
-        const int Kd = K + Kc; // = K rounded up to next multiple of 2
-        const int Kd_2 = Kd>>1; // = Kd/2
-        const int Kd16 = Kd_2<<4; // = (Kd/2)*16
+        const ptrdiff_t K_2 = K>>1; // K_2 = K/2 
+        const ptrdiff_t K_2m2 = K_2-2; 
+        const ptrdiff_t Kc = K-(K_2<<1);
+        const ptrdiff_t Kd = K + Kc; // = K rounded up to next multiple of 2
+        const ptrdiff_t Kd_2 = Kd>>1; // = Kd/2
+        const ptrdiff_t Kd16 = Kd_2<<4; // = (Kd/2)*16
 
         union dd { __m128d xm; double xd[2]; }; // dd = two doubles
         __m128d C00, C01, C10, C11;
@@ -3199,7 +3199,7 @@ namespace tmv {
 
         double* C1 = C0 + 16;
 
-        int j,i,k;
+        ptrdiff_t j,i,k;
 
         if (K_2 >= 2) {
             // this is easier if we know that there are at least two m128's
@@ -3316,57 +3316,57 @@ namespace tmv {
 
 #ifdef __SSE2__
     static void multmm_16_16_32(
-        const int , const int , const int ,
+        const ptrdiff_t , const ptrdiff_t , const ptrdiff_t ,
         const double* A0, const double* B0, double* C0)
     { sse2_multmm_16_16_32(A0,B0,C0); }
 
     static void multmm_M_16_32(
-        const int M, const int , const int ,
+        const ptrdiff_t M, const ptrdiff_t , const ptrdiff_t ,
         const double* A0, const double* B0, double* C0)
     { sse2_multmm_M_16_32(M,A0,B0,C0); }
 
     static void multmm_16_N_32(
-        const int , const int N, const int ,
+        const ptrdiff_t , const ptrdiff_t N, const ptrdiff_t ,
         const double* A0, const double* B0, double* C0)
     { sse2_multmm_16_N_32(N,A0,B0,C0); }
 
     static void multmm_16_16_K(
-        const int , const int , const int K,
+        const ptrdiff_t , const ptrdiff_t , const ptrdiff_t K,
         const double* A0, const double* B0, double* C0)
     { sse2_multmm_16_16_K(K,A0,B0,C0); }
 
     static void multmm_M_N_K(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const double* A0, const double* B0, double* C0)
     {
-        const int Kd = (((K-1)>>1)+1)<<1;
+        const ptrdiff_t Kd = (((K-1)>>1)+1)<<1;
         generic_multmm_M_N_K(M,N,K,Kd,A0,B0,C0); 
     }
 
 #else
     // If no SSE2, then repeat the 16 block version to call generic.
     static void multmm_16_16_16(
-        const int , const int , const int ,
+        const ptrdiff_t , const ptrdiff_t , const ptrdiff_t ,
         const double* A0, const double* B0, double* C0)
     { generic_multmm_16_16_16(A0,B0,C0); }
 
     static void multmm_M_16_16(
-        const int M, const int , const int ,
+        const ptrdiff_t M, const ptrdiff_t , const ptrdiff_t ,
         const double* A0, const double* B0, double* C0)
     { generic_multmm_M_16_16(M,A0,B0,C0); }
 
     static void multmm_16_N_16(
-        const int , const int N, const int ,
+        const ptrdiff_t , const ptrdiff_t N, const ptrdiff_t ,
         const double* A0, const double* B0, double* C0)
     { generic_multmm_16_N_16(N,A0,B0,C0); }
 
     static void multmm_16_16_K(
-        const int , const int , const int K,
+        const ptrdiff_t , const ptrdiff_t , const ptrdiff_t K,
         const double* A0, const double* B0, double* C0)
     { generic_multmm_16_16_K(K,A0,B0,C0); }
 
     static void multmm_M_N_K(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const double* A0, const double* B0, double* C0)
     { generic_multmm_M_N_K(M,N,K,K,A0,B0,C0); }
 
@@ -3381,27 +3381,27 @@ namespace tmv {
     //
 
     static void multmm_16_16_16(
-        const int , const int , const int ,
+        const ptrdiff_t , const ptrdiff_t , const ptrdiff_t ,
         const int* A0, const int* B0, int* C0)
     { generic_multmm_16_16_16(A0,B0,C0); }
 
     static void multmm_M_16_16(
-        const int M, const int , const int ,
+        const ptrdiff_t M, const ptrdiff_t , const ptrdiff_t ,
         const int* A0, const int* B0, int* C0)
     { generic_multmm_M_16_16(M,A0,B0,C0); }
 
     static void multmm_16_N_16(
-        const int , const int N, const int ,
+        const ptrdiff_t , const ptrdiff_t N, const ptrdiff_t ,
         const int* A0, const int* B0, int* C0)
     { generic_multmm_16_N_16(N,A0,B0,C0); }
 
     static void multmm_16_16_K(
-        const int , const int , const int K,
+        const ptrdiff_t , const ptrdiff_t , const ptrdiff_t K,
         const int* A0, const int* B0, int* C0)
     { generic_multmm_16_16_K(K,A0,B0,C0); }
 
     static void multmm_M_N_K(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const int* A0, const int* B0, int* C0)
     { generic_multmm_M_N_K(M,N,K,K,A0,B0,C0); }
 
@@ -3414,27 +3414,27 @@ namespace tmv {
     //
 
     static void multmm_16_16_16(
-        const int , const int , const int ,
+        const ptrdiff_t , const ptrdiff_t , const ptrdiff_t ,
         const long double* A0, const long double* B0, long double* C0)
     { generic_multmm_16_16_16(A0,B0,C0); }
 
     static void multmm_M_16_16(
-        const int M, const int , const int ,
+        const ptrdiff_t M, const ptrdiff_t , const ptrdiff_t ,
         const long double* A0, const long double* B0, long double* C0)
     { generic_multmm_M_16_16(M,A0,B0,C0); }
 
     static void multmm_16_N_16(
-        const int , const int N, const int ,
+        const ptrdiff_t , const ptrdiff_t N, const ptrdiff_t ,
         const long double* A0, const long double* B0, long double* C0)
     { generic_multmm_16_N_16(N,A0,B0,C0); }
 
     static void multmm_16_16_K(
-        const int , const int , const int K,
+        const ptrdiff_t , const ptrdiff_t , const ptrdiff_t K,
         const long double* A0, const long double* B0, long double* C0)
     { generic_multmm_16_16_K(K,A0,B0,C0); }
 
     static void multmm_M_N_K(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const long double* A0, const long double* B0, long double* C0)
     { generic_multmm_M_N_K(M,N,K,K,A0,B0,C0); }
 
@@ -3451,67 +3451,67 @@ namespace tmv {
 
     template <class T>
     static void call_multmm_16_16_16(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_16_16_16(M,N,K,A0,B0,C0); }
 
     template <class T>
     static void call_multmm_M_16_16(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_M_16_16(M,N,K,A0,B0,C0); }
 
     template <class T>
     static void call_multmm_16_N_16(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_16_N_16(M,N,K,A0,B0,C0); }
 
     template <class T>
     static void call_multmm_16_16_32(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_16_16_32(M,N,K,A0,B0,C0); }
 
     template <class T>
     static void call_multmm_M_16_32(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_M_16_32(M,N,K,A0,B0,C0); }
 
     template <class T>
     static void call_multmm_16_N_32(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_16_N_32(M,N,K,A0,B0,C0); }
 
     template <class T>
     static void call_multmm_16_16_64(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_16_16_64(M,N,K,A0,B0,C0); }
 
     template <class T>
     static void call_multmm_M_16_64(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_M_16_64(M,N,K,A0,B0,C0); }
 
     template <class T>
     static void call_multmm_16_N_64(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_16_N_64(M,N,K,A0,B0,C0); }
 
     template <class T>
     static void call_multmm_16_16_K(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_16_16_K(M,N,K,A0,B0,C0); }
 
     template <class T>
     static void call_multmm_M_N_K(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const T* A0, const T* B0, T* C0)
     { multmm_M_N_K(M,N,K,A0,B0,C0); }
 

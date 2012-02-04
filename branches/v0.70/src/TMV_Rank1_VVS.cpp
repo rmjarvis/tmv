@@ -77,9 +77,9 @@ namespace tmv {
         eps *= A.size() * TMV_Epsilon<T>();
 #endif
 
-        const int si = A.stepi();
-        const int sj = A.stepj();
-        const int N = A.size();
+        const ptrdiff_t si = A.stepi();
+        const ptrdiff_t sj = A.stepj();
+        const ptrdiff_t N = A.size();
         const Tx* xi = x.cptr();
         const Tx*const x0 = x.cptr();
 
@@ -91,7 +91,7 @@ namespace tmv {
         ++xi;
         T* Arowi = A.ptr()+si;
 
-        for (int i=1;i<N;++i,++xi,Arowi+=si) {
+        for (ptrdiff_t i=1;i<N;++i,++xi,Arowi+=si) {
             if (*xi != Tx(0)) {
                 // A.row(i,0,i+1) += ax * x.subVector(0,i+1);
                 T* Aij = Arowi;
@@ -100,7 +100,7 @@ namespace tmv {
                 if (a1 || isReal(alpha)) {
                     Tx axi = cx ? TMV_CONJ(*xi) : *xi;
                     if (!a1) axi *= TMV_REAL(alpha);
-                    for(int j=i+1;j>0;--j,++xj,(rm?++Aij:Aij+=sj)) {
+                    for(ptrdiff_t j=i+1;j>0;--j,++xj,(rm?++Aij:Aij+=sj)) {
                         const T temp = axi * (ha==cx ? *xj : TMV_CONJ(*xj));
 #ifdef TMVFLDEBUG
                         TMVAssert(Aij >= A._first);
@@ -111,7 +111,7 @@ namespace tmv {
                     }
                 } else {
                     T axi = alpha * (cx ? TMV_CONJ(*xi) : *xi);
-                    for(int j=i+1;j>0;--j,++xj,(rm?++Aij:Aij+=sj)) {
+                    for(ptrdiff_t j=i+1;j>0;--j,++xj,(rm?++Aij:Aij+=sj)) {
                         const T temp = axi * (ha==cx ? *xj : TMV_CONJ(*xj));
 #ifdef TMVFLDEBUG
                         TMVAssert(Aij >= A._first);
@@ -124,7 +124,7 @@ namespace tmv {
             } else if (!add) {
                 T* Aij = Arowi;
                 if (rm) std::fill_n(Aij,i+1,T(0));
-                else for(int j=i+1;j>0;--j,Aij+=sj) {
+                else for(ptrdiff_t j=i+1;j>0;--j,Aij+=sj) {
 #ifdef TMVFLDEBUG
                     TMVAssert(Aij >= A._first);
                     TMVAssert(Aij < A._last);
@@ -171,13 +171,13 @@ namespace tmv {
         eps *= A.size() * TMV_Epsilon<T>();
 #endif
 
-        const int si = cm ? 1 : A.stepi();
-        const int ds = A.stepj()+si;
-        const int N = A.size();
+        const ptrdiff_t si = cm ? 1 : A.stepi();
+        const ptrdiff_t ds = A.stepj()+si;
+        const ptrdiff_t N = A.size();
         const Tx* xj = x.cptr()+N-1;
         T* Ajj = A.ptr()+(N-1)*ds;
 
-        for (int jj=N,Nmj=1;jj>0;--jj,++Nmj,--xj,Ajj-=ds) {
+        for (ptrdiff_t jj=N,Nmj=1;jj>0;--jj,++Nmj,--xj,Ajj-=ds) {
             if (*xj!=Tx(0)) {
                 // Nmj = N-j
                 // A.col(j,j,N) += *xj * x.subVector(j,N);
@@ -186,7 +186,7 @@ namespace tmv {
                 if (a1 || isReal(alpha)) {
                     Tx axj = (ha!=cx) ? TMV_CONJ(*xj) : *xj;
                     if (!a1) axj *= TMV_REAL(alpha);
-                    for(int i=Nmj;i>0;--i,++xi,(cm?++Aij:Aij+=si)) {
+                    for(ptrdiff_t i=Nmj;i>0;--i,++xi,(cm?++Aij:Aij+=si)) {
                         const T temp = axj * (cx ? TMV_CONJ(*xi) : *xi);
 #ifdef TMVFLDEBUG
                         TMVAssert(Aij >= A._first);
@@ -197,7 +197,7 @@ namespace tmv {
                     }
                 } else {
                     T axj = alpha * ((ha!=cx) ? TMV_CONJ(*xj) : *xj);
-                    for(int i=Nmj;i>0;--i,++xi,(cm?++Aij:Aij+=si)) {
+                    for(ptrdiff_t i=Nmj;i>0;--i,++xi,(cm?++Aij:Aij+=si)) {
                         const T temp = axj * (cx ? TMV_CONJ(*xi) : *xi);
 #ifdef TMVFLDEBUG
                         TMVAssert(Aij >= A._first);
@@ -210,7 +210,7 @@ namespace tmv {
             } else if (!add) {
                 T* Aij = Ajj;
                 if (cm) std::fill_n(Aij,Nmj,T(0));
-                else for(int i=Nmj;i>0;--i,Aij+=si) {
+                else for(ptrdiff_t i=Nmj;i>0;--i,Aij+=si) {
 #ifdef TMVFLDEBUG
                     TMVAssert(Aij >= A._first);
                     TMVAssert(Aij < A._last);

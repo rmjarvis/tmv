@@ -68,15 +68,15 @@ namespace tmv {
         cout<<"M N lo hi = "<<QRx.colsize()<<"  "<<QRx.rowsize()<<"  "<<QRx.nlo()<<"  "<<QRx.nhi()<<endl;
         Matrix<T> A0(QRx);
 #endif
-        const int M = QRx.colsize();
-        const int N = QRx.rowsize();
+        const ptrdiff_t M = QRx.colsize();
+        const ptrdiff_t N = QRx.rowsize();
         if (QRx.nlo() == 0) {
             Qbeta.setZero();
         } else {
-            int endcol = QRx.nlo()+1;
-            int endrow = QRx.nhi()+1;
+            ptrdiff_t endcol = QRx.nlo()+1;
+            ptrdiff_t endrow = QRx.nhi()+1;
             T* Qbj = Qbeta.ptr();
-            for(int j=0;j<N;++j,++Qbj) {
+            for(ptrdiff_t j=0;j<N;++j,++Qbj) {
                 // Apply the Householder Reflection for this column
 #ifdef TMVFLDEBUG
                 TMVAssert(Qbj >= Qbeta._first);
@@ -137,7 +137,7 @@ namespace tmv {
             T d(0);
             Q.setZero();
             BandMatrixView<T>(Q,A.nlo(),A.nhi()) = A;
-            int newnhi = TMV_MIN(A.nlo()+A.nhi(),A.rowsize()-1);
+            ptrdiff_t newnhi = TMV_MIN(A.nlo()+A.nhi(),A.rowsize()-1);
             QR_Decompose(BandMatrixViewOf(Q,A.nlo(),newnhi),
                         beta.view(),d);
             R = BandMatrixViewOf(Q,0,newnhi);
@@ -164,7 +164,7 @@ namespace tmv {
 
         Vector<T> beta(A.rowsize());
         T d(0);
-        int newnhi = TMV_MIN(A.nlo()+A.nhi(),A.rowsize()-1);
+        ptrdiff_t newnhi = TMV_MIN(A.nlo()+A.nhi(),A.rowsize()-1);
         BandMatrix<T> QR(
             TMV_MIN(A.colsize(),A.rowsize()+A.nlo()),A.rowsize(),
             A.nlo(),newnhi,T(0));

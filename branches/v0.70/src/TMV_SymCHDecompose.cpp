@@ -135,10 +135,10 @@ namespace tmv {
         TMVAssert(A.ct() == NonConj);
         TMVAssert(isReal(T()) || A.isherm());
         TMVAssert(cm == A.iscm());
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
 #ifdef XDEBUG
         Matrix<T> A0(A);
-        for(int i=1;i<=N;i++) {
+        for(ptrdiff_t i=1;i<=N;i++) {
             T d = Matrix<T>(A.subSymMatrix(0,i)).det();
             if (TMV_REAL(d) < 0) {
                 cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
@@ -150,8 +150,8 @@ namespace tmv {
         VectorView<RT> Adiag = A.realPart().diag();
         if (cm) {
             RT* Ajj= Adiag.ptr();
-            const int ds = Adiag.step();
-            for(int j=0;j<N-1;++j,Ajj+=ds) {
+            const ptrdiff_t ds = Adiag.step();
+            for(ptrdiff_t j=0;j<N-1;++j,Ajj+=ds) {
                 if (*Ajj <= RT(0)) {
 #ifdef NOTHROW
                     std::cerr<<"Non Posdef HermMatrix found \n"; 
@@ -184,7 +184,7 @@ namespace tmv {
             *Ajj = TMV_SQRT(*Ajj);
         } else {
             RT* Aii = Adiag.ptr();
-            const int ds = Adiag.step();
+            const ptrdiff_t ds = Adiag.step();
             if (*Aii <= RT(0)) {
 #ifdef NOTHROW
                 std::cerr<<"Non Posdef HermMatrix found \n"; 
@@ -198,7 +198,7 @@ namespace tmv {
             TMVAssert(Aii < A.realPart()._last);
 #endif
             *Aii = TMV_SQRT(*Aii);
-            for(int i=1; i<N; ++i) {
+            for(ptrdiff_t i=1; i<N; ++i) {
                 Aii+=ds;
                 A.row(i,0,i) %= A.lowerTri().subTriMatrix(0,i).adjoint();
 #ifdef TMVFLDEBUG
@@ -278,11 +278,11 @@ namespace tmv {
         TMVAssert(isReal(T()) || A.isherm());
         TMVAssert(cm == A.iscm());
 
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
 
-        for (int jk=0; jk<N; jk+=CH_BLOCKSIZE)
+        for (ptrdiff_t jk=0; jk<N; jk+=CH_BLOCKSIZE)
         {
-            int jkpk = TMV_MIN(jk+CH_BLOCKSIZE,N);
+            ptrdiff_t jkpk = TMV_MIN(jk+CH_BLOCKSIZE,N);
 
             SymMatrixView<T> A00 = A.subSymMatrix(jk,jkpk);
             SymMatrixView<T> A11 = A.subSymMatrix(jkpk,N);
@@ -327,10 +327,10 @@ namespace tmv {
         TMVAssert(A.ct() == NonConj);
         TMVAssert(A.isherm());
         TMVAssert(cm == A.iscm());
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
 
         if (N > CH_BLOCKSIZE2) {
-            int k = N/2;
+            ptrdiff_t k = N/2;
             if (k > CH_BLOCKSIZE) k = k/CH_BLOCKSIZE*CH_BLOCKSIZE;
 
             SymMatrixView<T> A00 = A.subSymMatrix(0,k);
@@ -385,7 +385,7 @@ namespace tmv {
 #endif
                     *(A11ptr) = TMV_SQRT(A11);
                 } else {
-                    const int si = A.stepi();
+                    const ptrdiff_t si = A.stepi();
                     T A10 = (*(Aptr+si) /= A00);
                     T* A11ptr = Aptr+1+si;
                     RT A11 = TMV_REAL(*A11ptr);

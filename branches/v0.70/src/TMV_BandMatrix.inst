@@ -3,17 +3,17 @@
 
 #define Def1(RT,T,Ref) \
   template bool GenBandMatrix<T >::hasSubMatrix( \
-      int i1, int i2, int j1, int j2, int is, int js) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t is, ptrdiff_t js) const; \
   template bool GenBandMatrix<T >::hasSubVector( \
-      int i, int j, int is, int js, int s) const; \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t is, ptrdiff_t js, ptrdiff_t s) const; \
   template bool GenBandMatrix<T >::hasSubBandMatrix( \
-      int i1, int i2, int j1, int j2, int lo, int hi, int is, int js) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t lo, ptrdiff_t hi, ptrdiff_t is, ptrdiff_t js) const; \
   template bool ConstBandMatrixView<T,FortranStyle>::hasSubMatrix( \
-      int i1, int i2, int j1, int j2, int is, int js) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t is, ptrdiff_t js) const; \
   template bool ConstBandMatrixView<T,FortranStyle>::hasSubVector( \
-      int i, int j, int is, int js, int s) const; \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t is, ptrdiff_t js, ptrdiff_t s) const; \
   template bool ConstBandMatrixView<T,FortranStyle>::hasSubBandMatrix( \
-      int i1, int i2, int j1, int j2, int lo, int hi, int is, int js) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t lo, ptrdiff_t hi, ptrdiff_t is, ptrdiff_t js) const; \
   template T GenBandMatrix<T >::sumElements() const; \
   template RT GenBandMatrix<T >::sumAbsElements() const; \
   template RT GenBandMatrix<T >::sumAbs2Elements() const; \
@@ -25,7 +25,7 @@
   template RT GenBandMatrix<T >::doNorm2() const; \
   template RT GenBandMatrix<T >::doCondition() const; \
   template QuotXB<T,T > GenBandMatrix<T >::QInverse() const; \
-  template T GenBandMatrix<T >::cref(int i, int j) const; \
+  template T GenBandMatrix<T >::cref(ptrdiff_t i, ptrdiff_t j) const; \
   template BandMatrixView<T,CStyle>&  \
       BandMatrixView<T,CStyle>::clip(RT thresh); \
   template BandMatrixView<T,CStyle>&  \
@@ -37,7 +37,7 @@
   template BandMatrixView<T,CStyle>&  \
       BandMatrixView<T,CStyle>::conjugateSelf(); \
   template void BandMatrixView<T,CStyle>::doTransposeSelf(); \
-  template Ref BandMatrixView<T,CStyle>::ref(int i, int j); \
+  template Ref BandMatrixView<T,CStyle>::ref(ptrdiff_t i, ptrdiff_t j); \
   template void Swap(BandMatrixView<T > m1, BandMatrixView<T > m2); \
   template BandMatrix<T,DiagMajor> UpperBiDiagMatrix( \
       const GenVector<T >& v1, const GenVector<T >& v2); \

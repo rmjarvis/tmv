@@ -66,11 +66,11 @@ namespace tmv {
     template <class T, class T1> 
     void HermSV_Inverse(
         const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S, 
-        int kmax, SymMatrixView<T> sinv);
+        ptrdiff_t kmax, SymMatrixView<T> sinv);
     template <class T, class T1> 
     void SymSV_Inverse(
         const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S,
-        const GenMatrix<T1>& Vt, int kmax, SymMatrixView<T> sinv);
+        const GenMatrix<T1>& Vt, ptrdiff_t kmax, SymMatrixView<T> sinv);
 
     template <class T> 
     void HermTridiagonalChopSmallElements(
@@ -102,37 +102,37 @@ namespace tmv {
     template <class T, class T1> 
     inline void CallHermSV_Inverse(
         T , const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S,
-        int kmax, SymMatrixView<T> sinv)
+        ptrdiff_t kmax, SymMatrixView<T> sinv)
     { HermSV_Inverse(U,S,kmax,sinv); }
 
     template <class T, class T1> 
     inline void CallHermSV_Inverse(
         T , const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S, 
-        int kmax, SymMatrixView<CT> sinv)
+        ptrdiff_t kmax, SymMatrixView<CT> sinv)
     { HermSV_Inverse(U,S,kmax,sinv); }
 
     template <class T, class T1> 
     inline void CallSymSV_Inverse(
         T , const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S,
-        const GenMatrix<T1>& Vt, int kmax, SymMatrixView<T> sinv)
+        const GenMatrix<T1>& Vt, ptrdiff_t kmax, SymMatrixView<T> sinv)
     { SymSV_Inverse(U,S,Vt,kmax,sinv); }
 
     template <class T, class T1> 
     inline void CallSymSV_Inverse(
         T , const GenMatrix<T1>& U, const GenDiagMatrix<RT1>& S,
-        const GenMatrix<T1>& Vt, int kmax, SymMatrixView<CT> sinv)
+        const GenMatrix<T1>& Vt, ptrdiff_t kmax, SymMatrixView<CT> sinv)
     { SymSV_Inverse(U,S,Vt,kmax,sinv); }
 
     // Specialize disallowed complex combinations:
     template <class T>
     inline void CallHermSV_Inverse(
         CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& , 
-        int , SymMatrixView<T> )
+        ptrdiff_t , SymMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void CallSymSV_Inverse(
         CT , const GenMatrix<CT>& , const GenDiagMatrix<T>& ,
-        const GenMatrix<CT>& , int , SymMatrixView<T> )
+        const GenMatrix<CT>& , ptrdiff_t , SymMatrixView<T> )
     { TMVAssert(TMV_FALSE); }
 
 #undef CT

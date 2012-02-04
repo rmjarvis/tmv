@@ -78,9 +78,9 @@ namespace tmv {
         // Q is H0t H1t ... H_N-1t
         // So x = H_N-1 .. H1 H0 m
         //
-        const int M = Q.colsize();
-        const int N = Q.rowsize();
-        for(int j=0;j<N;++j) if (beta(j) != T1(0)) {
+        const ptrdiff_t M = Q.colsize();
+        const ptrdiff_t N = Q.rowsize();
+        for(ptrdiff_t j=0;j<N;++j) if (beta(j) != T1(0)) {
             HouseholderLMult(Q.col(j,j+1,M),beta(j),m.rowRange(j,M));
         }
     }
@@ -108,11 +108,12 @@ namespace tmv {
         //   = (H0t .. Hrt)t m
         // So form Y,Z from Ht's, rather than H's, and then call LDiv
 
-        const int M = Q.colsize();
-        const int N = Q.rowsize();
-        UpperTriMatrix<T1,NonUnitDiag|ColMajor> BaseZ(TMV_MIN(QR_BLOCKSIZE,N));
-        for(int j1=0;j1<N;) {
-            int j2 = TMV_MIN(N,j1+QR_BLOCKSIZE);
+        const ptrdiff_t M = Q.colsize();
+        const ptrdiff_t N = Q.rowsize();
+        UpperTriMatrix<T1,NonUnitDiag|ColMajor> BaseZ(
+            TMV_MIN(QR_BLOCKSIZE,int(N)));
+        for(ptrdiff_t j1=0;j1<N;) {
+            ptrdiff_t j2 = TMV_MIN(N,j1+QR_BLOCKSIZE);
             ConstMatrixView<T1> Y = Q.subMatrix(j1,M,j1,j2);
             UpperTriMatrixView<T1> Z = BaseZ.subTriMatrix(0,Y.rowsize());
             BlockHouseholderMakeZ(Y,Z,beta.subVector(j1,j2));
@@ -582,9 +583,9 @@ namespace tmv {
         //
         // x = m Qt 
         // Qt is H_N-1 H_N-2 ... H1 H0
-        const int M = Q.colsize();
-        const int N = Q.rowsize();
-        for(int j=N-1;j>=0;--j) if (beta(j) != T1(0)) {
+        const ptrdiff_t M = Q.colsize();
+        const ptrdiff_t N = Q.rowsize();
+        for(ptrdiff_t j=N-1;j>=0;--j) if (beta(j) != T1(0)) {
             HouseholderLMult(
                 Q.col(j,j+1,M).conjugate(),beta(j),
                 m.colRange(j,M).transpose());
@@ -612,11 +613,12 @@ namespace tmv {
         // x = m H_N-1 H_N-2 ... H1 H0
         // Again form Y,Z from Ht's, rather than H's, and then call RDiv
 
-        const int M = Q.colsize();
-        const int N = Q.rowsize();
-        UpperTriMatrix<T1,NonUnitDiag|ColMajor> BaseZ(TMV_MIN(QR_BLOCKSIZE,N));
-        for(int j2=N;j2>0;) {
-            int j1 = j2 > QR_BLOCKSIZE ? j2-QR_BLOCKSIZE : 0;
+        const ptrdiff_t M = Q.colsize();
+        const ptrdiff_t N = Q.rowsize();
+        UpperTriMatrix<T1,NonUnitDiag|ColMajor> BaseZ(
+            TMV_MIN(QR_BLOCKSIZE,int(N)));
+        for(ptrdiff_t j2=N;j2>0;) {
+            ptrdiff_t j1 = j2 > QR_BLOCKSIZE ? j2-QR_BLOCKSIZE : 0;
             ConstMatrixView<T1> Y = Q.subMatrix(j1,M,j1,j2);
             UpperTriMatrixView<T1> Z = BaseZ.subTriMatrix(0,Y.rowsize());
             BlockHouseholderMakeZ(Y,Z,beta.subVector(j1,j2));

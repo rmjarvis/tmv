@@ -70,8 +70,8 @@ namespace tmv {
             if (a1) *B.ptr() *= Ax;
             else *B.ptr() *= alpha * Ax;
         } else {
-            const int N = A.size();
-            const int k = N/2;
+            const ptrdiff_t N = A.size();
+            const ptrdiff_t k = N/2;
             // [ B00 B01 ] = [ A00  0  ] * [ B00 B01 ]
             // [  0  B11 ]   [  0  A11 ]   [  0  B11 ]
             // B00 = A00 * B00
@@ -168,8 +168,8 @@ namespace tmv {
                 else *C.ptr() += 
                     alpha * Ax * (cb?TMV_CONJ(*B.cptr()):*B.cptr());
         } else {
-            const int N = A.size();
-            const int k = N/2;
+            const ptrdiff_t N = A.size();
+            const ptrdiff_t k = N/2;
             // [ C00 C01 ] += [ A00  0  ] * [ B00 B01 ]
             // [  0  C11 ]    [  0  A11 ]   [  0  B11 ]
             // C00 += A00 * B00
@@ -343,8 +343,8 @@ namespace tmv {
             if (a1) *B.ptr() *= Ax;
             else *B.ptr() *= alpha * Ax;
         } else {
-            const int N = A.size();
-            const int k = N/2;
+            const ptrdiff_t N = A.size();
+            const ptrdiff_t k = N/2;
             // [ B00  0  ] = [ A00  0  ] * [ B00  0  ]
             // [ B10 B11 ]   [  0  A11 ]   [ B10 B11 ]
             // B00 = A00 * B00
@@ -441,8 +441,8 @@ namespace tmv {
                 else *C.ptr() += 
                     alpha * Ax * (cb?TMV_CONJ(*B.cptr()):*B.cptr());
         } else {
-            const int N = A.size();
-            const int k = N/2;
+            const ptrdiff_t N = A.size();
+            const ptrdiff_t k = N/2;
             // [ C00  0  ] += [ A00  0  ] * [ B00  0  ]
             // [ C10 C11 ]    [  0  A11 ]   [ B10 B11 ]
             // C00 += A00 * B00

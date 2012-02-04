@@ -78,17 +78,17 @@ namespace tmv {
         const Ty* yj = y.cptr();
         const Tx*const xptr = x.cptr();
         T* Acolj = A.ptr();
-        const int sj = A.stepj();
-        const int si = (cm ? 1 : A.stepi());
-        const int ys = y.step();
-        const int M = A.colsize();
-        const int N = A.rowsize();
+        const ptrdiff_t sj = A.stepj();
+        const ptrdiff_t si = (cm ? 1 : A.stepi());
+        const ptrdiff_t ys = y.step();
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t N = A.rowsize();
 
-        for (int j=N; j>0; --j,yj+=ys,Acolj+=sj) {
+        for (ptrdiff_t j=N; j>0; --j,yj+=ys,Acolj+=sj) {
             if (*yj!=Ty(0)) {
                 T* Aij = Acolj;
                 const Tx* xi = xptr;
-                for (int i=M; i>0; --i,++xi,(cm?++Aij:Aij+=si)) {
+                for (ptrdiff_t i=M; i>0; --i,++xi,(cm?++Aij:Aij+=si)) {
                     const T temp = 
                         (cx ? TMV_CONJ(*xi) : *xi) *
                         (cy ? TMV_CONJ(*yj) : *yj);
@@ -102,7 +102,7 @@ namespace tmv {
             } else if (!add) {
                 T* Aij = Acolj;
                 if (cm) std::fill_n(Aij,M,T(0));
-                else for (int i=M; i>0; --i,Aij+=si) {
+                else for (ptrdiff_t i=M; i>0; --i,Aij+=si) {
 #ifdef TMVFLDEBUG
                     TMVAssert(Aij >= A._first);
                     TMVAssert(Aij < A._last);
@@ -648,7 +648,7 @@ namespace tmv {
         Vector<Ty> y0 = y;
         Matrix<T> A0 = A;
         Matrix<T> A2 = A;
-        for(int i=0;i<x.size();i++) for(int j=0;j<y.size();j++) 
+        for(ptrdiff_t i=0;i<x.size();i++) for(ptrdiff_t j=0;j<y.size();j++) 
             if (add)
                 A2(i,j) += alpha*x0(i)*y0(j);
             else

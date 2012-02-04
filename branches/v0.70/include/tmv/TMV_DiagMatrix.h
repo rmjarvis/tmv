@@ -187,12 +187,12 @@ namespace tmv {
         // Access Functions
         //
 
-        inline int size() const { return diag().size(); }
-        inline int colsize() const { return size(); }
-        inline int rowsize() const { return size(); }
+        inline ptrdiff_t size() const { return diag().size(); }
+        inline ptrdiff_t colsize() const { return size(); }
+        inline ptrdiff_t rowsize() const { return size(); }
         inline DiagType dt() const { return NonUnitDiag; }
 
-        inline T operator()(int i, int j) const 
+        inline T operator()(ptrdiff_t i, ptrdiff_t j) const 
         {
             TMVAssert(i>=0 && i<size());
             TMVAssert(j>=0 && j<size());
@@ -200,7 +200,7 @@ namespace tmv {
             else return T(0);
         }
 
-        inline T operator()(int i) const 
+        inline T operator()(ptrdiff_t i) const 
         {
             TMVAssert(i>=0 && i<size());
             return diag()(i); 
@@ -280,19 +280,19 @@ namespace tmv {
         // subDiagMatrix
         //
 
-        inline const_view_type cSubDiagMatrix(int i1, int i2) const
+        inline const_view_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) const
         { return const_view_type(diag().cSubVector(i1,i2)); }
 
-        inline const_view_type subDiagMatrix(int i1, int i2) const
+        inline const_view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) const
         {
             TMVAssert(diag().hasSubVector(i1,i2,1));
             return cSubDiagMatrix(i1,i2);
         }
 
-        inline const_view_type cSubDiagMatrix(int i1, int i2, int istep) const
+        inline const_view_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         { return const_view_type(diag().cSubVector(i1,i2,istep)); }
 
-        inline const_view_type subDiagMatrix(int i1, int i2, int istep) const
+        inline const_view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         {
             TMVAssert(diag().hasSubVector(i1,i2,istep));
             return cSubDiagMatrix(i1,i2,istep);
@@ -533,11 +533,11 @@ namespace tmv {
             const BaseMatrix<T>& m2, std::ostream* fout=0) const
         { return true; }
 
-        inline T cref(int i, int j) const
+        inline T cref(ptrdiff_t i, ptrdiff_t j) const
         { return i==j ? cdiag()(i) : 0; }
         inline const T* cptr() const
         { return cdiag().cptr(); }
-        inline int step() const
+        inline ptrdiff_t step() const
         { return cdiag().step(); }
         inline bool isconj() const
         { return cdiag().isconj(); }
@@ -619,7 +619,7 @@ namespace tmv {
         // Access Functions
         //
 
-        inline T operator()(int i, int j) const 
+        inline T operator()(ptrdiff_t i, ptrdiff_t j) const 
         { 
             TMVAssert(i>0 && i<=c_type::size());
             TMVAssert(j>0 && j<=c_type::size());
@@ -627,7 +627,7 @@ namespace tmv {
             else return T(0);
         }
 
-        inline T operator()(int i) const 
+        inline T operator()(ptrdiff_t i) const 
         { 
             TMVAssert(i>0 && i<=c_type::size());
             return diag()(i);
@@ -640,13 +640,13 @@ namespace tmv {
         // subDiagMatrix
         //
 
-        inline const_view_type subDiagMatrix(int i1, int i2) const
+        inline const_view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) const
         {
             TMVAssert(diag().hasSubVector(i1,i2,1));
             return base::cSubDiagMatrix(i1-1,i2);
         }
 
-        inline const_view_type subDiagMatrix(int i1, int i2, int istep) const
+        inline const_view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         {
             TMVAssert(diag().hasSubVector(i1,i2,istep));
             return base::cSubDiagMatrix(i1-1,i2-1+istep,istep);
@@ -757,12 +757,12 @@ namespace tmv {
         // Access
         //
 
-        inline reference operator()(int i) 
+        inline reference operator()(ptrdiff_t i) 
         { 
             TMVAssert(i>=0 && i<size());
             return diag()(i); 
         }
-        inline reference operator()(int i, int TMV_DEBUGPARAM(j)) 
+        inline reference operator()(ptrdiff_t i, ptrdiff_t TMV_DEBUGPARAM(j)) 
         { 
             TMVAssert(i>=0 && i<size());
             TMVAssert(i==j); 
@@ -772,9 +772,9 @@ namespace tmv {
         inline vec_type diag() { return itsdiag; }
 
         // Repeat const versions
-        inline T operator()(int i) const
+        inline T operator()(ptrdiff_t i) const
         { return base::operator()(i); }
-        inline T operator()(int i, int j) const
+        inline T operator()(ptrdiff_t i, ptrdiff_t j) const
         { return base::operator()(i,j); }
         inline const_vec_type diag() const
         { return base::diag(); }
@@ -810,19 +810,19 @@ namespace tmv {
         // subDiagMatrix
         //
 
-        inline view_type cSubDiagMatrix(int i1, int i2)
+        inline view_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2)
         { return view_type(itsdiag.cSubVector(i1,i2)); }
 
-        inline view_type subDiagMatrix(int i1, int i2)
+        inline view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2)
         {
             TMVAssert(diag().hasSubVector(i1,i2,1));
             return cSubDiagMatrix(i1,i2);
         }
 
-        inline view_type cSubDiagMatrix(int i1, int i2, int istep)
+        inline view_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep)
         { return view_type(itsdiag.cSubVector(i1,i2,istep)); }
 
-        inline view_type subDiagMatrix(int i1, int i2, int istep)
+        inline view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep)
         {
             TMVAssert(diag().hasSubVector(i1,i2,istep));
             return cSubDiagMatrix(i1,i2,istep);
@@ -846,13 +846,13 @@ namespace tmv {
         inline view_type adjoint()
         { return conjugate(); }
 
-        inline const_view_type cSubDiagMatrix(int i1, int i2) const
+        inline const_view_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) const
         { return base::cSubDiagMatrix(i1,i2); }
-        inline const_view_type subDiagMatrix(int i1, int i2) const
+        inline const_view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) const
         { return base::subDiagMatrix(i1,i2); }
-        inline const_view_type cSubDiagMatrix(int i1, int i2, int istep) const
+        inline const_view_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         { return base::cSubDiagMatrix(i1,i2,istep); }
-        inline const_view_type subDiagMatrix(int i1, int i2, int istep) const
+        inline const_view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         { return base::subDiagMatrix(i1,i2,istep); }
         inline const_realpart_type realPart() const
         { return base::realPart(); }
@@ -967,12 +967,12 @@ namespace tmv {
         // Access
         //
 
-        inline reference operator()(int i) 
+        inline reference operator()(ptrdiff_t i) 
         { 
             TMVAssert(i>0 && i<=c_type::size());
             return diag()(i); 
         }
-        inline reference operator()(int i, int TMV_DEBUGPARAM(j)) 
+        inline reference operator()(ptrdiff_t i, ptrdiff_t TMV_DEBUGPARAM(j)) 
         { 
             TMVAssert(i==j); 
             TMVAssert(i>0 && i<=c_type::size());
@@ -982,12 +982,12 @@ namespace tmv {
         inline vec_type diag() 
         { return c_type::diag(); }
 
-        inline T operator()(int i) const 
+        inline T operator()(ptrdiff_t i) const 
         { 
             TMVAssert(i>0 && i<=c_type::size());
             return diag()(i); 
         }
-        inline T operator()(int i, int TMV_DEBUGPARAM(j)) const 
+        inline T operator()(ptrdiff_t i, ptrdiff_t TMV_DEBUGPARAM(j)) const 
         { 
             TMVAssert(i==j); 
             TMVAssert(i>0 && i<=c_type::size());
@@ -1030,19 +1030,19 @@ namespace tmv {
         // subDiagMatrix
         //
 
-        inline view_type subDiagMatrix(int i1, int i2)
+        inline view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2)
         {
             TMVAssert(diag().hasSubVector(i1,i2,1));
             return c_type::cSubDiagMatrix(i1-1,i2);
         }
 
-        inline view_type cSubDiagMatrix(int i1, int i2, int istep)
+        inline view_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep)
         {
             TMVAssert(diag().hasSubVector(i1,i2,istep));
             return c_type::cSubDiagMatrix(i1-1,i2-1+istep,istep);
         }
 
-        inline view_type subDiagMatrix(int i1, int i2, int istep)
+        inline view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep)
         {
             TMVAssert(diag().hasSubVector(i1,i2,istep));
             return view_type(diag().subVector(i1,i2,istep)); 
@@ -1066,19 +1066,19 @@ namespace tmv {
         inline view_type adjoint()
         { return conjugate(); }
 
-        inline const_view_type subDiagMatrix(int i1, int i2) const
+        inline const_view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) const
         {
             TMVAssert(diag().hasSubVector(i1,i2,1));
             return c_type::cSubDiagMatrix(i1-1,i2);
         }
 
-        inline const_view_type cSubDiagMatrix(int i1, int i2, int istep) const
+        inline const_view_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         {
             TMVAssert(diag().hasSubVector(i1,i2,istep));
             return c_type::cSubDiagMatrix(i1-1,i2-1+istep,istep);
         }
 
-        inline const_view_type subDiagMatrix(int i1, int i2, int istep) const
+        inline const_view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         {
             TMVAssert(diag().hasSubVector(i1,i2,istep));
             return view_type(diag().subVector(i1,i2,istep)); 
@@ -1134,10 +1134,10 @@ namespace tmv {
         // Constructors
         //
 
-        inline explicit DiagMatrix(int _size=0) : itsdiag(_size) 
+        inline explicit DiagMatrix(ptrdiff_t _size=0) : itsdiag(_size) 
         { TMVAssert(_size >= 0); }
 
-        inline DiagMatrix(int _size, const T& x) : itsdiag(_size,x)  
+        inline DiagMatrix(ptrdiff_t _size, const T& x) : itsdiag(_size,x)  
         { TMVAssert(_size >= 0); }
 
         inline explicit DiagMatrix(const GenVector<T>& rhs) : itsdiag(rhs) {}
@@ -1236,7 +1236,7 @@ namespace tmv {
         // Access
         //
 
-        inline T& operator()(int i) 
+        inline T& operator()(ptrdiff_t i) 
         { 
             if (A==CStyle) { 
                 TMVAssert(i>=0 && i<size());
@@ -1247,7 +1247,7 @@ namespace tmv {
             }
         }
 
-        inline T& operator()(int i, int TMV_DEBUGPARAM(j)) 
+        inline T& operator()(ptrdiff_t i, ptrdiff_t TMV_DEBUGPARAM(j)) 
         { 
             if (A==CStyle) { 
                 TMVAssert(i>=0 && i<size()); 
@@ -1260,7 +1260,7 @@ namespace tmv {
             return operator()(i);
         }
 
-        inline T operator()(int i) const 
+        inline T operator()(ptrdiff_t i) const 
         {
             if (A==CStyle) { 
                 TMVAssert(i>=0 && i<size());
@@ -1271,7 +1271,7 @@ namespace tmv {
             }
         }
 
-        inline T operator()(int i,int j) const 
+        inline T operator()(ptrdiff_t i,ptrdiff_t j) const 
         {
             if (A==CStyle) { 
                 TMVAssert(i>=0 && i<size()); 
@@ -1320,20 +1320,20 @@ namespace tmv {
         // subDiagMatrix
         //
 
-        inline view_type cSubDiagMatrix(int i1, int i2) 
+        inline view_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) 
         { return view_type(itsdiag.cSubVector(i1,i2)); }
 
-        inline view_type subDiagMatrix(int i1, int i2) 
+        inline view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) 
         { 
             TMVAssert(diag().hasSubVector(i1,i2,1));
             if (A == int(FortranStyle)) { --i1; }
             return cSubDiagMatrix(i1,i2); 
         }
 
-        inline view_type cSubDiagMatrix(int i1, int i2, int istep) 
+        inline view_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) 
         { return view_type(itsdiag.cSubVector(i1,i2,istep)); }
 
-        inline view_type subDiagMatrix(int i1, int i2, int istep) 
+        inline view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) 
         { 
             TMVAssert(diag().hasSubVector(i1,i2,istep));
             if (A == int(FortranStyle)) { --i1; i2 += istep-1; }
@@ -1346,20 +1346,20 @@ namespace tmv {
         inline realpart_type imagPart()
         { return realpart_type(diag().imagPart()); }
 
-        inline const_view_type cSubDiagMatrix(int i1, int i2) const
+        inline const_view_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) const
         { return const_view_type(itsdiag.cSubVector(i1,i2)); }
 
-        inline const_view_type subDiagMatrix(int i1, int i2) const
+        inline const_view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) const
         {
             TMVAssert(diag().hasSubVector(i1,i2,1));
             if (A == int(FortranStyle)) { --i1; }
             return cSubDiagMatrix(i1,i2);
         }
 
-        inline const_view_type cSubDiagMatrix(int i1, int i2, int istep) const
+        inline const_view_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         { return const_view_type(itsdiag.cSubVector(i1,i2,istep)); }
 
-        inline const_view_type subDiagMatrix(int i1, int i2, int istep) const
+        inline const_view_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         { 
             TMVAssert(diag().hasSubVector(i1,i2,istep));
             if (A == int(FortranStyle)) { --i1; i2 += istep-1; }
@@ -1404,7 +1404,7 @@ namespace tmv {
 
         using base::size;
 
-        inline void resize(int n) 
+        inline void resize(ptrdiff_t n) 
         { 
             TMVAssert(n >= 0);
             itsdiag.resize(n); 
@@ -1464,14 +1464,14 @@ namespace tmv {
     { return DiagMatrixView<T,A>(v.view()); }
 
     template <class T> 
-    inline ConstDiagMatrixView<T> DiagMatrixViewOf(const T* m, int size)
+    inline ConstDiagMatrixView<T> DiagMatrixViewOf(const T* m, ptrdiff_t size)
     {
         TMVAssert(size >= 0);
         return ConstDiagMatrixView<T>(VectorViewOf(m,size)); 
     }
 
     template <class T> 
-    inline DiagMatrixView<T> DiagMatrixViewOf(T* m, int size)
+    inline DiagMatrixView<T> DiagMatrixViewOf(T* m, ptrdiff_t size)
     {
         TMVAssert(size >= 0);
         return DiagMatrixView<T>(VectorViewOf(m,size)); 
@@ -1479,14 +1479,14 @@ namespace tmv {
 
     template <class T> 
     inline ConstDiagMatrixView<T> DiagMatrixViewOf(
-        const T* m, int size, int step)
+        const T* m, ptrdiff_t size, ptrdiff_t step)
     {
         TMVAssert(size >= 0);
         return ConstDiagMatrixView<T>(VectorViewOf(m,size,step)); 
     }
 
     template <class T> 
-    inline DiagMatrixView<T> DiagMatrixViewOf(T* m, int size, int step)
+    inline DiagMatrixView<T> DiagMatrixViewOf(T* m, ptrdiff_t size, ptrdiff_t step)
     {
         TMVAssert(size >= 0);
         return DiagMatrixView<T>(VectorViewOf(m,size,step)); 

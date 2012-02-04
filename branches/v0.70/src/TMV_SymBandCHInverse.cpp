@@ -62,7 +62,7 @@ namespace tmv {
 #endif
 
     template <class T> 
-    static void DoCHInverse(SymMatrixView<T> sinv, int nlo)
+    static void DoCHInverse(SymMatrixView<T> sinv, ptrdiff_t nlo)
     {
         TMVAssert(sinv.isherm());
         // inv = (L Lt)^-1 = Lt^-1 L^-1
@@ -75,11 +75,11 @@ namespace tmv {
     static void SimpleLDLt_AddXtDX(
         SymMatrixView<T> sinv, const GenMatrix<T>& X, const GenDiagMatrix<T>& D)
     {
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
         if (N==1) {
             sinv += D(0) * X.row(0).conjugate() ^ X.row(0);
         } else {
-            int No2 = N/2;
+            ptrdiff_t No2 = N/2;
             SimpleLDLt_AddXtDX(sinv,X.rowRange(0,No2),D.subDiagMatrix(0,No2));
             SimpleLDLt_AddXtDX(sinv,X.rowRange(No2,N),D.subDiagMatrix(No2,N));
         }
@@ -94,9 +94,9 @@ namespace tmv {
         // D really is a regular DiagMatrix - not the screwy block diagonal
         // version that we had to deal with there.
 
-        const int N = sinv.size();
+        const ptrdiff_t N = sinv.size();
         if (N > 1) {
-            int No2 = N/2;
+            ptrdiff_t No2 = N/2;
             MatrixView<T> X10 = sinv.subMatrix(No2,N,0,No2);
             LowerTriMatrixView<T> X11 = 
                 sinv.lowerTri(UnitDiag).subTriMatrix(No2,N);

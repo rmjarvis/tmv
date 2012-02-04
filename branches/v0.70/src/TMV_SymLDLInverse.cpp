@@ -80,8 +80,8 @@ namespace tmv {
         T* Di = sinv.diag().ptr();
         const int Dstep = sinv.diag().step();
         T* xDi = xD.ptr();
-        const int N = sinv.size();
-        for(int i=0;i<N;) {
+        const ptrdiff_t N = sinv.size();
+        for(ptrdiff_t i=0;i<N;) {
             if (i==N-1 || *xDi == T(0)) { // Then 1x1
 #ifdef TMVFLDEBUG
                 TMVAssert(Di >= sinv._first);
@@ -159,7 +159,7 @@ namespace tmv {
         Matrix<T> m1 = sinv + (herm ? X.adjoint() : X.transpose())*DD*X;
 #endif
 
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
         if (N == 1) {
             sinv += D(0) * ((herm ? X.row(0).conjugate() : X.row(0)) ^ X.row(0));
         } else if ((N == 2 && xD(0) != T(0)) || N <= SYM_LDL_BLOCKSIZE2) {
@@ -167,7 +167,7 @@ namespace tmv {
             PseudoDiag_LMultEq<herm>(D,xD,DX.view());
             SymMultMM<true>(T(1),herm?X.adjoint():X.transpose(),DX,sinv);
         } else {
-            int No2 = N/2;
+            ptrdiff_t No2 = N/2;
             if (xD(No2-1) != T(0)) ++No2;
             TMVAssert(xD(No2-1) == T(0));
             LDLt_AddXtDX<herm>(
@@ -210,7 +210,7 @@ namespace tmv {
         TMVAssert(sinv.size() == xDinv.size()+1);
         TMVAssert(xDinv.step() == 1);
 
-        const int N = sinv.size();
+        const ptrdiff_t N = sinv.size();
 
 #ifdef XDEBUG
         //cerr<<"Start LDLt_CombineInverse\n";
@@ -249,7 +249,7 @@ namespace tmv {
                     }
                 }
             } else {
-                int No2 = N/2;
+                ptrdiff_t No2 = N/2;
                 if (xDinv(No2-1) != T(0)) ++No2;
                 TMVAssert(xDinv(No2-1) == T(0));
                 TMVAssert(No2 < N);
@@ -296,7 +296,7 @@ namespace tmv {
 
     template <class T, class T1> 
     void LDL_Inverse(
-        const GenSymMatrix<T>& LLx, const GenVector<T>& xD, const int* P,
+        const GenSymMatrix<T>& LLx, const GenVector<T>& xD, const ptrdiff_t* P,
         SymMatrixView<T1> sinv)
     {
         TMVAssert(sinv.size() == LLx.size());

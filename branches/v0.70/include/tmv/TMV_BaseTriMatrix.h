@@ -83,7 +83,7 @@ namespace tmv {
     {
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
-        virtual int size() const = 0;
+        virtual ptrdiff_t size() const = 0;
         virtual DiagType dt() const = 0;
         virtual void assignToU(UpperTriMatrixView<RT> m) const = 0;
         virtual void assignToU(UpperTriMatrixView<CT> m) const = 0;
@@ -96,7 +96,7 @@ namespace tmv {
     {
         typedef TMV_RealType(T) RT;
         typedef TMV_ComplexType(T) CT;
-        virtual int size() const = 0;
+        virtual ptrdiff_t size() const = 0;
         virtual DiagType dt() const = 0;
         virtual void assignToL(LowerTriMatrixView<RT> m) const = 0;
         virtual void assignToL(LowerTriMatrixView<CT> m) const = 0;

@@ -41,11 +41,11 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RCCMultMM11(
-        const int K, const Ta*const A, const Tb* B, T*const C,
-        const int , const int , const int)
+        const ptrdiff_t K, const Ta*const A, const Tb* B, T*const C,
+        const ptrdiff_t , const ptrdiff_t , const ptrdiff_t)
     {
         T c00(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Tb bk0 = cb ? TMV_CONJ(B[k]) : B[k];
             c00 += a0k * bk0;
@@ -55,13 +55,13 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RCCMultMM21(
-        const int K, const Ta*const A, const Tb* B, T*const C,
-        const int Asi, const int , const int)
+        const ptrdiff_t K, const Ta*const A, const Tb* B, T*const C,
+        const ptrdiff_t Asi, const ptrdiff_t , const ptrdiff_t)
     {
         const Ta*const A1 = A + Asi;
         T c00(0);
         T c10(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Ta a1k = ca ? TMV_CONJ(A1[k]) : A1[k];
             const Tb bk0 = cb ? TMV_CONJ(B[k]) : B[k];
@@ -74,15 +74,15 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RCCMultMM31(
-        const int K, const Ta*const A, const Tb* B, T*const C,
-        const int Asi, const int , const int)
+        const ptrdiff_t K, const Ta*const A, const Tb* B, T*const C,
+        const ptrdiff_t Asi, const ptrdiff_t , const ptrdiff_t)
     {
         const Ta*const A1 = A + Asi;
         const Ta*const A2 = A1 + Asi;
         T c00(0);
         T c10(0);
         T c20(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Ta a1k = ca ? TMV_CONJ(A1[k]) : A1[k];
             const Ta a2k = ca ? TMV_CONJ(A2[k]) : A2[k];
@@ -98,8 +98,8 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RCCMultMM41(
-        const int K, const Ta*const A, const Tb* B, T*const C,
-                            const int Asi, const int , const int)
+        const ptrdiff_t K, const Ta*const A, const Tb* B, T*const C,
+        const ptrdiff_t Asi, const ptrdiff_t , const ptrdiff_t)
     {
         const Ta*const A1 = A + Asi;
         const Ta*const A2 = A1 + Asi;
@@ -108,7 +108,7 @@ namespace tmv {
         T c10(0);
         T c20(0);
         T c30(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Ta a1k = ca ? TMV_CONJ(A1[k]) : A1[k];
             const Ta a2k = ca ? TMV_CONJ(A2[k]) : A2[k];
@@ -127,14 +127,14 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RCCMultMM12(
-        const int K, const Ta*const A, const Tb* B, T*const C,
-                            const int , const int Bsj, const int Csj)
+        const ptrdiff_t K, const Ta*const A, const Tb* B, T*const C,
+        const ptrdiff_t , const ptrdiff_t Bsj, const ptrdiff_t Csj)
     {
         const Tb*const B1 = B + Bsj;
         T*const C1 = C + Csj;
         T c00(0);
         T c01(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Tb bk0 = cb ? TMV_CONJ(B[k]) : B[k];
             const Tb bk1 = cb ? TMV_CONJ(B1[k]) : B1[k];
@@ -147,8 +147,8 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RCCMultMM22(
-        const int K, const Ta*const A, const Tb* B, T*const C,
-                            const int Asi, const int Bsj, const int Csj)
+        const ptrdiff_t K, const Ta*const A, const Tb* B, T*const C,
+        const ptrdiff_t Asi, const ptrdiff_t Bsj, const ptrdiff_t Csj)
     {
         const Ta*const A1 = A + Asi;
         const Tb*const B1 = B + Bsj;
@@ -157,7 +157,7 @@ namespace tmv {
         T c10(0);
         T c01(0);
         T c11(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Ta a1k = ca ? TMV_CONJ(A1[k]) : A1[k];
             const Tb bk0 = cb ? TMV_CONJ(B[k]) : B[k];
@@ -175,8 +175,8 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RCCMultMM32(
-        const int K, const Ta*const A, const Tb* B, T*const C,
-                            const int Asi, const int Bsj, const int Csj)
+        const ptrdiff_t K, const Ta*const A, const Tb* B, T*const C,
+        const ptrdiff_t Asi, const ptrdiff_t Bsj, const ptrdiff_t Csj)
     {
         const Ta*const A1 = A + Asi;
         const Ta*const A2 = A1 + Asi;
@@ -188,7 +188,7 @@ namespace tmv {
         T c01(0);
         T c11(0);
         T c21(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Ta a1k = ca ? TMV_CONJ(A1[k]) : A1[k];
             const Ta a2k = ca ? TMV_CONJ(A2[k]) : A2[k];
@@ -211,8 +211,8 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RCCMultMM42(
-        const int K, const Ta*const A, const Tb* B, T*const C,
-                            const int Asi, const int Bsj, const int Csj)
+        const ptrdiff_t K, const Ta*const A, const Tb* B, T*const C,
+        const ptrdiff_t Asi, const ptrdiff_t Bsj, const ptrdiff_t Csj)
     {
         const Ta*const A1 = A + Asi;
         const Ta*const A2 = A1 + Asi;
@@ -223,7 +223,7 @@ namespace tmv {
         T c10(0);
         T c01(0);
         T c11(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Ta a1k = ca ? TMV_CONJ(A1[k]) : A1[k];
             const Tb bk0 = cb ? TMV_CONJ(B[k]) : B[k];
@@ -237,7 +237,7 @@ namespace tmv {
         C[1] += c10; c10 = T(0);
         C1[0] += c01; c01 = T(0);
         C1[1] += c11; c11 = T(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a2k = ca ? TMV_CONJ(A2[k]) : A2[k];
             const Ta a3k = ca ? TMV_CONJ(A3[k]) : A3[k];
             const Tb bk0 = cb ? TMV_CONJ(B[k]) : B[k];
@@ -255,8 +255,8 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RCCMultMM13(
-        const int K, const Ta*const A, const Tb* B, T*const C,
-                            const int , const int Bsj, const int Csj)
+        const ptrdiff_t K, const Ta*const A, const Tb* B, T*const C,
+        const ptrdiff_t , const ptrdiff_t Bsj, const ptrdiff_t Csj)
     {
         const Tb*const B1 = B + Bsj;
         const Tb*const B2 = B1 + Bsj;
@@ -265,7 +265,7 @@ namespace tmv {
         T c00(0);
         T c01(0);
         T c02(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Tb bk0 = cb ? TMV_CONJ(B[k]) : B[k];
             const Tb bk1 = cb ? TMV_CONJ(B1[k]) : B1[k];
@@ -281,8 +281,8 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RCCMultMM23(
-        const int K, const Ta*const A, const Tb* B, T*const C,
-                            const int Asi, const int Bsj, const int Csj)
+        const ptrdiff_t K, const Ta*const A, const Tb* B, T*const C,
+        const ptrdiff_t Asi, const ptrdiff_t Bsj, const ptrdiff_t Csj)
     {
         const Ta*const A1 = A + Asi;
         const Tb*const B1 = B + Bsj;
@@ -295,7 +295,7 @@ namespace tmv {
         T c11(0);
         T c02(0);
         T c12(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Ta a1k = ca ? TMV_CONJ(A1[k]) : A1[k];
             const Tb bk0 = cb ? TMV_CONJ(B[k]) : B[k];
@@ -318,8 +318,8 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RCCMultMM33(
-        const int K, const Ta*const A, const Tb* B, T*const C,
-                            const int Asi, const int Bsj, const int Csj)
+        const ptrdiff_t K, const Ta*const A, const Tb* B, T*const C,
+        const ptrdiff_t Asi, const ptrdiff_t Bsj, const ptrdiff_t Csj)
     {
         const Ta*const A1 = A + Asi;
         const Ta*const A2 = A1 + Asi;
@@ -336,7 +336,7 @@ namespace tmv {
         T c02(0);
         T c12(0);
         T c22(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Ta a1k = ca ? TMV_CONJ(A1[k]) : A1[k];
             const Ta a2k = ca ? TMV_CONJ(A2[k]) : A2[k];
@@ -366,8 +366,8 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RCCMultMM43(
-        const int K, const Ta*const A, const Tb* B, T*const C,
-                            const int Asi, const int Bsj, const int Csj)
+        const ptrdiff_t K, const Ta*const A, const Tb* B, T*const C,
+        const ptrdiff_t Asi, const ptrdiff_t Bsj, const ptrdiff_t Csj)
     {
         const Ta*const A1 = A + Asi;
         const Ta*const A2 = A1 + Asi;
@@ -382,7 +382,7 @@ namespace tmv {
         T c11(0);
         T c02(0);
         T c12(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Ta a1k = ca ? TMV_CONJ(A1[k]) : A1[k];
             const Tb bk0 = cb ? TMV_CONJ(B[k]) : B[k];
@@ -401,7 +401,7 @@ namespace tmv {
         C1[1] += c11; c11 = T(0);
         C2[0] += c02; c02 = T(0);
         C2[1] += c12; c12 = T(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a2k = ca ? TMV_CONJ(A2[k]) : A2[k];
             const Ta a3k = ca ? TMV_CONJ(A3[k]) : A3[k];
             const Tb bk0 = cb ? TMV_CONJ(B[k]) : B[k];
@@ -424,8 +424,8 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RCCMultMM14(
-        const int K, const Ta*const A, const Tb* B, T*const C,
-                            const int , const int Bsj, const int Csj)
+        const ptrdiff_t K, const Ta*const A, const Tb* B, T*const C,
+        const ptrdiff_t , const ptrdiff_t Bsj, const ptrdiff_t Csj)
     {
         const Tb*const B1 = B + Bsj;
         const Tb*const B2 = B1 + Bsj;
@@ -437,7 +437,7 @@ namespace tmv {
         T c01(0);
         T c02(0);
         T c03(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Tb bk0 = cb ? TMV_CONJ(B[k]) : B[k];
             const Tb bk1 = cb ? TMV_CONJ(B1[k]) : B1[k];
@@ -456,8 +456,8 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RCCMultMM24(
-        const int K, const Ta*const A, const Tb* B, T*const C,
-                            const int Asi, const int Bsj, const int Csj)
+        const ptrdiff_t K, const Ta*const A, const Tb* B, T*const C,
+        const ptrdiff_t Asi, const ptrdiff_t Bsj, const ptrdiff_t Csj)
     {
         const Ta*const A1 = A + Asi;
         const Tb*const B1 = B + Bsj;
@@ -470,7 +470,7 @@ namespace tmv {
         T c10(0);
         T c01(0);
         T c11(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Ta a1k = ca ? TMV_CONJ(A1[k]) : A1[k];
             const Tb bk0 = cb ? TMV_CONJ(B[k]) : B[k];
@@ -484,7 +484,7 @@ namespace tmv {
         C[1] += c10; c10 = T(0);
         C1[0] += c01; c01 = T(0);
         C1[1] += c11; c11 = T(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Ta a1k = ca ? TMV_CONJ(A1[k]) : A1[k];
             const Tb bk2 = cb ? TMV_CONJ(B2[k]) : B2[k];
@@ -502,8 +502,8 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RCCMultMM34(
-        const int K, const Ta*const A, const Tb* B, T*const C,
-                            const int Asi, const int Bsj, const int Csj)
+        const ptrdiff_t K, const Ta*const A, const Tb* B, T*const C,
+        const ptrdiff_t Asi, const ptrdiff_t Bsj, const ptrdiff_t Csj)
     {
         const Ta*const A1 = A + Asi;
         const Ta*const A2 = A1 + Asi;
@@ -519,7 +519,7 @@ namespace tmv {
         T c01(0);
         T c11(0);
         T c21(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Ta a1k = ca ? TMV_CONJ(A1[k]) : A1[k];
             const Ta a2k = ca ? TMV_CONJ(A2[k]) : A2[k];
@@ -538,7 +538,7 @@ namespace tmv {
         C1[0] += c01; c01 = T(0);
         C1[1] += c11; c11 = T(0);
         C1[2] += c21; c21 = T(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Ta a1k = ca ? TMV_CONJ(A1[k]) : A1[k];
             const Ta a2k = ca ? TMV_CONJ(A2[k]) : A2[k];
@@ -561,8 +561,8 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RCCMultMM44(
-        const int K, const Ta*const A, const Tb* B, T*const C,
-                            const int Asi, const int Bsj, const int Csj)
+        const ptrdiff_t K, const Ta*const A, const Tb* B, T*const C,
+        const ptrdiff_t Asi, const ptrdiff_t Bsj, const ptrdiff_t Csj)
     {
         const Ta*const A1 = A + Asi;
         const Ta*const A2 = A1 + Asi;
@@ -577,7 +577,7 @@ namespace tmv {
         T c10(0);
         T c01(0);
         T c11(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Ta a1k = ca ? TMV_CONJ(A1[k]) : A1[k];
             const Tb bk0 = cb ? TMV_CONJ(B[k]) : B[k];
@@ -591,7 +591,7 @@ namespace tmv {
         C[1] += c10; c10 = T(0);
         C1[0] += c01; c01 = T(0);
         C1[1] += c11; c11 = T(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a2k = ca ? TMV_CONJ(A2[k]) : A2[k];
             const Ta a3k = ca ? TMV_CONJ(A3[k]) : A3[k];
             const Tb bk0 = cb ? TMV_CONJ(B[k]) : B[k];
@@ -605,7 +605,7 @@ namespace tmv {
         C[3] += c10; c10 = T(0);
         C1[2] += c01; c01 = T(0);
         C1[3] += c11; c11 = T(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a2k = ca ? TMV_CONJ(A2[k]) : A2[k];
             const Ta a3k = ca ? TMV_CONJ(A3[k]) : A3[k];
             const Tb bk2 = cb ? TMV_CONJ(B2[k]) : B2[k];
@@ -619,7 +619,7 @@ namespace tmv {
         C2[3] += c10; c10 = T(0);
         C3[2] += c01; c01 = T(0);
         C3[3] += c11; c11 = T(0);
-        for(int k=K-1;k>=0;--k) {
+        for(ptrdiff_t k=K-1;k>=0;--k) {
             const Ta a0k = ca ? TMV_CONJ(A[k]) : A[k];
             const Ta a1k = ca ? TMV_CONJ(A1[k]) : A1[k];
             const Tb bk2 = cb ? TMV_CONJ(B2[k]) : B2[k];
@@ -637,16 +637,16 @@ namespace tmv {
 
     template <bool ca, bool cb, class T, class Ta, class Tb>
     static void RecursiveRCCMultMM(
-        const int M, const int N, const int K,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
         const Ta* A, const Tb* B, T* C,
-        const int Asi, const int Bsj, const int Csj)
+        const ptrdiff_t Asi, const ptrdiff_t Bsj, const ptrdiff_t Csj)
     {
         if (M > N && M > 4) {
-            int M1 = M/2;
+            ptrdiff_t M1 = M/2;
             RecursiveRCCMultMM<ca,cb>(M1,N,K,A,B,C,Asi,Bsj,Csj);
             RecursiveRCCMultMM<ca,cb>(M-M1,N,K,A+M1*Asi,B,C+M1,Asi,Bsj,Csj);
         } else if (N > 4) {
-            int N1 = N/2;
+            ptrdiff_t N1 = N/2;
             RecursiveRCCMultMM<ca,cb>(M,N1,K,A,B,C,Asi,Bsj,Csj);
             RecursiveRCCMultMM<ca,cb>(M,N-N1,K,A,B+N1*Bsj,C+N1*Csj,Asi,Bsj,Csj);
         } else {
@@ -708,18 +708,18 @@ namespace tmv {
         TMVAssert(B.iscm());
         TMVAssert(C.iscm());
 
-        const int M = C.colsize();
-        const int N = C.rowsize();
-        const int K = A.rowsize();
-        const int Asi = A.stepi();
-        const int Bsj = B.stepj();
+        const ptrdiff_t M = C.colsize();
+        const ptrdiff_t N = C.rowsize();
+        const ptrdiff_t K = A.rowsize();
+        const ptrdiff_t Asi = A.stepi();
+        const ptrdiff_t Bsj = B.stepj();
 
         const Ta* Ap = A.cptr();
         const Tb* Bp = B.cptr();
 
         Matrix<T,ColMajor> Ctemp(M,N,T(0));
         T* Ct = Ctemp.ptr();
-        int Ctsj = Ctemp.stepj();
+        ptrdiff_t Ctsj = Ctemp.stepj();
         RecursiveRCCMultMM<ca,cb>(M,N,K,Ap,Bp,Ct,Asi,Bsj,Ctsj);
         if (alpha != T(1)) Ctemp *= alpha;
         if (add) C += Ctemp;

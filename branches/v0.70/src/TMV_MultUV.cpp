@@ -71,11 +71,11 @@ namespace tmv {
     }
 
     template <class T> 
-    int UpperTriMatrixComposite<T>::stepi() const 
+    ptrdiff_t UpperTriMatrixComposite<T>::stepi() const 
     { return 1; }
 
     template <class T> 
-    int UpperTriMatrixComposite<T>::stepj() const 
+    ptrdiff_t UpperTriMatrixComposite<T>::stepj() const 
     { return this->size(); }
 
     template <class T> 
@@ -91,11 +91,11 @@ namespace tmv {
     }
 
     template <class T> 
-    int LowerTriMatrixComposite<T>::stepi() const 
+    ptrdiff_t LowerTriMatrixComposite<T>::stepi() const 
     { return 1; }
 
     template <class T> 
-    int LowerTriMatrixComposite<T>::stepj() const 
+    ptrdiff_t LowerTriMatrixComposite<T>::stepj() const 
     { return this->size(); }
 
     // 
@@ -115,13 +115,13 @@ namespace tmv {
         TMVAssert(ca == A.isconj());
         TMVAssert(ua == A.isunit());
 
-        const int N = x.size();
+        const ptrdiff_t N = x.size();
 
-        const int sj = rm ? 1 : A.stepj();
-        const int ds = A.stepi()+sj;
+        const ptrdiff_t sj = rm ? 1 : A.stepj();
+        const ptrdiff_t ds = A.stepi()+sj;
         T* xi = x.ptr();
         const Ta* Aii = A.cptr();
-        int len = N-1;
+        ptrdiff_t len = N-1;
 
         for(; len>0; --len,++xi,Aii+=ds) {
             // i = 0..N-2
@@ -129,7 +129,7 @@ namespace tmv {
             if (!ua) *xi *= (ca ? TMV_CONJ(*Aii) : *Aii);
             const T* xj = xi+1;
             const Ta* Aij = Aii+sj;
-            for(int j=len;j>0;--j,++xj,(rm?++Aij:Aij+=sj)) {
+            for(ptrdiff_t j=len;j>0;--j,++xj,(rm?++Aij:Aij+=sj)) {
 #ifdef TMVFLDEBUG
                 TMVAssert(xi >= x._first);
                 TMVAssert(xi < x._last);
@@ -173,11 +173,11 @@ namespace tmv {
         TMVAssert(ca == A.isconj());
         TMVAssert(ua == A.isunit());
 
-        const int N = x.size();
+        const ptrdiff_t N = x.size();
 
         T* x0 = x.ptr();
         const T* xj = x0+1;
-        const int si = cm ? 1 : A.stepi();
+        const ptrdiff_t si = cm ? 1 : A.stepi();
         const Ta* A0j = A.cptr();
 
 #ifdef TMVFLDEBUG
@@ -187,12 +187,12 @@ namespace tmv {
         if (!ua) *x0 *= (ca ? TMV_CONJ(*A0j) : *A0j);
         A0j += A.stepj();
 
-        for(int len=1; len<N; ++len,++xj,A0j+=A.stepj()) if (*xj != T(0)) {
+        for(ptrdiff_t len=1; len<N; ++len,++xj,A0j+=A.stepj()) if (*xj != T(0)) {
             // j = 1..N-1
             // x.subVector(0,j) += *xj * A.col(j,0,j);
             const Ta* Aij = A0j;
             T* xi = x0;
-            for(int i=len;i>0;--i,++xi,(cm?++Aij:Aij+=si)) {
+            for(ptrdiff_t i=len;i>0;--i,++xi,(cm?++Aij:Aij+=si)) {
 #ifdef TMVFLDEBUG
                 TMVAssert(xi >= x._first);
                 TMVAssert(xi < x._last);
@@ -238,24 +238,24 @@ namespace tmv {
         TMVAssert(ca == A.isconj());
         TMVAssert(ua == A.isunit());
 
-        const int N = x.size();
-        const int si = A.stepi();
-        const int sj = rm ? 1 : A.stepj();
-        const int ds = si+sj;
+        const ptrdiff_t N = x.size();
+        const ptrdiff_t si = A.stepi();
+        const ptrdiff_t sj = rm ? 1 : A.stepj();
+        const ptrdiff_t ds = si+sj;
 
         const T* x0 = x.cptr();
         T* xi = x.ptr() + N-1;
         const Ta* Ai0 = A.cptr()+(N-1)*si;
         const Ta* Aii = Ai0 + (N-1)*sj;
 
-        for(int len=N-1; len>0; --len,--xi,Ai0-=si,Aii-=ds) {
+        for(ptrdiff_t len=N-1; len>0; --len,--xi,Ai0-=si,Aii-=ds) {
             // i = N-1..1
             // x(i) = A.row(i,0,i+1) * x.subVector(0,i+1);
             T xx = *xi;
             if (!ua) xx *= (ca ? TMV_CONJ(*Aii) : *Aii);
             const Ta* Aij = Ai0;
             const T* xj = x0;
-            for(int j=len;j>0;--j,++xj,(rm?++Aij:Aij+=sj))
+            for(ptrdiff_t j=len;j>0;--j,++xj,(rm?++Aij:Aij+=sj))
                 xx += *xj * (ca ? TMV_CONJ(*Aij) : *Aij);
 #ifdef TMVFLDEBUG
             TMVAssert(xi >= x._first);
@@ -299,11 +299,11 @@ namespace tmv {
         TMVAssert(ca == A.isconj());
         TMVAssert(ua == A.isunit());
 
-        const int N = x.size();
+        const ptrdiff_t N = x.size();
 
         T* xj = x.ptr() + N-2;
-        const int si = cm ? 1 : A.stepi();
-        const int ds = A.stepj()+si;
+        const ptrdiff_t si = cm ? 1 : A.stepi();
+        const ptrdiff_t ds = A.stepj()+si;
         const Ta* Ajj = A.cptr()+(N-2)*ds;
 
 #ifdef TMVFLDEBUG
@@ -311,12 +311,12 @@ namespace tmv {
         TMVAssert(xj+1 < x._last);
 #endif
         if (!ua) *(xj+1) *= (ca ? TMV_CONJ(*(Ajj+ds)) : *(Ajj+ds));
-        for(int jj=N-1,len=1;jj>0;--jj,++len,--xj,Ajj-=ds) if (*xj!=T(0)) {
+        for(ptrdiff_t jj=N-1,len=1;jj>0;--jj,++len,--xj,Ajj-=ds) if (*xj!=T(0)) {
             // j = N-2..0, jj = j+1
             // x.subVector(j+1,N) += *xj * A.col(j,j+1,N);
             T* xi = xj+1;
             const Ta* Aij = Ajj+si;
-            for (int i=len;i>0;--i,++xi,(cm?++Aij:Aij+=si)) {
+            for (ptrdiff_t i=len;i>0;--i,++xi,(cm?++Aij:Aij+=si)) {
 #ifdef TMVFLDEBUG
                 TMVAssert(xi >= x._first);
                 TMVAssert(xi < x._last);
@@ -370,11 +370,11 @@ namespace tmv {
         // x = [  0  A22 A23 ] [ x2 ] = [ A22 x2 ]
         //     [  0   0  A33 ] [ 0  ]   [   0    ]
 
-        const int N = x.size(); // = A.size()
-        int j2 = N;
+        const ptrdiff_t N = x.size(); // = A.size()
+        ptrdiff_t j2 = N;
         for(const T* x2=x.cptr()+N-1; j2>0 && *x2==T(0); --j2,--x2);
         if (j2 == 0) return;
-        int j1 = 0;
+        ptrdiff_t j1 = 0;
         for(const T* x1=x.cptr(); *x1==T(0); ++j1,++x1);
         if (j1 == 0 && j2 == N) {
             DoMultEqMV(A,x);
@@ -416,11 +416,11 @@ namespace tmv {
         // x = [ A21 A22  0  ] [ x2 ] = [ A22 x2 ]
         //     [ A31 A32 A33 ] [ 0  ]   [ A32 x2 ]
 
-        const int N = x.size(); // = A.size()
-        int j2 = N;
+        const ptrdiff_t N = x.size(); // = A.size()
+        ptrdiff_t j2 = N;
         for(const T* x2=x.cptr()+N-1; j2>0 && *x2==T(0); --j2,--x2);
         if (j2 == 0) return;
-        int j1 = 0;
+        ptrdiff_t j1 = 0;
         for(const T* x1=x.cptr(); *x1==T(0); ++j1,++x1);
         if (j1 == 0 && j2 == N) {
             DoMultEqMV(A,x);

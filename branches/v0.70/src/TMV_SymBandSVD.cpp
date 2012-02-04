@@ -61,7 +61,7 @@ namespace tmv {
         DiagMatrix<RT> S;
         RT logdet;
         T signdet;
-        mutable int kmax;
+        mutable ptrdiff_t kmax;
     }; // HermBandSVDiv
 
     template <class T>
@@ -196,7 +196,7 @@ namespace tmv {
     }
 
     template <class T>
-    void HermBandSVDiv<T>::top(int neigen, std::ostream* debugout) const
+    void HermBandSVDiv<T>::top(ptrdiff_t neigen, std::ostream* debugout) const
     {
         TMVAssert(neigen > 0);
         if (neigen < pimpl->S.size()) pimpl->kmax = neigen;
@@ -209,7 +209,7 @@ namespace tmv {
     }
 
     template <class T>
-    int HermBandSVDiv<T>::getKMax() const 
+    ptrdiff_t HermBandSVDiv<T>::getKMax() const 
     { return pimpl->kmax; }
 
     template <class T>
@@ -220,8 +220,8 @@ namespace tmv {
     DiagMatrix<RT> HermBandSVDiv<T>::getS() const
     {
         DiagMatrix<RT> temp = pimpl->S;
-        const int N = pimpl->S.size();
-        for(int i=0;i<N;i++) 
+        const ptrdiff_t N = pimpl->S.size();
+        for(ptrdiff_t i=0;i<N;i++) 
             if (temp(i) < RT(0)) temp(i) = -temp(i);
         return temp;
     }
@@ -230,8 +230,8 @@ namespace tmv {
     Matrix<T> HermBandSVDiv<T>::getVt() const
     {
         Matrix<T> temp = pimpl->U.adjoint();
-        const int N = pimpl->S.size();
-        for(int i=0;i<N;i++) 
+        const ptrdiff_t N = pimpl->S.size();
+        for(ptrdiff_t i=0;i<N;i++) 
             if (pimpl->S(i) < 0) temp.row(i) *= RT(-1);
         return temp;
     }
@@ -261,11 +261,11 @@ namespace tmv {
     }
 
     template <class T>
-    int HermBandSVDiv<T>::colsize() const
+    ptrdiff_t HermBandSVDiv<T>::colsize() const
     { return pimpl->S.size(); }
 
     template <class T>
-    int HermBandSVDiv<T>::rowsize() const
+    ptrdiff_t HermBandSVDiv<T>::rowsize() const
     { return pimpl->S.size(); }
 
     template <class T>
@@ -281,7 +281,7 @@ namespace tmv {
         Matrix<T,ColMajor> Vt;
         RT logdet;
         T signdet;
-        mutable int kmax;
+        mutable ptrdiff_t kmax;
     }; // SymBandSVDiv
 
     template <class T>
@@ -411,7 +411,7 @@ namespace tmv {
     }
 
     template <class T>
-    void SymBandSVDiv<T>::top(int neigen,std::ostream* debugout) const
+    void SymBandSVDiv<T>::top(ptrdiff_t neigen,std::ostream* debugout) const
     {
         TMVAssert(neigen > 0);
         TMVAssert(neigen <= pimpl->S.size());
@@ -424,7 +424,7 @@ namespace tmv {
     }
 
     template <class T>
-    int SymBandSVDiv<T>::getKMax() const 
+    ptrdiff_t SymBandSVDiv<T>::getKMax() const 
     { return pimpl->kmax; }
 
     template <class T>
@@ -464,11 +464,11 @@ namespace tmv {
     }
 
     template <class T>
-    int SymBandSVDiv<T>::colsize() const
+    ptrdiff_t SymBandSVDiv<T>::colsize() const
     { return pimpl->S.size(); }
 
     template <class T>
-    int SymBandSVDiv<T>::rowsize() const
+    ptrdiff_t SymBandSVDiv<T>::rowsize() const
     { return pimpl->S.size(); }
 
 #undef RT

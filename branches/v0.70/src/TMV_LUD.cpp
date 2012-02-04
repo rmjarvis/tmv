@@ -250,7 +250,7 @@ namespace tmv {
             *fout << "U = "<<getU()<<std::endl;
             *fout << "P = "<<getP()<<std::endl;
             *fout << "  or by interchanges: ";
-            for(int i=0;i<getP().size();i++)
+            for(ptrdiff_t i=0;i<getP().size();i++)
                 *fout<<(getP().getValues())[i]<<" ";
         }
         Matrix<T> lu = getP()*getL()*getU();
@@ -264,11 +264,11 @@ namespace tmv {
     }
 
     template <class T> 
-    int LUDiv<T>::colsize() const
+    ptrdiff_t LUDiv<T>::colsize() const
     { return pimpl->LUx.colsize(); }
 
     template <class T> 
-    int LUDiv<T>::rowsize() const
+    ptrdiff_t LUDiv<T>::rowsize() const
     { return pimpl->LUx.rowsize(); }
 
 #ifdef INST_INT

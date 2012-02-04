@@ -104,9 +104,9 @@ namespace tmv {
 
         inline ProdXsB(const T _x, const GenSymBandMatrix<Tm>& _m) :
             x(_x), m(_m) {}
-        inline int size() const { return m.size(); }
+        inline ptrdiff_t size() const { return m.size(); }
         inline SymType sym() const { return m.issym() ? Sym : Herm; }
-        inline int nlo() const { return m.nlo(); }
+        inline ptrdiff_t nlo() const { return m.nlo(); }
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<Tm>& getM() const { return m; }
         inline void assignToB(BandMatrixView<real_type> m0) const
@@ -245,8 +245,8 @@ namespace tmv {
 
         inline SumsBX(T _x1, const GenSymBandMatrix<Tm>& _m, T _x2) :
             x1(_x1), m(_m), x2(_x2) {}
-        inline int size() const { return m.size(); }
-        inline int nlo() const { return m.nlo(); }
+        inline ptrdiff_t size() const { return m.size(); }
+        inline ptrdiff_t nlo() const { return m.nlo(); }
         inline SymType sym() const { return m.issym() ? Sym : Herm; }
         inline T getX1() const { return x1; }
         inline const GenSymBandMatrix<Tm>& getM() const { return m; }
@@ -393,8 +393,8 @@ namespace tmv {
             T _x2, const GenSymBandMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
-        inline int size() const { return m1.size(); }
-        inline int nlo() const { return TMV_MAX(m1.nlo(),m2.nlo()); }
+        inline ptrdiff_t size() const { return m1.size(); }
+        inline ptrdiff_t nlo() const { return TMV_MAX(m1.nlo(),m2.nlo()); }
         inline SymType sym() const 
         { return isReal(T1()) ? m2.sym() : m1.sym(); }
         inline T getX1() const { return x1; }
@@ -559,11 +559,11 @@ namespace tmv {
             const GenSymBandMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
-        inline int colsize() const { return m1.size(); }
-        inline int rowsize() const { return m1.size(); }
-        inline int nlo() const 
+        inline ptrdiff_t colsize() const { return m1.size(); }
+        inline ptrdiff_t rowsize() const { return m1.size(); }
+        inline ptrdiff_t nlo() const 
         { return TMV_MIN(colsize()-1,m1.nlo()+m2.nlo()); }
-        inline int nhi() const 
+        inline ptrdiff_t nhi() const 
         { return TMV_MIN(rowsize()-1,m1.nhi()+m2.nhi()); }
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
@@ -714,8 +714,8 @@ namespace tmv {
             TMVAssert(m1.issym() == m2.issym());
             TMVAssert(m1.isherm() == m2.isherm());
         }
-        inline int size() const { return m1.size(); }
-        inline int nlo() const 
+        inline ptrdiff_t size() const { return m1.size(); }
+        inline ptrdiff_t nlo() const 
         { return TMV_MIN(m1.nlo(),m2.nlo()); }
         inline SymType sym() const 
         { return isReal(T1()) ? m2.sym() : m1.sym(); }

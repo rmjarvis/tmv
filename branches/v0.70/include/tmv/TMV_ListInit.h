@@ -41,10 +41,10 @@ namespace tmv {
     class ListReadError : public ReadError
     {
     private :
-        int n;
+        ptrdiff_t n;
 
     public :
-        inline ListReadError(int nLeft) : n(nLeft) {}
+        inline ListReadError(ptrdiff_t nLeft) : n(nLeft) {}
         inline void write(std::ostream& os) const throw()
         {
             os<<"TMV Error: Reading from list initialization.\n";
@@ -60,11 +60,11 @@ namespace tmv {
     class ListAssigner
     {
     public:
-        ListAssigner(IT ptr, int nLeft) :
+        ListAssigner(IT ptr, ptrdiff_t nLeft) :
             _ptr(ptr), _nLeft(nLeft), _isLast(true) 
         {}
 
-        ListAssigner(IT ptr, int nLeft, const T& x) : 
+        ListAssigner(IT ptr, ptrdiff_t nLeft, const T& x) : 
             _ptr(ptr), _nLeft(nLeft), _isLast(false)
         {
 #ifdef TMV_DEBUG
@@ -102,7 +102,7 @@ namespace tmv {
 
     protected:
         IT  _ptr;
-        int _nLeft;
+        ptrdiff_t _nLeft;
         mutable bool _isLast;
     };
 

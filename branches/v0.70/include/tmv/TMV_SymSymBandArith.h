@@ -53,7 +53,7 @@ namespace tmv {
             T _x2, const GenSymMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
-        inline int size() const { return m2.size(); }
+        inline ptrdiff_t size() const { return m2.size(); }
         inline SymType sym() const
         { return isReal(T1()) ? m2.sym() : m1.sym(); }
         inline T getX1() const { return x1; }
@@ -249,8 +249,8 @@ namespace tmv {
             const GenSymMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
-        inline int colsize() const { return m2.size(); }
-        inline int rowsize() const { return m2.size(); }
+        inline ptrdiff_t colsize() const { return m2.size(); }
+        inline ptrdiff_t rowsize() const { return m2.size(); }
         inline T getX() const { return x; }
         inline const GenSymBandMatrix<T1>& getM1() const { return m1; }
         inline const GenSymMatrix<T2>& getM2() const { return m2; }
@@ -290,8 +290,8 @@ namespace tmv {
             TMVAssert(m2.colsize() == m1.size()); 
             TMVAssert(m2.rowsize() == m1.size()); 
         }
-        inline int colsize() const { return m1.size(); }
-        inline int rowsize() const { return m1.size(); }
+        inline ptrdiff_t colsize() const { return m1.size(); }
+        inline ptrdiff_t rowsize() const { return m1.size(); }
         inline T getX() const { return x; }
         inline const GenSymMatrix<T1>& getM1() const { return m1; }
         inline const GenSymBandMatrix<T2>& getM2() const { return m2; }

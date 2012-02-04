@@ -41,7 +41,7 @@ namespace tmv {
 
     template <class T> 
     void GetQFromBandQR(
-        MatrixView<T> QRx, const GenVector<T>& Qbeta, int nlo);
+        MatrixView<T> QRx, const GenVector<T>& Qbeta, ptrdiff_t nlo);
 
     template <class T, class T1> 
     void QR_LDivEq(

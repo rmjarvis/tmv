@@ -74,13 +74,13 @@ namespace tmv {
         TMVAssert(C.colsize() > 0);
         TMVAssert(C.ct()==NonConj);
 
-        int j1=0;
-        int k=A.nlo();
-        int j2=A.nhi()+1;
-        const int M = A.colsize();
-        const int N = A.rowsize();
+        ptrdiff_t j1=0;
+        ptrdiff_t k=A.nlo();
+        ptrdiff_t j2=A.nhi()+1;
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t N = A.rowsize();
 
-        for(int i=0;i<M; ++i) {
+        for(ptrdiff_t i=0;i<M; ++i) {
             // C.row(i) (+)= alpha * A.row(i,j1,j2) * B.rowRange(j1,j2);
             MultMV<add>(alpha,B.rowRange(j1,j2).transpose(),A.row(i,j1,j2),C.row(i));
             if (k>0) --k; else ++j1;
@@ -106,14 +106,14 @@ namespace tmv {
         TMVAssert(C.colsize() > 0);
         TMVAssert(C.ct()==NonConj);
 
-        int i1=0;
-        int k=A.nhi();
-        int i2=A.nlo()+1;
-        const int M = A.colsize();
-        const int N = A.rowsize();
+        ptrdiff_t i1=0;
+        ptrdiff_t k=A.nhi();
+        ptrdiff_t i2=A.nlo()+1;
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t N = A.rowsize();
 
         if (!add) C.setZero();
-        for(int j=0;j<N;++j) {
+        for(ptrdiff_t j=0;j<N;++j) {
             C.rowRange(i1,i2) += alpha * A.col(j,i1,i2) ^ B.row(j);
             if (k>0) --k; else ++i1;
             if (i2<M) ++i2;
@@ -135,8 +135,8 @@ namespace tmv {
         TMVAssert(C.colsize() > 0);
         TMVAssert(C.ct()==NonConj);
 
-        const int N = B.rowsize();
-        for(int j=0;j<N;j++)
+        const ptrdiff_t N = B.rowsize();
+        for(ptrdiff_t j=0;j<N;j++)
             // C.col(j) (+)= alpha * A * B.col(j);
             MultMV<add>(alpha,A,B.col(j),C.col(j));
     }
@@ -157,15 +157,15 @@ namespace tmv {
         TMVAssert(A.nhi() == 1);
         TMVAssert(A.isdm());
 
-        const int N = A.diag().size();
-        const int Nu = A.rowsize()>A.colsize() ? N : N-1;
-        const int Nl = A.rowsize()<A.colsize() ? N : N-1;
+        const ptrdiff_t N = A.diag().size();
+        const ptrdiff_t Nu = A.rowsize()>A.colsize() ? N : N-1;
+        const ptrdiff_t Nl = A.rowsize()<A.colsize() ? N : N-1;
 
         const Ta* di = A.cptr();
         const Ta* dui = A.diag(1).cptr();
         const Ta* dli = A.diag(-1).cptr()-1;
 
-        for(int i=0;i<N;++i,++di,++dui,++dli) {
+        for(ptrdiff_t i=0;i<N;++i,++di,++dui,++dli) {
             if (add) C.row(i) += *di*B.row(i);
             else C.row(i) = *di*B.row(i);
             if (i>0) C.row(i) += *dli*B.row(i-1);
@@ -437,9 +437,9 @@ namespace tmv {
         const T alpha, const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,
         MatrixView<T> C)
     {
-        const int N = C.rowsize();
-        for (int j=0;j<N;) {
-            int j2 = TMV_MIN(N,j+MM_BLOCKSIZE);
+        const ptrdiff_t N = C.rowsize();
+        for (ptrdiff_t j=0;j<N;) {
+            ptrdiff_t j2 = TMV_MIN(N,j+MM_BLOCKSIZE);
             if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                 if (C.isrm()) {
                     Matrix<Tb,RowMajor> B2 = TMV_REAL(alpha) * B.colRange(j,j2);

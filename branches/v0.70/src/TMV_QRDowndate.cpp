@@ -102,12 +102,12 @@ namespace tmv {
         // Find R0 so that A0 = Q0 R0
         // Input R is R1, output is R0
 
-        const int N = A.rowsize();
+        const ptrdiff_t N = A.rowsize();
 
         T* Rdiag = R.ptr();
-        const int ds = R.stepi()+R.stepj();
+        const ptrdiff_t ds = R.stepi()+R.stepj();
 
-        for(int j=0;j<N;++j,Rdiag+=ds) {
+        for(ptrdiff_t j=0;j<N;++j,Rdiag+=ds) {
             // Apply the Householder Reflection for this column
             VectorView<T> v = A.col(j);
             T beta;
@@ -146,7 +146,7 @@ namespace tmv {
         TMVAssert(A.ct() == NonConj);
         TMVAssert(R.dt() == NonUnitDiag);
 
-        const int N = A.rowsize();
+        const ptrdiff_t N = A.rowsize();
 
         if (N==1) {
             T b;
@@ -220,7 +220,7 @@ namespace tmv {
                 *Z01 = -TMV_CONJ(b0*b1)*vtmx;
             }
         } else {
-            int j1 = N/2;
+            ptrdiff_t j1 = N/2;
 
             UpperTriMatrixView<T> R1 = R.subTriMatrix(0,j1);
             MatrixView<T> Rx = R.subMatrix(0,j1,j1,N);
@@ -280,12 +280,12 @@ namespace tmv {
         TMVAssert(A.ct() == NonConj);
         TMVAssert(R.dt() == NonUnitDiag);
 
-        const int N = A.rowsize();
+        const ptrdiff_t N = A.rowsize();
 
         UpperTriMatrix<T,NonUnitDiag|ColMajor> BaseZ(
-            TMV_MIN(QR_BLOCKSIZE,N));
-        for(int j1=0;j1<N;) {
-            int j2 = TMV_MIN(N,j1+QR_BLOCKSIZE);
+            TMV_MIN(QR_BLOCKSIZE,int(N)));
+        for(ptrdiff_t j1=0;j1<N;) {
+            ptrdiff_t j2 = TMV_MIN(N,j1+QR_BLOCKSIZE);
             MatrixView<T> A1 = A.colRange(j1,j2);
             UpperTriMatrixView<T> R1 = R.subTriMatrix(j1,j2);
             UpperTriMatrixView<T> Z = BaseZ.subTriMatrix(0,j2-j1);

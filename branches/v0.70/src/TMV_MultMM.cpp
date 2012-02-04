@@ -70,15 +70,15 @@ namespace tmv {
         TMVAssert(B.isrm() || B.iscm());
         TMVAssert(C.iscm());
 
-        const int M = C.colsize();
-        const int N = C.rowsize();
-        const int K = A.rowsize();
-        const int Mb = (M>>6); // = M/64
-        const int Nb = (N>>6); // = N/64
-        const int Kb = (K>>6); // = K/64
-        const int Mc = M < 16 ? 1 : (M>>4); // = M/16
-        const int Nc = N < 16 ? 1 : (N>>4); // = N/16
-        const int Kc = K < 16 ? 1 : (K>>4); // = K/16
+        const ptrdiff_t M = C.colsize();
+        const ptrdiff_t N = C.rowsize();
+        const ptrdiff_t K = A.rowsize();
+        const ptrdiff_t Mb = (M>>6); // = M/64
+        const ptrdiff_t Nb = (N>>6); // = N/64
+        const ptrdiff_t Kb = (K>>6); // = K/64
+        const ptrdiff_t Mc = M < 16 ? 1 : (M>>4); // = M/16
+        const ptrdiff_t Nc = N < 16 ? 1 : (N>>4); // = N/16
+        const ptrdiff_t Kc = K < 16 ? 1 : (K>>4); // = K/16
         const bool twobig = (Mb&&Nb) || (Mb&&Kb) || (Nb&&Kb);
 
         if ( (M < 16 && N < 16 && K < 16) ||
@@ -425,8 +425,8 @@ namespace tmv {
         Matrix<T> B0 = B;
         Matrix<T> C0 = C;
         Matrix<T> C2 = C;
-        for(int i=0;i<C.colsize();i++)
-            for(int j=0;j<C.rowsize();j++)
+        for(ptrdiff_t i=0;i<C.colsize();i++)
+            for(ptrdiff_t j=0;j<C.rowsize();j++)
                 C2(i,j) = A0.row(i) * B0.col(j);
         C2 *= alpha;
         if (add) C2 += C0;

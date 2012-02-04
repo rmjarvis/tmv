@@ -2,28 +2,28 @@
 #define CT std::complex<T>
 
 #define Def1(RT,T,Ref) \
-  template T GenSymBandMatrix<T >::cref(int i, int j) const; \
-  template Ref SymBandMatrixView<T,CStyle>::ref(int i, int j); \
+  template T GenSymBandMatrix<T >::cref(ptrdiff_t i, ptrdiff_t j) const; \
+  template Ref SymBandMatrixView<T,CStyle>::ref(ptrdiff_t i, ptrdiff_t j); \
   template bool GenSymBandMatrix<T >::hasSubMatrix( \
-      int i1, int i2, int j1, int j2, int is, int js) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t is, ptrdiff_t js) const; \
   template bool GenSymBandMatrix<T >::hasSubBandMatrix( \
-      int i1, int i2, int j1, int j2, int lo, int hi, int is, int js) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t lo, ptrdiff_t hi, ptrdiff_t is, ptrdiff_t js) const; \
   template bool GenSymBandMatrix<T >::hasSubVector( \
-      int i, int j, int is, int js, int s) const; \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t is, ptrdiff_t js, ptrdiff_t s) const; \
   template bool GenSymBandMatrix<T >::hasSubSymMatrix( \
-      int i1, int i2, int is) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t is) const; \
   template bool GenSymBandMatrix<T >::hasSubSymBandMatrix( \
-      int i1, int i2, int lo, int is) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t lo, ptrdiff_t is) const; \
   template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubMatrix( \
-      int i1, int i2, int j1, int j2, int is, int js) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t is, ptrdiff_t js) const; \
   template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubBandMatrix( \
-      int i1, int i2, int j1, int j2, int lo, int hi, int is, int js) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t lo, ptrdiff_t hi, ptrdiff_t is, ptrdiff_t js) const; \
   template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubVector( \
-      int i, int j, int is, int js, int s) const; \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t is, ptrdiff_t js, ptrdiff_t s) const; \
   template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubSymMatrix( \
-      int i1, int i2, int is) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t is) const; \
   template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubSymBandMatrix( \
-      int i1, int i2, int lo, int is) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t lo, ptrdiff_t is) const; \
   template T GenSymBandMatrix<T >::sumElements() const; \
   template RT GenSymBandMatrix<T >::sumAbsElements() const; \
   template RT GenSymBandMatrix<T >::sumAbs2Elements() const; \

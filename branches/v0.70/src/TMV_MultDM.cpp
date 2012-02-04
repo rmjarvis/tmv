@@ -60,19 +60,19 @@ namespace tmv {
         TMVAssert(rm == B.isrm());
         TMVAssert(ca == A.diag().isconj());
 
-        const int M = B.colsize();
-        const int N = B.rowsize();
+        const ptrdiff_t M = B.colsize();
+        const ptrdiff_t N = B.rowsize();
 
         const Ta* Ai = A.diag().cptr();
         T* Browi = B.ptr();
-        const int Astep = A.diag().step();
-        const int stepj = B.stepj();
-        const int stepi = B.stepi();
+        const ptrdiff_t Astep = A.diag().step();
+        const ptrdiff_t stepj = B.stepj();
+        const ptrdiff_t stepi = B.stepi();
 
-        for(int i=M;i>0;--i,Ai+=Astep,Browi+=stepi) {
+        for(ptrdiff_t i=M;i>0;--i,Ai+=Astep,Browi+=stepi) {
             T* Bij = Browi;
             if (*Ai == Ta(0)) {
-                for(int j=N;j>0;--j,(rm?++Bij:Bij+=stepj)) {
+                for(ptrdiff_t j=N;j>0;--j,(rm?++Bij:Bij+=stepj)) {
 #ifdef TMVFLDEBUG
                     TMVAssert(Bij >= B._first);
                     TMVAssert(Bij < B._last);
@@ -80,7 +80,7 @@ namespace tmv {
                     *Bij = T(0);
                 }
             } else if (TMV_IMAG(*Ai) == TMV_RealType(Ta)(0)) {
-                for(int j=N;j>0;--j,(rm?++Bij:Bij+=stepj)) {
+                for(ptrdiff_t j=N;j>0;--j,(rm?++Bij:Bij+=stepj)) {
 #ifdef TMVFLDEBUG
                     TMVAssert(Bij >= B._first);
                     TMVAssert(Bij < B._last);
@@ -88,7 +88,7 @@ namespace tmv {
                     *Bij *= TMV_REAL(*Ai);
                 }
             } else {
-                for(int j=N;j>0;--j,(rm?++Bij:Bij+=stepj)) {
+                for(ptrdiff_t j=N;j>0;--j,(rm?++Bij:Bij+=stepj)) {
 #ifdef TMVFLDEBUG
                     TMVAssert(Bij >= B._first);
                     TMVAssert(Bij < B._last);
@@ -115,16 +115,16 @@ namespace tmv {
 
         const Ta*const Aptr = A.diag().cptr();
         T*const Bptr = B.ptr();
-        const int stepj = B.stepj();
-        const int stepi = B.stepi();
-        const int M = B.colsize();
-        int N = B.rowsize();
+        const ptrdiff_t stepj = B.stepj();
+        const ptrdiff_t stepi = B.stepi();
+        const ptrdiff_t M = B.colsize();
+        ptrdiff_t N = B.rowsize();
 
         T* Bcolj = Bptr;
         for(;N>0;--N,Bcolj+=stepj) {
             T* Bij = Bcolj;
             const Ta* Ai = Aptr;
-            for(int i=M;i>0;--i,++Ai,(cm?++Bij:Bij+=stepi)) {
+            for(ptrdiff_t i=M;i>0;--i,++Ai,(cm?++Bij:Bij+=stepi)) {
 #ifdef TMVFLDEBUG
                 TMVAssert(Bij >= B._first);
                 TMVAssert(Bij < B._last);
@@ -230,20 +230,20 @@ namespace tmv {
         const Ta* Ai = A.diag().cptr();
         const Tb* Browi = B.cptr();
         T* Crowi = C.ptr();
-        const int Astep = A.diag().step();
-        const int Bstepj = B.stepj();
-        const int Bstepi = B.stepi();
-        const int Cstepj = C.stepj();
-        const int Cstepi = C.stepi();
-        const int M = C.colsize();
-        const int N = C.rowsize();
+        const ptrdiff_t Astep = A.diag().step();
+        const ptrdiff_t Bstepj = B.stepj();
+        const ptrdiff_t Bstepi = B.stepi();
+        const ptrdiff_t Cstepj = C.stepj();
+        const ptrdiff_t Cstepi = C.stepi();
+        const ptrdiff_t M = C.colsize();
+        const ptrdiff_t N = C.rowsize();
 
-        for(int i=M;i>0;--i,Ai+=Astep,Browi+=Bstepi,Crowi+=Cstepi) {
+        for(ptrdiff_t i=M;i>0;--i,Ai+=Astep,Browi+=Bstepi,Crowi+=Cstepi) {
             const Tb* Bij = Browi;
             T* Cij = Crowi;
             if (TMV_IMAG(*Ai) == TMV_RealType(Ta)(0)) {
                 if (TMV_REAL(*Ai) != TMV_RealType(Ta)(0))
-                    for(int j=N;j>0;--j,(rm?++Bij:Bij+=Bstepj),
+                    for(ptrdiff_t j=N;j>0;--j,(rm?++Bij:Bij+=Bstepj),
                         (rm?++Cij:Cij+=Cstepj)) {
 #ifdef TMVFLDEBUG
                         TMVAssert(Cij >= C._first);
@@ -253,7 +253,7 @@ namespace tmv {
                     }
             }
             else
-                for(int j=N;j>0;--j,(rm?++Bij:Bij+=Bstepj),
+                for(ptrdiff_t j=N;j>0;--j,(rm?++Bij:Bij+=Bstepj),
                     (rm?++Cij:Cij+=Cstepj)) {
 #ifdef TMVFLDEBUG
                     TMVAssert(Cij >= C._first);
@@ -293,18 +293,18 @@ namespace tmv {
         const Ta*const Aptr = A.diag().cptr();
         const Tb* Bcolj = B.cptr();
         T* Ccolj = C.ptr();
-        const int Cstepj = C.stepj();
-        const int Cstepi = C.stepi();
-        const int Bstepj = B.stepj();
-        const int Bstepi = B.stepi();
-        const int M = C.colsize();
-        const int N = C.rowsize();
+        const ptrdiff_t Cstepj = C.stepj();
+        const ptrdiff_t Cstepi = C.stepi();
+        const ptrdiff_t Bstepj = B.stepj();
+        const ptrdiff_t Bstepi = B.stepi();
+        const ptrdiff_t M = C.colsize();
+        const ptrdiff_t N = C.rowsize();
 
-        for(int j=N;j>0;--j,Bcolj+=Bstepj,Ccolj+=Cstepj) {
+        for(ptrdiff_t j=N;j>0;--j,Bcolj+=Bstepj,Ccolj+=Cstepj) {
             const Tb* Bij = Bcolj;
             T* Cij = Ccolj;
             const Ta* Ai = Aptr;
-            for(int i=M;i>0;--i,++Ai,(cm?++Bij:Bij+=Bstepi),
+            for(ptrdiff_t i=M;i>0;--i,++Ai,(cm?++Bij:Bij+=Bstepi),
                 (cm?++Cij:Cij+=Cstepi)) {
 #ifdef TMVFLDEBUG
                 TMVAssert(Cij >= C._first);

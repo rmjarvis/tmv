@@ -93,7 +93,7 @@ namespace tmv {
         if (m.isrm()) {
             T* m0 = m.ptr();
             T* m1 = m0 + m.stepi();
-            for (int k=m.rowsize();k>0;--k,++m0,++m1) {
+            for (ptrdiff_t k=m.rowsize();k>0;--k,++m0,++m1) {
 #ifdef TMVFLDEBUG
                 TMVAssert(m0 >= m._first);
                 TMVAssert(m0 < m._last);
@@ -103,10 +103,10 @@ namespace tmv {
                 LMultEq_2x2(a,b,c,cc,*m0,*m1);
             }
         } else {
-            const int sj = m.stepj();
+            const ptrdiff_t sj = m.stepj();
             T* m0 = m.ptr();
             T* m1 = m0 + m.stepi();
-            for (int k=m.rowsize();k>0;--k,m0+=sj,m1+=sj) {
+            for (ptrdiff_t k=m.rowsize();k>0;--k,m0+=sj,m1+=sj) {
 #ifdef TMVFLDEBUG
                 TMVAssert(m0 >= m._first);
                 TMVAssert(m0 < m._last);
@@ -179,11 +179,11 @@ namespace tmv {
         const T1* Di = D.cptr();
         const T1* xDi = xD.cptr();
 
-        const int N = D.size();
-        const int sd = D.step();
-        const int sx = xD.step();
+        const ptrdiff_t N = D.size();
+        const ptrdiff_t sd = D.step();
+        const ptrdiff_t sx = xD.step();
 
-        for(int i=0;i<N;) {
+        for(ptrdiff_t i=0;i<N;) {
             if (i==N-1 || *xDi == T1(0)) {
                 if (herm) m.row(i) /= TMV_REAL(*Di);
                 else m.row(i) /= *Di;
@@ -243,11 +243,11 @@ namespace tmv {
         const T1* Di = D.cptr();
         const T1* xDi = xD.cptr();
 
-        const int N = D.size();
-        const int sd = D.step();
-        const int sx = xD.step();
+        const ptrdiff_t N = D.size();
+        const ptrdiff_t sd = D.step();
+        const ptrdiff_t sx = xD.step();
 
-        for(int i=0;i<N;) {
+        for(ptrdiff_t i=0;i<N;) {
             if (i==N-1 || *xDi == T1(0)) {
                 if (herm) 
                     m.row(i) *= TMV_REAL(*Di);

@@ -14,10 +14,10 @@ void TestPermutation()
 {
     T eps = EPS;
 
-    int pp1[10] = { 0,1,2,3,4,5,6,7,8,9 }; // identity
-    int pp2[10] = { 9,8,7,6,5,5,6,7,8,9 }; // reversal
-    int pp3[10] = { 5,3,5,9,4,5,9,8,9,9 }; // "random"
-    int pp3i[10] = { 2,6,5,6,4,5,8,9,9,9 }; // p3 in inverse order
+    ptrdiff_t pp1[10] = { 0,1,2,3,4,5,6,7,8,9 }; // identity
+    ptrdiff_t pp2[10] = { 9,8,7,6,5,5,6,7,8,9 }; // reversal
+    ptrdiff_t pp3[10] = { 5,3,5,9,4,5,9,8,9,9 }; // "random"
+    ptrdiff_t pp3i[10] = { 2,6,5,6,4,5,8,9,9,9 }; // p3 in inverse order
 
     int det1 = 1;
     int det2 = -1;

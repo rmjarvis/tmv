@@ -74,7 +74,7 @@ namespace tmv {
         MatrixView<T> U, VectorView<RT> D, VectorView<RT> E,
         MatrixView<T> Vt, bool UisI, bool VisI)
     {
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
 
         // D and E may have zeros on entry.  
         // This routine does the trivial deflations to get to subproblems
@@ -86,7 +86,7 @@ namespace tmv {
         dbgcout<<"After Chop: E = "<<E<<std::endl;
 
         // Find sub-problems to solve:
-        for(int q = N-1; q>0; ) {
+        for(ptrdiff_t q = N-1; q>0; ) {
             dbgcout<<"Looking for sub-problem:\n";
             dbgcout<<"q = "<<q<<std::endl;
             if (E(q-1) == T(0)) --q;
@@ -98,7 +98,7 @@ namespace tmv {
                 //       0
                 // So we need to find a p where all E(i) with p<=i<q are 
                 // non-zero.
-                int p = q-1;
+                ptrdiff_t p = q-1;
                 while (p>0 && !(E(p-1) == T(0))) --p;
                 // Now Zero out the last column:
                 if (Vt.cptr()) BidiagonalZeroLastCol<T>(
@@ -109,7 +109,7 @@ namespace tmv {
                 --q;
             } else {
                 // Find first p before q with either E(p) = 0 or D(p) = 0
-                int p=q-1;
+                ptrdiff_t p=q-1;
                 while (p>0 && !(E(p-1)==T(0)) && !(D(p)==T(0))) --p; 
                 dbgcout<<"p = "<<p<<std::endl;
                 if (D(p) == T(0)) {
@@ -184,7 +184,7 @@ namespace tmv {
         //dbgcout<<"A0 = "<<A0<<endl;
 #endif
 
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
 
         if (setUV) {
             TMVAssert(U.cptr() && Vt.cptr());
@@ -215,7 +215,7 @@ namespace tmv {
 
         // Make all of the singular values positive
         RT* Di = D.ptr();
-        for(int i=0;i<N;++i,++Di) if (*Di < 0) {
+        for(ptrdiff_t i=0;i<N;++i,++Di) if (*Di < 0) {
 #ifdef TMVFLDEBUG
             TMVAssert(Di >= D._first);
             TMVAssert(Di < D._last);
@@ -228,7 +228,7 @@ namespace tmv {
 
         // Now A = U * S * Vt
         // Sort output singular values 
-        AlignedArray<int> sortp(N);
+        AlignedArray<ptrdiff_t> sortp(N);
         D.sort(sortp.get(),Descend);
         if (U.cptr()) U.permuteCols(sortp.get());
         if (Vt.cptr()) Vt.permuteRows(sortp.get());
@@ -780,8 +780,8 @@ namespace tmv {
         TMVAssert(S.size() == U.rowsize());
         TMVAssert(U.iscm() || U.isrm());
 
-        const int M = U.colsize();
-        const int N = U.rowsize();
+        const ptrdiff_t M = U.colsize();
+        const ptrdiff_t N = U.rowsize();
         if (N == 0) return;
 
         // If M is much larger than N (technically M > 5/3 N),

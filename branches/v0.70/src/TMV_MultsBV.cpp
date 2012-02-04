@@ -59,9 +59,9 @@ namespace tmv {
     const T* SymBandMatrixComposite<T>::cptr() const
     {                       
         if (!itsm1.get()) {         
-            int s = this->size();        
-            int lo = this->nlo();      
-            int len = BandStorageLength(ColMajor,s,s,lo,0);
+            ptrdiff_t s = this->size();        
+            ptrdiff_t lo = this->nlo();      
+            ptrdiff_t len = BandStorageLength(ColMajor,s,s,lo,0);
             itsm1.resize(len);
             itsm = itsm1.get();
             this->assignTosB(SymBandMatrixView<T>(
@@ -73,15 +73,15 @@ namespace tmv {
     }               
 
     template <class T> 
-    int SymBandMatrixComposite<T>::stepi() const
+    ptrdiff_t SymBandMatrixComposite<T>::stepi() const
     { return 1; }
 
     template <class T> 
-    int SymBandMatrixComposite<T>::stepj() const
+    ptrdiff_t SymBandMatrixComposite<T>::stepj() const
     { return this->nlo(); }
 
     template <class T> 
-    int SymBandMatrixComposite<T>::diagstep() const
+    ptrdiff_t SymBandMatrixComposite<T>::diagstep() const
     { return this->nlo() + 1; }
 
 
@@ -97,7 +97,7 @@ namespace tmv {
         if (add) y += A.lowerBand() * x;
         else y = A.lowerBand() * x;
 
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
         if (N > 1 && A.nlo() > 0)
             y.subVector(0,N-1) += A.upperBandOff() * x.subVector(1,N);
     }

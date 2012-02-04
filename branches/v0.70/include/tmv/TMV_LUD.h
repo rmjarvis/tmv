@@ -86,7 +86,7 @@ namespace tmv {
     // L is returned as A.lowerTri(UnitDiag).
     // U is returned as A.upperTri(NonUnitDiag).
     template <class T> 
-    void LU_Decompose(MatrixView<T> A, int* P);
+    void LU_Decompose(MatrixView<T> A, ptrdiff_t* P);
 
     class Permutation;
 
@@ -160,8 +160,8 @@ namespace tmv {
         struct LUDiv_Impl;
         std::auto_ptr<LUDiv_Impl> pimpl;
 
-        int colsize() const;
-        int rowsize() const;
+        ptrdiff_t colsize() const;
+        ptrdiff_t rowsize() const;
 
     private :
 

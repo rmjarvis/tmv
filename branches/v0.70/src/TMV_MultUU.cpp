@@ -72,10 +72,10 @@ namespace tmv {
         TMVAssert(alpha != T(0));
         TMVAssert(B.ct()==NonConj);
 
-        const int N = B.size();
+        const ptrdiff_t N = B.size();
 
         if (A.isunit()) {
-            for(int i=0; i<N; ++i) {
+            for(ptrdiff_t i=0; i<N; ++i) {
                 B.row(i,i+1,N) += A.row(i,i+1,N) * B.subTriMatrix(i+1,N);
                 if (!B.isunit()) 
                     B.row(i,i,N) *= alpha;
@@ -83,11 +83,11 @@ namespace tmv {
             }
         } else {
             TMVAssert(!B.isunit());
-            const int Ads = A.stepi()+A.stepj();
+            const ptrdiff_t Ads = A.stepi()+A.stepj();
             const Ta* Aii = A.cptr();
-            const int Bds = B.stepi()+B.stepj();
+            const ptrdiff_t Bds = B.stepi()+B.stepj();
             T* Bii = B.ptr();
-            for(int i=0; i<N; ++i,Aii+=Ads,Bii+=Bds) {
+            for(ptrdiff_t i=0; i<N; ++i,Aii+=Ads,Bii+=Bds) {
                 T aa = A.isconj()?TMV_CONJ(*Aii):*Aii;
                 if (alpha != T(1)) aa *= alpha;
                 B.row(i,i+1,N) = aa * B.row(i,i+1,N) +
@@ -113,25 +113,25 @@ namespace tmv {
         TMVAssert(alpha != T(0));
         TMVAssert(B.ct()==NonConj);
 
-        const int N = B.size();
+        const ptrdiff_t N = B.size();
 
         if (A.isunit()) {
             if (B.isunit()) {
                 TMVAssert(alpha == T(1));
-                for(int j=1; j<N; ++j) {
+                for(ptrdiff_t j=1; j<N; ++j) {
                     B.subMatrix(0,j,j+1,N) += A.col(j,0,j) ^ B.row(j,j+1,N);
                     B.col(j,0,j) += A.col(j,0,j);
                 }
             } else {
-                for(int j=0; j<N; ++j) 
+                for(ptrdiff_t j=0; j<N; ++j) 
                     B.subMatrix(0,j,j,N) += A.col(j,0,j) ^ B.row(j,j,N);
                 B *= alpha;
             }
         } else {
             TMVAssert(!B.isunit());
-            const int Ads = A.stepi()+A.stepj();
+            const ptrdiff_t Ads = A.stepi()+A.stepj();
             const Ta* Ajj = A.cptr();
-            for(int j=0; j<N; ++j,Ajj+=Ads) {
+            for(ptrdiff_t j=0; j<N; ++j,Ajj+=Ads) {
                 B.subMatrix(0,j,j,N) += A.col(j,0,j) ^ B.row(j,j,N);
                 B.row(j,j,N) *= A.isconj()?TMV_CONJ(*Ajj):*Ajj;
             }
@@ -160,19 +160,19 @@ namespace tmv {
         //cout<<"alpha*A*B = "<<B2<<std::endl;
 #endif
 
-        const int N = B.size();
+        const ptrdiff_t N = B.size();
 
         if (B.isunit()) {
             // Then alpha = 1 and A.isunit
             if (SameStorage(A,B)) {
                 Vector<T> Acolj(N-1);
-                for(int j=N-1;j>0;--j) {
+                for(ptrdiff_t j=N-1;j>0;--j) {
                     Acolj.subVector(0,j) = A.col(j,0,j);
                     B.col(j,0,j) = A.subTriMatrix(0,j) * B.col(j,0,j);
                     B.col(j,0,j) += Acolj.subVector(0,j);
                 }
             } else {
-                for(int j=N-1;j>0;--j) {
+                for(ptrdiff_t j=N-1;j>0;--j) {
                     B.col(j,0,j) = A.subTriMatrix(0,j) * B.col(j,0,j);
                     B.col(j,0,j) += A.col(j,0,j);
                 }
@@ -180,13 +180,13 @@ namespace tmv {
         } else {
             if (SameStorage(A,B)) {
                 Vector<T> Btemp(N);
-                for(int jj=N,j=jj-1;jj>0;--jj,--j) { // jj = j+1
+                for(ptrdiff_t jj=N,j=jj-1;jj>0;--jj,--j) { // jj = j+1
                     Btemp.subVector(0,jj) = 
                         alpha * A.subTriMatrix(0,jj) * B.col(j,0,jj);
                     B.col(j,0,jj) = Btemp.subVector(0,jj);
                 }
             } else {
-                for(int j=0;j<N;++j) 
+                for(ptrdiff_t j=0;j<N;++j) 
                     B.col(j,0,j+1) = alpha * A.subTriMatrix(0,j+1) * B.col(j,0,j+1);
             }
         }
@@ -219,8 +219,8 @@ namespace tmv {
         Matrix<T> B2 = alpha*A0*B0;
 #endif
 
-        const int nb = TRI_MM_BLOCKSIZE;
-        const int N = A.size();
+        const ptrdiff_t nb = TRI_MM_BLOCKSIZE;
+        const ptrdiff_t N = A.size();
         const bool samestorage = ( 
             SameStorage(A,B) &&
             ((A.stepi()>A.stepj()) == (B.stepi()>B.stepj()) )  );
@@ -264,7 +264,7 @@ namespace tmv {
                 }
             }
         } else {
-            int k = N/2;
+            ptrdiff_t k = N/2;
             if (k > nb) k = samestorage ? nb :  k/nb*nb;
 
             // [ A00 A01 ] [ B00 B01 ] = [ A00 B00   A00 B01 + A01 B11 ]
@@ -312,10 +312,10 @@ namespace tmv {
         TMVAssert(B.size() > 0);
         TMVAssert(alpha != T(0));
 
-        const int N = B.size();
+        const ptrdiff_t N = B.size();
 
         if (A.isunit()) {
-            for(int i=N-1; i>=0; --i) {
+            for(ptrdiff_t i=N-1; i>=0; --i) {
                 B.row(i,0,i) += A.row(i,0,i) * B.subTriMatrix(0,i);
                 B.row(i,0,i) *= alpha;
             }
@@ -323,11 +323,11 @@ namespace tmv {
                 B.diag() *= alpha;
         } else {
             TMVAssert(!B.isunit());
-            const int Ads = A.stepi()+A.stepj();
+            const ptrdiff_t Ads = A.stepi()+A.stepj();
             const Ta* Aii = A.cptr()+(N-1)*Ads;
-            const int Bds = B.stepi()+B.stepj();
+            const ptrdiff_t Bds = B.stepi()+B.stepj();
             T* Bii = B.ptr()+(N-1)*Bds;
-            for(int i=N-1; i>=0; --i,Aii-=Ads,Bii-=Bds) {
+            for(ptrdiff_t i=N-1; i>=0; --i,Aii-=Ads,Bii-=Bds) {
                 T aa = A.isconj()?TMV_CONJ(*Aii):*Aii;
                 if (alpha != T(1)) aa *= alpha;
                 B.row(i,0,i) = aa * B.row(i,0,i) +
@@ -352,24 +352,24 @@ namespace tmv {
         TMVAssert(B.size() > 0);
         TMVAssert(alpha != T(0));
 
-        const int N = B.size();
+        const ptrdiff_t N = B.size();
 
         if (A.isunit()) {
             if (B.isunit()) {
-                for(int j=N-1,jj=N; jj>0; --j,--jj) {
+                for(ptrdiff_t j=N-1,jj=N; jj>0; --j,--jj) {
                     B.subMatrix(jj,N,0,j) += A.col(j,jj,N) ^ B.row(j,0,j);
                     B.col(j,jj,N) += A.col(j,jj,N);
                 }
             } else {
-                for(int j=N-1,jj=N; jj>0; --j,--jj) 
+                for(ptrdiff_t j=N-1,jj=N; jj>0; --j,--jj) 
                     B.subMatrix(jj,N,0,jj) += A.col(j,jj,N) ^ B.row(j,0,jj);
                 B *= alpha;
             }
         } else {
-            const int Ads = A.stepi()+A.stepj();
+            const ptrdiff_t Ads = A.stepi()+A.stepj();
             const Ta* Ajj = A.cptr()+(N-1)*Ads;
             TMVAssert(!B.isunit());
-            for(int j=N-1,jj=N; jj>0; --j,--jj,Ajj-=Ads) {
+            for(ptrdiff_t j=N-1,jj=N; jj>0; --j,--jj,Ajj-=Ads) {
                 B.subMatrix(jj,N,0,jj) += A.col(j,jj,N) ^ B.row(j,0,jj);
                 B.row(j,0,jj) *= A.isconj()?TMV_CONJ(*Ajj):*Ajj;
             }
@@ -387,15 +387,15 @@ namespace tmv {
         TMVAssert(B.size() > 0);
         TMVAssert(alpha != T(0));
 
-        const int N = B.size();
+        const ptrdiff_t N = B.size();
         if (B.isunit()) {
             // Then alpha = 1 and A.isunit
-            for(int j=0;j<N-1;++j) {
+            for(ptrdiff_t j=0;j<N-1;++j) {
                 B.col(j,j+1,N) = A.subTriMatrix(j+1,N) * B.col(j,j+1,N);
                 B.col(j,j+1,N) += A.col(j,j+1,N);
             }
         } else {
-            for(int j=0;j<N;++j) 
+            for(ptrdiff_t j=0;j<N;++j) 
                 B.col(j,j,N) = alpha * A.subTriMatrix(j,N) * B.col(j,j,N);
         }
     }
@@ -417,8 +417,8 @@ namespace tmv {
         Matrix<T> B2 = alpha*A0*B0;
 #endif
 
-        const int nb = TRI_MM_BLOCKSIZE;
-        const int N = A.size();
+        const ptrdiff_t nb = TRI_MM_BLOCKSIZE;
+        const ptrdiff_t N = A.size();
         const bool samestorage = ( 
             SameStorage(A,B) &&
             ((A.stepi()>A.stepj()) == (B.stepi()>B.stepj()) )  );
@@ -462,7 +462,7 @@ namespace tmv {
                 }
             }
         } else {
-            int k = N/2;
+            ptrdiff_t k = N/2;
             if (k > nb) k = samestorage ? nb : k/nb*nb;
 
             // [ A00  0  ] [ B00  0  ] = [      A00 B00           0    ]
@@ -513,13 +513,13 @@ namespace tmv {
         TMVAssert(alpha != T(0));
         TMVAssert(C.ct()==NonConj);
 
-        const int N = C.size();
+        const ptrdiff_t N = C.size();
 
         if (A.isunit()) {
             if (B.isunit()) {
-                const int Cds = C.stepi()+C.stepj();
+                const ptrdiff_t Cds = C.stepi()+C.stepj();
                 T* Cii = C.ptr();
-                for(int i=0; i<N; ++i,Cii+=Cds) {
+                for(ptrdiff_t i=0; i<N; ++i,Cii+=Cds) {
                     C.row(i,i+1,N) += 
                         alpha * A.row(i,i+1,N) * B.subTriMatrix(i+1,N);
                     C.row(i,i+1,N) += alpha * B.row(i,i+1,N);
@@ -530,14 +530,14 @@ namespace tmv {
                     *Cii += alpha;
                 }
             } else {
-                for(int i=0; i<N; ++i) {
+                for(ptrdiff_t i=0; i<N; ++i) {
                     C.row(i,i+1,N) += 
                         alpha * A.row(i,i+1,N) * B.subTriMatrix(i+1,N);
                     C.row(i,i,N) += alpha * B.row(i,i,N);
                 }
             }
         } else {
-            for(int i=0; i<N; ++i) 
+            for(ptrdiff_t i=0; i<N; ++i) 
                 C.row(i,i,N) += alpha * A.row(i,i,N) * B.subTriMatrix(i,N);
         }
     }
@@ -557,13 +557,13 @@ namespace tmv {
         TMVAssert(alpha != T(0));
         TMVAssert(C.ct()==NonConj);
 
-        const int N = C.size();
+        const ptrdiff_t N = C.size();
 
         if (A.isunit()) {
             if (B.isunit()) {
-                const int Cds = C.stepi()+C.stepj();
+                const ptrdiff_t Cds = C.stepi()+C.stepj();
                 T* Cjj = C.ptr();
-                for(int j=0; j<N; ++j,Cjj+=Cds) {
+                for(ptrdiff_t j=0; j<N; ++j,Cjj+=Cds) {
                     C.subMatrix(0,j,j+1,N) += alpha * A.col(j,0,j) ^ B.row(j,j+1,N);
                     C.col(j,0,j) += alpha * A.col(j,0,j);
                     C.row(j,j+1,N) += alpha * B.row(j,j+1,N);
@@ -574,19 +574,19 @@ namespace tmv {
                     *Cjj += alpha;
                 }
             } else {
-                for(int j=0; j<N; ++j) {
+                for(ptrdiff_t j=0; j<N; ++j) {
                     C.subMatrix(0,j,j,N) += alpha * A.col(j,0,j) ^ B.row(j,j,N);
                     C.row(j,j,N) += alpha * B.row(j,j,N);
                 }
             }
         } else {
             if (B.isunit()) {
-                for(int j=0; j<N; ++j) {
+                for(ptrdiff_t j=0; j<N; ++j) {
                     C.subMatrix(0,j+1,j+1,N) += alpha * A.col(j,0,j+1)^B.row(j,j+1,N);
                     C.col(j,0,j+1) += alpha * A.col(j,0,j+1);
                 }
             } else {
-                for(int j=0; j<N; ++j) 
+                for(ptrdiff_t j=0; j<N; ++j) 
                     C.subMatrix(0,j+1,j,N) += alpha * A.col(j,0,j+1) ^ B.row(j,j,N);
             }
         } 
@@ -606,13 +606,13 @@ namespace tmv {
         TMVAssert(alpha != T(0));
         TMVAssert(C.ct()==NonConj);
 
-        const int N = C.size();
+        const ptrdiff_t N = C.size();
 
         if (B.isunit()) {
             if (A.isunit()) {
-                const int Cds = C.stepi()+C.stepj();
+                const ptrdiff_t Cds = C.stepi()+C.stepj();
                 T* Cjj = C.ptr();
-                for(int j=0;j<N;++j,Cjj+=Cds) {
+                for(ptrdiff_t j=0;j<N;++j,Cjj+=Cds) {
                     C.col(j,0,j) += alpha * A.subTriMatrix(0,j) * B.col(j,0,j);
                     C.col(j,0,j) += alpha * A.col(j,0,j);
 #ifdef TMVFLDEBUG
@@ -622,13 +622,13 @@ namespace tmv {
                     *Cjj += alpha;
                 }
             } else {
-                for(int j=0;j<N;++j) {
+                for(ptrdiff_t j=0;j<N;++j) {
                     C.col(j,0,j) += alpha * A.subTriMatrix(0,j) * B.col(j,0,j);
                     C.col(j,0,j+1) += alpha * A.col(j,0,j+1);
                 }
             }
         } else {
-            for(int j=0;j<N;++j)
+            for(ptrdiff_t j=0;j<N;++j)
                 C.col(j,0,j+1) += alpha * A.subTriMatrix(0,j+1) * B.col(j,0,j+1);
         }
     }
@@ -646,8 +646,8 @@ namespace tmv {
         TMVAssert(alpha != T(0));
         TMVAssert(C.ct()==NonConj);
 
-        const int nb = TRI_MM_BLOCKSIZE;
-        const int N = A.size();
+        const ptrdiff_t nb = TRI_MM_BLOCKSIZE;
+        const ptrdiff_t N = A.size();
 
         if (N <= TRI_MM_BLOCKSIZE2) {
             if (A.isrm() && B.isrm() && C.isrm()) {
@@ -688,7 +688,7 @@ namespace tmv {
                 C = CC;
             }
         } else {
-            int k = N/2;
+            ptrdiff_t k = N/2;
             if (k > nb) k = k/nb*nb;
 
             // [ A00 A01 ] [ B00 B01 ] = [ A00 B00   A00 B01 + A01 B11 ]

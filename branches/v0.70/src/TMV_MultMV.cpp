@@ -60,7 +60,7 @@ namespace tmv {
     template <class T> const T* MatrixComposite<T>::cptr() const
     {
         if (!itsm.get()) {
-            int len = this->colsize()*this->rowsize();
+            ptrdiff_t len = this->colsize()*this->rowsize();
             itsm.resize(len);
             MatrixView<T>(itsm.get(),this->colsize(),this->rowsize(),
                           stepi(),stepj(),NonConj,len 
@@ -69,13 +69,13 @@ namespace tmv {
         return itsm.get();
     }
 
-    template <class T> int MatrixComposite<T>::stepi() const 
+    template <class T> ptrdiff_t MatrixComposite<T>::stepi() const 
     { return 1; }
 
-    template <class T> int MatrixComposite<T>::stepj() const 
+    template <class T> ptrdiff_t MatrixComposite<T>::stepj() const 
     { return this->colsize(); }
 
-    template <class T> int MatrixComposite<T>::ls() const 
+    template <class T> ptrdiff_t MatrixComposite<T>::ls() const 
     { return this->rowsize() * this->colsize(); }
 
     // 
@@ -101,22 +101,22 @@ namespace tmv {
         TMVAssert(cx == x.isconj());
         TMVAssert(ca == A.isconj());
 
-        const int M = A.colsize();
-        const int N = A.rowsize();
-        const int si = A.stepi();
-        const int sj = (rm ? 1 : A.stepj());
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t N = A.rowsize();
+        const ptrdiff_t si = A.stepi();
+        const ptrdiff_t sj = (rm ? 1 : A.stepj());
 
         const Ta* Ai0 = A.cptr();
         const Tx*const x0 = x.cptr();
         T* yi = y.ptr();
 
-        for(int i=M; i>0; --i,++yi,Ai0+=si) {
+        for(ptrdiff_t i=M; i>0; --i,++yi,Ai0+=si) {
             // *yi += A.row(i) * x
 
             const Ta* Aij = Ai0;
             const Tx* xj = x0;
             register T temp(0);
-            for(int j=N; j>0; --j,++xj,(rm?++Aij:Aij+=sj))
+            for(ptrdiff_t j=N; j>0; --j,++xj,(rm?++Aij:Aij+=sj))
                 temp += 
                     (cx ? TMV_CONJ(*xj) : *xj) *
                     (ca ? TMV_CONJ(*Aij) : *Aij);
@@ -146,10 +146,10 @@ namespace tmv {
         TMVAssert(ca == A.isconj());
         TMVAssert(cm == A.iscm());
 
-        const int M = A.colsize();
-        int N = A.rowsize();
-        const int si = (cm ? 1 : A.stepi());
-        const int sj = A.stepj();
+        const ptrdiff_t M = A.colsize();
+        ptrdiff_t N = A.rowsize();
+        const ptrdiff_t si = (cm ? 1 : A.stepi());
+        const ptrdiff_t sj = A.stepj();
 
         const Ta* A0j = A.cptr();
         const Tx* xj = x.cptr();
@@ -162,7 +162,7 @@ namespace tmv {
                 const Ta* Aij = A0j;
                 T* yi = y0;
                 const Tx xjval = (cx ? TMV_CONJ(*xj) : *xj);
-                for(int i=M; i>0; --i,++yi,(cm?++Aij:Aij+=si)) {
+                for(ptrdiff_t i=M; i>0; --i,++yi,(cm?++Aij:Aij+=si)) {
 #ifdef TMVFLDEBUG
                     TMVAssert(yi >= y._first);
                     TMVAssert(yi < y._last);
@@ -179,7 +179,7 @@ namespace tmv {
                 const Ta* Aij = A0j;
                 T* yi = y0;
                 const Tx xjval = (cx ? TMV_CONJ(*xj) : *xj);
-                for(int i=M; i>0; --i,++yi,(cm?++Aij:Aij+=si)) {
+                for(ptrdiff_t i=M; i>0; --i,++yi,(cm?++Aij:Aij+=si)) {
 #ifdef TMVFLDEBUG
                     TMVAssert(yi >= y._first);
                     TMVAssert(yi < y._last);
@@ -240,7 +240,7 @@ namespace tmv {
         Vector<T> y0 = y;
         Matrix<Ta> A0 = A;
         Vector<T> y2 = y;
-        for(int i=0;i<y.size();i++) {
+        for(ptrdiff_t i=0;i<y.size();i++) {
             if (add)
                 y2(i) += (A.row(i) * x0);
             else
@@ -253,14 +253,14 @@ namespace tmv {
         //                   [ x ]
         //                   [ 0 ]
 
-        const int N = x.size(); // = A.rowsize()
-        int j2 = N;
+        const ptrdiff_t N = x.size(); // = A.rowsize()
+        ptrdiff_t j2 = N;
         for(const Tx* x2=x.cptr()+N-1; j2>0 && *x2==Tx(0); --j2,--x2);
         if (j2 == 0) {
             if (!add) y.setZero();
             return;
         }
-        int j1 = 0;
+        ptrdiff_t j1 = 0;
         for(const Tx* x1=x.cptr(); *x1==Tx(0); ++j1,++x1);
         TMVAssert(j1 !=j2);
         if (j1 == 0 && j2 == N) UnitAMultMV1<add,cx>(A,x,y);
@@ -286,7 +286,7 @@ namespace tmv {
                 cerr<<"--> y = "<<y<<endl;
                 cerr<<"y2 = "<<y2<<endl;
             } else {
-                int imax;
+                ptrdiff_t imax;
                 (y-y2).maxAbsElement(&imax);
                 cerr<<"y("<<imax<<") = "<<y(imax)<<endl;
                 cerr<<"y2("<<imax<<") = "<<y2(imax)<<endl;
@@ -320,7 +320,7 @@ namespace tmv {
         Vector<T> y0 = y;
         Matrix<Ta> A0 = A;
         Vector<T> y2 = y;
-        for(int i=0;i<y.size();i++) {
+        for(ptrdiff_t i=0;i<y.size();i++) {
             if (add)
                 y2(i) += alpha * (A.row(i) * x0);
             else
@@ -335,8 +335,8 @@ namespace tmv {
         TMVAssert(y.size() > 0);
         TMVAssert(y.ct() == NonConj);
 
-        const int M = A.colsize();
-        const int N = A.rowsize();
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t N = A.rowsize();
 
         if (x.step() != 1 || SameStorage(x,y) ||
             (alpha != TMV_RealType(T)(1) && y.step() == 1 && M/4 >= N)) {
@@ -402,7 +402,7 @@ namespace tmv {
                 cerr<<"--> y = "<<y<<endl;
                 cerr<<"y2 = "<<y2<<endl;
             } else {
-                int imax;
+                ptrdiff_t imax;
                 (y-y2).maxAbsElement(&imax);
                 cerr<<"y("<<imax<<") = "<<y(imax)<<endl;
                 cerr<<"y2("<<imax<<") = "<<y2(imax)<<endl;
@@ -1158,7 +1158,7 @@ namespace tmv {
         Vector<T> y0 = y;
         Matrix<Ta> A0 = A;
         Vector<T> y2 = y;
-        for(int i=0;i<y.size();i++) {
+        for(ptrdiff_t i=0;i<y.size();i++) {
             if (add) y2(i) += alpha * (A.row(i) * x0);
             else y2(i) = alpha * (A.row(i) * x0);
         }
@@ -1198,7 +1198,7 @@ namespace tmv {
                 cerr<<"--> y = "<<y<<endl;
                 cerr<<"y2 = "<<y2<<endl;
             } else {
-                int imax;
+                ptrdiff_t imax;
                 (y-y2).maxAbsElement(&imax);
                 cerr<<"y("<<imax<<") = "<<y(imax)<<endl;
                 cerr<<"y2("<<imax<<") = "<<y2(imax)<<endl;

@@ -87,8 +87,8 @@ namespace tmv {
         //std::cout<<"A = "<<x<<std::endl;
         //std::cout<<"A.step = "<<A.stepi()<<" "<<A.stepj()<<std::endl;
 
-        const int sj = A.stepj();
-        const int N = A.size();
+        const ptrdiff_t sj = A.stepj();
+        const ptrdiff_t N = A.size();
         const Tx*const x0 = x.cptr();
         const Ty*const y0 = y.cptr();
 
@@ -102,14 +102,14 @@ namespace tmv {
         ++xj; ++yj;
         T* Acolj = A.ptr()+sj;
 
-        for (int j=1;j<N;++j,++xj,++yj,Acolj+=sj) {
+        for (ptrdiff_t j=1;j<N;++j,++xj,++yj,Acolj+=sj) {
             // A.col(j,0,j+1) += ax * y.subVector(0,j+1) + ay * x.subVector(0,j+1);
             if (*xj != Tx(0)) {
                 T* Aij = Acolj;
                 const Ty* yi = y0;
                 if (*yj != Ty(0)) {
                     const Tx* xi = x0;
-                    for(int i=j+1;i>0;--i,++yi,++xi,++Aij) {
+                    for(ptrdiff_t i=j+1;i>0;--i,++yi,++xi,++Aij) {
                         T temp = *xi * (ha ? TMV_CONJ(*yj) : *yj);
                         temp += *yi * (ha ? TMV_CONJ(*xj) : *xj);
 #ifdef TMVFLDEBUG
@@ -120,7 +120,7 @@ namespace tmv {
                         else *Aij = temp;
                     }
                 } else {
-                    for(int i=j+1;i>0;--i,++yi,++Aij) {
+                    for(ptrdiff_t i=j+1;i>0;--i,++yi,++Aij) {
                         const T temp = *yi * (ha ? TMV_CONJ(*xj) : *xj);
 #ifdef TMVFLDEBUG
                         TMVAssert(Aij >= A._first);
@@ -133,7 +133,7 @@ namespace tmv {
             } else if (*yj != Ty(0)) {
                 T* Aij = Acolj;
                 const Tx* xi = x0;
-                for(int i=j+1;i>0;--i,++xi,++Aij) {
+                for(ptrdiff_t i=j+1;i>0;--i,++xi,++Aij) {
                     const T temp = *xi * (ha ? TMV_CONJ(*yj) : *yj);
 #ifdef TMVFLDEBUG
                     TMVAssert(Aij >= A._first);
@@ -188,13 +188,13 @@ namespace tmv {
 #endif
 
         //std::cout<<"Start Lower"<<std::endl;
-        const int ds = A.stepj() + 1;
-        const int N = A.size();
+        const ptrdiff_t ds = A.stepj() + 1;
+        const ptrdiff_t N = A.size();
         const Tx* xj = x.cptr()+N-1;
         const Ty* yj = y.cptr()+N-1;
         T* Ajj = A.ptr()+(N-1)*ds;
 
-        for (int jj=N,Nmj=1;jj>0;--jj,++Nmj,--xj,--yj,Ajj-=ds) {
+        for (ptrdiff_t jj=N,Nmj=1;jj>0;--jj,++Nmj,--xj,--yj,Ajj-=ds) {
             // Nmj = N-j
             // A.col(j,j,N) += (A.isherm() ? TMV_CONJ(*yj) : *yj) * x.subVector(j,N);
             // A.col(j,j,N) += (A.isherm() ? TMV_CONJ(*xj) : *xj) * y.subVector(j,N);
@@ -203,7 +203,7 @@ namespace tmv {
                 const Tx* xi = xj;
                 if (*xj!=Tx(0)) {
                     const Ty* yi = yj;
-                    for(int i=Nmj;i>0;--i,++xi,++yi,++Aij) {
+                    for(ptrdiff_t i=Nmj;i>0;--i,++xi,++yi,++Aij) {
                         T temp = *xi * (ha ? TMV_CONJ(*yj) : *yj);
                         temp += *yi * (ha ? TMV_CONJ(*xj) : *xj);
 #ifdef TMVFLDEBUG
@@ -214,7 +214,7 @@ namespace tmv {
                         else *Aij = temp;
                     }
                 } else {
-                    for(int i=Nmj;i>0;--i,++xi,++Aij) {
+                    for(ptrdiff_t i=Nmj;i>0;--i,++xi,++Aij) {
                         const T temp = *xi * (ha ? TMV_CONJ(*yj) : *yj);
 #ifdef TMVFLDEBUG
                         TMVAssert(Aij >= A._first);
@@ -227,7 +227,7 @@ namespace tmv {
             } else if (*xj!=Tx(0)) {
                 T* Aij = Ajj;
                 const Ty* yi = yj;
-                for(int i=Nmj;i>0;--i,++yi,++Aij) {
+                for(ptrdiff_t i=Nmj;i>0;--i,++yi,++Aij) {
                     const T temp = *yi * (ha ? TMV_CONJ(*xj) : *xj);
 #ifdef TMVFLDEBUG
                     TMVAssert(Aij >= A._first);

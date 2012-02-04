@@ -64,18 +64,18 @@ namespace tmv {
         TMVAssert(alpha != T1(0));
         TMVAssert(B.ct() == NonConj);
 
-        const int N = A.size();
-        const int Astepj = rm ? 1 : A.stepj();
-        const int Ads = A.stepi() + Astepj;
-        const int Bstepj = rm ? 1 : B.stepj();
-        const int Bds = B.stepi() + Bstepj;
+        const ptrdiff_t N = A.size();
+        const ptrdiff_t Astepj = rm ? 1 : A.stepj();
+        const ptrdiff_t Ads = A.stepi() + Astepj;
+        const ptrdiff_t Bstepj = rm ? 1 : B.stepj();
+        const ptrdiff_t Bds = B.stepi() + Bstepj;
         const T2* Aii = A.cptr();
         T3* Bii = B.ptr();
 
-        for(int len=N;len>0;--len,Aii+=Ads,Bii+=Bds) {
+        for(ptrdiff_t len=N;len>0;--len,Aii+=Ads,Bii+=Bds) {
             const T2* Aij = Aii;
             T3* Bij = Bii;
-            for(int j=len;j>0;--j,(rm?++Aij:Aij+=Astepj),
+            for(ptrdiff_t j=len;j>0;--j,(rm?++Aij:Aij+=Astepj),
                 (rm?++Bij:Bij+=Bstepj)) {
 #ifdef TMVFLDEBUG
                 TMVAssert(Bij >= B._first);
@@ -116,18 +116,18 @@ namespace tmv {
         TMVAssert(alpha != T1(0));
         TMVAssert(B.ct() == NonConj);
 
-        const int N = A.size();
-        const int Astepi = (cm ? 1 : A.stepi());
-        const int Astepj = A.stepj();
-        const int Bstepi = (cm ? 1 : B.stepi());
-        const int Bstepj = B.stepj();
+        const ptrdiff_t N = A.size();
+        const ptrdiff_t Astepi = (cm ? 1 : A.stepi());
+        const ptrdiff_t Astepj = A.stepj();
+        const ptrdiff_t Bstepi = (cm ? 1 : B.stepi());
+        const ptrdiff_t Bstepj = B.stepj();
         const T2* Acolj = A.cptr()+(N-1)*Astepj;
         T3* Bcolj = B.ptr()+(N-1)*Bstepj;
 
-        for(int j=N;j>0;--j,Acolj-=Astepj,Bcolj-=Bstepj) {
+        for(ptrdiff_t j=N;j>0;--j,Acolj-=Astepj,Bcolj-=Bstepj) {
             const T2* Aij = Acolj;
             T3* Bij = Bcolj;
-            for(int i=j;i>0;--i,(cm?++Aij:Aij+=Astepi),(cm?++Bij:Bij+=Bstepi)) {
+            for(ptrdiff_t i=j;i>0;--i,(cm?++Aij:Aij+=Astepi),(cm?++Bij:Bij+=Bstepi)) {
                 if (a1) *Bij += (ca ? TMV_CONJ(*Aij) : *Aij);
                 else *Bij += alpha * (ca ? TMV_CONJ(*Aij) : *Aij);
             }

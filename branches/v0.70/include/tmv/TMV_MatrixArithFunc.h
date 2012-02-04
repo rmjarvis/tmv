@@ -86,11 +86,11 @@ namespace tmv {
         inline MatrixComposite(const MatrixComposite<T>&) {}
         virtual inline ~MatrixComposite() {}
         const T* cptr() const;
-        int stepi() const;
-        int stepj() const;
+        ptrdiff_t stepi() const;
+        ptrdiff_t stepj() const;
         inline ConjType ct() const { return NonConj; }
         inline bool canLinearize() const { return true; }
-        int ls() const;
+        ptrdiff_t ls() const;
 
     private:
         mutable AlignedArray<T> itsm;

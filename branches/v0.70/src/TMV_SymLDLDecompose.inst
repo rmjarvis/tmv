@@ -3,9 +3,9 @@
 
 #define DefLUD(RT,T)\
 template void LDL_Decompose(SymMatrixView<T > A, \
-    VectorView<T > xD, int* P, RT& ld, T& sd); \
+    VectorView<T > xD, ptrdiff_t* P, RT& ld, T& sd); \
 template void LDL_Decompose(SymMatrixView<T > A, \
-    SymBandMatrixView<T > D, int* P); \
+    SymBandMatrixView<T > D, ptrdiff_t* P); \
 
 DefLUD(T,T)
 #ifdef INST_COMPLEX

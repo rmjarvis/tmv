@@ -175,8 +175,8 @@ namespace tmv {
         inline UpperTriMatrixComposite(const UpperTriMatrixComposite<T>&) {}
         virtual inline ~UpperTriMatrixComposite() {}
         const T* cptr() const;
-        int stepi() const;
-        int stepj() const;
+        ptrdiff_t stepi() const;
+        ptrdiff_t stepj() const;
         inline ConjType ct() const { return NonConj; }
 
     private:
@@ -192,8 +192,8 @@ namespace tmv {
         inline LowerTriMatrixComposite(const LowerTriMatrixComposite<T>&) {}
         virtual inline ~LowerTriMatrixComposite() {}
         const T* cptr() const;
-        int stepi() const;
-        int stepj() const;
+        ptrdiff_t stepi() const;
+        ptrdiff_t stepj() const;
         inline ConjType ct() const { return NonConj; }
 
     private:

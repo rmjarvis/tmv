@@ -3,9 +3,9 @@
 
 #define Def1(T) \
   template const T* MatrixComposite<T >::cptr() const; \
-  template int MatrixComposite<T >::stepi() const; \
-  template int MatrixComposite<T >::stepj() const; \
-  template int MatrixComposite<T >::ls() const; \
+  template ptrdiff_t MatrixComposite<T >::stepi() const; \
+  template ptrdiff_t MatrixComposite<T >::stepj() const; \
+  template ptrdiff_t MatrixComposite<T >::ls() const; \
 
 Def1(T)
 #ifdef INST_COMPLEX

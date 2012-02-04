@@ -44,7 +44,7 @@
 #ifndef Array_H
 #define Array_H
 
-const int TMV_MaxStack = 1024; // bytes
+const ptrdiff_t TMV_MaxStack = 1024; // bytes
 
 #include <complex>
 
@@ -52,7 +52,7 @@ namespace tmv
 {
     template <class T>
     inline bool TMV_Aligned(const T* p)
-    { return (reinterpret_cast<size_t>(p) & 0xf) == 0; }
+    { return (reinterpret_cast<ptrdiff_t>(p) & 0xf) == 0; }
 
     // There doesn't seem to be any portable C++ function that guarantees
     // that the memory allocated will be aligned as necessary for 
@@ -82,12 +82,12 @@ namespace tmv
     {
     public:
         inline AlignedMemory() : p(0) {}
-        inline void allocate(const int n) 
+        inline void allocate(const ptrdiff_t n) 
         { 
 #ifdef TMV_END_PADDING
-            const int nn = n + 16/sizeof(T);
+            const ptrdiff_t nn = n + 16/sizeof(T);
             p = new T[nn];
-            for(int i=n;i<nn;++i) p[i] = T(0);
+            for(ptrdiff_t i=n;i<nn;++i) p[i] = T(0);
 #else
             p = new T[n]; 
 #endif
@@ -113,13 +113,13 @@ namespace tmv
     {
     public:
         AlignedMemory() : p(0) {}
-        inline void allocate(const int n) 
+        inline void allocate(const ptrdiff_t n) 
         { 
 #ifdef TMV_END_PADDING
-            const int nn = (n<<2)+15 + 16;
+            const ptrdiff_t nn = (n<<2)+15 + 16;
             p = new char[nn];
             float* pf = get();
-            for(int i=n;i<(nn>>2);++i) pf[i] = 0.F;
+            for(ptrdiff_t i=n;i<(nn>>2);++i) pf[i] = 0.F;
 #else
             p = new char[(n<<2)+15];
 #endif
@@ -132,15 +132,15 @@ namespace tmv
         inline float* get() 
         {
             float* pf = reinterpret_cast<float*>(
-                p + ((0x10-((size_t)(p) & 0xf)) & ~0x10));
-            TMVAssert( ((size_t)(pf) & 0xf) == 0);
+                p + ((0x10-((ptrdiff_t)(p) & 0xf)) & ~0x10));
+            TMVAssert( ((ptrdiff_t)(pf) & 0xf) == 0);
             return pf;
         }
         inline const float* get() const 
         {
             const float* pf = reinterpret_cast<const float*>(
-                p + ((0x10-((size_t)(p) & 0xf)) & ~0x10));
-            TMVAssert( ((size_t)(pf) & 0xf) == 0);
+                p + ((0x10-((ptrdiff_t)(p) & 0xf)) & ~0x10));
+            TMVAssert( ((ptrdiff_t)(pf) & 0xf) == 0);
             return pf;
         }
     private:
@@ -151,13 +151,13 @@ namespace tmv
     {
     public:
         AlignedMemory() : p(0) {}
-        inline void allocate(const int n) 
+        inline void allocate(const ptrdiff_t n) 
         { 
 #ifdef TMV_END_PADDING
-            const int nn = (n<<3)+15 + 16;
+            const ptrdiff_t nn = (n<<3)+15 + 16;
             p = new char[nn];
             double* pd = get();
-            for(int i=n;i<(nn>>3);++i) pd[i] = 0.;
+            for(ptrdiff_t i=n;i<(nn>>3);++i) pd[i] = 0.;
 #else
             p = new char[(n<<3)+15];
 #endif
@@ -170,15 +170,15 @@ namespace tmv
         inline double* get() 
         {
             double* pd = reinterpret_cast<double*>(
-                p + ((0x10-((size_t)(p) & 0xf)) & ~0x10));
-            TMVAssert( ((size_t)(pd) & 0xf) == 0);
+                p + ((0x10-((ptrdiff_t)(p) & 0xf)) & ~0x10));
+            TMVAssert( ((ptrdiff_t)(pd) & 0xf) == 0);
             return pd;
         }
         inline const double* get() const 
         {
             const double* pd = reinterpret_cast<const double*>(
-                p + ((0x10-((size_t)(p) & 0xf)) & ~0x10));
-            TMVAssert( ((size_t)(pd) & 0xf) == 0);
+                p + ((0x10-((ptrdiff_t)(p) & 0xf)) & ~0x10));
+            TMVAssert( ((ptrdiff_t)(pd) & 0xf) == 0);
             return pd;
         }
 
@@ -229,18 +229,18 @@ namespace tmv
             _n = 0;
 #endif
         }
-        inline AlignedArray(const int n) 
+        inline AlignedArray(const ptrdiff_t n) 
         {
             if (n > 0) p.allocate(n); 
 #ifdef TMV_INITIALIZE_NAN
             _n = n;
-            for(int i=0;i<_n;++i) get()[i] = TMV_Nan<T>::get();
+            for(ptrdiff_t i=0;i<_n;++i) get()[i] = TMV_Nan<T>::get();
 #endif
         }
         inline ~AlignedArray() 
         { 
 #ifdef TMV_INITIALIZE_NAN
-            for(int i=0;i<_n;++i) get()[i] = T(-999);
+            for(ptrdiff_t i=0;i<_n;++i) get()[i] = T(-999);
 #endif
             p.deallocate(); 
         }
@@ -260,16 +260,16 @@ namespace tmv
 #endif
             p.swapWith(rhs.p); 
         }
-        inline void resize(const int n) 
+        inline void resize(const ptrdiff_t n) 
         { 
 #ifdef TMV_INITIALIZE_NAN
-            for(int i=0;i<_n;++i) get()[i] = T(-999);
+            for(ptrdiff_t i=0;i<_n;++i) get()[i] = T(-999);
 #endif
             p.deallocate(); 
             if (n > 0) p.allocate(n); 
 #ifdef TMV_INITIALIZE_NAN
             _n = n;
-            for(int i=0;i<_n;++i) get()[i] = TMV_Nan<T>::get();
+            for(ptrdiff_t i=0;i<_n;++i) get()[i] = TMV_Nan<T>::get();
 #endif
         }
 
@@ -280,7 +280,7 @@ namespace tmv
 
         AlignedMemory<T> p;
 #ifdef TMV_INITIALIZE_NAN
-        int _n;
+        ptrdiff_t _n;
 #endif
 
         AlignedArray& operator=(AlignedArray& p2);
@@ -299,19 +299,19 @@ namespace tmv
             _n = 0;
 #endif
         }
-        inline AlignedArray(const int n) 
+        inline AlignedArray(const ptrdiff_t n) 
         { 
             if (n > 0) p.allocate(n<<1); 
 #ifdef TMV_INITIALIZE_NAN
             _n = n;
-            for(int i=0;i<_n;++i) 
+            for(ptrdiff_t i=0;i<_n;++i) 
                 get()[i] = TMV_Nan<std::complex<RT> >::get();
 #endif
         }
         inline ~AlignedArray() 
         {
 #ifdef TMV_INITIALIZE_NAN
-            for(int i=0;i<_n;++i) get()[i] = std::complex<RT>(-999,-888);
+            for(ptrdiff_t i=0;i<_n;++i) get()[i] = std::complex<RT>(-999,-888);
 #endif
             p.deallocate(); 
         }
@@ -331,16 +331,16 @@ namespace tmv
 #endif
             p.swapWith(rhs.p); 
         }
-        inline void resize(const int n) 
+        inline void resize(const ptrdiff_t n) 
         { 
 #ifdef TMV_INITIALIZE_NAN
-            for(int i=0;i<_n;++i) get()[i] = std::complex<RT>(-999,-888);
+            for(ptrdiff_t i=0;i<_n;++i) get()[i] = std::complex<RT>(-999,-888);
 #endif
             p.deallocate();
             if (n > 0) p.allocate(n<<1); 
 #ifdef TMV_INITIALIZE_NAN
             _n = n;
-            for(int i=0;i<_n;++i) 
+            for(ptrdiff_t i=0;i<_n;++i) 
                 get()[i] = TMV_Nan<std::complex<RT> >::get();
 #endif
         }
@@ -353,7 +353,7 @@ namespace tmv
 
         AlignedMemory<RT> p;
 #ifdef TMV_INITIALIZE_NAN
-        int _n;
+        ptrdiff_t _n;
 #endif
 
         AlignedArray& operator=(AlignedArray& p2);

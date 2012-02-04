@@ -63,13 +63,13 @@ namespace tmv {
         TMVAssert(A.ct() == NonConj);
 
         T* Aii = A.ptr();
-        const int ds = A.stepi()+1;
-        const int N = A.size();
+        const ptrdiff_t ds = A.stepi()+1;
+        const ptrdiff_t N = A.size();
 
-        for(int len=N;len>0;--len,Aii+=ds) {
+        for(ptrdiff_t len=N;len>0;--len,Aii+=ds) {
             // A.row(i,i,N) *= alpha;
             T* Aij = Aii;
-            for(int j=len;j>0;--j,++Aij) {
+            for(ptrdiff_t j=len;j>0;--j,++Aij) {
 #ifdef TMVFLDEBUG
                 TMVAssert(Aij >= A._first);
                 TMVAssert(Aij < A._last);
@@ -89,13 +89,13 @@ namespace tmv {
         TMVAssert(A.ct() == NonConj);
 
         T* A0j = A.ptr();
-        const int Astepj = A.stepj();
-        const int N = A.size();
+        const ptrdiff_t Astepj = A.stepj();
+        const ptrdiff_t N = A.size();
 
-        for(int j=N,len=1;j>0;--j,++len,A0j+=Astepj) {
+        for(ptrdiff_t j=N,len=1;j>0;--j,++len,A0j+=Astepj) {
             // A.col(j,0,j+1) *= alpha;
             T* Aij = A0j;
-            for(int i=len;i>0;--i,++Aij) {
+            for(ptrdiff_t i=len;i>0;--i,++Aij) {
 #ifdef TMVFLDEBUG
                 TMVAssert(Aij >= A._first);
                 TMVAssert(Aij < A._last);
@@ -132,9 +132,9 @@ namespace tmv {
                 else
                     ColMajorMultXM(alpha,A);
             } else {
-                const int M = A.colsize();
-                const int N = A.rowsize();
-                for(int i=0;i<M;++i) 
+                const ptrdiff_t M = A.colsize();
+                const ptrdiff_t N = A.rowsize();
+                for(ptrdiff_t i=0;i<M;++i) 
                     A.row(i,i,N) *= alpha;
             }
         }
@@ -186,13 +186,13 @@ namespace tmv {
             if (C.size() > 1) 
                 ElemMultMM<add>(alpha,A.offDiag(),B.offDiag(),C.offDiag());
         } else {
-            const int N = C.size();
+            const ptrdiff_t N = C.size();
             if (C.isrm()) {
-                for(int i=0;i<N;i++)
+                for(ptrdiff_t i=0;i<N;i++)
                     ElemMultVV<add>(
                         alpha,A.row(i,i,N),B.row(i,i,N),C.row(i,i,N));
             } else {
-                for(int j=0;j<N;j++)
+                for(ptrdiff_t j=0;j<N;j++)
                     ElemMultVV<add>(
                         alpha,A.col(j,0,j+1),B.col(j,0,j+1),C.col(j,0,j+1));
             }

@@ -62,12 +62,12 @@ namespace tmv {
         TMVAssert(v.ct() == NonConj);
 
         T* vptr = v.ptr();
-        const int s = v.step();
-        const int N = v.size();
+        const ptrdiff_t s = v.step();
+        const ptrdiff_t N = v.size();
         if (s == 1) {
-            const int N1 = N/4;
-            const int N2 = N-4*N1;
-            if (N1) for(int i=N1;i>0;--i,vptr+=4) {
+            const ptrdiff_t N1 = N/4;
+            const ptrdiff_t N2 = N-4*N1;
+            if (N1) for(ptrdiff_t i=N1;i>0;--i,vptr+=4) {
 #ifdef TMVFLDEBUG
                 TMVAssert(vptr >= v._first);
                 TMVAssert(vptr+3 < v._last);
@@ -77,7 +77,7 @@ namespace tmv {
                 vptr[2] *= x;
                 vptr[3] *= x;
             }
-            if (N2) for(int i=N2;i>0;--i,++vptr) {
+            if (N2) for(ptrdiff_t i=N2;i>0;--i,++vptr) {
 #ifdef TMVFLDEBUG
                 TMVAssert(vptr >= v._first);
                 TMVAssert(vptr < v._last);
@@ -85,7 +85,7 @@ namespace tmv {
                 *vptr *= x;
             }
         } else {
-            for(int i=N;i>0;--i,vptr+=s) {
+            for(ptrdiff_t i=N;i>0;--i,vptr+=s) {
 #ifdef TMVFLDEBUG
                 TMVAssert(vptr >= v._first);
                 TMVAssert(vptr < v._last);
@@ -154,7 +154,7 @@ namespace tmv {
 #ifdef XDEBUG
         Vector<T> v0 = v;
         Vector<T> vx = v;
-        for(int i=0;i<vx.size();i++) vx(i) *= x;
+        for(ptrdiff_t i=0;i<vx.size();i++) vx(i) *= x;
 #endif
 
         if (v.size() > 0 && x != T(1)) {
@@ -169,7 +169,7 @@ namespace tmv {
 
 #ifdef XDEBUG
         Vector<T> diff(v.size());
-        for(int i=0;i<v.size();i++) diff(i) = vx(i) - v(i);
+        for(ptrdiff_t i=0;i<v.size();i++) diff(i) = vx(i) - v(i);
         if (!(Norm(diff) <= 0.001*TMV_MAX(TMV_RealType(T)(1),Norm(v)))) {
             cerr<<"MultXV: x = "<<x<<endl;
             cerr<<"v = "<<TMV_Text(v)<<"  step "<<v.step()<<"  "<<v0<<endl;
@@ -201,14 +201,14 @@ namespace tmv {
 
         const T1* v1ptr = v1.cptr();
         T* v2ptr = v2.ptr();
-        const int s1 = v1.step();
-        const int s2 = v2.step();
-        const int N = v1.size();
+        const ptrdiff_t s1 = v1.step();
+        const ptrdiff_t s2 = v2.step();
+        const ptrdiff_t N = v1.size();
 
         if (s1 == 1 && s2 == 1) {
-            const int N1 = N/4;
-            const int N2 = N-4*N1;
-            if (N1) for(int i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
+            const ptrdiff_t N1 = N/4;
+            const ptrdiff_t N2 = N-4*N1;
+            if (N1) for(ptrdiff_t i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
 #ifdef TMVFLDEBUG
                 TMVAssert(v2ptr >= v2._first);
                 TMVAssert(v2ptr+3 < v2._last);
@@ -218,7 +218,7 @@ namespace tmv {
                 v2ptr[2] = x * (c1 ? TMV_CONJ(v1ptr[2]) : v1ptr[2]);
                 v2ptr[3] = x * (c1 ? TMV_CONJ(v1ptr[3]) : v1ptr[3]);
             }
-            if (N2) for(int i=N2;i>0;--i,v1ptr++,v2ptr++)  {
+            if (N2) for(ptrdiff_t i=N2;i>0;--i,v1ptr++,v2ptr++)  {
 #ifdef TMVFLDEBUG
                 TMVAssert(v2ptr >= v2._first);
                 TMVAssert(v2ptr < v2._last);
@@ -226,7 +226,7 @@ namespace tmv {
                 *v2ptr = x * (c1 ? TMV_CONJ(*v1ptr) : (*v1ptr));
             }
         } else
-            for(int i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2)  {
+            for(ptrdiff_t i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2)  {
 #ifdef TMVFLDEBUG
                 TMVAssert(v2ptr >= v2._first);
                 TMVAssert(v2ptr < v2._last);
@@ -243,7 +243,7 @@ namespace tmv {
 
 #ifdef XDEBUG
         Vector<T> vx = v1;
-        for(int i=0;i<vx.size();i++) vx(i) *= x;
+        for(ptrdiff_t i=0;i<vx.size();i++) vx(i) *= x;
 #endif
 
         if (v2.size() > 0) {
@@ -288,7 +288,7 @@ namespace tmv {
 
 #ifdef XDEBUG
         Vector<T> diff(v2.size());
-        for(int i=0;i<v2.size();i++) diff(i) = vx(i) - v2(i);
+        for(ptrdiff_t i=0;i<v2.size();i++) diff(i) = vx(i) - v2(i);
         if (!(Norm(diff) <= 0.001*TMV_MAX(TMV_RealType(T)(1),Norm(v2)))) {
             cerr<<"CopyMultXV: x = "<<x<<endl;
             cerr<<"v2 = "<<TMV_Text(v2)<<"  step "<<v2.step()<<endl;
@@ -343,18 +343,18 @@ namespace tmv {
         const Tx* xp = x.cptr();
         const Ty* yp = y.cptr();
         T* zp = z.ptr();
-        const int sx = x.step();
-        const int sy = y.step();
-        const int sz = z.step();
-        const int N = z.size();
+        const ptrdiff_t sx = x.step();
+        const ptrdiff_t sy = y.step();
+        const ptrdiff_t sz = z.step();
+        const ptrdiff_t N = z.size();
 
         if (sx == 1 && sy == 1 && sz == 1) {
-            const int N1 = N/4;
-            const int N2 = N-4*N1;
+            const ptrdiff_t N1 = N/4;
+            const ptrdiff_t N2 = N-4*N1;
 
             if (N1) {
                 if (alpha == Ta(1)) {
-                    for(int i=N1;i>0;--i,xp+=4,yp+=4,zp+=4) {
+                    for(ptrdiff_t i=N1;i>0;--i,xp+=4,yp+=4,zp+=4) {
 #ifdef TMVFLDEBUG
                         TMVAssert(zp >= z._first);
                         TMVAssert(zp+3 < z._last);
@@ -373,7 +373,7 @@ namespace tmv {
                             Maybe<cx>::conj(xp[3]) * Maybe<cy>::conj(yp[3]));
                     }
                 } else {
-                    for(int i=N1;i>0;--i,xp+=4,yp+=4,zp+=4) {
+                    for(ptrdiff_t i=N1;i>0;--i,xp+=4,yp+=4,zp+=4) {
 #ifdef TMVFLDEBUG
                         TMVAssert(zp >= z._first);
                         TMVAssert(zp+3 < z._last);
@@ -395,7 +395,7 @@ namespace tmv {
             }
             if (N2) {
                 if (alpha == Ta(1)) {
-                    for(int i=N2;i>0;--i,++xp,++yp,++zp)  {
+                    for(ptrdiff_t i=N2;i>0;--i,++xp,++yp,++zp)  {
 #ifdef TMVFLDEBUG
                         TMVAssert(zp >= z._first);
                         TMVAssert(zp < z._last);
@@ -405,7 +405,7 @@ namespace tmv {
                             Maybe<cx>::conj(*xp) * Maybe<cy>::conj(*yp));
                     }
                 } else {
-                    for(int i=N2;i>0;--i,++xp,++yp,++zp)  {
+                    for(ptrdiff_t i=N2;i>0;--i,++xp,++yp,++zp)  {
 #ifdef TMVFLDEBUG
                         TMVAssert(zp >= z._first);
                         TMVAssert(zp < z._last);
@@ -418,7 +418,7 @@ namespace tmv {
             }
         } else {
             if (alpha == Ta(1)) {
-                for(int i=N;i>0;--i,xp+=sx,yp+=sy,zp+=sz) {
+                for(ptrdiff_t i=N;i>0;--i,xp+=sx,yp+=sy,zp+=sz) {
 #ifdef TMVFLDEBUG
                     TMVAssert(zp >= z._first);
                     TMVAssert(zp < z._last);
@@ -427,7 +427,7 @@ namespace tmv {
                         *zp, Maybe<cx>::conj(*xp) * Maybe<cy>::conj(*yp));
                 }
             } else {
-                for(int i=N;i>0;--i,xp+=sx,yp+=sy,zp+=sz) {
+                for(ptrdiff_t i=N;i>0;--i,xp+=sx,yp+=sy,zp+=sz) {
 #ifdef TMVFLDEBUG
                     TMVAssert(zp >= z._first);
                     TMVAssert(zp < z._last);
@@ -451,7 +451,7 @@ namespace tmv {
 #ifdef XDEBUG
         Vector<T> z0 = z;
         Vector<T> zx(z.size());
-        for(int i=0;i<z.size();i++) zx(i) = alpha*x(i)*y(i);
+        for(ptrdiff_t i=0;i<z.size();i++) zx(i) = alpha*x(i)*y(i);
         if (add) zx += z;
         //cerr<<"ElemMultVV: alpha = "<<alpha<<", add = "<<add<<endl;
         //cerr<<"x = "<<TMV_Text(x)<<"  step "<<x.step()<<"  "<<x<<endl;

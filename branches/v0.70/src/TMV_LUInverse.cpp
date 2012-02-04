@@ -96,15 +96,17 @@ namespace tmv {
         int lwork = -1;
         AlignedArray<double> work(1);
         work.get()[0] = 0.;
-        LAPNAME(dgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
-                         LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+        LAPNAME(dgetri) (
+            LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
+            LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(work[0]);
         work.resize(lwork);
         VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
-        LAPNAME(dgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
-                         LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+        LAPNAME(dgetri) (
+            LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
+            LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
         LAP_Results("dgetri");
 #else
@@ -134,15 +136,17 @@ namespace tmv {
         int lwork = -1;
         AlignedArray<std::complex<double> > work(1);
         work.get()[0] = 0.;
-        LAPNAME(zgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
-                         LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+        LAPNAME(zgetri) (
+            LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
+            LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(TMV_REAL(work[0]));
         work.resize(lwork);
         VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
-        LAPNAME(zgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
-                         LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+        LAPNAME(zgetri) (
+            LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
+            LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
         LAP_Results("zgetri");
 #else
@@ -174,15 +178,17 @@ namespace tmv {
         int lwork = -1;
         AlignedArray<float> work(1);
         work.get()[0] = 0.;
-        LAPNAME(sgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
-                         LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+        LAPNAME(sgetri) (
+            LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
+            LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(work[0]);
         work.resize(lwork);
         VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
-        LAPNAME(sgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
-                         LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+        LAPNAME(sgetri) (
+            LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
+            LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
         LAP_Results("sgetri");
 #else
@@ -212,15 +218,17 @@ namespace tmv {
         int lwork = -1;
         AlignedArray<std::complex<float> > work(1);
         work.get()[0] = 0.;
-        LAPNAME(cgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
-                         LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+        LAPNAME(cgetri) (
+            LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
+            LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
         lwork = int(TMV_REAL(work[0]));
         work.resize(lwork);
         VectorViewOf(work.get(),lwork).setZero();
 #endif
 #endif
-        LAPNAME(cgetri) (LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
-                         LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
+        LAPNAME(cgetri) (
+            LAPCM LAPV(n),LAPP(minv.ptr()),LAPV(lda),
+            LAPP(ipiv.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
         LAP_Results("cgetri");
 #else
@@ -232,7 +240,7 @@ namespace tmv {
 
     template <class T, class T1> 
     void LU_Inverse(
-        const GenMatrix<T1>& LUx, const int* P, MatrixView<T> minv)
+        const GenMatrix<T1>& LUx, const ptrdiff_t* P, MatrixView<T> minv)
     {
         //std::cout<<"Start LU_Inverse"<<std::endl;
         //std::cout<<"LUx = "<<LUx<<std::endl;
@@ -281,7 +289,7 @@ namespace tmv {
             cerr<<"m = "<<m<<endl;
             cerr<<"LUx = "<<LUx<<endl;
             cerr<<"P = ";
-            for(int i=0;i<LUx.colsize();i++) cerr<<P[i]<<" ";
+            for(ptrdiff_t i=0;i<LUx.colsize();i++) cerr<<P[i]<<" ";
             cerr<<endl;
             cerr<<"minv = "<<minv<<endl;
             cerr<<"m*minv = "<<m*minv<<endl;

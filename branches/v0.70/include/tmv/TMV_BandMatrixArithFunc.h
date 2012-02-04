@@ -104,13 +104,13 @@ namespace tmv {
 
         // Definitions are in TMV_MultBV.cpp
         const T* cptr() const;
-        int stepi() const;
-        int stepj() const;
-        int diagstep() const;
+        ptrdiff_t stepi() const;
+        ptrdiff_t stepj() const;
+        ptrdiff_t diagstep() const;
 
         inline ConjType ct() const { return NonConj; }
         inline bool isconj() const { return false; }
-        int ls() const;
+        ptrdiff_t ls() const;
 
         ConstVectorView<T> constLinearView() const;
         inline bool canLinearize() const { return true; }

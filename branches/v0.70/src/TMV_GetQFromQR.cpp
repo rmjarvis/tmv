@@ -65,18 +65,18 @@ namespace tmv {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
         TMVAssert(beta.ct() == NonConj);
-        const int M = Q.colsize();
-        const int N = Q.rowsize();
+        const ptrdiff_t M = Q.colsize();
+        const ptrdiff_t N = Q.rowsize();
         Q.upperTri().setZero();
-        const int sb = beta.step();
+        const ptrdiff_t sb = beta.step();
         if (sb == 1) {
             const T* bi = beta.cptr()+(N-1);
-            for(int i=N-1;i>=0;--i,--bi) {
+            for(ptrdiff_t i=N-1;i>=0;--i,--bi) {
                 HouseholderUnpack(Q.subMatrix(i,M,i,N),*bi);
             }
         } else {
             const T* bi = beta.cptr()+(N-1)*sb;
-            for(int i=N-1;i>=0;--i,bi-=sb) {
+            for(ptrdiff_t i=N-1;i>=0;--i,bi-=sb) {
                 HouseholderUnpack(Q.subMatrix(i,M,i,N),*bi);
             }
         }
@@ -95,12 +95,13 @@ namespace tmv {
         NonBlockGetQFromQR(Q2.view(),beta);
         std::cout<<"Start Block GetQFromQR"<<std::endl;
 #endif
-        const int M = Q.colsize();
-        const int N = Q.rowsize();
+        const ptrdiff_t M = Q.colsize();
+        const ptrdiff_t N = Q.rowsize();
         Q.upperTri().setZero();
-        UpperTriMatrix<T,NonUnitDiag|ColMajor> BaseZ(TMV_MIN(QR_BLOCKSIZE,N));
-        for(int j2=N;j2>0;) {
-            int j1 = j2 > QR_BLOCKSIZE ? j2-QR_BLOCKSIZE : 0;
+        UpperTriMatrix<T,NonUnitDiag|ColMajor> BaseZ(
+            TMV_MIN(QR_BLOCKSIZE,int(N)));
+        for(ptrdiff_t j2=N;j2>0;) {
+            ptrdiff_t j1 = j2 > QR_BLOCKSIZE ? j2-QR_BLOCKSIZE : 0;
             MatrixView<T> Y = Q.subMatrix(j1,M,j1,j2);
             UpperTriMatrixView<T> Z = BaseZ.subTriMatrix(0,Y.rowsize());
             BlockHouseholderMakeZ(Y,Z,beta.subVector(j1,j2));

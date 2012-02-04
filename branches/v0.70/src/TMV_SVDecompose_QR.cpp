@@ -88,7 +88,7 @@ namespace tmv {
             if(zd) *zd = true; 
         }
         ++Di;
-        for(int k=E.size();k>0;--k,++Di,++Ei) {
+        for(ptrdiff_t k=E.size();k>0;--k,++Di,++Ei) {
 #ifdef TMVFLDEBUG
             TMVAssert(Di >= D._first);
             TMVAssert(Di < D._last);
@@ -137,14 +137,14 @@ namespace tmv {
         // B = [ 0 x x 0 ]
         //     [ 0 0 x x ]
         //     [ 0 0 0 x ]
-        // Zero out the first row maintaining the constancy of U B
+        // Zero out the first row maptrdiff_taining the constancy of U B
         // using Givens transformations.
         TMVAssert(E.size() == D.size());
         if (U.cptr()) TMVAssert(U.rowsize() == D.size()+1);
         TMVAssert(D.step() == 1);
         TMVAssert(E.step() == 1);
 
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
         RT* Di = D.ptr();
         RT* Ei = E.ptr();
 
@@ -157,7 +157,7 @@ namespace tmv {
             *Ei = RT(0);
             ++Ei;
             // Loop Invariant: x = B(0,i)
-            for(int i=0; i<N; ++i,++Di,++Ei) {
+            for(ptrdiff_t i=0; i<N; ++i,++Di,++Ei) {
 #ifdef TMVFLDEBUG
                 TMVAssert(Di >= D._first);
                 TMVAssert(Di < D._last);
@@ -187,14 +187,14 @@ namespace tmv {
         // B = [ 0 x x 0 0 ]
         //     [ 0 0 x x 0 ]
         //     [ 0 0 0 x x ]
-        // Zero out the last col maintaining the constancy of B Vt
+        // Zero out the last col maptrdiff_taining the constancy of B Vt
         // using Givens transformations.
         TMVAssert(E.size() == D.size());
         if (Vt.cptr()) TMVAssert(Vt.colsize() == D.size()+1);
         TMVAssert(D.step() == 1);
         TMVAssert(E.step() == 1);
 
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
         RT* Di = D.ptr()+N-1;
         RT* Ei = E.ptr()+N-1;
 
@@ -206,7 +206,7 @@ namespace tmv {
 #endif
             *Ei = RT(0);
             // Loop Invariant: x = B(i,N-1)
-            for(int i=N-1; i>=0; --i,--Di) {
+            for(ptrdiff_t i=N-1; i>=0; --i,--Di) {
 #ifdef TMVFLDEBUG
                 TMVAssert(Di >= D._first);
                 TMVAssert(Di < D._last);
@@ -252,7 +252,7 @@ namespace tmv {
         //         = c + |b|^2/d / (1+sqrt(1+|b|^2/d^2)
         //
         // mu = c + |b|^2/d / (1 + sqrt(1+|b|^2/d^2))
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
         TMVAssert(E.size() == N-1);
         TMVAssert(N > 1);
 
@@ -618,8 +618,8 @@ namespace tmv {
         Vector<RT> E0 = E;
         B.diag() = D0;
         B.diag(1) = E0;
-        const int M = U.cptr()&&Vt.cptr() ? U.colsize() : 0;
-        const int Nx = U.cptr()&&Vt.cptr() ? Vt.rowsize() : 0;
+        const ptrdiff_t M = U.cptr()&&Vt.cptr() ? U.colsize() : 0;
+        const ptrdiff_t Nx = U.cptr()&&Vt.cptr() ? Vt.rowsize() : 0;
         Matrix<T> A0(M,Nx);
         if (U.cptr() && Vt.cptr()) {
             A0 = U * B * Vt;
@@ -627,9 +627,9 @@ namespace tmv {
         }
 #endif
         // Reduce the superdiagonal elements of Bidiagonal Matrix B 
-        // (given by D,E) while maintaining U B Vt. 
+        // (given by D,E) while maptrdiff_taining U B Vt. 
         // Note: the input B must be unreduced - ie. all entries are non-zero.
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
         TMVAssert(N>0);
         TMVAssert(E.size() == N-1);
         if (U.cptr()) TMVAssert(U.rowsize() == N);
@@ -680,7 +680,7 @@ namespace tmv {
         // The rest of the procedure simply involves chasing this + down
         // the diagonal using Givens rotations.
         // For each Givens rotation we use, we also multiply U or Vt by the
-        // adjoint to maintain the constancy of U B Vt.
+        // adjoint to maptrdiff_tain the constancy of U B Vt.
         //
         // At the end of this procedure, E(N-1) should be smaller than it was.
         // Note: This procedure works exactly if N=2.
@@ -695,7 +695,7 @@ namespace tmv {
         dbgcout<<"x = "<<x<<std::endl;
         Givens<RT> G = GivensRotate(y,x);
         dbgcout<<"Rotatedi y,x => "<<y<<','<<x<<std::endl;
-        for(int i=1;i<N;++i) {
+        for(ptrdiff_t i=1;i<N;++i) {
             G.mult(*Di,*Ei);
             dbgcout<<"D,E -> "<<*Di<<','<<*Ei<<std::endl;
             if (Vt.cptr()) G.conjMult(Vt.rowPair(i-1,i));
@@ -758,8 +758,8 @@ namespace tmv {
         Matrix<RT> B(D.size(),D.size(),RT(0));
         B.diag() = D;
         B.diag(1) = E;
-        const int M = U.cptr()&&Vt.cptr() ? U.colsize() : 0;
-        const int Nx = U.cptr()&&Vt.cptr() ? Vt.rowsize() : 0;
+        const ptrdiff_t M = U.cptr()&&Vt.cptr() ? U.colsize() : 0;
+        const ptrdiff_t Nx = U.cptr()&&Vt.cptr() ? Vt.rowsize() : 0;
         Matrix<T> A0(M,Nx);
         if (U.cptr() && Vt.cptr()) {
             A0 = U * B * Vt;
@@ -767,7 +767,7 @@ namespace tmv {
         }
 #endif
 
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
         if (N <= 1) return;
 
         TMVAssert(D.size() == E.size()+1);
@@ -787,10 +787,10 @@ namespace tmv {
         // Initially q = N-1. (ie. All E(i) are potentially non-zero.)
         // When q = 0, we are done.
 
-        for(int q=N-1; q>0; ) {
+        for(ptrdiff_t q=N-1; q>0; ) {
             if (E(q-1) == T(0)) --q;
             else {
-                int p=q-1;
+                ptrdiff_t p=q-1;
                 while (p > 0 && (E(p-1) != T(0))) --p;
                 // Set p such that E(p-1) = 0 and all E(i) with p<=i<q are 
                 // non-zero.

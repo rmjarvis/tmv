@@ -47,7 +47,7 @@ namespace tmv {
 
     template <class T>
     bool GenUpperTriMatrix<T>::hasSubMatrix(
-        int i1, int i2, int j1, int j2, int istep, int jstep) const
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const
     {
         if (i1==i2 || j1==j2) return true; // no elements, so whatever...
         bool ok = true;
@@ -122,7 +122,7 @@ namespace tmv {
 
     template <class T>
     bool GenUpperTriMatrix<T>::hasSubVector(
-        int i, int j, int istep, int jstep, int n) const 
+        ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t n) const 
     {
         if (n==0) return true;
         bool ok = true;
@@ -139,8 +139,8 @@ namespace tmv {
             ok = false;
             std::cerr<<"j ("<<j<<") must be in 0 -- "<<size()-1<<std::endl;
         }
-        int i2 = i+istep*(n-1);
-        int j2 = j+jstep*(n-1);
+        ptrdiff_t i2 = i+istep*(n-1);
+        ptrdiff_t j2 = j+jstep*(n-1);
         if (i2 < 0 || i2 >= size()) {
             ok = false;
             std::cerr<<"last element's i ("<<i2<<") must be in 0 -- ";
@@ -164,7 +164,7 @@ namespace tmv {
 
     template <class T>
     bool GenUpperTriMatrix<T>::hasSubTriMatrix(
-        int i1, int i2, int istep) const 
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const 
     {
         if (i1==i2) return true;
         bool ok=true;
@@ -196,7 +196,7 @@ namespace tmv {
 
     template <class T>
     bool ConstUpperTriMatrixView<T,FortranStyle>::hasSubMatrix(
-        int i1, int i2, int j1, int j2, int istep, int jstep) const
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const
     {
         if (i1==i2 || j1==j2) return true; // no elements, so whatever...
         bool ok = true;
@@ -271,7 +271,7 @@ namespace tmv {
 
     template <class T>
     bool ConstUpperTriMatrixView<T,FortranStyle>::hasSubVector(
-        int i, int j, int istep, int jstep, int n) const 
+        ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t n) const 
     {
         if (n==0) return true;
         bool ok = true;
@@ -288,8 +288,8 @@ namespace tmv {
             ok = false;
             std::cerr<<"j ("<<j<<") must be in 1 -- "<<this->size()<<std::endl;
         }
-        int i2 = i+istep*(n-1);
-        int j2 = j+jstep*(n-1);
+        ptrdiff_t i2 = i+istep*(n-1);
+        ptrdiff_t j2 = j+jstep*(n-1);
         if (i2 < 1 || i2 > this->size()) {
             ok = false;
             std::cerr<<"last element's i ("<<i2<<") must be in 1 -- ";
@@ -313,7 +313,7 @@ namespace tmv {
 
     template <class T> 
     bool ConstUpperTriMatrixView<T,FortranStyle>::hasSubTriMatrix(
-        int i1, int i2, int istep) const 
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const 
     {
         if (i1==i2) return true;
         bool ok=true;
@@ -351,21 +351,21 @@ namespace tmv {
     template <class T>
     T GenUpperTriMatrix<T>::sumElements() const
     {
-        const int N = size();
+        const ptrdiff_t N = size();
         T sum(0);
         if (isrm()) 
             if (isunit())
-                for(int i=0;i<N;++i) 
+                for(ptrdiff_t i=0;i<N;++i) 
                     sum += row(i,i+1,N).sumElements();
             else
-                for(int i=0;i<N;++i) 
+                for(ptrdiff_t i=0;i<N;++i) 
                     sum += row(i,i,N).sumElements();
         else
             if (isunit())
-                for(int j=0;j<N;++j) 
+                for(ptrdiff_t j=0;j<N;++j) 
                     sum += col(j,0,j).sumElements();
             else
-                for(int j=0;j<N;++j) 
+                for(ptrdiff_t j=0;j<N;++j) 
                     sum += col(j,0,j+1).sumElements();
         if (isunit()) sum += RT(N);
         return sum;
@@ -374,21 +374,21 @@ namespace tmv {
     template <class T>
     static RT DoSumAbsElements(const GenUpperTriMatrix<T>& m)
     {
-        const int N = m.size();
+        const ptrdiff_t N = m.size();
         RT sum(0);
         if (m.isrm()) 
             if (m.isunit())
-                for(int i=0;i<N;++i) 
+                for(ptrdiff_t i=0;i<N;++i) 
                     sum += m.row(i,i+1,N).sumAbsElements();
             else
-                for(int i=0;i<N;++i) 
+                for(ptrdiff_t i=0;i<N;++i) 
                     sum += m.row(i,i,N).sumAbsElements();
         else
             if (m.isunit())
-                for(int j=0;j<N;++j) 
+                for(ptrdiff_t j=0;j<N;++j) 
                     sum += m.col(j,0,j).sumAbsElements();
             else
-                for(int j=0;j<N;++j) 
+                for(ptrdiff_t j=0;j<N;++j) 
                     sum += m.col(j,0,j+1).sumAbsElements();
         if (m.isunit()) sum += RT(N);
         return sum;
@@ -397,21 +397,21 @@ namespace tmv {
     template <class T>
     static RT DoSumAbs2Elements(const GenUpperTriMatrix<T>& m)
     {
-        const int N = m.size();
+        const ptrdiff_t N = m.size();
         RT sum(0);
         if (m.isrm()) 
             if (m.isunit())
-                for(int i=0;i<N;++i) 
+                for(ptrdiff_t i=0;i<N;++i) 
                     sum += m.row(i,i+1,N).sumAbs2Elements();
             else
-                for(int i=0;i<N;++i) 
+                for(ptrdiff_t i=0;i<N;++i) 
                     sum += m.row(i,i,N).sumAbs2Elements();
         else
             if (m.isunit())
-                for(int j=0;j<N;++j) 
+                for(ptrdiff_t j=0;j<N;++j) 
                     sum += m.col(j,0,j).sumAbs2Elements();
             else
-                for(int j=0;j<N;++j) 
+                for(ptrdiff_t j=0;j<N;++j) 
                     sum += m.col(j,0,j+1).sumAbs2Elements();
         if (m.isunit()) sum += RT(N);
         return sum;
@@ -434,21 +434,21 @@ namespace tmv {
     template <class T>
     RT GenUpperTriMatrix<T>::normSq(const RT scale) const
     {
-        const int N = size();
+        const ptrdiff_t N = size();
         RT sum(0);
         if (isrm()) 
             if (isunit())
-                for(int i=0;i<N;++i) 
+                for(ptrdiff_t i=0;i<N;++i) 
                     sum += row(i,i+1,N).normSq(scale);
             else
-                for(int i=0;i<N;++i) 
+                for(ptrdiff_t i=0;i<N;++i) 
                     sum += row(i,i,N).normSq(scale);
         else
             if (isunit())
-                for(int j=0;j<N;++j) 
+                for(ptrdiff_t j=0;j<N;++j) 
                     sum += col(j,0,j).normSq(scale);
             else
-                for(int j=0;j<N;++j) 
+                for(ptrdiff_t j=0;j<N;++j) 
                     sum += col(j,0,j+1).normSq(scale);
         if (isunit()) {
             if (scale == RT(1)) sum += RT(N);
@@ -493,10 +493,10 @@ namespace tmv {
     template <class T> 
     static RT NonLapMaxAbsElement(const GenUpperTriMatrix<T>& m)
     {
-        const int N = m.size();
+        const ptrdiff_t N = m.size();
         RT max(0);
         if (m.isrm()) {
-            for(int i=0;i<N;++i) {
+            for(ptrdiff_t i=0;i<N;++i) {
                 RT temp;
                 if (m.isunit())
                     temp = m.row(i,i+1,N).normInf();
@@ -505,7 +505,7 @@ namespace tmv {
                 if (temp > max) max = temp;
             }
         } else {
-            for(int j=0;j<N;++j) {
+            for(ptrdiff_t j=0;j<N;++j) {
                 RT temp;
                 if (m.isunit())
                     temp = m.col(j,0,j).normInf();
@@ -521,10 +521,10 @@ namespace tmv {
     template <class T> 
     static RT NonLapMaxAbs2Element(const GenUpperTriMatrix<T>& m)
     {
-        const int N = m.size();
+        const ptrdiff_t N = m.size();
         RT max(0);
         if (m.isrm()) {
-            for(int i=0;i<N;++i) {
+            for(ptrdiff_t i=0;i<N;++i) {
                 RT temp;
                 if (m.isunit())
                     temp = m.row(i,i+1,N).maxAbs2Element();
@@ -533,7 +533,7 @@ namespace tmv {
                 if (temp > max) max = temp;
             }
         } else {
-            for(int j=0;j<N;++j) {
+            for(ptrdiff_t j=0;j<N;++j) {
                 RT temp;
                 if (m.isunit())
                     temp = m.col(j,0,j).maxAbs2Element();
@@ -550,8 +550,8 @@ namespace tmv {
     static RT NonLapNorm1(const GenUpperTriMatrix<T>& m)
     {
         RT max(0);
-        const int N = m.size();
-        for(int j=0;j<N;++j) {
+        const ptrdiff_t N = m.size();
+        for(ptrdiff_t j=0;j<N;++j) {
             RT temp;
             if (m.isunit()) {
                 temp = m.col(j,0,j).norm1();
@@ -566,8 +566,8 @@ namespace tmv {
     static RT NonLapNormInf(const GenUpperTriMatrix<T>& m)
     {
         RT max(0);
-        const int N = m.size();
-        for(int j=0;j<N;++j) {
+        const ptrdiff_t N = m.size();
+        for(ptrdiff_t j=0;j<N;++j) {
             RT temp;
             if (m.isunit()) {
                 temp = m.row(j,j+1,N).norm1();
@@ -794,36 +794,36 @@ namespace tmv {
     template <class T, int A>
     UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::setZero()
     {
-        const int N = size();
+        const ptrdiff_t N = size();
 
         if (isrm())
             if (isunit())
-                for(int i=0;i<N;++i) row(i,i+1,N).setZero();
+                for(ptrdiff_t i=0;i<N;++i) row(i,i+1,N).setZero();
             else
-                for(int i=0;i<N;++i) row(i,i,N).setZero();
+                for(ptrdiff_t i=0;i<N;++i) row(i,i,N).setZero();
         else 
             if (isunit())
-                for(int j=0;j<N;++j) col(j,0,j).setZero();
+                for(ptrdiff_t j=0;j<N;++j) col(j,0,j).setZero();
             else
-                for(int j=0;j<N;++j) col(j,0,j+1).setZero();
+                for(ptrdiff_t j=0;j<N;++j) col(j,0,j+1).setZero();
         return *this; 
     } 
 
     template <class T, int A>
     UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::setAllTo(const T& x)
     {
-        const int N = size();
+        const ptrdiff_t N = size();
 
         if (isrm())
             if (isunit())
-                for(int i=0;i<N;++i) row(i,i+1,N).setAllTo(x); 
+                for(ptrdiff_t i=0;i<N;++i) row(i,i+1,N).setAllTo(x); 
             else
-                for(int i=0;i<N;++i) row(i,i,N).setAllTo(x); 
+                for(ptrdiff_t i=0;i<N;++i) row(i,i,N).setAllTo(x); 
         else 
             if (isunit())
-                for(int j=0;j<N;++j) col(j,0,j).setAllTo(x); 
+                for(ptrdiff_t j=0;j<N;++j) col(j,0,j).setAllTo(x); 
             else
-                for(int j=0;j<N;++j) col(j,0,j+1).setAllTo(x); 
+                for(ptrdiff_t j=0;j<N;++j) col(j,0,j+1).setAllTo(x); 
         return *this; 
     }
 
@@ -831,49 +831,49 @@ namespace tmv {
     UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::addToAll(const T& x) 
     {
         TMVAssert(!isunit());
-        const int N = size();
+        const ptrdiff_t N = size();
 
         if (isrm())
-            for(int i=0;i<N;++i) row(i,i,N).addToAll(x); 
+            for(ptrdiff_t i=0;i<N;++i) row(i,i,N).addToAll(x); 
         else 
-            for(int j=0;j<N;++j) col(j,0,j+1).addToAll(x); 
+            for(ptrdiff_t j=0;j<N;++j) col(j,0,j+1).addToAll(x); 
         return *this; 
     }
 
     template <class T, int A>
     UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::clip(RT thresh) 
     {
-        const int N = size();
+        const ptrdiff_t N = size();
 
         if (isrm())
             if (isunit())
-                for(int i=0;i<N;++i) row(i,i+1,N).clip(thresh);
+                for(ptrdiff_t i=0;i<N;++i) row(i,i+1,N).clip(thresh);
             else
-                for(int i=0;i<N;++i) row(i,i,N).clip(thresh);
+                for(ptrdiff_t i=0;i<N;++i) row(i,i,N).clip(thresh);
         else 
             if (isunit())
-                for(int j=0;j<N;++j) col(j,0,j).clip(thresh);
+                for(ptrdiff_t j=0;j<N;++j) col(j,0,j).clip(thresh);
             else
-                for(int j=0;j<N;++j) col(j,0,j+1).clip(thresh);
+                for(ptrdiff_t j=0;j<N;++j) col(j,0,j+1).clip(thresh);
         return *this; 
     }
 
     template <class T, int A>
     UpperTriMatrixView<T,A>& UpperTriMatrixView<T,A>::conjugateSelf() 
     {
-        const int N = size();
+        const ptrdiff_t N = size();
 
         if (isComplex(T())) {
             if (isrm())
                 if (isunit())
-                    for(int i=0;i<N;++i) row(i,i+1,N).conjugateSelf();
+                    for(ptrdiff_t i=0;i<N;++i) row(i,i+1,N).conjugateSelf();
                 else
-                    for(int i=0;i<N;++i) row(i,i,N).conjugateSelf();
+                    for(ptrdiff_t i=0;i<N;++i) row(i,i,N).conjugateSelf();
             else
                 if (isunit())
-                    for(int j=0;j<N;++j) col(j,0,j).conjugateSelf();
+                    for(ptrdiff_t j=0;j<N;++j) col(j,0,j).conjugateSelf();
                 else
-                    for(int j=0;j<N;++j) col(j,0,j+1).conjugateSelf();
+                    for(ptrdiff_t j=0;j<N;++j) col(j,0,j+1).conjugateSelf();
         }
         return *this; 
     }
@@ -896,21 +896,21 @@ namespace tmv {
     {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.dt() == m2.dt());
-        const int N = m1.size();
+        const ptrdiff_t N = m1.size();
 
         if (m1.isrm() && m2.isrm())
             if (m1.isunit()) 
-                for(int i=0;i<N;++i) 
+                for(ptrdiff_t i=0;i<N;++i) 
                     Swap(m1.row(i,i+1,N), m2.row(i,i+1,N));
             else
-                for(int i=0;i<N;++i) 
+                for(ptrdiff_t i=0;i<N;++i) 
                     Swap(m1.row(i,i,N), m2.row(i,i,N));
         else
             if (m1.isunit()) 
-                for(int j=0;j<N;++j) 
+                for(ptrdiff_t j=0;j<N;++j) 
                     Swap(m1.col(j,0,j), m2.col(j,0,j));
             else
-                for(int j=0;j<N;++j) 
+                for(ptrdiff_t j=0;j<N;++j) 
                     Swap(m1.col(j,0,j+1), m2.col(j,0,j+1));
     }
 
@@ -924,15 +924,15 @@ namespace tmv {
         if (m1.size() != m2.size()) return false;
         else if (m1.isSameAs(m2)) return true;
         else {
-            const int N = m1.size();
-            for(int j=0;j<N;++j) {
+            const ptrdiff_t N = m1.size();
+            for(ptrdiff_t j=0;j<N;++j) {
                 if (m1.col(j,0,j) != m2.col(j,0,j)) return false;
             }
 
             if (m1.isunit() && !m2.isunit()) {
-                for(int i=0;i<N;++i) if (m2(i,i) != T2(1)) return false;
+                for(ptrdiff_t i=0;i<N;++i) if (m2(i,i) != T2(1)) return false;
             } else if (m2.isunit() && !m1.isunit()) {
-                for(int i=0;i<N;++i) if (m1(i,i) != T1(1)) return false;
+                for(ptrdiff_t i=0;i<N;++i) if (m1(i,i) != T1(1)) return false;
             } else if (!m1.isunit() && !m2.isunit()) {
                 if (m1.diag() != m2.diag()) return false;
             }
@@ -948,21 +948,21 @@ namespace tmv {
     template <class T>
     void GenUpperTriMatrix<T>::write(const TMV_Writer& writer) const
     {
-        const int N = size();
+        const ptrdiff_t N = size();
         writer.begin();
         writer.writeCode("U");
         writer.writeSize(N);
         writer.writeSimpleSize(N);
         writer.writeStart();
-        for(int i=0;i<N;++i) {
+        for(ptrdiff_t i=0;i<N;++i) {
             writer.writeLParen();
             if (!writer.isCompact()) {
-                for(int j=0;j<i;++j) {
+                for(ptrdiff_t j=0;j<i;++j) {
                     writer.writeValue(T(0));
                     writer.writeSpace();
                 }
             }
-            for(int j=i;j<N;++j) {
+            for(ptrdiff_t j=i;j<N;++j) {
                 if (j > i) writer.writeSpace();
                 writer.writeValue(cref(i,j));
             }
@@ -979,9 +979,9 @@ namespace tmv {
     {
     public :
         UpperTriMatrix<T> m;
-        int i,j;
+        ptrdiff_t i,j;
         std::string exp,got;
-        int s;
+        ptrdiff_t s;
         T v1;
         bool is, iseof, isbad;
 
@@ -998,25 +998,25 @@ namespace tmv {
 
         UpperTriMatrixReadError(
             const GenUpperTriMatrix<T>& _m,
-            std::istream& _is, int _s) throw() :
+            std::istream& _is, ptrdiff_t _s) throw() :
             ReadError("UpperTriMatrix"),
             m(_m), i(0), j(0), s(_s), v1(1),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         UpperTriMatrixReadError(
-            int _i, int _j, const GenUpperTriMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenUpperTriMatrix<T>& _m,
             std::istream& _is, std::string _e, std::string _g) throw() :
             ReadError("UpperTriMatrix"),
             m(_m), i(_i), j(_j), exp(_e), got(_g), 
             s(m.size()), v1(i==j?T(1):T(0)),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         UpperTriMatrixReadError(
-            int _i, int _j, const GenUpperTriMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenUpperTriMatrix<T>& _m,
             std::istream& _is) throw() :
             ReadError("UpperTriMatrix"),
             m(_m), i(_i), j(_j), s(m.size()), v1(i==j?T(1):T(0)),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         UpperTriMatrixReadError(
-            int _i, int _j, const GenUpperTriMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenUpperTriMatrix<T>& _m,
             std::istream& _is, T _v1) throw() :
             ReadError("UpperTriMatrix"),
             m(_m), i(_i), j(_j), s(m.size()), v1(_v1),
@@ -1055,14 +1055,14 @@ namespace tmv {
             if (m.size() > 0) {
                 os<<"The portion of the UpperTriMatrix which was successfully "
                     "read is:\n";
-                const int N = m.size();
-                for(int ii=0;ii<i;++ii) {
+                const ptrdiff_t N = m.size();
+                for(ptrdiff_t ii=0;ii<i;++ii) {
                     os<<"( ";
-                    for(int jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
+                    for(ptrdiff_t jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
                     os<<" )\n";
                 }
                 os<<"( ";
-                for(int jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
+                for(ptrdiff_t jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
                 os<<" )\n";
             }
         }
@@ -1072,7 +1072,7 @@ namespace tmv {
     template <class T> 
     static void FinishRead(const TMV_Reader& reader, UpperTriMatrixView<T> m)
     {
-        const int N = m.size();
+        const ptrdiff_t N = m.size();
         std::string exp, got;
         T temp;
         if (!reader.readStart(exp,got)) {
@@ -1083,7 +1083,7 @@ namespace tmv {
             throw UpperTriMatrixReadError<T>(0,0,m,reader.getis(),exp,got);
 #endif
         }
-        for(int i=0;i<N;++i) {
+        for(ptrdiff_t i=0;i<N;++i) {
             if (!reader.readLParen(exp,got)) {
 #ifdef NOTHROW
                 std::cerr<<"UpperTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -1093,7 +1093,7 @@ namespace tmv {
 #endif
             }
             if (!reader.isCompact()) {
-                for(int j=0;j<i;++j) {
+                for(ptrdiff_t j=0;j<i;++j) {
                     if (!reader.readValue(temp)) {
 #ifdef NOTHROW
                         std::cerr<<"UpperTriMatrix Read Error: reading value\n";
@@ -1120,7 +1120,7 @@ namespace tmv {
                     }
                 }
             }
-            for(int j=i;j<N;++j) {
+            for(ptrdiff_t j=i;j<N;++j) {
                 if (j>i && !reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                     std::cerr<<"UpperTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -1189,7 +1189,7 @@ namespace tmv {
             throw UpperTriMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int s=size();
+        ptrdiff_t s=size();
         if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"UpperTriMatrix Read Error: reading size\n";
@@ -1232,7 +1232,7 @@ namespace tmv {
             throw UpperTriMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int s=size();
+        ptrdiff_t s=size();
         if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"UpperTriMatrix Read Error: reading size\n";
@@ -1273,20 +1273,20 @@ namespace tmv {
     template <class T>
     void GenLowerTriMatrix<T>::write(const TMV_Writer& writer) const
     {
-        const int N = size();
+        const ptrdiff_t N = size();
         writer.begin();
         writer.writeCode("L");
         writer.writeSize(N);
         writer.writeSimpleSize(N);
         writer.writeStart();
-        for(int i=0;i<N;++i) {
+        for(ptrdiff_t i=0;i<N;++i) {
             writer.writeLParen();
-            for(int j=0;j<i+1;++j) {
+            for(ptrdiff_t j=0;j<i+1;++j) {
                 if (j > 0) writer.writeSpace();
                 writer.writeValue(cref(i,j));
             }
             if (!writer.isCompact()) {
-                for(int j=i+1;j<N;++j) {
+                for(ptrdiff_t j=i+1;j<N;++j) {
                     writer.writeSpace();
                     writer.writeValue(T(0));
                 }
@@ -1304,9 +1304,9 @@ namespace tmv {
     {
     public :
         LowerTriMatrix<T> m;
-        int i,j;
+        ptrdiff_t i,j;
         std::string exp,got;
-        int s;
+        ptrdiff_t s;
         T v1;
         bool is, iseof, isbad;
 
@@ -1322,7 +1322,7 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
         LowerTriMatrixReadError(
-            int _i, int _j, const GenLowerTriMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenLowerTriMatrix<T>& _m,
             std::istream& _is,
             const std::string& _e, const std::string& _g) throw() :
             ReadError("LowerTriMatrix"),
@@ -1331,18 +1331,18 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         LowerTriMatrixReadError(
             const GenLowerTriMatrix<T>& _m,
-            std::istream& _is, int _s) throw() :
+            std::istream& _is, ptrdiff_t _s) throw() :
             ReadError("LowerTriMatrix"),
             m(_m), i(0), j(0), s(_s), v1(1),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         LowerTriMatrixReadError(
-            int _i, int _j, const GenLowerTriMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenLowerTriMatrix<T>& _m,
             std::istream& _is) throw() :
             ReadError("LowerTriMatrix"),
             m(_m), i(_i), j(_j), s(m.size()), v1(i==j?T(1):T(0)),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         LowerTriMatrixReadError(
-            int _i, int _j, const GenLowerTriMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenLowerTriMatrix<T>& _m,
             std::istream& _is, T _v1) throw() :
             ReadError("LowerTriMatrix"),
             m(_m), i(_i), j(_j), s(m.size()), v1(_v1),
@@ -1381,14 +1381,14 @@ namespace tmv {
             if (m.size() > 0) {
                 os<<"The portion of the LowerTriMatrix which was successfully "
                     "read is:\n";
-                const int N = m.size();
-                for(int ii=0;ii<i;++ii) {
+                const ptrdiff_t N = m.size();
+                for(ptrdiff_t ii=0;ii<i;++ii) {
                     os<<"( ";
-                    for(int jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
+                    for(ptrdiff_t jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
                     os<<" )\n";
                 }
                 os<<"( ";
-                for(int jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
+                for(ptrdiff_t jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
                 os<<" )\n";
             }
         }
@@ -1398,7 +1398,7 @@ namespace tmv {
     template <class T> 
     static void FinishRead(const TMV_Reader& reader, LowerTriMatrixView<T> m)
     {
-        const int N = m.size();
+        const ptrdiff_t N = m.size();
         std::string exp, got;
         T temp;
         if (!reader.readStart(exp,got)) {
@@ -1409,7 +1409,7 @@ namespace tmv {
             throw LowerTriMatrixReadError<T>(0,0,m,reader.getis(),exp,got);
 #endif
         }
-        for(int i=0;i<N;++i) {
+        for(ptrdiff_t i=0;i<N;++i) {
             if (!reader.readLParen(exp,got)) {
 #ifdef NOTHROW
                 std::cerr<<"LowerTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -1418,7 +1418,7 @@ namespace tmv {
                 throw LowerTriMatrixReadError<T>(i,0,m,reader.getis(),exp,got);
 #endif
             }
-            for(int j=0;j<i+1;++j) {
+            for(ptrdiff_t j=0;j<i+1;++j) {
                 if (j>0 && !reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                     std::cerr<<"LowerTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -1449,7 +1449,7 @@ namespace tmv {
                 }
             }
             if (!reader.isCompact()) {
-                for(int j=i+1;j<N;++j) {
+                for(ptrdiff_t j=i+1;j<N;++j) {
                     if (!reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                         std::cerr<<"LowerTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -1515,7 +1515,7 @@ namespace tmv {
             throw LowerTriMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int s=size();
+        ptrdiff_t s=size();
         if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"LowerTriMatrix Read Error: reading size\n";
@@ -1558,7 +1558,7 @@ namespace tmv {
             throw LowerTriMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int s=size();
+        ptrdiff_t s=size();
         if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"LowerTriMatrix Read Error: reading size\n";

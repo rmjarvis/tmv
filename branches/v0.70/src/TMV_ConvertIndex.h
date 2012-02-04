@@ -38,23 +38,23 @@
 namespace tmv {
 
     template <class VI> 
-    inline void ConvertIndexToPermute(int n, const VI& newIndex, int* P)
+    inline void ConvertIndexToPermute(ptrdiff_t n, const VI& newIndex, ptrdiff_t* P)
     {
         // newIndex[i]=j means value at original j location needs to go to i.
         std::vector<int> currIndex(n);
         std::vector<int> origIndex(n);
-        for(int i=0;i<n;++i) {
+        for(ptrdiff_t i=0;i<n;++i) {
             currIndex[i] = i;
             origIndex[i] = i;
         } 
         // currIndex[i]=j means value at original i location is currently at j.
         // origIndex[j]=i means value at original i location is currently at j.
-        for(int i=0;i<n;++i) {
-            int ip = currIndex[newIndex[i]];
+        for(ptrdiff_t i=0;i<n;++i) {
+            ptrdiff_t ip = currIndex[newIndex[i]];
             P[i] = ip;
             if (i != ip) { 
-                int origi = origIndex[i];
-                int origip = origIndex[ip];
+                ptrdiff_t origi = origIndex[i];
+                ptrdiff_t origip = origIndex[ip];
                 currIndex[origi] = ip;
                 currIndex[origip] = i;
                 origIndex[i] = origip;

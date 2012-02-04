@@ -178,14 +178,14 @@ namespace tmv {
         // Constructors
         //
 
-        explicit Permutation(int n=0) :
+        explicit Permutation(ptrdiff_t n=0) :
             itsn(n), itsmem(n), itsp(itsmem.get()), isinv(false)
         {
             TMVAssert(n >= 0);
-            for(int i=0;i<itsn;++i) itsmem[i] = i; 
+            for(ptrdiff_t i=0;i<itsn;++i) itsmem[i] = i; 
         }
 
-        Permutation(int n, const int* p, bool _isinv=false) :
+        Permutation(ptrdiff_t n, const ptrdiff_t* p, bool _isinv=false) :
             itsn(n), itsp(p), isinv(_isinv)
         { TMVAssert(n >= 0); }
 
@@ -208,13 +208,13 @@ namespace tmv {
         // Access 
         //
 
-        inline int size() const { return itsn; }
-        inline int colsize() const { return itsn; }
-        inline int rowsize() const { return itsn; }
-        inline int nrows() const { return itsn; }
-        inline int ncols() const { return itsn; }
+        inline ptrdiff_t size() const { return itsn; }
+        inline ptrdiff_t colsize() const { return itsn; }
+        inline ptrdiff_t rowsize() const { return itsn; }
+        inline ptrdiff_t nrows() const { return itsn; }
+        inline ptrdiff_t ncols() const { return itsn; }
 
-        inline int cref(int i, int j) const
+        inline int cref(ptrdiff_t i, ptrdiff_t j) const
         {
             // Two options:
             // 1) P = P * I = I.permuteRows(p)
@@ -243,18 +243,18 @@ namespace tmv {
             // So we choose to use the forward loop option.
             
             if (isinv) TMV_SWAP(i,j);
-            int temp = j;
-            for(int k=0;k<=i && k<=temp;++k) if (itsp[k]!=k) {
+            ptrdiff_t temp = j;
+            for(ptrdiff_t k=0;k<=i && k<=temp;++k) if (itsp[k]!=k) {
                 if (temp == k) temp = itsp[k];
                 else if (temp == itsp[k]) temp = k;
             }
             return (temp == i) ? 1 : 0;
         }
 
-        inline int operator()(int i, int j) const
+        inline int operator()(ptrdiff_t i, ptrdiff_t j) const
         { return cref(i,j); }
 
-        inline const int* getValues() const { return itsp; }
+        inline const ptrdiff_t* getValues() const { return itsp; }
 
         inline bool isInverse() const { return isinv; }
 
@@ -271,7 +271,7 @@ namespace tmv {
         inline int det() const
         {
             int d = 1; 
-            for(int i=0;i<itsn;++i) if (itsp[i] != i) d = -d; 
+            for(ptrdiff_t i=0;i<itsn;++i) if (itsp[i] != i) d = -d; 
             return d;
         }
 
@@ -287,10 +287,10 @@ namespace tmv {
             // equal to its index.
             // Then apply the permutation and count how many are still in
             // the same position.
-            AlignedArray<int> temp(itsn);
+            AlignedArray<ptrdiff_t> temp(itsn);
             makeIndex(temp.get());
             int t = 0;
-            for(int k=0;k<itsn;++k) if (temp[k] == k) ++t;
+            for(ptrdiff_t k=0;k<itsn;++k) if (temp[k] == k) ++t;
             return t;
         }
 
@@ -348,7 +348,7 @@ namespace tmv {
         inline Permutation& setToIdentity()
         {
             allocateMem();
-            for(int i=0;i<itsn;++i) itsmem[i] = i;
+            for(ptrdiff_t i=0;i<itsn;++i) itsmem[i] = i;
             isinv = false;
             return *this;
         }
@@ -398,17 +398,17 @@ namespace tmv {
 
             if (writer.isCompact()) {
                 writer.writeLParen();
-                for(int i=0;i<N;++i) {
+                for(ptrdiff_t i=0;i<N;++i) {
                     if (i > 0) writer.writeSpace();
                     writer.writeValue(itsp[i]);
                 }
                 writer.writeRParen();
             } else {
-                AlignedArray<int> temp(N);
+                AlignedArray<ptrdiff_t> temp(N);
                 makeIndex(temp.get());
-                for(int i=0;i<N;++i) {
+                for(ptrdiff_t i=0;i<N;++i) {
                     writer.writeLParen();
-                    for(int j=0;j<N;++j) {
+                    for(ptrdiff_t j=0;j<N;++j) {
                         if (j>0) writer.writeSpace();
                         writer.writeValue(temp[i]==j ? 1 : 0);
                     }
@@ -484,7 +484,7 @@ namespace tmv {
 
         template <class T> 
         friend inline void LU_Decompose(
-            BandMatrixView<T> m, Permutation& p, int nhi);
+            BandMatrixView<T> m, Permutation& p, ptrdiff_t nhi);
 
         template <class T>
         friend inline void LDL_Decompose(
@@ -515,7 +515,7 @@ namespace tmv {
         // resize
         //
 
-        inline void resize(int n)
+        inline void resize(ptrdiff_t n)
         {
             TMVAssert(n >= 0);
             if (n > itsn) {
@@ -529,19 +529,19 @@ namespace tmv {
 
     protected:
 
-        int itsn;
-        AlignedArray<int> itsmem;
-        const int* itsp;
+        ptrdiff_t itsn;
+        AlignedArray<ptrdiff_t> itsmem;
+        const ptrdiff_t* itsp;
         bool isinv;
 
-        inline void makeIndex(int* index) const
+        inline void makeIndex(ptrdiff_t* index) const
         {
-            for(int k=0;k<itsn;++k) index[k] = k;
+            for(ptrdiff_t k=0;k<itsn;++k) index[k] = k;
             if (isinv) {
-                for(int k=itsn-1;k>=0;--k) 
+                for(ptrdiff_t k=itsn-1;k>=0;--k) 
                     if (itsp[k]!=k) TMV_SWAP(index[k],index[itsp[k]]);
             } else {
-                for(int k=0;k<itsn;++k) 
+                for(ptrdiff_t k=0;k<itsn;++k) 
                     if (itsp[k]!=k) TMV_SWAP(index[k],index[itsp[k]]);
             }
         }
@@ -562,7 +562,7 @@ namespace tmv {
         { 
             if (!itsmem.get()) {
                 itsmem.resize(itsn);
-                for(int i=0;i<itsn;++i) itsmem[i] = itsp[i];
+                for(ptrdiff_t i=0;i<itsn;++i) itsmem[i] = itsp[i];
                 itsp = itsmem.get();
             }
         }
@@ -571,12 +571,12 @@ namespace tmv {
         { 
             itsn = orig.itsn;
             itsmem.resize(itsn);
-            for(int i=0;i<itsn;++i) itsmem[i] = orig.itsp[i];
+            for(ptrdiff_t i=0;i<itsn;++i) itsmem[i] = orig.itsp[i];
             itsp = itsmem.get();
             isinv = orig.isinv;
         }
 
-        inline int* getMem() 
+        inline ptrdiff_t* getMem() 
         { 
             // Make sure P owns its memory:
             TMVAssert(itsn==0 || itsmem.get());
@@ -630,9 +630,9 @@ namespace tmv {
     {
     public :
         Permutation m;
-        int i;
+        ptrdiff_t i;
         std::string exp,got;
-        int n;
+        ptrdiff_t n;
         bool is, iseof, isbad;
 
         PermutationReadError(std::istream& _is) throw() :
@@ -646,18 +646,18 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
         PermutationReadError(
-            int _i, const Permutation& _m, std::istream& _is) throw() :
+            ptrdiff_t _i, const Permutation& _m, std::istream& _is) throw() :
             ReadError("Permutation."),
             m(_m), i(_i), n(m.size()),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         PermutationReadError(
-            int _i, const Permutation& _m, std::istream& _is,
+            ptrdiff_t _i, const Permutation& _m, std::istream& _is,
             const std::string& _e, const std::string& _g) throw() :
             ReadError("Permutation."),
             m(_m), i(_i), exp(_e), got(_g), n(m.size()),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         PermutationReadError(
-            const Permutation& _m, std::istream& _is, int _n) throw() :
+            const Permutation& _m, std::istream& _is, ptrdiff_t _n) throw() :
             ReadError("Permutation."),
             m(_m), i(0), n(_n), is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
@@ -688,7 +688,7 @@ namespace tmv {
                 os<<"The portion of the Permutation which was successfully "
                     "read is: \n";
                 os<<"( ";
-                for(int k=0;k<i;++k) os<<' '<<m.getValues()[k]<<' ';
+                for(ptrdiff_t k=0;k<i;++k) os<<' '<<m.getValues()[k]<<' ';
                 os<<" )\n";
             }
         }
@@ -698,7 +698,7 @@ namespace tmv {
     inline void Permutation::read(const TMV_Reader& reader)
     {
         std::string exp,got;
-        int temp;
+        ptrdiff_t temp;
         if (!reader.readCode("P",exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"Permutation Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -707,7 +707,7 @@ namespace tmv {
             throw PermutationReadError(reader.getis(),exp,got);
 #endif
         }
-        int n=size();
+        ptrdiff_t n=size();
         if (!reader.readSize(n,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"Permutation Read Error: reading size\n";
@@ -772,7 +772,7 @@ namespace tmv {
             throw PermutationReadError(0,*this,reader.getis(),exp,got);
 #endif
         }
-        for(int i=0;i<itsn;++i) {
+        for(ptrdiff_t i=0;i<itsn;++i) {
             if (i>0 && !reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                 std::cerr<<"Permutation ReadError: "<<got<<" != "<<exp<<std::endl;
@@ -882,7 +882,7 @@ namespace tmv {
 
     template <class T> 
     inline void LU_Decompose(
-        BandMatrixView<T> m, Permutation& p, int nhi)
+        BandMatrixView<T> m, Permutation& p, ptrdiff_t nhi)
     {
         p.resize(m.colsize());
         p.allocateMem();
@@ -925,20 +925,20 @@ namespace tmv {
         const Permutation& p1, const Permutation& p2)
     {
         TMVAssert(p1.size() == p2.size());
-        const int n = p1.itsn;
+        const ptrdiff_t n = p1.itsn;
         if (p1.isinv == p2.isinv) {
-            for(int i=0;i<n;++i) {
+            for(ptrdiff_t i=0;i<n;++i) {
                 if (p1.itsp[i] != p2.itsp[i]) return false;
             }
             return true;
         } else {
             // If not the same storage, then this requires a bit of work
             // to see if they effect the same permutation.
-            AlignedArray<int> temp1(n);
-            AlignedArray<int> temp2(n);
+            AlignedArray<ptrdiff_t> temp1(n);
+            AlignedArray<ptrdiff_t> temp2(n);
             p1.makeIndex(temp1.get());
             p2.makeIndex(temp2.get());
-            for(int i=0;i<n;++i) {
+            for(ptrdiff_t i=0;i<n;++i) {
                 if (temp1[i] != temp2[i]) return false;
             }
             return true;

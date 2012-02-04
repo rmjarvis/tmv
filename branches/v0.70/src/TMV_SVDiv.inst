@@ -3,10 +3,10 @@
 
 #define DefDiv(T,RT1,T1,T2)\
 template void SV_LDiv(const GenMatrix<T1 >& U,\
-    const GenDiagMatrix<RT1 >& S, const GenMatrix<T1 >& V, const int kmax, \
+    const GenDiagMatrix<RT1 >& S, const GenMatrix<T1 >& V, const ptrdiff_t kmax, \
     const GenMatrix<T2 >& m, MatrixView<T > x); \
 template void SV_RDiv(const GenMatrix<T1 >& U,\
-    const GenDiagMatrix<RT1 >& S, const GenMatrix<T1 >& V, const int kmax, \
+    const GenDiagMatrix<RT1 >& S, const GenMatrix<T1 >& V, const ptrdiff_t kmax, \
     const GenMatrix<T2 >& m, MatrixView<T > x); \
 
 DefDiv(T,T,T,T)

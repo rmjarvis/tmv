@@ -81,8 +81,8 @@ namespace tmv {
         TMVAssert(ha == A.isherm());
         TMVAssert(a1 == (alpha == T(1)));
 
-        const int nb = SYM_R2K_BLOCKSIZE;
-        int N = A.size();
+        const ptrdiff_t nb = SYM_R2K_BLOCKSIZE;
+        ptrdiff_t N = A.size();
 
         if (N <= SYM_R2K_BLOCKSIZE2) {
             if (N == 1) {
@@ -101,7 +101,7 @@ namespace tmv {
             } else {
                 if (x.isrm() && y.isrm()) {
                     if (A.isrm()) {
-                        for (int i=0;i<N;++i) {
+                        for (ptrdiff_t i=0;i<N;++i) {
                             if (add) 
                                 A.row(i,0,i+1) += alpha * x.row(i) * 
                                     (ha ?
@@ -119,7 +119,7 @@ namespace tmv {
                         }
                     }
                     else {
-                        for (int j=0;j<N;++j) {
+                        for (ptrdiff_t j=0;j<N;++j) {
                             if (add) 
                                 A.col(j,j,N) += alpha * x.rowRange(j,N) * 
                                     (ha ? y.row(j).conjugate() : y.row(j));
@@ -133,13 +133,13 @@ namespace tmv {
                         }
                     }
                 } else { // x,y not row major
-                    for (int i=0;i<N;++i) {
+                    for (ptrdiff_t i=0;i<N;++i) {
                         Rank2Update<add>(alpha,x.col(i),y.col(i),A);
                     }
                 }
             }
         } else { // Not <= BLOCKSIZE2, so do recurse...
-            int k = N/2;
+            ptrdiff_t k = N/2;
             if (k > nb) k = k/nb*nb;
 
             RecursiveRank2KUpdate<ha,a1,add>(
@@ -173,7 +173,7 @@ namespace tmv {
         TMVAssert(A.uplo() == Lower);
         TMVAssert(A.ct() == NonConj);
 
-        int N = A.size();
+        ptrdiff_t N = A.size();
         if (N == 1) {
             Tx x00 = x(0,0);
             Ty y00 = y(0,0);
@@ -194,7 +194,7 @@ namespace tmv {
                 else *A.ptr() = temp;
             }
         } else {
-            const int k = N/2;
+            const ptrdiff_t k = N/2;
             const ConstMatrixView<Tx> x00 = x.subMatrix(0,k,0,k);
             const ConstMatrixView<Tx> x10 = x.subMatrix(k,N,0,k);
             const ConstMatrixView<Tx> x01 = x.subMatrix(0,k,k,N);
@@ -258,10 +258,10 @@ namespace tmv {
             return NonBlasRank2KUpdate<add>(
                 TMV_CONJ(alpha),x.conjugate(),y.conjugate(),A.conjugate());
         else if (SameStorage(x,A) || SameStorage(y,A)) {
-            const int N = A.size();
+            const ptrdiff_t N = A.size();
             TMVAssert(x.colsize() == N);
             TMVAssert(y.colsize() == N);
-            const int K = x.rowsize();
+            const ptrdiff_t K = x.rowsize();
             TMVAssert(y.rowsize() == K);
 
             if (K >= N) {

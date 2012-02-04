@@ -178,8 +178,8 @@ namespace tmv {
         TMVAssert(C.rowsize() == A.size());
         TMVAssert(C.colsize() == A.size());
 
-        const int N = A.size();
-        const int k = TMV_MAX(A.nlo(),B.nlo());
+        const ptrdiff_t N = A.size();
+        const ptrdiff_t k = TMV_MAX(A.nlo(),B.nlo());
 
         if (N > 0) {
             if (SameStorage(A,C) || SameStorage(B,C)) {
@@ -287,8 +287,8 @@ namespace tmv {
         TMVAssert(C.rowsize() == A.size());
         TMVAssert(C.colsize() == A.size());
 
-        const int N = A.size();
-        const int k = A.nlo();
+        const ptrdiff_t N = A.size();
+        const ptrdiff_t k = A.nlo();
         if (N > 0) {
             AddMM(alpha,A,beta,ConstBandMatrixView<Tb>(B,k,k),
                   BandMatrixView<T>(C,k,k));

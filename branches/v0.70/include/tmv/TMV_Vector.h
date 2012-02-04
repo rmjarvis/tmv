@@ -373,12 +373,12 @@ namespace tmv {
             if (!isSameAs(rhs)) Copy(*this,rhs); 
         }
 
-        inline T operator()(int i) const 
+        inline T operator()(ptrdiff_t i) const 
         { 
             TMVAssert(i>=0 && i<size());
             return cref(i); 
         }
-        inline T operator[](int i) const 
+        inline T operator[](ptrdiff_t i) const 
         { return operator()(i); }
 
         inline const_iterator begin() const
@@ -409,24 +409,24 @@ namespace tmv {
         // subVector
         //
 
-        bool hasSubVector(int i1, int i2, int istep) const;
+        bool hasSubVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const;
 
-        inline const_view_type cSubVector(int i1, int i2) const
+        inline const_view_type cSubVector(ptrdiff_t i1, ptrdiff_t i2) const
         { return const_view_type(cptr()+i1*step(),i2-i1,step(),ct()); }
 
-        inline const_view_type subVector(int i1, int i2) const
+        inline const_view_type subVector(ptrdiff_t i1, ptrdiff_t i2) const
         {
             TMVAssert(hasSubVector(i1,i2,1));
             return cSubVector(i1,i2);
         }
 
-        inline const_view_type cSubVector(int i1, int i2, int istep) const
+        inline const_view_type cSubVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         {
             return const_view_type(
                 cptr()+i1*step(),(i2-i1)/istep,istep*step(),ct());
         }
 
-        inline const_view_type subVector(int i1, int i2, int istep) const
+        inline const_view_type subVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         {
             TMVAssert(hasSubVector(i1,i2,istep));
             return cSubVector(i1,i2,istep);
@@ -504,17 +504,18 @@ namespace tmv {
 
         RT sumAbs2Elements() const;
 
-        T minElement(int* iminout=0) const;
+        T minElement(ptrdiff_t* iminout=0) const;
 
-        T maxElement(int* imaxout=0) const;
+        T maxElement(ptrdiff_t* imaxout=0) const;
 
-        RT minAbsElement(int* iminout=0) const;
+        RT minAbsElement(ptrdiff_t* iminout=0) const;
 
-        RT maxAbsElement(int* imaxout=0) const;
+        RT maxAbsElement(ptrdiff_t* imaxout=0) const;
 
-        RT minAbs2Element(int* iminout=0) const;
+        RT minAbs2Element(ptrdiff_t* iminout=0) const;
 
-        RT maxAbs2Element(int* imaxout=0) const;
+        RT maxAbs2Element(ptrdiff_t* imaxout=0) const;
+
 
         //
         // I/O
@@ -523,12 +524,12 @@ namespace tmv {
         void write(const TMV_Writer& writer) const;
 
         virtual const T* cptr() const =0;
-        virtual int step() const =0;
+        virtual ptrdiff_t step() const =0;
         virtual ConjType ct() const =0;
         inline bool isconj() const 
         { return (isComplex(T()) && ct()==Conj); }
 
-        virtual T cref(int i) const;
+        virtual T cref(ptrdiff_t i) const;
 
     private:
 
@@ -554,7 +555,7 @@ namespace tmv {
             _ct(rhs.ct())
         { TMVAssert(Attrib<A>::vectorok);  }
         inline ConstVectorView(
-            const T* v, int size, int step, ConjType ct) : 
+            const T* v, ptrdiff_t size, ptrdiff_t step, ConjType ct) : 
             _v(v), _size(size), _step(step), _ct(ct)
         { TMVAssert(Attrib<A>::vectorok);  }
         virtual inline ~ConstVectorView() 
@@ -564,16 +565,16 @@ namespace tmv {
 #endif
         }
 
-        inline int size() const { return _size; }
+        inline ptrdiff_t size() const { return _size; }
         inline const T* cptr() const { return _v; }
-        inline int step() const { return _step; }
+        inline ptrdiff_t step() const { return _step; }
         inline ConjType ct() const { return _ct; }
 
     private:
 
         const T*const _v;
-        const int _size;
-        const int _step;
+        const ptrdiff_t _size;
+        const ptrdiff_t _step;
         const ConjType _ct;
 
         type& operator=(const ConstVectorView<T,A>&);
@@ -600,7 +601,7 @@ namespace tmv {
             ConstVectorView<T,CStyle>(rhs) {}
         inline ConstVectorView(const GenVector<T>& rhs) : 
             ConstVectorView<T,CStyle>(rhs) {}
-        inline ConstVectorView(const T* inv, int insize, int instep, 
+        inline ConstVectorView(const T* inv, ptrdiff_t insize, ptrdiff_t instep, 
                                ConjType inct) : 
             ConstVectorView<T,CStyle>(inv,insize,instep,inct) {}
         virtual inline ~ConstVectorView() {}
@@ -609,28 +610,28 @@ namespace tmv {
         // Access Functions
         //
 
-        inline T operator()(int i) const 
+        inline T operator()(ptrdiff_t i) const 
         { 
             TMVAssert(i>0 && i<=this->size());
             return GenVector<T>::cref(i-1); 
         }
-        inline T operator[](int i) const 
+        inline T operator[](ptrdiff_t i) const 
         { return operator()(i); }
 
         // 
         // SubVector
         //
 
-        bool hasSubVector(int i1, int i2, int istep) const;
+        bool hasSubVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const;
 
-        inline const_view_type subVector(int i1, int i2) const
+        inline const_view_type subVector(ptrdiff_t i1, ptrdiff_t i2) const
         {
             TMVAssert(hasSubVector(i1,i2,1));
             return GenVector<T>::cSubVector(i1-1,i2);
         }
 
         inline const_view_type subVector(
-            int i1, int i2, int istep) const
+            ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         {
             TMVAssert(hasSubVector(i1,i2,istep));
             return GenVector<T>::cSubVector(i1-1,i2-1+istep,istep);
@@ -664,42 +665,42 @@ namespace tmv {
         // Functions of Vector
         //
 
-        inline T minElement(int* iminout=0) const
+        inline T minElement(ptrdiff_t* iminout=0) const
         { 
             T temp = GenVector<T>::minElement(iminout);
             if (iminout) ++(*iminout);
             return temp;
         }
 
-        inline T maxElement(int* imaxout=0) const
+        inline T maxElement(ptrdiff_t* imaxout=0) const
         { 
             T temp = GenVector<T>::maxElement(imaxout);
             if (imaxout) ++(*imaxout);
             return temp;
         }
 
-        inline RT minAbsElement(int* iminout=0) const
+        inline RT minAbsElement(ptrdiff_t* iminout=0) const
         { 
             RT temp = GenVector<T>::minAbsElement(iminout);
             if (iminout) ++(*iminout);
             return temp;
         }
 
-        inline RT maxAbsElement(int* imaxout=0) const
+        inline RT maxAbsElement(ptrdiff_t* imaxout=0) const
         { 
             RT temp = GenVector<T>::maxAbsElement(imaxout);
             if (imaxout) ++(*imaxout);
             return temp;
         }
 
-        inline RT minAbs2Element(int* iminout=0) const
+        inline RT minAbs2Element(ptrdiff_t* iminout=0) const
         { 
             RT temp = GenVector<T>::minAbs2Element(iminout);
             if (iminout) ++(*iminout);
             return temp;
         }
 
-        inline RT maxAbs2Element(int* imaxout=0) const
+        inline RT maxAbs2Element(ptrdiff_t* imaxout=0) const
         { 
             RT temp = GenVector<T>::maxAbs2Element(imaxout);
             if (imaxout) ++(*imaxout);
@@ -751,7 +752,7 @@ namespace tmv {
         { TMVAssert(Attrib<A>::vectorok); }
 
         inline VectorView(
-            T* v, int size, int step, ConjType ct 
+            T* v, ptrdiff_t size, ptrdiff_t step, ConjType ct 
             TMV_PARAMFIRSTLAST(T) ) :
             _v(v), _size(size), _step(step),
             _ct(ct) TMV_DEFFIRSTLAST(_first,_last)
@@ -828,12 +829,12 @@ namespace tmv {
         // Access Functions
         //
 
-        inline reference operator()(int i) 
+        inline reference operator()(ptrdiff_t i) 
         { 
             TMVAssert(i>=0 && i<size());
             return ref(i); 
         }
-        inline reference operator[](int i) 
+        inline reference operator[](ptrdiff_t i) 
         { return operator()(i); }
 
         inline iterator begin() 
@@ -853,9 +854,9 @@ namespace tmv {
         { return MyListAssigner(begin(),size(),x); }
 
         // Repeat const versions
-        inline T operator()(int i) const
+        inline T operator()(ptrdiff_t i) const
         { return base::operator()(i); }
-        inline T operator[](int i) const
+        inline T operator[](ptrdiff_t i) const
         { return base::operator[](i); }
         inline const_iterator begin() const
         { return base::begin(); }
@@ -881,39 +882,39 @@ namespace tmv {
 
         type& conjugateSelf();
 
-        type& DoBasis(int i);
-        inline type& makeBasis(int i) 
+        type& DoBasis(ptrdiff_t i);
+        inline type& makeBasis(ptrdiff_t i) 
         { TMVAssert(i>=0 && i<size()); return DoBasis(i); }
 
-        type& DoSwap(int i1, int i2);
-        inline type& swap(int i1, int i2) 
+        type& DoSwap(ptrdiff_t i1, ptrdiff_t i2);
+        inline type& swap(ptrdiff_t i1, ptrdiff_t i2) 
         { 
             TMVAssert(i1>=0 && i1<size());
             TMVAssert(i2>=0 && i2<size());
             return DoSwap(i1,i2);
         }
 
-        type& DoPermute(const int* p, int i1, int i2);
-        inline type& permute(const int* p, int i1, int i2) 
+        type& DoPermute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2);
+        inline type& permute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
         {
             TMVAssert(i1>=0 && i1 <= i2 && i2 <= size());
             return DoPermute(p,i1,i2);
         }
-        inline type& permute(const int* p) 
+        inline type& permute(const ptrdiff_t* p) 
         { return DoPermute(p,0,size()); }
 
-        type& DoReversePermute(const int* p, int i1, int i2);
-        inline type& reversePermute(const int* p, int i1, int i2) 
+        type& DoReversePermute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2);
+        inline type& reversePermute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
         {
             TMVAssert(i1>=0 && i1 <= i2 && i2 <= size());
             return DoReversePermute(p,i1,i2);
         }
-        inline type& reversePermute(const int* p) 
+        inline type& reversePermute(const ptrdiff_t* p) 
         { return reversePermute(p,0,size()); }
 
         type& reverseSelf();
 
-        type& sort(int* p, ADType ad=Ascend, CompType comp=RealComp);
+        type& sort(ptrdiff_t* p, ADType ad=Ascend, CompType comp=RealComp);
 
         inline type& sort(
             Permutation& P, ADType ad=Ascend, CompType comp=RealComp);
@@ -926,26 +927,26 @@ namespace tmv {
         // SubVector
         //
 
-        inline view_type cSubVector(int i1, int i2) 
+        inline view_type cSubVector(ptrdiff_t i1, ptrdiff_t i2) 
         {
             return view_type(
                 ptr()+i1*step(),(i2-i1),step(),ct() TMV_FIRSTLAST );
         }
 
-        inline view_type subVector(int i1, int i2) 
+        inline view_type subVector(ptrdiff_t i1, ptrdiff_t i2) 
         {
             TMVAssert(GenVector<T>::hasSubVector(i1,i2,1));
             return cSubVector(i1,i2);
         }
 
-        inline view_type cSubVector(int i1, int i2, int istep) 
+        inline view_type cSubVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) 
         {
             return view_type(
                 ptr()+i1*step(),(i2-i1)/istep,istep*step(), ct() 
                 TMV_FIRSTLAST );
         }
 
-        inline view_type subVector(int i1, int i2, int istep) 
+        inline view_type subVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) 
         {
             TMVAssert(GenVector<T>::hasSubVector(i1,i2,istep));
             return cSubVector(i1,i2,istep);
@@ -1011,13 +1012,13 @@ namespace tmv {
             );
         }
 
-        inline const_view_type cSubVector(int i1, int i2) const
+        inline const_view_type cSubVector(ptrdiff_t i1, ptrdiff_t i2) const
         { return base::cSubVector(i1,i2); }
-        inline const_view_type subVector(int i1, int i2) const
+        inline const_view_type subVector(ptrdiff_t i1, ptrdiff_t i2) const
         { return base::subVector(i1,i2); }
-        inline const_view_type cSubVector(int i1, int i2, int istep) const
+        inline const_view_type cSubVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         { return base::cSubVector(i1,i2,istep); }
-        inline const_view_type subVector(int i1, int i2, int istep) const
+        inline const_view_type subVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         { return base::subVector(i1,i2,istep); }
         inline const_view_type reverse() const
         { return base::reverse(); }
@@ -1044,19 +1045,19 @@ namespace tmv {
         void read(const TMV_Reader& reader);
 
 
-        inline int size() const { return _size; }
+        inline ptrdiff_t size() const { return _size; }
         inline const T* cptr() const { return _v; }
         inline T* ptr() { return _v; }
-        inline int step() const { return _step; }
+        inline ptrdiff_t step() const { return _step; }
         inline ConjType ct() const { return _ct; }
 
-        reference ref(int i);
+        reference ref(ptrdiff_t i);
 
     private:
 
         T*const _v;
-        const int _size;
-        const int _step;
+        const ptrdiff_t _size;
+        const ptrdiff_t _step;
         const ConjType _ct;
 
 #ifdef TMVFLDEBUG
@@ -1101,7 +1102,7 @@ namespace tmv {
         inline VectorView(const c_type& rhs) : c_type(rhs)  {}
 
         inline VectorView(
-            T* inv, int insize, int instep, ConjType inct
+            T* inv, ptrdiff_t insize, ptrdiff_t instep, ConjType inct
             TMV_PARAMFIRSTLAST(T) ) :
             c_type(inv,insize,instep,inct TMV_FIRSTLAST1(_first,_last) ) {}
 
@@ -1143,24 +1144,24 @@ namespace tmv {
         // Access Functions
         //
 
-        inline reference operator()(int i) 
+        inline reference operator()(ptrdiff_t i) 
         { 
             TMVAssert(i>0 && i<=this->size());
             return c_type::ref(i-1); 
         }
-        inline reference operator[](int i) 
+        inline reference operator[](ptrdiff_t i) 
         { return operator()(i); }
 
         typedef ListAssigner<T,iterator> MyListAssigner;
         inline MyListAssigner operator<<(const T& x)
         { return c_type::operator<<(x); }
 
-        inline T operator()(int i) const
+        inline T operator()(ptrdiff_t i) const
         { 
             TMVAssert(i>0 && i<=this->size());
             return c_type::cref(i-1); 
         }
-        inline T operator[](int i) const
+        inline T operator[](ptrdiff_t i) const
         { return operator()(i); }
 
         //
@@ -1182,14 +1183,14 @@ namespace tmv {
         inline type& conjugateSelf() 
         { c_type::conjugateSelf(); return *this; }
 
-        inline type& makeBasis(int i) 
+        inline type& makeBasis(ptrdiff_t i) 
         {
             TMVAssert(i>0 && i<=this->size());
             c_type::makeBasis(i-1); 
             return *this; 
         }
 
-        inline type& swap(int i1, int i2) 
+        inline type& swap(ptrdiff_t i1, ptrdiff_t i2) 
         {
             TMVAssert(i1>0 && i1<=this->size());
             TMVAssert(i2>0 && i2<=this->size());
@@ -1197,30 +1198,30 @@ namespace tmv {
             return *this;
         }
 
-        inline type& permute(const int* p, int i1, int i2) 
+        inline type& permute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
         { 
             TMVAssert(i1>0 && i1 <= i2 && i2 <= this->size());
             c_type::permute(p,i1-1,i2); 
             return *this; 
         }
 
-        inline type& permute(const int* p) 
+        inline type& permute(const ptrdiff_t* p) 
         { c_type::permute(p); return *this; }
 
-        inline type& reversePermute(const int* p, int i1, int i2) 
+        inline type& reversePermute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
         { 
             TMVAssert(i1>0 && i1 <= i2 && i2 <= this->size());
             c_type::reversePermute(p,i1-1,i2); 
             return *this; 
         }
 
-        inline type& reversePermute(const int* p) 
+        inline type& reversePermute(const ptrdiff_t* p) 
         { c_type::reversePermute(p); return *this; }
 
         inline type& reverseSelf() 
         { c_type::reverseSelf(); return *this; }
 
-        inline type& sort(int* p, ADType ad=Ascend, CompType comp=RealComp) 
+        inline type& sort(ptrdiff_t* p, ADType ad=Ascend, CompType comp=RealComp) 
         { c_type::sort(p,ad,comp); return *this; }
 
         inline type& sort(
@@ -1234,19 +1235,19 @@ namespace tmv {
         // SubVector
         //
 
-        inline bool hasSubVector(int i1, int i2, int istep) const
+        inline bool hasSubVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         { 
             return ConstVectorView<T,FortranStyle>(*this).hasSubVector(
                 i1,i2,istep); 
         }
 
-        inline view_type subVector(int i1, int i2) 
+        inline view_type subVector(ptrdiff_t i1, ptrdiff_t i2) 
         {
             TMVAssert(hasSubVector(i1,i2,1));
             return c_type::cSubVector(i1-1,i2);
         }
 
-        inline view_type subVector(int i1, int i2, int istep) 
+        inline view_type subVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) 
         {
             TMVAssert(hasSubVector(i1,i2,istep));
             return c_type::cSubVector(i1-1,i2-1+istep,istep);
@@ -1276,13 +1277,13 @@ namespace tmv {
         inline real_type flatten() 
         { return c_type::flatten(); }
 
-        inline const_view_type subVector(int i1, int i2) const
+        inline const_view_type subVector(ptrdiff_t i1, ptrdiff_t i2) const
         {
             TMVAssert(hasSubVector(i1,i2,1));
             return c_type::cSubVector(i1-1,i2);
         }
 
-        inline const_view_type subVector(int i1, int i2, int istep) const
+        inline const_view_type subVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         {
             TMVAssert(hasSubVector(i1,i2,istep));
             return c_type::cSubVector(i1-1,i2-1+istep,istep);
@@ -1317,22 +1318,22 @@ namespace tmv {
         // Functions of Vector
         //
 
-        inline T minElement(int* iminout=0) const
+        inline T minElement(ptrdiff_t* iminout=0) const
         { return const_type(*this).minElement(iminout); }
 
-        inline T maxElement(int* imaxout=0) const
+        inline T maxElement(ptrdiff_t* imaxout=0) const
         { return const_type(*this).maxElement(imaxout); }
 
-        inline RT minAbsElement(int* iminout=0) const
+        inline RT minAbsElement(ptrdiff_t* iminout=0) const
         { return const_type(*this).minAbsElement(iminout); }
 
-        inline RT maxAbsElement(int* imaxout=0) const
+        inline RT maxAbsElement(ptrdiff_t* imaxout=0) const
         { return const_type(*this).maxAbsElement(imaxout); }
 
-        inline RT minAbs2Element(int* iminout=0) const
+        inline RT minAbs2Element(ptrdiff_t* iminout=0) const
         { return const_type(*this).minAbs2Element(iminout); }
 
-        inline RT maxAbs2Element(int* imaxout=0) const
+        inline RT maxAbs2Element(ptrdiff_t* imaxout=0) const
         { return const_type(*this).maxAbs2Element(imaxout); }
 
     }; // FortranStyle VectorView
@@ -1372,7 +1373,7 @@ namespace tmv {
 #define NEW_SIZE(n) \
         _v(n), _size(n) TMV_DEFFIRSTLAST(_v.get(),_v.get()+n)
 
-        explicit inline Vector(int n=0) : NEW_SIZE(n)
+        explicit inline Vector(ptrdiff_t n=0) : NEW_SIZE(n)
         {
             TMVAssert(Attrib<A>::vectorok);  
             TMVAssert(n >= 0);
@@ -1381,7 +1382,7 @@ namespace tmv {
 #endif
         }
 
-        inline Vector(int n, T val) : NEW_SIZE(n)
+        inline Vector(ptrdiff_t n, T val) : NEW_SIZE(n)
         {
             TMVAssert(Attrib<A>::vectorok);  
             TMVAssert(n >= 0);
@@ -1549,7 +1550,7 @@ namespace tmv {
         inline reverse_iterator rend()
         { return rbegin() + size(); }
 
-        inline T operator()(int i) const 
+        inline T operator()(ptrdiff_t i) const 
         { 
             if (A == CStyle) {
                 TMVAssert(i>=0 && i<size()); return cref(i); 
@@ -1557,10 +1558,10 @@ namespace tmv {
                 TMVAssert(i>0 && i<=size()); return cref(i-1); 
             }
         }
-        inline T operator[](int i) const 
+        inline T operator[](ptrdiff_t i) const 
         { return operator()(i); }
 
-        inline T& operator()(int i) 
+        inline T& operator()(ptrdiff_t i) 
         { 
             if (A == CStyle) {
                 TMVAssert(i>=0 && i<size()); return ref(i); 
@@ -1568,7 +1569,7 @@ namespace tmv {
                 TMVAssert(i>0 && i<=size()); return ref(i-1); 
             }
         }
-        inline T& operator[](int i)
+        inline T& operator[](ptrdiff_t i)
         { return operator()(i); }
 
         typedef ListAssigner<T,iterator> MyListAssigner;
@@ -1590,16 +1591,16 @@ namespace tmv {
 
         type& conjugateSelf();
 
-        type& DoBasis(int i);
-        inline type& makeBasis(int i)
+        type& DoBasis(ptrdiff_t i);
+        inline type& makeBasis(ptrdiff_t i)
         { 
             if (A == CStyle) TMVAssert(i>=0 && i<size());
             else TMVAssert(i>0 && i<=size());
             return DoBasis(i);
         }
 
-        type& DoSwap(int i1, int i2);
-        inline type& swap(int i1, int i2)
+        type& DoSwap(ptrdiff_t i1, ptrdiff_t i2);
+        inline type& swap(ptrdiff_t i1, ptrdiff_t i2)
         {
             if (A == CStyle) 
                 TMVAssert(i1>=0 && i1<size() && i2>=0 && i2<size());
@@ -1607,27 +1608,27 @@ namespace tmv {
             return DoSwap(i1,i2);
         }
 
-        inline type& permute(const int* p, int i1, int i2)
+        inline type& permute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2)
         {
             if (A==FortranStyle) TMVAssert(i1>0);
             TMVAssert(i1>=0 && i1 <= i2 && i2 <= size());
             view().permute(p,i1,i2); return *this; 
         }
-        inline type& permute(const int* p) 
+        inline type& permute(const ptrdiff_t* p) 
         { view().permute(p); return *this; }
-        inline type& reversePermute(const int* p, int i1, int i2)
+        inline type& reversePermute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2)
         {
             if (A==FortranStyle) TMVAssert(i1>0);
             TMVAssert(i1>=0 && i1 <= i2 && i2 <= size());
             view().reversePermute(p,i1,i2); return *this; 
         }
-        inline type& reversePermute(const int* p) 
+        inline type& reversePermute(const ptrdiff_t* p) 
         { view().reversePermute(p,0,size()); return *this; }
 
         inline type& reverseSelf()
         { view().reverseSelf(); return *this; }
 
-        inline type& sort(int* p, ADType ad=Ascend, CompType comp=RealComp) 
+        inline type& sort(ptrdiff_t* p, ADType ad=Ascend, CompType comp=RealComp) 
         { view().sort(p,ad,comp); return *this; }
 
         inline type& sort(
@@ -1642,43 +1643,43 @@ namespace tmv {
         // SubVector
         //
 
-        inline const_view_type cSubVector(int i1, int i2) const
+        inline const_view_type cSubVector(ptrdiff_t i1, ptrdiff_t i2) const
         { return const_view_type(cptr()+i1,i2-i1,1,NonConj); }
 
-        inline const_view_type subVector(int i1, int i2) const
+        inline const_view_type subVector(ptrdiff_t i1, ptrdiff_t i2) const
         {
             TMVAssert(view().hasSubVector(i1,i2,1));
             if (A==FortranStyle) --i1;
             return cSubVector(i1,i2);
         }
 
-        inline view_type cSubVector(int i1, int i2)
+        inline view_type cSubVector(ptrdiff_t i1, ptrdiff_t i2)
         { return view_type(ptr()+i1,i2-i1,1,NonConj TMV_FIRSTLAST ); }
 
-        inline view_type subVector(int i1, int i2)
+        inline view_type subVector(ptrdiff_t i1, ptrdiff_t i2)
         {
             TMVAssert(view().hasSubVector(i1,i2,1));
             if (A==FortranStyle) --i1;
             return cSubVector(i1,i2);
         }
 
-        inline const_view_type cSubVector(int i1, int i2, int istep) const
+        inline const_view_type cSubVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         { return const_view_type(cptr()+i1,(i2-i1)/istep,istep,NonConj); }
 
-        inline const_view_type subVector(int i1, int i2, int istep) const
+        inline const_view_type subVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         {
             TMVAssert(view().hasSubVector(i1,i2,istep));
             if (A==FortranStyle) { --i1; i2 += istep-1; }
             return cSubVector(i1,i2,istep);
         }
 
-        inline view_type cSubVector(int i1, int i2, int istep)
+        inline view_type cSubVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep)
         {
             return view_type(
                 ptr()+i1,(i2-i1)/istep,istep,NonConj TMV_FIRSTLAST );
         }
 
-        inline view_type subVector(int i1, int i2, int istep)
+        inline view_type subVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep)
         {
             TMVAssert(view().hasSubVector(i1,i2,istep));
             if (A==FortranStyle) { --i1; i2 += istep-1; }
@@ -1738,22 +1739,22 @@ namespace tmv {
         // Functions of Vector
         //
 
-        inline T minElement(int* iminout=0) const
+        inline T minElement(ptrdiff_t* iminout=0) const
         { return view().minElement(iminout); }
 
-        inline T maxElement(int* imaxout=0) const
+        inline T maxElement(ptrdiff_t* imaxout=0) const
         { return view().maxElement(imaxout); }
 
-        inline RT minAbsElement(int* iminout=0) const
+        inline RT minAbsElement(ptrdiff_t* iminout=0) const
         { return view().minAbsElement(iminout); }
 
-        inline RT maxAbsElement(int* imaxout=0) const
+        inline RT maxAbsElement(ptrdiff_t* imaxout=0) const
         { return view().maxAbsElement(imaxout); }
 
-        inline RT minAbs2Element(int* iminout=0) const
+        inline RT minAbs2Element(ptrdiff_t* iminout=0) const
         { return view().minAbs2Element(iminout); }
 
-        inline RT maxAbs2Element(int* imaxout=0) const
+        inline RT maxAbs2Element(ptrdiff_t* imaxout=0) const
         { return view().maxAbs2Element(imaxout); }
 
         // 
@@ -1762,20 +1763,20 @@ namespace tmv {
 
         void read(const TMV_Reader& reader);
 
-        inline int size() const { return _size; }
+        inline ptrdiff_t size() const { return _size; }
         inline const T* cptr() const { return _v.get(); }
         inline T* ptr() { return _v.get(); }
-        inline int step() const { return 1; }
+        inline ptrdiff_t step() const { return 1; }
         inline ConjType ct() const { return NonConj; }
         inline bool isconj() const { return false; }
 
-        inline T cref(int i) const
+        inline T cref(ptrdiff_t i) const
         { return _v.get()[i]; }
 
-        inline T& ref(int i)
+        inline T& ref(ptrdiff_t i)
         { return _v.get()[i]; }
 
-        inline void resize(int n)
+        inline void resize(ptrdiff_t n)
         {
             TMVAssert(n >= 0);
             _v.resize(n);
@@ -1792,7 +1793,7 @@ namespace tmv {
     private:
 
         AlignedArray<T> _v;
-        int _size;
+        ptrdiff_t _size;
 
 #ifdef TMVFLDEBUG
     public:
@@ -1822,9 +1823,9 @@ namespace tmv {
     //
 
     template <class T, int A> 
-    Vector<T,A> DoBasisVector(int n, int i);
+    Vector<T,A> DoBasisVector(ptrdiff_t n, ptrdiff_t i);
     template <class T, int A> 
-    inline Vector<T,A> BasisVector(int n, int i)
+    inline Vector<T,A> BasisVector(ptrdiff_t n, ptrdiff_t i)
     { 
         TMVAssert(Attrib<A>::vectorok);  
         TMVAssert(n > 0);
@@ -1833,25 +1834,25 @@ namespace tmv {
         return DoBasisVector<T,A>(n,i); 
     }
     template <class T> 
-    inline Vector<T,CStyle> BasisVector(int n, int i)
+    inline Vector<T,CStyle> BasisVector(ptrdiff_t n, ptrdiff_t i)
     {
         TMVAssert(n > 0);
         return DoBasisVector<T,CStyle>(n,i); 
     }
 
     template <class T> 
-    inline VectorView<T,CStyle> VectorViewOf(T* v, int size)
+    inline VectorView<T,CStyle> VectorViewOf(T* v, ptrdiff_t size)
     {
         return VectorView<T,CStyle>(
             v,size,1,NonConj TMV_FIRSTLAST1(v,v+size)); 
     }
 
     template <class T> 
-    inline ConstVectorView<T,CStyle> VectorViewOf(const T* v, int size)
+    inline ConstVectorView<T,CStyle> VectorViewOf(const T* v, ptrdiff_t size)
     { return ConstVectorView<T,CStyle>(v,size,1,NonConj); }
 
     template <class T> 
-    inline VectorView<T,CStyle> VectorViewOf(T* v, int size, int step)
+    inline VectorView<T,CStyle> VectorViewOf(T* v, ptrdiff_t size, ptrdiff_t step)
     {
         return VectorView<T,CStyle>(
             v,size,step,NonConj TMV_FIRSTLAST1(v,v+size)); 
@@ -1859,7 +1860,7 @@ namespace tmv {
 
     template <class T> 
     inline ConstVectorView<T,CStyle> VectorViewOf(
-        const T* v, int size, int step)
+        const T* v, ptrdiff_t size, ptrdiff_t step)
     { return ConstVectorView<T,CStyle>(v,size,step,NonConj); }
 
 
@@ -1867,7 +1868,7 @@ namespace tmv {
     // Copy Vectors
     //
 
-    inline bool shouldReverse(const int step1, const int step2)
+    inline bool shouldReverse(const ptrdiff_t step1, const ptrdiff_t step2)
     {
         return ( (step2 < 0 && (step1 != 1 || step2 == -1)) ||
                  (step1 == -1 && step2 != 1) );
@@ -1895,11 +1896,11 @@ namespace tmv {
 
         const T1* v1ptr = v1.cptr();
         T* v2ptr = v2.ptr();
-        const int step1 = v1.step();
-        const int step2 = v2.step();
+        const ptrdiff_t step1 = v1.step();
+        const ptrdiff_t step2 = v2.step();
 
         if (step1 == 1 && step2 == 1) {
-            for(int i=v2.size();i>0;--i,++v1ptr,++v2ptr) {
+            for(ptrdiff_t i=v2.size();i>0;--i,++v1ptr,++v2ptr) {
 #ifdef TMVFLDEBUG
                 TMVAssert(v2ptr >= v2._first);
                 TMVAssert(v2ptr < v2._last);
@@ -1907,7 +1908,7 @@ namespace tmv {
                 *v2ptr = *v1ptr;
             }
         } else {
-            for(int i=v2.size();i>0;--i,v1ptr+=step1,v2ptr+=step2) {
+            for(ptrdiff_t i=v2.size();i>0;--i,v1ptr+=step1,v2ptr+=step2) {
 #ifdef TMVFLDEBUG
                 TMVAssert(v2ptr >= v2._first);
                 TMVAssert(v2ptr < v2._last);

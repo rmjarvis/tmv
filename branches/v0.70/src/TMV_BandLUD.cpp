@@ -152,7 +152,7 @@ namespace tmv {
         //std::cout<<"LUx => "<<pimpl->LUx<<std::endl;
 
         if (pimpl->LUx.nlo() > 0) {
-            int Anhi = pimpl->istrans ? A.nlo() : A.nhi();
+            ptrdiff_t Anhi = pimpl->istrans ? A.nlo() : A.nhi();
             if (Anhi < pimpl->LUx.nhi())
                 pimpl->LUx.diagRange(Anhi+1,pimpl->LUx.nhi()+1).setZero();
             //std::cout<<"LUx => "<<pimpl->LUx<<std::endl;
@@ -211,7 +211,7 @@ namespace tmv {
         //std::cout<<"LUx => "<<pimpl->LUx<<std::endl;
 
         if (pimpl->LUx.nlo() > 0) {
-            int Anhi = pimpl->istrans ? A.nlo() : A.nhi();
+            ptrdiff_t Anhi = pimpl->istrans ? A.nlo() : A.nhi();
             if (Anhi < pimpl->LUx.nhi())
                 pimpl->LUx.diagRange(Anhi+1,pimpl->LUx.nhi()+1).setZero();
             //std::cout<<"LUx => "<<pimpl->LUx<<std::endl;
@@ -377,11 +377,11 @@ namespace tmv {
     }
 
     template <class T> 
-    int BandLUDiv<T>::colsize() const
+    ptrdiff_t BandLUDiv<T>::colsize() const
     { return pimpl->LUx.colsize(); }
 
     template <class T> 
-    int BandLUDiv<T>::rowsize() const
+    ptrdiff_t BandLUDiv<T>::rowsize() const
     { return pimpl->LUx.rowsize(); }
 
 #ifdef INST_INT

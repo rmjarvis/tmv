@@ -52,8 +52,8 @@ class QUOTXM : public MatrixComposite<T>
 {
 public:
     inline QUOTXM(const T _x, const GENMATRIX2<Tm>& _m) : x(_x), m(_m) {}
-    inline int colsize() const { return m.rowsize(); }
-    inline int rowsize() const { return m.colsize(); }
+    inline ptrdiff_t colsize() const { return m.rowsize(); }
+    inline ptrdiff_t rowsize() const { return m.colsize(); }
     inline StorageType stor() const { return ColMajor; }
     inline T getX() const { return x; }
     inline const GENMATRIX2<Tm>& getM() const { return m; }

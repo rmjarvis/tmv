@@ -231,11 +231,11 @@ namespace tmv {
     }
 
     template <class T>
-    int HermCHDiv<T>::colsize() const
+    ptrdiff_t HermCHDiv<T>::colsize() const
     { return pimpl->LLx.size(); }
 
     template <class T>
-    int HermCHDiv<T>::rowsize() const
+    ptrdiff_t HermCHDiv<T>::rowsize() const
     { return pimpl->LLx.size(); }
 
 #ifdef INST_INT

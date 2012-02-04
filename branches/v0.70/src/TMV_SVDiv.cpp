@@ -56,7 +56,7 @@ namespace tmv {
     template <class T, class Tm, class Tx> 
     void SV_LDiv(
         const GenMatrix<T>& U, const GenDiagMatrix<RT>& SS, 
-        const GenMatrix<T>& Vt, int kmax,
+        const GenMatrix<T>& Vt, ptrdiff_t kmax,
         const GenMatrix<Tm>& m, MatrixView<Tx> x)
     {
         // A x = m
@@ -101,7 +101,7 @@ namespace tmv {
     template <class T, class Tm, class Tx> 
     void SV_RDiv(
         const GenMatrix<T>& U, const GenDiagMatrix<RT>& SS, 
-        const GenMatrix<T>& Vt, int kmax,
+        const GenMatrix<T>& Vt, ptrdiff_t kmax,
         const GenMatrix<Tm>& m, MatrixView<Tx> x) 
     {
         // x A = m

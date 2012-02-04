@@ -71,7 +71,7 @@ namespace tmv {
             A.stepi() == B.stepi() && A.stepj() == B.stepj()) {
             B.linearView() += alpha*A.constLinearView();
         } else {
-            for(int i=-A.nlo();i<=A.nhi();++i) {
+            for(ptrdiff_t i=-A.nlo();i<=A.nhi();++i) {
                 B.diag(i) += alpha * A.diag(i);
             }
         }

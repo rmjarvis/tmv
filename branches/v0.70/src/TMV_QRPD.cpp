@@ -62,7 +62,7 @@ namespace tmv {
         mutable RT logdet;
         mutable T signdet;
         mutable bool donedet;
-        int N1;
+        ptrdiff_t N1;
     };
 
 #define APTR1 (inplace ? 0 : (A.colsize()*A.rowsize()))
@@ -99,7 +99,7 @@ namespace tmv {
         QRP_Decompose(
             pimpl->QRx,pimpl->beta.view(),pimpl->P,pimpl->signdet,
             QRP_IsStrict());
-        int sd = pimpl->QRx.diag().step();
+        ptrdiff_t sd = pimpl->QRx.diag().step();
         TMVAssert(pimpl->N1>0);
         const T* endofdiag = pimpl->QRx.diag().cptr() + (pimpl->N1-1)*sd;
         while(pimpl->N1>0 && *endofdiag==T(0)) { 
@@ -260,7 +260,7 @@ namespace tmv {
             *fout << "R = "<<getR()<<std::endl;
             *fout << "P = "<<getP()<<std::endl;
             *fout << "  or by interchanges: ";
-            for(int i=0;i<getP().size();i++)
+            for(ptrdiff_t i=0;i<getP().size();i++)
                 *fout<<(getP().getValues())[i]<<" ";
             *fout<<std::endl;
         }
@@ -278,11 +278,11 @@ namespace tmv {
     }
 
     template <class T> 
-    int QRPDiv<T>::colsize() const
+    ptrdiff_t QRPDiv<T>::colsize() const
     { return pimpl->istrans ? pimpl->QRx.rowsize() : pimpl->QRx.colsize(); }
 
     template <class T> 
-    int QRPDiv<T>::rowsize() const
+    ptrdiff_t QRPDiv<T>::rowsize() const
     { return pimpl->istrans ? pimpl->QRx.colsize() : pimpl->QRx.rowsize(); }
 
 #ifdef INST_INT

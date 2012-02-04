@@ -57,7 +57,7 @@ namespace tmv {
         Matrix<T,ColMajor> Vt;
         RT logdet;
         T signdet;
-        mutable int kmax;
+        mutable ptrdiff_t kmax;
     }; 
 
 #define M TMV_MAX(A.colsize(),A.rowsize())
@@ -217,7 +217,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void BandSVDiv<T>::top(int neigen, std::ostream* debugout) const
+    void BandSVDiv<T>::top(ptrdiff_t neigen, std::ostream* debugout) const
     {
         TMVAssert(neigen > 0);
         if (neigen < pimpl->S.size()) pimpl->kmax = neigen;
@@ -229,7 +229,7 @@ namespace tmv {
         }
     }
 
-    template <class T> int BandSVDiv<T>::getKMax() const 
+    template <class T> ptrdiff_t BandSVDiv<T>::getKMax() const 
     { return pimpl->kmax; }
 
     template <class T> ConstMatrixView<T> BandSVDiv<T>::getU() const
@@ -272,11 +272,11 @@ namespace tmv {
     }
 
     template <class T> 
-    int BandSVDiv<T>::colsize() const
+    ptrdiff_t BandSVDiv<T>::colsize() const
     { return pimpl->istrans ? pimpl->U.rowsize() : pimpl->U.colsize(); }
 
     template <class T> 
-    int BandSVDiv<T>::rowsize() const
+    ptrdiff_t BandSVDiv<T>::rowsize() const
     { return pimpl->istrans ? pimpl->U.colsize() : pimpl->U.rowsize(); }
 
 #undef RT

@@ -62,7 +62,7 @@ namespace tmv {
             else if (alpha == T(0)) A.setZero();
             else if (A.canLinearize()) A.linearView() *= alpha;
             else {
-                for(int i=-A.nlo();i<=A.nhi();++i) A.diag(i) *= alpha;
+                for(ptrdiff_t i=-A.nlo();i<=A.nhi();++i) A.diag(i) *= alpha;
             }
         }
 #ifdef XDEBUG
@@ -85,8 +85,8 @@ namespace tmv {
         TMVAssert(A.rowsize() == C.rowsize());
         TMVAssert(B.colsize() == C.colsize());
         TMVAssert(B.rowsize() == C.rowsize());
-        const int lo = TMV_MIN(A.nlo(),B.nlo());
-        const int hi = TMV_MIN(A.nhi(),B.nhi());
+        const ptrdiff_t lo = TMV_MIN(A.nlo(),B.nlo());
+        const ptrdiff_t hi = TMV_MIN(A.nhi(),B.nhi());
         if (A.nlo() == lo && A.nhi() == hi && 
             B.nlo() == lo && B.nhi() == hi &&
             C.nlo() == lo && C.nhi() == hi) {
@@ -97,7 +97,7 @@ namespace tmv {
                     alpha,A.constLinearView(),B.constLinearView(),
                     C.linearView());
             } else {
-                for(int i=-lo;i<=hi;++i) 
+                for(ptrdiff_t i=-lo;i<=hi;++i) 
                     ElemMultVV<add>(alpha,A.diag(i),B.diag(i),C.diag(i));
             }
         } else {

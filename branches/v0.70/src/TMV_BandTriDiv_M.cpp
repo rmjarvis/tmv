@@ -67,18 +67,18 @@ namespace tmv {
         TMVAssert(A.nlo() == 0);
         TMVAssert(B.ct() == NonConj);
 
-        int N = B.colsize();
+        ptrdiff_t N = B.colsize();
 
-        int k = A.nhi();
+        ptrdiff_t k = A.nhi();
         if (ua) {
-            for(int i=N-1; i>=0; --i) {
+            for(ptrdiff_t i=N-1; i>=0; --i) {
                 B.row(i) -= A.row(i,i+1,N) * B.rowRange(i+1,N);
                 if (k > 0) --k; else --N;
             }
         } else {
-            const int ds = A.diagstep();
+            const ptrdiff_t ds = A.diagstep();
             const Ta* Aii = A.cptr() + (N-1)*ds;
-            for(int i=N-1; i>=0; --i,Aii-=ds) {
+            for(ptrdiff_t i=N-1; i>=0; --i,Aii-=ds) {
                 B.row(i) -= A.row(i,i+1,N) * B.rowRange(i+1,N);
                 if (*Aii==Ta(0)) {
 #ifdef NOTHROW
@@ -107,18 +107,18 @@ namespace tmv {
         TMVAssert(A.colsize()>A.nhi());
         TMVAssert(B.ct() == NonConj);
 
-        int N = A.colsize();
+        ptrdiff_t N = A.colsize();
 
-        int i1 = N-1-A.nhi();
+        ptrdiff_t i1 = N-1-A.nhi();
         if (ua) {
-            for(int j=N-1; j>0; --j) {
+            for(ptrdiff_t j=N-1; j>0; --j) {
                 B.rowRange(i1,j) -= A.col(j,i1,j) ^ B.row(j);
                 if (i1 > 0) --i1;
             }
         } else {
-            const int ds = A.diagstep();
+            const ptrdiff_t ds = A.diagstep();
             const Ta* Ajj = A.cptr() + (N-1)*ds;
-            for(int j=N-1; j>=0; --j,Ajj-=ds) {
+            for(ptrdiff_t j=N-1; j>=0; --j,Ajj-=ds) {
                 if (*Ajj==Ta(0)) {
 #ifdef NOTHROW
                     std::cerr<<"Singular BandUpperTriMatrix found\n"; 
@@ -146,19 +146,19 @@ namespace tmv {
         TMVAssert(A.nhi() == 0);
         TMVAssert(B.ct() == NonConj);
 
-        const int N = B.colsize();
+        const ptrdiff_t N = B.colsize();
 
-        int i1=0;
-        int k=A.nlo();
+        ptrdiff_t i1=0;
+        ptrdiff_t k=A.nlo();
         if (ua) {
-            for(int i=0; i<N; ++i) {
+            for(ptrdiff_t i=0; i<N; ++i) {
                 B.row(i) -= A.row(i,i1,i) * B.rowRange(i1,i);
                 if (k>0) --k; else ++i1;
             }
         } else {
-            const int ds = A.diagstep();
+            const ptrdiff_t ds = A.diagstep();
             const Ta* Aii = A.cptr();
-            for(int i=0; i<N; ++i,Aii+=ds) {
+            for(ptrdiff_t i=0; i<N; ++i,Aii+=ds) {
                 B.row(i) -= A.row(i,i1,i) * B.rowRange(i1,i);
                 if (*Aii==Ta(0)) {
 #ifdef NOTHROW
@@ -186,18 +186,18 @@ namespace tmv {
         TMVAssert(A.nhi() == 0);
         TMVAssert(B.ct() == NonConj);
 
-        const int N = B.colsize();
+        const ptrdiff_t N = B.colsize();
 
-        int i2=A.nlo()+1;
+        ptrdiff_t i2=A.nlo()+1;
         if (ua) {
-            for(int j=0; j<N; ++j) {
+            for(ptrdiff_t j=0; j<N; ++j) {
                 B.rowRange(j+1,i2) -= A.col(j,j+1,i2) ^ B.row(j);
                 if (i2 < N) ++i2;
             }
         } else {
-            const int ds = A.diagstep();
+            const ptrdiff_t ds = A.diagstep();
             const Ta* Ajj = A.cptr();
-            for(int j=0; j<N; ++j,Ajj+=ds) {
+            for(ptrdiff_t j=0; j<N; ++j,Ajj+=ds) {
                 if (*Ajj==Ta(0)) {
 #ifdef NOTHROW
                     std::cerr<<"Singular BandLowerTriMatrix found\n"; 
@@ -236,8 +236,8 @@ namespace tmv {
                 else if (A.iscm()) ColLowerTriLDivEq<ua>(A,B);
                 else RowLowerTriLDivEq<ua>(A,B);
         else {
-            const int N = B.rowsize();
-            for(int j=0;j<N;++j) {
+            const ptrdiff_t N = B.rowsize();
+            for(ptrdiff_t j=0;j<N;++j) {
                 TriLDivEq(A,B.col(j),ua?UnitDiag:NonUnitDiag);
             }
         }

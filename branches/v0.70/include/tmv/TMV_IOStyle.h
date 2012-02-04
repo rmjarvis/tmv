@@ -205,11 +205,11 @@ namespace tmv {
         void writeCode(const std::string& code) const
         { if (s.usecode) os << code << s.space; }
 
-        void writeSize(int n) const
+        void writeSize(ptrdiff_t n) const
         { if (s.writesize) os << n << s.space; }
-        void writeSimpleSize(int n) const
+        void writeSimpleSize(ptrdiff_t n) const
         { if (s.simplesize) writeSize(n); }
-        void writeFullSize(int n) const
+        void writeFullSize(ptrdiff_t n) const
         { if (!s.simplesize) writeSize(n); }
 
         void writeStart() const
@@ -335,7 +335,7 @@ namespace tmv {
         bool readFinal(std::string& exp, std::string& got) const
         { return readStr(trim(s.final),exp,got); }
 
-        bool readSize(int& n, std::string& exp, std::string& got) const
+        bool readSize(ptrdiff_t& n, std::string& exp, std::string& got) const
         {
             if (s.writesize) {
                 skipWhiteSpace();
@@ -347,10 +347,10 @@ namespace tmv {
             }
         }
 
-        bool readSimpleSize(int& n, std::string& exp, std::string& got) const
+        bool readSimpleSize(ptrdiff_t& n, std::string& exp, std::string& got) const
         { return s.simplesize ? readSize(n,exp,got) : true; }
 
-        bool readFullSize(int& n, std::string& exp, std::string& got) const
+        bool readFullSize(ptrdiff_t& n, std::string& exp, std::string& got) const
         { return !s.simplesize ? readSize(n,exp,got) : true; }
 
         template <class T>

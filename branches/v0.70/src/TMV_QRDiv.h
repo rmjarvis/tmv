@@ -63,24 +63,24 @@ namespace tmv {
 
     template <class T, class T1, class T2> 
     void QR_LDiv(
-        const GenMatrix<T1>& QR, const GenVector<T1>& beta, const int* P,
-        const GenMatrix<T2>& m, MatrixView<T> x, int N1);
+        const GenMatrix<T1>& QR, const GenVector<T1>& beta, const ptrdiff_t* P,
+        const GenMatrix<T2>& m, MatrixView<T> x, ptrdiff_t N1);
     template <class T, class T1> 
     void QR_LDivEq(
-        const GenMatrix<T1>& QR, const GenVector<T1>& beta, const int* P,
-        MatrixView<T> m, int N1);
+        const GenMatrix<T1>& QR, const GenVector<T1>& beta, const ptrdiff_t* P,
+        MatrixView<T> m, ptrdiff_t N1);
     template <class T, class T1, class T2> 
     void QR_RDiv(
-        const GenMatrix<T1>& QR, const GenVector<T1>& beta, const int* P,
-        const GenMatrix<T2>& m, MatrixView<T> x, int N1);
+        const GenMatrix<T1>& QR, const GenVector<T1>& beta, const ptrdiff_t* P,
+        const GenMatrix<T2>& m, MatrixView<T> x, ptrdiff_t N1);
     template <class T, class T1> 
     void QR_RDivEq(
-        const GenMatrix<T1>& QR, const GenVector<T1>& beta, const int* P,
-        MatrixView<T> m, int N1);
+        const GenMatrix<T1>& QR, const GenVector<T1>& beta, const ptrdiff_t* P,
+        MatrixView<T> m, ptrdiff_t N1);
     template <class T, class T1> 
     void QR_Inverse(
-        const GenMatrix<T1>& QRx, const GenVector<T1>& beta, const int* P,
-        MatrixView<T> minv, int N1);
+        const GenMatrix<T1>& QRx, const GenVector<T1>& beta, const ptrdiff_t* P,
+        MatrixView<T> minv, ptrdiff_t N1);
 
     // Specialize disallowed complex combinations:
 #define CT std::complex<T>
@@ -98,48 +98,48 @@ namespace tmv {
 
     template <class T>
     inline void QR_LDiv(
-        const GenMatrix<CT>& , const GenVector<CT>& , const int* ,
-        const GenMatrix<CT>& , MatrixView<T> , int )
+        const GenMatrix<CT>& , const GenVector<CT>& , const ptrdiff_t* ,
+        const GenMatrix<CT>& , MatrixView<T> , ptrdiff_t )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void QR_LDiv(
-        const GenMatrix<CT>& , const GenVector<CT>& , const int* ,
-        const GenMatrix<T>& , MatrixView<T> , int )
+        const GenMatrix<CT>& , const GenVector<CT>& , const ptrdiff_t* ,
+        const GenMatrix<T>& , MatrixView<T> , ptrdiff_t )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void QR_LDiv(
-        const GenMatrix<T>& , const GenVector<T>& , const int* ,
-        const GenMatrix<CT>& , MatrixView<T> , int )
+        const GenMatrix<T>& , const GenVector<T>& , const ptrdiff_t* ,
+        const GenMatrix<CT>& , MatrixView<T> , ptrdiff_t )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void QR_LDivEq(
-        const GenMatrix<CT>& , const GenVector<CT>& , const int* ,
-        MatrixView<T> , int )
+        const GenMatrix<CT>& , const GenVector<CT>& , const ptrdiff_t* ,
+        MatrixView<T> , ptrdiff_t )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void QR_RDiv(
-        const GenMatrix<CT>& , const GenVector<CT>& , const int* ,
-        const GenMatrix<CT>& , MatrixView<T> , int )
+        const GenMatrix<CT>& , const GenVector<CT>& , const ptrdiff_t* ,
+        const GenMatrix<CT>& , MatrixView<T> , ptrdiff_t )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void QR_RDiv(
-        const GenMatrix<CT>& , const GenVector<CT>& , const int* ,
-        const GenMatrix<T>& , MatrixView<T> , int )
+        const GenMatrix<CT>& , const GenVector<CT>& , const ptrdiff_t* ,
+        const GenMatrix<T>& , MatrixView<T> , ptrdiff_t )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void QR_RDiv(
-        const GenMatrix<T>& , const GenVector<T>& , const int* ,
-        const GenMatrix<CT>& , MatrixView<T> , int )
+        const GenMatrix<T>& , const GenVector<T>& , const ptrdiff_t* ,
+        const GenMatrix<CT>& , MatrixView<T> , ptrdiff_t )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void QR_RDivEq(
-        const GenMatrix<CT>& , const GenVector<CT>& , const int* ,
-        MatrixView<T> , int )
+        const GenMatrix<CT>& , const GenVector<CT>& , const ptrdiff_t* ,
+        MatrixView<T> , ptrdiff_t )
     { TMVAssert(TMV_FALSE); }
     template <class T>
     inline void QR_Inverse(
-        const GenMatrix<CT>& , const GenVector<CT>& , const int* ,
-        MatrixView<T> , int )
+        const GenMatrix<CT>& , const GenVector<CT>& , const ptrdiff_t* ,
+        MatrixView<T> , ptrdiff_t )
     { TMVAssert(TMV_FALSE); }
 #undef CT
 

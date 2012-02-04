@@ -93,9 +93,10 @@ namespace tmv {
 #else
         for(int i=0;i<n;++i) ipiv[i] = i+1;
 #endif
-        LAPNAME(dgetrs) (LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
-                         LAPP(LUx.cptr()),LAPV(lda),
-                         LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
+        LAPNAME(dgetrs) (
+            LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
+            LAPP(LUx.cptr()),LAPV(lda),
+            LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
         LAP_Results("dgetrs");
     }
     template <> 
@@ -120,9 +121,10 @@ namespace tmv {
 #else
         for(int i=0;i<n;++i) ipiv[i] = i+1;
 #endif
-        LAPNAME(zgetrs) (LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
-                         LAPP(LUx.cptr()),LAPV(lda),
-                         LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
+        LAPNAME(zgetrs) (
+            LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
+            LAPP(LUx.cptr()),LAPV(lda),
+            LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
         LAP_Results("zgetrs");
     }
 #endif
@@ -148,9 +150,10 @@ namespace tmv {
 #else
         for(int i=0;i<n;++i) ipiv[i] = i+1;
 #endif
-        LAPNAME(sgetrs) (LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
-                         LAPP(LUx.cptr()),LAPV(lda),
-                         LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
+        LAPNAME(sgetrs) (
+            LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
+            LAPP(LUx.cptr()),LAPV(lda),
+            LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
         LAP_Results("sgetrs");
     }
     template <> 
@@ -175,9 +178,10 @@ namespace tmv {
 #else
         for(int i=0;i<n;++i) ipiv[i] = i+1;
 #endif
-        LAPNAME(cgetrs) (LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
-                         LAPP(LUx.cptr()),LAPV(lda),
-                         LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
+        LAPNAME(cgetrs) (
+            LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
+            LAPP(LUx.cptr()),LAPV(lda),
+            LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
         LAP_Results("cgetrs");
     }
 #endif // MKL
@@ -186,7 +190,7 @@ namespace tmv {
 
     template <class T, class T1> 
     void LU_LDivEq(
-        const GenMatrix<T1>& LUx, const int* P, MatrixView<T> m)
+        const GenMatrix<T1>& LUx, const ptrdiff_t* P, MatrixView<T> m)
     {
         TMVAssert(m.colsize() == LUx.rowsize()); 
         TMVAssert(LUx.rowsize() == LUx.colsize());
@@ -270,9 +274,10 @@ namespace tmv {
 #else
         for(int i=0;i<n;++i) ipiv[i] = i+1;
 #endif
-        LAPNAME(dgetrs) (LAPCM LAPCH_T,LAPV(n),LAPV(nrhs),
-                         LAPP(LUx.cptr()),LAPV(lda),
-                         LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
+        LAPNAME(dgetrs) (
+            LAPCM LAPCH_T,LAPV(n),LAPV(nrhs),
+            LAPP(LUx.cptr()),LAPV(lda),
+            LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
         LAP_Results("dgetrs");
     }
     template <> 
@@ -296,9 +301,10 @@ namespace tmv {
 #else
         for(int i=0;i<n;++i) ipiv[i] = i+1;
 #endif
-        LAPNAME(zgetrs) (LAPCM m.isconj()?LAPCH_CT:LAPCH_T,LAPV(n),LAPV(nrhs),
-                         LAPP(LUx.cptr()),LAPV(lda),
-                         LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
+        LAPNAME(zgetrs) (
+            LAPCM m.isconj()?LAPCH_CT:LAPCH_T,LAPV(n),LAPV(nrhs),
+            LAPP(LUx.cptr()),LAPV(lda),
+            LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
         LAP_Results("zgetrs");
     }
 #endif
@@ -325,9 +331,10 @@ namespace tmv {
 #else
         for(int i=0;i<n;++i) ipiv[i] = i+1;
 #endif
-        LAPNAME(sgetrs) (LAPCM LAPCH_T,LAPV(n),LAPV(nrhs),
-                         LAPP(LUx.cptr()),LAPV(lda),
-                         LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
+        LAPNAME(sgetrs) (
+            LAPCM LAPCH_T,LAPV(n),LAPV(nrhs),
+            LAPP(LUx.cptr()),LAPV(lda),
+            LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
         LAP_Results("sgetrs");
     }
     template <> 
@@ -351,9 +358,10 @@ namespace tmv {
 #else
         for(int i=0;i<n;++i) ipiv[i] = i+1;
 #endif
-        LAPNAME(cgetrs) (LAPCM m.isconj()?LAPCH_CT:LAPCH_T,LAPV(n),LAPV(nrhs),
-                         LAPP(LUx.cptr()),LAPV(lda),
-                         LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
+        LAPNAME(cgetrs) (
+            LAPCM m.isconj()?LAPCH_CT:LAPCH_T,LAPV(n),LAPV(nrhs),
+            LAPP(LUx.cptr()),LAPV(lda),
+            LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
         LAP_Results("cgetrs");
     }
 #endif // MKL
@@ -362,7 +370,7 @@ namespace tmv {
 
     template <class T, class T1> 
     void LU_RDivEq(
-        const GenMatrix<T1>& LUx, const int* P, MatrixView<T> m)
+        const GenMatrix<T1>& LUx, const ptrdiff_t* P, MatrixView<T> m)
         // Solve x P L U = m:
     {
 #ifdef XDEBUG

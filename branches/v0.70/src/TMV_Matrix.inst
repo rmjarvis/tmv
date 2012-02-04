@@ -3,13 +3,13 @@
 
 #define Def1(RT,T,Ref)\
   template bool GenMatrix<T >::hasSubMatrix( \
-      int i1, int i2, int j1, int j2, int istep, int jstep) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const; \
   template bool GenMatrix<T >::hasSubVector( \
-      int i, int j, int istep, int jstep, int s) const; \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t s) const; \
   template bool ConstMatrixView<T,FortranStyle>::hasSubMatrix( \
-      int i1, int i2, int j1, int j2, int istep, int jstep) const; \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const; \
   template bool ConstMatrixView<T,FortranStyle>::hasSubVector( \
-      int i, int j, int istep, int jstep, int s) const; \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t s) const; \
   template T GenMatrix<T >::sumElements() const; \
   template RT GenMatrix<T >::sumAbsElements() const; \
   template RT GenMatrix<T >::sumAbs2Elements() const; \
@@ -23,7 +23,7 @@
   template QuotXM<T,T > GenMatrix<T >::QInverse() const; \
   template void GenMatrix<T >::write(const TMV_Writer& writer) const; \
   template void MatrixView<T,CStyle>::read(const TMV_Reader& reader); \
-  template T GenMatrix<T >::cref(int i, int j) const; \
+  template T GenMatrix<T >::cref(ptrdiff_t i, ptrdiff_t j) const; \
   template void Swap(MatrixView<T > m1, MatrixView<T > m2); \
   template void DoCopySameType(const GenMatrix<T >& m1, MatrixView<T > m2);  \
   template MatrixView<T,CStyle>& MatrixView<T,CStyle>::clip(RT thresh); \
@@ -35,10 +35,10 @@
   template MatrixView<T,CStyle>& MatrixView<T,CStyle>::setToIdentity( \
       const T& x); \
   template MatrixView<T,CStyle>& MatrixView<T,CStyle>::permuteRows( \
-      const int* p, int i1, int i2); \
+      const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2); \
   template MatrixView<T,CStyle>& MatrixView<T,CStyle>::reversePermuteRows( \
-      const int* p, int i1, int i2); \
-  template Ref MatrixView<T,CStyle>::ref(int i, int j); \
+      const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2); \
+  template Ref MatrixView<T,CStyle>::ref(ptrdiff_t i, ptrdiff_t j); \
 
 Def1(T,T,T&)
 #ifdef INST_COMPLEX

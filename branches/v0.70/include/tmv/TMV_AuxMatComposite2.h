@@ -56,8 +56,8 @@ public:
         const T _x, const GENMATRIX1<T1>& _m1, const GenMatrix<T2>& _m2) :
         x(_x), m1(_m1), m2(_m2)
     { TMVAssert(m1.rowsize() == m2.colsize()) ; }
-    inline int colsize() const { return m1.colsize(); }
-    inline int rowsize() const { return m2.rowsize(); }
+    inline ptrdiff_t colsize() const { return m1.colsize(); }
+    inline ptrdiff_t rowsize() const { return m2.rowsize(); }
     inline T getX() const { return x; }
     inline const GENMATRIX1<T1>& getM1() const { return m1; }
     inline const GenMatrix<T2>& getM2() const { return m2; }

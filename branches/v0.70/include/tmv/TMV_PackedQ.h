@@ -47,8 +47,8 @@ namespace tmv {
             const tmv::GenMatrix<T>& _Q, const tmv::GenVector<T>& _beta) :
             Q(_Q), beta(_beta) 
         { TMVAssert(beta.size() == Q.rowsize()); }
-        inline int colsize() const { return Q.colsize(); }
-        inline int rowsize() const { return Q.rowsize(); }
+        inline ptrdiff_t colsize() const { return Q.colsize(); }
+        inline ptrdiff_t rowsize() const { return Q.rowsize(); }
         inline StorageType stor() const { return ColMajor; }
         inline const GenMatrix<T>& getQ() const { return Q; }
         inline const GenVector<T>& getBeta() const { return beta; }
@@ -154,8 +154,8 @@ namespace tmv {
     {
     public:
         inline ProdXpQ(const T _x, const PackedQ<Tm>& _q) : x(_x), q(_q) {}
-        inline int colsize() const { return q.colsize(); }
-        inline int rowsize() const { return q.rowsize(); }
+        inline ptrdiff_t colsize() const { return q.colsize(); }
+        inline ptrdiff_t rowsize() const { return q.rowsize(); }
         inline StorageType stor() const { return ColMajor; }
         inline T getX() const { return x; }
         inline const PackedQ<Tm>& getQ() const { return q; }
@@ -189,7 +189,7 @@ namespace tmv {
             const T _x, const PackedQ<T1>& _q, const GenVector<T2>& _v) :
             x(_x), q(_q), v(_v)
         { TMVAssert(v.size()==q.rowsize()); }
-        inline int size() const { return q.colsize(); }
+        inline ptrdiff_t size() const { return q.colsize(); }
         inline T getX() const { return x; }
         inline const PackedQ<T1>& getQ() const { return q; }
         inline const GenVector<T2>& getV() const { return v; }
@@ -218,7 +218,7 @@ namespace tmv {
             const T _x, const GenVector<T1>& _v, const PackedQ<T2>& _q) :
             x(_x), v(_v), q(_q)
         { TMVAssert(v.size()==q.colsize()); }
-        inline int size() const { return q.rowsize(); }
+        inline ptrdiff_t size() const { return q.rowsize(); }
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV() const { return v; }
         inline const PackedQ<T2>& getQ() const { return q; }
@@ -321,8 +321,8 @@ namespace tmv {
             const T _x, const PackedQ<T1>& _q, const GenMatrix<T2>& _m) :
             x(_x), q(_q), m(_m)
         { TMVAssert(m.colsize()==q.rowsize()); }
-        inline int colsize() const { return q.colsize(); }
-        inline int rowsize() const { return m.rowsize(); }
+        inline ptrdiff_t colsize() const { return q.colsize(); }
+        inline ptrdiff_t rowsize() const { return m.rowsize(); }
         inline StorageType stor() const { return ColMajor; }
         inline T getX() const { return x; }
         inline const PackedQ<T1>& getQ() const { return q; }
@@ -353,8 +353,8 @@ namespace tmv {
         inline ProdMpQ(const T _x, const GenMatrix<T1>& _m,
                        const PackedQ<T2>& _q) : x(_x), m(_m), q(_q)
         { TMVAssert(m.rowsize()==q.colsize()); }
-        inline int colsize() const { return m.colsize(); }
-        inline int rowsize() const { return q.rowsize(); }
+        inline ptrdiff_t colsize() const { return m.colsize(); }
+        inline ptrdiff_t rowsize() const { return q.rowsize(); }
         inline StorageType stor() const { return ColMajor; }
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM() const { return m; }
@@ -461,7 +461,7 @@ namespace tmv {
             const T _x, const GenVector<T1>& _v, const PackedQ<T2>& _q) :
             x(_x), v(_v), q(_q)
         { TMVAssert(v.size()==q.colsize()); }
-        inline int size() const { return q.rowsize(); }
+        inline ptrdiff_t size() const { return q.rowsize(); }
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV() const { return v; }
         inline const PackedQ<T2>& getQ() const { return q; }
@@ -492,7 +492,7 @@ namespace tmv {
             const T _x, const GenVector<T1>& _v, const PackedQ<T2>& _q) :
             x(_x), v(_v), q(_q)
         { TMVAssert(v.size()==q.colsize()); }
-        inline int size() const { return q.rowsize(); }
+        inline ptrdiff_t size() const { return q.rowsize(); }
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV() const { return v; }
         inline const PackedQ<T2>& getQ() const { return q; }
@@ -578,8 +578,8 @@ namespace tmv {
             const T _x, const GenMatrix<T1>& _m, const PackedQ<T2>& _q) :
             x(_x), m(_m), q(_q)
         { TMVAssert( m.colsize() == q.colsize() ); }
-        inline int colsize() const { return q.rowsize(); }
-        inline int rowsize() const { return m.rowsize(); }
+        inline ptrdiff_t colsize() const { return q.rowsize(); }
+        inline ptrdiff_t rowsize() const { return m.rowsize(); }
         inline StorageType stor() const { return ColMajor; }
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM() const { return m; }
@@ -612,8 +612,8 @@ namespace tmv {
             const T _x, const GenMatrix<T1>& _m, const PackedQ<T2>& _q) :
             x(_x), m(_m), q(_q)
         { TMVAssert( m.rowsize() == q.rowsize() ); }
-        inline int colsize() const { return m.colsize(); }
-        inline int rowsize() const { return q.colsize(); }
+        inline ptrdiff_t colsize() const { return m.colsize(); }
+        inline ptrdiff_t rowsize() const { return q.colsize(); }
         inline StorageType stor() const { return ColMajor; }
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM() const { return m; }

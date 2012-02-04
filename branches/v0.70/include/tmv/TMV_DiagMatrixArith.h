@@ -83,7 +83,7 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline ProdXD(T _x, const GenDiagMatrix<T2>& _m) : x(_x), m(_m) {}
-        inline int size() const { return m.size(); }
+        inline ptrdiff_t size() const { return m.size(); }
         inline T getX() const { return x; }
         inline const GenDiagMatrix<T2>& getM() const { return m; }
         inline void assignToD(DiagMatrixView<real_type> m0) const
@@ -154,7 +154,7 @@ namespace tmv {
 
         inline SumDX(T _x1, const GenDiagMatrix<T2>& _m, T _x2) :
             x1(_x1), m(_m), x2(_x2) {}
-        inline int size() const { return m.size(); }
+        inline ptrdiff_t size() const { return m.size(); }
         inline T getX1() const { return x1; }
         inline const GenDiagMatrix<T2>& getM() const { return m; }
         inline T getX2() const { return x2; }
@@ -234,7 +234,7 @@ namespace tmv {
             T _x2, const GenDiagMatrix<T2>& _m2) :
             x1(_x1),m1(_m1),x2(_x2),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
-        inline int size() const { return m1.size(); }
+        inline ptrdiff_t size() const { return m1.size(); }
         inline T getX1() const { return x1; }
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
@@ -357,7 +357,7 @@ namespace tmv {
             T _x, const GenDiagMatrix<T1>& _m1,
             const GenDiagMatrix<T2>& _m2) : x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size()); }
-        inline int size() const { return m1.size(); }
+        inline ptrdiff_t size() const { return m1.size(); }
         inline T getX() const { return x; }
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
@@ -482,7 +482,7 @@ namespace tmv {
             T _x, const GenDiagMatrix<T1>& _m1, const GenDiagMatrix<T2>& _m2) : 
             x(_x),m1(_m1),m2(_m2)
         { TMVAssert(m1.size() == m2.size()); }
-        inline int size() const { return m1.size(); }
+        inline ptrdiff_t size() const { return m1.size(); }
         inline T getX() const { return x; }
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }
@@ -573,7 +573,7 @@ namespace tmv {
 
         inline QuotXD(T _x, const GenDiagMatrix<Tm>& _m) :
             x(_x), m(_m) {}
-        inline int size() const { return m.size(); }
+        inline ptrdiff_t size() const { return m.size(); }
         inline T getX() const { return x; }
         inline const GenDiagMatrix<Tm>& getM() const { return m; }
         inline void assignToD(DiagMatrixView<real_type> m0) const
@@ -618,7 +618,7 @@ namespace tmv {
             const T _x, const GenDiagMatrix<T1>& _m1,
             const GenDiagMatrix<T2>& _m2) : x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.size() == m2.size() ); }
-        inline int size() const { return m1.size(); }
+        inline ptrdiff_t size() const { return m1.size(); }
         inline T getX() const { return x; }
         inline const GenDiagMatrix<T1>& getM1() const { return m1; }
         inline const GenDiagMatrix<T2>& getM2() const { return m2; }

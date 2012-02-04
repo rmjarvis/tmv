@@ -113,11 +113,11 @@ namespace tmv {
     // Decompose A (input as Q) into Q R P.
     template <class T> 
     void QRP_Decompose(
-        MatrixView<T> Q, UpperTriMatrixView<T> R, int* P, bool strict);
+        MatrixView<T> Q, UpperTriMatrixView<T> R, ptrdiff_t* P, bool strict);
 
     template <class T> 
     void QRP_Decompose(
-        MatrixView<T> QRx, VectorView<T> beta, int* P, T& signdet, bool strict);
+        MatrixView<T> QRx, VectorView<T> beta, ptrdiff_t* P, T& signdet, bool strict);
 
     class Permutation;
 
@@ -237,8 +237,8 @@ namespace tmv {
         struct QRPDiv_Impl;
         std::auto_ptr<QRPDiv_Impl> pimpl;
 
-        int colsize() const;
-        int rowsize() const;
+        ptrdiff_t colsize() const;
+        ptrdiff_t rowsize() const;
 
     private :
 

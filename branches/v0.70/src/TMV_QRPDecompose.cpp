@@ -78,7 +78,7 @@ namespace tmv
 
     template <class T> 
     static void NonBlockQRPDecompose(
-        MatrixView<T> A, VectorView<T> beta, int* P, T& det,
+        MatrixView<T> A, VectorView<T> beta, ptrdiff_t* P, T& det,
         bool strict)
     {
 #ifdef XDEBUG
@@ -101,8 +101,8 @@ namespace tmv
         TMVAssert(A.iscm() || A.isrm());
         TMVAssert(beta.ct() == NonConj);
         TMVAssert(beta.step()==1);
-        const int M = A.colsize();
-        const int N = A.rowsize();
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t N = A.rowsize();
         const int Astepj = A.stepj();
         const RT sqrteps = TMV_SQRT(TMV_Epsilon<T>());
 
@@ -114,7 +114,7 @@ namespace tmv
         //cout<<"maxAbs = "<<A.maxAbsElement()<<std::endl;
         //cout<<"maxAbs2 = "<<A.maxAbs2Element()<<std::endl;
         Vector<RT> colnormsq(N);
-        for(int j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
+        for(ptrdiff_t j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
         //cout<<"colnormsq = "<<colnormsq<<std::endl;
         RT anormsq = colnormsq.sumElements();
         RT thresh = RT(N) * TMV_SQR(TMV_Epsilon<T>()) * anormsq;
@@ -128,13 +128,13 @@ namespace tmv
         // recalculate the norms. 
 
         T* bj = beta.ptr();
-        for(int j=0;j<N;++j,++bj) {
+        for(ptrdiff_t j=0;j<N;++j,++bj) {
             //cout<<"j = "<<j<<std::endl;
             //cout<<"colnormsq = "<<colnormsq<<std::endl;
             //cout<<"recalcthresh = "<<recalcthresh<<std::endl;
             if (strict || j==0 || colnormsq(j) < recalcthresh) {
                 // Find the column with the largest norm
-                int jpiv;
+                ptrdiff_t jpiv;
                 RT maxnormsq = colnormsq.subVector(j,N).maxElement(&jpiv);
                 //cout<<"jpiv = "<<jpiv<<std::endl;
                 if (j==0) recalcthresh = 4*sqrteps * maxnormsq;
@@ -146,7 +146,7 @@ namespace tmv
                 // threshold, then recalc all colnormsq's, and redetermine max.
                 if (maxnormsq < recalcthresh) {
                     //cout<<"do recalc\n";
-                    for(int k=j;k<N;++k) 
+                    for(ptrdiff_t k=j;k<N;++k) 
                         colnormsq(k) = A.col(k,j,M).normSq(scale);
                     //cout<<"colnormsq => "<<colnormsq<<std::endl;
                     maxnormsq = colnormsq.subVector(j,N).maxElement(&jpiv);
@@ -198,7 +198,7 @@ namespace tmv
 
             // And update the norms for use with the next column
             const T* Ajk = A.row(j,j+1,N).cptr();
-            for(int k=j+1;k<N;++k,Ajk+=Astepj) {
+            for(ptrdiff_t k=j+1;k<N;++k,Ajk+=Astepj) {
                 colnormsq(k) -= TMV_NORM(*Ajk*scale);
             }
         }
@@ -221,7 +221,7 @@ namespace tmv
             cerr<<"-> "<<A<<endl;
             cerr<<"beta = "<<beta<<endl;
             cerr<<"P = ";
-            for(int i=0;i<A.rowsize();i++) cerr<<P[i]<<" ";
+            for(ptrdiff_t i=0;i<A.rowsize();i++) cerr<<P[i]<<" ";
             cerr<<endl;
             cerr<<"QRP = "<<AA<<endl;
             cerr<<"A0 = "<<A0<<endl;
@@ -234,7 +234,7 @@ namespace tmv
 
     template <class T> 
     static void StrictBlockQRPDecompose(
-        MatrixView<T> A, VectorView<T> beta, int* P, T& det)
+        MatrixView<T> A, VectorView<T> beta, ptrdiff_t* P, T& det)
     {
         // Decompose A (input as A) into A = Q R P
         // where Q is unitary, R is upper triangular, and P is a permutation
@@ -256,8 +256,8 @@ namespace tmv
         cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
 #endif
 
-        const int M = A.colsize();
-        const int N = A.rowsize();
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t N = A.rowsize();
         const int Astepj = A.stepj();
         const RT sqrteps = TMV_SQRT(TMV_Epsilon<T>());
 
@@ -266,21 +266,21 @@ namespace tmv
         //cout<<"maxAbs = "<<A.maxAbsElement()<<std::endl;
         //cout<<"maxAbs2 = "<<A.maxAbs2Element()<<std::endl;
         Vector<RT> colnormsq(N);
-        for(int j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
+        for(ptrdiff_t j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
         RT anormsq = colnormsq.sumElements();
         RT thresh = RT(N) * TMV_SQR(TMV_Epsilon<T>()) * anormsq;
         RT recalcthresh(0);
 
-        Matrix<T,RowMajor> ZYtA(TMV_MIN(QRP_BLOCKSIZE,M),N);
+        Matrix<T,RowMajor> ZYtA(TMV_MIN(QRP_BLOCKSIZE,int(M)),N);
         // We keep track of the product ZYtA(j1:M,j1:N) [ stored as ZYtA ]
         // since this is the product that we need.  We update this one 
         // row at a time.
 
         T* bj = beta.ptr();
-        for(int j1=0;j1<N;) {
-            int j2 = TMV_MIN(N,j1+QRP_BLOCKSIZE);
-            for(int j=j1,jmj1=0; j<j2; ) {
-                int jpiv;
+        for(ptrdiff_t j1=0;j1<N;) {
+            ptrdiff_t j2 = TMV_MIN(N,j1+QRP_BLOCKSIZE);
+            for(ptrdiff_t j=j1,jmj1=0; j<j2; ) {
+                ptrdiff_t jpiv;
                 RT maxnormsq = colnormsq.subVector(j,N).maxElement(&jpiv);
                 if (recalcthresh == RT(0)) {
                     recalcthresh = 4*sqrteps * maxnormsq;
@@ -293,7 +293,7 @@ namespace tmv
                     // indicate to end the block, which will update the columns.
                     // Then next time through, we can do the recalc as needed.
                     if (j==j1) {
-                        for(int k=j;k<N;++k) 
+                        for(ptrdiff_t k=j;k<N;++k) 
                             colnormsq(k) = A.col(k,j,M).normSq(scale);
                         recalcthresh = RT(0);
                     }
@@ -374,7 +374,7 @@ namespace tmv
 
                     // Update the colnormsq values
                     const T* Ajk = Arowj.cptr();
-                    for(int k=j+1;k<N;++k,Ajk+=Astepj) {
+                    for(ptrdiff_t k=j+1;k<N;++k,Ajk+=Astepj) {
                         colnormsq(k) -= TMV_NORM(*Ajk*scale);
                     }
                     ++j; ++jmj1; ++bj;
@@ -400,7 +400,7 @@ namespace tmv
             cerr<<"-> "<<A<<endl;
             cerr<<"beta = "<<beta<<endl;
             cerr<<"P = ";
-            for(int i=0;i<A.rowsize();i++) cerr<<P[i]<<" ";
+            for(ptrdiff_t i=0;i<A.rowsize();i++) cerr<<P[i]<<" ";
             cerr<<endl;
             cerr<<"QRP = "<<AA<<endl;
             cerr<<"A0 = "<<A0<<endl;
@@ -413,8 +413,8 @@ namespace tmv
 
     template <class T> 
     static void moveLowColsToEnd(
-        Vector<RT>& colnormsq, RT thresh, int j1, int& j2, int& j3,
-        MatrixView<T> A, int* P)
+        Vector<RT>& colnormsq, RT thresh, ptrdiff_t j1, ptrdiff_t& j2, ptrdiff_t& j3,
+        MatrixView<T> A, ptrdiff_t* P)
     {
         // Move all columns of A (whose norms are in colnormsq) with norms
         // less than thresh to the end.  j1 is the first column we need to 
@@ -430,7 +430,7 @@ namespace tmv
             return;
         }
         if (j3 < j2) j2 = j3+1;
-        for(int i=j1;i<j2;++i) {
+        for(ptrdiff_t i=j1;i<j2;++i) {
             if (colnormsq(i) < thresh) {
                 TMVAssert(j3 < A.rowsize());
                 A.swapCols(i,j3);
@@ -444,12 +444,12 @@ namespace tmv
     }
 
 #ifdef XDEBUG
-    static void checkIndex(const Vector<double>& index, const int* P, int j1)
+    static void checkIndex(const Vector<double>& index, const ptrdiff_t* P, ptrdiff_t j1)
     {
-        const int N = index.size();
+        const ptrdiff_t N = index.size();
         Vector<double> index2(N);
-        for(int k=0;k<N;k++) index2(k) = double(k);
-        for(int k=0;k<j1;k++) index2.swap(k,P[k]);
+        for(ptrdiff_t k=0;k<N;k++) index2(k) = double(k);
+        for(ptrdiff_t k=0;k<j1;k++) index2.swap(k,P[k]);
         if (Norm(index-index2) > 0.01) {
             cout<<"index = "<<index<<endl;
             cout<<"index2 = "<<index2<<endl;
@@ -461,7 +461,7 @@ namespace tmv
 
     template <class T> 
     static void LooseBlockQRPDecompose(
-        MatrixView<T> A, VectorView<T> beta, int* P, T& det)
+        MatrixView<T> A, VectorView<T> beta, ptrdiff_t* P, T& det)
     {
         // Decompose A (input as A) into A = Q R P
         // where Q is unitary, R is upper triangular, and P is a permutation
@@ -486,8 +486,8 @@ namespace tmv
         cout<<"Norm(beta) = "<<Norm(beta)<<std::endl;
 #endif
 
-        const int M = A.colsize();
-        const int N = A.rowsize();
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t N = A.rowsize();
         const int Astepj = A.stepj();
         const RT sqrteps = TMV_SQRT(TMV_Epsilon<T>());
 
@@ -496,7 +496,7 @@ namespace tmv
         //cout<<"maxAbs = "<<A.maxAbsElement()<<std::endl;
         //cout<<"maxAbs2 = "<<A.maxAbs2Element()<<std::endl;
         Vector<RT> colnormsq(N);
-        for(int j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
+        for(ptrdiff_t j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
         //cout<<"colnormsq = "<<colnormsq<<std::endl;
         RT anormsq = colnormsq.sumElements();
         RT thresh = RT(N) * TMV_SQR(TMV_Epsilon<T>()) * anormsq;
@@ -506,18 +506,18 @@ namespace tmv
 
 #ifdef XDEBUG
         Vector<double> index(N);
-        for(int k=0;k<N;k++) index(k) = double(k);
+        for(ptrdiff_t k=0;k<N;k++) index(k) = double(k);
 #endif
 
-        for (int j1 = 0; j1 < N;) {
+        for (ptrdiff_t j1 = 0; j1 < N;) {
             // Do as many columns as possible such that none have to have 
             // their norms recalculated.
-            int j3=N; // j3 will be how many we have done in this loop
+            ptrdiff_t j3=N; // j3 will be how many we have done in this loop
             // Invariant: all columns from j3..N are known to have norms that
             // need to be recalculated.
             // The recalculation is done at the end of the loop.
 
-            int jpiv0;
+            ptrdiff_t jpiv0;
             RT maxnormsq = colnormsq.subVector(j1,N).maxElement(&jpiv0);
             //cout<<"j1 = "<<j1<<", j3 = "<<j3<<", jpiv = "<<jpiv0<<std::endl;
             //cout<<"colnormsq = "<<colnormsq<<std::endl;
@@ -553,27 +553,27 @@ namespace tmv
             if (recalcthresh < thresh) recalcthresh = thresh;
 
             TMVAssert(j1<j3);
-            int j1x = j1+1; 
+            ptrdiff_t j1x = j1+1; 
             // The first pass through, we don't want to include j1 in the 
             // moveLowColsToEnd call.
 
             // Work on this one block at a time:
             while (j1 < j3) {
-                int j2 = TMV_MIN(j3,j1+QRP_BLOCKSIZE);
+                ptrdiff_t j2 = TMV_MIN(j3,j1+QRP_BLOCKSIZE);
                 //cout<<"j1,j2,j3 = "<<j1<<','<<j2<<','<<j3<<std::endl;
                 //cout<<"Norm(A) = "<<Norm(A)<<std::endl;
                 TMVAssert(j1 - j2 < 0);
                 moveLowColsToEnd(colnormsq,recalcthresh,j1x,j2,j3,A,P);
 #ifdef XDEBUG
-                for(int k=j1x;k<j2;k++) index.swap(k,P[k]);
+                for(ptrdiff_t k=j1x;k<j2;k++) index.swap(k,P[k]);
                 checkIndex(index,P,j2);
 #endif
 
-                int origj2 = j2;
+                ptrdiff_t origj2 = j2;
                 UpperTriMatrix<T,NonUnitDiag|ColMajor> Z(j2-j1);
 
                 T* bj = beta.ptr()+j1*beta.step();
-                for(int j=j1; j<j2; ++j, ++bj) {
+                for(ptrdiff_t j=j1; j<j2; ++j, ++bj) {
                     //cout<<"j = "<<j<<std::endl;
                     //cout<<"Norm(A) = "<<Norm(A)<<std::endl;
 
@@ -645,7 +645,7 @@ namespace tmv
                     // we don't need those values until we recalculate them 
                     // from scratch anyway.)
                     const T* Ajk = A.row(j,j+1,j2).cptr();
-                    for(int k=j+1;k<j2;++k,Ajk+=Astepj) 
+                    for(ptrdiff_t k=j+1;k<j2;++k,Ajk+=Astepj) 
                         colnormsq(k) -= TMV_NORM(*Ajk*scale);
                 }
 
@@ -667,10 +667,10 @@ namespace tmv
 
                     // Update the colnormsq values for the rest of the matrix:
                     if (M-j2 > j2-j1)
-                        for(int k=origj2;k<N;++k) colnormsq(k) -= 
+                        for(ptrdiff_t k=origj2;k<N;++k) colnormsq(k) -= 
                             A.col(k,j1,j2).normSq(scale);
                     else 
-                        for(int k=origj2;k<N;++k) colnormsq(k) = 
+                        for(ptrdiff_t k=origj2;k<N;++k) colnormsq(k) = 
                             A.col(k,j2,M).normSq(scale);
                 }
 
@@ -680,7 +680,7 @@ namespace tmv
 #endif
                     // Put the bad columns back where they started before this 
                     // loop:
-                    for(int j=j2; j<origj2; ++j) if (P[j] > j2) {
+                    for(ptrdiff_t j=j2; j<origj2; ++j) if (P[j] > j2) {
                         TMVAssert(P[j] < A.rowsize());
                         A.swapCols(j,P[j]);
                         colnormsq.swap(j,P[j]);
@@ -700,14 +700,14 @@ namespace tmv
             if (j3 < N) {
                 //cout<<"recalculate colnorms\n";
                 // Then need to recalculate some of the colnorms:
-                for(int k=j3;k<N;++k) 
+                for(ptrdiff_t k=j3;k<N;++k) 
                     colnormsq(k) = A.col(k,j3,M).normSq(scale);
                 //cout<<"colnormsq = "<<colnormsq<<std::endl;
             }
         }
 
         if (det != T(0)) {
-            for(int i=0;i<N;++i) if (P[i] != i) det = -det;
+            for(ptrdiff_t i=0;i<N;++i) if (P[i] != i) det = -det;
         }
 
 #ifdef XDEBUG
@@ -727,7 +727,7 @@ namespace tmv
                 cerr<<"-> "<<A<<endl;
                 cerr<<"beta = "<<beta<<endl;
                 cerr<<"P = ";
-                for(int i=0;i<N;i++) cerr<<P[i]<<" ";
+                for(ptrdiff_t i=0;i<N;i++) cerr<<P[i]<<" ";
                 cerr<<endl;
                 cerr<<"QRP = "<<AA<<endl;
                 cerr<<"A0 = "<<A0<<endl;
@@ -745,7 +745,7 @@ namespace tmv
     template <class T> 
     static inline void NonLapQRPDecompose(
         MatrixView<T> A,
-        VectorView<T> beta, int* P, T& det, bool strict)
+        VectorView<T> beta, ptrdiff_t* P, T& det, bool strict)
     {
         // Decompose A (input as A) into A = Q R P
         // where Q is unitary, R is upper triangular, and P is a permutation
@@ -772,12 +772,12 @@ namespace tmv
 #ifdef LAP
     template <class T> 
     static inline void LapQRPDecompose(
-        MatrixView<T> A, VectorView<T> beta, int* P, T& det)
+        MatrixView<T> A, VectorView<T> beta, ptrdiff_t* P, T& det)
     { NonLapQRPDecompose(A,beta,P,det,true); }
 #ifdef INST_DOUBLE
     template <> 
     void LapQRPDecompose(
-        MatrixView<double> A, VectorView<double> beta, int* P, double& det)
+        MatrixView<double> A, VectorView<double> beta, ptrdiff_t* P, double& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(A.rowsize() > 0);
@@ -1064,7 +1064,7 @@ namespace tmv
 
     template <class T> 
     void QRP_Decompose(
-        MatrixView<T> A, VectorView<T> beta, int* P, T& det, bool strict)
+        MatrixView<T> A, VectorView<T> beta, ptrdiff_t* P, T& det, bool strict)
     {
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(A.rowsize() == beta.size());
@@ -1083,7 +1083,7 @@ namespace tmv
 #ifdef LAP
         Matrix<T> A2(A);
         Vector<T> beta2(beta);
-        AlignedArray<int> P2(beta.size());
+        AlignedArray<ptrdiff_t> P2(beta.size());
         T det2=det;
         NonLapQRPDecompose(A2.view(),beta2.view(),P2.get(),det2,strict);
         cout<<"NonLap QRP = "<<A2<<std::endl;
@@ -1120,7 +1120,7 @@ namespace tmv
             cerr<<"-> "<<A<<endl;
             cerr<<"beta = "<<beta<<endl;
             cerr<<"P = ";
-            for(int i=0;i<A.rowsize();i++) cerr<<P[i]<<" ";
+            for(ptrdiff_t i=0;i<A.rowsize();i++) cerr<<P[i]<<" ";
             cerr<<endl;
             cerr<<"QRP = "<<AA<<endl;
             cerr<<"A0 = "<<A0<<endl;
@@ -1143,7 +1143,7 @@ namespace tmv
 
     template <class T> 
     void QRP_Decompose(
-        MatrixView<T> Q, UpperTriMatrixView<T> R, int* P, bool strict)
+        MatrixView<T> Q, UpperTriMatrixView<T> R, ptrdiff_t* P, bool strict)
     {
         // Decompose A (input as Q) into A = Q R P
         // where Q is unitary, R is upper triangular, and P is a permutation
@@ -1183,7 +1183,7 @@ namespace tmv
 
         Vector<T> beta(A.rowsize());
         T d(0);
-        AlignedArray<int> P(A.rowsize());
+        AlignedArray<ptrdiff_t> P(A.rowsize());
         if (A.isconj())
             QRP_Decompose(A.conjugate(),beta.view(),P.get(),d,strict);
         else

@@ -88,7 +88,7 @@ namespace tmv {
         TMVAssert(C.ct() == NonConj);
         TMVAssert(!C.isrm() || C.iscm());
         TMVAssert(!C.isconj());
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
 
         if (SameStorage(A,C) && A.stepj() == C.stepi()) {
             // Then need temporary (see below)
@@ -104,8 +104,8 @@ namespace tmv {
             if (A.isunit()) {
                 if (B.isunit()) {
                     T* Cjj = C.ptr();
-                    const int Cds = C.stepi()+C.stepj();
-                    for(int j=0,jj=1;j<N;++j,++jj,Cjj+=Cds) {
+                    const ptrdiff_t Cds = C.stepi()+C.stepj();
+                    for(ptrdiff_t j=0,jj=1;j<N;++j,++jj,Cjj+=Cds) {
                         // C.col(j) (+=) alpha*A*B.col(j)
                         //
                         // C.col(j) (+=) alpha*A.colRange(j,N)*B.col(j,j,N)
@@ -142,9 +142,9 @@ namespace tmv {
                 } else {
                     const Tb* Bjj = B.cptr();
                     T* Cjj = C.ptr();
-                    const int Bds = B.stepi()+B.stepj();
-                    const int Cds = C.stepi()+C.stepj();
-                    for(int j=0,jj=1;j<N;++j,++jj,Bjj+=Bds,Cjj+=Cds) {
+                    const ptrdiff_t Bds = B.stepi()+B.stepj();
+                    const ptrdiff_t Cds = C.stepi()+C.stepj();
+                    for(ptrdiff_t j=0,jj=1;j<N;++j,++jj,Bjj+=Bds,Cjj+=Cds) {
                         T xBjj = B.isconj()?TMV_CONJ(*Bjj):*Bjj;
                         T newcjj = A.row(j,jj,N)*B.col(j,jj,N) + xBjj;
                         if (alpha != T(1)) {
@@ -173,9 +173,9 @@ namespace tmv {
                 if (B.isunit()) {
                     const Ta* Ajj = A.cptr();
                     T* Cjj = C.ptr();
-                    const int Ads = A.stepi()+A.stepj();
-                    const int Cds = C.stepi()+C.stepj();
-                    for(int j=0,jj=1;j<N;++j,++jj,Ajj+=Ads,Cjj+=Cds) {
+                    const ptrdiff_t Ads = A.stepi()+A.stepj();
+                    const ptrdiff_t Cds = C.stepi()+C.stepj();
+                    for(ptrdiff_t j=0,jj=1;j<N;++j,++jj,Ajj+=Ads,Cjj+=Cds) {
                         Ta xAjj = A.isconj() ? TMV_CONJ(*Ajj) : *Ajj;
                         T newcjj = A.row(j,jj,N)*B.col(j,jj,N) + xAjj;
                         if (alpha != T(1)) newcjj *= alpha;
@@ -199,9 +199,9 @@ namespace tmv {
                 } else {
                     const Tb* Bjj = B.cptr();
                     T* Cjj = C.ptr();
-                    const int Bds = B.stepi()+B.stepj();
-                    const int Cds = C.stepi()+C.stepj();
-                    for(int j=0,jj=1;j<N;++j,++jj,Bjj+=Bds,Cjj+=Cds) {
+                    const ptrdiff_t Bds = B.stepi()+B.stepj();
+                    const ptrdiff_t Cds = C.stepi()+C.stepj();
+                    for(ptrdiff_t j=0,jj=1;j<N;++j,++jj,Bjj+=Bds,Cjj+=Cds) {
                         T xBjj = B.isconj() ? TMV_CONJ(*Bjj) : *Bjj;
                         T newcjj = A.row(j,j,N)*B.col(j,j,N);
                         if (alpha != T(1)) {
@@ -270,8 +270,8 @@ namespace tmv {
         TMVAssert(alpha != T(0));
         TMVAssert(C.ct() == NonConj);
 
-        const int nb = TRI_MM_BLOCKSIZE;
-        const int N = A.size();
+        const ptrdiff_t nb = TRI_MM_BLOCKSIZE;
+        const ptrdiff_t N = A.size();
 
         if (N <= TRI_MM_BLOCKSIZE2) {
             if (C.isrm()) 
@@ -279,7 +279,7 @@ namespace tmv {
                     alpha,B.transpose(),A.transpose(),C.transpose());
             else ColMultMM<add>(alpha,A,B,C);
         } else {
-            int k = N/2;
+            ptrdiff_t k = N/2;
             if (k > nb) k = k/nb*nb;
 
             // [ A00 A01 ] [ B00  0  ] = [ A00 B00 + A01 B10   A01 B11 ]
@@ -356,7 +356,7 @@ namespace tmv {
         TMVAssert(A.size() == C.colsize());
         TMVAssert(B.size() == C.rowsize());
 
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
 
         if (N==0) return;
         else if (alpha == T(0)) {
@@ -424,9 +424,9 @@ namespace tmv {
         } else {
             if (A.isunit()) {
                 if (B.isunit()) {
-                    const int Cds = C.stepi()+C.stepj();
+                    const ptrdiff_t Cds = C.stepi()+C.stepj();
                     T* Cjj = C.ptr()+(C.rowsize()-1)*Cds;
-                    for(int jj=C.rowsize(),j=jj-1;jj>0;--jj,--j, Cjj-=Cds) {
+                    for(ptrdiff_t jj=C.rowsize(),j=jj-1;jj>0;--jj,--j, Cjj-=Cds) {
                         // jj = j+1
                         // C.col(j) (+=) alpha*A*B.col(j)
                         //
@@ -442,7 +442,7 @@ namespace tmv {
                         //   B can be stored in either triangle
                         //   A cannot be stored in C's upper triangle
 
-                        const int N = A.size();
+                        const ptrdiff_t N = A.size();
 
                         T newcjj = A.row(j,0,j)*B.col(j,0,j) + T(1);
                         if (alpha != T(1)) newcjj *= alpha;
@@ -464,16 +464,16 @@ namespace tmv {
                         *Cjj = newcjj;
                     }
                 } else {
-                    const int Nm1 = C.rowsize()-1;
-                    const int Bds = B.stepi()+B.stepj();
-                    const int Cds = C.stepi()+C.stepj();
+                    const ptrdiff_t Nm1 = C.rowsize()-1;
+                    const ptrdiff_t Bds = B.stepi()+B.stepj();
+                    const ptrdiff_t Cds = C.stepi()+C.stepj();
                     const Tb* Bjj = B.cptr()+Nm1*Bds;
                     T* Cjj = C.ptr()+Nm1*Cds;
-                    for(int jj=C.rowsize(),j=jj-1;
+                    for(ptrdiff_t jj=C.rowsize(),j=jj-1;
                         jj>0;
                         --jj,--j, Bjj-=Bds,Cjj-=Cds) {
 
-                        const int N = A.size();
+                        const ptrdiff_t N = A.size();
 
                         T xBjj = B.isconj()?TMV_CONJ(*Bjj):*Bjj;
                         T newcjj = A.row(j,0,j)*B.col(j,0,j) + xBjj;
@@ -501,16 +501,16 @@ namespace tmv {
                 }
             } else {
                 if (B.isunit()) {
-                    const int Nm1 = C.rowsize()-1;
-                    const int Ads = A.stepi()+A.stepj();
-                    const int Cds = C.stepi()+C.stepj();
+                    const ptrdiff_t Nm1 = C.rowsize()-1;
+                    const ptrdiff_t Ads = A.stepi()+A.stepj();
+                    const ptrdiff_t Cds = C.stepi()+C.stepj();
                     const Ta* Ajj = A.cptr()+Nm1*Ads;
                     T* Cjj = C.ptr()+Nm1*Cds;
-                    for(int jj=C.rowsize(),j=jj-1;
+                    for(ptrdiff_t jj=C.rowsize(),j=jj-1;
                         jj>0;
                         --jj,--j, Ajj-=Ads,Cjj-=Cds) {
 
-                        const int N = A.size();
+                        const ptrdiff_t N = A.size();
 
                         T newcjj = 
                             A.row(j,0,j)*B.col(j,0,j) +
@@ -534,16 +534,16 @@ namespace tmv {
                         *Cjj = newcjj;
                     }
                 } else {
-                    const int Nm1 = C.rowsize()-1;
-                    const int Bds = B.stepi()+B.stepj();
-                    const int Cds = C.stepi()+C.stepj();
+                    const ptrdiff_t Nm1 = C.rowsize()-1;
+                    const ptrdiff_t Bds = B.stepi()+B.stepj();
+                    const ptrdiff_t Cds = C.stepi()+C.stepj();
                     const Tb* Bjj = B.cptr()+Nm1*Bds;
                     T* Cjj = C.ptr()+Nm1*Cds;
-                    for(int jj=C.rowsize(),j=jj-1;
+                    for(ptrdiff_t jj=C.rowsize(),j=jj-1;
                         jj>0;
                         --jj,--j, Bjj-=Bds,Cjj-=Cds) {
 
-                        const int N = A.size();
+                        const ptrdiff_t N = A.size();
 
                         T xBjj = B.isconj() ? TMV_CONJ(*Bjj):*Bjj;
                         T newcjj = A.row(j,0,j+1)*B.col(j,0,j+1);
@@ -612,8 +612,8 @@ namespace tmv {
         TMVAssert(alpha != T(0));
         TMVAssert(C.ct() == NonConj);
 
-        const int nb = TRI_MM_BLOCKSIZE;
-        const int N = A.size();
+        const ptrdiff_t nb = TRI_MM_BLOCKSIZE;
+        const ptrdiff_t N = A.size();
 
         if (N <= TRI_MM_BLOCKSIZE2) {
             if (C.isrm()) 
@@ -622,7 +622,7 @@ namespace tmv {
             else
                 ColMultMM<add>(alpha,A,B,C);
         } else {
-            int k = N/2;
+            ptrdiff_t k = N/2;
             if (k > nb) k = k/nb*nb;
 
             // [ A00  0  ] [ B00 B01 ] = [ A00 B00       A00 B01      ]
@@ -699,7 +699,7 @@ namespace tmv {
         TMVAssert(A.size() == C.colsize());
         TMVAssert(B.size() == C.rowsize());
 
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
 
         if (N==0) return;
         else if (alpha == T(0)) {

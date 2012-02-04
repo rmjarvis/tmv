@@ -76,7 +76,7 @@ namespace tmv {
         TMVAssert(uu == L.isunit());
         TMVAssert(a1 == (alpha == T(1)));
 
-        int N = A.size();
+        ptrdiff_t N = A.size();
 
         if (N == 1) {
 #ifdef TMVFLDEBUG
@@ -98,8 +98,8 @@ namespace tmv {
             // [ A21 A22 ]          [ L21 L22 ] [  0   L22t ]
             //              = alpha [ L11 L11t        L11 L21t      ]
             //                      [ L21 L11t  L21 L21t + L22 L22t ]
-            int k = N/2;
-            const int nb = SYM_RK_BLOCKSIZE;
+            ptrdiff_t k = N/2;
+            const ptrdiff_t nb = SYM_RK_BLOCKSIZE;
             if (k > nb) k = k/nb*nb;
             SymMatrixView<T> A11 = A.subSymMatrix(0,k);
             SymMatrixView<T> A22 = A.subSymMatrix(k,N);
@@ -142,7 +142,7 @@ namespace tmv {
         TMVAssert(A.uplo() == Lower);
         TMVAssert(ha == A.isherm());
 
-        int N = A.size();
+        ptrdiff_t N = A.size();
 
         if (N == 1) {
 #ifdef TMVFLDEBUG
@@ -155,8 +155,8 @@ namespace tmv {
             // [ A21 A22 ]   [ L21 L22 ] [  0   L22t ]
             //             = [ L11 L11t        L11 L21t      ]
             //               [ L21 L11t  L21 L21t + L22 L22t ]
-            int k = N/2;
-            const int nb = SYM_RK_BLOCKSIZE;
+            ptrdiff_t k = N/2;
+            const ptrdiff_t nb = SYM_RK_BLOCKSIZE;
             if (k > nb) k = k/nb*nb;
             SymMatrixView<T> A11 = A.subSymMatrix(0,k);
             SymMatrixView<T> A22 = A.subSymMatrix(k,N);

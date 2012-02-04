@@ -1,7 +1,7 @@
 #define CT std::complex<T>
 
 #define DefInv(T,T1) \
-template void LU_Inverse(const GenMatrix<T1 >& LUx, const int* P, \
+template void LU_Inverse(const GenMatrix<T1 >& LUx, const ptrdiff_t* P, \
     MatrixView<T > minv); \
 
 DefInv(T,T)

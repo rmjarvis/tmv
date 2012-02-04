@@ -74,13 +74,13 @@ namespace tmv {
         TMVAssert(A.rowsize() > 0);
         TMVAssert(alpha != T(0));
 
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
 
         if (add) C += alpha * A.lowerBand() * B;
         else C = alpha * A.lowerBand() * B;
 
         if (N > 1 && A.nlo() > 0) {
-            const int M = C.rowsize();
+            const ptrdiff_t M = C.rowsize();
             if (B.nlo() > 0) {
                 C.subBandMatrix(
                     0,N-1,0,M,

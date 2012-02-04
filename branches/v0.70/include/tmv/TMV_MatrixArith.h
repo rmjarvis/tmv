@@ -78,8 +78,8 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline ProdXM(const T _x, const GenMatrix<Tm>& _m) : x(_x), m(_m) {}
-        inline int colsize() const { return m.colsize(); }
-        inline int rowsize() const { return m.rowsize(); }
+        inline ptrdiff_t colsize() const { return m.colsize(); }
+        inline ptrdiff_t rowsize() const { return m.rowsize(); }
         inline T getX() const { return x; }
         inline const GenMatrix<Tm>& getM() const { return m; }
         inline void assignToM(MatrixView<real_type> m0) const
@@ -153,8 +153,8 @@ namespace tmv {
         inline SumMX(T _x1, const GenMatrix<Tm>& _m, T _x2) :
             x1(_x1), m(_m), x2(_x2)
         { TMVAssert(m.isSquare()); }
-        inline int colsize() const { return m.colsize(); }
-        inline int rowsize() const { return m.rowsize(); }
+        inline ptrdiff_t colsize() const { return m.colsize(); }
+        inline ptrdiff_t rowsize() const { return m.rowsize(); }
         inline T getX1() const { return x1; }
         inline const GenMatrix<Tm>& getM() const { return m; }
         inline T getX2() const { return x2; }
@@ -266,8 +266,8 @@ namespace tmv {
         inline OProdVV(
             const T _x, const GenVector<T1>& _v1, const GenVector<T2>& _v2) :
             x(_x), v1(_v1), v2(_v2) {}
-        inline int colsize() const { return v1.size(); }
-        inline int rowsize() const { return v2.size(); }
+        inline ptrdiff_t colsize() const { return v1.size(); }
+        inline ptrdiff_t rowsize() const { return v2.size(); }
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV1() const { return v1; }
         inline const GenVector<T2>& getV2() const { return v2; }
@@ -369,8 +369,8 @@ namespace tmv {
             TMVAssert(m1.colsize() == m2.colsize());
             TMVAssert(m1.rowsize() == m2.rowsize()); 
         }
-        inline int colsize() const { return m1.colsize(); }
-        inline int rowsize() const { return m1.rowsize(); }
+        inline ptrdiff_t colsize() const { return m1.colsize(); }
+        inline ptrdiff_t rowsize() const { return m1.rowsize(); }
         inline T getX1() const { return x1; }
         inline const GenMatrix<T1>& getM1() const { return m1; }
         inline T getX2() const { return x2; }
@@ -503,7 +503,7 @@ namespace tmv {
             const T _x, const GenMatrix<T1>& _m, const GenVector<T2>& _v) :
             x(_x), m(_m), v(_v)
         { TMVAssert(v.size()==m.rowsize()); }
-        inline int size() const { return m.colsize(); }
+        inline ptrdiff_t size() const { return m.colsize(); }
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM() const { return m; }
         inline const GenVector<T2>& getV() const { return v; }
@@ -571,7 +571,7 @@ namespace tmv {
             const T _x, const GenVector<T1>& _v, const GenMatrix<T2>& _m) :
             x(_x), v(_v), m(_m)
         { TMVAssert(v.size()==m.colsize()); }
-        inline int size() const { return m.rowsize(); }
+        inline ptrdiff_t size() const { return m.rowsize(); }
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV() const { return v; }
         inline const GenMatrix<T2>& getM() const { return m; }
@@ -718,8 +718,8 @@ namespace tmv {
             const T _x, const GenMatrix<T1>& _m1, const GenMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert(m1.rowsize() == m2.colsize()) ; }
-        inline int colsize() const { return m1.colsize(); }
-        inline int rowsize() const { return m2.rowsize(); }
+        inline ptrdiff_t colsize() const { return m1.colsize(); }
+        inline ptrdiff_t rowsize() const { return m2.rowsize(); }
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM1() const { return m1; }
         inline const GenMatrix<T2>& getM2() const { return m2; }
@@ -855,8 +855,8 @@ namespace tmv {
             TMVAssert(m1.colsize() == m2.colsize());
             TMVAssert(m1.rowsize() == m2.rowsize()); 
         }
-        inline int colsize() const { return m1.colsize(); }
-        inline int rowsize() const { return m1.rowsize(); }
+        inline ptrdiff_t colsize() const { return m1.colsize(); }
+        inline ptrdiff_t rowsize() const { return m1.rowsize(); }
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM1() const { return m1; }
         inline const GenMatrix<T2>& getM2() const { return m2; }
@@ -945,8 +945,8 @@ namespace tmv {
         typedef typename Traits<T>::complex_type complex_type;
 
         inline QuotXM(const T _x, const GenMatrix<Tm>& _m) : x(_x), m(_m) {}
-        inline int colsize() const { return m.rowsize(); }
-        inline int rowsize() const { return m.colsize(); }
+        inline ptrdiff_t colsize() const { return m.rowsize(); }
+        inline ptrdiff_t rowsize() const { return m.colsize(); }
         inline T getX() const { return x; }
         inline const GenMatrix<Tm>& getM() const { return m; }
         inline void assignToM(MatrixView<real_type> m0) const
@@ -997,7 +997,7 @@ namespace tmv {
             const T _x, const GenVector<T1>& _v, const GenMatrix<T2>& _m) :
             x(_x), v(_v), m(_m)
         { TMVAssert(v.size()==m.colsize()); }
-        inline int size() const { return m.rowsize(); }
+        inline ptrdiff_t size() const { return m.rowsize(); }
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV() const { return v; }
         inline const GenMatrix<T2>& getM() const { return m; }
@@ -1031,7 +1031,7 @@ namespace tmv {
             const T _x, const GenVector<T1>& _v, const GenMatrix<T2>& _m) :
             x(_x), v(_v), m(_m)
         { TMVAssert(v.size()==m.rowsize()); }
-        inline int size() const { return m.colsize(); }
+        inline ptrdiff_t size() const { return m.colsize(); }
         inline T getX() const { return x; }
         inline const GenVector<T1>& getV() const { return v; }
         inline const GenMatrix<T2>& getM() const { return m; }
@@ -1162,8 +1162,8 @@ namespace tmv {
             const T _x, const GenMatrix<T1>& _m1, const GenMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.colsize() == m2.colsize() ); }
-        inline int colsize() const { return m2.rowsize(); }
-        inline int rowsize() const { return m1.rowsize(); }
+        inline ptrdiff_t colsize() const { return m2.rowsize(); }
+        inline ptrdiff_t rowsize() const { return m1.rowsize(); }
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM1() const { return m1; }
         inline const GenMatrix<T2>& getM2() const { return m2; }
@@ -1214,8 +1214,8 @@ namespace tmv {
             const T _x, const GenMatrix<T1>& _m1, const GenMatrix<T2>& _m2) :
             x(_x), m1(_m1), m2(_m2)
         { TMVAssert( m1.rowsize() == m2.rowsize() ); }
-        inline int colsize() const { return m1.colsize(); }
-        inline int rowsize() const { return m2.colsize(); }
+        inline ptrdiff_t colsize() const { return m1.colsize(); }
+        inline ptrdiff_t rowsize() const { return m2.colsize(); }
         inline T getX() const { return x; }
         inline const GenMatrix<T1>& getM1() const { return m1; }
         inline const GenMatrix<T2>& getM2() const { return m2; }

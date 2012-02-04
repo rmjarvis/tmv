@@ -61,15 +61,15 @@ namespace tmv {
         TMVAssert(alpha != Ta(1));
         TMVAssert(alpha != Ta(0));
 
-        const int M = A.colsize();
-        const int N = A.rowsize();
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t N = A.rowsize();
 
         T* Ai0 = A.ptr();
 
-        for(int i=M;i>0;--i,Ai0+=A.stepi()) {
+        for(ptrdiff_t i=M;i>0;--i,Ai0+=A.stepi()) {
             // A.row(i) *= alpha;
             T* Aij = Ai0;
-            for(int j=N;j>0;--j,++Aij) {
+            for(ptrdiff_t j=N;j>0;--j,++Aij) {
 #ifdef TMVFLDEBUG
                 TMVAssert(Aij >= A._first);
                 TMVAssert(Aij < A._last);
@@ -86,8 +86,8 @@ namespace tmv {
 #ifdef XDEBUG
         Matrix<T> A0 = A;
         Matrix<T> A2 = A;
-        for(int i=0;i<A.colsize();i++)
-            for(int j=0;j<A.rowsize();j++)
+        for(ptrdiff_t i=0;i<A.colsize();i++)
+            for(ptrdiff_t j=0;j<A.rowsize();j++)
                 A2(i,j) *= alpha;
         //cout<<"MultXM: alpha = "<<alpha<<", A = "<<TMV_Text(A)<<"  "<<A<<endl;
 #endif
@@ -107,22 +107,22 @@ namespace tmv {
                 else 
                     rowMajorMultXM(alpha,A.transpose());
             else {
-                const int M = A.colsize();
-                const int N = A.rowsize();
+                const ptrdiff_t M = A.colsize();
+                const ptrdiff_t N = A.rowsize();
                 if (M < N)
-                    for(int i=0;i<M;++i) A.row(i) *= alpha;
+                    for(ptrdiff_t i=0;i<M;++i) A.row(i) *= alpha;
                 else 
-                    for(int j=0;j<N;++j) A.col(j) *= alpha;
+                    for(ptrdiff_t j=0;j<N;++j) A.col(j) *= alpha;
             }
         }
 #ifdef XDEBUG
         //cout<<"Done: A = "<<A<<endl;
         // Doing A-A2 becomes recursive call to MultXM
         Matrix<T> diff(A.colsize(),A.rowsize());
-        for(int i=0;i<A.colsize();i++)
-            for(int j=0;j<A.rowsize();j++)
+        for(ptrdiff_t i=0;i<A.colsize();i++)
+            for(ptrdiff_t j=0;j<A.rowsize();j++)
                 diff(i,j) = A(i,j) - A2(i,j);
-        if (!Norm(diff) <= 0.001*TMV_ABS(alpha)*Norm(A))) {
+        if (!(Norm(diff) <= 0.001*TMV_ABS(alpha)*Norm(A))) {
             cerr<<"MultXM: alpha = "<<alpha<<endl;
             cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"-> A = "<<A<<endl;
@@ -149,12 +149,12 @@ namespace tmv {
             ElemMultVV<add>(
                 alpha,A.constLinearView(),B.constLinearView(),C.linearView());
         } else if (C.isrm()) {
-            const int M = C.colsize();
-            for(int i=0;i<M;i++)
+            const ptrdiff_t M = C.colsize();
+            for(ptrdiff_t i=0;i<M;i++)
                 ElemMultVV<add>(alpha,A.row(i),B.row(i),C.row(i));
         } else {
-            const int N = C.rowsize();
-            for(int j=0;j<N;j++)
+            const ptrdiff_t N = C.rowsize();
+            for(ptrdiff_t j=0;j<N;j++)
                 ElemMultVV<add>(alpha,A.col(j),B.col(j),C.col(j));
         }
     }

@@ -224,7 +224,7 @@ namespace tmv {
             *fout << "D = "<<getD()<<std::endl;
             *fout << "P = "<<getP()<<std::endl;
             *fout << "  or by interchanges: ";
-            for(int i=0;i<getP().size();i++)
+            for(ptrdiff_t i=0;i<getP().size();i++)
                 *fout<<(getP().getValues())[i]<<" ";
             *fout <<std::endl;
         }
@@ -241,11 +241,11 @@ namespace tmv {
     }
 
     template <class T>
-    int SymLDLDiv<T>::colsize() const
+    ptrdiff_t SymLDLDiv<T>::colsize() const
     { return pimpl->LLx.size(); }
 
     template <class T>
-    int SymLDLDiv<T>::rowsize() const
+    ptrdiff_t SymLDLDiv<T>::rowsize() const
     { return pimpl->LLx.size(); }
 
     template <class T>

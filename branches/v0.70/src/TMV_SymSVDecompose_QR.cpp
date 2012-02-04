@@ -75,7 +75,7 @@ namespace tmv {
             *Di = T(0); 
         }
         ++Di;
-        for(int k=E.size();k>0;--k,++Di,++Ei) {
+        for(ptrdiff_t k=E.size();k>0;--k,++Di,++Ei) {
 #ifdef TMVFLDEBUG
             TMVAssert(Di >= D._first);
             TMVAssert(Di < D._last);
@@ -122,7 +122,7 @@ namespace tmv {
         // For stability when |b| is small, we rearrange this to:
         // mu = c + |b|^2/d / (1 + sqrt(1+|b|^2/d^2))
         TMVAssert(isReal(T()));
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
         TMVAssert(E.size() == N-1);
         TMVAssert(N > 1);
 
@@ -146,9 +146,9 @@ namespace tmv {
         MatrixView<T> U, VectorView<RT> D, VectorView<RT> E)
     {
         // Reduce the superdiagonal elements of unreduced HermTridiagonal Matrix T 
-        // (given by D,E) while maintaining U B Ut. 
+        // (given by D,E) while maptrdiff_taining U B Ut. 
         // Note: the input T must be unreduced - ie. all entries are non-zero.
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
         TMVAssert(N>0);
         TMVAssert(E.size() == N-1);
         if (U.cptr()) TMVAssert(U.rowsize() == N); 
@@ -164,7 +164,7 @@ namespace tmv {
         Vector<RT> E0 = E;
         TT.diag() = D0;
         TT.diag(1) = TT.diag(-1) = E0;
-        const int M = U.colsize();
+        const ptrdiff_t M = U.colsize();
         Matrix<T> A0(M,M);
         if (U.cptr()) {
             A0 = U * TT * U.adjoint();
@@ -228,7 +228,7 @@ namespace tmv {
         //std::cout<<"x = "<<x<<std::endl;
         Givens<RT> G = GivensRotate(y,x);
         //std::cout<<"Rotated y,x => "<<y<<','<<x<<std::endl;
-        for(int i=0;;++i,++Di,++Ei) {
+        for(ptrdiff_t i=0;;++i,++Di,++Ei) {
 #ifdef TMVFLDEBUG
             TMVAssert(Di >= D._first);
             TMVAssert(Di < D._last);
@@ -288,7 +288,7 @@ namespace tmv {
     void EigenFromTridiagonal_QR(
         MatrixView<T> U, VectorView<RT> D, VectorView<RT> E)
     {
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
         if (N <= 1) return;
 
 #ifdef XDEBUG
@@ -298,7 +298,7 @@ namespace tmv {
         Matrix<RT> TT(N,N,RT(0));
         TT.diag() = D;
         TT.diag(1) = TT.diag(-1) = E;
-        const int M = U.colsize();
+        const ptrdiff_t M = U.colsize();
         Matrix<T> A0(M,M);
         if (U.cptr()) {
             A0 = U * TT * U.adjoint();
@@ -318,10 +318,10 @@ namespace tmv {
         // Loop invariant: all E(i) with i>=q are 0.
         // Initially q = N-1. (ie. All E(i) are potentially non-zero.)
         // When q = 0, we are done.
-        for(int q = N-1; q>0; ) {
+        for(ptrdiff_t q = N-1; q>0; ) {
             if (E(q-1) == T(0)) --q;
             else {
-                int p=q-1;
+                ptrdiff_t p=q-1;
                 while (p > 0 && (E(p-1) != T(0))) --p; 
                 // Set p such that E(p-1) = 0 and all E(i) with p<=i<q are 
                 // non-zero.

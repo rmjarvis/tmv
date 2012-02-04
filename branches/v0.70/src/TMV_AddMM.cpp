@@ -69,17 +69,17 @@ namespace tmv {
 
         const T2* Arowi = A.cptr();
         T* Browi = B.ptr();
-        const int M = A.colsize();
-        const int N = A.rowsize();
-        const int Asi = A.stepi();
-        const int Asj = (rm ? 1 : A.stepj());
-        const int Bsi = B.stepi();
-        const int Bsj = (rm ? 1 : B.stepj());
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t N = A.rowsize();
+        const ptrdiff_t Asi = A.stepi();
+        const ptrdiff_t Asj = (rm ? 1 : A.stepj());
+        const ptrdiff_t Bsi = B.stepi();
+        const ptrdiff_t Bsj = (rm ? 1 : B.stepj());
 
-        for(int i=M;i>0;--i,Arowi+=Asi,Browi+=Bsi) {
+        for(ptrdiff_t i=M;i>0;--i,Arowi+=Asi,Browi+=Bsi) {
             const T2* Aij = Arowi;
             T* Bij = Browi;
-            for(int j=N;j>0;--j,(rm?++Aij:Aij+=Asj),(rm?++Bij:Bij+=Bsj)) {
+            for(ptrdiff_t j=N;j>0;--j,(rm?++Aij:Aij+=Asj),(rm?++Bij:Bij+=Bsj)) {
 #ifdef TMVFLDEBUG
                 TMVAssert(Bij >= B._first);
                 TMVAssert(Bij < B._last);
@@ -150,8 +150,8 @@ namespace tmv {
         Matrix<T> A0 = A;
         Matrix<T> B0 = B;
         Matrix<T> B2 = B;
-        for(int i=0;i<A.colsize();i++)
-            for(int j=0;j<A.rowsize();j++)
+        for(ptrdiff_t i=0;i<A.colsize();i++)
+            for(ptrdiff_t j=0;j<A.rowsize();j++)
                 B2(i,j) += alpha*A(i,j);
         cout<<"AddMM: alpha = "<<alpha<<", A = "<<TMV_Text(A)<<"  "<<A<<endl;
         cout<<", B = "<<TMV_Text(B)<<"  "<<B<<endl;
@@ -178,8 +178,8 @@ namespace tmv {
 #ifdef XDEBUG
         cout<<"done: B = "<<B<<endl;
         Matrix<T> diff(B.colsize(),B.rowsize());
-        for(int i=0;i<B.colsize();i++)
-            for(int j=0;j<B.rowsize();j++)
+        for(ptrdiff_t i=0;i<B.colsize();i++)
+            for(ptrdiff_t j=0;j<B.rowsize();j++)
                 diff(i,j) = B(i,j) - B2(i,j);
         if (Norm(diff) > 0.001*(TMV_ABS(alpha)*Norm(A0)+Norm(B0))) {
             cerr<<"AddMM: alpha = "<<alpha<<endl;
@@ -205,8 +205,8 @@ namespace tmv {
         Matrix<T> A0 = A;
         Matrix<T> B0 = B;
         Matrix<T> C2(A.colsize(),A.rowsize());
-        for(int i=0;i<A.colsize();i++)
-            for(int j=0;j<A.rowsize();j++)
+        for(ptrdiff_t i=0;i<A.colsize();i++)
+            for(ptrdiff_t j=0;j<A.rowsize();j++)
                 C2(i,j) = alpha*A(i,j) + beta*B(i,j);
         cout<<"AddMM: alpha = "<<alpha<<", A = "<<TMV_Text(A)<<"  "<<A<<endl;
         cout<<"beta = "<<beta<<", B = "<<TMV_Text(B)<<"  "<<B;
@@ -242,8 +242,8 @@ namespace tmv {
 #ifdef XDEBUG
         cout<<"Done: C = "<<C<<endl;
         Matrix<T> diff(C.colsize(),C.rowsize());
-        for(int i=0;i<C.colsize();i++)
-            for(int j=0;j<C.rowsize();j++)
+        for(ptrdiff_t i=0;i<C.colsize();i++)
+            for(ptrdiff_t j=0;j<C.rowsize();j++)
                 diff(i,j) = C(i,j) - C2(i,j);
         if (Norm(diff) >
             0.001*(1.+TMV_ABS(alpha)*Norm(A0)+TMV_ABS(beta)*Norm(B0))) {

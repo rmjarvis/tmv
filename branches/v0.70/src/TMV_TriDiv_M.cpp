@@ -70,7 +70,7 @@ namespace tmv {
         const GenUpperTriMatrix<Ta>& A, MatrixView<T> B)
     {
         // Solve A X = B  where A is an upper triangle matrix
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
         TMVAssert(B.isrm());
         TMVAssert(A.size() == B.colsize());
         TMVAssert(B.colsize()>0);
@@ -78,12 +78,12 @@ namespace tmv {
         TMVAssert(B.ct() == NonConj);
 
         if (A.isunit()) {
-            for(int i=N-1; i>=0; --i) 
+            for(ptrdiff_t i=N-1; i>=0; --i) 
                 B.row(i) -= A.row(i,i+1,N) * B.rowRange(i+1,N);
         } else {
-            const int Ads = A.stepi() + A.stepj();
+            const ptrdiff_t Ads = A.stepi() + A.stepj();
             const Ta* Aii = A.cptr() + (N-1) * Ads;
-            for(int i=N-1; i>=0; --i,Aii-=Ads) {
+            for(ptrdiff_t i=N-1; i>=0; --i,Aii-=Ads) {
                 B.row(i) -= A.row(i,i+1,N) * B.rowRange(i+1,N);
                 if (*Aii==Ta(0)) {
 #ifdef NOTHROW
@@ -103,7 +103,7 @@ namespace tmv {
         const GenUpperTriMatrix<Ta>& A, MatrixView<T> B)
     {
         // Solve A X = B  where A is an upper triangle matrix
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
         TMVAssert(B.isrm());
         TMVAssert(A.size() == B.colsize());
         TMVAssert(B.colsize()>0);
@@ -111,12 +111,12 @@ namespace tmv {
         TMVAssert(B.ct() == NonConj);
 
         if (A.isunit()) {
-            for(int j=N-1; j>0; --j) 
+            for(ptrdiff_t j=N-1; j>0; --j) 
                 B.rowRange(0,j) -= A.col(j,0,j) ^ B.row(j);
         } else {
-            const int Ads = A.stepi()+A.stepj();
+            const ptrdiff_t Ads = A.stepi()+A.stepj();
             const Ta* Ajj = A.cptr() + (N-1)*Ads;
-            for(int j=N-1; j>=0; --j,Ajj-=Ads) {
+            for(ptrdiff_t j=N-1; j>=0; --j,Ajj-=Ads) {
                 if (*Ajj==Ta(0)) {
 #ifdef NOTHROW
                     std::cerr<<"Singular UpperTriMatrix found\n"; 
@@ -136,7 +136,7 @@ namespace tmv {
         const GenLowerTriMatrix<Ta>& A, MatrixView<T> B)
     {
         // Solve A X = B  where A is a lower triangle matrix
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
         TMVAssert(B.isrm());
         TMVAssert(A.size() == B.colsize());
         TMVAssert(B.colsize()>0);
@@ -144,12 +144,12 @@ namespace tmv {
         TMVAssert(B.ct() == NonConj);
 
         if (A.isunit()) {
-            for(int i=0;i<N;++i) 
+            for(ptrdiff_t i=0;i<N;++i) 
                 B.row(i) -= A.row(i,0,i) * B.rowRange(0,i);
         } else {
-            const int Ads = A.stepi()+A.stepj();
+            const ptrdiff_t Ads = A.stepi()+A.stepj();
             const Ta* Aii = A.cptr();
-            for(int i=0;i<N;++i,Aii+=Ads) {
+            for(ptrdiff_t i=0;i<N;++i,Aii+=Ads) {
                 B.row(i) -= A.row(i,0,i) * B.rowRange(0,i);
                 if (*Aii==Ta(0)) {
 #ifdef NOTHROW
@@ -169,7 +169,7 @@ namespace tmv {
         const GenLowerTriMatrix<Ta>& A, MatrixView<T> B)
     {
         // Solve A X = B  where A is a lower triangle matrix
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
         TMVAssert(B.isrm());
         TMVAssert(A.size() == B.colsize());
         TMVAssert(B.colsize()>0);
@@ -177,12 +177,12 @@ namespace tmv {
         TMVAssert(B.ct() == NonConj);
 
         if (A.isunit()) {
-            for(int j=0;j<N;++j) 
+            for(ptrdiff_t j=0;j<N;++j) 
                 B.rowRange(j+1,N) -= A.col(j,j+1,N) ^ B.row(j);
         } else {
-            const int Ads = A.stepi()+A.stepj();
+            const ptrdiff_t Ads = A.stepi()+A.stepj();
             const Ta* Ajj = A.cptr();
-            for(int j=0;j<N;++j,Ajj+=Ads) {
+            for(ptrdiff_t j=0;j<N;++j,Ajj+=Ads) {
                 if (*Ajj==Ta(0)) {
 #ifdef NOTHROW
                     std::cerr<<"Singular LowerTriMatrix found\n"; 
@@ -209,19 +209,19 @@ namespace tmv {
         TMVAssert(B.rowsize()>0);
         TMVAssert(B.ct() == NonConj);
 
-        const int nb = TRI_DIV_BLOCKSIZE;
-        const int N = A.size();
+        const ptrdiff_t nb = TRI_DIV_BLOCKSIZE;
+        const ptrdiff_t N = A.size();
 
         if (N <= TRI_DIV_BLOCKSIZE2) {
             if (B.isrm()) {
                 if (A.isrm()) RowTriLDivEq(A,B);
                 else ColTriLDivEq(A,B);
             } else {
-                const int K = B.rowsize();
-                for(int j=0;j<K;++j) TriLDivEq(A,B.col(j));
+                const ptrdiff_t K = B.rowsize();
+                for(ptrdiff_t j=0;j<K;++j) TriLDivEq(A,B.col(j));
             }
         } else {
-            int k = N/2;
+            ptrdiff_t k = N/2;
             if (k > nb) k = k/nb*nb;
 
             ConstUpperTriMatrixView<Ta> A00 = A.subTriMatrix(0,k);
@@ -248,19 +248,19 @@ namespace tmv {
         TMVAssert(B.rowsize()>0);
         TMVAssert(B.ct() == NonConj);
 
-        const int nb = TRI_DIV_BLOCKSIZE;
-        const int N = A.size();
+        const ptrdiff_t nb = TRI_DIV_BLOCKSIZE;
+        const ptrdiff_t N = A.size();
 
         if (N <= TRI_DIV_BLOCKSIZE2) {
             if (B.isrm()) {
                 if (A.isrm()) RowTriLDivEq(A,B);
                 else ColTriLDivEq(A,B);
             } else {
-                const int K = B.rowsize();
-                for(int j=0;j<K;++j) TriLDivEq(A,B.col(j));
+                const ptrdiff_t K = B.rowsize();
+                for(ptrdiff_t j=0;j<K;++j) TriLDivEq(A,B.col(j));
             }
         } else {
-            int k = N/2;
+            ptrdiff_t k = N/2;
             if (k > nb) k = k/nb*nb;
 
             ConstLowerTriMatrixView<Ta> A00 = A.subTriMatrix(0,k);

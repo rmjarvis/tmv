@@ -259,8 +259,8 @@ namespace tmv {
         //
 
         void thresh(TMV_RealType(T) toler, std::ostream* debugout=0) const;
-        void top(int neigen, std::ostream* debugout=0) const;
-        int getKMax() const;
+        void top(ptrdiff_t neigen, std::ostream* debugout=0) const;
+        ptrdiff_t getKMax() const;
 
         //
         // Access Decomposition
@@ -277,8 +277,8 @@ namespace tmv {
         struct HermBandSVDiv_Impl;
         std::auto_ptr<HermBandSVDiv_Impl> pimpl;
 
-        int colsize() const;
-        int rowsize() const;
+        ptrdiff_t colsize() const;
+        ptrdiff_t rowsize() const;
 
     private :
 
@@ -347,8 +347,8 @@ namespace tmv {
         //
 
         void thresh(TMV_RealType(T) toler, std::ostream* debugout=0) const;
-        void top(int neigen, std::ostream* debugout=0) const;
-        int getKMax() const;
+        void top(ptrdiff_t neigen, std::ostream* debugout=0) const;
+        ptrdiff_t getKMax() const;
 
         //
         // Access Decomposition
@@ -365,8 +365,8 @@ namespace tmv {
         struct SymBandSVDiv_Impl;
         std::auto_ptr<SymBandSVDiv_Impl> pimpl;
 
-        int colsize() const;
-        int rowsize() const;
+        ptrdiff_t colsize() const;
+        ptrdiff_t rowsize() const;
 
     private :
 

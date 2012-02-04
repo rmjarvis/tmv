@@ -60,7 +60,7 @@ namespace tmv {
     const T* VectorComposite<T>::cptr() const
     {
         if (!_v.get()) {
-            int len = this->size();
+            ptrdiff_t len = this->size();
             _v.resize(len);
             this->assignToV(
                 VectorView<T>(
@@ -87,14 +87,14 @@ namespace tmv {
         const T* v1ptr = v1.cptr();
         const T2* v2ptr = v2.cptr();
 
-        const int N = v1.size();
+        const ptrdiff_t N = v1.size();
         if (N > TMV_MULTVV_RECURSE_SIZE) {
             // This isn't for speed reasons - it's for increased accuracy.
             // For large vectors, the incremental additions can be much smaller
             // than the running sum, so the relative errors can be huge.
             // With the recursive algorithm, the relative error is generally
             // closer to the expected few * epsilon.
-            const int N1 = N/2;
+            const ptrdiff_t N1 = N/2;
             return 
                 nonBlasMultVV<unit,c2>(v1.subVector(0,N1),v2.subVector(0,N1)) +
                 nonBlasMultVV<unit,c2>(v1.subVector(N1,N),v2.subVector(N1,N));
@@ -102,21 +102,21 @@ namespace tmv {
             T res(0);
 
             if (unit) {
-                const int N1 = N/4;
-                const int N2 = N-4*N1;
-                if (N1) for(int i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
+                const ptrdiff_t N1 = N/4;
+                const ptrdiff_t N2 = N-4*N1;
+                if (N1) for(ptrdiff_t i=N1;i>0;--i,v1ptr+=4,v2ptr+=4) {
                     res += (*v1ptr) * (c2 ? TMV_CONJ(*v2ptr) : (*v2ptr));
                     res += v1ptr[1] * (c2 ? TMV_CONJ(v2ptr[1]) : v2ptr[1]);
                     res += v1ptr[2] * (c2 ? TMV_CONJ(v2ptr[2]) : v2ptr[2]);
                     res += v1ptr[3] * (c2 ? TMV_CONJ(v2ptr[3]) : v2ptr[3]);
                 }
-                if (N2) for(int i=N2;i>0;--i,++v1ptr,++v2ptr) 
+                if (N2) for(ptrdiff_t i=N2;i>0;--i,++v1ptr,++v2ptr) 
                     res += (*v1ptr) * (c2 ? TMV_CONJ(*v2ptr) : (*v2ptr));
             } else {
-                const int s1 = v1.step();
-                const int s2 = v2.step();
+                const ptrdiff_t s1 = v1.step();
+                const ptrdiff_t s2 = v2.step();
 
-                for(int i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2) 
+                for(ptrdiff_t i=N;i>0;--i,v1ptr+=s1,v2ptr+=s2) 
                     res += (*v1ptr) * (c2 ? TMV_CONJ(*v2ptr) : (*v2ptr));
             }
             return res;
@@ -264,7 +264,7 @@ namespace tmv {
 
 #ifdef XDEBUG
         T resx(0);
-        for(int i=0;i<v1.size();i++) {
+        for(ptrdiff_t i=0;i<v1.size();i++) {
             resx += v1(i)*v2(i);
         }
 #endif

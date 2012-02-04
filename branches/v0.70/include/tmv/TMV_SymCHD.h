@@ -201,8 +201,8 @@ namespace tmv {
         struct HermCHDiv_Impl;
         std::auto_ptr<HermCHDiv_Impl> pimpl;
 
-        int colsize() const;
-        int rowsize() const;
+        ptrdiff_t colsize() const;
+        ptrdiff_t rowsize() const;
 
     private :
 

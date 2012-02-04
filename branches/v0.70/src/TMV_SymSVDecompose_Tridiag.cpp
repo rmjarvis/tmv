@@ -64,7 +64,7 @@ namespace tmv {
     static void NonBlockTridiagonalize(
         SymMatrixView<T> A, VectorView<T> beta,
         VectorView<Td> D, VectorView<RT> E, 
-        T& signdet, int j1=0)
+        T& signdet, ptrdiff_t j1=0)
     {
         // Decompose A into U T Ut
         // The Tridiagonal Matrix T is stored as two vectors: D, E
@@ -73,7 +73,7 @@ namespace tmv {
         // However, the Householder reflections make E real, so this
         // distinction is irrelevant.
         // A along with beta hold the U matrix.
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
 
         TMVAssert(N > 0);
         TMVAssert(beta.size() == N-1);
@@ -86,7 +86,7 @@ namespace tmv {
 
         // We use Householder reflections to reduce A to the tridiagonal form:
         T* bj = beta.ptr() + j1;
-        for(int j=j1;j<N-1;++j,++bj) {
+        for(ptrdiff_t j=j1;j<N-1;++j,++bj) {
 #ifdef TMVFLDEBUG
             TMVAssert(bj >= beta._first);
             TMVAssert(bj < beta._last);
@@ -119,8 +119,8 @@ namespace tmv {
         // in the bidiagonalization routine are equal here, so there
         // is only one temporary matrix.
 
-        const int N = A.size();
-        const int Nm1 = N-1;
+        const ptrdiff_t N = A.size();
+        const ptrdiff_t Nm1 = N-1;
 
         TMVAssert(N > 0);
         TMVAssert(beta.size() == N-1);
@@ -131,18 +131,18 @@ namespace tmv {
         TMVAssert(beta.step() == 1);
         TMVAssert(!beta.isconj());
 
-        Matrix<T,ColMajor> ZYtmT(N,TMV_MIN(SYM_TRIDIAG_BLOCKSIZE,Nm1));
+        Matrix<T,ColMajor> ZYtmT(N,TMV_MIN(SYM_TRIDIAG_BLOCKSIZE,int(Nm1)));
         // It's easier (for me) to think about the calculations with ZYtm.
         // But the eventual Rank2KUpdate call will have unconjugated matrices
         // if we store (ZYtm)t for Hermitian or (ZYtm)T for symmetric.
         // This is what is stored in the Matrix ZYtmT.
 
         T* bj = beta.ptr();
-        for(int j1=0;j1<Nm1;) {
-            int j2 = TMV_MIN(Nm1,j1+SYM_TRIDIAG_BLOCKSIZE);
+        for(ptrdiff_t j1=0;j1<Nm1;) {
+            ptrdiff_t j2 = TMV_MIN(Nm1,j1+SYM_TRIDIAG_BLOCKSIZE);
 
             if (j2 < N) {
-                for(int j=j1,jj=0;j<j2;++j,++jj,++bj) { // jj = j-j1
+                for(ptrdiff_t j=j1,jj=0;j<j2;++j,++jj,++bj) { // jj = j-j1
 
                     // Update current column:
                     // A(j:N,j) -= Y(j:N,0:j) ZYtm(0:j,j) + (ZYtm)t(j:N,0:j) Yt(0:j,j)
@@ -158,7 +158,7 @@ namespace tmv {
                     }
 
                     // Do the Householder reflection
-                    const int Nmj = Acolj.size();
+                    const ptrdiff_t Nmj = Acolj.size();
                     VectorView<T> u = Acolj.subVector(1,Nmj);
 #ifdef TMVFLDEBUG
                     TMVAssert(bj >= beta._first);
@@ -578,9 +578,9 @@ namespace tmv {
 #endif
 
 #ifdef XDEBUG
-                const int N = A.size();
+                const ptrdiff_t N = A.size();
                 Matrix<T> UU(N,N,T(0));
-                for(int j=N-1;j>0;--j) UU.col(j,j,N) = A.col(j-1,j,N);
+                for(ptrdiff_t j=N-1;j>0;--j) UU.col(j,j,N) = A.col(j-1,j,N);
                 UU(0,0) = T(1);
                 GetQFromQR(UU.subMatrix(1,N,1,N),beta.subVector(0,N-1));
                 Matrix<T> TT(N,N,T(0));

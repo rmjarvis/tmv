@@ -67,12 +67,12 @@ namespace tmv {
     // L is returned as A.lowerTri(UnitDiag).
     template <class T> 
     void LDL_Decompose(
-        SymMatrixView<T> A, SymBandMatrixView<T> D, int* P);
+        SymMatrixView<T> A, SymBandMatrixView<T> D, ptrdiff_t* P);
 
     template <class T> 
     void LDL_Decompose(
         SymMatrixView<T> A, VectorView<T> xD,
-        int* P, TMV_RealType(T)& logdet, T& signdet);
+        ptrdiff_t* P, TMV_RealType(T)& logdet, T& signdet);
 
     class Permutation;
 
@@ -191,8 +191,8 @@ namespace tmv {
         struct SymLDLDiv_Impl;
         std::auto_ptr<SymLDLDiv_Impl> pimpl;
 
-        int colsize() const;
-        int rowsize() const;
+        ptrdiff_t colsize() const;
+        ptrdiff_t rowsize() const;
         bool isherm() const;
         bool issym() const;
 

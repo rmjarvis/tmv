@@ -63,8 +63,8 @@ namespace tmv {
         TMVAssert(U.iscm() || U.isrm());
         TMVAssert(unit == U.isunit());
 
-        const int N = U.size();
-        const int nb = TRI_DIV_BLOCKSIZE;
+        const ptrdiff_t N = U.size();
+        const ptrdiff_t nb = TRI_DIV_BLOCKSIZE;
 
         if (N == 1) {
             if (!unit) {
@@ -84,7 +84,7 @@ namespace tmv {
                 *Uptr = TMV_InverseOf(*Uptr);
             }
         } else {
-            int k = N/2;
+            ptrdiff_t k = N/2;
             if (k > nb) k = k/nb*nb;
 
             UpperTriMatrixView<T> U00 = U.subTriMatrix(0,k);

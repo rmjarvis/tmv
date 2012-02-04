@@ -58,7 +58,7 @@ namespace tmv {
         Matrix<T,ColMajor> Vt;
         RT logdet;
         T signdet;
-        mutable int kmax;
+        mutable ptrdiff_t kmax;
     };
 
 #define APTR1 (inplace ? 0 : (A.colsize()*A.rowsize()))
@@ -245,7 +245,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void SVDiv<T>::top(int neigen, std::ostream* debugout) const
+    void SVDiv<T>::top(ptrdiff_t neigen, std::ostream* debugout) const
     {
         TMVAssert(neigen > 0);
         if (neigen < pimpl->S.size()) pimpl->kmax = neigen;
@@ -258,7 +258,7 @@ namespace tmv {
     }
 
     template <class T> 
-    int SVDiv<T>::getKMax() const
+    ptrdiff_t SVDiv<T>::getKMax() const
     { return pimpl->kmax; }
 
     template <class T> 
@@ -303,11 +303,11 @@ namespace tmv {
     }
 
     template <class T> 
-    int SVDiv<T>::colsize() const
+    ptrdiff_t SVDiv<T>::colsize() const
     { return pimpl->istrans ? pimpl->U.rowsize() : pimpl->U.colsize(); }
 
     template <class T> 
-    int SVDiv<T>::rowsize() const
+    ptrdiff_t SVDiv<T>::rowsize() const
     { return pimpl->istrans ? pimpl->U.colsize() : pimpl->U.rowsize(); }
 
 #undef RT

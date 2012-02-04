@@ -2,9 +2,9 @@
 
 #define DefQRD(T)\
 template void QRP_Decompose(MatrixView<T > QR, \
-    VectorView<T > beta, int* P, T& det, bool strict); \
+    VectorView<T > beta, ptrdiff_t* P, T& det, bool strict); \
 template void QRP_Decompose(MatrixView<T > Q, \
-    UpperTriMatrixView<T > R, int* P, bool strict); \
+    UpperTriMatrixView<T > R, ptrdiff_t* P, bool strict); \
 template void QRP_Decompose(MatrixView<T > A, bool strict); \
 
 DefQRD(T)

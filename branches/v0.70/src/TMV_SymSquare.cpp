@@ -40,7 +40,7 @@ namespace tmv {
     template <bool herm, class T> 
     void SymSquare(MatrixView<T> A)
     {
-        const int N = A.colsize();
+        const ptrdiff_t N = A.colsize();
         if (N == 1) {
             const T A00 = *A.ptr();
 #ifdef TMVFLDEBUG
@@ -52,7 +52,7 @@ namespace tmv {
             else 
                 *A.ptr() = TMV_SQR(A00);
         } else {
-            const int K = N/2;
+            const ptrdiff_t K = N/2;
             MatrixView<T> A00 = A.subMatrix(0,K,0,K);
             MatrixView<T> A10 = A.subMatrix(K,N,0,K);
             MatrixView<T> A01 = A.subMatrix(0,K,K,N);

@@ -64,11 +64,11 @@ namespace tmv {
     template <class T> 
     void LU_Decompose(
         const GenBandMatrix<T>& A, LowerTriMatrixView<T> L,
-        BandMatrixView<T> U, int* P);
+        BandMatrixView<T> U, ptrdiff_t* P);
 
     // Do the decomposition in compressed form.
     template <class T> 
-    void LU_Decompose(BandMatrixView<T> LUx, int* P, int Anhi);
+    void LU_Decompose(BandMatrixView<T> LUx, ptrdiff_t* P, ptrdiff_t Anhi);
 
     class Permutation;
 
@@ -78,7 +78,7 @@ namespace tmv {
         BandMatrixView<T> U, Permutation& P);
 
     template <class T> 
-    void LU_Decompose(BandMatrixView<T> LUx, Permutation& P, int Anhi);
+    void LU_Decompose(BandMatrixView<T> LUx, Permutation& P, ptrdiff_t Anhi);
     
     template <class T, int A1> 
     inline void LU_Decompose(
@@ -99,7 +99,7 @@ namespace tmv {
     { LU_Decompose(A,L.view(),U.view(),P); }
 
     template <class T, int A1> 
-    inline void LU_Decompose(BandMatrix<T,A1>& LUx, Permutation& P, int Anhi)
+    inline void LU_Decompose(BandMatrix<T,A1>& LUx, Permutation& P, ptrdiff_t Anhi)
     { LU_Decompose(LUx.view(),P,Anhi); }
     
     template <class T> 
@@ -162,8 +162,8 @@ namespace tmv {
         struct BandLUDiv_Impl;
         std::auto_ptr<BandLUDiv_Impl> pimpl;
 
-        int colsize() const;
-        int rowsize() const;
+        ptrdiff_t colsize() const;
+        ptrdiff_t rowsize() const;
 
     private :
 

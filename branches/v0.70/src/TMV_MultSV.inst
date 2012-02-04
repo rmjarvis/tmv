@@ -3,8 +3,8 @@
 
 // Only the real version of these:
 template const T* SymMatrixComposite<T >::cptr() const; 
-template int SymMatrixComposite<T >::stepi() const; 
-template int SymMatrixComposite<T >::stepj() const; 
+template ptrdiff_t SymMatrixComposite<T >::stepi() const; 
+template ptrdiff_t SymMatrixComposite<T >::stepj() const; 
 
 #define DefMV(T,Ta,Tb)\
 template void MultMV<true>(const T alpha, const GenSymMatrix<Ta >& A, \

@@ -80,8 +80,8 @@ namespace tmv {
         TMVAssert(C.ct()==NonConj);
         TMVAssert(A.uplo() == Lower);
 
-        const int N = A.size();
-        for(int j=0;j<N;++j) {
+        const ptrdiff_t N = A.size();
+        for(ptrdiff_t j=0;j<N;++j) {
             if (add) C.row(j) += alpha * A.row(j,0,j+1) * B.rowRange(0,j+1);
             else C.row(j) = alpha * A.row(j,0,j+1) * B.rowRange(0,j+1);
             C.rowRange(0,j) += alpha * A.col(j,0,j) ^ B.row(j);
@@ -103,8 +103,8 @@ namespace tmv {
         TMVAssert(C.ct()==NonConj);
         TMVAssert(A.uplo() == Lower);
 
-        const int N = A.size();
-        for(int j=N-1;j>=0;--j) {
+        const ptrdiff_t N = A.size();
+        for(ptrdiff_t j=N-1;j>=0;--j) {
             if (add) C.row(j) += alpha * A.row(j,j,N) * B.rowRange(j,N);
             else C.row(j) = alpha * A.row(j,j,N) * B.rowRange(j,N);
             C.rowRange(j+1,N) += alpha * A.col(j,j+1,N) ^ B.row(j);
@@ -135,8 +135,8 @@ namespace tmv {
         TMVAssert(C.ct()==NonConj);
         TMVAssert(A.uplo() == Lower);
 
-        const int N = C.rowsize();
-        for(int j=0;j<N;++j) 
+        const ptrdiff_t N = C.rowsize();
+        for(ptrdiff_t j=0;j<N;++j) 
             if (add) C.col(j) += alpha * A * B.col(j);
             else C.col(j) = alpha * A * B.col(j);
     }
@@ -156,15 +156,15 @@ namespace tmv {
         TMVAssert(C.ct()==NonConj);
         TMVAssert(A.uplo() == Lower);
 
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
         if (N <= SYM_MM_BLOCKSIZE2) {
             if (B.isrm() && C.isrm()) RowMultMM<add>(alpha,A,B,C);
             else if (B.iscm() && C.iscm()) ColMultMM<add>(alpha,A,B,C);
             else if (C.colsize() < C.rowsize()) RowMultMM<add>(alpha,A,B,C);
             else ColMultMM<add>(alpha,A,B,C);
         } else {
-            int k = N/2;
-            const int nb = SYM_MM_BLOCKSIZE;
+            ptrdiff_t k = N/2;
+            const ptrdiff_t nb = SYM_MM_BLOCKSIZE;
             if (k > nb) k = k/nb*nb;
 
             // [ A00 A10t ] [ B0 ] = [ A00 B0 + A10t B1 ]
@@ -561,9 +561,9 @@ namespace tmv {
         const T alpha, const GenSymMatrix<Ta>& A, const GenMatrix<Tb>& B,
         MatrixView<T> C)
     {
-        const int N = C.rowsize();
-        for(int j=0;j<N;) {
-            int j2 = TMV_MIN(N,j+SYM_MM_BLOCKSIZE);
+        const ptrdiff_t N = C.rowsize();
+        for(ptrdiff_t j=0;j<N;) {
+            ptrdiff_t j2 = TMV_MIN(N,j+SYM_MM_BLOCKSIZE);
             if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                 if (C.isrm()) {
                     Matrix<Tb,RowMajor> B2 = TMV_REAL(alpha) * B.colRange(j,j2);
@@ -648,10 +648,10 @@ namespace tmv {
         TMVAssert(A.size() > 0);
         TMVAssert(alpha != T(0));
 
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
 
-        for(int j=0;j<N;) {
-            int j2 = TMV_MIN(N,j+SYM_MM_BLOCKSIZE);
+        for(ptrdiff_t j=0;j<N;) {
+            ptrdiff_t j2 = TMV_MIN(N,j+SYM_MM_BLOCKSIZE);
             if (TMV_IMAG(alpha) == TMV_RealType(T)(0)) {
                 if (C.isrm()) {
                     Matrix<Tb,RowMajor> B2(N,j2-j);

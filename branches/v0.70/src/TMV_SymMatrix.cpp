@@ -60,7 +60,7 @@ namespace tmv {
     //
 
     template <class T>
-    T GenSymMatrix<T>::cref(int i, int j) const
+    T GenSymMatrix<T>::cref(ptrdiff_t i, ptrdiff_t j) const
     {
         if ((uplo() == Upper && i<=j) || (uplo() == Lower && i>=j)) {
             const T* mi = cptr() + i*stepi() + j*stepj();
@@ -73,7 +73,7 @@ namespace tmv {
 
     template <class T, int A>
     typename SymMatrixView<T,A>::reference SymMatrixView<T,A>::ref(
-        int i, int j)
+        ptrdiff_t i, ptrdiff_t j)
     {
         if ((uplo() == Upper && i<=j) || (uplo() == Lower && i>=j)) {
             T* mi = ptr() + i*stepi() + j*stepj();
@@ -191,12 +191,12 @@ namespace tmv {
 
     template <class T> 
     bool GenSymMatrix<T>::hasSubMatrix(
-        int i1, int i2, int j1, int j2, int istep, int jstep) const
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const
     {
         if (i1==i2 || j1==j2) return true; // no elements, so whatever...
         bool ok = true;
-        int i2x = i2-istep;
-        int j2x = j2-jstep;
+        ptrdiff_t i2x = i2-istep;
+        ptrdiff_t j2x = j2-jstep;
         if (istep == 0) {
             ok = false;
             std::cerr<<"istep ("<<istep<<") can not be 0\n";
@@ -258,7 +258,7 @@ namespace tmv {
 
     template <class T> 
     bool GenSymMatrix<T>::hasSubVector(
-        int i, int j, int istep, int jstep, int n) const 
+        ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t n) const 
     {
         if (n==0) return true;
         bool ok = true;
@@ -275,8 +275,8 @@ namespace tmv {
             ok = false;
             std::cerr<<"j ("<<j<<") must be in 0 -- "<<size()-1<<std::endl;
         }
-        int i2 = i+istep*(n-1);
-        int j2 = j+jstep*(n-1);
+        ptrdiff_t i2 = i+istep*(n-1);
+        ptrdiff_t j2 = j+jstep*(n-1);
         if (i2 < 0 || i2 >= size()) {
             ok = false;
             std::cerr<<"last element's i ("<<i2<<") must be in 0 -- ";
@@ -296,7 +296,7 @@ namespace tmv {
     }
 
     template <class T> 
-    bool GenSymMatrix<T>::hasSubSymMatrix(int i1, int i2, int istep) const 
+    bool GenSymMatrix<T>::hasSubSymMatrix(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const 
     {
         if (i1==i2) return true;
         bool ok=true;
@@ -328,7 +328,7 @@ namespace tmv {
 
     template <class T> 
     bool ConstSymMatrixView<T,FortranStyle>::hasSubMatrix(
-        int i1, int i2, int j1, int j2, int istep, int jstep) const
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const
     {
         if (i1==i2 || j1==j2) return true; // no elements, so whatever...
         bool ok = true;
@@ -393,7 +393,7 @@ namespace tmv {
 
     template <class T> 
     bool ConstSymMatrixView<T,FortranStyle>::hasSubVector(
-        int i, int j, int istep, int jstep, int n) const 
+        ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t n) const 
     {
         if (n==0) return true;
         bool ok = true;
@@ -410,8 +410,8 @@ namespace tmv {
             ok = false;
             std::cerr<<"j ("<<j<<") must be in 1 -- "<<this->size()<<std::endl;
         }
-        int i2 = i+istep*(n-1);
-        int j2 = j+jstep*(n-1);
+        ptrdiff_t i2 = i+istep*(n-1);
+        ptrdiff_t j2 = j+jstep*(n-1);
         if (i2 < 1 || i2 > this->size()) {
             ok = false;
             std::cerr<<"last element's i ("<<i2<<") must be in 1 -- ";
@@ -432,7 +432,7 @@ namespace tmv {
 
     template <class T> 
     bool ConstSymMatrixView<T,FortranStyle>::hasSubSymMatrix(
-        int i1, int i2, int istep) const 
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const 
     {
         if (i1==i2) return true;
         bool ok=true;
@@ -467,7 +467,7 @@ namespace tmv {
     //
 
     template <class T, int A>
-    SymMatrixView<T,A>& SymMatrixView<T,A>::swapRowsCols(int i1, int i2)
+    SymMatrixView<T,A>& SymMatrixView<T,A>::swapRowsCols(ptrdiff_t i1, ptrdiff_t i2)
     {
         TMVAssert(i1<size());
         TMVAssert(i2<size());
@@ -507,10 +507,10 @@ namespace tmv {
 
     template <class T, int A>
     SymMatrixView<T,A>& SymMatrixView<T,A>::permuteRowsCols(
-        const int* p, int i1, int i2) 
+        const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
     {
-        const int* pi = p+i1;
-        for(int i=i1;i<i2;++i,++pi) {
+        const ptrdiff_t* pi = p+i1;
+        for(ptrdiff_t i=i1;i<i2;++i,++pi) {
             TMVAssert(*pi < size());
             swapRowsCols(i,*pi);
         }
@@ -519,10 +519,10 @@ namespace tmv {
 
     template <class T, int A>
     SymMatrixView<T,A>& SymMatrixView<T,A>::reversePermuteRowsCols(
-        const int* p, int i1, int i2)
+        const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2)
     {
-        const int* pi = p+i2;
-        for(int i=i2;i>i1;) {
+        const ptrdiff_t* pi = p+i2;
+        for(ptrdiff_t i=i2;i>i1;) {
             --i; --pi;
             TMVAssert(*pi < size());
             swapRowsCols(i,*pi);
@@ -632,7 +632,7 @@ namespace tmv {
     static RT NonLapNorm1(const GenSymMatrix<T>& m) 
     {
         RT max(0);
-        for(int j=0;j<m.size();++j) {
+        for(ptrdiff_t j=0;j<m.size();++j) {
             RT temp = m.col(j,0,j).norm1();
             temp += m.col(j,j,m.size()).norm1();
             if (temp > max) max = temp;
@@ -890,20 +890,20 @@ namespace tmv {
     template <class T> 
     void GenSymMatrix<T>::write(const TMV_Writer& writer) const
     {
-        const int N = size();
+        const ptrdiff_t N = size();
         writer.begin();
         writer.writeCode(issym() ? "S" : "H");
         writer.writeSize(N);
         writer.writeSimpleSize(N);
         writer.writeStart();
-        for(int i=0;i<N;++i) {
+        for(ptrdiff_t i=0;i<N;++i) {
             writer.writeLParen();
-            for(int j=0;j<i+1;++j) {
+            for(ptrdiff_t j=0;j<i+1;++j) {
                 if (j > 0) writer.writeSpace();
                 writer.writeValue(cref(i,j));
             }
             if (!writer.isCompact()) {
-                for(int j=i+1;j<N;++j) {
+                for(ptrdiff_t j=i+1;j<N;++j) {
                     writer.writeSpace();
                     writer.writeValue(cref(i,j));
                 }
@@ -921,9 +921,9 @@ namespace tmv {
     {
     public :
         SymMatrix<T> m;
-        int i,j;
+        ptrdiff_t i,j;
         std::string exp,got;
-        int s;
+        ptrdiff_t s;
         T v1, v2;
         bool is, iseof, isbad;
 
@@ -939,20 +939,20 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
         SymMatrixReadError(
-            int _i, int _j, const GenSymMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenSymMatrix<T>& _m,
             std::istream& _is,
             const std::string& _e, const std::string& _g) throw() :
             ReadError("SymMatrix."),
             m(_m), i(_i), j(_j), exp(_e), got(_g), s(m.size()), v1(0), v2(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         SymMatrixReadError(
-            int _i, int _j, const GenSymMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenSymMatrix<T>& _m,
             std::istream& _is, T _v1=0, T _v2=0) throw() :
             ReadError("SymMatrix."),
             m(_m), i(_i), j(_j), s(m.size()), v1(_v1), v2(_v2),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         SymMatrixReadError(
-            const GenSymMatrix<T>& _m, std::istream& _is, int _s) throw() :
+            const GenSymMatrix<T>& _m, std::istream& _is, ptrdiff_t _s) throw() :
             ReadError("SymMatrix."),
             m(_m), i(0), j(0), exp(0), got(0), s(_s), v1(0), v2(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
@@ -991,14 +991,14 @@ namespace tmv {
             if (m.size() > 0) {
                 os<<"The portion of the SymMatrix which was successfully "
                     "read is: \n";
-                const int N = m.size();
-                for(int ii=0;ii<i;++ii) {
+                const ptrdiff_t N = m.size();
+                for(ptrdiff_t ii=0;ii<i;++ii) {
                     os<<"( ";
-                    for(int jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
+                    for(ptrdiff_t jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
                     os<<" )\n";
                 }
                 os<<"( ";
-                for(int jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';      
+                for(ptrdiff_t jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';      
                 os<<" )\n";
             }
         }
@@ -1009,9 +1009,9 @@ namespace tmv {
     {
     public :
         HermMatrix<T> m;
-        int i,j;
+        ptrdiff_t i,j;
         std::string exp,got;
-        int s;
+        ptrdiff_t s;
         T v1, v2;
         bool is, iseof, isbad;
 
@@ -1027,7 +1027,7 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
         HermMatrixReadError(
-            int _i, int _j, const GenSymMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenSymMatrix<T>& _m,
             std::istream& _is,
             const std::string& _e, const std::string& _g) throw() :
             ReadError("HermMatrix."),
@@ -1035,14 +1035,14 @@ namespace tmv {
             s(m.size()), v1(0), v2(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         HermMatrixReadError(
-            int _i, int _j, const GenSymMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenSymMatrix<T>& _m,
             std::istream& _is, T _v1=0, T _v2=0) throw() :
             ReadError("HermMatrix."),
             m(_m), i(_i), j(_j), exp(0), got(0), 
             s(m.size()), v1(_v1), v2(_v2),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         HermMatrixReadError(
-            const GenSymMatrix<T>& _m, std::istream& _is, int _s) throw() :
+            const GenSymMatrix<T>& _m, std::istream& _is, ptrdiff_t _s) throw() :
             ReadError("HermMatrix."),
             m(_m), i(0), j(0), exp(0), got(0), s(_s), v1(0), v2(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
@@ -1084,14 +1084,14 @@ namespace tmv {
             if (m.size() > 0) {
                 os<<"The portion of the HermMatrix which was successfully "
                     "read is: \n";
-                const int N = m.size();
-                for(int ii=0;ii<i;++ii) {
+                const ptrdiff_t N = m.size();
+                for(ptrdiff_t ii=0;ii<i;++ii) {
                     os<<"( ";
-                    for(int jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
+                    for(ptrdiff_t jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
                     os<<" )\n";
                 }
                 os<<"( ";
-                for(int jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';      
+                for(ptrdiff_t jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';      
                 os<<" )\n";
             }
         }
@@ -1101,7 +1101,7 @@ namespace tmv {
     template <class T>
     static void FinishRead(const TMV_Reader& reader, SymMatrixView<T> m) 
     {
-        const int N = m.size();
+        const ptrdiff_t N = m.size();
         std::string exp, got;
         T temp;
         if (!reader.readStart(exp,got)) {
@@ -1115,7 +1115,7 @@ namespace tmv {
                 throw HermMatrixReadError<T>(0,0,m,reader.getis(),exp,got);
 #endif
         }
-        for(int i=0;i<N;++i) {
+        for(ptrdiff_t i=0;i<N;++i) {
             if (!reader.readLParen(exp,got)) {
 #ifdef NOTHROW
                 std::cerr<<"SymMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -1127,7 +1127,7 @@ namespace tmv {
                     throw HermMatrixReadError<T>(i,0,m,reader.getis(),exp,got);
 #endif
             }
-            for(int j=0;j<i+1;++j) {
+            for(ptrdiff_t j=0;j<i+1;++j) {
                 if (j>0 && !reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                     std::cerr<<"SymMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -1176,7 +1176,7 @@ namespace tmv {
                 }
             }
             if (!reader.isCompact()) {
-                for(int j=i+1;j<N;++j) {
+                for(ptrdiff_t j=i+1;j<N;++j) {
                     if (!reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                         std::cerr<<"SymMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -1252,7 +1252,7 @@ namespace tmv {
             throw SymMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int s=size();
+        ptrdiff_t s=size();
         if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"SymMatrix Read Error: reading size\n";
@@ -1297,7 +1297,7 @@ namespace tmv {
             throw HermMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int s=size();
+        ptrdiff_t s=size();
         if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"HermMatrix Read Error: reading size\n";
@@ -1346,7 +1346,7 @@ namespace tmv {
                 throw HermMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int s=size();
+        ptrdiff_t s=size();
         if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"SymMatrix Read Error: reading size\n";

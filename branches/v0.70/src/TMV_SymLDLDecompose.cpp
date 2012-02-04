@@ -74,7 +74,7 @@ namespace tmv {
     template <bool herm, class T> 
     static void NonBlockLDL_Decompose(
         SymMatrixView<T> A, VectorView<T> xD, 
-        int* P, RT& logdet, T& signdet, int j1=0)
+        ptrdiff_t* P, RT& logdet, T& signdet, ptrdiff_t j1=0)
     {
         // Bunch-Kaufman algorithm for LDL Decomposition of a symmetric matrix.
         //
@@ -192,7 +192,7 @@ namespace tmv {
         TMVAssert(A.isrm() || A.iscm());
         TMVAssert(A.ct()==NonConj);
         TMVAssert(A.uplo()==Lower);
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
         const RT alpha = (TMV_SQRT(RT(17))+1)/8;
 
 #ifdef XDEBUG
@@ -202,7 +202,7 @@ namespace tmv {
 
         VectorView<T> D = A.diag();
         T* Dj = D.ptr()+j1*D.step();
-        for (int j=j1; j<N;) { // ++j or j+=2 done below
+        for (ptrdiff_t j=j1; j<N;) { // ++j or j+=2 done below
             //std::cout<<j<<"  ";
             bool seq1 = true;
             if (j == N-1) {
@@ -212,7 +212,7 @@ namespace tmv {
             } else {
                 RT ajj = herm ? TMV_ABS(TMV_REAL(*Dj)) : TMV_ABS(*Dj);
                 //std::cout<<ajj<<"  ";
-                int p; // p is relative to j index, not absolute.
+                ptrdiff_t p; // p is relative to j index, not absolute.
                 RT apj = A.col(j,j,N).maxAbsElement(&p);
                 //std::cout<<apj<<"  ";
                 // Check for underflow:
@@ -344,10 +344,10 @@ namespace tmv {
                     //                -= C (CE^-1)t (since E^-1 is Hermitian)
                     // A(p,q) -= C(p,0)*(L(q,0)*) + C(p,1)*(L(q,1)*)
                     //   p >= q, so loop from top down
-                    const int sj = A.stepj();
+                    const ptrdiff_t sj = A.stepj();
                     T* Cq0 = A.ptr() + (j+2) + j*sj;
                     T* Cq1 = Cq0 + sj;
-                    for(int q = j+2; q<N; ++q,++Cq0,++Cq1) {
+                    for(ptrdiff_t q = j+2; q<N; ++q,++Cq0,++Cq1) {
                         T Lq0 = *Cq0 * x + *Cq1 * z;
                         T Lq1 = *Cq0 * (herm?TMV_CONJ(z):z) + *Cq1 * y;
                         //std::cout<<q<<"  "<<*Cq0<<','<<*Cq1<<"  "<<Lq0<<','<<Lq1<<std::endl;
@@ -368,10 +368,10 @@ namespace tmv {
                     // A(j+2:N,j+2:N) -= CE^-1Ct
                     // A(p,q) -= L(p,0)*(C(q,0)*) + L(p,1)*(C(q,1)*)
                     //   p >= q, so loop from bottom up.
-                    const int si = A.stepi();
+                    const ptrdiff_t si = A.stepi();
                     T* Cp0 = A.ptr() + (N-1)*si + j;
                     T* Cp1 = Cp0 + 1;
-                    for(int p = N-1; p>=j+2; --p,Cp0-=si,Cp1-=si) {
+                    for(ptrdiff_t p = N-1; p>=j+2; --p,Cp0-=si,Cp1-=si) {
                         T Lp0 = *Cp0 * x + *Cp1 * z;
                         T Lp1 = *Cp0 * (herm?TMV_CONJ(z):z) + *Cp1 * y;
                         //std::cout<<p<<"  "<<*Cp0<<','<<*Cp1<<"  "<<Lp0<<','<<Lp1<<std::endl;
@@ -432,7 +432,7 @@ namespace tmv {
     template <bool herm, class T> 
     static void BlockLDL_Decompose(
         SymMatrixView<T> A, VectorView<T> xD, 
-        int* P, RT& logdet, T& signdet)
+        ptrdiff_t* P, RT& logdet, T& signdet)
     {
         // Blocked version with level 3 calls
 
@@ -450,21 +450,21 @@ namespace tmv {
 #endif
 
         const RT alpha = (TMV_SQRT(RT(17))+1)/8;
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
 
         VectorView<T> D = A.diag();
         Matrix<T,ColMajor> LD(N,SYM_LDL_BLOCKSIZE+1);
         T* Dj = D.ptr();
-        for (int j1=0; j1<N; ) {
-            int j2 = TMV_MIN(j1+SYM_LDL_BLOCKSIZE,N);
+        for (ptrdiff_t j1=0; j1<N; ) {
+            ptrdiff_t j2 = TMV_MIN(j1+SYM_LDL_BLOCKSIZE,N);
 
             if (j2 < N) { // On last loop we skip some steps.  See below.
-                int j;
+                ptrdiff_t j;
                 T* LDjj = LD.ptr()+j1;  // = LD(j,jj)
                 for (j=j1; j<j2;) { // ++j or j+=2 done below
                     //std::cout<<j<<"  ";
                     bool seq1 = true;
-                    int jj = j-j1; // Col index in LD
+                    ptrdiff_t jj = j-j1; // Col index in LD
 
                     LD.col(jj,j,N) = A.col(j,j,N);
                     LD.col(jj,j,N) -= A.subMatrix(j,N,j1,j) *
@@ -479,7 +479,7 @@ namespace tmv {
                             TMV_ABS(TMV_REAL(*LDjj)) :
                             TMV_ABS(*LDjj);
                         //std::cout<<ajj<<"  ";
-                        int p; // p is relative to j index, not absolute.
+                        ptrdiff_t p; // p is relative to j index, not absolute.
                         RT apj = LD.col(jj,j,N).maxAbsElement(&p);
                         //std::cout<<apj<<"  ";
                         // Check for underflow:
@@ -651,14 +651,14 @@ namespace tmv {
                         }
 
                         // A(j+2:N,j:j+2) = LD E^-1
-                        const int ldsj = LD.stepj();
+                        const ptrdiff_t ldsj = LD.stepj();
                         T* LDq0 = LD.ptr() + (j+2) + jj*ldsj;
                         T* LDq1 = LDq0 + ldsj;
                         if (A.iscm()) {
-                            const int sj = A.stepj();
+                            const ptrdiff_t sj = A.stepj();
                             T* Aq0 = A.ptr() + (j+2) + j*sj;
                             T* Aq1 = Aq0 + sj;
-                            for(int q=j+2; q<N; ++q,++Aq0,++Aq1,++LDq0,++LDq1) {
+                            for(ptrdiff_t q=j+2; q<N; ++q,++Aq0,++Aq1,++LDq0,++LDq1) {
 #ifdef TMVFLDEBUG
                                 TMVAssert(Aq0 >= A._first);
                                 TMVAssert(Aq0 < A._last);
@@ -669,10 +669,10 @@ namespace tmv {
                                 *Aq1 = *LDq0 * (herm?TMV_CONJ(z):z) + *LDq1 * y;
                             }
                         } else {
-                            const int si = A.stepi();
+                            const ptrdiff_t si = A.stepi();
                             T* Aq0 = A.ptr() + (j+2)*si + j;
                             T* Aq1 = Aq0 + 1;
-                            for(int q=j+2; q<N; ++q,Aq0+=si,Aq1+=si,++LDq0,++LDq1) {
+                            for(ptrdiff_t q=j+2; q<N; ++q,Aq0+=si,Aq1+=si,++LDq0,++LDq1) {
 #ifdef TMVFLDEBUG
                                 TMVAssert(Aq0 >= A._first);
                                 TMVAssert(Aq0 < A._last);
@@ -744,7 +744,7 @@ namespace tmv {
                 A3.reset(new SymMatrixView<T>(A3S->view()));
             }
             Vector<T> xD3(xD.size(),T(0));
-            AlignedArray<int> P3(A.size());
+            AlignedArray<ptrdiff_t> P3(A.size());
             RT logdet3(1);
             T signdet3(1);
             if (A.isherm()) 
@@ -764,9 +764,9 @@ namespace tmv {
             cerr<<"xD = "<<xD<<endl;
             cerr<<"Norm(diff) = "<<Norm(xD-xD3)<<endl;
             cerr<<"P3 = ";
-            for(int i=0;i<A.size();i++) cerr<<P3[i]<<" ";
+            for(ptrdiff_t i=0;i<A.size();i++) cerr<<P3[i]<<" ";
             cerr<<"\nP  = ";
-            for(int i=0;i<A.size();i++) cerr<<P[i]<<" ";
+            for(ptrdiff_t i=0;i<A.size();i++) cerr<<P[i]<<" ";
             cerr<<endl;
             cerr<<"det3 = "<<logdet3<<"  "<<signdet3<<endl;
             cerr<<"det = "<<logdet<<"  "<<signdet<<endl;
@@ -778,7 +778,7 @@ namespace tmv {
     template <bool herm, class T> 
     static void NonLapLDL_Decompose(
         SymMatrixView<T> A, VectorView<T> xD, 
-        int* P, RT& logdet, T& signdet)
+        ptrdiff_t* P, RT& logdet, T& signdet)
     {
         TMVAssert(A.size()>0);
         TMVAssert(xD.size()+1 == A.size());
@@ -799,7 +799,7 @@ namespace tmv {
     template <class T> 
     static inline void LapLDL_Decompose(
         SymMatrixView<T> A, VectorView<T> xD,
-        int* P, RT& logdet, T& signdet)
+        ptrdiff_t* P, RT& logdet, T& signdet)
     { 
         if (A.isherm())
             NonLapLDL_Decompose<true>(A,xD,P,logdet,signdet); 
@@ -810,7 +810,7 @@ namespace tmv {
     template <> 
     void LapLDL_Decompose(
         SymMatrixView<double> A, VectorView<double> xD,
-        int* P, double& logdet, double& signdet)
+        ptrdiff_t* P, double& logdet, double& signdet)
     {
         TMVAssert(A.size()>0);
         TMVAssert(xD.size()+1 == A.size());
@@ -911,7 +911,7 @@ namespace tmv {
     void LapLDL_Decompose(
         SymMatrixView<std::complex<double> > A,
         VectorView<std::complex<double> > xD,
-        int* P, double& logdet, std::complex<double>& signdet)
+        ptrdiff_t* P, double& logdet, std::complex<double>& signdet)
     {
         TMVAssert(A.size()>0);
         TMVAssert(xD.size()+1 == A.size());
@@ -1059,7 +1059,7 @@ namespace tmv {
     template <> 
     void LapLDL_Decompose(
         SymMatrixView<float> A, VectorView<float> xD,
-        int* P, float& logdet, float& signdet)
+        ptrdiff_t* P, float& logdet, float& signdet)
     {
         TMVAssert(A.size()>0);
         TMVAssert(xD.size()+1 == A.size());
@@ -1155,7 +1155,7 @@ namespace tmv {
     void LapLDL_Decompose(
         SymMatrixView<std::complex<float> > A,
         VectorView<std::complex<float> > xD,
-        int* P, float& logdet, std::complex<float>& signdet)
+        ptrdiff_t* P, float& logdet, std::complex<float>& signdet)
     {
         TMVAssert(A.size()>0);
         TMVAssert(xD.size()+1 == A.size());
@@ -1303,7 +1303,7 @@ namespace tmv {
     template <class T> 
     void LDL_Decompose(
         SymMatrixView<T> A, VectorView<T> xD, 
-        int* P, RT& logdet, T& signdet)
+        ptrdiff_t* P, RT& logdet, T& signdet)
     {
         TMVAssert(A.size() > 0);
         TMVAssert(A.iscm() || A.isrm());
@@ -1374,7 +1374,7 @@ namespace tmv {
                 A3.reset(new SymMatrixView<T>(A3S->view()));
             }
             Vector<T> xD3(xD.size(),T(0));
-            AlignedArray<int> P3(A.size());
+            AlignedArray<ptrdiff_t> P3(A.size());
             RT logdet3(1);
             T signdet3(1);
             if (A.isherm()) 
@@ -1393,9 +1393,9 @@ namespace tmv {
             cerr<<"xD = "<<xD<<endl;
             cerr<<"Norm(diff) = "<<Norm(xD-xD3)<<endl;
             cerr<<"P3 = ";
-            for(int i=0;i<A.size();i++) cerr<<P3[i]<<" ";
+            for(ptrdiff_t i=0;i<A.size();i++) cerr<<P3[i]<<" ";
             cerr<<"\nP  = ";
-            for(int i=0;i<A.size();i++) cerr<<P[i]<<" ";
+            for(ptrdiff_t i=0;i<A.size();i++) cerr<<P[i]<<" ";
             cerr<<endl;
             cerr<<"det3 = "<<logdet3<<"  "<<signdet3<<endl;
             cerr<<"det = "<<logdet<<"  "<<signdet<<endl;
@@ -1407,7 +1407,7 @@ namespace tmv {
 
     template <class T> 
     void LDL_Decompose(
-        SymMatrixView<T> A, SymBandMatrixView<T> D, int* P)
+        SymMatrixView<T> A, SymBandMatrixView<T> D, ptrdiff_t* P)
     {
 #ifdef XDEBUG
         Matrix<T> A0 = A;

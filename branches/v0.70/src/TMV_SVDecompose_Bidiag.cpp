@@ -79,8 +79,8 @@ namespace tmv {
         // The Bidiagonal Matrix B is stored as two vectors: D, E
         // D is the diagonal, E is the super-diagonal
         // A along with Ubeta and Vtbeta hold the U and Vt matrices.
-        const int M = A.colsize();
-        const int N = A.rowsize();
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t N = A.rowsize();
 
         TMVAssert(N <= M);
         TMVAssert(N > 0);
@@ -97,7 +97,7 @@ namespace tmv {
         T* Vtj = Vtbeta.ptr();
         //cout<<"Start Bidiag\n";
         //cout<<"A = "<<A<<endl;
-        for(int j=0;j<N-1;++j,++Uj,++Vtj) {
+        for(ptrdiff_t j=0;j<N-1;++j,++Uj,++Vtj) {
 #ifdef TMVFLDEBUG
             TMVAssert(Uj >= Ubeta._first);
             TMVAssert(Uj < Ubeta._last);
@@ -174,14 +174,14 @@ namespace tmv {
         // this doesn't work.  So instead of keeping Z,W we are forced to use
         // a bit more temporary storage and store the products ZYtm and mXtW.
         //
-        // Furthermore, the m in these products is maintained such that the
+        // Furthermore, the m in these products is maptrdiff_tained such that the
         // it already has the appropriate multiplies from the other side.
         // Then, when we are done with the block, the update becomes just:
         //
         // m' = m' - Y (ZYtm) - (mXtW) X
         //
-        const int M = A.colsize();
-        const int N = A.rowsize();
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t N = A.rowsize();
 
 #ifdef XDEBUG
         //cout<<"Start BlockBidiag: A = "<<A<<endl;
@@ -200,17 +200,17 @@ namespace tmv {
         TMVAssert(Vtbeta.step()==1);
         TMVAssert(E.step()==1);
 
-        Matrix<T,RowMajor> ZYtm(TMV_MIN(BIDIAG_BLOCKSIZE,N-1),N);
-        Matrix<T,ColMajor> mXtW(M,TMV_MIN(BIDIAG_BLOCKSIZE,N-1));
+        Matrix<T,RowMajor> ZYtm(TMV_MIN(BIDIAG_BLOCKSIZE,int(N)-1),N);
+        Matrix<T,ColMajor> mXtW(M,TMV_MIN(BIDIAG_BLOCKSIZE,int(N)-1));
 
         T* Uj = Ubeta.ptr();
         T* Vtj = Vtbeta.ptr();
         RT* Dj = D.ptr();
         const int Ds = D.step();
         RT* Ej = E.ptr();
-        for(int j1=0;j1<N-1;) {
-            int j2 = TMV_MIN(N-1,j1+BIDIAG_BLOCKSIZE);
-            for(int j=j1,jj=0;j<j2;++j,++jj,++Uj,++Vtj,Dj+=Ds,++Ej) { // jj = j-j1
+        for(ptrdiff_t j1=0;j1<N-1;) {
+            ptrdiff_t j2 = TMV_MIN(N-1,j1+BIDIAG_BLOCKSIZE);
+            for(ptrdiff_t j=j1,jj=0;j<j2;++j,++jj,++Uj,++Vtj,Dj+=Ds,++Ej) { // jj = j-j1
                 //cout<<"j = "<<j<<endl;
 
                 // Update current column:
@@ -772,7 +772,7 @@ namespace tmv {
         std::cout<<"D = "<<D<<std::endl;
         std::cout<<"E = "<<E<<std::endl;
         std::cout<<"signdet = "<<signdet<<std::endl;
-        int N = D.size();
+        ptrdiff_t N = D.size();
         Matrix<T> U(A);
         GetQFromQR(U.view(),Ubeta);
         Matrix<T> Vt(N,N);

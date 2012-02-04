@@ -58,8 +58,8 @@ namespace tmv {
     const T* SymMatrixComposite<T>::cptr() const
     {
         if (!itsm.get()) {
-            int s = this->size();
-            int len = s*s;
+            ptrdiff_t s = this->size();
+            ptrdiff_t len = s*s;
             itsm.resize(len);
             this->assignToS(SymMatrixView<T>(
                     itsm.get(),s,stepi(),stepj(),Sym,uplo(),NonConj 
@@ -69,11 +69,11 @@ namespace tmv {
     }
 
     template <class T> 
-    int SymMatrixComposite<T>::stepi() const
+    ptrdiff_t SymMatrixComposite<T>::stepi() const
     { return 1; }
 
     template <class T> 
-    int SymMatrixComposite<T>::stepj() const
+    ptrdiff_t SymMatrixComposite<T>::stepj() const
     { return this->size(); }
 
     //
@@ -85,7 +85,7 @@ namespace tmv {
         const GenSymMatrix<Ta>& A, const GenVector<Tx>& x,
         VectorView<T> y)
     {
-        const int N = A.size();
+        const ptrdiff_t N = A.size();
         if (add) y += A.lowerTri() * x;
         else y = A.lowerTri() * x;
 
@@ -103,14 +103,14 @@ namespace tmv {
         // y += [ A21 A22 A23 ] [ x ] --> y += [ A22 ] x
         //      [ A31 A32 A33 ] [ 0 ]          [ A32 ]
 
-        const int N = x.size(); // == A.size()
-        int j2 = N;
+        const ptrdiff_t N = x.size(); // == A.size()
+        ptrdiff_t j2 = N;
         for(const Tx* x2=x.cptr()+N-1; j2>0 && *x2==Tx(0); --j2,--x2);
         if (j2 == 0) {
             if (!add) y.setZero();
             return;
         }
-        int j1 = 0;
+        ptrdiff_t j1 = 0;
         for(const Tx* x1=x.cptr(); *x1==Tx(0); ++j1,++x1);
         if (j1 == 0 && j2 == N) DoUnitAMultMV<add>(A,x,y);
         else {

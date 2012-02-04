@@ -51,7 +51,7 @@ namespace tmv {
     //
 
     template <class T> 
-    T GenBandMatrix<T>::cref(int i, int j) const
+    T GenBandMatrix<T>::cref(ptrdiff_t i, ptrdiff_t j) const
     {
         if (okij(i,j)) {
             const T* mi = cptr()+i*stepi()+j*stepj();
@@ -63,7 +63,7 @@ namespace tmv {
 
     template <class T, int A>
     typename BandMatrixView<T,A>::reference BandMatrixView<T,A>::ref(
-        int i, int j) 
+        ptrdiff_t i, ptrdiff_t j) 
     {
         T* mi = ptr()+i*stepi()+j*stepj();
         return RefHelper<T>::makeRef(mi,ct());
@@ -135,7 +135,7 @@ namespace tmv {
     { return false; }
 #endif
 
-    int BandStorageLength(StorageType s, int cs, int rs, int lo, int hi)
+    ptrdiff_t BandStorageLength(StorageType s, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, ptrdiff_t hi)
     {
         TMVAssert(s == RowMajor || s == ColMajor || s == DiagMajor);
         if (cs == 0 || rs == 0) return 0;
@@ -165,18 +165,18 @@ namespace tmv {
         }
     }
 
-    int BandNumElements(int cs, int rs, int lo, int hi)
+    ptrdiff_t BandNumElements(ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, ptrdiff_t hi)
     {
         if (cs == 0 || rs == 0) return 0;
         else if (cs == rs) {
             return cs*(lo+hi+1) - (lo*(lo+1)/2) - (hi*(hi+1)/2);
         } else if (cs > rs) {
             // lox = number of subdiagonals that are clipped.
-            int lox = TMV_MAX(rs+lo-cs,0);
+            ptrdiff_t lox = TMV_MAX(rs+lo-cs,ptrdiff_t(0));
             return rs*(lo+hi+1) - (lox*(lox+1)/2) - (hi*(hi+1)/2);
         } else {
             // hix = number of superdiagonals that are clipped.
-            int hix = TMV_MAX(cs+hi-rs,0);
+            ptrdiff_t hix = TMV_MAX(cs+hi-rs,ptrdiff_t(0));
             return cs*(lo+hi+1) - (lo*(lo+1)/2) - (hix*(hix+1)/2);
         }
     }
@@ -187,7 +187,7 @@ namespace tmv {
 
     template <class T> 
     bool GenBandMatrix<T>::hasSubMatrix(
-        int i1, int i2, int j1, int j2, int istep, int jstep) const
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const
     {
         if (i1==i2 || j1==j2) return true; // no elements, so whatever...
         bool ok = true;
@@ -261,7 +261,7 @@ namespace tmv {
 
     template <class T> 
     bool GenBandMatrix<T>::hasSubVector(
-        int i, int j, int istep, int jstep, int size) const
+        ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t size) const
     {
         if (size==0) return true;
         bool ok = true;
@@ -278,8 +278,8 @@ namespace tmv {
             ok = false;
             std::cerr<<"j ("<<j<<") must be in 0 -- "<<rowsize()-1<<std::endl;
         }
-        int i2 = i+istep*(size-1);
-        int j2 = j+jstep*(size-1);
+        ptrdiff_t i2 = i+istep*(size-1);
+        ptrdiff_t j2 = j+jstep*(size-1);
         if (i2 < 0 || i2 >= colsize()) {
             ok = false;
             std::cerr<<"last element's i ("<<i2<<") must be in 0 -- ";
@@ -302,8 +302,8 @@ namespace tmv {
     } 
     template <class T> 
     bool GenBandMatrix<T>::hasSubBandMatrix(
-        int i1, int i2, int j1, int j2, int newnlo, int newnhi,
-        int istep, int jstep) const
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t newnlo, ptrdiff_t newnhi,
+        ptrdiff_t istep, ptrdiff_t jstep) const
     {
         if (i1==i2 || j1==j2) return true; // no elements, so whatever...
         bool ok = true;
@@ -382,7 +382,7 @@ namespace tmv {
 
     template <class T> 
     bool ConstBandMatrixView<T,FortranStyle>::hasSubMatrix(
-        int i1, int i2, int j1, int j2, int istep, int jstep) const
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const
     {
         if (i1==i2 || j1==j2) return true; // no elements, so whatever...
         bool ok = true;
@@ -453,7 +453,7 @@ namespace tmv {
 
     template <class T> 
     bool ConstBandMatrixView<T,FortranStyle>::hasSubVector(
-        int i, int j, int istep, int jstep, int size) const
+        ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t size) const
     {
         if (size==0) return true;
         bool ok = true;
@@ -470,8 +470,8 @@ namespace tmv {
             ok = false;
             std::cerr<<"j ("<<j<<") must be in 1 -- "<<this->rowsize()<<std::endl;
         }
-        int i2 = i+istep*(size-1);
-        int j2 = j+jstep*(size-1);
+        ptrdiff_t i2 = i+istep*(size-1);
+        ptrdiff_t j2 = j+jstep*(size-1);
         if (i2 < 1 || i2 > this->colsize()) {
             ok = false;
             std::cerr<<"last element's i ("<<i2<<") must be in 1 -- ";
@@ -495,8 +495,8 @@ namespace tmv {
 
     template <class T> 
     bool ConstBandMatrixView<T,FortranStyle>::hasSubBandMatrix(
-        int i1, int i2, int j1, int j2, int newnlo, int newnhi,
-        int istep, int jstep) const
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t newnlo, ptrdiff_t newnhi,
+        ptrdiff_t istep, ptrdiff_t jstep) const
     {
         if (i1==i2 || j1==j2) return true; // no elements, so whatever...
         bool ok = true;
@@ -577,10 +577,10 @@ namespace tmv {
     bool ConstBandMatrixView<T,A>::canLinearize() const
     {
         if (linsize == -1) {
-            int rs = this->rowsize();
-            int cs = this->colsize();
-            int lo = this->nlo();
-            int hi = this->nhi();
+            ptrdiff_t rs = this->rowsize();
+            ptrdiff_t cs = this->colsize();
+            ptrdiff_t lo = this->nlo();
+            ptrdiff_t hi = this->nhi();
             if (rs > cs+this->nhi()) rs = cs+this->nhi();
             if (cs > rs+this->nlo()) cs = rs+this->nlo();
 
@@ -597,10 +597,10 @@ namespace tmv {
     bool BandMatrixView<T,A>::canLinearize() const
     {
         if (linsize == -1) {
-            int rs = this->rowsize();
-            int cs = this->colsize();
-            int lo = this->nlo();
-            int hi = this->nhi();
+            ptrdiff_t rs = this->rowsize();
+            ptrdiff_t cs = this->colsize();
+            ptrdiff_t lo = this->nlo();
+            ptrdiff_t hi = this->nhi();
             if (rs > cs+this->nhi()) rs = cs+this->nhi();
             if (cs > rs+this->nlo()) cs = rs+this->nlo();
 
@@ -661,32 +661,32 @@ namespace tmv {
     template <class T>
     T GenBandMatrix<T>::sumElements() const
     {
-        const int M = colsize();
-        const int N = rowsize();
+        const ptrdiff_t M = colsize();
+        const ptrdiff_t N = rowsize();
         T sum = 0;
         if (M > 0 && N > 0) {
             if (isrm()) {
-                int j1=0;
-                int j2=nhi()+1;
-                int k=nlo();
-                for(int i=0;i<M;++i) {
+                ptrdiff_t j1=0;
+                ptrdiff_t j2=nhi()+1;
+                ptrdiff_t k=nlo();
+                for(ptrdiff_t i=0;i<M;++i) {
                     sum += row(i,j1,j2).sumElements();
                     if (k>0) --k; else ++j1;
                     if (j2<N) ++j2;
                     else if (j1==N) break;
                 }
             } else if (iscm()) {
-                int i1=0;
-                int i2=nlo()+1;
-                int k=nhi();
-                for(int j=0;j<N;++j) {
+                ptrdiff_t i1=0;
+                ptrdiff_t i2=nlo()+1;
+                ptrdiff_t k=nhi();
+                for(ptrdiff_t j=0;j<N;++j) {
                     sum += col(j,i1,i2).sumElements();
                     if (k>0) --k; else ++i1;
                     if (i2<M) ++i2;
                     else if (i1==M) break;
                 }
             } else {
-                for(int i=-nlo();i<=nhi();++i) sum += diag(i).sumElements();
+                for(ptrdiff_t i=-nlo();i<=nhi();++i) sum += diag(i).sumElements();
             }
         }
         return sum;
@@ -695,32 +695,32 @@ namespace tmv {
     template <class T>
     static RT DoSumAbsElements(const GenBandMatrix<T>& m)
     {
-        const int M = m.colsize();
-        const int N = m.rowsize();
+        const ptrdiff_t M = m.colsize();
+        const ptrdiff_t N = m.rowsize();
         RT sum = 0;
         if (M > 0 && N > 0) {
             if (m.isrm()) {
-                int j1=0;
-                int j2=m.nhi()+1;
-                int k=m.nlo();
-                for(int i=0;i<M;++i) {
+                ptrdiff_t j1=0;
+                ptrdiff_t j2=m.nhi()+1;
+                ptrdiff_t k=m.nlo();
+                for(ptrdiff_t i=0;i<M;++i) {
                     sum += m.row(i,j1,j2).sumAbsElements();
                     if (k>0) --k; else ++j1;
                     if (j2<N) ++j2;
                     else if (j1==N) break;
                 }
             } else if (m.iscm()) {
-                int i1=0;
-                int i2=m.nlo()+1;
-                int k=m.nhi();
-                for(int j=0;j<N;++j) {
+                ptrdiff_t i1=0;
+                ptrdiff_t i2=m.nlo()+1;
+                ptrdiff_t k=m.nhi();
+                for(ptrdiff_t j=0;j<N;++j) {
                     sum += m.col(j,i1,i2).sumAbsElements();
                     if (k>0) --k; else ++i1;
                     if (i2<M) ++i2;
                     else if (i1==M) break;
                 }
             } else {
-                for(int i=-m.nlo();i<=m.nhi();++i) 
+                for(ptrdiff_t i=-m.nlo();i<=m.nhi();++i) 
                     sum += m.diag(i).sumAbsElements();
             }
         }
@@ -730,32 +730,32 @@ namespace tmv {
     template <class T>
     static RT DoSumAbs2Elements(const GenBandMatrix<T>& m)
     {
-        const int M = m.colsize();
-        const int N = m.rowsize();
+        const ptrdiff_t M = m.colsize();
+        const ptrdiff_t N = m.rowsize();
         RT sum = 0;
         if (M > 0 && N > 0) {
             if (m.isrm()) {
-                int j1=0;
-                int j2=m.nhi()+1;
-                int k=m.nlo();
-                for(int i=0;i<M;++i) {
+                ptrdiff_t j1=0;
+                ptrdiff_t j2=m.nhi()+1;
+                ptrdiff_t k=m.nlo();
+                for(ptrdiff_t i=0;i<M;++i) {
                     sum += m.row(i,j1,j2).sumAbs2Elements();
                     if (k>0) --k; else ++j1;
                     if (j2<N) ++j2;
                     else if (j1==N) break;
                 }
             } else if (m.iscm()) {
-                int i1=0;
-                int i2=m.nlo()+1;
-                int k=m.nhi();
-                for(int j=0;j<N;++j) {
+                ptrdiff_t i1=0;
+                ptrdiff_t i2=m.nlo()+1;
+                ptrdiff_t k=m.nhi();
+                for(ptrdiff_t j=0;j<N;++j) {
                     sum += m.col(j,i1,i2).sumAbs2Elements();
                     if (k>0) --k; else ++i1;
                     if (i2<M) ++i2;
                     else if (i1==M) break;
                 }
             } else {
-                for(int i=-m.nlo();i<=m.nhi();++i) 
+                for(ptrdiff_t i=-m.nlo();i<=m.nhi();++i) 
                     sum += m.diag(i).sumAbs2Elements();
             }
         }
@@ -778,32 +778,32 @@ namespace tmv {
     template <class T> 
     RT GenBandMatrix<T>::normSq(RT scale) const
     {
-        const int M = colsize();
-        const int N = rowsize();
+        const ptrdiff_t M = colsize();
+        const ptrdiff_t N = rowsize();
         RT sum = 0;
         if (M > 0 && N > 0) {
             if (isrm()) {
-                int j1=0;
-                int j2=nhi()+1;
-                int k=nlo();
-                for(int i=0;i<M;++i) {
+                ptrdiff_t j1=0;
+                ptrdiff_t j2=nhi()+1;
+                ptrdiff_t k=nlo();
+                for(ptrdiff_t i=0;i<M;++i) {
                     sum += row(i,j1,j2).normSq(scale);
                     if (k>0) --k; else ++j1;
                     if (j2<N) ++j2;
                     else if (j1==N) break;
                 }
             } else if (iscm()) {
-                int i1=0;
-                int i2=nlo()+1;
-                int k=nhi();
-                for(int j=0;j<N;++j) {
+                ptrdiff_t i1=0;
+                ptrdiff_t i2=nlo()+1;
+                ptrdiff_t k=nhi();
+                for(ptrdiff_t j=0;j<N;++j) {
                     sum += col(j,i1,i2).normSq(scale);
                     if (k>0) --k; else ++i1;
                     if (i2<M) ++i2;
                     else if (i1==M) break;
                 }
             } else {
-                for(int i=-nlo();i<=nhi();++i) sum += diag(i).normSq(scale);
+                for(ptrdiff_t i=-nlo();i<=nhi();++i) sum += diag(i).normSq(scale);
             }
         }
         return sum;
@@ -813,14 +813,14 @@ namespace tmv {
     static RT NonLapMaxAbsElement(const GenBandMatrix<T>& m)
     {
         RT max = 0;
-        const int M = m.colsize();
-        const int N = m.rowsize();
+        const ptrdiff_t M = m.colsize();
+        const ptrdiff_t N = m.rowsize();
         if (M > 0 && N > 0) {
             if (m.isrm()) {
-                int j1=0;
-                int j2=m.nhi()+1;
-                int k=m.nlo();
-                for(int i=0;i<M;++i) {
+                ptrdiff_t j1=0;
+                ptrdiff_t j2=m.nhi()+1;
+                ptrdiff_t k=m.nlo();
+                for(ptrdiff_t i=0;i<M;++i) {
                     RT temp = m.row(i,j1,j2).maxAbsElement();
                     if (temp > max) max = temp;
                     if (k>0) --k; else ++j1;
@@ -828,10 +828,10 @@ namespace tmv {
                     else if (j1==N) break;
                 }
             } else if (m.iscm()) {
-                int i1=0;
-                int i2=m.nlo()+1;
-                int k=m.nhi();
-                for(int j=0;j<N;++j) {
+                ptrdiff_t i1=0;
+                ptrdiff_t i2=m.nlo()+1;
+                ptrdiff_t k=m.nhi();
+                for(ptrdiff_t j=0;j<N;++j) {
                     RT temp = m.col(j,i1,i2).maxAbsElement();
                     if (temp > max) max = temp;
                     if (k>0) --k; else ++i1;
@@ -839,7 +839,7 @@ namespace tmv {
                     else if (i1==M) break;
                 }
             } else {
-                for(int i=-m.nlo();i<=m.nhi();++i) {
+                for(ptrdiff_t i=-m.nlo();i<=m.nhi();++i) {
                     RT temp = m.diag(i).maxAbsElement();
                     if (temp > max) max = temp;
                 }
@@ -852,14 +852,14 @@ namespace tmv {
     static RT NonLapMaxAbs2Element(const GenBandMatrix<T>& m)
     {
         RT max = 0;
-        const int M = m.colsize();
-        const int N = m.rowsize();
+        const ptrdiff_t M = m.colsize();
+        const ptrdiff_t N = m.rowsize();
         if (M > 0 && N > 0) {
             if (m.isrm()) {
-                int j1=0;
-                int j2=m.nhi()+1;
-                int k=m.nlo();
-                for(int i=0;i<M;++i) {
+                ptrdiff_t j1=0;
+                ptrdiff_t j2=m.nhi()+1;
+                ptrdiff_t k=m.nlo();
+                for(ptrdiff_t i=0;i<M;++i) {
                     RT temp = m.row(i,j1,j2).maxAbs2Element();
                     if (temp > max) max = temp;
                     if (k>0) --k; else ++j1;
@@ -867,10 +867,10 @@ namespace tmv {
                     else if (j1==N) break;
                 }
             } else if (m.iscm()) {
-                int i1=0;
-                int i2=m.nlo()+1;
-                int k=m.nhi();
-                for(int j=0;j<N;++j) {
+                ptrdiff_t i1=0;
+                ptrdiff_t i2=m.nlo()+1;
+                ptrdiff_t k=m.nhi();
+                for(ptrdiff_t j=0;j<N;++j) {
                     RT temp = m.col(j,i1,i2).maxAbs2Element();
                     if (temp > max) max = temp;
                     if (k>0) --k; else ++i1;
@@ -878,7 +878,7 @@ namespace tmv {
                     else if (i1==M) break;
                 }
             } else {
-                for(int i=-m.nlo();i<=m.nhi();++i) {
+                for(ptrdiff_t i=-m.nlo();i<=m.nhi();++i) {
                     RT temp = m.diag(i).maxAbs2Element();
                     if (temp > max) max = temp;
                 }
@@ -891,14 +891,14 @@ namespace tmv {
     template <class T> 
     static RT NonLapNorm1(const GenBandMatrix<T>& m)
     {
-        const int M = m.colsize();
-        const int N = m.rowsize();
+        const ptrdiff_t M = m.colsize();
+        const ptrdiff_t N = m.rowsize();
         RT max = 0;
         if (M > 0 && N > 0) {
-            int i1=0;
-            int i2=m.nlo()+1;
-            int k=m.nhi();
-            for(int j=0;j<N;++j) {
+            ptrdiff_t i1=0;
+            ptrdiff_t i2=m.nlo()+1;
+            ptrdiff_t k=m.nhi();
+            for(ptrdiff_t j=0;j<N;++j) {
                 RT temp = m.col(j,i1,i2).norm1();
                 if (temp > max) max = temp;
                 if (k>0) --k; else ++i1;
@@ -1188,31 +1188,31 @@ namespace tmv {
     {
         if (this->canLinearize()) linearView().clip(thresh);
         else {
-            const int M = colsize();
-            const int N = rowsize();
+            const ptrdiff_t M = colsize();
+            const ptrdiff_t N = rowsize();
             if (M > 0 && N > 0) {
                 if (isrm()) {
-                    int j1=0;
-                    int j2=nhi()+1;
-                    int k=nlo();
-                    for(int i=0;i<M;++i) {
+                    ptrdiff_t j1=0;
+                    ptrdiff_t j2=nhi()+1;
+                    ptrdiff_t k=nlo();
+                    for(ptrdiff_t i=0;i<M;++i) {
                         row(i,j1,j2).clip(thresh);
                         if (k>0) --k; else ++j1;
                         if (j2<N) ++j2;
                         else if (j1==N) break;
                     }
                 } else if (iscm()) {
-                    int i1=0;
-                    int i2=nlo()+1;
-                    int k=nhi();
-                    for(int j=0;j<N;++j) {
+                    ptrdiff_t i1=0;
+                    ptrdiff_t i2=nlo()+1;
+                    ptrdiff_t k=nhi();
+                    for(ptrdiff_t j=0;j<N;++j) {
                         col(j,i1,i2).clip(thresh);
                         if (k>0) --k; else ++i1;
                         if (i2<M) ++i2;
                         else if (i1==M) break;
                     }
                 } else {
-                    for(int i=-nlo();i<=nhi();++i) diag(i).clip(thresh);
+                    for(ptrdiff_t i=-nlo();i<=nhi();++i) diag(i).clip(thresh);
                 }
             }
         }
@@ -1224,31 +1224,31 @@ namespace tmv {
     {
         if (this->canLinearize()) linearView().setZero();
         else {
-            const int M = colsize();
-            const int N = rowsize();
+            const ptrdiff_t M = colsize();
+            const ptrdiff_t N = rowsize();
             if (M > 0 && N > 0) {
                 if (isrm()) {
-                    int j1=0;
-                    int j2=nhi()+1;
-                    int k=nlo();
-                    for(int i=0;i<M;++i) {
+                    ptrdiff_t j1=0;
+                    ptrdiff_t j2=nhi()+1;
+                    ptrdiff_t k=nlo();
+                    for(ptrdiff_t i=0;i<M;++i) {
                         row(i,j1,j2).setZero();
                         if (k>0) --k; else ++j1;
                         if (j2<N) ++j2;
                         else if (j1==N) break;
                     }
                 } else if (iscm()) {
-                    int i1=0;
-                    int i2=nlo()+1;
-                    int k=nhi();
-                    for(int j=0;j<N;++j) {
+                    ptrdiff_t i1=0;
+                    ptrdiff_t i2=nlo()+1;
+                    ptrdiff_t k=nhi();
+                    for(ptrdiff_t j=0;j<N;++j) {
                         col(j,i1,i2).setZero();
                         if (k>0) --k; else ++i1;
                         if (i2<M) ++i2;
                         else if (i1==M) break;
                     }
                 } else {
-                    for(int i=-nlo();i<=nhi();++i) diag(i).setZero();
+                    for(ptrdiff_t i=-nlo();i<=nhi();++i) diag(i).setZero();
                 }
             }
         }
@@ -1260,31 +1260,31 @@ namespace tmv {
     {
         if (this->canLinearize()) linearView().setAllTo(x);
         else {
-            const int M = colsize();
-            const int N = rowsize();
+            const ptrdiff_t M = colsize();
+            const ptrdiff_t N = rowsize();
             if (M > 0 && N > 0) {
                 if (isrm()) {
-                    int j1=0;
-                    int j2=nhi()+1;
-                    int k=nlo();
-                    for(int i=0;i<M;++i) {
+                    ptrdiff_t j1=0;
+                    ptrdiff_t j2=nhi()+1;
+                    ptrdiff_t k=nlo();
+                    for(ptrdiff_t i=0;i<M;++i) {
                         row(i,j1,j2).setAllTo(x);
                         if (k>0) --k; else ++j1;
                         if (j2<N) ++j2;
                         else if (j1==N) break;
                     }
                 } else if (iscm()) {
-                    int i1=0;
-                    int i2=nlo()+1;
-                    int k=nhi();
-                    for(int j=0;j<N;++j) {
+                    ptrdiff_t i1=0;
+                    ptrdiff_t i2=nlo()+1;
+                    ptrdiff_t k=nhi();
+                    for(ptrdiff_t j=0;j<N;++j) {
                         col(j,i1,i2).setAllTo(x);
                         if (k>0) --k; else ++i1;
                         if (i2<M) ++i2;
                         else if (i1==M) break;
                     }
                 } else {
-                    for(int i=-nlo();i<=nhi();++i) diag(i).setAllTo(x);
+                    for(ptrdiff_t i=-nlo();i<=nhi();++i) diag(i).setAllTo(x);
                 }
             }
         }
@@ -1296,31 +1296,31 @@ namespace tmv {
     {
         if (this->canLinearize()) linearView().addToAll(x);
         else {
-            const int M = colsize();
-            const int N = rowsize();
+            const ptrdiff_t M = colsize();
+            const ptrdiff_t N = rowsize();
             if (M > 0 && N > 0) {
                 if (isrm()) {
-                    int j1=0;
-                    int j2=nhi()+1;
-                    int k=nlo();
-                    for(int i=0;i<M;++i) {
+                    ptrdiff_t j1=0;
+                    ptrdiff_t j2=nhi()+1;
+                    ptrdiff_t k=nlo();
+                    for(ptrdiff_t i=0;i<M;++i) {
                         row(i,j1,j2).addToAll(x);
                         if (k>0) --k; else ++j1;
                         if (j2<N) ++j2;
                         else if (j1==N) break;
                     }
                 } else if (iscm()) {
-                    int i1=0;
-                    int i2=nlo()+1;
-                    int k=nhi();
-                    for(int j=0;j<N;++j) {
+                    ptrdiff_t i1=0;
+                    ptrdiff_t i2=nlo()+1;
+                    ptrdiff_t k=nhi();
+                    for(ptrdiff_t j=0;j<N;++j) {
                         col(j,i1,i2).addToAll(x);
                         if (k>0) --k; else ++i1;
                         if (i2<M) ++i2;
                         else if (i1==M) break;
                     }
                 } else {
-                    for(int i=-nlo();i<=nhi();++i) diag(i).addToAll(x);
+                    for(ptrdiff_t i=-nlo();i<=nhi();++i) diag(i).addToAll(x);
                 }
             }
         }
@@ -1332,7 +1332,7 @@ namespace tmv {
     {
         TMVAssert(colsize() == rowsize());
         TMVAssert(nlo() == nhi());
-        for(int i=1;i<=nhi();++i) Swap(diag(-i),diag(i));
+        for(ptrdiff_t i=1;i<=nhi();++i) Swap(diag(-i),diag(i));
     }
 
     template <class T, int A>
@@ -1340,31 +1340,31 @@ namespace tmv {
     {
         if (this->canLinearize()) linearView().conjugateSelf();
         else {
-            const int M = colsize();
-            const int N = rowsize();
+            const ptrdiff_t M = colsize();
+            const ptrdiff_t N = rowsize();
             if (isComplex(T()) && M > 0 && N > 0) {
                 if (isrm()) {
-                    int j1=0;
-                    int j2=nhi()+1;
-                    int k=nlo();
-                    for(int i=0;i<M;++i) {
+                    ptrdiff_t j1=0;
+                    ptrdiff_t j2=nhi()+1;
+                    ptrdiff_t k=nlo();
+                    for(ptrdiff_t i=0;i<M;++i) {
                         row(i,j1,j2).conjugateSelf();
                         if (k>0) --k; else ++j1;
                         if (j2<N) ++j2;
                         else if (j1==N) break;
                     }
                 } else if (iscm()) {
-                    int i1=0;
-                    int i2=nlo()+1;
-                    int k=nhi();
-                    for(int j=0;j<N;++j) {
+                    ptrdiff_t i1=0;
+                    ptrdiff_t i2=nlo()+1;
+                    ptrdiff_t k=nhi();
+                    for(ptrdiff_t j=0;j<N;++j) {
                         col(j,i1,i2).conjugateSelf();
                         if (k>0) --k; else ++i1;
                         if (i2<M) ++i2;
                         else if (i1==M) break;
                     }
                 } else {
-                    for(int i=-nlo();i<=nhi();++i) diag(i).conjugateSelf();
+                    for(ptrdiff_t i=-nlo();i<=nhi();++i) diag(i).conjugateSelf();
                 }
             }
         }
@@ -1454,31 +1454,31 @@ namespace tmv {
         TMVAssert2(m1.rowsize() == m2.rowsize());
         TMVAssert2(m1.nlo() == m2.nlo());
         TMVAssert2(m1.nhi() == m2.nhi());
-        const int M = m1.colsize();
-        const int N = m1.rowsize();
+        const ptrdiff_t M = m1.colsize();
+        const ptrdiff_t N = m1.rowsize();
         if (M > 0 && N > 0) {
             if (m1.isrm() && m2.isrm()) {
-                int j1=0;
-                int j2=m1.nhi()+1;
-                int k=m1.nlo();
-                for(int i=0;i<M;++i) {
+                ptrdiff_t j1=0;
+                ptrdiff_t j2=m1.nhi()+1;
+                ptrdiff_t k=m1.nlo();
+                for(ptrdiff_t i=0;i<M;++i) {
                     Swap(m1.row(i,j1,j2),m2.row(i,j1,j2));
                     if (k>0) --k; else ++j1;
                     if (j2<N) ++j2;
                     else if (j1==N) break;
                 }
             } else if (m1.iscm() && m2.iscm()) {
-                int i1=0;
-                int i2=m1.nlo()+1;
-                int k=m1.nhi();
-                for(int j=0;j<N;++j) {
+                ptrdiff_t i1=0;
+                ptrdiff_t i2=m1.nlo()+1;
+                ptrdiff_t k=m1.nhi();
+                for(ptrdiff_t j=0;j<N;++j) {
                     Swap(m1.col(j,i1,i2),m2.col(j,i1,i2));
                     if (k>0) --k; else ++i1;
                     if (i2<M) ++i2;
                     else if (i1==M) break;
                 }
             } else {
-                for(int i=-m1.nlo();i<=m1.nhi();++i) 
+                for(ptrdiff_t i=-m1.nlo();i<=m1.nhi();++i) 
                     Swap(m1.diag(i),m2.diag(i));
             }
         }
@@ -1495,17 +1495,17 @@ namespace tmv {
         else if (m1.rowsize() != m2.rowsize()) return false;
         else if (m1.isSameAs(m2)) return true;
         else {
-            int lo = TMV_MIN(m1.nlo(),m2.nlo());
-            int hi = TMV_MIN(m1.nhi(),m2.nhi());
-            for(int i=-lo;i<=hi;++i) 
+            ptrdiff_t lo = TMV_MIN(m1.nlo(),m2.nlo());
+            ptrdiff_t hi = TMV_MIN(m1.nhi(),m2.nhi());
+            for(ptrdiff_t i=-lo;i<=hi;++i) 
                 if (m1.diag(i) != m2.diag(i)) return false;
-            for(int i=-m1.nlo();i<-lo;++i)
+            for(ptrdiff_t i=-m1.nlo();i<-lo;++i)
                 if (m1.diag(i).maxAbs2Element() != T1(0)) return false;
-            for(int i=-m2.nlo();i<-lo;++i)
+            for(ptrdiff_t i=-m2.nlo();i<-lo;++i)
                 if (m2.diag(i).maxAbs2Element() != T2(0)) return false;
-            for(int i=hi+1;i<=m1.nhi();++i)
+            for(ptrdiff_t i=hi+1;i<=m1.nhi();++i)
                 if (m1.diag(i).maxAbs2Element() != T1(0)) return false;
-            for(int i=hi+1;i<=m2.nhi();++i)
+            for(ptrdiff_t i=hi+1;i<=m2.nhi();++i)
                 if (m2.diag(i).maxAbs2Element() != T2(0)) return false;
             return true;
         }
@@ -1540,10 +1540,10 @@ namespace tmv {
     template <class T>
     void GenBandMatrix<T>::write(const TMV_Writer& writer) const
     {
-        const int M = colsize();
-        const int N = rowsize();
-        int j1=0;
-        int j2=nhi()+1;
+        const ptrdiff_t M = colsize();
+        const ptrdiff_t N = rowsize();
+        ptrdiff_t j1=0;
+        ptrdiff_t j2=nhi()+1;
 
         writer.begin();
         writer.writeCode("B");
@@ -1553,20 +1553,20 @@ namespace tmv {
         writer.writeFullSize(nhi());
         writer.writeStart();
 
-        for(int i=0;i<M;++i) {
+        for(ptrdiff_t i=0;i<M;++i) {
             writer.writeLParen();
             if (!writer.isCompact()) {
-                for(int j=0;j<j1;++j) {
+                for(ptrdiff_t j=0;j<j1;++j) {
                     writer.writeValue(T(0));
                     if (j<N-1) writer.writeSpace();
                 }
             }
-            for(int j=j1;j<j2;++j) {
+            for(ptrdiff_t j=j1;j<j2;++j) {
                 if (j > j1) writer.writeSpace();
                 writer.writeValue(cref(i,j));
             }
             if (!writer.isCompact()) {
-                for(int j=j2;j<N;++j) {
+                for(ptrdiff_t j=j2;j<N;++j) {
                     writer.writeSpace();
                     writer.writeValue(T(0));
                 }
@@ -1586,10 +1586,10 @@ namespace tmv {
     {
     public :
         BandMatrix<T> m;
-        int i,j;
+        ptrdiff_t i,j;
         std::string exp,got;
-        int cs,rs;
-        int lo,hi;
+        ptrdiff_t cs,rs;
+        ptrdiff_t lo,hi;
         T v1;
         bool is, iseof, isbad;
 
@@ -1606,12 +1606,12 @@ namespace tmv {
 
         BandMatrixReadError(
             const GenBandMatrix<T>& _m, std::istream& _is,
-            int _cs, int _rs, int _lo, int _hi) throw() :
+            ptrdiff_t _cs, ptrdiff_t _rs, ptrdiff_t _lo, ptrdiff_t _hi) throw() :
             ReadError("BandMatrix."),
             m(_m), i(0), j(0), cs(_cs), rs(_rs), lo(_lo), hi(_hi), v1(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         BandMatrixReadError(
-            int _i, int _j, const GenBandMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenBandMatrix<T>& _m,
             std::istream& _is,
             const std::string& _e, const std::string& _g) throw() :
             ReadError("BandMatrix."),
@@ -1619,7 +1619,7 @@ namespace tmv {
             cs(m.colsize()), rs(m.rowsize()), lo(m.nlo()), hi(m.nhi()), v1(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         BandMatrixReadError(
-            int _i, int _j, const GenBandMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenBandMatrix<T>& _m,
             std::istream& _is, T _v1=0) throw() :
             ReadError("BandMatrix."),
             m(_m), i(_i), j(_j),
@@ -1667,15 +1667,15 @@ namespace tmv {
             if (m.colsize() > 0 || m.rowsize() > 0) {
                 os<<"The portion of the BandMatrix which was successfully "
                     "read is: \n";
-                const int N = m.rowsize();
-                for(int ii=0;ii<i;++ii) {
+                const ptrdiff_t N = m.rowsize();
+                for(ptrdiff_t ii=0;ii<i;++ii) {
                     os<<"( ";
-                    for(int jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
+                    for(ptrdiff_t jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
                     os<<" )\n";
 
                 }
                 os<<"( ";
-                for(int jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';      
+                for(ptrdiff_t jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';      
                 os<<" )\n";
             }
         }
@@ -1685,12 +1685,12 @@ namespace tmv {
     template <class T>
     static void FinishRead(const TMV_Reader& reader, BandMatrixView<T> m)
     {
-        const int M = m.colsize();
-        const int N = m.rowsize();
+        const ptrdiff_t M = m.colsize();
+        const ptrdiff_t N = m.rowsize();
         std::string exp,got;
         T temp;
-        int j1=0;
-        int j2=m.nhi()+1;
+        ptrdiff_t j1=0;
+        ptrdiff_t j2=m.nhi()+1;
 
         if (!reader.readStart(exp,got)) {
 #ifdef NOTHROW
@@ -1700,7 +1700,7 @@ namespace tmv {
             throw BandMatrixReadError<T>(0,0,m,reader.getis(),exp,got);
 #endif
         }
-        for(int i=0;i<M;++i) {
+        for(ptrdiff_t i=0;i<M;++i) {
             if (!reader.readLParen(exp,got)) {
 #ifdef NOTHROW
                 std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -1710,7 +1710,7 @@ namespace tmv {
 #endif
             }
             if (!reader.isCompact()) {
-                for(int j=0;j<j1;++j) {
+                for(ptrdiff_t j=0;j<j1;++j) {
                     if (!reader.readValue(temp)) {
 #ifdef NOTHROW
                         std::cerr<<"BandMatrix Read Error: reading value\n";
@@ -1737,7 +1737,7 @@ namespace tmv {
                     }
                 }
             }
-            for(int j=j1;j<j2;++j) {
+            for(ptrdiff_t j=j1;j<j2;++j) {
                 if (j>j1 && !reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                     std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -1757,7 +1757,7 @@ namespace tmv {
                 m.ref(i,j) = temp;
             }
             if (!reader.isCompact()) {
-                for(int j=j2;j<N;++j) {
+                for(ptrdiff_t j=j2;j<N;++j) {
                     if (!reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                         std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -1825,7 +1825,7 @@ namespace tmv {
             throw BandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int cs=colsize(), rs=rowsize(), lo=nlo(), hi=nhi();
+        ptrdiff_t cs=colsize(), rs=rowsize(), lo=nlo(), hi=nhi();
         if (!reader.readSize(cs,exp,got) || 
             !reader.readSize(rs,exp,got) || 
             !reader.readFullSize(lo,exp,got) || 
@@ -1856,7 +1856,7 @@ namespace tmv {
             throw BandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int cs=colsize(), rs=rowsize(), lo=nlo(), hi=nhi();
+        ptrdiff_t cs=colsize(), rs=rowsize(), lo=nlo(), hi=nhi();
         if (!reader.readSize(cs,exp,got) || 
             !reader.readSize(rs,exp,got) || 
             !reader.readFullSize(lo,exp,got) || 

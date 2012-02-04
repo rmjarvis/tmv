@@ -54,7 +54,7 @@ namespace tmv {
     //
 
     template <class T> 
-    T GenSymBandMatrix<T>::cref(int i, int j) const
+    T GenSymBandMatrix<T>::cref(ptrdiff_t i, ptrdiff_t j) const
     {
         if (okij(i,j)) {
             if ((uplo() == Upper && i<=j) || (uplo() == Lower && i>=j)) {
@@ -71,7 +71,7 @@ namespace tmv {
 
     template <class T, int A>
     typename SymBandMatrixView<T,A>::reference SymBandMatrixView<T,A>::ref(
-        int i, int j)
+        ptrdiff_t i, ptrdiff_t j)
     {
         if ((uplo() == Upper && i<=j) || (uplo() == Lower && i>=j)) {
             T* mi = ptr() + i*stepi() + j*stepj();
@@ -188,12 +188,12 @@ namespace tmv {
 
     template <class T> 
     bool GenSymBandMatrix<T>::hasSubMatrix(
-        int i1, int i2, int j1, int j2, int istep, int jstep) const
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const
     {
         if (i1==i2 || j1==j2) return true; // no elements, so whatever...
         bool ok = true;
-        int i2x = i2-istep;
-        int j2x = j2-jstep;
+        ptrdiff_t i2x = i2-istep;
+        ptrdiff_t j2x = j2-jstep;
         if (istep == 0) {
             ok = false;
             std::cerr<<"istep ("<<istep<<") can not be 0\n";
@@ -263,8 +263,8 @@ namespace tmv {
 
     template <class T> 
     bool GenSymBandMatrix<T>::hasSubBandMatrix(
-        int i1, int i2, int j1, int j2, int newnlo, int newnhi,
-        int istep, int jstep) const
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t newnlo, ptrdiff_t newnhi,
+        ptrdiff_t istep, ptrdiff_t jstep) const
     {
         if (i1==i2 || j1==j2) return true; // no elements, so whatever...
         bool ok = true;
@@ -348,7 +348,7 @@ namespace tmv {
 
     template <class T> 
     bool GenSymBandMatrix<T>::hasSubVector(
-        int i, int j, int istep, int jstep, int n) const 
+        ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t n) const 
     {
         if (n==0) return true;
         bool ok = true;
@@ -365,8 +365,8 @@ namespace tmv {
             ok = false;
             std::cerr<<"j ("<<j<<") must be in 0 -- "<<size()-1<<std::endl;
         }
-        int i2 = i+istep*(n-1);
-        int j2 = j+jstep*(n-1);
+        ptrdiff_t i2 = i+istep*(n-1);
+        ptrdiff_t j2 = j+jstep*(n-1);
         if (i2 < 0 || i2 >= size()) {
             ok = false;
             std::cerr<<"last element's i ("<<i2<<") must be in 0 -- ";
@@ -395,7 +395,7 @@ namespace tmv {
 
     template <class T> 
     bool GenSymBandMatrix<T>::hasSubSymMatrix(
-        int i1, int i2, int istep) const 
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const 
     {
         if (i1==i2) return true;
         bool ok=true;
@@ -432,7 +432,7 @@ namespace tmv {
 
     template <class T> 
     bool GenSymBandMatrix<T>::hasSubSymBandMatrix(
-        int i1, int i2, int newnlo, int istep) const 
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t newnlo, ptrdiff_t istep) const 
     {
         if (i1==i2) return true;
         bool ok=true;
@@ -469,7 +469,7 @@ namespace tmv {
 
     template <class T> 
     bool ConstSymBandMatrixView<T,FortranStyle>::hasSubMatrix(
-        int i1, int i2, int j1, int j2, int istep, int jstep) const
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const
     {
         if (i1==i2 || j1==j2) return true; // no elements, so whatever...
         bool ok = true;
@@ -542,8 +542,8 @@ namespace tmv {
 
     template <class T> 
     bool ConstSymBandMatrixView<T,FortranStyle>::hasSubBandMatrix(
-        int i1, int i2, int j1, int j2, int newnlo, int newnhi,
-        int istep, int jstep) const
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t newnlo, ptrdiff_t newnhi,
+        ptrdiff_t istep, ptrdiff_t jstep) const
     {
         if (i1==i2 || j1==j2) return true; // no elements, so whatever...
         bool ok = true;
@@ -627,7 +627,7 @@ namespace tmv {
 
     template <class T> 
     bool ConstSymBandMatrixView<T,FortranStyle>::hasSubVector(
-        int i, int j, int istep, int jstep, int n) const 
+        ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t n) const 
     {
         if (n==0) return true;
         bool ok = true;
@@ -644,8 +644,8 @@ namespace tmv {
             ok = false;
             std::cerr<<"j ("<<j<<") must be in 1 -- "<<this->size()<<std::endl;
         }
-        int i2 = i+istep*(n-1);
-        int j2 = j+jstep*(n-1);
+        ptrdiff_t i2 = i+istep*(n-1);
+        ptrdiff_t j2 = j+jstep*(n-1);
         if (i2 < 1 || i2 > this->size()) {
             ok = false;
             std::cerr<<"last element's i ("<<i2<<") must be in 1 -- ";
@@ -674,7 +674,7 @@ namespace tmv {
 
     template <class T> 
     bool ConstSymBandMatrixView<T,FortranStyle>::hasSubSymMatrix(
-        int i1, int i2, int istep) const 
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const 
     {
         if (i1==i2) return true;
         bool ok=true;
@@ -710,7 +710,7 @@ namespace tmv {
 
     template <class T> 
     bool ConstSymBandMatrixView<T,FortranStyle>::hasSubSymBandMatrix(
-        int i1, int i2, int newnlo, int istep) const 
+        ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t newnlo, ptrdiff_t istep) const 
     {
         if (i1==i2) return true;
         bool ok=true;
@@ -849,12 +849,12 @@ namespace tmv {
     {
         if (m.nlo() > 0) {
             RT max(0);
-            const int N = m.size();
+            const ptrdiff_t N = m.size();
             if (N > 0) {
-                int i1=0;
-                int i2=m.nlo()+1;
-                int k=m.nlo();
-                for(int j=0;j<N;++j) {
+                ptrdiff_t i1=0;
+                ptrdiff_t i2=m.nlo()+1;
+                ptrdiff_t k=m.nlo();
+                for(ptrdiff_t j=0;j<N;++j) {
                     RT temp = m.col(j,i1,j).norm1();
                     temp += m.col(j,j,i2).norm1();
                     if (temp > max) max = temp;
@@ -1174,9 +1174,9 @@ namespace tmv {
     template <class T> 
     void GenSymBandMatrix<T>::write(const TMV_Writer& writer) const
     {
-        const int N = rowsize();
-        int j1=0;
-        int j2=nlo()+1;
+        const ptrdiff_t N = rowsize();
+        ptrdiff_t j1=0;
+        ptrdiff_t j2=nlo()+1;
 
         writer.begin();
         writer.writeCode(issym()?"sB":"hB");
@@ -1185,24 +1185,24 @@ namespace tmv {
         writer.writeFullSize(nlo());
         writer.writeStart();
 
-        for(int i=0;i<N;++i) {
+        for(ptrdiff_t i=0;i<N;++i) {
             writer.writeLParen();
             if (!writer.isCompact()) {
-                for(int j=0;j<j1;++j) {
+                for(ptrdiff_t j=0;j<j1;++j) {
                     writer.writeValue(T(0));
                     writer.writeSpace();
                 }
             }
-            for(int j=j1;j<i+1;++j) {
+            for(ptrdiff_t j=j1;j<i+1;++j) {
                 if (j > j1) writer.writeSpace();
                 writer.writeValue(cref(i,j));
             }
             if (!writer.isCompact()) {
-                for(int j=i+1;j<j2;++j) {
+                for(ptrdiff_t j=i+1;j<j2;++j) {
                     writer.writeSpace();
                     writer.writeValue(cref(i,j));
                 }
-                for(int j=j2;j<N;++j) {
+                for(ptrdiff_t j=j2;j<N;++j) {
                     writer.writeSpace();
                     writer.writeValue(T(0));
                 }
@@ -1222,10 +1222,10 @@ namespace tmv {
     {
     public :
         SymBandMatrix<T> m;
-        int i,j;
+        ptrdiff_t i,j;
         std::string exp,got;
-        int s;
-        int lo;
+        ptrdiff_t s;
+        ptrdiff_t lo;
         T v1, v2;
         bool is, iseof, isbad;
 
@@ -1240,21 +1240,21 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
         SymBandMatrixReadError(
-            int _i, int _j, const GenSymBandMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenSymBandMatrix<T>& _m,
             std::istream& _is, std::string _e, std::string _g) throw() :
             ReadError("SymBandMatrix."),
             m(_m), i(_i), j(_j), exp(_e), got(_g),
             s(m.size()), lo(m.nlo()), v1(0), v2(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         SymBandMatrixReadError(
-            int _i, int _j, const GenSymBandMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenSymBandMatrix<T>& _m,
             std::istream& _is, T _v1=0, T _v2=0) throw() :
             ReadError("SymBandMatrix."),
             m(_m), i(_i), j(_j), s(m.size()), lo(m.nlo()), v1(_v1), v2(_v2),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         SymBandMatrixReadError(
             const GenSymBandMatrix<T>& _m, std::istream& _is, 
-            int _s, int _lo) throw() :
+            ptrdiff_t _s, ptrdiff_t _lo) throw() :
             ReadError("SymBandMatrix."),
             m(_m), i(0), j(0), s(_s), lo(_lo), v1(0), v2(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
@@ -1299,14 +1299,14 @@ namespace tmv {
             }
             if (m.size() > 0) {
                 os<<"The portion of the SymBandMatrix which was successfully read is: \n";
-                const int N = m.size();
-                for(int ii=0;ii<i;++ii) {
+                const ptrdiff_t N = m.size();
+                for(ptrdiff_t ii=0;ii<i;++ii) {
                     os<<"( ";
-                    for(int jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
+                    for(ptrdiff_t jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
                     os<<" )\n";
                 }
                 os<<"( ";
-                for(int jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';      
+                for(ptrdiff_t jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';      
                 os<<" )\n";
             }
         }
@@ -1317,10 +1317,10 @@ namespace tmv {
     {
     public :
         HermBandMatrix<T> m;
-        int i,j;
+        ptrdiff_t i,j;
         std::string exp,got;
-        int s;
-        int lo;
+        ptrdiff_t s;
+        ptrdiff_t lo;
         T v1, v2;
         bool is, iseof, isbad;
 
@@ -1335,21 +1335,21 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
         HermBandMatrixReadError(
-            int _i, int _j, const GenSymBandMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenSymBandMatrix<T>& _m,
             std::istream& _is, std::string _e, std::string _g) throw() :
             ReadError("HermBandMatrix."),
             m(_m), i(_i), j(_j), exp(_e), got(_g),
             s(m.size()), lo(m.nlo()), v1(0), v2(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         HermBandMatrixReadError(
-            int _i, int _j, const GenSymBandMatrix<T>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const GenSymBandMatrix<T>& _m,
             std::istream& _is, T _v1=0, T _v2=0) throw() :
             ReadError("HermBandMatrix."),
             m(_m), i(_i), j(_j), s(m.size()), lo(m.nlo()), v1(_v1), v2(_v2),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         HermBandMatrixReadError(
             const GenSymBandMatrix<T>& _m, std::istream& _is, 
-            int _s, int _lo) throw() :
+            ptrdiff_t _s, ptrdiff_t _lo) throw() :
             ReadError("HermBandMatrix."),
             m(_m), i(0), j(0), s(_s), lo(_lo), v1(0), v2(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
@@ -1397,14 +1397,14 @@ namespace tmv {
             }
             if (m.size() > 0) {
                 os<<"The portion of the HermBandMatrix which was successfully read is: \n";
-                const int N = m.size();
-                for(int ii=0;ii<i;++ii) {
+                const ptrdiff_t N = m.size();
+                for(ptrdiff_t ii=0;ii<i;++ii) {
                     os<<"( ";
-                    for(int jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
+                    for(ptrdiff_t jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
                     os<<" )\n";
                 }
                 os<<"( ";
-                for(int jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';      
+                for(ptrdiff_t jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';      
                 os<<" )\n";
             }
         }
@@ -1414,9 +1414,9 @@ namespace tmv {
     template <class T>
     static void FinishRead(const TMV_Reader& reader, SymBandMatrixView<T> m) 
     {
-        const int N = m.size();
-        int j1=0;
-        int j2=m.nlo()+1;
+        const ptrdiff_t N = m.size();
+        ptrdiff_t j1=0;
+        ptrdiff_t j2=m.nlo()+1;
         std::string exp, got;
         T temp;
         if (!reader.readStart(exp,got)) {
@@ -1430,7 +1430,7 @@ namespace tmv {
                 throw HermBandMatrixReadError<T>(0,0,m,reader.getis(),exp,got);
 #endif
         }
-        for(int i=0;i<N;++i) {
+        for(ptrdiff_t i=0;i<N;++i) {
             if (!reader.readLParen(exp,got)) {
 #ifdef NOTHROW
                 std::cerr<<"SymBandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -1443,7 +1443,7 @@ namespace tmv {
 #endif
             }
             if (!reader.isCompact()) {
-                for(int j=0;j<j1;++j) {
+                for(ptrdiff_t j=0;j<j1;++j) {
                     if (!reader.readValue(temp)) {
 #ifdef NOTHROW
                         std::cerr<<"SymBandMatrix Read Error: reading value\n";
@@ -1479,7 +1479,7 @@ namespace tmv {
                     }
                 }
             }
-            for(int j=j1;j<i+1;++j) {
+            for(ptrdiff_t j=j1;j<i+1;++j) {
                 if (j>j1 && !reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                     std::cerr<<"SymBandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -1528,7 +1528,7 @@ namespace tmv {
                 }
             }
             if (!reader.isCompact()) {
-                for(int j=i+1;j<j2;++j) {
+                for(ptrdiff_t j=i+1;j<j2;++j) {
                     if (!reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                         std::cerr<<"SymBandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -1553,7 +1553,7 @@ namespace tmv {
                     }
                     m.ref(i,j) = temp;
                 }
-                for(int j=j2;j<N;++j) {
+                for(ptrdiff_t j=j2;j<N;++j) {
                     if (!reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                         std::cerr<<"SymBandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -1641,7 +1641,7 @@ namespace tmv {
             throw SymBandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int s=size(), lo=nlo();
+        ptrdiff_t s=size(), lo=nlo();
         if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"SymBandMatrix Read Error: reading size\n";
@@ -1650,7 +1650,7 @@ namespace tmv {
             throw SymBandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int s2=s;
+        ptrdiff_t s2=s;
         if (!reader.readSimpleSize(s2,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"SymBandMatrix Read Error: reading size\n";
@@ -1694,7 +1694,7 @@ namespace tmv {
             throw HermBandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int s=size(), lo=nlo();
+        ptrdiff_t s=size(), lo=nlo();
         if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"HermBandMatrix Read Error: reading size\n";
@@ -1703,7 +1703,7 @@ namespace tmv {
             throw HermBandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int s2=s;
+        ptrdiff_t s2=s;
         if (!reader.readSimpleSize(s2,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"HermBandMatrix Read Error: reading size\n";
@@ -1751,7 +1751,7 @@ namespace tmv {
                 throw HermBandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int s=size(), lo=nlo();
+        ptrdiff_t s=size(), lo=nlo();
         if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"SymBandMatrix Read Error: reading size\n";

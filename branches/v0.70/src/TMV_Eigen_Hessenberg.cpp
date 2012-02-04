@@ -70,7 +70,7 @@ namespace tmv {
         // On output, H is stored in the upper-Hessenberg part of A
         // U is stored in compact form in the rest of A along with 
         // the vector Ubeta.
-        const int N = A.rowsize();
+        const ptrdiff_t N = A.rowsize();
 
         TMVAssert(A.colsize() == A.rowsize());
         TMVAssert(N > 0);
@@ -82,7 +82,7 @@ namespace tmv {
         // We use Householder reflections to reduce A to the Hessenberg form:
         T* Uj = Ubeta.ptr();
         T det = 0; // Ignore Householder det calculations
-        for(int j=0;j<N-1;++j,++Uj) {
+        for(ptrdiff_t j=0;j<N-1;++j,++Uj) {
 #ifdef TMVFLDEBUG
             TMVAssert(Uj >= Ubeta._first);
             TMVAssert(Uj < Ubeta._last);
@@ -119,7 +119,7 @@ namespace tmv {
     static void BlockHessenberg(
         MatrixView<T> A, VectorView<T> Ubeta)
     {
-        // Much like the block version of Bidiagonalize, we try to maintain
+        // Much like the block version of Bidiagonalize, we try to maptrdiff_tain
         // the operation of several successive Householder matrices in
         // a block form, where the net Block Householder is I - YZYt.
         //
@@ -146,7 +146,7 @@ namespace tmv {
         // We also need to do this same calculation for each column as we
         // progress through the block.
         //
-        const int N = A.rowsize();
+        const ptrdiff_t N = A.rowsize();
 
 #ifdef XDEBUG
         Matrix<T> A0(A);
@@ -158,19 +158,19 @@ namespace tmv {
         TMVAssert(!Ubeta.isconj());
         TMVAssert(Ubeta.step()==1);
 
-        int ncolmax = MIN(HESS_BLOCKSIZE,N-1);
+        ptrdiff_t ncolmax = MIN(HESS_BLOCKSIZE,N-1);
         Matrix<T,RowMajor> mYZt_full(N,ncolmax);
         UpperTriMatrix<T,NonUnitDiag|ColMajor> Z_full(ncolmax);
 
         T det(0); // Ignore Householder Determinant calculations
         T* Uj = Ubeta.ptr();
-        for(int j1=0;j1<N-1;) {
-            int j2 = MIN(N-1,j1+HESS_BLOCKSIZE);
-            int ncols = j2-j1;
+        for(ptrdiff_t j1=0;j1<N-1;) {
+            ptrdiff_t j2 = MIN(N-1,j1+HESS_BLOCKSIZE);
+            ptrdiff_t ncols = j2-j1;
             MatrixView<T> mYZt = mYZt_full.subMatrix(0,N-j1,0,ncols);
             UpperTriMatrixView<T> Z = Z_full.subTriMatrix(0,ncols);
 
-            for(int j=j1,jj=0;j<j2;++j,++jj,++Uj) { // jj = j-j1
+            for(ptrdiff_t j=j1,jj=0;j<j2;++j,++jj,++Uj) { // jj = j-j1
 
                 // Update current column of A
                 //
@@ -304,12 +304,12 @@ namespace tmv {
         TMVAssert(Ubeta.size() == A.rowsize()-1);
         TMVAssert(A.ct()==NonConj);
 
-        int n = A.rowsize();
-        int ilo = 1;
-        int ihi = n;
-        int lda = A.stepj();
+        ptrdiff_t n = A.rowsize();
+        ptrdiff_t ilo = 1;
+        ptrdiff_t ihi = n;
+        ptrdiff_t lda = A.stepj();
 #ifndef LAPNOWORK
-        int lwork = n*LAP_BLOCKSIZE;
+        ptrdiff_t lwork = n*LAP_BLOCKSIZE;
         double* work = LAP_DWork(lwork);
 #endif
         LAPNAME(dgehrd) (
@@ -319,7 +319,7 @@ namespace tmv {
 #ifdef LAPNOWORK
         LAP_Results("dgehrd");
 #else
-        LAP_Results(int(work[0]),m,n,lwork,"dgehrd");
+        LAP_Results(ptrdiff_t(work[0]),m,n,lwork,"dgehrd");
 #endif
     }
     template <> void LapHessenberg(
@@ -331,12 +331,12 @@ namespace tmv {
         TMVAssert(Ubeta.size() == A.rowsize()-1);
         TMVAssert(A.ct()==NonConj);
 
-        int n = A.rowsize();
-        int ilo = 1;
-        int ihi = n;
-        int lda = A.stepj();
+        ptrdiff_t n = A.rowsize();
+        ptrdiff_t ilo = 1;
+        ptrdiff_t ihi = n;
+        ptrdiff_t lda = A.stepj();
 #ifndef LAPNOWORK
-        int lwork = n*LAP_BLOCKSIZE;
+        ptrdiff_t lwork = n*LAP_BLOCKSIZE;
         std::complex<double>* work = LAP_ZWork(lwork);
 #endif
         LAPNAME(zgehrd) (
@@ -360,12 +360,12 @@ namespace tmv {
         TMVAssert(Ubeta.size() == A.rowsize()-1);
         TMVAssert(A.ct()==NonConj);
 
-        int n = A.rowsize();
-        int ilo = 1;
-        int ihi = n;
-        int lda = A.stepj();
+        ptrdiff_t n = A.rowsize();
+        ptrdiff_t ilo = 1;
+        ptrdiff_t ihi = n;
+        ptrdiff_t lda = A.stepj();
 #ifndef LAPNOWORK
-        int lwork = n*LAP_BLOCKSIZE;
+        ptrdiff_t lwork = n*LAP_BLOCKSIZE;
         float* work = LAP_SWork(lwork);
 #endif
         LAPNAME(sgebrd) (
@@ -375,7 +375,7 @@ namespace tmv {
 #ifdef LAPNOWORK
         LAP_Results("sgehrd");
 #else
-        LAP_Results(int(work[0]),m,n,lwork,"sgehrd");
+        LAP_Results(ptrdiff_t(work[0]),m,n,lwork,"sgehrd");
 #endif
     }
     template <> void LapHessenberg(
@@ -387,12 +387,12 @@ namespace tmv {
         TMVAssert(Ubeta.size() == A.rowsize());
         TMVAssert(A.ct()==NonConj);
 
-        int n = A.rowsize();
-        int ilo = 1;
-        int ihi = n;
-        int lda = A.stepj();
+        ptrdiff_t n = A.rowsize();
+        ptrdiff_t ilo = 1;
+        ptrdiff_t ihi = n;
+        ptrdiff_t lda = A.stepj();
 #ifndef LAPNOWORK
-        int lwork = n*LAP_BLOCKSIZE;
+        ptrdiff_t lwork = n*LAP_BLOCKSIZE;
         std::complex<float>* work = LAP_CWork(lwork);
 #endif
         LAPNAME(cgehrd) (

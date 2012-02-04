@@ -3,10 +3,10 @@
 
 #define DefDivEq(T,T1)\
   template void LDL_LDivEq(const GenSymMatrix<T1 >& L,  \
-      const GenVector<T1 >& xD, const int* P, \
+      const GenVector<T1 >& xD, const ptrdiff_t* P, \
       MatrixView<T > m); \
   template void LDL_RDivEq(const GenSymMatrix<T1 >& L,  \
-      const GenVector<T1 >& xD, const int* P, \
+      const GenVector<T1 >& xD, const ptrdiff_t* P, \
       MatrixView<T > m); \
 
 DefDivEq(T,T)

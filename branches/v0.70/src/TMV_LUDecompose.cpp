@@ -67,7 +67,7 @@ namespace tmv {
     //
 
     template <class T> 
-    static void NonBlockLUDecompose(MatrixView<T> A, int* P)
+    static void NonBlockLUDecompose(MatrixView<T> A, ptrdiff_t* P)
     {
         // LU Decompostion with partial pivoting.
         //
@@ -139,18 +139,18 @@ namespace tmv {
         TMVAssert(A.iscm());
         typedef TMV_RealType(T) RT;
 
-        const int N = A.rowsize();
-        const int M = A.colsize();
-        const int R = TMV_MIN(N,M);
+        const ptrdiff_t N = A.rowsize();
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t R = TMV_MIN(N,M);
 #ifdef XDEBUG
         Matrix<T> A0(A);
 #endif
 
         const T* Ujj = A.cptr();
-        const int Ads = A.stepj()+1;
-        int* Pj = P;
+        const ptrdiff_t Ads = A.stepj()+1;
+        ptrdiff_t* Pj = P;
 
-        for (int j=0; j<R; ++j,Ujj+=Ads,++Pj) {
+        for (ptrdiff_t j=0; j<R; ++j,Ujj+=Ads,++Pj) {
             //std::cout<<"j = "<<j<<std::endl;
             //std::cout<<"A.col(j) = "<<A.col(j)<<std::endl;
             if (j > 0) {
@@ -164,7 +164,7 @@ namespace tmv {
             }
 
             // Find the pivot element
-            int ip;
+            ptrdiff_t ip;
             RT piv = A.col(j,j,M).maxAbsElement(&ip);
             // ip is relative to j index, not absolute.
             //std::cout<<"piv = "<<piv<<std::endl;
@@ -214,7 +214,7 @@ namespace tmv {
             cerr<<"A0 = "<<TMV_Text(A)<<"  "<<A0<<endl;
             cerr<<"LU = "<<A<<endl;
             cerr<<"P = (";
-            for(int i=0;i<R;i++) cerr<<P[i]<<" ";
+            for(ptrdiff_t i=0;i<R;i++) cerr<<P[i]<<" ";
             cerr<<")\n";
             cerr<<"AA = "<<AA<<endl;
             cerr<<"Norm(A0-AA) = "<<Norm(AA-A0)<<endl;
@@ -225,7 +225,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static void RecursiveLUDecompose(MatrixView<T> A, int* P)
+    static void RecursiveLUDecompose(MatrixView<T> A, ptrdiff_t* P)
     {
         //std::cout<<"Start recursive LU: A = "<<A<<std::endl;
         // The recursive LU algorithm is similar to the block algorithm, except 
@@ -244,14 +244,14 @@ namespace tmv {
 
         TMVAssert(A.ct()==NonConj);
         TMVAssert(A.iscm());
-        const int N = A.rowsize();
-        const int M = A.colsize();
-        const int R = TMV_MIN(N,M);
+        const ptrdiff_t N = A.rowsize();
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t R = TMV_MIN(N,M);
 
         if (R > LU_BLOCKSIZE2) {
             // Split N in half, with N1 being rounded to multiple of BLOCKSIZE
             // if appropriate.
-            int N1 = R/2;
+            ptrdiff_t N1 = R/2;
             if (N1 > LU_BLOCKSIZE) N1 = (N1/LU_BLOCKSIZE)*LU_BLOCKSIZE;
 
             MatrixView<T> A0 = A.colRange(0,N1);
@@ -275,7 +275,7 @@ namespace tmv {
 
             // Decompose A~ into PLU
             RecursiveLUDecompose(A11,P+N1);
-            for(int i=N1;i<R;++i) P[i]+=N1;
+            for(ptrdiff_t i=N1;i<R;++i) P[i]+=N1;
 
             // Apply the new permutations to the left half
             A0.permuteRows(P,N1,R);
@@ -287,7 +287,7 @@ namespace tmv {
             VectorView<T> A0 = A.col(0);
             VectorView<T> A1 = A.col(1);
 
-            int ip0,ip1;
+            ptrdiff_t ip0,ip1;
             //std::cout<<"A0 = "<<A0<<std::endl;
             RT piv = A0.maxAbsElement(&ip0);
             //std::cout<<"ip0 => "<<ip0<<std::endl;
@@ -315,7 +315,7 @@ namespace tmv {
                 ip1 = 1;
                 T* Ai0 = A0.ptr()+1;
                 T* Ai1 = A1.ptr()+1;
-                for(int i=1;i<M;++i,++Ai0,++Ai1) {
+                for(ptrdiff_t i=1;i<M;++i,++Ai0,++Ai1) {
 #ifdef TMVFLDEBUG
                     TMVAssert(Ai0 >= A._first);
                     TMVAssert(Ai0 < A._last);
@@ -403,13 +403,13 @@ namespace tmv {
             cerr<<"A0 = "<<A_0<<endl;
             cerr<<"LU = "<<A<<endl;
             cerr<<"P = (";
-            for(int i=0;i<R;i++) cerr<<P[i]<<" ";
+            for(ptrdiff_t i=0;i<R;i++) cerr<<P[i]<<" ";
             cerr<<")\n";
             cerr<<"A2 = "<<A2<<endl;
             cerr<<"Norm(A-A2) = "<<Norm(A-A2)<<endl;
             cerr<<"Norm(AA-A0) = "<<Norm(AA-A_0)<<endl;
             cerr<<"correct P = (";
-            for(int i=0;i<R;i++) cerr<<P2[i]<<" ";
+            for(ptrdiff_t i=0;i<R;i++) cerr<<P2[i]<<" ";
             cerr<<")\n";
             abort();
         }
@@ -417,7 +417,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static inline void NonLapLUDecompose(MatrixView<T> A, int* P)
+    static inline void NonLapLUDecompose(MatrixView<T> A, ptrdiff_t* P)
     {
         TMVAssert(A.ct()==NonConj);
         TMVAssert(A.iscm());
@@ -427,42 +427,42 @@ namespace tmv {
 
 #ifdef ALAP
     template <class T> 
-    static void LapLUDecompose(MatrixView<T> A, int* P)
+    static void LapLUDecompose(MatrixView<T> A, ptrdiff_t* P)
     { NonLapLUDecompose(A,P); }
 #ifdef INST_DOUBLE
     template <> 
-    void LapLUDecompose(MatrixView<double> A, int* P)
+    void LapLUDecompose(MatrixView<double> A, ptrdiff_t* P)
     {
         TMVAssert(A.iscm());
         TMVAssert(A.ct()==NonConj);
 
-        int m = A.colsize();
-        int n = A.rowsize();
-        int lda = A.stepj();
+        ptrdiff_t m = A.colsize();
+        ptrdiff_t n = A.rowsize();
+        ptrdiff_t lda = A.stepj();
         AlignedArray<int> lap_p(n);
         LAPNAME(dgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                          LAPP(lap_p.get()) LAPINFO);
         LAP_Results("dgetrf");
-        const int M = A.colsize();
-        for(int i=0;i<M;i++) {
+        const ptrdiff_t M = A.colsize();
+        for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
         }
     }
     template <> 
-    void LapLUDecompose(MatrixView<std::complex<double> > A, int* P)
+    void LapLUDecompose(MatrixView<std::complex<double> > A, ptrdiff_t* P)
     {
         TMVAssert(A.iscm());
         TMVAssert(A.ct()==NonConj);
 
-        int m = A.colsize();
-        int n = A.rowsize();
-        int lda = A.stepj();
+        ptrdiff_t m = A.colsize();
+        ptrdiff_t n = A.rowsize();
+        ptrdiff_t lda = A.stepj();
         AlignedArray<int> lap_p(n);
         LAPNAME(zgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                          LAPP(lap_p.get()) LAPINFO);
         LAP_Results("zgetrf");
-        const int M = A.colsize();
-        for(int i=0;i<M;i++) {
+        const ptrdiff_t M = A.colsize();
+        for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
         }
     }
@@ -474,38 +474,38 @@ namespace tmv {
     // Try reducing KMP_STACKSIZE or increasing the shell stack limit.
     // So I'm cutting it out for MKL compilations
     template <> 
-    void LapLUDecompose(MatrixView<float> A, int* P)
+    void LapLUDecompose(MatrixView<float> A, ptrdiff_t* P)
     {
         TMVAssert(A.iscm());
         TMVAssert(A.ct()==NonConj);
 
-        int m = A.colsize();
-        int n = A.rowsize();
-        int lda = A.stepj();
+        ptrdiff_t m = A.colsize();
+        ptrdiff_t n = A.rowsize();
+        ptrdiff_t lda = A.stepj();
         AlignedArray<int> lap_p(n);
         LAPNAME(sgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                          LAPP(lap_p.get()) LAPINFO);
         LAP_Results("sgetrf");
-        const int M = A.colsize();
-        for(int i=0;i<M;i++) {
+        const ptrdiff_t M = A.colsize();
+        for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
         }
     }
     template <> 
-    void LapLUDecompose(MatrixView<std::complex<float> > A, int* P)
+    void LapLUDecompose(MatrixView<std::complex<float> > A, ptrdiff_t* P)
     {
         TMVAssert(A.iscm());
         TMVAssert(A.ct()==NonConj);
 
-        int m = A.colsize();
-        int n = A.rowsize();
-        int lda = A.stepj();
+        ptrdiff_t m = A.colsize();
+        ptrdiff_t n = A.rowsize();
+        ptrdiff_t lda = A.stepj();
         AlignedArray<int> lap_p(n);
         LAPNAME(cgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                          LAPP(lap_p.get()) LAPINFO);
         LAP_Results("cgetrf");
-        const int M = A.colsize();
-        for(int i=0;i<M;i++) {
+        const ptrdiff_t M = A.colsize();
+        for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
         }
     }
@@ -514,7 +514,7 @@ namespace tmv {
 #endif // ALAP
 
     template <class T> 
-    void LU_Decompose(MatrixView<T> A, int* P)
+    void LU_Decompose(MatrixView<T> A, ptrdiff_t* P)
     {
 #ifdef XDEBUG
         std::cout<<"Start LUDecompose:"<<std::endl;
@@ -551,7 +551,7 @@ namespace tmv {
             cerr<<"A0 = "<<A0<<endl;
             cerr<<"LU = "<<A<<endl;
             cerr<<"P = (";
-            for(int i=0;i<A.rowsize();i++) cerr<<P[i]<<" ";
+            for(ptrdiff_t i=0;i<A.rowsize();i++) cerr<<P[i]<<" ";
             cerr<<")\n";
             cerr<<"A2 = "<<A2<<endl;
             cerr<<"Norm(A0-A2) = "<<Norm(A0-A2)<<endl;
