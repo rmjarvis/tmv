@@ -1631,7 +1631,9 @@ namespace tmv {
     void SymBandMatrix<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
-        if (!reader.readCode("sB",exp,got) && !(isReal(T()) && got=="hB")) {
+        bool ok = isReal(T()) ? 
+            reader.readCode("sB","hB",exp,got) : reader.readCode("sB",exp,got);
+        if (!ok) {
 #ifdef NOTHROW
             std::cerr<<"SymBandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
             exit(1);
@@ -1682,7 +1684,9 @@ namespace tmv {
     void HermBandMatrix<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
-        if (!reader.readCode("hB",exp,got) && !(isReal(T()) && got=="sB")) {
+        bool ok = isReal(T()) ? 
+            reader.readCode("sB","hB",exp,got) : reader.readCode("hB",exp,got);
+        if (!ok) {
 #ifdef NOTHROW
             std::cerr<<"HermBandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
             exit(1);
@@ -1733,8 +1737,10 @@ namespace tmv {
     void SymBandMatrixView<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
-        if (!reader.readCode(issym()?"sB":"hB",exp,got) && 
-            !(isReal(T()) && got=="hB")) {
+        bool ok = isReal(T()) ? 
+            reader.readCode("S","H",exp,got) : 
+            reader.readCode(issym()?"S":"H",exp,got);
+        if (!ok) {
 #ifdef NOTHROW
             std::cerr<<"SymBandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
             exit(1);

@@ -1242,7 +1242,9 @@ namespace tmv {
     void SymMatrix<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
-        if (!reader.readCode("S",exp,got) && !(isReal(T()) && got=="H")) {
+        bool ok = isReal(T()) ? 
+            reader.readCode("S","H",exp,got) : reader.readCode("S",exp,got);
+        if (!ok) {
 #ifdef NOTHROW
             std::cerr<<"SymMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
             exit(1);
@@ -1285,7 +1287,9 @@ namespace tmv {
     void HermMatrix<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
-        if (!reader.readCode("H",exp,got) && !(isReal(T()) && got=="S")) {
+        bool ok = isReal(T()) ? 
+            reader.readCode("S","H",exp,got) : reader.readCode("H",exp,got);
+        if (!ok) {
 #ifdef NOTHROW
             std::cerr<<"HermMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
             exit(1);
@@ -1328,8 +1332,10 @@ namespace tmv {
     void SymMatrixView<T,A>::read(const TMV_Reader& reader)
     {
         std::string exp,got;
-        if (!reader.readCode(issym()?"S":"H",exp,got) && 
-            !(isReal(T()) && got=="H")) {
+        bool ok = isReal(T()) ? 
+            reader.readCode("S","H",exp,got) : 
+            reader.readCode(issym()?"S":"H",exp,got);
+        if (!ok) {
 #ifdef NOTHROW
             std::cerr<<"SymMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
             exit(1);

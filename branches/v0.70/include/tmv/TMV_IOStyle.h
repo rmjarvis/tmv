@@ -298,6 +298,25 @@ namespace tmv {
             }
         }
 
+        // For real SymMatrix, there are two valid codes.
+        bool readCode(
+            const std::string& code1, const std::string& code2,
+            std::string& exp, std::string& got) const
+        {
+            if (s.usecode) {
+                if (readStr(trim(code1),exp,got)) {
+                    return readSpace(exp,got);
+                } else if (got == code2) {
+                    exp = got = "";
+                    return readSpace(exp,got);
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+
         bool readStart(std::string& exp, std::string& got) const
         { return readStr(trim(s.start),exp,got); }
 

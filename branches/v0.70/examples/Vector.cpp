@@ -232,14 +232,14 @@ int main() try
     v4 << 2, 5.3, -1.5, -7, 0.5, -2.8;
     std::cout<<"v4 = "<<v4<<std::endl;
     //! v4 = 6  ( 2  5.3  -1.5  -7  0.5  -2.8 )
-    int p[6];
-    v4.sort(p);
+    tmv::Permutation P;
+    v4.sort(P);
     std::cout<<"Sorted: v4 = "<<v4<<std::endl;
     //! Sorted: v4 = 6  ( -7  -2.8  -1.5  0.5  2  5.3 )
-    v4.reversePermute(p);
+    v4 = P.inverse() * v4;
     std::cout<<"Sort undone: v4 = "<<v4<<std::endl;
     //! Sort undone: v4 = 6  ( 2  5.3  -1.5  -7  0.5  -2.8 )
-    v4.sort(); // Don't necessarily need p.
+    v4.sort(); // Don't necessarily need P.
     std::cout<<"Resorted: v4 = "<<v4<<std::endl;
     //! Resorted: v4 = 6  ( -7  -2.8  -1.5  0.5  2  5.3 )
 
