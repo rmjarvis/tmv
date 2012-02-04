@@ -708,22 +708,22 @@ namespace tmv {
 #endif
         }
         int n=size();
-        if (!reader.readSize(n)) {
+        if (!reader.readSize(n,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"Permutation Read Error: reading size\n";
             exit(1);
 #else
-            throw PermutationReadError(reader.getis());
+            throw PermutationReadError(reader.getis(),exp,got);
 #endif
         }
         if (n != size()) resize(n);
         n=size();
-        if (!reader.readSimpleSize(n)) {
+        if (!reader.readSimpleSize(n,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"Permutation Read Error: reading size\n";
             exit(1);
 #else
-            throw PermutationReadError(reader.getis());
+            throw PermutationReadError(reader.getis(),exp,got);
 #endif
         }
         if (n != size()) {
@@ -735,12 +735,12 @@ namespace tmv {
 #endif
         }
 
-        if (!reader.readFullSize(temp)) {
+        if (!reader.readFullSize(temp,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"Permutation Read Error: reading inv\n";
             exit(1);
 #else
-            throw PermutationReadError(reader.getis());
+            throw PermutationReadError(reader.getis(),exp,got);
 #endif
         }
         isinv = temp;

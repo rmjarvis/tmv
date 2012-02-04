@@ -1640,21 +1640,21 @@ namespace tmv {
 #endif
         }
         int s=size(), lo=nlo();
-        if (!reader.readSize(s)) {
+        if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"SymBandMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw SymBandMatrixReadError<T>(reader.getis());
+            throw SymBandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         int s2=s;
-        if (!reader.readSimpleSize(s2)) {
+        if (!reader.readSimpleSize(s2,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"SymBandMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw SymBandMatrixReadError<T>(reader.getis());
+            throw SymBandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s2 != s) {
@@ -1665,12 +1665,12 @@ namespace tmv {
             throw SymBandMatrixReadError<T>(*this,reader.getis(),s,lo);
 #endif
         }
-        if (!reader.readFullSize(lo)) {
+        if (!reader.readFullSize(lo,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"SymBandMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw SymBandMatrixReadError<T>(reader.getis());
+            throw SymBandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size() || lo != nlo()) resize(s,lo);
@@ -1691,21 +1691,21 @@ namespace tmv {
 #endif
         }
         int s=size(), lo=nlo();
-        if (!reader.readSize(s)) {
+        if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"HermBandMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw HermBandMatrixReadError<T>(reader.getis());
+            throw HermBandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         int s2=s;
-        if (!reader.readSimpleSize(s2)) {
+        if (!reader.readSimpleSize(s2,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"HermBandMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw HermBandMatrixReadError<T>(reader.getis());
+            throw HermBandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s2 != s) {
@@ -1716,12 +1716,12 @@ namespace tmv {
             throw HermBandMatrixReadError<T>(*this,reader.getis(),s,lo);
 #endif
         }
-        if (!reader.readFullSize(lo)) {
+        if (!reader.readFullSize(lo,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"HermBandMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw HermBandMatrixReadError<T>(reader.getis());
+            throw HermBandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size() || lo != nlo()) resize(s,lo);
@@ -1746,15 +1746,15 @@ namespace tmv {
 #endif
         }
         int s=size(), lo=nlo();
-        if (!reader.readSize(s)) {
+        if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"SymBandMatrix Read Error: reading size\n";
             exit(1);
 #else
             if (issym())
-                throw SymBandMatrixReadError<T>(reader.getis());
+                throw SymBandMatrixReadError<T>(reader.getis(),exp,got);
             else
-                throw HermBandMatrixReadError<T>(reader.getis());
+                throw HermBandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size()) {
@@ -1769,15 +1769,15 @@ namespace tmv {
 #endif
         }
         s=size();
-        if (!reader.readSimpleSize(s)) {
+        if (!reader.readSimpleSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"SymBandMatrix Read Error: reading size\n";
             exit(1);
 #else
             if (issym())
-                throw SymBandMatrixReadError<T>(reader.getis());
+                throw SymBandMatrixReadError<T>(reader.getis(),exp,got);
             else
-                throw HermBandMatrixReadError<T>(reader.getis());
+                throw HermBandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size()) {
@@ -1791,15 +1791,15 @@ namespace tmv {
                 throw HermBandMatrixReadError<T>(*this,reader.getis(),s,lo);
 #endif
         }
-        if (!reader.readFullSize(lo)) {
+        if (!reader.readFullSize(lo,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"SymBandMatrix Read Error: reading size\n";
             exit(1);
 #else
             if (issym())
-                throw SymBandMatrixReadError<T>(reader.getis());
+                throw SymBandMatrixReadError<T>(reader.getis(),exp,got);
             else
-                throw HermBandMatrixReadError<T>(reader.getis());
+                throw HermBandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (lo != nlo()) {

@@ -1190,22 +1190,22 @@ namespace tmv {
 #endif
         }
         int s=size();
-        if (!reader.readSize(s)) {
+        if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"UpperTriMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw UpperTriMatrixReadError<T>(reader.getis());
+            throw UpperTriMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size()) resize(s);
         s=size();
-        if (!reader.readSimpleSize(s)) {
+        if (!reader.readSimpleSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"UpperTriMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw UpperTriMatrixReadError<T>(reader.getis());
+            throw UpperTriMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size()) {
@@ -1233,12 +1233,12 @@ namespace tmv {
 #endif
         }
         int s=size();
-        if (!reader.readSize(s)) {
+        if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"UpperTriMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw UpperTriMatrixReadError<T>(reader.getis());
+            throw UpperTriMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size()) {
@@ -1250,12 +1250,12 @@ namespace tmv {
 #endif
         }
         s=size();
-        if (!reader.readSimpleSize(s)) {
+        if (!reader.readSimpleSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"UpperTriMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw UpperTriMatrixReadError<T>(reader.getis());
+            throw UpperTriMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size()) {
@@ -1516,22 +1516,22 @@ namespace tmv {
 #endif
         }
         int s=size();
-        if (!reader.readSize(s)) {
+        if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"LowerTriMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw LowerTriMatrixReadError<T>(reader.getis());
+            throw LowerTriMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size()) resize(s);
         s=size();
-        if (!reader.readSimpleSize(s)) {
+        if (!reader.readSimpleSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"LowerTriMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw LowerTriMatrixReadError<T>(reader.getis());
+            throw LowerTriMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size()) {
@@ -1559,12 +1559,12 @@ namespace tmv {
 #endif
         }
         int s=size();
-        if (!reader.readSize(s)) {
+        if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"LowerTriMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw LowerTriMatrixReadError<T>(reader.getis());
+            throw LowerTriMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size()) {
@@ -1576,12 +1576,12 @@ namespace tmv {
 #endif
         }
         s=size();
-        if (!reader.readSimpleSize(s)) {
+        if (!reader.readSimpleSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"LowerTriMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw LowerTriMatrixReadError<T>(reader.getis());
+            throw LowerTriMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size()) {

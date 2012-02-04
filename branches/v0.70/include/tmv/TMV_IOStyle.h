@@ -287,8 +287,15 @@ namespace tmv {
         bool readCode(
             const std::string& code, std::string& exp, std::string& got) const
         {
-            if (s.usecode) return readStr(trim(code),exp,got);
-            else return true;
+            if (s.usecode) {
+                if (readStr(trim(code),exp,got)) {
+                    return readSpace(exp,got);
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
         }
 
         bool readStart(std::string& exp, std::string& got) const
@@ -309,23 +316,23 @@ namespace tmv {
         bool readFinal(std::string& exp, std::string& got) const
         { return readStr(trim(s.final),exp,got); }
 
-        bool readSize(int& n) const
+        bool readSize(int& n, std::string& exp, std::string& got) const
         {
             if (s.writesize) {
                 skipWhiteSpace();
                 is >> n;
                 if (!is) return false;
-                else return true;
+                else return readSpace(exp,got);
             } else {
                 return true;
             }
         }
 
-        bool readSimpleSize(int& n) const
-        { return s.simplesize ? readSize(n) : true; }
+        bool readSimpleSize(int& n, std::string& exp, std::string& got) const
+        { return s.simplesize ? readSize(n,exp,got) : true; }
 
-        bool readFullSize(int& n) const
-        { return !s.simplesize ? readSize(n) : true; }
+        bool readFullSize(int& n, std::string& exp, std::string& got) const
+        { return !s.simplesize ? readSize(n,exp,got) : true; }
 
         template <class T>
         bool readValue(T& x) const

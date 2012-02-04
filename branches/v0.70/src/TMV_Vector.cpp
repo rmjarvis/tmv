@@ -1704,12 +1704,12 @@ namespace tmv {
 #endif
         }
         int n=size();
-        if (!reader.readSize(n)) {
+        if (!reader.readSize(n,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"Vector Read Error: reading size\n";
             exit(1); 
 #else
-            throw VectorReadError<T>(reader.getis());
+            throw VectorReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (n != size()) resize(n);
@@ -1730,12 +1730,12 @@ namespace tmv {
 #endif
         }
         int n=size();
-        if (!reader.readSize(n)) {
+        if (!reader.readSize(n,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"Vector Read Error: reading size\n";
             exit(1); 
 #else
-            throw VectorReadError<T>(reader.getis());
+            throw VectorReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (n != size()) {

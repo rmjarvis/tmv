@@ -1251,22 +1251,22 @@ namespace tmv {
 #endif
         }
         int s=size();
-        if (!reader.readSize(s)) {
+        if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"SymMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw SymMatrixReadError<T>(reader.getis());
+            throw SymMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size()) resize(s);
         s=size();
-        if (!reader.readSimpleSize(s)) {
+        if (!reader.readSimpleSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"SymMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw SymMatrixReadError<T>(reader.getis());
+            throw SymMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size()) {
@@ -1294,22 +1294,22 @@ namespace tmv {
 #endif
         }
         int s=size();
-        if (!reader.readSize(s)) {
+        if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"HermMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw HermMatrixReadError<T>(reader.getis());
+            throw HermMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size()) resize(s);
         s=size();
-        if (!reader.readSimpleSize(s)) {
+        if (!reader.readSimpleSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"HermMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw HermMatrixReadError<T>(reader.getis());
+            throw HermMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size()) {
@@ -1341,15 +1341,15 @@ namespace tmv {
 #endif
         }
         int s=size();
-        if (!reader.readSize(s)) {
+        if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"SymMatrix Read Error: reading size\n";
             exit(1);
 #else
             if (issym())
-                throw SymMatrixReadError<T>(reader.getis());
+                throw SymMatrixReadError<T>(reader.getis(),exp,got);
             else
-                throw HermMatrixReadError<T>(reader.getis());
+                throw HermMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size()) {
@@ -1364,15 +1364,15 @@ namespace tmv {
 #endif
         }
         s=size();
-        if (!reader.readSimpleSize(s)) {
+        if (!reader.readSimpleSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"SymMatrix Read Error: reading size\n";
             exit(1);
 #else
             if (issym())
-                throw SymMatrixReadError<T>(reader.getis());
+                throw SymMatrixReadError<T>(reader.getis(),exp,got);
             else
-                throw HermMatrixReadError<T>(reader.getis());
+                throw HermMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != size()) {

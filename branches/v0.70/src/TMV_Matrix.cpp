@@ -1323,12 +1323,13 @@ namespace tmv {
 #endif
         }
         int cs=colsize(), rs=rowsize();
-        if (!reader.readSize(cs) || !reader.readSize(rs)) {
+        if (!reader.readSize(cs,exp,got) || 
+            !reader.readSize(rs,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"Matrix Read Error: reading size\n";
             exit(1);
 #else
-            throw MatrixReadError<T>(reader.getis());
+            throw MatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (cs != colsize() || rs != rowsize()) resize(cs,rs);
@@ -1349,12 +1350,13 @@ namespace tmv {
 #endif
         }
         int cs=colsize(), rs=rowsize();
-        if (!reader.readSize(cs) || !reader.readSize(rs)) {
+        if (!reader.readSize(cs,exp,got) || 
+            !reader.readSize(rs,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"Matrix Read Error: reading size\n";
             exit(1);
 #else
-            throw MatrixReadError<T>(reader.getis());
+            throw MatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (cs != colsize() || rs != rowsize()) {

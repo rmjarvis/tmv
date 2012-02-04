@@ -1826,13 +1826,15 @@ namespace tmv {
 #endif
         }
         int cs=colsize(), rs=rowsize(), lo=nlo(), hi=nhi();
-        if (!reader.readSize(cs) || !reader.readSize(rs) || 
-            !reader.readFullSize(lo) || !reader.readFullSize(hi)) {
+        if (!reader.readSize(cs,exp,got) || 
+            !reader.readSize(rs,exp,got) || 
+            !reader.readFullSize(lo,exp,got) || 
+            !reader.readFullSize(hi,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"BandMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw BandMatrixReadError<T>(reader.getis());
+            throw BandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (cs != colsize() || rs != rowsize() || lo != nlo() || hi != nhi()) {
@@ -1855,13 +1857,15 @@ namespace tmv {
 #endif
         }
         int cs=colsize(), rs=rowsize(), lo=nlo(), hi=nhi();
-        if (!reader.readSize(cs) || !reader.readSize(rs) || 
-            !reader.readFullSize(lo) || !reader.readFullSize(hi)) {
+        if (!reader.readSize(cs,exp,got) || 
+            !reader.readSize(rs,exp,got) || 
+            !reader.readFullSize(lo,exp,got) || 
+            !reader.readFullSize(hi,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"BandMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw BandMatrixReadError<T>(reader.getis());
+            throw BandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (cs != colsize() || rs != rowsize() || lo != nlo() || hi != nhi()) {
