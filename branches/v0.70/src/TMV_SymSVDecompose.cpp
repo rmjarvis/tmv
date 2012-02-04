@@ -1079,7 +1079,7 @@ namespace tmv {
 #endif
         T signdet(0);
         Tridiagonalize(A,Ubeta.view(),SS,E.view(),signdet);
-        MatrixView<T> U(0,0,0,1,0,NonConj);
+        MatrixView<T> U(0,0,0,1,1,NonConj);
         EigenFromTridiagonal<T>(U,SS,E.view());
     }
 
@@ -1241,8 +1241,8 @@ namespace tmv {
             B.diag(1) = E;
 
             RT logdet(0);
-            MatrixView<T> U(0,0,0,1,0,NonConj);
-            MatrixView<T> Vt(0,0,0,1,0,NonConj);
+            MatrixView<T> U(0,0,0,1,1,NonConj);
+            MatrixView<T> Vt(0,0,0,1,1,NonConj);
             SV_Decompose<T>(B,U,SS,Vt,logdet,signdet);
         }
     }
@@ -1337,7 +1337,7 @@ namespace tmv {
             } else {
                 RT ld(0);
                 T d(0);
-                MatrixView<T> Vt(0,0,0,1,0,NonConj);
+                MatrixView<T> Vt(0,0,0,1,1,NonConj);
                 SymSV_Decompose<T>(U,SS,Vt,ld,d);
             }
         }

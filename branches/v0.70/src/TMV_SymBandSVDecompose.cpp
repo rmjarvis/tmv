@@ -725,7 +725,7 @@ namespace tmv {
         if (A.isconj()) {
             Eigen(A.conjugate(),SS);
         } else {
-            MatrixView<T> U(0,0,0,1,0,NonConj);
+            MatrixView<T> U(0,0,0,1,1,NonConj);
             UnsortedEigen<T>(A,U,SS);
             SS.sort(Ascend);
         }
@@ -815,7 +815,7 @@ namespace tmv {
             } else {
                 RT ld(0);
                 T d(0);
-                MatrixView<T> Vt(0,0,0,1,0,NonConj);
+                MatrixView<T> Vt(0,0,0,1,1,NonConj);
                 SV_Decompose<T>(A,U,SS,Vt,ld,d);
                 if (A.isherm()) {
                     for(int i=0;i<SS.size();i++) if (SS(i) < RT(0)) 
@@ -848,8 +848,8 @@ namespace tmv {
         } else {
             RT ld(0);
             T d(0);
-            MatrixView<T> U(0,0,0,1,0,NonConj);
-            MatrixView<T> Vt(0,0,0,1,0,NonConj);
+            MatrixView<T> U(0,0,0,1,1,NonConj);
+            MatrixView<T> Vt(0,0,0,1,1,NonConj);
             SV_Decompose<T>(A,U,SS,Vt,ld,d);
             if (A.isherm()) 
                 for(int i=0;i<SS.size();i++) if (SS(i) < RT(0)) 

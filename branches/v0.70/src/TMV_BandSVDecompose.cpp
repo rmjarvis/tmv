@@ -580,6 +580,8 @@ namespace tmv {
         TMVAssert(E.ct() == NonConj);
 
 #ifdef XDEBUG
+        std::cout<<"Start Band Bidiagonalize:\n";
+        std::cout<<"A = "<<A<<std::endl;
         Matrix<T> A0(A);
 #ifdef LAP
         BandMatrix<T> A2(A);
@@ -756,7 +758,7 @@ namespace tmv {
             SV_Decompose(A.conjugate(),U.conjugate(),S);
         } else {
             RT ld=0; T d=0;
-            MatrixView<T> Vt(0,0,0,1,0,NonConj);
+            MatrixView<T> Vt(0,0,0,1,1,NonConj);
             SV_Decompose<T>(A,U,S,Vt,ld,d); 
         }
     }
@@ -769,7 +771,7 @@ namespace tmv {
             SV_Decompose(A.conjugate(),S,Vt.conjugate());
         } else {
             RT ld=0; T d=0;
-            MatrixView<T> U(0,0,0,1,0,NonConj);
+            MatrixView<T> U(0,0,0,1,1,NonConj);
             SV_Decompose<T>(A,U,S,Vt,ld,d); 
         }
     }
@@ -778,8 +780,8 @@ namespace tmv {
     void SV_Decompose(const GenBandMatrix<T>& A, DiagMatrixView<RT> S)
     {
         RT ld=0; T d=0;
-        MatrixView<T> U(0,0,0,1,0,NonConj);
-        MatrixView<T> Vt(0,0,0,1,0,NonConj);
+        MatrixView<T> U(0,0,0,1,1,NonConj);
+        MatrixView<T> Vt(0,0,0,1,1,NonConj);
         SV_Decompose<T>(A,U,S,Vt,ld,d); 
     }
 

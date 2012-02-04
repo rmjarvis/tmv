@@ -1100,7 +1100,7 @@ namespace tmv {
                 if (UisI) U.subMatrix(0,K,0,K) = U1;
                 else U.colRange(0,K) *= U1;
             } else {
-                MatrixView<RT> U1(0,0,0,1,0,NonConj);
+                MatrixView<RT> U1(0,0,0,1,1,NonConj);
                 SV_DecomposeFromBidiagonal_DC<RT>(
                     U1,D1,E1.subVector(0,K-1),
                     Vt1.rowRange(0,K),false,false);
@@ -1125,7 +1125,7 @@ namespace tmv {
                 if (UisI) U.subMatrix(K+1,N,K+1,N) = U2;
                 else U.colRange(K+1,N) *= U2;
             } else {
-                MatrixView<RT> U1(0,0,0,1,0,NonConj);
+                MatrixView<RT> U1(0,0,0,1,1,NonConj);
                 SV_DecomposeFromBidiagonal_DC<RT>(
                     U1,D2,E2,Vt2.view(),false,Vt.cptr());
             }

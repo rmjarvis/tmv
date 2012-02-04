@@ -852,7 +852,7 @@ namespace tmv {
                 dbgcout<<"After DecomposeFromBidiag: Norm(UtU-1) = "<<
                     Norm(U.adjoint()*U-T(1))<<std::endl;
             } else {
-                MatrixView<T> U2(0,0,0,1,0,NonConj);
+                MatrixView<T> U2(0,0,0,1,1,NonConj);
                 SV_DecomposeFromBidiagonal<T>(U2,S.diag(),E.view(),Vt);
             }
 
@@ -918,7 +918,7 @@ namespace tmv {
         } else {
             RT ld(0);
             T d(0);
-            MatrixView<T> Vt(0,0,0,1,0,NonConj);
+            MatrixView<T> Vt(0,0,0,1,1,NonConj);
             SV_Decompose<T>(U,SS,Vt,ld,d,StoreU); 
         }
     }

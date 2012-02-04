@@ -70,7 +70,7 @@ namespace tmv {
     {
         TMVAssert(A.isherm());
 
-        MatrixView<T> Vt(0,0,0,1,0,NonConj);
+        MatrixView<T> Vt(0,0,0,1,1,NonConj);
         SV_Decompose<T>(A, pimpl->U.view(), pimpl->S.view(), Vt,
                        pimpl->logdet, pimpl->signdet);
         thresh(TMV_Epsilon<T>());
