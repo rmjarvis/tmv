@@ -70,8 +70,8 @@ namespace tmv {
         TMVAssert(sinv.isherm());
         TMVAssert(sinv.iscm());
 
-        ptrdiff_t n = sinv.size();
-        ptrdiff_t lda = sinv.stepj();
+        int n = sinv.size();
+        int lda = sinv.stepj();
         LAPNAME(dpotri) (
             LAPCM (sinv.uplo() == Upper ? LAPCH_UP : LAPCH_LO),
             LAPV(n),LAPP(sinv.ptr()),LAPV(lda) LAPINFO LAP1);
@@ -83,8 +83,8 @@ namespace tmv {
         TMVAssert(sinv.isherm());
         TMVAssert(sinv.iscm());
 
-        ptrdiff_t n = sinv.size();
-        ptrdiff_t lda = sinv.stepj();
+        int n = sinv.size();
+        int lda = sinv.stepj();
         LAPNAME(zpotri) (
             LAPCM (sinv.uplo() == Upper ? LAPCH_UP : LAPCH_LO),
             LAPV(n),LAPP(sinv.ptr()),LAPV(lda) LAPINFO LAP1);
@@ -98,8 +98,8 @@ namespace tmv {
         TMVAssert(sinv.isherm());
         TMVAssert(sinv.iscm());
 
-        ptrdiff_t n = sinv.size();
-        ptrdiff_t lda = sinv.stepj();
+        int n = sinv.size();
+        int lda = sinv.stepj();
         LAPNAME(spotri) (
             LAPCM (sinv.uplo() == Upper ? LAPCH_UP : LAPCH_LO),
             LAPV(n),LAPP(sinv.ptr()),LAPV(lda) LAPINFO LAP1);
@@ -111,8 +111,8 @@ namespace tmv {
         TMVAssert(sinv.isherm());
         TMVAssert(sinv.iscm());
 
-        ptrdiff_t n = sinv.size();
-        ptrdiff_t lda = sinv.stepj();
+        int n = sinv.size();
+        int lda = sinv.stepj();
         LAPNAME(cpotri) (
             LAPCM (sinv.uplo() == Upper ? LAPCH_UP : LAPCH_LO),
             LAPV(n),LAPP(sinv.ptr()),LAPV(lda) LAPINFO LAP1);
