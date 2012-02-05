@@ -522,20 +522,28 @@ int main()
     if context.TryCompile(mkl_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],mkl_source_file) or
+            CheckLibs(context,['mkl','pthread'],mkl_source_file) or
             CheckLibs(context,['mkl','guide','pthread'],mkl_source_file) or
+            CheckLibs(context,['mkl_em64t','pthread'],
+                        mkl_source_file) or
             CheckLibs(context,['mkl_em64t','guide','pthread'],
+                        mkl_source_file) or
+            CheckLibs(context,['mkl_ipf','pthread'],
                         mkl_source_file) or
             CheckLibs(context,['mkl_ipf','guide','pthread'],
                         mkl_source_file) or
+            CheckLibs(context,['mkl_ia32','pthread'],
+                        mkl_source_file) or
             CheckLibs(context,['mkl_ia32','guide','pthread'],
                         mkl_source_file) or
+            CheckLibs(context,['mkl_intel_lp64','mkl_core',threadlib,
+                        'pthread'],mkl_source_file) or
             CheckLibs(context,['mkl_intel_lp64','mkl_core',threadlib,
                         'guide','pthread'],mkl_source_file) or
             CheckLibs(context,['mkl_ia32','mkl_core','mkl_sequential'],
                         mkl_source_file) or
             CheckLibs(context,['mkl_intel_lp64','mkl_core','mkl_sequential'],
                         mkl_source_file) or
-            CheckLibs(context,['mkl','pthread'],mkl_source_file) or
             CheckLibs(context,['mkl'],mkl_source_file) )
 
         context.Result(result)
