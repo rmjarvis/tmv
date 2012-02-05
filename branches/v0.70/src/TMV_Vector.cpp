@@ -1054,8 +1054,8 @@ namespace tmv {
     template <> 
     void LapConjugate(VectorView<std::complex<double>,CStyle> v)
     { 
-        ptrdiff_t n = v.size();
-        ptrdiff_t s = v.step();
+        int n = v.size();
+        int s = v.step();
         LAPNAME(zlacgv) (LAPV(n),LAPP(v.ptr()),LAPV(s)); 
     }
 #endif
@@ -1063,8 +1063,8 @@ namespace tmv {
     template <> 
     void LapConjugate(VectorView<std::complex<float>,CStyle> v)
     {
-        ptrdiff_t n = v.size();
-        ptrdiff_t s = v.step();
+        int n = v.size();
+        int s = v.step();
         LAPNAME(clacgv) (LAPV(n),LAPP(v.ptr()),LAPV(s)); 
     }
 #endif
