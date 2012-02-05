@@ -283,7 +283,7 @@ namespace tmv {
         T psix=0, phix=0, dpsix=0, dphix=0;
 
         T f1 = f;
-        for(ptrdiff_t iter = 0; iter < TMV_MAXITER; iter++) {
+        for(int iter = 0; iter < TMV_MAXITER; iter++) {
             // Calculate psi, phi
             psi = phi = e = dpsi = dphi = T(0);
             for(ptrdiff_t j=0;j<k1;j++) {
@@ -370,7 +370,7 @@ namespace tmv {
         if (threepoles) dbgcout<<"USE THREE POLES\n";
 
         bool last = false;
-        for(ptrdiff_t iter = 0; iter < TMV_MAXITER; iter++) {
+        for(int iter = 0; iter < TMV_MAXITER; iter++) {
             dbgcout<<"Main iter = "<<iter<<", f = "<<f<<", eps*e = "<<eps*e<<endl;
             dbgcout<<"f("<<tau<<") = "<<f<<"  s = "<<s<<endl;
 
@@ -520,7 +520,7 @@ namespace tmv {
                     dbgcout<<"h(eta2) = h2 = "<<h2<<endl;
                     dbgcout<<"Same sign, so use Newton\n";
                     eta = (-f/df)/d2;
-                } else for(ptrdiff_t iter3 = 0; iter3 < TMV_MAXITER; iter3++) {
+                } else for(int iter3 = 0; iter3 < TMV_MAXITER; iter3++) {
                     dbgcout<<"iter3 = "<<iter3<<", eta = "<<eta<<
                         "  h = "<<h<<endl;
                     dbgcout<<"eta2 = "<<eta2<<"  h2 = "<<h2<<endl;
