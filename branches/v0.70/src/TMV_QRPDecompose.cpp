@@ -843,7 +843,7 @@ namespace tmv
     template <> 
     void LapQRPDecompose(
         MatrixView<std::complex<double> > A,
-        VectorView<std::complex<double> > beta, int* P,
+        VectorView<std::complex<double> > beta, ptrdiff_t* P,
         std::complex<double>& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
@@ -920,7 +920,7 @@ namespace tmv
 #ifdef INST_FLOAT
     template <> 
     void LapQRPDecompose(
-        MatrixView<float> A, VectorView<float> beta, int* P, float& det)
+        MatrixView<float> A, VectorView<float> beta, ptrdiff_t* P, float& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(A.rowsize() > 0);
@@ -986,7 +986,7 @@ namespace tmv
     template <> 
     void LapQRPDecompose(
         MatrixView<std::complex<float> > A,
-        VectorView<std::complex<float> > beta, int* P,
+        VectorView<std::complex<float> > beta, ptrdiff_t* P,
         std::complex<float>& det)
     {
         TMVAssert(A.colsize() >= A.rowsize());
