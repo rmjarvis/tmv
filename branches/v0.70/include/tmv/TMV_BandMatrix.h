@@ -3195,7 +3195,7 @@ namespace tmv {
             const ptrdiff_t i1 = j1 > nhi() ? j1-nhi() : 0;
             const ptrdiff_t i2 = TMV_MIN(j2 + nlo(),colsize());
             const ptrdiff_t newnhi = j1 < nhi() ? TMV_MIN(nhi(),j2-1) - j1 : 0;
-            const iptrdiff_tnewnlo = i1==i2 ? 0 : TMV_MIN(nlo()+nhi()-newnhi,i2-i1-1);
+            const ptrdiff_t newnlo = i1==i2 ? 0 : TMV_MIN(nlo()+nhi()-newnhi,i2-i1-1);
             const ptrdiff_t newlin = iscm() ? -1 : 0;
             TMVAssert(base::hasSubBandMatrix(
                     i1,i2,j1,j2,newnlo,newnhi,1,1));
