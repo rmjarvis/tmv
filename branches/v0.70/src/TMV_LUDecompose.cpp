@@ -436,9 +436,9 @@ namespace tmv {
         TMVAssert(A.iscm());
         TMVAssert(A.ct()==NonConj);
 
-        ptrdiff_t m = A.colsize();
-        ptrdiff_t n = A.rowsize();
-        ptrdiff_t lda = A.stepj();
+        int m = A.colsize();
+        int n = A.rowsize();
+        int lda = A.stepj();
         AlignedArray<int> lap_p(n);
         LAPNAME(dgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                          LAPP(lap_p.get()) LAPINFO);
@@ -454,9 +454,9 @@ namespace tmv {
         TMVAssert(A.iscm());
         TMVAssert(A.ct()==NonConj);
 
-        ptrdiff_t m = A.colsize();
-        ptrdiff_t n = A.rowsize();
-        ptrdiff_t lda = A.stepj();
+        int m = A.colsize();
+        int n = A.rowsize();
+        int lda = A.stepj();
         AlignedArray<int> lap_p(n);
         LAPNAME(zgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                          LAPP(lap_p.get()) LAPINFO);
@@ -468,7 +468,7 @@ namespace tmv {
     }
 #endif
 #ifdef INST_FLOAT
-#ifndef MKL
+//#ifndef MKL
     // This is giving me a weird runtime error sometimes with MKL:
     // OMP abort: Unable to set worker thread stack size to 2098176 bytes
     // Try reducing KMP_STACKSIZE or increasing the shell stack limit.
@@ -479,9 +479,9 @@ namespace tmv {
         TMVAssert(A.iscm());
         TMVAssert(A.ct()==NonConj);
 
-        ptrdiff_t m = A.colsize();
-        ptrdiff_t n = A.rowsize();
-        ptrdiff_t lda = A.stepj();
+        int m = A.colsize();
+        int n = A.rowsize();
+        int lda = A.stepj();
         AlignedArray<int> lap_p(n);
         LAPNAME(sgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                          LAPP(lap_p.get()) LAPINFO);
@@ -497,9 +497,9 @@ namespace tmv {
         TMVAssert(A.iscm());
         TMVAssert(A.ct()==NonConj);
 
-        ptrdiff_t m = A.colsize();
-        ptrdiff_t n = A.rowsize();
-        ptrdiff_t lda = A.stepj();
+        int m = A.colsize();
+        int n = A.rowsize();
+        int lda = A.stepj();
         AlignedArray<int> lap_p(n);
         LAPNAME(cgetrf) (LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                          LAPP(lap_p.get()) LAPINFO);
@@ -509,7 +509,7 @@ namespace tmv {
             P[i] = (lap_p.get())[i] LAPMINUS1;
         }
     }
-#endif // MKL
+//#endif // MKL
 #endif // FLOAT
 #endif // ALAP
 
