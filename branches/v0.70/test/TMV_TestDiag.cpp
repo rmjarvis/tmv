@@ -259,10 +259,10 @@ static void TestBasicDiagMatrix_IO()
         cm(i,i) = CT(i+1,i+1001);
     }
     m(3) = T(1.e-30);
-    cm(3) = CT(1.e-30,1.e-30);
+    cm(3) = CT(T(1.e-30),T(1.e-30));
     m(5) = T(9.e-3);
-    cm(5) = CT(9.e-3,9.e-3);
-    cm(6) = CT(9,9.e-3);
+    cm(5) = CT(T(9.e-3),T(9.e-3));
+    cm(6) = CT(T(9),T(9.e-3));
     m(7) = T(0.123456789);
     cm(7) = CT(3.123456789,600.987654321);
 
@@ -270,8 +270,8 @@ static void TestBasicDiagMatrix_IO()
     tmv::DiagMatrix<T> m2 = m;
     tmv::DiagMatrix<CT> cm2 = cm;
     if (!std::numeric_limits<T>::is_integer) {
-        m2.clip(1.e-2);
-        cm2.clip(1.e-2);
+        m2.clip(T(1.e-2));
+        cm2.clip(T(1.e-2));
     }
     tmv::DiagMatrix<T> m3 = m;
     tmv::DiagMatrix<CT> cm3 = cm;

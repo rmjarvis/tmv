@@ -32,9 +32,9 @@ inline void TestV(const V& a, std::string label)
 
     Assert(Equal(a,v,eps),label+" a != v");
 
-    RT normsq = 0.;
-    RT norm1 = 0.;
-    RT norminf = 0.;
+    RT normsq(0);
+    RT norm1(0);
+    RT norminf(0);
     for(int i=0;i<N;++i) {
         normsq += tmv::TMV_NORM(v(i));
         norm1 += tmv::TMV_ABS(v(i));

@@ -783,29 +783,41 @@ namespace tmv {
     extern bool TMV_FALSE; 
     // = false (in TMV_Vector.cpp), but without the unreachable returns
 
-    inline double TMV_ABS(const std::complex<int>& x)
-    { return TMV_ABS(std::complex<double>(std::real(x),std::imag(x))); }
+    inline int TMV_ABS(const std::complex<int>& x)
+    { return int(TMV_ABS(std::complex<double>(std::real(x),std::imag(x)))); }
 
-    inline double TMV_ARG(const std::complex<int>& x)
-    { return TMV_ARG(std::complex<double>(std::real(x),std::imag(x))); }
+    inline int TMV_ARG(const std::complex<int>& x)
+    { return int(TMV_ARG(std::complex<double>(std::real(x),std::imag(x)))); }
 
-    inline double TMV_SQRT(int x) 
-    { return TMV_SQRT(double(x)); }
+    inline int TMV_SQRT(int x) 
+    { return int(TMV_SQRT(double(x))); }
 
-    inline std::complex<double> TMV_SQRT(const std::complex<int>& x)
-    { return TMV_SQRT(std::complex<double>(std::real(x),std::imag(x))); }
+    inline std::complex<int> TMV_SQRT(const std::complex<int>& x)
+    {
+        std::complex<double> temp = 
+            TMV_SQRT(std::complex<double>(std::real(x),std::imag(x))); 
+        return std::complex<int>(int(real(temp)),int(imag(temp)));
+    }
 
-    inline double TMV_EXP(int x) 
-    { return TMV_EXP(double(x)); }
+    inline int TMV_EXP(int x) 
+    { return int(TMV_EXP(double(x))); }
 
-    inline std::complex<double> TMV_EXP(const std::complex<int>& x)
-    { return TMV_EXP(std::complex<double>(std::real(x),std::imag(x))); }
+    inline std::complex<int> TMV_EXP(const std::complex<int>& x)
+    {
+        std::complex<double> temp =
+            TMV_EXP(std::complex<double>(std::real(x),std::imag(x)));
+        return std::complex<int>(int(real(temp)),int(imag(temp)));
+    }
 
-    inline double TMV_LOG(int x) 
-    { return TMV_LOG(double(x)); }
+    inline int TMV_LOG(int x) 
+    { return int(TMV_LOG(double(x))); }
 
-    inline std::complex<double> TMV_LOG(const std::complex<int>& x)
-    { return TMV_LOG(std::complex<double>(std::real(x),std::imag(x))); }
+    inline std::complex<int> TMV_LOG(const std::complex<int>& x)
+    { 
+        std::complex<double> temp =
+            TMV_LOG(std::complex<double>(std::real(x),std::imag(x))); 
+        return std::complex<int>(int(real(temp)),int(imag(temp)));
+    }
 
     inline bool TMV_Underflow(int )
     { return false; }

@@ -934,12 +934,12 @@ static void TestBasicTriMatrix_IO()
         }
     }
     u(1,3) = l(3,1) = T(1.e-30);
-    cu(1,3) = cl(3,1) = CT(1.e-30,1.e-30);
+    cu(1,3) = cl(3,1) = CT(T(1.e-30),T(1.e-30));
     u(5,6) = l(6,5) = T(9.e-3);
-    cu(5,6) = cl(6,5) = CT(9.e-3,9.e-3);
-    cu(5,7) = cl(7,5) = CT(9,9.e-3);
+    cu(5,6) = cl(6,5) = CT(T(9.e-3),T(9.e-3));
+    cu(5,7) = cl(7,5) = CT(T(9),T(9.e-3));
     u(4,7) = l(7,4) = T(0.123456789);
-    cu(4,7) = cl(7,4) = CT(3.123456789,600.987654321);
+    cu(4,7) = cl(7,4) = CT(T(3.123456789),T(600.987654321));
 
     // First check clipping function...
     tmv::UpperTriMatrix<T> u2 = u;
