@@ -103,9 +103,11 @@ namespace tmv {
                    break;
               case SV : 
                    if (isherm()) 
-                       this->divider.reset(new HermSVDiv<T>(*this));
+                       this->divider.reset(
+                           new HermSVDiv<T>(*this,this->divIsInPlace()));
                    else
-                       this->divider.reset(new SymSVDiv<T>(*this));
+                       this->divider.reset(
+                           new SymSVDiv<T>(*this,this->divIsInPlace()));
                    break;
               default : 
                    // The above assert should have already failed

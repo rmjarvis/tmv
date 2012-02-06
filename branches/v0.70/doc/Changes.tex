@@ -280,6 +280,11 @@ definition of the SVD, I'm admitting the point that {\em everyone} else
 seems to use this definition.  So there is no point in trying to get TMV users
 to use my preferred definition: $A = U S V$.
 
+\item
+Added the ability of \tt{SymMatrix} SVD division to be done in place.
+In addition to the memory used for the \tt{SymMatrix} values, it also uses 
+the other half of the matrix that is normally not used for anything.
+
 \item[$\times$]
 Changed the mechanism for switching from the "Loose QRP" to the "Strict QRP"
 algorithm (and back).  It used to be a global \tt{bool} variable, called

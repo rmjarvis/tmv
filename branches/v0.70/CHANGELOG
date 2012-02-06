@@ -427,6 +427,11 @@ New features:
 -- Added a warning for when MultMM catches a std::bad_alloc exception
    and reverts to using a simpler algorithm that doesn't allocate memory.
 
+-- Added the ability of SymMatrix SVD division to be done in place.
+   In addition to the memory used for the SymMatrix values, it also uses 
+   the other half of the matrix that is normally not used for anything.
+
+
 Bug fixes:
 
 -- Added <cstddef> to TMV's includes.

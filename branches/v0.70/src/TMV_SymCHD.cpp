@@ -54,7 +54,6 @@ namespace tmv {
 
         const bool inplace;
         AlignedArray<T> Aptr1;
-        T* Aptr;
         SymMatrixView<T> LLx;
         mutable bool zerodet;
         mutable RT logdet;
@@ -62,19 +61,17 @@ namespace tmv {
     };
 
 #define APTR1 (inplace ? 0 : (A.size()*A.size()))
-#define APTR (inplace ? A.nonConst().ptr() : Aptr1.get())
 #define LLX \
     (inplace ? (A.uplo()==Upper ? A.nonConst().adjoint() : A.nonConst()) : \
-     HermMatrixViewOf(Aptr,A.size(),Lower,ColMajor))
+     HermMatrixViewOf(Aptr1.get(),A.size(),Lower,ColMajor))
 
     template <class T>
     HermCHDiv<T>::HermCHDiv_Impl::HermCHDiv_Impl(
         const GenSymMatrix<T>& A, bool _inplace) :
         inplace(_inplace && (A.iscm() || A.isrm())), 
-        Aptr1(APTR1), Aptr(APTR), LLx(LLX), 
-        zerodet(false), logdet(0),donedet(false) {}
+        Aptr1(APTR1), LLx(LLX), 
+        zerodet(false), logdet(0), donedet(false) {}
 
-#undef APTR
 #undef APTR1
 #undef LLX
 

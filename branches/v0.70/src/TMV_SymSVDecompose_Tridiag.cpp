@@ -547,8 +547,8 @@ namespace tmv {
                         b2.view(),D2.view(),E2.view(),d2);
 #endif // XDEBUG
 #ifdef LAP
-                // MJ: The RowMajor version of the LAPACK Tridiagonalize algorithm 
-                // (or Upper ColMajor storage is how they refer to it)
+                // TODO: The RowMajor version of the LAPACK Tridiagonalize 
+                // algorithm (Upper ColMajor storage is how they refer to it)
                 // stores the Householder vectors in a different way than my
                 // GetQFromQR function can handle.  I should really write a 
                 // version that can handle that, so I can call LAPACK in

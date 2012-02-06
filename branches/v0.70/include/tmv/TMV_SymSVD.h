@@ -211,7 +211,7 @@ namespace tmv {
         // Constructors
         //
 
-        HermSVDiv(const GenSymMatrix<T>& A);
+        HermSVDiv(const GenSymMatrix<T>& A, bool inplace);
         ~HermSVDiv();
 
         //
@@ -307,7 +307,7 @@ namespace tmv {
         // Constructors
         //
 
-        SymSVDiv(const GenSymMatrix<T>& A);
+        SymSVDiv(const GenSymMatrix<T>& A, bool inplace);
         ~SymSVDiv();
 
         //

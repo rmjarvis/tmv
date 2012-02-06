@@ -69,8 +69,9 @@ namespace tmv {
     // Decompose
     //
 
-    // MJ: This is a bit slower for row major, even with blocking, so write the
-    // row major version where A is decomposed into Lt D L rather than L D Lt.
+    // TODO: This is a bit slower for row major, even with blocking, so write 
+    // the row major version where A is decomposed into Lt D L rather than 
+    // L D Lt.
     template <bool herm, class T> 
     static void NonBlockLDL_Decompose(
         SymMatrixView<T> A, VectorView<T> xD, 

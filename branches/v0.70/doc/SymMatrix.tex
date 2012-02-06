@@ -696,7 +696,12 @@ s.divideInPlace()
 \index{SymMatrix!Methods!divIsSet}
 \index{SymMatrix!Methods!divideInPlace}
 work the same as for regular \tt{Matrix}es.
-(See \ref{Matrix_Division_Efficiency}.)
+(See \ref{Matrix_Division_Efficiency}.)  However, it should be noted that
+for \tt{tmv::SV}, the \tt{divideInPlace} option will use both the memory
+that is used for the \tt{SymMatrix} as well as the other half of the 
+memory that is normally not used.  So if you've done something clever 
+to use the other half of the matrix for something, that will get 
+clobbered too.
 
 And just as for a regular \tt{Matrix}, the functions \tt{s.det()}, \tt{s.logDet()}, and \tt{s.isSingular()} use whichever decomposition is currently set with \tt{s.divideUsing(dt)},
 unless \tt{s}'s data type is an integer type, in which case Bareiss's algorithm for the determinant

@@ -354,7 +354,7 @@ namespace tmv {
         }
     }
 
-    // MJ: Put in a recursive block calculation here.  (Also in Band*Band)
+    // TODO: Put in a recursive block calculation here.  (Also in Band*Band)
     template <bool add, class T, class Ta, class Tb> 
     static void DoMultMM(
         const T alpha, const GenBandMatrix<Ta>& A, const GenMatrix<Tb>& B,

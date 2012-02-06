@@ -49,11 +49,12 @@ namespace tmv {
     struct HermSVDiv<T>::HermSVDiv_Impl
     {
     public :
-        HermSVDiv_Impl(const GenSymMatrix<T>& m) :
-            U(m.size(),m.size()), S(m.size()), 
-            logdet(0), signdet(0), donedet(false), kmax(0) {}
+        HermSVDiv_Impl(const GenSymMatrix<T>& A, bool inplace);
 
-        Matrix<T,ColMajor> U;
+        const bool inplace;
+        AlignedArray<T> Uptr1;
+        T* Uptr;
+        MatrixView<T> U;
         DiagMatrix<RT> S;
         mutable RT logdet;
         mutable RT signdet;
@@ -61,9 +62,22 @@ namespace tmv {
         mutable ptrdiff_t kmax;
     }; // HermSVDiv
 
+#define UPTR1 (inplace ? 0 : (A.size()*A.size()))
+#define UX (inplace ? \
+            MatrixView<T>(A.nonConst().ptr(),A.size(),A.size(),\
+                          A.stepi(),A.stepj(),NonConj) : \
+            MatrixView<T>(Uptr1.get(),A.size(),A.size(),1,A.size(),NonConj))
+
     template <class T>
-    HermSVDiv<T>::HermSVDiv(const GenSymMatrix<T>& A) :
-        pimpl(new HermSVDiv_Impl(A))
+    HermSVDiv<T>::HermSVDiv_Impl::HermSVDiv_Impl(
+        const GenSymMatrix<T>& A, bool _inplace) :
+        inplace(_inplace && (A.iscm() || A.isrm())),
+        Uptr1(UPTR1), U(UX), S(A.size()), 
+        logdet(0), signdet(1), donedet(false), kmax(0) {}
+
+    template <class T>
+    HermSVDiv<T>::HermSVDiv(const GenSymMatrix<T>& A, bool inplace) :
+        pimpl(new HermSVDiv_Impl(A,inplace))
     {
         TMVAssert(A.isherm());
         pimpl->U.lowerTri() = A.lowerTri();
@@ -274,12 +288,11 @@ namespace tmv {
     struct SymSVDiv<T>::SymSVDiv_Impl
     {
     public :
-        SymSVDiv_Impl(const GenSymMatrix<T>& m) :
-            U(m.size(),m.size()),
-            S(m.size()), Vt(m.size(),m.size()),
-            logdet(0), signdet(1), kmax(0) {}
+        SymSVDiv_Impl(const GenSymMatrix<T>& A, bool _inplace);
 
-        Matrix<T,ColMajor> U;
+        const bool inplace;
+        AlignedArray<T> Uptr1;
+        MatrixView<T> U;
         DiagMatrix<RT> S;
         Matrix<T,ColMajor> Vt;
         RT logdet;
@@ -288,8 +301,19 @@ namespace tmv {
     }; // SymSVDiv
 
     template <class T>
-    SymSVDiv<T>::SymSVDiv(const GenSymMatrix<T>& A) :
-        pimpl(new SymSVDiv_Impl(A))
+    SymSVDiv<T>::SymSVDiv_Impl::SymSVDiv_Impl(
+        const GenSymMatrix<T>& A, bool _inplace) :
+        inplace(_inplace && (A.iscm() || A.isrm())),
+        Uptr1(UPTR1), U(UX), S(A.size()), Vt(A.size(),A.size()),
+        logdet(0), signdet(1), kmax(0) {}
+
+#undef UPTR1
+#undef UX
+
+
+    template <class T>
+    SymSVDiv<T>::SymSVDiv(const GenSymMatrix<T>& A, bool inplace) :
+        pimpl(new SymSVDiv_Impl(A,inplace))
     {
         TMVAssert(isComplex(T()));
         pimpl->U.lowerTri() = A.lowerTri();

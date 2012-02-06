@@ -88,8 +88,8 @@
 // *skQ SymBlockSparseMatrix 
 // *hkQ HermBlockSparseMatrix 
 //
-// MJ  BlockDiagMatrix and Sym varieties
-// MJ  SparseMatrix and Sym, Block varieties
+// TODO  BlockDiagMatrix and Sym varieties
+// TODO  SparseMatrix and Sym, Block varieties
 
 
 #ifndef TMV_Base_H
