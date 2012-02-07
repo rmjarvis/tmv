@@ -1598,12 +1598,12 @@ static void TestBasicSymBandMatrix_IO()
         }
     }
     s(1,3) = h(3,1) = T(1.e-30);
-    cs(1,3) = ch(3,1) = CT(1.e-30,1.e-30);
+    cs(1,3) = ch(3,1) = CT(T(1.e-30),T(1.e-30));
     s(5,6) = h(6,5) = T(9.e-3);
-    cs(5,6) = ch(6,5) = CT(9.e-3,9.e-3);
-    cs(5,7) = ch(7,5) = CT(9,9.e-3);
+    cs(5,6) = ch(6,5) = CT(T(9.e-3),T(9.e-3));
+    cs(5,7) = ch(7,5) = CT(T(9),T(9.e-3));
     s(4,7) = h(7,4) = T(0.123456789);
-    cs(4,7) = ch(7,4) = CT(3.123456789,600.987654321);
+    cs(4,7) = ch(7,4) = CT(T(3.123456789),T(600.987654321));
 
     // First check clipping function...
     tmv::SymBandMatrix<T> s2 = s;
@@ -1611,10 +1611,10 @@ static void TestBasicSymBandMatrix_IO()
     tmv::HermBandMatrix<T> h2 = h;
     tmv::HermBandMatrix<CT> ch2 = ch;
     if (!std::numeric_limits<T>::is_integer) {
-        s2.clip(1.e-2);
-        cs2.clip(1.e-2);
-        h2.clip(1.e-2);
-        ch2.clip(1.e-2);
+        s2.clip(T(1.e-2));
+        cs2.clip(T(1.e-2));
+        h2.clip(T(1.e-2));
+        ch2.clip(T(1.e-2));
     }
     tmv::SymBandMatrix<T> s3 = s;
     tmv::SymBandMatrix<CT> cs3 = cs;
@@ -1660,15 +1660,15 @@ static void TestBasicSymBandMatrix_IO()
 
     // When using (the default) prec(6), these will be the values read in.
     s(4,7) = h(7,4) = T(0.123457);
-    cs(4,7) = ch(7,4) = CT(3.12346,600.988);
+    cs(4,7) = ch(7,4) = CT(T(3.12346),T(600.988));
 
     // When using prec(12), the full correct values will be read in.
 
     // When using prec(4), these will be the values read in.
     s3(4,7) = h3(7,4) = T(0.1235);
-    cs3(4,7) = ch3(7,4) = CT(3.123,601.0);
+    cs3(4,7) = ch3(7,4) = CT(T(3.123),T(601.0));
     if (std::numeric_limits<T>::is_integer) cs3(4,7) = ch3(7,4) = CT(3,600);
-    else cs3(4,7) = ch3(7,4)  = CT(3.123,601.0);
+    else cs3(4,7) = ch3(7,4)  = CT(T(3.123),T(601.0));
 
     // Read them back in
     tmv::SymBandMatrix<T,tmv::Upper|tmv::RowMajor> xs1(N,noff);

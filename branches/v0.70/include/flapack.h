@@ -330,7 +330,7 @@ int zstedc_(const char& compz, const int& n, double* d, double* e,
     cdouble* z, const int& ldz, cdouble* work, const int& lwork,
     double* rwork, const int& lrwork, int* iwork, const int& liwork, int* info);
 int cstedc_(const char& compz, const int& n, float* d, float* e, 
-    cfloat* z, const int& ldz, cfloat* work, int* lwork, 
+    cfloat* z, const int& ldz, cfloat* work, const int& lwork, 
     float* rwork, const int& lrwork, int* iwork, const int& liwork, int* info);
 
 int dstegr_(const char& jobz, const char& range, const int& n, 

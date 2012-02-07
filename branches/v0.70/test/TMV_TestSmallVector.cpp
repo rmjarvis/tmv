@@ -435,19 +435,19 @@ static void TestSmallVectorIO()
         cv(i) = CT(T(i),T(N-i));
     }
     v(3) = T(1.e-30);
-    cv(3) = CT(1.e-30,1.e-30);
+    cv(3) = CT(T(1.e-30),T(1.e-30));
     v(8) = T(9.e-3);
-    cv(8) = CT(9.e-3,9.e-3);
-    cv(9) = CT(9,9.e-3);
+    cv(8) = CT(T(9.e-3),T(9.e-3));
+    cv(9) = CT(T(9),T(9.e-3));
     v(12) = T(0.123456789);
-    cv(12) = CT(3.123456789,600.987654321);
+    cv(12) = CT(T(3.123456789),T(600.987654321));
 
     // First check clipping function...
     tmv::SmallVector<T,NN> v2 = v;
     tmv::SmallVector<CT,NN> cv2 = cv;
     if (!std::numeric_limits<T>::is_integer) {
-        v2.clip(1.e-2);
-        cv2.clip(1.e-2);
+        v2.clip(T(1.e-2));
+        cv2.clip(T(1.e-2));
     }
     tmv::SmallVector<T,NN> v3 = v;
     tmv::SmallVector<CT,NN> cv3 = cv;
@@ -484,14 +484,14 @@ static void TestSmallVectorIO()
 
     // When using (the default) prec(6), these will be the values read in.
     v(12) = T(0.123457);
-    cv(12) = CT(3.12346,600.988);
+    cv(12) = CT(T(3.12346),T(600.988));
 
     // When using prec(12), the full correct values will be read in. (v2,cv2)
 
     // When using prec(4), these will be the values read in.
     v3(12) = T(0.1235);
     if (std::numeric_limits<T>::is_integer) cv3(12) = CT(3,600);
-    else cv3(12) = CT(3.123,601.0);
+    else cv3(12) = CT(T(3.123),T(601.0));
 
     // Read them back in
     tmv::SmallVector<T,NN> xv;
