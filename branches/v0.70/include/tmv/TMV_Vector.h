@@ -504,17 +504,63 @@ namespace tmv {
 
         RT sumAbs2Elements() const;
 
-        T minElement(ptrdiff_t* iminout=0) const;
+        // Note: if these are just minElement, etc. rather than 
+        // doMinElement, etc. then the template instantiations
+        // get confused by the versions with a template argument.
+        T doMinElement(ptrdiff_t* iminout=0) const;
 
-        T maxElement(ptrdiff_t* imaxout=0) const;
+        T doMaxElement(ptrdiff_t* imaxout=0) const;
 
-        RT minAbsElement(ptrdiff_t* iminout=0) const;
+        RT doMinAbsElement(ptrdiff_t* iminout=0) const;
 
-        RT maxAbsElement(ptrdiff_t* imaxout=0) const;
+        RT doMaxAbsElement(ptrdiff_t* imaxout=0) const;
 
-        RT minAbs2Element(ptrdiff_t* iminout=0) const;
+        RT doMinAbs2Element(ptrdiff_t* iminout=0) const;
 
-        RT maxAbs2Element(ptrdiff_t* imaxout=0) const;
+        RT doMaxAbs2Element(ptrdiff_t* imaxout=0) const;
+
+        inline T minElement(ptrdiff_t* iminout=0) const
+        { return doMinElement(iminout); }
+
+        inline T maxElement(ptrdiff_t* imaxout=0) const
+        { return doMaxElement(imaxout); }
+
+        inline RT minAbsElement(ptrdiff_t* iminout=0) const
+        { return doMinAbsElement(iminout); }
+
+        inline RT maxAbsElement(ptrdiff_t* imaxout=0) const
+        { return doMaxAbsElement(imaxout); }
+
+        inline RT minAbs2Element(ptrdiff_t* iminout=0) const
+        { return doMinAbs2Element(iminout); }
+
+        inline RT maxAbs2Element(ptrdiff_t* imaxout=0) const
+        { return doMaxAbs2Element(imaxout); }
+
+        // Also allow other int types in case ptrdiff_t is not int:
+        template <class INT>
+        inline T minElement(INT* iminout) const
+        { ptrdiff_t i; T temp=minElement(&i); *iminout=i; return temp; }
+
+        template <class INT>
+        inline T maxElement(INT* imaxout) const
+        { ptrdiff_t i; T temp=maxElement(&i); *imaxout=i; return temp; }
+
+        template <class INT>
+        inline RT minAbsElement(INT* iminout) const
+        { ptrdiff_t i; RT temp=minAbsElement(&i); *iminout=i; return temp; }
+
+        template <class INT>
+        inline RT maxAbsElement(INT* imaxout) const
+        { ptrdiff_t i; RT temp=maxAbsElement(&i); *imaxout=i; return temp; }
+
+        template <class INT>
+        inline RT minAbs2Element(INT* iminout) const
+        { ptrdiff_t i; RT temp=minAbs2Element(&i); *iminout=i; return temp; }
+
+        template <class INT>
+        inline RT maxAbs2Element(INT* imaxout) const
+        { ptrdiff_t i; RT temp=maxAbs2Element(&i); *imaxout=i; return temp; }
 
 
         //
@@ -706,6 +752,32 @@ namespace tmv {
             if (imaxout) ++(*imaxout);
             return temp;
         }
+
+        // Also allow other int types in case ptrdiff_t is not int:
+        template <class INT>
+        inline T minElement(INT* iminout) const
+        { ptrdiff_t i; T temp=minElement(&i); *iminout=i; return temp; }
+
+        template <class INT>
+        inline T maxElement(INT* imaxout) const
+        { ptrdiff_t i; T temp=maxElement(&i); *imaxout=i; return temp; }
+
+        template <class INT>
+        inline RT minAbsElement(INT* iminout) const
+        { ptrdiff_t i; RT temp=minAbsElement(&i); *iminout=i; return temp; }
+
+        template <class INT>
+        inline RT maxAbsElement(INT* imaxout) const
+        { ptrdiff_t i; RT temp=maxAbsElement(&i); *imaxout=i; return temp; }
+
+        template <class INT>
+        inline RT minAbs2Element(INT* iminout) const
+        { ptrdiff_t i; RT temp=minAbs2Element(&i); *iminout=i; return temp; }
+
+        template <class INT>
+        inline RT maxAbs2Element(INT* imaxout) const
+        { ptrdiff_t i; RT temp=maxAbs2Element(&i); *imaxout=i; return temp; }
+
 
 
     private:
@@ -1336,6 +1408,32 @@ namespace tmv {
         inline RT maxAbs2Element(ptrdiff_t* imaxout=0) const
         { return const_type(*this).maxAbs2Element(imaxout); }
 
+        // Also allow other int types in case ptrdiff_t is not int:
+        template <class INT>
+        inline T minElement(INT* iminout) const
+        { ptrdiff_t i; T temp=minElement(&i); *iminout=i; return temp; }
+
+        template <class INT>
+        inline T maxElement(INT* imaxout) const
+        { ptrdiff_t i; T temp=maxElement(&i); *imaxout=i; return temp; }
+
+        template <class INT>
+        inline RT minAbsElement(INT* iminout) const
+        { ptrdiff_t i; RT temp=minAbsElement(&i); *iminout=i; return temp; }
+
+        template <class INT>
+        inline RT maxAbsElement(INT* imaxout) const
+        { ptrdiff_t i; RT temp=maxAbsElement(&i); *imaxout=i; return temp; }
+
+        template <class INT>
+        inline RT minAbs2Element(INT* iminout) const
+        { ptrdiff_t i; RT temp=minAbs2Element(&i); *iminout=i; return temp; }
+
+        template <class INT>
+        inline RT maxAbs2Element(INT* imaxout) const
+        { ptrdiff_t i; RT temp=maxAbs2Element(&i); *imaxout=i; return temp; }
+
+
     }; // FortranStyle VectorView
 
 
@@ -1756,6 +1854,32 @@ namespace tmv {
 
         inline RT maxAbs2Element(ptrdiff_t* imaxout=0) const
         { return view().maxAbs2Element(imaxout); }
+
+        // Also allow other int types in case ptrdiff_t is not int:
+        template <class INT>
+        inline T minElement(INT* iminout) const
+        { ptrdiff_t i; T temp=minElement(&i); *iminout=i; return temp; }
+
+        template <class INT>
+        inline T maxElement(INT* imaxout) const
+        { ptrdiff_t i; T temp=maxElement(&i); *imaxout=i; return temp; }
+
+        template <class INT>
+        inline RT minAbsElement(INT* iminout) const
+        { ptrdiff_t i; RT temp=minAbsElement(&i); *iminout=i; return temp; }
+
+        template <class INT>
+        inline RT maxAbsElement(INT* imaxout) const
+        { ptrdiff_t i; RT temp=maxAbsElement(&i); *imaxout=i; return temp; }
+
+        template <class INT>
+        inline RT minAbs2Element(INT* iminout) const
+        { ptrdiff_t i; RT temp=minAbs2Element(&i); *iminout=i; return temp; }
+
+        template <class INT>
+        inline RT maxAbs2Element(INT* imaxout) const
+        { ptrdiff_t i; RT temp=maxAbs2Element(&i); *imaxout=i; return temp; }
+
 
         // 
         // I/O

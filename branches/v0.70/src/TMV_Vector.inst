@@ -10,12 +10,12 @@
   template T GenVector<T >::sumElements() const; \
   template RT GenVector<T >::sumAbsElements() const; \
   template RT GenVector<T >::sumAbs2Elements() const; \
-  template T GenVector<T >::minElement(ptrdiff_t* iminout) const; \
-  template T GenVector<T >::maxElement(ptrdiff_t* imaxout) const; \
-  template RT GenVector<T >::minAbsElement(ptrdiff_t* iminout) const; \
-  template RT GenVector<T >::maxAbsElement(ptrdiff_t* imaxout) const; \
-  template RT GenVector<T >::minAbs2Element(ptrdiff_t* iminout) const; \
-  template RT GenVector<T >::maxAbs2Element(ptrdiff_t* imaxout) const; \
+  template T GenVector<T >::doMinElement(ptrdiff_t* iminout) const; \
+  template T GenVector<T >::doMaxElement(ptrdiff_t* imaxout) const; \
+  template RT GenVector<T >::doMinAbsElement(ptrdiff_t* iminout) const; \
+  template RT GenVector<T >::doMaxAbsElement(ptrdiff_t* imaxout) const; \
+  template RT GenVector<T >::doMinAbs2Element(ptrdiff_t* iminout) const; \
+  template RT GenVector<T >::doMaxAbs2Element(ptrdiff_t* imaxout) const; \
   template T GenVector<T >::cref(ptrdiff_t i) const; \
   template Ref VectorView<T,CStyle>::ref(ptrdiff_t i); \
   template VectorView<T,CStyle>& VectorView<T,CStyle>::setZero(); \

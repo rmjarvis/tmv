@@ -41,7 +41,7 @@ Makes an \tt{n} $\times$ \tt{n} \tt{Permutation} set initially to the identity m
 
 \item
 \begin{tmvcode}
-tmv::Permutation p(int n, const int* pp, bool isinv=false)
+tmv::Permutation p(int n, const ptrdiff_t* pp, bool isinv=false)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{Permutation} using the provided values as the 
 list of interchanges.  The meaning of \tt{pp} is that \tt{v=p*v} is equivalent to
@@ -88,7 +88,7 @@ These are the same, and they do not create new storage.  So statements like
 \tt{v = p.transpose() * v} are efficient.
 
 \begin{tmvcode}
-const int* p.getValues()
+const ptrdiff_t* p.getValues()
 \end{tmvcode}
 Get the indices of the interchanges.  These are equivalent to the \tt{pp} values
 described above for the constructor.

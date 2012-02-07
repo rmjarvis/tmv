@@ -1229,9 +1229,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void Eigen(
-        const GenSymMatrix<T>& A, MatrixView<T> U,
-        VectorView<RT> SS)
+    void Eigen(const GenSymMatrix<T>& A, MatrixView<T> U, VectorView<RT> SS)
     {
         TMVAssert(A.isherm());
         TMVAssert(A.size() == SS.size());

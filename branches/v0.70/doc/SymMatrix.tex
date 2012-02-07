@@ -404,10 +404,10 @@ The method \tt{transposeSelf()} does nothing to a \tt{SymMatrix} and is equivale
 \tt{conjugateSelf()} for a \tt{HermMatrix}.
 \begin{tmvcode}
 s.swapRowsCols(int i1, int i2)
-s.permuteRowsCols(const int* p)
-s.reversePermuteRowsCols(const int* p)
-s.permuteRowsCols(const int* p, int i1, int i2)
-s.reversePermuteRowsCols(const int* p, int i1, int i2)
+s.permuteRowsCols(const ptrdiff_t* p)
+s.reversePermuteRowsCols(const ptrdiff_t* p)
+s.permuteRowsCols(const ptrdiff_t* p, int i1, int i2)
+s.reversePermuteRowsCols(const ptrdiff_t* p, int i1, int i2)
 \end{tmvcode}
 \index{SymMatrix!Methods!swapRowsCols}
 \index{SymMatrix!Methods!permuteRowsCols}

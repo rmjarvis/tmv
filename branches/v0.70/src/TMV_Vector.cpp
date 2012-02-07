@@ -754,7 +754,7 @@ namespace tmv {
 #endif
 
     template <class T> 
-    T GenVector<T>::minElement(ptrdiff_t* iminout) const
+    T GenVector<T>::doMinElement(ptrdiff_t* iminout) const
     {
         if (size() == 0) {
             if (iminout) *iminout = -1;
@@ -770,13 +770,13 @@ namespace tmv {
             if (iminout) *iminout = 0;
             return *cptr();
         } else {
-            T min = reverse().minElement(iminout);
+            T min = reverse().doMinElement(iminout);
             if (iminout) *iminout = size()-1-(*iminout);
             return min;
         }
     }
     template <class T> 
-    T GenVector<T>::maxElement(ptrdiff_t* imaxout) const
+    T GenVector<T>::doMaxElement(ptrdiff_t* imaxout) const
     {
         if (size() == 0) {
             if (imaxout) *imaxout = -1;
@@ -792,14 +792,14 @@ namespace tmv {
             if (imaxout) *imaxout = 0;
             return *cptr();
         } else {
-            T max = reverse().maxElement(imaxout);
+            T max = reverse().doMaxElement(imaxout);
             if (imaxout) *imaxout = size()-1-(*imaxout);
             return max;
         }
     }
 
     template <class T> 
-    RT GenVector<T>::minAbsElement(ptrdiff_t* iminout) const
+    RT GenVector<T>::doMinAbsElement(ptrdiff_t* iminout) const
     {
         if (size() == 0) {
             if (iminout) *iminout = -1;
@@ -815,13 +815,13 @@ namespace tmv {
             if (iminout) *iminout = 0;
             return RT(TMV_ABS(*cptr()));
         } else {
-            RT min = reverse().minAbsElement(iminout);
+            RT min = reverse().doMinAbsElement(iminout);
             if (iminout) *iminout = size()-1-(*iminout);
             return min;
         }
     }
     template <class T> 
-    RT GenVector<T>::maxAbsElement(ptrdiff_t* imaxout) const
+    RT GenVector<T>::doMaxAbsElement(ptrdiff_t* imaxout) const
     {
         if (size() == 0) {
             if (imaxout) *imaxout = -1;
@@ -837,14 +837,14 @@ namespace tmv {
             if (imaxout) *imaxout = 0;
             return RT(TMV_ABS(*cptr()));
         } else {
-            RT max = reverse().maxAbsElement(imaxout);
+            RT max = reverse().doMaxAbsElement(imaxout);
             if (imaxout) *imaxout = size()-1-(*imaxout);
             return max;
         }
     }
 
     template <class T> 
-    RT GenVector<T>::minAbs2Element(ptrdiff_t* iminout) const
+    RT GenVector<T>::doMinAbs2Element(ptrdiff_t* iminout) const
     {
         if (size() == 0) {
             if (iminout) *iminout = -1;
@@ -860,13 +860,13 @@ namespace tmv {
             if (iminout) *iminout = 0;
             return TMV_ABS2(*cptr());
         } else {
-            RT min = reverse().minAbs2Element(iminout);
+            RT min = reverse().doMinAbs2Element(iminout);
             if (iminout) *iminout = size()-1-(*iminout);
             return min;
         }
     }
     template <class T> 
-    RT GenVector<T>::maxAbs2Element(ptrdiff_t* imaxout) const
+    RT GenVector<T>::doMaxAbs2Element(ptrdiff_t* imaxout) const
     {
         if (size() == 0) {
             if (imaxout) *imaxout = -1;
@@ -882,7 +882,7 @@ namespace tmv {
             if (imaxout) *imaxout = 0;
             return TMV_ABS2(*cptr());
         } else {
-            RT max = reverse().maxAbs2Element(imaxout);
+            RT max = reverse().doMaxAbs2Element(imaxout);
             if (imaxout) *imaxout = size()-1-(*imaxout);
             return max;
         }

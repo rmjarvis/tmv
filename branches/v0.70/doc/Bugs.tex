@@ -226,6 +226,7 @@ If you get an error that looks something like:\\
 \texttt{TMV Error: info < 0 returned by LAPACK function dormqr}\\
 then this probably means that your LAPACK distribution does not support
 workspace size queries.  The solution is to use the flag \texttt{-DNOWORKQUERY}.
+I think TMV usually knows about these cases now and checks for them, but you might have a LAPACK distribution that I'm not aware of.  So you can add this flag by hand with the SCons option \tt{EXTRA_FLAGS=-DNOWORKQUERY}.  If that doesn't fix your problem, please file a bug report at  \myissues, since that means it's probably something else.
 
 \item {\bf Unable to link LAPACK on Mac:}
 \index{LAPACK!Linking}
@@ -255,10 +256,9 @@ propagates to lots of other routines as well.  The errors seem to be only for
 large matrices with at least one dimension $N > 100$ or so.  (I'm not sure of the 
 exact crossover point from working to non-working code.)
 
-I haven't surveyed which versions of XCode have this bug, but it is in versions
-3.2.2 and 3.2.4 at least.  
-Apparently, this is a known bug (ID 7437011), but it hasn't been fixed yet
-as of the writing of this documentation. 
+Apparently, this is a known bug (ID 7437011), but I don't know if it is fixed in the latest
+XCode 4 for the Lion OS (I don't yet have a computer with Lion on it).  But the bug is
+at least present in XCode versions 3.2.2 through 3.2.6.
 The best thing to do to see if your XCode installation has this problem
 is to install the test suite and make sure that it runs without errors.  If it makes it 
 through without errors, then you don't have to worry about it.
@@ -286,6 +286,10 @@ are not thread-safe.  So you might get segmentation faults or other strange
 non-repeatable errors at random times when using LAPACK within a multi-threaded
 program.  The solution is to compile TMV without LAPACK (with SCons option
 \tt{WITH_LAPACK=false}).
+
+\item {\bf LAPACK fails for extremely large matrices:}
+\index{LAPACK!Problems with extremely large matrices}
+For matrices that use more than 2 GBytes of memory, the integers that index the memory addresses need to be more that $2^{31}$.  This number exceeds the capacity of a 32 bit (signed) integer.  So the TMV library uses \tt{ptrdiff_t} for all integers that might be used in calculating such an index to make sure it is always safe.  However, LAPACK distributions generally use \tt{int}.  If this happens to be 32 bits on your machine, it can overflow.  This particularly a problem for the LAPACK SVD routine, since it needs workspace of size a bit more than $4n^2$.  So if $4n^2$ is more than $2^{31}$, it will fail.  Again, the solution is to compile TMV without LAPACK (with SCons option \tt{WITH_LAPACK=false}).
 
 \end{itemize}
 

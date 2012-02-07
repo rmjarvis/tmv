@@ -972,10 +972,10 @@ Swap the corresponding elements of two rows or two columns.
 
 \item
 \begin{tmvcode}
-m.permuteRows(const int* p)
-m.permuteRows(const int* p, int i1, int i2)
-m.reversePermuteRows(const int* p)
-m.reversePermuteRows(const int* p, int i1, int i2)
+m.permuteRows(const ptrdiff_t* p)
+m.permuteRows(const ptrdiff_t* p, int i1, int i2)
+m.reversePermuteRows(const ptrdiff_t* p)
+m.reversePermuteRows(const ptrdiff_t* p, int i1, int i2)
 \end{tmvcode}
 \index{Matrix!Methods!permuteRows}
 \index{Matrix!Methods!reversePermuteRows}
@@ -984,10 +984,10 @@ These are equivalent to the corresponding routines for \tt{Vector}s
 
 \item
 \begin{tmvcode}
-m.permuteCols(const int* p)
-m.permuteCols(const int* p, int j1, int j2)
-m.reversePermuteCols(const int* p)
-m.reversePermuteCols(const int* p, int j1, int j2)
+m.permuteCols(const ptrdiff_t* p)
+m.permuteCols(const ptrdiff_t* p, int j1, int j2)
+m.reversePermuteCols(const ptrdiff_t* p)
+m.reversePermuteCols(const ptrdiff_t* p, int j1, int j2)
 \end{tmvcode}
 \index{Matrix!Methods!permuteCols}
 \index{Matrix!Methods!reversePermuteCols}

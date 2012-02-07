@@ -242,7 +242,7 @@ Changed and Deprecated features:
    This would probably be a bit more efficient than using the default
    VectorView<T>::iterator which has the step size as a variable.
 
--- Changed type type of the size values from size_t to int.  The main 
+-- Changed type type of the size values from size_t to ptrdiff_t.  The main 
    reason for this is to prevent the constructors that take size arguments 
    from implicitly converting a negative number into a very large unsigned 
    value and then attempt to allocate a huge amount of memory.  If the size 
@@ -253,11 +253,27 @@ Changed and Deprecated features:
    amount of memory.  This seems like safer behavior.
 
    The only other place where this might matter is that the return type of
-   functions like m.colsize() now return an int rather than a size_t.  
+   functions like m.colsize() now return an ptrdiff_t rather than a size_t.  
    So if you do any comparisons with one of these values, such as 
    while(i < m.colsize()) and you compile with g++ -Wall, you'll want i 
    to be a signed integer type to avoid g++'s warning about comparing 
    signed and unsigned types.
+
+-- Changed all of the variables indexing offsets within the matrix (e.g. the 
+   arguments i and j of m(i,j)) from int to ptrdiff_t.  Previously, there were 
+   problems using matrices that exceeded 2 GBytes of memory if int is a 
+   32 bit integer.  The ptrdiff_t type is guaranteed to always be able to 
+   hold any offset that the OS can allocate in memory, so I switched the 
+   variables that deal with offsets from int to ptrdiff_t.  To be consistent,
+   I extended this to all the variables that are used to calculate these 
+   offsets as well, such as the arguments of m(i,j).
+
+   Normally, if you pass in an int variable, the compiler will automatically 
+   convert it to ptrdiff_t if necessary, so this change is largely 
+   transparent to the user. The only place it would require you to edit 
+   your code is if you use the explicit permutation functions like 
+   m.permuteRows(p) rather than using a Permutation object, then p would 
+   now have to be an array of ptrdiff_t rather than an array of int.
 
 -- Changed the svd().getV() method to svd().getVt() to conform to the 
    usual definition of the SVD: A = U * S * Vt.  The underlying matrix
@@ -434,18 +450,6 @@ New features:
 
 Bug fixes:
 
--- Added <cstddef> to TMV's includes.
-   This is required by g++ 4.6 for the ptrdiff_t type.
-
--- Implemented a workaround for a bug in icpc version 12.0.  
-   It was getting an internal error when compiling TMV_SymCHDecompose.cpp.
-   I don't think what I was doing was wrong, but I reworked the code slightly,
-   and now icpc is able to compile it.
-
--- Added support for the clang++ compiler.  This didn't require much editing, 
-   but it did complain about a couple things that had passed muster with the 
-   other compilers I had used.
-
 -- Fixed an error in the TMV_VERSION_AT_LEAST marco.  The old version was
    actually backwards.  It mistakenly returned whether the library's version 
    was equal to or _earlier_ than the provided values, rather than equal or 
@@ -463,3 +467,16 @@ Bug fixes:
    input matrix).
 
 -- Made the Givens rotations a bit more robust to overflow and underflow.
+
+-- Fixed a bug that P*v and P*m and similar operators didn't work if 
+   v or m is Small.
+
+-- Implemented a workaround for a bug in icpc version 12.0.  
+   It was getting an internal error when compiling TMV_SymCHDecompose.cpp.
+   I don't think what I was doing was wrong, but I reworked the code slightly,
+   and now icpc is able to compile it.
+
+-- Added support for the clang++ compiler.  This didn't require much editing, 
+   but it did complain about a couple things that had passed muster with the 
+   other compilers I had used.
+

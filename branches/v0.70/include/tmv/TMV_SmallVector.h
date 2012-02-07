@@ -480,6 +480,32 @@ namespace tmv {
             return max;
         }
 
+        // Also allow other int types in case ptrdiff_t is not int:
+        template <class INT>
+        inline T minElement(INT* iminout) const
+        { ptrdiff_t i; T temp=minElement(&i); *iminout=i; return temp; }
+
+        template <class INT>
+        inline T maxElement(INT* imaxout) const
+        { ptrdiff_t i; T temp=maxElement(&i); *imaxout=i; return temp; }
+
+        template <class INT>
+        inline RT minAbsElement(INT* iminout) const
+        { ptrdiff_t i; RT temp=minAbsElement(&i); *iminout=i; return temp; }
+
+        template <class INT>
+        inline RT maxAbsElement(INT* imaxout) const
+        { ptrdiff_t i; RT temp=maxAbsElement(&i); *imaxout=i; return temp; }
+
+        template <class INT>
+        inline RT minAbs2Element(INT* iminout) const
+        { ptrdiff_t i; RT temp=minAbs2Element(&i); *iminout=i; return temp; }
+
+        template <class INT>
+        inline RT maxAbs2Element(INT* imaxout) const
+        { ptrdiff_t i; RT temp=maxAbs2Element(&i); *imaxout=i; return temp; }
+
+
         //
         // Modifying Functions
         //
