@@ -36,6 +36,7 @@ opts = Variables(config_file)
 # Now set up options for the command line
 opts.Add('CXX','Name of c++ compiler')
 opts.Add('FLAGS','Compile flags to send to the compiler','')
+opts.Add('EXTRA_FLAGS','Extra compile flags to send to the compiler','')
 opts.Add(BoolVariable('DEBUG',
         'Turn on debugging statements in compilied library',False))
 opts.Add(PathVariable('PREFIX',
@@ -248,6 +249,10 @@ def BasicCCFlags(env):
         cxx_flags = env['FLAGS'].split(' ')
         env.Replace(CCFLAGS=cxx_flags)
         env['TEST_FLAGS'] = cxx_flags
+
+    cxx_flags = env['EXTRA_FLAGS'].split(' ')
+    env.AppendUnique(CCFLAGS=cxx_flags)
+    env['TEST_FLAGS'] += cxx_flags
 
 
 def AddOpenMPFlag(env):
