@@ -49,10 +49,10 @@ namespace tmv {
     template <class T, int A=0> 
     class Vector;
 
-    template <class T, int N, int A=0> 
+    template <class T, ptrdiff_t N, int A=0> 
     class SmallVector;
 
-    template <class T, int N> 
+    template <class T, ptrdiff_t N> 
     class SmallVectorComposite;
 
     // Things that inherit from this can be assigned to a Vector
@@ -100,7 +100,7 @@ namespace tmv {
             Attrib<A>::vtext()+">"; 
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline std::string TMV_Text(const SmallVector<T,N,A>& )
     { 
         std::ostringstream s;

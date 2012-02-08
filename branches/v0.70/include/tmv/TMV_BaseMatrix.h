@@ -67,10 +67,10 @@ namespace tmv {
     template <class T, int A=0>
     class Matrix;
 
-    template <class T, int M, int N, int A=0>
+    template <class T, ptrdiff_t M, ptrdiff_t N, int A=0>
     class SmallMatrix;
 
-    template <class T, int M, int N> 
+    template <class T, ptrdiff_t M, ptrdiff_t N> 
     class SmallMatrixComposite;
 
     template <class T> 
