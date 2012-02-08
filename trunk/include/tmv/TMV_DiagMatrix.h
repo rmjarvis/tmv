@@ -264,7 +264,7 @@ namespace tmv {
 
 #define NEW_SIZE(cs,rs) \
 
-        explicit DiagMatrix(int n=0) : itssize(n), itsm(n)
+        explicit DiagMatrix(ptrdiff_t n=0) : itssize(n), itsm(n)
         {
             TMVAssert(n >= 0);
             TMVStaticAssert(Traits<type>::okA);
@@ -273,7 +273,7 @@ namespace tmv {
 #endif
         }
 
-        DiagMatrix(int n, T x) : itssize(n), itsm(n)
+        DiagMatrix(ptrdiff_t n, T x) : itssize(n), itsm(n)
         {
             TMVAssert(n >= 0);
             TMVStaticAssert(Traits<type>::okA);
@@ -334,11 +334,11 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsm; }
         TMV_INLINE T* ptr() { return itsm; }
 
-        T cref(int i, int j) const { return (i!=j ? T(0) : cref(i)); }
-        T& ref(int i, int j) { return ref(i); }
+        T cref(ptrdiff_t i, ptrdiff_t j) const { return (i!=j ? T(0) : cref(i)); }
+        T& ref(ptrdiff_t i, ptrdiff_t j) { return ref(i); }
 
-        T cref(int i) const { return itsm[i]; }
-        T& ref(int i) { return itsm[i]; }
+        T cref(ptrdiff_t i) const { return itsm[i]; }
+        T& ref(ptrdiff_t i) { return itsm[i]; }
 
         void swapWith(type& m2)
         {
@@ -347,7 +347,7 @@ namespace tmv {
             itsm.swapWith(m2.itsm);
         }
 
-        void resize(const int n)
+        void resize(const ptrdiff_t n)
         {
             TMVAssert(n >= 0);
 #ifdef TMV_EXTRA_DEBUG
@@ -360,16 +360,16 @@ namespace tmv {
 #endif
         }
 
-        TMV_INLINE int size() const { return itssize; }
-        TMV_INLINE int nElements() const { return itssize; }
-        TMV_INLINE int step() const { return 1; }
+        TMV_INLINE ptrdiff_t size() const { return itssize; }
+        TMV_INLINE ptrdiff_t nElements() const { return itssize; }
+        TMV_INLINE ptrdiff_t step() const { return 1; }
         TMV_INLINE bool isconj() const { return false; }
         TMV_INLINE bool isrm() const { return true; }
         TMV_INLINE bool iscm() const { return true; }
 
     private:
 
-        int itssize;
+        ptrdiff_t itssize;
         AlignedArray<T> itsm;
 
     }; // DiagMatrix
@@ -425,7 +425,7 @@ namespace tmv {
         enum { twosA = isreal ? int(A) : (A & ~Conj & ~Unit) };
         enum { Asm = _checkalias ? (A & CheckAlias) : (A & ~NoAlias) };
         enum { nonunitAsm = Asm & ~Unit };
-        enum { twosAsm = isreal ? int(Asm) : (Asm & ~Conj & ~Unit) };
+        enum { twosAsm = isreal ? ptrdiff_t(Asm) : (Asm & ~Conj & ~Unit) };
 
         typedef ConstVectorView<T,A> const_diag_type;
         typedef ConstDiagMatrixView<T,A> const_subdiagmatrix_type;
@@ -477,13 +477,13 @@ namespace tmv {
         // Constructors
         //
 
-        ConstDiagMatrixView(const T* m, int n, int s) :
+        ConstDiagMatrixView(const T* m, ptrdiff_t n, ptrdiff_t s) :
             itsm(m), itssize(n), itsstep(s) 
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstDiagMatrixView(const T* m, int n) :
+        ConstDiagMatrixView(const T* m, ptrdiff_t n) :
             itsm(m), itssize(n), itsstep(_step)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -512,7 +512,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int S2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t S2, int A2>
         ConstDiagMatrixView(
             const ConstSmallDiagMatrixView<T,N2,S2,A2>& m2) :
             itsm(m2.cptr()), itssize(m2.size()), itsstep(m2.step()) 
@@ -521,7 +521,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int S2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t S2, int A2>
         ConstDiagMatrixView(
             const SmallDiagMatrixView<T,N2,S2,A2>& m2) :
             itsm(m2.cptr()), itssize(m2.size()), itsstep(m2.step()) 
@@ -547,13 +547,13 @@ namespace tmv {
 
         TMV_INLINE const T* cptr() const { return itsm; }
 
-        T cref(int i, int j) const { return (i!=j ? T(0) : cref(i)); }
+        T cref(ptrdiff_t i, ptrdiff_t j) const { return (i!=j ? T(0) : cref(i)); }
 
-        T cref(int i) const { return DoConj<_conj>(itsm[i*step()]); }
+        T cref(ptrdiff_t i) const { return DoConj<_conj>(itsm[i*step()]); }
 
-        TMV_INLINE int size() const { return itssize; }
-        TMV_INLINE int nElements() const { return itssize; }
-        TMV_INLINE int step() const { return itsstep; }
+        TMV_INLINE ptrdiff_t size() const { return itssize; }
+        TMV_INLINE ptrdiff_t nElements() const { return itssize; }
+        TMV_INLINE ptrdiff_t step() const { return itsstep; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE bool isrm() const { return step()==1; }
         TMV_INLINE bool iscm() const { return step()==1; }
@@ -561,7 +561,7 @@ namespace tmv {
     private :
 
         const T* itsm;
-        const int itssize;
+        const ptrdiff_t itssize;
         const CheckedInt<_step> itsstep;
 
     }; // ConstDiagMatrixView
@@ -603,7 +603,7 @@ namespace tmv {
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _unit = Attrib<A>::unit };
-        enum { twoS = isreal ? int(_step) : IntTraits<_step>::twoS };
+        enum { twoS = isreal ? ptrdiff_t(_step) : IntTraits<_step>::twoS };
 
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
@@ -697,13 +697,13 @@ namespace tmv {
         // Constructors
         //
 
-        DiagMatrixView(T* m, int n, int s) :
+        DiagMatrixView(T* m, ptrdiff_t n, ptrdiff_t s) :
             itsm(m), itssize(n), itsstep(s) 
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        DiagMatrixView(T* m, int n) :
+        DiagMatrixView(T* m, ptrdiff_t n) :
             itsm(m), itssize(n), itsstep(_step)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -724,7 +724,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int S2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t S2, int A2>
         DiagMatrixView(SmallDiagMatrixView<T,N2,S2,A2> m2) :
             itsm(m2.ptr()), itssize(m2.size()), itsstep(m2.step()) 
         {
@@ -762,15 +762,15 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsm; }
         TMV_INLINE T* ptr() { return itsm; }
 
-        T cref(int i, int j) const { return (i!=j ? T(0) : cref(i)); }
-        reference ref(int i, int j) { return ref(i); }
+        T cref(ptrdiff_t i, ptrdiff_t j) const { return (i!=j ? T(0) : cref(i)); }
+        reference ref(ptrdiff_t i, ptrdiff_t j) { return ref(i); }
 
-        T cref(int i) const { return DoConj<_conj>(itsm[i*step()]); }
-        reference ref(int i) { return reference(itsm[i*step()]); }
+        T cref(ptrdiff_t i) const { return DoConj<_conj>(itsm[i*step()]); }
+        reference ref(ptrdiff_t i) { return reference(itsm[i*step()]); }
 
-        TMV_INLINE int size() const { return itssize; }
-        TMV_INLINE int nElements() const { return itssize; }
-        TMV_INLINE int step() const { return itsstep; }
+        TMV_INLINE ptrdiff_t size() const { return itssize; }
+        TMV_INLINE ptrdiff_t nElements() const { return itssize; }
+        TMV_INLINE ptrdiff_t step() const { return itsstep; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE bool isrm() const { return step()==1; }
         TMV_INLINE bool iscm() const { return step()==1; }
@@ -778,7 +778,7 @@ namespace tmv {
     private :
 
         T* itsm;
-        const int itssize;
+        const ptrdiff_t itssize;
         const CheckedInt<_step> itsstep;
 
     }; // DiagMatrixView
@@ -792,7 +792,7 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE ConstDiagMatrixView<T,Unit> DiagMatrixViewOf(
-        const T* v, int size)
+        const T* v, ptrdiff_t size)
     {
         TMVAssert(size >= 0);
         return ConstDiagMatrixView<T,Unit>(v,size); 
@@ -800,21 +800,21 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE ConstDiagMatrixView<T> DiagMatrixViewOf(
-        const T* v, int size, int step)
+        const T* v, ptrdiff_t size, ptrdiff_t step)
     {
         TMVAssert(size >= 0);
         return ConstDiagMatrixView<T>(v,size,step); 
     }
 
     template <class T>
-    TMV_INLINE DiagMatrixView<T,Unit> DiagMatrixViewOf(T* v, int size)
+    TMV_INLINE DiagMatrixView<T,Unit> DiagMatrixViewOf(T* v, ptrdiff_t size)
     {
         TMVAssert(size >= 0);
         return DiagMatrixView<T,Unit>(v,size); 
     }
 
     template <class T>
-    TMV_INLINE DiagMatrixView<T> DiagMatrixViewOf(T* v, int size, int step)
+    TMV_INLINE DiagMatrixView<T> DiagMatrixViewOf(T* v, ptrdiff_t size, ptrdiff_t step)
     {
         TMVAssert(size >= 0);
         return DiagMatrixView<T>(v,size,step); 

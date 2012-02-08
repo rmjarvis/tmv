@@ -72,7 +72,7 @@ namespace tmv {
         // Constructors
         //
 
-        BasisVector(int n, int i, const T x=T(1)) : 
+        BasisVector(ptrdiff_t n, ptrdiff_t i, const T x=T(1)) : 
             itssize(n), itsindex(Maybe<_fort>::select(i-1,i)), itsval(x) 
         {
             TMVAssert(n > 0);
@@ -85,9 +85,9 @@ namespace tmv {
         // Auxilliary Functions
         //
 
-        T cref(int i) const  { return i==itsindex ? itsval : T(0); }
-        int size() const { return itssize; }
-        int nElements() const { return 1; }
+        T cref(ptrdiff_t i) const  { return i==itsindex ? itsval : T(0); }
+        ptrdiff_t size() const { return itssize; }
+        ptrdiff_t nElements() const { return 1; }
 
         template <class V2>
         void assignTo(BaseVector_Mutable<V2>& v2) const
@@ -99,8 +99,8 @@ namespace tmv {
 
     protected :
 
-        int itssize;
-        int itsindex;
+        ptrdiff_t itssize;
+        ptrdiff_t itsindex;
         T itsval;
 
     }; // BasisVector

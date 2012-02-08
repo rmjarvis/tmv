@@ -404,10 +404,6 @@ The method \tt{transposeSelf()} does nothing to a \tt{SymMatrix} and is equivale
 \tt{conjugateSelf()} for a \tt{HermMatrix}.
 \begin{tmvcode}
 s.swapRowsCols(int i1, int i2)
-s.permuteRowsCols(const ptrdiff_t* p)
-s.reversePermuteRowsCols(const ptrdiff_t* p)
-s.permuteRowsCols(const ptrdiff_t* p, int i1, int i2)
-s.reversePermuteRowsCols(const ptrdiff_t* p, int i1, int i2)
 \end{tmvcode}
 \index{SymMatrix!Methods!swapRowsCols}
 \index{SymMatrix!Methods!permuteRowsCols}
@@ -419,8 +415,7 @@ s.swapRows(i1,i2).swapCols(i1,i2);
 except that neither of these functions are allowed for a \tt{SymMatrix}, since 
 they result in non-symmetric matrices.  Only the combination of both
 maintains the symmetry of the matrix.  So this combination is included as
-a method.  The permute methods performs a series of these
-combined swaps.
+a method.
 \vspace{12pt}
 
 \subsection{Arithmetic}

@@ -360,7 +360,7 @@ namespace tmv {
         static inline FT call(const M& m)
         {
 #ifdef PRINTALGO_NormM
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Norm2 algo 1: N = "<<N<<std::endl;
 #endif
             typedef typename M::const_transpose_type Mt;
@@ -377,13 +377,13 @@ namespace tmv {
         static inline FT call(const M& m)
         {
 #ifdef PRINTALGO_NormM
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Norm2 algo 11: N = "<<N<<std::endl;
 #endif
             if (m.rowsize() > 0) {
                 typedef typename M::zfloat_type ZFT;
-                const int cs = M::_colsize;
-                const int rs = M::_rowsize;
+                const ptrdiff_t cs = M::_colsize;
+                const ptrdiff_t rs = M::_rowsize;
                 const int A = M::_rowmajor ? RowMajor : ColMajor;
                 typedef typename MCopyHelper<ZFT,Rec,cs,rs,A>::type Mc;
                 Mc mc = m;
@@ -404,7 +404,7 @@ namespace tmv {
         static FT call(const M& m)
         {
 #ifdef PRINTALGO_NormM
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Norm2 algo 12: N = "<<N<<std::endl;
 #endif
             if (m.rowsize() > 0) {
@@ -430,7 +430,7 @@ namespace tmv {
         static FT call(const M& m)
         {
 #ifdef PRINTALGO_NormM
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Norm2 algo 31: N = "<<N<<std::endl;
 #endif
             if (m.getDivType() == tmv::SV) 
@@ -448,7 +448,7 @@ namespace tmv {
         static FT call(const M& m)
         {
 #ifdef PRINTALGO_NormM
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Norm2 algo 32: N = "<<N<<std::endl;
 #endif
             if (m.colsize() < m.rowsize()) 
@@ -465,8 +465,8 @@ namespace tmv {
         typedef typename M::float_type FT;
         static TMV_INLINE FT call(const M& m)
         {
-            const int cs = M::_colsize;
-            const int rs = M::_rowsize;
+            const ptrdiff_t cs = M::_colsize;
+            const ptrdiff_t rs = M::_rowsize;
             const int algo = 
                 cs != Unknown && rs != Unknown ? (
                     cs < rs ? 1 : 11 ) :
@@ -492,7 +492,7 @@ namespace tmv {
                 M::_hasdivider ? 31 :
                 -4;
 #ifdef PRINTALGO_NormM
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Inline Norm2 \n";
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
@@ -526,7 +526,7 @@ namespace tmv {
         static inline FT call(const M& m)
         {
 #ifdef PRINTALGO_NormM
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Condition algo 1: N = "<<N<<std::endl;
 #endif
             typedef typename M::const_transpose_type Mt;
@@ -544,13 +544,13 @@ namespace tmv {
         static inline FT call(const M& m)
         {
 #ifdef PRINTALGO_NormM
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Condition algo 11: N = "<<N<<std::endl;
 #endif
             if (m.rowsize() > 0) {
                 typedef typename M::zfloat_type ZFT;
-                const int cs = M::_colsize;
-                const int rs = M::_rowsize;
+                const ptrdiff_t cs = M::_colsize;
+                const ptrdiff_t rs = M::_rowsize;
                 const int A = M::_rowmajor ? RowMajor : ColMajor;
                 typedef typename MCopyHelper<ZFT,Rec,cs,rs,A>::type Mc;
                 Mc mc = m;
@@ -571,7 +571,7 @@ namespace tmv {
         static FT call(const M& m)
         {
 #ifdef PRINTALGO_NormM
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Condition algo 12: N = "<<N<<std::endl;
 #endif
             if (m.rowsize() > 0) {
@@ -595,7 +595,7 @@ namespace tmv {
         static FT call(const M& m)
         {
 #ifdef PRINTALGO_NormM
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Condition algo 32: N = "<<N<<std::endl;
 #endif
             if (m.colsize() < m.rowsize()) 
@@ -612,8 +612,8 @@ namespace tmv {
         typedef typename M::float_type FT;
         static TMV_INLINE FT call(const M& m)
         {
-            const int cs = M::_colsize;
-            const int rs = M::_rowsize;
+            const ptrdiff_t cs = M::_colsize;
+            const ptrdiff_t rs = M::_rowsize;
             const int algo = 
                 cs != Unknown && rs != Unknown ? (
                     cs < rs ? 1 : 11 ) :
@@ -639,7 +639,7 @@ namespace tmv {
                 M::_hasdivider ? 12 :
                 -4;
 #ifdef PRINTALGO_NormM
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Inline Condition \n";
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;

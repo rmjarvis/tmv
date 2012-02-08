@@ -5,7 +5,7 @@
 #include "TMV_TestMatrixArith.h"
 
 template <class T, int N> 
-static void DoTestSmallMatrixArith_B7()
+static void DoTestSmallMatrixArith_B7a()
 {
     tmv::SmallMatrix<T,N,N,tmv::RowMajor> a1;
     for(int i=0;i<N;++i) for(int j=0;j<N;++j) {
@@ -47,23 +47,17 @@ static void DoTestSmallMatrixArith_B7()
     tmv::SmallVector<std::complex<T>,7> cv2 = ca3.col(0);
 
     if (showstartdone) {
-        std::cout<<"B7"<<std::endl;
+        std::cout<<"B7a"<<std::endl;
     }
-    TestMatrixArith7(a3,ca3,v2,cv2,v1,cv1,"NonSquare");
     TestMatrixArith7(a5,ca5,v1,cv1,v2,cv2,"NonSquare");
 #if (XTEST & 2)
-    tmv::SmallMatrix<T,7,N,tmv::ColMajor> a4 = a3;
-    tmv::SmallMatrix<std::complex<T>,7,N,tmv::ColMajor> ca4 = ca3;
     tmv::SmallMatrix<T,N,7,tmv::ColMajor> a6 = a5;
     tmv::SmallMatrix<std::complex<T>,N,7,tmv::ColMajor> ca6 = ca5;
 
-    TestMatrixArith7(a4,ca4,v2,cv2,v1,cv1,"NonSquare");
     TestMatrixArith7(a6,ca6,v1,cv1,v2,cv2,"NonSquare");
 #endif
 
 #if (XTEST & 32)
-    tmv::SmallMatrix<T,7,N,tmv::RowMajor|tmv::FortranStyle> a3f = a3;
-    tmv::SmallMatrix<std::complex<T>,7,N,tmv::RowMajor|tmv::FortranStyle> ca3f = ca3;
     tmv::SmallMatrix<T,N,7,tmv::RowMajor|tmv::FortranStyle> a5f = a5;
     tmv::SmallMatrix<std::complex<T>,N,7,tmv::RowMajor|tmv::FortranStyle> ca5f = ca5;
 
@@ -72,37 +66,34 @@ static void DoTestSmallMatrixArith_B7()
     tmv::SmallVector<T,7,tmv::FortranStyle> v2f = v2;
     tmv::SmallVector<std::complex<T>,7,tmv::FortranStyle> cv2f = cv2;
 
-    TestMatrixArith7(a3f,ca3f,v2,cv2,v1,cv1,"NonSquare");
     TestMatrixArith7(a5f,ca5f,v1,cv1,v2,cv2,"NonSquare");
-    TestMatrixArith7(a3f,ca3f,v2f,cv2f,v1,cv1,"NonSquare");
     TestMatrixArith7(a5f,ca5f,v1f,cv1f,v2,cv2,"NonSquare");
-    TestMatrixArith7(a3f,ca3f,v2f,cv2f,v1f,cv1f,"NonSquare");
     TestMatrixArith7(a5f,ca5f,v1f,cv1f,v2f,cv2f,"NonSquare");
 #endif
 }
 
 template <class T> 
-void TestSmallMatrixArith_B7()
+void TestSmallMatrixArith_B7a()
 {
-    DoTestSmallMatrixArith_B7<T,2>();
-    DoTestSmallMatrixArith_B7<T,5>();
+    DoTestSmallMatrixArith_B7a<T,2>();
+    DoTestSmallMatrixArith_B7a<T,5>();
 #if (XTEST & 2)
-    DoTestSmallMatrixArith_B7<T,1>();
-    DoTestSmallMatrixArith_B7<T,3>();
-    DoTestSmallMatrixArith_B7<T,4>();
+    DoTestSmallMatrixArith_B7a<T,1>();
+    DoTestSmallMatrixArith_B7a<T,3>();
+    DoTestSmallMatrixArith_B7a<T,4>();
 #endif
 }
 
 
 #ifdef TEST_DOUBLE
-template void TestSmallMatrixArith_B7<double>();
+template void TestSmallMatrixArith_B7a<double>();
 #endif
 #ifdef TEST_FLOAT
-template void TestSmallMatrixArith_B7<float>();
+template void TestSmallMatrixArith_B7a<float>();
 #endif
 #ifdef TEST_LONGDOUBLE
-template void TestSmallMatrixArith_B7<long double>();
+template void TestSmallMatrixArith_B7a<long double>();
 #endif
 #ifdef TEST_INT
-template void TestSmallMatrixArith_B7<int>();
+template void TestSmallMatrixArith_B7a<int>();
 #endif

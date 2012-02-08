@@ -160,13 +160,12 @@ appreciate hearing about your efforts at  \mygroup.
 \item {\bf Memory requirements:}
 The library is pretty big, so it can take quite a lot of memory to compile. 
 For most compilers, it seems that a minimum of around 512K is required.
-For compiling the test suite with the \texttt{-DXTEST} flag (especially when combining
-multiple extra tests, e.g. XTEST=127), at least 2 - 4 GB of memory is recommended.
+For compiling the test suite with the \texttt{XTEST} flag set to something other than 0 (especially something that combines a lot of multiple extra tests, e.g. XTEST=127), at least around 4 GB of memory is recommended.
 
 \item {\bf Linker choking:}
 Some linkers (e.g. the one on my old Mac G5) have trouble with the size 
 of some of the test suite's executables, especially when compiled 
-with \texttt{-DXTEST}.  If you encounter this problem, you can instead
+with \texttt{XTEST} set to include lots of extra tests.  If you encounter this problem, you can instead
 compile the smaller test suites.  
 
 The tests

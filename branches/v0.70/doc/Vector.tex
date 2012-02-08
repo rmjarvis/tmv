@@ -682,27 +682,6 @@ Swap elements \tt{v(i1)} and \tt{v(i2)}.
 
 \item
 \begin{tmvcode}
-v.permute(const ptrdiff_t* p)
-v.permute(const ptrdiff_t* p, int i1, int i2)
-v.reversePermute(const ptrdiff_t* p)
-v.reversePermute(const ptrdiff_t* p, int i1, int i2)
-\end{tmvcode}
-\index{Vector!Methods!permute}
-\index{Vector!Methods!reversePermute}
-The first one performs a series of swaps: (\tt{v(0)},\tt{v(p[0])}), (\tt{v(1)},\tt{v(p[1])}), ... 
-The second starts at \tt{i1} and ends at \tt{i2-1} rather than
-doing the whole range from 0 to \tt{n-1}.
-The last two work the same way, but do the swaps in the opposite order.
-
-Note: The indices listed in a permutation array (\tt{p}) always use 
-the C-style convention, even if \tt{v} uses Fortran-style indexing.
-
-These functions should not generally be needed in normal usage, since we now 
-have a \tt{Permutation} class to encapsulate the most common of these kinds of 
-operations.  See \S\ref{Permutation}
-
-\item
-\begin{tmvcode}
 v.sort(Permutation& p, tmv::ADType ad=tmv::Ascend, 
       tmv::CompType comp=tmv::RealComp)
 v.sort(tmv::ADType ad=tmv::Ascend, 

@@ -4,6 +4,7 @@
 #include "TMV.h"
 #include <fstream>
 #include <cstdio>
+#include <vector>
 
 #include "TMV_TestVectorArith.h"
 
@@ -55,7 +56,7 @@ static void TestVectorReal()
     v(23) = T(10*N);
     v(42) = T(0.25);
     v(15) = T(-20*N);
-    int imax,imin;
+    ptrdiff_t imax,imin;
     if (showacc) {
         std::cout<<"v = "<<v<<std::endl;
         std::cout<<"v.MaxAbs = "<<v.maxAbsElement(&imax)<<std::endl;
@@ -304,7 +305,7 @@ static void TestVectorComplex()
     }
     const int N = 100;
 
-    tmv::Vector<CT> v(N);
+    tmv::Vector<CT > v(N);
     for (int i=0; i<N; ++i) v(i) = CT(i,i+1234);
 
     for (int i=0; i<N; ++i) 
@@ -312,7 +313,7 @@ static void TestVectorComplex()
     for (int i=0; i<N; ++i) 
         Assert(v(i).imag() == T(i+1234), "CVector set");
 
-    tmv::VectorView<CT> v1(v.subVector(0,N,2));
+    tmv::VectorView<CT > v1(v.subVector(0,N,2));
     for (int i=0; i<N/2; ++i) 
         Assert(v1(i) == CT(2*i,2*i+1234), "CVector stride=2");
 
@@ -327,17 +328,17 @@ static void TestVectorComplex()
     Assert(v[5] == CT(2,2+1234),"Swap in CVector");
     v.swap(2,5);
 
-    tmv::Vector<CT> v2 = v.conjugate();
+    tmv::Vector<CT > v2 = v.conjugate();
 
     for (int i=0; i<N; ++i) Assert(v2(i) == CT(i,-i-1234), "Conjugate CVector");
     Assert(v2 == v.conjugate(),"Conjugate == CVector");
 
-    tmv::Vector<CT> v3(N);
+    tmv::Vector<CT > v3(N);
     for (int i=0; i<N; ++i) v3(i) = CT(i+10,2*i);
     v3(23) = CT(40*N,9*N);
     v3(42) = CT(0,1);
     v3(15) = CT(-32*N,24*N);
-    int imax,imin;
+    ptrdiff_t imax,imin;
     if (showacc) {
         std::cout<<"v = "<<v3<<std::endl;
         std::cout<<"v.MaxAbs = "<<v3.maxAbsElement(&imax)<<std::endl;
@@ -423,11 +424,11 @@ static void TestVectorComplex()
     tmv::Vector<T> b(N);
     for(int i=0;i<N;++i) b(i) = T(-3*i+191);
 
-    tmv::Vector<CT> ca = a;
+    tmv::Vector<CT > ca = a;
     Assert(Equal(ca,a,EPS),"Copy real V -> complex V");
 
     ca *= CT(3,4);
-    tmv::Vector<CT> cb = b*CT(3,4);
+    tmv::Vector<CT > cb = b*CT(3,4);
 
     prod = T(29)*T(25)*CT(-28,96);
     T normsqsum = 34342500;
@@ -453,7 +454,7 @@ static void TestVectorComplex()
     Assert(Equal2(NormSq(ca-cb),normsqdiff,EPS*N*normsqdiff),"CVector Diff");
 
     const int NN=20;
-    tmv::Vector<CT> w(NN);
+    tmv::Vector<CT > w(NN);
     w << 33,12,54,-12,43,-94,0,-20,40,-115,
       -120,140,330,10,-93,-39,49,100,-310,1;
 
@@ -462,8 +463,8 @@ static void TestVectorComplex()
        111,-1400,-230,110,52,-39,48,990,-710,-5;
     w.imagPart() = iw;
 
-    tmv::Vector<CT> origw = w;
-    tmv::Vector<CT> w2 = w;
+    tmv::Vector<CT > origw = w;
+    tmv::Vector<CT > w2 = w;
     tmv::Permutation P(NN);
     if (showacc) std::cout<<"unsorted w = "<<w<<std::endl;
 
@@ -582,7 +583,7 @@ static void TestVectorArith()
     typedef typename tmv::Traits<T>::complex_type CT;
 
     typedef tmv::VectorView<T> V;
-    typedef tmv::VectorView<CT> CV;
+    typedef tmv::VectorView<CT > CV;
     typedef tmv::VectorView<T,tmv::FortranStyle> VF;
     typedef tmv::VectorView<CT,tmv::FortranStyle> CVF;
 
@@ -593,14 +594,14 @@ static void TestVectorArith()
 
     tmv::Vector<T> a(N);
     for(int i=0;i<N;++i) a(i) = T(i+10);
-    tmv::Vector<CT> ca = a*CT(2,-1);;
+    tmv::Vector<CT > ca = a*CT(2,-1);
     V aa = a.view();
     CV caa = ca.view();
     TestVectorArith1(aa,caa,"Vector C");
 
     tmv::Vector<T> b(N);
     for(int i=0;i<N;++i) b(i) = T(-3*i+2);
-    tmv::Vector<CT> cb = b*CT(-5,1);
+    tmv::Vector<CT > cb = b*CT(-5,1);
     V bb = b.view();
     CV cbb = cb.view();
     TestVectorArith2(aa,caa,b,cbb,"Vector CC");
@@ -608,7 +609,7 @@ static void TestVectorArith()
     tmv::Vector<T> a10(10*N);
     V as = a10.subVector(0,10*N,10);
     as = a;
-    tmv::Vector<CT> ca10(10*N);
+    tmv::Vector<CT > ca10(10*N);
     CV cas = ca10.subVector(0,10*N,10);
     cas = ca;
     TestVectorArith1(as,cas,"Vector C Step");
@@ -616,7 +617,7 @@ static void TestVectorArith()
     tmv::Vector<T> b10(10*N);
     V bs = b10.subVector(0,10*N,10);
     bs = b;
-    tmv::Vector<CT> cb10(10*N);
+    tmv::Vector<CT > cb10(10*N);
     CV cbs = cb10.subVector(0,10*N,10);
     cbs = cb;
     TestVectorArith2(as,cas,bb,cbb,"Vector C StepA");
@@ -679,33 +680,41 @@ static void TestVectorIO()
     }
     const int N = 20;
     tmv::Vector<T> v(N);
-    tmv::Vector<CT> cv(N);
+    tmv::Vector<CT > cv(N);
     for (int i=0; i<N; ++i) {
         v(i) = T(i+34);
         cv(i) = CT(T(i),T(N-i));
     }
 
     v(3) = T(1.e-30);
-    cv(3) = CT(1.e-30,1.e-30);
+    cv(3) = CT(T(1.e-30),T(1.e-30));
     v(8) = T(9.e-3);
-    cv(8) = CT(9.e-3,9.e-3);
+    cv(8) = CT(T(9.e-3),T(9.e-3));
+    cv(9) = CT(T(9),T(9.e-3));
     v(12) = T(0.123456789);
-    cv(12) = CT(3.123456789,600.987654321);
+    cv(12) = CT(T(3.123456789),T(600.987654321));
 
     // First check clipping function...
     tmv::Vector<T> v2 = v;
-    tmv::Vector<CT> cv2 = cv;
+    tmv::Vector<CT > cv2 = cv;
     if (!std::numeric_limits<T>::is_integer) {
-        v2.clip(1.e-2);
-        cv2.clip(1.e-2);
+        v2.clip(T(1.e-2));
+        cv2.clip(T(1.e-2));
     }
     tmv::Vector<T> v3 = v;
-    tmv::Vector<CT> cv3 = cv;
+    tmv::Vector<CT > cv3 = cv;
     v3(3) = T(0);
     cv3(3) = T(0);
-    v3(8) = T(0); // Others, esp. cv3(8), shouldn't get clipped.
+    v3(8) = T(0); 
+    // Others, esp. cv3(8) and cv3(9) shouldn't get clipped.
     Assert(v2 == v3,"Vector clip");
     Assert(cv2 == cv3,"Complex Vector clip");
+    
+    // However, ThreshIO for complex works slightly differently than clip.
+    // It clips _either_ the real or imag component, so now cv2(8) and 
+    // cv2(9) need to be modified.
+    cv2(8) = cv3(8) = T(0);
+    cv2(9) = cv3(9) = T(9);
 
     // Write vectors with 4 different styles
     std::ofstream fout("tmvtest_vector_io.dat");
@@ -728,18 +737,18 @@ static void TestVectorIO()
 
     // When using (the default) prec(6), these will be the values read in.
     v(12) = T(0.123457);
-    cv(12) = CT(3.12346,600.988);
+    cv(12) = CT(T(3.12346),T(600.988));
 
     // When using prec(12), the full correct values will be read in. (v2,cv2)
 
     // When using prec(4), these will be the values read in.
     v3(12) = T(0.1235);
     if (std::numeric_limits<T>::is_integer) cv3(12) = CT(3,600);
-    else cv3(12) = CT(3.123,601.0);
+    else cv3(12) = CT(T(3.123),T(601.0));
 
     // Read them back in
     tmv::Vector<T> xv(N);
-    tmv::Vector<CT> xcv(N);
+    tmv::Vector<CT > xcv(N);
     std::ifstream fin("tmvtest_vector_io.dat");
     Assert(fin,"Couldn't open tmvtest_vector_io.dat for input");
     fin >> xv >> xcv;
@@ -760,7 +769,7 @@ static void TestVectorIO()
     // Also check switching the default IOStyle.
     tmv::CompactIO().makeDefault();
     tmv::Vector<T> zv1, zv2, zv3, zv4;
-    tmv::Vector<CT> zcv1, zcv2, zcv3, zcv4;
+    tmv::Vector<CT > zcv1, zcv2, zcv3, zcv4;
     fin.open("tmvtest_vector_io.dat");
     Assert(fin,"Couldn't open tmvtest_vector_io.dat for input");
     fin >> tmv::NormalIO() >> zv1 >> tmv::NormalIO() >> zcv1;

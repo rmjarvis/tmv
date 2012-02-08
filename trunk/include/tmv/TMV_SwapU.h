@@ -28,11 +28,11 @@ namespace tmv {
 #define TMV_SWAPU_UNROLL 0
 #endif
 
-    template <int algo, int s, class M1, class M2>
+    template <int algo, ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper;
 
     // algo 1: m1,m2 are unitdiag
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<1,s,M1,M2>
     {
         static inline void call(M1& m1, M2& m2)
@@ -42,21 +42,21 @@ namespace tmv {
                 typedef typename M2::offdiag_type M2o;
                 M1o m1o = m1.offDiag();
                 M2o m2o = m2.offDiag();
-                const int sm1 = IntTraits2<s,-1>::sum;
+                const ptrdiff_t sm1 = IntTraits2<s,-1>::sum;
                 SwapU_Helper<-3,sm1,M1o,M2o>::call(m1o,m2o);
             }
         }
     };
 
     // algo 2: UnknownDiag
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<2,s,M1,M2>
     {
         static void call(M1& m1, M2& m2)
         {
-            const int s2 = s > 20 ? Unknown : s;
-            const int s2p1 = IntTraits<s2>::Sp1;
-            const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
+            const ptrdiff_t s2 = s > 20 ? Unknown : s;
+            const ptrdiff_t s2p1 = IntTraits<s2>::Sp1;
+            const ptrdiff_t nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s > 10 ? false :
                 s == Unknown ? false :
@@ -72,7 +72,7 @@ namespace tmv {
     };          
 
     // algo 3: Transpose (and go back to -3, rather than -2)
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<3,s,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -86,21 +86,21 @@ namespace tmv {
     };          
 
     // algo 11: Loop over columns
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<11,s,M1,M2>
     {
         static void call(M1& m1, M2& m2)
         {
-            const int N = (s == Unknown ? m2.size() : s);
+            const ptrdiff_t N = (s == Unknown ? m2.size() : s);
             typedef typename M1::col_sub_type M1c;
             typedef typename M2::col_sub_type M2c;
             typedef typename M1c::iterator IT1;
             typedef typename M2c::iterator IT2;
-            const int step1 = m1.stepj();
-            const int step2 = m2.stepj();
+            const ptrdiff_t step1 = m1.stepj();
+            const ptrdiff_t step2 = m2.stepj();
             IT1 it1 = m1.get_col(0,0,1).begin();
             IT2 it2 = m2.get_col(0,0,1).begin();
-            for(int j=0;j<N;++j) {
+            for(ptrdiff_t j=0;j<N;++j) {
                 SwapV_Helper<-3,Unknown,M1c,M2c>::call2(j+1,it1,it2);
                 it1.shiftP(step1);
                 it2.shiftP(step2);
@@ -109,18 +109,18 @@ namespace tmv {
     };
 
     // algo 12: Loop over rows
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<12,s,M1,M2>
     {
         static void call(M1& m1, M2& m2)
         {
-            int N = (s == Unknown ? m2.size() : s);
+            ptrdiff_t N = (s == Unknown ? m2.size() : s);
             typedef typename M1::row_sub_type M1r;
             typedef typename M2::row_sub_type M2r;
             typedef typename M1r::iterator IT1;
             typedef typename M2r::iterator IT2;
-            const int step1 = m1.diagstep();
-            const int step2 = m2.diagstep();
+            const ptrdiff_t step1 = m1.diagstep();
+            const ptrdiff_t step2 = m2.diagstep();
             IT1 it1 = m1.get_row(0,0,N).begin();
             IT2 it2 = m2.get_row(0,0,N).begin();
             for(;N;--N) {
@@ -132,10 +132,10 @@ namespace tmv {
     };
 
     // algo 15: Fully unroll by columns
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<15,s,M1,M2>
     {
-        template <int I, int M, int J, int N>
+        template <ptrdiff_t I, ptrdiff_t M, ptrdiff_t J, ptrdiff_t N>
         struct Unroller
         {
             static TMV_INLINE void unroll(M1& m1, M2& m2)
@@ -144,7 +144,7 @@ namespace tmv {
                 Unroller<I,M,J+N/2,N-N/2>::unroll(m1,m2);
             }
         };
-        template <int I, int M, int J>
+        template <ptrdiff_t I, ptrdiff_t M, ptrdiff_t J>
         struct Unroller<I,M,J,1>
         {
             static TMV_INLINE void unroll(M1& m1, M2& m2)
@@ -153,16 +153,16 @@ namespace tmv {
                 Unroller<I+M/2,M-M/2,J,1>::unroll(m1,m2);
             }
         };
-        template <int I, int M, int J>
+        template <ptrdiff_t I, ptrdiff_t M, ptrdiff_t J>
         struct Unroller<I,M,J,0>
         { static TMV_INLINE void unroll(M1& , M2& ) {} };
-        template <int I, int J>
+        template <ptrdiff_t I, ptrdiff_t J>
         struct Unroller<I,1,J,1>
         {
             static TMV_INLINE void unroll(M1& m1, M2& m2)
             { TMV_SWAP(m2.ref(I,J) , m1.ref(I,J)); }
         };
-        template <int I, int J>
+        template <ptrdiff_t I, ptrdiff_t J>
         struct Unroller<I,0,J,1>
         { static TMV_INLINE void unroll(M1& , M2& ) {} };
 
@@ -171,10 +171,10 @@ namespace tmv {
     };
 
     // algo 16: Fully unroll by rows
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<16,s,M1,M2>
     {
-        template <int I, int M, int J, int N>
+        template <ptrdiff_t I, ptrdiff_t M, ptrdiff_t J, ptrdiff_t N>
         struct Unroller
         {
             static TMV_INLINE void unroll(M1& m1, M2& m2)
@@ -183,7 +183,7 @@ namespace tmv {
                 Unroller<I+M/2,M-M/2,J+M/2,N-M/2>::unroll(m1,m2);
             }
         };
-        template <int I, int J, int N>
+        template <ptrdiff_t I, ptrdiff_t J, ptrdiff_t N>
         struct Unroller<I,1,J,N>
         {
             static TMV_INLINE void unroll(M1& m1, M2& m2)
@@ -192,16 +192,16 @@ namespace tmv {
                 Unroller<I,1,J+N/2,N-N/2>::unroll(m1,m2);
             }
         };
-        template <int I, int J, int N>
+        template <ptrdiff_t I, ptrdiff_t J, ptrdiff_t N>
         struct Unroller<I,0,J,N>
         { static TMV_INLINE void unroll(M1& , M2& ) {} };
-        template <int I, int J>
+        template <ptrdiff_t I, ptrdiff_t J>
         struct Unroller<I,1,J,1>
         {
             static TMV_INLINE void unroll(M1& m1, M2& m2)
             { TMV_SWAP(m2.ref(I,J) , m1.ref(I,J) ); }
         };
-        template <int I, int J>
+        template <ptrdiff_t I, ptrdiff_t J>
         struct Unroller<I,1,J,0>
         { static TMV_INLINE void unroll(M1& , M2& ) {} };
 
@@ -210,7 +210,7 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<90,s,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -218,7 +218,7 @@ namespace tmv {
     };
 
     // algo 91: Call inst alias
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<91,s,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -226,7 +226,7 @@ namespace tmv {
     };
 
     // algo 96: Transpose
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<96,s,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -240,7 +240,7 @@ namespace tmv {
     };          
 
     // algo 196: Transpose
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<196,s,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -254,7 +254,7 @@ namespace tmv {
     };          
 
     // algo 97: Conjugate
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<97,s,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -268,7 +268,7 @@ namespace tmv {
     };          
 
     // algo 197: Conjugate
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<197,s,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -282,7 +282,7 @@ namespace tmv {
     };          
 
     // algo 98: Inline check for aliases
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<98,s,M1,M2>
     {
         static void call(M1& m1, M2& m2)
@@ -300,7 +300,7 @@ namespace tmv {
                     typedef typename M2::offdiag_type M2o;
                     M1o m1o = m1.offDiag();
                     M2o m2o = m2.offDiag();
-                    const int sm1 = IntTraits<s>::Sm1;
+                    const ptrdiff_t sm1 = IntTraits<s>::Sm1;
                     SwapU_Helper<-2,sm1,M1o,M2o>::call(m1o,m2o);
                 }
                 // And maybe conjugate the diag
@@ -316,7 +316,7 @@ namespace tmv {
     };
 
     // algo 99: Check for aliases
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<99,s,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -337,7 +337,7 @@ namespace tmv {
     };
 
     // algo -4: No branches or copies, and Upper, NonUnitDiag
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<-4,s,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -347,10 +347,10 @@ namespace tmv {
             TMVStaticAssert(M1::_upper);
             TMVStaticAssert(M2::_upper);
             typedef typename M2::value_type T2;
-            const int s2 = s > 20 ? Unknown : s;
-            const int s2p1 = IntTraits<s2>::Sp1;
+            const ptrdiff_t s2 = s > 20 ? Unknown : s;
+            const ptrdiff_t s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
-            const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
+            const ptrdiff_t nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s == Unknown ? false :
                 nops > TMV_SWAPU_UNROLL ? false :
@@ -363,7 +363,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<-3,s,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -380,7 +380,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<-2,s,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -401,7 +401,7 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases?
-    template <int s, class M1, class M2>
+    template <ptrdiff_t s, class M1, class M2>
     struct SwapU_Helper<-1,s,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -427,7 +427,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.isunit() == m2.isunit());
-        const int s = Sizes<M1::_size,M2::_size>::size;
+        const ptrdiff_t s = Sizes<M1::_size,M2::_size>::size;
         typedef typename M1::cview_type M1v;
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
@@ -444,7 +444,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.isunit() == m2.isunit());
-        const int s = Sizes<M1::_size,M2::_size>::size;
+        const ptrdiff_t s = Sizes<M1::_size,M2::_size>::size;
         typedef typename M1::cview_type M1v;
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
@@ -461,7 +461,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<M1::_size,M2::_size>::same));
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.isunit() == m2.isunit());
-        const int s = Sizes<M1::_size,M2::_size>::size;
+        const ptrdiff_t s = Sizes<M1::_size,M2::_size>::size;
         typedef typename M1::cview_type M1v;
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();

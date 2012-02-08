@@ -52,8 +52,8 @@ namespace tmv {
         // algo path to the ones that have vstep == 1.
 
         typedef typename Traits<T>::real_type RT;
-        const int M = m1.colsize();
-        const int N = m1.rowsize();
+        const ptrdiff_t M = m1.colsize();
+        const ptrdiff_t N = m1.rowsize();
 
         if (v3.step() == 1) {
             if (v2.step() == 1) {
@@ -99,8 +99,8 @@ namespace tmv {
         // algo path to the ones that have vstep == 1.
 
         typedef typename Traits<T>::real_type RT;
-        const int M = m1.colsize();
-        const int N = m1.rowsize();
+        const ptrdiff_t M = m1.colsize();
+        const ptrdiff_t N = m1.rowsize();
 
         if (v3.step() == 1) {
             if (v2.step() == 1) {

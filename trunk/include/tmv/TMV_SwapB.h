@@ -17,35 +17,35 @@ namespace tmv {
     // Swap Matrices
     //
 
-    template <int algo, int cs, int rs, class M1, class M2>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct SwapB_Helper;
 
     // algo 11: Loop over columns
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct SwapB_Helper<11,cs,rs,M1,M2>
     {
         static void call(M1& m1, M2& m2)
         {
-            const int M = cs == Unknown ? m2.colsize() : cs;
-            const int N = rs == Unknown ? m2.rowsize() : rs;
-            const int xx = Unknown;
+            const ptrdiff_t M = cs == Unknown ? m2.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m2.rowsize() : rs;
+            const ptrdiff_t xx = Unknown;
             typedef typename M1::col_sub_type M1c;
             typedef typename M2::col_sub_type M2c;
             typedef typename M1c::iterator IT1;
             typedef typename M2c::iterator IT2;
-            const int rowstep1 = m1.stepj();
-            const int rowstep2 = m2.stepj();
-            const int diagstep1 = m1.diagstep();
-            const int diagstep2 = m2.diagstep();
+            const ptrdiff_t rowstep1 = m1.stepj();
+            const ptrdiff_t rowstep2 = m2.stepj();
+            const ptrdiff_t diagstep1 = m1.diagstep();
+            const ptrdiff_t diagstep2 = m2.diagstep();
 
-            const int lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
-            const int j1 = m1.nhi();
-            const int j2 = TMV_MIN(N,M-m1.nlo());
-            const int j3 = TMV_MIN(N,M+m1.nhi());
-            int len = m1.nlo()+1;
+            const ptrdiff_t lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
+            const ptrdiff_t j1 = m1.nhi();
+            const ptrdiff_t j2 = TMV_MIN(N,M-m1.nlo());
+            const ptrdiff_t j3 = TMV_MIN(N,M+m1.nhi());
+            ptrdiff_t len = m1.nlo()+1;
             IT1 it1 = m1.get_col(0,0,len).begin();
             IT2 it2 = m2.get_col(0,0,len).begin();
-            int j=0;
+            ptrdiff_t j=0;
             for(;j<j1;++j) {
                 SwapV_Helper<-3,xx,M1c,M2c>::call2(len,it1,it2);
                 it1.shiftP(rowstep1);
@@ -67,31 +67,31 @@ namespace tmv {
     };
 
     // algo 12: Loop over rows
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct SwapB_Helper<12,cs,rs,M1,M2>
     {
         static void call(M1& m1, M2& m2)
         {
-            const int M = cs == Unknown ? m2.colsize() : cs;
-            const int N = rs == Unknown ? m2.rowsize() : rs;
-            const int xx = Unknown;
+            const ptrdiff_t M = cs == Unknown ? m2.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m2.rowsize() : rs;
+            const ptrdiff_t xx = Unknown;
             typedef typename M1::row_sub_type M1r;
             typedef typename M2::row_sub_type M2r;
             typedef typename M1r::iterator IT1;
             typedef typename M2r::iterator IT2;
-            const int colstep1 = m1.stepi();
-            const int colstep2 = m2.stepi();
-            const int diagstep1 = m1.diagstep();
-            const int diagstep2 = m2.diagstep();
+            const ptrdiff_t colstep1 = m1.stepi();
+            const ptrdiff_t colstep2 = m2.stepi();
+            const ptrdiff_t diagstep1 = m1.diagstep();
+            const ptrdiff_t diagstep2 = m2.diagstep();
 
-            const int lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
-            const int i1 = m1.nlo();
-            const int i2 = TMV_MIN(M,N-m1.nhi());
-            const int i3 = TMV_MIN(M,N+m1.nlo());
-            int len = m1.nhi()+1;
+            const ptrdiff_t lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
+            const ptrdiff_t i1 = m1.nlo();
+            const ptrdiff_t i2 = TMV_MIN(M,N-m1.nhi());
+            const ptrdiff_t i3 = TMV_MIN(M,N+m1.nlo());
+            ptrdiff_t len = m1.nhi()+1;
             IT1 it1 = m1.get_row(0,0,len).begin();
             IT2 it2 = m2.get_row(0,0,len).begin();
-            int i=0;
+            ptrdiff_t i=0;
             for(;i<i1;++i) {
                 SwapV_Helper<-3,xx,M1r,M2r>::call2(len,it1,it2);
                 it1.shiftP(colstep1);
@@ -113,35 +113,35 @@ namespace tmv {
     };
 
     // algo 13: Loop over diagonals
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct SwapB_Helper<13,cs,rs,M1,M2>
     {
         static void call(M1& m1, M2& m2)
         {
-            const int M = cs == Unknown ? m2.colsize() : cs;
-            const int N = rs == Unknown ? m2.rowsize() : rs;
-            const int xx = Unknown;
+            const ptrdiff_t M = cs == Unknown ? m2.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m2.rowsize() : rs;
+            const ptrdiff_t xx = Unknown;
             typedef typename M1::diag_sub_type M1d;
             typedef typename M2::diag_sub_type M2d;
             typedef typename M1d::iterator IT1;
             typedef typename M2d::iterator IT2;
-            const int colstep1 = m1.stepi();
-            const int colstep2 = m2.stepi();
-            const int rowstep1 = m1.stepj();
-            const int rowstep2 = m2.stepj();
+            const ptrdiff_t colstep1 = m1.stepi();
+            const ptrdiff_t colstep2 = m2.stepi();
+            const ptrdiff_t rowstep1 = m1.stepj();
+            const ptrdiff_t rowstep2 = m2.stepj();
             IT1 it1 = m1.get_diag(-m1.nlo()).begin();
             IT2 it2 = m2.get_diag(-m1.nlo()).begin();
-            int len = TMV_MIN(M-m1.nlo(),N);
-            for(int k=m1.nlo();k;--k) {
+            ptrdiff_t len = TMV_MIN(M-m1.nlo(),N);
+            for(ptrdiff_t k=m1.nlo();k;--k) {
                 SwapV_Helper<-3,xx,M1d,M2d>::call2(len,it1,it2);
                 it1.shiftP(-colstep1);
                 it2.shiftP(-colstep2);
                 if (len < N) ++len;
             }
             TMVAssert(len == TMV_MIN(M,N));
-            const int ds = IntTraits2<cs,rs>::min;
+            const ptrdiff_t ds = IntTraits2<cs,rs>::min;
             SwapV_Helper<-3,ds,M1d,M2d>::call2(len,it1,it2);
-            for(int k=1;k<=m1.nhi();++k) {
+            for(ptrdiff_t k=1;k<=m1.nhi();++k) {
                 it1.shiftP(rowstep1);
                 it2.shiftP(rowstep2);
                 if (k+len > N) --len;
@@ -151,7 +151,7 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct SwapB_Helper<90,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -159,7 +159,7 @@ namespace tmv {
     };
 
     // algo 91: Call inst alias
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct SwapB_Helper<91,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -167,7 +167,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct SwapB_Helper<97,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -181,7 +181,7 @@ namespace tmv {
     };
 
     // algo 197: Conjugate
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct SwapB_Helper<197,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -195,7 +195,7 @@ namespace tmv {
     };
 
     // algo 98: Inline check for aliases
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct SwapB_Helper<98,cs,rs,M1,M2>
     {
         static void call(M1& m1, M2& m2)
@@ -225,7 +225,7 @@ namespace tmv {
     };
 
     // algo 99: Check for aliases
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct SwapB_Helper<99,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -246,7 +246,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct SwapB_Helper<-3,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -262,7 +262,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct SwapB_Helper<-2,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -283,7 +283,7 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases?
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct SwapB_Helper<-1,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, M2& m2)
@@ -305,8 +305,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
-        const int cs = Sizes<M1::_colsize,M2::_colsize>::size;
-        const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
+        const ptrdiff_t cs = Sizes<M1::_colsize,M2::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
         typedef typename M1::cview_type M1v;
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
@@ -322,8 +322,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
-        const int cs = Sizes<M1::_colsize,M2::_colsize>::size;
-        const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
+        const ptrdiff_t cs = Sizes<M1::_colsize,M2::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
         typedef typename M1::cview_type M1v;
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
@@ -339,8 +339,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
-        const int cs = Sizes<M1::_colsize,M2::_colsize>::size;
-        const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
+        const ptrdiff_t cs = Sizes<M1::_colsize,M2::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
         typedef typename M1::cview_type M1v;
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();

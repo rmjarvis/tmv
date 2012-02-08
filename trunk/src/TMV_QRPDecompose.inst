@@ -3,7 +3,7 @@
 
 #define Def1(T1,RT)\
   template void InstQRP_Decompose( \
-      MatrixView<T1> A, VectorView<RT> beta, int* P, bool strict); \
+      MatrixView<T1> A, VectorView<RT> beta, ptrdiff_t* P, bool strict); \
 
 Def1(T,T)
 #ifdef TMV_INST_COMPLEX

@@ -18,5 +18,6 @@ TMV_TestSmallMatrixArith_B6a.cpp
 TMV_TestSmallMatrixArith_B6b.cpp
 TMV_TestSmallMatrixArith_B6c.cpp
 TMV_TestSmallMatrixArith_B6d.cpp
-TMV_TestSmallMatrixArith_B7.cpp
+TMV_TestSmallMatrixArith_B7a.cpp
+TMV_TestSmallMatrixArith_B7b.cpp
 

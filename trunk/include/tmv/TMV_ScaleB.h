@@ -26,16 +26,16 @@ namespace tmv {
     // BandMatrix *= x
     //
 
-    template <int algo, int cs, int rs, int ix, class T, class M1>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleB_Helper;
 
     // algo 0: trivial: cs == 0, rs == 0 or ix == 1, so nothing to do
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleB_Helper<0,cs,rs,ix,T,M1>
     { static TMV_INLINE void call(const Scaling<ix,T>& , M1& ) {} };
 
     // algo 1: Linearize to vector version
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleB_Helper<1,cs,rs,ix,T,M1>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
@@ -51,31 +51,31 @@ namespace tmv {
     };
 
     // algo 11: Loop over columns
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleB_Helper<11,cs,rs,ix,T,M1>
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
-            const int M = cs == Unknown ? m.colsize() : cs;
-            const int N = rs == Unknown ? m.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m.rowsize() : rs;
 #ifdef PRINTALGO_XB
             std::cout<<"ScaleB algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             typedef typename M1::col_sub_type M1c;
             typedef typename M1c::iterator IT;
-            const int rowstep = m.stepj();
-            const int diagstep = m.diagstep();
+            const ptrdiff_t rowstep = m.stepj();
+            const ptrdiff_t diagstep = m.diagstep();
 
-            const int lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
-            const int j1 = m.nhi();
-            const int j2 = TMV_MIN(N,M-m.nlo());
-            const int j3 = TMV_MIN(N,M+m.nhi());
+            const ptrdiff_t lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
+            const ptrdiff_t j1 = m.nhi();
+            const ptrdiff_t j2 = TMV_MIN(N,M-m.nlo());
+            const ptrdiff_t j3 = TMV_MIN(N,M+m.nhi());
             //std::cout<<"j1,j2,j3 = "<<j1<<','<<j2<<','<<j3<<std::endl;
-            int len = m.nlo()+1;
+            ptrdiff_t len = m.nlo()+1;
             IT it = m.get_col(0,0,len).begin();
-            int j=0;
+            ptrdiff_t j=0;
             for(;j<j1;++j) {
                 //std::cout<<"A j = "<<j<<", len  = "<<len<<std::endl;
                 ScaleV_Helper<-3,xx,ix,T,M1c>::call2(len,x,it);
@@ -97,30 +97,30 @@ namespace tmv {
     };
 
     // algo 12: Loop over rows
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleB_Helper<12,cs,rs,ix,T,M1>
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
-            const int M = cs == Unknown ? m.colsize() : cs;
-            const int N = rs == Unknown ? m.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m.rowsize() : rs;
 #ifdef PRINTALGO_XB
             std::cout<<"ScaleB algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             typedef typename M1::row_sub_type M1r;
             typedef typename M1r::iterator IT;
-            const int colstep = m.stepi();
-            const int diagstep = m.diagstep();
+            const ptrdiff_t colstep = m.stepi();
+            const ptrdiff_t diagstep = m.diagstep();
 
-            const int lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
-            const int i1 = m.nlo();
-            const int i2 = TMV_MIN(M,N-m.nhi());
-            const int i3 = TMV_MIN(M,N+m.nlo());
-            int len = m.nhi()+1;
+            const ptrdiff_t lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
+            const ptrdiff_t i1 = m.nlo();
+            const ptrdiff_t i2 = TMV_MIN(M,N-m.nhi());
+            const ptrdiff_t i3 = TMV_MIN(M,N+m.nlo());
+            ptrdiff_t len = m.nhi()+1;
             IT it = m.get_row(0,0,len).begin();
-            int i=0;
+            ptrdiff_t i=0;
             for(;i<i1;++i) {
                 ScaleV_Helper<-3,xx,ix,T,M1r>::call2(len,x,it);
                 it.shiftP(colstep);
@@ -139,33 +139,33 @@ namespace tmv {
     };
 
     // algo 13: Loop over diagonals
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleB_Helper<13,cs,rs,ix,T,M1>
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
-            const int M = cs == Unknown ? m.colsize() : cs;
-            const int N = rs == Unknown ? m.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m.rowsize() : rs;
 #ifdef PRINTALGO_XB
             std::cout<<"ScaleB algo 11: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             typedef typename M1::diag_sub_type M1d;
             typedef typename M1d::iterator IT;
-            const int colstep = m.stepi();
-            const int rowstep = m.stepj();
+            const ptrdiff_t colstep = m.stepi();
+            const ptrdiff_t rowstep = m.stepj();
             IT it = m.get_diag(-m.nlo()).begin();
-            int len = TMV_MIN(M-m.nlo(),N);
-            for(int k=m.nlo();k;--k) {
+            ptrdiff_t len = TMV_MIN(M-m.nlo(),N);
+            for(ptrdiff_t k=m.nlo();k;--k) {
                 ScaleV_Helper<-3,xx,ix,T,M1d>::call2(len,x,it);
                 it.shiftP(-colstep);
                 if (len < N) ++len;
             }
             TMVAssert(len == TMV_MIN(M,N));
-            const int ds = IntTraits2<cs,rs>::min;
+            const ptrdiff_t ds = IntTraits2<cs,rs>::min;
             ScaleV_Helper<-3,ds,ix,T,M1d>::call2(len,x,it);
-            for(int k=1;k<=m.nhi();++k) {
+            for(ptrdiff_t k=1;k<=m.nhi();++k) {
                 it.shiftP(rowstep);
                 if (k+len > N) --len;
                 ScaleV_Helper<-3,xx,ix,T,M1d>::call2(len,x,it);
@@ -174,7 +174,7 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleB_Helper<90,cs,rs,ix,T,M1>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
@@ -186,7 +186,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleB_Helper<97,cs,rs,ix,T,M1>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
@@ -198,7 +198,7 @@ namespace tmv {
     };
 
     // algo -4: No copies or branches
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleB_Helper<-4,cs,rs,ix,T,M1>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
@@ -226,7 +226,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleB_Helper<-3,cs,rs,ix,T,M1>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
@@ -234,7 +234,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleB_Helper<-2,cs,rs,ix,T,M1>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
@@ -253,7 +253,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleB_Helper<-1,cs,rs,ix,T,M1>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
@@ -264,8 +264,8 @@ namespace tmv {
     inline void Scale(
         const Scaling<ix,T>& x, BaseMatrix_Band_Mutable<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
         ScaleB_Helper<-2,cs,rs,ix,T,Mv>::call(x,mv);
@@ -275,8 +275,8 @@ namespace tmv {
     inline void InlineScale(
         const Scaling<ix,T>& x, BaseMatrix_Band_Mutable<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
         ScaleB_Helper<-3,cs,rs,ix,T,Mv>::call(x,mv);

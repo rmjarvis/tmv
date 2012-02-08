@@ -57,7 +57,7 @@ namespace tmv {
     // SmallVector
     //
 
-    template <class T, int N, int A0>
+    template <class T, ptrdiff_t N, int A0>
     struct Traits<SmallVector<T,N,A0> >
     {
         enum { A = (A0 & ~NoAlias) | Unit };
@@ -141,7 +141,7 @@ namespace tmv {
         typedef VIt<T,-1,NonConj> reverse_iterator;
     };
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     class SmallVector : 
         public BaseVector_Mutable<SmallVector<T,N,A> >
     {
@@ -228,12 +228,12 @@ namespace tmv {
 
         TMV_INLINE const T* cptr() const { return itsv; }
         TMV_INLINE T* ptr() { return itsv; }
-        T cref(int i) const  { return itsv[i]; }
-        T& ref(int i) { return itsv[i]; }
+        T cref(ptrdiff_t i) const  { return itsv[i]; }
+        T& ref(ptrdiff_t i) { return itsv[i]; }
 
-        TMV_INLINE int size() const { return N; }
-        TMV_INLINE int nElements() const { return N; }
-        TMV_INLINE int step() const { return 1; }
+        TMV_INLINE ptrdiff_t size() const { return N; }
+        TMV_INLINE ptrdiff_t nElements() const { return N; }
+        TMV_INLINE ptrdiff_t step() const { return 1; }
         TMV_INLINE bool isconj() const { return false; }
 
 
@@ -248,7 +248,7 @@ namespace tmv {
     // ConstSmallVectorView
     //
 
-    template <class T, int N, int S, int A0>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A0>
     struct Traits<ConstSmallVectorView<T,N,S,A0> >
     {
         enum { A = (A0 & ~NoAlias) | (
@@ -320,7 +320,7 @@ namespace tmv {
         typedef CVIt<T,negS,_conj?Conj:NonConj> const_reverse_iterator;
     };
 
-    template <class T, int N, int S, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A>
     class ConstSmallVectorView : 
         public BaseVector_Calc<ConstSmallVectorView<T,N,S,A> >
     {
@@ -346,13 +346,13 @@ namespace tmv {
         // Constructors
         //
 
-        ConstSmallVectorView(const T* v, int n, int s) : 
+        ConstSmallVectorView(const T* v, ptrdiff_t n, ptrdiff_t s) : 
             itsv(v), itssize(n), itsstep(s)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstSmallVectorView(const T* v, int n) : 
+        ConstSmallVectorView(const T* v, ptrdiff_t n) : 
             itsv(v), itssize(n), itsstep(S) 
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -394,7 +394,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int S2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t S2, int A2>
         ConstSmallVectorView(
             const ConstSmallVectorView<T,N2,S2,A2>& v2) :
             itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) 
@@ -403,7 +403,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int S2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t S2, int A2>
         ConstSmallVectorView(const SmallVectorView<T,N2,S2,A2>& v2) :
             itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) 
         {
@@ -428,11 +428,11 @@ namespace tmv {
         //
 
         TMV_INLINE const T* cptr() const { return itsv; }
-        T cref(int i) const  { return DoConj<_conj>(itsv[i*step()]); }
+        T cref(ptrdiff_t i) const  { return DoConj<_conj>(itsv[i*step()]); }
 
-        TMV_INLINE int size() const { return itssize; }
-        TMV_INLINE int nElements() const { return itssize; }
-        TMV_INLINE int step() const { return itsstep; }
+        TMV_INLINE ptrdiff_t size() const { return itssize; }
+        TMV_INLINE ptrdiff_t nElements() const { return itssize; }
+        TMV_INLINE ptrdiff_t step() const { return itsstep; }
         TMV_INLINE bool isconj() const { return _conj; }
 
     protected :
@@ -448,7 +448,7 @@ namespace tmv {
     // SmallVectorView
     //
 
-    template <class T, int N, int S, int A0>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A0>
     struct Traits<SmallVectorView<T,N,S,A0> >
     {
         enum { A = (A0 & ~NoAlias) | (
@@ -542,7 +542,7 @@ namespace tmv {
         typedef VIt<T,negS,_conj?Conj:NonConj> reverse_iterator;
     };
 
-    template <class T, int N, int S, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A>
     class SmallVectorView : 
         public BaseVector_Mutable<SmallVectorView<T,N,S,A> >
     {
@@ -567,13 +567,13 @@ namespace tmv {
         // Constructors
         //
 
-        SmallVectorView(T* v, int n, int s) :
+        SmallVectorView(T* v, ptrdiff_t n, ptrdiff_t s) :
             itsv(v), itssize(n), itsstep(s) 
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        SmallVectorView(T* v, int n) :
+        SmallVectorView(T* v, ptrdiff_t n) :
             itsv(v), itssize(n), itsstep(S) 
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -592,7 +592,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        template <int N2, int S2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t S2, int A2>
         SmallVectorView(SmallVectorView<T,N2,S2,A2> v2) :
             itsv(v2.ptr()), itssize(v2.size()), itsstep(v2.step())
         {
@@ -632,13 +632,13 @@ namespace tmv {
         //
 
         TMV_INLINE const T* cptr() const { return itsv; }
-        T cref(int i) const  { return DoConj<_conj>(itsv[i*step()]); }
+        T cref(ptrdiff_t i) const  { return DoConj<_conj>(itsv[i*step()]); }
         TMV_INLINE T* ptr() { return itsv; }
-        reference ref(int i) { return reference(itsv[i*step()]); }
+        reference ref(ptrdiff_t i) { return reference(itsv[i*step()]); }
 
-        TMV_INLINE int size() const { return itssize; }
-        TMV_INLINE int nElements() const { return itssize; }
-        TMV_INLINE int step() const { return itsstep; }
+        TMV_INLINE ptrdiff_t size() const { return itssize; }
+        TMV_INLINE ptrdiff_t nElements() const { return itssize; }
+        TMV_INLINE ptrdiff_t step() const { return itsstep; }
         TMV_INLINE bool isconj() const { return _conj; }
 
     protected :
@@ -654,23 +654,23 @@ namespace tmv {
     // Swap
     //
 
-    template <class V, class T, int N, int S, int A>
+    template <class V, class T, ptrdiff_t N, ptrdiff_t S, int A>
     TMV_INLINE void Swap(
         BaseVector_Mutable<V>& v1, SmallVectorView<T,N,S,A> v2)
     { DoSwap(v1,v2); }
-    template <class V, class T, int N, int S, int A>
+    template <class V, class T, ptrdiff_t N, ptrdiff_t S, int A>
     TMV_INLINE void Swap(
         SmallVectorView<T,N,S,A> v1, BaseVector_Mutable<V>& v2)
     { DoSwap(v1,v2); }
-    template <class T, int N, int S1, int A1, int S2, int A2>
+    template <class T, ptrdiff_t N, ptrdiff_t S1, int A1, ptrdiff_t S2, int A2>
     TMV_INLINE void Swap(
         SmallVectorView<T,N,S1,A1> v1, SmallVectorView<T,N,S2,A2> v2)
     { DoSwap(v1,v2); }
-    template <class T, int N, int A1, int S2, int A2>
+    template <class T, ptrdiff_t N, int A1, ptrdiff_t S2, int A2>
     TMV_INLINE void Swap(
         VectorView<T,A1> v1, SmallVectorView<T,N,S2,A2> v2)
     { DoSwap(v1,v2); }
-    template <class T, int N, int S1, int A1, int A2>
+    template <class T, ptrdiff_t N, ptrdiff_t S1, int A1, int A2>
     TMV_INLINE void Swap(
         SmallVectorView<T,N,S1,A1> v1, VectorView<T,A2> v2)
     { DoSwap(v1,v2); }
@@ -680,11 +680,11 @@ namespace tmv {
     // Conjugate
     //
     
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     TMV_INLINE typename SmallVector<T,N,A>::conjugate_type Conjugate(
         SmallVector<T,N,A>& v)
     { return v.conjugate(); }
-    template <class T, int N, int S, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A>
     TMV_INLINE typename SmallVectorView<T,N,S,A>::conjugate_type Conjugate(
         SmallVectorView<T,N,S,A> v)
     { return v.conjugate(); }
@@ -694,7 +694,7 @@ namespace tmv {
     // TMV_Text functions
     //
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     inline std::string TMV_Text(const SmallVector<T,N,A>& v)
     {
         std::ostringstream s;
@@ -704,7 +704,7 @@ namespace tmv {
         return s.str();
     }
 
-    template <class T, int N, int S, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A>
     inline std::string TMV_Text(const SmallVectorView<T,N,S,A>& v)
     {
         std::ostringstream s;
@@ -716,7 +716,7 @@ namespace tmv {
         return s.str();
     }
 
-    template <class T, int N, int S, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A>
     std::string TMV_Text(const ConstSmallVectorView<T,N,S,A>& v)
     {
         std::ostringstream s;

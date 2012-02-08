@@ -32,58 +32,58 @@ namespace tmv {
     template <class T1, int C1, class RT1, class T2>
     void InstQR_SolveInPlace(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1, MatrixView<T2> m2);
+        const Permutation* P, ptrdiff_t N1, MatrixView<T2> m2);
     template <class T1, int C1, class RT1, class T2>
     void InstQR_SolveTransposeInPlace(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1, MatrixView<T2> m2);
+        const Permutation* P, ptrdiff_t N1, MatrixView<T2> m2);
     template <class T1, int C1, class RT1, class T2, int C2, class T3>
     void InstQR_Solve(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1,
+        const Permutation* P, ptrdiff_t N1,
         const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
     template <class T1, int C1, class RT1, class T2, int C2, class T3>
     void InstQR_SolveTranspose(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1,
+        const Permutation* P, ptrdiff_t N1,
         const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3);
     template <class T1, int C1, class RT1, class T2>
     void InstQR_SolveInPlace(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1, VectorView<T2> v2);
+        const Permutation* P, ptrdiff_t N1, VectorView<T2> v2);
     template <class T1, int C1, class RT1, class T2>
     void InstQR_SolveTransposeInPlace(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1, VectorView<T2> v2);
+        const Permutation* P, ptrdiff_t N1, VectorView<T2> v2);
     template <class T1, int C1, class RT1, class T2, int C2, class T3>
     void InstQR_Solve(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1, 
+        const Permutation* P, ptrdiff_t N1, 
         const ConstVectorView<T2,C2>& v2, VectorView<T3> v3);
     template <class T1, int C1, class RT1, class T2, int C2, class T3>
     void InstQR_SolveTranspose(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1, 
+        const Permutation* P, ptrdiff_t N1, 
         const ConstVectorView<T2,C2>& v2, VectorView<T3> v3);
 
-    template <int algo, bool trans, int cs, class M1, class V1, class M2>
+    template <int algo, bool trans, ptrdiff_t cs, class M1, class V1, class M2>
     struct QR_SolveInPlace_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0)
     // Also used for invalid real/complex combination from the virtual calls.
-    template <bool trans, int cs, class M1, class V1, class M2>
+    template <bool trans, ptrdiff_t cs, class M1, class V1, class M2>
     struct QR_SolveInPlace_Helper<0,trans,cs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& , const V1& , const Permutation* , int, M2& ) {} 
+            const M1& , const V1& , const Permutation* , ptrdiff_t, M2& ) {} 
     };
 
     // algo 11: Normal case
-    template <int cs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, class M1, class V1, class M2>
     struct QR_SolveInPlace_Helper<11,false,cs,M1,V1,M2>
     {
         static void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& m2)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& m2)
         {
 #ifdef PRINTALGO_QR
             std::cout<<"QRSolveInPlace algo 11: trans,cs = "<<
@@ -96,7 +96,7 @@ namespace tmv {
             //    = Pt R^-1 Qt m2
             PackedQ_LDivEq(QR,beta,m2);
             typedef typename M2::rowrange_type::noalias_type M2r;
-            const int M = QR.colsize();
+            const ptrdiff_t M = QR.colsize();
             M2r m2a = m2.rowRange(0,N1).noAlias();
             M2r m2b = m2.rowRange(N1,M).noAlias();
             m2b.setZero();
@@ -104,11 +104,11 @@ namespace tmv {
             if (P) P->inverse().applyOnLeft(m2);
         }
     };
-    template <int cs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, class M1, class V1, class M2>
     struct QR_SolveInPlace_Helper<11,true,cs,M1,V1,M2>
     {
         static void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& m2)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& m2)
         {
 #ifdef PRINTALGO_QR
             std::cout<<"QRSolveInPlace algo 11: trans,cs = "<<
@@ -122,7 +122,7 @@ namespace tmv {
             //    = Q* R^-1T P m2
             if (P) P->applyOnLeft(m2);
             typedef typename M2::rowrange_type::noalias_type M2r;
-            const int M = QR.colsize();
+            const ptrdiff_t M = QR.colsize();
             M2r m2a = m2.rowRange(0,N1).noAlias();
             M2r m2b = m2.rowRange(N1,M).noAlias();
             m2b.setZero();
@@ -132,11 +132,11 @@ namespace tmv {
     };
 
     // algo 12: Normal case: M2 is a vector
-    template <int cs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, class M1, class V1, class M2>
     struct QR_SolveInPlace_Helper<12,false,cs,M1,V1,M2>
     {
         static void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& v2)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& v2)
         {
 #ifdef PRINTALGO_QR
             std::cout<<"QRSolveInPlace algo 12: trans,cs = "<<
@@ -149,7 +149,7 @@ namespace tmv {
             //    = Pt R^-1 Qt v2
             PackedQ_LDivEq(QR,beta,v2);
             typedef typename M2::subvector_type::noalias_type M2s;
-            const int M = QR.colsize();
+            const ptrdiff_t M = QR.colsize();
             M2s v2a = v2.subVector(0,N1).noAlias();
             M2s v2b = v2.subVector(N1,M).noAlias();
             v2b.setZero();
@@ -157,11 +157,11 @@ namespace tmv {
             if (P) P->inverse().applyOnLeft(v2);
         }
     };
-    template <int cs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, class M1, class V1, class M2>
     struct QR_SolveInPlace_Helper<12,true,cs,M1,V1,M2>
     {
         static void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& m2)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& m2)
         {
 #ifdef PRINTALGO_QR
             std::cout<<"QRSolveInPlace algo 12: trans,cs = "<<
@@ -175,7 +175,7 @@ namespace tmv {
             //    = Q* R^-1T P m2
             if (P) P->applyOnLeft(m2);
             typedef typename M2::subvector_type::noalias_type M2s;
-            const int M = QR.colsize();
+            const ptrdiff_t M = QR.colsize();
             M2s m2a = m2.subVector(0,N1).noAlias();
             M2s m2b = m2.subVector(N1,M).noAlias();
             m2b.setZero();
@@ -185,18 +185,18 @@ namespace tmv {
     };
 
     // algo 90: call InstQR_SolveInPlace
-    template <int cs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, class M1, class V1, class M2>
     struct QR_SolveInPlace_Helper<90,false,cs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& m2)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& m2)
         { InstQR_SolveInPlace(QR.xView(),beta.xView(),P,N1,m2.xView()); }
     };
-    template <int cs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, class M1, class V1, class M2>
     struct QR_SolveInPlace_Helper<90,true,cs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& m2)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& m2)
         {
             InstQR_SolveTransposeInPlace(
                 QR.xView(),beta.xView(),P,N1,m2.xView()); 
@@ -204,11 +204,11 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <bool trans, int cs, class M1, class V1, class M2>
+    template <bool trans, ptrdiff_t cs, class M1, class V1, class M2>
     struct QR_SolveInPlace_Helper<97,trans,cs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& m2)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& m2)
         {
             typedef typename M1::const_conjugate_type M1c;
             typedef typename M2::conjugate_type M2c;
@@ -220,11 +220,11 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <bool trans, int cs, class M1, class V1, class M2>
+    template <bool trans, ptrdiff_t cs, class M1, class V1, class M2>
     struct QR_SolveInPlace_Helper<-3,trans,cs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& m2)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& m2)
         {
             const bool invalid =
                 M1::iscomplex && M2::isreal;
@@ -253,11 +253,11 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <bool trans, int cs, class M1, class V1, class M2>
+    template <bool trans, ptrdiff_t cs, class M1, class V1, class M2>
     struct QR_SolveInPlace_Helper<-2,trans,cs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& m2)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& m2)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
@@ -281,11 +281,11 @@ namespace tmv {
         }
     };
 
-    template <bool trans, int cs, class M1, class V1, class M2>
+    template <bool trans, ptrdiff_t cs, class M1, class V1, class M2>
     struct QR_SolveInPlace_Helper<-1,trans,cs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& m2)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& m2)
         { 
             QR_SolveInPlace_Helper<-2,trans,cs,M1,V1,M2>::call(
                 QR,beta,P,N1,m2); 
@@ -295,14 +295,14 @@ namespace tmv {
     template <class M1, class V1, class M2>
     inline void InlineQR_SolveInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& m2)
+        const Permutation* P, ptrdiff_t N1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same));
         TMVStaticAssert((Sizes<M1::_colsize,V1::_size>::same));
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
-        const int cs1 = Sizes<M1::_colsize,M1::_rowsize>::size;
-        const int cs2 = Sizes<V1::_size,M2::_colsize>::size;
-        const int cs = Sizes<cs1,cs2>::size;
+        const ptrdiff_t cs1 = Sizes<M1::_colsize,M1::_rowsize>::size;
+        const ptrdiff_t cs2 = Sizes<V1::_size,M2::_colsize>::size;
+        const ptrdiff_t cs = Sizes<cs1,cs2>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::cview_type M2v;
@@ -316,14 +316,14 @@ namespace tmv {
     template <class M1, class V1, class M2>
     inline void QR_SolveInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& m2)
+        const Permutation* P, ptrdiff_t N1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same));
         TMVStaticAssert((Sizes<M1::_colsize,V1::_size>::same));
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
-        const int cs1 = Sizes<M1::_colsize,M1::_rowsize>::size;
-        const int cs2 = Sizes<V1::_size,M2::_colsize>::size;
-        const int cs = Sizes<cs1,cs2>::size;
+        const ptrdiff_t cs1 = Sizes<M1::_colsize,M1::_rowsize>::size;
+        const ptrdiff_t cs2 = Sizes<V1::_size,M2::_colsize>::size;
+        const ptrdiff_t cs = Sizes<cs1,cs2>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::cview_type M2v;
@@ -337,14 +337,14 @@ namespace tmv {
     template <class M1, class V1, class V2>
     inline void InlineQR_SolveInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, BaseVector_Mutable<V2>& v2)
+        const Permutation* P, ptrdiff_t N1, BaseVector_Mutable<V2>& v2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same));
         TMVStaticAssert((Sizes<M1::_colsize,V1::_size>::same));
         TMVStaticAssert((Sizes<M1::_colsize,V1::_size>::same));
-        const int cs1 = Sizes<M1::_colsize,M1::_rowsize>::size;
-        const int cs2 = Sizes<V1::_size,V2::_size>::size;
-        const int cs = Sizes<cs1,cs2>::size;
+        const ptrdiff_t cs1 = Sizes<M1::_colsize,M1::_rowsize>::size;
+        const ptrdiff_t cs2 = Sizes<V1::_size,V2::_size>::size;
+        const ptrdiff_t cs = Sizes<cs1,cs2>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::cview_type V2v;
@@ -358,14 +358,14 @@ namespace tmv {
     template <class M1, class V1, class V2>
     inline void QR_SolveInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, BaseVector_Mutable<V2>& v2)
+        const Permutation* P, ptrdiff_t N1, BaseVector_Mutable<V2>& v2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same));
         TMVStaticAssert((Sizes<M1::_colsize,V1::_size>::same));
         TMVStaticAssert((Sizes<M1::_colsize,V1::_size>::same));
-        const int cs1 = Sizes<M1::_colsize,M1::_rowsize>::size;
-        const int cs2 = Sizes<V1::_size,V2::_size>::size;
-        const int cs = Sizes<cs1,cs2>::size;
+        const ptrdiff_t cs1 = Sizes<M1::_colsize,M1::_rowsize>::size;
+        const ptrdiff_t cs2 = Sizes<V1::_size,V2::_size>::size;
+        const ptrdiff_t cs = Sizes<cs1,cs2>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::cview_type V2v;
@@ -379,14 +379,14 @@ namespace tmv {
     template <class M1, class V1, class M2>
     inline void InlineQR_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& m2)
+        const Permutation* P, ptrdiff_t N1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same));
         TMVStaticAssert((Sizes<M1::_colsize,V1::_size>::same));
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
-        const int cs1 = Sizes<M1::_colsize,M1::_rowsize>::size;
-        const int cs2 = Sizes<V1::_size,M2::_colsize>::size;
-        const int cs = Sizes<cs1,cs2>::size;
+        const ptrdiff_t cs1 = Sizes<M1::_colsize,M1::_rowsize>::size;
+        const ptrdiff_t cs2 = Sizes<V1::_size,M2::_colsize>::size;
+        const ptrdiff_t cs = Sizes<cs1,cs2>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::cview_type M2v;
@@ -400,14 +400,14 @@ namespace tmv {
     template <class M1, class V1, class M2>
     inline void QR_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& m2)
+        const Permutation* P, ptrdiff_t N1, BaseMatrix_Rec_Mutable<M2>& m2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same));
         TMVStaticAssert((Sizes<M1::_colsize,V1::_size>::same));
         TMVStaticAssert((Sizes<M1::_colsize,M2::_colsize>::same));
-        const int cs1 = Sizes<M1::_colsize,M1::_rowsize>::size;
-        const int cs2 = Sizes<V1::_size,M2::_colsize>::size;
-        const int cs = Sizes<cs1,cs2>::size;
+        const ptrdiff_t cs1 = Sizes<M1::_colsize,M1::_rowsize>::size;
+        const ptrdiff_t cs2 = Sizes<V1::_size,M2::_colsize>::size;
+        const ptrdiff_t cs = Sizes<cs1,cs2>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::cview_type M2v;
@@ -421,14 +421,14 @@ namespace tmv {
     template <class M1, class V1, class V2>
     inline void InlineQR_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, BaseVector_Mutable<V2>& v2)
+        const Permutation* P, ptrdiff_t N1, BaseVector_Mutable<V2>& v2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same));
         TMVStaticAssert((Sizes<M1::_colsize,V1::_size>::same));
         TMVStaticAssert((Sizes<M1::_colsize,V1::_size>::same));
-        const int cs1 = Sizes<M1::_colsize,M1::_rowsize>::size;
-        const int cs2 = Sizes<V1::_size,V2::_size>::size;
-        const int cs = Sizes<cs1,cs2>::size;
+        const ptrdiff_t cs1 = Sizes<M1::_colsize,M1::_rowsize>::size;
+        const ptrdiff_t cs2 = Sizes<V1::_size,V2::_size>::size;
+        const ptrdiff_t cs = Sizes<cs1,cs2>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::cview_type V2v;
@@ -442,14 +442,14 @@ namespace tmv {
     template <class M1, class V1, class V2>
     inline void QR_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, BaseVector_Mutable<V2>& v2)
+        const Permutation* P, ptrdiff_t N1, BaseVector_Mutable<V2>& v2)
     {
         TMVStaticAssert((Sizes<M1::_colsize,M1::_rowsize>::same));
         TMVStaticAssert((Sizes<M1::_colsize,V1::_size>::same));
         TMVStaticAssert((Sizes<M1::_colsize,V1::_size>::same));
-        const int cs1 = Sizes<M1::_colsize,M1::_rowsize>::size;
-        const int cs2 = Sizes<V1::_size,V2::_size>::size;
-        const int cs = Sizes<cs1,cs2>::size;
+        const ptrdiff_t cs1 = Sizes<M1::_colsize,M1::_rowsize>::size;
+        const ptrdiff_t cs2 = Sizes<V1::_size,V2::_size>::size;
+        const ptrdiff_t cs = Sizes<cs1,cs2>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::cview_type V2v;
@@ -460,21 +460,21 @@ namespace tmv {
             QRv,betav,P,N1,v2v);
     }
 
-    template <int algo, bool trans, int cs, int rs, class M1, class V1, class M2, class M3>
+    template <int algo, bool trans, ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2, class M3>
     struct QR_Solve_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0 or N == 0)
     // Also used for invalid real/complex combination from the virtual calls.
-    template <bool trans, int cs, int rs, class M1, class V1, class M2, class M3>
+    template <bool trans, ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2, class M3>
     struct QR_Solve_Helper<0,trans,cs,rs,M1,V1,M2,M3>
     { 
         static TMV_INLINE void call(
-            const M1& , const V1& , const Permutation* , int , 
+            const M1& , const V1& , const Permutation* , ptrdiff_t , 
             const M2& , M3& ) {}
     };
 
     // algo 11: Normal case
-    template <int cs, int rs, class M1, class V1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2, class M3>
     struct QR_Solve_Helper<11,false,cs,rs,M1,V1,M2,M3>
     {
         typedef typename M1::value_type T1;
@@ -528,7 +528,7 @@ namespace tmv {
 
 
         static void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, 
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, 
             const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_QR
@@ -539,7 +539,7 @@ namespace tmv {
             //std::cout<<"m2 = "<<m2<<std::endl;
             //std::cout<<"m3 = "<<m3<<std::endl;
 #endif
-            const int N = QR.rowsize();
+            const ptrdiff_t N = QR.rowsize();
 
             M3r m3a = m3.rowRange(0,N1).noAlias();
             M3r m3b = m3.rowRange(N1,N).noAlias();
@@ -560,11 +560,11 @@ namespace tmv {
             //std::cout<<"m3 => "<<m3<<std::endl;
         }
     };
-    template <int cs, int rs, class M1, class V1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2, class M3>
     struct QR_Solve_Helper<11,true,cs,rs,M1,V1,M2,M3>
     {
         static void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, 
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, 
             const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_QR
@@ -576,8 +576,8 @@ namespace tmv {
             //std::cout<<"m3 = "<<m3<<std::endl;
 #endif
             typedef typename M3::rowrange_type::noalias_type M3r;
-            const int M = QR.colsize();
-            const int N = QR.rowsize();
+            const ptrdiff_t M = QR.colsize();
+            const ptrdiff_t N = QR.rowsize();
             M3r m3a = m3.rowRange(0,N1).noAlias();
             M3r m3ax = m3.rowRange(0,N).noAlias();
             M3r m3b = m3.rowRange(N1,M).noAlias();
@@ -600,7 +600,7 @@ namespace tmv {
     };
 
     // algo 12: Normal case - M2, M3 are vectors
-    template <int cs, int rs, class M1, class V1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2, class M3>
     struct QR_Solve_Helper<12,false,cs,rs,M1,V1,M2,M3>
     {
         typedef typename M1::value_type T1;
@@ -665,7 +665,7 @@ namespace tmv {
 
 
         static void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, 
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, 
             const M2& v2, M3& v3)
         {
 #ifdef PRINTALGO_QR
@@ -676,7 +676,7 @@ namespace tmv {
             //std::cout<<"v2 = "<<v2<<std::endl;
             //std::cout<<"v3 = "<<v3<<std::endl;
 #endif
-            const int N = QR.rowsize();
+            const ptrdiff_t N = QR.rowsize();
 
             M3s v3a = v3.subVector(0,N1).noAlias();
             M3s v3b = v3.subVector(N1,N).noAlias();
@@ -707,11 +707,11 @@ namespace tmv {
             //std::cout<<"after /= P v3 => "<<v3<<std::endl;
         }
     };
-    template <int cs, int rs, class M1, class V1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2, class M3>
     struct QR_Solve_Helper<12,true,cs,rs,M1,V1,M2,M3>
     {
         static void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, 
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, 
             const M2& v2, M3& v3)
         {
 #ifdef PRINTALGO_QR
@@ -723,8 +723,8 @@ namespace tmv {
             //std::cout<<"v3 = "<<v3<<std::endl;
 #endif
             typedef typename M3::subvector_type::noalias_type M3s;
-            const int M = QR.colsize();
-            const int N = QR.rowsize();
+            const ptrdiff_t M = QR.colsize();
+            const ptrdiff_t N = QR.rowsize();
             M3s v3a = v3.subVector(0,N1).noAlias();
             M3s v3ax = v3.subVector(0,N).noAlias();
             M3s v3b = v3.subVector(N1,M).noAlias();
@@ -747,19 +747,19 @@ namespace tmv {
     };
 
     // algo 90: call InstQR_Solve
-    template <int cs, int rs, class M1, class V1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2, class M3>
     struct QR_Solve_Helper<90,false,cs,rs,M1,V1,M2,M3>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, 
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, 
             const M2& m2, M3& m3)
         { InstQR_Solve(QR.xView(),beta.xView(),P,N1,m2.xView(),m3.xView()); }
     };
-    template <int cs, int rs, class M1, class V1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2, class M3>
     struct QR_Solve_Helper<90,true,cs,rs,M1,V1,M2,M3>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, 
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, 
             const M2& m2, M3& m3)
         {
             InstQR_SolveTranspose(
@@ -768,11 +768,11 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <bool trans, int cs, int rs, class M1, class V1, class M2, class M3>
+    template <bool trans, ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2, class M3>
     struct QR_Solve_Helper<97,trans,cs,rs,M1,V1,M2,M3>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, 
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, 
             const M2& m2, M3& m3)
         {
             typedef typename M1::const_conjugate_type M1c;
@@ -787,11 +787,11 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <bool trans, int cs, int rs, class M1, class V1, class M2, class M3>
+    template <bool trans, ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2, class M3>
     struct QR_Solve_Helper<-3,trans,cs,rs,M1,V1,M2,M3>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, 
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, 
             const M2& m2, M3& m3)
         {
             TMVStaticAssert((
@@ -835,11 +835,11 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <bool trans, int cs, int rs, class M1, class V1, class M2, class M3>
+    template <bool trans, ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2, class M3>
     struct QR_Solve_Helper<-2,trans,cs,rs,M1,V1,M2,M3>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, 
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, 
             const M2& m2, M3& m3)
         {
             typedef typename M1::value_type T1;
@@ -865,11 +865,11 @@ namespace tmv {
         }
     };
 
-    template <bool trans, int cs, int rs, class M1, class V1, class M2, class M3>
+    template <bool trans, ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2, class M3>
     struct QR_Solve_Helper<-1,trans,cs,rs,M1,V1,M2,M3>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, 
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, 
             const M2& m2, M3& m3)
         {
             QR_Solve_Helper<-2,trans,cs,rs,M1,V1,M2,M3>::call(
@@ -880,7 +880,7 @@ namespace tmv {
     template <class M1, class V1, class M2, class M3>
     inline void InlineQR_Solve(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, 
+        const Permutation* P, ptrdiff_t N1, 
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
@@ -896,8 +896,8 @@ namespace tmv {
 
         // cs = QR.colsize
         // rs = QR.rowsize
-        const int cs = Sizes<M3::_colsize,M1::_rowsize>::size;
-        const int rs = Sizes<M1::_colsize,M2::_colsize>::size;
+        const ptrdiff_t cs = Sizes<M3::_colsize,M1::_rowsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_colsize,M2::_colsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::const_cview_type M2v;
@@ -913,7 +913,7 @@ namespace tmv {
     template <class M1, class V1, class M2, class M3>
     inline void QR_Solve(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, 
+        const Permutation* P, ptrdiff_t N1, 
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
@@ -927,8 +927,8 @@ namespace tmv {
         if (P) TMVAssert(QR.rowsize() == P->size());
         TMVAssert(N1 <= QR.rowsize());
 
-        const int cs = Sizes<M3::_colsize,M1::_rowsize>::size;
-        const int rs = Sizes<M1::_colsize,M2::_colsize>::size;
+        const ptrdiff_t cs = Sizes<M3::_colsize,M1::_rowsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_colsize,M2::_colsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::const_cview_type M2v;
@@ -944,7 +944,7 @@ namespace tmv {
     template <class M1, class V1, class V2, class V3>
     inline void InlineQR_Solve(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, 
+        const Permutation* P, ptrdiff_t N1, 
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
@@ -956,8 +956,8 @@ namespace tmv {
         if (P) TMVAssert(QR.rowsize() == P->size());
         TMVAssert(N1 <= QR.rowsize());
 
-        const int cs = Sizes<V3::_size,M1::_rowsize>::size;
-        const int rs = Sizes<M1::_colsize,V2::_size>::size;
+        const ptrdiff_t cs = Sizes<V3::_size,M1::_rowsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_colsize,V2::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
@@ -973,7 +973,7 @@ namespace tmv {
     template <class M1, class V1, class V2, class V3>
     inline void QR_Solve(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, 
+        const Permutation* P, ptrdiff_t N1, 
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
@@ -985,8 +985,8 @@ namespace tmv {
         if (P) TMVAssert(QR.rowsize() == P->size());
         TMVAssert(N1 <= QR.rowsize());
 
-        const int cs = Sizes<V3::_size,M1::_rowsize>::size;
-        const int rs = Sizes<M1::_colsize,V2::_size>::size;
+        const ptrdiff_t cs = Sizes<V3::_size,M1::_rowsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_colsize,V2::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
@@ -1002,7 +1002,7 @@ namespace tmv {
     template <class M1, class V1, class M2, class M3>
     inline void InlineQR_SolveTranspose(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, 
+        const Permutation* P, ptrdiff_t N1, 
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
@@ -1016,8 +1016,8 @@ namespace tmv {
         if (P) TMVAssert(QR.rowsize() == P->size());
         TMVAssert(N1 <= QR.rowsize());
 
-        const int cs = Sizes<M3::_colsize,M1::_rowsize>::size;
-        const int rs = Sizes<M1::_colsize,M2::_colsize>::size;
+        const ptrdiff_t cs = Sizes<M3::_colsize,M1::_rowsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_colsize,M2::_colsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::const_cview_type M2v;
@@ -1033,7 +1033,7 @@ namespace tmv {
     template <class M1, class V1, class M2, class M3>
     inline void QR_SolveTranspose(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, 
+        const Permutation* P, ptrdiff_t N1, 
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3)
     {
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
@@ -1047,8 +1047,8 @@ namespace tmv {
         if (P) TMVAssert(QR.rowsize() == P->size());
         TMVAssert(N1 <= QR.rowsize());
 
-        const int cs = Sizes<M3::_colsize,M1::_rowsize>::size;
-        const int rs = Sizes<M1::_colsize,M2::_colsize>::size;
+        const ptrdiff_t cs = Sizes<M3::_colsize,M1::_rowsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_colsize,M2::_colsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::const_cview_type M2v;
@@ -1064,7 +1064,7 @@ namespace tmv {
     template <class M1, class V1, class V2, class V3>
     inline void InlineQR_SolveTranspose(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, 
+        const Permutation* P, ptrdiff_t N1, 
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
@@ -1076,8 +1076,8 @@ namespace tmv {
         if (P) TMVAssert(QR.rowsize() == P->size());
         TMVAssert(N1 <= QR.rowsize());
 
-        const int cs = Sizes<V3::_size,M1::_rowsize>::size;
-        const int rs = Sizes<M1::_colsize,V2::_size>::size;
+        const ptrdiff_t cs = Sizes<V3::_size,M1::_rowsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_colsize,V2::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
@@ -1093,7 +1093,7 @@ namespace tmv {
     template <class M1, class V1, class V2, class V3>
     inline void QR_SolveTranspose(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, 
+        const Permutation* P, ptrdiff_t N1, 
         const BaseVector_Calc<V2>& v2, BaseVector_Mutable<V3>& v3)
     {
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
@@ -1105,8 +1105,8 @@ namespace tmv {
         if (P) TMVAssert(QR.rowsize() == P->size());
         TMVAssert(N1 <= QR.rowsize());
 
-        const int cs = Sizes<V3::_size,M1::_rowsize>::size;
-        const int rs = Sizes<M1::_colsize,V2::_size>::size;
+        const ptrdiff_t cs = Sizes<V3::_size,M1::_rowsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_colsize,V2::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;

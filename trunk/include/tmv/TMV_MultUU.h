@@ -76,11 +76,11 @@ namespace tmv {
         const T3 x, const ConstLowerTriMatrixView<T1,C1>& m2,
         const ConstLowerTriMatrixView<T2,C2>& m1, LowerTriMatrixView<T3> m3);
 
-    template <int algo, int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <int algo, ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper;
 
     // algo 0: Trivial, nothing to do.
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<0,s,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -89,7 +89,7 @@ namespace tmv {
     };
 
     // algo 1: s == 1, so reduces to scalar product
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<1,s,add,ix,T,M1,M2,M3>
     {
         static inline void call(
@@ -104,13 +104,13 @@ namespace tmv {
     };
 
     // algo 11: UpperTri loop over n
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<11,s,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==Unknown ? m3.size() : s;
+            const ptrdiff_t N = s==Unknown ? m3.size() : s;
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 11: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -123,14 +123,14 @@ namespace tmv {
             typedef typename M2::const_col_sub_type M2c;
             typedef typename M3::col_sub_type M3c;
             const int ix2 = u2 ? ix : 0;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
 #ifdef TMV_UU_INLINE_MV
             const int algo2 = -4;
 #else
             const int algo2 = -2;
 #endif
 
-            for(int j=N-1;j>=0;--j) {
+            for(ptrdiff_t j=N-1;j>=0;--j) {
                 // m3.col(j,0,j+1) = m1.subTriMatrix(0,j+1) * m2.col(j,0,j+1)
                 // ==>
                 // m3.col(j,0,j) = m1.col(j,0,j) * m2(j,j) +
@@ -151,13 +151,13 @@ namespace tmv {
     };
 
     // algo 12: UpperTri loop over m
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<12,s,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==Unknown ? m3.size() : s;
+            const ptrdiff_t N = s==Unknown ? m3.size() : s;
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 12: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -171,14 +171,14 @@ namespace tmv {
             typedef typename M2s::const_transpose_type M2t;
             typedef typename M3::row_sub_type M3r;
             const int ix1 = u1 ? ix : 0;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
 #ifdef TMV_UU_INLINE_MV
             const int algo2 = -4;
 #else
             const int algo2 = -2;
 #endif
 
-            for(int i=0;i<N;++i) {
+            for(ptrdiff_t i=0;i<N;++i) {
                 // m3.row(i,i,N) = m1.row(i,i,N) * m2.subTriMatrix(i,N)
                 // ==>
                 // m3.row(i,i+1,N) = m1.row(i,i+1,N) * m2.subTriMatrix(i+1,N) +
@@ -199,13 +199,13 @@ namespace tmv {
     };
 
     // algo 13: UpperTri loop over k
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<13,s,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==Unknown ? m3.size() : s;
+            const ptrdiff_t N = s==Unknown ? m3.size() : s;
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 13: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -222,14 +222,14 @@ namespace tmv {
             typedef typename M3::submatrix_type M3s;
             const int ix1 = u1 ? ix : 0;
             const int ix2 = u2 ? ix : 0;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
 #ifdef TMV_UU_INLINE_MV
             const int algo2 = -4;
 #else
             const int algo2 = -2;
 #endif
 
-            for(int k=N-1;k>=0;--k) {
+            for(ptrdiff_t k=N-1;k>=0;--k) {
                 // m3.subMatrix(0,k+1,k,N) = m1.col(k,0,k+1) ^ m2.row(k,k,N)
                 // ==>
                 // m3.subMatrix(0,k,k+1,N) = m1.col(k,0,k) ^ m2.row(k,k+1,N)
@@ -254,10 +254,10 @@ namespace tmv {
     };
 
     // algo 16: UpperTri: Unroll small case
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<16,s,add,ix,T,M1,M2,M3>
     {
-        template <int I, int N>
+        template <ptrdiff_t I, ptrdiff_t N>
         struct Unroller
         {
             static inline void unroll(
@@ -266,10 +266,10 @@ namespace tmv {
                 // [ C00 C01 ] = [ A00 A01 ] [ B00 B01 ]
                 // [  0  C11 ]   [  0  A11 ] [  0  B11 ]
 
-                const int Nx = N/2;
-                const int Ny = N-Nx;
-                const int I1 = I+Nx;
-                const int I2 = I+N;
+                const ptrdiff_t Nx = N/2;
+                const ptrdiff_t Ny = N-Nx;
+                const ptrdiff_t I1 = I+Nx;
+                const ptrdiff_t I2 = I+N;
                 typedef typename M1::const_subtrimatrix_type M1st;
                 typedef typename M1::const_submatrix_type M1sm;
                 typedef typename M1sm::const_transpose_type M1smt;
@@ -301,7 +301,7 @@ namespace tmv {
                 Unroller<I1,Ny>::unroll(x,m1,m2,m3);
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,1>
         {
             static TMV_INLINE void unroll(
@@ -314,7 +314,7 @@ namespace tmv {
                             m1.cref(I,I),Maybe<!u2>::prod(m2.cref(I,I),x)));
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,0>
         {
             static TMV_INLINE void unroll(
@@ -324,7 +324,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UU
-            const int N = s==Unknown ? m3.size() : s;
+            const ptrdiff_t N = s==Unknown ? m3.size() : s;
             std::cout<<"UU algo 16: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             Unroller<0,s>::unroll(x,m1,m2,m3); 
@@ -336,7 +336,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = m3.size();
+            const ptrdiff_t N = m3.size();
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 16: N,s,x = "<<N<<','<<Unknown<<
                 ','<<T(x)<<std::endl;
@@ -368,21 +368,21 @@ namespace tmv {
 
     // algo 17: Split the UpperTriMatrix into 3 sections and recurse
     // the calculation on each of them:
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<17,s,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==Unknown ? m3.size() : s;
+            const ptrdiff_t N = s==Unknown ? m3.size() : s;
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 17: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
 
-            const int sp1 = IntTraits<s>::Sp1;
-            const int sp2 = IntTraits<sp1>::Sp1;
+            const ptrdiff_t sp1 = IntTraits<s>::Sp1;
+            const ptrdiff_t sp2 = IntTraits<sp1>::Sp1;
             // nops = 1/6 n(n+1)(n+2)
-            const int nops = 
+            const ptrdiff_t nops = 
                 IntTraits2<IntTraits2<s,sp1>::safeprod,sp2>::safeprod / 6;
             const bool unroll = 
                 s > 10 ? false :
@@ -411,10 +411,10 @@ namespace tmv {
                 // [ C00 C01 ] = [ A00 A01 ] [ B00 B01 ]
                 // [  0  C11 ]   [  0  A11 ] [  0  B11 ]
 
-                const int Nx = N > 16 ? ((((N-1)>>5)+1)<<4) : (N>>1);
+                const ptrdiff_t Nx = N > 16 ? ((((N-1)>>5)+1)<<4) : (N>>1);
                 // (If N > 16, round N/2 up to a multiple of 16.)
-                const int sx = IntTraits<s>::half_roundup;
-                const int sy = IntTraits2<s,sx>::diff;
+                const ptrdiff_t sx = IntTraits<s>::half_roundup;
+                const ptrdiff_t sy = IntTraits2<s,sx>::diff;
 
                 typedef typename M1::const_subtrimatrix_type M1st;
                 typedef typename M1::const_submatrix_type M1sm;
@@ -460,13 +460,13 @@ namespace tmv {
     };
 
     // algo 21: LowerTri loop over n
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<21,s,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==Unknown ? m3.size() : s;
+            const ptrdiff_t N = s==Unknown ? m3.size() : s;
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 21: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -479,14 +479,14 @@ namespace tmv {
             typedef typename M2::const_col_sub_type M2c;
             typedef typename M3::col_sub_type M3c;
             const int ix2 = u2 ? ix : 0;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
 #ifdef TMV_UU_INLINE_MV
             const int algo2 = -4;
 #else
             const int algo2 = -2;
 #endif
 
-            for(int j=0;j<N;++j) {
+            for(ptrdiff_t j=0;j<N;++j) {
                 // m3.col(j,j,N) = m1.subTriMatrix(j,N) * m2.col(j,j,N)
                 // ==>
                 // m3.col(j,j+1,N) = m1.col(j,j+1,N) * m2(j,j) +
@@ -507,13 +507,13 @@ namespace tmv {
     };
 
     // algo 22: LowerTri loop over m
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<22,s,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==Unknown ? m3.size() : s;
+            const ptrdiff_t N = s==Unknown ? m3.size() : s;
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 22: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -527,14 +527,14 @@ namespace tmv {
             typedef typename M2s::const_transpose_type M2t;
             typedef typename M3::row_sub_type M3r;
             const int ix1 = u1 ? ix : 0;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
 #ifdef TMV_UU_INLINE_MV
             const int algo2 = -4;
 #else
             const int algo2 = -2;
 #endif
 
-            for(int i=N;i--;) {
+            for(ptrdiff_t i=N;i--;) {
                 // m3.row(i,0,i+1) = m1.row(i,0,i+1) * m2.subTriMatrix(0,i+1)
                 // ==>
                 // m3.row(i,0,i) = m1.row(i,0,i) * m2.subTriMatrix(0,i) +
@@ -555,13 +555,13 @@ namespace tmv {
     };
 
     // algo 23: LowerTri loop over k
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<23,s,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==Unknown ? m3.size() : s;
+            const ptrdiff_t N = s==Unknown ? m3.size() : s;
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 23: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -578,14 +578,14 @@ namespace tmv {
             typedef typename M3::submatrix_type M3s;
             const int ix1 = u1 ? ix : 0;
             const int ix2 = u2 ? ix : 0;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
 #ifdef TMV_UU_INLINE_MV
             const int algo2 = -4;
 #else
             const int algo2 = -2;
 #endif
 
-            for(int k=0;k<N;++k) {
+            for(ptrdiff_t k=0;k<N;++k) {
                 // m3.subMatrix(k,N,0,k+1) = m1.col(k,k,N) ^ m2.row(k,0,k+1)
                 // ==>
                 // m3.subMatrix(k+1,N,0,k) = m1.col(k,k+1,N) ^ m2.row(k,0,k)
@@ -610,10 +610,10 @@ namespace tmv {
     };
 
     // algo 26: LowerTri: Unroll small case
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<26,s,add,ix,T,M1,M2,M3>
     {
-        template <int I, int N>
+        template <ptrdiff_t I, ptrdiff_t N>
         struct Unroller
         {
             static inline void unroll(
@@ -622,10 +622,10 @@ namespace tmv {
                 // [ C00  0  ] = [ A00  0  ] [ B00  0  ]
                 // [ C10 C11 ]   [ A10 A11 ] [ B10 B11 ]
 
-                const int Nx = N/2;
-                const int Ny = N-Nx;
-                const int I1 = I+Nx;
-                const int I2 = I+N;
+                const ptrdiff_t Nx = N/2;
+                const ptrdiff_t Ny = N-Nx;
+                const ptrdiff_t I1 = I+Nx;
+                const ptrdiff_t I2 = I+N;
                 typedef typename M1::const_subtrimatrix_type M1st;
                 typedef typename M1::const_submatrix_type M1sm;
                 typedef typename M1sm::const_transpose_type M1smt;
@@ -657,7 +657,7 @@ namespace tmv {
                 Unroller<I1,Ny>::unroll(x,m1,m2,m3);
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,1>
         {
             static TMV_INLINE void unroll(
@@ -670,7 +670,7 @@ namespace tmv {
                             m1.cref(I,I),Maybe<!u2>::prod(m2.cref(I,I),x)));
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,0>
         {
             static TMV_INLINE void unroll(
@@ -691,7 +691,7 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = m3.size();
+            const ptrdiff_t N = m3.size();
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 26: N,s,x = "<<N<<','<<Unknown<<
                 ','<<T(x)<<std::endl;
@@ -723,21 +723,21 @@ namespace tmv {
 
     // algo 27: Split the LowerTriMatrix into 3 sections and recurse
     // the calculation on each of them:
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<27,s,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = s==Unknown ? m3.size() : s;
+            const ptrdiff_t N = s==Unknown ? m3.size() : s;
 #ifdef PRINTALGO_UU
             std::cout<<"UU algo 27: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
 
-            const int sp1 = IntTraits<s>::Sp1;
-            const int sp2 = IntTraits<sp1>::Sp1;
+            const ptrdiff_t sp1 = IntTraits<s>::Sp1;
+            const ptrdiff_t sp2 = IntTraits<sp1>::Sp1;
             // nops = 1/6 n(n+1)(n+2)
-            const int nops = 
+            const ptrdiff_t nops = 
                 IntTraits2<IntTraits2<s,sp1>::safeprod,sp2>::safeprod / 6;
             const bool unroll = 
                 s > 10 ? false :
@@ -766,10 +766,10 @@ namespace tmv {
                 // [ C00  0  ] = [ A00  0  ] [ B00  0  ]
                 // [ C10 C11 ]   [ A10 A11 ] [ B10 B11 ]
 
-                const int Nx = N > 16 ? ((((N-1)>>5)+1)<<4) : (N>>1);
+                const ptrdiff_t Nx = N > 16 ? ((((N-1)>>5)+1)<<4) : (N>>1);
                 // (If N > 16, round N/2 up to a multiple of 16.)
-                const int sx = IntTraits<s>::half_roundup;
-                const int sy = IntTraits2<s,sx>::diff;
+                const ptrdiff_t sx = IntTraits<s>::half_roundup;
+                const ptrdiff_t sy = IntTraits2<s,sx>::diff;
 
                 typedef typename M1::const_subtrimatrix_type M1st;
                 typedef typename M1::const_submatrix_type M1sm;
@@ -815,7 +815,7 @@ namespace tmv {
     };
 
     // algo 83: Use temporary for m1*m2
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<83,s,add,ix,T,M1,M2,M3>
     {
         // This algo is slightly complicated by the fact that we allow
@@ -854,7 +854,7 @@ namespace tmv {
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_UU
-            const int N = s == Unknown ? m3.size() : s;
+            const ptrdiff_t N = s == Unknown ? m3.size() : s;
             std::cout<<"UU algo 83: N,s,x = "<<N<< ','<<s<<','<<T(x)<<std::endl;
 #endif
             typedef typename Traits<T>::real_type RT;
@@ -863,7 +863,7 @@ namespace tmv {
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type PT3;
             const int A = M1::_rowmajor && M2::_rowmajor ? RowMajor : ColMajor;
-            const int s3 = M3::_shape;
+            const ptrdiff_t s3 = M3::_shape;
             typedef typename MCopyHelper<PT3,s3,s,s,A>::type M3c;
             // can't be unitdiag unless x == 1 and !add and m1,m2 are unit
             const bool unknowndiag = 
@@ -875,7 +875,7 @@ namespace tmv {
     };
 
     // algo 90: call inst
-    template <int s, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<90,s,false,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -886,7 +886,7 @@ namespace tmv {
             InstMultMM(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
-    template <int s, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<90,s,true,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -899,7 +899,7 @@ namespace tmv {
     };
 
     // algo 91: call inst alias
-    template <int s, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<91,s,false,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -910,7 +910,7 @@ namespace tmv {
             InstAliasMultMM(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
-    template <int s, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<91,s,true,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -923,7 +923,7 @@ namespace tmv {
     };
 
     // algo 96: Transpose
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<96,s,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -940,7 +940,7 @@ namespace tmv {
     };
 
     // algo 196: Transpose
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<196,s,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -957,7 +957,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<97,s,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -975,7 +975,7 @@ namespace tmv {
     };
 
     // algo 197: Conjugate
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<197,s,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -993,7 +993,7 @@ namespace tmv {
     };
 
     // algo 98: Inline check for aliases
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<98,s,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1063,7 +1063,7 @@ namespace tmv {
     };
 
     // algo 99: Check for aliases
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<99,s,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -1093,7 +1093,7 @@ namespace tmv {
     };
 
     // algo -4: No branches or copies.
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<-4,s,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -1103,11 +1103,11 @@ namespace tmv {
             const bool rxr = M1::_rowmajor && M3::_rowmajor;
             const bool crx = M1::_colmajor && M2::_rowmajor;
             const bool xcc = M2::_colmajor && M3::_colmajor;
-            const int s2 = s > 20 ? Unknown : s;
-            const int s2p1 = IntTraits<s2>::Sp1;
-            const int s2p2 = IntTraits<s2p1>::Sp1;
+            const ptrdiff_t s2 = s > 20 ? Unknown : s;
+            const ptrdiff_t s2p1 = IntTraits<s2>::Sp1;
+            const ptrdiff_t s2p2 = IntTraits<s2p1>::Sp1;
             // nops = 1/6 n(n+1)(n+2)
-            const int nops = 
+            const ptrdiff_t nops = 
                 IntTraits2<IntTraits2<s2,s2p1>::safeprod,s2p2>::safeprod / 6;
             const bool unroll = 
                 s > 10 ? false :
@@ -1130,7 +1130,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<-3,s,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -1163,7 +1163,7 @@ namespace tmv {
                 // TODO: Add checks for bad majority on m1,m2,m3.
                 -4;
 #ifdef PRINTALGO_UU
-            const int N = s==Unknown ? m3.size() : s;
+            const ptrdiff_t N = s==Unknown ? m3.size() : s;
             std::cout<<"InlineMultUU: x = "<<ix<<"  "<<T(x)<<std::endl;
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
@@ -1196,7 +1196,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<-2,s,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -1226,7 +1226,7 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases?
-    template <int s, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultUU_Helper<-1,s,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -1255,7 +1255,7 @@ namespace tmv {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(!m3.isunit() || T(x) == T(1));
 
-        const int s = Sizes<Sizes<M1::_size,M2::_size>::size,M3::_size>::size;
+        const ptrdiff_t s = Sizes<Sizes<M1::_size,M2::_size>::size,M3::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
@@ -1279,7 +1279,7 @@ namespace tmv {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(!m3.isunit() || T(x) == T(1));
 
-        const int s = Sizes<Sizes<M1::_size,M2::_size>::size,M3::_size>::size;
+        const ptrdiff_t s = Sizes<Sizes<M1::_size,M2::_size>::size,M3::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
@@ -1303,7 +1303,7 @@ namespace tmv {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(!m3.isunit() || T(x) == T(1));
 
-        const int s = Sizes<Sizes<M1::_size,M2::_size>::size,M3::_size>::size;
+        const ptrdiff_t s = Sizes<Sizes<M1::_size,M2::_size>::size,M3::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;

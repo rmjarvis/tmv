@@ -546,7 +546,7 @@ from all of this finagling, so unless you are really memory starved, it's probab
 
 To access this decomposition, use:
 \begin{tmvcode}
-bool b.lud().IsTrans()
+bool b.lud().isTrans()
 tmv::LowerTriMatrix<T,UnitDiag> b.lud().getL()
 tmv::ConstBandMatrixView<T> b.lud().getU()
 Permutation b.lud().getP()
@@ -557,7 +557,7 @@ Permutation b.lud().getP()
 The following should result in a matrix numerically very close to \tt{b}.
 \begin{tmvcode}
 tmv::Matrix<T> m2 = b.lud().getP() * b.lud().getL() * b.lud().getU();
-if (b.lud().IsTrans()) m2.transposeSelf();
+if (b.lud().isTrans()) m2.transposeSelf();
 \end{tmvcode}
 
 \item
@@ -572,7 +572,7 @@ I have not yet made a version of the \tt{PackedQ} class for \tt{BandMatrix}.
 So unfortunately, here \tt{getQ()} creates the matrix directly and is thus
 rather inefficient.}
 \begin{tmvcode}
-bool b.qrd().IsTrans()
+bool b.qrd().isTrans()
 tmv::Matrix<T> b.qrd().getQ()
 tmv::ConstBandMatrixView<T> b.qrd().getR()
 \end{tmvcode}
@@ -583,7 +583,7 @@ The following should result in a matrix numerically very close to \tt{b}.
 \begin{tmvcode}
 tmv::Matrix<T> m2(b.nrows,b.ncols);
 tmv::MatrixView<T> m2v = 
-      b.qrd().IsTrans() ? b2.transpose() : b2.view();
+      b.qrd().isTrans() ? b2.transpose() : b2.view();
 m2v = b.qrd().getQ() * b.qrd().getR();
 \end{tmvcode}
 

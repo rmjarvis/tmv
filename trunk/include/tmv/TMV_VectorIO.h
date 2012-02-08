@@ -25,12 +25,12 @@ namespace tmv {
     {
         static void call(const TMV_Writer& writer, const V& v)
         {
-            const int N = v.size();
+            const ptrdiff_t N = v.size();
             writer.begin();
             writer.writeCode("V");
             writer.writeSize(N);
             writer.writeLParen();
-            for(int i=0;i<N;++i) {
+            for(ptrdiff_t i=0;i<N;++i) {
                 if (i > 0) writer.writeSpace();
                 writer.writeValue(v.cref(i));
             }
@@ -105,9 +105,9 @@ namespace tmv {
     {
     public :
         Vector<T> v;
-        int i;
+        ptrdiff_t i;
         std::string exp,got;
-        int s;
+        ptrdiff_t s;
         bool is, iseof, isbad;
 
         VectorReadError(std::istream& _is) throw() :
@@ -122,20 +122,20 @@ namespace tmv {
 
         template <class V>
         VectorReadError(
-            int _i, const BaseVector<V>& _v, std::istream& _is) throw() :
+            ptrdiff_t _i, const BaseVector<V>& _v, std::istream& _is) throw() :
             ReadError("Vector"),
             v(_v), i(_i), s(_v.size()),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class V>
         VectorReadError(
-            int _i, const BaseVector<V>& _v, std::istream& _is,
+            ptrdiff_t _i, const BaseVector<V>& _v, std::istream& _is,
             const std::string& _e, const std::string& _g) throw() :
             ReadError("Vector"),
             v(_v), i(_i), exp(_e), got(_g), s(_v.size()),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class V>
         VectorReadError(
-            const BaseVector<V>& _v, std::istream& _is, int _s) throw() :
+            const BaseVector<V>& _v, std::istream& _is, ptrdiff_t _s) throw() :
             ReadError("Vector"),
             v(_v), i(0), s(_s),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
@@ -167,7 +167,7 @@ namespace tmv {
             if (v.size() > 0) {
                 os<<"The portion of the Vector which was successfully "
                     "read is: \n(";
-                for(int ii=0;ii<i;++ii) os<<' '<<v(ii)<<' ';
+                for(ptrdiff_t ii=0;ii<i;++ii) os<<' '<<v(ii)<<' ';
                 os<<")\n";
             }
         }
@@ -182,7 +182,7 @@ namespace tmv {
     {
         static void call(const TMV_Reader& reader, V& v)
         {
-            const int n = v.size();
+            const ptrdiff_t n = v.size();
             std::string exp, got;
             typedef typename V::value_type T;
             T temp;
@@ -194,7 +194,7 @@ namespace tmv {
                 throw VectorReadError<T>(0,v,reader.getis(),exp,got);
 #endif
             }
-            for(int i=0;i<n;++i) {
+            for(ptrdiff_t i=0;i<n;++i) {
                 if (i>0) {
                     if (!reader.readSpace(exp,got)) {
 #ifdef NOTHROW
@@ -262,7 +262,7 @@ namespace tmv {
         static TMV_INLINE void call(const TMV_Reader& reader, V& v)
         {
             typedef typename V::value_type T;
-            const int inst = 
+            const bool inst = 
                 (V::_size == Unknown || V::_size > 16) &&
                 Traits<T>::isinst;
             const int algo = 
@@ -322,7 +322,7 @@ namespace tmv {
             throw VectorReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int n=v.size();
+        ptrdiff_t n=v.size();
         if (!reader.readSize(n)) {
 #ifdef NOTHROW
             std::cerr<<"Vector Read Error: reading size\n";
@@ -355,7 +355,7 @@ namespace tmv {
             throw VectorReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int n=v.size();
+        ptrdiff_t n=v.size();
         if (!reader.readSize(n)) {
 #ifdef NOTHROW
             std::cerr<<"Vector Read Error: reading size\n";
@@ -389,7 +389,7 @@ namespace tmv {
             static_cast<BaseVector_Mutable<VectorView<T,A> >&>(v); 
     }
 
-    template <class T, int N, int S, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A>
     inline std::istream& operator>>(
         const TMV_Reader& reader, SmallVectorView<T,N,S,A> v)
     {
@@ -404,7 +404,7 @@ namespace tmv {
             static_cast<BaseVector_Mutable<VectorView<T,A> >&>(v); 
     }
 
-    template <class T, int N, int S, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A>
     inline std::istream& operator>>(
         std::istream& is, SmallVectorView<T,N,S,A> v)
     { 

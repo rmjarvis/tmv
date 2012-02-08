@@ -15,11 +15,11 @@ namespace tmv {
     // minv = x * m^-1
     //
 
-    template <int algo, int cs, int rs, int ix, class T, class M1, class M2>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper;
 
     // algo 0: cs or rs = 0, nothing to do
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<0,cs,rs,ix,T,M1,M2>
     {
         static TMV_INLINE void call(
@@ -34,8 +34,8 @@ namespace tmv {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvM algo 1: M,N,cs,rs = "<<M<<','<<N<<','<<
                 1<<','<<1<<std::endl;
 #endif
@@ -52,8 +52,8 @@ namespace tmv {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvM algo 2: M,N,cs,rs = "<<M<<','<<N<<','<<
                 2<<','<<2<<std::endl;
 #endif
@@ -84,8 +84,8 @@ namespace tmv {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvM algo 3: M,N,cs,rs = "<<M<<','<<N<<','<<
                 3<<','<<3<<std::endl;
 #endif
@@ -139,8 +139,8 @@ namespace tmv {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvM algo 4: M,N,cs,rs = "<<M<<','<<N<<','<<
                 4<<','<<4<<std::endl;
 #endif
@@ -294,8 +294,8 @@ namespace tmv {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvM algo 5: M,N,cs,rs = "<<M<<','<<N<<','<<
                 4<<','<<4<<std::endl;
 #endif
@@ -379,14 +379,14 @@ namespace tmv {
 
 
     // algo 11: Use Divider 
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<11,cs,rs,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvM algo 11: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
             std::cout<<"divIsSet = "<<m1.divIsSet()<<std::endl;
@@ -402,14 +402,14 @@ namespace tmv {
     };
 
     // algo 12: Calculate LU decomposition on the spot.
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<12,cs,rs,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvM algo 12: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -424,14 +424,14 @@ namespace tmv {
     };
 
     // algo 13: Calculate QR decomposition on the spot.
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<13,cs,rs,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvM algo 13: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -441,14 +441,14 @@ namespace tmv {
     };
 
     // algo 14: Figure out whether to use LU or QR
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<14,cs,rs,ix,T,M1,M2>
     {
         static inline void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvM algo 14: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -460,14 +460,14 @@ namespace tmv {
     };
 
     // algo 31: m1 is diagonal.  No alias check.
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<31,cs,rs,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvM algo 31: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -480,14 +480,14 @@ namespace tmv {
     };
 
     // algo 32: m1 is diagonal.  Safe for aliases.
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<32,cs,rs,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvM algo 32: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -511,14 +511,14 @@ namespace tmv {
     };
 
     // algo 33: m1,m2 are both diagonal.  No alias check.
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<33,cs,rs,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvM algo 33: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -530,14 +530,14 @@ namespace tmv {
     };
 
     // algo 34: m1,m2 are both diagonal.  With alias check.
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<34,cs,rs,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvM algo 34: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -549,14 +549,14 @@ namespace tmv {
     };
 
     // algo 41: m1 is triangular.  No alias.
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<41,cs,rs,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvM algo 41: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -572,14 +572,14 @@ namespace tmv {
     };
 
     // algo 42: m1 is triangular.  With alias check.
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<42,cs,rs,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
-            const int N = m1.rowsize();
+            const ptrdiff_t N = m1.rowsize();
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
+            const ptrdiff_t M = m1.colsize();
             std::cout<<"InvM algo 42: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -595,14 +595,14 @@ namespace tmv {
     };
 
     // algo 43: m1,m2 are both uppertri.  No alias
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<43,cs,rs,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvM algo 43: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -613,14 +613,14 @@ namespace tmv {
     };
 
     // algo 44: m1,m2 are both uppertri.  With alias check
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<44,cs,rs,ix,T,M1,M2>
     {
         static void call(const Scaling<ix,T>& x, const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvM algo 44: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -631,7 +631,7 @@ namespace tmv {
     };
 
     // algo 99: Check for aliases
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<99,cs,rs,ix,T,M1,M2>
     {
         static TMV_INLINE void call(
@@ -670,7 +670,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<-3,cs,rs,ix,T,M1,M2>
     {
         static TMV_INLINE void call(
@@ -709,7 +709,7 @@ namespace tmv {
     };
 
     // algo -2: No alias
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<-2,cs,rs,ix,T,M1,M2>
     {
         static TMV_INLINE void call(
@@ -718,7 +718,7 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases?
-    template <int cs, int rs, int ix, class T, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1, class M2>
     struct InvertM_Helper<-1,cs,rs,ix,T,M1,M2>
     {
         static TMV_INLINE void call(
@@ -746,8 +746,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<M1::_rowsize,M2::_colsize>::same));
         TMVAssert(m1.colsize() == m2.rowsize());
         TMVAssert(m1.rowsize() == m2.colsize());
-        const int cs = Sizes<M2::_colsize,M1::_rowsize>::size;
-        const int rs = Sizes<M2::_rowsize,M1::_colsize>::size;
+        const ptrdiff_t cs = Sizes<M2::_colsize,M1::_rowsize>::size;
+        const ptrdiff_t rs = Sizes<M2::_rowsize,M1::_colsize>::size;
         // Don't make a view for m1, since we want to make sure we keep 
         // a divider object if one is present.
         typedef typename M2::cview_type M2v;
@@ -760,11 +760,11 @@ namespace tmv {
     // mata = (at * a)^-1
     //
 
-    template <int algo, int cs, int rs, class M1, class M2>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper;
 
     // algo 0: cs or rs = 0, nothing to do
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<0,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(const M1& , M2& )
@@ -778,8 +778,8 @@ namespace tmv {
         static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvATA algo 1: M,N,cs,rs = "<<M<<','<<N<<','<<
                 1<<','<<1<<std::endl;
 #endif
@@ -792,14 +792,14 @@ namespace tmv {
     };
 
     // algo 2: Direct (mtm)^-1
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<2,cs,rs,M1,M2>
     {
         static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvATA algo 2: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -816,14 +816,14 @@ namespace tmv {
     };
 
     // algo 3: Direct (mmt)^-1
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<3,cs,rs,M1,M2>
     {
         static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvATA algo 3: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -840,14 +840,14 @@ namespace tmv {
     };
 
     // algo 11: Use Divider
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<11,cs,rs,M1,M2>
     {
         static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvATA algo 11: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
             std::cout<<"divIsSet = "<<m1.divIsSet()<<std::endl;
@@ -862,14 +862,14 @@ namespace tmv {
     };
 
     // algo 12: Calculate LU decomposition on the spot. 
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<12,cs,rs,M1,M2>
     {
         static inline void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvATA algo 12: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -878,14 +878,14 @@ namespace tmv {
     };
 
     // algo 13: Calculate QR decomposition on the spot. 
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<13,cs,rs,M1,M2>
     {
         static inline void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvATA algo 13: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -894,14 +894,14 @@ namespace tmv {
     };
 
     // algo 14: Figure out whether to use LU or QR
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<14,cs,rs,M1,M2>
     {
         static inline void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvATA algo 14: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -913,14 +913,14 @@ namespace tmv {
     };
 
     // algo 21: m1 is diagonal.  No alias check.
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<21,cs,rs,M1,M2>
     {
         static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvATA algo 21: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -939,14 +939,14 @@ namespace tmv {
     };
 
     // algo 22: m1 is diagonal.  Safe for aliases.
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<22,cs,rs,M1,M2>
     {
         static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvATA algo 22: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -967,14 +967,14 @@ namespace tmv {
     };
 
     // algo 23: m1,m2 are both diagonal.  No alias check.
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<23,cs,rs,M1,M2>
     {
         static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvATA algo 23: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -992,14 +992,14 @@ namespace tmv {
     };
 
     // algo 24: m1,m2 are both diagonal.  With alias check.
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<24,cs,rs,M1,M2>
     {
         static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvATA algo 24: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -1018,14 +1018,14 @@ namespace tmv {
     };
 
     // algo 31: m1 is uppertri.  No alias.
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<31,cs,rs,M1,M2>
     {
         static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvATA algo 31: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -1044,14 +1044,14 @@ namespace tmv {
     };
 
     // algo 32: m1 is uppertri.  With alias check.
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<32,cs,rs,M1,M2>
     {
         static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvATA algo 32: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -1070,14 +1070,14 @@ namespace tmv {
     };
 
     // algo 41: m1 is lowertri.  No alias.
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<41,cs,rs,M1,M2>
     {
         static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvATA algo 41: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -1096,14 +1096,14 @@ namespace tmv {
     };
 
     // algo 42: m1 is lowertri.  With alias check.
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<42,cs,rs,M1,M2>
     {
         static void call(const M1& m1, M2& m2)
         {
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"InvATA algo 42: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
 #endif
@@ -1122,7 +1122,7 @@ namespace tmv {
     };
 
     // algo 99: Check for aliases
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<99,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(const M1& m1, M2& m2)
@@ -1146,8 +1146,8 @@ namespace tmv {
                 cs == rs ? 12 : 
                 13;
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"AliasCheck InverseATA: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
@@ -1159,7 +1159,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<-3,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(const M1& m1, M2& m2)
@@ -1183,8 +1183,8 @@ namespace tmv {
                 cs == rs ? 12 : 
                 13;
 #ifdef PRINTALGO_INVM
-            const int M = m1.colsize();
-            const int N = m1.rowsize();
+            const ptrdiff_t M = m1.colsize();
+            const ptrdiff_t N = m1.rowsize();
             std::cout<<"Inline InverseATA: M,N,cs,rs = "<<M<<','<<N<<','<<
                 cs<<','<<rs<<std::endl;
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
@@ -1196,7 +1196,7 @@ namespace tmv {
     };
 
     // algo -2: No alias
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<-2,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(const M1& m1, M2& m2)
@@ -1204,7 +1204,7 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases?
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct InverseATA_Helper<-1,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(const M1& m1, M2& m2)
@@ -1231,8 +1231,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<M2::_rowsize,M2::_colsize>::same));
         TMVAssert(TMV_MIN(m1.colsize(),m1.rowsize()) == m2.rowsize());
         TMVAssert(m2.rowsize() == m2.colsize());
-        const int cs = M1::_colsize;
-        const int rs = M1::_rowsize;
+        const ptrdiff_t cs = M1::_colsize;
+        const ptrdiff_t rs = M1::_rowsize;
         // Don't make a view for m1, since we want to make sure we keep 
         // a divider object if one is present.
         typedef typename M2::cview_type M2v;

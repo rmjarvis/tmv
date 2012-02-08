@@ -60,7 +60,7 @@ namespace tmv {
         //         = c + |b|^2/d / (1+sqrt(1+|b|^2/d^2)
         //
         // mu = c + |b|^2/d / (1 + sqrt(1+|b|^2/d^2))
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
         TMVAssert(E.size() == N-1);
         TMVAssert(N > 1);
         typedef typename Vd::value_type T;
@@ -82,16 +82,16 @@ namespace tmv {
         }
     }
                         
-    template <int algo, int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_QR_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0, or N == 0)
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_QR_Helper<0,cs,rs,Mu,Vd,Ve,Mv>
     { static TMV_INLINE void call(Mu& , Vd& , Ve& , Mv& , bool , bool ) {} };
 
     // algo 11: Normal algorithm
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_QR_Helper<11,cs,rs,Mu,Vd,Ve,Mv>
     {
         static void call(Mu& U, Vd& D, Ve& E, Mv& V, bool UisI, bool VisI)
@@ -99,14 +99,14 @@ namespace tmv {
             typedef typename Vd::value_type RT;
             TMVStaticAssert(Traits<RT>::isreal);
 
-            const int N = rs==Unknown ? D.size() : rs;
+            const ptrdiff_t N = rs==Unknown ? D.size() : rs;
             if (N <= 1) return;
 #ifdef PRINTALGO_SVD
-            const int M = cs==Unknown ? U.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? U.colsize() : cs;
             std::cout<<"SVDecomposeFromBidiagonal algo 11: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             typedef typename Mu::colrange_type Mus;
             typedef typename Vd::subvector_type Vds;
             typedef typename Ve::subvector_type Ves;
@@ -123,10 +123,10 @@ namespace tmv {
             // Initially q = N-1. (ie. All E(i) are potentially non-zero.)
             // When q = 0, we are done.
 
-            for(int q=N-1; q>0; ) {
+            for(ptrdiff_t q=N-1; q>0; ) {
                 if (E.cref(q-1) == RT(0)) --q;
                 else {
-                    int p=q-1;
+                    ptrdiff_t p=q-1;
                     while (p > 0 && (E(p-1) != RT(0))) --p;
                     // Set p such that E(p-1) = 0 and all E(i) with p<=i<q are 
                     // non-zero.
@@ -166,15 +166,15 @@ namespace tmv {
     };
 
     // algo 21: Try to reduce the last elemet of E to zero.
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_QR_Helper<21,cs,rs,Mu,Vd,Ve,Mv>
     {
         static void reduce(Mu& U, Vd& D, Ve& E, Mv& V)
         {
             typedef typename Mu::real_type RT;
-            const int N = rs==Unknown ? D.size() : rs;
+            const ptrdiff_t N = rs==Unknown ? D.size() : rs;
 #ifdef PRINTALGO_SVD
-            const int M = cs==Unknown ? U.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? U.colsize() : cs;
             std::cout<<"SVDecomposeFromBidiagonal algo 21: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -196,8 +196,8 @@ namespace tmv {
             Vector<RT> E0 = E;
             B.diag() = D;
             B.diag(1) = E;
-            const int M1 = U.cptr() && V.cptr() ? U.colsize() : 0;
-            const int N1 = U.cptr() && V.cptr() ? V.rowsize() : 0;
+            const ptrdiff_t M1 = U.cptr() && V.cptr() ? U.colsize() : 0;
+            const ptrdiff_t N1 = U.cptr() && V.cptr() ? V.rowsize() : 0;
             Matrix<T> A0(M1,N1);
             if (U.cptr() && V.cptr()) A0 = U * B * V;
             //dbgcout<<"A0 = "<<A0<<std::endl;
@@ -264,7 +264,7 @@ namespace tmv {
             dbgcout<<"x = "<<x<<std::endl;
             Givens<RT> G = GivensRotate(y,x);
             dbgcout<<"Rotatedi y,x => "<<y<<','<<x<<std::endl;
-            for(int i=1;i<N;++i) {
+            for(ptrdiff_t i=1;i<N;++i) {
                 G.mult(*Di,*Ei);
                 dbgcout<<"D,E -> "<<*Di<<','<<*Ei<<std::endl;
                 if (V.cptr()) {
@@ -331,15 +331,15 @@ namespace tmv {
     // for the 2x2 case, which is mathematically exact.  But we do
     // some special things to make sure rounding errors don't kill
     // the reduction.
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_QR_Helper<22,cs,rs,Mu,Vd,Ve,Mv>
     {
         static void reduce(Mu& U, Vd& D, Ve& E, Mv& V)
         {
             typedef typename Mu::real_type RT;
 #ifdef PRINTALGO_SVD
-            const int M = cs==Unknown ? U.colsize() : cs;
-            const int N = rs==Unknown ? D.size() : rs;
+            const ptrdiff_t M = cs==Unknown ? U.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? D.size() : rs;
             std::cout<<"SVDecomposeFromBidiagonal algo 22: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -611,8 +611,8 @@ namespace tmv {
             Matrix<RT> g2(2,2); 
             g2(0,0) = c2; g2(0,1) = s2; g2(1,0) = -s2; g2(1,1) = c2;
             Matrix<RT> S = g1 * B * g2;
-            const int M1 = U.cptr() && V.cptr() ? U.colsize() : 0;
-            const int N1 = U.cptr() && V.cptr() ? V.rowsize() : 0;
+            const ptrdiff_t M1 = U.cptr() && V.cptr() ? U.colsize() : 0;
+            const ptrdiff_t N1 = U.cptr() && V.cptr() ? V.rowsize() : 0;
             Matrix<T> A(M1,N1);
             if (U.cptr() && V.cptr()) A = U * B * V;
             dbgcout<<"c1,s1 = "<<c1<<','<<s1<<std::endl;
@@ -681,7 +681,7 @@ namespace tmv {
     };
 
     // algo 90: call InstSV_DecomposeFromBidiagonal_QR
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_QR_Helper<90,cs,rs,Mu,Vd,Ve,Mv>
     {
         static TMV_INLINE void call(
@@ -693,7 +693,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_QR_Helper<-3,cs,rs,Mu,Vd,Ve,Mv>
     {
         static TMV_INLINE void call(
@@ -714,7 +714,7 @@ namespace tmv {
             typedef typename Traits2<typename Mu::value_type, typename Mv::value_type>::type T;
             typedef typename Mu::real_type RT;
 
-            const int N = rs==Unknown ? D.size() : rs;
+            const ptrdiff_t N = rs==Unknown ? D.size() : rs;
             dbgcout<<"Start Decompose from Bidiag:\n";
             if (U.cptr()) dbgcout<<"U = "<<TMV_Text(U)<<std::endl;
             if (V.cptr()) dbgcout<<"V = "<<TMV_Text(V)<<std::endl;
@@ -727,8 +727,8 @@ namespace tmv {
             Matrix<RT> B(N,N,RT(0));
             B.diag() = D;
             B.diag(1) = E;
-            const int M1 = U.cptr() && V.cptr() ? U.colsize() : 0;
-            const int N1 = U.cptr() && V.cptr() ? V.rowsize() : 0;
+            const ptrdiff_t M1 = U.cptr() && V.cptr() ? U.colsize() : 0;
+            const ptrdiff_t N1 = U.cptr() && V.cptr() ? V.rowsize() : 0;
             Matrix<T> A0(M1,N1);
             if (U.cptr() && V.cptr()) A0 = U * B * V;
             //dbgcout<<"A0 = "<<A0<<std::endl;
@@ -766,7 +766,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_QR_Helper<-2,cs,rs,Mu,Vd,Ve,Mv>
     {
         static TMV_INLINE void call(
@@ -785,7 +785,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_QR_Helper<-1,cs,rs,Mu,Vd,Ve,Mv>
     {
         static TMV_INLINE void call(
@@ -827,10 +827,10 @@ namespace tmv {
             TMVAssert(V.colsize() == D.size());
             TMVAssert(V.rowsize() >= V.colsize());
         }
-        const int cs = Mu::_colsize;
-        const int rs1 = Sizes<Mu::_rowsize,Vd::_size>::size;
-        const int rs2 = Sizes<Mv::_rowsize,Mv::_colsize>::size;
-        const int rs = Sizes<rs1,rs2>::size;
+        const ptrdiff_t cs = Mu::_colsize;
+        const ptrdiff_t rs1 = Sizes<Mu::_rowsize,Vd::_size>::size;
+        const ptrdiff_t rs2 = Sizes<Mv::_rowsize,Mv::_colsize>::size;
+        const ptrdiff_t rs = Sizes<rs1,rs2>::size;
         typedef typename Mu::cview_type Muv;
         typedef typename Vd::cview_type Vdv;
         typedef typename Ve::cview_type Vev;
@@ -874,10 +874,10 @@ namespace tmv {
             TMVAssert(V.colsize() == D.size());
             TMVAssert(V.rowsize() >= V.colsize());
         }
-        const int cs = Mu::_colsize;
-        const int rs1 = Sizes<Mu::_rowsize,Vd::_size>::size;
-        const int rs2 = Sizes<Mv::_rowsize,Mv::_colsize>::size;
-        const int rs = Sizes<rs1,rs2>::size;
+        const ptrdiff_t cs = Mu::_colsize;
+        const ptrdiff_t rs1 = Sizes<Mu::_rowsize,Vd::_size>::size;
+        const ptrdiff_t rs2 = Sizes<Mv::_rowsize,Mv::_colsize>::size;
+        const ptrdiff_t rs = Sizes<rs1,rs2>::size;
         typedef typename Mu::cview_type Muv;
         typedef typename Vd::cview_type Vdv;
         typedef typename Ve::cview_type Vev;

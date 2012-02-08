@@ -85,7 +85,7 @@ namespace tmv {
             zd = true;
         }
         ++Di;
-        for(int k=E.size();k>0;--k,++Di,++Ei) {
+        for(ptrdiff_t k=E.size();k>0;--k,++Di,++Ei) {
 
             // if |D(i)|^2 underflows, the set D(i) = 0
             if (TMV_Underflow(TMV_NORM(*Di))) {
@@ -142,7 +142,7 @@ namespace tmv {
         if (U.ptr()) TMVAssert(U.rowsize() == D.size()+1);
 
         typedef typename V1::real_type RT;
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
         typedef typename V1::iterator Dit;
         typedef typename V2::iterator Eit;
         Dit Di = D.begin();
@@ -153,7 +153,7 @@ namespace tmv {
             *Ei = RT(0);
             ++Ei;
             // Loop Invariant: x = B(0,i)
-            for(int i=0; i<N; ++i,++Di,++Ei) {
+            for(ptrdiff_t i=0; i<N; ++i,++Di,++Ei) {
                 Givens<RT> G = GivensRotate(*Di,x);
                 // Make new B = G B
                 if (i<N) {
@@ -187,7 +187,7 @@ namespace tmv {
         if (V.ptr()) TMVAssert(V.colsize() == D.size()+1);
 
         typedef typename V1::real_type RT;
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
         typedef typename V1::reverse_iterator Dit;
         typedef typename V2::reverse_iterator Eit;
         Dit Di = D.rbegin();
@@ -197,7 +197,7 @@ namespace tmv {
         if (x != RT(0)) {
             *Ei = RT(0);
             // Loop Invariant: x = B(i,N-1)
-            for(int i=N-1; i>=0; --i,++Di) {
+            for(ptrdiff_t i=N-1; i>=0; --i,++Di) {
                 Givens<RT> G = GivensRotate(*Di,x);
                 // Make new B = B GT
                 if (i>0) {
@@ -223,16 +223,16 @@ namespace tmv {
         MatrixView<Tu> U, VectorView<RT> D, VectorView<RT> E,
         MatrixView<Tv> V, bool setUV);
 
-    template <int algo, int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0, or N == 0)
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_Helper<0,cs,rs,Mu,Vd,Ve,Mv>
     { static TMV_INLINE void call(Mu& , Vd& , Ve& , Mv& , bool ) {} };
 
     // algo 1: D,E are complex.  Make them real first.
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_Helper<1,cs,rs,Mu,Vd,Ve,Mv>
     {
         static void call(Mu& U, Vd& D, Ve& E, Mv& V, bool setUV)
@@ -241,14 +241,14 @@ namespace tmv {
             typedef typename Vd::real_type RT;
             TMVStaticAssert(Traits<T>::iscomplex);
 
-            const int N = rs==Unknown ? D.size() : rs;
+            const ptrdiff_t N = rs==Unknown ? D.size() : rs;
             if (N == 0) return;
 #ifdef PRINTALGO_SVD
-            const int M = cs==Unknown ? U.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? U.colsize() : cs;
             std::cout<<"SVDecomposeFromBidiagonal algo 1: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
-            const int rsm1 = IntTraits<rs>::Sm1;
+            const ptrdiff_t rsm1 = IntTraits<rs>::Sm1;
             typedef typename VCopyHelper<RT,rs>::type rVd;
             typedef typename VCopyHelper<RT,rsm1>::type rVe;
             rVd rD = VectorSizer<T>(N);
@@ -260,7 +260,7 @@ namespace tmv {
                 V.setToIdentity();
             }
 
-            for(int j=0;j<N-1;++j) {
+            for(ptrdiff_t j=0;j<N-1;++j) {
                 dbgcout<<"j = "<<j<<", D = "<<D.cref(j)<<", E = "<<E.cref(j)<<std::endl;
                 RT absDj = TMV_ABS(D.cref(j));
                 T signDj = TMV_SIGN(D.cref(j),absDj);
@@ -303,7 +303,7 @@ namespace tmv {
     };
 
     // algo 11: Normal algorithm, D,E are real
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_Helper<11,cs,rs,Mu,Vd,Ve,Mv>
     {
         static void call(Mu& U, Vd& D, Ve& E, Mv& V, bool setUV)
@@ -311,10 +311,10 @@ namespace tmv {
             typedef typename Vd::value_type RT;
             TMVStaticAssert(Traits<RT>::isreal);
 
-            const int N = rs==Unknown ? D.size() : rs;
+            const ptrdiff_t N = rs==Unknown ? D.size() : rs;
             if (N == 0) return;
 #ifdef PRINTALGO_SVD
-            const int M = cs==Unknown ? U.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? U.colsize() : cs;
             std::cout<<"SVDecomposeFromBidiagonal algo 11: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -350,7 +350,7 @@ namespace tmv {
 
             // Make all of the singular values positive
             typename Vd::iterator Di = D.begin();
-            for(int i=0;i<N;++i,++Di) if (*Di < 0) {
+            for(ptrdiff_t i=0;i<N;++i,++Di) if (*Di < 0) {
                 *Di = -(*Di);
                 if (V.ptr()) V.row(i) = -V.row(i);
             }
@@ -374,7 +374,7 @@ namespace tmv {
 
     // algo 21: After basic prep work, this routine looks for sub-problems
     // that have no zeros in D or E. 
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_Helper<21,cs,rs,Mu,Vd,Ve,Mv>
     {
         static void call(Mu& U, Vd& D, Ve& E, Mv& V, bool UisI, bool VisI)
@@ -382,10 +382,10 @@ namespace tmv {
             typedef typename Vd::value_type RT;
             TMVStaticAssert(Traits<RT>::isreal);
 
-            const int N = rs==Unknown ? D.size() : rs;
+            const ptrdiff_t N = rs==Unknown ? D.size() : rs;
             if (N == 0) return;
 #ifdef PRINTALGO_SVD
-            const int M = cs==Unknown ? U.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? U.colsize() : cs;
             std::cout<<"SVDecomposeFromBidiagonal algo 21: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -395,14 +395,14 @@ namespace tmv {
             dbgcout<<"After Chop: D = "<<D<<std::endl;
             dbgcout<<"After Chop: E = "<<E<<std::endl;
 
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             typedef typename Mu::colrange_type Mus;
             typedef typename Vd::subvector_type Vds;
             typedef typename Ve::subvector_type Ves;
             typedef typename Mv::rowrange_type Mvs;
 
             // Find sub-problems to solve:
-            for(int q = N-1; q>0; ) {
+            for(ptrdiff_t q = N-1; q>0; ) {
                 dbgcout<<"Looking for sub-problem:\n";
                 dbgcout<<"q = "<<q<<std::endl;
                 if (E.cref(q-1) == RT(0)) --q;
@@ -414,7 +414,7 @@ namespace tmv {
                     //       0
                     // So we need to find a p where all E(i) with p<=i<q are 
                     // non-zero.
-                    int p = q-1;
+                    ptrdiff_t p = q-1;
                     while (p>0 && !(E.cref(p-1) == RT(0))) --p;
                     // Now Zero out the last column:
                     Vds D1 = D.subVector(p,q);
@@ -425,7 +425,7 @@ namespace tmv {
                     --q;
                 } else {
                     // Find first p before q with either E(p) = 0 or D(p) = 0
-                    int p=q-1;
+                    ptrdiff_t p=q-1;
                     while (p>0 && 
                            !(E.cref(p-1)==RT(0)) && 
                            !(D.cref(p)==RT(0))) --p;
@@ -466,15 +466,15 @@ namespace tmv {
     };
 
     // algo 31: Do a sub-problem with no zeros in D or E.
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_Helper<31,cs,rs,Mu,Vd,Ve,Mv>
     {
         static TMV_INLINE void call(
             Mu& U, Vd& D, Ve& E, Mv& V, bool UisI, bool VisI)
         {
 #ifdef PRINTALGO_SVD
-            const int M = cs==Unknown ? U.colsize() : cs;
-            const int N = rs==Unknown ? D.size() : rs;
+            const ptrdiff_t M = cs==Unknown ? U.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? D.size() : rs;
             std::cout<<"SVDecomposeFromBidiagonal algo 31: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -487,7 +487,7 @@ namespace tmv {
     };
 
     // algo 90: call InstSV_DecomposeFromBidiagonal
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_Helper<90,cs,rs,Mu,Vd,Ve,Mv>
     {
         static TMV_INLINE void call(Mu& U, Vd& D, Ve& E, Mv& V, bool setUV)
@@ -498,7 +498,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_Helper<-3,cs,rs,Mu,Vd,Ve,Mv>
     {
         static TMV_INLINE void call(Mu& U, Vd& D, Ve& E, Mv& V, bool setUV)
@@ -515,7 +515,7 @@ namespace tmv {
             std::cout<<"algo = "<<algo<<std::endl;
 #endif
 #ifdef XDEBUG_SVD
-            const int N = rs==Unknown ? D.size() : rs;
+            const ptrdiff_t N = rs==Unknown ? D.size() : rs;
             dbgcout<<"Start Decompose from Bidiag algo -3:\n";
             dbgcout<<"Norm(U) = "<<Norm(U)<<std::endl;
             dbgcout<<"Norm(V) = "<<Norm(V)<<std::endl;
@@ -534,7 +534,7 @@ namespace tmv {
             Matrix<RT> B(N,N,RT(0));
             B.diag() = D;
             B.diag(1) = E;
-            const int M1 = U.ptr() && V.ptr() ? U.colsize() : N;
+            const ptrdiff_t M1 = U.ptr() && V.ptr() ? U.colsize() : N;
             Matrix<T> A0(M1,N);
             if (U.ptr() && V.ptr() && !setUV) A0 = U * B * V;
             else A0 = B;
@@ -574,7 +574,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_Helper<-2,cs,rs,Mu,Vd,Ve,Mv>
     {
         static TMV_INLINE void call(Mu& U, Vd& D, Ve& E, Mv& V, bool setUV)
@@ -598,7 +598,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_Helper<-1,cs,rs,Mu,Vd,Ve,Mv>
     {
         static TMV_INLINE void call(Mu& U, Vd& D, Ve& E, Mv& V, bool setUV)
@@ -636,10 +636,10 @@ namespace tmv {
             TMVAssert(V.colsize() == D.size());
             TMVAssert(V.rowsize() == D.size());
         }
-        const int cs = Mu::_colsize;
-        const int rs1 = Sizes<Mu::_rowsize,Vd::_size>::size;
-        const int rs2 = Sizes<Mv::_rowsize,Mv::_colsize>::size;
-        const int rs = Sizes<rs1,rs2>::size;
+        const ptrdiff_t cs = Mu::_colsize;
+        const ptrdiff_t rs1 = Sizes<Mu::_rowsize,Vd::_size>::size;
+        const ptrdiff_t rs2 = Sizes<Mv::_rowsize,Mv::_colsize>::size;
+        const ptrdiff_t rs = Sizes<rs1,rs2>::size;
         typedef typename Mu::cview_type Muv;
         typedef typename Vd::cview_type Vdv;
         typedef typename Ve::cview_type Vev;
@@ -680,10 +680,10 @@ namespace tmv {
             TMVAssert(V.colsize() == D.size());
             TMVAssert(V.rowsize() == D.size());
         }
-        const int cs = Mu::_colsize;
-        const int rs1 = Sizes<Mu::_rowsize,Vd::_size>::size;
-        const int rs2 = Sizes<Mv::_rowsize,Mv::_colsize>::size;
-        const int rs = Sizes<rs1,rs2>::size;
+        const ptrdiff_t cs = Mu::_colsize;
+        const ptrdiff_t rs1 = Sizes<Mu::_rowsize,Vd::_size>::size;
+        const ptrdiff_t rs2 = Sizes<Mv::_rowsize,Mv::_colsize>::size;
+        const ptrdiff_t rs = Sizes<rs1,rs2>::size;
         typedef typename Mu::cview_type Muv;
         typedef typename Vd::cview_type Vdv;
         typedef typename Ve::cview_type Vev;
@@ -721,11 +721,11 @@ namespace tmv {
         MatrixView<T> U, DiagMatrixView<RT> S,
         MatrixView<T> V, T& signuv, RT& logdet, bool StoreU);
 
-    template <int algo, int cs, int rs, class Mu, class Ms, class Mv>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class Mu, class Ms, class Mv>
     struct SVDecompose_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0, or N == 0)
-    template <int cs, int rs, class Mu, class Ms, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Ms, class Mv>
     struct SVDecompose_Helper<0,cs,rs,Mu,Ms,Mv>
     {
         typedef typename Mu::float_type FT;
@@ -734,7 +734,7 @@ namespace tmv {
     };
 
     // algo 11: Normal algorithm
-    template <int cs, int rs, class Mu, class Ms, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Ms, class Mv>
     struct SVDecompose_Helper<11,cs,rs,Mu,Ms,Mv>
     {
         template <bool isreal, int dummy>
@@ -760,8 +760,8 @@ namespace tmv {
         static void call(
             Mu& U, Ms& S, Mv& V, ZT& signdet, FT& logdet, bool StoreU)
         {
-            const int M = cs==Unknown ? U.colsize() : cs;
-            const int N = rs==Unknown ? U.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? U.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? U.rowsize() : rs;
             if (N == 0) return;
 #ifdef PRINTALGO_SVD
             std::cout<<"SVDecompose algo 11: M,N,cs,rs = "<<M<<','<<N<<
@@ -775,7 +775,7 @@ namespace tmv {
                 // using a series of Householder transformations.
                 // The diagonal of the Bidiagonal Matrix B is stored in D.
                 // The superdiagonal is stored in E.
-                const int rsm1 = IntTraits<rs>::Sm1;
+                const ptrdiff_t rsm1 = IntTraits<rs>::Sm1;
                 typename VCopyHelper<T,rs>::type D = VectorSizer<T>(N);
                 typename VCopyHelper<T,rsm1>::type E = VectorSizer<T>(N-1);
                 typename VCopyHelper<RT,rs>::type Ubeta = VectorSizer<T>(N);
@@ -895,7 +895,7 @@ namespace tmv {
     };
 
     // algo 81: Copy U to colmajor
-    template <int cs, int rs, class Mu, class Ms, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Ms, class Mv>
     struct SVDecompose_Helper<81,cs,rs,Mu,Ms,Mv>
     {
         typedef typename Mu::float_type FT;
@@ -916,7 +916,7 @@ namespace tmv {
     };
 
     // algo 90: call InstSV_Decompose
-    template <int cs, int rs, class Mu, class Ms, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Ms, class Mv>
     struct SVDecompose_Helper<90,cs,rs,Mu,Ms,Mv>
     {
         typedef typename Mu::float_type FT;
@@ -930,7 +930,7 @@ namespace tmv {
     };
 
     // algo 95: Conjugate V
-    template <int cs, int rs, class Mu, class Ms, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Ms, class Mv>
     struct SVDecompose_Helper<95,cs,rs,Mu,Ms,Mv>
     {
         typedef typename Mu::float_type FT;
@@ -947,7 +947,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, class Mu, class Ms, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Ms, class Mv>
     struct SVDecompose_Helper<97,cs,rs,Mu,Ms,Mv>
     {
         typedef typename Mu::float_type FT;
@@ -965,7 +965,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class Mu, class Ms, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Ms, class Mv>
     struct SVDecompose_Helper<-3,cs,rs,Mu,Ms,Mv>
     {
         typedef typename Mu::float_type FT;
@@ -1020,7 +1020,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class Mu, class Ms, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Ms, class Mv>
     struct SVDecompose_Helper<-2,cs,rs,Mu,Ms,Mv>
     {
         typedef typename Mu::float_type FT;
@@ -1043,7 +1043,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class Mu, class Ms, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Ms, class Mv>
     struct SVDecompose_Helper<-1,cs,rs,Mu,Ms,Mv>
     {
         typedef typename Mu::float_type FT;
@@ -1079,10 +1079,10 @@ namespace tmv {
             TMVAssert(V.colsize() == U.rowsize());
             TMVAssert(V.rowsize() == U.rowsize());
         }
-        const int cs = Mu::_colsize;
-        const int rs1 = Sizes<Mu::_rowsize,Ms::_size>::size;
-        const int rs2 = Sizes<Mv::_rowsize,Mv::_colsize>::size;
-        const int rs = Sizes<rs1,rs2>::size;
+        const ptrdiff_t cs = Mu::_colsize;
+        const ptrdiff_t rs1 = Sizes<Mu::_rowsize,Ms::_size>::size;
+        const ptrdiff_t rs2 = Sizes<Mv::_rowsize,Mv::_colsize>::size;
+        const ptrdiff_t rs = Sizes<rs1,rs2>::size;
         typedef typename Mu::cview_type Muv;
         typedef typename Ms::cview_type Msv;
         typedef typename Mv::cview_type Mvv;
@@ -1117,10 +1117,10 @@ namespace tmv {
             TMVAssert(V.colsize() == U.rowsize());
             TMVAssert(V.rowsize() == U.rowsize());
         }
-        const int cs = Mu::_colsize;
-        const int rs1 = Sizes<Mu::_rowsize,Ms::_size>::size;
-        const int rs2 = Sizes<Mv::_rowsize,Mv::_colsize>::size;
-        const int rs = Sizes<rs1,rs2>::size;
+        const ptrdiff_t cs = Mu::_colsize;
+        const ptrdiff_t rs1 = Sizes<Mu::_rowsize,Ms::_size>::size;
+        const ptrdiff_t rs2 = Sizes<Mv::_rowsize,Mv::_colsize>::size;
+        const ptrdiff_t rs = Sizes<rs1,rs2>::size;
         typedef typename Mu::cview_type Muv;
         typedef typename Ms::cview_type Msv;
         typedef typename Mv::cview_type Mvv;
@@ -1171,7 +1171,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<Mv>&>(V), StoreU);
     }
 
-    template <class T, int M, int N, int Siu, int Sju, int Au, int Ss, int As, int Siv, int Sjv, int Av>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Siu, ptrdiff_t Sju, int Au, ptrdiff_t Ss, int As, ptrdiff_t Siv, ptrdiff_t Sjv, int Av>
     inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
@@ -1187,7 +1187,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<Mv>&>(V), StoreU);
     }
 
-    template <class T, int N, int Au, int As, int Siv, int Sjv, int Av>
+    template <class T, ptrdiff_t N, int Au, int As, ptrdiff_t Siv, ptrdiff_t Sjv, int Av>
     inline void SV_Decompose(
         MatrixView<T,Au> U,
         DiagMatrixView<typename Traits<T>::real_type,As> S,
@@ -1203,7 +1203,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<Mv>&>(V), StoreU);
     }
 
-    template <class T, int N, int Au, int Ss, int As, int Av>
+    template <class T, ptrdiff_t N, int Au, ptrdiff_t Ss, int As, int Av>
     inline void SV_Decompose(
         MatrixView<T,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
@@ -1219,7 +1219,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<Mv>&>(V), StoreU);
     }
 
-    template <class T, int N, int Au, int Ss, int As, int Siv, int Sjv, int Av>
+    template <class T, ptrdiff_t N, int Au, ptrdiff_t Ss, int As, ptrdiff_t Siv, ptrdiff_t Sjv, int Av>
     inline void SV_Decompose(
         MatrixView<T,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
@@ -1235,7 +1235,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<Mv>&>(V), StoreU);
     }
 
-    template <class T, int M, int N, int Siu, int Sju, int Au, int As, int Av>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Siu, ptrdiff_t Sju, int Au, int As, int Av>
     inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         DiagMatrixView<typename Traits<T>::real_type,As> S,
@@ -1251,7 +1251,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<Mv>&>(V), StoreU);
     }
 
-    template <class T, int M, int N, int Siu, int Sju, int Au, int As, int Siv, int Sjv, int Av>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Siu, ptrdiff_t Sju, int Au, int As, ptrdiff_t Siv, ptrdiff_t Sjv, int Av>
     inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         DiagMatrixView<typename Traits<T>::real_type,As> S,
@@ -1267,7 +1267,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<Mv>&>(V), StoreU);
     }
 
-    template <class T, int M, int N, int Siu, int Sju, int Au, int Ss, int As, int Av>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Siu, ptrdiff_t Sju, int Au, ptrdiff_t Ss, int As, int Av>
     inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
@@ -1296,7 +1296,7 @@ namespace tmv {
             static_cast<BaseMatrix_Diag_Mutable<Ms>&>(S), StoreU);
     }
 
-    template <class T, int N, int Au, int Ss, int As>
+    template <class T, ptrdiff_t N, int Au, ptrdiff_t Ss, int As>
     inline void SV_Decompose(
         MatrixView<T,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
@@ -1310,7 +1310,7 @@ namespace tmv {
             static_cast<BaseMatrix_Diag_Mutable<Ms>&>(S), StoreU);
     }
 
-    template <class T, int M, int N, int Siu, int Sju, int Au, int As>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Siu, ptrdiff_t Sju, int Au, int As>
     inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         DiagMatrixView<typename Traits<T>::real_type,As> S, bool StoreU=true)
@@ -1323,7 +1323,7 @@ namespace tmv {
             static_cast<BaseMatrix_Diag_Mutable<Ms>&>(S), StoreU);
     }
 
-    template <class T, int M, int N, int Siu, int Sju, int Au, int Ss, int As>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Siu, ptrdiff_t Sju, int Au, ptrdiff_t Ss, int As>
     inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
@@ -1353,7 +1353,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<Mv>&>(V), StoreU);
     }
 
-    template <class Mu, class T, int N, int As, int Siv, int Sjv, int Av>
+    template <class Mu, class T, ptrdiff_t N, int As, ptrdiff_t Siv, ptrdiff_t Sjv, int Av>
     inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         DiagMatrixView<typename Traits<T>::real_type,As> S,
@@ -1367,7 +1367,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<Mv>&>(V), StoreU);
     }
 
-    template <class Mu, class T, int N, int Ss, int As, int Av>
+    template <class Mu, class T, ptrdiff_t N, ptrdiff_t Ss, int As, int Av>
     inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
@@ -1381,7 +1381,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<Mv>&>(V), StoreU);
     }
 
-    template <class Mu, class T, int N, int Ss, int As, int Siv, int Sjv, int Av>
+    template <class Mu, class T, ptrdiff_t N, ptrdiff_t Ss, int As, ptrdiff_t Siv, ptrdiff_t Sjv, int Av>
     inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
@@ -1405,7 +1405,7 @@ namespace tmv {
         SV_Decompose(U, static_cast<BaseMatrix_Diag_Mutable<Ms>&>(S), StoreU);
     }
 
-    template <class Mu, class T, int N, int Ss, int As>
+    template <class Mu, class T, ptrdiff_t N, ptrdiff_t Ss, int As>
     inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
@@ -1429,7 +1429,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<Mv>&>(V), StoreU);
     }
 
-    template <class T, int N, int Au, class Ms, int Siv, int Sjv, int Av>
+    template <class T, ptrdiff_t N, int Au, class Ms, ptrdiff_t Siv, ptrdiff_t Sjv, int Av>
     inline void SV_Decompose(
         MatrixView<T,Au> U, BaseMatrix_Diag_Mutable<Ms>& S,
         SmallMatrixView<T,N,N,Siv,Sjv,Av> V, bool StoreU=true)
@@ -1441,7 +1441,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<Mv>&>(V), StoreU);
     }
 
-    template <class T, int M, int N, int Siu, int Sju, int Au, class Ms, int Av>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Siu, ptrdiff_t Sju, int Au, class Ms, int Av>
     inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         BaseMatrix_Diag_Mutable<Ms>& S,
@@ -1454,7 +1454,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<Mv>&>(V), StoreU);
     }
 
-    template <class T, int M, int N, int Siu, int Sju, int Au, class Ms, int Siv, int Sjv, int Av>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Siu, ptrdiff_t Sju, int Au, class Ms, ptrdiff_t Siv, ptrdiff_t Sjv, int Av>
     inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         BaseMatrix_Diag_Mutable<Ms>& S,
@@ -1475,7 +1475,7 @@ namespace tmv {
         SV_Decompose(static_cast<BaseMatrix_Rec_Mutable<Mu>&>(U), S, StoreU);
     }
 
-    template <class T, int M, int N, int Siu, int Sju, int Au, class Ms>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Siu, ptrdiff_t Sju, int Au, class Ms>
     inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         BaseMatrix_Diag_Mutable<Ms>& S, bool StoreU=true)
@@ -1499,7 +1499,7 @@ namespace tmv {
             static_cast<BaseMatrix_Diag_Mutable<Ms>&>(S), V, StoreU);
     }
 
-    template <class T, int N, int Au, int Ss, int As, class Mv>
+    template <class T, ptrdiff_t N, int Au, ptrdiff_t Ss, int As, class Mv>
     inline void SV_Decompose(
         MatrixView<T,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
@@ -1513,7 +1513,7 @@ namespace tmv {
             static_cast<BaseMatrix_Diag_Mutable<Ms>&>(S), V, StoreU);
     }
 
-    template <class T, int M, int N, int Siu, int Sju, int Au, int As, class Mv>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Siu, ptrdiff_t Sju, int Au, int As, class Mv>
     inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         DiagMatrixView<typename Traits<T>::real_type,As> S,
@@ -1527,7 +1527,7 @@ namespace tmv {
             static_cast<BaseMatrix_Diag_Mutable<Ms>&>(S), V, StoreU);
     }
 
-    template <class T, int M, int N, int Siu, int Sju, int Au, int Ss, int As, class Mv>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Siu, ptrdiff_t Sju, int Au, ptrdiff_t Ss, int As, class Mv>
     inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,
@@ -1553,7 +1553,7 @@ namespace tmv {
             U, S, static_cast<BaseMatrix_Rec_Mutable<Mv>&>(V), StoreU);
     }
 
-    template <class Mu, class Ms, class T, int N, int Siv, int Sjv, int Av>
+    template <class Mu, class Ms, class T, ptrdiff_t N, ptrdiff_t Siv, ptrdiff_t Sjv, int Av>
     inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         BaseMatrix_Diag_Mutable<Ms>& S,
@@ -1575,7 +1575,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<Mu>&>(U), S, V, StoreU);
     }
 
-    template <class T, int M, int N, int Siu, int Sju, int Au, class Ms, class Mv>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Siu, ptrdiff_t Sju, int Au, class Ms, class Mv>
     inline void SV_Decompose(
         SmallMatrixView<T,M,N,Siu,Sju,Au> U, BaseMatrix_Diag_Mutable<Ms>& S,
         BaseMatrix_Rec_Mutable<Mv>& V, bool StoreU=true)
@@ -1598,7 +1598,7 @@ namespace tmv {
             U, static_cast<BaseMatrix_Diag_Mutable<Ms>&>(S), V, StoreU);
     }
 
-    template <class Mu, class T, int N, int Ss, int As, class Mv>
+    template <class Mu, class T, ptrdiff_t N, ptrdiff_t Ss, int As, class Mv>
     inline void SV_Decompose(
         BaseMatrix_Rec_Mutable<Mu>& U,
         SmallDiagMatrixView<typename Traits<T>::real_type,N,Ss,As> S,

@@ -29,16 +29,16 @@ namespace tmv {
     template <class T, class RT>
     void InstUnpackQ(MatrixView<T> Q, const ConstVectorView<RT>& beta);
 
-    template <int algo, int cs, int rs, class M, class V>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M, class V>
     struct UnpackQ_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0 or 1, or N == 0)
-    template <int cs, int rs, class M, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M, class V>
     struct UnpackQ_Helper<0,cs,rs,M,V>
     { static TMV_INLINE void call(M& A, const V& beta) {} };
 
     // algo 11: Non-block algorithm, loop over n
-    template <int cs, int rs, class M1, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V>
     struct UnpackQ_Helper<11,cs,rs,M1,V>
     {
         static void call(M1& Q, const V& beta)
@@ -49,9 +49,9 @@ namespace tmv {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int M = cs==Unknown ? Q.colsize() : cs;
-            const int N = rs==Unknown ? beta.size() : rs;
-            const int K = Q.rowsize();
+            const ptrdiff_t M = cs==Unknown ? Q.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? beta.size() : rs;
+            const ptrdiff_t K = Q.rowsize();
 #ifdef PRINTALGO_QR
             std::cout<<"UnpackQ algo 11: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -69,7 +69,7 @@ namespace tmv {
             if (N > 1) Q.colRange(0,N).upperTri().offDiag().setZero();
 
             IT bj = beta.rbegin(); // rbegin, so iterate from end.
-            for (int j=N-1;j>=0;--j,++bj) {
+            for (ptrdiff_t j=N-1;j>=0;--j,++bj) {
                 // Work on the lower part of column j
                 Mref Qjj = Q.ref(j,j);
                 Mc u = Q.col(j,j+1,M);
@@ -85,22 +85,22 @@ namespace tmv {
     };
 
     // algo 21: Block algorithm
-    template <int cs, int rs, class M1, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V>
     struct UnpackQ_Helper<21,cs,rs,M1,V>
     {
         typedef typename M1::value_type T;
         static void call(M1& Q, const V& beta)
         {
-            const int M = cs==Unknown ? Q.colsize() : cs;
-            const int N = rs==Unknown ? beta.size() : rs;
-            const int K = Q.rowsize();
+            const ptrdiff_t M = cs==Unknown ? Q.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? beta.size() : rs;
+            const ptrdiff_t K = Q.rowsize();
 #ifdef PRINTALGO_QR
             std::cout<<"UnpackQ algo 21: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            const int Nx = TMV_QR_BLOCKSIZE;
-            const int s1 = IntTraits2<Nx,rs>::min;
-            const int N1 = TMV_MIN(Nx,N);
+            const ptrdiff_t Nx = TMV_QR_BLOCKSIZE;
+            const ptrdiff_t s1 = IntTraits2<Nx,rs>::min;
+            const ptrdiff_t N1 = TMV_MIN(Nx,N);
             typedef typename MCopyHelper<T,UpperTri,s1,s1>::type Ztype;
             Ztype BaseZ = MatrixSizer<T>(N1,N1);
 
@@ -114,8 +114,8 @@ namespace tmv {
             M2 tempBase = MatrixSizer<T>(N1,K);
 
             Q.colRange(0,N).upperTri().setZero();
-            for(int j2=N;j2>0;) {
-                int j1 = j2 > Nx ? j2-Nx : 0;
+            for(ptrdiff_t j2=N;j2>0;) {
+                ptrdiff_t j1 = j2 > Nx ? j2-Nx : 0;
                 M1s Y = Q.subMatrix(j1,M,j1,j2);
                 Zs Z = BaseZ.subTriMatrix(0,j2-j1);
                 Vs b1 = beta.subVector(j1,j2);
@@ -132,16 +132,16 @@ namespace tmv {
     };
 
     // algo 27: Block algorithm -- single block
-    template <int cs, int rs, class M1, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V>
     struct UnpackQ_Helper<27,cs,rs,M1,V>
     {
         typedef typename M1::value_type T;
         static void call(M1& Q, const V& beta)
         {
-            const int N = rs==Unknown ? beta.size() : rs;
-            const int K = Q.rowsize();
+            const ptrdiff_t N = rs==Unknown ? beta.size() : rs;
+            const ptrdiff_t K = Q.rowsize();
 #ifdef PRINTALGO_QR
-            const int M = cs==Unknown ? Q.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? Q.colsize() : cs;
             std::cout<<"UnpackQ algo 27: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -150,7 +150,7 @@ namespace tmv {
 
             typedef typename M1::colrange_type M1c;
 
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             typedef typename MCopyHelper<T,Rec,rs,xx>::type M2;
             typedef typename M2::colrange_type M2c;
             typedef typename M2c::uppertri_type M2t;
@@ -171,14 +171,14 @@ namespace tmv {
     };
 
     // algo 31: Decide which algorithm to use from runtime size
-    template <int cs, int rs, class M1, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V>
     struct UnpackQ_Helper<31,cs,rs,M1,V>
     {
         typedef typename M1::value_type T;
         static void call(M1& Q, const V& beta)
         {
-            const int M = cs==Unknown ? Q.colsize() : cs;
-            const int N = rs==Unknown ? beta.size() : rs;
+            const ptrdiff_t M = cs==Unknown ? Q.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? beta.size() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"UnpackQ algo 31: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -187,7 +187,7 @@ namespace tmv {
                 (rs == Unknown || rs <= 128) ? 27 : 0;
             const int algo21 =
                 (rs == Unknown || rs > 128) ? 21 : 0;
-            const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
+            const ptrdiff_t l2cache = TMV_L2_CACHE*1024/sizeof(T);
 
             if (M*N <= l2cache)
                 UnpackQ_Helper<11,cs,rs,M1,V>::call(Q,beta);
@@ -199,7 +199,7 @@ namespace tmv {
     };
 
     // algo 81: Copy to colmajor
-    template <int cs, int rs, class M, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M, class V>
     struct UnpackQ_Helper<81,cs,rs,M,V>
     {
         static inline void call(M& Q, const V& beta)
@@ -217,7 +217,7 @@ namespace tmv {
     };
 
     // algo 90: call InstUnpackQ
-    template <int cs, int rs, class M, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M, class V>
     struct UnpackQ_Helper<90,cs,rs,M,V>
     {
         static TMV_INLINE void call(M& Q, const V& beta)
@@ -225,7 +225,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, class M, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M, class V>
     struct UnpackQ_Helper<97,cs,rs,M,V>
     {
         static TMV_INLINE void call(M& Q, const V& beta)
@@ -237,15 +237,15 @@ namespace tmv {
     };
 
     // algo -4: No copies or branches
-    template <int cs, int rs, class M1, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V>
     struct UnpackQ_Helper<-4,cs,rs,M1,V>
     {
         typedef typename M1::value_type T;
         static TMV_INLINE void call(M1& Q, const V& beta)
         {
             typedef typename M1::value_type T;
-            const int csrs = IntTraits2<cs,rs>::prod;
-            const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
+            const ptrdiff_t csrs = IntTraits2<cs,rs>::prod;
+            const ptrdiff_t l2cache = TMV_L2_CACHE*1024/sizeof(T);
             const int algo = 
                 cs == 0 || rs == 0 || cs == 1 ? 0 :
                 TMV_OPT == 0 ? 11 :
@@ -267,7 +267,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V>
     struct UnpackQ_Helper<-3,cs,rs,M1,V>
     {
         static TMV_INLINE void call(M1& Q, const V& beta)
@@ -278,8 +278,8 @@ namespace tmv {
                 ( TMV_OPT >= 2 && !M1::_colmajor ) ? 81 :
                 -4 );
 #ifdef PRINTALGO_QR
-            const int M = cs==Unknown ? Q.colsize() : cs;
-            const int N = rs==Unknown ? beta.size() : rs;
+            const ptrdiff_t M = cs==Unknown ? Q.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? beta.size() : rs;
             std::cout<<"UnpackQ algo -3: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -291,7 +291,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class M, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M, class V>
     struct UnpackQ_Helper<-2,cs,rs,M,V>
     {
         static TMV_INLINE void call(M& Q, const V& beta)
@@ -310,7 +310,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class M, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M, class V>
     struct UnpackQ_Helper<-1,cs,rs,M,V>
     {
         static TMV_INLINE void call(M& Q, const V& beta)
@@ -329,8 +329,8 @@ namespace tmv {
         TMVAssert(Q.rowsize() == beta.size() ||
                   Q.rowsize() == Q.colsize());
 
-        const int cs = M::_colsize;
-        const int rs = V::_size;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = V::_size;
         typedef typename M::cview_type Mv;
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_REF(M,Mv) Qv = Q.cView();
@@ -350,8 +350,8 @@ namespace tmv {
         TMVAssert(Q.rowsize() == beta.size() ||
                   Q.rowsize() == Q.colsize());
 
-        const int cs = M::_colsize;
-        const int rs = V::_size;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = V::_size;
         typedef typename M::cview_type Mv;
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_REF(M,Mv) Qv = Q.cView();

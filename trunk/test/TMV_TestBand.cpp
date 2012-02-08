@@ -201,9 +201,9 @@ static void TestBasicBandMatrix_2()
            T(-1), T(1),  T(3),
                T(-2), T(0),  T(2) 
     };
+
     std::vector<T> qvecrm(11);
     for(int i=0;i<11;i++) qvecrm[i] = qarrm[i];
-
     std::vector<T> qveccm(11);
     for(int i=0;i<11;i++) qveccm[i] = qarcm[i];
     std::vector<T> qvecdm(11);
@@ -490,18 +490,18 @@ static void TestBasicBandMatrix_IO()
         }
     }
     m(3,1) = T(1.e-30);
-    cm(3,1) = CT(1.e-30,1.e-30);
+    cm(3,1) = CT(T(1.e-30),T(1.e-30));
     m(5,6) = T(9.e-3);
-    cm(5,6) = CT(9.e-3,9.e-3);
+    cm(5,6) = CT(T(9.e-3),T(9.e-3));
     m(7,4) = T(0.123456789);
-    cm(7,4) = CT(3.123456789,600.987654321);
+    cm(7,4) = CT(T(3.123456789),T(600.987654321));
 
     // First check clipping function...
     tmv::BandMatrix<T> m2 = m;
     tmv::BandMatrix<CT> cm2 = cm;
     if (!std::numeric_limits<T>::is_integer) {
-        m2.clip(1.e-2);
-        cm2.clip(1.e-2);
+        m2.clip(T(1.e-2));
+        cm2.clip(T(1.e-2));
     }
     tmv::BandMatrix<T> m3 = m;
     tmv::BandMatrix<CT> cm3 = cm;
@@ -529,14 +529,14 @@ static void TestBasicBandMatrix_IO()
 
     // When using (the default) prec(6), these will be the values read in.
     m(7,4) = T(0.123457);
-    cm(7,4) = CT(3.12346,600.988);
+    cm(7,4) = CT(T(3.12346),T(600.988));
 
     // When using prec(12), the full correct values will be read in. (m2,cm2)
 
     // When using prec(4), these will be the values read in.
     m3(7,4) = T(0.1235);
     if (std::numeric_limits<T>::is_integer) cm3(7,4) = CT(3,600);
-    else cm3(7,4) = CT(3.123,601.0);
+    else cm3(7,4) = CT(T(3.123),T(601.0));
 
     // Read them back in
     tmv::BandMatrix<T,tmv::RowMajor> xm1(M,N,nlo,nhi);

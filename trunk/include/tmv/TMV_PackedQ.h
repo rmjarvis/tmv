@@ -127,16 +127,16 @@ namespace tmv {
         VectorView<T2> v2);
 
     // cs,rs refer to M1.  xs is the other dimension of M2
-    template <int algo, bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    template <int algo, bool div, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0 or N == 0 or K == 0)
-    template <bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    template <bool div, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<0,div,cs,rs,xs,M1,V1,M2>
     { static TMV_INLINE void call(const M1& , const V1& , M2& ) {} };
 
     // algo 11: Normal case
-    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<11,false,cs,rs,xs,M1,V1,M2>
     {
         static void call(const M1& Q, const V1& beta, M2& m2)
@@ -154,8 +154,8 @@ namespace tmv {
 #endif
             typedef typename M1::real_type RT;
 
-            const int M = cs==Unknown ? Q.colsize() : cs;
-            const int N = rs==Unknown ? Q.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? Q.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? Q.rowsize() : rs;
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::row_type M2r;
             typedef typename M2::rowrange_type M2rr;
@@ -164,7 +164,7 @@ namespace tmv {
             typedef typename VCopyHelper<T2,xs>::type V3;
             V3 temp = VectorSizer<T2>(m2.rowsize());
 
-            for(int j=N-1;j>=0;--j) if (beta(j) != RT(0)) {
+            for(ptrdiff_t j=N-1;j>=0;--j) if (beta(j) != RT(0)) {
                 M1c u = Q.col(j,j+1,M);
                 M2r m2a = m2.row(j);
                 M2rr m2b = m2.rowRange(j+1,M);
@@ -181,7 +181,7 @@ namespace tmv {
             }
         }
     };
-    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<11,true,cs,rs,xs,M1,V1,M2>
     {
         static void call(const M1& Q, const V1& beta, M2& m2)
@@ -199,8 +199,8 @@ namespace tmv {
 #endif
             typedef typename M1::real_type RT;
 
-            const int M = cs==Unknown ? Q.colsize() : cs;
-            const int N = rs==Unknown ? Q.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? Q.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? Q.rowsize() : rs;
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::row_type M2r;
             typedef typename M2::rowrange_type M2rr;
@@ -209,7 +209,7 @@ namespace tmv {
             typedef typename VCopyHelper<T2,xs>::type V3;
             V3 temp = VectorSizer<T2>(m2.rowsize());
 
-            for(int j=0;j<N;++j) if (beta(j) != RT(0)) {
+            for(ptrdiff_t j=0;j<N;++j) if (beta(j) != RT(0)) {
                 M1c u = Q.col(j,j+1,M);
                 M2r m2a = m2.row(j);
                 M2rr m2b = m2.rowRange(j+1,M);
@@ -228,13 +228,13 @@ namespace tmv {
     };
 
     // algo 13: Construct Q directly and multiply.
-    template <bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    template <bool div, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<13,div,cs,rs,xs,M1,V1,M2>
     {
         static void call(const M1& Q, const V1& beta, M2& m2)
         {
-            const int M = cs==Unknown ? Q.colsize() : cs;
-            const int N = rs==Unknown ? Q.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? Q.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? Q.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"PackedQ_MultEq algo 13: div,cs,rs,xs = "<<
                 true<<','<<cs<<','<<rs<<','<<xs<<std::endl;
@@ -258,7 +258,7 @@ namespace tmv {
     };
 
     // algo 21: Block algorithm
-    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<21,false,cs,rs,xs,M1,V1,M2>
     {
         static void call(const M1& Q, const V1& beta, M2& m2)
@@ -275,11 +275,11 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
 
-            const int M = cs==Unknown ? Q.colsize() : cs;
-            const int N = rs==Unknown ? Q.rowsize() : rs;
-            const int Nb = TMV_QR_BLOCKSIZE;
-            const int s1 = IntTraits2<Nb,rs>::min;
-            const int N1 = TMV_MIN(Nb,N);
+            const ptrdiff_t M = cs==Unknown ? Q.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? Q.rowsize() : rs;
+            const ptrdiff_t Nb = TMV_QR_BLOCKSIZE;
+            const ptrdiff_t s1 = IntTraits2<Nb,rs>::min;
+            const ptrdiff_t N1 = TMV_MIN(Nb,N);
             typedef typename MCopyHelper<T1,UpperTri,s1,s1>::type Ztype;
             Ztype BaseZ(MatrixSizer<T1>(N1,N1));
 
@@ -292,8 +292,8 @@ namespace tmv {
             typedef typename V1::const_subvector_type V1s;
             typedef typename M2::rowrange_type M2r;
 
-            for(int j2=N;j2>0;) {
-                int j1 = j2 > Nb ? j2-Nb : 0;
+            for(ptrdiff_t j2=N;j2>0;) {
+                ptrdiff_t j1 = j2 > Nb ? j2-Nb : 0;
                 M1s Y = Q.subMatrix(j1,M,j1,j2);
                 Zs Z = BaseZ.subTriMatrix(0,j2-j1);
                 V1s b1 = beta.subVector(j1,j2);
@@ -312,7 +312,7 @@ namespace tmv {
 #endif
         }
     };
-    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<21,true,cs,rs,xs,M1,V1,M2>
     {
         static void call(const M1& Q, const V1& beta, M2& m2)
@@ -327,11 +327,11 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
 
-            const int M = cs==Unknown ? Q.colsize() : cs;
-            const int N = rs==Unknown ? Q.rowsize() : rs;
-            const int Nb = TMV_QR_BLOCKSIZE;
-            const int s1 = IntTraits2<Nb,rs>::min;
-            const int N1 = TMV_MIN(Nb,N);
+            const ptrdiff_t M = cs==Unknown ? Q.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? Q.rowsize() : rs;
+            const ptrdiff_t Nb = TMV_QR_BLOCKSIZE;
+            const ptrdiff_t s1 = IntTraits2<Nb,rs>::min;
+            const ptrdiff_t N1 = TMV_MIN(Nb,N);
             typedef typename MCopyHelper<T1,UpperTri,s1,s1>::type Ztype;
             Ztype BaseZ(MatrixSizer<T1>(N1,N1));
 
@@ -344,8 +344,8 @@ namespace tmv {
             typedef typename V1::const_subvector_type V1s;
             typedef typename M2::rowrange_type M2r;
 
-            for(int j1=0;j1<N;) {
-                int j2 = TMV_MIN(j1+Nb,N);
+            for(ptrdiff_t j1=0;j1<N;) {
+                ptrdiff_t j2 = TMV_MIN(j1+Nb,N);
                 M1s Y = Q.subMatrix(j1,M,j1,j2);
                 Zs Z = BaseZ.subTriMatrix(0,j2-j1);
                 V1s b1 = beta.subVector(j1,j2);
@@ -360,7 +360,7 @@ namespace tmv {
     };
 
     // algo 27: Block algorithm -- single block
-    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<27,false,cs,rs,xs,M1,V1,M2>
     {
         static void call(const M1& Q, const V1& beta, M2& m2)
@@ -375,7 +375,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
 
-            const int N = rs==Unknown ? Q.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? Q.rowsize() : rs;
 
             typedef typename MCopyHelper<T1,UpperTri,rs,rs>::type Ztype;
             Ztype Z(MatrixSizer<T1>(N,N));
@@ -387,7 +387,7 @@ namespace tmv {
             BlockHouseholderLMult(Q,Z,m2,temp);
         }
     };
-    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<27,true,cs,rs,xs,M1,V1,M2>
     {
         static void call(const M1& Q, const V1& beta, M2& m2)
@@ -402,7 +402,7 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
 
-            const int N = rs==Unknown ? Q.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? Q.rowsize() : rs;
 
             typedef typename MCopyHelper<T1,UpperTri,rs,rs>::type Ztype;
             Ztype Z(MatrixSizer<T1>(N,N));
@@ -416,17 +416,17 @@ namespace tmv {
     };
 
     // algo 31: Decide which algorithm to use from runtime size
-    template <bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    template <bool div, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<31,div,cs,rs,xs,M1,V1,M2>
     {
         static void call(const M1& Q, const V1& beta, M2& m2)
         {
-            const int M = cs==Unknown ? Q.colsize() : cs;
-            const int N = rs==Unknown ? Q.rowsize() : rs;
-            const int K = xs==Unknown ? m2.rowsize() : xs;
+            const ptrdiff_t M = cs==Unknown ? Q.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? Q.rowsize() : rs;
+            const ptrdiff_t K = xs==Unknown ? m2.rowsize() : xs;
             typedef typename M1::value_type T;
-            const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
-            const int csrs = IntTraits2<cs,rs>::prod;
+            const ptrdiff_t l2cache = TMV_L2_CACHE*1024/sizeof(T);
+            const ptrdiff_t csrs = IntTraits2<cs,rs>::prod;
             const int algo27 =
                 csrs != Unknown && csrs <= l2cache ? 0 :
                 (rs == Unknown || rs <= 128) ? 27 : 0;
@@ -485,7 +485,7 @@ namespace tmv {
 
     // algo 32: Decide which algorithm to use from runtime size,
     // all sizes known, csrs <= l2cache, cs >= 16
-    template <bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    template <bool div, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<32,div,cs,rs,xs,M1,V1,M2>
     {
         static void call(const M1& Q, const V1& beta, M2& m2)
@@ -509,13 +509,13 @@ namespace tmv {
     };
 
     // algo 90: call InstPackedQ_MultEq
-    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<90,false,cs,rs,xs,M1,V1,M2>
     {
         static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
         { InstPackedQ_MultEq(Q.xView(),beta.xView(),m2.xView()); }
     };
-    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<90,true,cs,rs,xs,M1,V1,M2>
     {
         static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
@@ -523,13 +523,13 @@ namespace tmv {
     };
 
     // algo 91: call InstPackedQ_MultEq -- M2 is a vector
-    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<91,false,cs,rs,xs,M1,V1,M2>
     {
         static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
         { InstPackedQ_MultEq(Q.xView(),beta.xView(),m2.col(0).xView()); }
     };
-    template <int cs, int rs, int xs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<91,true,cs,rs,xs,M1,V1,M2>
     {
         static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
@@ -537,7 +537,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    template <bool div, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<97,div,cs,rs,xs,M1,V1,M2>
     {
         static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
@@ -551,14 +551,14 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    template <bool div, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<-3,div,cs,rs,xs,M1,V1,M2>
     {
         static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
         {
             typedef typename M2::value_type T;
-            const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
-            const int csrs = IntTraits2<cs,rs>::prod;
+            const ptrdiff_t l2cache = TMV_L2_CACHE*1024/sizeof(T);
+            const ptrdiff_t csrs = IntTraits2<cs,rs>::prod;
             const int algo =
                 cs == 0 || rs == 0 || cs == 1 ? 0 :
                 TMV_OPT == 0 ? 11 :
@@ -587,7 +587,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    template <bool div, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<-2,div,cs,rs,xs,M1,V1,M2>
     {
         static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
@@ -619,7 +619,7 @@ namespace tmv {
         }
     };
 
-    template <bool div, int cs, int rs, int xs, class M1, class V1, class M2>
+    template <bool div, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class M1, class V1, class M2>
     struct PackedQ_MultEq_Helper<-1,div,cs,rs,xs,M1,V1,M2>
     {
         static TMV_INLINE void call(const M1& Q, const V1& beta, M2& m2)
@@ -636,9 +636,9 @@ namespace tmv {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
         TMVAssert(Q.colsize() == m2.colsize());
-        const int cs = Sizes<M2::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M1::_rowsize,V1::_size>::size;
-        const int xs = M2::_rowsize;
+        const ptrdiff_t cs = Sizes<M2::_colsize,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_rowsize,V1::_size>::size;
+        const ptrdiff_t xs = M2::_rowsize;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::cview_type M2v;
@@ -658,9 +658,9 @@ namespace tmv {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
         TMVAssert(Q.colsize() == m2.colsize());
-        const int cs = Sizes<M2::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M1::_rowsize,V1::_size>::size;
-        const int xs = M2::_rowsize;
+        const ptrdiff_t cs = Sizes<M2::_colsize,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_rowsize,V1::_size>::size;
+        const ptrdiff_t xs = M2::_rowsize;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::cview_type M2v;
@@ -680,14 +680,14 @@ namespace tmv {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
         TMVAssert(Q.colsize() == v2.size());
-        const int cs = Sizes<V2::_size,M1::_colsize>::size;
-        const int rs = Sizes<M1::_rowsize,V1::_size>::size;
+        const ptrdiff_t cs = Sizes<V2::_size,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_rowsize,V1::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::value_type T2;
-        const int xs = 1;
-        const int s2 = V2::_step;
-        const int xx = Unknown;
+        const ptrdiff_t xs = 1;
+        const ptrdiff_t s2 = V2::_step;
+        const ptrdiff_t xx = Unknown;
         const int c = V2::_conj ? Conj : NonConj;
         typedef typename MViewHelper<T2,Rec,cs,xs,s2,xx,c>::type V2v;
         TMV_MAYBE_CREF(M1,M1v) Qv = Q.cView();
@@ -706,14 +706,14 @@ namespace tmv {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
         TMVAssert(Q.colsize() == v2.size());
-        const int cs = Sizes<V2::_size,M1::_colsize>::size;
-        const int rs = Sizes<M1::_rowsize,V1::_size>::size;
+        const ptrdiff_t cs = Sizes<V2::_size,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_rowsize,V1::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::value_type T2;
-        const int xs = 1;
-        const int s2 = V2::_step;
-        const int xx = Unknown;
+        const ptrdiff_t xs = 1;
+        const ptrdiff_t s2 = V2::_step;
+        const ptrdiff_t xx = Unknown;
         const int c = V2::_conj ? Conj : NonConj;
         typedef typename MViewHelper<T2,Rec,cs,xs,s2,xx,c>::type V2v;
         TMV_MAYBE_CREF(M1,M1v) Qv = Q.cView();
@@ -732,9 +732,9 @@ namespace tmv {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
         TMVAssert(Q.colsize() == m2.colsize());
-        const int cs = Sizes<M2::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M1::_rowsize,V1::_size>::size;
-        const int xs = M2::_rowsize;
+        const ptrdiff_t cs = Sizes<M2::_colsize,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_rowsize,V1::_size>::size;
+        const ptrdiff_t xs = M2::_rowsize;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::cview_type M2v;
@@ -754,9 +754,9 @@ namespace tmv {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
         TMVAssert(Q.colsize() == m2.colsize());
-        const int cs = Sizes<M2::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M1::_rowsize,V1::_size>::size;
-        const int xs = M2::_rowsize;
+        const ptrdiff_t cs = Sizes<M2::_colsize,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_rowsize,V1::_size>::size;
+        const ptrdiff_t xs = M2::_rowsize;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::cview_type M2v;
@@ -776,14 +776,14 @@ namespace tmv {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
         TMVAssert(Q.colsize() == v2.size());
-        const int cs = Sizes<V2::_size,M1::_colsize>::size;
-        const int rs = Sizes<M1::_rowsize,V1::_size>::size;
+        const ptrdiff_t cs = Sizes<V2::_size,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_rowsize,V1::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::value_type T2;
-        const int xs = 1;
-        const int s2 = V2::_step;
-        const int xx = Unknown;
+        const ptrdiff_t xs = 1;
+        const ptrdiff_t s2 = V2::_step;
+        const ptrdiff_t xx = Unknown;
         const int c = V2::_conj ? Conj : NonConj;
         typedef typename MViewHelper<T2,Rec,cs,xs,s2,xx,c>::type V2v;
         TMV_MAYBE_CREF(M1,M1v) Qv = Q.cView();
@@ -802,14 +802,14 @@ namespace tmv {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == beta.size());
         TMVAssert(Q.colsize() == v2.size());
-        const int cs = Sizes<V2::_size,M1::_colsize>::size;
-        const int rs = Sizes<M1::_rowsize,V1::_size>::size;
+        const ptrdiff_t cs = Sizes<V2::_size,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_rowsize,V1::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::value_type T2;
-        const int xs = 1;
-        const int s2 = V2::_step;
-        const int xx = Unknown;
+        const ptrdiff_t xs = 1;
+        const ptrdiff_t s2 = V2::_step;
+        const ptrdiff_t xx = Unknown;
         const int c = V2::_conj ? Conj : NonConj;
         typedef typename MViewHelper<T2,Rec,cs,xs,s2,xx,c>::type V2v;
         TMV_MAYBE_CREF(M1,M1v) Qv = Q.cView();
@@ -881,8 +881,8 @@ namespace tmv {
         int det() 
         { 
             int d=1;
-            const int n = beta.size();
-            for(int i=0; i<n; ++i) if (beta!=RT(0)) d = -d;
+            const ptrdiff_t n = beta.size();
+            for(ptrdiff_t i=0; i<n; ++i) if (beta!=RT(0)) d = -d;
             return d;
         }
 
@@ -916,10 +916,10 @@ namespace tmv {
         // Auxilliary functions
         //
 
-        TMV_INLINE int colsize() const { return Q.colsize(); }
-        TMV_INLINE int rowsize() const { return Q.rowsize(); }
-        TMV_INLINE int nlo() const { return TMV_MAX(colsize()-1,0); }
-        TMV_INLINE int nhi() const { return TMV_MAX(rowsize()-1,0); }
+        TMV_INLINE ptrdiff_t colsize() const { return Q.colsize(); }
+        TMV_INLINE ptrdiff_t rowsize() const { return Q.rowsize(); }
+        TMV_INLINE ptrdiff_t nlo() const { return TMV_MAX(colsize()-1,ptrdiff_t(0)); }
+        TMV_INLINE ptrdiff_t nhi() const { return TMV_MAX(rowsize()-1,ptrdiff_t(0)); }
 
     private : 
 
@@ -1133,8 +1133,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type T12;
-            const int cs = M1::_colsize;
-            const int rs = M1::_rowsize;
+            const ptrdiff_t cs = M1::_colsize;
+            const ptrdiff_t rs = M1::_rowsize;
             const int A = M1::_rowmajor ? ColMajor : RowMajor;
             typename MCopyHelper<T12,Rec,rs,cs,A>::type m1a = m1.adjoint();
             PackedQ_LDivEq(m2.getQ(),m2.getBeta(),m1a);
@@ -1176,8 +1176,8 @@ namespace tmv {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type T12;
-            const int cs = M1::_colsize;
-            const int rs = M1::_rowsize;
+            const ptrdiff_t cs = M1::_colsize;
+            const ptrdiff_t rs = M1::_rowsize;
             const int A = M1::_rowmajor ? RowMajor : ColMajor;
             typename MCopyHelper<T12,Rec,cs,rs,A>::type m1c = m1;
             PackedQ_LDivEq(m2.getQ(),m2.getBeta(),m1c);

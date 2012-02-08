@@ -42,7 +42,7 @@
 
 namespace tmv {
 
-    template <class T, int N> 
+    template <class T, ptrdiff_t N> 
     class SmallVectorComposite : public VectorComposite<T>
     {
     public:
@@ -67,7 +67,7 @@ namespace tmv {
     // Vector * / Scalar
     //
 
-    template <class T, class T1, int N, int A> 
+    template <class T, class T1, ptrdiff_t N, int A> 
     class ProdXv : public SmallVectorComposite<T,N> 
     {
     public:
@@ -107,42 +107,42 @@ namespace tmv {
         const SmallVector<T1,N,A>& v;
     };
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline SmallVector<T,N,A>& operator*=(SmallVector<T,N,A>& v1, T x2)
     { MultXV<N>(x2,v1.ptr()); return v1; }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline SmallVector<CT,N,A>& operator*=(SmallVector<CT,N,A>& v1, T x2)
     { MultXV<N>(x2,v1.ptr()); return v1; }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline SmallVector<CT,N,A>& operator*=(SmallVector<CT,N,A>& v1, CCT x2)
     { MultXV<N>(CT(x2),v1.ptr()); return v1; }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline SmallVector<CT,N,A>& operator*=(SmallVector<CT,N,A>& v1, VCT x2)
     { MultXV<N>(CT(x2),v1.ptr()); return v1; }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline SmallVector<T,N,A>& operator/=(SmallVector<T,N,A>& v1, T x2)
     { MultXV<N>(TMV_InverseOf(x2),v1.ptr()); return v1; }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline SmallVector<CT,N,A>& operator/=(SmallVector<CT,N,A>& v1, T x2)
     { MultXV<N>(TMV_InverseOf(x2),v1.ptr()); return v1; }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline SmallVector<CT,N,A>& operator/=(SmallVector<CT,N,A>& v1, CCT x2)
     { MultXV<N>(TMV_InverseOf(CT(x2)),v1.ptr()); return v1; }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline SmallVector<CT,N,A>& operator/=(SmallVector<CT,N,A>& v1, VCT x2)
     { MultXV<N>(TMV_InverseOf(CT(x2)),v1.ptr()); return v1; }
 
 #define GENMATRIX SmallVector
 #define PRODXM ProdXv
 #define X ,N,A
-#define Y ,int N, int A
+#define Y ,ptrdiff_t N, int A
 #define GETM .getV()
 #include "tmv/TMV_AuxProdXM.h"
 #undef GENMATRIX
@@ -152,7 +152,7 @@ namespace tmv {
     // Vector + Vector
     //
 
-    template <class T, class T1, class T2, int N, int A1, int A2> 
+    template <class T, class T1, class T2, ptrdiff_t N, int A1, int A2> 
     class Sumvv_1_1 : public SmallVectorComposite<T,N> 
     {
     public:
@@ -196,7 +196,7 @@ namespace tmv {
         const SmallVector<T2,N,A2>& v2;
     };
 
-    template <class T, class T1, class T2, int N, int A1, int A2> 
+    template <class T, class T1, class T2, ptrdiff_t N, int A1, int A2> 
     class Sumvv_1_m1 : public SmallVectorComposite<T,N> 
     {
     public:
@@ -240,7 +240,7 @@ namespace tmv {
         const SmallVector<T2,N,A2>& v2;
     };
 
-    template <class T, class T1, class T2, int N, int A1, int A2> 
+    template <class T, class T1, class T2, ptrdiff_t N, int A1, int A2> 
     class Sumvv_1_x : public SmallVectorComposite<T,N> 
     {
     public:
@@ -286,7 +286,7 @@ namespace tmv {
         const SmallVector<T2,N,A2>& v2;
     };
 
-    template <class T, class T1, class T2, int N, int A1, int A2> 
+    template <class T, class T1, class T2, ptrdiff_t N, int A1, int A2> 
     class Sumvv_x_1 : public SmallVectorComposite<T,N> 
     {
     public:
@@ -332,7 +332,7 @@ namespace tmv {
         const SmallVector<T2,N,A2>& v2;
     };
 
-    template <class T, class T1, class T2, int N, int A1, int A2> 
+    template <class T, class T1, class T2, ptrdiff_t N, int A1, int A2> 
     class Sumvv_x_m1 : public SmallVectorComposite<T,N> 
     {
     public:
@@ -392,7 +392,7 @@ namespace tmv {
         const SmallVector<T2,N,A2>& v2;
     };
 
-    template <class T, class T1, class T2, int N, int A1, int A2> 
+    template <class T, class T1, class T2, ptrdiff_t N, int A1, int A2> 
     class Sumvv : public SmallVectorComposite<T,N> 
     {
     public:
@@ -453,7 +453,7 @@ namespace tmv {
         const SmallVector<T2,N,A2>& v2;
     };
 
-    template <class T, class T1, class T2, int N, int A> 
+    template <class T, class T1, class T2, ptrdiff_t N, int A> 
     class SumVv : public VectorComposite<T> 
     {
     public:
@@ -519,7 +519,7 @@ namespace tmv {
         const SmallVector<T2,N,A>& v2;
     };
 
-    template <class T, class T1, class T2, int N, int A> 
+    template <class T, class T1, class T2, ptrdiff_t N, int A> 
     class SumvV : public VectorComposite<T> 
     {
     public:
@@ -586,51 +586,51 @@ namespace tmv {
     };
 
     // v+=v
-    template <class T, int N, int A1, int A2> 
+    template <class T, ptrdiff_t N, int A1, int A2> 
     inline SmallVector<T,N,A1>& operator+=(
         SmallVector<T,N,A1>& v1, const SmallVector<T,N,A2>& v2) 
     { AddVV_1<N>(v2.cptr(),v1.ptr()); return v1; }
 
-    template <class T, int N, int A1, int A2> 
+    template <class T, ptrdiff_t N, int A1, int A2> 
     inline SmallVector<CT,N,A1>& operator+=(
         SmallVector<CT,N,A1>& v1, const SmallVector<T,N,A2>& v2) 
     { AddVV_1<N>(v2.cptr(),v1.ptr()); return v1; }
 
     // v-=v
-    template <class T, int N, int A1, int A2> 
+    template <class T, ptrdiff_t N, int A1, int A2> 
     inline SmallVector<T,N,A1>& operator-=(
         SmallVector<T,N,A1>& v1, const SmallVector<T,N,A2>& v2)
     { AddVV_m1<N>(v2.cptr(),v1.ptr()); return v1; }
 
-    template <class T, int N, int A1, int A2> 
+    template <class T, ptrdiff_t N, int A1, int A2> 
     inline SmallVector<CT,N,A1>& operator-=(
         SmallVector<CT,N,A1>& v1, const SmallVector<T,N,A2>& v2) 
     { AddVV_m1<N>(v2.cptr(),v1.ptr()); return v1; }
 
     // v+=(x*v)
-    template <class T, class T2, int N, int A1, int A2> 
+    template <class T, class T2, ptrdiff_t N, int A1, int A2> 
     inline SmallVector<T,N,A1>& operator+=(
         SmallVector<T,N,A1>& v, const ProdXv<T,T2,N,A2>& v2)
     { AddVV<N>(v2.getX(),v2.getV().cptr(),v.ptr()); return v; }
 
-    template <class T, int N, int A1, int A2> 
+    template <class T, ptrdiff_t N, int A1, int A2> 
     inline SmallVector<CT,N,A1>& operator+=(
         SmallVector<CT,N,A1>& v, const ProdXv<T,T,N,A2>& v2)
     { AddVV<N>(v2.getX(),v2.getV().cptr(),v.ptr()); return v; }
 
     // v-=(x*v)
-    template <class T, class T2, int N, int A1, int A2> 
+    template <class T, class T2, ptrdiff_t N, int A1, int A2> 
     inline SmallVector<T,N,A1>& operator-=(
         SmallVector<T,N,A1>& v, const ProdXv<T,T2,N,A2>& v2)
     { AddVV<N>(-v2.getX(),v2.getV().cptr(),v.ptr()); return v; }
 
-    template <class T, int N, int A1, int A2> 
+    template <class T, ptrdiff_t N, int A1, int A2> 
     inline SmallVector<CT,N,A1>& operator-=(
         SmallVector<CT,N,A1>& v, const ProdXv<T,T,N,A2>& v2)
     { AddVV<N>(-v2.getX(),v2.getV().cptr(),v.ptr()); return v; }
 
     // Mix with Vector
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline SmallVector<T,N,A>& operator+=(
         SmallVector<T,N,A>& v1, const GenVector<T>& v2) 
     {
@@ -642,7 +642,7 @@ namespace tmv {
         return v1; 
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline SmallVector<CT,N,A>& operator+=(
         SmallVector<CT,N,A>& v1, const GenVector<T>& v2) 
     {
@@ -654,7 +654,7 @@ namespace tmv {
         return v1; 
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline SmallVector<T,N,A>& operator-=(
         SmallVector<T,N,A>& v1, const GenVector<T>& v2) 
     {
@@ -666,7 +666,7 @@ namespace tmv {
         return v1; 
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline SmallVector<CT,N,A>& operator-=(
         SmallVector<CT,N,A>& v1, const GenVector<T>& v2) 
     {
@@ -681,7 +681,7 @@ namespace tmv {
     template <class T, class Tv> 
     class ProdXV;
 
-    template <class T, class T2, int N, int A> 
+    template <class T, class T2, ptrdiff_t N, int A> 
     inline SmallVector<T,N,A>& operator+=(
         SmallVector<T,N,A>& v, const ProdXV<T,T2>& v2) 
     {
@@ -693,7 +693,7 @@ namespace tmv {
         return v; 
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline SmallVector<CT,N,A>& operator+=(
         SmallVector<CT,N,A>& v, const ProdXV<T,T>& v2) 
     {
@@ -705,7 +705,7 @@ namespace tmv {
         return v; 
     }
 
-    template <class T, class T2, int N, int A> 
+    template <class T, class T2, ptrdiff_t N, int A> 
     inline SmallVector<T,N,A>& operator-=(
         SmallVector<T,N,A>& v, const ProdXV<T,T2>& v2) 
     {
@@ -717,7 +717,7 @@ namespace tmv {
         return v; 
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline SmallVector<CT,N,A>& operator-=(
         SmallVector<CT,N,A>& v, const ProdXV<T,T>& v2) 
     {
@@ -729,7 +729,7 @@ namespace tmv {
         return v; 
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline VectorView<T> operator+=(
         VectorView<T> v1, const SmallVector<T,N,A>& v2) 
     { 
@@ -740,7 +740,7 @@ namespace tmv {
         return v1; 
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline VectorView<CT> operator+=(
         VectorView<CT> v1, const SmallVector<T,N,A>& v2) 
     {
@@ -752,7 +752,7 @@ namespace tmv {
     }
 
     // v-=v
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline VectorView<T> operator-=(
         VectorView<T> v1, const SmallVector<T,N,A>& v2)
     { 
@@ -763,7 +763,7 @@ namespace tmv {
         return v1;
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline VectorView<CT> operator-=(
         VectorView<CT> v1, const SmallVector<T,N,A>& v2) 
     { 
@@ -775,7 +775,7 @@ namespace tmv {
     }
 
     // v+=(x*v)
-    template <class T, class T2, int N, int A> 
+    template <class T, class T2, ptrdiff_t N, int A> 
     inline VectorView<T> operator+=(
         VectorView<T> v, const ProdXv<T,T2,N,A>& v2)
     {
@@ -786,7 +786,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline VectorView<CT> operator+=(
         VectorView<CT> v, const ProdXv<T,T,N,A>& v2)
     { 
@@ -798,7 +798,7 @@ namespace tmv {
     }
 
     // v-=(x*v)
-    template <class T, class T2, int N, int A> 
+    template <class T, class T2, ptrdiff_t N, int A> 
     inline VectorView<T> operator-=(
         VectorView<T> v, const ProdXv<T,T2,N,A>& v2)
     { 
@@ -809,7 +809,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline VectorView<CT> operator-=(
         VectorView<CT> v, const ProdXv<T,T,N,A>& v2)
     {
@@ -833,7 +833,7 @@ namespace tmv {
 #define X1 ,N,A1
 #define X2 ,N,A2
 #define X3 ,N,A1,A2
-#define Y ,int N, int A1, int A2
+#define Y ,ptrdiff_t N, int A1, int A2
 #define GETM1 .getV()
 #define GETM2 .getV()
 #include "tmv/TMV_AuxSumMM.h"
@@ -844,7 +844,7 @@ namespace tmv {
 #define SUMMM_x_1 Sumvv_x_1
 #define SUMMM_x_m1 Sumvv_x_m1
 #define X3 ,N,A1,A2
-#define Y ,int N, int A1, int A2
+#define Y ,ptrdiff_t N, int A1, int A2
 #define GETM1 .getV1()
 #define GETM2 .getV2()
 #include "tmv/TMV_AuxSumMMa.h"
@@ -861,7 +861,7 @@ namespace tmv {
 #define PRODXM2 ProdXV
 #define X1 ,N,A
 #define X3 ,N,A
-#define Y ,int N, int A
+#define Y ,ptrdiff_t N, int A
 #define GETM1 .getV()
 #define GETM2 .getV()
 #include "tmv/TMV_AuxSumMM.h"
@@ -878,7 +878,7 @@ namespace tmv {
 #define PRODXM2 ProdXv
 #define X2 ,N,A
 #define X3 ,N,A
-#define Y ,int N, int A
+#define Y ,ptrdiff_t N, int A
 #define GETM1 .getV()
 #define GETM2 .getV()
 #include "tmv/TMV_AuxSumMM.h"
@@ -892,7 +892,7 @@ namespace tmv {
     // Element Product Vector * Vector
     //
 
-    template <class T, class T1, class T2, int N, int A1, int A2> 
+    template <class T, class T1, class T2, ptrdiff_t N, int A1, int A2> 
     class ElemProdvv : public VectorComposite<T> 
     {
     public:
@@ -920,7 +920,7 @@ namespace tmv {
         const SmallVector<T2,N,A2>& v2;
     };
 
-    template <class T, class T1, class T2, int N, int A> 
+    template <class T, class T1, class T2, ptrdiff_t N, int A> 
     class ElemProdVv : public VectorComposite<T> 
     {
     public:
@@ -947,7 +947,7 @@ namespace tmv {
         const SmallVector<T2,N,A>& v2;
     };
 
-    template <class T, class T1, class T2, int N, int A> 
+    template <class T, class T1, class T2, ptrdiff_t N, int A> 
     class ElemProdvV : public VectorComposite<T> 
     {
     public:
@@ -974,7 +974,7 @@ namespace tmv {
         const GenVector<T2>& v2;
     };
 
-    template <class T, int N, int A, class T2, class T3>
+    template <class T, ptrdiff_t N, int A, class T2, class T3>
     inline SmallVector<T,N,A>& operator+=(
         SmallVector<T,N,A>& v, const ElemProdVV<T,T2,T3>& pvv)
     {
@@ -983,7 +983,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     inline SmallVector<CT,N,A>& operator+=(
         SmallVector<CT,N,A>& v, const ElemProdVV<T,T,T>& pvv)
     {
@@ -992,7 +992,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A, class T2, class T3>
+    template <class T, ptrdiff_t N, int A, class T2, class T3>
     inline SmallVector<T,N,A>& operator-=(
         SmallVector<T,N,A>& v, const ElemProdVV<T,T2,T3>& pvv)
     {
@@ -1001,7 +1001,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     inline SmallVector<CT,N,A>& operator-=(
         SmallVector<CT,N,A>& v, const ElemProdVV<T,T,T>& pvv)
     {
@@ -1010,7 +1010,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A, class T2, int A2, class T3>
+    template <class T, ptrdiff_t N, int A, class T2, int A2, class T3>
     inline SmallVector<T,N,A>& operator+=(
         SmallVector<T,N,A>& v, const ElemProdvV<T,T2,T3,N,A2>& pvv)
     {
@@ -1019,7 +1019,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A, int A2>
+    template <class T, ptrdiff_t N, int A, int A2>
     inline SmallVector<CT,N,A>& operator+=(
         SmallVector<CT,N,A>& v, const ElemProdvV<T,T,T,N,A2>& pvv)
     {
@@ -1028,7 +1028,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A, class T2, int A2, class T3>
+    template <class T, ptrdiff_t N, int A, class T2, int A2, class T3>
     inline SmallVector<T,N,A>& operator-=(
         SmallVector<T,N,A>& v, const ElemProdvV<T,T2,T3,N,A2>& pvv)
     {
@@ -1037,7 +1037,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A, int A2>
+    template <class T, ptrdiff_t N, int A, int A2>
     inline SmallVector<CT,N,A>& operator-=(
         SmallVector<CT,N,A>& v, const ElemProdvV<T,T,T,N,A2>& pvv)
     {
@@ -1046,7 +1046,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A, class T2, class T3, int A3>
+    template <class T, ptrdiff_t N, int A, class T2, class T3, int A3>
     inline SmallVector<T,N,A>& operator+=(
         SmallVector<T,N,A>& v, const ElemProdVv<T,T2,T3,N,A3>& pvv)
     {
@@ -1055,7 +1055,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A, int A3>
+    template <class T, ptrdiff_t N, int A, int A3>
     inline SmallVector<CT,N,A>& operator+=(
         SmallVector<CT,N,A>& v, const ElemProdVv<T,T,T,N,A3>& pvv)
     {
@@ -1064,7 +1064,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A, class T2, class T3, int A3>
+    template <class T, ptrdiff_t N, int A, class T2, class T3, int A3>
     inline SmallVector<T,N,A>& operator-=(
         SmallVector<T,N,A>& v, const ElemProdVv<T,T2,T3,N,A3>& pvv)
     {
@@ -1073,7 +1073,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A, int A3>
+    template <class T, ptrdiff_t N, int A, int A3>
     inline SmallVector<CT,N,A>& operator-=(
         SmallVector<CT,N,A>& v, const ElemProdVv<T,T,T,N,A3>& pvv)
     {
@@ -1082,7 +1082,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A, class T2, int A2, class T3, int A3>
+    template <class T, ptrdiff_t N, int A, class T2, int A2, class T3, int A3>
     inline SmallVector<T,N,A>& operator+=(
         SmallVector<T,N,A>& v, const ElemProdvv<T,T2,T3,N,A2,A3>& pvv)
     {
@@ -1091,7 +1091,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A, int A2, int A3>
+    template <class T, ptrdiff_t N, int A, int A2, int A3>
     inline SmallVector<CT,N,A>& operator+=(
         SmallVector<CT,N,A>& v, const ElemProdvv<T,T,T,N,A2,A3>& pvv)
     {
@@ -1100,7 +1100,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A, class T2, int A2, class T3, int A3>
+    template <class T, ptrdiff_t N, int A, class T2, int A2, class T3, int A3>
     inline SmallVector<T,N,A>& operator-=(
         SmallVector<T,N,A>& v, const ElemProdvv<T,T2,T3,N,A2,A3>& pvv)
     {
@@ -1109,7 +1109,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A, int A2, int A3>
+    template <class T, ptrdiff_t N, int A, int A2, int A3>
     inline SmallVector<CT,N,A>& operator-=(
         SmallVector<CT,N,A>& v, const ElemProdvv<T,T,T,N,A2,A3>& pvv)
     {
@@ -1118,7 +1118,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, class T2, int A2, class T3>
+    template <class T, ptrdiff_t N, class T2, int A2, class T3>
     inline VectorView<T> operator+=(
         VectorView<T> v, const ElemProdvV<T,T2,T3,N,A2>& pvv)
     {
@@ -1127,7 +1127,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A2>
+    template <class T, ptrdiff_t N, int A2>
     inline VectorView<CT> operator+=(
         VectorView<CT> v, const ElemProdvV<T,T,T,N,A2>& pvv)
     {
@@ -1136,7 +1136,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, class T2, int A2, class T3>
+    template <class T, ptrdiff_t N, class T2, int A2, class T3>
     inline VectorView<T> operator-=(
         VectorView<T> v, const ElemProdvV<T,T2,T3,N,A2>& pvv)
     {
@@ -1145,7 +1145,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A2>
+    template <class T, ptrdiff_t N, int A2>
     inline VectorView<CT> operator-=(
         VectorView<CT> v, const ElemProdvV<T,T,T,N,A2>& pvv)
     {
@@ -1154,7 +1154,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, class T2, class T3, int A3>
+    template <class T, ptrdiff_t N, class T2, class T3, int A3>
     inline VectorView<T> operator+=(
         VectorView<T> v, const ElemProdVv<T,T2,T3,N,A3>& pvv)
     {
@@ -1163,7 +1163,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A3>
+    template <class T, ptrdiff_t N, int A3>
     inline VectorView<CT> operator+=(
         VectorView<CT> v, const ElemProdVv<T,T,T,N,A3>& pvv)
     {
@@ -1172,7 +1172,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, class T2, class T3, int A3>
+    template <class T, ptrdiff_t N, class T2, class T3, int A3>
     inline VectorView<T> operator-=(
         VectorView<T> v, const ElemProdVv<T,T2,T3,N,A3>& pvv)
     {
@@ -1181,7 +1181,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A3>
+    template <class T, ptrdiff_t N, int A3>
     inline VectorView<CT> operator-=(
         VectorView<CT> v, const ElemProdVv<T,T,T,N,A3>& pvv)
     {
@@ -1190,7 +1190,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, class T2, int A2, class T3, int A3>
+    template <class T, ptrdiff_t N, class T2, int A2, class T3, int A3>
     inline VectorView<T> operator+=(
         VectorView<T> v, const ElemProdvv<T,T2,T3,N,A2,A3>& pvv)
     {
@@ -1199,7 +1199,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A2, int A3>
+    template <class T, ptrdiff_t N, int A2, int A3>
     inline VectorView<CT> operator+=(
         VectorView<CT> v, const ElemProdvv<T,T,T,N,A2,A3>& pvv)
     {
@@ -1208,7 +1208,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, class T2, int A2, class T3, int A3>
+    template <class T, ptrdiff_t N, class T2, int A2, class T3, int A3>
     inline VectorView<T> operator-=(
         VectorView<T> v, const ElemProdvv<T,T2,T3,N,A2,A3>& pvv)
     {
@@ -1217,7 +1217,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A2, int A3>
+    template <class T, ptrdiff_t N, int A2, int A3>
     inline VectorView<CT> operator-=(
         VectorView<CT> v, const ElemProdvv<T,T,T,N,A2,A3>& pvv)
     {
@@ -1235,13 +1235,13 @@ namespace tmv {
 #define X1 ,N,A1
 #define X2 ,N,A2
 #define X3 ,N,A1,A2
-#define Y ,int N, int A1, int A2
+#define Y ,ptrdiff_t N, int A1, int A2
 #define GETM1 .getV()
 #define GETM2 .getV()
 #define OP ElemProd
 #include "tmv/TMV_AuxProdMM.h"
 #define X3 ,N,A1,A2
-#define Y ,int N, int A1, int A2
+#define Y ,ptrdiff_t N, int A1, int A2
 #define GETM1 .getV1()
 #define GETM2 .getV2()
 #include "tmv/TMV_AuxProdMMa.h"
@@ -1259,7 +1259,7 @@ namespace tmv {
 #define OP ElemProd
 #define X1 ,N,A
 #define X3 ,N,A
-#define Y ,int N, int A
+#define Y ,ptrdiff_t N, int A
 #define GETM1 .getV()
 #define GETM2 .getV()
 #include "tmv/TMV_AuxProdMM.h"
@@ -1277,7 +1277,7 @@ namespace tmv {
 #define OP ElemProd
 #define X2 ,N,A
 #define X3 ,N,A
-#define Y ,int N, int A
+#define Y ,ptrdiff_t N, int A
 #define GETM1 .getV()
 #define GETM2 .getV()
 #include "tmv/TMV_AuxProdMM.h"
@@ -1291,65 +1291,65 @@ namespace tmv {
     // Vector * Vector
     //
 
-    template <class T, int N, int A1, int A2> 
+    template <class T, ptrdiff_t N, int A1, int A2> 
     inline T operator*(
         const SmallVector<T,N,A1>& v1, const SmallVector<T,N,A2>& v2) 
     { return MultVV<N>(v1.cptr(),v2.cptr()); }
 
-    template <class T, int N, int A1, int A2> 
+    template <class T, ptrdiff_t N, int A1, int A2> 
     inline CT operator*(
         const SmallVector<CT,N,A1>& v1, const SmallVector<T,N,A2>& v2)
     { return MultVV<N>(v1.cptr(),v2.cptr()); }
 
-    template <class T, int N, int A1, int A2> 
+    template <class T, ptrdiff_t N, int A1, int A2> 
     inline CT operator*(
         const SmallVector<T,N,A1>& v1, const SmallVector<CT,N,A2>& v2)
     { return MultVV<N>(v2.cptr(),v1.cptr()); }
 
     // v * (x*v)
-    template <class T, class T2, int N, int A1, int A2> 
+    template <class T, class T2, ptrdiff_t N, int A1, int A2> 
     inline T operator*(
         const SmallVector<T,N,A1>& v1, const ProdXv<T,T2,N,A2>& v2) 
     { return v2.getX()*MultVV<N>(v1.cptr(),v2.getV().cptr()); }
 
-    template <class T, int N, int A1, int A2> 
+    template <class T, ptrdiff_t N, int A1, int A2> 
     inline CT operator*(
         const SmallVector<CT,N,A1>& v1, const ProdXv<T,T,N,A2>& v2)
     { return v2.getX()*MultVV<N>(v1.cptr(),v2.getV().cptr()); }
 
-    template <class T, class T2, int N, int A1, int A2> 
+    template <class T, class T2, ptrdiff_t N, int A1, int A2> 
     inline CT operator*(
         const SmallVector<T,N,A1>& v1, const ProdXv<CT,T2,N,A2>& v2)
     { return v2.getX()*MultVV<N>(v2.getV().cptr(),v1.cptr()); }
 
     // (x*v) * v
-    template <class T, class T1, int N, int A1, int A2> 
+    template <class T, class T1, ptrdiff_t N, int A1, int A2> 
     inline T operator*(
         const ProdXv<T,T1,N,A1>& v1, const SmallVector<T,N,A2>& v2)
     { return v1.getX()*MultVV<N>(v1.getV().cptr(),v2.cptr()); }
 
-    template <class T, int N, int A1, int A2> 
+    template <class T, ptrdiff_t N, int A1, int A2> 
     inline CT operator*(
         const ProdXv<T,T,N,A1>& v1, const SmallVector<CT,N,A2>& v2)
     { return v1.getX()*MultVV<N>(v2.cptr(),v1.getV().cptr()); }
 
-    template <class T, class T1, int N, int A1, int A2> 
+    template <class T, class T1, ptrdiff_t N, int A1, int A2> 
     inline CT operator*(
         const ProdXv<CT,T1,N,A1>& v1, const SmallVector<T,N,A2>& v2)
     { return v1.getX()*MultVV<N>(v1.getV().cptr(),v2.cptr()); }
 
     // (x*v) * (x*v)
-    template <class T, class T1, class T2, int N, int A1, int A2> 
+    template <class T, class T1, class T2, ptrdiff_t N, int A1, int A2> 
     inline T operator*(
         const ProdXv<T,T1,N,A1>& v1, const ProdXv<T,T2,N,A2>& v2)
     { return v1.getX()*v2.getX()*MultVV<N>(v1.getV().cptr(),v2.getV().cptr()); }
 
-    template <class T, class T1, int N, int A1, int A2> 
+    template <class T, class T1, ptrdiff_t N, int A1, int A2> 
     inline CT operator*(
         const ProdXv<CT,T1,N,A1>& v1, const ProdXv<T,T,N,A2>& v2)
     { return v1.getX()*v2.getX()*MultVV<N>(v1.getV().cptr(),v2.getV().cptr()); }
 
-    template <class T, class T2, int N, int A1, int A2> 
+    template <class T, class T2, ptrdiff_t N, int A1, int A2> 
     inline CT operator*(
         const ProdXv<T,T,N,A1>& v1, const ProdXv<CT,T2,N,A2>& v2)
     { return v1.getX()*v2.getX()*MultVV<N>(v1.getV().cptr(),v2.getV().cptr()); }
@@ -1358,7 +1358,7 @@ namespace tmv {
     // Mix with Vector:
 
     // v * v
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline T operator*(const GenVector<T>& v1, const SmallVector<T,N,A>& v2) 
     { 
         if (v1.step() == 1 && !v1.isconj())
@@ -1367,7 +1367,7 @@ namespace tmv {
             return MultVV(v1,v2.view());
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline CT operator*(const GenVector<CT>& v1, const SmallVector<T,N,A>& v2)
     { 
         if (v1.step() == 1 && !v1.isconj())
@@ -1376,7 +1376,7 @@ namespace tmv {
             return MultVV(v1,v2.view()); 
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline CT operator*(const GenVector<T>& v1, const SmallVector<CT,N,A>& v2)
     {
         if (v1.step() == 1 && !v1.isconj())
@@ -1386,7 +1386,7 @@ namespace tmv {
     }
 
     // v * (x*v)
-    template <class T, class T2, int N, int A> 
+    template <class T, class T2, ptrdiff_t N, int A> 
     inline T operator*(const GenVector<T>& v1, const ProdXv<T,T2,N,A>& v2) 
     { 
         if (v1.step() == 1 && !v1.isconj())
@@ -1395,7 +1395,7 @@ namespace tmv {
             return v2.getX()*MultVV(v1,v2.getV().view());
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline CT operator*(const GenVector<CT>& v1, const ProdXv<T,T,N,A>& v2)
     {
         if (v1.step() == 1 && !v1.isconj())
@@ -1404,7 +1404,7 @@ namespace tmv {
             return v2.getX()*MultVV(v1,v2.getV().view());
     }
 
-    template <class T, class T2, int N, int A> 
+    template <class T, class T2, ptrdiff_t N, int A> 
     inline CT operator*(const GenVector<T>& v1, const ProdXv<CT,T2,N,A>& v2)
     {
         if (v1.step() == 1 && !v1.isconj())
@@ -1414,7 +1414,7 @@ namespace tmv {
     }
 
     // (x*v) * v
-    template <class T, class T1, int N, int A> 
+    template <class T, class T1, ptrdiff_t N, int A> 
     inline T operator*(const ProdXV<T,T1>& v1, const SmallVector<T,N,A>& v2)
     {
         if (v1.getV().step() == 1)
@@ -1423,7 +1423,7 @@ namespace tmv {
             return v1.getX()*MultVV(v1.getV(),v2.view());
     }
 
-    template <class T, class T1, int N, int A> 
+    template <class T, class T1, ptrdiff_t N, int A> 
     inline CT operator*(const ProdXV<CT,T1>& v1, const SmallVector<T,N,A>& v2)
     {
         if (v1.getV().step() == 1)
@@ -1432,7 +1432,7 @@ namespace tmv {
             return v1.getX()*MultVV(v1.getV(),v2.view());
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline CT operator*(const ProdXV<T,T>& v1, const SmallVector<CT,N,A>& v2)
     {
         if (v1.getV().step() == 1)
@@ -1442,7 +1442,7 @@ namespace tmv {
     }
 
     // (x*v) * (x*v)
-    template <class T, class T1, class T2, int N, int A> 
+    template <class T, class T1, class T2, ptrdiff_t N, int A> 
     inline T operator*(const ProdXV<T,T1>& v1, const ProdXv<T,T2,N,A>& v2)
     {
         if (v1.getV().step() == 1)
@@ -1452,7 +1452,7 @@ namespace tmv {
             return v1.getX()*v2.getX()*MultVV(v1.getV(),v2.getV().view());
     }
 
-    template <class T, class T1, int N, int A> 
+    template <class T, class T1, ptrdiff_t N, int A> 
     inline CT operator*(const ProdXV<CT,T1>& v1, const ProdXv<T,T,N,A>& v2)
     {
         if (v1.getV().step() == 1)
@@ -1462,7 +1462,7 @@ namespace tmv {
             return v1.getX()*v2.getX()*MultVV(v1.getV(),v2.getV().view());
     }
 
-    template <class T, class T2, int N, int A> 
+    template <class T, class T2, ptrdiff_t N, int A> 
     inline CT operator*(const ProdXV<T,T>& v1, const ProdXv<CT,T2,N,A>& v2)
     {
         if (v1.getV().step() == 1)
@@ -1473,7 +1473,7 @@ namespace tmv {
     }
 
     // v * v 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline T operator*(const SmallVector<T,N,A>& v1, const GenVector<T>& v2) 
     {
         if (v2.step() == 1 && !v2.step())
@@ -1482,7 +1482,7 @@ namespace tmv {
             return MultVV(v1.view(),v2);
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline CT operator*(const SmallVector<CT,N,A>& v1, const GenVector<T>& v2)
     {
         if (v2.step() == 1 && !v2.step())
@@ -1491,7 +1491,7 @@ namespace tmv {
             return MultVV(v1.view(),v2);
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline CT operator*(const SmallVector<T,N,A>& v1, const GenVector<CT>& v2)
     { 
         if (v2.step() == 1 && !v2.step())
@@ -1501,7 +1501,7 @@ namespace tmv {
     }
 
     // v * (x*v)
-    template <class T, class T2, int N, int A> 
+    template <class T, class T2, ptrdiff_t N, int A> 
     inline T operator*(const SmallVector<T,N,A>& v1, const ProdXV<T,T2>& v2) 
     { 
         if (v2.getV().step() == 1)
@@ -1510,7 +1510,7 @@ namespace tmv {
             return v2.getX()*MultVV(v1.view(),v2.getV());
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline CT operator*(const SmallVector<CT,N,A>& v1, const ProdXV<T,T>& v2)
     {
         if (v2.getV().step() == 1)
@@ -1519,7 +1519,7 @@ namespace tmv {
             return v2.getX()*MultVV(v1.view(),v2.getV());
     }
 
-    template <class T, class T2, int N, int A> 
+    template <class T, class T2, ptrdiff_t N, int A> 
     inline CT operator*(const SmallVector<T,N,A>& v1, const ProdXV<CT,T2>& v2)
     { 
         if (v2.getV().step() == 1)
@@ -1529,7 +1529,7 @@ namespace tmv {
     }
 
     // (x*v) * v
-    template <class T, class T1, int N, int A> 
+    template <class T, class T1, ptrdiff_t N, int A> 
     inline T operator*(const ProdXv<T,T1,N,A>& v1, const GenVector<T>& v2)
     {
         if (v2.step() == 1 && !v2.step())
@@ -1538,7 +1538,7 @@ namespace tmv {
             return v1.getX()*MultVV(v1.getV().view(),v2);
     }
 
-    template <class T, class T1, int N, int A> 
+    template <class T, class T1, ptrdiff_t N, int A> 
     inline CT operator*(const ProdXv<CT,T1,N,A>& v1, const GenVector<T>& v2)
     {
         if (v2.step() == 1 && !v2.step())
@@ -1547,7 +1547,7 @@ namespace tmv {
             return v1.getX()*MultVV(v1.getV().view(),v2);
     }
 
-    template <class T, int N, int A> 
+    template <class T, ptrdiff_t N, int A> 
     inline CT operator*(const ProdXv<T,T,N,A>& v1, const GenVector<CT>& v2)
     {
         if (v2.step() == 1 && !v2.step())
@@ -1558,7 +1558,7 @@ namespace tmv {
 
     // (x*v) * (x*v)
 
-    template <class T, class T1, class T2, int N, int A> 
+    template <class T, class T1, class T2, ptrdiff_t N, int A> 
     inline T operator*(const ProdXv<T,T1,N,A>& v1, const ProdXV<T,T2>& v2)
     {
         if (v2.getV().step() == 1)
@@ -1568,7 +1568,7 @@ namespace tmv {
             return v1.getX()*v2.getX()*MultVV(v1.getV().view(),v2.getV());
     }
 
-    template <class T, class T1, int N, int A> 
+    template <class T, class T1, ptrdiff_t N, int A> 
     inline CT operator*(const ProdXv<CT,T1,N,A>& v1, const ProdXV<T,T>& v2)
     {
         if (v2.getV().step() == 1)
@@ -1578,7 +1578,7 @@ namespace tmv {
             return v1.getX()*v2.getX()*MultVV(v1.getV().view(),v2.getV());
     }
 
-    template <class T, class T2, int N, int A> 
+    template <class T, class T2, ptrdiff_t N, int A> 
     inline CT operator*(const ProdXv<T,T,N,A>& v1, const ProdXV<CT,T2>& v2)
     {
         if (v2.getV().step() == 1)
@@ -1592,7 +1592,7 @@ namespace tmv {
     // P * v
     //
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     class ProdPv : public VectorComposite<T>
     {
     public:
@@ -1620,7 +1620,7 @@ namespace tmv {
         const SmallVector<T,N,A>& v;
     };
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     class ProdvP : public VectorComposite<T>
     {
     public:
@@ -1646,17 +1646,17 @@ namespace tmv {
         const Permutation& p;
     };
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     inline ProdvP<T,N,A> operator*(
         const SmallVector<T,N,A>& v, const Permutation& p)
     { return ProdvP<T,N,A>(v,p); }
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     inline ProdPv<T,N,A> operator*(
         const Permutation& p, const SmallVector<T,N,A>& v)
     { return ProdPv<T,N,A>(p,v); }
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     inline SmallVector<T,N,A>& operator*=(
         SmallVector<T,N,A>& v, const Permutation& p)
     {
@@ -1665,7 +1665,7 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     class QuotvP : public VectorComposite<T>
     {
     public:
@@ -1691,7 +1691,7 @@ namespace tmv {
         const Permutation& p;
     };
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     class RQuotvP : public VectorComposite<T>
     {
     public:
@@ -1717,12 +1717,12 @@ namespace tmv {
         const Permutation& p;
     };
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     inline QuotvP<T,N,A> operator/(
         const SmallVector<T,N,A>& v, const Permutation& p)
     { return QuotvP<T,N,A>(v,p); }
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     inline SmallVector<T,N,A>& operator/=(
         SmallVector<T,N,A>& v, const Permutation& p)
     {
@@ -1732,12 +1732,12 @@ namespace tmv {
         return v;
     }
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     inline RQuotvP<T,N,A> operator%(
         const SmallVector<T,N,A>& v, const Permutation& p)
     { return RQuotvP<T,N,A>(v,p); }
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     inline SmallVector<T,N,A>& operator%=(
         SmallVector<T,N,A>& v, const Permutation& p)
     {

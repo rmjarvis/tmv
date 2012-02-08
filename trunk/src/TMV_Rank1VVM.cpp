@@ -26,8 +26,8 @@ namespace tmv {
         typedef typename V2::value_type T2;
         const Scaling<1,RT> one;
 
-        const int M = m3.colsize();
-        const int N = m3.rowsize();
+        const ptrdiff_t M = m3.colsize();
+        const ptrdiff_t N = m3.rowsize();
 
         if (v1.step() == 1) {
             if (v2.step() == 1) {

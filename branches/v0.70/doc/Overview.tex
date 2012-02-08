@@ -335,7 +335,7 @@ even if \tt{T} is complex.  In these cases, I will write \tt{RT} to indicate
 indicates ``the complex type associated with \tt{T}''.
 
 It is worth noting that \tt{Matrix<int>} is possible as well if you compile the library
-with the \tt{-DINST\_INT} flag. 
+with the SCons option \tt{INST\_INT=true}. 
 However, only simple 
 routines like multiplication and addition will give correct answers.  If you try to 
 divide by a \tt{Matrix<int>}, for example, the required calculations are impossible 

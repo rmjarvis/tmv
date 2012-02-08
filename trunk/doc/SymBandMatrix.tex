@@ -461,7 +461,7 @@ banded LU algorithm is limited to 3*\tt{nlo}+1 bands.
 
 To access this decomposition, use:
 \begin{tmvcode}
-bool sb.lud().IsTrans()
+bool sb.lud().isTrans()
 tmv::LowerTriMatrix<T,UnitDiag> sb.lud().getL()
 tmv::ConstBandMatrixView<T> sb.lud().getU()
 Permutation sb.lud().getP()
@@ -473,7 +473,7 @@ The following should result in a matrix numerically very close to \tt{sb}.
 \begin{tmvcode}
 tmv::Matrix<T> m2(sb.nrows(),sb.ncols);
 tmv::MatrixView<T> m2v = 
-      sb.lud().IsTrans() ? m2.transpose() : m2.view();
+      sb.lud().isTrans() ? m2.transpose() : m2.view();
 m2v = sb.lud().getP() * sb.lud().getL() * sb.lud().getU();
 \end{tmvcode}
 

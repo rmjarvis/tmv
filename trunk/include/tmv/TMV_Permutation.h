@@ -44,12 +44,10 @@
 //    Permutation(int n)
 //        Make an identity Permutation of size n.
 //
-//    Permutation(int n, const int* pp, bool isinv, int det)
+//    Permutation(int n, const int* pp, bool isinv)
 //        Make a Permutation P from array pp.
 //        If isinv = false, then the swaps are applied in order from the 
 //        left to the rows of m.  If isinv = true, then in reverse order.
-//        If det is given, it is taken to be the determinant of P. 
-//        If it is omitted, the determinant will be calculated.
 //
 // Access Functions
 //
@@ -81,8 +79,7 @@
 //       to figure out.  O(N).
 //
 //    p.det() const
-//       This is also O(N) to calculate, but it is calculated during
-//       the creation of the permutation, so actually O(1) here.
+//       This is also O(N) to calculate
 //    
 //
 // Mutable functions
@@ -183,28 +180,19 @@ namespace tmv {
         // Constructors
         //
 
-        explicit Permutation(int n=0) :
-            itsn(n), itsmem(n), itsp(itsmem), isinv(false), itsdet(1) 
+        explicit Permutation(ptrdiff_t n=0) :
+            itsn(n), itsmem(n), itsp(itsmem), isinv(false)
         {
             TMVAssert(n >= 0);
-            for(int i=0;i<itsn;++i) itsmem[i] = i; 
+            for(ptrdiff_t i=0;i<itsn;++i) itsmem[i] = i; 
         }
 
-        Permutation(int n, const int* p, bool _isinv, int d) :
-            itsn(n), itsp(p), isinv(_isinv), itsdet(d) 
+        Permutation(ptrdiff_t n, const ptrdiff_t* p, bool _isinv=false) :
+            itsn(n), itsp(p), isinv(_isinv)
         { TMVAssert(n >= 0); }
 
-        // if det is unknown, calculate it now.
-        Permutation(int n, const int* p, bool _isinv=false) :
-            itsn(n), itsp(p), isinv(_isinv), itsdet(1) 
-        {
-            TMVAssert(n >= 0);
-            calcDet(); 
-        }
-
         Permutation(const Permutation& rhs) :
-            itsn(rhs.itsn), itsp(rhs.itsp),
-            isinv(rhs.isinv), itsdet(rhs.itsdet) {}
+            itsn(rhs.itsn), itsp(rhs.itsp), isinv(rhs.isinv) {}
 
         ~Permutation() {}
 
@@ -214,7 +202,6 @@ namespace tmv {
             itsmem.resize(0); // also deallocates the memory
             itsp = rhs.itsp;
             isinv = rhs.isinv;
-            itsdet = rhs.itsdet;
             return *this;
         }
 
@@ -222,7 +209,7 @@ namespace tmv {
         // Access 
         //
 
-        int cref(int i, int j) const
+        int cref(ptrdiff_t i, ptrdiff_t j) const
         {
             // Two options:
             // 1) P = P * I = I.permuteRows(p)
@@ -251,8 +238,8 @@ namespace tmv {
             // So we choose to use the forward loop option.
 
             if (isinv) TMV_SWAP(i,j);
-            int temp = j;
-            for(int k=0;k<=i && k<=temp;++k) if (itsp[k]!=k) {
+            ptrdiff_t temp = j;
+            for(ptrdiff_t k=0;k<=i && k<=temp;++k) if (itsp[k]!=k) {
                 if (temp == k) temp = itsp[k];
                 else if (temp == itsp[k]) temp = k;
             }
@@ -265,16 +252,20 @@ namespace tmv {
         //
 
         TMV_INLINE Permutation inverse() const
-        { return Permutation(itsn,itsp,!isinv,itsdet); }
+        { return Permutation(itsn,itsp,!isinv); }
 
         TMV_INLINE Permutation transpose() const
         { return inverse(); }
 
         TMV_INLINE int det() const
-        { return itsdet; }
+        {
+            int d = 1; 
+            for(ptrdiff_t i=0;i<itsn;++i) if (itsp[i] != i) d = -d; 
+            return d;
+        }
 
         int logDet(int* sign=0) const
-        { if (sign) *sign = itsdet; return 0; }
+        { if (sign) *sign = det(); return 0; }
 
         int trace() const
         {
@@ -285,10 +276,10 @@ namespace tmv {
             // equal to its index.
             // Then apply the permutation and count how many are still in
             // the same position.
-            AlignedArray<int> temp(itsn);
+            AlignedArray<ptrdiff_t> temp(itsn);
             makeIndex(temp.get());
             int t = 0;
-            for(int k=0;k<itsn;++k) if (temp[k] == k) ++t;
+            for(ptrdiff_t k=0;k<itsn;++k) if (temp[k] == k) ++t;
             return t;
         }
 
@@ -344,20 +335,20 @@ namespace tmv {
             const Permutation& p1, const Permutation& p2)
         {
             TMVAssert(p1.size() == p2.size());
-            const int n = p1.itsn;
+            const ptrdiff_t n = p1.itsn;
             if (p1.isinv == p2.isinv) {
-                for(int i=0;i<n;++i) {
+                for(ptrdiff_t i=0;i<n;++i) {
                     if (p1.itsp[i] != p2.itsp[i]) return false;
                 }
                 return true;
             } else {
                 // If not the same storage, then this requires a bit of work
                 // to see if they effect the same permutation.
-                AlignedArray<int> temp1(n);
-                AlignedArray<int> temp2(n);
+                AlignedArray<ptrdiff_t> temp1(n);
+                AlignedArray<ptrdiff_t> temp2(n);
                 p1.makeIndex(temp1.get());
                 p2.makeIndex(temp2.get());
-                for(int i=0;i<n;++i) {
+                for(ptrdiff_t i=0;i<n;++i) {
                     if (temp1[i] != temp2[i]) return false;
                 }
                 return true;
@@ -377,9 +368,8 @@ namespace tmv {
         Permutation& setToIdentity()
         {
             allocateMem();
-            for(int i=0;i<itsn;++i) itsmem[i] = i;
+            for(ptrdiff_t i=0;i<itsn;++i) itsmem[i] = i;
             isinv = false;
-            itsdet = 1;
             return *this;
         }
 
@@ -465,7 +455,6 @@ namespace tmv {
             p1.itsmem.swapWith(p2.itsmem);
             TMV_SWAP(p1.itsp,p2.itsp);
             TMV_SWAP(p1.isinv,p2.isinv);
-            TMV_SWAP(p1.itsdet,p2.itsdet);
         }
 
         // Defined below.
@@ -494,16 +483,15 @@ namespace tmv {
             P.allocateMem();
             LU_Decompose(A,L,U,P.getMem());
             P.isinv = true;
-            P.calcDet();
         }
 
         template <class T>
         friend void LU_Decompose(
-            const BandMatrixView<T>& A, Permutation& P, int nhi)
+            const BandMatrixView<T>& A, Permutation& P, ptrdiff_t nhi)
         {
             TMVAssert(P.size() == A.colsize());
             P.allocateMem();
-            LU_Decompose(A,P.getMem(),P.itsdet=1,nhi);
+            LU_Decompose(A,P.getMem(),nhi);
             P.isinv = true;
         }
 
@@ -516,7 +504,6 @@ namespace tmv {
             P.allocateMem();
             LDL_Decompose(A,D,P.getMem());
             P.isinv = true;
-            P.calcDet();
         }
 
         template <class T>
@@ -528,7 +515,6 @@ namespace tmv {
             P.allocateMem();
             LDL_Decompose(A,xD,P.getMem(),logdet,signdet);
             P.isinv = true;
-            P.calcDet();
         }
 #endif
 
@@ -539,7 +525,6 @@ namespace tmv {
             TMVAssert(P.size() == v.size());
             P.allocateMem();
             tmv::Sort(v,P.getMem(),ad,comp);
-            P.calcDet();
             P.isinv = false;
         }
 
@@ -547,7 +532,7 @@ namespace tmv {
         // Auxilliary functions
         //
 
-        void resize(int n)
+        void resize(ptrdiff_t n)
         {
             TMVAssert(n >= 0);
             if (n > itsn) {
@@ -556,34 +541,32 @@ namespace tmv {
             }
             itsn = n;
             isinv = false;
-            itsdet = 1;
         }
 
-        TMV_INLINE int size() const { return itsn; }
-        TMV_INLINE int colsize() const { return itsn; }
-        TMV_INLINE int nlo() const { return TMV_MAX(itsn-1,0); }
-        TMV_INLINE int nhi() const { return TMV_MAX(itsn-1,0); }
-        TMV_INLINE int rowsize() const { return itsn; }
-        TMV_INLINE const int* getValues() const { return itsp; }
+        TMV_INLINE ptrdiff_t size() const { return itsn; }
+        TMV_INLINE ptrdiff_t colsize() const { return itsn; }
+        TMV_INLINE ptrdiff_t nlo() const { return TMV_MAX(itsn-1,ptrdiff_t(0)); }
+        TMV_INLINE ptrdiff_t nhi() const { return TMV_MAX(itsn-1,ptrdiff_t(0)); }
+        TMV_INLINE ptrdiff_t rowsize() const { return itsn; }
+        TMV_INLINE const ptrdiff_t* getValues() const { return itsp; }
         TMV_INLINE bool isInverse() const { return isinv; }
 
 
     protected:
 
-        int itsn;
-        AlignedArray<int> itsmem;
-        const int* itsp;
+        ptrdiff_t itsn;
+        AlignedArray<ptrdiff_t> itsmem;
+        const ptrdiff_t* itsp;
         bool isinv;
-        int itsdet; // det = 1 or -1
 
-        void makeIndex(int* index) const
+        void makeIndex(ptrdiff_t* index) const
         {
-            for(int k=0;k<itsn;++k) index[k] = k;
+            for(ptrdiff_t k=0;k<itsn;++k) index[k] = k;
             if (isinv) {
-                for(int k=itsn-1;k>=0;--k)
+                for(ptrdiff_t k=itsn-1;k>=0;--k)
                     if (itsp[k]!=k) TMV_SWAP(index[k],index[itsp[k]]);
             } else {
-                for(int k=0;k<itsn;++k)
+                for(ptrdiff_t k=0;k<itsn;++k)
                     if (itsp[k]!=k) TMV_SWAP(index[k],index[itsp[k]]);
             }
         }
@@ -604,7 +587,7 @@ namespace tmv {
         {
             if (!itsmem.get()) {
                 itsmem.resize(itsn);
-                for(int i=0;i<itsn;++i) itsmem[i] = itsp[i];
+                for(ptrdiff_t i=0;i<itsn;++i) itsmem[i] = itsp[i];
                 itsp = itsmem.get();
             }
         }
@@ -613,20 +596,12 @@ namespace tmv {
         {
             itsn = orig.itsn;
             itsmem.resize(itsn);
-            for(int i=0;i<itsn;++i) itsmem[i] = orig.itsp[i];
+            for(ptrdiff_t i=0;i<itsn;++i) itsmem[i] = orig.itsp[i];
             itsp = itsmem.get();
             isinv = orig.isinv;
-            itsdet = orig.itsdet;
         }
 
-        void calcDet() 
-        {
-            itsdet = 1; 
-            for(int i=0;i<itsn;++i) 
-                if (itsp[i] != i) itsdet = -itsdet; 
-        }
-
-        TMV_INLINE_ND int* getMem() 
+        TMV_INLINE_ND ptrdiff_t* getMem() 
         {
             // Make sure P owns its memory:
             TMVAssert(itsn==0 || itsmem.get());
@@ -671,7 +646,7 @@ namespace tmv {
     inline std::ostream& operator<<(
         const TMV_Writer& writer, const Permutation& p)
     {
-        const int N = p.size();
+        const ptrdiff_t N = p.size();
         writer.begin();
         writer.writeCode("P");
         writer.writeSize(N);
@@ -681,17 +656,17 @@ namespace tmv {
 
         if (writer.isCompact()) {
             writer.writeLParen();
-            for(int i=0;i<N;++i) {
+            for(ptrdiff_t i=0;i<N;++i) {
                 if (i > 0) writer.writeSpace();
                 writer.writeValue(p.getValues()[i]);
             }
             writer.writeRParen();
         } else {
-            AlignedArray<int> temp(N);
+            AlignedArray<ptrdiff_t> temp(N);
             p.makeIndex(temp.get());
-            for(int i=0;i<N;++i) {
+            for(ptrdiff_t i=0;i<N;++i) {
                 writer.writeLParen();
-                for(int j=0;j<N;++j) {
+                for(ptrdiff_t j=0;j<N;++j) {
                     if (j>0) writer.writeSpace();
                     writer.writeValue(temp[i]==j ? 1 : 0);
                 }
@@ -715,9 +690,9 @@ namespace tmv {
     {
     public :
         Permutation m;
-        int i;
+        ptrdiff_t i;
         std::string exp,got;
-        int n;
+        ptrdiff_t n;
         bool is, iseof, isbad;
 
         PermutationReadError(std::istream& _is) throw() :
@@ -731,17 +706,17 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
 
         PermutationReadError(
-            const Permutation& _m, std::istream& _is, int _n) throw() :
+            const Permutation& _m, std::istream& _is, ptrdiff_t _n) throw() :
             ReadError("Permutation."),
             m(_m), i(0), n(_n),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         PermutationReadError(
-            int _i, const Permutation& _m, std::istream& _is) throw() :
+            ptrdiff_t _i, const Permutation& _m, std::istream& _is) throw() :
             ReadError("Permutation."),
             m(_m), i(_i), n(_m.size()),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         PermutationReadError(
-            int _i, const Permutation& _m, std::istream& _is,
+            ptrdiff_t _i, const Permutation& _m, std::istream& _is,
             const std::string& _e, const std::string& _g) throw() :
             ReadError("Permutation."),
             m(_m), i(_i), exp(_e), got(_g), n(_m.size()),
@@ -774,7 +749,7 @@ namespace tmv {
                 os<<"The portion of the Permutation which was successfully "
                     "read is: \n";
                 os<<"( ";
-                for(int k=0;k<i;++k) os<<' '<<m.getValues()[k]<<' ';
+                for(ptrdiff_t k=0;k<i;++k) os<<' '<<m.getValues()[k]<<' ';
                 os<<" )\n";
             }
         }
@@ -784,7 +759,7 @@ namespace tmv {
     inline std::istream& operator>>(const TMV_Reader& reader, Permutation& p)
     {
         std::string exp,got;
-        int temp;
+        ptrdiff_t temp;
         if (!reader.readCode("P",exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"Permutation Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -793,7 +768,7 @@ namespace tmv {
             throw PermutationReadError(reader.getis(),exp,got);
 #endif
         }
-        int n=p.size();
+        ptrdiff_t n=p.size();
         if (!reader.readSize(n)) {
 #ifdef NOTHROW
             std::cerr<<"Permutation Read Error: reading size\n";
@@ -850,7 +825,7 @@ namespace tmv {
             throw PermutationReadError(0,p,reader.getis(),exp,got);
 #endif
         }
-        for(int i=0;i<n;++i) {
+        for(ptrdiff_t i=0;i<n;++i) {
             if (i>0 && !reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                 std::cerr<<"Permutation ReadError: "<<got<<" != "<<exp<<std::endl;
@@ -886,7 +861,6 @@ namespace tmv {
 #endif
         }
 
-        p.calcDet();
         return reader.getis();
     }
 

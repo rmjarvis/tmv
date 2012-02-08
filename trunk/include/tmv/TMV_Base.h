@@ -371,7 +371,7 @@ namespace tmv {
     // Note: can't use numeric_limits<int>::min, since it is a function,
     // not a compile-time constant.  
     // And we need Unknown as a compile-time constant.
-    const int Unknown = 1<<(sizeof(int)*8-1);
+    const ptrdiff_t Unknown = ptrdiff_t(1)<<(sizeof(ptrdiff_t)*8-1);
 
     // This helper class acts as a ? : operator for a typedef
     template <bool first, class T1, class T2>
@@ -563,7 +563,7 @@ namespace tmv {
     template <bool C, class T>
     TMV_INLINE T DoConj(const T& x) { return DoConj_Helper<C,T>::apply(x); }
 
-    template <int S>
+    template <ptrdiff_t S>
     struct IntTraits
     {
         enum { negS = -S };
@@ -599,7 +599,7 @@ namespace tmv {
                 S > 16 ? ((((S-1)>>5)+1)<<4) :
                 (S>>1)  )
         };
-        static inline int text() { return S; }
+        static inline ptrdiff_t text() { return S; }
     };
     template <>
     struct IntTraits<Unknown>
@@ -616,7 +616,7 @@ namespace tmv {
         static inline const char* text() { return "UNKNOWN"; }
     };
 
-    template <int S1, int S2>
+    template <ptrdiff_t S1, ptrdiff_t S2>
     struct IntTraits2
     {
         enum { sum = S1 + S2 };
@@ -629,7 +629,7 @@ namespace tmv {
         enum { min = S1 < S2 ? S1 : S2 };
         enum { max = S1 > S2 ? S1 : S2 };
     };
-    template <int S1>
+    template <ptrdiff_t S1>
     struct IntTraits2<S1,0>
     { // Specialization just to avoid division by zero warning.
         enum { sum = S1 };
@@ -640,7 +640,7 @@ namespace tmv {
         enum { min = S1 < 0 ? S1 : 0 };
         enum { max = S1 > 0 ? S1 : 0 };
     };
-    template <int S1>
+    template <ptrdiff_t S1>
     struct IntTraits2<S1,Unknown>
     {
         enum { sum = Unknown };
@@ -651,7 +651,7 @@ namespace tmv {
         enum { min = Unknown };
         enum { max = Unknown };
     };
-    template <int S2>
+    template <ptrdiff_t S2>
     struct IntTraits2<Unknown,S2>
     {
         enum { sum = Unknown };
@@ -1223,7 +1223,7 @@ namespace tmv {
         template <class T>
         static TMV_INLINE T twox(const T& x)
         { return 2*x; }
-        static TMV_INLINE int twox(const int& x)
+        static TMV_INLINE ptrdiff_t twox(const ptrdiff_t& x)
         { return x>>1; }
 
         // ++x or nothing
@@ -1322,10 +1322,10 @@ namespace tmv {
 
         // m.ref(i,i) = x or nothing
         template <class M, class T>
-        static TMV_INLINE void setdiag(M& m, int i, const T& x) 
+        static TMV_INLINE void setdiag(M& m, ptrdiff_t i, const T& x) 
         { m.ref(i,i) = x; }
         template <class M, class T>
-        static TMV_INLINE void setdiag2(M m, int i, const T& x) 
+        static TMV_INLINE void setdiag2(M m, ptrdiff_t i, const T& x) 
         { m.ref(i,i) = x; }
 
         // m.diag() = x or nothing
@@ -1698,9 +1698,9 @@ namespace tmv {
         static TMV_INLINE void assignTo(const T1& , T2& ) { }
 
         template <class M, class T>
-        static TMV_INLINE void setdiag(M& , int , const T& ) { }
+        static TMV_INLINE void setdiag(M& , ptrdiff_t , const T& ) { }
         template <class M, class T>
-        static TMV_INLINE void setdiag2(M , int , const T& ) { }
+        static TMV_INLINE void setdiag2(M , ptrdiff_t , const T& ) { }
 
         template <class M, class T>
         static TMV_INLINE void setdiag(M& , const T& ) { }
@@ -2289,18 +2289,16 @@ namespace tmv {
 
 
 #ifdef TMV_WARN
-    class TMV_WarnSingleton
+    struct TMV_WarnSingleton
     {
         // Note: This is not thread safe.
         // If multiple threads write to the warning stream at the
         // same time, they can clobber each other.
-    public:
-        static TMV_INLINE std::ostream*& inst() {
+        static TMV_INLINE std::ostream*& inst() 
+        {
             static std::ostream* warn = 0;
             return warn;
         }
-    private:
-        TMV_WarnSingleton();
     };
 
     inline void TMV_Warning(std::string s)
@@ -2328,10 +2326,10 @@ namespace tmv {
     // A helper structure that acts like an int,
     // but only bothers to make the integer if S == Unknown.
     // It also checks the constructor if S != Unknown
-    template <int S>
+    template <ptrdiff_t S>
     struct CheckedInt
     {
-        TMV_INLINE CheckedInt(int s) { 
+        TMV_INLINE CheckedInt(ptrdiff_t s) { 
 #ifdef TMV_DEBUG
             if (s != S) {
                 std::cerr<<"Mismatched CheckInt:\n";
@@ -2341,14 +2339,14 @@ namespace tmv {
 #endif
             TMVAssert(s == S); 
         }
-        TMV_INLINE operator int() const { return S; }
+        TMV_INLINE operator ptrdiff_t() const { return S; }
     };
     template <>
     struct CheckedInt<Unknown>
     {
-        int step;
-        TMV_INLINE CheckedInt(int s) : step(s) {}
-        TMV_INLINE operator int() const { return step; }
+        ptrdiff_t step;
+        TMV_INLINE CheckedInt(ptrdiff_t s) : step(s) {}
+        TMV_INLINE operator ptrdiff_t() const { return step; }
         TMV_INLINE ~CheckedInt() {}
     };
 

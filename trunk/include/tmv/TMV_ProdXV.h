@@ -71,8 +71,8 @@ namespace tmv {
         TMV_INLINE const Scaling<ix,T>& getX() const { return x; }
         TMV_INLINE const V& getV() const { return v; }
 
-        TMV_INLINE int size() const { return v.size(); }
-        value_type cref(int i) const 
+        TMV_INLINE ptrdiff_t size() const { return v.size(); }
+        value_type cref(ptrdiff_t i) const 
         { return  x*v.cref(i); }
 
         template <class V2>

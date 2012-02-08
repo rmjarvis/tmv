@@ -63,9 +63,10 @@
 // (which I call Strict QRP), or whether they are just reordered well
 // enough to put the correct zeros at the end (which I call Loose QRP) using
 // the function tmv::UseStrictQRP();
-// The default value is false, which is faster, but possibly less accurate 
-// for some matrices.
 // To turn the strict algorithm back off, use tmv::UseStrictQRP(false);
+// The Loose QRP algorithm is faster and seems to be good enough for
+// all the singular matrices I've tried it on, but someone might have a
+// need for the strict behavior.
 //
 
 
@@ -92,49 +93,49 @@ namespace tmv {
     template <class M1, class V1, class M2>
     inline void QR_Inverse(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& minv);
+        const Permutation* P, ptrdiff_t N1, BaseMatrix_Rec_Mutable<M2>& minv);
     template <class M1, class V1, class M2>
     inline void QR_InverseATA(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& ata);
+        const Permutation* P, ptrdiff_t N1, BaseMatrix_Rec_Mutable<M2>& ata);
 
     // In TMV_QRDiv.h
     template <class M1, class V1, class M2, class M3>
     inline void QR_Solve(
         const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
-        const Permutation* P, int N1, 
+        const Permutation* P, ptrdiff_t N1, 
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
     template <class M1, class V1, class V2, class V3>
     inline void QR_Solve(
         const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
-        const Permutation* P, int N1, 
+        const Permutation* P, ptrdiff_t N1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3);
     template <class M1, class V1, class M2, class M3>
     inline void QR_SolveTranspose(
         const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
-        const Permutation* P, int N1, 
+        const Permutation* P, ptrdiff_t N1, 
         const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
     template <class M1, class V1, class V2, class V3>
     inline void QR_SolveTranspose(
         const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
-        const Permutation* P, int N1, 
+        const Permutation* P, ptrdiff_t N1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3);
     template <class M1, class V1, class M2>
     inline void QR_SolveInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
-        const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& m2);
+        const Permutation* P, ptrdiff_t N1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class V1, class V2>
     inline void QR_SolveInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
-        const Permutation* P, int N1, BaseVector_Mutable<V2>& v2);
+        const Permutation* P, ptrdiff_t N1, BaseVector_Mutable<V2>& v2);
     template <class M1, class V1, class M2>
     inline void QR_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
-        const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& m2);
+        const Permutation* P, ptrdiff_t N1, BaseMatrix_Rec_Mutable<M2>& m2);
     template <class M1, class V1, class V2>
     inline void QR_SolveTransposeInPlace(
         const BaseMatrix_Rec<M1>& QR, const BaseVector<V1>& beta,
-        const Permutation* P, int N1, BaseVector_Mutable<V2>& v2);
+        const Permutation* P, ptrdiff_t N1, BaseVector_Mutable<V2>& v2);
 
 
     // 
@@ -142,22 +143,23 @@ namespace tmv {
     // it able to be done inline.
     //
 
-    class QRP_StrictSingleton 
+    struct QRP_StrictSingleton 
     {
-    public:
         // Technically, I think this isn't thread safe, but I'd be 
         // pretty shocked if people were having multiple threads
         // call this funtion at the same time.
-        static TMV_INLINE bool& inst() { 
+        static TMV_INLINE bool& inst() 
+        { 
             static bool strict;
             return strict;
         }
-    private:
-        QRP_StrictSingleton();
     };
 
     TMV_INLINE void UseStrictQRP(bool newstrict=true)
     { QRP_StrictSingleton::inst() = newstrict; }
+
+    TMV_INLINE bool QRP_IsStrict()
+    { return QRP_StrictSingleton::inst(); }
 
 
 
@@ -230,7 +232,7 @@ namespace tmv {
         template <class M1, class T2, int A2>
         void solve(const BaseMatrix<M1>& m1, MatrixView<T2,A2> m2) const
         { doSolve(m1,m2); }
-        template <class M1, class T2, int M2, int N2, int Si2, int Sj2, int A2>
+        template <class M1, class T2, ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         void solve(
             const BaseMatrix<M1>& m1, SmallMatrixView<T2,M2,N2,Si2,Sj2,A2> m2) const
         { doSolve(m1,m2); }
@@ -244,7 +246,7 @@ namespace tmv {
         template <class V1, class T2, int A2>
         void solve(const BaseVector<V1>& v1, VectorView<T2,A2> v2) const
         { doSolve(v1,v2); }
-        template <class V1, class T2, int N2, int S2, int A2>
+        template <class V1, class T2, ptrdiff_t N2, ptrdiff_t S2, int A2>
         void solve(const BaseVector<V1>& v1, SmallVectorView<T2,N2,S2,A2> v2) const
         { doSolve(v1,v2); }
 
@@ -259,7 +261,7 @@ namespace tmv {
         void solveTranspose(
             const BaseMatrix<M1>& m1, MatrixView<T2,A2> m2) const
         { doSolveTranspose(m1,m2); }
-        template <class M1, class T2, int M2, int N2, int Si2, int Sj2, int A2>
+        template <class M1, class T2, ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         void solveTranspose(
             const BaseMatrix<M1>& m1, SmallMatrixView<T2,M2,N2,Si2,Sj2,A2> m2) const
         { doSolveTranspose(m1,m2); }
@@ -275,7 +277,7 @@ namespace tmv {
         void solveTranspose(
             const BaseVector<V1>& v1, VectorView<T2,A2> v2) const
         { doSolveTranspose(v1,v2); }
-        template <class V1, class T2, int N2, int S2, int A2>
+        template <class V1, class T2, ptrdiff_t N2, ptrdiff_t S2, int A2>
         void solveTranspose(
             const BaseVector<V1>& v1, SmallVectorView<T2,N2,S2,A2> v2) const
         { doSolveTranspose(v1,v2); }
@@ -292,7 +294,7 @@ namespace tmv {
         template <class T2, int A2>
         void solveInPlace(MatrixView<T2,A2> m2) const
         { doSolveInPlace(m2); }
-        template <class T2, int M2, int N2, int Si2, int Sj2, int A2>
+        template <class T2, ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         void solveInPlace(SmallMatrixView<T2,M2,N2,Si2,Sj2,A2> m2) const
         { doSolveInPlace(m2); }
 
@@ -304,7 +306,7 @@ namespace tmv {
         template <class T2, int A2>
         void solveInPlace(VectorView<T2,A2> v2) const
         { doSolveInPlace(v2); }
-        template <class T2, int N2, int S2, int A2>
+        template <class T2, ptrdiff_t N2, ptrdiff_t S2, int A2>
         void solveInPlace(SmallVectorView<T2,N2,S2,A2> v2) const
         { doSolveInPlace(v2); }
 
@@ -316,7 +318,7 @@ namespace tmv {
         template <class T2, int A2>
         void solveTransposeInPlace(MatrixView<T2,A2> m2) const
         { doSolveTransposeInPlace(m2); }
-        template <class T2, int M2, int N2, int Si2, int Sj2, int A2>
+        template <class T2, ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         void solveTransposeInPlace(SmallMatrixView<T2,M2,N2,Si2,Sj2,A2> m2) const
         { doSolveTransposeInPlace(m2); }
 
@@ -328,7 +330,7 @@ namespace tmv {
         template <class T2, int A2>
         void solveTransposeInPlace(VectorView<T2,A2> v2) const
         { doSolveTransposeInPlace(v2); }
-        template <class T2, int N2, int S2, int A2>
+        template <class T2, ptrdiff_t N2, ptrdiff_t S2, int A2>
         void solveTransposeInPlace(SmallVectorView<T2,N2,S2,A2> v2) const
         { doSolveTransposeInPlace(v2); }
 
@@ -353,7 +355,7 @@ namespace tmv {
         template <class T2, int A2>
         void MakeInverse(MatrixView<T2,A2> minv) const
         { doMakeInverse(minv); }
-        template <class T2, int M2, int N2, int Si2, int Sj2, int A2>
+        template <class T2, ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         void MakeInverse(SmallMatrixView<T2,M2,N2,Si2,Sj2,A2> minv) const
         { doMakeInverse(minv); }
 
@@ -370,7 +372,7 @@ namespace tmv {
         template <class T2, int A2>
         void MakeInverseATA(MatrixView<T2,A2> minv) const
         { doMakeInverseATA(minv); }
-        template <class T2, int M2, int N2, int Si2, int Sj2, int A2>
+        template <class T2, ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         void MakeInverseATA(SmallMatrixView<T2,M2,N2,Si2,Sj2,A2> minv) const
         { doMakeInverseATA(minv); }
 
@@ -401,8 +403,8 @@ namespace tmv {
         // const QRPD<M>& can release the memory.
         mutable std::auto_ptr<QRPD_Impl<small,M> > pimpl;
 
-        int colsize() const;
-        int rowsize() const;
+        ptrdiff_t colsize() const;
+        ptrdiff_t rowsize() const;
 
         // op= not allowed.
         QRPD<M>& operator=(const QRPD<M>&);
@@ -528,20 +530,20 @@ namespace tmv {
     {
         template <class M1, class V1, class M2, class M3>
         static TMV_INLINE void solve(
-            const M1& QRx, const V1& beta, const Permutation& P, int N1,
+            const M1& QRx, const V1& beta, const Permutation& P, ptrdiff_t N1,
             const M2& m2, M3& m3)
         { QR_Solve(QRx,beta,&P,N1,m2,m3); }
         template <class M1, class V1, class M2>
         static TMV_INLINE void solveInPlace(
-            const M1& QRx, const V1& beta, const Permutation& P, int N1, M2& m2)
+            const M1& QRx, const V1& beta, const Permutation& P, ptrdiff_t N1, M2& m2)
         { QR_SolveInPlace(QRx,beta,&P,N1,m2); }
         template <class M1, class V1, class M2>
         static TMV_INLINE void makeInverse(
-            const M1& QRx, const V1& beta, const Permutation& P, int N1, M2& m2)
+            const M1& QRx, const V1& beta, const Permutation& P, ptrdiff_t N1, M2& m2)
         { QR_Inverse(QRx,beta,&P,N1,m2); }
         template <class M1, class V1, class M2>
         static TMV_INLINE void makeInverseATA(
-            const M1& QRx, const V1& beta, const Permutation& P, int N1, M2& m2)
+            const M1& QRx, const V1& beta, const Permutation& P, ptrdiff_t N1, M2& m2)
         { QR_InverseATA(QRx,beta,&P,N1,m2); }
     };
     template <>
@@ -550,22 +552,22 @@ namespace tmv {
         template <class M1, class V1, class M2, class M3>
         static TMV_INLINE void solve(
             const M1& QRx, const V1& beta, const Permutation& P,
-            int N1, const M2& m2, M3& m3)
+            ptrdiff_t N1, const M2& m2, M3& m3)
         { QR_SolveTranspose(QRx,beta,&P,N1,m2,m3); }
         template <class M1, class V1, class M2>
         static TMV_INLINE void solveInPlace(
-            const M1& QRx, const V1& beta, const Permutation& P, int N1, M2& m2)
+            const M1& QRx, const V1& beta, const Permutation& P, ptrdiff_t N1, M2& m2)
         { QR_SolveTransposeInPlace(QRx,beta,&P,N1,m2); }
         template <class M1, class V1, class M2>
         static TMV_INLINE void makeInverse(
-            const M1& QRx, const V1& beta, const Permutation& P, int N1, M2& m2)
+            const M1& QRx, const V1& beta, const Permutation& P, ptrdiff_t N1, M2& m2)
         { 
             typename M2::transpose_type m2t = m2.transpose();
             QR_Inverse(QRx,beta,&P,N1,m2t);
         }
         template <class M1, class V1, class M2>
         static TMV_INLINE void makeInverseATA(
-            const M1& QRx, const V1& beta, const Permutation& P, int N1, M2& m2)
+            const M1& QRx, const V1& beta, const Permutation& P, ptrdiff_t N1, M2& m2)
         { QR_InverseATA(QRx,beta,&P,N1,m2); }
     };
     template <bool istrans>
@@ -573,20 +575,20 @@ namespace tmv {
     {
         template <class M1, class V1, class M2, class M3>
         static TMV_INLINE void solve(
-            const M1& , const V1& , const Permutation& P, int N1,
+            const M1& , const V1& , const Permutation& P, ptrdiff_t N1,
             const M2& , M3& ) 
         { TMVAssert(false && "Calling invalid QRPHelper::solve\n"); }
         template <class M1, class V1, class M2>
         static TMV_INLINE void solveInPlace(
-            const M1& , const V1& , const Permutation& P, int N1, M2& )
+            const M1& , const V1& , const Permutation& P, ptrdiff_t N1, M2& )
         { TMVAssert(false && "Calling invalid QRPHelper::solveInPlace\n"); }
         template <class M1, class V1, class M2>
         static TMV_INLINE void makeInverse(
-            const M1& , const V1& , const Permutation& P, int N1, M2& )
+            const M1& , const V1& , const Permutation& P, ptrdiff_t N1, M2& )
         { TMVAssert(false && "Calling invalid QRPHelper::makeInverse\n"); }
         template <class M1, class V1, class M2>
         static TMV_INLINE void makeInverseATA(
-            const M1& , const V1& , const Permutation& P, int N1, M2& ) 
+            const M1& , const V1& , const Permutation& P, ptrdiff_t N1, M2& ) 
         { TMVAssert(false && "Calling invalid QRPHelper::makeInverseATA\n"); }
     };
 
@@ -598,7 +600,7 @@ namespace tmv {
         typedef typename M::value_type T;
         enum { cs1 = M::_colsize };
         enum { rs1 = M::_rowsize };
-        enum { istrans = int(cs1) < int(rs1) };
+        enum { istrans = ptrdiff_t(cs1) < ptrdiff_t(rs1) };
         enum { cs = IntTraits2<cs1,rs1>::max };
         enum { rs = IntTraits2<cs1,rs1>::min };
         enum { A = (istrans ? RowMajor : ColMajor) | NoAlias };
@@ -614,8 +616,8 @@ namespace tmv {
         {
             TMVStaticAssert(M::_colsize != Unknown);
             TMVStaticAssert(M::_rowsize != Unknown);
-            TMVAssert(A.colsize() == istrans ? int(rs) : int(cs));
-            TMVAssert(A.rowsize() == istrans ? int(cs) : int(rs));
+            TMVAssert(A.colsize() == istrans ? ptrdiff_t(rs) : ptrdiff_t(cs));
+            TMVAssert(A.rowsize() == istrans ? ptrdiff_t(cs) : ptrdiff_t(rs));
             //std::cout<<"QRPD_Impl small\n";
             //std::cout<<"istrans = "<<istrans<<std::endl;
             //std::cout<<"cs,rs = "<<cs<<','<<rs<<std::endl;
@@ -626,7 +628,7 @@ namespace tmv {
             SmallQRx = A;
             //std::cout<<"SmallQRx => "<<SmallQRx<<std::endl;
             //std::cout<<"QRx => "<<QRx<<std::endl;
-            QRP_Decompose(QRx,beta,P,QRP_StrictSingleton::inst());
+            QRP_Decompose(QRx,beta,P,QRP_IsStrict());
             //std::cout<<"SmallQRx => "<<SmallQRx<<std::endl;
             //std::cout<<"QRx => "<<QRx<<std::endl;
             //std::cout<<"beta => "<<beta<<std::endl;
@@ -673,7 +675,7 @@ namespace tmv {
         qrx_type QRx;
         beta_type beta;
         Permutation P;
-        int N1;
+        ptrdiff_t N1;
     };
     
     template <class M>
@@ -684,7 +686,7 @@ namespace tmv {
         enum { cs1 = M::_colsize };
         enum { rs1 = M::_rowsize };
         enum { knownsizes = cs1 != Unknown && rs1 != Unknown };
-        enum { istrans1 = knownsizes && cs1 < int(rs1) };
+        enum { istrans1 = knownsizes && cs1 < ptrdiff_t(rs1) };
         enum { cs = IntTraits2<cs1,rs1>::max };
         enum { rs = IntTraits2<cs1,rs1>::min };
         typedef typename MViewHelper<T,Rec,cs,rs,1,Unknown,NoAlias>::type qrx_type;
@@ -722,7 +724,7 @@ namespace tmv {
                 } else {
                     Maybe<M2::_conj>::conjself(QRx);
                 }
-                QRP_Decompose(QRx,beta,P,QRP_StrictSingleton::inst());
+                QRP_Decompose(QRx,beta,P,QRP_IsStrict());
                 //std::cout<<"After QRP_Decompose"<<std::endl;
                 //std::cout<<"N1 = "<<N1<<std::endl;
                 while (N1 > 0 && QRx.cref(N1-1,N1-1) == T(0)) {
@@ -755,7 +757,7 @@ namespace tmv {
                 } else {
                     Maybe<!knownsizes||!istrans1>::assignTo(A,QRx);
                 }
-                QRP_Decompose(QRx,beta,P,QRP_StrictSingleton::inst());
+                QRP_Decompose(QRx,beta,P,QRP_IsStrict());
                 //std::cout<<"After QRP_Decompose"<<std::endl;
                 //std::cout<<"N1 = "<<N1<<std::endl;
                 while (N1 > 0 && QRx.cref(N1-1,N1-1) == T(0)) {
@@ -836,7 +838,7 @@ namespace tmv {
         qrx_type QRx;
         beta_type beta;
         Permutation P;
-        int N1;
+        ptrdiff_t N1;
     };
 
     template <class M> template <class M2>
@@ -1019,11 +1021,11 @@ namespace tmv {
     }
 
     template <class M>
-    int QRPD<M>::colsize() const
+    ptrdiff_t QRPD<M>::colsize() const
     { return pimpl->istrans ? pimpl->QRx.rowsize() : pimpl->QRx.colsize(); }
 
     template <class M>
-    int QRPD<M>::rowsize() const
+    ptrdiff_t QRPD<M>::rowsize() const
     { return pimpl->istrans ? pimpl->QRx.colsize() : pimpl->QRx.rowsize(); }
 
 
@@ -1042,7 +1044,7 @@ namespace tmv {
             *fout << "R = "<<qrpd.getR()<<std::endl;
             *fout << "P = "<<qrpd.getP()<<std::endl;
             *fout << "  or by interchanges: ";
-            for(int i=0;i<qrpd.getP().size();i++)
+            for(ptrdiff_t i=0;i<qrpd.getP().size();i++)
                 *fout<<(qrpd.getP().getValues())[i]<<" ";
             *fout<<std::endl;
         }

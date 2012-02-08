@@ -187,7 +187,7 @@ of $R$ be strictly decreasing (in absolute value) from upper-left to lower-right
 If you are using a LAPACK library, you might find that the output $R$ diagonal
 is not always strictly decreasing, although it will usually be close.  If strictly monotonic
 diagonal elements are important for you, you can use the native TMV algorithm instead
-by compiling with the flag \texttt{-DNOGEQP3}. (geqp3 is the name of the LAPACK 
+by compiling with the SCons option \tt{USE\_GEQP3=false}. (\tt{geqp3} is the name of the LAPACK 
 function that does the QRP decomposition.)}.
 
 If \tt{strict} is \tt{false} (or omitted) however, then the diagonal elements of $R$ will not

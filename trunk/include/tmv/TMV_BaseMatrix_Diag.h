@@ -161,14 +161,14 @@ namespace tmv {
         // Access 
         //
 
-        TMV_INLINE_ND value_type operator()(int i, int j) const
+        TMV_INLINE_ND value_type operator()(ptrdiff_t i, ptrdiff_t j) const
         {
             CheckRowIndex<_fort>(i,size());
             CheckColIndex<_fort>(j,size());
             return cref(i,j);
         }
 
-        TMV_INLINE_ND value_type operator()(int i) const
+        TMV_INLINE_ND value_type operator()(ptrdiff_t i) const
         {
             CheckIndex<_fort>(i,size());
             return cref(i);
@@ -232,14 +232,14 @@ namespace tmv {
         //
 
         // These versions always uses CStyle
-        TMV_INLINE const_subdiagmatrix_type cSubDiagMatrix(int i1, int i2) const
+        TMV_INLINE const_subdiagmatrix_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) const
         {
             return const_subdiagmatrix_type(
                 cptr()+i1*step(), i2-i1, step());
         }
 
         TMV_INLINE const_subdiagmatrix_step_type cSubDiagMatrix(
-            int i1, int i2, int istep) const
+            ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         {
             return const_subdiagmatrix_step_type(
                 cptr()+i1*step(), (i2-i1)/istep, istep*step());
@@ -249,14 +249,14 @@ namespace tmv {
         // These check the indices according the the indexing style being
         // used, and then calls the above CStyle versions.
         TMV_INLINE_ND const_subdiagmatrix_type subDiagMatrix(
-            int i1, int i2) const
+            ptrdiff_t i1, ptrdiff_t i2) const
         {
             CheckRange<_fort>(i1,i2,size());
             return cSubDiagMatrix(i1,i2);
         }
 
         TMV_INLINE_ND const_subdiagmatrix_step_type subDiagMatrix(
-            int i1, int i2, int istep) const
+            ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         {
             CheckRange<_fort>(i1,i2,istep,size());
             return cSubDiagMatrix(i1,i2,istep);
@@ -343,22 +343,22 @@ namespace tmv {
         // class than this, or an infinite loop will result.
         // Also, cref, get_row and get_col from BaseMatrix.
 
-        TMV_INLINE int colsize() const { return mat().size(); }
-        TMV_INLINE int rowsize() const { return mat().size(); }
-        TMV_INLINE int size() const { return mat().size(); }
-        TMV_INLINE int nlo() const { return 0; }
-        TMV_INLINE int nhi() const { return 0; }
-        TMV_INLINE int step() const { return mat().step(); }
+        TMV_INLINE ptrdiff_t colsize() const { return mat().size(); }
+        TMV_INLINE ptrdiff_t rowsize() const { return mat().size(); }
+        TMV_INLINE ptrdiff_t size() const { return mat().size(); }
+        TMV_INLINE ptrdiff_t nlo() const { return 0; }
+        TMV_INLINE ptrdiff_t nhi() const { return 0; }
+        TMV_INLINE ptrdiff_t step() const { return mat().step(); }
 
-        TMV_INLINE int rowstart(int i) const { return i; }
-        TMV_INLINE int rowend(int i) const { return i+1; }
-        TMV_INLINE int colstart(int j) const { return j; }
-        TMV_INLINE int colend(int j) const { return j+1; }
+        TMV_INLINE ptrdiff_t rowstart(ptrdiff_t i) const { return i; }
+        TMV_INLINE ptrdiff_t rowend(ptrdiff_t i) const { return i+1; }
+        TMV_INLINE ptrdiff_t colstart(ptrdiff_t j) const { return j; }
+        TMV_INLINE ptrdiff_t colend(ptrdiff_t j) const { return j+1; }
 
         TMV_INLINE const value_type* cptr() const { return mat().cptr(); }
-        value_type cref(int i, int j) const 
+        value_type cref(ptrdiff_t i, ptrdiff_t j) const 
         { return (i!=j ? value_type(0) : cref(i)); }
-        TMV_INLINE value_type cref(int i) const 
+        TMV_INLINE value_type cref(ptrdiff_t i) const 
         { return mat().cref(i); }
 
         TMV_INLINE const_iterator begin() const
@@ -475,14 +475,14 @@ namespace tmv {
         // Access 
         //
 
-        TMV_INLINE_ND reference operator()(int i, int j)
+        TMV_INLINE_ND reference operator()(ptrdiff_t i, ptrdiff_t j)
         {
             TMVAssert(i == j);
             CheckIndex<_fort>(i,size());
             return ref(i);
         }
 
-        TMV_INLINE_ND reference operator()(int i)
+        TMV_INLINE_ND reference operator()(ptrdiff_t i)
         {
             CheckIndex<_fort>(i,size());
             return ref(i);
@@ -494,7 +494,7 @@ namespace tmv {
 
         // We need to repeat the const versions so the non-const ones
         // don't clobber them.
-        TMV_INLINE value_type operator()(int i, int j) const
+        TMV_INLINE value_type operator()(ptrdiff_t i, ptrdiff_t j) const
         { return base::operator()(i,j); }
         TMV_INLINE const_diag_type diag() const
         { return base::diag(); }
@@ -564,7 +564,7 @@ namespace tmv {
         TMV_INLINE type& setToIdentity(const value_type x=value_type(1))
         { diag().setAllTo(x); return mat(); }
 
-        TMV_INLINE_ND type& swap(int i1, int i2) 
+        TMV_INLINE_ND type& swap(ptrdiff_t i1, ptrdiff_t i2) 
         {
             CheckIndex<_fort>(i1,size());
             CheckIndex<_fort>(i2,size());
@@ -572,24 +572,24 @@ namespace tmv {
             return mat();
         }
 
-        TMV_INLINE type& cPermute(const int* p, int i1, int i2) 
+        TMV_INLINE type& cPermute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
         { diag().permute(p,i1,i2); return mat(); }
-        TMV_INLINE_ND type& permute(const int* p, int i1, int i2) 
+        TMV_INLINE_ND type& permute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
         {
             CheckRange<_fort>(i1,i2,size());
             return cPermute(p,i1,i2);
         }
-        TMV_INLINE type& permute(const int* p) 
+        TMV_INLINE type& permute(const ptrdiff_t* p) 
         { cPermute(p,0,size()); return mat(); }
 
-        TMV_INLINE type& cReversePermute(const int* p, int i1, int i2) 
+        TMV_INLINE type& cReversePermute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
         { diag().reversePermute(p,i1,i2); }
-        TMV_INLINE_ND type& reversePermute(const int* p, int i1, int i2) 
+        TMV_INLINE_ND type& reversePermute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
         {
             CheckRange<_fort>(i1,i2,size());
             return cReversePermute(p,i1,i2);
         }
-        TMV_INLINE type& reversePermute(const int* p) 
+        TMV_INLINE type& reversePermute(const ptrdiff_t* p) 
         { cReversePermute(p,0,size()); return mat(); }
 
 
@@ -598,11 +598,11 @@ namespace tmv {
         //
 
         // These versions always uses CStyle
-        TMV_INLINE subdiagmatrix_type cSubDiagMatrix(int i1, int i2) 
+        TMV_INLINE subdiagmatrix_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) 
         { return subdiagmatrix_type(ptr()+i1*step(), i2-i1, step()); }
 
         TMV_INLINE subdiagmatrix_step_type cSubDiagMatrix(
-            int i1, int i2, int istep) 
+            ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) 
         {
             return subdiagmatrix_step_type(
                 ptr()+i1*step(), (i2-i1)/istep, istep*step());
@@ -610,14 +610,14 @@ namespace tmv {
 
         // These check the indices according the the indexing style being
         // used, and then calls the above CStyle versions.
-        TMV_INLINE_ND subdiagmatrix_type subDiagMatrix(int i1, int i2) 
+        TMV_INLINE_ND subdiagmatrix_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) 
         {
             CheckRange<_fort>(i1,i2,size());
             return cSubDiagMatrix(i1,i2);
         }
 
         TMV_INLINE_ND subdiagmatrix_step_type subDiagMatrix(
-            int i1, int i2, int istep) 
+            ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) 
         {
             CheckRange<_fort>(i1,i2,istep,size());
             return cSubDiagMatrix(i1,i2,istep);
@@ -625,16 +625,16 @@ namespace tmv {
 
 
         // Repeat the const versions:
-        TMV_INLINE const_subdiagmatrix_type cSubDiagMatrix(int i1, int i2) const
+        TMV_INLINE const_subdiagmatrix_type cSubDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) const
         { return base::cSubDiagMatrix(i1,i2); }
         TMV_INLINE const_subdiagmatrix_step_type cSubDiagMatrix(
-            int i1, int i2, int istep) const
+            ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         { return base::cSubDiagMatrix(i1,i2,istep); }
 
-        TMV_INLINE const_subdiagmatrix_type subDiagMatrix(int i1, int i2) const
+        TMV_INLINE const_subdiagmatrix_type subDiagMatrix(ptrdiff_t i1, ptrdiff_t i2) const
         { return base::subDiagMatrix(i1,i2); }
         TMV_INLINE const_subdiagmatrix_step_type subDiagMatrix(
-            int i1, int i2, int istep) const
+            ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         { return base::subDiagMatrix(i1,i2,istep); }
 
 
@@ -734,15 +734,15 @@ namespace tmv {
         // class than this, or an infinite loop will result when compiling.
         // Also, cref and cptr from above.
 
-        TMV_INLINE int colsize() const { return mat().size(); }
-        TMV_INLINE int rowsize() const { return mat().size(); }
-        TMV_INLINE int size() const { return mat().size(); }
-        TMV_INLINE int step() const { return mat().step(); }
+        TMV_INLINE ptrdiff_t colsize() const { return mat().size(); }
+        TMV_INLINE ptrdiff_t rowsize() const { return mat().size(); }
+        TMV_INLINE ptrdiff_t size() const { return mat().size(); }
+        TMV_INLINE ptrdiff_t step() const { return mat().step(); }
 
         TMV_INLINE value_type* ptr() { return mat().ptr(); }
-        TMV_INLINE reference ref(int i, int j) { return mat().ref(i); }
-        TMV_INLINE reference ref(int i) { return mat().ref(i); }
-        TMV_INLINE value_type cref(int i) { return mat().cref(i); }
+        TMV_INLINE reference ref(ptrdiff_t i, ptrdiff_t j) { return mat().ref(i); }
+        TMV_INLINE reference ref(ptrdiff_t i) { return mat().ref(i); }
+        TMV_INLINE value_type cref(ptrdiff_t i) { return mat().cref(i); }
 
         TMV_INLINE iterator begin() 
         { return diag().begin(); }
@@ -783,34 +783,34 @@ namespace tmv {
     class ConstDiagMatrixView;
     template <class T, int A=0>
     class DiagMatrixView;
-    template <class T, int N, int A=0>
+    template <class T, ptrdiff_t N, int A=0>
     class SmallDiagMatrix;
-    template <class T, int N, int S=Unknown, int A=0>
+    template <class T, ptrdiff_t N, ptrdiff_t S=Unknown, int A=0>
     class ConstSmallDiagMatrixView;
-    template <class T, int N, int S=Unknown, int A=0>
+    template <class T, ptrdiff_t N, ptrdiff_t S=Unknown, int A=0>
     class SmallDiagMatrixView;
 
     // This helper class helps decide calc_type for composite classes:
-    template <class T, int cs, int rs, int A>
+    template <class T, ptrdiff_t cs, ptrdiff_t rs, int A>
     struct MCopyHelper<T,Diag,cs,rs,A>
     { typedef SmallDiagMatrix<T,cs,A> type; };
-    template <class T, int rs, int A>
+    template <class T, ptrdiff_t rs, int A>
     struct MCopyHelper<T,Diag,Unknown,rs,A>
     { typedef SmallDiagMatrix<T,rs,A> type; };
-    template <class T, int cs, int A>
+    template <class T, ptrdiff_t cs, int A>
     struct MCopyHelper<T,Diag,cs,Unknown,A>
     { typedef SmallDiagMatrix<T,cs,A> type; };
     template <class T, int A>
     struct MCopyHelper<T,Diag,Unknown,Unknown,A>
     { typedef DiagMatrix<T,A|NoAlias> type; };
 
-    template <class T, int cs, int rs, int si, int sj, int A>
+    template <class T, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t si, ptrdiff_t sj, int A>
     struct MViewHelper<T,Diag,cs,rs,si,sj,A>
     { 
         typedef SmallDiagMatrixView<T,cs,si,A> type; 
         typedef ConstSmallDiagMatrixView<T,cs,si,A> ctype; 
     };
-    template <class T, int si, int sj, int A>
+    template <class T, ptrdiff_t si, ptrdiff_t sj, int A>
     struct MViewHelper<T,Diag,Unknown,Unknown,si,sj,A>
     {
         enum { A2 = A | (si == 1 ? Unit : NonUnit) | NoAlias };

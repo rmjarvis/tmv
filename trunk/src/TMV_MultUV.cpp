@@ -30,14 +30,14 @@ namespace tmv {
     static void DoMultEq(const M1& m1, VectorView<T2,Unit> v2)
     {
         const Scaling<1,typename Traits<T2>::real_type> one;
-        const int xx = Unknown;
+        const ptrdiff_t xx = Unknown;
         if (m1.iscm()) 
             InlineMultMV<false>(one,m1.cmView(),v2.constView(),v2);
         else if (m1.isrm())
             InlineMultMV<false>(one,m1.rmView(),v2.constView(),v2);
         else {
             typedef typename M1::value_type T;
-            const int N = m1.size();
+            const ptrdiff_t N = m1.size();
             if (m1.isunit()) {
                 const int s = ShapeTraits<M1::_shape>::unit_shape;
                 typename MCopyHelper<T,s,xx,xx>::type mc(N);

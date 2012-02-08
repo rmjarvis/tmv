@@ -164,11 +164,11 @@ namespace tmv {
     class ConstVectorView;
     template <class T, int A=0>
     class VectorView;
-    template <class T, int N, int A=0>
+    template <class T, ptrdiff_t N, int A=0>
     class SmallVector;
-    template <class T, int N, int S=Unknown, int A=0>
+    template <class T, ptrdiff_t N, ptrdiff_t S=Unknown, int A=0>
     class ConstSmallVectorView;
-    template <class T, int N, int S=Unknown, int A=0>
+    template <class T, ptrdiff_t N, ptrdiff_t S=Unknown, int A=0>
     class SmallVectorView;
 
     // Used by sort(p)
@@ -366,13 +366,13 @@ namespace tmv {
     // to whether the vector uses CStyle or FortranStyle indexing.
     // They also update the indices to be consistent with CStyle.
     template <bool _fort>
-    TMV_INLINE_ND void CheckIndex(int& i, int n) 
+    TMV_INLINE_ND void CheckIndex(ptrdiff_t& i, ptrdiff_t n) 
     { TMVAssert(i>=0 && i<n && "index is not valid"); } // CStyle
     template <>
-    TMV_INLINE_ND void CheckIndex<true>(int& i, int n) 
+    TMV_INLINE_ND void CheckIndex<true>(ptrdiff_t& i, ptrdiff_t n) 
     { TMVAssert(i>=1 && i<=n && "index is not valid"); --i; } // FortranStyle
     template <bool _fort>
-    TMV_INLINE_ND void CheckRange(int& i1, int i2, int n)
+    TMV_INLINE_ND void CheckRange(ptrdiff_t& i1, ptrdiff_t i2, ptrdiff_t n)
     { // CStyle
         TMVAssert(i1 >= 0 && "first element must be in range");
         TMVAssert(i2 <= n && "last element must be in range");
@@ -380,7 +380,7 @@ namespace tmv {
                   "range must have a non-negative number of elements");
     }
     template <>
-    TMV_INLINE_ND void CheckRange<true>(int& i1, int i2, int n)
+    TMV_INLINE_ND void CheckRange<true>(ptrdiff_t& i1, ptrdiff_t i2, ptrdiff_t n)
     { // FortranStyle
         TMVAssert(i1 >= 1 && "first element must be in range");
         TMVAssert(i2 <= n && "last element must be in range");
@@ -388,7 +388,7 @@ namespace tmv {
         --i1;
     }
     template <bool _fort>
-    TMV_INLINE_ND void CheckRange(int& i1, int& i2, int istep, int n)
+    TMV_INLINE_ND void CheckRange(ptrdiff_t& i1, ptrdiff_t& i2, ptrdiff_t istep, ptrdiff_t n)
     { // CStyle
         TMVAssert(istep != 0 && "istep cannot be 0");
         TMVAssert(((i1 >= 0 && i1 < n) || i1==i2) && 
@@ -401,7 +401,7 @@ namespace tmv {
                   "must have a non-negative number of elements");
     }
     template <>
-    TMV_INLINE_ND void CheckRange<true>(int& i1, int& i2, int istep, int n)
+    TMV_INLINE_ND void CheckRange<true>(ptrdiff_t& i1, ptrdiff_t& i2, ptrdiff_t istep, ptrdiff_t n)
     { // FortranStyle
         TMVAssert(istep != 0 && "istep cannot be 0");
         TMVAssert(i1 >= 1 && i1 <= n && "first element must be in range");
@@ -417,7 +417,7 @@ namespace tmv {
     // same = Are they possibly the same size?
     // equal = Are they definitely the same size?
     // size = If knowable, what is that size?
-    template <int S1, int S2>
+    template <ptrdiff_t S1, ptrdiff_t S2>
     struct Sizes
     {
         enum { same = (S1==Unknown || S2==Unknown || S1==S2) };
@@ -426,7 +426,7 @@ namespace tmv {
     };
 
     // This helper class helps decide calc_type for composite classes:
-    template <class T, int s, int A=0>
+    template <class T, ptrdiff_t s, int A=0>
     struct VCopyHelper
     {
         typedef SmallVector<T,s,A|NoAlias> type; 
@@ -439,13 +439,13 @@ namespace tmv {
 
     // This is similar - it defines the right view type when the
     // size or step might be known.
-    template <class T, int N, int S, int A=0>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A=0>
     struct VViewHelper
     { 
         typedef SmallVectorView<T,N,S,A|NoAlias> type; 
         typedef ConstSmallVectorView<T,N,S,A|NoAlias> ctype; 
     };
-    template <class T, int S, int A>
+    template <class T, ptrdiff_t S, int A>
     struct VViewHelper<T,Unknown,S,A>
     {
         enum { A2 = A | (S == 1 ? Unit : NonUnit) | NoAlias };
@@ -497,12 +497,12 @@ namespace tmv {
                 V2::_step != Unknown ) };
         enum { same = (
                 known &&
-                V1::_step == int(V2::_step) ) };
+                V1::_step == ptrdiff_t(V2::_step) ) };
         enum { noclobber = (
                 known &&
                 ( same ||
-                  (V2::_step > 0 && V1::_step > int(V2::_step)) ||
-                  (V2::_step < 0 && V1::_step < int(V2::_step)) ) ) };
+                  (V2::_step > 0 && V1::_step > ptrdiff_t(V2::_step)) ||
+                  (V2::_step < 0 && V1::_step < ptrdiff_t(V2::_step)) ) ) };
     };
 
     // Defined in TMV_CopyV.h
@@ -554,29 +554,29 @@ namespace tmv {
     // Defined in TMV_MinMax.h
     template <class V>
     inline typename V::value_type DoMaxElement(
-        const BaseVector_Calc<V>& v, int* imax=0);
+        const BaseVector_Calc<V>& v, ptrdiff_t* imax=0);
     template <class V>
     inline typename V::float_type DoMaxAbsElement(
-        const BaseVector_Calc<V>& v, int* imax=0);
+        const BaseVector_Calc<V>& v, ptrdiff_t* imax=0);
     template <class V>
     inline typename V::real_type DoMaxAbs2Element(
-        const BaseVector_Calc<V>& v, int* imax=0);
+        const BaseVector_Calc<V>& v, ptrdiff_t* imax=0);
     template <class V>
     inline typename V::value_type DoMinElement(
-        const BaseVector_Calc<V>& v, int* imin=0);
+        const BaseVector_Calc<V>& v, ptrdiff_t* imin=0);
     template <class V>
     inline typename V::float_type DoMinAbsElement(
-        const BaseVector_Calc<V>& v, int* imin=0);
+        const BaseVector_Calc<V>& v, ptrdiff_t* imin=0);
     template <class V>
     inline typename V::real_type DoMinAbs2Element(
-        const BaseVector_Calc<V>& v, int* imin=0);
+        const BaseVector_Calc<V>& v, ptrdiff_t* imin=0);
 
     // Defined in TMV_SortV.h
     template <class V>
     inline void Sort(BaseVector_Mutable<V>& v, ADType ad, CompType comp);
     template <class V>
     inline void Sort(
-        BaseVector_Mutable<V>& v, int* P, ADType ad, CompType comp);
+        BaseVector_Mutable<V>& v, ptrdiff_t* P, ADType ad, CompType comp);
 
     // A helper class for returning views without necessarily
     // making a new object.
@@ -656,9 +656,9 @@ namespace tmv {
         // Access
         // 
 
-        TMV_INLINE value_type operator[](int i) const 
+        TMV_INLINE value_type operator[](ptrdiff_t i) const 
         { return operator()(i); }
-        TMV_INLINE value_type operator()(int i) const 
+        TMV_INLINE value_type operator()(ptrdiff_t i) const 
         {
             CheckIndex<_fort>(i,size());
             return cref(i);
@@ -677,22 +677,22 @@ namespace tmv {
         TMV_INLINE real_type sumAbs2Elements() const
         { return tmv::DoSumAbs2Elements(calc()); }
 
-        TMV_INLINE value_type maxElement(int* imax=0) const
+        TMV_INLINE value_type maxElement(ptrdiff_t* imax=0) const
         { return tmv::DoMaxElement(calc(),imax); }
 
-        TMV_INLINE float_type maxAbsElement(int* imax=0) const 
+        TMV_INLINE float_type maxAbsElement(ptrdiff_t* imax=0) const 
         { return tmv::DoMaxAbsElement(calc(),imax); }
 
-        TMV_INLINE real_type maxAbs2Element(int* imax=0) const
+        TMV_INLINE real_type maxAbs2Element(ptrdiff_t* imax=0) const
         { return tmv::DoMaxAbs2Element(calc(),imax); }
 
-        TMV_INLINE value_type minElement(int* imin=0) const
+        TMV_INLINE value_type minElement(ptrdiff_t* imin=0) const
         { return tmv::DoMinElement(calc(),imin); }
 
-        TMV_INLINE float_type minAbsElement(int* imin=0) const 
+        TMV_INLINE float_type minAbsElement(ptrdiff_t* imin=0) const 
         { return tmv::DoMinAbsElement(calc(),imin); }
 
-        TMV_INLINE real_type minAbs2Element(int* imin=0) const
+        TMV_INLINE real_type minAbs2Element(ptrdiff_t* imin=0) const
         { return tmv::DoMinAbs2Element(calc(),imin); }
 
         TMV_INLINE float_type norm1() const
@@ -742,10 +742,10 @@ namespace tmv {
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
 
-        TMV_INLINE int size() const { return vec().size(); }
-        TMV_INLINE int nElements() const { return vec().nElements(); }
+        TMV_INLINE ptrdiff_t size() const { return vec().size(); }
+        TMV_INLINE ptrdiff_t nElements() const { return vec().nElements(); }
 
-        TMV_INLINE value_type cref(int i) const  { return vec().cref(i); }
+        TMV_INLINE value_type cref(ptrdiff_t i) const  { return vec().cref(i); }
 
         template <class V2>
         TMV_INLINE void assignTo(BaseVector_Mutable<V2>& v2) const
@@ -835,24 +835,24 @@ namespace tmv {
         //
 
         // cSubVector always uses CStyle
-        const_subvector_type cSubVector(int i1, int i2) const
+        const_subvector_type cSubVector(ptrdiff_t i1, ptrdiff_t i2) const
         { return const_subvector_type(cptr()+i1*step(),i2-i1,step()); }
 
         const_subvector_step_type cSubVector(
-            int i1, int i2, int istep) const
+            ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         {
             return const_subvector_step_type(
                 cptr()+i1*step(), (i2-i1)/istep, istep*step());
         }
 
-        TMV_INLINE const_subvector_type subVector(int i1, int i2) const
+        TMV_INLINE const_subvector_type subVector(ptrdiff_t i1, ptrdiff_t i2) const
         {
             CheckRange<_fort>(i1,i2,size());
             return cSubVector(i1,i2);
         }
 
         TMV_INLINE const_subvector_step_type subVector(
-            int i1, int i2, int istep) const
+            ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         {
             CheckRange<_fort>(i1,i2,istep,size());
             return cSubVector(i1,i2,istep);
@@ -941,10 +941,10 @@ namespace tmv {
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
 
-        TMV_INLINE int size() const { return vec().size(); }
-        TMV_INLINE int step() const { return vec().step(); }
+        TMV_INLINE ptrdiff_t size() const { return vec().size(); }
+        TMV_INLINE ptrdiff_t step() const { return vec().step(); }
         TMV_INLINE const value_type* cptr() const { return vec().cptr(); }
-        TMV_INLINE value_type cref(int i) const  { return vec().cref(i); }
+        TMV_INLINE value_type cref(ptrdiff_t i) const  { return vec().cref(i); }
 
     private:
         void operator=(const BaseVector_Calc<V>&);
@@ -1035,9 +1035,9 @@ namespace tmv {
         // Access 
         //
 
-        TMV_INLINE reference operator[](int i)
+        TMV_INLINE reference operator[](ptrdiff_t i)
         { return operator()(i); }
-        TMV_INLINE reference operator()(int i)
+        TMV_INLINE reference operator()(ptrdiff_t i)
         {
             CheckIndex<_fort>(i,size());
             return ref(i);
@@ -1054,9 +1054,9 @@ namespace tmv {
 
         // We need to repeat the const versions so the non-const ones
         // don't clobber them.
-        TMV_INLINE value_type operator[](int i) const
+        TMV_INLINE value_type operator[](ptrdiff_t i) const
         { return base::operator[](i); }
-        TMV_INLINE value_type operator()(int i) const
+        TMV_INLINE value_type operator()(ptrdiff_t i) const
         { return base::operator()(i); }
 
         TMV_INLINE const_iterator begin() const
@@ -1099,15 +1099,15 @@ namespace tmv {
 
         type& setZero() 
         {
-            const int n=size();
-            for(int i=0;i<n;++i) ref(i) = value_type(0);
+            const ptrdiff_t n=size();
+            for(ptrdiff_t i=0;i<n;++i) ref(i) = value_type(0);
             return vec();
         }
 
         type& clip(float_type thresh) 
         {
-            const int n=size();
-            for(int i=0;i<n;++i) {
+            const ptrdiff_t n=size();
+            for(ptrdiff_t i=0;i<n;++i) {
                 const float_type temp = TMV_ABS(cref(i));
                 if (temp < thresh) ref(i) = value_type(0);
             }
@@ -1116,15 +1116,15 @@ namespace tmv {
 
         type& setAllTo(value_type x) 
         {
-            const int n=size();
-            for(int i=0;i<n;++i) ref(i) = x;
+            const ptrdiff_t n=size();
+            for(ptrdiff_t i=0;i<n;++i) ref(i) = x;
             return vec();
         }
 
         type& addToAll(value_type x) 
         {
-            const int n=size();
-            for(int i=0;i<n;++i) ref(i) += x;
+            const ptrdiff_t n=size();
+            for(ptrdiff_t i=0;i<n;++i) ref(i) += x;
             return vec();
         }
 
@@ -1134,58 +1134,58 @@ namespace tmv {
         template <class F>
         type& applyToAll(const F& f)
         {
-            const int n=size();
-            for(int i=0;i<n;++i) ref(i) = f(cref(i));
+            const ptrdiff_t n=size();
+            for(ptrdiff_t i=0;i<n;++i) ref(i) = f(cref(i));
             return vec();
         }
 
-        type& cMakeBasis(int i, value_type x=value_type(1)) 
+        type& cMakeBasis(ptrdiff_t i, value_type x=value_type(1)) 
         {
             setZero(); ref(i) = x;
             return vec();
         }
-        TMV_INLINE type& makeBasis(int i, value_type x=value_type(1)) 
+        TMV_INLINE type& makeBasis(ptrdiff_t i, value_type x=value_type(1)) 
         {
             CheckIndex<_fort>(i,size());
             return cMakeBasis(i,x);
         }
 
-        type& cSwap(int i1, int i2) 
+        type& cSwap(ptrdiff_t i1, ptrdiff_t i2) 
         {
             TMV_SWAP(ref(i1),ref(i2)); 
             return vec();
         }
-        TMV_INLINE type& swap(int i1, int i2) 
+        TMV_INLINE type& swap(ptrdiff_t i1, ptrdiff_t i2) 
         {
             CheckIndex<_fort>(i1,size());
             CheckIndex<_fort>(i2,size());
             return cSwap(i1,i2);
         }
 
-        type& cPermute(const int* p, int i1, int i2) 
+        type& cPermute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
         {
-            for(int i=i1;i<i2;++i) cSwap(i,p[i]); 
+            for(ptrdiff_t i=i1;i<i2;++i) cSwap(i,p[i]); 
             return vec();
         }
-        TMV_INLINE type& permute(const int* p, int i1, int i2) 
+        TMV_INLINE type& permute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
         {
             CheckRange<_fort>(i1,i2,size());
             return cPermute(p,i1,i2);
         }
-        TMV_INLINE type& permute(const int* p) 
+        TMV_INLINE type& permute(const ptrdiff_t* p) 
         { return cPermute(p,0,size()); }
 
-        type& cReversePermute(const int* p, int i1, int i2) 
+        type& cReversePermute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
         {
-            for(int i=i2;i>i1;) { --i; cSwap(i,p[i]); }
+            for(ptrdiff_t i=i2;i>i1;) { --i; cSwap(i,p[i]); }
             return vec();
         }
-        TMV_INLINE type& reversePermute(const int* p, int i1, int i2) 
+        TMV_INLINE type& reversePermute(const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2) 
         {
             CheckRange<_fort>(i1,i2,size());
             return cReversePermute(p,i1,i2);
         }
-        TMV_INLINE type& reversePermute(const int* p) 
+        TMV_INLINE type& reversePermute(const ptrdiff_t* p) 
         { return cReversePermute(p,0,size()); }
 
         TMV_INLINE type& reverseSelf() 
@@ -1202,22 +1202,22 @@ namespace tmv {
         // SubVector
         //
 
-        subvector_type cSubVector(int i1, int i2) 
+        subvector_type cSubVector(ptrdiff_t i1, ptrdiff_t i2) 
         { return subvector_type(ptr()+i1*step(),i2-i1,step()); }
 
-        subvector_step_type cSubVector(int i1, int i2, int istep) 
+        subvector_step_type cSubVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) 
         {
             return subvector_step_type(
                 ptr()+i1*step(), (i2-i1)/istep, istep*step());
         }
 
-        TMV_INLINE subvector_type subVector(int i1, int i2) 
+        TMV_INLINE subvector_type subVector(ptrdiff_t i1, ptrdiff_t i2) 
         {
             CheckRange<_fort>(i1,i2,size());
             return cSubVector(i1,i2);
         }
 
-        TMV_INLINE subvector_step_type subVector(int i1, int i2, int istep) 
+        TMV_INLINE subvector_step_type subVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) 
         {
             CheckRange<_fort>(i1,i2,istep,size());
             return cSubVector(i1,i2,istep);
@@ -1282,15 +1282,15 @@ namespace tmv {
 
 
         // Repeat the const versions:
-        TMV_INLINE const_subvector_type cSubVector(int i1, int i2) const
+        TMV_INLINE const_subvector_type cSubVector(ptrdiff_t i1, ptrdiff_t i2) const
         { return base::cSubVector(i1,i2); }
         TMV_INLINE const_subvector_step_type cSubVector(
-            int i1, int i2, int istep) const
+            ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         { return base::cSubVector(i1,i2,istep); }
-        TMV_INLINE const_subvector_type subVector(int i1, int i2) const
+        TMV_INLINE const_subvector_type subVector(ptrdiff_t i1, ptrdiff_t i2) const
         { return base::subVector(i1,i2); }
         TMV_INLINE const_subvector_step_type subVector(
-            int i1, int i2, int istep) const
+            ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const
         { return base::subVector(i1,i2,istep); }
         TMV_INLINE const_reverse_type reverse() const
         { return base::reverse(); }
@@ -1365,12 +1365,12 @@ namespace tmv {
         // Note that these last functionsneed to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
 
-        TMV_INLINE int size() const { return vec().size(); }
-        TMV_INLINE int step() const { return vec().step(); }
+        TMV_INLINE ptrdiff_t size() const { return vec().size(); }
+        TMV_INLINE ptrdiff_t step() const { return vec().step(); }
         TMV_INLINE value_type* ptr() { return vec().ptr(); }
         TMV_INLINE const value_type* cptr() { return vec().cptr(); }
-        TMV_INLINE reference ref(int i) { return vec().ref(i); }
-        TMV_INLINE value_type cref(int i) { return vec().cref(i); }
+        TMV_INLINE reference ref(ptrdiff_t i) { return vec().ref(i); }
+        TMV_INLINE value_type cref(ptrdiff_t i) { return vec().cref(i); }
 
     }; // BaseVector_Mutable
 
@@ -1397,16 +1397,16 @@ namespace tmv {
         public BaseVector<VectorSizer<T> >
     {
     public:
-        TMV_INLINE VectorSizer(const int _s) : s(_s) {}
-        TMV_INLINE int size() const { return s; }
+        TMV_INLINE VectorSizer(const ptrdiff_t _s) : s(_s) {}
+        TMV_INLINE ptrdiff_t size() const { return s; }
 
-        TMV_INLINE T cref(int ) const  { return T(0); }
+        TMV_INLINE T cref(ptrdiff_t ) const  { return T(0); }
 
         template <class M2>
         TMV_INLINE void assignTo(BaseVector_Mutable<M2>& ) const {}
 
     private :
-        const int s;
+        const ptrdiff_t s;
     }; // VectorSizer
 
 
@@ -1420,9 +1420,9 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same)); 
         TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::_size,V2::_size>::size;
-        const int n = (size == Unknown ? v1.size() : size);
-        for(int i=0;i<n;++i) if (v1.cref(i) != v2.cref(i)) return false;
+        const ptrdiff_t size = Sizes<V1::_size,V2::_size>::size;
+        const ptrdiff_t n = (size == Unknown ? v1.size() : size);
+        for(ptrdiff_t i=0;i<n;++i) if (v1.cref(i) != v2.cref(i)) return false;
         return true;
     }
 

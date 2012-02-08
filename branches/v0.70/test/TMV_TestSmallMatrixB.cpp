@@ -25,7 +25,8 @@ template <class T> void TestAllSmallMatrixB()
     TestSmallMatrixArith_B6b<T>();
     TestSmallMatrixArith_B6c<T>();
     TestSmallMatrixArith_B6d<T>();
-    TestSmallMatrixArith_B7<T>();
+    TestSmallMatrixArith_B7a<T>();
+    TestSmallMatrixArith_B7b<T>();
     std::cout<<"SmallMatrix<"<<tmv::TMV_Text(T())<<
         "> NonSquare Arithmetic passed all tests\n";
 }

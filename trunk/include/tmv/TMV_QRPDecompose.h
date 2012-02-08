@@ -39,28 +39,28 @@ namespace tmv {
     // Defined in TMV_QRPDecompose.cpp
     template <class T, class RT>
     void InstQRP_Decompose(
-        MatrixView<T> m, VectorView<RT> beta, int* P, bool strict);
+        MatrixView<T> m, VectorView<RT> beta, ptrdiff_t* P, bool strict);
 
-    template <int algo, int cs, int rs, class M, class V>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M, class V>
     struct QRPDecompose_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0 or 1, or N == 0)
-    template <int cs, int rs, class M, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M, class V>
     struct QRPDecompose_Helper<0,cs,rs,M,V>
-    { static TMV_INLINE void call(M& , V& , int* , bool ) {} };
+    { static TMV_INLINE void call(M& , V& , ptrdiff_t* , bool ) {} };
 
     // algo 11: Non-block algorithm, loop over n
     // This is basically the same algorithm for strict and not.
-    template <int cs, int rs, class M1, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V>
     struct QRPDecompose_Helper<11,cs,rs,M1,V>
     {
-        static void call(M1& A, V& beta, int* P, bool strict)
+        static void call(M1& A, V& beta, ptrdiff_t* P, bool strict)
         {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int M = cs==Unknown ? A.colsize() : cs;
-            const int N = rs==Unknown ? A.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRPDecompose algo 11: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -97,7 +97,7 @@ namespace tmv {
             //std::cout<<"maxAbs = "<<A.maxAbsElement()<<std::endl;
             //std::cout<<"maxAbs2 = "<<A.maxAbs2Element()<<std::endl;
             Vector<RT> colnormsq(N);
-            for(int j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
+            for(ptrdiff_t j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
             //std::cout<<"colnormsq = "<<colnormsq<<std::endl;
             RT anormsq = colnormsq.sumElements();
             RT thresh = RT(N) * TMV_SQR(TMV_Epsilon<T>()) * anormsq;
@@ -111,7 +111,7 @@ namespace tmv {
             // recalculate the norms. 
 
             IT bj = beta.begin();
-            for(int j=0;j<N;++j,++bj) {
+            for(ptrdiff_t j=0;j<N;++j,++bj) {
                 //std::cout<<"j = "<<j<<std::endl;
                 //std::cout<<"A = "<<A<<std::endl;
                 if (!(Norm(A) >= 0.)) abort();
@@ -119,7 +119,7 @@ namespace tmv {
                 //std::cout<<"recalcthresh = "<<recalcthresh<<std::endl;
                 if (strict || j==0 || colnormsq(j) < recalcthresh) {
                     // Find the column with the largest norm
-                    int jpiv;
+                    ptrdiff_t jpiv;
                     RT maxnormsq = colnormsq.subVector(j,N).maxElement(&jpiv);
                     //std::cout<<"maxnormsq = "<<maxnormsq<<std::endl;
                     //std::cout<<"jpiv = "<<jpiv<<std::endl;
@@ -131,7 +131,7 @@ namespace tmv {
                     // threshold, then recalc all colnormsq's, and redetermine max.
                     if (maxnormsq < recalcthresh) {
                         //std::cout<<"do recalc\n";
-                        for(int k=j;k<N;++k) 
+                        for(ptrdiff_t k=j;k<N;++k) 
                             colnormsq(k) = A.col(k,j,M).normSq(scale);
                         //std::cout<<"colnormsq => "<<colnormsq<<std::endl;
                         maxnormsq = colnormsq.subVector(j,N).maxElement(&jpiv);
@@ -187,7 +187,7 @@ namespace tmv {
                 //std::cout<<"Norm(A) = "<<Norm(A)<<std::endl;
 
                 // And update the norms for use with the next column
-                for(int k=j+1;k<N;++k) {
+                for(ptrdiff_t k=j+1;k<N;++k) {
                     colnormsq(k) -= TMV_NORM(A.cref(j,k)*scale);
                 }
             }
@@ -211,7 +211,7 @@ namespace tmv {
                 std::cerr<<"-> "<<A<<std::endl;
                 std::cerr<<"beta = "<<beta<<std::endl;
                 std::cerr<<"P = ";
-                for(int i=0;i<A.rowsize();i++) std::cerr<<P[i]<<" ";
+                for(ptrdiff_t i=0;i<A.rowsize();i++) std::cerr<<P[i]<<" ";
                 std::cerr<<std::endl;
                 std::cerr<<"QRP = "<<AA<<std::endl;
                 std::cerr<<"A0 = "<<A0<<std::endl;
@@ -224,16 +224,16 @@ namespace tmv {
     };
 
     // algo 21: Block strict algorithm
-    template <int cs, int rs, class M1, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V>
     struct QRPDecompose_Helper<21,cs,rs,M1,V>
     {
-        static void call(M1& A, V& beta, int* P, bool)
+        static void call(M1& A, V& beta, ptrdiff_t* P, bool)
         {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int M = cs==Unknown ? A.colsize() : cs;
-            const int N = rs==Unknown ? A.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRPDecompose algo 21: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -260,7 +260,7 @@ namespace tmv {
             //std::cout<<"maxAbs = "<<A.maxAbsElement()<<std::endl;
             //std::cout<<"maxAbs2 = "<<A.maxAbs2Element()<<std::endl;
             Vector<RT> colnormsq(N);
-            for(int j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
+            for(ptrdiff_t j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
             RT anormsq = colnormsq.sumElements();
             RT thresh = RT(N) * TMV_SQR(TMV_Epsilon<T>()) * anormsq;
             RT recalcthresh(0);
@@ -270,8 +270,8 @@ namespace tmv {
             typedef typename M1::row_sub_type M1r;
             typedef typename M1::submatrix_type M1s;
 
-            const int Nx = TMV_QR_BLOCKSIZE;
-            const int rs1 = IntTraits2<rs,Nx>::min;
+            const ptrdiff_t Nx = TMV_QR_BLOCKSIZE;
+            const ptrdiff_t rs1 = IntTraits2<rs,Nx>::min;
             typedef typename VCopyHelper<T,rs1>::type V2;
             typedef typename V2::subvector_type V2s;
             V2 tempBase = VectorSizer<T>(TMV_MIN(N,Nx));
@@ -279,23 +279,23 @@ namespace tmv {
             // We keep track of the product ZYtA(j1:M,j1:N) [ stored as ZYtA ]
             // since this is the product that we need.  We update this one 
             // row at a time.
-            const int cs1 = IntTraits2<cs,Nx>::min;
+            const ptrdiff_t cs1 = IntTraits2<cs,Nx>::min;
             typedef typename MCopyHelper<T,Rec,cs1,rs,RowMajor>::type M3;
             M3 ZYtA = MatrixSizer<T>(TMV_MIN(M,Nx),N);
             // TODO: Would this be faster for the regular QRDecomposition too?
             // i.e. Rather than using the normal BlockHouseholder calls.
 
             IT bj = beta.begin();
-            for(int j1=0;j1<N;) {
-                int j2 = TMV_MIN(N,j1+Nx);
+            for(ptrdiff_t j1=0;j1<N;) {
+                ptrdiff_t j2 = TMV_MIN(N,j1+Nx);
                 //std::cout<<"Start block "<<j1<<" .. "<<j2<<std::endl;
                 //std::cout<<"A = "<<A<<std::endl;
-                for(int j=j1,jmj1=0; j<j2; ) {
+                for(ptrdiff_t j=j1,jmj1=0; j<j2; ) {
                     //std::cout<<"Start j = "<<j<<std::endl;
                     //std::cout<<"A = "<<A<<std::endl;
                     //std::cout<<"colnormsq = "<<colnormsq<<std::endl;
                     //std::cout<<"recalcthresh = "<<recalcthresh<<std::endl;
-                    int jpiv;
+                    ptrdiff_t jpiv;
                     RT maxnormsq = colnormsq.subVector(j,N).maxElement(&jpiv);
                     //std::cout<<"maxnormsq = "<<maxnormsq<<std::endl;
                     //std::cout<<"jpiv = "<<jpiv<<std::endl;
@@ -312,7 +312,7 @@ namespace tmv {
                         // indicate to end the block, which will update the columns.
                         // Then next time through, we can do the recalc as needed.
                         if (j==j1) {
-                            for(int k=j;k<N;++k) 
+                            for(ptrdiff_t k=j;k<N;++k) 
                                 colnormsq(k) = A.col(k,j,M).normSq(scale);
                             recalcthresh = RT(0);
                         }
@@ -394,7 +394,7 @@ namespace tmv {
                         Arowj -= ZYtA.row(jmj1,j+1,N);
 
                         // Update the colnormsq values
-                        for(int k=j+1;k<N;++k) {
+                        for(ptrdiff_t k=j+1;k<N;++k) {
                             colnormsq(k) -= TMV_NORM(A.cref(j,k)*scale);
                         }
                         ++j; ++jmj1; ++bj;
@@ -434,7 +434,7 @@ namespace tmv {
                 std::cerr<<"-> "<<A<<std::endl;
                 std::cerr<<"beta = "<<beta<<std::endl;
                 std::cerr<<"P = ";
-                for(int i=0;i<A.rowsize();i++) std::cerr<<P[i]<<" ";
+                for(ptrdiff_t i=0;i<A.rowsize();i++) std::cerr<<P[i]<<" ";
                 std::cerr<<std::endl;
                 std::cerr<<"QRP = "<<AA<<std::endl;
                 std::cerr<<"A0 = "<<A0<<std::endl;
@@ -444,7 +444,7 @@ namespace tmv {
                 typedef typename V::copy_type Vc;
                 M1c A2 = A0;
                 Vc beta2 = beta;
-                int* P2 = new int[beta.size()];
+                ptrdiff_t* P2 = new ptrdiff_t[beta.size()];
                 QRPDecompose_Helper<11,cs,rs,M1c,Vc>::call(A2,beta2,P2,true);
                 std::cout<<"Algo 11:\n";
                 std::cout<<"A = "<<A<<std::endl;
@@ -456,9 +456,9 @@ namespace tmv {
                 std::cout<<"diff = "<<beta2-beta<<std::endl;
                 std::cout<<"Norm(b2-b) = "<<Norm(beta2-beta)<<std::endl;
                 std::cerr<<"P = ";
-                for(int i=0;i<A.rowsize();i++) std::cerr<<P[i]<<" ";
+                for(ptrdiff_t i=0;i<A.rowsize();i++) std::cerr<<P[i]<<" ";
                 std::cerr<<"\nP2 = ";
-                for(int i=0;i<A.rowsize();i++) std::cerr<<P2[i]<<" ";
+                for(ptrdiff_t i=0;i<A.rowsize();i++) std::cerr<<P2[i]<<" ";
                 std::cerr<<"\n";
                 abort(); 
             }
@@ -467,7 +467,7 @@ namespace tmv {
     };
 
     // algo 22: Block non-strict algorithm
-    template <int cs, int rs, class M1, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V>
     struct QRPDecompose_Helper<22,cs,rs,M1,V>
     {
         typedef typename M1::value_type T;
@@ -475,8 +475,8 @@ namespace tmv {
 
         template <class RT, class M> 
         static void moveLowColsToEnd(
-            Vector<RT>& colnormsq, RT thresh, int j1, int& j2, int& j3,
-            M& A, int* P)
+            Vector<RT>& colnormsq, RT thresh, ptrdiff_t j1, ptrdiff_t& j2, ptrdiff_t& j3,
+            M& A, ptrdiff_t* P)
         {
             // Move all columns of A (whose norms are in colnormsq) with norms
             // less than thresh to the end.  j1 is the first column we need to 
@@ -492,7 +492,7 @@ namespace tmv {
                 return;
             }
             if (j3 < j2) j2 = j3+1;
-            for(int i=j1;i<j2;++i) {
+            for(ptrdiff_t i=j1;i<j2;++i) {
                 if (colnormsq(i) < thresh) {
                     TMVAssert(j3 < A.rowsize());
                     A.swapCols(i,j3);
@@ -507,12 +507,12 @@ namespace tmv {
 
 #ifdef XDEBUG_QR
         static void checkIndex(
-            const Vector<double>& index, const int* P, int j1)
+            const Vector<double>& index, const ptrdiff_t* P, ptrdiff_t j1)
         {
-            const int N = index.size();
+            const ptrdiff_t N = index.size();
             Vector<double> index2(N);
-            for(int k=0;k<N;k++) index2(k) = double(k);
-            for(int k=0;k<j1;k++) index2.swap(k,P[k]);
+            for(ptrdiff_t k=0;k<N;k++) index2(k) = double(k);
+            for(ptrdiff_t k=0;k<j1;k++) index2.swap(k,P[k]);
             if (Norm(index-index2) > 0.01) {
                 std::cout<<"index = "<<index<<std::endl;
                 std::cout<<"index2 = "<<index2<<std::endl;
@@ -522,10 +522,10 @@ namespace tmv {
         }
 #endif
 
-        static void call(M1& A, V& beta, int* P, bool)
+        static void call(M1& A, V& beta, ptrdiff_t* P, bool)
         {
-            const int M = cs==Unknown ? A.colsize() : cs;
-            const int N = rs==Unknown ? A.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRPDecompose algo 22: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -552,9 +552,9 @@ namespace tmv {
             typedef typename M1::submatrix_type M1s;
             typedef typename V::iterator IT;
 
-            const int Nx = TMV_QR_BLOCKSIZE;
-            const int s1 = IntTraits2<Nx,rs>::min;
-            const int N1 = TMV_MIN(Nx,N);
+            const ptrdiff_t Nx = TMV_QR_BLOCKSIZE;
+            const ptrdiff_t s1 = IntTraits2<Nx,rs>::min;
+            const ptrdiff_t N1 = TMV_MIN(Nx,N);
             typedef typename MCopyHelper<T,UpperTri,s1,s1>::type Ztype;
             typedef typename Ztype::subtrimatrix_type Zs;
             Ztype BaseZ = MatrixSizer<T>(N1,N1);
@@ -569,7 +569,7 @@ namespace tmv {
             //std::cout<<"maxAbs = "<<A.maxAbsElement()<<std::endl;
             //std::cout<<"maxAbs2 = "<<A.maxAbs2Element()<<std::endl;
             Vector<RT> colnormsq(N);
-            for(int j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
+            for(ptrdiff_t j=0;j<N;++j) colnormsq(j) = A.col(j).normSq(scale);
             //std::cout<<"colnormsq = "<<colnormsq<<std::endl;
             RT anormsq = colnormsq.sumElements();
             RT thresh = RT(N) * TMV_SQR(TMV_Epsilon<T>()) * anormsq;
@@ -579,19 +579,19 @@ namespace tmv {
 
 #ifdef XDEBUG_QR
             Vector<double> index(N);
-            for(int k=0;k<N;k++) index(k) = double(k);
+            for(ptrdiff_t k=0;k<N;k++) index(k) = double(k);
 #endif
 
             IT bj = beta.begin();
-            for (int j1 = 0; j1 < N;) {
+            for (ptrdiff_t j1 = 0; j1 < N;) {
                 // Do as many columns as possible such that none have to have 
                 // their norms recalculated.
-                int j3=N; // j3 will be how many we have done in this loop
+                ptrdiff_t j3=N; // j3 will be how many we have done in this loop
                 // Invariant: all columns from j3..N are known to have norms that
                 // need to be recalculated.
                 // The recalculation is done at the end of the loop.
 
-                int jpiv0;
+                ptrdiff_t jpiv0;
                 RT maxnormsq = colnormsq.subVector(j1,N).maxElement(&jpiv0);
                 //std::cout<<"j1 = "<<j1<<", j3 = "<<j3<<", jpiv = "<<jpiv0<<std::endl;
                 //std::cout<<"colnormsq = "<<colnormsq<<std::endl;
@@ -627,26 +627,26 @@ namespace tmv {
                 if (recalcthresh < thresh) recalcthresh = thresh;
 
                 TMVAssert(j1<j3);
-                int j1x = j1+1; 
+                ptrdiff_t j1x = j1+1; 
                 // The first pass through, we don't want to include j1 in the 
                 // moveLowColsToEnd call.
 
                 // Work on this one block at a time:
                 while (j1 < j3) {
-                    int j2 = TMV_MIN(j3,j1+Nx);
+                    ptrdiff_t j2 = TMV_MIN(j3,j1+Nx);
                     //std::cout<<"j1,j2,j3 = "<<j1<<','<<j2<<','<<j3<<std::endl;
                     TMVAssert(j1 - j2 < 0);
                     moveLowColsToEnd(colnormsq,recalcthresh,j1x,j2,j3,A,P);
 #ifdef XDEBUG_QR
-                    for(int k=j1x;k<j2;k++) index.swap(k,P[k]);
+                    for(ptrdiff_t k=j1x;k<j2;k++) index.swap(k,P[k]);
                     checkIndex(index,P,j2);
 #endif
 
-                    int origj2 = j2;
+                    ptrdiff_t origj2 = j2;
                     typename Ztype::subtrimatrix_type Z = 
                         BaseZ.subTriMatrix(0,j2-j1);
 
-                    for(int j=j1; j<j2; ++j, ++bj) {
+                    for(ptrdiff_t j=j1; j<j2; ++j, ++bj) {
                         //std::cout<<"j = "<<j<<std::endl;
                         //std::cout<<"j1,j2,j3,origj2 = "<<j1<<','<<j2<<','<<j3<<','<<origj2<<std::endl;
 
@@ -718,7 +718,7 @@ namespace tmv {
                         // j2..origj2 columns are those with low norm already -
                         // we don't need those values until we recalculate them 
                         // from scratch anyway.)
-                        for(int k=j+1;k<j2;++k) 
+                        for(ptrdiff_t k=j+1;k<j2;++k) 
                             colnormsq(k) -= TMV_NORM(A.cref(j,k)*scale);
                         //std::cout<<"colnormsq => "<<colnormsq<<std::endl;
                     }
@@ -740,10 +740,10 @@ namespace tmv {
 
                         // Update the colnormsq values for the rest of the matrix:
                         if (M-j2 > j2-j1)
-                            for(int k=origj2;k<N;++k) colnormsq(k) -= 
+                            for(ptrdiff_t k=origj2;k<N;++k) colnormsq(k) -= 
                                 A.col(k,j1,j2).normSq(scale);
                         else 
-                            for(int k=origj2;k<N;++k) colnormsq(k) = 
+                            for(ptrdiff_t k=origj2;k<N;++k) colnormsq(k) = 
                                 A.col(k,j2,M).normSq(scale);
                     }
 
@@ -752,7 +752,7 @@ namespace tmv {
 #endif
                     // Put the bad columns back where they started before this 
                     // loop:
-                    for(int j=j2; j<origj2; ++j) if (P[j] > j2) {
+                    for(ptrdiff_t j=j2; j<origj2; ++j) if (P[j] > j2) {
                         TMVAssert(P[j] < A.rowsize());
                         A.swapCols(j,P[j]);
                         colnormsq.swap(j,P[j]);
@@ -770,7 +770,7 @@ namespace tmv {
                 if (j3 < N) {
                     //std::cout<<"recalculate colnorms\n";
                     // Then need to recalculate some of the colnorms:
-                    for(int k=j3;k<N;++k) 
+                    for(ptrdiff_t k=j3;k<N;++k) 
                         colnormsq(k) = A.col(k,j3,M).normSq(scale);
                     //std::cout<<"colnormsq = "<<colnormsq<<std::endl;
                 }
@@ -803,7 +803,7 @@ namespace tmv {
                     std::cerr<<"-> "<<A<<std::endl;
                     std::cerr<<"beta = "<<beta<<std::endl;
                     std::cerr<<"P = ";
-                    for(int i=0;i<N;i++) std::cerr<<P[i]<<" ";
+                    for(ptrdiff_t i=0;i<N;i++) std::cerr<<P[i]<<" ";
                     std::cerr<<std::endl;
                     std::cerr<<"QRP = "<<AA<<std::endl;
                     std::cerr<<"A0 = "<<A0<<std::endl;
@@ -818,20 +818,20 @@ namespace tmv {
     };
 
     // algo 31: Decide which algorithm to use from runtime size
-    template <int cs, int rs, class M1, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V>
     struct QRPDecompose_Helper<31,cs,rs,M1,V>
     {
-        static void call(M1& A, V& beta, int* P, bool strict)
+        static void call(M1& A, V& beta, ptrdiff_t* P, bool strict)
         {
             typedef typename M1::value_type T;
 
-            const int N = rs==Unknown ? A.rowsize() : rs;
-            const int M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRPDecompose algo 31: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
+            const ptrdiff_t l2cache = TMV_L2_CACHE*1024/sizeof(T);
 
 #ifdef PRINTALGO_QR
             std::cout<<"M*N = "<<M*N<<std::endl;
@@ -850,14 +850,14 @@ namespace tmv {
     };
 
     // algo 32: Call strict or non-strict algorithm according to strict param.
-    template <int cs, int rs, class M1, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V>
     struct QRPDecompose_Helper<32,cs,rs,M1,V>
     {
-        static void call(M1& A, V& beta, int* P, bool strict)
+        static void call(M1& A, V& beta, ptrdiff_t* P, bool strict)
         {
 #ifdef PRINTALGO_QR
-            const int M = cs==Unknown ? A.colsize() : cs;
-            const int N = rs==Unknown ? A.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
             std::cout<<"QRPDecompose algo 32: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -869,10 +869,10 @@ namespace tmv {
     };
 
     // algo 81: Copy to colmajor
-    template <int cs, int rs, class M, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M, class V>
     struct QRPDecompose_Helper<81,cs,rs,M,V>
     {
-        static inline void call(M& m, V& beta, int* P, bool strict)
+        static inline void call(M& m, V& beta, ptrdiff_t* P, bool strict)
         {
 #ifdef PRINTALGO_QR
             std::cout<<"QRPDecompose algo 81: cs,rs = "<<cs<<','<<rs<<std::endl;
@@ -887,18 +887,18 @@ namespace tmv {
     };
 
     // algo 90: call InstQRP_Decompose
-    template <int cs, int rs, class M, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M, class V>
     struct QRPDecompose_Helper<90,cs,rs,M,V>
     {
-        static TMV_INLINE void call(M& m, V& beta, int* P, bool strict)
+        static TMV_INLINE void call(M& m, V& beta, ptrdiff_t* P, bool strict)
         { InstQRP_Decompose(m.xView(),beta.xView(),P,strict); }
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, class M, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M, class V>
     struct QRPDecompose_Helper<97,cs,rs,M,V>
     {
-        static TMV_INLINE void call(M& m, V& beta, int* P, bool strict)
+        static TMV_INLINE void call(M& m, V& beta, ptrdiff_t* P, bool strict)
         {
             typedef typename M::conjugate_type Mc;
             Mc mc = m.conjugate();
@@ -907,14 +907,14 @@ namespace tmv {
     };
 
     // algo -4: No copies or branches
-    template <int cs, int rs, class M, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M, class V>
     struct QRPDecompose_Helper<-4,cs,rs,M,V>
     {
-        static TMV_INLINE void call(M& m, V& beta, int* P, bool strict)
+        static TMV_INLINE void call(M& m, V& beta, ptrdiff_t* P, bool strict)
         {
             typedef typename M::value_type T;
-            const int csrs = IntTraits2<cs,rs>::prod;
-            const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
+            const ptrdiff_t csrs = IntTraits2<cs,rs>::prod;
+            const ptrdiff_t l2cache = TMV_L2_CACHE*1024/sizeof(T);
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
@@ -940,10 +940,10 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V>
     struct QRPDecompose_Helper<-3,cs,rs,M1,V>
     {
-        static TMV_INLINE void call(M1& m, V& beta, int* P, bool strict)
+        static TMV_INLINE void call(M1& m, V& beta, ptrdiff_t* P, bool strict)
         {
             const int algo = (
                 ( cs != Unknown && rs != Unknown &&
@@ -951,8 +951,8 @@ namespace tmv {
                 ( TMV_OPT >= 2 && !M1::_colmajor ) ? 81 :
                 -4 );
 #ifdef PRINTALGO_QR
-            const int M = cs==Unknown ? m.colsize() : cs;
-            const int N = rs==Unknown ? m.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? m.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? m.rowsize() : rs;
             std::cout<<"QRPDecompose algo -3: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
@@ -964,10 +964,10 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class M, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M, class V>
     struct QRPDecompose_Helper<-2,cs,rs,M,V>
     {
-        static TMV_INLINE void call(M& m, V& beta, int* P, bool strict)
+        static TMV_INLINE void call(M& m, V& beta, ptrdiff_t* P, bool strict)
         {
             typedef typename M::value_type T;
             const bool inst = 
@@ -983,20 +983,20 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class M, class V>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M, class V>
     struct QRPDecompose_Helper<-1,cs,rs,M,V>
     {
-        static TMV_INLINE void call(M& m, V& beta, int* P, bool strict)
+        static TMV_INLINE void call(M& m, V& beta, ptrdiff_t* P, bool strict)
         { QRPDecompose_Helper<-2,cs,rs,M,V>::call(m,beta,P,strict); }
     };
 
     template <class M, class V>
     inline void InlineQRP_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, BaseVector_Mutable<V>& beta,
-        int* P, bool strict=false)
+        ptrdiff_t* P, bool strict=false)
     {
-        const int cs = M::_colsize;
-        const int rs = Sizes<M::_rowsize,V::_size>::size;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = Sizes<M::_rowsize,V::_size>::size;
         typedef typename M::cview_type Mv;
         typedef typename V::cview_type Vv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
@@ -1008,7 +1008,7 @@ namespace tmv {
     template <class M, class V>
     inline void QRP_Decompose(
         BaseMatrix_Rec_Mutable<M>& m, BaseVector_Mutable<V>& beta,
-        int* P, bool strict=false)
+        ptrdiff_t* P, bool strict=false)
     {
         TMVStaticAssert(V::isreal);
         TMVStaticAssert((Traits2<
@@ -1019,8 +1019,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<M::_rowsize,V::_size>::same));
         TMVAssert(m.rowsize() == beta.size());
 
-        const int cs = M::_colsize;
-        const int rs = Sizes<M::_rowsize,V::_size>::size;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = Sizes<M::_rowsize,V::_size>::size;
         typedef typename M::cview_type Mv;
         typedef typename V::cview_type Vv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
@@ -1039,7 +1039,6 @@ namespace tmv {
         P.allocateMem();
         QRP_Decompose(m,beta,P.getMem(),strict);
         P.isinv = false;
-        P.calcDet();
     }
 
     // The rest of these below are basically convenience functions
@@ -1088,7 +1087,7 @@ namespace tmv {
             static_cast<BaseMatrix_Tri_Mutable<M2>&>(R),P,strict); 
     }
 
-    template <class T, int M, int N, int Si, int Sj, int A, int Si2, int Sj2, int A2>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
     inline void QRP_Decompose(
         SmallMatrixView<T,M,N,Si,Sj,A> Q,
         SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> R,
@@ -1101,7 +1100,7 @@ namespace tmv {
             static_cast<BaseMatrix_Tri_Mutable<M2>&>(R),P,strict);
     }
 
-    template <class T, int N, int A, int Si2, int Sj2, int A2>
+    template <class T, ptrdiff_t N, int A, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
     inline void QRP_Decompose(
         MatrixView<T,A> Q,
         SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> R,
@@ -1114,7 +1113,7 @@ namespace tmv {
             static_cast<BaseMatrix_Tri_Mutable<M2>&>(R),P,strict);
     }
 
-    template <class T, int M, int N, int Si, int Sj, int A, int A2>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A, int A2>
     inline void QRP_Decompose(
         SmallMatrixView<T,M,N,Si,Sj,A> Q,
         UpperTriMatrixView<T,A2> R,
@@ -1134,7 +1133,7 @@ namespace tmv {
         QRP_Decompose(static_cast<BaseMatrix_Rec_Mutable<M1>&>(m),strict);
     }
 
-    template <class T, int M, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     inline void QRP_Decompose(
         SmallMatrixView<T,M,N,Si,Sj,A> m, bool strict=false)
     {
@@ -1163,7 +1162,7 @@ namespace tmv {
             Q,static_cast<BaseMatrix_Tri_Mutable<M2>&>(R),P,strict); 
     }
 
-    template <class T, int M, int N, int Si, int Sj, int A, class M2>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A, class M2>
     inline void QRP_Decompose(
         SmallMatrixView<T,M,N,Si,Sj,A> Q, BaseMatrix_Tri_Mutable<M2>& R,
         Permutation& P, bool strict=false)
@@ -1173,7 +1172,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<M1>&>(Q),R,P,strict);
     }
 
-    template <class M1, class T, int N, int Si2, int Sj2, int A2>
+    template <class M1, class T, ptrdiff_t N, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
     inline void QRP_Decompose(
         BaseMatrix_Rec_Mutable<M1>& Q,
         SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> R,

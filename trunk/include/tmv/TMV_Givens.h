@@ -281,11 +281,11 @@ namespace tmv {
     // GivensMult of a pair of vectors
     //
     
-    template <int also, int size, class T, class V1, class V2>
+    template <int also, ptrdiff_t size, class T, class V1, class V2>
     struct GivensMultV_Helper;
 
     // algo 0: size == 0, nothing to do
-    template <int size, class T, class V1, class V2>
+    template <ptrdiff_t size, class T, class V1, class V2>
     struct GivensMultV_Helper<0,size,T,V1,V2>
     {
         typedef typename Traits<T>::real_type RT;
@@ -293,7 +293,7 @@ namespace tmv {
     };
 
     // algo 11: simple for loop
-    template <int size, class T, class V1, class V2>
+    template <ptrdiff_t size, class T, class V1, class V2>
     struct GivensMultV_Helper<11,size,T,V1,V2>
     {
         typedef typename Traits<T>::real_type RT;
@@ -303,7 +303,7 @@ namespace tmv {
             TMVAssert(!SameStorage(v1,v2));
             TMVStaticAssert(!V1::_conj);
             TMVStaticAssert(!V2::_conj);
-            int N = size == Unknown ? v2.size() : size;
+            ptrdiff_t N = size == Unknown ? v2.size() : size;
 
             typedef typename V1::iterator IT1;
             typedef typename V2::iterator IT2;
@@ -324,7 +324,7 @@ namespace tmv {
     };
 
     // algo 12: 2 at a time
-    template <int size, class T, class V1, class V2>
+    template <ptrdiff_t size, class T, class V1, class V2>
     struct GivensMultV_Helper<12,size,T,V1,V2>
     {
         typedef typename Traits<T>::real_type RT;
@@ -334,9 +334,9 @@ namespace tmv {
             TMVAssert(!SameStorage(v1,v2));
             TMVStaticAssert(!V1::_conj);
             TMVStaticAssert(!V2::_conj);
-            const int N = size == Unknown ? v2.size() : size;
-            int N_2 = (N >> 1);
-            const int N_x = N - (N_2 << 1);
+            const ptrdiff_t N = size == Unknown ? v2.size() : size;
+            ptrdiff_t N_2 = (N >> 1);
+            const ptrdiff_t N_x = N - (N_2 << 1);
 
             typedef typename V1::iterator IT1;
             typedef typename V2::iterator IT2;
@@ -366,7 +366,7 @@ namespace tmv {
     };
 
     // algo 13: 4 at a time
-    template <int size, class T, class V1, class V2>
+    template <ptrdiff_t size, class T, class V1, class V2>
     struct GivensMultV_Helper<13,size,T,V1,V2>
     {
         typedef typename Traits<T>::real_type RT;
@@ -376,9 +376,9 @@ namespace tmv {
             TMVAssert(!SameStorage(v1,v2));
             TMVStaticAssert(!V1::_conj);
             TMVStaticAssert(!V2::_conj);
-            const int N = size == Unknown ? v2.size() : size;
-            int N_4 = (N >> 2);
-            int N_x = N - (N_4 << 2);
+            const ptrdiff_t N = size == Unknown ? v2.size() : size;
+            ptrdiff_t N_4 = (N >> 2);
+            ptrdiff_t N_x = N - (N_4 << 2);
 
             typedef typename V1::iterator IT1;
             typedef typename V2::iterator IT2;
@@ -414,7 +414,7 @@ namespace tmv {
     // TODO: SSE versions
 
     // algo 90: Call inst
-    template <int size, class T, class V1, class V2>
+    template <ptrdiff_t size, class T, class V1, class V2>
     struct GivensMultV_Helper<90,size,T,V1,V2>
     {
         typedef typename Traits<T>::real_type RT;
@@ -423,7 +423,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int size, class T, class V1, class V2>
+    template <ptrdiff_t size, class T, class V1, class V2>
     struct GivensMultV_Helper<97,size,T,V1,V2>
     {
         typedef typename Traits<T>::real_type RT;
@@ -438,7 +438,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int size, class T, class V1, class V2>
+    template <ptrdiff_t size, class T, class V1, class V2>
     struct GivensMultV_Helper<-3,size,T,V1,V2>
     {
         typedef typename Traits<T>::real_type RT;
@@ -453,7 +453,7 @@ namespace tmv {
             typedef typename V2::value_type T2;
             TMVStaticAssert((Traits2<T1,T2>::sametype));
 
-            const int allunit = V1::_step == 1 && V2::_step == 1;
+            const bool allunit = V1::_step == 1 && V2::_step == 1;
             const bool sreal = Traits<T>::isreal;
             const bool vreal = Traits<T1>::isreal;
             const int algo = 
@@ -474,7 +474,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int size, class T, class V1, class V2>
+    template <ptrdiff_t size, class T, class V1, class V2>
     struct GivensMultV_Helper<-2,size,T,V1,V2>
     {
         typedef typename Traits<T>::real_type RT;
@@ -500,7 +500,7 @@ namespace tmv {
         }
     };
 
-    template <int size, class T, class V1, class V2>
+    template <ptrdiff_t size, class T, class V1, class V2>
     struct GivensMultV_Helper<-1,size,T,V1,V2>
     {
         typedef typename Traits<T>::real_type RT;
@@ -521,7 +521,7 @@ namespace tmv {
 
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
         TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::_size,V2::_size>::size;
+        const ptrdiff_t size = Sizes<V1::_size,V2::_size>::size;
 
         typedef typename V1::cview_type V1v;
         typedef typename V2::cview_type V2v;
@@ -543,7 +543,7 @@ namespace tmv {
 
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
         TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::_size,V2::_size>::size;
+        const ptrdiff_t size = Sizes<V1::_size,V2::_size>::size;
 
         typedef typename V1::cview_type V1v;
         typedef typename V2::cview_type V2v;

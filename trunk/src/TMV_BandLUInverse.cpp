@@ -64,7 +64,7 @@ namespace tmv {
 
     template <class T, class T1> 
     void LU_Inverse(
-        const GenBandMatrix<T1>& LUx, const int* p, const MatrixView<T>& minv)
+        const GenBandMatrix<T1>& LUx, const ptrdiff_t* p, const MatrixView<T>& minv)
     {
         TMVAssert(LUx.isSquare());
         TMVAssert(minv.isSquare());
@@ -99,7 +99,7 @@ namespace tmv {
             cerr<<"LUInverse:\n";
             cerr<<"LUx = "<<LUx<<endl;
             cerr<<"p = ";
-            for(int i=0;i<LUx.colsize();i++) cerr<<p[i]<<" ";
+            for(ptrdiff_t i=0;i<LUx.colsize();i++) cerr<<p[i]<<" ";
             cerr<<endl;
             cerr<<"PLU = "<<PLU<<endl;
             cerr<<"minv = "<<minv<<endl;
@@ -114,13 +114,13 @@ namespace tmv {
     }
 
     template <bool unit, class T> 
-    static void RecursiveInverse(const UpperTriMatrixView<T>& U, int nhi)
+    static void RecursiveInverse(const UpperTriMatrixView<T>& U, ptrdiff_t nhi)
     {
         TMVAssert(U.iscm() || U.isrm());
         TMVAssert(unit == U.isunit());
 
-        const int N = U.size();
-        const int nb = TRI_DIV_BLOCKSIZE;
+        const ptrdiff_t N = U.size();
+        const ptrdiff_t nb = TRI_DIV_BLOCKSIZE;
 
         if (N == 1) {
             if (!unit) {
@@ -140,7 +140,7 @@ namespace tmv {
                 *Uptr = TMV_RealType(T)(1) / (*Uptr);
             }
         } else {
-            int k = N/2;
+            ptrdiff_t k = N/2;
             if (k > nb) k = k/nb*nb;
 
             UpperTriMatrixView<T> U00 = U.subTriMatrix(0,k);
@@ -163,7 +163,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static inline void DoInverse(const UpperTriMatrixView<T>& U, int nhi)
+    static inline void DoInverse(const UpperTriMatrixView<T>& U, ptrdiff_t nhi)
     {
 #ifndef NOTHROW
         try {
@@ -178,7 +178,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void TriInverse(const UpperTriMatrixView<T>& U, int nhi)
+    void TriInverse(const UpperTriMatrixView<T>& U, ptrdiff_t nhi)
     {
 #ifdef XDEBUG
         Matrix<T> U0(U);

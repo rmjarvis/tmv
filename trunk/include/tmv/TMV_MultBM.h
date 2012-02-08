@@ -56,11 +56,11 @@ namespace tmv {
     // BandMatrix * Matrix
     //
 
-    template <int algo, int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper;
 
     // algo 0: Trivial, nothing to do.
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<0,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -69,7 +69,7 @@ namespace tmv {
     };
 
     // algo 1: Trivial, just m3.setZero();
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<1,cs,rs,xs,false,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -78,15 +78,15 @@ namespace tmv {
     };
 
     // algo 2: cs == 1, so reduces to MultBV
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<2,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_BM
-            const int N = rs==Unknown ? m3.rowsize() : rs;
-            const int K = xs==Unknown ? m1.rowsize() : xs;
+            const ptrdiff_t N = rs==Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t K = xs==Unknown ? m1.rowsize() : xs;
             std::cout<<"MB algo 2: M,N,K,cs,rs,xs,x = "<<1<<','<<N<<','<<K<<
                 ','<<1<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -94,7 +94,7 @@ namespace tmv {
             typedef typename M2::const_colrange_type M2cr;
             typedef typename M2cr::const_transpose_type M2crt;
             typedef typename M3::row_type M3r;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             M1r m1r = m1.get_row(0,0,m1.nhi()+1);
             M2crt m2t = m2.cColRange(0,m1.nhi()+1).transpose();
             M3r m3r = m3.get_row(0);
@@ -103,15 +103,15 @@ namespace tmv {
     };
 
     // algo 102: same as 2, but use -1 algo
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<102,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_BM
-            const int N = rs==Unknown ? m3.rowsize() : rs;
-            const int K = xs==Unknown ? m1.rowsize() : xs;
+            const ptrdiff_t N = rs==Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t K = xs==Unknown ? m1.rowsize() : xs;
             std::cout<<"MB algo 102: M,N,K,cs,rs,xs,x = "<<1<<','<<N<<','<<K<<
                 ','<<1<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -119,7 +119,7 @@ namespace tmv {
             typedef typename M2::const_colrange_type M2cr;
             typedef typename M2cr::const_transpose_type M2crt;
             typedef typename M3::row_type M3r;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             M1r m1r = m1.get_row(0,0,m1.nhi()+1);
             M2crt m2t = m2.cColRange(0,m1.nhi()+1).transpose();
             M3r m3r = m3.get_row(0);
@@ -128,15 +128,15 @@ namespace tmv {
     };
 
     // algo 202: same as 2, but use -2 algo
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<202,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_BM
-            const int N = rs==Unknown ? m3.rowsize() : rs;
-            const int K = xs==Unknown ? m1.rowsize() : xs;
+            const ptrdiff_t N = rs==Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t K = xs==Unknown ? m1.rowsize() : xs;
             std::cout<<"MB algo 202: M,N,K,cs,rs,xs,x = "<<1<<','<<N<<','<<K<<
                 ','<<1<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -144,7 +144,7 @@ namespace tmv {
             typedef typename M2::const_colrange_type M2cr;
             typedef typename M2cr::const_transpose_type M2crt;
             typedef typename M3::row_type M3r;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             M1r m1r = m1.get_row(0,0,m1.nhi()+1);
             M2crt m2t = m2.cColRange(0,m1.nhi()+1).transpose();
             M3r m3r = m3.get_row(0);
@@ -153,15 +153,15 @@ namespace tmv {
     };
 
     // algo 3: rs == 1, so reduces to MultBV
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<3,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_BM
-            const int M = cs==Unknown ? m3.colsize() : cs;
-            const int K = xs==Unknown ? m1.rowsize() : xs;
+            const ptrdiff_t M = cs==Unknown ? m3.colsize() : cs;
+            const ptrdiff_t K = xs==Unknown ? m1.rowsize() : xs;
             std::cout<<"MB algo 3: M,N,K,cs,rs,xs,x = "<<M<<','<<1<<','<<K<<
                 ','<<cs<<','<<1<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -174,15 +174,15 @@ namespace tmv {
     };
 
     // algo 103: same as 3, but use -1 algo
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<103,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_BM
-            const int M = cs==Unknown ? m3.colsize() : cs;
-            const int K = xs==Unknown ? m1.rowsize() : xs;
+            const ptrdiff_t M = cs==Unknown ? m3.colsize() : cs;
+            const ptrdiff_t K = xs==Unknown ? m1.rowsize() : xs;
             std::cout<<"MB algo 103: M,N,K,cs,rs,xs,x = "<<M<<','<<1<<','<<K<<
                 ','<<cs<<','<<1<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -195,15 +195,15 @@ namespace tmv {
     };
 
     // algo 203: same as 3, but use -2 algo
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<203,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_BM
-            const int M = cs==Unknown ? m3.colsize() : cs;
-            const int K = xs==Unknown ? m1.rowsize() : xs;
+            const ptrdiff_t M = cs==Unknown ? m3.colsize() : cs;
+            const ptrdiff_t K = xs==Unknown ? m1.rowsize() : xs;
             std::cout<<"MB algo 203: M,N,K,cs,rs,xs,x = "<<M<<','<<1<<','<<K<<
                 ','<<cs<<','<<1<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -216,22 +216,22 @@ namespace tmv {
     };
 
     // algo 4: xs == 1, so reduces to Rank1Update
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<4,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_BM
-            const int M = cs==Unknown ? m3.colsize() : cs;
-            const int N = rs==Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? m3.rowsize() : rs;
             std::cout<<"MM algo 4: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<1<<
                 ','<<cs<<','<<rs<<','<<1<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::const_row_type M2r;
             typedef typename M3::rowrange_type M3rr;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             M1c m1c = m1.get_col(0,0,m1.nlo()+1);
             M2r m2r = m2.get_row(0);
             M3rr m3rr = m3.cRowRange(0,m1.nlo()+1);
@@ -241,22 +241,22 @@ namespace tmv {
     };
 
     // algo 104: same as 4, but use -1 algo
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<104,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_BM
-            const int M = cs==Unknown ? m3.colsize() : cs;
-            const int N = rs==Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? m3.rowsize() : rs;
             std::cout<<"MM algo 104: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<1<<
                 ','<<cs<<','<<rs<<','<<1<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::const_row_type M2r;
             typedef typename M3::rowrange_type M3rr;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             M1c m1c = m1.get_col(0,0,m1.nlo()+1);
             M2r m2r = m2.get_row(0);
             M3rr m3rr = m3.cRowRange(0,m1.nlo()+1);
@@ -266,22 +266,22 @@ namespace tmv {
     };
 
     // algo 204: same as 4, but use -2 algo
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<204,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_BM
-            const int M = cs==Unknown ? m3.colsize() : cs;
-            const int N = rs==Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? m3.rowsize() : rs;
             std::cout<<"MM algo 204: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<1<<
                 ','<<cs<<','<<rs<<','<<1<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::const_row_type M2r;
             typedef typename M3::rowrange_type M3rr;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             M1c m1c = m1.get_col(0,0,m1.nlo()+1);
             M2r m2r = m2.get_row(0);
             M3rr m3rr = m3.cRowRange(0,m1.nlo()+1);
@@ -292,22 +292,22 @@ namespace tmv {
 
 
     // algo 11: ?CC -- Loop over N
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<11,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int N = rs==Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m3.rowsize() : rs;
 #ifdef PRINTALGO_BM
-            const int M = cs==Unknown ? m3.colsize() : cs;
-            const int K = xs==Unknown ? m1.rowsize() : xs;
+            const ptrdiff_t M = cs==Unknown ? m3.colsize() : cs;
+            const ptrdiff_t K = xs==Unknown ? m1.rowsize() : xs;
             std::cout<<"MB algo 11: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M2::const_col_type M2c;
             typedef typename M3::col_type M3c;
-            for(int j=0;j<N;++j) {
+            for(ptrdiff_t j=0;j<N;++j) {
                 // m3.get_col(j) += x * m1 * m2.get_col(j)
                 M2c m2j = m2.get_col(j);
                 M3c m3j = m3.get_col(j);
@@ -318,16 +318,16 @@ namespace tmv {
     };
 
     // algo 21: R?R -- Loop over M
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<21,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = cs==Unknown ? m3.colsize() : cs;
-            const int K = xs==Unknown ? m1.rowsize() : xs;
+            const ptrdiff_t M = cs==Unknown ? m3.colsize() : cs;
+            const ptrdiff_t K = xs==Unknown ? m1.rowsize() : xs;
 #ifdef PRINTALGO_BM
-            const int N = rs==Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m3.rowsize() : rs;
             std::cout<<"MB algo 21: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -335,16 +335,16 @@ namespace tmv {
             typedef typename M2::const_rowrange_type M2rr;
             typedef typename M2rr::const_transpose_type M2rrt;
             typedef typename M3::row_type M3r;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
 
-            const int lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
-            const int i1 = m1.nlo();
-            const int i2 = TMV_MIN(M,K-m1.nhi());
-            const int i3 = TMV_MIN(M,K+m1.nlo());
-            int j1 = 0;
-            int j2 = m1.nhi()+1;
+            const ptrdiff_t lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
+            const ptrdiff_t i1 = m1.nlo();
+            const ptrdiff_t i2 = TMV_MIN(M,K-m1.nhi());
+            const ptrdiff_t i3 = TMV_MIN(M,K+m1.nlo());
+            ptrdiff_t j1 = 0;
+            ptrdiff_t j2 = m1.nhi()+1;
 
-            int i=0;
+            ptrdiff_t i=0;
             for(;i<i1;++i) {
                 // m3.get_row(j) += x * m1.get_row(j) * m2
                 M1r m1i = m1.get_row(i,j1,j2);
@@ -376,33 +376,33 @@ namespace tmv {
     };
 
     // algo 31: CR? -- Loop over K
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<31,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = cs==Unknown ? m3.colsize() : cs;
-            const int K = xs==Unknown ? m1.rowsize() : xs;
+            const ptrdiff_t M = cs==Unknown ? m3.colsize() : cs;
+            const ptrdiff_t K = xs==Unknown ? m1.rowsize() : xs;
 #ifdef PRINTALGO_BM
-            const int N = rs==Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m3.rowsize() : rs;
             std::cout<<"MB algo 31: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
             typedef typename M1::const_col_sub_type M1c;
             typedef typename M2::const_row_type M2r;
             typedef typename M3::rowrange_type M3rr;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
 
-            const int lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
-            const int j1 = m1.nhi();
-            const int j2 = TMV_MIN(K,M-m1.nlo());
-            const int j3 = TMV_MIN(K,M+m1.nhi());
-            int i1 = 0;
-            int i2 = m1.nlo()+1;
+            const ptrdiff_t lh = IntTraits<IntTraits2<M1::_nlo,M1::_nhi>::sum>::Sp1;
+            const ptrdiff_t j1 = m1.nhi();
+            const ptrdiff_t j2 = TMV_MIN(K,M-m1.nlo());
+            const ptrdiff_t j3 = TMV_MIN(K,M+m1.nhi());
+            ptrdiff_t i1 = 0;
+            ptrdiff_t i2 = m1.nlo()+1;
 
             Maybe<!add>::zero(m3);
-            int j=0;
+            ptrdiff_t j=0;
             for(;j<j1;++j) {
                 M1c m1j = m1.get_col(j,i1,i2);
                 M2r m2j = m2.get_row(j);
@@ -432,16 +432,16 @@ namespace tmv {
     };
 
     // algo 41: DRR, DCC -- Loop over diagonals
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<41,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int M = cs==Unknown ? m3.colsize() : cs;
-            const int K = xs==Unknown ? m1.rowsize() : xs;
+            const ptrdiff_t M = cs==Unknown ? m3.colsize() : cs;
+            const ptrdiff_t K = xs==Unknown ? m1.rowsize() : xs;
 #ifdef PRINTALGO_BM
-            const int N = rs==Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m3.rowsize() : rs;
             std::cout<<"MB algo 41: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -452,12 +452,12 @@ namespace tmv {
             typedef typename M3::rowrange_type M3rr;
             typedef typename M3rr::transpose_type M3rrt;
 
-            const int xx = Unknown;
-            int len = TMV_MIN(M-m1.nlo(),K);
-            const int ds = IntTraits2<cs,xs>::min;
+            const ptrdiff_t xx = Unknown;
+            ptrdiff_t len = TMV_MIN(M-m1.nlo(),K);
+            const ptrdiff_t ds = IntTraits2<cs,xs>::min;
 
             Maybe<!add>::zero(m3);
-            for(int k=m1.nlo();k;--k) {
+            for(ptrdiff_t k=m1.nlo();k;--k) {
                 M1dm m1k = DiagMatrixViewOf(m1.diag(-k,0,len));
                 M2rrt m2k = m2.cRowRange(0,len).transpose();
                 M3rrt m3k = m3.cRowRange(k,k+len).transpose();
@@ -471,7 +471,7 @@ namespace tmv {
             M3rrt m30 = m3.cRowRange(0,len).transpose();
             MultMD_Helper<-4,rs,ds,true,ix,T,M2rrt,M1dm,M3rrt>::call(
                 x,m20,m10,m30);
-            for(int k=1;k<=m1.nhi();++k) {
+            for(ptrdiff_t k=1;k<=m1.nhi();++k) {
                 if (k+len > K) --len;
                 M1dm m1k = DiagMatrixViewOf(m1.diag(k,0,len));
                 M2rrt m2k = m2.cRowRange(k,k+len).transpose();
@@ -485,16 +485,16 @@ namespace tmv {
     template <int ix, class T, class M> class ProdXM;
 
     // algo 81: copy x*m1
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<81,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_BM
-            const int M = cs == Unknown ? m3.colsize() : cs;
-            const int K = xs == Unknown ? m1.rowsize() : xs;
-            const int N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t K = xs == Unknown ? m1.rowsize() : xs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
             std::cout<<"MB algo 81: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -510,16 +510,16 @@ namespace tmv {
     };
 
     // algo 82: copy x*m2
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<82,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_BM
-            const int N = rs == Unknown ? m3.rowsize() : rs;
-            const int K = xs == Unknown ? m1.rowsize() : rs;
-            const int M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t K = xs == Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
             std::cout<<"MB algo 82: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -535,16 +535,16 @@ namespace tmv {
     };
 
     // algo 83: Use temporary for m1*m2
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<83,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const M2& m2, M3& m3)
         {
 #ifdef PRINTALGO_BM
-            const int M = cs == Unknown ? m3.colsize() : cs;
-            const int N = rs == Unknown ? m3.rowsize() : rs;
-            const int K = xs == Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t K = xs == Unknown ? m1.rowsize() : rs;
             std::cout<<"MB algo 83: M,N,K,cs,rs,xs,x = "<<M<<','<<N<<','<<K<<
                 ','<<cs<<','<<rs<<','<<xs<<','<<T(x)<<std::endl;
 #endif
@@ -559,7 +559,7 @@ namespace tmv {
     };
 
     // algo 90: call inst
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<90,cs,rs,xs,false,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -570,7 +570,7 @@ namespace tmv {
             InstMultMM(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<90,cs,rs,xs,true,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -583,7 +583,7 @@ namespace tmv {
     };
 
     // algo 91: call inst alias
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<91,cs,rs,xs,false,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -594,7 +594,7 @@ namespace tmv {
             InstAliasMultMM(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<91,cs,rs,xs,true,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -607,7 +607,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<97,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -625,7 +625,7 @@ namespace tmv {
     };
 
     // algo 197: Conjugate
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<197,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -643,7 +643,7 @@ namespace tmv {
     };
 
     // algo 98: Inline check for aliases
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<98,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -673,7 +673,7 @@ namespace tmv {
     };
 
     // algo 99: Check for aliases
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<99,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -705,7 +705,7 @@ namespace tmv {
     };
 
     // algo -4: No branches or copies
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<-4,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -731,7 +731,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<-3,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -781,9 +781,9 @@ namespace tmv {
                 -999;
                 TMVStaticAssert(algo != -999);
 #ifdef PRINTALGO_BM
-            const int M = cs==Unknown ? m3.colsize() : cs;
-            const int N = rs==Unknown ? m3.rowsize() : rs;
-            const int K = xs==Unknown ? m1.rowsize() : xs;
+            const ptrdiff_t M = cs==Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t K = xs==Unknown ? m1.rowsize() : xs;
             std::cout<<"InlineMultBM: x = "<<ix<<"  "<<T(x)<<std::endl;
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
@@ -817,7 +817,7 @@ namespace tmv {
     };
 
     // algo -402: Same as algo -2, but use -4 if no Inst version
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<-402,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -851,7 +851,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<-2,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -886,7 +886,7 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases?
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultBM_Helper<-1,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -919,9 +919,9 @@ namespace tmv {
         // cs = m3.colsize
         // rs = m3.rowsize
         // xs = "extra size" = m1.rowsize, m2.colsize
-        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
-        const int xs = Sizes<M1::_rowsize,M2::_colsize>::size;
+        const ptrdiff_t cs = Sizes<M3::_colsize,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
+        const ptrdiff_t xs = Sizes<M1::_rowsize,M2::_colsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
@@ -943,9 +943,9 @@ namespace tmv {
         TMVAssert(m1.rowsize() == m2.colsize());
         TMVAssert(m2.rowsize() == m3.rowsize());
 
-        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
-        const int xs = Sizes<M1::_rowsize,M2::_colsize>::size;
+        const ptrdiff_t cs = Sizes<M3::_colsize,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
+        const ptrdiff_t xs = Sizes<M1::_rowsize,M2::_colsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
@@ -967,9 +967,9 @@ namespace tmv {
         TMVAssert(m1.rowsize() == m2.colsize());
         TMVAssert(m2.rowsize() == m3.rowsize());
 
-        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
-        const int xs = Sizes<M1::_rowsize,M2::_colsize>::size;
+        const ptrdiff_t cs = Sizes<M3::_colsize,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
+        const ptrdiff_t xs = Sizes<M1::_rowsize,M2::_colsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;

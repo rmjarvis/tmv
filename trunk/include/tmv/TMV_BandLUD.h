@@ -200,8 +200,8 @@ namespace tmv {
         // const BandLUD<M>& can relase the memory.
         mutable std::auto_ptr<BandLUD_Impl<small,M> > pimpl;
 
-        int colsize() const;
-        int rowsize() const;
+        ptrdiff_t colsize() const;
+        ptrdiff_t rowsize() const;
 
         // op= not allowed.
         BandLUD<M>& operator=(const BandLUD<M>&);
@@ -730,17 +730,18 @@ namespace tmv {
     }
 
     template <class M>
-    int BandLUD<M>::colsize() const
+    ptrdiff_t BandLUD<M>::colsize() const
     { return pimpl->LUx.colsize(); }
 
     template <class M>
-    int BandLUD<M>::rowsize() const
+    ptrdiff_t BandLUD<M>::rowsize() const
     { return pimpl->LUx.rowsize(); }
 
 
     template <class M, class M2> 
     static bool CheckDecomp(
-        const BandLUD<M>& lud, const BaseMatrix_Calc<M2>& m, std::ostream* fout=0) 
+        const BandLUD<M>& lud, const BaseMatrix_Calc<M2>& m,
+        std::ostream* fout=0) 
     {
         typedef typename M2::real_type RT;
         //bool printmat = fout && m.colsize() < 100 && m.rowsize() < 100;

@@ -46,10 +46,18 @@ tmv::Permutation p(int n, const ptrdiff_t* pp, bool isinv=false)
 Makes an \tt{n} $\times$ \tt{n} \tt{Permutation} using the provided values as the 
 list of interchanges.  The meaning of \tt{pp} is that \tt{v=p*v} is equivalent to
 \begin{tmvcode}
-if (isinv) v.reversePermute(pp);
-else v.permute(pp);
+if (isinv) {
+    for(int i=n-1; i>=0; --i) v.swap(i,pp[i]);
+} else {
+    for(int i=0; i<n; ++i) v.swap(i,pp[i]);
+}
 \end{tmvcode}
 If \tt{isinv} is omitted, it is taken to be \tt{false}.
+
+Note: most of the parameter values to TMV methods that are listed as
+\tt{int} are actually \tt{ptrdiff\_t}.  This might be the same as \tt{int} on your system, or it might be equivalent to \tt{long}.  But the difference is normally completely transparent to the user, since the compiler will seemlessly convert between integer types as needed.  However, since we are dealing with an array of index values, the compiler can do the conversion.  You need to correctly use \tt{ptrdiff\_t} rather than \tt{int}.
+
+The reason we use \tt{ptrdiff\_t} is in case \tt{int} is only 32 bits and you allocate a matrix with more than $2^{31}$ elelements, then \tt{int} would overflow, but \tt{ptrdiff\_t} is guaranteed to be safe.  So we use \tt{ptrdiff\_t} for all memory offsets in the code, and to be consistent, all the parameters that deal with indices are \tt{ptrdiff\_t} as well.  I think this constructor is the only case where you actually need to know about this fact.
 
 \end{itemize}
 

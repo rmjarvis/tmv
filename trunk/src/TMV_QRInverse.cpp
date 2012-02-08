@@ -30,7 +30,7 @@ namespace tmv {
     template <class T1, int C1, class RT1, class T2>
     void InstQR_Inverse(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1, MatrixView<T2> m2)
+        const Permutation* P, ptrdiff_t N1, MatrixView<T2> m2)
     {
         InlineQR_Inverse(QR,beta,P,N1,m2);
     }
@@ -42,7 +42,7 @@ namespace tmv {
     template <class T1, int C1, class RT1, class T2>
     void InstQR_InverseATA(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1, MatrixView<T2> m2)
+        const Permutation* P, ptrdiff_t N1, MatrixView<T2> m2)
     {
         InlineQR_InverseATA(QR,beta,P,N1,m2);
     }

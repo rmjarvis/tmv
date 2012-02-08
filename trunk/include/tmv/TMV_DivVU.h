@@ -62,10 +62,10 @@ namespace tmv {
 #define TMV_DIVVU_PREFETCH 2048
 
 
-    template <int algo, int s, class V1, class M2>
+    template <int algo, ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper;
 
-    template <int algo, int s, class V1, class M2>
+    template <int algo, ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper;
 
     // algo 0: s = 0, so nothing to do
@@ -87,12 +87,12 @@ namespace tmv {
     };
 
     // algo 11: The basic column major loop for UpperTri
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<11,s,V1,M2>
     {
         static void call(V1& v1, const M2& m2)
         {
-            const int N = (s == Unknown ? m2.size() : s);
+            const ptrdiff_t N = (s == Unknown ? m2.size() : s);
             if (N == 0) return;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqVU algo 11: N,s = "<<N<<','<<s<<std::endl;
@@ -111,7 +111,7 @@ namespace tmv {
             IT1 X0 = v1.begin();
             IT1 X = X0 + N-1;
             IT2 A0j = m2.get_col(N-1,0,N).begin().nonConj();
-            const int Astepj = m2.stepj();
+            const ptrdiff_t Astepj = m2.stepj();
 
             const bool dopref = N * Astepj * sizeof(T1) >= TMV_DIVVU_PREFETCH;
 
@@ -119,7 +119,7 @@ namespace tmv {
             if (dopref) Prefetch_Read(A0j.get());
             else Prefetch_Read(m2.cptr());
 
-            for(int j=N;j--;) {
+            for(ptrdiff_t j=N;j--;) {
                 // loop from j = N-1 .. 0
                 if (*X != T2(0)) {
                     // x(j) = x(j) / A(j,j);
@@ -140,12 +140,12 @@ namespace tmv {
     };
 
     // algo 12: The basic row major loop for UpperTri
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<12,s,V1,M2>
     {
         static void call(V1& v1, const M2& m2)
         {
-            int N = (s == Unknown ? m2.size() : s);
+            ptrdiff_t N = (s == Unknown ? m2.size() : s);
             if (N == 0) return;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqVU algo 12: N,s = "<<N<<','<<s<<std::endl;
@@ -164,7 +164,7 @@ namespace tmv {
             //IT2 A00 = m2.get_row(0,0,N).begin().nonConj();
             // Actually Aii is the address of A(i,i+1)
             IT2 Aii = m2.get_row(N-1,N,N).begin().nonConj();
-            const int Adiagstep = m2.diagstep();
+            const ptrdiff_t Adiagstep = m2.diagstep();
 
             const bool dopref = N * m2.stepi() * sizeof(T1) >= TMV_DIVVU_PREFETCH;
 
@@ -176,12 +176,12 @@ namespace tmv {
             // [   0  A22 ] [  0 ]   [    0   ]
             // Unlike with MultUV, there is no gain from checking for 0's
             // at the start of v1.
-            int i=N-1;
+            ptrdiff_t i=N-1;
             while (N > 0 && *X == T2(0)) {
                 --N; --X; --i; Aii.shiftP(-Adiagstep); 
             }
 
-            for(int len=0;N--;--i) {
+            for(ptrdiff_t len=0;N--;--i) {
                 // loop from i = N-1..0
                 // x(i) = A.row(i,i,N) * x.subVector(i,N)
                 //      = A(i,i)^-1 * (
@@ -197,10 +197,10 @@ namespace tmv {
     };
 
     // algo 15: UpperTri: unroll by rows
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<15,s,V1,M2>
     {
-        template <int I, int N>
+        template <ptrdiff_t I, ptrdiff_t N>
         struct Unroller
         {
             static TMV_INLINE void unroll(V1& v1, const M2& m2)
@@ -209,7 +209,7 @@ namespace tmv {
                 Unroller<I,N/2>::unroll(v1,m2);
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,1>
         {
             static TMV_INLINE void unroll(V1& v1, const M2& m2)
@@ -223,7 +223,7 @@ namespace tmv {
                         m2.get_row(I,I+1,s),v1.cSubVector(I+1,s)));
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,0>
         { static TMV_INLINE void unroll(V1& , const M2& ) {} };
         static inline void call(V1& v1, const M2& m2)
@@ -236,12 +236,12 @@ namespace tmv {
     };
 
     // algo 21: The basic column major loop for LowerTri
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<21,s,V1,M2>
     {
         static void call(V1& v1, const M2& m2)
         {
-            int N = (s == Unknown ? m2.size() : s);
+            ptrdiff_t N = (s == Unknown ? m2.size() : s);
             if (N == 0) return;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqVU algo 21: N,s = "<<N<<','<<s<<std::endl;
@@ -260,14 +260,14 @@ namespace tmv {
             // Actually Ajj is the address of A(j,j+1)
             IT1 X = v1.begin();
             IT2 Ajj = m2.get_col(0,1,N).begin().nonConj();
-            const int Adiagstep = m2.diagstep();
+            const ptrdiff_t Adiagstep = m2.diagstep();
 
             const bool dopref = N * sizeof(T1) >= TMV_DIVVU_PREFETCH;
 
             Prefetch_MultiWrite(v1.ptr());
             Prefetch_Read(m2.cptr());
 
-            for(int j=0;N--;++j) {
+            for(ptrdiff_t j=0;N--;++j) {
                 // loop from j = 0 .. N-1
                 if (*X != T2(0)) {
                     // x(j) = x(j) / A(j,j);
@@ -288,12 +288,12 @@ namespace tmv {
     };
 
     // algo 22: The basic row major loop for LowerTri
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<22,s,V1,M2>
     {
         static void call(V1& v1, const M2& m2)
         {
-            int N = (s == Unknown ? m2.size() : s);
+            ptrdiff_t N = (s == Unknown ? m2.size() : s);
             if (N == 0) return;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqVU algo 22: N,s = "<<N<<','<<s<<std::endl;
@@ -311,8 +311,8 @@ namespace tmv {
             IT1 X0 = v1.begin();
             IT1 X = X0;
             IT2 Ai0 = m2.get_row(0,0,1).begin().nonConj();
-            const int Astepi = m2.stepi();
-            const int Adiagstep = m2.diagstep();
+            const ptrdiff_t Astepi = m2.stepi();
+            const ptrdiff_t Adiagstep = m2.diagstep();
 
             const bool dopref = N * sizeof(T1) >= TMV_DIVVU_PREFETCH;
 
@@ -321,11 +321,11 @@ namespace tmv {
 
             // [ A00  0  ] [  0 ]   [    0   ]
             // [ A10 A11 ] [ B1 ] = [ A11 B1 ]
-            int i=0;
+            ptrdiff_t i=0;
             while (N > 0 && *X == T2(0)) {
                 --N; ++X; ++X0; ++i; Ai0.shiftP(Adiagstep);
             }
-            for(int len=0;N--;++i) {
+            for(ptrdiff_t len=0;N--;++i) {
                 // loop from i = 0 .. N-1
                 // Yi = A.row(i,0,i+1) * x.subVector(0,i+1)
                 //    = A(i,i)^-1 * (
@@ -341,10 +341,10 @@ namespace tmv {
     };
 
     // algo 25: LowerTri: unroll by rows
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<25,s,V1,M2>
     {
-        template <int I, int N>
+        template <ptrdiff_t I, ptrdiff_t N>
         struct Unroller
         {
             static TMV_INLINE void unroll(V1& v1, const M2& m2)
@@ -353,7 +353,7 @@ namespace tmv {
                 Unroller<I+N/2,N-N/2>::unroll(v1,m2);
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,1>
         {
             static TMV_INLINE void unroll(V1& v1, const M2& m2)
@@ -367,7 +367,7 @@ namespace tmv {
                         m2.get_row(I,0,I),v1.cSubVector(0,I)));
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,0>
         { static TMV_INLINE void unroll(V1& , const M2& ) {} };
         static inline void call(V1& v1, const M2& m2)
@@ -380,12 +380,12 @@ namespace tmv {
     };
 
     // algo 43: v1.step == Unknown, so maybe copy v1
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<43,s,V1,M2>
     {
         static void call(V1& v1, const M2& m2)
         {
-            const int N = s == Unknown ? m2.size() : s;
+            const ptrdiff_t N = s == Unknown ? m2.size() : s;
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqVU algo 43: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -397,13 +397,13 @@ namespace tmv {
     };
 
     // algo 85: v1c = v1/m2, v1 = v1c
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<85,s,V1,M2>
     {
         static void call(V1& v1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int N = s == Unknown ? m2.size() : s;
+            const ptrdiff_t N = s == Unknown ? m2.size() : s;
             std::cout<<"LDivEqVU algo 85: N,s = "<<N<<','<<s<<std::endl;
 #endif
             typename V1::copy_type v1c(v1);
@@ -413,7 +413,7 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<90,s,V1,M2>
     {
         static TMV_INLINE void call(V1& v1, const M2& m2)
@@ -421,7 +421,7 @@ namespace tmv {
     };
 
     // algo 91: Call inst alias
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<91,s,V1,M2>
     {
         static TMV_INLINE void call(V1& v1, const M2& m2)
@@ -429,7 +429,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<97,s,V1,M2>
     {
         static TMV_INLINE void call(V1& v1, const M2& m2)
@@ -443,7 +443,7 @@ namespace tmv {
     };
 
     // algo 197: Conjugate
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<197,s,V1,M2>
     {
         static TMV_INLINE void call(V1& v1, const M2& m2)
@@ -457,7 +457,7 @@ namespace tmv {
     };
 
     // algo 98: Inline check for aliases
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<98,s,V1,M2>
     {
         static void call(V1& v1, const M2& m2)
@@ -473,7 +473,7 @@ namespace tmv {
     };
 
     // algo 99: Check for aliases
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<99,s,V1,M2>
     {
         static TMV_INLINE void call(V1& v1, const M2& m2)
@@ -499,16 +499,16 @@ namespace tmv {
     };
 
     // algo -4: No branches or copies
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<-4,s,V1,M2>
     {
         static TMV_INLINE void call(V1& v1, const M2& m2)
         {
             TMVStaticAssert(!V1::_conj);
-            const int s2 = s > 20 ? Unknown : s;
-            const int s2p1 = IntTraits<s2>::Sp1;
+            const ptrdiff_t s2 = s > 20 ? Unknown : s;
+            const ptrdiff_t s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
-            const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
+            const ptrdiff_t nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s > 10 ? false :
                 s == Unknown ? false :
@@ -527,7 +527,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<-3,s,V1,M2>
     {
         static TMV_INLINE void call(V1& v1, const M2& m2)
@@ -554,10 +554,10 @@ namespace tmv {
             // Copy vector to new storage:
             // 85 = temp v1 = v1/m2
 
-            const int s2 = s > 20 ? Unknown : s;
-            const int s2p1 = IntTraits<s2>::Sp1;
+            const ptrdiff_t s2 = s > 20 ? Unknown : s;
+            const ptrdiff_t s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
-            const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
+            const ptrdiff_t nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s > 10 ? false :
                 s == Unknown ? false :
@@ -621,7 +621,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<-2,s,V1,M2>
     {
         static TMV_INLINE void call(V1& v1, const M2& m2)
@@ -647,7 +647,7 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases?
-    template <int s, class V1, class M2>
+    template <ptrdiff_t s, class V1, class M2>
     struct LDivEqVU_Helper<-1,s,V1,M2>
     {
         static TMV_INLINE void call(V1& v1, const M2& m2)
@@ -667,7 +667,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<V1::_size,M2::_size>::same));
         TMVAssert(v1.size() == m2.size());
-        const int s = Sizes<V1::_size,M2::_size>::size;
+        const ptrdiff_t s = Sizes<V1::_size,M2::_size>::size;
         typedef typename V1::cview_type V1v;
         typedef typename M2::const_cview_type M2v;
         TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
@@ -680,7 +680,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<V1::_size,M2::_size>::same));
         TMVAssert(v1.size() == m2.size());
-        const int s = Sizes<V1::_size,M2::_size>::size;
+        const ptrdiff_t s = Sizes<V1::_size,M2::_size>::size;
         typedef typename V1::cview_type V1v;
         typedef typename M2::const_cview_type M2v;
         TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
@@ -693,7 +693,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<V1::_size,M2::_size>::same));
         TMVAssert(v1.size() == m2.size());
-        const int s = Sizes<V1::_size,M2::_size>::size;
+        const ptrdiff_t s = Sizes<V1::_size,M2::_size>::size;
         typedef typename V1::cview_type V1v;
         typedef typename M2::const_cview_type M2v;
         TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();

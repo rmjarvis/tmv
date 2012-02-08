@@ -84,10 +84,10 @@ namespace tmv {
         TMVAssert(rm == A.isrm());
         TMVAssert(ca == A.isconj());
 
-        const int N = b.size();
+        const ptrdiff_t N = b.size();
 
-        const int sj = (rm?1:A.stepj());
-        const int ds = A.diagstep();
+        const ptrdiff_t sj = (rm?1:A.stepj());
+        const ptrdiff_t ds = A.diagstep();
         const Ta* Aii = A.cptr() + (ua ? N-2 : N-1)*ds;
         T* bi = b.ptr() + (ua ? N-2 : N-1);
 
@@ -110,14 +110,14 @@ namespace tmv {
         }
         if (N==1) return;
 
-        int k = A.nhi()-1;
-        for(int i=N-1,len=1;i>0;--i,Aii-=ds,--bi) {
+        ptrdiff_t k = A.nhi()-1;
+        for(ptrdiff_t i=N-1,len=1;i>0;--i,Aii-=ds,--bi) {
             // Actual row being done is i-1, not i
 
             // *bi -= A.row(i,i+1,j2) * b.subVector(i+1,j2);
             const T* bj = bi+1;
             const Ta* Aij = Aii+sj;
-            for(int j=len;j>0;--j,++bj,(rm?++Aij:Aij+=sj)) {
+            for(ptrdiff_t j=len;j>0;--j,++bj,(rm?++Aij:Aij+=sj)) {
 #ifdef TMVFLDEBUG
                 TMVAssert(bi >= b.first);
                 TMVAssert(bi < b.last);
@@ -168,14 +168,14 @@ namespace tmv {
         TMVAssert(cm == A.iscm());
         TMVAssert(ca == A.isconj());
 
-        const int N = b.size();
+        const ptrdiff_t N = b.size();
 
-        const int si = (cm ? 1 : A.stepi());
-        const int sj = A.stepj();
-        const int ds = A.diagstep();
-        const int hi = A.nhi();
+        const ptrdiff_t si = (cm ? 1 : A.stepi());
+        const ptrdiff_t sj = A.stepj();
+        const ptrdiff_t ds = A.diagstep();
+        const ptrdiff_t hi = A.nhi();
 
-        int i1 = N-1;
+        ptrdiff_t i1 = N-1;
         if (i1 > hi) i1 -= hi;
         else i1 = 0;
 
@@ -184,7 +184,7 @@ namespace tmv {
         T* bi1 = b.ptr()+i1;
         T* bj = b.ptr()+N-1;
 
-        for(int len=N-1-i1;len>0;--bj) {
+        for(ptrdiff_t len=N-1-i1;len>0;--bj) {
             if (*bj != T(0)) {
                 if (!ua) {
                     if (*Ajj==Ta(0)) {
@@ -206,7 +206,7 @@ namespace tmv {
                 // b.subVector(i1,j) -= (*bj) * A.col(j,i1,j);
                 T* bi = bi1;
                 const Ta* Aij = Ai1j;
-                for(int i=len;i>0;--i,++bi,(cm?++Aij:Aij+=si)) {
+                for(ptrdiff_t i=len;i>0;--i,++bi,(cm?++Aij:Aij+=si)) {
 #ifdef TMVFLDEBUG
                     TMVAssert(bi >= b.first);
                     TMVAssert(bi < b.last);
@@ -260,11 +260,11 @@ namespace tmv {
         TMVAssert(rm == A.isrm());
         TMVAssert(ca == A.isconj());
 
-        const int N = A.colsize();
+        const ptrdiff_t N = A.colsize();
 
-        const int sj = (rm ? 1 : A.stepj());
-        const int si = A.stepi();
-        const int ds = A.diagstep();
+        const ptrdiff_t sj = (rm ? 1 : A.stepj());
+        const ptrdiff_t si = A.stepi();
+        const ptrdiff_t ds = A.diagstep();
 
         const Ta* Aij1 = A.cptr();
         const T* bj1 = b.cptr();
@@ -288,13 +288,13 @@ namespace tmv {
 
         ++bi;
         Aij1 += si;
-        int k=A.nlo()-1;
+        ptrdiff_t k=A.nlo()-1;
 
-        for(int i=1,len=1;i<N;++i,++bi) {
+        for(ptrdiff_t i=1,len=1;i<N;++i,++bi) {
             // *bi -= A.row(i,j1,i) * b.subVector(j1,i);
             const Ta* Aij = Aij1;
             const T* bj = bj1;
-            for(int j=len;j>0;--j,++bj,(rm?++Aij:Aij+=sj)) {
+            for(ptrdiff_t j=len;j>0;--j,++bj,(rm?++Aij:Aij+=sj)) {
 #ifdef TMVFLDEBUG
                 TMVAssert(bj >= b.first);
                 TMVAssert(bj < b.last);
@@ -346,17 +346,17 @@ namespace tmv {
         TMVAssert(cm == A.iscm());
         TMVAssert(ca == A.isconj());
 
-        const int N = A.colsize();
+        const ptrdiff_t N = A.colsize();
 
-        const int si = (cm ? 1 : A.stepi());
-        const int ds = A.diagstep();
+        const ptrdiff_t si = (cm ? 1 : A.stepi());
+        const ptrdiff_t ds = A.diagstep();
 
         const Ta* Ajj= A.cptr();
         T* bj = b.ptr();
 
-        int i2=TMV_MIN(A.nlo()+1,A.colsize());
+        ptrdiff_t i2=TMV_MIN(A.nlo()+1,A.colsize());
 
-        for(int len=i2-1;len>0;++bj,Ajj+=ds) {
+        for(ptrdiff_t len=i2-1;len>0;++bj,Ajj+=ds) {
             if (*bj != T(0)) {
                 if (!ua) {
                     if (*Ajj==Ta(0)) {
@@ -376,7 +376,7 @@ namespace tmv {
                 // b.subVector(j+1,i2) -= *bj * A.col(j,j+1,i2)
                 T* bi = bj+1;
                 const Ta* Aij = Ajj+si;
-                for(int i=len;i>0;--i,++bi,(cm?++Aij:Aij+=si)) {
+                for(ptrdiff_t i=len;i>0;--i,++bi,(cm?++Aij:Aij+=si)) {
 #ifdef TMVFLDEBUG
                     TMVAssert(bi >= b.first);
                     TMVAssert(bi < b.last);
@@ -463,10 +463,10 @@ namespace tmv {
         TMVAssert(A.nlo() == 0 || A.nhi() == 0);
         TMVAssert(b.ct() == NonConj);
 
-        const int N = b.size();
+        const ptrdiff_t N = b.size();
         if (b.step() == 1) {
             if (A.nlo() == 0) {
-                int i2 = N;
+                ptrdiff_t i2 = N;
                 for(const T* b2 = b.cptr()+i2-1; i2>0 && *b2==T(0); --i2,--b2);
                 if (i2==0) return;
                 else if (i2 == N) 
@@ -478,7 +478,7 @@ namespace tmv {
                     UpperTriLDivEq(A.subBandMatrix(0,i2,0,i2,0,i2-1),
                                    b.subVector(0,i2),dt);
             } else {
-                int i1 = 0;
+                ptrdiff_t i1 = 0;
                 for(const T* b1 = b.ptr(); i1<N && *b1==T(0); ++i1,++b1);
                 if (i1==N) return;
                 else if (i1 == 0) 

@@ -12,21 +12,21 @@ namespace tmv {
     template <class T1, class M2>
     static void DoTriLDivEq(VectorView<T1,Unit> v1, const M2& m2)
     {
-        const int xx = Unknown;
+        const ptrdiff_t xx = Unknown;
         if (m2.iscm()) 
             InlineTriLDivEq(v1,m2.cmView());
         else if (m2.isrm())
             InlineTriLDivEq(v1,m2.rmView());
         else {
             typedef typename M2::value_type T;
-            const int N = m2.size();
+            const ptrdiff_t N = m2.size();
             if (m2.isunit()) {
-                const int s = ShapeTraits<M2::_shape>::unit_shape;
+                const ptrdiff_t s = ShapeTraits<M2::_shape>::unit_shape;
                 typename MCopyHelper<T,s,xx,xx>::type mc(N);
                 InstCopy(m2,mc.xView());
                 InlineTriLDivEq(v1,mc.xView().constView().cmView());
             } else  {
-                const int s = ShapeTraits<M2::_shape>::nonunit_shape;
+                const ptrdiff_t s = ShapeTraits<M2::_shape>::nonunit_shape;
                 typename MCopyHelper<T,s,xx,xx>::type mc(N);
                 InstCopy(m2,mc.xView());
                 InlineTriLDivEq(v1,mc.xView().constView().cmView());

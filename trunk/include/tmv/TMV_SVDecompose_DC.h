@@ -41,7 +41,7 @@ namespace tmv {
     // step of the divide and conquer algorithm.
     template <class T, class V1, class V2, class V3, class V4, class V5>
     static T FindDCSingularValue(
-        const int k, const int N, const T rho,
+        const ptrdiff_t k, const ptrdiff_t N, const T rho,
         const BaseVector_Calc<V1>& D, const BaseVector_Calc<V2>& z,
         const BaseVector_Calc<V3>& zsq, T normsqz,
         BaseVector_Mutable<V4>& diff, BaseVector_Mutable<V5>& sum)
@@ -79,7 +79,7 @@ namespace tmv {
         // Most of the routine is the same for k=N-1 as for the normal
         // case, but there are some lines where the normal case uses
         // k, but when k==N-1, I need k-1.  So I use kk for these.
-        int kk = k < N-1 ? k : k-1;
+        ptrdiff_t kk = k < N-1 ? k : k-1;
 
         // First we need an initial guess for s_k 
         dbgcout<<"D[kk+1]-D[kk] = "<<D[kk+1]-D[kk]<<std::endl;
@@ -93,9 +93,9 @@ namespace tmv {
         T s = D[k] + t;
         dbgcout<<"Initial s = "<<s<<" = "<<D[k]<<" + "<<t<<std::endl;
 
-        for(int j=0;j<N;j++) sum[j] = D[j]+s;
-        for(int j=0;j<N;j++) diff[j] = D[j]-D[k];
-        for(int j=0;j<N;j++) diff[j] -= t;
+        for(ptrdiff_t j=0;j<N;j++) sum[j] = D[j]+s;
+        for(ptrdiff_t j=0;j<N;j++) diff[j] = D[j]-D[k];
+        for(ptrdiff_t j=0;j<N;j++) diff[j] -= t;
 
         // Let c = f(s) - z_k^2/(D_k^2-s^2) - z_k+1^2/(D_k+1^2-s^2)
         // i.e. c is f(s) without the two terms for the poles that
@@ -105,12 +105,12 @@ namespace tmv {
         // Note: for k==N-1, the two poles do not bracket the root, but 
         // we proceed similarly anyway.
         T psi(0);
-        for(int j=0;j<kk;j++) {
+        for(ptrdiff_t j=0;j<kk;j++) {
             psi += (zsq[j] / sum[j]) / diff[j];
             //dbgcout<<"psi += "<<zsq[j]<<" / ("<<diff[j]<<" * "<<sum[k]<<") = "<<psi<<std::endl;
         }
         T phi(0);
-        for(int j=N-1;j>kk+1;j--) {
+        for(ptrdiff_t j=N-1;j>kk+1;j--) {
             phi += (zsq[j] / sum[j]) / diff[j];
             //dbgcout<<"phi += "<<zsq[j]<<" / ("<<diff[j]<<" * "<<sum[k]<<") = "<<phi<<std::endl;
         }
@@ -126,7 +126,7 @@ namespace tmv {
         dbgcout<<"f("<<tau<<") = "<<f<<std::endl;
 
         T lowerbound, upperbound; // the allowed range for solution tau
-        int k1; // The index of the pole closest to the root
+        ptrdiff_t k1; // The index of the pole closest to the root
         if (k < N-1) {
             dbgcout<<"k < N-1\n";
             if (f >= T(0)) { // D_k < s_k < s
@@ -207,9 +207,9 @@ namespace tmv {
         // but some compilers do optimizations that lose accuracy 
         // and can end up with diff = 0.
         // So need to do this in two steps.
-        for(int j=0;j<N;j++) sum[j] = D[j]+s;
-        for(int j=0;j<N;j++) diff[j] = D[j]-D[k1];
-        for(int j=0;j<N;j++) diff[j] -= t;
+        for(ptrdiff_t j=0;j<N;j++) sum[j] = D[j]+s;
+        for(ptrdiff_t j=0;j<N;j++) diff[j] = D[j]-D[k1];
+        for(ptrdiff_t j=0;j<N;j++) diff[j] -= t;
 
         // Define f(s) = rho + psi(s) + z_k1^2/(D_k1^2-s^2) + phi(s)
         // psi(s) = Sum_k=1..k1-1 z_k^2/(D_k^2-s^2)
@@ -231,14 +231,14 @@ namespace tmv {
         do {
             // Calculate psi, phi
             psi = phi = e = dpsi = dphi = T(0);
-            for(int j=0;j<k1;j++) {
+            for(ptrdiff_t j=0;j<k1;j++) {
                 T temp = (z[j] / sum[j]) / diff[j];
                 psix = psi; dpsix = dpsi;
                 psi += z[j] * temp;
                 dpsi += temp * temp;
                 e -= psi;
             }
-            for(int j=N-1;j>k1;j--) {
+            for(ptrdiff_t j=N-1;j>k1;j--) {
                 T temp = (z[j] / sum[j]) / diff[j];
                 phix = phi; dphix = dphi;
                 phi += z[j] * temp;
@@ -314,12 +314,12 @@ namespace tmv {
             dt /= s + TMV_SQRT(s*s+dt);
             t += dt;
             s += dt;
-            for(int j=0;j<N;j++) sum[j] = D[j]+s;
+            for(ptrdiff_t j=0;j<N;j++) sum[j] = D[j]+s;
             if (TMV_ABS(s) < TMV_ABS(dt)) {
                 dbgcout<<"Need to redo the diff calculations\n";
-                for(int j=0;j<N;j++) diff[j] = D[j]-s;
+                for(ptrdiff_t j=0;j<N;j++) diff[j] = D[j]-s;
             } else  {
-                for(int j=0;j<N;j++) diff[j] -= dt;
+                for(ptrdiff_t j=0;j<N;j++) diff[j] -= dt;
             }
 
             if (iter == TMV_MAXITER-1) {
@@ -629,14 +629,14 @@ namespace tmv {
             eta /= s + TMV_SQRT(s*s+eta);
             t += eta;
             s += eta;
-            for(int j=0;j<N;j++) sum[j] = D[j]+s;
+            for(ptrdiff_t j=0;j<N;j++) sum[j] = D[j]+s;
             if (TMV_ABS(s) < TMV_ABS(eta)) {
                 // Then the iterative adjustment to diff isn't going to 
                 // maintain the accuracy we need.
                 dbgcout<<"Need to redo the diff calculations\n";
-                for(int j=0;j<N;j++) diff[j] = D[j]-s;
+                for(ptrdiff_t j=0;j<N;j++) diff[j] = D[j]-s;
             } else {
-                for(int j=0;j<N;j++) diff[j] -= eta;
+                for(ptrdiff_t j=0;j<N;j++) diff[j] -= eta;
             }
             if (last) break;
 
@@ -644,7 +644,7 @@ namespace tmv {
             psi = T(0);
             dpsi = T(0);
             e = T(0);
-            for(int j=0;j<k1;j++) {
+            for(ptrdiff_t j=0;j<k1;j++) {
                 T temp = (z[j] / sum[j]) / diff[j];
                 psix = psi; dpsix = dpsi;
                 psi += z[j] * temp;
@@ -653,7 +653,7 @@ namespace tmv {
             }
             phi = T(0);
             dphi = T(0);
-            for(int j=N-1;j>k1;j--) {
+            for(ptrdiff_t j=N-1;j>k1;j--) {
                 T temp = (z[j] / sum[j]) / diff[j];
                 phix = phi; dphix = dphi;
                 phi += z[j] * temp;
@@ -705,7 +705,7 @@ namespace tmv {
         // f(s) = rho + Sum_i=1..N z_i^2/(D_i^2-s^2)
         T ff = rho;
         dbgcout<<"f(s) = "<<rho<<" + ";
-        for(int j=0;j<N;j++) {
+        for(ptrdiff_t j=0;j<N;j++) {
             dbgcout<<(z[j]/diff[j])*(z[j]/sum[j])<<" + ";
             ff += (z[j]/diff[j])*(z[j]/sum[j]);
         }
@@ -731,9 +731,9 @@ namespace tmv {
         TMVAssert(S.size() == diffmat.colsize());
         TMVAssert(S.size() == diffmat.rowsize());
 
-        const int N = S.size();
+        const ptrdiff_t N = S.size();
         Vector<T> zsq(N);
-        for(int j=0;j<N;j++) zsq[j] = z[j]*z[j];
+        for(ptrdiff_t j=0;j<N;j++) zsq[j] = z[j]*z[j];
         const T normsqz = zsq.sumElements();
 
 #ifdef _OPENMP
@@ -743,7 +743,7 @@ namespace tmv {
             Vector<T> sum(N);
             T Sk;
 #pragma omp for
-            for(int k=0;k<N;k++) {
+            for(ptrdiff_t k=0;k<N;k++) {
                 Sk = FindDCSingularValue(k,N,rho,D,z,zsq,normsqz,diff,sum);
 #ifdef _OPENMP
 #pragma omp critical
@@ -760,7 +760,7 @@ namespace tmv {
         dbgcout<<"After omp parallel region\n";
 #else
         Vector<T> sum(N);
-        for(int k=0;k<N;k++) {
+        for(ptrdiff_t k=0;k<N;k++) {
             typename M1::col_type diff = diffmat.col(k);
             S[k] = FindDCSingularValue(k,N,rho,D,z,zsq,normsqz,diff,sum);
         }
@@ -780,9 +780,9 @@ namespace tmv {
         TMVAssert(S.size() == D.size());
         TMVAssert(S.size() == z.size());
 
-        const int N = S.size();
+        const ptrdiff_t N = S.size();
         Vector<T> zsq(N);
-        for(int j=0;j<N;j++) zsq[j] = z[j]*z[j];
+        for(ptrdiff_t j=0;j<N;j++) zsq[j] = z[j]*z[j];
         T normsqz = zsq.sumElements();
 
 #ifdef _OPENMP
@@ -795,7 +795,7 @@ namespace tmv {
 #ifdef _OPENMP
 #pragma omp for
 #endif
-            for(int k=0;k<N;k++) {
+            for(ptrdiff_t k=0;k<N;k++) {
                 Sk = FindDCSingularValue(k,N,rho,D,z,zsq,normsqz,diff,sum);
 #ifdef _OPENMP
 #pragma omp critical
@@ -808,23 +808,23 @@ namespace tmv {
         dbgcout<<"S => "<<S<<std::endl;
     }
 
-    template <int algo, int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_DC_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0, or N == 0)
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_DC_Helper<0,cs,rs,Mu,Vd,Ve,Mv>
     { static TMV_INLINE void call(Mu& , Vd& , Ve& , Mv& , bool , bool ) {} };
 
     // algo 1: Small problem: use the QR algorithm
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_DC_Helper<1,cs,rs,Mu,Vd,Ve,Mv>
     {
         static void call(Mu& U, Vd& D, Ve& E, Mv& V, bool UisI, bool VisI)
         {
-            const int N = rs==Unknown ? D.size() : rs;
+            const ptrdiff_t N = rs==Unknown ? D.size() : rs;
 #ifdef PRINTALGO_SVD
-            const int M = cs==Unknown ? U.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? U.colsize() : cs;
             std::cout<<"SVDecomposeFromBidiagonal algo 1: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -833,7 +833,7 @@ namespace tmv {
             dbgcout<<"After QR"<<std::endl;
             // Make all of the singular values positive
             typename Vd::iterator Di = D.begin();
-            for(int i=0;i<N;++i,++Di) if (*Di < 0) {
+            for(ptrdiff_t i=0;i<N;++i,++Di) if (*Di < 0) {
                 *Di = -(*Di);
                 if (V.cptr()) V.row(i) = -V.row(i);
             }
@@ -842,7 +842,7 @@ namespace tmv {
     };
 
     // algo 11: Normal divide and conquer algorithm
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_DC_Helper<11,cs,rs,Mu,Vd,Ve,Mv>
     {
         static void call(Mu& U, Vd& D, Ve& E, Mv& V, bool UisI, bool VisI)
@@ -850,9 +850,9 @@ namespace tmv {
             typedef typename Vd::value_type RT;
             TMVStaticAssert(Traits<RT>::isreal);
 
-            int N = rs==Unknown ? D.size() : rs;
+            ptrdiff_t N = rs==Unknown ? D.size() : rs;
 #ifdef PRINTALGO_SVD
-            const int M1 = cs==Unknown ? U.colsize() : cs;
+            const ptrdiff_t M1 = cs==Unknown ? U.colsize() : cs;
             std::cout<<"SVDecomposeFromBidiagonal algo 11: M,N,cs,rs = "<<
                 M1<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -1015,7 +1015,7 @@ namespace tmv {
             typedef typename Mvc::rowrange_type Mvcs;
             typedef Matrix<RT,ColMajor|NoDivider> Muc;
             typedef typename Muc::view_type Mucv;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
 
             // If N is too small, use the QR method
 
@@ -1032,7 +1032,7 @@ namespace tmv {
                     1,cs,rs,Mu,Vd,Ve,Mv>::call(U,D,E,V,UisI,VisI);
             }
             dbgcout<<"N > "<<TMV_DC_LIMIT<<std::endl;
-            int K = (N-1)/2;
+            ptrdiff_t K = (N-1)/2;
             const RT DK = D(K);
             const RT EK = E(K);
             Vector<RT> z(N,RT(0));
@@ -1137,8 +1137,8 @@ namespace tmv {
             RT tol = eps*norminf;
             dbgcout<<"tol = "<<tol<<std::endl;
             dbgcout<<"Initially D("<<K<<") = "<<D(K)<<std::endl;
-            int pivot = K;
-            for(int i=0;i<N-1;i++) {
+            ptrdiff_t pivot = K;
+            for(ptrdiff_t i=0;i<N-1;i++) {
                 dbgcout<<"D("<<i<<") = "<<D(i)<<std::endl;
                 dbgcout<<"z("<<i<<") = "<<z(i)<<std::endl;
                 dbgcout<<"pivot = "<<pivot<<"  "<<D(pivot)<<std::endl;
@@ -1211,10 +1211,10 @@ namespace tmv {
 #endif
 
                 // Check for deflation step 2:
-                int i_firstswap = N;
+                ptrdiff_t i_firstswap = N;
                 tol = eps*D(N-1);
                 dbgcout<<"tol = "<<tol<<std::endl;
-                for(int i=N-1;i>0;--i) {
+                for(ptrdiff_t i=N-1;i>0;--i) {
                     dbgcout<<"D("<<i-1<<") = "<<D(i-1)<<std::endl;
                     dbgcout<<"D("<<i<<") = "<<D(i)<<std::endl;
                     dbgcout<<"diff = "<<TMV_ABS(D(i) - D(i-1))<<std::endl;
@@ -1356,14 +1356,14 @@ namespace tmv {
                     //             prod_1..i-1 (sk^2-di^2)/(dk^2-di^2) *
                     //             prod_i..N-1 (sk^2-di^2)/(dk+1^2-di^2) ) 
                     //        * sign(z_i)
-                    for(int i=0;i<N;i++) {
+                    for(ptrdiff_t i=0;i<N;i++) {
                         RT di = D(i);
                         RT prod = -W(i,N-1)*(S(N-1) + di);
-                        for(int k=0;k<i;k++) {
+                        for(ptrdiff_t k=0;k<i;k++) {
                             prod *= -W(i,k)/(D(k)-di);
                             prod *= (S(k)+di)/(D(k)+di);
                         }
-                        for(int k=i+1;k<N;k++) {
+                        for(ptrdiff_t k=i+1;k<N;k++) {
                             prod *= -W(i,k-1)/(D(k)-di);
                             prod *= (S(k-1)+di)/(D(k)+di);
                         }
@@ -1381,27 +1381,27 @@ namespace tmv {
 
                     // Currently W(i,j) = di-sj
                     // First convert it to Y.transpose()
-                    for(int j=0;j<N;j++) {
+                    for(ptrdiff_t j=0;j<N;j++) {
                         VectorView<RT,Unit> yj = W.col(j);
                         Vector<RT> diff_j = yj; // copy current values
                         yj(0) = -z(0)/(S(j)*S(j));
-                        for(int i=1;i<N;i++)
+                        for(ptrdiff_t i=1;i<N;i++)
                             yj(i) = (z(i) / diff_j(i)) / (D(i)+S(j));
                     }
                     if (V.cptr()) {
                         Vector<RT> normyj(N);
-                        for(int j=0;j<N;j++) {
+                        for(ptrdiff_t j=0;j<N;j++) {
                             W.col(j) /= (normyj(j) = Norm(W.col(j)));
                         }
                         // V = Y * V
                         V.rowRange(0,N) = W.transpose() * V.rowRange(0,N);
-                        if (U.cptr()) for(int j=0;j<N;j++) W.col(j) *= normyj(j);
+                        if (U.cptr()) for(ptrdiff_t j=0;j<N;j++) W.col(j) *= normyj(j);
                     }
                     if (U.cptr()) {
                         // Now convert W from Y.transpose() to X
                         W.row(0).setAllTo(RT(-1));
-                        for(int i=1;i<N;i++) W.row(i) *= D(i);
-                        for(int j=0;j<N;j++) W.col(j) /= Norm(W.col(j));
+                        for(ptrdiff_t i=1;i<N;i++) W.row(i) *= D(i);
+                        for(ptrdiff_t j=0;j<N;j++) W.col(j) /= Norm(W.col(j));
                         // U = U*X
                         U.colRange(0,N) *= W;
                     }
@@ -1534,7 +1534,7 @@ namespace tmv {
     // Try that first!
 
     // algo 90: call InstSV_DecomposeFromBidiagonal_DC
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_DC_Helper<90,cs,rs,Mu,Vd,Ve,Mv>
     {
         static TMV_INLINE void call(
@@ -1546,7 +1546,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_DC_Helper<-3,cs,rs,Mu,Vd,Ve,Mv>
     {
         static TMV_INLINE void call(
@@ -1569,7 +1569,7 @@ namespace tmv {
             TMVAssert(D.minAbsElement() > RT(0));
             TMVAssert(E.minAbsElement() > RT(0));
 
-            const int N = rs==Unknown ? D.size() : rs;
+            const ptrdiff_t N = rs==Unknown ? D.size() : rs;
             dbgcout<<"Start Decompose from Bidiag:\n";
             if (U.cptr()) dbgcout<<"U = "<<TMV_Text(U)<<std::endl;
             if (V.cptr()) dbgcout<<"V = "<<TMV_Text(V)<<std::endl;
@@ -1582,8 +1582,8 @@ namespace tmv {
             Matrix<RT> B(N,N,RT(0));
             B.diag() = D;
             B.diag(1) = E;
-            const int M1 = U.cptr() && V.cptr() ? U.colsize() : 0;
-            const int N1 = U.cptr() && V.cptr() ? V.rowsize() : 0;
+            const ptrdiff_t M1 = U.cptr() && V.cptr() ? U.colsize() : 0;
+            const ptrdiff_t N1 = U.cptr() && V.cptr() ? V.rowsize() : 0;
             Matrix<T> A0(M1,N1);
             if (U.cptr() && V.cptr()) A0 = U*B*V;
             //dbgcout<<"A0 = "<<A0<<std::endl;
@@ -1621,7 +1621,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_DC_Helper<-2,cs,rs,Mu,Vd,Ve,Mv>
     {
         static TMV_INLINE void call(
@@ -1640,7 +1640,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class Mu, class Vd, class Ve, class Mv>
+    template <ptrdiff_t cs, ptrdiff_t rs, class Mu, class Vd, class Ve, class Mv>
     struct SVDecomposeFromBidiagonal_DC_Helper<-1,cs,rs,Mu,Vd,Ve,Mv>
     {
         static TMV_INLINE void call(
@@ -1682,10 +1682,10 @@ namespace tmv {
             TMVAssert(V.colsize() == D.size());
             TMVAssert(V.rowsize() >= V.colsize());
         }
-        const int cs = Mu::_colsize;
-        const int rs1 = Sizes<Mu::_rowsize,Vd::_size>::size;
-        const int rs2 = Sizes<Mv::_rowsize,Mv::_colsize>::size;
-        const int rs = Sizes<rs1,rs2>::size;
+        const ptrdiff_t cs = Mu::_colsize;
+        const ptrdiff_t rs1 = Sizes<Mu::_rowsize,Vd::_size>::size;
+        const ptrdiff_t rs2 = Sizes<Mv::_rowsize,Mv::_colsize>::size;
+        const ptrdiff_t rs = Sizes<rs1,rs2>::size;
         typedef typename Mu::cview_type Muv;
         typedef typename Vd::cview_type Vdv;
         typedef typename Ve::cview_type Vev;
@@ -1729,10 +1729,10 @@ namespace tmv {
             TMVAssert(V.colsize() == D.size());
             TMVAssert(V.rowsize() >= V.colsize());
         }
-        const int cs = Mu::_colsize;
-        const int rs1 = Sizes<Mu::_rowsize,Vd::_size>::size;
-        const int rs2 = Sizes<Mv::_rowsize,Mv::_colsize>::size;
-        const int rs = Sizes<rs1,rs2>::size;
+        const ptrdiff_t cs = Mu::_colsize;
+        const ptrdiff_t rs1 = Sizes<Mu::_rowsize,Vd::_size>::size;
+        const ptrdiff_t rs2 = Sizes<Mv::_rowsize,Mv::_colsize>::size;
+        const ptrdiff_t rs = Sizes<rs1,rs2>::size;
         typedef typename Mu::cview_type Muv;
         typedef typename Vd::cview_type Vdv;
         typedef typename Ve::cview_type Vev;

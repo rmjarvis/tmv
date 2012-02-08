@@ -81,7 +81,7 @@ namespace tmv {
     // Note: all algorithms here are designed to work if v2 and v3 are 
     // the same storage.  So it works for things like v *= U without 
     // any need for a temporary copy.
-    template <int algo, int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <int algo, ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper;
 
     // algo 0: s = 0, so nothing to do
@@ -111,13 +111,13 @@ namespace tmv {
     };
 
     // algo 11: The basic column major loop for UpperTri
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<11,s,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            int N = (s == Unknown ? m1.size() : s);
+            ptrdiff_t N = (s == Unknown ? m1.size() : s);
             if (N == 0) return;
 #ifdef PRINTALGO_UV
             std::cout<<"UV algo 11: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
@@ -141,7 +141,7 @@ namespace tmv {
             IT2 X = v2.begin().nonConj();
             IT3 Y0 = v3.begin();
             IT3 Y = Y0;
-            const int Astepj = m1.stepj();
+            const ptrdiff_t Astepj = m1.stepj();
 
             const bool dopref = N * sizeof(T1) >= TMV_UV_PREFETCH;
 
@@ -149,7 +149,7 @@ namespace tmv {
             Prefetch_Read(v2.cptr());
             Prefetch_MultiWrite(v3.ptr());
 
-            for(int j=0;N--;++j) {
+            for(ptrdiff_t j=0;N--;++j) {
                 // loop from j = 0 .. N-1
                 if (*X != T2(0)) {
                     Xj = ZProd<false,c2>::prod(x , *X++);
@@ -170,13 +170,13 @@ namespace tmv {
     };
 
     // algo 12: The basic row major loop for UpperTri
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<12,s,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            int N = (s == Unknown ? m1.size() : s);
+            ptrdiff_t N = (s == Unknown ? m1.size() : s);
             if (N == 0) return;
 #ifdef PRINTALGO_UV
             std::cout<<"UV algo 12: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
@@ -199,8 +199,8 @@ namespace tmv {
             IT1 Aii = m1.get_row(0,1,N).begin().nonConj();
             IT2 X = v2.begin().nonConj();
             IT3 Y = v3.begin();
-            const int Adiagstep = m1.diagstep();
-            const int Astepi = m1.stepi();
+            const ptrdiff_t Adiagstep = m1.diagstep();
+            const ptrdiff_t Astepi = m1.stepi();
 
             const bool dopref = N * sizeof(T1) >= TMV_UV_PREFETCH;
 
@@ -212,16 +212,16 @@ namespace tmv {
             // [  0  A11 A12 ] [ B2 ] = [ A11 B2 ]
             // [  0   0  A22 ] [  0 ]   [    0   ]
             while (N > 0 && v2(N-1) == T2(0)) Maybe<!add>::set(v3(--N),T3(0));
-            int i1=0;
+            ptrdiff_t i1=0;
             while (N > 0 && *X == T2(0)) { ++i1; --N; ++X; ++Aii; }
-            for(int i=0;i<i1;++i) {
+            for(ptrdiff_t i=0;i<i1;++i) {
                 Yi = MultVV_Helper<-4,Unknown,M1r,V2>::call2(N,Aii-1,X);
                 Aii.shiftP(Astepi);
                 if (dopref) Prefetch_Read(Aii.get()-1);
                 Maybe<add>::add(*Y++, x * Yi);
             }
 
-            for(int i=i1;N--;++i) {
+            for(ptrdiff_t i=i1;N--;++i) {
                 // loop from i = 0 .. N-1
                 // Yi = A.row(i,i,N) * x.subVector(i,N)
                 //    = A(i,i) * x(i)
@@ -236,10 +236,10 @@ namespace tmv {
     };
 
     // algo 15: UpperTri: unroll by rows
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<15,s,add,ix,T,M1,V2,V3>
     {
-        template <int I, int N>
+        template <ptrdiff_t I, ptrdiff_t N>
         struct Unroller
         {
             static TMV_INLINE void unroll(
@@ -249,7 +249,7 @@ namespace tmv {
                 Unroller<I+N/2,N-N/2>::unroll(x,m1,v2,v3);
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,1>
         {
             static TMV_INLINE void unroll(
@@ -266,7 +266,7 @@ namespace tmv {
                             m1.get_row(I,I+1,s),v2.cSubVector(I+1,s))));
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,0>
         {
             static TMV_INLINE void unroll(
@@ -284,13 +284,13 @@ namespace tmv {
 
     // algo 21: The basic column major loop for LowerTri
     // This is designed to work if v2 and v3 are the same storage.
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<21,s,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = (s == Unknown ? m1.size() : s);
+            const ptrdiff_t N = (s == Unknown ? m1.size() : s);
             if (N == 0) return;
 #ifdef PRINTALGO_UV
             std::cout<<"UV algo 21: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
@@ -315,7 +315,7 @@ namespace tmv {
             IT1 Ajj = m1.get_col(N-1,N,N).begin().nonConj();
             IT2 X = v2.begin().nonConj() + N-1;
             IT3 Y = v3.begin() + N;
-            const int Adiagstep = m1.diagstep();
+            const ptrdiff_t Adiagstep = m1.diagstep();
 
             const bool dopref = N * Adiagstep * sizeof(T1) >= TMV_UV_PREFETCH;
 
@@ -324,7 +324,7 @@ namespace tmv {
             if (dopref) Prefetch_Read(Ajj.get());
             else Prefetch_Read(m1.cptr());
 
-            for(int j=N,len=0;j--;++len) {
+            for(ptrdiff_t j=N,len=0;j--;++len) {
                 // loop from j = N-1 .. 0
                 if (*X != T2(0)) {
                     Xj = ZProd<false,c2>::prod(x , *X--);
@@ -346,13 +346,13 @@ namespace tmv {
     };
 
     // algo 22: The basic row major loop for LowerTri
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<22,s,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            int N = (s == Unknown ? m1.size() : s);
+            ptrdiff_t N = (s == Unknown ? m1.size() : s);
             if (N == 0) return;
 #ifdef PRINTALGO_UV
             std::cout<<"UV algo 22: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
@@ -375,7 +375,7 @@ namespace tmv {
             IT2 X0 = v2.begin().nonConj();
             IT2 X = X0 + N-1;
             IT3 Y = v3.begin() + N-1;
-            const int Astepi = m1.stepi();
+            const ptrdiff_t Astepi = m1.stepi();
 
             const bool dopref = 
                 N * m1.diagstep() * sizeof(T1) >= TMV_UV_PREFETCH;
@@ -388,13 +388,13 @@ namespace tmv {
             // [ A00  0   0  ] [  0 ]   [    0   ]
             // [ A10 A11  0  ] [ B2 ] = [ A11 B2 ]
             // [ A20 A21 A22 ] [  0 ]   [ A21 B2 ]
-            int i=N-1;
-            int i1=0;
+            ptrdiff_t i=N-1;
+            ptrdiff_t i1=0;
             while (N > 0 && *X0 == T2(0)) {
                 Maybe<!add>::set(v3(i1++),T3(0));
                 --N; ++Ai0; ++X0;
             }
-            int i2=i;
+            ptrdiff_t i2=i;
             while (N > 0 && *X == T2(0)) { --i2; --N; --X; }
             for(;i>i2;--i) {
                 Yi = MultVV_Helper<-4,Unknown,M1r,V2>::call2(N,Ai0,X0);
@@ -418,10 +418,10 @@ namespace tmv {
     };
 
     // algo 25: LowerTri: unroll by rows
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<25,s,add,ix,T,M1,V2,V3>
     {
-        template <int I, int N>
+        template <ptrdiff_t I, ptrdiff_t N>
         struct Unroller
         {
             static TMV_INLINE void unroll(
@@ -431,7 +431,7 @@ namespace tmv {
                 Unroller<I,N/2>::unroll(x,m1,v2,v3);
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,1>
         {
             static TMV_INLINE void unroll(
@@ -448,7 +448,7 @@ namespace tmv {
                             m1.get_row(I,0,I),v2.cSubVector(0,I))));
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,0>
         {
             static TMV_INLINE void unroll(
@@ -466,13 +466,13 @@ namespace tmv {
     };
 
     // algo 43: colmajor, v3.step == Unknown, so maybe copy v3
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<43,s,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = s == Unknown ? m1.size() : s;
+            const ptrdiff_t N = s == Unknown ? m1.size() : s;
 #ifdef PRINTALGO_UV
             std::cout<<"UV algo 43: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -484,13 +484,13 @@ namespace tmv {
     };
 
     // algo 53: rowmajor, v2.step == Unknown, so maybe copy v2
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<53,s,add,ix,T,M1,V2,V3>
     {
         static void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
-            const int N = s == Unknown ? m1.size() : s;
+            const ptrdiff_t N = s == Unknown ? m1.size() : s;
 #ifdef PRINTALGO_UV
             std::cout<<"UV algo 53: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
@@ -502,14 +502,14 @@ namespace tmv {
     };
 
     // algo 81: copy v2
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<81,s,add,ix,T,M1,V2,V3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
-            const int N = s == Unknown ? m1.size() : s;
+            const ptrdiff_t N = s == Unknown ? m1.size() : s;
             std::cout<<"UV algo 81: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             typename V3::noalias_type v3na = v3.noAlias();
@@ -520,14 +520,14 @@ namespace tmv {
     template <int ix, class T, class M, class V> class ProdMV;
 
     // algo 85: v3c = x*m1*v2, v3 (+)= v3c
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<85,s,add,ix,T,M1,V2,V3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
 #ifdef PRINTALGO_UV
-            const int N = s == Unknown ? m1.size() : s;
+            const ptrdiff_t N = s == Unknown ? m1.size() : s;
             std::cout<<"UV algo 85: N,s,x = "<<N<<','<<s<<','<<T(x)<<std::endl;
 #endif
             typedef typename Traits<T>::real_type RT;
@@ -538,7 +538,7 @@ namespace tmv {
     };
 
     // algo 90: call inst
-    template <int s, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<90,s,false,ix,T,M1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -549,7 +549,7 @@ namespace tmv {
             InstMultMV(xx,m1.xView(),v2.xView(),v3.xView());
         }
     };
-    template <int s, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<90,s,true,ix,T,M1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -562,7 +562,7 @@ namespace tmv {
     };
 
     // algo 91: call inst alias
-    template <int s, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<91,s,false,ix,T,M1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -573,7 +573,7 @@ namespace tmv {
             InstAliasMultMV(xx,m1.xView(),v2.xView(),v3.xView());
         }
     };
-    template <int s, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<91,s,true,ix,T,M1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -586,7 +586,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<97,s,add,ix,T,M1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -604,7 +604,7 @@ namespace tmv {
     };
 
     // algo 197: Conjugate
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<197,s,add,ix,T,M1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -622,7 +622,7 @@ namespace tmv {
     };
 
     // algo 98: Inline check for aliases
-    template <int s, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<98,s,true,ix,T,M1,V2,V3>
     {
         static void call(
@@ -645,7 +645,7 @@ namespace tmv {
         }
     };
     // if !add, then don't need the temporary if v2,v3 are aliased.
-    template <int s, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<98,s,false,ix,T,M1,V2,V3>
     {
         static void call(
@@ -669,7 +669,7 @@ namespace tmv {
     };
 
     // algo 99: Check for aliases
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<99,s,add,ix,T,M1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -699,17 +699,17 @@ namespace tmv {
     };
 
     // algo -4: No branches or copies
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<-4,s,add,ix,T,M1,V2,V3>
     {
         static TMV_INLINE void call(
             const Scaling<ix,T>& x, const M1& m1, const V2& v2, V3& v3)
         {
             TMVStaticAssert(!V3::_conj);
-            const int s2 = s > 20 ? Unknown : s;
-            const int s2p1 = IntTraits<s2>::Sp1;
+            const ptrdiff_t s2 = s > 20 ? Unknown : s;
+            const ptrdiff_t s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
-            const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
+            const ptrdiff_t nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s > 10 ? false :
                 s == Unknown ? false :
@@ -732,7 +732,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<-3,s,add,ix,T,M1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -759,10 +759,10 @@ namespace tmv {
             // 81 = copy v2
             // 85 = temp v3 = x*m1*v2
 
-            const int s2 = s > 20 ? Unknown : s;
-            const int s2p1 = IntTraits<s2>::Sp1;
+            const ptrdiff_t s2 = s > 20 ? Unknown : s;
+            const ptrdiff_t s2p1 = IntTraits<s2>::Sp1;
             // nops = n(n+1)/2
-            const int nops = IntTraits2<s2,s2p1>::safeprod / 2;
+            const ptrdiff_t nops = IntTraits2<s2,s2p1>::safeprod / 2;
             const bool unroll = 
                 s > 10 ? false :
                 s == Unknown ? false :
@@ -844,7 +844,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<-2,s,add,ix,T,M1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -874,7 +874,7 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases?
-    template <int s, bool add, int ix, class T, class M1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class M1, class V2, class V3>
     struct MultUV_Helper<-1,s,add,ix,T,M1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -900,7 +900,7 @@ namespace tmv {
         TMVAssert(m1.size() == v3.size());
         TMVAssert(m1.size() == v2.size());
         TMVAssert(v2.size() == v3.size());
-        const int s = Sizes<Sizes<M1::_size,V2::_size>::size,V3::_size>::size;
+        const ptrdiff_t s = Sizes<Sizes<M1::_size,V2::_size>::size,V3::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
@@ -921,7 +921,7 @@ namespace tmv {
         TMVAssert(m1.size() == v3.size());
         TMVAssert(m1.size() == v2.size());
         TMVAssert(v2.size() == v3.size());
-        const int s = Sizes<Sizes<M1::_size,V2::_size>::size,V3::_size>::size;
+        const ptrdiff_t s = Sizes<Sizes<M1::_size,V2::_size>::size,V3::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
@@ -942,7 +942,7 @@ namespace tmv {
         TMVAssert(m1.size() == v3.size());
         TMVAssert(m1.size() == v2.size());
         TMVAssert(v2.size() == v3.size());
-        const int s = Sizes<Sizes<M1::_size,V2::_size>::size,V3::_size>::size;
+        const ptrdiff_t s = Sizes<Sizes<M1::_size,V2::_size>::size,V3::_size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;

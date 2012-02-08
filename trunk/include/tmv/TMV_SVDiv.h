@@ -38,20 +38,20 @@ namespace tmv {
         const ConstMatrixView<T1,C1>& V, 
         const ConstVectorView<T2,C2>& v2, VectorView<T3> v3);
 
-    template <int algo, int cs, int rs, class M1u, class M1s, class M1v, class M2, class M3>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2, class M3>
     struct SV_Solve_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0 or N == 0)
     // Also used for invalid real/complex combination from the virtual calls.
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2, class M3>
     struct SV_Solve_Helper<0,cs,rs,M1u,M1s,M1v,M2,M3>
     {
         static TMV_INLINE void call(
-            const M1u& , const M1s& , const M1v& , int , const M2& , M3& ) {}
+            const M1u& , const M1s& , const M1v& , const M2& , M3& ) {}
     };
 
     // algo 11: Normal case
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2, class M3>
     struct SV_Solve_Helper<11,cs,rs,M1u,M1s,M1v,M2,M3>
     {
         static void call(
@@ -60,8 +60,8 @@ namespace tmv {
             typedef typename M1u::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type T12;
-            const int xx = Unknown;
-            const int xs = Sizes<M2::_rowsize,M3::_rowsize>::size;
+            const ptrdiff_t xx = Unknown;
+            const ptrdiff_t xs = Sizes<M2::_rowsize,M3::_rowsize>::size;
             typedef typename MCopyHelper<T12,Rec,xx,xs>::type M2c;
 
 #ifdef PRINTALGO_SVD
@@ -82,7 +82,7 @@ namespace tmv {
     };
 
     // algo 12: Normal case - M2, M3 are vectors
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2, class M3>
     struct SV_Solve_Helper<12,cs,rs,M1u,M1s,M1v,M2,M3>
     {
         static void call(
@@ -91,7 +91,7 @@ namespace tmv {
             typedef typename M1u::value_type T1;
             typedef typename M2::value_type T2;
             typedef typename Traits2<T1,T2>::type T12;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             typedef typename VCopyHelper<T12,xx>::type V2c;
 
 #ifdef PRINTALGO_SVD
@@ -111,7 +111,7 @@ namespace tmv {
     };
 
     // algo 90: call InstSV_Solve
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2, class M3>
     struct SV_Solve_Helper<90,cs,rs,M1u,M1s,M1v,M2,M3>
     {
         static TMV_INLINE void call(
@@ -123,7 +123,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2, class M3>
     struct SV_Solve_Helper<97,cs,rs,M1u,M1s,M1v,M2,M3>
     {
         static TMV_INLINE void call(
@@ -143,7 +143,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2, class M3>
     struct SV_Solve_Helper<-3,cs,rs,M1u,M1s,M1v,M2,M3>
     {
         static TMV_INLINE void call(
@@ -174,7 +174,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2, class M3>
     struct SV_Solve_Helper<-2,cs,rs,M1u,M1s,M1v,M2,M3>
     {
         static TMV_INLINE void call(
@@ -203,7 +203,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2, class M3>
     struct SV_Solve_Helper<-1,cs,rs,M1u,M1s,M1v,M2,M3>
     {
         static TMV_INLINE void call(
@@ -232,8 +232,8 @@ namespace tmv {
         TMVAssert(V.rowsize() == m3.colsize());
         TMVAssert(m2.rowsize() == m3.rowsize());
 
-        const int cs = Sizes<M3::_colsize,M1v::_rowsize>::size;
-        const int rs = Sizes<M2::_colsize,M1u::_colsize>::size;
+        const ptrdiff_t cs = Sizes<M3::_colsize,M1v::_rowsize>::size;
+        const ptrdiff_t rs = Sizes<M2::_colsize,M1u::_colsize>::size;
         typedef typename M1u::const_cview_type M1uv;
         typedef typename M1s::const_cview_type M1sv;
         typedef typename M1v::const_cview_type M1vv;
@@ -266,8 +266,8 @@ namespace tmv {
         TMVAssert(V.rowsize() == m3.colsize());
         TMVAssert(m2.rowsize() == m3.rowsize());
 
-        const int cs = Sizes<M3::_colsize,M1u::_rowsize>::size;
-        const int rs = Sizes<M2::_colsize,M1u::_colsize>::size;
+        const ptrdiff_t cs = Sizes<M3::_colsize,M1u::_rowsize>::size;
+        const ptrdiff_t rs = Sizes<M2::_colsize,M1u::_colsize>::size;
         typedef typename M1u::const_cview_type M1uv;
         typedef typename M1s::const_cview_type M1sv;
         typedef typename M1v::const_cview_type M1vv;
@@ -298,8 +298,8 @@ namespace tmv {
         TMVAssert(U.colsize() == v2.size());
         TMVAssert(V.rowsize() == v3.size());
 
-        const int cs = Sizes<V3::_size,M1u::_rowsize>::size;
-        const int rs = Sizes<V2::_size,M1u::_colsize>::size;
+        const ptrdiff_t cs = Sizes<V3::_size,M1u::_rowsize>::size;
+        const ptrdiff_t rs = Sizes<V2::_size,M1u::_colsize>::size;
         typedef typename M1u::const_cview_type M1uv;
         typedef typename M1s::const_cview_type M1sv;
         typedef typename M1v::const_cview_type M1vv;
@@ -330,8 +330,8 @@ namespace tmv {
         TMVAssert(U.colsize() == v2.size());
         TMVAssert(V.rowsize() == v3.size());
 
-        const int cs = Sizes<V3::_size,M1u::_rowsize>::size;
-        const int rs = Sizes<V2::_size,M1u::_colsize>::size;
+        const ptrdiff_t cs = Sizes<V3::_size,M1u::_rowsize>::size;
+        const ptrdiff_t rs = Sizes<V2::_size,M1u::_colsize>::size;
         typedef typename M1u::const_cview_type M1uv;
         typedef typename M1s::const_cview_type M1sv;
         typedef typename M1v::const_cview_type M1vv;

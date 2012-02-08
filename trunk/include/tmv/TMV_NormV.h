@@ -48,11 +48,11 @@ namespace tmv {
 #define TMV_NORMV_UNROLL 0
 #endif
 
-    template <int algo, int s, CompType comp, int ix, class ret, class V>
+    template <int algo, ptrdiff_t s, CompType comp, int ix, class ret, class V>
     struct SumElementsV_Helper;
 
     // algo 11: simple for loop
-    template <int s, CompType comp, int ix, class ret, class V>
+    template <ptrdiff_t s, CompType comp, int ix, class ret, class V>
     struct SumElementsV_Helper<11,s,comp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -62,9 +62,9 @@ namespace tmv {
             typedef typename TypeSelect<
                 V::isreal || Traits<ret>::iscomplex , ret ,
                 std::complex<ret> >::type BT;
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             ret sum(0);
-            for(int i=0;i<n;++i) 
+            for(ptrdiff_t i=0;i<n;++i) 
                 sum += Component<comp,BT>::f(
                     x * Traits<BT>::convert(v.cref(i)));
             return sum;
@@ -72,7 +72,7 @@ namespace tmv {
     };
 
     // algo 12: 2 at a time
-    template <int s, CompType comp, int ix, class ret, class V>
+    template <ptrdiff_t s, CompType comp, int ix, class ret, class V>
     struct SumElementsV_Helper<12,s,comp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -82,13 +82,13 @@ namespace tmv {
             typedef typename TypeSelect<
                 V::isreal || Traits<ret>::iscomplex , ret ,
                 std::complex<ret> >::type BT;
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             ret sum0(0), sum1(0);
             BT v0, v1;
             typedef typename V::const_iterator IT;
             IT it = v.begin();
-            int n_2 = (n>>1);
-            const int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            const ptrdiff_t nb = n-(n_2<<1);
 
             if (n_2) {
                 do {
@@ -111,7 +111,7 @@ namespace tmv {
     };
 
     // algo 13: 4 at a time
-    template <int s, CompType comp, int ix, class ret, class V>
+    template <ptrdiff_t s, CompType comp, int ix, class ret, class V>
     struct SumElementsV_Helper<13,s,comp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -121,14 +121,14 @@ namespace tmv {
             typedef typename TypeSelect<
                 V::isreal || Traits<ret>::iscomplex , ret ,
                 std::complex<ret> >::type BT;
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             ret sum0(0), sum1(0);
             BT v0, v1;
             typedef typename V::const_iterator IT;
             IT it = v.begin();
 
-            int n_4 = (n>>2);
-            int nb = n-(n_4<<2);
+            ptrdiff_t n_4 = (n>>2);
+            ptrdiff_t nb = n-(n_4<<2);
 
             if (n_4) {
                 do {
@@ -158,7 +158,7 @@ namespace tmv {
     };
 
     // algo 14: 8 at a time
-    template <int s, CompType comp, int ix, class ret, class V>
+    template <ptrdiff_t s, CompType comp, int ix, class ret, class V>
     struct SumElementsV_Helper<14,s,comp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -168,14 +168,14 @@ namespace tmv {
             typedef typename TypeSelect<
                 V::isreal || Traits<ret>::iscomplex , ret ,
                 std::complex<ret> >::type BT;
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             ret sum0(0), sum1(0);
             BT v0, v1;
             typedef typename V::const_iterator IT;
             IT it = v.begin();
 
-            int n_8 = (n>>3);
-            int nb = n-(n_8<<3);
+            ptrdiff_t n_8 = (n>>3);
+            ptrdiff_t nb = n-(n_8<<3);
 
             if (n_8) {
                 do {
@@ -219,7 +219,7 @@ namespace tmv {
     };
 
     // algo 15: fully unroll
-    template <int s, CompType comp, int ix, class ret, class V>
+    template <ptrdiff_t s, CompType comp, int ix, class ret, class V>
     struct SumElementsV_Helper<15,s,comp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -227,7 +227,7 @@ namespace tmv {
         typedef typename TypeSelect<
             V::isreal || Traits<ret>::iscomplex , ret ,
             std::complex<ret> >::type BT;
-        template <int I, int N>
+        template <ptrdiff_t I, ptrdiff_t N>
         struct Unroller
         {
             static TMV_INLINE ret unroll(const V& v, const Scaling<ix,RT>& x)
@@ -237,7 +237,7 @@ namespace tmv {
                     Unroller<I+N/2,N-N/2>::unroll(v,x));
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,1>
         {
             static TMV_INLINE ret unroll(const V& v, const Scaling<ix,RT>& x)
@@ -246,7 +246,7 @@ namespace tmv {
                     x * Traits<BT>::convert(v.cref(I)));
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,0>
         {
             static TMV_INLINE ret unroll(const V& v, const Scaling<ix,RT>& x)
@@ -257,35 +257,35 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int s, int ix, class ret, class V>
+    template <ptrdiff_t s, int ix, class ret, class V>
     struct SumElementsV_Helper<90,s,ValueComp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
         static TMV_INLINE ret call(const V& v, const Scaling<ix,RT>& x)
         { return InstSumElements(v.xView()); }
     };
-    template <int s, int ix, class ret, class V>
+    template <ptrdiff_t s, int ix, class ret, class V>
     struct SumElementsV_Helper<90,s,AbsComp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
         static TMV_INLINE ret call(const V& v, const Scaling<ix,RT>& x)
         { return InstSumAbsElements(v.xView()); }
     };
-    template <int s, int ix, class ret, class V>
+    template <ptrdiff_t s, int ix, class ret, class V>
     struct SumElementsV_Helper<90,s,Abs2Comp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
         static TMV_INLINE ret call(const V& v, const Scaling<ix,RT>& x)
         { return InstSumAbs2Elements(v.xView()); }
     };
-    template <int s, class ret, class V>
+    template <ptrdiff_t s, class ret, class V>
     struct SumElementsV_Helper<90,s,NormComp,1,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
         static TMV_INLINE ret call(const V& v, const Scaling<1,RT>& x)
         { return InstNormSq(v.xView()); }
     };
-    template <int s, class ret, class V>
+    template <ptrdiff_t s, class ret, class V>
     struct SumElementsV_Helper<90,s,NormComp,0,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -294,7 +294,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int s, CompType comp, int ix, class ret, class V>
+    template <ptrdiff_t s, CompType comp, int ix, class ret, class V>
     struct SumElementsV_Helper<97,s,comp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -305,7 +305,7 @@ namespace tmv {
             return SumElementsV_Helper<-2,s,comp,ix,ret,Vnc>::call(vnc,x);
         }
     };
-    template <int s, int ix, class ret, class V>
+    template <ptrdiff_t s, int ix, class ret, class V>
     struct SumElementsV_Helper<97,s,ValueComp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -319,7 +319,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int s, CompType comp, int ix, class ret, class V>
+    template <ptrdiff_t s, CompType comp, int ix, class ret, class V>
     struct SumElementsV_Helper<-3,s,comp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -327,7 +327,7 @@ namespace tmv {
         static TMV_INLINE ret call(const V& v, const Scaling<ix,RT>& x)
         {
             typedef typename V::real_type RT;
-            const int maxunroll = 80;
+            const ptrdiff_t maxunroll = 80;
             const int algo = 
                 TMV_OPT == 0 ? 11 :
                 ( s != Unknown && s <= maxunroll ) ? 15 :
@@ -339,7 +339,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int s, CompType comp, int ix, class ret, class V>
+    template <ptrdiff_t s, CompType comp, int ix, class ret, class V>
     struct SumElementsV_Helper<-2,s,comp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -357,7 +357,7 @@ namespace tmv {
         }
     };
 
-    template <int s, CompType comp, int ix, class ret, class V>
+    template <ptrdiff_t s, CompType comp, int ix, class ret, class V>
     struct SumElementsV_Helper<-1,s,comp,ix,ret,V>
     {
         typedef typename Traits<ret>::real_type RT;

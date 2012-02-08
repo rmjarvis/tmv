@@ -1501,21 +1501,21 @@ For the LU decomposition, we have:
 tmv::ConstLowerTriMatrixView<T> m.lud().getL()
 tmv::ConstUpperTriMatrixView<T> m.lud().getU()
 Permutation m.lud().getP()
-bool m.lud().IsTrans()
+bool m.lud().isTrans()
 \end{tmvcode}
 \index{Matrix!Methods!lud}
 \index{Matrix!LU decomposition}
 \index{LU Decomposition!Matrix}
 \tt{getL()} and \tt{getU()} return $L$ and $U$.
 \tt{getP()} returns the permutation, $P$.
-Finally, \tt{IsTrans()} returns whether
+Finally, \tt{isTrans()} returns whether
 the product $PLU$ is equal to \tt{m} or \tt{m.transpose()}.  
 
 The following should result in a \tt{Matrix m2}, which is numerically very close to
 the original \tt{Matrix m}:
 \begin{tmvcode}
 tmv::Matrix<T> m2 = m.lud().getP() * m.lud().getL() * m.lud().getU();
-if (m.lud().IsTrans()) m2.transposeSelf();
+if (m.lud().isTrans()) m2.transposeSelf();
 \end{tmvcode}
 
 \item
@@ -1523,13 +1523,13 @@ For the QR decomposition, we have:
 \begin{tmvcode}
 tmv::PackedQ<T> m.qrd().getQ();
 tmv::ConstUpperTriMatrix<T> m.qrd().getR();
-bool m.qrd().IsTrans();
+bool m.qrd().isTrans();
 \end{tmvcode}
 \index{Matrix!Methods!qrd}
 \index{Matrix!QR decomposition}
 \index{QR Decomposition!Matrix}
 \tt{getQ()} and \tt{getR()} return $Q$ and $R$.  
-\tt{IsTrans()} returns whether
+\tt{isTrans()} returns whether
 the decomposition is equal to \tt{m} or \tt{m.transpose()}.  
 
 Note: the \tt{PackedQ} class is convertible into a regular \tt{Matrix}, but if you are doing 
@@ -1541,7 +1541,7 @@ the original \tt{Matrix m}:
 \begin{tmvcode}
 tmv::Matrix<T> m2(m.nrows(),m.ncols());
 tmv::MatrixView<T> m2v = 
-      m.qrd().IsTrans() ? m2.transpose() : m2.view();
+      m.qrd().isTrans() ? m2.transpose() : m2.view();
 m2v = m.qrd().getQ() * m.qrd().getR();
 \end{tmvcode}
 
@@ -1551,14 +1551,14 @@ For the QRP decomposition, we have:
 tmv::PackedQ<T> m.qrpd().getQ()
 tmv::ConstUpperTriMatrixView<T> m.qrpd().getR()
 Permutation m.qrpd().getP()
-bool m.qrpd().IsTrans()
+bool m.qrpd().isTrans()
 \end{tmvcode}
 \index{Matrix!Methods!qrpd}
 \index{Matrix!QRP decomposition}
 \index{QRP Decomposition!Matrix}
 \tt{getQ()} and \tt{getR()} return $Q$ and $R$.
 \tt{getP()} returns the permutation, $P$.
-\tt{IsTrans()} returns whether
+\tt{isTrans()} returns whether
 the decomposition is equal to \tt{m} or \tt{m.transpose()}.  
 
 The following should result in a \tt{Matrix m2}, which is numerically very close to
@@ -1566,7 +1566,7 @@ the original \tt{Matrix m}:
 \begin{tmvcode}
 tmv::Matrix<T> m2(m.nrows(),m.ncols());
 tmv::MatrixView<T> m2v = 
-      m.qrpd().IsTrans() ? m2.transpose() : m2.view();
+      m.qrpd().isTrans() ? m2.transpose() : m2.view();
 m2v = m.qrpd().getQ() * m.qrpd().getR() * m.qrpd().getP();
 \end{tmvcode}
 

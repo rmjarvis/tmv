@@ -174,7 +174,7 @@ namespace tmv {
     struct AuxRef<std::complex<T>,true>
     { typedef ConjRef<std::complex<T> > reference; };
 
-    template <class T, int S, ConjType C>
+    template <class T, ptrdiff_t S, ConjType C>
     class VIt 
     {
     public :
@@ -186,25 +186,25 @@ namespace tmv {
         typedef T* pointer;
         typedef typename AuxRef<T,C==Conj>::reference reference;
 
-        TMV_INLINE VIt(T* inp, int step) : p(inp), s(step) {}
+        TMV_INLINE VIt(T* inp, ptrdiff_t step) : p(inp), s(step) {}
         TMV_INLINE explicit VIt(T* inp) : p(inp), s(S) 
         { TMVAssert(S != Unknown); }
         TMV_INLINE VIt(const type& rhs) : p(rhs.get()), s(rhs.step()) {}
 
-        template <int S2>
+        template <ptrdiff_t S2>
         TMV_INLINE VIt(const VIt<T,S2,C>& rhs) : p(rhs.get()), s(rhs.step()) {}
 
         TMV_INLINE type& operator=(const type& rhs) 
         { TMVAssert(step()==rhs.step()); p=rhs.get(); return *this; }
 
-        template <int S2>
+        template <ptrdiff_t S2>
         TMV_INLINE type& operator=(const VIt<T,S2,C>& rhs) 
         { TMVAssert(step()==rhs.step()); p=rhs.get(); return *this; }
 
         TMV_INLINE ~VIt() {}
 
         TMV_INLINE T* get() const { return p; }
-        TMV_INLINE int step() const { return s; }
+        TMV_INLINE ptrdiff_t step() const { return s; }
 
         TMV_INLINE bool operator==(const type& rhs) const 
         { return p == rhs.get(); }
@@ -222,18 +222,18 @@ namespace tmv {
         TMV_INLINE type operator--(int) 
         { type p2 = *this; p-=step(); return p2; }
 
-        TMV_INLINE type& operator+=(int n) { p += n*step(); return *this; }
-        TMV_INLINE type& operator-=(int n) { p -= n*step(); return *this; }
-        TMV_INLINE type operator+(int n) const 
+        TMV_INLINE type& operator+=(ptrdiff_t n) { p += n*step(); return *this; }
+        TMV_INLINE type& operator-=(ptrdiff_t n) { p -= n*step(); return *this; }
+        TMV_INLINE type operator+(ptrdiff_t n) const 
         { return type(p+n*step(),step()); }
-        TMV_INLINE type operator-(int n) const 
+        TMV_INLINE type operator-(ptrdiff_t n) const 
         { return type(p-n*step(),step()); }
-        TMV_INLINE type& shiftP(int n) { p += n; return *this; }
+        TMV_INLINE type& shiftP(ptrdiff_t n) { p += n; return *this; }
 
         TMV_INLINE ptrdiff_t operator-(const type& rhs) const 
         { return (p-rhs.get())/step(); }
 
-        TMV_INLINE reference operator[](int n) const 
+        TMV_INLINE reference operator[](ptrdiff_t n) const 
         { return reference(p[n*step()]); }
 
         typedef VIt<T,S,NonConj> nonconj_type;
@@ -250,7 +250,7 @@ namespace tmv {
         const CheckedInt<S> s;
     };
 
-    template <class T, int S, ConjType C>
+    template <class T, ptrdiff_t S, ConjType C>
     class CVIt
     {
     public :
@@ -262,34 +262,34 @@ namespace tmv {
         typedef const T* pointer;
         typedef const T& reference;
 
-        TMV_INLINE CVIt(const T* inp, int step) : p(inp), s(step) {}
+        TMV_INLINE CVIt(const T* inp, ptrdiff_t step) : p(inp), s(step) {}
         TMV_INLINE explicit CVIt(const T* inp) : p(inp), s(S) 
         { TMVAssert(S != Unknown); }
         TMV_INLINE CVIt(const type& rhs) : p(rhs.get()), s(rhs.step()) {}
 
-        template <int S2>
+        template <ptrdiff_t S2>
         TMV_INLINE CVIt(const CVIt<T,S2,C>& rhs) : 
             p(rhs.get()), s(rhs.step()) {}
 
-        template <int S2>
+        template <ptrdiff_t S2>
         TMV_INLINE CVIt(const VIt<T,S2,C>& rhs) : 
             p(rhs.get()), s(rhs.step()) {}
 
         TMV_INLINE type& operator=(const type& rhs)
         { TMVAssert(step()==rhs.step()); p = rhs.get(); return *this; }
 
-        template <int S2>
+        template <ptrdiff_t S2>
         TMV_INLINE type& operator=(const CVIt<T,S2,C>& rhs)
         { TMVAssert(step()==rhs.step()); p = rhs.get(); return *this; }
 
-        template <int S2>
+        template <ptrdiff_t S2>
         TMV_INLINE type& operator=(const VIt<T,S2,C>& rhs)
         { TMVAssert(step()==rhs.step()); p = rhs.get(); return *this; }
 
         TMV_INLINE ~CVIt() {}
 
         TMV_INLINE const T* get() const { return p; }
-        TMV_INLINE int step() const { return s; }
+        TMV_INLINE ptrdiff_t step() const { return s; }
 
         TMV_INLINE bool operator==(const type& rhs) const 
         { return p == rhs.get(); }
@@ -307,18 +307,18 @@ namespace tmv {
         TMV_INLINE type operator--(int) 
         { type p2 = *this; p-=step(); return p2; }
 
-        TMV_INLINE type& operator+=(int n) { p += n*step(); return *this; }
-        TMV_INLINE type& operator-=(int n) { p -= n*step(); return *this; }
-        TMV_INLINE type operator+(int n) const 
+        TMV_INLINE type& operator+=(ptrdiff_t n) { p += n*step(); return *this; }
+        TMV_INLINE type& operator-=(ptrdiff_t n) { p -= n*step(); return *this; }
+        TMV_INLINE type operator+(ptrdiff_t n) const 
         { return type(p+n*step(),step()); }
-        TMV_INLINE type operator-(int n) const 
+        TMV_INLINE type operator-(ptrdiff_t n) const 
         { return type(p-n*step(),step()); }
-        TMV_INLINE type& shiftP(int n) { p += n; return *this; }
+        TMV_INLINE type& shiftP(ptrdiff_t n) { p += n; return *this; }
 
         TMV_INLINE ptrdiff_t operator-(const type& rhs) const 
         { return (p-rhs.get())/step(); }
 
-        TMV_INLINE T operator[](int n) const 
+        TMV_INLINE T operator[](ptrdiff_t n) const 
         { return DoConj<C>(p[n*step()]); }
 
         typedef CVIt<T,S,NonConj> nonconj_type;
@@ -335,11 +335,11 @@ namespace tmv {
         const CheckedInt<S> s;
     };
 
-    template <class T, int S, ConjType C>
-    TMV_INLINE CVIt<T,S,C> operator+(int i, const CVIt<T,S,C>& it)
+    template <class T, ptrdiff_t S, ConjType C>
+    TMV_INLINE CVIt<T,S,C> operator+(ptrdiff_t i, const CVIt<T,S,C>& it)
     { return it + i; }
-    template <class T, int S, ConjType C>
-    TMV_INLINE VIt<T,S,C> operator+(int i, const VIt<T,S,C>& it)
+    template <class T, ptrdiff_t S, ConjType C>
+    TMV_INLINE VIt<T,S,C> operator+(ptrdiff_t i, const VIt<T,S,C>& it)
     { return it + i; }
 
 
@@ -404,7 +404,7 @@ namespace tmv {
     inline std::string TMV_Text(ConjRef<T>)
     { return std::string("ConjRef<") + TMV_Text(T()) + ">"; }
 
-    template <class T, int S, ConjType C>
+    template <class T, ptrdiff_t S, ConjType C>
     inline std::string TMV_Text(VIt<T,S,C> it)
     {
         std::ostringstream s;
@@ -415,7 +415,7 @@ namespace tmv {
         return s.str();
     }
 
-    template <class T, int S, ConjType C>
+    template <class T, ptrdiff_t S, ConjType C>
     inline std::string TMV_Text(CVIt<T,S,C> it)
     {
         std::ostringstream s;

@@ -1068,8 +1068,8 @@ namespace tmv {
             // Remember that the first element of v is not stored, but rather
             // is assumed to be 1.
 
-            int M = Y.colsize();
-            int N = Y.rowsize()-1; // # of cols already computed
+            ptrdiff_t M = Y.colsize();
+            ptrdiff_t N = Y.rowsize()-1; // # of cols already computed
 #ifdef XDEBUG_HOUSE
             typedef typename M1::value_type T;
             Matrix<T> Y0(Y);
@@ -1253,8 +1253,8 @@ namespace tmv {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int M = Y.colsize();
-            const int N = Y.rowsize();
+            const ptrdiff_t M = Y.colsize();
+            const ptrdiff_t N = Y.rowsize();
 
 #ifdef XDEBUG_HOUSE
             Matrix<T> Y0(Y);
@@ -1263,7 +1263,7 @@ namespace tmv {
             Vector<T> beta0 = beta;
             Matrix<T> Htot(M,M);
             Htot.setToIdentity();
-            for(int i=0;i<N;i++) {
+            for(ptrdiff_t i=0;i<N;i++) {
                 Matrix<T> H(M,M);
                 H.setToIdentity();
                 H.subMatrix(i,M,i,M) -= beta(i) * 
@@ -1273,7 +1273,7 @@ namespace tmv {
 #endif
 
             if (N > 2) {
-                int j1 = (N+1)/2;
+                ptrdiff_t j1 = (N+1)/2;
                 typename M1::const_colrange_type Y1 = Y.colRange(0,j1);
                 typename M2::subtrimatrix_type Z1 = Z.subTriMatrix(0,j1);
                 typename V::const_subvector_type beta1 = beta.subVector(0,j1);
@@ -1480,18 +1480,18 @@ namespace tmv {
             Matrix<T3> Hm = H*m0;
 #endif
 
-            int M = Y.colsize();
-            int N = Y.rowsize();
-            const int cs = Sizes<M1::_colsize,M3::_colsize>::size;
-            const int rs = Sizes<M1::_rowsize,M2::_size>::size;
-            const int xs = M3::_rowsize;
-            const int cs1 = IntTraits2<cs,rs>::diff;
-            const int Si1 = M1::_stepi;
-            const int Sj1 = M1::_stepj;
-            const int C1 = M1::_conj;
-            const int Si3 = M3::_stepi;
-            const int Sj3 = M3::_stepj;
-            const int C3 = M3::_conj;
+            ptrdiff_t M = Y.colsize();
+            ptrdiff_t N = Y.rowsize();
+            const ptrdiff_t cs = Sizes<M1::_colsize,M3::_colsize>::size;
+            const ptrdiff_t rs = Sizes<M1::_rowsize,M2::_size>::size;
+            const ptrdiff_t xs = M3::_rowsize;
+            const ptrdiff_t cs1 = IntTraits2<cs,rs>::diff;
+            const ptrdiff_t Si1 = M1::_stepi;
+            const ptrdiff_t Sj1 = M1::_stepj;
+            const int C1 = M1::_conj ? Conj : NonConj;
+            const ptrdiff_t Si3 = M3::_stepi;
+            const ptrdiff_t Sj3 = M3::_stepj;
+            const int C3 = M3::_conj ? Conj : NonConj;
             typedef typename M1::value_type T1;
             typedef typename M3::value_type T3;
             typedef typename MViewHelper<T1,Rec,rs,rs,Si1,Sj1,C1>::ctype M1a;
@@ -1713,18 +1713,18 @@ namespace tmv {
             Matrix<T3> Hm = Hinv*m0;
 #endif
 
-            int M = Y.colsize();
-            int N = Y.rowsize();
-            const int cs = Sizes<M1::_colsize,M3::_colsize>::size;
-            const int rs = Sizes<M1::_rowsize,M2::_size>::size;
-            const int xs = M3::_rowsize;
-            const int cs1 = IntTraits2<cs,rs>::diff;
-            const int Si1 = M1::_stepi;
-            const int Sj1 = M1::_stepj;
-            const int C1 = M1::_conj;
-            const int Si3 = M3::_stepi;
-            const int Sj3 = M3::_stepj;
-            const int C3 = M3::_conj;
+            ptrdiff_t M = Y.colsize();
+            ptrdiff_t N = Y.rowsize();
+            const ptrdiff_t cs = Sizes<M1::_colsize,M3::_colsize>::size;
+            const ptrdiff_t rs = Sizes<M1::_rowsize,M2::_size>::size;
+            const ptrdiff_t xs = M3::_rowsize;
+            const ptrdiff_t cs1 = IntTraits2<cs,rs>::diff;
+            const ptrdiff_t Si1 = M1::_stepi;
+            const ptrdiff_t Sj1 = M1::_stepj;
+            const int C1 = M1::_conj ? Conj : NonConj;
+            const ptrdiff_t Si3 = M3::_stepi;
+            const ptrdiff_t Sj3 = M3::_stepj;
+            const int C3 = M3::_conj ? Conj : NonConj;
             typedef typename M1::value_type T1;
             typedef typename M3::value_type T3;
             typedef typename MViewHelper<T1,Rec,rs,rs,Si1,Sj1,C1>::ctype M1a;
@@ -1929,14 +1929,14 @@ namespace tmv {
             TMVStaticAssert(!M3::_unknowndiag);
             TMVAssert(temp.size() == Y.rowsize());
 
-            int M = Y.colsize();
-            int N = Y.rowsize();
-            const int cs = M1::_colsize;
-            const int rs = Sizes<M1::_rowsize,M2::_size>::size;
-            const int cs1 = IntTraits2<cs,rs>::diff;
-            const int Si1 = M1::_stepi;
-            const int Sj1 = M1::_stepj;
-            const int C1 = M1::_conj;
+            ptrdiff_t M = Y.colsize();
+            ptrdiff_t N = Y.rowsize();
+            const ptrdiff_t cs = M1::_colsize;
+            const ptrdiff_t rs = Sizes<M1::_rowsize,M2::_size>::size;
+            const ptrdiff_t cs1 = IntTraits2<cs,rs>::diff;
+            const ptrdiff_t Si1 = M1::_stepi;
+            const ptrdiff_t Sj1 = M1::_stepj;
+            const int C1 = M1::_conj ? Conj : NonConj;
             typedef typename M1::value_type T;
             typedef typename MViewHelper<T,Rec,rs,rs,Si1,Sj1,C1>::type M1a;
             typedef typename MViewHelper<T,Rec,cs1,rs,Si1,Sj1,C1>::type M1b;
@@ -2101,9 +2101,9 @@ namespace tmv {
         {
             // z = -beta Z' Y't v
 
-            int N = Y.rowsize()-1; // # of cols already computed
+            ptrdiff_t N = Y.rowsize()-1; // # of cols already computed
 #ifdef XDEBUG_HOUSE
-            int M = Y.colsize();
+            ptrdiff_t M = Y.colsize();
             typedef typename M1::value_type T;
             Matrix<T> Y0(M+N+1,N+1);
             Y0.rowRange(0,N+1).setToIdentity();
@@ -2271,9 +2271,9 @@ namespace tmv {
         {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
-            const int N = Y.rowsize();
+            const ptrdiff_t N = Y.rowsize();
 #ifdef XDEBUG_HOUSE
-            const int M = Y.colsize();
+            const ptrdiff_t M = Y.colsize();
             Matrix<T> Y0(M+N,N);
             Y0.rowRange(0,N).setToIdentity();
             Y0.rowRange(N,M+N) = Y;
@@ -2281,7 +2281,7 @@ namespace tmv {
             Vector<T> beta0 = beta;
             Matrix<T> Htot(M+N,M+N);
             Htot.setToIdentity();
-            for(int i=0;i<N;i++) {
+            for(ptrdiff_t i=0;i<N;i++) {
                 Matrix<T> H(M+N,M+N);
                 H.setToIdentity();
                 H.subMatrix(i,M+N,i,M+N) -= beta(i) * 
@@ -2291,7 +2291,7 @@ namespace tmv {
 #endif
 
             if (N > 2) {
-                int j1 = (N+1)/2;
+                ptrdiff_t j1 = (N+1)/2;
                 typename M1::const_colrange_type Y1 = Y.colRange(0,j1);
                 typename M2::subtrimatrix_type Z1 = Z.subTriMatrix(0,j1);
                 typename V::const_subvector_type beta1 = beta.subVector(0,j1);
@@ -2460,9 +2460,9 @@ namespace tmv {
         static void call(const M1& Y, const M2& Z, M3& ma, M4& mb, M5& temp)
         {
 #ifdef XDEBUG_HOUSE
-            int M = Y.colsize();
-            int N = Y.rowsize();
-            int K = ma.rowsize();
+            ptrdiff_t M = Y.colsize();
+            ptrdiff_t N = Y.rowsize();
+            ptrdiff_t K = ma.rowsize();
 
             typedef typename M1::value_type T;
             typedef typename M3::value_type T3;
@@ -2691,9 +2691,9 @@ namespace tmv {
         static void call(const M1& Y, const M2& Z, M3& ma, M4& mb, M5& temp)
         {
 #ifdef XDEBUG_HOUSE
-            int M = Y.colsize();
-            int N = Y.rowsize();
-            int K = ma.rowsize();
+            ptrdiff_t M = Y.colsize();
+            ptrdiff_t N = Y.rowsize();
+            ptrdiff_t K = ma.rowsize();
 
             typedef typename M1::value_type T;
             typedef typename M3::value_type T3;
@@ -2917,8 +2917,8 @@ namespace tmv {
         typedef typename V::value_type RT;
         TMVStaticAssert(Traits<RT>::isreal);
         int detq = 1;
-        const int n = beta.size();
-        for(int i=0; i<n; ++i) if (beta[i] != RT(0)) detq = -detq;
+        const ptrdiff_t n = beta.size();
+        for(ptrdiff_t i=0; i<n; ++i) if (beta[i] != RT(0)) detq = -detq;
         return detq;
     }
 

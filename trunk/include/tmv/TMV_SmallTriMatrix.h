@@ -34,7 +34,7 @@
 
 namespace tmv {
 
-    template <class T, int N, int A0>
+    template <class T, ptrdiff_t N, int A0>
     struct Traits<SmallUpperTriMatrix<T,N,A0> >
     {
         typedef typename Traits<T>::real_type real_type;
@@ -86,8 +86,8 @@ namespace tmv {
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = false };
         enum { _dt = A & AllDiagType };
-        enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
-        enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : ptrdiff_t(IntTraits<_stepi>::twoS) };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : ptrdiff_t(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
 
         enum { _hasdivider = false };
@@ -213,7 +213,7 @@ namespace tmv {
         typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,An|CheckAlias> alias_type;
     };
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     class SmallUpperTriMatrix : 
         public BaseMatrix_Tri_Mutable<SmallUpperTriMatrix<T,N,A> >
     {
@@ -343,7 +343,7 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsm; }
         TMV_INLINE T* ptr() { return itsm; }
 
-        T cref(int i, int j) const 
+        T cref(ptrdiff_t i, ptrdiff_t j) const 
         {
             return (
                 (isunit() && i==j ) ? T(1) :
@@ -351,16 +351,16 @@ namespace tmv {
                 itsm[i*stepi() + j*stepj()]);
         }
 
-        reference ref(int i, int j)
+        reference ref(ptrdiff_t i, ptrdiff_t j)
         {
             return TriRefHelper<T,false,_nonunit>::makeRef(
                 isunit() && i==j, itsm[i*stepi() + j*stepj()] ); 
         }
 
-        TMV_INLINE int size() const { return N; }
-        int nElements() const { return N*(N+1)/2; }
-        TMV_INLINE int stepi() const { return _stepi; }
-        TMV_INLINE int stepj() const { return _stepj; }
+        TMV_INLINE ptrdiff_t size() const { return N; }
+        ptrdiff_t nElements() const { return N*(N+1)/2; }
+        TMV_INLINE ptrdiff_t stepi() const { return _stepi; }
+        TMV_INLINE ptrdiff_t stepj() const { return _stepj; }
         TMV_INLINE DiagType dt() const { return static_cast<DiagType>(_dt); }
         TMV_INLINE bool isunit() const { return _unit; }
         TMV_INLINE bool isconj() const { return false; }
@@ -373,7 +373,7 @@ namespace tmv {
 
     }; // SmallUpperTriMatrix
 
-    template <class T, int N, int Si, int Sj, int A0>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A0>
     struct Traits<ConstSmallUpperTriMatrixView<T,N,Si,Sj,A0> >
     {
         typedef typename Traits<T>::real_type real_type;
@@ -424,8 +424,8 @@ namespace tmv {
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
         enum { _dt = _unknowndiag ? Unknown : A & AllDiagType };
-        enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
-        enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : ptrdiff_t(IntTraits<_stepi>::twoS) };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : ptrdiff_t(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
 
         enum { known = N != Unknown };
@@ -521,7 +521,7 @@ namespace tmv {
         typedef CCMIt<type> const_colmajor_iterator;
     };
 
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     class ConstSmallUpperTriMatrixView :
         public BaseMatrix_Tri<ConstSmallUpperTriMatrixView<T,N,Si,Sj,A> >
     {
@@ -553,20 +553,20 @@ namespace tmv {
         //
         
         ConstSmallUpperTriMatrixView(
-            const T* m, int s, int si, int sj, DiagType dt) :
+            const T* m, ptrdiff_t s, ptrdiff_t si, ptrdiff_t sj, DiagType dt) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstSmallUpperTriMatrixView(const T* m, int s, int si, int sj) :
+        ConstSmallUpperTriMatrixView(const T* m, ptrdiff_t s, ptrdiff_t si, ptrdiff_t sj) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_dt != Unknown); 
         }
 
-        ConstSmallUpperTriMatrixView(const T* m, int s, int si) :
+        ConstSmallUpperTriMatrixView(const T* m, ptrdiff_t s, ptrdiff_t si) :
             itsm(m), itss(s), itssi(si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -574,7 +574,7 @@ namespace tmv {
             TMVStaticAssert(_dt != Unknown); 
         }
 
-        ConstSmallUpperTriMatrixView(const T* m, int s) :
+        ConstSmallUpperTriMatrixView(const T* m, ptrdiff_t s) :
             itsm(m), itss(s), itssi(Si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -618,7 +618,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         ConstSmallUpperTriMatrixView(
             const ConstSmallUpperTriMatrixView<T,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itss(m2.size()),
@@ -628,7 +628,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         ConstSmallUpperTriMatrixView(
             const SmallUpperTriMatrixView<T,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itss(m2.size()),
@@ -655,7 +655,7 @@ namespace tmv {
 
         TMV_INLINE const T* cptr() const { return itsm; }
 
-        T cref(int i, int j) const 
+        T cref(ptrdiff_t i, ptrdiff_t j) const 
         {
             return (
                 (isunit() && i==j ) ? T(1) :
@@ -663,15 +663,15 @@ namespace tmv {
                 DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
 
-        TMV_INLINE int colsize() const { return itss; }
-        TMV_INLINE int rowsize() const { return itss; }
-        TMV_INLINE int size() const { return itss; }
-        int nElements() const { return itss*(itss+1)/2; }
-        TMV_INLINE int stepi() const { return itssi; }
-        TMV_INLINE int stepj() const { return itssj; }
+        TMV_INLINE ptrdiff_t colsize() const { return itss; }
+        TMV_INLINE ptrdiff_t rowsize() const { return itss; }
+        TMV_INLINE ptrdiff_t size() const { return itss; }
+        ptrdiff_t nElements() const { return itss*(itss+1)/2; }
+        TMV_INLINE ptrdiff_t stepi() const { return itssi; }
+        TMV_INLINE ptrdiff_t stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE DiagType dt() const 
-        { return static_cast<DiagType>(static_cast<int>(itsdt)); }
+        { return static_cast<DiagType>(static_cast<ptrdiff_t>(itsdt)); }
         TMV_INLINE bool isunit() const { return dt() == UnitDiag; }
         TMV_INLINE bool isrm() const
         { return _rowmajor || (!_colmajor && stepj() == 1); }
@@ -688,7 +688,7 @@ namespace tmv {
 
     }; // ConstSmallUpperTriMatrixView
 
-    template <class T, int N, int Si, int Sj, int A0>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A0>
     struct Traits<SmallUpperTriMatrixView<T,N,Si,Sj,A0> >
     {
         typedef typename Traits<T>::real_type real_type;
@@ -739,8 +739,8 @@ namespace tmv {
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
         enum { _dt = _unknowndiag ? Unknown : A & AllDiagType };
-        enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
-        enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : ptrdiff_t(IntTraits<_stepi>::twoS) };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : ptrdiff_t(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
 
         enum { known = N != Unknown };
@@ -877,7 +877,7 @@ namespace tmv {
         typedef SmallUpperTriMatrixView<T,N,_stepi,_stepj,An|CheckAlias> alias_type;
     };
 
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     class SmallUpperTriMatrixView :
         public BaseMatrix_Tri_Mutable<SmallUpperTriMatrixView<T,N,Si,Sj,A> >
     {
@@ -910,20 +910,20 @@ namespace tmv {
         // Constructors
         //
 
-        SmallUpperTriMatrixView(T* m, int s, int si, int sj, DiagType dt) :
+        SmallUpperTriMatrixView(T* m, ptrdiff_t s, ptrdiff_t si, ptrdiff_t sj, DiagType dt) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        SmallUpperTriMatrixView(T* m, int s, int si, int sj) :
+        SmallUpperTriMatrixView(T* m, ptrdiff_t s, ptrdiff_t si, ptrdiff_t sj) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_dt != Unknown); 
         }
 
-        SmallUpperTriMatrixView(T* m, int s, int si) :
+        SmallUpperTriMatrixView(T* m, ptrdiff_t s, ptrdiff_t si) :
             itsm(m), itss(s), itssi(si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -931,7 +931,7 @@ namespace tmv {
             TMVStaticAssert(_dt != Unknown); 
         }
 
-        SmallUpperTriMatrixView(T* m, int s) :
+        SmallUpperTriMatrixView(T* m, ptrdiff_t s) :
             itsm(m), itss(s), itssi(Si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -956,7 +956,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         SmallUpperTriMatrixView(
             SmallUpperTriMatrixView<T,N2,Si2,Sj2,A2> m2) :
             itsm(m2.ptr()), itss(m2.size()),
@@ -1004,7 +1004,7 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsm; }
         TMV_INLINE T* ptr() { return itsm; }
 
-        T cref(int i, int j) const
+        T cref(ptrdiff_t i, ptrdiff_t j) const
         {
             return (
                 (isunit() && i==j ) ? T(1) :
@@ -1012,22 +1012,22 @@ namespace tmv {
                 DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
 
-        reference ref(int i, int j)
+        reference ref(ptrdiff_t i, ptrdiff_t j)
         {
             return TriRefHelper<T,_conj,_nonunit>::makeRef(
                 isunit() && i==j, itsm[i*stepi() + j*stepj()] ); 
         }
 
 
-        TMV_INLINE int colsize() const { return itss; }
-        TMV_INLINE int rowsize() const { return itss; }
-        TMV_INLINE int size() const { return itss; }
-        int nElements() const { return itss*(itss+1)/2; }
-        TMV_INLINE int stepi() const { return itssi; }
-        TMV_INLINE int stepj() const { return itssj; }
+        TMV_INLINE ptrdiff_t colsize() const { return itss; }
+        TMV_INLINE ptrdiff_t rowsize() const { return itss; }
+        TMV_INLINE ptrdiff_t size() const { return itss; }
+        ptrdiff_t nElements() const { return itss*(itss+1)/2; }
+        TMV_INLINE ptrdiff_t stepi() const { return itssi; }
+        TMV_INLINE ptrdiff_t stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE DiagType dt() const 
-        { return static_cast<DiagType>(static_cast<int>(itsdt)); }
+        { return static_cast<DiagType>(static_cast<ptrdiff_t>(itsdt)); }
         TMV_INLINE bool isunit() const { return dt() == UnitDiag; }
         TMV_INLINE bool isrm() const
         { return _rowmajor || (!_colmajor && stepj() == 1); }
@@ -1044,7 +1044,7 @@ namespace tmv {
 
     }; // SmallUpperTriMatrixView
 
-    template <class T, int N, int A0>
+    template <class T, ptrdiff_t N, int A0>
     struct Traits<SmallLowerTriMatrix<T,N,A0> >
     {
         typedef typename Traits<T>::real_type real_type;
@@ -1096,8 +1096,8 @@ namespace tmv {
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = false };
         enum { _dt = A & AllDiagType };
-        enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
-        enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : ptrdiff_t(IntTraits<_stepi>::twoS) };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : ptrdiff_t(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
 
         enum { _hasdivider = false };
@@ -1223,7 +1223,7 @@ namespace tmv {
         typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,An|CheckAlias> alias_type;
     };
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     class SmallLowerTriMatrix : 
         public BaseMatrix_Tri_Mutable<SmallLowerTriMatrix<T,N,A> >
     {
@@ -1353,7 +1353,7 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsm; }
         TMV_INLINE T* ptr() { return itsm; }
 
-        T cref(int i, int j) const 
+        T cref(ptrdiff_t i, ptrdiff_t j) const 
         {
             return (
                 (isunit() && i==j ) ? T(1) :
@@ -1361,16 +1361,16 @@ namespace tmv {
                 itsm[i*stepi() + j*stepj()]);
         }
 
-        reference ref(int i, int j)
+        reference ref(ptrdiff_t i, ptrdiff_t j)
         {
             return TriRefHelper<T,false,_nonunit>::makeRef(
                 isunit() && i==j, itsm[i*stepi() + j*stepj()] ); 
         }
 
-        TMV_INLINE int size() const { return N; }
-        int nElements() const { return N*(N+1)/2; }
-        TMV_INLINE int stepi() const { return _stepi; }
-        TMV_INLINE int stepj() const { return _stepj; }
+        TMV_INLINE ptrdiff_t size() const { return N; }
+        ptrdiff_t nElements() const { return N*(N+1)/2; }
+        TMV_INLINE ptrdiff_t stepi() const { return _stepi; }
+        TMV_INLINE ptrdiff_t stepj() const { return _stepj; }
         TMV_INLINE DiagType dt() const { return static_cast<DiagType>(_dt); }
         TMV_INLINE bool isunit() const { return _unit; }
         TMV_INLINE bool isconj() const { return false; }
@@ -1383,7 +1383,7 @@ namespace tmv {
 
     }; // SmallLowerTriMatrix
 
-    template <class T, int N, int Si, int Sj, int A0>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A0>
     struct Traits<ConstSmallLowerTriMatrixView<T,N,Si,Sj,A0> >
     {
         typedef typename Traits<T>::real_type real_type;
@@ -1434,8 +1434,8 @@ namespace tmv {
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
         enum { _dt = _unknowndiag ? Unknown : A & AllDiagType };
-        enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
-        enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : ptrdiff_t(IntTraits<_stepi>::twoS) };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : ptrdiff_t(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
 
         enum { known = N != Unknown };
@@ -1532,7 +1532,7 @@ namespace tmv {
         typedef CCMIt<type> const_colmajor_iterator;
     };
 
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     class ConstSmallLowerTriMatrixView :
         public BaseMatrix_Tri<ConstSmallLowerTriMatrixView<T,N,Si,Sj,A> >
     {
@@ -1564,20 +1564,20 @@ namespace tmv {
         //
         
         ConstSmallLowerTriMatrixView(
-            const T* m, int s, int si, int sj, DiagType dt) :
+            const T* m, ptrdiff_t s, ptrdiff_t si, ptrdiff_t sj, DiagType dt) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstSmallLowerTriMatrixView(const T* m, int s, int si, int sj) :
+        ConstSmallLowerTriMatrixView(const T* m, ptrdiff_t s, ptrdiff_t si, ptrdiff_t sj) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_dt != Unknown); 
         }
 
-        ConstSmallLowerTriMatrixView(const T* m, int s, int si) :
+        ConstSmallLowerTriMatrixView(const T* m, ptrdiff_t s, ptrdiff_t si) :
             itsm(m), itss(s), itssi(si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1585,7 +1585,7 @@ namespace tmv {
             TMVStaticAssert(_dt != Unknown); 
         }
 
-        ConstSmallLowerTriMatrixView(const T* m, int s) :
+        ConstSmallLowerTriMatrixView(const T* m, ptrdiff_t s) :
             itsm(m), itss(s), itssi(Si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1620,7 +1620,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         ConstSmallLowerTriMatrixView(
             const ConstSmallLowerTriMatrixView<T,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itss(m2.size()),
@@ -1630,7 +1630,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         ConstSmallLowerTriMatrixView(
             const SmallLowerTriMatrixView<T,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itss(m2.size()),
@@ -1657,7 +1657,7 @@ namespace tmv {
 
         TMV_INLINE const T* cptr() const { return itsm; }
 
-        T cref(int i, int j) const 
+        T cref(ptrdiff_t i, ptrdiff_t j) const 
         {
             return (
                 (isunit() && i==j ) ? T(1) :
@@ -1665,15 +1665,15 @@ namespace tmv {
                 DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
 
-        TMV_INLINE int colsize() const { return itss; }
-        TMV_INLINE int rowsize() const { return itss; }
-        TMV_INLINE int size() const { return itss; }
-        int nElements() const { return itss*(itss+1)/2; }
-        TMV_INLINE int stepi() const { return itssi; }
-        TMV_INLINE int stepj() const { return itssj; }
+        TMV_INLINE ptrdiff_t colsize() const { return itss; }
+        TMV_INLINE ptrdiff_t rowsize() const { return itss; }
+        TMV_INLINE ptrdiff_t size() const { return itss; }
+        ptrdiff_t nElements() const { return itss*(itss+1)/2; }
+        TMV_INLINE ptrdiff_t stepi() const { return itssi; }
+        TMV_INLINE ptrdiff_t stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE DiagType dt() const 
-        { return static_cast<DiagType>(static_cast<int>(itsdt)); }
+        { return static_cast<DiagType>(static_cast<ptrdiff_t>(itsdt)); }
         TMV_INLINE bool isunit() const { return dt() == UnitDiag; }
         TMV_INLINE bool isrm() const
         { return _rowmajor || (!_colmajor && stepj() == 1); }
@@ -1690,7 +1690,7 @@ namespace tmv {
 
     }; // ConstSmallLowerTriMatrixView
 
-    template <class T, int N, int Si, int Sj, int A0>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A0>
     struct Traits<SmallLowerTriMatrixView<T,N,Si,Sj,A0> >
     {
         typedef typename Traits<T>::real_type real_type;
@@ -1741,8 +1741,8 @@ namespace tmv {
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
         enum { _dt = _unknowndiag ? Unknown : A & AllDiagType };
-        enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
-        enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : ptrdiff_t(IntTraits<_stepi>::twoS) };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : ptrdiff_t(IntTraits<_stepj>::twoS) };
         enum { Nm1 = IntTraits<N>::Sm1 };
 
         enum { known = N != Unknown };
@@ -1879,7 +1879,7 @@ namespace tmv {
         typedef SmallLowerTriMatrixView<T,N,_stepi,_stepj,An|CheckAlias> alias_type;
     };
 
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     class SmallLowerTriMatrixView :
         public BaseMatrix_Tri_Mutable<SmallLowerTriMatrixView<T,N,Si,Sj,A> >
     {
@@ -1912,20 +1912,20 @@ namespace tmv {
         // Constructors
         //
 
-        SmallLowerTriMatrixView(T* m, int s, int si, int sj, DiagType dt) :
+        SmallLowerTriMatrixView(T* m, ptrdiff_t s, ptrdiff_t si, ptrdiff_t sj, DiagType dt) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        SmallLowerTriMatrixView(T* m, int s, int si, int sj) :
+        SmallLowerTriMatrixView(T* m, ptrdiff_t s, ptrdiff_t si, ptrdiff_t sj) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_dt != Unknown); 
         }
 
-        SmallLowerTriMatrixView(T* m, int s, int si) :
+        SmallLowerTriMatrixView(T* m, ptrdiff_t s, ptrdiff_t si) :
             itsm(m), itss(s), itssi(si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1933,7 +1933,7 @@ namespace tmv {
             TMVStaticAssert(_dt != Unknown); 
         }
 
-        SmallLowerTriMatrixView(T* m, int s) :
+        SmallLowerTriMatrixView(T* m, ptrdiff_t s) :
             itsm(m), itss(s), itssi(Si), itssj(Sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1958,7 +1958,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         SmallLowerTriMatrixView(
             SmallLowerTriMatrixView<T,N2,Si2,Sj2,A2> m2) :
             itsm(m2.ptr()), itss(m2.size()),
@@ -2006,7 +2006,7 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsm; }
         TMV_INLINE T* ptr() { return itsm; }
 
-        T cref(int i, int j) const
+        T cref(ptrdiff_t i, ptrdiff_t j) const
         {
             return (
                 (isunit() && i==j ) ? T(1) :
@@ -2014,22 +2014,22 @@ namespace tmv {
                 DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
 
-        reference ref(int i, int j)
+        reference ref(ptrdiff_t i, ptrdiff_t j)
         {
             return TriRefHelper<T,_conj,_nonunit>::makeRef(
                 isunit() && i==j, itsm[i*stepi() + j*stepj()] ); 
         }
  
 
-        TMV_INLINE int colsize() const { return itss; }
-        TMV_INLINE int rowsize() const { return itss; }
-        TMV_INLINE int size() const { return itss; }
-        int nElements() const { return itss*(itss+1)/2; }
-        TMV_INLINE int stepi() const { return itssi; }
-        TMV_INLINE int stepj() const { return itssj; }
+        TMV_INLINE ptrdiff_t colsize() const { return itss; }
+        TMV_INLINE ptrdiff_t rowsize() const { return itss; }
+        TMV_INLINE ptrdiff_t size() const { return itss; }
+        ptrdiff_t nElements() const { return itss*(itss+1)/2; }
+        TMV_INLINE ptrdiff_t stepi() const { return itssi; }
+        TMV_INLINE ptrdiff_t stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE DiagType dt() const 
-        { return static_cast<DiagType>(static_cast<int>(itsdt)); }
+        { return static_cast<DiagType>(static_cast<ptrdiff_t>(itsdt)); }
         TMV_INLINE bool isunit() const { return dt() == UnitDiag; }
         TMV_INLINE bool isrm() const
         { return _rowmajor || (!_colmajor && stepj() == 1); }
@@ -2051,53 +2051,53 @@ namespace tmv {
     // Swap
     //
 
-    template <class T, int N, int Si, int Sj, int A, class M>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A, class M>
     TMV_INLINE void Swap(
         BaseMatrix_Tri_Mutable<M>& m1,
         SmallUpperTriMatrixView<T,N,Si,Sj,A> m2)
     { DoSwap(m1,m2); }
-    template <class T, int N, int Si, int Sj, int A, class M>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A, class M>
     TMV_INLINE void Swap(
         SmallUpperTriMatrixView<T,N,Si,Sj,A> m1,
         BaseMatrix_Tri_Mutable<M>& m2)
     { DoSwap(m1,m2); }
-    template <class T, int N, int Si1, int Sj1, int A1, int Si2, int Sj2, int A2>
+    template <class T, ptrdiff_t N, ptrdiff_t Si1, ptrdiff_t Sj1, int A1, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
     TMV_INLINE void Swap(
         SmallUpperTriMatrixView<T,N,Si1,Sj1,A1> m1,
         SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> m2)
     { DoSwap(m1,m2); }
-    template <class T, int N, int Si1, int Sj1, int A1, int A2>
+    template <class T, ptrdiff_t N, ptrdiff_t Si1, ptrdiff_t Sj1, int A1, int A2>
     TMV_INLINE void Swap(
         SmallUpperTriMatrixView<T,N,Si1,Sj1,A1> m1,
         UpperTriMatrixView<T,A2> m2)
     { DoSwap(m1,m2); }
-    template <class T, int N, int A1, int Si2, int Sj2, int A2>
+    template <class T, ptrdiff_t N, int A1, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
     TMV_INLINE void Swap(
         UpperTriMatrixView<T,A1> m1,
         SmallUpperTriMatrixView<T,N,Si2,Sj2,A2> m2)
     { DoSwap(m1,m2); }
 
-    template <class T, int N, int Si, int Sj, int A, class M>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A, class M>
     TMV_INLINE void Swap(
         BaseMatrix_Tri_Mutable<M>& m1,
         SmallLowerTriMatrixView<T,N,Si,Sj,A> m2)
     { Swap(m1.transpose(),m2.transpose()); }
-    template <class T, int N, int Si, int Sj, int A, class M>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A, class M>
     TMV_INLINE void Swap(
         SmallLowerTriMatrixView<T,N,Si,Sj,A> m1,
         BaseMatrix_Tri_Mutable<M>& m2)
     { Swap(m1.transpose(),m2.transpose()); }
-    template <class T, int N, int Si1, int Sj1, int A1, int Si2, int Sj2, int A2>
+    template <class T, ptrdiff_t N, ptrdiff_t Si1, ptrdiff_t Sj1, int A1, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
     TMV_INLINE void Swap(
         SmallLowerTriMatrixView<T,N,Si1,Sj1,A1> m1,
         SmallLowerTriMatrixView<T,N,Si2,Sj2,A2> m2)
     { Swap(m1.transpose(),m2.transpose()); }
-    template <class T, int N, int Si1, int Sj1, int A1, int A2>
+    template <class T, ptrdiff_t N, ptrdiff_t Si1, ptrdiff_t Sj1, int A1, int A2>
     TMV_INLINE void Swap(
         SmallLowerTriMatrixView<T,N,Si1,Sj1,A1> m1,
         LowerTriMatrixView<T,A2> m2)
     { Swap(m1.transpose(),m2.transpose()); }
-    template <class T, int N, int A1, int Si2, int Sj2, int A2>
+    template <class T, ptrdiff_t N, int A1, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
     TMV_INLINE void Swap(
         LowerTriMatrixView<T,A1> m1,
         SmallLowerTriMatrixView<T,N,Si2,Sj2,A2> m2)
@@ -2108,56 +2108,56 @@ namespace tmv {
     // Conjugate, Transpose, Adjoint
     //
     
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     TMV_INLINE typename SmallUpperTriMatrix<T,N,A>::conjugate_type Conjugate(
         SmallUpperTriMatrix<T,N,A>& m)
     { return m.conjugate(); }
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     TMV_INLINE typename SmallUpperTriMatrixView<T,N,Si,Sj,A>::conjugate_type Conjugate(
         SmallUpperTriMatrixView<T,N,Si,Sj,A> m)
     { return m.conjugate(); }
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     TMV_INLINE typename SmallUpperTriMatrix<T,N,A>::transpose_type Transpose(
         SmallUpperTriMatrix<T,N,A>& m)
     { return m.transpose(); }
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     TMV_INLINE typename SmallUpperTriMatrixView<T,N,Si,Sj,A>::transpose_type Transpose(
         SmallUpperTriMatrixView<T,N,Si,Sj,A> m)
     { return m.transpose(); }
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     TMV_INLINE typename SmallUpperTriMatrix<T,N,A>::adjoint_type Adjoint(
         SmallUpperTriMatrix<T,N,A>& m)
     { return m.adjoint(); }
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     TMV_INLINE typename SmallUpperTriMatrixView<T,N,Si,Sj,A>::adjoint_type Adjoint(
         SmallUpperTriMatrixView<T,N,Si,Sj,A> m)
     { return m.adjoint(); }
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     TMV_INLINE typename SmallLowerTriMatrix<T,N,A>::conjugate_type Conjugate(
         SmallLowerTriMatrix<T,N,A>& m)
     { return m.conjugate(); }
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     TMV_INLINE typename SmallLowerTriMatrixView<T,N,Si,Sj,A>::conjugate_type Conjugate(
         SmallLowerTriMatrixView<T,N,Si,Sj,A> m)
     { return m.conjugate(); }
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     TMV_INLINE typename SmallLowerTriMatrix<T,N,A>::transpose_type Transpose(
         SmallLowerTriMatrix<T,N,A>& m)
     { return m.transpose(); }
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     TMV_INLINE typename SmallLowerTriMatrixView<T,N,Si,Sj,A>::transpose_type Transpose(
         SmallLowerTriMatrixView<T,N,Si,Sj,A> m)
     { return m.transpose(); }
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     TMV_INLINE typename SmallLowerTriMatrix<T,N,A>::adjoint_type Adjoint(
         SmallLowerTriMatrix<T,N,A>& m)
     { return m.adjoint(); }
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     TMV_INLINE typename SmallLowerTriMatrixView<T,N,Si,Sj,A>::adjoint_type Adjoint(
         SmallLowerTriMatrixView<T,N,Si,Sj,A> m)
     { return m.adjoint(); }
@@ -2167,7 +2167,7 @@ namespace tmv {
     // TMV_Text 
     //
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     inline std::string TMV_Text(const SmallUpperTriMatrix<T,N,A>& m)
     {
         std::ostringstream s;
@@ -2179,7 +2179,7 @@ namespace tmv {
         return s.str();
     }
 
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     inline std::string TMV_Text(
         const ConstSmallUpperTriMatrixView<T,N,Si,Sj,A>& m)
     {
@@ -2193,7 +2193,7 @@ namespace tmv {
         return s.str();
     }
 
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     inline std::string TMV_Text(
         const SmallUpperTriMatrixView<T,N,Si,Sj,A>& m)
     {
@@ -2207,7 +2207,7 @@ namespace tmv {
         return s.str();
     }
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     inline std::string TMV_Text(const SmallLowerTriMatrix<T,N,A>& m)
     {
         std::ostringstream s;
@@ -2219,7 +2219,7 @@ namespace tmv {
         return s.str();
     }
 
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     inline std::string TMV_Text(
         const ConstSmallLowerTriMatrixView<T,N,Si,Sj,A>& m)
     {
@@ -2233,7 +2233,7 @@ namespace tmv {
         return s.str();
     }
 
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     inline std::string TMV_Text(
         const SmallLowerTriMatrixView<T,N,Si,Sj,A>& m)
     {

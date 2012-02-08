@@ -15,22 +15,22 @@ namespace tmv {
     // TransposeSelf
     //
 
-    template <int algo, int hi, class M1>
+    template <int algo, ptrdiff_t hi, class M1>
     struct TransposeSelfB_Helper;
 
     // algo 0: nhi == 0, nothing to do.
-    template <int hi, class M1>
+    template <ptrdiff_t hi, class M1>
     struct TransposeSelfB_Helper<0,hi,M1>
     { static TMV_INLINE void call(M1& m) {} };
 
     // algo 11: Simple for loop
-    template <int hi, class M1>
+    template <ptrdiff_t hi, class M1>
     struct TransposeSelfB_Helper<11,hi,M1>
     {
         static void call(M1& m)
         {
-            const int nhi = (hi == Unknown ? m.nhi() : hi);
-            for(int k=1;k<=nhi;++k) {
+            const ptrdiff_t nhi = (hi == Unknown ? m.nhi() : hi);
+            for(ptrdiff_t k=1;k<=nhi;++k) {
                 typename M1::diag_sub_type::noalias_type v1 = 
                     m.get_diag(-k).noAlias();
                 typename M1::diag_sub_type::noalias_type v2 =
@@ -41,7 +41,7 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int hi, class M1>
+    template <ptrdiff_t hi, class M1>
     struct TransposeSelfB_Helper<90,hi,M1>
     {
         static TMV_INLINE void call(M1& m)
@@ -49,7 +49,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int hi, class M1>
+    template <ptrdiff_t hi, class M1>
     struct TransposeSelfB_Helper<97,hi,M1>
     {
         static TMV_INLINE void call(M1& m)
@@ -61,7 +61,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int hi, class M1>
+    template <ptrdiff_t hi, class M1>
     struct TransposeSelfB_Helper<-3,hi,M1>
     {
         static TMV_INLINE void call(M1& m)
@@ -75,13 +75,13 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int hi, class M1>
+    template <ptrdiff_t hi, class M1>
     struct TransposeSelfB_Helper<-2,hi,M1>
     {
         static TMV_INLINE void call(M1& m)
         {
             typedef typename M1::value_type T;
-            const int s = Sizes<M1::_colsize,M1::_rowsize>::size;
+            const ptrdiff_t s = Sizes<M1::_colsize,M1::_rowsize>::size;
             const bool inst = 
                 (s == Unknown || s > 16) &&
                 Traits<T>::isinst;
@@ -93,7 +93,7 @@ namespace tmv {
         }
     };
 
-    template <int hi, class M1>
+    template <ptrdiff_t hi, class M1>
     struct TransposeSelfB_Helper<-1,hi,M1>
     {
         static TMV_INLINE void call(M1& m)
@@ -107,7 +107,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<M::_nlo,M::_nhi>::same)); 
         TMVAssert(m.colsize() == m.rowsize());
         TMVAssert(m.nlo() == m.nhi());
-        const int hi = Sizes<M::_nlo,M::_nhi>::size;
+        const ptrdiff_t hi = Sizes<M::_nlo,M::_nhi>::size;
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
         TransposeSelfB_Helper<-2,hi,Mv>::call(mv);
@@ -120,7 +120,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<M::_nlo,M::_nhi>::same)); 
         TMVAssert(m.colsize() == m.rowsize());
         TMVAssert(m.nlo() == m.nhi());
-        const int hi = Sizes<M::_nlo,M::_nhi>::size;
+        const ptrdiff_t hi = Sizes<M::_nlo,M::_nhi>::size;
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
         TransposeSelfB_Helper<-3,hi,Mv>::call(mv);

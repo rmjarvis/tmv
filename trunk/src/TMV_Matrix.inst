@@ -5,9 +5,9 @@
 #define Def1(RT,T)\
   template void InstTransposeSelf(MatrixView<T> m); \
   template void InstPermuteRows(MatrixView<T> m,  \
-      const int* p, const int i1, const int i2); \
+      const ptrdiff_t* p, const ptrdiff_t i1, const ptrdiff_t i2); \
   template void InstReversePermuteRows(MatrixView<T> m,  \
-      const int* p, const int i1, const int i2); \
+      const ptrdiff_t* p, const ptrdiff_t i1, const ptrdiff_t i2); \
   template T InstSumElements(const ConstMatrixView<T>& m); \
   template RT InstSumAbs2Elements(const ConstMatrixView<T>& m); \
   template RT InstNormSq(const ConstMatrixView<T>& m);  \

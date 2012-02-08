@@ -49,7 +49,7 @@ namespace tmv {
 #define TMV_TransOf(S) (S==RowMajor ? ColMajor : RowMajor)
 
 #ifndef NOTHROW
-    template <class T, int M, int N, int A> 
+    template <class T, ptrdiff_t M, ptrdiff_t N, int A> 
     class SingularSmallMatrix : public Singular
     {
     public:
@@ -63,16 +63,16 @@ namespace tmv {
     };
 #endif
 
-    template <int N2, int K, StorageType S2, class T, class T2, int N, int M> 
+    template <ptrdiff_t N2, ptrdiff_t K, StorageType S2, class T, class T2, ptrdiff_t N, ptrdiff_t M> 
     inline void LDivEq_L(const SmallMatrix<T,N,M,ColMajor>& L, T2* m)
     // SmallMatrix<T2,N2,K,S2>& m
     {
         TMVAssert(M >= N);
         TMVAssert(N2 >= N);
         //m.view() /= L.lowerTri(UnitDiag);
-        for(int j=0;j<N;++j) {
-            for(int k=0;k<K;++k) {
-                for(int i=j+1;i<N;++i) {
+        for(ptrdiff_t j=0;j<N;++j) {
+            for(ptrdiff_t k=0;k<K;++k) {
+                for(ptrdiff_t i=j+1;i<N;++i) {
                     //m.ref(i,k) -= m.cref(j,k) * L.cref(i,j);
                     TMV_Val(m,N2,K,S2,i,k) -=
                         TMV_Val(m,N2,K,S2,j,k) * L.cref(i,j);
@@ -81,24 +81,24 @@ namespace tmv {
         }
     }
 
-    template <int N2, int K, StorageType S2, class T, class T2, int N, int M> 
+    template <ptrdiff_t N2, ptrdiff_t K, StorageType S2, class T, class T2, ptrdiff_t N, ptrdiff_t M> 
     inline void LDivEq_U(const SmallMatrix<T,M,N,ColMajor>& U, T2* m)
     // SmallMatrix<T2,N2,K,S2>& m
     {
         TMVAssert(M >= N);
         TMVAssert(N2 >= N);
         //m.view() /= U.upperTri();
-        for(int j=N-1;j>=0;--j) {
+        for(ptrdiff_t j=N-1;j>=0;--j) {
             if (U.cref(j,j) == T(0)) 
 #ifdef NOTHROW
             { std::cerr<<"Singular SmallMatrix found\n"; exit(1); }
 #else
             { throw Singular(); }
 #endif
-            for(int k=0;k<K;++k) {
+            for(ptrdiff_t k=0;k<K;++k) {
                 //m.ref(j,k) /= U.cref(j,j);
                 TMV_Val(m,N2,K,S2,j,k) /= U.cref(j,j);
-                for(int i=0;i<j;++i) {
+                for(ptrdiff_t i=0;i<j;++i) {
                     //m.ref(i,k) -= m.cref(j,k) * U.cref(i,j);
                     TMV_Val(m,N2,K,S2,i,k) -= 
                         TMV_Val(m,N2,K,S2,j,k) * U.cref(i,j);
@@ -107,22 +107,22 @@ namespace tmv {
         }
     }
 
-    template <int K, int N2, StorageType S2, class T, class T2, int N, int M> 
+    template <ptrdiff_t K, ptrdiff_t N2, StorageType S2, class T, class T2, ptrdiff_t N, ptrdiff_t M> 
     inline void RDivEq_U(const SmallMatrix<T,M,N,ColMajor>& U, T2* m)
     // SmallMatrix<T2,K,N2,S2>& m
     {
         TMVAssert(M >= N);
         TMVAssert(N2 >= N);
         //m.view() %= U.upperTri();
-        for(int i=0;i<N;++i) {
+        for(ptrdiff_t i=0;i<N;++i) {
             if (U.cref(i,i) == T(0)) 
 #ifdef NOTHROW
             { std::cerr<<"Singular SmallMatrix found\n"; exit(1); }
 #else
             { throw Singular(); }
 #endif
-            for(int k=0;k<K;++k) {
-                for(int j=0;j<i;++j) {
+            for(ptrdiff_t k=0;k<K;++k) {
+                for(ptrdiff_t j=0;j<i;++j) {
                     //m.ref(k,i) -= m.cref(k,j) * U.cref(j,i);
                     TMV_Val(m,K,N2,S2,k,i) -= 
                         TMV_Val(m,K,N2,S2,k,j) * U.cref(j,i);
@@ -133,12 +133,12 @@ namespace tmv {
         }
     }
 
-    template <class T, int M, int N> 
+    template <class T, ptrdiff_t M, ptrdiff_t N> 
     inline void InvertU(SmallMatrix<T,M,N,ColMajor>& U)
     {
         // Invert the upper triangle portion of U in place
         TMVAssert(M >= N);
-        for(int j=0;j<N;++j) {
+        for(ptrdiff_t j=0;j<N;++j) {
             if (U.cref(j,j) == T(0)) 
 #ifdef NOTHROW
             { std::cerr<<"Singular SmallMatrix found\n"; exit(1); }
@@ -147,39 +147,39 @@ namespace tmv {
 #endif
             U.ref(j,j) = TMV_RealType(T)(1)/U.cref(j,j);
             //U.col(j,0,j) = -U.SubTriMatrix(0,j) * U.col(j,0,j) * U(j,j);
-            for(int k=0;k<j;++k) {
-                for(int i=0;i<k;++i) U.ref(i,j) += U.cref(k,j) * U.cref(i,k);
+            for(ptrdiff_t k=0;k<j;++k) {
+                for(ptrdiff_t i=0;i<k;++i) U.ref(i,j) += U.cref(k,j) * U.cref(i,k);
                 U.ref(k,j) *= U.cref(k,k);
             }
-            for(int i=0;i<j;++i) U.ref(i,j) *= -U.cref(j,j);
+            for(ptrdiff_t i=0;i<j;++i) U.ref(i,j) *= -U.cref(j,j);
         }
     }
 
-    template <class T, int M, int N> 
+    template <class T, ptrdiff_t M, ptrdiff_t N> 
     inline void InvertL(SmallMatrix<T,N,M,ColMajor>& L)
     {
         // Invert the unit lower triangle portion of L in place
         TMVAssert(M >= N);
-        for(int j=N-1;j>=0;--j) {
+        for(ptrdiff_t j=N-1;j>=0;--j) {
             //L.col(j,j+1,N) = -L.SubTriMatrix(j+1,N) * L.col(j,j+1,N);
-            for(int k=N-1;k>j;--k) {
-                for(int i=N-1;i>k;--i) L.ref(i,j) += L.cref(k,j) * L.cref(i,k);
+            for(ptrdiff_t k=N-1;k>j;--k) {
+                for(ptrdiff_t i=N-1;i>k;--i) L.ref(i,j) += L.cref(k,j) * L.cref(i,k);
             }
-            for(int i=N-1;i>j;--i) L.ref(i,j) = -L.cref(i,j);
+            for(ptrdiff_t i=N-1;i>j;--i) L.ref(i,j) = -L.cref(i,j);
         }
     }
 
-    template <int K, StorageType S2, class T, class T2, int M, int N> 
+    template <ptrdiff_t K, StorageType S2, class T, class T2, ptrdiff_t M, ptrdiff_t N> 
     inline void Q_LDivEq(const SmallMatrix<T,M,N,ColMajor>& Q,
                          const T* beta, T2* m)
     // SmallMatrix<T2,M,K,S2>& m
     {
         TMVAssert(M > N);
-        for(int j=0;j<N;++j) if (beta[j] != T(0)) {
+        for(ptrdiff_t j=0;j<N;++j) if (beta[j] != T(0)) {
             //HouseholderLMult(Q.col(j,j+1,M),beta(j),m.rowRange(j,M));
-            for(int k=0;k<K;++k) {
+            for(ptrdiff_t k=0;k<K;++k) {
                 T2 temp(0);
-                for(int i=j+1;i<M;++i) 
+                for(ptrdiff_t i=j+1;i<M;++i) 
                     //temp += TMV_CONJ(Q.cref(i,j)) * m.cref(i,k);
                     temp += TMV_CONJ(Q.cref(i,j)) * TMV_Val(m,M,K,S2,i,k);
                 //temp += m.cref(j,k);
@@ -187,25 +187,25 @@ namespace tmv {
                 temp *= beta[j];
                 //m.ref(j,k) -= temp;
                 TMV_Val(m,M,K,S2,j,k) -= temp;
-                for(int i=j+1;i<M;++i) 
+                for(ptrdiff_t i=j+1;i<M;++i) 
                     //m.ref(i,k) -= Q.cref(i,j) * temp;
                     TMV_Val(m,M,K,S2,i,k) -= Q.cref(i,j) * temp;
             }
         }
     }
 
-    template <int K, StorageType S2, class T, class T2, int M, int N> 
+    template <ptrdiff_t K, StorageType S2, class T, class T2, ptrdiff_t M, ptrdiff_t N> 
     inline void Q_RDivEq(const SmallMatrix<T,M,N,ColMajor>& Q,
                          const T* beta, T2* m)
     //SmallMatrix<T2,K,M,S2>& m
     {
         TMVAssert(M > N);
-        for(int j=N-1;j>=0;--j) if (beta[j] != T(0)) {
+        for(ptrdiff_t j=N-1;j>=0;--j) if (beta[j] != T(0)) {
             //HouseholderLMult(Q.col(j,j+1,M).conjugate(),beta(j),
             //    m.colRange(j,M).transpose());
-            for(int k=0;k<K;++k) {
+            for(ptrdiff_t k=0;k<K;++k) {
                 T2 temp(0);
-                for(int i=j+1;i<M;++i) 
+                for(ptrdiff_t i=j+1;i<M;++i) 
                     //temp += Q.cref(i,j) * m.cref(k,i);
                     temp += Q.cref(i,j) * TMV_Val(m,K,M,S2,k,i);
                 //temp += m.cref(k,j);
@@ -213,7 +213,7 @@ namespace tmv {
                 temp *= beta[j];
                 //m.ref(k,j) -= temp;
                 TMV_Val(m,K,M,S2,k,j) -= temp;
-                for(int i=j+1;i<M;++i) 
+                for(ptrdiff_t i=j+1;i<M;++i) 
                     //m.ref(k,i) -= TMV_CONJ(Q.cref(i,j)) * temp;
                     TMV_Val(m,K,M,S2,k,i) -= TMV_CONJ(Q.cref(i,j)) * temp;
             }
@@ -227,16 +227,16 @@ namespace tmv {
 
     // This basically just takes the NonBlock LU_Decompose function
     // And inlines everything so the compiler can optimize it for small N
-    template <class T, int N> 
-    inline void DoLUD(SmallMatrix<T,N,N,ColMajor>& LU, int* P, T& signdet)
+    template <class T, ptrdiff_t N> 
+    inline void DoLUD(SmallMatrix<T,N,N,ColMajor>& LU, ptrdiff_t* P, T& signdet)
     {
         // Input as m, output as packed LU
-        for (int j=0; j<N; ++j)
+        for (ptrdiff_t j=0; j<N; ++j)
         {
             if (j > 1) {
                 //LU.col(j,0,j) /= LU.SubMatrix(0,j,0,j).lowerTri(UnitDiag);
-                for(int k=0;k<j;++k) if (LU.cref(k,j) != T(0)) {
-                    for(int i=k+1;i<j;++i) {
+                for(ptrdiff_t k=0;k<j;++k) if (LU.cref(k,j) != T(0)) {
+                    for(ptrdiff_t i=k+1;i<j;++i) {
                         LU.ref(i,j) -= LU.cref(k,j) * LU.cref(i,k);
                     }
                 }
@@ -244,20 +244,20 @@ namespace tmv {
 
             if (j > 0) {
                 //LU.col(j,j,N) -= LU.SubMatrix(j,N,0,j) * LU.col(j,0,j);
-                for(int k=0;k<j;++k) {
-                    for(int i=j;i<N;++i) {
+                for(ptrdiff_t k=0;k<j;++k) {
+                    for(ptrdiff_t i=j;i<N;++i) {
                         LU.ref(i,j) -= LU.cref(i,k) * LU.cref(k,j);
                     }
                 }
             }
 
             //LU.col(j,j,N).MaxAbsElement(&ip);
-            int ip = j;
+            ptrdiff_t ip = j;
             if (j < N-1) {
                 TMV_RealType(T) max = 
                     isReal(T()) ? TMV_ABS(LU.cref(j,j)) :
                     TMV_NORM(LU.cref(j,j));
-                for(int k=j+1;k<N;++k) {
+                for(ptrdiff_t k=j+1;k<N;++k) {
                     TMV_RealType(T) val = 
                         isReal(T()) ? TMV_ABS(LU.cref(k,j)) :
                         TMV_NORM(LU.cref(k,j));
@@ -276,7 +276,7 @@ namespace tmv {
             //if (LU(j,j) != T(0)) LU.col(j,j+1,N) /= LU(j,j);
             if (LU.cref(j,j) != T(0)) {
                 T invlujj = TMV_RealType(T)(1)/LU.cref(j,j);
-                for(int k=j+1;k<N;++k) LU.ref(k,j) *= invlujj;
+                for(ptrdiff_t k=j+1;k<N;++k) LU.ref(k,j) *= invlujj;
             }
         }
     }
@@ -287,23 +287,23 @@ namespace tmv {
     T HouseholderReflect(T& x0, VectorView<T> x, T& det);
 
     // Again, this is just the normal QR_Decompose with everything inlined.
-    template <class T, int M, int N> 
+    template <class T, ptrdiff_t M, ptrdiff_t N> 
     inline void DoQRD(SmallMatrix<T,M,N,ColMajor>& QR, T* beta)
     {
         TMVAssert(M >= N);
         T det(0);
-        for(int j=0;j<N;++j) {
+        for(ptrdiff_t j=0;j<N;++j) {
             beta[j] = HouseholderReflect(QR.ref(j,j),QR.col(j,j+1,M),det);
             if (beta[j] != T(0) && j<N-1) {
                 //HouseholderLMult(v,beta,QR.SubMatrix(j,M,j+1,N));
-                for(int k=j+1;k<N;++k) {
+                for(ptrdiff_t k=j+1;k<N;++k) {
                     T temp(0);
-                    for(int i=j+1;i<M;++i) temp += 
+                    for(ptrdiff_t i=j+1;i<M;++i) temp += 
                         TMV_CONJ(QR.cref(i,j)) * QR.cref(i,k);
                     temp += QR.cref(j,k);
                     temp *= beta[j];
                     QR.ref(j,k) -= temp;
-                    for(int i=j+1;i<M;++i) QR.ref(i,k) -= QR.cref(i,j) * temp;
+                    for(ptrdiff_t i=j+1;i<M;++i) QR.ref(i,k) -= QR.cref(i,j) * temp;
                 }
             }
         }
@@ -313,7 +313,7 @@ namespace tmv {
     // Determinant
     //
 
-    template <int algo, class T, int M, int N, StorageType S> 
+    template <ptrdiff_t algo, class T, ptrdiff_t M, ptrdiff_t N, StorageType S> 
     struct SMDet;
 
     template <class T, StorageType S> 
@@ -335,7 +335,7 @@ namespace tmv {
         }
     };
 
-    template <class T, int N, StorageType S> 
+    template <class T, ptrdiff_t N, StorageType S> 
     struct SMDet<10,T,N,N,S> // algo for normal calculation using LU
     {
         static T det(const T* m)
@@ -343,16 +343,16 @@ namespace tmv {
             SmallMatrix<T,N,N,ColMajor> LU;
             // LU = m;
             SmallMatrixCopy<N,N,S,ColMajor>(m,LU.ptr());
-            int P[N];
+            ptrdiff_t P[N];
             T d(1);
             DoLUD(LU,P,d);
-            if (d != T(0)) for(int i=0;i<N;++i) d *= LU.cref(i,i);
+            if (d != T(0)) for(ptrdiff_t i=0;i<N;++i) d *= LU.cref(i,i);
             return d;
         }
     };
 
-    template <class T, int N, StorageType S> 
-    struct SMDet<20,T,N,N,S> // algo for integers without fractions
+    template <class T, ptrdiff_t N, StorageType S> 
+    struct SMDet<20,T,N,N,S> // algo for ptrdiff_tegers without fractions
     {
         template <class TT>
         struct Helper
@@ -389,13 +389,13 @@ namespace tmv {
             SmallMatrixCopy<N,N,S,ColMajor>(m,A.ptr());
             // This is the 1x1 Bareiss algorithm
             T det = 1;
-            for (int k=0; k<N-1; ++k) {
-                int imin = k, jmin = k;
+            for (ptrdiff_t k=0; k<N-1; ++k) {
+                ptrdiff_t imin = k, jmin = k;
                 while (imin < N && Helper<T>::isZero(A.cref(imin,jmin))) ++imin;
                 if (imin == N) return T(0);
-                for (int j=k; j<N; ++j) {
+                for (ptrdiff_t j=k; j<N; ++j) {
                     if (Helper<T>::isUnity(A.cref(imin,jmin))) break;
-                    for (int i=k; i<N; ++i) {
+                    for (ptrdiff_t i=k; i<N; ++i) {
                         if (TMV_ABS2(A.cref(i,j))<TMV_ABS2(A.cref(imin,jmin)) &&
                             !Helper<T>::isZero(A.cref(i,j))) {
                             imin = i; jmin = j;
@@ -409,11 +409,11 @@ namespace tmv {
                 if (imin != k) { A.swapRows(imin,k); det *= -1; }
                 if (jmin != k) { A.swapCols(jmin,k); det *= -1; }
 
-                for (int j=k+1; j<N; ++j) for(int i=k+1; i<N; ++i)
+                for (ptrdiff_t j=k+1; j<N; ++j) for(ptrdiff_t i=k+1; i<N; ++i)
                     A.ref(i,j) = 
                         A.cref(k,k)*A.cref(i,j) - A.cref(i,k)*A.cref(k,j);
                 if (k > 0) {
-                    for (int j=k+1; j<N; ++j) for(int i=k+1; i<N; ++i)
+                    for (ptrdiff_t j=k+1; j<N; ++j) for(ptrdiff_t i=k+1; i<N; ++i)
                         A.ref(i,j) /= A.cref(k-1,k-1);
                 }
             }
@@ -422,14 +422,14 @@ namespace tmv {
         }
     };
 
-    template <class T, int M, int N, int A> 
+    template <class T, ptrdiff_t M, ptrdiff_t N, int A> 
     inline T DoDet(const SmallMatrix<T,M,N,A>& m)
     {
-        const int algo = 
+        const ptrdiff_t algo = 
             N == 1 ? 1 :
             N == 2 ? 2 :
             N == 3 ? 3 :
-            Traits<T>::isinteger ? 20 :
+            Traits<T>::isptrdiff_teger ? 20 :
             10;
         const StorageType S = static_cast<StorageType>(A & AllStorageType);
         return SMDet<algo,T,M,N,S>::det(m.cptr()); 
@@ -439,7 +439,7 @@ namespace tmv {
     // Matrix Inverse
     //
 
-    template <StorageType S2, class T, class T2, int M, int N>
+    template <StorageType S2, class T, class T2, ptrdiff_t M, ptrdiff_t N>
     inline void SMQRInv(SmallMatrix<T,M,N,ColMajor>& QR, T2* minv)
     //SmallMatrix<T2,N,M,S2> minv
     {
@@ -449,15 +449,15 @@ namespace tmv {
         InvertU(QR);
 
         //minv.setZero();
-        for(int i=0;i<M*N;++i) minv[i] = T2(0);
+        for(ptrdiff_t i=0;i<M*N;++i) minv[i] = T2(0);
         //minv.colRange(0,N)).upperTri() = QR.upperTri()
-        for(int j=0;j<N;++j) for(int i=0;i<=j;i++)
+        for(ptrdiff_t j=0;j<N;++j) for(ptrdiff_t i=0;i<=j;i++)
             //minv.ref(i,j) = QR.cref(i,j);
             TMV_Val(minv,N,M,S2,i,j) = QR.cref(i,j);
         Q_RDivEq<N,S2>(QR,beta,minv);
     }
 
-    template <class T, class T2, int M, int N, bool MltN, StorageType S, StorageType S2>
+    template <class T, class T2, ptrdiff_t M, ptrdiff_t N, bool MltN, StorageType S, StorageType S2>
     struct SMInv
     {
         SMInv(const T* m, T2* minv)
@@ -473,7 +473,7 @@ namespace tmv {
         }
     };
 
-    template <class T, class T2, int M, int N, StorageType S, StorageType S2>
+    template <class T, class T2, ptrdiff_t M, ptrdiff_t N, StorageType S, StorageType S2>
     struct SMInv<T,T2,M,N,true,S,S2>
     {
         SMInv(const T* m, T2* minv)
@@ -488,21 +488,21 @@ namespace tmv {
         }
     };
 
-    template <class T, int M, int N, bool MltN, StorageType S, StorageType S2>
+    template <class T, ptrdiff_t M, ptrdiff_t N, bool MltN, StorageType S, StorageType S2>
     struct SMInv<std::complex<T>,T,M,N,MltN,S,S2>
     {
         SMInv(const std::complex<T>*, T*)
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <class T, int M, int N, StorageType S, StorageType S2>
+    template <class T, ptrdiff_t M, ptrdiff_t N, StorageType S, StorageType S2>
     struct SMInv<std::complex<T>,T,M,N,true,S,S2>
     {
         SMInv(const std::complex<T>*, T*)
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <class T, class T2, int N, StorageType S, StorageType S2> 
+    template <class T, class T2, ptrdiff_t N, StorageType S, StorageType S2> 
     struct SMInv<T,T2,N,N,false,S,S2>
     {
         SMInv(const T* m, T2* minv)
@@ -512,7 +512,7 @@ namespace tmv {
             SmallMatrix<T,N,N,ColMajor> LU;
             // LU = m;
             SmallMatrixCopy<N,N,S,ColMajor>(m,LU.ptr());
-            int P[N];
+            ptrdiff_t P[N];
             T signdet(0);
             DoLUD(LU,P,signdet);
 
@@ -521,13 +521,13 @@ namespace tmv {
 
             //minv = LU.upperTri() * LU.lowerTri(UnitDiag);
             //minv.setZero();
-            for(int i=0;i<N*N;++i) minv[i] = T2(0);
-            for(int j=0;j<N;++j) {
-                for(int i=0;i<=j;++i) 
+            for(ptrdiff_t i=0;i<N*N;++i) minv[i] = T2(0);
+            for(ptrdiff_t j=0;j<N;++j) {
+                for(ptrdiff_t i=0;i<=j;++i) 
                     //minv.ref(i,j) = LU.cref(i,j);
                     TMV_Val(minv,N,N,S2,i,j) = LU.cref(i,j);
-                for(int k=j+1;k<N;++k) {
-                    for(int i=0;i<=k;++i) {
+                for(ptrdiff_t k=j+1;k<N;++k) {
+                    for(ptrdiff_t i=0;i<=k;++i) {
                         //minv.ref(i,j) += LU.cref(i,k) * LU.cref(k,j);
                         TMV_Val(minv,N,N,S2,i,j) += LU.cref(i,k) * LU.cref(k,j);
                     }
@@ -535,14 +535,14 @@ namespace tmv {
             }
 
             //minv.reversePermuteCols(P);
-            for(int j=N-1;j>=0;--j) if (P[j] != j)
-                for(int i=0;i<N;++i) 
+            for(ptrdiff_t j=N-1;j>=0;--j) if (P[j] != j)
+                for(ptrdiff_t i=0;i<N;++i) 
                     TMV_SWAP(TMV_Val(minv,N,N,S2,i,j),
                              TMV_Val(minv,N,N,S2,i,P[j]));
         }
     };
 
-    template <class T, int N, StorageType S, StorageType S2>
+    template <class T, ptrdiff_t N, StorageType S, StorageType S2>
     struct SMInv<std::complex<T>,T,N,N,false,S,S2>
     {
         SMInv(const std::complex<T>*, T*)
@@ -647,7 +647,7 @@ namespace tmv {
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <class T, class T2, int M, int N, int A, int A2> 
+    template <class T, class T2, ptrdiff_t M, ptrdiff_t N, int A, int A2> 
     inline void DoInverse(
         const SmallMatrix<T,M,N,A>& m, SmallMatrix<T2,N,M,A2>& minv)
     {
@@ -668,7 +668,7 @@ namespace tmv {
     // Essential Matrix Div Algorithms
     //
 
-    template <int K, StorageType S1, StorageType S2, class T, class T1, class T2, int M, int N>
+    template <ptrdiff_t K, StorageType S1, StorageType S2, class T, class T1, class T2, ptrdiff_t M, ptrdiff_t N>
     inline void SMQRLDiv(SmallMatrix<T,M,N,ColMajor>& QR, const T1* m1, T2* m2)
     //SmallMatrix<T1,M,K,S1> m1
     //SmallMatrix<T2,N,K,S2> m2
@@ -688,7 +688,7 @@ namespace tmv {
         LDivEq_U<N,K,S2>(QR,m2);
     }
 
-    template <int K, StorageType S1, StorageType S2, class T, class T1, class T2, int M, int N>
+    template <ptrdiff_t K, StorageType S1, StorageType S2, class T, class T1, class T2, ptrdiff_t M, ptrdiff_t N>
     inline void SMQRRDiv(SmallMatrix<T,M,N,ColMajor>& QR, const T1* m1, T2* m2)
     //SmallMatrix<T1,K,N,S1> m1
     //SmallMatrix<T2,K,M,S2> m2
@@ -699,12 +699,12 @@ namespace tmv {
 
         // m2 = m1 R^-1 Qt
         //m2.setZero();
-        for(int i=0;i<K*M;++i) m2[i] = T2(0);
+        for(ptrdiff_t i=0;i<K*M;++i) m2[i] = T2(0);
         //m2.colRange(0,N) = m1;
         if (S2 == ColMajor) 
             SmallMatrixCopy<K,N,S1,S2>(m1,m2);
         else 
-            for(int i=0;i<K;++i) for(int j=0;j<N;j++) 
+            for(ptrdiff_t i=0;i<K;++i) for(ptrdiff_t j=0;j<N;j++) 
                 //m2(i,j) = m1(i,j);
                 TMV_Val(m2,K,M,S2,i,j) = TMV_Val(m1,K,N,S1,i,j);
         //m2.colRange(0,N) %= QR.upperTri();
@@ -712,17 +712,17 @@ namespace tmv {
         Q_RDivEq<K,S2>(QR,beta,m2);
     }
 
-    template <int K, StorageType S2, class T, class T2, int N>
+    template <ptrdiff_t K, StorageType S2, class T, class T2, ptrdiff_t N>
     inline void SMLULDivEq(SmallMatrix<T,N,N,ColMajor>& LU, T2* m2)
     //SmallMatrix<T2,N,K,S2> m2
     {
-        int P[N];
+        ptrdiff_t P[N];
         T signdet(0);
         DoLUD(LU,P,signdet);
 
         //m2.permuteRows(P);
-        for(int i=0;i<N;++i) if (P[i] != i)
-            for(int j=0;j<K;++j) 
+        for(ptrdiff_t i=0;i<N;++i) if (P[i] != i)
+            for(ptrdiff_t j=0;j<K;++j) 
                 TMV_SWAP(TMV_Val(m2,N,K,S2,i,j),TMV_Val(m2,N,K,S2,P[i],j));
 
         // m2 = L^-1 m2
@@ -739,7 +739,7 @@ namespace tmv {
     // Matrix LDiv
     //
 
-    template <class T, class T1, class T2, int M, int N, bool MltN, int K, StorageType S, StorageType S1, StorageType S2> 
+    template <class T, class T1, class T2, ptrdiff_t M, ptrdiff_t N, bool MltN, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2> 
     struct SMLDivM
     {
         SMLDivM(const T* m, const T1* m1, T2* m2)
@@ -756,7 +756,7 @@ namespace tmv {
         }
     };
 
-    template <class T, class T1, class T2, int M, int N, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, class T1, class T2, ptrdiff_t M, ptrdiff_t N, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMLDivM<T,T1,T2,M,N,true,K,S,S1,S2>
     {
         SMLDivM(const T* m, const T1* m1, T2* m2)
@@ -774,35 +774,35 @@ namespace tmv {
         }
     };
 
-    template <class T, class T1, int M, int N, bool MltN, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, class T1, ptrdiff_t M, ptrdiff_t N, bool MltN, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMLDivM<std::complex<T>,T1,T,M,N,MltN,K,S,S1,S2>
     {
         SMLDivM(const std::complex<T>*, const T1*, T* )
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <class T, int M, int N, bool MltN, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, ptrdiff_t M, ptrdiff_t N, bool MltN, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMLDivM<T,std::complex<T>,T,M,N,MltN,K,S,S1,S2>
     {
         SMLDivM(const T*, const std::complex<T>*, T*)
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <class T, class T1, int M, int N, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, class T1, ptrdiff_t M, ptrdiff_t N, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMLDivM<std::complex<T>,T1,T,M,N,true,K,S,S1,S2>
     {
         SMLDivM(const std::complex<T>*, const T1*, T* )
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <class T, int M, int N, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMLDivM<T,std::complex<T>,T,M,N,true,K,S,S1,S2>
     {
         SMLDivM(const T*, const std::complex<T>*, T*)
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <class T, class T2, int N, int K, StorageType S, StorageType S2>
+    template <class T, class T2, ptrdiff_t N, ptrdiff_t K, StorageType S, StorageType S2>
     struct SMLDivEqM
     {
         SMLDivEqM(const T* m, T2* m2)
@@ -816,14 +816,14 @@ namespace tmv {
         }
     };
 
-    template <class T, int N, int K, StorageType S, StorageType S2>
+    template <class T, ptrdiff_t N, ptrdiff_t K, StorageType S, StorageType S2>
     struct SMLDivEqM<std::complex<T>,T,N,K,S,S2>
     {
         SMLDivEqM(const std::complex<T>*, T*)
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <class T, class T1, class T2, int N, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, class T1, class T2, ptrdiff_t N, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMLDivM<T,T1,T2,N,N,false,K,S,S1,S2>
     {
         SMLDivM(const T* m, const T1* m1, T2* m2)
@@ -837,14 +837,14 @@ namespace tmv {
         }
     };
 
-    template <class T, class T1, int N, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, class T1, ptrdiff_t N, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMLDivM<std::complex<T>,T1,T,N,N,false,K,S,S1,S2>
     {
         SMLDivM(const std::complex<T>*, const T1*, T*)
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <class T, int N, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, ptrdiff_t N, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMLDivM<T,std::complex<T>,T,N,N,false,K,S,S1,S2>
     {
         SMLDivM(const T*, const std::complex<T>*, T*)
@@ -852,7 +852,7 @@ namespace tmv {
     };
 
     // m2 = m^-1 m2
-    template <class T, class T2, int N, int K, int A, int A2> 
+    template <class T, class T2, ptrdiff_t N, ptrdiff_t K, int A, int A2> 
     inline void DoLDivEq(
         const SmallMatrix<T,N,N,A>& m, SmallMatrix<T2,N,K,A2>& m2)
     {
@@ -870,7 +870,7 @@ namespace tmv {
     }
 
     // m2 = m^-1 m1
-    template <class T, class T1, class T2, int M, int N, int K, int A, int A1, int A2> 
+    template <class T, class T1, class T2, ptrdiff_t M, ptrdiff_t N, ptrdiff_t K, int A, int A1, int A2> 
     inline void DoLDiv(
         const SmallMatrix<T,M,N,A>& m,
         const SmallMatrix<T1,M,K,A1>& m1, SmallMatrix<T2,N,K,A2>& m2)
@@ -895,7 +895,7 @@ namespace tmv {
     //
 
     // v2 = m^-1 v2
-    template <class T, class T2, int N, int A, int A2> 
+    template <class T, class T2, ptrdiff_t N, int A, int A2> 
     inline void DoLDivEq(
         const SmallMatrix<T,N,N,A>& m, SmallVector<T2,N,A2>& v2)
     {
@@ -912,7 +912,7 @@ namespace tmv {
     }
 
     // v2 = m^-1 v1
-    template <class T, class T1, class T2, int M, int N, int A, int A1, int A2> 
+    template <class T, class T1, class T2, ptrdiff_t M, ptrdiff_t N, int A, int A1, int A2> 
     inline void DoLDiv(
         const SmallMatrix<T,M,N,A>& m,
         const SmallVector<T1,M,A1>& v1, SmallVector<T2,N,A2>& v2)
@@ -935,7 +935,7 @@ namespace tmv {
     // Matrix RDiv
     //
 
-    template <class T, class T1, class T2, int M, int N, bool MltN, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, class T1, class T2, ptrdiff_t M, ptrdiff_t N, bool MltN, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMRDivM
     {
         SMRDivM(const T* m, const T1* m1, T2* m2)
@@ -952,7 +952,7 @@ namespace tmv {
         }
     };
 
-    template <class T, class T1, class T2, int M, int N, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, class T1, class T2, ptrdiff_t M, ptrdiff_t N, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMRDivM<T,T1,T2,M,N,true,K,S,S1,S2>
     {
         SMRDivM(const T* m, const T1* m1, T2* m2)
@@ -970,35 +970,35 @@ namespace tmv {
         }
     };
 
-    template <class T, class T1, int M, int N, bool MltN, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, class T1, ptrdiff_t M, ptrdiff_t N, bool MltN, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMRDivM<std::complex<T>,T1,T,M,N,MltN,K,S,S1,S2>
     {
         SMRDivM(const std::complex<T>*, const T1*, T*)
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <class T, int M, int N, bool MltN, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, ptrdiff_t M, ptrdiff_t N, bool MltN, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMRDivM<T,std::complex<T>,T,M,N,MltN,K,S,S1,S2>
     {
         SMRDivM(const T*, const std::complex<T>*, T*)
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <class T, class T1, int M, int N, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, class T1, ptrdiff_t M, ptrdiff_t N, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMRDivM<std::complex<T>,T1,T,M,N,true,K,S,S1,S2>
     {
         SMRDivM(const std::complex<T>*, const T1*, T*)
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <class T, int M, int N, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMRDivM<T,std::complex<T>,T,M,N,true,K,S,S1,S2>
     {
         SMRDivM(const T*, const std::complex<T>*, T*)
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <class T, class T2, int N, int K, StorageType S, StorageType S2>
+    template <class T, class T2, ptrdiff_t N, ptrdiff_t K, StorageType S, StorageType S2>
     struct SMRDivEqM
     {
         SMRDivEqM(const T* m, T2* m2)
@@ -1014,14 +1014,14 @@ namespace tmv {
         }
     };
 
-    template <class T, int N, int K, StorageType S, StorageType S2>
+    template <class T, ptrdiff_t N, ptrdiff_t K, StorageType S, StorageType S2>
     struct SMRDivEqM<std::complex<T>,T,N,K,S,S2>
     {
         SMRDivEqM(const std::complex<T>*, T*)
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <class T, class T1, class T2, int N, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, class T1, class T2, ptrdiff_t N, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMRDivM<T,T1,T2,N,N,false,K,S,S1,S2>
     {
         SMRDivM(const T* m, const T1* m1, T2* m2)
@@ -1036,14 +1036,14 @@ namespace tmv {
         }
     };
 
-    template <class T, class T1, int N, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, class T1, ptrdiff_t N, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMRDivM<std::complex<T>,T1,T,N,N,false,K,S,S1,S2>
     {
         SMRDivM(const std::complex<T>*, const T1*, T*)
         { TMVAssert(TMV_FALSE); }
     };
 
-    template <class T, int N, int K, StorageType S, StorageType S1, StorageType S2>
+    template <class T, ptrdiff_t N, ptrdiff_t K, StorageType S, StorageType S1, StorageType S2>
     struct SMRDivM<T,std::complex<T>,T,N,N,false,K,S,S1,S2>
     {
         SMRDivM(const T*, const std::complex<T>*, T*)
@@ -1051,7 +1051,7 @@ namespace tmv {
     };
 
     // m2 = m2 m^-1
-    template <class T, class T2, int N, int K, int A, int A2> 
+    template <class T, class T2, ptrdiff_t N, ptrdiff_t K, int A, int A2> 
     inline void DoRDivEq(
         const SmallMatrix<T,N,N,A>& m, SmallMatrix<T2,K,N,A2>& m2)
     {
@@ -1069,7 +1069,7 @@ namespace tmv {
     }
 
     // m2 = m^-1 m1
-    template <class T, class T1, class T2, int M, int N, int K, int A, int A1, int A2> 
+    template <class T, class T1, class T2, ptrdiff_t M, ptrdiff_t N, ptrdiff_t K, int A, int A1, int A2> 
     inline void DoRDiv(
         const SmallMatrix<T,M,N,A>& m,
         const SmallMatrix<T1,K,N,A1>& m1, SmallMatrix<T2,K,M,A2>& m2)
@@ -1093,7 +1093,7 @@ namespace tmv {
     //
 
     // v2 = v2 m^-1
-    template <class T, class T2, int N, int A, int A2> 
+    template <class T, class T2, ptrdiff_t N, int A, int A2> 
     inline void DoRDivEq(
         const SmallMatrix<T,N,N,A>& m, SmallVector<T2,N,A2>& v2)
     {
@@ -1110,7 +1110,7 @@ namespace tmv {
     }
 
     // v2 = m^-1 v1
-    template <class T, class T1, class T2, int M, int N, int A, int A1, int A2> 
+    template <class T, class T1, class T2, ptrdiff_t M, ptrdiff_t N, int A, int A1, int A2> 
     inline void DoRDiv(
         const SmallMatrix<T,M,N,A>& m,
         const SmallVector<T1,N,A1>& v1, SmallVector<T2,M,A2>& v2)
@@ -1132,7 +1132,7 @@ namespace tmv {
     // InverseATA
     //
 
-    template <StorageType S2, class T, int M, int N> 
+    template <StorageType S2, class T, ptrdiff_t M, ptrdiff_t N> 
     inline void SMQRATA(SmallMatrix<T,M,N,ColMajor> QR, T* ata)
     {
         TMVAssert(M >= N);
@@ -1141,12 +1141,12 @@ namespace tmv {
 
         InvertU(QR);
 
-        //ata = QR.upperTri() * QR.upperTri().adjoint();
+        //ata = QR.upperTri() * QR.upperTri().adjoptrdiff_t();
         //ata.setZero();
-        for(int i=0;i<N*N;++i) ata[i] = T(0);
-        for(int j=0;j<N;++j) {
-            for(int k=j;k<N;++k) {
-                for(int i=0;i<=k;++i) {
+        for(ptrdiff_t i=0;i<N*N;++i) ata[i] = T(0);
+        for(ptrdiff_t j=0;j<N;++j) {
+            for(ptrdiff_t k=j;k<N;++k) {
+                for(ptrdiff_t i=0;i<=k;++i) {
                     //ata.ref(i,j) += QR.cref(i,k) * TMV_CONJ(QR.cref(j,k));
                     TMV_Val(ata,N,N,S2,i,j) +=
                         QR.cref(i,k) * TMV_CONJ(QR.cref(j,k));
@@ -1155,7 +1155,7 @@ namespace tmv {
         }
     }
 
-    template <class T, int M, int N, bool MltN, StorageType S, StorageType S2>
+    template <class T, ptrdiff_t M, ptrdiff_t N, bool MltN, StorageType S, StorageType S2>
     struct SMATA
     {
         SMATA(const T* m, T* ata)
@@ -1170,7 +1170,7 @@ namespace tmv {
         }
     };
 
-    template <class T, int M, int N, StorageType S, StorageType S2>
+    template <class T, ptrdiff_t M, ptrdiff_t N, StorageType S, StorageType S2>
     struct SMATA<T,M,N,true,S,S2>
     {
         SMATA(const T* m, T* ata)
@@ -1185,7 +1185,7 @@ namespace tmv {
         }
     };
 
-    template <class T, int M, int N, int A, int A2> 
+    template <class T, ptrdiff_t M, ptrdiff_t N, int A, int A2> 
     inline void DoInverseATA(
         const SmallMatrix<T,M,N,A>& m, SmallMatrix<T,N,N,A2>& ata)
     {

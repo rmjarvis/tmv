@@ -16,16 +16,16 @@ namespace tmv {
     // Vector *= x
     //
 
-    template <int algo, int s, int ix, class T, class V>
+    template <int algo, ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper;
 
     // algo 0: trivial: s == 0 or ix == 1, so nothing to do
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<0,s,ix,T,V>
     { static TMV_INLINE void call(const Scaling<ix,T>& , V& ) {} };
 
     // algo 1: complex vector with unit step, convert to real version.
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<1,s,ix,T,V>
     {
         typedef typename V::iterator IT;
@@ -38,25 +38,25 @@ namespace tmv {
             Vf vf = v.flatten();
             ScaleV_Helper<-3,s2,ix,T,Vf>::call(x,vf);
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT it)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT it)
         {
             ITf itf = it.flatten();
-            const int n2 = n<<1;
+            const ptrdiff_t n2 = n<<1;
             ScaleV_Helper<-3,s2,ix,T,Vf>::call2(n2,x,itf);
         }
     };
 
     // algo 11: simple loop
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<11,s,ix,T,V>
     {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT it)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT it)
         {
             if (n) do {
                 *it = ZProd<false,false>::prod(x,*it); ++it;
@@ -65,19 +65,19 @@ namespace tmv {
     };
 
     // algo 12: 2 at a time
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<12,s,ix,T,V>
     {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
-        static void call2(const int n, const Scaling<ix,T>& x, IT it)
+        static void call2(const ptrdiff_t n, const Scaling<ix,T>& x, IT it)
         {
-            int n_2 = (n>>1);
-            const int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            const ptrdiff_t nb = n-(n_2<<1);
 
             if (n_2) do {
                 it[0] = ZProd<false,false>::prod(x,it[0]);
@@ -88,19 +88,19 @@ namespace tmv {
     };
 
     // algo 13: 4 at a time
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<13,s,ix,T,V>
     {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
-        static void call2(const int n, const Scaling<ix,T>& x, IT it)
+        static void call2(const ptrdiff_t n, const Scaling<ix,T>& x, IT it)
         {
-            int n_4 = (n>>2);
-            int nb = n-(n_4<<2);
+            ptrdiff_t n_4 = (n>>2);
+            ptrdiff_t nb = n-(n_4<<2);
 
             if (n_4) do {
                 it[0] = ZProd<false,false>::prod(x,it[0]);
@@ -115,10 +115,10 @@ namespace tmv {
     };
 
     // algo 15: fully unroll
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<15,s,ix,T,V>
     {
-        template <int I, int N>
+        template <ptrdiff_t I, ptrdiff_t N>
         struct Unroller
         {
             static TMV_INLINE void unroll(const Scaling<ix,T>& x, V& v)
@@ -127,13 +127,13 @@ namespace tmv {
                 Unroller<I+N/2,N-N/2>::unroll(x,v);
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,1>
         {
             static TMV_INLINE void unroll(const Scaling<ix,T>& x, V& v)
             { v.ref(I) = ZProd<false,false>::prod(x,v.cref(I)); }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,0>
         { static TMV_INLINE void unroll(const Scaling<ix,T>& , V& ) {} };
 
@@ -143,16 +143,16 @@ namespace tmv {
 
 #ifdef __SSE2__
     // algo 31: double precision SSE2: all real
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<31,s,ix,T,V>
     {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT A)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT A)
         {
             const bool unit = V::_step == 1;
             if (unit) {
@@ -162,8 +162,8 @@ namespace tmv {
                 }
             }
 
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            ptrdiff_t nb = n-(n_2<<1);
 
             if (n_2) {
                 IT A1 = A+1;
@@ -182,16 +182,16 @@ namespace tmv {
     };
 
     // algo 32: double precision SSE2: x real, v complex
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<32,s,ix,T,V>
     {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT A)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT A)
         {
             if (n) {
                 double x1 = x;
@@ -208,16 +208,16 @@ namespace tmv {
     };
 
     // algo 33: double precision SSE2: all complex
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<33,s,ix,T,V>
     {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT A)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT A)
         {
             if (n) {
                 std::complex<double> xx(x);
@@ -257,16 +257,16 @@ namespace tmv {
 
 #ifdef __SSE__
     // algo 41: single precision SSE: all real
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<41,s,ix,T,V>
     {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT A)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT A)
         {
             const bool unit = V::_step == 1;
             if (unit ) {
@@ -276,8 +276,8 @@ namespace tmv {
                 }
             }
 
-            int n_4 = (n>>2);
-            int nb = n-(n_4<<2);
+            ptrdiff_t n_4 = (n>>2);
+            ptrdiff_t nb = n-(n_4<<2);
 
             if (n_4) {
                 IT A1 = A+1;
@@ -300,16 +300,16 @@ namespace tmv {
     };
 
     // algo 42: single precision SSE: x real, v complex
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<42,s,ix,T,V>
     {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT A)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT A)
         {
             const bool unit = V::_step == 1;
             if (unit ) {
@@ -319,8 +319,8 @@ namespace tmv {
                 }
             }
 
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            ptrdiff_t nb = n-(n_2<<1);
 
             if (n_2) {
                 IT A1 = A+1;
@@ -339,16 +339,16 @@ namespace tmv {
     };
 
     // algo 43: single precision SSE: all complex
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<43,s,ix,T,V>
     {
         typedef typename V::iterator IT;
         static inline void call(const Scaling<ix,T>& x, V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             call2(n,x,v.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT A)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT A)
         {
             const bool unit = V::_step == 1;
 
@@ -359,8 +359,8 @@ namespace tmv {
                 }
             }
 
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            ptrdiff_t nb = n-(n_2<<1);
 
             if (n_2) {
                 IT A1 = A+1;
@@ -389,7 +389,7 @@ namespace tmv {
 #endif
 
     // algo 90: Call inst
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<90,s,ix,T,V>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, V& v)
@@ -401,7 +401,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<97,s,ix,T,V>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, V& v)
@@ -413,7 +413,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<-3,s,ix,T,V>
     {
         typedef typename V::value_type VT;
@@ -449,7 +449,7 @@ namespace tmv {
             ScaleV_Helper<algo,s,ix,T,V>::call(x,v); 
         }
         static TMV_INLINE void call2(
-            const int n, const Scaling<ix,T>& x, const IT& it)
+            const ptrdiff_t n, const Scaling<ix,T>& x, const IT& it)
         {
             TMVStaticAssert(!V::_conj);
             ScaleV_Helper<algo,s,ix,T,V>::call2(n,x,it); 
@@ -457,7 +457,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<-2,s,ix,T,V>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, V& v)
@@ -476,7 +476,7 @@ namespace tmv {
         }
     };
 
-    template <int s, int ix, class T, class V>
+    template <ptrdiff_t s, int ix, class T, class V>
     struct ScaleV_Helper<-1,s,ix,T,V>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, V& v)

@@ -220,7 +220,7 @@ namespace tmv {
         TMV_INLINE const V1& getV() const { return v1; }
         TMV_INLINE const M2& getM() const { return m2; }
 
-        TMV_INLINE int size() const { return m2.rowsize(); }
+        TMV_INLINE ptrdiff_t size() const { return m2.rowsize(); }
 
         template <class V3>
         TMV_INLINE_ND void assignTo(BaseVector_Mutable<V3>& v3) const
@@ -286,7 +286,7 @@ namespace tmv {
         TMV_INLINE const V1& getV() const { return v1; }
         TMV_INLINE const M2& getM() const { return m2; }
 
-        TMV_INLINE int size() const { return m2.colsize(); }
+        TMV_INLINE ptrdiff_t size() const { return m2.colsize(); }
 
         template <class V3>
         TMV_INLINE_ND void assignTo(BaseVector_Mutable<V3>& v3) const

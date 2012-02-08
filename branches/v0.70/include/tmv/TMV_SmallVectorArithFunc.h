@@ -56,90 +56,90 @@ namespace tmv {
 
 
     // v *= x
-    template <int N, class T, class Tv, bool ok> 
+    template <ptrdiff_t N, class T, class Tv, bool ok> 
     struct MultXVHelper 
     { MultXVHelper(const T, Tv*) {} };
-    template <int N, class T, class Tv>
+    template <ptrdiff_t N, class T, class Tv>
     struct MultXVHelper<N,T,Tv,true>
     {
         MultXVHelper(const T x, Tv* v)
-        { for(int i=0;i<N;++i) v[i] *= x; }
+        { for(ptrdiff_t i=0;i<N;++i) v[i] *= x; }
     };
-    template <int N, class T, class Tv> 
+    template <ptrdiff_t N, class T, class Tv> 
     inline void MultXV(const T x, Tv* v)
     { MultXVHelper<N,T,Tv,OKTypes(T,Tv)>(x,v); }
 
     // v2 = x * v1
-    template <int N, class T, class T1, class T2, bool ok>
+    template <ptrdiff_t N, class T, class T1, class T2, bool ok>
     struct MultXVHelper2
     { MultXVHelper2(const T, const T1*, T2*) {} };
-    template <int N, class T, class T1, class T2>
+    template <ptrdiff_t N, class T, class T1, class T2>
     struct MultXVHelper2<N,T,T1,T2,true>
     {
         MultXVHelper2(const T x, const T1* v1, T2* v2)
-        { for(int i=0;i<N;++i) v2[i] = x * v1[i]; }
+        { for(ptrdiff_t i=0;i<N;++i) v2[i] = x * v1[i]; }
     };
-    template <int N, class T, class T1, class T2> 
+    template <ptrdiff_t N, class T, class T1, class T2> 
     inline void MultXV( const T x, const T1* v1, T2* v2)
     { MultXVHelper2<N,T,T1,T2,OKTypes2(T,T1,T2)>(x,v1,v2); }
 
     // v2 += x * v1
-    template <int N, class T1, class T2, bool ok>
+    template <ptrdiff_t N, class T1, class T2, bool ok>
     struct AddVV_1Helper
     { AddVV_1Helper(const T1*, T2*) {} };
-    template <int N, class T1, class T2>
+    template <ptrdiff_t N, class T1, class T2>
     struct AddVV_1Helper<N,T1,T2,true>
     {
         inline AddVV_1Helper(const T1* v1, T2* v2)
-        { for(int i=0;i<N;++i) v2[i] += v1[i]; }
+        { for(ptrdiff_t i=0;i<N;++i) v2[i] += v1[i]; }
     };
-    template <int N, class T1, class T2> 
+    template <ptrdiff_t N, class T1, class T2> 
     inline void AddVV_1(const T1* v1, T2* v2)
     { AddVV_1Helper<N,T1,T2,OKTypes(T1,T2)>(v1,v2); }
 
-    template <int N, class T1, class T2, bool ok>
+    template <ptrdiff_t N, class T1, class T2, bool ok>
     struct AddVV_m1Helper
     { AddVV_m1Helper(const T1*, T2*) {} };
-    template <int N, class T1, class T2>
+    template <ptrdiff_t N, class T1, class T2>
     struct AddVV_m1Helper<N,T1,T2,true>
     {
         inline AddVV_m1Helper(const T1* v1, T2* v2)
-        { for(int i=0;i<N;++i) v2[i] -= v1[i]; }
+        { for(ptrdiff_t i=0;i<N;++i) v2[i] -= v1[i]; }
     };
-    template <int N, class T1, class T2> 
+    template <ptrdiff_t N, class T1, class T2> 
     inline void AddVV_m1(const T1* v1, T2* v2)
     { AddVV_m1Helper<N,T1,T2,OKTypes(T1,T2)>(v1,v2); }
 
-    template <int N, class T, class T1, class T2, bool ok>
+    template <ptrdiff_t N, class T, class T1, class T2, bool ok>
     struct AddVVHelper
     { AddVVHelper(const T, const T1*, T2*) {} };
-    template <int N, class T, class T1, class T2>
+    template <ptrdiff_t N, class T, class T1, class T2>
     struct AddVVHelper<N,T,T1,T2,true>
     {
         inline AddVVHelper(const T x, const T1* v1, T2* v2) 
-        { for(int i=0;i<N;++i) v2[i] += x*v1[i]; }
+        { for(ptrdiff_t i=0;i<N;++i) v2[i] += x*v1[i]; }
     };
-    template <int N, class T, class T1, class T2> 
+    template <ptrdiff_t N, class T, class T1, class T2> 
     inline void AddVV(const T x, const T1* v1, T2* v2)
     { AddVVHelper<N,T,T1,T2,OKTypes2(T,T1,T2)>(x,v1,v2); }
 
     // v3 = x1 * v1 + x2 * v2
-    template <int N, class T1, class T2, class T3> 
+    template <ptrdiff_t N, class T1, class T2, class T3> 
     inline void AddVV_1_1(const T1* v1, const T2* v2, T3* v3)
     { SmallVectorCopy<N>(v1,v3); AddVV_1<N>(v2,v3); }
-    template <int N, class T1, class T2, class T3> 
+    template <ptrdiff_t N, class T1, class T2, class T3> 
     inline void AddVV_1_m1(const T1* v1, const T2* v2, T3* v3)
     { SmallVectorCopy<N>(v1,v3); AddVV_m1<N>(v2,v3); }
-    template <int N, class T, class T1, class T2, class T3>
+    template <ptrdiff_t N, class T, class T1, class T2, class T3>
     inline void AddVV_1_x(const T1* v1, const T x2, const T2* v2, T3* v3)
     { MultXV<N>(x2,v2,v3); AddVV_1<N>(v1,v3); }
-    template <int N, class T, class T1, class T2, class T3>
+    template <ptrdiff_t N, class T, class T1, class T2, class T3>
     inline void AddVV_x_1(const T x1, const T1* v1, const T2* v2, T3* v3)
     { MultXV<N>(x1,v1,v3); AddVV_1<N>(v2,v3); }
-    template <int N, class T, class T1, class T2, class T3>
+    template <ptrdiff_t N, class T, class T1, class T2, class T3>
     inline void AddVV_x_m1(const T x1, const T1* v1, const T2* v2, T3* v3)
     { MultXV<N>(x1,v1,v3); AddVV_m1<N>(v2,v3); }
-    template <int N, class T, class T1, class T2, class T3> 
+    template <ptrdiff_t N, class T, class T1, class T2, class T3> 
     inline void AddVV(const T x1, const T1* v1, const T x2, const T2* v2, T3* v3)
     { MultXV<N>(x1,v1,v3); AddVV<N>(x2,v2,v3); }
 
@@ -150,13 +150,13 @@ namespace tmv {
     struct ProdType<T,std::complex<T> > { typedef std::complex<T> Tprod; };
 #define ProductType(T1,T2) typename ProdType<T1,T2>::Tprod
 
-    template <int N, class T, class T1, class T2>
+    template <ptrdiff_t N, class T, class T1, class T2>
     struct MultVVHelper
     {
         inline MultVVHelper(T& res, const T1* v1, const T2* v2) 
-        { for(int i=0;i<N;++i) res += v1[i]*v2[i]; }
+        { for(ptrdiff_t i=0;i<N;++i) res += v1[i]*v2[i]; }
     };
-    template <int N, class T1, class T2> 
+    template <ptrdiff_t N, class T1, class T2> 
     inline ProductType(T1,T2) MultVV(const T1* v1, const T2* v2)
     { 
         ProductType(T1,T2) res(0);
@@ -165,36 +165,36 @@ namespace tmv {
     }
 #undef ProductType
 
-    template <class T, class T1, class T2, class T3, int N, int A1, int A2, int A3>
+    template <class T, class T1, class T2, class T3, ptrdiff_t N, int A1, int A2, int A3>
     inline void ElemMultVV(
         const T alpha, const SmallVector<T1,N,A1>& v1, 
         const SmallVector<T2,N,A2>& v2, SmallVector<T3,N,A3>& v3)
     {
         if (alpha == T(1))
-            for(int i=0;i<N;++i) v3.ref(i) = v1.cref(i) * v2.cref(i);
+            for(ptrdiff_t i=0;i<N;++i) v3.ref(i) = v1.cref(i) * v2.cref(i);
         else
-            for(int i=0;i<N;++i) v3.ref(i) = alpha * v1.cref(i) * v2.cref(i);
+            for(ptrdiff_t i=0;i<N;++i) v3.ref(i) = alpha * v1.cref(i) * v2.cref(i);
     }
-    template <class T, class T1, class T2, int N, int A1, int A2, int A3> 
+    template <class T, class T1, class T2, ptrdiff_t N, int A1, int A2, int A3> 
     inline void ElemMultVV(
         const CT , const SmallVector<T1,N,A1>& ,
         const SmallVector<T2,N,A2>& , SmallVector<T,N,A3>& )
     { TMVAssert(TMV_FALSE); }
 
 
-    template <class T, class T1, class T2, class T3, int N, int A1, int A2, int A3>
+    template <class T, class T1, class T2, class T3, ptrdiff_t N, int A1, int A2, int A3>
     inline void AddElemMultVV(
         const T alpha, const SmallVector<T1,N,A1>& v1, 
         const SmallVector<T2,N,A2>& v2, SmallVector<T3,N,A3>& v3)
     {
         if (alpha == T(1))
-            for(int i=0;i<N;++i) v3.ref(i) += v1.cref(i) * v2.cref(i);
+            for(ptrdiff_t i=0;i<N;++i) v3.ref(i) += v1.cref(i) * v2.cref(i);
         else if (alpha == T(-1))
-            for(int i=0;i<N;++i) v3.ref(i) -= v1.cref(i) * v2.cref(i);
+            for(ptrdiff_t i=0;i<N;++i) v3.ref(i) -= v1.cref(i) * v2.cref(i);
         else
-            for(int i=0;i<N;++i) v3.ref(i) += alpha * v1.cref(i) * v2.cref(i);
+            for(ptrdiff_t i=0;i<N;++i) v3.ref(i) += alpha * v1.cref(i) * v2.cref(i);
     }
-    template <class T, class T1, class T2, int N, int A1, int A2, int A3> 
+    template <class T, class T1, class T2, ptrdiff_t N, int A1, int A2, int A3> 
     inline void AddElemMultVV(
         const CT , const SmallVector<T1,N,A1>& ,
         const SmallVector<T2,N,A2>& , SmallVector<T,N,A3>& )

@@ -105,6 +105,7 @@
 #include <complex>
 #include <memory>
 #include <stdexcept>
+#include <cstddef>
 #include <string>
 #include <algorithm>
 

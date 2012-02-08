@@ -1,9 +1,8 @@
 
 #include "tmv/TMV_Base.h"
 
-#define NOVIEWS
-#define NOSV
-#define USETEMP
+//#define NOVIEWS
+//#define NOSV
 
 template <class T> void TestAllSmallVector();
 template <class T> void TestAllSmallMatrix();
@@ -43,7 +42,8 @@ template <class T> void TestSmallMatrixArith_B6a();
 template <class T> void TestSmallMatrixArith_B6b();
 template <class T> void TestSmallMatrixArith_B6c();
 template <class T> void TestSmallMatrixArith_B6d();
-template <class T> void TestSmallMatrixArith_B7();
+template <class T> void TestSmallMatrixArith_B7a();
+template <class T> void TestSmallMatrixArith_B7b();
 template <class T> void TestAllSmallMatrixDiv();
 template <class T> void TestAllSmallMatrixDivA();
 template <class T> void TestAllSmallMatrixDivB();

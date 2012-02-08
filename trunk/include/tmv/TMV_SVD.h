@@ -110,7 +110,7 @@ namespace tmv {
         template <class M1, class T2, int A2>
         void solve(const BaseMatrix<M1>& m1, MatrixView<T2,A2> m2) const
         { doSolve(m1,m2); }
-        template <class M1, class T2, int M2, int N2, int Si2, int Sj2, int A2>
+        template <class M1, class T2, ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         void solve(
             const BaseMatrix<M1>& m1, SmallMatrixView<T2,M2,N2,Si2,Sj2,A2> m2) const
         { doSolve(m1,m2); }
@@ -124,7 +124,7 @@ namespace tmv {
         template <class V1, class T2, int A2>
         void solve(const BaseVector<V1>& v1, VectorView<T2,A2> v2) const
         { doSolve(v1,v2); }
-        template <class V1, class T2, int N2, int S2, int A2>
+        template <class V1, class T2, ptrdiff_t N2, ptrdiff_t S2, int A2>
         void solve(const BaseVector<V1>& v1, SmallVectorView<T2,N2,S2,A2> v2) const
         { doSolve(v1,v2); }
 
@@ -139,7 +139,7 @@ namespace tmv {
         void solveTranspose(
             const BaseMatrix<M1>& m1, MatrixView<T2,A2> m2) const
         { doSolveTranspose(m1,m2); }
-        template <class M1, class T2, int M2, int N2, int Si2, int Sj2, int A2>
+        template <class M1, class T2, ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         void solveTranspose(
             const BaseMatrix<M1>& m1, SmallMatrixView<T2,M2,N2,Si2,Sj2,A2> m2) const
         { doSolveTranspose(m1,m2); }
@@ -155,7 +155,7 @@ namespace tmv {
         void solveTranspose(
             const BaseVector<V1>& v1, VectorView<T2,A2> v2) const
         { doSolveTranspose(v1,v2); }
-        template <class V1, class T2, int N2, int S2, int A2>
+        template <class V1, class T2, ptrdiff_t N2, ptrdiff_t S2, int A2>
         void solveTranspose(
             const BaseVector<V1>& v1, SmallVectorView<T2,N2,S2,A2> v2) const
         { doSolveTranspose(v1,v2); }
@@ -172,7 +172,7 @@ namespace tmv {
         template <class T2, int A2>
         void solveInPlace(MatrixView<T2,A2> m2) const
         { doSolveInPlace(m2); }
-        template <class T2, int M2, int N2, int Si2, int Sj2, int A2>
+        template <class T2, ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         void solveInPlace(SmallMatrixView<T2,M2,N2,Si2,Sj2,A2> m2) const
         { doSolveInPlace(m2); }
 
@@ -184,7 +184,7 @@ namespace tmv {
         template <class T2, int A2>
         void solveInPlace(VectorView<T2,A2> v2) const
         { doSolveInPlace(v2); }
-        template <class T2, int N2, int S2, int A2>
+        template <class T2, ptrdiff_t N2, ptrdiff_t S2, int A2>
         void solveInPlace(SmallVectorView<T2,N2,S2,A2> v2) const
         { doSolveInPlace(v2); }
 
@@ -196,7 +196,7 @@ namespace tmv {
         template <class T2, int A2>
         void solveTransposeInPlace(MatrixView<T2,A2> m2) const
         { doSolveTransposeInPlace(m2); }
-        template <class T2, int M2, int N2, int Si2, int Sj2, int A2>
+        template <class T2, ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         void solveTransposeInPlace(SmallMatrixView<T2,M2,N2,Si2,Sj2,A2> m2) const
         { doSolveTransposeInPlace(m2); }
 
@@ -208,7 +208,7 @@ namespace tmv {
         template <class T2, int A2>
         void solveTransposeInPlace(VectorView<T2,A2> v2) const
         { doSolveTransposeInPlace(v2); }
-        template <class T2, int N2, int S2, int A2>
+        template <class T2, ptrdiff_t N2, ptrdiff_t S2, int A2>
         void solveTransposeInPlace(SmallVectorView<T2,N2,S2,A2> v2) const
         { doSolveTransposeInPlace(v2); }
 
@@ -233,7 +233,7 @@ namespace tmv {
         template <class T2, int A2>
         void MakeInverse(MatrixView<T2,A2> minv) const
         { doMakeInverse(minv); }
-        template <class T2, int M2, int N2, int Si2, int Sj2, int A2>
+        template <class T2, ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         void MakeInverse(SmallMatrixView<T2,M2,N2,Si2,Sj2,A2> minv) const
         { doMakeInverse(minv); }
 
@@ -250,7 +250,7 @@ namespace tmv {
         template <class T2, int A2>
         void MakeInverseATA(MatrixView<T2,A2> minv) const
         { doMakeInverseATA(minv); }
-        template <class T2, int M2, int N2, int Si2, int Sj2, int A2>
+        template <class T2, ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         void MakeInverseATA(SmallMatrixView<T2,M2,N2,Si2,Sj2,A2> minv) const
         { doMakeInverseATA(minv); }
 
@@ -277,8 +277,8 @@ namespace tmv {
         //
 
         void thresh(RT toler, std::ostream* debugout=0) const;
-        void top(int neigen, std::ostream* debugout=0) const;
-        int getKMax() const;
+        void top(ptrdiff_t neigen, std::ostream* debugout=0) const;
+        ptrdiff_t getKMax() const;
 
     private :
 
@@ -286,8 +286,8 @@ namespace tmv {
         // const SVD<M>& can release the memory.
         mutable std::auto_ptr<SVD_Impl<small,M> > pimpl;
 
-        int colsize() const;
-        int rowsize() const;
+        ptrdiff_t colsize() const;
+        ptrdiff_t rowsize() const;
 
         // op= not allowed.
         SVD<M>& operator=(const SVD<M>&);
@@ -415,7 +415,7 @@ namespace tmv {
     {
         template <class M1u, class M1s, class M1v, class M2, class M3>
         static TMV_INLINE void solve(
-            const M1u& U, const M1s& S, const M1v& V, int kmax,
+            const M1u& U, const M1s& S, const M1v& V, ptrdiff_t kmax,
             const M2& m2, M3& m3)
         {
             SV_Solve(
@@ -424,7 +424,7 @@ namespace tmv {
         }
         template <class M1u, class M1s, class M1v, class M2>
         static TMV_INLINE void solveInPlace(
-            const M1u& U, const M1s& S, const M1v& V, int kmax, M2& m2)
+            const M1u& U, const M1s& S, const M1v& V, ptrdiff_t kmax, M2& m2)
         { 
             SV_Solve(
                 U.colRange(0,kmax),S.subDiagMatrix(0,kmax),
@@ -432,7 +432,7 @@ namespace tmv {
         }
         template <class M1u, class M1s, class M1v, class M2>
         static TMV_INLINE void makeInverse(
-            const M1u& U, const M1s& S, const M1v& V, int kmax, M2& minv)
+            const M1u& U, const M1s& S, const M1v& V, ptrdiff_t kmax, M2& minv)
         { 
             SV_Inverse(
                 U.colRange(0,kmax),S.subDiagMatrix(0,kmax),
@@ -440,7 +440,7 @@ namespace tmv {
         }
         template <class M1u, class M1s, class M1v, class M2>
         static TMV_INLINE void makeInverseATA(
-            const M1u& U, const M1s& S, const M1v& V, int kmax, M2& ata)
+            const M1u& U, const M1s& S, const M1v& V, ptrdiff_t kmax, M2& ata)
         { 
             SV_InverseATA(
                 U.colRange(0,kmax),S.subDiagMatrix(0,kmax),
@@ -452,7 +452,7 @@ namespace tmv {
     {
         template <class M1u, class M1s, class M1v, class M2, class M3>
         static TMV_INLINE void solve(
-            const M1u& U, const M1s& S, const M1v& V, int kmax,
+            const M1u& U, const M1s& S, const M1v& V, ptrdiff_t kmax,
             const M2& m2, M3& m3)
         {
             SV_Solve(
@@ -461,7 +461,7 @@ namespace tmv {
         }
         template <class M1u, class M1s, class M1v, class M2>
         static TMV_INLINE void solveInPlace(
-            const M1u& U, const M1s& S, const M1v& V, int kmax, M2& m2)
+            const M1u& U, const M1s& S, const M1v& V, ptrdiff_t kmax, M2& m2)
         {
             SV_Solve(
                 V.rowRange(0,kmax).transpose(),S.subDiagMatrix(0,kmax),
@@ -469,7 +469,7 @@ namespace tmv {
         }
         template <class M1u, class M1s, class M1v, class M2>
         static TMV_INLINE void makeInverse(
-            const M1u& U, const M1s& S, const M1v& V, int kmax, M2& minv)
+            const M1u& U, const M1s& S, const M1v& V, ptrdiff_t kmax, M2& minv)
         { 
             SV_Inverse(
                 V.rowRange(0,kmax).transpose(),S.subDiagMatrix(0,kmax),
@@ -477,7 +477,7 @@ namespace tmv {
         }
         template <class M1u, class M1s, class M1v, class M2>
         static TMV_INLINE void makeInverseATA(
-            const M1u& U, const M1s& S, const M1v& V, int kmax, M2& ata)
+            const M1u& U, const M1s& S, const M1v& V, ptrdiff_t kmax, M2& ata)
         { 
             SV_InverseATA(
                 U.colRange(0,kmax),S.subDiagMatrix(0,kmax),V.rowRange(0,kmax),
@@ -489,19 +489,19 @@ namespace tmv {
     {
         template <class M1u, class M1s, class M1v, class M2, class M3>
         static TMV_INLINE void solve(
-            const M1u& , const M1s& , const M1v& , int , const M2& , M3& )
+            const M1u& , const M1s& , const M1v& , ptrdiff_t , const M2& , M3& )
         { TMVAssert(false && "Calling invalid SVHelper::solve\n"); }
         template <class M1u, class M1s, class M1v, class M2>
         static TMV_INLINE void solveInPlace(
-            const M1u& , const M1s& , const M1v& , int , M2& )
+            const M1u& , const M1s& , const M1v& , ptrdiff_t , M2& )
         { TMVAssert(false && "Calling invalid SVHelper::solveInPlace\n"); }
         template <class M1u, class M1s, class M1v, class M2>
         static TMV_INLINE void makeInverse(
-            const M1u& , const M1s& , const M1v& , int , M2& )
+            const M1u& , const M1s& , const M1v& , ptrdiff_t , M2& )
         { TMVAssert(false && "Calling invalid SVHelper::makeInverse\n"); }
         template <class M1u, class M1s, class M1v, class M2>
         static TMV_INLINE void makeInverseATA(
-            const M1u& , const M1s& , const M1v& , int , M2& )
+            const M1u& , const M1s& , const M1v& , ptrdiff_t , M2& )
         { TMVAssert(false && "Calling invalid SVHelper::makeInverseATA\n"); }
     };
 
@@ -515,7 +515,7 @@ namespace tmv {
         typedef typename M::zfloat_type ZT;
         enum { cs1 = M::_colsize };
         enum { rs1 = M::_rowsize };
-        enum { istrans = int(cs1) < int(rs1) };
+        enum { istrans = ptrdiff_t(cs1) < ptrdiff_t(rs1) };
         enum { cs = IntTraits2<cs1,rs1>::max };
         enum { rs = IntTraits2<cs1,rs1>::min };
         enum { A = (istrans ? RowMajor : ColMajor) | NoAlias };
@@ -526,10 +526,10 @@ namespace tmv {
         typedef typename MCopyHelper<T,Diag,rs,rs>::type sx_type;
         typedef typename MCopyHelper<T,Rec,rs,rs,RowMajor|NoAlias>::type vx_type;
 
-        enum { csu = istrans ? int(rs) : int(cs) };
+        enum { csu = istrans ? ptrdiff_t(rs) : ptrdiff_t(cs) };
         enum { rsu = rs };
         enum { csv = rs };
-        enum { rsv = istrans ? int(cs) : int(rs) };
+        enum { rsv = istrans ? ptrdiff_t(cs) : ptrdiff_t(rs) };
 
         typedef typename MViewHelper<T,Rec,csu,rsu,1,csu>::type getu_type;
         typedef typename sx_type::const_view_type gets_type;
@@ -542,8 +542,8 @@ namespace tmv {
         {
             TMVStaticAssert(M::_colsize != Unknown);
             TMVStaticAssert(M::_rowsize != Unknown);
-            TMVAssert(A.colsize() == istrans ? int(rs) : int(cs));
-            TMVAssert(A.rowsize() == istrans ? int(cs) : int(rs));
+            TMVAssert(A.colsize() == istrans ? ptrdiff_t(rs) : ptrdiff_t(cs));
+            TMVAssert(A.rowsize() == istrans ? ptrdiff_t(cs) : ptrdiff_t(rs));
             SmallUx = A;
             SV_Decompose(Ux,Sx,Vx,signdet,logdet,true);
         }
@@ -590,7 +590,7 @@ namespace tmv {
         vx_type Vx;
         ZT signdet;
         FT logdet;
-        int kmax;
+        ptrdiff_t kmax;
     };
     
     template <class M>
@@ -603,7 +603,7 @@ namespace tmv {
         enum { cs1 = M::_colsize };
         enum { rs1 = M::_rowsize };
         enum { knownsizes = cs1 != Unknown && rs1 != Unknown };
-        enum { istrans1 = knownsizes && cs1 < int(rs1) };
+        enum { istrans1 = knownsizes && cs1 < ptrdiff_t(rs1) };
         enum { cs = IntTraits2<cs1,rs1>::max };
         enum { rs = IntTraits2<cs1,rs1>::min };
         typedef typename MViewHelper<T,Rec,cs,rs,1,Unknown,ColMajor|NoAlias>::type ux_type;
@@ -611,13 +611,13 @@ namespace tmv {
         typedef Matrix<T,RowMajor|NoDivider|NoAlias> vx_type;
 
         enum { csu = (
-                knownsizes ? ( istrans1 ? int(rs) : int(cs) ) :
-                int(Unknown) ) };
-        enum { rsu = knownsizes ? int(rs) : int(Unknown) };
-        enum { csv = knownsizes ? int(rs) : int(Unknown) };
+                knownsizes ? ( istrans1 ? ptrdiff_t(rs) : ptrdiff_t(cs) ) :
+                ptrdiff_t(Unknown) ) };
+        enum { rsu = knownsizes ? ptrdiff_t(rs) : ptrdiff_t(Unknown) };
+        enum { csv = knownsizes ? ptrdiff_t(rs) : ptrdiff_t(Unknown) };
         enum { rsv = (
-                knownsizes ? ( istrans1 ? int(cs) : int(rs) ) :
-                int(Unknown) ) };
+                knownsizes ? ( istrans1 ? ptrdiff_t(cs) : ptrdiff_t(rs) ) :
+                ptrdiff_t(Unknown) ) };
 
         typedef typename MViewHelper<T,Rec,csu,rsu,1,csu>::type getu_type;
         typedef typename sx_type::const_view_type gets_type;
@@ -751,7 +751,7 @@ namespace tmv {
         ux_type Ux;
         sx_type Sx;
         vx_type Vx;
-        int kmax;
+        ptrdiff_t kmax;
         ZT signdet;
         FT logdet;
     };
@@ -914,11 +914,11 @@ namespace tmv {
     { return pimpl->Sx.cref(0) / pimpl->Sx.cref(pimpl->Sx.size()-1); }
 
     template <class M>
-    int SVD<M>::colsize() const
+    ptrdiff_t SVD<M>::colsize() const
     { return pimpl->istrans ? pimpl->Ux.rowsize() : pimpl->Ux.colsize(); }
 
     template <class M>
-    int SVD<M>::rowsize() const
+    ptrdiff_t SVD<M>::rowsize() const
     { return pimpl->istrans ? pimpl->Ux.colsize() : pimpl->Ux.rowsize(); }
 
     template <class M>
@@ -941,7 +941,7 @@ namespace tmv {
     }
 
     template <class M>
-    void SVD<M>::top(int neigen, std::ostream* debugout) const
+    void SVD<M>::top(ptrdiff_t neigen, std::ostream* debugout) const
     {
         TMVAssert(neigen > 0);
         if (neigen < pimpl->Sx.size()) pimpl->kmax = neigen;
@@ -954,7 +954,7 @@ namespace tmv {
     }
 
     template <class M>
-    int SVD<M>::getKMax() const
+    ptrdiff_t SVD<M>::getKMax() const
     { return pimpl->kmax; }
 
     template <class M, class M2>

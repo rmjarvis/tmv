@@ -27,10 +27,10 @@ namespace tmv {
         static void call(const TMV_Writer& writer, const M1& m)
         {
             typedef typename M1::value_type T;
-            const int M = m.colsize();
-            const int N = m.rowsize();
-            int j1=0;
-            int j2=m.nhi()+1;
+            const ptrdiff_t M = m.colsize();
+            const ptrdiff_t N = m.rowsize();
+            ptrdiff_t j1=0;
+            ptrdiff_t j2=m.nhi()+1;
 
             writer.begin();
             writer.writeCode("B");
@@ -40,20 +40,20 @@ namespace tmv {
             writer.writeFullSize(m.nhi());
             writer.writeStart();
 
-            for(int i=0;i<M;++i) {
+            for(ptrdiff_t i=0;i<M;++i) {
                 writer.writeLParen();
                 if (!writer.isCompact()) {
-                    for(int j=0;j<j1;++j) {
+                    for(ptrdiff_t j=0;j<j1;++j) {
                         writer.writeValue(T(0));
                         if (j < N-1) writer.writeSpace();
                     }
                 }
-                for(int j=j1;j<j2;++j) {
+                for(ptrdiff_t j=j1;j<j2;++j) {
                     if (j > j1) writer.writeSpace();
                     writer.writeValue(m.cref(i,j));
                 }
                 if (!writer.isCompact()) {
-                    for(int j=j2;j<N;++j) {
+                    for(ptrdiff_t j=j2;j<N;++j) {
                         writer.writeSpace();
                         writer.writeValue(T(0));
                     }
@@ -136,10 +136,10 @@ namespace tmv {
     {
     public :
         BandMatrix<T,NoDivider> m;
-        int i,j;
+        ptrdiff_t i,j;
         std::string exp,got;
-        int cs,rs;
-        int lo,hi;
+        ptrdiff_t cs,rs;
+        ptrdiff_t lo,hi;
         T v1;
         bool is, iseof, isbad;
 
@@ -157,13 +157,13 @@ namespace tmv {
         template <class M>
         BandMatrixReadError(
             const BaseMatrix_Band<M>& _m, std::istream& _is,
-            int _cs, int _rs, int _lo, int _hi) throw() :
+            ptrdiff_t _cs, ptrdiff_t _rs, ptrdiff_t _lo, ptrdiff_t _hi) throw() :
             ReadError("BandMatrix"),
             m(_m), i(0), j(0), cs(_cs), rs(_rs), lo(_lo), hi(_hi), v1(0),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class M>
         BandMatrixReadError(
-            int _i, int _j, const BaseMatrix_Band<M>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const BaseMatrix_Band<M>& _m,
             std::istream& _is,
             const std::string& _e, const std::string& _g) throw() :
             ReadError("BandMatrix"),
@@ -172,7 +172,7 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class M>
         BandMatrixReadError(
-            int _i, int _j, const BaseMatrix_Band<M>& _m, 
+            ptrdiff_t _i, ptrdiff_t _j, const BaseMatrix_Band<M>& _m, 
             std::istream& _is, T _v1=0) throw() :
             ReadError("BandMatrix"),
             m(_m), i(_i), j(_j), 
@@ -221,14 +221,14 @@ namespace tmv {
             if (m.colsize() > 0 || m.rowsize() > 0) {
                 os<<"The portion of the BandMatrix which was successfully "
                     "read is: \n";
-                const int N = m.rowsize();
-                for(int ii=0;ii<i;++ii) {
+                const ptrdiff_t N = m.rowsize();
+                for(ptrdiff_t ii=0;ii<i;++ii) {
                     os<<"( ";
-                    for(int jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
+                    for(ptrdiff_t jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
                     os<<" )\n";
                 }
                 os<<"( ";
-                for(int jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
+                for(ptrdiff_t jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
                 os<<" )\n";
             }
         }
@@ -244,12 +244,12 @@ namespace tmv {
         static void call(const TMV_Reader& reader, M1& m)
         {
             typedef typename M1::value_type T;
-            const int M = m.colsize();
-            const int N = m.rowsize();
+            const ptrdiff_t M = m.colsize();
+            const ptrdiff_t N = m.rowsize();
             std::string exp, got;
             T temp;
-            int j1=0;
-            int j2=m.nhi()+1;
+            ptrdiff_t j1=0;
+            ptrdiff_t j2=m.nhi()+1;
             if (!reader.readStart(exp,got)) {
 #ifdef NOTHROW
                 std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -258,7 +258,7 @@ namespace tmv {
                 throw BandMatrixReadError<T>(0,0,m,reader.getis(),exp,got);
 #endif
             }
-            for(int i=0;i<M;++i) {
+            for(ptrdiff_t i=0;i<M;++i) {
                 if (!reader.readLParen(exp,got)) {
 #ifdef NOTHROW
                     std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -268,7 +268,7 @@ namespace tmv {
 #endif
                 }
                 if (!reader.isCompact()) {
-                    for(int j=0;j<j1;++j) {
+                    for(ptrdiff_t j=0;j<j1;++j) {
                         if (!reader.readValue(temp)) {
 #ifdef NOTHROW
                             std::cerr<<"BandMatrix Read Error: reading value\n";
@@ -295,7 +295,7 @@ namespace tmv {
                         }
                     }
                 }
-                for(int j=j1;j<j2;++j) {
+                for(ptrdiff_t j=j1;j<j2;++j) {
                     if (j>j1 && !reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                         std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -315,7 +315,7 @@ namespace tmv {
                     m.ref(i,j) = temp;
                 }
                 if (!reader.isCompact()) {
-                    for(int j=j2;j<N;++j) {
+                    for(ptrdiff_t j=j2;j<N;++j) {
                         if (!reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                             std::cerr<<"BandMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -408,7 +408,7 @@ namespace tmv {
         static TMV_INLINE void call(const TMV_Reader& reader, M1& m)
         {
             typedef typename M1::value_type T;
-            const int inst = 
+            const bool inst = 
                 (M1::_colsize == Unknown || M1::_colsize > 16) &&
                 (M1::_rowsize == Unknown || M1::_rowsize > 16) &&
                 Traits<T>::isinst;
@@ -465,7 +465,7 @@ namespace tmv {
             throw BandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int cs=m.colsize(), rs=m.rowsize(), lo=m.nlo(), hi=m.nhi();
+        ptrdiff_t cs=m.colsize(), rs=m.rowsize(), lo=m.nlo(), hi=m.nhi();
         if (!reader.readSize(cs) || !reader.readSize(rs) ||
             !reader.readFullSize(lo) || !reader.readFullSize(hi)) {
 #ifdef NOTHROW
@@ -501,7 +501,7 @@ namespace tmv {
             throw BandMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int cs=m.colsize(), rs=m.rowsize(), lo=m.nlo(), hi=m.nhi();
+        ptrdiff_t cs=m.colsize(), rs=m.rowsize(), lo=m.nlo(), hi=m.nhi();
         if (!reader.readSize(cs) || !reader.readSize(rs) ||
             !reader.readFullSize(lo) || !reader.readFullSize(hi)) {
 #ifdef NOTHROW
@@ -530,7 +530,7 @@ namespace tmv {
             static_cast<BaseMatrix_Band_Mutable<BandMatrixView<T,A> >&>(m);
     }
 
-    template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, ptrdiff_t Si, ptrdiff_t Sj, int A>
     std::istream& operator>>(
         const TMV_Reader& reader, SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m)
     {
@@ -547,7 +547,7 @@ namespace tmv {
             static_cast<BaseMatrix_Band_Mutable<BandMatrixView<T,A> >&>(m);
     }
 
-    template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, ptrdiff_t Si, ptrdiff_t Sj, int A>
     std::istream& operator>>(
         std::istream& is, SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m)
     {
