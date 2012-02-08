@@ -65,80 +65,7 @@ namespace tmv {
         }
     };
 
-#ifdef TMV_NO_STL
-    // We allow for a possibility of the std::sort function not working
-    // correctly on someone's system.  This and a couple of other stl
-    // issues may be avoided by compiling with -DNOSTL.
-    // So, in this case, we use a median-of-three quicksort.
-    // This is not quite as good as the STL sort function, since they 
-    // use introsort - a strategy that mixes quick sort with other algorithms
-    // under particular situations.  So if the std::sort() works on your
-    // system, it is recommended.
-    template <class IT, class COMP>
-    static void Sort3(IT x1, IT x2, IT x3, const COMP& comp)
-    {
-        if (comp(*x3,*x1)) {
-            if (comp(*x1,*x2)) { // x3 < x1 < x2
-                iterator_traits<IT>::value_type temp = *x1;
-                *x1 = *x3;
-                *x3 = *x2;
-                *x2 = temp;
-            } else if (comp(*x2,*x3)) { // x2 < x3 < x1
-                iterator_traits<IT>::value_type temp = *x1;
-                *x1 = *x2;
-                *x2 = *x3;
-                *x3 = temp;
-            } else { // x3 <= x2 <= x1 and x3 < x1
-                TMV_SWAP(*x1,*x3);
-            }
-        } else {
-            if (comp(*x2,*x1)) { // x2 < x1 <= x3
-                TMV_SWAP(*x1,*x2);
-            } else if (comp(*x3,*x2)) { // x1 <= x3 < x2
-                TMV_SWAP(*x2,*x3);
-            } else { // x1 <= x2 <= x3
-                // nothing to do
-            }
-        }
-    }
-
-    template <class IT, class COMP>
-    static void DoSort(IT begin, IT end, const COMP& comp)
-    {
-        iterator_traits<IT>::difference_type n = end-begin;
-        TMVAssert(N >= 0);
-        if (N <= 3) {
-            if (N == 3) { // 3 elements
-                Sort3(begin,begin+1,begin+2,comp);
-            } else if (N == 2) { // 2 elements
-                if (comp(*(begin+1),*begin)) TMV_SWAP(*begin,*(begin+1));
-            } // else 0 or 1 element
-            return;
-        } else {
-            IT mid = begin + N/2;
-            Sort3(begin,mid,end-1,comp);
-            iterator_traits<IT>::value_type pivot = *mid;
-            TMV_SWAP(*mid,*(end-2));
-            IT left = begin+1;
-            IT right = end-3;
-            while (left < right) {
-                while (!comp(*right,pivot) && left < right) --right;
-                while (!comp(pivot,*left) && left < right) ++left;
-                if (left < right) TMV_SWAP(*left,*right);
-            }
-            TMVAssert(left == right);
-            if (comp(*left,pivot)) ++left;
-            TMV_SWAP(*left,*(end-2));
-            DoSort(begin,left,comp);
-            DoSort(left+1,end,comp);
-        }
-    }
-
-    template <class IT>
-    inline void DoSort(const IT& begin, const IT& end)
-    { DoSort(begin,end,std::less<iterator_traits<IT>::value_type>()); }
-#else
-    // Otherwise, just use the standard library sort routine.
+    // Just use the standard library sort routine.
     template <class IT, class COMP>
     inline void DoSort(IT begin, IT end, const COMP& comp)
     { std::sort(begin,end,comp); }
@@ -157,7 +84,6 @@ namespace tmv {
     template <class IT>
     inline void DoSort(const IT& begin, const IT& end)
     { std::sort(begin,end); }
-#endif
 
     // A helper class to keep track of indexes in the sort.
     // We sort the "value" according to which component of the actual
@@ -170,16 +96,16 @@ namespace tmv {
     private :
 
         T itsvalue;
-        int itsi;
+        ptrdiff_t itsi;
 
     public :
 
-        void set(T val, int i) { itsvalue = val; itsi = i; }
-        int getI() const { return itsi; }
+        void set(T val, ptrdiff_t i) { itsvalue = val; itsi = i; }
+        ptrdiff_t getI() const { return itsi; }
         T getVal() const { return itsvalue; }
         bool operator<(const VTIndex& rhs) const
         { return itsvalue < rhs.itsvalue; }
-        operator int() const { return itsi; }
+        operator ptrdiff_t() const { return itsi; }
 
     };
 
@@ -188,23 +114,23 @@ namespace tmv {
     // Ouput P is in swap form, meaning that permutation is series of
     // v.swap(i,P[i])
     template <class VI>
-    static void ConvertIndexToPermute(int n, const VI& newindex, int* P)
+    static void ConvertIndexToPermute(ptrdiff_t n, const VI& newindex, ptrdiff_t* P)
     {
         // newindex[i]=j means value at original j location needs to go to i.
-        std::vector<int> currindex(n);
-        std::vector<int> origindex(n);
-        for(int i=0;i<n;++i) {
+        std::vector<ptrdiff_t> currindex(n);
+        std::vector<ptrdiff_t> origindex(n);
+        for(ptrdiff_t i=0;i<n;++i) {
             currindex[i] = i;
             origindex[i] = i;
         } 
         // currindex[i]=j means value at original i location is currently at j.
         // origindex[j]=i means value at original i location is currently at j.
-        for(int i=0;i<n;++i) {
-            int ip = currindex[newindex[i]];
+        for(ptrdiff_t i=0;i<n;++i) {
+            ptrdiff_t ip = currindex[newindex[i]];
             P[i] = ip;
             if (i != ip) {
-                int origi = origindex[i];
-                int origip = origindex[ip];
+                ptrdiff_t origi = origindex[i];
+                ptrdiff_t origip = origindex[ip];
                 currindex[origi] = ip;
                 currindex[origip] = i;
                 origindex[i] = origip;
@@ -217,7 +143,7 @@ namespace tmv {
     template <class T>
     void InstSort(VectorView<T> v, ADType ad, CompType comp);
     template <class T>
-    void InstSort(VectorView<T> v, int* P, ADType ad, CompType comp);
+    void InstSort(VectorView<T> v, ptrdiff_t* P, ADType ad, CompType comp);
 
     template <int algo, class V>
     struct Sort_Helper;
@@ -226,37 +152,37 @@ namespace tmv {
     template <class V>
     struct Sort_Helper<11,V>
     {
-        static void call(V& v, int* P, ADType ad, CompType comp)
+        static void call(V& v, ptrdiff_t* P, ADType ad, CompType comp)
         {
             typedef typename V::value_type T;
             typedef typename V::float_type FT;
-            const int n = v.size();
+            const ptrdiff_t n = v.size();
             std::vector<VTIndex<FT> > newindex(n);
             if (ad == Ascend) {
                 if (comp == RealComp) 
-                    for(int i=0;i<n;++i) 
+                    for(ptrdiff_t i=0;i<n;++i) 
                         newindex[i].set(TMV_REAL(v.cref(i)),i);
                 else if (comp == AbsComp) 
-                    for(int i=0;i<n;++i) 
+                    for(ptrdiff_t i=0;i<n;++i) 
                         newindex[i].set(TMV_ABS(v.cref(i)),i);
                 else if (comp == ImagComp) 
-                    for(int i=0;i<n;++i) 
+                    for(ptrdiff_t i=0;i<n;++i) 
                         newindex[i].set(TMV_IMAG(v.cref(i)),i);
                 else 
-                    for(int i=0;i<n;++i) 
+                    for(ptrdiff_t i=0;i<n;++i) 
                         newindex[i].set(TMV_ARG(v.cref(i)),i);
             } else {
                 if (comp == RealComp) 
-                    for(int i=0;i<n;++i) 
+                    for(ptrdiff_t i=0;i<n;++i) 
                         newindex[i].set(-TMV_REAL(v.cref(i)),i);
                 else if (comp == AbsComp) 
-                    for(int i=0;i<n;++i) 
+                    for(ptrdiff_t i=0;i<n;++i) 
                         newindex[i].set(-TMV_ABS(v.cref(i)),i);
                 else if (comp == ImagComp) 
-                    for(int i=0;i<n;++i) 
+                    for(ptrdiff_t i=0;i<n;++i) 
                         newindex[i].set(-TMV_IMAG(v.cref(i)),i);
                 else 
-                    for(int i=0;i<n;++i) 
+                    for(ptrdiff_t i=0;i<n;++i) 
                         newindex[i].set(-TMV_ARG(v.cref(i)),i);
             }
             DoSort(newindex.begin(),newindex.end());
@@ -296,25 +222,25 @@ namespace tmv {
     template <class V>
     struct Sort_Helper<12,V>
     {
-        static void call(V& v, int* P, ADType ad, CompType comp)
+        static void call(V& v, ptrdiff_t* P, ADType ad, CompType comp)
         {
             typedef typename V::value_type T;
             typedef typename V::float_type FT;
-            const int n = v.size();
+            const ptrdiff_t n = v.size();
             std::vector<VTIndex<FT> > newindex(n);
             if (ad == Ascend) {
                 if (comp == RealComp) 
-                    for(int i=0;i<n;++i) 
+                    for(ptrdiff_t i=0;i<n;++i) 
                         newindex[i].set(TMV_REAL(v.cref(i)),i);
                 else 
-                    for(int i=0;i<n;++i) 
+                    for(ptrdiff_t i=0;i<n;++i) 
                         newindex[i].set(TMV_ABS(v.cref(i)),i);
             } else {
                 if (comp == RealComp) 
-                    for(int i=0;i<n;++i) 
+                    for(ptrdiff_t i=0;i<n;++i) 
                         newindex[i].set(-TMV_REAL(v.cref(i)),i);
                 else 
-                    for(int i=0;i<n;++i) 
+                    for(ptrdiff_t i=0;i<n;++i) 
                         newindex[i].set(-TMV_ABS(v.cref(i)),i);
             }
             DoSort(newindex.begin(),newindex.end());
@@ -346,7 +272,7 @@ namespace tmv {
     template <class V>
     struct Sort_Helper<90,V>
     {
-        static TMV_INLINE void call(V& v, int* P, ADType ad, CompType comp)
+        static TMV_INLINE void call(V& v, ptrdiff_t* P, ADType ad, CompType comp)
         { InstSort(v.xView(),P,ad,comp); }
         static TMV_INLINE void call(V& v, ADType ad, CompType comp)
         { InstSort(v.xView(),ad,comp); }
@@ -356,7 +282,7 @@ namespace tmv {
     template <class V>
     struct Sort_Helper<97,V>
     {
-        static TMV_INLINE void call(V& v, int* P, ADType ad, CompType comp)
+        static TMV_INLINE void call(V& v, ptrdiff_t* P, ADType ad, CompType comp)
         {
             // Swap ad if necessary 
             if (comp==ImagComp || comp==ArgComp) {
@@ -388,7 +314,7 @@ namespace tmv {
     template <class V>
     struct Sort_Helper<-3,V>
     {
-        static TMV_INLINE void call(V& v, int* P, ADType ad, CompType comp)
+        static TMV_INLINE void call(V& v, ptrdiff_t* P, ADType ad, CompType comp)
         {
             const int algo = V::isreal ? 12 : 11;
             Sort_Helper<algo,V>::call(v,P,ad,comp);
@@ -404,7 +330,7 @@ namespace tmv {
     template <class V>
     struct Sort_Helper<-2,V>
     {
-        static TMV_INLINE void call(V& v, int* P, ADType ad, CompType comp)
+        static TMV_INLINE void call(V& v, ptrdiff_t* P, ADType ad, CompType comp)
         {
             typedef typename V::value_type T;
             const bool inst = 
@@ -432,7 +358,7 @@ namespace tmv {
 
     template <class V>
     inline void InlineSort(
-        BaseVector_Mutable<V>& v, int* P, ADType ad, CompType comp)
+        BaseVector_Mutable<V>& v, ptrdiff_t* P, ADType ad, CompType comp)
     {
         typedef typename V::cview_type Vv;
         TMV_MAYBE_REF(V,Vv) vv = v.cView();
@@ -442,7 +368,7 @@ namespace tmv {
 
     template <class V>
     inline void Sort(
-        BaseVector_Mutable<V>& v, int* P, ADType ad, CompType comp)
+        BaseVector_Mutable<V>& v, ptrdiff_t* P, ADType ad, CompType comp)
     {
         typedef typename V::cview_type Vv;
         TMV_MAYBE_REF(V,Vv) vv = v.cView();

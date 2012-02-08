@@ -150,22 +150,22 @@ namespace tmv {
         {
             typedef typename Bareiss_Helper<T>::longdouble_type DT;
             Matrix<DT,NoDivider> A(m);
-            const int N = A.rowsize();
+            const ptrdiff_t N = A.rowsize();
 
             // Do the 1x1 Bareiss step for each element down the diagonal.
             T det = 1; // Keep track of +-1 from row/col swaps.
-            for (int k=0; k<N-1; ++k) {
+            for (ptrdiff_t k=0; k<N-1; ++k) {
 
                 // Find the minimum non-zero value
-                int imin = k, jmin = k;
+                ptrdiff_t imin = k, jmin = k;
                 // Make sure we start with a non-zero value
                 while (imin < N && 
                        Bareiss_Helper<T>::isZero(A.cref(imin,jmin))) ++imin;
                 if (imin == N) return T(0);
-                for (int j=k; j<N; ++j) {
+                for (ptrdiff_t j=k; j<N; ++j) {
                     if (Bareiss_Helper<T>::isUnity(A.cref(imin,jmin))) 
                         break;
-                    for (int i=k; i<N; ++i) {
+                    for (ptrdiff_t i=k; i<N; ++i) {
                         if (TMV_ABS2(A.cref(i,j))<TMV_ABS2(A.cref(imin,jmin)) &&
                             !Bareiss_Helper<T>::isZero(A.cref(i,j))) {
                             imin = i; jmin = j;
@@ -188,7 +188,7 @@ namespace tmv {
 
                 // Now ready to do the 1x1 Bareiss step
 
-                for (int j=k+1; j<N; ++j) for(int i=k+1; i<N; ++i) 
+                for (ptrdiff_t j=k+1; j<N; ++j) for(ptrdiff_t i=k+1; i<N; ++i) 
                     A.ref(i,j) = 
                         A.cref(k,k)*A.cref(i,j) -
                         A.cref(i,k)*A.cref(k,j);
@@ -196,7 +196,7 @@ namespace tmv {
                 // If k > 0, then we have to divide by the previous step's
                 // P value.
                 if (k > 0) {
-                    for (int j=k+1; j<N; ++j) for(int i=k+1; i<N; ++i) 
+                    for (ptrdiff_t j=k+1; j<N; ++j) for(ptrdiff_t i=k+1; i<N; ++i) 
                         A.ref(i,j) /= A.cref(k-1,k-1);
                 }
             }

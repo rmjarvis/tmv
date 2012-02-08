@@ -18,27 +18,27 @@ namespace tmv {
     // ConjugateSelf
     //
 
-    template <int algo, int s, class V>
+    template <int algo, ptrdiff_t s, class V>
     struct ConjugateV_Helper;
 
     // algo 0: real, so nothing to do
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ConjugateV_Helper<0,s,V>
     { static TMV_INLINE void call(V& ) { } };
     
     // algo 11: simple for loop
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ConjugateV_Helper<11,s,V>
     {
         static void call(V& v)
         {
-            const int n=v.size();
-            for(int i=0;i<n;++i) v.ref(i) = TMV_CONJ(v.cref(i));
+            const ptrdiff_t n=v.size();
+            for(ptrdiff_t i=0;i<n;++i) v.ref(i) = TMV_CONJ(v.cref(i));
         }
     };
 
     // algo 12: v.imagPart() *= -1
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ConjugateV_Helper<12,s,V>
     {
         static void call(V& v)
@@ -52,10 +52,10 @@ namespace tmv {
     };
 
     // algo 15: fully unroll
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ConjugateV_Helper<15,s,V>
     {
-        template <int I, int N>
+        template <ptrdiff_t I, ptrdiff_t N>
         struct Unroller
         {
             static TMV_INLINE void unroll(V& v)
@@ -64,13 +64,13 @@ namespace tmv {
                 Unroller<I+N/2,N-N/2>::unroll(v);
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,1>
         {
             static TMV_INLINE void unroll(V& v)
             { v.ref(I) = TMV_CONJ(v.cref(I)); }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,0>
         { static TMV_INLINE void unroll(V& v) {} };
         static inline void call(V& v)
@@ -78,7 +78,7 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ConjugateV_Helper<90,s,V>
     {
         static TMV_INLINE void call(V& v)
@@ -86,7 +86,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ConjugateV_Helper<97,s,V>
     {
         static TMV_INLINE void call(V& v)
@@ -98,7 +98,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ConjugateV_Helper<-3,s,V>
     {
         static TMV_INLINE void call(V& v)
@@ -112,7 +112,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ConjugateV_Helper<-2,s,V>
     {
         static TMV_INLINE void call(V& v)
@@ -130,7 +130,7 @@ namespace tmv {
         }
     };
 
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ConjugateV_Helper<-1,s,V>
     {
         static TMV_INLINE void call(V& v)

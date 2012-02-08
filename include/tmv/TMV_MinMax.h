@@ -10,26 +10,26 @@ namespace tmv {
 
     // Defined in TMV_Vector.cpp
     template <class T>
-    T InstMaxElement(const ConstVectorView<T>& v, int* imax);
+    T InstMaxElement(const ConstVectorView<T>& v, ptrdiff_t* imax);
 
     template <class T>
     typename ConstVectorView<T>::float_type InstMaxAbsElement(
-        const ConstVectorView<T>& v, int* imax); 
+        const ConstVectorView<T>& v, ptrdiff_t* imax); 
 
     template <class T>
     typename Traits<T>::real_type InstMaxAbs2Element(
-        const ConstVectorView<T>& v, int* imax);
+        const ConstVectorView<T>& v, ptrdiff_t* imax);
 
     template <class T>
-    T InstMinElement(const ConstVectorView<T>& v, int* imin);
+    T InstMinElement(const ConstVectorView<T>& v, ptrdiff_t* imin);
 
     template <class T>
     typename ConstVectorView<T>::float_type InstMinAbsElement(
-        const ConstVectorView<T>& v, int* imin);
+        const ConstVectorView<T>& v, ptrdiff_t* imin);
 
     template <class T>
     typename Traits<T>::real_type InstMinAbs2Element(
-        const ConstVectorView<T>& v, int* imin);
+        const ConstVectorView<T>& v, ptrdiff_t* imin);
 
  
 
@@ -47,7 +47,7 @@ namespace tmv {
     struct MinMaxElement_Helper<0,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static TMV_INLINE ret call(const V& , int* ibest)
+        static TMV_INLINE ret call(const V& , ptrdiff_t* ibest)
         {
             if (ibest) *ibest = -1;
             return ret(0);
@@ -59,7 +59,7 @@ namespace tmv {
     struct MinMaxElement_Helper<11,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static ret call(const V& v, int* ibest)
+        static ret call(const V& v, ptrdiff_t* ibest)
         {
             typedef typename V::value_type VT;
             typedef typename V::const_iterator IT;
@@ -67,7 +67,7 @@ namespace tmv {
                     typename V::zfloat_type , typename V::value_type >::type ZT;
             ZT value;
             ret best;
-            int n = V::_size == Unknown ? v.size() : V::_size;
+            ptrdiff_t n = V::_size == Unknown ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             IT it = v.begin();
@@ -103,7 +103,7 @@ namespace tmv {
     struct MinMaxElement_Helper<12,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static ret call(const V& v, int* ibest)
+        static ret call(const V& v, ptrdiff_t* ibest)
         {
             typedef typename V::value_type VT;
             typedef typename V::const_iterator IT;
@@ -112,14 +112,14 @@ namespace tmv {
             ret best;
             ZT value, value1;
             IT it = v.begin();
-            int n = V::_size == Unknown ? v.size() : V::_size;
+            ptrdiff_t n = V::_size == Unknown ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             best = Component<comp,VT>::f(*it);
             IT bestit = it;
 
-            int n_2 = ((n-1)>>1);
-            const int nb = n-1-(n_2<<1);
+            ptrdiff_t n_2 = ((n-1)>>1);
+            const ptrdiff_t nb = n-1-(n_2<<1);
 
             if (nb) {
                 value = Traits<ZT>::convert(it[1]);
@@ -153,7 +153,7 @@ namespace tmv {
     struct MinMaxElement_Helper<13,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static ret call(const V& v, int* ibest)
+        static ret call(const V& v, ptrdiff_t* ibest)
         {
             typedef typename V::value_type VT;
             typedef typename V::const_iterator IT;
@@ -162,14 +162,14 @@ namespace tmv {
             ret best;
             ZT value, value1, value2;
             IT it = v.begin();
-            int n = V::_size == Unknown ? v.size() : V::_size;
+            ptrdiff_t n = V::_size == Unknown ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
             const IT end = it + n;
             best = Component<comp,VT>::f(*it);
             IT bestit = it;
 
-            int n_3 = n/3;
+            ptrdiff_t n_3 = n/3;
 
             if (n % 3 != 1) {
                 value = Traits<ZT>::convert(it[1]);
@@ -217,7 +217,7 @@ namespace tmv {
     struct MinMaxElement_Helper<14,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static ret call(const V& v, int* ibest)
+        static ret call(const V& v, ptrdiff_t* ibest)
         {
             typedef typename V::value_type VT;
             typedef typename V::const_iterator IT;
@@ -226,10 +226,10 @@ namespace tmv {
             ret best;
             ZT value, value1, value2, value3;
             IT it = v.begin();
-            int n = V::_size == Unknown ? v.size() : V::_size;
+            ptrdiff_t n = V::_size == Unknown ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
-            int n_4 = ((n-1)>>2);
+            ptrdiff_t n_4 = ((n-1)>>2);
             best = Component<comp,VT>::f(*it);
             IT bestit = it;
 
@@ -297,7 +297,7 @@ namespace tmv {
         typedef typename V::value_type VT;
         typedef typename V::const_iterator IT;
 
-        template <int n, int x>
+        template <ptrdiff_t n, ptrdiff_t x>
         struct Helper1
         {
             static TMV_INLINE IT unroll1(const IT& v0)
@@ -325,7 +325,7 @@ namespace tmv {
                 else { best = f2; return temp2; }
             }
         };
-        template <int x>
+        template <ptrdiff_t x>
         struct Helper1<1,x>
         {
             static TMV_INLINE IT unroll1(const IT& v0)
@@ -335,10 +335,10 @@ namespace tmv {
             static TMV_INLINE IT unroll3(const IT& v0, ret& best)
             { best = Component<comp,VT>::f(*v0); return v0; }
         };
-        template <int x>
+        template <ptrdiff_t x>
         struct Helper1<0,x>; // not defined so give a compile error
 
-        static inline ret call(const V& v, int* ibest)
+        static inline ret call(const V& v, ptrdiff_t* ibest)
         {
             if (ibest) {
                 IT bestit = Helper1<V::_size,1>::unroll1(v.begin());
@@ -358,7 +358,7 @@ namespace tmv {
         typedef typename V::value_type VT;
         typedef typename V::const_iterator IT;
 
-        template <int n, int x>
+        template <ptrdiff_t n, ptrdiff_t x>
         struct Helper1
         {
             static TMV_INLINE void unroll(ret& best, IT& bestit, const IT& v0)
@@ -370,14 +370,14 @@ namespace tmv {
             }
         };
 
-        template <int x>
+        template <ptrdiff_t x>
         struct Helper1<1,x>
         { static TMV_INLINE void unroll(ret& best, IT& bestit, const IT& v0) {} };
 
-        template <int x>
+        template <ptrdiff_t x>
         struct Helper1<0,x>; 
 
-        static inline ret call(const V& v, int* ibest)
+        static inline ret call(const V& v, ptrdiff_t* ibest)
         {
             IT it = v.begin();
             ret best = Component<comp,VT>::f(*it);
@@ -395,14 +395,14 @@ namespace tmv {
     struct MinMaxElement_Helper<21,AbsComp,true,V>
     {
         typedef typename V::float_type ret;
-        static ret call(const V& v, int* ibest)
+        static ret call(const V& v, ptrdiff_t* ibest)
         {
             typedef typename V::value_type VT;
             typedef typename V::const_iterator IT;
             typedef typename V::zfloat_type ZT;
             ZT value;
             ret best;
-            int n = V::_size == Unknown ? v.size() : V::_size;
+            ptrdiff_t n = V::_size == Unknown ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,AbsComp,true,V>::call(v,ibest);
             IT it = v.begin();
@@ -430,14 +430,14 @@ namespace tmv {
     struct MinMaxElement_Helper<21,AbsComp,false,V>
     {
         typedef typename V::float_type ret;
-        static ret call(const V& v, int* ibest)
+        static ret call(const V& v, ptrdiff_t* ibest)
         {
             typedef typename V::value_type VT;
             typedef typename V::const_iterator IT;
             typedef typename V::zfloat_type ZT;
             ZT value;
             ret best;
-            int n = V::_size == Unknown ? v.size() : V::_size;
+            ptrdiff_t n = V::_size == Unknown ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,AbsComp,false,V>::call(v,ibest);
             IT it = v.begin();
@@ -467,7 +467,7 @@ namespace tmv {
     struct MinMaxElement_Helper<24,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static ret call(const V& v, int* ibest)
+        static ret call(const V& v, ptrdiff_t* ibest)
         {
             typedef typename V::value_type VT;
             typedef typename V::const_iterator IT;
@@ -476,10 +476,10 @@ namespace tmv {
             ret best;
             ZT value, value1;
             IT it = v.begin();
-            int n = V::_size == Unknown ? v.size() : V::_size;
+            ptrdiff_t n = V::_size == Unknown ? v.size() : V::_size;
             if (n == 0) 
                 return MinMaxElement_Helper<0,comp,max,V>::call(v,ibest);
-            int n_4 = ((n-1)>>2);
+            ptrdiff_t n_4 = ((n-1)>>2);
             best = Component<comp,VT>::f(*it);
             IT bestit = it;
 
@@ -542,7 +542,7 @@ L2:
     struct MinMaxElement_Helper<32,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static ret call(const V& v, int* ibest)
+        static ret call(const V& v, ptrdiff_t* ibest)
         {
 #if TMV_OPT >= 2
             if (!ibest && v.size() < 250) 
@@ -558,7 +558,7 @@ L2:
     struct MinMaxElement_Helper<33,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static ret call(const V& v, int* ibest)
+        static ret call(const V& v, ptrdiff_t* ibest)
         {
 #if TMV_OPT >= 2
             if (!ibest && v.size() < 250) 
@@ -574,7 +574,7 @@ L2:
     struct MinMaxElement_Helper<34,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static ret call(const V& v, int* ibest)
+        static ret call(const V& v, ptrdiff_t* ibest)
         {
 #if TMV_OPT >= 2
             if (!ibest && v.size() < 250) 
@@ -590,7 +590,7 @@ L2:
     struct MinMaxElement_Helper<35,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static ret call(const V& v, int* ibest)
+        static ret call(const V& v, ptrdiff_t* ibest)
         {
 #if TMV_OPT >= 2
             if (!ibest && v.size() < 250) 
@@ -606,42 +606,42 @@ L2:
     struct MinMaxElement_Helper<90,ValueComp,true,V>
     {
         typedef typename V::value_type ret;
-        static TMV_INLINE ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, ptrdiff_t* ibest)
         { return InstMaxElement(v.xView(),ibest); }
     };
     template <class V>
     struct MinMaxElement_Helper<90,AbsComp,true,V>
     {
         typedef typename V::float_type ret;
-        static TMV_INLINE ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, ptrdiff_t* ibest)
         { return InstMaxAbsElement(v.xView(),ibest); }
     };
     template <class V>
     struct MinMaxElement_Helper<90,Abs2Comp,true,V>
     {
         typedef typename V::real_type ret;
-        static TMV_INLINE ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, ptrdiff_t* ibest)
         { return InstMaxAbs2Element(v.xView(),ibest); }
     };
     template <class V>
     struct MinMaxElement_Helper<90,ValueComp,false,V>
     {
         typedef typename V::value_type ret;
-        static TMV_INLINE ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, ptrdiff_t* ibest)
         { return InstMinElement(v.xView(),ibest); }
     };
     template <class V>
     struct MinMaxElement_Helper<90,AbsComp,false,V>
     {
         typedef typename V::float_type ret;
-        static TMV_INLINE ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, ptrdiff_t* ibest)
         { return InstMinAbsElement(v.xView(),ibest); }
     };
     template <class V>
     struct MinMaxElement_Helper<90,Abs2Comp,false,V>
     {
         typedef typename V::real_type ret;
-        static TMV_INLINE ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, ptrdiff_t* ibest)
         { return InstMinAbs2Element(v.xView(),ibest); }
     };
  
@@ -650,7 +650,7 @@ L2:
     struct MinMaxElement_Helper<97,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static TMV_INLINE ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, ptrdiff_t* ibest)
         {
             typedef typename V::const_nonconj_type Vnc;
             Vnc vnc = v.nonConj();
@@ -661,7 +661,7 @@ L2:
     struct MinMaxElement_Helper<97,ValueComp,max,V>
     {
         typedef typename V::value_type ret;
-        static TMV_INLINE ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, ptrdiff_t* ibest)
         {
             typedef typename V::const_conjugate_type Vc;
             Vc vc = v.conjugate();
@@ -675,9 +675,9 @@ L2:
     struct MinMaxElement_Helper<-3,ValueComp,true,V>
     {
         typedef typename V::value_type ret;
-        static TMV_INLINE ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, ptrdiff_t* ibest)
         {
-            const int maxunroll = 
+            const ptrdiff_t maxunroll = 
                 TMV_OPT == 0 ? 0 : TMV_OPT == 1 ? 4 : TMV_OPT == 2 ? 12 : 40;
 #if TMV_OPT >= 2
             const int algo1 = 
@@ -722,9 +722,9 @@ L2:
     struct MinMaxElement_Helper<-3,AbsComp,true,V>
     {
         typedef typename V::float_type ret;
-        static TMV_INLINE ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, ptrdiff_t* ibest)
         {
-            const int maxunroll = 
+            const ptrdiff_t maxunroll = 
                 TMV_OPT == 0 ? 0 : TMV_OPT == 1 ? 4 : TMV_OPT == 2 ? 12 : 40;
 #if TMV_OPT >= 2
             const int algo1 = 
@@ -770,9 +770,9 @@ L2:
     struct MinMaxElement_Helper<-3,Abs2Comp,true,V>
     {
         typedef typename V::real_type ret;
-        static TMV_INLINE ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, ptrdiff_t* ibest)
         {
-            const int maxunroll = 
+            const ptrdiff_t maxunroll = 
                 TMV_OPT == 0 ? 0 : TMV_OPT == 1 ? 4 : TMV_OPT == 2 ? 12 : 40;
 #if TMV_OPT >= 2
             const int algo1 = 
@@ -817,9 +817,9 @@ L2:
     struct MinMaxElement_Helper<-3,ValueComp,false,V>
     {
         typedef typename V::value_type ret;
-        static TMV_INLINE ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, ptrdiff_t* ibest)
         {
-            const int maxunroll = 
+            const ptrdiff_t maxunroll = 
                 TMV_OPT == 0 ? 0 : TMV_OPT == 1 ? 4 : TMV_OPT == 2 ? 12 : 40;
 #if TMV_OPT >= 2
             const int algo1 = 
@@ -864,10 +864,10 @@ L2:
     struct MinMaxElement_Helper<-3,AbsComp,false,V>
     {
         typedef typename V::float_type ret;
-        static TMV_INLINE ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, ptrdiff_t* ibest)
         
         {
-            const int maxunroll = 
+            const ptrdiff_t maxunroll = 
                 TMV_OPT == 0 ? 0 : TMV_OPT == 1 ? 4 : TMV_OPT == 2 ? 12 : 40;
 #if TMV_OPT >= 2
             const int algo1 = 
@@ -915,9 +915,9 @@ L2:
     struct MinMaxElement_Helper<-3,Abs2Comp,false,V>
     {
         typedef typename V::real_type ret;
-        static TMV_INLINE ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, ptrdiff_t* ibest)
         {
-            const int maxunroll = 
+            const ptrdiff_t maxunroll = 
                 TMV_OPT == 0 ? 0 : TMV_OPT == 1 ? 4 : TMV_OPT == 2 ? 12 : 40;
 #if TMV_OPT >= 2
             const int algo1 = 
@@ -964,7 +964,7 @@ L2:
     struct MinMaxElement_Helper<-2,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static TMV_INLINE ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, ptrdiff_t* ibest)
         {
             typedef typename V::value_type VT;
             const bool inst = 
@@ -982,13 +982,13 @@ L2:
     struct MinMaxElement_Helper<-1,comp,max,V>
     {
         typedef typename Component<comp,typename V::value_type>::ret_type ret;
-        static TMV_INLINE ret call(const V& v, int* ibest)
+        static TMV_INLINE ret call(const V& v, ptrdiff_t* ibest)
         { return MinMaxElement_Helper<-2,comp,max,V>::call(v,ibest); }
     };
 
     template <class V>
     inline typename V::value_type DoMaxElement(
-        const BaseVector_Calc<V>& v, int* imax)
+        const BaseVector_Calc<V>& v, ptrdiff_t* imax)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();
@@ -997,7 +997,7 @@ L2:
 
     template <class V>
     inline typename V::float_type DoMaxAbsElement(
-        const BaseVector_Calc<V>& v, int* imax)
+        const BaseVector_Calc<V>& v, ptrdiff_t* imax)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();
@@ -1006,7 +1006,7 @@ L2:
 
     template <class V>
     inline typename V::real_type DoMaxAbs2Element(
-        const BaseVector_Calc<V>& v, int* imax)
+        const BaseVector_Calc<V>& v, ptrdiff_t* imax)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();
@@ -1015,7 +1015,7 @@ L2:
 
     template <class V>
     inline typename V::value_type DoMinElement(
-        const BaseVector_Calc<V>& v, int* imin)
+        const BaseVector_Calc<V>& v, ptrdiff_t* imin)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();
@@ -1024,7 +1024,7 @@ L2:
 
     template <class V>
     inline typename V::float_type DoMinAbsElement(
-        const BaseVector_Calc<V>& v, int* imin)
+        const BaseVector_Calc<V>& v, ptrdiff_t* imin)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();
@@ -1033,7 +1033,7 @@ L2:
 
     template <class V>
     inline typename V::real_type DoMinAbs2Element(
-        const BaseVector_Calc<V>& v, int* imin)
+        const BaseVector_Calc<V>& v, ptrdiff_t* imin)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();
@@ -1042,7 +1042,7 @@ L2:
 
     template <class V>
     inline typename V::value_type InlineMaxElement(
-        const BaseVector_Calc<V>& v, int* imax)
+        const BaseVector_Calc<V>& v, ptrdiff_t* imax)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();
@@ -1051,7 +1051,7 @@ L2:
 
     template <class V>
     inline typename V::float_type InlineMaxAbsElement(
-        const BaseVector_Calc<V>& v, int* imax)
+        const BaseVector_Calc<V>& v, ptrdiff_t* imax)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();
@@ -1060,7 +1060,7 @@ L2:
 
     template <class V>
     inline typename V::real_type InlineMaxAbs2Element(
-        const BaseVector_Calc<V>& v, int* imax)
+        const BaseVector_Calc<V>& v, ptrdiff_t* imax)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();
@@ -1069,7 +1069,7 @@ L2:
 
     template <class V>
     inline typename V::value_type InlineMinElement(
-        const BaseVector_Calc<V>& v, int* imin)
+        const BaseVector_Calc<V>& v, ptrdiff_t* imin)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();
@@ -1078,7 +1078,7 @@ L2:
 
     template <class V>
     inline typename V::float_type InlineMinAbsElement(
-        const BaseVector_Calc<V>& v, int* imin)
+        const BaseVector_Calc<V>& v, ptrdiff_t* imin)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();
@@ -1087,7 +1087,7 @@ L2:
 
     template <class V>
     inline typename V::real_type InlineMinAbs2Element(
-        const BaseVector_Calc<V>& v, int* imin)
+        const BaseVector_Calc<V>& v, ptrdiff_t* imin)
     {
         typedef typename V::const_cview_type Vv;
         TMV_MAYBE_CREF(V,Vv) vv = v.cView();

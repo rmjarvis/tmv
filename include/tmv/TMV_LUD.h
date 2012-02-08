@@ -219,8 +219,8 @@ namespace tmv {
         // const LUD<M>& can relase the memory.
         mutable std::auto_ptr<LUD_Impl<small,M> > pimpl;
 
-        int colsize() const;
-        int rowsize() const;
+        ptrdiff_t colsize() const;
+        ptrdiff_t rowsize() const;
 
         // op= not allowed.
         LUD<M>& operator=(const LUD<M>&);
@@ -416,9 +416,9 @@ namespace tmv {
         {
             TMVStaticAssert(M::_colsize != Unknown);
             TMVStaticAssert(M::_rowsize != Unknown);
-            TMVStaticAssert(M::_colsize == int(M::_rowsize));
-            TMVStaticAssert(M::_colsize == int(M2::_colsize));
-            TMVStaticAssert(M::_rowsize == int(M2::_rowsize));
+            TMVStaticAssert(M::_colsize == ptrdiff_t(M::_rowsize));
+            TMVStaticAssert(M::_colsize == ptrdiff_t(M2::_colsize));
+            TMVStaticAssert(M::_rowsize == ptrdiff_t(M2::_rowsize));
             TMVStaticAssert(lux_type::_colmajor);
             SmallLUx = A;
             LU_Decompose(LUx,P);
@@ -749,11 +749,11 @@ namespace tmv {
     }
 
     template <class M>
-    int LUD<M>::colsize() const
+    ptrdiff_t LUD<M>::colsize() const
     { return pimpl->LUx.colsize(); }
 
     template <class M>
-    int LUD<M>::rowsize() const
+    ptrdiff_t LUD<M>::rowsize() const
     { return pimpl->LUx.rowsize(); }
 
 

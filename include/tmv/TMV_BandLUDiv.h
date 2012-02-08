@@ -36,17 +36,17 @@ namespace tmv {
         const ConstMatrixView<T1,C1>& m1, const Permutation& P,
         VectorView<T2> v2);
 
-    template <int algo, bool trans, int cs, int rs, class M1, class M2>
+    template <int algo, bool trans, ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct BandLU_Solve_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0 or N == 0)
     // Also used for invalid real/complex combination from the virtual calls.
-    template <bool trans, int cs, int rs, class M1, class M2>
+    template <bool trans, ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct BandLU_Solve_Helper<0,trans,cs,rs,M1,M2>
     { static TMV_INLINE void call(const M1& , const Permutation& , M2& ) {} };
 
     // algo 11: Normal case
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct BandLU_Solve_Helper<11,false,cs,rs,M1,M2>
     {
         static void call(const M1& m1, const Permutation& P, M2& m2)
@@ -76,7 +76,7 @@ namespace tmv {
 #endif
         }
     };
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct BandLU_Solve_Helper<11,true,cs,rs,M1,M2>
     {
         static void call(const M1& m1, const Permutation& P, M2& m2)
@@ -109,13 +109,13 @@ namespace tmv {
     };
 
     // algo 90: call InstBandLU_Solve
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct BandLU_Solve_Helper<90,false,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(const M1& m1, const Permutation& P, M2& m2)
         { InstBandLU_SolveInPlace(m1.xView(),P,m2.xView()); }
     };
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct BandLU_Solve_Helper<90,true,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(const M1& m1, const Permutation& P, M2& m2)
@@ -123,7 +123,7 @@ namespace tmv {
     };
 
     // algo 95: Turn m1,m3 into vector
-    template <bool trans, int cs, int rs, class M1, class M2>
+    template <bool trans, ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct BandLU_Solve_Helper<95,trans,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(const M1& m1, const Permutation& P, M2& m2)
@@ -136,7 +136,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <bool trans, int cs, int rs, class M1, class M2>
+    template <bool trans, ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct BandLU_Solve_Helper<97,trans,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(const M1& m1, const Permutation& P, M2& m2)
@@ -150,7 +150,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <bool trans, int cs, int rs, class M1, class M2>
+    template <bool trans, ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct BandLU_Solve_Helper<-3,trans,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(const M1& m1, const Permutation& P, M2& m2)
@@ -177,7 +177,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <bool trans, int cs, int rs, class M1, class M2>
+    template <bool trans, ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct BandLU_Solve_Helper<-2,trans,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(const M1& m1, const Permutation& P, M2& m2)
@@ -208,7 +208,7 @@ namespace tmv {
         }
     };
 
-    template <bool trans, int cs, int rs, class M1, class M2>
+    template <bool trans, ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct BandLU_Solve_Helper<-1,trans,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(const M1& m1, const Permutation& P, M2& m2)
@@ -220,8 +220,8 @@ namespace tmv {
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
-        const int cs = M2::_colsize;
-        const int rs = M2::_rowsize;
+        const ptrdiff_t cs = M2::_colsize;
+        const ptrdiff_t rs = M2::_rowsize;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
@@ -234,8 +234,8 @@ namespace tmv {
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
-        const int cs = M2::_colsize;
-        const int rs = M2::_rowsize;
+        const ptrdiff_t cs = M2::_colsize;
+        const ptrdiff_t rs = M2::_rowsize;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
@@ -248,7 +248,7 @@ namespace tmv {
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2)
     {
-        const int cs = V2::_size;
+        const ptrdiff_t cs = V2::_size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V2::cview_type V2v;
         TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
@@ -261,7 +261,7 @@ namespace tmv {
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2)
     {
-        const int cs = V2::_size;
+        const ptrdiff_t cs = V2::_size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V2::cview_type V2v;
         TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
@@ -274,8 +274,8 @@ namespace tmv {
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
-        const int cs = M2::_colsize;
-        const int rs = M2::_rowsize;
+        const ptrdiff_t cs = M2::_colsize;
+        const ptrdiff_t rs = M2::_rowsize;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
@@ -288,8 +288,8 @@ namespace tmv {
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseMatrix_Rec_Mutable<M2>& m2)
     {
-        const int cs = M2::_colsize;
-        const int rs = M2::_rowsize;
+        const ptrdiff_t cs = M2::_colsize;
+        const ptrdiff_t rs = M2::_rowsize;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
@@ -302,7 +302,7 @@ namespace tmv {
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2)
     {
-        const int cs = V2::_size;
+        const ptrdiff_t cs = V2::_size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V2::cview_type V2v;
         TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
@@ -315,7 +315,7 @@ namespace tmv {
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2)
     {
-        const int cs = V2::_size;
+        const ptrdiff_t cs = V2::_size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V2::cview_type V2v;
         TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();

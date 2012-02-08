@@ -108,8 +108,8 @@ namespace tmv {
                         BandMatrix<T3,DiagMajor|NoDivider> m1c = x*m1;
                         DoMultMM<false>(one,m1c.constView().xView(),m2,m3);
                     } else {
-                        const int lo = TMV_MIN(m3.colsize()-1,m1.nlo()+m2.nlo());
-                        const int hi = TMV_MIN(m3.rowsize()-1,m1.nhi()+m2.nhi());
+                        const ptrdiff_t lo = TMV_MIN(m3.colsize()-1,m1.nlo()+m2.nlo());
+                        const ptrdiff_t hi = TMV_MIN(m3.rowsize()-1,m1.nhi()+m2.nhi());
                         BandMatrix<T3,ColMajor|NoDivider> m3c(
                             m3.colsize(),m3.rowsize(),lo,hi);
                         InstMultMM(T3(1),m1,m2,m3c.xView());
@@ -118,8 +118,8 @@ namespace tmv {
                 } else if (m3.isrm()) {
                     InstMultMM(x,m2.transpose(),m1.transpose(),m3.transpose());
                 } else  {
-                    const int lo = TMV_MIN(m3.colsize()-1,m1.nlo()+m2.nlo());
-                    const int hi = TMV_MIN(m3.rowsize()-1,m1.nhi()+m2.nhi());
+                    const ptrdiff_t lo = TMV_MIN(m3.colsize()-1,m1.nlo()+m2.nlo());
+                    const ptrdiff_t hi = TMV_MIN(m3.rowsize()-1,m1.nhi()+m2.nhi());
                     BandMatrix<T3,ColMajor|NoDivider> m3c(
                         m3.colsize(),m3.rowsize(),lo,hi);
                     InstMultMM(T3(1),m1,m2,m3c.xView());
@@ -217,8 +217,8 @@ namespace tmv {
                     BandMatrix<T3,DiagMajor|NoDivider> m1c = x*m1;
                     DoMultMM<true>(one,m1c.constView().xView(),m2,m3);
                 } else {
-                    const int lo = TMV_MIN(m3.colsize()-1,m1.nlo()+m2.nlo());
-                    const int hi = TMV_MIN(m3.rowsize()-1,m1.nhi()+m2.nhi());
+                    const ptrdiff_t lo = TMV_MIN(m3.colsize()-1,m1.nlo()+m2.nlo());
+                    const ptrdiff_t hi = TMV_MIN(m3.rowsize()-1,m1.nhi()+m2.nhi());
                     BandMatrix<T3,ColMajor|NoDivider> m3c(
                         m3.colsize(),m3.rowsize(),lo,hi);
                     InstMultMM(T3(1),m1,m2,m3c.xView());
@@ -227,8 +227,8 @@ namespace tmv {
             } else if (m3.isrm()) {
                 InstAddMultMM(x,m2.transpose(),m1.transpose(),m3.transpose());
             } else  {
-                const int lo = TMV_MIN(m3.colsize()-1,m1.nlo()+m2.nlo());
-                const int hi = TMV_MIN(m3.rowsize()-1,m1.nhi()+m2.nhi());
+                const ptrdiff_t lo = TMV_MIN(m3.colsize()-1,m1.nlo()+m2.nlo());
+                const ptrdiff_t hi = TMV_MIN(m3.rowsize()-1,m1.nhi()+m2.nhi());
                 BandMatrix<T3,ColMajor|NoDivider> m3c(
                     m3.colsize(),m3.rowsize(),lo,hi);
                 InstMultMM(T3(1),m1,m2,m3c.xView());

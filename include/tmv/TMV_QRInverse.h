@@ -21,33 +21,33 @@ namespace tmv {
     template <class T1, int C1, class RT1, class T2>
     void InstQR_Inverse(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1, MatrixView<T2> minv);
+        const Permutation* P, ptrdiff_t N1, MatrixView<T2> minv);
 
     template <class T1, int C1, class RT1, class T2>
     void InstQR_InverseATA(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1, MatrixView<T2> ata);
+        const Permutation* P, ptrdiff_t N1, MatrixView<T2> ata);
 
 
 
     // Note: cs,rs refer to M1, not M2 (which is reverse of M1)
-    template <int algo, int cs, int rs, class M1, class V1, class M2>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_Inverse_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0 or N == 0)
-    template <int cs, int rs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_Inverse_Helper<0,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& , const V1& , const Permutation* , int, M2& ) {} 
+            const M1& , const V1& , const Permutation* , ptrdiff_t, M2& ) {} 
     };
 
     // algo 11: Normal case
-    template <int cs, int rs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_Inverse_Helper<11,cs,rs,M1,V1,M2>
     {
         static void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& minv)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& minv)
         {
 #ifdef PRINTALGO_QR
             std::cout<<"QRInverse algo 11: cs,rs = "<<cs<<','<<rs<<std::endl;
@@ -63,7 +63,7 @@ namespace tmv {
             if (P) P->applyOnRight(A1);
 #endif
             minv.setZero();
-            const int N = rs == Unknown ? QR.rowsize() : rs;
+            const ptrdiff_t N = rs == Unknown ? QR.rowsize() : rs;
             typename M2::colrange_type::uppertri_type R = 
                 minv.colRange(0,N1).upperTri();
             R = QR.upperTri().subTriMatrix(0,N1);
@@ -88,11 +88,11 @@ namespace tmv {
     };
 
     // algo 12: Alternate method: Unpack Q first.
-    template <int cs, int rs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_Inverse_Helper<12,cs,rs,M1,V1,M2>
     {
         static void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& minv)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& minv)
         {
 #ifdef PRINTALGO_QR
             std::cout<<"QRInverse algo 12: cs,rs = "<<cs<<','<<rs<<std::endl;
@@ -108,7 +108,7 @@ namespace tmv {
             Matrix<T> A1 = Q1*R1;
             if (P) P->applyOnRight(A1);
 #endif
-            const int N = rs == Unknown ? QR.rowsize() : rs;
+            const ptrdiff_t N = rs == Unknown ? QR.rowsize() : rs;
             typename M2::transpose_type m2t = minv.transpose();
             m2t = QR.conjugate();
             UnpackQ(m2t,beta);
@@ -133,20 +133,20 @@ namespace tmv {
     };
 
     // algo 90: call InstQR_Inverse
-    template <int cs, int rs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_Inverse_Helper<90,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& minv)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& minv)
         { InstQR_Inverse(QR.xView(),beta.xView(),P,N1,minv.xView()); }
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_Inverse_Helper<97,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& minv)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& minv)
         {
             typedef typename M1::const_conjugate_type M1c;
             typedef typename M2::conjugate_type M2c;
@@ -157,11 +157,11 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_Inverse_Helper<-3,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& minv)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& minv)
         {
             const int algo = 
                 cs == 0 || rs == 0 ? 0 : 
@@ -185,11 +185,11 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_Inverse_Helper<-2,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& minv)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& minv)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
@@ -211,18 +211,18 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_Inverse_Helper<-1,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& minv)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& minv)
         { QR_Inverse_Helper<-2,cs,rs,M1,V1,M2>::call(QR,beta,P,N1,minv); }
     };
 
     template <class M1, class V1, class M2>
     inline void InlineQR_Inverse(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& minv)
+        const Permutation* P, ptrdiff_t N1, BaseMatrix_Rec_Mutable<M2>& minv)
     {
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
         TMVStaticAssert((Sizes<M1::_colsize,M2::_rowsize>::same));
@@ -233,8 +233,8 @@ namespace tmv {
         if (P) TMVAssert(QR.rowsize() == P->size());
         TMVAssert(N1 <= QR.rowsize());
 
-        const int cs = Sizes<M2::_rowsize,M1::_colsize>::size;
-        const int rs = Sizes<M2::_colsize,M1::_rowsize>::size;
+        const ptrdiff_t cs = Sizes<M2::_rowsize,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M2::_colsize,M1::_rowsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::cview_type M2v;
@@ -247,7 +247,7 @@ namespace tmv {
     template <class M1, class V1, class M2>
     inline void QR_Inverse(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& minv)
+        const Permutation* P, ptrdiff_t N1, BaseMatrix_Rec_Mutable<M2>& minv)
     {
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
         TMVStaticAssert((Sizes<M1::_colsize,M2::_rowsize>::same));
@@ -258,8 +258,8 @@ namespace tmv {
         if (P) TMVAssert(QR.rowsize() == P->size());
         TMVAssert(N1 <= QR.rowsize());
 
-        const int cs = Sizes<M2::_rowsize,M1::_colsize>::size;
-        const int rs = Sizes<M2::_colsize,M1::_rowsize>::size;
+        const ptrdiff_t cs = Sizes<M2::_rowsize,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M2::_colsize,M1::_rowsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
         typedef typename M2::cview_type M2v;
@@ -269,23 +269,23 @@ namespace tmv {
         QR_Inverse_Helper<-2,cs,rs,M1v,V1v,M2v>::call(QRv,betav,P,N1,minvv);
     }
 
-    template <int algo, int cs, int rs, class M1, class V1, class M2>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_InverseATA_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0 or N == 0)
-    template <int cs, int rs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_InverseATA_Helper<0,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& , const V1& , const Permutation* , int, M2& ) {} 
+            const M1& , const V1& , const Permutation* , ptrdiff_t, M2& ) {} 
     };
 
     // algo 11: Normal case
-    template <int cs, int rs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_InverseATA_Helper<11,cs,rs,M1,V1,M2>
     {
         static void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& ata)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& ata)
         {
 #ifdef PRINTALGO_QR
             std::cout<<"QRInverseATA algo 11: cs,rs = "<<cs<<','<<rs<<std::endl;
@@ -308,20 +308,20 @@ namespace tmv {
     };
 
     // algo 90: call InstQR_InverseATA
-    template <int cs, int rs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_InverseATA_Helper<90,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& ata)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& ata)
         { InstQR_InverseATA(QR.xView(),beta.xView(),P,N1,ata.xView()); }
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_InverseATA_Helper<97,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& ata)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& ata)
         {
             typedef typename M1::const_conjugate_type M1c;
             typedef typename M2::conjugate_type M2c;
@@ -332,11 +332,11 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_InverseATA_Helper<-3,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& ata)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& ata)
         {
             const int algo = 
                 cs == 0 || rs == 0 ? 0 : 
@@ -351,11 +351,11 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_InverseATA_Helper<-2,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& ata)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& ata)
         {
             typedef typename M1::value_type T1;
             typedef typename M2::value_type T2;
@@ -377,18 +377,18 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class M1, class V1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class M2>
     struct QR_InverseATA_Helper<-1,cs,rs,M1,V1,M2>
     {
         static TMV_INLINE void call(
-            const M1& QR, const V1& beta, const Permutation* P, int N1, M2& ata)
+            const M1& QR, const V1& beta, const Permutation* P, ptrdiff_t N1, M2& ata)
         { QR_InverseATA_Helper<-2,cs,rs,M1,V1,M2>::call(QR,beta,P,N1,ata); }
     }; 
 
     template <class M1, class V1, class M2>
     inline void InlineQR_InverseATA(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& ata)
+        const Permutation* P, ptrdiff_t N1, BaseMatrix_Rec_Mutable<M2>& ata)
     {
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
         TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
@@ -399,8 +399,8 @@ namespace tmv {
         if (P) TMVAssert(QR.rowsize() == P->size());
         TMVAssert(N1 <= QR.rowsize());
 
-        const int cs = M1::_colsize;
-        const int rs = Sizes<M2::_colsize,
+        const ptrdiff_t cs = M1::_colsize;
+        const ptrdiff_t rs = Sizes<M2::_colsize,
               Sizes<M2::_rowsize,M1::_rowsize>::size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;
@@ -414,7 +414,7 @@ namespace tmv {
     template <class M1, class V1, class M2>
     inline void QR_InverseATA(
         const BaseMatrix_Rec<M1>& QR, const BaseVector_Calc<V1>& beta,
-        const Permutation* P, int N1, BaseMatrix_Rec_Mutable<M2>& ata)
+        const Permutation* P, ptrdiff_t N1, BaseMatrix_Rec_Mutable<M2>& ata)
     {
         TMVStaticAssert((Sizes<M1::_rowsize,V1::_size>::same));
         TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
@@ -425,8 +425,8 @@ namespace tmv {
         if (P) TMVAssert(QR.rowsize() == P->size());
         TMVAssert(N1 <= QR.rowsize());
 
-        const int cs = M1::_colsize;
-        const int rs = Sizes<M2::_colsize,
+        const ptrdiff_t cs = M1::_colsize;
+        const ptrdiff_t rs = Sizes<M2::_colsize,
               Sizes<M2::_rowsize,M1::_rowsize>::size>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename V1::const_cview_type V1v;

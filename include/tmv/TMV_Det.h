@@ -30,19 +30,19 @@ namespace tmv {
     // Det
     //
 
-    template <int algo, int s, class M>
+    template <int algo, ptrdiff_t s, class M>
     struct DetM_Helper;
 
     // algo 0: s == 0, det = 1 (by definition)
     // Also unit-diag triangle matrices.
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct DetM_Helper<0,s,M>
     {
         typedef typename M::value_type T;
         static TMV_INLINE T call(const M& m)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Det algo 0: N,s = "<<N<<','<<s<<std::endl;
 #endif
             return T(1); 
@@ -57,7 +57,7 @@ namespace tmv {
         static TMV_INLINE T call(const M& m)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Det algo 1: N,s = "<<N<<','<<1<<std::endl;
 #endif
             return m.cref(0,0); 
@@ -72,7 +72,7 @@ namespace tmv {
         static inline T call(const M& m)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Det algo 2: N,s = "<<N<<','<<2<<std::endl;
 #endif
             return m.cref(0,0)*m.cref(1,1) - m.cref(0,1)*m.cref(1,0); 
@@ -87,7 +87,7 @@ namespace tmv {
         static inline T call(const M& m)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Det algo 3: N,s = "<<N<<','<<3<<std::endl;
             std::cout<<"m = "<<m<<std::endl;
             std::cout<<"A = "<<
@@ -119,7 +119,7 @@ namespace tmv {
         static inline T call(const M& m)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Det algo 4: N,s = "<<N<<','<<4<<std::endl;
             std::cout<<"m = "<<m<<std::endl;
 #endif
@@ -174,14 +174,14 @@ namespace tmv {
     // http://freevec.org/function/inverse_matrix_4x4_using_partitioning
 
     // algo 11: Direct product of diagonal:
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct DetM_Helper<11,s,M>
     {
         typedef typename M::value_type T;
         static TMV_INLINE T call(const M& m)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Det algo 11: N,s = "<<N<<','<<s<<std::endl;
 #endif
             return m.diag().prodElements(); 
@@ -189,14 +189,14 @@ namespace tmv {
     };
 
     // algo 12: Use Divider
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct DetM_Helper<12,s,M>
     {
         typedef typename M::value_type T;
         static T call(const M& m)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Det algo 12: N,s = "<<N<<','<<s<<std::endl;
 #endif
             m.setDiv();
@@ -207,14 +207,14 @@ namespace tmv {
     };
 
     // algo 13: Calculate LU decomposition on the spot.
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct DetM_Helper<13,s,M>
     {
         typedef typename M::value_type T;
         static inline T call(const M& m)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Det algo 13: N,s = "<<N<<','<<s<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M::real_type>::isinteger);
@@ -223,7 +223,7 @@ namespace tmv {
     };
 
     // algo 21: TriMatrix -- need to check for UnknownDiag
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct DetM_Helper<21,s,M>
     {
         typedef typename M::value_type T;
@@ -234,7 +234,7 @@ namespace tmv {
                 M::_unknowndiag ? 22 :
                 11;
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Det algo 21: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<" -> algo "<<algo2<<std::endl;
 #endif
@@ -243,14 +243,14 @@ namespace tmv {
     };
 
     // algo 22: UnknownDiag TriMatrix, so might be trivial.
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct DetM_Helper<22,s,M>
     {
         typedef typename M::value_type T;
         static inline T call(const M& m)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Det algo 22: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"m.isunit() = "<<m.isunit()<<std::endl;
 #endif
@@ -260,13 +260,13 @@ namespace tmv {
     };
  
     // algo 31: For integer, unknown size
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct DetM_Helper<31,s,M>
     {
         typedef typename M::value_type T;
         static T call(const M& m)
         {
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
 #ifdef PRINTALGO_DET
             std::cout<<"Det algo 31: N,s = "<<N<<','<<s<<std::endl;
 #endif
@@ -284,14 +284,14 @@ namespace tmv {
     };
 
     // algo 32: Use 1x1 Bareiss algorithm.
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct DetM_Helper<32,s,M>
     {
         typedef typename M::value_type T;
         static TMV_INLINE T call(const M& m)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Det algo 32: N,s = "<<N<<','<<s<<std::endl;
 #endif
             return IntegerDet(m);
@@ -299,7 +299,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct DetM_Helper<-3,s,M>
     {
         typedef typename M::value_type T;
@@ -321,7 +321,7 @@ namespace tmv {
                 13;
 
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Inline Det N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
@@ -335,7 +335,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
         TMVAssert(m.colsize() == m.rowsize());
-        const int s = Sizes<M::_colsize,M::_rowsize>::size;
+        const ptrdiff_t s = Sizes<M::_colsize,M::_rowsize>::size;
         // Don't make a view, since we want to make sure we keep 
         // a divider object if one is present.
         return DetM_Helper<-3,s,M>::call(m.mat());
@@ -346,11 +346,11 @@ namespace tmv {
     // LogDet
     //
 
-    template <int algo, int s, class M>
+    template <int algo, ptrdiff_t s, class M>
     struct LogDetM_Helper;
 
     // algo 0: Det = 1.
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct LogDetM_Helper<0,s,M>
     {
         typedef typename M::float_type RT;
@@ -358,7 +358,7 @@ namespace tmv {
         static inline RT call(const M& m, T* sign)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"LogDet algo 0: N,s = "<<N<<','<<s<<std::endl;
 #endif
             if (sign) *sign = T(1);
@@ -367,7 +367,7 @@ namespace tmv {
     };
 
     // algo 1: Log of direct det calculation.
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct LogDetM_Helper<1,s,M>
     {
         typedef typename M::float_type RT;
@@ -379,7 +379,7 @@ namespace tmv {
             RT logdet = TMV_LOG(absdet);
             if (sign) *sign = TMV_SIGN(det,absdet);
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"LogDet algo 1: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"det = "<<det<<std::endl;
             std::cout<<"logdet = "<<logdet<<std::endl;
@@ -390,7 +390,7 @@ namespace tmv {
     };
 
     // algo 11: Direct log product of diagonal:
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct LogDetM_Helper<11,s,M>
     {
         typedef typename M::float_type RT;
@@ -398,7 +398,7 @@ namespace tmv {
         static inline RT call(const M& m, T* sign)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"LogDet algo 11: N,s = "<<N<<','<<s<<std::endl;
 #endif
             return m.diag().logProdElements(sign); 
@@ -406,7 +406,7 @@ namespace tmv {
     };
 
     // algo 12: Use Divider 
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct LogDetM_Helper<12,s,M>
     {
         typedef typename M::float_type RT;
@@ -414,7 +414,7 @@ namespace tmv {
         static RT call(const M& m, T* sign)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"LogDet algo 12: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"divisset? "<<m.divIsSet()<<std::endl;
 #endif
@@ -426,7 +426,7 @@ namespace tmv {
     };
 
     // algo 13: Calculate LU decomposition on the spot.
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct LogDetM_Helper<13,s,M>
     {
         typedef typename M::float_type RT;
@@ -434,7 +434,7 @@ namespace tmv {
         static inline RT call(const M& m, T* sign)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"LogDet algo 13: N,s = "<<N<<','<<s<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M::real_type>::isinteger);
@@ -443,7 +443,7 @@ namespace tmv {
     };
 
     // algo 21: TriMatrix -- need to check for UnknownDiag
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct LogDetM_Helper<21,s,M>
     {
         typedef typename M::float_type RT;
@@ -455,7 +455,7 @@ namespace tmv {
                 M::_unknowndiag ? 22 :
                 11;
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"LogDet algo 21: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<" -> algo "<<algo2<<std::endl;
 #endif
@@ -464,7 +464,7 @@ namespace tmv {
     };
 
     // algo 22: UnknownDiag TriMatrix, so might be trivial.
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct LogDetM_Helper<22,s,M>
     {
         typedef typename M::float_type RT;
@@ -472,7 +472,7 @@ namespace tmv {
         static inline RT call(const M& m, T* sign)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"LogDet algo 22: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"m.isunit() = "<<m.isunit()<<std::endl;
 #endif
@@ -482,7 +482,7 @@ namespace tmv {
     };
  
     // algo -3: Determine which algorithm to use
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct LogDetM_Helper<-3,s,M>
     {
         typedef typename M::float_type RT;
@@ -503,7 +503,7 @@ namespace tmv {
                 M::_hasdivider ? 12 :
                 13;
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Inline LogDet N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
@@ -518,7 +518,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
         TMVAssert(m.colsize() == m.rowsize());
-        const int s = Sizes<M::_colsize,M::_rowsize>::size;
+        const ptrdiff_t s = Sizes<M::_colsize,M::_rowsize>::size;
         // Don't make a view, since we want to make sure we keep 
         // a divider object if one is present.
         return LogDetM_Helper<-3,s,M>::call(m.mat(),sign);
@@ -529,17 +529,17 @@ namespace tmv {
     // IsSingular
     //
 
-    template <int algo, int s, class M>
+    template <int algo, ptrdiff_t s, class M>
     struct IsSingularM_Helper;
 
     // algo 0: Trivially non-singular
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct IsSingularM_Helper<0,s,M>
     {
         static TMV_INLINE bool call(const M& m)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"IsSingular algo 0: N,s = "<<N<<','<<s<<std::endl;
 #endif
             return false; 
@@ -547,7 +547,7 @@ namespace tmv {
     };
 
     // algo 1: Check if Det == 0
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct IsSingularM_Helper<1,s,M>
     {
         static inline bool call(const M& m)
@@ -555,7 +555,7 @@ namespace tmv {
             typedef typename M::value_type T;
             T det = Det(m);
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"IsSingular algo 1: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"det = "<<det<<std::endl;
 #endif
@@ -564,13 +564,13 @@ namespace tmv {
     };
 
     // algo 11: Look for a zero on the diagonal
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct IsSingularM_Helper<11,s,M>
     {
         static TMV_INLINE bool call(const M& m)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"IsSingular algo 11: N,s = "<<N<<','<<s<<std::endl;
 #endif
             return m.diag().hasZeroElement(); 
@@ -578,13 +578,13 @@ namespace tmv {
     };
 
     // algo 12: Use Divider
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct IsSingularM_Helper<12,s,M>
     {
         static bool call(const M& m)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"IsSingular algo 12: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"divisset? "<<m.divIsSet()<<std::endl;
 #endif
@@ -596,13 +596,13 @@ namespace tmv {
     };
 
     // algo 13: Calculate LU decomposition on the spot.
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct IsSingularM_Helper<13,s,M>
     {
         static inline bool call(const M& m)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"IsSingular algo 12: N,s = "<<N<<','<<s<<std::endl;
 #endif
             TMVStaticAssert(!Traits<typename M::real_type>::isinteger);
@@ -611,7 +611,7 @@ namespace tmv {
     };
 
     // algo 21: TriMatrix -- need to check for UnknownDiag
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct IsSingularM_Helper<21,s,M>
     {
         static inline bool call(const M& m)
@@ -621,7 +621,7 @@ namespace tmv {
                 M::_unknowndiag ? 22 :
                 11;
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"IsSingular algo 21: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<" -> algo ="<<algo2<<std::endl;
 #endif
@@ -630,13 +630,13 @@ namespace tmv {
     };
 
     // algo 22: UnknownDiag TriMatrix, so might be trivial.
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct IsSingularM_Helper<22,s,M>
     {
         static inline bool call(const M& m)
         {
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"IsSingular algo 21: N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"m.isunit() = "<<m.isunit()<<std::endl;
 #endif
@@ -646,7 +646,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct IsSingularM_Helper<-3,s,M>
     {
         static TMV_INLINE bool call(const M& m)
@@ -665,7 +665,7 @@ namespace tmv {
                 M::_hasdivider ? 12 :
                 13;
 #ifdef PRINTALGO_DET
-            const int N = m.rowsize();
+            const ptrdiff_t N = m.rowsize();
             std::cout<<"Inline IsSingular N,s = "<<N<<','<<s<<std::endl;
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
             std::cout<<"algo = "<<algo<<std::endl;
@@ -679,7 +679,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
         TMVAssert(m.colsize() == m.rowsize());
-        const int s = Sizes<M::_colsize,M::_rowsize>::size;
+        const ptrdiff_t s = Sizes<M::_colsize,M::_rowsize>::size;
         // Don't make a view, since we want to make sure we keep 
         // a divider object if one is present.
         return IsSingularM_Helper<-3,s,M>::call(m.mat());
@@ -692,37 +692,37 @@ namespace tmv {
     //
 
     // Defined below, but used here.
-    template <int algo, int s, class V>
+    template <int algo, ptrdiff_t s, class V>
     struct HasZeroElementV_Helper;
-    template <int algo, int s, class V>
+    template <int algo, ptrdiff_t s, class V>
     struct LogProdElementsV_Helper;
 
-    template <int algo, int s, class V>
+    template <int algo, ptrdiff_t s, class V>
     struct ProdElementsV_Helper;
 
     // algo 0: s == 0, define prod = 1
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<0,s,V>
     {
         typedef typename V::value_type T;
         static TMV_INLINE T call(const V& v)
         {
 #ifdef PRINTALGO_DET
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             std::cout<<"Prod Elements algo 0: n,s = "<<n<<','<<s<<std::endl;
 #endif
             return T(1);
         }
     };
     // algo 1: s == 1
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<1,s,V>
     {
         typedef typename V::value_type T;
         static TMV_INLINE T call(const V& v)
         {
 #ifdef PRINTALGO_DET
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             std::cout<<"Prod Elements algo 1: n,s = "<<n<<','<<s<<std::endl;
 #endif
             return v.cref(0);
@@ -730,19 +730,19 @@ namespace tmv {
     };
 
     // algo 11: simple for loop
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<11,s,V>
     {
         typedef typename V::value_type T;
         static T call(const V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 11: n,s = "<<n<<','<<s<<std::endl;
 #endif
             if (n > 0) {
                 T prod = v.cref(0);
-                for(int i=1;i<n;++i) 
+                for(ptrdiff_t i=1;i<n;++i) 
                     prod = ZProd<false,false>::prod(prod,v.cref(i));
                 return prod;
             } else return T(1);
@@ -750,20 +750,20 @@ namespace tmv {
     };
 
     // algo 12: 2 at a time
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<12,s,V>
     {
         typedef typename V::value_type T;
         static T call(const V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 12: n,s = "<<n<<','<<s<<std::endl;
 #endif
             T prod0(1), prod1(1);
             typename V::const_iterator it = v.begin();
-            int n_2 = (n>>1);
-            const int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            const ptrdiff_t nb = n-(n_2<<1);
 
             if (n_2) {
                 do {
@@ -781,20 +781,20 @@ namespace tmv {
     };
 
     // algo 13: 4 at a time
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<13,s,V>
     {
         typedef typename V::value_type T;
         static T call(const V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 13: n,s = "<<n<<','<<s<<std::endl;
 #endif
             T prod0(1), prod1(1);
             typename V::const_iterator it = v.begin();
-            int n_4 = (n>>2);
-            int nb = n-(n_4<<2);
+            ptrdiff_t n_4 = (n>>2);
+            ptrdiff_t nb = n-(n_4<<2);
 
             if (n_4) {
                 do {
@@ -812,20 +812,20 @@ namespace tmv {
     };
 
     // algo 14: 8 at a time
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<14,s,V>
     {
         typedef typename V::value_type T;
         static T call(const V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 14: n,s = "<<n<<','<<s<<std::endl;
 #endif
             T prod0(1), prod1(1), prod2(1), prod3(1);
             typename V::const_iterator it = v.begin();
-            int n_8 = (n>>3);
-            int nb = n-(n_8<<3);
+            ptrdiff_t n_8 = (n>>3);
+            ptrdiff_t nb = n-(n_8<<3);
 
             if (n_8) {
                 do {
@@ -849,12 +849,12 @@ namespace tmv {
     };
 
     // algo 15: fully unroll
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<15,s,V>
     {
         typedef typename V::value_type T;
 
-        template <int I, int N>
+        template <ptrdiff_t I, ptrdiff_t N>
         struct Unroller
         {
             static TMV_INLINE T unroll(const V& v)
@@ -864,16 +864,16 @@ namespace tmv {
                     Unroller<I+N/2,N-N/2>::unroll(v));
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,1>
         { static TMV_INLINE T unroll(const V& v) { return v.cref(I); } };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,0>
         { static TMV_INLINE T unroll(const V& v) { return T(1); } };
         static inline T call(const V& v)
         {
 #ifdef PRINTALGO_DET
-            const int n = v.size();
+            const ptrdiff_t n = v.size();
             std::cout<<"Prod Elements algo 15: n,s = "<<n<<','<<s<<std::endl;
 #endif
             return Unroller<0,s>::unroll(v); 
@@ -883,13 +883,13 @@ namespace tmv {
     // TODO: Add float SSE
 #ifdef __SSE2__
     // algo 31: double precision SSE2: real
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<31,s,V>
     {
         typedef typename V::const_iterator IT;
         static double call(const V& v)
         {
-            int n = s == Unknown ? v.size() : s;
+            ptrdiff_t n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 31: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -906,8 +906,8 @@ namespace tmv {
                     }
                 }
 
-                int n_2 = (n>>1);
-                int nb = n-(n_2<<1);
+                ptrdiff_t n_2 = (n>>1);
+                ptrdiff_t nb = n-(n_2<<1);
 
                 if (n_2) {
                     IT it1 = it+1;
@@ -932,13 +932,13 @@ namespace tmv {
     };
 
     // algo 32: double precision SSE2: complex
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<32,s,V>
     {
         typedef typename V::const_iterator IT;
         static std::complex<double> call(const V& v)
         {
-            int n = s == Unknown ? v.size() : s;
+            ptrdiff_t n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"Prod Elements algo 32: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -981,7 +981,7 @@ namespace tmv {
 
     // algo 71: If the direct product might cause an overflow, use
     // LogDet instead.
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<71,s,V>
     {
         typedef typename V::value_type T;
@@ -989,7 +989,7 @@ namespace tmv {
         static T call(const V& v)
         {
 #ifdef PRINTALGO_DET
-            const int n = v.size();
+            const ptrdiff_t n = v.size();
             std::cout<<"Prod Elements algo 71: n,s = "<<n<<','<<s<<std::endl;
 #endif
             RT max = v.maxAbs2Element();
@@ -997,13 +997,13 @@ namespace tmv {
             if (max > RT(1) && min < RT(1)) {
                 // Then it's possible for a direct product to overflow,
                 // but the actual product to be calculable.
-                const int n = s == Unknown ? v.size() : s;
+                const ptrdiff_t n = s == Unknown ? v.size() : s;
                 // There is probably a more efficient way to do this.
                 // This requires 2*log(n) multiplies, which isn't
                 // large compared to what will actually be done in the 
                 // ProdElements or logProdElements loop, but still I 
                 // suspect there is something faster than this.
-                for(int k=1;k<n;k*=2) {
+                for(ptrdiff_t k=1;k<n;k*=2) {
                     max *= max;
                     min *= min;
                 }
@@ -1028,7 +1028,7 @@ namespace tmv {
 
     // algo 72: Similar to 71, but try direct product first, and only 
     // check min,max if overflow or underflow is found.
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<72,s,V>
     {
         typedef typename V::value_type T;
@@ -1036,7 +1036,7 @@ namespace tmv {
         static T call(const V& v)
         {
 #ifdef PRINTALGO_DET
-            const int n = v.size();
+            const ptrdiff_t n = v.size();
             std::cout<<"Prod Elements algo 72: n,s = "<<n<<','<<s<<std::endl;
 #endif
             T det1 = ProdElementsV_Helper<-4,s,V>::call(v);
@@ -1079,7 +1079,7 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<90,s,V>
     {
         typedef typename V::value_type T;
@@ -1088,7 +1088,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<97,s,V>
     {
         typedef typename V::value_type T;
@@ -1102,7 +1102,7 @@ namespace tmv {
     };
 
     // algo -4: No branches or copies
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<-4,s,V>
     {
         typedef typename V::value_type T;
@@ -1135,7 +1135,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<-3,s,V>
     {
         typedef typename V::value_type T;
@@ -1159,7 +1159,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<-2,s,V>
     {
         typedef typename V::value_type T;
@@ -1176,7 +1176,7 @@ namespace tmv {
         }
     };
 
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ProdElementsV_Helper<-1,s,V>
     {
         typedef typename V::value_type T;
@@ -1208,7 +1208,7 @@ namespace tmv {
     //
 
     // algo 1: If no sign given, call version without sign.
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct LogProdElementsV_Helper<1,s,V>
     {
         typedef typename V::float_type RT;
@@ -1216,7 +1216,7 @@ namespace tmv {
         static inline RT call(const V& v, T* sign)
         {
 #ifdef PRINTALGO_DET
-            const int n = v.size();
+            const ptrdiff_t n = v.size();
             std::cout<<"LogProd Elements algo 1: n,s = "<<n<<','<<s<<std::endl;
 #endif
             if (sign) {
@@ -1228,7 +1228,7 @@ namespace tmv {
     };
 
     // algo 11: simple for loop, real
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct LogProdElementsV_Helper<11,s,V>
     {
         typedef typename V::float_type RT;
@@ -1236,7 +1236,7 @@ namespace tmv {
         static RT call(const V& v, T* sign)
         {
             TMVStaticAssert(Traits<T>::isreal);
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 11: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -1245,7 +1245,7 @@ namespace tmv {
             typename V::const_iterator it = v.begin();
             *sign = T(1);
 
-            for(int i=0;i<n;++i) {
+            for(ptrdiff_t i=0;i<n;++i) {
                 v0 = *it++;
                 sum += TMV_LOG(TMV_ABS(v0));
                 if (v0 > T(0)) continue;
@@ -1257,14 +1257,14 @@ namespace tmv {
         static RT call(const V& v)
         {
             TMVStaticAssert(Traits<T>::isreal);
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 11: n,s = "<<n<<','<<s<<std::endl;
 #endif
             RT sum(0);
             T v0;
             typename V::const_iterator it = v.begin();
-            for(int i=0;i<n;++i) {
+            for(ptrdiff_t i=0;i<n;++i) {
                 v0 = *it++;
                 sum += TMV_LOG(TMV_ABS(v0));
             }
@@ -1273,21 +1273,21 @@ namespace tmv {
     };
 
     // algo 12: 2 at a time, real
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct LogProdElementsV_Helper<12,s,V>
     {
         typedef typename V::float_type RT;
         typedef typename V::zfloat_type T;
         static RT call(const V& v, T* sign)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 12: n,s = "<<n<<','<<s<<std::endl;
 #endif
             RT sum0(0), sum1(0);
             T v0, v1;
-            int n_2 = (n>>1);
-            const int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            const ptrdiff_t nb = n-(n_2<<1);
             typename V::const_iterator it = v.begin();
             *sign = T(1);
 
@@ -1314,15 +1314,15 @@ namespace tmv {
         }
         static RT call(const V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 12: n,s = "<<n<<','<<s<<std::endl;
 #endif
             RT sum0(0), sum1(0);
             T v0, v1;
             typename V::const_iterator it = v.begin();
-            int n_2 = (n>>1);
-            const int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            const ptrdiff_t nb = n-(n_2<<1);
 
             if (n_2) {
                 do {
@@ -1341,7 +1341,7 @@ namespace tmv {
     };
 
     // algo 16: simple for loop, complex
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct LogProdElementsV_Helper<16,s,V>
     {
         typedef typename V::float_type RT;
@@ -1349,7 +1349,7 @@ namespace tmv {
         static RT call(const V& v, T* sign)
         {
             TMVStaticAssert(Traits<T>::iscomplex);
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 16: n,s = "<<n<<','<<s<<std::endl;
 #endif
@@ -1359,7 +1359,7 @@ namespace tmv {
             typename V::const_iterator it = v.begin();
             *sign = T(1);
 
-            for(int i=0;i<n;++i) {
+            for(ptrdiff_t i=0;i<n;++i) {
                 v0 = *it++;
                 absv0 = std::abs(v0);
                 sum += std::log(absv0);
@@ -1371,14 +1371,14 @@ namespace tmv {
         static RT call(const V& v)
         {
             TMVStaticAssert(Traits<T>::iscomplex);
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"LogProd Elements algo 16: n,s = "<<n<<','<<s<<std::endl;
 #endif
             RT sum(0);
             T v0;
             typename V::const_iterator it = v.begin();
-            for(int i=0;i<n;++i) {
+            for(ptrdiff_t i=0;i<n;++i) {
                 v0 = *it++;
                 sum += TMV_LOG(TMV_ABS(v0));
             }
@@ -1387,7 +1387,7 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct LogProdElementsV_Helper<90,s,V>
     {
         typedef typename V::float_type RT;
@@ -1397,7 +1397,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct LogProdElementsV_Helper<97,s,V>
     {
         typedef typename V::float_type RT;
@@ -1413,7 +1413,7 @@ namespace tmv {
     };
 
     // algo -4: No branches or copies
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct LogProdElementsV_Helper<-4,s,V>
     {
         typedef typename V::float_type RT;
@@ -1447,7 +1447,7 @@ namespace tmv {
 
     // algo -3: Determine which algorithm to use
     // Just check if sign is 0 and call correct version of algo -4.
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct LogProdElementsV_Helper<-3,s,V>
     {
         typedef typename V::float_type RT;
@@ -1457,7 +1457,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct LogProdElementsV_Helper<-2,s,V>
     {
         typedef typename V::float_type RT;
@@ -1475,7 +1475,7 @@ namespace tmv {
         }
     };
 
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct LogProdElementsV_Helper<-1,s,V>
     {
         typedef typename V::float_type RT;
@@ -1508,17 +1508,17 @@ namespace tmv {
     //
 
     // algo 11: simple for loop
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct HasZeroElementV_Helper<11,s,V>
     {
         typedef typename V::value_type T;
         static bool call(const V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"HasZeroElement algo 11: n,s = "<<n<<','<<s<<std::endl;
 #endif
-            for(int i=0;i<n;++i) {
+            for(ptrdiff_t i=0;i<n;++i) {
                 if (v.cref(i) != T(0)) continue;
                 else return true;
             }
@@ -1527,19 +1527,19 @@ namespace tmv {
     };
 
     // algo 12: 2 at a time
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct HasZeroElementV_Helper<12,s,V>
     {
         typedef typename V::value_type T;
         static bool call(const V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"HasZeroElement algo 12: n,s = "<<n<<','<<s<<std::endl;
 #endif
             typename V::const_iterator it = v.begin();
-            int n_2 = (n>>1);
-            const int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            const ptrdiff_t nb = n-(n_2<<1);
 
             if (n_2) do {
                 if (it[0] != T(0) && it[1] != T(0)) it+=2;
@@ -1551,19 +1551,19 @@ namespace tmv {
     };
 
     // algo 13: 4 at a time
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct HasZeroElementV_Helper<13,s,V>
     {
         typedef typename V::value_type T;
         static bool call(const V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"HasZeroElement algo 13: n,s = "<<n<<','<<s<<std::endl;
 #endif
             typename V::const_iterator it = v.begin();
-            int n_4 = (n>>2);
-            int nb = n-(n_4<<2);
+            ptrdiff_t n_4 = (n>>2);
+            ptrdiff_t nb = n-(n_4<<2);
 
             if (n_4) do {
                 if (it[0] != T(0) && it[1] != T(0) &&
@@ -1579,19 +1579,19 @@ namespace tmv {
     };
 
     // algo 14: 8 at a time
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct HasZeroElementV_Helper<14,s,V>
     {
         typedef typename V::value_type T;
         static bool call(const V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
 #ifdef PRINTALGO_DET
             std::cout<<"HasZeroElement algo 14: n,s = "<<n<<','<<s<<std::endl;
 #endif
             typename V::const_iterator it = v.begin();
-            int n_8 = (n>>3);
-            int nb = n-(n_8<<3);
+            ptrdiff_t n_8 = (n>>3);
+            ptrdiff_t nb = n-(n_8<<3);
 
             if (n_8) do {
                 if (it[0] != T(0) && it[1] != T(0) &&
@@ -1609,12 +1609,12 @@ namespace tmv {
     };
 
     // algo 15: fully unroll
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct HasZeroElementV_Helper<15,s,V>
     {
         typedef typename V::value_type T;
 
-        template <int I, int N>
+        template <ptrdiff_t I, ptrdiff_t N>
         struct Unroller
         {
             static TMV_INLINE bool unroll(const V& v)
@@ -1624,13 +1624,13 @@ namespace tmv {
                     Unroller<I+N/2,N-N/2>::unroll(v));
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,1>
         {
             static TMV_INLINE bool unroll(const V& v) 
             { return v.cref(I) == T(0); } 
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,0>
         { static TMV_INLINE bool unroll(const V& v) { return false; } };
         static inline bool call(const V& v)
@@ -1643,7 +1643,7 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct HasZeroElementV_Helper<90,s,V>
     {
         typedef typename V::value_type T;
@@ -1652,7 +1652,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct HasZeroElementV_Helper<97,s,V>
     {
         typedef typename V::value_type T;
@@ -1665,7 +1665,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct HasZeroElementV_Helper<-3,s,V>
     {
         typedef typename V::value_type T;
@@ -1689,7 +1689,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct HasZeroElementV_Helper<-2,s,V>
     {
         typedef typename V::value_type T;
@@ -1706,7 +1706,7 @@ namespace tmv {
         }
     };
 
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct HasZeroElementV_Helper<-1,s,V>
     {
         typedef typename V::value_type T;

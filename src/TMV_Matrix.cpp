@@ -218,7 +218,7 @@ namespace tmv {
     // time of any algorithm anyway, it doesn't seem worth the bother.
     template <class T>
     void InstPermuteRows(
-        MatrixView<T> m, const int* p, const int i1, const int i2)
+        MatrixView<T> m, const ptrdiff_t* p, const ptrdiff_t i1, const ptrdiff_t i2)
     {
         if (m.iscm()) {
             MatrixView<T,ColMajor> mcm = m;
@@ -233,7 +233,7 @@ namespace tmv {
 
     template <class T>
     void InstReversePermuteRows(
-        MatrixView<T> m, const int* p, const int i1, const int i2)
+        MatrixView<T> m, const ptrdiff_t* p, const ptrdiff_t i1, const ptrdiff_t i2)
     {
         if (m.iscm()) {
             MatrixView<T,ColMajor> mcm = m;

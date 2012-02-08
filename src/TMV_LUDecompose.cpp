@@ -22,11 +22,11 @@ namespace tmv {
 #ifdef ALAP
     template <class T> 
     static inline void LapLU_Decompose(
-        MatrixView<T,ColMajor>& A, int* P)
+        MatrixView<T,ColMajor>& A, ptrdiff_t* P)
     { InlineLU_Decompose(A,P); }
 #ifdef TMV_INST_DOUBLE
     static void LapLU_Decompose(
-        MatrixView<double,ColMajor>& A, int* P)
+        MatrixView<double,ColMajor>& A, ptrdiff_t* P)
     {
         TMVAssert(A.iscm());
 
@@ -45,7 +45,7 @@ namespace tmv {
         delete [] lap_p;
     }
     static void LapLU_Decompose(
-        MatrixView<std::complex<double>,ColMajor>& A, int* P)
+        MatrixView<std::complex<double>,ColMajor>& A, ptrdiff_t* P)
     {
         TMVAssert(A.iscm());
 
@@ -71,7 +71,7 @@ namespace tmv {
     //   Try reducing KMP_STACKSIZE or increasing the shell stack limit.
     // So I'm cutting it out for MKL compilations
     static void LapLU_Decompose(
-        MatrixView<float,ColMajor>& A, int* P)
+        MatrixView<float,ColMajor>& A, ptrdiff_t* P)
     {
         int m = A.colsize();
         int n = A.rowsize();
@@ -88,7 +88,7 @@ namespace tmv {
         delete [] lap_p;
     }
     static void LapLU_Decompose(
-        MatrixView<std::complex<float>,ColMajor>& A, int* P)
+        MatrixView<std::complex<float>,ColMajor>& A, ptrdiff_t* P)
     {
         int m = A.colsize();
         int n = A.rowsize();
@@ -109,7 +109,7 @@ namespace tmv {
 #endif // ALAP
 
     template <class T> 
-    void InstLU_Decompose(MatrixView<T> A, int* P)
+    void InstLU_Decompose(MatrixView<T> A, ptrdiff_t* P)
     {
         if (A.colsize() > 0 && A.rowsize() > 0) {
             if (A.iscm()) {

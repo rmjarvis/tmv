@@ -208,10 +208,10 @@ namespace tmv {
         enum { _colsize = M2::_rowsize };
         enum { _rowsize = M1::_rowsize };
         enum { _nlo = (
-                M2::_nlo == 0 ? int(M1::_nlo) : 
+                M2::_nlo == 0 ? ptrdiff_t(M1::_nlo) : 
                 IntTraits2<IntTraits<_colsize>::Sm1,0>::max ) };
         enum { _nhi = (
-                M2::_nhi == 0 ? int(M1::_nhi) : 
+                M2::_nhi == 0 ? ptrdiff_t(M1::_nhi) : 
                 IntTraits2<IntTraits<_rowsize>::Sm1,0>::max ) };
         enum { _fort = M1::_fort && M2::_fort };
         enum { _calc = false };
@@ -223,7 +223,7 @@ namespace tmv {
         enum { cm1 = Traits<typename M1::calc_type>::_colmajor };
         enum { cm2 = Traits<typename M2::calc_type>::_colmajor };
         enum { _rowmajor = 
-            (rm1 && rm2) || (!cm1 && !cm2 && _rowsize > int(_colsize)) };
+            (rm1 && rm2) || (!cm1 && !cm2 && _rowsize > ptrdiff_t(_colsize)) };
 
         typedef QuotMM<ix,T,M1,M2> type;
         enum { s = _shape };
@@ -262,12 +262,12 @@ namespace tmv {
         TMV_INLINE const M1& getM1() const { return m1; }
         TMV_INLINE const M2& getM2() const { return m2; }
 
-        TMV_INLINE int colsize() const { return m2.rowsize(); }
-        TMV_INLINE int rowsize() const { return m1.rowsize(); }
-        TMV_INLINE int nlo() const 
-        { return m2.nlo() == 0 ? m1.nlo() : TMV_MAX(colsize()-1,0); }
-        TMV_INLINE int nhi() const 
-        { return m2.nhi() == 0 ? m1.nhi() : TMV_MAX(rowsize()-1,0); }
+        TMV_INLINE ptrdiff_t colsize() const { return m2.rowsize(); }
+        TMV_INLINE ptrdiff_t rowsize() const { return m1.rowsize(); }
+        TMV_INLINE ptrdiff_t nlo() const 
+        { return m2.nlo() == 0 ? m1.nlo() : TMV_MAX(colsize()-1,ptrdiff_t(0)); }
+        TMV_INLINE ptrdiff_t nhi() const 
+        { return m2.nhi() == 0 ? m1.nhi() : TMV_MAX(rowsize()-1,ptrdiff_t(0)); }
 
         template <class M3>
         TMV_INLINE_ND void assignTo(BaseMatrix_Mutable<M3>& m3) const
@@ -303,10 +303,10 @@ namespace tmv {
         enum { _colsize = M1::_colsize };
         enum { _rowsize = M2::_colsize };
         enum { _nlo = (
-                M2::_nlo == 0 ? int(M1::_nlo) : 
+                M2::_nlo == 0 ? ptrdiff_t(M1::_nlo) : 
                 IntTraits2<IntTraits<_colsize>::Sm1,0>::max ) };
         enum { _nhi = (
-                M2::_nhi == 0 ? int(M1::_nhi) : 
+                M2::_nhi == 0 ? ptrdiff_t(M1::_nhi) : 
                 IntTraits2<IntTraits<_rowsize>::Sm1,0>::max ) };
         enum { _fort = M1::_fort && M2::_fort };
         enum { _calc = false };
@@ -318,7 +318,7 @@ namespace tmv {
         enum { cm1 = Traits<typename M1::calc_type>::_colmajor };
         enum { cm2 = Traits<typename M2::calc_type>::_colmajor };
         enum { _rowmajor = 
-            (rm1 && rm2) || (!cm1 && !cm2 && _rowsize > int(_colsize)) };
+            (rm1 && rm2) || (!cm1 && !cm2 && _rowsize > ptrdiff_t(_colsize)) };
 
         typedef RQuotMM<ix,T,M1,M2> type;
         enum { s = _shape };
@@ -358,12 +358,12 @@ namespace tmv {
         TMV_INLINE const M1& getM1() const { return m1; }
         TMV_INLINE const M2& getM2() const { return m2; }
 
-        TMV_INLINE int colsize() const { return m1.colsize(); }
-        TMV_INLINE int rowsize() const { return m2.colsize(); }
-        TMV_INLINE int nlo() const 
-        { return m2.nlo() == 0 ? m1.nlo() : TMV_MAX(colsize()-1,0); }
-        TMV_INLINE int nhi() const 
-        { return m2.nhi() == 0 ? m1.nhi() : TMV_MAX(rowsize()-1,0); }
+        TMV_INLINE ptrdiff_t colsize() const { return m1.colsize(); }
+        TMV_INLINE ptrdiff_t rowsize() const { return m2.colsize(); }
+        TMV_INLINE ptrdiff_t nlo() const 
+        { return m2.nlo() == 0 ? m1.nlo() : TMV_MAX(colsize()-1,ptrdiff_t(0)); }
+        TMV_INLINE ptrdiff_t nhi() const 
+        { return m2.nhi() == 0 ? m1.nhi() : TMV_MAX(rowsize()-1,ptrdiff_t(0)); }
 
         template <class M3>
         TMV_INLINE_ND void assignTo(BaseMatrix_Mutable<M3>& m3) const

@@ -48,11 +48,11 @@ namespace tmv {
 #define TMV_NORMM_UNROLL 0
 #endif
 
-    template <int algo, int cs, int rs, CompType comp, int ix, class ret, class M1>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, CompType comp, int ix, class ret, class M1>
     struct SumElementsM_Helper;
 
     // algo 1: linearize to vector version
-    template <int cs, int rs, CompType comp, int ix, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, int ix, class ret, class M1>
     struct SumElementsM_Helper<1,cs,rs,comp,ix,ret,M1>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -68,7 +68,7 @@ namespace tmv {
     };
 
     // algo 201: linearize to vector version
-    template <int cs, int rs, CompType comp, int ix, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, int ix, class ret, class M1>
     struct SumElementsM_Helper<201,cs,rs,comp,ix,ret,M1>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -84,7 +84,7 @@ namespace tmv {
     };
 
     // algo 11: loop over columns
-    template <int cs, int rs, CompType comp, int ix, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, int ix, class ret, class M1>
     struct SumElementsM_Helper<11,cs,rs,comp,ix,ret,M1>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -93,10 +93,10 @@ namespace tmv {
 #ifdef PRINTALGO_NormM
             std::cout<<"SumElementsM algo 11: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int N = (rs == Unknown ? m.rowsize() : rs);
+            const ptrdiff_t N = (rs == Unknown ? m.rowsize() : rs);
             typedef typename M1::const_col_type Mc;
             ret sum(0);
-            for(int j=0;j<N;++j) {
+            for(ptrdiff_t j=0;j<N;++j) {
                 Mc mc = m.get_col(j);
                 sum += SumElementsV_Helper<-3,cs,comp,ix,ret,Mc>::call(mc,x);
             }
@@ -105,7 +105,7 @@ namespace tmv {
     };
 
     // algo 12: loop over rows
-    template <int cs, int rs, CompType comp, int ix, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, int ix, class ret, class M1>
     struct SumElementsM_Helper<12,cs,rs,comp,ix,ret,M1>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -114,10 +114,10 @@ namespace tmv {
 #ifdef PRINTALGO_NormM
             std::cout<<"SumElementsM algo 12: "<<TMV_Text(comp)<<std::endl;
 #endif
-            const int M = (cs == Unknown ? m.colsize() : cs);
+            const ptrdiff_t M = (cs == Unknown ? m.colsize() : cs);
             typedef typename M1::const_row_type Mr;
             ret sum(0);
-            for(int i=0;i<M;++i) {
+            for(ptrdiff_t i=0;i<M;++i) {
                 Mr mr = m.get_row(i);
                 sum += SumElementsV_Helper<-3,rs,comp,ix,ret,Mr>::call(mr,x);
             }
@@ -126,13 +126,13 @@ namespace tmv {
     };
 
     // algo 15: Fully unroll by columns
-    template <int cs, int rs, CompType comp, int ix, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, int ix, class ret, class M1>
     struct SumElementsM_Helper<15,cs,rs,comp,ix,ret,M1>
     {
         typedef typename M1::value_type VT;
         typedef typename Traits<ret>::real_type RT;
 
-        template <int I, int M, int J, int N>
+        template <ptrdiff_t I, ptrdiff_t M, ptrdiff_t J, ptrdiff_t N>
         struct Unroller
         {
             static TMV_INLINE ret unroll(const M1& m, const Scaling<ix,RT>& x)
@@ -142,7 +142,7 @@ namespace tmv {
                     Unroller<I,M,J+N/2,N-N/2>::unroll(m,x));
             }
         };
-        template <int I, int M, int J>
+        template <ptrdiff_t I, ptrdiff_t M, ptrdiff_t J>
         struct Unroller<I,M,J,1>
         {
             static TMV_INLINE ret unroll(const M1& m, const Scaling<ix,RT>& x)
@@ -152,19 +152,19 @@ namespace tmv {
                     Unroller<I+M/2,M-M/2,J,1>::unroll(m,x));
             }
         };
-        template <int I, int M, int J>
+        template <ptrdiff_t I, ptrdiff_t M, ptrdiff_t J>
         struct Unroller<I,M,J,0>
         {
             static TMV_INLINE ret unroll(const M1& , const Scaling<ix,RT>& ) 
             { return ret(0); } 
         };
-        template <int I, int J>
+        template <ptrdiff_t I, ptrdiff_t J>
         struct Unroller<I,1,J,1>
         {
             static TMV_INLINE ret unroll(const M1& m, const Scaling<ix,RT>& x)
             { return Component<comp,VT>::f(x * m.cref(I,J)); }
         };
-        template <int I, int J>
+        template <ptrdiff_t I, ptrdiff_t J>
         struct Unroller<I,1,J,0>
         {
             static TMV_INLINE ret unroll(const M1& m, const Scaling<ix,RT>& x)
@@ -180,12 +180,12 @@ namespace tmv {
     };
 
     // algo 16: Fully unroll by rows
-    template <int cs, int rs, CompType comp, int ix, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, int ix, class ret, class M1>
     struct SumElementsM_Helper<16,cs,rs,comp,ix,ret,M1>
     {
         typedef typename M1::value_type VT;
         typedef typename Traits<ret>::real_type RT;
-        template <int I, int M, int J, int N>
+        template <ptrdiff_t I, ptrdiff_t M, ptrdiff_t J, ptrdiff_t N>
         struct Unroller
         {
             static TMV_INLINE ret unroll(const M1& m, const Scaling<ix,RT>& x)
@@ -195,7 +195,7 @@ namespace tmv {
                     Unroller<I+M/2,M-M/2,J,N>::unroll(m,x));
             }
         };
-        template <int I, int J, int N>
+        template <ptrdiff_t I, ptrdiff_t J, ptrdiff_t N>
         struct Unroller<I,1,J,N>
         {
             static TMV_INLINE ret unroll(const M1& m, const Scaling<ix,RT>& x)
@@ -205,19 +205,19 @@ namespace tmv {
                     Unroller<I,1,J+N/2,N-N/2>::unroll(m,x));
             }
         };
-        template <int I, int J, int N>
+        template <ptrdiff_t I, ptrdiff_t J, ptrdiff_t N>
         struct Unroller<I,0,J,N>
         {
             static TMV_INLINE ret unroll(const M1& , const Scaling<ix,RT>& ) 
             { return ret(0); } 
         };
-        template <int I, int J>
+        template <ptrdiff_t I, ptrdiff_t J>
         struct Unroller<I,1,J,1>
         {
             static TMV_INLINE ret unroll(const M1& m, const Scaling<ix,RT>& x)
             { return Component<comp,VT>::f(x * m.cref(I,J)); }
         };
-        template <int I, int J>
+        template <ptrdiff_t I, ptrdiff_t J>
         struct Unroller<I,1,J,0>
         {
             static TMV_INLINE ret unroll(const M1& m, const Scaling<ix,RT>& x)
@@ -233,7 +233,7 @@ namespace tmv {
     };
 
     // algo 30: Unknown sizes, determine which algorithm to use
-    template <int cs, int rs, CompType comp, int ix, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, int ix, class ret, class M1>
     struct SumElementsM_Helper<30,cs,rs,comp,ix,ret,M1>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -251,7 +251,7 @@ namespace tmv {
     };
     
     // algo 90: Call inst
-    template <int cs, int rs, int ix, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class ret, class M1>
     struct SumElementsM_Helper<90,cs,rs,ValueComp,ix,ret,M1>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -259,7 +259,7 @@ namespace tmv {
         static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         { return InstSumElements(m.xView()); }
     };
-    template <int cs, int rs, int ix, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class ret, class M1>
     struct SumElementsM_Helper<90,cs,rs,AbsComp,ix,ret,M1>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -267,7 +267,7 @@ namespace tmv {
         static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         { return InstSumAbsElements(m.xView()); }
     };
-    template <int cs, int rs, int ix, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class ret, class M1>
     struct SumElementsM_Helper<90,cs,rs,Abs2Comp,ix,ret,M1>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -275,7 +275,7 @@ namespace tmv {
         static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         { return InstSumAbs2Elements(m.xView()); }
     };
-    template <int cs, int rs, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class ret, class M1>
     struct SumElementsM_Helper<90,cs,rs,NormComp,1,ret,M1>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -283,7 +283,7 @@ namespace tmv {
         static TMV_INLINE ret call(const M1& m, const Scaling<1,RT>& x)
         { return InstNormSq(m.xView()); }
     };
-    template <int cs, int rs, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class ret, class M1>
     struct SumElementsM_Helper<90,cs,rs,NormComp,0,ret,M1>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -293,7 +293,7 @@ namespace tmv {
     };
     
     // algo 97: Conjugate
-    template <int cs, int rs, CompType comp, int ix, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, int ix, class ret, class M1>
     struct SumElementsM_Helper<97,cs,rs,comp,ix,ret,M1>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -305,7 +305,7 @@ namespace tmv {
             return SumElementsM_Helper<-2,cs,rs,comp,ix,ret,Mnc>::call(mnc,x);
         }
     };
-    template <int cs, int rs, int ix, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class ret, class M1>
     struct SumElementsM_Helper<97,cs,rs,ValueComp,ix,ret,M1>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -320,17 +320,17 @@ namespace tmv {
     };
     
     // algo -4: No branches or copies
-    template <int cs, int rs, CompType comp, int ix, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, int ix, class ret, class M1>
     struct SumElementsM_Helper<-4,cs,rs,comp,ix,ret,M1>
     {
         typedef typename Traits<ret>::real_type RT;
 
         static TMV_INLINE ret call(const M1& m, const Scaling<ix,RT>& x)
         {
-            const int cs2 = cs > 20 ? Unknown : cs;
-            const int rs2 = rs > 20 ? Unknown : rs;
+            const ptrdiff_t cs2 = cs > 20 ? Unknown : cs;
+            const ptrdiff_t rs2 = rs > 20 ? Unknown : rs;
             // nops = m*n
-            const int nops = IntTraits2<cs2,rs2>::safeprod;
+            const ptrdiff_t nops = IntTraits2<cs2,rs2>::safeprod;
             const bool unroll = 
                 ( cs > 10 && rs > 10 ) ? false :
                 ( cs == Unknown || rs == Unknown ) ? false :
@@ -357,7 +357,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, CompType comp, int ix, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, int ix, class ret, class M1>
     struct SumElementsM_Helper<-3,cs,rs,comp,ix,ret,M1>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -378,7 +378,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, CompType comp, int ix, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, int ix, class ret, class M1>
     struct SumElementsM_Helper<-2,cs,rs,comp,ix,ret,M1>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -399,7 +399,7 @@ namespace tmv {
         }
     };
     
-    template <int cs, int rs, CompType comp, int ix, class ret, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, int ix, class ret, class M1>
     struct SumElementsM_Helper<-1,cs,rs,comp,ix,ret,M1>
     {
         typedef typename Traits<ret>::real_type RT;
@@ -412,8 +412,8 @@ namespace tmv {
     inline typename M::value_type InlineSumElements(
         const BaseMatrix_Rec<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::value_type VT;
         typedef typename M::real_type RT;
         typedef typename M::const_cview_type Mv;
@@ -426,8 +426,8 @@ namespace tmv {
     inline typename M::value_type DoSumElements(
         const BaseMatrix_Rec<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::value_type VT;
         typedef typename M::real_type RT;
         typedef typename M::const_cview_type Mv;
@@ -440,8 +440,8 @@ namespace tmv {
     inline typename M::float_type InlineSumAbsElements(
         const BaseMatrix_Rec<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::float_type RT;
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
@@ -453,8 +453,8 @@ namespace tmv {
     inline typename M::float_type DoSumAbsElements(
         const BaseMatrix_Rec<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::float_type RT;
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
@@ -466,8 +466,8 @@ namespace tmv {
     inline typename M::real_type InlineSumAbs2Elements(
         const BaseMatrix_Rec<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::real_type RT;
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
@@ -479,8 +479,8 @@ namespace tmv {
     inline typename M::real_type DoSumAbs2Elements(
         const BaseMatrix_Rec<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::real_type RT;
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
@@ -492,8 +492,8 @@ namespace tmv {
     inline typename M::real_type InlineNormSq(
         const BaseMatrix_Rec<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::real_type RT;
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
@@ -504,8 +504,8 @@ namespace tmv {
     template <class M>
     inline typename M::real_type DoNormSq(const BaseMatrix_Rec<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::real_type RT;
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
@@ -517,8 +517,8 @@ namespace tmv {
     inline typename M::float_type InlineNormSq(
         const BaseMatrix_Rec<M>& m, typename M::float_type scale)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::float_type RT;
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
@@ -530,8 +530,8 @@ namespace tmv {
     inline typename M::float_type DoNormSq(
         const BaseMatrix_Rec<M>& m, typename M::float_type scale)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::float_type RT;
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
@@ -553,11 +553,11 @@ namespace tmv {
     typename Traits<T>::real_type InstMaxAbs2Element(
         const ConstMatrixView<T>& m); 
 
-    template <int algo, int cs, int rs, CompType comp, class M1>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, CompType comp, class M1>
     struct MaxAbsElementM_Helper;
 
     // algo 1: linearize to vector version
-    template <int cs, int rs, CompType comp, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, class M1>
     struct MaxAbsElementM_Helper<1,cs,rs,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
@@ -573,7 +573,7 @@ namespace tmv {
     };
 
     // algo 201: linearize to vector version
-    template <int cs, int rs, CompType comp, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, class M1>
     struct MaxAbsElementM_Helper<201,cs,rs,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
@@ -589,7 +589,7 @@ namespace tmv {
     };
 
     // algo 11: loop over columns
-    template <int cs, int rs, CompType comp, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, class M1>
     struct MaxAbsElementM_Helper<11,cs,rs,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
@@ -599,9 +599,9 @@ namespace tmv {
             std::cout<<"MaxAbsElementM algo 11: "<<TMV_Text(comp)<<std::endl;
 #endif
             typedef typename M1::const_col_type Mc;
-            const int N = (rs == Unknown ? m.rowsize() : rs);
+            const ptrdiff_t N = (rs == Unknown ? m.rowsize() : rs);
             ret max(0);
-            for(int j=0;j<N;++j) {
+            for(ptrdiff_t j=0;j<N;++j) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,Mc>::call(
                     m.get_col(j),0);
                 if (temp > max) max = temp;
@@ -611,7 +611,7 @@ namespace tmv {
     };
 
     // algo 12: loop over rows
-    template <int cs, int rs, CompType comp, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, class M1>
     struct MaxAbsElementM_Helper<12,cs,rs,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
@@ -621,9 +621,9 @@ namespace tmv {
             std::cout<<"MaxAbsElementM algo 12: "<<TMV_Text(comp)<<std::endl;
 #endif
             typedef typename M1::const_row_type Mr;
-            const int M = (cs == Unknown ? m.colsize() : cs);
+            const ptrdiff_t M = (cs == Unknown ? m.colsize() : cs);
             ret max(0);
-            for(int i=0;i<M;++i) {
+            for(ptrdiff_t i=0;i<M;++i) {
                 ret temp = MinMaxElement_Helper<-3,comp,true,Mr>::call(
                     m.get_row(i),0);
                 if (temp > max) max = temp;
@@ -633,7 +633,7 @@ namespace tmv {
     };
 
     // algo 13: loop over columns with temp storage
-    template <int cs, int rs, CompType comp, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, class M1>
     struct MaxAbsElementM_Helper<13,cs,rs,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
@@ -644,11 +644,11 @@ namespace tmv {
 #endif
             typedef typename M1::const_col_type Mc;
             typedef tmv::Vector<ret> V;
-            const int N = (rs == Unknown ? m.rowsize() : rs);
+            const ptrdiff_t N = (rs == Unknown ? m.rowsize() : rs);
             if (N == 0) return ret(0);
             else {
                 V temp(N);
-                for(int j=0;j<N;++j) {
+                for(ptrdiff_t j=0;j<N;++j) {
                     temp(j) = MinMaxElement_Helper<-3,comp,true,Mc>::call(
                         m.get_col(j),0);
                 }
@@ -658,7 +658,7 @@ namespace tmv {
     };
 
     // algo 14: loop over rows with temp storage
-    template <int cs, int rs, CompType comp, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, class M1>
     struct MaxAbsElementM_Helper<14,cs,rs,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
@@ -669,11 +669,11 @@ namespace tmv {
 #endif
             typedef typename M1::const_row_type Mr;
             typedef tmv::Vector<ret> V;
-            const int M = (cs == Unknown ? m.colsize() : cs);
+            const ptrdiff_t M = (cs == Unknown ? m.colsize() : cs);
             if (M == 0) return ret(0);
             else {
                 V temp(M);
-                for(int i=0;i<M;++i) {
+                for(ptrdiff_t i=0;i<M;++i) {
                     temp(i) = MinMaxElement_Helper<-3,comp,true,Mr>::call(
                         m.get_row(i),0);
                 }
@@ -689,7 +689,7 @@ namespace tmv {
     // there might be a small speed increase available by unrolling.
 
     // algo 30: Unknown sizes, determine which algorithm to use
-    template <int cs, int rs, CompType comp, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, class M1>
     struct MaxAbsElementM_Helper<30,cs,rs,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
@@ -707,14 +707,14 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct MaxAbsElementM_Helper<90,cs,rs,AbsComp,M1>
     {
         typedef typename M1::float_type ret;
         static TMV_INLINE ret call(const M1& m)
         { return InstMaxAbsElement(m.xView()); }
     };
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct MaxAbsElementM_Helper<90,cs,rs,Abs2Comp,M1>
     {
         typedef typename M1::real_type ret;
@@ -723,7 +723,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, CompType comp, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, class M1>
     struct MaxAbsElementM_Helper<97,cs,rs,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
@@ -736,7 +736,7 @@ namespace tmv {
     };
 
     // algo -4: No branches or copies
-    template <int cs, int rs, CompType comp, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, class M1>
     struct MaxAbsElementM_Helper<-4,cs,rs,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
@@ -757,7 +757,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algo to use
-    template <int cs, int rs, CompType comp, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, class M1>
     struct MaxAbsElementM_Helper<-3,cs,rs,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
@@ -777,7 +777,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, CompType comp, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, class M1>
     struct MaxAbsElementM_Helper<-2,cs,rs,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
@@ -797,7 +797,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, CompType comp, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, CompType comp, class M1>
     struct MaxAbsElementM_Helper<-1,cs,rs,comp,M1>
     {
         typedef typename Component<comp,typename M1::value_type>::ret_type ret;
@@ -809,8 +809,8 @@ namespace tmv {
     inline typename M::float_type InlineMaxAbsElement(
         const BaseMatrix_Rec<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
         return MaxAbsElementM_Helper<-3,cs,rs,AbsComp,Mv>::call(mv);
@@ -820,8 +820,8 @@ namespace tmv {
     inline typename M::float_type DoMaxAbsElement(
         const BaseMatrix_Rec<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
         return MaxAbsElementM_Helper<-2,cs,rs,AbsComp,Mv>::call(mv);
@@ -831,8 +831,8 @@ namespace tmv {
     inline typename M::real_type InlineMaxAbs2Element(
         const BaseMatrix_Rec<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
         return MaxAbsElementM_Helper<-3,cs,rs,Abs2Comp,Mv>::call(mv);
@@ -842,8 +842,8 @@ namespace tmv {
     inline typename M::real_type DoMaxAbs2Element(
         const BaseMatrix_Rec<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
         return MaxAbsElementM_Helper<-2,cs,rs,Abs2Comp,Mv>::call(mv);
@@ -860,11 +860,11 @@ namespace tmv {
     typename ConstMatrixView<T>::float_type InstNorm1(
         const ConstMatrixView<T>& m); 
 
-    template <int algo, int cs, int rs, class M1>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct Norm1M_Helper;
 
     // algo 11: loop over columns
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct Norm1M_Helper<11,cs,rs,M1>
     {
         typedef typename M1::float_type RT;
@@ -873,9 +873,9 @@ namespace tmv {
 #ifdef PRINTALGO_NormM
             std::cout<<"Norm1M algo 1: "<<std::endl;
 #endif
-            const int N = (rs == Unknown ? m.rowsize() : rs);
+            const ptrdiff_t N = (rs == Unknown ? m.rowsize() : rs);
             RT max(0);
-            for(int j=0;j<N;++j) {
+            for(ptrdiff_t j=0;j<N;++j) {
                 RT temp = InlineSumAbsElements(m.get_col(j));
                 if (temp > max) max = temp;
             }
@@ -884,7 +884,7 @@ namespace tmv {
     };
 
     // algo 12: loop over rows
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct Norm1M_Helper<12,cs,rs,M1>
     {
         typedef typename M1::float_type RT;
@@ -893,8 +893,8 @@ namespace tmv {
 #ifdef PRINTALGO_NormM
             std::cout<<"Norm1M algo 12: "<<std::endl;
 #endif
-            int M = (cs == Unknown ? m.colsize() : cs);
-            int N = (rs == Unknown ? m.rowsize() : rs);
+            ptrdiff_t M = (cs == Unknown ? m.colsize() : cs);
+            ptrdiff_t N = (rs == Unknown ? m.rowsize() : rs);
             if (M == 0 || N == 0) return RT(0);
 
             if (M <= 8) return Norm1M_Helper<11,cs,rs,M1>::call(m);
@@ -911,7 +911,7 @@ namespace tmv {
 
             IT1 it1 = begin1;
             IT2 it2 = m.get_row(0).begin();
-            int end_step = m.stepi() - N; // back to the start of next row
+            ptrdiff_t end_step = m.stepi() - N; // back to the start of next row
 
             do {
                 do {
@@ -927,7 +927,7 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct Norm1M_Helper<90,cs,rs,M1>
     {
         typedef typename M1::float_type RT;
@@ -936,7 +936,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct Norm1M_Helper<97,cs,rs,M1>
     {
         typedef typename M1::float_type RT;
@@ -949,7 +949,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algo to use
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct Norm1M_Helper<-3,cs,rs,M1>
     {
         typedef typename M1::float_type RT;
@@ -971,7 +971,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct Norm1M_Helper<-2,cs,rs,M1>
     {
         typedef typename M1::float_type RT;
@@ -990,7 +990,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct Norm1M_Helper<-1,cs,rs,M1>
     {
         typedef typename M1::float_type RT;
@@ -1002,8 +1002,8 @@ namespace tmv {
     inline typename M::float_type InlineNorm1(
         const BaseMatrix_Rec<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
         return Norm1M_Helper<-3,cs,rs,Mv>::call(mv);
@@ -1012,8 +1012,8 @@ namespace tmv {
     template <class M>
     inline typename M::float_type DoNorm1(const BaseMatrix_Rec<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::const_cview_type Mv;
         TMV_MAYBE_CREF(M,Mv) mv = m.cView();
         return Norm1M_Helper<-2,cs,rs,Mv>::call(mv);

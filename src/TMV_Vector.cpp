@@ -20,6 +20,8 @@
 namespace tmv {
 
     // First some things from TMV_Blas.h
+    // TODO: This doesn't need to be global.  Just make one each time
+    // and pass it into LAP_Results.
     int Lap_info = 0;
 
     void LAP_Results(const char* fn)
@@ -148,7 +150,7 @@ namespace tmv {
 #endif // FLOAT
 #endif // BLAS
 
-    static inline bool shouldReverse(const int step1, const int step2)
+    static inline bool shouldReverse(const ptrdiff_t step1, const ptrdiff_t step2)
     {
         return ( (step2 < 0 && (step1 != 1 || step2 == -1)) ||
                  (step1 == -1 && step2 != 1) );
@@ -478,7 +480,7 @@ namespace tmv {
     //
 
     template <class T> 
-    T InstMaxElement(const ConstVectorView<T>& v, int* imax)
+    T InstMaxElement(const ConstVectorView<T>& v, ptrdiff_t* imax)
     {
         if (v.step() == 1) return InlineMaxElement(v.unitView(),imax);
         else return InlineMaxElement(v,imax);
@@ -490,7 +492,7 @@ namespace tmv {
 
     template <class T> 
     static typename ConstVectorView<T>::float_type DoInstMaxAbsElement(
-        const ConstVectorView<T>& v, int* imax)
+        const ConstVectorView<T>& v, ptrdiff_t* imax)
     {
         if (v.step() == 1) return InlineMaxAbsElement(v.unitView(),imax);
         else return InlineMaxAbsElement(v,imax);
@@ -498,7 +500,7 @@ namespace tmv {
 
     template <class T> 
     static typename Traits<T>::real_type DoInstMaxAbs2Element(
-        const ConstVectorView<T>& v, int* imax)
+        const ConstVectorView<T>& v, ptrdiff_t* imax)
     {
         if (v.step() == 1) return InlineMaxAbs2Element(v.unitView(),imax);
         else return InlineMaxAbs2Element(v,imax);
@@ -509,7 +511,7 @@ namespace tmv {
     // with BLASNORETURN
 #ifdef TMV_INST_DOUBLE
     static double DoInstMaxAbs2Element(
-        const ConstVectorView<double>& v, int* imax)
+        const ConstVectorView<double>& v, ptrdiff_t* imax)
     {
         int n=v.size();
         if (n == 0) return double(0);
@@ -609,12 +611,12 @@ namespace tmv {
 
     template <class T> 
     typename ConstVectorView<T>::float_type InstMaxAbsElement(
-        const ConstVectorView<T>& v, int* imax)
+        const ConstVectorView<T>& v, ptrdiff_t* imax)
     { return DoInstMaxAbsElement(v,imax); }
 
     template <class T> 
     typename Traits<T>::real_type InstMaxAbs2Element(
-        const ConstVectorView<T>& v, int* imax)
+        const ConstVectorView<T>& v, ptrdiff_t* imax)
     { return DoInstMaxAbs2Element(v,imax); }
 
 
@@ -623,7 +625,7 @@ namespace tmv {
     //
 
     template <class T> 
-    T InstMinElement(const ConstVectorView<T>& v, int* imin)
+    T InstMinElement(const ConstVectorView<T>& v, ptrdiff_t* imin)
     {
         if (v.step() == 1) return InlineMinElement(v.unitView(),imin);
         else return InlineMinElement(v,imin);
@@ -636,7 +638,7 @@ namespace tmv {
 
     template <class T> 
     static typename ConstVectorView<T>::float_type DoInstMinAbsElement(
-        const ConstVectorView<T>& v, int* imin)
+        const ConstVectorView<T>& v, ptrdiff_t* imin)
     {
         if (v.step() == 1) return InlineMinAbsElement(v.unitView(),imin);
         else return InlineMinAbsElement(v,imin);
@@ -644,7 +646,7 @@ namespace tmv {
 
     template <class T> 
     typename Traits<T>::real_type DoInstMinAbs2Element(
-        const ConstVectorView<T>& v, int* imin)
+        const ConstVectorView<T>& v, ptrdiff_t* imin)
     {
         if (v.step() == 1) return InlineMinAbs2Element(v.unitView(),imin);
         else return InlineMinAbs2Element(v,imin);
@@ -654,7 +656,7 @@ namespace tmv {
 #ifdef BLASIDAMIN
 #ifdef TMV_INST_DOUBLE
     double DoInstMinAbs2Element(
-        const ConstVectorView<double>& v, int* imin)
+        const ConstVectorView<double>& v, ptrdiff_t* imin)
     {
         int n=v.size();
         if (n == 0) return double(0); 
@@ -676,10 +678,10 @@ namespace tmv {
         }
     }
     double DoInstMinAbsElement(
-        const ConstVectorView<double>& v, int* imin)
+        const ConstVectorView<double>& v, ptrdiff_t* imin)
     { DoInstMinAbs2Element(v,imin); }
     double DoInstMinAbs2Element(
-        const ConstVectorView<std::complex<double> >& v, int* imin)
+        const ConstVectorView<std::complex<double> >& v, ptrdiff_t* imin)
     {
         int n=v.size();
         if (n == 0) return double(0); 
@@ -703,7 +705,7 @@ namespace tmv {
 #endif // DOUBLE
 #ifdef TMV_INST_FLOAT
     float DoInstMinAbs2Element(
-        const ConstVectorView<float>& v, int* imin)
+        const ConstVectorView<float>& v, ptrdiff_t* imin)
     {
         int n=v.size();
         if (n == 0) return float(0); 
@@ -725,10 +727,10 @@ namespace tmv {
         }
     }
     float DoInstMinAbsElement(
-        const ConstVectorView<float>& v, int* imin)
+        const ConstVectorView<float>& v, ptrdiff_t* imin)
     { DoInstMinAbs2Element(v,imin); }
     float DoInstMinAbs2Element(
-        const ConstVectorView<std::complex<float> >& v, int* imin)
+        const ConstVectorView<std::complex<float> >& v, ptrdiff_t* imin)
     {
         int n=v.size();
         if (n == 0) return float(0); 
@@ -755,12 +757,12 @@ namespace tmv {
 
     template <class T> 
     typename ConstVectorView<T>::float_type InstMinAbsElement(
-        const ConstVectorView<T>& v, int* imin)
+        const ConstVectorView<T>& v, ptrdiff_t* imin)
     { return DoInstMinAbsElement(v,imin); }
 
     template <class T> 
     typename Traits<T>::real_type InstMinAbs2Element(
-        const ConstVectorView<T>& v, int* imin)
+        const ConstVectorView<T>& v, ptrdiff_t* imin)
     { return DoInstMinAbs2Element(v,imin); }
 
 
@@ -863,7 +865,7 @@ namespace tmv {
         }
     }
     template <class T> 
-    void InstSort(VectorView<T> v, int* P, ADType ad, CompType comp)
+    void InstSort(VectorView<T> v, ptrdiff_t* P, ADType ad, CompType comp)
     {
         if (v.step() == 1) {
             VectorView<T,Unit> vu = v.unitView();

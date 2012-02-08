@@ -26,19 +26,19 @@ namespace tmv {
 
 
     // Note: cs,rs refer to M1, not M2 (which is reverse of M1)
-    template <int algo, int cs, int rs, class M1u, class M1s, class M1v, class M2>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2>
     struct SV_Inverse_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0 or N == 0)
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2>
     struct SV_Inverse_Helper<0,cs,rs,M1u,M1s,M1v,M2>
     {
         static TMV_INLINE void call(
-            const M1u& , const M1s& , const M1v& , int, M2& ) {} 
+            const M1u& , const M1s& , const M1v& , M2& ) {} 
     };
 
     // algo 11: Normal case
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2>
     struct SV_Inverse_Helper<11,cs,rs,M1u,M1s,M1v,M2>
     {
         static void call(
@@ -50,14 +50,14 @@ namespace tmv {
             // m2 = (USV)^-1
             //    = Vt S^-1 Ut
             typedef typename M1u::value_type T;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             typename MCopyHelper<T,Rec,xx,cs>::type SinvUt = U.adjoint() / S;
             minv = V.adjoint() * SinvUt;
         }
     };
 
     // algo 90: call InstSV_Inverse
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2>
     struct SV_Inverse_Helper<90,cs,rs,M1u,M1s,M1v,M2>
     {
         static TMV_INLINE void call(
@@ -66,7 +66,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2>
     struct SV_Inverse_Helper<97,cs,rs,M1u,M1s,M1v,M2>
     {
         static TMV_INLINE void call(
@@ -84,7 +84,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2>
     struct SV_Inverse_Helper<-3,cs,rs,M1u,M1s,M1v,M2>
     {
         static TMV_INLINE void call(
@@ -107,7 +107,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2>
     struct SV_Inverse_Helper<-2,cs,rs,M1u,M1s,M1v,M2>
     {
         static TMV_INLINE void call(
@@ -133,7 +133,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2>
     struct SV_Inverse_Helper<-1,cs,rs,M1u,M1s,M1v,M2>
     {
         static TMV_INLINE void call(
@@ -156,8 +156,8 @@ namespace tmv {
         TMVAssert(U.colsize() == minv.rowsize());
         TMVAssert(V.rowsize() == minv.colsize());
 
-        const int cs = Sizes<M2::_rowsize,M1u::_colsize>::size;
-        const int rs = Sizes<M2::_colsize,M1v::_rowsize>::size;
+        const ptrdiff_t cs = Sizes<M2::_rowsize,M1u::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M2::_colsize,M1v::_rowsize>::size;
         typedef typename M1u::const_cview_type M1uv;
         typedef typename M1s::const_cview_type M1sv;
         typedef typename M1v::const_cview_type M1vv;
@@ -184,8 +184,8 @@ namespace tmv {
         TMVAssert(U.colsize() == minv.rowsize());
         TMVAssert(V.rowsize() == minv.colsize());
 
-        const int cs = Sizes<M2::_rowsize,M1u::_colsize>::size;
-        const int rs = Sizes<M2::_colsize,M1u::_rowsize>::size;
+        const ptrdiff_t cs = Sizes<M2::_rowsize,M1u::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M2::_colsize,M1u::_rowsize>::size;
         typedef typename M1u::const_cview_type M1uv;
         typedef typename M1s::const_cview_type M1sv;
         typedef typename M1v::const_cview_type M1vv;
@@ -197,19 +197,19 @@ namespace tmv {
         SV_Inverse_Helper<-2,cs,rs,M1uv,M1sv,M1vv,M2v>::call(Uv,Sv,Vv,minvv);
     }
 
-    template <int algo, int cs, int rs, class M1u, class M1s, class M1v, class M2>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2>
     struct SV_InverseATA_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0 or N == 0)
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2>
     struct SV_InverseATA_Helper<0,cs,rs,M1u,M1s,M1v,M2>
     {
         static TMV_INLINE void call(
-            const M1u& , const M1s& , const M1v& , int, M2& ) {} 
+            const M1u& , const M1s& , const M1v& , M2& ) {} 
     };
 
     // algo 11: Normal case
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2>
     struct SV_InverseATA_Helper<11,cs,rs,M1u,M1s,M1v,M2>
     {
         static void call(
@@ -222,14 +222,14 @@ namespace tmv {
             // AtA = Vt S^2 V
             //     = Vt S^-2 V
             typedef typename M1u::value_type T;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             typename MCopyHelper<T,Rec,xx,rs>::type SinvV = V / S;
             ata = SinvV.adjoint() * SinvV;
         }
     };
 
     // algo 90: call InstSV_InverseATA
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2>
     struct SV_InverseATA_Helper<90,cs,rs,M1u,M1s,M1v,M2>
     {
         static TMV_INLINE void call(
@@ -238,7 +238,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2>
     struct SV_InverseATA_Helper<97,cs,rs,M1u,M1s,M1v,M2>
     {
         static TMV_INLINE void call(
@@ -256,7 +256,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2>
     struct SV_InverseATA_Helper<-3,cs,rs,M1u,M1s,M1v,M2>
     {
         static TMV_INLINE void call(
@@ -280,7 +280,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2>
     struct SV_InverseATA_Helper<-2,cs,rs,M1u,M1s,M1v,M2>
     {
         static TMV_INLINE void call(
@@ -307,7 +307,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class M1u, class M1s, class M1v, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1u, class M1s, class M1v, class M2>
     struct SV_InverseATA_Helper<-1,cs,rs,M1u,M1s,M1v,M2>
     {
         static TMV_INLINE void call(
@@ -333,8 +333,8 @@ namespace tmv {
         TMVAssert(V.rowsize() == ata.rowsize());
         TMVAssert(V.rowsize() == ata.colsize());
 
-        const int cs = M1u::_colsize;
-        const int rs = Sizes<M2::_colsize,
+        const ptrdiff_t cs = M1u::_colsize;
+        const ptrdiff_t rs = Sizes<M2::_colsize,
               Sizes<M2::_rowsize,M1u::_rowsize>::size>::size;
         typedef typename M1u::const_cview_type M1uv;
         typedef typename M1s::const_cview_type M1sv;
@@ -362,8 +362,8 @@ namespace tmv {
         TMVAssert(V.rowsize() == ata.rowsize());
         TMVAssert(V.rowsize() == ata.colsize());
 
-        const int cs = M1u::_colsize;
-        const int rs = Sizes<M2::_colsize,
+        const ptrdiff_t cs = M1u::_colsize;
+        const ptrdiff_t rs = Sizes<M2::_colsize,
               Sizes<M2::_rowsize,M1u::_rowsize>::size>::size;
         typedef typename M1u::const_cview_type M1uv;
         typedef typename M1s::const_cview_type M1sv;

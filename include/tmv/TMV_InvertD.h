@@ -17,7 +17,7 @@ namespace tmv {
     // DiagMatrix = DiagMatrix^-1
     //
 
-    template <int algo, int s, class V>
+    template <int algo, ptrdiff_t s, class V>
     struct ElemInvert_Helper;
 
     // algo 0: s == 0, nothing to do
@@ -26,20 +26,20 @@ namespace tmv {
     {
         typedef typename V::iterator IT;
         static TMV_INLINE void call(V& ) {}
-        static TMV_INLINE void call2(int, IT ) {}
+        static TMV_INLINE void call2(ptrdiff_t, IT ) {}
     };
 
     // algo 11: simple for loop
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ElemInvert_Helper<11,s,V>
     {
         typedef typename V::iterator IT;
         static inline void call(V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             call2(n,v.begin());
         }
-        static void call2(int n, IT A)
+        static void call2(ptrdiff_t n, IT A)
         {
             typedef typename V::real_type RT;
             if (n) do {
@@ -51,16 +51,16 @@ namespace tmv {
 
 #ifdef __SSE2__
     // algo 31: double precision SSE2: v real
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ElemInvert_Helper<31,s,V>
     {
         typedef typename V::iterator IT;
         static inline void call(V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             call2(n,v.begin());
         }
-        static void call2(int n, IT A)
+        static void call2(ptrdiff_t n, IT A)
         {
             const bool unit = V::_step == 1;
             const typename V::real_type one(1);
@@ -72,8 +72,8 @@ namespace tmv {
                 }
             }
 
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            ptrdiff_t nb = n-(n_2<<1);
             
             if (n_2) {
                 IT A1 = A+1;
@@ -93,16 +93,16 @@ namespace tmv {
     };
 
     // algo 33: double precision SSE2: v complex
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ElemInvert_Helper<33,s,V>
     {
         typedef typename V::iterator IT;
         static inline void call(V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             call2(n,v.begin());
         }
-        static void call2(int n, IT A)
+        static void call2(ptrdiff_t n, IT A)
         {
             if (n) {
                 // These look backwards, but order is from hi to lo values.
@@ -141,16 +141,16 @@ namespace tmv {
     // However, it is only 12 bit accurate, which is not acceptable,
     // so unfortunately we can't use it.
     // Instead, we do the reciprocal as 1 / x with _mm_div_ps.
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ElemInvert_Helper<41,s,V>
     {
         typedef typename V::iterator IT;
         static inline void call(V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             call2(n,v.begin());
         }
-        static void call2(int n, IT A)
+        static void call2(ptrdiff_t n, IT A)
         {
             const bool unit = V::_step == 1;
             const typename V::real_type one(1);
@@ -162,8 +162,8 @@ namespace tmv {
                 }
             }
 
-            int n_4 = (n>>2);
-            int nb = n-(n_4<<2);
+            ptrdiff_t n_4 = (n>>2);
+            ptrdiff_t nb = n-(n_4<<2);
             
             if (n_4) {
                 IT A1 = A+1;
@@ -189,16 +189,16 @@ namespace tmv {
     };
 
     // algo 43: single precision SSE: v complex
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ElemInvert_Helper<43,s,V>
     {
         typedef typename V::iterator IT;
         static inline void call(V& v)
         {
-            const int n = s == Unknown ? v.size() : s;
+            const ptrdiff_t n = s == Unknown ? v.size() : s;
             call2(n,v.begin());
         }
-        static void call2(int n, IT A)
+        static void call2(ptrdiff_t n, IT A)
         {
             const bool unit = V::_step == 1;
             const typename V::real_type one(1);
@@ -210,8 +210,8 @@ namespace tmv {
                 }
             }
 
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            ptrdiff_t nb = n-(n_2<<1);
             
             if (n_2) {
                 IT A1 = A+1;
@@ -238,7 +238,7 @@ namespace tmv {
 #endif
 
     // algo 90: Call inst
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ElemInvert_Helper<90,s,V>
     {
         static TMV_INLINE void call(V& v)
@@ -246,7 +246,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ElemInvert_Helper<97,s,V>
     {
         static TMV_INLINE void call(V& v)
@@ -258,7 +258,7 @@ namespace tmv {
     };
 
     // algo -4: No branches or copies
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ElemInvert_Helper<-4,s,V>
     {
         typedef typename V::iterator IT;
@@ -296,7 +296,7 @@ namespace tmv {
             std::cout<<"v => "<<v<<std::endl;
 #endif
         }
-        static TMV_INLINE void call2(int n, IT A)
+        static TMV_INLINE void call2(ptrdiff_t n, IT A)
         {
             TMVStaticAssert(!V::_conj);
             ElemInvert_Helper<algo,s,V>::call2(n,A); 
@@ -304,7 +304,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ElemInvert_Helper<-3,s,V>
     {
         static TMV_INLINE void call(V& v)
@@ -312,7 +312,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ElemInvert_Helper<-2,s,V>
     {
         static TMV_INLINE void call(V& v)
@@ -330,7 +330,7 @@ namespace tmv {
         }
     };
 
-    template <int s, class V>
+    template <ptrdiff_t s, class V>
     struct ElemInvert_Helper<-1,s,V>
     {
         static TMV_INLINE void call(V& v)

@@ -50,13 +50,13 @@ namespace tmv {
 
     // If xs is known, then this is easy, since we know the right 
     // function to use at compile time.
-    template <int K2, int KB, class T>
+    template <ptrdiff_t K2, ptrdiff_t KB, class T>
     struct get_Kcleanup
     {
         typedef void Kcleanup(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<1,T>& x, const T* A, const T* B, T* C);
-        static TMV_INLINE Kcleanup* call(const int K)
+        static TMV_INLINE Kcleanup* call(const ptrdiff_t K)
         {
             TMVStaticAssert(K2 != Unknown);
             return &call_multmm_16_16_K_known<K2,1,T>;
@@ -64,13 +64,13 @@ namespace tmv {
     };
 
 #ifndef TMV_MM_OPT_CLEANUP
-    template <int KB, class T>
+    template <ptrdiff_t KB, class T>
     struct get_Kcleanup<Unknown,KB,T>
     {
         typedef void Kcleanup(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<1,T>& x, const T* A, const T* B, T* C);
-        static TMV_INLINE Kcleanup* call(const int K)
+        static TMV_INLINE Kcleanup* call(const ptrdiff_t K)
         { return &call_multmm_16_16_K<1,T>; }
     };
 #else
@@ -84,9 +84,9 @@ namespace tmv {
     struct get_Kcleanup<Unknown,64,T>
     {
         typedef void Kcleanup(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<1,T>& x, const T* A, const T* B, T* C);
-        static Kcleanup* call(const int K)
+        static Kcleanup* call(const ptrdiff_t K)
         {
             TMVAssert(K > 0);
             TMVAssert(K < 64);
@@ -227,9 +227,9 @@ namespace tmv {
     struct get_Kcleanup<Unknown,32,T>
     {
         typedef void Kcleanup(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<1,T>& x, const T* A, const T* B, T* C);
-        static Kcleanup* call(const int K)
+        static Kcleanup* call(const ptrdiff_t K)
         {
             TMVAssert(K > 0);
             TMVAssert(K < 32);
@@ -306,9 +306,9 @@ namespace tmv {
     struct get_Kcleanup<Unknown,16,T>
     {
         typedef void Kcleanup(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<1,T>& x, const T* A, const T* B, T* C);
-        static Kcleanup* call(const int K)
+        static Kcleanup* call(const ptrdiff_t K)
         {
             TMVAssert(K > 0);
             TMVAssert(K < 16);
@@ -370,7 +370,7 @@ namespace tmv {
 
         static inline void call(
             const ConstMatrixView<RT>& m1x,
-            RT* m2p, int M, int N, int si, int sj)
+            RT* m2p, ptrdiff_t M, ptrdiff_t N, ptrdiff_t si, ptrdiff_t sj)
         {
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"MyCopy real"<<std::endl;
@@ -411,7 +411,7 @@ namespace tmv {
 
         static inline void call(
             const ConstMatrixView<RT>& m1x,
-            RT* m2p, int M, int N, int si, int sj)
+            RT* m2p, ptrdiff_t M, ptrdiff_t N, ptrdiff_t si, ptrdiff_t sj)
         {
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"MyCopy complex"<<std::endl;
@@ -421,7 +421,7 @@ namespace tmv {
                 (m2p+(M-1)*si+(N-1)*sj+1)<<std::endl;
 #endif
             TMVAssert(si == 1);
-            const int size = N*sj;
+            const ptrdiff_t size = N*sj;
             M1r m1r(m1x);
             M1r m1i(m1x.cptr()+1,m1r.colsize(),m1r.rowsize(),
                     m1r.stepi(),m1r.stepj());
@@ -463,7 +463,7 @@ namespace tmv {
 
         typedef void F(
             const ConstMatrixView<RT>& m1x,
-            RT* m2p, int M, int N, int si, int sj);
+            RT* m2p, ptrdiff_t M, ptrdiff_t N, ptrdiff_t si, ptrdiff_t sj);
 
         template <bool known, int dummy>
         struct GetCopyHelper;
@@ -494,11 +494,11 @@ namespace tmv {
         }
     };
 
-    template <int MB, int NB, int KB, int ix, class T>
+    template <ptrdiff_t MB, ptrdiff_t NB, ptrdiff_t KB, int ix, class T>
     struct select_multmm
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_N_K(M,N,K,x,A,B,C); }
     };
@@ -506,7 +506,7 @@ namespace tmv {
     struct select_multmm<16,16,16,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_16_16(M,N,K,x,A,B,C); }
     };
@@ -514,7 +514,7 @@ namespace tmv {
     struct select_multmm<16,16,32,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_16_32(M,N,K,x,A,B,C); }
     };
@@ -522,31 +522,31 @@ namespace tmv {
     struct select_multmm<16,16,64,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_16_64(M,N,K,x,A,B,C); }
     };
-    template <int MB, int ix, class T>
+    template <ptrdiff_t MB, int ix, class T>
     struct select_multmm<MB,16,16,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_16_known<MB>(M,N,K,x,A,B,C); }
     };
-    template <int MB, int ix, class T>
+    template <ptrdiff_t MB, int ix, class T>
     struct select_multmm<MB,16,32,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_32_known<MB>(M,N,K,x,A,B,C); }
     };
-    template <int MB, int ix, class T>
+    template <ptrdiff_t MB, int ix, class T>
     struct select_multmm<MB,16,64,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_64_known<MB>(M,N,K,x,A,B,C); }
     };
@@ -554,7 +554,7 @@ namespace tmv {
     struct select_multmm<Unknown,16,16,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_16(M,N,K,x,A,B,C); }
     };
@@ -562,7 +562,7 @@ namespace tmv {
     struct select_multmm<Unknown,16,32,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_32(M,N,K,x,A,B,C); }
     };
@@ -570,31 +570,31 @@ namespace tmv {
     struct select_multmm<Unknown,16,64,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_M_16_64(M,N,K,x,A,B,C); }
     };
-    template <int NB, int ix, class T>
+    template <ptrdiff_t NB, int ix, class T>
     struct select_multmm<16,NB,16,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_16_known<NB>(M,N,K,x,A,B,C); }
     };
-    template <int NB, int ix, class T>
+    template <ptrdiff_t NB, int ix, class T>
     struct select_multmm<16,NB,32,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_32_known<NB>(M,N,K,x,A,B,C); }
     };
-    template <int NB, int ix, class T>
+    template <ptrdiff_t NB, int ix, class T>
     struct select_multmm<16,NB,64,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_64_known<NB>(M,N,K,x,A,B,C); }
     };
@@ -602,7 +602,7 @@ namespace tmv {
     struct select_multmm<16,Unknown,16,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_16(M,N,K,x,A,B,C); }
     };
@@ -610,7 +610,7 @@ namespace tmv {
     struct select_multmm<16,Unknown,32,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_32(M,N,K,x,A,B,C); }
     };
@@ -618,15 +618,15 @@ namespace tmv {
     struct select_multmm<16,Unknown,64,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_N_64(M,N,K,x,A,B,C); }
     };
-    template <int KB, int ix, class T>
+    template <ptrdiff_t KB, int ix, class T>
     struct select_multmm<16,16,KB,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_16_K_known<KB>(M,N,K,x,A,B,C); }
     };
@@ -634,22 +634,22 @@ namespace tmv {
     struct select_multmm<16,16,Unknown,ix,T>
     {
         static TMV_INLINE void call(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<ix,T>& x, const T* A, const T* B, T* C)
         { multmm_16_16_K(M,N,K,x,A,B,C); }
     };
 
-    template <bool iscomplex1, bool iscomplex2, int cs, int rs, int xs, class RT>
+    template <bool iscomplex1, bool iscomplex2, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class RT>
     struct MyProd;
 
-    template <int cs, int rs, int xs, class RT>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class RT>
     struct MyProd<false,false,cs,rs,xs,RT> // both real
     {
         static void call(
-            const int M, const int N, const int K,
-            RT* m1p, const int si1, const int sj1,
-            RT* m2p, const int si2, const int sj2,
-            RT* m3p, const int si3, const int sj3)
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+            RT* m1p, const ptrdiff_t si1, const ptrdiff_t sj1,
+            RT* m2p, const ptrdiff_t si2, const ptrdiff_t sj2,
+            RT* m3p, const ptrdiff_t si3, const ptrdiff_t sj3)
         {
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"MyProd both real"<<std::endl;
@@ -679,16 +679,16 @@ namespace tmv {
 #endif
         }
     };
-    template <int cs, int rs, int xs, class RT>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class RT>
     struct MyProd<true,false,cs,rs,xs,RT> // m1 is complex
     {
         typedef std::complex<RT> CT;
 
         static void call(
-            const int M, const int N, const int K,
-            RT* m1p, const int si1, const int sj1,
-            RT* m2p, const int si2, const int sj2,
-            RT* m3p, const int si3, const int sj3)
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+            RT* m1p, const ptrdiff_t si1, const ptrdiff_t sj1,
+            RT* m2p, const ptrdiff_t si2, const ptrdiff_t sj2,
+            RT* m3p, const ptrdiff_t si3, const ptrdiff_t sj3)
         {
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"MyProd (m1 complex)"<<std::endl;
@@ -709,8 +709,8 @@ namespace tmv {
             //std::cout<<"m1 = "<<m1<<std::endl;
             //std::cout<<"m2 = "<<m2<<std::endl;
 #endif
-            const int xn1 = M*si1;
-            const int xn3 = N*sj3;
+            const ptrdiff_t xn1 = M*si1;
+            const ptrdiff_t xn3 = N*sj3;
             const Scaling<1,RT> one;
             select_multmm<cs,rs,xs,1,RT>::call(M,N,K,one,m1p,m2p,m3p);
             select_multmm<cs,rs,xs,1,RT>::call(M,N,K,one,m1p+xn1,m2p,m3p+xn3);
@@ -720,16 +720,16 @@ namespace tmv {
 #endif
         }
     };
-    template <int cs, int rs, int xs, class RT>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class RT>
     struct MyProd<false,true,cs,rs,xs,RT> // m2 is complex
     {
         typedef std::complex<RT> CT;
 
         static void call(
-            const int M, const int N, const int K,
-            RT* m1p, const int si1, const int sj1,
-            RT* m2p, const int si2, const int sj2,
-            RT* m3p, const int si3, const int sj3)
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+            RT* m1p, const ptrdiff_t si1, const ptrdiff_t sj1,
+            RT* m2p, const ptrdiff_t si2, const ptrdiff_t sj2,
+            RT* m3p, const ptrdiff_t si3, const ptrdiff_t sj3)
         {
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"MyProd (m2 complex)"<<std::endl;
@@ -750,8 +750,8 @@ namespace tmv {
             //std::cout<<"m1 = "<<m1<<std::endl;
             //std::cout<<"m2 = "<<m2<<std::endl;
 #endif
-            const int xn2 = N*sj2;
-            const int xn3 = N*sj3;
+            const ptrdiff_t xn2 = N*sj2;
+            const ptrdiff_t xn3 = N*sj3;
             const Scaling<1,RT> one;
             select_multmm<cs,rs,xs,1,RT>::call(M,N,K,one,m1p,m2p,m3p);
             select_multmm<cs,rs,xs,1,RT>::call(M,N,K,one,m1p,m2p+xn2,m3p+xn3);
@@ -761,16 +761,16 @@ namespace tmv {
 #endif
         }
     };
-    template <int cs, int rs, int xs, class RT>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, class RT>
     struct MyProd<true,true,cs,rs,xs,RT> // both complex
     {
         typedef std::complex<RT> CT;
 
         static void call(
-            const int M, const int N, const int K,
-            RT* m1p, const int si1, const int sj1,
-            RT* m2p, const int si2, const int sj2,
-            RT* m3p, const int si3, const int sj3)
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+            RT* m1p, const ptrdiff_t si1, const ptrdiff_t sj1,
+            RT* m2p, const ptrdiff_t si2, const ptrdiff_t sj2,
+            RT* m3p, const ptrdiff_t si3, const ptrdiff_t sj3)
         {
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"MyProd (both complex)"<<std::endl;
@@ -792,9 +792,9 @@ namespace tmv {
             //std::cout<<"m2 = "<<m2<<std::endl;
             //std::cout<<"m3 = "<<m3<<std::endl;
 #endif
-            const int xn1 = M*si1;
-            const int xn2 = N*sj2;
-            const int xn3 = N*sj3;
+            const ptrdiff_t xn1 = M*si1;
+            const ptrdiff_t xn2 = N*sj2;
+            const ptrdiff_t xn3 = N*sj3;
             const Scaling<1,RT> one;
             const Scaling<-1,RT> mone;
             select_multmm<cs,rs,xs,1,RT>::call(M,N,K,one,m1p,m2p,m3p);
@@ -816,14 +816,14 @@ namespace tmv {
     struct MyCleanup<false,false,RT> // both real
     {
         typedef void Kcleanup(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<1,RT>& x, const RT* A, const RT* B, RT* C);
 
         static void call(
-            const int M, const int N, const int K,
-            RT* m1p, const int si1, const int sj1,
-            RT* m2p, const int si2, const int sj2,
-            RT* m3p, const int si3, const int sj3,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+            RT* m1p, const ptrdiff_t si1, const ptrdiff_t sj1,
+            RT* m2p, const ptrdiff_t si2, const ptrdiff_t sj2,
+            RT* m3p, const ptrdiff_t si3, const ptrdiff_t sj3,
             Kcleanup* cleanup)
         {
 #ifdef PRINTALGO_MM_BLOCK
@@ -860,14 +860,14 @@ namespace tmv {
         typedef std::complex<RT> CT;
 
         typedef void Kcleanup(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<1,RT>& x, const RT* A, const RT* B, RT* C);
 
         static void call(
-            const int M, const int N, const int K,
-            RT* m1p, const int si1, const int sj1,
-            RT* m2p, const int si2, const int sj2,
-            RT* m3p, const int si3, const int sj3,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+            RT* m1p, const ptrdiff_t si1, const ptrdiff_t sj1,
+            RT* m2p, const ptrdiff_t si2, const ptrdiff_t sj2,
+            RT* m3p, const ptrdiff_t si3, const ptrdiff_t sj3,
             Kcleanup* cleanup)
         {
 #ifdef PRINTALGO_MM_BLOCK
@@ -890,8 +890,8 @@ namespace tmv {
 #endif
             TMVAssert(cleanup);
             const Scaling<1,RT> one;
-            const int xn1 = M*si1;
-            const int xn3 = N*sj3;
+            const ptrdiff_t xn1 = M*si1;
+            const ptrdiff_t xn3 = N*sj3;
             (*cleanup)(M,N,K,one,m1p,m2p,m3p);
             (*cleanup)(M,N,K,one,m1p+xn1,m2p,m3p+xn3);
 #ifdef PRINTALGO_MM_BLOCK
@@ -905,14 +905,14 @@ namespace tmv {
     {
         typedef std::complex<RT> CT;
         typedef void Kcleanup(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<1,RT>& x, const RT* A, const RT* B, RT* C);
 
         static void call(
-            const int M, const int N, const int K,
-            RT* m1p, const int si1, const int sj1,
-            RT* m2p, const int si2, const int sj2,
-            RT* m3p, const int si3, const int sj3,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+            RT* m1p, const ptrdiff_t si1, const ptrdiff_t sj1,
+            RT* m2p, const ptrdiff_t si2, const ptrdiff_t sj2,
+            RT* m3p, const ptrdiff_t si3, const ptrdiff_t sj3,
             Kcleanup* cleanup)
         {
 #ifdef PRINTALGO_MM_BLOCK
@@ -935,8 +935,8 @@ namespace tmv {
 #endif
             TMVAssert(cleanup);
             const Scaling<1,RT> one;
-            const int size2 = si2 == 1 ? N*sj2 : K*si2;
-            const int size3 = si3 == 1 ? N*sj3 : M*si3;
+            const ptrdiff_t size2 = si2 == 1 ? N*sj2 : K*si2;
+            const ptrdiff_t size3 = si3 == 1 ? N*sj3 : M*si3;
             (*cleanup)(M,N,K,one,m1p,m2p,m3p);
             (*cleanup)(M,N,K,one,m1p,m2p+size2,m3p+size3);
 #ifdef PRINTALGO_MM_BLOCK
@@ -950,14 +950,14 @@ namespace tmv {
     {
         typedef std::complex<RT> CT;
         typedef void Kcleanup(
-            const int M, const int N, const int K,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
             const Scaling<1,RT>& x, const RT* A, const RT* B, RT* C);
 
         static void call(
-            const int M, const int N, const int K,
-            RT* m1p, const int si1, const int sj1,
-            RT* m2p, const int si2, const int sj2,
-            RT* m3p, const int si3, const int sj3,
+            const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+            RT* m1p, const ptrdiff_t si1, const ptrdiff_t sj1,
+            RT* m2p, const ptrdiff_t si2, const ptrdiff_t sj2,
+            RT* m3p, const ptrdiff_t si3, const ptrdiff_t sj3,
             Kcleanup* cleanup)
         {
 #ifdef PRINTALGO_MM_BLOCK
@@ -981,9 +981,9 @@ namespace tmv {
 #endif
             TMVAssert(cleanup);
             const Scaling<1,RT> one;
-            const int xn1 = M*si1;
-            const int xn2 = N*sj2;
-            const int xn3 = N*sj3;
+            const ptrdiff_t xn1 = M*si1;
+            const ptrdiff_t xn2 = N*sj2;
+            const ptrdiff_t xn3 = N*sj3;
 
             (*cleanup)(M,N,K,one,m1p,m2p,m3p);
 #ifdef PRINTALGO_MM_BLOCK
@@ -1043,7 +1043,7 @@ namespace tmv {
 
         static void call(
             const RT* xp, 
-            RT* m1p, const int M, const int N, const int si1, const int sj1,
+            RT* m1p, const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t si1, const ptrdiff_t sj1,
             MatrixView<RT> m2x)
         {
 #ifdef PRINTALGO_MM_BLOCK
@@ -1068,8 +1068,8 @@ namespace tmv {
             TMVAssert(si1 == 1);
             M1r m1(m1p,M,N,si1,sj1);
             // Get back to original steps, rather than realPart.
-            const int si2 = Maybe<Traits<T2>::iscomplex>::divby2(m2x.stepi());
-            const int sj2 = Maybe<Traits<T2>::iscomplex>::divby2(m2x.stepj());
+            const ptrdiff_t si2 = Maybe<Traits<T2>::iscomplex>::divby2(m2x.stepi());
+            const ptrdiff_t sj2 = Maybe<Traits<T2>::iscomplex>::divby2(m2x.stepj());
             M2 m2((T2*)m2x.ptr(),m2x.colsize(),m2x.rowsize(),si2,sj2);
             const RT xx(*((RT*)(xp)));
 #ifdef PRINTALGO_MM_BLOCK
@@ -1106,7 +1106,7 @@ namespace tmv {
 
         static void call(
             const RT* xp, 
-            RT* m1p, const int M, const int N, const int si1, const int sj1,
+            RT* m1p, const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t si1, const ptrdiff_t sj1,
             MatrixView<RT> m2x)
         {
 #ifdef PRINTALGO_MM_BLOCK
@@ -1122,8 +1122,8 @@ namespace tmv {
             TMVAssert(si1 == 1);
             M1r m1(m1p,M,N,si1,sj1);
             // Get back to original steps, rather than realPart.
-            const int si2 = Maybe<Traits<T2>::iscomplex>::divby2(m2x.stepi());
-            const int sj2 = Maybe<Traits<T2>::iscomplex>::divby2(m2x.stepj());
+            const ptrdiff_t si2 = Maybe<Traits<T2>::iscomplex>::divby2(m2x.stepi());
+            const ptrdiff_t sj2 = Maybe<Traits<T2>::iscomplex>::divby2(m2x.stepj());
             M2 m2((T2*)m2x.ptr(),m2x.colsize(),m2x.rowsize(),si2,sj2);
             const T2 xx(*((T2*)(xp)));
             Scaling<0,T2> x(xx);
@@ -1150,8 +1150,8 @@ namespace tmv {
 
         static void call(
             const RT* xp,
-            RT* m1p, const int M, const int N,
-            const int si1, const int sj1,
+            RT* m1p, const ptrdiff_t M, const ptrdiff_t N,
+            const ptrdiff_t si1, const ptrdiff_t sj1,
             MatrixView<RT> m2x)
         {
 #ifdef PRINTALGO_MM_BLOCK
@@ -1168,7 +1168,7 @@ namespace tmv {
             M2r m2r(m2x);
             M2i m2i(m2x.ptr()+1,m2r.colsize(),m2r.rowsize(),
                     m2r.stepi(),m2r.stepj());
-            const int size = N*sj1;
+            const ptrdiff_t size = N*sj1;
             M1r m1r(m1p,M,N,si1,sj1);
             M1r m1i(m1p+size,M,N,si1,sj1);
             const RT xx(*((RT*)(xp)));
@@ -1217,8 +1217,8 @@ namespace tmv {
 
         static void call(
             const RT* xp,
-            RT* m1p, const int M, const int N,
-            const int si1, const int sj1,
+            RT* m1p, const ptrdiff_t M, const ptrdiff_t N,
+            const ptrdiff_t si1, const ptrdiff_t sj1,
             MatrixView<RT> m2x)
         {
 #ifdef PRINTALGO_MM_BLOCK
@@ -1235,7 +1235,7 @@ namespace tmv {
             M2r m2r(m2x);
             M2i m2i(m2x.ptr()+1,m2r.colsize(),m2r.rowsize(),
                     m2r.stepi(),m2r.stepj());
-            const int size = N*sj1;
+            const ptrdiff_t size = N*sj1;
             M1r m1r(m1p,M,N,si1,sj1);
             M1r m1i(m1p+size,M,N,si1,sj1);
             const T2 xx(*((T2*)(xp)));
@@ -1278,7 +1278,7 @@ namespace tmv {
 
         typedef void F(
             const RT* xp,
-            RT* m1p, const int M, const int N, const int si1, const int sj1,
+            RT* m1p, const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t si1, const ptrdiff_t sj1,
             MatrixView<RT> m2x);
 
         template <bool known, int dummy>
@@ -1313,10 +1313,10 @@ namespace tmv {
     // A helper function to round a column length up to the next
     // multiple of 2 or 4 if required for the SSE commands for that type.
     template <class T>
-    static TMV_INLINE int RoundUp(const int x)
+    static TMV_INLINE ptrdiff_t RoundUp(const ptrdiff_t x)
     { return x; }
     template <>
-    TMV_INLINE int RoundUp<double>(const int x)
+    TMV_INLINE ptrdiff_t RoundUp<double>(const ptrdiff_t x)
     {
         return (
 #ifdef __SSE2__
@@ -1327,7 +1327,7 @@ namespace tmv {
         );
     }
     template <>
-    TMV_INLINE int RoundUp<float>(const int x)
+    TMV_INLINE ptrdiff_t RoundUp<float>(const ptrdiff_t x)
     {
         return (
 #ifdef __SSE__
@@ -1389,14 +1389,14 @@ namespace tmv {
     static void DoRecursiveBlockMultMM3(
         const RT* x, const ConstMatrixView<RT>& m1,
         const ConstMatrixView<RT>& m2, MatrixView<RT> m3,
-        const int MB, const int NB, const int KB,
-        const int MB0, const int NB0, 
-        const int lgMB, const int lgNB, const int lgKB,
-        const int i1, const int j1, int k1,
-        const int i2, const int j2, const int k2,
-        const int Mb, const int Nb, const int Kb,
+        const ptrdiff_t MB, const ptrdiff_t NB, const ptrdiff_t KB,
+        const ptrdiff_t MB0, const ptrdiff_t NB0, 
+        const ptrdiff_t lgMB, const ptrdiff_t lgNB, const ptrdiff_t lgKB,
+        const ptrdiff_t i1, const ptrdiff_t j1, ptrdiff_t k1,
+        const ptrdiff_t i2, const ptrdiff_t j2, const ptrdiff_t k2,
+        const ptrdiff_t Mb, const ptrdiff_t Nb, const ptrdiff_t Kb,
         RT* m1p, RT* m2p, RT* m3p,
-        const int two1, const int two2, const int two3,
+        const ptrdiff_t two1, const ptrdiff_t two2, const ptrdiff_t two3,
         bool firstm1, bool firstm2, bool firstm3, bool lastm3,
         CopyF* copy1, CopyF* copy1_k, CopyF* mycopy1, CopyF* mycopy1_k,
         CopyF* copy2, CopyF* copy2_k, CopyF* mycopy2, CopyF* mycopy2_k,
@@ -1420,35 +1420,35 @@ namespace tmv {
 #endif
 
         if (Mb > 1 && Nb > 1 && Kb > 1) {
-            const int Mx = Mb>>1; // = Mb/2
-            const int Nx = Nb>>1; // = Nb/2
-            const int Kx = Kb>>1; // = Kb/2
-            const int Mz = Mx<<lgMB;
-            const int Nz = Nx<<lgNB;
-            const int Kz = Kx<<lgKB;
-            const int Mw = (i2-i1-Mz);
-            const int Nw = (j2-j1-Nz);
-            const int Kw = RoundUp<RT>(k2-k1-Kz);
+            const ptrdiff_t Mx = Mb>>1; // = Mb/2
+            const ptrdiff_t Nx = Nb>>1; // = Nb/2
+            const ptrdiff_t Kx = Kb>>1; // = Kb/2
+            const ptrdiff_t Mz = Mx<<lgMB;
+            const ptrdiff_t Nz = Nx<<lgNB;
+            const ptrdiff_t Kz = Kx<<lgKB;
+            const ptrdiff_t Mw = (i2-i1-Mz);
+            const ptrdiff_t Nw = (j2-j1-Nz);
+            const ptrdiff_t Kw = RoundUp<RT>(k2-k1-Kz);
 
-            const int im = i1 + Mz;
-            const int jm = j1 + Nz;
-            const int km = k1 + Kz;
+            const ptrdiff_t im = i1 + Mz;
+            const ptrdiff_t jm = j1 + Nz;
+            const ptrdiff_t km = k1 + Kz;
 
-            const int n1a = two1*Mz*Kz;
-            const int n1b = n1a + two1*Mz*Kw;
-            const int n1c = n1b + two1*Mw*Kz;
+            const ptrdiff_t n1a = two1*Mz*Kz;
+            const ptrdiff_t n1b = n1a + two1*Mz*Kw;
+            const ptrdiff_t n1c = n1b + two1*Mw*Kz;
 
-            const int n2a = two2*Nz*Kz;
-            const int n2b = n2a + two2*Nz*Kw;
-            const int n2c = n2b + two2*Nw*Kz;
+            const ptrdiff_t n2a = two2*Nz*Kz;
+            const ptrdiff_t n2b = n2a + two2*Nz*Kw;
+            const ptrdiff_t n2c = n2b + two2*Nw*Kz;
 
-            const int n3a = two3*Mz*Nz;
-            const int n3b = n3a + two3*Mz*Nw;
-            const int n3c = n3b + two3*Mw*Nz;
+            const ptrdiff_t n3a = two3*Mz*Nz;
+            const ptrdiff_t n3b = n3a + two3*Mz*Nw;
+            const ptrdiff_t n3c = n3b + two3*Mw*Nz;
 #ifdef PRINTALGO_MM_BLOCK
-            const int My = Mb-Mx; 
-            const int Ny = Nb-Nx;
-            const int Ky = Kb-Kx;
+            const ptrdiff_t My = Mb-Mx; 
+            const ptrdiff_t Ny = Nb-Nx;
+            const ptrdiff_t Ky = Kb-Kx;
             std::cout<<"Regular split (all > 1)\n";
             std::cout<<"Mxyzw = "<<Mx<<','<<My<<','<<Mz<<','<<Mw<<std::endl;
             std::cout<<"Nxyzw = "<<Nx<<','<<Ny<<','<<Nz<<','<<Nw<<std::endl;
@@ -1596,7 +1596,7 @@ namespace tmv {
                 (*mycopy2) (m2.cSubMatrix(k1,k1+KB,j1,j2),m2p,KB,NB,1,KB);
             if (firstm3)
             {
-                const int size3 = two3*MB*NB;
+                const ptrdiff_t size3 = two3*MB*NB;
                 VectorView<RT,Unit> m3x(m3p,size3);
                 m3x.setZero();
             }
@@ -1606,13 +1606,13 @@ namespace tmv {
             {
                 if (mykf) 
                 {
-                    const int size1 = (two1*MB)<<lgKB;
-                    const int size2 = (two2*NB)<<lgKB;
+                    const ptrdiff_t size1 = (two1*MB)<<lgKB;
+                    const ptrdiff_t size2 = (two2*NB)<<lgKB;
                     m1p += size1;
                     m2p += size2;
                     k1 += KB;
-                    const int Kc = k2-k1;
-                    const int Kd = RoundUp<RT>(Kc);
+                    const ptrdiff_t Kc = k2-k1;
+                    const ptrdiff_t Kd = RoundUp<RT>(Kc);
 #ifdef TEST_POINTERS
                     TMVAssert(m1p < glob_m1p_end);
                     TMVAssert(m2p < glob_m2p_end);
@@ -1636,25 +1636,25 @@ namespace tmv {
             }
         } else if (Mb > 1 && Nb > 1) {
             TMVAssert(Mb > 1 && Nb > 1 && Kb == 1);
-            const int Mx = Mb>>1; // = Mb/2
-            const int Nx = Nb>>1; // = Nb/2
-            const int Mz = Mx<<lgMB;
-            const int Nz = Nx<<lgNB;
-            const int Mw = (i2-i1-Mz);
-            const int Nw = (j2-j1-Nz);
-            const int Kw = RoundUp<RT>(k2-k1);
+            const ptrdiff_t Mx = Mb>>1; // = Mb/2
+            const ptrdiff_t Nx = Nb>>1; // = Nb/2
+            const ptrdiff_t Mz = Mx<<lgMB;
+            const ptrdiff_t Nz = Nx<<lgNB;
+            const ptrdiff_t Mw = (i2-i1-Mz);
+            const ptrdiff_t Nw = (j2-j1-Nz);
+            const ptrdiff_t Kw = RoundUp<RT>(k2-k1);
 
-            const int im = i1 + Mz;
-            const int jm = j1 + Nz;
+            const ptrdiff_t im = i1 + Mz;
+            const ptrdiff_t jm = j1 + Nz;
 
-            const int n1b = two1*Mz*Kw;
-            const int n2b = two2*Nz*Kw;
-            const int n3a = two3*Mz*Nz;
-            const int n3b = n3a + two3*Mz*Nw;
-            const int n3c = n3b + two3*Mw*Nz;
+            const ptrdiff_t n1b = two1*Mz*Kw;
+            const ptrdiff_t n2b = two2*Nz*Kw;
+            const ptrdiff_t n3a = two3*Mz*Nz;
+            const ptrdiff_t n3b = n3a + two3*Mz*Nw;
+            const ptrdiff_t n3c = n3b + two3*Mw*Nz;
 #ifdef PRINTALGO_MM_BLOCK
-            const int My = Mb-Mx; 
-            const int Ny = Nb-Nx;
+            const ptrdiff_t My = Mb-Mx; 
+            const ptrdiff_t Ny = Nb-Nx;
             std::cout<<"M,N > 1 split\n";
             std::cout<<"Mxyzw = "<<Mx<<','<<My<<','<<Mz<<','<<Mw<<std::endl;
             std::cout<<"Nxyzw = "<<Nx<<','<<Ny<<','<<Nz<<','<<Nw<<std::endl;
@@ -1717,26 +1717,26 @@ namespace tmv {
                 mycleanup,kf,kfa,kfb,mykf);
         } else if (Mb > 1 && Kb > 1) {
             TMVAssert(Mb > 1 && Kb > 1 && Nb == 1);
-            const int Mx = Mb>>1; // = Mb/2
-            const int Kx = Kb>>1; // = Kb/2
-            const int Mz = Mx<<lgMB;
-            const int Kz = Kx<<lgKB;
-            const int Mw = (i2-i1-Mz);
-            const int Nw = (j2-j1);
-            const int Kw = RoundUp<RT>(k2-k1-Kz);
+            const ptrdiff_t Mx = Mb>>1; // = Mb/2
+            const ptrdiff_t Kx = Kb>>1; // = Kb/2
+            const ptrdiff_t Mz = Mx<<lgMB;
+            const ptrdiff_t Kz = Kx<<lgKB;
+            const ptrdiff_t Mw = (i2-i1-Mz);
+            const ptrdiff_t Nw = (j2-j1);
+            const ptrdiff_t Kw = RoundUp<RT>(k2-k1-Kz);
 
-            const int im = i1 + Mz;
-            const int km = k1 + Kz;
+            const ptrdiff_t im = i1 + Mz;
+            const ptrdiff_t km = k1 + Kz;
 
-            const int n1a = two1*Mz*Kz;
-            const int n1b = n1a + two1*Mz*Kw;
-            const int n1c = n1b + two1*Mw*Kz;
-            const int n2a = two2*Nw*Kz;
-            const int n3b = two3*Mz*Nw;
+            const ptrdiff_t n1a = two1*Mz*Kz;
+            const ptrdiff_t n1b = n1a + two1*Mz*Kw;
+            const ptrdiff_t n1c = n1b + two1*Mw*Kz;
+            const ptrdiff_t n2a = two2*Nw*Kz;
+            const ptrdiff_t n3b = two3*Mz*Nw;
 
 #ifdef PRINTALGO_MM_BLOCK
-            const int My = Mb-Mx; 
-            const int Ky = Kb-Kx;
+            const ptrdiff_t My = Mb-Mx; 
+            const ptrdiff_t Ky = Kb-Kx;
             std::cout<<"M,K > 1 split\n";
             std::cout<<"Mxyzw = "<<Mx<<','<<My<<','<<Mz<<','<<Mw<<std::endl;
             std::cout<<"Nw = "<<Nw<<std::endl;
@@ -1800,26 +1800,26 @@ namespace tmv {
                 mycleanup,kf,kfa,kfb,mykf);
         } else if (Nb > 1 && Kb > 1) {
             TMVAssert(Nb > 1 && Kb > 1 && Mb == 1);
-            const int Nx = Nb>>1; // = Nb/2
-            const int Kx = Kb>>1; // = Kb/2
-            const int Nz = Nx<<lgNB;
-            const int Kz = Kx<<lgKB;
-            const int Mw = (i2-i1);
-            const int Nw = (j2-j1-Nz);
-            const int Kw = RoundUp<RT>(k2-k1-Kz);
+            const ptrdiff_t Nx = Nb>>1; // = Nb/2
+            const ptrdiff_t Kx = Kb>>1; // = Kb/2
+            const ptrdiff_t Nz = Nx<<lgNB;
+            const ptrdiff_t Kz = Kx<<lgKB;
+            const ptrdiff_t Mw = (i2-i1);
+            const ptrdiff_t Nw = (j2-j1-Nz);
+            const ptrdiff_t Kw = RoundUp<RT>(k2-k1-Kz);
 
-            const int jm = j1 + Nz;
-            const int km = k1 + Kz;
+            const ptrdiff_t jm = j1 + Nz;
+            const ptrdiff_t km = k1 + Kz;
 
-            const int n1a = two1*Mw*Kz;
-            const int n2a = two2*Nz*Kz;
-            const int n2b = n2a + two2*Nz*Kw;
-            const int n2c = n2b + two2*Nw*Kz;
-            const int n3a = two3*Mw*Nz;
+            const ptrdiff_t n1a = two1*Mw*Kz;
+            const ptrdiff_t n2a = two2*Nz*Kz;
+            const ptrdiff_t n2b = n2a + two2*Nz*Kw;
+            const ptrdiff_t n2c = n2b + two2*Nw*Kz;
+            const ptrdiff_t n3a = two3*Mw*Nz;
 
 #ifdef PRINTALGO_MM_BLOCK
-            const int Ny = Nb-Nx;
-            const int Ky = Kb-Kx;
+            const ptrdiff_t Ny = Nb-Nx;
+            const ptrdiff_t Ky = Kb-Kx;
             std::cout<<"N,K > 1 split\n";
             std::cout<<"Mw = "<<Mw<<std::endl;
             std::cout<<"Nxyzw = "<<Nx<<','<<Ny<<','<<Nz<<','<<Nw<<std::endl;
@@ -1883,19 +1883,19 @@ namespace tmv {
                 mycleanup,kf,kfa,kfb,mykf);
         } else if (Mb > 1) {
             TMVAssert(Mb > 1 && Nb == 1 && Kb == 1);
-            const int Mx = Mb>>1; // = Mb/2
-            const int Mz = Mx<<lgMB;
-            const int Nw = (j2-j1);
-            const int Kw = RoundUp<RT>(k2-k1);
+            const ptrdiff_t Mx = Mb>>1; // = Mb/2
+            const ptrdiff_t Mz = Mx<<lgMB;
+            const ptrdiff_t Nw = (j2-j1);
+            const ptrdiff_t Kw = RoundUp<RT>(k2-k1);
 
-            const int im = i1 + Mz;
+            const ptrdiff_t im = i1 + Mz;
 
-            const int n1b = two1*Mz*Kw;
-            const int n3b = two3*Mz*Nw;
+            const ptrdiff_t n1b = two1*Mz*Kw;
+            const ptrdiff_t n3b = two3*Mz*Nw;
 
 #ifdef PRINTALGO_MM_BLOCK
-            const int My = Mb-Mx; 
-            const int Mw = (i2-i1-Mz);
+            const ptrdiff_t My = Mb-Mx; 
+            const ptrdiff_t Mw = (i2-i1-Mz);
             std::cout<<"M > 1 split\n";
             std::cout<<"Mxyzw = "<<Mx<<','<<My<<','<<Mz<<','<<Mw<<std::endl;
             std::cout<<"Nw = "<<Nw<<std::endl;
@@ -1934,19 +1934,19 @@ namespace tmv {
                 mycleanup,kf,kfa,kfb,mykf);
         } else if (Nb > 1) {
             TMVAssert(Nb > 1 && Kb == 1 && Mb == 1);
-            const int Nx = Nb>>1; // = Nb/2
-            const int Nz = Nx<<lgNB;
-            const int Mw = (i2-i1);
-            const int Kw = RoundUp<RT>(k2-k1);
+            const ptrdiff_t Nx = Nb>>1; // = Nb/2
+            const ptrdiff_t Nz = Nx<<lgNB;
+            const ptrdiff_t Mw = (i2-i1);
+            const ptrdiff_t Kw = RoundUp<RT>(k2-k1);
 
-            const int jm = j1 + Nz;
+            const ptrdiff_t jm = j1 + Nz;
 
-            const int n2b = two2*Nz*Kw;
-            const int n3a = two3*Mw*Nz;
+            const ptrdiff_t n2b = two2*Nz*Kw;
+            const ptrdiff_t n3a = two3*Mw*Nz;
 
 #ifdef PRINTALGO_MM_BLOCK
-            const int Ny = Nb-Nx;
-            const int Nw = (j2-j1-Nz);
+            const ptrdiff_t Ny = Nb-Nx;
+            const ptrdiff_t Nw = (j2-j1-Nz);
             std::cout<<"N > 1 split\n";
             std::cout<<"Mw = "<<Mw<<std::endl;
             std::cout<<"Nxyzw = "<<Nx<<','<<Ny<<','<<Nz<<','<<Nw<<std::endl;
@@ -1985,19 +1985,19 @@ namespace tmv {
                 mycleanup,kf,kfa,kfb,mykf);
         } else { // Kb > 1
             TMVAssert(Kb > 1 && Mb == 1 && Nb == 1);
-            const int Kx = Kb>>1; // = Kb/2
-            const int Kz = Kx<<lgKB;
-            const int Mw = (i2-i1);
-            const int Nw = (j2-j1);
+            const ptrdiff_t Kx = Kb>>1; // = Kb/2
+            const ptrdiff_t Kz = Kx<<lgKB;
+            const ptrdiff_t Mw = (i2-i1);
+            const ptrdiff_t Nw = (j2-j1);
 
-            const int km = k1 + Kz;
+            const ptrdiff_t km = k1 + Kz;
 
-            const int n1a = two1*Mw*Kz;
-            const int n2a = two2*Nw*Kz;
+            const ptrdiff_t n1a = two1*Mw*Kz;
+            const ptrdiff_t n2a = two2*Nw*Kz;
 
 #ifdef PRINTALGO_MM_BLOCK
-            const int Ky = Kb-Kx;
-            const int Kw = RoundUp<RT>(k2-k1-Kz);
+            const ptrdiff_t Ky = Kb-Kx;
+            const ptrdiff_t Kw = RoundUp<RT>(k2-k1-Kz);
             std::cout<<"N,K > 1 split\n";
             std::cout<<"Mw = "<<Mw<<std::endl;
             std::cout<<"Nw = "<<Nw<<std::endl;
@@ -2087,9 +2087,9 @@ namespace tmv {
     static void DoRecursiveBlockMultMM2(
         const RT* x, const ConstMatrixView<RT>& m1,
         const ConstMatrixView<RT>& m2, MatrixView<RT> m3,
-        const int M, const int N, const int K,
-        const int MB, const int NB, const int KB,
-        const int lgMB, const int lgNB, const int lgKB,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+        const ptrdiff_t MB, const ptrdiff_t NB, const ptrdiff_t KB,
+        const ptrdiff_t lgMB, const ptrdiff_t lgNB, const ptrdiff_t lgKB,
         const bool m1_z, const bool m2_z, const bool m3_z,
         CopyF* copy1, CopyF* copy1_k, CopyF* copy1b, CopyF* copy1b_k,
         CopyF* copy2, CopyF* copy2_k, CopyF* copy2a, CopyF* copy2a_k,
@@ -2097,25 +2097,25 @@ namespace tmv {
         ProdF* prod, ProdF* proda, ProdF* prodb, ProdF* prodc,
         CleanupF* cleanup, KF* kf, KF* kfa, KF* kfb, KF* kfc)
     {
-        const int Mb = (M>>lgMB); // = M/MB
-        const int Nb = (N>>lgNB); // = N/NB
-        const int Kb = (K>>lgKB); // = K/KB
-        const int Ma = (Mb<<lgMB); // = M/MB*MB
-        const int Na = (Nb<<lgNB); // = N/NB*NB
-        const int Ka = (Kb<<lgKB); // = K/KB*KB
-        const int Mc = M-Ma; // = M%MB
-        const int Nc = N-Na; // = N%NB
-        const int Kc = K-Ka; // = K%KB
+        const ptrdiff_t Mb = (M>>lgMB); // = M/MB
+        const ptrdiff_t Nb = (N>>lgNB); // = N/NB
+        const ptrdiff_t Kb = (K>>lgKB); // = K/KB
+        const ptrdiff_t Ma = (Mb<<lgMB); // = M/MB*MB
+        const ptrdiff_t Na = (Nb<<lgNB); // = N/NB*NB
+        const ptrdiff_t Ka = (Kb<<lgKB); // = K/KB*KB
+        const ptrdiff_t Mc = M-Ma; // = M%MB
+        const ptrdiff_t Nc = N-Na; // = N%NB
+        const ptrdiff_t Kc = K-Ka; // = K%KB
         // *bx and *cx are the values to pass to the DoRecursiveMultMM3
         // function.  They take accound of whether there is a partial block
         // that needs to be dealt with.  If there is we add one to the number
         // of block and use the real Mc or Nc.  But if not, we don't augment
         // the block count, and we use the full block size for Mc or Nc, which
         // indicate the size of the final block in the recursion.
-        const int Mbx = Mc == 0 ? Mb : Mb+1;
-        const int Nbx = Nc == 0 ? Nb : Nb+1;
-        const int Mcx = Mc == 0 ? MB : Mc;
-        const int Ncx = Nc == 0 ? NB : Nc;
+        const ptrdiff_t Mbx = Mc == 0 ? Mb : Mb+1;
+        const ptrdiff_t Nbx = Nc == 0 ? Nb : Nb+1;
+        const ptrdiff_t Mcx = Mc == 0 ? MB : Mc;
+        const ptrdiff_t Ncx = Nc == 0 ? NB : Nc;
         // Similiarly the following "x" functiosn pass the right function
         // according to what Mcx or Ncx is.
         CopyF* copy1bx = Mc==0 ? copy1 : copy1b;
@@ -2132,14 +2132,14 @@ namespace tmv {
         KF* kfbx = Mc==0 ? kf : kfb;
         KF* kfcx = Mc==0 ? kfax : Nc==0 ? kfb : kfc;
 
-        const int Kd = RoundUp<RT>(Kc);
+        const ptrdiff_t Kd = RoundUp<RT>(Kc);
         // = Kc rounded up to multiple of 2 or 4 as required for SSE commands
-        const int Ktot_d = (Kb<<lgKB) + Kd;
+        const ptrdiff_t Ktot_d = (Kb<<lgKB) + Kd;
         TMVAssert(Ktot_d == RoundUp<RT>(K));
 
-        const int two1 = m1_z ? 2 : 1;
-        const int two2 = m2_z ? 2 : 1;
-        const int two3 = m3_z ? 2 : 1;
+        const ptrdiff_t two1 = m1_z ? 2 : 1;
+        const ptrdiff_t two2 = m2_z ? 2 : 1;
+        const ptrdiff_t two3 = m3_z ? 2 : 1;
 
 #ifdef PRINTALGO_MM_BLOCK
         std::cout<<"RecursiveBlockMultMM2:\n";
@@ -2160,9 +2160,9 @@ namespace tmv {
         if (Mb >= 3*std::max(Nb,Kb)/2) { // M is largest
             TMVAssert(Mb >= 3);
             TMVAssert(Nb >= 2 || Kb >= 2);
-            int nsplit = Mb / (std::max(Nb,Kb)/2);
-            const int Mx = (Mb-1)/nsplit+1;
-            int My = Mb - (nsplit-1) * Mx;
+            ptrdiff_t nsplit = Mb / (std::max(Nb,Kb)/2);
+            const ptrdiff_t Mx = (Mb-1)/nsplit+1;
+            ptrdiff_t My = Mb - (nsplit-1) * Mx;
             while (My <= 0) {
                 // This doesn't happen often, but it is possible.
                 // e.g. Mb = 19, Nb/2 = 3 -> nsplit = 6, Mx = 4, My = -1
@@ -2175,13 +2175,13 @@ namespace tmv {
             std::cout<<"nsplit = "<<nsplit<<std::endl;
             std::cout<<"Mx,My = "<<Mx<<','<<My<<std::endl;
 #endif
-            int i1m = 0;
+            ptrdiff_t i1m = 0;
             TMVAssert(nsplit >= 2);
-            int Mz = Mx<<lgMB;
+            ptrdiff_t Mz = Mx<<lgMB;
 
-            int size1 = two1*Mz*Ktot_d;
-            int size2 = two2*Ktot_d*N;
-            int size3 = two3*Mz*N;
+            ptrdiff_t size1 = two1*Mz*Ktot_d;
+            ptrdiff_t size2 = two2*Ktot_d*N;
+            ptrdiff_t size3 = two3*Mz*N;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"m1 size = "<<size1<<std::endl;
             std::cout<<"m2 size = "<<size2<<std::endl;
@@ -2205,8 +2205,8 @@ namespace tmv {
             glob_m3p_end = m3p+size3;
 #endif
 
-            for(int n=0;n<nsplit-1;++n) {
-                const int i2m = i1m + Mz;
+            for(ptrdiff_t n=0;n<nsplit-1;++n) {
+                const ptrdiff_t i2m = i1m + Mz;
                 DoRecursiveBlockMultMM3(
                     x,m1,m2,m3,
                     MB,Ncx,KB,MB,NB,lgMB,lgNB,lgKB,
@@ -2220,7 +2220,7 @@ namespace tmv {
                     cleanup,kf,kfax,kf,kfax);
                 i1m = i2m;
             }
-            const int i2m = i1m + (My<<lgMB);
+            const ptrdiff_t i2m = i1m + (My<<lgMB);
             DoRecursiveBlockMultMM3(
                 x,m1,m2,m3,
                 MB,Ncx,KB,MB,NB,lgMB,lgNB,lgKB,
@@ -2248,21 +2248,21 @@ namespace tmv {
         } else if (Nb >= 3*std::max(Mb,Kb)/2) { // N is largest
             TMVAssert(Nb >= 3);
             TMVAssert(Mb >= 2 || Kb >= 2);
-            int nsplit = Nb / (std::max(Mb,Kb)/2);
-            const int Nx = (Nb-1)/nsplit+1; 
-            int Ny = Nb - (nsplit-1) * Nx;
+            ptrdiff_t nsplit = Nb / (std::max(Mb,Kb)/2);
+            const ptrdiff_t Nx = (Nb-1)/nsplit+1; 
+            ptrdiff_t Ny = Nb - (nsplit-1) * Nx;
             while (Ny <= 0) { --nsplit; Ny += Nx; }
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"nsplit = "<<nsplit<<std::endl;
             std::cout<<"Nx,Ny = "<<Nx<<','<<Ny<<std::endl;
 #endif
-            int j1m = 0;
+            ptrdiff_t j1m = 0;
             TMVAssert(nsplit >= 2);
-            int Nz = Nx<<lgNB;
+            ptrdiff_t Nz = Nx<<lgNB;
 
-            int size1 = two1*M*Ktot_d;
-            int size2 = two2*Ktot_d*Nz;
-            int size3 = two3*M*Nz;
+            ptrdiff_t size1 = two1*M*Ktot_d;
+            ptrdiff_t size2 = two2*Ktot_d*Nz;
+            ptrdiff_t size3 = two3*M*Nz;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"m1 size = "<<size1<<std::endl;
             std::cout<<"m2 size = "<<size2<<std::endl;
@@ -2286,8 +2286,8 @@ namespace tmv {
             glob_m3p_end = m3p+size3;
 #endif
 
-            for(int n=0;n<nsplit-1;++n) {
-                const int j2m = j1m + Nz;
+            for(ptrdiff_t n=0;n<nsplit-1;++n) {
+                const ptrdiff_t j2m = j1m + Nz;
                 DoRecursiveBlockMultMM3(
                     x,m1,m2,m3,
                     Mcx,NB,KB,MB,NB,lgMB,lgNB,lgKB,
@@ -2301,7 +2301,7 @@ namespace tmv {
                     cleanup,kf,kf,kfbx,kfbx);
                 j1m = j2m;
             }
-            const int j2m = j1m + (Ny<<lgNB);
+            const ptrdiff_t j2m = j1m + (Ny<<lgNB);
             DoRecursiveBlockMultMM3(
                 x,m1,m2,m3,
                 Mcx,NB,KB,MB,NB,lgMB,lgNB,lgKB,
@@ -2329,24 +2329,24 @@ namespace tmv {
         } else if (Kb >= 2*std::max(Mb,Nb)) { // K is largest
             TMVAssert(Kb >= 4);
             TMVAssert(Mb >= 2 || Nb >= 2);
-            int nsplit = Kb / std::max(Mb,Nb);
-            const int Kx = (Kb-1)/nsplit+1;
-            int Ky = Kb - (nsplit-1) * Kx;
+            ptrdiff_t nsplit = Kb / std::max(Mb,Nb);
+            const ptrdiff_t Kx = (Kb-1)/nsplit+1;
+            ptrdiff_t Ky = Kb - (nsplit-1) * Kx;
             while (Ky <= 0) { --nsplit; Ky += Kx; }
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"nsplit = "<<nsplit<<std::endl;
             std::cout<<"Kx,Ky = "<<Kx<<','<<Ky<<std::endl;
 #endif
-            int k1m = 0;
+            ptrdiff_t k1m = 0;
             TMVAssert(nsplit >= 2);
-            int Kz = Kx<<lgKB;
+            ptrdiff_t Kz = Kx<<lgKB;
 
             // Make room for last partial block if necessary
-            int Kzz = (Ky == Kx) ? Kz + Kd : Kz;
+            ptrdiff_t Kzz = (Ky == Kx) ? Kz + Kd : Kz;
 
-            int size1 = two1*M*Kzz;
-            int size2 = two2*Kzz*N;
-            int size3 = two3*M*N;
+            ptrdiff_t size1 = two1*M*Kzz;
+            ptrdiff_t size2 = two2*Kzz*N;
+            ptrdiff_t size3 = two3*M*N;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"m1 size = "<<size1<<std::endl;
             std::cout<<"m2 size = "<<size2<<std::endl;
@@ -2370,8 +2370,8 @@ namespace tmv {
             glob_m3p_end = m3p+size3;
 #endif
 
-            for(int n=0;n<nsplit-1;++n) {
-                const int k2m = k1m + Kz;
+            for(ptrdiff_t n=0;n<nsplit-1;++n) {
+                const ptrdiff_t k2m = k1m + Kz;
                 DoRecursiveBlockMultMM3(
                     x,m1,m2,m3,
                     Mcx,Ncx,KB,MB,NB,lgMB,lgNB,lgKB,
@@ -2400,21 +2400,21 @@ namespace tmv {
             TMVAssert(Mb >= 2);
             TMVAssert(Nb >= 2);
             TMVAssert(Kb >= 2);
-            const int Mx = Mb-(Mb>>1); // = M/2, rounding up if odd
-            const int Nx = Nb-(Nb>>1); // = N/2, rounding up if odd
-            const int Kx = Kb-(Kb>>1); // = K/2, rounding up if odd
-            const int im = Mx<<lgMB;
-            const int jm = Nx<<lgNB;
-            const int km = Kx<<lgKB;
-            const int Mz = Mx<<lgMB;
-            const int Nz = Nx<<lgNB;
-            const int Kz = Kx<<lgKB;
-            int Mw = (M-Mz);
-            int Nw = (N-Nz);
-            int Kw = RoundUp<RT>(K-Kz);
-            int size1 = two1*std::max(Mz,Mw)*Ktot_d;
-            int size2 = two2*Ktot_d*N;
-            int size3 = two3*std::max(Mz,Mw)*std::max(Nz,Nw);
+            const ptrdiff_t Mx = Mb-(Mb>>1); // = M/2, rounding up if odd
+            const ptrdiff_t Nx = Nb-(Nb>>1); // = N/2, rounding up if odd
+            const ptrdiff_t Kx = Kb-(Kb>>1); // = K/2, rounding up if odd
+            const ptrdiff_t im = Mx<<lgMB;
+            const ptrdiff_t jm = Nx<<lgNB;
+            const ptrdiff_t km = Kx<<lgKB;
+            const ptrdiff_t Mz = Mx<<lgMB;
+            const ptrdiff_t Nz = Nx<<lgNB;
+            const ptrdiff_t Kz = Kx<<lgKB;
+            ptrdiff_t Mw = (M-Mz);
+            ptrdiff_t Nw = (N-Nz);
+            ptrdiff_t Kw = RoundUp<RT>(K-Kz);
+            ptrdiff_t size1 = two1*std::max(Mz,Mw)*Ktot_d;
+            ptrdiff_t size2 = two2*Ktot_d*N;
+            ptrdiff_t size3 = two3*std::max(Mz,Mw)*std::max(Nz,Nw);
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"Mx,Nx,Kx = "<<Mx<<','<<Nx<<','<<Kx<<std::endl;
             std::cout<<"Mz,Nz,Kz = "<<Mz<<','<<Nz<<','<<Kz<<std::endl;
@@ -2446,12 +2446,12 @@ namespace tmv {
                 <<std::endl;
 #endif
 
-            const int n1a = two1*Mz*Kz;
-            const int n1c = two1*Mw*Kz;
+            const ptrdiff_t n1a = two1*Mz*Kz;
+            const ptrdiff_t n1c = two1*Mw*Kz;
 
-            const int n2a = two2*Nz*Kz;
-            const int n2b = n2a + two2*Nz*Kw;
-            const int n2c = n2b + two2*Nw*Kz;
+            const ptrdiff_t n2a = two2*Nz*Kz;
+            const ptrdiff_t n2b = n2a + two2*Nz*Kw;
+            const ptrdiff_t n2c = n2b + two2*Nw*Kz;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"n1ac = "<<n1a<<','<<n1c<<std::endl;
             std::cout<<"n2abc = "<<n2a<<','<<n2b<<','<<n2c<<std::endl;
@@ -2548,11 +2548,11 @@ namespace tmv {
         }
     }
 
-    template <int algo, int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_RecursiveBlock_Helper;
 
     // algo 63: The normal recursive block algorithm.
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_RecursiveBlock_Helper<63,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -2567,9 +2567,9 @@ namespace tmv {
             const bool m1_z = Traits<T1>::iscomplex;
             const bool m2_z = Traits<T2>::iscomplex;
             const bool m3_z = Traits<PT3>::iscomplex;
-            const int MB    = 16;
-            const int NB    = 16;
-            const int KB    = 
+            const ptrdiff_t MB = 16;
+            const ptrdiff_t NB = 16;
+            const ptrdiff_t KB = 
 #ifdef __SSE__
                 Traits2<RT,float>::sametype ? (
                     ( xs == Unknown || xs >= 128 ) ? 64 :
@@ -2587,12 +2587,12 @@ namespace tmv {
                     16 ) :
 #endif
                 16;
-            const int lgMB  = IntTraits<MB>::log;
-            const int lgNB  = IntTraits<NB>::log;
-            const int lgKB  = IntTraits<KB>::log;
-            const int csx = cs == Unknown ? Unknown : (cs-((cs>>lgMB)<<lgMB));
-            const int rsx = rs == Unknown ? Unknown : (rs-((rs>>lgNB)<<lgNB));
-            const int xsx = xs == Unknown ? Unknown : (xs-((xs>>lgKB)<<lgKB));
+            const ptrdiff_t lgMB = IntTraits<MB>::log;
+            const ptrdiff_t lgNB = IntTraits<NB>::log;
+            const ptrdiff_t lgKB = IntTraits<KB>::log;
+            const ptrdiff_t csx = cs == Unknown ? Unknown : (cs-((cs>>lgMB)<<lgMB));
+            const ptrdiff_t rsx = rs == Unknown ? Unknown : (rs-((rs>>lgNB)<<lgNB));
+            const ptrdiff_t xsx = xs == Unknown ? Unknown : (xs-((xs>>lgKB)<<lgKB));
 
             typedef typename M1::const_submatrix_type M1sub;
             typedef typename M1sub::const_transpose_type M1sub_t;
@@ -2602,35 +2602,35 @@ namespace tmv {
             // We will determine the value of K once and call a known K
             // algorithm for the K cleanup calls.
             typedef void KF(
-                const int M, const int N, const int K,
+                const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
                 const Scaling<1,RT>& x, const RT* A, const RT* B, RT* C);
 
             typedef void CopyF(
                 const ConstMatrixView<RT>& m1x,
-                RT* m2p, int M, int N, int si, int sj);
+                RT* m2p, ptrdiff_t M, ptrdiff_t N, ptrdiff_t si, ptrdiff_t sj);
             typedef void AssignF(
                 const RT* x, 
-                RT* m1p, const int M, const int N, const int si1, const int sj1,
+                RT* m1p, const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t si1, const ptrdiff_t sj1,
                 MatrixView<RT> m2x);
             typedef void ProdF(
-                const int M, const int N, const int K,
-                RT* m1p, const int si1, const int sj1,
-                RT* m2p, const int si2, const int sj2,
-                RT* m3p, const int si3, const int sj3);
+                const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+                RT* m1p, const ptrdiff_t si1, const ptrdiff_t sj1,
+                RT* m2p, const ptrdiff_t si2, const ptrdiff_t sj2,
+                RT* m3p, const ptrdiff_t si3, const ptrdiff_t sj3);
             typedef void CleanupF(
-                const int M, const int N, const int K,
-                RT* m1p, const int si1, const int sj1,
-                RT* m2p, const int si2, const int sj2,
-                RT* m3p, const int si3, const int sj3,
+                const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+                RT* m1p, const ptrdiff_t si1, const ptrdiff_t sj1,
+                RT* m2p, const ptrdiff_t si2, const ptrdiff_t sj2,
+                RT* m3p, const ptrdiff_t si3, const ptrdiff_t sj3,
                 KF* kf);
 
-            const int M = cs==Unknown ? m3.colsize() : cs;
-            const int N = rs==Unknown ? m3.rowsize() : rs;
-            const int K = xs==Unknown ? m1.rowsize() : xs;
+            const ptrdiff_t M = cs==Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t K = xs==Unknown ? m1.rowsize() : xs;
 
-            const int Mb = (M>>lgMB); // = M/MB
-            const int Nb = (N>>lgNB); // = N/NB
-            const int Kb = (K>>lgKB); // = K/KB
+            const ptrdiff_t Mb = (M>>lgMB); // = M/MB
+            const ptrdiff_t Nb = (N>>lgNB); // = N/NB
+            const ptrdiff_t Kb = (K>>lgKB); // = K/KB
 
             // The following requirement should be checked by algo 71.
             // It should only call this function when these relations are true.
@@ -2638,9 +2638,9 @@ namespace tmv {
             TMVAssert(Nb>=2);
             TMVAssert(Kb>=2);
 
-            const int Mc = M-(Mb<<lgMB); // = M%MB
-            const int Nc = N-(Nb<<lgNB); // = N%NB
-            const int Kc = K-(Kb<<lgKB); // = K%KB
+            const ptrdiff_t Mc = M-(Mb<<lgMB); // = M%MB
+            const ptrdiff_t Nc = N-(Nb<<lgNB); // = N%NB
+            const ptrdiff_t Kc = K-(Kb<<lgKB); // = K%KB
 
             KF* kf = 0;
             KF* kfa = 0;
@@ -2694,7 +2694,7 @@ namespace tmv {
     // algo 163: m1, m2, or m3 is nomajor (but might really be rm or cm).
     // Use get_copy and get_assign to figure out which copy or assign
     // function to use.
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_RecursiveBlock_Helper<163,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -2710,9 +2710,9 @@ namespace tmv {
             const bool m1_z = Traits<T1>::iscomplex;
             const bool m2_z = Traits<T2>::iscomplex;
             const bool m3_z = Traits<PT3>::iscomplex;
-            const int MB    = 16;
-            const int NB    = 16;
-            const int KB    = 
+            const ptrdiff_t MB = 16;
+            const ptrdiff_t NB = 16;
+            const ptrdiff_t KB = 
 #ifdef __SSE__
                 Traits2<RT,float>::sametype ? 64 :
 #endif
@@ -2720,52 +2720,52 @@ namespace tmv {
                 Traits2<RT,double>::sametype ? 32 :
 #endif
                 16;
-            const int lgMB  = IntTraits<MB>::log;
-            const int lgNB  = IntTraits<NB>::log;
-            const int lgKB  = IntTraits<KB>::log;
+            const ptrdiff_t lgMB = IntTraits<MB>::log;
+            const ptrdiff_t lgNB = IntTraits<NB>::log;
+            const ptrdiff_t lgKB = IntTraits<KB>::log;
 
             typedef typename M1::const_transpose_type M1t;
 
             typedef void KF(
-                const int M, const int N, const int K,
+                const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
                 const Scaling<1,RT>& x, const RT* A, const RT* B, RT* C);
 
             typedef void CopyF(
                 const ConstMatrixView<RT>& m1x,
-                RT* m2p, int M, int N, int si, int sj);
+                RT* m2p, ptrdiff_t M, ptrdiff_t N, ptrdiff_t si, ptrdiff_t sj);
             typedef void AssignF(
                 const RT* x, 
-                RT* m1p, const int M, const int N, const int si1, const int sj1,
+                RT* m1p, const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t si1, const ptrdiff_t sj1,
                 MatrixView<RT> m2x);
             typedef void ProdF(
-                const int M, const int N, const int K,
-                RT* m1p, const int si1, const int sj1,
-                RT* m2p, const int si2, const int sj2,
-                RT* m3p, const int si3, const int sj3);
+                const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+                RT* m1p, const ptrdiff_t si1, const ptrdiff_t sj1,
+                RT* m2p, const ptrdiff_t si2, const ptrdiff_t sj2,
+                RT* m3p, const ptrdiff_t si3, const ptrdiff_t sj3);
             typedef void CleanupF(
-                const int M, const int N, const int K,
-                RT* m1p, const int si1, const int sj1,
-                RT* m2p, const int si2, const int sj2,
-                RT* m3p, const int si3, const int sj3,
+                const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+                RT* m1p, const ptrdiff_t si1, const ptrdiff_t sj1,
+                RT* m2p, const ptrdiff_t si2, const ptrdiff_t sj2,
+                RT* m3p, const ptrdiff_t si3, const ptrdiff_t sj3,
                 KF* kf);
 
-            const int M = m3.colsize();
-            const int N = m3.rowsize();
-            const int K = m1.rowsize();
+            const ptrdiff_t M = m3.colsize();
+            const ptrdiff_t N = m3.rowsize();
+            const ptrdiff_t K = m1.rowsize();
 
-            const int XX = Unknown;
+            const ptrdiff_t XX = Unknown;
 
-            const int Mb = (M>>lgMB); // = M/MB
-            const int Nb = (N>>lgNB); // = N/NB
-            const int Kb = (K>>lgKB); // = K/KB
+            const ptrdiff_t Mb = (M>>lgMB); // = M/MB
+            const ptrdiff_t Nb = (N>>lgNB); // = N/NB
+            const ptrdiff_t Kb = (K>>lgKB); // = K/KB
 
             TMVAssert(Mb>=2);
             TMVAssert(Nb>=2);
             TMVAssert(Kb>=2);
 
-            const int Mc = M-(Mb<<lgMB); // = M%MB
-            const int Nc = N-(Nb<<lgNB); // = N%NB
-            const int Kc = K-(Kb<<lgKB); // = K%KB
+            const ptrdiff_t Mc = M-(Mb<<lgMB); // = M%MB
+            const ptrdiff_t Nc = N-(Nb<<lgNB); // = N%NB
+            const ptrdiff_t Kc = K-(Kb<<lgKB); // = K%KB
 
             KF* kf = 0;
             KF* kfa = 0;
@@ -2818,7 +2818,7 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct MultMM_RecursiveBlock_Helper<90,cs,rs,xs,false,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -2829,7 +2829,7 @@ namespace tmv {
             InstMultMM_RecursiveBlock(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct MultMM_RecursiveBlock_Helper<90,cs,rs,xs,true,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -2842,7 +2842,7 @@ namespace tmv {
     };
 
     // algo -3: Call correct version depending on whether majority is known
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_RecursiveBlock_Helper<-3,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -2858,7 +2858,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_RecursiveBlock_Helper<-2,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -2885,7 +2885,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_RecursiveBlock_Helper<-1,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -2908,9 +2908,9 @@ namespace tmv {
         TMVAssert(m1.rowsize() == m2.colsize());
         TMVAssert(m2.rowsize() == m3.rowsize());
 
-        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
-        const int xs = Sizes<M1::_rowsize,M2::_colsize>::size;
+        const ptrdiff_t cs = Sizes<M3::_colsize,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
+        const ptrdiff_t xs = Sizes<M1::_rowsize,M2::_colsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
@@ -2933,9 +2933,9 @@ namespace tmv {
         TMVAssert(m1.rowsize() == m2.colsize());
         TMVAssert(m2.rowsize() == m3.rowsize());
 
-        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
-        const int xs = Sizes<M1::_rowsize,M2::_colsize>::size;
+        const ptrdiff_t cs = Sizes<M3::_colsize,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
+        const ptrdiff_t xs = Sizes<M1::_rowsize,M2::_colsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
@@ -3006,14 +3006,14 @@ namespace tmv {
     static void DoBlockMultMM3(
         const RT* x, const ConstMatrixView<RT>& m1,
         const ConstMatrixView<RT>& m2, MatrixView<RT> m3,
-        const int i1, const int j1, const int i2, const int j2,
-        const int MB, const int NB, const int KB, const int Kb,
-        const int size1, const int size2, const int size3,
+        const ptrdiff_t i1, const ptrdiff_t j1, const ptrdiff_t i2, const ptrdiff_t j2,
+        const ptrdiff_t MB, const ptrdiff_t NB, const ptrdiff_t KB, const ptrdiff_t Kb,
+        const ptrdiff_t size1, const ptrdiff_t size2, const ptrdiff_t size3,
         RT* m1p, RT* m2p, RT* m3p, bool firstm1, bool firstm2, 
         CopyF* mycopy1, CopyF* mycopy2, CopyF* mycopy1_k, CopyF* mycopy2_k,
         AssignF* myassign, ProdF* myprod,
         CleanupF* mycleanup, KF* kf,
-        const int Ka, const int K, const int Kc, const int Kd)
+        const ptrdiff_t Ka, const ptrdiff_t K, const ptrdiff_t Kc, const ptrdiff_t Kd)
     {
 #ifdef PRINTALGO_MM_BLOCK
         std::cout<<"DoBlockMultMM3\n";
@@ -3033,7 +3033,7 @@ namespace tmv {
 
         VectorView<RT,Unit> m3x(m3p,size3);
         m3x.setZero();
-        for (int k=0;k<Kb;++k,m1p+=size1,m2p+=size2) {
+        for (ptrdiff_t k=0;k<Kb;++k,m1p+=size1,m2p+=size2) {
             if (firstm1) 
                 (*mycopy1) (m1.cSubMatrix(i1,i2,k*KB,(k+1)*KB).transpose(),
                             m1p,KB,MB,1,KB);
@@ -3061,9 +3061,9 @@ namespace tmv {
     static void DoBlockMultMM2(
         const RT* x, const ConstMatrixView<RT>& m1,
         const ConstMatrixView<RT>& m2, MatrixView<RT> m3,
-        const int M, const int N, const int K,
-        const int MB, const int NB, const int KB,
-        const int lgMB, const int lgNB, const int lgKB,
+        const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+        const ptrdiff_t MB, const ptrdiff_t NB, const ptrdiff_t KB,
+        const ptrdiff_t lgMB, const ptrdiff_t lgNB, const ptrdiff_t lgKB,
         const bool m1_z, const bool m2_z, const bool m3_z,
         CopyF* copy1, CopyF* copy1_k, CopyF* copy1b, CopyF* copy1b_k,
         CopyF* copy2, CopyF* copy2_k, CopyF* copy2a, CopyF* copy2a_k,
@@ -3071,18 +3071,18 @@ namespace tmv {
         ProdF* prod, ProdF* proda, ProdF* prodb, ProdF* prodc,
         CleanupF* cleanup, KF* kf, KF* kfa, KF* kfb, KF* kfc)
     {
-        const int Mb = (M>>lgMB); // = M/MB
-        const int Nb = (N>>lgNB); // = N/NB
-        const int Kb = (K>>lgKB); // = K/KB
-        const int Ma = (Mb<<lgMB); // = M/MB*MB
-        const int Na = (Nb<<lgNB); // = N/NB*NB
-        const int Ka = (Kb<<lgKB); // = K/KB*KB
-        const int Mc = M-(Mb<<lgMB); // = M%MB
-        const int Nc = N-(Nb<<lgNB); // = N%NB
-        const int Kc = K-(Kb<<lgKB); // = K%KB
-        const int Kd = RoundUp<RT>(Kc);
+        const ptrdiff_t Mb = (M>>lgMB); // = M/MB
+        const ptrdiff_t Nb = (N>>lgNB); // = N/NB
+        const ptrdiff_t Kb = (K>>lgKB); // = K/KB
+        const ptrdiff_t Ma = (Mb<<lgMB); // = M/MB*MB
+        const ptrdiff_t Na = (Nb<<lgNB); // = N/NB*NB
+        const ptrdiff_t Ka = (Kb<<lgKB); // = K/KB*KB
+        const ptrdiff_t Mc = M-(Mb<<lgMB); // = M%MB
+        const ptrdiff_t Nc = N-(Nb<<lgNB); // = N%NB
+        const ptrdiff_t Kc = K-(Kb<<lgKB); // = K%KB
+        const ptrdiff_t Kd = RoundUp<RT>(Kc);
         // = Kc rounded up to multiple of 2 or 4 as required for SSE commands
-        const int Ktot_d = (Kb<<lgKB) + Kd;
+        const ptrdiff_t Ktot_d = (Kb<<lgKB) + Kd;
         TMVAssert(Ktot_d == RoundUp<RT>(K));
 #ifdef PRINTALGO_MM_BLOCK
         std::cout<<"DoBlockMultMM2\n";
@@ -3093,15 +3093,15 @@ namespace tmv {
         std::cout<<"Mc,Nc,Kc,Kd = "<<Mc<<','<<Nc<<','<<Kc<<','<<Kd<<std::endl;
 #endif
 
-        const int two1 = m1_z ? 2 : 1;
-        const int two2 = m2_z ? 2 : 1;
-        const int two3 = m3_z ? 2 : 1;
+        const ptrdiff_t two1 = m1_z ? 2 : 1;
+        const ptrdiff_t two2 = m2_z ? 2 : 1;
+        const ptrdiff_t two3 = m3_z ? 2 : 1;
 
-        const int size1 = two1*MB*KB;
-        const int size1y = two1*Mc*KB;
-        const int size2 = two2*NB*KB;
-        const int size2y = two2*Nc*KB;
-        const int size3 = two3*MB*NB;
+        const ptrdiff_t size1 = two1*MB*KB;
+        const ptrdiff_t size1y = two1*Mc*KB;
+        const ptrdiff_t size2 = two2*NB*KB;
+        const ptrdiff_t size2y = two2*Nc*KB;
+        const ptrdiff_t size3 = two3*MB*NB;
 
         AlignedArray<RT> m3_temp(size3);
         RT* m3p = m3_temp;
@@ -3114,7 +3114,7 @@ namespace tmv {
             AlignedArray<RT> m2_temp(two2*NB*Ktot_d);
             RT* m1p0 = m1_temp;
             RT* m2p0 = m2_temp;
-            const int fullsize1 = two1*MB*Ktot_d;
+            const ptrdiff_t fullsize1 = two1*MB*Ktot_d;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"N >= M\n";
             std::cout<<"m1p0 = "<<m1p0<<" end = "<<(m1p0+size1)<<std::endl;
@@ -3127,9 +3127,9 @@ namespace tmv {
             glob_m3p_end = m3p+size3;
 #endif
 
-            for(int j=0;j<Nb;++j) {
+            for(ptrdiff_t j=0;j<Nb;++j) {
                 RT* m1p = m1p0;
-                for(int i=0;i<Mb;++i) {
+                for(ptrdiff_t i=0;i<Mb;++i) {
                     DoBlockMultMM3(
                         x,m1,m2,m3,
                         i*MB,j*NB,(i+1)*MB,(j+1)*NB, MB,NB,KB,Kb,
@@ -3153,7 +3153,7 @@ namespace tmv {
             }
             if (Nc) {
                 RT* m1p = m1p0;
-                for(int i=0;i<Mb;++i) {
+                for(ptrdiff_t i=0;i<Mb;++i) {
                     DoBlockMultMM3(
                         x,m1,m2,m3,
                         i*MB,Na,(i+1)*MB,N, MB,Nc,KB,Kb,
@@ -3181,7 +3181,7 @@ namespace tmv {
             AlignedArray<RT> m2_temp(two2*N*Ktot_d);
             RT* m1p0 = m1_temp;
             RT* m2p0 = m2_temp;
-            const int fullsize2 = two2*NB*Ktot_d;
+            const ptrdiff_t fullsize2 = two2*NB*Ktot_d;
 #ifdef PRINTALGO_MM_BLOCK
             std::cout<<"N <= M\n";
             std::cout<<"m1p0 = "<<m1p0<<" end = "<<(m1p0+size1)<<std::endl;
@@ -3194,9 +3194,9 @@ namespace tmv {
             glob_m3p_end = m3p+size3;
 #endif
 
-            for(int i=0;i<Mb;++i) {
+            for(ptrdiff_t i=0;i<Mb;++i) {
                 RT* m2p = m2p0;
-                for(int j=0;j<Nb;++j) {
+                for(ptrdiff_t j=0;j<Nb;++j) {
                     DoBlockMultMM3(
                         x,m1,m2,m3,
                         i*MB,j*NB,(i+1)*MB,(j+1)*NB, MB,NB,KB,Kb,
@@ -3220,7 +3220,7 @@ namespace tmv {
             }
             if (Mc) {
                 RT* m2p = m2p0;
-                for(int j=0;j<Nb;++j) {
+                for(ptrdiff_t j=0;j<Nb;++j) {
                     DoBlockMultMM3(
                         x,m1,m2,m3,
                         Ma,j*NB,M,(j+1)*NB, Mc,NB,KB,Kb,
@@ -3245,11 +3245,11 @@ namespace tmv {
         }
     }
 
-    template <int algo, int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Block_Helper;
 
     // algo 64: The normal block algorithm.
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Block_Helper<64,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -3264,9 +3264,9 @@ namespace tmv {
             const bool m1_z = Traits<T1>::iscomplex;
             const bool m2_z = Traits<T2>::iscomplex;
             const bool m3_z = Traits<PT3>::iscomplex;
-            const int MB    = 16;
-            const int NB    = 16;
-            const int KB    = 
+            const ptrdiff_t MB = 16;
+            const ptrdiff_t NB = 16;
+            const ptrdiff_t KB = 
 #ifdef __SSE__
                 Traits2<RT,float>::sametype ? (
                     ( xs == Unknown || xs >= 128 ) ? 64 :
@@ -3284,12 +3284,12 @@ namespace tmv {
                     16 ) :
 #endif
                 16;
-            const int lgMB  = IntTraits<MB>::log;
-            const int lgNB  = IntTraits<NB>::log;
-            const int lgKB  = IntTraits<KB>::log;
-            const int csx = cs == Unknown ? Unknown : (cs-((cs>>lgMB)<<lgMB));
-            const int rsx = rs == Unknown ? Unknown : (rs-((rs>>lgNB)<<lgNB));
-            const int xsx = xs == Unknown ? Unknown : (xs-((xs>>lgKB)<<lgKB));
+            const ptrdiff_t lgMB = IntTraits<MB>::log;
+            const ptrdiff_t lgNB = IntTraits<NB>::log;
+            const ptrdiff_t lgKB = IntTraits<KB>::log;
+            const ptrdiff_t csx = cs == Unknown ? Unknown : (cs-((cs>>lgMB)<<lgMB));
+            const ptrdiff_t rsx = rs == Unknown ? Unknown : (rs-((rs>>lgNB)<<lgNB));
+            const ptrdiff_t xsx = xs == Unknown ? Unknown : (xs-((xs>>lgKB)<<lgKB));
 
             typedef typename M1::const_submatrix_type M1sub;
             typedef typename M1sub::const_transpose_type M1sub_t;
@@ -3299,38 +3299,38 @@ namespace tmv {
             // We will determine the value of K once and call a known K
             // algorithm for the K cleanup calls.
             typedef void KF(
-                const int M, const int N, const int K,
+                const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
                 const Scaling<1,RT>& x, const RT* A, const RT* B, RT* C);
 
             typedef void CopyF(
                 const ConstMatrixView<RT>& m1x,
-                RT* m2p, int M, int N, int si, int sj);
+                RT* m2p, ptrdiff_t M, ptrdiff_t N, ptrdiff_t si, ptrdiff_t sj);
             typedef void AssignF(
                 const RT* x, 
-                RT* m1p, const int M, const int N, const int si1, const int sj1,
+                RT* m1p, const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t si1, const ptrdiff_t sj1,
                 MatrixView<RT> m2x);
             typedef void ProdF(
-                const int M, const int N, const int K,
-                RT* m1p, const int si1, const int sj1,
-                RT* m2p, const int si2, const int sj2,
-                RT* m3p, const int si3, const int sj3);
+                const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+                RT* m1p, const ptrdiff_t si1, const ptrdiff_t sj1,
+                RT* m2p, const ptrdiff_t si2, const ptrdiff_t sj2,
+                RT* m3p, const ptrdiff_t si3, const ptrdiff_t sj3);
             typedef void CleanupF(
-                const int M, const int N, const int K,
-                RT* m1p, const int si1, const int sj1,
-                RT* m2p, const int si2, const int sj2,
-                RT* m3p, const int si3, const int sj3,
+                const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+                RT* m1p, const ptrdiff_t si1, const ptrdiff_t sj1,
+                RT* m2p, const ptrdiff_t si2, const ptrdiff_t sj2,
+                RT* m3p, const ptrdiff_t si3, const ptrdiff_t sj3,
                 KF* kf);
 
-            const int M = cs==Unknown ? m3.colsize() : cs;
-            const int N = rs==Unknown ? m3.rowsize() : rs;
-            const int K = xs==Unknown ? m1.rowsize() : xs;
+            const ptrdiff_t M = cs==Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t K = xs==Unknown ? m1.rowsize() : xs;
 
-            const int Mb = (M>>lgMB); // = M/MB
-            const int Nb = (N>>lgNB); // = N/NB
-            const int Kb = (K>>lgKB); // = K/KB
-            const int Mc = M-(Mb<<lgMB); // = M%MB
-            const int Nc = N-(Nb<<lgNB); // = N%NB
-            const int Kc = K-(Kb<<lgKB); // = K%KB
+            const ptrdiff_t Mb = (M>>lgMB); // = M/MB
+            const ptrdiff_t Nb = (N>>lgNB); // = N/NB
+            const ptrdiff_t Kb = (K>>lgKB); // = K/KB
+            const ptrdiff_t Mc = M-(Mb<<lgMB); // = M%MB
+            const ptrdiff_t Nc = N-(Nb<<lgNB); // = N%NB
+            const ptrdiff_t Kc = K-(Kb<<lgKB); // = K%KB
 
             KF* kf = 0;
             KF* kfa = 0;
@@ -3389,7 +3389,7 @@ namespace tmv {
     // algo 164: m1, m2, or m3 is nomajor (but might really be rm or cm).
     // Use get_copy and get_assign to figure out which copy or assign
     // function to use.
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Block_Helper<164,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static void call(
@@ -3404,9 +3404,9 @@ namespace tmv {
             const bool m1_z = Traits<T1>::iscomplex;
             const bool m2_z = Traits<T2>::iscomplex;
             const bool m3_z = Traits<PT3>::iscomplex;
-            const int MB    = 16;
-            const int NB    = 16;
-            const int KB    = 
+            const ptrdiff_t MB = 16;
+            const ptrdiff_t NB = 16;
+            const ptrdiff_t KB = 
 #ifdef __SSE__
                 Traits2<RT,float>::sametype ? 64 :
 #endif
@@ -3414,47 +3414,47 @@ namespace tmv {
                 Traits2<RT,double>::sametype ? 32 :
 #endif
                 16;
-            const int lgMB  = IntTraits<MB>::log;
-            const int lgNB  = IntTraits<NB>::log;
-            const int lgKB  = IntTraits<KB>::log;
+            const ptrdiff_t lgMB = IntTraits<MB>::log;
+            const ptrdiff_t lgNB = IntTraits<NB>::log;
+            const ptrdiff_t lgKB = IntTraits<KB>::log;
 
             typedef typename M1::const_transpose_type M1t;
 
             typedef void KF(
-                const int M, const int N, const int K,
+                const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
                 const Scaling<1,RT>& x, const RT* A, const RT* B, RT* C);
 
             typedef void CopyF(
                 const ConstMatrixView<RT>& m1x,
-                RT* m2p, int M, int N, int si, int sj);
+                RT* m2p, ptrdiff_t M, ptrdiff_t N, ptrdiff_t si, ptrdiff_t sj);
             typedef void AssignF(
                 const RT* x, 
-                RT* m1p, const int M, const int N, const int si1, const int sj1,
+                RT* m1p, const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t si1, const ptrdiff_t sj1,
                 MatrixView<RT> m2x);
             typedef void ProdF(
-                const int M, const int N, const int K,
-                RT* m1p, const int si1, const int sj1,
-                RT* m2p, const int si2, const int sj2,
-                RT* m3p, const int si3, const int sj3);
+                const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+                RT* m1p, const ptrdiff_t si1, const ptrdiff_t sj1,
+                RT* m2p, const ptrdiff_t si2, const ptrdiff_t sj2,
+                RT* m3p, const ptrdiff_t si3, const ptrdiff_t sj3);
             typedef void CleanupF(
-                const int M, const int N, const int K,
-                RT* m1p, const int si1, const int sj1,
-                RT* m2p, const int si2, const int sj2,
-                RT* m3p, const int si3, const int sj3,
+                const ptrdiff_t M, const ptrdiff_t N, const ptrdiff_t K,
+                RT* m1p, const ptrdiff_t si1, const ptrdiff_t sj1,
+                RT* m2p, const ptrdiff_t si2, const ptrdiff_t sj2,
+                RT* m3p, const ptrdiff_t si3, const ptrdiff_t sj3,
                 KF* kf);
 
-            const int M = m3.colsize();
-            const int N = m3.rowsize();
-            const int K = m1.rowsize();
+            const ptrdiff_t M = m3.colsize();
+            const ptrdiff_t N = m3.rowsize();
+            const ptrdiff_t K = m1.rowsize();
 
-            const int XX = Unknown;
+            const ptrdiff_t XX = Unknown;
 
-            const int Mb = (M>>lgMB); // = M/MB
-            const int Nb = (N>>lgNB); // = N/NB
-            const int Kb = (K>>lgKB); // = K/KB
-            const int Mc = M-(Mb<<lgMB); // = M%MB
-            const int Nc = N-(Nb<<lgNB); // = N%NB
-            const int Kc = K-(Kb<<lgKB); // = K%KB
+            const ptrdiff_t Mb = (M>>lgMB); // = M/MB
+            const ptrdiff_t Nb = (N>>lgNB); // = N/NB
+            const ptrdiff_t Kb = (K>>lgKB); // = K/KB
+            const ptrdiff_t Mc = M-(Mb<<lgMB); // = M%MB
+            const ptrdiff_t Nc = N-(Nb<<lgNB); // = N%NB
+            const ptrdiff_t Kc = K-(Kb<<lgKB); // = K%KB
 
             KF* kf = 0;
             KF* kfa = 0;
@@ -3507,7 +3507,7 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Block_Helper<90,cs,rs,xs,false,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -3518,7 +3518,7 @@ namespace tmv {
             InstMultMM_Block(xx,m1.xView(),m2.xView(),m3.xView());
         }
     };
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Block_Helper<90,cs,rs,xs,true,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -3531,7 +3531,7 @@ namespace tmv {
     };
 
     // algo -3: Call correct version depending on whether majority is known
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Block_Helper<-3,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -3555,7 +3555,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Block_Helper<-2,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -3582,7 +3582,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Block_Helper<-1,cs,rs,xs,add,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -3605,9 +3605,9 @@ namespace tmv {
         TMVAssert(m1.rowsize() == m2.colsize());
         TMVAssert(m2.rowsize() == m3.rowsize());
 
-        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
-        const int xs = Sizes<M1::_rowsize,M2::_colsize>::size;
+        const ptrdiff_t cs = Sizes<M3::_colsize,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
+        const ptrdiff_t xs = Sizes<M1::_rowsize,M2::_colsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;
@@ -3630,9 +3630,9 @@ namespace tmv {
         TMVAssert(m1.rowsize() == m2.colsize());
         TMVAssert(m2.rowsize() == m3.rowsize());
 
-        const int cs = Sizes<M3::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
-        const int xs = Sizes<M1::_rowsize,M2::_colsize>::size;
+        const ptrdiff_t cs = Sizes<M3::_colsize,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M3::_rowsize,M2::_rowsize>::size;
+        const ptrdiff_t xs = Sizes<M1::_rowsize,M2::_colsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         typedef typename M3::cview_type M3v;

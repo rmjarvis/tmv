@@ -25,16 +25,16 @@ namespace tmv {
         const bool trans, MatrixView<T2> m2);
 
 
-    template <int algo, int cs, int rs, class M2>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M2>
     struct LU_Inverse_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0 or N == 0)
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct LU_Inverse_Helper<0,cs,rs,M1>
     { static TMV_INLINE void call(M1& , const Permutation& ) {} };
 
     // algo 11: Normal case
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct LU_Inverse_Helper<11,cs,rs,M1>
     {
         static void call(M1& m1, const Permutation& P)
@@ -88,7 +88,7 @@ namespace tmv {
     };
 
     // algo 90: call InstLU_Inverse
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct LU_Inverse_Helper<90,cs,rs,M1>
     {
         static TMV_INLINE void call(M1& m1, const Permutation& P)
@@ -96,7 +96,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct LU_Inverse_Helper<97,cs,rs,M1>
     {
         static TMV_INLINE void call(M1& m1, const Permutation& P)
@@ -108,7 +108,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct LU_Inverse_Helper<-3,cs,rs,M1>
     {
         static TMV_INLINE void call(M1& m1, const Permutation& P)
@@ -146,7 +146,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct LU_Inverse_Helper<-2,cs,rs,M1>
     {
         static TMV_INLINE void call(M1& m1, const Permutation& P)
@@ -165,7 +165,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct LU_Inverse_Helper<-1,cs,rs,M1>
     {
         static TMV_INLINE void call(M1& m1, const Permutation& P)
@@ -176,8 +176,8 @@ namespace tmv {
     inline void InlineLU_Inverse(
         BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& P)
     {
-        const int cs = M1::_colsize;
-        const int rs = M1::_rowsize;
+        const ptrdiff_t cs = M1::_colsize;
+        const ptrdiff_t rs = M1::_rowsize;
         typedef typename M1::cview_type M1v;
         TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
         LU_Inverse_Helper<-3,cs,rs,M1v>::call(m1v,P);
@@ -187,19 +187,19 @@ namespace tmv {
     inline void LU_Inverse(
         BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& P)
     {
-        const int cs = M1::_colsize;
-        const int rs = M1::_rowsize;
+        const ptrdiff_t cs = M1::_colsize;
+        const ptrdiff_t rs = M1::_rowsize;
         typedef typename M1::cview_type M1v;
         TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
         LU_Inverse_Helper<-2,cs,rs,M1v>::call(m1v,P);
     }
 
-    template <int algo, int cs, int rs, class M1, class M2>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LU_InverseATA_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0 or N == 0)
     // Also used for invalid real/complex combination from the virtual calls.
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LU_InverseATA_Helper<0,cs,rs,M1,M2>
     { 
         static TMV_INLINE void call(
@@ -207,7 +207,7 @@ namespace tmv {
     };
 
     // algo 11: Normal case
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LU_InverseATA_Helper<11,cs,rs,M1,M2>
     {
         static void call(
@@ -268,7 +268,7 @@ namespace tmv {
     };
 
     // algo 90: call InstLU_InverseATA
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LU_InverseATA_Helper<90,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(
@@ -280,7 +280,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LU_InverseATA_Helper<97,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(
@@ -295,7 +295,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LU_InverseATA_Helper<-3,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(
@@ -350,7 +350,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LU_InverseATA_Helper<-2,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(
@@ -379,7 +379,7 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases?  Not now.  Do we need this?
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LU_InverseATA_Helper<-1,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(
@@ -392,8 +392,8 @@ namespace tmv {
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         const bool trans, BaseMatrix_Rec_Mutable<M2>& m2)
     {
-        const int cs = M2::_colsize;
-        const int rs = M2::_rowsize;
+        const ptrdiff_t cs = M2::_colsize;
+        const ptrdiff_t rs = M2::_rowsize;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
@@ -406,8 +406,8 @@ namespace tmv {
         const BaseMatrix_Rec<M1>& m1, const Permutation& P,
         const bool trans, BaseMatrix_Rec_Mutable<M2>& m2)
     {
-        const int cs = M2::_colsize;
-        const int rs = M2::_rowsize;
+        const ptrdiff_t cs = M2::_colsize;
+        const ptrdiff_t rs = M2::_rowsize;
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();

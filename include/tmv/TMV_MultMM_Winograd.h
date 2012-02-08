@@ -35,7 +35,7 @@ namespace tmv {
 
 
     // Need this for final pass.
-    template <int algo, int cs, int rs, int xs, bool add, int ix, class T, class M1, class M2, class M3>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, bool add, int ix, class T, class M1, class M2, class M3>
     struct MultMM_Helper;
 
     template <int algo, bool add, int ix, class T, class M1, class M2, class M3>
@@ -146,9 +146,9 @@ namespace tmv {
             TMVAssert(m1.rowsize() == m2.colsize());
             TMVAssert(m2.rowsize() == m3.rowsize());
 
-            const int M = m3.colsize();
-            const int N = m3.rowsize();
-            const int K = m1.rowsize();
+            const ptrdiff_t M = m3.colsize();
+            const ptrdiff_t N = m3.rowsize();
+            const ptrdiff_t K = m1.rowsize();
             TMVAssert(m1.colsize() == M);
             TMVAssert(m2.rowsize() == N);
             TMVAssert(m2.colsize() == K);
@@ -164,12 +164,12 @@ namespace tmv {
                     x,m1,m2,m3);
             }
 
-            const int Mb = M>>1;
-            const int Ma = M-Mb;
-            const int Nb = N>>1;
-            const int Na = N-Nb;
-            const int Kb = K>>1;
-            const int Ka = K-Kb;
+            const ptrdiff_t Mb = M>>1;
+            const ptrdiff_t Ma = M-Mb;
+            const ptrdiff_t Nb = N>>1;
+            const ptrdiff_t Na = N-Nb;
+            const ptrdiff_t Kb = K>>1;
+            const ptrdiff_t Ka = K-Kb;
 
 #ifdef PRINTALGO_MM_WIN
             std::cout<<"Winograd recursive branch: \n";
@@ -311,7 +311,7 @@ namespace tmv {
         static TMV_INLINE void call(
             const Scaling<ix,T> x, const M1& m1, const M2& m2, M3& m3)
         {
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             MultMM_Helper<73,xx,xx,xx,add,ix,T,M1,M2,M3>::call(x,m1,m2,m3); 
         }
     };

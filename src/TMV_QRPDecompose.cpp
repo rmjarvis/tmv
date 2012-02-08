@@ -39,7 +39,7 @@
 namespace tmv {
 
     template <class M, class V> 
-    static inline void DoQRP_Decompose(M& A, V& beta, int* P, bool strict)
+    static inline void DoQRP_Decompose(M& A, V& beta, ptrdiff_t* P, bool strict)
     { 
         typename M::cmview_type Acm = A.cmView();
         typename V::unitview_type betau = beta.unitView();
@@ -49,7 +49,7 @@ namespace tmv {
 #ifdef LAP
 #ifdef TMV_INST_DOUBLE
     void DoQRP_Decompose(
-        MatrixView<double> A, VectorView<double> beta, int* P, bool strict)
+        MatrixView<double> A, VectorView<double> beta, ptrdiff_t* P, bool strict)
     {
         int m = A.colsize();
         int n = A.rowsize();
@@ -105,7 +105,7 @@ namespace tmv {
 #endif
 #ifdef TMV_INST_FLOAT
     void DoQRP_Decompose(
-        MatrixView<float> A, VectorView<float> beta, int* P, bool strict)
+        MatrixView<float> A, VectorView<float> beta, ptrdiff_t* P, bool strict)
     {
         int m = A.colsize();
         int n = A.rowsize();
@@ -163,7 +163,7 @@ namespace tmv {
 
     template <class T, class RT> 
     void InstQRP_Decompose(
-        MatrixView<T> A, VectorView<RT> beta, int* P, bool strict)
+        MatrixView<T> A, VectorView<RT> beta, ptrdiff_t* P, bool strict)
     {
         if (A.rowsize() > 0) {
             if (beta.step() == 1) {

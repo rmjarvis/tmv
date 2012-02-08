@@ -42,12 +42,12 @@ namespace tmv {
             typedef typename TypeSelect<
                 Traits<T2>::isreal , typename M3::real_type, 
                 typename M3::complex_type>::type T2x;
-            const int N = m3.rowsize();
-            for(int j=0;j<N;++j) {
-                const int i1 = m3.colstart(j);
-                const int i2 = m3.colend(j);
+            const ptrdiff_t N = m3.rowsize();
+            for(ptrdiff_t j=0;j<N;++j) {
+                const ptrdiff_t i1 = m3.colstart(j);
+                const ptrdiff_t i2 = m3.colend(j);
                 //std::cout<<"j = "<<j<<" i = "<<i1<<".."<<i2<<std::endl;
-                for(int i=i1;i<i2;++i) {
+                for(ptrdiff_t i=i1;i<i2;++i) {
                     //std::cout<<m1.cref(i,j)<<" * "<<m2.cref(i,j);
                     Maybe<add>::add(
                         m3.ref(i,j) , x * m1.cref(i,j) * m2.cref(i,j));
@@ -78,12 +78,12 @@ namespace tmv {
             typedef typename TypeSelect<
                 Traits<T2>::isreal , typename M3::real_type, 
                 typename M3::complex_type>::type T2x;
-            const int M = m3.colsize();
-            for(int i=0;i<M;++i) {
-                const int j1 = m3.rowstart(i);
-                const int j2 = m3.rowend(i);
+            const ptrdiff_t M = m3.colsize();
+            for(ptrdiff_t i=0;i<M;++i) {
+                const ptrdiff_t j1 = m3.rowstart(i);
+                const ptrdiff_t j2 = m3.rowend(i);
                 //std::cout<<"i = "<<i<<" j = "<<j1<<".."<<j2<<std::endl;
-                for(int j=j1;j<j2;++j) {
+                for(ptrdiff_t j=j1;j<j2;++j) {
                     //std::cout<<m1.cref(i,j)<<" * "<<m2.cref(i,j);
                     Maybe<add>::add(
                         m3.ref(i,j) , x * m1.cref(i,j) * m2.cref(i,j));
@@ -204,7 +204,7 @@ namespace tmv {
         enum { cm1 = Traits<typename M1::calc_type>::_colmajor };
         enum { cm2 = Traits<typename M2::calc_type>::_colmajor };
         enum { _rowmajor =
-            (rm1 && rm2) || (!cm1 && !cm2 && _rowsize > int(_colsize)) };
+            (rm1 && rm2) || (!cm1 && !cm2 && _rowsize > ptrdiff_t(_colsize)) };
 
         typedef ElemProdMM<ix,T,M1,M2> type;
         enum { s = _shape };
@@ -246,12 +246,12 @@ namespace tmv {
         TMV_INLINE const M1& getM1() const { return m1; }
         TMV_INLINE const M2& getM2() const { return m2; }
 
-        TMV_INLINE int colsize() const { return m1.colsize(); }
-        TMV_INLINE int rowsize() const { return m1.rowsize(); }
-        TMV_INLINE int nlo() const { return TMV_MIN(m1.nlo(),m2.nlo()); }
-        TMV_INLINE int nhi() const { return TMV_MIN(m1.nhi(),m2.nhi()); }
+        TMV_INLINE ptrdiff_t colsize() const { return m1.colsize(); }
+        TMV_INLINE ptrdiff_t rowsize() const { return m1.rowsize(); }
+        TMV_INLINE ptrdiff_t nlo() const { return TMV_MIN(m1.nlo(),m2.nlo()); }
+        TMV_INLINE ptrdiff_t nhi() const { return TMV_MIN(m1.nhi(),m2.nhi()); }
 
-        value_type cref(int i, int j) const
+        value_type cref(ptrdiff_t i, ptrdiff_t j) const
         { return x * (m1.cref(i,j) * m2.cref(i,j)); }
 
         template <class M3>

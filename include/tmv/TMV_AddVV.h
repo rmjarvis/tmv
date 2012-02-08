@@ -24,11 +24,11 @@ namespace tmv {
     // Vector = x1 * Vector + x2 * Vector
     //
 
-    template <int algo, int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <int algo, ptrdiff_t size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper;
 
     // algo 0: size = 0, nothing to do
-    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<0,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -39,13 +39,13 @@ namespace tmv {
             const Scaling<ix2,T2>& , const V2& , V3& ) 
         {}
         static TMV_INLINE void call2(
-            int , const Scaling<ix1,T1>& , IT1 ,
+            ptrdiff_t , const Scaling<ix1,T1>& , IT1 ,
             const Scaling<ix2,T2>& , IT2 , IT3 )
         {}
     };  
 
     // algo 1: complex vectors with unit step, convert to real version
-    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<1,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -69,20 +69,20 @@ namespace tmv {
                 x1,v1f,x2,v2f,v3f);
         }
         static inline void call2(
-            int n, const Scaling<ix1,T1>& x1, IT1 it1,
+            ptrdiff_t n, const Scaling<ix1,T1>& x1, IT1 it1,
             const Scaling<ix2,T2>& x2, IT2 it2, IT3 it3)
         {
             IT1f it1f = it1.flatten();
             IT2f it2f = it2.flatten();
             IT3f it3f = it3.flatten();
-            const int n2 = n<<1;
+            const ptrdiff_t n2 = n<<1;
             AddVV_Helper<-4,size2,ix1,T1,V1f,ix2,T2,V2f,V3f>::call2(
                 n2,x1,it1f,x2,it2f,it3f);
         }
     };
 
     // algo 11: simple for loop
-    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<11,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -92,14 +92,14 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            const int n = size == Unknown ? v3.size() : size;
-            for(int i=0;i<n;++i) 
+            const ptrdiff_t n = size == Unknown ? v3.size() : size;
+            for(ptrdiff_t i=0;i<n;++i) 
                 v3.ref(i) = ZSum::sum(
                     ZProd<false,false>::prod(x1 , v1.cref(i)),
                     ZProd<false,false>::prod(x2 , v2.cref(i)));
         }
         static void call2(
-            int n, const Scaling<ix1,T1>& x1, IT1 it1,
+            ptrdiff_t n, const Scaling<ix1,T1>& x1, IT1 it1,
             const Scaling<ix2,T2>& x2, IT2 it2, IT3 it3)
         {
             const bool c1 = V1::_conj;
@@ -112,7 +112,7 @@ namespace tmv {
     };  
 
     // algo 12: 2 at a time
-    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<12,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -122,15 +122,15 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            const int n = size == Unknown ? v3.size() : size;
+            const ptrdiff_t n = size == Unknown ? v3.size() : size;
             call2(n,x1,v1.begin().nonConj(),x2,v2.begin().nonConj(),v3.begin());
         }
         static void call2(
-            const int n, const Scaling<ix1,T1>& x1, IT1 it1,
+            const ptrdiff_t n, const Scaling<ix1,T1>& x1, IT1 it1,
             const Scaling<ix2,T2>& x2, IT2 it2, IT3 it3)
         {
-            int n_2 = (n>>1);
-            const int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            const ptrdiff_t nb = n-(n_2<<1);
             const bool c1 = V1::_conj;
             const bool c2 = V2::_conj;
 
@@ -152,7 +152,7 @@ namespace tmv {
     };
 
     // algo 13: 4 at a time
-    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<13,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -162,15 +162,15 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            const int n = size == Unknown ? v3.size() : size;
+            const ptrdiff_t n = size == Unknown ? v3.size() : size;
             call2(n,x1,v1.begin().nonConj(),x2,v2.begin().nonConj(),v3.begin());
         }
         static void call2(
-            const int n, const Scaling<ix1,T1>& x1, IT1 it1,
+            const ptrdiff_t n, const Scaling<ix1,T1>& x1, IT1 it1,
             const Scaling<ix2,T2>& x2, IT2 it2, IT3 it3)
         {
-            int n_4 = (n>>2);
-            int nb = n-(n_4<<2);
+            ptrdiff_t n_4 = (n>>2);
+            ptrdiff_t nb = n-(n_4<<2);
             const bool c1 = V1::_conj;
             const bool c2 = V2::_conj;
 
@@ -198,7 +198,7 @@ namespace tmv {
     };
 
     // algo 14: 8 at a time
-    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<14,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -208,15 +208,15 @@ namespace tmv {
             const Scaling<ix1,T1>& x1, const V1& v1,
             const Scaling<ix2,T2>& x2, const V2& v2, V3& v3)
         {
-            const int n = size == Unknown ? v3.size() : size;
+            const ptrdiff_t n = size == Unknown ? v3.size() : size;
             call2(n,x1,v1.begin().nonConj(),x2,v2.begin().nonConj(),v3.begin());
         }
         static void call2(
-            const int n, const Scaling<ix1,T1>& x1, IT1 it1,
+            const ptrdiff_t n, const Scaling<ix1,T1>& x1, IT1 it1,
             const Scaling<ix2,T2>& x2, IT2 it2, IT3 it3)
         {
-            int n_8 = (n>>3);
-            int nb = n-(n_8<<3);
+            ptrdiff_t n_8 = (n>>3);
+            ptrdiff_t nb = n-(n_8<<3);
             const bool c1 = V1::_conj;
             const bool c2 = V2::_conj;
 
@@ -256,10 +256,10 @@ namespace tmv {
     };
 
     // algo 15: fully unroll
-    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<15,size,ix1,T1,V1,ix2,T2,V2,V3> // known size, unroll
     {
-        template <int I, int N>
+        template <ptrdiff_t I, ptrdiff_t N>
         struct Unroller
         {
             static TMV_INLINE void unroll(
@@ -270,7 +270,7 @@ namespace tmv {
                 Unroller<I+N/2,N-N/2>::unroll(x1,v1,x2,v2,v3);
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,1>
         {
             static TMV_INLINE void unroll(
@@ -282,7 +282,7 @@ namespace tmv {
                     ZProd<false,false>::prod(x2 , v2.cref(I))); 
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,0>
         {
             static TMV_INLINE void unroll(
@@ -296,7 +296,7 @@ namespace tmv {
     };
 
     // algo 90: call inst 
-    template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<90,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
         static TMV_INLINE void call(
@@ -311,7 +311,7 @@ namespace tmv {
     };
 
     // algo 91: call inst alias
-    template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<91,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
         static TMV_INLINE void call(
@@ -326,7 +326,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<97,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
         static TMV_INLINE void call(
@@ -345,7 +345,7 @@ namespace tmv {
     };
 
     // algo 197: Conjugate
-    template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<197,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
         static TMV_INLINE void call(
@@ -364,7 +364,7 @@ namespace tmv {
     };
 
     // algo 98: Inline check for aliases
-    template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<98,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
         static void call(
@@ -399,7 +399,7 @@ namespace tmv {
     };
 
     // algo 99: Check for aliases
-    template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<99,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
         static TMV_INLINE void call(
@@ -429,7 +429,7 @@ namespace tmv {
     };
 
     // algo -4: No branches or copies
-    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<-4,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
         typedef typename V3::value_type T3;
@@ -464,7 +464,7 @@ namespace tmv {
                 x1,v1,x2,v2,v3);
         }
         static TMV_INLINE void call2(
-            const int n, const Scaling<ix1,T1>& x1, const IT1& it1,
+            const ptrdiff_t n, const Scaling<ix1,T1>& x1, const IT1& it1,
             const Scaling<ix2,T2>& x2, const IT2& it2, const IT3& it3)
         {
             TMVStaticAssert(!V3::_conj);
@@ -474,7 +474,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t size, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<-3,size,ix1,T1,V1,ix2,T2,V2,V3>
     {
         static TMV_INLINE void call(
@@ -487,7 +487,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<-2,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
         static TMV_INLINE void call(
@@ -517,7 +517,7 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases?
-    template <int s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
+    template <ptrdiff_t s, int ix1, class T1, class V1, int ix2, class T2, class V2, class V3>
     struct AddVV_Helper<-1,s,ix1,T1,V1,ix2,T2,V2,V3>
     {
         static TMV_INLINE void call(
@@ -542,7 +542,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s = Sizes<Sizes<V1::_size,V2::_size>::size,V3::_size>::size;
+        const ptrdiff_t s = Sizes<Sizes<V1::_size,V2::_size>::size,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
@@ -563,7 +563,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s = Sizes<Sizes<V1::_size,V2::_size>::size,V3::_size>::size;
+        const ptrdiff_t s = Sizes<Sizes<V1::_size,V2::_size>::size,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
@@ -584,7 +584,7 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s = Sizes<Sizes<V1::_size,V2::_size>::size,V3::_size>::size;
+        const ptrdiff_t s = Sizes<Sizes<V1::_size,V2::_size>::size,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;

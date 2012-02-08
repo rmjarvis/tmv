@@ -47,23 +47,23 @@ namespace tmv {
 
     // Defined in TMV_BandLUDecompose.cpp
     template <class T>
-    void InstBandLU_Decompose(MatrixView<T> m, int* P);
+    void InstBandLU_Decompose(MatrixView<T> m, ptrdiff_t* P);
 
-    template <int algo, int cs, int rs, class M>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M>
     struct BandLUDecompose_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0 or 1, or N == 0)
-    template <int cs, int rs, class M>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M>
     struct BandLUDecompose_Helper<0,cs,rs,M>
-    { static TMV_INLINE void call(M& A, int* P) {} };
+    { static TMV_INLINE void call(M& A, ptrdiff_t* P) {} };
 
     // algo 1: N == 1
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct BandLUDecompose_Helper<1,cs,rs,M1>
     {
-        static void call(M1& A, int* P)
+        static void call(M1& A, ptrdiff_t* P)
         {
-            const int M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
             TMVAssert(A.rowsize() == 1);
 #ifdef PRINTALGO_BandLU
             std::cout<<"BandLUDecompose algo 1: M,N,cs,rs = "<<M<<','<<1<<
@@ -91,12 +91,12 @@ namespace tmv {
     };
 
     // algo 2: N == 2
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct BandLUDecompose_Helper<2,cs,rs,M1>
     {
-        static void call(M1& A, int* P)
+        static void call(M1& A, ptrdiff_t* P)
         {
-            const int M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
             TMVAssert(A.rowsize() == 2);
 #ifdef PRINTALGO_BandLU
             std::cout<<"BandLUDecompose algo 2: M,N,cs,rs = "<<M<<','<<2<<
@@ -111,7 +111,7 @@ namespace tmv {
             typename M1::col_type::iterator it0 = A0.begin();
             typename M1::col_type::iterator it1 = A1.begin();
 
-            int ip0,ip1;
+            ptrdiff_t ip0,ip1;
             RT piv = A0.maxAbsElement(&ip0);
 
             if (TMV_Underflow(piv)) {
@@ -131,7 +131,7 @@ namespace tmv {
                 const T A01 = *it1++;
                 piv = RT(0); // next pivot element
                 ip1 = 1;
-                for(int i=1;i<M;++i,++it0,++it1) {
+                for(ptrdiff_t i=1;i<M;++i,++it0,++it1) {
                     *it0 *= invA00;
                     *it1 -= *it0 * A01;
                     RT absAi1 = TMV_ABS(*it1);
@@ -161,12 +161,12 @@ namespace tmv {
     };
 
     // algo 3: M == 2
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct BandLUDecompose_Helper<3,cs,rs,M1>
     {
-        static void call(M1& A, int* P)
+        static void call(M1& A, ptrdiff_t* P)
         {
-            const int N = rs==Unknown ? A.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
             TMVAssert(A.colsize() == 2);
 #ifdef PRINTALGO_BandLU
             std::cout<<"BandLUDecompose algo 3: M,N,cs,rs = "<<2<<','<<N<<
@@ -179,7 +179,7 @@ namespace tmv {
             typename M1::col_type A0 = A.get_col(0);
             typename M1::col_type A1 = A.get_col(1);
 
-            int ip0;
+            ptrdiff_t ip0;
             RT piv = A0.maxAbsElement(&ip0);
 
             if (TMV_Underflow(piv)) {
@@ -221,10 +221,10 @@ namespace tmv {
     };
 
     // algo 11: Non-block algorithm, loop over n
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct BandLUDecompose_Helper<11,cs,rs,M1>
     {
-        static void call(M1& A, int* P)
+        static void call(M1& A, ptrdiff_t* P)
         {
             // LU Decompostion with partial pivoting.
             //
@@ -291,10 +291,10 @@ namespace tmv {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int N = rs==Unknown ? A.rowsize() : rs;
-            const int M = cs==Unknown ? A.colsize() : cs;
-            const int R = TMV_MIN(N,M);
-            const int xx = Unknown;
+            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t R = TMV_MIN(N,M);
+            const ptrdiff_t xx = Unknown;
 #ifdef PRINTALGO_LU
             std::cout<<"LUDecompose algo 11: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -313,7 +313,7 @@ namespace tmv {
             const int algo2 = -2;
 #endif
 
-            for (int j=0; j<R; ++j) {
+            for (ptrdiff_t j=0; j<R; ++j) {
                 M1c Ajb = A.get_col(j,j,M);
                 M1l L = A.cSubMatrix(0,j,0,j).unitLowerTri();
 
@@ -331,7 +331,7 @@ namespace tmv {
                 }
 
                 // Find the pivot element
-                int ip;
+                ptrdiff_t ip;
                 RT piv = Ajb.maxAbsElement(&ip);
                 // ip is relative to j index, not absolute.
 
@@ -372,11 +372,11 @@ namespace tmv {
     };
 
     // algo 21: Block algorithm
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct BandLUDecompose_Helper<21,cs,rs,M1>
     {
         typedef typename M1::value_type T;
-        static void call(M1& A, int* P)
+        static void call(M1& A, ptrdiff_t* P)
         {
             // If A is large, we can take advantage of Blas Level 3 speed
             // by partitioning the matrix by columns.
@@ -409,18 +409,18 @@ namespace tmv {
 
             typedef typename M1::real_type RT;
 
-            const int N = rs==Unknown ? A.rowsize() : rs;
-            const int M = cs==Unknown ? A.colsize() : cs;
-            const int Nx = TMV_BandLU_BLOCKSIZE;
-            const int R = TMV_MIN(N,M);
-            const int xx = Unknown;
+            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t Nx = TMV_BandLU_BLOCKSIZE;
+            const ptrdiff_t R = TMV_MIN(N,M);
+            const ptrdiff_t xx = Unknown;
 #ifdef PRINTALGO_BandLU
             std::cout<<"BandLUDecompose algo 21: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
 
-            int jk=0;
-            for (int jkpk=jk+Nx; jkpk<=R; jk=jkpk, jkpk+=Nx) {
+            ptrdiff_t jk=0;
+            for (ptrdiff_t jkpk=jk+Nx; jkpk<=R; jk=jkpk, jkpk+=Nx) {
                 typedef typename M1::submatrix_type M1s;
                 typedef typename M1::const_submatrix_type M1sc;
                 typedef typename M1s::const_unit_lowertri_type M1l;
@@ -454,12 +454,12 @@ namespace tmv {
                             Scaling<-1,RT>(),A10,A01,A11);
                     }
                 }
-                for(int i=jk;i<jkpk;++i) P[i]+=jk;
+                for(ptrdiff_t i=jk;i<jkpk;++i) P[i]+=jk;
             }
 
             if (jk < R) { // Last block is not full size
 
-                const int Ny = R-jk;
+                const ptrdiff_t Ny = R-jk;
                 typedef typename M1::submatrix_type M1s;
                 typedef typename M1s::const_unit_lowertri_type M1l;
                 M1s A0 = A.cSubMatrix(jk,M,jk,R); // Both A00 and A10
@@ -483,16 +483,16 @@ namespace tmv {
                     M1l L00 = A00.unitLowerTri();
                     LDivEqMU_Helper<-2,xx,xx,M1s,M1l>::call(A01,L00);
                 }
-                for(int i=jk;i<R;++i) P[i]+=jk;
+                for(ptrdiff_t i=jk;i<R;++i) P[i]+=jk;
             }
         }
     };
 
     // algo 27: Recursive algorithm
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct BandLUDecompose_Helper<27,cs,rs,M1>
     {
-        static void call(M1& A, int* P)
+        static void call(M1& A, ptrdiff_t* P)
         {
             // The recursive LU algorithm is similar to the block algorithm,
             // except that the block is roughly half the size of the whole 
@@ -501,14 +501,14 @@ namespace tmv {
             // get down to an Mx2 or Mx1 matrix.
             typedef typename M1::real_type RT;
 
-            const int N = rs==Unknown ? A.rowsize() : rs;
-            const int M = cs==Unknown ? A.colsize() : cs;
-            const int R = TMV_MIN(N,M);
+            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t R = TMV_MIN(N,M);
 #ifdef PRINTALGO_BandLU
             std::cout<<"BandLUDecompose algo 27: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            const int rx = IntTraits2<rs,cs>::min;
+            const ptrdiff_t rx = IntTraits2<rs,cs>::min;
             const int algo2a = 
                 (rs==Unknown || rs==1) ? 1 : 0;
 #if TMV_BandLU_RECURSE > 1
@@ -543,11 +543,11 @@ namespace tmv {
             typedef typename M1c::const_rowrange_type M1sc;
             typedef typename M1s::const_unit_lowertri_type M1l;
 
-            const int Nx = R > 16 ? ((((R-1)>>5)+1)<<4) : (R>>1);
+            const ptrdiff_t Nx = R > 16 ? ((((R-1)>>5)+1)<<4) : (R>>1);
             // (If R > 16, round R/2 up to a multiple of 16.)
-            const int rsx = IntTraits<rx>::half_roundup;
-            const int rsy = IntTraits2<rs,rsx>::diff;
-            const int csy = IntTraits2<cs,rsx>::diff;
+            const ptrdiff_t rsx = IntTraits<rx>::half_roundup;
+            const ptrdiff_t rsy = IntTraits2<rs,rsx>::diff;
+            const ptrdiff_t csy = IntTraits2<cs,rsx>::diff;
 
             M1c A0 = A.cColRange(0,Nx);
             M1s A00 = A0.cRowRange(0,Nx);
@@ -577,7 +577,7 @@ namespace tmv {
 
                 // Decompose A~ into PLU
                 BandLUDecompose_Helper<algo3,csy,rsy,M1s>::call(A11,P+Nx);
-                for(int i=Nx;i<R;++i) P[i]+=Nx;
+                for(ptrdiff_t i=Nx;i<R;++i) P[i]+=Nx;
 
                 // Apply the new permutations to the left half
                 A0.cPermuteRows(P,Nx,R);
@@ -603,7 +603,7 @@ namespace tmv {
 
                 // Decompose A~ into PLU
                 BandLUDecompose_Helper<algo3b,csy,rsy,M1s>::call(A11,P+Nx);
-                for(int i=Nx;i<R;++i) P[i]+=Nx;
+                for(ptrdiff_t i=Nx;i<R;++i) P[i]+=Nx;
 
                 // Apply the new permutations to the left half
                 A0.cPermuteRows(P,Nx,R);
@@ -626,10 +626,10 @@ namespace tmv {
     };
 
     // algo 81: Copy to colmajor
-    template <int cs, int rs, class M>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M>
     struct BandLUDecompose_Helper<81,cs,rs,M>
     {
-        static void call(M& m, int* P)
+        static void call(M& m, ptrdiff_t* P)
         {
 #ifdef PRINTALGO_BandLU
             std::cout<<"BandLUDecompose algo 81: cs,rs = "<<cs<<','<<rs<<std::endl;
@@ -643,18 +643,18 @@ namespace tmv {
     };
 
     // algo 90: call InstBandLU_Decompose
-    template <int cs, int rs, class M>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M>
     struct BandLUDecompose_Helper<90,cs,rs,M>
     {
-        static TMV_INLINE void call(M& m, int* P)
+        static TMV_INLINE void call(M& m, ptrdiff_t* P)
         { InstBandLU_Decompose(m.xView(),P); }
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, class M>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M>
     struct BandLUDecompose_Helper<97,cs,rs,M>
     {
-        static TMV_INLINE void call(M& m, int* P)
+        static TMV_INLINE void call(M& m, ptrdiff_t* P)
         {
             typedef typename M::conjugate_type Mc;
             Mc mc = m.conjugate();
@@ -663,11 +663,11 @@ namespace tmv {
     };
 
     // algo -4: No copies or branches
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct BandLUDecompose_Helper<-4,cs,rs,M1>
     {
         typedef typename M1::value_type T;
-        static TMV_INLINE void call(M1& m, int* P)
+        static TMV_INLINE void call(M1& m, ptrdiff_t* P)
         {
             const int algo = 
                 cs == 0 || rs == 0 || cs == 1 ? 0 :
@@ -705,10 +705,10 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct BandLUDecompose_Helper<-3,cs,rs,M1>
     {
-        static TMV_INLINE void call(M1& m, int* P)
+        static TMV_INLINE void call(M1& m, ptrdiff_t* P)
         {
             const int algo = (
                 ( cs != Unknown && rs != Unknown &&
@@ -716,8 +716,8 @@ namespace tmv {
                 !M1::_colmajor ? 81 :
                 -4 );
 #ifdef PRINTALGO_BandLU
-            const int M = cs==Unknown ? m.colsize() : cs;
-            const int N = rs==Unknown ? m.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? m.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? m.rowsize() : rs;
             std::cout<<"BandLUDecompose algo -3: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -726,10 +726,10 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class M>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M>
     struct BandLUDecompose_Helper<-2,cs,rs,M>
     {
-        static TMV_INLINE void call(M& m, int* P)
+        static TMV_INLINE void call(M& m, ptrdiff_t* P)
         {
             typedef typename M::value_type T;
             const bool inst = 
@@ -745,19 +745,19 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class M>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M>
     struct BandLUDecompose_Helper<-1,cs,rs,M>
     {
-        static TMV_INLINE void call(M& m, int* P)
+        static TMV_INLINE void call(M& m, ptrdiff_t* P)
         { BandLUDecompose_Helper<-2,cs,rs,M>::call(m,P); }
     };
 
     template <class M>
     inline void InlineBandLU_Decompose(
-        BaseMatrix_Rec_Mutable<M>& m, int* P)
+        BaseMatrix_Rec_Mutable<M>& m, ptrdiff_t* P)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
         BandLUDecompose_Helper<-3,cs,rs,Mv>::call(mv,P);
@@ -765,10 +765,10 @@ namespace tmv {
 
     template <class M>
     inline void BandLU_Decompose(
-        BaseMatrix_Rec_Mutable<M>& m, int* P)
+        BaseMatrix_Rec_Mutable<M>& m, ptrdiff_t* P)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
         BandLUDecompose_Helper<-2,cs,rs,Mv>::call(mv,P);
@@ -783,7 +783,6 @@ namespace tmv {
         P.allocateMem();
         BandLU_Decompose(m,P.getMem());
         P.isinv = true;
-        P.calcDet();
     }
 
     // Allow views as an argument by value (for convenience)
@@ -793,7 +792,7 @@ namespace tmv {
         typedef MatrixView<T,A> M;
         BandLU_Decompose(static_cast<BaseMatrix_Rec_Mutable<M>&>(m),P); 
     }
-    template <class T, int M, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     TMV_INLINE void BandLU_Decompose(
         SmallMatrixView<T,M,N,Si,Sj,A> m, Permutation& P)
     {

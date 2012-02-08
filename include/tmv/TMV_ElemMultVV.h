@@ -33,7 +33,7 @@ namespace tmv {
     // ElementProd functions:
     //
 
-    template <int algo, int s, bool add, int ix, class T, class V1, class V2, class V3>
+    template <int algo, ptrdiff_t s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper;
 
     // algo 0: s == 0, nothing to do
@@ -46,7 +46,7 @@ namespace tmv {
     };
 
     // algo 11: simple for loop
-    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<11,s,add,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -55,11 +55,11 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == Unknown ? v3.size() : s;
+            const ptrdiff_t n = s == Unknown ? v3.size() : s;
             call2(n,x1,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(
-            int n, const Scaling<ix,T>& x1, IT1 it1, IT2 it2, IT3 it3)
+            ptrdiff_t n, const Scaling<ix,T>& x1, IT1 it1, IT2 it2, IT3 it3)
         {
             const bool c1 = V1::_conj;
             const bool c2 = V2::_conj;
@@ -73,7 +73,7 @@ namespace tmv {
     };  
 
     // algo 12: 2 at a time
-    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<12,s,add,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -82,14 +82,14 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == Unknown ? v3.size() : s;
+            const ptrdiff_t n = s == Unknown ? v3.size() : s;
             call2(n,x1,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(
-            const int n, const Scaling<ix,T>& x1, IT1 x, IT2 y, IT3 z)
+            const ptrdiff_t n, const Scaling<ix,T>& x1, IT1 x, IT2 y, IT3 z)
         {
-            int n_2 = (n>>1);
-            const int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            const ptrdiff_t nb = n-(n_2<<1);
             const bool c1 = V1::_conj;
             const bool c2 = V2::_conj;
 
@@ -113,7 +113,7 @@ namespace tmv {
     };
 
     // algo 13: 4 at a time
-    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<13,s,add,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -122,14 +122,14 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == Unknown ? v3.size() : s;
+            const ptrdiff_t n = s == Unknown ? v3.size() : s;
             call2(n,x1,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(
-            const int n, const Scaling<ix,T>& x1, IT1 x, IT2 y, IT3 z)
+            const ptrdiff_t n, const Scaling<ix,T>& x1, IT1 x, IT2 y, IT3 z)
         {
-            int n_4 = (n>>2);
-            int nb = n-(n_4<<2);
+            ptrdiff_t n_4 = (n>>2);
+            ptrdiff_t nb = n-(n_4<<2);
             const bool c1 = V1::_conj;
             const bool c2 = V2::_conj;
 
@@ -162,7 +162,7 @@ namespace tmv {
     };
 
     // algo 14: 8 at a time
-    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<14,s,add,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -171,14 +171,14 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == Unknown ? v3.size() : s;
+            const ptrdiff_t n = s == Unknown ? v3.size() : s;
             call2(n,x1,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
         static void call2(
-            const int n, const Scaling<ix,T>& x1, IT1 x, IT2 y, IT3 z)
+            const ptrdiff_t n, const Scaling<ix,T>& x1, IT1 x, IT2 y, IT3 z)
         {
-            int n_8 = (n>>3);
-            int nb = n-(n_8<<3);
+            ptrdiff_t n_8 = (n>>3);
+            ptrdiff_t nb = n-(n_8<<3);
             const bool c1 = V1::_conj;
             const bool c2 = V2::_conj;
 
@@ -227,13 +227,13 @@ namespace tmv {
     };
 
     // algo 15: fully unroll
-    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<15,s,add,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         typedef typename V3::iterator IT3;
-        template <int I, int N>
+        template <ptrdiff_t I, ptrdiff_t N>
         struct Unroller
         {
             static TMV_INLINE void unroll(
@@ -250,7 +250,7 @@ namespace tmv {
                 Unroller<I+N/2,N-N/2>::unroll2(x1,x,y,z);
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,1>
         {
             static TMV_INLINE void unroll(
@@ -273,7 +273,7 @@ namespace tmv {
                         x1 , ZProd<c1,c2>::prod(x[I],y[I]))); 
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,0>
         {
             static TMV_INLINE void unroll(
@@ -286,13 +286,13 @@ namespace tmv {
             const Scaling<ix,T>& x1, const V1& v1, const V2& v2, V3& v3)
         { Unroller<0,s>::unroll(x1,v1,v2,v3); }
         static inline void call2(
-            const int , const Scaling<ix,T>& x1,
+            const ptrdiff_t , const Scaling<ix,T>& x1,
             const IT1& x, const IT2& y, const IT3& z)
         { Unroller<0,s>::unroll2(x1,x,y,z); }
     };
 
     // algo 90: Call inst
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<90,s,true,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -303,7 +303,7 @@ namespace tmv {
             InstAddElemMultVV(xx,v1.xView(),v2.xView(),v3.xView()); 
         }
     };
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<90,s,false,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -316,7 +316,7 @@ namespace tmv {
     };
 
     // algo 91: Call inst alias
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<91,s,true,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -327,7 +327,7 @@ namespace tmv {
             InstAliasAddElemMultVV(xx,v1.xView(),v2.xView(),v3.xView()); 
         }
     };
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<91,s,false,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -340,7 +340,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<97,s,add,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -358,7 +358,7 @@ namespace tmv {
     };
 
     // algo 197: Conjugate
-    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<197,s,add,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -376,7 +376,7 @@ namespace tmv {
     };
 
     // algo 98: Inline check for aliases
-    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<98,s,add,ix,T,V1,V2,V3>
     {
         static void call(
@@ -420,7 +420,7 @@ namespace tmv {
     };
 
     // algo 99: Check for aliases
-    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<99,s,add,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -448,7 +448,7 @@ namespace tmv {
     };
 
     // algo -4: No branches or copies
-    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<-4,s,add,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -473,7 +473,7 @@ namespace tmv {
             ElemMultVV_Helper<algo,s,add,ix,T,V1,V2,V3>::call(x1,v1,v2,v3); 
         }
         static TMV_INLINE void call2(
-            const int n,
+            const ptrdiff_t n,
             const Scaling<ix,T>& x1, const IT1& x, const IT2& y, IT3& z)
         {
             TMVStaticAssert(!V3::_conj);
@@ -482,7 +482,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<-3,s,add,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -491,7 +491,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<-2,s,add,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -520,7 +520,7 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases?
-    template <int s, bool add, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, bool add, int ix, class T, class V1, class V2, class V3>
     struct ElemMultVV_Helper<-1,s,add,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -548,8 +548,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::_size,V2::_size>::size;
-        const int s = Sizes<s12,V3::_size>::size;
+        const ptrdiff_t s12 = Sizes<V1::_size,V2::_size>::size;
+        const ptrdiff_t s = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
@@ -569,8 +569,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::_size,V2::_size>::size;
-        const int s = Sizes<s12,V3::_size>::size;
+        const ptrdiff_t s12 = Sizes<V1::_size,V2::_size>::size;
+        const ptrdiff_t s = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
@@ -590,8 +590,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::_size,V2::_size>::size;
-        const int s = Sizes<s12,V3::_size>::size;
+        const ptrdiff_t s12 = Sizes<V1::_size,V2::_size>::size;
+        const ptrdiff_t s = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;

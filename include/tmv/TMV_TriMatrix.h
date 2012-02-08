@@ -571,8 +571,8 @@ namespace tmv {
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = false };
         enum { _dt = A & AllDiagType };
-        enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
-        enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : ptrdiff_t(IntTraits<_stepi>::twoS) };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : ptrdiff_t(IntTraits<_stepj>::twoS) };
 
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
@@ -704,7 +704,7 @@ namespace tmv {
         // Constructors
         //
 
-        explicit UpperTriMatrix(int n=0) : itss(n), itsm(n*n)
+        explicit UpperTriMatrix(ptrdiff_t n=0) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVAssert(n >= 0);
@@ -716,7 +716,7 @@ namespace tmv {
 #endif
         }
 
-        UpperTriMatrix(int n, T x) : itss(n), itsm(n*n)
+        UpperTriMatrix(ptrdiff_t n, T x) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVAssert(n >= 0);
@@ -803,7 +803,7 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsm; }
         TMV_INLINE T* ptr() { return itsm; }
 
-        T cref(int i, int j) const 
+        T cref(ptrdiff_t i, ptrdiff_t j) const 
         {
             return (
                 (isunit() && i==j) ? T(1) :
@@ -811,7 +811,7 @@ namespace tmv {
                 itsm[_rowmajor ? i*stepi() + j : i + j*stepj()]);
         }
 
-        reference ref(int i, int j)
+        reference ref(ptrdiff_t i, ptrdiff_t j)
         {
             return TriRefHelper<T,false,_nonunit>::makeRef(
                 isunit() && i==j,
@@ -825,7 +825,7 @@ namespace tmv {
             itsm.swapWith(m2.itsm);
         }
 
-        void resize(const int s)
+        void resize(const ptrdiff_t s)
         {
             TMVAssert(s >= 0);
 #ifdef TMV_EXTRA_DEBUG
@@ -844,10 +844,10 @@ namespace tmv {
 #endif
         }
 
-        TMV_INLINE int size() const { return itss; }
-        int nElements() const { return itss*(itss+1)/2; }
-        TMV_INLINE int stepi() const { return _rowmajor ? itss : 1; }
-        TMV_INLINE int stepj() const { return _rowmajor ? 1 : itss; }
+        TMV_INLINE ptrdiff_t size() const { return itss; }
+        ptrdiff_t nElements() const { return itss*(itss+1)/2; }
+        TMV_INLINE ptrdiff_t stepi() const { return _rowmajor ? itss : 1; }
+        TMV_INLINE ptrdiff_t stepj() const { return _rowmajor ? 1 : itss; }
         TMV_INLINE DiagType dt() const { return static_cast<DiagType>(_dt); }
         TMV_INLINE bool isunit() const { return _unit; }
         TMV_INLINE bool isconj() const { return false; }
@@ -856,7 +856,7 @@ namespace tmv {
 
     protected :
 
-        int itss;
+        ptrdiff_t itss;
         AlignedArray<T> itsm;
 
     }; // UpperTriMatrix
@@ -906,8 +906,8 @@ namespace tmv {
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
         enum { _dt = _unknowndiag ? Unknown : A & AllDiagType };
-        enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
-        enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : ptrdiff_t(IntTraits<_stepi>::twoS) };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : ptrdiff_t(IntTraits<_stepj>::twoS) };
 
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
@@ -1009,20 +1009,20 @@ namespace tmv {
         //
 
         ConstUpperTriMatrixView(
-            const T* m, int s, int si, int sj, DiagType dt) :
+            const T* m, ptrdiff_t s, ptrdiff_t si, ptrdiff_t sj, DiagType dt) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstUpperTriMatrixView(const T* m, int s, int si, int sj) :
+        ConstUpperTriMatrixView(const T* m, ptrdiff_t s, ptrdiff_t si, ptrdiff_t sj) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_dt != Unknown); 
         }
 
-        ConstUpperTriMatrixView(const T* m, int s, int si) :
+        ConstUpperTriMatrixView(const T* m, ptrdiff_t s, ptrdiff_t si) :
             itsm(m), itss(s), itssi(si), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1030,7 +1030,7 @@ namespace tmv {
             TMVStaticAssert(_dt != Unknown); 
         }
 
-        ConstUpperTriMatrixView(const T* m, int s) :
+        ConstUpperTriMatrixView(const T* m, ptrdiff_t s) :
             itsm(m), itss(s), itssi(_stepi), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1066,7 +1066,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         ConstUpperTriMatrixView(
             const ConstSmallUpperTriMatrixView<T,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itss(m2.size()), 
@@ -1076,7 +1076,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         ConstUpperTriMatrixView(
             const SmallUpperTriMatrixView<T,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itss(m2.size()), 
@@ -1103,7 +1103,7 @@ namespace tmv {
 
         TMV_INLINE const T* cptr() const { return itsm; }
 
-        T cref(int i, int j) const 
+        T cref(ptrdiff_t i, ptrdiff_t j) const 
         {
             return (
                 (isunit() && i==j) ? T(1) :
@@ -1111,15 +1111,15 @@ namespace tmv {
                 DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
 
-        TMV_INLINE int colsize() const { return itss; }
-        TMV_INLINE int rowsize() const { return itss; }
-        TMV_INLINE int size() const { return itss; }
-        int nElements() const { return itss*(itss+1)/2; }
-        TMV_INLINE int stepi() const { return itssi; }
-        TMV_INLINE int stepj() const { return itssj; }
+        TMV_INLINE ptrdiff_t colsize() const { return itss; }
+        TMV_INLINE ptrdiff_t rowsize() const { return itss; }
+        TMV_INLINE ptrdiff_t size() const { return itss; }
+        ptrdiff_t nElements() const { return itss*(itss+1)/2; }
+        TMV_INLINE ptrdiff_t stepi() const { return itssi; }
+        TMV_INLINE ptrdiff_t stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE DiagType dt() const 
-        { return static_cast<DiagType>(static_cast<int>(itsdt)); }
+        { return static_cast<DiagType>(static_cast<ptrdiff_t>(itsdt)); }
         TMV_INLINE bool isunit() const { return dt() == UnitDiag; }
         TMV_INLINE bool isrm() const
         {
@@ -1135,7 +1135,7 @@ namespace tmv {
     private :
 
         const T* itsm;
-        const int itss;
+        const ptrdiff_t itss;
         const CheckedInt<_stepi> itssi;
         const CheckedInt<_stepj> itssj;
         const CheckedInt<_dt> itsdt;
@@ -1187,8 +1187,8 @@ namespace tmv {
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
         enum { _dt = _unknowndiag ? Unknown : A & AllDiagType };
-        enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
-        enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : ptrdiff_t(IntTraits<_stepi>::twoS) };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : ptrdiff_t(IntTraits<_stepj>::twoS) };
 
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
@@ -1328,20 +1328,20 @@ namespace tmv {
         // Constructors
         //
 
-        UpperTriMatrixView(T* m, int s, int si, int sj, DiagType dt) :
+        UpperTriMatrixView(T* m, ptrdiff_t s, ptrdiff_t si, ptrdiff_t sj, DiagType dt) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        UpperTriMatrixView(T* m, int s, int si, int sj) :
+        UpperTriMatrixView(T* m, ptrdiff_t s, ptrdiff_t si, ptrdiff_t sj) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_dt != Unknown); 
         }
 
-        UpperTriMatrixView(T* m, int s, int si) :
+        UpperTriMatrixView(T* m, ptrdiff_t s, ptrdiff_t si) :
             itsm(m), itss(s), itssi(si), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1349,7 +1349,7 @@ namespace tmv {
             TMVStaticAssert(_dt != Unknown); 
         }
 
-        UpperTriMatrixView(T* m, int s) :
+        UpperTriMatrixView(T* m, ptrdiff_t s) :
             itsm(m), itss(s), itssi(_stepi), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1374,7 +1374,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         UpperTriMatrixView(SmallUpperTriMatrixView<T,N2,Si2,Sj2,A2> m2) :
             itsm(m2.ptr()), itss(m2.size()), 
             itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
@@ -1421,7 +1421,7 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsm; }
         TMV_INLINE T* ptr() { return itsm; }
 
-        T cref(int i, int j) const
+        T cref(ptrdiff_t i, ptrdiff_t j) const
         {
             return (
                 (isunit() && i==j) ? T(1) :
@@ -1429,21 +1429,21 @@ namespace tmv {
                 DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
 
-        reference ref(int i, int j)
+        reference ref(ptrdiff_t i, ptrdiff_t j)
         {
             return TriRefHelper<T,_conj,_nonunit>::makeRef(
                 isunit() && i==j, itsm[i*stepi()+j*stepj()]); 
         }
 
-        TMV_INLINE int colsize() const { return itss; }
-        TMV_INLINE int rowsize() const { return itss; }
-        TMV_INLINE int size() const { return itss; }
-        int nElements() const { return itss*(itss+1)/2; }
-        TMV_INLINE int stepi() const { return itssi; }
-        TMV_INLINE int stepj() const { return itssj; }
+        TMV_INLINE ptrdiff_t colsize() const { return itss; }
+        TMV_INLINE ptrdiff_t rowsize() const { return itss; }
+        TMV_INLINE ptrdiff_t size() const { return itss; }
+        ptrdiff_t nElements() const { return itss*(itss+1)/2; }
+        TMV_INLINE ptrdiff_t stepi() const { return itssi; }
+        TMV_INLINE ptrdiff_t stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE DiagType dt() const 
-        { return static_cast<DiagType>(static_cast<int>(itsdt)); }
+        { return static_cast<DiagType>(static_cast<ptrdiff_t>(itsdt)); }
         TMV_INLINE bool isunit() const { return itsdt == UnitDiag; }
         TMV_INLINE bool isrm() const
         {
@@ -1459,7 +1459,7 @@ namespace tmv {
     private :
 
         T* itsm;
-        const int itss;
+        const ptrdiff_t itss;
         const CheckedInt<_stepi> itssi;
         const CheckedInt<_stepj> itssj;
         const CheckedInt<_dt> itsdt;
@@ -1518,8 +1518,8 @@ namespace tmv {
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = false };
         enum { _dt = A & AllDiagType };
-        enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
-        enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : ptrdiff_t(IntTraits<_stepi>::twoS) };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : ptrdiff_t(IntTraits<_stepj>::twoS) };
 
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
@@ -1651,7 +1651,7 @@ namespace tmv {
         // Constructors
         //
 
-        explicit LowerTriMatrix(int n=0) : itss(n), itsm(n*n)
+        explicit LowerTriMatrix(ptrdiff_t n=0) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVAssert(n >= 0);
@@ -1663,7 +1663,7 @@ namespace tmv {
 #endif
         }
 
-        LowerTriMatrix(int n, T x) : itss(n), itsm(n*n)
+        LowerTriMatrix(ptrdiff_t n, T x) : itss(n), itsm(n*n)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVAssert(n >= 0);
@@ -1750,7 +1750,7 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsm; }
         TMV_INLINE T* ptr() { return itsm; }
 
-        T cref(int i, int j) const 
+        T cref(ptrdiff_t i, ptrdiff_t j) const 
         {
             return (
                 (isunit() && i==j) ? T(1) :
@@ -1758,7 +1758,7 @@ namespace tmv {
                 itsm[_rowmajor ? i*stepi() + j : i + j*stepj()]);
         }
 
-        reference ref(int i, int j)
+        reference ref(ptrdiff_t i, ptrdiff_t j)
         {
             return TriRefHelper<T,false,_nonunit>::makeRef(
                 isunit() && i==j,
@@ -1772,7 +1772,7 @@ namespace tmv {
             itsm.swapWith(m2.itsm);
         }
 
-        void resize(const int s)
+        void resize(const ptrdiff_t s)
         {
             TMVAssert(s >= 0);
 #ifdef TMV_EXTRA_DEBUG
@@ -1791,10 +1791,10 @@ namespace tmv {
 #endif
         }
 
-        TMV_INLINE int size() const { return itss; }
-        int nElements() const { return itss*(itss+1)/2; }
-        TMV_INLINE int stepi() const { return _rowmajor ? itss : 1; }
-        TMV_INLINE int stepj() const { return _rowmajor ? 1 : itss; }
+        TMV_INLINE ptrdiff_t size() const { return itss; }
+        ptrdiff_t nElements() const { return itss*(itss+1)/2; }
+        TMV_INLINE ptrdiff_t stepi() const { return _rowmajor ? itss : 1; }
+        TMV_INLINE ptrdiff_t stepj() const { return _rowmajor ? 1 : itss; }
         TMV_INLINE DiagType dt() const { return static_cast<DiagType>(_dt); }
         TMV_INLINE bool isunit() const { return _unit; }
         TMV_INLINE bool isconj() const { return false; }
@@ -1803,7 +1803,7 @@ namespace tmv {
 
     protected :
 
-        int itss;
+        ptrdiff_t itss;
         AlignedArray<T> itsm;
 
     }; // LowerTriMatrix
@@ -1853,8 +1853,8 @@ namespace tmv {
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
         enum { _dt = _unknowndiag ? Unknown : A & AllDiagType };
-        enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
-        enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : ptrdiff_t(IntTraits<_stepi>::twoS) };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : ptrdiff_t(IntTraits<_stepj>::twoS) };
 
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
@@ -1956,20 +1956,20 @@ namespace tmv {
         //
         
         ConstLowerTriMatrixView(
-            const T* m, int s, int si, int sj, DiagType dt) :
+            const T* m, ptrdiff_t s, ptrdiff_t si, ptrdiff_t sj, DiagType dt) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstLowerTriMatrixView(const T* m, int s, int si, int sj) :
+        ConstLowerTriMatrixView(const T* m, ptrdiff_t s, ptrdiff_t si, ptrdiff_t sj) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_dt != Unknown); 
         }
 
-        ConstLowerTriMatrixView(const T* m, int s, int si) :
+        ConstLowerTriMatrixView(const T* m, ptrdiff_t s, ptrdiff_t si) :
             itsm(m), itss(s), itssi(si), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1977,7 +1977,7 @@ namespace tmv {
             TMVStaticAssert(_dt != Unknown); 
         }
 
-        ConstLowerTriMatrixView(const T* m, int s) :
+        ConstLowerTriMatrixView(const T* m, ptrdiff_t s) :
             itsm(m), itss(s), itssi(_stepi), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -2013,7 +2013,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         ConstLowerTriMatrixView(
             const ConstSmallLowerTriMatrixView<T,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itss(m2.size()), 
@@ -2023,7 +2023,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         ConstLowerTriMatrixView(
             const SmallLowerTriMatrixView<T,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itss(m2.size()), 
@@ -2050,7 +2050,7 @@ namespace tmv {
 
         TMV_INLINE const T* cptr() const { return itsm; }
 
-        T cref(int i, int j) const 
+        T cref(ptrdiff_t i, ptrdiff_t j) const 
         {
             return (
                 (isunit() && i==j) ? T(1) :
@@ -2058,15 +2058,15 @@ namespace tmv {
                 DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
 
-        TMV_INLINE int colsize() const { return itss; }
-        TMV_INLINE int rowsize() const { return itss; }
-        TMV_INLINE int size() const { return itss; }
-        int nElements() const { return itss*(itss+1)/2; }
-        TMV_INLINE int stepi() const { return itssi; }
-        TMV_INLINE int stepj() const { return itssj; }
+        TMV_INLINE ptrdiff_t colsize() const { return itss; }
+        TMV_INLINE ptrdiff_t rowsize() const { return itss; }
+        TMV_INLINE ptrdiff_t size() const { return itss; }
+        ptrdiff_t nElements() const { return itss*(itss+1)/2; }
+        TMV_INLINE ptrdiff_t stepi() const { return itssi; }
+        TMV_INLINE ptrdiff_t stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE DiagType dt() const 
-        { return static_cast<DiagType>(static_cast<int>(itsdt)); }
+        { return static_cast<DiagType>(static_cast<ptrdiff_t>(itsdt)); }
         TMV_INLINE bool isunit() const { return itsdt == UnitDiag; }
         TMV_INLINE bool isrm() const
         {
@@ -2082,7 +2082,7 @@ namespace tmv {
     private :
 
         const T* itsm;
-        const int itss;
+        const ptrdiff_t itss;
         const CheckedInt<_stepi> itssi;
         const CheckedInt<_stepj> itssj;
         const CheckedInt<_dt> itsdt;
@@ -2134,8 +2134,8 @@ namespace tmv {
         enum { _nonunit = Attrib<A>::nonunitdiag };
         enum { _unknowndiag = !(_unit || _nonunit) };
         enum { _dt = _unknowndiag ? Unknown : A & AllDiagType };
-        enum { twoSi = isreal ? int(_stepi) : int(IntTraits<_stepi>::twoS) };
-        enum { twoSj = isreal ? int(_stepj) : int(IntTraits<_stepj>::twoS) };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : ptrdiff_t(IntTraits<_stepi>::twoS) };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : ptrdiff_t(IntTraits<_stepj>::twoS) };
 
         enum { _hasdivider = false };
         typedef QuotXM<1,real_type,type> inverse_type;
@@ -2275,20 +2275,20 @@ namespace tmv {
         // Constructors
         //
 
-        LowerTriMatrixView(T* m, int s, int si, int sj, DiagType dt) :
+        LowerTriMatrixView(T* m, ptrdiff_t s, ptrdiff_t si, ptrdiff_t sj, DiagType dt) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(dt)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        LowerTriMatrixView(T* m, int s, int si, int sj) :
+        LowerTriMatrixView(T* m, ptrdiff_t s, ptrdiff_t si, ptrdiff_t sj) :
             itsm(m), itss(s), itssi(si), itssj(sj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_dt != Unknown); 
         }
 
-        LowerTriMatrixView(T* m, int s, int si) :
+        LowerTriMatrixView(T* m, ptrdiff_t s, ptrdiff_t si) :
             itsm(m), itss(s), itssi(si), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -2296,7 +2296,7 @@ namespace tmv {
             TMVStaticAssert(_dt != Unknown); 
         }
 
-        LowerTriMatrixView(T* m, int s) :
+        LowerTriMatrixView(T* m, ptrdiff_t s) :
             itsm(m), itss(s), itssi(_stepi), itssj(_stepj), itsdt(_dt)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -2321,7 +2321,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         LowerTriMatrixView(SmallLowerTriMatrixView<T,N2,Si2,Sj2,A2> m2) :
             itsm(m2.ptr()), itss(m2.size()), 
             itssi(m2.stepi()), itssj(m2.stepj()), itsdt(m2.dt())
@@ -2368,7 +2368,7 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsm; }
         TMV_INLINE T* ptr() { return itsm; }
 
-        T cref(int i, int j) const
+        T cref(ptrdiff_t i, ptrdiff_t j) const
         {
             return (
                 (isunit() && i==j) ? T(1) :
@@ -2376,21 +2376,21 @@ namespace tmv {
                 DoConj<_conj>(itsm[i*stepi() + j*stepj()]));
         }
 
-        reference ref(int i, int j)
+        reference ref(ptrdiff_t i, ptrdiff_t j)
         {
             return TriRefHelper<T,_conj,_nonunit>::makeRef(
                 isunit() && i==j, itsm[i*stepi()+j*stepj()]); 
         }
 
-        TMV_INLINE int colsize() const { return itss; }
-        TMV_INLINE int rowsize() const { return itss; }
-        TMV_INLINE int size() const { return itss; }
-        int nElements() const { return itss*(itss+1)/2; }
-        TMV_INLINE int stepi() const { return itssi; }
-        TMV_INLINE int stepj() const { return itssj; }
+        TMV_INLINE ptrdiff_t colsize() const { return itss; }
+        TMV_INLINE ptrdiff_t rowsize() const { return itss; }
+        TMV_INLINE ptrdiff_t size() const { return itss; }
+        ptrdiff_t nElements() const { return itss*(itss+1)/2; }
+        TMV_INLINE ptrdiff_t stepi() const { return itssi; }
+        TMV_INLINE ptrdiff_t stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE DiagType dt() const 
-        { return static_cast<DiagType>(static_cast<int>(itsdt)); }
+        { return static_cast<DiagType>(static_cast<ptrdiff_t>(itsdt)); }
         TMV_INLINE bool isunit() const { return itsdt == UnitDiag; }
         TMV_INLINE bool isrm() const
         {
@@ -2406,7 +2406,7 @@ namespace tmv {
     private :
 
         T* itsm;
-        const int itss;
+        const ptrdiff_t itss;
         const CheckedInt<_stepi> itssi;
         const CheckedInt<_stepj> itssj;
         const CheckedInt<_dt> itsdt;
@@ -2435,7 +2435,7 @@ namespace tmv {
 
     template <class T>
     inline UpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
-        T* m, int size, StorageType stor)
+        T* m, ptrdiff_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         TMVAssert(size >= 0);
@@ -2447,7 +2447,7 @@ namespace tmv {
 
     template <class T>
     inline ConstUpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
-        const T* m, int size, StorageType stor)
+        const T* m, ptrdiff_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         TMVAssert(size >= 0);
@@ -2459,17 +2459,17 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE UpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
-        T* m, int size, int stepi, int stepj)
+        T* m, ptrdiff_t size, ptrdiff_t stepi, ptrdiff_t stepj)
     { return UpperTriMatrixView<T,NonUnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
     TMV_INLINE ConstUpperTriMatrixView<T,NonUnitDiag> UpperTriMatrixViewOf(
-        const T* m, int size, int stepi, int stepj)
+        const T* m, ptrdiff_t size, ptrdiff_t stepi, ptrdiff_t stepj)
     { return ConstUpperTriMatrixView<T,NonUnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
     inline UpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
-        T* m, int size, StorageType stor)
+        T* m, ptrdiff_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         TMVAssert(size >= 0);
@@ -2481,7 +2481,7 @@ namespace tmv {
 
     template <class T>
     inline ConstUpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
-        const T* m, int size, StorageType stor)
+        const T* m, ptrdiff_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         TMVAssert(size >= 0);
@@ -2493,17 +2493,17 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE UpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
-        T* m, int size, int stepi, int stepj)
+        T* m, ptrdiff_t size, ptrdiff_t stepi, ptrdiff_t stepj)
     { return UpperTriMatrixView<T,UnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
     TMV_INLINE ConstUpperTriMatrixView<T,UnitDiag> UnitUpperTriMatrixViewOf(
-        const T* m, int size, int stepi, int stepj)
+        const T* m, ptrdiff_t size, ptrdiff_t stepi, ptrdiff_t stepj)
     { return ConstUpperTriMatrixView<T,UnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
     inline UpperTriMatrixView<T> UpperTriMatrixViewOf(
-        T* m, int size, StorageType stor, DiagType dt)
+        T* m, ptrdiff_t size, StorageType stor, DiagType dt)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         TMVAssert(size >= 0);
@@ -2516,7 +2516,7 @@ namespace tmv {
 
     template <class T>
     inline ConstUpperTriMatrixView<T> UpperTriMatrixViewOf(
-        const T* m, int size, StorageType stor, DiagType dt)
+        const T* m, ptrdiff_t size, StorageType stor, DiagType dt)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         TMVAssert(size >= 0);
@@ -2529,7 +2529,7 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE_ND UpperTriMatrixView<T> UpperTriMatrixViewOf(
-        T* m, int size, int stepi, int stepj, DiagType dt)
+        T* m, ptrdiff_t size, ptrdiff_t stepi, ptrdiff_t stepj, DiagType dt)
     {
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
         return UpperTriMatrixView<T>(m,size,stepi,stepj,dt); 
@@ -2537,7 +2537,7 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE_ND ConstUpperTriMatrixView<T> UpperTriMatrixViewOf(
-        const T* m, int size, int stepi, int stepj, DiagType dt)
+        const T* m, ptrdiff_t size, ptrdiff_t stepi, ptrdiff_t stepj, DiagType dt)
     {
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
         return ConstUpperTriMatrixView<T>(m,size,stepi,stepj,dt); 
@@ -2545,7 +2545,7 @@ namespace tmv {
  
     template <class T>
     inline LowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
-        T* m, int size, StorageType stor)
+        T* m, ptrdiff_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         TMVAssert(size >= 0);
@@ -2557,7 +2557,7 @@ namespace tmv {
 
     template <class T>
     inline ConstLowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
-        const T* m, int size, StorageType stor)
+        const T* m, ptrdiff_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         TMVAssert(size >= 0);
@@ -2569,17 +2569,17 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE LowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
-        T* m, int size, int stepi, int stepj)
+        T* m, ptrdiff_t size, ptrdiff_t stepi, ptrdiff_t stepj)
     { return LowerTriMatrixView<T,NonUnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
     TMV_INLINE ConstLowerTriMatrixView<T,NonUnitDiag> LowerTriMatrixViewOf(
-        const T* m, int size, int stepi, int stepj)
+        const T* m, ptrdiff_t size, ptrdiff_t stepi, ptrdiff_t stepj)
     { return ConstLowerTriMatrixView<T,NonUnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
     inline LowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
-        T* m, int size, StorageType stor)
+        T* m, ptrdiff_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         TMVAssert(size >= 0);
@@ -2591,7 +2591,7 @@ namespace tmv {
 
     template <class T>
     inline ConstLowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
-        const T* m, int size, StorageType stor)
+        const T* m, ptrdiff_t size, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         TMVAssert(size >= 0);
@@ -2603,17 +2603,17 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE LowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
-        T* m, int size, int stepi, int stepj)
+        T* m, ptrdiff_t size, ptrdiff_t stepi, ptrdiff_t stepj)
     { return LowerTriMatrixView<T,UnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
     TMV_INLINE ConstLowerTriMatrixView<T,UnitDiag> UnitLowerTriMatrixViewOf(
-        const T* m, int size, int stepi, int stepj)
+        const T* m, ptrdiff_t size, ptrdiff_t stepi, ptrdiff_t stepj)
     { return ConstLowerTriMatrixView<T,UnitDiag>(m,size,stepi,stepj); }
 
     template <class T>
     inline LowerTriMatrixView<T> LowerTriMatrixViewOf(
-        T* m, int size, StorageType stor, DiagType dt)
+        T* m, ptrdiff_t size, StorageType stor, DiagType dt)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         TMVAssert(size >= 0);
@@ -2626,7 +2626,7 @@ namespace tmv {
 
     template <class T>
     inline ConstLowerTriMatrixView<T> LowerTriMatrixViewOf(
-        const T* m, int size, StorageType stor, DiagType dt)
+        const T* m, ptrdiff_t size, StorageType stor, DiagType dt)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         TMVAssert(size >= 0);
@@ -2639,7 +2639,7 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE_ND LowerTriMatrixView<T> LowerTriMatrixViewOf(
-        T* m, int size, int stepi, int stepj, DiagType dt)
+        T* m, ptrdiff_t size, ptrdiff_t stepi, ptrdiff_t stepj, DiagType dt)
     {
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
         return LowerTriMatrixView<T>(m,size,stepi,stepj,dt); 
@@ -2647,7 +2647,7 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE_ND ConstLowerTriMatrixView<T> LowerTriMatrixViewOf(
-        const T* m, int size, int stepi, int stepj, DiagType dt)
+        const T* m, ptrdiff_t size, ptrdiff_t stepi, ptrdiff_t stepj, DiagType dt)
     {
         TMVAssert(dt == UnitDiag || dt == NonUnitDiag);
         return ConstLowerTriMatrixView<T>(m,size,stepi,stepj,dt); 

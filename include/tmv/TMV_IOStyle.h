@@ -128,8 +128,15 @@ namespace tmv {
 
         // Helper for dealing with threshold writing.
         template <class T>
-        T outVal(const T& val)
+        T outVal(const T& val) const
         { return (thresh > 0. && TMV_ABS(val) < thresh) ? T(0) : val; }
+
+        template <class T>
+        std::complex<T> outVal(const std::complex<T>& val) const
+        {
+            return thresh > 0. ?
+                std::complex<T>(outVal(real(val)),outVal(imag(val))) : val; 
+        }
 
         // Private constructor with initial default values.
         // (The int is just to make it easy to resolve on the signature.)
@@ -198,11 +205,11 @@ namespace tmv {
         void writeCode(const std::string& code) const
         { if (s.usecode) os << code << " "; }
 
-        void writeSize(int n) const
+        void writeSize(ptrdiff_t n) const
         { if (s.writesize) os << n << " "; }
-        void writeSimpleSize(int n) const
+        void writeSimpleSize(ptrdiff_t n) const
         { if (s.simplesize) writeSize(n); }
-        void writeFullSize(int n) const
+        void writeFullSize(ptrdiff_t n) const
         { if (!s.simplesize) writeSize(n); }
 
         void writeStart() const
@@ -220,7 +227,7 @@ namespace tmv {
 
         template <class T>
         void writeValue(const T& x) const
-        { os << Value((s.thresh > 0. && TMV_ABS(x) < s.thresh) ? T(0) : x); }
+        { os << Value(s.outVal(x)); }
 
         bool isCompact() const
         { return s.usecompact; }
@@ -302,7 +309,7 @@ namespace tmv {
         bool readFinal(std::string& exp, std::string& got) const
         { return readStr(trim(s.final),exp,got); }
 
-        bool readSize(int& n) const
+        bool readSize(ptrdiff_t& n) const
         {
             if (s.writesize) {
                 skipWhiteSpace();
@@ -314,10 +321,10 @@ namespace tmv {
             }
         }
 
-        bool readSimpleSize(int& n) const
+        bool readSimpleSize(ptrdiff_t& n) const
         { return s.simplesize ? readSize(n) : true; }
 
-        bool readFullSize(int& n) const
+        bool readFullSize(ptrdiff_t& n) const
         { return !s.simplesize ? readSize(n) : true; }
 
         template <class T>

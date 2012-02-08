@@ -104,22 +104,22 @@ namespace tmv {
     // m2 is UpperTri or LowerTri
     //
 
-    template <int algo, int cs, int rs, class M1, class M2>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper;
 
     // algo 0: Trivial, nothing to do.
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<0,cs,rs,M1,M2>
     { static TMV_INLINE void call(M1& , const M2& ) {} };
 
     // algo 1: M == 1, so reduces to ScaleV
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<1,cs,rs,M1,M2>
     {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 1: M,N,cs,rs = "<<1<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -138,13 +138,13 @@ namespace tmv {
     };
 
     // algo 101: same as 1, but use -1 algo
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<101,cs,rs,M1,M2>
     {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 101: M,N,cs,rs = "<<1<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -163,13 +163,13 @@ namespace tmv {
     };
 
     // algo 201: same as 1, but use -2 algo
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<201,cs,rs,M1,M2>
     {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 201: M,N,cs,rs = "<<1<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -188,13 +188,13 @@ namespace tmv {
     };
 
     // algo 2: N == 1, so reduces to LDivVU
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<2,cs,rs,M1,M2>
     {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
             std::cout<<"LDivEqMU algo 2: M,N,cs,rs = "<<M<<','<<1<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -206,13 +206,13 @@ namespace tmv {
     };
 
     // algo 102: same as 2, but use -1 algo
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<102,cs,rs,M1,M2>
     {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
             std::cout<<"LDivEqMU algo 102: M,N,cs,rs = "<<M<<','<<1<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -224,13 +224,13 @@ namespace tmv {
     };
 
     // algo 202: same as 2, but use -2 algo
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<202,cs,rs,M1,M2>
     {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
             std::cout<<"LDivEqMU algo 202: M,N,cs,rs = "<<M<<','<<1<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -242,20 +242,20 @@ namespace tmv {
     };
 
     // algo 11: UpperTri loop over n
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<11,cs,rs,M1,M2>
     {
         static inline void call(M1& m1, const M2& m2)
         {
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
 #ifdef PRINTALGO_DivU
-            const int M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
             std::cout<<"LDivEqMU algo 11: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
 
             typedef typename M1::col_type M1c;
-            for(int j=0;j<N;++j) {
+            for(ptrdiff_t j=0;j<N;++j) {
                 // m1.col(j) /= m2
                 M1c m1j = m1.get_col(j);
                 LDivEqVU_Helper<-4,cs,M1c,M2>::call(m1j,m2);
@@ -264,14 +264,14 @@ namespace tmv {
     };
 
     // algo 12: UpperTri loop over m
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<12,cs,rs,M1,M2>
     {
         static inline void call(M1& m1, const M2& m2)
         {
-            const int M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
 #ifdef PRINTALGO_DivU
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 12: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -283,7 +283,7 @@ namespace tmv {
             typedef typename M1::row_type M1r;
             typedef typename M1::rowrange_type::const_transpose_type M1rrt;
             const int ix2 = u2 ? 1 : 0;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             const Scaling<-1,RT> mone;
 #ifdef TMV_DIVMU_INLINE_MV
             const int algo2 = -4;
@@ -291,7 +291,7 @@ namespace tmv {
             const int algo2 = -2;
 #endif
 
-            for(int i=M;i--;) {
+            for(ptrdiff_t i=M;i--;) {
                 // m1.row(i) -= m2.row(i,i+1,M) * m1.rowRange(i+1,M)
                 // m1.row(i) /= m2(i,i)
                 M1r m1i = m1.get_row(i);
@@ -307,14 +307,14 @@ namespace tmv {
     };
 
     // algo 13: UpperTri loop over k
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<13,cs,rs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
 #ifdef PRINTALGO_DivU
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 13: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -327,7 +327,7 @@ namespace tmv {
             typedef typename M1::const_row_type M1rc;
             typedef typename M2::const_col_sub_type M2c;
             const int ix2 = u2 ? 1 : 0;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             const Scaling<-1,RT> mone;
 #ifdef TMV_DIVMU_INLINE_MV
             const int algo2 = -4;
@@ -335,7 +335,7 @@ namespace tmv {
             const int algo2 = -2;
 #endif
 
-            for(int k=M;k--;) {
+            for(ptrdiff_t k=M;k--;) {
                 // m1.row(k) /= m2(k,k)
                 // m1.rowRange(0,k) -= m2.col(k,0,k) ^ m1.row(k)
                 M1r m1k = m1.get_row(k);
@@ -351,14 +351,14 @@ namespace tmv {
     };
 
     // algo 16: For small cs, create m2.inverse() explicitly
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<16,cs,rs,M1,M2>
     {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int M = cs==Unknown ? m1.colsize() : cs;
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 16: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -372,14 +372,14 @@ namespace tmv {
             MultMM<false>(one,m2inv,m1,m1na);
         }
     };
-    template <int rs, class M1, class M2>
+    template <ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<16,Unknown,rs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int M = m1.colsize();
+            const ptrdiff_t M = m1.colsize();
 #ifdef PRINTALGO_DivU
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 16: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<Unknown<<','<<rs<<std::endl;
 #endif
@@ -429,14 +429,14 @@ namespace tmv {
     // E /= C
     // D -= BE
     // D /= A
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<17,cs,rs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
 #ifdef PRINTALGO_DivU
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 17: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -491,10 +491,10 @@ namespace tmv {
             const Scaling<-1,RT> mone;
 
             if (M > TMV_DIVMU_RECURSE) {
-                const int Mx = M > 16 ? ((((M-1)>>5)+1)<<4) : (M>>1);
+                const ptrdiff_t Mx = M > 16 ? ((((M-1)>>5)+1)<<4) : (M>>1);
                 // (If M > 16, round M/2 up to a multiple of 16.)
-                const int csx = IntTraits<cs>::half_roundup;
-                const int csy = IntTraits2<cs,csx>::diff;
+                const ptrdiff_t csx = IntTraits<cs>::half_roundup;
+                const ptrdiff_t csy = IntTraits2<cs,csx>::diff;
 
                 M2a A = m2.cSubTriMatrix(0,Mx);
                 M2b B = m2.cSubMatrix(0,Mx,Mx,M);
@@ -526,14 +526,14 @@ namespace tmv {
     };
 
     // algo 21: LowerTri loop over n
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<21,cs,rs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
 #ifdef PRINTALGO_DivU
-            const int M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
             std::cout<<"LDivEqMU algo 21: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -544,7 +544,7 @@ namespace tmv {
 #endif
 
             typedef typename M1::col_type M1c;
-            for(int j=0;j<N;++j) {
+            for(ptrdiff_t j=0;j<N;++j) {
                 // m1.col(j) /= m2
                 M1c m1j = m1.get_col(j);
                 LDivEqVU_Helper<algo2,cs,M1c,M2>::call(m1j,m2);
@@ -553,14 +553,14 @@ namespace tmv {
     };
 
     // algo 22: LowerTri loop over m
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<22,cs,rs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
 #ifdef PRINTALGO_DivU
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 22: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -572,7 +572,7 @@ namespace tmv {
             typedef typename M1::rowrange_type::const_transpose_type M1rrt;
             typedef typename M1::row_type M1r;
             const int ix2 = u2 ? 1 : 0;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             const Scaling<-1,RT> mone;
 #ifdef TMV_DIVMU_INLINE_MV
             const int algo2 = -4;
@@ -580,7 +580,7 @@ namespace tmv {
             const int algo2 = -2;
 #endif
 
-            for(int i=0;i<M;++i) {
+            for(ptrdiff_t i=0;i<M;++i) {
                 // m1.row(i) -= m2.row(i,0,i) * m1.rowRange(0,i)
                 // m1.row(i) /= m2(i,i)
                 M1r m1i = m1.get_row(i);
@@ -596,14 +596,14 @@ namespace tmv {
     };
 
     // algo 23: LowerTri loop over k
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<23,cs,rs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
 #ifdef PRINTALGO_DivU
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 23: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -616,7 +616,7 @@ namespace tmv {
             typedef typename M1::rowrange_type M1rr;
             typedef typename M2::const_col_sub_type M2c;
             const int ix2 = u2 ? 1 : 0;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
             const Scaling<-1,RT> mone;
 #ifdef TMV_DIVMU_INLINE_MV
             const int algo2 = -4;
@@ -624,7 +624,7 @@ namespace tmv {
             const int algo2 = -2;
 #endif
 
-            for(int k=0;k<M;++k) {
+            for(ptrdiff_t k=0;k<M;++k) {
                 // m1.row(k) /= m2(k,k)
                 // m1.rowRange(k+1,M) -= m2.col(k,k+1,M) ^ m1.row(k)
                 M1r m1k = m1.get_row(k);
@@ -640,14 +640,14 @@ namespace tmv {
     };
 
     // algo 26: For small cs, create m2.inverse() explicitly
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<26,cs,rs,M1,M2>
     {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int M = cs==Unknown ? m1.colsize() : cs;
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 26: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -661,14 +661,14 @@ namespace tmv {
             MultMM<false>(one,m2inv,m1,m1na);
         }
     };
-    template <int rs, class M1, class M2>
+    template <ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<26,Unknown,rs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int M = m1.colsize();
+            const ptrdiff_t M = m1.colsize();
 #ifdef PRINTALGO_DivU
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 26: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<Unknown<<','<<rs<<std::endl;
 #endif
@@ -718,14 +718,14 @@ namespace tmv {
     // D /= A
     // E -= BD
     // E /= C
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<27,cs,rs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
 #ifdef PRINTALGO_DivU
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 27: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -780,10 +780,10 @@ namespace tmv {
             const Scaling<-1,RT> mone;
 
             if (M > TMV_DIVMU_RECURSE) {
-                const int Mx = M > 16 ? ((((M-1)>>5)+1)<<4) : (M>>1);
+                const ptrdiff_t Mx = M > 16 ? ((((M-1)>>5)+1)<<4) : (M>>1);
                 // (If M > 16, round M/2 up to a multiple of 16.)
-                const int csx = IntTraits<cs>::half_roundup;
-                const int csy = IntTraits2<cs,csx>::diff;
+                const ptrdiff_t csx = IntTraits<cs>::half_roundup;
+                const ptrdiff_t csy = IntTraits2<cs,csx>::diff;
 
                 M2a A = m2.cSubTriMatrix(0,Mx);
                 M2b B = m2.cSubMatrix(Mx,M,0,Mx);
@@ -816,14 +816,14 @@ namespace tmv {
 
     // algo 31: Determine which algorithm to use based on the runtime
     // knowledge of the sizes.
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<31,cs,rs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
 #if defined(PRINTALGO_DivU) || defined(_OPENMP)
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
 #endif
 #ifdef PRINTALGO_DivU
             std::cout<<"LDivEqMU algo 31: M,N,cs,rs = "<<M<<','<<N<<
@@ -843,8 +843,8 @@ namespace tmv {
             const int algo3 = upper ? 17 : 27;
 
 #ifdef _OPENMP
-            const int Mc = M < 16 ? 1 : M>>4; // M/16
-            const int Nc = N < 16 ? 1 : N>>4; // N/16
+            const ptrdiff_t Mc = M < 16 ? 1 : M>>4; // M/16
+            const ptrdiff_t Nc = N < 16 ? 1 : N>>4; // N/16
 #endif
 
             // Put the small matrix option first, so it doesn't have to 
@@ -871,14 +871,14 @@ namespace tmv {
     // that is a multiple of 16.  This way we get the maximum advantage from
     // our blocking structure while keeping the threads as balanced as 
     // possible.
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<36,cs,rs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
 #ifdef PRINTALGO_DivU
-            const int M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
             std::cout<<"LDivEqMU algo 36: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -907,10 +907,10 @@ namespace tmv {
 #endif
                     LDivEqMU_Helper<algo2,cs,rs,M1,M2>::call(m1,m2);
                 } else {
-                    int Nx = N / num_threads;
+                    ptrdiff_t Nx = N / num_threads;
                     Nx = ((((Nx-1)>>4)+1)<<4); 
-                    int j1 = mythread * Nx;
-                    int j2 = (mythread+1) * Nx;
+                    ptrdiff_t j1 = mythread * Nx;
+                    ptrdiff_t j2 = (mythread+1) * Nx;
                     if (j2 > N || mythread == num_threads-1) j2 = N;
 #ifdef PRINTALGO_DivU_OMP
 #pragma omp critical
@@ -923,7 +923,7 @@ namespace tmv {
 #endif
                     if (j1 < N)  {
                         typedef typename M1::colrange_type M1c;
-                        const int rsx = Unknown; 
+                        const ptrdiff_t rsx = Unknown; 
                         M1c m1c = m1.cColRange(j1,j2);
 #ifdef PRINTALGO_DivU_OMP
 #pragma omp critical
@@ -949,15 +949,15 @@ namespace tmv {
 #endif
 
     // algo 38: Unknown cs, check if M is small
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<38,cs,rs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
         {
             TMVStaticAssert(cs == Unknown);
-            const int M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
 #ifdef PRINTALGO_DivU
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 38: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -986,14 +986,14 @@ namespace tmv {
     };
 
     // algo 81: copy m2
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<81,cs,rs,M1,M2>
     {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int M = cs == Unknown ? m1.colsize() : cs;
-            const int N = rs == Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m1.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 81: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -1003,14 +1003,14 @@ namespace tmv {
     };
 
     // algo 84: copy m1
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<84,cs,rs,M1,M2>
     {
         static inline void call(M1& m1, const M2& m2)
         {
 #ifdef PRINTALGO_DivU
-            const int M = cs == Unknown ? m1.colsize() : cs;
-            const int N = rs == Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m1.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m1.rowsize() : rs;
             std::cout<<"LDivEqMU algo 84: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -1025,7 +1025,7 @@ namespace tmv {
     };
 
     // algo 90: call inst
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<90,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
@@ -1033,7 +1033,7 @@ namespace tmv {
     };
 
     // algo 91: call inst alias
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<91,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
@@ -1041,7 +1041,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<97,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
@@ -1055,7 +1055,7 @@ namespace tmv {
     };
 
     // algo 197: Conjugate
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<197,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
@@ -1069,7 +1069,7 @@ namespace tmv {
     };
 
     // algo 98: Inline check for aliases
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<98,cs,rs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -1088,7 +1088,7 @@ namespace tmv {
     };
 
     // algo 99: Check for aliases
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<99,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
@@ -1114,7 +1114,7 @@ namespace tmv {
     };
 
     // algo -4: No branches or copies
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<-4,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
@@ -1137,7 +1137,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<-3,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
@@ -1173,9 +1173,9 @@ namespace tmv {
             const bool rc = M1::_rowmajor && M2::_colmajor;
             const bool cx = M1::_colmajor;
 #ifdef _OPENMP
-            const int Mc = cs == Unknown ? Unknown : (cs < 16) ? 1 : (cs>>4);
-            const int Nc = rs == Unknown ? Unknown : (rs < 16) ? 1 : (rs>>4);
-            const int McMcNc = IntTraits2<IntTraits2<Mc,Mc>::prod,Nc>::prod;
+            const ptrdiff_t Mc = cs == Unknown ? Unknown : (cs < 16) ? 1 : (cs>>4);
+            const ptrdiff_t Nc = rs == Unknown ? Unknown : (rs < 16) ? 1 : (rs>>4);
+            const ptrdiff_t McMcNc = IntTraits2<IntTraits2<Mc,Mc>::prod,Nc>::prod;
 #endif
             const int algo = 
                 ( cs == 0 || rs == 0 ) ? 0 :
@@ -1208,8 +1208,8 @@ namespace tmv {
 #endif
                 27 ;
 #ifdef PRINTALGO_DivU
-            const int M = cs==Unknown ? m1.colsize() : cs;
-            const int N = rs==Unknown ? m1.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? m1.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? m1.rowsize() : rs;
             std::cout<<"InlineLDivEqMU: \n";
             std::cout<<"m1 = "<<TMV_Text(m1)<<std::endl;
             std::cout<<"m2 = "<<TMV_Text(m2)<<std::endl;
@@ -1252,7 +1252,7 @@ namespace tmv {
     };
 
     // algo -402: Same as algo -2, but use -4 if no Inst version
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<-402,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
@@ -1279,7 +1279,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<-2,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
@@ -1307,7 +1307,7 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases?
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct LDivEqMU_Helper<-1,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
@@ -1329,8 +1329,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<M2::_size,M1::_colsize>::same));
         TMVAssert(m2.size() == m1.colsize());
 
-        const int cs = Sizes<M1::_colsize,M2::_size>::size;
-        const int rs = M1::_rowsize;
+        const ptrdiff_t cs = Sizes<M1::_colsize,M2::_size>::size;
+        const ptrdiff_t rs = M1::_rowsize;
         typedef typename M1::cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
@@ -1344,8 +1344,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<M2::_size,M1::_colsize>::same));
         TMVAssert(m2.size() == m1.colsize());
 
-        const int cs = Sizes<M1::_colsize,M2::_size>::size;
-        const int rs = M1::_rowsize;
+        const ptrdiff_t cs = Sizes<M1::_colsize,M2::_size>::size;
+        const ptrdiff_t rs = M1::_rowsize;
         typedef typename M1::cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
@@ -1359,8 +1359,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<M2::_size,M1::_colsize>::same));
         TMVAssert(m2.size() == m1.colsize());
 
-        const int cs = Sizes<M1::_colsize,M2::_size>::size;
-        const int rs = M1::_rowsize;
+        const ptrdiff_t cs = Sizes<M1::_colsize,M2::_size>::size;
+        const ptrdiff_t rs = M1::_rowsize;
         typedef typename M1::cview_type M1v;
         typedef typename M2::const_cview_type M2v;
         TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();

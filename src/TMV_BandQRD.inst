@@ -3,11 +3,11 @@
 
 template class BandQRDiv<T >;
 template void GetQFromBandQR( 
-  const MatrixView<T >& QRx, const GenVector<T >& Qbeta, const int nlo);
+  const MatrixView<T >& QRx, const GenVector<T >& Qbeta, const ptrdiff_t nlo);
 #ifdef INST_COMPLEX
 template class BandQRDiv<CT >;
 template void GetQFromBandQR( 
-  const MatrixView<CT >& QRx, const GenVector<CT >& Qbeta, const int nlo);
+  const MatrixView<CT >& QRx, const GenVector<CT >& Qbeta, const ptrdiff_t nlo);
 #endif
 
 #define DefDivEq(T,T2)\

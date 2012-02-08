@@ -49,7 +49,7 @@ namespace tmv {
     public :
 
         RMIt() : m(0), i(0), j(0) {}
-        RMIt(M* _m, int _i, int _j) : m(_m), i(_i), j(_j) {}
+        RMIt(M* _m, ptrdiff_t _i, ptrdiff_t _j) : m(_m), i(_i), j(_j) {}
         RMIt(const RMIt<M>& rhs) : m(rhs.m), i(rhs.i), j(rhs.j) {}
         RMIt<M>& operator=(const RMIt<M>& rhs) 
         { 
@@ -61,8 +61,8 @@ namespace tmv {
         ~RMIt() {}
 
         M* getM() const { return m; }
-        int getI() const { return i; }
-        int getJ() const { return j; }
+        ptrdiff_t getI() const { return i; }
+        ptrdiff_t getJ() const { return j; }
 
         inline bool operator==(const RMIt<M>& rhs) const 
         { return m==rhs.m && i==rhs.i && j==rhs.j; }
@@ -93,8 +93,8 @@ namespace tmv {
     private :
 
         M* m;
-        int i;
-        int j;
+        ptrdiff_t i;
+        ptrdiff_t j;
 
     };
 
@@ -104,7 +104,7 @@ namespace tmv {
     public :
 
         CRMIt() : m(0), i(0), j(0) {}
-        CRMIt(const M* _m, int _i, int _j) : m(_m), i(_i), j(_j) {}
+        CRMIt(const M* _m, ptrdiff_t _i, ptrdiff_t _j) : m(_m), i(_i), j(_j) {}
         CRMIt(const CRMIt<M>& rhs) : m(rhs.m), i(rhs.i), j(rhs.j) {}
         CRMIt<M>& operator=(const CRMIt<M>& rhs) 
         { 
@@ -116,8 +116,8 @@ namespace tmv {
         ~CRMIt() {}
 
         const M* getM() const { return m; }
-        int getI() const { return i; }
-        int getJ() const { return j; }
+        ptrdiff_t getI() const { return i; }
+        ptrdiff_t getJ() const { return j; }
 
         inline bool operator==(const CRMIt<M>& rhs) const 
         { return m==rhs.m && i==rhs.i && j==rhs.j; }
@@ -148,8 +148,8 @@ namespace tmv {
     private :
 
         const M* m;
-        int i;
-        int j;
+        ptrdiff_t i;
+        ptrdiff_t j;
 
     };
 
@@ -159,7 +159,7 @@ namespace tmv {
     public :
 
         CMIt() : m(0), i(0), j(0) {}
-        CMIt(M* _m, int _i, int _j) : m(_m), i(_i), j(_j) {}
+        CMIt(M* _m, ptrdiff_t _i, ptrdiff_t _j) : m(_m), i(_i), j(_j) {}
         CMIt(const CMIt<M>& rhs) : m(rhs.m), i(rhs.i), j(rhs.j) {}
         CMIt<M>& operator=(const CMIt<M>& rhs) 
         { 
@@ -171,8 +171,8 @@ namespace tmv {
         ~CMIt() {}
 
         M* getM() const { return m; }
-        int getI() const { return i; }
-        int getJ() const { return j; }
+        ptrdiff_t getI() const { return i; }
+        ptrdiff_t getJ() const { return j; }
 
         inline bool operator==(const CMIt<M>& rhs) const 
         { return m==rhs.m && i==rhs.i && j==rhs.j; }
@@ -203,8 +203,8 @@ namespace tmv {
     private :
 
         M* m;
-        int i;
-        int j;
+        ptrdiff_t i;
+        ptrdiff_t j;
 
     };
 
@@ -214,7 +214,7 @@ namespace tmv {
     public :
 
         CCMIt() : m(0), i(0), j(0) {}
-        CCMIt(const M* _m, int _i, int _j) : m(_m), i(_i), j(_j) {}
+        CCMIt(const M* _m, ptrdiff_t _i, ptrdiff_t _j) : m(_m), i(_i), j(_j) {}
         CCMIt(const CCMIt<M>& rhs) : m(rhs.m), i(rhs.i), j(rhs.j) {}
         CCMIt<M>& operator=(const CCMIt<M>& rhs) 
         { 
@@ -226,8 +226,8 @@ namespace tmv {
         ~CCMIt() {}
 
         const M* getM() const { return m; }
-        int getI() const { return i; }
-        int getJ() const { return j; }
+        ptrdiff_t getI() const { return i; }
+        ptrdiff_t getJ() const { return j; }
 
         inline bool operator==(const CCMIt<M>& rhs) const 
         { return m==rhs.m && i==rhs.i && j==rhs.j; }
@@ -258,8 +258,8 @@ namespace tmv {
     private :
 
         const M* m;
-        int i;
-        int j;
+        ptrdiff_t i;
+        ptrdiff_t j;
 
     };
 
@@ -269,7 +269,7 @@ namespace tmv {
     public :
 
         DMIt() : m(0), i(0), j(0) {}
-        DMIt(M* _m, int _i, int _j) : m(_m), i(_i), j(_j) {}
+        DMIt(M* _m, ptrdiff_t _i, ptrdiff_t _j) : m(_m), i(_i), j(_j) {}
         DMIt(const DMIt<M>& rhs) : m(rhs.m), i(rhs.i), j(rhs.j) {}
         DMIt<M>& operator=(const DMIt<M>& rhs) 
         { 
@@ -281,8 +281,8 @@ namespace tmv {
         ~DMIt() {}
 
         M* getM() const { return m; }
-        int getI() const { return i; }
-        int getJ() const { return j; }
+        ptrdiff_t getI() const { return i; }
+        ptrdiff_t getJ() const { return j; }
 
         inline bool operator==(const DMIt<M>& rhs) const 
         { return m==rhs.m && i==rhs.i && j==rhs.j; }
@@ -316,8 +316,8 @@ namespace tmv {
     private :
 
         M* m;
-        int i;
-        int j;
+        ptrdiff_t i;
+        ptrdiff_t j;
 
     };
 
@@ -327,7 +327,7 @@ namespace tmv {
     public :
 
         CDMIt() : m(0), i(0), j(0) {}
-        CDMIt(const M* _m, int _i, int _j) : m(_m), i(_i), j(_j) {}
+        CDMIt(const M* _m, ptrdiff_t _i, ptrdiff_t _j) : m(_m), i(_i), j(_j) {}
         CDMIt(const CDMIt<M>& rhs) : m(rhs.m), i(rhs.i), j(rhs.j) {}
         CDMIt<M>& operator=(const CDMIt<M>& rhs) 
         { 
@@ -339,8 +339,8 @@ namespace tmv {
         ~CDMIt() {}
 
         const M* getM() const { return m; }
-        int getI() const { return i; }
-        int getJ() const { return j; }
+        ptrdiff_t getI() const { return i; }
+        ptrdiff_t getJ() const { return j; }
 
         inline bool operator==(const CDMIt<M>& rhs) const 
         { return m==rhs.m && i==rhs.i && j==rhs.j; }
@@ -374,8 +374,8 @@ namespace tmv {
     private :
 
         const M* m;
-        int i;
-        int j;
+        ptrdiff_t i;
+        ptrdiff_t j;
 
     };
 

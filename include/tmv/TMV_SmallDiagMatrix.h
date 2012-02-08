@@ -38,7 +38,7 @@ namespace tmv {
     // SmallDiagMatrix
     //
 
-    template <class T, int N, int A0>
+    template <class T, ptrdiff_t N, int A0>
     struct Traits<SmallDiagMatrix<T,N,A0> >
     {
         enum { A = (A0 & ~NoDivider & ~NoAlias) | Unit };
@@ -139,7 +139,7 @@ namespace tmv {
         typedef iterator colmajor_iterator;
     };
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     class SmallDiagMatrix : 
         public BaseMatrix_Diag_Mutable<SmallDiagMatrix<T,N,A> >
     {
@@ -241,15 +241,15 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsm; }
         TMV_INLINE T* ptr() { return itsm; }
 
-        T cref(int i, int j) const { return (i!=j ? T(0) : cref(i)); }
-        T& ref(int i, int j) { return ref(i); }
+        T cref(ptrdiff_t i, ptrdiff_t j) const { return (i!=j ? T(0) : cref(i)); }
+        T& ref(ptrdiff_t i, ptrdiff_t j) { return ref(i); }
 
-        T cref(int i) const { return itsm[i]; }
-        T& ref(int i) { return itsm[i]; }
+        T cref(ptrdiff_t i) const { return itsm[i]; }
+        T& ref(ptrdiff_t i) { return itsm[i]; }
 
-        TMV_INLINE int size() const { return N; }
-        TMV_INLINE int nElements() const { return N; }
-        TMV_INLINE int step() const { return 1; }
+        TMV_INLINE ptrdiff_t size() const { return N; }
+        TMV_INLINE ptrdiff_t nElements() const { return N; }
+        TMV_INLINE ptrdiff_t step() const { return 1; }
         TMV_INLINE bool isconj() const { return false; }
         TMV_INLINE bool isrm() const { return true; }
         TMV_INLINE bool iscm() const { return true; }
@@ -260,7 +260,7 @@ namespace tmv {
 
     }; // SmallDiagMatrix
 
-    template <class T, int N, int S, int A0>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A0>
     struct Traits<ConstSmallDiagMatrixView<T,N,S,A0> >
     {
         enum { A = (A0 & ~NoDivider & ~NoAlias) | (
@@ -344,7 +344,7 @@ namespace tmv {
         typedef const_iterator const_colmajor_iterator;
     };
 
-    template <class T, int N, int S, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A>
     class ConstSmallDiagMatrixView :
         public BaseMatrix_Diag<ConstSmallDiagMatrixView<T,N,S,A> >
     {
@@ -371,13 +371,13 @@ namespace tmv {
         // Constructors
         //
 
-        ConstSmallDiagMatrixView(const T* m, int n, int s) :
+        ConstSmallDiagMatrixView(const T* m, ptrdiff_t n, ptrdiff_t s) :
             itsm(m), itssize(n), itsstep(s)
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstSmallDiagMatrixView(const T* m, int n) :
+        ConstSmallDiagMatrixView(const T* m, ptrdiff_t n) :
             itsm(m), itssize(n), itsstep(S)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -414,7 +414,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int S2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t S2, int A2>
         ConstSmallDiagMatrixView(
             const ConstSmallDiagMatrixView<T,N2,S2,A2>& m2) :
             itsm(m2.cptr()), itssize(m2.size()), itsstep(m2.step()) 
@@ -423,7 +423,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int S2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t S2, int A2>
         ConstSmallDiagMatrixView(
             const SmallDiagMatrixView<T,N2,S2,A2>& m2) :
             itsm(m2.cptr()), itssize(m2.size()), itsstep(m2.step()) 
@@ -449,13 +449,13 @@ namespace tmv {
 
         TMV_INLINE const T* cptr() const { return itsm; }
 
-        T cref(int i, int j) const { return (i!=j ? T(0) : cref(i)); }
+        T cref(ptrdiff_t i, ptrdiff_t j) const { return (i!=j ? T(0) : cref(i)); }
 
-        T cref(int i) const { return DoConj<_conj>(itsm[i*step()]); }
+        T cref(ptrdiff_t i) const { return DoConj<_conj>(itsm[i*step()]); }
 
-        TMV_INLINE int size() const { return itssize; }
-        TMV_INLINE int nElements() const { return itssize; }
-        TMV_INLINE int step() const { return itsstep; }
+        TMV_INLINE ptrdiff_t size() const { return itssize; }
+        TMV_INLINE ptrdiff_t nElements() const { return itssize; }
+        TMV_INLINE ptrdiff_t step() const { return itsstep; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE bool isrm() const { return step()==1; }
         TMV_INLINE bool iscm() const { return step()==1; }
@@ -468,7 +468,7 @@ namespace tmv {
 
     }; // ConstSmallDiagMatrixView
 
-    template <class T, int N, int S, int A0>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A0>
     struct Traits<SmallDiagMatrixView<T,N,S,A0> >
     {
         enum { A = (A0 & ~NoDivider & ~NoAlias) | (
@@ -576,7 +576,7 @@ namespace tmv {
         typedef iterator colmajor_iterator;
     };
 
-    template <class T, int N, int S, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A>
     class SmallDiagMatrixView :
         public BaseMatrix_Diag_Mutable<SmallDiagMatrixView<T,N,S,A> >
     {
@@ -605,13 +605,13 @@ namespace tmv {
         // Constructors
         //
 
-        SmallDiagMatrixView(T* m, int n, int s) :
+        SmallDiagMatrixView(T* m, ptrdiff_t n, ptrdiff_t s) :
             itsm(m), itssize(n), itsstep(s) 
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        SmallDiagMatrixView(T* m, int n) :
+        SmallDiagMatrixView(T* m, ptrdiff_t n) :
             itsm(m), itssize(n), itsstep(S)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -638,7 +638,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int S2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t S2, int A2>
         SmallDiagMatrixView(SmallDiagMatrixView<T,N2,S2,A2> m2) :
             itsm(m2.ptr()), itssize(m2.size()), itsstep(m2.step()) 
         {
@@ -676,15 +676,15 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsm; }
         TMV_INLINE T* ptr() { return itsm; }
 
-        T cref(int i, int j) const { return (i!=j ? T(0) : cref(i)); }
-        reference ref(int i, int j) { return ref(i); }
+        T cref(ptrdiff_t i, ptrdiff_t j) const { return (i!=j ? T(0) : cref(i)); }
+        reference ref(ptrdiff_t i, ptrdiff_t j) { return ref(i); }
 
-        T cref(int i) const { return DoConj<_conj>(itsm[i*step()]); }
-        reference ref(int i) { return reference(itsm[i*step()]); }
+        T cref(ptrdiff_t i) const { return DoConj<_conj>(itsm[i*step()]); }
+        reference ref(ptrdiff_t i) { return reference(itsm[i*step()]); }
 
-        TMV_INLINE int size() const { return itssize; }
-        TMV_INLINE int nElements() const { return itssize; }
-        TMV_INLINE int step() const { return itsstep; }
+        TMV_INLINE ptrdiff_t size() const { return itssize; }
+        TMV_INLINE ptrdiff_t nElements() const { return itssize; }
+        TMV_INLINE ptrdiff_t step() const { return itsstep; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE bool isrm() const { return step()==1; }
         TMV_INLINE bool iscm() const { return step()==1; }
@@ -692,7 +692,7 @@ namespace tmv {
     private :
 
         T* itsm;
-        const int itssize;
+        const ptrdiff_t itssize;
         const CheckedInt<S> itsstep;
 
     }; // SmallDiagMatrixView
@@ -739,7 +739,7 @@ namespace tmv {
         VectorView<T,A> v)
     { return typename DMVO<VectorView<T,A> >::v(v.ptr(),v.size(),v.step()); }
 
-    template <class T, int N, int S, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A>
     TMV_INLINE typename DMVO<SmallVectorView<T,N,S,A> >::v DiagMatrixViewOf(
         SmallVectorView<T,N,S,A> v)
     {
@@ -752,23 +752,23 @@ namespace tmv {
     // Swap
     //
 
-    template <class T, int N, int S, int A, class MM>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A, class MM>
     TMV_INLINE void Swap(
         BaseMatrix_Diag_Mutable<MM>& m1, SmallDiagMatrixView<T,N,S,A> m2)
     { Swap(m1.diag(),m2.diag()); }
-    template <class T, int N, int S, int A, class MM>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A, class MM>
     TMV_INLINE void Swap(
         SmallDiagMatrixView<T,N,S,A> m1, BaseMatrix_Diag_Mutable<MM>& m2)
     { Swap(m1.diag(),m2.diag()); }
-    template <class T, int N, int S1, int A1, int S2, int A2>
+    template <class T, ptrdiff_t N, ptrdiff_t S1, int A1, ptrdiff_t S2, int A2>
     TMV_INLINE void Swap(
         SmallDiagMatrixView<T,N,S1,A1> m1, SmallDiagMatrixView<T,N,S2,A2> m2)
     { Swap(m1.diag(),m2.diag()); }
-    template <class T, int N, int S1, int A1, int A2>
+    template <class T, ptrdiff_t N, ptrdiff_t S1, int A1, int A2>
     TMV_INLINE void Swap(
         SmallDiagMatrixView<T,N,S1,A1> m1, DiagMatrixView<T,A2> m2)
     { Swap(m1.diag(),m2.diag()); }
-    template <class T, int N, int A1, int S2, int A2>
+    template <class T, ptrdiff_t N, int A1, ptrdiff_t S2, int A2>
     TMV_INLINE void Swap(
         DiagMatrixView<T,A1> m1, SmallDiagMatrixView<T,N,S2,A2> m2)
     { Swap(m1.diag(),m2.diag()); }
@@ -778,29 +778,29 @@ namespace tmv {
     // Conjugate, Transpose, Adjoint
     //
     
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     TMV_INLINE typename SmallDiagMatrix<T,N,A>::conjugate_type Conjugate(
         SmallDiagMatrix<T,N,A>& m)
     { return m.conjugate(); }
-    template <class T, int N, int S, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A>
     TMV_INLINE typename SmallDiagMatrixView<T,N,S,A>::conjugate_type Conjugate(
         SmallDiagMatrixView<T,N,S,A> m)
     { return m.conjugate(); }
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     TMV_INLINE typename SmallDiagMatrix<T,N,A>::transpose_type Transpose(
         SmallDiagMatrix<T,N,A>& m)
     { return m.transpose(); }
-    template <class T, int N, int S, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A>
     TMV_INLINE typename SmallDiagMatrixView<T,N,S,A>::transpose_type Transpose(
         SmallDiagMatrixView<T,N,S,A> m)
     { return m.transpose(); }
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     TMV_INLINE typename SmallDiagMatrix<T,N,A>::adjoint_type Adjoint(
         SmallDiagMatrix<T,N,A>& m)
     { return m.adjoint(); }
-    template <class T, int N, int S, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A>
     TMV_INLINE typename SmallDiagMatrixView<T,N,S,A>::adjoint_type Adjoint(
         SmallDiagMatrixView<T,N,S,A> m)
     { return m.adjoint(); }
@@ -810,7 +810,7 @@ namespace tmv {
     // TMV_Text 
     //
 
-    template <class T, int N, int A>
+    template <class T, ptrdiff_t N, int A>
     inline std::string TMV_Text(const SmallDiagMatrix<T,N,A>& m)
     {
         std::ostringstream s;
@@ -820,7 +820,7 @@ namespace tmv {
         return s.str();
     }
 
-    template <class T, int N, int S, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A>
     inline std::string TMV_Text(
         const ConstSmallDiagMatrixView<T,N,S,A>& m)
     {
@@ -833,7 +833,7 @@ namespace tmv {
         return s.str();
     }
 
-    template <class T, int N, int S, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A>
     inline std::string TMV_Text(const SmallDiagMatrixView<T,N,S,A>& m)
     {
         std::ostringstream s;

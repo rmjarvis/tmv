@@ -743,8 +743,8 @@ namespace tmv {
         enum { _conj = false };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _canlin = true };
-        enum { twoSi = isreal ? int(_stepi) : IntTraits<_stepi>::twoS };
-        enum { twoSj = isreal ? int(_stepj) : IntTraits<_stepj>::twoS };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : IntTraits<_stepi>::twoS };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : IntTraits<_stepj>::twoS };
 
         enum { _hasdivider = Attrib<A>::withdivider };
         typedef QuotXM<1,real_type,type> inverse_type;
@@ -922,7 +922,7 @@ namespace tmv {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        Matrix(int cs, int rs) :
+        Matrix(ptrdiff_t cs, ptrdiff_t rs) :
             itscs(cs), itsrs(rs), linsize(cs*rs), itsm(linsize)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -932,7 +932,7 @@ namespace tmv {
 #endif
         }
 
-        Matrix(int cs, int rs, T x) :
+        Matrix(ptrdiff_t cs, ptrdiff_t rs, T x) :
             itscs(cs), itsrs(rs), linsize(cs*rs), itsm(linsize)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -996,10 +996,10 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsm; }
         TMV_INLINE T* ptr() { return itsm; }
 
-        T cref(int i, int j) const
+        T cref(ptrdiff_t i, ptrdiff_t j) const
         { return itsm[_rowmajor ? i*stepi()+j : i+j*stepj()]; }
 
-        T& ref(int i, int j)
+        T& ref(ptrdiff_t i, ptrdiff_t j)
         { return itsm[_rowmajor ? i*stepi()+j : i+j*stepj()]; }
 
         void swapWith(type& m2)
@@ -1010,7 +1010,7 @@ namespace tmv {
             itsm.swapWith(m2.itsm);
         }
 
-        void resize(const int cs, const int rs)
+        void resize(const ptrdiff_t cs, const ptrdiff_t rs)
         {
             TMVAssert(cs >= 0 && rs >= 0);
 #ifdef TMV_EXTRA_DEBUG
@@ -1026,21 +1026,21 @@ namespace tmv {
 #endif
         }
 
-        TMV_INLINE int ls() const { return linsize; }
-        TMV_INLINE int colsize() const { return itscs; }
-        TMV_INLINE int rowsize() const { return itsrs; }
-        int nElements() const { return itscs*itsrs; }
-        TMV_INLINE int stepi() const { return _rowmajor ? itsrs : 1; }
-        TMV_INLINE int stepj() const { return _rowmajor ? 1 : itscs; }
+        TMV_INLINE ptrdiff_t ls() const { return linsize; }
+        TMV_INLINE ptrdiff_t colsize() const { return itscs; }
+        TMV_INLINE ptrdiff_t rowsize() const { return itsrs; }
+        ptrdiff_t nElements() const { return itscs*itsrs; }
+        TMV_INLINE ptrdiff_t stepi() const { return _rowmajor ? itsrs : 1; }
+        TMV_INLINE ptrdiff_t stepj() const { return _rowmajor ? 1 : itscs; }
         TMV_INLINE bool isconj() const { return false; }
         TMV_INLINE bool isrm() const { return _rowmajor; }
         TMV_INLINE bool iscm() const { return _colmajor; }
 
     private:
 
-        int itscs;
-        int itsrs;
-        int linsize;
+        ptrdiff_t itscs;
+        ptrdiff_t itsrs;
+        ptrdiff_t linsize;
         AlignedArray<T> itsm;
 
     }; // Matrix
@@ -1089,8 +1089,8 @@ namespace tmv {
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _canlin = false };
-        enum { twoSi = isreal ? int(_stepi) : IntTraits<_stepi>::twoS };
-        enum { twoSj = isreal ? int(_stepj) : IntTraits<_stepj>::twoS };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : IntTraits<_stepi>::twoS };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : IntTraits<_stepj>::twoS };
 
         enum { copyA = (
                 (_rowmajor ? RowMajor : ColMajor) |
@@ -1210,20 +1210,20 @@ namespace tmv {
         //
 
         TMV_INLINE ConstMatrixView(
-            const T* m, int cs, int rs, int si, int sj) :
+            const T* m, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t si, ptrdiff_t sj) :
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(sj) 
         { 
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        TMV_INLINE ConstMatrixView(const T* m, int cs, int rs, int si) :
+        TMV_INLINE ConstMatrixView(const T* m, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t si) :
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(_stepj) 
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_stepj != Unknown); 
         }
 
-        TMV_INLINE ConstMatrixView(const T* m, int cs, int rs) :
+        TMV_INLINE ConstMatrixView(const T* m, ptrdiff_t cs, ptrdiff_t rs) :
             itsm(m), itscs(cs), itsrs(rs), itssi(_stepi), itssj(_stepj)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1256,7 +1256,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int M2, int N2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         TMV_INLINE ConstMatrixView(
             const ConstSmallMatrixView<T,M2,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
@@ -1266,7 +1266,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int M2, int N2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         TMV_INLINE ConstMatrixView(
             const SmallMatrixView<T,M2,N2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
@@ -1293,15 +1293,15 @@ namespace tmv {
 
         TMV_INLINE const T* cptr() const { return itsm; }
 
-        T cref(int i, int j) const
+        T cref(ptrdiff_t i, ptrdiff_t j) const
         { return DoConj<_conj>(itsm[i*stepi()+j*stepj()]); }
 
-        TMV_INLINE int ls() const { return itscs*itsrs; }
-        TMV_INLINE int colsize() const { return itscs; }
-        TMV_INLINE int rowsize() const { return itsrs; }
-        int nElements() const { return itscs*itsrs; }
-        TMV_INLINE int stepi() const { return itssi; }
-        TMV_INLINE int stepj() const { return itssj; }
+        TMV_INLINE ptrdiff_t ls() const { return itscs*itsrs; }
+        TMV_INLINE ptrdiff_t colsize() const { return itscs; }
+        TMV_INLINE ptrdiff_t rowsize() const { return itsrs; }
+        ptrdiff_t nElements() const { return itscs*itsrs; }
+        TMV_INLINE ptrdiff_t stepi() const { return itssi; }
+        TMV_INLINE ptrdiff_t stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE bool isrm() const 
         { return _rowmajor || (!_colmajor &&  stepj() == 1); }
@@ -1311,8 +1311,8 @@ namespace tmv {
     private :
 
         const T* itsm;
-        const int itscs;
-        const int itsrs;
+        const ptrdiff_t itscs;
+        const ptrdiff_t itsrs;
         const CheckedInt<_stepi> itssi;
         const CheckedInt<_stepj> itssj;
 
@@ -1362,8 +1362,8 @@ namespace tmv {
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _canlin = false };
-        enum { twoSi = isreal ? int(_stepi) : IntTraits<_stepi>::twoS };
-        enum { twoSj = isreal ? int(_stepj) : IntTraits<_stepj>::twoS };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : IntTraits<_stepi>::twoS };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : IntTraits<_stepj>::twoS };
 
         enum { copyA = (
                 (_rowmajor ? RowMajor : ColMajor) |
@@ -1532,20 +1532,20 @@ namespace tmv {
         // Constructors
         //
 
-        TMV_INLINE MatrixView(T* m, int cs, int rs, int si, int sj) :
+        TMV_INLINE MatrixView(T* m, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t si, ptrdiff_t sj) :
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(sj) 
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        TMV_INLINE MatrixView(T* m, int cs, int rs, int si) :
+        TMV_INLINE MatrixView(T* m, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t si) :
             itsm(m), itscs(cs), itsrs(rs), itssi(si), itssj(_stepj) 
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVStaticAssert(_stepj != Unknown); 
         }
 
-        TMV_INLINE MatrixView(T* m, int cs, int rs) :
+        TMV_INLINE MatrixView(T* m, ptrdiff_t cs, ptrdiff_t rs) :
             itsm(m), itscs(cs), itsrs(rs), itssi(_stepi), itssj(_stepj)
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -1569,7 +1569,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int M2, int N2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         TMV_INLINE MatrixView(SmallMatrixView<T,M2,N2,Si2,Sj2,A2> m2) :
             itsm(m2.ptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
             itssi(m2.stepi()), itssj(m2.stepj())
@@ -1608,18 +1608,18 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsm; }
         TMV_INLINE T* ptr() { return itsm; }
 
-        T cref(int i, int j) const
+        T cref(ptrdiff_t i, ptrdiff_t j) const
         { return DoConj<_conj>(itsm[i*stepi()+j*stepj()]); }
 
-        reference ref(int i, int j) 
+        reference ref(ptrdiff_t i, ptrdiff_t j) 
         { return reference(itsm[i*stepi()+j*stepj()]); }
 
-        TMV_INLINE int ls() const { return itscs*itsrs; }
-        TMV_INLINE int colsize() const { return itscs; }
-        TMV_INLINE int rowsize() const { return itsrs; }
-        int nElements() const { return itscs*itsrs; }
-        TMV_INLINE int stepi() const { return itssi; }
-        TMV_INLINE int stepj() const { return itssj; }
+        TMV_INLINE ptrdiff_t ls() const { return itscs*itsrs; }
+        TMV_INLINE ptrdiff_t colsize() const { return itscs; }
+        TMV_INLINE ptrdiff_t rowsize() const { return itsrs; }
+        ptrdiff_t nElements() const { return itscs*itsrs; }
+        TMV_INLINE ptrdiff_t stepi() const { return itssi; }
+        TMV_INLINE ptrdiff_t stepj() const { return itssj; }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE bool isrm() const 
         { return _rowmajor || (!_colmajor &&  stepj() == 1); }
@@ -1629,8 +1629,8 @@ namespace tmv {
     private :
 
         T* itsm;
-        const int itscs;
-        const int itsrs;
+        const ptrdiff_t itscs;
+        const ptrdiff_t itsrs;
         const CheckedInt<_stepi> itssi;
         const CheckedInt<_stepj> itssj;
 
@@ -1648,7 +1648,7 @@ namespace tmv {
     // MatrixView of raw memory:
     template <class T>
     inline MatrixView<T> MatrixViewOf(
-        T* m, int colsize, int rowsize, StorageType stor)
+        T* m, ptrdiff_t colsize, ptrdiff_t rowsize, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         TMVAssert(colsize >= 0 && rowsize >= 0);
@@ -1660,7 +1660,7 @@ namespace tmv {
 
     template <class T>
     inline ConstMatrixView<T> MatrixViewOf(
-        const T* m, int colsize, int rowsize, StorageType stor)
+        const T* m, ptrdiff_t colsize, ptrdiff_t rowsize, StorageType stor)
     {
         TMVAssert(stor == RowMajor || stor == ColMajor);
         TMVAssert(colsize >= 0 && rowsize >= 0);
@@ -1672,7 +1672,7 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE MatrixView<T> MatrixViewOf(
-        T* m, int colsize, int rowsize, int stepi, int stepj)
+        T* m, ptrdiff_t colsize, ptrdiff_t rowsize, ptrdiff_t stepi, ptrdiff_t stepj)
     { 
         TMVAssert(colsize >= 0 && rowsize >= 0);
         return MatrixView<T>(m,colsize,rowsize,stepi,stepj); 
@@ -1680,7 +1680,7 @@ namespace tmv {
 
     template <class T>
     TMV_INLINE ConstMatrixView<T> MatrixViewOf(
-        const T* m, int colsize, int rowsize, int stepi, int stepj)
+        const T* m, ptrdiff_t colsize, ptrdiff_t rowsize, ptrdiff_t stepi, ptrdiff_t stepj)
     {
         TMVAssert(colsize >= 0 && rowsize >= 0);
         return ConstMatrixView<T>(m,colsize,rowsize,stepi,stepj); 

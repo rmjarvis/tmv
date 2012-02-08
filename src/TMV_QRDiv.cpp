@@ -32,22 +32,22 @@ namespace tmv {
     template <class T1, int C1, class RT1, class T2>
     void InstQR_SolveInPlace(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1, MatrixView<T2> m2)
+        const Permutation* P, ptrdiff_t N1, MatrixView<T2> m2)
     { InlineQR_SolveInPlace(QR,beta,P,N1,m2); }
     template <class T1, int C1, class RT1, class T2>
     void InstQR_SolveTransposeInPlace(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1, MatrixView<T2> m2)
+        const Permutation* P, ptrdiff_t N1, MatrixView<T2> m2)
     { InlineQR_SolveTransposeInPlace(QR,beta,P,N1,m2); }
     template <class T1, int C1, class RT1, class T2>
     void InstQR_SolveInPlace(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1, VectorView<T2> v2)
+        const Permutation* P, ptrdiff_t N1, VectorView<T2> v2)
     { InlineQR_SolveInPlace(QR,beta,P,N1,v2); }
     template <class T1, int C1, class RT1, class T2>
     void InstQR_SolveTransposeInPlace(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1, VectorView<T2> v2)
+        const Permutation* P, ptrdiff_t N1, VectorView<T2> v2)
     { InlineQR_SolveTransposeInPlace(QR,beta,P,N1,v2); }
 
 
@@ -59,25 +59,25 @@ namespace tmv {
     template <class T1, int C1, class RT1, class T2, int C2, class T3>
     void InstQR_Solve(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1,
+        const Permutation* P, ptrdiff_t N1,
         const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3)
     { InlineQR_Solve(QR,beta,P,N1,m2,m3); }
     template <class T1, int C1, class RT1, class T2, int C2, class T3>
     void InstQR_SolveTranspose(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1,
+        const Permutation* P, ptrdiff_t N1,
         const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3)
     { InlineQR_SolveTranspose(QR,beta,P,N1,m2,m3); }
     template <class T1, int C1, class RT1, class T2, int C2, class T3>
     void InstQR_Solve(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1,
+        const Permutation* P, ptrdiff_t N1,
         const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
     { InlineQR_Solve(QR,beta,P,N1,v2,v3); }
     template <class T1, int C1, class RT1, class T2, int C2, class T3>
     void InstQR_SolveTranspose(
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, int N1,
+        const Permutation* P, ptrdiff_t N1,
         const ConstVectorView<T2,C2>& v2, VectorView<T3> v3)
     { InlineQR_SolveTranspose(QR,beta,P,N1,v2,v3); }
 

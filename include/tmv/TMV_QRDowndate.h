@@ -63,23 +63,23 @@ namespace tmv {
     template <class T, int C>
     void InstQR_Downdate(UpperTriMatrixView<T> R, MatrixView<T,C> A);
 
-    template <int algo, int cs, int rs, class M1, class M2>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct QRDowndate_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0 or 1, or N == 0)
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct QRDowndate_Helper<0,cs,rs,M1,M2>
     { static TMV_INLINE void call(M1& , M2& ) {} };
 
     // algo 11: Non-block algorithm, loop over n
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct QRDowndate_Helper<11,cs,rs,M1,M2>
     {
         static void call(M1& R, M2& A)
         {
-            const int N = rs == Unknown ? R.size() : rs;
+            const ptrdiff_t N = rs == Unknown ? R.size() : rs;
 #ifdef PRINTALGO_QR
-            const int M = cs == Unknown ? A.colsize() : cs;
+            const ptrdiff_t M = cs == Unknown ? A.colsize() : cs;
             std::cout<<"QRDowndate algo 11: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
@@ -98,7 +98,7 @@ namespace tmv {
             V2 tempBase = VectorSizer<T>(N);
 
             RT beta;
-            for(int j=0;j<N;++j) {
+            for(ptrdiff_t j=0;j<N;++j) {
                 // Apply the Householder Reflection for this column
                 M2c u = A.col(j);
                 if (!HouseholderUnReflect(R.ref(j,j),u,beta)) {
@@ -131,14 +131,14 @@ namespace tmv {
     // probably faster if there is only one row to remove.
 
     // algo 21: Block algorithm
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct QRDowndate_Helper<21,cs,rs,M1,M2>
     {
         static void call(M1& R, M2& A)
         {
-            const int N = rs==Unknown ? A.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
-            const int M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
             std::cout<<"QRDowndate algo 21: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -150,7 +150,7 @@ namespace tmv {
             typedef typename M2::col_type M2c;
             typedef typename M2::colrange_type M2cr;
 
-            const int NB = 4;
+            const ptrdiff_t NB = 4;
             typedef typename MCopyHelper<T,UpperTri,NB,NB>::type Ztype;
             typedef typename Ztype::subtrimatrix_type Zs;
             typedef typename Ztype::col_sub_type Zc;
@@ -159,17 +159,17 @@ namespace tmv {
 
             typedef typename MCopyHelper<T,Rec,NB,Unknown>::type M3;
             typedef typename M3::col_sub_type M3c;
-            const int Si = M3::_stepi;
-            const int Sj = M3::_stepj;
+            const ptrdiff_t Si = M3::_stepi;
+            const ptrdiff_t Sj = M3::_stepj;
             typedef typename MViewHelper<T,Rec,NB,Unknown,Si,Sj>::type M3cr;
 
-            M3 tempBase = MatrixSizer<T>(NB,TMV_MAX(1,N-NB));
+            M3 tempBase = MatrixSizer<T>(NB,TMV_MAX(ptrdiff_t(1),N-NB));
 
             RT beta;
-            int j1=0;
-            for(int j2=j1+NB; j2<N; j1=j2,j2+=NB) {
+            ptrdiff_t j1=0;
+            for(ptrdiff_t j2=j1+NB; j2<N; j1=j2,j2+=NB) {
                 M2cr A1 = A.colRange(j1,j2);
-                for(int j=j1;j<j2;++j) {
+                for(ptrdiff_t j=j1;j<j2;++j) {
                     M2c u = A.col(j);
                     if (!HouseholderUnReflect(R.ref(j,j),u,beta)) {
 #ifdef TMV_NO_THROW
@@ -211,7 +211,7 @@ namespace tmv {
                 A4 -= A1 * temp;
             }
             M2cr A1 = A.colRange(j1,N);
-            for(int j=j1;j<N;++j) {
+            for(ptrdiff_t j=j1;j<N;++j) {
                 M2c u = A.col(j);
                 if (!HouseholderUnReflect(R.ref(j,j),u,beta))
                 {
@@ -240,10 +240,10 @@ namespace tmv {
     template <class M1, class M2, class M3>
     inline void RecursiveQRDowndate(M1& R, M2& A, M3& Z, bool makeZ)
     {
-        //const int cs = M2::_colsize;
-        //const int M = cs==Unknown ? A.colsize() : cs;
-        const int rs = Sizes<M2::_rowsize,M1::_size>::size;
-        const int N = rs==Unknown ? A.rowsize() : rs;
+        //const ptrdiff_t cs = M2::_colsize;
+        //const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
+        const ptrdiff_t rs = Sizes<M2::_rowsize,M1::_size>::size;
+        const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
 
         typedef typename M1::value_type T;
         typedef typename M1::real_type RT;
@@ -257,7 +257,7 @@ namespace tmv {
         typedef typename M3::col_sub_type M3c;
 
         if (N > 2) {
-            int j1 = N/2;
+            ptrdiff_t j1 = N/2;
             M1s R1 = R.subTriMatrix(0,j1);
             M2cr A1 = A.colRange(0,j1);
             M3s Z1 = Z.subTriMatrix(0,j1);
@@ -341,7 +341,7 @@ namespace tmv {
     }
 
     // algo 22: Block algorithm, using recursive within each block
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct QRDowndate_Helper<22,cs,rs,M1,M2>
     {
         static void call(M1& R, M2& A)
@@ -349,19 +349,19 @@ namespace tmv {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int M = cs==Unknown ? A.colsize() : cs;
-            const int N = rs==Unknown ? A.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRDowndate algo 22: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
-            const int NB = TMV_QR_BLOCKSIZE;
+            const ptrdiff_t NB = TMV_QR_BLOCKSIZE;
 
             typedef typename M1::row_sub_type M1r;
             typedef typename M1::submatrix_type M1s;
-            const int Si1 = M1::_stepi;
-            const int Sj1 = M1::_stepj;
-            const int C1 = M1::_conj | NonUnitDiag;
+            const ptrdiff_t Si1 = M1::_stepi;
+            const ptrdiff_t Sj1 = M1::_stepj;
+            const int C1 = M1::_conj ? Conj : NonConj | NonUnitDiag;
             // Note: The C term is usually just used to set the 
             // Conj or NonConj status.  But any attribute may be put here,
             // so put the NonUnitDiag attribute to keep it from being
@@ -370,25 +370,25 @@ namespace tmv {
 
             typedef typename M2::col_sub_type M2c;
             typedef typename M2::colrange_type M2cr;
-            const int Si2 = M2::_stepi;
-            const int Sj2 = M2::_stepj;
-            const int C2 = M2::_conj;
+            const ptrdiff_t Si2 = M2::_stepi;
+            const ptrdiff_t Sj2 = M2::_stepj;
+            const int C2 = M2::_conj ? Conj : NonConj;
             typedef typename MViewHelper<T,Rec,cs,NB,Si2,Sj2,C2>::type M2a;
-            const int s4 = (
+            const ptrdiff_t s4 = (
                 rs == Unknown ? Unknown :
                 rs - NB*(rs/NB) );
             typedef typename MViewHelper<T,Rec,cs,s4,Si2,Sj2,C2>::type M2b;
 
-            const int s1 = IntTraits2<NB,rs>::min;
-            const int N1 = TMV_MIN(NB,N);
+            const ptrdiff_t s1 = IntTraits2<NB,rs>::min;
+            const ptrdiff_t N1 = TMV_MIN(NB,N);
             typedef typename MCopyHelper<T,UpperTri,s1,s1>::type Ztype;
             typedef typename Ztype::subtrimatrix_type Zs;
             Ztype BaseZ = MatrixSizer<T>(N1,N1);
             typename Ztype::view_type Z = BaseZ.view();
 
-            const int s2 = IntTraits2<rs,NB>::diff;
-            const int s3 = IntTraits2<s1,s2>::max;
-            const int N3 = TMV_MAX(N1,N-NB);
+            const ptrdiff_t s2 = IntTraits2<rs,NB>::diff;
+            const ptrdiff_t s3 = IntTraits2<s1,s2>::max;
+            const ptrdiff_t N3 = TMV_MAX(N1,N-NB);
             typedef typename MCopyHelper<T,Rec,s1,s3>::type M3;
             typedef typename M3::col_sub_type M3c;
             typedef typename M3::colrange_type M3cr;
@@ -396,8 +396,8 @@ namespace tmv {
             M3 tempBase = MatrixSizer<T>(N1,N3);
 
             RT beta;
-            int j1=0;
-            for(int j2=j1+NB; j2<N; j1=j2,j2+=NB) {
+            ptrdiff_t j1=0;
+            for(ptrdiff_t j2=j1+NB; j2<N; j1=j2,j2+=NB) {
                 M1a R1 = R.subTriMatrix(j1,j2);
                 M2a A1 = A.colRange(j1,j2);
 
@@ -429,7 +429,7 @@ namespace tmv {
             }
 
             M2b A1 = A.subMatrix(j1,M,j1,N);
-            for(int j=j1;j<N;++j) {
+            for(ptrdiff_t j=j1;j<N;++j) {
                 M2c u = A.col(j);
                 if (!HouseholderUnReflect(R.ref(j,j),u,beta)) {
 #ifdef TMV_NO_THROW
@@ -454,16 +454,16 @@ namespace tmv {
     };
 
     // algo 27: Recursive algorithm
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct QRDowndate_Helper<27,cs,rs,M1,M2>
     {
         static void call(M1& R, M2& A)
         {
             typedef typename M1::value_type T;
 
-            const int N = rs==Unknown ? A.rowsize() : rs;
+            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_QR
-            const int M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
             std::cout<<"QRDowndate algo 27: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
@@ -484,15 +484,15 @@ namespace tmv {
     };
 
     // algo 31: Decide which algorithm to use from runtime size
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct QRDowndate_Helper<31,cs,rs,M1,M2>
     {
         static void call(M1& R, M2& A)
         {
             typedef typename M1::value_type T;
 
-            const int N = rs==Unknown ? A.rowsize() : rs;
-            const int M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
 #ifdef PRINTALGO_QR
             std::cout<<"QRDowndate algo 31: M,N,cs,rs = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
@@ -501,7 +501,7 @@ namespace tmv {
                 (rs == Unknown || rs <= 128) ? 27 : 0;
             const int algo22 = 
                 (rs == Unknown || rs > 128) ? 22 : 0;
-            const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
+            const ptrdiff_t l2cache = TMV_L2_CACHE*1024/sizeof(T);
 
             if (N*(M+N) <= l2cache)
                 QRDowndate_Helper<11,cs,rs,M1,M2>::call(R,A);
@@ -513,7 +513,7 @@ namespace tmv {
     };
 
     // algo 90: call InstQR_Downdate
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct QRDowndate_Helper<90,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& R, M2& A)
@@ -521,7 +521,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct QRDowndate_Helper<97,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& R, M2& A)
@@ -535,16 +535,16 @@ namespace tmv {
     };
 
     // algo -4: No copies or branches
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct QRDowndate_Helper<-4,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& R, M2& A)
         {
             typedef typename M1::value_type T;
-            const int csrs = IntTraits2<cs,rs>::prod;
-            const int rsrs = IntTraits<IntTraits2<rs,rs>::prod>::halfS;
-            const int totmem = IntTraits2<csrs,rsrs>::sum;
-            const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
+            const ptrdiff_t csrs = IntTraits2<cs,rs>::prod;
+            const ptrdiff_t rsrs = IntTraits<IntTraits2<rs,rs>::prod>::halfS;
+            const ptrdiff_t totmem = IntTraits2<csrs,rsrs>::sum;
+            const ptrdiff_t l2cache = TMV_L2_CACHE*1024/sizeof(T);
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
@@ -565,7 +565,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct QRDowndate_Helper<-3,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& R, M2& A)
@@ -576,7 +576,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct QRDowndate_Helper<-2,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& R, M2& A)
@@ -595,7 +595,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct QRDowndate_Helper<-1,cs,rs,M1,M2>
     {
         static TMV_INLINE void call(M1& R, M2& A)
@@ -614,8 +614,8 @@ namespace tmv {
         TMVStaticAssert(!M1::_unit);
         TMVAssert(A.rowsize() == R.size());
         TMVAssert(!R.isunit());
-        const int cs = M2::_colsize;
-        const int rs = Sizes<M2::_rowsize,M1::_size>::size;
+        const ptrdiff_t cs = M2::_colsize;
+        const ptrdiff_t rs = Sizes<M2::_rowsize,M1::_size>::size;
         typedef typename M1::nonunitdiag_type::cview_type M1v;
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_REF(M1,M1v) Rv = R.viewAsNonUnitDiag().cView();
@@ -635,8 +635,8 @@ namespace tmv {
         TMVStaticAssert(!M1::_unit);
         TMVAssert(A.rowsize() == R.size());
         TMVAssert(!R.isunit());
-        const int cs = M2::_colsize;
-        const int rs = Sizes<M2::_rowsize,M1::_size>::size;
+        const ptrdiff_t cs = M2::_colsize;
+        const ptrdiff_t rs = Sizes<M2::_rowsize,M1::_size>::size;
         typedef typename M1::nonunitdiag_type::cview_type M1v;
         typedef typename M2::cview_type M2v;
         TMV_MAYBE_REF(M1,M1v) Rv = R.viewAsNonUnitDiag().cView();
@@ -657,7 +657,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<M2>&>(A)); 
     }
 
-    template <class T, int M, int N, int Si1, int Sj1, int A1, int Si2, int Sj2, int A2>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Si1, ptrdiff_t Sj1, int A1, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
     inline void QR_Downdate(
         SmallUpperTriMatrixView<T,N,Si1,Sj1,A1> R,
         SmallMatrixView<T,M,N,Si2,Sj2,A2> A)
@@ -669,7 +669,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<M2>&>(A));
     }
 
-    template <class T, int M, int N, int A1, int Si2, int Sj2, int A2>
+    template <class T, ptrdiff_t M, ptrdiff_t N, int A1, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
     inline void QR_Downdate(
         UpperTriMatrixView<T,A1> R,
         SmallMatrixView<T,M,N,Si2,Sj2,A2> A)
@@ -681,7 +681,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<M2>&>(A));
     }
 
-    template <class T, int N, int Si1, int Sj1, int A1, int A2>
+    template <class T, ptrdiff_t N, ptrdiff_t Si1, ptrdiff_t Sj1, int A1, int A2>
     inline void QR_Downdate(
         SmallUpperTriMatrixView<T,N,Si1,Sj1,A1> R,
         MatrixView<T,A2> A)
@@ -707,8 +707,8 @@ namespace tmv {
         TMVStaticAssert(!M1::_unit);
         TMVAssert(A.size() == R.size());
         TMVAssert(!R.isunit());
-        const int cs = 1;
-        const int rs = Sizes<V2::_size,M1::_size>::size;
+        const ptrdiff_t cs = 1;
+        const ptrdiff_t rs = Sizes<V2::_size,M1::_size>::size;
         typedef typename M1::nonunitdiag_type::cview_type M1v;
         typedef typename MViewHelper<T2,Rec,1,rs,Unknown,V2::_step>::type V2v;
         TMV_MAYBE_REF(M1,M1v) Rv = R.viewAsNonUnitDiag().cView();
@@ -728,8 +728,8 @@ namespace tmv {
         TMVStaticAssert(!M1::_unit);
         TMVAssert(A.size() == R.size());
         TMVAssert(!R.isunit());
-        const int cs = 1;
-        const int rs = Sizes<V2::_size,M1::_size>::size;
+        const ptrdiff_t cs = 1;
+        const ptrdiff_t rs = Sizes<V2::_size,M1::_size>::size;
         typedef typename M1::nonunitdiag_type::cview_type M1v;
         typedef typename MViewHelper<T2,Rec,1,rs,Unknown,V2::_step>::type V2v;
         TMV_MAYBE_REF(M1,M1v) Rv = R.viewAsNonUnitDiag().cView();
@@ -748,7 +748,7 @@ namespace tmv {
             static_cast<BaseVector_Mutable<V2>&>(A)); 
     }
 
-    template <class T, int N, int Si1, int Sj1, int A1, int S2, int A2>
+    template <class T, ptrdiff_t N, ptrdiff_t Si1, ptrdiff_t Sj1, int A1, ptrdiff_t S2, int A2>
     inline void QR_Downdate(
         SmallUpperTriMatrixView<T,N,Si1,Sj1,A1> R,
         SmallVectorView<T,N,S2,A2> A)
@@ -760,7 +760,7 @@ namespace tmv {
             static_cast<BaseVector_Mutable<V2>&>(A));
     }
 
-    template <class T, int N, int A1, int S2, int A2>
+    template <class T, ptrdiff_t N, int A1, ptrdiff_t S2, int A2>
     inline void QR_Downdate(
         UpperTriMatrixView<T,A1> R,
         SmallVectorView<T,N,S2,A2> A)
@@ -772,7 +772,7 @@ namespace tmv {
             static_cast<BaseVector_Mutable<V2>&>(A));
     }
 
-    template <class T, int N, int Si1, int Sj1, int A1, int A2>
+    template <class T, ptrdiff_t N, ptrdiff_t Si1, ptrdiff_t Sj1, int A1, int A2>
     inline void QR_Downdate(
         SmallUpperTriMatrixView<T,N,Si1,Sj1,A1> R,
         VectorView<T,A2> A)

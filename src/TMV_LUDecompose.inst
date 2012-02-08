@@ -2,7 +2,7 @@
 #define CT std::complex<T>
 
 #define Def1(T1)\
-  template void InstLU_Decompose(MatrixView<T1> m, int* P); \
+  template void InstLU_Decompose(MatrixView<T1> m, ptrdiff_t* P); \
 
 Def1(T)
 #ifdef TMV_INST_COMPLEX

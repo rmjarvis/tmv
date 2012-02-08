@@ -24,14 +24,14 @@ template void InstAliasCopy(const ConstVectorView<T >& v1, VectorView<CT > v2);
 #define Def2(RT,T) \
   template void InstReverseSelf(VectorView<T > v); \
   template T InstSumElements(const ConstVectorView<T >& v); \
-  template T InstMaxElement(const ConstVectorView<T >& v, int* imax); \
-  template T InstMinElement(const ConstVectorView<T >& v, int* imin); \
+  template T InstMaxElement(const ConstVectorView<T >& v, ptrdiff_t* imax); \
+  template T InstMinElement(const ConstVectorView<T >& v, ptrdiff_t* imin); \
   template RT InstSumAbs2Elements(const ConstVectorView<T >& v); \
-  template RT InstMaxAbs2Element(const ConstVectorView<T >& v, int* imax); \
-  template RT InstMinAbs2Element(const ConstVectorView<T >& v, int* imax); \
+  template RT InstMaxAbs2Element(const ConstVectorView<T >& v, ptrdiff_t* imax); \
+  template RT InstMinAbs2Element(const ConstVectorView<T >& v, ptrdiff_t* imax); \
   template RT InstNormSq(const ConstVectorView<T >& v);  \
   template void InstSort(VectorView<T > v, ADType ad, CompType comp); \
-  template void InstSort(VectorView<T > v, int* P, ADType ad, CompType comp); \
+  template void InstSort(VectorView<T > v, ptrdiff_t* P, ADType ad, CompType comp); \
   template void InstRead(const TMV_Reader& reader, VectorView<T > v); \
 
 Def2(T,T)
@@ -41,8 +41,8 @@ Def2(T,CT)
 
 #define Def3(RT,T) \
   template RT InstSumAbsElements(const ConstVectorView<T >& v); \
-  template RT InstMaxAbsElement(const ConstVectorView<T >& v, int* imax); \
-  template RT InstMinAbsElement(const ConstVectorView<T >& v, int* imax); \
+  template RT InstMaxAbsElement(const ConstVectorView<T >& v, ptrdiff_t* imax); \
+  template RT InstMinAbsElement(const ConstVectorView<T >& v, ptrdiff_t* imax); \
   template RT InstNorm2(const ConstVectorView<T >& v); \
   template RT InstNormSq(const ConstVectorView<T >& v, const RT scale);  \
 

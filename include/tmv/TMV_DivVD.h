@@ -25,7 +25,7 @@ namespace tmv {
     // v3(i) = x * v1(i) / v2(i)
     //
 
-    template <int algo, int s, int ix, class T, class V1, class V2, class V3>
+    template <int algo, ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper;
 
     // algo 0: s == 0, nothing to do
@@ -38,11 +38,11 @@ namespace tmv {
         static TMV_INLINE void call(
             const Scaling<ix,T>&, const V1&, const V2&, V3&) {}
         static TMV_INLINE void call2(
-            int, const Scaling<ix,T>&, IT1, IT2, IT3) {}
+            ptrdiff_t, const Scaling<ix,T>&, IT1, IT2, IT3) {}
     };
 
     // algo 11: simple for loop
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<11,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -51,10 +51,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == Unknown ? v3.size() : s;
+            const ptrdiff_t n = s == Unknown ? v3.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
             const bool c1 = V1::_conj;
             const bool c2 = V2::_conj;
@@ -71,7 +71,7 @@ namespace tmv {
 
 #ifdef __SSE2__
     // algo 31: double precision SSE2: all real
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<31,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -80,10 +80,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == Unknown ? v2.size() : s;
+            const ptrdiff_t n = s == Unknown ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
 #ifdef PRINTALGO_DivD
             std::cout<<"ElemDivVV algo 31: N,s = "<<n<<','<<s<<std::endl;
@@ -103,8 +103,8 @@ namespace tmv {
                 }
             }
 
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            ptrdiff_t nb = n-(n_2<<1);
             
             if (n_2) {
                 IT1 A1 = A+1;
@@ -126,7 +126,7 @@ namespace tmv {
     };
 
     // algo 32: double precision SSE2: x real v1 real v2 complex
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<32,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -135,10 +135,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == Unknown ? v2.size() : s;
+            const ptrdiff_t n = s == Unknown ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
 #ifdef PRINTALGO_DivD
             std::cout<<"ElemDivVV algo 32: N,s = "<<n<<','<<s<<std::endl;
@@ -152,8 +152,8 @@ namespace tmv {
                 }
             }
 
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            ptrdiff_t nb = n-(n_2<<1);
             
             if (n_2) {
                 IT1 A1 = A+1;
@@ -179,7 +179,7 @@ namespace tmv {
     };
 
     // algo 33: double precision SSE2: x real v1 complex v2 complex
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<33,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -188,10 +188,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == Unknown ? v2.size() : s;
+            const ptrdiff_t n = s == Unknown ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
 #ifdef PRINTALGO_DivD
             std::cout<<"ElemDivVV algo 33: N,s = "<<n<<','<<s<<std::endl;
@@ -229,7 +229,7 @@ namespace tmv {
     };
 
     // algo 34: double precision SSE2: x complex v1 real v2 complex
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<34,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -238,10 +238,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == Unknown ? v2.size() : s;
+            const ptrdiff_t n = s == Unknown ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
 #ifdef PRINTALGO_DivD
             std::cout<<"ElemDivVV algo 34: N,s = "<<n<<','<<s<<std::endl;
@@ -257,8 +257,8 @@ namespace tmv {
                 }
             }
 
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            ptrdiff_t nb = n-(n_2<<1);
             
             if (n_2) {
                 IT1 A1 = A+1;
@@ -285,7 +285,7 @@ namespace tmv {
     };
 
     // algo 35: double precision SSE2: all complex
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<35,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -294,10 +294,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == Unknown ? v2.size() : s;
+            const ptrdiff_t n = s == Unknown ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
 #ifdef PRINTALGO_DivD
             std::cout<<"ElemDivVV algo 35: N,s = "<<n<<','<<s<<std::endl;
@@ -336,7 +336,7 @@ namespace tmv {
 
 #ifdef __SSE__
     // algo 41: single precision SSE: all real
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<41,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -345,10 +345,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == Unknown ? v2.size() : s;
+            const ptrdiff_t n = s == Unknown ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
 #ifdef PRINTALGO_DivD
             std::cout<<"ElemDivVV algo 41: N,s = "<<n<<','<<s<<std::endl;
@@ -374,8 +374,8 @@ namespace tmv {
                 }
             }
 
-            int n_4 = (n>>2);
-            int nb = n-(n_4<<2);
+            ptrdiff_t n_4 = (n>>2);
+            ptrdiff_t nb = n-(n_4<<2);
             
             if (n_4) {
                 IT1 A1 = A+1;
@@ -414,7 +414,7 @@ namespace tmv {
     };
 
     // algo 42: single precision SSE: x real v1 real v2 complex
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<42,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -423,10 +423,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == Unknown ? v2.size() : s;
+            const ptrdiff_t n = s == Unknown ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
 #ifdef PRINTALGO_DivD
             std::cout<<"ElemDivVV algo 42: N,s = "<<n<<','<<s<<std::endl;
@@ -441,8 +441,8 @@ namespace tmv {
                 }
             }
 
-            int n_4 = (n>>2);
-            int nb = n-(n_4<<2);
+            ptrdiff_t n_4 = (n>>2);
+            ptrdiff_t nb = n-(n_4<<2);
             
             if (n_4) {
                 IT1 A1 = A+1;
@@ -476,7 +476,7 @@ namespace tmv {
     };
 
     // algo 43: single precision SSE: x real v1 complex v2 complex
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<43,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -485,10 +485,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == Unknown ? v2.size() : s;
+            const ptrdiff_t n = s == Unknown ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
 #ifdef PRINTALGO_DivD
             std::cout<<"ElemDivVV algo 43: N,s = "<<n<<','<<s<<std::endl;
@@ -509,8 +509,8 @@ namespace tmv {
                 }
             }
 
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            ptrdiff_t nb = n-(n_2<<1);
             
             if (n_2) {
                 IT1 A1 = A+1;
@@ -539,7 +539,7 @@ namespace tmv {
     };
 
     // algo 44: single precision SSE: x complex v1 real v2 complex
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<44,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -548,10 +548,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == Unknown ? v2.size() : s;
+            const ptrdiff_t n = s == Unknown ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
 #ifdef PRINTALGO_DivD
             std::cout<<"ElemDivVV algo 44: N,s = "<<n<<','<<s<<std::endl;
@@ -568,8 +568,8 @@ namespace tmv {
                 }
             }
 
-            int n_4 = (n>>2);
-            int nb = n-(n_4<<2);
+            ptrdiff_t n_4 = (n>>2);
+            ptrdiff_t nb = n-(n_4<<2);
             
             if (n_4) {
                 IT1 A1 = A+1;
@@ -606,7 +606,7 @@ namespace tmv {
     };
 
     // algo 45: single precision SSE: all complex
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<45,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -615,10 +615,10 @@ namespace tmv {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, V3& v3)
         {
-            const int n = s == Unknown ? v2.size() : s;
+            const ptrdiff_t n = s == Unknown ? v2.size() : s;
             call2(n,x,v1.begin().nonConj(),v2.begin().nonConj(),v3.begin());
         }
-        static void call2(int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+        static void call2(ptrdiff_t n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
 #ifdef PRINTALGO_DivD
             std::cout<<"ElemDivVV algo 45: N,s = "<<n<<','<<s<<std::endl;
@@ -641,8 +641,8 @@ namespace tmv {
                 }
             }
 
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            ptrdiff_t nb = n-(n_2<<1);
             
             if (n_2) {
                 IT1 A1 = A+1;
@@ -684,7 +684,7 @@ namespace tmv {
 #endif
 
     // algo 90: Call inst
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<90,s,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -697,7 +697,7 @@ namespace tmv {
     };
 
     // algo 91: Call inst alias
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<91,s,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -710,7 +710,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<97,s,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -728,7 +728,7 @@ namespace tmv {
     };
 
     // algo 197: Conjugate
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<197,s,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -746,7 +746,7 @@ namespace tmv {
     };
 
     // algo 98: Inline check for aliases
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<98,s,ix,T,V1,V2,V3>
     {
         static void call(
@@ -788,7 +788,7 @@ namespace tmv {
     };
 
     // algo 99: Check for aliases
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<99,s,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -816,7 +816,7 @@ namespace tmv {
     };
 
     // algo -4: No branches or copies
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<-4,s,ix,T,V1,V2,V3>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
@@ -839,7 +839,7 @@ namespace tmv {
             ElemDivVV_Helper<algo,s,ix,T,V1,V2,V3>::call(x,v1,v2,v3); 
         }
         static TMV_INLINE void call2(
-            int n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
+            ptrdiff_t n, const Scaling<ix,T>& x, IT1 A, IT2 B, IT3 C)
         {
             TMVStaticAssert(!V3::_conj);
             ElemDivVV_Helper<algo,s,ix,T,V1,V2,V3>::call2(n,x,A,B,C);
@@ -847,7 +847,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<-3,s,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -859,7 +859,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<-2,s,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -887,7 +887,7 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases?
-    template <int s, int ix, class T, class V1, class V2, class V3>
+    template <ptrdiff_t s, int ix, class T, class V1, class V2, class V3>
     struct ElemDivVV_Helper<-1,s,ix,T,V1,V2,V3>
     {
         static TMV_INLINE void call(
@@ -914,8 +914,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::_size,V2::_size>::size;
-        const int s = Sizes<s12,V3::_size>::size;
+        const ptrdiff_t s12 = Sizes<V1::_size,V2::_size>::size;
+        const ptrdiff_t s = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
@@ -934,8 +934,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::_size,V2::_size>::size;
-        const int s = Sizes<s12,V3::_size>::size;
+        const ptrdiff_t s12 = Sizes<V1::_size,V2::_size>::size;
+        const ptrdiff_t s = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;
@@ -954,8 +954,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,V3::_size>::same));
         TMVAssert(v1.size() == v2.size());
         TMVAssert(v1.size() == v3.size());
-        const int s12 = Sizes<V1::_size,V2::_size>::size;
-        const int s = Sizes<s12,V3::_size>::size;
+        const ptrdiff_t s12 = Sizes<V1::_size,V2::_size>::size;
+        const ptrdiff_t s = Sizes<s12,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename V3::cview_type V3v;

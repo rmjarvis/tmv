@@ -94,13 +94,13 @@ namespace tmv {
         TMV_INLINE const M1& getM1() const { return m1; }
         TMV_INLINE const T2& getX2() const { return x2; }
 
-        TMV_INLINE int colsize() const { return m1.colsize(); }
-        TMV_INLINE int rowsize() const { return m1.rowsize(); }
-        TMV_INLINE int nlo() const { return m1.nlo(); }
-        TMV_INLINE int nhi() const { return m1.nhi(); }
-        TMV_INLINE int ls() const { return m1.ls(); }
+        TMV_INLINE ptrdiff_t colsize() const { return m1.colsize(); }
+        TMV_INLINE ptrdiff_t rowsize() const { return m1.rowsize(); }
+        TMV_INLINE ptrdiff_t nlo() const { return m1.nlo(); }
+        TMV_INLINE ptrdiff_t nhi() const { return m1.nhi(); }
+        TMV_INLINE ptrdiff_t ls() const { return m1.ls(); }
 
-        value_type cref(int i, int j) const
+        value_type cref(ptrdiff_t i, ptrdiff_t j) const
         { return (i == j) ? (x1 * m1.cref(i,j) + x2) : (x1 * m1.cref(i,j)); }
 
         template <class M3>

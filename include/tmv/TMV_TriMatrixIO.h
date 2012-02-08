@@ -33,21 +33,21 @@ namespace tmv {
         static void call(const TMV_Writer& writer, const M& m)
         {
             typedef typename M::value_type T;
-            const int N = m.size();
+            const ptrdiff_t N = m.size();
             writer.begin();
             writer.writeCode("U");
             writer.writeSize(N);
             writer.writeSimpleSize(N);
             writer.writeStart();
-            for(int i=0;i<N;++i) {
+            for(ptrdiff_t i=0;i<N;++i) {
                 writer.writeLParen();
                 if (!writer.isCompact()) {
-                    for(int j=0;j<i;++j) {
+                    for(ptrdiff_t j=0;j<i;++j) {
                         writer.writeValue(T(0));
                         writer.writeSpace();
                     }
                 }
-                for(int j=i;j<N;++j) {
+                for(ptrdiff_t j=i;j<N;++j) {
                     if (j > i) writer.writeSpace();
                     writer.writeValue(m.cref(i,j));
                 }
@@ -66,20 +66,20 @@ namespace tmv {
         static void call(const TMV_Writer& writer, const M& m)
         {
             typedef typename M::value_type T;
-            const int N = m.size();
+            const ptrdiff_t N = m.size();
             writer.begin();
             writer.writeCode("L");
             writer.writeSize(N);
             writer.writeSimpleSize(N);
             writer.writeStart();
-            for(int i=0;i<N;++i) {
+            for(ptrdiff_t i=0;i<N;++i) {
                 writer.writeLParen();
-                for(int j=0;j<i+1;++j) {
+                for(ptrdiff_t j=0;j<i+1;++j) {
                     if (j > 0) writer.writeSpace();
                     writer.writeValue(m.cref(i,j));
                 }
                 if (!writer.isCompact()) {
-                    for(int j=i+1;j<N;++j) {
+                    for(ptrdiff_t j=i+1;j<N;++j) {
                         writer.writeSpace();
                         writer.writeValue(T(0));
                     }
@@ -167,9 +167,9 @@ namespace tmv {
 #define TAG (upper ? "UpperTriMatrix" : "LowerTriMatrix")
 
         M m;
-        int i,j;
+        ptrdiff_t i,j;
         std::string exp,got;
-        int s;
+        ptrdiff_t s;
         T v1;
         bool is, iseof, isbad;
 
@@ -186,13 +186,13 @@ namespace tmv {
 
         template <class M>
         TriMatrixReadError(
-            const BaseMatrix_Tri<M>& _m, std::istream& _is, int _s) throw() :
+            const BaseMatrix_Tri<M>& _m, std::istream& _is, ptrdiff_t _s) throw() :
             ReadError(TAG),
             m(_m), i(0), j(0), s(_s), v1(1),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class M>
         TriMatrixReadError(
-            int _i, int _j, const BaseMatrix_Tri<M>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const BaseMatrix_Tri<M>& _m,
             std::istream& _is,
             const std::string& _e, const std::string& _g) throw() :
             ReadError(TAG),
@@ -201,14 +201,14 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class M>
         TriMatrixReadError(
-            int _i, int _j, const BaseMatrix_Tri<M>& _m, 
+            ptrdiff_t _i, ptrdiff_t _j, const BaseMatrix_Tri<M>& _m, 
             std::istream& _is) throw() :
             ReadError(TAG),
             m(_m), i(_i), j(_j), s(_m.size()), v1(i==j?T(1):T(0)),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class M>
         TriMatrixReadError(
-            int _i, int _j, const BaseMatrix_Tri<M>& _m, 
+            ptrdiff_t _i, ptrdiff_t _j, const BaseMatrix_Tri<M>& _m, 
             std::istream& _is, T _v1) throw() :
             ReadError(TAG),
             m(_m), i(_i), j(_j), s(_m.size()), v1(_v1),
@@ -248,14 +248,14 @@ namespace tmv {
             if (m.size() > 0) {
                 os<<"The portion of the "<<TAG<<" which was successfully "
                     "read is: \n";
-                const int N = m.size();
-                for(int ii=0;ii<i;++ii) {
+                const ptrdiff_t N = m.size();
+                for(ptrdiff_t ii=0;ii<i;++ii) {
                     os<<"( ";
-                    for(int jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
+                    for(ptrdiff_t jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
                     os<<" )\n";
                 }
                 os<<"( ";
-                for(int jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
+                for(ptrdiff_t jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
                 os<<" )\n";
             }
         }
@@ -274,7 +274,7 @@ namespace tmv {
         static void call(const TMV_Reader& reader, M& m)
         {
             typedef typename M::value_type T;
-            const int N = m.size();
+            const ptrdiff_t N = m.size();
             std::string exp, got;
             T temp;
             if (!reader.readStart(exp,got)) {
@@ -285,7 +285,7 @@ namespace tmv {
                 throw TriMatrixReadError<true,T>(0,0,m,reader.getis(),exp,got);
 #endif
             }
-            for(int i=0;i<N;++i) {
+            for(ptrdiff_t i=0;i<N;++i) {
                 if (!reader.readLParen(exp,got)) {
 #ifdef NOTHROW
                     std::cerr<<"UpperTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -295,7 +295,7 @@ namespace tmv {
 #endif
                 }
                 if (!reader.isCompact()) {
-                    for(int j=0;j<i;++j) {
+                    for(ptrdiff_t j=0;j<i;++j) {
                         if (!reader.readValue(temp)) {
 #ifdef NOTHROW
                             std::cerr<<"UpperTriMatrix Read Error: reading value\n";
@@ -322,7 +322,7 @@ namespace tmv {
                         }
                     }
                 }
-                for(int j=i;j<N;++j) {
+                for(ptrdiff_t j=i;j<N;++j) {
                     if (j>i && !reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                         std::cerr<<"UpperTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -387,7 +387,7 @@ namespace tmv {
         static void call(const TMV_Reader& reader, M& m)
         {
             typedef typename M::value_type T;
-            const int N = m.size();
+            const ptrdiff_t N = m.size();
             std::string exp, got;
             T temp;
             if (!reader.readStart(exp,got)) {
@@ -398,7 +398,7 @@ namespace tmv {
                 throw TriMatrixReadError<false,T>(0,0,m,reader.getis(),exp,got);
 #endif
             }
-            for(int i=0;i<N;++i) {
+            for(ptrdiff_t i=0;i<N;++i) {
                 if (!reader.readLParen(exp,got)) {
 #ifdef NOTHROW
                     std::cerr<<"LowerTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -407,7 +407,7 @@ namespace tmv {
                     throw TriMatrixReadError<false,T>(i,0,m,reader.getis(),exp,got);
 #endif
                 }
-                for(int j=0;j<i+1;++j) {
+                for(ptrdiff_t j=0;j<i+1;++j) {
                     if (j>0 && !reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                         std::cerr<<"LowerTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -438,7 +438,7 @@ namespace tmv {
                     }
                 }
                 if (!reader.isCompact()) {
-                    for(int j=i+1;j<N;++j) {
+                    for(ptrdiff_t j=i+1;j<N;++j) {
                         if (!reader.readSpace(exp,got)) {
 #ifdef NOTHROW
                             std::cerr<<"LowerTriMatrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -532,7 +532,7 @@ namespace tmv {
         static TMV_INLINE void call(const TMV_Reader& reader, M& m)
         {
             typedef typename M::value_type T;
-            const int inst = 
+            const bool inst = 
                 (M::_colsize == Unknown || M::_colsize > 16) &&
                 (M::_rowsize == Unknown || M::_rowsize > 16) &&
                 Traits<T>::isinst;
@@ -594,7 +594,7 @@ namespace tmv {
             throw TriMatrixReadError<upper,T>(reader.getis(),exp,got);
 #endif
         }
-        int s=m.size();
+        ptrdiff_t s=m.size();
         if (!reader.readSize(s)) {
 #ifdef NOTHROW
             std::cerr<<tag<<" Read Error: reading size\n";
@@ -645,7 +645,7 @@ namespace tmv {
             throw TriMatrixReadError<true,T>(reader.getis(),exp,got);
 #endif
         }
-        int s=m.size();
+        ptrdiff_t s=m.size();
         if (!reader.readSize(s)) {
 #ifdef NOTHROW
             std::cerr<<"UpperTriMatrix Read Error: reading size\n";
@@ -689,7 +689,7 @@ namespace tmv {
             throw TriMatrixReadError<false,T>(reader.getis(),exp,got);
 #endif
         }
-        int s=m.size();
+        ptrdiff_t s=m.size();
         if (!reader.readSize(s)) {
 #ifdef NOTHROW
             std::cerr<<"TriMatrix Read Error: reading size\n";
@@ -744,7 +744,7 @@ namespace tmv {
             static_cast<BaseMatrix_Tri_Mutable<LowerTriMatrixView<T,A> >&>(m);
     }
 
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     std::istream& operator>>(
         const TMV_Reader& reader, SmallUpperTriMatrixView<T,N,Si,Sj,A> m)
     {
@@ -753,7 +753,7 @@ namespace tmv {
             SmallUpperTriMatrixView<T,N,Si,Sj,A> >&>(m);
     }
 
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     std::istream& operator>>(
         const TMV_Reader& reader, SmallLowerTriMatrixView<T,N,Si,Sj,A> m)
     {
@@ -776,7 +776,7 @@ namespace tmv {
             static_cast<BaseMatrix_Tri_Mutable<LowerTriMatrixView<T,A> >&>(m);
     }
 
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     std::istream& operator>>(
         std::istream& is, SmallUpperTriMatrixView<T,N,Si,Sj,A> m)
     {
@@ -785,7 +785,7 @@ namespace tmv {
             SmallUpperTriMatrixView<T,N,Si,Sj,A> >&>(m);
     }
 
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     std::istream& operator>>(
         std::istream& is, SmallLowerTriMatrixView<T,N,Si,Sj,A> m)
     {

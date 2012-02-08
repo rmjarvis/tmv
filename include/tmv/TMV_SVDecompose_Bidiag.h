@@ -36,25 +36,25 @@ namespace tmv {
     // The Bidiagonal Matrix B is stored as two vectors: D, E
     // D is the diagonal, E is the super-diagonal
     // A along with Ubeta and Vbeta hold the U and V matrices.
-    template <int algo, int cs, int rs, class M1, class V1, class V2, class V3, class V4>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class V2, class V3, class V4>
     struct Bidiagonalize_Helper;
 
     // algo 0: Trivial, nothing to do (M == 0, or N == 0)
-    template <int cs, int rs, class M1, class V1, class V2, class V3, class V4>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class V2, class V3, class V4>
     struct Bidiagonalize_Helper<0,cs,rs,M1,V1,V2,V3,V4>
     { static TMV_INLINE void call(M1& , V1& , V2& , V3&, V4& ) {} };
 
     // algo 11: Non-blocked algorithm
     // We use Householder reflections to reduce A to the bidiagonal form:
-    template <int cs, int rs, class M1, class V1, class V2, class V3, class V4>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class V2, class V3, class V4>
     struct Bidiagonalize_Helper<11,cs,rs,M1,V1,V2,V3,V4>
     {
         static void call(M1& A, V1& Ubeta, V2& Vbeta, V3& D, V4& E)
         {
             typedef typename M1::value_type T;
 
-            const int M = cs==Unknown ? A.colsize() : cs;
-            const int N = rs==Unknown ? A.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
             if (N == 0) return;
 #ifdef PRINTALGO_SVD
             std::cout<<"Bidiagonalize algo 11: M,N,cs,rs = "<<
@@ -74,7 +74,7 @@ namespace tmv {
 
             IT1 Ubj = Ubeta.begin();
             IT2 Vbj = Vbeta.begin();
-            for(int j=0;j<N-1;++j,++Ubj,++Vbj) {
+            for(ptrdiff_t j=0;j<N-1;++j,++Ubj,++Vbj) {
                 M1c u1 = A.col(j,j+1,M);
                 M1r A10 = A.row(j,j+1,N);
                 M1s A1x = A.subMatrix(j+1,M,j+1,N);
@@ -100,7 +100,7 @@ namespace tmv {
     };
 
     // algo 21: Blocked algorithm
-    template <int cs, int rs, class M1, class V1, class V2, class V3, class V4>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class V2, class V3, class V4>
     struct Bidiagonalize_Helper<21,cs,rs,M1,V1,V2,V3,V4>
     {
         static void call(M1& A, V1& Ubeta, V2& Vbeta, V3& D, V4& E)
@@ -108,8 +108,8 @@ namespace tmv {
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
-            const int M = cs==Unknown ? A.colsize() : cs;
-            const int N = rs==Unknown ? A.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_SVD
             std::cout<<"Bidiagonalize algo 21: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
@@ -151,7 +151,7 @@ namespace tmv {
             typedef typename Vx::subvector_type Vxs;
             Vx tempBase = VectorSizer<T>(M);
 
-            const int NB = TMV_BIDIAG_BLOCKSIZE;
+            const ptrdiff_t NB = TMV_BIDIAG_BLOCKSIZE;
             typedef typename MCopyHelper<T,Rec,NB,rs,RowMajor>::type M3;
             typedef typename MCopyHelper<T,Rec,cs,NB>::type M4;
 
@@ -162,14 +162,14 @@ namespace tmv {
 
             IT1 Ubj = Ubeta.begin();
             IT2 Vbj = Vbeta.begin();
-            int j1 = 0;
+            ptrdiff_t j1 = 0;
             RT bu, bv;
 
             M3 ZYtm = MatrixSizer<T>(NB,N);
             M4 mXtW = MatrixSizer<T>(M,NB);
 
-            for(int j2=j1+NB;j2<N-1;j1=j2,j2+=NB) {
-                for(int j=j1,jj=0;j<j2;++j,++jj,++Ubj,++Vbj) {
+            for(ptrdiff_t j2=j1+NB;j2<N-1;j1=j2,j2+=NB) {
+                for(ptrdiff_t j=j1,jj=0;j<j2;++j,++jj,++Ubj,++Vbj) {
                     // jj = j-j1
 
                     // Update current column:
@@ -286,7 +286,7 @@ namespace tmv {
             }
 
             // Do the ones that don't fit into blocks.
-            for(int j=j1;j<N-1;++j,++Ubj,++Vbj) {
+            for(ptrdiff_t j=j1;j<N-1;++j,++Ubj,++Vbj) {
                 M1c u1 = A.col(j,j+1,M);
                 M1r A10 = A.row(j,j+1,N);
                 M1s A1x = A.subMatrix(j+1,M,j+1,N);
@@ -313,20 +313,20 @@ namespace tmv {
     };
 
     // algo 31: Decide which algorithm to use based on runtime size
-    template <int cs, int rs, class M1, class V1, class V2, class V3, class V4>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class V2, class V3, class V4>
     struct Bidiagonalize_Helper<31,cs,rs,M1,V1,V2,V3,V4>
     {
         static void call(M1& A, V1& Ubeta, V2& Vbeta, V3& D, V4& E)
         {
             typedef typename M1::value_type T;
 
-            const int M = cs==Unknown ? A.colsize() : cs;
-            const int N = rs==Unknown ? A.rowsize() : rs;
+            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
+            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
 #ifdef PRINTALGO_SVD
             std::cout<<"Bidiagonalize algo 31: M,N,cs,rs = "<<
                 M<<','<<N<<','<<cs<<','<<rs<<std::endl;
 #endif
-            const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
+            const ptrdiff_t l2cache = TMV_L2_CACHE*1024/sizeof(T);
             if (M*N <= l2cache)
                 Bidiagonalize_Helper<11,cs,rs,M1,V1,V2,V3,V4>::call(
                     A,Ubeta,Vbeta,D,E);
@@ -337,7 +337,7 @@ namespace tmv {
     };
 
     // algo 90: call InstSV_DecomposeFromBidiagonal
-    template <int cs, int rs, class M1, class V1, class V2, class V3, class V4>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class V2, class V3, class V4>
     struct Bidiagonalize_Helper<90,cs,rs,M1,V1,V2,V3,V4>
     {
         static TMV_INLINE void call(M1& A, V1& Ubeta, V2& Vbeta, V3& D, V4& E)
@@ -348,15 +348,15 @@ namespace tmv {
     };
 
     // algo -4: No copies or branches
-    template <int cs, int rs, class M1, class V1, class V2, class V3, class V4>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class V2, class V3, class V4>
     struct Bidiagonalize_Helper<-4,cs,rs,M1,V1,V2,V3,V4>
     {
         static TMV_INLINE void call(M1& A, V1& Ubeta, V2& Vbeta, V3& D, V4& E)
         {
             typedef typename M1::value_type T;
-            const int csrs = IntTraits2<cs,rs>::prod;
-            const int rsrs = IntTraits2<rs,rs>::prod;
-            const int l2cache = TMV_L2_CACHE*1024/sizeof(T);
+            const ptrdiff_t csrs = IntTraits2<cs,rs>::prod;
+            const ptrdiff_t rsrs = IntTraits2<rs,rs>::prod;
+            const ptrdiff_t l2cache = TMV_L2_CACHE*1024/sizeof(T);
             const int algo = 
                 cs == 0 || rs == 0 ? 0 :
                 TMV_OPT == 0 ? 11 :
@@ -378,7 +378,7 @@ namespace tmv {
             //std::cout<<"m = "<<U<<std::endl;
 #endif
 #ifdef XDEBUG_SVD
-            const int N = rs==Unknown ? D.size() : rs;
+            const ptrdiff_t N = rs==Unknown ? D.size() : rs;
             dbgcout<<"Start Bidiagonalize:\n";
             dbgcout<<"A = "<<TMV_Text(A)<<"   "<<A<<std::endl;
             typedef typename M1::value_type T;
@@ -419,7 +419,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, class M1, class V1, class V2, class V3, class V4>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class V2, class V3, class V4>
     struct Bidiagonalize_Helper<-3,cs,rs,M1,V1,V2,V3,V4>
     {
         static TMV_INLINE void call(M1& A, V1& Ubeta, V2& Vbeta, V3& D, V4& E)
@@ -431,7 +431,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, class M1, class V1, class V2, class V3, class V4>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class V2, class V3, class V4>
     struct Bidiagonalize_Helper<-2,cs,rs,M1,V1,V2,V3,V4>
     {
         static TMV_INLINE void call(M1& A, V1& Ubeta, V2& Vbeta, V3& D, V4& E)
@@ -449,7 +449,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class M1, class V1, class V2, class V3, class V4>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class V1, class V2, class V3, class V4>
     struct Bidiagonalize_Helper<-1,cs,rs,M1,V1,V2,V3,V4>
     {
         static TMV_INLINE void call(M1& A, V1& Ubeta, V2& Vbeta, V3& D, V4& E)
@@ -487,9 +487,9 @@ namespace tmv {
         TMVAssert(A.rowsize() == Ubeta.size());
         TMVAssert(A.rowsize() == E.size()+1);
         TMVAssert(A.rowsize() == Vbeta.size()+1);
-        const int cs = M1::_colsize;
-        const int rs1 = Sizes<M1::_rowsize,V1::_size>::size;
-        const int rs = Sizes<rs1,V3::_size>::size;
+        const ptrdiff_t cs = M1::_colsize;
+        const ptrdiff_t rs1 = Sizes<M1::_rowsize,V1::_size>::size;
+        const ptrdiff_t rs = Sizes<rs1,V3::_size>::size;
         typedef typename M1::cview_type M1v;
         typedef typename V1::cview_type V1v;
         typedef typename V2::cview_type V2v;
@@ -532,9 +532,9 @@ namespace tmv {
         TMVAssert(A.rowsize() == Ubeta.size());
         TMVAssert(A.rowsize() == E.size()+1);
         TMVAssert(A.rowsize() == Vbeta.size()+1);
-        const int cs = M1::_colsize;
-        const int rs1 = Sizes<M1::_rowsize,V1::_size>::size;
-        const int rs = Sizes<rs1,V3::_size>::size;
+        const ptrdiff_t cs = M1::_colsize;
+        const ptrdiff_t rs1 = Sizes<M1::_rowsize,V1::_size>::size;
+        const ptrdiff_t rs = Sizes<rs1,V3::_size>::size;
         typedef typename M1::cview_type M1v;
         typedef typename V1::cview_type V1v;
         typedef typename V2::cview_type V2v;

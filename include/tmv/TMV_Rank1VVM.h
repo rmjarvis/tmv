@@ -70,11 +70,11 @@ namespace tmv {
         const T3 x, const ConstVectorView<T1,C1>& v1, 
         const ConstVectorView<T2,C2>& v2, MatrixView<T3> m3);
 
-    template <int algo, int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper;
 
     // algo 0: cs or rs = 0, so nothing to do
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<0,cs,rs,add,ix,T,V1,V2,M3>
     {
         static TMV_INLINE void call(
@@ -83,14 +83,14 @@ namespace tmv {
     };
 
     // algo 1: cs == 1, so simplifies to a MultXV function
-    template <int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<1,1,rs,add,ix,T,V1,V2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
-            const int N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
             std::cout<<"R1 algo 1: M,N,cs,rs,x = "<<1<<','<<N<<
                 ','<<1<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -102,14 +102,14 @@ namespace tmv {
     };
 
     // algo 101: same as 1, but use -1 algo
-    template <int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<101,1,rs,add,ix,T,V1,V2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
-            const int N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
             std::cout<<"R1 algo 101: M,N,cs,rs,x = "<<1<<','<<N<<
                 ','<<1<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -121,14 +121,14 @@ namespace tmv {
     };
 
     // algo 201: same as 1, but use -2 algo
-    template <int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<201,1,rs,add,ix,T,V1,V2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
-            const int N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
             std::cout<<"R1 algo 201: M,N,cs,rs,x = "<<1<<','<<N<<
                 ','<<1<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -140,14 +140,14 @@ namespace tmv {
     };
 
     // algo 2: rs == 1, so simplifies to a MultXV function
-    template <int cs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<2,cs,1,add,ix,T,V1,V2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
-            const int M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
             std::cout<<"R1 algo 2: M,N,cs,rs,x = "<<M<<','<<1<<
                 ','<<cs<<','<<1<<','<<T(x)<<std::endl;
 #endif
@@ -159,14 +159,14 @@ namespace tmv {
     };
 
     // algo 102: same as 2, but use -1 algo
-    template <int cs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<102,cs,1,add,ix,T,V1,V2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
-            const int M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
             std::cout<<"R1 algo 102: M,N,cs,rs,x = "<<M<<','<<1<<
                 ','<<cs<<','<<1<<','<<T(x)<<std::endl;
 #endif
@@ -178,14 +178,14 @@ namespace tmv {
     };
 
     // algo 202: same as 2, but use -2 algo
-    template <int cs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<202,cs,1,add,ix,T,V1,V2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
-            const int M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
             std::cout<<"R1 algo 202: M,N,cs,rs,x = "<<M<<','<<1<<
                 ','<<cs<<','<<1<<','<<T(x)<<std::endl;
 #endif
@@ -197,15 +197,15 @@ namespace tmv {
     };
 
     // algo 3: Transpose
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<3,cs,rs,add,ix,T,V1,V2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
-            const int M = cs == Unknown ? m3.colsize() : cs;
-            const int N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
             std::cout<<"R1 algo 3: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -217,15 +217,15 @@ namespace tmv {
     };
 
     // algo 11: The basic column major loop
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<11,cs,rs,add,ix,T,V1,V2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            const int N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
 #ifdef PRINTALGO_R1
-            const int M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
             std::cout<<"R1 algo 12: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -233,7 +233,7 @@ namespace tmv {
             typedef typename Traits2<T,T2>::type PT2;
             typedef typename M3::col_type M3c;
 
-            for(int j=0;j<N;++j) {
+            for(ptrdiff_t j=0;j<N;++j) {
                 PT2 v2j = ZProd<false,false>::prod(x , v2.cref(j));
                 M3c m3j = m3.get_col(j);
                 MultXV_Helper<-4,cs,add,0,PT2,V1,M3c>::call(v2j,v1,m3j);
@@ -242,14 +242,14 @@ namespace tmv {
     };
 
     // algo 12: Column major loop with iterators
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<12,cs,rs,add,ix,T,V1,V2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            const int M = cs == Unknown ? m3.colsize() : cs;
-            const int N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
 #ifdef PRINTALGO_R1
             std::cout<<"R1 algo 12: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -268,10 +268,10 @@ namespace tmv {
             typedef typename M3::col_type M3c;
             typedef typename M3c::iterator IT3;
 
-            const int stepj = m3.stepj();
+            const ptrdiff_t stepj = m3.stepj();
             IT3 A0 = m3.get_col(0).begin();
 
-            for(int j=N;j;--j) {
+            for(ptrdiff_t j=N;j;--j) {
                 Y0 = ZProd<false,c2>::prod(x , *Y++);
                 MultXV_Helper<-4,cs,add,0,PT2,V1,M3c>::call2(
                     M,Scaling<0,PT2>(Y0),X,A0);
@@ -281,14 +281,14 @@ namespace tmv {
     };
 
     // algo 13: column major, 4 columns at a time
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<13,cs,rs,add,ix,T,V1,V2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            const int M = cs == Unknown ? m3.colsize() : cs;
-            const int N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
 #ifdef PRINTALGO_R1
             std::cout<<"R1 algo 13: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -309,12 +309,12 @@ namespace tmv {
                 typedef typename M3::value_type T3;
                 typedef typename M3::col_type::iterator IT3;
 
-                int N4 = N>>2; // N4 = N/4
-                int Nb = N-(N4<<2); // N4 = N%4
-                const int stepj = m3.stepj();
-                const int stepj_4 = (stepj<<2) - M;
+                ptrdiff_t N4 = N>>2; // N4 = N/4
+                ptrdiff_t Nb = N-(N4<<2); // N4 = N%4
+                const ptrdiff_t stepj = m3.stepj();
+                const ptrdiff_t stepj_4 = (stepj<<2) - M;
                 // step over 4 columns and back to start
-                const int stepj_1 = stepj - M;
+                const ptrdiff_t stepj_1 = stepj - M;
 
                 IT3 A0 = m3.get_col(0).begin();
                 IT3 A1 = A0; A1.shiftP(stepj);
@@ -333,7 +333,7 @@ namespace tmv {
                 Prefetch_Write(A2.get());
                 Prefetch_Write(A3.get());
 
-                int i;
+                ptrdiff_t i;
 
                 if (N4) do {
                     Y0 = x * Y[0]; Y1 = x * Y[1]; Y2 = x * Y[2]; Y3 = x * Y[3];
@@ -375,7 +375,7 @@ namespace tmv {
 
     // algo 14: do all columns at once -- rs <= 4, and must be known
     // rs == 1
-    template <int cs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<14,cs,1,add,ix,T,V1,V2,M3>
     {
         static void call(
@@ -383,13 +383,13 @@ namespace tmv {
         { Rank1VVM_Helper<2,cs,1,add,ix,T,V1,V2,M3>::call(x,v1,v2,m3); }
     };
     // rs == 2
-    template <int cs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<14,cs,2,add,ix,T,V1,V2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            int M = cs == Unknown ? m3.colsize() : cs;
+            ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
 #ifdef PRINTALGO_R1
             std::cout<<"R1 algo 14 N==2: M,N,cs,rs,x = "<<M<<','<<2<<
                 ','<<cs<<','<<2<<','<<T(x)<<std::endl;
@@ -408,7 +408,7 @@ namespace tmv {
 
             typedef typename M3::value_type T3;
             typedef typename M3::col_type::iterator IT3;
-            const int stepj = m3.stepj();
+            const ptrdiff_t stepj = m3.stepj();
             IT3 A0 = m3.get_col(0).begin();
             IT3 A1 = A0; A1.shiftP(stepj);
 
@@ -422,13 +422,13 @@ namespace tmv {
         }
     };
     // rs == 3
-    template <int cs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<14,cs,3,add,ix,T,V1,V2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            int M = cs == Unknown ? m3.colsize() : cs;
+            ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
 #ifdef PRINTALGO_R1
             std::cout<<"R1 algo 14 N==3: M,N,cs,rs,x = "<<M<<','<<3<<
                 ','<<cs<<','<<3<<','<<T(x)<<std::endl;
@@ -448,7 +448,7 @@ namespace tmv {
 
             typedef typename M3::value_type T3;
             typedef typename M3::col_type::iterator IT3;
-            const int stepj = m3.stepj();
+            const ptrdiff_t stepj = m3.stepj();
             IT3 A0 = m3.get_col(0).begin();
             IT3 A1 = A0; A1.shiftP(stepj);
             IT3 A2 = A1; A2.shiftP(stepj);
@@ -464,13 +464,13 @@ namespace tmv {
         }
     };
     // rs == 4
-    template <int cs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<14,cs,4,add,ix,T,V1,V2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            int M = cs == Unknown ? m3.colsize() : cs;
+            ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
 #ifdef PRINTALGO_R1
             std::cout<<"R1 algo 14 N==4: M,N,cs,rs,x = "<<M<<','<<4<<
                 ','<<cs<<','<<4<<','<<T(x)<<std::endl;
@@ -491,7 +491,7 @@ namespace tmv {
 
             typedef typename M3::value_type T3;
             typedef typename M3::col_type::iterator IT3;
-            const int stepj = m3.stepj();
+            const ptrdiff_t stepj = m3.stepj();
             IT3 A0 = m3.get_col(0).begin();
             IT3 A1 = A0; A1.shiftP(stepj);
             IT3 A2 = A1; A2.shiftP(stepj);
@@ -510,10 +510,10 @@ namespace tmv {
     };
 
     // algo 16: fully unroll by columns
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<16,cs,rs,add,ix,T,V1,V2,M3>
     {
-        template <int J, int N>
+        template <ptrdiff_t J, ptrdiff_t N>
         struct Unroller
         {
             static TMV_INLINE void unroll(
@@ -523,11 +523,11 @@ namespace tmv {
                 Unroller<J+N/2,N-N/2>::unroll(x,v1,v2,m3);
             }
         };
-        template <int J>
+        template <ptrdiff_t J>
         struct Unroller<J,1>
         {
             typedef typename Traits2<T,typename V2::value_type>::type PT2;
-            template <int I, int M>
+            template <ptrdiff_t I, ptrdiff_t M>
             struct Unroller2
             {
                 static TMV_INLINE void unroll(
@@ -537,7 +537,7 @@ namespace tmv {
                     Unroller2<I+M/2,M-M/2>::unroll(v1,v2j,m3);
                 }
             };
-            template <int I>
+            template <ptrdiff_t I>
             struct Unroller2<I,1>
             {
                 static TMV_INLINE void unroll(
@@ -564,14 +564,14 @@ namespace tmv {
     };
 
     // algo 17: column major, 2 columns at a time, complex m3
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<17,cs,rs,add,ix,T,V1,V2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            const int M = cs == Unknown ? m3.colsize() : cs;
-            const int N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
 #ifdef PRINTALGO_R1
             std::cout<<"R1 algo 17: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -593,10 +593,10 @@ namespace tmv {
                 typedef typename M3::col_type::iterator IT3;
                 RT3 rA0, iA0, rA1, iA1;
 
-                int N2 = N>>1; // N2 = N/2
-                int Nb = N - (N2<<1); // Nb = N%2
-                const int stepj = m3.stepj();
-                const int stepj_2 = (stepj<<1) - M;
+                ptrdiff_t N2 = N>>1; // N2 = N/2
+                ptrdiff_t Nb = N - (N2<<1); // Nb = N%2
+                const ptrdiff_t stepj = m3.stepj();
+                const ptrdiff_t stepj_2 = (stepj<<1) - M;
                 // step over 2 columns and back to start
 
                 IT3 A0 = m3.get_col(0).begin();
@@ -615,7 +615,7 @@ namespace tmv {
                 Prefetch_Write(A0.get());
                 Prefetch_Write(A1.get());
 
-                int i;
+                ptrdiff_t i;
 
                 if (N2) do {
                     Y0 = ZProd<false,c2>::prod(x,Y[0]);
@@ -660,7 +660,7 @@ namespace tmv {
 
     // algo 18: do all columns at once, complex m3: rs <= 4, and must be known
     // rs == 1
-    template <int cs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<18,cs,1,add,ix,T,V1,V2,M3>
     {
         static void call(
@@ -668,13 +668,13 @@ namespace tmv {
         { Rank1VVM_Helper<2,cs,1,add,ix,T,V1,V2,M3>::call(x,v1,v2,m3); }
     };
     // rs == 2
-    template <int cs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<18,cs,2,add,ix,T,V1,V2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            int M = cs == Unknown ? m3.colsize() : cs;
+            ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
 #ifdef PRINTALGO_R1
             std::cout<<"R1 algo 18 N==2: M,N,cs,rs,x = "<<M<<','<<2<<
                 ','<<cs<<','<<2<<','<<T(x)<<std::endl;
@@ -696,7 +696,7 @@ namespace tmv {
                 typedef typename M3::col_type::iterator IT3;
                 RT3 rA0, iA0, rA1, iA1;
 
-                const int stepj = m3.stepj();
+                const ptrdiff_t stepj = m3.stepj();
                 IT3 A0 = m3.get_col(0).begin();
                 IT3 A1 = A0; A1.shiftP(stepj);
                 const IT1 X_begin = v1.begin().nonConj();
@@ -721,13 +721,13 @@ namespace tmv {
         }
     };
     // rs == 3
-    template <int cs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<18,cs,3,add,ix,T,V1,V2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            int M = cs == Unknown ? m3.colsize() : cs;
+            ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
 #ifdef PRINTALGO_R1
             std::cout<<"R1 algo 18 N==3: M,N,cs,rs,x = "<<M<<','<<3<<
                 ','<<cs<<','<<3<<','<<T(x)<<std::endl;
@@ -750,7 +750,7 @@ namespace tmv {
                 typedef typename M3::col_type::iterator IT3;
                 RT3 rA0, iA0, rA1, iA1, rA2, iA2;
 
-                const int stepj = m3.stepj();
+                const ptrdiff_t stepj = m3.stepj();
                 IT3 A0 = m3.get_col(0).begin();
                 IT3 A1 = A0; A1.shiftP(stepj);
                 IT3 A2 = A1; A2.shiftP(stepj);
@@ -781,13 +781,13 @@ namespace tmv {
         }
     };
     // rs == 4
-    template <int cs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<18,cs,4,add,ix,T,V1,V2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            int M = cs == Unknown ? m3.colsize() : cs;
+            ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
 #ifdef PRINTALGO_R1
             std::cout<<"R1 algo 18 N==4: M,N,cs,rs,x = "<<M<<','<<4<<
                 ','<<cs<<','<<4<<','<<T(x)<<std::endl;
@@ -811,7 +811,7 @@ namespace tmv {
                 typedef typename M3::col_type::iterator IT3;
                 RT3 rA0, iA0, rA1, iA1;
 
-                const int stepj = m3.stepj();
+                const ptrdiff_t stepj = m3.stepj();
                 IT3 A0 = m3.get_col(0).begin();
                 IT3 A1 = A0; A1.shiftP(stepj);
                 IT3 A2 = A1; A2.shiftP(stepj);
@@ -850,10 +850,10 @@ namespace tmv {
 
     // algo 26: fully unroll by rows
     // Neither this, nore 16 above seems to be faster for any cs,rs.
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<26,cs,rs,add,ix,T,V1,V2,M3>
     {
-        template <int I, int M>
+        template <ptrdiff_t I, ptrdiff_t M>
         struct Unroller
         {
             static TMV_INLINE void unroll(
@@ -863,11 +863,11 @@ namespace tmv {
                 Unroller<I+M/2,M-M/2>::unroll(x,v1,v2,m3);
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,1>
         {
             typedef typename Traits2<T,typename V1::value_type>::type PT1;
-            template <int J, int N>
+            template <ptrdiff_t J, ptrdiff_t N>
             struct Unroller2
             {
                 static TMV_INLINE void unroll(
@@ -877,7 +877,7 @@ namespace tmv {
                     Unroller2<J+N/2,N-N/2>::unroll(v1i,v2,m3);
                 }
             };
-            template <int J>
+            template <ptrdiff_t J>
             struct Unroller2<J,1>
             {
                 static TMV_INLINE void unroll(
@@ -908,14 +908,14 @@ namespace tmv {
     // (This isn't actually an SSE version.  Just a starting point.)
 #ifdef __SSE2__
     // algo 31: double precision SSE2: all real
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<31,cs,rs,add,ix,T,V1,V2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            const int M = cs == Unknown ? m3.colsize() : cs;
-            const int N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
 #ifdef PRINTALGO_R1
             std::cout<<"R1 algo 31: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -939,12 +939,12 @@ namespace tmv {
                 typedef typename M3::value_type T3;
                 typedef typename M3::col_type::iterator IT3;
 
-                int N4 = N>>2; // N4 = N/4
-                int Nb = N-(N4<<2); // N4 = N%4
-                const int stepj = m3.stepj();
-                const int stepj_4 = (stepj<<2) - M;
+                ptrdiff_t N4 = N>>2; // N4 = N/4
+                ptrdiff_t Nb = N-(N4<<2); // N4 = N%4
+                const ptrdiff_t stepj = m3.stepj();
+                const ptrdiff_t stepj_4 = (stepj<<2) - M;
                 // step over 4 columns and back to start
-                const int stepj_1 = stepj - M;
+                const ptrdiff_t stepj_1 = stepj - M;
 
                 IT3 A0 = m3.get_col(0).begin();
                 IT3 A1 = A0; A1.shiftP(stepj);
@@ -963,7 +963,7 @@ namespace tmv {
                 Prefetch_Write(A2.get());
                 Prefetch_Write(A3.get());
 
-                int i;
+                ptrdiff_t i;
 
                 if (N4) do {
                     Y0 = x * Y[0]; Y1 = x * Y[1]; Y2 = x * Y[2]; Y3 = x * Y[3];
@@ -1007,7 +1007,7 @@ namespace tmv {
 
 
     // algo 71: colmajor, ix==0, so might need to copy v1
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<71,cs,rs,add,ix,T,V1,V2,M3>
     {
         static void call(
@@ -1015,14 +1015,14 @@ namespace tmv {
         {
             TMVStaticAssert(TMV_R1_ZeroIX);
 #ifdef PRINTALGO_R1
-            const int M = cs == Unknown ? m3.colsize() : cs;
-            const int N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
             std::cout<<"R1 algo 71: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
 #ifdef TMV_R1_SCALE
-            const int MM = cs == Unknown ? m3.colsize() : cs;
-            const int NN = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t MM = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t NN = rs == Unknown ? m3.rowsize() : rs;
             const int algo2 = M3::iscomplex ? 17 : 13;
             if (NN > TMV_R1_COPY_SCALE_RATIO * MM) {
 #endif
@@ -1039,15 +1039,15 @@ namespace tmv {
     template <int ix, class T, class V> class ProdXV;
 
     // algo 81: copy x*v1
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<81,cs,rs,add,ix,T,V1,V2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
-            const int M = cs == Unknown ? m3.colsize() : cs;
-            const int N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
             std::cout<<"R1 algo 81: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -1059,15 +1059,15 @@ namespace tmv {
     };
 
     // algo 82: copy x*v2
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<82,cs,rs,add,ix,T,V1,V2,M3>
     {
         static inline void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
-            const int N = rs == Unknown ? m3.rowsize() : rs;
-            const int M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
             std::cout<<"R1 algo 82: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -1079,14 +1079,14 @@ namespace tmv {
     };
 
     // algo 83: copy both
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<83,cs,rs,add,ix,T,V1,V2,M3>
     {
         static void call(
             const Scaling<ix,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
-            const int M = cs == Unknown ? m3.colsize() : cs;
-            const int N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
 #ifdef PRINTALGO_R1
             std::cout<<"R1 algo 83: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
@@ -1104,15 +1104,15 @@ namespace tmv {
         }
     };
     // If ix == 1, don't need the branch
-    template <int cs, int rs, bool add, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<83,cs,rs,add,1,T,V1,V2,M3>
     {
         static inline void call(
             const Scaling<1,T>& x, const V1& v1, const V2& v2, M3& m3)
         {
 #ifdef PRINTALGO_R1
-            const int M = cs == Unknown ? m3.colsize() : cs;
-            const int N = rs == Unknown ? m3.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m3.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m3.rowsize() : rs;
             std::cout<<"R1 algo 83: M,N,cs,rs,x = "<<M<<','<<N<<
                 ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
 #endif
@@ -1122,7 +1122,7 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int cs, int rs, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<90,cs,rs,true,ix,T,V1,V2,M3>
     {
         static TMV_INLINE void call(
@@ -1133,7 +1133,7 @@ namespace tmv {
             InstAddRank1Update(xx,v1.xView(),v2.xView(),m3.xView()); 
         }
     };
-    template <int cs, int rs, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<90,cs,rs,false,ix,T,V1,V2,M3>
     {
         static TMV_INLINE void call(
@@ -1146,7 +1146,7 @@ namespace tmv {
     };
 
     // algo 91: Call inst alias
-    template <int cs, int rs, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<91,cs,rs,true,ix,T,V1,V2,M3>
     {
         static TMV_INLINE void call(
@@ -1157,7 +1157,7 @@ namespace tmv {
             InstAliasAddRank1Update(xx,v1.xView(),v2.xView(),m3.xView()); 
         }
     };
-    template <int cs, int rs, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<91,cs,rs,false,ix,T,V1,V2,M3>
     {
         static TMV_INLINE void call(
@@ -1170,7 +1170,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<97,cs,rs,add,ix,T,V1,V2,M3>
     {
         static TMV_INLINE void call(
@@ -1188,7 +1188,7 @@ namespace tmv {
     };
 
     // algo 197: Conjugate
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<197,cs,rs,add,ix,T,V1,V2,M3>
     {
         static TMV_INLINE void call(
@@ -1206,7 +1206,7 @@ namespace tmv {
     };
 
     // algo 98: Inline check for aliases
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<98,cs,rs,add,ix,T,V1,V2,M3>
     {
         static void call(
@@ -1231,7 +1231,7 @@ namespace tmv {
     };
 
     // algo 99: Check for aliases
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<99,cs,rs,add,ix,T,V1,V2,M3>
     {
         static TMV_INLINE void call(
@@ -1262,7 +1262,7 @@ namespace tmv {
     };
 
     // algo -4: No branches or copies
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<-4,cs,rs,add,ix,T,V1,V2,M3>
     {
         static TMV_INLINE void call(
@@ -1297,7 +1297,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<-3,cs,rs,add,ix,T,V1,V2,M3>
     {
         static TMV_INLINE void call(
@@ -1377,7 +1377,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<-2,cs,rs,add,ix,T,V1,V2,M3>
     {
         static TMV_INLINE void call(
@@ -1410,7 +1410,7 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases?
-    template <int cs, int rs, bool add, int ix, class T, class V1, class V2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, bool add, int ix, class T, class V1, class V2, class M3>
     struct Rank1VVM_Helper<-1,cs,rs,add,ix,T,V1,V2,M3>
     {
         static TMV_INLINE void call(
@@ -1435,8 +1435,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<M3::_rowsize,V2::_size>::same));
         TMVAssert(m3.colsize() == v1.size());
         TMVAssert(m3.rowsize() == v2.size());
-        const int cs = Sizes<M3::_colsize,V1::_size>::size;
-        const int rs = Sizes<M3::_rowsize,V2::_size>::size;
+        const ptrdiff_t cs = Sizes<M3::_colsize,V1::_size>::size;
+        const ptrdiff_t rs = Sizes<M3::_rowsize,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename M3::cview_type M3v;
@@ -1455,8 +1455,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<M3::_rowsize,V2::_size>::same));
         TMVAssert(m3.colsize() == v1.size());
         TMVAssert(m3.rowsize() == v2.size());
-        const int cs = Sizes<M3::_colsize,V1::_size>::size;
-        const int rs = Sizes<M3::_rowsize,V2::_size>::size;
+        const ptrdiff_t cs = Sizes<M3::_colsize,V1::_size>::size;
+        const ptrdiff_t rs = Sizes<M3::_rowsize,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename M3::cview_type M3v;
@@ -1475,8 +1475,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<M3::_rowsize,V2::_size>::same));
         TMVAssert(m3.colsize() == v1.size());
         TMVAssert(m3.rowsize() == v2.size());
-        const int cs = Sizes<M3::_colsize,V1::_size>::size;
-        const int rs = Sizes<M3::_rowsize,V2::_size>::size;
+        const ptrdiff_t cs = Sizes<M3::_colsize,V1::_size>::size;
+        const ptrdiff_t rs = Sizes<M3::_rowsize,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         typedef typename M3::cview_type M3v;

@@ -9,8 +9,7 @@ import sys
 # Subdirectories containing SConscript files.  We always process src but
 # there are some other optional ones
 src_dir = 'src'
-#subdirs=['test','examples','doc']
-subdirs=['test','examples','bin','share']
+subdirs=['test','examples','bin','share','doc']
 
 # Configurations will be saved here so command line options don't
 # have to be sent more than once

@@ -87,8 +87,8 @@ namespace tmv {
         Vector<typename V3::value_type> v3i = v3;
         Vector<typename V3::value_type> v3c = v3;
         if (!add) v3c.setZero();
-        for(int i=0;i<v3.size();++i) {
-            for(int j=0;j<v2.size();++j) {
+        for(ptrdiff_t i=0;i<v3.size();++i) {
+            for(ptrdiff_t j=0;j<v2.size();++j) {
                 v3c.ref(i) += T(x) * m1.cref(i,j) * v2.cref(j);
             }
         }
@@ -119,8 +119,8 @@ namespace tmv {
         Vector<typename V3::value_type> v3i = v3;
         Vector<typename V3::value_type> v3c = v3;
         if (!add) v3c.setZero();
-        for(int i=0;i<v1.size();++i) {
-            for(int j=0;j<v3.size();++j) {
+        for(ptrdiff_t i=0;i<v1.size();++i) {
+            for(ptrdiff_t j=0;j<v3.size();++j) {
                 v3c.ref(j) += T(x) * v1.cref(i) *  m2.cref(i,j);
             }
         }
@@ -151,8 +151,8 @@ namespace tmv {
         Vector<typename V1::value_type> v1i = v1;
         Vector<typename V1::value_type> v3 = v1;
         v3.setZero();
-        for(int i=0;i<v1.size();++i) {
-            for(int j=0;j<v1.size();++j) {
+        for(ptrdiff_t i=0;i<v1.size();++i) {
+            for(ptrdiff_t j=0;j<v1.size();++j) {
                 v3.ref(j) += T(x) * v1.cref(i) *  m2.cref(i,j);
             }
         }
@@ -220,9 +220,9 @@ namespace tmv {
         TMV_INLINE const M1& getM() const { return m1; }
         TMV_INLINE const V2& getV() const { return v2; }
 
-        TMV_INLINE int size() const { return m1.colsize(); }
+        TMV_INLINE ptrdiff_t size() const { return m1.colsize(); }
 
-        value_type cref(int i) const
+        value_type cref(ptrdiff_t i) const
         { return x * (m1.get_row(i) * v2); }
 
         template <class V3>
@@ -291,9 +291,9 @@ namespace tmv {
         TMV_INLINE const V1& getV() const { return v1; }
         TMV_INLINE const M2& getM() const { return m2; }
 
-        TMV_INLINE int size() const { return m2.rowsize(); }
+        TMV_INLINE ptrdiff_t size() const { return m2.rowsize(); }
 
-        value_type cref(int j) const
+        value_type cref(ptrdiff_t j) const
         { return x * (v1 * m2.get_col(j)); }
 
         template <class V3>

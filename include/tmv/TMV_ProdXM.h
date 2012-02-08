@@ -97,12 +97,12 @@ namespace tmv {
         TMV_INLINE const Scaling<ix,T>& getX() const { return x; }
         TMV_INLINE const M& getM() const { return m; }
 
-        TMV_INLINE int colsize() const { return m.colsize(); }
-        TMV_INLINE int rowsize() const { return m.rowsize(); }
-        TMV_INLINE int nlo() const { return m.nlo(); }
-        TMV_INLINE int nhi() const { return m.nhi(); }
+        TMV_INLINE ptrdiff_t colsize() const { return m.colsize(); }
+        TMV_INLINE ptrdiff_t rowsize() const { return m.rowsize(); }
+        TMV_INLINE ptrdiff_t nlo() const { return m.nlo(); }
+        TMV_INLINE ptrdiff_t nhi() const { return m.nhi(); }
 
-        value_type cref(int i, int j) const
+        value_type cref(ptrdiff_t i, ptrdiff_t j) const
         { return x * m.cref(i,j); }
 
         template <class M2>

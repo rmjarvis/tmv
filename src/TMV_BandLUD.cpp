@@ -348,11 +348,11 @@ namespace tmv {
     }
 
     template <class T> 
-    int BandLUDiv<T>::colsize() const
+    ptrdiff_t BandLUDiv<T>::colsize() const
     { return pimpl->LUx.colsize(); }
 
     template <class T> 
-    int BandLUDiv<T>::rowsize() const
+    ptrdiff_t BandLUDiv<T>::rowsize() const
     { return pimpl->LUx.rowsize(); }
 
 #ifdef INST_INT

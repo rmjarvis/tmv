@@ -22,9 +22,9 @@ namespace tmv {
 #if TMV_OPT >= 2
 #define TMV_VV_RECURSE
 #endif
-    const int TMV_MultVV_RecurseSize = 16*1024;
+    const ptrdiff_t TMV_MultVV_RecurseSize = 16*1024;
 
-    template <int algo, int s, class V1, class V2>
+    template <int algo, ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper;
 
     // algo 0: s=0, return 0
@@ -36,12 +36,12 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static TMV_INLINE PT call(const V1& , const V2& )
         { return PT(0); }
-        static TMV_INLINE PT call2(int n, IT1 it1, IT2 it2)
+        static TMV_INLINE PT call2(ptrdiff_t n, IT1 it1, IT2 it2)
         { return PT(0); }
     };
 
     // algo 1: v1 is complex, v2 is real: swap v1,v2
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<1,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
@@ -49,12 +49,12 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static TMV_INLINE PT call(const V1& v1, const V2& v2)
         { return MultVV_Helper<-4,s,V2,V1>::call(v2,v1); }
-        static TMV_INLINE PT call2(int n, IT1 it1, IT2 it2)
+        static TMV_INLINE PT call2(ptrdiff_t n, IT1 it1, IT2 it2)
         { return MultVV_Helper<-4,s,V2,V1>::call2(n,it2,it1); }
     };
 
     // algo 2: v2 is conj: conjugate result
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<2,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
@@ -68,7 +68,7 @@ namespace tmv {
             V2c v2c = v2.conjugate();
             return TMV_CONJ(MultVV_Helper<-4,s,V1c,V2c>::call(v1c,v2c));
         }
-        static TMV_INLINE PT call2(int n, IT1 it1, IT2 it2)
+        static TMV_INLINE PT call2(ptrdiff_t n, IT1 it1, IT2 it2)
         {
             typedef typename V1::const_conjugate_type V1c;
             typedef typename V2::const_conjugate_type V2c;
@@ -77,7 +77,7 @@ namespace tmv {
     };
 
     // algo 11: simple for loop
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<11,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
@@ -85,16 +85,16 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static PT call(const V1& v1, const V2& v2)
         {
-            const int n = s == Unknown ? v1.size() : s;
+            const ptrdiff_t n = s == Unknown ? v1.size() : s;
             if (n == 0) return PT(0);
             else {
                 PT sum(0);
-                for(int i=0;i<n;++i) 
+                for(ptrdiff_t i=0;i<n;++i) 
                     sum += ZProd<false,false>::prod(v1.cref(i) , v2.cref(i));
                 return sum;
             }
         }
-        static PT call2(int n, IT1 it1, IT2 it2)
+        static PT call2(ptrdiff_t n, IT1 it1, IT2 it2)
         {
             const bool c1 = V1::_conj;
             const bool c2 = V2::_conj;
@@ -107,7 +107,7 @@ namespace tmv {
     };
 
     // algo 12: 2 at once
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<12,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
@@ -115,14 +115,14 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline PT call(const V1& v1, const V2& v2)
         {
-            const int n = s == Unknown ? v1.size() : s;
+            const ptrdiff_t n = s == Unknown ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
-        static PT call2(const int n, IT1 it1, IT2 it2)
+        static PT call2(const ptrdiff_t n, IT1 it1, IT2 it2)
         {
             PT sum0(0), sum1(0);
-            int n_2 = (n>>1);
-            const int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            const ptrdiff_t nb = n-(n_2<<1);
             const bool c1 = V1::_conj;
             const bool c2 = V2::_conj;
             if (n_2) {
@@ -142,7 +142,7 @@ namespace tmv {
     };
 
     // algo 13: 4 at once
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<13,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
@@ -150,14 +150,14 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline PT call(const V1& v1, const V2& v2)
         {
-            const int n = s == Unknown ? v1.size() : s;
+            const ptrdiff_t n = s == Unknown ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
-        static PT call2(const int n, IT1 it1, IT2 it2)
+        static PT call2(const ptrdiff_t n, IT1 it1, IT2 it2)
         {
             PT sum0(0), sum1(0);
-            int n_4 = (n>>2);
-            int nb = n-(n_4<<2);
+            ptrdiff_t n_4 = (n>>2);
+            ptrdiff_t nb = n-(n_4<<2);
             const bool c1 = V1::_conj;
             const bool c2 = V2::_conj;
             if (n_4) {
@@ -179,7 +179,7 @@ namespace tmv {
     };
 
     // algo 14: 8 at once
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<14,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
@@ -187,14 +187,14 @@ namespace tmv {
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline PT call(const V1& v1, const V2& v2)
         {
-            const int n = s == Unknown ? v1.size() : s;
+            const ptrdiff_t n = s == Unknown ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
-        static PT call2(const int n, IT1 it1, IT2 it2)
+        static PT call2(const ptrdiff_t n, IT1 it1, IT2 it2)
         {
             PT sum0(0), sum1(0);
-            int n_8 = (n>>3);
-            int nb = n-(n_8<<3);
+            ptrdiff_t n_8 = (n>>3);
+            ptrdiff_t nb = n-(n_8<<3);
             const bool c1 = V1::_conj;
             const bool c2 = V2::_conj;
             if (n_8) {
@@ -219,13 +219,13 @@ namespace tmv {
     };
 
     // algo 15: fully unroll
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<15,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
-        template <int I, int N>
+        template <ptrdiff_t I, ptrdiff_t N>
         struct Unroller
         {
             static inline PT unroll(const V1& v1, const V2& v2)
@@ -241,7 +241,7 @@ namespace tmv {
                     Unroller<I+N/2,N-N/2>::unroll2(it1,it2));
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,1>
         {
             static inline PT unroll(const V1& v1, const V2& v2)
@@ -253,7 +253,7 @@ namespace tmv {
                 return ZProd<c1,c2>::prod(it1[I] , it2[I]); 
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,0>
         {
             static inline PT unroll(const V1& v1, const V2& v2)
@@ -264,23 +264,23 @@ namespace tmv {
 
         static inline PT call(const V1& v1, const V2& v2)
         { return Unroller<0,s>::unroll(v1,v2); }
-        static inline PT call2(const int n, const IT1& it1, const IT2& it2)
+        static inline PT call2(const ptrdiff_t n, const IT1& it1, const IT2& it2)
         { return Unroller<0,s>::unroll2(it1,it2); }
     };
 
 #ifdef __SSE2__
     // algo 31: double precision SSE2: all real
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<31,s,V1,V2>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline double call(const V1& v1, const V2& v2)
         {
-            const int n = s == Unknown ? v1.size() : s;
+            const ptrdiff_t n = s == Unknown ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
-        static double call2(int n, IT1 A, IT2 B)
+        static double call2(ptrdiff_t n, IT1 A, IT2 B)
         {
             const bool unit1 = V1::_step == 1;
             const bool unit2 = V2::_step == 1;
@@ -299,8 +299,8 @@ namespace tmv {
                 }
             }
 
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            ptrdiff_t nb = n-(n_2<<1);
 
             if (n_2) {
                 IT1 A1 = A+1;
@@ -326,17 +326,17 @@ namespace tmv {
     };
 
     // algo 32: double precision SSE2: v1 real v2 complex
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<32,s,V1,V2>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline std::complex<double> call(const V1& v1, const V2& v2)
         {
-            const int n = s == Unknown ? v1.size() : s;
+            const ptrdiff_t n = s == Unknown ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
-        static std::complex<double> call2(int n, IT1 A, IT2 B)
+        static std::complex<double> call2(ptrdiff_t n, IT1 A, IT2 B)
         {
             TMVStaticAssert(!V2::_conj);
             const bool unit1 = V1::_step == 1;
@@ -356,8 +356,8 @@ namespace tmv {
                 }
             }
 
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            ptrdiff_t nb = n-(n_2<<1);
 
             if (n_2) {
                 IT1 A1 = A+1;
@@ -392,17 +392,17 @@ namespace tmv {
     };
 
     // algo 33: double precision SSE2: all complex
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<33,s,V1,V2>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline std::complex<double> call(const V1& v1, const V2& v2)
         {
-            const int n = s == Unknown ? v1.size() : s;
+            const ptrdiff_t n = s == Unknown ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
-        static std::complex<double> call2(int n, IT1 A, IT2 B)
+        static std::complex<double> call2(ptrdiff_t n, IT1 A, IT2 B)
         {
             TMVStaticAssert(!V2::_conj);
             const bool c1 = V1::_conj;
@@ -457,17 +457,17 @@ namespace tmv {
 
 #ifdef __SSE__
     // algo 41: single precision SSE: all real
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<41,s,V1,V2>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline float call(const V1& v1, const V2& v2)
         {
-            const int n = s == Unknown ? v1.size() : s;
+            const ptrdiff_t n = s == Unknown ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
-        static float call2(int n, IT1 A, IT2 B)
+        static float call2(ptrdiff_t n, IT1 A, IT2 B)
         {
             const bool unit1 = V1::_step == 1;
             const bool unit2 = V2::_step == 1;
@@ -486,8 +486,8 @@ namespace tmv {
                 }
             }
 
-            int n_4 = (n>>2);
-            int nb = n-(n_4<<2);
+            ptrdiff_t n_4 = (n>>2);
+            ptrdiff_t nb = n-(n_4<<2);
 
             if (n_4) {
                 IT1 A1 = A+1;
@@ -522,17 +522,17 @@ namespace tmv {
     };
 
     // algo 42: single precision SSE: v1 real v2 complex
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<42,s,V1,V2>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline std::complex<float> call(const V1& v1, const V2& v2)
         {
-            const int n = s == Unknown ? v1.size() : s;
+            const ptrdiff_t n = s == Unknown ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
-        static std::complex<float> call2(int n, IT1 A, IT2 B)
+        static std::complex<float> call2(ptrdiff_t n, IT1 A, IT2 B)
         {
             TMVStaticAssert(!V2::_conj);
             const bool unit1 = V1::_step == 1;
@@ -552,8 +552,8 @@ namespace tmv {
                 }
             }
 
-            int n_4 = (n>>2);
-            int nb = n-(n_4<<2);
+            ptrdiff_t n_4 = (n>>2);
+            ptrdiff_t nb = n-(n_4<<2);
 
             if (n_4) {
                 IT1 A1 = A+1;
@@ -596,17 +596,17 @@ namespace tmv {
     };
 
     // algo 43: single precision SSE: all complex
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<43,s,V1,V2>
     {
         typedef typename V1::const_nonconj_type::const_iterator IT1;
         typedef typename V2::const_nonconj_type::const_iterator IT2;
         static inline std::complex<float> call(const V1& v1, const V2& v2)
         {
-            const int n = s == Unknown ? v1.size() : s;
+            const ptrdiff_t n = s == Unknown ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
-        static std::complex<float> call2(int n, IT1 A, IT2 B)
+        static std::complex<float> call2(ptrdiff_t n, IT1 A, IT2 B)
         {
             TMVStaticAssert(!V2::_conj);
             const bool unit1 = V1::_step == 1;
@@ -627,8 +627,8 @@ namespace tmv {
                 }
             }
 
-            int n_2 = (n>>1);
-            int nb = n-(n_2<<1);
+            ptrdiff_t n_2 = (n>>1);
+            ptrdiff_t nb = n-(n_2<<1);
 
             if (n_2) {
                 IT1 A1 = A+1;
@@ -678,7 +678,7 @@ namespace tmv {
     // than the running sum, so the relative errors can be huge.
     // With the recursive algorithm, the relative error is generally
     // closer to the expected few * epsilon.
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<71,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
@@ -687,17 +687,17 @@ namespace tmv {
         typedef typename Traits<PT>::real_type RT;
         static inline PT call(const V1& v1, const V2& v2)
         {
-            const int n = s == Unknown ? v1.size() : s;
+            const ptrdiff_t n = s == Unknown ? v1.size() : s;
             return call2(n,v1.begin().nonConj(),v2.begin().nonConj());
         }
-        static PT call2(const int n, const IT1& it1, const IT2& it2)
+        static PT call2(const ptrdiff_t n, const IT1& it1, const IT2& it2)
         {
-            const int s1 = IntTraits<s>::half_roundup;
-            const int s2 = IntTraits2<s,s1>::diff;
+            const ptrdiff_t s1 = IntTraits<s>::half_roundup;
+            const ptrdiff_t s2 = IntTraits2<s,s1>::diff;
 
             if (n == 0) return PT(0);
             else if (n > TMV_MultVV_RecurseSize) {
-                const int no2 = n/2;
+                const ptrdiff_t no2 = n/2;
                 return (
                     MultVV_Helper<71,s1,V1,V2>::call2(no2,it1,it2) + 
                     MultVV_Helper<71,s2,V1,V2>::call2(
@@ -709,7 +709,7 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<90,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
@@ -718,7 +718,7 @@ namespace tmv {
     };
 
     // algo 96: Swap v1,v2
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<96,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
@@ -728,7 +728,7 @@ namespace tmv {
 
 
     // algo 97: Conjugate
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<97,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
@@ -743,7 +743,7 @@ namespace tmv {
     };
 
     // algo -4: No branches or copies
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<-4,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
@@ -767,7 +767,7 @@ namespace tmv {
                 V2::_conj ? 2 :
                 TMV_OPT == 0 ? 11 :
                 s != Unknown ? 11 :
-                ( s != Unknown && s <= int(128/sizeof(PT)) ) ? 15 :
+                ( s != Unknown && s <= ptrdiff_t(128/sizeof(PT)) ) ? 15 :
 #ifdef __SSE__
                 ( allfloat && v1real && v2real && allunit ) ? 41 :
                 ( allfloat && v1real && v2complex ) ? 42 :
@@ -784,12 +784,12 @@ namespace tmv {
                 11 ) };
         static TMV_INLINE PT call(const V1& v1, const V2& v2)
         { return MultVV_Helper<algo,s,V1,V2>::call(v1,v2); }
-        static TMV_INLINE PT call2(const int n, const IT1& it1, const IT2& it2)
+        static TMV_INLINE PT call2(const ptrdiff_t n, const IT1& it1, const IT2& it2)
         { return MultVV_Helper<algo,s,V1,V2>::call2(n,it1,it2); }
     };
 
     // algo -3: Determine which algorithm to use.
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<-3,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
@@ -805,7 +805,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<-2,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
@@ -832,7 +832,7 @@ namespace tmv {
         }
     };
 
-    template <int s, class V1, class V2>
+    template <ptrdiff_t s, class V1, class V2>
     struct MultVV_Helper<-1,s,V1,V2>
     {
         typedef typename ProdType<V1,V2>::type PT;
@@ -846,7 +846,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
         TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::_size,V2::_size>::size;
+        const ptrdiff_t size = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
@@ -860,7 +860,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<V1::_size,V2::_size>::same));
         TMVAssert(v1.size() == v2.size());
-        const int size = Sizes<V1::_size,V2::_size>::size;
+        const ptrdiff_t size = Sizes<V1::_size,V2::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V2::const_cview_type V2v;
         TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();

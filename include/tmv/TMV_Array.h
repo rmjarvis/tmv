@@ -14,7 +14,7 @@
 #ifndef Array_H
 #define Array_H
 
-const int TMV_MaxStack = 1024; // bytes
+const ptrdiff_t TMV_MaxStack = 1024; // bytes
 
 #include <complex>
 
@@ -52,13 +52,13 @@ namespace tmv
     {
     public:
         TMV_INLINE AlignedMemory() : p(0) {}
-        TMV_INLINE void allocate(const int n) 
+        TMV_INLINE void allocate(const ptrdiff_t n) 
         {
             //std::cout<<"AlignedMemory allocate "<<n<<std::endl;
 #ifdef TMV_END_PADDING
-            const int nn = n + 16/sizeof(T);
+            const ptrdiff_t nn = n + 16/sizeof(T);
             p = new T[nn];
-            for(int i=n;i<nn;++i) p[i] = T(0);
+            for(ptrdiff_t i=n;i<nn;++i) p[i] = T(0);
 #else
             p = new T[n]; 
 #endif
@@ -84,14 +84,14 @@ namespace tmv
     {
     public:
         TMV_INLINE AlignedMemory() : p(0) {}
-        TMV_INLINE void allocate(const int n) 
+        TMV_INLINE void allocate(const ptrdiff_t n) 
         {
             //std::cout<<"AlignedMemory float allocate "<<n<<std::endl;
 #ifdef TMV_END_PADDING
-            const int nn = (n<<2)+15 + 16;
+            const ptrdiff_t nn = (n<<2)+15 + 16;
             p = new char[nn];
             float* pf = get();
-            for(int i=n;i<(nn>>2);++i) pf[i] = 0.F;
+            for(ptrdiff_t i=n;i<(nn>>2);++i) pf[i] = 0.F;
 #else
             p = new char[(n<<2)+15];
 #endif
@@ -123,14 +123,14 @@ namespace tmv
     {
     public:
         TMV_INLINE AlignedMemory() : p(0) {}
-        TMV_INLINE void allocate(const int n) 
+        TMV_INLINE void allocate(const ptrdiff_t n) 
         {
             //std::cout<<"AlignedMemory double allocate "<<n<<std::endl;
 #ifdef TMV_END_PADDING
-            const int nn = (n<<3)+15 + 16;
+            const ptrdiff_t nn = (n<<3)+15 + 16;
             p = new char[nn];
             double* pd = get();
-            for(int i=n;i<(nn>>3);++i) pd[i] = 0.;
+            for(ptrdiff_t i=n;i<(nn>>3);++i) pd[i] = 0.;
 #else
             p = new char[(n<<3)+15];
 #endif
@@ -173,11 +173,20 @@ namespace tmv
     template <class T>
     struct TMV_Nan 
     {
+        template <bool isint, int dummy>
+        struct MakeNan;
+
+        template <int dummy>
+        struct MakeNan<true,dummy>
+        { static T call() { return T(1)<<(sizeof(T)*8-1); } };
+        template <int dummy>
+        struct MakeNan<false,dummy>
+        { static T call() { T zero(0); return zero/zero; } };
+
         static TMV_INLINE T get() 
         {
-            static T zero(0);
-            static T nan = 
-                std::numeric_limits<T>::is_integer ? Unknown : zero/zero;
+            const bool isint = std::numeric_limits<T>::is_integer;
+            static T nan = MakeNan<isint,1>::call();
             return nan; 
         }
     };
@@ -202,7 +211,7 @@ namespace tmv
             _n = 0;
 #endif
         }
-        TMV_INLINE AlignedArray(const int n) 
+        TMV_INLINE AlignedArray(const ptrdiff_t n) 
         {
             if (n > 0) p.allocate(n); 
 #ifdef TMV_INITIALIZE_NAN
@@ -233,7 +242,7 @@ namespace tmv
 #endif
             p.swapWith(rhs.p); 
         }
-        TMV_INLINE void resize(const int n) 
+        TMV_INLINE void resize(const ptrdiff_t n) 
         {
 #ifdef TMV_INITIALIZE_NAN
             fill_with(-Traits<T>::destr_value());
@@ -248,7 +257,7 @@ namespace tmv
 #ifdef TMV_INITIALIZE_NAN
         void fill_with(T x)
         { 
-            for(int i=0;i<_n;++i) get()[i] = x; 
+            for(ptrdiff_t i=0;i<_n;++i) get()[i] = x; 
         }
 #endif
 
@@ -259,7 +268,7 @@ namespace tmv
 
         AlignedMemory<T> p;
 #ifdef TMV_INITIALIZE_NAN
-        int _n;
+        ptrdiff_t _n;
 #endif
 
         AlignedArray& operator=(AlignedArray& p2);
@@ -278,7 +287,7 @@ namespace tmv
             _n = 0;
 #endif
         }
-        TMV_INLINE AlignedArray(const int n) 
+        TMV_INLINE AlignedArray(const ptrdiff_t n) 
         {
             if (n > 0) p.allocate(n<<1); 
 #ifdef TMV_INITIALIZE_NAN
@@ -297,7 +306,7 @@ namespace tmv
 #ifdef TMV_INITIALIZE_NAN
         void fill_with(std::complex<RT> x)
         {
-            for(int i=0;i<_n;++i) get()[i] = x; 
+            for(ptrdiff_t i=0;i<_n;++i) get()[i] = x; 
         }
 #endif
 
@@ -316,7 +325,7 @@ namespace tmv
 #endif
             p.swapWith(rhs.p); 
         }
-        TMV_INLINE void resize(const int n) 
+        TMV_INLINE void resize(const ptrdiff_t n) 
         {
 #ifdef TMV_INITIALIZE_NAN
             fill_with(-Traits<RT>::destr_value());
@@ -337,7 +346,7 @@ namespace tmv
 
         AlignedMemory<RT> p;
 #ifdef TMV_INITIALIZE_NAN
-        int _n;
+        ptrdiff_t _n;
 #endif
 
         AlignedArray& operator=(AlignedArray& p2);
@@ -360,16 +369,16 @@ namespace tmv
     // And smallN is for N < 4 or N < 2 where the SSE alignment isn't 
     // necessary, to make sure we don't gratuitously use extra memory when 
     // we have a lot of SmallVector<float,2>'s or something like that.
-    template <class T, int N, bool bigN, bool smallN>
+    template <class T, ptrdiff_t N, bool bigN, bool smallN>
     class StackArray2;
 
-    template <class T, int N>
+    template <class T, ptrdiff_t N>
     class StackArray2<T,N,false,false>
     // !bigN, !smallN
     {
     public:
 #ifdef TMV_END_PADDING
-        StackArray2() { for(int i=N;i<NN;++i) get()[i] = T(0); }
+        StackArray2() { for(ptrdiff_t i=N;i<NN;++i) get()[i] = T(0); }
 #endif
         TMV_INLINE T* get() { return p; }
         TMV_INLINE const T* get() const { return p; }
@@ -385,13 +394,13 @@ namespace tmv
         T p[NN]; 
 #endif
     };
-    template <class T, int N>
+    template <class T, ptrdiff_t N>
     class StackArray2<T,N,false,true>
     // smallN 
     {
     public:
 #ifdef TMV_END_PADDING
-        StackArray2() { for(int i=N;i<NN;++i) get()[i] = T(0); }
+        StackArray2() { for(ptrdiff_t i=N;i<NN;++i) get()[i] = T(0); }
 #endif
         TMV_INLINE T* get() { return p; }
         TMV_INLINE const T* get() const { return p; }
@@ -405,13 +414,13 @@ namespace tmv
     };
 
 #ifdef __SSE__
-    template <int N>
+    template <ptrdiff_t N>
     class StackArray2<float,N,false,false>
     // !bigN, !smallN 
     {
     public:
 #ifdef TMV_END_PADDING
-        StackArray2() { for(int i=N;i<NN;++i) get()[i] = 0.F; }
+        StackArray2() { for(ptrdiff_t i=N;i<NN;++i) get()[i] = 0.F; }
 #endif
         TMV_INLINE float* get() { return xp.p; }
         TMV_INLINE const float* get() const { return xp.p; }
@@ -423,13 +432,13 @@ namespace tmv
 #endif
         union { float p[NN]; __m128 x; } xp;
     };
-    template <int N>
+    template <ptrdiff_t N>
     class StackArray2<float,N,false,true>
     // smallN 
     {
     public:
 #ifdef TMV_END_PADDING
-        StackArray2() { for(int i=N;i<NN;++i) get()[i] = 0.F; }
+        StackArray2() { for(ptrdiff_t i=N;i<NN;++i) get()[i] = 0.F; }
 #endif
         TMV_INLINE float* get() { return p; }
         TMV_INLINE const float* get() const { return p; }
@@ -443,13 +452,13 @@ namespace tmv
     };
 #endif
 #ifdef __SSE2__
-    template <int N>
+    template <ptrdiff_t N>
     class StackArray2<double,N,false,false>
     // !bigN, !smallN 
     {
     public:
 #ifdef TMV_END_PADDING
-        StackArray2() { for(int i=N;i<NN;++i) get()[i] = 0.; }
+        StackArray2() { for(ptrdiff_t i=N;i<NN;++i) get()[i] = 0.; }
 #endif
         TMV_INLINE double* get() { return xp.p; }
         TMV_INLINE const double* get() const { return xp.p; }
@@ -461,13 +470,13 @@ namespace tmv
 #endif
         union { double p[NN]; __m128d x; } xp;
     };
-    template <int N>
+    template <ptrdiff_t N>
     class StackArray2<double,N,false,true>
     // smallN 
     {
     public:
 #ifdef TMV_END_PADDING
-        StackArray2() { for(int i=N;i<NN;++i) get()[i] = 0.; }
+        StackArray2() { for(ptrdiff_t i=N;i<NN;++i) get()[i] = 0.; }
 #endif
         TMV_INLINE double* get() { return p; }
         TMV_INLINE const double* get() const { return p; }
@@ -481,7 +490,7 @@ namespace tmv
     };
 #endif
 
-    template <class T, int N>
+    template <class T, ptrdiff_t N>
     class StackArray2<T,N,true,false>
     // bigN
     {
@@ -494,15 +503,15 @@ namespace tmv
     };
 
     // Now the real class that we use: StackArray<T,N>
-    template <class T, int N>
+    template <class T, ptrdiff_t N>
     class StackArray
     {
     public :
 #ifdef TMV_INITIALIZE_NAN
         StackArray()
-        { for(int i=0;i<N;++i) get()[i] = TMV_Nan<T>::get(); }
+        { for(ptrdiff_t i=0;i<N;++i) get()[i] = TMV_Nan<T>::get(); }
         ~StackArray() 
-        { for(int i=0;i<N;++i) get()[i] = -Traits<T>::destr_value(); }
+        { for(ptrdiff_t i=0;i<N;++i) get()[i] = -Traits<T>::destr_value(); }
 #else
         TMV_INLINE StackArray() {}
         TMV_INLINE ~StackArray()  {}
@@ -520,7 +529,7 @@ namespace tmv
         TMV_INLINE const T* get() const { return p.get(); }
 
     private :
-        enum { bigN = N*int(sizeof(T)) > TMV_MaxStack };
+        enum { bigN = N*ptrdiff_t(sizeof(T)) > TMV_MaxStack };
         enum { smallN = (
 #ifdef __SSE__
                 Traits2<T,float>::sametype ? ( N < 4 ) :
@@ -536,7 +545,7 @@ namespace tmv
         StackArray(const StackArray& p2);
     };
 
-    template <class RT, int N>
+    template <class RT, ptrdiff_t N>
     class StackArray<std::complex<RT>,N>
     {
     public :
@@ -544,9 +553,9 @@ namespace tmv
 
 #ifdef TMV_INITIALIZE_NAN
         StackArray() 
-        { for(int i=0;i<N;++i) get()[i] = TMV_Nan<std::complex<RT> >::get(); }
+        { for(ptrdiff_t i=0;i<N;++i) get()[i] = TMV_Nan<std::complex<RT> >::get(); }
         ~StackArray() 
-        { for(int i=0;i<N;++i) get()[i] = -Traits<RT>::destr_value(); }
+        { for(ptrdiff_t i=0;i<N;++i) get()[i] = -Traits<RT>::destr_value(); }
 #else
         TMV_INLINE StackArray() {}
         TMV_INLINE ~StackArray() {}
@@ -566,7 +575,7 @@ namespace tmv
 
     private :
 
-        enum { bigN = N*int(sizeof(T)) > TMV_MaxStack };
+        enum { bigN = N*ptrdiff_t(sizeof(T)) > TMV_MaxStack };
         enum { smallN = (
 #ifdef __SSE__
                 Traits2<T,float>::sametype ? ( N < 2 ) :

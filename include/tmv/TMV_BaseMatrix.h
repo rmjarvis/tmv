@@ -184,26 +184,26 @@ namespace tmv {
     // to whether the matrix uses CStyle or FortranStyle indexing.
     // They also update the indices to be consistent with CStyle.
     template <bool _fort>
-    TMV_INLINE_ND void CheckRowIndex(int& i, int m)
+    TMV_INLINE_ND void CheckRowIndex(ptrdiff_t& i, ptrdiff_t m)
     { // CStyle
         TMVAssert(i >= 0 && "row index must be in matrix");
         TMVAssert(i < m && "row index must be in matrix");
     }
     template <bool _fort>
-    TMV_INLINE_ND void CheckColIndex(int& j, int n)
+    TMV_INLINE_ND void CheckColIndex(ptrdiff_t& j, ptrdiff_t n)
     { // CStyle
         TMVAssert(j >= 0 && "column index must be in matrix");
         TMVAssert(j < n && "column index must be in matrix");
     }
     template <>
-    TMV_INLINE_ND void CheckRowIndex<true>(int& i, int m)
+    TMV_INLINE_ND void CheckRowIndex<true>(ptrdiff_t& i, ptrdiff_t m)
     { // FortranStyle
         TMVAssert(i >= 1 && "row index must be in matrix");
         TMVAssert(i <= m && "row index must be in matrix");
         --i;
     }
     template <>
-    TMV_INLINE_ND void CheckColIndex<true>(int& j, int n)
+    TMV_INLINE_ND void CheckColIndex<true>(ptrdiff_t& j, ptrdiff_t n)
     { // FortranStyle
         TMVAssert(j >= 1 && "column index must be in matrix");
         TMVAssert(j <= n && "column index must be in matrix");
@@ -275,24 +275,24 @@ namespace tmv {
         enum { same = (
                 Traits2<T1,T2>::sametype &&
                 known &&
-                M1::_stepi == int(M2::_stepi) &&
-                M1::_stepj == int(M2::_stepj) ) };
+                M1::_stepi == ptrdiff_t(M2::_stepi) &&
+                M1::_stepj == ptrdiff_t(M2::_stepj) ) };
         enum { opp = (
                 Traits2<T1,T2>::sametype &&
                 known &&
-                M1::_stepi == int(M2::_stepj) &&
-                M1::_stepj == int(M2::_stepi) ) };
+                M1::_stepi == ptrdiff_t(M2::_stepj) &&
+                M1::_stepj == ptrdiff_t(M2::_stepi) ) };
     };
 
     // This helper class helps decide calc_type for composite classes:
     // We don't define anything, since it needs to be specialized
     // differently for each shape.
-    template <class T, int shape, int cs, int rs, int A=0>
+    template <class T, int shape, ptrdiff_t cs, ptrdiff_t rs, int A=0>
     struct MCopyHelper;
 
     // This is similar - it defines the right view type when some
     // sizes or steps might be known.
-    template <class T, int shape, int cs, int rs, int si, int sj, int A=0>
+    template <class T, int shape, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t si, ptrdiff_t sj, int A=0>
     struct MViewHelper;
 
     template <class M>
@@ -367,7 +367,7 @@ namespace tmv {
         // Access
         //
 
-        TMV_INLINE value_type operator()(int i, int j) const 
+        TMV_INLINE value_type operator()(ptrdiff_t i, ptrdiff_t j) const 
         {
             CheckRowIndex<_fort>(i,colsize());
             CheckColIndex<_fort>(j,rowsize());
@@ -442,20 +442,20 @@ namespace tmv {
         TMV_INLINE copy_type copy() const 
         { return static_cast<copy_type>(mat()); }
 
-        TMV_INLINE int nrows() const { return colsize(); }
-        TMV_INLINE int ncols() const { return rowsize(); }
+        TMV_INLINE ptrdiff_t nrows() const { return colsize(); }
+        TMV_INLINE ptrdiff_t ncols() const { return rowsize(); }
         TMV_INLINE bool isSquare() const { return colsize() == rowsize(); }
 
         // Note that these last functions need to be defined in a more derived
         // class than this, or an infinite loop will result when compiling.
 
-        TMV_INLINE int colsize() const { return mat().colsize(); }
-        TMV_INLINE int rowsize() const { return mat().rowsize(); }
-        TMV_INLINE int nlo() const { return mat().nlo(); }
-        TMV_INLINE int nhi() const { return mat().nhi(); }
-        TMV_INLINE int nElements() const { return mat().nElements(); }
+        TMV_INLINE ptrdiff_t colsize() const { return mat().colsize(); }
+        TMV_INLINE ptrdiff_t rowsize() const { return mat().rowsize(); }
+        TMV_INLINE ptrdiff_t nlo() const { return mat().nlo(); }
+        TMV_INLINE ptrdiff_t nhi() const { return mat().nhi(); }
+        TMV_INLINE ptrdiff_t nElements() const { return mat().nElements(); }
 
-        TMV_INLINE value_type cref(int i, int j) const  
+        TMV_INLINE value_type cref(ptrdiff_t i, ptrdiff_t j) const  
         { return eval().cref(i,j); }
 
         template <class M2>
@@ -623,13 +623,13 @@ namespace tmv {
         TMV_INLINE const type& mat() const
         { return static_cast<const type&>(*this); }
 
-        TMV_INLINE int colsize() const { return mat().colsize(); }
-        TMV_INLINE int rowsize() const { return mat().rowsize(); }
+        TMV_INLINE ptrdiff_t colsize() const { return mat().colsize(); }
+        TMV_INLINE ptrdiff_t rowsize() const { return mat().rowsize(); }
 
-        TMV_INLINE int rowstart(int i) const { return mat().rowstart(i); }
-        TMV_INLINE int rowend(int i) const { return mat().rowend(i); }
-        TMV_INLINE int colstart(int j) const { return mat().colstart(j); }
-        TMV_INLINE int colend(int j) const { return mat().colend(j); }
+        TMV_INLINE ptrdiff_t rowstart(ptrdiff_t i) const { return mat().rowstart(i); }
+        TMV_INLINE ptrdiff_t rowend(ptrdiff_t i) const { return mat().rowend(i); }
+        TMV_INLINE ptrdiff_t colstart(ptrdiff_t j) const { return mat().colstart(j); }
+        TMV_INLINE ptrdiff_t colend(ptrdiff_t j) const { return mat().colend(j); }
 
         TMV_INLINE const_rowmajor_iterator rowmajor_begin() const
         { return mat().rowmajor_begin(); }
@@ -694,7 +694,7 @@ namespace tmv {
         // Access 
         //
 
-        TMV_INLINE_ND reference operator()(int i, int j)
+        TMV_INLINE_ND reference operator()(ptrdiff_t i, ptrdiff_t j)
         {
             CheckIndex<_fort>(i,colsize());
             CheckIndex<_fort>(j,rowsize());
@@ -839,10 +839,10 @@ namespace tmv {
         TMV_INLINE type& mat()
         { return static_cast<type&>(*this); }
 
-        TMV_INLINE int colsize() const { return mat().colsize(); }
-        TMV_INLINE int rowsize() const { return mat().rowsize(); }
-        TMV_INLINE reference ref(int i, int j) { return mat().ref(i,j); }
-        TMV_INLINE value_type cref(int i, int j) const  
+        TMV_INLINE ptrdiff_t colsize() const { return mat().colsize(); }
+        TMV_INLINE ptrdiff_t rowsize() const { return mat().rowsize(); }
+        TMV_INLINE reference ref(ptrdiff_t i, ptrdiff_t j) { return mat().ref(i,j); }
+        TMV_INLINE value_type cref(ptrdiff_t i, ptrdiff_t j) const  
         { return mat().cref(i,j); }
 
         TMV_INLINE rowmajor_iterator rowmajor_begin()
@@ -879,21 +879,21 @@ namespace tmv {
         public BaseMatrix<MatrixSizer<T> >
     {
     public:
-        TMV_INLINE MatrixSizer(const int _cs, const int _rs) :
+        TMV_INLINE MatrixSizer(const ptrdiff_t _cs, const ptrdiff_t _rs) :
             cs(_cs), rs(_rs) {}
-        TMV_INLINE int colsize() const { return cs; }
-        TMV_INLINE int rowsize() const { return rs; }
-        TMV_INLINE int nlo() const { return TMV_MAX(cs-1,0); }
-        TMV_INLINE int nhi() const { return TMV_MAX(rs-1,0); }
-        TMV_INLINE int nElements() const { return cs * rs; }
+        TMV_INLINE ptrdiff_t colsize() const { return cs; }
+        TMV_INLINE ptrdiff_t rowsize() const { return rs; }
+        TMV_INLINE ptrdiff_t nlo() const { return TMV_MAX(cs-1,0); }
+        TMV_INLINE ptrdiff_t nhi() const { return TMV_MAX(rs-1,0); }
+        TMV_INLINE ptrdiff_t nElements() const { return cs * rs; }
 
-        TMV_INLINE T cref(int , int ) const  { return T(0); }
+        TMV_INLINE T cref(ptrdiff_t , ptrdiff_t ) const  { return T(0); }
 
         template <class M2>
         TMV_INLINE void assignTo(BaseMatrix_Mutable<M2>& ) const {}
 
     private :
-        const int cs, rs;
+        const ptrdiff_t cs, rs;
     }; // MatrixSizer
 
     //
@@ -906,11 +906,11 @@ namespace tmv {
     // This is also why we need DoTrace, rather than simply Trace, since
     // we have to make sure eval() is called.
 
-    template <int algo, int size, class M>
+    template <int algo, ptrdiff_t size, class M>
     struct Trace_Helper;
 
     // algo 0: Zero size, so trace is defined as 0.
-    template <int size, class M>
+    template <ptrdiff_t size, class M>
     struct Trace_Helper<0,size,M>
     {
         static inline typename M::value_type call(const M& m) 
@@ -918,7 +918,7 @@ namespace tmv {
     };
 
     // algo 1: Values are calculated.  Call diag().sumElements().
-    template <int size, class M>
+    template <ptrdiff_t size, class M>
     struct Trace_Helper<1,size,M>
     {
         static inline typename M::value_type call(const M& m) 
@@ -926,31 +926,31 @@ namespace tmv {
     };
 
     // algo 2: Values are not calculated.  Do sum using cref(i,i).
-    template <int size, class M>
+    template <ptrdiff_t size, class M>
     struct Trace_Helper<2,size,M>
     {
         static inline typename M::value_type call(const M& m) 
         {
-            const int n = size == Unknown ? m.colsize() : size;
+            const ptrdiff_t n = size == Unknown ? m.colsize() : size;
             typename M::value_type sum(0);
-            for (int i=0;i<n;++i) sum += m.cref(i,i);
+            for (ptrdiff_t i=0;i<n;++i) sum += m.cref(i,i);
             return sum;
         }
     };
 
     // algo 3: Special for triangular with unit diagonal
-    template <int size, class M>
+    template <ptrdiff_t size, class M>
     struct Trace_Helper<3,size,M>
     {
         static inline typename M::value_type call(const M& m) 
         {
-            const int n = size == Unknown ? m.colsize() : size;
+            const ptrdiff_t n = size == Unknown ? m.colsize() : size;
             return typename M::value_type(n); 
         }
     };
 
     // algo 4: Check for UnknownDiag
-    template <int size, class M>
+    template <ptrdiff_t size, class M>
     struct Trace_Helper<4,size,M>
     {
         static inline typename M::value_type call(const M& m) 
@@ -963,7 +963,7 @@ namespace tmv {
     // algo 11: Triangular matrix.  Check _unit and _unknowndiag.
     // (Can't do this below, since _unit and _unknowndiag aren't 
     //  valid members of most matrix classes.)
-    template <int size, class M>
+    template <ptrdiff_t size, class M>
     struct Trace_Helper<11,size,M>
     {
         static inline typename M::value_type call(const M& m) 
@@ -982,7 +982,7 @@ namespace tmv {
     {
         TMVStaticAssert((Sizes<M::_rowsize,M::_colsize>::same));
         TMVAssert(m.colsize() == m.rowsize());
-        const int size = Sizes<M::_rowsize,M::_colsize>::size;
+        const ptrdiff_t size = Sizes<M::_rowsize,M::_colsize>::size;
         const int algo = 
             size == 0 ? 0 :
             ShapeTraits<M::_shape>::unit ? 3 :
@@ -1007,18 +1007,18 @@ namespace tmv {
     // Also, using crefs as I do here means that I don't have to 
     // write different versions for each kind of matrix.
     // This will work for every possible pairing.
-    template <bool rm, int cs, int rs, class M1, class M2>
+    template <bool rm, ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct EqMM_Helper;
 
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct EqMM_Helper<true,cs,rs,M1,M2> // rm = true
     {
         static bool eq(const M1& m1, const M2& m2)
         {
-            const int M = cs == Unknown ? m1.colsize() : cs;
-            const int N = rs == Unknown ? m1.rowsize() : rs;
-            for(int i=0;i<M;++i) {
-                for(int j=0;j<N;++j) {
+            const ptrdiff_t M = cs == Unknown ? m1.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m1.rowsize() : rs;
+            for(ptrdiff_t i=0;i<M;++i) {
+                for(ptrdiff_t j=0;j<N;++j) {
                     if (m1.cref(i,j) != m2.cref(i,j)) return false;
                 }
             }
@@ -1026,15 +1026,15 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, class M1, class M2>
+    template <ptrdiff_t cs, ptrdiff_t rs, class M1, class M2>
     struct EqMM_Helper<false,cs,rs,M1,M2> // rm = false
     {
         static bool eq(const M1& m1, const M2& m2)
         {
-            const int M = cs == Unknown ? m1.colsize() : cs;
-            const int N = rs == Unknown ? m1.rowsize() : rs;
-            for(int j=0;j<N;++j) {
-                for(int i=0;i<M;++i) {
+            const ptrdiff_t M = cs == Unknown ? m1.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m1.rowsize() : rs;
+            for(ptrdiff_t j=0;j<N;++j) {
+                for(ptrdiff_t i=0;i<M;++i) {
                     if (m1.cref(i,j) != m2.cref(i,j)) return false;
                 }
             }
@@ -1050,8 +1050,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same)); 
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
-        const int cs = Sizes<M1::_colsize,M2::_colsize>::size;
-        const int rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
+        const ptrdiff_t cs = Sizes<M1::_colsize,M2::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M1::_rowsize,M2::_rowsize>::size;
         const bool rm = M2::_rowmajor || (M1::_rowmajor && !M2::_colmajor);
         typedef typename M1::const_cview_type M1v;
         typedef typename M2::const_cview_type M2v;

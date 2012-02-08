@@ -20,16 +20,16 @@ namespace tmv {
     // Matrix *= x
     //
 
-    template <int algo, int cs, int rs, int ix, class T, class M1>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleM_Helper;
 
     // algo 0: trivial: cs == 0, rs == 0 or ix == 1, so nothing to do
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleM_Helper<0,cs,rs,ix,T,M1>
     { static TMV_INLINE void call(const Scaling<ix,T>& , M1& ) {} };
 
     // algo 1: Linearize to vector version
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleM_Helper<1,cs,rs,ix,T,M1>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
@@ -41,16 +41,16 @@ namespace tmv {
     };
 
     // algo 11: Loop over columns
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleM_Helper<11,cs,rs,ix,T,M1>
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
-            const int M = cs == Unknown ? m.colsize() : cs;
-            int N = rs == Unknown ? m.rowsize() : rs;
+            const ptrdiff_t M = cs == Unknown ? m.colsize() : cs;
+            ptrdiff_t N = rs == Unknown ? m.rowsize() : rs;
             typedef typename M1::col_type Mc;
             typedef typename Mc::iterator IT;
-            const int step = m.stepj();
+            const ptrdiff_t step = m.stepj();
             IT it = m.get_col(0).begin();
             for(;N;--N) {
                 ScaleV_Helper<-3,cs,ix,T,Mc>::call2(M,x,it);
@@ -60,16 +60,16 @@ namespace tmv {
     };
 
     // algo 21: Loop over rows
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleM_Helper<21,cs,rs,ix,T,M1>
     {
         static void call(const Scaling<ix,T>& x, M1& m)
         {
-            int M = cs == Unknown ? m.colsize() : cs;
-            const int N = rs == Unknown ? m.rowsize() : rs;
+            ptrdiff_t M = cs == Unknown ? m.colsize() : cs;
+            const ptrdiff_t N = rs == Unknown ? m.rowsize() : rs;
             typedef typename M1::row_type Mr;
             typedef typename Mr::iterator IT;
-            const int step = m.stepi();
+            const ptrdiff_t step = m.stepi();
             IT it = m.get_row(0).begin();
             for(;M;--M) {
                 ScaleV_Helper<-3,rs,ix,T,Mr>::call2(N,x,it);
@@ -79,7 +79,7 @@ namespace tmv {
     };
 
     // algo 31: Unknown sizes, determine which algorithm to use
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleM_Helper<31,cs,rs,ix,T,M1>
     {
         static void call(const Scaling<ix,T>& x, M1& m)
@@ -95,10 +95,10 @@ namespace tmv {
     };
 
     // algo 25: Fully unroll by rows
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleM_Helper<25,cs,rs,ix,T,M1>
     {
-        template <int I, int M, int J, int N, bool iscomplex>
+        template <ptrdiff_t I, ptrdiff_t M, ptrdiff_t J, ptrdiff_t N, bool iscomplex>
         struct Unroller
         {
             static TMV_INLINE void unroll(const Scaling<ix,T>& x, M1& m)
@@ -107,7 +107,7 @@ namespace tmv {
                 Unroller<I+M/2,M-M/2,J,N,iscomplex>::unroll(x,m);
             }
         };
-        template <int I, int J, int N, bool iscomplex>
+        template <ptrdiff_t I, ptrdiff_t J, ptrdiff_t N, bool iscomplex>
         struct Unroller<I,1,J,N,iscomplex>
         {
             static TMV_INLINE void unroll(const Scaling<ix,T>& x, M1& m)
@@ -116,16 +116,16 @@ namespace tmv {
                 Unroller<I,1,J+N/2,N-N/2,iscomplex>::unroll(x,m);
             }
         };
-        template <int I, int J, int N, bool iscomplex>
+        template <ptrdiff_t I, ptrdiff_t J, ptrdiff_t N, bool iscomplex>
         struct Unroller<I,0,J,N,iscomplex>
         { static TMV_INLINE void unroll(const Scaling<ix,T>& , M1& ) {} };
-        template <int I, int J>
+        template <ptrdiff_t I, ptrdiff_t J>
         struct Unroller<I,1,J,1,false>
         {
             static TMV_INLINE void unroll(const Scaling<ix,T>& x, M1& m)
             { m.ref(I,J) *= x; }
         };
-        template <int I, int J>
+        template <ptrdiff_t I, ptrdiff_t J>
         struct Unroller<I,1,J,1,true>
         {
             static TMV_INLINE void unroll(const Scaling<ix,T>& x, M1& m)
@@ -139,7 +139,7 @@ namespace tmv {
                 m.ref(I,J) = VT(rm,im);
             }
         };
-        template <int I, int J, bool iscomplex>
+        template <ptrdiff_t I, ptrdiff_t J, bool iscomplex>
         struct Unroller<I,1,J,0,iscomplex>
         { static TMV_INLINE void unroll(const Scaling<ix,T>& , M1& ) {} };
 
@@ -148,10 +148,10 @@ namespace tmv {
     };
 
     // algo 15: Fully unroll by columns
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleM_Helper<15,cs,rs,ix,T,M1>
     {
-        template <int I, int M, int J, int N, bool iscomplex>
+        template <ptrdiff_t I, ptrdiff_t M, ptrdiff_t J, ptrdiff_t N, bool iscomplex>
         struct Unroller
         {
             static TMV_INLINE void unroll(const Scaling<ix,T>& x, M1& m)
@@ -160,7 +160,7 @@ namespace tmv {
                 Unroller<I,M,J+N/2,N-N/2,iscomplex>::unroll(x,m);
             }
         };
-        template <int I, int M, int J, bool iscomplex>
+        template <ptrdiff_t I, ptrdiff_t M, ptrdiff_t J, bool iscomplex>
         struct Unroller<I,M,J,1,iscomplex>
         {
             static TMV_INLINE void unroll(const Scaling<ix,T>& x, M1& m)
@@ -169,16 +169,16 @@ namespace tmv {
                 Unroller<I+M/2,M-M/2,J,1,iscomplex>::unroll(x,m);
             }
         };
-        template <int I, int M, int J, bool iscomplex>
+        template <ptrdiff_t I, ptrdiff_t M, ptrdiff_t J, bool iscomplex>
         struct Unroller<I,M,J,0,iscomplex>
         { static TMV_INLINE void unroll(const Scaling<ix,T>& , M1& ) {} };
-        template <int I, int J>
+        template <ptrdiff_t I, ptrdiff_t J>
         struct Unroller<I,1,J,1,false>
         {
             static TMV_INLINE void unroll(const Scaling<ix,T>& x, M1& m)
             { m.ref(I,J) *= x; }
         };
-        template <int I, int J>
+        template <ptrdiff_t I, ptrdiff_t J>
         struct Unroller<I,1,J,1,true>
         {
             static TMV_INLINE void unroll(const Scaling<ix,T>& x, M1& m)
@@ -192,7 +192,7 @@ namespace tmv {
                 m.ref(I,J) = VT(rm,im);
             }
         };
-        template <int I, int J, bool iscomplex>
+        template <ptrdiff_t I, ptrdiff_t J, bool iscomplex>
         struct Unroller<I,0,J,1,iscomplex>
         { static TMV_INLINE void unroll(const Scaling<ix,T>& , M1& ) {} };
 
@@ -201,7 +201,7 @@ namespace tmv {
     };
 
     // algo 90: Call inst
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleM_Helper<90,cs,rs,ix,T,M1>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
@@ -213,7 +213,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleM_Helper<97,cs,rs,ix,T,M1>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
@@ -225,7 +225,7 @@ namespace tmv {
     };
 
     // algo -4: No copies or branches
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleM_Helper<-4,cs,rs,ix,T,M1>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
@@ -237,7 +237,7 @@ namespace tmv {
                 M1::_canlin ? 2 :
                 TMV_OPT == 0 ? 11 :
                 ( cs != Unknown && rs != Unknown ) ? (
-                    ( IntTraits2<cs,rs>::prod <= int(128/sizeof(T1)) ) ? (
+                    ( IntTraits2<cs,rs>::prod <= ptrdiff_t(128/sizeof(T1)) ) ? (
                         ( M1::_rowmajor ? 25 : 15 ) ) :
                     M1::_rowmajor ? 21 :
                     M1::_colmajor ? 11 :
@@ -249,7 +249,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleM_Helper<-3,cs,rs,ix,T,M1>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
@@ -264,7 +264,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleM_Helper<-2,cs,rs,ix,T,M1>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
@@ -283,7 +283,7 @@ namespace tmv {
         }
     };
 
-    template <int cs, int rs, int ix, class T, class M1>
+    template <ptrdiff_t cs, ptrdiff_t rs, int ix, class T, class M1>
     struct ScaleM_Helper<-1,cs,rs,ix,T,M1>
     {
         static TMV_INLINE void call(const Scaling<ix,T>& x, M1& m)
@@ -294,8 +294,8 @@ namespace tmv {
     inline void Scale(
         const Scaling<ix,T>& x, BaseMatrix_Rec_Mutable<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
         ScaleM_Helper<-2,cs,rs,ix,T,Mv>::call(x,mv);
@@ -305,8 +305,8 @@ namespace tmv {
     inline void InlineScale(
         const Scaling<ix,T>& x, BaseMatrix_Rec_Mutable<M>& m)
     {
-        const int cs = M::_colsize;
-        const int rs = M::_rowsize;
+        const ptrdiff_t cs = M::_colsize;
+        const ptrdiff_t rs = M::_rowsize;
         typedef typename M::cview_type Mv;
         TMV_MAYBE_REF(M,Mv) mv = m.cView();
         ScaleM_Helper<-3,cs,rs,ix,T,Mv>::call(x,mv);

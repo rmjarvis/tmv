@@ -4,10 +4,10 @@
 #define Def1(T1,C1,RT1,T2)\
     template void InstQR_Inverse( \
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta, \
-        const Permutation* P, int N1, MatrixView<T2> m2); \
+        const Permutation* P, ptrdiff_t N1, MatrixView<T2> m2); \
     template void InstQR_InverseATA( \
         const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta, \
-        const Permutation* P, int N1, MatrixView<T2> m2); \
+        const Permutation* P, ptrdiff_t N1, MatrixView<T2> m2); \
 
 Def1(T,NonConj,T,T)
 #ifdef TMV_INST_COMPLEX

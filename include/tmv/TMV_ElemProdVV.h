@@ -73,9 +73,9 @@ namespace tmv {
         TMV_INLINE const V1& getV1() const { return v1; }
         TMV_INLINE const V2& getV2() const { return v2; }
 
-        TMV_INLINE int size() const { return v1.size(); }
+        TMV_INLINE ptrdiff_t size() const { return v1.size(); }
 
-        value_type cref(int i) const
+        value_type cref(ptrdiff_t i) const
         { return x * (v1.cref(i) * v2.cref(i)); }
 
         template <class V3>

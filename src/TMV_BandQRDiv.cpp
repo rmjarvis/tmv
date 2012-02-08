@@ -63,10 +63,10 @@ namespace tmv {
         TMVAssert(Q.colsize() == m.colsize());
 
         if (Q.nlo() > 0) {
-            int i2 = Q.nlo()+1;
-            const int M = Q.colsize();
-            const int N = Q.rowsize();
-            for(int j=0,i1=1;j<N;++j,++i1) {
+            ptrdiff_t i2 = Q.nlo()+1;
+            const ptrdiff_t M = Q.colsize();
+            const ptrdiff_t N = Q.rowsize();
+            for(ptrdiff_t j=0,i1=1;j<N;++j,++i1) {
                 if (Qbeta(j) != T1(0)) 
                     HouseholderLMult(Q.col(j,i1,i2),Qbeta(j),m.rowRange(j,i2));
                 if (i2<M) ++i2;
@@ -84,12 +84,12 @@ namespace tmv {
         TMVAssert(m.rowsize() == Q.colsize());
 
         if (Q.nlo() > 0) {
-            const int M = Q.colsize();
-            const int N = Q.rowsize();
-            int i1 = N;
-            int i2 = Q.isSquare() ? N : TMV_MIN(N+Q.nlo(),M);
-            int k=Q.isSquare() ? Q.nlo() : N+Q.nlo()-i2;
-            for(int j=N-1;i1>0;--j,--i1) {
+            const ptrdiff_t M = Q.colsize();
+            const ptrdiff_t N = Q.rowsize();
+            ptrdiff_t i1 = N;
+            ptrdiff_t i2 = Q.isSquare() ? N : TMV_MIN(N+Q.nlo(),M);
+            ptrdiff_t k=Q.isSquare() ? Q.nlo() : N+Q.nlo()-i2;
+            for(ptrdiff_t j=N-1;i1>0;--j,--i1) {
                 if (Qbeta(j) != T1(0)) 
                     HouseholderLMult(Q.col(j,i1,i2).conjugate(),Qbeta(j),
                                       m.colRange(j,i2).transpose());
@@ -125,7 +125,7 @@ namespace tmv {
         QR2.divideUsing(QR);
         Matrix<T> x2 = m / QR2;
 #endif
-        const int N = QRx.rowsize();
+        const ptrdiff_t N = QRx.rowsize();
 
         if (QRx.isSquare()) {
             x = m;
@@ -188,7 +188,7 @@ namespace tmv {
         QR2.divideUsing(QR);
         Matrix<T> m2 = m / QR2;
 #endif
-        const int N = QRx.rowsize();
+        const ptrdiff_t N = QRx.rowsize();
 
         Q_LDivEq(QRx,Qbeta,m);
         TriLDivEq(QRx.subBandMatrix(0,N,0,N,0,QRx.nhi()),m,NonUnitDiag);
@@ -236,8 +236,8 @@ namespace tmv {
         QR2.divideUsing(QR);
         Matrix<T> x2 = m % QR2;
 #endif
-        const int M = QRx.colsize();
-        const int N = QRx.rowsize();
+        const ptrdiff_t M = QRx.colsize();
+        const ptrdiff_t N = QRx.rowsize();
 
         x.colRange(N,M).setZero();
         x.colRange(0,N) = m;
@@ -289,7 +289,7 @@ namespace tmv {
         Matrix<T> m2 = m % QR2;
 #endif
 
-        const int N = QRx.rowsize();
+        const ptrdiff_t N = QRx.rowsize();
 
         // Solve x Q R = m in place (m <- x)
         TriLDivEq(QRx.subBandMatrix(0,N,0,N,0,QRx.nhi()).transpose(),

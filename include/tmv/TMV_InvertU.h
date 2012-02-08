@@ -50,16 +50,16 @@ namespace tmv {
     // U = U^-1
     //
 
-    template <int algo, int s, class M>
+    template <int algo, ptrdiff_t s, class M>
     struct InvertU_Helper;
 
     // algo 0: nothing to do (either s==0, or invert diag of unitdiag m.)
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct InvertU_Helper<0,s,M>
     { static TMV_INLINE void call(M& ) {} };
 
     // algo 1: s == 1, so simplifies to a scalar quotient
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct InvertU_Helper<1,s,M>
     {
         // m.diag is already inverted, so nothing to do.
@@ -67,13 +67,13 @@ namespace tmv {
     };
 
     // algo 2: transpose
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct InvertU_Helper<2,s,M>
     {
         static TMV_INLINE void call(M& m)
         {
 #ifdef PRINTALGO_InvU
-            int N = (s == Unknown ? m.size() : s);
+            ptrdiff_t N = (s == Unknown ? m.size() : s);
             std::cout<<"InvU algo 2: N,s,x = "<<N<<','<<s<<std::endl;
 #endif
             typedef typename M::transpose_type Mt;
@@ -83,12 +83,12 @@ namespace tmv {
     };
 
     // algo 11: column major loop 
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct InvertU_Helper<11,s,M>
     {
         static void call(M& m)
         {
-            int N = (s == Unknown ? m.size() : s);
+            ptrdiff_t N = (s == Unknown ? m.size() : s);
 #ifdef PRINTALGO_InvU
             std::cout<<"InvU algo 11: N,s,x = "<<N<<','<<s<<std::endl;
 #endif
@@ -100,14 +100,14 @@ namespace tmv {
             typedef typename M::value_type T;
             typedef typename M::real_type RT;
             typedef typename TypeSelect<u,RT,T>::type XT;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
 #ifdef TMV_INVU_INLINE_MV
             const int algo2 = -4;
 #else
             const int algo2 = -2;
 #endif
 
-            for(int j=0;j<N;++j) {
+            for(ptrdiff_t j=0;j<N;++j) {
                 // m.col(j,0,j) = -m.subTraiMatrix(0,j)^-1 *
                 //                   m.col(j,0,j) * m(j,j)^-1
                 Mc mj = m.get_col(j,0,j);
@@ -120,12 +120,12 @@ namespace tmv {
     };
 
     // algo 12: row major loop
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct InvertU_Helper<12,s,M>
     {
         static void call(M& m)
         {
-            int N = (s == Unknown ? m.size() : s);
+            ptrdiff_t N = (s == Unknown ? m.size() : s);
 #ifdef PRINTALGO_InvU
             std::cout<<"InvU algo 11: N,s,x = "<<N<<','<<s<<std::endl;
 #endif
@@ -138,14 +138,14 @@ namespace tmv {
             typedef typename M::value_type T;
             typedef typename M::real_type RT;
             typedef typename TypeSelect<u,RT,T>::type XT;
-            const int xx = Unknown;
+            const ptrdiff_t xx = Unknown;
 #ifdef TMV_INVU_INLINE_MV
             const int algo2 = -4;
 #else
             const int algo2 = -2;
 #endif
 
-            for(int i=N-1;i>=0;--i) {
+            for(ptrdiff_t i=N-1;i>=0;--i) {
                 // m.row(i,i+1,N) = -(m(i,i)^-1) * m.row(i,i+1,N) * 
                 //                      m.subTraiMatrix(i+1,N)^-1
                 Mr mi = m.get_row(i,i+1,N);
@@ -158,10 +158,10 @@ namespace tmv {
     };
 
     // algo 16: UpperTri: Unroll small case
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct InvertU_Helper<16,s,M>
     {
-        template <int I, int N>
+        template <ptrdiff_t I, ptrdiff_t N>
         struct Unroller
         {
             static inline void unroll(M& m)
@@ -176,10 +176,10 @@ namespace tmv {
                 // B00 = A00^-1
                 // B01 = -B00 A01 B11
 
-                const int Nx = N/2;
-                const int Ny = N-Nx;
-                const int I1 = I+Nx;
-                const int I2 = I+N;
+                const ptrdiff_t Nx = N/2;
+                const ptrdiff_t Ny = N-Nx;
+                const ptrdiff_t I1 = I+Nx;
+                const ptrdiff_t I2 = I+N;
                 typedef typename M::submatrix_type Msm;
                 typedef typename M::subtrimatrix_type Mst;
                 typedef typename M::const_submatrix_type Msmc;
@@ -212,16 +212,16 @@ namespace tmv {
                     one,A11t,A01ct,A01t);
             }
         };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,1> // diagonal is already done, so nothing to do.
         { static TMV_INLINE void unroll(M&) {} };
-        template <int I>
+        template <ptrdiff_t I>
         struct Unroller<I,0>
         { static TMV_INLINE void unroll(M&) {} };
         static inline void call(M& m)
         {
 #ifdef PRINTALGO_InvU
-            const int N = m.size();
+            const ptrdiff_t N = m.size();
             std::cout<<"InvU algo 16: N,s,x = "<<N<<','<<s<<std::endl;
 #endif
             Unroller<0,s>::unroll(m); 
@@ -230,19 +230,19 @@ namespace tmv {
 
     // algo 17: Split U into 3 sections and recurse 
     // TODO: Combine these the way I do for MultUU, etc.
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct InvertU_Helper<17,s,M>
     {
         static void call(M& m)
         {
-            const int N = m.size();
+            const ptrdiff_t N = m.size();
 #ifdef PRINTALGO_InvU
             std::cout<<"InvU algo 17: N,s,x = "<<N<<','<<s<<std::endl;
 #endif
-            const int sp1 = IntTraits<s>::Sp1;
-            const int sp2 = IntTraits<sp1>::Sp1;
+            const ptrdiff_t sp1 = IntTraits<s>::Sp1;
+            const ptrdiff_t sp2 = IntTraits<sp1>::Sp1;
             // nops = 1/6 n(n+1)(n+2)
-            const int nops =
+            const ptrdiff_t nops =
                 IntTraits2<IntTraits2<s,sp1>::safeprod,sp2>::safeprod/6;
             const bool unroll =
                 s > 10 ? false :
@@ -275,10 +275,10 @@ namespace tmv {
                 // B00 = A00^-1
                 // B01 = -B00 A01 B11
 
-                const int Nx = N > 16 ? ((((N-1)>>5)+1)<<4) : (N>>1);
+                const ptrdiff_t Nx = N > 16 ? ((((N-1)>>5)+1)<<4) : (N>>1);
                 // (If N > 16, round N/2 up to a multiple of 16.)
-                const int sx = IntTraits<s>::half_roundup;
-                const int sy = IntTraits2<s,sx>::diff;
+                const ptrdiff_t sx = IntTraits<s>::half_roundup;
+                const ptrdiff_t sy = IntTraits2<s,sx>::diff;
 
                 typedef typename M::submatrix_type Msm;
                 typedef typename M::subtrimatrix_type Mst;
@@ -325,7 +325,7 @@ namespace tmv {
     // algo 50: Invert the diagonal.
     // I invert the diagonal first, since it is more efficient to 
     // use the sse commands if possible.
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct InvertU_Helper<50,s,M>
     {
         static inline void call(M& m)
@@ -339,7 +339,7 @@ namespace tmv {
     };
 
     // algo 51: Maybe invert the diagonal.  (m is UnknownDiag)
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct InvertU_Helper<51,s,M>
     {
         static inline void call(M& m)
@@ -350,7 +350,7 @@ namespace tmv {
     };
 
     // algo 90: call InstInvertSelf
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct InvertU_Helper<90,s,M>
     {
         static TMV_INLINE void call(M& m)
@@ -358,7 +358,7 @@ namespace tmv {
     };
 
     // algo 97: Conjugate
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct InvertU_Helper<97,s,M>
     {
         static TMV_INLINE void call(M& m)
@@ -370,17 +370,17 @@ namespace tmv {
     };
 
     // algo -4: No branches or copies
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct InvertU_Helper<-4,s,M>
     {
         static TMV_INLINE void call(M& m)
         {
             TMVStaticAssert(M::_upper);
-            const int s2 = s > 20 ? Unknown : s;
-            const int s2p1 = IntTraits<s2>::Sp1;
-            const int s2p2 = IntTraits<s2p1>::Sp1;
+            const ptrdiff_t s2 = s > 20 ? Unknown : s;
+            const ptrdiff_t s2p1 = IntTraits<s2>::Sp1;
+            const ptrdiff_t s2p2 = IntTraits<s2p1>::Sp1;
             // nops = 1/6 n(n+1)(n+2)
-            const int nops =
+            const ptrdiff_t nops =
                 IntTraits2<IntTraits2<s2,s2p1>::safeprod,s2p2>::safeprod / 6;
             const bool unroll = 
                 s > 10 ? false :
@@ -405,7 +405,7 @@ namespace tmv {
     };
 
     // algo -3: Determine which algorithm to use
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct InvertU_Helper<-3,s,M>
     {
         static TMV_INLINE void call(M& m)
@@ -438,7 +438,7 @@ namespace tmv {
     };
 
     // algo -2: Check for inst
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct InvertU_Helper<-2,s,M>
     {
         static TMV_INLINE void call(M& m)
@@ -456,7 +456,7 @@ namespace tmv {
         }
     };
 
-    template <int s, class M>
+    template <ptrdiff_t s, class M>
     struct InvertU_Helper<-1,s,M>
     {
         static TMV_INLINE void call(M& m)

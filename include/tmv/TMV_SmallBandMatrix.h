@@ -26,19 +26,41 @@
 //    
 // Special Constructors
 //
+//    UpperBiDiagMatrix(const Vector& v1, const Vector& v2)
 //    ThinBandMatrix<T,0,1,A>(const Vector& v1, const Vector& v2)
 //        Makes an upper bidiagonal matrix with the vectors
 //        v1 on the main diagonal, and v2 on the superdiagonal
 //
+//    LowerBiDiagMatrix(const Vector& v1, const Vector& v2)
 //    ThinBandMatrix<T,1,0,A>(const Vector& v1, const Vector& v2)
 //        Makes an lower bidiagonal matrix with the vectors
 //        v1 on the subdiagonal, and v2 on the main diagonal
 //
-//    ThinBandMatrix<T,1,1,A>(const Vector& v1, const Vector& v2,
-//                            const Vector& v3)
+//    TriDiagMatrix(const Vector& v1, const Vector& v2, const Vector& v3)
+//    ThinBandMatrix<T,1,1,A>(
+//            const Vector& v1, const Vector& v2, const Vector& v3)
 //        Makes a tridiagonal matrix with the vectors
 //        v1 on the subdiagonal, v2 on the main diagonal, and 
 //        v3 on the superdiagonal
+//
+//    ConstBandMatrixView BandMatrixViewOf(const Matrix<T>& m, nlo, nhi)
+//    ConstBandMatrixView BandMatrixViewOf(const BandMatrix<T>& m, nlo, nhi)
+//    ConstBandMatrixView BandMatrixViewOf(const DiagMatrix<T>& m)
+//    ConstBandMatrixView BandMatrixViewOf(const TriMatrix<T>& m, nlo=n-1)
+//        Makes a constant BandMatrix view of the corresponding part of m.
+//        While this view cannot be modified, changing the original m
+//        will cause corresponding changes in this view of m.
+//        For the second version, nlo,nhi must be <= the corresponding 
+//        values in m.
+//        For the fourth version, nlo is optional.
+//
+//    BandMatrixView BandMatrixViewOf(Matrix<T>& m, nlo, nhi)
+//    BandMatrixView BandMatrixViewOf(BandMatrix<T>& m, nlo, nhi)
+//    BandMatrixView BandMatrixViewOf(DiagMatrix<T>& m)
+//    BandMatrixView BandMatrixViewOf(TriMatrix<T>& m, nhi=n-1)
+//        Makes a modifiable BandMatrix view of the corresponding part of m.
+//        Modifying this matrix will change the corresponding elements in
+//        the orginial Matrix.
 //
 
 
@@ -49,7 +71,7 @@
 
 namespace tmv {
 
-    template <class T, int M, int N, int LO, int HI, int A0>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, int A0>
     struct Traits<SmallBandMatrix<T,M,N,LO,HI,A0> >
     {
         typedef typename Traits<T>::real_type real_type;
@@ -119,8 +141,8 @@ namespace tmv {
                 (M > N) ? IntTraits2<N,IntTraits<LOpHI>::Sp1>::prod :
                 IntTraits2<N,IntTraits2<Mm1,LOpHI>::prod>::sum ) };
 
-        enum { twoSi = isreal ? int(_stepi) : IntTraits<_stepi>::twoS };
-        enum { twoSj = isreal ? int(_stepj) : IntTraits<_stepj>::twoS };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : IntTraits<_stepi>::twoS };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : IntTraits<_stepj>::twoS };
         enum { minMN = IntTraits2<M,N>::min };
 
         enum { _hasdivider = Attrib<A>::withdivider };
@@ -276,7 +298,7 @@ namespace tmv {
         typedef SmallBandMatrixView<T,M,N,LO,HI,_stepi,_stepj,An|CheckAlias> alias_type;
     };
 
-    template <class T, int M, int N, int LO, int HI, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, int A>
     class SmallBandMatrix : 
         public BaseMatrix_Band_Mutable<SmallBandMatrix<T,M,N,LO,HI,A> >,
         public BandMatrixDivHelper<SmallBandMatrix<T,M,N,LO,HI,A> >
@@ -474,14 +496,16 @@ namespace tmv {
         {
 #ifdef TMV_USE_VALGRIND
             AlignedArray<int> ok(ls());
-            for (int i=0;i<ls();++i) ok[i] = 0;
-            for (int i=0;i<colsize();++i) for (int j=0;j<rowsize();++j) {
-                if (okij(i,j)) {
-                    int k = i*stepi() + j*stepj();
-                    ok[k] = true;
+            for (ptrdiff_t i=0;i<ls();++i) ok[i] = 0;
+            for (ptrdiff_t i=0;i<colsize();++i) {
+                for (ptrdiff_t j=0;j<rowsize();++j) {
+                    if (okij(i,j)) {
+                        ptrdiff_t k = i*stepi() + j*stepj();
+                        ok[k] = true;
+                    }
                 }
             }
-            for (int k=0;k<ls();++k) if (!ok[k]) {
+            for (ptrdiff_t k=0;k<ls();++k) if (!ok[k]) {
                 ptr()[k] = T(-777);
             }
 #endif
@@ -492,14 +516,16 @@ namespace tmv {
         {
 #ifdef TMV_USE_VALGRIND
             AlignedArray<int> ok(ls());
-            for (int i=0;i<ls();++i) ok[i] = 0;
-            for (int i=0;i<colsize();++i) for (int j=0;j<rowsize();++j) {
-                if (okij(i,j)) {
-                    int k = i*stepi() + j*stepj();
-                    ok[k] = true;
+            for (ptrdiff_t i=0;i<ls();++i) ok[i] = 0;
+            for (ptrdiff_t i=0;i<colsize();++i) {
+                for (ptrdiff_t j=0;j<rowsize();++j) {
+                    if (okij(i,j)) {
+                        ptrdiff_t k = i*stepi() + j*stepj();
+                        ok[k] = true;
+                    }
                 }
             }
-            for (int k=0;k<ls();++k) if (!ok[k]) {
+            for (ptrdiff_t k=0;k<ls();++k) if (!ok[k]) {
                 ptr()[k] = T(-777);
             }
 #endif
@@ -515,23 +541,23 @@ namespace tmv {
         TMV_INLINE const T* start_mem() const { return itsm1; }
         TMV_INLINE T* start_mem() { return itsm1; }
 
-        T cref(int i, int j) const
+        T cref(ptrdiff_t i, ptrdiff_t j) const
         { 
             if (InBand(i,j,LO,HI)) return itsm[i*stepi() + j*stepj()]; 
             else return T(0);
         }
 
-        T& ref(int i, int j)
+        T& ref(ptrdiff_t i, ptrdiff_t j)
         { return itsm[i*stepi() + j*stepj()]; }
 
-        TMV_INLINE int ls() const { return _linsize; }
-        TMV_INLINE int colsize() const { return M; }
-        TMV_INLINE int rowsize() const { return N; }
-        TMV_INLINE int nlo() const { return LO; }
-        TMV_INLINE int nhi() const { return HI; }
-        TMV_INLINE int stepi() const { return _stepi; }
-        TMV_INLINE int stepj() const { return _stepj; }
-        TMV_INLINE int diagstep() const { return _diagstep; }
+        TMV_INLINE ptrdiff_t ls() const { return _linsize; }
+        TMV_INLINE ptrdiff_t colsize() const { return M; }
+        TMV_INLINE ptrdiff_t rowsize() const { return N; }
+        TMV_INLINE ptrdiff_t nlo() const { return LO; }
+        TMV_INLINE ptrdiff_t nhi() const { return HI; }
+        TMV_INLINE ptrdiff_t stepi() const { return _stepi; }
+        TMV_INLINE ptrdiff_t stepj() const { return _stepj; }
+        TMV_INLINE ptrdiff_t diagstep() const { return _diagstep; }
         TMV_INLINE bool isconj() const { return false; }
         TMV_INLINE bool isrm() const { return _rowmajor; }
         TMV_INLINE bool iscm() const { return _colmajor; }
@@ -544,7 +570,7 @@ namespace tmv {
 
     }; // SmallBandMatrix
 
-    template <class T, int LO, int HI, int A0>
+    template <class T, ptrdiff_t LO, ptrdiff_t HI, int A0>
     struct Traits<ThinBandMatrix<T,LO,HI,A0> >
     {
         typedef typename Traits<T>::real_type real_type;
@@ -603,8 +629,8 @@ namespace tmv {
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _canlin = true };
 
-        enum { twoSi = isreal ? int(_stepi) : IntTraits<_stepi>::twoS };
-        enum { twoSj = isreal ? int(_stepj) : IntTraits<_stepj>::twoS };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : IntTraits<_stepi>::twoS };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : IntTraits<_stepj>::twoS };
 
         enum { _hasdivider = Attrib<A>::withdivider };
 
@@ -764,7 +790,7 @@ namespace tmv {
     };
 
 
-    template <class T, int LO, int HI, int A>
+    template <class T, ptrdiff_t LO, ptrdiff_t HI, int A>
     class ThinBandMatrix : 
         public BaseMatrix_Band_Mutable<ThinBandMatrix<T,LO,HI,A> >,
         public BandMatrixDivHelper<ThinBandMatrix<T,LO,HI,A> >
@@ -818,7 +844,7 @@ namespace tmv {
 #endif
         }
 
-        ThinBandMatrix(int cs, int rs) :
+        ThinBandMatrix(ptrdiff_t cs, ptrdiff_t rs) :
             itscs(cs), itsrs(rs), 
             linsize(BandStorageLength(_stor,itscs,itsrs,LO,HI)),
             itssi(_rowmajor ? LO+HI : _colmajor ? 1 :
@@ -837,7 +863,7 @@ namespace tmv {
 #endif
         }
 
-        ThinBandMatrix(int cs, int rs, T x) :
+        ThinBandMatrix(ptrdiff_t cs, ptrdiff_t rs, T x) :
             itscs(cs), itsrs(rs), 
             linsize(BandStorageLength(_stor,itscs,itsrs,LO,HI)),
             itssi(_rowmajor ? LO+HI : _colmajor ? 1 :
@@ -1043,14 +1069,16 @@ namespace tmv {
         {
 #ifdef TMV_USE_VALGRIND
             AlignedArray<int> ok(ls());
-            for (int i=0;i<ls();++i) ok[i] = 0;
-            for (int i=0;i<colsize();++i) for (int j=0;j<rowsize();++j) {
-                if (okij(i,j)) {
-                    int k = i*stepi() + j*stepj();
-                    ok[k] = true;
+            for (ptrdiff_t i=0;i<ls();++i) ok[i] = 0;
+            for (ptrdiff_t i=0;i<colsize();++i) {
+                for (ptrdiff_t j=0;j<rowsize();++j) {
+                    if (okij(i,j)) {
+                        ptrdiff_t k = i*stepi() + j*stepj();
+                        ok[k] = true;
+                    }
                 }
             }
-            for (int k=0;k<ls();++k) if (!ok[k]) {
+            for (ptrdiff_t k=0;k<ls();++k) if (!ok[k]) {
                 ptr()[k] = T(-777);
             }
 #endif
@@ -1061,14 +1089,16 @@ namespace tmv {
         {
 #ifdef TMV_USE_VALGRIND
             AlignedArray<int> ok(ls());
-            for (int i=0;i<ls();++i) ok[i] = 0;
-            for (int i=0;i<colsize();++i) for (int j=0;j<rowsize();++j) {
-                if (okij(i,j)) {
-                    int k = i*stepi() + j*stepj();
-                    ok[k] = true;
+            for (ptrdiff_t i=0;i<ls();++i) ok[i] = 0;
+            for (ptrdiff_t i=0;i<colsize();++i) {
+                for (ptrdiff_t j=0;j<rowsize();++j) {
+                    if (okij(i,j)) {
+                        ptrdiff_t k = i*stepi() + j*stepj();
+                        ok[k] = true;
+                    }
                 }
             }
-            for (int k=0;k<ls();++k) if (!ok[k]) {
+            for (ptrdiff_t k=0;k<ls();++k) if (!ok[k]) {
                 ptr()[k] = T(-777);
             }
 #endif
@@ -1084,13 +1114,13 @@ namespace tmv {
         TMV_INLINE const T* start_mem() const { return itsm1; }
         TMV_INLINE T* start_mem() { return itsm1; }
 
-        T cref(int i, int j) const
+        T cref(ptrdiff_t i, ptrdiff_t j) const
         { 
             if (InBand(i,j,LO,HI)) return itsm[i*stepi() + j*stepj()]; 
             else return T(0);
         }
 
-        T& ref(int i, int j)
+        T& ref(ptrdiff_t i, ptrdiff_t j)
         { return itsm[i*stepi() + j*stepj()]; }
 
         void swapWith(type& m2)
@@ -1104,7 +1134,7 @@ namespace tmv {
             TMV_SWAP(itsm,m2.itsm);
         }
 
-        void resize(int cs, int rs)
+        void resize(ptrdiff_t cs, ptrdiff_t rs)
         {
             TMVAssert(cs >= 0 && rs >= 0);
 #ifdef TMV_EXTRA_DEBUG
@@ -1125,14 +1155,14 @@ namespace tmv {
         }
 
 
-        TMV_INLINE int ls() const { return linsize; }
-        TMV_INLINE int colsize() const { return itscs; }
-        TMV_INLINE int rowsize() const { return itsrs; }
-        TMV_INLINE int nlo() const { return LO; }
-        TMV_INLINE int nhi() const { return HI; }
-        TMV_INLINE int stepi() const { return itssi; }
-        TMV_INLINE int stepj() const { return itssj; }
-        TMV_INLINE int diagstep() const 
+        TMV_INLINE ptrdiff_t ls() const { return linsize; }
+        TMV_INLINE ptrdiff_t colsize() const { return itscs; }
+        TMV_INLINE ptrdiff_t rowsize() const { return itsrs; }
+        TMV_INLINE ptrdiff_t nlo() const { return LO; }
+        TMV_INLINE ptrdiff_t nhi() const { return HI; }
+        TMV_INLINE ptrdiff_t stepi() const { return itssi; }
+        TMV_INLINE ptrdiff_t stepj() const { return itssj; }
+        TMV_INLINE ptrdiff_t diagstep() const 
         { return _diagmajor ? 1 : stepi()+stepj(); }
         TMV_INLINE bool isconj() const { return false; }
         TMV_INLINE bool isrm() const { return _rowmajor; }
@@ -1141,9 +1171,9 @@ namespace tmv {
 
     private:
 
-        int itscs;
-        int itsrs;
-        int linsize;
+        ptrdiff_t itscs;
+        ptrdiff_t itsrs;
+        ptrdiff_t linsize;
         CheckedInt<_stepi> itssi;
         CheckedInt<_stepj> itssj;
         AlignedArray<T> itsm1;
@@ -1151,7 +1181,7 @@ namespace tmv {
 
     }; // ThinBandMatrix
 
-    template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A0>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, ptrdiff_t Si, ptrdiff_t Sj, int A0>
     struct Traits<ConstSmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A0> >
     {
         typedef typename Traits<T>::real_type real_type;
@@ -1209,8 +1239,8 @@ namespace tmv {
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = Attrib<A>::checkalias };
         enum { _canlin = false };
-        enum { twoSi = isreal ? int(_stepi) : IntTraits<_stepi>::twoS };
-        enum { twoSj = isreal ? int(_stepj) : IntTraits<_stepj>::twoS };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : IntTraits<_stepi>::twoS };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : IntTraits<_stepj>::twoS };
         enum { minMN = IntTraits2<M,N>::min };
 
         enum { bandknown = LO != Unknown && HI != Unknown };
@@ -1327,7 +1357,7 @@ namespace tmv {
         typedef CDMIt<type> const_diagmajor_iterator;
     };
 
-    template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, ptrdiff_t Si, ptrdiff_t Sj, int A>
     class ConstSmallBandMatrixView : 
         public BaseMatrix_Band<ConstSmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> >,
         public BandMatrixDivHelper<ConstSmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> >
@@ -1358,7 +1388,7 @@ namespace tmv {
         //
 
         TMV_INLINE ConstSmallBandMatrixView(
-            const T* m, int cs, int rs, int lo, int hi, int si, int sj) :
+            const T* m, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, ptrdiff_t hi, ptrdiff_t si, ptrdiff_t sj) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi),
             itssi(si), itssj(sj) 
         { 
@@ -1366,7 +1396,7 @@ namespace tmv {
         }
 
         TMV_INLINE ConstSmallBandMatrixView(
-            const T* m, int cs, int rs, int lo, int hi, int si) :
+            const T* m, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, ptrdiff_t hi, ptrdiff_t si) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi),
             itssi(si), itssj(Sj) 
         {
@@ -1375,7 +1405,7 @@ namespace tmv {
         }
 
         TMV_INLINE ConstSmallBandMatrixView(
-            const T* m, int cs, int rs, int lo, int hi) :
+            const T* m, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, ptrdiff_t hi) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi),
             itssi(Si), itssj(Sj)
         {
@@ -1385,7 +1415,7 @@ namespace tmv {
         }
 
         TMV_INLINE ConstSmallBandMatrixView(
-            const T* m, int cs, int rs, int lo) :
+            const T* m, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(HI),
             itssi(Si), itssj(Sj)
         {
@@ -1395,7 +1425,7 @@ namespace tmv {
             TMVStaticAssert(Sj != Unknown); 
         }
 
-        TMV_INLINE ConstSmallBandMatrixView(const T* m, int cs, int rs) :
+        TMV_INLINE ConstSmallBandMatrixView(const T* m, ptrdiff_t cs, ptrdiff_t rs) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(LO), itsnhi(HI),
             itssi(Si), itssj(Sj)
         {
@@ -1406,7 +1436,7 @@ namespace tmv {
             TMVStaticAssert(Sj != Unknown); 
         }
 
-        TMV_INLINE ConstSmallBandMatrixView(const T* m, int cs) :
+        TMV_INLINE ConstSmallBandMatrixView(const T* m, ptrdiff_t cs) :
             itsm(m), itscs(cs), itsrs(N), itsnlo(LO), itsnhi(HI),
             itssi(Si), itssj(Sj)
         {
@@ -1459,7 +1489,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int M2, int N2, int LO2, int HI2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t LO2, ptrdiff_t HI2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         TMV_INLINE ConstSmallBandMatrixView(
             const ConstSmallBandMatrixView<T,M2,N2,LO2,HI2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
@@ -1470,7 +1500,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int M2, int N2, int LO2, int HI2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t LO2, ptrdiff_t HI2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         TMV_INLINE ConstSmallBandMatrixView(
             const SmallBandMatrixView<T,M2,N2,LO2,HI2,Si2,Sj2,A2>& m2) :
             itsm(m2.cptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
@@ -1498,20 +1528,20 @@ namespace tmv {
 
         TMV_INLINE const T* cptr() const { return itsm; }
 
-        T cref(int i, int j) const
+        T cref(ptrdiff_t i, ptrdiff_t j) const
         { 
             if (InBand(i,j,itsnlo,itsnhi)) 
                 return DoConj<_conj>(itsm[i*stepi() + j*stepj()]); 
             else return T(0);
         }
 
-        TMV_INLINE int colsize() const { return itscs; }
-        TMV_INLINE int rowsize() const { return itsrs; }
-        TMV_INLINE int nlo() const { return itsnlo; }
-        TMV_INLINE int nhi() const { return itsnhi; }
-        TMV_INLINE int stepi() const { return itssi; }
-        TMV_INLINE int stepj() const { return itssj; }
-        TMV_INLINE int diagstep() const 
+        TMV_INLINE ptrdiff_t colsize() const { return itscs; }
+        TMV_INLINE ptrdiff_t rowsize() const { return itsrs; }
+        TMV_INLINE ptrdiff_t nlo() const { return itsnlo; }
+        TMV_INLINE ptrdiff_t nhi() const { return itsnhi; }
+        TMV_INLINE ptrdiff_t stepi() const { return itssi; }
+        TMV_INLINE ptrdiff_t stepj() const { return itssj; }
+        TMV_INLINE ptrdiff_t diagstep() const 
         { return _diagmajor ? 1 : stepi()+stepj(); }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE bool isrm() const 
@@ -1533,7 +1563,7 @@ namespace tmv {
 
     }; // ConstSmallBandMatrixView
 
-    template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A0>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, ptrdiff_t Si, ptrdiff_t Sj, int A0>
     struct Traits<SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A0> >
     {
         typedef typename Traits<T>::real_type real_type;
@@ -1591,8 +1621,8 @@ namespace tmv {
         enum { _conj = Attrib<A>::conj };
         enum { _checkalias = Attrib<A>::checkalias };
         enum { _canlin = false };
-        enum { twoSi = isreal ? int(_stepi) : IntTraits<_stepi>::twoS };
-        enum { twoSj = isreal ? int(_stepj) : IntTraits<_stepj>::twoS };
+        enum { twoSi = isreal ? ptrdiff_t(_stepi) : IntTraits<_stepi>::twoS };
+        enum { twoSj = isreal ? ptrdiff_t(_stepj) : IntTraits<_stepj>::twoS };
         enum { minMN = IntTraits2<M,N>::min };
 
         enum { bandknown = LO != Unknown && HI != Unknown };
@@ -1765,7 +1795,7 @@ namespace tmv {
         typedef SmallBandMatrixView<T,M,M,LO,HI,_stepi,_stepj,Ar|CheckAlias> alias_type;
     };
 
-    template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, ptrdiff_t Si, ptrdiff_t Sj, int A>
     class SmallBandMatrixView : 
         public BaseMatrix_Band_Mutable<SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> >,
         public BandMatrixDivHelper<SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> >
@@ -1799,7 +1829,7 @@ namespace tmv {
         //
 
         TMV_INLINE SmallBandMatrixView(
-            T* m, int cs, int rs, int lo, int hi, int si, int sj) :
+            T* m, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, ptrdiff_t hi, ptrdiff_t si, ptrdiff_t sj) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi),
             itssi(si), itssj(sj) 
         {
@@ -1807,7 +1837,7 @@ namespace tmv {
         }
 
         TMV_INLINE SmallBandMatrixView(
-            T* m, int cs, int rs, int lo, int hi, int si) :
+            T* m, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, ptrdiff_t hi, ptrdiff_t si) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi),
             itssi(si), itssj(Sj) 
         {
@@ -1816,7 +1846,7 @@ namespace tmv {
         }
 
         TMV_INLINE SmallBandMatrixView(
-            T* m, int cs, int rs, int lo, int hi) :
+            T* m, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, ptrdiff_t hi) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(hi),
             itssi(Si), itssj(Sj)
         {
@@ -1825,7 +1855,7 @@ namespace tmv {
             TMVStaticAssert(Sj != Unknown); 
         }
 
-        TMV_INLINE SmallBandMatrixView(T* m, int cs, int rs, int lo) :
+        TMV_INLINE SmallBandMatrixView(T* m, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(lo), itsnhi(HI),
             itssi(Si), itssj(Sj)
         {
@@ -1835,7 +1865,7 @@ namespace tmv {
             TMVStaticAssert(Sj != Unknown); 
         }
 
-        TMV_INLINE SmallBandMatrixView(T* m, int cs, int rs) :
+        TMV_INLINE SmallBandMatrixView(T* m, ptrdiff_t cs, ptrdiff_t rs) :
             itsm(m), itscs(cs), itsrs(rs), itsnlo(LO), itsnhi(HI),
             itssi(Si), itssj(Sj)
         {
@@ -1846,7 +1876,7 @@ namespace tmv {
             TMVStaticAssert(Sj != Unknown); 
         }
 
-        TMV_INLINE SmallBandMatrixView(T* m, int cs) :
+        TMV_INLINE SmallBandMatrixView(T* m, ptrdiff_t cs) :
             itsm(m), itscs(cs), itsrs(N), itsnlo(LO), itsnhi(HI),
             itssi(Si), itssj(Sj)
         {
@@ -1890,7 +1920,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int M2, int N2, int LO2, int HI2, int Si2, int Sj2, int A2>
+        template <ptrdiff_t M2, ptrdiff_t N2, ptrdiff_t LO2, ptrdiff_t HI2, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
         TMV_INLINE SmallBandMatrixView(
             SmallBandMatrixView<T,M2,N2,LO2,HI2,Si2,Sj2,A2> m2) :
             itsm(m2.ptr()), itscs(m2.colsize()), itsrs(m2.rowsize()),
@@ -1942,23 +1972,23 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsm; }
         TMV_INLINE T* ptr() { return itsm; }
 
-        T cref(int i, int j) const
+        T cref(ptrdiff_t i, ptrdiff_t j) const
         { 
             if (InBand(i,j,itsnlo,itsnhi)) 
                 return DoConj<_conj>(itsm[i*stepi() + j*stepj()]); 
             else return T(0);
         }
 
-        reference ref(int i, int j) 
+        reference ref(ptrdiff_t i, ptrdiff_t j) 
         { return reference(itsm[i*stepi()+j*stepj()]); }
 
-        TMV_INLINE int colsize() const { return itscs; }
-        TMV_INLINE int rowsize() const { return itsrs; }
-        TMV_INLINE int nlo() const { return itsnlo; }
-        TMV_INLINE int nhi() const { return itsnhi; }
-        TMV_INLINE int stepi() const { return itssi; }
-        TMV_INLINE int stepj() const { return itssj; }
-        TMV_INLINE int diagstep() const
+        TMV_INLINE ptrdiff_t colsize() const { return itscs; }
+        TMV_INLINE ptrdiff_t rowsize() const { return itsrs; }
+        TMV_INLINE ptrdiff_t nlo() const { return itsnlo; }
+        TMV_INLINE ptrdiff_t nhi() const { return itsnhi; }
+        TMV_INLINE ptrdiff_t stepi() const { return itssi; }
+        TMV_INLINE ptrdiff_t stepj() const { return itssj; }
+        TMV_INLINE ptrdiff_t diagstep() const
         { return _diagmajor ? 1 : stepi()+stepj(); }
         TMV_INLINE bool isconj() const { return _conj; }
         TMV_INLINE bool isrm() const 
@@ -1985,7 +2015,42 @@ namespace tmv {
 
     //
     // Special Creators:
+    //   UpperBiDiagMatrix(v1,v2)
+    //        Returns a square BandMatrix with nlo=0, nhi=1, 
+    //   LowerBiDiagMatrix(v1,v2)
+    //        Returns a BandMatrix with nlo=1, nhi=0, 
+    //   TriDiagMatrix(v1,v2,v3)
+    //        Returns a BandMatrix with nhi=1, nlo=1, 
     //
+    //   In all three cases, the vectors are given from bottom to top. 
+
+#define T1 typename V1::value_type
+#define T2 typename V2::value_type
+#define T3 typename V3::value_type
+#define T12 typename Traits2<T1,T2>::type
+#define T123 typename Traits2<T12,T3>::type
+    template <class V1, class V2> 
+    TMV_INLINE ThinBandMatrix<T12,0,1,DiagMajor> UpperBiDiagMatrix(
+        const BaseVector<V1>& v1, const BaseVector<V2>& v2)
+    { return ThinBandMatrix<T12,0,1,DiagMajor>(v1,v2); }
+
+    template <class V1, class V2>
+    TMV_INLINE ThinBandMatrix<T12,1,0,DiagMajor> LowerBiDiagMatrix(
+        const BaseVector<V1>& v1, const BaseVector<V2>& v2)
+    { return ThinBandMatrix<T12,1,0,DiagMajor>(v1,v2); }
+
+    template <class V1, class V2, class V3>
+    TMV_INLINE ThinBandMatrix<T123,1,1,DiagMajor> TriDiagMatrix(
+        const BaseVector<V1>& v1, const BaseVector<V2>& v2,
+        const BaseVector<V3>& v3)
+    { return ThinBandMatrix<T123,1,1,DiagMajor>(v1,v2,v3); }
+#undef T1
+#undef T2
+#undef T3
+#undef T12
+#undef T123
+
+
     // View parts of a Matrix, another BandMatrix, a DiagMatrix,
     // or a TriMatrix as a BandMatrix:
     //
@@ -2030,7 +2095,7 @@ namespace tmv {
 
     template <class M>
     TMV_INLINE typename BMVO<M>::cb BandMatrixViewOf(
-        const BaseMatrix_Rec<M>& m, int lo, int hi)
+        const BaseMatrix_Rec<M>& m, ptrdiff_t lo, ptrdiff_t hi)
     {
         TMVAssert(lo >= 0);
         TMVAssert(hi >= 0);
@@ -2041,7 +2106,7 @@ namespace tmv {
     }
     template <class M>
     TMV_INLINE typename BMVO<M>::b BandMatrixViewOf(
-        BaseMatrix_Rec_Mutable<M>& m, int lo, int hi)
+        BaseMatrix_Rec_Mutable<M>& m, ptrdiff_t lo, ptrdiff_t hi)
     {
         TMVAssert(lo >= 0);
         TMVAssert(hi >= 0);
@@ -2052,7 +2117,7 @@ namespace tmv {
     }
     template <class T, int A>
     TMV_INLINE typename BMVO<MatrixView<T,A> >::b BandMatrixViewOf(
-        MatrixView<T,A> m, int lo, int hi)
+        MatrixView<T,A> m, ptrdiff_t lo, ptrdiff_t hi)
     {
         TMVAssert(lo >= 0);
         TMVAssert(hi >= 0);
@@ -2061,9 +2126,9 @@ namespace tmv {
         return typename BMVO<MatrixView<T,A> >::b(
             m.ptr(),m.colsize(),m.rowsize(),lo,hi,m.stepi(),m.stepj());
     }
-    template <class T, int M, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     TMV_INLINE typename BMVO<SmallMatrixView<T,M,N,Si,Sj,A> >::b 
-    BandMatrixViewOf(SmallMatrixView<T,M,N,Si,Sj,A> m, int lo, int hi)
+    BandMatrixViewOf(SmallMatrixView<T,M,N,Si,Sj,A> m, ptrdiff_t lo, ptrdiff_t hi)
     {
         TMVAssert(lo >= 0);
         TMVAssert(hi >= 0);
@@ -2075,7 +2140,7 @@ namespace tmv {
 
     template <class M>
     TMV_INLINE typename BMVO<M>::cb BandMatrixViewOf(
-        const BaseMatrix_Band<M>& m, int lo, int hi)
+        const BaseMatrix_Band<M>& m, ptrdiff_t lo, ptrdiff_t hi)
     {
         TMVAssert(lo >= 0);
         TMVAssert(hi >= 0);
@@ -2086,7 +2151,7 @@ namespace tmv {
     }
     template <class M>
     TMV_INLINE typename BMVO<M>::b BandMatrixViewOf(
-        BaseMatrix_Band_Mutable<M>& m, int lo, int hi)
+        BaseMatrix_Band_Mutable<M>& m, ptrdiff_t lo, ptrdiff_t hi)
     {
         TMVAssert(lo >= 0);
         TMVAssert(hi >= 0);
@@ -2097,7 +2162,7 @@ namespace tmv {
     }
     template <class T, int A>
     TMV_INLINE typename BMVO<BandMatrixView<T,A> >::b BandMatrixViewOf(
-        BandMatrixView<T,A> m, int lo, int hi)
+        BandMatrixView<T,A> m, ptrdiff_t lo, ptrdiff_t hi)
     {
         TMVAssert(lo >= 0);
         TMVAssert(hi >= 0);
@@ -2106,10 +2171,10 @@ namespace tmv {
         return typename BMVO<BandMatrixView<T,A> >::b(
             m.ptr(),m.colsize(),m.rowsize(),lo,hi,m.stepi(),m.stepj());
     }
-    template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, ptrdiff_t Si, ptrdiff_t Sj, int A>
     TMV_INLINE typename BMVO<SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> >::b 
     BandMatrixViewOf(
-        SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m, int lo, int hi)
+        SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m, ptrdiff_t lo, ptrdiff_t hi)
     {
         TMVAssert(lo >= 0);
         TMVAssert(hi >= 0);
@@ -2153,7 +2218,7 @@ namespace tmv {
 
     template <class M>
     TMV_INLINE typename BMVOTri<M>::cb BandMatrixViewOf(
-        const BaseMatrix_Tri<M>& m, int lohi)
+        const BaseMatrix_Tri<M>& m, ptrdiff_t lohi)
     {
         TMVAssert(lohi >= 0);
         TMVAssert(lohi < m.size());
@@ -2164,7 +2229,7 @@ namespace tmv {
     }
     template <class M>
     TMV_INLINE typename BMVOTri<M>::b BandMatrixViewOf(
-        BaseMatrix_Tri_Mutable<M>& m, int lohi)
+        BaseMatrix_Tri_Mutable<M>& m, ptrdiff_t lohi)
     {
         TMVAssert(lohi >= 0);
         TMVAssert(lohi < m.size());
@@ -2175,16 +2240,16 @@ namespace tmv {
     }
     template <class T, int A>
     TMV_INLINE typename BMVOTri<UpperTriMatrixView<T,A> >::b BandMatrixViewOf(
-        UpperTriMatrixView<T,A> m, int hi)
+        UpperTriMatrixView<T,A> m, ptrdiff_t hi)
     {
         TMVAssert(hi >= 0);
         TMVAssert(hi < m.size());
         return typename BMVOTri<UpperTriMatrixView<T,A> >::b(
             m.ptr(),m.size(),m.size(),0,hi,m.stepi(),m.stepj());
     }
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     TMV_INLINE typename BMVOTri<SmallUpperTriMatrixView<T,N,Si,Sj,A> >::b
-    BandMatrixViewOf(SmallUpperTriMatrixView<T,N,Si,Sj,A> m, int hi)
+    BandMatrixViewOf(SmallUpperTriMatrixView<T,N,Si,Sj,A> m, ptrdiff_t hi)
     {
         TMVAssert(hi >= 0);
         TMVAssert(hi < m.size());
@@ -2193,16 +2258,16 @@ namespace tmv {
     }
     template <class T, int A>
     TMV_INLINE typename BMVOTri<LowerTriMatrixView<T,A> >::b BandMatrixViewOf(
-        LowerTriMatrixView<T,A> m, int lo)
+        LowerTriMatrixView<T,A> m, ptrdiff_t lo)
     {
         TMVAssert(lo >= 0);
         TMVAssert(lo < m.size());
         return typename BMVOTri<LowerTriMatrixView<T,A> >::b(
             m.ptr(),m.size(),m.size(),lo,0,m.stepi(),m.stepj());
     }
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     TMV_INLINE typename BMVOTri<SmallLowerTriMatrixView<T,N,Si,Sj,A> >::b
-    BandMatrixViewOf(SmallLowerTriMatrixView<T,N,Si,Sj,A> m, int lo)
+    BandMatrixViewOf(SmallLowerTriMatrixView<T,N,Si,Sj,A> m, ptrdiff_t lo)
     {
         TMVAssert(lo >= 0);
         TMVAssert(lo < m.size());
@@ -2217,8 +2282,8 @@ namespace tmv {
     {
         return typename BMVOTri<M>::cb2(
             m.cptr(),m.size(),m.size(),
-            M::_upper ? 0 : TMV_MAX(m.size()-1,0), 
-            M::_upper ? TMV_MAX(m.size()-1,0) : 0,
+            M::_upper ? 0 : TMV_MAX(m.size()-1,ptrdiff_t(0)), 
+            M::_upper ? TMV_MAX(m.size()-1,ptrdiff_t(0)) : 0,
             m.stepi(),m.stepj());
     }
     template <class M>
@@ -2227,8 +2292,8 @@ namespace tmv {
     {
         return typename BMVOTri<M>::b2(
             m.ptr(),m.size(),m.size(),
-            M::_upper ? 0 : TMV_MAX(m.size()-1,0), 
-            M::_upper ?  TMV_MAX(m.size()-1,0) : 0,
+            M::_upper ? 0 : TMV_MAX(m.size()-1,ptrdiff_t(0)), 
+            M::_upper ?  TMV_MAX(m.size()-1,ptrdiff_t(0)) : 0,
             m.stepi(),m.stepj());
     }
     template <class T, int A>
@@ -2237,15 +2302,15 @@ namespace tmv {
     {
         return typename BMVOTri<UpperTriMatrixView<T,A> >::b2(
             m.ptr(),m.size(),m.size(),
-            0,TMV_MAX(m.size()-1,0),m.stepi(),m.stepj());
+            0,TMV_MAX(m.size()-1,ptrdiff_t(0)),m.stepi(),m.stepj());
     }
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     TMV_INLINE typename BMVOTri<SmallUpperTriMatrixView<T,N,Si,Sj,A> >::b2 
     BandMatrixViewOf(SmallUpperTriMatrixView<T,N,Si,Sj,A> m)
     {
         return typename BMVOTri<SmallUpperTriMatrixView<T,N,Si,Sj,A> >::b2(
             m.ptr(),m.size(),m.size(),
-            0,TMV_MAX(m.size()-1,0),m.stepi(),m.stepj());
+            0,TMV_MAX(m.size()-1,ptrdiff_t(0)),m.stepi(),m.stepj());
     }
     template <class T, int A>
     TMV_INLINE typename BMVOTri<LowerTriMatrixView<T,A> >::b2 BandMatrixViewOf(
@@ -2253,15 +2318,15 @@ namespace tmv {
     {
         return typename BMVOTri<LowerTriMatrixView<T,A> >::b2(
             m.ptr(),m.size(),m.size(),
-            TMV_MAX(m.size()-1,0),0,m.stepi(),m.stepj());
+            TMV_MAX(m.size()-1,ptrdiff_t(0)),0,m.stepi(),m.stepj());
     }
-    template <class T, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     TMV_INLINE typename BMVOTri<SmallLowerTriMatrixView<T,N,Si,Sj,A> >::b2
     BandMatrixViewOf(SmallLowerTriMatrixView<T,N,Si,Sj,A> m)
     {
         return typename BMVOTri<SmallLowerTriMatrixView<T,N,Si,Sj,A> >::b2(
             m.ptr(),m.size(),m.size(),
-            TMV_MAX(m.size()-1,0),0,m.stepi(),m.stepj());
+            TMV_MAX(m.size()-1,ptrdiff_t(0)),0,m.stepi(),m.stepj());
     }
 
 
@@ -2307,7 +2372,7 @@ namespace tmv {
         return typename BMVODiag<DiagMatrixView<T,A> >::b(
             m.ptr(),m.size(),m.size(),0,0,1,m.step()-1);
     }
-    template <class T, int N, int S, int A>
+    template <class T, ptrdiff_t N, ptrdiff_t S, int A>
     TMV_INLINE typename BMVODiag<SmallDiagMatrixView<T,N,S,A> >::b 
     BandMatrixViewOf(SmallDiagMatrixView<T,N,S,A> m)
     {
@@ -2320,31 +2385,31 @@ namespace tmv {
     // Swap
     //
 
-    template <class T, int LO, int HI, int A>
+    template <class T, ptrdiff_t LO, ptrdiff_t HI, int A>
     TMV_INLINE void Swap(
         ThinBandMatrix<T,LO,HI,A>& m1, ThinBandMatrix<T,LO,HI,A>& m2)
     { m1.swapWith(m2); }
-    template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A, class MM>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, ptrdiff_t Si, ptrdiff_t Sj, int A, class MM>
     TMV_INLINE void Swap(
         BaseMatrix_Band_Mutable<MM>& m1,
         SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m2)
     { DoSwap(m1,m2); }
-    template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A, class MM>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, ptrdiff_t Si, ptrdiff_t Sj, int A, class MM>
     TMV_INLINE void Swap(
         SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m1,
         BaseMatrix_Band_Mutable<MM>& m2)
     { DoSwap(m1,m2); }
-    template <class T, int M, int N, int LO, int HI, int Si1, int Sj1, int A1, int Si2, int Sj2, int A2>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, ptrdiff_t Si1, ptrdiff_t Sj1, int A1, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
     TMV_INLINE void Swap(
         SmallBandMatrixView<T,M,N,LO,HI,Si1,Sj1,A1> m1,
         SmallBandMatrixView<T,M,N,LO,HI,Si2,Sj2,A2> m2)
     { DoSwap(m1,m2); }
-    template <class T, int M, int N, int LO, int HI, int Si1, int Sj1, int A1, int A2>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, ptrdiff_t Si1, ptrdiff_t Sj1, int A1, int A2>
     TMV_INLINE void Swap(
         SmallBandMatrixView<T,M,N,LO,HI,Si1,Sj1,A1> m1,
         BandMatrixView<T,A2> m2)
     { DoSwap(m1,m2); }
-    template <class T, int M, int N, int LO, int HI, int A1, int Si2, int Sj2, int A2>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, int A1, ptrdiff_t Si2, ptrdiff_t Sj2, int A2>
     TMV_INLINE void Swap(
         BandMatrixView<T,A1> m1,
         SmallBandMatrixView<T,M,N,LO,HI,Si2,Sj2,A2> m2)
@@ -2355,41 +2420,41 @@ namespace tmv {
     // Conjugate, Transpose, Adjoint
     //
 
-    template <class T, int M, int N, int LO, int HI, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, int A>
     TMV_INLINE typename SmallBandMatrix<T,M,N,LO,HI,A>::conjugate_type 
     Conjugate(SmallBandMatrix<T,M,N,LO,HI,A>& m)
     { return m.conjugate(); }
-    template <class T, int LO, int HI, int A>
+    template <class T, ptrdiff_t LO, ptrdiff_t HI, int A>
     TMV_INLINE typename ThinBandMatrix<T,LO,HI,A>::conjugate_type 
     Conjugate(ThinBandMatrix<T,LO,HI,A>& m)
     { return m.conjugate(); }
-    template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, ptrdiff_t Si, ptrdiff_t Sj, int A>
     TMV_INLINE typename SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A>::conjugate_type
     Conjugate(SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m)
     { return m.conjugate(); }
 
-    template <class T, int M, int N, int LO, int HI, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, int A>
     TMV_INLINE typename SmallBandMatrix<T,M,N,LO,HI,A>::transpose_type 
     Transpose(SmallBandMatrix<T,M,N,LO,HI,A>& m)
     { return m.transpose(); }
-    template <class T, int LO, int HI, int A>
+    template <class T, ptrdiff_t LO, ptrdiff_t HI, int A>
     TMV_INLINE typename ThinBandMatrix<T,LO,HI,A>::transpose_type 
     Transpose(ThinBandMatrix<T,LO,HI,A>& m)
     { return m.transpose(); }
-    template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, ptrdiff_t Si, ptrdiff_t Sj, int A>
     TMV_INLINE typename SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A>::transpose_type
     Transpose(SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m)
     { return m.transpose(); }
 
-    template <class T, int M, int N, int LO, int HI, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, int A>
     TMV_INLINE typename SmallBandMatrix<T,M,N,LO,HI,A>::adjoint_type 
     Adjoint(SmallBandMatrix<T,M,N,LO,HI,A>& m)
     { return m.adjoint(); }
-    template <class T, int LO, int HI, int A>
+    template <class T, ptrdiff_t LO, ptrdiff_t HI, int A>
     TMV_INLINE typename ThinBandMatrix<T,LO,HI,A>::adjoint_type Adjoint(
         ThinBandMatrix<T,LO,HI,A>& m)
     { return m.adjoint(); }
-    template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, ptrdiff_t Si, ptrdiff_t Sj, int A>
     TMV_INLINE typename SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A>::adjoint_type 
     Adjoint(SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A> m)
     { return m.adjoint(); }
@@ -2399,7 +2464,7 @@ namespace tmv {
     // TMV_Text 
     //
 
-    template <class T, int M, int N, int LO, int HI, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, int A>
     inline std::string TMV_Text(const SmallBandMatrix<T,M,N,LO,HI,A>& m)
     {
         std::ostringstream s;
@@ -2412,7 +2477,7 @@ namespace tmv {
         return s.str();
     }
 
-    template <class T, int LO, int HI, int A>
+    template <class T, ptrdiff_t LO, ptrdiff_t HI, int A>
     inline std::string TMV_Text(const ThinBandMatrix<T,LO,HI,A>& m)
     {
         std::ostringstream s;
@@ -2425,7 +2490,7 @@ namespace tmv {
         return s.str();
     }
 
-    template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, ptrdiff_t Si, ptrdiff_t Sj, int A>
     inline std::string TMV_Text(
         const ConstSmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A>& m)
     {
@@ -2441,7 +2506,7 @@ namespace tmv {
         return s.str();
     }
 
-    template <class T, int M, int N, int LO, int HI, int Si, int Sj, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t LO, ptrdiff_t HI, ptrdiff_t Si, ptrdiff_t Sj, int A>
     inline std::string TMV_Text(
         const SmallBandMatrixView<T,M,N,LO,HI,Si,Sj,A>& m)
     {

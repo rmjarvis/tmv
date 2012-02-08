@@ -492,7 +492,7 @@ namespace tmv {
         // Constructors
         //
 
-        explicit Vector(int n=0) : itssize(n), itsv(n)
+        explicit Vector(ptrdiff_t n=0) : itssize(n), itsv(n)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVAssert(n>=0);
@@ -501,7 +501,7 @@ namespace tmv {
 #endif
         }
 
-        Vector(int n, T val) : itssize(n), itsv(n)
+        Vector(ptrdiff_t n, T val) : itssize(n), itsv(n)
         {
             TMVStaticAssert(Traits<type>::okA);
             TMVAssert(n>=0);
@@ -552,12 +552,12 @@ namespace tmv {
 
         TMV_INLINE const T* cptr() const { return itsv; }
         TMV_INLINE T* ptr() { return itsv; }
-        TMV_INLINE T cref(int i) const  { return itsv[i]; }
-        TMV_INLINE T& ref(int i) { return itsv[i]; }
+        TMV_INLINE T cref(ptrdiff_t i) const  { return itsv[i]; }
+        TMV_INLINE T& ref(ptrdiff_t i) { return itsv[i]; }
 
-        TMV_INLINE int size() const { return itssize; }
-        TMV_INLINE int nElements() const { return itssize; }
-        TMV_INLINE int step() const { return 1; }
+        TMV_INLINE ptrdiff_t size() const { return itssize; }
+        TMV_INLINE ptrdiff_t nElements() const { return itssize; }
+        TMV_INLINE ptrdiff_t step() const { return 1; }
         TMV_INLINE bool isconj() const { return false; }
         void swapWith(type& rhs)
         {
@@ -566,7 +566,7 @@ namespace tmv {
             itsv.swapWith(rhs.itsv);
         }
 
-        void resize(int n)
+        void resize(ptrdiff_t n)
         {
             TMVAssert(n >= 0);
 #ifdef TMV_EXTRA_DEBUG
@@ -581,7 +581,7 @@ namespace tmv {
 
     private:
 
-        int itssize;
+        ptrdiff_t itssize;
         AlignedArray<T> itsv;
 
     }; // Vector
@@ -620,7 +620,7 @@ namespace tmv {
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _unit = Attrib<A>::unit };
         enum { negS = IntTraits<_step>::negS };
-        enum { twoS = isreal ? int(_step) : IntTraits<_step>::twoS };
+        enum { twoS = isreal ? ptrdiff_t(_step) : IntTraits<_step>::twoS };
 
         enum { unitA = A | Unit };
         enum { nonunitA = A & ~Unit };
@@ -680,13 +680,13 @@ namespace tmv {
         // Constructors
         //
 
-        ConstVectorView(const T* v, int n, int s) : 
+        ConstVectorView(const T* v, ptrdiff_t n, ptrdiff_t s) : 
             itsv(v), itssize(n), itsstep(s) 
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        ConstVectorView(const T* v, int n) : 
+        ConstVectorView(const T* v, ptrdiff_t n) : 
             itsv(v), itssize(n), itsstep(_step) 
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -721,7 +721,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int S2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t S2, int A2>
         ConstVectorView(const ConstSmallVectorView<T,N2,S2,A2>& v2) :
             itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step())
         {
@@ -729,7 +729,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int S2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t S2, int A2>
         ConstVectorView(const SmallVectorView<T,N2,S2,A2>& v2) :
             itsv(v2.cptr()), itssize(v2.size()), itsstep(v2.step()) 
         {
@@ -754,17 +754,17 @@ namespace tmv {
 
         TMV_INLINE const T* cptr() const { return itsv; }
 
-        TMV_INLINE T cref(int i) const  { return DoConj<_conj>(itsv[i*step()]); }
+        TMV_INLINE T cref(ptrdiff_t i) const  { return DoConj<_conj>(itsv[i*step()]); }
 
-        TMV_INLINE int size() const { return itssize; }
-        TMV_INLINE int nElements() const { return itssize; }
-        TMV_INLINE int step() const { return itsstep; }
+        TMV_INLINE ptrdiff_t size() const { return itssize; }
+        TMV_INLINE ptrdiff_t nElements() const { return itssize; }
+        TMV_INLINE ptrdiff_t step() const { return itsstep; }
         TMV_INLINE bool isconj() const { return _conj; }
 
     protected :
 
         const T* itsv;
-        const int itssize;
+        const ptrdiff_t itssize;
         const CheckedInt<_step> itsstep;
 
     }; // ConstVectorView
@@ -804,7 +804,7 @@ namespace tmv {
         enum { _checkalias = !Attrib<A>::noalias };
         enum { _unit = Attrib<A>::unit };
         enum { negS = IntTraits<_step>::negS };
-        enum { twoS = isreal ? int(_step) : IntTraits<_step>::twoS };
+        enum { twoS = isreal ? ptrdiff_t(_step) : IntTraits<_step>::twoS };
 
         enum { unitA = A | Unit };
         enum { nonunitA = A & ~Unit };
@@ -892,13 +892,13 @@ namespace tmv {
         // Constructors
         //
 
-        VectorView(T* v, int n, int s) : 
+        VectorView(T* v, ptrdiff_t n, ptrdiff_t s) : 
             itsv(v), itssize(n), itsstep(s) 
         {
             TMVStaticAssert(Traits<type>::okA);
         }
 
-        VectorView(T* v, int n) : 
+        VectorView(T* v, ptrdiff_t n) : 
             itsv(v), itssize(n), itsstep(_step) 
         {
             TMVStaticAssert(Traits<type>::okA);
@@ -919,7 +919,7 @@ namespace tmv {
             TMVStaticAssert(Attrib<A>::conj == int(Attrib<A2>::conj)); 
         }
 
-        template <int N2, int S2, int A2>
+        template <ptrdiff_t N2, ptrdiff_t S2, int A2>
         VectorView(SmallVectorView<T,N2,S2,A2> v2) :
             itsv(v2.ptr()), itssize(v2.size()), itsstep(v2.step())
         {
@@ -953,18 +953,19 @@ namespace tmv {
         TMV_INLINE const T* cptr() const { return itsv; }
         TMV_INLINE T* ptr() { return itsv; }
 
-        TMV_INLINE T cref(int i) const  { return DoConj<_conj>(itsv[i*step()]); }
-        TMV_INLINE reference ref(int i) { return reference(itsv[i*step()]); }
+        TMV_INLINE T cref(ptrdiff_t i) const  
+        { return DoConj<_conj>(itsv[i*step()]); }
+        TMV_INLINE reference ref(ptrdiff_t i) { return reference(itsv[i*step()]); }
 
-        TMV_INLINE int size() const { return itssize; }
-        TMV_INLINE int nElements() const { return itssize; }
-        TMV_INLINE int step() const { return itsstep; }
+        TMV_INLINE ptrdiff_t size() const { return itssize; }
+        TMV_INLINE ptrdiff_t nElements() const { return itssize; }
+        TMV_INLINE ptrdiff_t step() const { return itsstep; }
         TMV_INLINE bool isconj() const { return _conj; }
 
     protected :
 
         T* itsv;
-        const int itssize;
+        const ptrdiff_t itssize;
         const CheckedInt<_step> itsstep;
 
     }; // VectorView
@@ -977,14 +978,14 @@ namespace tmv {
 
     // VectorView of raw memory:
     template <class T>
-    TMV_INLINE VectorView<T,Unit> VectorViewOf(T* v, int size)
+    TMV_INLINE VectorView<T,Unit> VectorViewOf(T* v, ptrdiff_t size)
     {
         TMVAssert(size >= 0);
         return VectorView<T,Unit>(v,size); 
     }
 
     template <class T>
-    TMV_INLINE VectorView<T,NonUnit> VectorViewOf(T* v, int size, int step)
+    TMV_INLINE VectorView<T,NonUnit> VectorViewOf(T* v, ptrdiff_t size, ptrdiff_t step)
     {
         TMVAssert(size >= 0);
         return VectorView<T,NonUnit>(v,size,step); 

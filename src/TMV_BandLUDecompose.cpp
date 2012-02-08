@@ -57,7 +57,7 @@ namespace tmv {
 
     template <class T> 
     static void NonLapBandLU_Decompose(
-        const BandMatrixView<T>& A, int* P, int& det)
+        const BandMatrixView<T>& A, ptrdiff_t* P)
     {
         // LU Decompostion with partial pivoting.
         //
@@ -113,19 +113,19 @@ namespace tmv {
         TMVAssert(A.iscm());
         TMVAssert(A.ct() == NonConj);
         TMVAssert(A.isSquare());
-        const int N = A.rowsize();
+        const ptrdiff_t N = A.rowsize();
 
         typedef TMV_RealType(T) RT;
 
-        const int ds = A.diagstep();
+        const ptrdiff_t ds = A.diagstep();
         T* Ujj = A.ptr();
-        int* Pj=P;
+        ptrdiff_t* Pj=P;
 
-        int endcol = A.nlo()+1;
-        int endrow = A.nhi()+1;
-        for (int j=0; j<N-1; ++j,Ujj+=ds,++Pj) {
+        ptrdiff_t endcol = A.nlo()+1;
+        ptrdiff_t endrow = A.nhi()+1;
+        for (ptrdiff_t j=0; j<N-1; ++j,Ujj+=ds,++Pj) {
             // Find the pivot element
-            int ip;
+            ptrdiff_t ip;
             T piv = A.col(j,j,endcol).maxAbsElement(&ip);
 
             if (TMV_Underflow(piv)) {
@@ -137,7 +137,6 @@ namespace tmv {
                 ip += j;
                 Swap(A.row(ip,j,endrow),A.row(j,j,endrow));
                 *Pj = ip;
-                det = -det;
             } else *Pj = j;
 
             // If Ujj is 0, then all of the L's are 0.
@@ -156,7 +155,7 @@ namespace tmv {
 
     template <class T> 
     static void NonLapTriDiagLU_Decompose(
-        const BandMatrixView<T>& A, int* P, int& det)
+        const BandMatrixView<T>& A, ptrdiff_t* P)
     {
         // LU Decompostion for TriDiagonal BandMatrix
         //
@@ -170,7 +169,7 @@ namespace tmv {
         TMVAssert(A.colsize() >= A.rowsize());
         TMVAssert(A.ct() == NonConj);
         TMVAssert(A.isSquare());
-        const int N = A.rowsize();
+        const ptrdiff_t N = A.rowsize();
 
         typedef TMV_RealType(T) RT;
 
@@ -178,9 +177,9 @@ namespace tmv {
         T* Lj = Ujj+A.stepi();  // = L(j+1,j)
         T* Uj1 = Ujj+A.stepj(); // = U(j,j+1)
         T* Uj2 = Uj1+A.stepj(); // = U(j,j+2)
-        int* Pj=P;
+        ptrdiff_t* Pj=P;
 
-        for (int j=0; j<N-1; ++j,++Ujj,++Lj,++Uj1,++Uj2,++Pj) {
+        for (ptrdiff_t j=0; j<N-1; ++j,++Ujj,++Lj,++Uj1,++Uj2,++Pj) {
             bool pivot = TMV_ABS(*Lj) > TMV_ABS(*Ujj);
 
             if (pivot) {
@@ -189,7 +188,6 @@ namespace tmv {
                 if (j+1<N) TMV_SWAP(*(Ujj+1),*Uj1);
                 if (j+2<N) TMV_SWAP(*(Uj1+1),*Uj2);
                 *Pj = j+1;
-                det = -det;
             } else *Pj = j;
 
 #ifdef TMVFLDEBUG
@@ -217,12 +215,12 @@ namespace tmv {
 #ifdef LAP
     template <class T> 
     static inline void LapBandLU_Decompose(
-        const BandMatrixView<T>& A, int* P, int& det)
-    { NonLapBandLU_Decompose(A,P,det); }
+        const BandMatrixView<T>& A, ptrdiff_t* P)
+    { NonLapBandLU_Decompose(A,P); }
 #ifdef INST_DOUBLE
     template <> 
     void LapBandLU_Decompose(
-        const BandMatrixView<double>& A, int* P, int& det)
+        const BandMatrixView<double>& A, ptrdiff_t* P)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.iscm());
@@ -239,12 +237,11 @@ namespace tmv {
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
-            if (P[i]!=i) det = -det;
         }
     }
     template <> 
     void LapBandLU_Decompose(
-        const BandMatrixView<std::complex<double> >& A, int* P, int& det)
+        const BandMatrixView<std::complex<double> >& A, ptrdiff_t* P)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.iscm());
@@ -261,14 +258,13 @@ namespace tmv {
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
-            if (P[i]!=i) det = -det;
         }
     }
 #endif
 #ifdef INST_FLOAT
     template <> 
     void LapBandLU_Decompose(
-        const BandMatrixView<float>& A, int* P, int& det)
+        const BandMatrixView<float>& A, ptrdiff_t* P)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.iscm());
@@ -285,12 +281,11 @@ namespace tmv {
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
-            if (P[i]!=i) det = -det;
         }
     }
     template <> 
     void LapBandLU_Decompose(
-        const BandMatrixView<std::complex<float> >& A, int* P, int& det)
+        const BandMatrixView<std::complex<float> >& A, ptrdiff_t* P)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.iscm());
@@ -307,19 +302,18 @@ namespace tmv {
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
-            if (P[i]!=i) det = -det;
         }
     }
 #endif 
     // Now Lap version of DiagMajor Tridiagonal:
     template <class T> 
     static inline void LapTriDiagLU_Decompose(
-        const BandMatrixView<T>& A, int* P, int& det)
-    { NonLapTriDiagLU_Decompose(A,P,det); }
+        const BandMatrixView<T>& A, ptrdiff_t* P)
+    { NonLapTriDiagLU_Decompose(A,P); }
 #ifdef INST_DOUBLE
     template <> 
     void LapTriDiagLU_Decompose(
-        const BandMatrixView<double>& A, int* P, int& det)
+        const BandMatrixView<double>& A, ptrdiff_t* P)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.isdm());
@@ -335,12 +329,11 @@ namespace tmv {
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
-            if (P[i]!=i) det = -det;
         }
     }
     template <> 
     void LapTriDiagLU_Decompose(
-        const BandMatrixView<std::complex<double> >& A, int* P, int& det)
+        const BandMatrixView<std::complex<double> >& A, ptrdiff_t* P)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.isdm());
@@ -356,14 +349,13 @@ namespace tmv {
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
-            if (P[i]!=i) det = -det;
         }
     }
 #endif
 #ifdef INST_FLOAT
     template <> 
     void LapTriDiagLU_Decompose(
-        const BandMatrixView<float>& A, int* P, int& det)
+        const BandMatrixView<float>& A, ptrdiff_t* P)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.isdm());
@@ -379,12 +371,11 @@ namespace tmv {
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
-            if (P[i]!=i) det = -det;
         }
     }
     template <> 
     void LapTriDiagLU_Decompose(
-        const BandMatrixView<std::complex<float> >& A, int* P, int& det)
+        const BandMatrixView<std::complex<float> >& A, ptrdiff_t* P)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.isdm());
@@ -400,7 +391,6 @@ namespace tmv {
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
-            if (P[i]!=i) det = -det;
         }
     }
 #endif 
@@ -408,7 +398,7 @@ namespace tmv {
 
     template <class T> 
     void LU_Decompose(
-        const BandMatrixView<T>& A, int* P, int& det, int 
+        const BandMatrixView<T>& A, ptrdiff_t* P, ptrdiff_t 
 #ifdef LAP
         Anhi
 #endif
@@ -430,36 +420,36 @@ namespace tmv {
 #ifdef LAP
                     if (A.nlo()+Anhi+1 > A.rowsize()) {
                         TMVAssert(A.nhi()+1 == A.rowsize());
-                        NonLapBandLU_Decompose(A,P,det);
+                        NonLapBandLU_Decompose(A,P);
                     } else {
-                        LapBandLU_Decompose(A,P,det);
+                        LapBandLU_Decompose(A,P);
                     }
 #else
-                    NonLapBandLU_Decompose(A,P,det);
+                    NonLapBandLU_Decompose(A,P);
 #endif
                 } else {
 #ifdef LAP
-                    LapTriDiagLU_Decompose(A,P,det);
+                    LapTriDiagLU_Decompose(A,P);
 #else
-                    NonLapTriDiagLU_Decompose(A,P,det);
+                    NonLapTriDiagLU_Decompose(A,P);
 #endif
                 }
             }
         } else {
             // Marix is already LU decomposed, since no sub-diagonals.
             // Just set P values appropriately.
-            const int n = A.colsize();
-            for(int i=0;i<n;++i) P[i] = i;
+            const ptrdiff_t n = A.colsize();
+            for(ptrdiff_t i=0;i<n;++i) P[i] = i;
         }
 
 #ifdef XDEBUG
-        int N = A.colsize();
-        int nlo = A.nlo();
+        ptrdiff_t N = A.colsize();
+        ptrdiff_t nlo = A.nlo();
         Matrix<T> L(N,N,T(0));
         L.diag().setAllTo(T(1));
-        for(int i=0;i<N;++i) {
+        for(ptrdiff_t i=0;i<N;++i) {
             Swap(L.row(i,0,i),L.row(P[i],0,i));
-            int end = TMV_MIN(i+nlo+1,N);
+            ptrdiff_t end = TMV_MIN(i+nlo+1,N);
             L.col(i,i+1,end) = A.col(i,i+1,end);
         }
         Matrix<T> U(BandMatrixViewOf(A,0,A.nhi()));
@@ -474,16 +464,15 @@ namespace tmv {
             cerr<<"L = "<<L<<endl;
             cerr<<"U = "<<U<<endl;
             cerr<<"P = ";
-            for(int i=0;i<N;i++) cerr<<P[i]<<" ";
+            for(ptrdiff_t i=0;i<N;i++) cerr<<P[i]<<" ";
             cerr<<endl;
 #ifdef LAP
             BandMatrix<T,ColMajor> A2 = A0;
-            AlignedArray<int> P2(A.colsize());
-            int det2(0);
-            NonLapBandLU_Decompose(A2.view(),P2.get(),det2);
+            AlignedArray<ptrdiff_t> P2(A.colsize());
+            NonLapBandLU_Decompose(A2.view(),P2.get());
             cerr<<"NonLap version = "<<A2<<endl;
             cerr<<"P2 = ";
-            for(int i=0;i<N;i++) cerr<<(P2.get())[i]<<" ";
+            for(ptrdiff_t i=0;i<N;i++) cerr<<(P2.get())[i]<<" ";
             cerr<<endl;
 #endif
             abort();
@@ -494,16 +483,15 @@ namespace tmv {
     template <class T> 
     void LU_Decompose(
         const GenBandMatrix<T>& A, const LowerTriMatrixView<T>& L,
-        const BandMatrixView<T>& U, int* P)
+        const BandMatrixView<T>& U, ptrdiff_t* P)
     {
         TMVAssert(L.size() == A.colsize());
         TMVAssert(L.size() == A.rowsize());
         TMVAssert(L.size() == U.size());
         TMVAssert(U.nhi() >= A.nlo() + A.nhi());
-        int d(0);
         BandMatrix<T> LU(A.colsize(),A.rowsize(),A.nlo(),A.nlo()+A.nhi());
         LU = A;
-        LU_Decompose(LU.view(),P,d,A.nhi());
+        LU_Decompose(LU.view(),P,A.nhi());
         U = LU.upperBand();
         if (L.isunit())
             LU_PackedPL_Unpack(LU,P,L);

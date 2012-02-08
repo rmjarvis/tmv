@@ -23,16 +23,16 @@ namespace tmv {
     //  a matrix, so the same Helper structure is used for both.)
     //
 
-    template <int algo, int s, int xs, class M1, class M2>
+    template <int algo, ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper;
 
     // algo 0: s=0 or xs=0, so nothing to do
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<0,s,xs,M1,M2>
     { static void call(M1& , const M2& ) {} };
 
     // algo 1: xs=1 -- m1 has only one column.
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<1,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -47,7 +47,7 @@ namespace tmv {
     };
 
     // algo 5: Direct transpose
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<5,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -62,7 +62,7 @@ namespace tmv {
     };
 
     // algo 6: Direct transpose, with alias 
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<6,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -77,7 +77,7 @@ namespace tmv {
     };
 
     // algo 11: m2 is 1x1 
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<11,s,xs,M1,M2>
     {
         template <class M1x>
@@ -98,7 +98,7 @@ namespace tmv {
     };
 
     // algo 12: m2 is 2x2
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<12,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -114,8 +114,8 @@ namespace tmv {
             // m2.transpose() *= m1inv.transpose() results in a temporary.
             // Likewise with a 3x3 matrix.
             // For now, just write a simple loop.
-            const int K = xs == Unknown ? m1.rowsize() : xs;
-            for(int k=0;k<K;++k) {
+            const ptrdiff_t K = xs == Unknown ? m1.rowsize() : xs;
+            for(ptrdiff_t k=0;k<K;++k) {
                 T1 a = (m1.cref(0,k) * m2inv.cref(0,0) + 
                         m1.cref(1,k) * m2inv.cref(0,1));
                 T1 b = (m1.cref(0,k) * m2inv.cref(1,0) +
@@ -127,7 +127,7 @@ namespace tmv {
     };
 
     // algo 13: m2 is small enough to do inverse directly and multiply.
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<13,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -140,7 +140,7 @@ namespace tmv {
     };
 
     // algo 21: m2 is 1x1, m1 is a vector
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<21,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -155,7 +155,7 @@ namespace tmv {
     };
 
     // algo 22: m2 is 2x2, m1 is a vector
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<22,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -179,7 +179,7 @@ namespace tmv {
     };
 
     // algo 23: do inverse directly, m1 is a vector
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<23,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -192,7 +192,7 @@ namespace tmv {
     };
 
     // algo 31: Use Divider 
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<31,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -211,7 +211,7 @@ namespace tmv {
     };
 
     // algo 32: Calculate LU decomposition on the spot.
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<32,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -225,7 +225,7 @@ namespace tmv {
     };
 
     // algo 41: Use Divider (transpose)
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<41,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -244,7 +244,7 @@ namespace tmv {
     };
 
     // algo 42: Calculate LU decomposition on the spot (transpose)
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<42,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -258,7 +258,7 @@ namespace tmv {
     };
 
     // algo 51: m2 is diag, invert it directly.
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<51,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -273,7 +273,7 @@ namespace tmv {
     };
 
     // algo 52: m2 is diag, invert it directly, with alias check.
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<52,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -287,7 +287,7 @@ namespace tmv {
     };
 
     // algo 53: m1 is a vector
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<53,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -303,7 +303,7 @@ namespace tmv {
     };
 
     // algo 54: m1 is a vector, with alias check
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<54,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -318,7 +318,7 @@ namespace tmv {
     };
 
     // algo 55: m1 is diagonal
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<55,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -334,7 +334,7 @@ namespace tmv {
     };
 
     // algo 56: m1 is diagonal, with alias check
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<56,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -350,7 +350,7 @@ namespace tmv {
     };
 
     // algo 61: m2 is triangular
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<61,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -364,7 +364,7 @@ namespace tmv {
     };
 
     // algo 62: m2 is triangular, with alias check
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<62,s,xs,M1,M2>
     {
         static void call(M1& m1, const M2& m2)
@@ -377,7 +377,7 @@ namespace tmv {
     };
 
     // algo 98: Check aliases for transpose solution
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<98,s,xs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
@@ -410,7 +410,7 @@ namespace tmv {
     };
 
     // algo 99: Check aliases for regular solution
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<99,s,xs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
@@ -444,7 +444,7 @@ namespace tmv {
     };
 
     // algo -4: Figure out which algorithm to use for transpose solution
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<-4,s,xs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
@@ -477,7 +477,7 @@ namespace tmv {
     };
 
     // algo -3: Figure out which algorithm to use for regular solution
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<-3,s,xs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
@@ -547,7 +547,7 @@ namespace tmv {
     };
 
     // algo -2: Check for aliases? for regular solution
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<-2,s,xs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
@@ -560,7 +560,7 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases? for regular solution
-    template <int s, int xs, class M1, class M2>
+    template <ptrdiff_t s, ptrdiff_t xs, class M1, class M2>
     struct LDivEqM_Helper<-1,s,xs,M1,M2>
     {
         static TMV_INLINE void call(M1& m1, const M2& m2)
@@ -590,8 +590,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,M2::_rowsize>::same));
         TMVAssert(v1.size() == m2.colsize());
         TMVAssert(v1.size() == m2.rowsize());
-        const int s1 = Sizes<M2::_colsize,M2::_rowsize>::size;
-        const int s = Sizes<V1::_size,s1>::size;
+        const ptrdiff_t s1 = Sizes<M2::_colsize,M2::_rowsize>::size;
+        const ptrdiff_t s = Sizes<V1::_size,s1>::size;
         typedef typename V1::cview_type V1v;
         TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
         LDivEqM_Helper<-1,s,1,V1v,M2>::call(v1v,m2.mat());
@@ -614,9 +614,9 @@ namespace tmv {
         TMVStaticAssert((Sizes<M1::_colsize,M2::_rowsize>::same));
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m1.colsize() == m2.rowsize());
-        const int s1 = Sizes<M2::_colsize,M2::_rowsize>::size;
-        const int s = Sizes<M1::_colsize,s1>::size;
-        const int xs = M1::_rowsize;
+        const ptrdiff_t s1 = Sizes<M2::_colsize,M2::_rowsize>::size;
+        const ptrdiff_t s = Sizes<M1::_colsize,s1>::size;
+        const ptrdiff_t xs = M1::_rowsize;
         typedef typename M1::cview_type M1v;
         TMV_MAYBE_REF(M1,M1v) m1v = m1.cView();
         LDivEqM_Helper<-1,s,xs,M1v,M2>::call(m1v,m2.mat());
@@ -639,8 +639,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<V1::_size,M2::_rowsize>::same));
         TMVAssert(v1.size() == m2.colsize());
         TMVAssert(v1.size() == m2.rowsize());
-        const int s1 = Sizes<M2::_colsize,M2::_rowsize>::size;
-        const int s = Sizes<V1::_size,s1>::size;
+        const ptrdiff_t s1 = Sizes<M2::_colsize,M2::_rowsize>::size;
+        const ptrdiff_t s = Sizes<V1::_size,s1>::size;
         typedef typename V1::cview_type V1v;
         TMV_MAYBE_REF(V1,V1v) v1v = v1.cView();
         LDivEqM_Helper<-2,s,1,V1v,M2>::call(v1v,m2.mat());
@@ -664,9 +664,9 @@ namespace tmv {
         TMVStaticAssert((Sizes<M1::_rowsize,M2::_rowsize>::same));
         TMVAssert(m1.rowsize() == m2.colsize());
         TMVAssert(m1.rowsize() == m2.rowsize());
-        const int s1 = Sizes<M2::_colsize,M2::_rowsize>::size;
-        const int s = Sizes<M1::_rowsize,s1>::size;
-        const int xs = M1::_colsize;
+        const ptrdiff_t s1 = Sizes<M2::_colsize,M2::_rowsize>::size;
+        const ptrdiff_t s = Sizes<M1::_rowsize,s1>::size;
+        const ptrdiff_t xs = M1::_colsize;
         typedef typename M1::transpose_type::cview_type M1t;
         M1t m1t = m1.transpose().cView();
         LDivEqM_Helper<-2,s,xs,M1t,M2>::call(m1t,m2.mat());
@@ -678,11 +678,11 @@ namespace tmv {
     // m3 = m1 / m2, or v3 = v1 / m2
     // 
 
-    template <int algo, int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <int algo, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper;
 
     // algo 0: Nothing to do
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<0,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -691,7 +691,7 @@ namespace tmv {
     };
 
     // algo 1: xs == 1: M1,M3 have only one column
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<1,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -706,7 +706,7 @@ namespace tmv {
     };
 
     // algo 5: Direct transpose
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<5,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -723,7 +723,7 @@ namespace tmv {
     };
 
     // algo 6: Direct transpose, with alias
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<6,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -740,7 +740,7 @@ namespace tmv {
     };
 
     // algo 11: m2 is 1x1
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<11,cs,rs,xs,ix,T,M1,M2,M3>
     {
         template <class M1x, class M3x>
@@ -773,7 +773,7 @@ namespace tmv {
     };
 
     // algo 12: m2 is 2x2
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<12,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -788,7 +788,7 @@ namespace tmv {
     };
 
     // algo 13: m2 is small enough to do inverse directly and multiply.
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<13,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -803,7 +803,7 @@ namespace tmv {
     };
 
     // algo 21: m2 is 1x1, m1,m3 are vectors
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<21,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -820,7 +820,7 @@ namespace tmv {
     };
 
     // algo 22: m2 is 2x2, m1,m3 are vectors
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<22,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -847,7 +847,7 @@ namespace tmv {
     };
 
     // algo 23: do inverse directly, m1,m3 are vectors
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<23,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -862,7 +862,7 @@ namespace tmv {
     };
 
     // algo 31: Use Divider
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<31,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -884,7 +884,7 @@ namespace tmv {
     };
 
     // algo 32: Calculate LU decomposition on the spot.
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<32,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -901,7 +901,7 @@ namespace tmv {
     };
 
     // algo 33: Calculate QR decomposition on the spot.
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<33,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -918,7 +918,7 @@ namespace tmv {
     };
 
     // algo 34: Figure out whether to use LU or QR
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<34,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -936,7 +936,7 @@ namespace tmv {
     };
 
     // algo 41: Use Divider
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<41,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -958,7 +958,7 @@ namespace tmv {
     };
 
     // algo 42: Calculate LU decomposition on the spot.
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<42,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -975,7 +975,7 @@ namespace tmv {
     };
 
     // algo 43: Calculate QR decomposition on the spot.
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<43,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -992,7 +992,7 @@ namespace tmv {
     };
 
     // algo 44: Figure out whether to use LU or QR
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<44,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1011,7 +1011,7 @@ namespace tmv {
 
     // 51-38: m2 is diagonal
     // algo 51: Convert to m3 = x * m2.inverse() * m1
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<51,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1027,7 +1027,7 @@ namespace tmv {
     };
 
     // algo 52: Convert to m3 = x * m2.inverse() * m1, with alias
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<52,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1042,7 +1042,7 @@ namespace tmv {
     };
 
     // algo 53: m1,m3 are vectors, with alias check
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<53,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1059,7 +1059,7 @@ namespace tmv {
     };
 
     // algo 54: m1,m3 are vectors, with alias check
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<54,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1075,7 +1075,7 @@ namespace tmv {
     };
 
     // algo 55: All diagonal
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<55,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1092,7 +1092,7 @@ namespace tmv {
     };
 
     // algo 56: All diagonal, with alias check
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<56,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1109,7 +1109,7 @@ namespace tmv {
     };
 
     // algo 57: m1 is diagonal
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<57,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static void call(
@@ -1121,7 +1121,7 @@ namespace tmv {
 #endif
             if (m2.isSingular()) ThrowSingular("DiagMatrix");
             typedef typename M3::value_type T3;
-            const int s = Sizes<cs,rs>::size;
+            const ptrdiff_t s = Sizes<cs,rs>::size;
             typedef typename VCopyHelper<T3,s>::type V;
             V v(m2.size());
             ElemDivVV(x,m1.diag(),m2.diag(),v);
@@ -1133,7 +1133,7 @@ namespace tmv {
 
     // 61-46: m2 is triangular
     // algo 61: Convert to LDivEq
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<61,cs,rs,xs,ix,T,M1,M2,M3>
     {
         template <class M>
@@ -1166,7 +1166,7 @@ namespace tmv {
     };
 
     // algo 62: Convert to LDivEq with alias check
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<62,cs,rs,xs,ix,T,M1,M2,M3>
     {
         template <class M>
@@ -1200,7 +1200,7 @@ namespace tmv {
     };
 
     // algo 98: Check aliases for transpose solution
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<98,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -1243,7 +1243,7 @@ namespace tmv {
     };
 
     // algo 99: Check aliases for regular solution
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<99,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -1288,7 +1288,7 @@ namespace tmv {
     };
 
     // algo -4: Figure out which algorithm to use for transpose solution
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<-4,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -1331,7 +1331,7 @@ namespace tmv {
     };
 
     // algo -3: Figure out which algorithm to use for regular solution
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<-3,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -1427,7 +1427,7 @@ namespace tmv {
     };
 
     // algo -2: Check for aliases? for transpose solution
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<-2,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -1441,7 +1441,7 @@ namespace tmv {
     };
 
     // algo -1: Check for aliases? for regular solution
-    template <int cs, int rs, int xs, int ix, class T, class M1, class M2, class M3>
+    template <ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t xs, int ix, class T, class M1, class M2, class M3>
     struct LDivM_Helper<-1,cs,rs,xs,ix,T,M1,M2,M3>
     {
         static TMV_INLINE void call(
@@ -1473,8 +1473,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<V3::_size,M2::_rowsize>::same));
         TMVAssert(v1.size() == m2.colsize());
         TMVAssert(v3.size() == m2.rowsize());
-        const int cs = Sizes<M2::_colsize,V1::_size>::size;
-        const int rs = Sizes<M2::_rowsize,V3::_size>::size;
+        const ptrdiff_t cs = Sizes<M2::_colsize,V1::_size>::size;
+        const ptrdiff_t rs = Sizes<M2::_rowsize,V3::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V3::cview_type V3v;
         TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
@@ -1502,9 +1502,9 @@ namespace tmv {
         TMVAssert(m1.colsize() == m2.colsize());
         TMVAssert(m3.colsize() == m2.rowsize());
         TMVAssert(m3.rowsize() == m1.rowsize());
-        const int cs = Sizes<M2::_colsize,M1::_colsize>::size;
-        const int rs = Sizes<M2::_rowsize,M3::_colsize>::size;
-        const int xs = Sizes<M3::_rowsize,M1::_rowsize>::size;
+        const ptrdiff_t cs = Sizes<M2::_colsize,M1::_colsize>::size;
+        const ptrdiff_t rs = Sizes<M2::_rowsize,M3::_colsize>::size;
+        const ptrdiff_t xs = Sizes<M3::_rowsize,M1::_rowsize>::size;
         typedef typename M1::const_cview_type M1v;
         typedef typename M3::cview_type M3v;
         TMV_MAYBE_CREF(M1,M1v) m1v = m1.cView();
@@ -1531,8 +1531,8 @@ namespace tmv {
         TMVStaticAssert((Sizes<V3::_size,M2::_colsize>::same));
         TMVAssert(v1.size() == m2.rowsize());
         TMVAssert(v3.size() == m2.colsize());
-        const int cs = Sizes<M2::_colsize,V3::_size>::size;
-        const int rs = Sizes<M2::_rowsize,V1::_size>::size;
+        const ptrdiff_t cs = Sizes<M2::_colsize,V3::_size>::size;
+        const ptrdiff_t rs = Sizes<M2::_rowsize,V1::_size>::size;
         typedef typename V1::const_cview_type V1v;
         typedef typename V3::cview_type V3v;
         TMV_MAYBE_CREF(V1,V1v) v1v = v1.cView();
@@ -1563,9 +1563,9 @@ namespace tmv {
         TMVAssert(m1.rowsize() == m2.rowsize());
         TMVAssert(m3.rowsize() == m2.colsize());
         TMVAssert(m1.colsize() == m3.colsize());
-        const int cs = Sizes<M2::_colsize,M3::_rowsize>::size;
-        const int rs = Sizes<M2::_rowsize,M1::_rowsize>::size;
-        const int xs = Sizes<M3::_colsize,M1::_colsize>::size;
+        const ptrdiff_t cs = Sizes<M2::_colsize,M3::_rowsize>::size;
+        const ptrdiff_t rs = Sizes<M2::_rowsize,M1::_rowsize>::size;
+        const ptrdiff_t xs = Sizes<M3::_colsize,M1::_colsize>::size;
         typedef typename M1::const_transpose_type::const_cview_type M1t;
         typedef typename M3::transpose_type::cview_type M3t;
         M1t m1t = m1.transpose().cView();

@@ -26,16 +26,16 @@ namespace tmv {
     {
         static void call(const TMV_Writer& writer, const M1& m)
         {
-            const int M = m.colsize();
-            const int N = m.rowsize();
+            const ptrdiff_t M = m.colsize();
+            const ptrdiff_t N = m.rowsize();
             writer.begin();
             writer.writeCode("M");
             writer.writeSize(M);
             writer.writeSize(N);
             writer.writeStart();
-            for(int i=0;i<M;++i) {
+            for(ptrdiff_t i=0;i<M;++i) {
                 writer.writeLParen();
-                for(int j=0;j<N;++j) {
+                for(ptrdiff_t j=0;j<N;++j) {
                     if (j > 0) writer.writeSpace();
                     writer.writeValue(m.cref(i,j));
                 }
@@ -115,9 +115,9 @@ namespace tmv {
     {
     public :
         Matrix<T,NoDivider> m;
-        int i,j;
+        ptrdiff_t i,j;
         std::string exp,got;
-        int cs,rs;
+        ptrdiff_t cs,rs;
         bool is, iseof, isbad;
 
         MatrixReadError(std::istream& _is) throw() :
@@ -133,7 +133,7 @@ namespace tmv {
 
         template <class M>
         MatrixReadError(
-            int _i, int _j, const BaseMatrix_Rec<M>& _m, 
+            ptrdiff_t _i, ptrdiff_t _j, const BaseMatrix_Rec<M>& _m, 
             std::istream& _is) throw() :
             ReadError("Matrix"),
             m(_m), i(_i), j(_j), 
@@ -141,7 +141,7 @@ namespace tmv {
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
         template <class M>
         MatrixReadError(
-            int _i, int _j, const BaseMatrix_Rec<M>& _m,
+            ptrdiff_t _i, ptrdiff_t _j, const BaseMatrix_Rec<M>& _m,
             std::istream& _is,
             const std::string& _e, const std::string& _g) throw() :
             ReadError("Matrix"),
@@ -151,7 +151,7 @@ namespace tmv {
         template <class M>
         MatrixReadError(
             const BaseMatrix_Rec<M>& _m,
-            std::istream& _is, int _cs, int _rs) throw() :
+            std::istream& _is, ptrdiff_t _cs, ptrdiff_t _rs) throw() :
             ReadError("Matrix"),
             m(_m), i(0), cs(_cs), rs(_rs),
             is(_is), iseof(_is.eof()), isbad(_is.bad()) {}
@@ -187,16 +187,16 @@ namespace tmv {
                 }
             }
             if (m.colsize() > 0 || m.rowsize() > 0) {
-                const int N = m.rowsize();
+                const ptrdiff_t N = m.rowsize();
                 os<<"The portion of the Matrix which was successfully "
                     "read is: \n";
-                for(int ii=0;ii<i;++ii) {
+                for(ptrdiff_t ii=0;ii<i;++ii) {
                     os<<"( ";
-                    for(int jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
+                    for(ptrdiff_t jj=0;jj<N;++jj) os<<' '<<m.cref(ii,jj)<<' ';
                     os<<" )\n";
                 }
                 os<<"( ";
-                for(int jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
+                for(ptrdiff_t jj=0;jj<j;++jj) os<<' '<<m.cref(i,jj)<<' ';
                 os<<" )\n";
             }
         }
@@ -212,8 +212,8 @@ namespace tmv {
         static void call(const TMV_Reader& reader, M1& m)
         {
             typedef typename M1::value_type T;
-            const int M = m.colsize();
-            const int N = m.rowsize();
+            const ptrdiff_t M = m.colsize();
+            const ptrdiff_t N = m.rowsize();
             std::string exp, got;
             T temp;
             if (!reader.readStart(exp,got)) {
@@ -224,7 +224,7 @@ namespace tmv {
                 throw MatrixReadError<T>(0,0,m,reader.getis(),exp,got);
 #endif
             }
-            for(int i=0;i<M;++i) {
+            for(ptrdiff_t i=0;i<M;++i) {
                 if (!reader.readLParen(exp,got)) {
 #ifdef NOTHROW
                     std::cerr<<"Matrix Read Error: "<<got<<" != "<<exp<<std::endl;
@@ -233,7 +233,7 @@ namespace tmv {
                     throw MatrixReadError<T>(i,0,m,reader.getis(),exp,got);
 #endif
                 }
-                for(int j=0;j<N;++j) {
+                for(ptrdiff_t j=0;j<N;++j) {
                     if (j>0) {
                         if (!reader.readSpace(exp,got)) {
 #ifdef NOTHROW
@@ -318,7 +318,7 @@ namespace tmv {
         static TMV_INLINE void call(const TMV_Reader& reader, M1& m)
         {
             typedef typename M1::value_type T;
-            const int inst = 
+            const bool inst = 
                 (M1::_colsize == Unknown || M1::_colsize > 16) &&
                 (M1::_rowsize == Unknown || M1::_rowsize > 16) &&
                 Traits<T>::isinst;
@@ -380,7 +380,7 @@ namespace tmv {
             throw MatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int cs=m.colsize(), rs=m.rowsize();
+        ptrdiff_t cs=m.colsize(), rs=m.rowsize();
         if (!reader.readSize(cs) || !reader.readSize(rs)) {
 #ifdef NOTHROW
             std::cerr<<"Matrix Read Error: reading size\n";
@@ -414,7 +414,7 @@ namespace tmv {
             throw MatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
-        int cs=m.colsize(), rs=m.rowsize();
+        ptrdiff_t cs=m.colsize(), rs=m.rowsize();
         if (!reader.readSize(cs) || !reader.readSize(rs)) {
 #ifdef NOTHROW
             std::cerr<<"Matrix Read Error: reading size\n";
@@ -448,7 +448,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<MatrixView<T,A> >&>(m); 
     }
 
-    template <class T, int M, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     std::istream& operator>>(
         const TMV_Reader& reader, SmallMatrixView<T,M,N,Si,Sj,A> m)
     { 
@@ -464,7 +464,7 @@ namespace tmv {
             static_cast<BaseMatrix_Rec_Mutable<MatrixView<T,A> >&>(m); 
     }
 
-    template <class T, int M, int N, int Si, int Sj, int A>
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
     std::istream& operator>>(std::istream& is, SmallMatrixView<T,M,N,Si,Sj,A> m)
     { 
         return is >>

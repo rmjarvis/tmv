@@ -89,7 +89,7 @@ namespace tmv {
         TMVAssert(D.step() == 1);
         TMVAssert(E.step() == 1);
 
-        const int N = D.size();
+        const ptrdiff_t N = D.size();
 
         std::complex<T>* Uj = Udiag.ptr();
         std::complex<T>* Vj = Vdiag.ptr();
@@ -105,7 +105,7 @@ namespace tmv {
 #endif
         *Vj = T(1);
         std::complex<T> newcDj = *cDj;
-        for(int j=0;j<N-1;++j,++Uj,++Dj,++Ej,++cEj) {
+        for(ptrdiff_t j=0;j<N-1;++j,++Uj,++Dj,++Ej,++cEj) {
 #ifdef TMVFLDEBUG
             TMVAssert(Dj >= D.first);
             TMVAssert(Dj < D.last);
@@ -165,11 +165,11 @@ namespace tmv {
         TMVAssert(D.size() == A.rowsize());
         TMVAssert(D.size() == E.size()+1);
 
-        const int M = A.colsize();
-        const int N = A.rowsize();
+        const ptrdiff_t M = A.colsize();
+        const ptrdiff_t N = A.rowsize();
 
-        const int nlo = A.nlo();
-        const int nhi = A.nhi();
+        const ptrdiff_t nlo = A.nlo();
+        const ptrdiff_t nhi = A.nhi();
 
         if (nlo == 0 && nhi == 1) {
             Vector<T> Ud(N);
@@ -207,15 +207,15 @@ namespace tmv {
                 U1.reset(new MatrixView<T>(UU->view()));
             }
 
-            std::vector<int> vec(N), ver(N-1);
-            int endcol = nlo+1;
+            std::vector<ptrdiff_t> vec(N), ver(N-1);
+            ptrdiff_t endcol = nlo+1;
             Vector<T> Ubeta(N);
             Vector<T> Vbeta(N-1);
 
             T* Ubj = Ubeta.ptr();
-            for(int j=0;j<N-1;++j,++Ubj) {
+            for(ptrdiff_t j=0;j<N-1;++j,++Ubj) {
                 vec[j] = endcol;
-                int endrow = TMV_MIN(endcol+nhi,N);
+                ptrdiff_t endrow = TMV_MIN(endcol+nhi,N);
                 ver[j] = endrow;
 #ifdef TMVFLDEBUG
                 TMVAssert(Ubj >= Ubeta.first);
@@ -246,7 +246,7 @@ namespace tmv {
 
             if (V) {
                 V->setToIdentity();
-                for (int j=N-2;j>=0;--j) {
+                for (ptrdiff_t j=N-2;j>=0;--j) {
                     V->row(j+1,j+2,ver[j]) = U1->row(j,j+2,ver[j]);
                     HouseholderUnpack(
                         V->transpose().subMatrix(j+1,ver[j],j+1,N),Vbeta(j));
@@ -258,7 +258,7 @@ namespace tmv {
                 U->diag(1).setZero();
                 // Ubj is currently &U(N-1)
                 HouseholderUnpack(U->subMatrix(N-1,vec[N-1],N-1,N),*Ubj);
-                for (int j=N-2;j>=0;--j) {
+                for (ptrdiff_t j=N-2;j>=0;--j) {
                     U->row(j,j,ver[j]).setZero();
                     HouseholderUnpack(U->subMatrix(j,vec[j],j,N),*(--Ubj));
                 }
@@ -671,16 +671,16 @@ namespace tmv {
                 logdet += DiagMatrixViewOf(A.diag()).logDet(&s);
                 signdet *= s;
             }
-            const int N = A.rowsize();
+            const ptrdiff_t N = A.rowsize();
             const T* Ajj = A.cptr();
-            const int Ads = A.stepi()+A.stepj();
+            const ptrdiff_t Ads = A.stepi()+A.stepj();
             RT* Sj = S.diag().ptr();
-            const int Ss = S.diag().step();
+            const ptrdiff_t Ss = S.diag().step();
             T* Ujj = U ? U->ptr() : 0;
-            const int Uds = U ? (U->stepi()+U->stepj()) : 0;
+            const ptrdiff_t Uds = U ? (U->stepi()+U->stepj()) : 0;
 
             if (A.isconj()) {
-                for(int j=0;j<N;++j,Ajj+=Ads,Sj+=Ss) {
+                for(ptrdiff_t j=0;j<N;++j,Ajj+=Ads,Sj+=Ss) {
 #ifdef TMVFLDEBUG
                     TMVAssert(Sj >= S.first);
                     TMVAssert(Sj < S.last);
@@ -695,7 +695,7 @@ namespace tmv {
                     }
                 }
             } else {
-                for(int j=0;j<N;++j,Ajj+=Ads,Sj+=Ss) {
+                for(ptrdiff_t j=0;j<N;++j,Ajj+=Ads,Sj+=Ss) {
 #ifdef TMVFLDEBUG
                     TMVAssert(Sj >= S.first);
                     TMVAssert(Sj < S.last);
@@ -710,7 +710,7 @@ namespace tmv {
                     }
                 }
             }
-            AlignedArray<int> sortp(N);
+            AlignedArray<ptrdiff_t> sortp(N);
             S.diag().sort(sortp.get(),Descend);
             if (U) U->permuteCols(sortp.get());
             if (V) V->permuteRows(sortp.get());

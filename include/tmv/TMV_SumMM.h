@@ -172,12 +172,12 @@ namespace tmv {
         TMV_INLINE const Scaling<ix2,T2>& getX2() const { return x2; }
         TMV_INLINE const M2& getM2() const { return m2; }
 
-        TMV_INLINE int colsize() const { return m1.colsize(); }
-        TMV_INLINE int rowsize() const { return m1.rowsize(); }
-        TMV_INLINE int nlo() const { return TMV_MAX(m1.nlo(),m2.nlo()); }
-        TMV_INLINE int nhi() const { return TMV_MAX(m1.nhi(),m2.nhi()); }
+        TMV_INLINE ptrdiff_t colsize() const { return m1.colsize(); }
+        TMV_INLINE ptrdiff_t rowsize() const { return m1.rowsize(); }
+        TMV_INLINE ptrdiff_t nlo() const { return TMV_MAX(m1.nlo(),m2.nlo()); }
+        TMV_INLINE ptrdiff_t nhi() const { return TMV_MAX(m1.nhi(),m2.nhi()); }
 
-        value_type cref(int i, int j) const
+        value_type cref(ptrdiff_t i, ptrdiff_t j) const
         { return x1 * m1.cref(i,j) + x2 * m2.cref(i,j); }
 
         template <class M3>
