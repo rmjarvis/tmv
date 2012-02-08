@@ -429,7 +429,7 @@ namespace tmv {
             N == 1 ? 1 :
             N == 2 ? 2 :
             N == 3 ? 3 :
-            Traits<T>::isptrdiff_teger ? 20 :
+            Traits<T>::isinteger ? 20 :
             10;
         const StorageType S = static_cast<StorageType>(A & AllStorageType);
         return SMDet<algo,T,M,N,S>::det(m.cptr()); 
