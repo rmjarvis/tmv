@@ -1425,7 +1425,7 @@ namespace tmv {
             return *this; 
         }
 
-        template <class T2, int M, int N, int A2> 
+        template <class T2, ptrdiff_t M, ptrdiff_t N, int A2> 
         inline type& operator=(const SmallMatrix<T2,M,N,A2>& m2) 
         { 
             TMVAssert(colsize() == M && rowsize() == N);
@@ -2004,7 +2004,7 @@ namespace tmv {
         inline type& operator=(const AssignableToMatrix<CT>& m2) 
         { c_type::operator=(m2); return *this; }
 
-        template <class T2, int M, int N, int A2> 
+        template <class T2, ptrdiff_t M, ptrdiff_t N, int A2> 
         inline type& operator=(const SmallMatrix<T2,M,N,A2>& m2) 
         { c_type::operator=(m2); return *this; }
 
@@ -2564,7 +2564,7 @@ namespace tmv {
             m2.assignToM(view());
         }
 
-        template <class T2, int M, int N, int A2> 
+        template <class T2, ptrdiff_t M, ptrdiff_t N, int A2> 
         inline Matrix(const SmallMatrix<T2,M,N,A2>& rhs) :
             NEW_SIZE(rhs.colsize(),rhs.rowsize()) 
         { 
@@ -2644,7 +2644,7 @@ namespace tmv {
             return *this; 
         }
 
-        template <class T2, int M, int N, int A2> 
+        template <class T2, ptrdiff_t M, ptrdiff_t N, int A2> 
         inline type& operator=(const SmallMatrix<T2,M,N,A2>& m2)
         { 
             TMVAssert(m2.colsize() == colsize() && m2.rowsize() == rowsize());

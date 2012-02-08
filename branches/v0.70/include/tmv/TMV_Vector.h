@@ -889,7 +889,7 @@ namespace tmv {
             return *this; 
         }
 
-        template <class T2, int N, int A2> 
+        template <class T2, ptrdiff_t N, int A2> 
         inline type& operator=(const SmallVector<T2,N,A2>& v2) 
         { 
             TMVAssert(size() == v2.size());
@@ -1207,7 +1207,7 @@ namespace tmv {
         inline type& operator=(const AssignableToVector<CT>& v2) 
         { c_type::operator=(v2); return *this; }
 
-        template <class T2, int N, int A2> 
+        template <class T2, ptrdiff_t N, int A2> 
         inline type& operator=(const SmallVector<T2,N,A2>& v2) 
         { c_type::operator=(v2); return *this; }
 
@@ -1538,7 +1538,7 @@ namespace tmv {
             v2.assignToV(view()); 
         }
 
-        template <class T2, int N, int A2> 
+        template <class T2, ptrdiff_t N, int A2> 
         inline Vector(const SmallVector<T2,N,A2>& rhs) : 
             NEW_SIZE(rhs.size())
         {
@@ -1618,7 +1618,7 @@ namespace tmv {
             return *this; 
         }
 
-        template <class T2, int N, int A2> 
+        template <class T2, ptrdiff_t N, int A2> 
         inline type& operator=(const SmallVector<T2,N,A2>& v2) 
         { 
             TMVAssert(v2.size() == size());
