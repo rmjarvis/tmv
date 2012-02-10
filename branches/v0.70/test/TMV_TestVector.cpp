@@ -60,7 +60,7 @@ static void TestVectorReal()
     v(23) = T(10*N);
     v(42) = T(0.25);
     v(15) = T(-20*N);
-    ptrdiff_t imax,imin;
+    int imax,imin;
     if (showacc) {
         std::cout<<"v = "<<v<<std::endl;
         std::cout<<"v.MaxAbs = "<<v.maxAbsElement(&imax)<<std::endl;
@@ -349,7 +349,7 @@ static void TestVectorComplex()
     v3(23) = CT(40*N,9*N);
     v3(42) = CT(0,1);
     v3(15) = CT(-32*N,24*N);
-    ptrdiff_t imax,imin;
+    int imax,imin;
 
     if (!std::numeric_limits<T>::is_integer) {
         if (showacc) {
