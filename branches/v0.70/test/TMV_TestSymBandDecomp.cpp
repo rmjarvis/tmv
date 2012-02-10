@@ -524,8 +524,6 @@ void TestHermBandDecomp()
 template <class T, tmv::UpLoType uplo, tmv::StorageType stor> 
 void TestSymBandDecomp()
 {
-    showstartdone = true;
-
     typedef std::complex<T> CT;
     for (int mattype = START; mattype <= 17; mattype++) {
 #if !(XTEST & 64) || defined(LAP)
