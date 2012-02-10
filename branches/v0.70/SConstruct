@@ -87,8 +87,8 @@ opts.Add(BoolVariable('FORCE_MKL',
             'Force scons to use MKL for BLAS and/or LAPACK', False))
 opts.Add(BoolVariable('FORCE_ACML',
             'Force scons to use ACML for BLAS and/or LAPACK', False))
-opts.Add(BoolVariable('FORCE_CLAMD',
-            'Force scons to use clAmdBlas', False))
+#opts.Add(BoolVariable('FORCE_CLAMD',
+            #'Force scons to use clAmdBlas', False))
 opts.Add(BoolVariable('FORCE_GOTO',
             'Force scons to use GOTO BLAS', False))
 opts.Add(BoolVariable('FORCE_ATLAS',
@@ -990,7 +990,7 @@ def DoLibraryAndHeaderChecks(config):
     Mostly we check for a bunch of different BLAS and LAPACK libraries.
     Start with FORCE options if any.
     Otherwise, go through looking for a BLAS library in order:
-    MKL, ACML, CLAMD, GOTO, ATLAS, CBLAS, FBLAS
+    MKL, ACML, GOTO, ATLAS, CBLAS, FBLAS
     Once a BLAS library is found, check for a LAPACK library in order:
     (MKL or ACML if that BLAS) CLAPACK, FLAPACK, ATLAS LAPACK
     """
@@ -1031,10 +1031,10 @@ def DoLibraryAndHeaderChecks(config):
                 foundlap = 1
                 print 'Using ACML LAPACK'
  
-        elif config.env['FORCE_CLAMD']:
-            config.CheckCLAMD()
-            config.env.Append(CPPDEFINES=['CLAMD'])
-            print 'Using clAmdBlas'
+        #elif config.env['FORCE_CLAMD']:
+            #config.CheckCLAMD()
+            #config.env.Append(CPPDEFINES=['CLAMD'])
+            #print 'Using clAmdBlas'
  
         elif config.env['FORCE_GOTO']:
             config.CheckGOTO()
@@ -1074,9 +1074,9 @@ def DoLibraryAndHeaderChecks(config):
                 print 'Using ACML LAPACK'
 
  
-        elif config.CheckCLAMD() :
-            config.env.Append(CPPDEFINES=['CLAMD'])
-            print 'Using clAmdBlas'
+        #elif config.CheckCLAMD() :
+            #config.env.Append(CPPDEFINES=['CLAMD'])
+            #print 'Using clAmdBlas'
 
         elif config.CheckGOTO() :
             config.env.Append(CPPDEFINES=['FBLAS'])
@@ -1182,7 +1182,7 @@ def DoConfig(env):
     config = env.Configure(custom_tests = {
         'CheckMKL' : CheckMKL ,
         'CheckACML' : CheckACML ,
-        'CheckCLAMD' : CheckCLAMD ,
+        #'CheckCLAMD' : CheckCLAMD ,
         'CheckGOTO' : CheckGOTO ,
         'CheckATLAS' : CheckATLAS ,
         'CheckCBLAS' : CheckCBLAS ,
