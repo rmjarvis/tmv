@@ -169,30 +169,30 @@ void TestHermDecomp()
                 if (showstartdone) std::cout<<"CH"<<std::endl;
                 tmv::LowerTriMatrix<T> L = m.chd().getL();
                 tmv::Matrix<T> LLt = L*L.adjoint();
-                Assert(Norm(m-LLt) <= eps*normm,"Herm CH");
+                Assert(Equal(m,LLt,eps*normm),"Herm CH");
 
                 tmv::LowerTriMatrix<CT> cL = c.chd().getL();
                 tmv::Matrix<CT> cLLt = cL*cL.adjoint();
-                Assert(Norm(c-cLLt) <= ceps*normc,"Herm C CH");
+                Assert(Equal(c,cLLt,ceps*normc),"Herm C CH");
 
 #if (XTEST & 16)
                 tmv::HermMatrix<T,uplo|stor> m2 = m;
                 CH_Decompose(m2);
                 L = m2.lowerTri();
                 LLt = L*L.adjoint();
-                Assert(Norm(m-LLt) <= eps*normm,"Herm CH2");
+                Assert(Equal(m,LLt,eps*normm),"Herm CH2");
 
                 tmv::HermMatrix<CT,uplo|stor> c2 = c;
                 CH_Decompose(c2);
                 cL = c2.lowerTri();
                 cLLt = cL*cL.adjoint();
-                Assert(Norm(c-cLLt) <= ceps*normc,"Herm C CH2");
+                Assert(Equal(c,cLLt,ceps*normc),"Herm C CH2");
 
                 c2.conjugate() = c;
                 CH_Decompose(c2.conjugate());
                 cL = c2.conjugate().lowerTri();
                 cLLt = cL*cL.adjoint();
-                Assert(Norm(c-cLLt) <= ceps*normc,"Herm C CH2");
+                Assert(Equal(c,cLLt,ceps*normc),"Herm C CH2");
                 Assert(posdef, "Didn't throw NonPosDef, and mattype != pos def");
 #endif
                 std::cout<<"."; std::cout.flush();
@@ -215,14 +215,14 @@ void TestHermDecomp()
                 tmv::BandMatrix<T> D = m.lud().getD();
                 tmv::Permutation P = m.lud().getP();
                 tmv::Matrix<T> LDL = P*L*D*L.adjoint()*P.transpose();
-                Assert(Norm(m-LDL) <= eps*normm,"Herm LDL");
+                Assert(Equal(m,LDL,eps*normm),"Herm LDL");
 
                 tmv::LowerTriMatrix<CT,tmv::UnitDiag> cL = c.lud().getL();
                 tmv::BandMatrix<CT> cD = c.lud().getD();
                 tmv::Permutation cP = c.lud().getP();
                 tmv::Matrix<CT> cLDL = 
                     cP*cL*cD*cL.adjoint()*cP.transpose();
-                Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL");
+                Assert(Equal(c,cLDL,ceps*normc),"Herm C LDL");
 
 #if (XTEST & 16)
                 tmv::HermMatrix<T,uplo|stor> m2 = m;
@@ -231,32 +231,32 @@ void TestHermDecomp()
                 LDL_Decompose(m2,D2,P2);
                 L = m2.unitLowerTri();
                 LDL = P2*L*D2*L.adjoint()*P2.transpose();
-                Assert(Norm(m-LDL) <= eps*normm,"Herm LDL2");
+                Assert(Equal(m,LDL,eps*normm),"Herm LDL2");
 
                 tmv::HermMatrix<CT,uplo|stor> c2 = c;
                 tmv::HermBandMatrix<CT,uplo|stor> cD2(N,1);
                 LDL_Decompose(c2,cD2,P2);
                 cL = c2.unitLowerTri();
                 cLDL = P2*cL*cD2*cL.adjoint()*P2.transpose();
-                Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL2");
+                Assert(Equal(c,cLDL,ceps*normc),"Herm C LDL2");
 
                 c2.conjugate() = c;
                 LDL_Decompose(c2.conjugate(),cD2,P2);
                 cL = c2.conjugate().unitLowerTri();
                 cLDL = P2*cL*cD2*cL.adjoint()*P2.transpose();
-                Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL3");
+                Assert(Equal(c,cLDL,ceps*normc),"Herm C LDL3");
 
                 c2 = c;
                 LDL_Decompose(c2,cD2.conjugate(),P2);
                 cL = c2.unitLowerTri();
                 cLDL = P2*cL*cD2.conjugate()*cL.adjoint()*P2.transpose();
-                Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL4");
+                Assert(Equal(c,cLDL,ceps*normc),"Herm C LDL4");
 
                 c2.conjugate() = c;
                 LDL_Decompose(c2.conjugate(),cD2.conjugate(),P2);
                 cL = c2.conjugate().unitLowerTri();
                 cLDL = P2*cL*cD2.conjugate()*cL.adjoint()*P2.transpose();
-                Assert(Norm(c-cLDL) <= ceps*normc,"Herm C LDL5");
+                Assert(Equal(c,cLDL,ceps*normc),"Herm C LDL5");
 #endif
                 std::cout<<"."; std::cout.flush();
 #ifndef NOTHROW
@@ -279,12 +279,12 @@ void TestHermDecomp()
                 std::cout<<"Norm(m-U*S*Vt) = "<<Norm(m-U*S*Vt)<<std::endl;
                 std::cout<<"eps*Norm(m) = "<<eps*normm<<std::endl;
             }
-            Assert(Norm(m-U*S*Vt) <= eps*normm,"Herm SV");
+            Assert(Equal(m,U*S*Vt,eps*normm),"Herm SV");
 
             tmv::Matrix<CT> cU = c.svd().getU();
             tmv::DiagMatrix<T> cS = c.svd().getS();
             tmv::Matrix<CT> cVt = c.svd().getVt();
-            Assert(Norm(c-cU*cS*cVt) <= ceps*normc,"Herm C SV");
+            Assert(Equal(c,cU*cS*cVt,ceps*normc),"Herm C SV");
 
 #if (XTEST & 16)
             const T x = 
@@ -295,50 +295,60 @@ void TestHermDecomp()
             tmv::DiagMatrix<T> S2(N);
             tmv::Matrix<T> Vt2(N,N);
             SV_Decompose(m,U2,S2,Vt2);
-            Assert(Norm(m-U2*S2*Vt2) <= eps*normm,"Herm SV2");
+            Assert(Equal(m,U2*S2*Vt2,eps*normm),"Herm SV2");
 
             tmv::HermMatrix<T,uplo|stor> m2 = m;
             SV_Decompose(m2,S2);
-            Assert(Norm(S2-S) <= eps*normm,"Herm SV3");
+            Assert(Equal(S2,S,eps*normm),"Herm SV3");
             SV_Decompose(m,U2,S2);
-            Assert(Norm(S2-S) <= eps*normm,"Herm SV4 S");
-            Assert(Norm(tmv::Matrix<T>(m/x)*tmv::Matrix<T>(m.transpose()/x)-
-                        U2*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*U2.adjoint()) <= 
-                   eps*(normm/x)*(normm/x),"Herm SV4 U");
+            Assert(Equal(S2,S,eps*normm),"Herm SV4 S");
+            Assert(Equal(
+                    tmv::Matrix<T>(m/x)*tmv::Matrix<T>(m.transpose()/x),
+                    U2*tmv::DiagMatrix<T>(S2/x)*
+                    tmv::DiagMatrix<T>(S2/x)*U2.adjoint(),
+                    eps*(normm/x)*(normm/x)),"Herm SV4 U");
             SV_Decompose(m,S2,Vt2);
-            Assert(Norm(S2-S) <= eps*normm,"Herm SV5 S");
-            Assert(Norm(tmv::Matrix<T>(m.adjoint()/x)*tmv::Matrix<T>(m/x)-
-                        Vt2.adjoint()*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*Vt2) <= 
-                   eps*(normm/x)*(normm/x),"Herm SV5 Vt");
+            Assert(Equal(S2,S,eps*normm),"Herm SV5 S");
+            Assert(Equal(
+                    tmv::Matrix<T>(m.adjoint()/x)*tmv::Matrix<T>(m/x),
+                    Vt2.adjoint()*tmv::DiagMatrix<T>(S2/x)*
+                    tmv::DiagMatrix<T>(S2/x)*Vt2,
+                    eps*(normm/x)*(normm/x)),"Herm SV5 Vt");
 
             tmv::Matrix<CT> cU2(N,N);
             tmv::DiagMatrix<T> cS2(N);
             tmv::Matrix<CT> cVt2(N,N);
             SV_Decompose(c,cU2,cS2,cVt2);
-            Assert(Norm(c-cU2*cS2*cVt2) <= ceps*normc,"Herm C SV2");
+            Assert(Equal(c,cU2*cS2*cVt2,ceps*normc),"Herm C SV2");
 
             tmv::HermMatrix<CT,uplo|stor> c2 = c;
             SV_Decompose(c2,cS2);
-            Assert(Norm(cS2-cS) <= ceps*normc,"Herm C SV3");
+            Assert(Equal(cS2,cS,ceps*normc),"Herm C SV3");
             SV_Decompose(c,cU2,cS2);
-            Assert(Norm(cS2-cS) <= ceps*normc,"Herm C SV4 S");
-            Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
-                        cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <= 
-                   ceps*(normc/x)*(normc/x),"Herm C SV4 U");
+            Assert(Equal(cS2,cS,ceps*normc),"Herm C SV4 S");
+            Assert(Equal(
+                    tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x),
+                    cU2*tmv::DiagMatrix<CT>(cS2/x)*
+                    tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint(),
+                    ceps*(normc/x)*(normc/x)),"Herm C SV4 U");
             SV_Decompose(c,cS2,cVt2);
-            Assert(Norm(cS2-cS) <= ceps*normc,"Herm C SV5 S");
-            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
-                        cVt2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cVt2) <= 
-                   ceps*(normc/x)*(normc/x),"Herm C SV5 Vt");
+            Assert(Equal(cS2,cS,ceps*normc),"Herm C SV5 S");
+            Assert(Equal(
+                    tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x),
+                    cVt2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*
+                    tmv::DiagMatrix<CT>(cS2/x)*cVt2,
+                    ceps*(normc/x)*(normc/x)),"Herm C SV5 Vt");
 
             c2 = c.conjugate();
             SV_Decompose(c2.conjugate(),cS2);
-            Assert(Norm(cS2-cS) <= ceps*normc,"Herm C SV6");
+            Assert(Equal(cS2,cS,ceps*normc),"Herm C SV6");
             SV_Decompose(c,cU2.conjugate(),cS2);
-            Assert(Norm(cS2-cS) <= ceps*normc,"Herm C SV4 S");
-            Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
-                        cU2.conjugate()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.transpose()) <=
-                   ceps*(normc/x)*(normc/x), "Herm C SV4 U");
+            Assert(Equal(cS2,cS,ceps*normc),"Herm C SV4 S");
+            Assert(Equal(
+                    tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x),
+                    cU2.conjugate()*tmv::DiagMatrix<CT>(cS2/x)*
+                    tmv::DiagMatrix<CT>(cS2/x)*cU2.transpose(),
+                    ceps*(normc/x)*(normc/x)), "Herm C SV4 U");
 #endif
             std::cout<<"."; std::cout.flush();
         }
@@ -349,37 +359,38 @@ void TestHermDecomp()
             tmv::Matrix<T> V(N,N);
             tmv::Vector<T> L(N);
             Eigen(m,V,L);
-            Assert(Norm(m*V-V*DiagMatrixViewOf(L)) <= eps*normm,"Herm Eigen");
+            Assert(Equal(m*V,V*DiagMatrixViewOf(L),eps*normm),"Herm Eigen");
 
             tmv::Matrix<CT> cV(N,N);
             tmv::Vector<T> cL(N);
             Eigen(c,cV,cL);
-            Assert(Norm(c*cV-cV*DiagMatrixViewOf(cL)) <= eps*normc,
+            Assert(Equal(c*cV,cV*DiagMatrixViewOf(cL),eps*normc),
                    "Herm C Eigen");
 
 #if (XTEST & 16)
             tmv::Vector<T> L2(N);
             Eigen(m,L2);
-            Assert(Norm(L2-L) <= eps*normm,"Herm Eigen2");
+            Assert(Equal(L2,L,eps*normm),"Herm Eigen2");
 
             tmv::Vector<T> cL2(N);
             Eigen(c,cL2);
-            Assert(Norm(cL2-cL) <= eps*normc,"Herm C Eigen2");
+            Assert(Equal(cL2,cL,eps*normc),"Herm C Eigen2");
 
             Eigen(c,cV.conjugate(),cL);
-            Assert(Norm(c*cV.conjugate()-cV.conjugate()*DiagMatrixViewOf(cL)) <= 
-                   eps*normc,"Herm C Eigen3");
+            Assert(Equal(
+                    c*cV.conjugate(),cV.conjugate()*DiagMatrixViewOf(cL),
+                    eps*normc),"Herm C Eigen3");
 
             Eigen(c.conjugate(),cV,cL);
-            Assert(Norm(c.conjugate()*cV-cV*DiagMatrixViewOf(cL)) <= eps*normc,
+            Assert(Equal(c.conjugate()*cV,cV*DiagMatrixViewOf(cL),eps*normc),
                    "Herm C Eigen4");
 
             Eigen(c.conjugate(),cV.conjugate(),cL);
-            Assert(Norm(c*cV-cV*DiagMatrixViewOf(cL)) <= eps*normc,
+            Assert(Equal(c*cV,cV*DiagMatrixViewOf(cL),eps*normc),
                    "Herm C Eigen5");
 
             Eigen(c.conjugate(),cL2);
-            Assert(Norm(cL2-cL) <= eps*normc,"Herm C Eigen6");
+            Assert(Equal(cL2,cL,eps*normc),"Herm C Eigen6");
 #endif
             std::cout<<"."; std::cout.flush();
         }
@@ -393,7 +404,7 @@ void TestHermDecomp()
                 if (showstartdone) std::cout<<"SquareRoot"<<std::endl;
                 tmv::HermMatrix<T,uplo|stor> S = m;
                 SquareRoot(S);
-                Assert(Norm(m-S*S) <= eps*normm,"Herm Square Root");
+                Assert(Equal(m,S*S,eps*normm),"Herm Square Root");
 
                 tmv::HermMatrix<CT,uplo|stor> cS = c;
                 SquareRoot(cS);
@@ -401,7 +412,7 @@ void TestHermDecomp()
 #if (XTEST & 16)
                 cS.conjugate() = c;
                 SquareRoot(cS.conjugate());
-                Assert(Norm(c-cS.conjugate()*cS.conjugate()) <= eps*normc,
+                Assert(Equal(c,cS.conjugate()*cS.conjugate(),eps*normc),
                        "Herm C Square Root 2");
 #endif
                 Assert(posdef,"Didn't throw NonPosDef, and mattype != pos def");
@@ -579,7 +590,7 @@ void TestSymDecomp()
                     std::cout<<"Norm(m-LDL) = "<<Norm(m-LDL)<<std::endl;
                     std::cout<<"eps*Norm(m) = "<<eps*normm<<std::endl;
                 }
-                Assert(Norm(m-LDL) <= eps*normm,"Sym LDL");
+                Assert(Equal(m,LDL,eps*normm),"Sym LDL");
 
                 tmv::LowerTriMatrix<CT,tmv::UnitDiag> cL = c.lud().getL();
                 tmv::BandMatrix<CT> cD = c.lud().getD();
@@ -590,7 +601,7 @@ void TestSymDecomp()
                     std::cout<<"Norm(c-cLDL) = "<<Norm(c-cLDL)<<std::endl;
                     std::cout<<"ceps*Norm(c) = "<<ceps*normc<<std::endl;
                 }
-                Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL");
+                Assert(Equal(c,cLDL,ceps*normc),"Sym C LDL");
 
 #if (XTEST & 16)
                 tmv::SymMatrix<T,uplo|stor> m2 = m;
@@ -599,32 +610,32 @@ void TestSymDecomp()
                 LDL_Decompose(m2,D2,P2);
                 L = m2.unitLowerTri();
                 LDL = P2*L*D2*L.transpose()*P2.transpose();
-                Assert(Norm(m-LDL) <= eps*normm,"Sym LDL2");
+                Assert(Equal(m,LDL,eps*normm),"Sym LDL2");
 
                 tmv::SymMatrix<CT,uplo|stor> c2 = c;
                 tmv::SymBandMatrix<CT,uplo|stor> cD2(N,1);
                 LDL_Decompose(c2,cD2,P2);
                 cL = c2.unitLowerTri();
                 cLDL = P2*cL*cD2*cL.transpose()*P2.transpose();
-                Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL2");
+                Assert(Equal(c,cLDL,ceps*normc),"Sym C LDL2");
 
                 c2.conjugate() = c;
                 LDL_Decompose(c2.conjugate(),cD2,P2);
                 cL = c2.conjugate().unitLowerTri();
                 cLDL = P2*cL*cD2*cL.transpose()*P2.transpose();
-                Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL3");
+                Assert(Equal(c,cLDL,ceps*normc),"Sym C LDL3");
 
                 c2= c;
                 LDL_Decompose(c2,cD2.conjugate(),P2);
                 cL = c2.unitLowerTri();
                 cLDL = P2*cL*cD2.conjugate()*cL.transpose()*P2.transpose();
-                Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL4");
+                Assert(Equal(c,cLDL,ceps*normc),"Sym C LDL4");
 
                 c2.conjugate() = c;
                 LDL_Decompose(c2.conjugate(),cD2.conjugate(),P2);
                 cL = c2.conjugate().unitLowerTri();
                 cLDL = P2*cL*cD2.conjugate()*cL.transpose()*P2.transpose();
-                Assert(Norm(c-cLDL) <= ceps*normc,"Sym C LDL5");
+                Assert(Equal(c,cLDL,ceps*normc),"Sym C LDL5");
 #endif
                 std::cout<<"."; std::cout.flush();
 #ifndef NOTHROW
@@ -647,7 +658,7 @@ void TestSymDecomp()
                 std::cout<<"Norm(m-U*S*Vt) = "<<Norm(m-U*S*Vt)<<std::endl;
                 std::cout<<"eps*Norm(m) = "<<eps*normm<<std::endl;
             }
-            Assert(Norm(m-U*S*Vt) <= eps*normm,"Sym SV");
+            Assert(Equal(m,U*S*Vt,eps*normm),"Sym SV");
 
             tmv::Matrix<CT> cU = c.symsvd().getU();
             tmv::DiagMatrix<T> cS = c.symsvd().getS();
@@ -656,7 +667,7 @@ void TestSymDecomp()
                 std::cout<<"Norm(c-U*S*Vt) = "<<Norm(c-cU*cS*cVt)<<std::endl;
                 std::cout<<"eps*Norm(c) = "<<eps*normc<<std::endl;
             }
-            Assert(Norm(c-cU*cS*cVt) <= ceps*normc,"Sym C SV");
+            Assert(Equal(c,cU*cS*cVt,ceps*normc),"Sym C SV");
 
 #if (XTEST & 16)
             const T x = 
@@ -667,50 +678,59 @@ void TestSymDecomp()
             tmv::DiagMatrix<T> S2(N);
             tmv::Matrix<T> Vt2(N,N);
             SV_Decompose(m,U2,S2,Vt2);
-            Assert(Norm(m-U2*S2*Vt2) <= eps*normm,"Sym SV2");
+            Assert(Equal(m,U2*S2*Vt2,eps*normm),"Sym SV2");
 
             tmv::SymMatrix<T,uplo|stor> m2 = m;
             SV_Decompose(m2,S2);
-            Assert(Norm(S2-S) <= eps*normm,"Sym SV3");
+            Assert(Equal(S2,S,eps*normm),"Sym SV3");
             SV_Decompose(m,U2,S2);
-            Assert(Norm(S2-S) <= eps*normm,"Sym SV4 S");
-            Assert(Norm(tmv::Matrix<T>(m/x)*tmv::Matrix<T>(m.adjoint()/x)-
-                        U2*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*U2.adjoint()) <=
-                   eps*(normm/x)*(normm/x), "Sym SV4 U");
+            Assert(Equal(S2,S,eps*normm),"Sym SV4 S");
+            Assert(Equal(
+                    tmv::Matrix<T>(m/x)*tmv::Matrix<T>(m.adjoint()/x),
+                    U2*tmv::DiagMatrix<T>(S2/x)*
+                    tmv::DiagMatrix<T>(S2/x)*U2.adjoint(),
+                    eps*(normm/x)*(normm/x)), "Sym SV4 U");
             SV_Decompose(m,S2,Vt2);
-            Assert(Norm(S2-S) <= eps*normm,"Sym SV5 S");
-            Assert(Norm(tmv::Matrix<T>(m.adjoint()/x)*tmv::Matrix<T>(m/x)-
-                        Vt2.adjoint()*tmv::DiagMatrix<T>(S2/x)*tmv::DiagMatrix<T>(S2/x)*Vt2) <=
-                   eps*(normm/x)*(normm/x), "Sym SV5 Vt");
+            Assert(Equal(S2,S,eps*normm),"Sym SV5 S");
+            Assert(Equal(
+                    tmv::Matrix<T>(m.adjoint()/x)*tmv::Matrix<T>(m/x),
+                    Vt2.adjoint()*tmv::DiagMatrix<T>(S2/x)*
+                    tmv::DiagMatrix<T>(S2/x)*Vt2,
+                    eps*(normm/x)*(normm/x)), "Sym SV5 Vt");
 
             tmv::Matrix<CT> cU2(N,N);
             tmv::DiagMatrix<T> cS2(N);
             tmv::Matrix<CT> cVt2(N,N);
             SV_Decompose(c,cU2,cS2,cVt2);
-            Assert(Norm(c-cU2*cS2*cVt2) <= ceps*normc,"Sym C SV2");
+            Assert(Equal(c,cU2*cS2*cVt2,ceps*normc),"Sym C SV2");
 
             tmv::SymMatrix<CT,uplo|stor> c2 = c;
             SV_Decompose(c2,cS2);
-            Assert(Norm(cS2-cS) <= ceps*normc,"Sym C SV3");
+            Assert(Equal(cS2,cS,ceps*normc),"Sym C SV3");
             SV_Decompose(c,cU2,cS2);
-            Assert(Norm(cS2-cS) <= ceps*normc,"Sym C SV4 S");
-            Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
-                        cU2*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint()) <= 
-                   ceps*(normc/x)*(normc/x),"Sym C SV4 U");
+            Assert(Equal(cS2,cS,ceps*normc),"Sym C SV4 S");
+            Assert(Equal(
+                    tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x),
+                    cU2*tmv::DiagMatrix<CT>(cS2/x)*
+                    tmv::DiagMatrix<CT>(cS2/x)*cU2.adjoint(),
+                    ceps*(normc/x)*(normc/x)),"Sym C SV4 U");
             SV_Decompose(c,cS2,cVt2);
-            Assert(Norm(cS2-cS) <= ceps*normc,"Sym C SV5 S");
-            Assert(Norm(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x)-
-                        cVt2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cVt2) <= 
-                   ceps*(normc/x)*(normc/x),"Sym C SV5 Vt");
+            Assert(Equal(cS2,cS,ceps*normc),"Sym C SV5 S");
+            Assert(Equal(tmv::Matrix<CT>(c.adjoint()/x)*tmv::Matrix<CT>(c/x),
+                        cVt2.adjoint()*tmv::DiagMatrix<CT>(cS2/x)*
+                        tmv::DiagMatrix<CT>(cS2/x)*cVt2,
+                        ceps*(normc/x)*(normc/x)),"Sym C SV5 Vt");
 
             c2 = c.conjugate();
             SV_Decompose(c2.conjugate(),cS2);
-            Assert(Norm(cS2-cS) <= ceps*normc,"Sym C SV6");
+            Assert(Equal(cS2,cS,ceps*normc),"Sym C SV6");
             SV_Decompose(c,cU2.conjugate(),cS2);
-            Assert(Norm(cS2-cS) <= ceps*normc,"Sym C SV7 S");
-            Assert(Norm(tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x)-
-                        cU2.conjugate()*tmv::DiagMatrix<CT>(cS2/x)*tmv::DiagMatrix<CT>(cS2/x)*cU2.transpose()) <= 
-                   ceps*(normc/x)*(normc/x),"Sym C SV7 U");
+            Assert(Equal(cS2,cS,ceps*normc),"Sym C SV7 S");
+            Assert(Equal(
+                    tmv::Matrix<CT>(c/x)*tmv::Matrix<CT>(c.adjoint()/x),
+                    cU2.conjugate()*tmv::DiagMatrix<CT>(cS2/x)*
+                    tmv::DiagMatrix<CT>(cS2/x)*cU2.transpose(),
+                    ceps*(normc/x)*(normc/x)),"Sym C SV7 U");
 #endif
             std::cout<<"."; std::cout.flush();
         }
@@ -841,57 +861,57 @@ void TestPolar()
                 std::cout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<std::endl;
                 std::cout<<"eps = "<<eps<<std::endl;
             }
-            Assert(Norm(m-U*P) <= eps*normm,"Polar");
-            Assert(Norm(U.adjoint()*U-T(1)) <= eps,"Polar UtU");
+            Assert(Equal(m,U*P,eps*normm),"Polar");
+            Assert(Equal(U.adjoint()*U,T(1),eps),"Polar UtU");
 
             tmv::HermMatrix<CT,tmv::Lower|tmv::ColMajor> cP(N);
             tmv::Matrix<CT,stor> cU = c;
             PolarDecompose(cU,cP);
-            Assert(Norm(c-cU*cP) <= ceps*normc,"C Polar");
-            Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Polar UtU");
+            Assert(Equal(c,cU*cP,ceps*normc),"C Polar");
+            Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C Polar UtU");
 
 #if (XTEST & 16)
             U = m;
             PolarDecompose(U,P.transpose());
-            Assert(Norm(m-U*P) <= eps*normm,"Polar2");
-            Assert(Norm(U.adjoint()*U-T(1)) <= eps,"Polar2 UtU");
+            Assert(Equal(m,U*P,eps*normm),"Polar2");
+            Assert(Equal(U.adjoint()*U,T(1),eps),"Polar2 UtU");
 
             cU = c;
             PolarDecompose(cU,cP.adjoint());
-            Assert(Norm(c-cU*cP) <= ceps*normc,"C Polar2");
-            Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Polar2 UtU");
+            Assert(Equal(c,cU*cP,ceps*normc),"C Polar2");
+            Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C Polar2 UtU");
 
             cU = c;
             PolarDecompose(cU,cP.transpose());
-            Assert(Norm(c-cU*cP.transpose()) <= ceps*normc,"C Polar3");
-            Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Polar3 UtU");
+            Assert(Equal(c,cU*cP.transpose(),ceps*normc),"C Polar3");
+            Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C Polar3 UtU");
 
             cU = c;
             PolarDecompose(cU,cP.conjugate());
-            Assert(Norm(c-cU*cP.transpose()) <= ceps*normc,"C Polar4");
-            Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Polar4 UtU");
+            Assert(Equal(c,cU*cP.transpose(),ceps*normc),"C Polar4");
+            Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C Polar4 UtU");
 
             cU.conjugate() = c;
             PolarDecompose(cU.conjugate(),cP);
-            Assert(Norm(c-cU.conjugate()*cP) <= ceps*normc,"C Polar5");
-            Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Polar5 UtU");
+            Assert(Equal(c,cU.conjugate()*cP,ceps*normc),"C Polar5");
+            Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C Polar5 UtU");
 
             cU.conjugate() = c;
             PolarDecompose(cU.conjugate(),cP.adjoint());
-            Assert(Norm(c-cU.conjugate()*cP) <= ceps*normc,"C Polar6");
-            Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Polar6 UtU");
+            Assert(Equal(c,cU.conjugate()*cP,ceps*normc),"C Polar6");
+            Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C Polar6 UtU");
 
             cU.conjugate() = c;
             PolarDecompose(cU.conjugate(),cP.transpose());
-            Assert(Norm(c-cU.conjugate()*cP.transpose()) <= ceps*normc,
+            Assert(Equal(c,cU.conjugate()*cP.transpose(),ceps*normc),
                    "C Polar7");
-            Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Polar7 UtU");
+            Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C Polar7 UtU");
 
             cU.conjugate() = c;
             PolarDecompose(cU.conjugate(),cP.conjugate());
-            Assert(Norm(c-cU.conjugate()*cP.transpose()) <= ceps*normc,
+            Assert(Equal(c,cU.conjugate()*cP.transpose(),ceps*normc),
                    "C Polar8");
-            Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Polar8 UtU");
+            Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C Polar8 UtU");
 #endif
             std::cout<<"."; std::cout.flush();
         } while (false);
@@ -911,8 +931,8 @@ void TestPolar()
                 std::cout<<"Norm(b-UP) = "<<Norm(b-U*P)<<"  "<<eps*normb<<std::endl;
                 std::cout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<"  "<<eps<<std::endl;
             }
-            Assert(Norm(b-U*P) <= eps*normb,"Band Polar");
-            Assert(Norm(U.adjoint()*U-T(1)) <= eps,"Band Polar UtU");
+            Assert(Equal(b,U*P,eps*normb),"Band Polar");
+            Assert(Equal(U.adjoint()*U,T(1),eps),"Band Polar UtU");
 
             tmv::HermMatrix<CT,tmv::Lower|tmv::ColMajor> cP(N);
             tmv::Matrix<CT,stor> cU(cb.colsize(),N);
@@ -923,43 +943,43 @@ void TestPolar()
                 std::cout<<"Norm(UtU-1) = "<<Norm(cU.adjoint()*cU-T(1))<<
                     "  "<<ceps<<std::endl;
             }
-            Assert(Norm(cb-cU*cP) <= ceps*normcb,"C Band Polar");
-            Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Band Polar UtU");
+            Assert(Equal(cb,cU*cP,ceps*normcb),"C Band Polar");
+            Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C Band Polar UtU");
 
 #if (XTEST & 16)
             PolarDecompose(b,U,P.transpose());
-            Assert(Norm(b-U*P) <= eps*normb,"Band Polar2");
-            Assert(Norm(U.adjoint()*U-T(1)) <= eps,"Band Polar2 UtU");
+            Assert(Equal(b,U*P,eps*normb),"Band Polar2");
+            Assert(Equal(U.adjoint()*U,T(1),eps),"Band Polar2 UtU");
 
             PolarDecompose(cb,cU,cP.adjoint());
-            Assert(Norm(cb-cU*cP) <= ceps*normcb,"C Band Polar2");
-            Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Band Polar2 UtU");
+            Assert(Equal(cb,cU*cP,ceps*normcb),"C Band Polar2");
+            Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C Band Polar2 UtU");
 
             PolarDecompose(cb,cU,cP.transpose());
-            Assert(Norm(cb-cU*cP.transpose()) <= ceps*normcb,"C Band Polar3");
-            Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Band Polar3 UtU");
+            Assert(Equal(cb,cU*cP.transpose(),ceps*normcb),"C Band Polar3");
+            Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C Band Polar3 UtU");
 
             PolarDecompose(cb,cU,cP.conjugate());
-            Assert(Norm(cb-cU*cP.transpose()) <= ceps*normcb,"C Band Polar4");
-            Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Band Polar4 UtU");
+            Assert(Equal(cb,cU*cP.transpose(),ceps*normcb),"C Band Polar4");
+            Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C Band Polar4 UtU");
 
             PolarDecompose(cb,cU.conjugate(),cP);
-            Assert(Norm(cb-cU.conjugate()*cP) <= ceps*normcb,"C Band Polar5");
-            Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Band Polar5 UtU");
+            Assert(Equal(cb,cU.conjugate()*cP,ceps*normcb),"C Band Polar5");
+            Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C Band Polar5 UtU");
 
             PolarDecompose(cb,cU.conjugate(),cP.adjoint());
-            Assert(Norm(cb-cU.conjugate()*cP) <= ceps*normcb,"C Band Polar6");
-            Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Band Polar6 UtU");
+            Assert(Equal(cb,cU.conjugate()*cP,ceps*normcb),"C Band Polar6");
+            Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C Band Polar6 UtU");
 
             PolarDecompose(cb,cU.conjugate(),cP.transpose());
-            Assert(Norm(cb-cU.conjugate()*cP.transpose()) <= ceps*normcb,
+            Assert(Equal(cb,cU.conjugate()*cP.transpose(),ceps*normcb),
                    "C Band Polar7");
-            Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Band Polar7 UtU");
+            Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C Band Polar7 UtU");
 
             PolarDecompose(cb,cU.conjugate(),cP.conjugate());
-            Assert(Norm(cb-cU.conjugate()*cP.transpose()) <= ceps*normcb,
+            Assert(Equal(cb,cU.conjugate()*cP.transpose(),ceps*normcb),
                    "C Band Polar8");
-            Assert(Norm(cU.adjoint()*cU-T(1)) <= ceps,"C Band Polar8 UtU");
+            Assert(Equal(cU.adjoint()*cU,T(1),ceps),"C Band Polar8 UtU");
 #endif
             std::cout<<"."; std::cout.flush();
         } while (false);

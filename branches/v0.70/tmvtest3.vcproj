@@ -342,7 +342,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\TMV_TestSmallMatrixArith_B7.cpp"
+				RelativePath=".\test\TMV_TestSmallMatrixArith_B7a.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TMV_TestSmallMatrixArith_B7b.cpp"
 				>
 			</File>
 			<File

@@ -65,7 +65,7 @@ opts.Add(BoolVariable('TEST_INT',
         'Instantiate <int> in the test suite', False))
 
 opts.Add(BoolVariable('IMPORT_ENV',
-            'Import full environment from calling shell', False))
+            'Import full environment from calling shell', True))
 opts.Add(PathVariable('EXTRA_PATH',
             'Extra paths for executables (separated by : if more than 1)',
             '',PathVariable.PathAccept))
@@ -119,6 +119,8 @@ opts.Add('XTEST',
         'Do extra tests in the test suite (1=non-unit step, 2=extra sizes/shapes, 4=mix real/complex,  8=degenerate,  16=extra arithmetic, 32=FortranStyle, 64=extreme matrices) ', 0)
 opts.Add(BoolVariable('MEM_TEST',
             'Test for memory leaks', False))
+opts.Add(BoolVariable('NAN_TEST',
+            'Test for memory initialized with nans', False))
 opts.Add(BoolVariable('SMALL_TESTS',
             'Make the small test programs: tmvtest1a, tmvtest1b, etc.', False))
 opts.Add(BoolVariable('WARN',

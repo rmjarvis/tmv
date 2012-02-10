@@ -108,12 +108,8 @@ so the whitespace doesn't confuse the parser.  e.g. \texttt{scons FLAGS='-O3 -g'
 \end{itemize}
 The next flags set up the paths that SCons will use to try to find your BLAS and LAPACK libraries.
 \begin{itemize}
-\item \texttt{IMPORT\_ENV=false} specifies whether to import the entire environment from the calling shell.
-The default
-is to start with a clean environment to be less susceptible to a particular user having an unusual set up.  But sometimes sysadmins set things up in non-standard ways and use
-the environment variables to make everything work.  If this is the case, then 
-\texttt{IMPORT\_ENV} should do the trick.  It imports the environment, but does not add any
-\texttt{-I} or \texttt{-L} flags when compiling.
+\item \texttt{IMPORT\_ENV=true} specifies whether to import the entire environment from the calling shell.
+The default is for SCons to use the same environment as the shell from which it is called.  However, sometimes it can be useful to start with a clean environment and manually add paths (see below) for various things, in which case you would want to set this to \tt{false}.
 \item \texttt{EXTRA\_PATH=''} specifies directories in which to search for executables (notably the compiler, although you can also just give the full path in the \texttt{CXX} parameter)
 in addition to the standard locations such as \texttt{/usr/bin} and \texttt{/usr/local/bin}.
 If you are giving multiple directories, they should be separated by colons.
@@ -212,6 +208,7 @@ supports it.  So the default is to use the flag \texttt{-msse2}, but you can dis
 is treated as a bit set, with each non-zero bit turning on particular tests.  Type ``\tt{scons -h}'' for 
 more information.
 \item \texttt{MEM\_TEST=false} specifies whether to include extra memory tests in the library and test suite.
+\item \texttt{NAN\_TEST=false} specifies whether to stress test the code's ability to deal with \tt{nan}s in the allocated memory by initializing all memory allocations with all \tt{nan}s.
 \item \texttt{USE\_STEGR=false} specifies whether to use the LAPACK algorithm called
 \tt{dstegr} (or \tt{sstegr} for \tt{<float>}) for symmetric
 eigenvector calculation.  If it is false, the divide-and-conquer algorithm,

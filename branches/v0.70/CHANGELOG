@@ -365,6 +365,12 @@ Changed and Deprecated features:
    but I haven't done (and don't plan to do) much to gussy that up.  It's 
    still pretty bare bones to just get the library installed for you.
 
+-- Switched the default value for the SCons option IMPORT_ENV to false.
+   I think most users probably expect SCons to be able to search the include 
+   and library paths that they have set up in their environment.  So if
+   you want SCons to have a clean environment and manually give it extra
+   paths, you should explicitly set IMPORT_ENV=false.
+
 New features:
 
 -- Added the matrix iterators described above.
@@ -446,7 +452,6 @@ New features:
 -- Added the ability of SymMatrix SVD division to be done in place.
    In addition to the memory used for the SymMatrix values, it also uses 
    the other half of the matrix that is normally not used for anything.
-
 
 Bug fixes:
 

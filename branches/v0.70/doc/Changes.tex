@@ -415,6 +415,13 @@ but I haven't done (and don't plan to do) much to gussy them up.  They're
 still pretty bare bones to just get the library installed for you and
 compile the test suite.
 
+\item
+Switched the default value for the SCons option \tt{IMPORT\_ENV} to \tt{false}.
+I think most users probably expect SCons to be able to search the include 
+and library paths that they have set up in their environment.  So if
+you want SCons to have a clean environment and manually give it extra
+paths, you should explicitly set \tt{IMPORT\_ENV=false}.
+
 \item[$\times$]
 Removed the functions and methods that had been deprecated in version 0.65.
 

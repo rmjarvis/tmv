@@ -795,7 +795,7 @@ namespace tmv {
     { return v.maxAbsElement(); }
 
     template <class T, ptrdiff_t N, int A> 
-    inline VectorView<T,A> Conjugate(const SmallVector<T,N,A>& v)
+    inline ConstVectorView<T,A> Conjugate(const SmallVector<T,N,A>& v)
     { return v.conjugate(); }
 
     template <class T, ptrdiff_t N, int A> 
