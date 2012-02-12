@@ -290,6 +290,7 @@ namespace tmv {
         Vector<double> E1(n);
         E1.subVector(0,n-1) = E;
         E1[n-1] = 0.;
+        int Lap_info=0;
         if (setUV) {
             char c = 'I';
             TMVAssert(U.cptr() && Vt.cptr());
@@ -310,7 +311,6 @@ namespace tmv {
                 lwork = 8*n;
                 AlignedArray<int> iwork(lwork);
 #endif
-                int Lap_info=0;
                 LAPNAME(dbdsdc) (
                     LAPCM LAPV(u),LAPV(c),LAPV(n),
                     LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -329,7 +329,6 @@ namespace tmv {
                 lwork = 8*n;
                 AlignedArray<int> iwork(lwork);
 #endif
-                int Lap_info=0;
                 LAPNAME(dbdsdc) (
                     LAPCM LAPV(u),LAPV(c),LAPV(n),
                     LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -357,7 +356,6 @@ namespace tmv {
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
-            int Lap_info=0;
             LAPNAME(dbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -380,7 +378,6 @@ namespace tmv {
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
-            int Lap_info=0;
             LAPNAME(dbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -418,6 +415,7 @@ namespace tmv {
         Vector<double> E1(n);
         E1.subVector(0,n-1) = E;
         E1[n-1] = 0.;
+        int Lap_info=0;
         if (U.cptr() || Vt.cptr()) {
             char c = 'I';
             Matrix<double,ColMajor> U1(n,n,0.);
@@ -439,7 +437,6 @@ namespace tmv {
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
-            int Lap_info=0;
             LAPNAME(dbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -468,7 +465,6 @@ namespace tmv {
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
-            int Lap_info=0;
             LAPNAME(dbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -507,6 +503,7 @@ namespace tmv {
         Vector<float> E1(n);
         E1.subVector(0,n-1) = E;
         E1[n-1] = 0.;
+        int Lap_info=0;
         if (setUV) {
             char c = 'I';
             TMVAssert(U.cptr() && Vt.cptr());
@@ -521,7 +518,6 @@ namespace tmv {
                 lwork = 8*n;
                 AlignedArray<int> iwork(lwork);
 #endif
-                int Lap_info=0;
                 LAPNAME(sbdsdc) (
                     LAPCM LAPV(u),LAPV(c),LAPV(n),
                     LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -540,7 +536,6 @@ namespace tmv {
                 lwork = 8*n;
                 AlignedArray<int> iwork(lwork);
 #endif
-                int Lap_info=0;
                 LAPNAME(sbdsdc) (
                     LAPCM LAPV(u),LAPV(c),LAPV(n),
                     LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -560,7 +555,6 @@ namespace tmv {
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
-            int Lap_info=0;
             LAPNAME(sbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -579,7 +573,6 @@ namespace tmv {
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
-            int Lap_info=0;
             LAPNAME(sbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -614,6 +607,7 @@ namespace tmv {
         Vector<float> E1(n);
         E1.subVector(0,n-1) = E;
         E1[n-1] = 0.;
+        int Lap_info=0;
         if (U.cptr() || Vt.cptr()) {
             char c = 'I';
             Matrix<float,ColMajor> U1(n,n,0.F);
@@ -627,7 +621,6 @@ namespace tmv {
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
-            int Lap_info=0;
             LAPNAME(sbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -653,7 +646,6 @@ namespace tmv {
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
-            int Lap_info=0;
             LAPNAME(sbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),

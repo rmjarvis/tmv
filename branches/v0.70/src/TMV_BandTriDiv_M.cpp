@@ -304,9 +304,9 @@ namespace tmv {
             (A.nhi()==0 && A.isrm()) ? A.nlo() : 0;
         int lda = A.diagstep();
         int ldb = B.stepj();
+        int Lap_info=0;
         if (A.iscm() && A.isconj()) {
             B.conjugateSelf();
-            int Lap_info=0;
             LAPNAME(ztbtrs) (
                 LAPCM A.nlo()==0?LAPCH_UP:LAPCH_LO,
                 LAPCH_NT, dt==UnitDiag?LAPCH_U:LAPCH_NU,
@@ -314,7 +314,6 @@ namespace tmv {
                 LAPP(B.ptr()),LAPV(ldb) LAPINFO LAP1 LAP1 LAP1);
             B.conjugateSelf();
         } else {
-            int Lap_info=0;
             LAPNAME(ztbtrs) (
                 LAPCM (A.iscm()?A.nlo():A.nhi())==0?LAPCH_UP:LAPCH_LO,
                 A.iscm()?LAPCH_NT:A.isconj()?LAPCH_CT:LAPCH_T, 
@@ -378,9 +377,9 @@ namespace tmv {
             (A.nhi()==0 && A.isrm()) ? A.nlo() : 0;
         int lda = A.diagstep();
         int ldb = B.stepj();
+        int Lap_info=0;
         if (A.iscm() && A.isconj()) {
             B.conjugateSelf();
-            int Lap_info=0;
             LAPNAME(ctbtrs) (
                 LAPCM A.nlo()==0?LAPCH_UP:LAPCH_LO,
                 LAPCH_NT, dt==UnitDiag?LAPCH_U:LAPCH_NU,
@@ -388,7 +387,6 @@ namespace tmv {
                 LAPP(B.ptr()),LAPV(ldb) LAPINFO LAP1 LAP1 LAP1);
             B.conjugateSelf();
         } else {
-            int Lap_info=0;
             LAPNAME(ctbtrs) (
                 LAPCM (A.iscm()?A.nlo():A.nhi())==0?LAPCH_UP:LAPCH_LO,
                 A.iscm()?LAPCH_NT:A.isconj()?LAPCH_CT:LAPCH_T, 
