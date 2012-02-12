@@ -44,19 +44,8 @@ namespace tmv {
     // First two things from TMV_Base.h
     bool TMV_FALSE = false;
 
-    // Next one thing from TMV_ListInit.h
-    ListInitClass ListInit;
-
     // And also some things from TMV_Blas.h
-    int Lap_info = 0;
-    char Blas_ch_N = 'N';
-    char Blas_ch_C = 'C';
-    char Blas_ch_T = 'T';
-    char Blas_ch_L = 'L';
-    char Blas_ch_R = 'R';
-    char Blas_ch_U = 'U';
-
-    void LAP_Results(const char* fn)
+    void LAP_Results(int Lap_info, const char* fn)
     {
         if (Lap_info < 0) {
 #ifdef NOTHROW
@@ -69,10 +58,9 @@ namespace tmv {
     }
 
     void LAP_Results(
-        const int lwork_opt, const int m, const int n,
-        const int lwork, const char* fn)
+        int Lap_info, int lwork_opt, int m, int n, int lwork, const char* fn)
     {
-        LAP_Results(fn);
+        LAP_Results(Lap_info,fn);
         if (lwork_opt > lwork) { 
             std::ostringstream s;
             s << "LAPACK function " << fn << 

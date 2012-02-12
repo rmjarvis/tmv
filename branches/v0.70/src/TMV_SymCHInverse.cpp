@@ -72,10 +72,11 @@ namespace tmv {
 
         int n = sinv.size();
         int lda = sinv.stepj();
+        int Lap_info=0;
         LAPNAME(dpotri) (
             LAPCM (sinv.uplo() == Upper ? LAPCH_UP : LAPCH_LO),
             LAPV(n),LAPP(sinv.ptr()),LAPV(lda) LAPINFO LAP1);
-        LAP_Results("dpotri");
+        LAP_Results(Lap_info,"dpotri");
     }
     template <> 
     void LapCHInverse(SymMatrixView<std::complex<double> > sinv)
@@ -85,10 +86,11 @@ namespace tmv {
 
         int n = sinv.size();
         int lda = sinv.stepj();
+        int Lap_info=0;
         LAPNAME(zpotri) (
             LAPCM (sinv.uplo() == Upper ? LAPCH_UP : LAPCH_LO),
             LAPV(n),LAPP(sinv.ptr()),LAPV(lda) LAPINFO LAP1);
-        LAP_Results("zpotri");
+        LAP_Results(Lap_info,"zpotri");
     }
 #endif
 #ifdef INST_FLOAT
@@ -100,10 +102,11 @@ namespace tmv {
 
         int n = sinv.size();
         int lda = sinv.stepj();
+        int Lap_info=0;
         LAPNAME(spotri) (
             LAPCM (sinv.uplo() == Upper ? LAPCH_UP : LAPCH_LO),
             LAPV(n),LAPP(sinv.ptr()),LAPV(lda) LAPINFO LAP1);
-        LAP_Results("spotri");
+        LAP_Results(Lap_info,"spotri");
     }
     template <> 
     void LapCHInverse(SymMatrixView<std::complex<float> > sinv)
@@ -113,10 +116,11 @@ namespace tmv {
 
         int n = sinv.size();
         int lda = sinv.stepj();
+        int Lap_info=0;
         LAPNAME(cpotri) (
             LAPCM (sinv.uplo() == Upper ? LAPCH_UP : LAPCH_LO),
             LAPV(n),LAPP(sinv.ptr()),LAPV(lda) LAPINFO LAP1);
-        LAP_Results("cpotri");
+        LAP_Results(Lap_info,"cpotri");
     }
 #endif // FLOAT
 #endif // LAP

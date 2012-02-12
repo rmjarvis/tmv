@@ -822,6 +822,7 @@ namespace tmv {
         int n = A.size();
         int lda = A.stepj();
         AlignedArray<int> lap_p(n);
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
@@ -843,9 +844,9 @@ namespace tmv {
             LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-        LAP_Results("dsytrf");
+        LAP_Results(Lap_info,"dsytrf");
 #else
-        LAP_Results(int(work[0]),n,n,lwork,"dsytrf");
+        LAP_Results(Lap_info,int(work[0]),n,n,lwork,"dsytrf");
 #endif
         // Supposedly, sytrf is supposed to successfully complete the
         // decomposition if it encounters a singularity.  But in my 
@@ -923,6 +924,7 @@ namespace tmv {
         int lda = A.stepj();
         AlignedArray<int> lap_p(n);
         if (A.isherm()) {
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = n*LAP_BLOCKSIZE;
@@ -944,13 +946,14 @@ namespace tmv {
                 LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("zhetrf");
+            LAP_Results(Lap_info,"zhetrf");
 #else
-            LAP_Results(int(TMV_REAL(work[0])),n,n,lwork,"zhetrf");
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),n,n,lwork,"zhetrf");
 #endif
             if (Lap_info > 0) 
                 throw Singular("SymMatrix in LAPACK routine zhetrf");
         } else {
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = n*LAP_BLOCKSIZE;
@@ -972,9 +975,9 @@ namespace tmv {
                 LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("zsytrf");
+            LAP_Results(Lap_info,"zsytrf");
 #else
-            LAP_Results(int(TMV_REAL(work[0])),n,n,lwork,"zsytrf");
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),n,n,lwork,"zsytrf");
 #endif
             if (Lap_info > 0) 
                 throw Singular("SymMatrix in LAPACK routine zsytrf");
@@ -1071,6 +1074,7 @@ namespace tmv {
         int n = A.size();
         int lda = A.stepj();
         AlignedArray<int> lap_p(n);
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
@@ -1092,9 +1096,9 @@ namespace tmv {
             LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-        LAP_Results("ssytrf");
+        LAP_Results(Lap_info,"ssytrf");
 #else
-        LAP_Results(int(work[0]),n,n,lwork,"ssytrf");
+        LAP_Results(Lap_info,int(work[0]),n,n,lwork,"ssytrf");
 #endif
         if (Lap_info > 0) throw Singular("SymMatrix in LAPACK routine ssytrf");
         int* pi = lap_p.get();
@@ -1167,6 +1171,7 @@ namespace tmv {
         int lda = A.stepj();
         AlignedArray<int> lap_p(n);
         if (A.isherm()) {
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = n*LAP_BLOCKSIZE;
@@ -1188,13 +1193,14 @@ namespace tmv {
                 LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("chetrf");
+            LAP_Results(Lap_info,"chetrf");
 #else
-            LAP_Results(int(TMV_REAL(work[0])),n,n,lwork,"chetrf");
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),n,n,lwork,"chetrf");
 #endif
             if (Lap_info > 0) 
                 throw Singular("SymMatrix in LAPACK routine chetrf");
         } else {
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = n*LAP_BLOCKSIZE;
@@ -1216,9 +1222,9 @@ namespace tmv {
                 LAPCM LAPCH_LO,LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(lap_p.get()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("csytrf");
+            LAP_Results(Lap_info,"csytrf");
 #else
-            LAP_Results(int(TMV_REAL(work[0])),n,n,lwork,"csytrf");
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),n,n,lwork,"csytrf");
 #endif
             if (Lap_info > 0) 
                 throw Singular("SymMatrix in LAPACK routine csytrf");

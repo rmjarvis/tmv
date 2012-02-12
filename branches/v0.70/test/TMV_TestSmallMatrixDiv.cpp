@@ -35,6 +35,7 @@ static void TestSmallSquareDiv()
     tmv::SmallVector<T,N> x = b/m;
     tmv::SmallVector<T,N> b2 = m*x;
     if (showacc) {
+        std::cout<<"eps = "<<eps<<std::endl;
         std::cout<<"b = "<<b<<std::endl;
         std::cout<<"x = b/m = "<<x<<std::endl;
         std::cout<<"b2 = "<<b2<<std::endl;

@@ -93,11 +93,12 @@ namespace tmv {
 #else
         for(int i=0;i<n;++i) ipiv[i] = i+1;
 #endif
+        int Lap_info=0;
         LAPNAME(dgetrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
             LAPP(LUx.cptr()),LAPV(lda),
             LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
-        LAP_Results("dgetrs");
+        LAP_Results(Lap_info,"dgetrs");
     }
     template <> 
     void LapLULDivEq(
@@ -121,11 +122,12 @@ namespace tmv {
 #else
         for(int i=0;i<n;++i) ipiv[i] = i+1;
 #endif
+        int Lap_info=0;
         LAPNAME(zgetrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
             LAPP(LUx.cptr()),LAPV(lda),
             LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
-        LAP_Results("zgetrs");
+        LAP_Results(Lap_info,"zgetrs");
     }
 #endif
 #ifdef INST_FLOAT
@@ -150,11 +152,12 @@ namespace tmv {
 #else
         for(int i=0;i<n;++i) ipiv[i] = i+1;
 #endif
+        int Lap_info=0;
         LAPNAME(sgetrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
             LAPP(LUx.cptr()),LAPV(lda),
             LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
-        LAP_Results("sgetrs");
+        LAP_Results(Lap_info,"sgetrs");
     }
     template <> 
     void LapLULDivEq(
@@ -178,11 +181,12 @@ namespace tmv {
 #else
         for(int i=0;i<n;++i) ipiv[i] = i+1;
 #endif
+        int Lap_info=0;
         LAPNAME(cgetrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
             LAPP(LUx.cptr()),LAPV(lda),
             LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
-        LAP_Results("cgetrs");
+        LAP_Results(Lap_info,"cgetrs");
     }
 #endif // MKL
 #endif // FLOAT
@@ -274,11 +278,12 @@ namespace tmv {
 #else
         for(int i=0;i<n;++i) ipiv[i] = i+1;
 #endif
+        int Lap_info=0;
         LAPNAME(dgetrs) (
             LAPCM LAPCH_T,LAPV(n),LAPV(nrhs),
             LAPP(LUx.cptr()),LAPV(lda),
             LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
-        LAP_Results("dgetrs");
+        LAP_Results(Lap_info,"dgetrs");
     }
     template <> 
     void LapLURDivEq(
@@ -301,11 +306,12 @@ namespace tmv {
 #else
         for(int i=0;i<n;++i) ipiv[i] = i+1;
 #endif
+        int Lap_info=0;
         LAPNAME(zgetrs) (
             LAPCM m.isconj()?LAPCH_CT:LAPCH_T,LAPV(n),LAPV(nrhs),
             LAPP(LUx.cptr()),LAPV(lda),
             LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
-        LAP_Results("zgetrs");
+        LAP_Results(Lap_info,"zgetrs");
     }
 #endif
 #ifdef INST_FLOAT
@@ -331,11 +337,12 @@ namespace tmv {
 #else
         for(int i=0;i<n;++i) ipiv[i] = i+1;
 #endif
+        int Lap_info=0;
         LAPNAME(sgetrs) (
             LAPCM LAPCH_T,LAPV(n),LAPV(nrhs),
             LAPP(LUx.cptr()),LAPV(lda),
             LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
-        LAP_Results("sgetrs");
+        LAP_Results(Lap_info,"sgetrs");
     }
     template <> 
     void LapLURDivEq(
@@ -358,11 +365,12 @@ namespace tmv {
 #else
         for(int i=0;i<n;++i) ipiv[i] = i+1;
 #endif
+        int Lap_info=0;
         LAPNAME(cgetrs) (
             LAPCM m.isconj()?LAPCH_CT:LAPCH_T,LAPV(n),LAPV(nrhs),
             LAPP(LUx.cptr()),LAPV(lda),
             LAPP(ipiv.get()),LAPP(m.ptr()),LAPV(ldb) LAPINFO LAP1);
-        LAP_Results("cgetrs");
+        LAP_Results(Lap_info,"cgetrs");
     }
 #endif // MKL
 #endif // FLOAT

@@ -278,6 +278,7 @@ namespace tmv {
         beta.setZero();
         D.setZero();
         E.setZero();
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
@@ -301,9 +302,9 @@ namespace tmv {
             LAPP(A.ptr()),LAPV(ldu),LAPP(D.ptr()),LAPP(E.ptr()),
             LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-        LAP_Results("dsytrd");
+        LAP_Results(Lap_info,"dsytrd");
 #else
-        LAP_Results(int(work[0]),n,n,lwork,"dsytrd");
+        LAP_Results(Lap_info,int(work[0]),n,n,lwork,"dsytrd");
 #endif
     }
     template <> 
@@ -343,6 +344,7 @@ namespace tmv {
         beta.setZero();
         D.setZero();
         E.setZero();
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
@@ -369,9 +371,9 @@ namespace tmv {
         //std::cout<<"After zhetrd\n";
         if (!A.isconj()) beta.conjugateSelf();
 #ifdef LAPNOWORK
-        LAP_Results("zhetrd");
+        LAP_Results(Lap_info,"zhetrd");
 #else
-        LAP_Results(int(TMV_REAL(work[0])),n,n,lwork,"zhetrd");
+        LAP_Results(Lap_info,int(TMV_REAL(work[0])),n,n,lwork,"zhetrd");
 #endif
         //std::cout<<"Done LapTridiag\n";
     }
@@ -400,6 +402,7 @@ namespace tmv {
         beta.setZero();
         D.setZero();
         E.setZero();
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
@@ -423,9 +426,9 @@ namespace tmv {
             LAPP(A.ptr()),LAPV(ldu),LAPP(D.ptr()),LAPP(E.ptr()),
             LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-        LAP_Results("ssytrd");
+        LAP_Results(Lap_info,"ssytrd");
 #else
-        LAP_Results(int(work[0]),n,n,lwork,"ssytrd");
+        LAP_Results(Lap_info,int(work[0]),n,n,lwork,"ssytrd");
 #endif
     }
     template <> 
@@ -453,6 +456,7 @@ namespace tmv {
         beta.setZero();
         D.setZero();
         E.setZero();
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
@@ -488,9 +492,9 @@ namespace tmv {
         //std::cout<<"After chetrd"<<std::endl;
         if (!A.isconj()) beta.conjugateSelf();
 #ifdef LAPNOWORK
-        LAP_Results("chetrd");
+        LAP_Results(Lap_info,"chetrd");
 #else
-        LAP_Results(int(TMV_REAL(work[0])),n,n,lwork,"chetrd");
+        LAP_Results(Lap_info,int(TMV_REAL(work[0])),n,n,lwork,"chetrd");
 #endif
     }
 #endif

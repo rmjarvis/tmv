@@ -226,8 +226,8 @@ namespace tmv {
 
 }
 
-#define BLASP(x) tmv::FBLAS_ConvertP(x)
-#define BLASCValue(x) tmv::FBLAS_ConvertToComplex(x)
+#define BLASP(x) FBLAS_ConvertP(x)
+#define BLASCValue(x) FBLAS_ConvertToComplex(x)
 
 #endif
 
@@ -279,7 +279,7 @@ namespace tmv {
     { return MKL_ConvertP(const_cast<std::complex<float>*>(ptr)); }
 }
 
-#define LAPP(x) tmv::MKL_ConvertP(x)
+#define LAPP(x) MKL_ConvertP(x)
 
 #endif // !CLAPACK
 #endif // !FLAPACK
@@ -308,16 +308,16 @@ namespace tmv {
 // until the underlying problem has been fixed.
 //#define BLASZDROT
 
-/* Works with either of these sets of defines: */
+// Works with either of these sets of defines:
+#if 0
 #define BLASZDOTRETURN
-
-/*
+#else
 #define BLAS_
 #define BLASPTR
 #define BLASSTRLEN
 #define BLASZDOTFIRST
 #define BLASZDOTSUB sub  // This one is optional actually
-*/
+#endif
 
 namespace tmv {
 
@@ -344,8 +344,8 @@ namespace tmv {
 
 }
 
-#define BLASP(x) tmv::ACML_ConvertP(x)
-#define BLASCValue(x) tmv::ACML_ConvertToComplex(x)
+#define BLASP(x) ACML_ConvertP(x)
+#define BLASCValue(x) ACML_ConvertToComplex(x)
 
 #ifndef NOLAP
 #ifndef CLAPACK
@@ -353,16 +353,17 @@ namespace tmv {
 
 #define LAP
 
-/* Works with one or the other of these sets of defines: */
+// Works with one or the other of these sets of defines:
+// Except that the latter lets us fix the dstedc workspace bug
+#if 0
 #define LAPNOWORK
-
-/*
+#else
 #define LAP_
 #define LAPPTR
 #define LAPSTRLEN
-*/
+#endif
 
-#define LAPP(x) tmv::ACML_ConvertP(x)
+#define LAPP(x) ACML_ConvertP(x)
 
 #endif // !CLAPACK
 #endif // !FLAPACK
@@ -452,7 +453,7 @@ namespace tmv {
 
 }
 
-#define LAPP(x) tmv::CLAPACK_ConvertP(x)
+#define LAPP(x) CLAPACK_ConvertP(x)
 
 #endif // LAP
 
@@ -503,8 +504,8 @@ namespace tmv {
 
 }
 
-#define LAPP(x) tmv::FLAPACK_ConvertP(x)
-#define LAPCValue(x) tmv::FLAPACK_ConvertToComplex(x)
+#define LAPP(x) FLAPACK_ConvertP(x)
+#define LAPCValue(x) FLAPACK_ConvertToComplex(x)
 
 #endif // LAP
 #endif // BLAS
@@ -526,14 +527,12 @@ namespace tmv {
 #endif // ELAP
 
 namespace tmv {
-    // These are defined in TMV_Vector.cpp
-    extern int Lap_info; 
-    extern char Blas_ch_N;
-    extern char Blas_ch_C;
-    extern char Blas_ch_T;
-    extern char Blas_ch_L;
-    extern char Blas_ch_R;
-    extern char Blas_ch_U;
+    const char Blas_ch_N = 'N';
+    const char Blas_ch_C = 'C';
+    const char Blas_ch_T = 'T';
+    const char Blas_ch_L = 'L';
+    const char Blas_ch_R = 'R';
+    const char Blas_ch_U = 'U';
 }
 
 #ifdef BLAS
@@ -571,15 +570,15 @@ namespace tmv {
 #define BLASCH_UP CblasUpper
 #else
 #define BLASCM
-#define BLASCH_NT BLASV(tmv::Blas_ch_N)
-#define BLASCH_CT BLASV(tmv::Blas_ch_C)
-#define BLASCH_T BLASV(tmv::Blas_ch_T)
-#define BLASCH_L BLASV(tmv::Blas_ch_L)
-#define BLASCH_R BLASV(tmv::Blas_ch_R)
-#define BLASCH_U BLASV(tmv::Blas_ch_U)
-#define BLASCH_NU BLASV(tmv::Blas_ch_N)
-#define BLASCH_LO BLASV(tmv::Blas_ch_L)
-#define BLASCH_UP BLASV(tmv::Blas_ch_U)
+#define BLASCH_NT BLASV(Blas_ch_N)
+#define BLASCH_CT BLASV(Blas_ch_C)
+#define BLASCH_T BLASV(Blas_ch_T)
+#define BLASCH_L BLASV(Blas_ch_L)
+#define BLASCH_R BLASV(Blas_ch_R)
+#define BLASCH_U BLASV(Blas_ch_U)
+#define BLASCH_NU BLASV(Blas_ch_N)
+#define BLASCH_LO BLASV(Blas_ch_L)
+#define BLASCH_UP BLASV(Blas_ch_U)
 #endif
 
 #ifdef BLASSTRLEN
@@ -636,7 +635,7 @@ namespace tmv {
 #endif
 
 #ifdef LAPINFORETURN
-#define LAPNAME(x) tmv::Lap_info = LAPNAMEX(x)
+#define LAPNAME(x) Lap_info = LAPNAMEX(x)
 #else
 #define LAPNAME(x) LAPNAMEX(x)
 #endif
@@ -664,15 +663,15 @@ namespace tmv {
 #define LAPCH_UP CblasUpper
 #else
 #define LAPCM
-#define LAPCH_NT LAPV(tmv::Blas_ch_N)
-#define LAPCH_CT LAPV(tmv::Blas_ch_C)
-#define LAPCH_T LAPV(tmv::Blas_ch_T)
-#define LAPCH_L LAPV(tmv::Blas_ch_L)
-#define LAPCH_R LAPV(tmv::Blas_ch_R)
-#define LAPCH_U LAPV(tmv::Blas_ch_U)
-#define LAPCH_NU LAPV(tmv::Blas_ch_N)
-#define LAPCH_LO LAPV(tmv::Blas_ch_L)
-#define LAPCH_UP LAPV(tmv::Blas_ch_U)
+#define LAPCH_NT LAPV(Blas_ch_N)
+#define LAPCH_CT LAPV(Blas_ch_C)
+#define LAPCH_T LAPV(Blas_ch_T)
+#define LAPCH_L LAPV(Blas_ch_L)
+#define LAPCH_R LAPV(Blas_ch_R)
+#define LAPCH_U LAPV(Blas_ch_U)
+#define LAPCH_NU LAPV(Blas_ch_N)
+#define LAPCH_LO LAPV(Blas_ch_L)
+#define LAPCH_UP LAPV(Blas_ch_U)
 #endif
 
 #ifdef LAPSTRLEN
@@ -692,9 +691,9 @@ namespace tmv {
 #ifdef LAPINFORETURN
 #define LAPINFO
 #elif defined LAPINFOREF
-#define LAPINFO ,tmv::Lap_info
+#define LAPINFO ,Lap_info
 #else
-#define LAPINFO ,LAPP(&tmv::Lap_info)
+#define LAPINFO ,LAPP(&Lap_info)
 #endif
 
 #ifdef CLAP
@@ -715,10 +714,9 @@ namespace tmv {
 namespace tmv {
 
     // Defined in Vector.cpp
-    void LAP_Results(const char* fn);
+    void LAP_Results(int Lap_info, const char* fn);
     void LAP_Results(
-        const int lwork_opt, const int m, const int n,
-        const int lwork, const char* fn);
+        int Lap_info, int lwork_opt, int m, int n, int lwork, const char* fn);
 
     template <class T> class GenMatrix;
     template <class T> class GenUpperTriMatrix;

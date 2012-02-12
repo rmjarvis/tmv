@@ -792,6 +792,7 @@ namespace tmv
         for(int i=0;i<n;++i) (lap_p.get())[i] = 0;
         beta.setZero();
         int lda = A.stepj();
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = 3*n+1;
@@ -815,9 +816,9 @@ namespace tmv
             LAPP(lap_p.get()),LAPP(beta.ptr()) 
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-        LAP_Results("dgeqp3");
+        LAP_Results(Lap_info,"dgeqp3");
 #else
-        LAP_Results(int(work[0]),m,n,lwork,"dgeqp3");
+        LAP_Results(Lap_info,int(work[0]),m,n,lwork,"dgeqp3");
 #endif
         double thresh = TMV_Epsilon<double>()*A.normF();
         for(int i=0;i<n;++i) {
@@ -859,6 +860,7 @@ namespace tmv
         for(int i=0;i<n;++i) (lap_p.get())[i] = 0;
         beta.setZero();
         int lda = A.stepj();
+        int Lap_info=0;
 #ifndef LAPNOWORK
         AlignedArray<double> rwork(2*n);
         VectorViewOf(rwork.get(),2*n).setZero();
@@ -884,9 +886,9 @@ namespace tmv
             LAPP(lap_p.get()),LAPP(beta.ptr()) 
             LAPWK(work.get()) LAPVWK(lwork) LAPWK(rwork.get()) LAPINFO);
 #ifdef LAPNOWORK
-        LAP_Results("zgeqp3");
+        LAP_Results(Lap_info,"zgeqp3");
 #else
-        LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zgeqp3");
+        LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"zgeqp3");
 #endif
         beta.conjugateSelf();
         double thresh = TMV_Epsilon<double>()*A.normF();
@@ -935,6 +937,7 @@ namespace tmv
         for(int i=0;i<n;++i) (lap_p.get())[i] = 0;
         beta.setZero();
         int lda = A.stepj();
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = 3*n+1;
@@ -958,9 +961,9 @@ namespace tmv
             LAPP(lap_p.get()),LAPP(beta.ptr()) 
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-        LAP_Results("sgeqp3");
+        LAP_Results(Lap_info,"sgeqp3");
 #else
-        LAP_Results(int(work[0]),m,n,lwork,"sgeqp3");
+        LAP_Results(Lap_info,int(work[0]),m,n,lwork,"sgeqp3");
 #endif
         float thresh = TMV_Epsilon<float>()*A.normF();
         for(int i=0;i<n;++i) {
@@ -1002,6 +1005,7 @@ namespace tmv
         for(int i=0;i<n;++i) (lap_p.get())[i] = 0;
         beta.setZero();
         int lda = A.stepj();
+        int Lap_info=0;
 #ifndef LAPNOWORK
         AlignedArray<float> rwork(2*n);
         VectorViewOf(rwork.get(),2*n).setZero();
@@ -1027,9 +1031,9 @@ namespace tmv
             LAPP(lap_p.get()),LAPP(beta.ptr()) 
             LAPWK(work.get()) LAPVWK(lwork) LAPWK(rwork.get()) LAPINFO);
 #ifdef LAPNOWORK
-        LAP_Results("cgeqp3");
+        LAP_Results(Lap_info,"cgeqp3");
 #else
-        LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cgeqp3");
+        LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"cgeqp3");
 #endif
         float thresh = TMV_Epsilon<float>()*A.normF();
         const std::complex<float>* Aii = A.diag().cptr();

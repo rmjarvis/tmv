@@ -104,6 +104,7 @@ namespace tmv {
                 TMVAssert(V.iscm());
                 int ldu = U.stepj();
                 int ldv = V.stepj();
+                int Lap_info=0;
 #ifndef LAPNOWORK
                 int lwork = (3*n+4)*n;
                 AlignedArray<double> work(lwork);
@@ -122,6 +123,7 @@ namespace tmv {
                 TMVAssert(V.isrm());
                 int ldu = U.stepi();
                 int ldv = V.stepi();
+                int Lap_info=0;
 #ifndef LAPNOWORK
                 int lwork = (3*n+4)*n;
                 AlignedArray<double> work(lwork);
@@ -149,6 +151,7 @@ namespace tmv {
             //std::cout<<"D = "<<D<<std::endl;
             //std::cout<<"E = "<<E<<std::endl;
             //std::cout<<"E1 = "<<E1<<std::endl;
+            int Lap_info=0;
 #ifndef LAPNOWORK
             int lwork = (3*n+4)*n;
             AlignedArray<double> work(lwork);
@@ -171,6 +174,7 @@ namespace tmv {
             int ldu = n;
             int ldv = n;
             char c = 'N';
+            int Lap_info=0;
 #ifndef LAPNOWORK
             int lwork = 4*n;
             AlignedArray<double> work(lwork);
@@ -184,7 +188,7 @@ namespace tmv {
                 0,LAPV(ldu),0,LAPV(ldv),0,0
                 LAPWK(work.get()) LAPWK(iwork.get()) LAPINFO LAP1 LAP1);
         }
-        LAP_Results("dbdsdc");
+        LAP_Results(Lap_info,"dbdsdc");
         E = E1.subVector(0,n-1);
         //std::cout<<"Done: D => "<<D<<std::endl;
         //std::cout<<"E1 => "<<E1<<std::endl;
@@ -224,6 +228,7 @@ namespace tmv {
             //std::cout<<"D = "<<D<<std::endl;
             //std::cout<<"E = "<<E<<std::endl;
             //std::cout<<"E1 = "<<E1<<std::endl;
+            int Lap_info=0;
 #ifndef LAPNOWORK
             int lwork = (3*n+4)*n;
             AlignedArray<double> work(lwork);
@@ -252,6 +257,7 @@ namespace tmv {
             //std::cout<<"D = "<<D<<std::endl;
             //std::cout<<"E = "<<E<<std::endl;
             //std::cout<<"E1 = "<<E1<<std::endl;
+            int Lap_info=0;
 #ifndef LAPNOWORK
             int lwork = 4*n;
             AlignedArray<double> work(lwork);
@@ -265,7 +271,215 @@ namespace tmv {
                 0,LAPV(ldu),0,LAPV(ldv),0,0
                 LAPWK(work.get()) LAPWK(iwork.get()) LAPINFO LAP1 LAP1);
         }
-        LAP_Results("dbdsdc");
+        LAP_Results(Lap_info,"dbdsdc");
+        E = E1.subVector(0,n-1);
+        //std::cout<<"Done: D => "<<D<<std::endl;
+        //std::cout<<"E1 => "<<E1<<std::endl;
+        //std::cout<<"E => "<<E<<std::endl;
+    }
+#endif
+#ifdef TMV_INST_FLOAT
+    void LapSVDecomposeFromBidiagonal(
+        MatrixView<float> U, VectorView<float>& D, VectorView<float>& E,
+        MatrixView<float> V, bool setUV)
+    {
+        TMVAssert(D.size() == E.size()+1);
+        if (U.cptr()) {
+            TMVAssert(U.colsize() >= U.rowsize());
+            TMVAssert(U.rowsize() == D.size());
+        }
+        if (V.cptr()) { 
+            TMVAssert(V.rowsize() == V.colsize()); 
+            TMVAssert(V.rowsize() == D.size()); 
+            if (U.cptr() && setUV) TMVAssert(U.iscm() == V.iscm());
+        }
+
+        char u = 'U';
+        int n = D.size();
+        Vector<float> E1(n);
+        E1.subVector(0,n-1) = E;
+        E1[n-1] = 0.;
+        if (setUV) {
+            char c = 'I';
+            TMVAssert(U.cptr() && V.cptr());
+            //std::cout<<"setUV\n";
+            //std::cout<<"U = "<<U<<std::endl;
+            //std::cout<<"V = "<<V<<std::endl;
+            //std::cout<<"D = "<<D<<std::endl;
+            //std::cout<<"E = "<<E<<std::endl;
+            //std::cout<<"E1 = "<<E1<<std::endl;
+            if (U.iscm()) {
+                TMVAssert(V.iscm());
+                int ldu = U.stepj();
+                int ldv = V.stepj();
+                int Lap_info=0;
+#ifndef LAPNOWORK
+                int lwork = (3*n+4)*n;
+                AlignedArray<float> work(lwork);
+                VectorViewOf(work.get(),lwork).setZero();
+                lwork = 8*n;
+                AlignedArray<int> iwork(lwork);
+#endif
+                LAPNAME(sbdsdc) (
+                    LAPCM LAPV(u),LAPV(c),LAPV(n),
+                    LAPP(D.ptr()),LAPP(E1.ptr()),
+                    LAPP(U.ptr()),LAPV(ldu),LAPP(V.ptr()),LAPV(ldv),0,0
+                    LAPWK(work.get()) LAPWK(iwork.get()) LAPINFO LAP1 LAP1);
+            } else {
+                u = 'L';
+                TMVAssert(U.isrm());
+                TMVAssert(V.isrm());
+                int ldu = U.stepi();
+                int ldv = V.stepi();
+                int Lap_info=0;
+#ifndef LAPNOWORK
+                int lwork = (3*n+4)*n;
+                AlignedArray<float> work(lwork);
+                VectorViewOf(work.get(),lwork).setZero();
+                lwork = 8*n;
+                AlignedArray<int> iwork(lwork);
+#endif
+                LAPNAME(sbdsdc) (
+                    LAPCM LAPV(u),LAPV(c),LAPV(n),
+                    LAPP(D.ptr()),LAPP(E1.ptr()),
+                    LAPP(V.ptr()),LAPV(ldv),LAPP(U.ptr()),LAPV(ldu),0,0
+                    LAPWK(work.get()) LAPWK(iwork.get()) LAPINFO LAP1 LAP1);
+            }
+        } else if (U.cptr() || V.cptr()) {
+            char c = 'I';
+            Matrix<float,ColMajor> U1(n,n,0.);
+            Matrix<float,ColMajor> V1(n,n,0.);
+            int ldu = U1.stepj();
+            int ldv = V1.stepj();
+            //std::cout<<"U.cptr() || V.cptr()\n";
+            //if (U.cptr()) std::cout<<"U = "<<U<<std::endl;
+            //std::cout<<"U1 = "<<U1<<std::endl;
+            //if (V.cptr()) std::cout<<"V = "<<V<<std::endl;
+            //std::cout<<"V1 = "<<V1<<std::endl;
+            //std::cout<<"D = "<<D<<std::endl;
+            //std::cout<<"E = "<<E<<std::endl;
+            //std::cout<<"E1 = "<<E1<<std::endl;
+            int Lap_info=0;
+#ifndef LAPNOWORK
+            int lwork = (3*n+4)*n;
+            AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+            lwork = 8*n;
+            AlignedArray<int> iwork(lwork);
+#endif
+            LAPNAME(sbdsdc) (
+                LAPCM LAPV(u),LAPV(c),LAPV(n),
+                LAPP(D.ptr()),LAPP(E1.ptr()),
+                LAPP(U1.ptr()),LAPV(ldu),LAPP(V1.ptr()),LAPV(ldv),0,0
+                LAPWK(work.get()) LAPWK(iwork.get()) LAPINFO LAP1 LAP1);
+            if (U.cptr()) U = U*U1;
+            if (V.cptr()) V = V1*V;
+        } else {
+            //std::cout<<"!(U.cptr() || V.cptr())\n";
+            //std::cout<<"D = "<<D<<std::endl;
+            //std::cout<<"E = "<<E<<std::endl;
+            //std::cout<<"E1 = "<<E1<<std::endl;
+            int ldu = n;
+            int ldv = n;
+            char c = 'N';
+            int Lap_info=0;
+#ifndef LAPNOWORK
+            int lwork = 4*n;
+            AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+            lwork = 8*n;
+            AlignedArray<int> iwork(lwork);
+#endif
+            LAPNAME(sbdsdc) (
+                LAPCM LAPV(u),LAPV(c),LAPV(n),
+                LAPP(D.ptr()),LAPP(E1.ptr()),
+                0,LAPV(ldu),0,LAPV(ldv),0,0
+                LAPWK(work.get()) LAPWK(iwork.get()) LAPINFO LAP1 LAP1);
+        }
+        LAP_Results(Lap_info,"sbdsdc");
+        E = E1.subVector(0,n-1);
+        //std::cout<<"Done: D => "<<D<<std::endl;
+        //std::cout<<"E1 => "<<E1<<std::endl;
+        //std::cout<<"E => "<<E<<std::endl;
+    }
+    void LapSVDecomposeFromBidiagonal(
+        MatrixView<std::complex<float> > U,
+        VectorView<float>& D, VectorView<float>& E,
+        MatrixView<std::complex<float> > V, bool setUV)
+    {
+        TMVAssert(D.size() == E.size()+1);
+        if (U.cptr()) {
+            TMVAssert(U.colsize() >= U.rowsize());
+            TMVAssert(U.rowsize() == D.size());
+        }
+        if (V.cptr()) { 
+            TMVAssert(V.rowsize() == V.colsize()); 
+            TMVAssert(V.rowsize() == D.size()); 
+        }
+
+        char u = 'U';
+        int n = D.size();
+        Vector<float> E1(n);
+        E1.subVector(0,n-1) = E;
+        E1[n-1] = 0.;
+        if (U.cptr() || V.cptr()) {
+            char c = 'I';
+            Matrix<float,ColMajor> U1(n,n,0.);
+            Matrix<float,ColMajor> V1(n,n,0.);
+            int ldu = U1.stepj();
+            int ldv = V1.stepj();
+            //std::cout<<"U.cptr() || V.cptr()\n";
+            //if (U.cptr()) std::cout<<"U = "<<U<<std::endl;
+            //std::cout<<"U1 = "<<U1<<std::endl;
+            //if (V.cptr()) std::cout<<"V = "<<V<<std::endl;
+            //std::cout<<"V1 = "<<V1<<std::endl;
+            //std::cout<<"D = "<<D<<std::endl;
+            //std::cout<<"E = "<<E<<std::endl;
+            //std::cout<<"E1 = "<<E1<<std::endl;
+            int Lap_info=0;
+#ifndef LAPNOWORK
+            int lwork = (3*n+4)*n;
+            AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+            lwork = 8*n;
+            AlignedArray<int> iwork(lwork);
+#endif
+            LAPNAME(sbdsdc) (
+                LAPCM LAPV(u),LAPV(c),LAPV(n),
+                LAPP(D.ptr()),LAPP(E1.ptr()),
+                LAPP(U1.ptr()),LAPV(ldu),LAPP(V1.ptr()),LAPV(ldv),0,0
+                LAPWK(work.get()) LAPWK(iwork.get()) LAPINFO LAP1 LAP1);
+            if (setUV) {
+                if (U.cptr()) U = U1;
+                if (V.cptr()) V = V1;
+            } else {
+                if (U.cptr()) U = U*U1;
+                if (V.cptr()) V = V1*V;
+            }
+        } else {
+            TMVAssert(!setUV);
+            int ldu = n;
+            int ldv = n;
+            char c = 'N';
+            //std::cout<<"!(U.cptr() || V.cptr())\n";
+            //std::cout<<"D = "<<D<<std::endl;
+            //std::cout<<"E = "<<E<<std::endl;
+            //std::cout<<"E1 = "<<E1<<std::endl;
+            int Lap_info=0;
+#ifndef LAPNOWORK
+            int lwork = 4*n;
+            AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+            lwork = 8*n;
+            AlignedArray<int> iwork(lwork);
+#endif
+            LAPNAME(sbdsdc) (
+                LAPCM LAPV(u),LAPV(c),LAPV(n),
+                LAPP(D.ptr()),LAPP(E1.ptr()),
+                0,LAPV(ldu),0,LAPV(ldv),0,0
+                LAPWK(work.get()) LAPWK(iwork.get()) LAPINFO LAP1 LAP1);
+        }
+        LAP_Results(Lap_info,"sbdsdc");
         E = E1.subVector(0,n-1);
         //std::cout<<"Done: D => "<<D<<std::endl;
         //std::cout<<"E1 => "<<E1<<std::endl;

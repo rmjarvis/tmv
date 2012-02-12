@@ -451,7 +451,7 @@ namespace tmv {
 
         int n = A.size();
         int lda = A.iscm() ? A.stepj() : A.stepi();
-
+        int Lap_info=0;
         LAPNAME(dpotrf) (
             LAPCM A.iscm()?LAPCH_LO:LAPCH_UP, LAPV(n),
             LAPP(A.ptr()),LAPV(lda) LAPINFO LAP1);
@@ -463,7 +463,7 @@ namespace tmv {
             throw NonPosDefHermMatrix<double>(A);
 #endif
         }
-        LAP_Results("dpotrf");
+        LAP_Results(Lap_info,"dpotrf");
     }
     template <> 
     void LapCH_Decompose(SymMatrixView<std::complex<double> > A)
@@ -475,6 +475,7 @@ namespace tmv {
 
         int n = A.size();
         int lda = A.iscm() ? A.stepj() : A.stepi();
+        int Lap_info=0;
         LAPNAME(zpotrf) (
             LAPCM A.iscm()?LAPCH_LO:LAPCH_UP, LAPV(n),
             LAPP(A.ptr()),LAPV(lda) LAPINFO LAP1);
@@ -486,7 +487,7 @@ namespace tmv {
             throw NonPosDefHermMatrix<std::complex<double> >(A);
 #endif
         }
-        LAP_Results("zpotrf");
+        LAP_Results(Lap_info,"zpotrf");
     }
 #endif
 #ifdef INST_FLOAT
@@ -499,6 +500,7 @@ namespace tmv {
 
         int n = A.size();
         int lda = A.iscm() ? A.stepj() : A.stepi();
+        int Lap_info=0;
         LAPNAME(spotrf) (
             LAPCM A.iscm()?LAPCH_LO:LAPCH_UP, LAPV(n),
             LAPP(A.ptr()),LAPV(lda) LAPINFO LAP1);
@@ -510,7 +512,7 @@ namespace tmv {
             throw NonPosDefHermMatrix<float>(A);
 #endif
         }
-        LAP_Results("spotrf");
+        LAP_Results(Lap_info,"spotrf");
     }
     template <> 
     void LapCH_Decompose(SymMatrixView<std::complex<float> > A)
@@ -522,6 +524,7 @@ namespace tmv {
 
         int n = A.size();
         int lda = A.iscm() ? A.stepj() : A.stepi();
+        int Lap_info=0;
         LAPNAME(cpotrf) (
             LAPCM A.iscm()?LAPCH_LO:LAPCH_UP, LAPV(n),
             LAPP(A.ptr()),LAPV(lda) LAPINFO LAP1);
@@ -533,7 +536,7 @@ namespace tmv {
             throw NonPosDefHermMatrix<std::complex<float> >(A);
 #endif
         }
-        LAP_Results("cpotrf");
+        LAP_Results(Lap_info,"cpotrf");
     }
 #endif 
 #endif // ALAP

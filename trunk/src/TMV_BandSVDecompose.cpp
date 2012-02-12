@@ -314,6 +314,7 @@ namespace tmv {
         int ncc = 0;
         int kl = A.nlo();
         int ku = A.nhi();
+        int Lap_info=0;
 #ifndef LAPNOWORK
         int lwork = 2*TMV_MAX(m,n);
         AlignedArray<double> work(lwork);
@@ -345,7 +346,7 @@ namespace tmv {
             logdet += DiagMatrixViewOf(D).logDet(&s);
             signdet *= s;
         }
-        LAP_Results("dgbbrd");
+        LAP_Results(Lap_info,"dgbbrd");
     }
     template <> 
     void LapBidiagonalize(
@@ -380,6 +381,7 @@ namespace tmv {
         int o = 0;
         int kl = A.nlo();
         int ku = A.nhi();
+        int Lap_info=0;
 #ifndef LAPNOWORK
         int lwork = TMV_MAX(m,n);
         AlignedArray<std::complex<double> > work(lwork);
@@ -414,7 +416,7 @@ namespace tmv {
             logdet += DiagMatrixViewOf(A2.diag()).logDet(&s);
             signdet *= s;
         }
-        LAP_Results("zgbbrd");
+        LAP_Results(Lap_info,"zgbbrd");
     }
 #endif
 #ifdef INST_FLOAT
@@ -453,6 +455,7 @@ namespace tmv {
         int ncc = 0;
         int kl = A.nlo();
         int ku = A.nhi();
+        int Lap_info=0;
 #ifndef LAPNOWORK
         int lwork = 2*TMV_MAX(m,n);
         AlignedArray<float> work(lwork);
@@ -482,7 +485,7 @@ namespace tmv {
             logdet += DiagMatrixViewOf(D).logDet(&s);
             signdet *= s;
         }
-        LAP_Results("sgbbrd");
+        LAP_Results(Lap_info,"sgbbrd");
     }
     template <> 
     void LapBidiagonalize(
@@ -517,6 +520,7 @@ namespace tmv {
         int o = 0;
         int kl = A.nlo();
         int ku = A.nhi();
+        int Lap_info=0;
 #ifndef LAPNOWORK
         int lwork = TMV_MAX(m,n);
         AlignedArray<std::complex<float> > work(lwork);
@@ -548,7 +552,7 @@ namespace tmv {
             logdet += DiagMatrixViewOf(A2.diag()).logDet(&s);
             signdet *= s;
         }
-        LAP_Results("cgbbrd");
+        LAP_Results(Lap_info,"cgbbrd");
     }
 #endif
 #endif

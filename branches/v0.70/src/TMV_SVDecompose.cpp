@@ -310,6 +310,7 @@ namespace tmv {
                 lwork = 8*n;
                 AlignedArray<int> iwork(lwork);
 #endif
+                int Lap_info=0;
                 LAPNAME(dbdsdc) (
                     LAPCM LAPV(u),LAPV(c),LAPV(n),
                     LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -328,6 +329,7 @@ namespace tmv {
                 lwork = 8*n;
                 AlignedArray<int> iwork(lwork);
 #endif
+                int Lap_info=0;
                 LAPNAME(dbdsdc) (
                     LAPCM LAPV(u),LAPV(c),LAPV(n),
                     LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -355,6 +357,7 @@ namespace tmv {
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
+            int Lap_info=0;
             LAPNAME(dbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -377,13 +380,14 @@ namespace tmv {
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
+            int Lap_info=0;
             LAPNAME(dbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
                 0,LAPV(ldu),0,LAPV(ldv),0,0
                 LAPWK(work.get()) LAPWK(iwork.get()) LAPINFO LAP1 LAP1);
         }
-        LAP_Results("dbdsdc");
+        LAP_Results(Lap_info,"dbdsdc");
         E = E1.subVector(0,n-1);
         //std::cout<<"Done: D => "<<D<<std::endl;
         //std::cout<<"E1 => "<<E1<<std::endl;
@@ -435,6 +439,7 @@ namespace tmv {
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
+            int Lap_info=0;
             LAPNAME(dbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -463,13 +468,14 @@ namespace tmv {
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
+            int Lap_info=0;
             LAPNAME(dbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
                 0,LAPV(ldu),0,LAPV(ldv),0,0
                 LAPWK(work.get()) LAPWK(iwork.get()) LAPINFO LAP1 LAP1);
         }
-        LAP_Results("dbdsdc");
+        LAP_Results(Lap_info,"dbdsdc");
         E = E1.subVector(0,n-1);
         //std::cout<<"Done: D => "<<D<<std::endl;
         //std::cout<<"E1 => "<<E1<<std::endl;
@@ -515,6 +521,7 @@ namespace tmv {
                 lwork = 8*n;
                 AlignedArray<int> iwork(lwork);
 #endif
+                int Lap_info=0;
                 LAPNAME(sbdsdc) (
                     LAPCM LAPV(u),LAPV(c),LAPV(n),
                     LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -533,6 +540,7 @@ namespace tmv {
                 lwork = 8*n;
                 AlignedArray<int> iwork(lwork);
 #endif
+                int Lap_info=0;
                 LAPNAME(sbdsdc) (
                     LAPCM LAPV(u),LAPV(c),LAPV(n),
                     LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -552,6 +560,7 @@ namespace tmv {
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
+            int Lap_info=0;
             LAPNAME(sbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -570,13 +579,14 @@ namespace tmv {
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
+            int Lap_info=0;
             LAPNAME(sbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
                 0,LAPV(ldu),0,LAPV(ldv),0,0
                 LAPWK(work.get()) LAPWK(iwork.get()) LAPINFO LAP1 LAP1);
         }
-        LAP_Results("sbdsdc");
+        LAP_Results(Lap_info,"sbdsdc");
         E = E1.subVector(0,n-1);
     }
     template <> 
@@ -617,6 +627,7 @@ namespace tmv {
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
+            int Lap_info=0;
             LAPNAME(sbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
@@ -642,13 +653,14 @@ namespace tmv {
             lwork = 8*n;
             AlignedArray<int> iwork(lwork);
 #endif
+            int Lap_info=0;
             LAPNAME(sbdsdc) (
                 LAPCM LAPV(u),LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E1.ptr()),
                 0,LAPV(ldu),0,LAPV(ldv),0,0
                 LAPWK(work.get()) LAPWK(iwork.get()) LAPINFO LAP1 LAP1);
         }
-        LAP_Results("sbdsdc");
+        LAP_Results(Lap_info,"sbdsdc");
         E = E1.subVector(0,n-1);
     }
 #endif // FLOAT

@@ -297,6 +297,7 @@ namespace tmv {
         beta.setZero();
         if (BlasIsCM(A)) {
             int lda = A.stepj();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = 2*n*LAP_BLOCKSIZE;
@@ -318,12 +319,13 @@ namespace tmv {
                 LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-            LAP_Results("dgeqrf");
+            LAP_Results(Lap_info,"dgeqrf");
 #else
-            LAP_Results(int(work[0]),m,n,lwork,"dgeqrf");
+            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"dgeqrf");
 #endif
         } else {
             int lda = A.stepi();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = 2*n*LAP_BLOCKSIZE;
@@ -345,9 +347,9 @@ namespace tmv {
                 LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-            LAP_Results("dgelqf");
+            LAP_Results(Lap_info,"dgelqf");
 #else
-            LAP_Results(int(work[0]),m,n,lwork,"dgelqf");
+            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"dgelqf");
 #endif
         }
         double* bi = beta.ptr();
@@ -374,6 +376,7 @@ namespace tmv {
         beta.setZero();
         if (BlasIsCM(A)) {
             int lda = A.stepj();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = 2*n*LAP_BLOCKSIZE;
@@ -395,13 +398,14 @@ namespace tmv {
                 LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-            LAP_Results("zgeqrf");
+            LAP_Results(Lap_info,"zgeqrf");
 #else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zgeqrf");
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"zgeqrf");
 #endif
             beta.conjugateSelf();
         } else {
             int lda = A.stepi();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = 2*n*LAP_BLOCKSIZE;
@@ -423,9 +427,9 @@ namespace tmv {
                 LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-            LAP_Results("zgelqf");
+            LAP_Results(Lap_info,"zgelqf");
 #else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zgelqf");
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"zgelqf");
 #endif
         }
         std::complex<double>* bi = beta.ptr();
@@ -460,6 +464,7 @@ namespace tmv {
         beta.setZero();
         if (BlasIsCM(A)) {
             int lda = A.stepj();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = 2*n*LAP_BLOCKSIZE;
@@ -481,12 +486,13 @@ namespace tmv {
                 LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-            LAP_Results("sgeqrf");
+            LAP_Results(Lap_info,"sgeqrf");
 #else
-            LAP_Results(int(work[0]),m,n,lwork,"sgeqrf");
+            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"sgeqrf");
 #endif
         } else {
             int lda = A.stepi();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = 2*n*LAP_BLOCKSIZE;
@@ -508,9 +514,9 @@ namespace tmv {
                 LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-            LAP_Results("sgelqf");
+            LAP_Results(Lap_info,"sgelqf");
 #else
-            LAP_Results(int(work[0]),m,n,lwork,"sgelqf");
+            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"sgelqf");
 #endif
         }
         float* bi = beta.ptr();
@@ -536,6 +542,7 @@ namespace tmv {
         beta.setZero();
         if (BlasIsCM(A)) {
             int lda = A.stepj();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = 2*n*LAP_BLOCKSIZE;
@@ -557,13 +564,14 @@ namespace tmv {
                 LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-            LAP_Results("cgeqrf");
+            LAP_Results(Lap_info,"cgeqrf");
 #else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cgeqrf");
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"cgeqrf");
 #endif
             beta.conjugateSelf();
         } else {
             int lda = A.stepi();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = 2*n*LAP_BLOCKSIZE;
@@ -585,9 +593,9 @@ namespace tmv {
                 LAPCM LAPV(n),LAPV(m),LAPP(A.ptr()),LAPV(lda),
                 LAPP(beta.ptr()) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-            LAP_Results("cgelqf");
+            LAP_Results(Lap_info,"cgelqf");
 #else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cgelqf");
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"cgelqf");
 #endif
         }
         std::complex<float>* bi = beta.ptr();

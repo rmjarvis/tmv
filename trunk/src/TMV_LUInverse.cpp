@@ -36,6 +36,7 @@ namespace tmv {
         for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i]+1;
         const int* ipiv = ipiv1.get();
 #endif
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
@@ -54,9 +55,9 @@ namespace tmv {
             LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
             LAPP(ipiv) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-        LAP_Results("dgetri");
+        LAP_Results(Lap_info,"dgetri");
 #else
-        LAP_Results(int(work[0]),n,n,lwork,"dgetri");
+        LAP_Results(Lap_info,int(work[0]),n,n,lwork,"dgetri");
 #endif
     }
     static void DoLUInverse(
@@ -72,6 +73,7 @@ namespace tmv {
         for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i]+1;
         const int* ipiv = ipiv1.get();
 #endif
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
@@ -90,9 +92,9 @@ namespace tmv {
             LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
             LAPP(ipiv) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-        LAP_Results("zgetri");
+        LAP_Results(Lap_info,"zgetri");
 #else
-        LAP_Results(int(std::real(work[0])),n,n,lwork,"zgetri");
+        LAP_Results(Lap_info,int(std::real(work[0])),n,n,lwork,"zgetri");
 #endif
     }
 #endif
@@ -110,6 +112,7 @@ namespace tmv {
         for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i]+1;
         const int* ipiv = ipiv1.get();
 #endif
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
@@ -128,9 +131,9 @@ namespace tmv {
             LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
             LAPP(ipiv) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-        LAP_Results("sgetri");
+        LAP_Results(Lap_info,"sgetri");
 #else
-        LAP_Results(int(work[0]),n,n,lwork,"sgetri");
+        LAP_Results(Lap_info,int(work[0]),n,n,lwork,"sgetri");
 #endif
     }
     static void DoLUInverse(
@@ -146,6 +149,7 @@ namespace tmv {
         for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i]+1;
         const int* ipiv = ipiv1.get();
 #endif
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = n*LAP_BLOCKSIZE;
@@ -164,9 +168,9 @@ namespace tmv {
             LAPCM LAPV(n),LAPP(m1.ptr()),LAPV(lda),
             LAPP(ipiv) LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-        LAP_Results("cgetri");
+        LAP_Results(Lap_info,"cgetri");
 #else
-        LAP_Results(int(std::real(work[0])),n,n,lwork,"cgetri");
+        LAP_Results(Lap_info,int(std::real(work[0])),n,n,lwork,"cgetri");
 #endif
     }
 #endif // FLOAT

@@ -31,14 +31,14 @@ if env['MEM_TEST']:
     env1.Append(CPPDEFINES=['TMV_MEM_TEST'])
 if env['END_PADDING']:
     env1.Append(CPPDEFINES=['TMV_END_PADDING'])
-if env['XTEST'] > 0:
+if int(env['XTEST']) > 0:
     env1.Append(CPPDEFINES=['XTEST=' + env['XTEST']])
 if env['NAN_TEST']:
     env1.Append(CPPDEFINES=['TMV_INITIALIZE_NAN'])
-if env['TEST_DEBUG'] or env['DEBUG']:
+if env['DEBUG'] or env['TEST_DEBUG']:
     env1.Append(CPPDEFINES=['XXD'])
 else:
-    env1.Append(CPPDEFINES=['NDEBUG'])
+    env1.Append(CPPDEFINES=['TMV_NDEBUG'])
 if env['DEBUG']:
     env1.Append(CPPDEFINES=['TMV_EXTRA_DEBUG'])
 
@@ -71,7 +71,7 @@ env3 = env1.Clone()
 obj_basic = env1.Object(test_basic_files)
 obj_diag = env1.Object(test_diag_files)
 obj_tri = env1.Object(test_tri_files)
-obj_div = [ env1.Object(test_div_files) ,
+obj_div = [ env1.Object(test_div_files),
     env1b.Object(test_div_lap_files) ]
 obj_band = [ env2.Object(test_band_files),
     env2b.Object(test_band_lap_files) ]

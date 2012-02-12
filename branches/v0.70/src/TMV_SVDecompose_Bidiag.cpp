@@ -484,6 +484,7 @@ namespace tmv {
         // Stupid LAPACK requires an extra element in the Vtbeta vector
         // which it sets to 0 (!!!) rather than ignores.
         // So we need to create a temporary Vector which is size n.
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = (m+n)*LAP_BLOCKSIZE;
@@ -510,9 +511,9 @@ namespace tmv {
         //std::cout<<"After dgebrd"<<std::endl;
         Vtbeta = Vtbeta2.subVector(0,n-1);
 #ifdef LAPNOWORK
-        LAP_Results("dgebrd");
+        LAP_Results(Lap_info,"dgebrd");
 #else
-        LAP_Results(int(work[0]),m,n,lwork,"dgebrd");
+        LAP_Results(Lap_info,int(work[0]),m,n,lwork,"dgebrd");
 #endif
         if (signdet) {
             const double* Ubi = Ubeta.cptr();
@@ -549,6 +550,7 @@ namespace tmv {
         E.setZero();
         Ubeta.setZero();
         Vector<std::complex<double> > Vtbeta2(n,0.);
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = (m+n)*LAP_BLOCKSIZE;
@@ -576,9 +578,9 @@ namespace tmv {
         Ubeta.conjugateSelf();
         Vtbeta = Vtbeta2.subVector(0,n-1);
 #ifdef LAPNOWORK
-        LAP_Results("zgebrd");
+        LAP_Results(Lap_info,"zgebrd");
 #else
-        LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zgebrd");
+        LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"zgebrd");
 #endif
         if (signdet!=0.) {
             const std::complex<double>* Ubi = Ubeta.cptr();
@@ -617,6 +619,7 @@ namespace tmv {
         E.setZero();
         Ubeta.setZero();
         Vector<float> Vtbeta2(n,0.F);  
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = (m+n)*LAP_BLOCKSIZE;
@@ -643,9 +646,9 @@ namespace tmv {
         //std::cout<<"After sgebrd"<<std::endl;
         Vtbeta = Vtbeta2.subVector(0,n-1);
 #ifdef LAPNOWORK
-        LAP_Results("sgebrd");
+        LAP_Results(Lap_info,"sgebrd");
 #else
-        LAP_Results(int(work[0]),m,n,lwork,"sgebrd");
+        LAP_Results(Lap_info,int(work[0]),m,n,lwork,"sgebrd");
 #endif
         if (signdet) {
             const float* Ubi = Ubeta.cptr();
@@ -682,6 +685,7 @@ namespace tmv {
         E.setZero();
         Ubeta.setZero();
         Vector<std::complex<float> > Vtbeta2(n,0.F);
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = (m+n)*LAP_BLOCKSIZE;
@@ -714,9 +718,9 @@ namespace tmv {
         Ubeta.conjugateSelf();
         Vtbeta = Vtbeta2.subVector(0,n-1);
 #ifdef LAPNOWORK
-        LAP_Results("cgebrd");
+        LAP_Results(Lap_info,"cgebrd");
 #else
-        LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cgebrd");
+        LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"cgebrd");
 #endif
         if (signdet!=0.F) {
             const std::complex<float>* Ubi = Ubeta.cptr();

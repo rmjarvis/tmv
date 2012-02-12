@@ -304,12 +304,13 @@ namespace tmv {
         TMVAssert(Ubeta.size() == A.rowsize()-1);
         TMVAssert(A.ct()==NonConj);
 
-        ptrdiff_t n = A.rowsize();
-        ptrdiff_t ilo = 1;
-        ptrdiff_t ihi = n;
-        ptrdiff_t lda = A.stepj();
+        int n = A.rowsize();
+        int ilo = 1;
+        int ihi = n;
+        int lda = A.stepj();
+        int Lap_info=0;
 #ifndef LAPNOWORK
-        ptrdiff_t lwork = n*LAP_BLOCKSIZE;
+        int lwork = n*LAP_BLOCKSIZE;
         double* work = LAP_DWork(lwork);
 #endif
         LAPNAME(dgehrd) (
@@ -317,9 +318,9 @@ namespace tmv {
             LAPP(A.ptr()),LAPV(lda),LAPP(Ubeta.ptr())
             LAPWK(work) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-        LAP_Results("dgehrd");
+        LAP_Results(Lap_info,"dgehrd");
 #else
-        LAP_Results(ptrdiff_t(work[0]),m,n,lwork,"dgehrd");
+        LAP_Results(Lap_info,int(work[0]),m,n,lwork,"dgehrd");
 #endif
     }
     template <> void LapHessenberg(
@@ -331,12 +332,13 @@ namespace tmv {
         TMVAssert(Ubeta.size() == A.rowsize()-1);
         TMVAssert(A.ct()==NonConj);
 
-        ptrdiff_t n = A.rowsize();
-        ptrdiff_t ilo = 1;
-        ptrdiff_t ihi = n;
-        ptrdiff_t lda = A.stepj();
+        int n = A.rowsize();
+        int ilo = 1;
+        int ihi = n;
+        int lda = A.stepj();
+        int Lap_info=0;
 #ifndef LAPNOWORK
-        ptrdiff_t lwork = n*LAP_BLOCKSIZE;
+        int lwork = n*LAP_BLOCKSIZE;
         std::complex<double>* work = LAP_ZWork(lwork);
 #endif
         LAPNAME(zgehrd) (
@@ -345,9 +347,9 @@ namespace tmv {
             LAPWK(work) LAPVWK(lwork) LAPINFO);
         Ubeta.ConjugateSelf();
 #ifdef LAPNOWORK
-        LAP_Results("zgehrd");
+        LAP_Results(Lap_info,"zgehrd");
 #else
-        LAP_Results(int(REAL(work[0])),m,n,lwork,"zgehrd");
+        LAP_Results(Lap_info,int(REAL(work[0])),m,n,lwork,"zgehrd");
 #endif
     }
 #endif
@@ -360,12 +362,13 @@ namespace tmv {
         TMVAssert(Ubeta.size() == A.rowsize()-1);
         TMVAssert(A.ct()==NonConj);
 
-        ptrdiff_t n = A.rowsize();
-        ptrdiff_t ilo = 1;
-        ptrdiff_t ihi = n;
-        ptrdiff_t lda = A.stepj();
+        int n = A.rowsize();
+        int ilo = 1;
+        int ihi = n;
+        int lda = A.stepj();
+        int Lap_info=0;
 #ifndef LAPNOWORK
-        ptrdiff_t lwork = n*LAP_BLOCKSIZE;
+        int lwork = n*LAP_BLOCKSIZE;
         float* work = LAP_SWork(lwork);
 #endif
         LAPNAME(sgebrd) (
@@ -373,9 +376,9 @@ namespace tmv {
             LAPP(A.ptr()),LAPV(lda),LAPP(Ubeta.ptr())
             LAPWK(work) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-        LAP_Results("sgehrd");
+        LAP_Results(Lap_info,"sgehrd");
 #else
-        LAP_Results(ptrdiff_t(work[0]),m,n,lwork,"sgehrd");
+        LAP_Results(Lap_info,int(work[0]),m,n,lwork,"sgehrd");
 #endif
     }
     template <> void LapHessenberg(
@@ -387,12 +390,13 @@ namespace tmv {
         TMVAssert(Ubeta.size() == A.rowsize());
         TMVAssert(A.ct()==NonConj);
 
-        ptrdiff_t n = A.rowsize();
-        ptrdiff_t ilo = 1;
-        ptrdiff_t ihi = n;
-        ptrdiff_t lda = A.stepj();
+        int n = A.rowsize();
+        int ilo = 1;
+        int ihi = n;
+        int lda = A.stepj();
+        int Lap_info=0;
 #ifndef LAPNOWORK
-        ptrdiff_t lwork = n*LAP_BLOCKSIZE;
+        int lwork = n*LAP_BLOCKSIZE;
         std::complex<float>* work = LAP_CWork(lwork);
 #endif
         LAPNAME(cgehrd) (
@@ -401,9 +405,9 @@ namespace tmv {
             LAPWK(work) LAPVWK(lwork) LAPINFO);
         Ubeta.ConjugateSelf();
 #ifdef LAPNOWORK
-        LAP_Results("cgehrd");
+        LAP_Results(Lap_info,"cgehrd");
 #else
-        LAP_Results(int(REAL(work[0])),m,n,lwork,"cgehrd");
+        LAP_Results(Lap_info,int(REAL(work[0])),m,n,lwork,"cgehrd");
 #endif
     }
 #endif 

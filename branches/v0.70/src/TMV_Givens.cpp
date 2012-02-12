@@ -223,9 +223,9 @@ namespace tmv {
         TMVAssert(v1.size()==v2.size());
         TMVAssert(v1.ct()==NonConj);
         TMVAssert(v2.ct()==NonConj);
-        ptrdiff_t n=v1.size();
-        ptrdiff_t s1=v1.step();
-        ptrdiff_t s2=v2.step();
+        int n=v1.size();
+        int s1=v1.step();
+        int s2=v2.step();
         double* v1p = v1.ptr();
         if (s1<0) v1p += (n-1)*s1;
         double* v2p = v2.ptr();

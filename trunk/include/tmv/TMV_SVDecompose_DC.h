@@ -742,12 +742,18 @@ namespace tmv {
             Vector<T> diff(N);
             Vector<T> sum(N);
             T Sk;
-#pragma omp for
-            for(ptrdiff_t k=0;k<N;k++) {
-                Sk = FindDCSingularValue(k,N,rho,D,z,zsq,normsqz,diff,sum);
-#ifdef _OPENMP
-#pragma omp critical
+            // For some reason pgCC requires an actual int for the omp
+            // for loop, not just a signed integer type.  So ptrdiff_t
+            // can't be used.
+#ifdef PLATFORM_COMPILER_PGI
+            typedef int int_omp;
+#else
+            typedef ptrdiff_t int_omp;
 #endif
+#pragma omp for
+            for(int_omp k=0;k<N;k++) {
+                Sk = FindDCSingularValue(k,N,rho,D,z,zsq,normsqz,diff,sum);
+#pragma omp critical
                 {
                     dbgcout<<"Before assign answer for  k = "<<k<<std::endl;
                     S[k] = Sk;
@@ -787,24 +793,31 @@ namespace tmv {
 
 #ifdef _OPENMP
 #pragma omp parallel
-#endif
         {
             Vector<T> diff(N);
             Vector<T> sum(N);
             T Sk;
-#ifdef _OPENMP
+#ifdef PLATFORM_COMPILER_PGI
+            typedef int int_omp;
+#else
+            typedef ptrdiff_t int_omp;
+#endif
 #pragma omp for
-#endif
-            for(ptrdiff_t k=0;k<N;k++) {
+            for(int_omp k=0;k<N;k++) {
                 Sk = FindDCSingularValue(k,N,rho,D,z,zsq,normsqz,diff,sum);
-#ifdef _OPENMP
 #pragma omp critical
-#endif
                 {
                     S[k] = Sk;
                 }
             }
         }
+#else
+        Vector<T> diff(N);
+        Vector<T> sum(N);
+        for(ptrdiff_t k=0;k<N;k++) {
+            S[k] = FindDCSingularValue(k,N,rho,D,z,zsq,normsqz,diff,sum);
+        }
+#endif
         dbgcout<<"S => "<<S<<std::endl;
     }
 

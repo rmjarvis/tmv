@@ -27,22 +27,24 @@ namespace tmv {
     {
         int n = m.size();
         int lda = m.iscm() ? m.stepj() : m.stepi();
+        int Lap_info=0;
         LAPNAME(dtrtri) (
             LAPCM m.iscm()?LAPCH_UP:LAPCH_LO,
             m.isunit()?LAPCH_U:LAPCH_NU,LAPV(n),LAPP(m.ptr()),LAPV(lda) LAPINFO
             LAP1 LAP1);
-        LAP_Results("dtrtri");
+        LAP_Results(Lap_info,"dtrtri");
     }
     void DoInvertSelf(
         const UpperTriMatrixView<std::complex<double> >& m)
     {
         int n = m.size();
         int lda = m.iscm() ? m.stepj() : m.stepi();
+        int Lap_info=0;
         LAPNAME(ztrtri) (
             LAPCM m.iscm()?LAPCH_UP:LAPCH_LO,
             m.isunit()?LAPCH_U:LAPCH_NU,LAPV(n),LAPP(m.ptr()),LAPV(lda) LAPINFO
             LAP1 LAP1);
-        LAP_Results("ztrtri");
+        LAP_Results(Lap_info,"ztrtri");
     }
 #endif
 #ifdef TMV_INST_FLOAT
@@ -50,22 +52,24 @@ namespace tmv {
     {
         int n = m.size();
         int lda = m.iscm() ? m.stepj() : m.stepi();
+        int Lap_info=0;
         LAPNAME(strtri) (
             LAPCM m.iscm()?LAPCH_UP:LAPCH_LO,
             m.isunit()?LAPCH_U:LAPCH_NU,LAPV(n),LAPP(m.ptr()),LAPV(lda) LAPINFO
             LAP1 LAP1);
-        LAP_Results("strtri");
+        LAP_Results(Lap_info,"strtri");
     }
     void DoInvertSelf(
         const UpperTriMatrixView<std::complex<float> >& m)
     {
         int n = m.size();
         int lda = m.iscm() ? m.stepj() : m.stepi();
+        int Lap_info=0;
         LAPNAME(ctrtri) (
             LAPCM m.iscm()?LAPCH_UP:LAPCH_LO,
             m.isunit()?LAPCH_U:LAPCH_NU,LAPV(n),LAPP(m.ptr()),LAPV(lda) LAPINFO
             LAP1 LAP1);
-        LAP_Results("ctrtri");
+        LAP_Results(Lap_info,"ctrtri");
     }
 #endif // FLOAT
 #endif // ALAP

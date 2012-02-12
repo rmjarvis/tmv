@@ -52,6 +52,7 @@ namespace tmv {
         int k = Q.rowsize();
         if (Q.iscm()) {
             int ldq = Q.stepj();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -79,12 +80,13 @@ namespace tmv {
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("dormqr");
+            LAP_Results(Lap_info,"dormqr");
 #else
-            LAP_Results(int(work[0]),m,n,lwork,"dormqr");
+            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"dormqr");
 #endif
         } else {
             int ldq = Q.stepi();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -112,9 +114,9 @@ namespace tmv {
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("dormlq");
+            LAP_Results(Lap_info,"dormlq");
 #else
-            LAP_Results(int(work[0]),m,n,lwork,"dormlq");
+            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"dormlq");
 #endif
         }
     }
@@ -132,6 +134,7 @@ namespace tmv {
             int n = x.iscm() ? x.rowsize() : x.colsize();
             int ldq = Q.stepj();
             if (x.iscm() == Q.isconj()) x.conjugateSelf();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -160,9 +163,9 @@ namespace tmv {
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
             if (x.iscm() == Q.isconj()) x.conjugateSelf();
 #ifdef LAPNOWORK
-            LAP_Results("zunmqr");
+            LAP_Results(Lap_info,"zunmqr");
 #else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zunmqr");
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"zunmqr");
 #endif
         } else {
             int ldx = x.iscm() ? x.stepj() : x.stepi();
@@ -170,6 +173,7 @@ namespace tmv {
             int n = x.iscm() ? x.rowsize() : x.colsize();
             int ldq = Q.stepi();
             if (x.iscm() != Q.isconj()) x.conjugateSelf();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -198,9 +202,9 @@ namespace tmv {
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
             if (x.iscm() != Q.isconj()) x.conjugateSelf();
 #ifdef LAPNOWORK
-            LAP_Results("zunmlq");
+            LAP_Results(Lap_info,"zunmlq");
 #else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zunmlq");
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"zunmlq");
 #endif
         }
     }
@@ -215,6 +219,7 @@ namespace tmv {
         int k = Q.rowsize();
         if (Q.iscm()) {
             int ldq = Q.stepj();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -242,12 +247,13 @@ namespace tmv {
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("dormqr");
+            LAP_Results(Lap_info,"dormqr");
 #else
-            LAP_Results(int(work[0]),m,n,lwork,"dormqr");
+            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"dormqr");
 #endif
         } else {
             int ldq = Q.stepi();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -275,9 +281,9 @@ namespace tmv {
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("dormlq");
+            LAP_Results(Lap_info,"dormlq");
 #else
-            LAP_Results(int(work[0]),m,n,lwork,"dormlq");
+            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"dormlq");
 #endif
         }
     }
@@ -295,6 +301,7 @@ namespace tmv {
             int n = x.iscm() ? x.rowsize() : x.colsize();
             int ldq = Q.stepj();
             if (x.iscm() == Q.isconj()) x.conjugateSelf();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -323,9 +330,9 @@ namespace tmv {
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
             if (x.iscm() == Q.isconj()) x.conjugateSelf();
 #ifdef LAPNOWORK
-            LAP_Results("zunmqr");
+            LAP_Results(Lap_info,"zunmqr");
 #else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zunmqr");
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"zunmqr");
 #endif
         } else {
             int ldx = x.iscm() ? x.stepj() : x.stepi();
@@ -333,6 +340,7 @@ namespace tmv {
             int n = x.iscm() ? x.rowsize() : x.colsize();
             int ldq = Q.stepi();
             if (x.iscm() != Q.isconj()) x.conjugateSelf();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -361,9 +369,9 @@ namespace tmv {
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
             if (x.iscm() != Q.isconj()) x.conjugateSelf();
 #ifdef LAPNOWORK
-            LAP_Results("zunmlq");
+            LAP_Results(Lap_info,"zunmlq");
 #else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"zunmlq");
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"zunmlq");
 #endif
         }
     }
@@ -402,6 +410,7 @@ namespace tmv {
         int k = Q.rowsize();
         if (Q.iscm()) {
             int ldq = Q.stepj();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -429,12 +438,13 @@ namespace tmv {
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("sormqr");
+            LAP_Results(Lap_info,"sormqr");
 #else
-            LAP_Results(int(work[0]),m,n,lwork,"sormqr");
+            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"sormqr");
 #endif
         } else {
             int ldq = Q.stepi();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -462,9 +472,9 @@ namespace tmv {
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("sormlq");
+            LAP_Results(Lap_info,"sormlq");
 #else
-            LAP_Results(int(work[0]),m,n,lwork,"sormlq");
+            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"sormlq");
 #endif
         }
     }
@@ -482,6 +492,7 @@ namespace tmv {
             int n = x.iscm() ? x.rowsize() : x.colsize();
             int ldq = Q.stepj();
             if (x.iscm() == Q.isconj()) x.conjugateSelf();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -510,9 +521,9 @@ namespace tmv {
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
             if (x.iscm() == Q.isconj()) x.conjugateSelf();
 #ifdef LAPNOWORK
-            LAP_Results("cunmqr");
+            LAP_Results(Lap_info,"cunmqr");
 #else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cunmqr");
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"cunmqr");
 #endif
         } else {
             int ldx = x.iscm() ? x.stepj() : x.stepi();
@@ -520,6 +531,7 @@ namespace tmv {
             int n = x.iscm() ? x.rowsize() : x.colsize();
             int ldq = Q.stepi();
             if (x.iscm() != Q.isconj()) x.conjugateSelf();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -548,9 +560,9 @@ namespace tmv {
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
             if (x.iscm() != Q.isconj()) x.conjugateSelf();
 #ifdef LAPNOWORK
-            LAP_Results("cunmlq");
+            LAP_Results(Lap_info,"cunmlq");
 #else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cunmlq");
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"cunmlq");
 #endif
         }
     }
@@ -565,6 +577,7 @@ namespace tmv {
         int k = Q.rowsize();
         if (Q.iscm()) {
             int ldq = Q.stepj();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -592,12 +605,13 @@ namespace tmv {
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("sormqr");
+            LAP_Results(Lap_info,"sormqr");
 #else
-            LAP_Results(int(work[0]),m,n,lwork,"sormqr");
+            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"sormqr");
 #endif
         } else {
             int ldq = Q.stepi();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -625,9 +639,9 @@ namespace tmv {
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("sormlq");
+            LAP_Results(Lap_info,"sormlq");
 #else
-            LAP_Results(int(work[0]),m,n,lwork,"sormlq");
+            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"sormlq");
 #endif
         }
     }
@@ -645,6 +659,7 @@ namespace tmv {
             int n = x.iscm() ? x.rowsize() : x.colsize();
             int ldq = Q.stepj();
             if (x.iscm() == Q.isconj()) x.conjugateSelf();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -673,9 +688,9 @@ namespace tmv {
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
             if (x.iscm() == Q.isconj()) x.conjugateSelf();
 #ifdef LAPNOWORK
-            LAP_Results("cunmqr");
+            LAP_Results(Lap_info,"cunmqr");
 #else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cunmqr");
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"cunmqr");
 #endif
         } else {
             int ldx = x.iscm() ? x.stepj() : x.stepi();
@@ -683,6 +698,7 @@ namespace tmv {
             int n = x.iscm() ? x.rowsize() : x.colsize();
             int ldq = Q.stepi();
             if (x.iscm() != Q.isconj()) x.conjugateSelf();
+            int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
             int lwork = x.rowsize()*LAP_BLOCKSIZE;
@@ -711,9 +727,9 @@ namespace tmv {
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
             if (x.iscm() != Q.isconj()) x.conjugateSelf();
 #ifdef LAPNOWORK
-            LAP_Results("cunmlq");
+            LAP_Results(Lap_info,"cunmlq");
 #else
-            LAP_Results(int(TMV_REAL(work[0])),m,n,lwork,"cunmlq");
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"cunmlq");
 #endif
         }
     }

@@ -38,6 +38,7 @@
 #include "TMV_Givens.h"
 #include "tmv/TMV_VectorArith.h"
 #include "tmv/TMV_MatrixArith.h"
+#include "tmv/portable_platform.h"
 #include <iostream>
 using std::endl;
 
@@ -818,14 +819,20 @@ namespace tmv {
             Vector<T> diff(N);
             Vector<T> sum(N);
             T Sk;
+            // For some reason pgCC requires an actual int for the omp
+            // for loop, not just a signed integer type.  So ptrdiff_t
+            // can't be used.
+#ifdef PLATFORM_COMPILER_PGI
+            typedef int int_omp;
+#else
+            typedef ptrdiff_t int_omp;
+#endif
 #pragma omp for
-            for(ptrdiff_t k=0;k<N;k++) {
+            for(int_omp k=0;k<N;k++) {
                 Sk = FindDCSingularValue(
                     k,N,rho,D.cptr(),z.cptr(),
                     zsq.cptr(),normsqz,diff.ptr(),sum.ptr());
-#ifdef _OPENMP
 #pragma omp critical
-#endif
                 {
                     S[k] = Sk;
                     diffmat.col(k) = diff;
@@ -865,16 +872,17 @@ namespace tmv {
             Vector<T> diff(N);
             Vector<T> sum(N);
             T Sk;
-#ifdef _OPENMP
-#pragma omp for
+#ifdef PLATFORM_COMPILER_PGI
+            typedef int int_omp;
+#else
+            typedef ptrdiff_t int_omp;
 #endif
-            for(ptrdiff_t k=0;k<N;k++) {
+#pragma omp for
+            for(int_omp k=0;k<N;k++) {
                 Sk = FindDCSingularValue(
                     k,N,rho,D.cptr(),z.cptr(),
                     zsq.cptr(),normsqz,diff.ptr(),sum.ptr());
-#ifdef _OPENMP
 #pragma omp critical
-#endif
                 {
                     S[k] = Sk;
                 }

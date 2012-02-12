@@ -34,10 +34,11 @@ namespace tmv {
         int n = A.rowsize();
         int lda = A.stepj();
         int* lap_p = new int[n];
+        int Lap_info=0;
         LAPNAME(dgetrf) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p) LAPINFO);
-        LAP_Results("dgetrf");
+        LAP_Results(Lap_info,"dgetrf");
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
             P[i] = lap_p[i] LAPMINUS1;
@@ -53,10 +54,11 @@ namespace tmv {
         int n = A.rowsize();
         int lda = A.stepj();
         int* lap_p = new int[n];
+        int Lap_info=0;
         LAPNAME(zgetrf) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p) LAPINFO);
-        LAP_Results("zgetrf");
+        LAP_Results(Lap_info,"zgetrf");
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
             P[i] = lap_p[i] LAPMINUS1;
@@ -77,10 +79,11 @@ namespace tmv {
         int n = A.rowsize();
         int lda = A.stepj();
         int* lap_p = new int[n];
+        int Lap_info=0;
         LAPNAME(sgetrf) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p) LAPINFO);
-        LAP_Results("sgetrf");
+        LAP_Results(Lap_info,"sgetrf");
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
             P[i] = lap_p[i] LAPMINUS1;
@@ -94,10 +97,11 @@ namespace tmv {
         int n = A.rowsize();
         int lda = A.stepj();
         int* lap_p = new int[n];
+        int Lap_info=0;
         LAPNAME(cgetrf) (
             LAPCM LAPV(m),LAPV(n),LAPP(A.ptr()),LAPV(lda),
             LAPP(lap_p) LAPINFO);
-        LAP_Results("cgetrf");
+        LAP_Results(Lap_info,"cgetrf");
         const int M = A.colsize();
         for(int i=0;i<M;i++) {
             P[i] = lap_p[i] LAPMINUS1;

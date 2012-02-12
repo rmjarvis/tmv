@@ -32,9 +32,11 @@ env1 = env.Clone(CCFLAGS=env['TEST_FLAGS'],
 env1.Append(CPPDEFINES=['TMV_OPT=' + env['TEST_OPT']])
 if env['MEM_TEST']:
     env1.Append(CPPDEFINES=['TMV_MEM_TEST'])
-if env['XTEST'] > 0:
+if env['END_PADDING']:
+    env1.Append(CPPDEFINES=['TMV_END_PADDING'])
+if int(env['XTEST']) > 0:
     env1.Append(CPPDEFINES=['XTEST=' + env['XTEST']])
-if (int(env['XTEST']) & 64) and not env['WITH_BLAS']:
+if env['NAN_TEST']:
     env1.Append(CPPDEFINES=['TMV_INITIALIZE_NAN'])
 if env['DEBUG'] or env['TEST_DEBUG']:
     env1.Append(CPPDEFINES=['XXD'])
@@ -53,8 +55,6 @@ if env['INST_INT']:
     env1.Append(CPPDEFINES=['TMV_INST_INT'])
 if not env['INST_COMPLEX']:
     env1.Append(CPPDEFINES=['TMV_NO_INST_COMPLEX'])
-if not env['INST_MIX']:
-    env1.Append(CPPDEFINES=['TMV_NO_INST_MIX'])
 if not env['TEST_FLOAT']:
     env1.Append(CPPDEFINES=['NO_TEST_FLOAT'])
 if not env['TEST_DOUBLE']:
@@ -80,19 +80,17 @@ obj_mix = env1.Object(test_mix_files)
 progmix = env1.Program('tmvtestmix', obj_mix)
 
 env3 = env1.Clone()
-if env['NOMIX_SMALL']:
-    env3.Append(CPPDEFINES=['NOMIX_SMALL'])
 
 obj_basic = env1.Object(test_basic_files)
 obj_diag = env1.Object(test_diag_files)
 obj_tri = env1.Object(test_tri_files)
-obj_div = [ env1.Object(test_div_files) ,
+obj_div = [ env1.Object(test_div_files),
     env1b.Object(test_div_lap_files) ]
-obj_band = [ env2.Object(test_band_files) ,
+obj_band = [ env2.Object(test_band_files),
     env2b.Object(test_band_lap_files) ]
-obj_sym = [ env2.Object(test_sym_files) ,
+obj_sym = [ env2.Object(test_sym_files),
     env2b.Object(test_sym_lap_files) ]
-obj_symband = [ env2.Object(test_symband_files) ,
+obj_symband = [ env2.Object(test_symband_files),
     env2b.Object(test_symband_lap_files) ]
 obj_small = env3.Object(test_small_files)
 obj_small_mv = env3.Object(test_small_mv_files)

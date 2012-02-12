@@ -290,11 +290,12 @@ namespace tmv {
         AlignedArray<double> work(lwork);
         VectorViewOf(work.get(),lwork).setZero();
 #endif
+        int Lap_info=0;
         LAPNAME(dsbtrd) (
             LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
             LAPP(A2.cptr()),LAPV(lda),LAPP(D.ptr()),LAPP(E.ptr()),
             LAPP(UU),LAPV(ldu) LAPWK(work.get()) LAPINFO LAP1 LAP1 );
-        LAP_Results("dsbtrd");
+        LAP_Results(Lap_info,"dsbtrd");
     }
     template <> 
     void LapTridiagonalize(
@@ -334,11 +335,12 @@ namespace tmv {
         AlignedArray<std::complex<double> > work(lwork);
         VectorViewOf(work.get(),lwork).setZero();
 #endif
+        int Lap_info=0;
         LAPNAME(zhbtrd) (
             LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
             LAPP(A2.cptr()),LAPV(lda),LAPP(D.ptr()),LAPP(E.ptr()),
             LAPP(UU),LAPV(ldu) LAPWK(work.get()) LAPINFO LAP1 LAP1 );
-        LAP_Results("zhbtrd");
+        LAP_Results(Lap_info,"zhbtrd");
     }
 #endif
 #ifdef INST_FLOAT
@@ -377,11 +379,12 @@ namespace tmv {
         AlignedArray<float> work(lwork);
         VectorViewOf(work.get(),lwork).setZero();
 #endif
+        int Lap_info=0;
         LAPNAME(ssbtrd) (
             LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
             LAPP(A2.cptr()),LAPV(lda),LAPP(D.ptr()),LAPP(E.ptr()),
             LAPP(UU),LAPV(ldu) LAPWK(work.get()) LAPINFO LAP1 LAP1 );
-        LAP_Results("dsbtrd");
+        LAP_Results(Lap_info,"dsbtrd");
     }
     template <> 
     void LapTridiagonalize(
@@ -421,11 +424,12 @@ namespace tmv {
         AlignedArray<std::complex<float> > work(lwork);
         VectorViewOf(work.get(),lwork).setZero();
 #endif
+        int Lap_info=0;
         LAPNAME(chbtrd) (
             LAPCM LAPV(vect),LAPCH_LO,LAPV(n),LAPV(kl),
             LAPP(A2.cptr()),LAPV(lda),LAPP(D.ptr()),LAPP(E.ptr()),
             LAPP(UU),LAPV(ldu) LAPWK(work.get()) LAPINFO LAP1 LAP1 );
-        LAP_Results("chbtrd");
+        LAP_Results(Lap_info,"chbtrd");
     }
 #endif 
 #endif // LAP

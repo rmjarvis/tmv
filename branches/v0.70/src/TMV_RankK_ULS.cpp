@@ -188,20 +188,22 @@ namespace tmv {
     {
         int n = A.size();
         int lda = A.iscm() ? A.stepj() : A.stepi();
+        int Lap_info=0;
         LAPNAME(dlauum) (
             LAPCM A.iscm()?LAPCH_UP:LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(lda) LAPINFO LAP1);
-        LAP_Results("dlauum");
+        LAP_Results(Lap_info,"dlauum");
     }
     template<> 
     void LapSetUUt(SymMatrixView<std::complex<double> > A)
     {
         int n = A.size();
         int lda = A.iscm() ? A.stepj() : A.stepi();
+        int Lap_info=0;
         LAPNAME(zlauum) (
             LAPCM A.iscm()?LAPCH_UP:LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(lda) LAPINFO LAP1);
-        LAP_Results("zlauum");
+        LAP_Results(Lap_info,"zlauum");
     }
 #endif
 #ifdef INST_FLOAT
@@ -210,20 +212,22 @@ namespace tmv {
     {
         int n = A.size();
         int lda = A.iscm() ? A.stepj() : A.stepi();
+        int Lap_info=0;
         LAPNAME(slauum) (
             LAPCM A.iscm()?LAPCH_UP:LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(lda) LAPINFO LAP1);
-        LAP_Results("slauum");
+        LAP_Results(Lap_info,"slauum");
     }
     template<> 
     void LapSetUUt(SymMatrixView<std::complex<float> > A)
     {
         int n = A.size();
         int lda = A.iscm() ? A.stepj() : A.stepi();
+        int Lap_info=0;
         LAPNAME(clauum) (
             LAPCM A.iscm()?LAPCH_UP:LAPCH_LO,LAPV(n),
             LAPP(A.ptr()),LAPV(lda) LAPINFO LAP1);
-        LAP_Results("clauum");
+        LAP_Results(Lap_info,"clauum");
     }
 #endif // FLOAT
 #endif // AELAP

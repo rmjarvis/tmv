@@ -332,7 +332,7 @@ namespace tmv {
         char vect = U.cptr() ? Vt.cptr() ? 'B' : 'Q' : Vt.cptr() ? 'P' : 'N';
         double* VV = Vt.ptr();
         double* UU = U.ptr();
-
+        int Lap_info=0;
         LAPNAME(dgbbrd) (
             LAPCM LAPV(vect),LAPV(m),LAPV(n),LAPV(ncc),
             LAPV(kl),LAPV(ku),
@@ -345,7 +345,7 @@ namespace tmv {
             logdet += DiagMatrixViewOf(D).logDet(&s);
             signdet *= s;
         }
-        LAP_Results("dgbbrd");
+        LAP_Results(Lap_info,"dgbbrd");
     }
     template <> 
     void LapBidiagonalize(
@@ -399,7 +399,7 @@ namespace tmv {
         char vect = U.cptr() ? Vt.cptr() ? 'B' : 'Q' : Vt.cptr() ? 'P' : 'N';
         std::complex<double>* VV = Vt.ptr();
         std::complex<double>* UU = U.ptr();
-
+        int Lap_info=0;
         LAPNAME(zgbbrd) (
             LAPCM LAPV(vect),LAPV(m),LAPV(n),LAPV(o),
             LAPV(kl),LAPV(ku),LAPP(A2.cptr()-A.nhi()),LAPV(lda),
@@ -415,7 +415,7 @@ namespace tmv {
             logdet += DiagMatrixViewOf(A2.diag()).logDet(&s);
             signdet *= s;
         }
-        LAP_Results("zgbbrd");
+        LAP_Results(Lap_info,"zgbbrd");
     }
 #endif
 #ifdef INST_FLOAT
@@ -470,7 +470,7 @@ namespace tmv {
         char vect = U.cptr() ? Vt.cptr() ? 'B' : 'Q' : Vt.cptr() ? 'P' : 'N';
         float* VV = Vt.ptr();
         float* UU = U.ptr();
-
+        int Lap_info=0;
         LAPNAME(sgbbrd) (
             LAPCM LAPV(vect),LAPV(m),LAPV(n),LAPV(ncc),
             LAPV(kl),LAPV(ku),
@@ -483,7 +483,7 @@ namespace tmv {
             logdet += DiagMatrixViewOf(D).logDet(&s);
             signdet *= s;
         }
-        LAP_Results("sgbbrd");
+        LAP_Results(Lap_info,"sgbbrd");
     }
     template <> 
     void LapBidiagonalize(
@@ -537,7 +537,7 @@ namespace tmv {
         char vect = U.cptr() ? Vt.cptr() ? 'B' : 'Q' : Vt.cptr() ? 'P' : 'N';
         std::complex<float>* VV = Vt.ptr();
         std::complex<float>* UU = U.ptr();
-
+        int Lap_info=0;
         LAPNAME(cgbbrd) (
             LAPCM LAPV(vect),LAPV(m),LAPV(n),LAPV(o),
             LAPV(kl),LAPV(ku),LAPP(A2.cptr()-A.nhi()),LAPV(lda),
@@ -550,7 +550,7 @@ namespace tmv {
             logdet += DiagMatrixViewOf(A2.diag()).logDet(&s);
             signdet *= s;
         }
-        LAP_Results("cgbbrd");
+        LAP_Results(Lap_info,"cgbbrd");
     }
 #endif
 #endif

@@ -131,8 +131,10 @@ namespace tmv {
         if (U.cptr() && U.iscm() && U.colsize() == U.stepj()) {
             char c = 'V';
             int ldu = U.stepj();
+            int Lap_info=0;
 #ifndef LAPNOWORK
             int lgn = int(ceil(log(double(n))/log(2.)));
+#ifdef NOWORKQUERY
             int lwork = 1+3*n+2*n*lgn+4*n*n;
             // The official recommendation only has 3*n*n at the end,
             // but this leads to seg faults.  I think this is a bug
@@ -145,6 +147,31 @@ namespace tmv {
             int liwork = 6*(1+n)+5*n*lgn;
             AlignedArray<double> work(lwork);
             AlignedArray<int> iwork(liwork);
+#else
+            int lwork = -1;
+            int liwork = -1;
+            AlignedArray<double> work(1);
+            work.get()[0] = 0.;
+            AlignedArray<int> iwork(1);
+            LAPNAME(dstedc) (
+                LAPCM LAPV(c),LAPV(n),
+                LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U.ptr()),LAPV(ldu)
+                LAPWK(work.get()) LAPVWK(lwork) 
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
+            lwork = int(work[0]);
+            liwork = iwork[0];
+            //std::cout<<"After dstedc work query:\n";
+            //std::cout<<"lwork = "<<lwork<<", liwork = "<<liwork<<std::endl;
+            //std::cout<<"cf: "<<1+3*n+2*n*lgn+4*n*n<<"  "<<6*(1+n)+5*n*lgn<<std::endl;
+            // Even worse -- some implementations do not return the correct
+            // work size when using a work query.
+            // Add n^2 conditionally on the return being this value in 
+            // case an implementation has a totally different work size,
+            // in which case, we'll assume that they have it right.
+            if (lwork == 1+3*n+2*n*lgn+3*n*n) lwork += n*n;
+            work.resize(lwork);
+            iwork.resize(liwork);
+#endif
             VectorViewOf(work.get(),lwork).setZero();
 #endif
             //std::cout<<"Before dstedc:\n";
@@ -154,24 +181,41 @@ namespace tmv {
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U.ptr()),LAPV(ldu)
                 LAPWK(work.get()) LAPVWK(lwork) 
-                LAPWK(iwork.get()) LAPVWK(liwork) 
-                LAPINFO LAP1);
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
             //std::cout<<"After dstedc: lap_info = "<<Lap_info<<std::endl;
             //std::cout<<"work[0] = "<<work[0]<<", iwork[0] = "<<iwork[0]<<std::endl;
 #ifdef LAPNOWORK
-            LAP_Results("dstedc");
+            LAP_Results(Lap_info,"dstedc");
 #else
-            LAP_Results(int(work[0]),n,n,lwork,"dstedc");
+            LAP_Results(Lap_info,int(work[0]),n,n,lwork,"dstedc");
 #endif
         } else if (U.cptr()) {
             char c = 'I';
             Matrix<double,ColMajor> U1(n,n);
             int ldu = U1.stepj();
+            int Lap_info=0;
 #ifndef LAPNOWORK
+#ifdef NOWORKQUERY
             int lwork = 1+(4+n)*n;
             int liwork = 3+5*n;
             AlignedArray<double> work(lwork);
             AlignedArray<int> iwork(liwork);
+#else
+            int lwork = -1;
+            int liwork = -1;
+            AlignedArray<double> work(1);
+            work.get()[0] = 0.;
+            AlignedArray<int> iwork(1);
+            LAPNAME(dstedc) (
+                LAPCM LAPV(c),LAPV(n),
+                LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U1.ptr()),LAPV(ldu)
+                LAPWK(work.get()) LAPVWK(lwork) 
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
+            lwork = int(work[0]);
+            liwork = iwork[0];
+            work.resize(lwork);
+            iwork.resize(liwork);
+#endif
             VectorViewOf(work.get(),lwork).setZero();
 #endif
             //std::cout<<"Before dstedc:\n";
@@ -181,36 +225,55 @@ namespace tmv {
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U1.ptr()),LAPV(ldu)
                 LAPWK(work.get()) LAPVWK(lwork) 
-                LAPWK(iwork.get()) LAPVWK(liwork) 
-                LAPINFO LAP1);
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
             //std::cout<<"After dstedc: lap_info = "<<Lap_info<<std::endl;
             //std::cout<<"work[0] = "<<work[0]<<", iwork[0] = "<<iwork[0]<<std::endl;
 #ifdef LAPNOWORK
-            LAP_Results("dstedc");
+            LAP_Results(Lap_info,"dstedc");
 #else
-            LAP_Results(int(work[0]),n,n,lwork,"dstedc");
+            LAP_Results(Lap_info,int(work[0]),n,n,lwork,"dstedc");
 #endif
             U *= U1;
         } else {
             char c = 'N';
             int ldu = n;
+            int Lap_info=0;
 #ifndef LAPNOWORK
+#ifdef NOWORKQUERY
             int lwork = 1;
             int liwork = 1;
             AlignedArray<double> work(lwork);
             AlignedArray<int> iwork(liwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
+#else
+            int lwork = -1;
+            int liwork = -1;
+            AlignedArray<double> work(1);
+            work.get()[0] = 0.;
+            AlignedArray<int> iwork(1);
             LAPNAME(dstedc) (
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),0,LAPV(ldu)
                 LAPWK(work.get()) LAPVWK(lwork) 
-                LAPWK(iwork.get()) LAPVWK(liwork) 
-                LAPINFO LAP1);
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
+            lwork = int(work[0]);
+            liwork = iwork[0];
+            work.resize(lwork);
+            iwork.resize(liwork);
+#endif
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+            //std::cout<<"Before dstedc:\n";
+            //std::cout<<"c = "<<c<<", n = "<<n<<std::endl;
+            //std::cout<<"lwork = "<<lwork<<", liwork = "<<liwork<<std::endl;
+            LAPNAME(dstedc) (
+                LAPCM LAPV(c),LAPV(n),
+                LAPP(D.ptr()),LAPP(E.ptr()),0,LAPV(ldu)
+                LAPWK(work.get()) LAPVWK(lwork) 
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("dstedc");
+            LAP_Results(Lap_info,"dstedc");
 #else
-            LAP_Results(int(work[0]),n,n,lwork,"dstedc");
+            LAP_Results(Lap_info,int(work[0]),n,n,lwork,"dstedc");
 #endif
         }
     }
@@ -230,72 +293,142 @@ namespace tmv {
         if (U.cptr() && U.iscm() && U.colsize() == U.stepj()) {
             char c = 'V';
             int ldu = U.stepj();
+            int Lap_info=0;
 #ifndef LAPNOWORK
+#ifdef NOWORKQUERY
             int lgn = int(ceil(log(double(n))/log(2.)));
             int lwork = n*n;
-            int lrwork = 1+3*(1+n)*n+2*n*lgn;
+            int lrwork = 1+3*n+2*n*lgn+3*n*n;
             int liwork = 6*(1+n)+5*n*lgn;
             AlignedArray<std::complex<double> > work(lwork);
             AlignedArray<double> rwork(lrwork);
             AlignedArray<int> iwork(liwork);
-            VectorViewOf(work.get(),lwork).setZero();
-            VectorViewOf(rwork.get(),lrwork).setZero();
-#endif
+#else
+            int lwork = -1;
+            int lrwork = -1;
+            int liwork = -1;
+            AlignedArray<std::complex<double> > work(1);
+            work.get()[0] = 0.;
+            AlignedArray<double> rwork(1);
+            rwork.get()[0] = 0.;
+            AlignedArray<int> iwork(1);
             LAPNAME(zstedc) (
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U.ptr()),LAPV(ldu)
                 LAPWK(work.get()) LAPVWK(lwork) 
                 LAPWK(rwork.get()) LAPVWK(lrwork) 
-                LAPWK(iwork.get()) LAPVWK(liwork) 
-                LAPINFO LAP1);
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
+            lwork = int(real(work[0]));
+            lrwork = int(rwork[0]);
+            liwork = iwork[0];
+            //std::cout<<"After zstedc work query:\n";
+            //std::cout<<"lwork = "<<lwork<<", lrwork = "<<lrwork<<", liwork = "<<liwork<<std::endl;
+            //int lgn = int(ceil(log(double(n))/log(2.)));
+            //std::cout<<"cf: "<<n*n<<"  "<<1+3*n+2*n*lgn+3*n*n<<"  "<<6*(1+n)+5*n*lgn<<std::endl;
+            work.resize(lwork);
+            rwork.resize(lrwork);
+            iwork.resize(liwork);
+#endif
+            VectorViewOf(work.get(),lwork).setZero();
+            VectorViewOf(rwork.get(),lrwork).setZero();
+#endif
+            //std::cout<<"Before zstedc:\n";
+            //std::cout<<"c = "<<c<<", n = "<<n<<std::endl;
+            //std::cout<<"lwork = "<<lwork<<", lrwork = "<<lrwork<<", liwork = "<<liwork<<std::endl;
+            LAPNAME(zstedc) (
+                LAPCM LAPV(c),LAPV(n),
+                LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U.ptr()),LAPV(ldu)
+                LAPWK(work.get()) LAPVWK(lwork) 
+                LAPWK(rwork.get()) LAPVWK(lrwork) 
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("zstedc");
+            LAP_Results(Lap_info,"zstedc");
 #else
-            LAP_Results(int(real(work[0])),n,n,lwork,"zstedc");
+            LAP_Results(Lap_info,int(real(work[0])),n,n,lwork,"zstedc");
 #endif
         } else if (U.cptr()) {
             char c = 'I';
             Matrix<double,ColMajor> U1(n,n);
             int ldu = U1.stepj();
+            int Lap_info=0;
 #ifndef LAPNOWORK
+#ifdef NOWORKQUERY
             int lwork = 1+(4+n)*n;
             int liwork = 3+5*n;
             AlignedArray<double> work(lwork);
             AlignedArray<int> iwork(liwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
+#else
+            int lwork = -1;
+            int liwork = -1;
+            AlignedArray<double> work(1);
+            work.get()[0] = 0.;
+            AlignedArray<int> iwork(1);
             LAPNAME(dstedc) (
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U1.ptr()),LAPV(ldu)
                 LAPWK(work.get()) LAPVWK(lwork) 
-                LAPWK(iwork.get()) LAPVWK(liwork) 
-                LAPINFO LAP1);
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
+            lwork = int(work[0]);
+            liwork = iwork[0];
+            work.resize(lwork);
+            iwork.resize(liwork);
+#endif
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+            //std::cout<<"Before dstedc:\n";
+            //std::cout<<"c = "<<c<<", n = "<<n<<std::endl;
+            //std::cout<<"lwork = "<<lwork<<", liwork = "<<liwork<<std::endl;
+            LAPNAME(dstedc) (
+                LAPCM LAPV(c),LAPV(n),
+                LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U1.ptr()),LAPV(ldu)
+                LAPWK(work.get()) LAPVWK(lwork) 
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("dstedc");
+            LAP_Results(Lap_info,"dstedc");
 #else
-            LAP_Results(int(work[0]),n,n,lwork,"dstedc");
+            LAP_Results(Lap_info,int(work[0]),n,n,lwork,"dstedc");
 #endif
             U *= U1;
         } else {
             char c = 'N';
             int ldu = n;
+            int Lap_info=0;
 #ifndef LAPNOWORK
+#ifdef NOWORKQUERY
             int lwork = 1;
             int liwork = 1;
             AlignedArray<double> work(lwork);
             AlignedArray<int> iwork(liwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
+#else
+            int lwork = -1;
+            int liwork = -1;
+            AlignedArray<double> work(1);
+            work.get()[0] = 0.;
+            AlignedArray<int> iwork(1);
             LAPNAME(dstedc) (
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),0,LAPV(ldu)
                 LAPWK(work.get()) LAPVWK(lwork) 
-                LAPWK(iwork.get()) LAPVWK(liwork) 
-                LAPINFO LAP1);
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
+            lwork = int(work[0]);
+            liwork = iwork[0];
+            work.resize(lwork);
+            iwork.resize(liwork);
+#endif
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+            //std::cout<<"Before dstedc:\n";
+            //std::cout<<"c = "<<c<<", n = "<<n<<std::endl;
+            //std::cout<<"lwork = "<<lwork<<", liwork = "<<liwork<<std::endl;
+            LAPNAME(dstedc) (
+                LAPCM LAPV(c),LAPV(n),
+                LAPP(D.ptr()),LAPP(E.ptr()),0,LAPV(ldu)
+                LAPWK(work.get()) LAPVWK(lwork) 
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("dstedc");
+            LAP_Results(Lap_info,"dstedc");
 #else
-            LAP_Results(int(work[0]),n,n,lwork,"dstedc");
+            LAP_Results(Lap_info,int(work[0]),n,n,lwork,"dstedc");
 #endif
         }
     }
@@ -316,68 +449,120 @@ namespace tmv {
         if (U.cptr() && U.iscm() && U.colsize() == U.stepj()) {
             char c = 'V';
             int ldu = U.stepj();
+            int Lap_info=0;
 #ifndef LAPNOWORK
             int lgn = int(ceil(log(float(n))/log(2.)));
+#ifdef NOWORKQUERY
             int lwork = 1+3*n+2*n*lgn+4*n*n;
             int liwork = 6*(1+n)+5*n*lgn;
             AlignedArray<float> work(lwork);
             AlignedArray<int> iwork(liwork);
+#else
+            int lwork = -1;
+            int liwork = -1;
+            AlignedArray<float> work(1);
+            work.get()[0] = 0.;
+            AlignedArray<int> iwork(1);
+            LAPNAME(sstedc) (
+                LAPCM LAPV(c),LAPV(n),
+                LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U.ptr()),LAPV(ldu)
+                LAPWK(work.get()) LAPVWK(lwork) 
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
+            lwork = int(work[0]);
+            liwork = iwork[0];
+            if (lwork == 1+3*n+2*n*lgn+3*n*n) lwork += n*n;
+            work.resize(lwork);
+            iwork.resize(liwork);
+#endif
             VectorViewOf(work.get(),lwork).setZero();
 #endif
             LAPNAME(sstedc) (
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U.ptr()),LAPV(ldu)
                 LAPWK(work.get()) LAPVWK(lwork) 
-                LAPWK(iwork.get()) LAPVWK(liwork) 
-                LAPINFO LAP1);
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("sstedc");
+            LAP_Results(Lap_info,"sstedc");
 #else
-            LAP_Results(int(work[0]),n,n,lwork,"sstedc");
+            LAP_Results(Lap_info,int(work[0]),n,n,lwork,"sstedc");
 #endif
         } else if (U.cptr()) {
             char c = 'I';
             Matrix<float,ColMajor> U1(n,n);
             int ldu = U1.stepj();
+            int Lap_info=0;
 #ifndef LAPNOWORK
+#ifdef NOWORKQUERY
             int lwork = 1+(4+n)*n;
             int liwork = 3+5*n;
             AlignedArray<float> work(lwork);
             AlignedArray<int> iwork(liwork);
+#else
+            int lwork = -1;
+            int liwork = -1;
+            AlignedArray<float> work(1);
+            work.get()[0] = 0.;
+            AlignedArray<int> iwork(1);
+            LAPNAME(sstedc) (
+                LAPCM LAPV(c),LAPV(n),
+                LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U1.ptr()),LAPV(ldu)
+                LAPWK(work.get()) LAPVWK(lwork) 
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
+            lwork = int(work[0]);
+            liwork = iwork[0];
+            work.resize(lwork);
+            iwork.resize(liwork);
+#endif
             VectorViewOf(work.get(),lwork).setZero();
 #endif
             LAPNAME(sstedc) (
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U1.ptr()),LAPV(ldu)
                 LAPWK(work.get()) LAPVWK(lwork) 
-                LAPWK(iwork.get()) LAPVWK(liwork) 
-                LAPINFO LAP1);
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("sstedc");
+            LAP_Results(Lap_info,"sstedc");
 #else
-            LAP_Results(int(work[0]),n,n,lwork,"sstedc");
+            LAP_Results(Lap_info,int(work[0]),n,n,lwork,"sstedc");
 #endif
             U *= U1;
         } else {
             char c = 'N';
             int ldu = n;
+            int Lap_info=0;
 #ifndef LAPNOWORK
+#ifdef NOWORKQUERY
             int lwork = 1;
             int liwork = 1;
             AlignedArray<float> work(lwork);
             AlignedArray<int> iwork(liwork);
+#else
+            int lwork = -1;
+            int liwork = -1;
+            AlignedArray<float> work(1);
+            work.get()[0] = 0.;
+            AlignedArray<int> iwork(1);
+            LAPNAME(sstedc) (
+                LAPCM LAPV(c),LAPV(n),
+                LAPP(D.ptr()),LAPP(E.ptr()),0,LAPV(ldu)
+                LAPWK(work.get()) LAPVWK(lwork) 
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
+            lwork = int(work[0]);
+            liwork = iwork[0];
+            work.resize(lwork);
+            iwork.resize(liwork);
+#endif
             VectorViewOf(work.get(),lwork).setZero();
 #endif
             LAPNAME(sstedc) (
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),0,LAPV(ldu)
                 LAPWK(work.get()) LAPVWK(lwork) 
-                LAPWK(iwork.get()) LAPVWK(liwork) 
-                LAPINFO LAP1);
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("sstedc");
+            LAP_Results(Lap_info,"sstedc");
 #else
-            LAP_Results(int(work[0]),n,n,lwork,"sstedc");
+            LAP_Results(Lap_info,int(work[0]),n,n,lwork,"sstedc");
 #endif
         }
     }
@@ -397,14 +582,38 @@ namespace tmv {
         if (U.cptr() && U.iscm() && U.colsize() == U.stepj()) {
             char c = 'V';
             int ldu = U.stepj();
+            int Lap_info=0;
 #ifndef LAPNOWORK
+#ifdef NOWORKQUERY
             int lgn = int(ceil(log(float(n))/log(2.)));
             int lwork = n*n;
-            int lrwork = 1+3*(1+n)*n+2*n*lgn;
+            int lrwork = 1+3*n+2*n*lgn+3*n*n;
             int liwork = 6*(1+n)+5*n*lgn;
             AlignedArray<std::complex<float> > work(lwork);
             AlignedArray<float> rwork(lrwork);
             AlignedArray<int> iwork(liwork);
+#else
+            int lwork = -1;
+            int lrwork = -1;
+            int liwork = -1;
+            AlignedArray<std::complex<float> > work(1);
+            work.get()[0] = 0.;
+            AlignedArray<float> rwork(1);
+            rwork.get()[0] = 0.;
+            AlignedArray<int> iwork(1);
+            LAPNAME(cstedc) (
+                LAPCM LAPV(c),LAPV(n),
+                LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U.ptr()),LAPV(ldu)
+                LAPWK(work.get()) LAPVWK(lwork) 
+                LAPWK(rwork.get()) LAPVWK(lrwork) 
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
+            lwork = int(real(work[0]));
+            lrwork = int(rwork[0]);
+            liwork = iwork[0];
+            work.resize(lwork);
+            rwork.resize(lrwork);
+            iwork.resize(liwork);
+#endif
             VectorViewOf(work.get(),lwork).setZero();
             VectorViewOf(rwork.get(),lrwork).setZero();
 #endif
@@ -413,22 +622,39 @@ namespace tmv {
                 LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U.ptr()),LAPV(ldu)
                 LAPWK(work.get()) LAPVWK(lwork) 
                 LAPWK(rwork.get()) LAPVWK(lrwork) 
-                LAPWK(iwork.get()) LAPVWK(liwork) 
-                LAPINFO LAP1);
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("cstedc");
+            LAP_Results(Lap_info,"cstedc");
 #else
-            LAP_Results(int(real(work[0])),n,n,lwork,"cstedc");
+            LAP_Results(Lap_info,int(real(work[0])),n,n,lwork,"cstedc");
 #endif
         } else if (U.cptr()) {
             char c = 'I';
             Matrix<float,ColMajor> U1(n,n);
             int ldu = U1.stepj();
+            int Lap_info=0;
 #ifndef LAPNOWORK
+#ifdef NOWORKQUERY
             int lwork = 1+(4+n)*n;
             int liwork = 3+5*n;
             AlignedArray<float> work(lwork);
             AlignedArray<int> iwork(liwork);
+#else
+            int lwork = -1;
+            int liwork = -1;
+            AlignedArray<float> work(1);
+            work.get()[0] = 0.;
+            AlignedArray<int> iwork(1);
+            LAPNAME(sstedc) (
+                LAPCM LAPV(c),LAPV(n),
+                LAPP(D.ptr()),LAPP(E.ptr()),LAPP(U1.ptr()),LAPV(ldu)
+                LAPWK(work.get()) LAPVWK(lwork) 
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
+            lwork = int(work[0]);
+            liwork = iwork[0];
+            work.resize(lwork);
+            iwork.resize(liwork);
+#endif
             VectorViewOf(work.get(),lwork).setZero();
 #endif
             LAPNAME(sstedc) (
@@ -438,31 +664,48 @@ namespace tmv {
                 LAPWK(iwork.get()) LAPVWK(liwork) 
                 LAPINFO LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("sstedc");
+            LAP_Results(Lap_info,"sstedc");
 #else
-            LAP_Results(int(work[0]),n,n,lwork,"sstedc");
+            LAP_Results(Lap_info,int(work[0]),n,n,lwork,"sstedc");
 #endif
             U *= U1;
         } else {
             char c = 'N';
             int ldu = n;
+            int Lap_info=0;
 #ifndef LAPNOWORK
+#ifdef NOWORKQUERY
             int lwork = 1;
             int liwork = 1;
             AlignedArray<float> work(lwork);
             AlignedArray<int> iwork(liwork);
+#else
+            int lwork = -1;
+            int liwork = -1;
+            AlignedArray<float> work(1);
+            work.get()[0] = 0.;
+            AlignedArray<int> iwork(1);
+            LAPNAME(sstedc) (
+                LAPCM LAPV(c),LAPV(n),
+                LAPP(D.ptr()),LAPP(E.ptr()),0,LAPV(ldu)
+                LAPWK(work.get()) LAPVWK(lwork) 
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
+            lwork = int(work[0]);
+            liwork = iwork[0];
+            work.resize(lwork);
+            iwork.resize(liwork);
+#endif
             VectorViewOf(work.get(),lwork).setZero();
 #endif
             LAPNAME(sstedc) (
                 LAPCM LAPV(c),LAPV(n),
                 LAPP(D.ptr()),LAPP(E.ptr()),0,LAPV(ldu)
                 LAPWK(work.get()) LAPVWK(lwork) 
-                LAPWK(iwork.get()) LAPVWK(liwork) 
-                LAPINFO LAP1);
+                LAPWK(iwork.get()) LAPVWK(liwork) LAPINFO LAP1);
 #ifdef LAPNOWORK
-            LAP_Results("sstedc");
+            LAP_Results(Lap_info,"sstedc");
 #else
-            LAP_Results(int(work[0]),n,n,lwork,"sstedc");
+            LAP_Results(Lap_info,int(work[0]),n,n,lwork,"sstedc");
 #endif
         }
     }
@@ -517,6 +760,7 @@ namespace tmv {
             Matrix<double,ColMajor> U1(n,n);
             int ldu = U1.stepj();
             AlignedArray<int> isuppz(2*n);
+            int Lap_info=0;
 #ifndef LAPNOWORK
             int lwork = 18*n;
             int liwork = 10*n;
@@ -590,7 +834,7 @@ namespace tmv {
                 TMV_Warning(ss.str());
                 return AltLapEigenFromTridiagonal(U,D,E);
             }
-            LAP_Results("dstegr");
+            LAP_Results(Lap_info,"dstegr");
             D = Dout;
             U *= U1;
         } else {
@@ -623,6 +867,7 @@ namespace tmv {
             Matrix<double,ColMajor> U1(n,n);
             int ldu = U1.stepj();
             AlignedArray<int> isuppz(2*n);
+            int Lap_info=0;
 #ifndef LAPNOWORK
             int lwork = 18*n;
             int liwork = 10*n;
@@ -677,7 +922,7 @@ namespace tmv {
                 TMV_Warning(ss.str());
                 return AltLapEigenFromTridiagonal(U,D,E);
             }
-            LAP_Results("dstegr");
+            LAP_Results(Lap_info,"dstegr");
             D = Dout;
             U *= U1;
         } else {
@@ -711,6 +956,7 @@ namespace tmv {
             Matrix<float,ColMajor> U1(n,n);
             int ldu = U1.stepj();
             AlignedArray<int> isuppz(2*n);
+            int Lap_info=0;
 #ifndef LAPNOWORK
             int lwork = 18*n;
             int liwork = 10*n;
@@ -757,7 +1003,7 @@ namespace tmv {
                 TMV_Warning(ss.str());
                 return AltLapEigenFromTridiagonal(U,D,E);
             }
-            LAP_Results("sstegr");
+            LAP_Results(Lap_info,"sstegr");
             D = Dout;
             U *= U1;
         } else {
@@ -790,6 +1036,7 @@ namespace tmv {
             Matrix<float,ColMajor> U1(n,n);
             int ldu = U1.stepj();
             AlignedArray<int> isuppz(2*n);
+            int Lap_info=0;
 #ifndef LAPNOWORK
             int lwork = 18*n;
             int liwork = 10*n;
@@ -836,7 +1083,7 @@ namespace tmv {
                 TMV_Warning(ss.str());
                 return AltLapEigenFromTridiagonal(U,D,E);
             }
-            LAP_Results("sstegr");
+            LAP_Results(Lap_info,"sstegr");
             D = Dout;
             U *= U1;
         } else {

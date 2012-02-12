@@ -34,10 +34,6 @@
 
 namespace tmv {
 
-    class ListInitClass {};
-
-    extern ListInitClass ListInit;
-
     class ListReadError : public ReadError
     {
     private :

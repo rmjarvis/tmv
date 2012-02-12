@@ -342,11 +342,12 @@ namespace tmv {
         int ldm = m.stepj();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i] LAPPLUS1;
+        int Lap_info=0;
         LAPNAME(dgbtrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(kl),LAPV(ku),LAPV(nrhs),
             LAPP(LUx.cptr()-LUx.nhi()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(m.ptr()),LAPV(ldm) LAPINFO LAP1);
-        LAP_Results("dgbtrs");
+        LAP_Results(Lap_info,"dgbtrs");
     }
     template <> 
     void LapLU_LDivEq(
@@ -374,11 +375,12 @@ namespace tmv {
         int ldm = m.stepj();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i] LAPPLUS1;
+        int Lap_info=0;
         LAPNAME(zgbtrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(kl),LAPV(ku),LAPV(nrhs),
             LAPP(LUx.cptr()-LUx.nhi()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(m.ptr()),LAPV(ldm) LAPINFO LAP1);
-        LAP_Results("zgbtrs");
+        LAP_Results(Lap_info,"zgbtrs");
     }
     template <> 
     void LapTriDiagLU_LDivEq(
@@ -401,12 +403,13 @@ namespace tmv {
         int ldm = m.stepj();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i] LAPPLUS1;
+        int Lap_info=0;
         LAPNAME(dgttrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
             LAPP(LUx.diag(-1).cptr()),LAPP(LUx.diag().cptr()),
             LAPP(LUx.diag(1).cptr()),LAPP(LUx.diag(2).cptr()),
             LAPP(lap_p.get()),LAPP(m.ptr()),LAPV(ldm) LAPINFO LAP1);
-        LAP_Results("dgttrs");
+        LAP_Results(Lap_info,"dgttrs");
     }
     template <> 
     void LapTriDiagLU_LDivEq(
@@ -431,12 +434,13 @@ namespace tmv {
         int ldm = m.stepj();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i] LAPPLUS1;
+        int Lap_info=0;
         LAPNAME(zgttrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
             LAPP(LUx.diag(-1).cptr()), LAPP(LUx.diag().cptr()),
             LAPP(LUx.diag(1).cptr()), LAPP(LUx.diag(2).cptr()), 
             LAPP(lap_p.get()), LAPP(m.ptr()),LAPV(ldm) LAPINFO LAP1);
-        LAP_Results("zgttrs");
+        LAP_Results(Lap_info,"zgttrs");
     }
     template <> 
     void LapLU_RDivEq(
@@ -462,11 +466,12 @@ namespace tmv {
         int ldm = m.stepi();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i]+1;
+        int Lap_info=0;
         LAPNAME(dgbtrs) (
             LAPCM LAPCH_T,LAPV(n),LAPV(kl),LAPV(ku),LAPV(nrhs),
             LAPP(LUx.cptr()-LUx.nhi()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(m.ptr()),LAPV(ldm) LAPINFO LAP1);
-        LAP_Results("dgbtrs");
+        LAP_Results(Lap_info,"dgbtrs");
     }
     template <> 
     void LapLU_RDivEq(
@@ -493,12 +498,13 @@ namespace tmv {
         int ldm = m.stepi();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i]+1;
+        int Lap_info=0;
         LAPNAME(zgbtrs) (
             LAPCM LUx.isconj()?LAPCH_CT:LAPCH_T,
             LAPV(n),LAPV(kl),LAPV(ku),LAPV(nrhs),
             LAPP(LUx.cptr()-LUx.nhi()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(m.ptr()),LAPV(ldm) LAPINFO LAP1);
-        LAP_Results("zgbtrs");
+        LAP_Results(Lap_info,"zgbtrs");
     }
     template <> 
     void LapTriDiagLU_RDivEq(
@@ -521,12 +527,13 @@ namespace tmv {
         int ldm = m.stepi();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i]+1;
+        int Lap_info=0;
         LAPNAME(dgttrs) (
             LAPCM LAPCH_T,LAPV(n),LAPV(nrhs),
             LAPP(LUx.diag(-1).cptr()), LAPP(LUx.diag().cptr()),
             LAPP(LUx.diag(1).cptr()), LAPP(LUx.diag(2).cptr()),
             LAPP(lap_p.get()),LAPP(m.ptr()),LAPV(ldm) LAPINFO LAP1);
-        LAP_Results("dgttrs");
+        LAP_Results(Lap_info,"dgttrs");
     }
     template <> 
     void LapTriDiagLU_RDivEq(
@@ -550,12 +557,13 @@ namespace tmv {
         int ldm = m.stepi();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i]+1;
+        int Lap_info=0;
         LAPNAME(zgttrs) (
             LAPCM LUx.isconj()?LAPCH_CT:LAPCH_T, LAPV(n),LAPV(nrhs),
             LAPP(LUx.diag(-1).cptr()), LAPP(LUx.diag().cptr()),
             LAPP(LUx.diag(1).cptr()), LAPP(LUx.diag(2).cptr()),
             LAPP(lap_p.get()), LAPP(m.ptr()),LAPV(ldm) LAPINFO LAP1);
-        LAP_Results("zgttrs");
+        LAP_Results(Lap_info,"zgttrs");
     }
 #endif // DOUBLE
 #ifdef INST_FLOAT
@@ -583,11 +591,12 @@ namespace tmv {
         int ldm = m.stepj();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i] LAPPLUS1;
+        int Lap_info=0;
         LAPNAME(sgbtrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(kl),LAPV(ku),LAPV(nrhs),
             LAPP(LUx.cptr()-LUx.nhi()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(m.ptr()),LAPV(ldm) LAPINFO LAP1);
-        LAP_Results("sgbtrs");
+        LAP_Results(Lap_info,"sgbtrs");
     }
     template <> 
     void LapLU_LDivEq(
@@ -615,11 +624,12 @@ namespace tmv {
         int ldm = m.stepj();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i] LAPPLUS1;
+        int Lap_info=0;
         LAPNAME(cgbtrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(kl),LAPV(ku),LAPV(nrhs),
             LAPP(LUx.cptr()-LUx.nhi()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(m.ptr()),LAPV(ldm) LAPINFO LAP1);
-        LAP_Results("cgbtrs");
+        LAP_Results(Lap_info,"cgbtrs");
     }
     template <> 
     void LapTriDiagLU_LDivEq(
@@ -642,12 +652,13 @@ namespace tmv {
         int ldm = m.stepj();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i] LAPPLUS1;
+        int Lap_info=0;
         LAPNAME(sgttrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
             LAPP(LUx.diag(-1).cptr()), LAPP(LUx.diag().cptr()),
             LAPP(LUx.diag(1).cptr()), LAPP(LUx.diag(2).cptr()),
             LAPP(lap_p.get()),LAPP(m.ptr()),LAPV(ldm) LAPINFO LAP1);
-        LAP_Results("sgttrs");
+        LAP_Results(Lap_info,"sgttrs");
     }
     template <> 
     void LapTriDiagLU_LDivEq(
@@ -672,12 +683,13 @@ namespace tmv {
         int ldm = m.stepj();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i] LAPPLUS1;
+        int Lap_info=0;
         LAPNAME(cgttrs) (
             LAPCM LAPCH_NT,LAPV(n),LAPV(nrhs),
             LAPP(LUx.diag(-1).cptr()), LAPP(LUx.diag().cptr()),
             LAPP(LUx.diag(1).cptr()), LAPP(LUx.diag(2).cptr()),
             LAPP(lap_p.get()),LAPP(m.ptr()),LAPV(ldm) LAPINFO LAP1);
-        LAP_Results("cgttrs");
+        LAP_Results(Lap_info,"cgttrs");
     }
     template <> 
     void LapLU_RDivEq(
@@ -703,11 +715,12 @@ namespace tmv {
         int ldm = m.stepi();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i]+1;
+        int Lap_info=0;
         LAPNAME(sgbtrs) (
             LAPCM LAPCH_T,LAPV(n),LAPV(kl),LAPV(ku),LAPV(nrhs),
             LAPP(LUx.cptr()-LUx.nhi()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(m.ptr()),LAPV(ldm) LAPINFO LAP1);
-        LAP_Results("sgbtrs");
+        LAP_Results(Lap_info,"sgbtrs");
     }
     template <> 
     void LapLU_RDivEq(
@@ -734,12 +747,13 @@ namespace tmv {
         int ldm = m.stepi();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i]+1;
+        int Lap_info=0;
         LAPNAME(cgbtrs) (
             LAPCM LUx.isconj()?LAPCH_CT:LAPCH_T,
             LAPV(n),LAPV(kl),LAPV(ku),LAPV(nrhs),
             LAPP(LUx.cptr()-LUx.nhi()),LAPV(lda),
             LAPP(lap_p.get()),LAPP(m.ptr()),LAPV(ldm) LAPINFO LAP1);
-        LAP_Results("cgbtrs");
+        LAP_Results(Lap_info,"cgbtrs");
     }
     template <> 
     void LapTriDiagLU_RDivEq(
@@ -762,12 +776,13 @@ namespace tmv {
         int ldm = m.stepi();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i]+1;
+        int Lap_info=0;
         LAPNAME(sgttrs) (
             LAPCM LAPCH_T,LAPV(n),LAPV(nrhs),
             LAPP(LUx.diag(-1).cptr()), LAPP(LUx.diag().cptr()),
             LAPP(LUx.diag(1).cptr()), LAPP(LUx.diag(2).cptr()),
             LAPP(lap_p.get()),LAPP(m.ptr()),LAPV(ldm) LAPINFO LAP1);
-        LAP_Results("sgttrs");
+        LAP_Results(Lap_info,"sgttrs");
     }
     template <> 
     void LapTriDiagLU_RDivEq(
@@ -791,12 +806,13 @@ namespace tmv {
         int ldm = m.stepi();
         AlignedArray<int> lap_p(n);
         for(int i=0;i<n;i++) (lap_p.get())[i] = P[i]+1;
+        int Lap_info=0;
         LAPNAME(cgttrs) (
             LAPCM LUx.isconj()?LAPCH_CT:LAPCH_T,LAPV(n),LAPV(nrhs),
             LAPP(LUx.diag(-1).cptr()), LAPP(LUx.diag().cptr()),
             LAPP(LUx.diag(1).cptr()), LAPP(LUx.diag(2).cptr()),
             LAPP(lap_p.get()), LAPP(m.ptr()),LAPV(ldm) LAPINFO LAP1);
-        LAP_Results("cgttrs");
+        LAP_Results(Lap_info,"cgttrs");
     }
 #endif // FLOAT
 #endif // LAP

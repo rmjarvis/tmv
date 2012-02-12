@@ -227,10 +227,11 @@ namespace tmv {
         int ku = A.nhi()-kl;
         int lda = A.stepj()+1;
         AlignedArray<int> lap_p(n);
+        int Lap_info=0;
         LAPNAME(dgbtrf) (
             LAPCM LAPV(n),LAPV(n),LAPV(kl),LAPV(ku),
             LAPP(A.ptr()-A.nhi()),LAPV(lda),LAPP(lap_p.get()) LAPINFO );
-        LAP_Results("dgbtrf");
+        LAP_Results(Lap_info,"dgbtrf");
         const ptrdiff_t M = A.colsize();
         for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
@@ -247,10 +248,11 @@ namespace tmv {
         int ku = A.nhi()-kl;
         int lda = A.stepj()+1;
         AlignedArray<int> lap_p(n);
+        int Lap_info=0;
         LAPNAME(zgbtrf) (
             LAPCM LAPV(n),LAPV(n),LAPV(kl),LAPV(ku),
             LAPP(A.ptr()-A.nhi()),LAPV(lda),LAPP(lap_p.get()) LAPINFO );
-        LAP_Results("zgbtrf");
+        LAP_Results(Lap_info,"zgbtrf");
         const ptrdiff_t M = A.colsize();
         for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
@@ -269,10 +271,11 @@ namespace tmv {
         int ku = A.nhi()-kl;
         int lda = A.stepj()+1;
         AlignedArray<int> lap_p(n);
+        int Lap_info=0;
         LAPNAME(sgbtrf) (
             LAPCM LAPV(n),LAPV(n),LAPV(kl),LAPV(ku),
             LAPP(A.ptr()-A.nhi()),LAPV(lda),LAPP(lap_p.get()) LAPINFO );
-        LAP_Results("sgbtrf");
+        LAP_Results(Lap_info,"sgbtrf");
         const ptrdiff_t M = A.colsize();
         for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
@@ -289,10 +292,11 @@ namespace tmv {
         int ku = A.nhi()-kl;
         int lda = A.stepj()+1;
         AlignedArray<int> lap_p(n);
+        int Lap_info=0;
         LAPNAME(cgbtrf) (
             LAPCM LAPV(n),LAPV(n),LAPV(kl),LAPV(ku),
             LAPP(A.ptr()-A.nhi()),LAPV(lda),LAPP(lap_p.get()) LAPINFO );
-        LAP_Results("cgbtrf");
+        LAP_Results(Lap_info,"cgbtrf");
         const ptrdiff_t M = A.colsize();
         for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
@@ -314,10 +318,11 @@ namespace tmv {
         TMVAssert(A.ct()==NonConj);
         int n = A.colsize();
         AlignedArray<int> lap_p(n);
+        int Lap_info=0;
         LAPNAME(dgttrf) (
             LAPCM LAPV(n),LAPP(A.diag(-1).ptr()),LAPP(A.diag().ptr()),
             LAPP(A.diag(1).ptr()),LAPP(A.diag(2).ptr()),LAPP(lap_p.get()) LAPINFO );
-        LAP_Results("dgttrf");
+        LAP_Results(Lap_info,"dgttrf");
         const ptrdiff_t M = A.colsize();
         for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
@@ -333,10 +338,11 @@ namespace tmv {
         TMVAssert(A.ct()==NonConj);
         int n = A.colsize();
         AlignedArray<int> lap_p(n);
+        int Lap_info=0;
         LAPNAME(zgttrf) (
             LAPCM LAPV(n),LAPP(A.diag(-1).ptr()),LAPP(A.diag().ptr()), 
             LAPP(A.diag(1).ptr()),LAPP(A.diag(2).ptr()),LAPP(lap_p.get()) LAPINFO);
-        LAP_Results("zgttrf");
+        LAP_Results(Lap_info,"zgttrf");
         const ptrdiff_t M = A.colsize();
         for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
@@ -354,10 +360,11 @@ namespace tmv {
         TMVAssert(A.ct()==NonConj);
         int n = A.colsize();
         AlignedArray<int> lap_p(n);
+        int Lap_info=0;
         LAPNAME(sgttrf) (
             LAPCM LAPV(n),LAPP(A.diag(-1).ptr()),LAPP(A.diag().ptr()),
             LAPP(A.diag(1).ptr()),LAPP(A.diag(2).ptr()),LAPP(lap_p.get()) LAPINFO );
-        LAP_Results("sgttrf");
+        LAP_Results(Lap_info,"sgttrf");
         const ptrdiff_t M = A.colsize();
         for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
@@ -373,10 +380,11 @@ namespace tmv {
         TMVAssert(A.ct()==NonConj);
         int n = A.colsize();
         AlignedArray<int> lap_p(n);
+        int Lap_info=0;
         LAPNAME(cgttrf) (
             LAPCM LAPV(n),LAPP(A.diag(-1).ptr()),LAPP(A.diag().ptr()), 
             LAPP(A.diag(1).ptr()),LAPP(A.diag(2).ptr()),LAPP(lap_p.get()) LAPINFO);
-        LAP_Results("cgttrf");
+        LAP_Results(Lap_info,"cgttrf");
         const ptrdiff_t M = A.colsize();
         for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;

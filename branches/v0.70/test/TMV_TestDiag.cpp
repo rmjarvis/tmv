@@ -264,7 +264,7 @@ static void TestBasicDiagMatrix_IO()
     cm(5) = CT(T(9.e-3),T(9.e-3));
     cm(6) = CT(T(9),T(9.e-3));
     m(7) = T(0.123456789);
-    cm(7) = CT(3.123456789,600.987654321);
+    cm(7) = CT(T(3.123456789),T(600.987654321));
 
     // First check clipping function...
     tmv::DiagMatrix<T> m2 = m;
@@ -306,14 +306,14 @@ static void TestBasicDiagMatrix_IO()
 
     // When using (the default) prec(6), these will be the values read in.
     m(7) = T(0.123457);
-    cm(7) = CT(3.12346,600.988);
+    cm(7) = CT(T(3.12346),T(600.988));
 
     // When using prec(12), the full correct values will be read in. (m2,cm2)
 
     // When using prec(4), these will be the values read in.
     m3(7) = T(0.1235);
     if (std::numeric_limits<T>::is_integer) cm3(7) = CT(3,600);
-    else cm3(7) = CT(3.123,601.0);
+    else cm3(7) = CT(T(3.123),T(601.0));
 
     // Read them back in
     tmv::DiagMatrix<T> xm1(N);
