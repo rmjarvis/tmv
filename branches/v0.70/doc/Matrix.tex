@@ -1487,6 +1487,7 @@ Whenever that is the case, this directive will be ignored.}:
 m.divideInPlace()
 \end{tmvcode}
 \index{Matrix!Methods!divideInPlace}
+This method implicitly also calls \tt{m.saveDiv()}, since once the matrix decomposition has been performed, you can't redo it.  So most of the time, you will want to save the decomposition after you made it.  But if you update the matrix with some new values, and you want to do some division operation with the new values, then you will need to explicitly call either \tt{m.unsetDiv()} or \tt{m.resetDiv()} to redo the decomposition for the new values.
 
 \subsubsection{Determinants}
 \index{Matrix!Determinant}
