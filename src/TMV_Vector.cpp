@@ -20,11 +20,7 @@
 namespace tmv {
 
     // First some things from TMV_Blas.h
-    // TODO: This doesn't need to be global.  Just make one each time
-    // and pass it into LAP_Results.
-    int Lap_info = 0;
-
-    void LAP_Results(const char* fn)
+    void LAP_Results(int Lap_info, const char* fn)
     {
         if (Lap_info < 0) {
 #ifdef NOTHROW
@@ -37,10 +33,9 @@ namespace tmv {
     }
 
     void LAP_Results(
-        const int lwork_opt, const int m, const int n,
-        const int lwork, const char* fn)
+        int Lap_info, int lwork_opt, int m, int n, int lwork, const char* fn)
     {
-        LAP_Results(fn);
+        LAP_Results(Lap_info,fn);
         if (lwork_opt > lwork) {
             std::ostringstream s;
             s << "LAPACK function " << fn << 

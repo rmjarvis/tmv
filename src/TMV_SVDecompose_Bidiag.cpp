@@ -47,6 +47,7 @@ namespace tmv {
         // Stupid LAPACK requires an extra element in the Vbeta vector
         // which it sets to 0 (!!!) rather than ignores.
         // So we need to create a temporary Vector which is size n.
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = (m+n)*LAP_BLOCKSIZE;
@@ -73,9 +74,9 @@ namespace tmv {
         //std::cout<<"After dgebrd"<<std::endl;
         Vbeta = Vbeta2.subVector(0,n-1);
 #ifdef LAPNOWORK
-        LAP_Results("dgebrd");
+        LAP_Results(Lap_info,"dgebrd");
 #else
-        LAP_Results(int(work[0]),m,n,lwork,"dgebrd");
+        LAP_Results(Lap_info,int(work[0]),m,n,lwork,"dgebrd");
 #endif
     }
 #endif
@@ -92,6 +93,7 @@ namespace tmv {
         E.setZero();
         Ubeta.setZero();
         Vector<float> Vbeta2(n,0.F);  
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = (m+n)*LAP_BLOCKSIZE;
@@ -118,9 +120,9 @@ namespace tmv {
         //std::cout<<"After sgebrd"<<std::endl;
         Vbeta = Vbeta2.subVector(0,n-1);
 #ifdef LAPNOWORK
-        LAP_Results("sgebrd");
+        LAP_Results(Lap_info,"sgebrd");
 #else
-        LAP_Results(int(work[0]),m,n,lwork,"sgebrd");
+        LAP_Results(Lap_info,int(work[0]),m,n,lwork,"sgebrd");
 #endif
     }
 #endif 

@@ -274,12 +274,13 @@ namespace tmv {
             (A.nhi()==0 && A.isrm()) ? A.nlo() : 0;
         int lda = A.diagstep();
         int ldb = B.stepj();
+        int Lap_info=0;
         LAPNAME(dtbtrs) (
             LAPCM (A.iscm()?A.nlo():A.nhi())==0?LAPCH_UP:LAPCH_LO,
             A.iscm()?LAPCH_NT:LAPCH_T, dt==UnitDiag?LAPCH_U:LAPCH_NU,
             LAPV(n),LAPV(kd),LAPV(nrhs), LAPP(A.cptr()-aoffset),LAPV(lda),
             LAPP(B.ptr()),LAPV(ldb) LAPINFO LAP1 LAP1 LAP1);
-        LAP_Results("dtbtrs");
+        LAP_Results(Lap_info,"dtbtrs");
     }
     template <> void LapTriLDivEq(
         const GenBandMatrix<std::complex<double> >& A,
@@ -303,6 +304,7 @@ namespace tmv {
             (A.nhi()==0 && A.isrm()) ? A.nlo() : 0;
         int lda = A.diagstep();
         int ldb = B.stepj();
+        int Lap_info=0;
         if (A.iscm() && A.isconj()) {
             B.conjugateSelf();
             LAPNAME(ztbtrs) (
@@ -319,7 +321,7 @@ namespace tmv {
                 LAPV(n),LAPV(kd),LAPV(nrhs), LAPP(A.cptr()-aoffset),LAPV(lda),
                 LAPP(B.ptr()),LAPV(ldb) LAPINFO LAP1 LAP1 LAP1);
         }
-        LAP_Results("ztbtrs");
+        LAP_Results(Lap_info,"ztbtrs");
     }
 #endif
 #ifdef INST_FLOAT
@@ -345,12 +347,13 @@ namespace tmv {
             (A.nhi()==0 && A.isrm()) ? A.nlo() : 0;
         int lda = A.diagstep();
         int ldb = B.stepj();
+        int Lap_info=0;
         LAPNAME(stbtrs) (
             LAPCM (A.iscm()?A.nlo():A.nhi())==0?LAPCH_UP:LAPCH_LO,
             A.iscm()?LAPCH_NT:LAPCH_T, dt==UnitDiag?LAPCH_U:LAPCH_NU,
             LAPV(n),LAPV(kd),LAPV(nrhs), LAPP(A.cptr()-aoffset),LAPV(lda),
             LAPP(B.ptr()),LAPV(ldb) LAPINFO LAP1 LAP1 LAP1);
-        LAP_Results("stbtrs");
+        LAP_Results(Lap_info,"stbtrs");
     }
     template <> void LapTriLDivEq(
         const GenBandMatrix<std::complex<float> >& A,
@@ -374,6 +377,7 @@ namespace tmv {
             (A.nhi()==0 && A.isrm()) ? A.nlo() : 0;
         int lda = A.diagstep();
         int ldb = B.stepj();
+        int Lap_info=0;
         if (A.iscm() && A.isconj()) {
             B.conjugateSelf();
             LAPNAME(ctbtrs) (
@@ -390,7 +394,7 @@ namespace tmv {
                 LAPV(n),LAPV(kd),LAPV(nrhs), LAPP(A.cptr()-aoffset),LAPV(lda),
                 LAPP(B.ptr()),LAPV(ldb) LAPINFO LAP1 LAP1 LAP1);
         }
-        LAP_Results("ctbtrs");
+        LAP_Results(Lap_info,"ctbtrs");
     }
 #endif
 #endif // LAP

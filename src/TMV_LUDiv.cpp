@@ -58,11 +58,12 @@ namespace tmv {
         for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i] LAPPLUS1;
         const int* ipiv = ipiv1.get();
 #endif
+        int Lap_info=0;
         LAPNAME(dgetrs) (
             LAPCM trans?LAPCH_T:LAPCH_NT,
             LAPV(n),LAPV(nrhs),LAPP(m1.cptr()),LAPV(lda),
             LAPP(ipiv),LAPP(m2.ptr()),LAPV(ldb) LAPINFO LAP1);
-        LAP_Results("dgetrs");
+        LAP_Results(Lap_info,"dgetrs");
     }
     template <bool trans, class M1> 
     static void LapLUSolve(
@@ -82,12 +83,13 @@ namespace tmv {
         const int* ipiv = ipiv1.get();
 #endif
         if (!trans && m1.isconj()) m2.conjugateSelf();
+        int Lap_info=0;
         LAPNAME(zgetrs) (
             LAPCM trans?(m1.isconj()?LAPCH_CT:LAPCH_T):LAPCH_NT,
             LAPV(n),LAPV(nrhs),LAPP(m1.cptr()),LAPV(lda),
             LAPP(ipiv),LAPP(m2.ptr()),LAPV(ldb) LAPINFO LAP1);
         if (!trans && m1.isconj()) m2.conjugateSelf();
-        LAP_Results("zgetrs");
+        LAP_Results(Lap_info,"zgetrs");
     }
     template <bool trans, class M1> 
     static void LapLUSolve(
@@ -134,11 +136,12 @@ namespace tmv {
         for(int i=0;i<n;++i) ipiv1[i] = P.getValues()[i] LAPPLUS1;
         const int* ipiv = ipiv1.get();
 #endif
+        int Lap_info=0;
         LAPNAME(sgetrs) (
             LAPCM trans?LAPCH_T:LAPCH_NT,
             LAPV(n),LAPV(nrhs),LAPP(m1.cptr()),LAPV(lda),
             LAPP(ipiv),LAPP(m2.ptr()),LAPV(ldb) LAPINFO LAP1);
-        LAP_Results("sgetrs");
+        LAP_Results(Lap_info,"sgetrs");
     }
     template <bool trans, class M1> 
     static void LapLUSolve(
@@ -158,12 +161,13 @@ namespace tmv {
         const int* ipiv = ipiv1.get();
 #endif
         if (!trans && m1.isconj()) m2.conjugateSelf();
+        int Lap_info=0;
         LAPNAME(cgetrs) (
             LAPCM trans?(m1.isconj()?LAPCH_CT:LAPCH_T):LAPCH_NT,
             LAPV(n),LAPV(nrhs),LAPP(m1.cptr()),LAPV(lda),
             LAPP(ipiv),LAPP(m2.ptr()),LAPV(ldb) LAPINFO LAP1);
         if (!trans && m1.isconj()) m2.conjugateSelf();
-        LAP_Results("cgetrs");
+        LAP_Results(Lap_info,"cgetrs");
     }
     template <bool trans, class M1> 
     static void LapLUSolve(

@@ -57,6 +57,7 @@ namespace tmv {
         for(int i=0;i<n;++i) (lap_p.get())[i] = 0;
         beta.setZero();
         int lda = A.stepj();
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = 3*n+1;
@@ -80,9 +81,9 @@ namespace tmv {
             LAPP(lap_p.get()),LAPP(beta.ptr()) 
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-        LAP_Results("dgeqp3");
+        LAP_Results(Lap_info,"dgeqp3");
 #else
-        LAP_Results(int(work[0]),m,n,lwork,"dgeqp3");
+        LAP_Results(Lap_info,int(work[0]),m,n,lwork,"dgeqp3");
 #endif
         double thresh = TMV_Epsilon<double>()*A.normF();
         for(int i=0;i<n;++i) {
@@ -113,6 +114,7 @@ namespace tmv {
         for(int i=0;i<n;++i) (lap_p.get())[i] = 0;
         beta.setZero();
         int lda = A.stepj();
+        int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
         int lwork = 3*n+1;
@@ -136,9 +138,9 @@ namespace tmv {
             LAPP(lap_p.get()),LAPP(beta.ptr()) 
             LAPWK(work.get()) LAPVWK(lwork) LAPINFO);
 #ifdef LAPNOWORK
-        LAP_Results("sgeqp3");
+        LAP_Results(Lap_info,"sgeqp3");
 #else
-        LAP_Results(int(work[0]),m,n,lwork,"sgeqp3");
+        LAP_Results(Lap_info,int(work[0]),m,n,lwork,"sgeqp3");
 #endif
         float thresh = TMV_Epsilon<float>()*A.normF();
         for(int i=0;i<n;++i) {

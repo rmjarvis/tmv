@@ -271,18 +271,23 @@ namespace tmv {
 #else
 
 #define BLAS
-#define BLASZDROT
+// It has zdrot, csrot, but there is a bug where they sometimes return
+// wrong answers.  I filed a ticket (#1106), but they replied that the 
+// bug is actually in gfortran.  They suggest a workaround of using the
+// netlib zdrot directly, but it is easier to just disable zdrot for ACML
+// until the underlying problem has been fixed.
+//#define BLASZDROT
 
-/* Works with either of these sets of defines: */
+// Works with either of these sets of defines:
+#if 0
 #define BLASZDOTRETURN
-
-/*
+#else
 #define BLAS_
 #define BLASPTR
 #define BLASSTRLEN
 #define BLASZDOTFIRST
 #define BLASZDOTSUB sub  // This one is optional actually
-*/
+#endif
 
 namespace tmv {
 
@@ -318,14 +323,15 @@ namespace tmv {
 
 #define LAP
 
-/* Works with one or the other of these sets of defines: */
+// Works with one or the other of these sets of defines:
+// Except that the latter lets us fix the dstedc workspace bug
+#if 0
 #define LAPNOWORK
-
-/*
+#else
 #define LAP_
 #define LAPPTR
 #define LAPSTRLEN
-*/
+#endif
 
 #define LAPP(x) ACML_ConvertP(x)
 
@@ -491,8 +497,6 @@ namespace tmv {
 #endif // ELAP
 
 namespace tmv {
-    // This are defined in TMV_Vector.cpp
-    extern int Lap_info; 
     const char Blas_ch_N = 'N';
     const char Blas_ch_C = 'C';
     const char Blas_ch_T = 'T';
@@ -601,7 +605,7 @@ namespace tmv {
 #endif
 
 #ifdef LAPINFORETURN
-#define LAPNAME(x) tmv::Lap_info = LAPNAMEX(x)
+#define LAPNAME(x) Lap_info = LAPNAMEX(x)
 #else
 #define LAPNAME(x) LAPNAMEX(x)
 #endif
@@ -657,9 +661,9 @@ namespace tmv {
 #ifdef LAPINFORETURN
 #define LAPINFO
 #elif defined LAPINFOREF
-#define LAPINFO ,tmv::Lap_info
+#define LAPINFO ,Lap_info
 #else
-#define LAPINFO ,LAPP(&tmv::Lap_info)
+#define LAPINFO ,LAPP(&Lap_info)
 #endif
 
 #ifdef CLAP
@@ -680,10 +684,9 @@ namespace tmv {
 namespace tmv {
 
     // Defined in Vector.cpp
-    void LAP_Results(const char* fn);
-    void LAP_Results(const int lwork_opt, const int m, const int n,
-                     const int lwork, const char* fn);
-
+    void LAP_Results(int Lap_info, const char* fn);
+    void LAP_Results(
+        int Lap_info, int lwork_opt, int m, int n, int lwork, const char* fn);
 
     template <class M> class BaseMatrix_Rec;
     template <class M> class BaseMatrix_Tri;
