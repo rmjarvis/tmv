@@ -106,7 +106,7 @@ opts.Add(BoolVariable('FORCE_FLAPACK',
 opts.Add(BoolVariable('USE_STEGR',
             'Use the LAPACK function ?stegr for finding eigenvectors', False))
 opts.Add(BoolVariable('USE_GEQP3',
-            'Use the LAPACK function ?qeqp3 for finding strict QRP decomposition', True))
+            'Use the LAPACK function ?qeqp3 for finding strict QRP decomposition', False))
 opts.Add('LIBS','Libraries to send to the linker','')
 
 opts.Add(BoolVariable('TEST_DEBUG',
@@ -281,7 +281,7 @@ def AddOpenMPFlag(env):
         ldflag = ['-fopenmp']
         xlib = ['pthread']
     elif compiler == 'clang++':
-        print 'No OpenMP support for clangg++'
+        print 'No OpenMP support for clang++'
         env['WITH_OPENMP'] = False
         return
     elif compiler == 'icpc':

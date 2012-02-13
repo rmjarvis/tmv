@@ -55,6 +55,8 @@ if env['TEST_INT']:
 env1b = env1.Clone()
 if env['LAP']:
     env1b.Append(CPPDEFINES=['LAP'])
+    if not env['USE_GEQP3']:
+        env1b.Append(CPPDEFINES=['NOGEQP3'])
 
 env2 = env1.Clone(LIBS=sblibs+env['LIBS'])
 
@@ -71,12 +73,9 @@ env3 = env1.Clone()
 obj_basic = env1.Object(test_basic_files)
 obj_diag = env1.Object(test_diag_files)
 obj_tri = env1.Object(test_tri_files)
-obj_div = [ env1.Object(test_div_files),
-    env1b.Object(test_div_lap_files) ]
-obj_band = [ env2.Object(test_band_files),
-    env2b.Object(test_band_lap_files) ]
-obj_sym = [ env2.Object(test_sym_files),
-    env2b.Object(test_sym_lap_files) ]
+obj_div = [ env1.Object(test_div_files), env1b.Object(test_div_lap_files) ]
+obj_band = [ env2.Object(test_band_files), env2b.Object(test_band_lap_files) ]
+obj_sym = [ env2.Object(test_sym_files), env2b.Object(test_sym_lap_files) ]
 obj_symband = [ env2.Object(test_symband_files),
     env2b.Object(test_symband_lap_files) ]
 obj_small = env3.Object(test_small_files)

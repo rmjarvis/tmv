@@ -320,7 +320,7 @@ void TestMatrixDecomp()
                    "QR - QtQ - PackedQ (1)"); 
             Assert(Equal(Q / m.qrpd().getQ(),T(1),T(N)*eps),
                    "QR - QtQ - PackedQ (2)"); 
-#ifndef LAP
+#if !defined(LAP) || defined(NOGEQP3)
             if (strict) for(int i=1;i<R.size();i++) {
                 Assert(std::abs(R(i,i))<=std::abs(R(i-1,i-1)),"QRP - strict"); 
             }
@@ -336,7 +336,7 @@ void TestMatrixDecomp()
                    "C QRP - QtQ - PackedQ (1)"); 
             Assert(Equal(cQ / c.qrpd().getQ(),T(1),T(N)*ceps),
                    "C QRP - QtQ - PackedQ (2)"); 
-#ifndef LAP
+#if !defined(LAP) || defined(NOGEQP3)
             if (strict) for(int i=1;i<cR.size();i++) {
                 Assert(std::abs(cR(i,i))<=std::abs(cR(i-1,i-1)),
                        "C QRP - strict"); 
@@ -350,7 +350,7 @@ void TestMatrixDecomp()
             QRP = Q*R*P2;
             Assert(Equal(m,QRP,eps*normm),"QRP2"); 
             Assert(Equal(Q.transpose()*Q,T(1),T(N)*eps),"QRP2 - QtQ"); 
-#ifndef LAP
+#if !defined(LAP) || defined(NOGEQP3)
             if (strict) for(int i=1;i<R.size();i++) {
                 Assert(std::abs(R(i,i))<=std::abs(R(i-1,i-1)),"QRP2 - strict"); 
             }
@@ -367,7 +367,7 @@ void TestMatrixDecomp()
             cQRP = cQ*cR*cP2;
             Assert(Equal(c,cQRP,ceps*normc),"C QRP2"); 
             Assert(Equal(cQ.adjoint()*cQ,T(1),T(N)*ceps),"C QRP2 - QtQ"); 
-#ifndef LAP
+#if !defined(LAP) || defined(NOGEQP3)
             if (strict) for(int i=1;i<cR.size();i++) {
                 Assert(std::abs(cR(i,i))<=std::abs(cR(i-1,i-1)),
                        "C QRP2 - strict"); 
@@ -384,7 +384,7 @@ void TestMatrixDecomp()
             cQRP = cQ.conjugate()*cR*cP3;
             Assert(Equal(c,cQRP,ceps*normc),"C QRP4"); 
             Assert(Equal(cQ.adjoint()*cQ,T(1),T(N)*ceps),"C QRP4 - QtQ"); 
-#ifndef LAP
+#if !defined(LAP) || defined(NOGEQP3)
             if (strict) for(int i=1;i<cR.size();i++) {
                 Assert(std::abs(cR(i,i))<=std::abs(cR(i-1,i-1)),
                        "C QRP4 - strict"); 
@@ -402,7 +402,7 @@ void TestMatrixDecomp()
             cQRP = cQ*cR.conjugate()*cP4;
             Assert(Equal(c,cQRP,ceps*normc),"C QRP6"); 
             Assert(Equal(cQ.adjoint()*cQ,T(1),T(N)*ceps),"C QRP6 - QtQ"); 
-#ifndef LAP
+#if !defined(LAP) || defined(NOGEQP3)
             if (strict) for(int i=1;i<cR.size();i++) {
                 Assert(std::abs(cR(i,i))<=std::abs(cR(i-1,i-1)),
                        "C QRP6 - strict"); 
@@ -416,7 +416,7 @@ void TestMatrixDecomp()
             cQRP = cQ.conjugate()*cR.conjugate()*cP5;
             Assert(Equal(c,cQRP,ceps*normc),"C QRP7"); 
             Assert(Equal(cQ.adjoint()*cQ,T(1),T(N)*ceps),"C QRP7 - QtQ"); 
-#ifndef LAP
+#if !defined(LAP) || defined(NOGEQP3)
             if (strict) for(int i=1;i<cR.size();i++) {
                 Assert(std::abs(cR(i,i))<=std::abs(cR(i-1,i-1)),
                        "C QRP7 - strict"); 
