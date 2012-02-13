@@ -94,14 +94,7 @@ if env['SHARED']:
 
     env7 = env1.Clone()
     env7.Prepend(LIBS=['tmv'])
-    #sblib = env1.SharedLibrary('#lib/tmv_symband',
-    #                           lib + 
-    #                           obj_sblib + obj_noint_sblib +
-    #                           obj_omp_noint_sblib + obj_stegr_sblib)
     sblib = env7.SharedLibrary('#lib/tmv_symband',
-                               #obj_lib + obj_noint_lib +
-                               #obj_omp_lib + obj_omp_noint_lib +
-                               #obj_geqp3_lib +
                                obj_sblib + obj_noint_sblib +
                                obj_omp_noint_sblib + obj_stegr_sblib)
 

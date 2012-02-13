@@ -91,6 +91,7 @@ It has defaults for \texttt{g++}, \texttt{icpc} and \texttt{pgCC}.  If you are u
 like the default, then you can specify this by hand.  
 Remember to put the flags in quotes,
 so the whitespace doesn't confuse the parser.  e.g. \texttt{scons FLAGS='-O3 -g'}
+\item \texttt{EXTRA\_FLAGS=''} specifies extra flags to pass to the compiler in addition to what TMV will use by default.  This is useful if you just want to add a specific flag but still want to keep the other flags that TMV uses automatically.
 \item \texttt{DEBUG=false} specifies whether to keep the debugging assert statements in the compiled library code.  \tt{DEBUG=true} turns on all the TMV debugging statements, even those that would normall require \tt{-DTMV\_EXTRA\_DEBUG}.
 \item \texttt{PREFIX=/usr/local} specifies where to install the library when running \texttt{scons install} (see below).
 \item \texttt{INST\_FLOAT=true} specifies whether to instantiate the \tt{<float>} templates.

@@ -3,8 +3,8 @@
 //#define XDEBUG_QR
 
 #ifdef NOGEQP3
-#ifdef LAP
-#undef LAP
+#ifndef NOLAP
+#define NOLAP
 #endif
 #endif
 
