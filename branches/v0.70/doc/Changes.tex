@@ -404,6 +404,10 @@ using the \tt{stegr} algorithm is considered a feature for advanced users to tur
 they know what they are doing.
 
 \item
+Changed the default for the \tt{USE\_GEQP3} SCons flag to \tt{false}.
+Here it is mostly a performance issue.  The LAPACK \tt{geqp3} function is as slow as the TMV ``Strict QRP'' algorithm, but it doesn't actually result in strictly decreasing values along the diagonal.  Plus one implementation I found did produce wrong answers occasionally (an MKL library that shipped with icpc 11.1), so I decided to also make this an option a feature for advanced users to turn on if they really want it.
+
+\item
 Removed the \tt{make} and \tt{cmake} installation methods.  
 Now SCons is the 
 only supported method for installation.  I use SCons exclusively now, 
