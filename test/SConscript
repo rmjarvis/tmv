@@ -32,8 +32,6 @@ env1 = env.Clone(CCFLAGS=env['TEST_FLAGS'],
 env1.Append(CPPDEFINES=['TMV_OPT=' + env['TEST_OPT']])
 if env['MEM_TEST']:
     env1.Append(CPPDEFINES=['TMV_MEM_TEST'])
-if env['END_PADDING']:
-    env1.Append(CPPDEFINES=['TMV_END_PADDING'])
 if int(env['XTEST']) > 0:
     env1.Append(CPPDEFINES=['XTEST=' + env['XTEST']])
 if env['NAN_TEST']:
@@ -45,16 +43,6 @@ else:
 if env['DEBUG']:
     env1.Append(CPPDEFINES=['TMV_EXTRA_DEBUG'])
 
-if not env['INST_FLOAT']:
-    env1.Append(CPPDEFINES=['TMV_NO_INST_FLOAT'])
-if not env['INST_DOUBLE']:
-    env1.Append(CPPDEFINES=['TMV_NO_INST_DOUBLE'])
-if env['INST_LONGDOUBLE']:
-    env1.Append(CPPDEFINES=['TMV_INST_LONGDOUBLE'])
-if env['INST_INT']:
-    env1.Append(CPPDEFINES=['TMV_INST_INT'])
-if not env['INST_COMPLEX']:
-    env1.Append(CPPDEFINES=['TMV_NO_INST_COMPLEX'])
 if not env['TEST_FLOAT']:
     env1.Append(CPPDEFINES=['NO_TEST_FLOAT'])
 if not env['TEST_DOUBLE']:
@@ -68,6 +56,8 @@ if env['TEST_INT']:
 env1b = env1.Clone()
 if env['LAP']:
     env1b.Append(CPPDEFINES=['LAP'])
+    if not env['USE_GEQP3']:
+        env1b.Append(CPPDEFINES=['NOGEQP3'])
 
 env2 = env1.Clone(LIBS=sblibs+env['LIBS'])
 

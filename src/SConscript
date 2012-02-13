@@ -40,10 +40,10 @@ sblib_stegr_files= [] #sym_stegr
 env1 = env.Clone()
 
 if env['MEM_TEST']:
-  print 'Using mmgr.cpp'
-  lib_files += ['mmgr.cpp']
+    print 'Using mmgr.cpp'
+    lib_files += ['mmgr.cpp']
 
-if ((int(env['XTEST']) & 64) and not env['WITH_BLAS']):
+if env['NAN_TEST']:
     env1.Append(CPPDEFINES=['TMV_INITIALIZE_NAN'])
 
 env2 = env1.Clone()
@@ -113,12 +113,23 @@ else:
                                obj_sblib + obj_noint_sblib +
                                obj_omp_noint_sblib + obj_stegr_sblib)
 
+all_obj_files = \
+    obj_lib + obj_noint_lib + obj_omp_lib + \
+    obj_omp_noint_lib + obj_geqp3_lib + \
+    obj_sblib + obj_noint_sblib + \
+    obj_omp_noint_sblib + obj_stegr_sblib
+
+# Note: this next bit depends on the object files being in the src directory.
+# If this ever changes, I'll need to do something different to get the name
+# of the corresponding inst file.
+for objfile in all_obj_files:
+    inst = os.path.splitext(str(objfile))[0] + '.inst'
+    Depends(objfile,inst)
 
 env.Alias(target='lib', source=lib)
 env.Alias(target='sblib', source=sblib)
 
 Default(['lib','sblib'])
-#Default(['lib'])
 
 #
 # install/uninstall
@@ -135,14 +146,12 @@ header_install_dir = os.path.join(env['INSTALL_PREFIX'], header_dir)
 header_install_dir_sub = os.path.join(env['INSTALL_PREFIX'], header_dir_sub)
 
 lib_targets = [lib,sblib]
-#lib_targets = [lib]
 
 lib_file = '#' + lib[0].path
 sblib_file = '#' + sblib[0].path
 
 # Save this info for share/SConscript
 env['LIB_FILE_NAMES'] = [lib_file,sblib_file]
-#env['LIB_FILE_NAMES'] = [lib_file]
 
 if 'install' in COMMAND_LINE_TARGETS: 
 
@@ -151,7 +160,6 @@ if 'install' in COMMAND_LINE_TARGETS:
         env.Depends(sblib,installed_lib)
         installed_sblib = env1.Install(dir=lib_install_dir, source=sblib)
         env.Alias(target='install', source=[installed_lib,installed_sblib])
-        #env.Alias(target='install', source=[installed_lib])
 
     else :
         env.Alias(target='install', 

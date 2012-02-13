@@ -695,6 +695,31 @@ namespace tmv {
         TMV_INLINE real_type minAbs2Element(ptrdiff_t* imin=0) const
         { return tmv::DoMinAbs2Element(calc(),imin); }
 
+        // Also allow other int types in case ptrdiff_t is not int:
+        template <class INT>
+        TMV_INLINE value_type maxElement(INT* imax) const
+        { ptrdiff_t i; value_type x=tmv::DoMaxElement(calc(),&i); *imax=i; return x; }
+
+        template <class INT>
+        TMV_INLINE float_type maxAbsElement(INT* imax) const 
+        { ptrdiff_t i; float_type x=tmv::DoMaxAbsElement(calc(),&i); *imax=i; return x; }
+
+        template <class INT>
+        TMV_INLINE real_type maxAbs2Element(INT* imax) const
+        { ptrdiff_t i; real_type x=tmv::DoMaxAbs2Element(calc(),&i); *imax=i; return x; }
+
+        template <class INT>
+        TMV_INLINE value_type minElement(INT* imin) const
+        { ptrdiff_t i; value_type x=tmv::DoMinElement(calc(),&i); *imin=i; return x; }
+
+        template <class INT>
+        TMV_INLINE float_type minAbsElement(INT* imin) const 
+        { ptrdiff_t i; float_type x=tmv::DoMinAbsElement(calc(),&i); *imin=i; return x; }
+
+        template <class INT>
+        TMV_INLINE real_type minAbs2Element(INT* imin) const
+        { ptrdiff_t i; real_type x=tmv::DoMinAbs2Element(calc(),&i); *imin=i; return x; }
+
         TMV_INLINE float_type norm1() const
         { return sumAbsElements(); }
 

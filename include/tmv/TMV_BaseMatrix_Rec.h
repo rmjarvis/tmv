@@ -1013,8 +1013,8 @@ namespace tmv {
 
         TMV_INLINE ptrdiff_t colsize() const { return mat().colsize(); }
         TMV_INLINE ptrdiff_t rowsize() const { return mat().rowsize(); }
-        TMV_INLINE ptrdiff_t nlo() const { return TMV_MAX(colsize()-1,0); }
-        TMV_INLINE ptrdiff_t nhi() const { return TMV_MAX(rowsize()-1,0); }
+        TMV_INLINE ptrdiff_t nlo() const { return TMV_MAX(colsize()-1,ptrdiff_t(0)); }
+        TMV_INLINE ptrdiff_t nhi() const { return TMV_MAX(rowsize()-1,ptrdiff_t(0)); }
         TMV_INLINE ptrdiff_t ls() const { return mat().ls(); }
         TMV_INLINE ptrdiff_t stepi() const { return mat().stepi(); }
         TMV_INLINE ptrdiff_t stepj() const { return mat().stepj(); }

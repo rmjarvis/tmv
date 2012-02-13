@@ -9,7 +9,7 @@ import sys
 # Subdirectories containing SConscript files.  We always process src but
 # there are some other optional ones
 src_dir = 'src'
-subdirs=['test','examples','bin','share','doc']
+subdirs=['test','examples','bin','share']
 
 # Configurations will be saved here so command line options don't
 # have to be sent more than once
@@ -32,11 +32,12 @@ opts = Variables(config_file)
 
 # Now set up options for the command line
 opts.Add('CXX','Name of c++ compiler')
-opts.Add('FLAGS','Compile flags to send to the compiler','')
+opts.Add('FLAGS','Flags to send to the compiler','')
+opts.Add('EXTRA_FLAGS','Extra flags to send to the compiler','')
+opts.Add(BoolVariable('DEBUG',
+        'Turn on debugging statements in compilied library',False))
 opts.Add(PathVariable('PREFIX',
         'prefix for installation','', PathVariable.PathAccept))
-opts.Add(BoolVariable('SHARED',
-        'Build a shared library',False))
 
 opts.Add(EnumVariable('OPT',
         'Set the optimization level for TMV library', '2',
@@ -55,6 +56,8 @@ opts.Add(BoolVariable('INST_COMPLEX',
         'Instantiate complex<T> templates in compiled library', True))
 opts.Add(BoolVariable('INST_MIX',
         'Instantiate functions that mix real with complex', True))
+opts.Add(BoolVariable('SHARED',
+        'Build a shared library',False))
 
 opts.Add(EnumVariable('TEST_OPT',
         'Set the optimization level for TMV test suite', '1',
@@ -69,7 +72,7 @@ opts.Add(BoolVariable('TEST_INT',
         'Instantiate <int> in the test suite', True))
 
 opts.Add(BoolVariable('IMPORT_ENV',
-        'Import full environment from calling shell', False))
+        'Import full environment from calling shell', True))
 opts.Add(PathVariable('EXTRA_PATH',
         'Extra paths for executables (separated by : if more than 1)',
         '',PathVariable.PathAccept))
@@ -91,6 +94,8 @@ opts.Add(BoolVariable('FORCE_MKL',
         'Force scons to use MKL for BLAS and/or LAPACK', False))
 opts.Add(BoolVariable('FORCE_ACML',
         'Force scons to use ACML for BLAS and/or LAPACK', False))
+#opts.Add(BoolVariable('FORCE_CLAMD',
+        #'Force scons to use clAmdBlas', False))
 opts.Add(BoolVariable('FORCE_GOTO',
         'Force scons to use GOTO BLAS', False))
 opts.Add(BoolVariable('FORCE_ATLAS',
@@ -106,31 +111,26 @@ opts.Add(BoolVariable('FORCE_ATLAS_LAPACK',
 opts.Add(BoolVariable('FORCE_FLAPACK',
         'Force scons to use Fortran LAPACK', False))
 opts.Add(BoolVariable('USE_STEGR',
-        'Use the LAPACK function ?stegr for finding eigenvectors', True))
+        'Use the LAPACK function ?stegr for finding eigenvectors', False))
 opts.Add(BoolVariable('USE_GEQP3',
-        'Use the LAPACK function ?qeqp3 for finding strict QRP decomposition', True))
-
+        'Use the LAPACK function ?qeqp3 for finding strict QRP decomposition', False))
 opts.Add('LIBS','Libraries to send to the linker','')
 
-opts.Add(BoolVariable('DEBUG',
-        'Turn on debugging statements in compilied library',False))
 opts.Add(BoolVariable('TEST_DEBUG',
-        'Only turn on debugging statements in the test suite',False))
+        'Turn on debugging statements in the test suite',False))
 opts.Add(BoolVariable('STATIC','Use static linkage', False))
 opts.Add(BoolVariable('WITH_SSE',
-        'Only necessary for icpc compilations: Use SSE commands', True))
+        'Use SSE commands (only necessary for icpc compilations)', True))
 opts.Add('XTEST',
         'Do extra tests in the test suite (1=non-unit step, 2=extra sizes/shapes, 4=mix real/complex,  8=degenerate,  16=extra arithmetic, 32=FortranStyle, 64=extreme matrices) ', 0)
-opts.Add(BoolVariable('MEM_TEST',
-        'Test for memory leaks', False))
+opts.Add(BoolVariable('MEM_TEST','Test for memory leaks', False))
+opts.Add(BoolVariable('NAN_TEST','Test memory initialized with nans', False))
 opts.Add(BoolVariable('SMALL_TESTS',
         'Make the small test programs: tmvtest1a, tmvtest1b, etc.', False))
 opts.Add(BoolVariable('WARN',
         'Add warning compiler flags, like -Wall', False))
 opts.Add(BoolVariable('PROFILE',
-        'Add profiling compiler flags -pg', False))
-opts.Add(BoolVariable('NOMIX_SMALL',
-        'Do not test the mixed Small and regular arithmetic', False))
+        'Add profiling compiler flags like -pg', False))
 opts.Add(BoolVariable('CACHE_LIB',
         'Cache the results of the library checks',True))
 opts.Add(BoolVariable('WITH_UPS',
@@ -143,7 +143,6 @@ Help(opts.GenerateHelpText(initial_env))
 
 # This helps us determine of openmp is available
 openmp_mingcc_vers = 4.1
-openmp_minclang_vers = 3.1 # Probably earlier, but this is the first I tested.
 openmp_minicpc_vers = 9.1  # 9.0 is supposed to work but has bugs
 openmp_minpgcc_vers = 6.0
 openmp_mincc_vers = 5.0    # I don't actually know what this should be.
@@ -203,7 +202,6 @@ def BasicCCFlags(env):
     
         elif compiler == 'clang++':
             env.Replace(CCFLAGS=['-O2'])
-            env.Append(CCFLAGS=['-fno-strict-aliasing'])
             env['TEST_FLAGS'] = ['-O1']
             if env['PROFILE']:
                 env.Append(CCFLAGS=['-pg'])
@@ -235,13 +233,10 @@ def BasicCCFlags(env):
                 if version >= 11:
                     env.Append(CCFLAGS=['-wd2259'])
                     env['TEST_FLAGS'] += ['-wd2259']
-            #else :
-                #env.Append(CCFLAGS=['-w'])
-                #env['TEST_FLAGS'] += ['-w']
 
         elif compiler == 'pgCC':
             env.Replace(CCFLAGS=['-O2','-fast','-Mcache_align'])
-            env['TEST_FLAGS'] = ['-O1']
+            env['TEST_FLAGS'] = ['-O0']
             if env['PROFILE']:
                 # Not sure if this is right...
                 env.Append(CCFLAGS=['-pg'])
@@ -252,7 +247,7 @@ def BasicCCFlags(env):
 
         elif compiler == 'CC':
             env.Replace(CCFLAGS=['-O2','-fast','-instances=semiexplicit'])
-            env['TEST_FLAGS'] = ['-instances=semiexplicit']
+            env['TEST_FLAGS'] = ['-O1','-instances=semiexplicit']
             if env['WARN']:
                 env.Append(CCFLAGS=['-g','+w'])
                 env['TEST_FLAGS'] += ['-g','+w']
@@ -275,6 +270,10 @@ def BasicCCFlags(env):
         env.Replace(CCFLAGS=cxx_flags)
         env['TEST_FLAGS'] = cxx_flags
 
+    cxx_flags = env['EXTRA_FLAGS'].split(' ')
+    env.AppendUnique(CCFLAGS=cxx_flags)
+    env['TEST_FLAGS'] += cxx_flags
+
 
 def AddOpenMPFlag(env):
     """
@@ -282,7 +281,7 @@ def AddOpenMPFlag(env):
     the compiler.
 
     g++ uses -fopemnp
-    clang++ uses -fopemnp
+    clang++ doesn't have OpenMP support yet
     icpc uses -openmp
     pgCC uses -mp
     CC uses -xopenmp
@@ -300,13 +299,9 @@ def AddOpenMPFlag(env):
         ldflag = ['-fopenmp']
         xlib = ['pthread']
     elif compiler == 'clang++':
-        if version < openmp_minclang_vers: 
-            print 'No OpenMP support for clang++ versions before ',openmp_minclang_vers
-            env['WITH_OPENMP'] = False
-            return
-        flag = ['-fopenmp']
-        ldflag = ['-fopenmp']
-        xlib = ['pthread']
+        print 'No OpenMP support for clang++'
+        env['WITH_OPENMP'] = False
+        return
     elif compiler == 'icpc':
         if version < openmp_minicpc_vers:
             print 'No OpenMP support for icpc versions before ',openmp_minicpc_vers
@@ -345,7 +340,7 @@ def AddOpenMPFlag(env):
         env['WITH_OPENMP'] = False
         return
     else:
-        print 'Warning: No OpenMP support for compiler ',compiler
+        print 'No OpenMP support for compiler ',compiler
         env['WITH_OPENMP'] = False
         return
 
@@ -443,9 +438,9 @@ def AddExtraPaths(env):
     whole set is prepended.  The order within this list is:
 
         local lib and include paths
+        paths in PREFIX directory
         paths in EXTRA_*PATH parameters
         paths from the user's environment
-        paths in PREFIX directory
 
     Only paths that actually exists are kept.
     """
@@ -456,11 +451,6 @@ def AddExtraPaths(env):
     cpp_paths = ['#include']
     lib_paths1 = ['#lib']
     lib_paths2 = []
-
-    # Paths specified in EXTRA_*
-    bin_paths += env['EXTRA_PATH'].split(':')
-    cpp_paths += env['EXTRA_INCLUDE_PATH'].split(':')
-    lib_paths2 += env['EXTRA_LIB_PATH'].split(':')
 
     # PREFIX directory
     # If none given, then don't add them to the -L and -I directories.
@@ -473,6 +463,11 @@ def AddExtraPaths(env):
         AddPath(lib_paths1, os.path.join(env['PREFIX'], 'lib'))
         env['INSTALL_PREFIX'] = env['PREFIX']
     
+    # Paths specified in EXTRA_*
+    bin_paths += env['EXTRA_PATH'].split(':')
+    cpp_paths += env['EXTRA_INCLUDE_PATH'].split(':')
+    lib_paths2 += env['EXTRA_LIB_PATH'].split(':')
+
     # Paths found in environment paths
     if env['IMPORT_PATHS'] and os.environ.has_key('PATH'):
         paths=os.environ['PATH']
@@ -504,7 +499,7 @@ def AddExtraPaths(env):
     env.Prepend(CPPPATH= cpp_paths)
     env.Prepend(LIBPATH= lib_paths2)
     env.Prepend(LIBPATH= lib_paths1)
-    env['LIBPATH2'] = lib_paths2    # usef for the tmv-link file
+    env['LIBPATH2'] = lib_paths2    # used for the tmv-link file
 
 def ReadFileList(fname):
     """
@@ -523,7 +518,7 @@ def ReadFileList(fname):
 
 def CheckLibs(context,try_libs,source_file):
     init_libs = context.env['LIBS']
-    context.env.Prepend(LIBS=try_libs)
+    context.env.PrependUnique(LIBS=try_libs)
     result = context.TryLink(source_file,'.cpp')
     if not result :
         context.env.Replace(LIBS=init_libs)
@@ -535,11 +530,11 @@ def CheckMKL(context):
 #include "mkl.h"
 int main()
 {
-  char ta='N', tb='N';
-  int M=1,N=1,K=1,lda=1,ldb=1,ldc=1;
-  double alpha=1.,beta=1., *A=0, *B=0, *C=0;
-  dgemm(&ta,&tb,&M,&N,&K,&alpha,A,&lda,B,&ldb,&beta,C,&ldc);
-  return 0;
+    char ta='N', tb='N';
+    int M=1,N=1,K=1,lda=1,ldb=1,ldc=1;
+    double alpha=1.,beta=1., *A=0, *B=0, *C=0;
+    dgemm(&ta,&tb,&M,&N,&K,&alpha,A,&lda,B,&ldb,&beta,C,&ldc);
+    return 0;
 }
 """
 
@@ -554,21 +549,22 @@ int main()
     if context.TryCompile(mkl_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],mkl_source_file) or
-            CheckLibs(context,['mkl','guide','pthread'],mkl_source_file) or
-            CheckLibs(context,['mkl_em64t','guide','pthread'],
-                        mkl_source_file) or
-            CheckLibs(context,['mkl_ipf','guide','pthread'],
-                        mkl_source_file) or
-            CheckLibs(context,['mkl_ia32','guide','pthread'],
-                        mkl_source_file) or
-            CheckLibs(context,['mkl_intel_lp64','mkl_core',threadlib,
-                        'guide','pthread'],mkl_source_file) or
-            CheckLibs(context,['mkl_ia32','mkl_core','mkl_sequential'],
-                        mkl_source_file) or
-            CheckLibs(context,['mkl_intel_lp64','mkl_core','mkl_sequential'],
-                        mkl_source_file) or
+            CheckLibs(context,['mkl'],mkl_source_file) or
             CheckLibs(context,['mkl','pthread'],mkl_source_file) or
-            CheckLibs(context,['mkl'],mkl_source_file) )
+            CheckLibs(context,['mkl','guide','pthread'],mkl_source_file) or
+            CheckLibs(context,['mkl_em64t','pthread'],mkl_source_file) or
+            CheckLibs(context,['mkl_em64t','guide','pthread'],mkl_source_file) or
+            CheckLibs(context,['mkl_ipf','pthread'],mkl_source_file) or
+            CheckLibs(context,['mkl_ipf','guide','pthread'],mkl_source_file) or
+            CheckLibs(context,['mkl_ia32','pthread'],mkl_source_file) or
+            CheckLibs(context,['mkl_ia32','guide','pthread'],mkl_source_file) or
+            CheckLibs(context,['mkl_intel_lp64','mkl_core',threadlib,'pthread'],mkl_source_file) or
+            CheckLibs(context,['mkl_intel_lp64','mkl_core',threadlib,'guide','pthread'],mkl_source_file) or
+            CheckLibs(context,['mkl_em64t','mkl_core','mkl_sequential'],mkl_source_file) or
+            CheckLibs(context,['mkl_ipf','mkl_core','mkl_sequential'],mkl_source_file) or
+            CheckLibs(context,['mkl_ia32','mkl_core','mkl_sequential'],mkl_source_file) or
+            CheckLibs(context,['mkl_intel_lp64','mkl_core','mkl_sequential'],mkl_source_file) or
+            False)
 
         context.Result(result)
 
@@ -590,11 +586,11 @@ def CheckACML(context):
 #include "acml.h"
 int main()
 {
-  char uplo='U', compq='I';
-  int n=1,ldu=1,ldv=1,*iq=0,*info=0;
-  double *d=0, *e=0, *u=0, *v=0, *q=0;
-  dbdsdc(uplo,compq,n,d,e,u,ldu,v,ldv,q,iq,info);
-  return 0;
+    char uplo='U', compq='I';
+    int n=1,ldu=1,ldv=1,*iq=0,*info=0;
+    double *d=0, *e=0, *u=0, *v=0, *q=0;
+    dbdsdc(uplo,compq,n,d,e,u,ldu,v,ldv,q,iq,info);
+    return 0;
 }
 """
     context.Message('Checking for ACML... ')
@@ -602,9 +598,11 @@ int main()
     if context.TryCompile(acml_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],acml_source_file) or
-            CheckLibs(context,['acml','pgftnrtl'],acml_source_file) or
+            CheckLibs(context,['acml'],acml_source_file) or
             CheckLibs(context,['acml','gfortran'],acml_source_file) or
-            CheckLibs(context,['acml'],acml_source_file) )
+            CheckLibs(context,['acml','gfortran','pthread'],acml_source_file) or
+            CheckLibs(context,['acml','pgftnrtl'],acml_source_file) or
+            False)
 
         context.Result(result)
 
@@ -621,6 +619,43 @@ int main()
             
     return result
 
+def CheckCLAMD(context):
+# NB: This doesn't work yet...
+    clamd_source_file = """
+#include "clAmdBlas.h"
+int main()
+{
+    char ta='N', tb='N';
+    int M=1,N=1,K=1,lda=1,ldb=1,ldc=1;
+    double alpha=1.,beta=1., *A=0, *B=0, *C=0;
+    dgemm_(ta,tb,M,N,K,alpha,A,lda,B,ldb,beta,C,ldc,1,1);
+    return 0;
+}
+"""
+    context.Message('Checking for clAmdBlas... ')
+
+    if context.TryCompile(clamd_source_file,'.cpp'):
+        result = (
+            CheckLibs(context,[],clamd_source_file) or
+            CheckLibs(context,['clAmdBlas'],clamd_source_file) or
+            CheckLibs(context,['clAmdBlas','OpenCL'],clamd_source_file) or
+            False)
+
+        context.Result(result)
+
+        if not result and context.env['FORCE_CLAMD']:            
+            print 'Warning: Forced use of clAmdBlas even though link test failed.'
+            result = 1
+
+    else:
+        result = 0
+        context.Result(result)
+        if context.env['FORCE_CLAMD']:
+            print 'Error: FORCE_CLAMD, but failed to find or compile with clAmdBlas.h'
+            Exit(1)
+    
+    return result
+
 
 def CheckGOTO(context):
     fblas_source_file = """
@@ -629,11 +664,11 @@ extern "C" {
 }
 int main()
 {
-  char ta='N', tb='N';
-  int M=1,N=1,K=1,lda=1,ldb=1,ldc=1;
-  double alpha=1.,beta=1., *A=0, *B=0, *C=0;
-  dgemm_(ta,tb,M,N,K,alpha,A,lda,B,ldb,beta,C,ldc,1,1);
-  return 0;
+    char ta='N', tb='N';
+    int M=1,N=1,K=1,lda=1,ldb=1,ldc=1;
+    double alpha=1.,beta=1., *A=0, *B=0, *C=0;
+    dgemm_(ta,tb,M,N,K,alpha,A,lda,B,ldb,beta,C,ldc,1,1);
+    return 0;
 }
 """
 
@@ -642,14 +677,17 @@ int main()
     if context.TryCompile(fblas_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],fblas_source_file) or
-            CheckLibs(context,['goto2','pthread'],fblas_source_file) or
             CheckLibs(context,['goto2'],fblas_source_file) or
-            CheckLibs(context,['goto2','gfortran','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto2','pthread'],fblas_source_file) or
             CheckLibs(context,['goto2','gfortran'],fblas_source_file) or
-            CheckLibs(context,['goto','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto2','gfortran','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto2','pgftnrtl'],fblas_source_file) or
             CheckLibs(context,['goto'],fblas_source_file) or
+            CheckLibs(context,['goto','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto','gfortran'],fblas_source_file) or
             CheckLibs(context,['goto','gfortran','pthread'],fblas_source_file) or
-            CheckLibs(context,['goto','gfortran'],fblas_source_file))
+            CheckLibs(context,['goto','pgftnrtl'],fblas_source_file) or
+            False)
 
         context.Result(result)
 
@@ -666,8 +704,6 @@ int main()
 
     return result
 
-
-
 def CheckATLAS(context):
     atlas_source_file = """
 extern "C" {
@@ -675,11 +711,11 @@ extern "C" {
 }
 int main()
 {
-  int M=1,N=1,K=1,lda=1,ldb=1,ldc=1;
-  double alpha=1.,beta=1., *A=0, *B=0, *C=0;
-  cblas_dgemm(CblasRowMajor,CblasNoTrans,CblasNoTrans,
-      M,N,K,alpha,A,lda,B,ldb,beta,C,ldc);
-  return 0;
+    int M=1,N=1,K=1,lda=1,ldb=1,ldc=1;
+    double alpha=1.,beta=1., *A=0, *B=0, *C=0;
+    cblas_dgemm(CblasRowMajor,CblasNoTrans,CblasNoTrans,
+        M,N,K,alpha,A,lda,B,ldb,beta,C,ldc);
+    return 0;
 }
 """
 
@@ -688,8 +724,11 @@ int main()
     if context.TryCompile(atlas_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],atlas_source_file) or
+            CheckLibs(context,['ptcblas','atlas'],atlas_source_file) or
             CheckLibs(context,['ptcblas','atlas','pthread'],atlas_source_file) or
-            CheckLibs(context,['cblas','atlas'],atlas_source_file))
+            CheckLibs(context,['ptcblas','atlas','guide','pthread'],atlas_source_file) or
+            CheckLibs(context,['cblas','atlas'],atlas_source_file) or
+            False)
 
         context.Result(result)
 
@@ -716,11 +755,11 @@ extern "C" {
 }
 int main()
 {
-  int M=1,N=1,K=1,lda=1,ldb=1,ldc=1;
-  double alpha=1.,beta=1., *A=0, *B=0, *C=0;
-  cblas_dgemm(CblasRowMajor,CblasNoTrans,CblasNoTrans,
-          M,N,K,alpha,A,lda,B,ldb,beta,C,ldc);
-  return 0;
+    int M=1,N=1,K=1,lda=1,ldb=1,ldc=1;
+    double alpha=1.,beta=1., *A=0, *B=0, *C=0;
+    cblas_dgemm(CblasRowMajor,CblasNoTrans,CblasNoTrans,
+        M,N,K,alpha,A,lda,B,ldb,beta,C,ldc);
+    return 0;
 }
 """
 
@@ -729,11 +768,12 @@ int main()
     if context.TryCompile(cblas_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],cblas_source_file) or
+            CheckLibs(context,['cblas'],cblas_source_file) or
             CheckLibs(context,['cblas','gfortran'],cblas_source_file) or
             CheckLibs(context,['cblas','pgftnrtl'],cblas_source_file) or
             CheckLibs(context,['blas','gfortran'],cblas_source_file) or
             CheckLibs(context,['blas','pgftnrtl'],cblas_source_file) or
-            CheckLibs(context,['cblas'],cblas_source_file) )
+            False)
 
         context.Result(result)
 
@@ -759,22 +799,23 @@ extern "C" {
 }
 int main()
 {
-  char ta='N', tb='N';
-  int M=1,N=1,K=1,lda=1,ldb=1,ldc=1;
-  double alpha=1.,beta=1., *A=0, *B=0, *C=0;
-  dgemm_(ta,tb,M,N,K,alpha,A,lda,B,ldb,beta,C,ldc,1,1);
-  return 0;
+    char ta='N', tb='N';
+    int M=1,N=1,K=1,lda=1,ldb=1,ldc=1;
+    double alpha=1.,beta=1., *A=0, *B=0, *C=0;
+    dgemm_(ta,tb,M,N,K,alpha,A,lda,B,ldb,beta,C,ldc,1,1);
+    return 0;
 }
 """
 
-    context.Message('Checking for Fotran BLAS... ')
+    context.Message('Checking for Fortran BLAS... ')
 
     if context.TryCompile(fblas_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],fblas_source_file) or
+            CheckLibs(context,['blas'],fblas_source_file) or
             CheckLibs(context,['blas','gfortran'],fblas_source_file) or
             CheckLibs(context,['blas','pgftnrtl'],fblas_source_file) or
-            CheckLibs(context,['blas'],fblas_source_file) )
+            False)
 
         context.Result(result)
 
@@ -799,11 +840,11 @@ def CheckMKL_LAP(context):
 #include "mkl.h"
 int main()
 {
-  char uplo='U', compq='I';
-  int n=1,ldu=1,ldv=1,*iq=0,*iwork=0,info=0;
-  double *d=0, *e=0, *u=0, *v=0, *q=0, *work=0;
-  dbdsdc(&uplo,&compq,&n,d,e,u,&ldu,v,&ldv,q,iq,work,iwork,&info);
-  return 0;
+    char uplo='U', compq='I';
+    int n=1,ldu=1,ldv=1,*iq=0,*iwork=0,info=0;
+    double *d=0, *e=0, *u=0, *v=0, *q=0, *work=0;
+    dbdsdc(&uplo,&compq,&n,d,e,u,&ldu,v,&ldv,q,iq,work,iwork,&info);
+    return 0;
 }
 """
 
@@ -812,7 +853,8 @@ int main()
     result = (context.TryCompile(mkl_lap_source_file,'.cpp') and
         (CheckLibs(context,[],mkl_lap_source_file) or
          CheckLibs(context,['mkl_lapack'],mkl_lap_source_file) or
-         CheckLibs(context,['mkl_lapack','guide'],mkl_lap_source_file)))
+         CheckLibs(context,['mkl_lapack','guide'],mkl_lap_source_file) or
+         False))
 
     context.Result(result)
     return result
@@ -826,10 +868,10 @@ extern "C" {
 }
 int main()
 {
-  int N=1,lda=1;
-  double* A=0;
-  clapack_dlauum(CblasRowMajor,CblasUpper,N,A,lda);
-  return 0;
+    int N=1,lda=1;
+    double* A=0;
+    clapack_dlauum(CblasRowMajor,CblasUpper,N,A,lda);
+    return 0;
 }
 """
 
@@ -840,7 +882,8 @@ int main()
             CheckLibs(context,[],atlas_lapack_source_file) or
             CheckLibs(context,['lapack'],atlas_lapack_source_file) or 
             CheckLibs(context,['clapack'],atlas_lapack_source_file) or
-            CheckLibs(context,['lapack_atlas'],atlas_lapack_source_file) )
+            CheckLibs(context,['lapack_atlas'],atlas_lapack_source_file) or
+            False)
 
         context.Result(result)
 
@@ -867,12 +910,12 @@ extern "C" {
 }
 int main()
 {
-  char uplo='U', compq='I';
-  integer n=1,ldu=1,ldv=1,*iq=0,*iwork=0,info=0,lwork=0,*ipiv=0;
-  doublereal *d=0, *e=0, *u=0, *v=0, *q=0, *work=0;
-  dbdsdc_(&uplo,&compq,&n,d,e,u,&ldu,v,&ldv,q,iq,work,iwork,&info);
-  dgetri_(&n,u,&ldu,ipiv,work,&lwork,&info);
-  return 0;
+    char uplo='U', compq='I';
+    integer n=1,ldu=1,ldv=1,*iq=0,*iwork=0,info=0,lwork=0,*ipiv=0;
+    doublereal *d=0, *e=0, *u=0, *v=0, *q=0, *work=0;
+    dbdsdc_(&uplo,&compq,&n,d,e,u,&ldu,v,&ldv,q,iq,work,iwork,&info);
+    dgetri_(&n,u,&ldu,ipiv,work,&lwork,&info);
+    return 0;
 }
 """
 
@@ -881,6 +924,8 @@ int main()
     if context.TryCompile(clapack_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],clapack_source_file) or
+            CheckLibs(context,['lapack'],clapack_source_file) or
+            CheckLibs(context,['clapack'],clapack_source_file) or
             CheckLibs(context,['lapack','cblaswr','f2c'],clapack_source_file) or
             CheckLibs(context,['lapack','fblaswr','f2c'],clapack_source_file) or
             CheckLibs(context,['clapack','cblaswr','f2c'],clapack_source_file) or
@@ -889,8 +934,7 @@ int main()
             CheckLibs(context,['clapack','f2c'],clapack_source_file) or
             CheckLibs(context,['lapack','F77'],clapack_source_file) or
             CheckLibs(context,['clapack','F77'],clapack_source_file) or
-            CheckLibs(context,['lapack'],clapack_source_file) or
-            CheckLibs(context,['clapack'],clapack_source_file) )
+            False)
 
         context.Result(result)
 
@@ -917,11 +961,11 @@ extern "C" {
 }
 int main()
 {
-  char uplo='U', compq='I';
-  int n=1,ldu=1,ldv=1,*iq=0,*iwork=0,info=0;
-  double *d=0, *e=0, *u=0, *v=0, *q=0, *work=0;
-  dbdsdc_(uplo,compq,n,d,e,u,ldu,v,ldv,q,iq,work,iwork,&info);
-  return 0;
+    char uplo='U', compq='I';
+    int n=1,ldu=1,ldv=1,*iq=0,*iwork=0,info=0;
+    double *d=0, *e=0, *u=0, *v=0, *q=0, *work=0;
+    dbdsdc_(uplo,compq,n,d,e,u,ldu,v,ldv,q,iq,work,iwork,&info);
+    return 0;
 }
 """
 
@@ -930,6 +974,7 @@ int main()
     if context.TryCompile(flapack_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],flapack_source_file) or
+            CheckLibs(context,['lapack'],flapack_source_file) or
             CheckLibs(context,['lapack','gfortran'],flapack_source_file) or
             CheckLibs(context,['lapack','pgftnrtl'],flapack_source_file) or
             CheckLibs(context,['lapack','cblaswr','f2c'],flapack_source_file) or
@@ -940,7 +985,7 @@ int main()
             CheckLibs(context,['clapack','f2c'],flapack_source_file) or
             CheckLibs(context,['lapack','F77'],flapack_source_file) or
             CheckLibs(context,['clapack','F77'],flapack_source_file) or
-            CheckLibs(context,['lapack'],flapack_source_file) )
+            False)
 
         context.Result(result)
 
@@ -992,7 +1037,7 @@ def DoLibraryAndHeaderChecks(config):
                 foundlap = 1
                 print 'Using MKL LAPACK'
             if compiler == 'icpc' and version <= 9.0:
-                # TODO: A better way to do this would be to do a check
+                # TODO: A better way to do this would be to check
                 # for whether work queries work correctly.
                 # For now, I know that icpc 9.0 (and probably earlier?)
                 # doesn't do work queries.
@@ -1006,6 +1051,11 @@ def DoLibraryAndHeaderChecks(config):
                 foundlap = 1
                 print 'Using ACML LAPACK'
  
+        #elif config.env['FORCE_CLAMD']:
+            #config.CheckCLAMD()
+            #config.env.Append(CPPDEFINES=['CLAMD'])
+            #print 'Using clAmdBlas'
+
         elif config.env['FORCE_GOTO']:
             config.CheckGOTO()
             config.env.Append(CPPDEFINES=['FBLAS'])
@@ -1042,6 +1092,10 @@ def DoLibraryAndHeaderChecks(config):
             if config.env['WITH_LAPACK']:
                 foundlap = 1
                 print 'Using ACML LAPACK'
+
+        #elif config.CheckCLAMD() :
+            #config.env.Append(CPPDEFINES=['CLAMD'])
+            #print 'Using clAmdBlas'
 
         elif config.CheckGOTO() :
             config.env.Append(CPPDEFINES=['FBLAS'])
@@ -1162,6 +1216,7 @@ def DoConfig(env):
     config = env.Configure(custom_tests = {
         'CheckMKL' : CheckMKL ,
         'CheckACML' : CheckACML ,
+        #'CheckCLAMD' : CheckCLAMD ,
         'CheckGOTO' : CheckGOTO ,
         'CheckATLAS' : CheckATLAS ,
         'CheckCBLAS' : CheckCBLAS ,
@@ -1207,6 +1262,9 @@ if not GetOption('help'):
     if env['WITH_UPS']:
         subdirs += ['ups']
 
+    if 'doc' in COMMAND_LINE_TARGETS:
+        subdirs += ['doc']
+
     # subdirectores to process.  We process src by default
     script_files = [os.path.join(src_dir,'SConscript')]
     for d in subdirs:
@@ -1214,5 +1272,4 @@ if not GetOption('help'):
             script_files.append(os.path.join(d,'SConscript'))
 
     SConscript(script_files, exports=['env'])
-
 
