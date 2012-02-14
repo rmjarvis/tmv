@@ -33,15 +33,17 @@ extern bool symoprod;
 extern bool dontthrow;
 extern std::string lastsuccess;
 
-inline void PreAssert(std::string s)
-{
 #ifdef TMV_DEBUG
+inline void PreAssert(const std::string& s)
+{
     if (showtests) { 
         std::cout<<"Trying: "<<s;  
         std::cout.flush(); 
     } 
-#endif
 }
+#else
+inline void PreAssert(const std::string& ) {}
+#endif
 
 inline void DoAssert(bool x, std::string s)
 {

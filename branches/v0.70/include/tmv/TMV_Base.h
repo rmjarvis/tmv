@@ -576,6 +576,15 @@ namespace tmv {
 #define TMV_DEPRECATED(func) func
 #endif
 
+    // Use DEBUGPARAM(x) for parameters that are only used in TMVAssert
+    // statements.  So then they don't give warnings when compiled with 
+    // -DNDEBUG
+#ifdef TMV_DEBUG
+#define TMV_DEBUG_PARAM(x) x
+#else
+#define TMV_DEBUG_PARAM(x)
+#endif
+
 #ifndef NOTHROW
     class ReadError :
         public Error
@@ -682,7 +691,7 @@ namespace tmv {
     template <int S>
     struct CheckedInt
     {
-        CheckedInt(ptrdiff_t s) {
+        CheckedInt(ptrdiff_t TMV_DEBUG_PARAM(s)) {
 #ifdef TMV_DEBUG
             if (s != S) {
                 std::cerr<<"Mismatched CheckInt:\n";

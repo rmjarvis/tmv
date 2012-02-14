@@ -199,7 +199,7 @@ However, the provided code did work successfully on all the compilers I
 tested it on, so technically this is not a ``known'' compiler issue, just a 
 potential issue.}.
 
-Note that this can only ever be an issue if you specifically request that TMV use the \tt{stegr} algorithm with the SCons option \tt{USE_STEGR=true}.  If you do not do this, then TMV doesn't use the LAPACK \tt{?stegr} functions at all.
+Note that this can only ever be an issue if you specifically request that TMV use the \tt{stegr} algorithm with the SCons option \tt{USE_STEGR=true}.  If you do not do this, then TMV doesn't use the LAPACK \tt{?stegr} functions at all, so it's not a problem.
 
 \end{itemize}
 
@@ -215,9 +215,8 @@ result for $R$.  The diagonal elements of $R$ are supposed to be monotonically d
 along the diagonal, but sometimes this is not strictly true.  This probably varies among
 implementations, so your version might always succeed.
 
-But if this feature is important to you, then you can compile with \tt{USE_GEQP3=false},
-which will use the native TMV code for strict QRP decomposition for this 
-rather than the LAPACK function (which is called \tt{?geqp3}).
+This would only happen if you install TMV with the SCons option \tt{USE_GEQP3=true},
+to use the LAPACK function (which is called \tt{?geqp3} rather than the native TMV function.  So the solution is to use \tt{USE_GEQP3=false} instead.
 
 \item{\bf Info $<$ 0 errors:}
 \index{LAPACK!Workspace issues}
