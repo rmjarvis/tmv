@@ -823,12 +823,12 @@ namespace tmv {
             // for loop, not just a signed integer type.  So ptrdiff_t
             // can't be used.
 #ifdef PLATFORM_COMPILER_PGI
-            typedef int int_omp;
+#define TMV_INT_OMP int
 #else
-            typedef ptrdiff_t int_omp;
+#define TMV_INT_OMP ptrdiff_t
 #endif
 #pragma omp for
-            for(int_omp k=0;k<N;k++) {
+            for(TMV_INT_OMP k=0;k<N;k++) {
                 Sk = FindDCSingularValue(
                     k,N,rho,D.cptr(),z.cptr(),
                     zsq.cptr(),normsqz,diff.ptr(),sum.ptr());
@@ -872,13 +872,8 @@ namespace tmv {
             Vector<T> diff(N);
             Vector<T> sum(N);
             T Sk;
-#ifdef PLATFORM_COMPILER_PGI
-            typedef int int_omp;
-#else
-            typedef ptrdiff_t int_omp;
-#endif
 #pragma omp for
-            for(int_omp k=0;k<N;k++) {
+            for(TMV_INT_OMP k=0;k<N;k++) {
                 Sk = FindDCSingularValue(
                     k,N,rho,D.cptr(),z.cptr(),
                     zsq.cptr(),normsqz,diff.ptr(),sum.ptr());
@@ -887,6 +882,7 @@ namespace tmv {
                     S[k] = Sk;
                 }
             }
+#undef TMV_INT_OMP
         }
 #else
         Vector<T> diff(N);

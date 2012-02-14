@@ -947,10 +947,10 @@ static void TestBasicTriMatrix_IO()
     tmv::LowerTriMatrix<T> l2 = l;
     tmv::LowerTriMatrix<CT> cl2 = cl;
     if (!std::numeric_limits<T>::is_integer) {
-        u2.clip(1.e-2);
-        cu2.clip(1.e-2);
-        l2.clip(1.e-2);
-        cl2.clip(1.e-2);
+        u2.clip(T(1.e-2));
+        cu2.clip(T(1.e-2));
+        l2.clip(T(1.e-2));
+        cl2.clip(T(1.e-2));
     }
     tmv::UpperTriMatrix<T> u3 = u;
     tmv::UpperTriMatrix<CT> cu3 = cu;
@@ -996,14 +996,14 @@ static void TestBasicTriMatrix_IO()
 
     // When using (the default) prec(6), these will be the values read in.
     u(4,7) = l(7,4) = T(0.123457);
-    cu(4,7) = cl(7,4) = CT(3.12346,600.988);
+    cu(4,7) = cl(7,4) = CT(T(3.12346),T(600.988));
 
     // When using prec(12), the full correct values will be read in.
 
     // When using prec(4), these will be the values read in.
     u3(4,7) = l3(7,4) = T(0.1235);
     if (std::numeric_limits<T>::is_integer) cu3(4,7) = cl3(7,4) = CT(3,600);
-    else cu3(4,7) = cl3(7,4) = CT(3.123,601.0);
+    else cu3(4,7) = cl3(7,4) = CT(T(3.123),T(601.0));
 
     // Read them back in
     tmv::UpperTriMatrix<T,D|tmv::RowMajor> xu1(N);

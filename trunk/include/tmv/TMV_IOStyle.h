@@ -33,8 +33,6 @@
 #ifndef TMV_IOStyle_H
 #define TMV_IOStyle_H
 
-#include "util/portable_platform.h"
-
 namespace tmv {
 
     class IOStyle 

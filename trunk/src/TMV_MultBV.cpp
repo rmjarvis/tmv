@@ -13,6 +13,8 @@
 #include "tmv/TMV_SumVV.h"
 #include "tmv/TMV_ProdXV.h"
 #include "tmv/TMV_ProdXM.h"
+#include "tmv/TMV_MultMV.h"
+#include "tmv/TMV_ConjugateV.h"
 #endif
 
 // The CBLAS trick of using RowMajor with ConjTrans when we have a 
