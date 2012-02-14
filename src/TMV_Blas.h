@@ -696,7 +696,7 @@ namespace tmv {
     static inline bool BlasIsRM(const BaseMatrix_Rec<M>& m)
     {
 #ifdef BLAS
-        return m.isrm() && m.stepi() >= m.rowsize() && m.stepi() >= 1;
+        return m.isrm() && m.stepi() >= int(m.rowsize()) && m.stepi() >= 1;
 #else
         return m.isrm();
 #endif
@@ -706,7 +706,7 @@ namespace tmv {
     static inline bool BlasIsCM(const BaseMatrix_Rec<M>& m)
     {
 #ifdef BLAS
-        return m.iscm() && m.stepj() >= m.colsize() && m.stepj() >= 1;
+        return m.iscm() && m.stepj() >= int(m.colsize()) && m.stepj() >= 1;
 #else
         return m.iscm();
 #endif
