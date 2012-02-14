@@ -211,7 +211,7 @@ def BasicCCFlags(env):
                 env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
     
         elif compiler == 'icpc':
-            env.Replace(CCFLAGS=['-O3'])
+            env.Replace(CCFLAGS=['-O2'])
             if env['WITH_SSE']:
                 env.Append(CCFLAGS=['-msse2'])
             env['TEST_FLAGS'] = ['-O1']
