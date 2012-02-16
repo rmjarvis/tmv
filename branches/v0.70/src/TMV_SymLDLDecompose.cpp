@@ -392,7 +392,7 @@ namespace tmv {
                 }
                 if (herm && isComplex(T())) {
 #ifdef XDEBUG
-                    TMVAssert(normInf(A.diag().imagPart()) <= eps);
+                    TMVAssert(NormInf(A.diag().imagPart()) <= eps);
 #endif
                     A.diag().subVector(j+2,N).imagPart().setZero();
                 }

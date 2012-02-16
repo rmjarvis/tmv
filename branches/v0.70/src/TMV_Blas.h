@@ -250,13 +250,18 @@ namespace tmv {
 #include "mkl.h"
 
 
-#ifndef NOLAP
 #ifndef CLAPACK
 #ifndef FLAPACK
 
-#define LAP
+// If we have MKL for BLAS, we always have ELAP functions, so let's use them,
+// since they are all basically extended BLAS calls anyway.
 #define ELAP
+
+#ifndef NOLAP
+#define LAP
 #define XLAP
+#endif
+
 #define LAPPTR
 
 namespace tmv {
@@ -283,7 +288,6 @@ namespace tmv {
 
 #endif // !CLAPACK
 #endif // !FLAPACK
-#endif // LAP
 
 #endif // BLAS
 
@@ -389,13 +393,16 @@ namespace tmv {
 extern "C" {
 #include "cblas.h"
 
-#ifndef NOLAP
 #ifndef CLAPACK
 #ifndef FLAPACK
 
-#define ALAP 
 #define AELAP 
+
+#ifndef NOLAP
+#define ALAP 
 #define CLAP
+#endif
+
 #define LAPINFORETURN
 #define LAPNOWORK
 
@@ -403,7 +410,6 @@ extern "C" {
 
 #endif // !FLAPACK
 #endif // !CLAPACK
-#endif // !NOLAP
 
 }
 
@@ -520,10 +526,12 @@ namespace tmv {
 // LAP always implies the ALAP subset
 #ifdef LAP
 #define ALAP
+#define ANYLAP
 #endif // LAP
 
 #ifdef ELAP
 #define AELAP
+#define ANYLAP
 #endif // ELAP
 
 namespace tmv {
@@ -624,7 +632,7 @@ namespace tmv {
 
 #endif // BLAS
 
-#ifdef ALAP
+#ifdef ANYLAP
 
 #ifdef CLAP
 #define LAPNAMEX(x) clapack_ ## x
@@ -709,7 +717,7 @@ namespace tmv {
 #define LAP_BLOCKSIZE 64
 #endif
 
-#endif // ALAP
+#endif // ANYLAP
 
 namespace tmv {
 

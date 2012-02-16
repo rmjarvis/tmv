@@ -32,7 +32,6 @@
 
 //#define XDEBUG
 
-
 #include "TMV_Blas.h"
 #include "tmv/TMV_SymMatrixArithFunc.h"
 #include "tmv/TMV_SymMatrix.h"
@@ -144,7 +143,7 @@ namespace tmv {
 
         if (ha && isComplex(T())) {
 #ifdef XDEBUG
-            TMVAssert(normInf(A.diag().imagPart()) <= eps);
+            TMVAssert(NormInf(A.diag().imagPart()) <= eps);
 #endif
             A.diag().imagPart().setZero();
         }
@@ -221,7 +220,7 @@ namespace tmv {
         }
         if (ha && isComplex(T())) {
 #ifdef XDEBUG
-            TMVAssert(normInf(A.diag().imagPart()) <= eps);
+            TMVAssert(NormInf(A.diag().imagPart()) <= eps);
 #endif
             A.diag().imagPart().setZero();
         }
@@ -336,13 +335,19 @@ namespace tmv {
         TMVAssert(x.ct() == NonConj);
         TMVAssert(A.iscm());
 
+        //std::cout<<"BlasRank1Update:\n";
+        //std::cout<<"alpha = "<<alpha<<std::endl;
+        //std::cout<<"x = "<<TMV_Text(x)<<"  step "<<x.step()<<std::endl;
+        //std::cout<<"A = "<<TMV_Text(A)<<"  U = "<<A.isupper()<<", step "<<A.stepi()<<" "<<A.stepj()<<std::endl;
 #ifndef ELAP
         if (A.issym() && x.step() != 1) {
+            //std::cout<<"ndef ELAP and not step1, so copy x\n";
             Vector<std::complex<double> > xx = x;
             return BlasRank1Update(alpha,xx,A);
         } else
 #endif
             if (A.isherm()) {
+                //std::cout<<"A.isherm()\n";
                 TMVAssert(TMV_IMAG(alpha)==0.);
                 int n=A.size();
                 int xs=x.step();
@@ -350,17 +355,32 @@ namespace tmv {
                 if (xs < 0) xp += (n-1)*xs;
                 int lda=A.stepj();
                 double ralpha = TMV_REAL(alpha);
+                //std::cout<<"Before zher:\n";
+                //std::cout<<"n = "<<n<<std::endl;
+                //std::cout<<"ralpha = "<<ralpha<<std::endl;
+                //std::cout<<"xp = "<<xp<<std::endl;
+                //std::cout<<"xs = "<<xs<<std::endl;
+                //std::cout<<"Ap = "<<A.ptr()<<std::endl;
+                //std::cout<<"lda = "<<lda<<std::endl;
                 BLASNAME(zher) (
                     BLASCM A.uplo()==Upper?BLASCH_UP:BLASCH_LO,
                     BLASV(n),BLASV(ralpha),BLASP(xp),BLASV(xs),
                     BLASP(A.ptr()),BLASV(lda) BLAS1);
             } else {
+                //std::cout<<"not A.isherm()\n";
                 int n = A.size();
                 int lda = A.stepj();
 #ifdef ELAP
                 int xs = x.step();
                 const std::complex<double>* xp = x.cptr();
                 if (xs < 0) xp += (n-1)*xs;
+                //std::cout<<"Before zsyr:\n";
+                //std::cout<<"n = "<<n<<std::endl;
+                //std::cout<<"alpha = "<<alpha<<std::endl;
+                //std::cout<<"xp = "<<xp<<std::endl;
+                //std::cout<<"xs = "<<xs<<std::endl;
+                //std::cout<<"Ap = "<<A.ptr()<<std::endl;
+                //std::cout<<"lda = "<<lda<<std::endl;
                 LAPNAME(zsyr) (
                     LAPCM A.uplo()==Upper ? LAPCH_UP : LAPCH_LO,
                     LAPV(n),LAPP(&alpha),LAPP(xp),LAPV(xs),
@@ -370,14 +390,31 @@ namespace tmv {
                 std::complex<double> beta(1);
                 if (x.step() == 1) {
                     const std::complex<double>* xp = x.cptr();
+                    //std::cout<<"Before zsyrk:\n";
+                    //std::cout<<"n = "<<n<<std::endl;
+                    //std::cout<<"k = "<<k<<std::endl;
+                    //std::cout<<"alpha = "<<alpha<<std::endl;
+                    //std::cout<<"xp = "<<xp<<std::endl;
+                    //std::cout<<"beta = "<<beta<<std::endl;
+                    //std::cout<<"Ap = "<<A.ptr()<<std::endl;
+                    //std::cout<<"lda = "<<lda<<std::endl;
                     BLASNAME(zsyrk) (
                         BLASCM A.uplo()==Upper?BLASCH_UP:BLASCH_LO, BLASCH_NT,
                         BLASV(n),BLASV(k),BLASP(&alpha),BLASP(xp),BLASV(n),
                         BLASP(&beta),BLASP(A.ptr()),BLASV(lda) BLAS1 BLAS1);
                 } else {
+                    //std::cout<<"x.step() != 1, so copy alpha*x\n";
                     Vector<std::complex<double> > xx = alpha * x;
                     std::complex<double> xa(1);
                     const std::complex<double>* xp = xx.cptr();
+                    //std::cout<<"Before zsyrk:\n";
+                    //std::cout<<"n = "<<n<<std::endl;
+                    //std::cout<<"k = "<<k<<std::endl;
+                    //std::cout<<"xa = "<<xa<<std::endl;
+                    //std::cout<<"xp = "<<xp<<std::endl;
+                    //std::cout<<"beta = "<<beta<<std::endl;
+                    //std::cout<<"Ap = "<<A.ptr()<<std::endl;
+                    //std::cout<<"lda = "<<lda<<std::endl;
                     BLASNAME(zsyrk) (
                         BLASCM A.uplo()==Upper?BLASCH_UP:BLASCH_LO, BLASCH_NT,
                         BLASV(n),BLASV(k),BLASP(&xa),BLASP(xp),BLASV(n),
@@ -531,19 +568,27 @@ namespace tmv {
         cout<<"Start Rank1Update: alpha = "<<alpha<<endl;
         cout<<"A = "<<TMV_Text(A)<<"  "<<A<<endl;
         cout<<"x = "<<TMV_Text(x)<<"  "<<x<<endl;
+        cout<<"herm = "<<A.isherm()<<std::endl;
+        cout<<"sym = "<<A.issym()<<std::endl;
+        cout<<"x.ptr = "<<x.cptr()<<std::endl;
+        cout<<"A.ptr = "<<A.cptr()<<" ... "<<A.cptr()+A.size()*A.size()<<std::endl;
 #endif
 
+        typedef TMV_RealType(T) RT;
         TMVAssert(A.size() == x.size());
         TMVAssert(TMV_IMAG(alpha)==TMV_RealType(T)(0) || !A.isherm());
         if (alpha != T(0) && A.size() > 0) {
 #ifdef BLAS
             if (!A.iscm() && A.isrm()) {
+                //std::cout<<"Transpose A\n";
                 return Rank1Update<add>(
                     alpha,x,A.issym()?A.transpose():A.adjoint());
             } else if (A.isconj())  {
+                //std::cout<<"Conjugate A\n";
                 return Rank1Update<add>(
                     TMV_CONJ(alpha),x.conjugate(),A.conjugate());
-            } else if (A.iscm() && A.stepj()>0) {
+            } else if (A.iscm() && A.stepj() >= A.size() && A.stepj() >= 1) {
+                //std::cout<<"A.iscm()\n";
                 // Most BLAS implementations do fine with the x.step() != 1.
                 // However, some implementations seem to propagate nan's from
                 // the temporary memory they create to do the unit-1 
@@ -551,20 +596,25 @@ namespace tmv {
                 // So to make sure they don't have to make a temporary, I just
                 // do it here for them.
                 if (x.step() != 1 || x.isconj() || SameStorage(x,A)) {
+                    //std::cout<<"Copy x\n";
                     Vector<Tx> xx = x;
                     if (!add) A.setZero();
                     BlasRank1Update(alpha,xx,A);
                 } else {
+                    //std::cout<<"No need to copy x\n";
                     if (!add) A.setZero();
                     BlasRank1Update(alpha,x,A);
                 }
             } else {
+                //std::cout<<"not A.iscm()\n";
                 if (A.isherm()) {
-                    HermMatrix<T,Lower|ColMajor> AA(A.size());
+                    //std::cout<<"A.isherm()\n";
+                    HermMatrix<T,Lower|ColMajor> AA(A.size(),RT(0));
                     Rank1Update<false>(alpha,x,AA.view());
                     if (add) A += AA;
                     else A = AA;
                 } else {
+                    //std::cout<<"not A.isherm()\n";
                     SymMatrix<T,Lower|ColMajor> AA(A.size(),T(0));
                     Rank1Update<false>(alpha,x,AA.view());
                     if (add) A += AA;
@@ -580,7 +630,7 @@ namespace tmv {
         TMVAssert(A.isHermOK());
         cout<<"Done Rank1\n";
         cout<<"Norm(A-A2) = "<<Norm(A-A2)<<std::endl;
-        if (!(Norm(A-A2) < 0.001*(TMV_ABS(alpha)*TMV_SQR(Norm(x0))+Norm(A0)))) {
+        if (!(Norm(A-A2) <= 0.001*(TMV_ABS(alpha)*TMV_SQR(Norm(x0))+Norm(A0)))) {
             cerr<<"Rank1Update: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;
             cerr<<"x = "<<TMV_Text(x)<<"  step = "<<x.step()<<"  "<<x<<endl;

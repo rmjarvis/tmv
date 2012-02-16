@@ -116,6 +116,7 @@ namespace tmv {
                 }
                 if (ha && isComplex(T())) {
 #ifdef XDEBUG
+                    TMVAssert(NormInf(A.diag().imagPart()) <
                               A.size()*TMV_Epsilon<T>()*
                               (Norm(A)+Norm(x)*Norm(y)));
 #endif

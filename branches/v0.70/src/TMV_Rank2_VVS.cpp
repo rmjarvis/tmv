@@ -155,7 +155,7 @@ namespace tmv {
         else *A.ptr() = A00;
         if (ha && isComplex(T())) {
 #ifdef XDEBUG
-            TMVAssert(normInf(A.diag().imagPart()) <= eps);
+            TMVAssert(NormInf(A.diag().imagPart()) <= eps);
 #endif
             A.diag().imagPart().setZero();
         }
@@ -243,7 +243,7 @@ namespace tmv {
         }
         if (ha && isComplex(T())) {
 #ifdef XDEBUG
-            TMVAssert(normInf(A.diag().imagPart()) <= eps);
+            TMVAssert(NormInf(A.diag().imagPart()) <= eps);
 #endif
             A.diag().imagPart().setZero();
         }

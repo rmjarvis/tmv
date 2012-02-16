@@ -759,7 +759,7 @@ namespace tmv {
 
 #ifdef XDEBUG
         //cout<<"Done Rank1Update: A->"<<A<<endl;
-        if (!(Norm(A-A2) < 0.001*(TMV_ABS(alpha)*Norm(x0)*Norm(y0)+
+        if (!(Norm(A-A2) <= 0.001*(TMV_ABS(alpha)*Norm(x0)*Norm(y0)+
                                   (add?Norm(A0):TMV_RealType(T)(0))))) {
             cerr<<"Rank1Update: alpha = "<<alpha<<endl;
             cerr<<"add = "<<add<<endl;

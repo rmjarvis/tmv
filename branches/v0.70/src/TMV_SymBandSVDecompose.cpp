@@ -167,6 +167,8 @@ namespace tmv {
 
         const ptrdiff_t N = A.size();
         const ptrdiff_t nlo = A.nlo();
+        //std::cout<<"Start NonLapTridiagonalize\n";
+        //std::cout<<"N,nlo = "<<N<<','<<nlo<<std::endl;
 
         if (nlo == 1) {
             TMVAssert(A.isherm());
@@ -246,6 +248,8 @@ namespace tmv {
 
             if (!A.isherm()) signdet *= signdet;
         }
+        //std::cout<<"Done tridiag: D = "<<D<<std::endl;
+        //std::cout<<"E = "<<E<<std::endl;
     }
 
 #ifdef LAP
@@ -495,9 +499,10 @@ namespace tmv {
             TT.diag(1) = TT.diag(-1) = E;
             Matrix<T> A2 = U*TT*(A.isherm() ? U.adjoint() : U.transpose());
             std::cout<<"After Tridiag: Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
+            std::cout<<"Norm(A0) = "<<Norm(A0)<<std::endl;
             std::cout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<std::endl;
             std::cout<<"Norm(UUt-1) = "<<Norm(U*U.adjoint()-T(1))<<std::endl;
-            if (!(Norm(A2-A0) < 0.001*Norm(A0))) {
+            if (!(Norm(A2-A0) <= 1.e-6*Norm(A0))) {
                 cerr<<"Tridiagonalize: \n";
                 cerr<<"A0 = "<<TMV_Text(A)<<"  "<<A0<<endl;
                 cerr<<"Done: U = "<<U<<endl;
@@ -560,7 +565,7 @@ namespace tmv {
             std::cout<<"After UnsortedEigen: Norm(A2-A0) = "<<Norm(A2-A0)<<std::endl;
             std::cout<<"Norm(UtU-1) = "<<Norm(U.adjoint()*U-T(1))<<std::endl;
             std::cout<<"Norm(UUt-1) = "<<Norm(U*U.adjoint()-T(1))<<std::endl;
-            if (!(Norm(A0-A2) < 0.0001 * Norm(U) * Norm(SS) * Norm(U))) {
+            if (!(Norm(A0-A2) <= 0.0001 * Norm(U) * Norm(SS) * Norm(U))) {
                 cerr<<"Unsorted Eigen:\n";
                 //cerr<<"A = "<<A0<<endl;
                 //cerr<<"U = "<<U<<endl;
@@ -678,9 +683,9 @@ namespace tmv {
             }
         }
 #ifdef XDEBUG
-        if (U&&Vt) {
+        if (U.cptr()&&Vt.cptr()) {
             Matrix<T> A2 = U * SS * Vt;
-            if (!(Norm(A0-A2) < 0.0001 * Norm(U) * Norm(SS) * Norm(Vt))) {
+            if (!(Norm(A0-A2) <= 0.0001 * Norm(U) * Norm(SS) * Norm(Vt))) {
                 cerr<<"SV_Decompose:\n";
                 cerr<<"A = "<<A0<<endl;
                 cerr<<"U = "<<U<<endl;
