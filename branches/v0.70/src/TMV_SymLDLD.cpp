@@ -57,7 +57,6 @@ namespace tmv {
 
         const bool inplace;
         AlignedArray<T> Aptr1;
-        T* Aptr;
         SymMatrixView<T> LLx;
         Vector<T> xD;
         Permutation P;
@@ -68,26 +67,23 @@ namespace tmv {
     };
 
 #define APTR1 (inplace ? 0 : (A.size()*A.size()))
-#define APTR (inplace ? A.nonConst().ptr() : Aptr1.get())
 #define LLX \
     (inplace ? \
      (A.uplo()==Upper ? \
       (A.isherm() ? A.nonConst().adjoint() : A.nonConst().transpose()) : \
       A.nonConst()) : \
-     (A.isherm() ? \
-      HermMatrixViewOf(Aptr,A.size(),Lower,ColMajor) : \
-      SymMatrixViewOf(Aptr,A.size(),Lower,ColMajor)))
+     SymMatrixView<T>(Aptr1.get(),A.size(),1,A.size(),A.isherm()?Herm:Sym,Lower,NonConj\
+                      TMV_FIRSTLAST1(Aptr1.get(),Aptr1.get()+A.size()*A.size())))
 
     template <class T>
     SymLDLDiv<T>::SymLDLDiv_Impl::SymLDLDiv_Impl(
         const GenSymMatrix<T>& A, bool _inplace
     ) :
         inplace(_inplace && (A.isrm() || A.iscm())), 
-        Aptr1(APTR1), Aptr(APTR), LLx(LLX), xD(A.size()-1),
+        Aptr1(APTR1), LLx(LLX), xD(A.size()-1),
         P(A.colsize()), logdet(0), signdet(1), A0(A) {}
 
 #undef APTR1
-#undef APTR
 #undef LLX
 
     template <class T>

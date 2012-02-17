@@ -63,7 +63,8 @@ namespace tmv {
 #define APTR1 (inplace ? 0 : (A.size()*A.size()))
 #define LLX \
     (inplace ? (A.uplo()==Upper ? A.nonConst().adjoint() : A.nonConst()) : \
-     HermMatrixViewOf(Aptr1.get(),A.size(),Lower,ColMajor))
+     SymMatrixView<T>(Aptr1.get(),A.size(),1,A.size(),Herm,Lower,NonConj \
+                      TMV_FIRSTLAST1(Aptr1.get(),Aptr1.get()+A.size()*A.size())))
 
     template <class T>
     HermCHDiv<T>::HermCHDiv_Impl::HermCHDiv_Impl(
@@ -187,6 +188,7 @@ namespace tmv {
     {
         // ata = (At A)^-1 = A^-1 (A^-1)t
         //     = A^-1 A^-1
+        if (isComplex(T())) ata.diag().imagPart().setZero();
         SymMatrixView<T> hermata = HermMatrixViewOf(ata,Lower);
         doMakeInverse(hermata);
         SymSquare<true>(ata);

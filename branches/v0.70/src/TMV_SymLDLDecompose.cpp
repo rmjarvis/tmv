@@ -1328,6 +1328,8 @@ namespace tmv {
 #ifdef LAP
             if (!A.iscm()) {
                 Matrix<T,ColMajor> temp(A.size(),A.size());
+                if (A.isherm() && isComplex(T())) 
+                    temp.diag().imagPart().setZero();
                 SymMatrixView<T> A2 = A.isherm() ?
                     HermMatrixViewOf(temp,Lower) :
                     SymMatrixViewOf(temp,Lower);

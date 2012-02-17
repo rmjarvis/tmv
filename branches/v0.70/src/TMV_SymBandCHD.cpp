@@ -238,6 +238,7 @@ namespace tmv {
     {
         // ata = (At A)^-1 = A^-1 (A^-1)t
         //     = A^-1 A^-1
+        if (isComplex(T())) ata.diag().imagPart().setZero();
         SymMatrixView<T> hermata = HermMatrixViewOf(ata,Lower);
         doMakeInverse(hermata);
         SymSquare<true>(ata);

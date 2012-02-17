@@ -191,7 +191,7 @@ namespace tmv {
                 U = A;
                 if (A.issym())
                     U1.reset(new SymMatrixView<T>(SymMatrixViewOf(U,Lower)));
-                else
+                else 
                     U1.reset(new SymMatrixView<T>(HermMatrixViewOf(U,Lower)));
             } else {
                 if (A.issym()) {

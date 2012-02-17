@@ -139,6 +139,7 @@ namespace tmv {
     void HermBandSVDiv<T>::doMakeInverse(MatrixView<T1> minv) const
     { 
         // A^-1 = U S^-1 Ut
+        if (isComplex(T1())) minv.diag().imagPart().setZero();
         CallHermSV_Inverse(
             T(),pimpl->U,pimpl->S,pimpl->kmax,HermMatrixViewOf(minv,Upper));
         if (pimpl->S.size() > 1)

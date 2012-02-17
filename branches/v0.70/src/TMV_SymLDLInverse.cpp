@@ -329,6 +329,8 @@ namespace tmv {
                 }
             } else if (!(sinv.iscm() || sinv.isrm())) {
                 Matrix<T,ColMajor> minv1(LLx.size(),LLx.size());
+                if (LLx.isherm() && isComplex(T())) 
+                    minv1.diag().imagPart().setZero();
                 SymMatrixView<T> sinv1 = LLx.isherm() ?
                     HermMatrixViewOf(minv1,Lower) :
                     SymMatrixViewOf(minv1,Lower);
