@@ -353,16 +353,16 @@ Changed and Deprecated features:
    that stegr failed to work correctly.  But sometimes that program just
    crashes.  That's not very nice behavior, so rather than let users run 
    into problems and then turn it off at that point, I'll make using 
-   using the stegr algorithm a feature for advanced users to turn on if 
-   they know what they are doing.
+   using the stegr algorithm a feature for users to turn on if they know 
+   what they are doing.
 
 -- Changed the default for the USE_GEQP3 SCons flag to false.  Here it is 
    mostly a performance issue.  The LAPACK geqp3 function is as slow as the 
    TMV "Strict QRP" algorithm, but it doesn't actually result in strictly 
    decreasing values along the diagonal.  Plus one implementation I found 
    did produce wrong answers occasionally (an MKL library that shipped with 
-   icpc 11.1), so I decided to also make this an option a feature for 
-   advanced users to turn on if they really want it.
+   icpc 11.1), so I decided to also make this an optional feature for 
+   users to turn on if they really want it.
 
 -- Removed the make and cmake installation methods.  Now scons is the 
    only supported method for installation.  I use scons exclusively now,

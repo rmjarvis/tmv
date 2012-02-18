@@ -119,7 +119,7 @@ namespace tmv {
     static void BlockHessenberg(
         MatrixView<T> A, VectorView<T> Ubeta)
     {
-        // Much like the block version of Bidiagonalize, we try to maptrdiff_tain
+        // Much like the block version of Bidiagonalize, we try to maintain
         // the operation of several successive Householder matrices in
         // a block form, where the net Block Householder is I - YZYt.
         //

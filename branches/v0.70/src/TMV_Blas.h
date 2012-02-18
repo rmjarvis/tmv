@@ -393,16 +393,13 @@ namespace tmv {
 extern "C" {
 #include "cblas.h"
 
+#ifndef NOLAP
 #ifndef CLAPACK
 #ifndef FLAPACK
 
-#define AELAP 
-
-#ifndef NOLAP
 #define ALAP 
+#define AELAP 
 #define CLAP
-#endif
-
 #define LAPINFORETURN
 #define LAPNOWORK
 
@@ -410,6 +407,7 @@ extern "C" {
 
 #endif // !FLAPACK
 #endif // !CLAPACK
+#endif // !NOLAP
 
 }
 
@@ -526,13 +524,15 @@ namespace tmv {
 // LAP always implies the ALAP subset
 #ifdef LAP
 #define ALAP
-#define ANYLAP
 #endif // LAP
 
 #ifdef ELAP
 #define AELAP
-#define ANYLAP
 #endif // ELAP
+
+#if defined(ALAP) || defined(AELAP)
+#define ANYLAP
+#endif
 
 namespace tmv {
     const char Blas_ch_N = 'N';

@@ -137,7 +137,7 @@ namespace tmv {
         // B = [ 0 x x 0 ]
         //     [ 0 0 x x ]
         //     [ 0 0 0 x ]
-        // Zero out the first row maptrdiff_taining the constancy of U B
+        // Zero out the first row maintaining the constancy of U B
         // using Givens transformations.
         TMVAssert(E.size() == D.size());
         if (U.cptr()) TMVAssert(U.rowsize() == D.size()+1);
@@ -187,7 +187,7 @@ namespace tmv {
         // B = [ 0 x x 0 0 ]
         //     [ 0 0 x x 0 ]
         //     [ 0 0 0 x x ]
-        // Zero out the last col maptrdiff_taining the constancy of B Vt
+        // Zero out the last col maintaining the constancy of B Vt
         // using Givens transformations.
         TMVAssert(E.size() == D.size());
         if (Vt.cptr()) TMVAssert(Vt.colsize() == D.size()+1);
@@ -627,7 +627,7 @@ namespace tmv {
         }
 #endif
         // Reduce the superdiagonal elements of Bidiagonal Matrix B 
-        // (given by D,E) while maptrdiff_taining U B Vt. 
+        // (given by D,E) while maintaining U B Vt. 
         // Note: the input B must be unreduced - ie. all entries are non-zero.
         const ptrdiff_t N = D.size();
         TMVAssert(N>0);
@@ -680,7 +680,7 @@ namespace tmv {
         // The rest of the procedure simply involves chasing this + down
         // the diagonal using Givens rotations.
         // For each Givens rotation we use, we also multiply U or Vt by the
-        // adjoint to maptrdiff_tain the constancy of U B Vt.
+        // adjoint to maintain the constancy of U B Vt.
         //
         // At the end of this procedure, E(N-1) should be smaller than it was.
         // Note: This procedure works exactly if N=2.

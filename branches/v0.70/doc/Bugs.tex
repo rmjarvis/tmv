@@ -12,26 +12,29 @@
 I have tested the code using the following compilers:\\
 $\quad$\\
 % Done:
-% Flute: clang++ 3.1 NO BLAS
-% Flute: Apple g++ 4.0.1 NO BLAS
-% Flute: Apple g++ 4.2.1 NO BLAS
-% Flute: g++ 4.4.6 NO BLAS
-% Flute: g++ 4.5.3 NO BLAS
-% Flute: g++ 4.6.2 NO BLAS, GOTO2
-% bnl: g++ 4.3.2 FBLAS, NO BLAS
-% bnl: g++ 4.1.2 NO BLAS
-% apu: icpc 10.1 MKL BLAS, MKL LAPACK
-% chimaera: pgCC 6.1 NO BLAS ACML LAPACK
-% chimaera: g++ 3.4.6 NO BLAS, ATLAS+FLAPACK, 
-% queenbee: icpc 11.1 FBLAS, MKL BLAS, MKL LAPACK
-% queenbee: g++ 3.4.6 MKL LAPACK 
-% susi: g++ 4.4.5 NO BLAS
+% Flute: clang++ 3.1 NO BLAS 						X
+% Flute: Apple g++ 4.0.1 NO BLAS			
+% Flute: Apple g++ 4.2.1 NO BLAS			
+% Flute: g++ 4.4.6 NO BLAS						X
+% Flute: g++ 4.5.3 NO BLAS				
+% Flute: g++ 4.6.2 NO BLAS, GOTO2, GOTO2+FLAPACK, ATLAS			X
+% bnl: g++ 4.3.2 NO BLAS, FBLAS						X
+% bnl: g++ 4.1.2 NO BLAS, FBLAS						X
+% apu: icpc 10.1 NO BLAS, MKL BLAS, MKL LAPACK				X
+% chimaera: pgCC 6.1 NO BLAS, ACML BLAS, ACML LAPACK			X
+% chimaera: g++ 3.4.6 NO BLAS, ATLAS+FLAPACK, 				X
+% lonestar: icpc 11.1 NO BLAS, MKL BLAS, MKL LAPACK			X
+% lonestar: g++ 4.1.2 NO BLAS, FBLAS, MKL BLAS, MKL LAPACK		
+% queenbee: icpc 11.1 NO BLAS, MKL BLAS, MKL LAPACK	
+% queenbee: g++ 3.4.6 NO BLAS, FBLAS, MKL BLAS, MKL LAPACK 		
+% susi: g++ 4.4.5 NO BLAS, MKL BLAS, MKL LAPACK				
+% susi: icpc 12.0.4 NO BLAS, MKL BLAS, MKL LAPACK			X
 % 
 GNU's g++ -- versions 3.4.6, 4.1.2, 4.3.2, 4.4.6, 4.5.3, 4.6.2 \\
 % chimaera, bach g++41, bach g++, Flute g++-fsf-4.4, Flute g++-fsf-4.5, Flute g++-fsf-4.6
 Apple's g++ -- version 4.0.1, 4.2.1 \\
 % Flute g++-4.0, g++-4.2
-Intel's icpc -- versions 10.1, 11.1, 12.0\\
+Intel's icpc -- versions 10.1, 11.1, 12.0.4\\
 % apu, queenbee, susi
 Portland's pgCC -- version 6.1\\
 % chimaera
@@ -50,7 +53,7 @@ compiler, but no guarantees if you use one other than these\footnote{
 It does seem to be the case that 
 every time I try the code on a new compiler, there is some issue that needs to be addressed.  
 Either because the compiler fails to support some aspect of the C++ standard, or they enforce
-an aspect that I have failed to strictly conform to.}.
+an aspect that I have failed to strictly conform to.  Or sometimes even because of a bug in the compiler.}.
   So if you do try to compile on a different compiler, 
 I would appreciate it if you could let me know whether you were successful.  
 Please email the TMV discussion group at \mygroup\ with your experience (good or bad) using 
@@ -69,14 +72,12 @@ g++ 4.4 and 4.5 (at least 4.4.2 through 4.5.0) have a pretty egregious bug in th
 can cause the code to abort rather than allow a thrown value to be caught.  
 This is a reported bug (42159), and according to the bug report it seems to only occur in
 conjunction with MacOS 10.6 (Snow Leopard), however it is certainly possible that it 
-may show up in other systems too. 
+may show up in other systems too.  (I don't have Lion yet, so I haven't tested it with that.)
 
 However, I have discovered a workaround that seems to fix the problem.  Link with 
 \tt{-lpthread} even if you are not using OpenMP or have any other reason to use that
 library.  Something about linking with that library fixes the exception handling problems.
-In a SCons installation, this is done automatically for g++ versions 4.4 and 4.5.  
-If you are installing with make, then you'll have to add this yourself.
-Likewise, you'll need to link your own code with \tt{-lpthread} as well.
+Anyway, this is mostly to explain why TMV adds \tt{-lpthread} to the recommended linking instructions for these systems even if you disable OpenMP support.
 
 \item {\bf g++ -O2, versions 4.1 and 4.2:}
 \index{Installation!g++}
@@ -92,7 +93,7 @@ and sent it to Gnu as a bug report.
 They confirmed the bug and suggested
 using the flag \texttt{-fno-strict-aliasing}, which did fix the problems.
 
-Another option, which might be a good idea anyway is to just use \texttt{-O} 
+Another option, which might be a good idea anyway is to just use \texttt{-O1} 
 when you want a version that 
 includes the TMV assert statements, and make sure to use \texttt{-DNDEBUG} 
 when you want a more optimized version.
@@ -287,7 +288,7 @@ program.  The solution is to compile TMV without LAPACK (with SCons option
 
 \item {\bf LAPACK fails for extremely large matrices:}
 \index{LAPACK!Problems with extremely large matrices}
-For matrices that use more than 2 GBytes of memory, the integers that index the memory addresses need to be more that $2^{31}$.  This number exceeds the capacity of a 32 bit (signed) integer.  So the TMV library uses \tt{ptrdiff_t} for all integers that might be used in calculating such an index to make sure it is always safe.  However, LAPACK distributions generally use \tt{int}.  If this happens to be 32 bits on your machine, it can overflow.  This particularly a problem for the LAPACK SVD routine, since it needs workspace of size a bit more than $4n^2$.  So if $4n^2$ is more than $2^{31}$, it will fail.  Again, the solution is to compile TMV without LAPACK (with SCons option \tt{WITH_LAPACK=false}).
+For matrices that use more than 2 GBytes of memory, the integers that index the memory addresses need to be more that $2^{31}$.  This number exceeds the capacity of a 32 bit (signed) integer.  So the TMV library uses \tt{ptrdiff_t} for all integers that might be used in calculating such an index to make sure it is always safe.  However, LAPACK distributions generally use \tt{int}.  If this happens to be 32 bits on your machine, it can overflow.  This is particularly a problem for the LAPACK SVD routine, since it needs workspace of size a bit more than $4n^2$.  So if $4n^2$ is more than $2^{31}$, it will fail.  Again, the solution is to compile TMV without LAPACK (with SCons option \tt{WITH_LAPACK=false}).
 
 \end{itemize}
 

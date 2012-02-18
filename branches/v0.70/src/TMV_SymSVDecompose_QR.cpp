@@ -146,7 +146,7 @@ namespace tmv {
         MatrixView<T> U, VectorView<RT> D, VectorView<RT> E)
     {
         // Reduce the superdiagonal elements of unreduced HermTridiagonal Matrix T 
-        // (given by D,E) while maptrdiff_taining U B Ut. 
+        // (given by D,E) while maintaining U B Ut. 
         // Note: the input T must be unreduced - ie. all entries are non-zero.
         const ptrdiff_t N = D.size();
         TMVAssert(N>0);

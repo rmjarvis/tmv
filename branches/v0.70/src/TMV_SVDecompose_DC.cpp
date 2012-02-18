@@ -572,7 +572,7 @@ namespace tmv {
                 // if f > 0, then deta needs to be negative
                 // if f < 0, then deta needs to be positive
                 // This dictates which bound is the one to use for eta2
-                // In below iteration, we maptrdiff_tain h(eta2) * h(eta) < 0
+                // In below iteration, we maintain h(eta2) * h(eta) < 0
                 T eta2 = (f>0) ? mineta : maxeta;
                 dbgcout<<"eta2 = "<<eta2<<endl;
                 T h2 = ((c*eta2 - a)*eta2 + b)*eta2 + g;
@@ -709,7 +709,7 @@ namespace tmv {
             for(ptrdiff_t j=0;j<N;j++) sum[j] = D[j]+s;
             if (TMV_ABS(s) < TMV_ABS(eta)) {
                 // Then the iterative adjustment to diff isn't going to 
-                // maptrdiff_tain the accuracy we need.
+                // maintain the accuracy we need.
                 dbgcout<<"Need to redo the diff calculations\n";
                 for(ptrdiff_t j=0;j<N;j++) diff[j] = D[j]-s; 
             } else {

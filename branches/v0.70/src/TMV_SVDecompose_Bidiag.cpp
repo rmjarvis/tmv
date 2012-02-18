@@ -174,7 +174,7 @@ namespace tmv {
         // this doesn't work.  So instead of keeping Z,W we are forced to use
         // a bit more temporary storage and store the products ZYtm and mXtW.
         //
-        // Furthermore, the m in these products is maptrdiff_tained such that the
+        // Furthermore, the m in these products is maintained such that the
         // it already has the appropriate multiplies from the other side.
         // Then, when we are done with the block, the update becomes just:
         //
