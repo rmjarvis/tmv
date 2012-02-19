@@ -1,13 +1,495 @@
-Changes from version 0.62 to 0.63:  
+Changes from version 0.65 to 0.70:  
 (See the History section in the full documentation for changes from previous
-versions to 0.62.)
+versions to 0.65.)
 
-Here is a brief list of the more important changes:
+The impetus for this release was mostly just the first change listed below
+about the behavior of comma initialization for matrices.  But since I knew
+this change would not be backwards compatible, and might require users
+to edit their code, I decided to try to put all the non-backward-
+compatible changes that I've been thinking about introducing into this
+release to try to do everything at once. 
 
-- Added stepped versions of VectorViewOf and MatrixViewOf.
-- Used template metaprogramming to speed up many SmallMatrix computations.
-- Changed ListInit size checks from run-time checks to Assert statements,
-  so they disappear with -DNDEBUG.
-- Allow SmallMatrix to be used with moderately large M,N by using 
-  StackArray class to use heap for large allocations.
+Another big change is to have only two template parameters.  The first one is
+still the value type (e.g. double).  But the second one now is an int.
+All the parameters that been 2nd, 3rd or 4th, such as CStyle, FortranStyle, 
+UnitDiag, NonUnitDiag, Upper, Lower etc. are now combined into the single
+integer using the bitwise or operator (|).  
+
+I also redesigned the I/O system to use the equivalent of stream manipulators 
+to control the I/O behavior.  The default output format hasn't changed, but 
+if you ever did anything fancier than that, you'll need to change your code 
+to use the new system.
+
+There are quite a few other non-backwards-compatible changes that are 
+probably less of an issue for most people, but you should look through 
+this file carefully to see if any other changes might require some
+of your code to be modified.  It might be a bit of work to covert your 
+code to this version, and I apologize for that, but my hope is that the 
+UI will be pretty stable after this release.
+
+There are still a few more changes in the UI that will happen in the big 
+redesign that I'm calling versin 0.90.  (I know I've been advertising the 
+redesign for a while now. It might be ready sometime in the next year, I 
+hope.) That version will change the base classes of the TMV objects, so if
+you use any of them directly (e.g. the various "Gen" classes)  then those 
+will go away at that point.  I've already removed mentions of them from the 
+documentation, so they are officially deprecated, but code that uses them 
+will continue to work with this version.  It will also keep track of when 
+views are conjugates of the underlying data in memory at compile time 
+through the attribute template parameter.  But these changes were too 
+difficult to back port into the current design, so they'll have to wait 
+until the vesion 0.90 release.
+
+Changed and Deprecated features:
+
+-- Changed the behavior of the m << 1, 2, 3... initialization.  Now the items 
+   in the initialization list should be in RowMajor order regardless of the 
+   storage order of the matrix m.  This makes it much easier to 
+   understand the initialization, since the list can be arranged to look like 
+   the matrix you are setting.  e.g. the snippet:
+
+   tmv::Matrix<double> m(3,5);
+   m << 3 ,  9 ,  1 ,  4 ,  2 ,
+        7 , -3 ,  0 , -1 ,  4 ,
+       -6 ,  2 , 11 ,  5 ,  6 ;
+
+   now initializes the matrix to have the values as shown in the rectangle.  
+   However, the old behavior was to follow the storage order of the matrix, 
+   and since the default storage order is ColMajor, this would unintuitively 
+   initialize the matrix to
+
+   (  3   4  -3   4  11  )
+   (  9   2   0  -6   5  )
+   (  1   7  -1   2   6  )
+   
+   rather than the obviously intended matrix
+   
+   (  3   9   1   4   2  )
+   (  7  -3   0  -1   4  )
+   ( -6   2  11   5   6  )
+
+   Now the code correctly initializes the matrix to the second one regardless 
+   of how the matrix intrinsically stores the values, which I believe is a 
+   much more intuitive behavior.
+
+   Of course, if you do want to initialize according to a ColMajor list of 
+   numbers for some reason, you can initialize m.transpose() instead:
+
+   tmv::Matrix<double> m(3,5);
+   m.transpose() << 3 ,  7 , -6 ,
+                    9 , -3 ,  2 ,
+                    1 ,  0 , 11 ,
+                    4 , -1 ,  5 ,
+                    2 ,  4 ,  6 ,
+
+-- Removed the constructors from either a C-style array or a std::vector.  
+   The reason is similar to the reasoning above -- I wanted to decouple the 
+   internal storage order from the order of the elements in the initializing 
+   vector.
+
+   To take the place of these constructors' functionality, I added iterators 
+   that iterate over the matrix in either RowMajor or ColMajor order, so the 
+   assignment can be done with the standard library's std::copy function.
+
+   const double rmar[15] =
+       { 3, 9, 1, 4, 2, 7, -3, 0, -1, 4, -6, 2, 11, 5, 6};
+   const double cmar[15] =
+       { 3, 7, -6, 9, -3, 2, 1, 0, 11, 4, -1, 5, 2, 4, 6};
+
+   // Old style constuctors: (no longer valid)
+   tmv::Matrix<double,tmv::RowMajor> m1(3,5,rmar);
+   tmv::Matrix<double,tmv::ColMajor> m2(3,5,cmar);
+
+   // New style assignment with iterators:
+   tmv::Matrix<double> m3(3,5); // Can be either StorageType
+   std::copy(rmar, rmar+15, m3.rowmajor_begin());
+   tmv::Matrix<double> m4(3,5);
+   std::copy(cmar, cmar+15, m3.colmajor_begin());
+
+   In addition, a BandMatrix can be iterated in DiagMajor order using 
+   m.diagmajor_begin().
+
+-- Changed all (non-Small) matrix and vector types to only use 2 template
+   parameters.  The second parameter is now an integer that includes all
+   the information that was in the sometimes several parameters.  The 
+   values should be combined using the bitwise or operator (|).  
+   
+   So if you had declared an upper triangle matrix as:
+
+   tmv::UpperTriMatrix<double,UnitDiag,ColMajor,FortranStyle> U(5);
+
+   Now you would instead write:
+
+   tmv::UpperTriMatrix<double,UnitDiag|ColMajor|FortranStyle> U(5);
+
+   This doesn't sound like a very useful change yet.  The advantage is that
+   now you can leave out _any_ parameters that you don't want to specify,
+   and the default value would be used.  And for the values you do specify,
+   you can list them in any order now, so you don't have to try to remember 
+   which parameter is supposed to be first.  For example, the default 
+   StorageType is ColMajor, so the above declaration could instead be:
+
+   tmv::UpperTriMatrix<double,UnitDiag|FortranStyle> U(5);
+
+   Or if you want to decalare a symmetric matrix for which you want to
+   use fortran-style indexing, you used to have to write:
+
+   tmv::SymMatrix<double,Upper,ColMajor,FortranStyle> S(5);
+
+   even though you probably don't really care about which half of the 
+   matrix is directly stored in memory or what its storage order is.
+   Now you can just write:
+
+   tmv::SymMatrix<double,FortranStyle> S(5);
+
+   In future releases, I am planning to add some more attribute options,
+   and also to extend some of these attributs to Views.  However,
+   this release does not have any new functionality with respect to the
+   attributes.  It only effects the change in the UI.
+   
+- Removed the functions read, write and writeCompact, and replaced them 
+   with a more streamlined I/O interface. Now there are objects that act 
+   like stream manipulators to control how the next TMV object should be 
+   written or read:
+
+   os << m;
+   os << tmv::CompactIO() << m;
+   os << tmv::ThreshIO(1.e-8) << m;
+   is >> m;
+   is >> tmv::CompactIO() >> m;
+
+   The first line outputs the matrix in the same format as previous versions 
+   used.  This format is the same regardless of whether it is a regular 
+   Matrix or one of the special varieties.  
+
+   The next line replaces the old command m.writeCompact(os).  I also changed 
+   the "compact" style to be more compact than before (which means that it is 
+   not backwards compatible with files written by older versions of TMV). 
+
+   The third line replaces the old m.write(os,1.e-8) to clip all small values 
+   to 0, which is useful when rounding errors are expected to produce many 
+   values near 0.  Also, now for complex values, the real and imaginary parts 
+   are separately thresholded, so (1,6.535e-17) would be output as (1,0) 
+   if written with tmv::ThreshIO(1.e-8) or some other reasonable threshold 
+   value.
+
+   And the last two lines show how to read the matrix in either regular or 
+   compact format.  This is also not backwards compatible with old code, since 
+   is >> m used to implicitly expect compact format for the special matrix 
+   varieties.  Now special matrices can be read in either format, and the 
+   compact style needs to be explicitly specified.  
+
+   There is a lot more to the new I/O style than just these.  See the
+   documentation for details about the new features.
+
+-- Removed the auto_ptr read functions.  This notation was cumbersome,
+   and since all matrices can be resized now (feature added in v0.65),
+   there is no need for it anymore.  The auto_ptr was really just a 
+   workaround for the fact that matrices didn't used to be able to be resized.
+   So rather than writing:
+
+   std::auto_ptr<tmv::Matrix<double> > pm;
+   is >> pm;  // old style would construct a new Matrix
+   [... Use matrix as *pm ... ]
+
+   you can now simply write:
+
+   tmv::Matrix<double> m;
+   is >> m;   // m is automatically resized to the correct size.
+   [... Use matrix as m ... ]
+
+-- Removed the ElementProd and AddElementProd functions.
+   The equivalent behavior is now done with a new operator ElemProd(a,b)
+   which returns a composite object representing the element-wise product
+   of two vectors or matrices.  So where you used to write:
+
+   ElementProd(x,a,b);
+   AddElementProd(y,d,e,f);
+
+   you would now write:
+
+   b = x * ElemProd(a,b);
+   f += y * ElemProd(d,e);
+
+-- Removed the routines that returned pointers to new BaseMatrixes.  
+   In general, using the BaseMatrix class directly is not really very 
+   useful, so I don't think anyone is actually using these methods.  And in 
+   the version 0.9 TMV code in development, I've completely redesigned the 
+   back end.  It gets rid of the virtual class hierarchy completely using the 
+   CRTP idiom rather than virtual functions.  But this means that methods like 
+   newCopy(), newTranspose(), etc. are not really relevant anymore.
+
+   There are no simple workarounds for this lost functionality, so if you 
+   were using these functions and are sorry to see them go, or if you are 
+   otherwise using the virtual functionality (e.g. putting pointers to a 
+   bunch of disparate BaseMatrix objects into a std::vector or other 
+   container class), let me know what your use case is and we can try to 
+   figure out how best to incorporate your needs in the next version and 
+   in the version 0.90 redesign.
+
+-- Changed the second template parameter of VIt and CVIt from either
+   Step or Unit to the actual step size to use if known.  If the step
+   size is not known at compile time, you can use the special value
+   tmv::Unknown, and the value will be determined at run time with
+   a variable.  This allows the user more flexibility for optimizing
+   code.  For example, if you want to iterate over the real values 
+   of a complex vector, you could explicitly set the step size to 2:
+
+   for(VIt<T,2,NonConj> i=v.realPart().begin(); i!=v.realPart().end(); ++i) {
+       ....
+   }
+
+   This would probably be a bit more efficient than using the default
+   VectorView<T>::iterator which has the step size as a variable.
+
+-- Changed type type of the size values from size_t to ptrdiff_t.  The main 
+   reason for this is to prevent the constructors that take size arguments 
+   from implicitly converting a negative number into a very large unsigned 
+   value and then attempt to allocate a huge amount of memory.  If the size 
+   parameters in a constructor such as tmv::Matrix<T>(nrows,ncols) were the 
+   result of some calculation and they accidentally were allowed to be 
+   negative, the new code will hit an assert statement checking that they 
+   are nonnegative, rather than trying to allocate the incorrectly huge 
+   amount of memory.  This seems like safer behavior.
+
+   The only other place where this might matter is that the return type of
+   functions like m.colsize() now return an ptrdiff_t rather than a size_t.  
+   So if you do any comparisons with one of these values, such as 
+   while(i < m.colsize()) and you compile with g++ -Wall, you'll want i 
+   to be a signed integer type to avoid g++'s warning about comparing 
+   signed and unsigned types.
+
+-- Changed all of the variables indexing offsets within the matrix (e.g. the 
+   arguments i and j of m(i,j)) from int to ptrdiff_t.  Previously, there were 
+   problems using matrices that exceeded 2 GBytes of memory if int is a 
+   32 bit integer.  The ptrdiff_t type is guaranteed to always be able to 
+   hold any offset that the OS can allocate in memory, so I switched the 
+   variables that deal with offsets from int to ptrdiff_t.  To be consistent,
+   I extended this to all the variables that are used to calculate these 
+   offsets as well, such as the arguments of m(i,j).
+
+   Normally, if you pass in an int variable, the compiler will automatically 
+   convert it to ptrdiff_t if necessary, so this change is largely 
+   transparent to the user. The only place it would require you to edit 
+   your code is if you use the explicit permutation functions like 
+   m.permuteRows(p) rather than using a Permutation object, then p would 
+   now have to be an array of ptrdiff_t rather than an array of int.
+
+-- Changed the svd().getV() method to svd().getVt() to conform to the 
+   usual definition of the SVD: A = U * S * Vt.  The underlying matrix
+   in question hasn't changed.  We just refer to it as Vt now rather than V.
+   While I still haven't seen a good reason for this to be the definition
+   of the SVD, I'm admitting the point that _everyone_ else seems
+   to use this definition.  So no point in me trying to get TMV users
+   to use my preferred definition: A = U * S * V.
+
+-- Changed the mechanism for switching from the "Loose QRP" to the "Strict 
+   QRP" algorithm (and back).  It used to be a global bool variable, called
+
+   bool tmv::QRPDiv<T>::StrictQRP
+
+   which was initially false, but which you could set to true.
+   Now you should set the equivalent of this variable with the function
+
+   tmv::UseStrictQRP();
+
+   to start using the Strict QRP algorithm and
+
+   tmv::UseStrictQRP(false);
+
+   to stop using it.  You can access the current state of the variable with
+
+   bool tmv::QRP_IsStrict()
+
+   The only functionality difference with the new interface is that now there
+   is only one variable for all types, rather than a different one for each
+   type T.
+
+-- Changed what "const" in front of a VectorView, MatrixView, etc. means 
+   for the mutability of the view.  Now a const VectorView works the same 
+   as a ConstVectorView.  That is, it is no longer able to modify the 
+   underlying data.
+
+   The main way this might impact some users is if you have written a 
+   function that can take a mutable View object as a parameter, you 
+   should not pass it by const reference anymore.  You should pass it by 
+   value instead now.  E.g.
+
+   void DoSomethingTo(VectorView<double> v);
+
+   rather than
+
+   void DoSomethingTo(const VectorView<double>& v);
+
+   Then code like
+
+   DoSomethingTo(m.row(3));
+
+   will still work as before.
+
+-- Removed the det argument from the constructor for Permutation.
+   Also, now the determinant is only calculated if you ask for it, rather 
+   than every time you create a Permutation.
+
+-- Changed the default behavior to not output warnings.  To turn it on,
+   you need to explicitly use tmv::WriteWarningsTo(&std::cerr) (or whatever
+   stream you want to write the warnings to).
+
+-- Removed warnings for norm2 and makeInverseATA.  I decided that these
+   warnings were probably unneccessary.  Any user who uses these functions
+   probably understands them well enough that they wouldn't be surprised
+   by the behavior of TMV, so the warnings aren't needed.
+
+-- Removed the various functions that had been deprecated in the 0.6x
+   versions of TMV.
+
+-- Changed the compiler flag -DTMVNDEBUG to -DTMV_NDEBUG to match other 
+   flags that start with TMV.
+
+-- Changed the default for the USE_STEGR scons flag to false.  Too many
+   systems I've run this on have trouble with the LAPACK stegr algorithm.
+   It's just not very robust with respect to nan's and inf's.  TMV can
+   sometimes detect the problem and call stedc instead when it finds 
+   that stegr failed to work correctly.  But sometimes that program just
+   crashes.  That's not very nice behavior, so rather than let users run 
+   into problems and then turn it off at that point, I'll make using 
+   using the stegr algorithm a feature for users to turn on if they know 
+   what they are doing.
+
+-- Changed the default for the USE_GEQP3 SCons flag to false.  Here it is 
+   mostly a performance issue.  The LAPACK geqp3 function is as slow as the 
+   TMV "Strict QRP" algorithm, but it doesn't actually result in strictly 
+   decreasing values along the diagonal.  Plus one implementation I found 
+   did produce wrong answers occasionally (an MKL library that shipped with 
+   icpc 11.1), so I decided to also make this an optional feature for 
+   users to turn on if they really want it.
+
+-- Removed the make and cmake installation methods.  Now scons is the 
+   only supported method for installation.  I use scons exclusively now,
+   and it works well on every system I've run it on.  So it seems silly
+   to keep supporting the other installation methods.  
+   
+   The Windows Visual C++ files are still there for those who use VC++,
+   but I haven't done (and don't plan to do) much to gussy that up.  It's 
+   still pretty bare bones to just get the library installed for you.
+
+-- Switched the default value for the SCons option IMPORT_ENV to false.
+   I think most users probably expect SCons to be able to search the include 
+   and library paths that they have set up in their environment.  So if
+   you want SCons to have a clean environment and manually give it extra
+   paths, you should explicitly set IMPORT_ENV=false.
+
+New features:
+
+-- Added the matrix iterators described above.
+
+-- Added the ability to do comma initialization for DiagMatrix, UpperTriMatrix,
+   LowerTriMatrix, BandMatrix, and their corresponding view types.
+   These are also always listed in RowMajor order regardless of the actual 
+   storage order of the matrix in memory.  Also, only the values in the 
+   corresponding parts of the matrices should be listed in the initialization.
+   e.g.
+ 
+   tmv::DiagMatrix<double> d(4);
+   d << 4 ,
+             9 , 
+                 11 ,
+                      -4 ;
+   tmv::UpperTriMatrix<double> u(4);
+   u << 4 ,  9 , -1 ,  0 ,
+            18 ,  3 , -7 ,
+                  1 ,  5 ,
+                      10 ;
+   tmv::LowerTriMatrix<double> l(4);
+   l <<  1 ,
+        12 , -3 ,
+         8 ,  5 , -9 ,
+         3 , 20 , 14 ,  4 ;
+   tmv::BandMatrix<double> b(4,1,1);
+   b <<  7 ,  9 ,
+        10 , -1 ,  5 ,
+              8 , -6 , 21 , 
+                   2 ,  8 ;
+
+   I chose not to add similar initializers for symmetric or hermitian matrix
+   types, because I think initialization of them is clearer in terms of only
+   the upper or lower triangle part that is stored in memory.  So the way to 
+   initialize them would be something like:
+  
+   tmv::SymMatrix<double> s(4);
+   s.upperTri() << 2 ,  1 , -3 ,  7 ,
+                       -8 , -2 , 12 ,
+                             6 ,  1 ,
+                                  7 ;
+   tmv::SymBandMatrix<double> sb(4,1);
+   sb.lowerBand() <<  8 ,
+                     12 ,  5 ,
+                          -8 ,  2 ,
+                                6 , 10 ;
+ 
+-- Turned off error checking for the number of elements for a list 
+   initialization when TMV is in non-debugging mode (i.e. either NDEBUG 
+   or TMV_NDEBUG is defined).
+
+-- Added compact I/O for regular Matrix and Vector objects.  Since the compact 
+   format changed to avoid the parentheses and commas, it makes sense
+   to add this functionality to Matrix and Vector as well.
+
+-- Added a few more "ViewOf" functions to allow direct views of memory as 
+   different kinds of matrix types directly specifying the step in each 
+   direction.  These are more flexible than the versions that merely specify a
+   StorageType to use.  For non-contiguous data, those weren't sufficient.
+   So now, you can view arbitrary data in memory as an UpperTriMatrixView, 
+   LowerTriMatrixView, DiagMatrixView, BandMatrixView, SymMatrixView, or 
+   SymBandMatrixView specifying the memory address of m(0,0) and the step 
+   size in each direction.
+
+-- Changed the definitions of the various decomposition functions
+   to accept either views (as before) or regular Matrix, Vector, etc. 
+   objects.  So, you no longer need to call these with m.view()
+   as you had to before.
+
+-- Added default constructors to Vector, Matrix and all the special matrix 
+   classes.  These construct a zero-sized matrix, so normally you would want
+   to resize the matrix at some point.  See the above item about removing
+   the auto_ptr read functions for an example of how this could be useful.
+
+-- Added a warning for when MultMM catches a std::bad_alloc exception
+   and reverts to using a simpler algorithm that doesn't allocate memory.
+
+-- Added the ability of SymMatrix SVD division to be done in place.
+   In addition to the memory used for the SymMatrix values, it also uses 
+   the other half of the matrix that is normally not used for anything.
+
+Bug fixes:
+
+-- Fixed an error in the TMV_VERSION_AT_LEAST marco.  The old version was
+   actually backwards.  It mistakenly returned whether the library's version 
+   was equal to or _earlier_ than the provided values, rather than equal or 
+   later.  The workaround if you need to check versions before 0.70 is to use
+   #if TMV_MINOR_VERSION >= 70 
+   to correctly exclude v0.65 and earlier versions, rather than 
+   #if TMV_VERSION_AT_LEAST(0,70)
+   which will incorrectly allow v0.65 and earlier through.  This workaround
+   will work until the TMV_MAJOR_VERSION value jumps up to 1, at which
+   point hopefully nobody will need to be checking for versions earlier than
+   v0.70 anyway.
+
+-- Fixed a bug where the symmetric SVD algorithm could go into an infinite
+   loop (very rarely -- it required particularly strange properties in the
+   input matrix).
+
+-- Made the Givens rotations a bit more robust to overflow and underflow.
+
+-- Fixed a bug that P*v and P*m and similar operators didn't work if 
+   v or m is Small.
+
+-- Implemented a workaround for a bug in icpc version 12.0.  
+   It was getting an internal error when compiling TMV_SymCHDecompose.cpp.
+   I don't think what I was doing was wrong, but I reworked the code slightly,
+   and now icpc is able to compile it.
+
+-- Added support for the clang++ compiler.  This didn't require much editing, 
+   but it did complain about a couple things that had passed muster with the 
+   other compilers I had used.
 

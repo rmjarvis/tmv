@@ -1,0 +1,49 @@
+
+#define CT std::complex<T>
+
+template class HermSVDiv<T >;
+template class SymSVDiv<T >;
+#ifdef INST_COMPLEX
+template class HermSVDiv<CT >;
+template class SymSVDiv<CT >;
+#endif
+
+#define DefDivEq(T,T2)\
+template void HermSVDiv<T >::doLDivEq(MatrixView<T2 > m) const; \
+template void HermSVDiv<T >::doRDivEq(MatrixView<T2 > m) const; \
+template void HermSVDiv<T >::doMakeInverse(MatrixView<T2 > m) const; \
+template void HermSVDiv<T >::doMakeInverse(SymMatrixView<T2 > m) const; \
+template void SymSVDiv<T >::doLDivEq(MatrixView<T2 > m) const; \
+template void SymSVDiv<T >::doRDivEq(MatrixView<T2 > m) const; \
+template void SymSVDiv<T >::doMakeInverse(MatrixView<T2 > m) const; \
+template void SymSVDiv<T >::doMakeInverse(SymMatrixView<T2 > m) const; \
+
+DefDivEq(T,T)
+#ifdef INST_COMPLEX
+DefDivEq(T,CT)
+DefDivEq(CT,CT)
+#endif
+
+#undef DefDivEq
+
+#define DefDiv(T,T1,T2) \
+template void HermSVDiv<T >::doLDiv(const GenMatrix<T1 >& m1, \
+    MatrixView<T2 > m2) const; \
+template void HermSVDiv<T >::doRDiv(const GenMatrix<T1 >& m1, \
+    MatrixView<T2 > m2) const; \
+template void SymSVDiv<T >::doLDiv(const GenMatrix<T1 >& m1, \
+    MatrixView<T2 > m2) const; \
+template void SymSVDiv<T >::doRDiv(const GenMatrix<T1 >& m1, \
+    MatrixView<T2 > m2) const; \
+
+DefDiv(T,T,T)
+#ifdef INST_COMPLEX
+DefDiv(T,T,CT)
+DefDiv(T,CT,CT)
+DefDiv(CT,T,CT)
+DefDiv(CT,CT,CT)
+#endif
+
+#undef DefDiv
+
+#undef CT

@@ -1,0 +1,18 @@
+
+#define CT std::complex<T>
+
+#define DefR1(T,Tx)\
+  template void Rank1Update<true>(const T alpha,const GenVector<Tx >& x, \
+      SymMatrixView<T > A); \
+  template void Rank1Update<false>(const T alpha,const GenVector<Tx >& x, \
+      SymMatrixView<T > A); \
+
+DefR1(T,T)
+#ifdef INST_COMPLEX
+DefR1(CT,T)
+DefR1(CT,CT)
+#endif
+
+#undef DefR1
+
+#undef CT

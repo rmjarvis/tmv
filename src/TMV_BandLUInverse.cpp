@@ -64,7 +64,7 @@ namespace tmv {
 
     template <class T, class T1> 
     void LU_Inverse(
-        const GenBandMatrix<T1>& LUx, const ptrdiff_t* p, const MatrixView<T>& minv)
+        const GenBandMatrix<T1>& LUx, const ptrdiff_t* p, MatrixView<T> minv)
     {
         TMVAssert(LUx.isSquare());
         TMVAssert(minv.isSquare());
@@ -114,7 +114,7 @@ namespace tmv {
     }
 
     template <bool unit, class T> 
-    static void RecursiveInverse(const UpperTriMatrixView<T>& U, ptrdiff_t nhi)
+    static void RecursiveInverse(UpperTriMatrixView<T> U, ptrdiff_t nhi)
     {
         TMVAssert(U.iscm() || U.isrm());
         TMVAssert(unit == U.isunit());
@@ -134,8 +134,8 @@ namespace tmv {
 #endif
                 }
 #ifdef TMVFLDEBUG
-                TMVAssert(Uptr >= U.first);
-                TMVAssert(Uptr < U.last);
+                TMVAssert(Uptr >= U._first);
+                TMVAssert(Uptr < U._last);
 #endif
                 *Uptr = TMV_RealType(T)(1) / (*Uptr);
             }
@@ -163,7 +163,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static inline void DoInverse(const UpperTriMatrixView<T>& U, ptrdiff_t nhi)
+    static inline void DoInverse(UpperTriMatrixView<T> U, ptrdiff_t nhi)
     {
 #ifndef NOTHROW
         try {
@@ -178,7 +178,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void TriInverse(const UpperTriMatrixView<T>& U, ptrdiff_t nhi)
+    void TriInverse(UpperTriMatrixView<T> U, ptrdiff_t nhi)
     {
 #ifdef XDEBUG
         Matrix<T> U0(U);

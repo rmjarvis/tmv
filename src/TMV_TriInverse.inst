@@ -1,0 +1,15 @@
+
+#define CT std::complex<T>
+
+#define DefInv(T) \
+template void TriInverse(UpperTriMatrixView<T > minv); \
+
+DefInv(T)
+#ifdef INST_COMPLEX
+DefInv(CT)
+#endif
+
+#undef DefInv
+
+#undef CT
+

@@ -30,6 +30,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
+//#include <iostream>
 
 #include "tmv/TMV_BandLUD.h"
 #include "TMV_BandLUDiv.h"
@@ -69,40 +70,44 @@ namespace tmv {
 #define NEWHI TMV_MIN(A.nlo()+A.nhi(),A.colsize()-1)
 #define APTR1 (inplace ? 0 : \
                BandStorageLength(ColMajor,A.colsize(),A.colsize(),NEWLO,NEWHI))
+#define TRID (A.nlo() == 1 && A.nhi() == 1)
 #define APTR (inplace ? A.nonConst().ptr() : Aptr1.get())
 
 #define LUX (istrans ? \
              (inplace ? \
               BandMatrixView<T>(A.nonConst().ptr(),A.colsize(),A.colsize(),\
                                 A.nhi(),NEWHI,A.stepj(),A.stepi(),A.diagstep(),\
-                                TMV_TransOf(A.stor()),A.ct() \
-                                TMV_FIRSTLAST1(A.nonConst().first,\
-                                               A.nonConst().last) ) : \
+                                A.ct() \
+                                TMV_FIRSTLAST1(A.nonConst()._first,\
+                                               A.nonConst()._last) ) : \
               BandMatrixViewOf(Aptr,A.colsize(),A.colsize(),A.nhi(), \
-                               NEWHI, (A.nlo() == 1 && A.nhi() == 1) ? \
-                               DiagMajor : ColMajor)) : \
+                               NEWHI, TRID ? DiagMajor : ColMajor)) : \
              (inplace ? \
               BandMatrixView<T>(A.nonConst().ptr(),A.colsize(),\
                                 A.colsize(),A.nlo(),NEWHI,\
                                 A.stepi(),A.stepj(),A.diagstep(),\
-                                A.stor(),A.ct() \
-                                TMV_FIRSTLAST1(A.nonConst().first,\
-                                               A.nonConst().last) ) : \
+                                A.ct() \
+                                TMV_FIRSTLAST1(A.nonConst()._first,\
+                                               A.nonConst()._last) ) : \
               BandMatrixViewOf(Aptr,A.colsize(),A.colsize(),A.nlo(), \
-                               NEWHI, (A.nlo() == 1 && A.nhi() == 1) ?\
-                               DiagMajor : ColMajor)))
+                               NEWHI, TRID ? DiagMajor : ColMajor)))
 
     template <class T> 
     BandLUDiv<T>::BandLUDiv_Impl::BandLUDiv_Impl(
-        const GenBandMatrix<T>& A, bool _inplace
-    ) :
+        const GenBandMatrix<T>& A, bool _inplace) :
         istrans(A.nhi()<A.nlo() || (A.nhi()==A.nlo() && A.isrm())),
         inplace(NEWLO == 0 || 
                 (_inplace && 
                  ((A.isrm() && istrans) || (A.iscm() && !istrans) || 
-                  (A.isdm() && A.nlo()==1 && A.nhi()==1)))),
+                  (A.isdm() && TRID)))),
         Aptr1(APTR1), Aptr(APTR), LUx(LUX),
-        P(A.colsize()), logdet(0), signdet(1), donedet(false) {}
+        P(A.colsize()), logdet(0), signdet(1), donedet(false) 
+    {
+        //std::cout<<"BandLUDiv_Impl constructor\n";
+        //std::cout<<"A = "<<TMV_Text(A)<<" = "<<A<<std::endl;
+        //LUx.setZero();
+        //std::cout<<"LUx = "<<TMV_Text(LUx)<<" = "<<LUx<<std::endl;
+    }
 
 #undef LUX
 #undef APTR
@@ -144,12 +149,15 @@ namespace tmv {
                     A.transpose();
             else BandMatrixViewOf(pimpl->LUx,A.nlo(),A.nhi()) = A;
         }
+        //std::cout<<"LUx => "<<pimpl->LUx<<std::endl;
 
         if (pimpl->LUx.nlo() > 0) {
-            int Anhi = pimpl->istrans ? A.nlo() : A.nhi();
+            ptrdiff_t Anhi = pimpl->istrans ? A.nlo() : A.nhi();
             if (Anhi < pimpl->LUx.nhi())
                 pimpl->LUx.diagRange(Anhi+1,pimpl->LUx.nhi()+1).setZero();
+            //std::cout<<"LUx => "<<pimpl->LUx<<std::endl;
             LU_Decompose(pimpl->LUx,pimpl->P,Anhi);
+            //std::cout<<"LUx => "<<pimpl->LUx<<std::endl;
         }
     }
 
@@ -160,16 +168,32 @@ namespace tmv {
 
 #define LUX \
     BandMatrixViewOf(Aptr,A.colsize(),A.colsize(),NEWLO,NEWHI, \
-                     (A.nlo()==1 && A.nhi()==1) ? DiagMajor : ColMajor)
+                     TRID ? DiagMajor : ColMajor)
 
     template <class T> 
     BandLUDiv<T>::BandLUDiv_Impl::BandLUDiv_Impl(
         const AssignableToBandMatrix<T>& A) :
         istrans(A.nhi()<A.nlo()), inplace(false),
         Aptr1(APTR1), Aptr(APTR), LUx(LUX),
-        P(A.colsize()), logdet(0), signdet(1), donedet(false) {}
+        P(A.colsize()), logdet(0), signdet(1), donedet(false) 
+    {
+        //std::cout<<"BandLUDivImpl Assignable constructor\n";
+        //std::cout<<"A = "<<TMV_Text(A)<<" = "<<BandMatrix<T>(A)<<std::endl;
+        //std::cout<<"LUx = "<<TMV_Text(LUx)<<" = "<<LUx<<std::endl;
+        //std::cout<<"Aptr1 = "<<Aptr1.get()<<std::endl;
+        //std::cout<<"Aptr = "<<Aptr<<std::endl;
+        //std::cout<<"len = "<<APTR1<<std::endl;
+        //std::cout<<"LUx.stepi = "<<LUx.stepi()<<std::endl;
+        //std::cout<<"LUx.stepj = "<<LUx.stepj()<<std::endl;
+        //std::cout<<"LUx.first = "<<LUx._first<<std::endl;
+        //std::cout<<"LUx.last = "<<LUx._last<<std::endl;
+        //std::cout<<"&LUx(0,0) = "<<LUx.cptr()<<std::endl;
+        //std::cout<<"&LUx("<<NEWLO<<",0) = "<<LUx.cptr()+NEWLO*LUx.stepi()<<std::endl;
+        //std::cout<<"&LUx(0,"<<NEWHI<<") = "<<LUx.cptr()+NEWHI*LUx.stepj()<<std::endl;
+    }
 
 #undef LUX
+#undef TRID
 #undef APTR
 #undef APTR1
 #undef NEWLO
@@ -184,12 +208,15 @@ namespace tmv {
             BandMatrixViewOf(pimpl->LUx,A.nhi(),A.nlo()).transpose() = A;
         else 
             BandMatrixViewOf(pimpl->LUx,A.nlo(),A.nhi()) = A;
+        //std::cout<<"LUx => "<<pimpl->LUx<<std::endl;
 
         if (pimpl->LUx.nlo() > 0) {
-            int Anhi = pimpl->istrans ? A.nlo() : A.nhi();
+            ptrdiff_t Anhi = pimpl->istrans ? A.nlo() : A.nhi();
             if (Anhi < pimpl->LUx.nhi())
                 pimpl->LUx.diagRange(Anhi+1,pimpl->LUx.nhi()+1).setZero();
+            //std::cout<<"LUx => "<<pimpl->LUx<<std::endl;
             LU_Decompose(pimpl->LUx,pimpl->P,Anhi);
+            //std::cout<<"LUx => "<<pimpl->LUx<<std::endl;
         }
     }
 
@@ -197,22 +224,24 @@ namespace tmv {
     BandLUDiv<T>::~BandLUDiv() {}
 
     template <class T> template <class T1> 
-    void BandLUDiv<T>::doLDivEq(const MatrixView<T1>& m) const
+    void BandLUDiv<T>::doLDivEq(MatrixView<T1> m) const
     {
-        if (pimpl->istrans) LU_RDivEq(pimpl->LUx,pimpl->P.getValues(),m.transpose());
+        if (pimpl->istrans) 
+            LU_RDivEq(pimpl->LUx,pimpl->P.getValues(),m.transpose());
         else LU_LDivEq(pimpl->LUx,pimpl->P.getValues(),m);
     }
 
     template <class T> template <class T1> 
-    void BandLUDiv<T>::doRDivEq(const MatrixView<T1>& m) const
+    void BandLUDiv<T>::doRDivEq(MatrixView<T1> m) const
     {
-        if (pimpl->istrans) LU_LDivEq(pimpl->LUx,pimpl->P.getValues(),m.transpose());
+        if (pimpl->istrans) 
+            LU_LDivEq(pimpl->LUx,pimpl->P.getValues(),m.transpose());
         else LU_RDivEq(pimpl->LUx,pimpl->P.getValues(),m);
     }
 
     template <class T> template <class T1, class T2> 
     void BandLUDiv<T>::doLDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         if (pimpl->istrans) 
             LU_RDivEq(pimpl->LUx,pimpl->P.getValues(),(x=m).transpose());
@@ -221,7 +250,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void BandLUDiv<T>::doRDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         if (pimpl->istrans) 
             LU_LDivEq(pimpl->LUx,pimpl->P.getValues(),(x=m).transpose());
@@ -254,7 +283,7 @@ namespace tmv {
     }                  
 
     template <class T> template <class T1> 
-    void BandLUDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
+    void BandLUDiv<T>::doMakeInverse(MatrixView<T1> minv) const
     {
         if (pimpl->istrans)
             LU_Inverse(pimpl->LUx,pimpl->P.getValues(),minv.transpose());
@@ -263,7 +292,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void BandLUDiv<T>::doMakeInverseATA(const MatrixView<T>& ata) const
+    void BandLUDiv<T>::doMakeInverseATA(MatrixView<T> ata) const
     {
         // See corresponding routine in TMV_LUD.cpp
         if (pimpl->istrans) {

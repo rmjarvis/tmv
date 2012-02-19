@@ -4,6 +4,8 @@
 #include "TMV.h"
 #include <fstream>
 
+#define NOELEMMULT
+
 #include "TMV_TestMatrixArith.h"
 
 template <class T> void TestDiagMatrixArith_B6b()

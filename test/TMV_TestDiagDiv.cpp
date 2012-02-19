@@ -8,9 +8,6 @@
 template <class T> 
 void TestDiagDiv()
 {
-    typedef typename tmv::Traits<T>::real_type RT;
-    typedef typename tmv::Traits<RT>::float_type FT;
-
     tmv::DiagMatrix<T> m(10);
 
     for(int i=0;i<10;++i) m(i) = T(2+4*i);
@@ -28,7 +25,7 @@ void TestDiagDiv()
     b(5) = 5;
     b(9) = -5;
 
-    FT eps = EPS * Norm(m) * Norm(minv);
+    T eps = EPS * Norm(m) * Norm(minv);
 
     tmv::Vector<T> x = b/m;
     tmv::Vector<T> b2 = m*x;
@@ -99,7 +96,7 @@ void TestDiagDiv()
     c(3) += std::complex<T>(2,3);
     c.subDiagMatrix(5,9) *= std::complex<T>(0,2);
 
-    FT ceps = EPS * Norm(c) * Norm(c.inverse());
+    T ceps = EPS * Norm(c) * Norm(c.inverse());
 
     std::complex<T> cdet1(1);
     for(int i=0;i<10;++i) cdet1 *= c(i);
@@ -168,7 +165,8 @@ void TestDiagDiv()
     TestDiagDiv_A<T>();
     TestDiagDiv_B1<T>();
     TestDiagDiv_B2<T>();
-    std::cout<<"DiagMatrix<"<<Text(T())<<"> Division passed all tests\n";
+    std::cout<<"DiagMatrix<"<<tmv::TMV_Text(T())<<
+        "> Division passed all tests\n";
 }
 
 

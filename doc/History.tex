@@ -44,95 +44,126 @@ I also added BandMatrix.
 The new version number here was because I needed some added functionality for a
 project I was working on.  It retrospect, it really only deserves a 0.01 increment,
 since the changes weren't that big.  But, oh well.
+
 \begin{itemize}
+
 \item
 Added QR\_Downdate.  (This was the main new functionality I needed.)
+
 \item
 Improved the numerical accuracy of the QRP decomposition.
+
 \item
 Added the possibility of not storing U,V for the SVD.
+
 \item
 Greatly improved the test suite, and consequently found and corrected a few bugs.
+
 \item
 Added some arithmetic functionality that had been missing (like \tt{m += L*U}).
+
 \end{itemize}
 
 \item[Version 0.5]
 The new symmetric matrix classes precipitated a major version number update.
 I also sped up a lot of the algorithms:
+
 \begin{itemize}
+
 \item
 Added SymMatrix, HermMatrix, and all associated functionality.
+
 \item
 Added blocked versions of most of the algorithms, so the non-LAPACK
 code runs a lot faster.
+
 \item
 Allowed for loose QRP decomposition.
+
 \item
 Added divideInPlace().
+
 \end{itemize}
 
 \item[Version 0.51]
 Some minor improvements:
+
 \begin{itemize}
+
 \item
 Sped up some functions like matrix addition and assignment by adding the 
 LinearView method.
+
 \item
 Added QR\_Update, and improved the QR\_Downdate algorithm.
+
 \item
 Blocked some more algorithms like TriMatrix multiplication/division, so non-BLAS
 code runs significantly faster (but still much slower than BLAS).
+
 \end{itemize}
 
 \item[Version 0.52]
 The first ``public'' release!  And correspondingly, the first with documentation
 and a web site.  A few other people had used previous versions, but since the
 only documentation was my comments in the .h files, it wasn't all that user-friendly.
+
 \begin{itemize}
+
 \item
 Added saveDiv() and related methods for division control.  Also changed the 
 default behavior from saving the decomposition to not saving it.
+
 \item
 Added in-place versions of the algorithms for $S = L^\dagger L$ and $S = L L^\dagger$.
+
 \end{itemize}
 
 \item[Version 0.53]
-By popular demand (well, a request by Fritz Stabenau, at least):
+By popular demand (well, a polite request by Fritz Stabenau, at least):
+
 \begin{itemize}
+
 \item
 Added the Fortran-style indexing.
+
 \end{itemize}
 
 \item[Version 0.54]
 Inspired by my to-do list, which I wrote for Version 0.52, I tackled a few of the 
 items on the list and addressed some issues that people had been having
 with compiling:
+
 \begin{itemize}
+
 \item[$\times$]
 Changed from a rudimentary exception scheme (with just one class - 
 \tt{tmv\_exception}) to the current more full-featured exception hierarchy.
 Also added \tt{auto\_ptr} usage instead of bald pointers to make the 
 exception throws memory-leak safe.
+
 \item
 Sped up SymLUDiv and SymSVDiv inverses.
+
 \item
 Added the possibility of compiling a small version of the library and test suite.
+
 \item[$\times$]
 Consolidated SymLUDiv and HermLUDiv classes into just SymLUDiv, which now checks
 whether the matrix is hermitian automatically.  
+
 \item
 Reduced the number of operations that make temporary matrices when multiple
 objects use the same storage. 
+
 \item
 Specialized Tridiagonal $\times$ Matrix calculation.
+
 \item
 Added ElementProd and AddElementProd functions for matrices.
+
 \item
-Added CLAPACK and ACML as known versions of LAPACK (the LAPACK calls
-had previously been specific to the Intel MKL version).  Also made the file
-\tt{TMV\_Blas.h} much better organized, so it is easier to tailor the code to 
-a different LAPACK distribution with different calling conventions.
+Added CLAPACK and ACML as known versions of LAPACK.  
 
 \end{itemize}
 
@@ -140,35 +171,32 @@ a different LAPACK distribution with different calling conventions.
 This revision merits a first-decimal-place increment, since I added a 
 few big features.  I also registered it with SourceForge, 
 which is a pretty big milestone as well.
+
 \begin{itemize}
+
 \item
 Added \tt{SmallVector} and \tt{SmallMatrix} with all accompanying algorithms.
+
 \item 
 Added \tt{SymBandMatrix} and \tt{HermBandMatrix} with all accompanying algorithms.
+
 \item
 Made arithmetic between any two special matrices compatible, so long as 
 the operation is allowed given their respective shapes.  
-e.g. \tt{U += B} and \tt{U *= B} are allowed if \tt{B} is upper-banded.  
-There are many other expressions that are now legal statements.
+
 \item[$\times$]
 Changed \tt{QR\_Downdate()} to throw an exception rather than return false
 when it fails.
+
 \item
 Added the GPL License to the end of this documentation, and a copyright
 and GPL snippet into each file.
+
 \item[$\times$]
 Changed the -D compiler options for changing which types get instantiated.
-The default is still to instantiate double and float.  Now to turn these
-off, use \texttt{-DNO\_INST\_DOUBLE} and \texttt{-DNO\_INST\_FLOAT} respectively.  To
-add int or long double instantiations, use \texttt{-DINST\_INT} and 
-\texttt{-DINST\_LONGDOUBLE} respectively.
+
 \item
-Split up the library into \texttt{libtmv.a} and \texttt{libtmv\_symband.a}.  The
-latter includes everything for the \tt{SymMatrix}, \tt{HermMatrix}, 
-\tt{BandMatrix}, \tt{SymBandMatrix}, and \tt{HermBandMatrix} classes.
-The former includes everything else including \tt{DiagMatrix} and
-\tt{Upper/LowerTriMatrix}.  Also, I got rid of \texttt{libsmalltmv.a}, which
-was basically the same as the new trimmed down \texttt{libtmv.a}.
+Split up the library into \texttt{libtmv.a} and \texttt{libtmv\_symband.a}. 
 
 \end{itemize}
 
@@ -177,58 +205,36 @@ A number of updates mostly precipitated by feature requests by me in my own
 use of the library, as well as some from a few other users.
 I also did a complete systematic edit of the documentation which 
 precipitated some more changes to make the UI a bit more intuitive.
+
 \begin{itemize}
+
 \item[$\times$]
 Changed the default storage for the \tt{Matrix} class to \tt{ColMajor}
-rather than \tt{RowMajor}, since it seems to be more common that column-major
-storage is the more efficient choice.  Therefore, it makes sense to have this
-be the default.
-\item[$\times$]
-Changed a lot of \tt{size\_t} parameters to \tt{int} - mostly variables
-which are indices of a matrix or vector, like \tt{i} and \tt{j} in \tt{m(i,j)}.  
-These variables used to be of type \tt{size\_t}, and now they are \tt{int},
-even though they are usually required to be positive.
+rather than \tt{RowMajor}.
 
-The reason for this change
-was that the implementation of these
-functions often involves multiplying the index
-by a step size, which is allowed to be negative (and hence
-is an \tt{int}), so there were lots of casts to \tt{int} for these variables.
-I decided that it would be better to simply have them be \tt{int} in the first place.
-
-The particular change that is most likely to require modification to existing code
-involves permutations, which used to be \tt{size\_t} arrays, and are now
-\tt{int} arrays.  So if you used them, you might need to change their
-declarations in your code to \tt{(int [])}.
 \item[$\times$]
-Removed \tt{U.MakeUnitDiag}, since the name was counter-intuitive to what it actually did, and the functionality is more obvious through the
-\tt{UpperTriMatrixViewOf} function.
+Changed a lot of \tt{size\_t} parameters to \tt{int}.
+
+\item[$\times$]
+Removed \tt{U.MakeUnitDiag}.
+
 \item
 Sped up matrix multiplication for non-blas implementations, including
 openmp pragmas to allow for multiple threads on machines that support them.
-The code is now within a factor of 2 or 3 of a good optimized BLAS 
-distribution.  So it is still worth it to use BLAS if you have one available,
-but if you don't have one on you machine, the non-blas code is no longer a
-order of magnitude slower.
+
 \item
 Changed a few things which prevented Microsoft Visual C++ from compiling successfully.  
-As far as I can tell, these are aspects in which VC++ is not fully compliant with the C++ 
-standard, but there were work-arounds for all of them.
 Thanks to Andy Molloy
 for spearheading this effort and doing the lion's share of the work to make
 the code compatible with the VC++ compiler.
+
 \item[$\times$]
 Removed the optional index parameter to the non-method versions of 
-MaxElement, etc.   i.e.\\
-\tt{vmax = v.MaxElement(\&imax)}\\
-will work, but not\\
-\tt{vmax = MaxElement(v,\&imax)}\\
-However the functional form without the \tt{imax} parameter still works as before.
-Basically, this was just a semantic choice.  It seems to me that the meaning of the method
-form with the index parameter is much clearer than the functional form with two arguments.
+MaxElement, etc.  
 
-I also added an optional \tt{scale} parameter to \tt{m.NormSq(scale)}.
-Again, this optional parameter is only allowed in the method version, not the function \tt{NormSq(m)}
+\item
+Added an optional \tt{scale} parameter to \tt{m.NormSq(scale)}.
+
 \item[$\times$]
 Added the explicit decomposition routines.  I also
 got rid of the \tt{SVU}, \tt{SVV} and \tt{SVS} options for \tt{m.divideUsing(...)}, since the point 
@@ -236,50 +242,44 @@ of these was to do the decomposition without calculation $U$ and/or $V$.  This i
 more intuitively with the explicit decomposition routines.
 I also added the (hermitian) eigenvalue/eigenvector routines which used to
 require using the division accessors in non-intuitive ways to calculate.
+
 \item 
-Fixed a couple of places where underflow and overflow could cause problems.  However, I have
-not put such very large or very small matrices into the test suite, so there are probably other
-places where these could be a problem.  (Added this to the To Do list.)
+Fixed a couple of places where underflow and overflow could cause problems.  
+
 \item
 Updated the native TMV code for the singular value decomposition and hermitian 
 eigenvalue calculation to use the divide-and-conquer algorithm.
+
 \item
-Added \tt{m.logDet()} method.  With very large matrices, it is common for the determinant
-to overflow, but often the logarithm of the determinant is sufficient.  
-For example, one may be trying to minimize a 
-likelihood function that
-includes the determinant of a matrix.  Minimizing the log(likelihood) is equivalent, which
-thus involves the log of the determinant.  
+Added \tt{m.logDet()} method.  
+
 \item[$\times$]
 Changed \tt{m.svd().getS()} to return a \tt{DiagMatrix} rather than a \tt{Vector}.
-(Sorry - this change eluded documentation until version 0.62.)
+
 \end{itemize}
 
 \item[Version 0.62]
 
 This release contains a number of bug fixes and corrections of mistakes in the documentation.
-I also significantly revamped the \tt{SmallMatrix} class to make it faster at the expense of a few fewer 
-features.  
+I also significantly revamped the \tt{SmallMatrix} class to make it faster at the expense of a few fewer features.  
+
 \begin{itemize}
+
 \item
 Corrected an error with \tt{m.divIsSet()}.
+
 \item
 Corrected some errors in the documentation -- Thanks to Jake VanderPlas for pointing these out.
+
 \item
 Improved the behavior of the division accessors, also at the suggestion of Jake VanderPlas. (Thanks again!)  They used to require that the division
-object had already been set or they would give an error.  So to set the SVD threshold for example,
-you had to write:\\
-\tt{m.divideUsing(tmv::SV);}\\
-\tt{m.setDiv();}\\
-\tt{m.svd().thresh(1.e-5);}\\
-Jake rightly pointed out that this was not very intuitive.  So now the accessors (like \tt{m.svd()}) set
-the division object appropriately if it is not already set.  The above task is now simply performed
-by just the single line:\\
-\tt{m.svd().thresh(1.e-5);}
+object had already been set or they would give an error. Now the accessors (like \tt{m.svd()}) set
+the division object appropriately if it is not already set. 
+
 \item
 Added the \tt{ListInit} method for initializing the values of a \tt{Vector} or \tt{Matrix}.  Thanks to Paul
-Sarli for this suggestion.  The implementation is based somewhat on a similar 
-initialization syntax in the Little Template Library (LTL) by Niv Drory et al.
+Sarli for this suggestion.  
+
 \item[$\times$]
 Significantly changed the \tt{SmallMatrix} class.  See \S\ref{SmallMatrix}, on the \tt{SmallMatrix} class 
 in the documentation
@@ -290,20 +290,12 @@ for the full details of how it works now.  But in brief, here are the main chang
 \item Improved the arithmetic so more of the routines correctly do the calculation inline to allow the
 compiler more opportunity to optimize the calculation.
 \item Added inlined division and determinants.
-\item Got rid of the "Small" views.  Because I got rid of the inheritance in \tt{SmallMatrix}, there is no longer a 
-\tt{GenSmallMatrix} class from which the views and regular objects can both inherit.  This
-makes it a bit unwieldy to write all the different arithmetic combinations of how 
-\tt{SmallMatrix} and \tt{SmallMatrixView} could combine.  So I just made all views
-regular \tt{VectorView} or \tt{MatrixView} objects.  These can be assigned to a \tt{SmallVector}
-or \tt{SmallMatrix}, or used in arithmetic calculations with them, so all the arithmetic statements
-that use \tt{transpose()} or \tt{row()} or \tt{col()} (for example) will still work, but they might
-not be done inline anymore.
+\item Got rid of the "Small" views. 
 \end{itemize}
+
 \item
-Consolidated some of the old header files.  Now all \tt{TriMatrix} and \tt{DiagMatrix}
-calculations are included as part of \tt{TMV.h}, so there is no need to include \tt{TMV\_Tri.h}
-or \tt{TMV\_Diag.h} anymore.  Although, these header files are still included for backwards
-compatibility.
+Consolidated some of the old header files.  
+
 \item[$\times$]
 Removed some of the \tt{ViewOf} commands that were not very clear and
 which have other, clearer ways of doing the same thing:
@@ -321,51 +313,31 @@ which have other, clearer ways of doing the same thing:
 \tt{U = UpperTriMatrixViewOf(U,UnitDiag)} should now be written\\
 \tt{U = U.viewAsUnitDiag()}.
 \end{itemize}
+
 \item
 Tracked down the problems I had been having with the LAPACK \tt{dstegr} and \tt{sstegr} 
-functions.  The segmentation faults were because the algorithm writes to an element
-one pas the end of the E vector.  Apparently, this is a documented feature, but it doesn't
-make any sense to me why they would need to do this.  I had previous discovered similar
-behavior with the \tt{zhetrd} and \tt{dgebrd} functions.  Anyway, I fixed this by allocating a
-vector with one extra element and copying the values.
+functions.  TMV now checks for some known problems with the LAPACK implementation
+of \tt{stegr} sometimes failing, and it calls \tt{stedc} if there was a problem.
 
-I also found that there are two separate problems with the \tt{stegr} algorithm where
-it produces incorrect results sometimes.
-First, sometimes the \tt{stegr} algorithm seems to return early - before the last update
-to the D vector and U matrix.  I actually figured out how to correct the D vector from some 
-values that remain in the workspace, but I couldn't figure out how to correct the U matrix.
-This is also a documented feature -- \tt{stegr} returns the value of 2 in the \tt{info} variable 
-when this happens.
-
-Second, the \tt{stegr} algorithm is apparently not very careful about avoiding overflow or underflow.
-I found \tt{NaN}'s in the output U matrix for particular input matrices from the float version
-of the algorithm, \tt{sstegr}.  The \tt{info} variable is 0 on output in these cases, so unfortunately
-\tt{stegr} does not detect the problem.  So this has to be checked for by hand.
-
-Since both of these problems are detectable based on the output values (including examining
-the workspace in the first case), TMV now checks for the problem, and it there was a problem,
-it calls the \tt{stedc} routine instead.
 \item
 Tested the code for memory bugs with Paul Nettle's mmgr.h code.  There were only a couple of 
 minor memory leaks, which were fixed.
+
 \item
 Fixed a problem with the OpenMP version of the code giving segmentation faults with pgCC.
+
 \item
 Added the SCons installation method to automatically discover what BLAS and LAPACK libraries 
-are installed on your computer.  This should make it easier for most users to install an efficient
-version of the TMV library without having to fiddle with the Makefile.
-\item
-Added compatibility for Fortran versions of BLAS and LAPACK, including header files that
-should work with them, \texttt{fblas.h} and \texttt{flapack.h} are in the \texttt{include} directory.
-\item
-Added the CMake installation method.  Thanks to Andy Molloy for providing this.  I haven't
-made this method as full featured as the SCons method, but it is pretty straightforward to get
-a basic TMV library compiled.
-\item
-Added hyperlinks to the PDF documentation.  This should make it much easier to locate a particular topic by simply clicking on the link in the Table of Contents.  In PDF viewers that support it, you can 
-also navigate using the ``drawer'' which will show the various sections and let you jump directly to them.
+are installed on your computer.  
 
-Also, I added an index, complete with hyperlinks as well, that should make it easier to find a particular topic that you might need help with.
+\item
+Added compatibility for generic Fortran versions of BLAS and LAPACK.
+
+\item
+Added the CMake installation method.  Thanks to Andy Molloy for providing this.  
+
+\item
+Added hyperlinks to the PDF documentation. Also, I added an index, complete with hyperlinks as well, that should make it easier to find a particular topic that you might need help with.
 
 \end{itemize}
 
@@ -373,7 +345,7 @@ Also, I added an index, complete with hyperlinks as well, that should make it ea
 The biggest thing in this version is the new lowercase syntax for the
 methods, which was in response to feedback from a number of TMV users, 
 who didn't like the old syntax.  Hopefully, I'm not responding to the 
-minority here, but I do agree that the new syntax is more conformant 
+minority here, but I do agree that the new syntax conforms better
 to common C++ standards.  There are also a couple of bug fixes, and I've
 started using Google Code for my main website.
 
@@ -381,20 +353,11 @@ started using Google Code for my main website.
 
 \item[$\times$]
 Changed the names of the methods to start with a lowercase.
-Many of the methods had started with an uppercase, but this style
-is not very popular, so I decided to go ahead and change them.
-
 The free functions all still start with a capital letter.
 Both use camelCase, with underscores after 2 or 3 letter abbreviations
 such as LU or SV to help them stand out (since the camel case doesn't do it).
 This seems to be a more common standard in the C++ community and is more
 self-consistent than the style I had been using.
-
-The old names are still here for this version, but are marked as deprecated.
-Compiling old code with g++ with the flag -Wno-deprecated-declarations
-will make is compile without warning.
-But the deprecated versions will disappear eventually, so you will want to
-covert your existing code over to the new names at some point.
 
 \item[$\times$]
 Changed the syntax for list initialization.
@@ -402,36 +365,12 @@ The old style was \\
 \tt{v = tmv::ListInit, a0 , a1 , a2 , a3  ...}\\
 The new style is \\
 \tt{v << a0 , a1 , a2 , a3 ...}\\
-Also accepted is \\
-\tt{v << a0 << a1 << a2 << a3 ...}\\
-This notation seems clearer, and avoid the global variable \tt{tmv::ListInit}.
-(Again, the old notation is still present, but deprecated.)
 
 \item
 Improved the speed of the native (i.e. non-BLAS) matrix multiplication algorithm.
-It is now generally within a factor of two or so of optimized BLAS implementations.
-So it's not such a big performance hit if you compile without BLAS anymore.
-But if you are using large matrices, then we still recommend compiling with 
-an optimized BLAS library if possible.
-
-The improvements for large matrices involved:
-\begin{enumerate}
-\item Using a blocked algorithm with copying the 
-sub-matrices to new storage so the block calculations are contiguous in memory,
-\item Using optimized kernels for the single-block calculation, including using
-SSE and SSE2 intrinsics when available,
-\item Implementing complex calculations
-as sequential real operations, rather than try to do the complex arithmetic
-directly, which was significantly slower, and
-\item Using OpenMP to split the 
-calculation into as many parts as there are available threads.
-\end{enumerate}
 
 \item
 Fixed a couple of bugs involving \tt{SmallMatrix}.  
-\tt{m.setZero()} didn't return \tt{*this} as it should have,
-and there were two \tt{DoCopy} helper functions that caused 
-ambiguity problems for some compilers.
 
 \item
 Disabled the cases where BlasRowMajor was used in CBlas implementations, 
@@ -476,76 +415,67 @@ There are also a bunch of miscellaneous feature additions as well -- most notabl
 
 \begin{itemize}
 
-\item Added a some very difficult matrices to the test suite, and found and fixed quite a few 
-bugs as a result involving underflow, overflow, and loss of precision.  It is worth noting that
-when compiled to use LAPACK, rather than the native TMV code, some of these tests
-(which are enabled with \tt{XTEST=64}) fail.  Different LAPACK distributions fail different tests, some getting most of them right, and others failing quite a few tests.  So if you find your program having problems with particular input matrices, it might be worth compiling TMV with \tt{WITH\_LAPACK=false} to see if that helps.
+\item
+Added a some very difficult matrices to the test suite, and found and fixed quite a few 
+bugs as a result involving underflow, overflow, and loss of precision.  
 
-\item Fixed a bug that \tt{U(i,i)} was invalid if \tt{U} is non-const and is \tt{UnitDiag} even 
+\item 
+Fixed a bug that \tt{U(i,i)} was invalid if \tt{U} is non-const and is \tt{UnitDiag} even 
 if the resulting value is not used in a mutable context.  
-e.g. \tt{T diag\_i = U(i,i)}.  This used to give an error.  Now, \tt{U(i,j)} returns a special reference
-that can always be used as a value, even if \tt{i==j} and \tt{U} is \tt{UnitDiag}.  
-However, if the user tries to modify the value through this reference type, then it gives
-an error.  This was probably not causing anyone any problems, and the workarounds 
-weren't too onerous, but it seemed worth getting the syntax right.
 
-\item Added a new \tt{Permutation} class to encapsulate permutation operations.  
-This is basically a wrapper around the old functions
-like \tt{m.permuteRows(p)}.  Now you can write \tt{m = P * m} instead.  All of the routines
-which returned a permutation as an \tt{int* p} object now returns it as a \tt{Permutation} object.
-This includes \tt{Vector::sort}, \tt{LU\_Decompose}, \tt{QRP\_Decompose}, and 
-\tt{LDL\_Decompose}.  The old functions still work, but are now undocumented.
+\item 
+Added a new \tt{Permutation} class to encapsulate permutation operations.  
 
-\item[$\times$] The \tt{getP()} methods from the LU and QRP divider objects now return
-a \tt{Permutation} rather than a \tt{const int*}.  As described above, this should make the 
-code clearer when the permutation is used.  However, it will break code that uses 
-the old syntax.
+\item[$\times$] 
+The \tt{getP()} methods from the LU and QRP divider objects now return
+a \tt{Permutation} rather than a \tt{const int*}.  
 
-\item Added \tt{m.sumElements()} and \tt{m.sumAbsElements()}.
+\item 
+Added \tt{m.sumElements()} and \tt{m.sumAbsElements()}.
 
-\item Added \tt{v.minAbs2Element()}, \tt{v.maxAbs2Element()} and \tt{m.maxAbs2Element()}.
+\item 
+Added \tt{v.minAbs2Element()}, \tt{v.maxAbs2Element()} and \tt{m.maxAbs2Element()}.
 
-\item Added \tt{m.unitUpperTri()} and \tt{m.unitLowerTri()}.
+\item 
+Added \tt{m.unitUpperTri()} and \tt{m.unitLowerTri()}.
 
-\item Added \tt{b.subBandMatrix(i1,i2,j1,j2)} (i.e. a version that calculates the correct 
-\tt{newnlo} and \tt{newnhi} automatically) to \tt{BandMatrix} and \tt{SymBandMatrix}.
+\item 
+Added \tt{b.subBandMatrix(i1,i2,j1,j2)} to \tt{BandMatrix} and \tt{SymBandMatrix}.
 
-\item Made \tt{Swap(m1,m2)} and \tt{Swap(v1,v2)} efficient when the arguments are both
-complete matrices or vectors, rather than views, so they now take $O(1)$ time rather than
-$O(MN)$ and $O(N)$ respectively.
+\item 
+Made \tt{Swap(m1,m2)} and \tt{Swap(v1,v2)} efficient when the arguments are both
+complete matrices or vectors, rather than views.
 
-\item Added \tt{cView()} and \tt{fView()} methods to switch indexing styles of a matrix or vector.
+\item 
+Added \tt{cView()} and \tt{fView()} methods to switch indexing styles of a matrix or vector.
 
-\item Made arithmetic with \tt{SmallVector} and \tt{SmallMatrix} somewhat more flexible in that
+\item 
+Made arithmetic with \tt{SmallVector} and \tt{SmallMatrix} somewhat more flexible in that
 the composite objects now (again actually) derive from the normal \tt{GenVector} and
-\tt{GenMatrix} classes.  This removes the "No implicit instantiation" item that had appeared
-in the list of limitations of the \tt{Small} classes.
+\tt{GenMatrix} classes.  
 
-I had removed that inheritance for version 0.62 in my attempt to get rid of the expensive virtual
-tables from all small operations.  However, the vtable here is almost never expensive 
-(unlike the one that had been in \tt{SmallVector} and \tt{SmallMatrix}), and
-it allows for a greater freedom of expression with the \tt{Small} objects.
+\item 
+Added a version of \tt{MatrixViewOf} with arbitrary steps.
 
-\item Added a version of \tt{MatrixViewOf} with arbitrary steps.
-
-\item Added the three C preprocessor definitions: \tt{TMV\_MAJOR\_VERSION}, 
+\item 
+Added the three C preprocessor definitions: \tt{TMV\_MAJOR\_VERSION}, 
 \tt{TMV\_MINOR\_VERSION},
 and \tt{TMV\_VERSION\_AT\_LEAST(major,minor)} to help users customize
 their code depending on the version of TMV that is installed on a particular
-computer.  Also documented the \tt{TMV\_Version} function and the \tt{tmv-version}
-script, which have been around
-for a couple versions now, but weren't yet documented.
+computer.  
 
-\item Fixed a bug in BLAS versions of U*M and L*M when U or L is real and
+\item 
+Fixed a bug in BLAS versions of U*M and L*M when U or L is real and
 M is complex.
 
-\item Fixed a bug in \tt{m.det()} when \tt{m} is a \tt{SmallMatrix<T,1,1>}.
+\item 
+Fixed a bug in \tt{m.det()} when \tt{m} is a \tt{SmallMatrix<T,1,1>}.
 
-\item Fixed a bug in an (apparently) uncommon pathway of \tt{Rank2Update}.
-I say uncommon since it never turned up until I expanded the scope of
-the test suite to include more combinations of matrix types.
+\item 
+Fixed a bug in an (apparently) uncommon pathway of \tt{Rank2Update}.
 
-\item Researched my \tt{QRDowndate} algorithm to see if it is in the literature already.
+\item 
+Researched my \tt{QRDowndate} algorithm to see if it is in the literature already.
 The only similar algorithm I could find was in Bojanczyk and Steinhardt (1991), 
 a paper which seems to have been overlooked by the matrix algorithms community.
 It's not quite the same as mine in detail, but it is based on the same basic idea.
@@ -553,6 +483,65 @@ I added this reference to the discussion in the documentation about my algorithm
 
 \end{itemize}
 
-\item[Version 0.65] See \S\ref{Changes}.
+\item[Version 0.65]
+
+This update primarily fixed some problems for integer matrices.  In addition to some compiler
+errors for some combinations of SCons parameters, I also added the ability to calculate the 
+determinant of integer matrices.  It had been documented (albeit somewhat poorly) that 
+this would not work for integer matrices.  However, user Ronny Bergmann convinced me that
+it would make sense to include the ability to produce accurate determinants for integer matrices.
+
+\begin{itemize}
+
+\item 
+Made \tt{m.det()} produce accurate results if \tt{m} is a \tt{Matrix<int>} or 
+\tt{Matrix<complex<int> >}.  Or in general if the underlying type is an integer type.
+
+\item 
+Added \tt{m.sumAbs2Elements()}.
+
+\item 
+Added \tt{m.addToAll(x)}.
+
+\item 
+Added \tt{m.unitUpperTri()} and \tt{m.unitLowerTri()} for symmetric/hermitian matrices.
+
+\item 
+Added the \tt{resize} methods to resize an existing vector or matrix, at the request of users Zhaoming Ma and Gary Bernstein.  
+
+\item 
+Added SCons option \tt{SHARED=true} to compile as a shared library rather than a static library.
+
+\item 
+Added the ability to turn off TMV debug statements with \tt{-DTMVNDEBUG}.
+
+\item 
+Skip compiling functions that are invalid for integer values, like the various decompositions 
+and such.  
+
+\item 
+Fixed some compiling errors with \tt{INST_INT=true}, including some linking errors 
+for several combinations of compile options.
+
+\item 
+Fixed a couple bugs in the allocation code.
+
+\item 
+Increased the maximum number of iterations within the divide-and-conquer SVD
+algorithm from 20 to 100, since I found a case that required 27 iterations to converge.
+
+\item 
+Fixed some places where nan's in the input values could lead to
+infinite loops in certain algorithms. 
+
+\item 
+Fixed a place in the SV decomposition which could (rarely) go into an infinite loop.
+
+\item 
+Made code more robust to broken BLAS distributions that incorrectly multiply the output matrix or vector by the \tt{beta} variable even if it is zero.  This is a problem if there are \tt{nan}'s present in the memory, since multiplies by zero doesn't set the value to zero in that case.  Now we always check for \tt{beta == 0} and zero out the memory if appropriate.
+
+\end{itemize}
+
+\item[Version \tmvversion] See \S\ref{Changes}.
 
 \end{description}

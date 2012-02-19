@@ -1,0 +1,120 @@
+
+#define CT std::complex<T>
+
+#define Def1(RT,T) \
+  template DivHelper<T >::DivHelper(); \
+  template DivHelper<T >::~DivHelper(); \
+  template void DivHelper<T >::divideUsing(DivType dt) const; \
+  template void DivHelper<T >::divideInPlace() const; \
+  template void DivHelper<T >::dontDivideInPlace() const; \
+  template bool DivHelper<T >::divIsInPlace() const; \
+  template void DivHelper<T >::saveDiv() const; \
+  template void DivHelper<T >::dontSaveDiv() const; \
+  template bool DivHelper<T >::divIsSaved() const; \
+  template void DivHelper<T >::unsetDiv() const; \
+  template void DivHelper<T >::resetDiv() const; \
+  template bool DivHelper<T >::divIsSet() const; \
+  template void DivHelper<T >::doneDiv() const; \
+  template bool DivHelper<T >::checkDecomp(std::ostream* os) const; \
+  template bool DivHelper<T >::checkDecomp(const BaseMatrix<T >& m2, \
+      std::ostream* os) const; \
+  template const Divider<T >* DivHelper<T >::getDiv() const; \
+  template DivType DivHelper<T >::getDivType() const; \
+  template T DivHelper<T >::doDet() const; \
+  template RT DivHelper<T >::doLogDet(T* sign) const; \
+  template void DivHelper<T >::doMakeInverseATA( \
+      MatrixView<T > m2) const; \
+  template bool DivHelper<T >::doIsSingular() const; \
+  template RT DivHelper<T >::doNorm2() const; \
+  template RT DivHelper<T >::doCondition() const; \
+  template void DivHelper<T>::resetDivType() const; \
+
+Def1(T,T)
+#ifdef INST_COMPLEX
+Def1(T,CT)
+#endif
+
+#undef Def1
+
+#define Def2(T,T1) \
+  template void DivHelper<T >::doMakeInverse(MatrixView<T1 > m) const; \
+  template void DivHelper<T >::doLDivEq(VectorView<T1 > v) const; \
+  template void DivHelper<T >::doRDivEq(VectorView<T1 > v) const; \
+  template void DivHelper<T >::doLDivEq(MatrixView<T1 > m) const; \
+  template void DivHelper<T >::doRDivEq(MatrixView<T1 > m) const; \
+
+Def2(T,T)
+#ifdef INST_COMPLEX
+Def2(T,CT)
+Def2(CT,CT)
+#endif
+
+#undef Def2
+
+#define Def2(T,T1) \
+  template <> template <> void DivHelper<T >::doMakeInverse( \
+      MatrixView<T1 > ) const \
+  { TMVAssert(TMV_FALSE); } \
+  template <> template <> void DivHelper<T >::doLDivEq( \
+      VectorView<T1 > ) const \
+  { TMVAssert(TMV_FALSE); } \
+  template <> template <> void DivHelper<T >::doRDivEq( \
+      VectorView<T1 > ) const \
+  { TMVAssert(TMV_FALSE); } \
+  template <> template <> void DivHelper<T >::doLDivEq( \
+      MatrixView<T1 > ) const \
+  { TMVAssert(TMV_FALSE); } \
+  template <> template <> void DivHelper<T >::doRDivEq( \
+      MatrixView<T1 > ) const \
+  { TMVAssert(TMV_FALSE); } \
+
+#ifdef INST_COMPLEX
+Def2(CT,T)
+#endif
+
+#undef Def2
+
+#define Def3(T,T1,T2) \
+  template void DivHelper<T >::doLDiv(const GenVector<T1 >& v1, \
+      VectorView<T2 > v2) const; \
+  template void DivHelper<T >::doRDiv(const GenVector<T1 >& v1, \
+      VectorView<T2 > v2) const; \
+  template void DivHelper<T >::doLDiv(const GenMatrix<T1 >& v1, \
+      MatrixView<T2 > v2) const; \
+  template void DivHelper<T >::doRDiv(const GenMatrix<T1 >& v1, \
+      MatrixView<T2 > v2) const; \
+
+Def3(T,T,T)
+#ifdef INST_COMPLEX
+Def3(T,T,CT)
+Def3(T,CT,CT)
+Def3(CT,T,CT)
+Def3(CT,CT,CT)
+#endif
+
+#undef Def3
+
+#define Def3(T,T1,T2) \
+  template <> template <> void DivHelper<T >::doLDiv(const GenVector<T1 >& , \
+      VectorView<T2 > ) const \
+  { TMVAssert(TMV_FALSE); } \
+  template <> template <> void DivHelper<T >::doRDiv(const GenVector<T1 >& , \
+      VectorView<T2 > ) const \
+  { TMVAssert(TMV_FALSE); } \
+  template <> template <> void DivHelper<T >::doLDiv(const GenMatrix<T1 >& , \
+      MatrixView<T2 > ) const \
+  { TMVAssert(TMV_FALSE); } \
+  template <> template <> void DivHelper<T >::doRDiv(const GenMatrix<T1 >& , \
+      MatrixView<T2 > ) const \
+  { TMVAssert(TMV_FALSE); } \
+
+#ifdef INST_COMPLEX
+Def3(CT,T,T)
+Def3(T,CT,T)
+Def3(CT,CT,T)
+#endif
+
+#undef Def3
+
+#undef CT
+

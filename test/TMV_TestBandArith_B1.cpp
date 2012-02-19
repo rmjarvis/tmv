@@ -1,48 +1,38 @@
 #define START 0
 
-#include "TMV_Test.h"
-#include "TMV_Test_2.h"
 #include "TMV.h"
 #include "TMV_Band.h"
+#include "TMV_Test.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestBandArith.h"
-
-#if 0
-template <class M1, class M2>
-inline bool CanAddEq(
-    const tmv::BaseMatrix_Band_Mutable<M1>& , const tmv::BaseMatrix_Rec<M2>& )
-{ return false; }
-
-template <class M1, class M2, class M3> 
-inline bool CanMult(
-    const tmv::BaseMatrix_Band<M1>& , const tmv::BaseMatrix_Rec<M2>& ,
-    const tmv::BaseMatrix_Band_Mutable<M3>& )
-{ return false; }
-
-template <class M1, class M2, class M3> 
-inline bool CanMult(
-    const tmv::BaseMatrix_Rec<M1>& , const tmv::BaseMatrix_Band<M2>& ,
-    const tmv::BaseMatrix_Band_Mutable<M3>& )
-{ return false; }
-
-template <class M1, class M2, class M3> 
-inline bool CanMult(
-    const tmv::BaseMatrix_Rec<M1>& , const tmv::BaseMatrix_Rec<M2>& ,
-    const tmv::BaseMatrix_Band_Mutable<M3>& )
-{ return false; }
-#endif
-
-template <class M1, class M2, class M3> 
-inline bool CanElemMult(
-    const tmv::BaseMatrix_Band<M1>& a, const tmv::BaseMatrix_Rec<M2>& b,
-    const tmv::BaseMatrix_Band_Mutable<M3>& c)
-{ 
-    return a.rowsize() == c.rowsize() && a.colsize() == c.colsize() &&
-        b.rowsize() == c.rowsize() && b.colsize() == c.colsize() &&
-        c.nlo() >= a.nlo() && c.nhi() >= a.nhi();
-}
 
 #define NOADDEQ
 #define NOMULTEQ
+#define NOELEMMULT
+
+template <class T1, class T2> 
+inline bool CanAddEq(
+    const tmv::BandMatrixView<T1>& , const tmv::MatrixView<T2>& )
+{ return false; }
+
+template <class T1, class T2, class T3> 
+inline bool CanMultMM(
+    const tmv::BandMatrixView<T1>& , const tmv::MatrixView<T2>& ,
+    const tmv::BandMatrixView<T3>& )
+{ return false; }
+
+template <class T1, class T2, class T3> 
+inline bool CanMultMM(
+    const tmv::MatrixView<T2>& , const tmv::BandMatrixView<T1>& ,
+    const tmv::BandMatrixView<T3>& )
+{ return false; }
+
+template <class T1, class T2, class T3> 
+inline bool CanMultMM(
+    const tmv::MatrixView<T2>& , const tmv::MatrixView<T1>& ,
+    const tmv::BandMatrixView<T3>& )
+{ return false; }
+
 #include "TMV_TestMatrixArith.h"
 
 template <class T> 

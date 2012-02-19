@@ -67,7 +67,7 @@ namespace tmv {
     };
 
 #define NEWLO (istrans ? A.nhi() : A.nlo())
-#define NEWHI TMV_MIN(A.nlo()+A.nhi(),istrans?A.colsize():A.rowsize()-1)
+#define NEWHI TMV_MIN(A.nlo()+A.nhi(),(istrans?A.colsize():A.rowsize())-1)
 #define APTR1 inplace ? 0 : \
     BandStorageLength(ColMajor, istrans ? A.rowsize() : A.colsize(), \
                       istrans ? A.colsize() : A.rowsize(), NEWLO, NEWHI)
@@ -130,7 +130,7 @@ namespace tmv {
     BandQRDiv<T>::~BandQRDiv() {}
 
     template <class T> template <class T1> 
-    void BandQRDiv<T>::doLDivEq(const MatrixView<T1>& m) const
+    void BandQRDiv<T>::doLDivEq(MatrixView<T1> m) const
     {
         if (pimpl->istrans)
             QR_RDivEq(pimpl->QRx,pimpl->Qbeta,m.transpose());
@@ -139,7 +139,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void BandQRDiv<T>::doRDivEq(const MatrixView<T1>& m) const
+    void BandQRDiv<T>::doRDivEq(MatrixView<T1> m) const
     {
         if (pimpl->istrans) QR_LDivEq(pimpl->QRx,pimpl->Qbeta,m.transpose());
         else QR_RDivEq(pimpl->QRx,pimpl->Qbeta,m);
@@ -147,7 +147,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void BandQRDiv<T>::doLDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         TMVAssert(m.rowsize() == x.rowsize());
         TMVAssert(m.colsize() == colsize());
@@ -160,7 +160,7 @@ namespace tmv {
 
     template <class T> template <class T1, class T2> 
     void BandQRDiv<T>::doRDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         TMVAssert(m.colsize() == x.colsize());
         TMVAssert(m.rowsize() == rowsize());
@@ -198,7 +198,7 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void BandQRDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
+    void BandQRDiv<T>::doMakeInverse(MatrixView<T1> minv) const
     {
         MatrixView<T1> minv2 = pimpl->istrans ? minv.transpose() : minv;
         TMVAssert(pimpl->QRx.colsize() >= pimpl->QRx.rowsize());
@@ -208,7 +208,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void BandQRDiv<T>::doMakeInverseATA(const MatrixView<T>& minv) const
+    void BandQRDiv<T>::doMakeInverseATA(MatrixView<T> minv) const
     {
         TMVAssert(minv.colsize() == pimpl->QRx.rowsize());
         TMVAssert(minv.rowsize() == pimpl->QRx.rowsize());
@@ -235,7 +235,7 @@ namespace tmv {
 
     template <class T> 
     void GetQFromBandQR(
-        const MatrixView<T>& Q, const GenVector<T>& Qbeta, const ptrdiff_t nlo) 
+        MatrixView<T> Q, const GenVector<T>& Qbeta, const ptrdiff_t nlo) 
     {
         // Extract the Q matrix from a combined QRx matrix
         TMVAssert(Q.colsize() >= Q.rowsize());

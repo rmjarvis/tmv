@@ -1,28 +1,38 @@
 
 #define CT std::complex<T>
 
-#define Def1(T,RT)\
-    template void InstGivensRotate(T& x, T& y, RT& c, T& s);
+#define DefGiv1(T) \
+  template Givens<T > GivensRotate(T& x, T& y); \
 
-Def1(T,T)
-#ifdef TMV_INST_COMPLEX
-Def1(CT,T)
+DefGiv1(T)
+#ifdef INST_COMPLEX
+DefGiv1(CT)
+#endif
+  
+#define DefGiv2(RT,Ts,T) \
+  template void GivensMult(RT c, Ts s, T& x, T& y); \
+  template void GivensMult(RT c, Ts s, VectorView<T > v0, \
+      VectorView<T > v1); \
+  template void GivensSymMult(RT c, Ts s, T& x, T& y, T& z); \
+  template void GivensHermMult(RT c, Ts s, T& x, T& y, T& z); \
+
+DefGiv2(T,T,T)
+#ifdef INST_COMPLEX
+DefGiv2(T,T,CT)
+DefGiv2(T,CT,CT)
 #endif
 
-#undef Def1
-    
-#define Def2(T,RT,T2)\
-    template void InstGivensMultV(\
-        RT c, T s, VectorView<T2> v1, VectorView<T2> v2);
+#undef DefGiv1
+#undef DefGiv2
 
-Def2(T,T,T)
-#ifdef TMV_INST_COMPLEX
-#ifdef TMV_INST_MIX
-Def2(T,T,CT)
+#if 0
+#ifdef INST_COMPLEX
+template void GivensMult(T c, CT s, ConjRef<CT > x, ConjRef<CT > y); 
+template void GivensMult(T c, T s, ConjRef<CT > x, ConjRef<CT > y); 
+template void GivensMult(T c, CT s, VarConjRef<CT > x, VarConjRef<CT > y); 
+template void GivensMult(T c, T s, VarConjRef<CT > x, VarConjRef<CT > y); 
 #endif
-Def2(CT,T,CT)
 #endif
-
-#undef Def2
 
 #undef CT
+

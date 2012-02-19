@@ -39,9 +39,6 @@ opts.Add(BoolVariable('DEBUG',
 opts.Add(PathVariable('PREFIX',
         'prefix for installation','', PathVariable.PathAccept))
 
-opts.Add(EnumVariable('OPT',
-        'Set the optimization level for TMV library', '2',
-        allowed_values=('0','1','2','3')))
 opts.Add(BoolVariable('WITH_OPENMP',
         'Look for openmp and use if found.', True))
 opts.Add(BoolVariable('INST_FLOAT',
@@ -52,16 +49,9 @@ opts.Add(BoolVariable('INST_LONGDOUBLE',
         'Instantiate <long double> templates in compiled library', False))
 opts.Add(BoolVariable('INST_INT',
         'Instantiate <int> templates in compiled library', False))
-opts.Add(BoolVariable('INST_COMPLEX',
-        'Instantiate complex<T> templates in compiled library', True))
-opts.Add(BoolVariable('INST_MIX',
-        'Instantiate functions that mix real with complex', True))
 opts.Add(BoolVariable('SHARED',
         'Build a shared library',False))
 
-opts.Add(EnumVariable('TEST_OPT',
-        'Set the optimization level for TMV test suite', '1',
-        allowed_values=('0','1','2','3')))
 opts.Add(BoolVariable('TEST_FLOAT',
         'Instantiate <float> in the test suite', True))
 opts.Add(BoolVariable('TEST_DOUBLE',
@@ -69,7 +59,7 @@ opts.Add(BoolVariable('TEST_DOUBLE',
 opts.Add(BoolVariable('TEST_LONGDOUBLE',
         'Instantiate <long double> in the test suite', False))
 opts.Add(BoolVariable('TEST_INT',
-        'Instantiate <int> in the test suite', True))
+        'Instantiate <int> in the test suite', False))
 
 opts.Add(BoolVariable('IMPORT_ENV',
         'Import full environment from calling shell', True))
@@ -151,7 +141,7 @@ openmp_mincc_vers = 5.0    # I don't actually know what this should be.
 def RunInstall(env, targets, subdir):
     install_dir = os.path.join(env['INSTALL_PREFIX'], subdir)
     env.Alias(target='install',
-            source=env.Install(dir=install_dir, source=targets))
+          source=env.Install(dir=install_dir, source=targets))
 
 def RunUninstall(env, targets, subdir):
     # There is no env.Uninstall method, we must build our own
@@ -161,7 +151,7 @@ def RunUninstall(env, targets, subdir):
     # delete from $prefix/bin/
     files = []
     for t in targets:
-        ifile = os.path.join(install_dir, os.path.basename(str(t)))
+        ifile = os.path.join(install_dir, os.path.basename(str(t))) 
         files.append(ifile)
 
     for f in files:
@@ -174,7 +164,7 @@ def BasicCCFlags(env):
 
     compiler = env['CXXTYPE']
     version = env['CXXVERSION_NUMERICAL']
-    
+
     # First parse the LIBS options if present
     if env['LIBS'] == '':
         env.Replace(LIBS=[])
@@ -199,7 +189,7 @@ def BasicCCFlags(env):
             if env['WARN']:
                 env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror'])
                 env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
-    
+
         elif compiler == 'clang++':
             env.Replace(CCFLAGS=['-O2'])
             env['TEST_FLAGS'] = ['-O1']
@@ -209,7 +199,7 @@ def BasicCCFlags(env):
             if env['WARN']:
                 env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror'])
                 env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
-    
+
         elif compiler == 'icpc':
             env.Replace(CCFLAGS=['-O2'])
             if env['WITH_SSE']:
@@ -643,7 +633,7 @@ int main()
 
         context.Result(result)
 
-        if not result and context.env['FORCE_CLAMD']:            
+        if not result and context.env['FORCE_CLAMD']:
             print 'Warning: Forced use of clAmdBlas even though link test failed.'
             result = 1
 
@@ -660,7 +650,7 @@ int main()
 def CheckGOTO(context):
     fblas_source_file = """
 extern "C" {
-#include "util/fblas.h"
+#include "fblas.h"
 }
 int main()
 {
@@ -795,7 +785,7 @@ int main()
 def CheckFBLAS(context):
     fblas_source_file = """
 extern "C" {
-#include "util/fblas.h"
+#include "fblas.h"
 }
 int main()
 {
@@ -957,7 +947,7 @@ int main()
 def CheckFLAPACK(context):
     flapack_source_file = """
 extern "C" {
-#include "util/flapack.h"
+#include "flapack.h"
 }
 int main()
 {
@@ -1055,7 +1045,7 @@ def DoLibraryAndHeaderChecks(config):
             #config.CheckCLAMD()
             #config.env.Append(CPPDEFINES=['CLAMD'])
             #print 'Using clAmdBlas'
-
+ 
         elif config.env['FORCE_GOTO']:
             config.CheckGOTO()
             config.env.Append(CPPDEFINES=['FBLAS'])
@@ -1176,7 +1166,6 @@ def DoConfig(env):
     # Some extra flags depending on the options:
     if env['WITH_OPENMP']:
         AddOpenMPFlag(env)
-    env.Append(CPPDEFINES=['TMV_OPT=' + env['OPT']])
     if not env['DEBUG']:
         print 'Debugging turned off'
         env.Append(CPPDEFINES=['TMV_NDEBUG'])
@@ -1191,20 +1180,6 @@ def DoConfig(env):
             env.Append(LINKFLAGS=['-Bstatic'])
         else:
             env.Append(LINKFLAGS=['-static'])
-
-    # Define which types are in library:
-    if not env['INST_DOUBLE']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_DOUBLE'])
-    if not env['INST_FLOAT']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_FLOAT'])
-    if env['INST_INT']:
-        env.Append(CPPDEFINES=['TMV_INST_INT'])
-    if env['INST_LONGDOUBLE']:
-        env.Append(CPPDEFINES=['TMV_INST_LONGDOUBLE'])
-    if not env['INST_MIX']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_MIX'])
-    if not env['INST_COMPLEX']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_COMPLEX'])
 
     import SCons.SConf
 
@@ -1262,7 +1237,7 @@ if not GetOption('help'):
     if env['WITH_UPS']:
         subdirs += ['ups']
 
-    if 'doc' in COMMAND_LINE_TARGETS:
+    if 'doc' in COMMAND_LINE_TARGETS: 
         subdirs += ['doc']
 
     # subdirectores to process.  We process src by default

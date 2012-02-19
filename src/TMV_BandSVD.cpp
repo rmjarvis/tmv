@@ -54,7 +54,7 @@ namespace tmv {
         const bool istrans;
         Matrix<T,ColMajor> U;
         DiagMatrix<RT> S;
-        Matrix<T,ColMajor> V;
+        Matrix<T,ColMajor> Vt;
         RT logdet;
         T signdet;
         mutable ptrdiff_t kmax;
@@ -67,7 +67,7 @@ namespace tmv {
     BandSVDiv<T>::BandSVDiv_Impl::BandSVDiv_Impl(
         const GenBandMatrix<T>& A) :
         istrans(A.colsize() < A.rowsize()),
-        U(M,N), S(N), V(N,N), logdet(0), signdet(1), kmax(0) {}
+        U(M,N), S(N), Vt(N,N), logdet(0), signdet(1), kmax(0) {}
 
 #undef M
 #undef N
@@ -78,7 +78,7 @@ namespace tmv {
     {
         SV_Decompose<T>(
             pimpl->istrans ? A.transpose() : A.view(),
-            pimpl->U.view(),pimpl->S.view(),pimpl->V.view(),
+            pimpl->U.view(),pimpl->S.view(),pimpl->Vt.view(),
             pimpl->logdet,pimpl->signdet);
         thresh(TMV_Epsilon<T>());
     }
@@ -87,55 +87,55 @@ namespace tmv {
     BandSVDiv<T>::~BandSVDiv() {}
 
     template <class T> template <class T1> 
-    void BandSVDiv<T>::doLDivEq(const MatrixView<T1>& m) const
+    void BandSVDiv<T>::doLDivEq(MatrixView<T1> m) const
     {
         TMVAssert(m.colsize() == rowsize());
         TMVAssert(m.colsize() == colsize());
         if (pimpl->istrans) 
             CallSV_RDiv(
-                T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
+                T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,
                 m.transpose(),m.transpose());
-        else CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,m);
+        else CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,m);
     }
 
     template <class T> template <class T1> 
-    void BandSVDiv<T>::doRDivEq(const MatrixView<T1>& m) const
+    void BandSVDiv<T>::doRDivEq(MatrixView<T1> m) const
     {
         TMVAssert(m.rowsize() == rowsize());
         TMVAssert(m.rowsize() == colsize());
         if (pimpl->istrans) 
             CallSV_LDiv(
-                T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
+                T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,
                 m.transpose(),m.transpose());
-        else CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,m);
+        else CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,m);
     }
 
     template <class T> template <class T1, class T2> 
     void BandSVDiv<T>::doLDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         TMVAssert(m.rowsize() == x.rowsize());
         TMVAssert(m.colsize() == colsize());
         TMVAssert(x.colsize() == rowsize());
         if (pimpl->istrans) 
             CallSV_RDiv(
-                T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
+                T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,
                 m.transpose(),x.transpose());
-        else CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,x);
+        else CallSV_LDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,x);
     }
 
     template <class T> template <class T1, class T2> 
     void BandSVDiv<T>::doRDiv(
-        const GenMatrix<T1>& m, const MatrixView<T2>& x) const
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
     {
         TMVAssert(m.colsize() == x.colsize());
         TMVAssert(m.rowsize() == rowsize());
         TMVAssert(x.rowsize() == colsize());
         if (pimpl->istrans) 
             CallSV_LDiv(
-                T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,
+                T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,
                 m.transpose(),x.transpose());
-        else CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->V,pimpl->kmax,m,x);
+        else CallSV_RDiv(T(),pimpl->U,pimpl->S,pimpl->Vt,pimpl->kmax,m,x);
     }
 
     template <class T> 
@@ -153,31 +153,31 @@ namespace tmv {
     }
 
     template <class T> template <class T1> 
-    void BandSVDiv<T>::doMakeInverse(const MatrixView<T1>& minv) const
+    void BandSVDiv<T>::doMakeInverse(MatrixView<T1> minv) const
     { 
         if (pimpl->istrans) {
-            Matrix<T,ColMajor> SinvV = 
-                pimpl->V.conjugate().rowRange(0,pimpl->kmax) /
+            Matrix<T,ColMajor> SinvVt = 
+                pimpl->Vt.conjugate().rowRange(0,pimpl->kmax) /
                 pimpl->S.subDiagMatrix(0,pimpl->kmax);
-            minv = pimpl->U.conjugate().colRange(0,pimpl->kmax) * SinvV;
+            minv = pimpl->U.conjugate().colRange(0,pimpl->kmax) * SinvVt;
         } else  {
             Matrix<T,ColMajor> SinvUt = 
                 pimpl->U.adjoint().rowRange(0,pimpl->kmax) /
                 pimpl->S.subDiagMatrix(0,pimpl->kmax);
-            minv = pimpl->V.adjoint().colRange(0,pimpl->kmax) * SinvUt;
+            minv = pimpl->Vt.adjoint().colRange(0,pimpl->kmax) * SinvUt;
         }
     }
 
     template <class T> 
-    void BandSVDiv<T>::doMakeInverseATA(const MatrixView<T>& minv) const
+    void BandSVDiv<T>::doMakeInverseATA(MatrixView<T> minv) const
     {
-        Matrix<T,ColMajor> SinvV = 
-            pimpl->V.rowRange(0,pimpl->kmax) /
+        Matrix<T,ColMajor> SinvVt = 
+            pimpl->Vt.rowRange(0,pimpl->kmax) /
             pimpl->S.subDiagMatrix(0,pimpl->kmax);
         if (pimpl->istrans)
-            minv = SinvV.transpose() * SinvV.conjugate();
+            minv = SinvVt.transpose() * SinvVt.conjugate();
         else
-            minv = SinvV.adjoint() * SinvV;
+            minv = SinvVt.adjoint() * SinvVt;
     }
 
     template <class T> 
@@ -234,17 +234,17 @@ namespace tmv {
 
     template <class T> ConstMatrixView<T> BandSVDiv<T>::getU() const
     {
-        if (pimpl->istrans) return pimpl->V.transpose(); 
+        if (pimpl->istrans) return pimpl->Vt.transpose(); 
         else return pimpl->U.view(); 
     }
 
     template <class T> ConstDiagMatrixView<RT> BandSVDiv<T>::getS() const
     { return pimpl->S.view(); }
 
-    template <class T> ConstMatrixView<T> BandSVDiv<T>::getV() const
+    template <class T> ConstMatrixView<T> BandSVDiv<T>::getVt() const
     {
         if (pimpl->istrans) return pimpl->U.transpose(); 
-        else return pimpl->V.view();
+        else return pimpl->Vt.view();
     }
 
     template <class T> 
@@ -257,16 +257,16 @@ namespace tmv {
             *fout << "M = "<<m<<std::endl;
             *fout << "U = "<<getU()<<std::endl;
             *fout << "S = "<<getS()<<std::endl;
-            *fout << "V = "<<getV()<<std::endl;
+            *fout << "Vt = "<<getVt()<<std::endl;
         }
-        Matrix<T> usv = getU()*getS()*getV();
+        Matrix<T> usv = getU()*getS()*getVt();
         RT nm = Norm(usv-mm);
-        nm /= Norm(getU())*Norm(getS())*Norm(getV());
+        nm /= Norm(getU())*Norm(getS())*Norm(getVt());
         RT cond = getS()(0) / getS()(getKMax()-1);
         if (fout) {
-            *fout << "USV = "<<usv<<std::endl;
-            *fout << "Norm(M-USV) = "<<Norm(mm-usv)<<std::endl;
-            *fout << "Norm(M-USV)/Norm(USV) = "<<nm<<std::endl;
+            *fout << "USVt = "<<usv<<std::endl;
+            *fout << "Norm(M-USVt) = "<<Norm(mm-usv)<<std::endl;
+            *fout << "Norm(M-USVt)/Norm(USVt) = "<<nm<<std::endl;
         }
         return nm < cond*RT(mm.colsize())*TMV_Epsilon<T>();
     }

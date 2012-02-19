@@ -1,36 +1,83 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
+// Copyright (C) 1998 - 2009                                                 //
+//                                                                           //
+// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
+// where you can find the current version and current documention.           //
+//                                                                           //
+// For concerns or problems with the software, Mike may be contacted at      //
+// mike_jarvis@users.sourceforge.net                                         //
+//                                                                           //
+// This program is free software; you can redistribute it and/or             //
+// modify it under the terms of the GNU General Public License               //
+// as published by the Free Software Foundation; either version 2            //
+// of the License, or (at your option) any later version.                    //
+//                                                                           //
+// This program is distributed in the hope that it will be useful,           //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
+// GNU General Public License for more details.                              //
+//                                                                           //
+// You should have received a copy of the GNU General Public License         //
+// along with this program in the file LICENSE.                              //
+//                                                                           //
+// If not, write to:                                                         //
+// The Free Software Foundation, Inc.                                        //
+// 51 Franklin Street, Fifth Floor,                                          //
+// Boston, MA  02110-1301, USA.                                              //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
+
+
+#ifdef _OPENMP
 
 #include "TMV_Blas.h"
-#include "tmv/TMV_MultMM_OpenMP.h"
-#include "tmv/TMV_MultMM.h"
-#include "tmv/TMV_Matrix.h"
+#include "TMV_MultMM.h"
+#include <omp.h>
 
 namespace tmv {
 
-    template <class T1, int C1, class T2, int C2, class T3>
-    void InstMultMM_OpenMP(
-        const T3 x,
-        const ConstMatrixView<T1,C1>& m1,
-        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3)
+    template <bool add, class T, class Ta, class Tb> 
+    void OpenMPMultMM(
+        const T x, const GenMatrix<Ta>& A, const GenMatrix<Tb>& B,
+        MatrixView<T> C)
     {
-#if !defined(BLAS) && TMV_OPT > 2 && defined(_OPENMP)
-        InlineMultMM_OpenMP<false>(Scaling<0,T3>(x),m1,m2,m3); 
-#else
-        InstMultMM(x,m1,m2,m3);
-#endif
+        const ptrdiff_t M = C.colsize();
+        const ptrdiff_t N = C.rowsize();
+
+#pragma omp parallel
+        {
+            ptrdiff_t num_threads = omp_get_num_threads();
+            ptrdiff_t mythread = omp_get_thread_num();
+            if (num_threads == 1) {
+                BlockMultMM<add>(x,A,B,C);
+            } else if (M > N) {
+                ptrdiff_t Mx = M / num_threads;
+                Mx = ((((Mx-1)>>4)+1)<<4); // round up to mult of 16
+                ptrdiff_t i1 = mythread * Mx;
+                ptrdiff_t i2 = (mythread+1) * Mx;
+                if (i2 > M || mythread == num_threads-1) i2 = M;
+                if (i1 < M) {
+                    // Need to make sure, since we rounded up Mx!
+                    BlockMultMM<add>(x,A.rowRange(i1,i2),B,C.rowRange(i1,i2));
+                }
+            } else {
+                ptrdiff_t Nx = N / num_threads;
+                Nx = ((((Nx-1)>>4)+1)<<4); 
+                ptrdiff_t j1 = mythread * Nx;
+                ptrdiff_t j2 = (mythread+1) * Nx;
+                if (j2 > N || mythread == num_threads-1) j2 = N;
+                if (j1 < N) {
+                    BlockMultMM<add>(x,A,B.colRange(j1,j2),C.colRange(j1,j2));
+                }
+            }
+        }
     }
 
-    template <class T1, int C1, class T2, int C2, class T3>
-    void InstAddMultMM_OpenMP(
-        const T3 x,
-        const ConstMatrixView<T1,C1>& m1,
-        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3)
-    {
-#if !defined(BLAS) && TMV_OPT > 0 && defined(_OPENMP)
-        InlineMultMM_OpenMP<true>(Scaling<0,T3>(x),m1,m2,m3); 
-#else
-        InstAddMultMM(x,m1,m2,m3);
+#ifdef BLAS
+#define INST_SKIP_BLAS
 #endif
-    }
 
 #define InstFile "TMV_MultMM_OpenMP.inst"
 #include "TMV_Inst.h"
@@ -38,4 +85,5 @@ namespace tmv {
 
 } // namespace tmv
 
+#endif
 

@@ -2,45 +2,40 @@
 #define START1 0
 #define START2 0
 
-#define NODIV 
-#define NOASSIGN
-#define PRINTALGO_NormB
-
-#include "TMV_Test.h"
-#include "TMV_Test_2.h"
 #include "TMV.h"
 #include "TMV_Band.h"
+#include "TMV_Test.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestBandArith.h"
 
-template <class M1, class M2> 
+template <class T1, class T2> 
 inline bool CanAddEq(
-    const tmv::BaseMatrix_Band_Mutable<M1>& a,
-    const tmv::BaseMatrix_Band<M2>& b)
+    const tmv::BandMatrixView<T1>& a, const tmv::BandMatrixView<T2>& b)
 { 
     return a.colsize() == b.colsize() && a.rowsize() == b.rowsize() &&
         a.nhi() >= b.nhi() && a.nlo() >= b.nlo();
 }
 
-template <class M1, class M2, class M3> 
-inline bool CanMult(
-    const tmv::BaseMatrix_Band<M1>& a, const tmv::BaseMatrix_Band<M2>& b,
-    const tmv::BaseMatrix_Band_Mutable<M3>& c)
+template <class T1, class T2, class T3> 
+inline bool CanMultMM(
+    const tmv::BandMatrixView<T1>& a, const tmv::BandMatrixView<T2>& b,
+    const tmv::BandMatrixView<T3>& c)
 { 
     return a.rowsize() == b.colsize() && a.colsize() == c.colsize() &&
         b.rowsize() == c.rowsize() &&
-        (c.nlo() >= a.nlo() + b.nlo() || c.nlo() == c.colsize()-1) &&
-        (c.nhi() >= a.nhi() + b.nhi() || c.nhi() == c.rowsize()-1);
+        (c.nlo() >= a.nlo() + b.nlo() || c.nlo() == int(c.colsize())-1) &&
+        (c.nhi() >= a.nhi() + b.nhi() || c.nhi() == int(c.rowsize())-1);
 }
 
-template <class M1, class M2, class M3> 
-inline bool CanElemMult(
-    const tmv::BaseMatrix_Band<M1>& a, const tmv::BaseMatrix_Band<M2>& b,
-    const tmv::BaseMatrix_Band_Mutable<M3>& c)
-{ 
+template <class T1, class T2, class T3>
+static inline bool CanElemMultMM(
+    const tmv::BandMatrixView<T1>& a, const tmv::BandMatrixView<T2>& b,
+    const tmv::BandMatrixView<T3>& c)
+{
     return a.rowsize() == c.rowsize() && a.colsize() == c.colsize() &&
         b.rowsize() == c.rowsize() && b.colsize() == c.colsize() &&
-        c.nlo() >= std::min(a.nlo(),b.nlo()) &&
-        c.nhi() >= std::min(a.nhi(),b.nhi());
+        c.nlo() > std::min(a.nlo(),b.nlo()) &&
+        c.nhi() > std::min(a.nhi(),b.nhi());
 }
 
 

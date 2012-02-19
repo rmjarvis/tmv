@@ -1,6 +1,6 @@
 % !TEX root = TMV_Documentation.tex
 
-\section{Known Bugs and Deficiencies}
+\section{Known bugs and deficiencies}
 \label{Bugs}
 \index{Bugs!Known bugs}
 
@@ -11,19 +11,41 @@
 
 I have tested the code using the following compilers:\\
 $\quad$\\
-GNU's g++ -- versions 3.4.6, 4.1.2, 4.3.3, 4.4.4 and 4.5.0 \\
-% chimaera, bach, susi g++-4.3.3, Flute g++-fsf-4.4 Flute g++-4
+% Done:
+% Flute: clang++ 3.1 NO BLAS
+% Flute: Apple g++ 4.0.1 NO BLAS
+% Flute: Apple g++ 4.2.1 NO BLAS
+% Flute: g++ 4.4.6 NO BLAS
+% Flute: g++ 4.5.3 NO BLAS, ATLAS, ATLAS_LAP
+% Flute: g++ 4.6.2 NO BLAS, GOTO2, GOTO2+FLAPACK, ATLAS
+% bnl: g++ 4.3.2 NO BLAS, FBLAS
+% bnl: g++ 4.1.2 NO BLAS, FBLAS
+% apu: icpc 10.1 NO BLAS, MKL BLAS, MKL LAPACK
+% chimaera: pgCC 6.1 NO BLAS, ACML BLAS, ACML LAPACK
+% chimaera: g++ 3.4.6 NO BLAS, ATLAS+FLAPACK, 
+% lonestar: icpc 11.1 NO BLAS, MKL BLAS, MKL LAPACK
+% lonestar: g++ 4.1.2 NO BLAS, FBLAS, MKL BLAS, MKL LAPACK
+% queenbee: icpc 11.1 NO BLAS, MKL BLAS, MKL LAPACK
+% queenbee: g++ 3.4.6 NO BLAS, FBLAS, MKL BLAS, MKL LAPACK
+% susi: g++ 4.4.5 NO BLAS, MKL BLAS, MKL LAPACK	
+% susi: icpc 12.0.4 NO BLAS, MKL BLAS, MKL LAPACK
+% 
+GNU's g++ -- versions 3.4.6, 4.1.2, 4.3.2, 4.4.6, 4.5.3, 4.6.2 \\
+% chimaera, bach g++41, bach g++, Flute g++-fsf-4.4, Flute g++-fsf-4.5, Flute g++-fsf-4.6
 Apple's g++ -- version 4.0.1, 4.2.1 \\
-% Flute g++-4.0, g++
-Intel's icpc -- versions 10.1, 11.1\\
-% apu, abe
+% Flute g++-4.0, g++-4.2
+Intel's icpc -- versions 10.1, 11.1, 12.0.4\\
+% apu, queenbee, susi
 Portland's pgCC -- version 6.1\\
 % chimaera
+LLVM's clang++ -- version 3.1\\
+% Flute
 Microsoft's cl -- Visual C++ 2008 Express Edition\\
 % Sousaphone
 \index{Installation!g++}
 \index{Installation!icpc}
 \index{Installation!pgCC}
+\index{Installation!clang++}
 \index{Installation!Visual C++}
 
 It should work with any ansi-compliant
@@ -31,7 +53,7 @@ compiler, but no guarantees if you use one other than these\footnote{
 It does seem to be the case that 
 every time I try the code on a new compiler, there is some issue that needs to be addressed.  
 Either because the compiler fails to support some aspect of the C++ standard, or they enforce
-an aspect that I have failed to strictly conform to.}.
+an aspect that I have failed to strictly conform to.  Or sometimes even because of a bug in the compiler.}.
   So if you do try to compile on a different compiler, 
 I would appreciate it if you could let me know whether you were successful.  
 Please email the TMV discussion group at \mygroup\ with your experience (good or bad) using 
@@ -50,14 +72,12 @@ g++ 4.4 and 4.5 (at least 4.4.2 through 4.5.0) have a pretty egregious bug in th
 can cause the code to abort rather than allow a thrown value to be caught.  
 This is a reported bug (42159), and according to the bug report it seems to only occur in
 conjunction with MacOS 10.6 (Snow Leopard), however it is certainly possible that it 
-may show up in other systems too. 
+may show up in other systems too.  (I don't have Lion yet, so I haven't tested it with that.)
 
 However, I have discovered a workaround that seems to fix the problem.  Link with 
 \tt{-lpthread} even if you are not using OpenMP or have any other reason to use that
 library.  Something about linking with that library fixes the exception handling problems.
-In a SCons installation, this is done automatically for g++ versions 4.4 and 4.5.  
-If you are installing with make, then you'll have to add this yourself.
-Likewise, you'll need to link your own code with \tt{-lpthread} as well.
+Anyway, this is mostly to explain why TMV adds \tt{-lpthread} to the recommended linking instructions for these systems even if you disable OpenMP support.
 
 \item {\bf g++ -O2, versions 4.1 and 4.2:}
 \index{Installation!g++}
@@ -73,7 +93,7 @@ and sent it to Gnu as a bug report.
 They confirmed the bug and suggested
 using the flag \texttt{-fno-strict-aliasing}, which did fix the problems.
 
-Another option, which might be a good idea anyway is to just use \texttt{-O} 
+Another option, which might be a good idea anyway is to just use \texttt{-O1} 
 when you want a version that 
 includes the TMV assert statements, and make sure to use \texttt{-DNDEBUG} 
 when you want a more optimized version.
@@ -141,51 +161,32 @@ appreciate hearing about your efforts at  \mygroup.
 \item {\bf Memory requirements:}
 The library is pretty big, so it can take quite a lot of memory to compile. 
 For most compilers, it seems that a minimum of around 512K is required.
-For compiling the test suite with the \texttt{-DXTEST} flag (especially when combining
-multiple extra tests, e.g. XTEST=127), at least 2 - 4 GB of memory is recommended.
+For compiling the test suite with the \texttt{XTEST} flag set to something other than 0 (especially something that combines a lot of multiple extra tests, e.g. XTEST=127), at least around 4 GB of memory is recommended.
 
 \item {\bf Linker choking:}
 Some linkers (e.g. the one on my old Mac G5) have trouble with the size 
 of some of the test suite's executables, especially when compiled 
-with \texttt{-DXTEST}.  If you encounter this problem, you can instead
+with \texttt{XTEST} set to include lots of extra tests.  If you encounter this problem, you can instead
 compile the smaller test suites.  
 
 The tests
 in \texttt{tmvtest1} are split into \texttt{tmvtest1a}, \texttt{tmvtest1b} and \texttt{tmvtest1c}.
 Likewise \texttt{tmvtest2} has \texttt{a}, \texttt{b} and \texttt{c} versions, and \texttt{tmvtest3}
 has \texttt{a}, \texttt{b}, \texttt{c} and \texttt{d} versions.  These are 
-compiled by typing \texttt{make test1a},~ \texttt{make test1b}, etc.  So if you want
-to run the tests on a machine that can't link the full programs, these
-smaller versions can help.   
-
-With the SCons installation, you can 
-type \texttt{scons test SMALL\_TESTS=true}.  Or you can make them one
+compiled by typing \texttt{scons test SMALL\_TESTS=true}.  Or you can make them one
 at a time by typing \texttt{scons test1a},~ \texttt{scons test1b}, etc.
 
-You might also try testing only one type at a time: First compile with \texttt{-DNO\_INST\_FLOAT},
-and then with \texttt{-DNO\_INST\_DOUBLE} (or with SCons, use \texttt{INST\_FLOAT=false}
-and then \texttt{INST\_FLOAT=true INST\_DOUBLE=false}).  This cuts the size of the executables
+You might also try testing only one type at a time: First compile with \texttt{INST\_FLOAT=false}
+and then \texttt{INST\_FLOAT=true INST\_DOUBLE=false}.  This cuts the size of the executables
 in half, which can also help if the above trick doesn't work.  (I had to do this for test2c on one 
 of my test systems that does not have much memory.)
 \index{Installation!Test suite}
 
-\item {\bf Standard Template Library:}
-In a few places, the TMV code uses standard template library algorithms.
-Normally these work fine, but a couple of the compilers I tested the code on
-didn't seem to have the STL correctly installed. 
-
-Rather than trying to get the sysadmin for these systems to find and fix the problem, 
-I just added an option to compile without some of the problematic STL functions.
-With the option set, it uses a simple median-of-three
-quicksort algorithm, rather than the STL \tt{sort} command, and it reads the strings
-in character by character rather than using the normal string I/O.  
-You can enable this option by compiling with the flag \texttt{-DNOSTL}.  
-
 \item {\bf Non-portable IsNaN():}
-The LAPACK function \tt{sstegr} sometimes produces \tt{nan} values on output.
+The LAPACK function \tt{?stegr} sometimes produces \tt{nan} values on output.
 Apparently there is a bug in at least some distributions of this function.
 Anyway, TMV checks for this and calls the alternative (but slower) function
-\tt{sstedc} instead whenever a \tt{nan} is found.  
+\tt{?stedc} instead whenever a \tt{nan} is found.  
 The problem is that there is no C++ standard way to check
 for a \tt{nan} value.  
 
@@ -199,10 +200,7 @@ However, the provided code did work successfully on all the compilers I
 tested it on, so technically this is not a ``known'' compiler issue, just a 
 potential issue.}.
 
-Alternatively, you can compile with \texttt{-DNOSTEGR} which will always
-use \tt{sstedc} instead of \tt{sstegr} at the expense of a bit of speed.
-Since this is the only place we need to use the \tt{IsNaN} function, that 
-should fix the problem.
+Note that this can only ever be an issue if you specifically request that TMV use the \tt{stegr} algorithm with the SCons option \tt{USE_STEGR=true}.  If you do not do this, then TMV doesn't use the LAPACK \tt{?stegr} functions at all, so it's not a problem.
 
 \end{itemize}
 
@@ -218,9 +216,8 @@ result for $R$.  The diagonal elements of $R$ are supposed to be monotonically d
 along the diagonal, but sometimes this is not strictly true.  This probably varies among
 implementations, so your version might always succeed.
 
-But if this feature is important to you, then you can compile with the flag \texttt{-DNOGEQP3},
-which will use the native TMV code for strict QRP decomposition for this 
-rather than the LAPACK function (which is called \tt{?geqp3}).
+This would only happen if you install TMV with the SCons option \tt{USE_GEQP3=true},
+to use the LAPACK function (which is called \tt{?geqp3} rather than the native TMV function.  So the solution is to use \tt{USE_GEQP3=false} instead.
 
 \item{\bf Info $<$ 0 errors:}
 \index{LAPACK!Workspace issues}
@@ -228,6 +225,7 @@ If you get an error that looks something like:\\
 \texttt{TMV Error: info < 0 returned by LAPACK function dormqr}\\
 then this probably means that your LAPACK distribution does not support
 workspace size queries.  The solution is to use the flag \texttt{-DNOWORKQUERY}.
+I think TMV usually knows about these cases now and checks for them, but you might have a LAPACK distribution that I'm not aware of.  So you can add this flag by hand with the SCons option \tt{EXTRA_FLAGS=-DNOWORKQUERY}.  If that doesn't fix your problem, please file a bug report at  \myissues, since that means it's probably something else.
 
 \item {\bf Unable to link LAPACK on Mac:}
 \index{LAPACK!Linking}
@@ -257,26 +255,25 @@ propagates to lots of other routines as well.  The errors seem to be only for
 large matrices with at least one dimension $N > 100$ or so.  (I'm not sure of the 
 exact crossover point from working to non-working code.)
 
-I haven't surveyed which versions of XCode have this bug, but it is in versions
-3.2.2 and 3.2.4 at least.  
-Apparently, this is a known bug (ID 7437011), but it hasn't been fixed yet
-as of the writing of this documentation. 
+Apparently, this is a known bug (ID 7437011), but I don't know if it is fixed in the latest
+XCode 4 for the Lion OS (I don't yet have a computer with Lion on it).  But the bug is
+at least present in XCode versions 3.2.2 through 3.2.6.
 The best thing to do to see if your XCode installation has this problem
 is to install the test suite and make sure that it runs without errors.  If it makes it 
 through without errors, then you don't have to worry about it.
 
 If you encounter this problem, which manifests as \tt{tmvtest1} failing in the \tt{<float>} section,
 then I'm afraid the possible solutions are to forego using \tt{Matrix<float>}, switch to another
-BLAS library, or compile TMV without BLAS.
+BLAS library, or compile TMV without BLAS (with SCons option \tt{USE_BLAS=false}).
 
 \item {\bf Overflow and underflow when using LAPACK:}
 \index{LAPACK!Overflow/underflow problems}
 \index{Bugs!nan or inf when using LAPACK}
 The normal distribution of LAPACK algorithms are not as careful as the TMV code when 
 it comes to guarding against overflow and underflow.  As a result, you may find
-matrix decompositions resulting in values with nan or inf when using TMV
-with LAPACK support enabled.  The solution is to compile TMV without the LAPACK
-library (e.g. by using \tt{WITH_LAPACK=false} in the SCons installation method).
+matrix decompositions resulting in values with \tt{nan} or \tt{inf} when using TMV
+with LAPACK support enabled.  The solution if this is a problem for you is to compile TMV without the LAPACK
+library (using the SCons option \tt{WITH_LAPACK=false}).
 This does not generally result in slower code, since the native TMV code is almost always
 as fast (usually using the same algorithm) as the LAPACK distribution, but has better
 guards against overflow and underflow.
@@ -286,12 +283,16 @@ guards against overflow and underflow.
 I have found that many LAPACK libraries (especially older installations) 
 are not thread-safe.  So you might get segmentation faults or other strange
 non-repeatable errors at random times when using LAPACK within a multi-threaded
-program.  The solution is to compile TMV without LAPACK (e.g. by using
-\tt{WITH_LAPACK=false} in the SCons installation method).  
+program.  The solution is to compile TMV without LAPACK (with SCons option
+\tt{WITH_LAPACK=false}).
+
+\item {\bf LAPACK fails for extremely large matrices:}
+\index{LAPACK!Problems with extremely large matrices}
+For matrices that use more than 2 GBytes of memory, the integers that index the memory addresses need to be more that $2^{31}$.  This number exceeds the capacity of a 32 bit (signed) integer.  So the TMV library uses \tt{ptrdiff_t} for all integers that might be used in calculating such an index to make sure it is always safe.  However, LAPACK distributions generally use \tt{int}.  If this happens to be 32 bits on your machine, it can overflow.  This is particularly a problem for the LAPACK SVD routine, since it needs workspace of size a bit more than $4n^2$.  So if $4n^2$ is more than $2^{31}$, it will fail.  Again, the solution is to compile TMV without LAPACK (with SCons option \tt{WITH_LAPACK=false}).
 
 \end{itemize}
 
-\subsection{To Do List}
+\subsection{To-do list}
 \label{To_Do_List}
 
 Here is a list of various deficiencies with the current version of the TMV library.
@@ -323,7 +324,7 @@ valid, mathematically.  Rewriting this as:
 s3 += x*s1;
 s3 += s2;
 \end{tmvcode}
-will compile and work correctly.  This bug will be fixed in version 0.70, which is currently
+will compile and work correctly.  This bug will be fixed in version 0.90, which is currently
 in development.
 
 \item
@@ -338,8 +339,7 @@ I need to add the non-hermitian routines.
 
 Block-diagonal, generic sparse (probably both
 row-based and column-based), block sparse, symmetric and hermitian block
-diagonal, small symmetric and hermitian...
-Maybe skew-symmetric and skew-hermitian.  Are these worth adding?  Let me know.
+diagonal, etc.  Maybe skew-symmetric and skew-hermitian.  Are these worth adding?  Let me know.
 
 \item
 \textbf{Packed storage}
@@ -347,36 +347,11 @@ Maybe skew-symmetric and skew-hermitian.  Are these worth adding?  Let me know.
 \index{UpperTriMatrix!Packed storage}
 \index{LowerTriMatrix!Packed storage}
 
-Triangle and symmetric matrices. can be stored in (approximately) half the 
+Triangular and symmetric matrices. can be stored in (approximately) half the 
 memory as a full $N \times N$ matrix using what is known as packed storage.  
 There are BLAS routines for dealing with
 these packed storage matrices, but I don't yet have the ability to 
 create/use such matrices.
-
-\item
-\textbf{List initialization for non-rectangular matrices}
-\index{Matrix!List initialization}
-
-I'm not sure what makes the most sense for the list initialization of special matrices.
-The most straightforward way to implement it would be to just assign the elements
-in order that they are stored in memory.  But what do I do for the memory locations
-that do not correspond to a location in memory.
-For example, for an \tt{UpperTriMatrix}, should the initializer be:
-\begin{tmvcode}
-U << 1, 2, 3,
-     0, 4, 5,
-     0, 0, 6;
-\end{tmvcode}
-or
-\begin{tmvcode}
-U << 1, 2, 3,
-        4, 5,
-           6;
-\end{tmvcode}
-Likewise, a \tt{BandMatrix} has confusing locations for elements that are allocated in 
-memory, but are not actually part of the matrix.  Should I require these to be in the 
-list of values?  If you have any thoughts about this, feel free to email 
-the disccussion group (\mygroup) about them.
 
 \item
 \textbf{Hermitian eigenvector algorithm}
@@ -388,14 +363,15 @@ There is a faster algorithm for calculating eigenvectors of a hermitian
 matrix given the eigenvalues, which uses a technique know as
 a ``Relatively Robust Representation''.  The native TMV
 code does not use this, so it is slower than a compilation which calls
-the LAPACK routine.
+the LAPACK routine (which is only enabled if you use both 
+\tt{WITH_LAPACK=true} and \tt{USE_STEGR=true}).
 I think this is the only routine for which the LAPACK version is still significantly
-faster than the native TMV code.
+faster than the native TMV code.  Although, I do find that many LAPACK distributions have a fairly buggy version of the algorithm that does not deal very well with overflow and underflow, which is why it must be specifically enabled.  Hopefully when I implement this in TMV, I can do a better job in this regard.
 
 \item
 \textbf{Row-major Bunch-Kaufman}
 \index{SymMatrix!Bunch-Kaufman decomposition}
-\index{Bunch-Kaufman Decomposition!SymMatrix}
+\index{Bunch-Kaufman decomposition!SymMatrix}
 
 The Bunch-Kaufman decomposition for row-major symmetric/hermitian
 matrices is currently $L D L^\dagger$, rather than $L^\dagger D L$.  
@@ -425,24 +401,10 @@ feature too.  Probably as an option (since most matrices don't need it)
 as something like \tt{m.Equilibrate()} before calling a division routine.
 
 \item
-\textbf{OpenMP}
+\textbf{OpenMP in the SVD algorithm}
 \index{OpenMP}
 
-I have rewritten the basic Matrix product algorithm to exploit multiple threads using 
-OpenMP pragma's.  This gives a good boost in speed for non-BLAS 
-compilations, especially since most of the calculation time for the higher-level
-algorithms is in the MultMM functions.  Also, the SVD divide and conquer
-algorithm uses OpenMP.  
-
-But the SVD only uses half of the potential for OpenMP at the moment.  I need
-to reorganize the algorithm a bit to make it more amenable to being parallelized,
-but it is certainly doable.
-
-Also I should go through the whole code to
-see which other algorithms might benefit from parallelization.  I suspect that all of
-the so-called ``Level 3 BLAS'' functions will be amenable to parallelization.  I'm not sure
-which higher level functions (i.e. those normally in a LAPACK library) can
-be parallelized, but probably some of them.
+TMV's implementation of the divide-and-conquer SVD algorithm only uses half of the potential for parallelization at the moment.  I need to reorganize the algorithm a bit to make it more amenable to being further parallelized, but it is certainly doable.
 
 \item
 \textbf{Check for memory throws}
@@ -453,6 +415,8 @@ matrix being worked on, so we assume there is enough space for
 these allocations.  However, I should add try-catch blocks to catch 
 any out-of-memory throws and use a less memory-intesive algorithm
 when necessary.
+
+Version 0.90 will include these checks.
 
 \item
 \textbf{Integer determinants for special matrices}
@@ -468,3 +432,16 @@ structure, even using the same Bareiss algorithm as I currently use.
 \index{SymBandMatrix!Determinant!integer values}
 
 \end{enumerate}
+
+\subsection{Reporting bugs}
+
+If you find a bug in the TMV library that is not listed above, please let me know.  The preferred way to report a bug is to enter a ticket at \myissues.  You will need to have a Google account, but they are free, so I hope that isn't too much of a hardship.  Click ``New Issue''.  If you aren't logged into your Google account, you'll be asked to log in.  This will bring up a form for you to fill out.  
+
+There are two templates for you to choose from: ``Defect report from user'' and ``Feature request''.  In both cases, you should first enter a summary.  Then there is a text box where you can provide more information.
+
+For a defect report, there are three questions that you should answer to help me understand the problem you are having.  They are pretty self-explanatory, so just do your best to answer them as completely as possible.  Err on the side of providing too much information rather than too little to help me figure out how to reproduce the error.  And if appropriate, please also attach the code you are using, preferably distilled down to as small a program as possible, that produces the error.
+
+A feature request is more open-ended.  Just describe what you would like to see in a future version of TMV in as much detail as you feel is appropriate.
+
+Another option, especially if you aren't sure if what you are seeing is really a bug or not and you want some more informal feedback, is to email the TMV discussion email list at \mygroup.  Either I or someone else on the list may be able to help you figure out the problem.
+

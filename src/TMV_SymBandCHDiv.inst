@@ -1,0 +1,22 @@
+
+#define CT std::complex<T>
+
+#define DefDivEq(T,T1)\
+template void CH_LDivEq(const GenSymBandMatrix<T1 >& LL,\
+    MatrixView<T > b); \
+template void CH_RDivEq(const GenSymBandMatrix<T1 >& LL,\
+    MatrixView<T > b); \
+template void LDL_LDivEq(const GenSymBandMatrix<T1 >& LL,\
+    MatrixView<T > b); \
+template void LDL_RDivEq(const GenSymBandMatrix<T1 >& LL,\
+    MatrixView<T > b); \
+
+DefDivEq(T,T)
+#ifdef INST_COMPLEX
+DefDivEq(CT,T)
+DefDivEq(CT,CT)
+#endif
+
+#undef DefDivEq
+
+#undef CT

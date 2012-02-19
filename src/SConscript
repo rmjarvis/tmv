@@ -8,18 +8,16 @@ ReadFileList=env['__readfunc']
 
 # Source lists
 basic = ReadFileList('basic.files')
+basic_noint = ReadFileList('basic_noint.files')
 basic_omp = ReadFileList('basic_omp.files')
+basic_omp_noint = ReadFileList('basic_omp_noint.files')
+basic_geqp3 = ReadFileList('basic_geqp3.files')
 diag = ReadFileList('diag.files')
 tri = ReadFileList('tri.files')
 tri_noint = ReadFileList('tri_noint.files')
-tri_omp = ReadFileList('tri_omp.files')
-tri_omp_noint = ReadFileList('tri_omp_noint.files')
-div = ReadFileList('div.files')
-div_omp = ReadFileList('div_omp.files')
-div_geqp3 = ReadFileList('div_geqp3.files')
 
 band = ReadFileList('band.files')
-band_noint = ReadFileList('band_noint.filesx')
+band_noint = ReadFileList('band_noint.files')
 sym = ReadFileList('sym.files')
 sym_noint = ReadFileList('sym_noint.files')
 sym_omp_noint = ReadFileList('sym_omp_noint.files')
@@ -27,15 +25,17 @@ sym_stegr = ReadFileList('sym_stegr.files')
 symband = ReadFileList('symband.files')
 symband_noint = ReadFileList('symband_noint.files')
 
-lib_files= basic + diag + tri 
-lib_noint_files= tri_noint + div
-lib_omp_files= basic_omp+ tri_omp 
-lib_omp_noint_files = tri_omp_noint + div_omp
-lib_geqp3_files= div_geqp3
-sblib_files= band #+ sym + symband
-sblib_noint_files= band_noint #+ sym_noint + symband_noint
-sblib_omp_noint_files= [] #sym_omp_noint
-sblib_stegr_files= [] #sym_stegr
+lib_files= basic + diag + tri
+lib_noint_files= basic_noint + tri_noint
+lib_omp_files= basic_omp
+lib_omp_noint_files= basic_omp_noint
+lib_geqp3_files= basic_geqp3
+sblib_files= band + sym + symband
+sblib_noint_files= band_noint + sym_noint + symband_noint
+sblib_omp_noint_files= sym_omp_noint
+sblib_stegr_files= sym_stegr
+
+
 
 env1 = env.Clone()
 
@@ -45,11 +45,17 @@ if env['MEM_TEST']:
 
 if env['NAN_TEST']:
     env1.Append(CPPDEFINES=['TMV_INITIALIZE_NAN'])
+if not env['INST_FLOAT']:
+    env1.Append(CPPDEFINES=['NO_INST_FLOAT'])
+if not env['INST_DOUBLE']:
+    env1.Append(CPPDEFINES=['NO_INST_DOUBLE'])
+if env['INST_LONGDOUBLE'] or env['TEST_LONGDOUBLE']:
+    env1.Append(CPPDEFINES=['INST_LONGDOUBLE'])
 
 env2 = env1.Clone()
 
-if env['INST_INT']:
-    env2.Remove(CPPDEFINES=['TMV_INST_INT'])
+if env['INST_INT'] or env['TEST_INT']:
+    env1.Append(CPPDEFINES=['INST_INT'])
 
 env3 = env1.Clone()
 env4 = env2.Clone()

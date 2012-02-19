@@ -1,89 +1,119 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
+// Copyright (C) 1998 - 2009                                                 //
+//                                                                           //
+// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
+// where you can find the current version and current documention.           //
+//                                                                           //
+// For concerns or problems with the software, Mike may be contacted at      //
+// mike_jarvis@users.sourceforge.net                                         //
+//                                                                           //
+// This program is free software; you can redistribute it and/or             //
+// modify it under the terms of the GNU General Public License               //
+// as published by the Free Software Foundation; either version 2            //
+// of the License, or (at your option) any later version.                    //
+//                                                                           //
+// This program is distributed in the hope that it will be useful,           //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
+// GNU General Public License for more details.                              //
+//                                                                           //
+// You should have received a copy of the GNU General Public License         //
+// along with this program in the file LICENSE.                              //
+//                                                                           //
+// If not, write to:                                                         //
+// The Free Software Foundation, Inc.                                        //
+// 51 Franklin Street, Fifth Floor,                                          //
+// Boston, MA  02110-1301, USA.                                              //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
 
-//#define PRINTALGO_XB
 
-#include "tmv/TMV_MultXB.h"
+//#define XDEBUG
+
+#include "tmv/TMV_BandMatrixArithFunc.h"
 #include "tmv/TMV_BandMatrix.h"
-#include "tmv/TMV_ProdXM.h"
-#include "tmv/TMV_TransposeB.h"
-#include "tmv/TMV_Vector.h"
-#include "tmv/TMV_ScaleB.h"
+#include "tmv/TMV_VectorArith.h"
+
+#ifdef XDEBUG
+#include "tmv/TMV_MatrixArith.h"
+#include "tmv/TMV_BandMatrixArith.h"
+#include <iostream>
+using std::cerr;
+using std::endl;
+#endif
 
 namespace tmv {
 
-    template <bool add, class T, class M1, class M2>
-    static void DoMultXM(const T x, const M1& m1, M2& m2)
+    //
+    // MultXM
+    //
+
+    template <class T> 
+    void MultXM(const T alpha, BandMatrixView<T> A)
     {
-        if (x == T(1))
-            InlineMultXM<add>(Scaling<1,T>(x),m1,m2); 
-        else if (x == T(-1))
-            InlineMultXM<add>(Scaling<-1,T>(x),m1,m2); 
-        else if (x == T(0))
-            Maybe<!add>::zero(m2);
-        else
-            InlineMultXM<add>(Scaling<0,T>(x),m1,m2); 
+#ifdef XDEBUG
+        Matrix<T> A0 = A;
+        Matrix<T> A2 = alpha*A0;
+#endif
+        if (A.rowsize() > 0 && A.colsize() > 0 && alpha != T(1)) {
+            if (A.isconj()) MultXM(TMV_CONJ(alpha),A.conjugate());
+            else if (alpha == T(0)) A.setZero();
+            else if (A.canLinearize()) A.linearView() *= alpha;
+            else {
+                for(ptrdiff_t i=-A.nlo();i<=A.nhi();++i) A.diag(i) *= alpha;
+            }
+        }
+#ifdef XDEBUG
+        if (!(Norm(A2-A) <= 0.001*TMV_ABS(alpha)*Norm(A0))) {
+            cerr<<"MultXM: alpha = "<<alpha;
+            cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
+            cerr<<"A2 = "<<A2<<endl;
+            cerr<<"Norm(diff) = "<<Norm(A-A2)<<endl;
+            abort();
+        }
+#endif
     }
 
-    template <bool add, class T, class M1, class M2>
-    static void DoMultXM(const std::complex<T> x, const M1& m1, M2& m2)
-    { 
-        if (imag(x) == T(0)) {
-            if (real(x) == T(1))
-                InlineMultXM<add>(Scaling<1,T>(real(x)),m1,m2); 
-            else if (real(x) == T(-1))
-                InlineMultXM<add>(Scaling<-1,T>(real(x)),m1,m2); 
-            else if (real(x) == T(0))
-                Maybe<!add>::zero(m2);
-            else
-                InlineMultXM<add>(Scaling<0,T>(real(x)),m1,m2); 
-        } else 
-            InlineMultXM<add>(Scaling<0,std::complex<T> >(x),m1,m2); 
-    }
-
-    template <class T1, int C1, class T2>
-    void InstMultXM(
-        const T2 x, const ConstBandMatrixView<T1,C1>& m1, BandMatrixView<T2> m2)
+    template <bool add, class T, class Ta, class Tb> 
+    void ElemMultMM(
+        const T alpha, const GenBandMatrix<Ta>& A, const GenBandMatrix<Tb>& B,
+        BandMatrixView<T> C)
     {
-        if (m1.iscm() && m2.iscm()) {
-            BandMatrixView<T2,ColMajor> m2cm = m2.cmView();
-            DoMultXM<false>(x,m1.cmView(),m2cm);
-        } else if (m1.isrm() && m2.isrm()) {
-            BandMatrixView<T2,ColMajor> m2t = m2.transpose().cmView();
-            DoMultXM<false>(x,m1.transpose().cmView(),m2t);
-        } else if (m1.isdm() && m2.isdm()) {
-            BandMatrixView<T2,DiagMajor> m2dm = m2.dmView();
-            DoMultXM<false>(x,m1.dmView(),m2dm);
+        TMVAssert(A.colsize() == C.colsize());
+        TMVAssert(A.rowsize() == C.rowsize());
+        TMVAssert(B.colsize() == C.colsize());
+        TMVAssert(B.rowsize() == C.rowsize());
+        const ptrdiff_t lo = TMV_MIN(A.nlo(),B.nlo());
+        const ptrdiff_t hi = TMV_MIN(A.nhi(),B.nhi());
+        if (A.nlo() == lo && A.nhi() == hi && 
+            B.nlo() == lo && B.nhi() == hi &&
+            C.nlo() == lo && C.nhi() == hi) {
+            if (A.canLinearize() && B.canLinearize() && C.canLinearize() &&
+                A.stepi() == C.stepi() && A.stepj() == C.stepj() &&
+                B.stepi() == C.stepi() && B.stepj() == C.stepj()) {
+                ElemMultVV<add>(
+                    alpha,A.constLinearView(),B.constLinearView(),
+                    C.linearView());
+            } else {
+                for(ptrdiff_t i=-lo;i<=hi;++i) 
+                    ElemMultVV<add>(alpha,A.diag(i),B.diag(i),C.diag(i));
+            }
         } else {
-            InstCopy(m1,m2);
-            InstScale(x,m2);
+            if (!add) {
+                if (C.nlo() > lo) {
+                    C.diagRange(-C.nlo(),-lo).setZero();
+                }
+                if (C.nhi() > hi) {
+                    C.diagRange(hi+1,C.nhi()+1).setZero();
+                }
+            }
+            ElemMultMM<add>(
+                alpha,A.diagRange(-lo,hi+1),B.diagRange(-lo,hi+1),
+                C.diagRange(-lo,hi+1));
         }
     }
-
-    template <class T1, int C1, class T2>
-    void InstAddMultXM(
-        const T2 x, const ConstBandMatrixView<T1,C1>& m1, BandMatrixView<T2> m2)
-    {
-        if (m1.iscm() && m2.iscm()) {
-            BandMatrixView<T2,ColMajor> m2cm = m2.cmView();
-            DoMultXM<true>(x,m1.cmView(),m2cm);
-        } else if (m1.isrm() && m2.isrm()) {
-            BandMatrixView<T2,ColMajor> m2t = m2.transpose().cmView();
-            DoMultXM<true>(x,m1.transpose().cmView(),m2t);
-        } else if (m1.isdm() && m2.isdm()) {
-            BandMatrixView<T2,DiagMajor> m2dm = m2.dmView();
-            DoMultXM<true>(x,m1.dmView(),m2dm);
-        } else {
-            DoMultXM<true>(x,m1,m2);
-        }
-    }
-
-    template <class T1, int C1, class T2>
-    void InstAliasMultXM(
-        const T2 x, const ConstBandMatrixView<T1,C1>& m1, BandMatrixView<T2> m2)
-    { InlineAliasMultXM<false>(Scaling<0,T2>(x),m1,m2); }
-    template <class T1, int C1, class T2>
-    void InstAliasAddMultXM(
-        const T2 x, const ConstBandMatrixView<T1,C1>& m1, BandMatrixView<T2> m2)
-    { InlineAliasMultXM<true>(Scaling<0,T2>(x),m1,m2); }
 
 #define InstFile "TMV_MultXB.inst"
 #include "TMV_Inst.h"

@@ -7,8 +7,7 @@
 #include "TMV_TestMatrixArith.h"
 #define CT std::complex<T>
 
-template <class T> 
-void TestMatrixArith_7()
+template <class T> void TestMatrixArith_7()
 {
     // Now we use the TestMatrixArith.h file to test lots of different
     // syntaxes for calling matrix arithmetic.  This tests the inline
@@ -86,17 +85,6 @@ void TestMatrixArith_7()
     TestMatrixArith7(a3,ca3,v1s,cv1s,v2v,cv2v,"Square 10");
     TestMatrixArith7(a3,ca3,v1v,cv1v,v2s,cv2s,"Square 11");
     TestMatrixArith7(a3,ca3,v1s,cv1s,v2s,cv2s,"Square 12");
-#endif
-
-#if (XTEST & 32)
-    tmv::Matrix<T,tmv::FortranStyle> a1f = a1;
-    tmv::Matrix<CT,tmv::FortranStyle> ca1f = ca1;
-    tmv::Vector<T,tmv::FortranStyle> v1f = v1;
-    tmv::Vector<CT,tmv::FortranStyle> cv1f = cv1;
-    tmv::Vector<T,tmv::FortranStyle> v2f = v2;
-    tmv::Vector<CT,tmv::FortranStyle> cv2f = cv2;
-
-    TestMatrixArith7(a1f,ca1f,v1f,cv1f,v2f,cv2f,"Square 1F");
 #endif
 
     tmv::Matrix<T,tmv::RowMajor> a4x(7,4);
