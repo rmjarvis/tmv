@@ -80,7 +80,7 @@ Changed and Deprecated features:
                     9 , -3 ,  2 ,
                     1 ,  0 , 11 ,
                     4 , -1 ,  5 ,
-                    2 ,  4 ,  6 ,
+                    2 ,  4 ,  6 ;
 
 -- Removed the constructors from either a C-style array or a std::vector.  
    The reason is similar to the reasoning above -- I wanted to decouple the 
@@ -373,7 +373,7 @@ Changed and Deprecated features:
    but I haven't done (and don't plan to do) much to gussy that up.  It's 
    still pretty bare bones to just get the library installed for you.
 
--- Switched the default value for the SCons option IMPORT_ENV to false.
+-- Switched the default value for the SCons option IMPORT_ENV to true.
    I think most users probably expect SCons to be able to search the include 
    and library paths that they have set up in their environment.  So if
    you want SCons to have a clean environment and manually give it extra
