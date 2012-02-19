@@ -65,10 +65,10 @@ If you need to run SCons multiple times (for example to compile the test suite o
     * `INST_INT=false` specifies whether to instantiate the `<int>` templates.
     * `WITH_OPENMP=true` specifies whether to use OpenMP to parallelize some parts of the code.
     * `SHARED=false` specifies whether to make the library files shared as opposed to static libraries.
-    * `TEST_FLOAT=true` specifies whether to include the <float> tests in the test suite.
-    * `TEST_DOUBLE=true` specifies whether to include the <double> tests in the test suite.
-    * `TEST_LONGDOUBLE=false` specifies whether to include the <long double> tests in the test suite.
-    * `TEST_INT=false` specifies whether to include the <int> tests in the test suite.
+    * `TEST_FLOAT=true` specifies whether to include the `<float>` tests in the test suite.
+    * `TEST_DOUBLE=true` specifies whether to include the `<double>` tests in the test suite.
+    * `TEST_LONGDOUBLE=false` specifies whether to include the `<long double>` tests in the test suite.
+    * `TEST_INT=false` specifies whether to include the `<int>` tests in the test suite.
 
 The next flags set up the paths that SCons will use to try to find your BLAS and LAPACK libraries.
     * `IMPORT_ENV=true` specifies whether to import the entire environment from the calling shell.  The default is for SCons to use the same environment as the shell from which it is called.  However, sometimes it can be useful to start with a clean environment and manually add paths (see below) for various things, in which case you would want to set this to false.
