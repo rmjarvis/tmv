@@ -8,7 +8,7 @@ Using TMV with Microsoft Visual C++ is a bit different from the other compilers,
 
 1. Download the tarball as described on the [Installation] page.
 
-There are many Windows utilities that can unpack the tarball.  With [http://www.izarc.org/ IZArc], for example, you right click on the file `tmv0.65.tar.gz` in Windows Explorer, select IZArc, then select Extract Here.  This should make a directory called `tmv0.65` which has all of the source code and other files for the TMV library.
+There are many Windows utilities that can unpack the tarball.  With [http://www.izarc.org/ IZArc], for example, you right click on the file `tmv0.70.tar.gz` in Windows Explorer, select IZArc, then select Extract Here.  This should make a directory called `tmv0.70` which has all of the source code and other files for the TMV library.
 
 2. Start Microsoft Visual C++.  
 
