@@ -8,7 +8,7 @@ You can get the tarball [http://code.google.com/p/tmv-cpp/downloads/detail?name=
 
 Copy it to the directory where you want to put the TMV library.
 
-=== 2. Unpack the tarball.  ===
+=== 2. Unpack the tarball  ===
 
 On linux machines, the commands are:
 {{{
@@ -22,10 +22,13 @@ This will make a directory called `tmv0.70` with the subdirectories:
 along with the files `README`, `INSTALL` and others
 in the top directory.
 
-3. (If you will be using Microsoft Visual C++, please see 
+(If you will be using Microsoft Visual C++, please see 
 [Microsoft_Installation Visual C++].  Otherwise continue on with 
 these instructions.)
 
+=== 3. Install SCons ===
+
+Make sure SCons is installed on your system.
 It is available for free from [http://www.scons.org/].  (It is a very quick installation if you have Python installed.)
 
 === 4. Install the TMV library ===
