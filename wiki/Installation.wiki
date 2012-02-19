@@ -28,7 +28,7 @@ these instructions.)
 
 It is available for free from [http://www.scons.org/].  (It is a very quick installation if you have Python installed.)
 
-=== 4. Install the TMV library
+=== 4. Install the TMV library ===
 
 Type:
 {{{
@@ -155,4 +155,3 @@ This will make three executables called `tmvtest1`, `tmvtest2` and `tmvtest3` in
 Then you should run the three test suites. They should output a bunch of lines reading _Something_` passed all tests`. If one of them ends in a line that starts with `Error`,  then please post a bug report at [http://code.google.com/p/tmv-cpp/issues] about the problem including what compiler you are using, some details about your system, and what (if any) BLAS and LAPACK libraries you are linking to.
 
 If you specify `SMALL_TESTS=true`, then the smaller test executables `tmvtest1a-d`, `tmvtest2a-c`, and `tmvtest3a-e` (where `a-d` means  four files with each of `a`, `b`, `c` and `d`) will be made instead. These perform the same tests as the larger test executables, but can be easier for some linkers.
-
