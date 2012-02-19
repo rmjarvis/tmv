@@ -87,14 +87,12 @@ and also the files:
    The next flags set up the paths that SCons will use to try to find your 
    BLAS and LAPACK libraries.
  
-     IMPORT_ENV=false specifies whether to import the entire environment 
-           from the calling shell.  The default is to start with a clean 
-           environment to be less susceptible to a particular user having an 
-           unusual set up.  But sometimes sysadmins set things up in 
-           non-standard ways and use the environment variables to make 
-           everything work.  If this is the case, then IMPORT_ENV should do 
-           the trick.  It imports the environment, but does not add any
-           -I or -L flags when compiling.
+     IMPORT_ENV=true specifies whether to import the entire environment 
+           from the calling shell.  The default is for SCons to use the 
+	   same environment as the shell from which it is called.  However,
+	   sometimes it can be useful to start with a clean environment and 
+	   manually add paths (see below) for various things, in which case 
+	   you would want to set this to false.
      EXTRA_PATH='' specifies directories in which to search for executables 
            (notably the compiler, although you can also just give the full 
            path in the CXX parameter) in addition to the standard locations 
@@ -116,13 +114,11 @@ and also the files:
            LD_LIBRARY_PATH and LIBRARY_PATH.  
   
    The next options can be used to specify whether to use BLAS and/or LAPACK 
-   libraries, overriding the default of using whatever libraries SCons 
-   chooses from searching through your path and trying to link the libraries 
-   that it finds. 
+   libraries.
 
      WITH_BLAS=true specifies whether to look for and try to use a BLAS 
            library.
-     WITH_LAPACK=true specifies whether to look for and try to use a 
+     WITH_LAPACK=false specifies whether to look for and try to use a 
            LAPACK library.
   
    (See also the PDF documentation for still more options.)
@@ -133,7 +129,7 @@ and also the files:
      scons install
 
    (or possibly "sudo scons install" if you are installing into /usr/local
-   or somewhere similar).  This will copy all the header files i
+   or somewhere similar).  This will copy all the header files 
    to [PREFIX]/include and the library files to [PREFIX]/lib.
 
    The default PREFIX is /usr/local, but this can be changed 
