@@ -23,7 +23,7 @@ along with the files `README`, `INSTALL` and others
 in the top directory.
 
 (If you will be using Microsoft Visual C++, please see 
-[Microsoft_Installation Visual C++].  Otherwise continue on with 
+[Microsoft_Installation Visual C++ Instructions].  Otherwise continue on with 
 these instructions.)
 
 === 3. Install SCons ===
