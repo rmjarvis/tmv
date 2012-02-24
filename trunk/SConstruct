@@ -1157,6 +1157,27 @@ def DoLibraryAndHeaderChecks(config):
     else:
         config.env.Append(CPPDEFINES=['NOBLAS'])
     
+def GetNCPU():
+    """
+    Detects the number of CPUs on a system. Cribbed from pp.
+    """
+    # Linux, Unix and MacOS:
+    if hasattr(os, 'sysconf'):
+        if os.sysconf_names.has_key('SC_NPROCESSORS_ONLN'):
+            # Linux & Unix:
+            ncpus = os.sysconf('SC_NPROCESSORS_ONLN')
+            if isinstance(ncpus, int) and ncpus > 0:
+                return ncpus
+        else: # OSX:
+            return int(os.popen2('sysctl -n hw.ncpu')[1].read())
+    # Windows:
+    if os.environ.has_key('NUMBER_OF_PROCESSORS'):
+        ncpus = int(os.environ['NUMBER_OF_PROCESSORS']);
+        if ncpus > 0:
+            return ncpus
+    return 1 # Default
+
+
 
 def DoConfig(env):
     """
@@ -1169,6 +1190,14 @@ def DoConfig(env):
 
     # Figure out what kind of compiler we are dealing with
     GetCompilerVersion(env)
+
+    # If not explicit, set number of jobs according to number of CPUs
+    if env.GetOption('num_jobs') != 1:
+        print "Using specified number of jobs = ",env.GetOption('num_jobs')
+    else:
+        env.SetOption('num_jobs', GetNCPU())
+        print "Determined that a good number of jobs = ",env.GetOption('num_jobs')
+
    
     # The basic flags for this compiler if not explicitly specified
     BasicCCFlags(env)
@@ -1231,6 +1260,7 @@ def DoConfig(env):
     #     main compilation steps.
     if not env['CACHE_LIB']:
         SCons.SConf.SetCacheMode('auto')
+
 
 
 #
