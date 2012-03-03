@@ -1,0 +1,38 @@
+#define CT std::complex<T>
+
+#define DefDivEq(T,T1)\
+template void QR_LDivEq(const GenMatrix<T1 >& QRx,\
+    const GenVector<T1 >& beta, const ptrdiff_t* P, \
+    MatrixView<T > m, ptrdiff_t N1); \
+template void QR_RDivEq(const GenMatrix<T1 >& QRx,\
+    const GenVector<T1 >& beta, const ptrdiff_t* P, \
+    MatrixView<T > m, ptrdiff_t N1); \
+
+DefDivEq(T,T)
+#ifdef INST_COMPLEX
+DefDivEq(CT,T)
+DefDivEq(CT,CT)
+#endif
+
+#undef DefDivEq
+
+#define DefDiv(T,T1,T2)\
+template void QR_LDiv(const GenMatrix<T1 >& QRx,\
+    const GenVector<T1 >& beta, const ptrdiff_t* P, \
+    const GenMatrix<T2 >& m, MatrixView<T > x, ptrdiff_t N1); \
+template void QR_RDiv(const GenMatrix<T1 >& QRx,\
+    const GenVector<T1 >& beta, const ptrdiff_t* P, \
+    const GenMatrix<T2 >& m, MatrixView<T > x, ptrdiff_t N1); \
+
+DefDiv(T,T,T)
+#ifdef INST_COMPLEX
+DefDiv(CT,T,T)
+DefDiv(CT,T,CT)
+DefDiv(CT,CT,T)
+DefDiv(CT,CT,CT)
+#endif
+
+#undef DefDiv
+
+#undef CT
+

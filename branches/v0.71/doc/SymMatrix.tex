@@ -1,0 +1,797 @@
+% !TEX root = TMV_Documentation.tex
+
+\section{Symmetric and hermitian matrices}
+\index{SymMatrix}
+\index{HermMatrix|see{SymMatrix}}
+\label{SymMatrix}
+
+The \tt{SymMatrix} class is our symmetric matrix class.  A symmetric matrix is
+one for which $m = m^T$.  We also have a class called
+\tt{HermMatrix}, which is our hermitian matrix class.  A hermitian matrix
+is one for which $m = m^\dagger$.  The two are exactly the same 
+if \tt{T} is real, but for complex \tt{T}, they are different.
+
+One general caveat about complex \tt{HermMatrix} calculations is that the diagonal
+elements should all be real.  Some calculations assume this, and only 
+use the real part of the diagonal elements.  Other calculations use the 
+full complex value as it is in memory.  Therefore, if you set a diagonal element 
+to a non-real value at some point, the results will likely be wrong in
+unpredictable ways.  Plus of course, your matrix won't actually be hermitian any more,
+so the right answer is undefined in any case.
+
+All the \tt{SymMatrix} and \tt{HermMatrix} routines are included by:
+\begin{tmvcode}
+#include "TMV_Sym.h"
+\end{tmvcode}
+\index{TMV\_Sym.h}
+
+In addition to the data type template parameter (indicated here by \tt{T} as usual),
+there is also a second template parameter that specifies attributes of the
+\tt{SymMatrix} or \tt{HermMatrix}.  The attributes that are allowed are:
+\begin{description} \itemsep -2pt
+\item[$\bullet$] \tt{CStyle} or \tt{FortranStyle}
+\item[$\bullet$] \tt{ColMajor} or \tt{RowMajor}
+\item[$\bullet$] \tt{Lower} or \tt{Upper}
+\end{description}
+The final option refers to which triangle the data are actually stored in, 
+since the
+other half of the values are identical, so we do not need to reference them.
+The default attributes are \tt{CStyle}, \tt{ColMajor} and \tt{Lower}.
+
+The storage of a \tt{SymMatrix} takes
+$N \times N$ elements of memory, even though approximately half of them 
+are never used.  Someday, I'll write the packed storage versions, which will allow for
+efficient storage of the matrices.
+
+Usually, the symmetric/hermitian distinction does not affect the use of the classes.
+(It does affect the actual calculations performed of course.)  So we will use 
+\tt{s} for both, and just point out whenever a \tt{HermMatrix} acts differently
+from a \tt{SymMatrix}.
+
+Most functions and methods for \tt{SymMatrix} and \tt{HermMatrix}
+work the same as they do for \tt{Matrix}.
+In these cases, we will just list the functions that are allowed with the
+effect understood to be the same as for a regular \tt{Matrix}.  Of course, there are 
+almost always algorithmic speed-ups, which the code will use to take advantage of the 
+symmetric or hermitian structure.
+Whenever there is a difference in how a function works,
+we will explain the difference.
+
+
+\subsection{Constructors}
+\index{SymMatrix!Constructors}
+\label{SymMatrix_Constructors}
+
+As usual, the optional \tt{A} template argument specifies attributes about
+the \tt{SymMatrix}.  The default attributes if not specified are
+\tt{CStyle|ColMajor|Lower}.
+
+
+\begin{itemize}
+
+\item
+\begin{tmvcode}
+tmv::SymMatrix<T,A> s()
+tmv::HermMatrix<T,A> h()
+\end{tmvcode}
+Makes a \tt{SymMatrix} or \tt{HermMatrix} with zero size.  You would normally use the \tt{resize} function later to
+change the size to some useful value.
+
+\item 
+\begin{tmvcode}
+tmv::SymMatrix<T,A> s(int n)
+tmv::HermMatrix<T,A> h(int n)
+\end{tmvcode}
+Makes an \tt{n} $\times$ \tt{n} \tt{SymMatrix} or \tt{HermMatrix}
+with {\em uninitialized} values.
+If extra debugging is turned on (with the compiler flag \tt{-DTMV\_EXTRA\_DEBUG}), then the values are in fact initialized to 888.  
+
+\item
+\begin{tmvcode}
+tmv::SymMatrix<T,A> s(int n, T x)
+tmv::HermMatrix<T,A> h(int n, RT x)
+\end{tmvcode}
+Makes an \tt{n} $\times$ \tt{n} \tt{SymMatrix} or \tt{HermMatrix} 
+with all values equal to \tt{x}.
+For the \tt{HermMatrix} version of this, \tt{x} must be real.
+
+\item 
+\begin{tmvcode}
+tmv::SymMatrix<T,A> s(const Matrix<T,A2>& m)
+tmv::HermMatrix<T,A> h(const Matrix<T,A2>& m)
+tmv::SymMatrix<T,A> s(const DiagMatrix<T,A2>& d)
+tmv::HermMatrix<T,A> h(const DiagMatrix<T,A2>& d)
+\end{tmvcode}
+Makes a \tt{SymMatrix} or \tt{HermMatrix} which copies the corresponding values of \tt{m}.
+
+\item
+\begin{tmvcode}
+tmv::SymMatrix<T,A> s1(const SymMatrix<T2,A2>& s2)
+tmv::HermMatrix<T,A> h1(const HermMatrix<T2,A2>& h2)
+s1 = s2
+\end{tmvcode}
+Copy \tt{s2} or \tt{h2} respectively, which may be of any type \tt{T2} so long
+as values of type \tt{T2} are convertible into type \tt{T}.
+The assignment operator has the same flexibility.
+
+\item
+\begin{tmvcode}
+tmv::SymMatrixView<T,A> s = 
+      tmv::SymMatrixViewOf(MatrixView<T> m, UpLoType uplo)
+tmv::ConstSymMatrixView<T,A> s = 
+      tmv::SymMatrixViewOf(ConstMatrixView<T> m, UpLoType uplo)
+tmv::SymMatrixView<T,A> h = 
+      tmv::HermMatrixViewOf(MatrixView<T>& m, UpLoType uplo)
+tmv::ConstSymMatrixView<T,A> h = 
+      tmv::HermMatrixViewOf(ConstMatrixView<T>& m, UpLoType uplo)
+\end{tmvcode}
+\index{Matrix!View portion as SymMatrix or HermMatrix}
+Make a \tt{SymMatrixView} of the corresponding portion of \tt{m}.
+\tt{uplo} should be either \tt{Lower} or \tt{Upper} to indicate which
+portion of \tt{m} you want to view as symmetric.
+
+\item
+\begin{tmvcode}
+tmv::SymMatrixView<T,A> s = 
+      tmv::SymMatrixViewOf(T* vv, int n, UpLoType uplo, 
+      StorageType stor)
+tmv::ConstSymMatrixView<T,A> s =
+      tmv::SymMatrixViewOf(const T* vv, int n, UpLoType uplo, 
+      StorageType stor)
+tmv::SymMatrixView<T,A> h =
+      tmv::HermMatrixViewOf(T* vv, int n, UpLoType uplo, 
+      StorageType stor)
+tmv::ConstSymMatrixView<T,A> h =
+      tmv::HermMatrixViewOf(const T* vv, int n, UpLoType uplo, 
+      StorageType stor)
+\end{tmvcode}
+\index{SymMatrix!View of raw memory}
+Make a \tt{SymMatrixView} of the actual memory elements, \tt{vv}, in either the 
+upper or lower triangle.
+\tt{vv} must be of length \tt{n} $\times$ \tt{n}, even though only about half 
+of the values are actually used,
+
+\item
+\begin{tmvcode}
+tmv::SymMatrixView<T,A> s = 
+      tmv::SymMatrixViewOf(T* vv, int n, UpLoType uplo, int stepi, 
+      int stepj)
+tmv::ConstSymMatrixView<T,A> s =
+      tmv::SymMatrixViewOf(const T* vv, int n, UpLoType uplo, 
+      int stepi, int stepj)
+tmv::SymMatrixView<T,A> h =
+      tmv::HermMatrixViewOf(T* vv, int n, UpLoType uplo, int stepi, 
+      int stepj)
+tmv::ConstSymMatrixView<T,A> h =
+      tmv::HermMatrixViewOf(const T* vv, int n, UpLoType uplo,
+      int stepi, int stepj)
+\end{tmvcode}
+\index{SymMatrix!View of raw memory}
+Make a \tt{SymMatrixView} of the actual memory elements, \tt{vv}, in either the 
+upper or lower triangle.  This allows for arbitrary steps through the data.
+
+\end{itemize}
+
+\subsection{Access}
+\index{SymMatrix!Access methods}
+\label{SymMatrix_Access}
+
+\begin{itemize}
+
+\item
+\begin{tmvcode}
+s.nrows() = s.ncols() = s.colsize() = s.rowsize() = s.size()
+s.resize(int new_size)
+s(i,j)
+s.cref(i,j)
+s.ref(i,j)
+\end{tmvcode}
+\index{SymMatrix!Methods!nrows}
+\index{SymMatrix!Methods!ncols}
+\index{SymMatrix!Methods!rowsize}
+\index{SymMatrix!Methods!colsize}
+\index{SymMatrix!Methods!size}
+\index{SymMatrix!Methods!resize}
+\index{SymMatrix!Methods!operator()}
+\index{SymMatrix!Methods!cref}
+\index{SymMatrix!Methods!ref}
+The only difference here from the corresponding methods for a \tt{Matrix} is that a complex \tt{HermMatrix} has a special reference type, since it needs to check whether its value is the conjugate of the value actually stored in memory.  This will necessarily be true for values in either the upper or lower triangle.
+
+\item
+\begin{tmvcode}
+s.row(int i, int j1, int j2)
+s.col(int i, int j1, int j2)
+s.diag()
+s.diag(int i)
+s.diag(int i, int k1, int k2)
+\end{tmvcode}
+\index{SymMatrix!Methods!row}
+\index{SymMatrix!Methods!col}
+\index{SymMatrix!Methods!diag}
+As for triangle matrices, the versions of \tt{row} and \tt{col} with only one argument are
+missing, since the full row or column isn't accessible as a \tt{VectorView}.
+You must specify a valid range within the row or column that you want, 
+given the upper or lower storage of \tt{s}.
+The diagonal element may be in a \tt{VectorView} with either elements in the 
+lower triangle or the upper triangle, but not both.  To access a full row, you would 
+therefore need to use two steps:
+\begin{tmvcode}
+s.row(i,0,i) = ...
+s.row(i,i,ncols) = ...
+\end{tmvcode}
+
+\item
+\begin{tmvcode}
+T* s.ptr()
+const T* s.cptr() const
+int s.stepi() const
+int s.stepj() const
+bool s.isconj() const
+bool s.issym() const
+bool s.isherm() const
+bool s.isupper() const
+bool s.isrm() const
+bool s.iscm() const
+\end{tmvcode}
+\index{SymMatrix!Methods!ptr}
+\index{SymMatrix!Methods!cptr}
+\index{SymMatrix!Methods!stepi}
+\index{SymMatrix!Methods!stepj}
+\index{SymMatrix!Methods!isconj}
+\index{SymMatrix!Methods!issym}
+\index{SymMatrix!Methods!isherm}
+\index{SymMatrix!Methods!isupper}
+\index{SymMatrix!Methods!isrm}
+\index{SymMatrix!Methods!iscm}
+These methods allow for direct memory access of a \tt{SymMatrix}.  There are a few new methods here: \tt{issym()} returns whether \tt{s} is symmetric (as opposed to hermitian), \tt{isherm()} returns whether it is hermitian (as opposed to symmetric), and \tt{isupper()} returns whether the the elements actually stored in memory are for the upper triangle (as opposed to the lower triangle).  Note that for a real \tt{SymMatrix} both \tt{issym()} and \tt{isherm()} will return \tt{true}.
+
+\item
+\begin{tmvcode}
+s.subVector(int i, int j, int istep, int jstep, int size)
+s.subMatrix(int i1, int i2, int j1, int j2)
+s.subMatrix(int i1, int i2, int j1, int j2, int istep, int jstep)
+\end{tmvcode}
+\index{SymMatrix!Methods!subVector}
+\index{SymMatrix!Methods!subMatrix}
+These work the same as for a \tt{Matrix}
+(See \ref{Matrix_Access}.)
+except that the entire
+subvector or submatrix must be completely within either the upper or lower triangle.
+
+\item
+\begin{tmvcode}
+s.subSymMatrix(int i1, int i2, int istep = 1)
+\end{tmvcode}
+\index{SymMatrix!Methods!subSymMatrix}
+This returns a \tt{SymMatrixView} of \tt{s} whose upper-left
+corner is \tt{s(i1,i1)}, and whose lower-right corner is 
+\tt{s(i2-istep,i2-istep)} for \tt{CStyle} or \tt{s(i2,i2)} for \tt{FortranStyle}.  If \tt{istep} $\neq 1$, then it is the 
+step in both the \tt{i} and \tt{j} directions.
+
+\item
+\begin{tmvcode}
+s.upperTri(DiagType dt=NonUnitDiag)
+s.lowerTri(DiagType dt=NonUnitDiag)
+s.unitUpperTri()
+s.unitLowerTri()
+\end{tmvcode}
+\index{SymMatrix!Methods!upperTri}
+\index{SymMatrix!Methods!lowerTri}
+\index{SymMatrix!Methods!unitUpperTri}
+\index{SymMatrix!Methods!unitLowerTri}
+All of these are valid, regardless
+of which triangle stores the actual data for \tt{s}.
+
+\item
+\begin{tmvcode}
+s.transpose()
+s.conjugate()
+s.adjoint()
+s.view()
+s.cView()
+s.fView()
+s.realPart()
+s.imagPart()
+\end{tmvcode}
+\index{SymMatrix!Methods!transpose}
+\index{SymMatrix!Methods!conjugate}
+\index{SymMatrix!Methods!adjoint}
+\index{SymMatrix!Methods!view}
+\index{SymMatrix!Methods!cView}
+\index{SymMatrix!Methods!fView}
+\index{SymMatrix!Methods!realPart}
+\index{SymMatrix!Methods!imagPart}
+These return \tt{SymMatrixView}s.
+Note that the imaginary part of a complex hermitian matrix is skew-symmetric,
+so \tt{s.imagPart()} is illegal for a \tt{HermMatrix}.  If you need to
+deal with the imaginary part of a \tt{HermMatrix},
+you can view them as a triangle matrix with \tt{s.upperTri().imagPart()}
+\footnote{Or, 
+since the diagonal elements are all real.
+you could also use \tt{s.upperTri().offDiag().imagPart()}.}.
+
+\end{itemize}
+
+Note that there are no iterators provided for \tt{SymMatrix} or \tt{HermMatrix}.  The recommended way to iterate over their stored values is to use the \tt{upperTri()} or \tt{lowerTri()} methods and iterate over those portions of the matrix directly.
+
+\subsection{Functions}
+\index{SymMatrix!Functions of}
+\label{SymMatrix_Functions}
+
+\begin{tmvcode}
+RT s.norm1() = Norm1(s)
+RT s.norm2() = Norm2(s) 
+RT s.normInf() = NormInf(s)
+RT s.normF() = NormF(s) = s.norm() = Norm(s)
+RT s.normSq() = NormSq(s)
+RT s.normSq(RT scale)
+RT s.maxAbsElement() = MaxAbsElement(s)
+RT s.maxAbs2Element() = MaxAbs2Element(s)
+T s.trace() = Trace(s)
+T s.sumElements() = SumElements(s)
+RT s.sumAbsElements() = SumAbsElements(s)
+RT s.sumAbs2Elements() = SumAbs2Elements(s)
+T s.det() = Det(s)
+RT s.logDet(T* sign=0) = LogDet(s)
+bool s.isSingular()
+RT s.condition()
+RT s.doCondition()
+sinv = s.inverse() = Inverse(s)
+s.makeInverse(Matrix<T>& sinv)
+s.makeInverse(SymMatrix<T>& sinv)
+s.makeInverseATA(Matrix<T>& cov)
+\end{tmvcode}
+\index{SymMatrix!Functions of!Norm1}
+\index{SymMatrix!Functions of!Norm2}
+\index{SymMatrix!Functions of!NormInf}
+\index{SymMatrix!Functions of!MaxAbsElement}
+\index{SymMatrix!Functions of!MaxAbs2Element}
+\index{SymMatrix!Methods!norm1}
+\index{SymMatrix!Methods!norm2}
+\index{SymMatrix!Methods!normInf}
+\index{SymMatrix!Methods!maxAbsElement}
+\index{SymMatrix!Methods!maxAbs2Element}
+\index{SymMatrix!Functions of!Norm}
+\index{SymMatrix!Functions of!NormF}
+\index{SymMatrix!Functions of!NormSq}
+\index{SymMatrix!Functions of!Trace}
+\index{SymMatrix!Functions of!SumElements}
+\index{SymMatrix!Functions of!SumAbsElements}
+\index{SymMatrix!Functions of!SumAbs2Elements}
+\index{SymMatrix!Functions of!Det}
+\index{SymMatrix!Functions of!LogDet}
+\index{SymMatrix!Functions of!Inverse}
+\index{SymMatrix!Methods!norm}
+\index{SymMatrix!Methods!normF}
+\index{SymMatrix!Methods!normSq}
+\index{SymMatrix!Methods!trace}
+\index{SymMatrix!Methods!sumElements}
+\index{SymMatrix!Methods!sumAbsElements}
+\index{SymMatrix!Methods!sumAbs2Elements}
+\index{SymMatrix!Methods!det}
+\index{SymMatrix!Methods!logDet}
+\index{SymMatrix!Methods!isSingular}
+\index{SymMatrix!Methods!condition}
+\index{SymMatrix!Methods!doCondition}
+\index{SymMatrix!Methods!inverse}
+\index{SymMatrix!Methods!makeInverse}
+\index{SymMatrix!Methods!makeInverseATA}
+Since the inverse of an \tt{SymMatrix} is also symmetric,
+the object returned by \tt{s.inverse()} is 
+assignable to a \tt{SymMatrix}.  Of course you can also assign it
+to a regular \tt{Matrix} if you prefer.  Similarly, there are versions
+of \tt{s.makeInverse(minv)} for both argument types.  
+
+\begin{tmvcode}
+s.setZero()
+s.setAllTo(T x)
+s.addToAll(T x)
+s.clip(RT thresh)
+s.setToIdentity(T x = 1)
+s.conjugateSelf()
+s.transposeSelf()
+Swap(s1,s2)
+\end{tmvcode}
+\index{SymMatrix!Methods!setZero}
+\index{SymMatrix!Methods!setAllTo}
+\index{SymMatrix!Methods!addToAll}
+\index{SymMatrix!Methods!clip}
+\index{SymMatrix!Methods!setToIdentity}
+\index{SymMatrix!Methods!conjugateSelf}
+\index{SymMatrix!Methods!transposeSelf}
+\index{SymMatrix!Functions of!Swap}
+The method \tt{transposeSelf()} does nothing to a \tt{SymMatrix} and is equivalent to
+\tt{conjugateSelf()} for a \tt{HermMatrix}.
+\begin{tmvcode}
+s.swapRowsCols(int i1, int i2)
+\end{tmvcode}
+\index{SymMatrix!Methods!swapRowsCols}
+\index{SymMatrix!Methods!permuteRowsCols}
+\index{SymMatrix!Methods!reversePermuteRowsCols}
+The new method, \tt{swapRowsCols}, would be equivalent to 
+\begin{tmvcode}
+s.swapRows(i1,i2).swapCols(i1,i2);
+\end{tmvcode}
+except that neither of these functions are allowed for a \tt{SymMatrix}, since 
+they result in non-symmetric matrices.  Only the combination of both
+maintains the symmetry of the matrix.  So this combination is included as
+a method.
+\vspace{12pt}
+
+\subsection{Arithmetic}
+\index{SymMatrix!Arithmetic}
+\label{SymMatrix_Arithmetic}
+
+In addition to \tt{x}, \tt{v}, and \tt{m} from before,
+we now add \tt{s} for a \tt{SymMatrix}.
+
+\begin{tmvcode}
+s2 = -s1
+s2 = x * s1
+s2 = s1 [*/] x
+s3 = s1 [+-] s2
+m2 = m1 [+-] s
+m2 = s [+-] m1
+s [*/]= x
+s2 [+-]= s1
+m [+-]= s
+v2 = s * v1
+v2 = v1 * s
+v *= s
+m = s1 * s2
+s3 = ElemProd(s1,s2)
+m2 = s * m1
+m2 = m1 * s
+m *= s
+s2 = s1 [+-] x
+s2 = x [+-] s1
+s [+-]= x
+s = x
+s = v ^ v
+s [+-]= v ^ v
+s = m * m.transpose()
+s [+-]= m * m.transpose()
+s = U * U.transpose()
+s [+-]= U * U.transpose()
+s = L * L.transpose()
+s [+-]= L * L.transpose()
+\end{tmvcode}
+\index{Vector!Arithmetic!outer product}
+\index{SymMatrix!Arithmetic!rank-1 update}
+\index{SymMatrix!Arithmetic!rank-k update}
+For outer products, both \tt{v}'s need to be the same actual data.  If \tt{s}
+is complex hermitian, then it should actually be 
+\tt{s = v ^ v.conjugate()}.
+Likewise for the next three (called ``rank-k updates''), the \tt{m}'s, \tt{L}'s and
+\tt{U}'s need to be the
+same data, and for a complex hermitian matrix, \tt{transpose()}
+should be replaced with \tt{adjoint()}.
+
+\subsection{Delayed evaluation}
+
+As usual, the above arithmetic operations try to delay the evaluation 
+of the expression until the storage location is known.  Only if the 
+expression gets sufficiently complicated will TMV use a temporary
+object to store an intermediate result.
+
+However, there is a minor issue with \tt{SymMatrix} arithmetic that is
+worth knowing about.
+Because TMV uses the same base class for both hermitian and symmetric
+matrices, the compiler cannot tell the difference between them in arithmetic
+operations.  (The difference is stored in a variable, so the code knows which kind of matrix it is at runtime.)
+This can become an issue when doing complicated arithmetic operations
+with complex hermitian or symmetric matrices.
+
+For some operations, the compiler cannot tell whether the result is
+necessarily another \tt{SymMatrix} or whether it is merely a regular
+\tt{Matrix}.
+For example, a complex scalar times a complex \tt{HermMatrix} is not 
+hermitian (or symmetric), but a complex scalar times a \tt{SymMatrix}
+is still symmetric.  However, since the base classes are the same, and the 
+arithmetic is done in terms of the base classes, the compiler cannot
+figure out whether the result is symmetric.
+Likewise the sum of a complex \tt{SymMatrix} and a complex \tt{HermMatrix} is not hermitian or symmetric.
+
+Most of the time, this won't matter, since
+you will generally assign the result to either a \tt{SymMatrix} or a \tt{Matrix}
+as appropriate, and the code can check whether the assignment is valid at runtime.  
+However, if you let your expression get more complicated than a single
+matrix addition, multiplication, etc., then some things that should be allowed give compiler errors.
+For example:
+\begin{tmvcode}
+s3 += x*s1+s2;
+\end{tmvcode}
+is not legal for complex symmetric \tt{s1, s2, s3}, even though this is valid mathematically.
+This is because there is no 3-matrix 
+\tt{Add} function.  (TMV's \tt{AddMM} function just adds a multiple of one 
+matrix to another.)  So the right hand side needs to be instantiated before
+being added to the left side, and it will instantiate as a regular \tt{Matrix},
+which cannot be added to a \tt{SymMatrix}.  
+If the ``\tt{+=}'' had been just ``\tt{=}'', then we wouldn't have any problem,
+since the composite object that stores \tt{x*s1+s2} is assignable to a \tt{SymMatrix}.
+
+One work-around is to explicitly tell the compiler to instantiate the right hand
+side as a \tt{SymMatrix}:
+\begin{tmvcode}
+s3 += SymMatrix<T>(x*s1+s2);
+\end{tmvcode}
+
+Another work-around, which I suspect will usually be preferred, is to break the 
+equation into multiple statements, each of which are simple enough to not require
+any instantiation:
+\begin{tmvcode}
+s3 += x*s1;
+s3 += s2;
+\end{tmvcode}
+
+The forthcoming version 0.90 which is currently in development has a 
+more sophisticated way of determining how to instantiate a composite object,
+which will fix this problem.
+
+\subsection{Division}
+\index{SymMatrix!Arithmetic!division}
+\label{SymMatrix_Division}
+
+The division operations are:
+\begin{tmvcode}
+v2 = v1 [/%] s
+m2 = m1 [/%] s
+m2 = s [/%] m1
+m = s1 [/%] s2
+s1 = x [/%] s2
+v [/%]= s
+m [/%]= s
+\end{tmvcode}
+
+\tt{SymMatrix} has three possible choices for the decomposition to use for division:
+\begin{enumerate}
+\item
+\tt{m.divideUsing(tmv::LU)} will perform something similar to the LU decomposition
+for regular matrices.  But in fact, it does what is called an LDL or Bunch-Kaufman
+decomposition.  
+
+A permutation of \tt{m} is decomposed into a lower triangle matrix ($L$)
+times a symmetric block diagonal matrix ($D$) times the transpose of $L$.
+$D$ has either 1x1 and 2x2 blocks down the diagonal.  For hermitian matrices,
+the third term is the adjoint of $L$ rather than the transpose.
+
+This is the default decomposition to use if you don't specify anything.
+
+To access this decomposition, use:
+\begin{tmvcode}
+ConstLowerTriMatrixView<T> s.lud().getL()
+BandMatrix<T> s.lud().getD()
+const Permutation& s.lud().getP()
+\end{tmvcode}
+\index{SymMatrix!Methods!lud}
+\index{SymMatrix!LU decomposition|see{SymMatrix!Bunch-Kaufman decomposition}}
+\index{SymMatrix!Bunch-Kaufman decomposition}
+\index{Bunch-Kaufman decomposition!SymMatrix}
+The following should result in a matrix numerically very close to \tt{s}.
+\begin{tmvcode}
+Matrix<T> m2 = s.lud().getP() * s.lud().getL() * s.lud().getD() * 
+      s.lud().getL().transpose() * s.lud().getP().transpose();
+\end{tmvcode}
+For a complex hermitian \tt{s}, you would need to replace
+\tt{transpose} with \tt{adjoint}.
+
+\item
+\tt{s.divideUsing(tmv::CH)} will perform a Cholesky decomposition.  
+The matrix \tt{s} must be hermitian (or real symmetric) to use \tt{CH}, since that is the
+only kind of matrix that has a Cholesky decomposition.  
+
+It is also similar to an 
+LU decomposition, where $U$ is the adjoint of $L$, and there is no permutation.
+It can be a bit dangerous, since not all hermitian matrices have such a decomposition,
+so the decomposition could fail.  Only so-called ``positive-definite'' hermitian 
+matrices have a Cholesky decomposition.  A positive-definite matrix has
+all positive real eigenvalues.  In general, hermitian matrices have real, but
+not necessarily positive eigenvalues.  
+
+One example of a 
+positive-definite matrix is $s = A^\dagger A$ where $A$ is any matrix.   
+Then $s$ is guaranteed to be positive-semi-definite
+(which means some of the eigenvalues may be 0, but not negative).
+In this case, the routine will usually work, but still might fail from 
+numerical round-off errors if $s$ is nearly singular.  
+
+When the decomposition fails, it throws an object of type
+\tt{NonPosDef}.
+\index{Exceptions!NonPosDef}
+
+See \S\ref{NonPosDef} for some more discussion about positive-definite
+matrices.
+
+The only advantage of Cholesky over Bunch-Kaufman is speed.  (And only about
+20 to 30\% at that.)  If you know your 
+matrix is positive-definite, the Cholesky decomposition is the fastest way to 
+do division.
+
+To access this decomposition, use:
+\begin{tmvcode}
+ConstLowerTriMatrixView<T> s.chd().getL()
+\end{tmvcode}
+\index{SymMatrix!Methods!chd}
+\index{SymMatrix!Cholesky decomposition}
+\index{Cholesky decomposition!SymMatrix}
+The following should result in a matrix numerically very close to \tt{s}.
+\begin{tmvcode}
+Matrix<T> m2 = s.chd().getL() * s.chd().getL().adjoint()
+\end{tmvcode}
+
+\item
+\tt{s.divideUsing(tmv::SV)} will perform either an eigenvalue decomposition
+(for hermitian and real symmetric matrices) or a regular singular value
+decomposition (for complex symmetric matrices).
+
+For hermitian matrices (including real symmetric matrices), 
+the eigenvalue decomposition is $H = U S U^\dagger$, where $U$ is
+unitary and $S$ is diagonal.  So this would be identical to a singular
+value decomposition where $V = U^\dagger$, 
+except that the elements of $S$, the eigenvalues of $H$, may be negative.
+
+However, this decomposition is just as useful for division, dealing with singular
+matrices just as elegantly.  It just means that internally, we allow the values
+of $S$ to be negative, taking the absolute value when necessary (e.g. for \tt{norm2}).
+The below access commands finish the calculation of $S$ and $V$ so that the $S(i)$
+values are positive. 
+
+To access this decomposition, use:
+\begin{tmvcode}
+ConstMatrixView<T> s.svd().getU()
+DiagMatrix<RT> s.svd().getS()
+Matrix<T> s.svd().getVt()
+\end{tmvcode}
+\index{SymMatrix!Methods!svd}
+\index{SymMatrix!Methods!symsvd}
+\index{SymMatrix!Singular value decomposition}
+\index{Singular value decomposition!SymMatrix}
+The following should result in a matrix numerically very close to \tt{s}.
+\begin{tmvcode}
+Matrix<T> m2 = s.svd().getU() * s.svd().getS() * s.svd().getVt()
+\end{tmvcode}
+
+For a complex symmetric \tt{s}, the situation is not as convenient,
+since $V \neq U^\dagger$.
+So for complex symmetric matrices, we
+just do the normal SVD: $s = USV^\dagger$, although the algorithm
+does use the symmetry of the matrix to 
+speed up portions of the algorithm relative that that for a general matrix.
+
+The access is also necessarily different, since the object returned by 
+\tt{s.svd()} implicitly assumes that $V = U$ (modulo some sign changes), 
+so we need a 
+new accessor: \tt{s.symsvd()}.  Its \tt{getS} and \tt{getVt} methods return Views
+rather than instantiated matrices.
+
+Both versions also have the same control and access routines as a regular SVD
+(See \ref{Matrix_Division_Access}):
+\begin{tmvcode}
+s.svd().thresh(RT thresh)
+s.svd().top(int nsing)
+RT s.svd().condition()
+int s.svd().getKMax()
+\end{tmvcode}
+(Likewise for \tt{s.symsvd()}.)
+
+\end{enumerate}
+The routines 
+\begin{tmvcode}
+s.saveDiv()
+s.setDiv()
+s.resetDiv()
+s.unsetDiv()
+bool s.divIsSet()
+s.divideInPlace()
+\end{tmvcode}
+\index{SymMatrix!Methods!saveDiv}
+\index{SymMatrix!Methods!setDiv}
+\index{SymMatrix!Methods!resetDiv}
+\index{SymMatrix!Methods!unsetDiv}
+\index{SymMatrix!Methods!divIsSet}
+\index{SymMatrix!Methods!divideInPlace}
+work the same as for regular \tt{Matrix}es.
+(See \ref{Matrix_Division_Efficiency}.)  However, it should be noted that
+for \tt{tmv::SV}, the \tt{divideInPlace} option will use both the memory
+that is used for the \tt{SymMatrix} as well as the other half of the 
+memory that is normally not used.  So if you've done something clever 
+to use the other half of the matrix for something, that will get 
+clobbered too.
+
+And just as for a regular \tt{Matrix}, the functions \tt{s.det()}, \tt{s.logDet()}, and \tt{s.isSingular()} use whichever decomposition is currently set with \tt{s.divideUsing(dt)},
+unless \tt{s}'s data type is an integer type, in which case Bareiss's algorithm for the determinant
+is used.
+\index{SymMatrix!Determinant}
+\index{SymMatrix|Methods!det}
+\index{SymMatrix|Methods!logDet}
+\index{SymMatrix|Methods!isSingular}
+
+\subsection{I/O}
+\index{SymMatrix!I/O}
+\label{SymMatrix_IO}
+
+The simplest I/O syntax is the usual:
+\begin{tmvcode}
+os << s;
+is >> s;
+\end{tmvcode}
+The output format is the same as for a \tt{Matrix}.
+(See \ref{Matrix_IO}.)  On input, if the matrix read in is not symmetric (or Hermitian as appropriate), then a \tt{tmv::ReadError} is thrown.  
+
+There is also a compact I/O style that puts all the elements in the lower triangle all on a single line and skips the parentheses. 
+\begin{tmvcode}
+os << tmv::CompactIO() << s;
+is >> tmv::CompactIO() >> s;
+\end{tmvcode}
+\index{IOStyle!CompactIO}
+
+One can also write small values as 0 with
+\begin{tmvcode}
+os << tmv::ThreshIO(thresh) << s;
+os << tmv::CompactIO().setThresh(thresh) << s;
+\end{tmvcode}
+\index{IOStyle!ThreshIO}
+
+See \S\ref{IOStyle} for more information about specifying custom I/O styles, including
+features like using brackets instead of parentheses, or putting commas between elements,
+or specifying an output precision.  
+
+\subsection{Other operations}
+\index{SymMatrix!Arithmetic!rank-2 Update}
+\index{SymMatrix!Arithmetic!rank-2k Update}
+\index{SymMatrix!Arithmetic!product of two regular matrices}
+\label{SymMatrix_Ops}
+
+There are three more arithmetic routines that we provide for \tt{SymMatrix},
+which do not have
+any corresponding shorthand with the usual arithmetic operators.
+
+The first two are:
+\begin{tmvcode}
+Rank2Update<bool add>(T x, const Vector<T1>& v1, const Vector<T2>& v2, 
+      SymMatrix<T>& s)
+Rank2KUpdate<bool add>(T x, const Matrix<T1>& m1, const Matrix<T2>& m2,
+      SymMatrix<T>& s)
+\end{tmvcode}
+They are similar to the \tt{Rank1Update} and \tt{RankKUpdate} routines,
+which are implemented in TMV with the expressions 
+\tt{s += x * v \^\ v} and \tt{s += x * m * m.transpose()}.
+
+A rank-2 update calculates
+\begin{tmvcode}
+s (+=) x * ((v1 ^ v2) + (v2 ^ v1))
+s (+=) x * (v1 ^ v2.conjugate()) + conj(x) * (v2 ^ v1.conjugate())
+\end{tmvcode}
+for a symmetric or hermitian \tt{s} respectively,
+where ``(+=)'' means ``+='' if \tt{add} is \tt{true} and ``='' 
+if \tt{add} is \tt{false}.
+Likewise, a rank-2k update calculates:
+\begin{tmvcode}
+s (+=) x * (m1 * m2.transpose() + m2 * m1.transpose())
+s (+=) x * m1 * m2.adjoint() + conj(x) * m2 * m1.adjoint()
+\end{tmvcode}
+for a symmetric or hermitian \tt{s} respectively.
+
+We don't have an arithmetic operator 
+shorthand for these, because, as you can see, the operator
+overloading required would be quite complicated.  
+And since they are pretty rare, I decided to just let the programmer 
+call the routines explicitly.
+
+The other routine is:
+\begin{tmvcode}
+SymMultMM<bool add>(T x, const Matrix<T>& m1, const Matrix<T>& m2, 
+      SymMatrix<T>& s)
+\end{tmvcode}
+This calculates the usual generalized matrix product:
+\tt{s (+=) x * m1 * m2}, but it basically
+asserts that the product \tt{m1 * m2} is symmetric (or hermitian as appropriate).
+
+Since a matrix product is not in general symmetric, I decided not to allow 
+this operation with just the usual operators to prevent the user from doing 
+this accidentally.  However, there are times when the 
+programmer can know that the product should be (at least numerically close to)
+symmetric and that this calculation is ok.  Therefore it is provided as a subroutine.
+
+Note: All three of these functions may also take views as their arguments.  They don't have to be instantiated objects.
+

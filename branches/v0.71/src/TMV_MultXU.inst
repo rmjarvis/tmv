@@ -1,0 +1,33 @@
+
+#define CT std::complex<T>
+
+#define DefXM(T)\
+  template void MultXM(const T alpha, UpperTriMatrixView<T > A); \
+  
+DefXM(T)
+#ifdef INST_COMPLEX
+DefXM(CT)
+#endif
+
+#undef DefXM
+
+#define DefAddEl(T,T1,T2)\
+  template void ElemMultMM<false>(const T alpha, \
+      const GenUpperTriMatrix<T1 >& A, const GenUpperTriMatrix<T2 >& B, \
+      UpperTriMatrixView<T > C);  \
+  template void ElemMultMM<true>(const T alpha, \
+      const GenUpperTriMatrix<T1 >& A, const GenUpperTriMatrix<T2 >& B, \
+      UpperTriMatrixView<T > C);  \
+
+DefAddEl(T,T,T)
+#ifdef INST_COMPLEX
+DefAddEl(CT,T,T)
+DefAddEl(CT,T,CT)
+DefAddEl(CT,CT,T)
+DefAddEl(CT,CT,CT)
+#endif
+
+#undef DefAddEl
+
+#undef CT
+

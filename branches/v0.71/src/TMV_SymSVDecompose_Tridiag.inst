@@ -1,0 +1,18 @@
+
+#define CT std::complex<T>
+
+#define DefSVD(RT,T,Td)\
+template void Tridiagonalize( \
+    SymMatrixView<T > A, VectorView<T > beta, \
+    VectorView<Td > D, VectorView<RT> E, T& signdet); \
+
+DefSVD(T,T,T)
+#ifdef INST_COMPLEX
+DefSVD(T,CT,T)
+DefSVD(T,CT,CT)
+#endif
+
+#undef DefSVD
+
+#undef CT
+

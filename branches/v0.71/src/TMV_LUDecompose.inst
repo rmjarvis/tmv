@@ -1,0 +1,14 @@
+
+#define CT std::complex<T>
+
+#define DefLUD(T)\
+  template void LU_Decompose(MatrixView<T > lu, ptrdiff_t* p); \
+
+DefLUD(T)
+#ifdef INST_COMPLEX
+DefLUD(CT)
+#endif
+
+#undef DefLUD
+
+#undef CT

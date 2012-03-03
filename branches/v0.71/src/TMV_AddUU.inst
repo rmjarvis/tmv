@@ -1,0 +1,47 @@
+
+#define CT std::complex<T>
+
+#define DefAdd(T,Ta)\
+  template void AddMM(const T alpha, const GenUpperTriMatrix<Ta >& A, \
+      UpperTriMatrixView<T > B); \
+
+DefAdd(T,T)
+#ifdef INST_COMPLEX
+DefAdd(CT,T)
+DefAdd(CT,CT)
+#endif
+
+#undef DefAdd
+
+#define DefAdd2(T,Ta,Tb)\
+  template void AddMM(const T alpha, const GenUpperTriMatrix<Ta >& A, \
+      const T beta, const GenUpperTriMatrix<Tb >& B, \
+      UpperTriMatrixView<T > C); \
+
+DefAdd2(T,T,T)
+#ifdef INST_COMPLEX
+DefAdd2(CT,T,T)
+DefAdd2(CT,T,CT)
+DefAdd2(CT,CT,CT)
+#endif
+
+#undef DefAdd2
+
+#define DefAdd2(T,Ta,Tb)\
+  template void AddMM(const T alpha, const GenUpperTriMatrix<Ta >& A, \
+      const T beta, const GenMatrix<Tb >& B, MatrixView<T > C); \
+  template void AddMM(const T alpha, const GenUpperTriMatrix<Ta >& A, \
+      const T beta, const GenLowerTriMatrix<Tb >& B, \
+      MatrixView<T > C); \
+
+DefAdd2(T,T,T)
+#ifdef INST_COMPLEX
+DefAdd2(CT,T,T)
+DefAdd2(CT,CT,T)
+DefAdd2(CT,T,CT)
+DefAdd2(CT,CT,CT)
+#endif
+
+#undef DefAdd2
+
+#undef CT

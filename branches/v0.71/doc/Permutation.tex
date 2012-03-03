@@ -1,0 +1,236 @@
+% !TEX root = TMV_Documentation.tex
+
+\section{Permutations}
+\index{Permutation}
+\label{Permutation}
+
+The \tt{Permutation} class is our permutation matrix class.
+A permutation matrix is a square matrix with exactly one 1 in each row and
+column, and all the rest of the elements equal to 0.
+
+However, internally we do not store a permutation this way.
+Instead, we treat a permutation as a series of pair-wise interchanges.
+This seems to be the fastest way to apply a permutation to a matrix or
+vector, rather than using an index-based method.
+
+Also, I didn't bother to have a \tt{PermutationView} class.  Instead, the 
+\tt{Permutation} object keeps track of whether it owns its data or is just
+referencing values kept somewhere else.  Whenever you perform 
+a mutable action on the object, it copies the values if necessary.
+So you cannot indirectly modify another \tt{Permutation} the way you can
+with \tt{MatrixView}.
+
+\subsection{Constructors}
+\index{Permutation!Constructors}
+\label{Permutation_Constructors}
+
+\begin{itemize}
+
+\item
+\begin{tmvcode}
+tmv::Permutation p()
+\end{tmvcode}
+Makes a \tt{Permutation} with zero size.  You would normally use the \tt{resize} function later to
+change the size to some useful value.
+
+\item 
+\begin{tmvcode}
+tmv::Permutation p(int n)
+\end{tmvcode}
+Makes an \tt{n} $\times$ \tt{n} \tt{Permutation} set initially to the identity matrix.
+
+\item
+\begin{tmvcode}
+tmv::Permutation p(int n, const ptrdiff_t* pp, bool isinv=false)
+\end{tmvcode}
+Makes an \tt{n} $\times$ \tt{n} \tt{Permutation} using the provided values as the 
+list of interchanges.  The meaning of \tt{pp} is that \tt{v=p*v} is equivalent to
+\begin{tmvcode}
+if (isinv) {
+    for(int i=n-1; i>=0; --i) v.swap(i,pp[i]);
+} else {
+    for(int i=0; i<n; ++i) v.swap(i,pp[i]);
+}
+\end{tmvcode}
+If \tt{isinv} is omitted, it is taken to be \tt{false}.
+
+Note: most of the parameter values to TMV methods that are listed as
+\tt{int} are actually \tt{ptrdiff\_t}.  This might be the same as \tt{int} on your system, or it might be equivalent to \tt{long}.  But the difference is normally completely transparent to the user, since the compiler will seemlessly convert between integer types as needed.  However, since we are dealing with an array of index values, the compiler can do the conversion.  You need to correctly use \tt{ptrdiff\_t} rather than \tt{int}.
+
+The reason we use \tt{ptrdiff\_t} is in case \tt{int} is only 32 bits and you allocate a matrix with more than $2^{31}$ elelements, then \tt{int} would overflow, but \tt{ptrdiff\_t} is guaranteed to be safe.  So we use \tt{ptrdiff\_t} for all memory offsets in the code, and to be consistent, all the parameters that deal with indices are \tt{ptrdiff\_t} as well.  I think this constructor is the only case where you actually need to know about this fact.
+
+\end{itemize}
+
+
+\subsection{Access}
+\index{Permutation!Access methods}
+\label{Permutation_Access}
+
+\begin{tmvcode}
+p.resize(int new_size)
+\end{tmvcode}
+\index{Permutation!Methods!resize}
+
+\begin{tmvcode}
+p.nrows() = p.ncols() = p.colsize() = p.rowsize() = p.size()
+p(i,j)
+p.cref(i,j)
+\end{tmvcode}
+\index{Permutation!Methods!nrows}
+\index{Permutation!Methods!ncols}
+\index{Permutation!Methods!rowsize}
+\index{Permutation!Methods!colsize}
+\index{Permutation!Methods!size}
+\index{Permutation!Methods!operator()}
+\index{Permutation!Methods!cref}
+Note: Because of the way the permutation is stored, \tt{p(i,j)} is not
+terribly efficient.  It takes $O(N)$ time to calculate.  Also, there is no
+mutable version like there is for most matrices.
+
+\begin{tmvcode}
+p.transpose() = p.inverse()
+\end{tmvcode}
+\index{Permutation!Methods!transpose}
+\index{Permutation!Methods!inverse}
+These are the same, and they do not create new storage.  So statements like
+\tt{v = p.transpose() * v} are efficient.
+
+\begin{tmvcode}
+const ptrdiff_t* p.getValues()
+\end{tmvcode}
+Get the indices of the interchanges.  These are equivalent to the \tt{pp} values
+described above for the constructor.
+
+\begin{tmvcode}
+bool p.isInverse()
+\end{tmvcode}
+Returns true the the interchange values are taken in the reverse order (last to first)
+or false if not.  This is equivalent to the \tt{isinv} parameter in the constructor from the \tt{pp} values.
+
+\vspace{12pt} % Again, I wish I knew why I need this here.
+
+\subsection{Functions}
+\index{Permutation!Functions of}
+\label{Permutation_Functions}
+
+Most of these functions aren't very interesting, since most of them have 
+trivial values like 1 or n.  But we provide them all for consistency with the 
+functions that other matrices provide.
+
+\begin{tmvcode}
+int p.norm1() = Norm1(p) = 1
+int p.norm2() = Norm2(p) = 1
+int p.normInf() = NormInf(p) = 1
+int p.maxAbsElement() = MaxAbsElement(p) = 1
+int p.maxAbs2Element() = MaxAbs2Element(p) = 1
+double p.normF() = NormF(p) = p.norm() = Norm(p) = sqrt(n)
+int p.normSq() = NormSq(p) = n
+double p.normSq(double scale) = n*scale^2
+int p.trace() = Trace(p)
+int p.sumElements() = SumElements(p) = n
+int p.sumAbsElements() = SumAbsElements(p) = n
+int p.sumAbs2Elements() = SumAbs2Elements(p) = n
+int p.det() = Det(p)
+int p.logDet(int* sign=0) = LogDet(p)
+bool p.isSingular() = false
+int p.condition() = 1
+int p.doCondition() = 1
+pinv = p.inverse() = Inverse(p)
+p.makeInverse(Matrix<T>& minv)
+p.makeInverseATA(Matrix<T>& cov)
+\end{tmvcode}
+\index{Permutation!Functions of!Norm1}
+\index{Permutation!Functions of!Norm2}
+\index{Permutation!Functions of!NormInf}
+\index{Permutation!Functions of!MaxAbsElement}
+\index{Permutation!Functions of!MaxAbs2Element}
+\index{Permutation!Methods!norm1}
+\index{Permutation!Methods!norm2}
+\index{Permutation!Methods!normInf}
+\index{Permutation!Methods!maxAbsElement}
+\index{Permutation!Methods!maxAbs2Element}
+\index{Permutation!Functions of!Norm}
+\index{Permutation!Functions of!NormF}
+\index{Permutation!Functions of!NormSq}
+\index{Permutation!Functions of!Trace}
+\index{Permutation!Functions of!SumElements}
+\index{Permutation!Functions of!SumAbsElements}
+\index{Permutation!Functions of!SumAbs2Elements}
+\index{Permutation!Functions of!Det}
+\index{Permutation!Functions of!LogDet}
+\index{Permutation!Functions of!Inverse}
+\index{Permutation!Methods!norm}
+\index{Permutation!Methods!normF}
+\index{Permutation!Methods!normSq}
+\index{Permutation!Methods!trace}
+\index{Permutation!Methods!sumElements}
+\index{Permutation!Methods!sumAbsElements}
+\index{Permutation!Methods!sumAbs2Elements}
+\index{Permutation!Methods!det}
+\index{Permutation!Methods!logDet}
+\index{Permutation!Methods!isSingular}
+\index{Permutation!Methods!condition}
+\index{Permutation!Methods!doCondition}
+\index{Permutation!Methods!inverse}
+\index{Permutation!Methods!makeInverse}
+\index{Permutation!Methods!makeInverseATA}
+
+\begin{tmvcode}
+p.setToIdentity()
+p.transposeSelf()
+p.invertSelf()
+Swap(p1,p2)
+\end{tmvcode}
+\index{Permutation!Methods!setToIdentity}
+\index{Permutation!Methods!transposeSelf}
+\index{Permutation!Methods!invertSelf}
+\index{Permutation!Functions of!Swap}
+
+\subsection{Arithmetic}
+\index{Permutation!Arithmetic}
+\label{Permutation_Arithmetic}
+
+\begin{tmvcode}
+v2 = p * v1
+v2 = v1 * p
+v2 = v1 / p
+v2 = v1 % p
+v *= p
+v /= p
+v %= p
+m2 = p * m1
+m2 = m1 * p
+m2 = m1 / p
+m2 = m1 % p
+m *= p
+m /= p
+m %= p
+p1 == p2
+p1 != p2
+\end{tmvcode}
+
+\vspace{12pt}
+
+\subsection{I/O}
+\index{Permutation!I/O}
+\label{Permutation_IO}
+
+The simplest output syntax is the usual:
+\begin{tmvcode}
+os << p;
+\end{tmvcode}
+The output format is the same as for a \tt{Matrix}, including all the 0's.
+(See \ref{Matrix_IO}.)  Unlike most matrix types, this format cannot be read back into a
+\tt{Permutation} object.  
+
+If you need to be able to read the values back in, you should use the compact I/O style that writes out the permutation as a list of indices for the interchanges.
+\begin{tmvcode}
+os << tmv::CompactIO() << p;
+is >> tmv::CompactIO() >> p;
+\end{tmvcode}
+\index{IOStyle!CompactIO}
+On input, the \tt{Permutation p} will be resized if necessary based on the size information read in.
+
+See \S\ref{IOStyle} for more information about specifying custom I/O styles, including
+features like using brackets instead of parentheses, or putting commas between elements,
+or specifying an output precision.  

@@ -1,0 +1,44 @@
+
+#define CT std::complex<T>
+
+#define DefAdd(T,Ta)\
+  template void AddMM(const T alpha, const GenBandMatrix<Ta >& A, \
+      BandMatrixView<T > B); \
+
+DefAdd(T,T)
+#ifdef INST_COMPLEX
+DefAdd(CT,T)
+DefAdd(CT,CT)
+#endif
+
+#undef DefAdd
+
+#define DefAdd(T,Ta,Tb)\
+  template void AddMM(const T alpha, const GenBandMatrix<Ta >& A, \
+      const T beta, const GenBandMatrix<Tb >& B, \
+      BandMatrixView<T > C); \
+
+DefAdd(T,T,T)
+#ifdef INST_COMPLEX
+DefAdd(CT,T,T)
+DefAdd(CT,T,CT)
+DefAdd(CT,CT,CT)
+#endif
+
+#undef DefAdd
+
+#define DefAdd(T,Ta,Tb)\
+  template void AddMM(const T alpha, const GenBandMatrix<Ta >& A, \
+      const T beta, const GenMatrix<Tb >& B, MatrixView<T > C); \
+
+DefAdd(T,T,T)
+#ifdef INST_COMPLEX
+DefAdd(CT,T,T)
+DefAdd(CT,CT,T)
+DefAdd(CT,T,CT)
+DefAdd(CT,CT,CT)
+#endif
+
+#undef DefAdd
+
+#undef CT

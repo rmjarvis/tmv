@@ -1,0 +1,499 @@
+% !TEX root = TMV_Documentation.tex
+
+\section{Upper/lower triangle matrices}
+\index{UpperTriMatrix}
+\index{LowerTriMatrix|see{UpperTriMatrix}}
+\label{TriMatrix}
+
+The \tt{UpperTriMatrix} class is our upper triangle matrix class, which is non-zero
+only on the main diagonal and above.  \tt{LowerTriMatrix} is our class for lower
+triangle matrices, which are non-zero only on the main diagonal and below.
+
+In addition to the data type template parameter (indicated here by \tt{T} as usual),
+there is also a second template parameter that specifies attributes of the
+\tt{UpperTriMatrix} or \tt{LowerTriMatrix}.  The attributes that are allowed are:
+\begin{description} \itemsep -2pt
+\item[$\bullet$] \tt{CStyle} or \tt{FortranStyle}
+\item[$\bullet$] \tt{ColMajor} or \tt{RowMajor}
+\item[$\bullet$] \tt{NonUnitDiag} or \tt{UnitDiag}
+\end{description}
+The first two options work the same as for a regular \tt{Matrix}.
+The final option refers to whether the elements on the diagonal should be 
+taken to be all 1's (\tt{UnitDiag}) rather than what is actually stored 
+in memory (\tt{NonUnitDiag}).
+The default attributes are \tt{CStyle}, \tt{ColMajor} and \tt{NonUnitDiag}.
+
+The storage of both an \tt{UpperTriMatrix} and a \tt{LowerTriMatrix} takes
+$N \times N$ elements of memory, even though approximately half of them 
+are never used.  Someday, I'll write the packed storage versions, which will
+allow for more efficient storage of the matrices.
+
+Most functions and methods for \tt{UpperTriMatrix} and \tt{LowerTriMatrix}
+work the same as they do for \tt{Matrix}.
+In these cases, we will just list the functions that are allowed with the
+effect understood to be the same as for a regular \tt{Matrix}.  Of course, there are 
+almost always algorithmic speed-ups, which the code will use to take advantage of the 
+triangle structure.
+Whenever there is a difference in how a function works,
+we will explain the difference.
+Also, all of the routines are analogous for \tt{UpperTriMatrix} and 
+\tt{LowerTriMatrix}, so we only list each routine once 
+(the \tt{UpperTriMatrix} version for definiteness).  
+
+
+\subsection{Constructors}
+\index{UpperTriMatrix!Constructors}
+\label{TriMatrix_Constructors}
+
+As usual, the optional \tt{A} template argument specifies attributes about
+the \tt{UpperTriMatrix}.  The default attributes if not specified are
+\tt{CStyle|ColMajor|NonUnitDiag}.  The constructors for \tt{LowerTriMatrix} are 
+completely analogous and are omitted for brevity.
+
+\begin{itemize}
+
+\item
+\begin{tmvcode}
+tmv::UpperTriMatrix<T,A> U()
+\end{tmvcode}
+Makes an \tt{UpperTriMatrix} with zero size.  You would normally use the \tt{resize} function later to
+change the size to some useful value.
+
+\item 
+\begin{tmvcode}
+tmv::UpperTriMatrix<T,A> U(int n)
+\end{tmvcode}
+Makes an \tt{n} $\times$ \tt{n} \tt{UpperTriMatrix} with {\em uninitialized} values.
+If extra debugging is turned on (with the compiler flag \tt{-DTMV\_EXTRA\_DEBUG}), then the values are in fact initialized to 888.  
+
+\item
+\begin{tmvcode}
+tmv::UpperTriMatrix<T,A> U(int n, T x)
+\end{tmvcode}
+Makes an \tt{n} $\times$ \tt{n} \tt{UpperTriMatrix} with all values equal to \tt{x}.
+
+\item 
+\begin{tmvcode}
+tmv::UpperTriMatrix<T,A> U(const Matrix<T,A2>& m)
+tmv::UpperTriMatrix<T,A> U(const UperTriMatrix<T,A2>& U2)
+\end{tmvcode}
+Make an \tt{UpperTriMatrix} which copies the corresponding values of
+\tt{m} or \tt{U2}.  Note that the attributes are allowed to be different.
+Specifically, \tt{U2} can be \tt{NonUnitDiag} and \tt{U} can be \tt{UnitDiag},
+in which case, it will only copy the off-diagonal values, and take
+the diagonal values to be all 1's.  Going the other way from \tt{UnitDiag}
+to \tt{NonUnitDiag} will put actual 1's into memory along the diagonal.
+
+\item
+\begin{tmvcode}
+tmv::UpperTriMatrix<T,A> U1(const UpperTriMatrix<T2,A2>& U2)
+U1 = U2
+\end{tmvcode}
+Copy the \tt{UpperTriMatrix U2}, which may be of any type \tt{T2} so long
+as values of type \tt{T2} are convertible into type \tt{T}.
+The assignment operator has the same flexibility.
+
+\item
+\begin{tmvcode}
+tmv::UpperTriMatrix<T,A> U;
+U << U00, U01, U02, ...
+          U11, U12, ...
+               U22, ...
+                    ...
+tmv::LowerTriMatrix<T,A> L;
+L << L00,
+     L10, L11, 
+     L20, L21, L22,
+     ...
+\end{tmvcode}
+Initialize the \tt{UpperTriMatrix U} and \tt{LowerTriMatrix L} with lists of values.  As usual, the 
+list elements should be listed in RowMajor order, and only the values that are in the upper or
+lower triangle should be given.  If \tt{U} or \tt{L} is \tt{UnitDiag}, then the diagonal elements should be 
+listed as 1's.
+\item
+\begin{tmvcode}
+tmv::UpperTriMatrixView<T,A> U = 
+      tmv::UpperTriMatrixViewOf(T* vv, int n, StorageType stor, 
+      DiagType dt=NonUnitDiag)
+tmv::ConstUpperTriMatrixView<T,A> U = 
+      tmv::UpperTriMatrixViewOf(const T* vv, int n, StorageType stor, 
+      DiagType dt=NonUnitDiag)
+tmv::UpperTriMatrixView<T,A> U = 
+      tmv::UnitUpperTriMatrixViewOf(T* vv, int n, StorageType stor)
+tmv::UpperTriMatrixView<T,A> U = 
+      tmv::UnitUpperTriMatrixViewOf(T* vv, int n, StorageType stor)
+\end{tmvcode}
+\index{UpperTriMatrix!View of raw memory}
+Make a \tt{UpperTriMatrixView} of the actual memory elements, \tt{vv}.
+One wrinkle here is that if \tt{dt} is \tt{UnitDiag}, then 
+\tt{vv} is still the location of the
+upper left corner, even though that value is never used 
+(since the value is just taken to
+be 1).  Also, \tt{vv} must be of length \tt{n} $\times$ \tt{n},
+so all of the lower triangle
+elements must be in memory, even though they are never used.
+
+The last two functions are currently equivalent to the first two with \tt{dt=UnitDiag}.
+However, in future versions of TMV this will allow for the \tt{dt} value to be 
+known at compile time rather than run time which could improve efficiency
+in some cases.
+
+Also, \tt{A} here should only be \tt{CStyle} or \tt{FortranStyle}.  For now, this is the only attribute we allow for views (of any matrix variety).  Later versions will allow views to keep track of more of their attributes at compile time, but for now things like whether it is \tt{UnitDiag} or \tt{NonUnitDiag} are runtime variables.
+
+\item
+\begin{tmvcode}
+tmv::UpperTriMatrixView<T,A> U = 
+      tmv::UpperTriMatrixViewOf(T* vv, int n, int stepi, int stepj, 
+      DiagType dt=NonUnitDiag)
+tmv::ConstUpperTriMatrixView<T,A> U = 
+      tmv::UpperTriMatrixViewOf(const T* vv, int n, int stepi, 
+      int stepj, DiagType dt=NonUnitDiag)
+tmv::UpperTriMatrixView<T,A> U = 
+      tmv::UnitUpperTriMatrixViewOf(T* vv, int n, int stepi, int stepj)
+tmv::ConstUpperTriMatrixView<T,A> U = 
+      tmv::UnitUpperTriMatrixViewOf(const T* vv, int n, int stepi, 
+      int stepj)
+\end{tmvcode}
+\index{UpperTriMatrix!View of raw memory}
+Make a \tt{UpperTriMatrixView} of the actual memory elements, \tt{vv}.
+These versions allow you to provide an arbitrary step through the data in 
+the $i$ and $j$ directions. 
+\end{itemize}
+
+\subsection{Access}
+\index{UpperTriMatrix!Access methods}
+\label{TriMatrix_Access}
+
+\begin{itemize}
+
+\item
+\begin{tmvcode}
+U.nrows() = U.ncols() = U.colsize() = U.rowsize() = U.size()
+U.resize(int newsize)
+U(i,j)
+U.cref(i,j)
+U.ref(i,j)
+\end{tmvcode}
+\index{UpperTriMatrix!Methods!nrows}
+\index{UpperTriMatrix!Methods!ncols}
+\index{UpperTriMatrix!Methods!rowsize}
+\index{UpperTriMatrix!Methods!colsize}
+\index{UpperTriMatrix!Methods!size}
+\index{UpperTriMatrix!Methods!resize}
+\index{UpperTriMatrix!Methods!operator()}
+\index{UpperTriMatrix!Methods!row}
+\index{UpperTriMatrix!Methods!col}
+\index{UpperTriMatrix!Methods!diag}
+For the mutable \tt{U(i,j)} version, the position must fall within the
+upper triangle.  If \tt{U} is \tt{const}, then \tt{U(i,j)} returns 0 for
+positions in the lower triangle.
+\tt{U(i,i)} does work if \tt{U} is \tt{UnitDiag}, but assigning anything
+other than \tt{1} is an error.
+
+\item
+\begin{tmvcode}
+U.row(int i, int j1, int j2)
+U.col(int j, int i1, int i2)
+U.diag()
+U.diag(int i)
+U.diag(int i, int k1, int k2)
+\end{tmvcode}
+\index{UpperTriMatrix!Methods!row}
+\index{UpperTriMatrix!Methods!col}
+\index{UpperTriMatrix!Methods!diag}
+Note that the versions of \tt{row} and \tt{col} with only one argument are
+missing, since the full row or column isn't accessible as a \tt{VectorView}.
+You must specify a valid range within the row or column that you want, 
+given the upper triangle shape of \tt{U}.  Likewise for the \tt{LowerTriMatrix}
+versions of these.
+If \tt{U} is \tt{UnitDiag}, then the range may not include the diagonal element.
+Similarly, \tt{U.diag()} is valid only if \tt{U} is \tt{NonUnitDiag}.
+
+\item
+\begin{tmvcode}
+UpperTriMatrix<T>::rowmajor_iterator U.rowmajor_begin()
+UpperTriMatrix<T>::rowmajor_iterator U.rowmajor_end()
+UpperTriMatrix<T>::const_rowmajor_iterator U.rowmajor_begin() const
+UpperTriMatrix<T>::const_rowmajor_iterator U.rowmajor_end() const
+UpperTriMatrix<T>::colmajor_iterator U.colmajor_begin()
+UpperTriMatrix<T>::colmajor_iterator U.colmajor_end()
+UpperTriMatrix<T>::const_colmajor_iterator U.colmajor_begin() const
+UpperTriMatrix<T>::const_colmajor_iterator U.colmajor_end() const
+\end{tmvcode}
+These iterators only traverse the elements that are actually stored in memory. So for an \tt{UpperTriMatrix}, the iteration skips all the elements the the strict lower triangle.
+
+\item
+\begin{tmvcode}
+T* U.ptr()
+const T* U.cptr() const
+int U.stepi() const
+int U.stepj() const
+bool U.isconj() const
+bool U.isrm() const
+bool U.iscm() const
+bool U.isunit() const
+\end{tmvcode}
+\index{UpperTriMatrix!Methods!ptr}
+\index{UpperTriMatrix!Methods!cptr}
+\index{UpperTriMatrix!Methods!stepi}
+\index{UpperTriMatrix!Methods!stepj}
+\index{UpperTriMatrix!Methods!isconj}
+\index{UpperTriMatrix!Methods!isrm}
+\index{UpperTriMatrix!Methods!iscm}
+These methods allow for direct memory access of an \tt{UpperTriMatrix} or \tt{LowerTriMatrix} or views thereof. 
+The last item is new and returns whether \tt{U} is \tt{UnitDiag} or not.
+
+\item
+\begin{tmvcode}
+U.subVector(int i, int j, int istep, int jstep, int size)
+U.subMatrix(int i1, int i2, int j1, int j2)
+U.subMatrix(int i1, int i2, int j1, int j2, int istep, int jstep)
+\end{tmvcode}
+\index{UpperTriMatrix!Methods!subVector}
+\index{UpperTriMatrix!Methods!subMatrix}
+This works the same as for \tt{Matrix}
+(See \ref{Matrix_Access}),
+except that all of the elements in the 
+subvector or submatrix must be completely within the upper or lower triangle, as
+appropriate.  If \tt{U} is \tt{UnitDiag}, then no elements may be on the 
+main diagonal.
+
+\item
+\begin{tmvcode}
+U.subTriMatrix(int i1, int i2, int istep = 1)
+\end{tmvcode}
+\index{UpperTriMatrix!Methods!subTriMatrix}
+This returns the upper or lower triangle matrix whose upper-left
+corner is \tt{U(i1,i1)}, and whose lower-right corner is 
+\tt{U(i2-istep,i2-istep)} for C-style indexing or \tt{U(i2,i2)} 
+for Fortran-style indexing.  If \tt{istep} $\neq 1$, then it is the 
+step in both the \tt{i} and \tt{j} directions.
+
+\item
+\begin{tmvcode}
+U.offDiag()
+\end{tmvcode}
+\index{UpperTriMatrix!Methods!offDiag}
+This returns a view to the portion of the triangle matrix that does not include
+the diagonal elements.  It will always be \tt{NonUnitDiag}.
+Internally, it provides an easy way to deal with the \tt{UnitDiag} triangle matrices
+for many routines.  But it may be useful for some users as well.
+
+\item
+\begin{tmvcode}
+U.viewAsUnitDiag()
+\end{tmvcode}
+\index{UpperTriMatrix!Methods!viewAsUnitDiag}
+This returns a view to a \tt{NonUnitDiag} triangle matrix that treats it
+instead as a \tt{UnitDiag} triangle matrix.
+
+\item
+\begin{tmvcode}
+U.transpose()
+U.conjugate()
+U.adjoint()
+U.view()
+U.cView()
+U.fView()
+U.realPart()
+U.imagPart()
+\end{tmvcode}
+\index{UpperTriMatrix!Methods!transpose}
+\index{UpperTriMatrix!Methods!conjugate}
+\index{UpperTriMatrix!Methods!adjoint}
+\index{UpperTriMatrix!Methods!view}
+\index{UpperTriMatrix!Methods!cView}
+\index{UpperTriMatrix!Methods!fView}
+\index{UpperTriMatrix!Methods!realPart}
+\index{UpperTriMatrix!Methods!imagPart}
+Note that the transpose and adjoint of an \tt{UpperTriMatrix} is an
+\tt{LowerTriMatrixView} and vice versa.  Otherwise, these all return
+\tt{UpperTriMatrixView}s.
+
+\end{itemize}
+
+\subsection{Functions}
+\index{UpperTriMatrix!Functions of}
+\label{TriMatrix_Functions}
+
+\begin{tmvcode}
+RT U.norm1() = Norm1(U)
+RT U.norm2() = Norm2(U)
+RT U.normInf() = NormInf(U)
+RT U.normF() = NormF(U) = U.norm() = Norm(U)
+RT U.normSq() = NormSq(U)
+RT U.normSq(RT scale)
+RT U.maxAbsElement() = MaxAbsElement(U)
+RT U.maxAbs2Element() = MaxAbs2Element(U)
+T U.trace() = Trace(U)
+T U.sumElements() = SumElements(U)
+RT U.sumAbsElements() = SumAbsElements(U)
+RT U.sumAbs2Elements() = SumAbs2Elements(U)
+T U.det() = Det(U)
+RT U.logDet(T* sign=0) = LogDet(U)
+bool U.isSingular()
+RT U.condition()
+RT U.doCondition()
+Uinv = U.inverse() = Inverse(U)
+U.makeInverse(Matrix<T>& minv)
+U.makeInverse(UpperTriMatrix<T>& Uinv)
+U.makeInverseATA(Matrix<T>& cov)
+\end{tmvcode}
+\index{UpperTriMatrix!Functions of!Norm1}
+\index{UpperTriMatrix!Functions of!Norm2}
+\index{UpperTriMatrix!Functions of!NormInf}
+\index{UpperTriMatrix!Functions of!MaxAbsElement}
+\index{UpperTriMatrix!Functions of!MaxAbs2Element}
+\index{UpperTriMatrix!Methods!norm1}
+\index{UpperTriMatrix!Methods!norm2}
+\index{UpperTriMatrix!Methods!normInf}
+\index{UpperTriMatrix!Methods!maxAbsElement}
+\index{UpperTriMatrix!Methods!maxAbs2Element}
+\index{UpperTriMatrix!Functions of!Norm}
+\index{UpperTriMatrix!Functions of!NormF}
+\index{UpperTriMatrix!Functions of!NormSq}
+\index{UpperTriMatrix!Functions of!Trace}
+\index{UpperTriMatrix!Functions of!SumElements}
+\index{UpperTriMatrix!Functions of!SumAbsElements}
+\index{UpperTriMatrix!Functions of!SumAbs2Elements}
+\index{UpperTriMatrix!Functions of!Det}
+\index{UpperTriMatrix!Functions of!LogDet}
+\index{UpperTriMatrix!Functions of!Inverse}
+\index{UpperTriMatrix!Methods!norm}
+\index{UpperTriMatrix!Methods!normF}
+\index{UpperTriMatrix!Methods!normSq}
+\index{UpperTriMatrix!Methods!trace}
+\index{UpperTriMatrix!Methods!sumElements}
+\index{UpperTriMatrix!Methods!sumAbsElements}
+\index{UpperTriMatrix!Methods!sumAbs2Elements}
+\index{UpperTriMatrix!Methods!det}
+\index{UpperTriMatrix!Methods!logDet}
+\index{UpperTriMatrix!Methods!isSingular}
+\index{UpperTriMatrix!Methods!condition}
+\index{UpperTriMatrix!Methods!doCondition}
+\index{UpperTriMatrix!Methods!inverse}
+\index{UpperTriMatrix!Methods!makeInverse}
+\index{UpperTriMatrix!Methods!makeInverseATA}
+Since the inverse of an \tt{UpperTriMatrix} is also upper triangular,
+the object returned by \tt{U.inverse()} is 
+assignable to an \tt{UpperTriMatrix}.  Of course you can also assign it
+to a regular \tt{Matrix} if you prefer.  Similarly, there are versions
+of \tt{U.makeInverse(minv)} for both argument types. 
+
+\begin{tmvcode}
+U.setZero()
+U.setAllTo(T x)
+U.addToAll(T x)
+U.clip(RT thresh)
+U.setToIdentity(T x = 1)
+U.conjugateSelf()
+U.invertSelf()
+Swap(U1,U2)
+\end{tmvcode}
+\index{UpperTriMatrix!Methods!setZero}
+\index{UpperTriMatrix!Methods!setAllTo}
+\index{UpperTriMatrix!Methods!addToAll}
+\index{UpperTriMatrix!Methods!clip}
+\index{UpperTriMatrix!Methods!setToIdentity}
+\index{UpperTriMatrix!Methods!conjugateSelf}
+\index{UpperTriMatrix!Methods!invertSelf}
+\index{UpperTriMatrix!Functions of!Swap}
+Like for \tt{DiagMatrix}, \tt{invertSelf} calculates $U^{-1}$ in place.  
+It is equivalent to \tt{U = U.inverse()} and, like the other division operations, is invalid for \tt{T = int} or \tt{complex<int>}.
+\vspace{12pt}
+
+\subsection{Arithmetic}
+\index{UpperTriMatrix!Arithmetic}
+\label{TriMatrix_Arithmetic}
+
+In addition to \tt{x}, \tt{v}, and \tt{m} from before, 
+we now add \tt{U} and \tt{L} for a \tt{UpperTriMatrix}
+and \tt{LowerTriMatrix} respectively.  Where the syntax is identical
+for the two cases, only the \tt{U} form is listed.
+
+\begin{tmvcode}
+U2 = -U1
+U2 = x * U1
+U2 = U1 [*/] x
+U3 = U1 [+-] U2
+m2 = m1 [+-] U
+m2 = U [+-] m1
+m = L [+-] U
+m = U [+-] L
+U [*/]= x
+U2 [+-]= U1
+m [+-]= U
+v2 = U * v1
+v2 = v1 * U
+v *= U
+U3 = U1 * U2
+U3 = ElemProd(U1,U2)
+m2 = U * m1
+m2 = m1 * U
+m = U * L
+m = L * U
+U2 *= U1
+m *= U
+U2 = U1 [+-] x
+U2 = x [+-] U1
+U [+-]= x
+\end{tmvcode}
+
+\subsection{Division}
+\index{UpperTriMatrix!Arithmetic!division}
+\label{TriMatrix_Division}
+
+The division operations are: (again omitting the L forms when redundant)
+\begin{tmvcode}
+v2 = v1 [/%] U
+m2 = m1 [/%] U
+m2 = U [/%] m1
+U3 = U1 [/%] U2
+U2 = x [/%] U1
+m = U [/%] L
+m = L [/%] U
+v [/%]= U
+U2 [/%]= U1
+m [/%]= U
+\end{tmvcode}
+Division by a triangular matrix does not require any decomposition, so there are none of the usual helper functions for division that a regular \tt{Matrix} has such as \tt{divideUsing}, \tt{saveDiv}, etc.
+If an \tt{UpperTriMatrix} or \tt{LowerTriMatrix} is singular, you can find out with \tt{m.isSingular()},
+but there is no direct way to use SVD for the division and avoid any
+divisions by 0.  If you want to do this, you should use \tt{BandMatrixViewOf(U)} to 
+treat \tt{U} as a \tt{BandMatrix}, which can use SVD.
+
+\subsection{I/O}
+\index{UpperTriMatrix!I/O}
+\label{TriMatrix_IO}
+
+The simplest I/O syntax is the usual:
+\begin{tmvcode}
+os << U << L;
+is >> U >> L;
+\end{tmvcode}
+The output format is the same as for a \tt{Matrix}, including all the 0's.
+(See \ref{Matrix_IO}.)  On input, if any of the elements in the wrong triangle 
+are not 0, a \tt{tmv::ReadError} is thrown.  Likewise if the input matrix is
+\tt{UnitDiag}, but a diagonal element read in is not equal to 1.
+
+There is also a compact I/O style that puts all the elements that aren't trivially 0 all on a single line and skips the parentheses. 
+\begin{tmvcode}
+os << tmv::CompactIO() << U;
+os << tmv::CompactIO() << L;
+is >> tmv::CompactIO() >> U;
+is >> tmv::CompactIO() >> L;
+\end{tmvcode}
+\index{IOStyle!CompactIO}
+
+One can also write small values as 0 with
+\begin{tmvcode}
+os << tmv::ThreshIO(thresh) << U;
+os << tmv::ThreshIO(thresh) << L;
+os << tmv::CompactIO().setThresh(thresh) << U;
+os << tmv::CompactIO().setThresh(thresh) << L;
+\end{tmvcode}
+\index{IOStyle!ThreshIO}
+
+See \S\ref{IOStyle} for more information about specifying custom I/O styles, including
+features like using brackets instead of parentheses, or putting commas between elements,
+or specifying an output precision.  

@@ -1,0 +1,10 @@
+# vim: set filetype=python :
+
+Import('env')
+ReadFileList=env['__readfunc']
+
+texlist = ReadFileList('doc.files')
+
+pdfdoc = env.PDF(target='TMV_Documentation.pdf',source='TMV_Documentation.tex')
+Depends(pdfdoc,texlist)
+

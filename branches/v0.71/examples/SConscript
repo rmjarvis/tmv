@@ -1,0 +1,22 @@
+# vim: set filetype=python :
+
+Import('env')
+
+libs=['tmv'] 
+sblibs=['tmv_symband','tmv']
+
+env1 = env.Clone(CPPDEFINES=[],LIBS=libs+env['LIBS'])
+if env['MEM_TEST']:
+  env1.Append(CPPDEFINES=['MEMTEST'])
+env2 = env1.Clone(LIBS=sblibs+env['LIBS'])
+
+vector = env1.Program('vector','Vector.cpp')
+matrix = env1.Program('matrix','Matrix.cpp')
+division = env1.Program('division','Division.cpp')
+bandmatrix = env2.Program('bandmatrix','BandMatrix.cpp')
+symmatrix = env2.Program('symmatrix','SymMatrix.cpp')
+
+
+env.Alias(target='examples',
+    source=[vector,matrix,division,bandmatrix,symmatrix])
+

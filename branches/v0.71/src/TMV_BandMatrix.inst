@@ -1,0 +1,115 @@
+
+#define CT std::complex<T>
+
+#define Def1(RT,T,Ref) \
+  template bool GenBandMatrix<T >::hasSubMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t is, ptrdiff_t js) const; \
+  template bool GenBandMatrix<T >::hasSubVector( \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t is, ptrdiff_t js, ptrdiff_t s) const; \
+  template bool GenBandMatrix<T >::hasSubBandMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t lo, ptrdiff_t hi, ptrdiff_t is, ptrdiff_t js) const; \
+  template bool ConstBandMatrixView<T,FortranStyle>::hasSubMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t is, ptrdiff_t js) const; \
+  template bool ConstBandMatrixView<T,FortranStyle>::hasSubVector( \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t is, ptrdiff_t js, ptrdiff_t s) const; \
+  template bool ConstBandMatrixView<T,FortranStyle>::hasSubBandMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t lo, ptrdiff_t hi, ptrdiff_t is, ptrdiff_t js) const; \
+  template T GenBandMatrix<T >::sumElements() const; \
+  template RT GenBandMatrix<T >::sumAbsElements() const; \
+  template RT GenBandMatrix<T >::sumAbs2Elements() const; \
+  template RT GenBandMatrix<T >::normF() const; \
+  template RT GenBandMatrix<T >::normSq(const RT scale) const; \
+  template RT GenBandMatrix<T >::norm1() const; \
+  template RT GenBandMatrix<T >::maxAbsElement() const; \
+  template RT GenBandMatrix<T >::maxAbs2Element() const; \
+  template RT GenBandMatrix<T >::doNorm2() const; \
+  template RT GenBandMatrix<T >::doCondition() const; \
+  template QuotXB<T,T > GenBandMatrix<T >::QInverse() const; \
+  template T GenBandMatrix<T >::cref(ptrdiff_t i, ptrdiff_t j) const; \
+  template BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::clip(RT thresh); \
+  template BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::setAllTo(const T& x); \
+  template BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::addToAll(const T& x); \
+  template BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::setZero(); \
+  template BandMatrixView<T,CStyle>&  \
+      BandMatrixView<T,CStyle>::conjugateSelf(); \
+  template void BandMatrixView<T,CStyle>::doTransposeSelf(); \
+  template Ref BandMatrixView<T,CStyle>::ref(ptrdiff_t i, ptrdiff_t j); \
+  template void Swap(BandMatrixView<T > m1, BandMatrixView<T > m2); \
+  template BandMatrix<T,DiagMajor> UpperBiDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2); \
+  template BandMatrix<T,DiagMajor> LowerBiDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2); \
+  template BandMatrix<T,DiagMajor> TriDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2, \
+      const GenVector<T >& v3); \
+  template bool ConstBandMatrixView<T >::canLinearize() const; \
+  template bool BandMatrixView<T >::canLinearize() const; \
+  template void GenBandMatrix<T >::write(const TMV_Writer& writer) const; \
+  template void BandMatrixView<T >::read(const TMV_Reader& reader); \
+
+Def1(T,T,T&)
+#ifdef INST_COMPLEX
+Def1(T,CT,VarConjRef<CT >)
+#endif
+
+#undef Def1
+
+#ifndef TISINT
+#define Def1b(RT,T) \
+  template T GenBandMatrix<T >::det() const; \
+  template RT GenBandMatrix<T >::logDet(T* sign) const; \
+  template void GenBandMatrix<T >::setDiv() const; \
+  template bool GenBandMatrix<T >::divIsLUDiv() const; \
+  template bool GenBandMatrix<T >::divIsQRDiv() const; \
+  template bool GenBandMatrix<T >::divIsSVDiv() const; \
+
+Def1b(T,T)
+#ifdef INST_COMPLEX
+Def1b(T,CT)
+#endif
+
+#undef Def1b
+#endif
+
+#define Def2(T1,T2)\
+  template bool operator==(const GenBandMatrix<T1 >& m1, \
+      const GenBandMatrix<T2 >& m2); \
+  template bool operator==(const GenBandMatrix<T1 >& m1, \
+      const GenMatrix<T2 >& m2); \
+
+Def2(T,T)
+#ifdef INST_COMPLEX
+Def2(T,CT)
+Def2(CT,T)
+Def2(CT,CT)
+#endif
+
+#undef Def2
+
+#define Def5(T,A)\
+  template void BandMatrix<T,A>::read(const TMV_Reader& reader); \
+
+Def5(T,RowMajor|CStyle)
+Def5(T,ColMajor|CStyle)
+Def5(T,DiagMajor|CStyle)
+Def5(T,RowMajor|FortranStyle)
+Def5(T,ColMajor|FortranStyle)
+Def5(T,DiagMajor|FortranStyle)
+#ifdef INST_COMPLEX
+Def5(CT,RowMajor|CStyle)
+Def5(CT,ColMajor|CStyle)
+Def5(CT,DiagMajor|CStyle)
+Def5(CT,RowMajor|FortranStyle)
+Def5(CT,ColMajor|FortranStyle)
+Def5(CT,DiagMajor|FortranStyle)
+#endif
+
+#undef Def5
+
+#undef CT
+
+

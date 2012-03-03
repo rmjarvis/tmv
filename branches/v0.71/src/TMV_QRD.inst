@@ -1,0 +1,38 @@
+#define CT std::complex<T>
+
+template class QRDiv<T >;
+#ifdef INST_COMPLEX
+template class QRDiv<CT >;
+#endif
+
+#define DefDivEq(T,T2)\
+template void QRDiv<T >::doLDivEq(MatrixView<T2 > m) const; \
+template void QRDiv<T >::doRDivEq(MatrixView<T2 > m) const; \
+template void QRDiv<T >::doMakeInverse(MatrixView<T2 > m) const; \
+
+DefDivEq(T,T)
+#ifdef INST_COMPLEX
+DefDivEq(T,CT)
+DefDivEq(CT,CT)
+#endif
+
+#undef DefDivEq
+
+#define DefDiv(T,T1,T2) \
+template void QRDiv<T >::doLDiv(const GenMatrix<T1 >& m1, \
+    MatrixView<T2 > m2) const; \
+template void QRDiv<T >::doRDiv(const GenMatrix<T1 >& m1, \
+    MatrixView<T2 > m2) const; \
+
+DefDiv(T,T,T)
+#ifdef INST_COMPLEX
+DefDiv(T,T,CT)
+DefDiv(T,CT,CT)
+DefDiv(CT,T,CT)
+DefDiv(CT,CT,CT)
+#endif
+
+#undef DefDiv
+
+#undef CT
+

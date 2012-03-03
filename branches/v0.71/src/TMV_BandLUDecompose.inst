@@ -1,0 +1,18 @@
+
+#define CT std::complex<T>
+
+#define DefLUD(T) \
+template void LU_Decompose(BandMatrixView<T > lu, ptrdiff_t* p, ptrdiff_t Anhi); \
+template void LU_Decompose( \
+    const GenBandMatrix<T >& A, LowerTriMatrixView<T > L, \
+    BandMatrixView<T > U, ptrdiff_t* P); \
+
+DefLUD(T)
+#ifdef INST_COMPLEX
+DefLUD(CT)
+#endif
+
+#undef DefLUD
+
+#undef CT
+

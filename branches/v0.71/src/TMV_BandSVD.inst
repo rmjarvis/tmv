@@ -1,0 +1,38 @@
+
+#define CT std::complex<T>
+
+template class BandSVDiv<T >;
+#ifdef INST_COMPLEX
+template class BandSVDiv<CT >;
+#endif
+
+#define DefDivEq(T,T2)\
+template void BandSVDiv<T >::doLDivEq(MatrixView<T2 > m) const; \
+template void BandSVDiv<T >::doRDivEq(MatrixView<T2 > m) const; \
+template void BandSVDiv<T >::doMakeInverse(MatrixView<T2 > m) const; \
+
+DefDivEq(T,T)
+#ifdef INST_COMPLEX
+DefDivEq(T,CT)
+DefDivEq(CT,CT)
+#endif
+
+#undef DefDivEq
+
+#define DefDiv(T,T1,T2) \
+template void BandSVDiv<T >::doLDiv(const GenMatrix<T1 >& m1, \
+    MatrixView<T2 > m2) const; \
+template void BandSVDiv<T >::doRDiv(const GenMatrix<T1 >& m1, \
+    MatrixView<T2 > m2) const; \
+
+DefDiv(T,T,T)
+#ifdef INST_COMPLEX
+DefDiv(T,T,CT)
+DefDiv(T,CT,CT)
+DefDiv(CT,T,CT)
+DefDiv(CT,CT,CT)
+#endif
+
+#undef DefDiv
+
+#undef CT

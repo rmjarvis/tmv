@@ -1,0 +1,26 @@
+
+#define CT std::complex<T>
+
+template ConstVectorView<T > DiagMatrixComposite<T >::cdiag() const;
+#ifdef INST_COMPLEX
+template ConstVectorView<CT > DiagMatrixComposite<CT >::cdiag() const;
+#endif
+
+#define DefMV(T,Ta,Tb)\
+  template void MultMV<true>(const T alpha, const GenDiagMatrix<Ta >& A, \
+      const GenVector<Tb >& x, VectorView<T > y);  \
+  template void MultMV<false>(const T alpha, const GenDiagMatrix<Ta >& A, \
+      const GenVector<Tb >& x, VectorView<T > y);  \
+
+DefMV(T,T,T)
+#ifdef INST_COMPLEX
+DefMV(CT,T,T)
+DefMV(CT,T,CT)
+DefMV(CT,CT,T)
+DefMV(CT,CT,CT)
+#endif
+
+#undef DefMV
+
+#undef CT
+

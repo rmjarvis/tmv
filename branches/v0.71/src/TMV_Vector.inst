@@ -1,0 +1,110 @@
+
+#define CT std::complex<T>
+
+#define Def1(RT,T,Ref) \
+  template bool GenVector<T >::hasSubVector(ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const; \
+  template bool ConstVectorView<T,FortranStyle>::hasSubVector( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const; \
+  template RT GenVector<T >::normSq(const RT scale) const; \
+  template RT GenVector<T >::norm2() const; \
+  template T GenVector<T >::sumElements() const; \
+  template RT GenVector<T >::sumAbsElements() const; \
+  template RT GenVector<T >::sumAbs2Elements() const; \
+  template T GenVector<T >::doMinElement(ptrdiff_t* iminout) const; \
+  template T GenVector<T >::doMaxElement(ptrdiff_t* imaxout) const; \
+  template RT GenVector<T >::doMinAbsElement(ptrdiff_t* iminout) const; \
+  template RT GenVector<T >::doMaxAbsElement(ptrdiff_t* imaxout) const; \
+  template RT GenVector<T >::doMinAbs2Element(ptrdiff_t* iminout) const; \
+  template RT GenVector<T >::doMaxAbs2Element(ptrdiff_t* imaxout) const; \
+  template T GenVector<T >::cref(ptrdiff_t i) const; \
+  template Ref VectorView<T,CStyle>::ref(ptrdiff_t i); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::setZero(); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::setAllTo( \
+      const T& x); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::addToAll( \
+      const T& x); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::conjugateSelf(); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::DoBasis(ptrdiff_t i); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::DoSwap( \
+      ptrdiff_t i1, ptrdiff_t i2); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::DoPermute( \
+      const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::DoReversePermute( \
+      const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::reverseSelf(); \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::sort( \
+      ptrdiff_t* p, ADType ad, CompType comp); \
+  template void GenVector<T >::write(const TMV_Writer& writer) const; \
+  template void VectorView<T,CStyle>::read(const TMV_Reader& reader); \
+  template void Swap(VectorView<T > v1, VectorView<T > v2); \
+
+Def1(T,T,T&)
+#ifdef INST_COMPLEX
+Def1(T,CT,VarConjRef<CT >)
+#endif
+
+#undef Def1
+
+#define Def1a(RT,T) \
+  template VectorView<T,CStyle>& VectorView<T,CStyle>::clip(RT thresh); \
+      
+Def1a(T,T)
+#ifndef TISINT
+#ifdef INST_COMPLEX
+Def1a(T,CT)
+#endif
+#endif
+
+#undef Def1a
+
+#ifndef NOTHROW
+  template void VectorReadError<T>::write(std::ostream& os) const throw();
+  template void VectorReadError<CT>::write(std::ostream& os) const throw();
+#endif
+
+#define Def2(RT,T,A) \
+  template Vector<T,A>& Vector<T,A>::setZero(); \
+  template Vector<T,A>& Vector<T,A>::clip(RT thresh); \
+  template Vector<T,A>& Vector<T,A>::setAllTo(const T& x); \
+  template Vector<T,A>& Vector<T,A>::addToAll(const T& x); \
+  template Vector<T,A>& Vector<T,A>::conjugateSelf(); \
+  template Vector<T,A>& Vector<T,A>::DoBasis(ptrdiff_t i); \
+  template Vector<T,A>& Vector<T,A>::DoSwap(ptrdiff_t i1, ptrdiff_t i2); \
+  template void Vector<T,A>::read(const TMV_Reader& reader); \
+  template Vector<T,A> DoBasisVector(ptrdiff_t,ptrdiff_t); \
+
+Def2(T,T,CStyle)
+Def2(T,T,FortranStyle)
+#ifdef INST_COMPLEX
+Def2(T,CT,CStyle)
+Def2(T,CT,FortranStyle)
+#endif
+
+#undef Def2
+
+#define Def3(T1,T2) \
+  template bool operator==(const GenVector<T1 >& v1, \
+      const GenVector<T2 >& v2); \
+
+Def3(T,T)
+#ifdef INST_COMPLEX
+Def3(T,CT)
+Def3(CT,T)
+Def3(CT,CT)
+#endif
+
+#undef Def3
+
+#ifndef INST_SKIP_BLAS
+#define Def4(T) \
+  template void DoCopySameType<T >(const GenVector<T >& v1, \
+      VectorView<T > v2); \
+
+Def4(T)
+#ifdef INST_COMPLEX
+Def4(CT)
+#endif
+#endif
+
+#undef CT
+

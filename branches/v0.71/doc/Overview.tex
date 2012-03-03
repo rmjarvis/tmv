@@ -1,0 +1,444 @@
+% !TEX root = TMV_Documentation.tex
+
+\section{Overview}
+
+First, this library is provided without any warranty of any kind.  There is no guarantee
+that the code will produce accurate results for all inputs.  If someone dies because
+my code gave you a wrong result, \underline{do not} blame me.
+
+OK, that was mostly for the crazies out there.  Really, I think this is a pretty good 
+product, and I've been using it for my own research extensively.  So at least 
+for the routines that I use, they are probably reasonably well debugged.
+I also have a test suite, which tries to be comprehensive, although
+occasionally I find bugs that I hadn't thought to test for in the test suite, so 
+there may still be a few lurking in there.  That means the code should definitely be considered
+a beta-type release.  Hence the ``0.'' version number.  I'm also still adding functionality,
+so there may be interface changes from one version to the next if I decide I 
+want to do something a different way.  Just be warned.  Any such changes will be 
+mentioned in \S\ref{Changes} of subsequent releases.  And see \S\ref{History}
+for changes introduced in previous versions.
+
+\subsection{Features of TMV}
+
+The Template Matrix/Vector (TMV) Library is a C++ class library designed to make
+writing code with vectors and matrices both transparent and fast.  Transparency 
+means that when you look at your code months later, it is obvious what the code
+does, making it easier to debug.  Fast means the execution time of the code should
+be as fast as possible - this is mostly algorithm dependent, so we want the 
+underlying library code to use the fastest algorithms possible.
+
+If there were another free C++ Matrix library available that satisfied these requirements
+and provided all (or even most) of the functionality I wanted, I probably would
+not have written this.  But, at least when I started writing this, the available matrix libraries
+were not very good.  Either they didn't have good operator overloading, or they 
+didn't do complex matrices well, or they didn't include singular value decompositions,
+or something.  Anyway, since I did decide to write 
+my own library, hopefully other people can benefit from my efforts and will find 
+this to be a useful product.
+
+Given the above basic guidelines, the specific design features that I 
+have incorporated into the code include:
+
+\begin{enumerate}
+\item
+\textbf{Operator overloading}
+
+Matrix equations look like real math equations in the code. 
+For example, one can write 
+\begin{tmvcode}
+v2 = m * v1;
+v2 += 5 * m.transpose() * v1;
+m *= 3.;
+v2 += m1*v1 + 3*v2 + 8*m2.transpose()*v3;
+\end{tmvcode}
+to perform the corresponding mathematical operations.
+
+I also define division:
+\begin{tmvcode}
+x = b/A;
+\end{tmvcode}
+to mean solve the matrix equation $A x = b$.  If $A$ has more rows than columns,
+then the solution will be a least-square solution.
+
+\item
+\textbf{Delayed evaluation}
+
+Equations like the above 
+\begin{tmvcode}
+v2 = m * v1;
+v2 += 5 * m.transpose() * v1;
+\end{tmvcode}
+do not create a temporary vector before assigning or adding the result to \tt{v2}.  This makes 
+the TMV code just as fast as code which uses a functional form, such as:
+\begin{tmvcode}
+dgemv('N',m,n,1.,mp,ldm,v1p,s1,0.,v2p,s2);
+dgemv('T',m,n,5.,mp,ldm,v1p,s1,1.,v2p,s2);
+\end{tmvcode}
+In fact, when installed with a BLAS library, these are the exact 
+BLAS functions that the above TMV statements will call behind the scenes.
+So speed is not sacrificed for the sake of code legibility.
+
+However, a more complicated equation like
+\begin{tmvcode}
+v2 += m1*v1 + 3*v2 + 8*m2.transpose()*v3;
+\end{tmvcode}
+does not have a specialized routine, 
+so it will require a couple temporary \tt{Vector}s.
+Generally, if a statement performs just one operation, no temporary will be needed.  
+(This includes all operations with corresponding BLAS functions along with some others
+that are not included in BLAS.)
+More complicated equations like this last example will give the right answer, 
+but may not be quite as efficient as if you expand
+the code to perform one operation per line.
+
+\item
+\textbf{Template classes}
+
+Of course, all of the matrix and vector classes are templates, so you can have 
+\begin{tmvcode}
+Matrix<float>
+Matrix<double>
+Matrix<complex<double> >
+Matrix<long double>
+Matrix<MyQuadPrecisionType>
+\end{tmvcode}
+or whatever.
+
+\item
+\textbf{Mix complex/real}
+
+One can multiply a real matrix by a complex
+vector without having to copy the matrix to a complex one for the sake of the calculation
+and deal with the concomitantly slower calculation.  
+Likewise for the other arithmetic operations.  
+
+However, it does not allow mixing of underlying data types 
+(\tt{float} with \tt{double}, for example), 
+with the exception of simple assignments.
+
+\item
+\textbf{Views}
+
+Operations like \tt{m.transpose()} or \tt{v.subVector(3,8)}
+return ``views'' of the underlying data rather than copying to new storage.  
+This model helps delay calculations, which increases efficiency.  And the syntax
+is fairly obvious.  For example:
+\begin{tmvcode}
+v.subVector(3,8) *= 3.;
+m.row(3) += 4. * m.row(0);
+m *= m.transpose();
+\end{tmvcode}
+modifies the underlying \tt{v} and \tt{m} in the obvious ways.
+
+Note that in the last equation, \tt{m.transpose()} uses the same storage as
+\tt{m}, which is getting overwritten in the process.  The code recognizes 
+this conflict and uses temporary storage to obtain the correct result.
+See ``Alias checking'' below for more about this.
+
+\item
+\textbf{C- or Fortran-style indexing}
+
+Both C- and Fortran-style (i.e. zero-based or one-based) indexing are possible for
+element access of the matrices and vectors.
+
+With C-style indexing, all matrix and vector indexing starts with 0.  
+So the upper-left element of a matrix is \tt{m(0,0)}, not \tt{m(1,1)}. 
+Likewise, the lower right element of an $M \times N$ matrix is \tt{m(M-1,N-1)}.
+For element ranges, such as \tt{v.subVector(0,10)}, the first number is the 
+index of the first element, and the second number is ``one-past-the-end'' of 
+the range.  So, this would return a 10 element vector from \tt{v(0)} to
+\tt{v(9)} inclusive, not an 11 element one including \tt{v(10)}.
+
+With Fortran-style indexing, all matrix and vector indexing starts with 1.
+So the upper-left element of a matrix is \tt{m(1,1)}.  Likewise, the lower right
+element of an $M \times N$ matrix is \tt{m(M,N)}.  For element ranges, such as
+\tt{v.subVector(1,10)}, the first number is the index of the first element, and
+the second number is the last element.  So, this would return a 10 element vector
+from \tt{v(1)} to \tt{v(10)} inclusive, which represents the same actual elements 
+as the C-style example above.
+
+\item
+\textbf{Special matrices}
+
+Many applications use matrices with known sparsity or a specific structure.  
+The code is able to exploit a number of these structures for increased
+efficiency in both speed and storage.  So far the following special matrices are
+available: diagonal, upper/lower triangle, symmetric, hermitian, banded, and 
+symmetric or hermitian banded.  
+Special types of banded matrices, such as 
+upper and lower banded, tridiagonal, or Hessenberg, may all be declared as a 
+regular \tt{BandMatrix}.  The code checks the number of sub- and super-diagonals 
+and uses the right algorithm when such specialization is advantageous for a 
+particular calculation.
+
+\item
+\textbf{Flexible storage}
+
+Both row-major and column-major storage are possible as an optional
+extra template parameter.
+For banded matrices, there is also diagonal-major storage.
+This can aid I/O, which may require a particular format to mesh with another
+program.  Also, some algorithms 
+are faster for one storage than than the other, so it can be worth switching storage
+and checking the speed difference.
+
+\item
+\textbf{Alias checking}
+
+Expressions such as \tt{m *= m} pose a problem for many matrix libraries, since
+no matter what order you do the calculation, you will necessarily overwrite elements 
+that you need for later stages of the calculation.  
+The TMV code automatically recognizes the
+conflict (generally known as an alias) and creates the needed temporary storage.
+
+The code only checks the addresses of the first elements of the different objects.
+So expressions such as \tt{m = m.lowerTri() * m.upperTri()} will work
+correctly, even though there are three types of matrices involved, since the 
+address of the upper-left corner of each matrix is the same.  (This particular
+expression does not even need a temporary.  The code orders the steps of this
+calculation so it can be done in place.)
+
+However, \tt{v.subVector(5,15) += v.subVector(0,10)} will be calculated 
+incorrectly, since the subvectors start at different locations, so the code
+doesn't notice the aliasing.  Here, elements 5-9 will be overwritten before
+they are added to the left-side vector.
+
+Therefore, some care is still needed on the part of the user.  But this limited check is sufficient
+for most applications.
+
+\item
+\textbf{BLAS}
+
+For the combinations of types for which there are existing BLAS
+routines, the code can call the optimized BLAS routines instead of its own 
+code.  For other combinations (or for user defined types like 
+\tt{MyQuadPrecisionType} or somesuch), 
+TMV has a native implementation that it uses instead, 
+using blocking and recursive techniques to make the code fairly fast on modern CPUs.
+
+This feature can be turned off at compile time if desired 
+with the option \tt{WITH_BLAS=false},
+although this is not generally recommended if 
+BLAS is available on your machine, and speed is important for your 
+application.  This is especially true if you have a highly optimized BLAS
+distribution for your machine like MKL or ACML.  However, 
+the native code is usually within a factor of 2 or so of even these BLAS implementations,
+so if you don't care much about optimizing the speed of your code, it's not so bad to 
+use the native TMV code.
+\item
+\textbf{LAPACK}
+
+TMV can also be configured to call LAPACK routines behind the scenes when possible, 
+which may be faster than the native TMV code.  For types that don't have LAPACK routines, 
+or if you do not enable the LAPACK calls,
+the code uses blocked and/or recursive algorithms, which are similarly fast.  
+
+For almost all algorithms, 
+the TMV code is approximately as fast as LAPACK routines -
+sometimes faster, since most
+LAPACK distributions do not use recursive algorithms yet, which are generally
+slightly faster on modern machines with good compilers. 
+So if you don't want to deal with getting LAPACK
+up and running, it won't generally be too bad, speedwise, 
+to leave the LAPACK calls turned off.
+
+Also, it is worth noting that many LAPACK libraries are not thread safe.
+So if your main program uses multiple threads, and you aren't sure whether
+your LAPACK library is thread safe, you might want to compile TMV without 
+LAPACK to avoid intermittent mysterious segmentation faults from the
+LAPACK library.  I believe all the native TMV code is thread safe.
+
+\begin{comment}
+\item
+\textbf{Comments}
+
+The code is highly commented, especially for the more complicated algorithms.
+I have this egotistical quirk that I need to understand all of the code I write.
+So none of the algorithms are just taken verbatim from LAPACK or anything like that.
+I force myself to understand the algorithm (usually from Golub and van Loan,
+but sometimes from a journal article or something I find on the net),
+write a long comment explaining how it works, and then finally write the code
+from scratch.  Then I usually compare my code to the LAPACK version, at which point
+I have occasionally found ways to either speed it up or make it more accurate
+(which also get commented, of course).
+
+But the point is - if you want to understand how, say, the blocked Bunch-Kaufman
+algorithm works, you'll probably do better looking at the comment in the 
+TMV code than trying to decipher the LAPACK routines.  Plus, the code itself is
+usually a lot more readable, since the arithmetic is written with the operator
+overloads and such rather than the cryptic BLAS function names.
+\end{comment}
+
+\end{enumerate}
+
+\subsection{Basic usage}
+
+All of the basic TMV classes and functions, including the \tt{Vector} and \tt{Matrix} 
+classes, can be accessed with
+\begin{tmvcode}
+#include "TMV.h"
+\end{tmvcode}
+\index{TMV.h}
+The special matrices described below (other than diagonal and triangular matrices) 
+are not included in this header file.
+See their sections for the names
+of the files to include to access those classes.
+
+All of the TMV classes and functions reside in the namespace \tt{tmv}. 
+And of course, they are all templates.
+So if you want to declare a $10 \times 10$ \tt{Matrix}, one would write:
+\begin{tmvcode}
+tmv::Matrix<double> m(10,10);
+\end{tmvcode}
+\index{Namespace tmv}
+
+If writing \tt{tmv::} all the time is cumbersome, one can use \tt{using}
+statements near the top of the code:
+\begin{tmvcode}
+using tmv::Matrix;
+using tmv::Vector;
+\end{tmvcode}
+Or, while generally considered bad coding style, one can import the whole namespace:
+\begin{tmvcode}
+using namespace tmv;
+\end{tmvcode}
+Or, you could use typedef to avoid having to write the template type as well:
+\begin{tmvcode}
+typedef tmv::Matrix<double> DMatrix;
+typedef tmv::Vector<double> DVector;
+\end{tmvcode}
+In this documentation, I will usually write \tt{tmv::} with the class names to help remind the reader
+that it is necessary, especially near the 
+beginnings of the sections.  
+But for the sake of brevity and readability, I sometimes omit it.
+
+\subsection {Data types}
+
+Throughout most of the documentation, I will write \tt{T} for the underlying type.
+Wherever you see \tt{T}, you should put \tt{double} or \tt{std::complex<float>} or whatever.
+
+For a user defined type, like \tt{MyQuadPrecisionType} for example, the main requirements are that 
+in addition to the usual arithmetic operators, the functions:
+\begin{tmvcode}
+std::numeric_limits<T>::epsilon()
+sqrt(T x) 
+exp(T x) 
+log(T x)
+\end{tmvcode}
+\index{User-defined types}
+need to be defined appropriately, where \tt{T} is your type name.  See \S\ref{Install} for details about
+compiling the library for types other than \tt{double} and \tt{float}.
+
+Some functions in this documentation will return a real value or require a real argument, 
+even if \tt{T} is complex.  In these cases, I will write \tt{RT} to indicate 
+``the real type associated with \tt{T}''.  Similarly, there are places where \tt{CT}
+indicates ``the complex type associated with \tt{T}''.
+
+It is worth noting that \tt{Matrix<int>} is possible as well if you compile the library
+with the SCons option \tt{INST\_INT=true}. 
+However, only simple 
+routines like multiplication and addition will give correct answers.  If you try to 
+divide by a \tt{Matrix<int>}, for example, the required calculations are impossible 
+for \tt{int}'s,
+so the result will not be correct.  But since the possibility of multiplication of 
+integer matrices seemed desirable, we do allow them to be used.  
+\emph{Caveat programor}.  If debugging is turned on (with \tt{DEBUG=true} in the scons installation), 
+then trying to do anything that requires
+\tt{sqrt} or \tt{epsilon} for \tt{int}s will result in a runtime error.  Specifically a 
+\tt{FailedAssert} exception will be thrown.
+\index{Matrix!integer types}
+
+The one somewhat complicated algorithm that is available for integer types is
+the determinant, since the determinant of an integer matrix is always an integer.
+The algorithm to do this is a so-called integer-preserving algorithm from Bareiss (1968)
+that only uses division when it is known that the result will not require a fractional part.
+I've extended his algorithm to \tt{complex<int>} as well, so those are also accurate.
+\index{Matrix!Determinant!integer types}
+
+\subsection{Getting the version of TMV}
+\index{Version of TMV}
+
+At times it can be useful to be able to access what version of TMV is installed on a 
+particular machine, either to log the information as part of the meta-data about a
+run of a program, or even to modify the code depending on which features of TMV
+are available.  To address this, we provide three ways to access this information.
+
+First, there is a function you can call from within your program:
+\begin{tmvcode}
+std::string TMV_Version();
+\end{tmvcode}
+\index{TMV\_Version}
+For this release, this function returns the string ``\tttmvversion''.  This is useful for inserting
+into a log file or anywhere else that you want to record the version somewhere.
+
+Second we also provide three C preprocessor definitions:
+\begin{tmvcode}
+TMV_MAJOR_VERSION
+TMV_MINOR_VERSION
+TMV_VERSION_AT_LEAST(major,minor)
+\end{tmvcode}
+\index{TMV\_MAJOR\_VERSION}
+\index{TMV\_MINOR\_VERSION}
+\index{TMV\_VERSION\_AT\_LEAST}
+\index{Conditional compilation}
+The first two are defined to be \tmvmajorversion\ and \tmvminorversion\ for this release.
+The third can be used with an \tt{#if} directive to change what code you want to compile
+according the the version of TMV that is installed.
+For example, in version 0.65 we added the \tt{m.addToAll(x)} function.  So you could
+write:
+\begin{tmvcode}
+#if TMV_VERSION_AT_LEAST(0,65)
+m.addToAll(1.0);
+#else
+for(int i=0;i<m.nrows();++i) 
+    for(int j=0;j<m.ncols();++j)
+        m(i,j) += 1.0;
+#endif
+\end{tmvcode}
+
+And finally, we also include a bash script called \tt{tmv-version} that will output
+the version number, so you can run this
+directly from the command line.  For this release, this script produces the output:\\ \\
+\texttt{\$ tmv-version} \\
+\tttmvversion \\
+\texttt{\$}\\ \\
+This can be useful as part of a larger script if you want to log the TMV version from that
+rather than from within a C++ program.  
+
+Hopefully these three methods will satisfy any potential manner in which you might want 
+to access the version of TMV that is on your system.  If there is something I missed, and 
+none of these work for you, please
+let me know, and I'll probably be happy to provide another mechanism in future releases.
+
+\subsection {Notations used in this document}
+
+There are three fonts used in this document.  First, for the main text, we use times.
+Second, as you have no doubt already noticed, \tt{typewriter font} is used to 
+indicate bits of code.  And finally, when I discuss the math about matrices, I 
+use $italics$ -- for example, $v_2 = m * v_1$.
+
+Also, my code syntax in this documentation is not very rigorous, aiming to maximize
+readability of the code, rather than including all of the type specifications for everything.
+
+I tend to freely mix the syntax of how a function is used with how
+it is declared in order to try to provide all of the information you will need on one line.  
+For example, the constructor listed as:
+\begin{tmvcode}
+tmv::Vector<T,A> v(int n, const T* vv)
+\end{tmvcode}
+is actually declared in the code as:
+\begin{tmvcode}
+template <class T, int A>
+tmv::Vector<T,A>::Vector(int n, const T* vv);
+\end{tmvcode}
+and when it is used in your source code, you would write something like:
+\begin{tmvcode}
+int n = 5;
+const double vv[n] = {1.2, 3.1, 9.1, 9.2, -3.5};
+tmv::Vector<double,tmv::CStyle> v(n,vv);
+\end{tmvcode}
+So, the notation that I use in the documentation for this constructor is kind of a hybrid between the declaration syntax and the use syntax.  The intent is to improve readability, but
+if you are ever confused about how to use a particular method, you should look at
+the \tt{.h} header files themselves, since they obviously have the exactly accurate
+declarations.  
+

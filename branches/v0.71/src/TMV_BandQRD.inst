@@ -1,0 +1,42 @@
+
+#define CT std::complex<T>
+
+template class BandQRDiv<T >;
+template void GetQFromBandQR( 
+    MatrixView<T > QRx, const GenVector<T >& Qbeta, const ptrdiff_t nlo);
+#ifdef INST_COMPLEX
+template class BandQRDiv<CT >;
+template void GetQFromBandQR( 
+    MatrixView<CT > QRx, const GenVector<CT >& Qbeta, const ptrdiff_t nlo);
+#endif
+
+#define DefDivEq(T,T2)\
+template void BandQRDiv<T >::doLDivEq(MatrixView<T2 > m) const; \
+template void BandQRDiv<T >::doRDivEq(MatrixView<T2 > m) const; \
+template void BandQRDiv<T >::doMakeInverse(MatrixView<T2 > m) const; \
+
+DefDivEq(T,T)
+#ifdef INST_COMPLEX
+DefDivEq(T,CT)
+DefDivEq(CT,CT)
+#endif
+
+#undef DefDivEq
+
+#define DefDiv(T,T1,T2) \
+template void BandQRDiv<T >::doLDiv(const GenMatrix<T1 >& m1, \
+    MatrixView<T2 > m2) const; \
+template void BandQRDiv<T >::doRDiv(const GenMatrix<T1 >& m1, \
+    MatrixView<T2 > m2) const; \
+
+DefDiv(T,T,T)
+#ifdef INST_COMPLEX
+DefDiv(T,T,CT)
+DefDiv(T,CT,CT)
+DefDiv(CT,T,CT)
+DefDiv(CT,CT,CT)
+#endif
+
+#undef DefDiv
+
+#undef CT

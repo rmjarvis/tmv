@@ -1,0 +1,25 @@
+
+#define CT std::complex<T>
+
+#define DefSVD(RT,T)\
+template void DoSVDecomposeFromBidiagonal( \
+    MatrixView<T > U, VectorView<RT> D, VectorView<RT> E, MatrixView<T > V, \
+    bool UisI, bool VisI); \
+template void SV_Decompose(MatrixView<T > U, \
+    DiagMatrixView<RT > S, MatrixView<T > V, RT& ld, T& det, bool StoreU); \
+template void SV_Decompose(MatrixView<T > U, \
+    DiagMatrixView<RT > S, MatrixView<T > V, bool StoreU); \
+template void SV_Decompose(MatrixView<T > U, \
+    DiagMatrixView<RT > S, bool StoreU); \
+template void SV_DecomposeFromBidiagonal(MatrixView<T > U, \
+    VectorView<RT > D, VectorView<RT > E, MatrixView<T > V, bool SetUV);  \
+
+DefSVD(T,T)
+#ifdef INST_COMPLEX
+DefSVD(T,CT)
+#endif
+
+#undef DefSVD
+
+#undef CT
+

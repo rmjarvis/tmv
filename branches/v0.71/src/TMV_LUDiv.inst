@@ -1,0 +1,18 @@
+
+#define CT std::complex<T>
+
+#define DefDivEq(T,T1)\
+  template void LU_LDivEq(const GenMatrix<T1 >& A,\
+      const ptrdiff_t* P, MatrixView<T > b); \
+  template void LU_RDivEq(const GenMatrix<T1 >& A,\
+      const ptrdiff_t* P, MatrixView<T > b); \
+
+DefDivEq(T,T)
+#ifdef INST_COMPLEX
+DefDivEq(CT,T)
+DefDivEq(CT,CT)
+#endif
+
+#undef DefDivEq
+
+#undef CT

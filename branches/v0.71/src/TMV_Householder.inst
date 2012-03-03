@@ -1,0 +1,63 @@
+
+#define CT std::complex<T>
+
+#define DefHR(T)\
+template T HouseholderReflect(T& x0, VectorView<T > x, T& det);  \
+template T HouseholderReflect(VectorView<T > x, T& det);  \
+template T HouseholderReflect(MatrixView<T > m, T& det);  \
+template bool HouseholderUnReflect(T& y, VectorView<T > x, \
+    T& beta);  \
+template void HouseholderUnpack(T& v0, VectorView<T > v, T beta); \
+template void HouseholderUnpack(MatrixView<T > m, T beta); \
+template void BlockHouseholderAugment(const GenMatrix<T >& Y, \
+    UpperTriMatrixView<T > Z, T beta); \
+template void BlockHouseholderMakeZ(const GenMatrix<T >& Y, \
+    UpperTriMatrixView<T > Z, const GenVector<T >& beta); \
+template void BlockHouseholderUnpack(MatrixView<T > Y, \
+    const GenUpperTriMatrix<T >& Z, MatrixView<T > m); \
+
+DefHR(T)
+#ifdef INST_COMPLEX
+DefHR(CT)
+#endif
+
+#undef DefHR
+
+// These are only for CT:
+#ifdef INST_COMPLEX
+#if 0
+template CT HouseholderReflect(ConjRef<CT > x0, VectorView<CT > x,
+    CT& det); 
+template CT HouseholderReflect(VarConjRef<CT > x0, VectorView<CT > x,
+    CT& det);
+template void HouseholderUnpack(ConjRef<CT > v0, VectorView<CT > v,
+    CT beta); 
+template void HouseholderUnpack(VarConjRef<CT > v0, VectorView<CT > v,
+    CT beta);
+template bool HouseholderUnReflect(ConjRef<CT > y, VectorView<CT > x,
+    CT& det);
+template bool HouseholderUnReflect(VarConjRef<CT > y, VectorView<CT > x,
+    CT& det);
+#endif
+#endif
+
+#define DefMult(T,T1)\
+template void HouseholderLMult( \
+    const GenVector<T1 >& v, T1 beta, VectorView<T > m0, \
+    MatrixView<T > mx); \
+template void HouseholderLMult( \
+    const GenVector<T1 >& v, T1 beta, MatrixView<T > m); \
+template void BlockHouseholderLMult(const GenMatrix<T1 >& Y, \
+    const GenUpperTriMatrix<T1 >& Z, MatrixView<T > m); \
+template void BlockHouseholderLDiv(const GenMatrix<T1 >& Y, \
+    const GenUpperTriMatrix<T1 >& Z, MatrixView<T > m); \
+
+DefMult(T,T)
+#ifdef INST_COMPLEX
+DefMult(CT,T)
+DefMult(CT,CT)
+#endif
+
+#undef DefMult
+
+#undef CT

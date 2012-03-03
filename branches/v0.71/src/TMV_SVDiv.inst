@@ -1,0 +1,23 @@
+
+#define CT std::complex<T>
+
+#define DefDiv(T,RT1,T1,T2)\
+template void SV_LDiv(const GenMatrix<T1 >& U,\
+    const GenDiagMatrix<RT1 >& S, const GenMatrix<T1 >& V, const ptrdiff_t kmax, \
+    const GenMatrix<T2 >& m, MatrixView<T > x); \
+template void SV_RDiv(const GenMatrix<T1 >& U,\
+    const GenDiagMatrix<RT1 >& S, const GenMatrix<T1 >& V, const ptrdiff_t kmax, \
+    const GenMatrix<T2 >& m, MatrixView<T > x); \
+
+DefDiv(T,T,T,T)
+#ifdef INST_COMPLEX
+DefDiv(CT,T,T,T)
+DefDiv(CT,T,T,CT)
+DefDiv(CT,T,CT,T)
+DefDiv(CT,T,CT,CT)
+#endif
+
+#undef DefDiv
+
+#undef CT
+

@@ -1,0 +1,25 @@
+
+#define CT std::complex<T>
+
+#define DefDivEq(T,T1)\
+template void LU_PackedPL_Unpack(const GenBandMatrix<T1 >& A, \
+    const ptrdiff_t* p, LowerTriMatrixView<T > m); \
+template void LU_PackedPL_LDivEq(const GenBandMatrix<T1 >& A, \
+    const ptrdiff_t* p, MatrixView<T > m); \
+template void LU_PackedPL_RDivEq(const GenBandMatrix<T1 >& A, \
+    const ptrdiff_t* p, MatrixView<T > m); \
+template void LU_LDivEq(const GenBandMatrix<T1 >& A, \
+    const ptrdiff_t* p, MatrixView<T > m); \
+template void LU_RDivEq(const GenBandMatrix<T1 >& A, \
+    const ptrdiff_t* p, MatrixView<T > m); \
+
+DefDivEq(T,T)
+#ifdef INST_COMPLEX
+DefDivEq(CT,T)
+DefDivEq(CT,CT)
+#endif
+
+#undef DefDivEq
+
+#undef CT
+

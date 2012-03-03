@@ -1,0 +1,15 @@
+
+#define CT std::complex<T>
+
+#define DefCHD(T)\
+template void CH_Decompose(SymBandMatrixView<T > A); \
+template void LDL_Decompose(SymBandMatrixView<T > A); \
+
+DefCHD(T)
+#ifdef INST_COMPLEX
+DefCHD(CT)
+#endif
+
+#undef DefCHD
+
+#undef CT

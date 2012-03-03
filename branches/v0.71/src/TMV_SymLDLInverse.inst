@@ -1,0 +1,17 @@
+
+#define CT std::complex<T>
+
+#define DefInv(T,T1) \
+template void LDL_Inverse(const GenSymMatrix<T1 >& L, \
+    const GenVector<T1 >& xD, const ptrdiff_t* P, SymMatrixView<T > sinv); \
+
+DefInv(T,T)
+#ifdef INST_COMPLEX
+DefInv(CT,T)
+DefInv(CT,CT)
+#endif
+
+#undef DefInv
+
+#undef CT
+
