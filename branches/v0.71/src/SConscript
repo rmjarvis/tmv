@@ -1,6 +1,7 @@
 # vim: set filetype=python :
 
 import os
+import sys
 
 Import('env')
 
@@ -100,32 +101,34 @@ if env['SHARED']:
         lib_final_dir = os.path.join(env['FINAL_PREFIX'],'lib')
     else:
         lib_final_dir = os.path.join(GetBuildPath('#lib'))
-    lib_final_name = os.path.join(lib_final_dir,'libtmv.dylib')
-    sblib_final_name = os.path.join(lib_final_dir,'libtmv_symband.dylib')
 
-    if env['PLATFORM'] == 'darwin':
+    if sys.platform == 'darwin':
+        lib_final_name = os.path.join(lib_final_dir,'libtmv.dylib')
+        sblib_final_name = os.path.join(lib_final_dir,'libtmv_symband.dylib')
         env1.AppendUnique( SHLINKFLAGS=[
-	    '-dynamic',
-	    '-Wl,-install_name,%s'%lib_final_name,
-	    '-Wl,-compatibility_version,%s.%s'%tuple(compat_version_numbers),
-	    '-Wl,-current_version,%s.%s'%tuple(version_numbers) ] )
+            '-dynamic',
+            '-Wl,-install_name,%s'%lib_final_name,
+            '-Wl,-compatibility_version,%s.%s'%tuple(compat_version_numbers),
+            '-Wl,-current_version,%s.%s'%tuple(version_numbers) ] )
         env7.AppendUnique( SHLINKFLAGS=[
-	    '-dynamic',
-	    '-Wl,-install_name,%s'%sblib_final_name,
-	    '-Wl,-compatibility_version,%s.%s'%tuple(compat_version_numbers),
-	    '-Wl,-current_version,%s.%s'%tuple(version_numbers) ] )
-    if env['PLATFORM'] == 'linux2':
-         env1.AppendUnique( SHLINKFLAGS=[
-	    '-Wl,-soname,%s'%lib_final_name ])
-         env7.AppendUnique( SHLINKFLAGS=[
-	    '-Wl,-soname,%s'%sblib_final_name ])
+            '-dynamic',
+            '-Wl,-install_name,%s'%sblib_final_name,
+            '-Wl,-compatibility_version,%s.%s'%tuple(compat_version_numbers),
+            '-Wl,-current_version,%s.%s'%tuple(version_numbers) ] )
+    if sys.platform == 'linux2':
+        lib_final_name = os.path.join(lib_final_dir,'libtmv.so')
+        sblib_final_name = os.path.join(lib_final_dir,'libtmv_symband.so')
+        env1.AppendUnique( SHLINKFLAGS=[
+            '-Wl,-soname,%s'%lib_final_name ])
+        env7.AppendUnique( SHLINKFLAGS=[
+            '-Wl,-soname,%s'%sblib_final_name ])
 
     lib = env1.SharedLibrary(
             os.path.join('#lib','tmv'),
-	    obj_lib + obj_noint_lib + obj_omp_lib + obj_omp_noint_lib + obj_geqp3_lib)
+            obj_lib + obj_noint_lib + obj_omp_lib + obj_omp_noint_lib + obj_geqp3_lib)
     sblib = env7.SharedLibrary(
             os.path.join('#lib','tmv_symband'),
-	    obj_sblib + obj_noint_sblib + obj_omp_noint_sblib + obj_stegr_sblib)
+            obj_sblib + obj_noint_sblib + obj_omp_noint_sblib + obj_stegr_sblib)
 
 else:
     obj_lib = env1.StaticObject(lib_files)
@@ -141,10 +144,10 @@ else:
 
     lib = env1.StaticLibrary(
             os.path.join('#lib','tmv'),
-	    obj_lib + obj_noint_lib + obj_omp_lib + obj_omp_noint_lib + obj_geqp3_lib)
+            obj_lib + obj_noint_lib + obj_omp_lib + obj_omp_noint_lib + obj_geqp3_lib)
     sblib = env1.StaticLibrary(
             os.path.join('#lib','tmv_symband'),
-	    obj_sblib + obj_noint_sblib + obj_omp_noint_sblib + obj_stegr_sblib)
+            obj_sblib + obj_noint_sblib + obj_omp_noint_sblib + obj_stegr_sblib)
 
 all_obj_files = \
     obj_lib + obj_noint_lib + obj_omp_lib + \
@@ -191,12 +194,12 @@ if 'install' in COMMAND_LINE_TARGETS:
 
     else :
         env.Alias(target='install', 
-	    source=env1.Install(dir=lib_install_dir, source=lib_targets))
+            source=env1.Install(dir=lib_install_dir, source=lib_targets))
 
     hfiles1 = []
     hfiles = os.listdir(GetBuildPath(os.path.join('#include','tmv')))
     for f in hfiles:
-	if f[0:3] == 'TMV':
+        if f[0:3] == 'TMV':
             hfiles1 += [os.path.join('#include','tmv',f)]
     installed_h = env1.Install(dir=header_install_dir_sub, source=hfiles1)
     env.Alias(target='install', source=installed_h)
@@ -204,7 +207,7 @@ if 'install' in COMMAND_LINE_TARGETS:
     hfiles2 = []
     hfiles = os.listdir(GetBuildPath(os.path.join('#include')))
     for f in hfiles:
-	if f[0:3] == 'TMV':
+        if f[0:3] == 'TMV':
             hfiles2 += [os.path.join('#include',f)]
     installed_h = env1.Install(dir=header_install_dir, source=hfiles2)
     env.Alias(target='install', source=installed_h)
@@ -222,8 +225,8 @@ if 'uninstall' in COMMAND_LINE_TARGETS:
     # Delete files from include/tmv
     hfiles1 = os.listdir(GetBuildPath(os.path.join('#include','tmv')))
     for f in hfiles1:
-	if f[0:3] == 'TMV':
-	    cmd = env1.Command(os.path.join(header_install_dir_sub,f), None, deltarget)
+        if f[0:3] == 'TMV':
+            cmd = env1.Command(os.path.join(header_install_dir_sub,f), None, deltarget)
             env.Alias('uninstall',cmd)
 
     # Delete include/tmv subdirectory
@@ -232,8 +235,8 @@ if 'uninstall' in COMMAND_LINE_TARGETS:
     # Delete include/*.h files
     hfiles2 = os.listdir(GetBuildPath('#include'))
     for f in hfiles2:
-	if f[0:3] == 'TMV':
-	    cmd = env1.Command(os.path.join(header_install_dir,f), None, deltarget)
+        if f[0:3] == 'TMV':
+            cmd = env1.Command(os.path.join(header_install_dir,f), None, deltarget)
             env.Alias('uninstall',cmd)
 
 

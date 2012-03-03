@@ -1254,6 +1254,12 @@ if env['IMPORT_ENV']:
     env = Environment(ENV=os.environ)
     opts.Update(env)
 
+# Check for unknown variables in case something is misspelled
+unknown = opts.UnknownVariables()
+if unknown:
+    print "Unknown variables:", unknown.keys()
+    Exit(1)
+
 opts.Save(config_file,env)
 Help(opts.GenerateHelpText(env))
 
