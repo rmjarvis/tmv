@@ -33,8 +33,6 @@
 #ifndef TMV_IOStyle_H
 #define TMV_IOStyle_H
 
-#include "portable_platform.h"
-
 namespace tmv {
 
     class IOStyle 
@@ -246,14 +244,12 @@ namespace tmv {
         // I apply the workaround to all version before 7.
         template <class T>
         static inline T Value(const T& x) { return x; }
-#ifdef PLATFORM_COMPILER_PGI
-#if PLATFORM_COMPILER_VERSION < 0x070000
+#if defined(__PGI) && (!defined(__PGIC__) || __PGIC__ < 7)
         static inline double Value(const long double& x) 
         { return double(x); }
         static inline std::complex<double> Value(
             const std::complex<long double>& x)
         { return std::complex<double>(x); }
-#endif
 #endif
     };
 

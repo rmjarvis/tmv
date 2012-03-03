@@ -38,7 +38,6 @@
 #include "TMV_Givens.h"
 #include "tmv/TMV_VectorArith.h"
 #include "tmv/TMV_MatrixArith.h"
-#include "tmv/portable_platform.h"
 #include <iostream>
 using std::endl;
 
@@ -822,7 +821,7 @@ namespace tmv {
             // For some reason pgCC requires an actual int for the omp
             // for loop, not just a signed integer type.  So ptrdiff_t
             // can't be used.
-#ifdef PLATFORM_COMPILER_PGI
+#ifdef __PGI
 #define TMV_INT_OMP int
 #else
 #define TMV_INT_OMP ptrdiff_t
