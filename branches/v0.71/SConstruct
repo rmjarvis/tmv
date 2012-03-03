@@ -1187,9 +1187,9 @@ def DoConfig(env):
     # If not explicit, set number of jobs according to number of CPUs
     # Note: this doesn't override an explicity scons -jN
     if 'N_BUILD_THREADS' in env:
-        env.SetOption('num_jobs', env['N_BUILD_THREADS'])
+        env.SetOption('num_jobs', int(env['N_BUILD_THREADS']))
         # Do this, because if using scons -jN, it doesn't get updated.
-        if (env.GetOption('num_jobs') == env['N_BUILD_THREADS']):
+        if (env.GetOption('num_jobs') == int(env['N_BUILD_THREADS'])):
             print 'Using specified number of jobs =',env.GetOption('num_jobs')
     else:
         ncpu = GetNCPU()
