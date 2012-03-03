@@ -123,8 +123,8 @@ opts.Add(BoolVariable('CACHE_LIB',
         'Cache the results of the library checks', True))
 opts.Add(BoolVariable('WITH_UPS',
         'Install the ups directory under PREFIX/ups', False))
-opts.Add(BoolVariable('SINGLE_BUILD_THREAD',
-        'Only use a single build thread, rather than the default of ncpus', False))
+opts.Add('N_BUILD_THREADS',
+        'Number of build threads to use (0 = use ncpus)')
 
 
 # This helps us determine of openmp is available
@@ -1185,14 +1185,17 @@ def DoConfig(env):
     GetCompilerVersion(env)
    
     # If not explicit, set number of jobs according to number of CPUs
-    if env.GetOption('num_jobs') != 1:
-        print 'Using specified number of jobs =',env.GetOption('num_jobs')
-    elif env['SINGLE_BUILD_THREAD']:
-        print 'Using single thread for build process'
-        env.SetOption('num_jobs', 1)
+    # Note: this doesn't override an explicity scons -jN
+    if 'N_BUILD_THREADS' in env:
+        env.SetOption('num_jobs', env['N_BUILD_THREADS'])
+        # Do this, because if using scons -jN, it doesn't get updated.
+        if (env.GetOption('num_jobs') == env['N_BUILD_THREADS']):
+            print 'Using specified number of jobs =',env.GetOption('num_jobs')
     else:
-        env.SetOption('num_jobs', GetNCPU())
-        print 'Determined that a good number of jobs =',env.GetOption('num_jobs')
+        ncpu = GetNCPU()
+        env.SetOption('num_jobs', ncpu)
+        if env.GetOption('num_jobs') == ncpu:
+            print 'Determined that a good number of jobs =',env.GetOption('num_jobs')
 
     # The basic flags for this compiler if not explicitly specified
     BasicCCFlags(env)
