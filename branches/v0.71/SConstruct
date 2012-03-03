@@ -1267,12 +1267,6 @@ if not GetOption('help'):
     env['_InstallProgram'] = RunInstall
     env['_UninstallProgram'] = RunUninstall
 
-    # See src/SConscript to see what this is for...
-    if env['PLATFORM'] == 'darwin':
-        rename_lib = Builder(action =
-                'install_name_tool -id $FINAL_LIB_NAME $SOURCE; touch $TARGET')
-        env.Append(BUILDERS = { 'RenameLib' : rename_lib })
-
     if env['WITH_UPS']:
         subdirs += ['ups']
     if 'doc' in COMMAND_LINE_TARGETS: 
