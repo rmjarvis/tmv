@@ -30,6 +30,11 @@ changes are in the build process.
    tmv-link file, you'll want to change your makefile or build script to 
    use the new location.
 
+-- Added a SCons flag IMPORT_PREFIX which specifies whether to use 
+   PREFIX/include and PREFIX/lib in the search paths.  The default is true,
+   which matches the old behavior, but for fink I needed to be able to 
+   turn that off.
+
 -- Added a new feature that scons will now automatically try to determine 
    how many cpus your system has and use that for the number of build jobs 
    to run at once.  Usually, this is a good choice, but if you don't want
@@ -76,5 +81,4 @@ changes are in the build process.
    extra_mmgr.h
    nommgr.h
    tmv/portable_platform.h
-
 

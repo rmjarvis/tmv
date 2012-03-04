@@ -59,8 +59,6 @@ opts.Add(BoolVariable('TEST_LONGDOUBLE',
 opts.Add(BoolVariable('TEST_INT',
         'Instantiate <int> in the test suite', False))
 
-opts.Add(BoolVariable('IMPORT_ENV',
-        'Import full environment from calling shell', True))
 opts.Add(PathVariable('EXTRA_PATH',
         'Extra paths for executables (separated by : if more than 1)',
         '',PathVariable.PathAccept))
@@ -73,6 +71,10 @@ opts.Add(PathVariable('EXTRA_INCLUDE_PATH',
 opts.Add(BoolVariable('IMPORT_PATHS',
         'Import PATH, C_INCLUDE_PATH and LIBRARY_PATH/LD_LIBRARY_PATH environment variables',
         False))
+opts.Add(BoolVariable('IMPORT_ENV',
+        'Import full environment from calling shell', True))
+opts.Add(BoolVariable('IMPORT_PREFIX',
+        'Use PREFIX/include and PREFIX/lib in search paths', True))
 
 opts.Add(BoolVariable('WITH_BLAS',
         'Look for blas libraries and link if found.', True))
@@ -445,17 +447,19 @@ def AddExtraPaths(env):
         env['INSTALL_PREFIX'] = default_prefix
         env['FINAL_PREFIX'] = default_prefix
     else:
+        env['INSTALL_PREFIX'] = env['PREFIX']
+
         # FINAL_PREFIX is designed for installations like that done by fink where it installs
         # everything into a temporary directory, and then once it finished successfully, it
         # copies the resulting files to a final location.  This pretty much just matters for the
         # tmv-link file to have the right -L flag.
         if env['FINAL_PREFIX'] == '':
             env['FINAL_PREFIX'] = env['PREFIX']
-    
-        AddPath(bin_paths, os.path.join(env['FINAL_PREFIX'],'bin'))
-        AddPath(cpp_paths, os.path.join(env['FINAL_PREFIX'],'include'))
-        AddPath(lib_paths1, os.path.join(env['FINAL_PREFIX'],'lib'))
-        env['INSTALL_PREFIX'] = env['PREFIX']
+
+        if env['IMPORT_PREFIX']:
+            AddPath(bin_paths, os.path.join(env['PREFIX'],'bin'))
+            AddPath(cpp_paths, os.path.join(env['PREFIX'],'include'))
+            AddPath(lib_paths1, os.path.join(env['PREFIX'],'lib'))
 
     # Paths specified in EXTRA_*
     bin_paths += env['EXTRA_PATH'].split(':')
