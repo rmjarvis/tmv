@@ -47,17 +47,17 @@ RunUninstall = env['_UninstallProgram']
 
 # Install tmv-link in INSTALL_PREFIX/share/tmv
 share_targets = [env.File('tmv-link')]
-install_subdir = os.path.join('share','tmv')
+share_subdir = os.path.join('share','tmv')
 
 if 'install' in COMMAND_LINE_TARGETS:
     env.Alias('install', done_install)
-    RunInstall(env, share_targets, install_subdir)
+    RunInstall(env, share_targets, share_subdir)
 
 if 'uninstall' in COMMAND_LINE_TARGETS:
-    RunUninstall(env, share_targets, install_subdir)
+    RunUninstall(env, share_targets, share_subdir)
 
 
-# Also install some documenation files in INSTALL_PREFIX/share/tmv/doc
+# Also install some documenation files in INSTALL_PREFIX/share/doc/tmv
 doc_targets = [env.File(os.path.join('#','README'))]
 doc_targets += [env.File(os.path.join('#','LICENSE'))]
 doc_targets += [env.File(os.path.join('#','CHANGELOG'))]
@@ -66,12 +66,12 @@ pdf_file = env.File(os.path.join('#doc','TMV_Documentation.pdf'))
 if os.path.exists(pdf_file.abspath):
     doc_targets += [pdf_file]
 
-install_subdir = os.path.join(install_subdir,'doc')
+doc_subdir = os.path.join('share','doc','tmv')
 
 if 'install' in COMMAND_LINE_TARGETS:
     env.Alias('install', done_install)
-    RunInstall(env, doc_targets, install_subdir)
+    RunInstall(env, doc_targets, doc_subdir)
 
 if 'uninstall' in COMMAND_LINE_TARGETS:
-    RunUninstall(env, doc_targets, install_subdir)
+    RunUninstall(env, doc_targets, doc_subdir)
 
