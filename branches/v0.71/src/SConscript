@@ -38,7 +38,7 @@ sblib_stegr_files= sym_stegr
 
 
 
-env1 = env.Clone(LIBS=[])
+env1 = env.Clone()
 
 if env['MEM_TEST']:
     print 'Using mmgr.cpp'
@@ -92,7 +92,7 @@ if env['SHARED']:
     # Some stuff to get it to set the right library name and compatibility version:
     version_text = os.popen(os.path.join('..','bin','tmv-version')).read()
     version_numbers = version_text.strip().split('.')
-    compat_version_numbers = version_numbers
+    compat_version_numbers = version_numbers[:] # [:] forces copy
     # TODO: Currently, I manually set the compatibility version when less than
     # the current version.  Any way to automate this?
     compat_version_numbers[1] = '70'
@@ -109,22 +109,31 @@ if env['SHARED']:
             '-Wl,-install_name,%s'%lib_final_name,
             '-Wl,-compatibility_version,%s.%s'%tuple(compat_version_numbers),
             '-Wl,-current_version,%s.%s'%tuple(version_numbers) ] )
+    if sys.platform == 'linux2':
+        # If the BLAS/LAPACK libs are static, this fails on linux (at least where I tried it),
+	# On the other hand, the link step doesn't seem to require the other libraries
+	# as it does on OSX.  So I think it's safe to just clear out LIBS here.
+	env1.Replace(LIBS=[])
+        lib_final_name = os.path.join(lib_final_dir,'libtmv.so')
+        env1.AppendUnique( SHLINKFLAGS=[
+            '-Wl,-soname,%s'%lib_final_name ])
+
+    lib = env1.SharedLibrary(
+            os.path.join('#lib','tmv'),
+            obj_lib + obj_noint_lib + obj_omp_lib + obj_omp_noint_lib + obj_geqp3_lib)
+
+    if sys.platform == 'darwin':
+        env7.Prepend(LIBS=lib)
         env7.AppendUnique( SHLINKFLAGS=[
             '-dynamic',
             '-Wl,-install_name,%s'%sblib_final_name,
             '-Wl,-compatibility_version,%s.%s'%tuple(compat_version_numbers),
             '-Wl,-current_version,%s.%s'%tuple(version_numbers) ] )
     if sys.platform == 'linux2':
-        lib_final_name = os.path.join(lib_final_dir,'libtmv.so')
         sblib_final_name = os.path.join(lib_final_dir,'libtmv_symband.so')
-        env1.AppendUnique( SHLINKFLAGS=[
-            '-Wl,-soname,%s'%lib_final_name ])
         env7.AppendUnique( SHLINKFLAGS=[
             '-Wl,-soname,%s'%sblib_final_name ])
 
-    lib = env1.SharedLibrary(
-            os.path.join('#lib','tmv'),
-            obj_lib + obj_noint_lib + obj_omp_lib + obj_omp_noint_lib + obj_geqp3_lib)
     sblib = env7.SharedLibrary(
             os.path.join('#lib','tmv_symband'),
             obj_sblib + obj_noint_sblib + obj_omp_noint_sblib + obj_stegr_sblib)

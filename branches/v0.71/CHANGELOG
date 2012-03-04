@@ -25,6 +25,37 @@ changes are in the build process.
    file rather than the final installation directory.  So I added this
    parameter so I could tell SCons to use this value instead.
 
+-- Moved the tmv-link file from PREFIX/share/tmv-link to the fink 
+   recommended location PREFIX/share/tmv/tmv-link.  So if you use the 
+   tmv-link file, you'll want to change your makefile or build script to 
+   use the new location.
+
+-- Added a new feature that scons will now automatically try to determine 
+   how many cpus your system has and use that for the number of build jobs 
+   to run at once.  Usually, this is a good choice, but if you don't want
+   it, you can override this in two ways:
+
+   1) There is a new SCons flag N_BUILD_THREADS which you can set.
+      The default value 0 here indicates to use the number of cpus.
+
+   2) scons -jN will always override either of these and use N jobs.
+
+-- Fixed up naming of a shared library on OSX.  OSX doesn't use the normal
+   RPATH stuff in an executable to indicate where a shared library is located.
+   Instead it stores the path name in the shared library itself, and then
+   when building an executable, it copies that location into the executable
+   so it knows where to look at run time.
+
+   Well, TMV wasn't getting the name of the shared library correct before,
+   so this wasn't working.  I fixed that, so now programs compiled with a 
+   TMV shared library should run correctly without having to set
+   LD_LIBRARY_PATH explicitly.
+
+-- Added flags to include the rpath for linux compilations.  Unlike OSX,
+   linux builds use some flags at link time to put the location of shared 
+   libraries into the executable.  I've added these flags to the flags in
+   the tmv-link file, so this should now happen automatically for you.
+
 -- Changed the default value of SHARED to true.  So the default will be
    to create a shared library (libtmv.so, libtmv.dylib, etc.) rather than a 
    static library (libtmv.a).  If you need a static library, you now need
@@ -34,26 +65,16 @@ changes are in the build process.
    that let me include the RPATH stuff in the tmv-link file which makes it
    easier to deal with using TMV as a shared library.
 
--- Now scons will automatically try to determine how many cpus your system 
-   has and use that for the number of build jobs to run at once.
-   You can override this by explicitly using -jN which will force scons to 
-   use N build jobs.  
+-- Removed a few files from the list of installed files.  They are header 
+   files that are only used during the build process, and shouldn't have 
+   been installed.  If you want to remove them from your include directory
+   from previous installations, they are:
 
-   If you want to use N=1, however, this doesn't work.  That's because 
-   internally, "scons" and "scons -j1" are indistinguishable.  So if 
-   the number of jobs is 1, then I am taking that to be the default 
-   without a -j flag.  So there are two ways around this (which I consider
-   a minor bug in SCons).  
-   1) "scons -j0"  A little strange, but that will also do 1 job at a time, 
-      and it won't be confused for the default.
-   2) "scons SINGLE_BUILD_THREAD=true"  I added this new SCons flag 
-      as a clearer way to specify that only a single thread should be used
-      when building.
+   fblas.h
+   flapack.h
+   mmgr.h
+   extra_mmgr.h
+   nommgr.h
+   tmv/portable_platform.h
 
--- Fixed a bug in the way SCons builds shared libraries on OSX.  OSX doesn't 
-   use the normal RPATH flags for telling an executable where its shared
-   libraries live.  Instead it tags the shared library with its path, and 
-   then puts that into the executable at link time.  Great.  However, 
-   when SCons builds a shared library in OSX, it doesn't include the full
-   path for the library.  So we have to use install_name_tool to rename
-   the library.
+

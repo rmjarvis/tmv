@@ -124,7 +124,7 @@ opts.Add(BoolVariable('CACHE_LIB',
 opts.Add(BoolVariable('WITH_UPS',
         'Install the ups directory under PREFIX/ups', False))
 opts.Add('N_BUILD_THREADS',
-        'Number of build threads to use (0 = use ncpus)')
+        'Number of build threads to use (0 means use ncpus)', 0)
 
 
 # This helps us determine of openmp is available
@@ -673,13 +673,17 @@ int main()
             CheckLibs(context,[],fblas_source_file) or
             CheckLibs(context,['goto2'],fblas_source_file) or
             CheckLibs(context,['goto2','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto2','gomp','pthread'],fblas_source_file) or
             CheckLibs(context,['goto2','gfortran'],fblas_source_file) or
             CheckLibs(context,['goto2','gfortran','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto2','gfortran','gomp','pthread'],fblas_source_file) or
             CheckLibs(context,['goto2','pgftnrtl'],fblas_source_file) or
             CheckLibs(context,['goto'],fblas_source_file) or
             CheckLibs(context,['goto','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto','gomp','pthread'],fblas_source_file) or
             CheckLibs(context,['goto','gfortran'],fblas_source_file) or
             CheckLibs(context,['goto','gfortran','pthread'],fblas_source_file) or
+            CheckLibs(context,['goto','gfortran','gomp','pthread'],fblas_source_file) or
             CheckLibs(context,['goto','pgftnrtl'],fblas_source_file) or
             False)
 
@@ -1053,7 +1057,10 @@ def DoLibraryAndHeaderChecks(config):
         elif config.env['FORCE_GOTO']:
             config.CheckGOTO()
             config.env.Append(CPPDEFINES=['FBLAS'])
-            print 'Using GOTO BLAS'
+            print 'Using GotoBLAS'
+            if config.env['WITH_OPENMP']:
+                print 'Disabling OpenMP, since GotBLAS becomes very slow with it'
+                config.env['WITH_OPENMP'] = False
 
         elif config.env['FORCE_ATLAS']:
             config.CheckATLAS()
@@ -1094,6 +1101,9 @@ def DoLibraryAndHeaderChecks(config):
         elif config.CheckGOTO() :
             config.env.Append(CPPDEFINES=['FBLAS'])
             print 'Using GotoBLAS'
+            if config.env['WITH_OPENMP']:
+                print 'Disabling OpenMP, since GotBLAS becomes very slow with it'
+                config.env['WITH_OPENMP'] = False
 
         elif config.CheckCBLAS() :
             config.env.Append(CPPDEFINES=['CBLAS'])
@@ -1186,12 +1196,12 @@ def DoConfig(env):
    
     # If not explicit, set number of jobs according to number of CPUs
     # Note: this doesn't override an explicity scons -jN
-    if 'N_BUILD_THREADS' in env:
+    if int(env['N_BUILD_THREADS']) > 0:
         env.SetOption('num_jobs', int(env['N_BUILD_THREADS']))
         # Do this, because if using scons -jN, it doesn't get updated.
         if (env.GetOption('num_jobs') == int(env['N_BUILD_THREADS'])):
             print 'Using specified number of jobs =',env.GetOption('num_jobs')
-    else:
+    elif int(env['N_BUILD_THREADS']) == 0:
         ncpu = GetNCPU()
         env.SetOption('num_jobs', ncpu)
         if env.GetOption('num_jobs') == ncpu:
@@ -1201,8 +1211,6 @@ def DoConfig(env):
     BasicCCFlags(env)
 
     # Some extra flags depending on the options:
-    if env['WITH_OPENMP']:
-        AddOpenMPFlag(env)
     if not env['DEBUG']:
         print 'Debugging turned off'
         env.Append(CPPDEFINES=['TMV_NDEBUG'])
@@ -1244,6 +1252,9 @@ def DoConfig(env):
     if not env['CACHE_LIB']:
         SCons.SConf.SetCacheMode('auto')
 
+    # Do this after BLAS checks, since we disable it for GotoBLAS
+    if env['WITH_OPENMP']:
+        AddOpenMPFlag(env)
 
 #
 # main program
