@@ -38,7 +38,7 @@ sblib_stegr_files= sym_stegr
 
 
 
-env1 = env.Clone()
+env1 = env.Clone(LIBS=[])
 
 if env['MEM_TEST']:
     print 'Using mmgr.cpp'
@@ -88,7 +88,6 @@ if env['SHARED']:
     obj_stegr_sblib = env6.SharedObject(sblib_stegr_files)
 
     env7 = env1.Clone()
-    env7.Prepend(LIBS=['tmv'])
 
     # Some stuff to get it to set the right library name and compatibility version:
     version_text = os.popen(os.path.join('..','bin','tmv-version')).read()
