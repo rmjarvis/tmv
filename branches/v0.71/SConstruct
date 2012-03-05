@@ -8,7 +8,7 @@ import sys
 
 # Subdirectories containing SConscript files.  We always process these, but 
 # there are some other optional ones
-subdirs = ['src','bin','share']
+subdirs = ['src','bin','share','test']
 
 # Configurations will be saved here so command line options don't
 # have to be sent more than once
@@ -1353,8 +1353,6 @@ if not GetOption('help'):
         subdirs += ['ups']
     if 'doc' in COMMAND_LINE_TARGETS: 
         subdirs += ['doc']
-    if 'test' in COMMAND_LINE_TARGETS: 
-        subdirs += ['test']
     if 'examples' in COMMAND_LINE_TARGETS: 
         subdirs += ['examples']
 
