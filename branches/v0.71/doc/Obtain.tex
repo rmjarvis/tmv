@@ -82,7 +82,7 @@ so the whitespace doesn't confuse the parser.  e.g. \texttt{scons FLAGS='-O3 -g'
 \item \texttt{EXTRA\_FLAGS=''} specifies extra flags to pass to the compiler in addition to what TMV will use by default.  This is useful if you just want to add a specific flag but still want to keep the other flags that TMV uses automatically.
 \item \texttt{DEBUG=false} specifies whether to keep the debugging assert statements in the compiled library code.  \tt{DEBUG=true} turns on all the TMV debugging statements, even those that would normall require \tt{-DTMV\_EXTRA\_DEBUG}.
 \item \texttt{PREFIX=/usr/local} specifies where to install the library when running \texttt{scons install} (see below).
-\item \texttt{FINAL\_PREFIX=''} specifies a final installation directory if different from \texttt{PREFIX}.  This is used for installations (e.g. fink) that install everything in a temporary directory first, and then copies everthing to a final location only if the installation was successful.
+\item \texttt{FINAL\_PREFIX=''} specifies a final installation directory if different from \texttt{PREFIX}.  This is used for installations (e.g. fink) that install everything in a temporary directory first and then copy everthing to a final location only if the installation was successful.
 \item \texttt{INST\_FLOAT=true} specifies whether to instantiate the \tt{<float>} templates.
 \item \texttt{INST\_DOUBLE=true} specifies whether to instantiate the \tt{<double>} templates.
 \item \texttt{INST\_LONGDOUBLE=false} specifies whether to instantiate the \tt{<long double>} templates.
@@ -90,7 +90,7 @@ so the whitespace doesn't confuse the parser.  e.g. \texttt{scons FLAGS='-O3 -g'
 \index{Installation!OpenMP}
 \index{OpenMP}
 \item \texttt{WITH\_OPENMP=true} specifies whether to use OpenMP to parallelize some parts of the code.
-\item \texttt{SHARED=false} specifies whether to make the library files shared as opposed to static libraries.  Making the libraries shared (e.g. \texttt{libtmv.so}, \texttt{libtmv.dylib}, etc. depending on your system) allows the compiled programs that use TMV to be quite a bit smaller typically.  However, since shared libraries often require a bit more care in terms of having your paths set up properly, the default is to create static libraries.
+\item \texttt{SHARED=true} specifies whether to make shared libraries as opposed to static libraries.  Making the libraries shared (e.g. \texttt{libtmv.so}, \texttt{libtmv.dylib}, etc. depending on your system) allows the compiled programs that use TMV to be quite a bit smaller typically, so we've made that the default.
 \item \texttt{TEST\_FLOAT=true} specifies whether to include the \tt{<float>} tests in the test suite.
 \item \texttt{TEST\_DOUBLE=true} specifies whether to include the \tt{<double>} tests in the test suite.
 \item \texttt{TEST\_LONGDOUBLE=false} specifies whether to include the \tt{<long double>} tests in the test suite.
@@ -98,11 +98,6 @@ so the whitespace doesn't confuse the parser.  e.g. \texttt{scons FLAGS='-O3 -g'
 \end{itemize}
 The next flags set up the paths that SCons will use to try to find your BLAS and LAPACK libraries.
 \begin{itemize}
-\item \texttt{IMPORT\_ENV=true} specifies whether to import the entire environment from the calling shell.
-The default is for SCons to use the same environment as the shell from which it is called.  However, sometimes it can be useful to start with a clean environment and manually add paths (see below) for various things, in which case you would want to set this to \tt{false}.
-\item \texttt{EXTRA\_PATH=''} specifies directories in which to search for executables (notably the compiler, although you can also just give the full path in the \texttt{CXX} parameter)
-in addition to the standard locations such as \texttt{/usr/bin} and \texttt{/usr/local/bin}.
-If you are giving multiple directories, they should be separated by colons.
 \item \texttt{EXTRA\_INCLUDE\_PATH=''} specifies directories in which to search for header files
 (such as the BLAS or LAPACK header files)
 in addition to the standard locations such as \texttt{/usr/include} and \texttt{/usr/local/include}.
@@ -115,6 +110,12 @@ These directories are specified as \texttt{-L} flags to the linker.
 If you are giving multiple directories, they should be separated by colons.
 \item \texttt{IMPORT\_PATHS=false} specifies whether to import extra path directories from the environment variables: 
 \texttt{PATH}, \texttt{C\_INCLUDE\_PATH}, \texttt{LD\_LIBRARY\_PATH} and \texttt{LIBRARY\_PATH}.
+\item \texttt{IMPORT\_ENV=true} specifies whether to import the entire environment from the calling shell.
+The default is for SCons to use the same environment as the shell from which it is called.  However, sometimes it can be useful to start with a clean environment and manually add paths (see below) for various things, in which case you would want to set this to \tt{false}.
+\item \texttt{EXTRA\_PATH=''} specifies directories in which to search for executables (notably the compiler, although you can also just give the full path in the \texttt{CXX} parameter)
+in addition to the standard locations such as \texttt{/usr/bin} and \texttt{/usr/local/bin}.
+If you are giving multiple directories, they should be separated by colons.
+\item \texttt{IMPORT\_PREFIX=true} specifies whether to use \texttt{PREFIX/include} and \texttt{PREFIX/lib} in your search paths.  This is the default (and is equivalent to the old behavior), but sometimes it is necessary or preferable to not include these directories.
 \end{itemize}
 The next options can be used to specify what BLAS and/or LAPACK libraries to use (if any),
 overriding the default of using whatever libraries SCons chooses from searching through your path
@@ -209,7 +210,7 @@ named \tt{dstedc} (or \tt{sstedc}) will be used instead.
 \index{LAPACK!dstegr/sstegr issues}
 
 I've had trouble with the LAPACK \tt{?stegr} algorithms on a number of systems.  Mostly, it doesn't always deal with \tt{nan}'s and \tt{inf}'s very well.  The documentation for it says:
-{\sc ?stegr works only on machines which follow IEEE-754 floating-point standard in their handling of infinities and NaNs. Normal execution of ?stegr may create NaNs and infinities and hence may abort due to a floating point exception in environments which do not conform to the IEEE-754 standard.}  I haven't had too many aborts (just one system I think).  More often, I get things like \tt{nan}s in the output and such, so I guess these systems must not conform to IEEE-754.  If you think your system is conforming, and you want to enable \tt{stegr}, go ahead and set \tt{USE_STEGR} to \tt{true}.
+{\sc ?stegr works only on machines which follow IEEE-754 floating-point standard in their handling of infinities and NaNs. Normal execution of ?stegr may create NaNs and infinities and hence may abort due to a floating point exception in environments which do not conform to the IEEE-754 standard.}  I haven't had too many aborts (just one system I think).  More often, I get things like \tt{nan}s in the output and such, so I guess these systems must not conform to IEEE-754.  If you think your system is conforming, and you want to enable \tt{stegr}, go ahead and set \tt{USE\_STEGR} to \tt{true}.
 \item
 \texttt{USE\_GEQP3=false} specifies whether to use the LAPACK algorithm called
 \tt{dgeqp3} (or its variants) for the strict QRP decomposition.  I think the native TMV code is superior to the LAPACK code, so it is not enabled by default.  But if you want to use for the so-called Strict QRP decomposition (c.f. \S\ref{QRP}), you can set this to \tt{true}.
@@ -221,7 +222,7 @@ something similar).
 \item \texttt{CACHE\_LIB=true} specifies whether to cache the results of the library checks.  
 Scons is pretty good at only recompiling what needs to be recompiled based on what options or files you have changed.  However, it is not good at detecting when changed options might change the results of a BLAS or LAPACK library check.  So if you add new paths for it to search, or even moreso, if you change the names or locations of libraries on your system, then you should set \tt{CACHE\_LIB=false} to force SCons to redo the BLAS and LAPACK checks each time.
 \item \texttt{WITH\_UPS=false} specifies whether to install TMV information for \tt{ups} into the \tt{PREFIX/ups} directory.
-\item \texttt{SINGLE\_BUILD\_THREAD=false} specifies whether to use only a single thread when building the code, rather than the default of ncpus.  Note that this only applied to the default case when you don't specify the number of threads with -jN.  The -jN flag always takes precedence.
+\item \texttt{N\_BUILD\_THREADS=0} specifies how many threads SCons should use when building the code.  This is equivalent to using \tt{scons -jN}, but this option gets saved, so you don't need to type it each time when doing multiple builds.  The default value of 0 indicates that SCons should try to automatically determine the number of cpus and use that.
 \end{itemize}
 
 When SCons starts up, it will look through the standard paths, along with any extra paths you have
@@ -299,17 +300,17 @@ Or if you are using Band, Sym or SymBand matrices, use:
 These flags (except for the optional -ltmv_symband) have been
 saved in the file:
 
-/usr/local/share/tmv-link
+/usr/local/share/tmv/tmv-link
 
 so you can automatically use the correct flags in a makefile
 (for example) by using lines such as:
 
-TMVLINK := $(shell cat /usr/local/share/tmv-link)
+TMVLINK := $(shell cat /usr/local/share/tmv/tmv-link)
 LIBS = $(TMVLINK) [... other libs ...]
 
 In a SConstruct file, you can do something like the following:
 
-env.MergeFlags(open('/usr/local/share/tmv-link').read())
+env.MergeFlags(open('/usr/local/share/tmv/tmv-link').read())
 
 
 scons: done building targets.
@@ -509,17 +510,17 @@ the same thing, or something slightly different, including possibly
 As mentioned above, 
 you can automatically use whatever BLAS libraries
 TMV found and compiled against by reading the file
-\tt{/usr/local/share/tmv-link} (or \tt{PREFIX/share/tmv-link}) and using that
+\tt{/usr/local/share/tmv/tmv-link} (or \tt{PREFIX/share/tmv/tmv-link}) and using that
 for your linking flags.  
 You can use this file in a \tt{makefile} by writing 
 something like the following:
 \begin{verbatim}
-TMVLINK := $(shell cat /usr/local/share/tmv-link)
+TMVLINK := $(shell cat /usr/local/share/tmv/tmv-link)
 LIBS = $(TMVLINK) [... other libs ...]
 \end{verbatim}
 Or in a \tt{SConstruct} file, you can do something like
 \begin{verbatim}
-env.MergeFlags(open('/usr/local/share/tmv-link').read())
+env.MergeFlags(open('/usr/local/share/tmv/tmv-link').read())
 \end{verbatim}
 Remember though that if you are using band and/or symmetric/hermitian matrices, you
 also need to add the flag \tt{-ltmv\_symband} to \tt{LIBS} as well.

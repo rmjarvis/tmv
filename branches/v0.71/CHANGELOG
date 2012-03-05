@@ -7,11 +7,10 @@ use fink, you can now just type:
 
 fink install tmv
 
-to install tmv in /sw/lib and /sw/include.
+to install TMV in /sw/lib and /sw/include.
 
-However, the process of getting this to happen required a few minor changes
-to the SCons files.  I also learned a few SCons tricks that I've incorporated
-as well.
+However, the process of getting this to happen required a few changes to the 
+SCons files.  I also learned a few SCons tricks that I've incorporated as well.
 
 This release is completely backwards compatible as far as the header files
 and library are concerned, since nothing there has changed.  The only 
@@ -29,6 +28,10 @@ changes are in the build process.
    recommended location PREFIX/share/tmv/tmv-link.  So if you use the 
    tmv-link file, you'll want to change your makefile or build script to 
    use the new location.
+
+-- Added documentation files to the installation process.  The files README,
+   CHANGELOG, LICENSE, and TMV_Documentation are now installed in
+   PREFIX/share/doc/tmv/.
 
 -- Added a SCons flag IMPORT_PREFIX which specifies whether to use 
    PREFIX/include and PREFIX/lib in the search paths.  The default is true,
@@ -82,3 +85,6 @@ changes are in the build process.
    nommgr.h
    tmv/portable_platform.h
 
+-- Added a feature to the SCons script to check for unknown variables.
+   So if you mistype something, it now lets you know rather than blithely 
+   continuing on ignoring the value you mistyped.

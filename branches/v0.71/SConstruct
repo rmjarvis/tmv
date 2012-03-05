@@ -27,7 +27,7 @@ default_prefix = '/usr/local'
 opts = Variables(config_file)
 
 # Now set up options for the command line
-opts.Add('CXX','Name of c++ compiler')
+opts.Add('CXX','Name of c++ compiler','g++')
 opts.Add('FLAGS','Flags to send to the compiler','')
 opts.Add('EXTRA_FLAGS','Extra flags to send to the compiler','')
 opts.Add(BoolVariable('DEBUG',
@@ -338,37 +338,71 @@ def AddOpenMPFlag(env):
     env.AppendUnique(LINKFLAGS=ldflag)
     env.AppendUnique(LIBS=xlib)
 
+def which(program):
+    """
+    Mimic functionality of unix which command
+    """
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    if sys.platform == "win32" and not program.endswith(".exe"):
+        program += ".exe"
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
+
 def GetCompilerVersion(env):
     """
     """
-    compiler = env['CXX']
+    compiler = which(env['CXX'])
+    print 'Using compiler:',compiler
+
+    compiler_real = os.path.realpath(compiler)
+    #compiler_base = os.path.basename(compiler_real) 
+    # ^^ Doesn't work if compiler_real is ccache.  But I want to be able to detect when
+    # g++ is a symlink for clang++ (as fink does for OSX 10.7).  So look in the 
+    # --version output below for clang instead.
+    compiler_base = os.path.basename(compiler)
 
     # Get the compiler type without suffix or path.  
     # e.g. /sw/bin/g++-4 -> g++
-    if 'icpc' in compiler :
+    if 'icpc' in compiler_base :
         compilertype = 'icpc'
         versionflag = '--version'
         linenum=0
-    elif 'pgCC' in compiler :
+    elif 'pgCC' in compiler_base :
         compilertype = 'pgCC'
         versionflag = '--version'
         linenum=1
         # pgCC puts the version number on the second line of output.
-    elif 'clang++' in compiler :
+    elif 'clang++' in compiler_base :
         compilertype = 'clang++'
         versionflag = '--version'
         linenum=0
-    elif 'g++' in compiler :
+    elif 'g++' in compiler_base :
         compilertype = 'g++'
         versionflag = '--version'
         linenum=0
-    elif 'CC' in compiler :
+    elif 'CC' in compiler_base :
         compilertype = 'CC'
         versionflag = '-V'
         linenum=0
-    elif 'cl' in compiler :
+    elif 'cl' in compiler_base :
         compilertype = 'cl'
         versionflag = ''
+        linenum=0
+    elif 'c++' in compiler_base :
+        compilertype = 'c++'
+        versionflag = '--version'
         linenum=0
     else :
         compilertype = 'unknown'
@@ -378,8 +412,30 @@ def GetCompilerVersion(env):
     if compilertype != 'unknown':
         cmd = compiler + ' ' + versionflag + ' 2>&1'
         lines = os.popen(cmd).readlines()
+
+        # Check if g++ is a symlink for something else:
+        if compilertype is 'g++':
+            if 'clang' in lines[0]:
+                print 'Detected clang++ masquerading as g++'
+                compilertype = 'clang++'
+            # Any others I should look for?
+
+        # Check if c++ is a symlink for something else:
+        if compilertype is 'c++':
+            if 'clang' in lines[0]:
+                print 'Detected clang++ masquerading as c++'
+                compilertype = 'clang++'
+            elif 'g++' in lines[0] or 'gcc' in lines[0]:
+                print 'Detected g++ masquerading as c++'
+                compilertype = 'g++'
+            else:
+                print 'Cannot determine what kind of compiler c++ really is'
+                compilertype = 'unknown'
+            # Any others I should look for?
+
+    # redo this check in case was c++ -> unknown
+    if compilertype != 'unknown':
         line = lines[linenum]
-    
         import re
         match = re.search(r'[0-9]+(\.[0-9]+)+', line)
     
@@ -392,7 +448,6 @@ def GetCompilerVersion(env):
             version = 0
             vnum = 0
 
-    print '\nUsing compiler:',compiler
     print 'compiler version:',version
 
     env['CXXTYPE'] = compilertype
