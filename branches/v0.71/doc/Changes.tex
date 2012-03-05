@@ -4,13 +4,10 @@
 \label{Changes}
 
 This release is the first one to be included in fink.  So on a Mac, if you use fink, you can now just type: 
-
 \begin{verbatim}
 fink install tmv
 \end{verbatim}
-
 to install TMV in \texttt{/sw/lib} and \texttt{/sw/include}.
-
 However, the process of getting this to happen required a few changes to the SCons files.  I also learned a few SCons tricks that I've incorporated as well.
 
 Here is a list of the changes from version \prevtmvversion\ to \tmvversion.  
@@ -22,16 +19,15 @@ This release is completely backwards compatible as far as the header files and l
 
 \item
 Added a new SCons parameter \tt{FINAL\_PREFIX}.  This was needed for fink to 
-get the \tt{tmv-link} file correct.  It installs everything into a temporary
-directory, and then only once everything has installed correctly does
-it copy everything to the \tt{/sw/*} directories.  This is generally fine,
+get the \tt{tmv-link} file correct.  Fink installs everything into a temporary
+directory and then, only once everything has installed correctly, does
+it copy everything to the \tt{/sw} directory.  This is generally fine,
 except that the temporary directory was being used in the \tt{tmv-link}
 file rather than the final installation directory.  So I added this
-parameter so I could tell SCons to use this value instead.
+parameter to be able to tell SCons to use the final directory instead.
 
 \item
-Moved the \tt{tmv-link} file from \tt{PREFIX/share/tmv-link} to the fink 
-recommended location \tt{PREFIX/share/tmv/tmv-link}.  So if you use the 
+Moved the installed \tt{tmv-link} file from \tt{PREFIX/share/tmv-link} to the fink-recommended location \tt{PREFIX/share/tmv/tmv-link}.  So if you use the 
 \tt{tmv-link} file, you'll want to change your makefile or build script to 
 use the new location.
 
@@ -41,7 +37,7 @@ Added documentation files to the installation process.  The files \tt{README},
 \tt{PREFIX/share/doc/tmv/}.
 
 \item
-Added a SCons flag \tt{IMPORT\_PREFIX} which specifies whether to use 
+Added a SCons flag \tt{IMPORT\_PREFIX} which specifies whether to use the directories
 \tt{PREFIX/include} and \tt{PREFIX/lib} in the search paths.  The default is true,
 which matches the old behavior, but for fink I needed to be able to 
 turn that off.
@@ -53,14 +49,20 @@ to run at once.  Usually, this is a good choice, but if you don't want
 it, you can override this in two ways:
 
 \begin{enumerate}
-\item There is a new SCons flag \tt{N\_BUILD\_THREADS} which you can set.
+\item There is a new SCons flag \tt{N\_BUILD\_THREADS}, which will force a
+a particular number of build jobs.
 The default value 0 here indicates to use the number of cpus.
 
 \item \tt{scons -jN} will always override either of these and use N jobs.
 \end{enumerate}
 
 \item
-Fixed up naming of a shared library on OSX.  OSX doesn't use the normal
+Added flags to include the RPATH in the linking step and in the \tt{tmv-link} file.  
+Usually, these flags store in an executable file the locations of any shared libraries it needs at run time.  I've added these flags to the flags in
+the \tt{tmv-link} file, so this should now happen automatically for you.  Without these flags, you needed to have the library location in your \tt{LD\_LIBRARY\_PATH}, so now that should no longer be necessary.
+
+\item
+Fixed up the internal name of the shared library on OSX.  OSX doesn't use the normal
 RPATH stuff in an executable to indicate where a shared library is located.
 Instead it stores the path name in the shared library itself, and then
 when building an executable, it copies that location into the executable
@@ -72,33 +74,30 @@ TMV shared library should run correctly without having to set
 \tt{LD\_LIBRARY\_PATH} explicitly.
 
 \item
-Added flags to include the rpath for linux compilations.  Unlike OSX,
-linux builds use some flags at link time to put the location of shared 
-libraries into the executable.  I've added these flags to the flags in
-the tmv-link file, so this should now happen automatically for you.
+Changed the names of the shared library files to fully-versioned names
+(e.g. \tt{libtmv.so.0.71}) with a symbolic link to this name from the 
+regular library name (e.g. \tt{libtmv.so}).
 
 \item
-Changed the default value of \tt{SHARED} to true.  So the default will be
+Changed the default value of \tt{SHARED} to true.  So the default is now
 to create a shared library (\tt{libtmv.so}, \tt{libtmv.dylib}, etc.) rather than a 
 static library (\tt{libtmv.a}).  If you need a static library, you now need
-to explicitly set this to false.
+to explicitly set \tt{SHARED=false}.
 
-I made this change, mostly because I learned about some SCons features
-that let me include the RPATH stuff in the \tt{tmv-link} file which makes it
-easier to deal with using TMV as a shared library.
+I made this change, mostly because I figured out how to make the above changes, so now using a shared library should be just as easy as using a static library.  And this will help keep down the size of the executable files significantly (since the TMV libraries are pretty large).
 
 \item
 Removed a few files from the list of installed files.  They are header 
-files that are only used during the build process, and shouldn't have 
-been installed.  If you want to remove them from your include directory
+files that are only used during the build process, and they should not have 
+been installed before.  If you want to remove them from your include directory
 from previous installations, they are:
 
-\tt{fblas.h\\
-flapack.h\\
-mmgr.h\\
-extra\_mmgr.h\\
-nommgr.h\\
-tmv/portable\_platform.h}
+\tt{fblas.h}\\
+\tt{flapack.h}\\
+\tt{mmgr.h}\\
+\tt{extra\_mmgr.h}\\
+\tt{nommgr.h}\\
+\tt{tmv/portable\_platform.h}
 
 \item
 Added a feature to the SCons script to check for unknown variables.

@@ -51,9 +51,20 @@ in the top directory.
 
 \item Make sure you have SCons installed on your system.  
 It is available for free from \url{http://www.scons.org/}.  (It is a
-very quick installation if you have Python installed.)
+very quick installation if you already have Python installed.)
 
 \end{enumerate}
+
+\subsubsection{Using Fink}
+
+\begin{quote}
+Starting with TMV version 0.71, TMV is available on Fink for OSX systems.  So if you use a Mac and you have Fink (\url{http://www.finkproject.org/}) installed on your system already, you just need to type\\
+\texttt{fink install tmv}
+
+This should install TMV in the \texttt{/sw} directory with a minimum of fuss.
+
+The only caveats here are that it will always install a shared library (\tt{libtmv.dylib}), and it will always use Apple's Frameworks BLAS library.  If these are not acceptable to you, then you will need to download TMV and install it yourself.
+\end{quote}
 
 \subsection{Installing the TMV library}
 \label{Install_Install}
