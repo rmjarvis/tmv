@@ -93,12 +93,10 @@ if env['SHARED']:
     # Some stuff to get it to set the right library name and compatibility version:
     version_text = os.popen(os.path.join('..','bin','tmv-version')).read()
     version = tuple(version_text.strip().split('.'))
-    print 'version = ',version
     # TODO: Currently, I manually set the compatibility version when less than
     # the current version.  Any way to automate this?
     #compat_version = version 
     compat_version = 0 , 70
-    print 'compat_version = ',compat_version
     if 'install' in COMMAND_LINE_TARGETS: 
         lib_final_dir = os.path.join(env['FINAL_PREFIX'],'lib')
     else:
