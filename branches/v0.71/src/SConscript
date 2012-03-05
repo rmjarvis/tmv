@@ -227,8 +227,8 @@ if 'install' in COMMAND_LINE_TARGETS:
 
         installed_link_name = os.path.join(lib_install_dir, os.path.basename(link_name))
         installed_sblink_name = os.path.join(lib_install_dir, os.path.basename(sblink_name))
-        installed_link = env1.Command( installed_link_name , installed_lib , SymLink)
-        installed_sblink = env7.Command( installed_sblink_name , installed_sblib , SymLink)
+        installed_link = env1.Command( installed_link_name , lib_final_name , SymLink)
+        installed_sblink = env7.Command( installed_sblink_name , sblib_final_name , SymLink)
 
         env.Alias(target='install', 
 	    source=[installed_lib,installed_sblib,installed_link,installed_sblink])
