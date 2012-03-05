@@ -152,11 +152,11 @@ if env['SHARED']:
             obj_sblib + obj_noint_sblib + obj_omp_noint_sblib + obj_stegr_sblib)
 
     def SymLink(target, source, env):
-        os.symlink(os.path.abspath(str(source[0])), os.path.abspath(str(target[0])))
+        os.symlink(env['FinalLibName'], os.path.abspath(str(target[0])))
 
     # This just makes a link in the #lib directory.  Need to redo this in the install directory.
-    link = env1.Command( link_name , lib , SymLink)
-    sblink = env7.Command( sblink_name , sblib , SymLink)
+    link = env1.Command( link_name , lib , SymLink, FinalLibName=str(lib))
+    sblink = env7.Command( sblink_name , sblib , SymLink, FinalLibName=str(sblib))
     Default(link,sblink)
 
     lib_targets = [lib,sblib]
@@ -225,8 +225,10 @@ if 'install' in COMMAND_LINE_TARGETS:
 
         installed_link_name = os.path.join(lib_install_dir, os.path.basename(link_name))
         installed_sblink_name = os.path.join(lib_install_dir, os.path.basename(sblink_name))
-        installed_link = env1.Command( installed_link_name , lib_final_name , SymLink)
-        installed_sblink = env7.Command( installed_sblink_name , sblib_final_name , SymLink)
+        installed_link = env1.Command( installed_link_name , installed_lib , SymLink,
+	    FinalLibName=lib_final_name)
+        installed_sblink = env7.Command( installed_sblink_name , installed_sblib , SymLink, 
+	    FinalLibName=sblib_final_name)
 
         env.Alias(target='install', 
 	    source=[installed_lib,installed_sblib,installed_link,installed_sblink])
