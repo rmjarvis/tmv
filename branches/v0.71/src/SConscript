@@ -104,7 +104,8 @@ if env['SHARED']:
 
     if sys.platform == 'darwin':
         lib_final_name = os.path.join(lib_final_dir,'libtmv.%s.%s.dylib'%version)
-        link_name = os.path.join(GetBuildPath('#lib'),'libtmv.dylib')
+        link_name1 = os.path.join(GetBuildPath('#lib'),'libtmv.dylib')
+        link_name2 = os.path.join(GetBuildPath('#lib'),'libtmv.%s.dylib'%version[0])
         env1.AppendUnique( SHLINKFLAGS=[
             '-dynamic',
             '-Wl,-install_name,%s'%lib_final_name,
@@ -113,7 +114,8 @@ if env['SHARED']:
 	env1.Replace(SHLIBSUFFIX = '.%s.%s.dylib'%version)
 
         sblib_final_name = os.path.join(lib_final_dir,'libtmv_symband.%s.%s.dylib'%version)
-        sblink_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.dylib')
+        sblink_name1 = os.path.join(GetBuildPath('#lib'),'libtmv_symband.dylib')
+        sblink_name2 = os.path.join(GetBuildPath('#lib'),'libtmv_symband.%s.dylib'%version[0])
         env7.AppendUnique( SHLINKFLAGS=[
             '-dynamic',
             '-Wl,-install_name,%s'%sblib_final_name,
@@ -127,12 +129,14 @@ if env['SHARED']:
 	# as it does on OSX.  So I think it's safe to just clear out LIBS here.
 	env1.Replace(LIBS=[])
         lib_final_name = os.path.join(lib_final_dir,'libtmv.so.%s.%s'%version)
-        link_name = os.path.join(GetBuildPath('#lib'),'libtmv.so')
+        link_name1 = os.path.join(GetBuildPath('#lib'),'libtmv.so')
+        link_name2 = os.path.join(GetBuildPath('#lib'),'libtmv.so.%s'%version[0])
         env1.AppendUnique( SHLINKFLAGS=['-Wl,-soname,%s'%lib_final_name ])
 	env1.Replace(SHLIBSUFFIX = '.so.%s.%s'%version)
 
         sblib_final_name = os.path.join(lib_final_dir,'libtmv_symband.so.%s.%s'%version)
-        sblink_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.so')
+        sblink_name1 = os.path.join(GetBuildPath('#lib'),'libtmv_symband.so')
+        sblink_name2 = os.path.join(GetBuildPath('#lib'),'libtmv_symband.so.%s'%version[0])
         env7.AppendUnique( SHLINKFLAGS=['-Wl,-soname,%s'%sblib_final_name ])
 	env7.Replace(SHLIBSUFFIX = '.so.%s.%s'%version)
 
@@ -152,12 +156,16 @@ if env['SHARED']:
             obj_sblib + obj_noint_sblib + obj_omp_noint_sblib + obj_stegr_sblib)
 
     def SymLink(target, source, env):
-        os.symlink(env['FinalLibName'], os.path.abspath(str(target[0])))
+        t = os.path.abspath(str(target[0]))
+        if os.path.exists(t): os.remove(t) 
+        os.symlink(env['LibName'], t)
 
     # This just makes a link in the #lib directory.  Need to redo this in the install directory.
-    link = env1.Command( link_name , lib , SymLink, FinalLibName=str(lib))
-    sblink = env7.Command( sblink_name , sblib , SymLink, FinalLibName=str(sblib))
-    Default(link,sblink)
+    link1 = env1.Command( link_name1 , lib , SymLink, LibName=str(lib[0]))
+    link2 = env1.Command( link_name2 , lib , SymLink, LibName=str(lib[0]))
+    sblink1 = env7.Command( sblink_name1 , sblib , SymLink, LibName=str(sblib[0]))
+    sblink2 = env7.Command( sblink_name2 , sblib , SymLink, LibName=str(sblib[0]))
+    Default(link1,link2,sblink1,sblink2)
 
     lib_targets = [lib,sblib]
 
@@ -223,15 +231,23 @@ if 'install' in COMMAND_LINE_TARGETS:
             env.Depends(sblib,installed_lib)
         installed_sblib = env7.Install(dir=lib_install_dir, source=sblib)
 
-        installed_link_name = os.path.join(lib_install_dir, os.path.basename(link_name))
-        installed_sblink_name = os.path.join(lib_install_dir, os.path.basename(sblink_name))
-        installed_link = env1.Command( installed_link_name , installed_lib , SymLink,
-	    FinalLibName=lib_final_name)
-        installed_sblink = env7.Command( installed_sblink_name , installed_sblib , SymLink, 
-	    FinalLibName=sblib_final_name)
+        installed_link_name1 = os.path.join(lib_install_dir, os.path.basename(link_name1))
+        installed_link_name2 = os.path.join(lib_install_dir, os.path.basename(link_name2))
+        installed_sblink_name1 = os.path.join(lib_install_dir, os.path.basename(sblink_name1))
+        installed_sblink_name2 = os.path.join(lib_install_dir, os.path.basename(sblink_name2))
+        installed_link1 = env1.Command( installed_link_name1 , installed_lib , SymLink,
+	    LibName=lib_final_name)
+        installed_link2 = env1.Command( installed_link_name2 , installed_lib , SymLink,
+	    LibName=lib_final_name)
+        installed_sblink1 = env7.Command( installed_sblink_name1 , installed_sblib , SymLink, 
+	    LibName=sblib_final_name)
+        installed_sblink2 = env7.Command( installed_sblink_name2 , installed_sblib , SymLink, 
+	    LibName=sblib_final_name)
 
         env.Alias(target='install', 
-	    source=[installed_lib,installed_sblib,installed_link,installed_sblink])
+	    source=[installed_lib,installed_sblib,
+	            installed_link1,installed_sblink1,
+	            installed_link2,installed_sblink2])
 
     else :
         env.Alias(target='install', 
