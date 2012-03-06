@@ -59,11 +59,14 @@ very quick installation if you already have Python installed.)
 
 \begin{quote}
 Starting with TMV version 0.71, TMV is available on Fink for OSX systems.  So if you use a Mac and you have Fink (\url{http://www.finkproject.org/}) installed on your system already, you just need to type\\
-\texttt{fink install tmv}
+\texttt{fink install tmv0}
 
-This should install TMV in the \texttt{/sw} directory with a minimum of fuss.
+This should install TMV in the \texttt{/sw} directory with a minimum of fuss.  (The 0 at the end 
+of the package name
+is anticipation of an eventual upgrade to version 1.0 whose library file will not be backwards
+compatible with this one.  That will then be fink package tmv1.)
 
-The only caveats here are that it will always install a shared library (\tt{libtmv.dylib}), and it will always use Apple's Frameworks BLAS library.  If these are not acceptable to you, then you will need to download TMV and install it yourself.
+The only caveats here are that it will always install a shared library (\tt{libtmv.dylib}), and it will always use Apple's Frameworks BLAS library.  Also, it uses whatever C++ compiler is the default for your version of fink (usually a variety of g++, but they switched to clang++ with MacOS 10.7).  If these are not acceptable to you, then you will need to download TMV and install it yourself.
 \end{quote}
 
 \subsection{Installing the TMV library}

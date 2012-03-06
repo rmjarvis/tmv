@@ -121,10 +121,10 @@
 		\hyperpage{93}
   \item BLAS
     \subitem ACML, \hyperpage{15}
-    \subitem ATLAS, \hyperpage{15, 16}
-    \subitem CBLAS, \hyperpage{15}
+    \subitem ATLAS, \hyperpage{16}
+    \subitem CBLAS, \hyperpage{16}
     \subitem Errors with float, \hyperpage{161}
-    \subitem Fortran BLAS, \hyperpage{15}
+    \subitem Fortran BLAS, \hyperpage{16}
     \subitem GotoBLAS, \hyperpage{15}
     \subitem Linking, \hyperpage{21}
     \subitem MKL, \hyperpage{15}
@@ -295,7 +295,7 @@
     \subitem Overflow/underflow problems, \hyperpage{162}
     \subitem Problems in multi-threaded programs, \hyperpage{162}
     \subitem Problems with extremely large matrices, \hyperpage{162}
-    \subitem Problems with QRP decomposition, \hyperpage{16}, 
+    \subitem Problems with QRP decomposition, \hyperpage{17}, 
 		\hyperpage{110}, \hyperpage{161}
     \subitem SCons options, \hyperpage{15}
     \subitem Workspace issues, \hyperpage{105}, \hyperpage{161}
@@ -531,7 +531,7 @@
     \subitem Update, \hyperpage{112}
       \subsubitem algorithm, \hyperpage{115}
   \item QRP decomposition, \hyperpage{110}
-    \subitem LAPACK ?geqp3, \hyperpage{16}, \hyperpage{110}
+    \subitem LAPACK ?geqp3, \hyperpage{17}, \hyperpage{110}
     \subitem Matrix, \hyperpage{50}, \hyperpage{54}, \hyperpage{110}
 
   \indexspace
