@@ -1,3 +1,33 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
+// Copyright (C) 1998 - 2009                                                 //
+//                                                                           //
+// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
+// where you can find the current version and current documention.           //
+//                                                                           //
+// For concerns or problems with the software, Mike may be contacted at      //
+// mike_jarvis@users.sourceforge.net                                         //
+//                                                                           //
+// This program is free software; you can redistribute it and/or             //
+// modify it under the terms of the GNU General Public License               //
+// as published by the Free Software Foundation; either version 2            //
+// of the License, or (at your option) any later version.                    //
+//                                                                           //
+// This program is distributed in the hope that it will be useful,           //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
+// GNU General Public License for more details.                              //
+//                                                                           //
+// You should have received a copy of the GNU General Public License         //
+// along with this program in the file LICENSE.                              //
+//                                                                           //
+// If not, write to:                                                         //
+// The Free Software Foundation, Inc.                                        //
+// 51 Franklin Street, Fifth Floor,                                          //
+// Boston, MA  02110-1301, USA.                                              //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -27,7 +57,7 @@
 //   BLASPTR -- Pass all arguments to Blas calls by pointer, not reference.
 //   BLASSTRLEN -- Last argument of Blas calls need the length of char array.
 //   BLASZDROT -- Include extra routines, zdrot and csrot
-//   BLASIDAMIN -- Include extra routines idamin, isamin, izamin, icamin
+//   BLASIDAMIN -- Include extra routines idamin, isamin
 //
 //   LAP -- Use LAPack calls (see below for more specific subsets here)
 //   CLAP -- LAPack calls should use clapack_* calling convention.
@@ -166,7 +196,7 @@ extern "C" {
 
 #define BLAS
 extern "C" {
-#include "util/fblas.h"
+#include "fblas.h"
 }
 #define BLAS_
 #define BLASSTRLEN
@@ -363,16 +393,13 @@ namespace tmv {
 extern "C" {
 #include "cblas.h"
 
+#ifndef NOLAP
 #ifndef CLAPACK
 #ifndef FLAPACK
 
-#define AELAP 
-
-#ifndef NOLAP
 #define ALAP 
+#define AELAP 
 #define CLAP
-#endif
-
 #define LAPINFORETURN
 #define LAPNOWORK
 
@@ -380,6 +407,7 @@ extern "C" {
 
 #endif // !FLAPACK
 #endif // !CLAPACK
+#endif // !NOLAP
 
 }
 
@@ -454,7 +482,7 @@ namespace tmv {
 #define LAP_
 
 extern "C" {
-#include "util/flapack.h"
+#include "flapack.h"
 }
 
 namespace tmv {
@@ -496,13 +524,15 @@ namespace tmv {
 // LAP always implies the ALAP subset
 #ifdef LAP
 #define ALAP
-#define ANYLAP
 #endif // LAP
 
 #ifdef ELAP
 #define AELAP
-#define ANYLAP
 #endif // ELAP
+
+#if defined(ALAP) || defined(AELAP)
+#define ANYLAP
+#endif
 
 namespace tmv {
     const char Blas_ch_N = 'N';
@@ -696,32 +726,13 @@ namespace tmv {
     void LAP_Results(
         int Lap_info, int lwork_opt, int m, int n, int lwork, const char* fn);
 
-    template <class M> class BaseMatrix_Rec;
-    template <class M> class BaseMatrix_Tri;
-    template <class M> class BaseMatrix_Band;
+    template <class T> class GenMatrix;
+    template <class T> class GenUpperTriMatrix;
+    template <class T> class GenLowerTriMatrix;
+    template <class T> class GenBandMatrix;
 
-    template <class M>
-    static inline bool BlasIsRM(const BaseMatrix_Rec<M>& m)
-    {
-#ifdef BLAS
-        return m.isrm() && m.stepi() >= int(m.rowsize()) && m.stepi() >= 1;
-#else
-        return m.isrm();
-#endif
-    }
-
-    template <class M>
-    static inline bool BlasIsCM(const BaseMatrix_Rec<M>& m)
-    {
-#ifdef BLAS
-        return m.iscm() && m.stepj() >= int(m.colsize()) && m.stepj() >= 1;
-#else
-        return m.iscm();
-#endif
-    }
-
-    template <class M>
-    static inline bool BlasIsRM(const BaseMatrix_Tri<M>& m)
+    template <class T>
+    static inline bool BlasIsRM(const GenMatrix<T>& m)
     {
 #ifdef BLAS
         return m.isrm() && m.stepi() >= m.rowsize() && m.stepi() >= 1;
@@ -730,8 +741,8 @@ namespace tmv {
 #endif
     }
 
-    template <class M>
-    static inline bool BlasIsCM(const BaseMatrix_Tri<M>& m)
+    template <class T>
+    static inline bool BlasIsCM(const GenMatrix<T>& m)
     {
 #ifdef BLAS
         return m.iscm() && m.stepj() >= m.colsize() && m.stepj() >= 1;
@@ -740,8 +751,49 @@ namespace tmv {
 #endif
     }
 
-    template <class M>
-    static inline bool BlasIsRM(const BaseMatrix_Band<M>& m)
+    template <class T>
+    static inline bool BlasIsRM(const GenUpperTriMatrix<T>& m)
+    {
+#ifdef BLAS
+        return m.isrm() && m.stepi() >= m.rowsize() && m.stepi() >= 1;
+#else
+        return m.isrm();
+#endif
+    }
+
+    template <class T>
+    static inline bool BlasIsCM(const GenUpperTriMatrix<T>& m)
+    {
+#ifdef BLAS
+        return m.iscm() && m.stepj() >= m.colsize() && m.stepj() >= 1;
+#else
+        return m.iscm();
+#endif
+    }
+
+    template <class T>
+    static inline bool BlasIsRM(const GenLowerTriMatrix<T>& m)
+    {
+#ifdef BLAS
+        return m.isrm() && m.stepi() >= m.rowsize() && m.stepi() >= 1;
+#else
+        return m.isrm();
+#endif
+    }
+
+    template <class T>
+    static inline bool BlasIsCM(const GenLowerTriMatrix<T>& m)
+    {
+#ifdef BLAS
+        return m.iscm() && m.stepj() >= m.colsize() && m.stepj() >= 1;
+#else
+        return m.iscm();
+#endif
+    }
+
+
+    template <class T>
+    static inline bool BlasIsRM(const GenBandMatrix<T>& m)
     {
 #ifdef BLAS
         return m.isrm() && m.stepi() >= (m.nlo()+m.nhi()) && m.stepi() >= 0;
@@ -750,8 +802,8 @@ namespace tmv {
 #endif
     }
 
-    template <class M>
-    static inline bool BlasIsCM(const BaseMatrix_Band<M>& m)
+    template <class T>
+    static inline bool BlasIsCM(const GenBandMatrix<T>& m)
     {
 #ifdef BLAS
         return m.iscm() && m.stepj() >= (m.nlo()+m.nhi()) && m.stepj() >= 0;
@@ -761,6 +813,5 @@ namespace tmv {
     }
 
 }
-
 
 #endif // TMV_BLAS_H

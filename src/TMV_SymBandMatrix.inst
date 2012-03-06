@@ -1,0 +1,119 @@
+
+#define CT std::complex<T>
+
+#define Def1(RT,T,Ref) \
+  template T GenSymBandMatrix<T >::cref(ptrdiff_t i, ptrdiff_t j) const; \
+  template Ref SymBandMatrixView<T,CStyle>::ref(ptrdiff_t i, ptrdiff_t j); \
+  template bool GenSymBandMatrix<T >::hasSubMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t is, ptrdiff_t js) const; \
+  template bool GenSymBandMatrix<T >::hasSubBandMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t lo, ptrdiff_t hi, ptrdiff_t is, ptrdiff_t js) const; \
+  template bool GenSymBandMatrix<T >::hasSubVector( \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t is, ptrdiff_t js, ptrdiff_t s) const; \
+  template bool GenSymBandMatrix<T >::hasSubSymMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t is) const; \
+  template bool GenSymBandMatrix<T >::hasSubSymBandMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t lo, ptrdiff_t is) const; \
+  template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t is, ptrdiff_t js) const; \
+  template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubBandMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t lo, ptrdiff_t hi, ptrdiff_t is, ptrdiff_t js) const; \
+  template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubVector( \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t is, ptrdiff_t js, ptrdiff_t s) const; \
+  template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubSymMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t is) const; \
+  template bool ConstSymBandMatrixView<T,FortranStyle>::hasSubSymBandMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t lo, ptrdiff_t is) const; \
+  template T GenSymBandMatrix<T >::sumElements() const; \
+  template RT GenSymBandMatrix<T >::sumAbsElements() const; \
+  template RT GenSymBandMatrix<T >::sumAbs2Elements() const; \
+  template RT GenSymBandMatrix<T >::normF() const; \
+  template RT GenSymBandMatrix<T >::normSq(const RT scale) const; \
+  template RT GenSymBandMatrix<T >::norm1() const; \
+  template RT GenSymBandMatrix<T >::maxAbsElement() const; \
+  template RT GenSymBandMatrix<T >::maxAbs2Element() const; \
+  template RT GenSymBandMatrix<T >::doNorm2() const; \
+  template RT GenSymBandMatrix<T >::doCondition() const; \
+  template QuotXsB<T,T > GenSymBandMatrix<T >::QInverse() const; \
+  template void GenSymBandMatrix<T >::write(const TMV_Writer& writer) const; \
+  template void SymBandMatrixView<T,CStyle>::read(const TMV_Reader& reader); \
+  template SymBandMatrix<T,Upper|DiagMajor> SymTriDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2); \
+  template HermBandMatrix<T,Upper|DiagMajor> HermTriDiagMatrix( \
+      const GenVector<T >& v1, const GenVector<T >& v2, UpLoType U); \
+
+Def1(T,T,T&)
+#ifdef INST_COMPLEX
+Def1(T,CT,VarConjRef<CT >)
+#endif
+
+#undef Def1
+
+#ifndef TISINT
+#define Def1b(RT,T) \
+  template T GenSymBandMatrix<T >::det() const; \
+  template RT GenSymBandMatrix<T >::logDet(T* sign) const; \
+  template void GenSymBandMatrix<T >::setDiv() const; \
+  template bool GenSymBandMatrix<T >::divIsLUDiv() const; \
+  template bool GenSymBandMatrix<T >::divIsCHDiv() const; \
+  template bool GenSymBandMatrix<T >::divIsHermSVDiv() const; \
+  template bool GenSymBandMatrix<T >::divIsSymSVDiv() const; \
+
+Def1b(T,T)
+#ifdef INST_COMPLEX
+Def1b(T,CT)
+#endif
+
+#undef Def1b
+#endif
+
+  template HermBandMatrix<CT,Upper|DiagMajor> HermTriDiagMatrix( 
+      const GenVector<T >& v1, const GenVector<CT >& v2, UpLoType U); 
+
+#define Def2(T1,T2) \
+  template void GenSymBandMatrix<T1 >::doMakeInverse( \
+      SymMatrixView<T2 > sinv) const; \
+
+Def2(T,T)
+#ifdef INST_COMPLEX
+Def2(T,CT)
+Def2(CT,CT)
+#endif
+
+#undef Def2
+
+#define Def3(RT,T,A) \
+  template void SymBandMatrix<T,A>::read(const TMV_Reader& reader); \
+  template void HermBandMatrix<T,A>::read(const TMV_Reader& reader); \
+
+Def3(T,T,Upper|RowMajor|CStyle)
+Def3(T,T,Upper|ColMajor|CStyle)
+Def3(T,T,Upper|DiagMajor|CStyle)
+Def3(T,T,Lower|RowMajor|CStyle)
+Def3(T,T,Lower|ColMajor|CStyle)
+Def3(T,T,Lower|DiagMajor|CStyle)
+Def3(T,T,Upper|RowMajor|FortranStyle)
+Def3(T,T,Upper|ColMajor|FortranStyle)
+Def3(T,T,Upper|DiagMajor|FortranStyle)
+Def3(T,T,Lower|RowMajor|FortranStyle)
+Def3(T,T,Lower|ColMajor|FortranStyle)
+Def3(T,T,Lower|DiagMajor|FortranStyle)
+#ifdef INST_COMPLEX
+Def3(T,CT,Upper|RowMajor|CStyle)
+Def3(T,CT,Upper|ColMajor|CStyle)
+Def3(T,CT,Upper|DiagMajor|CStyle)
+Def3(T,CT,Lower|RowMajor|CStyle)
+Def3(T,CT,Lower|ColMajor|CStyle)
+Def3(T,CT,Lower|DiagMajor|CStyle)
+Def3(T,CT,Upper|RowMajor|FortranStyle)
+Def3(T,CT,Upper|ColMajor|FortranStyle)
+Def3(T,CT,Upper|DiagMajor|FortranStyle)
+Def3(T,CT,Lower|RowMajor|FortranStyle)
+Def3(T,CT,Lower|ColMajor|FortranStyle)
+Def3(T,CT,Lower|DiagMajor|FortranStyle)
+#endif
+
+#undef Def3
+
+#undef CT
+

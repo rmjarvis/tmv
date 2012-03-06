@@ -1,61 +1,689 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
+// Copyright (C) 1998 - 2009                                                 //
+//                                                                           //
+// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
+// where you can find the current version and current documention.           //
+//                                                                           //
+// For concerns or problems with the software, Mike may be contacted at      //
+// mike_jarvis@users.sourceforge.net                                         //
+//                                                                           //
+// This program is free software; you can redistribute it and/or             //
+// modify it under the terms of the GNU General Public License               //
+// as published by the Free Software Foundation; either version 2            //
+// of the License, or (at your option) any later version.                    //
+//                                                                           //
+// This program is distributed in the hope that it will be useful,           //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
+// GNU General Public License for more details.                              //
+//                                                                           //
+// You should have received a copy of the GNU General Public License         //
+// along with this program in the file LICENSE.                              //
+//                                                                           //
+// If not, write to:                                                         //
+// The Free Software Foundation, Inc.                                        //
+// 51 Franklin Street, Fifth Floor,                                          //
+// Boston, MA  02110-1301, USA.                                              //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
 
-//#define PRINTALGO_QR
-//#define XDEBUG_QR
+
+//#define XDEBUG
+
 
 #include "TMV_Blas.h"
-#include "tmv/TMV_PackedQ.h"
+#include "TMV_QRDiv.h"
+#include "tmv/TMV_QRD.h"
 #include "tmv/TMV_Matrix.h"
-#include "tmv/TMV_SmallMatrix.h"
-#include "tmv/TMV_Vector.h"
-#include "tmv/TMV_SmallVector.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_CopyM.h"
-#include "tmv/TMV_CopyV.h"
-#include "tmv/TMV_ConjugateV.h"
+#include "TMV_Householder.h"
+#include "tmv/TMV_PackedQ.h"
 
-#include "tmv/TMV_ScaleM.h"
-#include "tmv/TMV_ProdMM.h"
-#include "tmv/TMV_ProdMV.h"
-#include "tmv/TMV_SumVV.h"
-#include "tmv/TMV_OProdVV.h"
-
-#ifdef XDEBUG_QR
+#ifdef XDEBUG
+#include "tmv/TMV_MatrixArith.h"
 #include <iostream>
-#include "TMV_MatrixIO.h"
-#include "TMV_VectorIO.h"
-#include "TMV_Vector.h"
-#include "TMV_Matrix.h"
+using std::cout;
+using std::cerr;
+using std::endl;
 #endif
 
 namespace tmv {
 
-    template <class M1, class V1, class M2>
-    static void DoPackedQ_MultEq(
-        const M1& Q, const V1& beta, M2& m2)
-    { InlinePackedQ_MultEq(Q,beta.unitView(),m2); }
+#ifdef TMV_BLOCKSIZE
+#define QR_BLOCKSIZE TMV_BLOCKSIZE
+#else
+#define QR_BLOCKSIZE 64
+#endif
 
-    template <class M1, class V1, class M2>
-    static void DoPackedQ_LDivEq(
-        const M1& Q, const V1& beta, M2& m2)
-    { InlinePackedQ_LDivEq(Q,beta.unitView(),m2); }
+
+    //
+    // Packed Q - LDivEq
+    //
+
+    template <class T, class T1> 
+    static void NonBlockQLDivEq(
+        const GenMatrix<T1>& Q, const GenVector<T1>& beta,
+        MatrixView<T> m)
+    {
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(Q.rowsize() == beta.size());
+        TMVAssert(Q.colsize() == m.colsize());
+        TMVAssert(Q.ct() == NonConj);
+        TMVAssert(beta.ct() == NonConj);
+        // Solve Q x = m in place 
+        // where Q is stored as Householder vectors along with beta
+        //
+        // Q is H0t H1t ... H_N-1t
+        // So x = H_N-1 .. H1 H0 m
+        //
+        const ptrdiff_t M = Q.colsize();
+        const ptrdiff_t N = Q.rowsize();
+        for(ptrdiff_t j=0;j<N;++j) if (beta(j) != T1(0)) {
+            HouseholderLMult(Q.col(j,j+1,M),beta(j),m.rowRange(j,M));
+        }
+    }
+
+    template <class T, class T1> 
+    static void BlockQLDivEq(
+        const GenMatrix<T1>& Q, const GenVector<T1>& beta,
+        MatrixView<T> m)
+    {
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(Q.rowsize() == beta.size());
+        TMVAssert(Q.colsize() == m.colsize());
+        TMVAssert(Q.ct() == NonConj);
+        TMVAssert(beta.ct() == NonConj);
+
+#ifdef XDEBUG
+        Matrix<T> m0(m);
+        Matrix<T> m2(m);
+        NonBlockQLDivEq(Q,beta,m2.view());
+#endif
+
+        // x = H_N-1 .. H1 H0 m
+        // In first block step:
+        // m = (Hr .. H0) m
+        //   = (H0t .. Hrt)t m
+        // So form Y,Z from Ht's, rather than H's, and then call LDiv
+
+        const ptrdiff_t M = Q.colsize();
+        const ptrdiff_t N = Q.rowsize();
+        UpperTriMatrix<T1,NonUnitDiag|ColMajor> BaseZ(
+            TMV_MIN(QR_BLOCKSIZE,int(N)));
+        for(ptrdiff_t j1=0;j1<N;) {
+            ptrdiff_t j2 = TMV_MIN(N,j1+QR_BLOCKSIZE);
+            ConstMatrixView<T1> Y = Q.subMatrix(j1,M,j1,j2);
+            UpperTriMatrixView<T1> Z = BaseZ.subTriMatrix(0,Y.rowsize());
+            BlockHouseholderMakeZ(Y,Z,beta.subVector(j1,j2));
+            BlockHouseholderLDiv(Y,Z,m.rowRange(j1,M));
+            j1 = j2;
+        }
+#ifdef XDEBUG
+        if (Norm(m-m2) > 0.001*Norm(Q)*Norm(m0)) {
+            cerr<<"BlockQLDivEq: Q = "<<TMV_Text(Q)<<"  "<<Q<<endl;
+            cerr<<"beta = "<<beta<<endl;
+            cerr<<"m = "<<TMV_Text(m)<<"  "<<m0<<endl;
+            cerr<<"-> m = "<<m<<endl;
+            cerr<<"NonBlock m = "<<m2<<endl;
+            abort(); 
+        }
+#endif
+    }
+
+    template <class T, class T1> 
+    static void NonLapQLDivEq(
+        const GenMatrix<T1>& Q, const GenVector<T1>& beta,
+        MatrixView<T> m)
+    {
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(Q.rowsize() == beta.size());
+        TMVAssert(Q.colsize() == m.colsize());
+        TMVAssert(Q.ct() == NonConj);
+        TMVAssert(beta.ct() == NonConj);
+
+        if (Q.rowsize() > QR_BLOCKSIZE && m.rowsize() > QR_BLOCKSIZE)
+            BlockQLDivEq(Q,beta,m);
+        else
+            NonBlockQLDivEq(Q,beta,m);
+    }
+#ifdef LAP
+    template <class T, class T1> 
+    static inline void LapQLDivEq(
+        const GenMatrix<T1>& Q, const GenVector<T1>& beta,
+        MatrixView<T> m)
+    { NonLapQLDivEq(Q,beta,m); }
+#ifdef INST_DOUBLE
+    template <> 
+    void LapQLDivEq(
+        const GenMatrix<double>& Q,
+        const GenVector<double>& beta, MatrixView<double> x)
+    {
+        int ldx = BlasIsCM(x) ? x.stepj() : x.stepi();
+        int m = BlasIsCM(x) ? x.colsize() : x.rowsize();
+        int n = BlasIsCM(x) ? x.rowsize() : x.colsize();
+        int k = Q.rowsize();
+        if (BlasIsCM(Q)) {
+            int ldq = Q.stepj();
+            int Lap_info=0;
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<double> work(1);
+            work.get()[0] = 0.;
+            LAPNAME(dormqr) (
+                LAPCM BlasIsCM(x)?LAPCH_L:LAPCH_R, 
+                BlasIsCM(x)?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
+                LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            lwork = int(work[0]);
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(dormqr) (
+                LAPCM BlasIsCM(x)?LAPCH_L:LAPCH_R, 
+                BlasIsCM(x)?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
+                LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+#ifdef LAPNOWORK
+            LAP_Results(Lap_info,"dormqr");
+#else
+            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"dormqr");
+#endif
+        } else {
+            int ldq = Q.stepi();
+            int Lap_info=0;
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            AlignedArray<double> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<double> work(1);
+            work.get()[0] = 0.;
+            LAPNAME(dormlq) (
+                LAPCM BlasIsCM(x)?LAPCH_L:LAPCH_R,
+                BlasIsCM(x)?LAPCH_NT:LAPCH_T,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            lwork = int(work[0]);
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(dormlq) (
+                LAPCM BlasIsCM(x)?LAPCH_L:LAPCH_R,
+                BlasIsCM(x)?LAPCH_NT:LAPCH_T,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+#ifdef LAPNOWORK
+            LAP_Results(Lap_info,"dormlq");
+#else
+            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"dormlq");
+#endif
+        }
+    }
+    template <> 
+    void LapQLDivEq(
+        const GenMatrix<std::complex<double> >& Q,
+        const GenVector<std::complex<double> >& beta,
+        MatrixView<std::complex<double> > x)
+    {
+        int k = Q.rowsize();
+        if (BlasIsCM(Q)) {
+            int ldx = BlasIsCM(x) ? x.stepj() : x.stepi();
+            int m = BlasIsCM(x) ? x.colsize() : x.rowsize();
+            int n = BlasIsCM(x) ? x.rowsize() : x.colsize();
+            int ldq = Q.stepj();
+            if (BlasIsCM(x) == x.isconj()) x.conjugateSelf();
+            Vector<std::complex<double> > conjbeta = beta.conjugate();
+            int Lap_info=0;
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            AlignedArray<std::complex<double> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<std::complex<double> > work(1);
+            work.get()[0] = 0.;
+            LAPNAME(zunmqr) (
+                LAPCM BlasIsCM(x)?LAPCH_L:LAPCH_R,
+                BlasIsCM(x)?LAPCH_CT:LAPCH_NT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(conjbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            lwork = int(TMV_REAL(work[0]));
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(zunmqr) (
+                LAPCM BlasIsCM(x)?LAPCH_L:LAPCH_R,
+                BlasIsCM(x)?LAPCH_CT:LAPCH_NT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(conjbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            if (BlasIsCM(x) == x.isconj()) x.conjugateSelf();
+#ifdef LAPNOWORK
+            LAP_Results(Lap_info,"zunmqr");
+#else
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"zunmqr");
+#endif
+        } else {
+            int ldx = BlasIsCM(x) ? x.stepj() : x.stepi();
+            int m = BlasIsCM(x) ? x.colsize() : x.rowsize();
+            int n = BlasIsCM(x) ? x.rowsize() : x.colsize();
+            int ldq = Q.stepi();
+            if (BlasIsCM(x) != x.isconj()) x.conjugateSelf();
+            int Lap_info=0;
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            AlignedArray<std::complex<double> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<std::complex<double> > work(1);
+            work.get()[0] = 0.;
+            LAPNAME(zunmlq) (
+                LAPCM BlasIsCM(x)?LAPCH_L:LAPCH_R,
+                BlasIsCM(x)?LAPCH_NT:LAPCH_CT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            lwork = int(TMV_REAL(work[0]));
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(zunmlq) (
+                LAPCM BlasIsCM(x)?LAPCH_L:LAPCH_R,
+                BlasIsCM(x)?LAPCH_NT:LAPCH_CT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            if (BlasIsCM(x) != x.isconj()) x.conjugateSelf();
+#ifdef LAPNOWORK
+            LAP_Results(Lap_info,"zunmlq");
+#else
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"zunmlq");
+#endif
+        }
+    }
+#endif
+#ifdef INST_FLOAT
+    template <> 
+    void LapQLDivEq(
+        const GenMatrix<float>& Q,
+        const GenVector<float>& beta, MatrixView<float> x)
+    {
+        int ldx = BlasIsCM(x) ? x.stepj() : x.stepi();
+        int m = BlasIsCM(x) ? x.colsize() : x.rowsize();
+        int n = BlasIsCM(x) ? x.rowsize() : x.colsize();
+        int k = Q.rowsize();
+        if (BlasIsCM(Q)) {
+            int ldq = Q.stepj();
+            int Lap_info=0;
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<float> work(1);
+            work.get()[0] = 0.;
+            LAPNAME(sormqr) (
+                LAPCM BlasIsCM(x)?LAPCH_L:LAPCH_R, 
+                BlasIsCM(x)?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
+                LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            lwork = int(work[0]);
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(sormqr) (
+                LAPCM BlasIsCM(x)?LAPCH_L:LAPCH_R, 
+                BlasIsCM(x)?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
+                LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+#ifdef LAPNOWORK
+            LAP_Results(Lap_info,"sormqr");
+#else
+            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"sormqr");
+#endif
+        } else {
+            int ldq = Q.stepi();
+            int Lap_info=0;
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            AlignedArray<float> work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<float> work(1);
+            work.get()[0] = 0.;
+            LAPNAME(sormlq) (
+                LAPCM BlasIsCM(x)?LAPCH_L:LAPCH_R,
+                BlasIsCM(x)?LAPCH_NT:LAPCH_T,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            lwork = int(work[0]);
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(sormlq) (
+                LAPCM BlasIsCM(x)?LAPCH_L:LAPCH_R,
+                BlasIsCM(x)?LAPCH_NT:LAPCH_T,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+#ifdef LAPNOWORK
+            LAP_Results(Lap_info,"sormlq");
+#else
+            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"sormlq");
+#endif
+        }
+    }
+    template <> 
+    void LapQLDivEq(
+        const GenMatrix<std::complex<float> >& Q,
+        const GenVector<std::complex<float> >& beta,
+        MatrixView<std::complex<float> > x)
+    {
+        int k = Q.rowsize();
+        if (BlasIsCM(Q)) {
+            int ldx = BlasIsCM(x) ? x.stepj() : x.stepi();
+            int m = BlasIsCM(x) ? x.colsize() : x.rowsize();
+            int n = BlasIsCM(x) ? x.rowsize() : x.colsize();
+            int ldq = Q.stepj();
+            if (BlasIsCM(x) == x.isconj()) x.conjugateSelf();
+            Vector<std::complex<float> > conjbeta = beta.conjugate();
+            int Lap_info=0;
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            AlignedArray<std::complex<float> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<std::complex<float> > work(1);
+            work.get()[0] = 0.;
+            LAPNAME(cunmqr) (
+                LAPCM BlasIsCM(x)?LAPCH_L:LAPCH_R,
+                BlasIsCM(x)?LAPCH_CT:LAPCH_NT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(conjbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            lwork = int(TMV_REAL(work[0]));
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(cunmqr) (
+                LAPCM BlasIsCM(x)?LAPCH_L:LAPCH_R,
+                BlasIsCM(x)?LAPCH_CT:LAPCH_NT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(conjbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            if (BlasIsCM(x) == x.isconj()) x.conjugateSelf();
+#ifdef LAPNOWORK
+            LAP_Results(Lap_info,"cunmqr");
+#else
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"cunmqr");
+#endif
+        } else {
+            int ldx = BlasIsCM(x) ? x.stepj() : x.stepi();
+            int m = BlasIsCM(x) ? x.colsize() : x.rowsize();
+            int n = BlasIsCM(x) ? x.rowsize() : x.colsize();
+            int ldq = Q.stepi();
+            if (BlasIsCM(x) != x.isconj()) x.conjugateSelf();
+            int Lap_info=0;
+#ifndef LAPNOWORK
+#ifdef NOWORKQUERY
+            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            AlignedArray<std::complex<float> > work(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#else
+            int lwork = -1;
+            AlignedArray<std::complex<float> > work(1);
+            work.get()[0] = 0.;
+            LAPNAME(cunmlq) (
+                LAPCM BlasIsCM(x)?LAPCH_L:LAPCH_R,
+                BlasIsCM(x)?LAPCH_NT:LAPCH_CT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            lwork = int(TMV_REAL(work[0]));
+            work.resize(lwork);
+            VectorViewOf(work.get(),lwork).setZero();
+#endif
+#endif
+            LAPNAME(cunmlq) (
+                LAPCM BlasIsCM(x)?LAPCH_L:LAPCH_R,
+                BlasIsCM(x)?LAPCH_NT:LAPCH_CT,
+                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
+            if (BlasIsCM(x) != x.isconj()) x.conjugateSelf();
+#ifdef LAPNOWORK
+            LAP_Results(Lap_info,"cunmlq");
+#else
+            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"cunmlq");
+#endif
+        }
+    }
+#endif
+#endif
+
+    template <class T, class T1> 
+    void Q_LDivEq(
+        const GenMatrix<T1>& Q, const GenVector<T1>& beta,
+        MatrixView<T> m)
+    {
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(beta.size() == Q.rowsize());
+        TMVAssert(m.colsize() == Q.colsize());
+        TMVAssert(Q.isrm() || Q.iscm());
+        TMVAssert(Q.ct() == NonConj);
+        TMVAssert(beta.ct() == NonConj);
+
+#ifdef XDEBUG
+        std::cout<<"Start Q_LDivEq: \n";
+        Matrix<T1> QQ(Q.colsize(),Q.colsize(),0.);
+        QQ.setToIdentity();
+        QQ.colRange(0,Q.rowsize()) = Q;
+        Vector<T1> bb(Q.colsize(),0.);
+        bb.subVector(0,beta.size()) = beta;
+        GetQFromQR(QQ.view(),bb);
+        Matrix<T1> Qx = Q;
+        Vector<T1> bx = beta;
+        GetQFromQR(Qx.view(),bx);
+        Matrix<T> m0 = m;
+        Matrix<T> m2 = QQ.adjoint() * m;
+        std::cout<<"Q = "<<TMV_Text(Q)<<std::endl;
+        std::cout<<"steps = "<<Q.stepi()<<"  "<<Q.stepj()<<std::endl;
+        std::cout<<"beta = "<<TMV_Text(beta)<<std::endl;
+        std::cout<<"step = "<<beta.step()<<std::endl;
+        std::cout<<"m = "<<TMV_Text(m)<<std::endl;
+        std::cout<<"steps = "<<m.stepi()<<"  "<<m.stepj()<<std::endl;
+        std::cout<<"Q = "<<Q<<std::endl;
+        std::cout<<"beta = "<<beta<<std::endl;
+        std::cout<<"QQ = "<<QQ<<std::endl;
+        std::cout<<"Qx = "<<Qx<<std::endl;
+        std::cout<<"Norm(Qx-QQx) = "<<Norm(Qx-QQ.colRange(0,Q.rowsize()))<<std::endl;
+        std::cout<<"m0 = "<<m<<std::endl;
+        std::cout<<"m2 = "<<m2<<std::endl;
+        std::cout<<"m2' = "<<(Qx.adjoint() * m)<<std::endl;
+#ifdef LAP
+        Matrix<T> m3 = m;
+        NonLapQLDivEq(Q,beta,m3.view());
+        std::cout<<"m3 = "<<m3<<std::endl;
+#endif
+#endif
+
+        if (m.colsize() > 0 && m.rowsize() > 0) {
+#ifdef LAP
+            if ( BlasIsRM(m) || BlasIsCM(m) ) {
+                LapQLDivEq(Q,beta,m);
+            } else {
+                Matrix<T> mc = m;
+                LapQLDivEq(Q,beta,mc.view());
+                m = mc;
+            }
+#else
+            NonLapQLDivEq(Q,beta,m);
+#endif
+        }
+
+#ifdef XDEBUG
+        std::cout<<"m = "<<m<<std::endl;
+        std::cout<<"m2 = "<<m2<<std::endl;
+        std::cout<<"m-m2 = "<<m-m2<<std::endl;
+        std::cout<<"Norm(m-m2) = "<<Norm(m-m2)<<std::endl;
+        if (Norm(m-m2) > 0.001*Norm(m0)) {
+            cerr<<"Q_LDivEq\n";
+            cerr<<"Q = "<<Q<<endl;
+            cerr<<"beta = "<<beta<<endl;
+            cerr<<"m = "<<TMV_Text(m)<<"  "<<m0<<endl;
+            cerr<<"m => "<<m<<endl;
+            cerr<<"m2 = "<<m2<<endl;
+            cerr<<"Norm(m-m2) = "<<Norm(m-m2)<<endl;
+            abort();
+        }
+#endif
+    }
+
+    //
+    // Packed Q - RDivEq
+    //
+
+    template <class T, class T1> 
+    static void NonBlockQRDivEq(
+        const GenMatrix<T1>& Q, const GenVector<T1>& beta,
+        MatrixView<T> m)
+    {
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(beta.size() == Q.rowsize());
+        TMVAssert(m.rowsize() == Q.colsize());
+        TMVAssert(Q.ct() == NonConj);
+        TMVAssert(beta.ct() == NonConj);
+        // Solve x Q = m in place
+        // where Q is stored as Householder vectors along with beta
+        //
+        // x = m Qt 
+        // Qt is H_N-1 H_N-2 ... H1 H0
+        const ptrdiff_t M = Q.colsize();
+        const ptrdiff_t N = Q.rowsize();
+        for(ptrdiff_t j=N-1;j>=0;--j) if (beta(j) != T1(0)) {
+            HouseholderLMult(
+                Q.col(j,j+1,M).conjugate(),beta(j),
+                m.colRange(j,M).transpose());
+        }
+    }
+
+    template <class T, class T1> 
+    static void BlockQRDivEq(
+        const GenMatrix<T1>& Q, const GenVector<T1>& beta,
+        MatrixView<T> m)
+    {
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(Q.rowsize() == beta.size());
+        TMVAssert(Q.colsize() == m.rowsize());
+        TMVAssert(Q.ct() == NonConj);
+        TMVAssert(beta.ct() == NonConj);
+
+#ifdef XDEBUG
+        Matrix<T> m0(m);
+        Matrix<T> m2(m);
+        NonBlockQRDivEq(Q,beta,m2.view());
+#endif
+
+        // x = m Qt 
+        // x = m H_N-1 H_N-2 ... H1 H0
+        // Again form Y,Z from Ht's, rather than H's, and then call RDiv
+
+        const ptrdiff_t M = Q.colsize();
+        const ptrdiff_t N = Q.rowsize();
+        UpperTriMatrix<T1,NonUnitDiag|ColMajor> BaseZ(
+            TMV_MIN(QR_BLOCKSIZE,int(N)));
+        for(ptrdiff_t j2=N;j2>0;) {
+            ptrdiff_t j1 = j2 > QR_BLOCKSIZE ? j2-QR_BLOCKSIZE : 0;
+            ConstMatrixView<T1> Y = Q.subMatrix(j1,M,j1,j2);
+            UpperTriMatrixView<T1> Z = BaseZ.subTriMatrix(0,Y.rowsize());
+            BlockHouseholderMakeZ(Y,Z,beta.subVector(j1,j2));
+            BlockHouseholderLMult(Y,Z,m.colRange(j1,M).adjoint());
+            j2 = j1;
+        }
+#ifdef XDEBUG
+        if (Norm(m-m2) > 0.001*Norm(Q)*Norm(m0)) {
+            cerr<<"BlockQRDivEq: Q = "<<TMV_Text(Q)<<"  "<<Q<<endl;
+            cerr<<"beta = "<<beta<<endl;
+            cerr<<"m = "<<TMV_Text(m)<<"  "<<m0<<endl;
+            cerr<<"-> m = "<<m<<endl;
+            cerr<<"NonBlock m = "<<m2<<endl;
+            abort(); 
+        }
+#endif
+    }
+
+    template <class T, class T1> 
+    static void NonLapQRDivEq(
+        const GenMatrix<T1>& Q, const GenVector<T1>& beta,
+        MatrixView<T> m)
+    {
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(Q.rowsize() == beta.size());
+        TMVAssert(Q.colsize() == m.rowsize());
+        TMVAssert(Q.ct() == NonConj);
+        TMVAssert(beta.ct() == NonConj);
+
+        if (Q.rowsize() > QR_BLOCKSIZE && m.colsize() > QR_BLOCKSIZE)
+            BlockQRDivEq(Q,beta,m);
+        else
+            NonBlockQRDivEq(Q,beta,m);
+    }
 
 #ifdef LAP
-#ifdef TMV_INST_DOUBLE
-    static void DoPackedQ_LDivEq(
-        const ConstMatrixView<double>& Q,
-        const ConstVectorView<double>& beta,
-        MatrixView<double> x)
+    template <class T, class T1> 
+    static inline void LapQRDivEq(
+        const GenMatrix<T1>& Q, const GenVector<T1>& beta,
+        MatrixView<T> m)
+    { NonLapQRDivEq(Q,beta,m); }
+#ifdef INST_DOUBLE
+    template <> 
+    void LapQRDivEq(
+        const GenMatrix<double>& Q,
+        const GenVector<double>& beta, MatrixView<double> x)
     {
-        int ldx = x.iscm() ? x.stepj() : x.stepi();
-        int m = x.iscm() ? x.colsize() : x.rowsize();
-        int n = x.iscm() ? x.rowsize() : x.colsize();
+        int ldx = BlasIsCM(x) ? x.stepj() : x.stepi();
+        int m = BlasIsCM(x) ? x.colsize() : x.rowsize();
+        int n = BlasIsCM(x) ? x.rowsize() : x.colsize();
         int k = Q.rowsize();
-        if (Q.iscm()) {
+        if (BlasIsCM(Q)) {
             int ldq = Q.stepj();
             int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            int lwork = x.colsize()*LAP_BLOCKSIZE;
             AlignedArray<double> work(lwork);
             VectorViewOf(work.get(),lwork).setZero();
 #else
@@ -63,8 +691,8 @@ namespace tmv {
             AlignedArray<double> work(1);
             work.get()[0] = 0.;
             LAPNAME(dormqr) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R, 
-                x.iscm()?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
+                LAPCM BlasIsCM(x)?LAPCH_R:LAPCH_L, 
+                BlasIsCM(x)?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
                 LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -74,8 +702,8 @@ namespace tmv {
 #endif
 #endif
             LAPNAME(dormqr) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R, 
-                x.iscm()?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
+                LAPCM BlasIsCM(x)?LAPCH_R:LAPCH_L, 
+                BlasIsCM(x)?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
                 LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -89,7 +717,7 @@ namespace tmv {
             int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            int lwork = x.colsize()*LAP_BLOCKSIZE;
             AlignedArray<double> work(lwork);
             VectorViewOf(work.get(),lwork).setZero();
 #else
@@ -97,8 +725,8 @@ namespace tmv {
             AlignedArray<double> work(1);
             work.get()[0] = 0.;
             LAPNAME(dormlq) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_NT:LAPCH_T,
+                LAPCM BlasIsCM(x)?LAPCH_R:LAPCH_L,
+                BlasIsCM(x)?LAPCH_NT:LAPCH_T,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -108,8 +736,8 @@ namespace tmv {
 #endif
 #endif
             LAPNAME(dormlq) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_NT:LAPCH_T,
+                LAPCM BlasIsCM(x)?LAPCH_R:LAPCH_L,
+                BlasIsCM(x)?LAPCH_NT:LAPCH_T,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -120,24 +748,24 @@ namespace tmv {
 #endif
         }
     }
-    template <int C>
-    void DoPackedQ_LDivEq(
-        const ConstMatrixView<std::complex<double>,C>& Q,
-        const ConstVectorView<double>& beta,
+    template <> 
+    void LapQRDivEq(
+        const GenMatrix<std::complex<double> >& Q,
+        const GenVector<std::complex<double> >& beta,
         MatrixView<std::complex<double> > x)
     {
         int k = Q.rowsize();
-        Vector<std::complex<double> > cbeta = beta;
-        if (Q.iscm()) {
-            int ldx = x.iscm() ? x.stepj() : x.stepi();
-            int m = x.iscm() ? x.colsize() : x.rowsize();
-            int n = x.iscm() ? x.rowsize() : x.colsize();
+        if (BlasIsCM(Q)) {
+            int ldx = BlasIsCM(x) ? x.stepj() : x.stepi();
+            int m = BlasIsCM(x) ? x.colsize() : x.rowsize();
+            int n = BlasIsCM(x) ? x.rowsize() : x.colsize();
             int ldq = Q.stepj();
-            if (x.iscm() == Q.isconj()) x.conjugateSelf();
+            if (BlasIsCM(x) == x.isconj()) x.conjugateSelf();
+            Vector<std::complex<double> > conjbeta = beta.conjugate();
             int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            int lwork = x.colsize()*LAP_BLOCKSIZE;
             AlignedArray<std::complex<double> > work(lwork);
             VectorViewOf(work.get(),lwork).setZero();
 #else
@@ -145,10 +773,10 @@ namespace tmv {
             AlignedArray<std::complex<double> > work(1);
             work.get()[0] = 0.;
             LAPNAME(zunmqr) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_CT:LAPCH_NT,
+                LAPCM BlasIsCM(x)?LAPCH_R:LAPCH_L,
+                BlasIsCM(x)?LAPCH_CT:LAPCH_NT,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPP(conjbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
             lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
@@ -156,27 +784,27 @@ namespace tmv {
 #endif
 #endif
             LAPNAME(zunmqr) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_CT:LAPCH_NT,
+                LAPCM BlasIsCM(x)?LAPCH_R:LAPCH_L,
+                BlasIsCM(x)?LAPCH_CT:LAPCH_NT,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPP(conjbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            if (x.iscm() == Q.isconj()) x.conjugateSelf();
+            if (BlasIsCM(x) == x.isconj()) x.conjugateSelf();
 #ifdef LAPNOWORK
             LAP_Results(Lap_info,"zunmqr");
 #else
             LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"zunmqr");
 #endif
         } else {
-            int ldx = x.iscm() ? x.stepj() : x.stepi();
-            int m = x.iscm() ? x.colsize() : x.rowsize();
-            int n = x.iscm() ? x.rowsize() : x.colsize();
+            int ldx = BlasIsCM(x) ? x.stepj() : x.stepi();
+            int m = BlasIsCM(x) ? x.colsize() : x.rowsize();
+            int n = BlasIsCM(x) ? x.rowsize() : x.colsize();
             int ldq = Q.stepi();
-            if (x.iscm() != Q.isconj()) x.conjugateSelf();
+            if (BlasIsCM(x) != x.isconj()) x.conjugateSelf();
             int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            int lwork = x.colsize()*LAP_BLOCKSIZE;
             AlignedArray<std::complex<double> > work(lwork);
             VectorViewOf(work.get(),lwork).setZero();
 #else
@@ -184,10 +812,10 @@ namespace tmv {
             AlignedArray<std::complex<double> > work(1);
             work.get()[0] = 0.;
             LAPNAME(zunmlq) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_NT:LAPCH_CT,
+                LAPCM BlasIsCM(x)?LAPCH_R:LAPCH_L,
+                BlasIsCM(x)?LAPCH_NT:LAPCH_CT,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
             lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
@@ -195,12 +823,12 @@ namespace tmv {
 #endif
 #endif
             LAPNAME(zunmlq) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_NT:LAPCH_CT,
+                LAPCM BlasIsCM(x)?LAPCH_R:LAPCH_L,
+                BlasIsCM(x)?LAPCH_NT:LAPCH_CT,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            if (x.iscm() != Q.isconj()) x.conjugateSelf();
+            if (BlasIsCM(x) != x.isconj()) x.conjugateSelf();
 #ifdef LAPNOWORK
             LAP_Results(Lap_info,"zunmlq");
 #else
@@ -208,221 +836,32 @@ namespace tmv {
 #endif
         }
     }
-    void DoPackedQ_MultEq(
-        const ConstMatrixView<double>& Q,
-        const ConstVectorView<double>& beta,
-        MatrixView<double> x)
+#endif
+#ifdef INST_FLOAT
+    template <> 
+    void LapQRDivEq(
+        const GenMatrix<float>& Q,
+        const GenVector<float>& beta, MatrixView<float> x)
     {
-        int ldx = x.iscm() ? x.stepj() : x.stepi();
-        int m = x.iscm() ? x.colsize() : x.rowsize();
-        int n = x.iscm() ? x.rowsize() : x.colsize();
+        int ldx = BlasIsCM(x) ? x.stepj() : x.stepi();
+        int m = BlasIsCM(x) ? x.colsize() : x.rowsize();
+        int n = BlasIsCM(x) ? x.rowsize() : x.colsize();
         int k = Q.rowsize();
-        if (Q.iscm()) {
+        if (BlasIsCM(Q)) {
             int ldq = Q.stepj();
             int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
-            AlignedArray<double> work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<double> work(1);
-            work.get()[0] = 0.;
-            LAPNAME(dormqr) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R, 
-                x.iscm()?LAPCH_NT:LAPCH_T, LAPV(m),LAPV(n),LAPV(k),
-                LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(work[0]);
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(dormqr) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R, 
-                x.iscm()?LAPCH_NT:LAPCH_T, LAPV(m),LAPV(n),LAPV(k),
-                LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-#ifdef LAPNOWORK
-            LAP_Results(Lap_info,"dormqr");
-#else
-            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"dormqr");
-#endif
-        } else {
-            int ldq = Q.stepi();
-            int Lap_info=0;
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
-            AlignedArray<double> work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<double> work(1);
-            work.get()[0] = 0.;
-            LAPNAME(dormlq) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_T:LAPCH_NT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(work[0]);
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(dormlq) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_T:LAPCH_NT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-#ifdef LAPNOWORK
-            LAP_Results(Lap_info,"dormlq");
-#else
-            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"dormlq");
-#endif
-        }
-    }
-    template <int C>
-    void DoPackedQ_MultEq(
-        const ConstMatrixView<std::complex<double>,C>& Q,
-        const ConstVectorView<double>& beta,
-        MatrixView<std::complex<double> > x)
-    {
-        int k = Q.rowsize();
-        Vector<std::complex<double> > cbeta = beta;
-        if (Q.iscm()) {
-            int ldx = x.iscm() ? x.stepj() : x.stepi();
-            int m = x.iscm() ? x.colsize() : x.rowsize();
-            int n = x.iscm() ? x.rowsize() : x.colsize();
-            int ldq = Q.stepj();
-            if (x.iscm() == Q.isconj()) x.conjugateSelf();
-            int Lap_info=0;
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
-            AlignedArray<std::complex<double> > work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<std::complex<double> > work(1);
-            work.get()[0] = 0.;
-            LAPNAME(zunmqr) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_NT:LAPCH_CT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(TMV_REAL(work[0]));
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(zunmqr) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_NT:LAPCH_CT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            if (x.iscm() == Q.isconj()) x.conjugateSelf();
-#ifdef LAPNOWORK
-            LAP_Results(Lap_info,"zunmqr");
-#else
-            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"zunmqr");
-#endif
-        } else {
-            int ldx = x.iscm() ? x.stepj() : x.stepi();
-            int m = x.iscm() ? x.colsize() : x.rowsize();
-            int n = x.iscm() ? x.rowsize() : x.colsize();
-            int ldq = Q.stepi();
-            if (x.iscm() != Q.isconj()) x.conjugateSelf();
-            int Lap_info=0;
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
-            AlignedArray<std::complex<double> > work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<std::complex<double> > work(1);
-            work.get()[0] = 0.;
-            LAPNAME(zunmlq) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_CT:LAPCH_NT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(TMV_REAL(work[0]));
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(zunmlq) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_CT:LAPCH_NT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            if (x.iscm() != Q.isconj()) x.conjugateSelf();
-#ifdef LAPNOWORK
-            LAP_Results(Lap_info,"zunmlq");
-#else
-            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"zunmlq");
-#endif
-        }
-    }
-    static void DoPackedQ_LDivEq(
-        const ConstMatrixView<double>& Q,
-        const ConstVectorView<double>& beta,
-        VectorView<double> x)
-    { DoPackedQ_LDivEq(Q,beta,ColVectorViewOf(x).xView()); }
-    template <int C>
-    void DoPackedQ_LDivEq(
-        const ConstMatrixView<std::complex<double>,C>& Q,
-        const ConstVectorView<double>& beta,
-        VectorView<std::complex<double> > x)
-    { DoPackedQ_LDivEq(Q,beta,ColVectorViewOf(x).xView()); }
-    static void DoPackedQ_MultEq(
-        const ConstMatrixView<double>& Q,
-        const ConstVectorView<double>& beta,
-        VectorView<double> x)
-    { DoPackedQ_MultEq(Q,beta,ColVectorViewOf(x).xView()); }
-    template <int C>
-    void DoPackedQ_MultEq(
-        const ConstMatrixView<std::complex<double>,C>& Q,
-        const ConstVectorView<double>& beta,
-        VectorView<std::complex<double> > x)
-    { DoPackedQ_MultEq(Q,beta,ColVectorViewOf(x).xView()); }
-#endif
-#ifdef TMV_INST_FLOAT
-    static void DoPackedQ_LDivEq(
-        const ConstMatrixView<float>& Q,
-        const ConstVectorView<float>& beta,
-        MatrixView<float> x)
-    {
-        int ldx = x.iscm() ? x.stepj() : x.stepi();
-        int m = x.iscm() ? x.colsize() : x.rowsize();
-        int n = x.iscm() ? x.rowsize() : x.colsize();
-        int k = Q.rowsize();
-        if (Q.iscm()) {
-            int ldq = Q.stepj();
-            int Lap_info=0;
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            int lwork = x.colsize()*LAP_BLOCKSIZE;
             AlignedArray<float> work(lwork);
             VectorViewOf(work.get(),lwork).setZero();
 #else
             int lwork = -1;
             AlignedArray<float> work(1);
-            work.get()[0] = 0.F;
+            work.get()[0] = 0.;
             LAPNAME(sormqr) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R, 
-                x.iscm()?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
+                LAPCM BlasIsCM(x)?LAPCH_R:LAPCH_L, 
+                BlasIsCM(x)?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
                 LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -432,8 +871,8 @@ namespace tmv {
 #endif
 #endif
             LAPNAME(sormqr) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R, 
-                x.iscm()?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
+                LAPCM BlasIsCM(x)?LAPCH_R:LAPCH_L, 
+                BlasIsCM(x)?LAPCH_T:LAPCH_NT, LAPV(m),LAPV(n),LAPV(k),
                 LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -447,16 +886,16 @@ namespace tmv {
             int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            int lwork = x.colsize()*LAP_BLOCKSIZE;
             AlignedArray<float> work(lwork);
             VectorViewOf(work.get(),lwork).setZero();
 #else
             int lwork = -1;
             AlignedArray<float> work(1);
-            work.get()[0] = 0.F;
+            work.get()[0] = 0.;
             LAPNAME(sormlq) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_NT:LAPCH_T,
+                LAPCM BlasIsCM(x)?LAPCH_R:LAPCH_L,
+                BlasIsCM(x)?LAPCH_NT:LAPCH_T,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -466,8 +905,8 @@ namespace tmv {
 #endif
 #endif
             LAPNAME(sormlq) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_NT:LAPCH_T,
+                LAPCM BlasIsCM(x)?LAPCH_R:LAPCH_L,
+                BlasIsCM(x)?LAPCH_NT:LAPCH_T,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
                 LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
@@ -478,35 +917,35 @@ namespace tmv {
 #endif
         }
     }
-    template <int C>
-    void DoPackedQ_LDivEq(
-        const ConstMatrixView<std::complex<float>,C>& Q,
-        const ConstVectorView<float>& beta,
+    template <> 
+    void LapQRDivEq(
+        const GenMatrix<std::complex<float> >& Q,
+        const GenVector<std::complex<float> >& beta,
         MatrixView<std::complex<float> > x)
     {
         int k = Q.rowsize();
-        Vector<std::complex<float> > cbeta = beta;
-        if (Q.iscm()) {
-            int ldx = x.iscm() ? x.stepj() : x.stepi();
-            int m = x.iscm() ? x.colsize() : x.rowsize();
-            int n = x.iscm() ? x.rowsize() : x.colsize();
+        if (BlasIsCM(Q)) {
+            int ldx = BlasIsCM(x) ? x.stepj() : x.stepi();
+            int m = BlasIsCM(x) ? x.colsize() : x.rowsize();
+            int n = BlasIsCM(x) ? x.rowsize() : x.colsize();
             int ldq = Q.stepj();
-            if (x.iscm() == Q.isconj()) x.conjugateSelf();
+            if (BlasIsCM(x) == x.isconj()) x.conjugateSelf();
+            Vector<std::complex<float> > conjbeta = beta.conjugate();
             int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            int lwork = x.colsize()*LAP_BLOCKSIZE;
             AlignedArray<std::complex<float> > work(lwork);
             VectorViewOf(work.get(),lwork).setZero();
 #else
             int lwork = -1;
             AlignedArray<std::complex<float> > work(1);
-            work.get()[0] = 0.F;
+            work.get()[0] = 0.;
             LAPNAME(cunmqr) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_CT:LAPCH_NT,
+                LAPCM BlasIsCM(x)?LAPCH_R:LAPCH_L,
+                BlasIsCM(x)?LAPCH_CT:LAPCH_NT,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPP(conjbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
             lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
@@ -514,38 +953,38 @@ namespace tmv {
 #endif
 #endif
             LAPNAME(cunmqr) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_CT:LAPCH_NT,
+                LAPCM BlasIsCM(x)?LAPCH_R:LAPCH_L,
+                BlasIsCM(x)?LAPCH_CT:LAPCH_NT,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPP(conjbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            if (x.iscm() == Q.isconj()) x.conjugateSelf();
+            if (BlasIsCM(x) == x.isconj()) x.conjugateSelf();
 #ifdef LAPNOWORK
             LAP_Results(Lap_info,"cunmqr");
 #else
             LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"cunmqr");
 #endif
         } else {
-            int ldx = x.iscm() ? x.stepj() : x.stepi();
-            int m = x.iscm() ? x.colsize() : x.rowsize();
-            int n = x.iscm() ? x.rowsize() : x.colsize();
+            int ldx = BlasIsCM(x) ? x.stepj() : x.stepi();
+            int m = BlasIsCM(x) ? x.colsize() : x.rowsize();
+            int n = BlasIsCM(x) ? x.rowsize() : x.colsize();
             int ldq = Q.stepi();
-            if (x.iscm() != Q.isconj()) x.conjugateSelf();
+            if (BlasIsCM(x) != x.isconj()) x.conjugateSelf();
             int Lap_info=0;
 #ifndef LAPNOWORK
 #ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
+            int lwork = x.colsize()*LAP_BLOCKSIZE;
             AlignedArray<std::complex<float> > work(lwork);
             VectorViewOf(work.get(),lwork).setZero();
 #else
             int lwork = -1;
             AlignedArray<std::complex<float> > work(1);
-            work.get()[0] = 0.F;
+            work.get()[0] = 0.;
             LAPNAME(cunmlq) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_NT:LAPCH_CT,
+                LAPCM BlasIsCM(x)?LAPCH_R:LAPCH_L,
+                BlasIsCM(x)?LAPCH_NT:LAPCH_CT,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
             lwork = int(TMV_REAL(work[0]));
             work.resize(lwork);
@@ -553,12 +992,12 @@ namespace tmv {
 #endif
 #endif
             LAPNAME(cunmlq) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_NT:LAPCH_CT,
+                LAPCM BlasIsCM(x)?LAPCH_R:LAPCH_L,
+                BlasIsCM(x)?LAPCH_NT:LAPCH_CT,
                 LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
+                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
                 LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            if (x.iscm() != Q.isconj()) x.conjugateSelf();
+            if (BlasIsCM(x) != x.isconj()) x.conjugateSelf();
 #ifdef LAPNOWORK
             LAP_Results(Lap_info,"cunmlq");
 #else
@@ -566,354 +1005,235 @@ namespace tmv {
 #endif
         }
     }
-    void DoPackedQ_MultEq(
-        const ConstMatrixView<float>& Q,
-        const ConstVectorView<float>& beta,
-        MatrixView<float> x)
-    {
-        int ldx = x.iscm() ? x.stepj() : x.stepi();
-        int m = x.iscm() ? x.colsize() : x.rowsize();
-        int n = x.iscm() ? x.rowsize() : x.colsize();
-        int k = Q.rowsize();
-        if (Q.iscm()) {
-            int ldq = Q.stepj();
-            int Lap_info=0;
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
-            AlignedArray<float> work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<float> work(1);
-            work.get()[0] = 0.F;
-            LAPNAME(sormqr) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R, 
-                x.iscm()?LAPCH_NT:LAPCH_T, LAPV(m),LAPV(n),LAPV(k),
-                LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(work[0]);
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(sormqr) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R, 
-                x.iscm()?LAPCH_NT:LAPCH_T, LAPV(m),LAPV(n),LAPV(k),
-                LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-#ifdef LAPNOWORK
-            LAP_Results(Lap_info,"sormqr");
-#else
-            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"sormqr");
-#endif
-        } else {
-            int ldq = Q.stepi();
-            int Lap_info=0;
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
-            AlignedArray<float> work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<float> work(1);
-            work.get()[0] = 0.F;
-            LAPNAME(sormlq) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_T:LAPCH_NT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(work[0]);
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(sormlq) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_T:LAPCH_NT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(beta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-#ifdef LAPNOWORK
-            LAP_Results(Lap_info,"sormlq");
-#else
-            LAP_Results(Lap_info,int(work[0]),m,n,lwork,"sormlq");
-#endif
-        }
-    }
-    template <int C>
-    void DoPackedQ_MultEq(
-        const ConstMatrixView<std::complex<float>,C>& Q,
-        const ConstVectorView<float>& beta,
-        MatrixView<std::complex<float> > x)
-    {
-        int k = Q.rowsize();
-        Vector<std::complex<float> > cbeta = beta;
-        if (Q.iscm()) {
-            int ldx = x.iscm() ? x.stepj() : x.stepi();
-            int m = x.iscm() ? x.colsize() : x.rowsize();
-            int n = x.iscm() ? x.rowsize() : x.colsize();
-            int ldq = Q.stepj();
-            if (x.iscm() == Q.isconj()) x.conjugateSelf();
-            int Lap_info=0;
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
-            AlignedArray<std::complex<float> > work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<std::complex<float> > work(1);
-            work.get()[0] = 0.F;
-            LAPNAME(cunmqr) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_NT:LAPCH_CT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(TMV_REAL(work[0]));
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(cunmqr) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_NT:LAPCH_CT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            if (x.iscm() == Q.isconj()) x.conjugateSelf();
-#ifdef LAPNOWORK
-            LAP_Results(Lap_info,"cunmqr");
-#else
-            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"cunmqr");
-#endif
-        } else {
-            int ldx = x.iscm() ? x.stepj() : x.stepi();
-            int m = x.iscm() ? x.colsize() : x.rowsize();
-            int n = x.iscm() ? x.rowsize() : x.colsize();
-            int ldq = Q.stepi();
-            if (x.iscm() != Q.isconj()) x.conjugateSelf();
-            int Lap_info=0;
-#ifndef LAPNOWORK
-#ifdef NOWORKQUERY
-            int lwork = x.rowsize()*LAP_BLOCKSIZE;
-            AlignedArray<std::complex<float> > work(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#else
-            int lwork = -1;
-            AlignedArray<std::complex<float> > work(1);
-            work.get()[0] = 0.F;
-            LAPNAME(cunmlq) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_CT:LAPCH_NT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            lwork = int(TMV_REAL(work[0]));
-            work.resize(lwork);
-            VectorViewOf(work.get(),lwork).setZero();
-#endif
-#endif
-            LAPNAME(cunmlq) (
-                LAPCM x.iscm()?LAPCH_L:LAPCH_R,
-                x.iscm()?LAPCH_CT:LAPCH_NT,
-                LAPV(m),LAPV(n),LAPV(k),LAPP(Q.cptr()),LAPV(ldq),
-                LAPP(cbeta.cptr()),LAPP(x.ptr()),LAPV(ldx)
-                LAPWK(work.get()) LAPVWK(lwork) LAPINFO LAP1 LAP1);
-            if (x.iscm() != Q.isconj()) x.conjugateSelf();
-#ifdef LAPNOWORK
-            LAP_Results(Lap_info,"cunmlq");
-#else
-            LAP_Results(Lap_info,int(TMV_REAL(work[0])),m,n,lwork,"cunmlq");
-#endif
-        }
-    }
-    static void DoPackedQ_LDivEq(
-        const ConstMatrixView<float>& Q,
-        const ConstVectorView<float>& beta,
-        VectorView<float> x)
-    { DoPackedQ_LDivEq(Q,beta,ColVectorViewOf(x).xView()); }
-    template <int C>
-    void DoPackedQ_LDivEq(
-        const ConstMatrixView<std::complex<float>,C>& Q,
-        const ConstVectorView<float>& beta,
-        VectorView<std::complex<float> > x)
-    { DoPackedQ_LDivEq(Q,beta,ColVectorViewOf(x).xView()); }
-    static void DoPackedQ_MultEq(
-        const ConstMatrixView<float>& Q,
-        const ConstVectorView<float>& beta,
-        VectorView<float> x)
-    { DoPackedQ_MultEq(Q,beta,ColVectorViewOf(x).xView()); }
-    template <int C>
-    void DoPackedQ_MultEq(
-        const ConstMatrixView<std::complex<float>,C>& Q,
-        const ConstVectorView<float>& beta,
-        VectorView<std::complex<float> > x)
-    { DoPackedQ_MultEq(Q,beta,ColVectorViewOf(x).xView()); }
 #endif
 #endif // LAP
 
-    template <class T1, int C1, class RT1, class T2>
-    void InstPackedQ_MultEq(
-        const ConstMatrixView<T1,C1>& Q, const ConstVectorView<RT1>& beta,
-        MatrixView<T2> m2)
+    template <class T, class T1> 
+    void Q_RDivEq(
+        const GenMatrix<T1>& Q, const GenVector<T1>& beta,
+        MatrixView<T> m)
     {
-#ifdef XDEBUG_QR
-        std::cout<<"InstPackedQ_MultEq matrix\n";
-        std::cout<<"Q = "<<TMV_Text(Q)<<"  "<<Q<<std::endl;
-        std::cout<<"beta = "<<TMV_Text(beta)<<"  "<<beta<<std::endl;
-        std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
-        Matrix<T2> m2x = m2;
-        InlinePackedQ_MultEq(Q,beta,m2x);
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(beta.size() == Q.rowsize());
+        TMVAssert(m.rowsize() == Q.colsize());
+        TMVAssert(Q.isrm() || Q.iscm());
+        TMVAssert(Q.ct() == NonConj);
+        TMVAssert(beta.ct() == NonConj);
+
+#ifdef XDEBUG
+        std::cout<<"Start Q_RDivEq: \n";
+        Matrix<T1> QQ(Q.colsize(),Q.colsize(),0.);
+        QQ.setToIdentity();
+        QQ.colRange(0,Q.rowsize()) = Q;
+        Vector<T1> bb(Q.colsize(),0.);
+        bb.subVector(0,beta.size()) = beta;
+        GetQFromQR(QQ.view(),bb);
+        Matrix<T> m0 = m;
+        Matrix<T> m2 = m * QQ.adjoint();
+        std::cout<<"Q = "<<TMV_Text(Q)<<std::endl;
+        std::cout<<"beta = "<<TMV_Text(beta)<<std::endl;
+        std::cout<<"m = "<<TMV_Text(m)<<std::endl;
+        std::cout<<"Q = "<<Q<<std::endl;
+        std::cout<<"beta = "<<beta<<std::endl;
+        std::cout<<"m = "<<m<<std::endl;
 #endif
-        if (Q.isrm() || Q.iscm()) {
-            if (beta.step() == 1) {
-                if (m2.iscm() || m2.isrm()) {
-                    DoPackedQ_MultEq(Q,beta,m2); 
-                } else {
-                    Matrix<T2,ColMajor|NoDivider> m2c = m2;
-                    InstPackedQ_MultEq(Q,beta,m2c.xView());
-                    InstCopy(m2c.constView().xView(),m2);
-                }
+
+        if (m.colsize() > 0 && m.rowsize() > 0) {
+#ifdef LAP
+            if ( BlasIsRM(m) || BlasIsCM(m) ) {
+                LapQRDivEq(Q,beta,m);
             } else {
-                Vector<RT1> betac = beta;
-                InstPackedQ_MultEq(Q,betac.constView().xView(),m2);
+                Matrix<T> mc = m;
+                LapQRDivEq(Q,beta,mc.view());
+                m = mc;
             }
-        } else {
-            Matrix<T1,ColMajor|NoDivider> Qc = Q;
-            InstPackedQ_MultEq(Qc.constView().xView(),beta,m2);
+#else
+            NonLapQRDivEq(Q,beta,m);
+#endif
         }
-#ifdef XDEBUG_QR
-        std::cout<<"m2 => "<<m2<<std::endl;
-        std::cout<<"Norm(m2-m2x) = "<<Norm(m2-m2x)<<std::endl;
-        if (!(Norm(m2-m2x) < 1.e-3*Norm(Q)*Norm(m2x))) {
+
+#ifdef XDEBUG
+        std::cout<<"Norm(m-m2) = "<<Norm(m-m2)<<std::endl;
+        if (Norm(m-m2) > 0.001*Norm(m0)) {
+            cerr<<"Q_RDivEq\n";
+            cerr<<"Q = "<<Q<<endl;
+            cerr<<"beta = "<<beta<<endl;
+            cerr<<"m = "<<TMV_Text(m)<<"  "<<m0<<endl;
+            cerr<<"m => "<<m<<endl;
+            cerr<<"m2 = "<<m2<<endl;
+            cerr<<"Norm(m-m2) = "<<Norm(m-m2)<<endl;
             abort();
         }
 #endif
     }
 
-    template <class T1, int C1, class RT1, class T2>
-    void InstPackedQ_LDivEq(
-        const ConstMatrixView<T1,C1>& Q, const ConstVectorView<RT1>& beta,
-        MatrixView<T2> m2)
+    //
+    // PackedQ routines
+    //
+
+    template <class T> 
+    static void unpack(
+        const GenMatrix<T>& Q, const GenVector<T>& beta,
+        MatrixView<T> m)
     {
-#ifdef XDEBUG_QR
-        std::cout<<"InstPackedQ_LDivEq matrix\n";
-        std::cout<<"Q = "<<TMV_Text(Q)<<"  "<<Q<<std::endl;
-        std::cout<<"beta = "<<TMV_Text(beta)<<"  "<<beta<<std::endl;
-        std::cout<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
-        Matrix<T2> m2x = m2;
-        InlinePackedQ_LDivEq(Q,beta,m2x);
-#endif
-        if (Q.isrm() || Q.iscm()) {
-            if (beta.step() == 1) {
-                if (m2.iscm() || m2.isrm()) {
-                    DoPackedQ_LDivEq(Q,beta,m2); 
-                } else {
-                    Matrix<T2,ColMajor|NoDivider> m2c = m2;
-                    InstPackedQ_LDivEq(Q,beta,m2c.xView());
-                    InstCopy(m2c.constView().xView(),m2);
-                }
-            } else {
-                Vector<RT1> betac = beta;
-                InstPackedQ_LDivEq(Q,betac.constView().xView(),m2);
-            }
+        if ( BlasIsRM(m) || BlasIsCM(m) ){
+            m = Q;
+            GetQFromQR(m,beta);
         } else {
-            Matrix<T1,ColMajor|NoDivider> Qc = Q;
-            InstPackedQ_LDivEq(Qc.constView().xView(),beta,m2);
+            Matrix<T> m1 = Q;
+            GetQFromQR(m1.view(),beta);
+            m = m1;
         }
-#ifdef XDEBUG_QR
-        std::cout<<"m2 => "<<m2<<std::endl;
-        std::cout<<"Norm(m2-m2x) = "<<Norm(m2-m2x)<<std::endl;
-        if (!(Norm(m2-m2x) < 1.e-3*Norm(Q)*Norm(m2x))) {
-            abort();
-        }
-#endif
-    }
- 
-    template <class T1, int C1, class RT1, class T2>
-    void InstPackedQ_MultEq(
-        const ConstMatrixView<T1,C1>& Q, const ConstVectorView<RT1>& beta,
-        VectorView<T2> v2)
-    {
-#ifdef XDEBUG_QR
-        std::cout<<"InstPackedQ_MultEq vector\n";
-        std::cout<<"Q = "<<TMV_Text(Q)<<"  "<<Q<<std::endl;
-        std::cout<<"beta = "<<TMV_Text(beta)<<"  "<<beta<<std::endl;
-        std::cout<<"v2 = "<<TMV_Text(v2)<<"  "<<v2<<std::endl;
-        Vector<T2> v2x = v2;
-        InlinePackedQ_MultEq(Q,beta,v2x);
-#endif
-        if (Q.isrm() || Q.iscm()) {
-            if (beta.step() == 1) {
-                if (v2.step() == 1) {
-                    DoPackedQ_MultEq(Q,beta,v2); 
-                } else {
-                    Vector<T2> v2c = v2;
-                    InstPackedQ_MultEq(Q,beta,v2c.xView());
-                    InstCopy(v2c.constView().xView(),v2);
-                }
-            } else {
-                Vector<RT1> betac = beta;
-                InstPackedQ_MultEq(Q,betac.constView().xView(),v2);
-            }
-        } else {
-            Matrix<T1,ColMajor|NoDivider> Qc = Q;
-            InstPackedQ_MultEq(Qc.constView().xView(),beta,v2);
-        }
-#ifdef XDEBUG_QR
-        std::cout<<"v2 => "<<v2<<std::endl;
-        std::cout<<"Norm(v2-v2x) = "<<Norm(v2-v2x)<<std::endl;
-        if (!(Norm(v2-v2x) < 1.e-3*Norm(Q)*Norm(v2x))) {
-            abort();
-        }
-#endif
     }
 
-    template <class T1, int C1, class RT1, class T2>
-    void InstPackedQ_LDivEq(
-        const ConstMatrixView<T1,C1>& Q, const ConstVectorView<RT1>& beta,
-        VectorView<T2> v2)
+    template <class T, class T1> 
+    static void unpack(
+        const GenMatrix<T>& Q, const GenVector<T>& beta,
+        MatrixView<T1> m)
     {
-#ifdef XDEBUG_QR
-        std::cout<<"InstPackedQ_LDivEq vector\n";
-        std::cout<<"Q = "<<TMV_Text(Q)<<"  "<<Q<<std::endl;
-        std::cout<<"beta = "<<TMV_Text(beta)<<"  "<<beta<<std::endl;
-        std::cout<<"v2 = "<<TMV_Text(v2)<<"  "<<v2<<std::endl;
-        Vector<T2> v2x = v2;
-        InlinePackedQ_LDivEq(Q,beta,v2x);
-#endif
-        if (Q.isrm() || Q.iscm()) {
-            if (beta.step() == 1) {
-                if (v2.step() == 1) {
-                    DoPackedQ_LDivEq(Q,beta,v2); 
-                } else {
-                    Vector<T2> v2c = v2;
-                    InstPackedQ_LDivEq(Q,beta,v2c.xView());
-                    InstCopy(v2c.constView().xView(),v2);
-                }
-            } else {
-                Vector<RT1> betac = beta;
-                InstPackedQ_LDivEq(Q,betac.constView().xView(),v2);
-            }
-        } else {
-            Matrix<T1,ColMajor|NoDivider> Qc = Q;
-            InstPackedQ_LDivEq(Qc.constView().xView(),beta,v2);
-        }
-#ifdef XDEBUG_QR
-        std::cout<<"v2 => "<<v2<<std::endl;
-        std::cout<<"Norm(v2-v2x) = "<<Norm(v2-v2x)<<std::endl;
-        if (!(Norm(v2-v2x) < 1.e-3*Norm(Q)*Norm(v2x))) {
-            abort();
-        }
-#endif
+        Matrix<T> m1 = Q;
+        GetQFromQR(m1.view(),beta);
+        m = m1;
     }
 
+    template <class T> template <class T1> 
+    void PackedQ<T>::doAssignToM(MatrixView<T1> m) const
+    { unpack(Q,beta,m); }
+
+    template <class T> template <class T1> 
+    void PackedQ<T>::LDivEq(VectorView<T1> v) const
+    {
+        TMVAssert(Q.colsize() == Q.rowsize());
+        TMVAssert(beta.size() == Q.rowsize());
+        TMVAssert(v.size() == Q.colsize());
+        TMVAssert(Q.isrm() || Q.iscm());
+        TMVAssert(Q.ct() == NonConj);
+        TMVAssert(beta.ct() == NonConj);
+
+        Q_LDivEq(Q,beta,ColVectorViewOf(v));
+    }
+
+    template <class T> template <class T1> 
+    void PackedQ<T>::RDivEq(VectorView<T1> v) const
+    {
+        TMVAssert(Q.colsize() == Q.rowsize());
+        TMVAssert(beta.size() == Q.rowsize());
+        TMVAssert(v.size() == Q.colsize());
+        TMVAssert(Q.isrm() || Q.iscm());
+        TMVAssert(Q.ct() == NonConj);
+        TMVAssert(beta.ct() == NonConj);
+
+        Q_RDivEq(Q,beta,RowVectorViewOf(v));
+    }
+
+    template <class T> template <class T1, class T2> 
+    void PackedQ<T>::LDiv(
+        const GenVector<T1>& v, VectorView<T2> x) const
+    {
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(beta.size() == Q.rowsize());
+        TMVAssert(v.size() == Q.colsize());
+        TMVAssert(x.size() == Q.rowsize());
+        TMVAssert(Q.isrm() || Q.iscm());
+        TMVAssert(Q.ct() == NonConj);
+        TMVAssert(beta.ct() == NonConj);
+
+        // Solve Q x = v
+        if (Q.isSquare()) {
+            x = v;
+            Q_LDivEq(Q,beta,ColVectorViewOf(x));
+        } else {
+            Vector<T1> v1 = v;
+            Q_LDivEq(Q,beta,ColVectorViewOf(v1));
+            x = v1.subVector(0,x.size());
+        }
+    }
+
+    template <class T> template <class T1, class T2> 
+    void PackedQ<T>::RDiv(
+        const GenVector<T1>& v, VectorView<T2> x) const
+    {
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(beta.size() == Q.rowsize());
+        TMVAssert(x.size() == Q.colsize());
+        TMVAssert(v.size() == Q.rowsize());
+        TMVAssert(Q.ct() == NonConj);
+        TMVAssert(beta.ct() == NonConj);
+
+        x.subVector(0,v.size()) = v;
+        x.subVector(v.size(),x.size()).setZero();
+        Q_RDivEq(Q,beta,RowVectorViewOf(x));
+    }
+
+    template <class T> template <class T1> 
+    void PackedQ<T>::LDivEq(MatrixView<T1> m) const
+    {
+        TMVAssert(Q.colsize() == Q.rowsize());
+        TMVAssert(beta.size() == Q.rowsize());
+        TMVAssert(m.colsize() == Q.colsize());
+        TMVAssert(Q.isrm() || Q.iscm());
+        TMVAssert(Q.ct() == NonConj);
+        TMVAssert(beta.ct() == NonConj);
+
+        Q_LDivEq(Q,beta,m);
+    }
+
+    template <class T> template <class T1> 
+    void PackedQ<T>::RDivEq(MatrixView<T1> m) const
+    {
+        TMVAssert(Q.colsize() == Q.rowsize());
+        TMVAssert(beta.size() == Q.rowsize());
+        TMVAssert(m.rowsize() == Q.rowsize());
+        TMVAssert(Q.ct() == NonConj);
+        TMVAssert(beta.ct() == NonConj);
+
+        Q_RDivEq(Q,beta,m);
+    }
+
+    template <class T> template <class T1, class T2> 
+    void PackedQ<T>::LDiv(
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
+    {
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(beta.size() == Q.rowsize());
+        TMVAssert(m.colsize() == Q.colsize());
+        TMVAssert(x.colsize() == Q.rowsize());
+        TMVAssert(x.rowsize() == m.rowsize());
+        TMVAssert(Q.isrm() || Q.iscm());
+        TMVAssert(Q.ct() == NonConj);
+        TMVAssert(beta.ct() == NonConj);
+
+        // Solve Q x = m
+        if (Q.isSquare()) {
+            x = m;
+            Q_LDivEq(Q,beta,x);
+        } else {
+            Matrix<T,ColMajor> m1 = m;
+            Q_LDivEq(Q,beta,m1.view());
+            x = m1.rowRange(0,x.colsize());
+        }
+    }
+
+    template <class T> template <class T1, class T2> 
+    void PackedQ<T>::RDiv(
+        const GenMatrix<T1>& m, MatrixView<T2> x) const
+    {
+        TMVAssert(Q.colsize() >= Q.rowsize());
+        TMVAssert(beta.size() == Q.rowsize());
+        TMVAssert(x.rowsize() == Q.colsize());
+        TMVAssert(m.rowsize() == Q.rowsize());
+        TMVAssert(x.colsize() == m.colsize());
+        TMVAssert(Q.ct() == NonConj);
+        TMVAssert(beta.ct() == NonConj);
+
+        x.colRange(0,m.rowsize()) = m;
+        x.colRange(m.rowsize(),x.rowsize()).setZero();
+        Q_RDivEq(Q,beta,x);
+    }
+
+#ifdef INST_INT
+#undef INST_INT
+#endif
 
 #define InstFile "TMV_PackedQ.inst"
 #include "TMV_Inst.h"

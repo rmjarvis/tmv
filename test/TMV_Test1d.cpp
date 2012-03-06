@@ -22,7 +22,8 @@ bool symoprod = false;
 bool dontthrow = false;
 std::string lastsuccess = "";
 
-int main() try {
+int main() try 
+{
     std::ofstream log("tmvtest1d.log");
     tmv::WriteWarningsTo(&log);
 
@@ -30,7 +31,7 @@ int main() try {
     //showdiv=true;
     //showtests=true;
     //showstartdone=true;
-
+ 
 #if 1
 
 #ifdef TEST_DOUBLE
@@ -77,29 +78,4 @@ catch (...) {
 #else
 catch (int) {}
 #endif
-
-void PreAssert(std::string s)
-{
-    if (showtests) { 
-        std::cout<<"Trying: "<<s;  
-        std::cout.flush(); 
-    } 
-}
-
-void DoAssert(bool x, std::string s)
-{
-    if (x) { 
-        if (showtests) std::cout<<"  Passed"<<std::endl;
-        lastsuccess = s; 
-    } else { 
-        if (showtests) std::cout<<"  Failed"<<std::endl;
-        if (dontthrow) std::cout<<"Failed test: "<<s<<std::endl;  
-        else 
-#ifdef NOTHROW
-        { std::cerr<<"Error in test: "<<s<<std::endl; exit(1); }
-#else
-        throw tmv::Error("Error in test: ",s);  
-#endif
-    } 
-}
 

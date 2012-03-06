@@ -56,7 +56,7 @@ namespace tmv {
     template <class T, class T1> 
     void Q_LDivEq(
         const GenBandMatrix<T1>& Q, const GenVector<T1>& Qbeta,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == Qbeta.size());
@@ -77,7 +77,7 @@ namespace tmv {
     template <class T, class T1> 
     void Q_RDivEq(
         const GenBandMatrix<T1>& Q, const GenVector<T1>& Qbeta,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Qbeta.size() == Q.rowsize());
@@ -105,7 +105,7 @@ namespace tmv {
     template <class T, class T1, class T2> 
     void QR_LDiv(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta,
-        const GenMatrix<T2>& m, const MatrixView<T>& x)
+        const GenMatrix<T2>& m, MatrixView<T> x)
     {
         TMVAssert(QRx.colsize() >= QRx.rowsize());
         TMVAssert(Qbeta.size() == QRx.rowsize());
@@ -170,7 +170,7 @@ namespace tmv {
     template <class T, class T1> 
     void QR_LDivEq(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta, 
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(QRx.colsize() == QRx.rowsize());
         TMVAssert(Qbeta.size() == QRx.rowsize());
@@ -216,7 +216,7 @@ namespace tmv {
     template <class T, class T1, class T2> 
     void QR_RDiv(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta, 
-        const GenMatrix<T2>& m, const MatrixView<T>& x)
+        const GenMatrix<T2>& m, MatrixView<T> x)
     {
         TMVAssert(QRx.colsize() >= QRx.rowsize());
         TMVAssert(Qbeta.size() == QRx.rowsize());
@@ -270,7 +270,7 @@ namespace tmv {
     template <class T, class T1> 
     void QR_RDivEq(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta, 
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(QRx.colsize() == QRx.rowsize());
         TMVAssert(Qbeta.size() == QRx.rowsize());

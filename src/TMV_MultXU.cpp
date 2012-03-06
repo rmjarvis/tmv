@@ -1,97 +1,208 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
+// Copyright (C) 1998 - 2009                                                 //
+//                                                                           //
+// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
+// where you can find the current version and current documention.           //
+//                                                                           //
+// For concerns or problems with the software, Mike may be contacted at      //
+// mike_jarvis@users.sourceforge.net                                         //
+//                                                                           //
+// This program is free software; you can redistribute it and/or             //
+// modify it under the terms of the GNU General Public License               //
+// as published by the Free Software Foundation; either version 2            //
+// of the License, or (at your option) any later version.                    //
+//                                                                           //
+// This program is distributed in the hope that it will be useful,           //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
+// GNU General Public License for more details.                              //
+//                                                                           //
+// You should have received a copy of the GNU General Public License         //
+// along with this program in the file LICENSE.                              //
+//                                                                           //
+// If not, write to:                                                         //
+// The Free Software Foundation, Inc.                                        //
+// 51 Franklin Street, Fifth Floor,                                          //
+// Boston, MA  02110-1301, USA.                                              //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
 
-#include "tmv/TMV_MultXU.h"
+
+//#define XDEBUG
+
+//#define TMV_DEBUG
+//#include <iostream>
+
+#include "tmv/TMV_TriMatrixArithFunc.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_ScaleU.h"
-#include "tmv/TMV_ProdXM.h"
-#include "tmv/TMV_Vector.h"
-#include "tmv/TMV_ConjugateV.h"
+#include "tmv/TMV_VectorArith.h"
+
+#ifdef XDEBUG
+#include "tmv/TMV_MatrixArith.h"
+#include <iostream>
+using std::cout;
+using std::cerr;
+using std::endl;
+#endif
 
 namespace tmv {
 
-    template <bool add, class T, class M1, class M2>
-    static void DoMultXM(const T x, const M1& m1, M2& m2)
-    {
-        if (x == T(1))
-            InlineMultXM<add>(Scaling<1,T>(x),m1,m2); 
-        else if (x == T(-1))
-            InlineMultXM<add>(Scaling<-1,T>(x),m1,m2); 
-        else if (x == T(0))
-            Maybe<!add>::zero(m2);
-        else
-            InlineMultXM<add>(Scaling<0,T>(x),m1,m2); 
-    }
+    //
+    // MultXM
+    //
 
-    template <bool add, class T, class M1, class M2>
-    static void DoMultXM(const std::complex<T> x, const M1& m1, M2& m2)
-    { 
-        if (imag(x) == T(0)) {
-            if (real(x) == T(1))
-                InlineMultXM<add>(Scaling<1,T>(real(x)),m1,m2); 
-            else if (real(x) == T(-1))
-                InlineMultXM<add>(Scaling<-1,T>(real(x)),m1,m2); 
-            else if (real(x) == T(0))
-                Maybe<!add>::zero(m2);
-            else
-                InlineMultXM<add>(Scaling<0,T>(real(x)),m1,m2); 
-        } else 
-            InlineMultXM<add>(Scaling<0,std::complex<T> >(x),m1,m2); 
-    }
-
-    template <class T1, int C1, class T2>
-    void InstMultXM(
-        const T2 x, const ConstUpperTriMatrixView<T1,C1>& m1,
-        UpperTriMatrixView<T2> m2)
+    template <class T, class T1> 
+    static void RowMajorMultXM(const T1 alpha, UpperTriMatrixView<T> A)
     {
-        if (m1.iscm() && m2.iscm()) {
-            UpperTriMatrixView<T2,NonUnitDiag|ColMajor> m2cm = m2.cmView();
-            DoMultXM<false>(x,m1.cmView(),m2cm);
-        } else if (m1.isrm() && m2.isrm()) {
-            UpperTriMatrixView<T2,NonUnitDiag|RowMajor> m2rm = m2.rmView();
-            DoMultXM<false>(x,m1.rmView(),m2rm);
-        } else {
-            InstCopy(m1,m2.xView());
-            InstScale(x,m2);
+        TMVAssert(A.isrm());
+        TMVAssert(!A.isunit());
+        TMVAssert(alpha != T1(1));
+        TMVAssert(A.size() > 0);
+        TMVAssert(A.ct() == NonConj);
+
+        T* Aii = A.ptr();
+        const ptrdiff_t ds = A.stepi()+1;
+        const ptrdiff_t N = A.size();
+
+        for(ptrdiff_t len=N;len>0;--len,Aii+=ds) {
+            // A.row(i,i,N) *= alpha;
+            T* Aij = Aii;
+            for(ptrdiff_t j=len;j>0;--j,++Aij) {
+#ifdef TMVFLDEBUG
+                TMVAssert(Aij >= A._first);
+                TMVAssert(Aij < A._last);
+#endif
+                *Aij *= alpha;
+            }
         }
     }
 
-    template <class T1, int C1, class T2>
-    void InstAddMultXM(
-        const T2 x, const ConstUpperTriMatrixView<T1,C1>& m1,
-        UpperTriMatrixView<T2> m2)
+    template <class T, class T1> 
+    static void ColMajorMultXM(const T1 alpha, UpperTriMatrixView<T> A)
     {
-        if (m2.iscm()) {
-            UpperTriMatrixView<T2,NonUnitDiag|ColMajor> m2cm = m2;
-            if (m1.iscm())
-                DoMultXM<true>(x,m1.cmView(),m2cm);
-            else 
-                DoMultXM<true>(x,m1,m2cm);
-        } else if (m2.isrm()) {
-            UpperTriMatrixView<T2,NonUnitDiag|RowMajor> m2rm = m2;
-            if (m1.isrm())
-                DoMultXM<true>(x,m1.rmView(),m2rm);
-            else 
-                DoMultXM<true>(x,m1,m2rm);
-        } else {
-            DoMultXM<true>(x,m1,m2);
+        TMVAssert(A.iscm());
+        TMVAssert(!A.isunit());
+        TMVAssert(alpha != T1(1));
+        TMVAssert(A.size() > 0);
+        TMVAssert(A.ct() == NonConj);
+
+        T* A0j = A.ptr();
+        const ptrdiff_t Astepj = A.stepj();
+        const ptrdiff_t N = A.size();
+
+        for(ptrdiff_t j=N,len=1;j>0;--j,++len,A0j+=Astepj) {
+            // A.col(j,0,j+1) *= alpha;
+            T* Aij = A0j;
+            for(ptrdiff_t i=len;i>0;--i,++Aij) {
+#ifdef TMVFLDEBUG
+                TMVAssert(Aij >= A._first);
+                TMVAssert(Aij < A._last);
+#endif
+                *Aij *= alpha;
+            }
         }
     }
 
-    template <class T1, int C1, class T2>
-    void InstAliasMultXM(
-        const T2 x, const ConstUpperTriMatrixView<T1,C1>& m1,
-        UpperTriMatrixView<T2> m2)
-    { InlineAliasMultXM<false>(Scaling<0,T2>(x),m1,m2); }
-    template <class T1, int C1, class T2>
-    void InstAliasAddMultXM(
-        const T2 x, const ConstUpperTriMatrixView<T1,C1>& m1,
-        UpperTriMatrixView<T2> m2)
-    { InlineAliasMultXM<true>(Scaling<0,T2>(x),m1,m2); }
+    template <class T> 
+    void MultXM(const T alpha, UpperTriMatrixView<T> A)
+    // A = alpha * A
+    {
+#ifdef XDEBUG
+        Matrix<T> A0 = A;
+        Matrix<T> A2 = alpha * A0;
+        //cout<<"MultXM: alpha = "<<alpha<<", A = "<<TMV_Text(A)<<" "<<A<<endl;
+#endif
 
+        if (A.size() > 0 && alpha != T(1)) {
+            TMVAssert(!A.isunit());
+            if (A.isconj()) {
+                MultXM(TMV_CONJ(alpha),A.conjugate());
+            } else if (alpha == T(0)) {
+                A.setZero();
+            } else if (A.isrm()) {
+                if (TMV_IMAG(alpha) == TMV_RealType(T)(0))
+                    RowMajorMultXM(TMV_REAL(alpha),A);
+                else
+                    RowMajorMultXM(alpha,A);
+            } else if (A.iscm()) {
+                if (TMV_IMAG(alpha) == TMV_RealType(T)(0))
+                    ColMajorMultXM(TMV_REAL(alpha),A);
+                else
+                    ColMajorMultXM(alpha,A);
+            } else {
+                const ptrdiff_t M = A.colsize();
+                const ptrdiff_t N = A.rowsize();
+                for(ptrdiff_t i=0;i<M;++i) 
+                    A.row(i,i,N) *= alpha;
+            }
+        }
+#ifdef XDEBUG
+        //cout<<"Done MultXM: A = "<<A<<endl;
+        if (!(Norm(Matrix<T>(A)-A2) <= 0.001*TMV_ABS(alpha)*Norm(A))) {
+            cerr<<"MultXM: alpha = "<<alpha<<endl;
+            cerr<<"A = "<<TMV_Text(A)<<"  "<<A0<<endl;
+            cerr<<"-> A = "<<A<<endl;
+            cerr<<"A2 = "<<A2<<endl;
+            abort();
+        }
+#endif
+    }
+
+    template <bool add, class T, class Ta, class Tb> 
+    void ElemMultMM(
+        const T alpha, const GenUpperTriMatrix<Ta>& A,
+        const GenUpperTriMatrix<Tb>& B, UpperTriMatrixView<T> C)
+    {
+        //std::cout<<"Start ElemMultMM:\n";
+        //std::cout<<"add = "<<add<<std::endl;
+        //std::cout<<"alpha = "<<alpha<<std::endl;
+        //std::cout<<"A = "<<TMV_Text(A)<<"  "<<A<<std::endl;
+        //std::cout<<"B = "<<TMV_Text(B)<<"  "<<B<<std::endl;
+        //std::cout<<"C = "<<TMV_Text(C)<<"  "<<C<<std::endl;
+        TMVAssert(A.size() == C.size());
+        TMVAssert(B.size() == C.size());
+        if (C.isunit()) {
+            TMVAssert(alpha == T(1));
+            TMVAssert(A.isunit());
+            TMVAssert(B.isunit());
+            TMVAssert(add == false);
+            if (C.size() > 1) 
+                ElemMultMM<add>(alpha,A.offDiag(),B.offDiag(),C.offDiag());
+        } else if (A.isunit()) {
+            if (B.isunit()) {
+                if (add) C.diag().addToAll(alpha);
+                else C.diag().setAllTo(alpha);
+            } else {
+                if (add) C.diag() += alpha * B.diag();
+                else C.diag() = alpha * B.diag();
+            }
+            if (C.size() > 1) 
+                ElemMultMM<add>(alpha,A.offDiag(),B.offDiag(),C.offDiag());
+        } else if (B.isunit()) {
+            if (add) C.diag() += alpha * A.diag();
+            else C.diag() = alpha * A.diag();
+            if (C.size() > 1) 
+                ElemMultMM<add>(alpha,A.offDiag(),B.offDiag(),C.offDiag());
+        } else {
+            const ptrdiff_t N = C.size();
+            if (C.isrm()) {
+                for(ptrdiff_t i=0;i<N;i++)
+                    ElemMultVV<add>(
+                        alpha,A.row(i,i,N),B.row(i,i,N),C.row(i,i,N));
+            } else {
+                for(ptrdiff_t j=0;j<N;j++)
+                    ElemMultVV<add>(
+                        alpha,A.col(j,0,j+1),B.col(j,0,j+1),C.col(j,0,j+1));
+            }
+        }
+        //std::cout<<"C => "<<TMV_Text(C)<<"  "<<C<<std::endl;
+    }
 
 #define InstFile "TMV_MultXU.inst"
 #include "TMV_Inst.h"
 #undef InstFile
 
 } // namespace tmv
-
 

@@ -42,8 +42,8 @@
 				AdditionalOptions="/bigobj"
 				Optimization="0"
 				InlineFunctionExpansion="0"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\Loser\My Documents\tmv0.62\include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;NOBLAS"
+				AdditionalIncludeDirectories="include"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -121,8 +121,8 @@
 				FavorSizeOrSpeed="0"
 				EnableFiberSafeOptimizations="true"
 				WholeProgramOptimization="false"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\Loser\My Documents\tmv0.62\include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;NOBLAS;XTEST"
+				AdditionalIncludeDirectories="include"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;XTEST=7;TEST_INT"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="1"
@@ -141,11 +141,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalOptions="/ltcg"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
+				LinkTimeCodeGeneration="0"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -192,7 +194,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\TMV_Test3.h"
+				RelativePath=".\test\TMV_Test_3.h"
 				>
 			</File>
 			<File
@@ -225,6 +227,14 @@
 			</File>
 			<File
 				RelativePath=".\test\TMV_TestSmallMatrixArith_A3b.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TMV_TestSmallMatrixArith_A3c.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TMV_TestSmallMatrixArith_A3d.cpp"
 				>
 			</File>
 			<File
@@ -276,6 +286,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\TMV_TestSmallMatrixArith_B3c.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TMV_TestSmallMatrixArith_B3d.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\test\TMV_TestSmallMatrixArith_B4a.cpp"
 				>
 			</File>
@@ -324,11 +342,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\TMV_TestSmallMatrixArith_B7.cpp"
+				RelativePath=".\test\TMV_TestSmallMatrixArith_B7a.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TMV_TestSmallMatrixArith_B7b.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\test\TMV_TestSmallMatrixB.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TMV_TestSmallMatrixDet.cpp"
 				>
 			</File>
 			<File

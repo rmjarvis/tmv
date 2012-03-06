@@ -1,0 +1,21 @@
+
+#define CT std::complex<T>
+
+#define DefInv(RT,T,T1) \
+  template void HermSV_Inverse(\
+      const GenMatrix<T1 >& U, const GenDiagMatrix<RT >& S, ptrdiff_t kmax,\
+      SymMatrixView<T > sinv);\
+  template void SymSV_Inverse(\
+      const GenMatrix<T1 >& U, const GenDiagMatrix<RT >& S,\
+      const GenMatrix<T1 >& V, ptrdiff_t kmax, SymMatrixView<T > sinv);\
+
+DefInv(T,T,T)
+#ifdef INST_COMPLEX
+DefInv(T,CT,T)
+DefInv(T,CT,CT)
+#endif
+
+#undef DefInv
+
+#undef CT
+

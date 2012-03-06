@@ -1,24 +1,33 @@
 
 #define CT std::complex<T>
 
-#define Def1(T1,C1,T2) \
-  template void InstMultXM(const T2 x, \
-      const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2); \
-  template void InstAddMultXM(const T2 x, \
-      const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2); \
-  template void InstAliasMultXM(const T2 x, \
-      const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2); \
-  template void InstAliasAddMultXM(const T2 x, \
-      const ConstMatrixView<T1,C1>& m1, MatrixView<T2> m2); \
-
-Def1(T,NonConj,T)
-#ifdef TMV_INST_COMPLEX
-#ifdef TMV_INST_MIX
-Def1(T,NonConj,CT)
-#endif
-Def1(CT,NonConj,CT)
-Def1(CT,Conj,CT)
+#define DefXM(T)\
+  template void MultXM(const T alpha, MatrixView<T > A);
+  
+DefXM(T)
+#ifdef INST_COMPLEX
+DefXM(CT)
 #endif
 
-#undef Def1
+#undef DefXM
+
+#define DefAddEl(T,T1,T2)\
+  template void ElemMultMM<false>(const T alpha, \
+      const GenMatrix<T1 >& A, const GenMatrix<T2 >& B, \
+      MatrixView<T > C);  \
+  template void ElemMultMM<true>(const T alpha, \
+      const GenMatrix<T1 >& A, const GenMatrix<T2 >& B, \
+      MatrixView<T > C);  \
+
+DefAddEl(T,T,T)
+#ifdef INST_COMPLEX
+DefAddEl(CT,T,T)
+DefAddEl(CT,T,CT)
+DefAddEl(CT,CT,T)
+DefAddEl(CT,CT,CT)
+#endif
+
+#undef DefAddEl
+
 #undef CT
+

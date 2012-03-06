@@ -1,41 +1,10 @@
-
 #include "TMV_Test.h"
 #include "TMV_Test_1.h"
 #include "TMV.h"
 
-template <class M0, class M1>
-inline void CopyBack(
-    const tmv::BaseMatrix_Tri<M0>& m0, tmv::BaseMatrix_Tri_Mutable<M1>& m1)
-{
-#ifdef XXD
-    if (showtests) {
-        std::cout<<"Special CopyBackM:\n";
-        std::cout<<"m0 = "<<tmv::TMV_Text(m0)<<std::endl;
-        std::cout<<"m1 = "<<tmv::TMV_Text(m1)<<std::endl;
-    }
-#endif
-    if (m1.isunit()) m1 = m0.viewAsUnitDiag();
-    else m1 = m0;
-}
-
-template <class M1, class M2, class M3>
-static inline bool CanElemMult(
-    const tmv::BaseMatrix_Tri<M1>& a, const tmv::BaseMatrix_Tri<M2>& b,
-    const tmv::BaseMatrix_Tri_Mutable<M3>& c)
-{
-#ifdef XXD
-    if (showtests) {
-        std::cout<<"Tri: CanElemMult:\n";
-        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
-        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
-        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
-    }
-#endif
-    return (a.size() == b.size()) && (a.size() == c.size()) &&
-        (!c.isunit() || (a.isunit() && b.isunit()));
-}
-
 #define NOADDEQ
+#define NOELEMMULT
+
 #include "TMV_TestMatrixArith.h"
 
 template <class T> 
@@ -65,7 +34,6 @@ void TestTriMatrixArith_A4b()
     tmv::Matrix<CT,tmv::ColMajor> ca2x = ca1x;
     ca2x -= a2x;
     ca2x *= CT(1,-2);
-    ca2x(0,0) = CT(7,12);
 
     tmv::UpperTriMatrixView<T> u1 = a1x.upperTri();
     tmv::UpperTriMatrixView<CT> cu1 = ca1x.upperTri();

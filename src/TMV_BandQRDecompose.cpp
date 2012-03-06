@@ -51,8 +51,7 @@ namespace tmv {
 
     template <class T> 
     void QR_Decompose(
-        const BandMatrixView<T>& QRx,
-        const VectorView<T>& Qbeta, T& det)
+        BandMatrixView<T> QRx, VectorView<T> Qbeta, T& det)
     {
         // Decompose A (input as QRx) into A = Q R 
         // where Q is unitary, and R is upper triangular
@@ -80,8 +79,8 @@ namespace tmv {
             for(ptrdiff_t j=0;j<N;++j,++Qbj) {
                 // Apply the Householder Reflection for this column
 #ifdef TMVFLDEBUG
-                TMVAssert(Qbj >= Qbeta.first);
-                TMVAssert(Qbj < Qbeta.last);
+                TMVAssert(Qbj >= Qbeta._first);
+                TMVAssert(Qbj < Qbeta._last);
 #endif
                 *Qbj = HouseholderReflect(QRx.subMatrix(j,endcol,j,endrow),det);
                 if (endcol < M) ++endcol;
@@ -117,7 +116,7 @@ namespace tmv {
     template <class T> 
     void QR_Decompose(
         const GenBandMatrix<T>& A,
-        const MatrixView<T>& Q, const BandMatrixView<T>& R)
+        MatrixView<T> Q, BandMatrixView<T> R)
     {
         // Decompose A = Q R 
         // where Q is unitary and R is upper banded
@@ -151,7 +150,7 @@ namespace tmv {
 
     template <class T> 
     void QR_Decompose(
-        const GenBandMatrix<T>& A, const BandMatrixView<T>& R)
+        const GenBandMatrix<T>& A, BandMatrixView<T> R)
     {
         // Decompose A = Q R 
         // where Q is unitary and R is upper banded
@@ -160,7 +159,8 @@ namespace tmv {
         TMVAssert(R.colsize() == A.rowsize());
         TMVAssert(R.rowsize() == A.rowsize());
         TMVAssert(R.nlo() >= 0);
-        TMVAssert(R.nhi() == R.rowsize()-1 || R.nhi() >= A.nlo() + A.nhi());
+        TMVAssert(R.nhi() == R.rowsize()-1 || 
+                  R.nhi() >= A.nlo() + A.nhi());
 
         Vector<T> beta(A.rowsize());
         T d(0);

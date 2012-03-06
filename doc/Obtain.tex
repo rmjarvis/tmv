@@ -1,6 +1,6 @@
 % !TEX root = TMV_Documentation.tex
 
-\section{Obtaining and Compiling the Library}
+\section{Obtaining and compiling the library}
 \index{Installation}
 \label{Install}
 
@@ -49,36 +49,31 @@ This will make a directory called \texttt{tmv\tmvversion} with the subdirectorie
 along with the files \tt{README}, \tt{INSTALL} and others
 in the top directory.
 
-\end{enumerate}
-
-At this point there are several different choices for how to compile the library.
-The preferred method is to use SCons.  To use this method, continue onto \S\ref{Install_SCons}.
-However, we also provide instructions for using standard make (\S\ref{Install_Make}),
-CMake (\S\ref{Install_CMake}), or Visual C++ (\S\ref{Install_Microsoft}).
-
-
-
-\subsection{Installing using SCons}
-\label{Install_SCons}
-\index{Installation!SCons}
-
-With the version 0.62 release of TMV, I introduced a new installation method using SCons.  
-For that 
-release it was considered an alternative method, since it was brand new.  However, by now, I
-have tried it on quite a few platforms and it seems to be working very well.  It usually finds
-the BLAS and LAPACK libraries on your system automatically, which is nicer than having 
-to specify them by hand.
-
-If you have trouble installing with SCons, you can try the 
-\texttt{Makefile} installation instead (\S\ref{Install_Make}).  And please let me know about 
-the problem you are having either at \mygroup\ or \myissues.
-
-\begin{enumerate}
-\item Download and unpack the tarball as described above (\S\ref{Install_Obtain}).
-
 \item Make sure you have SCons installed on your system.  
 It is available for free from \url{http://www.scons.org/}.  (It is a
-very quick installation if you have Python installed.)
+very quick installation if you already have Python installed.)
+
+\end{enumerate}
+
+\subsubsection{Using Fink}
+
+\begin{quote}
+Starting with TMV version 0.71, TMV is available on Fink for OSX systems.  So if you use a Mac and you have Fink (\url{http://www.finkproject.org/}) installed on your system already, you just need to type\\
+\texttt{fink install tmv0}
+
+This should install TMV in the \texttt{/sw} directory with a minimum of fuss.  (The 0 at the end 
+of the package name
+is anticipation of an eventual upgrade to version 1.0 whose library file will not be backwards
+compatible with this one.  That will then be fink package tmv1.)
+
+The only caveats here are that it will always install a shared library (\tt{libtmv.dylib}), and it will always use Apple's Frameworks BLAS library.  Also, it uses whatever C++ compiler is the default for your version of fink (usually a variety of g++, but they switched to clang++ with MacOS 10.7).  If these are not acceptable to you, then you will need to download TMV and install it yourself.
+\end{quote}
+
+\subsection{Installing the TMV library}
+\label{Install_Install}
+\index{Installation}
+
+\begin{enumerate}
 
 \item Type \\
 \texttt{scons [Optional flags -- see below]}
@@ -86,22 +81,10 @@ very quick installation if you have Python installed.)
 This will make the libraries \texttt{libtmv.a} and \texttt{libtmv\_symband.a}
 and put them into the directory \texttt{lib}. 
 
-As with \texttt{make}, you can add
-the flag \texttt{-j4} to use 4 (or whatever number of) compilers simultaneously.
-Also, the command \texttt{scons -h} will print information
-about the options specific to TMV.
-
-There are a number of command-line options that you might need (but try it with no flags
-first -- it can often find everything automatically).  
-The options are listed 
-with their default value.  You change them simply by specifying a different value
-on the command line.  For example:\\
+There are a number of command-line options that you might need (but try it with no flags first -- it can often find everything automatically).  
+You can get a list of these options from the command line with \texttt{scons -h}.  The options are listed with their default value.  You change them simply by specifying a different value on the command line.  For example:\\
 \texttt{scons CXX=icpc INST\_LONGDOUBLE=true}\\
-If you need to run SCons multiple times (for example to compile the test suite or install
-the libraries as described below), you only need to specify the new parameter values the first
-time you run the SCons.
-The program automatically saves your options and continues to use them until you
-change a value again.
+If you need to run SCons multiple times (for example, to compile the test suite or install the libraries as described below), you only need to specify the new parameter values the first time you run SCons.  The program automatically saves your options and continues to use them until you change a value again.
 \begin{itemize}
 \item \texttt{CXX=g++} specifies which C++ compiler to use.
 \item \texttt{FLAGS=''} specifies the basic flags to pass to the compiler.  The default behavior is to
@@ -110,8 +93,10 @@ It has defaults for \texttt{g++}, \texttt{icpc} and \texttt{pgCC}.  If you are u
 like the default, then you can specify this by hand.  
 Remember to put the flags in quotes,
 so the whitespace doesn't confuse the parser.  e.g. \texttt{scons FLAGS='-O3 -g'}
-\item \texttt{DEBUG=false} specifies whether to keep the debugging assert statements in the compiled library code.  
+\item \texttt{EXTRA\_FLAGS=''} specifies extra flags to pass to the compiler in addition to what TMV will use by default.  This is useful if you just want to add a specific flag but still want to keep the other flags that TMV uses automatically.
+\item \texttt{DEBUG=false} specifies whether to keep the debugging assert statements in the compiled library code.  \tt{DEBUG=true} turns on all the TMV debugging statements, even those that would normall require \tt{-DTMV\_EXTRA\_DEBUG}.
 \item \texttt{PREFIX=/usr/local} specifies where to install the library when running \texttt{scons install} (see below).
+\item \texttt{FINAL\_PREFIX=''} specifies a final installation directory if different from \texttt{PREFIX}.  This is used for installations (e.g. fink) that install everything in a temporary directory first and then copy everthing to a final location only if the installation was successful.
 \item \texttt{INST\_FLOAT=true} specifies whether to instantiate the \tt{<float>} templates.
 \item \texttt{INST\_DOUBLE=true} specifies whether to instantiate the \tt{<double>} templates.
 \item \texttt{INST\_LONGDOUBLE=false} specifies whether to instantiate the \tt{<long double>} templates.
@@ -119,7 +104,7 @@ so the whitespace doesn't confuse the parser.  e.g. \texttt{scons FLAGS='-O3 -g'
 \index{Installation!OpenMP}
 \index{OpenMP}
 \item \texttt{WITH\_OPENMP=true} specifies whether to use OpenMP to parallelize some parts of the code.
-\item \texttt{SHARED=false} specifies whether to make the library files shared as opposed to static libraries.  Making the libraries shared (e.g. \texttt{libtmv.so}, \texttt{libtmv.dylib}, etc. depending on your system) allows the compiled programs that use TMV to be quite a bit smaller typically.  However, since shared libraries often require a bit more care in terms of having your paths set up properly, the default is to create static libraries.
+\item \texttt{SHARED=true} specifies whether to make shared libraries as opposed to static libraries.  Making the libraries shared (e.g. \texttt{libtmv.so}, \texttt{libtmv.dylib}, etc. depending on your system) allows the compiled programs that use TMV to be quite a bit smaller typically, so we've made that the default.
 \item \texttt{TEST\_FLOAT=true} specifies whether to include the \tt{<float>} tests in the test suite.
 \item \texttt{TEST\_DOUBLE=true} specifies whether to include the \tt{<double>} tests in the test suite.
 \item \texttt{TEST\_LONGDOUBLE=false} specifies whether to include the \tt{<long double>} tests in the test suite.
@@ -127,15 +112,6 @@ so the whitespace doesn't confuse the parser.  e.g. \texttt{scons FLAGS='-O3 -g'
 \end{itemize}
 The next flags set up the paths that SCons will use to try to find your BLAS and LAPACK libraries.
 \begin{itemize}
-\item \texttt{IMPORT\_ENV=false} specifies whether to import the entire environment from the calling shell.
-The default
-is to start with a clean environment to be less susceptible to a particular user having an unusual set up.  But sometimes sysadmins set things up in non-standard ways and use
-the environment variables to make everything work.  If this is the case, then 
-\texttt{IMPORT\_ENV} should do the trick.  It imports the environment, but does not add any
-\texttt{-I} or \texttt{-L} flags when compiling.
-\item \texttt{EXTRA\_PATH=''} specifies directories in which to search for executables (notably the compiler, although you can also just give the full path in the \texttt{CXX} parameter)
-in addition to the standard locations such as \texttt{/usr/bin} and \texttt{/usr/local/bin}.
-If you are giving multiple directories, they should be separated by colons.
 \item \texttt{EXTRA\_INCLUDE\_PATH=''} specifies directories in which to search for header files
 (such as the BLAS or LAPACK header files)
 in addition to the standard locations such as \texttt{/usr/include} and \texttt{/usr/local/include}.
@@ -148,6 +124,12 @@ These directories are specified as \texttt{-L} flags to the linker.
 If you are giving multiple directories, they should be separated by colons.
 \item \texttt{IMPORT\_PATHS=false} specifies whether to import extra path directories from the environment variables: 
 \texttt{PATH}, \texttt{C\_INCLUDE\_PATH}, \texttt{LD\_LIBRARY\_PATH} and \texttt{LIBRARY\_PATH}.
+\item \texttt{IMPORT\_ENV=true} specifies whether to import the entire environment from the calling shell.
+The default is for SCons to use the same environment as the shell from which it is called.  However, sometimes it can be useful to start with a clean environment and manually add paths (see below) for various things, in which case you would want to set this to \tt{false}.
+\item \texttt{EXTRA\_PATH=''} specifies directories in which to search for executables (notably the compiler, although you can also just give the full path in the \texttt{CXX} parameter)
+in addition to the standard locations such as \texttt{/usr/bin} and \texttt{/usr/local/bin}.
+If you are giving multiple directories, they should be separated by colons.
+\item \texttt{IMPORT\_PREFIX=true} specifies whether to use \texttt{PREFIX/include} and \texttt{PREFIX/lib} in your search paths.  This is the default (and is equivalent to the old behavior), but sometimes it is necessary or preferable to not include these directories.
 \end{itemize}
 The next options can be used to specify what BLAS and/or LAPACK libraries to use (if any),
 overriding the default of using whatever libraries SCons chooses from searching through your path
@@ -231,28 +213,30 @@ supports it.  So the default is to use the flag \texttt{-msse2}, but you can dis
 is treated as a bit set, with each non-zero bit turning on particular tests.  Type ``\tt{scons -h}'' for 
 more information.
 \item \texttt{MEM\_TEST=false} specifies whether to include extra memory tests in the library and test suite.
-\item \texttt{USE\_STEGR=true} specifies whether to use the LAPACK algorithm called
+\item \texttt{NAN\_TEST=false} specifies whether to stress test the code's ability to deal with \tt{nan}s in the allocated memory by initializing all memory allocations with all \tt{nan}s.
+\item \texttt{USE\_STEGR=false} specifies whether to use the LAPACK algorithm called
 \tt{dstegr} (or \tt{sstegr} for \tt{<float>}) for symmetric
 eigenvector calculation.  If it is false, the divide-and-conquer algorithm,
 named \tt{dstedc} (or \tt{sstedc}) will be used instead.
-\index{Singular Value Decomposition!LAPACK ?stegr}
+\index{Singular value decomposition!LAPACK ?stegr}
 \index{Eigenvalues!LAPACK ?stegr}
 \index{Warnings!LAPACK ?stegr}
 \index{LAPACK!dstegr/sstegr issues}
+
+I've had trouble with the LAPACK \tt{?stegr} algorithms on a number of systems.  Mostly, it doesn't always deal with \tt{nan}'s and \tt{inf}'s very well.  The documentation for it says:
+{\sc ?stegr works only on machines which follow IEEE-754 floating-point standard in their handling of infinities and NaNs. Normal execution of ?stegr may create NaNs and infinities and hence may abort due to a floating point exception in environments which do not conform to the IEEE-754 standard.}  I haven't had too many aborts (just one system I think).  More often, I get things like \tt{nan}s in the output and such, so I guess these systems must not conform to IEEE-754.  If you think your system is conforming, and you want to enable \tt{stegr}, go ahead and set \tt{USE\_STEGR} to \tt{true}.
 \item
-\texttt{USE\_GEQP3=true} specifies whether to use the LAPACK algorithm called
-\tt{dgeqp3} (or its variants) for the strict QRP decomposition.  If it is false,
-the native TMV code will be used instead.
-\index{QRP Decomposition!LAPACK ?geqp3}
+\texttt{USE\_GEQP3=false} specifies whether to use the LAPACK algorithm called
+\tt{dgeqp3} (or its variants) for the strict QRP decomposition.  I think the native TMV code is superior to the LAPACK code, so it is not enabled by default.  But if you want to use for the so-called Strict QRP decomposition (c.f. \S\ref{QRP}), you can set this to \tt{true}.
+\index{QRP decomposition!LAPACK ?geqp3}
 \index{LAPACK!Problems with QRP decomposition}
 \item \texttt{SMALL\_TESTS=false} specifies whether to make the smaller test suite programs: \texttt{tmvtest1a}, \texttt{tmvtest1b}, etc. 
 \item \texttt{WARN=false} specifies whether to have the compiler report warning (with -Wall or
 something similar).
 \item \texttt{CACHE\_LIB=true} specifies whether to cache the results of the library checks.  
-Scons is pretty good at only recompiling what needs to be recompiled based on what options or files you have changed.  However, it is not good at detecting when changed options might change the results of a BLAS or LAPACK library check.  So if you add new paths for it to search, or even more so, if you change the names or locations of libraries on your system, then you should set \tt{CACHE\_LIB=false} to force scons to redo the BLAS and LAPACK checks each time.
-\item \texttt{WITH\_UPS=false} specifies whether to install TMV information for ups into the \tt{PREFIX/ups} directory.
-\item \texttt{TEST\_DEPRECATED=false} specifies whether to use the old deprecated method
-names in the test suite.
+Scons is pretty good at only recompiling what needs to be recompiled based on what options or files you have changed.  However, it is not good at detecting when changed options might change the results of a BLAS or LAPACK library check.  So if you add new paths for it to search, or even moreso, if you change the names or locations of libraries on your system, then you should set \tt{CACHE\_LIB=false} to force SCons to redo the BLAS and LAPACK checks each time.
+\item \texttt{WITH\_UPS=false} specifies whether to install TMV information for \tt{ups} into the \tt{PREFIX/ups} directory.
+\item \texttt{N\_BUILD\_THREADS=0} specifies how many threads SCons should use when building the code.  This is equivalent to using \tt{scons -jN}, but this option gets saved, so you don't need to type it each time when doing multiple builds.  The default value of 0 indicates that SCons should try to automatically determine the number of cpus and use that.
 \end{itemize}
 
 When SCons starts up, it will look through the standard paths, along with any extra paths you have
@@ -330,17 +314,17 @@ Or if you are using Band, Sym or SymBand matrices, use:
 These flags (except for the optional -ltmv_symband) have been
 saved in the file:
 
-/usr/local/share/tmv-link
+/usr/local/share/tmv/tmv-link
 
 so you can automatically use the correct flags in a makefile
 (for example) by using lines such as:
 
-TMVLINK := $(shell cat /usr/local/share/tmv-link)
+TMVLINK := $(shell cat /usr/local/share/tmv/tmv-link)
 LIBS = $(TMVLINK) [... other libs ...]
 
 In a SConstruct file, you can do something like the following:
 
-env.MergeFlags(open('/usr/local/share/tmv-link').read())
+env.MergeFlags(open('/usr/local/share/tmv/tmv-link').read())
 
 
 scons: done building targets.
@@ -352,411 +336,17 @@ computer so that you can automatically get the linkage correct according to what
 you decide to use when installing TMV.  This is especially useful on systems where a
 system administrator installs the library, which is then used by many users.  
 
-You can have your makefiles or SConstruct files read this file as described above.
-The \tt{examples} directory has a makefile that uses the above lines
+You can have your \tt{makefile}s or \tt{SConstruct} files read this file as described above.
+The \tt{examples} directory has a \tt{makefile} that uses the above lines
 (using the local \tt{share} directory rather than the installed location)
 that you can look at as a example.
 
 \end{enumerate}
 
-\subsection{Installing using make}
-\label{Install_Make}
-This is a more standard installation method if you don't want to bother with SCons, or if you are just
-more familiar with the make program and don't want to deal with SCons.  It requires a bit more
-user input in terms of directly specifying the BLAS and/or LAPACK libraries, but because of that
-it is also a bit easier to exactly customize the installation if you want to do something non-standard.
-
-\begin{enumerate}
-\item Download and unpack the tarball as described above (\S\ref{Install_Obtain}).
-
-\item
-Edit the Makefile:
-\index{LAPACK!Setup makefile}
-\index{BLAS!Setup makefile}
-\index{Installation!Setup makefile}
-
-The start of the Makefile lists 5 things to specify: the compiler,
-the include directories, the other flags to send to the compiler, 
-any necessary BLAS/LAPACK linkage flags, and the installation directory.
-The default setup is:
-\begin{verbatim}
-CC= g++
-INCLUDE= -Iinclude
-CFLAGS= $(INCLUDE) -O -DNDEBUG
-TESTCFLAGS= $(INCLUDE)
-BLASLIBS=
-PREFIX=/usr/local
-\end{verbatim}
-but you will probably want to change this\footnote{
-The original version of the \texttt{Makefile}
-is copied in the file \texttt{Makefile.original} in case your copy gets messed up, and you want to 
-go back to the original.}.
-
-This default setup will compile using g++ without any BLAS or LAPACK library and 
-with debugging turned off. 
-This setup should work on any system with gcc, although it probably
-won't be as fast as using an optimized BLAS library and/or a LAPACK library.
-
-You should edit these so that:
-\begin{itemize}
-\item \texttt{CC} specifies the C++ compiler to use.
-\item \texttt{INCLUDE} specifies the directories for any BLAS and LAPACK header
-files you want to include. (You should leave \tt{-Iinclude} there as well.)
-\item \texttt{CFLAGS} contains any compiler flags you want.
-(See below for TMV-specific flags to consider.)
-\item \texttt{TESTCFLAGS} contains any compiler flags you want for the test suite compilation.
-\item \texttt{BLASLIBS} specifies the libraries required for linking your BLAS and LAPACK libraries.
-\item \texttt{PREFIX} specifies the directory for \texttt{make install} to copy the files to.
-\end{itemize}
-
-After these lines, there are several commented-out examples for different systems 
-using various BLAS
-and LAPACK versions, showcasing some of the compiler options described below,
-and giving examples of what you need for several common (or at least representative) systems.
-If you have a system similar to one of these, then it should be a good 
-starting point for you to figure out what you want to use.
-
-See the next section below for a complete list of compiler flags that control how the TMV library is built.
-
-\item
-(Advanced usage) Edit the Inst and Blas files if necessary.
-
-By default, the library will include instantiations of all classes and 
-functions
-that use either \texttt{double} or \texttt{float} (including complex versions of each).  
-There are a few flags, such as 
-\texttt{-DNO\_INST\_FLOAT} and \texttt{-DINST\_LONGDOUBLE},
-that change this as described below.  
-But if you want to compile routines for some other class, such as a user-defined
-\texttt{MyQuadPrecisionType} class, then you will need to modify the file 
-\texttt{src/TMV\_Inst.h}.
-You simply need to add the lines:
-\begin{tmvcode}
-#define T MyQuadPrecisionType
-#include InstFile
-#undef T
-\end{tmvcode}
-\index{User-defined types}
-to the end of the file before compiling.  (Obviously, you should
-replace \tt{MyQuadPrecisionType} with whatever
-type you want to be instantiated in the library.)
-
-Also, the file \texttt{src/TMV\_Blas.h}
-sets up all the BLAS and LAPACK calling structures,
-as well as the necessary \texttt{\#include} statements.  
-So if the BLAS or LAPACK options aren't working 
-for your system, you may need to edit these files as well.
-The comments at the beginning of 
-\texttt{TMV\_Blas.h} gives instructions on how to set up the file for 
-other installations.
-\index{LAPACK!Setup TMV\_Blas.h file}
-\index{BLAS!Setup TMV\_Blas.h file}
-
-\item
-Type: \\
-\texttt{make}
-
-This will make the TMV libraries, \texttt{libtmv.a} and \texttt{libtmv\_symband.a},
-which will be located in the directory \texttt{lib}.
-
-Then type:\\
-\texttt{make install}\\
-(or possibly \tt{sudo make install} if you are installing into \tt{/usr/local} or somewhere similar).
-This will copy the header files to \texttt{PREFIX/include} and the library files to
-\texttt{PREFIX/lib}.  
-
-The default \texttt{PREFIX} is \texttt{/usr/local}, but this can be changed
-to some other installation directory as described above.
-
-\item
-(Optional) Type:\\
-\texttt{make test}
-\index{Installation!Test suite}
-
-This will make three executables called \texttt{tmvtest1}, 
-\texttt{tmvtest2} and \texttt{tmvtest3} in the \texttt{bin} directory.
-
-If you want to make the smaller test executables instead, you can type:\\
-\texttt{make smalltest}\\
-to make the smaller executables: \texttt{tmvtest1a}, \texttt{tmvtest1b}, \texttt{tmvtest1c}, \texttt{tmvtest1d}, \texttt{tmvtest2a}, \texttt{tmvtest2b}, \texttt{tmvtest2c}, \texttt{tmvtest3a}, \texttt{tmvtest3b}, \texttt{tmvtest3c}, 
-\texttt{tmvtest3d} and \texttt{tmvtest3e}.
-
-They should each compile successfully, and when you run them, they
-should output a bunch of lines that end with \texttt{...passed all tests}
-(or similar).  
-
-If one of them ends in a line that starts with \texttt{Error}, 
-then please post a bug report at \myissues\ about the problem including what compiler
-you are using, some details about your system, and what (if any) BLAS and LAPACK
-libraries you are linking to.
-
-\item
-(Optional) Type:\\
-\texttt{make examples} 
-
-This will make five executables called \texttt{vector}, \texttt{matrix}, \texttt{division},
-\texttt{bandmatrix}, and \texttt{symmatrix}.
-These programs, along with their corresponding source code in the \texttt{examples}
-directory, give concrete examples of some of the common things you might want
-to do with the TMV library.  They don't really try to be comprehensive,
-but they do give a pretty good overview of the main features,
-so looking at them may be a useful way to get started programming with TMV.
-
-Also, they are a lot quicker to compile than the test suite, so they can provide a 
-quick way to make sure that you have specified the correct linking flags for any
-BLAS or LAPACK libraries that you might need (according to the \tt{-D} flags
-you specified for building the TMV library.
-
-\end{enumerate}
-
-\subsection{Compiler flags}
-\label{Install_Flags}
-\index{Installation!Compiler flags}
-
-Here are some compiler define flags to consider using:
-\begin{itemize}
-\item
-\texttt{-DNDEBUG} or \texttt{-DTMVNDEBUG}
-will turn off debugging.  My recommendation is to set this flag when compiling the library,
-but leave it off in your own code, especially during debugging.  This will do most of the 
-relevant sanity checks on calls to TMV functions, but the back end code will be as fast as possible.
-
-Note: The second option allows you to turn off debugging in just the calls to TMV functions
-without turning it off for your own code.  So this can be useful if you 
-find that TMV debugging statements are in time critical parts of the code
-and you want to remove them without turning off other assert statements 
-in your code.
-\end{itemize}
-The rest of the flags are only relevant when compiling the TMV library, so you won't 
-need any of them when compiling your own code that uses TMV routines.  And if you 
-install with SCons, it will determine which flags to set according to the somewhat simpler 
-list of SCons options.
-\begin{itemize}
-\item
-\texttt{-DNO\_INST\_FLOAT} will not instantiate any \tt{<float>} classes or routines.
-\item
-\texttt{-DNO\_INST\_DOUBLE} will not instantiate any \tt{<double>} classes or routines.
-\item
-\texttt{-DNO\_INST\_COMPLEX} will not instantiate any complex classes or routines.
-\item
-\texttt{-DINST\_LONGDOUBLE} will instantiate \tt{<long double>} classes and routines.
-\item
-\texttt{-DINST\_INT} will instantiate \tt{<int>} classes and routines.
-\end{itemize}
-The next flags specify what BLAS and/or LAPACK libraries to use (if any):
-\index{LAPACK!Compiler flags}
-\index{BLAS!Compiler flags}
-\begin{itemize}
-\item
-\texttt{-DNOBLAS} will not call any external BLAS or LAPACK routines
-\item
-\texttt{-DNOLAP} will not call any external LAPACK routines
-\item
-\texttt{-DATLAS} will set up the BLAS calls as defined by ATLAS.  And (if -DNOLAP
-is not specified), it will also call the several LAPACK routines
-provided by ATLAS.
-\index{BLAS!ATLAS}
-\item
-\texttt{-DCBLAS} will set up the BLAS calls using the notation provided by the 
-CBLAS interface to BLAS.  Many systems have a library like this installed as 
-\index{BLAS!CBLAS}
-\texttt{/usr/local/lib/libcblas.a}, or some similar location,
-so it is worth looking to see if you have this before
-trying to install something new.
-\item
-\texttt{-DFBLAS} will set up the BLAS calls using a library that was designed to be called
-from Fortran programs rather than C.  
-Most BLAS installations also install the C interface, but if your
-BLAS does not have this (e.g. older versions of GotoBLAS), then this flag should work.  
-Since there is often no
-header file for a Fortran BLAS library, we include the file \texttt{fblas.h} in the TMV 
-\index{BLAS!Fortran BLAS}
-\texttt{include} directory that should work.
-\item
-\texttt{-DCLAPACK} will set up the LAPACK calls for the CLAPACK distribution.  
-Defining both ATLAS and CLAPACK will use
-the CLAPACK version for all LAPACK routines, including the ones also provided by 
-ATLAS.  That is, ATLAS will only be used for its BLAS routines.  If you want
-the ATLAS versions of its few LAPACK routines instead, the ATLAS 
-installation instructions describe a way to get them into the CLAPACK library.
-Also, you should make sure the \texttt{-I} directories lists the directory with the CLAPACK
-version of clapack.h before the ATLAS version.
-\index{LAPACK!CLAPACK}
-\index{BLAS!ATLAS}
-\item
-\texttt{-DFLAPACK} will set up the LAPACK calls for a distribution that
-was designed to be called from Fortran programs rather than C.  Since such distributions
-do not provide a header file, we provide \texttt{flapack.h} in the TMV \texttt{include} directory.
-\index{LAPACK!Fortran LAPACK}
-\item
-\texttt{-DMKL} will call all the external BLAS and LAPACK routines as defined by the
-Intel Math Kernel Library.  You should specify the directory with \texttt{mkl.h} with a 
-\index{BLAS!MKL}
-\index{LAPACK!MKL}
-\texttt{-I} flag if it is not installed in your include path.
-\item
-\texttt{-DACML} will call all the external BLAS and LAPACK routines as defined by the 
-AMD Core Math Library.  You should specify the directory with \texttt{acml.h} with a 
-\index{BLAS!ACML}
-\index{LAPACK!ACML}
-\texttt{-I} flag if it is not installed in your include path.
-\end{itemize}
-The next set of compiler defines are not usually necessary.  But
-if you have problems, these might be useful:
-\begin{itemize}
-\item
-\texttt{-DXTEST=[num]} will do extra testing in the test suite, as well as add a few $O(N)$
-time assert statements.  (Most of the assert statements that are normally run only take
-$O(1)$ time.)  I always do tests with \tt{XTEST=127} to turn on all of the extra tests
-before releasing a version, but the
-executable gets quite large, as do many of the \texttt{TMV\_Test*.o} files.  Plus it takes
-a lot longer to compile.  So the default is to not use it.  
-
-\item
-\texttt{-DMEMTEST} will do extra testing of the memory usage to look for memory leaks
-and other memory errors.  Again, there is probably no need for you to use this
-flag.  But if you think there is a memory leak in TMV, this could help you find it, 
-in which case please let me know.
-
-\item
-\texttt{-DNOSTEGR} specifies that the LAPACK algorithm called
-\tt{dstegr} (or \tt{sstegr} for \tt{<float>}) should not be used for symmetric
-eigenvector calculation.  In this case, the divide-and-conquer algorithm,
-named \tt{dstedc} (or \tt{sstedc}) will be used instead.
-\index{Singular Value Decomposition!LAPACK ?stegr}
-\index{Eigenvalues!LAPACK ?stegr}
-\index{Warnings!LAPACK ?stegr}
-\index{LAPACK!dstegr/sstegr issues}
-
-The LAPACK \tt{stegr} algorithm can fail in various ways, some of which are 
-documented, and some of which are not.  I think TMV now detects all the 
-ways that it can fail and calls
-the slower, but more robust, \tt{stedc} routine in such cases.
-If you want to avoid this behavior and always use the \tt{stedc} algorithm,
-you can compile with this flag.
-
-Also, with some older LAPACK distributions (e.g. the MKL distribution that comes with icpc 9.1),
-I've had even more severe problems
-with \tt{stegr}, and had to disable it with this flag just to get the code to run correctly.
-I am not sure how pervasive such problems are.
-\item
-\texttt{-DNOGEQP3} specifies that the LAPACK algorithm called
-\tt{dgeqp3} (or its variants) should not be used for the strict QRP decomposition.
-In this case, the native TMV code will be used instead.
-\index{QRP Decomposition!LAPACK ?geqp3}
-\index{LAPACK!Problems with QRP decomposition}
-
-I have found that the LAPACK code for \tt{?geqp3} does not always
-produce an $R$ matrix
-with strictly decreasing elements along the diagonal.  So if this is important
-for you, then you should use this flag.
-\item
-\index{LAPACK!Workspace issues}
-\texttt{-DNOWORKQUERY} specifies that your LAPACK library does not support
-work size queries.  There are a few LAPACK routines that require workspace whose
-optimal size depends on details of the L1 cache size of your machine.  Normally,
-you can pass the routine a work size of -1 to indicate that you are doing a workspace
-query, in which case the routine is supposed to return the optimal value to use.  This is the normal
-mode of operation for TMV.  
-
-However, some older LAPACK distributions do not support
-this process.  The example I found was the MKL with icpc version 9.0.
-So if you get errors similar to \\
-\texttt{TMV Error: info < 0 returned by LAPACK function dormqr}\\
-this could be the problem.  Using this flag will compile without the workspace queries, instead just
-using a good guess for the optimal size.
-\index{BLAS!MKL}
-
-\item
-\texttt{-DNOSTL} uses some workarounds for segments of code that use the STL
-library, but which didn't work for one of my compilers.  I'm pretty sure it is
-because the compiler wasn't installed correctly, so I don't think you
-should really ever need to use this flag.  
-But in any case, it 
-will use a median-of-three quicksort algorithm for sorting
-rather than the standard library's sort.  And it manually reads strings 
-using character reads, rather than using the \tt{>>} operator.  
-
-\item
-\texttt{-DXDEBUG} will do different extra (much slower) debugging.  This one checks for
-incorrect results from the various algorithms by doing things the simple slow way
-and comparing the results to the fast blocked or recursive or in-place version
-to make sure the answer isn't (significantly) different.  
-I use this one a lot when debugging
-new algorithms, usually on a file-by-file basis.  Again, you shouldn't need this for
-an official release version.  But if you do get wrong answers for something, and you 
-feel especially inclined to diagnose the problem for me, you could
-use this to try to find the problem.
-
-\item
-\texttt{-DTMV\_BLOCKSIZE=NN} will change the block size used by some routines.  
-The current value is 64, which is good for many computers.  
-The optimal value will depend on the size of your
-CPU's L1 cache.  So if you want to try to tune the algorithms, you can 
-modify this value to something more appropriate for your computer.
-However, you are probably better off just using an optimized BLAS and LAPACK
-library and let TMV call that instead.
-\end{itemize}
-
-\subsection{Installing using CMake}
-\label{Install_CMake}
-
-CMake is another automated build tool.  I am not very well versed in it, but a user of the 
-TMV library, Andy Molloy, sent me the \texttt{CMakeLists.txt} files that he used to compile TMV,
-so I am distributing them for anyone else who wants
-to use them.  It is an easy way to build a basic TMV library, but I am not sure how hard it is
-to get it working with BLAS or LAPACK libraries\footnote{
-I was about to start learning more about it when a colleague, Erin Sheldon, introduced me to
-SCons, which I like a lot, so I haven't been motivated to go back to CMake and really flesh
-it out like I did with the SCons installation script.}.
-The basic usage is as follows:
-
-\begin{enumerate}
-\item Download and unpack the tarball as described above (\S\ref{Install_Obtain}).
-
-\item
-Download CMake from \url{http://www.cmake.org/} if you do not already have it.
-
-\item
-In the TMV directory, type\\
-\texttt{cmake -i .} $\qquad$ (for interactive text-based configuration) \\
-or\\
-\texttt{ccmake .} $\qquad \quad \,$ (for menu-based configuration) \\
-for Unix, or run \texttt{CMakeSetup.exe} in Windows.
-
-Answer the configuration questions and/or set the options listed.
-
-\item
-Type:\\
-\texttt{make}\\
-to make the libraries.
-
-Then type:\\
-\texttt{make install}\\
-to copy the libraries into /usr/local/lib and all the header files into
-/usr/local/include (or the lib and include subdirectories of wherever
-you set as your install directory when configuring).
-
-\item
-(Optional) Type:\\
-\texttt{make test}\\
-to make the test suite executables.
-
-\item
-(Optional) Type:\\
-\texttt{make examples}\\
-to make the programs in the \tt{examples} directory.
-
-\end{enumerate}
-
-I haven't incorporated most of the options that I added to the SCons installation above.
-But I think all of that is possible with CMake, so if someone who is an expert in CMake wants
-to do this and send me the CMake files for it, I'll include them in future releases.
-
 \subsection{Installing using Microsoft Visual C++}
 \label{Install_Microsoft}
 
-Using TMV with Microsoft Visual C++ is a bit different from the other compilers,
+Using TMV with Microsoft Visual C++ is a bit different from other compilers,
 since it has a Windows framework for building programs, rather than a command 
 line\footnote{
 There is a way to compile on the command line, but I suspect that will not be the 
@@ -778,7 +368,7 @@ called \texttt{tmv\tmvversion} which has all of the source code and other files 
 Start Microsoft Visual C++.  
 
 I have Visual C++ 2008 Express Edition, so all instructions below
-about menus and such refer that that edition.  I would assume that other editions have their 
+about menus and such refer that that edition.  Other editions probably have their 
 menus arranged similarly, but there may be some differences.
 
 \item
@@ -858,8 +448,10 @@ Now you should be all set to use the TMV library in your program.
 
 \subsection{Compiling your own program}
 
-Each \texttt{.cpp} file that uses TMV will need to have \\
-\tt{\#include "TMV.h"}\\
+Each \texttt{.cpp} file that uses TMV will need to have 
+\begin{tmvcode}
+#include "TMV.h"
+\end{tmvcode}
 at the top.
 \index{TMV.h}
 
@@ -871,22 +463,51 @@ will need to include their particular header files as well:
 #include "TMV_SymBand.h"
 \end{tmvcode}
 \index{TMV\_Band.h}
-\index{TMV\_Small.h}
 \index{TMV\_Sym.h}
 \index{TMV\_SymBand.h}
 
-If you did not install TMV into a standard place like \tt{/usr/local} (specified
-by \tt{PREFIX} in the scons and make installations), then you will also
-need to tell your compiler where you installed the header files with\\
-\tt{-IPREFIX/include}\\
+When compiling your object files, there are a couple of compiler flags that you might want to use:
+\begin{itemize}
+\item
+\texttt{-DNDEBUG}\\
+\texttt{-DTMV\_NDEBUG}
+
+Either of these will turn off the normal debugging statements in the TMV header files.  All of the normal debugging statements in TMV take $O(1)$ time, so they are not too intrusive to leave turned on, and they can be very useful in catching errors in your code.  For example, they check that the sizes of two matrices being multiplied or added match up correctly, and that the indices given for submatrices and subvectors fit into the main matrix or vector.  
+
+The normal behavior that we think will be appropriate for most users is to leave these statements active during development, and then when you turn off your own \tt{assert} statements with \tt{-DNDEBUG}, that will turn off the TMV asserts as well.  However, if you want to turn off the TMV asserts without otherwise affecting your own debug lines, then \tt{-DTMV\_NDEBUG} will do that.
+
+\item
+\texttt{-DTMV\_EXTRA\_DEBUG}
+
+This will turn on some extra debugging statements that can sometimes be useful.  First, whenever you create a matrix that is nominally uninitialized (e.g. \tt{tmv::Matrix<T> m(4,3);}), this will instead initialize it with all 888's.  This can make it easier to find bugs, since uninitialized memory can often be 0's, which might hide that fact that you forgot to initialize some of the values to 0.  So your code might work for a while and then give wrong answers when something else about your code changes.
+
+Perhaps more important, when any matrix is destroyed, this will first set all the values to 999.  That makes it easier to notice if you accidentally use a view to that matrix after that point.  Again, without this step, your code might work correctly for a while, and then suddenly fail, so this can help you find such errors.
+
+Finally, there are a few $O(N)$ asserts that get turned on with this flag, such as checking that hermitian views of a complex \tt{Matrix} actually has real elements on the diagonal (as required for the view to be hermitian).  This takes $O(N)$ time, since it needs to check every element on the diagonal.  
+
+\end{itemize}
+
+Also, if you did not install TMV into a standard place like \tt{/usr/local} (specified
+by \tt{PREFIX} in the installation process), then you will also
+need to tell your compiler where you installed the header files with
+\begin{verbatim}
+-IPREFIX/include
+\end{verbatim}
+
 Then for the linking step, you need to link your program with the TMV
-library with\\
-\tt{-ltmv}\\
-or if TMV is not installed in your path then\\
-\tt{-LPREFIX/lib -ltmv}\\
+library with
+\begin{verbatim}
+-ltmv
+\end{verbatim}
+or if TMV is not installed in your path then
+\begin{verbatim}
+-LPREFIX/lib -ltmv
+\end{verbatim}
 If you are using band or symmetric/hermitian matrices, then you will
-need to link with the flags\\
-\tt{-ltmv\_symband -ltmv}.
+need to link with the flags
+\begin{verbatim}
+-ltmv_symband -ltmv
+\end{verbatim}
 
 And if you are using BLAS and/or LAPACK calls from the TMV code,
 then you will also need to
@@ -900,20 +521,20 @@ the same thing, or something slightly different, including possibly
 \index{LAPACK!Linking}
 \index{BLAS!Linking}
 
-As mentioned above, if you use the scons installation method, then 
+As mentioned above, 
 you can automatically use whatever BLAS libraries
 TMV found and compiled against by reading the file
-\tt{/usr/local/share/tmv-link} (or \tt{PREFIX/share/tmv-link}) and using that
+\tt{/usr/local/share/tmv/tmv-link} (or \tt{PREFIX/share/tmv/tmv-link}) and using that
 for your linking flags.  
-You can use this file in a makefile by writing 
+You can use this file in a \tt{makefile} by writing 
 something like the following:
 \begin{verbatim}
-TMVLINK := $(shell cat /usr/local/share/tmv-link)
+TMVLINK := $(shell cat /usr/local/share/tmv/tmv-link)
 LIBS = $(TMVLINK) [... other libs ...]
 \end{verbatim}
-Or if you are using SConstruct, you can do something like
+Or in a \tt{SConstruct} file, you can do something like
 \begin{verbatim}
-env.MergeFlags(open('/usr/local/share/tmv-link').read())
+env.MergeFlags(open('/usr/local/share/tmv/tmv-link').read())
 \end{verbatim}
 Remember though that if you are using band and/or symmetric/hermitian matrices, you
 also need to add the flag \tt{-ltmv\_symband} to \tt{LIBS} as well.

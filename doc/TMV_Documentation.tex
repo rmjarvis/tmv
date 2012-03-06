@@ -40,10 +40,10 @@
 \usepackage{times}
 %\renewcommand{\tt}[1]{{\texttt {#1}}}
 %\renewcommand{\tt}[1]{\rm #1}
-\newcommand{\prevtmvversion}{0.64}
-\newcommand{\tmvversion}{0.65}
+\newcommand{\prevtmvversion}{0.70}
+\newcommand{\tmvversion}{0.71}
 \newcommand{\tmvmajorversion}{0}
-\newcommand{\tmvminorversion}{65}
+\newcommand{\tmvminorversion}{71}
 \newcommand{\tttmvversion}{\texttt \tmvversion}
 \newcommand{\mygroupx}{tmv-discuss@googlegroups.com}
 \newcommand{\mygroup}{\href{mailto:\mygroupx}{\texttt \mygroupx}}
@@ -72,6 +72,7 @@ morecomment=[l][\color{blue}]{//},
 morecomment=[l][\color{red}]{//!},
 morekeywords={size_t},
 showstringspaces=false,
+morekeywords={ptrdiff_t, RAND_MAX},
 keywordstyle=\color{Green},
 %stringstyle=\color{Maroon},
 %identifierstyle=\color{},
@@ -87,13 +88,13 @@ keywordstyle=\color{Green},
 
 \renewcommand{\tt}[1]{{\lstinline {#1}}}
 \lstnewenvironment{tmvcode}{}{}
-\newcommand{\inputcode}[1]{\lstinputlisting[basicstyle=\small]{#1}}
+\newcommand{\inputcode}[1]{\lstinputlisting[basicstyle=\small,breaklines=true]{#1}}
 
 \begin{document}
 
 \title{Template Matrix/Vector Library for C++ \\ User Manual \\ Version \tmvversion}
 \author{Mike Jarvis}
-\date{March 1, 2011}
+\date{March 5, 2012}
 \maketitle
 
 \tableofcontents
@@ -135,7 +136,13 @@ keywordstyle=\color{Green},
 \input{Error}
 
 \newpage
-\input{Advanced}
+\input{Eigen}
+
+\newpage
+\input{Decompositions}
+
+\newpage
+\input{IOStyle}
 
 \newpage
 \input{Example}

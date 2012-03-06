@@ -1,0 +1,45 @@
+
+#define CT std::complex<T>
+
+#define DefMV(T,Ta,Tb)\
+template void AddMM(const T alpha, const GenSymMatrix<Ta >& A, \
+    const T beta, const GenMatrix<Tb >& B, MatrixView<T > C); \
+
+
+DefMV(T,T,T)
+#ifdef INST_COMPLEX
+DefMV(CT,T,T)
+DefMV(CT,T,CT)
+DefMV(CT,CT,T)
+DefMV(CT,CT,CT)
+#endif
+
+#undef DefMV
+
+#define DefAdd(T,Ta) \
+template void AddMM(const T alpha, const GenSymMatrix<Ta >& A, \
+    MatrixView<T > B); \
+
+DefAdd(T,T)
+#ifdef INST_COMPLEX
+DefAdd(CT,T)
+DefAdd(CT,CT)
+#endif
+
+#undef DefAdd
+
+#define DefAdd(T,Ta,Tb) \
+template void AddMM(const T alpha, const GenSymMatrix<Ta >& A, \
+    const T beta, const GenSymMatrix<Tb >& B, \
+    MatrixView<T > C); \
+
+DefAdd(T,T,T)
+#ifdef INST_COMPLEX
+DefAdd(CT,T,T)
+DefAdd(CT,T,CT)
+DefAdd(CT,CT,CT)
+#endif
+
+#undef DefAdd
+
+#undef CT

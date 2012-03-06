@@ -213,7 +213,7 @@ For the combinations of types for which there are existing BLAS
 routines, the code can call the optimized BLAS routines instead of its own 
 code.  For other combinations (or for user defined types like 
 \tt{MyQuadPrecisionType} or somesuch), 
-TMV has a native implementation that is uses instead, 
+TMV has a native implementation that it uses instead, 
 using blocking and recursive techniques to make the code fairly fast on modern CPUs.
 
 This feature can be turned off at compile time if desired 
@@ -241,13 +241,6 @@ slightly faster on modern machines with good compilers.
 So if you don't want to deal with getting LAPACK
 up and running, it won't generally be too bad, speedwise, 
 to leave the LAPACK calls turned off.
-
-The only real exception to this statement
-is the eigenvector calculation for a hermitian matrix.  I have not yet 
-implemented the new RRR
-(Relatively Robust Representation) algorithm by Dhillon.  So if your program is
-spending a significant amount of time calculating eigenvectors of large symmetric matrices,
-it may be worth having TMV call the LAPACK routines.
 
 Also, it is worth noting that many LAPACK libraries are not thread safe.
 So if your main program uses multiple threads, and you aren't sure whether
@@ -342,14 +335,14 @@ even if \tt{T} is complex.  In these cases, I will write \tt{RT} to indicate
 indicates ``the complex type associated with \tt{T}''.
 
 It is worth noting that \tt{Matrix<int>} is possible as well if you compile the library
-with the \tt{-DINST\_INT} flag. 
+with the SCons option \tt{INST\_INT=true}. 
 However, only simple 
 routines like multiplication and addition will give correct answers.  If you try to 
 divide by a \tt{Matrix<int>}, for example, the required calculations are impossible 
 for \tt{int}'s,
 so the result will not be correct.  But since the possibility of multiplication of 
 integer matrices seemed desirable, we do allow them to be used.  
-\emph{Caveat programor}.  If debugging is turned on with \tt{DEBUG=true}, 
+\emph{Caveat programor}.  If debugging is turned on (with \tt{DEBUG=true} in the scons installation), 
 then trying to do anything that requires
 \tt{sqrt} or \tt{epsilon} for \tt{int}s will result in a runtime error.  Specifically a 
 \tt{FailedAssert} exception will be thrown.
@@ -361,6 +354,61 @@ The algorithm to do this is a so-called integer-preserving algorithm from Bareis
 that only uses division when it is known that the result will not require a fractional part.
 I've extended his algorithm to \tt{complex<int>} as well, so those are also accurate.
 \index{Matrix!Determinant!integer types}
+
+\subsection{Getting the version of TMV}
+\index{Version of TMV}
+
+At times it can be useful to be able to access what version of TMV is installed on a 
+particular machine, either to log the information as part of the meta-data about a
+run of a program, or even to modify the code depending on which features of TMV
+are available.  To address this, we provide three ways to access this information.
+
+First, there is a function you can call from within your program:
+\begin{tmvcode}
+std::string TMV_Version();
+\end{tmvcode}
+\index{TMV\_Version}
+For this release, this function returns the string ``\tttmvversion''.  This is useful for inserting
+into a log file or anywhere else that you want to record the version somewhere.
+
+Second we also provide three C preprocessor definitions:
+\begin{tmvcode}
+TMV_MAJOR_VERSION
+TMV_MINOR_VERSION
+TMV_VERSION_AT_LEAST(major,minor)
+\end{tmvcode}
+\index{TMV\_MAJOR\_VERSION}
+\index{TMV\_MINOR\_VERSION}
+\index{TMV\_VERSION\_AT\_LEAST}
+\index{Conditional compilation}
+The first two are defined to be \tmvmajorversion\ and \tmvminorversion\ for this release.
+The third can be used with an \tt{#if} directive to change what code you want to compile
+according the the version of TMV that is installed.
+For example, in version 0.65 we added the \tt{m.addToAll(x)} function.  So you could
+write:
+\begin{tmvcode}
+#if TMV_VERSION_AT_LEAST(0,65)
+m.addToAll(1.0);
+#else
+for(int i=0;i<m.nrows();++i) 
+    for(int j=0;j<m.ncols();++j)
+        m(i,j) += 1.0;
+#endif
+\end{tmvcode}
+
+And finally, we also include a bash script called \tt{tmv-version} that will output
+the version number, so you can run this
+directly from the command line.  For this release, this script produces the output:\\ \\
+\texttt{\$ tmv-version} \\
+\tttmvversion \\
+\texttt{\$}\\ \\
+This can be useful as part of a larger script if you want to log the TMV version from that
+rather than from within a C++ program.  
+
+Hopefully these three methods will satisfy any potential manner in which you might want 
+to access the version of TMV that is on your system.  If there is something I missed, and 
+none of these work for you, please
+let me know, and I'll probably be happy to provide another mechanism in future releases.
 
 \subsection {Notations used in this document}
 
@@ -376,15 +424,16 @@ I tend to freely mix the syntax of how a function is used with how
 it is declared in order to try to provide all of the information you will need on one line.  
 For example, the constructor listed as:
 \begin{tmvcode}
-tmv::Vector<T,index> v(size_t n, const T* vv)
+tmv::Vector<T,A> v(int n, const T* vv)
 \end{tmvcode}
 is actually declared in the code as:
 \begin{tmvcode}
-tmv::Vector<T,index>::Vector(size_t n, const T* vv);
+template <class T, int A>
+tmv::Vector<T,A>::Vector(int n, const T* vv);
 \end{tmvcode}
 and when it is used in your source code, you would write something like:
 \begin{tmvcode}
-size_t n = 5;
+int n = 5;
 const double vv[n] = {1.2, 3.1, 9.1, 9.2, -3.5};
 tmv::Vector<double,tmv::CStyle> v(n,vv);
 \end{tmvcode}

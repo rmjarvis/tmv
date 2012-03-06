@@ -1,0 +1,16 @@
+
+#define CT std::complex<T>
+
+#define DefSymMult(T,T1)\
+template void HouseholderLRMult(const GenVector<T1 >& v, T1 beta, \
+    SymMatrixView<T > m); \
+
+DefSymMult(T,T)
+#ifdef INST_COMPLEX
+DefSymMult(CT,T)
+DefSymMult(CT,CT)
+#endif
+
+#undef SymMult
+
+#undef CT

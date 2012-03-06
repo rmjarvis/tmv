@@ -1,42 +1,36 @@
 #define START 0
 
-#include "TMV_Test.h"
-#include "TMV_Test_2.h"
 #include "TMV.h"
 #include "TMV_Band.h"
+#include "TMV_Test.h"
+#include "TMV_Test_2.h"
 #include "TMV_TestBandArith.h"
 
-template <class M1, class M2> 
-inline bool CanAddEq(
-    const tmv::BaseMatrix_Diag_Mutable<M1>& a,
-    const tmv::BaseMatrix_Band<M2>& b)
-{ 
-    return a.colsize() == b.colsize() && a.rowsize() == b.rowsize() &&
-        b.nhi() == 0 && b.nlo() == 0;
-}
+#define NOADDEQ
+#define NOELEMMULT
 
-template <class M1, class M2, class M3> 
-inline bool CanMult(
-    const tmv::BaseMatrix_Diag<M1>& a, const tmv::BaseMatrix_Band<M2>& b,
-    const tmv::BaseMatrix_Diag_Mutable<M3>& c)
+template <class T1, class T2, class T3> 
+inline bool CanMultMM(
+    const tmv::DiagMatrixView<T1>& a, const tmv::BandMatrixView<T2>& b,
+    const tmv::DiagMatrixView<T3>& c)
 { 
     return b.colsize() == a.size() && b.rowsize() == a.size() && 
         c.size() == a.size() && b.nlo() == 0 && b.nhi() == 0;
 }
 
-template <class M1, class M2, class M3> 
-inline bool CanMult(
-    const tmv::BaseMatrix_Band<M1>& a, const tmv::BaseMatrix_Diag<M2>& b,
-    const tmv::BaseMatrix_Diag_Mutable<M3>& c)
+template <class T1, class T2, class T3> 
+inline bool CanMultMM(
+    const tmv::BandMatrixView<T2>& a, const tmv::DiagMatrixView<T1>& b,
+    const tmv::DiagMatrixView<T3>& c)
 { 
     return a.colsize() == b.size() && a.rowsize() == b.size() &&
         c.size() == a.size() && a.nlo() == 0 && a.nhi() == 0;
 }
 
-template <class M1, class M2, class M3> 
-inline bool CanMult(
-    const tmv::BaseMatrix_Band<M1>& a, const tmv::BaseMatrix_Band<M2>& b,
-    const tmv::BaseMatrix_Diag_Mutable<M3>& c)
+template <class T1, class T2, class T3> 
+inline bool CanMultMM(
+    const tmv::BandMatrixView<T1>& a, const tmv::BandMatrixView<T2>& b,
+    const tmv::DiagMatrixView<T3>& c)
 { 
     return a.colsize() == c.size() && b.rowsize() == c.size() && 
         a.rowsize() == b.colsize() && 
