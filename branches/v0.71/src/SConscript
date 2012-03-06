@@ -107,14 +107,17 @@ if env['SHARED']:
         #lib_full_name = os.path.join(GetBuildPath('#lib'),'libtmv.%s.%s.dylib'%version)
         lib_short_name = os.path.join(GetBuildPath('#lib'),'libtmv.%s.dylib'%version[0])
         link_name = os.path.join(GetBuildPath('#lib'),'libtmv.dylib')
+        #print 'lib_final_name = ',lib_final_name
+        #print 'lib_short_name = ',lib_short_name
+        #print 'link_name = ',link_name
         env1.AppendUnique( SHLINKFLAGS=[
             '-dynamic',
             '-Wl,-install_name,%s'%lib_final_name,
             '-Wl,-compatibility_version,%s.%s'%compat_version,
             '-Wl,-current_version,%s.%s'%version ] )
-	env1.Replace(SHLIBSUFFIX = '.%s.dylib'%version[0])
+        env1.Replace(SHLIBSUFFIX = '.%s.dylib'%version[0])
 
-        sblib_final_name = os.path.join(lib_final_dir,'libtmv_symband.%s.%s.dylib'%version)
+        sblib_final_name = os.path.join(lib_final_dir,'libtmv_symband.%s.dylib'%version[0])
         #sblib_full_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.%s.%s.dylib'%version)
         sblib_short_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.%s.dylib'%version[0])
         sblink_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.dylib')
@@ -123,30 +126,30 @@ if env['SHARED']:
             '-Wl,-install_name,%s'%sblib_final_name,
             '-Wl,-compatibility_version,%s.%s'%compat_version,
             '-Wl,-current_version,%s.%s'%version ] )
-	env7.Replace(SHLIBSUFFIX = '.%s.dylib'%version[0])
+        env7.Replace(SHLIBSUFFIX = '.%s.dylib'%version[0])
 
     elif sys.platform == 'linux2':
         # If the BLAS/LAPACK libs are static, this fails on linux (at least where I tried it),
-	# On the other hand, the link step doesn't seem to require the other libraries
-	# as it does on OSX.  So I think it's safe to just clear out LIBS here.
-	env1.Replace(LIBS=[])
+        # On the other hand, the link step doesn't seem to require the other libraries
+        # as it does on OSX.  So I think it's safe to just clear out LIBS here.
+        env1.Replace(LIBS=[])
         lib_final_name = os.path.join(lib_final_dir,'libtmv.so.%s'%version[0])
         #lib_full_name = os.path.join(GetBuildPath('#lib'),'libtmv.so.%s.%s'%version)
         lib_short_name = os.path.join(GetBuildPath('#lib'),'libtmv.so.%s'%version[0])
         link_name = os.path.join(GetBuildPath('#lib'),'libtmv.so')
         env1.AppendUnique( SHLINKFLAGS=['-Wl,-soname,%s'%lib_final_name ])
-	env1.Replace(SHLIBSUFFIX = '.so.%s'%version[0])
+        env1.Replace(SHLIBSUFFIX = '.so.%s'%version[0])
 
         sblib_final_name = os.path.join(lib_final_dir,'libtmv_symband.so.%s'%version[0])
         #sblib_full_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.so.%s.%s'%version)
         sblib_short_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.so.%s'%version[0])
         sblink_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.so')
-        env7.AppendUnique( SHLINKFLAGS=['-Wl,-soname,%s'%sblib_final_name ])
-	env7.Replace(SHLIBSUFFIX = '.so.%s'%version[0])
+        env7.AppendUnique( SHLINKFLAGS=['-Wl,-soname,%s'%sblib_final_name ]) 
+        env7.Replace(SHLIBSUFFIX = '.so.%s'%version[0])
 
     elif sys.platform == 'win32':
         raise ValueError(
-	    "Sorry, making shared libraries on Windows is unsupported.  Use SHARED=false")
+            "Sorry, making shared libraries on Windows is unsupported.  Use SHARED=false")
 
     lib = env1.SharedLibrary(
             os.path.join('#lib','tmv'),
@@ -160,6 +163,9 @@ if env['SHARED']:
             obj_sblib + obj_noint_sblib + obj_omp_noint_sblib + obj_stegr_sblib)
 
     def SymLink(target, source, env):
+        #print 'SymLink: source = ',str(source[0])
+        #print 'target = ',str(target[0])
+        #print 'LibName = ',env['LibName']
         t = os.path.abspath(str(target[0]))
         if os.path.exists(t): os.remove(t) 
         os.symlink(env['LibName'], t)
@@ -241,17 +247,17 @@ if 'install' in COMMAND_LINE_TARGETS:
         #installed_sblib_short_name = os.path.join(lib_install_dir, os.path.basename(sblib_short_name))
 
         installed_link = env1.Command( installed_link_name , installed_lib , SymLink,
-	    LibName=lib_final_name)
+            LibName=lib_final_name)
         #installed_link2 = env1.Command( installed_lib_short_name , installed_lib , SymLink,
-	    #LibName=lib_final_name)
+            #LibName=lib_final_name)
         installed_sblink = env7.Command( installed_sblink_name , installed_sblib , SymLink, 
-	    LibName=sblib_final_name)
+            LibName=sblib_final_name)
         #installed_sblink2 = env7.Command( installed_sblib_short_name , installed_sblib , SymLink, 
-	    #LibName=sblib_final_name)
+            #LibName=sblib_final_name)
 
         env.Alias(target='install', 
-	    source=[installed_lib,installed_sblib,
-	            installed_link,installed_sblink ])
+            source=[installed_lib,installed_sblib,
+                    installed_link,installed_sblink ])
 
     else :
         env.Alias(target='install', 
