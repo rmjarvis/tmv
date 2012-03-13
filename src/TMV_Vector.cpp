@@ -528,10 +528,10 @@ namespace tmv {
         }
     }
     static double DoInstMaxAbsElement(
-        const ConstVectorView<double>& v, int* imax)
+        const ConstVectorView<double>& v, ptrdiff_t* imax)
     { return DoInstMaxAbs2Element(v,imax); }
     static double DoInstMaxAbs2Element(
-        const ConstVectorView<std::complex<double> >& v, int* imax)
+        const ConstVectorView<std::complex<double> >& v, ptrdiff_t* imax)
     {
         int n=v.size();
         if (n == 0) return double(0);
@@ -555,7 +555,7 @@ namespace tmv {
 #endif // DOUBLE
 #ifdef TMV_INST_FLOAT
     static float DoInstMaxAbs2Element(
-        const ConstVectorView<float>& v, int* imax)
+        const ConstVectorView<float>& v, ptrdiff_t* imax)
     {
         int n=v.size();
         if (n == 0) return float(0);
@@ -577,10 +577,10 @@ namespace tmv {
         }
     }
     static float DoInstMaxAbsElement(
-        const ConstVectorView<float>& v, int* imax)
+        const ConstVectorView<float>& v, ptrdiff_t* imax)
     { return DoInstMaxAbs2Element(v,imax); }
     static float DoInstMaxAbs2Element(
-        const ConstVectorView<std::complex<float> >& v, int* imax)
+        const ConstVectorView<std::complex<float> >& v, ptrdiff_t* imax)
     {
         int n=v.size();
         if (n == 0) return float(0);

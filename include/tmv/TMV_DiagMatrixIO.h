@@ -434,12 +434,12 @@ namespace tmv {
 #endif
         }
         ptrdiff_t s=m.size();
-        if (!reader.readSize(s)) {
+        if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"DiagMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw DiagMatrixReadError<T>(reader.getis());
+            throw DiagMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != m.size()) {
@@ -451,12 +451,12 @@ namespace tmv {
 #endif
         }
         s=m.size();
-        if (!reader.readSimpleSize(s)) {
+        if (!reader.readSimpleSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"DiagMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw DiagMatrixReadError<T>(reader.getis());
+            throw DiagMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != m.size()) {
@@ -485,22 +485,22 @@ namespace tmv {
 #endif
         }
         ptrdiff_t s=m.size();
-        if (!reader.readSize(s)) {
+        if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"DiagMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw DiagMatrixReadError<T>(reader.getis());
+            throw DiagMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != m.size()) m.resize(s);
         s=m.size();
-        if (!reader.readSimpleSize(s)) {
+        if (!reader.readSimpleSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"DiagMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw DiagMatrixReadError<T>(reader.getis());
+            throw DiagMatrixReadError<T>(reader.getis(),exp,got);
 #endif
         }
         if (s != m.size()) {

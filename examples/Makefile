@@ -1,13 +1,10 @@
 CC= g++
 INCLUDE= -I../include
-CFLAGS= $(INCLUDE) -O2 -DTMV_INST_MIX
-#TMVLINK := $(shell cat ../share/tmv-link)
-#LIBS = $(TMVLINK) 
-LIBS = -L../lib -ltmv -lpthread -fopenmp
-LIB = ../lib/libtmv.a
-#CFLAGS= $(INCLUDE) -DTMV_INLINE -DTMV_OPT=2
-#LIBS =
-#LIB =
+CFLAGS= $(INCLUDE) -O2 -DNDEBUG
+TMVLINK := $(shell cat ../share/tmv-link)
+SBTMVLINK = -ltmv_symband $(TMVLINK)
+LIBS = $(TMVLINK) 
+SBLIBS = $(SBTMVLINK) 
 
 #all: vector matrix division bandmatrix symmatrix
 all: vector matrix division 

@@ -1,6 +1,8 @@
 # vim: set filetype=python :
 
 import os
+import sys
+import glob
 
 Import('env')
 
@@ -75,22 +77,103 @@ if env['SHARED']:
     obj_omp_noint_lib = env4.SharedObject(lib_omp_noint_files)
     obj_geqp3_lib = env5.SharedObject(lib_geqp3_files)
 
-
-    lib = env1.SharedLibrary('#lib/tmv',
-                             obj_lib + obj_noint_lib +
-                             obj_omp_lib + obj_omp_noint_lib +
-                             obj_geqp3_lib)
-
     obj_sblib = env1.SharedObject(sblib_files)
     obj_noint_sblib = env2.SharedObject(sblib_noint_files)
     obj_omp_noint_sblib = env4.SharedObject(sblib_omp_noint_files)
     obj_stegr_sblib = env6.SharedObject(sblib_stegr_files)
 
     env7 = env1.Clone()
-    env7.Prepend(LIBS=['tmv'])
-    sblib = env7.SharedLibrary('#lib/tmv_symband',
-                               obj_sblib + obj_noint_sblib +
-                               obj_omp_noint_sblib + obj_stegr_sblib)
+
+    # Some stuff to get it to set the right library name and compatibility version:
+    version_text = os.popen(os.path.join('..','bin','tmv-version')).read()
+    #version = tuple(version_text.strip().split('.'))
+    version = 0,9
+    # Currently, I manually set the compatibility version when less than
+    # the current version.  Any way to automate this?  Probably not.
+    #compat_version = version 
+    compat_version = 0,9
+    if 'install' in COMMAND_LINE_TARGETS: 
+        lib_final_dir = os.path.join(env['FINAL_PREFIX'],'lib')
+    else:
+        lib_final_dir = os.path.join(GetBuildPath('#lib'))
+
+    if sys.platform == 'darwin':
+        lib_final_name = os.path.join(lib_final_dir,'libtmv.%s.dylib'%version[0])
+        #lib_full_name = os.path.join(GetBuildPath('#lib'),'libtmv.%s.%s.dylib'%version)
+        lib_short_name = os.path.join(GetBuildPath('#lib'),'libtmv.%s.dylib'%version[0])
+        link_name = os.path.join(GetBuildPath('#lib'),'libtmv.dylib')
+        #print 'lib_final_name = ',lib_final_name
+        #print 'lib_short_name = ',lib_short_name
+        #print 'link_name = ',link_name
+        env1.AppendUnique( SHLINKFLAGS=[
+            '-dynamic',
+            '-Wl,-install_name,%s'%lib_final_name,
+            '-Wl,-compatibility_version,%s.%s'%compat_version,
+            '-Wl,-current_version,%s.%s'%version ] )
+        env1.Replace(SHLIBSUFFIX = '.%s.dylib'%version[0])
+
+        sblib_final_name = os.path.join(lib_final_dir,'libtmv_symband.%s.dylib'%version[0])
+        #sblib_full_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.%s.%s.dylib'%version)
+        sblib_short_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.%s.dylib'%version[0])
+        sblink_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.dylib')
+        env7.AppendUnique( SHLINKFLAGS=[
+            '-dynamic',
+            '-Wl,-install_name,%s'%sblib_final_name,
+            '-Wl,-compatibility_version,%s.%s'%compat_version,
+            '-Wl,-current_version,%s.%s'%version ] )
+        env7.Replace(SHLIBSUFFIX = '.%s.dylib'%version[0])
+
+    elif sys.platform == 'linux2':
+        # If the BLAS/LAPACK libs are static, this fails on linux (at least where I tried it),
+        # On the other hand, the link step doesn't seem to require the other libraries
+        # as it does on OSX.  So I think it's safe to just clear out LIBS here.
+        env1.Replace(LIBS=[])
+        lib_final_name = os.path.join(lib_final_dir,'libtmv.so.%s'%version[0])
+        #lib_full_name = os.path.join(GetBuildPath('#lib'),'libtmv.so.%s.%s'%version)
+        lib_short_name = os.path.join(GetBuildPath('#lib'),'libtmv.so.%s'%version[0])
+        link_name = os.path.join(GetBuildPath('#lib'),'libtmv.so')
+        env1.AppendUnique( SHLINKFLAGS=['-Wl,-soname,%s'%lib_final_name ])
+        env1.Replace(SHLIBSUFFIX = '.so.%s'%version[0])
+
+        sblib_final_name = os.path.join(lib_final_dir,'libtmv_symband.so.%s'%version[0])
+        #sblib_full_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.so.%s.%s'%version)
+        sblib_short_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.so.%s'%version[0])
+        sblink_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.so')
+        env7.AppendUnique( SHLINKFLAGS=['-Wl,-soname,%s'%sblib_final_name ]) 
+        env7.Replace(SHLIBSUFFIX = '.so.%s'%version[0])
+
+    elif sys.platform == 'win32':
+        raise ValueError(
+            "Sorry, making shared libraries on Windows is unsupported.  Use SHARED=false")
+
+    lib = env1.SharedLibrary(
+            os.path.join('#lib','tmv'),
+            obj_lib + obj_noint_lib + obj_omp_lib + obj_omp_noint_lib + obj_geqp3_lib)
+
+    if sys.platform == 'darwin':
+        env7.Prepend(LIBS=lib)
+
+    sblib = env7.SharedLibrary(
+            os.path.join('#lib','tmv_symband'),
+            obj_sblib + obj_noint_sblib + obj_omp_noint_sblib + obj_stegr_sblib)
+
+    def SymLink(target, source, env):
+        #print 'SymLink: source = ',str(source[0])
+        #print 'target = ',str(target[0])
+        #print 'LibName = ',env['LibName']
+        t = os.path.abspath(str(target[0]))
+        if os.path.exists(t): os.remove(t) 
+        os.symlink(env['LibName'], t)
+
+    # This just makes a link in the #lib directory.  Need to redo this in the install directory.
+    link = env1.Command( link_name , lib , SymLink, LibName=lib_short_name)
+    #link2 = env1.Command( lib_full_name , lib , SymLink, LibName=lib_short_name)
+    sblink = env7.Command( sblink_name , sblib , SymLink, LibName=sblib_short_name)
+    #sblink2 = env7.Command( sblib_full_name , sblib , SymLink, LibName=sblib_short_name)
+    Default(link,sblink)
+
+    lib_targets = [lib,sblib]
+
 
 else:
     obj_lib = env1.StaticObject(lib_files)
@@ -104,14 +187,13 @@ else:
     obj_omp_noint_sblib = env4.StaticObject(sblib_omp_noint_files)
     obj_stegr_sblib = env6.StaticObject(sblib_stegr_files)
 
-
-    lib = env1.StaticLibrary('#lib/tmv',
-                             obj_lib + obj_noint_lib +
-                             obj_omp_lib + obj_omp_noint_lib +
-                             obj_geqp3_lib)
-    sblib = env1.StaticLibrary('#lib/tmv_symband',
-                               obj_sblib + obj_noint_sblib +
-                               obj_omp_noint_sblib + obj_stegr_sblib)
+    lib = env1.StaticLibrary(
+            os.path.join('#lib','tmv'),
+            obj_lib + obj_noint_lib + obj_omp_lib + obj_omp_noint_lib + obj_geqp3_lib)
+    sblib = env1.StaticLibrary(
+            os.path.join('#lib','tmv_symband'),
+            obj_sblib + obj_noint_sblib + obj_omp_noint_sblib + obj_stegr_sblib)
+    lib_targets = [lib,sblib]
 
 all_obj_files = \
     obj_lib + obj_noint_lib + obj_omp_lib + \
@@ -119,33 +201,24 @@ all_obj_files = \
     obj_sblib + obj_noint_sblib + \
     obj_omp_noint_sblib + obj_stegr_sblib
 
-# Note: this next bit depends on the object files being in the src directory.
-# If this ever changes, I'll need to do something different to get the name
-# of the corresponding inst file.
 for objfile in all_obj_files:
-    inst = os.path.splitext(str(objfile))[0] + '.inst'
+    inst = os.path.join('..','src',
+            os.path.splitext(os.path.basename(str(objfile)))[0] + '.inst')
     Depends(objfile,inst)
 
 env.Alias(target='lib', source=lib)
 env.Alias(target='sblib', source=sblib)
 
-Default(['lib','sblib'])
-
 #
 # install/uninstall
 #
 
-# Relative install paths from prefix
-lib_dir = 'lib'
-header_dir = 'include'
-header_dir_sub = os.path.join(header_dir,'tmv')
+Default(lib_targets)
 
 # Add the prefix to the installation directories
-lib_install_dir = os.path.join(env['INSTALL_PREFIX'], lib_dir)
-header_install_dir = os.path.join(env['INSTALL_PREFIX'], header_dir)
-header_install_dir_sub = os.path.join(env['INSTALL_PREFIX'], header_dir_sub)
-
-lib_targets = [lib,sblib]
+lib_install_dir = os.path.join(env['INSTALL_PREFIX'],'lib')
+header_install_dir = os.path.join(env['INSTALL_PREFIX'],'include')
+header_install_dir_sub = os.path.join(env['INSTALL_PREFIX'],'include','tmv')
 
 lib_file = '#' + lib[0].path
 sblib_file = '#' + sblib[0].path
@@ -157,23 +230,45 @@ if 'install' in COMMAND_LINE_TARGETS:
 
     if env['SHARED']:
         installed_lib = env1.Install(dir=lib_install_dir, source=lib)
-        env.Depends(sblib,installed_lib)
-        installed_sblib = env1.Install(dir=lib_install_dir, source=sblib)
-        env.Alias(target='install', source=[installed_lib,installed_sblib])
+        if sys.platform == 'darwin':
+            env.Depends(sblib,installed_lib)
+        installed_sblib = env7.Install(dir=lib_install_dir, source=sblib)
+
+        installed_link_name = os.path.join(lib_install_dir, os.path.basename(link_name))
+        #installed_lib_short_name = os.path.join(lib_install_dir, os.path.basename(lib_short_name))
+        installed_sblink_name = os.path.join(lib_install_dir, os.path.basename(sblink_name))
+        #installed_sblib_short_name = os.path.join(lib_install_dir, os.path.basename(sblib_short_name))
+
+        installed_link = env1.Command( installed_link_name , installed_lib , SymLink,
+            LibName=lib_final_name)
+        #installed_link2 = env1.Command( installed_lib_short_name , installed_lib , SymLink,
+            #LibName=lib_final_name)
+        installed_sblink = env7.Command( installed_sblink_name , installed_sblib , SymLink, 
+            LibName=sblib_final_name)
+        #installed_sblink2 = env7.Command( installed_sblib_short_name , installed_sblib , SymLink, 
+            #LibName=sblib_final_name)
+
+        env.Alias(target='install', 
+            source=[installed_lib,installed_sblib,
+                    installed_link,installed_sblink ])
 
     else :
-        env.Alias(target='install', 
-	    source=env1.Install(dir=lib_install_dir, source=lib_targets))
+        env.Alias(target='install', source=
+                env1.Install(dir=lib_install_dir, source=lib_targets))
 
+    hfiles1 = []
+    hfiles = glob.glob(os.path.join(GetBuildPath('#include'),'tmv','TMV*.h'))
+    for f in hfiles:
+        hfiles1 += [os.path.join('#include','tmv',f)]
+    installed_h = env1.Install(dir=header_install_dir_sub, source=hfiles1)
+    env.Alias(target='install', source=installed_h)
 
-    hglob = os.path.join('#'+header_dir,'*.h')
-    env.Alias(target='install', 
-              source=env1.Install(dir=header_install_dir, 
-                                 source=Glob(hglob)))
-    hglob = os.path.join('#'+header_dir_sub,'*.h')
-    env.Alias(target='install', 
-              source=env1.Install(dir=header_install_dir_sub, 
-                                 source=Glob(hglob)))
+    hfiles2 = []
+    hfiles = glob.glob(os.path.join(GetBuildPath('#include'),'TMV*.h'))
+    for f in hfiles:
+        hfiles2 += [os.path.join('#include',f)]
+    installed_h = env1.Install(dir=header_install_dir, source=hfiles2)
+    env.Alias(target='install', source=installed_h)
 
 if 'uninstall' in COMMAND_LINE_TARGETS:
     # There is no env.Uninstall method, we must build our own
@@ -186,15 +281,19 @@ if 'uninstall' in COMMAND_LINE_TARGETS:
         env.Alias('uninstall', env1.Command(f, None, deltarget))
 
     # Delete files from include/tmv
-    hfiles = Glob(os.path.join(header_install_dir_sub, '*'))
-    for f in hfiles:
-        env.Alias('uninstall', env1.Command(f, None, deltarget))
-    # delete include/tmv subdirectory
+    hfiles1 = glob.glob(os.path.join(GetBuildPath('#include'),'tmv','TMV*.h'))
+    for f in hfiles1:
+        cmd = env1.Command(os.path.join(header_install_dir_sub,f), None, deltarget)
+        env.Alias('uninstall',cmd)
+
+    # Delete include/tmv subdirectory
     env.Alias('uninstall', env1.Command(header_install_dir_sub, None, deltarget))
 
-    # Delete include/TMV*.h files
-    hfiles = Glob(os.path.join(header_install_dir, 'TMV*.h'))
-    for f in hfiles:
-        env.Alias('uninstall', env1.Command(f, None, deltarget))
+    # Delete include/*.h files
+    hfiles2 = os.listdir(GetBuildPath('#include'))
+    hfiles2 = glob.glob(os.path.join(GetBuildPath('#include'),'TMV*.h'))
+    for f in hfiles2:
+        cmd = env1.Command(os.path.join(header_install_dir,f), None, deltarget)
+        env.Alias('uninstall',cmd)
 
 

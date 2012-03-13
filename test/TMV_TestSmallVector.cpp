@@ -225,8 +225,8 @@ static void TestSmallVectorComplex()
     }
 
     v.swap(2,5);
-    Assert(v[2] == CT(5,5+1234),"Swap in CSmallVector");
-    Assert(v[5] == CT(2,2+1234),"Swap in CSmallVector");
+    Assert(v[2] == CT(T(5),T(5+1234)),"Swap in CSmallVector");
+    Assert(v[5] == CT(T(2),T(2+1234)),"Swap in CSmallVector");
     v.swap(2,5);
 
     tmv::SmallVector<CT,N> v2 = v.conjugate();
@@ -257,8 +257,8 @@ static void TestSmallVectorComplex()
 
     tmv::SmallVector<CT,N> ca = a;
     Assert(Equal(ca,a,EPS*Norm(a)),"Copy real V -> complex V");
-    ca *= CT(3,4);
-    tmv::SmallVector<CT,N> cb = b*CT(3,4);
+    ca *= CT(T(3),T(4));
+    tmv::SmallVector<CT,N> cb = b*CT(T(3),T(4));
 
     CT prod = 0;
     FT normsum = 0, normdiff = 0;
@@ -319,21 +319,22 @@ static void TestSmallVectorIO()
     tmv::SmallVector<CT,NN> cv;
     for (int i=0; i<NN; ++i) {
         v(i) = T(i+34);
-        cv(i) = CT(i,100-i);
+        cv(i) = CT(T(i),T(100-i));
     }
     v(3) = T(1.e-30);
-    cv(3) = CT(1.e-30,1.e-30);
+    cv(3) = CT(T(1.e-30),T(1.e-30));
     v(8) = T(9.e-3);
-    cv(8) = CT(9.e-3,9.e-3);
+    cv(8) = CT(T(9.e-3),T(9.e-3));
+    cv(9) = CT(T(9),T(9.e-3));
     v(12) = T(0.123456789);
-    cv(12) = CT(3.123456789,600.987654321);
+    cv(12) = CT(T(3.123456789),T(600.987654321));
 
     // First check clipping function...
     tmv::SmallVector<T,NN> v2 = v;
     tmv::SmallVector<CT,NN> cv2 = cv;
     if (!std::numeric_limits<T>::is_integer) {
-        v2.clip(1.e-2);
-        cv2.clip(1.e-2);
+        v2.clip(T(1.e-2));
+        cv2.clip(T(1.e-2));
     }
     tmv::SmallVector<T,NN> v3 = v;
     tmv::SmallVector<CT,NN> cv3 = cv;
@@ -342,6 +343,12 @@ static void TestSmallVectorIO()
     v3(8) = T(0); // Others, esp. cv3(8), shouldn't get clipped.
     Assert(v2 == v3,"SmallVector clip");
     Assert(cv2 == cv3,"Complex SmallVector clip");
+
+    // However, ThreshIO for complex works slightly differently than clip.
+    // It clips _either_ the real or imag component, so now cv2(8) and 
+    // cv2(9) need to be modified.
+    cv2(8) = cv3(8) = T(0);
+    cv2(9) = cv3(9) = T(9);
 
     // Write vectors with 4 different styles
     std::ofstream fout("tmvtest_smallvector_io.dat");
@@ -364,14 +371,14 @@ static void TestSmallVectorIO()
 
     // When using (the default) prec(6), these will be the values read in.
     v(12) = T(0.123457);
-    cv(12) = CT(3.12346,600.988);
+    cv(12) = CT(T(3.12346),T(600.988));
 
     // When using prec(12), the full correct values will be read in. (v2,cv2)
 
     // When using prec(4), these will be the values read in.
     v3(12) = T(0.1235);
-    if (std::numeric_limits<T>::is_integer) cv3(12) = CT(3,600);
-    else cv3(12) = CT(3.123,601.0);
+    if (std::numeric_limits<T>::is_integer) cv3(12) = CT(T(3),T(600));
+    else cv3(12) = CT(T(3.123),T(601.0));
 
     // Read them back in
     tmv::SmallVector<T,NN> xv;

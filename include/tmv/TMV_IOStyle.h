@@ -201,10 +201,10 @@ namespace tmv {
         }
                 
         void writeCode(const std::string& code) const
-        { if (s.usecode) os << code << " "; }
+        { if (s.usecode) os << code << s.space; }
 
         void writeSize(ptrdiff_t n) const
-        { if (s.writesize) os << n << " "; }
+        { if (s.writesize) os << n << s.space; }
         void writeSimpleSize(ptrdiff_t n) const
         { if (s.simplesize) writeSize(n); }
         void writeFullSize(ptrdiff_t n) const
@@ -244,14 +244,12 @@ namespace tmv {
         // I apply the workaround to all version before 7.
         template <class T>
         static inline T Value(const T& x) { return x; }
-#ifdef PLATFORM_COMPILER_PGI
-#if PLATFORM_COMPILER_VERSION < 0x070000
+#if defined(__PGI) && (!defined(__PGIC__) || __PGIC__ < 7)
         static inline double Value(const long double& x) 
         { return double(x); }
         static inline std::complex<double> Value(
             const std::complex<long double>& x)
         { return std::complex<double>(x); }
-#endif
 #endif
     };
 
@@ -285,8 +283,34 @@ namespace tmv {
         bool readCode(
             const std::string& code, std::string& exp, std::string& got) const
         {
-            if (s.usecode) return readStr(trim(code),exp,got);
-            else return true;
+            if (s.usecode) {
+                if (readStr(trim(code),exp,got)) {
+                    return readSpace(exp,got);
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        }
+
+        // For real SymMatrix, there are two valid codes.
+        bool readCode(
+            const std::string& code1, const std::string& code2,
+            std::string& exp, std::string& got) const
+        {
+            if (s.usecode) {
+                if (readStr(trim(code1),exp,got)) {
+                    return readSpace(exp,got);
+                } else if (got == code2) {
+                    exp = got = "";
+                    return readSpace(exp,got);
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
         }
 
         bool readStart(std::string& exp, std::string& got) const
@@ -307,23 +331,23 @@ namespace tmv {
         bool readFinal(std::string& exp, std::string& got) const
         { return readStr(trim(s.final),exp,got); }
 
-        bool readSize(ptrdiff_t& n) const
+        bool readSize(ptrdiff_t& n, std::string& exp, std::string& got) const
         {
             if (s.writesize) {
                 skipWhiteSpace();
                 is >> n;
                 if (!is) return false;
-                else return true;
+                else return readSpace(exp,got);
             } else {
                 return true;
             }
         }
 
-        bool readSimpleSize(ptrdiff_t& n) const
-        { return s.simplesize ? readSize(n) : true; }
+        bool readSimpleSize(ptrdiff_t& n, std::string& exp, std::string& got) const
+        { return s.simplesize ? readSize(n,exp,got) : true; }
 
-        bool readFullSize(ptrdiff_t& n) const
-        { return !s.simplesize ? readSize(n) : true; }
+        bool readFullSize(ptrdiff_t& n, std::string& exp, std::string& got) const
+        { return !s.simplesize ? readSize(n,exp,got) : true; }
 
         template <class T>
         bool readValue(T& x) const

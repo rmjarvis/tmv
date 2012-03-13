@@ -595,12 +595,12 @@ namespace tmv {
 #endif
         }
         ptrdiff_t s=m.size();
-        if (!reader.readSize(s)) {
+        if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<tag<<" Read Error: reading size\n";
             exit(1);
 #else
-            throw TriMatrixReadError<upper,T>(reader.getis());
+            throw TriMatrixReadError<upper,T>(reader.getis(),exp,got);
 #endif
         }
         if (s != m.size()) {
@@ -612,12 +612,12 @@ namespace tmv {
 #endif
         }
         s=m.size();
-        if (!reader.readSimpleSize(s)) {
+        if (!reader.readSimpleSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<tag<<" Read Error: reading size\n";
             exit(1);
 #else
-            throw TriMatrixReadError<upper,T>(reader.getis());
+            throw TriMatrixReadError<upper,T>(reader.getis(),exp,got);
 #endif
         }
         if (s != m.size()) {
@@ -646,22 +646,22 @@ namespace tmv {
 #endif
         }
         ptrdiff_t s=m.size();
-        if (!reader.readSize(s)) {
+        if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"UpperTriMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw TriMatrixReadError<true,T>(reader.getis());
+            throw TriMatrixReadError<true,T>(reader.getis(),exp,got);
 #endif
         }
         if (s != m.size()) m.resize(s);
         s=m.size();
-        if (!reader.readSimpleSize(s)) {
+        if (!reader.readSimpleSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"UpperTriMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw TriMatrixReadError<true,T>(reader.getis());
+            throw TriMatrixReadError<true,T>(reader.getis(),exp,got);
 #endif
         }
         if (s != m.size()) {
@@ -690,22 +690,22 @@ namespace tmv {
 #endif
         }
         ptrdiff_t s=m.size();
-        if (!reader.readSize(s)) {
+        if (!reader.readSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"TriMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw TriMatrixReadError<false,T>(reader.getis());
+            throw TriMatrixReadError<false,T>(reader.getis(),exp,got);
 #endif
         }
         if (s != m.size()) m.resize(s);
         s=m.size();
-        if (!reader.readSimpleSize(s)) {
+        if (!reader.readSimpleSize(s,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"TriMatrix Read Error: reading size\n";
             exit(1);
 #else
-            throw TriMatrixReadError<false,T>(reader.getis());
+            throw TriMatrixReadError<false,T>(reader.getis(),exp,got);
 #endif
         }
         if (s != m.size()) {
