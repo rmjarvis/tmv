@@ -62,7 +62,7 @@
 #ifndef TMV_Base_H
 #define TMV_Base_H
 
-#if (!defined(NDEBUG) && !defined(TMVNDEBUG))
+#if (!defined(NDEBUG) && !defined(TMV_NDEBUG))
 #define TMV_DEBUG
 #endif
 
@@ -113,15 +113,16 @@
 #include <complex>
 #include <memory>
 #include <stdexcept>
+#include <cstddef>
 #include <string>
 #include <algorithm>
+#include <typeinfo>
 
 #if defined(__SSE2__) || defined(__SSE__)
 #include "xmmintrin.h"
 #endif
 
 #ifdef TMV_DEBUG
-#include <typeinfo>
 #include <sstream>
 #include <iostream>
 #endif

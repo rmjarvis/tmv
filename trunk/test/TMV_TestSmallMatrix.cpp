@@ -104,17 +104,17 @@ inline void TestBasicSmallMatrix_1()
     }
 
     for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) {
-        ca(i,j) = CT(3+i+5*j,T(0)+i-j);
-        cb(i,j) = CT(3+2*i+4*j,4-10*i);
+        ca(i,j) = CT(T(3+i+5*j),T(0)+i-j);
+        cb(i,j) = CT(T(3+2*i+4*j),T(4-10*i));
     }
 
     cm = ca+cb;
     for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
-        Assert(cm(i,j) == CT(6+3*i+9*j,4-9*i-j),"Add CSmallMatrix");
+        Assert(cm(i,j) == CT(T(6+3*i+9*j),T(4-9*i-j)),"Add CSmallMatrix");
 
     cm = ca-cb;
     for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
-        Assert(cm(i,j) == CT(T(0)-i+j,-4+11*i-j),"Subtract CSmallMatrix");
+        Assert(cm(i,j) == CT(T(0)-i+j,T(-4+11*i-j)),"Subtract CSmallMatrix");
 
     cm = ca;
     for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) 
@@ -282,29 +282,36 @@ inline void TestBasicSmallMatrix_IO()
 
     for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
         m(i,j) = T(k);
-        cm(i,j) = CT(k,k+1000);
+        cm(i,j) = CT(T(k),T(k+1000));
     }
     m(3,1) = T(1.e-30);
-    cm(3,1) = CT(1.e-30,1.e-30);
+    cm(3,1) = CT(T(1.e-30),T(1.e-30));
     m(2,0) = T(9.e-3);
-    cm(2,0) = CT(9.e-3,9.e-3);
+    cm(2,0) = CT(T(9.e-3),T(9.e-3));
+    cm(2,1) = CT(T(9),T(9.e-3));
     m(1,0) = T(0.123456789);
-    cm(1,0) = CT(3.123456789,600.987654321);
+    cm(1,0) = CT(T(3.123456789),T(600.987654321));
 
     // First check clipping function...
     tmv::SmallMatrix<T,M,N> m2 = m;
     tmv::SmallMatrix<CT,M,N> cm2 = cm;
     if (!std::numeric_limits<T>::is_integer) {
-        m2.clip(1.e-2);
-        cm2.clip(1.e-2);
+        m2.clip(T(1.e-2));
+        cm2.clip(T(1.e-2));
     }
     tmv::SmallMatrix<T,M,N> m3 = m;
     tmv::SmallMatrix<CT,M,N> cm3 = cm;
     m3(3,1) = T(0);
     cm3(3,1) = T(0);
-    m3(2,0) = T(0); // Others, esp. cm3(2,0), shouldn't get clipped.
+    m3(2,0) = T(0); // Others, esp. cm3(2,0) and cm3(2,1), shouldn't get clipped.
     Assert(m2 == m3,"SmallMatrix clip");
     Assert(cm2 == cm3,"Complex SmallMatrix clip");
+
+    // However, ThreshIO for complex works slightly differently than clip.
+    // It clips _either_ the real or imag component, so now cm2(5,6) and 
+    // cm2(6,6) need to be modified.
+    cm2(2,0) = cm3(2,0) = T(0);
+    cm2(2,1) = cm3(2,1) = T(9);
 
     // Write matrices with 4 different styles
     std::ofstream fout("tmvtest_smallmatrix_io.dat");
@@ -327,14 +334,14 @@ inline void TestBasicSmallMatrix_IO()
 
     // When using (the default) prec(6), these will be the values read in.
     m(1,0) = T(0.123457);
-    cm(1,0) = CT(3.12346,600.988);
+    cm(1,0) = CT(T(3.12346),T(600.988));
 
     // When using prec(12), the full correct values will be read in. (m2,cm2)
 
     // When using prec(4), these will be the values read in.
     m3(1,0) = T(0.1235);
-    if (std::numeric_limits<T>::is_integer) cm3(1,0) = CT(3,600);
-    else cm3(1,0) = CT(3.123,601.0);
+    if (std::numeric_limits<T>::is_integer) cm3(1,0) = CT(T(3),T(600));
+    else cm3(1,0) = CT(T(3.123),T(601.0));
 
     // Read them back in
     tmv::SmallMatrix<T,M,N,tmv::RowMajor> xm1;

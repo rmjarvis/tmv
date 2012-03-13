@@ -196,7 +196,7 @@ namespace tmv {
         enum { _nlo = IntTraits2<M1::_nlo,M2::_nlo>::min };
         enum { _nhi = IntTraits2<M1::_nhi,M2::_nlo>::min };
         enum { shape1 = ShapeTraits2<M1::_shape,M2::_shape>::eprod };
-        enum { _shape = ix==1 ? shape1 : ShapeTraits<shape1>::nonunit_shape };
+        enum { _shape = ix==1 ? int(shape1) : ShapeTraits<shape1>::nonunit_shape };
         enum { _fort = M1::_fort && M2::_fort };
         enum { _calc = false };
         enum { rm1 = Traits<typename M1::calc_type>::_rowmajor };

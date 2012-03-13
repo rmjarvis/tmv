@@ -1,4 +1,4 @@
-#define PRINTALGO_QR
+//#define PRINTALGO_QR
 //#define PRINTALGO_DIVM
 //#define PRINTALGO_DIVU
 //#define PRINTALGO_DIVU_OMP
@@ -11,21 +11,21 @@
 //#define PRINTALGO_MV
 //#define PRINTALGO_DET
 
-#define XDEBUG_PRODMM
-#define XDEBUG_QUOTMM
-#define XDEBUG_HOUSE
+//#define XDEBUG_PRODMM
+//#define XDEBUG_QUOTMM
+//#define XDEBUG_HOUSE
 
-#undef NDEBUG
+//#undef NDEBUG
 #include <iostream>
 
-#define TMV_NO_LIB
+//#define TMV_NO_LIB
 #include "TMV.h"
 
 // How big do you want the matrices to be?
 // (The matrix being inverted is MxN.  
 //  K is the other dimension of the matrix being solved.)
-const int M = 3;
-const int N = 3;
+const int M = 4000;
+const int N = 4000;
 const int K = 1;
 #define AISSQUARE
 
@@ -41,7 +41,7 @@ const int K = 1;
 // 1 = QR
 // 2 = QRP
 // 3 = SV
-#define ALGO 1
+#define ALGO 3
 //#define STRICTQRP
 
 // Define whether you want to include the error checks.
@@ -55,7 +55,7 @@ const int K = 1;
 //#define DOEIGENSMALL
 
 // Skip the separate decomposition and solution steps?
-//#define NO_SEPARATE_DECOMP
+#define NO_SEPARATE_DECOMP
 
 // For large N, this can be useful to keep the condition of the matrix
 // not too large.

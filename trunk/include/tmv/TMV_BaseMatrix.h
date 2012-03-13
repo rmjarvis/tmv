@@ -883,8 +883,8 @@ namespace tmv {
             cs(_cs), rs(_rs) {}
         TMV_INLINE ptrdiff_t colsize() const { return cs; }
         TMV_INLINE ptrdiff_t rowsize() const { return rs; }
-        TMV_INLINE ptrdiff_t nlo() const { return TMV_MAX(cs-1,0); }
-        TMV_INLINE ptrdiff_t nhi() const { return TMV_MAX(rs-1,0); }
+        TMV_INLINE ptrdiff_t nlo() const { return TMV_MAX(cs-1,ptrdiff_t(0)); }
+        TMV_INLINE ptrdiff_t nhi() const { return TMV_MAX(rs-1,ptrdiff_t(0)); }
         TMV_INLINE ptrdiff_t nElements() const { return cs * rs; }
 
         TMV_INLINE T cref(ptrdiff_t , ptrdiff_t ) const  { return T(0); }

@@ -381,7 +381,7 @@ namespace tmv {
 #endif
         }
         ptrdiff_t cs=m.colsize(), rs=m.rowsize();
-        if (!reader.readSize(cs) || !reader.readSize(rs)) {
+        if (!reader.readSize(cs,exp,got) || !reader.readSize(rs,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"Matrix Read Error: reading size\n";
             exit(1);
@@ -415,7 +415,7 @@ namespace tmv {
 #endif
         }
         ptrdiff_t cs=m.colsize(), rs=m.rowsize();
-        if (!reader.readSize(cs) || !reader.readSize(rs)) {
+        if (!reader.readSize(cs,exp,got) || !reader.readSize(rs,exp,got)) {
 #ifdef NOTHROW
             std::cerr<<"Matrix Read Error: reading size\n";
             exit(1);
