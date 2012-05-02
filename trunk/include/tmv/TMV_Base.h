@@ -2223,6 +2223,15 @@ namespace tmv {
     throw tmv::FailedAssert(#x,__LINE__,__FILE__); } } while(false)
 #endif
 
+    // Use DEBUGPARAM(x) for parameters that are only used in TMVAssert
+    // statements.  So then they don't give warnings when compiled with 
+    // -DNDEBUG
+#ifdef TMV_DEBUG
+#define TMV_DEBUG_PARAM(x) x
+#else
+#define TMV_DEBUG_PARAM(x)
+#endif
+
 #ifndef TMV_NO_THROW
     class ReadError : 
         public Error
@@ -2330,7 +2339,7 @@ namespace tmv {
     template <ptrdiff_t S>
     struct CheckedInt
     {
-        TMV_INLINE CheckedInt(ptrdiff_t s) { 
+        TMV_INLINE CheckedInt(ptrdiff_t TMV_DEBUG_PARAM(s)) { 
 #ifdef TMV_DEBUG
             if (s != S) {
                 std::cerr<<"Mismatched CheckInt:\n";
@@ -2461,15 +2470,6 @@ namespace tmv {
 
     inline std::string TMV_Text(UpLoType u)
     { return u==Upper ? "Upper" : "Lower"; }
-
-    // Use DEBUGPARAM(x) for parameters that are only used in TMVAssert
-    // statements.  So then they don't give warnings when compiled with 
-    // -DNDEBUG
-#ifdef TMV_DEBUG
-#define TMV_DEBUG_PARAM(x) x
-#else
-#define TMV_DEBUG_PARAM(x)
-#endif
 
     // This bit is to workaround a bug in pgCC that was fixed in version 7.
     // I don't know if versions earlier than 6.1 had the bug, but 
