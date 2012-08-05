@@ -1,0 +1,42 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#
+# Script to make the tmv-link file according to the linkage requirements that
+# SCons found for BLAS and LAPACK on this system.
+#
+#------------------------------------------------------------------------------
+
+LOCAL_FILENAME="$1"
+INSTALLED_FILENAME="$2"
+FLAGS="`cat $LOCAL_FILENAME`"
+
+echo
+echo "The TMV library was successfully installed.  "
+echo "To link your code against the TMV library, you should use the "
+echo "link flags: "
+echo
+echo $FLAGS
+echo
+echo "Or if you are using Band, Sym or SymBand matrices, use: "
+echo
+echo "-ltmv_symband" $FLAGS
+echo
+echo "These flags (except for the optional -ltmv_symband) have been"
+echo "saved in the file:"
+echo
+echo $INSTALLED_FILENAME
+echo
+echo "so you can automatically use the correct flags in a makefile"
+echo "(for example) by using lines such as:"
+echo
+echo "TMVLINK := \$(shell cat $INSTALLED_FILENAME)"
+echo "LIBS = \$(TMVLINK) [... other libs ...]"
+echo
+echo "In a SConstruct file, you can do something like the following: "
+echo
+echo "env.MergeFlags(open('$INSTALLED_FILENAME').read())"
+echo
+
+
+exit 0
+

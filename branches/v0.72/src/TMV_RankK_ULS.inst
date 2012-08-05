@@ -1,0 +1,18 @@
+
+#define CT std::complex<T>
+
+#define DefR1(T,Tx)\
+  template void RankKUpdate<true>(const T alpha, \
+      const GenUpperTriMatrix<Tx >& x, SymMatrixView<T > A); \
+  template void RankKUpdate<false>(const T alpha, \
+      const GenUpperTriMatrix<Tx >& x, SymMatrixView<T > A); \
+
+DefR1(T,T)
+#ifdef INST_COMPLEX
+DefR1(CT,T)
+DefR1(CT,CT)
+#endif
+
+#undef DefR1
+
+#undef CT

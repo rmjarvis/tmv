@@ -1,0 +1,39 @@
+
+#define CT std::complex<T>
+
+#define Def1(T) \
+  template const T* MatrixComposite<T >::cptr() const; \
+  template ptrdiff_t MatrixComposite<T >::stepi() const; \
+  template ptrdiff_t MatrixComposite<T >::stepj() const; \
+  template ptrdiff_t MatrixComposite<T >::ls() const; \
+
+Def1(T)
+#ifdef INST_COMPLEX
+Def1(CT)
+#endif
+
+#define DefMV(T,Ta,Tx)\
+  template void MultMV<true>(const T alpha, const GenMatrix<Ta >& A, \
+      const GenVector<Tx >& x, VectorView<T > y); \
+  template void MultMV<false>(const T alpha, const GenMatrix<Ta >& A, \
+      const GenVector<Tx >& x, VectorView<T > y); \
+  template void UnitAMultMV1<true,false>(const GenMatrix<Ta >& A, \
+      const GenVector<Tx >& x, VectorView<T > y); \
+  template void UnitAMultMV1<true,true>(const GenMatrix<Ta >& A, \
+      const GenVector<Tx >& x, VectorView<T > y); \
+  template void UnitAMultMV1<false,false>(const GenMatrix<Ta >& A, \
+      const GenVector<Tx >& x, VectorView<T > y); \
+  template void UnitAMultMV1<false,true>(const GenMatrix<Ta >& A, \
+      const GenVector<Tx >& x, VectorView<T > y); \
+
+DefMV(T,T,T)
+#ifdef INST_COMPLEX
+DefMV(CT,T,T)
+DefMV(CT,T,CT)
+DefMV(CT,CT,T)
+DefMV(CT,CT,CT)
+#endif
+
+#undef DefMV
+
+#undef CT

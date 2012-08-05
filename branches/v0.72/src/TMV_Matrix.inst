@@ -1,0 +1,100 @@
+
+#define CT std::complex<T>
+
+#define Def1(RT,T,Ref)\
+  template bool GenMatrix<T >::hasSubMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const; \
+  template bool GenMatrix<T >::hasSubVector( \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t s) const; \
+  template bool ConstMatrixView<T,FortranStyle>::hasSubMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const; \
+  template bool ConstMatrixView<T,FortranStyle>::hasSubVector( \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t s) const; \
+  template T GenMatrix<T >::sumElements() const; \
+  template RT GenMatrix<T >::sumAbsElements() const; \
+  template RT GenMatrix<T >::sumAbs2Elements() const; \
+  template RT GenMatrix<T >::normSq(const RT scale) const; \
+  template RT GenMatrix<T >::normF() const; \
+  template RT GenMatrix<T >::norm1() const; \
+  template RT GenMatrix<T >::maxAbsElement() const; \
+  template RT GenMatrix<T >::maxAbs2Element() const; \
+  template RT GenMatrix<T >::doNorm2() const; \
+  template RT GenMatrix<T >::doCondition() const; \
+  template QuotXM<T,T > GenMatrix<T >::QInverse() const; \
+  template void GenMatrix<T >::write(const TMV_Writer& writer) const; \
+  template void MatrixView<T,CStyle>::read(const TMV_Reader& reader); \
+  template T GenMatrix<T >::cref(ptrdiff_t i, ptrdiff_t j) const; \
+  template void Swap(MatrixView<T > m1, MatrixView<T > m2); \
+  template void DoCopySameType(const GenMatrix<T >& m1, MatrixView<T > m2);  \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::clip(RT thresh); \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::setZero(); \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::setAllTo(const T& x); \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::addToAll(const T& x); \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::transposeSelf(); \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::conjugateSelf(); \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::setToIdentity( \
+      const T& x); \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::permuteRows( \
+      const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2); \
+  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::reversePermuteRows( \
+      const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2); \
+  template Ref MatrixView<T,CStyle>::ref(ptrdiff_t i, ptrdiff_t j); \
+
+Def1(T,T,T&)
+#ifdef INST_COMPLEX
+Def1(T,CT,VarConjRef<CT >)
+#endif
+
+#undef Def1
+
+#ifndef TISINT
+#define Def1b(RT,T) \
+  template T GenMatrix<T >::det() const; \
+  template RT GenMatrix<T >::logDet(T* sign) const; \
+  template bool GenMatrix<T >::isSingular() const; \
+  template void GenMatrix<T >::setDiv() const; \
+  template bool GenMatrix<T >::divIsLUDiv() const; \
+  template bool GenMatrix<T >::divIsQRDiv() const; \
+  template bool GenMatrix<T >::divIsQRPDiv() const; \
+  template bool GenMatrix<T >::divIsSVDiv() const; \
+
+
+Def1b(T,T)
+#ifdef INST_COMPLEX
+Def1b(T,CT)
+#endif
+
+#undef Def1b
+#endif
+
+#define Def2(T,A) \
+  template void Matrix<T,A>::read(const TMV_Reader& reader); \
+
+Def2(T,RowMajor|CStyle)
+Def2(T,ColMajor|CStyle)
+Def2(T,RowMajor|FortranStyle)
+Def2(T,ColMajor|FortranStyle)
+#ifdef INST_COMPLEX
+Def2(CT,RowMajor|CStyle)
+Def2(CT,ColMajor|CStyle)
+Def2(CT,RowMajor|FortranStyle)
+Def2(CT,ColMajor|FortranStyle)
+#endif
+
+#undef Def2
+
+#define Def3(T1,T2)\
+  template bool operator==(const GenMatrix<T1 >& m1, \
+      const GenMatrix<T2 >& m2); \
+
+Def3(T,T)
+#ifdef INST_COMPLEX
+Def3(T,CT)
+Def3(CT,T)
+Def3(CT,CT)
+#endif
+
+#undef Def3
+
+#undef CT
+

@@ -1,0 +1,240 @@
+Note: More complete installation information is contained in 
+doc/TMV_Documentation.pdf.  If the instructions there differ from these, 
+then it is probably true that the pdf is correct, rather than this file.
+
+
+1. Obtain the tarball from one of the following repositories:
+
+http://code.google.com/p/tmv-cpp/
+http://sourceforge.net/projects/tmv-cpp/
+
+2. Unpack the tarball with:
+
+gunzip tmv0.70.tar.gz
+tar xf tmv0.70.tar
+
+This will make a directory called tmv0.70 with subdirectories:
+  doc
+  examples
+  include
+  lib
+  src
+  test
+and also the files:
+  INSTALL  (This file)
+  README
+  LICENSE
+  CHANGELOG
+  (plus others)
+
+3. Make sure you have SCons installed on your system.  
+
+   It is available for free from http://www.scons.org/.  
+   (It is a very quick installation if you have Python installed.)
+
+4. Type:
+
+     scons [Optional flags -- see below]
+   
+   This will make the libraries libtmv.a and libtmv_symband.a
+   and put them into the directory lib.  Similar to make, you can add
+   the flag -j4 to use 4 (or whatever number of) compilers simultaneously.
+   Also, the command scons -h will print information about the options 
+   specific to TMV.
+
+   There are a number of command-line options that you might need 
+   (but try it with no flags first -- it can often find everything 
+   automatically).  
+   The options are listed with their default value.  You change them 
+   simply by specifying a different value on the command line.  
+   For example:
+
+     scons CXX=icpc INST_LONGDOUBLE=true
+
+   If you need to run SCons multiple times (for example to compile the test 
+   suite or install the libraries as described below), you only need to 
+   specify the new parameter values the first time you run the SCons.
+   The program automatically saves your options and continues to use them 
+   until you change a value again.
+
+     CXX=g++ specifies which C++ compiler to use.
+     FLAGS='' specifies the basic flags to pass to the compiler.  
+           The default behavior is to automatically choose good flags 
+           to use according to which kind of compiler you are using.
+     DEBUG=false specifies whether to keep the debugging assert statements 
+           in the compiled library code.  
+     PREFIX=/usr/local specifies where to install the library when running 
+           scons install (see below).
+     INST_FLOAT=true specifies whether to instantiate the <float> templates.
+     INST_DOUBLE=true specifies whether to instantiate the <double> 
+           templates.
+     INST_LONGDOUBLE=false specifies whether to instantiate the <long double> 
+           templates.
+     INST_INT=false specifies whether to instantiate the <int> templates.
+     WITH_OPENMP=true specifies whether to use OpenMP to parallelize some 
+           parts of the code.
+     SHARED=false specifies whether to make the library files shared as 
+           opposed to static libraries.
+     TEST_FLOAT=true specifies whether to include the <float> tests in the 
+           test suite.
+     TEST_DOUBLE=true specifies whether to include the <double> tests in the 
+           test suite.
+     TEST_LONGDOUBLE=false specifies whether to include the <long double> 
+           tests in the test suite.
+     TEST_INT=false specifies whether to include the <int> tests in the test 
+           suite.
+ 
+   The next flags set up the paths that SCons will use to try to find your 
+   BLAS and LAPACK libraries.
+ 
+     IMPORT_ENV=true specifies whether to import the entire environment 
+           from the calling shell.  The default is for SCons to use the 
+	   same environment as the shell from which it is called.  However,
+	   sometimes it can be useful to start with a clean environment and 
+	   manually add paths (see below) for various things, in which case 
+	   you would want to set this to false.
+     EXTRA_PATH='' specifies directories in which to search for executables 
+           (notably the compiler, although you can also just give the full 
+           path in the CXX parameter) in addition to the standard locations 
+           such as /usr/bin and /usr/local/bin.  If you are giving multiple 
+           directories, they should be separated by colons.
+     EXTRA_INCLUDE_PATH='' specifies directories in which to search for 
+           header files (such as the BLAS or LAPACK header files)
+           in addition to the standard locations such as /usr/include and 
+           /usr/local/include.  These directories are specified as -I flags 
+           to the compiler.  If you are giving multiple directories, they
+           should be separated by colons.
+     EXTRA_LIB_PATH='' specifies directories in which to search for libraries
+           (such as the BLAS or LAPACK libraries) in addition to the standard 
+           locations such as /usr/lib and /usr/local/lib.  These directories 
+           are specified as -L flags to the linker.  If you are giving 
+           multiple directories, they should be separated by colons.
+     IMPORT_PATHS=false specifies whether to import extra path directories 
+           from the environment variables: PATH, C_INCLUDE_PATH, 
+           LD_LIBRARY_PATH and LIBRARY_PATH.  
+  
+   The next options can be used to specify whether to use BLAS and/or LAPACK 
+   libraries.
+
+     WITH_BLAS=true specifies whether to look for and try to use a BLAS 
+           library.
+     WITH_LAPACK=false specifies whether to look for and try to use a 
+           LAPACK library.
+  
+   (See also the PDF documentation for still more options.)
+
+
+5. Then type:
+
+     scons install
+
+   (or possibly "sudo scons install" if you are installing into /usr/local
+   or somewhere similar).  This will copy all the header files 
+   to [PREFIX]/include and the library files to [PREFIX]/lib.
+
+   The default PREFIX is /usr/local, but this can be changed 
+   to some other installation directory as described above.
+
+   
+6. (optional) Type:
+   
+     scons test
+   
+   to make the test suite executables:
+
+     test/tmvtest1
+     test/tmvtest2
+     test/tmvtest3
+
+   If you want to make the smaller test executables instead, you can type:
+
+     scons test SMALL_TESTS=true
+
+   to make the executables:
+
+     test/tmvtest1a
+     test/tmvtest1b
+     test/tmvtest1c
+     test/tmvtest1d
+     test/tmvtest2a
+     test/tmvtest2b
+     test/tmvtest2c
+     test/tmvtest3a
+     test/tmvtest3b
+     test/tmvtest3c
+     test/tmvtest3d
+     test/tmvtest3e
+
+   They should each compile successfully, and when you run them, they
+   should output a bunch of lines that end with "...passed all tests"
+   (or similar).  If not, see the documantation (doc/TMV_Documentation.pdf)
+   for how to submit a bug report.
+
+
+7. (Optional) Type:
+
+     scons examples
+
+    to make the executables:
+
+      examples/vector
+      examples/matrix
+      examples/division
+      examples/bandmatrix
+      examples/symmatrix
+
+    These programs, along with their corresponding source code in the
+    examples directory, give concrete examples of some of the common
+    things you might want to do with the TMV library.  They don't really
+    try to be comprehensive, but they do give a pretty good overview of the
+    main features, so looking at them may be a useful way to get started
+    programming with TMV.
+
+
+8. Compile your own program:
+
+   Each .cpp file that uses the TMV library will need to have
+
+     #include "TMV.h"
+
+   at the top.  Furthermore, if you are using band, symmetric or hermitian
+   matrices, you will need to include their particular files as well:
+
+     #include "TMV_Band.h"
+     #include "TMV_Sym.h"
+     #include "TMV_SymBand.h"
+
+   Also, you will need to compile with -I[PREFIX]/include,
+   and also link with
+
+     -L[PREFIX]/lib -ltmv
+
+   where [PREFIX] is the directory where you installed the libraries
+   as specified at the top of the Makefile.
+   Of course, if you installed the libraries and header files to a directory
+   in your path, then you do not need the -I and -L flags.
+
+   If you use and banded or symmetric/hermitian matrices, then you will
+   need to link with the flags -ltmv_symband -ltmv.
+
+   If you are using BLAS and/or LAPACK libraries with TMV, then you also
+   need to link with the appropriate libraries.  To help you know what
+   those are, the command "scons install" will create a file:
+
+     [PREFIX]/share/tmv-link
+
+   which gives the necessary linking flags to use.
+
+   If you are using a makefile to compile your program, you can make 
+   sure to automatically use the correct flags by using lines such as:
+
+     TMVLINK := $(shell cat /usr/local/share/tmv-link)
+     LIBS = $(TMVLINK) [... other libs ...]
+
+   (Obviously change the to the correct file if your PREFIX is not /usr/local.)
+
+   Also, the tmv-link file does not include the -ltmv_symband flag, so if you 
+   are using symmetric and/or banded matrices, make sure to add that before
+   $(TMVLINK).
+
+

@@ -1,0 +1,20 @@
+
+#define CT std::complex<T>
+
+#define DefMM(T,Tx,Ty)\
+  template void SymMultMM<true>(const T alpha,const GenMatrix<Tx >& x, \
+      const GenMatrix<Ty >& y, SymMatrixView<T > A); \
+  template void SymMultMM<false>(const T alpha,const GenMatrix<Tx >& x, \
+      const GenMatrix<Ty >& y, SymMatrixView<T > A); \
+
+DefMM(T,T,T)
+#ifdef INST_COMPLEX
+DefMM(CT,T,T)
+DefMM(CT,T,CT)
+DefMM(CT,CT,T)
+DefMM(CT,CT,CT)
+#endif
+
+#undef DefMM
+
+#undef CT

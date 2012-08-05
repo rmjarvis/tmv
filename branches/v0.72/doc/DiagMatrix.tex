@@ -1,0 +1,382 @@
+% !TEX root = TMV_Documentation.tex
+
+\section{Diagonal matrices}
+\index{DiagMatrix}
+\label{DiagMatrix}
+
+The \tt{DiagMatrix} class is our diagonal matrix class.  
+A diagonal matrix is only non-zero
+along the main diagonal of the matrix.  
+
+In addition to the data type template parameter (indicated here by \tt{T} as usual),
+there is also a second template parameter that specifies attributes of the
+\tt{DiagMatrix}.  The only attributes that are allowed are:
+\begin{description} \itemsep -2pt
+\item[$\bullet$] \tt{CStyle} or \tt{FortranStyle}
+\end{description}
+which work basically the same way as for a \tt{Vector}.
+The default value is \tt{CStyle}.
+
+Most functions and methods for \tt{DiagMatrix} work the same
+as they do for \tt{Matrix}.
+In these cases, we will just list the functions
+that are allowed with the
+effect understood to be the same as for a regular \tt{Matrix}.  Of course, there are 
+almost always algorithmic speed-ups, which the code will use to take advantage of the 
+diagonal structure.
+Whenever there is a difference in how a function works,
+we will explain the difference.
+
+\subsection{Constructors}
+\index{DiagMatrix!Constructors}
+\label{DiagMatrix_Constructors}
+
+As usual, the optional \tt{A} template argument specifies attributes about
+the \tt{DiagMatrix}.  The default value if not specified is \tt{CStyle}.
+
+\begin{itemize}
+
+\item
+\begin{tmvcode}
+tmv::DiagMatrix<T,A> d()
+\end{tmvcode}
+Makes a \tt{DiagMatrix} with zero size.  You would normally use the \tt{resize} function later to
+change the size to some useful value.
+
+\item 
+\begin{tmvcode}
+tmv::DiagMatrix<T,A> d(int n)
+\end{tmvcode}
+Makes an \tt{n} $\times$ \tt{n} \tt{DiagMatrix} with {\em uninitialized} values.
+If extra debugging is turned on (with the compiler flag \tt{-DTMV\_EXTRA\_DEBUG}), then the values along the diagonal are in fact initialized to 888. 
+
+\item
+\begin{tmvcode}
+tmv::DiagMatrix<T,A> d(int n, T x)
+\end{tmvcode}
+Makes an \tt{n} $\times$ \tt{n} \tt{DiagMatrix} with all values along the diagonal equal to \tt{x}.
+
+\item
+\begin{tmvcode}
+tmv::DiagMatrix<T,A> d(const Vector<T,A2>& v)
+\end{tmvcode}
+Makes a \tt{DiagMatrix} with \tt{v} as the diagonal.
+
+\item 
+\begin{tmvcode}
+tmv::DiagMatrix<T,A> d(const Matrix<T,A2>& m)
+\end{tmvcode}
+Makes a \tt{DiagMatrix} with the diagonal of \tt{m} as the diagonal.
+
+\item
+\begin{tmvcode}
+tmv::DiagMatrix<T,A> d1(const DiagMatrix<T2,A2>& d2)
+d1 = d2
+\end{tmvcode}
+Copy the \tt{DiagMatrix d2}, which may be of any type \tt{T2} so long
+as values of type \tt{T2} are convertible into type \tt{T}.
+The assignment operator has the same flexibility.
+
+\item
+\begin{tmvcode}
+tmv::DiagMatrix<T,A> d;
+d << d00,
+         d11,
+             d22,
+                 d33, 
+                     ...
+\end{tmvcode}
+Initialize the \tt{DiagMatrix d}, with a list of values.  Note that only the values on the diagonal should be given.  (They do not need to be on different lines as shown -- that is merely to suggest the structure of the values in the matrix.)
+
+\item
+\begin{tmvcode}
+tmv::DiagMatrixView<T,A> d = DiagMatrixViewOf(Vector<T>& v)
+tmv::ConstDiagMatrixView<T,A> d = DiagMatrixViewOf(const Vector<T>& v)
+\end{tmvcode}
+\index{Vector!Functions of!DiagMatrixViewOf}
+\index{Vector!View as a diagonal matrix}
+Makes a \tt{DiagMatrixView} whose diagonal is \tt{v}.  Note: \tt{v} may also be a view, rather than an actual \tt{Vector}.
+
+\item
+\begin{tmvcode}
+tmv::DiagMatrixView<T,A> d = tmv::DiagMatrixViewOf(T* vv, int n)
+tmv::ConstDiagMatrixView<T,A> d = 
+      tmv::DiagMatrixViewOf(const T* vv, int n)
+tmv::DiagMatrixView<T,A> d = 
+      tmv::DiagMatrixViewOf(T* vv, int n, int step)
+tmv::ConstDiagMatrixView<T,A> d = 
+      tmv::DiagMatrixViewOf(const T* vv, int n, int step)
+\end{tmvcode}
+\index{DiagMatrix!View of raw memory}
+Make a \tt{DiagMatrixView} whose diagonal consists of the actual memory elements \tt{vv}.  The last two allow for a non-unit step between the elements.
+
+\end{itemize}
+
+
+\subsection{Access}
+\index{DiagMatrix!Access methods}
+\label{DiagMatrix_Access}
+
+\begin{itemize}
+
+\item
+\begin{tmvcode}
+d.nrows() = d.ncols() = d.colsize() = d.rowsize() = d.size()
+d.resize(int newsize)
+d(i,j)
+d(i) = d(i,i)
+d.cref(i)
+d.ref(i)
+\end{tmvcode}
+\index{DiagMatrix!Methods!nrows}
+\index{DiagMatrix!Methods!ncols}
+\index{DiagMatrix!Methods!rowsize}
+\index{DiagMatrix!Methods!colsize}
+\index{DiagMatrix!Methods!size}
+\index{DiagMatrix!Methods!resize}
+\index{DiagMatrix!Methods!operator()}
+\index{DiagMatrix!Methods!cref}
+\index{DiagMatrix!Methods!ref}
+For the mutable \tt{d(i,j)} version, \tt{i} must equal \tt{j}.
+If \tt{d} is not mutable, then \tt{d(i,j)} with \tt{i}$\neq$\tt{j} returns the 
+value 0.
+
+\item
+\begin{tmvcode}
+d.diag()
+\end{tmvcode}
+\index{DiagMatrix!Methods!diag}
+This returns the main diagonal as usual.
+
+\item
+\begin{tmvcode}
+DiagMatrix<T>::iterator d.begin()
+DiagMatrix<T>::iterator d.end()
+DiagMatrix<T>::const_iterator d.begin() const
+DiagMatrix<T>::const_iterator d.end() const
+\end{tmvcode}
+These iterate along the diagonal of the \tt{DiagMatrix}.
+
+\item
+\begin{tmvcode}
+T* d.ptr()
+const T* d.cptr() const
+int d.step() const
+bool d.isconj() const
+\end{tmvcode}
+\index{DiagMatrix!Methods!ptr}
+\index{DiagMatrix!Methods!cptr}
+\index{DiagMatrix!Methods!step}
+\index{DiagMatrix!Methods!isconj}
+These methods allow for direct memory access of a \tt{DiagMatrix}.
+
+\item
+\begin{tmvcode}
+d.subDiagMatrix(int i1, int i2, int istep = 1)
+\end{tmvcode}
+This is equivalent to \tt{DiagMatrixViewOf(d.diag().subVector(i1,i2,istep))}.
+
+\item
+\begin{tmvcode}
+d.transpose() = d.view()
+d.conjugate() = d.adjoint()
+d.cview()
+d.fview()
+d.realPart()
+d.imagPart()
+\end{tmvcode}
+\index{DiagMatrix!Methods!subDiagMatrix}
+\index{DiagMatrix!Methods!transpose}
+\index{DiagMatrix!Methods!conjugate}
+\index{DiagMatrix!Methods!adjoint}
+\index{DiagMatrix!Methods!view}
+\index{DiagMatrix!Methods!cView}
+\index{DiagMatrix!Methods!fView}
+\index{DiagMatrix!Methods!realPart}
+\index{DiagMatrix!Methods!imagPart}
+These return \tt{DiagMatrixView}s.
+
+\end{itemize}
+
+\subsection{Functions}
+\index{DiagMatrix!Functions of}
+\label{DiagMatrix_Functions}
+
+\begin{tmvcode}
+RT d.norm1() = Norm1(d)
+RT d.norm2() = Norm2(d) 
+RT d.normInf() = NormInf(d)
+RT d.maxAbsElement() = MaxAbsElement(d)
+\end{tmvcode}
+\index{DiagMatrix!Functions of!Norm1}
+\index{DiagMatrix!Functions of!Norm2}
+\index{DiagMatrix!Functions of!NormInf}
+\index{DiagMatrix!Functions of!MaxAbsElement}
+\index{DiagMatrix!Methods!norm1}
+\index{DiagMatrix!Methods!norm2}
+\index{DiagMatrix!Methods!normInf}
+\index{DiagMatrix!Methods!maxAbsElement}
+(Actually for a diagonal matrix, all of the above norms are equal.)
+\begin{tmvcode}
+RT d.maxAbs2Element() = MaxAbs2Element(d)
+RT d.normF() = NormF(d) = d.norm() = Norm(d)
+RT d.normSq() = NormSq(d)
+RT d.normSq(RT scale)
+T d.trace() = Trace(d)
+T d.sumElements() = SumElements(d)
+RT d.sumAbsElements() = SumAbsElements(d)
+RT d.sumAbs2Elements() = SumAbs2Elements(d)
+T d.det() = Det(d)
+RT d.logDet(T* sign=0) = LogDet(d)
+bool d.isSingular()
+RT d.condition()
+RT d.doCondition()
+dinv = d.inverse() = Inverse(d)
+d.makeInverse(Matrix<T>& minv)
+d.makeInverse(DiagMatrix<T>& dinv)
+d.makeInverseATA(Matrix<T>& cov)
+d.makeInverseATA(DiagMatrix<T>& cov)
+\end{tmvcode}
+\index{DiagMatrix!Functions of!MaxAbs2Element}
+\index{DiagMatrix!Functions of!Norm}
+\index{DiagMatrix!Functions of!NormF}
+\index{DiagMatrix!Functions of!NormSq}
+\index{DiagMatrix!Functions of!Trace}
+\index{DiagMatrix!Functions of!SumElements}
+\index{DiagMatrix!Functions of!SumAbsElements}
+\index{DiagMatrix!Functions of!SumAbs2Elements}
+\index{DiagMatrix!Functions of!Det}
+\index{DiagMatrix!Functions of!LogDet}
+\index{DiagMatrix!Functions of!Inverse}
+\index{DiagMatrix!Methods!maxAbs2Element}
+\index{DiagMatrix!Methods!norm}
+\index{DiagMatrix!Methods!normF}
+\index{DiagMatrix!Methods!normSq}
+\index{DiagMatrix!Methods!trace}
+\index{DiagMatrix!Methods!sumElements}
+\index{DiagMatrix!Methods!sumAbsElements}
+\index{DiagMatrix!Methods!sumAbs2Elements}
+\index{DiagMatrix!Methods!det}
+\index{DiagMatrix!Methods!logDet}
+\index{DiagMatrix!Methods!isSingular}
+\index{DiagMatrix!Methods!condition}
+\index{DiagMatrix!Methods!doCondition}
+\index{DiagMatrix!Methods!inverse}
+\index{DiagMatrix!Methods!makeInverse}
+\index{DiagMatrix!Methods!makeInverseATA}
+Since the inverse of a \tt{DiagMatrix} is a \tt{DiagMatrix},
+we also provide a version of the \tt{makeInverse} syntax, which allows dinv
+to be a \tt{DiagMatrix}.  (Likewise for \tt{makeInverseATA}.)  The same option is 
+available with the operator version: \tt{dinv = d.inverse()}.
+
+\begin{tmvcode}
+d.setZero()
+d.setAllTo(T x)
+d.addToAll(T x)
+d.clip(RT thresh)
+d.setToIdentity(T x = 1)
+d.conjugateSelf()
+d.transposeSelf() // null operation
+d.invertSelf()
+Swap(d1,d2)
+\end{tmvcode}
+\index{DiagMatrix!Methods!setZero}
+\index{DiagMatrix!Methods!setAllTo}
+\index{DiagMatrix!Methods!addToAll}
+\index{DiagMatrix!Methods!clip}
+\index{DiagMatrix!Methods!setToIdentity}
+\index{DiagMatrix!Methods!conjugateSelf}
+\index{DiagMatrix!Methods!transposeSelf}
+\index{DiagMatrix!Methods!invertSelf}
+\index{DiagMatrix!Functions of!Swap}
+There is one new method here for \tt{DiagMatrix}: The method \tt{invertSelf}  calculates $d^{-1}$ in place.  
+It is equivalent to \tt{d = d.inverse()} and, like the other division operations, is invalid for \tt{T = int} or \tt{complex<int>}.
+\vspace{12pt}
+
+\subsection{Arithmetic}
+\index{DiagMatrix!Arithmetic}
+\label{DiagMatrix_Arithmetic}
+
+In addition to \tt{x}, \tt{v}, and \tt{m} from before, we now add \tt{d} for a \tt{DiagMatrix}.
+
+\begin{tmvcode}
+d2 = -d1
+d2 = x * d1
+d2 = d1 [*/] x
+d3 = d1 [+-] d2
+m2 = m1 [+-] d
+m2 = d [+-] m1
+d [*/]= x
+d2 [+-]= d1
+m [+-]= d
+v2 = d * v1
+v2 = v1 * d
+v *= d
+d3 = d1 * d2
+d3 = ElemProd(d1,d2)
+m2 = d * m1
+m2 = m1 * d
+d2 *= d1
+m *= d
+d2 = d1 [+-] x
+d2 = x [+-] d1
+d [+-]= x
+d = x
+\end{tmvcode}
+
+\subsection{Division}
+\index{DiagMatrix!Arithmetic!division}
+\label{DiagMatrix_Division}
+
+The division operations are:
+\begin{tmvcode}
+v2 = v1 [/%] d
+m2 = m1 [/%] d
+m2 = d [/%] m1
+d3 = d1 [/%] d2
+d2 = x [/%] d1
+v [/%]= d
+d2 [/%]= d1
+m [/%]= d
+\end{tmvcode}
+Division by a diagonal matrix does not require any decomposition, so there are none of the usual helper functions for division that a regular \tt{Matrix} has such as \tt{divideUsing}, \tt{saveDiv}, etc.
+If a \tt{DiagMatrix} is singular, you can find out with \tt{d.isSingular()},
+but there is no direct way to use SVD for the division and avoid any
+divisions by 0.  If you want to do this, you should use \tt{BandMatrixViewOf(d)} to 
+treat \tt{d} as a \tt{BandMatrix}, which can use SVD.
+
+
+\subsection{I/O}
+\index{DiagMatrix!I/O}
+\label{DiagMatrix_IO}
+
+The simplest I/O syntax is the usual:
+\begin{tmvcode}
+os << d;
+is >> d;
+\end{tmvcode}
+The output format is the same as for a \tt{Matrix}, including all the 0's.
+(See \S\ref{Matrix_IO}.)  On input, if any off diagonal elements are not 0, a
+\tt{tmv::ReadError} is thrown.
+
+There is also a compact I/O style:
+\begin{tmvcode}
+os << tmv::CompactIO() << d;
+is >> tmv::CompactIO() >> d;
+\end{tmvcode}
+\index{IOStyle!CompactIO}
+which uses the format:
+\begin{tmvcode}
+D n d(0,0) d(1,1) d(2,2) ... d(n-1,n-1)
+\end{tmvcode}
+
+One can also write small values as 0 with
+\begin{tmvcode}
+os << tmv::ThreshIO(thresh) << d;
+os << tmv::CompactIO().setThresh(thresh) << d;
+\end{tmvcode}
+\index{IOStyle!ThreshIO}
+
+See \S\ref{IOStyle} for more information about specifying custom I/O styles, including
+features like using brackets instead of parentheses, or putting commas between elements,
+or specifying an output precision.  

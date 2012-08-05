@@ -1,0 +1,91 @@
+
+#define CT std::complex<T>
+
+#define Def1(T,RT) \
+  template bool GenUpperTriMatrix<T >::hasSubMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const; \
+  template bool GenUpperTriMatrix<T >::hasSubVector( \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t size) const; \
+  template bool GenUpperTriMatrix<T >::hasSubTriMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const; \
+  template bool ConstUpperTriMatrixView<T,FortranStyle>::hasSubMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const; \
+  template bool ConstUpperTriMatrixView<T,FortranStyle>::hasSubVector( \
+      ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t size) const; \
+  template bool ConstUpperTriMatrixView<T,FortranStyle>::hasSubTriMatrix( \
+      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t istep) const; \
+  template T GenUpperTriMatrix<T >::sumElements() const; \
+  template RT GenUpperTriMatrix<T >::sumAbsElements() const; \
+  template RT GenUpperTriMatrix<T >::sumAbs2Elements() const; \
+  template RT GenUpperTriMatrix<T >::normF() const; \
+  template RT GenUpperTriMatrix<T >::normSq(const RT scale) const; \
+  template RT GenUpperTriMatrix<T >::norm1() const; \
+  template RT GenUpperTriMatrix<T >::doNorm2() const; \
+  template RT GenUpperTriMatrix<T >::doCondition() const; \
+  template RT GenUpperTriMatrix<T >::normInf() const; \
+  template RT GenUpperTriMatrix<T >::maxAbsElement() const; \
+  template RT GenUpperTriMatrix<T >::maxAbs2Element() const; \
+  template UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::setZero(); \
+  template UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::setAllTo(const T& x); \
+  template UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::addToAll(const T& x); \
+  template UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::clip(RT t); \
+  template UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::conjugateSelf(); \
+  template UpperTriMatrixView<T,CStyle>& \
+      UpperTriMatrixView<T,CStyle>::setToIdentity(const T& x); \
+  template void GenUpperTriMatrix<T >::write(const TMV_Writer& writer) const; \
+  template void GenLowerTriMatrix<T >::write(const TMV_Writer& writer) const; \
+  template void UpperTriMatrixView<T,CStyle>::read(const TMV_Reader& reader); \
+  template void LowerTriMatrixView<T,CStyle>::read(const TMV_Reader& reader); \
+
+Def1(T,T)
+#ifdef INST_COMPLEX
+Def1(CT,T)
+#endif
+
+#undef Def1
+
+#define Def2(T1,T2) \
+  template bool operator==(const GenUpperTriMatrix<T1 >& m1, \
+      const GenUpperTriMatrix<T2 >& m2); \
+
+Def2(T,T)
+#ifdef INST_COMPLEX
+Def2(T,CT)
+Def2(CT,T)
+Def2(CT,CT)
+#endif
+
+#undef Def2
+
+#define Def3(T,A) \
+  template void UpperTriMatrix<T,A>::read(const TMV_Reader& reader); \
+  template void LowerTriMatrix<T,A>::read(const TMV_Reader& reader); \
+
+Def3(T,UnitDiag|RowMajor|CStyle)
+Def3(T,UnitDiag|ColMajor|CStyle)
+Def3(T,NonUnitDiag|RowMajor|CStyle)
+Def3(T,NonUnitDiag|ColMajor|CStyle)
+Def3(T,UnitDiag|RowMajor|FortranStyle)
+Def3(T,UnitDiag|ColMajor|FortranStyle)
+Def3(T,NonUnitDiag|RowMajor|FortranStyle)
+Def3(T,NonUnitDiag|ColMajor|FortranStyle)
+#ifdef INST_COMPLEX
+Def3(CT,UnitDiag|RowMajor|CStyle)
+Def3(CT,UnitDiag|ColMajor|CStyle)
+Def3(CT,NonUnitDiag|RowMajor|CStyle)
+Def3(CT,NonUnitDiag|ColMajor|CStyle)
+Def3(CT,UnitDiag|RowMajor|FortranStyle)
+Def3(CT,UnitDiag|ColMajor|FortranStyle)
+Def3(CT,NonUnitDiag|RowMajor|FortranStyle)
+Def3(CT,NonUnitDiag|ColMajor|FortranStyle)
+#endif
+
+#undef Def3
+
+#undef CT
+

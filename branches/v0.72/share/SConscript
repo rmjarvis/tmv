@@ -1,0 +1,77 @@
+# vim: set filetype=python :
+
+import SCons
+import os
+Import('env')
+
+libs=['tmv'] 
+
+installed_link_file = File(os.path.join('share','tmv','tmv-link'),env['INSTALL_PREFIX']).abspath
+
+link_file = File(os.path.join('#share','tmv-link'))
+
+env1 = env.Clone(LIBS=libs+env['LIBS'],
+    LINKFILE=link_file, INSTALLED_LINKFILE=installed_link_file,
+    LIBPATH=env['LIBPATH2'])
+
+# Include the shared library location within the executable.
+lib_install_dir = os.path.join(env['FINAL_PREFIX'], 'lib')
+if env['SHARED']:
+    if 'install' in COMMAND_LINE_TARGETS:
+        env1.Append( RPATH = Dir(lib_install_dir).abspath )
+    else:
+        env1.Append( RPATH = Dir('#lib').abspath )
+
+    # Workaround for SCons bug: The above doesn't always work correctly.
+    # RPATH clashes with LINKFLAGS.  So if LINKFLAGS is already set, we need this workaround.
+    # See: http://scons.tigris.org/issues/show_bug.cgi?id=1644
+    # Fixed in version 2.1.
+    major , minor, junk = SCons.__version__.split('.',2)
+    if major < 2 or (major == 2 and minor == 0):
+        env1.Append( LINKFLAGS = ["$__RPATH"] )
+
+    if env['PREFIX'] != '':
+        env1.AppendUnique(LIBPATH=os.path.join(env['FINAL_PREFIX'], 'lib'))
+
+lib_files = env['LIB_FILE_NAMES']
+cmd1 = 'rm -f $LINKFILE; '
+cmd1 += 'echo $_LIBDIRFLAGS $_LIBFLAGS $LINKFLAGS > $TARGET '
+env1.Command(link_file,lib_files,cmd1)
+
+# TODO: This is linux-specific.  Should I do something for Windows?
+cmd2 = 'share/tmv-link-msg $LINKFILE $INSTALLED_LINKFILE'
+done_install = env1.Command('#share/done_install', str(installed_link_file), cmd2)
+
+RunInstall = env['_InstallProgram']
+RunUninstall = env['_UninstallProgram']
+
+# Install tmv-link in INSTALL_PREFIX/share/tmv
+share_targets = [env.File('tmv-link')]
+share_subdir = os.path.join('share','tmv')
+
+if 'install' in COMMAND_LINE_TARGETS:
+    env.Alias('install', done_install)
+    RunInstall(env, share_targets, share_subdir)
+
+if 'uninstall' in COMMAND_LINE_TARGETS:
+    RunUninstall(env, share_targets, share_subdir)
+
+
+# Also install some documenation files in INSTALL_PREFIX/share/doc/tmv
+doc_targets = [env.File(os.path.join('#','README'))]
+doc_targets += [env.File(os.path.join('#','LICENSE'))]
+doc_targets += [env.File(os.path.join('#','CHANGELOG'))]
+
+pdf_file = env.File(os.path.join('#doc','TMV_Documentation.pdf'))
+if os.path.exists(pdf_file.abspath):
+    doc_targets += [pdf_file]
+
+doc_subdir = os.path.join('share','doc','tmv')
+
+if 'install' in COMMAND_LINE_TARGETS:
+    env.Alias('install', done_install)
+    RunInstall(env, doc_targets, doc_subdir)
+
+if 'uninstall' in COMMAND_LINE_TARGETS:
+    RunUninstall(env, doc_targets, doc_subdir)
+

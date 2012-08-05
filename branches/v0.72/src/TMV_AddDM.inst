@@ -1,0 +1,19 @@
+
+#define CT std::complex<T>
+
+#define DefAdd(T,Ta,Tb)\
+  template void AddMM(const T alpha, const GenDiagMatrix<Ta >& A, \
+      const T beta, const GenMatrix<Tb >& B, MatrixView<T > C); \
+
+DefAdd(T,T,T)
+#ifdef INST_COMPLEX
+DefAdd(CT,T,T)
+DefAdd(CT,T,CT)
+DefAdd(CT,CT,T)
+DefAdd(CT,CT,CT)
+#endif
+
+#undef DefAdd
+
+#undef CT
+

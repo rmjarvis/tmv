@@ -1,0 +1,228 @@
+% !TEX root = TMV_Documentation.tex
+
+\section{Matrix I/O Styles}
+\label{IOStyle}
+
+\subsection{The normal I/O format}
+
+As mentioned previously, the simplest syntax for writing a matrix to a stream is the usual C++ syntax:
+\begin{tmvcode}
+os << m;
+\end{tmvcode}
+
+This always uses the same format no matter what kind of matrix is being printed.  Namely, the size of the matrix (nrows ncols), and then each row listed as a vector surrounded by parentheses.  So for a $4\times5$ matrix, the output would be something like:
+\begin{tmvcode}
+4 5
+( 1.2  3.4  0.9  5.3  6.1 )
+( 0.9  3.9  8.8  9.0  1.0 )
+( 2.4  1.7  5.6  7.6  8.3 )
+( 0.1  4.5  6.6  1.9  6.2 )
+\end{tmvcode}
+
+This format can be read back in using the usual C++ syntax:
+\begin{tmvcode}
+is >> m;
+\end{tmvcode}
+If the size of the matrix \tt{m} doesn't match the size being read from the input stream, then the matrix will be resized to match, assuming the matrix is a type that can be resized appropriately.  If the matrix type is intrinsically square (e.g. \tt{DiagMatrix} or \tt{SymMatrix}), then the input sizes must be equal.  The above $4\times5$ matrix could not be read into these types for example.
+
+And if the type of matrix \tt{m} requires zeros in certain places, then the input matrix must have zeros in those places too.  If it does not, then a \tt{ReadError} is thrown.  Likewise if the matrix type is symmetric or Hermitian, then the input matrix must be such as well.
+
+\subsection{The compact I/O format}
+
+The other standard I/O format that we have already mentioned is what I call the ``Compact'' format.  This format puts everything on a single line and includes all the information to load the values back into memory, but no more than than.  It starts with a letter code indicating the kind of matrix being written.  Then any size values.  Then all the elements in row-major order, omitting any trivial values based on the shape or type of matrix.
+
+To write using this format, you would write:
+\begin{tmvcode}
+os << tmv::CompactIO() << m;
+\end{tmvcode}
+
+The above $4\times5$ matrix would be output as:
+\begin{tmvcode}
+M 4 5 1.2 3.4 0.9 5.3 6.1 0.9 3.9 8.8 9.0 1.0 2.4 1.7 5.6 7.6 8.3 0.1 4.5 
+6.6 1.9 6.2
+\end{tmvcode}
+all on one line (i.e. without the line break).  
+
+This format isn't as pretty of course, but it saves space, especially when writing some of the special matrix varieties that have lots of zeros in them.  Also, this format records extra information that might be necessary when reading back.  For example, the compact format for banded matrices includes the number of super- and sub-diagonals, so the matrix can be correctly resized on input.  
+
+Also, \tt{Permutation} objects store their data in a very different way than what gets output in the normal format, so it can only be read in using the compact format.  
+
+\subsection[The IOStyle class]{The \tt{IOStyle} class}
+
+The above function \tt{tmv::CompactIO()} returns a \tt{tmv::IOStyle} object.  This is the class TMV uses to mediate everything about the I/O.  And if you don't like either of the above two styles, you can design your own.  For example, you might like the normal format, but don't want the size printed.  Or you might want to use square brackets rather than parentheses.  Or no brackets at all, but still in a rectangular grid.  All these things are possible with the \tt{IOStyle} class.  So let's get into some details about how you can use it.
+
+The only constructor is a default constructor:
+\begin{tmvcode}
+IOStyle()
+\end{tmvcode}
+which gives you the ``normal'' I/O format described above.  (However, see \S\ref{IOStyleDefault} below for how you can change the default IOStyle.)  
+In fact, TMV internally converts a statement like:
+\begin{tmvcode}
+os << m;
+\end{tmvcode}
+into
+\begin{tmvcode}
+os << IOStyle() << m;
+\end{tmvcode}
+
+The \tt{IOStyle} class has quite a few methods that change various aspects of the I/O behavior:
+
+\begin{itemize}
+\item
+\begin{tmvcode}
+useCode()
+noCode()
+\end{tmvcode}
+Specify whether or not to use the letter code that indicates what kind of object is being printed.  The codes TMV currently uses are:
+\begin{itemize} \itemsep -2pt
+\item \tt{V = Vector}
+\item \tt{M = Matrix}
+\item \tt{P = Permutation}
+\item \tt{D = DiagMatrix}
+\item \tt{U = UpperTriMatrix}
+\item \tt{L = LowerTriMatrix}
+\item \tt{B = BandMatrix}
+\item \tt{S = SymMatrix}
+\item \tt{H = HermMatrix}
+\item \tt{sB = SymBandMatrix}
+\item \tt{hB = HermBandMatrix}
+\end{itemize}
+
+\item
+\begin{tmvcode}
+simpleSize()
+\end{tmvcode}
+Write the size as \tt{nrows ncols} regardless of whether this is redundant (because the matrix type is necessarily square, like a \tt{DiagMatrix}) or insufficient (because the matrix type needs more information like the number of super- and sub-diagonals for a \tt{BandMatrix}).
+
+\item
+\begin{tmvcode}
+fullSize()
+\end{tmvcode}
+Write all the size information necessary for the matrix type in question, and only as much as is necessary.  e.g. for a \tt{DiagMatrix}, only write \tt{nrows} (since \tt{ncols} is the same), and for a \tt{BandMatrix}, write \tt{nrows ncols nlo nhi} to describe the full band structure.
+
+\item
+\begin{tmvcode}
+noSize()
+\end{tmvcode}
+Do not write any size values.
+
+\item
+\begin{tmvcode}
+noPrefix()
+\end{tmvcode}
+Turn off all prefix items (code and size)
+
+\item
+\begin{tmvcode}
+markup(start, lparen, space, rparen, rowend, final)
+\end{tmvcode}
+Change the markup text to use.  (All the parameters are input as \tt{std::string}, although one would usually give tham as string literals.)  \tt{start} is the text to put after the prefix and before the first row of a matrix.  \tt{lparen} is the text to put before the first element of a row (or vector).  \tt{space} is the text to put between two elements in a row (or vector).  \tt{rparen} is the text to put after the last element of a row (or vector).  \tt{rowend} is the text to put after each row in a matrix, except for the last one.  \tt{final} is the text to put after the last row in a matrix.
+
+To give a concrete example, the ``normal'' format described above would be specified as
+\begin{tmvcode}
+markup("\n","( ","  "," )","\n","\n")
+\end{tmvcode}
+
+\item
+\begin{tmvcode}
+fullMatrix()
+compact()
+\end{tmvcode}
+Specify whether to write all the elements of a matrix, even if they are trivially zero because of the type of matrix being printed (\tt{fullMatrix}), or to only write those elements that are non-trivial (\tt{compact}).
+
+\item
+\begin{tmvcode}
+setThresh(double thresh)
+\end{tmvcode}
+Specify a threshold, below which (in absolute value) any output value should be written as zero, instead of its value in memory.  This is useful when looking at matrices that should be numerically mostly (or all) 0's, so you don't have to wade through many values like \tt{6.4345e-16} looking for elements that are significant.
+
+Note that for complex values, the real and imaginary components are separately checked, so something like \tt{(1,7.54351e-16)} would be written as \tt{(1,0)} if \tt{thresh} is something reasonable like \tt{1.e-10}.
+
+\item
+\begin{tmvcode}
+setPrecision(int prec)
+useDefaultPrecision()
+\end{tmvcode}
+Specify the precision to use on output.  The first method basically applies the \tt{std::ostream} method \tt{precision(prec)} to the matrix elements being written.  The second method instructs TMV to just use whatever the stream's current precision is without changing it.
+
+\end{itemize}
+
+All of these methods return the \tt{IOStyle} object back (by reference), so they can be strung together and then passed to the \tt{ostream} or \tt{istream} for a particular matrix.
+\begin{tmvcode}
+os << IOStyle().noPrefix().setPrecision(8) << m;
+\end{tmvcode}
+
+Note that each TMV object being read or written needs its own \tt{IOStyle} specification preceding it if you want to use something other than the default.  So if you write
+\begin{tmvcode}
+os << IOStyle().noPrefix().setPrecision(8) << m1 << m2;
+\end{tmvcode}
+\tt{m1} would get the modified format spectified, but \tt{m2} would get the default style.  If you want to use the same modified format for several matrices, you can create and name an \tt{IOStyle} object and use it several times. For example,
+\begin{tmvcode}
+IOStyle myStyle;
+myStyle.noPrefix().setPrecision(8);
+os << myStyle << m1 << myStyle << m2;
+\end{tmvcode}
+
+Or if you want to use an alternate style for every I/O statement in your program, you could change the default \tt{IOStyle}...
+
+\subsection{Changing the default style}
+\label{IOStyleDefault}
+
+If you have a preference for a different I/O style, you can set it to be the default \tt{IOStyle} that is used automatically when using the simple I/O commands like \tt{os << m} or \tt{is >> m}.  To set a particular \tt{IOStyle} object to be the default, use the method
+\begin{tmvcode}
+makeDefault()
+\end{tmvcode}
+For example, if you want the standard I/O style to have no prefix and use square brackets rather than parentheses, you could write
+\begin{tmvcode}
+IOStyle().noPrefix().markup("","[ ","  "," ]","\n","\n").makeDefault();
+\end{tmvcode}
+near the beginning of you program.  Then every time your program writes a matrix (unless you explicitly specify some other style), it will use that format instead of the original default.
+
+You can also revert the default I/O style back to its original state with the class function
+\begin{tmvcode}
+tmv::IOStyle::revertDefault();
+\end{tmvcode}
+
+\subsection[Functions that return an IOStyle object]{Functions that return an \tt{IOStyle} object}
+
+We have several functions that return an \tt{IOStyle} object that may be more convenient than starting with the default \tt{IOStyle()} and specifying modifications:
+ 
+\begin{itemize}
+\item \tt{CompactIO()} was already mentioned above.  It is equivalent to:
+\begin{tmvcode}
+IOStyle().useCode().fullSize().compact().markup("",""," ",""," ","")
+\end{tmvcode}
+
+\item \tt{NormalIO()} is normally unnecessary, since it is the default \tt{IOStyle}.  However, it can be useful if the default has been changed.  It is equivalent to
+\begin{tmvcode}
+IOStyle().noCode().simpleSize().fullMatrix().
+      markup("\n","( ","  "," )","\n","\n")
+\end{tmvcode}
+
+\item
+\tt{ThreshIO(thresh)} is equivalent to
+\begin{tmvcode}
+IOStyle().setThresh(thresh)
+\end{tmvcode}
+
+\item
+\tt{PrecIO(prec)} is equivalent to
+\begin{tmvcode}
+IOStyle().setPrecision(prec)
+\end{tmvcode}
+
+\item
+\tt{EigenIO()} mimics the default I/O style of the Eigen matrix library.  It is equivalent to
+\begin{tmvcode}
+IOStyle().noPrefix().fullMatrix().markup("",""," ","","\n","");
+\end{tmvcode}
+
+\end{itemize}
+
+Notice that all of these functions start with the default \tt{IOStyle}, so they inherit from the current default style anything that they don't explicitly override.  For example, most of them do not explicitly do anything to the precision.  So whatever is currently set in the default will also be used when you use these functions.
+
+Also, you can start with one of these functions and modify from there, rather than starting with \tt{IOStyle()}, if that is more convenient.  For example, if you want to use the ``compact format'' and also set a threshold of \tt{1.e-6}, you could write
+\begin{tmvcode}
+os << tmv::CompactIO().setThresh(1.e-6) << m;
+\end{tmvcode}
+

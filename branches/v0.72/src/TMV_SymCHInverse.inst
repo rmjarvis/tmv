@@ -1,0 +1,15 @@
+#define CT std::complex<T>
+
+#define DefInv(T,T1) \
+template void CH_Inverse(const GenSymMatrix<T1 >& m, SymMatrixView<T > sinv); \
+    
+DefInv(T,T)
+#ifdef INST_COMPLEX
+DefInv(CT,T)
+DefInv(CT,CT)
+#endif
+
+#undef DefInv
+
+#undef CT
+

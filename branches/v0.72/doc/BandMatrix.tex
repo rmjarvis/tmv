@@ -1,0 +1,745 @@
+% !TEX root = TMV_Documentation.tex
+
+\section{Band-diagonal matrices}
+\index{BandMatrix}
+\label{BandMatrix}
+
+The \tt{BandMatrix} class is our band-diagonal matrix, which is only non-zero
+on the main diagonal and a few sub- and super-diagonals.  While band-diagonal
+matrices are usually square, we allow for non-square banded matrices as well.
+You may even have rows or columns that are completely outside of the 
+band structure, and hence are all 0.  For example a $10\times 5$ band matrix
+with 2 sub-diagonals is valid even though the bottom 3 rows are all 0.
+
+Throughout, we use \tt{nlo} to refer to the number of sub-diagonals 
+(below the main diagonal) stored
+in the \tt{BandMatrix}, and \tt{nhi} to refer to the number of super-diagonals
+(above the main diagonal).
+
+All the \tt{BandMatrix} routines are included by:
+\begin{tmvcode}
+#include "TMV_Band.h"
+\end{tmvcode}
+\index{TMV\_Band.h}
+
+In addition to the data type template parameter (indicated here by \tt{T} as usual),
+there is also a second template parameter that specifies attributes of the
+\tt{BandMatrix}.  The attributes that are allowed are:
+\begin{description} \itemsep -2pt
+\item[$\bullet$] \tt{CStyle} or \tt{FortranStyle}
+\item[$\bullet$] \tt{ColMajor}, \tt{RowMajor}, or \tt{DiagMajor}
+\end{description}
+For this class, we have the additional storage possibility: \tt{DiagMajor},
+which has unit step along the diagonals.  It stores the values in memory
+starting with the lowest sub-diagonal and progressing up to the highest
+super-diagonal.
+The default attributes are \tt{CStyle} and \tt{ColMajor}.
+
+For each type of storage, we require that the step size in each direction
+be uniform within a given row, column or diagonal. 
+This means that we require a few extra elements
+of memory that are not actually used.
+To demonstrate the different storage orders and why extra memory is required, 
+here are three $6 \times 6$ band-diagonal
+matrices, each with $nlo = 2$ and $nhi = 3$ in each of the different storage
+types.  The number in each place indicates the offset in memory from the 
+top left element.
+
+\begin{align*}
+\textrm{ColMajor:} ~ ~ & \left(\begin{array}{cccccc}0 & 5 & 10 & 15 &  &  \\1 & 6 & 11 & 16 & 21 &  \\2 & 7 & 12 & 17 & 22 & 27 \\ & 8 & 13 & 18 & 23 & 28 \\ &  & 14 & 19 & 24 & 29 \\ &  &  & 20 & 25 & 30\end{array}\right) \\
+\textrm{RowMajor:} ~  ~ & \left(\begin{array}{cccccc}0 & 1 & 2 & 3 &  &  \\ 5 & 6 & 7 & 8 & 9 &  \\ 10 & 11 & 12 & 13 & 14 & 15 \\ & 16 & 17 & 18 & 19 & 20 \\ &  & 22 & 23 & 24 & 25 \\ &  &  & 28 & 29 & 30\end{array}\right) \\
+\textrm{DiagMajor:} ~  ~ & \left(\begin{array}{cccccc}0 & 6 & 12 & 18 &  &  \\-5 & 1 & 7 & 13 & 19 &  \\ -10 & -4 & 2 & 8 & 14 & 20 \\ & -9 & -3 & 3 & 9 & 15 \\ &  & -8 & -2 & 4 & 10 \\ &  &  & -7 & -1 & 5\end{array}\right)
+\end{align*}
+
+First, notice that all three storage methods require 4 extra locations in memory, 
+which do not hold
+any actual matrix data.  
+(They require a total of 31 memory addresses for only 27 that are used.)
+This is because we want to have the same step size between consecutive row elements
+for every row.  Likewise for the columns (which in turn implies that it is also 
+true for the diagonals).
+
+For $N\times N$ square matrices, the total memory needed is $(N-1)*(nlo+nhi+1)+1$, 
+which wastes $(nlo-1)*nlo/2 + (nhi-1)*nhi/2$ locations.  For non-square
+matrices, the formula is more complicated, and changes slightly between the 
+three storages.
+If you want to know the memory used by a \tt{BandMatrix}, we provide the routine:
+\begin{tmvcode}
+int BandStorageLength(StorageType stor, int nrows, int ncols, int nlo, 
+      int nhi)
+\end{tmvcode}
+\index{BandMatrix!Memory usage}
+\index{BandMatrix!BandStorageLength}
+For square matrices, all three methods always need the same amount of memory 
+(and for non-square, they aren't very different), so the 
+decision about which method to use should generally be based on performance 
+considerations rather than memory usage.
+The speed of the various matrix operations are different for the different storage 
+types.  If the matrix calculation speed is important, it may be worth trying 
+all three to see which is fastest for the operations you are using.
+
+Second, notice that the \tt{DiagMajor} storage doesn't start with the 
+upper left element as usual.
+Rather, it starts at the start of the lowest sub-diagonal.  
+This mostly just impacts the \tt{BandMatrixViewOf} function.  If the storage is 
+given as \tt{DiagMajor}, then
+the start of the array needs to be at the start of the lowest sub-diagonal.  
+
+Most functions and methods for \tt{BandMatrix} 
+work the same as they do for \tt{Matrix}.
+In these cases, we will just list the functions that are allowed with the
+effect understood to be the same as for a regular \tt{Matrix}.  Of course, there are 
+almost always algorithmic speed-ups, which the code will use to take advantage of the 
+banded structure.
+Whenever there is a difference in how a function works,
+we will explain the difference.
+
+
+\subsection{Constructors}
+\index{BandMatrix!Constructors}
+\label{BandMatrix_Constructors}
+
+As usual, the optional \tt{A} template argument specifies attributes about
+the \tt{DiagMatrix}.  The default attributes if not specified are
+\tt{CStyle|ColMajor}.
+
+\begin{itemize}
+
+\item
+\begin{tmvcode}
+tmv::BandMatrix<T,A> b()
+\end{tmvcode}
+Makes a \tt{BandMatrix} with zero size.  You would normally use the \tt{resize} function later to
+change the size to some useful value.
+
+\item 
+\begin{tmvcode}
+tmv::BandMatrix<T,A> b(int nrows, int ncols, int nlo, int nhi)
+\end{tmvcode}
+Makes a \tt{BandMatrix} with \tt{nrows} rows, \tt{ncols} columns, 
+\tt{nlo} sub-diagonals,
+and \tt{nhi} super-diagonals with {\em uninitialized} values.
+If extra debugging is turned on (with the compiler flag \tt{-DTMV\_EXTRA\_DEBUG}), then the values are initialized to 888.
+
+\item
+\begin{tmvcode}
+tmv::BandMatrix<T,A> b(int nrows, int ncols, int nlo, int nhi, T x)
+\end{tmvcode}
+Makes a \tt{BandMatrix} with all values equal to \tt{x}.
+
+\item 
+\begin{tmvcode}
+tmv::BandMatrix<T,A> b(const Matrix<T,A2>& m, int nlo, int nhi)
+tmv::BandMatrix<T,A> b(const BandMatrix<T,A2>& m, int nlo, int nhi)
+tmv::BandMatrix<T,A> b(const UpperTriMatrix<T,A2>& m, int nhi)
+tmv::BandMatrix<T,A> b(const LowerTriMatrix<T,A2>& m, int nlo)
+\end{tmvcode}
+Make a \tt{BandMatrix} the same size as \tt{m}, which copies the values of \tt{m}
+that are within the band defined by \tt{nlo} and \tt{nhi}
+For the second one, \tt{nlo} and \tt{nhi} must not be larger than those for \tt{m}.
+For the last two, \tt{nlo} and \tt{nhi} (respectively) are taken to be $0$.
+
+\item
+\begin{tmvcode}
+tmv::BandMatrix<T,tmv::DiagMajor> m = UpperBiDiagMatrix(
+      const Vector<T>& v1, const Vector<T>& v2)
+tmv::BandMatrix<T,tmv::DiagMajor> m = LowerBiDiagMatrix(
+      const Vector<T>& v1, const Vector<T>& v2)
+tmv::BandMatrix<T,tmv::DiagMajor> m = TriDiagMatrix(
+      const Vector<T>& v1,  const Vector<T>& v2, const Vector<T>& v3)
+\end{tmvcode}
+\index{BandMatrix!Constructors!UpperBiDiagMatrix}
+\index{BandMatrix!Constructors!LowerBiDiagMatrix}
+\index{BandMatrix!Constructors!TriDiagMatrix}
+Shorthand to create bi- or tri-diagonal \tt{BandMatrix}es if you already have the 
+\tt{Vector}s.  The \tt{Vector}s are in order from bottom to top in each case.
+
+\item
+\begin{tmvcode}
+tmv::BandMatrix<T,A> b1(const BandMatrix<T2,A2>& b2)
+b1 = b2
+\end{tmvcode}
+Copy the \tt{BandMatrix b2}, which may be of any type \tt{T2} so long
+as values of type \tt{T2} are convertible into type \tt{T}.
+The assignment operator has the same flexibility.
+
+\item
+\begin{tmvcode}
+tmv::BandMatrixView<T,A> b = 
+      BandMatrixViewOf(MatrixView<T> m, int nlo, int nhi)
+tmv::BandMatrixView<T,A> b = 
+      BandMatrixViewOf(BandMatrixView<T> m, int nlo, int nhi)
+tmv::BandMatrixView<T,A> b = 
+      BandMatrixViewOf(DiagMatrixView<T> m)
+tmv::BandMatrixView<T,A> b = 
+      BandMatrixViewOf(UpperTriMatrixView<T> m)
+tmv::BandMatrixView<T,A> b = 
+      BandMatrixViewOf(UpperTriMatrixView<T> m, int nhi)
+tmv::BandMatrixView<T,A> b = 
+      BandMatrixViewOf(LowerTriMatrixView<T> m)
+tmv::BandMatrixView<T,A> b = 
+      BandMatrixViewOf(LowerTriMatrixView<T> m, int nlo)
+\end{tmvcode}
+\index{Matrix!View portion as a BandMatrix}
+\index{BandMatrix!View portion as a thinner BandMatrix}
+\index{DiagMatrix!View as a BandMatrix}
+\index{UpperTriMatrix!View as a BandMatrix}
+Make an \tt{BandMatrixView} of the corresponding portion of \tt{m}.  
+There are also \tt{ConstBandMatrixView} versions of all of these.  
+
+\item
+\begin{tmvcode}
+tmv::BandMatrixView<T,A> b(MatrixView<T> m, int nlo, int nhi)
+tmv::BandMatrixView<T,A> b(BandMatrixView<T> m, int nlo, int nhi)
+\end{tmvcode}
+\index{BandMatrix!Constructors!BandMatrixView}
+\index{Matrix!View portion as a BandMatrix}
+\index{BandMatrix!View portion as a thinner BandMatrix}
+For square matrices \tt{m}, these (and the corresponding \tt{ConstBandMatrixView}
+versions) work the same as the above \tt{BandMatrixViewOf}
+commands.  However, this version preserves the values of \tt{nrows} and \tt{ncols}
+from \tt{m}
+even if some of the rows or columns do not include any of the new band.
+This is only important if \tt{m} is not square.
+
+For example, if \tt{m} is $10 \times 8$, then 
+\begin{tmvcode}
+tmv::BandMatrixView<T> b1(m,0,2);
+\end{tmvcode}
+will create a $10 \times 8$ \tt{BandMatrixView} of \tt{m}'s diagonal plus two super-diagonals, but
+\begin{tmvcode}
+tmv::BandMatrixView<T> b2 = BandMatrixViewOf(m,0,2);
+\end{tmvcode}
+will instead create an $8 \times 8$ \tt{BandMatrixView} of the same portion of \tt{m}.
+
+Note that the same difference holds for the \tt{BandMatrix} constructor:
+\begin{tmvcode}
+tmv::BandMatrix<T> b1(m,0,2);
+\end{tmvcode}
+will create a $10 \times 8$ \tt{BandMatrix}, but
+\begin{tmvcode}
+tmv::BandMatrix<T> b2 = BandMatrixViewOf(m,0,2);
+\end{tmvcode}
+will create an $8 \times 8$ \tt{BandMatrix}.
+
+\item
+\begin{tmvcode}
+tmv::BandMatrixView<T> b = 
+      tmv::BandMatrixViewOf(T* vv, int ncols, int nrows, 
+          int nlo, int nhi, StorageType stor)
+tmv::ConstBandMatrixView<T> b = 
+      tmv::BandMatrixViewOf(const T* vv, int ncols, int nrows, 
+          int nlo, int nhi, StorageType stor)
+\end{tmvcode}
+\index{BandMatrix!View of raw memory}
+Make a \tt{BandMatrixView} of the actual memory elements, \tt{vv}.
+The length of the data array should be \tt{BandStorageLength(stor,ncols,nrows,nlo,nhi)}.  
+One important point: The \tt{DiagMajor} storage order starts at the beginning of the lowest sub-diagonal, so
+\tt{vv} is the memory address of \tt{b(nlo,0)}, not \tt{b(0,0)}.
+
+\item
+\begin{tmvcode}
+tmv::BandMatrixView<T> b = 
+      tmv::BandMatrixViewOf(T* vv, int ncols, int nrows, 
+          int nlo, int nhi, int stepi, int stepj)
+tmv::ConstBandMatrixView<T> b = 
+      tmv::BandMatrixViewOf(const T* vv, int ncols, int nrows, 
+          int nlo, int nhi, int stepi, int stepj)
+\end{tmvcode}
+\index{BandMatrix!View of raw memory}
+Make a \tt{BandMatrixView} of the actual memory elements, \tt{vv}.
+These allow for arbitrary steps through the data.  Also, the value \tt{*vv}
+is always \tt{b(0,0)} even if the elements are laid out in \tt{DiagMajor} order in memory.
+
+
+\end{itemize}
+
+\subsection{Access}
+\index{BandMatrix!Access methods}
+\label{BandMatrix_Access}
+
+\begin{itemize}
+
+\item
+\begin{tmvcode}
+b.nrows() = b.colsize()
+b.ncols() = b.rowsize()
+b.resize(int new_nrows, int new_ncols, int new_nlo, int new_nhi)
+b(i,j)
+b.cref(i,j)
+b.ref(i,j)
+\end{tmvcode}
+\index{BandMatrix!Methods!nrows}
+\index{BandMatrix!Methods!ncols}
+\index{BandMatrix!Methods!rowsize}
+\index{BandMatrix!Methods!colsize}
+\index{BandMatrix!Methods!resize}
+\index{BandMatrix!Methods!operator()}
+\index{BandMatrix!Methods!cref}
+\index{BandMatrix!Methods!ref}
+For the mutable \tt{b(i,j)} version, the position must fall within the
+band.  If \tt{b} is not mutable, then \tt{b(i,j)} return 0 for
+positions outside of the band.
+
+\item
+\begin{tmvcode}
+b.row(int i, int j1, int j2)
+b.col(int j, int i1, int i2)
+b.diag()
+b.diag(int i)
+b.diag(int i, int k1, int k2)
+\end{tmvcode}
+\index{BandMatrix!Methods!row}
+\index{BandMatrix!Methods!col}
+\index{BandMatrix!Methods!diag}
+The versions of \tt{row} and \tt{col} with only one argument are
+missing, since the full row or column isn't accessible as a \tt{VectorView}.
+You must specify a valid range within the row or column that you want, 
+given the banded storage of \tt{b}.
+
+\item
+\begin{tmvcode}
+ConstVectorView<T> b.constLinearView() const
+VectorView<T> b.linearView()
+bool b.canLinearize()
+\end{tmvcode}
+\index{BandMatrix!View as a contiguous Vector}
+\index{BandMatrix!Methods!linearView}
+\index{BandMatrix!Methods!constLinearView}
+\index{BandMatrix!Methods!canLinearize}
+These are similar to the regular \tt{Matrix} version in that they return a view to the elements of a \tt{BandMatrix} as a single vector.  However, 
+in this case, there are a few elements in memory that are not necessarily
+defined, since they lie outside of the actual band structure, so some care
+should be used depending on the application of the returned vector views.  
+They are always allowed for an actual \tt{BandMatrix}.  For a \tt{BandMatrixView} (or \tt{ConstBandMatrixView}), they are only allowed if all of the elements in the view are in one contiguous block of memory.  The helper function \tt{b.canLinearize()} returns whether or not the first two methods will work.
+
+\item
+\begin{tmvcode}
+BandMatrix<T>::rowmajor_iterator b.rowmajor_begin()
+BandMatrix<T>::rowmajor_iterator b.rowmajor_end()
+BandMatrix<T>::const_rowmajor_iterator b.rowmajor_begin() const
+BandMatrix<T>::const_rowmajor_iterator b.rowmajor_end() const
+BandMatrix<T>::colmajor_iterator b.colmajor_begin()
+BandMatrix<T>::colmajor_iterator b.colmajor_end()
+BandMatrix<T>::const_colmajor_iterator b.colmajor_begin() const
+BandMatrix<T>::const_colmajor_iterator b.colmajor_end() const
+BandMatrix<T>::diagmajor_iterator b.diagmajor_begin()
+BandMatrix<T>::diagmajor_iterator b.diagmajor_end()
+BandMatrix<T>::const_diagmajor_iterator b.diagmajor_begin() const
+BandMatrix<T>::const_diagmajor_iterator b.diagmajor_end() const
+\end{tmvcode}
+Here we have added a new set of iterators that traverse the matrix in diagonal-major order.  Unlike the others, they do not start with $m(0,0)$.  They instead start at the beginning of the lowest subdiagonal in the band and proceed up to the highest super-diagonal.  Note: If you want to iterate along the diagonals starting with the highest super-diagonal and proceeding down, you can use \tt{b.transpose().diagmajor_begin()}.
+
+\item
+\begin{tmvcode}
+T* b.ptr()
+const T* b.cptr() const
+int b.stepi() const
+int b.stepj() const
+int b.diagstep() const
+bool b.isconj() const
+bool b.isrm() const
+bool b.iscm() const
+bool b.isdm() const
+\end{tmvcode}
+\index{BandMatrix!Methods!ptr}
+\index{BandMatrix!Methods!cptr}
+\index{BandMatrix!Methods!stepi}
+\index{BandMatrix!Methods!stepj}
+\index{BandMatrix!Methods!diagstep}
+\index{BandMatrix!Methods!isconj}
+\index{BandMatrix!Methods!isrm}
+\index{BandMatrix!Methods!iscm}
+\index{BandMatrix!Methods!isdm}
+These methods allow for direct memory access of a \tt{BandMatrix}.  There are two new methods here: \tt{m.diagstep() = m.stepi()+m.stepj()} returns the step size along the diagonal directions, and \tt{isdm()} is another convenience function that returns whether \tt{b} is \tt{DiagMajor}. 
+
+\item
+\begin{tmvcode}
+b.subVector(int i, int j, int istep, int jstep, int size)
+b.subMatrix(int i1, int i2, int j1, int j2)
+b.subMatrix(int i1, int i2, int j1, int j2, int istep, int jstep)
+\end{tmvcode}
+\index{BandMatrix!Methods!subVector}
+\index{BandMatrix!Methods!subMatrix}
+These work the same as for a \tt{Matrix}
+(See \ref{Matrix_Access}),
+except that the entire
+subvector or submatrix must be completely within the band.
+
+\item
+\begin{tmvcode}
+b.subBandMatrix(int i1, int i2, int j1, int j2)
+b.subBandMatrix(int i1, int i2, int j1, int j2, int newnlo, int newnhi)
+b.subBandMatrix(int i1, int i2, int j1, int j2, int newnlo, int newnhi, 
+      int istep, int jstep)
+\end{tmvcode}
+\index{BandMatrix!Methods!subBandMatrix}
+This returns a \tt{BandMatrixView} that is a subset of a \tt{BandMatrix}.
+The first version returns the full band matrix that fits within the rows
+\tt{i1..i2} and the columns \tt{j1..j2}.  If \tt{i1 == j1} and the range is 
+relatively large, then the values of \tt{nlo} and \tt{nhi} for the new 
+submatrix will match the values of the original matrix \tt{b}.  However,
+if the new size is too small, then the number of bands may be 
+smaller if some off-diagonals would be outside of the range. 
+Likewise, if \tt{i1 != j1}, then \tt{nlo + nhi} will (typically) be preserved, but some 
+sub-diagonals may become super-diagonals or vice versa.
+
+If you want more control over the number of off-diagonals, then
+the next two versions allow you to specify them explicitly.  The final
+version also allows a non-unit step in each direction.
+
+For example, if \tt{b} is a $6 \times 6$ \tt{BandMatrix} with 2 sub-diagonals and 
+3 super-diagonals
+(like our example above), the 3 super-diagonals may be viewed with \tt{b.subBandMatrix(0,5,1,6,0,2)} with \tt{CStyle} indexing or \tt{b.subBandMatrix(1,5,2,6,0,2)} with \tt{FortranStyle} indexing.
+
+\item
+\begin{tmvcode}
+b.rowRange(int i1, int i2)
+b.colRange(int j1, int j2)
+b.diagRange(int k1, int k2)
+\end{tmvcode}
+\index{BandMatrix!Methods!rowRange}
+\index{BandMatrix!Methods!colRange}
+\index{BandMatrix!Methods!diagRange}
+These return a \tt{BandMatrixView} of the parts of these rows,
+columns or diagonals that
+appear within the original banded structure.  For our example of viewing just
+the super-diagonals of a $6 \times 6$ \tt{BandMatrix} with 2 sub- and 
+3 super-diagonals, we
+could instead use \tt{b.diagRange(1,4)} with \tt{CStyle} indexing or \tt{b.diagRange(1,3)} with \tt{FortranStyle} indexing.  The last 3 rows would be \tt{b.rowRange(3,6)} or \tt{b.rowRange(4,6)} respectively.
+Note that this wold be a $3 \times 5$ matrix with 0 sub-diagonals and 
+4 super-diagonals.
+These routines calculate the appropriate changes in the size and shape to include
+all of the relevant parts of the rows or columns.
+
+\item
+\begin{tmvcode}
+b.upperBand()
+b.lowerBand()
+\end{tmvcode}
+\index{BandMatrix!Methods!upperBand}
+\index{BandMatrix!Methods!lowerBand}
+These return a \tt{BandMatrixView} including the main diagonal and either the
+super- or sub-diagonals.  The size
+is set automatically to include the entire band.  (This is only
+non-trivial for non-square band matrices.)  
+
+\item
+\begin{tmvcode}
+b.upperBandOff()
+b.lowerBandOff()
+\end{tmvcode}
+\index{BandMatrix!Methods!upperBandOff}
+\index{BandMatrix!Methods!lowerBandOff}
+These return a \tt{BandMatrixView} of only the off-diagonals of either the
+upper or lower half of the matrix.  
+They are inspired by analogy with the combination \tt{m.upperTri().offDiag()}.
+Since \tt{BandMatrix} does not have the method \tt{offDiag}, these provide
+the same functionality.
+
+\item
+\begin{tmvcode}
+b.transpose()
+b.conjugate()
+b.adjoint()
+b.view()
+b.cView()
+b.fView()
+b.realPart()
+b.imagPart()
+\end{tmvcode}
+\index{BandMatrix!Methods!transpose}
+\index{BandMatrix!Methods!conjugate}
+\index{BandMatrix!Methods!adjoint}
+\index{BandMatrix!Methods!view}
+\index{BandMatrix!Methods!cView}
+\index{BandMatrix!Methods!fView}
+\index{BandMatrix!Methods!realPart}
+\index{BandMatrix!Methods!imagPart}
+These return \tt{BandMatrixView}s.
+
+\end{itemize}
+
+\subsection{Functions}
+\index{BandMatrix!Functions of}
+\label{BandMatrix_Functions}
+
+\begin{tmvcode}
+RT b.norm1() = Norm1(b)
+RT b.norm2() = Norm2(b)
+RT b.normInf() = NormInf(b)
+RT b.normF() = NormF(b) = b.norm() = Norm(b)
+RT b.normSq() = NormSq(b)
+RT b.normSq(RT scale)
+RT b.maxAbsElement() = MaxAbsElement(b)
+RT b.maxAbs2Element() = MaxAbs2Element(b)
+T b.trace() = Trace(b)
+T b.sumElements() = SumElements(b)
+RT b.sumAbsElements() = SumAbsElements(b)
+RT b.sumAbs2Elements() = SumAbs2Elements(b)
+T b.det() = Det(b)
+RT b.logDet(T* sign=0) = LogDet(b)
+bool b.isSingular()
+RT b.condition()
+RT b.doCondition()
+minv = b.inverse() = Inverse(b)
+b.makeInverse(Matrix<T>& minv)
+b.makeInverseATA(Matrix<T>& cov)
+\end{tmvcode}
+\index{BandMatrix!Functions of!Norm1}
+\index{BandMatrix!Functions of!Norm2}
+\index{BandMatrix!Functions of!NormInf}
+\index{BandMatrix!Functions of!MaxAbsElement}
+\index{BandMatrix!Functions of!MaxAbs2Element}
+\index{BandMatrix!Methods!norm1}
+\index{BandMatrix!Methods!norm2}
+\index{BandMatrix!Methods!normInf}
+\index{BandMatrix!Methods!maxAbsElement}
+\index{BandMatrix!Methods!maxAbs2Element}
+\index{BandMatrix!Functions of!Norm}
+\index{BandMatrix!Functions of!NormF}
+\index{BandMatrix!Functions of!NormSq}
+\index{BandMatrix!Functions of!Trace}
+\index{BandMatrix!Functions of!SumElements}
+\index{BandMatrix!Functions of!SumAbsElements}
+\index{BandMatrix!Functions of!SumAbs2Elements}
+\index{BandMatrix!Functions of!Det}
+\index{BandMatrix!Functions of!LogDet}
+\index{BandMatrix!Functions of!Inverse}
+\index{BandMatrix!Methods!norm}
+\index{BandMatrix!Methods!normF}
+\index{BandMatrix!Methods!normSq}
+\index{BandMatrix!Methods!trace}
+\index{BandMatrix!Methods!sumElements}
+\index{BandMatrix!Methods!sumAbsElements}
+\index{BandMatrix!Methods!sumAbs2Elements}
+\index{BandMatrix!Methods!det}
+\index{BandMatrix!Methods!logDet}
+\index{BandMatrix!Methods!isSingular}
+\index{BandMatrix!Methods!condition}
+\index{BandMatrix!Methods!doCondition}
+\index{BandMatrix!Methods!inverse}
+\index{BandMatrix!Methods!makeInverse}
+\index{BandMatrix!Methods!makeInverseATA}
+The inverse of a \tt{BandMatrix} is not (in general) banded.  So \tt{minv} here
+must be a regular \tt{Matrix}.
+
+\begin{tmvcode}
+b.setZero()
+b.setAllTo(T x)
+b.addToAll(T x)
+b.clip(RT thresh)
+b.setToIdentity(T x = 1)
+b.conjugateSelf()
+b.transposeSelf()
+Swap(b1,b2)
+\end{tmvcode}
+\index{BandMatrix!Methods!setZero}
+\index{BandMatrix!Methods!setAllTo}
+\index{BandMatrix!Methods!addToAll}
+\index{BandMatrix!Methods!clip}
+\index{BandMatrix!Methods!setToIdentity}
+\index{BandMatrix!Methods!conjugateSelf}
+\index{BandMatrix!Methods!transposeSelf}
+\index{BandMatrix!Functions of!Swap}
+\vspace{12pt}
+
+\subsection{Arithmetic}
+\index{BandMatrix!Arithmetic}
+\label{BandMatrix_Arithmetic}
+
+In addition to \tt{x}, \tt{v}, and \tt{m} from before, we now add \tt{b} 
+for a \tt{BandMatrix}.
+
+\begin{tmvcode}
+b2 = -b1
+b2 = x * b1
+b2 = b1 [*/] x
+b3 = b1 [+-] b2
+m2 = m1 [+-] b
+m2 = b [+-] m1
+b [*/]= x
+b2 [+-]= b1
+m [+-]= b
+v2 = b * v1
+v2 = v1 * b
+v *= b
+b3 = b1 * b2
+b3 = ElemProd(b1,b2)
+m2 = b * m1
+m2 = m1 * b
+m *= b
+b2 = b1 [+-] x
+b2 = x [+-] b1
+b [+-]= x
+b = x
+\end{tmvcode}
+
+\subsection{Division}
+\index{BandMatrix!Arithmetic!division}
+\label{BandMatrix_Division}
+
+The division operations are:
+\begin{tmvcode}
+v2 = v1 [/%] b
+m2 = m1 [/%] b
+m2 = b [/%] m1
+m = b1 [/%] b2
+m = x [/%] b
+v [/%]= b
+m [/%]= b
+\end{tmvcode}
+\tt{BandMatrix} has three possible choices for the decomposition to use for division:
+\begin{enumerate}
+\item
+\tt{b.divideUsing(tmv::LU)} does a normal LU decomposition,
+taking into account the band structure of the matrix, which greatly speeds up 
+the calculation into the lower and upper (banded) triangles.
+This is the default decomposition to use for a square \tt{BandMatrix} 
+if you don't specify anything.
+
+This decomposition can only really
+be done in place if either \tt{nlo} or \tt{nhi} is 0,
+in which case it is automatically done in place,
+since the \tt{BandMatrix} is already lower or upper triangle.
+Thus, there is usually no reason to use the \tt{divideInPlace()} method.
+
+If this is not the case, and you really want to do the decomposition in place, you can
+declare a matrix with a wider band and view the portion that represents the matrix
+you actually want.  This view then can be divided in place.  More specifically,
+you need to declare the wider \tt{BandMatrix} with \tt{ColMajor} storage,
+with the smaller of
+\{\tt{nlo}, \tt{nhi}\} as the number of sub-diagonals, and with 
+(\tt{nlo} + \tt{nhi}) as the number of super-diagonals.  
+Then you can use \tt{BandMatrixViewOf} to view the portion you want, transposing it if
+necessary.  On the other hand, you are probably not going to get much of a speed gain 
+from all of this finagling, so unless you are really memory starved, it's probably not worth it.
+\index{BandMatrix!Methods!divideInPlace}
+
+To access this decomposition, use:
+\begin{tmvcode}
+bool b.lud().isTrans()
+tmv::LowerTriMatrix<T,UnitDiag> b.lud().getL()
+tmv::ConstBandMatrixView<T> b.lud().getU()
+const Permutation& b.lud().getP()
+\end{tmvcode}
+\index{BandMatrix!Methods!lud}
+\index{BandMatrix!LU decomposition}
+\index{LU decomposition!BandMatrix}
+The following should result in a matrix numerically very close to \tt{b}.
+\begin{tmvcode}
+tmv::Matrix<T> m2 = b.lud().getP() * b.lud().getL() * b.lud().getU();
+if (b.lud().isTrans()) m2.transposeSelf();
+\end{tmvcode}
+
+\item
+\tt{b.divideUsing(tmv::QR)} will perform a QR decomposition.  
+This is the default method for a non-square \tt{BandMatrix}.
+
+The same kind of machinations need to be done to perform this in place as 
+for the LU decomposition except that the wider matrix you provide should have at least as many rows as columns.  Only if the matrix is square should you make sure that the number of subdiagonals is the smaller of \{\tt{nlo}, \tt{nhi}\}.
+\index{BandMatrix!Methods!divideInPlace}
+
+To access this decomposition, use:\footnote{
+I have not yet made a version of the \tt{PackedQ} class for \tt{BandMatrix}.
+So unfortunately, here \tt{getQ()} creates the matrix directly and is thus
+rather inefficient.}
+\begin{tmvcode}
+bool b.qrd().isTrans()
+tmv::Matrix<T> b.qrd().getQ()
+tmv::ConstBandMatrixView<T> b.qrd().getR()
+\end{tmvcode}
+\index{BandMatrix!Methods!qrd}
+\index{BandMatrix!QR decomposition}
+\index{QR decomposition!BandMatrix}
+The following should result in a matrix numerically very close to \tt{b}.
+\begin{tmvcode}
+tmv::Matrix<T> m2(b.nrows,b.ncols);
+tmv::MatrixView<T> m2v = 
+      b.qrd().isTrans() ? b2.transpose() : b2.view();
+m2v = b.qrd().getQ() * b.qrd().getR();
+\end{tmvcode}
+
+\item
+\tt{b.divideUsing(tmv::SV)} will perform a singular value decomposition.
+
+This cannot be done in place.
+\index{BandMatrix!Methods!divideInPlace}
+
+To access this decomposition, use:
+\begin{tmvcode}
+tmv::ConstMatrixView<T> b.svd().getU()
+tmv::ConstDiagMatrixView<RT> b.svd().getS()
+tmv::ConstMatrixView<T> b.svd().getVt()
+\end{tmvcode}
+\index{BandMatrix!Methods!svd}
+\index{BandMatrix!Singular value decomposition}
+\index{Singular value decomposition!BandMatrix}
+The product of these three
+should result in a matrix numerically very close to \tt{b}.
+
+There are the same control and access routines as for a regular SVD
+(See \ref{Matrix_Division_Access}),
+\begin{tmvcode}
+b.svd().thresh(RT thresh)
+b.svd().top(int nsing)
+RT b.svd().condition()
+int b.svd().getKMax()
+\end{tmvcode}
+
+\end{enumerate}
+The routines 
+\begin{tmvcode}
+b.saveDiv()
+b.setDiv()
+b.resetDiv()
+b.unsetDiv()
+bool b.divIsSet()
+\end{tmvcode}
+\index{BandMatrix!Methods!saveDiv}
+\index{BandMatrix!Methods!setDiv}
+\index{BandMatrix!Methods!resetDiv}
+\index{BandMatrix!Methods!unsetDiv}
+\index{BandMatrix!Methods!divIsSet}
+work the same as for regular \tt{Matrix}es.
+(See \ref{Matrix_Division_Efficiency}.)
+
+And just as for a regular \tt{Matrix}, the functions \tt{b.det()}, \tt{b.logDet()}, and \tt{b.isSingular()} use whichever decomposition is currently set with \tt{b.divideUsing(dt)},
+unless \tt{b}'s data type is an integer type, in which case Bareiss's algorithm for the determinant
+is used.
+\index{BandMatrix!Determinant}
+\index{BandMatrix|Methods!det}
+\index{BandMatrix|Methods!logDet}
+\index{BandMatrix|Methods!isSingular}
+
+\subsection{I/O}
+\index{BandMatrix!I/O}
+\label{BandMatrix_IO}
+
+The simplest I/O syntax is the usual:
+\begin{tmvcode}
+os << b;
+is >> b;
+\end{tmvcode}
+The output format is the same as for a \tt{Matrix}, including all the 0's.
+(See \ref{Matrix_IO}.)  On input, if any of the elements outside of the band structure
+are not 0, a \tt{tmv::ReadError} is thrown.
+
+There is also a compact I/O style that puts all the elements that aren't trivially 0 all on a single line and skips the parentheses. 
+\begin{tmvcode}
+os << tmv::CompactIO() << b;
+is >> tmv::CompactIO() >> b;
+\end{tmvcode}
+\index{IOStyle!CompactIO}
+This has the extra advantage that it also outputs the number of sub- and super-diagonals, so the \tt{BandMatrix} can be resized correctly if it is not the right size already.  The normal I/O style only includes the number of rows and columns, so the number of diagonals is assumed to be correct if the matrix needs to be resized.  The compact I/O style can adjust both the size and the number of diagonals.
+
+One can also write small values as 0 with
+\begin{tmvcode}
+os << tmv::ThreshIO(thresh) << b;
+os << tmv::CompactIO().setThresh(thresh) << b;
+\end{tmvcode}
+\index{IOStyle!ThreshIO}
+
+See \S\ref{IOStyle} for more information about specifying custom I/O styles, including
+features like using brackets instead of parentheses, or putting commas between elements,
+or specifying an output precision.  

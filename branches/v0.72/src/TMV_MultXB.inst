@@ -1,0 +1,33 @@
+
+#define CT std::complex<T>
+
+#define DefXM(T)\
+  template void MultXM(const T alpha, BandMatrixView<T > A); \
+  
+DefXM(T)
+#ifdef INST_COMPLEX
+DefXM(CT)
+#endif
+
+#undef DefXM
+
+#define DefEl(T,T1,T2)\
+  template void ElemMultMM<false>(const T alpha, \
+      const GenBandMatrix<T1 >& A, const GenBandMatrix<T2 >& B, \
+      BandMatrixView<T > C);  \
+  template void ElemMultMM<true>(const T alpha, \
+      const GenBandMatrix<T1 >& A, const GenBandMatrix<T2 >& B, \
+      BandMatrixView<T > C);  \
+
+DefEl(T,T,T)
+#ifdef INST_COMPLEX
+DefEl(CT,T,T)
+DefEl(CT,T,CT)
+DefEl(CT,CT,T)
+DefEl(CT,CT,CT)
+#endif
+
+#undef DefEl
+
+#undef CT
+

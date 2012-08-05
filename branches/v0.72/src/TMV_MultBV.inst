@@ -1,0 +1,35 @@
+
+#define CT std::complex<T>
+
+#define Def1(T) \
+  template const T* BandMatrixComposite<T >::cptr() const; \
+  template ptrdiff_t BandMatrixComposite<T >::stepi() const; \
+  template ptrdiff_t BandMatrixComposite<T >::stepj() const; \
+  template ptrdiff_t BandMatrixComposite<T >::diagstep() const; \
+  template ptrdiff_t BandMatrixComposite<T >::ls() const; \
+  template ConstVectorView<T > BandMatrixComposite<T >::constLinearView() const; \
+
+Def1(T)
+#ifdef INST_COMPLEX
+Def1(CT)
+#endif
+
+#undef Def1
+
+#define DefMV(T,Ta,Tx)\
+  template void MultMV<true>(const T alpha, const GenBandMatrix<Ta >& A, \
+      const GenVector<Tx >& x, VectorView<T > y); \
+  template void MultMV<false>(const T alpha, const GenBandMatrix<Ta >& A, \
+      const GenVector<Tx >& x, VectorView<T > y); \
+
+DefMV(T,T,T)
+#ifdef INST_COMPLEX
+DefMV(CT,T,T)
+DefMV(CT,CT,T)
+DefMV(CT,T,CT)
+DefMV(CT,CT,CT)
+#endif
+
+#undef DefMV
+
+#undef CT

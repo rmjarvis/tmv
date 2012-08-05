@@ -1,0 +1,17 @@
+
+#define CT std::complex<T>
+
+#define DefDivEq(T,T1)\
+template void TriLDivEq(const GenBandMatrix<T1 >& A, \
+    MatrixView<T > B, DiagType dt); \
+
+DefDivEq(T,T)
+#ifdef INST_COMPLEX
+DefDivEq(CT,T)
+DefDivEq(CT,CT)
+#endif
+
+#undef DefDivEq
+
+#undef CT
+

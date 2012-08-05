@@ -1,0 +1,90 @@
+#define CT std::complex<T>
+
+#define DefDivEq(T,T1)\
+template void Q_LDivEq(const GenMatrix<T1 >& Q,\
+    const GenVector<T1 >& beta, MatrixView<T > m); \
+template void Q_RDivEq(const GenMatrix<T1 >& Q,\
+    const GenVector<T1 >& beta, MatrixView<T > m); \
+template void PackedQ<T1 >::doAssignToM(MatrixView<T > m) const; \
+template void PackedQ<T1 >::LDivEq(VectorView<T > v) const; \
+template void PackedQ<T1 >::LDivEq(MatrixView<T > m) const; \
+template void PackedQ<T1 >::RDivEq(VectorView<T > v) const; \
+template void PackedQ<T1 >::RDivEq(MatrixView<T > m) const; \
+
+DefDivEq(T,T)
+#ifdef INST_COMPLEX
+DefDivEq(CT,T)
+DefDivEq(CT,CT)
+#endif
+
+#undef DefDivEq
+
+#define DefDivEq(T,T1)\
+template <> void Q_LDivEq(const GenMatrix<T1 >& ,\
+    const GenVector<T1 >& , MatrixView<T > )\
+    { TMVAssert(TMV_FALSE); }\
+template <> void Q_RDivEq(const GenMatrix<T1 >& ,\
+    const GenVector<T1 >& , MatrixView<T > )\
+    { TMVAssert(TMV_FALSE); }\
+template <> template <> void PackedQ<T1 >::doAssignToM( \
+    MatrixView<T > ) const \
+    { TMVAssert(TMV_FALSE); }\
+template <> template <> void PackedQ<T1 >::LDivEq(VectorView<T >) const\
+    { TMVAssert(TMV_FALSE); }\
+template <> template <> void PackedQ<T1 >::RDivEq(VectorView<T >) const\
+    { TMVAssert(TMV_FALSE); }\
+template <> template <> void PackedQ<T1 >::LDivEq(MatrixView<T >) const\
+    { TMVAssert(TMV_FALSE); }\
+template <> template <> void PackedQ<T1 >::RDivEq(MatrixView<T >) const\
+    { TMVAssert(TMV_FALSE); }\
+
+#ifdef INST_COMPLEX
+DefDivEq(T,CT)
+#endif
+
+#undef DefDivEq
+
+#define DefDiv(T,T1,T2)\
+template void PackedQ<T1 >::LDiv(const GenVector<T2 >& v, \
+    VectorView<T > x) const; \
+template void PackedQ<T1 >::LDiv(const GenMatrix<T2 >& m, \
+    MatrixView<T > x) const; \
+template void PackedQ<T1 >::RDiv(const GenVector<T2 >& v, \
+    VectorView<T > x) const; \
+template void PackedQ<T1 >::RDiv(const GenMatrix<T2 >& m, \
+    MatrixView<T > x) const; \
+
+DefDiv(T,T,T)
+#ifdef INST_COMPLEX
+DefDiv(CT,T,T)
+DefDiv(CT,T,CT)
+DefDiv(CT,CT,T)
+DefDiv(CT,CT,CT)
+#endif
+
+#undef DefDiv
+
+#define DefDiv(T,T1,T2)\
+template <> template <> void PackedQ<T1 >::LDiv( \
+    const GenVector<T2 >& , VectorView<T > ) const\
+    { TMVAssert(TMV_FALSE); }\
+template <> template <> void PackedQ<T1 >::RDiv( \
+    const GenVector<T2 >& , VectorView<T > ) const\
+    { TMVAssert(TMV_FALSE); }\
+template <> template <> void PackedQ<T1 >::LDiv( \
+    const GenMatrix<T2 >& , MatrixView<T > ) const\
+    { TMVAssert(TMV_FALSE); }\
+template <> template <> void PackedQ<T1 >::RDiv( \
+    const GenMatrix<T2 >& , MatrixView<T > ) const\
+    { TMVAssert(TMV_FALSE); }\
+
+#ifdef INST_COMPLEX
+DefDiv(T,T,CT)
+DefDiv(T,CT,T)
+DefDiv(T,CT,CT)
+#endif
+
+#undef DefDiv
+
+#undef CT
+

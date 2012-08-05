@@ -1,0 +1,20 @@
+
+#define CT std::complex<T>
+
+#define DefR2(T,Tx,Ty)\
+  template void Rank2Update<true>(const T alpha,const GenVector<Tx >& x, \
+      const GenVector<Ty >& y, SymMatrixView<T > A); \
+  template void Rank2Update<false>(const T alpha,const GenVector<Tx >& x, \
+      const GenVector<Ty >& y, SymMatrixView<T > A); \
+
+DefR2(T,T,T)
+#ifdef INST_COMPLEX
+DefR2(CT,T,T)
+DefR2(CT,T,CT)
+DefR2(CT,CT,T)
+DefR2(CT,CT,CT)
+#endif
+
+#undef DefR2
+
+#undef CT

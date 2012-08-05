@@ -1,0 +1,35 @@
+
+#define CT std::complex<T>
+
+#define DefSVD(RT,T)\
+template void UnsortedEigen(const GenSymBandMatrix<T >& A, \
+    MatrixView<T > U, VectorView<RT > S); \
+template void SV_Decompose(const GenSymBandMatrix<T >& A, \
+    MatrixView<T > U, DiagMatrixView<RT > S,  \
+    MatrixView<T > V, RT& ld, T& sd); \
+template void SV_Decompose(const GenSymBandMatrix<T >& A, \
+    MatrixView<T > U, DiagMatrixView<RT > S, \
+    MatrixView<T > V); \
+template void SV_Decompose(const GenSymBandMatrix<T >& A, \
+    MatrixView<T > U, DiagMatrixView<RT > S); \
+template void SV_Decompose(const GenSymBandMatrix<T >& A, \
+    DiagMatrixView<RT > S, MatrixView<T > V); \
+template void SV_Decompose(const GenSymBandMatrix<T >& A, \
+    DiagMatrixView<RT > S); \
+template void Eigen(const GenSymBandMatrix<T >& A, \
+    MatrixView<T > U, VectorView<RT > S); \
+template void Eigen(const GenSymBandMatrix<T >& A, \
+    VectorView<RT > S); \
+template void SquareRoot(const GenSymBandMatrix<T >& A, \
+    SymMatrixView<T > S); \
+
+DefSVD(T,T)
+#ifdef INST_COMPLEX
+DefSVD(T,CT)
+#endif
+
+#undef DefSVD
+
+#undef CT
+
+

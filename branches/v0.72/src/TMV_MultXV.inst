@@ -1,0 +1,44 @@
+
+#define CT std::complex<T>
+
+#define Def0(T)\
+  template void MultXV(const T x, VectorView<T > v2); \
+
+Def0(T)
+#ifdef INST_COMPLEX
+Def0(CT)
+#endif
+
+#undef Def0
+
+#define Def1(T,T1)\
+  template void MultXV(const T x, const GenVector<T1 >& v1, \
+      VectorView<T > v2); \
+
+Def1(T,T)
+#ifdef INST_COMPLEX
+Def1(CT,T)
+Def1(CT,CT)
+#endif
+
+#undef Def1
+
+#define Def2(T,T1,T2)\
+  template void ElemMultVV<false>(const T alpha, \
+      const GenVector<T1 >& x, const GenVector<T2 >& y, \
+      VectorView<T > z);  \
+  template void ElemMultVV<true>(const T alpha, \
+      const GenVector<T1 >& x, const GenVector<T2 >& y, \
+      VectorView<T > z);  \
+
+Def2(T,T,T)
+#ifdef INST_COMPLEX
+Def2(CT,T,T)
+Def2(CT,T,CT)
+Def2(CT,CT,T)
+Def2(CT,CT,CT)
+#endif
+
+#undef Def2
+
+#undef CT

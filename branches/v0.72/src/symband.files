@@ -1,0 +1,6 @@
+TMV_SymBandMatrix.cpp
+TMV_MultsBV.cpp
+TMV_AddsBsB.cpp
+TMV_MultsBM.cpp
+TMV_MultsBB.cpp
+TMV_SymBandIntegerDet.cpp

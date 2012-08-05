@@ -1,0 +1,37 @@
+
+#define CT std::complex<T>
+
+#define DefInvert(T,RT)\
+  template RT SymInvert_2x2<true,T >(T& a, T& b, T& c); \
+  template T SymInvert_2x2<false,T >(T& a, T& b, T& c); \
+
+DefInvert(T,T)
+#ifdef INST_COMPLEX
+DefInvert(CT,T)
+#endif
+
+#undef DefInvert
+
+#define DefDivEq(RT1,T1,T2)\
+  template void PseudoDiag_LDivEq<true,T2,T1 >( \
+      const GenVector<T1 >& D, const GenVector<T1 >& xD, \
+      MatrixView<T2 > m); \
+  template void PseudoDiag_LDivEq<false,T2,T1 >( \
+      const GenVector<T1 >& D, const GenVector<T1 >& xD, \
+      MatrixView<T2 > m); \
+  template void PseudoDiag_LMultEq<true,T2,T1 >( \
+      const GenVector<T1 >& D, const GenVector<T1 >& xD, \
+      MatrixView<T2 > m); \
+  template void PseudoDiag_LMultEq<false,T2,T1 >( \
+      const GenVector<T1 >& D, const GenVector<T1 >& xD, \
+      MatrixView<T2 > m); \
+
+DefDivEq(T,T,T)
+#ifdef INST_COMPLEX
+DefDivEq(T,T,CT)
+DefDivEq(T,CT,CT)
+#endif
+
+#undef DefDivEq
+
+#undef CT

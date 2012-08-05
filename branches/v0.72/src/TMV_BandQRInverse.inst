@@ -1,0 +1,16 @@
+#define CT std::complex<T>
+
+#define DefInv(T,T1)\
+template void QR_Inverse(const GenBandMatrix<T1 >& QRx, \
+    const GenVector<T1 >& beta, MatrixView<T > minv);\
+
+DefInv(T,T)
+#ifdef INST_COMPLEX
+DefInv(CT,T)
+DefInv(CT,CT)
+#endif
+
+#undef DefInv
+
+#undef CT
+

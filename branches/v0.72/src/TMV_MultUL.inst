@@ -1,0 +1,24 @@
+
+#define CT std::complex<T>
+
+#define DefMM(T,Ta,Tb)\
+  template void MultMM<true>(const T alpha, const GenUpperTriMatrix<Ta >& A, \
+      const GenLowerTriMatrix<Tb >& B, MatrixView<T > C); \
+  template void MultMM<false>(const T alpha, const GenUpperTriMatrix<Ta >& A, \
+      const GenLowerTriMatrix<Tb >& B, MatrixView<T > C); \
+  template void MultMM<true>(const T alpha, const GenLowerTriMatrix<Ta >& A, \
+      const GenUpperTriMatrix<Tb >& B, MatrixView<T > C); \
+  template void MultMM<false>(const T alpha, const GenLowerTriMatrix<Ta >& A, \
+      const GenUpperTriMatrix<Tb >& B, MatrixView<T > C); \
+
+DefMM(T,T,T)
+#ifdef INST_COMPLEX
+DefMM(CT,T,T)
+DefMM(CT,T,CT)
+DefMM(CT,CT,T)
+DefMM(CT,CT,CT)
+#endif
+
+#undef DefMM
+
+#undef CT
