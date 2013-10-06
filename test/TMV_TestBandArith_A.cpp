@@ -4,7 +4,6 @@
 
 #define NODIV 
 #define NOASSIGN
-#define PRINTALGO_NormB
 
 #include "TMV_Test.h"
 #include "TMV_Test_2.h"

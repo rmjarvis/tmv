@@ -14,6 +14,7 @@
 #include <iostream>
 #include "tmv/TMV_VectorIO.h"
 #include "tmv/TMV_MatrixIO.h"
+#include "tmv/TMV_BandMatrixIO.h"
 #endif
 
 #ifdef XDEBUG_BV
@@ -758,6 +759,13 @@ namespace tmv {
                 V3::_conj ? 97 :
                 inst ? 90 : 
                 -3;
+#ifdef PRINTALGO_BV
+            const ptrdiff_t M = v3.size();
+            const ptrdiff_t N = v2.size();
+            std::cout<<"BV algo -2: M,N,cs,rs,x = "<<M<<','<<0<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+            std::cout<<"algo = "<<algo<<std::endl;
+#endif
             MultBV_Helper<algo,cs,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
         }
     };
@@ -773,6 +781,12 @@ namespace tmv {
                 ( rs == 0 || cs == 0 ) ? 0 : 
                 V3::_checkalias ? 99 : 
                 -2;
+#ifdef PRINTALGO_BV
+            const ptrdiff_t M = v3.size();
+            const ptrdiff_t N = v2.size();
+            std::cout<<"BV algo -1: M,N,cs,rs,x = "<<M<<','<<0<<
+                ','<<cs<<','<<rs<<','<<T(x)<<std::endl;
+#endif
             MultBV_Helper<algo,cs,rs,add,ix,T,M1,V2,V3>::call(x,m1,v2,v3);
         }
     };

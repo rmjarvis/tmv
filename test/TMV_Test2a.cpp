@@ -30,9 +30,8 @@ int main() try {
     //showdiv=true;
     //showtests=true;
     //showstartdone=true;
-    TestBandMatrix<double>();
 
-#if 0
+#if 1
 
 #ifdef TEST_DOUBLE
     TestBandMatrix<double>();
