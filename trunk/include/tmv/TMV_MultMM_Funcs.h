@@ -149,6 +149,95 @@ namespace tmv {
         BaseMatrix_Rec_Mutable<M1>& m1,
         const Scaling<ix,T>& x, const Permutation& m2);
 
+    // From TMV_MultBM.h
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
+        const BaseMatrix_Rec<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Rec<M1>& m1,
+        const BaseMatrix_Band<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
+
+    // From TMV_MultBB.h
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
+        const BaseMatrix_Band<M2>& m2, BaseMatrix_Band_Mutable<M3>& m3);
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
+        const BaseMatrix_Band<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
+        const BaseMatrix_Band<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3);
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
+        const BaseMatrix_Band<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3);
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
+        const BaseMatrix_Tri<M2>& m2, BaseMatrix_Mutable<M3>& m3);
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Tri<M1>& m1,
+        const BaseMatrix_Band<M2>& m2, BaseMatrix_Mutable<M3>& m3);
+
+    // From TMV_MultBD.h
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Band_Mutable<M3>& m3);
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    TMV_INLINE void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Band<M2>& m2, BaseMatrix_Band_Mutable<M3>& m3);
+
+    template <class M1, int ix, class T, class M2>
+    TMV_INLINE void MultEqMM(
+        BaseMatrix_Band_Mutable<M1>& m1,
+        const Scaling<ix,T>& x, const BaseMatrix_Diag<M2>& m2);
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Band<M2>& m2, BaseMatrix_Rec_Mutable<M3>& m3);
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3);
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Band<M2>& m2, BaseMatrix_Tri_Mutable<M3>& m3);
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Band<M1>& m1,
+        const BaseMatrix_Diag<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3);
+
+    template <bool add, int ix, class T, class M1, class M2, class M3>
+    inline void MultMM(
+        const Scaling<ix,T>& x, const BaseMatrix_Diag<M1>& m1,
+        const BaseMatrix_Band<M2>& m2, BaseMatrix_Diag_Mutable<M3>& m3);
+
+
 } // namespace tmv
 
 #endif

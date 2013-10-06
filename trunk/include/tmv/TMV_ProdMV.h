@@ -29,12 +29,36 @@ namespace tmv {
     inline void MultMV(
         const Scaling<ix,T>& x, const BaseMatrix<M1>& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
-    { MultMV<add>(x,m1.calc(),v2.calc(),v3.vec()); }
+    {
+#ifdef XDEBUG_PRODMV
+        std::cerr<<"MultMV Calculate m1, v2:  add = "<<add<<std::endl;
+        std::cerr<<"x = "<<ix<<"  "<<T(x)<<std::endl;
+        std::cerr<<"m1 = "<<TMV_Text(m1)<<"  "<<m1<<std::endl;
+        std::cerr<<"v2 = "<<TMV_Text(v2)<<"  "<<v2<<std::endl;
+        std::cerr<<"v3 = "<<TMV_Text(v3)<<"  "<<v3<<std::endl;
+        std::cerr<<"m1.calc() = "<<TMV_Text(m1.calc())<<"  "<<m1.calc()<<std::endl;
+        std::cerr<<"v2.calc() = "<<TMV_Text(v2.calc())<<"  "<<v2.calc()<<std::endl;
+        std::cerr<<"v3.vec() = "<<TMV_Text(v3.vec())<<"  "<<v3.vec()<<std::endl;
+#endif
+        MultMV<add>(x,m1.calc(),v2.calc(),v3.vec()); 
+    }
     template <bool add, int ix, class T, class V1, class M2, class V3>
     inline void MultVM(
         const Scaling<ix,T>& x, const BaseVector<V1>& v1, 
         const BaseMatrix<M2>& m2, BaseVector_Mutable<V3>& v3)
-    { MultVM<add>(x,v1.calc(),m2.calc(),v3.vec()); }
+    {
+#ifdef XDEBUG_PRODMV
+        std::cerr<<"MultVM Calculate v1,m2:  add = "<<add<<std::endl;
+        std::cerr<<"x = "<<ix<<"  "<<T(x)<<std::endl;
+        std::cerr<<"v1 = "<<TMV_Text(v1)<<"  "<<v1<<std::endl;
+        std::cerr<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
+        std::cerr<<"v3 = "<<TMV_Text(v3)<<"  "<<v3<<std::endl;
+        std::cerr<<"v1.calc() = "<<TMV_Text(v1.calc())<<"  "<<v1.calc()<<std::endl;
+        std::cerr<<"m2.calc() = "<<TMV_Text(m2.calc())<<"  "<<m2.calc()<<std::endl;
+        std::cerr<<"v3.vec() = "<<TMV_Text(v3.vec())<<"  "<<v3.vec()<<std::endl;
+#endif
+        MultVM<add>(x,v1.calc(),m2.calc(),v3.vec()); 
+    }
 
     // If everything is _Calc, then there should be an overload
     // that says how to do the calculation.  This will give a 
@@ -45,23 +69,21 @@ namespace tmv {
         const BaseVector_Calc<V2>& , BaseVector_Mutable<V3>& )
     { TMVStaticAssert(ix == 999); }
 
-    // The default behavior of MultEqVM is to do a copy.
-    template <class V1, int ix, class T, class M2>
-    inline void MultEqVM(
-        BaseVector_Mutable<V1>& v1,
-        const Scaling<ix,T>& x, const BaseMatrix_Calc<M2>& m2)
-    {
-        MultVM<false>(
-            Scaling<1,typename V1::real_type>(),
-            ProdXV<ix,T,V1>(x,v1.vec()).calc(),m2.mat(),v1.vec()); 
-    }
-
-    // And the default behavior for MultVM is to transpose m
+    // The default behavior for MultVM is to transpose m
     template <bool add, int ix, class T, class V1, class M2, class V3>
     inline void MultVM(
         const Scaling<ix,T>& x, const BaseVector_Calc<V1>& v1, 
         const BaseMatrix_Calc<M2>& m2, BaseVector_Mutable<V3>& v3)
-    { MultMV<add>(x,m2.transpose(),v1.vec(),v3.vec()); }
+    {
+#ifdef XDEBUG_PRODMV
+        std::cerr<<"MultVM Transpose m2:  add = "<<add<<std::endl;
+        std::cerr<<"x = "<<ix<<"  "<<T(x)<<std::endl;
+        std::cerr<<"v1 = "<<TMV_Text(v1)<<"  "<<v1<<std::endl;
+        std::cerr<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
+        std::cerr<<"v3 = "<<TMV_Text(v3)<<"  "<<v3<<std::endl;
+#endif
+        MultMV<add>(x,m2.transpose(),v1.vec(),v3.vec()); 
+    }
 
     // Also allow x to be missing (taken to be 1) or a scalar.
     template <bool add, class M1, class V2, class V3>
@@ -77,6 +99,23 @@ namespace tmv {
         T x, const BaseMatrix<M1>& m1, 
         const BaseVector<V2>& v2, BaseVector_Mutable<V3>& v3)
     { MultMV<add>(Scaling<0,T>(x),m1.calc(),v2.calc(),v3.vec()); }
+
+    // The default behavior of MultEqVM is to do a copy.
+    template <class V1, int ix, class T, class M2>
+    inline void MultEqVM(
+        BaseVector_Mutable<V1>& v1,
+        const Scaling<ix,T>& x, const BaseMatrix_Calc<M2>& m2)
+    {
+#ifdef XDEBUG_PRODMV
+        std::cerr<<"MultEqVM Copy x*v1:\n";
+        std::cerr<<"x = "<<ix<<"  "<<T(x)<<std::endl;
+        std::cerr<<"v1 = "<<TMV_Text(v1)<<"  "<<v1<<std::endl;
+        std::cerr<<"m2 = "<<TMV_Text(m2)<<"  "<<m2<<std::endl;
+#endif
+        MultVM<false>(
+            Scaling<1,typename V1::real_type>(),
+            ProdXV<ix,T,V1>(x,v1.vec()).calc(),m2.mat(),v1.vec()); 
+    }
 
 #ifdef XDEBUG_PRODMV
     template <bool add, int ix, class T, class M1, class V2, class V3>

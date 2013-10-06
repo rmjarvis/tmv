@@ -303,7 +303,7 @@ namespace tmv {
     };
 
     // algo 91: Call inst alias
-    template <ptrdiff_t s, ptrdiff_t ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
+    template <ptrdiff_t s, int ix1, class T1, class M1, int ix2, class T2, class M2, class M3>
     struct AddUU_Helper<91,s,ix1,T1,M1,ix2,T2,M2,M3>
     {
         static TMV_INLINE void call(

@@ -956,7 +956,7 @@ namespace tmv {
     TMV_INLINE void MultEqVM(
         BaseVector_Mutable<V1>& v1,
         const Scaling<ix,T>& x, const BaseMatrix_Tri<M2>& m2)
-    { MultVM<false>(x,v1.vec(),m2.mat(),v1.vec()); }
+    { InlineMultMV<false>(x,m2.transpose(),v1.vec(),v1.vec()); }
 
 } // namespace tmv
 
