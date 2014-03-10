@@ -414,19 +414,19 @@ def GetCompilerVersion(env):
         lines = os.popen(cmd).readlines()
 
         # Check if g++ is a symlink for something else:
-        if compilertype is 'g++':
-            if 'clang' in lines[0]:
+        if compilertype == 'g++':
+            if 'clang' in lines[0] or 'clang' in lines[1]:
                 print 'Detected clang++ masquerading as g++'
                 compilertype = 'clang++'
             # Any others I should look for?
 
         # Check if c++ is a symlink for something else:
-        if compilertype is 'c++':
-            if 'clang' in lines[0]:
-                print 'Detected clang++ masquerading as c++'
+        if compilertype == 'c++':
+            if 'clang' in lines[0] or 'clang' in lines[1]:
+                print 'Detected that c++ is really clang++'
                 compilertype = 'clang++'
             elif 'g++' in lines[0] or 'gcc' in lines[0]:
-                print 'Detected g++ masquerading as c++'
+                print 'Detected that c++ is really g++'
                 compilertype = 'g++'
             else:
                 print 'Cannot determine what kind of compiler c++ really is'
