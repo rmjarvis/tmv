@@ -45,10 +45,10 @@ opts.Add(BoolVariable('INST_FLOAT',
         'Instantiate <float> templates in compiled library', True))
 opts.Add(BoolVariable('INST_DOUBLE',
         'Instantiate <double> templates in compiled library', True))
-opts.Add(BoolVariable('INST_LONGDOUBLE',
-        'Instantiate <long double> templates in compiled library', False))
 opts.Add(BoolVariable('INST_INT',
         'Instantiate <int> templates in compiled library', False))
+opts.Add(BoolVariable('INST_LONGDOUBLE',
+        'Instantiate <long double> templates in compiled library', False))
 opts.Add(BoolVariable('INST_COMPLEX',
         'Instantiate complex<T> templates in compiled library', True))
 opts.Add(BoolVariable('INST_MIX',
@@ -63,10 +63,10 @@ opts.Add(BoolVariable('TEST_FLOAT',
         'Instantiate <float> in the test suite', True))
 opts.Add(BoolVariable('TEST_DOUBLE',
         'Instantiate <double> in the test suite', True))
-opts.Add(BoolVariable('TEST_LONGDOUBLE',
-        'Instantiate <long double> in the test suite', False))
 opts.Add(BoolVariable('TEST_INT',
         'Instantiate <int> in the test suite', True))
+opts.Add(BoolVariable('TEST_LONGDOUBLE',
+        'Instantiate <long double> in the test suite', False))
 
 opts.Add(PathVariable('EXTRA_PATH',
         'Extra paths for executables (separated by : if more than 1)',
@@ -423,18 +423,18 @@ def GetCompilerVersion(env):
         lines = os.popen(cmd).readlines()
         # Check if g++ is a symlink for something else:
         if compilertype is 'g++':
-            if 'clang' in lines[0]:
+            if 'clang' in lines[0] or 'clang' in lines[1]:
                 print 'Detected clang++ masquerading as g++'
                 compilertype = 'clang++'
             # Any others I should look for?
 
         # Check if c++ is a symlink for something else:
         if compilertype is 'c++':
-            if 'clang' in lines[0]:
-                print 'Detected clang++ masquerading as c++'
+            if 'clang' in lines[0] or 'clang' in lines[1]:
+                print 'Detected that c++ is reall clang++'
                 compilertype = 'clang++'
             elif 'g++' in lines[0] or 'gcc' in lines[0]:
-                print 'Detected g++ masquerading as c++'
+                print 'Detected that c++ is reall g++'
                 compilertype = 'g++'
             else:
                 print 'Cannot determine what kind of compiler c++ really is'
@@ -1374,7 +1374,7 @@ if not GetOption('help'):
     DoConfig(env)
  
     # subdirectory SConscript files can use this function
-    env['__readfunc'] = ReadFileList
+    env['_ReadFileList'] = ReadFileList
     env['_InstallProgram'] = RunInstall
     env['_UninstallProgram'] = RunUninstall
 

@@ -5,7 +5,7 @@ import SCons
 
 Import('env')
 
-ReadFileList=env['__readfunc']
+ReadFileList=env['_ReadFileList']
 
 libs=['tmv'] 
 sblibs=['tmv_symband','tmv'] 
