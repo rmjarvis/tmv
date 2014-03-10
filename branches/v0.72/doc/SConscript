@@ -1,7 +1,7 @@
 # vim: set filetype=python :
 
 Import('env')
-ReadFileList=env['__readfunc']
+ReadFileList=env['_ReadFileList']
 
 texlist = ReadFileList('doc.files')
 
