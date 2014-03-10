@@ -239,18 +239,18 @@ if 'install' in COMMAND_LINE_TARGETS:
         installed_sblib = env7.Install(dir=lib_install_dir, source=sblib)
 
         installed_link_name = os.path.join(lib_install_dir, os.path.basename(link_name))
-        installed_lib_short_name = os.path.join(lib_install_dir, os.path.basename(lib_short_name))
+        #installed_lib_short_name = os.path.join(lib_install_dir, os.path.basename(lib_short_name))
         installed_sblink_name = os.path.join(lib_install_dir, os.path.basename(sblink_name))
-        installed_sblib_short_name = os.path.join(lib_install_dir, os.path.basename(sblib_short_name))
+        #installed_sblib_short_name = os.path.join(lib_install_dir, os.path.basename(sblib_short_name))
 
         installed_link = env1.Command( installed_link_name , installed_lib , SymLink,
             LibName=lib_final_name)
-        installed_link2 = env1.Command( installed_lib_short_name , installed_lib , SymLink,
-            LibName=lib_final_name)
+        #installed_link2 = env1.Command( installed_lib_short_name , installed_lib , SymLink,
+            #LibName=lib_final_name)
         installed_sblink = env7.Command( installed_sblink_name , installed_sblib , SymLink, 
             LibName=sblib_final_name)
-        installed_sblink2 = env7.Command( installed_sblib_short_name , installed_sblib , SymLink, 
-            LibName=sblib_final_name)
+        #installed_sblink2 = env7.Command( installed_sblib_short_name , installed_sblib , SymLink, 
+            #LibName=sblib_final_name)
 
         env.Alias(target='install', 
             source=[installed_lib,installed_sblib,
