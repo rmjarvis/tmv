@@ -6,7 +6,7 @@ import glob
 
 Import('env')
 
-ReadFileList=env['__readfunc']
+ReadFileList=env['_ReadFileList']
 
 # Source lists
 basic = ReadFileList('basic.files')
@@ -38,6 +38,7 @@ sblib_files= band #+ sym + symband
 sblib_noint_files= band_noint #+ sym_noint + symband_noint
 sblib_omp_noint_files= [] #sym_omp_noint
 sblib_stegr_files= [] #sym_stegr
+
 
 env1 = env.Clone()
 
@@ -86,20 +87,18 @@ if env['SHARED']:
 
     # Some stuff to get it to set the right library name and compatibility version:
     version_text = os.popen(os.path.join('..','bin','tmv-version')).read()
-    #version = tuple(version_text.strip().split('.'))
+    version = tuple(version_text.strip().split('.'))
+    # Override on trunk!
     version = 0,9
     # Currently, I manually set the compatibility version when less than
     # the current version.  Any way to automate this?  Probably not.
     #compat_version = version 
     compat_version = 0,9
-    if 'install' in COMMAND_LINE_TARGETS: 
-        lib_final_dir = os.path.join(env['FINAL_PREFIX'],'lib')
-    else:
-        lib_final_dir = os.path.join(GetBuildPath('#lib'))
+    lib_final_dir = os.path.join(env['FINAL_PREFIX'],'lib')
 
     if sys.platform == 'darwin':
-        lib_final_name = os.path.join(lib_final_dir,'libtmv.%s.dylib'%version[0])
-        #lib_full_name = os.path.join(GetBuildPath('#lib'),'libtmv.%s.%s.dylib'%version)
+        lib_final_name = os.path.join(lib_final_dir,'libtmv.%s.dylib'%compat_version[0])
+        lib_full_name = os.path.join(GetBuildPath('#lib'),'libtmv.%s.%s.dylib'%version)
         lib_short_name = os.path.join(GetBuildPath('#lib'),'libtmv.%s.dylib'%version[0])
         link_name = os.path.join(GetBuildPath('#lib'),'libtmv.dylib')
         #print 'lib_final_name = ',lib_final_name
@@ -110,10 +109,10 @@ if env['SHARED']:
             '-Wl,-install_name,%s'%lib_final_name,
             '-Wl,-compatibility_version,%s.%s'%compat_version,
             '-Wl,-current_version,%s.%s'%version ] )
-        env1.Replace(SHLIBSUFFIX = '.%s.dylib'%version[0])
+        env1.Replace(SHLIBSUFFIX = '.%s.dylib'%compat_version[0])
 
-        sblib_final_name = os.path.join(lib_final_dir,'libtmv_symband.%s.dylib'%version[0])
-        #sblib_full_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.%s.%s.dylib'%version)
+        sblib_final_name = os.path.join(lib_final_dir,'libtmv_symband.%s.dylib'%compat_version[0])
+        sblib_full_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.%s.%s.dylib'%version)
         sblib_short_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.%s.dylib'%version[0])
         sblink_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.dylib')
         env7.AppendUnique( SHLINKFLAGS=[
@@ -121,26 +120,26 @@ if env['SHARED']:
             '-Wl,-install_name,%s'%sblib_final_name,
             '-Wl,-compatibility_version,%s.%s'%compat_version,
             '-Wl,-current_version,%s.%s'%version ] )
-        env7.Replace(SHLIBSUFFIX = '.%s.dylib'%version[0])
+        env7.Replace(SHLIBSUFFIX = '.%s.dylib'%compat_version[0])
 
-    elif sys.platform == 'linux2':
+    elif sys.platform.startswith('linux'):  # Should work for both linux2 and linux3
         # If the BLAS/LAPACK libs are static, this fails on linux (at least where I tried it),
         # On the other hand, the link step doesn't seem to require the other libraries
         # as it does on OSX.  So I think it's safe to just clear out LIBS here.
         env1.Replace(LIBS=[])
-        lib_final_name = os.path.join(lib_final_dir,'libtmv.so.%s'%version[0])
-        #lib_full_name = os.path.join(GetBuildPath('#lib'),'libtmv.so.%s.%s'%version)
+        lib_final_name = 'libtmv.so.%s'%compat_version[0]
+        lib_full_name = os.path.join(GetBuildPath('#lib'),'libtmv.so.%s.%s'%version)
         lib_short_name = os.path.join(GetBuildPath('#lib'),'libtmv.so.%s'%version[0])
         link_name = os.path.join(GetBuildPath('#lib'),'libtmv.so')
         env1.AppendUnique( SHLINKFLAGS=['-Wl,-soname,%s'%lib_final_name ])
-        env1.Replace(SHLIBSUFFIX = '.so.%s'%version[0])
+        env1.Replace(SHLIBSUFFIX = '.so.%s'%compat_version[0])
 
-        sblib_final_name = os.path.join(lib_final_dir,'libtmv_symband.so.%s'%version[0])
-        #sblib_full_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.so.%s.%s'%version)
+        sblib_final_name = 'libtmv_symband.so.%s'%compat_version[0]
+        sblib_full_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.so.%s.%s'%version)
         sblib_short_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.so.%s'%version[0])
         sblink_name = os.path.join(GetBuildPath('#lib'),'libtmv_symband.so')
         env7.AppendUnique( SHLINKFLAGS=['-Wl,-soname,%s'%sblib_final_name ]) 
-        env7.Replace(SHLIBSUFFIX = '.so.%s'%version[0])
+        env7.Replace(SHLIBSUFFIX = '.so.%s'%compat_version[0])
 
     elif sys.platform == 'win32':
         raise ValueError(
