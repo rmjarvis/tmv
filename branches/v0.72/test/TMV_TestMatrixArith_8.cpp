@@ -149,9 +149,12 @@ template <class T> void TestMatrixArith_8()
                 std::cout<<"a = "<<ar<<std::endl;
                 std::cout<<"b = "<<br<<std::endl;
                 std::cout<<"c (CC) = "<<c1<<std::endl;
-                std::cout<<"c (RC) = "<<(c=ar*bc)<<Norm((c=ar*bc)-c1)<<std::endl;
-                std::cout<<"c (CR) = "<<(c=ac*br)<<Norm((c=ac*br)-c1)<<std::endl;
-                std::cout<<"c (RR) = "<<(c=ar*br)<<Norm((c=ar*br)-c1)<<std::endl;
+                std::cout<<"c (RC) = "<<(c=ar*bc);
+                std::cout<<Norm((c=ar*bc)-c1)<<std::endl;
+                std::cout<<"c (CR) = "<<(c=ac*br);
+                std::cout<<Norm((c=ac*br)-c1)<<std::endl;
+                std::cout<<"c (RR) = "<<(c=ar*br);
+                std::cout<<Norm((c=ar*br)-c1)<<std::endl;
                 std::cout<<"cf eps = "<<eps<<std::endl;
             }
             Assert(Equal((c=ar*bc),c1,eps),"ar*bc");
@@ -348,9 +351,12 @@ template <class T> void TestMatrixArith_8()
                 std::cout<<"a = "<<ar<<std::endl;
                 std::cout<<"b = "<<br<<std::endl;
                 std::cout<<"c (CC) = "<<c1<<std::endl;
-                std::cout<<"c (RC) = "<<(c=ar*bc)<<Norm((c=ar*bc)-c1)<<std::endl;
-                std::cout<<"c (CR) = "<<(c=ac*br)<<Norm((c=ac*br)-c1)<<std::endl;
-                std::cout<<"c (RR) = "<<(c=ar*br)<<Norm((c=ar*br)-c1)<<std::endl;
+                std::cout<<"c (RC) = "<<(c=ar*bc);
+                std::cout<<Norm((c=ar*bc)-c1)<<std::endl;
+                std::cout<<"c (CR) = "<<(c=ac*br);
+                std::cout<<Norm((c=ac*br)-c1)<<std::endl;
+                std::cout<<"c (RR) = "<<(c=ar*br);
+                std::cout<<Norm((c=ar*br)-c1)<<std::endl;
                 std::cout<<"cf eps = "<<eps<<std::endl;
             }
             Assert(Equal((c=ar*bc),c1,eps),"ar*bc");

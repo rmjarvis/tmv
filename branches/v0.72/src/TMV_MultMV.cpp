@@ -261,7 +261,7 @@ namespace tmv {
             return;
         }
         ptrdiff_t j1 = 0;
-        for(const Tx* x1=x.cptr(); *x1==Tx(0); ++j1,++x1);
+        for(const Tx* x1=x.cptr(); *x1==Tx(0); ++j1,++x1) {}
         TMVAssert(j1 !=j2);
         if (j1 == 0 && j2 == N) UnitAMultMV1<add,cx>(A,x,y);
         else UnitAMultMV1<add,cx>(A.colRange(j1,j2),x.subVector(j1,j2),y);
