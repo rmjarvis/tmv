@@ -36,6 +36,8 @@ static void TestBasicMatrix_1()
     tmv::ConstMatrixView<T,tmv::FortranStyle> mfcv = mf.view();
     tmv::MatrixView<T,tmv::FortranStyle> mfv = mf.view();
 
+    tmv::VIt<T,1,tmv::NonConj> vit = m.linearView().begin();
+    tmv::CVIt<T,1,tmv::NonConj> cvit = m.linearView().begin();
     for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
         Assert(m(i,j) == k,"Read/Write Matrix");
         Assert(mcv(i,j) == k,"Access Matrix CV");
@@ -49,6 +51,10 @@ static void TestBasicMatrix_1()
         Assert(mf[i+1][j+1] == k,"[] style access of MatrixF");
         Assert(mfcv[i+1][j+1] == k,"[] style access of MatrixF CV");
         Assert(mfv[i+1][j+1] == k,"[] style access of MatrixF V");
+        if (S == tmv::RowMajor) {
+            Assert(*vit++ == k,"Matrix.linearView");
+            Assert(*cvit++ == k,"Matrix.linearView with CVIt");
+        }
         Assert(m.row(i)(j) == k,"Matrix.row");
         Assert(mcv.row(i)(j) == k,"Matrix.row CV");
         Assert(mv.row(i)(j) == k,"Matrix.row V");
@@ -167,10 +173,20 @@ static void TestBasicMatrix_1()
     for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k)
         cm(i,j) = CT(T(k),T(k+1000));
 
+    tmv::VIt<CT,1,tmv::NonConj> vit2 = cm.linearView().begin();
+    tmv::CVIt<CT,1,tmv::NonConj> cvit2 = cm.linearView().begin();
+    tmv::VIt<CT,1,tmv::Conj> vit3 = cm.conjugate().linearView().begin();
+    tmv::CVIt<CT,1,tmv::Conj> cvit3 = cm.conjugate().linearView().begin();
     for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
         Assert(cm(i,j) == CT(T(k),T(k+1000)),"Read/Write CMatrix");
         Assert(cm.row(i)(j) == CT(T(k),T(k+1000)),"CMatrix.row");
         Assert(cm.col(j)(i) == CT(T(k),T(k+1000)),"CMatrix.col");
+        if (S == tmv::RowMajor) {
+            Assert(*vit2++ == CT(T(k),T(k+1000)),"CMatrix.linearView");
+            Assert(*cvit2++ == CT(T(k),T(k+1000)),"CMatrix.linearView with CVIt");
+            Assert(*vit3++ == CT(T(k),-T(k+1000)),"CMatrix.linearView with conj");
+            Assert(*cvit3++ == CT(T(k),-T(k+1000)),"CMatrix.linearView with conj, CVIt");
+        }
     }
 
     for (int i=0; i<M; ++i) for (int j=0; j<N; ++j) {

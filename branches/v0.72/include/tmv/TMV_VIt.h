@@ -207,7 +207,7 @@ namespace tmv {
     template <class T>
     struct AuxRef<std::complex<T>,Conj>
     {
-        typedef ConjRef<T> reference; 
+        typedef ConjRef<std::complex<T> > reference; 
         static std::complex<T> apply(const std::complex<T>& x) 
         { return std::conj(x); }
     };
@@ -643,6 +643,11 @@ namespace tmv {
         ptrdiff_t step() const { return s; }
         ConjType getC() const { return c; }
 
+        template <int S, ConjType C>
+        inline operator VIt<CT,S,C>() const { return VIt<CT,S,C>(getP(), step()); }
+        template <int S, ConjType C>
+        inline operator CVIt<CT,S,C>() const { return CVIt<CT,S,C>(getP(), step()); }
+
         inline bool operator==(const VarConjIter<CT >& rhs) const 
         { return p == rhs.p; }
         inline bool operator!=(const VarConjIter<CT >& rhs) const 
@@ -752,6 +757,9 @@ namespace tmv {
         const CT* getP() const { return p; }
         ptrdiff_t step() const { return s; }
         ConjType getC() const { return c; }
+
+        template <int S, ConjType C>
+        inline operator CVIt<CT,S,C>() const { return CVIt<CT,S,C>(getP(), step()); }
 
         inline bool operator==(const CVarConjIter<CT >& rhs) const 
         { return p == rhs.p; }
