@@ -5,6 +5,18 @@ ReadFileList=env['_ReadFileList']
 
 texlist = ReadFileList('doc.files')
 
+# TODO: SCons doesn't seem to use a complete process for building the PDf.
+# I think it's probably just a bug in pdflatex, which is what SCons uses, 
+# but there is no color in the final document, and I don't think the indexing
+# is correct.  
+# Anyway, the better procedure is to just do this by hand:
+#    latex TMV_Documentation.tex
+#    [ repeat ] 
+#    makeindex TMV_Documentation.tex
+#    latex TMV_Documentation.tex
+#    [ repeat ] 
+#    dvipdf TMV_Documentation.dvi
+
 pdfdoc = env.PDF(target='TMV_Documentation.pdf',source='TMV_Documentation.tex')
 Depends(pdfdoc,texlist)
 

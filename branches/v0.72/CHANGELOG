@@ -1,90 +1,29 @@
-Changes from version 0.70 to 0.71:  
+Changes from version 0.71 to 0.72:  
 (See the History section in the full documentation for changes from previous
-versions to 0.70.)
+versions to 0.71.)
 
-This release is the first one to be included in fink.  So on a Mac, if you 
-use fink, you can now just type: 
+This release is mostly just some minor bug fixes and some changes in the 
+installation defaults.
 
-fink install tmv
+-- Correctly detects when g++ is really clang++.  Apple has been lying about
+   its C++ compiler in recent MacOS systems (10.7-10.9).  They use clang++,
+   but they call the program g++.  This used to mess up TMV, since clang++ 
+   does not support OpenMP, so it would wrongly try to use OpenMP and end up 
+   with linking problems.  TMV now detects when clang++ is masquerading as
+   g++ and handles this correctly.
 
-to install TMV in /sw/lib and /sw/include.
+-- Fixes some problems with the install_name in the shared libraries.  
+   (Issues #3 and #7)
 
-However, the process of getting this to happen required a few changes to the 
-SCons files.  I also learned a few SCons tricks that I've incorporated as well.
+-- Fixed some warnings emitted by clang++.  These weren't bugs -- just some
+   things that clang++ warns about that other compilers hadn't cared about.
 
-This release is completely backwards compatible as far as the header files
-and library are concerned, since nothing there has changed.  The only 
-changes are in the build process.
+-- Changed the default value of INST_INT to True, so the Matrix<int> templates
+   are instantiated now unless you specifically disable them.  Enough people
+   had expected them to be there and asked about why they were getting 
+   linking errors when they used Matrix<int>, so I decided to build them
+   by default now.  They don't add much to the library size.
 
--- Added a new SCons parameter FINAL_PREFIX.  This was needed for fink to 
-   get the tmv-link file correct.  It installs everything into a temporary
-   directory, and then only once everything has installed correctly does
-   it copy everything to the /sw/* directories.  This is generally fine,
-   except that the temporary directory was being used in the tmv-link
-   file rather than the final installation directory.  So I added this
-   parameter so I could tell SCons to use this value instead.
+-- Added a default conversion from VarConjIter to VIt.  It was an oversight
+   that this wasn't possible before.  (Issue #5)
 
--- Moved the tmv-link file from PREFIX/share/tmv-link to the fink 
-   recommended location PREFIX/share/tmv/tmv-link.  So if you use the 
-   tmv-link file, you'll want to change your makefile or build script to 
-   use the new location.
-
--- Added documentation files to the installation process.  The files README,
-   CHANGELOG, LICENSE, and TMV_Documentation are now installed in
-   PREFIX/share/doc/tmv/.
-
--- Added a SCons flag IMPORT_PREFIX which specifies whether to use 
-   PREFIX/include and PREFIX/lib in the search paths.  The default is true,
-   which matches the old behavior, but for fink I needed to be able to 
-   turn that off.
-
--- Added a new feature that scons will now automatically try to determine 
-   how many cpus your system has and use that for the number of build jobs 
-   to run at once.  Usually, this is a good choice, but if you don't want
-   it, you can override this in two ways:
-
-   1) There is a new SCons flag N_BUILD_THREADS which you can set.
-      The default value 0 here indicates to use the number of cpus.
-
-   2) scons -jN will always override either of these and use N jobs.
-
--- Fixed up naming of a shared library on OSX.  OSX doesn't use the normal
-   RPATH stuff in an executable to indicate where a shared library is located.
-   Instead it stores the path name in the shared library itself, and then
-   when building an executable, it copies that location into the executable
-   so it knows where to look at run time.
-
-   Well, TMV wasn't getting the name of the shared library correct before,
-   so this wasn't working.  I fixed that, so now programs compiled with a 
-   TMV shared library should run correctly without having to set
-   LD_LIBRARY_PATH explicitly.
-
--- Added flags to include the rpath for linux compilations.  Unlike OSX,
-   linux builds use some flags at link time to put the location of shared 
-   libraries into the executable.  I've added these flags to the flags in
-   the tmv-link file, so this should now happen automatically for you.
-
--- Changed the default value of SHARED to true.  So the default will be
-   to create a shared library (libtmv.so, libtmv.dylib, etc.) rather than a 
-   static library (libtmv.a).  If you need a static library, you now need
-   to explicitly set this to false.
-
-   I made this change, mostly because I learned about some SCons features
-   that let me include the RPATH stuff in the tmv-link file which makes it
-   easier to deal with using TMV as a shared library.
-
--- Removed a few files from the list of installed files.  They are header 
-   files that are only used during the build process, and shouldn't have 
-   been installed.  If you want to remove them from your include directory
-   from previous installations, they are:
-
-   fblas.h
-   flapack.h
-   mmgr.h
-   extra_mmgr.h
-   nommgr.h
-   tmv/portable_platform.h
-
--- Added a feature to the SCons script to check for unknown variables.
-   So if you mistype something, it now lets you know rather than blithely 
-   continuing on ignoring the value you mistyped.

@@ -699,6 +699,45 @@ Removed the functions and methods that had been deprecated in version 0.65.
 
 \end{itemize}
 
+\item[Version 0.71]
+
+This release was the first one to be included in fink.
+So on a Mac, if you use fink, you can now just type: 
+\begin{verbatim}
+fink install tmv
+\end{verbatim}
+to install TMV in \texttt{/sw/lib} and \texttt{/sw/include}.
+However, the process of getting this to happen required a few changes to the SCons files.
+I also learned a few SCons tricks that I've incorporated as well.
+
+\begin{itemize}
+
+\item
+Added a new SCons parameter \tt{FINAL\_PREFIX}.
+
+\item
+Moved the installed \tt{tmv-link} file from \tt{PREFIX/share/tmv-link} to the fink-recommended location \tt{PREFIX/share/tmv/tmv-link}.
+
+\item
+Added documentation files to the installation process.  The files \tt{README},
+\tt{CHANGELOG}, \tt{LICENSE}, and \tt{TMV\_Documentation} are now installed in
+\tt{PREFIX/share/doc/tmv/}.
+
+\item
+Added a SCons flag \tt{IMPORT\_PREFIX} which specifies whether to include
+\tt{PREFIX/include} and \tt{PREFIX/lib} in the search paths.
+
+\item
+Added a new feature that scons will now automatically try to determine 
+how many cpus your system has and use that for the number of build jobs 
+to run at once.  You can turn this off with either \tt{N\_BUILD\_THREADS} or \tt{scons -jN}.
+
+\item
+Changed the default value of \tt{SHARED} to true, and fixed up some features of the shared
+library to conform to common standard practices.
+
+\end{itemize}
+
 \item[Version \tmvversion] See \S\ref{Changes}.
 
 \end{description}
