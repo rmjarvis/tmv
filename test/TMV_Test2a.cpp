@@ -35,17 +35,17 @@ int main() try {
 
 #ifdef TEST_DOUBLE
     TestBandMatrix<double>();
-    TestBandDiv<double>();
+    //TestBandDiv<double>();
 #endif
 
 #ifdef TEST_FLOAT
     TestBandMatrix<float>();
-    TestBandDiv<float>();
+    //TestBandDiv<float>();
 #endif
 
 #ifdef TEST_LONGDOUBLE
     TestBandMatrix<long double>();
-    TestBandDiv<long double>();
+    //TestBandDiv<long double>();
 #endif 
 
 #ifdef TEST_INT

@@ -508,28 +508,11 @@ namespace tmv {
             BaseMatrix_Rec_Mutable<M>& m, BaseVector_Mutable<V>& beta,
             Permutation& P, bool strict=false);
 
+        // In TMV_BandLUDecompose.h
+        template <class M>
+        friend void BandLU_Decompose(BaseMatrix_Band_Mutable<M>& m, Permutation& P);
+
 #if 0
-        template <class T>
-        friend void LU_Decompose(
-            const GenBandMatrix<T>& A, const LowerTriMatrixView<T>& L,
-            const BandMatrixView<T>& U, Permutation& P)
-        {
-            TMVAssert(P.size() == A.colsize());
-            P.allocateMem();
-            LU_Decompose(A,L,U,P.getMem());
-            P.isinv = true;
-        }
-
-        template <class T>
-        friend void LU_Decompose(
-            const BandMatrixView<T>& A, Permutation& P, ptrdiff_t nhi)
-        {
-            TMVAssert(P.size() == A.colsize());
-            P.allocateMem();
-            LU_Decompose(A,P.getMem(),nhi);
-            P.isinv = true;
-        }
-
         template <class T>
         friend void LDL_Decompose(
             const SymMatrixView<T>& A, const SymBandMatrixView<T>& D,

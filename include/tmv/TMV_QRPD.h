@@ -1011,10 +1011,10 @@ namespace tmv {
         //
         // This produces the exact right answer, but it is way too slow!
         // The GvL algorithm is order mn.  This is order mn^2.
-        Matrix<T> minv(rowsize(),colsize());
         if (isSingular()) {
             return normInf / TMV_Epsilon<RT>();
         } else {
+            Matrix<T> minv(rowsize(),colsize());
             makeInverse(minv);
             return normInf * minv.normInf();
         }

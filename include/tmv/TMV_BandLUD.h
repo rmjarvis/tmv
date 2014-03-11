@@ -31,33 +31,33 @@ namespace tmv {
     // In TMV_BandLUDecompose.h
     template <class M>
     inline void BandLU_Decompose(
-        BaseMatrix_Rec_Mutable<M>& m, Permutation& P);
+        BaseMatrix_Band_Mutable<M>& m, Permutation& P);
 
     // In TMV_BandLUInverse.h
     template <class M1>
     inline void BandLU_Inverse(
-        BaseMatrix_Rec_Mutable<M1>& m1, const Permutation& P);
+        BaseMatrix_Band_Mutable<M1>& m1, const Permutation& P);
     template <class M1, class M2>
     inline void BandLU_InverseATA(
-        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
-        const bool trans, BaseMatrix_Rec_Mutable<M2>& m2);
+        const BaseMatrix_Band<M1>& m1, const Permutation& P,
+        const bool trans, BaseMatrix_Band_Mutable<M2>& m2);
 
     // In TMV_BandLUDiv.h
     template <class M1, class M2>
     inline void BandLU_SolveInPlace(
-        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
-        BaseMatrix_Rec_Mutable<M2>& m2);
+        const BaseMatrix_Band<M1>& m1, const Permutation& P,
+        BaseMatrix_Band_Mutable<M2>& m2);
     template <class M1, class V2>
     inline void BandLU_SolveInPlace(
-        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
+        const BaseMatrix_Band<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2);
     template <class M1, class M2>
     inline void BandLU_SolveTransposeInPlace(
-        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
-        BaseMatrix_Rec_Mutable<M2>& m2);
+        const BaseMatrix_Band<M1>& m1, const Permutation& P,
+        BaseMatrix_Band_Mutable<M2>& m2);
     template <class M1, class V2>
     inline void BandLU_SolveTransposeInPlace(
-        const BaseMatrix_Rec<M1>& m1, const Permutation& P,
+        const BaseMatrix_Band<M1>& m1, const Permutation& P,
         BaseVector_Mutable<V2>& v2);
 
 
@@ -86,12 +86,13 @@ namespace tmv {
 
         enum { small = (
                 M::_colsize != Unknown && M::_rowsize != Unknown &&
+                M::_nlo != Unknown && M::_nhi != Unknown &&
                 M::_colsize <= 8 && M::_rowsize <= 8 ) };
 
         typedef typename BandLUD_Impl<small,M>::lux_type lux_type;
         typedef const lux_type& getlu_type;
-        typedef typename lux_type::const_unit_lowertri_type getl_type;
-        typedef typename lux_type::const_uppertri_type getu_type;
+        typedef LowerTriMatrix<T,UnitDiag> getl_type;
+        typedef typename lux_type::const_upperband_type getu_type;
         typedef Permutation getp_type;
 
         //
@@ -117,12 +118,12 @@ namespace tmv {
         // Perform the division in place
         //
         template <class M2>
-        void solveInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const;
+        void solveInPlace(BaseMatrix_Mutable<M2>& m2) const;
         template <class V2>
         void solveInPlace(BaseVector_Mutable<V2>& v2) const;
 
         template <class M2>
-        void solveTransposeInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const;
+        void solveTransposeInPlace(BaseMatrix_Mutable<M2>& m2) const;
         template <class V2>
         void solveTransposeInPlace(BaseVector_Mutable<V2>& v2) const;
 
@@ -133,7 +134,7 @@ namespace tmv {
         
         template <class M1, class M2>
         void solve(
-            const BaseMatrix<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2) const
+            const BaseMatrix<M1>& m1, BaseMatrix_Mutable<M2>& m2) const
         { solveInPlace(m2=m1); }
         template <class V1, class V2>
         void solve(
@@ -142,7 +143,7 @@ namespace tmv {
 
         template <class M1, class M2>
         void solveTranspose(
-            const BaseMatrix<M1>& m1, BaseMatrix_Rec_Mutable<M2>& m2) const
+            const BaseMatrix<M1>& m1, BaseMatrix_Mutable<M2>& m2) const
         { solveTransposeInPlace(m2=m1); }
         template <class V1, class V2>
         void solveTranspose(
@@ -164,7 +165,7 @@ namespace tmv {
         //
         
         template <class M2>
-        void makeInverse(BaseMatrix_Rec_Mutable<M2>& minv) const;
+        void makeInverse(BaseMatrix_Mutable<M2>& minv) const;
 
 
         //
@@ -172,7 +173,7 @@ namespace tmv {
         //
         
         template <class M2>
-        void makeInverseATA(BaseMatrix_Rec_Mutable<M2>& ata) const;
+        void makeInverseATA(BaseMatrix_Mutable<M2>& ata) const;
 
 
         // 
@@ -209,11 +210,11 @@ namespace tmv {
     
     template <class T>
     class InstBandLUD :
-        public BandLUD<Matrix<T,ColMajor> >,
+        public BandLUD<BandMatrix<T,ColMajor> >,
         public Divider<T>
     {
     public :
-        typedef BandLUD<Matrix<T,ColMajor> > base;
+        typedef BandLUD<BandMatrix<T,ColMajor> > base;
         typedef typename base::RT RT;
         typedef typename base::CT CT;
         typedef typename base::FT FT;
@@ -221,7 +222,7 @@ namespace tmv {
 
         // Sets up the internal storage and does the decomposition.
         template <int C>
-        InstBandLUD(const ConstMatrixView<T,C>& A, bool _inplace=false);
+        InstBandLUD(const ConstBandMatrixView<T,C>& A, bool _inplace=false);
         InstBandLUD(const InstBandLUD<T>& rhs);
         ~InstBandLUD();
 
@@ -381,11 +382,17 @@ namespace tmv {
     template <class M>
     struct BandLUD_Impl<true,M>
     {
-        enum { istrans = M::_rowmajor };
         enum { size = M::_colsize };
+        enum { lo1 = M::_nlo };
+        enum { hi1 = M::_nhi };
+        enum { istridiag = lo1 == 1 && hi1 == 1 };
+        enum { istrans = (ptrdiff_t(hi1) < ptrdiff_t(lo1) ||
+                          (ptrdiff_t(hi1) == ptrdiff_t(lo1) && M::_rowmajor)) };
+        enum { lo = (istrans ? (lo1+hi1) : lo1) };
+        enum { hi = (istrans ? hi1 : (lo1+hi1)) };
         typedef typename M::value_type T;
-        enum { A = NoAlias | (istrans ? RowMajor : ColMajor) };
-        typedef typename MCopyHelper<T,Rec,size,size,A>::type Mc;
+        enum { A = NoAlias | (istridiag ? DiagMajor : istrans ? RowMajor : ColMajor) };
+        typedef typename BCopyHelper<T,Band,size,size,lo,hi,A>::type Mc;
         typedef typename TypeSelect< istrans ,
                 typename Mc::transpose_type ,
                 typename Mc::view_type>::type lux_type;
@@ -397,11 +404,14 @@ namespace tmv {
         {
             TMVStaticAssert(M::_colsize != Unknown);
             TMVStaticAssert(M::_rowsize != Unknown);
+            TMVStaticAssert(M::_nlo != Unknown);
+            TMVStaticAssert(M::_nhi != Unknown);
             TMVStaticAssert(M::_colsize == M::_rowsize);
             TMVStaticAssert(M::_colsize == M2::_colsize);
             TMVStaticAssert(M::_rowsize == M2::_rowsize);
             TMVStaticAssert(lux_type::_colmajor);
-            SmallLUx = A;
+            SmallLUx.setZero();
+            BandMatrixViewOf(SmallLUx,lo,hi) = A;
             BandLU_Decompose(LUx,P);
         }
         template <class M2, class M3>
@@ -446,27 +456,76 @@ namespace tmv {
     template <class M>
     struct BandLUD_Impl<false,M>
     {
-        enum { istrans1 = M::_rowmajor };
+        enum { size = M::_colsize };
+        enum { lo1 = M::_nlo };
+        enum { hi1 = M::_nhi };
+        enum { knownsizes = lo1 != Unknown && hi1 != Unknown };
+        enum { istridiag1 = lo1 == 1 && hi1 == 1 };
+        enum { istrans1 = knownsizes && (
+                ptrdiff_t(hi1) < ptrdiff_t(lo1) || 
+                (ptrdiff_t(hi1) == ptrdiff_t(lo1) && M::_rowmajor)) };
+        enum { lo = istrans1 ? (lo1+hi1) : lo1 };
+        enum { hi = istrans1 ? hi1 : (lo1+hi1) };
+        typedef typename M::value_type T;
+        enum { A = NoAlias | (istridiag1 ? DiagMajor : istrans1 ? RowMajor : ColMajor) };
+        typedef typename BCopyHelper<T,Band,size,size,lo,hi,A>::type Mc;
         typedef typename TypeSelect< istrans1 ,
-                typename M::transpose_type::noalias_type ,
-                typename M::noalias_type>::type lux_type;
+                typename Mc::transpose_type::noalias_type ,
+                typename Mc::noalias_type>::type lux_type;
+
+#define NEWLO TMV_MIN(A.nlo(),A.nhi())
+#define NEWHI TMV_MIN(A.nlo()+A.nhi(),A.colsize()-1)
+#define APTR1 (inplace ? 0 : \
+               BandStorageLength(ColMajor,A.colsize(),A.colsize(),NEWLO,NEWHI))
+#define TRID (A.nlo() == 1 && A.nhi() == 1)
+#define APTR (inplace ? A.nonConst().ptr() : Aptr1.get())
+
+#define LUX (istrans1 ? \
+             (inplace ? \
+              BandMatrixView<T>(A.nonConst().ptr(),A.colsize(),A.colsize(),\
+                                A.nhi(),NEWHI,A.stepj(),A.stepi(),A.diagstep(),\
+                                A.ct() \
+                                TMV_FIRSTLAST1(A.nonConst()._first,\
+                                               A.nonConst()._last) ) : \
+              BandMatrixViewOf(Aptr,A.colsize(),A.colsize(),A.nhi(), \
+                               NEWHI, TRID ? DiagMajor : ColMajor)) : \
+             (inplace ? \
+              BandMatrixView<T>(A.nonConst().ptr(),A.colsize(),\
+                                A.colsize(),A.nlo(),NEWHI,\
+                                A.stepi(),A.stepj(),A.diagstep(),\
+                                A.ct() \
+                                TMV_FIRSTLAST1(A.nonConst()._first,\
+                                               A.nonConst()._last) ) : \
+              BandMatrixViewOf(Aptr,A.colsize(),A.colsize(),A.nlo(), \
+                               NEWHI, TRID ? DiagMajor : ColMajor)))
 
         template <class M2>
-        BandLUD_Impl(const BaseMatrix_Rec<M2>& A, bool _inplace) :
-            // if A is rm, copy it to the transpose of LUx (which is cm)
-            istrans(A.isrm()),
-            // inplace only if matrix is rowmajor or colmajor
-            inplace((A.iscm() || A.isrm()) && _inplace),
-            // Aptr is the pointer to new storage if any
-            Aptr( inplace ? 0 : A.rowsize()*A.rowsize() ),
+        BandLUD_Impl(const BaseMatrix_Band<M2>& A, bool _inplace) :
+            istrans(A.nlo() < A.nhi() || (A.nlo() == A.nhi() && A.isrm())),
+            istridiag(A.nlo() == 1 && A.nhi() == 1),
+            inplace(NEWLO == 0 ||
+                    (_inplace && (
+                        (A.isrm() && istrans && A.stepi() >= A.nlo()+2*A.nhi()) || 
+                        (A.iscm() && !istrans && A.stepj() >= 2*A.nlo()+A.nhi()) || 
+                        (A.isdm() && istridiag)
+                    ))
+            ),
+            // Aptr1 is the pointer to new storage if any
+            Aptr1(APTR1),
+            // Aptr is the pointer to the (0,0) element (which isn't necessarily Aptr1)
+            Aptr(APTR),
             // LUx views this memory as the LU matrix
             LUx(
-                inplace ? A.nonConst().ptr() : Aptr.get() , // ptr
+                inplace ? A.nonConst().ptr() : (
+                    Aptr + (istridiag ? A.colsize() : 0) ), // ptr
                 // A is square, so no need to check istrans for the right
                 // values of rowsize,colsize here.
-                A.rowsize() ,  // colsize
-                A.rowsize() ,  // rowsize
-                1 ,  // stepi
+                A.colsize() ,  // colsize
+                A.colsize() ,  // rowsize
+                istrans ? A.nhi() : A.nlo(),  // nlo
+                TMV_MIN(A.nlo()+A.nhi(),A.colsize()-1) , // nhi
+                istridiag ? 1-ptrdiff_t(A.colsize()) : 1 ,  // stepi
+                istridiag ? ptrdiff_t(A.colsize()) : 1 ,  // stepj
                 // Here we do need to check istrans for the right step.
                 ( inplace ? (istrans ? A.stepi() : A.stepj()) :
                   A.rowsize() ) // stepj
@@ -497,31 +556,6 @@ namespace tmv {
 #endif
             }
 
-        // If A is not a BaseMatrix_Rec, can't do it in place.
-        template <class M2>
-        BandLUD_Impl(const BaseMatrix<M2>& A, bool ) :
-            istrans(false), inplace(false),
-            Aptr( A.rowsize()*A.rowsize() ),
-            LUx(Aptr.get(),A.rowsize(), A.rowsize(),1,A.rowsize()),
-            P(A.rowsize())
-        {
-            TMVStaticAssert(lux_type::_colmajor);
-            TMVStaticAssert((Sizes<M::_colsize,M::_rowsize>::same));
-            TMVStaticAssert((Sizes<M2::_colsize,M2::_rowsize>::same));
-            TMVAssert(A.colsize() == A.rowsize());
-            LUx = A;
-            BandLU_Decompose(LUx,P);
-#ifdef PRINTALGO_BandLU
-            std::cout<<"BandLUD_Impl (not small) constructor for non-Rec\n";
-            std::cout<<"this = "<<this<<std::endl;
-            std::cout<<"istrans = "<<istrans<<std::endl;
-            std::cout<<"inplace = "<<inplace<<std::endl;
-            std::cout<<"Aptr = "<<Aptr<<"  "<<A.rowsize()*A.rowsize()<<std::endl;
-            std::cout<<"A = "<<A<<std::endl;
-            std::cout<<"LUx = "<<LUx<<std::endl;
-            std::cout<<"P = "<<P<<std::endl;
-#endif
-        }
         template <class M2, class M3>
         void solve(const M2& m2, M3& m3)
         {
@@ -572,8 +606,9 @@ namespace tmv {
         { BandLU_InverseATA(LUx,P,istrans,ata); }
 
 
-        const bool istrans,inplace;
-        AlignedArray<typename M::value_type> Aptr;
+        const bool istrans,istridiag,inplace;
+        AlignedArray<typename M::value_type> Aptr1;
+        typename M::value_type* Aptr;
         lux_type LUx;
         Permutation P;
     };
@@ -617,7 +652,7 @@ namespace tmv {
     }
 
     template <class M> template <class M2>
-    void BandLUD<M>::solveInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const
+    void BandLUD<M>::solveInPlace(BaseMatrix_Mutable<M2>& m2) const
     {
         TMVStaticAssert((Sizes<M2::_colsize,M::_colsize>::same));
         TMVAssert(m2.colsize() == colsize());
@@ -625,7 +660,7 @@ namespace tmv {
     }
 
     template <class M> template <class M2>
-    void BandLUD<M>::solveTransposeInPlace(BaseMatrix_Rec_Mutable<M2>& m2) const
+    void BandLUD<M>::solveTransposeInPlace(BaseMatrix_Mutable<M2>& m2) const
     {
         TMVStaticAssert((Sizes<M2::_colsize,M::_rowsize>::same));
         TMVAssert(m2.colsize() == rowsize());
@@ -665,7 +700,7 @@ namespace tmv {
     { return getU().isSingular(); }
 
     template <class M> template <class M2>
-    void BandLUD<M>::makeInverse(BaseMatrix_Rec_Mutable<M2>& minv) const
+    void BandLUD<M>::makeInverse(BaseMatrix_Mutable<M2>& minv) const
     {
         TMVStaticAssert((Sizes<M::_colsize,M2::_rowsize>::same));
         TMVStaticAssert((Sizes<M::_rowsize,M2::_colsize>::same));
@@ -675,7 +710,7 @@ namespace tmv {
     }
 
     template <class M> template <class M2>
-    void BandLUD<M>::makeInverseATA(BaseMatrix_Rec_Mutable<M2>& ata) const
+    void BandLUD<M>::makeInverseATA(BaseMatrix_Mutable<M2>& ata) const
     {
         TMVAssert(ata.rowsize() == rowsize());
         TMVAssert(ata.colsize() == rowsize());
@@ -688,11 +723,14 @@ namespace tmv {
 
     template <class M>
     typename BandLUD<M>::getl_type BandLUD<M>::getL() const 
-    { return pimpl->LUx.unitLowerTri(); }
+    {
+
+        return BandLUD<M>::getl_type(pimpl->LUx.unitLowerTri()); 
+    }
 
     template <class M>
     typename BandLUD<M>::getu_type BandLUD<M>::getU() const 
-    { return pimpl->LUx.upperTri(); }
+    { return pimpl->LUx.upperBand(); }
 
     template <class M>
     typename BandLUD<M>::getlu_type BandLUD<M>::getLU() const 
@@ -720,10 +758,10 @@ namespace tmv {
         //
         // This produces the exact right answer, but it is way too slow!
         // The GvL algorithm is order n^2.  This is order n^3.
-        Matrix<T> minv(rowsize(),colsize());
         if (isSingular()) {
             return normInf / TMV_Epsilon<RT>();
         } else {
+            Matrix<T> minv(rowsize(),colsize());
             makeInverse(minv);
             return normInf * minv.normInf();
         }

@@ -229,8 +229,8 @@ template <class T> void TestAllBandDiv()
     std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<"> passed all ";
     std::cout<<"decomposition tests.\n";
     TestBandDiv<T>(tmv::LU);
-    TestBandDiv<T>(tmv::QR);
-    TestBandDiv<T>(tmv::SV);
+    //TestBandDiv<T>(tmv::QR);
+    //TestBandDiv<T>(tmv::SV);
 }
 
 #ifdef TEST_DOUBLE
