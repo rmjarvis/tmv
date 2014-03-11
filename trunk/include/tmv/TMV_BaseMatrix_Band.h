@@ -294,7 +294,7 @@ namespace tmv {
 
     // Since SmallBandMatrix needs to know nlo and nhi at compile time,
     // we always use BandMatrix here. 
-    // Is there a reason to have a BCopyHelper that takes lo,hi params?
+    // BCopyHelper takes lo,hi params.
     template <class T, ptrdiff_t cs, ptrdiff_t rs, int A>
     struct MCopyHelper<T,Band,cs,rs,A>
     {
@@ -311,6 +311,48 @@ namespace tmv {
     };
     template <class T, ptrdiff_t si, ptrdiff_t sj, int A>
     struct MViewHelper<T,Band,Unknown,Unknown,si,sj,A>
+    {
+        enum { A2 = A |
+            (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) | NoAlias };
+        typedef BandMatrixView<T,A2> type; 
+        typedef ConstBandMatrixView<T,A2> ctype; 
+    };
+
+
+    template <class T, int shape, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, ptrdiff_t hi, int A>
+    struct BCopyHelper;
+    template <class T, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, ptrdiff_t hi, int A>
+    struct BCopyHelper<T,Band,cs,rs,lo,hi,A>
+    {
+        typedef SmallBandMatrix<T,cs,rs,lo,hi,A> type;
+    };
+    template <class T, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, int A>
+    struct BCopyHelper<T,Band,cs,rs,lo,Unknown,A>
+    {
+        typedef typename MCopyHelper<T,Band,cs,rs,A>::type type;
+    };
+    template <class T, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t hi, int A>
+    struct BCopyHelper<T,Band,cs,rs,Unknown,hi,A>
+    {
+        typedef typename MCopyHelper<T,Band,cs,rs,A>::type type;
+    };
+    template <class T, ptrdiff_t cs, ptrdiff_t rs, int A>
+    struct BCopyHelper<T,Band,cs,rs,Unknown,Unknown,A>
+    {
+        typedef typename MCopyHelper<T,Band,cs,rs,A>::type type;
+    };
+
+    template <class T, int shape,  ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, ptrdiff_t hi, ptrdiff_t si, ptrdiff_t sj, int A>
+    struct BViewHelper;
+    template <class T, ptrdiff_t cs, ptrdiff_t rs, ptrdiff_t lo, ptrdiff_t hi, ptrdiff_t si, ptrdiff_t sj, int A>
+    struct BViewHelper<T,Band,cs,rs,lo,hi,si,sj,A>
+    { 
+        enum { xx = Unknown };
+        typedef SmallBandMatrixView<T,cs,rs,lo,hi,si,sj,A> type; 
+        typedef ConstSmallBandMatrixView<T,cs,rs,lo,hi,si,sj,A> ctype; 
+    };
+    template <class T, ptrdiff_t si, ptrdiff_t sj, int A>
+    struct BViewHelper<T,Band,Unknown,Unknown,Unknown,Unknown,si,sj,A>
     {
         enum { A2 = A |
             (si == 1 ? ColMajor : sj == 1 ? RowMajor : NonMajor) | NoAlias };

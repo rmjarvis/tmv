@@ -21,33 +21,16 @@
 #include "TMV_PermuteM.h"
 #endif
 
-// BLOCKSIZE is the block size to use in algo 21
-#define TMV_BandLU_BLOCKSIZE 64
-
-// RECURSE = the maximum size to stop recursing in algo 27
-#if TMV_OPT >= 3
-#define TMV_BandLU_RECURSE 2
-#elif TMV_OPT == 2
-#define TMV_BandLU_RECURSE 32
-#else
-#define TMV_BandLU_RECURSE 1
-#endif
-
 // INLINE_MV = Inline the MV (MultMV, LDivEqVU) calls.
 #if TMV_OPT >= 1
-#define TMV_BandLU_INLINE_MV
-#endif
-
-// INLINE_MM = Inline the small-sized MM (MultMM, LDivEqMU) calls.
-#if TMV_OPT >= 3
-#define TMV_BandLU_INLINE_MM
+#define TMV_BandLU_INLINE_VVM
 #endif
 
 namespace tmv {
 
     // Defined in TMV_BandLUDecompose.cpp
     template <class T>
-    void InstBandLU_Decompose(MatrixView<T> m, ptrdiff_t* P);
+    void InstBandLU_Decompose(BandMatrixView<T> m, ptrdiff_t* P);
 
     template <int algo, ptrdiff_t cs, ptrdiff_t rs, class M>
     struct BandLUDecompose_Helper;
@@ -57,170 +40,7 @@ namespace tmv {
     struct BandLUDecompose_Helper<0,cs,rs,M>
     { static TMV_INLINE void call(M& A, ptrdiff_t* P) {} };
 
-    // algo 1: N == 1
-    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
-    struct BandLUDecompose_Helper<1,cs,rs,M1>
-    {
-        static void call(M1& A, ptrdiff_t* P)
-        {
-            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
-            TMVAssert(A.rowsize() == 1);
-#ifdef PRINTALGO_BandLU
-            std::cout<<"BandLUDecompose algo 1: M,N,cs,rs = "<<M<<','<<1<<
-                ','<<cs<<','<<rs<<std::endl;
-#endif
-            // Same as NonBlock version, but with R==1 hard coded
-            typedef typename M1::value_type T;
-            typedef typename M1::real_type RT;
-
-            typename M1::col_type A0 = A.get_col(0);
-            RT piv = A0.maxAbsElement(P);
-
-            if (TMV_Underflow(piv)) {
-                *P = 0;
-                A0.setZero();
-            } else {
-                if (*P != 0) {
-                    A0.swap(*P,0);
-                }
-                //A0.cSubVector(1,M) /= A0.cref(0);
-                typename M1::col_sub_type A0b = A0.cSubVector(1,M);
-                Scale(Scaling<0,T>(RT(1)/A0.cref(0)),A0b);
-            }
-        }
-    };
-
-    // algo 2: N == 2
-    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
-    struct BandLUDecompose_Helper<2,cs,rs,M1>
-    {
-        static void call(M1& A, ptrdiff_t* P)
-        {
-            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
-            TMVAssert(A.rowsize() == 2);
-#ifdef PRINTALGO_BandLU
-            std::cout<<"BandLUDecompose algo 2: M,N,cs,rs = "<<M<<','<<2<<
-                ','<<cs<<','<<rs<<std::endl;
-#endif
-            // Same as NonBlock version, but with N==2 hard coded
-            typedef typename M1::value_type T;
-            typedef typename M1::real_type RT;
-
-            typename M1::col_type A0 = A.get_col(0);
-            typename M1::col_type A1 = A.get_col(1);
-            typename M1::col_type::iterator it0 = A0.begin();
-            typename M1::col_type::iterator it1 = A1.begin();
-
-            ptrdiff_t ip0,ip1;
-            RT piv = A0.maxAbsElement(&ip0);
-
-            if (TMV_Underflow(piv)) {
-                A0.setZero();
-                ip0 = 0;
-                piv = A1.cSubVector(1,M).maxAbsElement(&ip1);
-                ip1++;
-            } else {
-                if (ip0 != 0) {
-                    A0.swap(ip0,0);
-                    A1.swap(ip0,0);
-                } 
-
-                // A0.subVector(1,M) /= A00;
-                // A1.subVector(1,M) -= A0.subVector(1,M) * A01;
-                const T invA00 = RT(1)/(*it0++);
-                const T A01 = *it1++;
-                piv = RT(0); // next pivot element
-                ip1 = 1;
-                for(ptrdiff_t i=1;i<M;++i,++it0,++it1) {
-                    *it0 *= invA00;
-                    *it1 -= *it0 * A01;
-                    RT absAi1 = TMV_ABS(*it1);
-                    if (absAi1 > piv) { piv = absAi1; ip1=i; }
-                }
-            }
-
-            if (TMV_Underflow(piv)) {
-                A1.cSubVector(1,M).setZero();
-                ip1 = 1;
-            } else {
-                if (M > 2) {
-                    if (ip1 != 1) {
-                        A1.swap(ip1,1);
-                        A0.swap(ip1,1);
-                    } 
-
-                    //A1.cSubVector(2,M) /= A1.cref(1);
-                    typename M1::col_sub_type A1b = A1.cSubVector(2,M);
-                    Scale(Scaling<0,T>(RT(1)/A1.cref(1)),A1b);
-                }
-            }
-
-            P[0] = ip0;
-            P[1] = ip1;
-        }
-    };
-
-    // algo 3: M == 2
-    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
-    struct BandLUDecompose_Helper<3,cs,rs,M1>
-    {
-        static void call(M1& A, ptrdiff_t* P)
-        {
-            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
-            TMVAssert(A.colsize() == 2);
-#ifdef PRINTALGO_BandLU
-            std::cout<<"BandLUDecompose algo 3: M,N,cs,rs = "<<2<<','<<N<<
-                ','<<cs<<','<<rs<<std::endl;
-#endif
-            // Same as NonBlock version, but with M==2 hard coded
-            typedef typename M1::value_type T;
-            typedef typename M1::real_type RT;
-
-            typename M1::col_type A0 = A.get_col(0);
-            typename M1::col_type A1 = A.get_col(1);
-
-            ptrdiff_t ip0;
-            RT piv = A0.maxAbsElement(&ip0);
-
-            if (TMV_Underflow(piv)) {
-                A0.setZero();
-                ip0 = 0;
-            } else {
-                if (ip0 != 0) {
-                    A0.swap(ip0,0);
-                    A1.swap(ip0,0);
-                } 
-
-                // A0.subVector(1,M) /= A00;
-                // A1.subVector(1,M) -= A0.subVector(1,M) * A01;
-                A0.ref(1) /= A0.cref(0);
-                A1.ref(1) -= A0.cref(1) * A1.cref(0);
-            }
-
-            P[0] = ip0;
-            P[1] = 1;
-
-            if (N <= 2) return;
-            else {
-                typename M1::row_sub_type::noalias_type Aa =
-                    A.get_row(0,2,N).noAlias();
-                typename M1::row_sub_type::noalias_type Ab =
-                    A.get_row(1,2,N).noAlias();
-                // M=2, N>2, so solve for U(0:2,2:N))
-                // A.colRange(2,N).permuteRows(P);
-                if (ip0 == 1) {
-                    //A.cColRange(2,N).swapRows(0,1);
-                    Swap(Aa,Ab);
-                }
-
-                // A.colRange(2,N) /= A.colRange(0,2).unitLowerTri();
-                //A.get_row(1,2,N) -= A1.cref(0) * A.get_row(0,2,N);
-                MultXV<true>(Scaling<0,T>(-A1.cref(0)),Aa,Ab);
-            }
-        }
-    };
-
-    // algo 11: Non-block algorithm, loop over n
+    // algo 11: Regular partial pivoting algorithm
     template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct BandLUDecompose_Helper<11,cs,rs,M1>
     {
@@ -228,112 +48,91 @@ namespace tmv {
         {
             // LU Decompostion with partial pivoting.
             //
-            // We want to decompose the matrix (input as A) into P * L * U
-            // where P is a permutation, 
-            // L is a unit-diag lower triangle matrix,
-            // and U is an upper triangle matrix.  
+            // For band matrices, we use a somewhat different algorithm than for
+            // regular matrices.  With regular matrices, the main operations were 
+            // Matrix * Vector.  With the band matrix, these become difficult
+            // to implement, since the submatrix that is doing the multiplying
+            // goes off the edge of the bands.  So we choose to implement an
+            // algorithm based on outerproduct updates which works better, since
+            // the matrix being updated is completely within the band.
             //
-            // After doing j cols of the calculation, we have calculated
-            // U(0:j,0:j) and L(0:N,0:j) 
-            // (where my a:b notation does not include the index b)
+            // On input, A contains the original band matrix with nlo subdiagonals
+            // and nhi superdiagonals.  A must be created with nlo subdiagonals
+            // and nlo+nhi superdiagonals.
             //
-            // The equation A = LU gives for the j col:
-            //
-            // A(0:N,j) = L(0:N,0:N) U(0:N,j)
-            //
-            // which breaks up into:
-            //
-            // (1) A(0:j,j) = L(0:j,0:N) U(0:N,j)
-            // (2) A(j:N,j) = L(j:N,0:N) U(0:N,j)
-            //
-            // The first of these (1) simplifies to:
+            // On each step, we calculate the j column of L, the j row of U
+            // and the diagonal Ujj.  here is the first step:
             // 
-            // (1*) A(0:j,j) = L(0:j,0:j) U(0:j,j)
+            // A = L0 U0
+            // ( A00 A0x ) = (  1  0 ) ( U00 U0x )
+            // ( Ax0 Axx )   ( Lx0 I ) (  0  A'  )
             //
-            // since L is lower triangular, so L(0:j,j:N) = 0.
-            // L(0:j,0:j) is already known, so this equation can be solved for
-            // U(0:j,j) by forward substitution.
-            // 
-            // The second equation (2) simplifies to:
+            // In Ax0, only A_10..A_nlo,0 are nonzero.
+            // In A0x, only A_01..A_0,nhi are nonzero.
+            // Axx is also band diagonal with the same nlo,nhi
             //
-            //      A(j:N,j) = L(j:N,0:j+1) U(0:j+1,j)
-            // (2*)          = L(j:N,0:j) U(0:j,j) + L(j:N,j) U(j,j)
+            // The formulae for L,U components are:
             //
-            // since U is upper triangular so U(j+1:N,j) = 0.
-            // Since we now know U(0:j,j) from (1*) above, this equation can
-            // be solved for the product L(j:N,j) U(j,j)
-            // 
-            // This means we have some leeway on the values for L(j,j) and 
-            // U(j,j), as only their product is specified.
+            // U00 = A00
+            // Lx0 = Ax0/U00
+            // U0x = A0x
+            // Uxx = Axx - Lx0 U0x
             //
-            // If we take U to have unit diagonal, then L(j,j) is set here along
-            // with the rest of the L(j:N,j) column.  However, this will mean 
-            // that the forward substutions in the (1*) steps will require 
-            // divisions by the non-unit-diagonal elements of L.
-            // It is faster to take L to have unit-diagonal elements,
-            // and do the division by U(j,j) here, since then we can calculate 
-            // 1/U(j,j) and multiply.  So 1 division and N-j multiplies 
-            // which is generally faster than N-j divisions.
+            // It is apparent that Lx0 and U0x will have the same nonzero structure 
+            // as Ax0 and A0x respectively.  This continues down the recursion,
+            // so when we are done, L is lower banded with nlo subdiagonals, and
+            // U is upper banded with nhi superdiagonals.
+            //  
+            // Unfortunately, this gets messed up a bit with pivoting.  
+            // If the pivot element is as low as it can be, A_nlo,0, then 
+            // swapping rows nlo and 0 will put A_nlo,nlo+nhi into A_0,nlo+nhi.
+            // So we need to expand the upper band storage to nlo+nhi.
             //
-            // However, another potential problem is that U(j,j) could be 0,
-            // or close to 0.  
-            // This would lead to either an error or inaccurate results.
-            // Thus we add a step in the middle of the (2*) calculation:
+            // The other problem is a bit more subtle.  Swapping rows j+nlo and j
+            // also moves data from the j row down to the j+nlo in some of the 
+            // previous columns which store data for L.  This would also screw up
+            // the band structure, but we don't actually need to do this swap.
+            // If we just keep track of what the swaps would be, we can just swap
+            // rows in the remaining parts of A without swapping rows for L.
+            // This makes the LDivEq, RDivEq functions a bit more complicated.
             //
-            // Define v(j:N) = A(j:N,j) - L(j:N,0:j) U(0:j,j)
-            // 
-            // We search v for the element with the largest absolute value and 
-            // apply a permutation to swap it into the j spot.
-            // This element then becomes U(j,j), which is then the divisor for 
-            // the rest of the vector.  This will minimize the possibility of 
-            // roundoff errors due to small U(j,j)'s.
-            // 
             typedef typename M1::value_type T;
             typedef typename M1::real_type RT;
 
             const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
-            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
-            const ptrdiff_t R = TMV_MIN(N,M);
             const ptrdiff_t xx = Unknown;
 #ifdef PRINTALGO_LU
-            std::cout<<"LUDecompose algo 11: M,N,cs,rs = "<<M<<','<<N<<
+            std::cout<<"BandLUDecompose algo 11: M,N,cs,rs = "<<A.colsize()<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
 
             typedef typename M1::col_sub_type M1c;
-            typedef typename M1::row_type M1r;
             typedef typename M1::const_col_sub_type M1cc;
-            typedef typename M1::colrange_type M1cr;
-            typedef typename M1::const_submatrix_type M1s;
-            typedef typename M1::submatrix_type::const_unit_lowertri_type M1l;
+            typedef typename M1::const_row_sub_type M1r;
+            typedef typename M1::submatrix_type M1s;
+            typedef typename M1::diag_type::iterator IT;
 
-#ifdef TMV_LU_INLINE_MV
+            const Scaling<-1,RT> mone;
+
+#ifdef TMV_BandLU_INLINE_VVM
             const int algo2 = -4;
 #else
             const int algo2 = -2;
 #endif
 
-            for (ptrdiff_t j=0; j<R; ++j) {
-                M1c Ajb = A.get_col(j,j,M);
-                M1l L = A.cSubMatrix(0,j,0,j).unitLowerTri();
-
-                if (j > 0) {
-                    M1c Aja = A.get_col(j,0,j);
-                    // Solve for U(0:j,j))
-                    //A.get_col(j,0,j) /= A.cSubMatrix(0,j,0,j).unitLowerTri();
-                    LDivEqVU_Helper<algo2,xx,M1c,M1l>::call(Aja,L);
-
-                    // Solve for v = L(j:M,j) U(j,j)
-                    //A.get_col(j,j,M) -= 
-                        //A.cSubMatrix(j,M,0,j) * A.get_col(j,0,j);
-                    MultMV_Helper<algo2,xx,xx,true,-1,RT,M1s,M1cc,M1c>::call(
-                        Scaling<-1,RT>(),A.cSubMatrix(j,M,0,j),Aja,Ajb);
-                }
+            ptrdiff_t endcol = A.nlo()+1;
+            ptrdiff_t endrow = A.nhi()+1;
+            IT Ajj = A.diag().begin().nonConj();
+            for (ptrdiff_t j=0; j<N-1; ++j, ++Ajj) {
+                M1c Ajb = A.get_col(j,j,endcol);
+                M1c Ajc = A.get_col(j,j+1,endcol);
+                M1r Ajr = A.get_row(j,j+1,endrow);
+                M1s Ajs = A.cSubMatrix(j+1,endcol,j+1,endrow);
 
                 // Find the pivot element
                 ptrdiff_t ip;
-                RT piv = Ajb.maxAbsElement(&ip);
                 // ip is relative to j index, not absolute.
+                RT piv = Ajb.maxAbsElement(&ip);
 
                 // Check for underflow:
                 if (TMV_Underflow(piv)) {
@@ -347,281 +146,103 @@ namespace tmv {
                     ip += j;
                     TMVAssert(ip < A.colsize());
                     TMVAssert(j < A.colsize());
-                    A.cSwapRows(ip,j);  // This does both Lkb and A'
+                    // This does both Lkb and A'
+                    Swap(A.row(ip,j,endrow),A.row(j,j,endrow));
                     P[j] = ip;
                 } else P[j] = j;
 
-                // Solve for L(j+1:M,j)
-                // If Ujj is 0, then all of the L's are 0.
+                // If A(j,j) is 0, then all of the L's are 0.
                 // ie. Ujj Lij = 0 for all i>j
                 // Any value for Lij is valid, so leave them 0.
-                if (A.cref(j,j) != T(0)) {
-                    //A.col(j,j+1,M) /= *Ujj;
-                    M1c Ajc = A.get_col(j,j+1,M);
-                    Scale(Scaling<0,T>(RT(1)/A.cref(j,j)),Ajc);
-                }
+                if (*Ajj != T(0)) Ajc /= *Ajj;
+
+                //A.subMatrix(j+1,endcol,j+1,endrow) -= (A.col(j,j+1,endcol) ^ A.row(j,j+1,endrow));
+                Rank1VVM_Helper<algo2,xx,xx,true,-1,RT,M1cc,M1r,M1s>::call(mone,Ajc,Ajr,Ajs);
+
+                if (endcol < N) ++endcol;
+                if (endrow < N) ++endrow;
             }
-            if (N > M) {
-                // Solve for U(0:M,M:N))
-                //A.cColRange(M,N) /= A.cColRange(0,M).unitLowerTri();
-                M1cr Acr = A.cColRange(M,N);
-                M1l L = A.cColRange(0,M).unitLowerTri();
-                LDivEqMU_Helper<-2,cs,xx,M1cr,M1l>::call(Acr,L);
-            }
+            // j == N-1
+            P[N-1] = N-1;
         }
     };
 
-    // algo 21: Block algorithm
+    // algo 31: Tridiagonal bandmatrix: nlo = nhi = 1
     template <ptrdiff_t cs, ptrdiff_t rs, class M1>
-    struct BandLUDecompose_Helper<21,cs,rs,M1>
+    struct BandLUDecompose_Helper<31,cs,rs,M1>
     {
-        typedef typename M1::value_type T;
         static void call(M1& A, ptrdiff_t* P)
         {
-            // If A is large, we can take advantage of Blas Level 3 speed
-            // by partitioning the matrix by columns.
+            // LU Decompostion for TriDiagonal BandMatrix
             //
-            // We do this calculation one block at a time down the diagonal. 
-            // Each block contains k columns (expect for possibly the last 
-            // block which may be fewer).
+            // For TriDiagonal BandMatrices, there are only two choices for 
+            // each pivot, so we can specialize some of the calculations.
+            // Otherwise, this is the same algorithm as above.
             //
-            // For the first block, we decompose A into:
-            //
-            // ( A00 A01 ) = ( L00  0  ) ( U00 U01 )
-            // ( A10 A11 )   ( L10  A~ ) (  0   1  )
-            //
-            // From this we obtain:
-            //
-            // (1) A00 = L00 U00
-            // (2) A10 = L10 U00
-            // (3) A01 = L00 U01
-            // (4) A11 = L10 U01 + A~
-            //
-            // For (1) we decompose A00 in place using the non-blocked 
-            // algorithm.
-            // (2) and (3) then give us L10 and U01.
-            // Finally, (4) lets us solve for A~.
-            // Repeat until done.
-            //
-            // With pivoting, the only real change is to combine equations 
-            // (1),(2) and solve both together with the non-blocked algorithm.
-            //
-
-            typedef typename M1::real_type RT;
-
             const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
-            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
-            const ptrdiff_t Nx = TMV_BandLU_BLOCKSIZE;
-            const ptrdiff_t R = TMV_MIN(N,M);
             const ptrdiff_t xx = Unknown;
-#ifdef PRINTALGO_BandLU
-            std::cout<<"BandLUDecompose algo 21: M,N,cs,rs = "<<M<<','<<N<<
+#ifdef PRINTALGO_LU
+            std::cout<<"BandLUDecompose algo 11: M,N,cs,rs = "<<A.colsize()<<','<<N<<
                 ','<<cs<<','<<rs<<std::endl;
 #endif
+            typedef typename M1::value_type T;
+            typedef typename M1::real_type RT;
 
-            ptrdiff_t jk=0;
-            for (ptrdiff_t jkpk=jk+Nx; jkpk<=R; jk=jkpk, jkpk+=Nx) {
-                typedef typename M1::submatrix_type M1s;
-                typedef typename M1::const_submatrix_type M1sc;
-                typedef typename M1s::const_unit_lowertri_type M1l;
-                M1s A0 = A.cSubMatrix(jk,M,jk,jkpk); // Both A00 and A10
-                M1s A1 = A.cSubMatrix(jk,M,jkpk,N); // Both A01 and A11
-                M1s A2 = A.cSubMatrix(jk,M,0,jk); // Previous blocks
-                M1s A00 = A.cSubMatrix(jk,jkpk,jk,jkpk);
-                M1s A10 = A.cSubMatrix(jkpk,M,jk,jkpk);
-                M1s A01 = A.cSubMatrix(jk,jkpk,jkpk,N);
-                M1s A11 = A.cSubMatrix(jkpk,M,jkpk,N);
+            typedef typename M1::col_sub_type M1c;
+            typedef typename M1::const_col_sub_type M1cc;
+            typedef typename M1::const_row_sub_type M1r;
+            typedef typename M1::submatrix_type M1s;
+            typedef typename M1::diag_type::iterator IT;
 
-                // Solve for L00, U00
-                BandLUDecompose_Helper<11,xx,Nx,M1s>::call(A0,P+jk);
+            const Scaling<-1,RT> mone;
 
-                // Apply the permutation to the rest of the matrix
-                if (jk > 0) {
-                    A2.cPermuteRows(P+jk,0,Nx);
+            IT Ujj = A.diag().begin().nonConj();  // U(j,j)
+            IT Lj = Ujj; Lj.shiftP(A.stepi());    // L(j+1,j)
+            IT Uj1 = Ujj; Uj1.shiftP(A.stepj());  // U(j,j+1)
+            IT Uj2 = Uj1; Uj2.shiftP(A.stepj());  // U(j,j+2)
+
+            for (ptrdiff_t j=0; j<N-1; ++j,++Ujj,++Lj,++Uj1,++Uj2) {
+                bool pivot = TMV_ABS(*Lj) > TMV_ABS(*Ujj);
+
+                if (pivot) {
+                    //swap(A.row(j+1,j,endrow),A.row(j,j,endrow));
+                    TMV_SWAP(*Lj,*Ujj);
+                    if (j+1<N) TMV_SWAP(*(Ujj+1),*Uj1);
+                    if (j+2<N) TMV_SWAP(*(Uj1+1),*Uj2);
+                    P[j] = j+1;
+                } else P[j] = j;
+
+                if (TMV_Underflow(*Ujj)) {
+                    *Ujj = *Lj = T(0);
+                } else {
+                    *Lj /= *Ujj;
                 }
-                if (jkpk < N) {
-                    A1.cPermuteRows(P+jk,0,Nx);
 
-                    // Solve for U01
-                    //A01 /= A00.unitLowerTri();
-                    M1l L00 = A00.unitLowerTri();
-                    LDivEqMU_Helper<-2,Nx,xx,M1s,M1l>::call(A01,L00);
-
-                    // Solve for A~
-                    if (jkpk < M) {
-                        //A11 -= A10 * A01;
-                        MultMM_Helper<-2,xx,xx,Nx,true,-1,RT,M1sc,M1sc,M1s>::call(
-                            Scaling<-1,RT>(),A10,A01,A11);
-                    }
-                }
-                for(ptrdiff_t i=jk;i<jkpk;++i) P[i]+=jk;
+                //A.row(j+1,j+1,endrow) -= *Lj * A.row(j,j+1,endrow);
+                *(Ujj+1) -= *Lj * (*Uj1);
+                if (pivot && j+2<N) *(Uj1+1) -= *Lj * (*Uj2); // (if !pivot, *Uj2 == 0)
             }
-
-            if (jk < R) { // Last block is not full size
-
-                const ptrdiff_t Ny = R-jk;
-                typedef typename M1::submatrix_type M1s;
-                typedef typename M1s::const_unit_lowertri_type M1l;
-                M1s A0 = A.cSubMatrix(jk,M,jk,R); // Both A00 and A10
-                M1s A1 = A.cSubMatrix(jk,M,R,N); // Both A01 and A11
-                M1s A2 = A.cSubMatrix(jk,M,0,jk); // Previous blocks
-                M1s A00 = A.cSubMatrix(jk,R,jk,R);
-                M1s A01 = A.cSubMatrix(jk,R,R,N);
-
-                // Solve for L00, U00
-                BandLUDecompose_Helper<11,xx,xx,M1s>::call(A0,P+jk);
-
-                // Apply the permutation to the rest of the matrix
-                if (jk > 0) {
-                    A2.cPermuteRows(P+jk,0,Nx);
-                }
-                if (R < N) {
-                    A1.cPermuteRows(P+jk,0,Nx);
-
-                    // Solve for U01
-                    //A01 /= A00.unitLowerTri();
-                    M1l L00 = A00.unitLowerTri();
-                    LDivEqMU_Helper<-2,xx,xx,M1s,M1l>::call(A01,L00);
-                }
-                for(ptrdiff_t i=jk;i<R;++i) P[i]+=jk;
-            }
+            // j == N-1
+            P[j] = N-1;
         }
     };
 
-    // algo 27: Recursive algorithm
-    template <ptrdiff_t cs, ptrdiff_t rs, class M1>
-    struct BandLUDecompose_Helper<27,cs,rs,M1>
+    // algo 71: Check whether m is tri-diagonal or not
+    template <ptrdiff_t cs, ptrdiff_t rs, class M>
+    struct BandLUDecompose_Helper<81,cs,rs,M>
     {
-        static void call(M1& A, ptrdiff_t* P)
+        static void call(M& m, ptrdiff_t* P)
         {
-            // The recursive LU algorithm is similar to the block algorithm,
-            // except that the block is roughly half the size of the whole 
-            // matrix.
-            // We keep dividing the matrix in half (column-wise) until we 
-            // get down to an Mx2 or Mx1 matrix.
-            typedef typename M1::real_type RT;
-
-            const ptrdiff_t N = rs==Unknown ? A.rowsize() : rs;
-            const ptrdiff_t M = cs==Unknown ? A.colsize() : cs;
-            const ptrdiff_t R = TMV_MIN(N,M);
 #ifdef PRINTALGO_BandLU
-            std::cout<<"BandLUDecompose algo 27: M,N,cs,rs = "<<M<<','<<N<<
-                ','<<cs<<','<<rs<<std::endl;
+            std::cout<<"BandLUDecompose algo 71: cs,rs = "<<cs<<','<<rs<<std::endl;
 #endif
-            const ptrdiff_t rx = IntTraits2<rs,cs>::min;
-            const int algo2a = 
-                (rs==Unknown || rs==1) ? 1 : 0;
-#if TMV_BandLU_RECURSE > 1
-            const int algo2b = 
-                (rs==Unknown || rs==2) && (cs==Unknown || cs>2) ? 2 : 0;
-            const int algo2c = 
-                (cs==Unknown || cs==2) ? 3 : 0;
-#endif
-#if TMV_BandLU_RECURSE > 2
-            const int algo2d = 
-                (rx != Unknown && rx > TMV_BandLU_RECURSE) ? 0 :
-                11;
-#endif
-
-            const int algo3 =  // The algorithm for R > 32
-                (rx == Unknown || rx > 32) ? 27 : 0;
-            const int algo4 =  // The algorithm for MultMM, LDivEqMU
-                rx == Unknown ? -2 : rx > 32 ? -3 : 0;
-#if TMV_BandLU_RECURSE < 32
-            const int algo3b =  // The algorithm for R > BandLU_RECURSE
-                (rx == Unknown || rx > TMV_BandLU_RECURSE) ? 27 : 0;
-            const int algo4b =  // The algorithm for R<32 MultMM, LDivEqMU
-#ifdef TMV_BandLU_INLINE_MM
-                rx == Unknown ? -4 :
-#else
-                rx == Unknown ? -402 :
-#endif
-                rx > TMV_BandLU_RECURSE ? -4 : 0;
-#endif
-            typedef typename M1::colrange_type M1c;
-            typedef typename M1c::rowrange_type M1s;
-            typedef typename M1c::const_rowrange_type M1sc;
-            typedef typename M1s::const_unit_lowertri_type M1l;
-
-            const ptrdiff_t Nx = R > 16 ? ((((R-1)>>5)+1)<<4) : (R>>1);
-            // (If R > 16, round R/2 up to a multiple of 16.)
-            const ptrdiff_t rsx = IntTraits<rx>::half_roundup;
-            const ptrdiff_t rsy = IntTraits2<rs,rsx>::diff;
-            const ptrdiff_t csy = IntTraits2<cs,rsx>::diff;
-
-            M1c A0 = A.cColRange(0,Nx);
-            M1s A00 = A0.cRowRange(0,Nx);
-            M1s A10 = A0.cRowRange(Nx,M);
-            M1c A1 = A.cColRange(Nx,N);
-            M1s A01 = A1.cRowRange(0,Nx);
-            M1s A11 = A1.cRowRange(Nx,M);
-            M1l L00 = A00.unitLowerTri();
-
-            if (R > 32) { 
-                // For large R, make sure to use good MultMM algo
-
-                // Decompose left half into PLU
-                BandLUDecompose_Helper<algo3,cs,rsx,M1c>::call(A0,P);
-
-                // Apply the permutation to the right half of the matrix
-                A1.cPermuteRows(P,0,Nx);
-
-                // Solve for U01
-                //A01 /= A00.unitLowerTri();
-                LDivEqMU_Helper<algo4,rsx,rsy,M1s,M1l>::call(A01,L00);
-
-                // Solve for A~
-                //A11 -= A10 * A01;
-                MultMM_Helper<algo4,csy,rsy,rsx,true,-1,RT,M1sc,M1sc,M1s>::call(
-                    Scaling<-1,RT>(),A10,A01,A11);
-
-                // Decompose A~ into PLU
-                BandLUDecompose_Helper<algo3,csy,rsy,M1s>::call(A11,P+Nx);
-                for(ptrdiff_t i=Nx;i<R;++i) P[i]+=Nx;
-
-                // Apply the new permutations to the left half
-                A0.cPermuteRows(P,Nx,R);
-
-#if TMV_BandLU_RECURSE < 32
-            } else if (R > TMV_BandLU_RECURSE) {
-                // For small R, use simpler inline algorithms
-
-                // Decompose left half into PLU
-                BandLUDecompose_Helper<algo3b,cs,rsx,M1c>::call(A0,P);
-
-                // Apply the permutation to the right half of the matrix
-                A1.cPermuteRows(P,0,Nx);
-
-                // Solve for U01
-                //A01 /= A00.unitLowerTri();
-                LDivEqMU_Helper<algo4b,rsx,rsy,M1s,M1l>::call(A01,L00);
-
-                // Solve for A~
-                //A11 -= A10 * A01;
-                MultMM_Helper<algo4b,csy,rsy,rsx,true,-1,RT,M1sc,M1sc,M1s>::call(
-                    Scaling<-1,RT>(),A10,A01,A11);
-
-                // Decompose A~ into PLU
-                BandLUDecompose_Helper<algo3b,csy,rsy,M1s>::call(A11,P+Nx);
-                for(ptrdiff_t i=Nx;i<R;++i) P[i]+=Nx;
-
-                // Apply the new permutations to the left half
-                A0.cPermuteRows(P,Nx,R);
-#endif
-            } else if (N == 1) 
-                BandLUDecompose_Helper<algo2a,cs,rs,M1>::call(A,P);
-#if TMV_BandLU_RECURSE > 1
-            else if (N == 2 && M > 2) 
-                BandLUDecompose_Helper<algo2b,cs,rs,M1>::call(A,P);
-            else if (M == 2) 
-                BandLUDecompose_Helper<algo2c,cs,rs,M1>::call(A,P);
-#endif
-#if TMV_BandLU_RECURSE > 2
-            else if (R > 2) 
-                BandLUDecompose_Helper<algo2d,cs,rs,M1>::call(A,P);
-#endif
-            else 
-                TMVAssert(N==0 || M==0 || M==1); // and thus nothing to do.
+            const ptrdiff_t lo = m._nlo==Unknown ? m.nlo() : m._nlo;
+            const ptrdiff_t hi = m._nhi==Unknown ? m.nhi() : m._nhi;
+            // Note: hi is the original lo+hi, so if the original was tridiagonal, then hi==2.
+            if (lo == 1 && hi == 2) 
+                BandLUDecompose_Helper<11,cs,rs,Mcm>::call(m,P);
+            else
+                BandLUDecompose_Helper<21,cs,rs,Mcm>::call(m,P);
         }
     };
 
@@ -635,10 +256,27 @@ namespace tmv {
             std::cout<<"BandLUDecompose algo 81: cs,rs = "<<cs<<','<<rs<<std::endl;
 #endif
             typedef typename M::value_type T;
-            typedef typename MCopyHelper<T,Rec,cs,rs,ColMajor>::type Mcm;
+            typedef typename MCopyHelper<T,Band,cs,rs,ColMajor>::type Mcm;
             Mcm mcm = m;
             BandLUDecompose_Helper<-2,cs,rs,Mcm>::call(mcm,P);
             m.noAlias() = mcm;
+        }
+    };
+
+    // algo 82: Copy to diagmajor
+    template <ptrdiff_t cs, ptrdiff_t rs, class M>
+    struct BandLUDecompose_Helper<82,cs,rs,M>
+    {
+        static void call(M& m, ptrdiff_t* P)
+        {
+#ifdef PRINTALGO_BandLU
+            std::cout<<"BandLUDecompose algo 82: cs,rs = "<<cs<<','<<rs<<std::endl;
+#endif
+            typedef typename M::value_type T;
+            typedef typename MCopyHelper<T,Band,cs,rs,DiagMajor>::type Mdm;
+            Mdm mdm = m;
+            BandLUDecompose_Helper<-2,cs,rs,Mdm>::call(mdm,P);
+            m.noAlias() = mdm;
         }
     };
 
@@ -662,7 +300,7 @@ namespace tmv {
         }
     };
 
-    // algo -4: No copies or branches
+    // algo -4: No copies or branches -- CM algorithm
     template <ptrdiff_t cs, ptrdiff_t rs, class M1>
     struct BandLUDecompose_Helper<-4,cs,rs,M1>
     {
@@ -672,10 +310,8 @@ namespace tmv {
             const int algo = 
                 cs == 0 || rs == 0 || cs == 1 ? 0 :
                 TMV_OPT == 0 ? 11 :
-                rs == 1 ? 1 : 
-                cs == 2 ? 3 :
-                rs == 2 ? 2 :
-                27;
+                (M::_nlo == 1 && M::_nhi == 2) ? 21 :
+                11;
 #ifdef PRINTALGO_BandLU
             std::cout<<"Inline BandLUDecompose: \n";
             std::cout<<"m = "<<TMV_Text(m)<<std::endl;
@@ -689,13 +325,22 @@ namespace tmv {
 #endif
             BandLUDecompose_Helper<algo,cs,rs,M1>::call(m,P);
 #ifdef XDEBUG_BandLU
-            Matrix<T> lu = m.unitLowerTri() * m.upperTri();
+            const ptrdiff_t N = m.colsize();
+            Matrix<T> L(N,N,T(0));
+            L.diag().setAllTo(T(1));
+            for(ptrdiff_t i=0;i<N;++i) {
+                Swap(L.row(i,0,i),L.row(P[i],0,i));
+                ptrdiff_t end = TMV_MIN(i+nlo+1,N);
+                L.col(i,i+1,end) = m.col(i,i+1,end);
+            }
+            Matrix<T> U = BandMatrixViewOf(m,0,m.nhi());
+            Matrix<T> lu = L*U;
             Matrix<T> plu = lu;
             plu.reversePermuteRows(P);
             if (Norm(plu-mi) > 1.e-3*Norm(mi)) {
                 std::cout<<"m => "<<m<<std::endl;
-                std::cout<<"L = "<<m.unitLowerTri()<<std::endl;
-                std::cout<<"U = "<<m.upperTri()<<std::endl;
+                std::cout<<"L = "<<L<<std::endl;
+                std::cout<<"U = "<<U<<std::endl;
                 std::cout<<"L*U = "<<lu<<std::endl;
                 std::cout<<"P*L*U = "<<plu<<std::endl;
                 abort();
@@ -710,11 +355,23 @@ namespace tmv {
     {
         static TMV_INLINE void call(M1& m, ptrdiff_t* P)
         {
-            const int algo = (
-                ( cs != Unknown && rs != Unknown &&
-                  cs <= 16 && rs <= 16 ) ? -4 :
+            const int cmalgo = (
+                ( cs != Unknown && rs != Unknown && cs <= 16 && rs <= 16 ) ? -4 :
                 !M1::_colmajor ? 81 :
                 -4 );
+            const int dmalgo = (
+                ( cs != Unknown && rs != Unknown && cs <= 16 && rs <= 16 ) ? -4 :
+                !M1::_diagmajor ? 82 :
+                -4 );
+
+            const int algo = 
+                cs == 0 || rs == 0 || cs == 1 ? 0 :
+                TMV_OPT == 0 ? 11 :
+                (M::_nlo == 1 && M::_nhi == 2) ? dmalgo :
+                (N::_nlo != 1 && M::_nlo != Unknown) ? cmalgo :
+                (N::_nhi != 2 && M::_nhi != Unknown) ? cmalgo :
+                (M::_nlo == Unknown || M::_nhi == Unknown) ? 71 :
+                cmalgo;
 #ifdef PRINTALGO_BandLU
             const ptrdiff_t M = cs==Unknown ? m.colsize() : cs;
             const ptrdiff_t N = rs==Unknown ? m.rowsize() : rs;
@@ -754,7 +411,7 @@ namespace tmv {
 
     template <class M>
     inline void InlineBandLU_Decompose(
-        BaseMatrix_Rec_Mutable<M>& m, ptrdiff_t* P)
+        BaseMatrix_Band_Mutable<M>& m, ptrdiff_t* P)
     {
         const ptrdiff_t cs = M::_colsize;
         const ptrdiff_t rs = M::_rowsize;
@@ -765,7 +422,7 @@ namespace tmv {
 
     template <class M>
     inline void BandLU_Decompose(
-        BaseMatrix_Rec_Mutable<M>& m, ptrdiff_t* P)
+        BaseMatrix_Band_Mutable<M>& m, ptrdiff_t* P)
     {
         const ptrdiff_t cs = M::_colsize;
         const ptrdiff_t rs = M::_rowsize;
@@ -776,8 +433,7 @@ namespace tmv {
 
     // This function is a friend of Permutation class.
     template <class M>
-    inline void BandLU_Decompose(
-        BaseMatrix_Rec_Mutable<M>& m, Permutation& P)
+    inline void BandLU_Decompose(BaseMatrix_Band_Mutable<M>& m, Permutation& P)
     {
         TMVAssert(P.size() == m.colsize());
         P.allocateMem();
@@ -787,23 +443,21 @@ namespace tmv {
 
     // Allow views as an argument by value (for convenience)
     template <class T, int A>
-    TMV_INLINE void BandLU_Decompose(MatrixView<T,A> m, Permutation& P)
+    TMV_INLINE void BandLU_Decompose(BandMatrixView<T,A> m, Permutation& P)
     {
         typedef MatrixView<T,A> M;
-        BandLU_Decompose(static_cast<BaseMatrix_Rec_Mutable<M>&>(m),P); 
+        BandLU_Decompose(static_cast<BaseMatrix_Band_Mutable<M>&>(m),P); 
     }
-    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t Si, ptrdiff_t Sj, int A>
-    TMV_INLINE void BandLU_Decompose(
-        SmallMatrixView<T,M,N,Si,Sj,A> m, Permutation& P)
+    template <class T, ptrdiff_t M, ptrdiff_t N, ptrdiff_t lo, ptrdiff_t hi, ptrdiff_t Si, ptrdiff_t Sj, int A>
+    TMV_INLINE void BandLU_Decompose(SmallBandMatrixView<T,M,N,lo,hi,Si,Sj,A> m, Permutation& P)
     {
-        typedef SmallMatrixView<T,M,N,Si,Sj,A> MM;
-        BandLU_Decompose(static_cast<BaseMatrix_Rec_Mutable<MM>&>(m),P); 
+        typedef SmallMatrixView<T,M,N,lo,hi,Si,Sj,A> MM;
+        BandLU_Decompose(static_cast<BaseMatrix_Band_Mutable<MM>&>(m),P); 
     }
-
-#undef TMV_BandLU_RECURSE
-#undef TMV_BandLU_BLOCKSIZE
 
 } // namespace tmv
+
+#undef TMV_BandLU_INLINE_VVM
 
 #endif
 

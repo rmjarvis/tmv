@@ -364,10 +364,10 @@ namespace tmv {
             DivHelper<T>::divideUsing(dt);
         }
 
+        lud_type lud() const;
 #if 0
-        bandlud_type lud() const;
-        bandqrd_type qrd() const;
-        bandsvd_type svd() const;
+        qrd_type qrd() const;
+        svd_type svd() const;
 #endif
 
         virtual ConstBandMatrixView<T> getConstView() const=0;
@@ -403,8 +403,8 @@ namespace tmv {
         typedef typename Traits<M>::svd_type svd_type;
 
         TMV_INLINE void resetDivType() const {} 
-#if 0
         TMV_INLINE lud_type lud() const { return lud_type(mat2(),false); }
+#if 0
         TMV_INLINE qrd_type qrd() const { return qrd_type(mat2(),false); }
         TMV_INLINE svd_type svd() const { return svd_type(mat2(),false); }
 #endif
@@ -512,17 +512,15 @@ namespace tmv {
 
         enum { _hasdivider = Attrib<A>::withdivider };
 
+        typedef QuotXM<1,real_type,type> inverse_type;
+        typedef typename TypeSelect<_hasdivider ,
+                const InstBandLUD<T>& , BandLUD<copy_type> >::type lud_type;
 #if 0
-        typedef QuotXB<1,real_type,type> inverse_type;
         typedef typename TypeSelect<_hasdivider ,
-                const InstBandLUD<T>& , LUD<copy_type> >::type lud_type;
+                const InstBandQRD<T>& , BandQRD<copy_type> >::type qrd_type;
         typedef typename TypeSelect<_hasdivider ,
-                const InstBandQRD<T>& , QRD<copy_type> >::type qrd_type;
-        typedef typename TypeSelect<_hasdivider ,
-                const InstBandSVD<T>& , SVD<copy_type> >::type svd_type;
+                const InstBandSVD<T>& , BandSVD<copy_type> >::type svd_type;
 #else
-        typedef InvalidType inverse_type;
-        typedef InvalidType lud_type;
         typedef InvalidType qrd_type;
         typedef InvalidType svd_type;
 #endif
@@ -1033,17 +1031,15 @@ namespace tmv {
         typedef BandMatrix<T,copyA> copy_type;
         enum { _hasdivider = Attrib<A>::withdivider };
 
-#if 0
-        typedef QuotXB<1,real_type,type> inverse_type;
+        typedef QuotXM<1,real_type,type> inverse_type;
         typedef typename TypeSelect<_hasdivider ,
                 const InstBandLUD<T>& , BandLUD<copy_type> >::type lud_type;
+#if 0
         typedef typename TypeSelect<_hasdivider ,
                 const InstBandQRD<T>& , BandQRD<copy_type> >::type qrd_type;
         typedef typename TypeSelect<_hasdivider ,
                 const InstBandSVD<T>& , BandSVD<copy_type> >::type svd_type;
 #else
-        typedef InvalidType inverse_type;
-        typedef InvalidType lud_type;
         typedef InvalidType qrd_type;
         typedef InvalidType svd_type;
 #endif
@@ -1330,17 +1326,15 @@ namespace tmv {
         typedef BandMatrix<T,copyA> copy_type;
         enum { _hasdivider = Attrib<A>::withdivider };
 
-#if 0
-        typedef QuotXB<1,real_type,type> inverse_type;
+        typedef QuotXM<1,real_type,type> inverse_type;
         typedef typename TypeSelect<_hasdivider ,
                 const InstBandLUD<T>& , BandLUD<copy_type> >::type lud_type;
+#if 0
         typedef typename TypeSelect<_hasdivider ,
                 const InstBandQRD<T>& , BandQRD<copy_type> >::type qrd_type;
         typedef typename TypeSelect<_hasdivider ,
                 const InstBandSVD<T>& , BandSVD<copy_type> >::type svd_type;
 #else
-        typedef InvalidType inverse_type;
-        typedef InvalidType lud_type;
         typedef InvalidType qrd_type;
         typedef InvalidType svd_type;
 #endif

@@ -164,14 +164,22 @@ namespace tmv {
         static void call2(ptrdiff_t n, IT1 it1, IT2 it2)
         {
             typedef typename V1::real_type RT;
+            typedef typename IT1::realpart_type IT1r;
+            typedef typename IT1::imagpart_type IT1i;
+            typedef typename IT2::realpart_type IT2r;
+            typedef typename IT2::imagpart_type IT2i;
             RT t0, t1;
+            IT1r it1r = it1.realPart();
+            IT1i it1i = it1.imagPart();
+            IT2r it2r = it2.realPart();
+            IT2i it2i = it2.imagPart();
             if (n) do {
-                t0 = real(*it1);
-                t1 = imag(*it1);
-                real(*it1) = real(*it2);
-                imag(*it1) = imag(*it2); ++it1;
-                real(*it2) = t0;
-                imag(*it2) = t1; ++it2;
+                t0 = *it1r;
+                t1 = *it1i;
+                *it1r++ = *it2r;
+                *it1i++ = *it2i;
+                *it2r++ = t0;
+                *it2i++ = t1;
             } while (--n);
         }
     };
@@ -189,17 +197,23 @@ namespace tmv {
         }
         static void call2(ptrdiff_t n, IT1 it1, IT2 it2)
         {
-            typedef typename IT1::nonconj_type IT1n;
             typedef typename V1::real_type RT;
+            typedef typename IT1::realpart_type IT1r;
+            typedef typename IT1::imagpart_type IT1i;
+            typedef typename IT2::realpart_type IT2r;
+            typedef typename IT2::imagpart_type IT2i;
             RT t0, t1;
-            IT1n it1n = it1.nonConj();
+            IT1r it1r = it1.realPart();
+            IT1i it1i = it1.imagPart();
+            IT2r it2r = it2.realPart();
+            IT2i it2i = it2.imagPart();
             if (n) do {
-                t0 = real(*it1n);
-                t1 = imag(*it1n);
-                real(*it1n) = real(*it2);
-                imag(*it1n) = -imag(*it2); ++it1n;
-                real(*it2) = t0;
-                imag(*it2) = -t1; ++it2;
+                t0 = *it1r;
+                t1 = *it1i;
+                *it1r++ = *it2r;
+                *it1i++ = -*it2i;
+                *it2r++ = t0;
+                *it2i++ = -t1;
             } while (--n);
         }
     };

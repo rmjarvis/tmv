@@ -239,10 +239,24 @@ namespace tmv {
         typedef VIt<T,S,NonConj> nonconj_type;
         TMV_INLINE nonconj_type nonConj() const 
         { return nonconj_type(p,step()); }
+
         typedef typename Traits<T>::real_type real_type;
-        typedef VIt<real_type,S,NonConj> flatten_type;
+        typedef VIt<real_type,1,NonConj> flatten_type;
         TMV_INLINE flatten_type flatten() const 
         { return flatten_type(reinterpret_cast<real_type*>(p),1); }
+
+        typedef VIt<real_type,Traits<T>::isreal?S:IntTraits<S>::twoS,NonConj> realpart_type;
+        typedef VIt<real_type,Traits<T>::isreal?S:IntTraits<S>::twoS,NonConj> imagpart_type;
+        TMV_INLINE realpart_type realPart() const 
+        { 
+            return realpart_type(reinterpret_cast<real_type*>(p),
+                                 Traits<T>::isreal?step():2*step()); 
+        }
+        TMV_INLINE imagpart_type imagPart() const 
+        {
+            return imagpart_type(reinterpret_cast<real_type*>(p)+1,
+                                 Traits<T>::isreal?step():2*step()); 
+        }
 
     private :
 
@@ -324,10 +338,24 @@ namespace tmv {
         typedef CVIt<T,S,NonConj> nonconj_type;
         TMV_INLINE nonconj_type nonConj() const 
         { return nonconj_type(p,step()); }
+
         typedef typename Traits<T>::real_type real_type;
-        typedef CVIt<real_type,S,NonConj> flatten_type;
+        typedef CVIt<real_type,1,NonConj> flatten_type;
         TMV_INLINE flatten_type flatten() const 
         { return flatten_type(reinterpret_cast<const real_type*>(p),1); }
+
+        typedef CVIt<real_type,Traits<T>::isreal?S:IntTraits<S>::twoS,NonConj> realpart_type;
+        typedef CVIt<real_type,Traits<T>::isreal?S:IntTraits<S>::twoS,NonConj> imagpart_type;
+        TMV_INLINE realpart_type realPart() const 
+        { 
+            return realpart_type(reinterpret_cast<real_type*>(p),
+                                 Traits<T>::isreal?step():2*step()); 
+        }
+        TMV_INLINE imagpart_type imagPart() const 
+        {
+            return imagpart_type(reinterpret_cast<real_type*>(p)+1,
+                                 Traits<T>::isreal?step():2*step()); 
+        }
 
     private :
 
