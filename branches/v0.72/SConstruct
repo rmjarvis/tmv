@@ -43,10 +43,10 @@ opts.Add(BoolVariable('INST_FLOAT',
         'Instantiate <float> templates in compiled library', True))
 opts.Add(BoolVariable('INST_DOUBLE',
         'Instantiate <double> templates in compiled library', True))
+opts.Add(BoolVariable('INST_INT',
+        'Instantiate <int> templates in compiled library', True))
 opts.Add(BoolVariable('INST_LONGDOUBLE',
         'Instantiate <long double> templates in compiled library', False))
-opts.Add(BoolVariable('INST_INT',
-        'Instantiate <int> templates in compiled library', False))
 opts.Add(BoolVariable('SHARED',
         'Build a shared library',True))
 
@@ -54,10 +54,10 @@ opts.Add(BoolVariable('TEST_FLOAT',
         'Instantiate <float> in the test suite', True))
 opts.Add(BoolVariable('TEST_DOUBLE',
         'Instantiate <double> in the test suite', True))
+opts.Add(BoolVariable('TEST_INT',
+        'Instantiate <int> in the test suite', True))
 opts.Add(BoolVariable('TEST_LONGDOUBLE',
         'Instantiate <long double> in the test suite', False))
-opts.Add(BoolVariable('TEST_INT',
-        'Instantiate <int> in the test suite', False))
 
 opts.Add(PathVariable('EXTRA_PATH',
         'Extra paths for executables (separated by : if more than 1)',
@@ -127,6 +127,8 @@ opts.Add(BoolVariable('WITH_UPS',
         'Install the ups directory under PREFIX/ups', False))
 opts.Add('N_BUILD_THREADS',
         'Number of build threads to use (0 means use ncpus)', 0)
+opts.Add(BoolVariable('USE_UNKNOWN_VARS',
+        'Allow other parameters besides the ones listed here.',False))
 
 
 # This helps us determine of openmp is available
@@ -1334,7 +1336,17 @@ if env['IMPORT_ENV']:
 unknown = opts.UnknownVariables()
 if unknown:
     print "Unknown variables:", unknown.keys()
+    print 'If you are sure these are right (e.g. you want to set some SCons parameters'
+    print 'that are not in the list of TMV parameters given by scons -h)'
+    print 'then you can override this check with USE_UNKNOWN_VARS=true'
     Exit(1)
+
+print 'Using the following (non-default) scons options:'
+for opt in opts.options:
+    if (opt.default != env[opt.key]):
+        print '   %s = %s'%(opt.key,env[opt.key])
+print 'These can be edited directly in the file %s.'%config_file
+print 'Type scons -h for a full list of available options.'
 
 opts.Save(config_file,env)
 Help(opts.GenerateHelpText(env))
