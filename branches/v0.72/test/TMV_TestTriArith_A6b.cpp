@@ -71,6 +71,7 @@ void TestTriMatrixArith_A6b()
     tmv::Matrix<CT,tmv::ColMajor> ca2x = ca1x;
     ca2x -= a2x;
     ca2x *= CT(1,-2);
+    ca2x(0,0) = CT(0,-5);
 
     tmv::UpperTriMatrixView<T> u4 = a1x.unitUpperTri();
     tmv::UpperTriMatrixView<CT> cu4 = ca1x.unitUpperTri();
