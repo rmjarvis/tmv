@@ -621,6 +621,8 @@ int main()
             CheckLibs(context,['mkl_ipf']+pthread,mkl_source_file) or
             CheckLibs(context,['mkl_ia32']+pthread,mkl_source_file) or
             CheckLibs(context,['mkl_intel_lp64','mkl_core']+threadlib+pthread,mkl_source_file) or
+            CheckLibs(context,['mkl_intel_lp64','mkl_core','mkl_sequential'],mkl_source_file) or
+            CheckLibs(context,['mkl_intel_lp64','mkl_core','mkl_sequential']+pthread,mkl_source_file) or
             False)
 
         context.Result(result)
