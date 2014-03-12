@@ -3,16 +3,21 @@ Changes from version 0.71 to 0.72:
 versions to 0.71.)
 
 This release is mostly just some minor bug fixes and some changes in the 
-installation defaults.
+installation defaults.  Probably the most significant change is that I have
+switched the license from GPL to BSD.  
 
--- Correctly detects when g++ is really clang++.  Apple has been lying about
-   its C++ compiler in recent MacOS systems (10.7-10.9).  They use clang++,
-   but they call the program g++.  This used to mess up TMV, since clang++ 
-   does not support OpenMP, so it would wrongly try to use OpenMP and end up 
-   with linking problems.  TMV now detects when clang++ is masquerading as
-   g++ and handles this correctly.
+-- Changed the license from GPL to BSD.  This seems to be where the open 
+   source community is moving, so I think it makes sense for TMV to have a 
+   more permissive license going forward.
 
--- Fixes some problems with the install_name in the shared libraries.  
+-- Made Scons correctly detect when g++ is really clang++.  Apple has been 
+   lying about its C++ compiler in recent MacOS systems (10.7-10.9).  They use 
+   clang++, but they call the program g++.  This used to mess up TMV, since 
+   clang++ does not support OpenMP, so it would wrongly try to use OpenMP and 
+   end up with linking problems.  TMV now detects when clang++ is masquerading 
+   as g++ and handles this correctly.
+
+-- Fixed some problems with the install_name in the shared libraries.  
    (Issues #3 and #7)
 
 -- Fixed some warnings emitted by clang++.  These weren't bugs -- just some

@@ -4,7 +4,8 @@
 \label{Changes}
 
 This release is mostly just some minor bug fixes and some changes in the 
-installation defaults.
+installation defaults.  Probably the most significant change is that I have
+switched the license from GPL to BSD.  
 
 Here is a list of the changes from version \prevtmvversion\ to \tmvversion.  
 (See \S\ref{History} for changes from previous versions to \prevtmvversion\.)
@@ -15,8 +16,12 @@ with previous versions.
 
 \begin{itemize}
 
+\item Changed the license from GPL to BSD.  This seems to be where the open 
+source community is moving, so I think it makes sense for TMV to have a 
+more permissive license going forward.
+
 \item
-Correctly detects when g++ is really clang++.  Apple has been lying about
+Made Scons correctly detect when g++ is really clang++.  Apple has been lying about
 its C++ compiler in recent MacOS systems (10.7-10.9).  They use clang++,
 but they call the program g++.  This used to mess up TMV, since clang++ 
 does not support OpenMP, so it would wrongly try to use OpenMP and end up 
@@ -24,7 +29,7 @@ with linking problems.  TMV now detects when clang++ is masquerading as
 g++ and handles this correctly.
 
 \item
-Fixes some problems with the \texttt{install\_name} in the shared libraries.  
+Fixed some problems with the \texttt{install\_name} in the shared libraries.  
 (Issues 3 and 7)
 
 \item
