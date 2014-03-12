@@ -24,7 +24,7 @@ with linking problems.  TMV now detects when clang++ is masquerading as
 g++ and handles this correctly.
 
 \item
-Fixes some problems with the install\_name in the shared libraries.  
+Fixes some problems with the \texttt{install\_name} in the shared libraries.  
 (Issues 3 and 7)
 
 \item
@@ -32,14 +32,20 @@ Fixed some warnings emitted by clang++.  These weren't bugs -- just some
 things that clang++ warns about that other compilers hadn't cared about.
 
 \item
-Changed the default value of INST\_INT to True, so the Matrix<int> templates
-are instantiated now unless you specifically disable them.  Enough people
+Changed the default value of \texttt{INST\_INT} to \texttt{True}, so the \tt{Matrix<int>}
+templates are instantiated now unless you specifically disable them.  Enough people
 had expected them to be there and asked about why they were getting 
-linking errors when they used Matrix<int>, so I decided to build them
+linking errors when they used \tt{Matrix<int>}, so I decided to build them
 by default now.  They don't add much to the library size.
 
 \item
-Added a default conversion from VarConjIter to VIt.  It was an oversight
+Added a default conversion from \tt{VarConjIter} to \tt{VIt}.  It was an oversight
 that this wasn't possible before.  (Issue 5)
+
+\item 
+Fixed a bug in the test suite about \tt{long double} I/O.  The standard library does
+not read in \tt{long double} variables at full precision.  They are only accurate to
+double precision.  So I changed the I/O tests to only test \tt{long double} I/O
+to double precision.  (Issue 8)
 
 \end{itemize}
