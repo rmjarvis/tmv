@@ -97,6 +97,18 @@ template <class X1, class X2>
 inline bool Equal2(const X1& a, const X2& b, int )
 { return a == b; }
 
+// C++ I/O doesn't seem capable of reading in at higher accuracy than double precision.
+// If you do fin >> x; where x is a long double variable and the text in the file is 
+// 1.234, say, then (x-1.234) will not be zero after this.  Instead it will be something
+// of order 1.e-17.  So we only check the IO at double precision for long doubles.
+template <class M1, class M2, class T>
+inline bool EqualIO(const M1& a, const M2& b, T eps)
+{ return Equal(a,b,eps); }
+template <class M1, class M2>
+inline bool EqualIO(const M1& a, const M2& b, long double eps )
+{ return Equal(a,b,10*tmv::TMV_Epsilon<double>()); }
+
+
 extern bool XXDEBUG1;
 extern bool XXDEBUG2;
 extern bool XXDEBUG3;

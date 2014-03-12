@@ -358,8 +358,10 @@ void TestPermutation()
     Assert(p1x == p1,"Permutation identity constructor");
 
     if (!(std::numeric_limits<T>::is_integer)) {
-        Assert(Equal2(Norm(p3),Norm(m3),eps),"Permutation Norm");
-        Assert(Equal2(NormF(p3),NormF(m3),eps),"Permutation NormF");
+        // Norm(p) returns a double, so don't use a smaller eps than that.
+        T deps = std::max(double(eps), 10.*tmv::TMV_Epsilon<double>());
+        Assert(Equal2(Norm(p3),Norm(m3),deps),"Permutation Norm");
+        Assert(Equal2(NormF(p3),NormF(m3),deps),"Permutation NormF");
     }
     Assert(Equal2(NormSq(p3),NormSq(m3),eps),"Permutation NormSq");
     Assert(Equal2(Norm1(p3),Norm1(m3),eps),"Permutation Norm1");

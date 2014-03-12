@@ -939,7 +939,7 @@ static void TestBasicTriMatrix_IO()
     cu(5,6) = cl(6,5) = CT(T(9.e-3),T(9.e-3));
     cu(5,7) = cl(7,5) = CT(T(9),T(9.e-3));
     u(4,7) = l(7,4) = T(0.123456789);
-    cu(4,7) = cl(7,4) = CT(T(3.123456789),T(600.987654321));
+    cu(4,7) = cl(7,4) = CT(T(3.123456789),T(6.987654321));
 
     // First check clipping function...
     tmv::UpperTriMatrix<T> u2 = u;
@@ -996,14 +996,14 @@ static void TestBasicTriMatrix_IO()
 
     // When using (the default) prec(6), these will be the values read in.
     u(4,7) = l(7,4) = T(0.123457);
-    cu(4,7) = cl(7,4) = CT(T(3.12346),T(600.988));
+    cu(4,7) = cl(7,4) = CT(T(3.12346),T(6.98765));
 
     // When using prec(12), the full correct values will be read in.
 
     // When using prec(4), these will be the values read in.
     u3(4,7) = l3(7,4) = T(0.1235);
-    if (std::numeric_limits<T>::is_integer) cu3(4,7) = cl3(7,4) = CT(3,600);
-    else cu3(4,7) = cl3(7,4) = CT(T(3.123),T(601.0));
+    if (std::numeric_limits<T>::is_integer) cu3(4,7) = cl3(7,4) = CT(3,6);
+    else cu3(4,7) = cl3(7,4) = CT(T(3.123),T(6.988));
 
     // Read them back in
     tmv::UpperTriMatrix<T,D|tmv::RowMajor> xu1(N);
@@ -1013,27 +1013,27 @@ static void TestBasicTriMatrix_IO()
     std::ifstream fin("tmvtest_trimatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_trimatrix_io.dat for input");
     fin >> xu1 >> xl1 >> xcu1 >> xcl1;
-    Assert(u == xu1,"UpperTriMatrix I/O check normal");
-    Assert(l == xl1,"LowerTriMatrix I/O check normal");
-    Assert(cu == xcu1,"CUpperTriMatrix I/O check normal");
-    Assert(cl == xcl1,"CLowerTriMatrix I/O check normal");
+    Assert(EqualIO(u,xu1,EPS),"UpperTriMatrix I/O check normal");
+    Assert(EqualIO(l,xl1,EPS),"LowerTriMatrix I/O check normal");
+    Assert(EqualIO(cu,xcu1,EPS),"CUpperTriMatrix I/O check normal");
+    Assert(EqualIO(cl,xcl1,EPS),"CLowerTriMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xu1 >> tmv::CompactIO() >> xl1;
     fin >> tmv::CompactIO() >> xcu1 >> tmv::CompactIO() >> xcl1;
-    Assert(u == xu1,"UpperTriMatrix I/O check compact");
-    Assert(l == xl1,"LowerTriMatrix I/O check compact");
-    Assert(cu == xcu1,"CUpperTriMatrix I/O check compact");
-    Assert(cl == xcl1,"CLowerTriMatrix I/O check compact");
+    Assert(EqualIO(u,xu1,EPS),"UpperTriMatrix I/O check compact");
+    Assert(EqualIO(l,xl1,EPS),"LowerTriMatrix I/O check compact");
+    Assert(EqualIO(cu,xcu1,EPS),"CUpperTriMatrix I/O check compact");
+    Assert(EqualIO(cl,xcl1,EPS),"CLowerTriMatrix I/O check compact");
     fin >> xu1.view() >> xl1.view() >> xcu1.view() >> xcl1.view();
-    Assert(u2 == xu1,"UpperTriMatrix I/O check thresh");
-    Assert(l2 == xl1,"LowerTriMatrix I/O check thresh");
-    Assert(cu2 == xcu1,"CUpperTriMatrix I/O check thresh");
-    Assert(cl2 == xcl1,"CLowerTriMatrix I/O check thresh");
+    Assert(EqualIO(u2,xu1,EPS),"UpperTriMatrix I/O check thresh");
+    Assert(EqualIO(l2,xl1,EPS),"LowerTriMatrix I/O check thresh");
+    Assert(EqualIO(cu2,xcu1,EPS),"CUpperTriMatrix I/O check thresh");
+    Assert(EqualIO(cl2,xcl1,EPS),"CLowerTriMatrix I/O check thresh");
     fin >> myStyle >> xu1.view() >> myStyle >> xl1.view();
     fin >> myStyle >> xcu1.view() >> myStyle >> xcl1.view();
-    Assert(u3 == xu1,"UpperTriMatrix I/O check compact thresh & prec(4)");
-    Assert(l3 == xl1,"LowerTriMatrix I/O check compact thresh & prec(4)");
-    Assert(cu3 == xcu1,"CUpperTriMatrix I/O check compact thresh & prec(4)");
-    Assert(cl3 == xcl1,"CLowerTriMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(u3,xu1,EPS),"UpperTriMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(l3,xl1,EPS),"LowerTriMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cu3,xcu1,EPS),"CUpperTriMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cl3,xcl1,EPS),"CLowerTriMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // Repeat for column major
@@ -1044,27 +1044,27 @@ static void TestBasicTriMatrix_IO()
     fin.open("tmvtest_trimatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_trimatrix_io.dat for input");
     fin >> xu2.view() >> xl2.view() >> xcu2.view() >> xcl2.view();
-    Assert(u == xu2,"UpperTriMatrix I/O check normal");
-    Assert(l == xl2,"LowerTriMatrix I/O check normal");
-    Assert(cu == xcu2,"CUpperTriMatrix I/O check normal");
-    Assert(cl == xcl2,"CLowerTriMatrix I/O check normal");
+    Assert(EqualIO(u,xu2,EPS),"UpperTriMatrix I/O check normal");
+    Assert(EqualIO(l,xl2,EPS),"LowerTriMatrix I/O check normal");
+    Assert(EqualIO(cu,xcu2,EPS),"CUpperTriMatrix I/O check normal");
+    Assert(EqualIO(cl,xcl2,EPS),"CLowerTriMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xu2.view() >> tmv::CompactIO() >> xl2.view();
     fin >> tmv::CompactIO() >> xcu2.view() >> tmv::CompactIO() >> xcl2.view();
-    Assert(u == xu2,"UpperTriMatrix I/O check compact");
-    Assert(l == xl2,"LowerTriMatrix I/O check compact");
-    Assert(cu == xcu2,"CUpperTriMatrix I/O check compact");
-    Assert(cl == xcl2,"CLowerTriMatrix I/O check compact");
+    Assert(EqualIO(u,xu2,EPS),"UpperTriMatrix I/O check compact");
+    Assert(EqualIO(l,xl2,EPS),"LowerTriMatrix I/O check compact");
+    Assert(EqualIO(cu,xcu2,EPS),"CUpperTriMatrix I/O check compact");
+    Assert(EqualIO(cl,xcl2,EPS),"CLowerTriMatrix I/O check compact");
     fin >> xu2 >> xl2 >> xcu2 >> xcl2;
-    Assert(u2 == xu2,"UpperTriMatrix I/O check thresh");
-    Assert(l2 == xl2,"LowerTriMatrix I/O check thresh");
-    Assert(cu2 == xcu2,"CUpperTriMatrix I/O check thresh");
-    Assert(cl2 == xcl2,"CLowerTriMatrix I/O check thresh");
+    Assert(EqualIO(u2,xu2,EPS),"UpperTriMatrix I/O check thresh");
+    Assert(EqualIO(l2,xl2,EPS),"LowerTriMatrix I/O check thresh");
+    Assert(EqualIO(cu2,xcu2,EPS),"CUpperTriMatrix I/O check thresh");
+    Assert(EqualIO(cl2,xcl2,EPS),"CLowerTriMatrix I/O check thresh");
     fin >> myStyle >> xu2 >> myStyle >> xl2;
     fin >> myStyle >> xcu2 >> myStyle >> xcl2;
-    Assert(u3 == xu2,"UpperTriMatrix I/O check compact thresh & prec(4)");
-    Assert(l3 == xl2,"LowerTriMatrix I/O check compact thresh & prec(4)");
-    Assert(cu3 == xcu2,"CUpperTriMatrix I/O check compact thresh & prec(4)");
-    Assert(cl3 == xcl2,"CLowerTriMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(u3,xu2,EPS),"UpperTriMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(l3,xl2,EPS),"LowerTriMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cu3,xcu2,EPS),"CUpperTriMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cl3,xcl2,EPS),"CLowerTriMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // And repeat for matrices that need to be resized.
@@ -1078,27 +1078,27 @@ static void TestBasicTriMatrix_IO()
     Assert(fin,"Couldn't open tmvtest_trimatrix_io.dat for input");
     fin >> tmv::NormalIO() >> zu1 >> tmv::NormalIO() >> zl1;
     fin >> tmv::NormalIO() >> zcu1 >> tmv::NormalIO() >> zcl1;
-    Assert(u == zu1,"UpperTriMatrix I/O check normal");
-    Assert(l == zl1,"LowerTriMatrix I/O check normal");
-    Assert(cu == zcu1,"CUpperTriMatrix I/O check normal");
-    Assert(cl == zcl1,"CLowerTriMatrix I/O check normal");
+    Assert(EqualIO(u,zu1,EPS),"UpperTriMatrix I/O check normal");
+    Assert(EqualIO(l,zl1,EPS),"LowerTriMatrix I/O check normal");
+    Assert(EqualIO(cu,zcu1,EPS),"CUpperTriMatrix I/O check normal");
+    Assert(EqualIO(cl,zcl1,EPS),"CLowerTriMatrix I/O check normal");
     fin >> zu2 >> zl2 >> zcu2 >> zcl2;
-    Assert(u == zu2,"UpperTriMatrix I/O check compact");
-    Assert(l == zl2,"LowerTriMatrix I/O check compact");
-    Assert(cu == zcu2,"CUpperTriMatrix I/O check compact");
-    Assert(cl == zcl2,"CLowerTriMatrix I/O check compact");
+    Assert(EqualIO(u,zu2,EPS),"UpperTriMatrix I/O check compact");
+    Assert(EqualIO(l,zl2,EPS),"LowerTriMatrix I/O check compact");
+    Assert(EqualIO(cu,zcu2,EPS),"CUpperTriMatrix I/O check compact");
+    Assert(EqualIO(cl,zcl2,EPS),"CLowerTriMatrix I/O check compact");
     fin >> tmv::NormalIO() >> zu3 >> tmv::NormalIO() >> zl3;
     fin >> tmv::NormalIO() >> zcu3 >> tmv::NormalIO() >> zcl3;
-    Assert(u2 == zu3,"UpperTriMatrix I/O check thresh");
-    Assert(l2 == zl3,"LowerTriMatrix I/O check thresh");
-    Assert(cu2 == zcu3,"CUpperTriMatrix I/O check thresh");
-    Assert(cl2 == zcl3,"CLowerTriMatrix I/O check thresh");
+    Assert(EqualIO(u2,zu3,EPS),"UpperTriMatrix I/O check thresh");
+    Assert(EqualIO(l2,zl3,EPS),"LowerTriMatrix I/O check thresh");
+    Assert(EqualIO(cu2,zcu3,EPS),"CUpperTriMatrix I/O check thresh");
+    Assert(EqualIO(cl2,zcl3,EPS),"CLowerTriMatrix I/O check thresh");
     fin >> myStyle >> zu4 >> myStyle >> zl4;
     fin >> myStyle >> zcu4 >> myStyle >> zcl4;
-    Assert(u3 == zu4,"UpperTriMatrix I/O check compact thresh & prec(4)");
-    Assert(l3 == zl4,"LowerTriMatrix I/O check compact thresh & prec(4)");
-    Assert(cu3 == zcu4,"CUpperTriMatrix I/O check compact thresh & prec(4)");
-    Assert(cl3 == zcl4,"CLowerTriMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(u3,zu4,EPS),"UpperTriMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(l3,zl4,EPS),"LowerTriMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cu3,zcu4,EPS),"CUpperTriMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cl3,zcl4,EPS),"CLowerTriMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // Also try reading with the opposite DiagType.
@@ -1113,27 +1113,27 @@ static void TestBasicTriMatrix_IO()
         tmv::LowerTriMatrix<CT,tmv::NonUnitDiag> zcl5,zcl6,zcl7,zcl8;
         fin >> tmv::NormalIO() >> zu5 >> tmv::NormalIO() >> zl5;
         fin >> tmv::NormalIO() >> zcu5 >> tmv::NormalIO() >> zcl5;
-        Assert(u == zu5,"UpperTriMatrix I/O check normal Unit->NonUnit");
-        Assert(l == zl5,"LowerTriMatrix I/O check normal Unit->NonUnit");
-        Assert(cu == zcu5,"CUpperTriMatrix I/O check normal Unit->NonUnit");
-        Assert(cl == zcl5,"CLowerTriMatrix I/O check normal Unit->NonUnit");
+        Assert(EqualIO(u,zu5,EPS),"UpperTriMatrix I/O check normal Unit->NonUnit");
+        Assert(EqualIO(l,zl5,EPS),"LowerTriMatrix I/O check normal Unit->NonUnit");
+        Assert(EqualIO(cu,zcu5,EPS),"CUpperTriMatrix I/O check normal Unit->NonUnit");
+        Assert(EqualIO(cl,zcl5,EPS),"CLowerTriMatrix I/O check normal Unit->NonUnit");
         fin >> zu6 >> zl6 >> zcu6 >> zcl6;
-        Assert(u == zu6,"UpperTriMatrix I/O check compact Unit->NonUnit");
-        Assert(l == zl6,"LowerTriMatrix I/O check compact Unit->NonUnit");
-        Assert(cu == zcu6,"CUpperTriMatrix I/O check compact Unit->NonUnit");
-        Assert(cl == zcl6,"CLowerTriMatrix I/O check compact Unit->NonUnit");
+        Assert(EqualIO(u,zu6,EPS),"UpperTriMatrix I/O check compact Unit->NonUnit");
+        Assert(EqualIO(l,zl6,EPS),"LowerTriMatrix I/O check compact Unit->NonUnit");
+        Assert(EqualIO(cu,zcu6,EPS),"CUpperTriMatrix I/O check compact Unit->NonUnit");
+        Assert(EqualIO(cl,zcl6,EPS),"CLowerTriMatrix I/O check compact Unit->NonUnit");
         fin >> tmv::NormalIO() >> zu7 >> tmv::NormalIO() >> zl7;
         fin >> tmv::NormalIO() >> zcu7 >> tmv::NormalIO() >> zcl7;
-        Assert(u2 == zu7,"UpperTriMatrix I/O check thresh Unit->NonUnit");
-        Assert(l2 == zl7,"LowerTriMatrix I/O check thresh Unit->NonUnit");
-        Assert(cu2 == zcu7,"CUpperTriMatrix I/O check thresh Unit->NonUnit");
-        Assert(cl2 == zcl7,"CLowerTriMatrix I/O check thresh Unit->NonUnit");
+        Assert(EqualIO(u2,zu7,EPS),"UpperTriMatrix I/O check thresh Unit->NonUnit");
+        Assert(EqualIO(l2,zl7,EPS),"LowerTriMatrix I/O check thresh Unit->NonUnit");
+        Assert(EqualIO(cu2,zcu7,EPS),"CUpperTriMatrix I/O check thresh Unit->NonUnit");
+        Assert(EqualIO(cl2,zcl7,EPS),"CLowerTriMatrix I/O check thresh Unit->NonUnit");
         fin >> myStyle >> zu8 >> myStyle >> zl8;
         fin >> myStyle >> zcu8 >> myStyle >> zcl8;
-        Assert(u3 == zu8,"UpperTriMatrix I/O check compact thresh Unit->NonUnit");
-        Assert(l3 == zl8,"LowerTriMatrix I/O check compact thresh Unit->NonUnit");
-        Assert(cu3 == zcu8,"CUpperTriMatrix I/O check compact thresh Unit->NonUnit");
-        Assert(cl3 == zcl8,"CLowerTriMatrix I/O check compact thresh Unit->NonUnit");
+        Assert(EqualIO(u3,zu8,EPS),"UpperTriMatrix I/O check compact thresh Unit->NonUnit");
+        Assert(EqualIO(l3,zl8,EPS),"LowerTriMatrix I/O check compact thresh Unit->NonUnit");
+        Assert(EqualIO(cu3,zcu8,EPS),"CUpperTriMatrix I/O check compact thresh Unit->NonUnit");
+        Assert(EqualIO(cl3,zcl8,EPS),"CLowerTriMatrix I/O check compact thresh Unit->NonUnit");
     } else {
 #ifndef NOTHROW
         tmv::UpperTriMatrix<T,tmv::UnitDiag> zu5;
@@ -1156,10 +1156,10 @@ static void TestBasicTriMatrix_IO()
     fin.open("tmvtest_trimatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_trimatrix_io.dat for input");
     fin >> zm1 >> zm2 >> zcm1 >> zcm2;
-    Assert(u == zm1,"UpperTriMatrix -> Matrix I/O check");
-    Assert(l == zm2,"LowerTriMatrix -> Matrix I/O check");
-    Assert(cu == zcm1,"CUpperTriMatrix -> CMatrix I/O check");
-    Assert(cl == zcm2,"CLowerTriMatrix -> CMatrix I/O check");
+    Assert(EqualIO(u,zm1,EPS),"UpperTriMatrix -> Matrix I/O check");
+    Assert(EqualIO(l,zm2,EPS),"LowerTriMatrix -> Matrix I/O check");
+    Assert(EqualIO(cu,zcm1,EPS),"CUpperTriMatrix -> CMatrix I/O check");
+    Assert(EqualIO(cl,zcm2,EPS),"CLowerTriMatrix -> CMatrix I/O check");
     fin.close();
 
 #if XTEST == 0

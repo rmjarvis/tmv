@@ -264,7 +264,7 @@ static void TestBasicDiagMatrix_IO()
     cm(5) = CT(T(9.e-3),T(9.e-3));
     cm(6) = CT(T(9),T(9.e-3));
     m(7) = T(0.123456789);
-    cm(7) = CT(T(3.123456789),T(600.987654321));
+    cm(7) = CT(T(3.123456789),T(6.987654321));
 
     // First check clipping function...
     tmv::DiagMatrix<T> m2 = m;
@@ -306,14 +306,14 @@ static void TestBasicDiagMatrix_IO()
 
     // When using (the default) prec(6), these will be the values read in.
     m(7) = T(0.123457);
-    cm(7) = CT(T(3.12346),T(600.988));
+    cm(7) = CT(T(3.12346),T(6.98765));
 
     // When using prec(12), the full correct values will be read in. (m2,cm2)
 
     // When using prec(4), these will be the values read in.
     m3(7) = T(0.1235);
-    if (std::numeric_limits<T>::is_integer) cm3(7) = CT(3,600);
-    else cm3(7) = CT(T(3.123),T(601.0));
+    if (std::numeric_limits<T>::is_integer) cm3(7) = CT(3,6);
+    else cm3(7) = CT(T(3.123),T(6.988));
 
     // Read them back in
     tmv::DiagMatrix<T> xm1(N);
@@ -321,17 +321,17 @@ static void TestBasicDiagMatrix_IO()
     std::ifstream fin("tmvtest_diagmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_diagmatrix_io.dat for input");
     fin >> xm1 >> xcm1;
-    Assert(m == xm1,"DiagMatrix I/O check normal");
-    Assert(cm == xcm1,"CDiagMatrix I/O check normal");
+    Assert(EqualIO(m,xm1,EPS),"DiagMatrix I/O check normal");
+    Assert(EqualIO(cm,xcm1,EPS),"CDiagMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xm1 >> tmv::CompactIO() >> xcm1;
-    Assert(m == xm1,"DiagMatrix I/O check compact");
-    Assert(cm == xcm1,"CDiagMatrix I/O check compact");
+    Assert(EqualIO(m,xm1,EPS),"DiagMatrix I/O check compact");
+    Assert(EqualIO(cm,xcm1,EPS),"CDiagMatrix I/O check compact");
     fin >> xm1.view() >> xcm1.view();
-    Assert(m2 == xm1,"DiagMatrix I/O check thresh");
-    Assert(cm2 == xcm1,"CDiagMatrix I/O check thresh");
+    Assert(EqualIO(m2,xm1,EPS),"DiagMatrix I/O check thresh");
+    Assert(EqualIO(cm2,xcm1,EPS),"CDiagMatrix I/O check thresh");
     fin >> myStyle >> xm1.view() >> myStyle >> xcm1.view();
-    Assert(m3 == xm1,"DiagMatrix I/O check compact thresh & prec(4)");
-    Assert(cm3 == xcm1,"CDiagMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(m3,xm1,EPS),"DiagMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cm3,xcm1,EPS),"CDiagMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // Repeat for matrices that need to be resized.
@@ -342,17 +342,17 @@ static void TestBasicDiagMatrix_IO()
     fin.open("tmvtest_diagmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_diagmatrix_io.dat for input");
     fin >> tmv::NormalIO() >> zm1 >> tmv::NormalIO() >> zcm1;
-    Assert(m == zm1,"DiagMatrix I/O check normal");
-    Assert(cm == zcm1,"CDiagMatrix I/O check normal");
+    Assert(EqualIO(m,zm1,EPS),"DiagMatrix I/O check normal");
+    Assert(EqualIO(cm,zcm1,EPS),"CDiagMatrix I/O check normal");
     fin >> zm2 >> zcm2;
-    Assert(m == zm2,"DiagMatrix I/O check compact");
-    Assert(cm == zcm2,"CDiagMatrix I/O check compact");
+    Assert(EqualIO(m,zm2,EPS),"DiagMatrix I/O check compact");
+    Assert(EqualIO(cm,zcm2,EPS),"CDiagMatrix I/O check compact");
     fin >> tmv::NormalIO() >> zm3 >> tmv::NormalIO() >> zcm3;
-    Assert(m2 == zm3,"DiagMatrix I/O check thresh");
-    Assert(cm2 == zcm3,"CDiagMatrix I/O check thresh");
+    Assert(EqualIO(m2,zm3,EPS),"DiagMatrix I/O check thresh");
+    Assert(EqualIO(cm2,zcm3,EPS),"CDiagMatrix I/O check thresh");
     fin >> myStyle >> zm4 >> myStyle >> zcm4;
-    Assert(m3 == zm4,"DiagMatrix I/O check compact thresh & prec(4)");
-    Assert(cm3 == zcm4,"CDiagMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(m3,zm4,EPS),"DiagMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cm3,zcm4,EPS),"CDiagMatrix I/O check compact thresh & prec(4)");
     fin.close();
     tmv::IOStyle::revertDefault();
 
@@ -362,8 +362,8 @@ static void TestBasicDiagMatrix_IO()
     fin.open("tmvtest_diagmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_diagmatrix_io.dat for input");
     fin >> zm5 >> zcm5;
-    Assert(m == zm5,"DiagMatrix -> Matrix I/O check");
-    Assert(cm == zcm5,"CDiagMatrix -> CMatrix I/O check");
+    Assert(EqualIO(m,zm5,EPS),"DiagMatrix -> Matrix I/O check");
+    Assert(EqualIO(cm,zcm5,EPS),"CDiagMatrix -> CMatrix I/O check");
     fin.close();
 
 #if XTEST == 0

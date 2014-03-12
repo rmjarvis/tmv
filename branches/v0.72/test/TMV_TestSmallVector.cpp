@@ -440,7 +440,7 @@ static void TestSmallVectorIO()
     cv(8) = CT(T(9.e-3),T(9.e-3));
     cv(9) = CT(T(9),T(9.e-3));
     v(12) = T(0.123456789);
-    cv(12) = CT(T(3.123456789),T(600.987654321));
+    cv(12) = CT(T(3.123456789),T(6.987654321));
 
     // First check clipping function...
     tmv::SmallVector<T,NN> v2 = v;
@@ -484,14 +484,14 @@ static void TestSmallVectorIO()
 
     // When using (the default) prec(6), these will be the values read in.
     v(12) = T(0.123457);
-    cv(12) = CT(T(3.12346),T(600.988));
+    cv(12) = CT(T(3.12346),T(6.98765));
 
     // When using prec(12), the full correct values will be read in. (v2,cv2)
 
     // When using prec(4), these will be the values read in.
     v3(12) = T(0.1235);
-    if (std::numeric_limits<T>::is_integer) cv3(12) = CT(3,600);
-    else cv3(12) = CT(T(3.123),T(601.0));
+    if (std::numeric_limits<T>::is_integer) cv3(12) = CT(3,6);
+    else cv3(12) = CT(T(3.123),T(6.988));
 
     // Read them back in
     tmv::SmallVector<T,NN> xv;
@@ -499,17 +499,17 @@ static void TestSmallVectorIO()
     std::ifstream fin("tmvtest_smallvector_io.dat");
     Assert(fin,"Couldn't open tmvtest_smallvector_io.dat for input");
     fin >> xv >> xcv;
-    Assert(v == xv,"SmallVector I/O check normal");
-    Assert(cv == xcv,"CSmallVector I/O check normal");
+    Assert(EqualIO(v,xv,EPS),"SmallVector I/O check normal");
+    Assert(EqualIO(cv,xcv,EPS),"CSmallVector I/O check normal");
     fin >> tmv::CompactIO() >> xv >> tmv::CompactIO() >> xcv;
-    Assert(v == xv,"SmallVector I/O check compact");
-    Assert(cv == xcv,"CSmallVector I/O check compact");
+    Assert(EqualIO(v,xv,EPS),"SmallVector I/O check compact");
+    Assert(EqualIO(cv,xcv,EPS),"CSmallVector I/O check compact");
     fin >> xv.view() >> xcv.view();
-    Assert(v2 == xv,"SmallVector I/O check thresh");
-    Assert(cv2 == xcv,"CSmallVector I/O check thresh");
+    Assert(EqualIO(v2,xv,EPS),"SmallVector I/O check thresh");
+    Assert(EqualIO(cv2,xcv,EPS),"CSmallVector I/O check thresh");
     fin >> myStyle >> xv.view() >> myStyle >> xcv.view();
-    Assert(v3 == xv,"SmallVector I/O check compact thresh & prec(4)");
-    Assert(cv3 == xcv,"CSmallVector I/O check compact thresh & prec(4)");
+    Assert(EqualIO(v3,xv,EPS),"SmallVector I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cv3,xcv,EPS),"CSmallVector I/O check compact thresh & prec(4)");
     fin.close();
 
     // Read back into regular Vector
@@ -520,17 +520,17 @@ static void TestSmallVectorIO()
     fin.open("tmvtest_smallvector_io.dat");
     Assert(fin,"Couldn't open tmvtest_smallvector_io.dat for input");
     fin >> tmv::NormalIO() >> zv1 >> tmv::NormalIO() >> zcv1;
-    Assert(v == zv1,"SmallVector I/O check normal -> Vector");
-    Assert(cv == zcv1,"CSmallVector I/O check normal -> Vector");
+    Assert(EqualIO(v,zv1,EPS),"SmallVector I/O check normal -> Vector");
+    Assert(EqualIO(cv,zcv1,EPS),"CSmallVector I/O check normal -> Vector");
     fin >> zv2 >> zcv2;
-    Assert(v == zv2,"SmallVector I/O check compact -> Vector");
-    Assert(cv == zcv2,"CSmallVector I/O check compact -> Vector");
+    Assert(EqualIO(v,zv2,EPS),"SmallVector I/O check compact -> Vector");
+    Assert(EqualIO(cv,zcv2,EPS),"CSmallVector I/O check compact -> Vector");
     fin >> tmv::NormalIO() >> zv3 >> tmv::NormalIO() >> zcv3;
-    Assert(v2 == zv3,"SmallVector I/O check thresh -> Vector");
-    Assert(cv2 == zcv3,"CSmallVector I/O check thresh -> Vector");
+    Assert(EqualIO(v2,zv3,EPS),"SmallVector I/O check thresh -> Vector");
+    Assert(EqualIO(cv2,zcv3,EPS),"CSmallVector I/O check thresh -> Vector");
     fin >> myStyle >> zv4 >> myStyle >> zcv4;
-    Assert(v3 == zv4,"SmallVector I/O check compact thresh -> Vector");
-    Assert(cv3 == zcv4,"CSmallVector I/O check compact thresh -> Vector");
+    Assert(EqualIO(v3,zv4,EPS),"SmallVector I/O check compact thresh -> Vector");
+    Assert(EqualIO(cv3,zcv4,EPS),"CSmallVector I/O check compact thresh -> Vector");
     fin.close();
     // Switch it back.
     tmv::IOStyle::revertDefault();

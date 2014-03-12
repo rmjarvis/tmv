@@ -1168,7 +1168,7 @@ static void TestBasicSymMatrix_IO()
     cs(5,6) = ch(6,5) = CT(T(9.e-3),T(9.e-3));
     cs(5,7) = ch(7,5) = CT(T(9),T(9.e-3));
     s(4,7) = h(7,4) = T(0.123456789);
-    cs(4,7) = ch(7,4) = CT(T(3.123456789),T(600.987654321));
+    cs(4,7) = ch(7,4) = CT(T(3.123456789),T(6.987654321));
 
     // First check clipping function...
     tmv::SymMatrix<T> s2 = s;
@@ -1225,14 +1225,14 @@ static void TestBasicSymMatrix_IO()
 
     // When using (the default) prec(6), these will be the values read in.
     s(4,7) = h(7,4) = T(0.123457);
-    cs(4,7) = ch(7,4) = CT(T(3.12346),T(600.988));
+    cs(4,7) = ch(7,4) = CT(T(3.12346),T(6.98765));
 
     // When using prec(12), the full correct values will be read in.
 
     // When using prec(4), these will be the values read in.
     s3(4,7) = h3(7,4) = T(0.1235);
-    if (std::numeric_limits<T>::is_integer) cs3(4,7) = ch3(7,4) = CT(3,600);
-    else cs3(4,7) = ch3(7,4)  = CT(T(3.123),T(601.0));
+    if (std::numeric_limits<T>::is_integer) cs3(4,7) = ch3(7,4) = CT(3,6);
+    else cs3(4,7) = ch3(7,4)  = CT(T(3.123),T(6.988));
 
     // Read them back in
     tmv::SymMatrix<T,tmv::Upper|tmv::RowMajor> xs1(N);
@@ -1242,27 +1242,27 @@ static void TestBasicSymMatrix_IO()
     std::ifstream fin("tmvtest_symmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_symmatrix_io.dat for input");
     fin >> xs1 >> xh1 >> xcs1 >> xch1;
-    Assert(s == xs1,"SymMatrix I/O check normal");
-    Assert(h == xh1,"HermMatrix I/O check normal");
-    Assert(cs == xcs1,"CSymMatrix I/O check normal");
-    Assert(ch == xch1,"CHermMatrix I/O check normal");
+    Assert(EqualIO(s,xs1,EPS),"SymMatrix I/O check normal");
+    Assert(EqualIO(h,xh1,EPS),"HermMatrix I/O check normal");
+    Assert(EqualIO(cs,xcs1,EPS),"CSymMatrix I/O check normal");
+    Assert(EqualIO(ch,xch1,EPS),"CHermMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xs1 >> tmv::CompactIO() >> xh1;
     fin >> tmv::CompactIO() >> xcs1 >> tmv::CompactIO() >> xch1;
-    Assert(s == xs1,"SymMatrix I/O check compact");
-    Assert(h == xh1,"HermMatrix I/O check compact");
-    Assert(cs == xcs1,"CSymMatrix I/O check compact");
-    Assert(ch == xch1,"CHermMatrix I/O check compact");
+    Assert(EqualIO(s,xs1,EPS),"SymMatrix I/O check compact");
+    Assert(EqualIO(h,xh1,EPS),"HermMatrix I/O check compact");
+    Assert(EqualIO(cs,xcs1,EPS),"CSymMatrix I/O check compact");
+    Assert(EqualIO(ch,xch1,EPS),"CHermMatrix I/O check compact");
     fin >> xs1.view() >> xh1.view() >> xcs1.view() >> xch1.view();
-    Assert(s2 == xs1,"SymMatrix I/O check thresh");
-    Assert(h2 == xh1,"HermMatrix I/O check thresh");
-    Assert(cs2 == xcs1,"CSymMatrix I/O check thresh");
-    Assert(ch2 == xch1,"CHermMatrix I/O check thresh");
+    Assert(EqualIO(s2,xs1,EPS),"SymMatrix I/O check thresh");
+    Assert(EqualIO(h2,xh1,EPS),"HermMatrix I/O check thresh");
+    Assert(EqualIO(cs2,xcs1,EPS),"CSymMatrix I/O check thresh");
+    Assert(EqualIO(ch2,xch1,EPS),"CHermMatrix I/O check thresh");
     fin >> myStyle >> xs1.view() >> myStyle >> xh1.view();
     fin >> myStyle >> xcs1.view() >> myStyle >> xch1.view();
-    Assert(s3 == xs1,"SymMatrix I/O check compact thresh & prec(4)");
-    Assert(h3 == xh1,"HermMatrix I/O check compact thresh & prec(4)");
-    Assert(cs3 == xcs1,"CSymMatrix I/O check compact thresh & prec(4)");
-    Assert(ch3 == xch1,"CHermMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(s3,xs1,EPS),"SymMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(h3,xh1,EPS),"HermMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cs3,xcs1,EPS),"CSymMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(ch3,xch1,EPS),"CHermMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // Repeat for column major
@@ -1273,27 +1273,27 @@ static void TestBasicSymMatrix_IO()
     fin.open("tmvtest_symmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_symmatrix_io.dat for input");
     fin >> xs2.view() >> xh2.view() >> xcs2.view() >> xch2.view();
-    Assert(s == xs2,"SymMatrix I/O check normal");
-    Assert(h == xh2,"HermMatrix I/O check normal");
-    Assert(cs == xcs2,"CSymMatrix I/O check normal");
-    Assert(ch == xch2,"CHermMatrix I/O check normal");
+    Assert(EqualIO(s,xs2,EPS),"SymMatrix I/O check normal");
+    Assert(EqualIO(h,xh2,EPS),"HermMatrix I/O check normal");
+    Assert(EqualIO(cs,xcs2,EPS),"CSymMatrix I/O check normal");
+    Assert(EqualIO(ch,xch2,EPS),"CHermMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xs2.view() >> tmv::CompactIO() >> xh2.view();
     fin >> tmv::CompactIO() >> xcs2.view() >> tmv::CompactIO() >> xch2.view();
-    Assert(s == xs2,"SymMatrix I/O check compact");
-    Assert(h == xh2,"HermMatrix I/O check compact");
-    Assert(cs == xcs2,"CSymMatrix I/O check compact");
-    Assert(ch == xch2,"CHermMatrix I/O check compact");
+    Assert(EqualIO(s,xs2,EPS),"SymMatrix I/O check compact");
+    Assert(EqualIO(h,xh2,EPS),"HermMatrix I/O check compact");
+    Assert(EqualIO(cs,xcs2,EPS),"CSymMatrix I/O check compact");
+    Assert(EqualIO(ch,xch2,EPS),"CHermMatrix I/O check compact");
     fin >> xs2 >> xh2 >> xcs2 >> xch2;
-    Assert(s2 == xs2,"SymMatrix I/O check thresh");
-    Assert(h2 == xh2,"HermMatrix I/O check thresh");
-    Assert(cs2 == xcs2,"CSymMatrix I/O check thresh");
-    Assert(ch2 == xch2,"CHermMatrix I/O check thresh");
+    Assert(EqualIO(s2,xs2,EPS),"SymMatrix I/O check thresh");
+    Assert(EqualIO(h2,xh2,EPS),"HermMatrix I/O check thresh");
+    Assert(EqualIO(cs2,xcs2,EPS),"CSymMatrix I/O check thresh");
+    Assert(EqualIO(ch2,xch2,EPS),"CHermMatrix I/O check thresh");
     fin >> myStyle >> xs2 >> myStyle >> xh2;
     fin >> myStyle >> xcs2 >> myStyle >> xch2;
-    Assert(s3 == xs2,"SymMatrix I/O check compact thresh & prec(4)");
-    Assert(h3 == xh2,"HermMatrix I/O check compact thresh & prec(4)");
-    Assert(cs3 == xcs2,"CSymMatrix I/O check compact thresh & prec(4)");
-    Assert(ch3 == xch2,"CHermMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(s3,xs2,EPS),"SymMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(h3,xh2,EPS),"HermMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cs3,xcs2,EPS),"CSymMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(ch3,xch2,EPS),"CHermMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // Repeat for Lower Storage
@@ -1306,27 +1306,27 @@ static void TestBasicSymMatrix_IO()
     fin.open("tmvtest_symmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_symmatrix_io.dat for input");
     fin >> xh3.view() >> xs3.view() >> xcs3.view() >> xch3.view();
-    Assert(s == xh3,"SymMatrix I/O check normal");
-    Assert(h == xs3,"HermMatrix I/O check normal");
-    Assert(cs == xcs3,"CSymMatrix I/O check normal");
-    Assert(ch == xch3,"CHermMatrix I/O check normal");
+    Assert(EqualIO(s,xh3,EPS),"SymMatrix I/O check normal");
+    Assert(EqualIO(h,xs3,EPS),"HermMatrix I/O check normal");
+    Assert(EqualIO(cs,xcs3,EPS),"CSymMatrix I/O check normal");
+    Assert(EqualIO(ch,xch3,EPS),"CHermMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xh3.view() >> tmv::CompactIO() >> xs3.view();
     fin >> tmv::CompactIO() >> xcs3.view() >> tmv::CompactIO() >> xch3.view();
-    Assert(s == xh3,"SymMatrix I/O check compact");
-    Assert(h == xs3,"HermMatrix I/O check compact");
-    Assert(cs == xcs3,"CSymMatrix I/O check compact");
-    Assert(ch == xch3,"CHermMatrix I/O check compact");
+    Assert(EqualIO(s,xh3,EPS),"SymMatrix I/O check compact");
+    Assert(EqualIO(h,xs3,EPS),"HermMatrix I/O check compact");
+    Assert(EqualIO(cs,xcs3,EPS),"CSymMatrix I/O check compact");
+    Assert(EqualIO(ch,xch3,EPS),"CHermMatrix I/O check compact");
     fin >> xh3 >> xs3 >> xcs3 >> xch3;
-    Assert(s2 == xh3,"SymMatrix I/O check thresh");
-    Assert(h2 == xs3,"HermMatrix I/O check thresh");
-    Assert(cs2 == xcs3,"CSymMatrix I/O check thresh");
-    Assert(ch2 == xch3,"CHermMatrix I/O check thresh");
+    Assert(EqualIO(s2,xh3,EPS),"SymMatrix I/O check thresh");
+    Assert(EqualIO(h2,xs3,EPS),"HermMatrix I/O check thresh");
+    Assert(EqualIO(cs2,xcs3,EPS),"CSymMatrix I/O check thresh");
+    Assert(EqualIO(ch2,xch3,EPS),"CHermMatrix I/O check thresh");
     fin >> myStyle >> xh3 >> myStyle >> xs3;
     fin >> myStyle >> xcs3 >> myStyle >> xch3;
-    Assert(s3 == xh3,"SymMatrix I/O check compact thresh & prec(4)");
-    Assert(h3 == xs3,"HermMatrix I/O check compact thresh & prec(4)");
-    Assert(cs3 == xcs3,"CSymMatrix I/O check compact thresh & prec(4)");
-    Assert(ch3 == xch3,"CHermMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(s3,xh3,EPS),"SymMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(h3,xs3,EPS),"HermMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cs3,xcs3,EPS),"CSymMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(ch3,xch3,EPS),"CHermMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     tmv::SymMatrix<T,tmv::Lower|tmv::ColMajor> xs4(N);
@@ -1336,27 +1336,27 @@ static void TestBasicSymMatrix_IO()
     fin.open("tmvtest_symmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_symmatrix_io.dat for input");
     fin >> xh4.view() >> xs4.view() >> xcs4.view() >> xch4.view();
-    Assert(s == xh4,"SymMatrix I/O check normal");
-    Assert(h == xs4,"HermMatrix I/O check normal");
-    Assert(cs == xcs4,"CSymMatrix I/O check normal");
-    Assert(ch == xch4,"CHermMatrix I/O check normal");
+    Assert(EqualIO(s,xh4,EPS),"SymMatrix I/O check normal");
+    Assert(EqualIO(h,xs4,EPS),"HermMatrix I/O check normal");
+    Assert(EqualIO(cs,xcs4,EPS),"CSymMatrix I/O check normal");
+    Assert(EqualIO(ch,xch4,EPS),"CHermMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xh4.view() >> tmv::CompactIO() >> xs4.view();
     fin >> tmv::CompactIO() >> xcs4.view() >> tmv::CompactIO() >> xch4.view();
-    Assert(s == xh4,"SymMatrix I/O check compact");
-    Assert(h == xs4,"HermMatrix I/O check compact");
-    Assert(cs == xcs4,"CSymMatrix I/O check compact");
-    Assert(ch == xch4,"CHermMatrix I/O check compact");
+    Assert(EqualIO(s,xh4,EPS),"SymMatrix I/O check compact");
+    Assert(EqualIO(h,xs4,EPS),"HermMatrix I/O check compact");
+    Assert(EqualIO(cs,xcs4,EPS),"CSymMatrix I/O check compact");
+    Assert(EqualIO(ch,xch4,EPS),"CHermMatrix I/O check compact");
     fin >> xh4 >> xs4 >> xcs4 >> xch4;
-    Assert(s2 == xh4,"SymMatrix I/O check thresh");
-    Assert(h2 == xs4,"HermMatrix I/O check thresh");
-    Assert(cs2 == xcs4,"CSymMatrix I/O check thresh");
-    Assert(ch2 == xch4,"CHermMatrix I/O check thresh");
+    Assert(EqualIO(s2,xh4,EPS),"SymMatrix I/O check thresh");
+    Assert(EqualIO(h2,xs4,EPS),"HermMatrix I/O check thresh");
+    Assert(EqualIO(cs2,xcs4,EPS),"CSymMatrix I/O check thresh");
+    Assert(EqualIO(ch2,xch4,EPS),"CHermMatrix I/O check thresh");
     fin >> myStyle >> xh4 >> myStyle >> xs4;
     fin >> myStyle >> xcs4 >> myStyle >> xch4;
-    Assert(s3 == xh4,"SymMatrix I/O check compact thresh & prec(4)");
-    Assert(h3 == xs4,"HermMatrix I/O check compact thresh & prec(4)");
-    Assert(cs3 == xcs4,"CSymMatrix I/O check compact thresh & prec(4)");
-    Assert(ch3 == xch4,"CHermMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(s3,xh4,EPS),"SymMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(h3,xs4,EPS),"HermMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cs3,xcs4,EPS),"CSymMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(ch3,xch4,EPS),"CHermMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // And repeat for matrices that need to be resized.
@@ -1370,27 +1370,27 @@ static void TestBasicSymMatrix_IO()
     Assert(fin,"Couldn't open tmvtest_symmatrix_io.dat for input");
     fin >> tmv::NormalIO() >> zs1 >> tmv::NormalIO() >> zh1;
     fin >> tmv::NormalIO() >> zcs1 >> tmv::NormalIO() >> zch1;
-    Assert(s == zs1,"SymMatrix I/O check normal");
-    Assert(h == zh1,"HermMatrix I/O check normal");
-    Assert(cs == zcs1,"CSymMatrix I/O check normal");
-    Assert(ch == zch1,"CHermMatrix I/O check normal");
+    Assert(EqualIO(s,zs1,EPS),"SymMatrix I/O check normal");
+    Assert(EqualIO(h,zh1,EPS),"HermMatrix I/O check normal");
+    Assert(EqualIO(cs,zcs1,EPS),"CSymMatrix I/O check normal");
+    Assert(EqualIO(ch,zch1,EPS),"CHermMatrix I/O check normal");
     fin >> zs2 >> zh2 >> zcs2 >> zch2;
-    Assert(s == zs2,"SymMatrix I/O check compact");
-    Assert(h == zh2,"HermMatrix I/O check compact");
-    Assert(cs == zcs2,"CSymMatrix I/O check compact");
-    Assert(ch == zch2,"CHermMatrix I/O check compact");
+    Assert(EqualIO(s,zs2,EPS),"SymMatrix I/O check compact");
+    Assert(EqualIO(h,zh2,EPS),"HermMatrix I/O check compact");
+    Assert(EqualIO(cs,zcs2,EPS),"CSymMatrix I/O check compact");
+    Assert(EqualIO(ch,zch2,EPS),"CHermMatrix I/O check compact");
     fin >> tmv::NormalIO() >> zs3 >> tmv::NormalIO() >> zh3;
     fin >> tmv::NormalIO() >> zcs3 >> tmv::NormalIO() >> zch3;
-    Assert(s2 == zs3,"SymMatrix I/O check thresh");
-    Assert(h2 == zh3,"HermMatrix I/O check thresh");
-    Assert(cs2 == zcs3,"CSymMatrix I/O check thresh");
-    Assert(ch2 == zch3,"CHermMatrix I/O check thresh");
+    Assert(EqualIO(s2,zs3,EPS),"SymMatrix I/O check thresh");
+    Assert(EqualIO(h2,zh3,EPS),"HermMatrix I/O check thresh");
+    Assert(EqualIO(cs2,zcs3,EPS),"CSymMatrix I/O check thresh");
+    Assert(EqualIO(ch2,zch3,EPS),"CHermMatrix I/O check thresh");
     fin >> myStyle >> zs4 >> myStyle >> zh4;
     fin >> myStyle >> zcs4 >> myStyle >> zch4;
-    Assert(s3 == zs4,"SymMatrix I/O check compact thresh & prec(4)");
-    Assert(h3 == zh4,"HermMatrix I/O check compact thresh & prec(4)");
-    Assert(cs3 == zcs4,"CSymMatrix I/O check compact thresh & prec(4)");
-    Assert(ch3 == zch4,"CHermMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(s3,zs4,EPS),"SymMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(h3,zh4,EPS),"HermMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cs3,zcs4,EPS),"CSymMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(ch3,zch4,EPS),"CHermMatrix I/O check compact thresh & prec(4)");
     fin.close();
     tmv::IOStyle::revertDefault();
 
@@ -1400,10 +1400,10 @@ static void TestBasicSymMatrix_IO()
     fin.open("tmvtest_symmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_symmatrix_io.dat for input");
     fin >> zm1 >> zm2 >> zcm1 >> zcm2;
-    Assert(s == zm1,"SymMatrix -> Matrix I/O check");
-    Assert(h == zm2,"HermMatrix -> Matrix I/O check");
-    Assert(cs == zcm1,"CSymMatrix -> CMatrix I/O check");
-    Assert(ch == zcm2,"CHermMatrix -> CMatrix I/O check");
+    Assert(EqualIO(s,zm1,EPS),"SymMatrix -> Matrix I/O check");
+    Assert(EqualIO(h,zm2,EPS),"HermMatrix -> Matrix I/O check");
+    Assert(EqualIO(cs,zcm1,EPS),"CSymMatrix -> CMatrix I/O check");
+    Assert(EqualIO(ch,zcm2,EPS),"CHermMatrix -> CMatrix I/O check");
     fin.close();
 
 #if XTEST == 0

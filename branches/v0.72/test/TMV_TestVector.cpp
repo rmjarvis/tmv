@@ -710,7 +710,7 @@ static void TestVectorIO()
     cv(8) = CT(T(9.e-3),T(9.e-3));
     cv(9) = CT(T(9),T(9.e-3));
     v(12) = T(0.123456789);
-    cv(12) = CT(T(3.123456789),T(600.987654321));
+    cv(12) = CT(T(3.123456789),T(6.987654321));
 
     // First check clipping function...
     tmv::Vector<T> v2 = v;
@@ -755,14 +755,14 @@ static void TestVectorIO()
 
     // When using (the default) prec(6), these will be the values read in.
     v(12) = T(0.123457);
-    cv(12) = CT(T(3.12346),T(600.988));
+    cv(12) = CT(T(3.12346),T(6.98765));
 
     // When using prec(12), the full correct values will be read in. (v2,cv2)
 
     // When using prec(4), these will be the values read in.
     v3(12) = T(0.1235);
-    if (std::numeric_limits<T>::is_integer) cv3(12) = CT(3,600);
-    else cv3(12) = CT(T(3.123),T(601.0));
+    if (std::numeric_limits<T>::is_integer) cv3(12) = CT(3,6);
+    else cv3(12) = CT(T(3.123),T(6.988));
 
     // Read them back in
     tmv::Vector<T> xv(N);
@@ -770,17 +770,24 @@ static void TestVectorIO()
     std::ifstream fin("tmvtest_vector_io.dat");
     Assert(fin,"Couldn't open tmvtest_vector_io.dat for input");
     fin >> xv >> xcv;
-    Assert(v == xv,"Vector I/O check normal");
-    Assert(cv == xcv,"CVector I/O check normal");
+    if (showacc) {
+        std::cout<<"v = "<<v<<std::endl;
+        std::cout<<"xv = "<<xv<<std::endl;
+        std::cout<<"xcv = "<<xcv<<std::endl;
+        std::cout<<"v-xv = "<<(v-xv)<<std::endl;
+        std::cout<<"cv-xcv = "<<(cv-xcv)<<std::endl;
+    }
+    Assert(EqualIO(v,xv,EPS),"Vector I/O check normal");
+    Assert(EqualIO(cv,xcv,EPS),"CVector I/O check normal");
     fin >> tmv::CompactIO() >> xv >> tmv::CompactIO() >> xcv;
-    Assert(v == xv,"Vector I/O check compact");
-    Assert(cv == xcv,"CVector I/O check compact");
+    Assert(EqualIO(v,xv,EPS),"Vector I/O check compact");
+    Assert(EqualIO(cv,xcv,EPS),"CVector I/O check compact");
     fin >> xv.view() >> xcv.view();
-    Assert(v2 == xv,"Vector I/O check thresh");
-    Assert(cv2 == xcv,"CVector I/O check thresh");
+    Assert(EqualIO(v2,xv,EPS),"Vector I/O check thresh");
+    Assert(EqualIO(cv2,xcv,EPS),"CVector I/O check thresh");
     fin >> myStyle >> xv.view() >> myStyle >> xcv.view();
-    Assert(v3 == xv,"Vector I/O check compact thresh & prec(4)");
-    Assert(cv3 == xcv,"CVector I/O check compact thresh & prec(4)");
+    Assert(EqualIO(v3,xv,EPS),"Vector I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cv3,xcv,EPS),"CVector I/O check compact thresh & prec(4)");
     fin.close();
 
     // Read into vectors that need to be resized.
@@ -791,17 +798,17 @@ static void TestVectorIO()
     fin.open("tmvtest_vector_io.dat");
     Assert(fin,"Couldn't open tmvtest_vector_io.dat for input");
     fin >> tmv::NormalIO() >> zv1 >> tmv::NormalIO() >> zcv1;
-    Assert(v == zv1,"Vector I/O check normal with resize");
-    Assert(cv == zcv1,"CVector I/O check normal with resize");
+    Assert(EqualIO(v,zv1,EPS),"Vector I/O check normal with resize");
+    Assert(EqualIO(cv,zcv1,EPS),"CVector I/O check normal with resize");
     fin >> zv2 >> zcv2;
-    Assert(v == zv2,"Vector I/O check compact with resize");
-    Assert(cv == zcv2,"CVector I/O check compact with resize");
+    Assert(EqualIO(v,zv2,EPS),"Vector I/O check compact with resize");
+    Assert(EqualIO(cv,zcv2,EPS),"CVector I/O check compact with resize");
     fin >> tmv::NormalIO() >> zv3 >> tmv::NormalIO() >> zcv3;
-    Assert(v2 == zv3,"Vector I/O check thresh with resize");
-    Assert(cv2 == zcv3,"CVector I/O check thresh with resize");
+    Assert(EqualIO(v2,zv3,EPS),"Vector I/O check thresh with resize");
+    Assert(EqualIO(cv2,zcv3,EPS),"CVector I/O check thresh with resize");
     fin >> myStyle >> zv4 >> myStyle >> zcv4;
-    Assert(v3 == zv4,"Vector I/O check compact thresh with resize");
-    Assert(cv3 == zcv4,"CVector I/O check compact thresh with resize");
+    Assert(EqualIO(v3,zv4,EPS),"Vector I/O check compact thresh with resize");
+    Assert(EqualIO(cv3,zcv4,EPS),"CVector I/O check compact thresh with resize");
     fin.close();
     // Switch it back.
     tmv::IOStyle::revertDefault();

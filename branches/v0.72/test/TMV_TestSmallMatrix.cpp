@@ -287,7 +287,7 @@ inline void TestBasicSmallMatrix_IO()
     cm(5,6) = CT(T(9.e-3),T(9.e-3));
     cm(6,6) = CT(T(9),T(9.e-3));
     m(7,4) = T(0.123456789);
-    cm(7,4) = CT(T(3.123456789),T(600.987654321));
+    cm(7,4) = CT(T(3.123456789),T(6.987654321));
 
     // First check clipping function...
     tmv::SmallMatrix<T,M,N> m2 = m;
@@ -331,14 +331,14 @@ inline void TestBasicSmallMatrix_IO()
 
     // When using (the default) prec(6), these will be the values read in.
     m(7,4) = T(0.123457);
-    cm(7,4) = CT(T(3.12346),T(600.988));
+    cm(7,4) = CT(T(3.12346),T(6.98765));
 
     // When using prec(12), the full correct values will be read in. (m2,cm2)
 
     // When using prec(4), these will be the values read in.
     m3(7,4) = T(0.1235);
-    if (std::numeric_limits<T>::is_integer) cm3(7,4) = CT(3,600);
-    else cm3(7,4) = CT(T(3.123),T(601.0));
+    if (std::numeric_limits<T>::is_integer) cm3(7,4) = CT(3,6);
+    else cm3(7,4) = CT(T(3.123),T(6.988));
 
     // Read them back in
     tmv::SmallMatrix<T,M,N,tmv::RowMajor> xm1;
@@ -346,17 +346,17 @@ inline void TestBasicSmallMatrix_IO()
     std::ifstream fin("tmvtest_smallmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_smallmatrix_io.dat for input");
     fin >> xm1 >> xcm1;
-    Assert(m == xm1,"SmallMatrix I/O check normal");
-    Assert(cm == xcm1,"CSmallMatrix I/O check normal");
+    Assert(EqualIO(m,xm1,EPS),"SmallMatrix I/O check normal");
+    Assert(EqualIO(cm,xcm1,EPS),"CSmallMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xm1 >> tmv::CompactIO() >> xcm1;
-    Assert(m == xm1,"SmallMatrix I/O check compact");
-    Assert(cm == xcm1,"CSmallMatrix I/O check compact");
+    Assert(EqualIO(m,xm1,EPS),"SmallMatrix I/O check compact");
+    Assert(EqualIO(cm,xcm1,EPS),"CSmallMatrix I/O check compact");
     fin >> xm1.view() >> xcm1.view();
-    Assert(m2 == xm1,"SmallMatrix I/O check thresh");
-    Assert(cm2 == xcm1,"CSmallMatrix I/O check thresh");
+    Assert(EqualIO(m2,xm1,EPS),"SmallMatrix I/O check thresh");
+    Assert(EqualIO(cm2,xcm1,EPS),"CSmallMatrix I/O check thresh");
     fin >> myStyle >> xm1.view() >> myStyle >> xcm1.view();
-    Assert(m3 == xm1,"SmallMatrix I/O check compact thresh & prec(4)");
-    Assert(cm3 == xcm1,"CSmallMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(m3,xm1,EPS),"SmallMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cm3,xcm1,EPS),"CSmallMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // Repeat for column major
@@ -365,17 +365,17 @@ inline void TestBasicSmallMatrix_IO()
     fin.open("tmvtest_smallmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_smallmatrix_io.dat for input");
     fin >> xm2.view() >> xcm2.view();
-    Assert(m == xm2,"SmallMatrix I/O check normal");
-    Assert(cm == xcm2,"CSmallMatrix I/O check normal");
+    Assert(EqualIO(m,xm2,EPS),"SmallMatrix I/O check normal");
+    Assert(EqualIO(cm,xcm2,EPS),"CSmallMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xm2.view() >> tmv::CompactIO() >> xcm2.view();
-    Assert(m == xm2,"SmallMatrix I/O check compact");
-    Assert(cm == xcm2,"CSmallMatrix I/O check compact");
+    Assert(EqualIO(m,xm2,EPS),"SmallMatrix I/O check compact");
+    Assert(EqualIO(cm,xcm2,EPS),"CSmallMatrix I/O check compact");
     fin >> xm2 >> xcm2;
-    Assert(m2 == xm2,"SmallMatrix I/O check thresh");
-    Assert(cm2 == xcm2,"CSmallMatrix I/O check thresh");
+    Assert(EqualIO(m2,xm2,EPS),"SmallMatrix I/O check thresh");
+    Assert(EqualIO(cm2,xcm2,EPS),"CSmallMatrix I/O check thresh");
     fin >> myStyle >> xm2 >> myStyle >> xcm2;
-    Assert(m3 == xm2,"SmallMatrix I/O check compact thresh & prec(4)");
-    Assert(cm3 == xcm2,"CSmallMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(m3,xm2,EPS),"SmallMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cm3,xcm2,EPS),"CSmallMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // Read back into regular SmallMatrix
@@ -386,17 +386,17 @@ inline void TestBasicSmallMatrix_IO()
     fin.open("tmvtest_smallmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_smallmatrix_io.dat for input");
     fin >> tmv::NormalIO() >> zm1 >> tmv::NormalIO() >> zcm1;
-    Assert(m == zm1,"SmallMatrix I/O check normal -> Matrix");
-    Assert(cm == zcm1,"CSmallMatrix I/O check normal -> Matrix");
+    Assert(EqualIO(m,zm1,EPS),"SmallMatrix I/O check normal -> Matrix");
+    Assert(EqualIO(cm,zcm1,EPS),"CSmallMatrix I/O check normal -> Matrix");
     fin >> zm2 >> zcm2;
-    Assert(m == zm2,"SmallMatrix I/O check compact -> Matrix");
-    Assert(cm == zcm2,"CSmallMatrix I/O check compact -> Matrix");
+    Assert(EqualIO(m,zm2,EPS),"SmallMatrix I/O check compact -> Matrix");
+    Assert(EqualIO(cm,zcm2,EPS),"CSmallMatrix I/O check compact -> Matrix");
     fin >> tmv::NormalIO() >> zm3 >> tmv::NormalIO() >> zcm3;
-    Assert(m2 == zm3,"SmallMatrix I/O check thresh -> Matrix");
-    Assert(cm2 == zcm3,"CSmallMatrix I/O check thresh -> Matrix");
+    Assert(EqualIO(m2,zm3,EPS),"SmallMatrix I/O check thresh -> Matrix");
+    Assert(EqualIO(cm2,zcm3,EPS),"CSmallMatrix I/O check thresh -> Matrix");
     fin >> myStyle >> zm4 >> myStyle >> zcm4;
-    Assert(m3 == zm4,"SmallMatrix I/O check compact thresh -> Matrix");
-    Assert(cm3 == zcm4,"CSmallMatrix I/O check compact thresh -> Matrix");
+    Assert(EqualIO(m3,zm4,EPS),"SmallMatrix I/O check compact thresh -> Matrix");
+    Assert(EqualIO(cm3,zcm4,EPS),"CSmallMatrix I/O check compact thresh -> Matrix");
     fin.close();
     // Switch it back.
     tmv::IOStyle::revertDefault();

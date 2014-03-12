@@ -448,7 +448,7 @@ static void TestBasicBandMatrix_IO()
     cm(5,6) = CT(T(9.e-3),T(9.e-3));
     cm(6,6) = CT(T(9),T(9.e-3));
     m(7,4) = T(0.123456789);
-    cm(7,4) = CT(T(3.123456789),T(600.987654321));
+    cm(7,4) = CT(T(3.123456789),T(6.987654321));
 
     // First check clipping function...
     tmv::BandMatrix<T> m2 = m;
@@ -490,14 +490,14 @@ static void TestBasicBandMatrix_IO()
 
     // When using (the default) prec(6), these will be the values read in.
     m(7,4) = T(0.123457);
-    cm(7,4) = CT(T(3.12346),T(600.988));
+    cm(7,4) = CT(T(3.12346),T(6.98765));
 
     // When using prec(12), the full correct values will be read in. (m2,cm2)
 
     // When using prec(4), these will be the values read in.
     m3(7,4) = T(0.1235);
-    if (std::numeric_limits<T>::is_integer) cm3(7,4) = CT(3,600);
-    else cm3(7,4) = CT(T(3.123),T(601.0));
+    if (std::numeric_limits<T>::is_integer) cm3(7,4) = CT(3,6);
+    else cm3(7,4) = CT(T(3.123),T(6.988));
 
     // Read them back in
     tmv::BandMatrix<T,tmv::RowMajor> xm1(M,N,nlo,nhi);
@@ -505,17 +505,17 @@ static void TestBasicBandMatrix_IO()
     std::ifstream fin("tmvtest_bandmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
     fin >> xm1 >> xcm1;
-    Assert(m == xm1,"BandMatrix I/O check normal");
-    Assert(cm == xcm1,"CBandMatrix I/O check normal");
+    Assert(EqualIO(m,xm1,EPS),"BandMatrix I/O check normal");
+    Assert(EqualIO(cm,xcm1,EPS),"CBandMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xm1 >> tmv::CompactIO() >> xcm1;
-    Assert(m == xm1,"BandMatrix I/O check compact");
-    Assert(cm == xcm1,"CBandMatrix I/O check compact");
+    Assert(EqualIO(m,xm1,EPS),"BandMatrix I/O check compact");
+    Assert(EqualIO(cm,xcm1,EPS),"CBandMatrix I/O check compact");
     fin >> xm1.view() >> xcm1.view();
-    Assert(m2 == xm1,"BandMatrix I/O check thresh");
-    Assert(cm2 == xcm1,"CBandMatrix I/O check thresh");
+    Assert(EqualIO(m2,xm1,EPS),"BandMatrix I/O check thresh");
+    Assert(EqualIO(cm2,xcm1,EPS),"CBandMatrix I/O check thresh");
     fin >> myStyle >> xm1.view() >> myStyle >> xcm1.view();
-    Assert(m3 == xm1,"BandMatrix I/O check compact thresh & prec(4)");
-    Assert(cm3 == xcm1,"CBandMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(m3,xm1,EPS),"BandMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cm3,xcm1,EPS),"CBandMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // Repeat for column major
@@ -524,17 +524,17 @@ static void TestBasicBandMatrix_IO()
     fin.open("tmvtest_bandmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
     fin >> xm2.view() >> xcm2.view();
-    Assert(m == xm2,"BandMatrix I/O check normal");
-    Assert(cm == xcm2,"CBandMatrix I/O check normal");
+    Assert(EqualIO(m,xm2,EPS),"BandMatrix I/O check normal");
+    Assert(EqualIO(cm,xcm2,EPS),"CBandMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xm2.view() >> tmv::CompactIO() >> xcm2.view();
-    Assert(m == xm2,"BandMatrix I/O check compact");
-    Assert(cm == xcm2,"CBandMatrix I/O check compact");
+    Assert(EqualIO(m,xm2,EPS),"BandMatrix I/O check compact");
+    Assert(EqualIO(cm,xcm2,EPS),"CBandMatrix I/O check compact");
     fin >> xm2 >> xcm2;
-    Assert(m2 == xm2,"BandMatrix I/O check thresh");
-    Assert(cm2 == xcm2,"CBandMatrix I/O check thresh");
+    Assert(EqualIO(m2,xm2,EPS),"BandMatrix I/O check thresh");
+    Assert(EqualIO(cm2,xcm2,EPS),"CBandMatrix I/O check thresh");
     fin >> myStyle >> xm2 >> myStyle >> xcm2;
-    Assert(m3 == xm2,"BandMatrix I/O check compact thresh & prec(4)");
-    Assert(cm3 == xcm2,"CBandMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(m3,xm2,EPS),"BandMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cm3,xcm2,EPS),"CBandMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // Repeat for diag major
@@ -543,17 +543,17 @@ static void TestBasicBandMatrix_IO()
     fin.open("tmvtest_bandmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
     fin >> xm3.view() >> xcm3.view();
-    Assert(m == xm3,"BandMatrix I/O check normal");
-    Assert(cm == xcm3,"CBandMatrix I/O check normal");
+    Assert(EqualIO(m,xm3,EPS),"BandMatrix I/O check normal");
+    Assert(EqualIO(cm,xcm3,EPS),"CBandMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xm3.view() >> tmv::CompactIO() >> xcm3.view();
-    Assert(m == xm3,"BandMatrix I/O check compact");
-    Assert(cm == xcm3,"CBandMatrix I/O check compact");
+    Assert(EqualIO(m,xm3,EPS),"BandMatrix I/O check compact");
+    Assert(EqualIO(cm,xcm3,EPS),"CBandMatrix I/O check compact");
     fin >> xm3 >> xcm3;
-    Assert(m2 == xm3,"BandMatrix I/O check thresh");
-    Assert(cm2 == xcm3,"CBandMatrix I/O check thresh");
+    Assert(EqualIO(m2,xm3,EPS),"BandMatrix I/O check thresh");
+    Assert(EqualIO(cm2,xcm3,EPS),"CBandMatrix I/O check thresh");
     fin >> myStyle >> xm3 >> myStyle >> xcm3;
-    Assert(m3 == xm3,"BandMatrix I/O check compact thresh & prec(4)");
-    Assert(cm3 == xcm3,"CBandMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(m3,xm3,EPS),"BandMatrix I/O check compact thresh & prec(4)");
+    Assert(EqualIO(cm3,xcm3,EPS),"CBandMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // And repeat for matrices that need to be resized.
@@ -568,17 +568,17 @@ static void TestBasicBandMatrix_IO()
     fin.open("tmvtest_bandmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
     fin >> tmv::NormalIO() >> zm1 >> tmv::NormalIO() >> zcm1;
-    Assert(m == zm1,"BandMatrix I/O check normal with resize");
-    Assert(cm == zcm1,"CBandMatrix I/O check normal with resize");
+    Assert(EqualIO(m,zm1,EPS),"BandMatrix I/O check normal with resize");
+    Assert(EqualIO(cm,zcm1,EPS),"CBandMatrix I/O check normal with resize");
     fin >> zm2 >> zcm2;
-    Assert(m == zm2,"BandMatrix I/O check compact with resize");
-    Assert(cm == zcm2,"CBandMatrix I/O check compact with resize");
+    Assert(EqualIO(m,zm2,EPS),"BandMatrix I/O check compact with resize");
+    Assert(EqualIO(cm,zcm2,EPS),"CBandMatrix I/O check compact with resize");
     fin >> tmv::NormalIO() >> zm3 >> tmv::NormalIO() >> zcm3;
-    Assert(m2 == zm3,"BandMatrix I/O check thresh with resize");
-    Assert(cm2 == zcm3,"CBandMatrix I/O check thresh with resize");
+    Assert(EqualIO(m2,zm3,EPS),"BandMatrix I/O check thresh with resize");
+    Assert(EqualIO(cm2,zcm3,EPS),"CBandMatrix I/O check thresh with resize");
     fin >> myStyle >> zm4 >> myStyle >> zcm4;
-    Assert(m3 == zm4,"BandMatrix I/O check compact thresh with resize");
-    Assert(cm3 == zcm4,"CBandMatrix I/O check compact thresh with resize");
+    Assert(EqualIO(m3,zm4,EPS),"BandMatrix I/O check compact thresh with resize");
+    Assert(EqualIO(cm3,zcm4,EPS),"CBandMatrix I/O check compact thresh with resize");
     fin.close();
     // Switch it back.
     tmv::IOStyle::revertDefault();
@@ -589,8 +589,8 @@ static void TestBasicBandMatrix_IO()
     fin.open("tmvtest_bandmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
     fin >> zm5 >> zcm5;
-    Assert(m == zm5,"BandMatrix -> Matrix I/O check");
-    Assert(cm == zcm5,"CBandMatrix -> CMatrix I/O check");
+    Assert(EqualIO(m,zm5,EPS),"BandMatrix -> Matrix I/O check");
+    Assert(EqualIO(cm,zcm5,EPS),"CBandMatrix -> CMatrix I/O check");
     fin.close();
 
 #if XTEST == 0
