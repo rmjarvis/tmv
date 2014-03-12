@@ -136,6 +136,8 @@ opts.Add(BoolVariable('WITH_UPS',
         'Install the ups directory under PREFIX/ups',False))
 opts.Add('N_BUILD_THREADS',
         'Number of build threads to use (0 means use ncpus)', 0)
+opts.Add(BoolVariable('USE_UNKNOWN_VARS',
+        'Allow other parameters besides the ones listed here.',False))
 
 
 # This helps us determine of openmp is available
@@ -257,7 +259,7 @@ def BasicCCFlags(env):
                 env['TEST_FLAGS'] += ['/W1','/WX']
 
         else:
-            print 'Warning: Unknown compiler.  You should set FLAGS directly.'
+            print 'WARNING: Unknown compiler.  You should set FLAGS directly.'
             env.Replace(CCFLAGS=[])
             env['TEST_FLAGS'] = []
 
@@ -607,39 +609,47 @@ int main()
     return 0;
 }
 """
+    simple_source_file = "int main() { return 0; }"
 
     context.Message('Checking for MKL... ')
-    if context.env['CXXTYPE'] == 'icpc':
-        threadlib = 'mkl_intel_thread'
-    elif context.env['CXXTYPE'] == 'pgCC':
-        threadlib = 'mkl_pgi_thread'
-    else:
-        threadlib = 'mkl_gnu_thread'
 
     if context.TryCompile(mkl_source_file,'.cpp'):
+        
+        # If guide or iomp5 are available, link them along with pthread
+        pthread = ['pthread']
+        if CheckLibs(context,['guide']+pthread,simple_source_file):
+            pthread = ['guide']+pthread
+        if CheckLibs(context,pthread+['iomp5'],simple_source_file):
+            pthread = pthread+['iomp5']
+
+        if context.env['CXXTYPE'] == 'icpc':
+            threadlib = ['mkl_intel_thread']
+        elif context.env['CXXTYPE'] == 'pgCC':
+            threadlib = ['mkl_pgi_thread']
+        else:
+            threadlib = ['mkl_gnu_thread']
+
         result = (
             CheckLibs(context,[],mkl_source_file) or
             CheckLibs(context,['mkl'],mkl_source_file) or
-            CheckLibs(context,['mkl','pthread'],mkl_source_file) or
-            CheckLibs(context,['mkl','guide','pthread'],mkl_source_file) or
-            CheckLibs(context,['mkl_em64t','pthread'],mkl_source_file) or
-            CheckLibs(context,['mkl_em64t','guide','pthread'],mkl_source_file) or
-            CheckLibs(context,['mkl_ipf','pthread'],mkl_source_file) or
-            CheckLibs(context,['mkl_ipf','guide','pthread'],mkl_source_file) or
-            CheckLibs(context,['mkl_ia32','pthread'],mkl_source_file) or
-            CheckLibs(context,['mkl_ia32','guide','pthread'],mkl_source_file) or
-            CheckLibs(context,['mkl_intel_lp64','mkl_core',threadlib,'pthread'],mkl_source_file) or
-            CheckLibs(context,['mkl_intel_lp64','mkl_core',threadlib,'guide','pthread'],mkl_source_file) or
-            CheckLibs(context,['mkl_em64t','mkl_core','mkl_sequential'],mkl_source_file) or
-            CheckLibs(context,['mkl_ipf','mkl_core','mkl_sequential'],mkl_source_file) or
-            CheckLibs(context,['mkl_ia32','mkl_core','mkl_sequential'],mkl_source_file) or
+            CheckLibs(context,['mkl']+pthread,mkl_source_file) or
+            CheckLibs(context,['mkl_em64t']+pthread,mkl_source_file) or
+            CheckLibs(context,['mkl_ipf']+pthread,mkl_source_file) or
+            CheckLibs(context,['mkl_ia32']+pthread,mkl_source_file) or
+            CheckLibs(context,['mkl_intel_lp64','mkl_core']+threadlib+pthread,mkl_source_file) or
             CheckLibs(context,['mkl_intel_lp64','mkl_core','mkl_sequential'],mkl_source_file) or
+            CheckLibs(context,['mkl_intel_lp64','mkl_core','mkl_sequential']+pthread,mkl_source_file) or
             False)
 
         context.Result(result)
 
         if not result and context.env['FORCE_MKL']:
-            print 'Warning: Forced use of MKL even though link test failed.'
+            print 'WARNING: Forced use of MKL even though link test failed.'
+            print "         The compiled library will not have the correct linking commands"
+            print "         set up for your MKL version."
+            print "         You should figure out what libraries you need to link with here:"
+            print "         http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor"
+            print "         and add them explicitly with the LIBS option in SCons."
             result = 1
 
     else:
@@ -677,7 +687,11 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_ACML']:
-            print 'Warning: Forced use of ACML even though link test failed.'
+            print 'WARNING: Forced use of ACML even though link test failed.'
+            print "         The compiled library will not have the correct linking commands"
+            print "         set up for your ACML version."
+            print "         You should figure out what libraries you need to link with"
+            print "         and add them explicitly with the LIBS option in SCons."
             result = 1
 
     else:
@@ -714,7 +728,11 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_CLAMD']:            
-            print 'Warning: Forced use of clAmdBlas even though link test failed.'
+            print 'WARNING: Forced use of clAmdBlas even though link test failed.'
+            print "         The compiled library will not have the correct linking commands"
+            print "         set up for your clAmdBlas version."
+            print "         You should figure out what libraries you need to link with"
+            print "         and add them explicitly with the LIBS option in SCons."
             result = 1
 
     else:
@@ -766,7 +784,11 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_GOTO']:
-            print 'Warning: Forced use of GOTO even though link test failed.'
+            print 'WARNING: Forced use of GOTO even though link test failed.'
+            print "         The compiled library will not have the correct linking commands"
+            print "         set up for your GOTO BLAS version."
+            print "         You should figure out what libraries you need to link with"
+            print "         and add them explicitly with the LIBS option in SCons."
             result = 1
 
     else:
@@ -807,7 +829,11 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_ATLAS']:
-            print 'Warning: Forced use of ATLAS even though link test failed.'
+            print 'WARNING: Forced use of ATLAS even though link test failed.'
+            print "         The compiled library will not have the correct linking commands"
+            print "         set up for your ATLAS version."
+            print "         You should figure out what libraries you need to link with"
+            print "         and add them explicitly with the LIBS option in SCons."
             result = 1
 
     else:
@@ -852,7 +878,11 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_CBLAS']:
-            print 'Warning: Forced use of CBLAS even though link test failed.'
+            print 'WARNING: Forced use of CBLAS even though link test failed.'
+            print "         The compiled library will not have the correct linking commands"
+            print "         set up for your BLAS version."
+            print "         You should figure out what libraries you need to link with"
+            print "         and add them explicitly with the LIBS option in SCons."
             result = 1
 
     else:
@@ -894,7 +924,11 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_FBLAS']:
-            print 'Warning: Forced use of FBLAS even though link test failed.'
+            print 'WARNING: Forced use of FBLAS even though link test failed.'
+            print "         The compiled library will not have the correct linking commands"
+            print "         set up for your BLAS version."
+            print "         You should figure out what libraries you need to link with"
+            print "         and add them explicitly with the LIBS option in SCons."
             result = 1
 
     else:
@@ -962,7 +996,11 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_ATLAS_LAPACK']:
-            print 'Warning: Forced use of ATLAS LAPACK even though link test failed.'
+            print 'WARNING: Forced use of ATLAS LAPACK even though link test failed.'
+            print "         The compiled library will not have the correct linking commands"
+            print "         set up for your ATLAS version."
+            print "         You should figure out what libraries you need to link with"
+            print "         and add them explicitly with the LIBS option in SCons."
             result = 1
 
     else:
@@ -1013,7 +1051,11 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_CLAPACK']:
-            print 'Warning: Forced use of CLAPACK even though link test failed.'
+            print 'WARNING: Forced use of CLAPACK even though link test failed.'
+            print "         The compiled library will not have the correct linking commands"
+            print "         set up for your LAPACK version."
+            print "         You should figure out what libraries you need to link with"
+            print "         and add them explicitly with the LIBS option in SCons."
             result = 1
 
     else:
@@ -1064,7 +1106,11 @@ int main()
         context.Result(result)
 
         if not result and context.env['FORCE_FLAPACK']:
-            print 'Warning: Forced use of FLAPACK even though link test failed.'
+            print 'WARNING: Forced use of FLAPACK even though link test failed.'
+            print "         The compiled library will not have the correct linking commands"
+            print "         set up for your LAPACK version."
+            print "         You should figure out what libraries you need to link with"
+            print "         and add them explicitly with the LIBS option in SCons."
             result = 1
 
     else:
@@ -1363,7 +1409,17 @@ if env['IMPORT_ENV']:
 unknown = opts.UnknownVariables()
 if unknown:
     print "Unknown variables:", unknown.keys()
+    print 'If you are sure these are right (e.g. you want to set some SCons parameters'
+    print 'that are not in the list of TMV parameters given by scons -h)'
+    print 'then you can override this check with USE_UNKNOWN_VARS=true'
     Exit(1)
+
+print 'Using the following (non-default) scons options:'
+for opt in opts.options:
+    if (opt.default != env[opt.key]):
+        print '   %s = %s'%(opt.key,env[opt.key])
+print 'These can be edited directly in the file %s.'%config_file
+print 'Type scons -h for a full list of available options.'
 
 opts.Save(config_file,env)
 Help(opts.GenerateHelpText(env))
