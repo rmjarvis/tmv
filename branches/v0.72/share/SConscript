@@ -59,7 +59,7 @@ if 'uninstall' in COMMAND_LINE_TARGETS:
 
 # Also install some documenation files in INSTALL_PREFIX/share/doc/tmv
 doc_targets = [env.File(os.path.join('#','README'))]
-doc_targets += [env.File(os.path.join('#','LICENSE'))]
+doc_targets += [env.File(os.path.join('#','TMV_LICENSE'))]
 doc_targets += [env.File(os.path.join('#','CHANGELOG'))]
 
 pdf_file = env.File(os.path.join('#doc','TMV_Documentation.pdf'))

@@ -23,7 +23,7 @@ This will make a directory called tmv0.70 with subdirectories:
 and also the files:
   INSTALL  (This file)
   README
-  LICENSE
+  TMV_LICENSE
   CHANGELOG
   (plus others)
 
@@ -89,10 +89,10 @@ and also the files:
  
      IMPORT_ENV=true specifies whether to import the entire environment 
            from the calling shell.  The default is for SCons to use the 
-	   same environment as the shell from which it is called.  However,
-	   sometimes it can be useful to start with a clean environment and 
-	   manually add paths (see below) for various things, in which case 
-	   you would want to set this to false.
+           same environment as the shell from which it is called.  However,
+           sometimes it can be useful to start with a clean environment and 
+           manually add paths (see below) for various things, in which case 
+           you would want to set this to false.
      EXTRA_PATH='' specifies directories in which to search for executables 
            (notably the compiler, although you can also just give the full 
            path in the CXX parameter) in addition to the standard locations 

@@ -2,11 +2,12 @@ Changes from version 0.71 to 0.72:
 (See the History section in the full documentation for changes from previous
 versions to 0.71.)
 
-This release is mostly just some minor bug fixes and some changes in the 
-installation defaults.  Probably the most significant change is that I have
-switched the license from GPL to BSD.  
+This release is mostly just some bug fixes to work with newer compilers.  But
+there are also some minor changes in the installation defaults along with a 
+couple new features.  However, the most significant change is probably that
+TMV is now licensed under the FreeBSD license, rather than GPL.
 
--- Changed the license from GPL to BSD.  This seems to be where the open 
+-- Changed the license from GPL to FreeBSD.  This seems to be where the open 
    source community is moving, so I think it makes sense for TMV to have a 
    more permissive license going forward.
 
@@ -17,11 +18,13 @@ switched the license from GPL to BSD.
    end up with linking problems.  TMV now detects when clang++ is masquerading 
    as g++ and handles this correctly.
 
--- Fixed some problems with the install_name in the shared libraries.  
-   (Issues #3 and #7)
+-- Made the code compliant with the latest version of clang++, which suddenly
+   got extra picky about how friend functions are declared, giving errors
+   for code that doesn't comply with an obscure line in the standard that 
+   it used to be able to compile just fine.  (Issue 9)
 
--- Fixed some warnings emitted by clang++.  These weren't bugs -- just some
-   things that clang++ warns about that other compilers hadn't cared about.
+-- Fixed some problems with the install_name in the shared libraries.  
+   (Issues 3 and 7)
 
 -- Changed the default value of INST_INT to True, so the Matrix<int> templates
    are instantiated now unless you specifically disable them.  Enough people
@@ -30,5 +33,5 @@ switched the license from GPL to BSD.
    by default now.  They don't add much to the library size.
 
 -- Added a default conversion from VarConjIter to VIt.  It was an oversight
-   that this wasn't possible before.  (Issue #5)
+   that this wasn't possible before.  (Issue 5)
 
