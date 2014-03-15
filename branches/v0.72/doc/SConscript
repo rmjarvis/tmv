@@ -12,7 +12,7 @@ texlist = ReadFileList('doc.files')
 # Anyway, the better procedure is to just do this by hand:
 #    latex TMV_Documentation.tex
 #    [ repeat ] 
-#    makeindex TMV_Documentation.tex
+#    makeindex TMV_Documentation.idx
 #    latex TMV_Documentation.tex
 #    [ repeat ] 
 #    dvipdf TMV_Documentation.dvi

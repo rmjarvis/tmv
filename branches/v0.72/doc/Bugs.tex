@@ -249,7 +249,7 @@ precedence over /usr/lib.
 
 \item {\bf Errors in \tt{Matrix<float>} calculations using BLAS on Mac:}
 \index{BLAS!Errors with float}
-\index{Bugs!Wrong answers in \tt{Matrix<float>} when using XCode BLAS on Mac}
+\index{Bugs!Wrong answers when using XCode BLAS on Mac}
 I have found that some XCode BLAS libraries seem to have errors in the 
 calculations for large \tt{<float>} matrices.  I think it is an error in the \tt{sgemm}
 function.  Since very many of the other algorithms use this function, the error
