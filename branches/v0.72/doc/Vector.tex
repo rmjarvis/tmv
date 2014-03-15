@@ -943,6 +943,8 @@ tmv::CVIt<T,1,tmv::NonConj>
 tmv::VIt<T,-1,tmv::NonConj>
 tmv::CVIt<T,-1,tmv::NonConj>
 \end{tmvcode}
+\label{VIt}
+\label{CVIt}
 respectively.  They all satisfy the requirements of a STL random-access iterator.
 \tt{VIt} is a mutable iterator, and \tt{CVIt} is a const iterator.
 
@@ -956,6 +958,8 @@ This is because their iterators always use \tt{tmv::Unknown} as the step paramet
 tmv::VarConjIter<T>
 tmv::CVarConjIter<T>
 \end{tmvcode}
+\label{VarConjIter}
+\label{CVarConjIter}
 
 If you know that you are dealing with a complex view that is not conjugated, you can 
 convert your iterator into one of the above \tt{VIt} or \tt{CVIt} types, which will be 

@@ -29,6 +29,13 @@ with linking problems.  TMV now detects when clang++ is masquerading as
 g++ and handles this correctly.
 
 \item
+Made the code compliant with the latest version of clang++, which suddenly
+got extra picky about how friend functions are declared, giving errors
+for code that doesn't comply with an obscure line in the standard that 
+it used to be able to compile just fine (as does every other compiler as
+well).  (Issue 9)
+
+\item
 Fixed some problems with the \texttt{install\_name} in the shared libraries.  
 (Issues 3 and 7)
 
@@ -52,5 +59,8 @@ Fixed a bug in the test suite about \tt{long double} I/O.  The standard library 
 not read in \tt{long double} variables at full precision.  They are only accurate to
 double precision.  So I changed the I/O tests to only test \tt{long double} I/O
 to double precision.  (Issue 8)
+
+\item
+Updated the linking checks for MKL to work with the latest version (11.1).
 
 \end{itemize}

@@ -21,7 +21,8 @@ TMV is now licensed under the FreeBSD license, rather than GPL.
 -- Made the code compliant with the latest version of clang++, which suddenly
    got extra picky about how friend functions are declared, giving errors
    for code that doesn't comply with an obscure line in the standard that 
-   it used to be able to compile just fine.  (Issue 9)
+   it used to be able to compile just fine (as does every other compiler as
+   well).  (Issue 9)
 
 -- Fixed some problems with the install_name in the shared libraries.  
    (Issues 3 and 7)
@@ -35,3 +36,4 @@ TMV is now licensed under the FreeBSD license, rather than GPL.
 -- Added a default conversion from VarConjIter to VIt.  It was an oversight
    that this wasn't possible before.  (Issue 5)
 
+-- Updated the linking checks for MKL to work with the latest version (11.1).
