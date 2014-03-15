@@ -4,6 +4,8 @@
 #define Def1(T) \
   template QuotXU<T,T > GenUpperTriMatrix<T >::QInverse() const; \
   template QuotXL<T,T > GenLowerTriMatrix<T >::QInverse() const; \
+  template T GenUpperTriMatrix<T >::det() const; \
+  template T GenLowerTriMatrix<T >::det() const; \
 
 Def1(T)
 #ifdef INST_COMPLEX
@@ -13,9 +15,8 @@ Def1(CT)
 #undef Def1
 
 #ifndef TISINT
-#define Def1b(T) \
-  template T GenUpperTriMatrix<T >::det() const; \
-  template T GenLowerTriMatrix<T >::det() const; \
+#define Def1b(T,RT) \
+  template RT GenUpperTriMatrix<T>::logDet(T* s) const; \
   template UpperTriMatrixView<T,CStyle>& \
       UpperTriMatrixView<T,CStyle>::invertSelf(); \
   template void GenUpperTriMatrix<T >::doMakeInverseATA( \
@@ -23,9 +24,9 @@ Def1(CT)
   template void GenLowerTriMatrix<T >::doMakeInverseATA( \
       MatrixView<T > ) const; \
 
-Def1b(T)
+Def1b(T,T)
 #ifdef INST_COMPLEX
-Def1b(CT)
+Def1b(CT,T)
 #endif
 
 #undef Def1b

@@ -160,6 +160,18 @@
 
 namespace tmv {
 
+    // Any friend functions with default arguments have to have their default argument 
+    // declared outside of the class declaration.  So we need to declare these here.
+    // The definitions will be below after the class declaration.
+
+    class Permutation;
+    template <class T>
+    inline void QRP_Decompose(
+        MatrixView<T> Q, UpperTriMatrixView<T> R, Permutation& p, bool strict=false);
+    template <class T>
+    inline void QRP_Decompose(
+        MatrixView<T> QRx, VectorView<T> beta, Permutation& p, T& signdet, bool strict=false);
+
     class Permutation
     {
     public:
@@ -454,32 +466,25 @@ namespace tmv {
             Permutation& p, ADType ad, CompType comp);
 
         template <class T>
-        friend inline void LU_Decompose(
-            MatrixView<T> m, Permutation& p);
+        friend inline void LU_Decompose(MatrixView<T> m, Permutation& p);
 
         template <class T>
         friend inline void QRP_Decompose(
-            MatrixView<T> Q, UpperTriMatrixView<T> R,
-            Permutation& p, bool strict=false);
+            MatrixView<T> Q, UpperTriMatrixView<T> R, Permutation& p, bool strict);
 
         template <class T>
         friend inline void QRP_Decompose(
-            MatrixView<T> QRx, VectorView<T> beta,
-            Permutation& p, T& signdet, bool strict=false);
+            MatrixView<T> QRx, VectorView<T> beta, Permutation& p, T& signdet, bool strict);
 
         template <class T> 
         friend inline void LU_Decompose(
-            const GenBandMatrix<T>& m, LowerTriMatrixView<T> L,
-            BandMatrixView<T> U, Permutation& p);
+            const GenBandMatrix<T>& m, LowerTriMatrixView<T> L, BandMatrixView<T> U, Permutation& p);
 
         template <class T> 
-        friend inline void LU_Decompose(
-            BandMatrixView<T> m, Permutation& p, ptrdiff_t nhi);
+        friend inline void LU_Decompose(BandMatrixView<T> m, Permutation& p, ptrdiff_t nhi);
 
         template <class T>
-        friend inline void LDL_Decompose(
-            SymMatrixView<T> m, SymBandMatrixView<T> D,
-            Permutation& p);
+        friend inline void LDL_Decompose(SymMatrixView<T> m, SymBandMatrixView<T> D, Permutation& p);
 
         template <class T>
         friend inline void LDL_Decompose(
@@ -487,18 +492,14 @@ namespace tmv {
             Permutation& p, TMV_RealType(T)& logdet, T& signdet);
 
         template <class T, int A>
-        friend inline void DoVectorSort(
-            VectorView<T,A> v, Permutation& p,
-            ADType ad, CompType comp);
+        friend inline void DoVectorSort(VectorView<T,A> v, Permutation& p, ADType ad, CompType comp);
 
         //
         // Op ==, !=
         //
 
-        friend inline bool operator==(
-            const Permutation& p1, const Permutation& p2);
-        friend inline bool operator!=(
-            const Permutation& p1, const Permutation& p2);
+        friend inline bool operator==(const Permutation& p1, const Permutation& p2);
+        friend inline bool operator!=(const Permutation& p1, const Permutation& p2);
 
 
         //
@@ -850,8 +851,7 @@ namespace tmv {
 
     template <class T>
     inline void QRP_Decompose(
-        MatrixView<T> QRx, VectorView<T> beta,
-        Permutation& p, T& signdet, bool strict)
+        MatrixView<T> QRx, VectorView<T> beta, Permutation& p, T& signdet, bool strict)
     {
         p.resize(QRx.rowsize());
         p.allocateMem();
