@@ -7,13 +7,20 @@
 #include "TMV_Test_2.h"
 #include "TMV_TestSymArith.h"
 
+#ifdef TMV_MEM_DEBUG
+// See the discussion of this in TMV_TestTri.cpp.  But basically, there seems to be something
+// in the std library exception class that doesn't interact well with the mmgr-style memory
+// debugging.  So we skip those tests if we are doing MEM_DEBUG
+#define NOTHROW
+#endif
+
 template <class T> 
 static bool IsPosDef(const tmv::GenSymMatrix<T>& m)
 {
 #ifdef NOTHROW
     for(int i=1;i<=m.size();i++) {
         T d = Det(m.subSymMatrix(0,i));
-        if (tmv::TMV_REAL(d) < 0) return false;
+        if (tmv::TMV_REAL(d) <= 0) return false;
     }
     return true;
 #else

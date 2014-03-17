@@ -114,8 +114,8 @@
 
 #include <typeinfo>
 
-#ifdef MEMTEST
-#include "mmgr.h"
+#ifdef TMV_MEM_DEBUG
+#include "tmv/mmgr.h"
 #endif
 
 #ifndef NO_INST_DOUBLE
@@ -502,15 +502,12 @@ namespace tmv {
     class Error : public std::runtime_error
     {
     public :
-        std::string s1;
-        std::string s2;
-        inline Error(std::string _s1, std::string _s2="") throw() :
-            std::runtime_error("TMV Error"), s1(_s1), s2(_s2) {}
+        inline Error(std::string _s1) throw() :
+            std::runtime_error("TMV Error: "+_s1) {}
         virtual inline ~Error() throw() {}
+        // Typically, this is overridden by subclasses with more detail.
         virtual inline void write(std::ostream& os) const throw()
-        { os << "TMV Error: " << s1 << s2 << std::endl; }
-        virtual inline const char* what() const throw()
-        { return s1.c_str(); }
+        { os << this->what() << std::endl; }
     };
 
     inline std::ostream& operator<<(std::ostream& os, const Error& e) throw()
@@ -526,7 +523,7 @@ namespace tmv {
 
         inline FailedAssert(std::string s, unsigned long l, 
                             std::string f) throw() :
-            Error("Failed Assert statement ",s),
+            Error("Failed Assert statement "+s),
             failed_assert(s), line(l), file(f) {}
         virtual inline ~FailedAssert() throw() {}
         virtual inline void write(std::ostream& os) const throw()
@@ -583,13 +580,8 @@ namespace tmv {
         inline ReadError() throw() :
             Error("Invalid istream input encountered.") {}
         inline ReadError(std::string s) throw() :
-            Error("Invalid istream input encountered while reading ",s) {}
+            Error("Invalid istream input encountered while reading "+s) {}
         virtual inline ~ReadError() throw() {}
-        virtual inline void write(std::ostream& os) const throw()
-        { 
-            os << "TMV Read Error: " << Error::s1 << ' ' << Error::s2 << 
-                std::endl; 
-        }
     };
 
     // Each Vector, Matrix type has it's own derived ReadError class
@@ -603,13 +595,8 @@ namespace tmv {
         inline Singular() throw() :
             Error("Encountered singular matrix.") {}
         inline Singular(std::string s) throw() :
-            Error("Encountered singular ",s) {}
+            Error("Encountered singular "+s) {}
         virtual inline ~Singular() throw() {}
-        virtual inline void write(std::ostream& os) const throw()
-        {
-            os << "TMV Singular: " << Error::s1 << ' ' << Error::s2 <<
-                std::endl; 
-        }
     };
 
     class NonPosDef :
@@ -619,13 +606,8 @@ namespace tmv {
         inline NonPosDef() throw() :
             Error("Invalid non-positive-definite matrix found.") {}
         inline NonPosDef(std::string s) throw() :
-            Error("Non-positive-definite matrix found in ",s) {}
+            Error("Non-positive-definite matrix found in "+s) {}
         virtual inline ~NonPosDef() throw() {}
-        virtual inline void write(std::ostream& os) const throw()
-        {
-            os << "TMV NonPosDef: " << Error::s1 << ' ' << Error::s2 << 
-                std::endl; 
-        }
     };
 #endif
 

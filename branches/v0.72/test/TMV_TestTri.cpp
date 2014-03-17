@@ -6,6 +6,18 @@
 
 #define CT std::complex<T>
 
+#ifdef TMV_MEM_DEBUG
+// There seems to be something weird about this throw statement.  Something gets
+// allocated when the TriMatrixReadError is constructed that is allocated with 
+// new[], but then at the end of the try block, it is deallocated with plain delete.
+// The memory manager flags this up as an error, but since it is in not in TMV
+// code (the module is marked with ??(0000)::??, which means it is in some library
+// that doesn't include the mmgr.h file), I haven't been able to debug it.  I can't
+// even figure out what object in memory it corresponds to.  Maybe something in the 
+// standard library's exception class, or runtime_error?  But that's just a guess, really.
+#define NOTHROW
+#endif
+
 template <class T, tmv::DiagType D, tmv::StorageType S> 
 static void TestBasicUpperTriMatrix_1()
 {

@@ -28,8 +28,8 @@ if env['SHARED']:
     if env['PREFIX'] != '':
         env1.AppendUnique(LIBPATH=os.path.join(env['FINAL_PREFIX'], 'lib'))
 
-if env['MEM_TEST']:
-  env1.Append(CPPDEFINES=['MEMTEST'])
+if env['MEM_DEBUG']:
+  env1.Append(CPPDEFINES=['TMV_MEM_DEBUG'])
 
 env2 = env1.Clone(LIBS=sblibs+env['LIBS'])
 

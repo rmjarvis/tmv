@@ -9,6 +9,13 @@
 #include "TMV_Test_2.h"
 #include "TMV_TestSymArith.h"
 
+#ifdef TMV_MEM_DEBUG
+// See the discussion of this in TMV_TestTri.cpp.  But basically, there seems to be something
+// in the std library exception class that doesn't interact well with the mmgr-style memory
+// debugging.  So we skip those tests if we are doing MEM_DEBUG
+#define NOTHROW
+#endif
+
 template <class T, tmv::UpLoType uplo, tmv::StorageType stor> 
 void TestHermDecomp()
 {
@@ -164,7 +171,7 @@ void TestHermDecomp()
 #ifdef NOTHROW
         if (posdef) {
 #else
-            try  {
+            try {
 #endif
                 if (showstartdone) std::cout<<"CH"<<std::endl;
                 tmv::LowerTriMatrix<T> L = m.chd().getL();

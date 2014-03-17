@@ -43,7 +43,7 @@ namespace tmv {
             std::cerr<<"info < 0 returned by LAPACK function "<<fn<<std::endl;
             exit(1);
 #else
-            throw Error("info < 0 returned by LAPACK function ",fn);
+            throw Error(std::string("info < 0 returned by LAPACK function ")+fn);
 #endif
         }
     }

@@ -39,7 +39,7 @@ sblib_stegr_files= sym_stegr
 
 env1 = env.Clone()
 
-if env['MEM_TEST']:
+if env['MEM_DEBUG']:
     print 'Using mmgr.cpp'
     lib_files += ['mmgr.cpp']
 
@@ -207,8 +207,9 @@ all_obj_files = \
 # If this ever changes, I'll need to do something different to get the name
 # of the corresponding inst file.
 for objfile in all_obj_files:
-    inst = os.path.splitext(str(objfile))[0] + '.inst'
-    Depends(objfile,inst)
+    if str(objfile).startswith('TMV'):
+        inst = os.path.splitext(str(objfile))[0] + '.inst'
+        Depends(objfile,inst)
 
 env.Alias(target='lib', source=lib)
 env.Alias(target='sblib', source=sblib)

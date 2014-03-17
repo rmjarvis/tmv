@@ -61,7 +61,7 @@ inline void DoAssert(bool x, std::string s)
 #ifdef NOTHROW
             std::cerr<<"Error in test: "<<s<<std::endl; exit(1); 
 #else
-            throw tmv::Error("Error in test: ",s);  
+            throw tmv::Error("Error in test: "+s);  
 #endif
 #ifdef TMV_DEBUG
         }

@@ -113,7 +113,7 @@ opts.Add(BoolVariable('WITH_SSE',
         'Use SSE commands (only necessary for icpc compilations)', True))
 opts.Add('XTEST',
         'Do extra tests in the test suite (1=non-unit step, 2=extra sizes/shapes, 4=mix real/complex,  8=degenerate,  16=extra arithmetic, 32=FortranStyle, 64=extreme matrices) ', 0)
-opts.Add(BoolVariable('MEM_TEST','Test for memory leaks', False))
+opts.Add(BoolVariable('MEM_DEBUG','Do extra tests for memory leaks other memroy problems', False))
 opts.Add(BoolVariable('NAN_TEST','Test memory initialized with nans', False))
 opts.Add(BoolVariable('SMALL_TESTS',
         'Make the small test programs: tmvtest1a, tmvtest1b, etc.', False))
@@ -1323,8 +1323,8 @@ def DoConfig(env):
     if not env['DEBUG']:
         print 'Debugging turned off'
         env.Append(CPPDEFINES=['TMV_NDEBUG'])
-    if env['MEM_TEST']:
-        env.Append(CPPDEFINES=['TMV_MEM_TEST'])
+    if env['MEM_DEBUG']:
+        env.Append(CPPDEFINES=['TMV_MEM_DEBUG'])
     if '-m32' in env['CCFLAGS']:
         env.Append(LINKFLAGS=['-m32'])
     if '-m64' in env['CCFLAGS']:
