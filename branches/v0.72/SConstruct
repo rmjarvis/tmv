@@ -732,7 +732,7 @@ int main()
 def CheckGOTO(context):
     fblas_source_file = """
 extern "C" {
-#include "fblas.h"
+#include "../src/fblas.h"
 }
 int main()
 {
@@ -883,7 +883,7 @@ int main()
 def CheckFBLAS(context):
     fblas_source_file = """
 extern "C" {
-#include "fblas.h"
+#include "../src/fblas.h"
 }
 int main()
 {
@@ -1057,7 +1057,7 @@ int main()
 def CheckFLAPACK(context):
     flapack_source_file = """
 extern "C" {
-#include "flapack.h"
+#include "../src/flapack.h"
 }
 int main()
 {
@@ -1311,10 +1311,20 @@ def DoConfig(env):
                 print 'Using specified number of jobs =',env.GetOption('num_jobs')
         elif int(env['N_BUILD_THREADS']) == 0:
             ncpu = GetNCPU()
-            if ncpu > 1:
+            if ncpu > 4:
+                # Don't use more than 4 cpus for the automatic version.
+                env.SetOption('num_jobs', 4)
+                if env.GetOption('num_jobs') == 4:
+                    print 'Determined that there are',ncpu,
+                    print 'cpus, but only using 4 jobs to avoid overly high memory use.'
+            elif ncpu > 1:
                 env.SetOption('num_jobs', ncpu)
+                # Importantly, the above line doesn't do anything if the user has run with
+                # scons -j1.  It only works if num_jobs was 1 by default, with no explicit -j1.
                 if env.GetOption('num_jobs') == ncpu:
-                    print 'Determined that a good number of jobs =',env.GetOption('num_jobs')
+                    print 'Determined that there are',ncpu,'cpus, so use this many jobs.'
+            if env.GetOption('num_jobs') == ncpu:
+                print 'You can override this behavior with scons -jN'
 
     # The basic flags for this compiler if not explicitly specified
     BasicCCFlags(env)
