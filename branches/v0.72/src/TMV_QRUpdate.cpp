@@ -28,7 +28,7 @@
 #include "tmv/TMV_TriMatrix.h"
 #include "tmv/TMV_TriMatrixArith.h"
 #include "tmv/TMV_DiagMatrix.h"
-#include "TMV_Householder.h"
+#include "tmv/TMV_Householder.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_VectorArith.h"
 #include "tmv/TMV_MatrixArith.h"

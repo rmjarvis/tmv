@@ -25,7 +25,7 @@
 
 #include "TMV_SVDiv.h"
 #include "tmv/TMV_SVD.h"
-#include "TMV_Givens.h"
+#include "tmv/TMV_Givens.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_Matrix.h"
 #include <iostream>

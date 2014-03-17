@@ -26,7 +26,7 @@
 #include "TMV_QRDiv.h"
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "TMV_Householder.h"
+#include "tmv/TMV_Householder.h"
 
 #ifdef XDEBUG
 #include "tmv/TMV_MatrixArith.h"

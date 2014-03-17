@@ -22,7 +22,7 @@
 
 
 #include "TMV_Blas.h"
-#include "TMV_Givens.h"
+#include "tmv/TMV_Givens.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_VIt.h"
 

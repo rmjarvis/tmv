@@ -27,7 +27,7 @@
 #include "TMV_SymSVDiv.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_Matrix.h"
-#include "TMV_Givens.h"
+#include "tmv/TMV_Givens.h"
 
 #ifdef XDEBUG
 #define THRESH 1.e-5

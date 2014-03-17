@@ -31,5 +31,6 @@
 #include "tmv/TMV_SymSVD.h"
 #include "tmv/TMV_SymCHD.h"
 #include "tmv/TMV_SymMatrixArith.h"
+#include "tmv/TMV_SymHouseholder.h"
 
 #endif

@@ -21,7 +21,7 @@
 
 
 
-#include "TMV_SymHouseholder.h"
+#include "tmv/TMV_SymHouseholder.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_SymMatrix.h"
 #include "tmv/TMV_SymMatrixArith.h"

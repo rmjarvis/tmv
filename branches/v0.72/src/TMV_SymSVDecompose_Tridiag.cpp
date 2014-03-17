@@ -24,8 +24,8 @@
 
 #include "TMV_Blas.h"
 #include "TMV_SymSVDiv.h"
-#include "TMV_Householder.h"
-#include "TMV_SymHouseholder.h"
+#include "tmv/TMV_Householder.h"
+#include "tmv/TMV_SymHouseholder.h"
 #include "tmv/TMV_SymMatrix.h"
 #include "tmv/TMV_SymMatrixArith.h"
 #include "tmv/TMV_MatrixArith.h"

@@ -25,7 +25,7 @@
 #include "TMV_Blas.h"
 #include "TMV_SymSVDiv.h"
 #include "tmv/TMV_SymMatrix.h"
-#include "TMV_Givens.h"
+#include "tmv/TMV_Givens.h"
 #include "tmv/TMV_VectorArith.h"
 #include "tmv/TMV_MatrixArith.h"
 #include <iostream>

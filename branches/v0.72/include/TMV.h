@@ -38,6 +38,8 @@
 #include "tmv/TMV_MatrixArith.h"
 #include "tmv/TMV_PackedQ.h"
 #include "tmv/TMV_PermutationArith.h"
+#include "tmv/TMV_Givens.h"
+#include "tmv/TMV_Householder.h"
 
 #include "TMV_Diag.h"
 #include "TMV_Tri.h"

@@ -33,7 +33,7 @@
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_TriMatrix.h"
 #include "TMV_QRDiv.h"
-#include "TMV_Householder.h"
+#include "tmv/TMV_Householder.h"
 #include "tmv/TMV_VectorArith.h"
 #include "tmv/TMV_MatrixArith.h"
 #include "tmv/TMV_PackedQ.h"

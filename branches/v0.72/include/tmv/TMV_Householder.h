@@ -109,12 +109,6 @@ namespace tmv {
     // in x, except for the first element, which is 1.
     // Beta is the return value.  y is returned as x0.
 
-#if 0
-    template <class T> 
-    T HouseholderReflect(ConjRef<T> x0, VectorView<T> x, T& det);
-    template <class T> 
-    T HouseholderReflect(VarConjRef<T> x0, VectorView<T> x, T& det);
-#else
     template <class T> 
     inline T HouseholderReflect(ConjRef<T> x0, VectorView<T> x, T& det)
     {
@@ -131,7 +125,6 @@ namespace tmv {
         if (x0.isconj()) x0.getRef() = TMV_CONJ(x0.getRef());
         return HouseholderReflect(x0.getRef(),x,det);
     }
-#endif
 
     template <class T> 
     T HouseholderReflect(VectorView<T> x, T& det);
@@ -156,12 +149,7 @@ namespace tmv {
     // The rest of the vector is transformed into the Householder vector.
     // This is used for downdating QR decompositions.
     // The return value is true if successful, false if |y| < |x|.
-#if 0
-    template <class T> 
-    bool HouseholderUnReflect(ConjRef<T> y, VectorView<T> x, T& beta);
-    template <class T> 
-    bool HouseholderUnReflect(VarConjRef<T> y, VectorView<T> x, T& beta);
-#else
+    
     template <class T> 
     inline bool HouseholderUnReflect(
         ConjRef<T> x0, VectorView<T> x, T& beta)
@@ -177,7 +165,6 @@ namespace tmv {
         TMVAssert(TMV_IMAG(x0.getRef()) == TMV_RealType(T)(0));
         return HouseholderUnReflect(x0.getRef(),x,beta);
     }
-#endif
     
     template <class T1, class T2> 
     void HouseholderLMult(
@@ -201,12 +188,6 @@ namespace tmv {
     // matrix, H. 
     // (v0,v) is set to Ht times e0.
 
-#if 0
-    template <class T> 
-    void HouseholderUnpack(ConjRef<T> v0, VectorView<T> v, T beta);
-    template <class T> 
-    void HouseholderUnpack(VarConjRef<T> v0, VectorView<T> v, T beta);
-#else
     template <class T> 
     inline void HouseholderUnpack(
         ConjRef<T> v0, VectorView<T> v, T beta)
@@ -228,7 +209,6 @@ namespace tmv {
             HouseholderUnpack(v0.getRef(),v,beta);
         }
     }
-#endif
 
     template <class T> 
     void HouseholderUnpack(MatrixView<T> m, T beta);

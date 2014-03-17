@@ -25,7 +25,7 @@
 
 #include "TMV_BandQRDiv.h"
 #include "tmv/TMV_BandMatrix.h"
-#include "TMV_Householder.h"
+#include "tmv/TMV_Householder.h"
 #include "TMV_BandLUDiv.h"
 
 #ifdef XDEBUG

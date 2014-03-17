@@ -34,8 +34,8 @@
 #include "TMV_BandSVDiv.h"
 #include "tmv/TMV_MatrixArith.h"
 #include "tmv/TMV_VectorArith.h"
-#include "TMV_Householder.h"
-#include "TMV_SymHouseholder.h"
+#include "tmv/TMV_Householder.h"
+#include "tmv/TMV_SymHouseholder.h"
 
 #ifdef NOTHROW
 #include <iostream>
