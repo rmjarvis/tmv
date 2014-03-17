@@ -1323,7 +1323,7 @@ def DoConfig(env):
                 # scons -j1.  It only works if num_jobs was 1 by default, with no explicit -j1.
                 if env.GetOption('num_jobs') == ncpu:
                     print 'Determined that there are',ncpu,'cpus, so use this many jobs.'
-            if env.GetOption('num_jobs') == ncpu:
+            if env.GetOption('num_jobs') > 1:
                 print 'You can override this behavior with scons -jN'
 
     # The basic flags for this compiler if not explicitly specified
