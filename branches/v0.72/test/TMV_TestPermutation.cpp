@@ -359,7 +359,7 @@ void TestPermutation()
 
     if (!(std::numeric_limits<T>::is_integer)) {
         // Norm(p) returns a double, so don't use a smaller eps than that.
-        T deps = std::max(double(eps), 10.*tmv::TMV_Epsilon<double>());
+        T deps = T(std::max(double(eps), 10.*tmv::TMV_Epsilon<double>()));
         Assert(Equal2(Norm(p3),Norm(m3),deps),"Permutation Norm");
         Assert(Equal2(NormF(p3),NormF(m3),deps),"Permutation NormF");
     }
