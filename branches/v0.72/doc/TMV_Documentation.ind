@@ -138,10 +138,10 @@
     \subitem nan or inf when using LAPACK, \hyperpage{161}
     \subitem Reporting new issues, \hyperpage{12}
     \subitem SymMatrix arithmetic, \hyperpage{161}
-    \subitem Wrong answers in \tt{Matrix<float>} when using XCode BLAS on Mac, 
-		\hyperpage{160}
     \subitem Wrong answers when using g++ version 4.1 or 4.2, 
 		\hyperpage{158}
+    \subitem Wrong answers when using XCode BLAS on Mac, 
+		\hyperpage{160}
   \item Bunch-Kaufman decomposition, \hyperpage{107}
     \subitem SymMatrix, \hyperpage{86}, \hyperpage{108}, 
 		\hyperpage{162}
@@ -267,7 +267,7 @@
     \subitem OpenMP, \hyperpage{13}
     \subitem pgCC, \hyperpage{158, 159}
     \subitem Solaris Studio, \hyperpage{159}
-    \subitem Test suite, \hyperpage{16}, \hyperpage{159}
+    \subitem Test suite, \hyperpage{18}, \hyperpage{159}
     \subitem Visual C++, \hyperpage{158}
   \item IOStyle
     \subitem CompactIO, \hyperpage{31}, \hyperpage{55}, \hyperpage{63}, 

@@ -249,15 +249,23 @@ This is the exact output that I get with the default options on my MacBook.}
 \begin{verbatim}
 $ scons
 scons: Reading SConscript files ...
-
-Using compiler: g++-4
-compiler version: 4.3.2
+Using the default scons options
+Using compiler: /usr/bin/g++
+Detected clang++ masquerading as g++
+compiler version: 5.1
+Determined that there are 4 cpus, so use this many jobs.
+You can override this behavior with scons -jN
 Debugging turned off
 Checking for MKL... no
 Checking for ACML... no
 Checking for GotoBLAS... no
-Checking for CBLAS... yes
-Using CBLAS
+Checking for CBLAS... no
+Checking for ATLAS... no
+Checking for Fortran BLAS... yes
+Using Fortran BLAS
+No OpenMP support for clang++
+TMV Version  0.72
+
 scons: done reading SConscript files.
 scons: Building targets ...
 \end{verbatim}
@@ -268,27 +276,6 @@ on your computer, then it probably means that you need to tell SCons which direc
 to search, in addition to the standard locations.  The most straightforward way to do this is
 with the parameters \texttt{EXTRA\_INCLUDE\_PATH} and \texttt{EXTRA\_LIB\_PATH}.  
 These are described in detail above.  See also \texttt{IMPORT\_ENV} and \texttt{IMPORT\_PATHS}.
-
-\item (Optional) Type\\
-\texttt{scons test}
-\index{Installation!Test suite}
-
-This will make three executables called \texttt{tmvtest1}, 
-\texttt{tmvtest2} and \texttt{tmvtest3} in the \texttt{test} directory.
-
-Then you should run the three test suites.
-They should output a bunch of lines reading \texttt{[{\em Something}] passed all tests}.
-If one of them ends in a line that starts with \texttt{Error}, 
-then please post a bug report at \myissues\ about the problem including what compiler
-you are using, some details about your system, and what (if any) BLAS and LAPACK
-libraries you are linking to.
-
-If you specify \texttt{SMALL\_TESTS=true}, then the smaller test executables
-\texttt{tmvtest1a-d}, \texttt{tmvtest2a-c}, and \texttt{tmvtest3a-e} (where \tt{a-d} means 
-four files with each of \tt{a}, \tt{b}, \tt{c} and \tt{d})
-will be made instead.
-These perform the same tests as the larger test executables, but can be easier
-for some linkers.
 
 \item Type\\
 \texttt{scons install}\\
@@ -341,6 +328,27 @@ You can have your \tt{makefile}s or \tt{SConstruct} files read this file as desc
 The \tt{examples} directory has a \tt{makefile} that uses the above lines
 (using the local \tt{share} directory rather than the installed location)
 that you can look at as a example.
+
+\item (Optional) Type\\
+\texttt{scons test}
+\index{Installation!Test suite}
+
+This will make three executables called \texttt{tmvtest1}, 
+\texttt{tmvtest2} and \texttt{tmvtest3} in the \texttt{test} directory.
+
+Then you should run the three test suites.
+They should output a bunch of lines reading \texttt{[{\em Something}] passed all tests}.
+If one of them ends in a line that starts with \texttt{Error}, 
+then please post a bug report at \myissues\ about the problem including what compiler
+you are using, some details about your system, and what (if any) BLAS and LAPACK
+libraries you are linking to.
+
+If you specify \texttt{SMALL\_TESTS=true}, then the smaller test executables
+\texttt{tmvtest1a-d}, \texttt{tmvtest2a-c}, and \texttt{tmvtest3a-e} (where \tt{a-d} means 
+four files with each of \tt{a}, \tt{b}, \tt{c} and \tt{d})
+will be made instead.
+These perform the same tests as the larger test executables, but can be easier
+for some linkers.
 
 \end{enumerate}
 
