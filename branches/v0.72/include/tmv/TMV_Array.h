@@ -102,79 +102,78 @@ namespace tmv
     class AlignedMemory<float>
     {
     public:
-        AlignedMemory() : p(0) {}
+        AlignedMemory() : mem(0), p(0) {}
         inline void allocate(const ptrdiff_t n) 
         { 
 #ifdef TMV_END_PADDING
             const ptrdiff_t nn = (n<<2)+15 + 16;
-            p = new char[nn];
-            float* pf = get();
-            for(ptrdiff_t i=n;i<(nn>>2);++i) pf[i] = 0.F;
+            mem = new char[nn];
+            p = calculateP();
+            for(ptrdiff_t i=n;i<(nn>>2);++i) p[i] = 0.F;
 #else
-            p = new char[(n<<2)+15];
+            mem = new char[(n<<2)+15];
+            p = calculateP();
 #endif
-            TMVAssert((void*)(p+(n<<2)+15) >= (void*)(get()+n));
+            TMVAssert((void*)(mem+(n<<2)+15) >= (void*)(p+n));
         }
         inline void deallocate()
-        { if (p) delete [] p; p=0; }
+        { if (mem) delete [] mem; mem=0; p=0; }
         inline void swapWith(AlignedMemory<float>& rhs)
-        { char* temp = p; p = rhs.p; rhs.p = temp; }
-        inline float* get() 
+        { 
+            char* temp1 = mem; mem = rhs.mem; rhs.mem = temp1; 
+            float* temp2 = p; p = rhs.p; rhs.p = temp2; 
+        }
+        inline float* get() { return p; }
+        inline float* calculateP()
         {
             float* pf = reinterpret_cast<float*>(
-                p + ((0x10-((ptrdiff_t)(p) & 0xf)) & ~0x10));
+                mem + ((0x10-((ptrdiff_t)(mem) & 0xf)) & ~0x10));
             TMVAssert( ((ptrdiff_t)(pf) & 0xf) == 0);
             return pf;
         }
-        inline const float* get() const 
-        {
-            const float* pf = reinterpret_cast<const float*>(
-                p + ((0x10-((ptrdiff_t)(p) & 0xf)) & ~0x10));
-            TMVAssert( ((ptrdiff_t)(pf) & 0xf) == 0);
-            return pf;
-        }
+        inline const float* get() const  { return p; }
     private:
-        char* p;
+        char* mem;
+        float* p;
     };
     template <>
     class AlignedMemory<double>
     {
     public:
-        AlignedMemory() : p(0) {}
+        AlignedMemory() : mem(0), p(0) {}
         inline void allocate(const ptrdiff_t n) 
         { 
 #ifdef TMV_END_PADDING
             const ptrdiff_t nn = (n<<3)+15 + 16;
-            p = new char[nn];
-            double* pd = get();
-            for(ptrdiff_t i=n;i<(nn>>3);++i) pd[i] = 0.;
+            mem = new char[nn];
+            p = calculateP();
+            for(ptrdiff_t i=n;i<(nn>>3);++i) p[i] = 0.;
 #else
-            p = new char[(n<<3)+15];
+            mem = new char[(n<<3)+15];
+            p = calculateP();
 #endif
-            TMVAssert((void*)(p+(n<<3)+15) >= (void*)(get()+n));
+            TMVAssert((void*)(mem+(n<<3)+15) >= (void*)(p+n));
         }
         inline void deallocate()
-        { if (p) delete [] p; p=0; }
+        { if (mem) delete [] mem; mem=0; p=0; }
         inline void swapWith(AlignedMemory<double>& rhs)
-        { char* temp = p; p = rhs.p; rhs.p = temp; }
-        inline double* get() 
+        { 
+            char* temp1 = mem; mem = rhs.mem; rhs.mem = temp1; 
+            double* temp2 = p; p = rhs.p; rhs.p = temp2; 
+        }
+        inline double* calculateP() 
         {
             double* pd = reinterpret_cast<double*>(
-                p + ((0x10-((ptrdiff_t)(p) & 0xf)) & ~0x10));
+                mem + ((0x10-((ptrdiff_t)(mem) & 0xf)) & ~0x10));
             TMVAssert( ((ptrdiff_t)(pd) & 0xf) == 0);
             return pd;
         }
-        inline const double* get() const 
-        {
-            const double* pd = reinterpret_cast<const double*>(
-                p + ((0x10-((ptrdiff_t)(p) & 0xf)) & ~0x10));
-            TMVAssert( ((ptrdiff_t)(pd) & 0xf) == 0);
-            return pd;
-        }
+        inline double* get() { return p; }
+        inline const double* get() const { return p; }
 
     private :
-        char* p;
-
+        char* mem;
+        double* p;
     };
 
 #ifdef TMV_INITIALIZE_NAN
