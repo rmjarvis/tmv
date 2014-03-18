@@ -1,4 +1,39 @@
-Changes from version 0.72 to 1.00:  
+Changes from version 0.71 to 0.72:  
 (See the History section in the full documentation for changes from previous
-versions to 0.72.)
+versions to 0.71.)
 
+This release is mostly just some bug fixes to work with newer compilers.  But
+there are also some minor changes in the installation defaults along with a 
+couple new features.  However, the most significant change is probably that
+TMV is now licensed under the FreeBSD license, rather than GPL.
+
+-- Changed the license from GPL to FreeBSD.  This seems to be where the open 
+   source community is moving, so I think it makes sense for TMV to have a 
+   more permissive license going forward.
+
+-- Made Scons correctly detect when g++ is really clang++.  Apple has been 
+   lying about its C++ compiler in recent MacOS systems (10.7-10.9).  They use 
+   clang++, but they call the program g++.  This used to mess up TMV, since 
+   clang++ does not support OpenMP, so it would wrongly try to use OpenMP and 
+   end up with linking problems.  TMV now detects when clang++ is masquerading 
+   as g++ and handles this correctly.
+
+-- Made the code compliant with the latest version of clang++, which suddenly
+   got extra picky about how friend functions are declared, giving errors
+   for code that doesn't comply with an obscure line in the standard that 
+   it used to be able to compile just fine (as does every other compiler as
+   well).  (Issue 9)
+
+-- Fixed some problems with the install_name in the shared libraries.  
+   (Issues 3 and 7)
+
+-- Changed the default value of INST_INT to True, so the Matrix<int> templates
+   are instantiated now unless you specifically disable them.  Enough people
+   had expected them to be there and asked about why they were getting 
+   linking errors when they used Matrix<int>, so I decided to build them
+   by default now.  They don't add much to the library size.
+
+-- Added a default conversion from VarConjIter to VIt.  It was an oversight
+   that this wasn't possible before.  (Issue 5)
+
+-- Updated the linking checks for MKL to work with the latest version (11.1).

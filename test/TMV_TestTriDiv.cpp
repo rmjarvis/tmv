@@ -8,8 +8,6 @@
 template <class T, class M, class CM> 
 static void TestBasicTriDiv()
 {
-    typedef typename tmv::Traits<T>::float_type FT;
-
     tmv::Matrix<T,tmv::ColMajor> a(10,10);
 
     for(int i=0;i<10;++i) for(int j=0;j<10;++j) 
@@ -23,7 +21,7 @@ static void TestBasicTriDiv()
     M minv = m;
     minv.invertSelf();
 
-    FT eps = EPS * Norm(m) * Norm(minv);
+    T eps = EPS * Norm(m) * Norm(minv);
 
     M id1 = m*minv;
     M id2 = minv*m;
@@ -179,7 +177,7 @@ static void TestBasicTriDiv()
     tmv::Matrix<std::complex<T> > ca = a * std::complex<T>(1,2);
     CM c(ca);
 
-    FT ceps = EPS * Norm(c) * Norm(c.inverse());
+    T ceps = EPS * Norm(c) * Norm(c.inverse());
 
     std::complex<T> cdet1(1);
     for(int i=0;i<10;++i) cdet1 *= c(i,i);
@@ -361,7 +359,8 @@ void TestTriDiv()
     TestTriDiv_C1<T>();
     TestTriDiv_C2<T>();
 
-    std::cout<<"TriMatrix<"<<Text(T())<<"> Division passed all tests\n";
+    std::cout<<"TriMatrix<"<<tmv::TMV_Text(T())<<
+        "> Division passed all tests\n";
 }
 
 #ifdef TEST_DOUBLE

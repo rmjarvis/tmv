@@ -5,44 +5,59 @@
 \label{Permutation}
 
 The \tt{Permutation} class is our permutation matrix class.
-A permutation matrix is square matrix with exactly one 1 in each row and
-column, and all the rest of the elements equal to zero.
+A permutation matrix is a square matrix with exactly one 1 in each row and
+column, and all the rest of the elements equal to 0.
 
 However, internally we do not store a permutation this way.
 Instead, we treat a permutation as a series of pair-wise interchanges.
 This seems to be the fastest way to apply a permutation to a matrix or
 vector, rather than using an index-based method.
 
-Also, I didn't bother to have a PermutationView class.  Instead, the 
-Permutation object keeps track of whether it owns its data or is just
+Also, I didn't bother to have a \tt{PermutationView} class.  Instead, the 
+\tt{Permutation} object keeps track of whether it owns its data or is just
 referencing values kept somewhere else.  Whenever you perform 
 a mutable action on the object, it copies the values if necessary.
-So you cannot indirectly modify another Permutation the way you can
-with MatrixView.
+So you cannot indirectly modify another \tt{Permutation} the way you can
+with \tt{MatrixView}.
 
 \subsection{Constructors}
 \index{Permutation!Constructors}
 \label{Permutation_Constructors}
 
 \begin{itemize}
+
+\item
+\begin{tmvcode}
+tmv::Permutation p()
+\end{tmvcode}
+Makes a \tt{Permutation} with zero size.  You would normally use the \tt{resize} function later to
+change the size to some useful value.
+
 \item 
 \begin{tmvcode}
-tmv::Permutation p(size_t n)
+tmv::Permutation p(int n)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{Permutation} set initially to the identity matrix.
 
 \item
 \begin{tmvcode}
-tmv::Permutation p(size_t n, const int* pp, bool isinv, int det)
+tmv::Permutation p(int n, const ptrdiff_t* pp, bool isinv=false)
 \end{tmvcode}
 Makes an \tt{n} $\times$ \tt{n} \tt{Permutation} using the provided values as the 
-list of interchanges.  The meaning of pp is that \tt{v=p*v} is equivalent to
+list of interchanges.  The meaning of \tt{pp} is that \tt{v=p*v} is equivalent to
 \begin{tmvcode}
-if (isinv) v.reversePermute(pp);
-else v.permute(pp);
+if (isinv) {
+    for(int i=n-1; i>=0; --i) v.swap(i,pp[i]);
+} else {
+    for(int i=0; i<n; ++i) v.swap(i,pp[i]);
+}
 \end{tmvcode}
-The last two parameters may be omitted.  If \tt{det} is omitted, it will be calculated
-from the input values.  And if \tt{isinv} is omitted, it is taken to be \tt{false}.
+If \tt{isinv} is omitted, it is taken to be \tt{false}.
+
+Note: most of the parameter values to TMV methods that are listed as
+\tt{int} are actually \tt{ptrdiff\_t}.  This might be the same as \tt{int} on your system, or it might be equivalent to \tt{long}.  But the difference is normally completely transparent to the user, since the compiler will seemlessly convert between integer types as needed.  However, since we are dealing with an array of index values, the compiler can do the conversion.  You need to correctly use \tt{ptrdiff\_t} rather than \tt{int}.
+
+The reason we use \tt{ptrdiff\_t} is in case \tt{int} is only 32 bits and you allocate a matrix with more than $2^{31}$ elelements, then \tt{int} would overflow, but \tt{ptrdiff\_t} is guaranteed to be safe.  So we use \tt{ptrdiff\_t} for all memory offsets in the code, and to be consistent, all the parameters that deal with indices are \tt{ptrdiff\_t} as well.  I think this constructor is the only case where you actually need to know about this fact.
 
 \end{itemize}
 
@@ -52,13 +67,14 @@ from the input values.  And if \tt{isinv} is omitted, it is taken to be \tt{fals
 \label{Permutation_Access}
 
 \begin{tmvcode}
-p.resize(size_t new_size)
+p.resize(int new_size)
 \end{tmvcode}
 \index{Permutation!Methods!resize}
 
 \begin{tmvcode}
 p.nrows() = p.ncols() = p.colsize() = p.rowsize() = p.size()
 p(i,j)
+p.cref(i,j)
 \end{tmvcode}
 \index{Permutation!Methods!nrows}
 \index{Permutation!Methods!ncols}
@@ -66,6 +82,7 @@ p(i,j)
 \index{Permutation!Methods!colsize}
 \index{Permutation!Methods!size}
 \index{Permutation!Methods!operator()}
+\index{Permutation!Methods!cref}
 Note: Because of the way the permutation is stored, \tt{p(i,j)} is not
 terribly efficient.  It takes $O(N)$ time to calculate.  Also, there is no
 mutable version like there is for most matrices.
@@ -79,7 +96,7 @@ These are the same, and they do not create new storage.  So statements like
 \tt{v = p.transpose() * v} are efficient.
 
 \begin{tmvcode}
-const int* p.getValues()
+const ptrdiff_t* p.getValues()
 \end{tmvcode}
 Get the indices of the interchanges.  These are equivalent to the \tt{pp} values
 described above for the constructor.
@@ -88,8 +105,9 @@ described above for the constructor.
 bool p.isInverse()
 \end{tmvcode}
 Returns true the the interchange values are taken in the reverse order (last to first)
-or false if not.
-\vspace{12pt}
+or false if not.  This is equivalent to the \tt{isinv} parameter in the constructor from the \tt{pp} values.
+
+\vspace{12pt} % Again, I wish I knew why I need this here.
 
 \subsection{Functions}
 \index{Permutation!Functions of}
@@ -101,7 +119,7 @@ functions that other matrices provide.
 
 \begin{tmvcode}
 int p.norm1() = Norm1(p) = 1
-int p.norm2() = Norm2(p) = p.doNorm2() = 1
+int p.norm2() = Norm2(p) = 1
 int p.normInf() = NormInf(p) = 1
 int p.maxAbsElement() = MaxAbsElement(p) = 1
 int p.maxAbs2Element() = MaxAbs2Element(p) = 1
@@ -128,7 +146,6 @@ p.makeInverseATA(Matrix<T>& cov)
 \index{Permutation!Functions of!MaxAbs2Element}
 \index{Permutation!Methods!norm1}
 \index{Permutation!Methods!norm2}
-\index{Permutation!Methods!doNorm2}
 \index{Permutation!Methods!normInf}
 \index{Permutation!Methods!maxAbsElement}
 \index{Permutation!Methods!maxAbs2Element}
@@ -192,45 +209,28 @@ p1 == p2
 p1 != p2
 \end{tmvcode}
 
-\subsection{Input/Output}
-\index{Permutation!Input/output}
+\vspace{12pt}
+
+\subsection{I/O}
+\index{Permutation!I/O}
 \label{Permutation_IO}
 
-The simplest output is the usual:
+The simplest output syntax is the usual:
 \begin{tmvcode}
-os << p
+os << p;
 \end{tmvcode}
-where \tt{os} is any \tt{std::ostream}.
 The output format is the same as for a \tt{Matrix}, including all the 0's.
-(See \ref{Matrix_IO}.)
+(See \ref{Matrix_IO}.)  Unlike most matrix types, this format cannot be read back into a
+\tt{Permutation} object.  
 
-There is also a compact format:
+If you need to be able to read the values back in, you should use the compact I/O style that writes out the permutation as a list of indices for the interchanges.
 \begin{tmvcode}
-p.writeCompact(os)
+os << tmv::CompactIO() << p;
+is >> tmv::CompactIO() >> p;
 \end{tmvcode}
-\index{Permutation!Methods!writeCompact}
-which outputs in the format:
-\begin{tmvcode}
-P n isinv ( pp[0]  pp[1]  ...  pp[n-1] )
-\end{tmvcode}
-where \tt{isinv} is a boolean (1 or 0), and the \tt{pp} values are the 
-indices of the interchanges.
-In other words, the permutation could be created as
-\begin{tmvcode}
-Permutation p(n,pp,isinv);
-\end{tmvcode}
+\index{IOStyle!CompactIO}
+On input, the \tt{Permutation p} will be resized if necessary based on the size information read in.
 
-The same (compact, that is) format can be read back in the usual two ways:
-\begin{tmvcode}
-tmv::Permutation p(n);
-is >> p;
-std::auto_ptr<tmv::Permutation> pptr;
-is >> pptr;
-\end{tmvcode}
-where the first gives an error if \tt{p} is the wrong size and the second allocates
-a new \tt{Permutation} that is the correct size.
-\index{Permutation!Methods!write}
-\index{Permutation!Methods!writeCompact}
-\index{Permutation!Methods!read}
-
-
+See \S\ref{IOStyle} for more information about specifying custom I/O styles, including
+features like using brackets instead of parentheses, or putting commas between elements,
+or specifying an output precision.  

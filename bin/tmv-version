@@ -21,8 +21,8 @@ MYNAME='bin/tmv-version'
 
 # The following line will include a URL name after the colon
 # for any SVN version.
-svnURL='$HeadURL: https://tmv-cpp.googlecode.com/svn/tags/v0.65/bin/tmv-version $'
-svnRev='$Rev: 42 $'
+svnURL='$HeadURL$'
+svnRev='$Rev$'
 
 
 # extract the revision

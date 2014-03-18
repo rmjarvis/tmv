@@ -1,0 +1,1005 @@
+\begin{theindex}
+
+  \item BandMatrix, \hyperpage{70}
+    \subitem Access methods, \hyperpage{73}
+    \subitem Arithmetic, \hyperpage{76}
+      \subsubitem division, \hyperpage{77}
+    \subitem BandStorageLength, \hyperpage{71}
+    \subitem Constructors, \hyperpage{71}
+      \subsubitem BandMatrixView, \hyperpage{72}
+      \subsubitem LowerBiDiagMatrix, \hyperpage{72}
+      \subsubitem TriDiagMatrix, \hyperpage{72}
+      \subsubitem UpperBiDiagMatrix, \hyperpage{72}
+    \subitem Determinant, \hyperpage{78}
+      \subsubitem integer values, \hyperpage{163}
+    \subitem Functions of, \hyperpage{75}
+      \subsubitem Det, \hyperpage{76}
+      \subsubitem Inverse, \hyperpage{76}
+      \subsubitem LogDet, \hyperpage{76}
+      \subsubitem MaxAbs2Element, \hyperpage{76}
+      \subsubitem MaxAbsElement, \hyperpage{76}
+      \subsubitem Norm, \hyperpage{76}
+      \subsubitem Norm1, \hyperpage{76}
+      \subsubitem Norm2, \hyperpage{76}
+      \subsubitem NormF, \hyperpage{76}
+      \subsubitem NormInf, \hyperpage{76}
+      \subsubitem NormSq, \hyperpage{76}
+      \subsubitem SumAbs2Elements, \hyperpage{76}
+      \subsubitem SumAbsElements, \hyperpage{76}
+      \subsubitem SumElements, \hyperpage{76}
+      \subsubitem Swap, \hyperpage{76}
+      \subsubitem Trace, \hyperpage{76}
+    \subitem I/O, \hyperpage{78}
+    \subitem LU decomposition, \hyperpage{77}, \hyperpage{107}
+    \subitem Memory usage, \hyperpage{71}
+    \subitem Methods
+      \subsubitem addToAll, \hyperpage{76}
+      \subsubitem adjoint, \hyperpage{75}
+      \subsubitem canLinearize, \hyperpage{73}
+      \subsubitem clip, \hyperpage{76}
+      \subsubitem col, \hyperpage{73}
+      \subsubitem colRange, \hyperpage{75}
+      \subsubitem colsize, \hyperpage{73}
+      \subsubitem condition, \hyperpage{76}
+      \subsubitem conjugate, \hyperpage{75}
+      \subsubitem conjugateSelf, \hyperpage{76}
+      \subsubitem constLinearView, \hyperpage{73}
+      \subsubitem cptr, \hyperpage{74}
+      \subsubitem cref, \hyperpage{73}
+      \subsubitem cView, \hyperpage{75}
+      \subsubitem det, \hyperpage{76}
+      \subsubitem diag, \hyperpage{73}
+      \subsubitem diagRange, \hyperpage{75}
+      \subsubitem diagstep, \hyperpage{74}
+      \subsubitem divideInPlace, \hyperpage{77, 78}
+      \subsubitem divIsSet, \hyperpage{78}
+      \subsubitem doCondition, \hyperpage{76}
+      \subsubitem fView, \hyperpage{75}
+      \subsubitem imagPart, \hyperpage{75}
+      \subsubitem inverse, \hyperpage{76}
+      \subsubitem iscm, \hyperpage{74}
+      \subsubitem isconj, \hyperpage{74}
+      \subsubitem isdm, \hyperpage{74}
+      \subsubitem isrm, \hyperpage{74}
+      \subsubitem isSingular, \hyperpage{76}
+      \subsubitem linearView, \hyperpage{73}
+      \subsubitem logDet, \hyperpage{76}
+      \subsubitem lowerBand, \hyperpage{75}
+      \subsubitem lowerBandOff, \hyperpage{75}
+      \subsubitem lud, \hyperpage{77}
+      \subsubitem makeInverse, \hyperpage{76}
+      \subsubitem makeInverseATA, \hyperpage{76}
+      \subsubitem maxAbs2Element, \hyperpage{76}
+      \subsubitem maxAbsElement, \hyperpage{76}
+      \subsubitem ncols, \hyperpage{73}
+      \subsubitem norm, \hyperpage{76}
+      \subsubitem norm1, \hyperpage{76}
+      \subsubitem norm2, \hyperpage{76}
+      \subsubitem normF, \hyperpage{76}
+      \subsubitem normInf, \hyperpage{76}
+      \subsubitem normSq, \hyperpage{76}
+      \subsubitem nrows, \hyperpage{73}
+      \subsubitem operator(), \hyperpage{73}
+      \subsubitem ptr, \hyperpage{74}
+      \subsubitem qrd, \hyperpage{78}
+      \subsubitem realPart, \hyperpage{75}
+      \subsubitem ref, \hyperpage{73}
+      \subsubitem resetDiv, \hyperpage{78}
+      \subsubitem resize, \hyperpage{73}
+      \subsubitem row, \hyperpage{73}
+      \subsubitem rowRange, \hyperpage{75}
+      \subsubitem rowsize, \hyperpage{73}
+      \subsubitem saveDiv, \hyperpage{78}
+      \subsubitem setAllTo, \hyperpage{76}
+      \subsubitem setDiv, \hyperpage{78}
+      \subsubitem setToIdentity, \hyperpage{76}
+      \subsubitem setZero, \hyperpage{76}
+      \subsubitem stepi, \hyperpage{74}
+      \subsubitem stepj, \hyperpage{74}
+      \subsubitem subBandMatrix, \hyperpage{74}
+      \subsubitem subMatrix, \hyperpage{74}
+      \subsubitem subVector, \hyperpage{74}
+      \subsubitem sumAbs2Elements, \hyperpage{76}
+      \subsubitem sumAbsElements, \hyperpage{76}
+      \subsubitem sumElements, \hyperpage{76}
+      \subsubitem svd, \hyperpage{78}
+      \subsubitem trace, \hyperpage{76}
+      \subsubitem transpose, \hyperpage{75}
+      \subsubitem transposeSelf, \hyperpage{76}
+      \subsubitem unsetDiv, \hyperpage{78}
+      \subsubitem upperBand, \hyperpage{75}
+      \subsubitem upperBandOff, \hyperpage{75}
+      \subsubitem view, \hyperpage{75}
+    \subitem Polar decomposition, \hyperpage{111}
+    \subitem QR decomposition, \hyperpage{78}, \hyperpage{108}
+    \subitem Singular value decomposition, \hyperpage{78}, 
+		\hyperpage{110}
+    \subitem View as a contiguous Vector, \hyperpage{73}
+    \subitem View of raw memory, \hyperpage{73}
+    \subitem View portion as a thinner BandMatrix, \hyperpage{72}
+    \subitem View portion as SymBandMatrix or HermBandMatrix, 
+		\hyperpage{92}
+  \item BLAS
+    \subitem ACML, \hyperpage{14}
+    \subitem ATLAS, \hyperpage{15}
+    \subitem CBLAS, \hyperpage{15}
+    \subitem Errors with float, \hyperpage{160}
+    \subitem Fortran BLAS, \hyperpage{15}
+    \subitem GotoBLAS, \hyperpage{14}
+    \subitem Linking, \hyperpage{20}
+    \subitem MKL, \hyperpage{14}
+    \subitem SCons options, \hyperpage{14}
+  \item BSD License, \hyperpage{172}
+  \item Bugs
+    \subitem Exceptions not handles correctly when using g++ version 4.4 or 4.5 on Snow Leopard, 
+		\hyperpage{158}
+    \subitem Known bugs, \hyperpage{158}
+    \subitem Known compiler issues, \hyperpage{158}
+    \subitem nan or inf when using LAPACK, \hyperpage{161}
+    \subitem Reporting new issues, \hyperpage{12}
+    \subitem SymMatrix arithmetic, \hyperpage{161}
+    \subitem Wrong answers when using g++ version 4.1 or 4.2, 
+		\hyperpage{158}
+    \subitem Wrong answers when using XCode BLAS on Mac, 
+		\hyperpage{160}
+  \item Bunch-Kaufman decomposition, \hyperpage{107}
+    \subitem SymMatrix, \hyperpage{86}, \hyperpage{108}, 
+		\hyperpage{162}
+
+  \indexspace
+
+  \item Cholesky decomposition, \hyperpage{107}
+    \subitem NonPosDef exception, \hyperpage{103}
+    \subitem SymBandMatrix, \hyperpage{96}, \hyperpage{107}
+    \subitem SymMatrix, \hyperpage{87}, \hyperpage{107}
+  \item Conditional compilation, \hyperpage{9}
+
+  \indexspace
+
+  \item Determinant, \hyperpage{51}
+  \item DiagMatrix, \hyperpage{59}
+    \subitem Access methods, \hyperpage{60}
+    \subitem Arithmetic, \hyperpage{62}
+      \subsubitem division, \hyperpage{62}
+    \subitem Constructors, \hyperpage{59}
+    \subitem Functions of, \hyperpage{61}
+      \subsubitem Det, \hyperpage{61}
+      \subsubitem Inverse, \hyperpage{61}
+      \subsubitem LogDet, \hyperpage{61}
+      \subsubitem MaxAbs2Element, \hyperpage{61}
+      \subsubitem MaxAbsElement, \hyperpage{61}
+      \subsubitem Norm, \hyperpage{61}
+      \subsubitem Norm1, \hyperpage{61}
+      \subsubitem Norm2, \hyperpage{61}
+      \subsubitem NormF, \hyperpage{61}
+      \subsubitem NormInf, \hyperpage{61}
+      \subsubitem NormSq, \hyperpage{61}
+      \subsubitem SumAbs2Elements, \hyperpage{61}
+      \subsubitem SumAbsElements, \hyperpage{61}
+      \subsubitem SumElements, \hyperpage{61}
+      \subsubitem Swap, \hyperpage{61}
+      \subsubitem Trace, \hyperpage{61}
+    \subitem I/O, \hyperpage{62}
+    \subitem Methods
+      \subsubitem addToAll, \hyperpage{61}
+      \subsubitem adjoint, \hyperpage{61}
+      \subsubitem clip, \hyperpage{61}
+      \subsubitem colsize, \hyperpage{60}
+      \subsubitem condition, \hyperpage{61}
+      \subsubitem conjugate, \hyperpage{61}
+      \subsubitem conjugateSelf, \hyperpage{61}
+      \subsubitem cptr, \hyperpage{60}
+      \subsubitem cref, \hyperpage{60}
+      \subsubitem cView, \hyperpage{61}
+      \subsubitem det, \hyperpage{61}
+      \subsubitem diag, \hyperpage{60}
+      \subsubitem doCondition, \hyperpage{61}
+      \subsubitem fView, \hyperpage{61}
+      \subsubitem imagPart, \hyperpage{61}
+      \subsubitem inverse, \hyperpage{61}
+      \subsubitem invertSelf, \hyperpage{61}
+      \subsubitem isconj, \hyperpage{60}
+      \subsubitem isSingular, \hyperpage{61}
+      \subsubitem logDet, \hyperpage{61}
+      \subsubitem makeInverse, \hyperpage{61}
+      \subsubitem makeInverseATA, \hyperpage{61}
+      \subsubitem maxAbs2Element, \hyperpage{61}
+      \subsubitem maxAbsElement, \hyperpage{61}
+      \subsubitem ncols, \hyperpage{60}
+      \subsubitem norm, \hyperpage{61}
+      \subsubitem norm1, \hyperpage{61}
+      \subsubitem norm2, \hyperpage{61}
+      \subsubitem normF, \hyperpage{61}
+      \subsubitem normInf, \hyperpage{61}
+      \subsubitem normSq, \hyperpage{61}
+      \subsubitem nrows, \hyperpage{60}
+      \subsubitem operator(), \hyperpage{60}
+      \subsubitem ptr, \hyperpage{60}
+      \subsubitem realPart, \hyperpage{61}
+      \subsubitem ref, \hyperpage{60}
+      \subsubitem resize, \hyperpage{60}
+      \subsubitem rowsize, \hyperpage{60}
+      \subsubitem setAllTo, \hyperpage{61}
+      \subsubitem setToIdentity, \hyperpage{61}
+      \subsubitem setZero, \hyperpage{61}
+      \subsubitem size, \hyperpage{60}
+      \subsubitem step, \hyperpage{60}
+      \subsubitem subDiagMatrix, \hyperpage{61}
+      \subsubitem sumAbs2Elements, \hyperpage{61}
+      \subsubitem sumAbsElements, \hyperpage{61}
+      \subsubitem sumElements, \hyperpage{61}
+      \subsubitem trace, \hyperpage{61}
+      \subsubitem transpose, \hyperpage{61}
+      \subsubitem transposeSelf, \hyperpage{61}
+      \subsubitem view, \hyperpage{61}
+    \subitem View as a BandMatrix, \hyperpage{72}
+    \subitem View of raw memory, \hyperpage{60}
+
+  \indexspace
+
+  \item Eigenvalues, \hyperpage{105}, \hyperpage{162}
+    \subitem LAPACK ?stegr, \hyperpage{15}
+    \subitem SymBandMatrix, \hyperpage{106}
+    \subitem SymMatrix, \hyperpage{106}
+  \item Exceptions, \hyperpage{102}
+    \subitem FailedAssert, \hyperpage{102}
+    \subitem NonPosDef, \hyperpage{86}, \hyperpage{103}, 
+		\hyperpage{108}, \hyperpage{111}, \hyperpage{114}
+    \subitem ReadError, \hyperpage{23}, \hyperpage{31}, \hyperpage{36}, 
+		\hyperpage{103}
+    \subitem Singular, \hyperpage{50}, \hyperpage{54}, \hyperpage{103}, 
+		\hyperpage{108}
+
+  \indexspace
+
+  \item HermBandMatrix, \hyperindexformat{\see{SymBandMatrix}}{90}
+  \item HermMatrix, \hyperindexformat{\see{SymMatrix}}{80}
+
+  \indexspace
+
+  \item Installation, \hyperpage{12}
+    \subitem Borland C++ Builder, \hyperpage{159}
+    \subitem clang++, \hyperpage{158}
+    \subitem g++, \hyperpage{158}
+    \subitem icpc, \hyperpage{158}
+    \subitem Known problems, \hyperpage{158}
+    \subitem Obtaining source code, \hyperpage{12}
+    \subitem OpenMP, \hyperpage{13}
+    \subitem pgCC, \hyperpage{158, 159}
+    \subitem Solaris Studio, \hyperpage{159}
+    \subitem Test suite, \hyperpage{18}, \hyperpage{159}
+    \subitem Visual C++, \hyperpage{158}
+  \item IOStyle
+    \subitem CompactIO, \hyperpage{31}, \hyperpage{55}, \hyperpage{63}, 
+		\hyperpage{69}, \hyperpage{79}, \hyperpage{88}, 
+		\hyperpage{98}, \hyperpage{101}
+    \subitem ThreshIO, \hyperpage{31}, \hyperpage{55}, \hyperpage{63}, 
+		\hyperpage{69}, \hyperpage{79}, \hyperpage{88}, 
+		\hyperpage{98}
+
+  \indexspace
+
+  \item LAPACK
+    \subitem ACML, \hyperpage{14}
+    \subitem ATLAS, \hyperpage{15}
+    \subitem CLAPACK, \hyperpage{15}, \hyperpage{160}
+    \subitem dstegr/sstegr issues, \hyperpage{15}, \hyperpage{104}
+    \subitem Exceptions from LDL\_Decompose, \hyperpage{108}
+    \subitem Fortran LAPACK, \hyperpage{15}
+    \subitem Householder matrices, \hyperpage{115}
+    \subitem Linking, \hyperpage{20}, \hyperpage{160}
+    \subitem MKL, \hyperpage{14}
+    \subitem Overflow/underflow problems, \hyperpage{161}
+    \subitem Problems in multi-threaded programs, \hyperpage{161}
+    \subitem Problems with extremely large matrices, \hyperpage{161}
+    \subitem Problems with QRP decomposition, \hyperpage{16}, 
+		\hyperpage{109}, \hyperpage{160}
+    \subitem SCons options, \hyperpage{14}
+    \subitem Workspace issues, \hyperpage{104}, \hyperpage{160}
+  \item License, \hyperpage{172}
+  \item Linear Equations
+    \subitem Exact solution, \hyperpage{47}
+    \subitem Least square solution, \hyperpage{48}
+  \item LowerTriMatrix, \hyperindexformat{\see{UpperTriMatrix}}{64}
+    \subitem Packed storage, \hyperpage{162}
+  \item LU decomposition, \hyperpage{107}
+    \subitem BandMatrix, \hyperpage{77}, \hyperpage{107}
+    \subitem Matrix, \hyperpage{49}, \hyperpage{52}, \hyperpage{107}
+    \subitem SmallMatrix, \hyperpage{58}
+    \subitem SymBandMatrix, \hyperpage{96}
+
+  \indexspace
+
+  \item Matrix, \hyperpage{34}
+    \subitem Access methods, \hyperpage{36}
+    \subitem Arithmetic, \hyperpage{45}
+      \subsubitem division, \hyperpage{47--50}
+      \subsubitem element by element product, \hyperpage{47}
+      \subsubitem rank-1 update, \hyperpage{46}
+    \subitem clip, \hyperpage{55}
+    \subitem ConstMatrixView, \hyperpage{39}
+    \subitem Constructors, \hyperpage{34}
+    \subitem Decompositions, \hyperpage{49}, \hyperpage{52}
+    \subitem Determinant, \hyperpage{43}, \hyperpage{51}
+      \subsubitem integer types, \hyperpage{9}, \hyperpage{52}
+    \subitem Functions of, \hyperpage{41}
+      \subsubitem Det, \hyperpage{43}
+      \subsubitem Inverse, \hyperpage{44}
+      \subsubitem LogDet, \hyperpage{43}
+      \subsubitem MaxAbs2Element, \hyperpage{42}
+      \subsubitem MaxAbsElement, \hyperpage{42}
+      \subsubitem Norm, \hyperpage{42}
+      \subsubitem Norm1, \hyperpage{41}
+      \subsubitem Norm2, \hyperpage{42}
+      \subsubitem NormF, \hyperpage{42}
+      \subsubitem NormInf, \hyperpage{42}
+      \subsubitem NormSq, \hyperpage{42}
+      \subsubitem SumAbs2Elements, \hyperpage{43}
+      \subsubitem SumAbsElements, \hyperpage{43}
+      \subsubitem SumElements, \hyperpage{43}
+      \subsubitem Swap, \hyperpage{45}
+      \subsubitem Trace, \hyperpage{42}
+    \subitem I/O, \hyperpage{55}
+    \subitem Initialization, \hyperpage{35}
+    \subitem integer types, \hyperpage{9}
+    \subitem List initialization, \hyperpage{36}, \hyperpage{57}
+    \subitem LU decomposition, \hyperpage{49}, \hyperpage{52}, 
+		\hyperpage{107}
+    \subitem MatrixView, \hyperpage{39}
+    \subitem Methods
+      \subsubitem addToAll, \hyperpage{44}
+      \subsubitem adjoint, \hyperpage{40}
+      \subsubitem canLinearize, \hyperpage{37}, \hyperpage{41}
+      \subsubitem clip, \hyperpage{44}
+      \subsubitem col, \hyperpage{37}
+      \subsubitem colPair, \hyperpage{40}
+      \subsubitem colRange, \hyperpage{39}
+      \subsubitem colsize, \hyperpage{36}
+      \subsubitem condition, \hyperpage{43}
+      \subsubitem conjugate, \hyperpage{40}
+      \subsubitem conjugateSelf, \hyperpage{45}
+      \subsubitem constLinearView, \hyperpage{37}, \hyperpage{41}
+      \subsubitem cptr, \hyperpage{38}
+      \subsubitem cref, \hyperpage{36}
+      \subsubitem cView, \hyperpage{40}
+      \subsubitem det, \hyperpage{43}, \hyperpage{51}
+      \subsubitem diag, \hyperpage{37}
+      \subsubitem divideInPlace, \hyperpage{51}
+      \subsubitem divIsSet, \hyperpage{51}
+      \subsubitem doCondition, \hyperpage{43}
+      \subsubitem fView, \hyperpage{40}
+      \subsubitem imagPart, \hyperpage{40}
+      \subsubitem inverse, \hyperpage{44}
+      \subsubitem iscm, \hyperpage{38}
+      \subsubitem isconj, \hyperpage{38}
+      \subsubitem isrm, \hyperpage{38}
+      \subsubitem isSingular, \hyperpage{43}, \hyperpage{54}
+      \subsubitem linearView, \hyperpage{37}, \hyperpage{41}
+      \subsubitem logDet, \hyperpage{43}, \hyperpage{51}
+      \subsubitem lowerTri, \hyperpage{41}
+      \subsubitem lud, \hyperpage{52}
+      \subsubitem makeInverse, \hyperpage{44}
+      \subsubitem makeInverseATA, \hyperpage{44}
+      \subsubitem maxAbs2Element, \hyperpage{42}
+      \subsubitem maxAbsElement, \hyperpage{42}
+      \subsubitem ncols, \hyperpage{36}
+      \subsubitem norm, \hyperpage{42}
+      \subsubitem norm1, \hyperpage{41}
+      \subsubitem norm2, \hyperpage{42}
+      \subsubitem normF, \hyperpage{42}
+      \subsubitem normInf, \hyperpage{42}
+      \subsubitem normSq, \hyperpage{42}
+      \subsubitem nrows, \hyperpage{36}
+      \subsubitem operator(), \hyperpage{36}
+      \subsubitem operator[], \hyperpage{36}
+      \subsubitem ptr, \hyperpage{38}
+      \subsubitem qrd, \hyperpage{53}
+      \subsubitem qrpd, \hyperpage{53}
+      \subsubitem realPart, \hyperpage{40}
+      \subsubitem ref, \hyperpage{36}
+      \subsubitem resetDiv, \hyperpage{51}
+      \subsubitem resize, \hyperpage{38}
+      \subsubitem row, \hyperpage{37}
+      \subsubitem rowPair, \hyperpage{40}
+      \subsubitem rowRange, \hyperpage{39}
+      \subsubitem rowsize, \hyperpage{36}
+      \subsubitem saveDiv, \hyperpage{51}
+      \subsubitem setAllTo, \hyperpage{44}
+      \subsubitem setDiv, \hyperpage{51}
+      \subsubitem setToIdentity, \hyperpage{44}
+      \subsubitem setZero, \hyperpage{44}
+      \subsubitem stepi, \hyperpage{38}
+      \subsubitem stepj, \hyperpage{38}
+      \subsubitem subMatrix, \hyperpage{39}
+      \subsubitem subVector, \hyperpage{37}
+      \subsubitem sumAbs2Elements, \hyperpage{43}
+      \subsubitem sumAbsElements, \hyperpage{43}
+      \subsubitem sumElements, \hyperpage{43}
+      \subsubitem svd, \hyperpage{53--55}
+      \subsubitem swapCols, \hyperpage{45}
+      \subsubitem swapRows, \hyperpage{45}
+      \subsubitem trace, \hyperpage{42}
+      \subsubitem transpose, \hyperpage{40}
+      \subsubitem transposeSelf, \hyperpage{45}
+      \subsubitem unitLowerTri, \hyperpage{41}
+      \subsubitem unitUpperTri, \hyperpage{41}
+      \subsubitem unsetDiv, \hyperpage{51}
+      \subsubitem upperTri, \hyperpage{41}
+      \subsubitem view, \hyperpage{40}
+    \subitem Polar decomposition, \hyperpage{111}
+    \subitem Pseudo-inverse, \hyperpage{50}
+    \subitem QR decomposition, \hyperpage{49}, \hyperpage{53}, 
+		\hyperpage{108}
+    \subitem QRP decomposition, \hyperpage{49}, \hyperpage{53}, 
+		\hyperpage{55}, \hyperpage{109}
+    \subitem Resizing, \hyperpage{38}
+    \subitem Singular, \hyperpage{54}
+    \subitem Singular value decomposition, \hyperpage{50}, 
+		\hyperpage{53, 54}, \hyperpage{110}
+    \subitem View as a contiguous Vector, \hyperpage{37}, 
+		\hyperpage{41}
+    \subitem View of raw memory, \hyperpage{35}
+    \subitem View portion as a BandMatrix, \hyperpage{72}
+    \subitem View portion as SymBandMatrix or HermBandMatrix, 
+		\hyperpage{92}
+    \subitem View portion as SymMatrix or HermMatrix, \hyperpage{81}
+    \subitem Views, \hyperpage{39}
+
+  \indexspace
+
+  \item Namespace tmv, \hyperpage{8}
+  \item NoWarnings, \hyperpage{104}
+
+  \indexspace
+
+  \item OpenMP, \hyperpage{13}, \hyperpage{162}
+
+  \indexspace
+
+  \item Permutation, \hyperpage{99}
+    \subitem Access methods, \hyperpage{99}
+    \subitem Arithmetic, \hyperpage{100}
+    \subitem Constructors, \hyperpage{99}
+    \subitem Functions of, \hyperpage{100}
+      \subsubitem Det, \hyperpage{100}
+      \subsubitem Inverse, \hyperpage{100}
+      \subsubitem LogDet, \hyperpage{100}
+      \subsubitem MaxAbs2Element, \hyperpage{100}
+      \subsubitem MaxAbsElement, \hyperpage{100}
+      \subsubitem Norm, \hyperpage{100}
+      \subsubitem Norm1, \hyperpage{100}
+      \subsubitem Norm2, \hyperpage{100}
+      \subsubitem NormF, \hyperpage{100}
+      \subsubitem NormInf, \hyperpage{100}
+      \subsubitem NormSq, \hyperpage{100}
+      \subsubitem SumAbs2Elements, \hyperpage{100}
+      \subsubitem SumAbsElements, \hyperpage{100}
+      \subsubitem SumElements, \hyperpage{100}
+      \subsubitem Swap, \hyperpage{100}
+      \subsubitem Trace, \hyperpage{100}
+    \subitem I/O, \hyperpage{101}
+    \subitem Methods
+      \subsubitem colsize, \hyperpage{100}
+      \subsubitem condition, \hyperpage{100}
+      \subsubitem cref, \hyperpage{100}
+      \subsubitem det, \hyperpage{100}
+      \subsubitem doCondition, \hyperpage{100}
+      \subsubitem inverse, \hyperpage{100}
+      \subsubitem invertSelf, \hyperpage{100}
+      \subsubitem isSingular, \hyperpage{100}
+      \subsubitem logDet, \hyperpage{100}
+      \subsubitem makeInverse, \hyperpage{100}
+      \subsubitem makeInverseATA, \hyperpage{100}
+      \subsubitem maxAbs2Element, \hyperpage{100}
+      \subsubitem maxAbsElement, \hyperpage{100}
+      \subsubitem ncols, \hyperpage{100}
+      \subsubitem norm, \hyperpage{100}
+      \subsubitem norm1, \hyperpage{100}
+      \subsubitem norm2, \hyperpage{100}
+      \subsubitem normF, \hyperpage{100}
+      \subsubitem normInf, \hyperpage{100}
+      \subsubitem normSq, \hyperpage{100}
+      \subsubitem nrows, \hyperpage{100}
+      \subsubitem operator(), \hyperpage{100}
+      \subsubitem resize, \hyperpage{99}
+      \subsubitem rowsize, \hyperpage{100}
+      \subsubitem setToIdentity, \hyperpage{100}
+      \subsubitem size, \hyperpage{100}
+      \subsubitem sumAbs2Elements, \hyperpage{100}
+      \subsubitem sumAbsElements, \hyperpage{100}
+      \subsubitem sumElements, \hyperpage{100}
+      \subsubitem trace, \hyperpage{100}
+      \subsubitem transpose, \hyperpage{100}
+      \subsubitem transposeSelf, \hyperpage{100}
+    \subitem Vector sort, \hyperpage{28}
+  \item Polar decomposition, \hyperpage{111}
+    \subitem BandMatrix, \hyperpage{111}
+    \subitem Matrix, \hyperpage{111}
+
+  \indexspace
+
+  \item QR decomposition, \hyperpage{108}
+    \subitem BandMatrix, \hyperpage{78}, \hyperpage{108}
+    \subitem Downdate, \hyperpage{114}
+      \subsubitem algorithm, \hyperpage{115}
+      \subsubitem NonPosDef exception, \hyperpage{103}, \hyperpage{114}
+    \subitem Matrix, \hyperpage{49}, \hyperpage{53}, \hyperpage{108}
+    \subitem SmallMatrix, \hyperpage{58}
+    \subitem Update, \hyperpage{111}
+      \subsubitem algorithm, \hyperpage{114}
+  \item QRP decomposition, \hyperpage{109}
+    \subitem LAPACK ?geqp3, \hyperpage{16}, \hyperpage{109}
+    \subitem Matrix, \hyperpage{49}, \hyperpage{53}, \hyperpage{109}
+
+  \indexspace
+
+  \item Singular Matrices, \hyperpage{54}
+  \item Singular value decomposition, \hyperpage{109}
+    \subitem BandMatrix, \hyperpage{78}, \hyperpage{110}
+    \subitem LAPACK ?stegr, \hyperpage{15}
+    \subitem Matrix, \hyperpage{50}, \hyperpage{53}, \hyperpage{110}
+    \subitem SymBandMatrix, \hyperpage{97}, \hyperpage{110}
+    \subitem SymMatrix, \hyperpage{87}, \hyperpage{110}
+  \item SmallMatrix, \hyperpage{56}
+    \subitem Access methods, \hyperpage{57}
+    \subitem Arithmetic
+      \subsubitem division, \hyperpage{58}
+      \subsubitem no alias checking, \hyperpage{57}
+    \subitem Constructors, \hyperpage{56}
+    \subitem Functions of, \hyperpage{57}
+    \subitem Limitations, \hyperpage{57}
+    \subitem LU decomposition, \hyperpage{58}
+    \subitem QR decomposition, \hyperpage{58}
+    \subitem Views, \hyperpage{57, 58}
+  \item SmallVector, \hyperpage{32}
+    \subitem Access methods, \hyperpage{33}
+    \subitem Arithmetic
+      \subsubitem no alias checking, \hyperpage{57}
+    \subitem Constructors, \hyperpage{33}
+    \subitem Functions of, \hyperpage{33}
+    \subitem List initialization, \hyperpage{33}
+    \subitem Views, \hyperpage{58}
+  \item square root
+    \subitem SymBandMatrix, \hyperpage{111}
+    \subitem SymMatrix, \hyperpage{111}
+  \item SymBandMatrix, \hyperpage{90}
+    \subitem Access methods, \hyperpage{92}
+    \subitem Arithmetic, \hyperpage{95}
+      \subsubitem division, \hyperpage{96}
+    \subitem Cholesky decomposition, \hyperpage{96}, \hyperpage{107}
+    \subitem Constructors, \hyperpage{90}
+      \subsubitem HermTriDiagMatrix, \hyperpage{91}
+      \subsubitem SymTriDiagMatrix, \hyperpage{91}
+    \subitem Determinant, \hyperpage{97}
+      \subsubitem integer values, \hyperpage{163}
+    \subitem Eigenvalues and eigenvectors, \hyperpage{106}, 
+		\hyperpage{162}
+    \subitem Functions of, \hyperpage{94}
+      \subsubitem Det, \hyperpage{95}
+      \subsubitem Inverse, \hyperpage{95}
+      \subsubitem LogDet, \hyperpage{95}
+      \subsubitem MaxAbs2Element, \hyperpage{95}
+      \subsubitem MaxAbsElement, \hyperpage{95}
+      \subsubitem Norm, \hyperpage{95}
+      \subsubitem Norm1, \hyperpage{95}
+      \subsubitem Norm2, \hyperpage{95}
+      \subsubitem NormF, \hyperpage{95}
+      \subsubitem NormInf, \hyperpage{95}
+      \subsubitem NormSq, \hyperpage{95}
+      \subsubitem SumAbs2Elements, \hyperpage{95}
+      \subsubitem SumAbsElements, \hyperpage{95}
+      \subsubitem SumElements, \hyperpage{95}
+      \subsubitem Swap, \hyperpage{95}
+      \subsubitem Trace, \hyperpage{95}
+    \subitem I/O, \hyperpage{97}
+    \subitem LU decomposition, \hyperpage{96}
+    \subitem Methods
+      \subsubitem addToAll, \hyperpage{95}
+      \subsubitem adjoint, \hyperpage{94}
+      \subsubitem chd, \hyperpage{96}
+      \subsubitem clip, \hyperpage{95}
+      \subsubitem col, \hyperpage{93}
+      \subsubitem colsize, \hyperpage{93}
+      \subsubitem condition, \hyperpage{95}
+      \subsubitem conjugate, \hyperpage{94}
+      \subsubitem conjugateSelf, \hyperpage{95}
+      \subsubitem cptr, \hyperpage{93}
+      \subsubitem cref, \hyperpage{93}
+      \subsubitem cView, \hyperpage{94}
+      \subsubitem det, \hyperpage{95}
+      \subsubitem diag, \hyperpage{93}
+      \subsubitem diagRange, \hyperpage{93}
+      \subsubitem diagstep, \hyperpage{93}
+      \subsubitem divideInPlace, \hyperpage{97}
+      \subsubitem divIsSet, \hyperpage{97}
+      \subsubitem doCondition, \hyperpage{95}
+      \subsubitem fView, \hyperpage{94}
+      \subsubitem imagPart, \hyperpage{94}
+      \subsubitem inverse, \hyperpage{95}
+      \subsubitem iscm, \hyperpage{93}
+      \subsubitem isconj, \hyperpage{93}
+      \subsubitem isdm, \hyperpage{93}
+      \subsubitem isherm, \hyperpage{93}
+      \subsubitem isrm, \hyperpage{93}
+      \subsubitem isSingular, \hyperpage{95}
+      \subsubitem issym, \hyperpage{93}
+      \subsubitem isupper, \hyperpage{93}
+      \subsubitem logDet, \hyperpage{95}
+      \subsubitem lowerBand, \hyperpage{93}
+      \subsubitem lowerBandOff, \hyperpage{93}
+      \subsubitem lud, \hyperpage{96}
+      \subsubitem makeInverse, \hyperpage{95}
+      \subsubitem makeInverseATA, \hyperpage{95}
+      \subsubitem maxAbs2Element, \hyperpage{95}
+      \subsubitem maxAbsElement, \hyperpage{95}
+      \subsubitem ncols, \hyperpage{93}
+      \subsubitem nhi, \hyperpage{93}
+      \subsubitem nlo, \hyperpage{93}
+      \subsubitem norm, \hyperpage{95}
+      \subsubitem norm1, \hyperpage{95}
+      \subsubitem norm2, \hyperpage{95}
+      \subsubitem normF, \hyperpage{95}
+      \subsubitem normInf, \hyperpage{95}
+      \subsubitem normSq, \hyperpage{95}
+      \subsubitem nrows, \hyperpage{93}
+      \subsubitem operator(), \hyperpage{93}
+      \subsubitem ptr, \hyperpage{93}
+      \subsubitem realPart, \hyperpage{94}
+      \subsubitem ref, \hyperpage{93}
+      \subsubitem resetDiv, \hyperpage{97}
+      \subsubitem resize, \hyperpage{93}
+      \subsubitem row, \hyperpage{93}
+      \subsubitem rowsize, \hyperpage{93}
+      \subsubitem saveDiv, \hyperpage{97}
+      \subsubitem setAllTo, \hyperpage{95}
+      \subsubitem setDiv, \hyperpage{97}
+      \subsubitem setToIdentity, \hyperpage{95}
+      \subsubitem setZero, \hyperpage{95}
+      \subsubitem size, \hyperpage{93}
+      \subsubitem stepi, \hyperpage{93}
+      \subsubitem stepj, \hyperpage{93}
+      \subsubitem subBandMatrix, \hyperpage{93}
+      \subsubitem subMatrix, \hyperpage{93}
+      \subsubitem subSymBandMatrix, \hyperpage{94}
+      \subsubitem subSymMatrix, \hyperpage{94}
+      \subsubitem subVector, \hyperpage{93}
+      \subsubitem sumAbs2Elements, \hyperpage{95}
+      \subsubitem sumAbsElements, \hyperpage{95}
+      \subsubitem sumElements, \hyperpage{95}
+      \subsubitem svd, \hyperpage{97}
+      \subsubitem symDiagRange, \hyperpage{94}
+      \subsubitem trace, \hyperpage{95}
+      \subsubitem transpose, \hyperpage{94}
+      \subsubitem transposeSelf, \hyperpage{95}
+      \subsubitem unsetDiv, \hyperpage{97}
+      \subsubitem upperBand, \hyperpage{93}
+      \subsubitem upperBandOff, \hyperpage{93}
+      \subsubitem view, \hyperpage{94}
+    \subitem Singular value decomposition, \hyperpage{97}, 
+		\hyperpage{110}
+    \subitem square root, \hyperpage{111}
+    \subitem Tri-diagonal LDL decomposition, \hyperpage{108}
+    \subitem View of raw memory, \hyperpage{92}
+  \item SymMatrix, \hyperpage{80}
+    \subitem Access methods, \hyperpage{82}
+    \subitem Arithmetic, \hyperpage{84}, \hyperpage{161}
+      \subsubitem division, \hyperpage{86}
+      \subsubitem product of two regular matrices, \hyperpage{88}
+      \subsubitem rank-1 update, \hyperpage{85}
+      \subsubitem rank-2 Update, \hyperpage{88}
+      \subsubitem rank-2k Update, \hyperpage{88}
+      \subsubitem rank-k update, \hyperpage{85}
+    \subitem Bunch-Kaufman decomposition, \hyperpage{86}, 
+		\hyperpage{108}, \hyperpage{162}
+    \subitem Cholesky decomposition, \hyperpage{87}, \hyperpage{107}
+    \subitem Constructors, \hyperpage{80}
+    \subitem Determinant, \hyperpage{88}
+      \subsubitem integer values, \hyperpage{163}
+    \subitem Eigenvalues and eigenvectors, \hyperpage{106}, 
+		\hyperpage{162}
+    \subitem Functions of, \hyperpage{83}
+      \subsubitem Det, \hyperpage{84}
+      \subsubitem Inverse, \hyperpage{84}
+      \subsubitem LogDet, \hyperpage{84}
+      \subsubitem MaxAbs2Element, \hyperpage{84}
+      \subsubitem MaxAbsElement, \hyperpage{84}
+      \subsubitem Norm, \hyperpage{84}
+      \subsubitem Norm1, \hyperpage{84}
+      \subsubitem Norm2, \hyperpage{84}
+      \subsubitem NormF, \hyperpage{84}
+      \subsubitem NormInf, \hyperpage{84}
+      \subsubitem NormSq, \hyperpage{84}
+      \subsubitem SumAbs2Elements, \hyperpage{84}
+      \subsubitem SumAbsElements, \hyperpage{84}
+      \subsubitem SumElements, \hyperpage{84}
+      \subsubitem Swap, \hyperpage{84}
+      \subsubitem Trace, \hyperpage{84}
+    \subitem I/O, \hyperpage{88}
+    \subitem Methods
+      \subsubitem addToAll, \hyperpage{84}
+      \subsubitem adjoint, \hyperpage{83}
+      \subsubitem chd, \hyperpage{87}
+      \subsubitem clip, \hyperpage{84}
+      \subsubitem col, \hyperpage{82}
+      \subsubitem colsize, \hyperpage{82}
+      \subsubitem condition, \hyperpage{84}
+      \subsubitem conjugate, \hyperpage{83}
+      \subsubitem conjugateSelf, \hyperpage{84}
+      \subsubitem cptr, \hyperpage{82}
+      \subsubitem cref, \hyperpage{82}
+      \subsubitem cView, \hyperpage{83}
+      \subsubitem det, \hyperpage{84}
+      \subsubitem diag, \hyperpage{82}
+      \subsubitem divideInPlace, \hyperpage{88}
+      \subsubitem divIsSet, \hyperpage{88}
+      \subsubitem doCondition, \hyperpage{84}
+      \subsubitem fView, \hyperpage{83}
+      \subsubitem imagPart, \hyperpage{83}
+      \subsubitem inverse, \hyperpage{84}
+      \subsubitem iscm, \hyperpage{82}
+      \subsubitem isconj, \hyperpage{82}
+      \subsubitem isherm, \hyperpage{82}
+      \subsubitem isrm, \hyperpage{82}
+      \subsubitem isSingular, \hyperpage{84}
+      \subsubitem issym, \hyperpage{82}
+      \subsubitem isupper, \hyperpage{82}
+      \subsubitem logDet, \hyperpage{84}
+      \subsubitem lowerTri, \hyperpage{83}
+      \subsubitem lud, \hyperpage{86}
+      \subsubitem makeInverse, \hyperpage{84}
+      \subsubitem makeInverseATA, \hyperpage{84}
+      \subsubitem maxAbs2Element, \hyperpage{84}
+      \subsubitem maxAbsElement, \hyperpage{84}
+      \subsubitem ncols, \hyperpage{82}
+      \subsubitem norm, \hyperpage{84}
+      \subsubitem norm1, \hyperpage{84}
+      \subsubitem norm2, \hyperpage{84}
+      \subsubitem normF, \hyperpage{84}
+      \subsubitem normInf, \hyperpage{84}
+      \subsubitem normSq, \hyperpage{84}
+      \subsubitem nrows, \hyperpage{82}
+      \subsubitem operator(), \hyperpage{82}
+      \subsubitem permuteRowsCols, \hyperpage{84}
+      \subsubitem ptr, \hyperpage{82}
+      \subsubitem realPart, \hyperpage{83}
+      \subsubitem ref, \hyperpage{82}
+      \subsubitem resetDiv, \hyperpage{88}
+      \subsubitem resize, \hyperpage{82}
+      \subsubitem reversePermuteRowsCols, \hyperpage{84}
+      \subsubitem row, \hyperpage{82}
+      \subsubitem rowsize, \hyperpage{82}
+      \subsubitem saveDiv, \hyperpage{88}
+      \subsubitem setAllTo, \hyperpage{84}
+      \subsubitem setDiv, \hyperpage{88}
+      \subsubitem setToIdentity, \hyperpage{84}
+      \subsubitem setZero, \hyperpage{84}
+      \subsubitem size, \hyperpage{82}
+      \subsubitem stepi, \hyperpage{82}
+      \subsubitem stepj, \hyperpage{82}
+      \subsubitem subMatrix, \hyperpage{83}
+      \subsubitem subSymMatrix, \hyperpage{83}
+      \subsubitem subVector, \hyperpage{83}
+      \subsubitem sumAbs2Elements, \hyperpage{84}
+      \subsubitem sumAbsElements, \hyperpage{84}
+      \subsubitem sumElements, \hyperpage{84}
+      \subsubitem svd, \hyperpage{87}
+      \subsubitem swapRowsCols, \hyperpage{84}
+      \subsubitem symsvd, \hyperpage{87}
+      \subsubitem trace, \hyperpage{84}
+      \subsubitem transpose, \hyperpage{83}
+      \subsubitem transposeSelf, \hyperpage{84}
+      \subsubitem unitLowerTri, \hyperpage{83}
+      \subsubitem unitUpperTri, \hyperpage{83}
+      \subsubitem unsetDiv, \hyperpage{88}
+      \subsubitem upperTri, \hyperpage{83}
+      \subsubitem view, \hyperpage{83}
+    \subitem Packed storage, \hyperpage{162}
+    \subitem Singular value decomposition, \hyperpage{87}, 
+		\hyperpage{110}
+    \subitem square root, \hyperpage{111}
+    \subitem View of raw memory, \hyperpage{81, 82}
+    \subitem View portion as SymBandMatrix or HermBandMatrix, 
+		\hyperpage{92}
+
+  \indexspace
+
+  \item TMV.h, \hyperpage{8}, \hyperpage{19}
+  \item TMV\_Band.h, \hyperpage{19}, \hyperpage{70}
+  \item TMV\_MAJOR\_VERSION, \hyperpage{9}
+  \item TMV\_MINOR\_VERSION, \hyperpage{9}
+  \item TMV\_Small.h, \hyperpage{32}
+  \item TMV\_Sym.h, \hyperpage{19}, \hyperpage{80}
+  \item TMV\_SymBand.h, \hyperpage{19}, \hyperpage{90}
+  \item TMV\_Version, \hyperpage{9}
+  \item TMV\_VERSION\_AT\_LEAST, \hyperpage{9}
+  \item Tridiagonal decomposition, \hyperpage{108}
+  \item Tridiagonal LDL decomposition
+    \subitem SymBandMatrix, \hyperpage{108}
+
+  \indexspace
+
+  \item UpperTriMatrix, \hyperpage{64}
+    \subitem Access methods, \hyperpage{66}
+    \subitem Arithmetic, \hyperpage{68}
+      \subsubitem division, \hyperpage{69}
+    \subitem Constructors, \hyperpage{64}
+    \subitem Functions of, \hyperpage{67}
+      \subsubitem Det, \hyperpage{68}
+      \subsubitem Inverse, \hyperpage{68}
+      \subsubitem LogDet, \hyperpage{68}
+      \subsubitem MaxAbs2Element, \hyperpage{68}
+      \subsubitem MaxAbsElement, \hyperpage{68}
+      \subsubitem Norm, \hyperpage{68}
+      \subsubitem Norm1, \hyperpage{68}
+      \subsubitem Norm2, \hyperpage{68}
+      \subsubitem NormF, \hyperpage{68}
+      \subsubitem NormInf, \hyperpage{68}
+      \subsubitem NormSq, \hyperpage{68}
+      \subsubitem SumAbs2Elements, \hyperpage{68}
+      \subsubitem SumAbsElements, \hyperpage{68}
+      \subsubitem SumElements, \hyperpage{68}
+      \subsubitem Swap, \hyperpage{68}
+      \subsubitem Trace, \hyperpage{68}
+    \subitem I/O, \hyperpage{69}
+    \subitem Methods
+      \subsubitem addToAll, \hyperpage{68}
+      \subsubitem adjoint, \hyperpage{67}
+      \subsubitem clip, \hyperpage{68}
+      \subsubitem col, \hyperpage{66}
+      \subsubitem colsize, \hyperpage{66}
+      \subsubitem condition, \hyperpage{68}
+      \subsubitem conjugate, \hyperpage{67}
+      \subsubitem conjugateSelf, \hyperpage{68}
+      \subsubitem cptr, \hyperpage{67}
+      \subsubitem cView, \hyperpage{67}
+      \subsubitem det, \hyperpage{68}
+      \subsubitem diag, \hyperpage{66}
+      \subsubitem doCondition, \hyperpage{68}
+      \subsubitem fView, \hyperpage{67}
+      \subsubitem imagPart, \hyperpage{67}
+      \subsubitem inverse, \hyperpage{68}
+      \subsubitem invertSelf, \hyperpage{68}
+      \subsubitem iscm, \hyperpage{67}
+      \subsubitem isconj, \hyperpage{67}
+      \subsubitem isrm, \hyperpage{67}
+      \subsubitem isSingular, \hyperpage{68}
+      \subsubitem logDet, \hyperpage{68}
+      \subsubitem makeInverse, \hyperpage{68}
+      \subsubitem makeInverseATA, \hyperpage{68}
+      \subsubitem maxAbs2Element, \hyperpage{68}
+      \subsubitem maxAbsElement, \hyperpage{68}
+      \subsubitem ncols, \hyperpage{66}
+      \subsubitem norm, \hyperpage{68}
+      \subsubitem norm1, \hyperpage{68}
+      \subsubitem norm2, \hyperpage{68}
+      \subsubitem normF, \hyperpage{68}
+      \subsubitem normInf, \hyperpage{68}
+      \subsubitem normSq, \hyperpage{68}
+      \subsubitem nrows, \hyperpage{66}
+      \subsubitem offDiag, \hyperpage{67}
+      \subsubitem operator(), \hyperpage{66}
+      \subsubitem ptr, \hyperpage{67}
+      \subsubitem realPart, \hyperpage{67}
+      \subsubitem resize, \hyperpage{66}
+      \subsubitem row, \hyperpage{66}
+      \subsubitem rowsize, \hyperpage{66}
+      \subsubitem setAllTo, \hyperpage{68}
+      \subsubitem setToIdentity, \hyperpage{68}
+      \subsubitem setZero, \hyperpage{68}
+      \subsubitem size, \hyperpage{66}
+      \subsubitem stepi, \hyperpage{67}
+      \subsubitem stepj, \hyperpage{67}
+      \subsubitem subMatrix, \hyperpage{67}
+      \subsubitem subTriMatrix, \hyperpage{67}
+      \subsubitem subVector, \hyperpage{67}
+      \subsubitem sumAbs2Elements, \hyperpage{68}
+      \subsubitem sumAbsElements, \hyperpage{68}
+      \subsubitem sumElements, \hyperpage{68}
+      \subsubitem trace, \hyperpage{68}
+      \subsubitem transpose, \hyperpage{67}
+      \subsubitem view, \hyperpage{67}
+      \subsubitem viewAsUnitDiag, \hyperpage{67}
+    \subitem Packed storage, \hyperpage{162}
+    \subitem View as a BandMatrix, \hyperpage{72}
+    \subitem View of raw memory, \hyperpage{65, 66}
+  \item User-defined types, \hyperpage{9}
+
+  \indexspace
+
+  \item Vector, \hyperpage{21}
+    \subitem Access methods, \hyperpage{22}
+    \subitem Arithmetic, \hyperpage{29}
+      \subsubitem element by element product, \hyperpage{30}
+      \subsubitem inner product, \hyperpage{30}
+      \subsubitem outer product, \hyperpage{46}, \hyperpage{85}
+    \subitem clip, \hyperpage{31}
+    \subitem Constructors, \hyperpage{21}
+    \subitem Functions of, \hyperpage{26}
+      \subsubitem DiagMatrixViewOf, \hyperpage{60}
+      \subsubitem MaxAbs2Element, \hyperpage{27}
+      \subsubitem MaxAbsElement, \hyperpage{27}
+      \subsubitem MaxElement, \hyperpage{27}
+      \subsubitem MinAbs2Element, \hyperpage{27}
+      \subsubitem MinAbsElement, \hyperpage{27}
+      \subsubitem MinElement, \hyperpage{27}
+      \subsubitem Norm, \hyperpage{26}, \hyperpage{28}
+      \subsubitem Norm1, \hyperpage{26}
+      \subsubitem Norm2, \hyperpage{26}
+      \subsubitem NormInf, \hyperpage{27}
+      \subsubitem NormSq, \hyperpage{26}
+      \subsubitem SumAbs2Elements, \hyperpage{27}
+      \subsubitem SumAbsElements, \hyperpage{26}
+      \subsubitem SumElements, \hyperpage{27}
+      \subsubitem Swap, \hyperpage{29}
+    \subitem I/O, \hyperpage{31}
+    \subitem Initialization, \hyperpage{23}
+    \subitem Iterators, \hyperpage{22}, \hyperpage{31}
+    \subitem List initialization, \hyperpage{23}
+    \subitem Methods
+      \subsubitem addToAll, \hyperpage{28}
+      \subsubitem begin, \hyperpage{22}
+      \subsubitem clip, \hyperpage{28}
+      \subsubitem conjugate, \hyperpage{25}
+      \subsubitem conjugateSelf, \hyperpage{28}
+      \subsubitem cptr, \hyperpage{23}
+      \subsubitem cref, \hyperpage{22}
+      \subsubitem cView, \hyperpage{25}
+      \subsubitem end, \hyperpage{22}
+      \subsubitem flatten, \hyperpage{25}
+      \subsubitem fView, \hyperpage{25}
+      \subsubitem imagPart, \hyperpage{25}
+      \subsubitem isconj, \hyperpage{23}
+      \subsubitem makeBasis, \hyperpage{28}
+      \subsubitem maxAbs2Element, \hyperpage{27}
+      \subsubitem maxAbsElement, \hyperpage{27}
+      \subsubitem maxElement, \hyperpage{27}
+      \subsubitem minAbs2Element, \hyperpage{27}
+      \subsubitem minAbsElement, \hyperpage{27}
+      \subsubitem minElement, \hyperpage{27}
+      \subsubitem norm, \hyperpage{26}
+      \subsubitem norm1, \hyperpage{26}
+      \subsubitem norm2, \hyperpage{26}
+      \subsubitem normInf, \hyperpage{27}
+      \subsubitem normSq, \hyperpage{26}
+      \subsubitem operator(), \hyperpage{22}
+      \subsubitem operator[], \hyperpage{22}
+      \subsubitem ptr, \hyperpage{23}
+      \subsubitem rbegin, \hyperpage{22}
+      \subsubitem realPart, \hyperpage{25}
+      \subsubitem ref, \hyperpage{22}
+      \subsubitem rend, \hyperpage{22}
+      \subsubitem resize, \hyperpage{24}
+      \subsubitem reverse, \hyperpage{25}
+      \subsubitem reverseSelf, \hyperpage{28}
+      \subsubitem setAllTo, \hyperpage{28}
+      \subsubitem setZero, \hyperpage{28}
+      \subsubitem size, \hyperpage{22}
+      \subsubitem sort, \hyperpage{28}
+      \subsubitem step, \hyperpage{23}
+      \subsubitem subVector, \hyperpage{24}
+      \subsubitem sumAbs2Elements, \hyperpage{27}
+      \subsubitem sumAbsElements, \hyperpage{26}
+      \subsubitem sumElements, \hyperpage{27}
+      \subsubitem swap, \hyperpage{28}
+      \subsubitem view, \hyperpage{25}
+    \subitem Resizing, \hyperpage{24}
+    \subitem VectorView, \hyperpage{24}
+    \subitem View as a 1$\times$n matrix, \hyperpage{35}
+    \subitem View as a diagonal matrix, \hyperpage{60}
+    \subitem View as an n$\times$1 matrix, \hyperpage{35}
+    \subitem View of raw memory, \hyperpage{22}
+    \subitem Views, \hyperpage{24}
+  \item Version of TMV, \hyperpage{9}
+
+  \indexspace
+
+  \item Warnings, \hyperpage{104}
+    \subitem bad\_alloc, \hyperpage{104}
+    \subitem LAPACK ?stegr, \hyperpage{15}, \hyperpage{104}
+    \subitem LAPACK workspace, \hyperpage{104}
+    \subitem Set an output stream to use, \hyperpage{104}
+    \subitem SVD convergence, \hyperpage{104}
+    \subitem Turn off, \hyperpage{104}
+  \item WriteWarningsTo, \hyperpage{104}
+
+\end{theindex}

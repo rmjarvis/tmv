@@ -1,0 +1,21 @@
+
+#define CT std::complex<T>
+
+#define DefMV(T,Ta,Tb)\
+  template void MultMM<true>(const T alpha, const GenDiagMatrix<Ta >& A, \
+      const GenMatrix<Tb >& B, MatrixView<T > C);  \
+  template void MultMM<false>(const T alpha, const GenDiagMatrix<Ta >& A, \
+      const GenMatrix<Tb >& B, MatrixView<T > C);  \
+
+DefMV(T,T,T)
+#ifdef INST_COMPLEX
+DefMV(CT,T,T)
+DefMV(CT,T,CT)
+DefMV(CT,CT,T)
+DefMV(CT,CT,CT)
+#endif
+
+#undef DefMV
+
+#undef CT
+

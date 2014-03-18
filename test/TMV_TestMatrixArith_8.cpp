@@ -7,11 +7,8 @@
 #include "TMV_TestMatrixArith.h"
 #define CT std::complex<T>
 
-template <class T> 
-void TestMatrixArith_8()
+template <class T> void TestMatrixArith_8()
 {
-    typedef typename tmv::Traits<T>::real_type RT;
-    typedef typename tmv::Traits<RT>::float_type FT;
 #if 1
     const int NSIZE = 4;
     const int sizear[NSIZE] = {2,5,77,637};
@@ -43,7 +40,7 @@ void TestMatrixArith_8()
                 bc(i,j) = CT(T(2*i-13),T(-3*j+8));
             tmv::Matrix<CT,tmv::RowMajor> ar = ac;
             tmv::Matrix<CT,tmv::RowMajor> br = bc;
-            FT eps = EPS;
+            T eps = EPS;
             if (!std::numeric_limits<T>::is_integer)
                 eps *= (T(1)+Norm(ac)+Norm(bc));
 
@@ -143,7 +140,7 @@ void TestMatrixArith_8()
                 bc(i,j) = CT(T(2*i-13),T(-3*j+8));
             tmv::Matrix<CT,tmv::RowMajor> ar = ac;
             tmv::Matrix<CT,tmv::RowMajor> br = bc;
-            FT eps = FT(10) * EPS;
+            T eps = T(10) * EPS;
             if (!std::numeric_limits<T>::is_integer)
                 eps *= (T(1)+Norm(ac)*Norm(bc));
 
@@ -183,7 +180,7 @@ void TestMatrixArith_8()
 
             tmv::Matrix<CT> c0 = c1;
             c1 = c0 + ac * bc;
-            eps = FT(10) * EPS;
+            eps = T(10) * EPS;
             if (!std::numeric_limits<T>::is_integer)
                 eps *= (Norm(c0)+Norm(ac)*Norm(bc));
             Assert(Equal(((c=c0)+=ar*br),c1,eps),"+ar*br");
@@ -212,7 +209,7 @@ void TestMatrixArith_8()
 
             T x1(7);
             c1 = x1*ac * bc;
-            eps = FT(10) * EPS;
+            eps = T(10) * EPS;
             if (!std::numeric_limits<T>::is_integer)
                 eps *= (T(1)+x1*Norm(ac)*Norm(bc));
             Assert(Equal((c=x1*ar*br),c1,eps),"xar*br");
@@ -240,7 +237,7 @@ void TestMatrixArith_8()
                    "xcac*cbr");
 
             c1 = c0 + x1*ac * bc;
-            eps = FT(10) * EPS;
+            eps = T(10) * EPS;
             if (!std::numeric_limits<T>::is_integer)
                 eps *= (Norm(c0)+x1*Norm(ac)*Norm(bc));
             Assert(Equal(((c=c0)+=x1*ar*br),c1,eps),"+xar*br");
@@ -269,7 +266,7 @@ void TestMatrixArith_8()
 
             CT z1(7,-9);
             c1 = z1*ac * bc;
-            eps = FT(10) * EPS;
+            eps = T(10) * EPS;
             if (!std::numeric_limits<T>::is_integer)
                 eps *= (T(1)+tmv::TMV_ABS2(z1)*Norm(ac)*Norm(bc));
             Assert(Equal((c=z1*ar*br),c1,eps),"zar*br");
@@ -297,7 +294,7 @@ void TestMatrixArith_8()
                    "zcac*cbr");
 
             c1 = c0 + z1*ac * bc;
-            eps = FT(10) * EPS;
+            eps = T(10) * EPS;
             if (!std::numeric_limits<T>::is_integer)
                 eps *= (Norm(c0)+tmv::TMV_ABS2(z1)*Norm(ac)*Norm(bc));
             Assert(Equal(((c=c0)+=z1*ar*br),c1,eps),"+zar*br");
@@ -344,7 +341,7 @@ void TestMatrixArith_8()
                 bc(i,j) = T(2*i-3*j+13);
             tmv::Matrix<T,tmv::RowMajor> ar = ac;
             tmv::Matrix<T,tmv::RowMajor> br = bc;
-            FT eps = FT(10) * EPS;
+            T eps = T(10) * EPS;
             if (!std::numeric_limits<T>::is_integer)
                 eps *= (T(1)+Norm(ac)*Norm(bc));
 
@@ -369,7 +366,7 @@ void TestMatrixArith_8()
 
             tmv::Matrix<T> c0 = c1;
             c1 = c0 + ac * bc;
-            eps = FT(10) * EPS;
+            eps = T(10) * EPS;
             if (!std::numeric_limits<T>::is_integer)
                 eps *= (Norm(c0)+Norm(ac)*Norm(bc));
             Assert(Equal(((c=c0)+=ar*br),c1,eps),"+ar*br");
@@ -378,7 +375,7 @@ void TestMatrixArith_8()
 
             T x1(7);
             c1 = x1*ac * bc;
-            eps = FT(10) * EPS;
+            eps = T(10) * EPS;
             if (!std::numeric_limits<T>::is_integer)
                 eps *= (T(1)+x1*Norm(ac)*Norm(bc));
             Assert(Equal((c=x1*ar*br),c1,eps),"xar*br");
@@ -386,7 +383,7 @@ void TestMatrixArith_8()
             Assert(Equal((c=x1*ac*br),c1,eps),"xac*br");
 
             c1 = c0 + x1*ac * bc;
-            eps = FT(10) * EPS;
+            eps = T(10) * EPS;
             if (!std::numeric_limits<T>::is_integer)
                 eps *= (Norm(c0)+x1*Norm(ac)*Norm(bc));
             Assert(Equal(((c=c0)+=x1*ar*br),c1,eps),"+xar*br");

@@ -6,11 +6,8 @@
 #endif
 
 #include <iostream>
-#include <typeinfo>
 #include <cmath>
 #include "tmv/TMV_Base.h"
-
-#define EPS (10*tmv::TMV_Epsilon<FT>())
 
 #ifndef NO_TEST_DOUBLE
 #define TEST_DOUBLE
@@ -24,6 +21,8 @@
 #define TEST_COMPLEX
 #endif
 
+#define EPS (10*tmv::TMV_Epsilon<T>())
+
 extern bool showtests;
 extern bool showacc;
 extern bool showdiv;
@@ -34,8 +33,41 @@ extern bool symoprod;
 extern bool dontthrow;
 extern std::string lastsuccess;
 
-void PreAssert(std::string s);
-void DoAssert(bool x, std::string s);
+#ifdef TMV_DEBUG
+inline void PreAssert(const std::string& s)
+{
+    if (showtests) { 
+        std::cout<<"Trying: "<<s;  
+        std::cout.flush(); 
+    } 
+}
+#else
+inline void PreAssert(const std::string& ) {}
+#endif
+
+inline void DoAssert(bool x, std::string s)
+{
+    if (x) { 
+#ifdef TMV_DEBUG
+        if (showtests) std::cout<<"  Passed"<<std::endl;
+        lastsuccess = s; 
+#endif
+    } else { 
+#ifdef TMV_DEBUG
+        if (showtests) std::cout<<"  Failed"<<std::endl;
+        if (dontthrow) std::cout<<"Failed test: "<<s<<std::endl;  
+        else {
+#endif
+#ifdef NOTHROW
+            std::cerr<<"Error in test: "<<s<<std::endl; exit(1); 
+#else
+            throw tmv::Error("Error in test: "+s);  
+#endif
+#ifdef TMV_DEBUG
+        }
+#endif
+    } 
+}
 
 #define Assert(x,s) \
     do {  \
@@ -45,103 +77,37 @@ void DoAssert(bool x, std::string s);
 
 template <class M1, class M2, class T>
 inline bool Equal(const M1& a, const M2& b, T eps)
-{
+{ 
     T normdiff = Norm(a-b);
-#ifdef XXD
-    if (showacc && !(normdiff <= eps)) {
-        std::cout<<"test1 = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
-        std::cout<<"test2 = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
-        std::cout<<"diff = "<<a-b<<std::endl;
-        std::cout<<"Norm(diff) = "<<normdiff<<std::endl;
-        std::cout<<"eps = "<<eps<<std::endl;
-    }
     if (showtests) std::cout<<"  "<<normdiff<<" <=? "<<eps<<"  ";
-#endif
     return normdiff <= eps; 
 }
 template <class X1, class X2, class T>
 inline bool Equal2(const X1& a, const X2& b, T eps)
 {
     T absdiff = tmv::TMV_ABS2(a-b);
-#ifdef XXD
-    if (showacc && !(absdiff <= eps)) {
-        std::cout<<"test1 = "<<a<<std::endl;
-        std::cout<<"test2 = "<<b<<std::endl;
-        std::cout<<"abs2(diff) = "<<absdiff<<std::endl;
-        std::cout<<"eps = "<<eps<<std::endl;
-    }
     if (showtests) std::cout<<"  "<<absdiff<<" <=? "<<eps<<"  ";
-#endif
     return absdiff <= eps;
 }
 
 template <class M1, class M2>
 inline bool Equal(const M1& a, const M2& b, int )
-{
-    bool eq = (a == b);
-#ifdef XXD
-    if (showacc && !(eq)) {
-        std::cout<<"test1 = "<<a<<std::endl;
-        std::cout<<"test2 = "<<b<<std::endl;
-        std::cout<<"Norm(diff) = "<<Norm(a-b)<<std::endl;
-        std::cout<<"test1 == test2 = "<<eq<<std::endl;
-    }
-#endif
-    return eq;
-}
+{ return a == b; }
 template <class X1, class X2>
 inline bool Equal2(const X1& a, const X2& b, int )
-{
-    bool eq = (a == b);
-#ifdef XXD
-    if (showacc && !(eq)) {
-        std::cout<<"test1 = "<<a<<std::endl;
-        std::cout<<"test2 = "<<b<<std::endl;
-        std::cout<<"abs(diff) = "<<tmv::TMV_ABS2(a-b)<<std::endl;
-        std::cout<<"test1 == test2 = "<<eq<<std::endl;
-    }
-#endif
-    return eq;
-}
+{ return a == b; }
 
-template <class T>
-static inline std::string Text(const T&)
-{ return std::string("Unknown (") + typeid(T).name() + ")"; }
+// C++ I/O doesn't seem capable of reading in at higher accuracy than double precision.
+// If you do fin >> x; where x is a long double variable and the text in the file is 
+// 1.234, say, then (x-1.234) will not be zero after this.  Instead it will be something
+// of order 1.e-17.  So we only check the IO at double precision for long doubles.
+template <class M1, class M2, class T>
+inline bool EqualIO(const M1& a, const M2& b, T eps)
+{ return Equal(a,b,eps); }
+template <class M1, class M2>
+inline bool EqualIO(const M1& a, const M2& b, long double eps )
+{ return Equal(a,b,10*tmv::TMV_Epsilon<double>()); }
 
-static inline std::string Text(const double&)
-{ return "double"; }
-
-static inline std::string Text(const float&)
-{ return "float"; }
-
-static inline std::string Text(const int&)
-{ return "int"; }
-
-static inline std::string Text(const long double&)
-{ return "long double"; }
-
-template <class T>
-static inline std::string Text(std::complex<T>)
-{ return std::string("complex<") + Text(T()) + ">"; }
-
-static inline std::string Text(tmv::DivType d)
-{
-    return
-        d==tmv::LU ? "LU" :
-        d==tmv::CH ? "CH" :
-        d==tmv::QR ? "QR" :
-        d==tmv::QRP ? "QRP" :
-        d==tmv::SV ? "SV" : "XX";
-}
-
-static inline std::string Text(tmv::StorageType s)
-{ 
-    return
-        s==tmv::ColMajor ? "ColMajor" :
-        s==tmv::RowMajor ? "RowMajor" :
-        s==tmv::DiagMajor ? "DiagMajor" :
-        "NonMajor";
-}
 
 extern bool XXDEBUG1;
 extern bool XXDEBUG2;

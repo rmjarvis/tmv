@@ -7,8 +7,7 @@
 #include "TMV_TestMatrixArith.h"
 #define CT std::complex<T>
 
-template <class T> 
-void TestMatrixArith_2()
+template <class T> void TestMatrixArith_2()
 {
     tmv::Matrix<T,tmv::RowMajor> a1x(4,4);
     for(int i=0;i<4;++i) for(int j=0;j<4;++j) {
@@ -50,16 +49,6 @@ void TestMatrixArith_2()
     ca3.diag().addToAll(CT(-22,15));
 
     TestMatrixArith2(a3,ca3,"Square 3");
-#endif
-
-#if (XTEST & 32)
-    tmv::Matrix<T,tmv::FortranStyle> a1f = a1;
-    tmv::Matrix<CT,tmv::FortranStyle> ca1f = ca1;
-    tmv::Matrix<T,tmv::FortranStyle> a2f = a2;
-    tmv::Matrix<CT,tmv::FortranStyle> ca2f = ca2;
-
-    TestMatrixArith2(a1f,ca1f,"Square 1F");
-    TestMatrixArith2(a2f,ca2f,"Square 2F");
 #endif
 
     tmv::Matrix<T,tmv::RowMajor> a4x(7,4);

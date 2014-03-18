@@ -1,3 +1,4 @@
-TMV_InvertU.cpp
-TMV_DivVU.cpp
-TMV_DivUU.cpp
+TMV_TriDiv_V.cpp
+TMV_TriDiv_M.cpp
+TMV_TriDiv_L.cpp
+TMV_TriInverse.cpp

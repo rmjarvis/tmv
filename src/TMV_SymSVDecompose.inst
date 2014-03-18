@@ -1,0 +1,35 @@
+
+#define CT std::complex<T>
+
+#define DefSVD(RT,T)\
+template void UnsortedHermEigen(MatrixView<T > U, VectorView<RT > S); \
+template void UnsortedEigen(SymMatrixView<T > A, VectorView<RT > S); \
+template void EigenFromTridiagonal(MatrixView<T > U, \
+    VectorView<RT > D, VectorView<RT > E); \
+template void HermSV_Decompose(MatrixView<T > U, DiagMatrixView<RT > S); \
+template void SymSV_Decompose(MatrixView<T > U, \
+    DiagMatrixView<RT > S, MatrixView<T > V, RT& logdet, T& det); \
+template void SV_Decompose(SymMatrixView<T > A, DiagMatrixView<RT > S); \
+template void SV_Decompose(const GenSymMatrix<T >& A, \
+    MatrixView<T > U, DiagMatrixView<RT > S, MatrixView<T > V); \
+template void SV_Decompose(const GenSymMatrix<T >& A, \
+    MatrixView<T > U, DiagMatrixView<RT > S); \
+template void SV_Decompose(const GenSymMatrix<T >& A, \
+    DiagMatrixView<RT > S, MatrixView<T > V); \
+template void Eigen(const GenSymMatrix<T >& A, \
+    MatrixView<T > U, VectorView<RT > S); \
+template void Eigen(const GenSymMatrix<T >& A, VectorView<RT > S); \
+template void PolarDecompose(MatrixView<T > U, SymMatrixView<T > P); \
+template void PolarDecompose(const GenBandMatrix<T >& A, \
+    MatrixView<T > U, SymMatrixView<T > P); \
+template void SquareRoot(SymMatrixView<T > A); \
+
+DefSVD(T,T)
+#ifdef INST_COMPLEX
+DefSVD(T,CT)
+#endif
+
+#undef DefSVD
+
+#undef CT
+

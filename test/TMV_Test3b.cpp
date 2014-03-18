@@ -22,7 +22,8 @@ bool symoprod = false;
 bool dontthrow = false;
 std::string lastsuccess = "";
 
-int main() try {
+int main() try 
+{
     std::ofstream log("tmvtest3b.log");
     tmv::WriteWarningsTo(&log);
 
@@ -41,15 +42,15 @@ int main() try {
     TestAllSmallMatrixA<float>();
 #endif
 
-#ifdef TEST_INT
-    TestAllSmallMatrixA<int>();
-#endif 
-
 #ifdef TEST_LONGDOUBLE
     TestAllSmallMatrixA<long double>();
 #endif 
 
+#ifdef TEST_INT
+    TestAllSmallMatrixA<int>();
 #endif 
+
+#endif
 
     return 0;
 }
@@ -65,39 +66,12 @@ catch (std::exception& e) {
     std::cerr<<e.what()<<std::endl;
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
-}
-catch (...) {
+} catch (...) {
     std::cerr<<"Unknown exception thrown\n";
     std::cerr<<"Last successful test was "<<lastsuccess<<std::endl;
     return 1;
 }
 #else
-catch (int) {}
+catch (double) {}
 #endif
-
-
-void PreAssert(std::string s)
-{
-    if (showtests) { 
-        std::cout<<"Trying: "<<s;  
-        std::cout.flush(); 
-    } 
-}
-
-void DoAssert(bool x, std::string s)
-{
-    if (x) { 
-        if (showtests) std::cout<<"  Passed"<<std::endl;
-        lastsuccess = s; 
-    } else { 
-        if (showtests) std::cout<<"  Failed"<<std::endl;
-        if (dontthrow) std::cout<<"Failed test: "<<s<<std::endl;  
-        else
-#ifdef NOTHROW
-        { std::cerr<<"Error in test: "<<s<<std::endl; exit(1); }
-#else
-        throw tmv::Error("Error in test: ",s);  
-#endif
-    } 
-}
 

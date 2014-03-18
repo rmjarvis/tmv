@@ -1,31 +1,21 @@
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
+// Copyright (C) 1998 - 2014                                                 //
+// All rights reserved                                                       //
 //                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
+// The project is hosted at https://code.google.com/p/tmv-cpp/               //
 // where you can find the current version and current documention.           //
 //                                                                           //
 // For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
+// mike_jarvis17 [at] gmail.                                                 //
 //                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
+// This software is licensed under a FreeBSD license.  The file              //
+// TMV_LICENSE should have bee included with this distribution.              //
+// It not, you can get a copy from https://code.google.com/p/tmv-cpp/.       //
 //                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
+// Essentially, you can use this software however you want provided that     //
+// you include the TMV_LICENSE file in any distribution that uses it.        //
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -35,7 +25,7 @@
 
 #include "TMV_BandQRDiv.h"
 #include "tmv/TMV_BandMatrix.h"
-#include "TMV_Householder.h"
+#include "tmv/TMV_Householder.h"
 #include "TMV_BandLUDiv.h"
 
 #ifdef XDEBUG
@@ -56,7 +46,7 @@ namespace tmv {
     template <class T, class T1> 
     void Q_LDivEq(
         const GenBandMatrix<T1>& Q, const GenVector<T1>& Qbeta,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Q.rowsize() == Qbeta.size());
@@ -77,7 +67,7 @@ namespace tmv {
     template <class T, class T1> 
     void Q_RDivEq(
         const GenBandMatrix<T1>& Q, const GenVector<T1>& Qbeta,
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(Q.colsize() >= Q.rowsize());
         TMVAssert(Qbeta.size() == Q.rowsize());
@@ -105,7 +95,7 @@ namespace tmv {
     template <class T, class T1, class T2> 
     void QR_LDiv(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta,
-        const GenMatrix<T2>& m, const MatrixView<T>& x)
+        const GenMatrix<T2>& m, MatrixView<T> x)
     {
         TMVAssert(QRx.colsize() >= QRx.rowsize());
         TMVAssert(Qbeta.size() == QRx.rowsize());
@@ -170,7 +160,7 @@ namespace tmv {
     template <class T, class T1> 
     void QR_LDivEq(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta, 
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(QRx.colsize() == QRx.rowsize());
         TMVAssert(Qbeta.size() == QRx.rowsize());
@@ -216,7 +206,7 @@ namespace tmv {
     template <class T, class T1, class T2> 
     void QR_RDiv(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta, 
-        const GenMatrix<T2>& m, const MatrixView<T>& x)
+        const GenMatrix<T2>& m, MatrixView<T> x)
     {
         TMVAssert(QRx.colsize() >= QRx.rowsize());
         TMVAssert(Qbeta.size() == QRx.rowsize());
@@ -270,7 +260,7 @@ namespace tmv {
     template <class T, class T1> 
     void QR_RDivEq(
         const GenBandMatrix<T1>& QRx, const GenVector<T1>& Qbeta, 
-        const MatrixView<T>& m)
+        MatrixView<T> m)
     {
         TMVAssert(QRx.colsize() == QRx.rowsize());
         TMVAssert(Qbeta.size() == QRx.rowsize());

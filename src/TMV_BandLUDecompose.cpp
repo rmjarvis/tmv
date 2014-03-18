@@ -1,23 +1,43 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
+// Copyright (C) 1998 - 2014                                                 //
+// All rights reserved                                                       //
+//                                                                           //
+// The project is hosted at https://code.google.com/p/tmv-cpp/               //
+// where you can find the current version and current documention.           //
+//                                                                           //
+// For concerns or problems with the software, Mike may be contacted at      //
+// mike_jarvis17 [at] gmail.                                                 //
+//                                                                           //
+// This software is licensed under a FreeBSD license.  The file              //
+// TMV_LICENSE should have bee included with this distribution.              //
+// It not, you can get a copy from https://code.google.com/p/tmv-cpp/.       //
+//                                                                           //
+// Essentially, you can use this software however you want provided that     //
+// you include the TMV_LICENSE file in any distribution that uses it.        //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
 
-//#define PRINTALGO_LU
-//#define XDEBUG_LU
+
+//#define XDEBUG
 
 
 #include "TMV_Blas.h"
-#include "tmv/TMV_BandLUDecompose.h"
+#include "TMV_BandLUDiv.h"
+#include "tmv/TMV_BandLUD.h"
 #include "tmv/TMV_BandMatrix.h"
-#include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_SmallTriMatrix.h"
-#include "tmv/TMV_Vector.h"
-#include "tmv/TMV_SmallVector.h"
-#include "tmv/TMV_CopyV.h"
-#include "tmv/TMV_SwapV.h"
-#include "tmv/TMV_MinMax.h"
-#include "tmv/TMV_CopyM.h"
-#include "tmv/TMV_CopyU.h"
-#include "tmv/TMV_PermuteM.h"
-#include "tmv/TMV_Det.h"
+#include "tmv/TMV_VectorArith.h"
+#include "tmv/TMV_MatrixArith.h"
+
+#ifdef XDEBUG
+#include <iostream>
+#include "tmv/TMV_BandMatrixArith.h"
+using std::cout;
+using std::cerr;
+using std::endl;
+#endif
 
 namespace tmv {
 
@@ -26,8 +46,7 @@ namespace tmv {
     //
 
     template <class T> 
-    static void NonLapBandLU_Decompose(
-        const BandMatrixView<T>& A, ptrdiff_t* P)
+    static void NonLapBandLU_Decompose(BandMatrixView<T> A, ptrdiff_t* P)
     {
         // LU Decompostion with partial pivoting.
         //
@@ -124,8 +143,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static void NonLapTriDiagLU_Decompose(
-        const BandMatrixView<T>& A, ptrdiff_t* P)
+    static void NonLapTriDiagLU_Decompose(BandMatrixView<T> A, ptrdiff_t* P)
     {
         // LU Decompostion for TriDiagonal BandMatrix
         //
@@ -161,19 +179,20 @@ namespace tmv {
             } else *Pj = j;
 
 #ifdef TMVFLDEBUG
-            TMVAssert(Lj >= A.first);
-            TMVAssert(Lj < A.last);
+            TMVAssert(Lj >= A._first);
+            TMVAssert(Lj < A._last);
 #endif
             if (TMV_Underflow(*Ujj)) {
                 *Ujj = *Lj = T(0);
             } else {
-                *Lj /= *Ujj;
+                // *Lj /= *Ujj;
+                *Lj = TMV_Divide(*Lj,*Ujj);
             }
 
             //A.row(j+1,j+1,endrow) -= *Lj * A.row(j,j+1,endrow);
 #ifdef TMVFLDEBUG
-            TMVAssert(Ujj+1 >= A.first);
-            TMVAssert(Ujj+1 < A.last);
+            TMVAssert(Ujj+1 >= A._first);
+            TMVAssert(Ujj+1 < A._last);
 #endif
             *(Ujj+1) -= *Lj * (*Uj1);
             if (pivot && j+2<N) *(Uj1+1) -= *Lj * (*Uj2); // (if !pivot, *Uj2 == 0)
@@ -184,13 +203,11 @@ namespace tmv {
 
 #ifdef LAP
     template <class T> 
-    static inline void LapBandLU_Decompose(
-        const BandMatrixView<T>& A, ptrdiff_t* P)
+    static inline void LapBandLU_Decompose(BandMatrixView<T> A, ptrdiff_t* P)
     { NonLapBandLU_Decompose(A,P); }
 #ifdef INST_DOUBLE
     template <> 
-    void LapBandLU_Decompose(
-        const BandMatrixView<double>& A, ptrdiff_t* P)
+    void LapBandLU_Decompose(BandMatrixView<double> A, ptrdiff_t* P)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.iscm());
@@ -205,14 +222,13 @@ namespace tmv {
             LAPCM LAPV(n),LAPV(n),LAPV(kl),LAPV(ku),
             LAPP(A.ptr()-A.nhi()),LAPV(lda),LAPP(lap_p.get()) LAPINFO );
         LAP_Results(Lap_info,"dgbtrf");
-        const int M = A.colsize();
-        for(int i=0;i<M;i++) {
+        const ptrdiff_t M = A.colsize();
+        for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
         }
     }
     template <> 
-    void LapBandLU_Decompose(
-        const BandMatrixView<std::complex<double> >& A, ptrdiff_t* P)
+    void LapBandLU_Decompose(BandMatrixView<std::complex<double> > A, ptrdiff_t* P)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.iscm());
@@ -227,16 +243,15 @@ namespace tmv {
             LAPCM LAPV(n),LAPV(n),LAPV(kl),LAPV(ku),
             LAPP(A.ptr()-A.nhi()),LAPV(lda),LAPP(lap_p.get()) LAPINFO );
         LAP_Results(Lap_info,"zgbtrf");
-        const int M = A.colsize();
-        for(int i=0;i<M;i++) {
+        const ptrdiff_t M = A.colsize();
+        for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
         }
     }
 #endif
 #ifdef INST_FLOAT
     template <> 
-    void LapBandLU_Decompose(
-        const BandMatrixView<float>& A, ptrdiff_t* P)
+    void LapBandLU_Decompose(BandMatrixView<float> A, ptrdiff_t* P)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.iscm());
@@ -251,14 +266,13 @@ namespace tmv {
             LAPCM LAPV(n),LAPV(n),LAPV(kl),LAPV(ku),
             LAPP(A.ptr()-A.nhi()),LAPV(lda),LAPP(lap_p.get()) LAPINFO );
         LAP_Results(Lap_info,"sgbtrf");
-        const int M = A.colsize();
-        for(int i=0;i<M;i++) {
+        const ptrdiff_t M = A.colsize();
+        for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
         }
     }
     template <> 
-    void LapBandLU_Decompose(
-        const BandMatrixView<std::complex<float> >& A, ptrdiff_t* P)
+    void LapBandLU_Decompose(BandMatrixView<std::complex<float> > A, ptrdiff_t* P)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.iscm());
@@ -273,21 +287,19 @@ namespace tmv {
             LAPCM LAPV(n),LAPV(n),LAPV(kl),LAPV(ku),
             LAPP(A.ptr()-A.nhi()),LAPV(lda),LAPP(lap_p.get()) LAPINFO );
         LAP_Results(Lap_info,"cgbtrf");
-        const int M = A.colsize();
-        for(int i=0;i<M;i++) {
+        const ptrdiff_t M = A.colsize();
+        for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
         }
     }
 #endif 
     // Now Lap version of DiagMajor Tridiagonal:
     template <class T> 
-    static inline void LapTriDiagLU_Decompose(
-        const BandMatrixView<T>& A, ptrdiff_t* P)
+    static inline void LapTriDiagLU_Decompose(BandMatrixView<T> A, ptrdiff_t* P)
     { NonLapTriDiagLU_Decompose(A,P); }
 #ifdef INST_DOUBLE
     template <> 
-    void LapTriDiagLU_Decompose(
-        const BandMatrixView<double>& A, ptrdiff_t* P)
+    void LapTriDiagLU_Decompose(BandMatrixView<double> A, ptrdiff_t* P)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.isdm());
@@ -299,17 +311,15 @@ namespace tmv {
         int Lap_info=0;
         LAPNAME(dgttrf) (
             LAPCM LAPV(n),LAPP(A.diag(-1).ptr()),LAPP(A.diag().ptr()),
-            LAPP(A.diag(1).ptr()),LAPP(A.diag(2).ptr()),
-            LAPP(lap_p.get()) LAPINFO );
+            LAPP(A.diag(1).ptr()),LAPP(A.diag(2).ptr()),LAPP(lap_p.get()) LAPINFO );
         LAP_Results(Lap_info,"dgttrf");
-        const int M = A.colsize();
-        for(int i=0;i<M;i++) {
+        const ptrdiff_t M = A.colsize();
+        for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
         }
     }
     template <> 
-    void LapTriDiagLU_Decompose(
-        const BandMatrixView<std::complex<double> >& A, ptrdiff_t* P)
+    void LapTriDiagLU_Decompose(BandMatrixView<std::complex<double> > A, ptrdiff_t* P)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.isdm());
@@ -321,19 +331,17 @@ namespace tmv {
         int Lap_info=0;
         LAPNAME(zgttrf) (
             LAPCM LAPV(n),LAPP(A.diag(-1).ptr()),LAPP(A.diag().ptr()), 
-            LAPP(A.diag(1).ptr()),LAPP(A.diag(2).ptr()),
-            LAPP(lap_p.get()) LAPINFO);
+            LAPP(A.diag(1).ptr()),LAPP(A.diag(2).ptr()),LAPP(lap_p.get()) LAPINFO);
         LAP_Results(Lap_info,"zgttrf");
-        const int M = A.colsize();
-        for(int i=0;i<M;i++) {
+        const ptrdiff_t M = A.colsize();
+        for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
         }
     }
 #endif
 #ifdef INST_FLOAT
     template <> 
-    void LapTriDiagLU_Decompose(
-        const BandMatrixView<float>& A, ptrdiff_t* P)
+    void LapTriDiagLU_Decompose(BandMatrixView<float> A, ptrdiff_t* P)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.isdm());
@@ -345,17 +353,15 @@ namespace tmv {
         int Lap_info=0;
         LAPNAME(sgttrf) (
             LAPCM LAPV(n),LAPP(A.diag(-1).ptr()),LAPP(A.diag().ptr()),
-            LAPP(A.diag(1).ptr()),LAPP(A.diag(2).ptr()),
-            LAPP(lap_p.get()) LAPINFO );
+            LAPP(A.diag(1).ptr()),LAPP(A.diag(2).ptr()),LAPP(lap_p.get()) LAPINFO );
         LAP_Results(Lap_info,"sgttrf");
-        const int M = A.colsize();
-        for(int i=0;i<M;i++) {
+        const ptrdiff_t M = A.colsize();
+        for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
         }
     }
     template <> 
-    void LapTriDiagLU_Decompose(
-        const BandMatrixView<std::complex<float> >& A, ptrdiff_t* P)
+    void LapTriDiagLU_Decompose(BandMatrixView<std::complex<float> > A, ptrdiff_t* P)
     {
         TMVAssert(A.isSquare());
         TMVAssert(A.isdm());
@@ -367,11 +373,10 @@ namespace tmv {
         int Lap_info=0;
         LAPNAME(cgttrf) (
             LAPCM LAPV(n),LAPP(A.diag(-1).ptr()),LAPP(A.diag().ptr()), 
-            LAPP(A.diag(1).ptr()),LAPP(A.diag(2).ptr()),
-            LAPP(lap_p.get()) LAPINFO);
+            LAPP(A.diag(1).ptr()),LAPP(A.diag(2).ptr()),LAPP(lap_p.get()) LAPINFO);
         LAP_Results(Lap_info,"cgttrf");
-        const int M = A.colsize();
-        for(int i=0;i<M;i++) {
+        const ptrdiff_t M = A.colsize();
+        for(ptrdiff_t i=0;i<M;i++) {
             P[i] = (lap_p.get())[i] LAPMINUS1;
         }
     }
@@ -380,7 +385,7 @@ namespace tmv {
 
     template <class T> 
     void LU_Decompose(
-        const BandMatrixView<T>& A, ptrdiff_t* P, ptrdiff_t 
+        BandMatrixView<T> A, ptrdiff_t* P, ptrdiff_t 
 #ifdef LAP
         Anhi
 #endif
@@ -464,8 +469,8 @@ namespace tmv {
 
     template <class T> 
     void LU_Decompose(
-        const GenBandMatrix<T>& A, const LowerTriMatrixView<T>& L,
-        const BandMatrixView<T>& U, ptrdiff_t* P)
+        const GenBandMatrix<T>& A, LowerTriMatrixView<T> L,
+        BandMatrixView<T> U, ptrdiff_t* P)
     {
         TMVAssert(L.size() == A.colsize());
         TMVAssert(L.size() == A.rowsize());

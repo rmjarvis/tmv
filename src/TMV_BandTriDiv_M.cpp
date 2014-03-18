@@ -1,31 +1,21 @@
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2009                                                 //
+// Copyright (C) 1998 - 2014                                                 //
+// All rights reserved                                                       //
 //                                                                           //
-// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
+// The project is hosted at https://code.google.com/p/tmv-cpp/               //
 // where you can find the current version and current documention.           //
 //                                                                           //
 // For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis@users.sourceforge.net                                         //
+// mike_jarvis17 [at] gmail.                                                 //
 //                                                                           //
-// This program is free software; you can redistribute it and/or             //
-// modify it under the terms of the GNU General Public License               //
-// as published by the Free Software Foundation; either version 2            //
-// of the License, or (at your option) any later version.                    //
+// This software is licensed under a FreeBSD license.  The file              //
+// TMV_LICENSE should have bee included with this distribution.              //
+// It not, you can get a copy from https://code.google.com/p/tmv-cpp/.       //
 //                                                                           //
-// This program is distributed in the hope that it will be useful,           //
-// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
-// GNU General Public License for more details.                              //
-//                                                                           //
-// You should have received a copy of the GNU General Public License         //
-// along with this program in the file LICENSE.                              //
-//                                                                           //
-// If not, write to:                                                         //
-// The Free Software Foundation, Inc.                                        //
-// 51 Franklin Street, Fifth Floor,                                          //
-// Boston, MA  02110-1301, USA.                                              //
+// Essentially, you can use this software however you want provided that     //
+// you include the TMV_LICENSE file in any distribution that uses it.        //
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -57,7 +47,7 @@ namespace tmv {
 
     template <bool ua, class T, class Ta> 
     static void RowUpperTriLDivEq(
-        const GenBandMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenBandMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(B.isrm());
         TMVAssert(A.isSquare());
@@ -96,7 +86,7 @@ namespace tmv {
 
     template <bool ua, class T, class Ta> 
     static void ColUpperTriLDivEq(
-        const GenBandMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenBandMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(B.isrm());
         TMVAssert(A.isSquare());
@@ -136,7 +126,7 @@ namespace tmv {
 
     template <bool ua, class T, class Ta> 
     static void RowLowerTriLDivEq(
-        const GenBandMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenBandMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(B.isrm());
         TMVAssert(A.isSquare());
@@ -176,7 +166,7 @@ namespace tmv {
 
     template <bool ua, class T, class Ta> 
     static void ColLowerTriLDivEq(
-        const GenBandMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenBandMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(B.isrm());
         TMVAssert(A.isSquare());
@@ -215,7 +205,7 @@ namespace tmv {
 
     template <bool ua, class T, class Ta> 
     static void NonLapTriLDivEq(
-        const GenBandMatrix<Ta>& A, const MatrixView<T>& B)
+        const GenBandMatrix<Ta>& A, MatrixView<T> B)
     {
         TMVAssert(A.isSquare());
         TMVAssert(B.colsize() == A.colsize());
@@ -246,14 +236,14 @@ namespace tmv {
 #ifdef LAP
     template <class T, class Ta> 
     static inline void LapTriLDivEq(
-        const GenBandMatrix<Ta>& A, const MatrixView<T>& B, DiagType dt)
+        const GenBandMatrix<Ta>& A, MatrixView<T> B, DiagType dt)
     { 
         if (dt == UnitDiag) NonLapTriLDivEq<true>(A,B);
         else NonLapTriLDivEq<false>(A,B);
     }
 #ifdef INST_DOUBLE
     template <> void LapTriLDivEq(
-        const GenBandMatrix<double>& A, const MatrixView<double>& B, DiagType dt)
+        const GenBandMatrix<double>& A, MatrixView<double> B, DiagType dt)
     {
         TMVAssert(A.isSquare());
         TMVAssert(B.colsize() == A.colsize());
@@ -284,7 +274,7 @@ namespace tmv {
     }
     template <> void LapTriLDivEq(
         const GenBandMatrix<std::complex<double> >& A,
-        const MatrixView<std::complex<double> >& B, DiagType dt)
+        MatrixView<std::complex<double> > B, DiagType dt)
     {
         TMVAssert(A.isSquare());
         TMVAssert(B.colsize() == A.colsize());
@@ -326,7 +316,7 @@ namespace tmv {
 #endif
 #ifdef INST_FLOAT
     template <> void LapTriLDivEq(
-        const GenBandMatrix<float>& A, const MatrixView<float>& B, DiagType dt)
+        const GenBandMatrix<float>& A, MatrixView<float> B, DiagType dt)
     {
         TMVAssert(A.isSquare());
         TMVAssert(B.colsize() == A.colsize());
@@ -357,7 +347,7 @@ namespace tmv {
     }
     template <> void LapTriLDivEq(
         const GenBandMatrix<std::complex<float> >& A,
-        const MatrixView<std::complex<float> >& B, DiagType dt)
+        MatrixView<std::complex<float> > B, DiagType dt)
     {
         TMVAssert(A.isSquare());
         TMVAssert(B.colsize() == A.colsize());
@@ -400,7 +390,7 @@ namespace tmv {
 #endif // LAP
 
     template <class T, class Ta> void TriLDivEq(
-        const GenBandMatrix<Ta>& A, const MatrixView<T>& B, DiagType dt)
+        const GenBandMatrix<Ta>& A, MatrixView<T> B, DiagType dt)
     {
 #ifdef XDEBUG
         Matrix<T> B0 = B;

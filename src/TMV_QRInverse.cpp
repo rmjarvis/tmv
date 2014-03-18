@@ -1,51 +1,51 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
+// Copyright (C) 1998 - 2014                                                 //
+// All rights reserved                                                       //
+//                                                                           //
+// The project is hosted at https://code.google.com/p/tmv-cpp/               //
+// where you can find the current version and current documention.           //
+//                                                                           //
+// For concerns or problems with the software, Mike may be contacted at      //
+// mike_jarvis17 [at] gmail.                                                 //
+//                                                                           //
+// This software is licensed under a FreeBSD license.  The file              //
+// TMV_LICENSE should have bee included with this distribution.              //
+// It not, you can get a copy from https://code.google.com/p/tmv-cpp/.       //
+//                                                                           //
+// Essentially, you can use this software however you want provided that     //
+// you include the TMV_LICENSE file in any distribution that uses it.        //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
 
-//#define PRINTALGO_QR
-
-#include "TMV_Blas.h"
-#include "tmv/TMV_QRInverse.h"
+#include "TMV_QRDiv.h"
 #include "tmv/TMV_Matrix.h"
 #include "tmv/TMV_Vector.h"
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_CopyM.h"
-#include "tmv/TMV_CopyU.h"
-#include "tmv/TMV_CopyV.h"
-#include "tmv/TMV_DivVU.h"
-#include "tmv/TMV_DivMU.h"
-#include "tmv/TMV_PermuteM.h"
-#include "tmv/TMV_MultUL.h"
-#include "tmv/TMV_MultPM.h"
-#include "tmv/TMV_MultXM.h"
-#include "tmv/TMV_ScaleM.h"
-
-#include "tmv/TMV_ProdMM.h"
-#include "tmv/TMV_QuotMM.h"
-#include "tmv/TMV_DivM.h"
 
 namespace tmv {
 
-    //
-    // Inverse
-    //
-    
-    template <class T1, int C1, class RT1, class T2>
-    void InstQR_Inverse(
-        const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, ptrdiff_t N1, MatrixView<T2> m2)
+    template <class T, class T1> 
+    void QR_Inverse(
+        const GenMatrix<T1>& QRx, const GenVector<T1>& beta, const ptrdiff_t* P,
+        MatrixView<T> minv, ptrdiff_t N1)
     {
-        InlineQR_Inverse(QR,beta,P,N1,m2);
+        // minv = Pt R^-1 Qt
+        TMVAssert(minv.colsize() == QRx.rowsize());
+        TMVAssert(minv.rowsize() == QRx.colsize());
+
+        minv.setZero();
+        UpperTriMatrixView<T> R = minv.colRange(0,N1).upperTri();
+        R = QRx.upperTri().subTriMatrix(0,N1);
+        R.invertSelf();
+        Q_RDivEq(QRx,beta,minv);
+        if (P) minv.reversePermuteRows(P);
     }
 
-    //
-    // InverseATA
-    //
-
-    template <class T1, int C1, class RT1, class T2>
-    void InstQR_InverseATA(
-        const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta,
-        const Permutation* P, ptrdiff_t N1, MatrixView<T2> m2)
-    {
-        InlineQR_InverseATA(QR,beta,P,N1,m2);
-    }
+#ifdef INST_INT
+#undef INST_INT
+#endif
 
 #define InstFile "TMV_QRInverse.inst"
 #include "TMV_Inst.h"

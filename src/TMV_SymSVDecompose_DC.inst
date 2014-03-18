@@ -1,0 +1,23 @@
+
+#define CT std::complex<T>
+
+#define DefSVD(RT,T)\
+template void EigenFromTridiagonal_DC(MatrixView<T > U, \
+    VectorView<RT > D, VectorView<RT > E, bool UisI); \
+
+DefSVD(T,T)
+#ifdef INST_COMPLEX
+DefSVD(T,CT)
+#endif
+
+#undef DefSVD
+
+#undef CT
+
+template void FindDCEigenValues(
+    Vector<T>& S, const T rho, const GenVector<T>& D, const GenVector<T>& z,
+    Matrix<T,ColMajor>& diffmat);
+
+template void FindDCEigenValues(
+    Vector<T>& S, const T rho, const GenVector<T>& D, const GenVector<T>& z);
+

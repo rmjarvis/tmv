@@ -6,18 +6,9 @@
 \label{SymBandMatrix}
 
 The \tt{SymBandMatrix} class is our symmetric band matrix, which combines
-the properties of SymMatrix and BandMatrix; it has a banded structure and
+the properties of \tt{SymMatrix} and \tt{BandMatrix}; it has a banded structure and
 $m = m^T$.  Likewise \tt{HermBandMatrix} is our hermitian band matrix for
 which $m = m^\dagger$.
-
-Both classes inherit from \tt{GenSymBandMatrix}, which in turn inherits from 
-\tt{BaseMatrix}.  The various views and composite classes described below 
-also inherit from \tt{GenSymBandMatrix}.
-\index{SymBandMatrix!SymBandMatrixView}
-\index{SymBandMatrix!ConstSymBandMatrixView}
-\index{SymBandMatrix!GenSymBandMatrix}
-\index{SymBandMatrix!SymBandMatrixComposite}
-\index{BaseMatrix}
 
 As with the documentation for \tt{SymMatrix}/\tt{HermMatrix}, the descriptions
 below will only be written for \tt{SymBandMatrix} with the implication
@@ -38,12 +29,15 @@ All the \tt{SymBandMatrix} and \tt{HermBandMatrix} routines are included by:
 \end{tmvcode}
 \index{TMV\_SymBand.h}
 
-In addition to the \tt{T} template parameter, there are three other template 
-parameters: \tt{uplo}, which can be either \tt{tmv::Upper} or \tt{tmv::Lower};
-\tt{stor}, which can be one of \tt{tmv::RowMajor}, \tt{tmv::ColMajor}, or 
-\tt{tmv::DiagMajor}; and \tt{index}, which can be either \tt{tmv::CStyle}
-or \tt{tmv::FortranStyle}.  The default values for these are 
-\tt{Lower}, \tt{ColMajor}, \tt{CStyle}.
+In addition to the data type template parameter (indicated here by \tt{T} as usual),
+there is also a second template parameter that specifies attributes of the
+\tt{SymBandMatrix} or \tt{HermBandMatrix}.  The attributes that are allowed are:
+\begin{description} \itemsep -2pt
+\item[$\bullet$] \tt{CStyle} or \tt{FortranStyle}
+\item[$\bullet$] \tt{ColMajor}, \tt{RowMajor}, or \tt{DiagMajor}
+\item[$\bullet$] \tt{Lower} or \tt{Upper}
+\end{description}
+The default attributes are \tt{CStyle}, \tt{ColMajor} and \tt{Lower}.
 
 The storage size required is the same as for the \tt{BandMatrix} of
 the upper or lower band portion.
@@ -59,9 +53,6 @@ all three to see which is fastest for the operations you are using.
 Also, as with \tt{BandMatrix}, the storage for \tt{Lower}, \tt{DiagMajor} 
 does not start with the upper left element as usual.
 Rather, it starts at the start of the lowest sub-diagonal.  
-So for the constructors that 
-take the matrix information from an array (\tt{T*} or \tt{vector<T>}), 
-the start of the array needs to be at the start of the lowest sub-diagonal.  
 
 Most functions and methods for \tt{SymBandMatrix} and \tt{HermBandMatrix}
 work the same as they do for \tt{Matrix}.
@@ -76,59 +67,60 @@ we will explain the difference.
 \index{SymBandMatrix!Constructors}
 \label{SymBandMatrix_Constructors}
 
+As usual, the optional \tt{A} template argument specifies attributes about
+the \tt{SymBandMatrix}.  The default attributes if not specified are
+\tt{CStyle|ColMajor|Lower}.
+
 \begin{itemize}
+
+\item
+\begin{tmvcode}
+tmv::SymBandMatrix<T,A> sb()
+tmv::HermBandMatrix<T,A> hb()
+\end{tmvcode}
+Makes a \tt{SymBandMatrix} or \tt{HermBandMatrix} with zero size.  You would normally use the \tt{resize} function later to
+change the size to some useful value.
+
 \item 
 \begin{tmvcode}
-tmv::SymBandMatrix<T,uplo,stor,index> sb(size_t n, int nlo)
+tmv::SymBandMatrix<T,A> sb(int n, int nlo)
+tmv::HermBandMatrix<T,A> hb(int n, int nlo)
 \end{tmvcode}
-Makes an \tt{n} $\times$ \tt{n} \tt{SymBandMatrix} with 
+Makes an \tt{n} $\times$ \tt{n} \tt{SymBandMatrix} or \tt{HermBandMatrix} with 
 \tt{nlo} off-diagonals
-and with \underline{uninitialized} values.
-If debugging is turned on (i.e. not turned off 
-with \tt{-DNDEBUG} or \tt{-DTMVNDEBUG}), then the values are initialized to 888.
+and with {\em uninitialized} values.
+If extra debugging is turned on (with the compiler flag \tt{-DTMV\_EXTRA\_DEBUG}), then the values are initialized to 888.
 
 \item
 \begin{tmvcode}
-tmv::SymBandMatrix<T,uplo,stor,index> sb(size_t n, int nlo, T x)
+tmv::SymBandMatrix<T,A> sb(int n, int nlo, T x)
+tmv::HermBandMatrix<T,A> hb(int n, int nlo, RT x)
 \end{tmvcode}
-Makes an \tt{n} $\times$ \tt{n} \tt{SymBandMatrix} with \tt{nlo} off-diagonals
-and with all values equal to \tt{x}.
-
-\item
-\begin{tmvcode}
-tmv::SymBandMatrix<T,uplo,stor,index> sb(size_t n, int nlo, 
-      const T* vv)
-tmv::SymBandMatrix<T,uplo,stor,index> sb(size_t n, int nlo, 
-      const std::vector<T>& vv)
-\end{tmvcode}
-Makes a \tt{SymBandMatrix} which copies the elements from \tt{vv}.  
+Makes an \tt{n} $\times$ \tt{n} \tt{SymBandMatrix}  or \tt{HermBandMatrix} with \tt{nlo} off-diagonals
+and with all values equal to \tt{x}.  For the \tt{HermBandMatrix} version of this, \tt{x} must be real.
 
 \item 
 \begin{tmvcode}
-tmv::SymBandMatrix<T,uplo,stor,index> sb(const GenMatrix<T>& m, 
-      int nlo)
-tmv::SymBandMatrix<T,uplo,stor,index> sb(const GenSymMatrix<T>& m, 
-      int nlo)
-tmv::SymBandMatrix<T,uplo,stor,index> sb(const GenBandMatrix<T>& m, 
-      int nlo)
-tmv::SymBandMatrix<T,uplo,stor,index> sb(const GenSymBandMatrix<T>& m, 
-      int nlo)
+tmv::SymBandMatrix<T,A> sb(const Matrix<T,A2>& m, int nlo)
+tmv::SymBandMatrix<T,A> sb(const SymMatrix<T,A2>& m, int nlo)
+tmv::SymBandMatrix<T,A> sb(const BandMatrix<T,A2>& m, int nlo)
+tmv::SymBandMatrix<T,A> sb(const SymBandMatrix<T,A2>& m, int nlo)
 \end{tmvcode}
 Makes a \tt{SymBandMatrix} which copies the corresponding values of \tt{m}.  
 For the last two, \tt{nlo} must not be larger than the number of upper
-or lower bands in \tt{m}.
+or lower bands in \tt{m}.  There are similar constructors for \tt{HermBandMatrix}.
 
 \item
 \begin{tmvcode}
-tmv::SymBandMatrix<T,uplo,DiagMajor> sb = SymTriDiagMatrix(
-      const GenVector<T>& v1, const GenVector<T>& v2)
-tmv::SymBandMatrix<T,uplo,DiagMajor> sb = SymTriDiagMatrix(
-      const GenVector<T>& v1, const GenVector<T>& v2)
-tmv::HermBandMatrix<T,uplo,DiagMajor> sb = HermTriDiagMatrix(
-      const GenVector<T>& v1, const GenVector<T>& v2, 
+tmv::SymBandMatrix<T,DiagMajor> sb = SymTriDiagMatrix(
+      const Vector<T>& v1, const Vector<T>& v2)
+tmv::SymBandMatrix<T,DiagMajor> sb = SymTriDiagMatrix(
+      const Vector<T>& v1, const Vector<T>& v2)
+tmv::HermBandMatrix<T,DiagMajor> hb = HermTriDiagMatrix(
+      const Vector<T>& v1, const Vector<T>& v2, 
       UpLoType uplo)
-tmv::HermBandMatrix<T,uplo,DiagMajor> sb = HermTriDiagMatrix(
-      const GenVector<T>& v1, const GenVector<T>& v2, 
+tmv::HermBandMatrix<T,DiagMajor> hb = HermTriDiagMatrix(
+      const Vector<T>& v1, const Vector<T>& v2, 
       UpLoType uplo)
 \end{tmvcode}
 \index{SymBandMatrix!Constructors!SymTriDiagMatrix}
@@ -141,11 +133,12 @@ With a \tt{HermTriDiagMatrix}, \tt{v1} should be real, although
 it may be either a real-valued \tt{Vector} or a complex-valued
 \tt{Vector} whose imaginary components are all zero.
 Also, \tt{HermTriDiagMatrix} takes an extra parameter, \tt{uplo}, indicating
-whether \tt{v2} should be used as the upper or lower off-diagonal.
+whether \tt{v2} should be used as the upper or lower off-diagonal 
+(since they differ by a conjugation).
 
 \item
 \begin{tmvcode}
-tmv::SymBandMatrix<T> sb1(const GenSymBandMatrix<T2>& sb2)
+tmv::SymBandMatrix<T,A> sb1(const SymBandMatrix<T2,A2>& sb2)
 sb1 = sb2
 \end{tmvcode}
 Copy the \tt{SymBandMatrix m2}, which may be of any type \tt{T2} so long
@@ -154,17 +147,17 @@ The assignment operator has the same flexibility.
 
 \item
 \begin{tmvcode}
-tmv::SymBandMatrixView<T> sb = 
+tmv::SymBandMatrixView<T,A> sb = 
       SymBandMatrixViewOf(MatrixView<T> m, UpLoType uplo, int nlo)
-tmv::SymBandMatrixView<T> sb = 
+tmv::SymBandMatrixView<T,A> sb = 
       SymBandMatrixViewOf(SymMatrixView<T> m, int nlo)
-tmv::SymBandMatrixView<T> sb = 
+tmv::SymBandMatrixView<T,A> sb = 
       SymBandMatrixViewOf(BandMatrixView<T> m, UpLoType uplo, int nlo)
-tmv::SymBandMatrixView<T> sb = 
+tmv::SymBandMatrixView<T,A> hb = 
       HermBandMatrixViewOf(MatrixView<T> m, UpLoType uplo, int nlo)
-tmv::SymBandMatrixView<T> sb = 
+tmv::SymBandMatrixView<T,A> hb = 
       HermBandMatrixViewOf(SymMatrixView<T> m, int nlo)
-tmv::SymBandMatrixView<T> sb = 
+tmv::SymBandMatrixView<T,A> hb = 
       HermBandMatrixViewOf(BandMatrixView<T> m, UpLoType uplo, int nlo)
 \end{tmvcode}
 \index{Matrix!View portion as SymBandMatrix or HermBandMatrix}
@@ -180,21 +173,44 @@ There are also \tt{ConstSymBandMatrixView} versions of these.
 
 \item
 \begin{tmvcode}
-tmv::SymBandMatrixView<T> sb = 
-      tmv::SymBandMatrixViewOf(T* vv, size_t n, int nlo, 
+tmv::SymBandMatrixView<T,A> sb = 
+      tmv::SymBandMatrixViewOf(T* vv, int n, int nlo, 
           UpLoType uplo, StorageType stor)
-tmv::ConstSymBandMatrixView<T> sb = 
-      tmv::SymBandMatrixViewOf(const T* vv, size_t n, int nlo, 
+tmv::ConstSymBandMatrixView<T,A> sb = 
+      tmv::SymBandMatrixViewOf(const T* vv, int n, int nlo, 
           UpLoType uplo, StorageType stor)
-tmv::SymBandMatrixView<T> sb = 
-      tmv::HermBandMatrixViewOf(T* vv, size_t n, int nlo, 
+tmv::SymBandMatrixView<T,A> hb = 
+      tmv::HermBandMatrixViewOf(T* vv, int n, int nlo, 
           UpLoType uplo, StorageType stor)
-tmv::ConstSymBandMatrixView<T> sb = 
-      tmv::HermBandMatrixViewOf(const T* vv, size_t n, int nlo, 
+tmv::ConstSymBandMatrixView<T,A> hb = 
+      tmv::HermBandMatrixViewOf(const T* vv, int n, int nlo, 
           UpLoType uplo, StorageType stor)
 \end{tmvcode}
 \index{SymBandMatrix!View of raw memory}
-Make a \tt{SymBandMatrixView} of the actual memory elements, \tt{vv}.
+Make a \tt{SymBandMatrixView} of the actual memory elements, \tt{vv}, in either the
+upper or lower band. 
+The length of the data array should be 
+\tt{BandStorageLength(stor,n,n,nlo,0)}.  Also, as with the corresponding \tt{BandMatrixViewOf} functions, if \tt{uplo} is \tt{Lower} and \tt{stor} is \tt{DiagMajor} then \tt{vv} should be the memory address of \tt{b(nlo,0)}, not \tt{b(0,0)}.
+
+
+\item
+\begin{tmvcode}
+tmv::SymBandMatrixView<T,A> sb = 
+      tmv::SymBandMatrixViewOf(T* vv, int n, int nlo, 
+          UpLoType uplo, int stepi, int stepj)
+tmv::ConstSymBandMatrixView<T,A> sb = 
+      tmv::SymBandMatrixViewOf(const T* vv, int n, int nlo, 
+          UpLoType uplo, int stepi, int stepj)
+tmv::SymBandMatrixView<T,A> hb = 
+      tmv::HermBandMatrixViewOf(T* vv, int n, int nlo, 
+          UpLoType uplo, int stepi, int stepj)
+tmv::ConstSymBandMatrixView<T,A> hb = 
+      tmv::HermBandMatrixViewOf(const T* vv, int n, int nlo, 
+          UpLoType uplo, int stepi, int stepj)
+\end{tmvcode}
+\index{SymBandMatrix!View of raw memory}
+Make a \tt{SymBandMatrixView} of the actual memory elements, \tt{vv}, in either the 
+upper or lower band.  This allows for arbitrary steps through the data.
 
 \end{itemize}
 
@@ -202,37 +218,80 @@ Make a \tt{SymBandMatrixView} of the actual memory elements, \tt{vv}.
 \index{SymBandMatrix!Access methods}
 \label{SymBandMatrix_Access}
 
-\begin{tmvcode}
-sb.resize(size_t new_size, int new_nlo)
-\end{tmvcode}
-\index{SymBandMatrix!Methods!resize}
+\begin{itemize}
 
+\item
 \begin{tmvcode}
 sb.nrows() = sb.ncols() = sb.colsize() = sb.rowsize() = sb.size()
 sb.nlo() = sb.nhi()
+sb.resize(int new_size, int new_nlo)
 sb(i,j)
-sb.row(int i, int j1, int j2)
-sb.col(int i, int j1, int j2)
-sb.diag()
-sb.diag(int i)
-sb.diag(int i, int k1, int k2)
+sb.cref(i,j)
+sb.ref(i,j)
 \end{tmvcode}
 \index{SymBandMatrix!Methods!nrows}
 \index{SymBandMatrix!Methods!ncols}
 \index{SymBandMatrix!Methods!rowsize}
 \index{SymBandMatrix!Methods!colsize}
 \index{SymBandMatrix!Methods!size}
+\index{SymBandMatrix!Methods!nlo}
+\index{SymBandMatrix!Methods!nhi}
+\index{SymBandMatrix!Methods!resize}
 \index{SymBandMatrix!Methods!operator()}
+\index{SymBandMatrix!Methods!cref}
+\index{SymBandMatrix!Methods!ref}
+As with a complex \tt{HermMatrix}, a complex \tt{HermBandMatrix} has a special reference type, since it needs to check whether its value is the conjugate of the value actually stored in memory.  This will necessarily be true for values in either the upper or lower band.
+Also, for the mutable \tt{sb(i,j)} version, the position must fall within the
+band.  If \tt{sb} is not mutable, then \tt{sb(i,j)} returns 0 for
+positions outside of the band.
+
+\item
+\begin{tmvcode}
+sb.row(int i, int j1, int j2)
+sb.col(int i, int j1, int j2)
+sb.diag()
+sb.diag(int i)
+sb.diag(int i, int k1, int k2)
+\end{tmvcode}
 \index{SymBandMatrix!Methods!row}
 \index{SymBandMatrix!Methods!col}
 \index{SymBandMatrix!Methods!diag}
-For the mutable \tt{d(i,j)} version, 
 Again, the versions of \tt{row} and \tt{col} with only one argument are
 missing, since the full row or column isn't accessible as a \tt{VectorView}.
 You must specify a valid range within the row or column that you want, 
 given the banded storage of \tt{sb}.  And, like for \tt{SymMatrix}, a full row
 must be accessed in its two parts, one on each side of the diagonal.
 
+\item
+\begin{tmvcode}
+T* sb.ptr()
+const T* sb.cptr() const
+int sb.stepi() const
+int sb.stepj() const
+int sb.diagstep() const
+bool sb.isconj() const
+bool sb.issym() const
+bool sb.isherm() const
+bool sb.isupper() const
+bool sb.isrm() const
+bool sb.iscm() const
+bool sb.isdm() const
+\end{tmvcode}
+\index{SymBandMatrix!Methods!ptr}
+\index{SymBandMatrix!Methods!cptr}
+\index{SymBandMatrix!Methods!stepi}
+\index{SymBandMatrix!Methods!stepj}
+\index{SymBandMatrix!Methods!diagstep}
+\index{SymBandMatrix!Methods!isconj}
+\index{SymBandMatrix!Methods!issym}
+\index{SymBandMatrix!Methods!isherm}
+\index{SymBandMatrix!Methods!isupper}
+\index{SymBandMatrix!Methods!isrm}
+\index{SymBandMatrix!Methods!iscm}
+\index{SymBandMatrix!Methods!isdm}
+These methods allow for direct memory access of a \tt{SymBandMatrix}.
+
+\item
 \begin{tmvcode}
 sb.subVector(int i, int j, int istep, int jstep, int size)
 sb.subMatrix(int i1, int i2, int j1, int j2)
@@ -260,7 +319,7 @@ These work the same as for a \tt{BandMatrix}
 except that the entire
 subvector or submatrix must be completely within the upper or lower band.
 
-
+\item
 \begin{tmvcode}
 sb.subSymMatrix(int i1, int i2)
 sb.subSymMatrix(int i1, int i2, int istep)
@@ -274,6 +333,7 @@ from \tt{i1} to \tt{i2} along the diagonal with an optional step,
 and includes the off-diagonals in the same rows/cols.  For the first two,
 the \tt{SymMatrix} must be completely with the band.
 
+\item
 \begin{tmvcode}
 sb.symDiagRange(int newnlo)
 \end{tmvcode}
@@ -282,6 +342,7 @@ Since \tt{diagRange} returns a regular \tt{BandMatrixView}, it must be completel
 within either the upper or lower band.  This routine returns a \tt{SymBandMatrixView}
 which straddles the diagonal with \tt{newnlo} super- and sub-diagonals.
 
+\item
 \begin{tmvcode}
 sb.transpose()
 sb.conjugate()
@@ -300,13 +361,17 @@ sb.imagPart()
 \index{SymBandMatrix!Methods!fView}
 \index{SymBandMatrix!Methods!realPart}
 \index{SymBandMatrix!Methods!imagPart}
+These return \tt{SymBandMatrixView}s.
 Note that the imaginary part of a complex hermitian band matrix is
 skew-symmetric, so \tt{sb.imagPart()} is illegal for a \tt{HermBandMatrix}.
 If you need to manipulate the imaginary part of a \tt{HermMatrix}, 
 you could use
 \tt{sb.upperBandOff().imagPart()} 
 (since all the diagonal elements are real).
-\vspace{12pt}
+
+\end{itemize}
+
+Note that there are no iterators provided for \tt{SymBandMatrix} or \tt{HermBandMatrix}.  The recommended way to iterate over their stored values is to use the \tt{upperBand()} or \tt{lowerBand()} methods and iterate over those portions of the matrix directly.
 
 \subsection{Functions}
 \index{SymBandMatrix!Functions of}
@@ -314,7 +379,7 @@ you could use
 
 \begin{tmvcode}
 RT sb.norm1() = Norm1(sb)
-RT sb.norm2() = Norm2(sb) = sb.doNorm2()
+RT sb.norm2() = Norm2(sb)
 RT sb.normInf() = NormInf(sb)
 RT sb.normF() = NormF(sb) = sb.norm() = Norm(sb)
 RT sb.normSq() = NormSq(sb)
@@ -342,7 +407,6 @@ sb.makeInverseATA(Matrix<T>& cov)
 \index{SymBandMatrix!Functions of!MaxAbs2Element}
 \index{SymBandMatrix!Methods!norm1}
 \index{SymBandMatrix!Methods!norm2}
-\index{SymBandMatrix!Methods!doNorm2}
 \index{SymBandMatrix!Methods!normInf}
 \index{SymBandMatrix!Methods!maxAbsElement}
 \index{SymBandMatrix!Methods!maxAbs2Element}
@@ -393,7 +457,10 @@ Swap(sb1,sb2)
 \index{SymBandMatrix!Methods!conjugateSelf}
 \index{SymBandMatrix!Methods!transposeSelf}
 \index{SymBandMatrix!Functions of!Swap}
-\vspace{12pt}
+As with \tt{SymMatrix}, the method \tt{transposeSelf()} does nothing to a \tt{SymBandMatrix} and is equivalent to
+\tt{conjugateSelf()} for a \tt{HermBandMatrix}.
+
+\vspace{12pt} % I don't know why I need this.  LaTex isn't putting the normal spacing here.
 
 \subsection{Arithmetic}
 \index{SymBandMatrix!Arithmetic}
@@ -422,6 +489,7 @@ v2 = sb * v1
 v2 = v1 * sb
 v *= sb
 b = sb1 * sb2
+sb3 = ElemProd(sb1,sb2)
 m2 = sb * m1
 m2 = m1 * sb
 m *= sb
@@ -464,11 +532,11 @@ To access this decomposition, use:
 bool sb.lud().isTrans()
 tmv::LowerTriMatrix<T,UnitDiag> sb.lud().getL()
 tmv::ConstBandMatrixView<T> sb.lud().getU()
-Permutation sb.lud().getP()
+const Permutation& sb.lud().getP()
 \end{tmvcode}
 \index{SymBandMatrix!Methods!lud}
 \index{SymBandMatrix!LU decomposition}
-\index{LU Decomposition!SymBandMatrix}
+\index{LU decomposition!SymBandMatrix}
 The following should result in a matrix numerically very close to \tt{sb}.
 \begin{tmvcode}
 tmv::Matrix<T> m2(sb.nrows(),sb.ncols);
@@ -504,9 +572,9 @@ DiagMatrix<T> sb.chd().getD()
 \end{tmvcode}
 \index{SymBandMatrix!Methods!chd}
 \index{SymBandMatrix!Cholesky decomposition}
-\index{Cholesky Decomposition!SymBandMatrix}
+\index{Cholesky decomposition!SymBandMatrix}
 with $L$ being made unit-diagonal or $D$ being set to the identity matrix
-as appropriate.  (Obviously, getL() contains all of the information for the non-tridiagonal
+as appropriate.  (Obviously, \tt{getL()} contains all of the information for the non-tridiagonal
 version.)
 
 The following should result in a matrix numerically very close to \tt{sb}.
@@ -524,18 +592,18 @@ To access this decomposition, use:
 \begin{tmvcode}
 ConstMatrixView<T> sb.svd().getU()
 DiagMatrix<RT> sb.svd().getS()
-Matrix<T> sb.svd().getV()
+Matrix<T> sb.svd().getVt()
 \end{tmvcode}
 \index{SymBandMatrix!Methods!svd}
 \index{SymBandMatrix!Singular value decomposition}
-\index{Singular Value Decomposition!SymBandMatrix}
+\index{Singular value decomposition!SymBandMatrix}
 (As for \tt{SymMatrix}, a complex symmetric matrix needs to use the accessor
-\tt{symsvd()} instead, whose \tt{getS} and \tt{getV} methods return Views
+\tt{symsvd()} instead, whose \tt{getS} and \tt{getVt} methods return Views
 rather than instantiated matrices.)
 
 The following should result in a matrix numerically very close to \tt{sb}.
 \begin{tmvcode}
-Matrix<T> m2 = sb.svd().getU() * sb.svd().getS() * sb.svd().getV()
+Matrix<T> m2 = sb.svd().getU() * sb.svd().getS() * sb.svd().getVt()
 \end{tmvcode}
 
 Both versions also have the same control and access routines as a regular SVD:
@@ -565,60 +633,46 @@ sb.divideInPlace()
 \index{SymBandMatrix!Methods!divIsSet}
 \index{SymBandMatrix!Methods!divideInPlace}
 work the same as for regular \tt{Matrix}es.
-(See \ref{Matrix_Division_Efficiency}.)
+(See \ref{Matrix_Division_Efficiency}.)  However, \tt{divideInPlace} only actually works for the \tt{CH} algorithm.
 
-And the function \tt{sb.det()} (or \tt{sb.logDet()}) calculates the determinant
-using whichever decomposition is currently set with \tt{sb.divideUsing(dt)},
-unless \tt{sb}'s data type is an integer type, in which case Bareiss's algorithm 
+And just as for a regular \tt{Matrix}, the functions \tt{sb.det()}, \tt{sb.logDet()}, and \tt{sb.isSingular()} use whichever decomposition is currently set with \tt{sb.divideUsing(dt)},
+unless \tt{sb}'s data type is an integer type, in which case Bareiss's algorithm for the determinant
 is used.
 \index{SymBandMatrix!Determinant}
+\index{SymBandMatrix|Methods!det}
+\index{SymBandMatrix|Methods!logDet}
+\index{SymBandMatrix|Methods!isSingular}
 
-\subsection{Input/Output}
-\index{SymBandMatrix!Input/output}
+
+\subsection{I/O}
+\index{SymBandMatrix!I/O}
 \label{SymBandMatrix_IO}
 
-The simplest output is the usual:
+The simplest I/O syntax is the usual:
 \begin{tmvcode}
-os << sb
+os << sb;
+is >> sb;
 \end{tmvcode}
-where \tt{os} is any \tt{std::ostream}.
 The output format is the same as for a \tt{Matrix}.
-(See \ref{Matrix_IO}.)
+(See \ref{Matrix_IO}.)  On input, if the matrix read in is not symmetric (or Hermitian as appropriate), then a \tt{tmv::ReadError} is thrown.  Likewise if any of the elements outside of the band structure
+are not 0.
 
-There is also a compact format for a \tt{BandMatrix}:
+There is also a compact I/O style that puts all the elements in the lower band all on a single line and skips the parentheses. 
 \begin{tmvcode}
-sb.writeCompact(os)
-\index{SymBandMatrix!Methods!writeCompact}
+os << tmv::CompactIO() << sb;
+is >> tmv::CompactIO() >> sb;
 \end{tmvcode}
-outputs in the format:
-\begin{tmvcode}
-hB/sB n nlo
-( sb(0,0)  )
-( sb(1,0)  sb(1,1)  )
-...
-( sb(nlo,0)  sb(nlo,1) ...  sb(nlo,nlo) )
-( sb(nlo+1,1)  sb(nlo+1,2) ...  sb(nlo+1,nlo+1) )
-...
-( sb(n-1,n-nlo-1)  ... sb(n-1,n-1) )
-\end{tmvcode}
-where \tt{hB/sB} means \underline{either} \tt{hB} or \tt{sB}, 
-which indicates whether the matrix is hermitian or symmetric.
+\index{IOStyle!CompactIO}
+This has the extra advantage that it also outputs the number of off-diagonals, so the \tt{SymBandMatrix} can be resized correctly if it is not the right size already.  The normal I/O style only includes the number of rows and columns, so the number of diagonals is assumed to be correct if the matrix needs to be resized.  The compact I/O style can adjust both the size and the number of diagonals.
 
-The same compact format can be read back in the usual two ways:
+One can also write small values as 0 with
 \begin{tmvcode}
-tmv::SymBandMatrix<T> sb(n,nlo);
-tmv::HermBandMatrix<T> hb(n,nlo);
-is >> sb >> hb;
-std::auto_ptr<tmv::SymBandMatrix<T> > sbptr;
-std::auto_ptr<tmv::HermBandMatrix<T> > hbptr;
-is >> sbptr >> hbptr;
+os << tmv::ThreshIO(thresh) << sb;
+os << tmv::CompactIO().setThresh(thresh) << sb;
 \end{tmvcode}
+\index{IOStyle!ThreshIO}
 
-One can write small values as 0 with
-\begin{tmvcode}
-sb.write(std::ostream& os, RT thresh)
-sb.writeCompact(std::ostream& os, RT thresh)
-\end{tmvcode}
-\index{SymBandMatrix!Methods!writeCompact}
-\index{SymBandMatrix!Methods!write}
+See \S\ref{IOStyle} for more information about specifying custom I/O styles, including
+features like using brackets instead of parentheses, or putting commas between elements,
+or specifying an output precision.  
 

@@ -1,37 +1,30 @@
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+// The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
+// Copyright (C) 1998 - 2014                                                 //
+// All rights reserved                                                       //
+//                                                                           //
+// The project is hosted at https://code.google.com/p/tmv-cpp/               //
+// where you can find the current version and current documention.           //
+//                                                                           //
+// For concerns or problems with the software, Mike may be contacted at      //
+// mike_jarvis17 [at] gmail.                                                 //
+//                                                                           //
+// This software is licensed under a FreeBSD license.  The file              //
+// TMV_LICENSE should have bee included with this distribution.              //
+// It not, you can get a copy from https://code.google.com/p/tmv-cpp/.       //
+//                                                                           //
+// Essentially, you can use this software however you want provided that     //
+// you include the TMV_LICENSE file in any distribution that uses it.        //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
 
 
-#ifndef TMV_Tri_H
-#define TMV_Tri_H
+
+#ifndef TMV_TRI_H
+#define TMV_TRI_H
 
 #include "tmv/TMV_TriMatrix.h"
-#include "tmv/TMV_SmallTriMatrix.h"
-
-#include "tmv/TMV_TriMatrixIO.h"
-#include "tmv/TMV_CopyU.h"
-#include "tmv/TMV_SwapU.h"
-#include "tmv/TMV_NormU.h"
-
-#include "tmv/TMV_ScaleU.h"
-#include "tmv/TMV_MultXU.h"
-#include "tmv/TMV_AddUU.h"
-#include "tmv/TMV_MultUV.h"
-#include "tmv/TMV_MultUM.h"
-#include "tmv/TMV_MultUU.h"
-#include "tmv/TMV_MultUL.h"
-#include "tmv/TMV_MultUD.h"
-
-#include "tmv/TMV_InvertU.h"
-#include "tmv/TMV_DivVU.h"
-#include "tmv/TMV_DivMU.h"
-#include "tmv/TMV_DivUU.h"
-
-#ifndef TMV_H
-#include "tmv/TMV_ProdXM.h"
-#include "tmv/TMV_SumMM.h"
-#include "tmv/TMV_SumMX.h"
-#include "tmv/TMV_ProdMV.h"
-#include "tmv/TMV_ProdMM.h"
-#include "tmv/TMV_ElemProdMM.h"
-#endif
+#include "tmv/TMV_TriMatrixArith.h"
 
 #endif

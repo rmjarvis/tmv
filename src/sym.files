@@ -9,3 +9,4 @@ TMV_Rank2K_MMS.cpp
 TMV_RankK_ULS.cpp
 TMV_RankK_LUS.cpp
 TMV_SymMultMMS.cpp
+TMV_SymIntegerDet.cpp

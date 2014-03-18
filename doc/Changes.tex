@@ -1,154 +1,66 @@
 % !TEX root = TMV_Documentation.tex
 
-\section{Changes from Version \prevtmvversion\ to \tmvversion}
+\section{Changes from version \prevtmvversion\ to \tmvversion}
 \label{Changes}
 
+This release is mostly just some minor bug fixes and some changes in the 
+installation defaults.  Probably the most significant change is that I have
+switched the license from GPL to BSD.  
+
 Here is a list of the changes from version \prevtmvversion\ to \tmvversion.  
-%Whenever a change is not backward compatible, meaning that code using 
-%the previous version might be broken, I mark the item with a $\times$ bullet rather 
-%than the usual $\bullet$ to indicate this.  
-This version is completely backwards compatible in its functionality, so code that worked
-with version \prevtmvversion\ should still work correctly.
-
-This update primarily fixed some problems for integer matrices.  In addition to some compiler
-errors for some combinations of scons parameters, I also added the ability to calculate the 
-determinant of integer matrices.  It had been documented (albeit somewhat poorly) that 
-this would not work for integer matrices.  However, user Ronny Bergmann convinced me that
-it would make sense to include the ability to produce accurate determinants for integer matrices.
-
-There are also a number miscellaneous feature additions and other bug fixes as well.
-Note that the below list may not be completely comprehensive.  
-There may be some minor bug fixes that I 
-found that I didn't deem significant enough to mention here.
-
+(See \S\ref{History} for changes from previous versions to \prevtmvversion\.)
+%Whenever a change is not backward compatible, meaning that code using the previous version might be broken, I mark the item with a $\times$ bullet rather than the usual $\bullet$ to indicate this.  
+This release is completely backwards compatible as far as the header files and library are 
+concerned.  There are a couple (minor) new features, but the library should be link-compatible
+with previous versions.
 
 \begin{itemize}
 
-\item Made \tt{m.det()} produce accurate results if \tt{m} is a \tt{Matrix<int>} or 
-\tt{Matrix<complex<int> >}.  Or in general if the underlying type is an integer type.
+\item Changed the license from GPL to BSD.  This seems to be where the open 
+source community is moving, so I think it makes sense for TMV to have a 
+more permissive license going forward.
 
-The algorithm in this case is not the usual one (decompose the matrix into $LU$ and
-then compute the product of the diagonal elements of $U$), since this algorithm uses division which obviously leads to errors if the elements are integers.  
-We could just use \tt{double} or \tt{long double} for
-the intermediate storage and convert back to the nearest integer at the end, but it has
-been shown by Bareiss (1968) that a different algorithm is better at avoiding intermediate
-values with significant rounding errors.  So we use that algorithm with \tt{long double} 
-intermediates, which seems to be effective at producing accurate answers over the 
-full range of values expressible as a 32 bit integer, and usually over the full range of a 64 bit 
-integer\footnote{There are probably some very carefully constructed matrices which could produce 
-a wrong answer, but normal matrices should almost always return the correct answer.}.
+\item
+Made Scons correctly detect when g++ is really clang++.  Apple has been lying about
+its C++ compiler in recent MacOS systems (10.7-10.9).  They use clang++,
+but they call the program g++.  This used to mess up TMV, since clang++ 
+does not support OpenMP, so it would wrongly try to use OpenMP and end up 
+with linking problems.  TMV now detects when clang++ is masquerading as
+g++ and handles this correctly.
 
-\item Added \tt{m.sumAbs2Elements()} (which works for \tt{complex<int>} matrices, unlike the normal method \tt{m.sumAbsElements()}).
+\item
+Made the code compliant with the latest version of clang++, which suddenly
+got extra picky about how friend functions are declared, giving errors
+for code that doesn't comply with an obscure line in the standard that 
+it used to be able to compile just fine (as does every other compiler as
+well).  (Issue 9)
 
-\item Added \tt{m.addToAll(x)}.
+\item
+Fixed some problems with the \texttt{install\_name} in the shared libraries.  
+(Issues 3 and 7)
 
-\item Added \tt{m.unitUpperTri()} and \tt{m.unitLowerTri()} for symmetric/hermitian matrices.
-These had been documented to be there, but I had forgotten to actually add them to the code.
+\item
+Fixed some warnings emitted by clang++.  These weren't bugs -- just some
+things that clang++ warns about that other compilers hadn't cared about.
 
-\item Added the \tt{resize} methods to resize an existing vector or matrix, at the request of users Zhaoming Ma and Gary Bernstein.  
-I had thought that there was a speed benefit to having the sizes be \tt{const} variables, so the compiler could make optimization about the sizes of some loops and such.  However, it seems that (at least for the several compilers I tried), there is really no advantage to having the sizes be \tt{const}.  So given that, I might as well allow the sizes to be modifiable by the user.
+\item
+Changed the default value of \texttt{INST\_INT} to \texttt{True}, so the \tt{Matrix<int>}
+templates are instantiated now unless you specifically disable them.  Enough people
+had expected them to be there and asked about why they were getting 
+linking errors when they used \tt{Matrix<int>}, so I decided to build them
+by default now.  They don't add much to the library size.
 
-\item Added the ability to compile TMV as a shared library, rather than a static library 
-using the \tt{SHARED=true} option with the scons installation method.
+\item
+Added a default conversion from \tt{VarConjIter} to \tt{VIt}.  It was an oversight
+that this wasn't possible before.  (Issue 5)
 
-\item Added the ability to turn off TMV debug statements with \tt{-DTMVNDEBUG}.
-Defining \tt{NDEBUG} will still work to turn off TMV debugging statements as well, but this
-allows the user to turn off just the TMV debug statements without turning off the debug
-statements in their own code (e.g.\ using the normal \tt{assert} command).
+\item 
+Fixed a bug in the test suite about \tt{long double} I/O.  The standard library does
+not read in \tt{long double} variables at full precision.  They are only accurate to
+double precision.  So I changed the I/O tests to only test \tt{long double} I/O
+to double precision.  (Issue 8)
 
-\item Skip compiling functions that are invalid for integer values, like the various decompositions 
-and such.  The methods that normally use these functions will produce a \tt{FailedAssert}
-exception if the library is compiled with \tt{DEBUG=true}.  And if not, then these methods 
-will typically either not do anything, or return 0, as appropriate.  
-
-Beginning in version v0.70 (in development), these will produce a \tt{static\_assert} failure
-at compile time, rather than a runtime error, which is a better behavior.
-
-\item Updated the test suite to work better with \tt{<int>} tests.  Many tests had been disabled
-for \tt{int}, since the way I had tested things didn't really work with integer matrices.
-But with the new changes, I can run a larger fraction of the test suite on \tt{<int>} and
-\tt{<complex<int> >} matrices.
-
-\item Added \tt{TEST\_FLOAT}, \tt{TEST\_DOUBLE}, etc. to the list of scons options.  
-  This allows one to only test one type at a time without recompiling the libraries.
-
-\item Made the default configuration for scons to be WITH\_LAPACK=false.
-   Too many LAPACK installations are not thread safe.  And since I 
-   personally use a lot of OpenMP code in my programs, I occasionally
-   get random segmentation faults when I use TMV with LAPACK.  
-   And since the native TMV code is almost universally as fast as LAPACK
-   and is thread safe, I finally decided to just make that the default.
-
-\item Fixed some compiling errors with \tt{INST_INT=true}, including some linking errors 
-for several combinations of compile options.
-
-\item Fixed a bug in the allocation code for icpc compilations.
-   icpc has a ``feature'' that it only turns on SSE commands if you explicitly
-   specify the compile flag \tt{-msse} or \tt{-msse2}.  (g++ always turns them on
-   when the architecture supports them.)  The file \tt{TMV\_Array.h} where TMV implements
-   the memory allocation has different
-   behavior depending on whether SSE is enabled or not.
-
-   Anyway, we do turn these on in our SCons installation for TMV.
-   However, if a user code does not use these flags then that leads to a
-   mismatch in the behavior for the user code and the TMV
-   library, which could sometimes cause segmentation faults.
-
-   We fixed this by always using the SSE alignment even if SSE is not
-   enabled.  This is probably a good idea anyway, since some BLAS libraries
-   are probably faster with the aligned memory allocation too, so it
-   seems worth it to always align on 16 byte boundaries even if TMV
-   doesn't explicitly know that it will be useful.
-
-\item Fixed a bug in \tt{StackArray} (used for \tt{SmallVector} and \tt{SmallMatrix}) where
-complex allocations were not getting properly aligned on 16 byte boundaries.
-
-\item Increased the maximum number of iterations within the divide-and-conquer SVD
-algorithm from 20 to 100, since I found a case that required 27 iterations to converge.
-
-\item Fixed some places where nan's in the input values could lead to
-infinite loops in certain algorithms. 
-
-\item Fixed a place in the SV Decomposition which could (rarely) go into an infinite loop.
-
-\item Fixed a bug in the calls of BLAS functions that have a
-   \tt{beta} parameter, such as \tt{gemv} and \tt{gemm}.  
-   BLAS reinterprets a statement like \tt{y=A*x} as
-   \tt{y = beta*y + alpha*A*x} with \tt{alpha=1} and \tt{beta=0}.  The problem
-   comes when \tt{y} is uninitialized data (which is often the case in this kind of
-   situation) and that uninitialized data happens to have a \tt{nan} in it.
-   Then some BLAS distributions are true to the \tt{beta*y} formulation which
-   involves a \tt{0*nan = nan}.  So the output preserves the \tt{nan}, rather than
-   overwriting it with the desired answer.
-   
-   From my reading of the BLAS standard, this is a bug in these BLAS distributions.
-   (They are supposed to zero out the input data if \tt{beta = 0}.  But since some 
-   popular distributions (e.g. GotoBLAS) have this bug, the TMV code needs to 
-   work around it.
-
-   The solution is basically to always zero out the \tt{y} value directly
-   before calling \tt{gemv} (or similarly for several other BLAS functions), 
-   rather than counting on the BLAS implementation to do it.  
-   So that is what TMV does now.
-   
-   This can also affect LAPACK functions that set some memory to a value.
-   Depending on the LAPACK implementation, it may or may not initialize the memory before
-   calling a BLAS routine.  So now TMV zeros out all uninitialized data that 
-   it passes to a LAPACK function too.
-   
-   I also added a feature to the test suite where uninitialized data can be intentionally
-   set to all \tt{nan}'s\footnote{To do so, set the ``extreme matrices'' bit in the optional
-   \tt{XTEST} parameter.
-   That is, set \tt{XTEST=64}, or more generally set \tt{XTEST} so that \tt{XTEST&64 == true}}, 
-   rather than relying on happenstance to find these bugs.
-
-\item Now always use -fno-strict-aliasing for g++ compiliations when using scons.
-   (It was just for versions $\le$ 4.2.)  I found a bug in g++ 4.5 that was fixed by
-   turning off strict aliasing.  And there is a different bug for versions before 4.2 that is fixed by turning it off. 
-   Since I don't think the strict aliasing
-   optimizations are probably worth much for TMV, I decided to just always
-   use the -fno-strict-aliasing flag and be safe rather than pick an choose which
-   g++ versions don't have bugs in their aliasing optimizations.
-
+\item
+Updated the linking checks for MKL to work with the latest version (11.1).
 
 \end{itemize}

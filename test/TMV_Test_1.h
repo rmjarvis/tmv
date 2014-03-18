@@ -1,3 +1,4 @@
+#define ALIASOK
 
 #include "tmv/TMV_Base.h"
 

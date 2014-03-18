@@ -6,9 +6,9 @@ import os
 import sys
 
 
-# Subdirectories containing SConscript files.  We always process these, but
-# there are some other optional ones according to the Scons parameters
-subdirs=['src','share','bin','test']
+# Subdirectories containing SConscript files.  We always process these, but 
+# there are some other optional ones
+subdirs = ['src','bin','share','test']
 
 # Configurations will be saved here so command line options don't
 # have to be sent more than once
@@ -27,18 +27,16 @@ default_prefix = '/usr/local'
 opts = Variables(config_file)
 
 # Now set up options for the command line
-opts.Add('CXX','Name of c++ compiler')
+opts.Add('CXX','Name of c++ compiler','g++')
 opts.Add('FLAGS','Flags to send to the compiler','')
 opts.Add('EXTRA_FLAGS','Extra flags to send to the compiler','')
 opts.Add(BoolVariable('DEBUG',
         'Turn on debugging statements in compilied library',False))
 opts.Add(PathVariable('PREFIX',
-        'Prefix for installation','', PathVariable.PathAccept))
+        'prefix for installation','', PathVariable.PathAccept))
 opts.Add(PathVariable('FINAL_PREFIX',
-        'Final installation prefix if different from PREFIX','', PathVariable.PathAccept))
+        'final installation prefix if different from PREFIX','', PathVariable.PathAccept))
 
-opts.Add(EnumVariable('OPT',
-        'Set the optimization level for TMV library', '2',allowed_values=('0','1','2','3')))
 opts.Add(BoolVariable('WITH_OPENMP',
         'Look for openmp and use if found.', True))
 opts.Add(BoolVariable('INST_FLOAT',
@@ -46,19 +44,12 @@ opts.Add(BoolVariable('INST_FLOAT',
 opts.Add(BoolVariable('INST_DOUBLE',
         'Instantiate <double> templates in compiled library', True))
 opts.Add(BoolVariable('INST_INT',
-        'Instantiate <int> templates in compiled library', False))
+        'Instantiate <int> templates in compiled library', True))
 opts.Add(BoolVariable('INST_LONGDOUBLE',
         'Instantiate <long double> templates in compiled library', False))
-opts.Add(BoolVariable('INST_COMPLEX',
-        'Instantiate complex<T> templates in compiled library', True))
-opts.Add(BoolVariable('INST_MIX',
-        'Instantiate functions that mix real with complex', True))
 opts.Add(BoolVariable('SHARED',
         'Build a shared library',True))
 
-opts.Add(EnumVariable('TEST_OPT',
-        'Set the optimization level for TMV test suite', '1',
-        allowed_values=('0','1','2','3')))
 opts.Add(BoolVariable('TEST_FLOAT',
         'Instantiate <float> in the test suite', True))
 opts.Add(BoolVariable('TEST_DOUBLE',
@@ -122,7 +113,7 @@ opts.Add(BoolVariable('WITH_SSE',
         'Use SSE commands (only necessary for icpc compilations)', True))
 opts.Add('XTEST',
         'Do extra tests in the test suite (1=non-unit step, 2=extra sizes/shapes, 4=mix real/complex,  8=degenerate,  16=extra arithmetic, 32=FortranStyle, 64=extreme matrices) ', 0)
-opts.Add(BoolVariable('MEM_TEST','Test for memory leaks', False))
+opts.Add(BoolVariable('MEM_DEBUG','Do extra tests for memory leaks other memroy problems', False))
 opts.Add(BoolVariable('NAN_TEST','Test memory initialized with nans', False))
 opts.Add(BoolVariable('SMALL_TESTS',
         'Make the small test programs: tmvtest1a, tmvtest1b, etc.', False))
@@ -131,9 +122,9 @@ opts.Add(BoolVariable('WARN',
 opts.Add(BoolVariable('PROFILE',
         'Add profiling compiler flags like -pg', False))
 opts.Add(BoolVariable('CACHE_LIB',
-        'Cache the results of the library checks',True))
+        'Cache the results of the library checks', True))
 opts.Add(BoolVariable('WITH_UPS',
-        'Install the ups directory under PREFIX/ups',False))
+        'Install the ups directory under PREFIX/ups', False))
 opts.Add('N_BUILD_THREADS',
         'Number of build threads to use (0 means use ncpus)', 0)
 opts.Add(BoolVariable('USE_UNKNOWN_VARS',
@@ -150,7 +141,7 @@ openmp_mincc_vers = 5.0    # I don't actually know what this should be.
 def RunInstall(env, targets, subdir):
     install_dir = os.path.join(env['INSTALL_PREFIX'], subdir)
     env.Alias(target='install',
-            source=env.Install(dir=install_dir, source=targets))
+          source=env.Install(dir=install_dir, source=targets))
 
 def RunUninstall(env, targets, subdir):
     # There is no env.Uninstall method, we must build our own
@@ -160,7 +151,7 @@ def RunUninstall(env, targets, subdir):
     # delete from $prefix/bin/
     files = []
     for t in targets:
-        ifile = os.path.join(install_dir, os.path.basename(str(t)))
+        ifile = os.path.join(install_dir, os.path.basename(str(t))) 
         files.append(ifile)
 
     for f in files:
@@ -173,7 +164,7 @@ def BasicCCFlags(env):
 
     compiler = env['CXXTYPE']
     version = env['CXXVERSION_NUMERICAL']
-    
+
     # First parse the LIBS options if present
     if env['LIBS'] == '':
         env.Replace(LIBS=[])
@@ -198,7 +189,7 @@ def BasicCCFlags(env):
             if env['WARN']:
                 env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror'])
                 env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
-    
+
         elif compiler == 'clang++':
             env.Replace(CCFLAGS=['-O2'])
             env['TEST_FLAGS'] = ['-O1']
@@ -208,7 +199,7 @@ def BasicCCFlags(env):
             if env['WARN']:
                 env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror'])
                 env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
-    
+
         elif compiler == 'icpc':
             env.Replace(CCFLAGS=['-O2'])
             if env['WITH_SSE']:
@@ -364,10 +355,10 @@ def which(program):
         if is_exe(program):
             return program
     else:
-         for path in os.environ["PATH"].split(os.pathsep):
-             exe_file = os.path.join(path, program)
-             if is_exe(exe_file):
-                 return exe_file
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
 
     return None
 
@@ -378,10 +369,6 @@ def GetCompilerVersion(env):
     print 'Using compiler:',compiler
 
     compiler_real = os.path.realpath(compiler)
-    #compiler_base = os.path.basename(compiler_real) 
-    # ^^ Doesn't work if compiler_real is ccache.  But I want to be able to detect when
-    # g++ is a symlink for clang++ (as fink does for OSX 10.7).  So look in the 
-    # --version output below for clang instead.
     compiler_base = os.path.basename(compiler)
 
     # Get the compiler type without suffix or path.  
@@ -423,20 +410,22 @@ def GetCompilerVersion(env):
     if compilertype != 'unknown':
         cmd = compiler + ' ' + versionflag + ' 2>&1'
         lines = os.popen(cmd).readlines()
+
         # Check if g++ is a symlink for something else:
-        if compilertype is 'g++':
+        if compilertype == 'g++':
             if 'clang' in lines[0] or 'clang' in lines[1]:
                 print 'Detected clang++ masquerading as g++'
                 compilertype = 'clang++'
-            # Any others I should look for?
+                # When it is masquerading, the line with the version is the second line.
+                linenum=1
 
         # Check if c++ is a symlink for something else:
-        if compilertype is 'c++':
+        if compilertype == 'c++':
             if 'clang' in lines[0] or 'clang' in lines[1]:
-                print 'Detected that c++ is reall clang++'
+                print 'Detected that c++ is really clang++'
                 compilertype = 'clang++'
             elif 'g++' in lines[0] or 'gcc' in lines[0]:
-                print 'Detected that c++ is reall g++'
+                print 'Detected that c++ is really g++'
                 compilertype = 'g++'
             else:
                 print 'Cannot determine what kind of compiler c++ really is'
@@ -465,12 +454,7 @@ def GetCompilerVersion(env):
     env['CXXVERSION_NUMERICAL'] = float(vnum)
 
 
-def ExpandPath(path):
-    p=os.path.expanduser(path)
-    p=os.path.expandvars(p)
-    return p
-
-def AddPath(pathlist, newpath, prepend=False):
+def AddPath(pathlist, newpath):
     """
     Add path(s) to a list of paths.  Check the path exists and that it is
     not already in the list
@@ -481,14 +465,10 @@ def AddPath(pathlist, newpath, prepend=False):
     else:
         # to deal with expansions and possible end / which 
         # messes up uniqueness test
-        p = ExpandPath(newpath)
-        p = os.path.abspath(p) 
+        p = os.path.abspath(newpath) 
         if os.path.exists(p):
-            if p not in pathlist:
-                if prepend:
-                    pathlist.insert(0, p)
-                else:
-                    pathlist.append(p)
+            if pathlist.count(p) == 0:
+                pathlist.append(p)
 
 def AddExtraPaths(env):
     """
@@ -531,10 +511,10 @@ def AddExtraPaths(env):
             env['FINAL_PREFIX'] = env['PREFIX']
 
         if env['IMPORT_PREFIX']:
-            AddPath(bin_paths, os.path.join(env['PREFIX'], 'bin'))
-            AddPath(cpp_paths, os.path.join(env['PREFIX'], 'include'))
-            AddPath(lib_paths1, os.path.join(env['PREFIX'], 'lib'))
-    
+            AddPath(bin_paths, os.path.join(env['PREFIX'],'bin'))
+            AddPath(cpp_paths, os.path.join(env['PREFIX'],'include'))
+            AddPath(lib_paths1, os.path.join(env['PREFIX'],'lib'))
+
     # Paths specified in EXTRA_*
     bin_paths += env['EXTRA_PATH'].split(':')
     cpp_paths += env['EXTRA_INCLUDE_PATH'].split(':')
@@ -609,12 +589,12 @@ int main()
     return 0;
 }
 """
+
     simple_source_file = "int main() { return 0; }"
 
     context.Message('Checking for MKL... ')
 
     if context.TryCompile(mkl_source_file,'.cpp'):
-        
         # If guide or iomp5 are available, link them along with pthread
         pthread = ['pthread']
         if CheckLibs(context,['guide']+pthread,simple_source_file):
@@ -622,6 +602,7 @@ int main()
         if CheckLibs(context,pthread+['iomp5'],simple_source_file):
             pthread = pthread+['iomp5']
 
+        # Try to pick out the correct thread library
         if context.env['CXXTYPE'] == 'icpc':
             threadlib = ['mkl_intel_thread']
         elif context.env['CXXTYPE'] == 'pgCC':
@@ -727,10 +708,10 @@ int main()
 
         context.Result(result)
 
-        if not result and context.env['FORCE_CLAMD']:            
+        if not result and context.env['FORCE_CLAMD']:
             print 'WARNING: Forced use of clAmdBlas even though link test failed.'
             print "         The compiled library will not have the correct linking commands"
-            print "         set up for your clAmdBlas version."
+            print "         set up for your CLAMD version."
             print "         You should figure out what libraries you need to link with"
             print "         and add them explicitly with the LIBS option in SCons."
             result = 1
@@ -748,7 +729,7 @@ int main()
 def CheckGOTO(context):
     fblas_source_file = """
 extern "C" {
-#include "util/fblas.h"
+#include "../src/fblas.h"
 }
 int main()
 {
@@ -786,7 +767,7 @@ int main()
         if not result and context.env['FORCE_GOTO']:
             print 'WARNING: Forced use of GOTO even though link test failed.'
             print "         The compiled library will not have the correct linking commands"
-            print "         set up for your GOTO BLAS version."
+            print "         set up for your GOTOBLAS version."
             print "         You should figure out what libraries you need to link with"
             print "         and add them explicitly with the LIBS option in SCons."
             result = 1
@@ -899,7 +880,7 @@ int main()
 def CheckFBLAS(context):
     fblas_source_file = """
 extern "C" {
-#include "util/fblas.h"
+#include "../src/fblas.h"
 }
 int main()
 {
@@ -1053,7 +1034,7 @@ int main()
         if not result and context.env['FORCE_CLAPACK']:
             print 'WARNING: Forced use of CLAPACK even though link test failed.'
             print "         The compiled library will not have the correct linking commands"
-            print "         set up for your LAPACK version."
+            print "         set up for your CLAPACK version."
             print "         You should figure out what libraries you need to link with"
             print "         and add them explicitly with the LIBS option in SCons."
             result = 1
@@ -1073,7 +1054,7 @@ int main()
 def CheckFLAPACK(context):
     flapack_source_file = """
 extern "C" {
-#include "util/flapack.h"
+#include "../src/flapack.h"
 }
 int main()
 {
@@ -1175,11 +1156,14 @@ def DoLibraryAndHeaderChecks(config):
             #config.CheckCLAMD()
             #config.env.Append(CPPDEFINES=['CLAMD'])
             #print 'Using clAmdBlas'
-
+ 
         elif config.env['FORCE_GOTO']:
             config.CheckGOTO()
             config.env.Append(CPPDEFINES=['FBLAS'])
-            print 'Using GOTO BLAS'
+            print 'Using GotoBLAS'
+            if config.env['WITH_OPENMP']:
+                print 'Disabling OpenMP, since GotBLAS becomes very slow with it'
+                config.env['WITH_OPENMP'] = False
 
         elif config.env['FORCE_ATLAS']:
             config.CheckATLAS()
@@ -1220,6 +1204,9 @@ def DoLibraryAndHeaderChecks(config):
         elif config.CheckGOTO() :
             config.env.Append(CPPDEFINES=['FBLAS'])
             print 'Using GotoBLAS'
+            if config.env['WITH_OPENMP']:
+                print 'Disabling OpenMP, since GotBLAS becomes very slow with it'
+                config.env['WITH_OPENMP'] = False
 
         elif config.CheckCBLAS() :
             config.env.Append(CPPDEFINES=['CBLAS'])
@@ -1292,11 +1279,10 @@ def GetNCPU():
             return int(os.popen2('sysctl -n hw.ncpu')[1].read())
     # Windows:
     if os.environ.has_key('NUMBER_OF_PROCESSORS'):
-        ncpus = int(os.environ['NUMBER_OF_PROCESSORS']);
+        ncpus = int(os.environ['NUMBER_OF_PROCESSORS'])
         if ncpus > 0:
             return ncpus
     return 1 # Default
-
 
 
 def DoConfig(env):
@@ -1310,7 +1296,7 @@ def DoConfig(env):
 
     # Figure out what kind of compiler we are dealing with
     GetCompilerVersion(env)
-
+   
     # If not explicit, set number of jobs according to number of CPUs
     # Note: this doesn't override an explicit scons -jN
     if env.GetOption('num_jobs') == 1: # not set with -jN
@@ -1322,21 +1308,30 @@ def DoConfig(env):
                 print 'Using specified number of jobs =',env.GetOption('num_jobs')
         elif int(env['N_BUILD_THREADS']) == 0:
             ncpu = GetNCPU()
-            if ncpu > 1:
+            if ncpu > 4:
+                # Don't use more than 4 cpus for the automatic version.
+                env.SetOption('num_jobs', 4)
+                if env.GetOption('num_jobs') == 4:
+                    print 'Determined that there are',ncpu,
+                    print 'cpus, but only using 4 jobs to avoid overly high memory use.'
+            elif ncpu > 1:
                 env.SetOption('num_jobs', ncpu)
+                # Importantly, the above line doesn't do anything if the user has run with
+                # scons -j1.  It only works if num_jobs was 1 by default, with no explicit -j1.
                 if env.GetOption('num_jobs') == ncpu:
-                    print 'Determined that a good number of jobs =',env.GetOption('num_jobs')
-   
+                    print 'Determined that there are',ncpu,'cpus, so use this many jobs.'
+            if env.GetOption('num_jobs') > 1:
+                print 'You can override this behavior with scons -jN'
+
     # The basic flags for this compiler if not explicitly specified
     BasicCCFlags(env)
 
     # Some extra flags depending on the options:
-    env.Append(CPPDEFINES=['TMV_OPT=' + env['OPT']])
     if not env['DEBUG']:
         print 'Debugging turned off'
         env.Append(CPPDEFINES=['TMV_NDEBUG'])
-    if env['MEM_TEST']:
-        env.Append(CPPDEFINES=['TMV_MEM_TEST'])
+    if env['MEM_DEBUG']:
+        env.Append(CPPDEFINES=['TMV_MEM_DEBUG'])
     if '-m32' in env['CCFLAGS']:
         env.Append(LINKFLAGS=['-m32'])
     if '-m64' in env['CCFLAGS']:
@@ -1347,28 +1342,13 @@ def DoConfig(env):
         else:
             env.Append(LINKFLAGS=['-static'])
 
-    # Define which types are in library:
-    if not env['INST_DOUBLE']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_DOUBLE'])
-    if not env['INST_FLOAT']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_FLOAT'])
-    if env['INST_INT']:
-        env.Append(CPPDEFINES=['TMV_INST_INT'])
-    if env['INST_LONGDOUBLE']:
-        env.Append(CPPDEFINES=['TMV_INST_LONGDOUBLE'])
-    if not env['INST_MIX']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_MIX'])
-    if not env['INST_COMPLEX']:
-        env.Append(CPPDEFINES=['TMV_NO_INST_COMPLEX'])
-
     import SCons.SConf
 
     # Figure out what BLAS and/or LAPACK libraries are on the system
-    # I have had bad luck with scons figuring out when the cache is invalid.
-    # This just forces a check every time.
+    # MJ: I have had bad luck with scons figuring out when the cache
+    #     is invalid.  This just forces a check every time.
     if not env['CACHE_LIB']:
         SCons.SConf.SetCacheMode('force')
-
     config = env.Configure(custom_tests = {
         'CheckMKL' : CheckMKL ,
         'CheckACML' : CheckACML ,
@@ -1381,17 +1361,16 @@ def DoConfig(env):
         'CheckATLAS_LAP' : CheckATLAS_LAP ,
         'CheckCLAPACK' : CheckCLAPACK ,
         'CheckFLAPACK' : CheckFLAPACK })
-
     DoLibraryAndHeaderChecks(config)
     env = config.Finish()
-    # Turn the cache back on now, since we want it for the main compilation steps.
+    # MJ: Turn the cache back on now, since we want it for the
+    #     main compilation steps.
     if not env['CACHE_LIB']:
         SCons.SConf.SetCacheMode('auto')
 
     # Do this after BLAS checks, since we disable it for GotoBLAS
     if env['WITH_OPENMP']:
         AddOpenMPFlag(env)
-
 
 #
 # main program
@@ -1414,12 +1393,15 @@ if unknown:
     print 'then you can override this check with USE_UNKNOWN_VARS=true'
     Exit(1)
 
-print 'Using the following (non-default) scons options:'
-for opt in opts.options:
-    if (opt.default != env[opt.key]):
-        print '   %s = %s'%(opt.key,env[opt.key])
-print 'These can be edited directly in the file %s.'%config_file
-print 'Type scons -h for a full list of available options.'
+if any(opt.default != env[opt.key] for opt in opts.options):
+    print 'Using the following (non-default) scons options:'
+    for opt in opts.options:
+        if (opt.default != env[opt.key]):
+            print '   %s = %s'%(opt.key,env[opt.key])
+    print 'These can be edited directly in the file %s.'%config_file
+    print 'Type scons -h for a full list of available options.'
+else:
+    print 'Using the default scons options'
 
 opts.Save(config_file,env)
 Help(opts.GenerateHelpText(env))
@@ -1436,9 +1418,9 @@ if not GetOption('help'):
 
     if env['WITH_UPS']:
         subdirs += ['ups']
-    if 'doc' in COMMAND_LINE_TARGETS:
+    if 'doc' in COMMAND_LINE_TARGETS: 
         subdirs += ['doc']
-    if 'examples' in COMMAND_LINE_TARGETS:
+    if 'examples' in COMMAND_LINE_TARGETS: 
         subdirs += ['examples']
 
     # subdirectores to process.  We process src by default

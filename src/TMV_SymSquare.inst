@@ -1,0 +1,16 @@
+#define CT std::complex<T>
+
+#define DefSQ(tf,T) \
+template void SymSquare<tf,T >(MatrixView<T > A); \
+
+DefSQ(true,T)
+DefSQ(false,T)
+#ifdef INST_COMPLEX
+DefSQ(true,CT)
+DefSQ(false,CT)
+#endif
+
+#undef DefSQ
+
+#undef CT
+

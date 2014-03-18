@@ -9,23 +9,21 @@ ReadFileList=env['_ReadFileList']
 
 libs=['tmv'] 
 sblibs=['tmv_symband','tmv'] 
-#sblibs=['tmv'] 
 
 test_basic_files = ReadFileList('test_basic.files')
 test_diag_files = ReadFileList('test_diag.files')
 test_tri_files = ReadFileList('test_tri.files')
 test_div_files = ReadFileList('test_div.files')
 test_div_lap_files = ReadFileList('test_div_lap.files')
-test_band_files = ReadFileList('test_band.filesx')
-#test_band_lap_files = ReadFileList('test_band_lap.files')
-test_band_lap_files = []
+test_band_files = ReadFileList('test_band.files')
+test_band_lap_files = ReadFileList('test_band_lap.files')
 test_sym_files = ReadFileList('test_sym.files')
 test_sym_lap_files = ReadFileList('test_sym_lap.files')
 test_symband_files = ReadFileList('test_symband.files')
 test_symband_lap_files = ReadFileList('test_symband_lap.files')
 test_small_files = ReadFileList('test_small.files')
-test_small_mv_files = ReadFileList('test_small_mv.files')
-test_small_mm_files = ReadFileList('test_small_mm.files')
+test_small_sq_files = ReadFileList('test_small_sq.files')
+test_small_nonsq_files = ReadFileList('test_small_nonsq.files')
 test_small_sq_div_files = ReadFileList('test_small_sq_div.files')
 test_small_nonsq_div_files = ReadFileList('test_small_nonsq_div.files')
 
@@ -51,9 +49,8 @@ if env['SHARED']:
         env1.AppendUnique(LIBPATH=os.path.join(env['FINAL_PREFIX'], 'lib'))
 
 # Clear all the BLAS/LAPACK defines and reset the others:
-env1.Append(CPPDEFINES=['TMV_OPT=' + env['TEST_OPT']])
-if env['MEM_TEST']:
-    env1.Append(CPPDEFINES=['TMV_MEM_TEST'])
+if env['MEM_DEBUG']:
+    env1.Append(CPPDEFINES=['TMV_MEM_DEBUG'])
 if int(env['XTEST']) > 0:
     env1.Append(CPPDEFINES=['XTEST=' + env['XTEST']])
 if env['NAN_TEST']:
@@ -65,15 +62,14 @@ else:
 if env['DEBUG']:
     env1.Append(CPPDEFINES=['TMV_EXTRA_DEBUG'])
 
-if not env['TEST_FLOAT']:
+if not env['TEST_FLOAT'] or not env['INST_FLOAT']:
     env1.Append(CPPDEFINES=['NO_TEST_FLOAT'])
-if not env['TEST_DOUBLE']:
+if not env['TEST_DOUBLE'] or not env['INST_DOUBLE']:
     env1.Append(CPPDEFINES=['NO_TEST_DOUBLE'])
 if env['TEST_LONGDOUBLE']:
     env1.Append(CPPDEFINES=['TEST_LONGDOUBLE'])
 if env['TEST_INT']:
     env1.Append(CPPDEFINES=['TEST_INT'])
-
 
 env1b = env1.Clone()
 if env['LAP']:
@@ -96,23 +92,20 @@ env3 = env1.Clone()
 obj_basic = env1.Object(test_basic_files)
 obj_diag = env1.Object(test_diag_files)
 obj_tri = env1.Object(test_tri_files)
-obj_div = [ env1.Object(test_div_files),
-    env1b.Object(test_div_lap_files) ]
-obj_band = [ env2.Object(test_band_files),
-    env2b.Object(test_band_lap_files) ]
-obj_sym = [ env2.Object(test_sym_files),
-    env2b.Object(test_sym_lap_files) ]
+obj_div = [ env1.Object(test_div_files), env1b.Object(test_div_lap_files) ]
+obj_band = [ env2.Object(test_band_files), env2b.Object(test_band_lap_files) ]
+obj_sym = [ env2.Object(test_sym_files), env2b.Object(test_sym_lap_files) ]
 obj_symband = [ env2.Object(test_symband_files),
     env2b.Object(test_symband_lap_files) ]
 obj_small = env3.Object(test_small_files)
-obj_small_mv = env3.Object(test_small_mv_files)
-obj_small_mm = env3.Object(test_small_mm_files)
+obj_small_sq = env3.Object(test_small_sq_files)
+obj_small_nonsq = env3.Object(test_small_nonsq_files)
 obj_small_sq_div = env3.Object(test_small_sq_div_files)
 obj_small_nonsq_div = env3.Object(test_small_nonsq_div_files)
 
 test1files = [obj_basic, obj_diag, obj_tri, obj_div, 'TMV_Test1.cpp']
 test2files = [obj_band, obj_sym, obj_symband, 'TMV_Test2.cpp']
-test3files = [obj_small, obj_small_mv, obj_small_mm, 
+test3files = [obj_small, obj_small_sq, obj_small_nonsq,
               obj_small_sq_div, obj_small_nonsq_div, 'TMV_Test3.cpp']
 
 test1afiles = [obj_basic, 'TMV_Test1a.cpp']
@@ -123,8 +116,8 @@ test2afiles = [obj_band, 'TMV_Test2a.cpp']
 test2bfiles = [obj_sym, 'TMV_Test2b.cpp']
 test2cfiles = [obj_symband, 'TMV_Test2c.cpp']
 test3afiles = [obj_small, 'TMV_Test3a.cpp']
-test3bfiles = [obj_small_mv, 'TMV_Test3b.cpp']
-test3cfiles = [obj_small_mm, 'TMV_Test3c.cpp']
+test3bfiles = [obj_small_sq, 'TMV_Test3b.cpp']
+test3cfiles = [obj_small_nonsq, 'TMV_Test3c.cpp']
 test3dfiles = [obj_small_sq_div, 'TMV_Test3d.cpp']
 test3efiles = [obj_small_nonsq_div, 'TMV_Test3e.cpp']
 
@@ -173,6 +166,6 @@ if env['SMALL_TESTS'] :
 else :
 
     env.Alias(target='test', source=[
-        'test1','test2a','test3'])
+        'test1','test2','test3'])
 
 

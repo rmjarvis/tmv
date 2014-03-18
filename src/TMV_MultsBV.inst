@@ -1,0 +1,26 @@
+
+#define CT std::complex<T>
+
+template const T* SymBandMatrixComposite<T >::cptr() const;
+template ptrdiff_t SymBandMatrixComposite<T >::stepi() const;
+template ptrdiff_t SymBandMatrixComposite<T >::stepj() const;
+template ptrdiff_t SymBandMatrixComposite<T >::diagstep() const;
+
+#define DefMV(T,Ta,Tb)\
+template void MultMV<true>(const T alpha, const GenSymBandMatrix<Ta >& A, \
+    const GenVector<Tb >& x, VectorView<T > y);  \
+template void MultMV<false>(const T alpha, const GenSymBandMatrix<Ta >& A, \
+    const GenVector<Tb >& x, VectorView<T > y);  \
+
+
+DefMV(T,T,T)
+#ifdef INST_COMPLEX
+DefMV(CT,T,T)
+DefMV(CT,T,CT)
+DefMV(CT,CT,T)
+DefMV(CT,CT,CT)
+#endif
+
+#undef DefMV
+
+#undef CT
