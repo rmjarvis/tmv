@@ -369,10 +369,6 @@ def GetCompilerVersion(env):
     print 'Using compiler:',compiler
 
     compiler_real = os.path.realpath(compiler)
-    #compiler_base = os.path.basename(compiler_real) 
-    # ^^ Doesn't work if compiler_real is ccache.  But I want to be able to detect when
-    # g++ is a symlink for clang++ (as fink does for OSX 10.7).  So look in the 
-    # --version output below for clang instead.
     compiler_base = os.path.basename(compiler)
 
     # Get the compiler type without suffix or path.  
@@ -422,7 +418,6 @@ def GetCompilerVersion(env):
                 compilertype = 'clang++'
                 # When it is masquerading, the line with the version is the second line.
                 linenum=1
-            # Any others I should look for?
 
         # Check if c++ is a symlink for something else:
         if compilertype == 'c++':
