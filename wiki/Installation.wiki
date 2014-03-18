@@ -4,7 +4,7 @@
 
 === 1. Download the source code ===
 
-You can get the tarball [http://code.google.com/p/tmv-cpp/downloads/detail?name=tmv0.71.tar.gz here].
+You can get the tarball [https://drive.google.com/file/d/0B6hIz9tCW5iZTnRsM1RiSjhrdTg/edit?usp=sharing here].
 
 Copy it to the directory where you want to put the TMV library.
 
@@ -12,12 +12,12 @@ Copy it to the directory where you want to put the TMV library.
 
 On linux machines, the commands are:
 {{{
-gunzip tmv0.71.tar.gz
-tar xf tmv0.71.tar
+gunzip tmv0.72.tar.gz
+tar xf tmv0.72.tar
 }}}
 On Windows, you can use a utility like [http://www.izarc.org/ IZArc], or something similar.
 
-This will make a directory called `tmv0.71` with the subdirectories:
+This will make a directory called `tmv0.72` with the subdirectories:
 `doc`, `examples`, `include`, `lib`, `src` and `test`
 along with the files `README`, `INSTALL` and others
 in the top directory.
@@ -62,13 +62,13 @@ If you need to run SCons multiple times (for example to compile the test suite o
     * `INST_FLOAT=true` specifies whether to instantiate the `<float>` templates.
     * `INST_DOUBLE=true` specifies whether to instantiate the `<double>` templates.
     * `INST_LONGDOUBLE=false` specifies whether to instantiate the `<long double>` templates.
-    * `INST_INT=false` specifies whether to instantiate the `<int>` templates.
+    * `INST_INT=true` specifies whether to instantiate the `<int>` templates.
     * `WITH_OPENMP=true` specifies whether to use OpenMP to parallelize some parts of the code.
     * `SHARED=false` specifies whether to make the library files shared as opposed to static libraries.
     * `TEST_FLOAT=true` specifies whether to include the `<float>` tests in the test suite.
     * `TEST_DOUBLE=true` specifies whether to include the `<double>` tests in the test suite.
     * `TEST_LONGDOUBLE=false` specifies whether to include the `<long double>` tests in the test suite.
-    * `TEST_INT=false` specifies whether to include the `<int>` tests in the test suite.
+    * `TEST_INT=true` specifies whether to include the `<int>` tests in the test suite.
 
 The next flags set up the paths that SCons will use to try to find your BLAS and LAPACK libraries.
     * `IMPORT_ENV=true` specifies whether to import the entire environment from the calling shell.  The default is for SCons to use the same environment as the shell from which it is called.  However, sometimes it can be useful to start with a clean environment and manually add paths (see below) for various things, in which case you would want to set this to false.
@@ -90,18 +90,23 @@ When SCons starts up, it will look through the standard paths, along with any ex
 {{{
 $ scons
 scons: Reading SConscript files ...
-
-Using compiler: g++-4
-compiler version: 4.3.2
+Using the default scons options
+Using compiler: /usr/bin/g++
+Detected clang++ masquerading as g++
+compiler version: 5.1
+Determined that there are 4 cpus, so use this many jobs.
+You can override this behavior with scons -jN
 Debugging turned off
 Checking for MKL... no
 Checking for ACML... no
 Checking for GotoBLAS... no
-Checking for CBLAS... yes
-Using CBLAS
-Checking for CLAPACK... no
-Checking for Fortran LAPACK... yes
-Using Fortran LAPACK
+Checking for CBLAS... no
+Checking for ATLAS... no
+Checking for Fortran BLAS... yes
+Using Fortran BLAS
+No OpenMP support for clang++
+TMV Version  0.72
+
 scons: done reading SConscript files.
 scons: Building targets ...
 }}}
