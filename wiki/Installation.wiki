@@ -4,7 +4,7 @@
 
 === 1. Download the source code ===
 
-You can get the tarball [https://drive.google.com/file/d/0B6hIz9tCW5iZeFZNM0hLME42ZU0/edit?usp=sharing here].
+You can get the tarball [https://googledrive.com/host/0B6hIz9tCW5iZdEcybFNjRHFmOEE/tmv0.72.tar.gz here].  
 
 Copy it to the directory where you want to put the TMV library.
 
