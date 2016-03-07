@@ -317,6 +317,14 @@ void SV_Decompose(
       const HermBandMatrix<T>& A, Matrix<T>& U, DiagMatrix<RT>& S);
 \end{tmvcode}
 
+On output, the singular values \tt{S} will be in decreasing order of absolute value.
+This is the typical order one would want for principal value decompositions,
+where only the largest several singular values (aka principal values) would be 
+used.  Note that this is different from the order returned by \tt{Eigen}
+(cf. \S\ref{Eigenvalues}).  Other than this detail and the fact that \tt{S}
+is packaged as a \tt{DiagMatrix} rather than a \tt{Vector}, the result of these two
+functions for Hermitian matrices is identical.
+
 \subsection[Polar decomposition] {Polar decomposition \rm (\tt{Matrix}, \tt{BandMatrix})}
 \index{Polar decomposition}
 

@@ -97,3 +97,10 @@ void Eigen(const HermBandMatrix<T>& A, Vector<RT>& lambda)
 \end{tmvcode}
 \index{SymMatrix!Eigenvalues and eigenvectors}
 \index{SymBandMatrix!Eigenvalues and eigenvectors}
+
+The eigenvalues \tt{lambda} will be in ascending order as is usual for eigenvalue
+applications.  Note that this is different from the order returned by \tt{SV\_Decompose}
+(cf. \S\ref{Decompositions}).
+Other than this detail and the fact that \tt{lambda}
+is packaged as a \tt{Vector} rather than a \tt{DiagMatrix}, the result of these two
+functions for Hermitian matrices is identical.
