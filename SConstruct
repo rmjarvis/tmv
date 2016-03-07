@@ -653,8 +653,8 @@ int main()
         pthread = ['pthread']
         if CheckLibs(context,['guide']+pthread,simple_source_file):
             pthread = ['guide']+pthread
-        if CheckLibs(context,pthread+['iomp5'],simple_source_file):
-            pthread = pthread+['iomp5']
+        if CheckLibs(context,['iomp5']+pthread,simple_source_file):
+            pthread = ['iomp5']+pthread
 
         # Try to pick out the correct thread library
         if context.env['CXXTYPE'] == 'icpc':
