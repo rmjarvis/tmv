@@ -597,8 +597,6 @@ static void TestVectorArith()
 {
     typedef tmv::VectorView<T> V;
     typedef tmv::VectorView<CT > CV;
-    typedef tmv::VectorView<T,tmv::FortranStyle> VF;
-    typedef tmv::VectorView<CT,tmv::FortranStyle> CVF;
 
     const int N = 100;
 
@@ -651,6 +649,8 @@ static void TestVectorArith()
     TestVectorArith2(ar,car,br,cbr,"Vector C RevAB");
 
 #if (XTEST & 32)
+    typedef tmv::VectorView<T,tmv::FortranStyle> VF;
+    typedef tmv::VectorView<CT,tmv::FortranStyle> CVF;
     VF af = a.fView();
     CVF caf = ca.fView();
     TestVectorArith1(af,caf,"Vector F");

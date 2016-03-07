@@ -104,8 +104,6 @@ namespace tmv {
         TMVAssert(A.isSquare());
         const ptrdiff_t N = A.rowsize();
 
-        typedef TMV_RealType(T) RT;
-
         const ptrdiff_t ds = A.diagstep();
         T* Ujj = A.ptr();
         ptrdiff_t* Pj=P;
@@ -158,8 +156,6 @@ namespace tmv {
         TMVAssert(A.ct() == NonConj);
         TMVAssert(A.isSquare());
         const ptrdiff_t N = A.rowsize();
-
-        typedef TMV_RealType(T) RT;
 
         T* Ujj = A.ptr(); // = U(j,j)
         T* Lj = Ujj+A.stepi();  // = L(j+1,j)

@@ -1279,10 +1279,10 @@ namespace tmv {
                     os<<"Input stream cannot read next character.\n";
                 }
             }
-            if (abs(i-j) > m.nlo() && v1 != T(0)) {
+            if (std::abs(i-j) > m.nlo() && v1 != T(0)) {
                 os<<"Invalid input.  Expected 0, got "<<v1<<".\n";
             }
-            if (abs(i-j) <= m.nlo() && v1 != v2) {
+            if (std::abs(i-j) <= m.nlo() && v1 != v2) {
                 os<<"Input matrix is not symmetric.\n";
                 os<<"Lower triangle has the value "<<v1<<" at ("<<i<<","<<j<<")\n";
                 os<<"Upper triangle has the value "<<v2<<" at ("<<j<<","<<i<<")\n";
@@ -1374,13 +1374,13 @@ namespace tmv {
                     os<<"Input stream cannot read next character.\n";
                 }
             }
-            if (abs(i-j) > m.nlo() && v1 != T(0)) {
+            if (std::abs(i-j) > m.nlo() && v1 != T(0)) {
                 os<<"Invalid input.  Expected 0, got "<<v1<<".\n";
             }
             if (i==j && v1 != T(0)) {
                 os<<"Non-real value found on diagonal: "<<v1<<std::endl;
             }
-            if (abs(i-j) <= m.nlo() && i!=j && v1 != v1) {
+            if (std::abs(i-j) <= m.nlo() && i!=j && v1 != v1) {
                 os<<"Input matrix is not symmetric.\n";
                 os<<"Lower triangle has the value "<<v1<<" at ("<<i<<","<<j<<")\n";
                 os<<"Upper triangle has the value "<<v2<<" at ("<<j<<","<<i<<")\n";

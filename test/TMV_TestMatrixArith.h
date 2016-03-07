@@ -229,11 +229,11 @@ static void DoTestMa_Basic(const MM& a, std::string label)
 template <class MM> 
 static void DoTestMa_Full(const MM& a, std::string label)
 {
-    typedef typename MM::value_type T;
-    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMa_Basic(a,label);
 
 #if (XTEST & 16)
+    typedef typename MM::value_type T;
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Continuing on to MMa Full"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -359,11 +359,11 @@ static void DoTestMX1a_Basic(const MM& a, T2 x, std::string label)
 template <class MM, class T2> 
 static void DoTestMX1a_Full(const MM& a, T2 x, std::string label)
 {
-    typedef typename MM::value_type T;
-    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMX1a_Basic(a,x,label);
 
 #if (XTEST & 16)
+    typedef typename MM::value_type T;
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Continuing on to MX1a Full"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -484,11 +484,11 @@ static void DoTestMX2a_Basic(MM& a, T2 x, std::string label)
 template <class MM, class T2> 
 static void DoTestMX2a_Full(MM& a, T2 x, std::string label)
 {
-    typedef typename MM::value_type T;
-    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMX2a_Basic(a,x,label);
 
 #if (XTEST & 16)
+    typedef typename MM::value_type T;
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Continuing on to MX2a Full"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -655,13 +655,13 @@ static void DoTestMV1a_Basic(const MM& a, const V& b, std::string label)
 template <class MM, class V> 
 static void DoTestMV1a_Full(const MM& a, const V& b, std::string label)
 {
+    DoTestMV1a_Basic(a,b,label);
+
+#if (XTEST & 16)
     typedef typename MM::value_type Ta;
     typedef typename V::value_type T;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
-    DoTestMV1a_Basic(a,b,label);
-
-#if (XTEST & 16)
     if (showstartdone) {
         std::cout<<"Continuing on to MV1a Full"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -741,13 +741,13 @@ static void DoTestVM1a_Basic(const MM& a, const V& b, std::string label)
 template <class MM, class V> 
 static void DoTestVM1a_Full(const MM& a, const V& b, std::string label)
 {
+    DoTestVM1a_Basic(a,b,label);
+
+#if (XTEST & 16)
     typedef typename MM::value_type Ta;
     typedef typename V::value_type T;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
-    DoTestVM1a_Basic(a,b,label);
-
-#if (XTEST & 16)
     if (showstartdone) {
         std::cout<<"Continuing on to VM1a Full"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -1094,12 +1094,12 @@ static void DoTestMV2a_Basic(const MM& a, V& b, std::string label)
 template <class MM, class V> 
 static void DoTestMV2a_Full(const MM& a, V& b, std::string label)
 {
-    typedef typename MM::value_type Ta;
-    typedef typename V::value_type T;
-    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMV2a_Basic(a,b,label);
 
 #if (XTEST & 16)
+    typedef typename MM::value_type Ta;
+    typedef typename V::value_type T;
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Continuing on to MV2a Full"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -1317,12 +1317,12 @@ static void DoTestVM2a_Basic(const MM& a, V& b, std::string label)
 template <class MM, class V> 
 static void DoTestVM2a_Full(const MM& a, V& b, std::string label)
 {
-    typedef typename MM::value_type Ta;
-    typedef typename V::value_type T;
-    typedef typename tmv::Traits<T>::real_type RT;
     DoTestVM2a_Basic(a,b,label);
 
 #if (XTEST & 16)
+    typedef typename MM::value_type Ta;
+    typedef typename V::value_type T;
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Continuing on to VM2a Full"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -1664,13 +1664,13 @@ static void DoTestMV3a_Basic(
 template <class MM, class V1, class V2> 
 static void DoTestMV3a_Full(const MM& a, const V1& b, V2& c, std::string label)
 {
+    DoTestMV3a_Basic(a,b,c,label);
+
+#if (XTEST & 16)
     typedef typename MM::value_type Ta;
     typedef typename V1::value_type Tb;
     typedef typename V2::value_type T;
     typedef typename tmv::Traits<T>::real_type RT;
-    DoTestMV3a_Basic(a,b,c,label);
-
-#if (XTEST & 16)
     if (showstartdone) {
         std::cout<<"Continuing on to MV3a Full"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -1877,14 +1877,14 @@ static void DoTestVM3a_Basic(
 template <class MM, class V1, class V2> 
 static void DoTestVM3a_Full(const MM& a, const V1& b, V2& c, std::string label)
 {
+    DoTestVM3a_Basic(a,b,c,label);
+
+#if (XTEST & 16)
     typedef typename MM::value_type Ta;
     typedef typename V1::value_type Tb;
     typedef typename V2::value_type T;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
-    DoTestVM3a_Basic(a,b,c,label);
-
-#if (XTEST & 16)
     if (showstartdone) {
         std::cout<<"Continuing on to VM3a Full"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -2162,13 +2162,13 @@ static void DoTestMM1a_Basic(const M1& a, const M2& b, std::string label)
 template <class M1, class M2> 
 static void DoTestMM1a_Full(const M1& a, const M2& b, std::string label)
 {
+    DoTestMM1a_Basic(a,b,label);
+
+#if (XTEST & 16)
     typedef typename M1::value_type T;
     typedef typename M2::value_type Tb;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits<T>::complex_type CT;
-    DoTestMM1a_Basic(a,b,label);
-
-#if (XTEST & 16)
     if (showstartdone) {
         std::cout<<"Continuing on to MM1a Full"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -2521,12 +2521,12 @@ static void DoTestMM2a_Basic(M1& a, const M2& b, std::string label)
 template <class M1, class M2> 
 static void DoTestMM2a_Full(M1& a, const M2& b, std::string label)
 {
-    typedef typename M1::value_type T;
-    typedef typename M2::value_type Tb;
-    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMM2a_Basic(a,b,label);
 
 #if (XTEST & 16)
+    typedef typename M1::value_type T;
+    typedef typename M2::value_type Tb;
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Continuing on to MM2a Full"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -2670,13 +2670,13 @@ static void DoTestMM3a_Basic(const M1& a, const M2& b, std::string label)
 template <class M1, class M2> 
 static void DoTestMM3a_Full(const M1& a, const M2& b, std::string label)
 {
+    DoTestMM3a_Basic(a,b,label);
+
+#if (XTEST & 16)
     typedef typename M1::value_type T;
     typedef typename M2::value_type Tb;
     typedef typename tmv::Traits<T>::real_type RT;
     typedef typename tmv::Traits2<T,Tb>::type PT;
-    DoTestMM3a_Basic(a,b,label);
-
-#if (XTEST & 16)
     if (showstartdone) {
         std::cout<<"Continuing on to MM3a Full"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -2864,12 +2864,12 @@ static void DoTestMM4a_Basic(M1& a, const M2& b, std::string label)
 template <class M1, class M2> 
 static void DoTestMM4a_Full(M1& a, const M2& b, std::string label)
 {
-    typedef typename M1::value_type T;
-    typedef typename M2::value_type Tb;
-    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMM4a_Basic(a,b,label);
 
 #if (XTEST & 16)
+    typedef typename M1::value_type T;
+    typedef typename M2::value_type Tb;
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Continuing on to MM4a Full"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -3251,14 +3251,14 @@ static void DoTestMM5a_Basic(
 template <class M1, class M2, class M3> 
 static void DoTestMM5a_Full(const M1& a, const M2& b, M3& c, std::string label)
 {
-    typedef typename M1::value_type Ta;
-    typedef typename M2::value_type Tb;
-    typedef typename M3::value_type T;
-    typedef typename tmv::Traits<T>::real_type RT;
     DoTestMM5a_Basic(a,b,c,label);
 
 #ifndef BASIC_MULTMM_ONLY
 #if (XTEST & 16)
+    typedef typename M1::value_type Ta;
+    typedef typename M2::value_type Tb;
+    typedef typename M3::value_type T;
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Continuing on to MM5a Full"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -3433,11 +3433,11 @@ template <class M, class V1, class V2>
 static void DoTestOProda_Full(
     M& a, const V1& v1, const V2& v2, std::string label)
 {
-    typedef typename M::value_type T;
-    typedef typename tmv::Traits<T>::real_type RT;
     DoTestOProda_Basic(a,v1,v2,label);
 
 #if (XTEST & 16)
+    typedef typename M::value_type T;
+    typedef typename tmv::Traits<T>::real_type RT;
     if (showstartdone) {
         std::cout<<"Continuing on to OProda Full"<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;

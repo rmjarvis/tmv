@@ -461,10 +461,6 @@ namespace tmv {
 
         friend inline void Swap(Permutation& p1, Permutation& p2);
 
-        template <class T, int A>
-        friend inline VectorView<T,A>& VectorView<T,A>::sort(
-            Permutation& p, ADType ad, CompType comp);
-
         template <class T>
         friend inline void LU_Decompose(MatrixView<T> m, Permutation& p);
 
@@ -490,6 +486,9 @@ namespace tmv {
         friend inline void LDL_Decompose(
             SymMatrixView<T> m, VectorView<T> xD,
             Permutation& p, TMV_RealType(T)& logdet, T& signdet);
+
+        template <class T, int A>
+        inline VectorView<T,A>& sort(Permutation& p, ADType ad, CompType comp);
 
         template <class T, int A>
         friend inline void DoVectorSort(VectorView<T,A> v, Permutation& p, ADType ad, CompType comp);
