@@ -611,8 +611,6 @@ int main()
 
     context.Message('Checking for OpenMP library... ')
 
-    AddOpenMPFlag(context.env)
-
     if context.TryCompile(omp_source_file,'.cpp'):
         result = (
             CheckLibs(context,[],omp_source_file) or
@@ -1431,7 +1429,8 @@ def DoConfig(env):
     DoLibraryAndHeaderChecks(config)
 
     # Do this after BLAS checks, since we disable it for GotoBLAS
-    if env['WITH_OPENMP']:
+    AddOpenMPFlag(config.env)
+    if config.env['WITH_OPENMP']:
         if not config.CheckOMP():
             config.env['WITH_OPENMP'] = False
 
