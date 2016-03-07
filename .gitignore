@@ -1,0 +1,6 @@
+*.os
+*.o
+.scon*
+tmv_scons*
+*.filesx
+*.log
