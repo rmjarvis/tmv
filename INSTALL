@@ -19,7 +19,7 @@ This will make a directory called tmv0.70 with subdirectories:
   include
   lib
   src
-  test
+  tests
 and also the files:
   INSTALL  (This file)
   README
@@ -138,32 +138,32 @@ and also the files:
    
 6. (optional) Type:
    
-     scons test
+     scons tests
    
    to make the test suite executables:
 
-     test/tmvtest1
-     test/tmvtest2
-     test/tmvtest3
+     tests/tmvtest1
+     tests/tmvtest2
+     tests/tmvtest3
 
    If you want to make the smaller test executables instead, you can type:
 
-     scons test SMALL_TESTS=true
+     scons tests SMALL_TESTS=true
 
    to make the executables:
 
-     test/tmvtest1a
-     test/tmvtest1b
-     test/tmvtest1c
-     test/tmvtest1d
-     test/tmvtest2a
-     test/tmvtest2b
-     test/tmvtest2c
-     test/tmvtest3a
-     test/tmvtest3b
-     test/tmvtest3c
-     test/tmvtest3d
-     test/tmvtest3e
+     tests/tmvtest1a
+     tests/tmvtest1b
+     tests/tmvtest1c
+     tests/tmvtest1d
+     tests/tmvtest2a
+     tests/tmvtest2b
+     tests/tmvtest2c
+     tests/tmvtest3a
+     tests/tmvtest3b
+     tests/tmvtest3c
+     tests/tmvtest3d
+     tests/tmvtest3e
 
    They should each compile successfully, and when you run them, they
    should output a bunch of lines that end with "...passed all tests"

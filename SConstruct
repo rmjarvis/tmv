@@ -12,7 +12,7 @@ print 'SCons is version',SCons.__version__,'using python version',platform.pytho
 
 # Subdirectories containing SConscript files.  We always process these, but 
 # there are some other optional ones
-subdirs = ['src','bin','share','test']
+subdirs = ['src','bin','share','tests']
 
 # Configurations will be saved here so command line options don't
 # have to be sent more than once
@@ -505,7 +505,7 @@ def AddExtraPaths(env):
     """
     # local includes and lib paths
     # The # symbol means to interpret these from the top-level scons
-    # directory even when we are in a sub-directory (src,test,etc.)
+    # directory even when we are in a sub-directory (src,tests,etc.)
     bin_paths = []
     cpp_paths = ['#include']
     lib_paths1 = ['#lib']
