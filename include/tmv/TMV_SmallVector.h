@@ -185,7 +185,7 @@ namespace tmv {
             v2.assignTov(*this);
         }
 
-        virtual inline ~SmallVector()
+        inline ~SmallVector()
         {
             TMV_SETFIRSTLAST(0,0);
 #ifdef TMV_EXTRA_DEBUG

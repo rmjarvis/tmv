@@ -40,12 +40,12 @@ namespace tmv {
         typedef typename Traits<T>::real_type real_type;
         typedef typename Traits<T>::complex_type complex_type;
 
-        SmallMatrixComposite() {}
-        SmallMatrixComposite(const SmallMatrixComposite<T,M,N>&) {}
-        virtual ~SmallMatrixComposite() {}
+        inline SmallMatrixComposite() {}
+        inline SmallMatrixComposite(const SmallMatrixComposite<T,M,N>&) {}
+        inline ~SmallMatrixComposite() {}
 
-        ptrdiff_t colsize() const { return M; }
-        ptrdiff_t rowsize() const { return N; }
+        inline ptrdiff_t colsize() const { return M; }
+        inline ptrdiff_t rowsize() const { return N; }
 
         virtual void assignTom(
             SmallMatrix<real_type,M,N,ColMajor|CStyle>& m) const = 0;

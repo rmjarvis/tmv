@@ -41,7 +41,7 @@ namespace tmv {
 
         inline SmallVectorComposite() {}
         inline SmallVectorComposite(const SmallVectorComposite<T,N>&) {}
-        virtual inline ~SmallVectorComposite() {}
+        inline ~SmallVectorComposite() {}
 
         inline ptrdiff_t size() const { return N; }
         virtual void assignTov(SmallVector<real_type,N,CStyle>& v) const = 0;
