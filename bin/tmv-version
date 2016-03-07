@@ -1,18 +1,24 @@
 #!/bin/bash
-#------------------------------------------------------------------------------
-#
-# Script to return SVN version of this product.  Change "tmv" to the name of
-# your product to get it to work.  Don't forget to run:
-#
-#   svn propset svn:keywords "HeadURL Rev" tmv-version 
-#   svn ci -m "setting keywords property to HeadURL" tmv-version
-#
-# once you have added this to your new SVN product 
-#
-# Erin Sheldon BNL
-# Revision numbers not updated unless this file updated, so including
-#	revision doesn not work. Removed.  ES
-#------------------------------------------------------------------------------
+###############################################################################
+##                                                                           ##
+## The Template Matrix/Vector Library for C++ was created by Mike Jarvis     ##
+## Copyright (C) 1998 - 2014                                                 ##
+## All rights reserved                                                       ##
+##                                                                           ##
+## The project is hosted at https://code.google.com/p/tmv-cpp/               ##
+## where you can find the current version and current documention.           ##
+##                                                                           ##
+## For concerns or problems with the software, Mike may be contacted at      ##
+## mike_jarvis17 [at] gmail.                                                 ##
+##                                                                           ##
+## This software is licensed under a FreeBSD license.  The file              ##
+## TMV_LICENSE should have bee included with this distribution.              ##
+## It not, you can get a copy from https://code.google.com/p/tmv-cpp/.       ##
+##                                                                           ##
+## Essentially, you can use this software however you want provided that     ##
+## you include the TMV_LICENSE file in any distribution that uses it.        ##
+##                                                                           ##
+###############################################################################
 
 echo 0.73
 exit 0
