@@ -159,13 +159,13 @@ env.Alias(target='testmix', source=progmix)
 
 if env['SMALL_TESTS'] :
 
-    env.Alias(target='test', source=[
+    env.Alias(target='tests', source=[
         'test1a','test1b','test1c','test1d','test2a','test2b','test2c',
         'test3a','test3b','test3c','test3d','test3e'])
 
 else :
 
-    env.Alias(target='test', source=[
-        'test1','test2','test3'])
+    env.Alias(target='tests', source=[
+        'test1','test2','test3','testmix'])
 
 
