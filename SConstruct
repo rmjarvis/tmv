@@ -188,7 +188,7 @@ def BasicCCFlags(env):
         if compiler == 'g++':
             env.Replace(CCFLAGS=['-O2'])
             env.Append(CCFLAGS=['-fno-strict-aliasing'])
-            env['TEST_FLAGS'] = ['-O1']
+            env['TEST_FLAGS'] = ['-O0']
             if env['PROFILE']:
                 env.Append(CCFLAGS=['-pg'])
                 env['TEST_FLAGS'] += ['-pg']
@@ -198,7 +198,7 @@ def BasicCCFlags(env):
 
         elif compiler == 'clang++':
             env.Replace(CCFLAGS=['-O2'])
-            env['TEST_FLAGS'] = ['-O1']
+            env['TEST_FLAGS'] = ['-O0']
             if env['PROFILE']:
                 env.Append(CCFLAGS=['-pg'])
                 env['TEST_FLAGS'] += ['-pg']
@@ -210,7 +210,7 @@ def BasicCCFlags(env):
             env.Replace(CCFLAGS=['-O2'])
             if env['WITH_SSE']:
                 env.Append(CCFLAGS=['-msse2'])
-            env['TEST_FLAGS'] = ['-O1']
+            env['TEST_FLAGS'] = ['-O0']
             if version >= 10:
                 env.Append(CCFLAGS=['-vec-report0'])
                 env['TEST_FLAGS'] += ['-vec-report0']
