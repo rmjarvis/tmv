@@ -196,7 +196,7 @@ namespace tmv {
         T* Uj = Ubeta.ptr();
         T* Vtj = Vtbeta.ptr();
         RT* Dj = D.ptr();
-        const int Ds = D.step();
+        const ptrdiff_t Ds = D.step();
         RT* Ej = E.ptr();
         for(ptrdiff_t j1=0;j1<N-1;) {
             ptrdiff_t j2 = TMV_MIN(N-1,j1+BIDIAG_BLOCKSIZE);

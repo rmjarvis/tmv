@@ -93,7 +93,7 @@ namespace tmv
         TMVAssert(beta.step()==1);
         const ptrdiff_t M = A.colsize();
         const ptrdiff_t N = A.rowsize();
-        const int Astepj = A.stepj();
+        const ptrdiff_t Astepj = A.stepj();
         const RT sqrteps = TMV_SQRT(TMV_Epsilon<T>());
 
         // Keep track of the norm of each column
@@ -248,7 +248,7 @@ namespace tmv
 
         const ptrdiff_t M = A.colsize();
         const ptrdiff_t N = A.rowsize();
-        const int Astepj = A.stepj();
+        const ptrdiff_t Astepj = A.stepj();
         const RT sqrteps = TMV_SQRT(TMV_Epsilon<T>());
 
         RT scale = RT(1) / A.maxAbs2Element(); // for more stable normSq
@@ -478,7 +478,7 @@ namespace tmv
 
         const ptrdiff_t M = A.colsize();
         const ptrdiff_t N = A.rowsize();
-        const int Astepj = A.stepj();
+        const ptrdiff_t Astepj = A.stepj();
         const RT sqrteps = TMV_SQRT(TMV_Epsilon<T>());
 
         RT scale = RT(1) / A.maxAbs2Element(); // for more stable normSq

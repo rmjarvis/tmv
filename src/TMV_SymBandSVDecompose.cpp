@@ -193,7 +193,7 @@ namespace tmv {
                 }
             }
 
-            std::vector<int> vec(N-1);
+            std::vector<ptrdiff_t> vec(N-1);
             Vector<T> Ubeta(N-1);
             ptrdiff_t endcol = nlo+1;
             if (endcol > N) endcol = N;

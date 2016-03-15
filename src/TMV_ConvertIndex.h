@@ -31,8 +31,8 @@ namespace tmv {
     inline void ConvertIndexToPermute(ptrdiff_t n, const VI& newIndex, ptrdiff_t* P)
     {
         // newIndex[i]=j means value at original j location needs to go to i.
-        std::vector<int> currIndex(n);
-        std::vector<int> origIndex(n);
+        std::vector<ptrdiff_t> currIndex(n);
+        std::vector<ptrdiff_t> origIndex(n);
         for(ptrdiff_t i=0;i<n;++i) {
             currIndex[i] = i;
             origIndex[i] = i;

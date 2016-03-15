@@ -5335,7 +5335,7 @@ namespace tmv {
         TMVAssert(m1.size() == m2.size());
         TMVAssert(m1.dt() == NonUnitDiag);
         TMVAssert(m2.dt() == NonUnitDiag);
-        const int N = m1.size();
+        const ptrdiff_t  N = m1.size();
 
         if (!m1.isSameAs(m2) && m1.size() > 0) {
             if (m1.iscm() && m2.iscm()) 

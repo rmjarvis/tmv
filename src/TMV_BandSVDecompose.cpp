@@ -197,7 +197,7 @@ namespace tmv {
                 U1.reset(new MatrixView<T>(UU->view()));
             }
 
-            std::vector<int> vec(N), ver(N-1);
+            std::vector<ptrdiff_t> vec(N), ver(N-1);
             ptrdiff_t endcol = nlo+1;
             Vector<T> Ubeta(N);
             Vector<T> Vtbeta(N-1);

@@ -68,7 +68,7 @@ namespace tmv {
         L.invertSelf();
 
         T* Di = sinv.diag().ptr();
-        const int Dstep = sinv.diag().step();
+        const ptrdiff_t Dstep = sinv.diag().step();
         T* xDi = xD.ptr();
         const ptrdiff_t N = sinv.size();
         for(ptrdiff_t i=0;i<N;) {

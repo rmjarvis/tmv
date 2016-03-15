@@ -564,11 +564,11 @@ namespace tmv {
         cout<<"A.ptr = "<<A.cptr()<<" ... "<<A.cptr()+A.size()*A.size()<<std::endl;
 #endif
 
-        typedef TMV_RealType(T) RT;
         TMVAssert(A.size() == x.size());
         TMVAssert(TMV_IMAG(alpha)==TMV_RealType(T)(0) || !A.isherm());
         if (alpha != T(0) && A.size() > 0) {
 #ifdef BLAS
+            typedef TMV_RealType(T) RT;
             if (!A.iscm() && A.isrm()) {
                 //std::cout<<"Transpose A\n";
                 return Rank1Update<add>(

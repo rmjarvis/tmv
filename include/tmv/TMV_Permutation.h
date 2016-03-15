@@ -297,10 +297,10 @@ namespace tmv {
         }
 
         inline int sumElements() const
-        { return itsn; }
+        { return int(itsn); }
 
         inline int sumAbsElements() const
-        { return itsn; }
+        { return int(itsn); }
 
         inline int maxAbsElement() const
         { return 1; }
@@ -309,7 +309,7 @@ namespace tmv {
         { return 1; }
 
         inline int normSq() const
-        { return itsn; }
+        { return int(itsn); }
 
         inline double normSq(const double scale) const
         { return itsn * scale * scale; }
@@ -390,7 +390,7 @@ namespace tmv {
 
         inline void write(const TMV_Writer& writer) const
         {
-            const int N = size();
+            const ptrdiff_t  N = size();
             writer.begin();
             writer.writeCode("P");
             writer.writeSize(N);
