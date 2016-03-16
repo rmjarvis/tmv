@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2014                                                 //
+// Copyright (C) 1998 - 2016                                                 //
 // All rights reserved                                                       //
 //                                                                           //
 // The project is hosted at https://code.google.com/p/tmv-cpp/               //
