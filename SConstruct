@@ -646,7 +646,7 @@ int main()
 }
 """
 
-    simple_source_file = "int main() { return 0; }"
+    simple_source_file = "int main() { return 0; }\n"
 
     context.Message('Checking for MKL... ')
 
@@ -657,6 +657,8 @@ int main()
             pthread = ['guide']+pthread
         if CheckLibs(context,['iomp5']+pthread,simple_source_file):
             pthread = ['iomp5']+pthread
+        if CheckLibs(context,['dl']+pthread,simple_source_file):
+            pthread = ['dl']+pthread
 
         # Try to pick out the correct thread library
         if context.env['CXXTYPE'] == 'icpc':
@@ -665,6 +667,8 @@ int main()
             threadlib = ['mkl_pgi_thread']
         else:
             threadlib = ['mkl_gnu_thread']
+            if CheckLibs(context,['gomp']+pthread,simple_source_file):
+                pthread = ['gomp']+pthread
 
         result = (
             CheckLibs(context,[],mkl_source_file) or
@@ -674,9 +678,11 @@ int main()
             CheckLibs(context,['mkl_ipf']+pthread,mkl_source_file) or
             CheckLibs(context,['mkl_ia32']+pthread,mkl_source_file) or
             CheckLibs(context,['mkl_intel_lp64','mkl_core']+threadlib+pthread,mkl_source_file) or
-            CheckLibs(context,['mkl_intel_lp64','mkl_core']+threadlib+['gomp']+pthread,mkl_source_file) or
+            CheckLibs(context,['mkl_gf_lp64','mkl_core']+threadlib+pthread,mkl_source_file) or
             CheckLibs(context,['mkl_intel_lp64','mkl_core','mkl_sequential'],mkl_source_file) or
             CheckLibs(context,['mkl_intel_lp64','mkl_core','mkl_sequential']+pthread,mkl_source_file) or
+            CheckLibs(context,['mkl_gf_lp64','mkl_core','mkl_sequential'],mkl_source_file) or
+            CheckLibs(context,['mkl_gf_lp64','mkl_core','mkl_sequential']+pthread,mkl_source_file) or
             False)
 
         context.Result(result)
