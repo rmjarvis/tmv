@@ -193,8 +193,8 @@ def BasicCCFlags(env):
                 env.Append(CCFLAGS=['-pg'])
                 env['TEST_FLAGS'] += ['-pg']
             if env['WARN']:
-                env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror'])
-                env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
+                env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror','-Wno-long-long'])
+                env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror','-Wno-long-long']
 
         elif compiler == 'clang++':
             env.Replace(CCFLAGS=['-O2'])
@@ -203,8 +203,8 @@ def BasicCCFlags(env):
                 env.Append(CCFLAGS=['-pg'])
                 env['TEST_FLAGS'] += ['-pg']
             if env['WARN']:
-                env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror'])
-                env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror']
+                env.Append(CCFLAGS=['-g3','-ansi','-pedantic-errors','-Wall','-Werror','-Wno-long-long'])
+                env['TEST_FLAGS'] += ['-g3','-ansi','-pedantic-errors','-Wall','-Werror','-Wno-long-long']
 
         elif compiler == 'icpc':
             env.Replace(CCFLAGS=['-O2'])
@@ -347,6 +347,7 @@ def AddOpenMPFlag(env):
     #print 'Adding openmp support:',flag
     #print 'Using OpenMP'
     env['OMP_FLAGS'] = flag 
+    env.AppendUnique(CCFLAGS=flag)
     env.AppendUnique(LINKFLAGS=ldflag)
     env.AppendUnique(LIBS=xlib)
 
@@ -608,8 +609,9 @@ int main()
     return int(res);
 }
 """
-
     context.Message('Checking for OpenMP library... ')
+
+    AddOpenMPFlag(context.env)
 
     if context.TryCompile(omp_source_file,'.cpp'):
         result = (
@@ -672,6 +674,7 @@ int main()
             CheckLibs(context,['mkl_ipf']+pthread,mkl_source_file) or
             CheckLibs(context,['mkl_ia32']+pthread,mkl_source_file) or
             CheckLibs(context,['mkl_intel_lp64','mkl_core']+threadlib+pthread,mkl_source_file) or
+            CheckLibs(context,['mkl_intel_lp64','mkl_core']+threadlib+['gomp']+pthread,mkl_source_file) or
             CheckLibs(context,['mkl_intel_lp64','mkl_core','mkl_sequential'],mkl_source_file) or
             CheckLibs(context,['mkl_intel_lp64','mkl_core','mkl_sequential']+pthread,mkl_source_file) or
             False)
@@ -1429,7 +1432,6 @@ def DoConfig(env):
     DoLibraryAndHeaderChecks(config)
 
     # Do this after BLAS checks, since we disable it for GotoBLAS
-    AddOpenMPFlag(config.env)
     if config.env['WITH_OPENMP']:
         if not config.CheckOMP():
             config.env['WITH_OPENMP'] = False
