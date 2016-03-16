@@ -23,7 +23,7 @@ if env['SHARED']:
     # See: http://scons.tigris.org/issues/show_bug.cgi?id=1644
     # Fixed in version 2.1.
     major , minor, junk = SCons.__version__.split('.',2)
-    if major < 2 or (major == 2 and minor == 0):
+    if int(major) < 2 or (int(major) == 2 and int(minor) == 0):
         env1.Append( LINKFLAGS = ["$__RPATH"] )
     if env['PREFIX'] != '':
         env1.AppendUnique(LIBPATH=os.path.join(env['FINAL_PREFIX'], 'lib'))
