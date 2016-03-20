@@ -3,23 +3,23 @@ doc/TMV_Documentation.pdf.  If the instructions there differ from these,
 then it is probably true that the pdf is correct, rather than this file.
 
 
-1. Obtain the tarball from one of the following repositories:
+1. Obtain the tarball from:
 
-http://code.google.com/p/tmv-cpp/
-http://sourceforge.net/projects/tmv-cpp/
+https://github.com/rmjarvis/tmv/releases/tag/v0.73
 
 2. Unpack the tarball with:
 
-gunzip tmv0.70.tar.gz
-tar xf tmv0.70.tar
+gunzip tmv-0.73.tar.gz
+tar xf tmv-0.73.tar
 
-This will make a directory called tmv0.70 with subdirectories:
+This will make a directory called tmv0.73 with subdirectories:
   doc
   examples
   include
   lib
   src
   tests
+
 and also the files:
   INSTALL  (This file)
   README
@@ -61,6 +61,7 @@ and also the files:
      FLAGS='' specifies the basic flags to pass to the compiler.  
            The default behavior is to automatically choose good flags 
            to use according to which kind of compiler you are using.
+     LINKFLAGS='' specifies the flags to use at link time.
      DEBUG=false specifies whether to keep the debugging assert statements 
            in the compiled library code.  
      PREFIX=/usr/local specifies where to install the library when running 
@@ -112,6 +113,8 @@ and also the files:
      IMPORT_PATHS=false specifies whether to import extra path directories 
            from the environment variables: PATH, C_INCLUDE_PATH, 
            LD_LIBRARY_PATH and LIBRARY_PATH.  
+     IMPORT_PREFIX=false specifies whether to add PREFIX/include and 
+           PREFIX/lib to the include and link paths respectively.
   
    The next options can be used to specify whether to use BLAS and/or LAPACK 
    libraries.

@@ -3,3 +3,6 @@
 *.dvi
 *.out
 *.idx
+*.fls
+*.ilg
+*.ind

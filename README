@@ -7,6 +7,5 @@ Installation instructions may be found in the above
 documention or also in the file INSTALL.
 
 There are some example programs in the examples directory.
-To make these, type scons examples or make examples (according
-to which installation method you prefer).
+To make these, type scons examples.
 

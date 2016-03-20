@@ -27,35 +27,9 @@ you are running the program on.
 All of the TMV code is licensed using the Gnu General Public License.  See 
 \S\ref{License} for more details.
 
-\subsection{Obtaining the source code}
-\label{Install_Obtain}
-\index{Installation!Obtaining source code}
+\subsection{Using Fink}
+\index{Installaion!Fink}
 
-
-\begin{enumerate}
-
-\item
-Go to \website\ for a link to a tarball with all of the source code (on the right hand side as a
-``Featured Download'', or also in the ``Downloads'' tab), and copy
-it to the directory where you want to put the TMV library.
-
-\item
-Unpack the tarball:\\
-\texttt{gunzip tmv\tmvversion .tar.gz}\\
-\texttt{tar xf tmv\tmvversion .tar}
-
-This will make a directory called \texttt{tmv\tmvversion} with the subdirectories:
-\texttt{doc}, \texttt{examples}, \texttt{include}, \texttt{lib}, \texttt{src} and \texttt{tests} 
-along with the files \tt{README}, \tt{INSTALL} and others
-in the top directory.
-
-\item Make sure you have SCons installed on your system,  
-available at \url{http://www.scons.org/}.  (It is a
-very quick installation if you already have Python installed.)
-
-\end{enumerate}
-
-\subsubsection{Using Fink}
 
 \begin{quote}
 Starting with TMV version 0.71, TMV is available on Fink for OSX systems.  So if you use a Mac and you have Fink (\url{http://www.finkproject.org/}) installed on your system already, you just need to type\\
@@ -69,9 +43,38 @@ compatible with this one.  That will then be fink package tmv1.)
 The only caveats here are that it will always install a shared library (\tt{libtmv.dylib}), and it will always use Apple's Frameworks BLAS library.  Also, it uses whatever C++ compiler is the default for your version of fink (usually a variety of g++, but they switched to clang++ with MacOS 10.7).  If these are not acceptable to you, then you will need to download TMV and install it yourself.
 \end{quote}
 
-\subsection{Installing the TMV library}
+\subsection{Installing the TMV library from source}
 \label{Install_Install}
-\index{Installation}
+
+\subsubsection{Obtaining the source code}
+\label{Install_Obtain}
+\index{Installation!Obtaining source code}
+
+\begin{enumerate}
+
+\item
+Go to \website\ for a link to a tarball with all of the source code (click the Releases tab),
+and copy it to the directory where you want to put the TMV library.
+
+\item
+Unpack the tarball:\\
+\texttt{gunzip tmv-\tmvversion .tar.gz}\\
+\texttt{tar xf tmv-\tmvversion .tar}
+
+This will make a directory called \texttt{tmv-\tmvversion} with the subdirectories:
+\texttt{doc}, \texttt{examples}, \texttt{include}, \texttt{lib}, \texttt{src} and \texttt{tests} 
+along with the files \tt{README}, \tt{INSTALL} and others
+in the top directory.
+
+\end{enumerate}
+
+
+\subsubsection{Running SCons}
+\index{Installaion!SCons}
+
+Make sure you have SCons installed on your system,  
+available at \url{http://www.scons.org/}.  (It is a
+very quick installation if you already have Python installed.)
 
 \begin{enumerate}
 
@@ -94,6 +97,7 @@ like the default, then you can specify this by hand.
 Remember to put the flags in quotes,
 so the whitespace doesn't confuse the parser.  e.g. \texttt{scons FLAGS='-O3 -g'}
 \item \texttt{EXTRA\_FLAGS=''} specifies extra flags to pass to the compiler in addition to what TMV will use by default.  This is useful if you just want to add a specific flag but still want to keep the other flags that TMV uses automatically.
+\item \texttt{LINKFLAGS=''} specifies the flags to use at link time.
 \item \texttt{DEBUG=false} specifies whether to keep the debugging assert statements in the compiled library code.  \tt{DEBUG=true} turns on all the TMV debugging statements, even those that would normall require \tt{-DTMV\_EXTRA\_DEBUG}.
 \item \texttt{PREFIX=/usr/local} specifies where to install the library when running \texttt{scons install} (see below).
 \item \texttt{FINAL\_PREFIX=''} specifies a final installation directory if different from \texttt{PREFIX}.  This is used for installations (e.g. fink) that install everything in a temporary directory first and then copy everthing to a final location only if the installation was successful.
@@ -159,7 +163,7 @@ in TMV is \#\ref{Bugs_RRR} on my To-do list (\S\ref{Bugs}).
 }.  And even then, TMV may still be faster 
 if you use a machine with multiple 
 cores, since TMV seems to have better parallelization of this algorithm
- (if \tt{WITH_OPENMP=true}) than many LAPACK libraries.
+ (if \texttt{WITH\_OPENMP=true}) than many LAPACK libraries.
 Also, it is worth noting that many LAPACK libraries are not thread safe.
 So if your main program uses multiple threads, and you aren't sure whether
 your LAPACK library is thread safe, you might want to compile TMV without 
@@ -203,10 +207,10 @@ Finally, some miscellaneous options that you are less likely to need:
 \item \texttt{STATIC=false} specifies whether to use static linkage for the test program.  Some systems have trouble with
 dynamic linkage of libraries.  This usually indicates that something is installed incorrectly, but
 it can be easier to just use static linkage when you compile as a workaround.  This flag does this
-for the test suite executables.  \footnote{Note: combining \texttt{STATIC=true} with \texttt{SHARED=true} does not work.}
+for the test suite executables.\footnote{Note: combining \texttt{STATIC=true} with \texttt{SHARED=true} does not work.}
 \item \texttt{WITH\_SSE=true} specifies whether to use the \texttt{-msse2} flag with \texttt{icpc} compilations. 
 It seems like most machines that have \texttt{icpc} are able to use SSE commands.  However, 
-I couldn't figure out a compiler flag that would turn on SSE {\em if and only if} the machine
+I couldn't figure out a compiler flag that would turn on SSE \emph{if and only if} the machine
 supports it.  So the default is to use the flag \texttt{-msse2}, but you can disable it by setting 
 \texttt{WITH\_SSE=false} if your machine doesn't have SSE support.  In fact, I don't even know if this option is ever necessary, since \texttt{icpc} might be smart enough to ignore this flag if your machine doesn't support SSE instructions.
 \item \texttt{XTEST=0} specifies whether to include extra tests in the test suite.  \texttt{XTEST}
@@ -224,7 +228,10 @@ named \tt{dstedc} (or \tt{sstedc}) will be used instead.
 \index{LAPACK!dstegr/sstegr issues}
 
 I've had trouble with the LAPACK \tt{?stegr} algorithms on a number of systems.  Mostly, it doesn't always deal with \tt{nan}'s and \tt{inf}'s very well.  The documentation for it says:
-{\sc ?stegr works only on machines which follow IEEE-754 floating-point standard in their handling of infinities and NaNs. Normal execution of ?stegr may create NaNs and infinities and hence may abort due to a floating point exception in environments which do not conform to the IEEE-754 standard.}  I haven't had too many aborts (just one system I think).  More often, I get things like \tt{nan}s in the output and such, so I guess these systems must not conform to IEEE-754.  If you think your system is conforming, and you want to enable \tt{stegr}, go ahead and set \tt{USE\_STEGR} to \tt{true}.
+\begin{quotation}
+?stegr works only on machines which follow IEEE-754 floating-point standard in their handling of infinities and NaNs. Normal execution of ?stegr may create NaNs and infinities and hence may abort due to a floating point exception in environments which do not conform to the IEEE-754 standard.
+\end{quotation}
+I haven't had too many aborts (just one system I think).  More often, I get things like \tt{nan}s in the output and such, so I guess these systems must not conform to IEEE-754.  If you think your system is conforming, and you want to enable \tt{stegr}, go ahead and set \tt{USE\_STEGR} to \tt{true}.
 \item
 \texttt{USE\_GEQP3=false} specifies whether to use the LAPACK algorithm called
 \tt{dgeqp3} (or its variants) for the strict QRP decomposition.  I think the native TMV code is superior to the LAPACK code, so it is not enabled by default.  But if you want to use for the so-called Strict QRP decomposition (c.f. \S\ref{QRP}), you can set this to \tt{true}.
@@ -348,109 +355,6 @@ four files with each of \tt{a}, \tt{b}, \tt{c} and \tt{d})
 will be made instead.
 These perform the same tests as the larger test executables, but can be easier
 for some linkers.
-
-\end{enumerate}
-
-\subsection{Installing using Microsoft Visual C++}
-\label{Install_Microsoft}
-
-Using TMV with Microsoft Visual C++ is a bit different from other compilers,
-since it has a Windows framework for building programs, rather than a command 
-line\footnote{
-There is a way to compile on the command line, but I suspect that will not be the 
-usual way that people will want to use the TMV library.  If you are interested in compiling
-this on the command line, I did have success installing SCons and then, within the
-Visual Studio 2008 Command Prompt, using the command:
-\texttt{C:$\backslash$Python26$\backslash$Scripts$\backslash$scons CXX=cl IMPORT\_ENV=true}.}.
-
-\begin{enumerate}
-\item Download and unpack the tarball as described above (\S\ref{Install_Obtain}).
-
-There are many Windows utilities that can unpack the
-tarball.  With IZArc (\url{http://www.izarc.org/}), for example, you right click on the file 
-\texttt{tmv\tmvversion.tar.gz}
-in Windows Explorer, select IZArc, then select Extract Here.  This should make a directory
-called \texttt{tmv\tmvversion} which has all of the source code and other files for the TMV library.
-
-\item
-Start Microsoft Visual C++.  
-
-I have Visual C++ 2008 Express Edition, so all instructions below
-about menus and such refer that that edition.  Other editions probably have their 
-menus arranged similarly, but there may be some differences.
-
-\item
-Open the ``Solution'' file \texttt{tmvtest1.sln}.
-
-Each test suite needs to be made individually, so I'll give detailed instructions for the first
-test program.  The other two are made the same way.
-
-Go to the File menu.  Select Open.  Then select Project/Solution...
-In the \texttt{tmv\tmvversion} directory, look for the file
-\texttt{tmvtest1.sln} and select it.  
-
-This includes a project for the first test program, \texttt{tmvtest1.vcproj}, and a project for
-the main TMV library, \texttt{tmv.vcproj}.
-
-\item
-Select Debug or Release mode.
-
-There are two modes for building programs in Visual C++: Debug and Release.  
-You can choose either one.  Dubug mode will compile faster and 
-Release mode will execute faster.  
-
-When writing 
-your own code, you will probably want to start with Debug mode and then switch to Release
-when everything is working, so you will end up compiling the TMV library in both modes anyway.
-
-You can select the mode in a pull down menu in the top button bar.  With my setup
-(which I think is the default), it is directly to the right of a green arrow.
-
-\item
-Build \texttt{tmvtest1}.
-
-Go to the Build menu.  Select Build Solution.
-
-\item 
-Run \texttt{tmvtest1}.
-
-Go to the Debug menu.  Select Start Without Debugging.  (Of course, you can instead
-choose Start Debugging if you'd rather, but that will make it run slower.)
-
-A console window should open up to show the output of the program.  
-When it is done, you should see the message,
-"Press any key to continue . . . "
-
-The previous output lines should all read \texttt{[{\em Something}] passed all tests}.
-If the last line starts with \texttt{Error}, 
-then please post an issue at \myissues\ about the problem.
-
-\item
-Repeat for \texttt{tmvtest2} and \texttt{tmvtest3}.  
-
-Note: the solution file for \texttt{tmvtest2} includes the
-project for the TMV library with symmetric and banded matrices, \texttt{tmv\_symband.vcproj}.
-
-\item
-Include \texttt{tmv.vcproj} (and \texttt{tmv\_symband.vcproj} if necessary) in the solution for your own project.
-
-Any program that uses the TMV library needs to include the project \texttt{tmv.vcproj}.  To do this,
-Go to the File, select Add, Existing Project...
-In the \texttt{tmv\tmvversion} directory, look for the file
-\texttt{tmv.vcproj} and select it.  If you are going to be using symmetric and/or banded matrices,
-then you should also select \texttt{tmv\_symaband.vcproj}.
-
-Then, in the Solution Explorer window, select your project.  Then go to the Project menu
-and select Properties.  Select Common Properties, then Framework and References.  
-Click the Add New Reference... button.  Select the TMV library (or libraries), and press OK.
-
-Next you need to tell your program where to look for the TMV header files.  So on the Property Page,
-select All Configurations at the top.  Then go to Configuration Properties, C/C++, General.
-At the entry for Additional Include Directories, click the [...] button at the right.  Click on the folder icon
-to add a new line, and then click the [...] button.  Browse to the 
-\texttt{tmv\tmvversion} directory, and select the include directory.  Press OK three times.
-
-Now you should be all set to use the TMV library in your program.
 
 \end{enumerate}
 

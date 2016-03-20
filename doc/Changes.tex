@@ -4,17 +4,49 @@
 \label{Changes}
 
 This release is mostly just some minor bug fixes.  Also, since Google Code went under,
-TMV is now hosted on GitHub at https://github.com/rmjarvis/tmv.
+TMV is now hosted on GitHub at \url{https://github.com/rmjarvis/tmv}.
 
 Here is a list of the changes from version \prevtmvversion\ to \tmvversion.  
 (See \S\ref{History} for changes from previous versions to \prevtmvversion\.)
 %Whenever a change is not backward compatible, meaning that code using the previous version might be broken, I mark the item with a $\times$ bullet rather than the usual $\bullet$ to indicate this.  
 This release is completely backwards compatible as far as the header files and library are 
-concerned.  There are a couple (minor) new features, but the library should be link-compatible
+concerned.  The library should be link-compatible
 with previous versions.
+
+The numbers at the ends of some items below indicate which issue is connected
+with the change:
+
+\url{https://github.com/rmjarvis/tmv/issues?q=is\%3Aissue+is\%3Aclosed}
+
+\subsection{Bug Fixes}
 
 \begin{itemize}
 
-\item ...
+\item Removed an extraneous 16 bytes of memory usage from \texttt{SmallVector}. (\#12)
+\item Gives an error if PREFIX is the source directory (rather than just 
+  failing to work properly). (\#13)
+\item Fixed compiler warnings from newer versions of clang++.
+\item Changed tmv-version to a simple echo line rather than the complicated
+  thing we used to have that stopped working when we switched from svn
+  to git. (\#20)
+\end{itemize}
 
+\subsection{Build updates}
+
+\begin{itemize}
+\item Added support for OpenMP for clang v3.7+.
+\item Improved automatic library selection for MKL. (\#15)
+\item Fixed broken \texttt{USE\_UNKNOWN\_VARS} feature. (\#16)
+\item No longer includes \texttt{\$PREFIX/include} in the include path by default.
+  Use scons \texttt{IMPORT\_PREFIX=true} if you want to include it. (\#17)
+\item Added \texttt{LINKFLAGS} as an explicit option. (\#21)
+\item No longer officially support Visual C++ installation.  I suspect it still
+  works, but I no longer include it in my list of tested systems.
+\end{itemize}
+
+\subsection{Documatation updates}
+
+\begin{itemize}
+\item Documented the sort order for eigenvectors returned by \texttt{Eigen} and singular
+  values returned \texttt{SV\_Decompose}. (\#14)
 \end{itemize}
