@@ -1,0 +1,19 @@
+Process for updating fink with a new version:
+
+- Download the tagged tarball from GitHub.
+- Get the md5sum value for it.
+- Update the tmv0.info file with the new Source-MD5 value.
+- Update /sw/fink/dists/local/main/finkinfo/tmv0.info link to point to new info file.
+- fink validate tmv0.info
+- fink -m --build-as-nobody rebuild tmv0
+- dpkg -c /sw/fink/debs/tmv0_[...].deb
+- dpkg -c /sw/fink/debs/tmv0-shlibs_[...].deb
+- fink validate /sw/fink/debs/tmv0_[...].deb
+- fink validate /sw/fink/debs/tmv0-shlibs_[...].deb
+- fink install tmv0
+- Check that otool -L /sw/lib/libtmv[...].dylib has the right version number and directory.
+- git add updated info file for this version.
+- Submit to: http://sourceforge.net/p/fink/package-submissions/
+  - Milestone = Undergoing Validation
+  - Status = open
+  - Mention that you have done the above tests.
