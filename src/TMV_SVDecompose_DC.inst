@@ -1,25 +1,17 @@
 
 #define CT std::complex<T>
 
-#define DefSVD(RT,T)\
-template void SV_DecomposeFromBidiagonal_DC(MatrixView<T > U, \
-    VectorView<RT > D, VectorView<RT > E, MatrixView<T > V, \
-    bool UisI, bool VisI); \
-   
+#define Def1(Tu,RT,Tv)\
+    template void InstSV_DecomposeFromBidiagonal_DC( \
+        MatrixView<Tu> U, VectorView<RT> D, VectorView<RT> E, \
+        MatrixView<Tv> V, bool UisI, bool VisI); \
 
-DefSVD(T,T)
-#ifdef INST_COMPLEX
-DefSVD(T,CT)
+Def1(T,T,T)
+#ifdef TMV_INST_COMPLEX
+Def1(CT,T,T)
+Def1(T,T,CT)
+Def1(CT,T,CT)
 #endif
 
-#undef DefSVD
-
+#undef Def1
 #undef CT
-
-template void FindDCSingularValues(
-    Vector<T>& S, const T rho, const GenVector<T>& D, const GenVector<T>& z,
-    Matrix<T,ColMajor>& diffmat);
-
-template void FindDCSingularValues(
-    Vector<T>& S, const T rho, const GenVector<T>& D, const GenVector<T>& z);
-

@@ -1,23 +1,31 @@
 
 #define CT std::complex<T>
 
-#define DefDiv(T,RT1,T1,T2)\
-template void SV_LDiv(const GenMatrix<T1 >& U,\
-    const GenDiagMatrix<RT1 >& S, const GenMatrix<T1 >& V, const ptrdiff_t kmax, \
-    const GenMatrix<T2 >& m, MatrixView<T > x); \
-template void SV_RDiv(const GenMatrix<T1 >& U,\
-    const GenDiagMatrix<RT1 >& S, const GenMatrix<T1 >& V, const ptrdiff_t kmax, \
-    const GenMatrix<T2 >& m, MatrixView<T > x); \
+#define Def1(T1,C1,RT1,T2,C2,T3)\
+    template void InstSV_Solve( \
+        const ConstMatrixView<T1,C1>& U, const ConstDiagMatrixView<RT1>& S, \
+        const ConstMatrixView<T1,C1>& V, \
+        const ConstMatrixView<T2,C2>& m2, MatrixView<T3> m3); \
+    template void InstSV_Solve( \
+        const ConstMatrixView<T1,C1>& U, const ConstDiagMatrixView<RT1>& S, \
+        const ConstMatrixView<T1,C1>& V, \
+        const ConstVectorView<T2,C2>& v2, VectorView<T3> v3); \
 
-DefDiv(T,T,T,T)
-#ifdef INST_COMPLEX
-DefDiv(CT,T,T,T)
-DefDiv(CT,T,T,CT)
-DefDiv(CT,T,CT,T)
-DefDiv(CT,T,CT,CT)
+Def1(T,NonConj,T,T,NonConj,T)
+#ifdef TMV_INST_COMPLEX
+Def1(T,NonConj,T,T,NonConj,CT)
+Def1(T,NonConj,T,CT,NonConj,CT)
+Def1(T,NonConj,T,CT,Conj,CT)
+Def1(CT,NonConj,T,T,NonConj,CT)
+Def1(CT,Conj,T,T,NonConj,CT)
+#ifdef TMV_INST_MIX
+#endif
+Def1(CT,NonConj,T,CT,NonConj,CT)
+Def1(CT,Conj,T,CT,NonConj,CT)
+Def1(CT,NonConj,T,CT,Conj,CT)
+Def1(CT,Conj,T,CT,Conj,CT)
 #endif
 
-#undef DefDiv
+
 
 #undef CT
-

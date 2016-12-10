@@ -1,21 +1,31 @@
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2016                                                 //
-// All rights reserved                                                       //
+// Copyright (C) 1998 - 2009                                                 //
 //                                                                           //
-// The project is hosted at https://code.google.com/p/tmv-cpp/               //
+// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
 // where you can find the current version and current documention.           //
 //                                                                           //
 // For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis17 [at] gmail.                                                 //
+// mike_jarvis@users.sourceforge.net                                         //
 //                                                                           //
-// This software is licensed under a FreeBSD license.  The file              //
-// TMV_LICENSE should have bee included with this distribution.              //
-// It not, you can get a copy from https://code.google.com/p/tmv-cpp/.       //
+// This program is free software; you can redistribute it and/or             //
+// modify it under the terms of the GNU General Public License               //
+// as published by the Free Software Foundation; either version 2            //
+// of the License, or (at your option) any later version.                    //
 //                                                                           //
-// Essentially, you can use this software however you want provided that     //
-// you include the TMV_LICENSE file in any distribution that uses it.        //
+// This program is distributed in the hope that it will be useful,           //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
+// GNU General Public License for more details.                              //
+//                                                                           //
+// You should have received a copy of the GNU General Public License         //
+// along with this program in the file LICENSE.                              //
+//                                                                           //
+// If not, write to:                                                         //
+// The Free Software Foundation, Inc.                                        //
+// 51 Franklin Street, Fifth Floor,                                          //
+// Boston, MA  02110-1301, USA.                                              //
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -54,7 +64,7 @@ namespace tmv {
 
     template <class T, class T1> 
     void LU_Inverse(
-        const GenBandMatrix<T1>& LUx, const ptrdiff_t* p, MatrixView<T> minv)
+        const GenBandMatrix<T1>& LUx, const ptrdiff_t* p, const MatrixView<T>& minv)
     {
         TMVAssert(LUx.isSquare());
         TMVAssert(minv.isSquare());
@@ -104,7 +114,7 @@ namespace tmv {
     }
 
     template <bool unit, class T> 
-    static void RecursiveInverse(UpperTriMatrixView<T> U, ptrdiff_t nhi)
+    static void RecursiveInverse(const UpperTriMatrixView<T>& U, ptrdiff_t nhi)
     {
         TMVAssert(U.iscm() || U.isrm());
         TMVAssert(unit == U.isunit());
@@ -124,8 +134,8 @@ namespace tmv {
 #endif
                 }
 #ifdef TMVFLDEBUG
-                TMVAssert(Uptr >= U._first);
-                TMVAssert(Uptr < U._last);
+                TMVAssert(Uptr >= U.first);
+                TMVAssert(Uptr < U.last);
 #endif
                 *Uptr = TMV_RealType(T)(1) / (*Uptr);
             }
@@ -153,7 +163,7 @@ namespace tmv {
     }
 
     template <class T> 
-    static inline void DoInverse(UpperTriMatrixView<T> U, ptrdiff_t nhi)
+    static inline void DoInverse(const UpperTriMatrixView<T>& U, ptrdiff_t nhi)
     {
 #ifndef NOTHROW
         try {
@@ -168,7 +178,7 @@ namespace tmv {
     }
 
     template <class T> 
-    void TriInverse(UpperTriMatrixView<T> U, ptrdiff_t nhi)
+    void TriInverse(const UpperTriMatrixView<T>& U, ptrdiff_t nhi)
     {
 #ifdef XDEBUG
         Matrix<T> U0(U);

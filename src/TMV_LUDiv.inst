@@ -1,18 +1,28 @@
 
 #define CT std::complex<T>
 
-#define DefDivEq(T,T1)\
-  template void LU_LDivEq(const GenMatrix<T1 >& A,\
-      const ptrdiff_t* P, MatrixView<T > b); \
-  template void LU_RDivEq(const GenMatrix<T1 >& A,\
-      const ptrdiff_t* P, MatrixView<T > b); \
+#define Def1(T1,T2,C1)\
+  template void InstLU_SolveInPlace( \
+      const ConstMatrixView<T1,C1>& m1, const Permutation& P, \
+      MatrixView<T2> m2); \
+  template void InstLU_SolveTransposeInPlace( \
+      const ConstMatrixView<T1,C1>& m1, const Permutation& P, \
+      MatrixView<T2> m2); \
+  template void InstLU_SolveInPlace( \
+      const ConstMatrixView<T1,C1>& m1, const Permutation& P, \
+      VectorView<T2> v2); \
+  template void InstLU_SolveTransposeInPlace( \
+      const ConstMatrixView<T1,C1>& m1, const Permutation& P, \
+      VectorView<T2> v2); \
 
-DefDivEq(T,T)
-#ifdef INST_COMPLEX
-DefDivEq(CT,T)
-DefDivEq(CT,CT)
+Def1(T,T,NonConj)
+#ifdef TMV_INST_COMPLEX
+#ifdef TMV_INST_MIX
+Def1(T,CT,NonConj)
+#endif
+Def1(CT,CT,NonConj)
+Def1(CT,CT,Conj)
 #endif
 
-#undef DefDivEq
-
+#undef Def1
 #undef CT

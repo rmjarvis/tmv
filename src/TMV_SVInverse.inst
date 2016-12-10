@@ -1,0 +1,23 @@
+
+#define CT std::complex<T>
+
+#define Def1(T1,C1,RT1,T2)\
+    template void InstSV_Inverse( \
+        const ConstMatrixView<T1,C1>& U, const ConstDiagMatrixView<RT1>& S, \
+        const ConstMatrixView<T1,C1>& V, MatrixView<T2> minv); \
+    template void InstSV_InverseATA( \
+        const ConstMatrixView<T1,C1>& U, const ConstDiagMatrixView<RT1>& S, \
+        const ConstMatrixView<T1,C1>& V, MatrixView<T2> ata); \
+
+Def1(T,NonConj,T,T)
+#ifdef TMV_INST_COMPLEX
+#ifdef TMV_INST_MIX
+Def1(T,NonConj,T,CT)
+#endif
+Def1(CT,NonConj,T,CT)
+Def1(CT,Conj,T,CT)
+#endif
+
+#undef Def1
+    
+#undef CT

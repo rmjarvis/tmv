@@ -3,11 +3,18 @@
 
 #include "TMV_Test.h"
 
+#ifdef EXPLICIT_ALIAS
+#define ALIAS .alias()
+#else
+#define ALIAS
+#endif
+
 template <class V> 
 inline void TestV(const V& a, std::string label)
 {
     typedef typename V::value_type T;
     typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) {
         std::cout<<"Start V "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -15,8 +22,9 @@ inline void TestV(const V& a, std::string label)
 
     const tmv::Vector<T> v = a;
     const int N = a.size();
-    RT eps = EPS*N;
+    FT eps = EPS*N;
 
+#ifdef XXD
     if (XXDEBUG1) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
         std::cout<<"v = "<<tmv::TMV_Text(v)<<" = "<<v<<std::endl;
@@ -29,26 +37,22 @@ inline void TestV(const V& a, std::string label)
         std::cout<<"abs(diff) = "<<tmv::TMV_ABS(NormSq(a)-NormSq(v))<<std::endl;
         std::cout<<"eps*normsq = "<<eps*NormSq(v)<<std::endl;
     }
+#endif
 
     Assert(Equal(a,v,eps),label+" a != v");
 
-    RT normsq(0);
-    RT norm1(0);
-    RT norminf(0);
+    FT normsq = 0.;
+    FT norm1 = 0.;
+    FT norminf = 0.;
     for(int i=0;i<N;++i) {
         normsq += tmv::TMV_NORM(v(i));
         norm1 += tmv::TMV_ABS(v(i));
         if (tmv::TMV_ABS(v(i)) > norminf) norminf = tmv::TMV_ABS(v(i));
     }
 
-    if (!(std::numeric_limits<RT>::is_integer)) {
-        Assert(Equal2(Norm2(a),tmv::TMV_SQRT(normsq),eps*tmv::TMV_SQRT(normsq)),
-               label+" Norm2");
-    }
-    if (!(std::numeric_limits<RT>::is_integer && tmv::Traits<T>::iscomplex)) {
-        Assert(Equal2(Norm1(a),norm1,eps*norm1),label+" Norm1");
-        Assert(Equal2(NormInf(a),norminf,eps*norminf),label+" NormInf");
-    }
+    Assert(Equal2(Norm2(a),sqrt(normsq),eps*sqrt(normsq)),label+" Norm2");
+    Assert(Equal2(Norm1(a),norm1,eps*norm1),label+" Norm1");
+    Assert(Equal2(NormInf(a),norminf,eps*norminf),label+" NormInf");
     Assert(Equal2(NormSq(a),normsq,eps*normsq),label+" NormSq");
 
     if (showstartdone) {
@@ -60,20 +64,24 @@ template <class V, class T2>
 inline void TestVX(const V& a, T2 x, std::string label)
 {
     typedef typename V::value_type T;
-    typedef typename tmv::Traits2<T,T2>::type PT;
     typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
+    typedef typename tmv::Traits2<T,T2>::type PT;
     if (showstartdone) {
         std::cout<<"Start VX "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
         std::cout<<"x "<<x<<std::endl;
+#endif
     }
 
     const tmv::Vector<T> v = a;
     const int N = a.size();
-    RT eps = EPS*N;
+    FT eps = EPS*N;
     if (!(std::numeric_limits<RT>::is_integer)) 
-        eps *= Norm(v) * tmv::TMV_ABS2(x);
+        eps *= Norm(v) * tmv::TMV_ABS(x);
 
+#ifdef XXD
     if (XXDEBUG2) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
         std::cout<<"v = "<<tmv::TMV_Text(v)<<" = "<<v<<std::endl;
@@ -84,6 +92,7 @@ inline void TestVX(const V& a, T2 x, std::string label)
         std::cout<<"Norm(diff) = "<<Norm((x*a)-(x*v))<<std::endl;
         std::cout<<"eps = "<<eps<<std::endl;
     }
+#endif
     Assert(Equal(a,v,eps),label+" a != v");
 
     tmv::Vector<PT> v2 = v;
@@ -108,8 +117,9 @@ template <class V, class T2>
 inline void TestVX2(V& a, T2 x, std::string label)
 {
     typedef typename V::value_type T;
-    typedef typename tmv::Traits2<T,T2>::type PT;
     typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
+    typedef typename tmv::Traits2<T,T2>::type PT;
     if (showstartdone) {
         std::cout<<"Start VX2 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -118,7 +128,7 @@ inline void TestVX2(V& a, T2 x, std::string label)
 
     const tmv::Vector<T> v = a;
     const int N = a.size();
-    RT eps = EPS*N;
+    FT eps = EPS*N;
     if (!(std::numeric_limits<RT>::is_integer)) 
         eps *= Norm(v) * tmv::TMV_ABS2(x);
 
@@ -126,6 +136,7 @@ inline void TestVX2(V& a, T2 x, std::string label)
 
     tmv::Vector<PT> v2 = v;
 
+#ifdef XXD
     if (XXDEBUG3) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
         std::cout<<"v = "<<tmv::TMV_Text(v)<<" = "<<v<<std::endl;
@@ -136,6 +147,7 @@ inline void TestVX2(V& a, T2 x, std::string label)
         std::cout<<"eps = "<<eps<<std::endl;
         a = v;
     }
+#endif
 
     // v2 = x*v
     for(int i=0;i<N;++i) v2(i) = x*v(i);
@@ -143,10 +155,10 @@ inline void TestVX2(V& a, T2 x, std::string label)
     Assert(Equal(a,v2,eps),label+" a *= x");
     a = v;
     Assert(Equal((a*=x),v2,eps),label+" a *= x (2)");
-#ifdef ALIASOK
-    (a=v) = a*x;
+#ifndef NOALIAS
+    (a=v) ALIAS = a*x;
     Assert(Equal(a,v2,eps),label+" a = a*x");
-    (a=v) = x*a;
+    (a=v) ALIAS = x*a;
     Assert(Equal(a,v2,eps),label+" a = x*a");
 #endif
 
@@ -155,8 +167,8 @@ inline void TestVX2(V& a, T2 x, std::string label)
         for(int i=0;i<N;++i) v2(i) = v(i)/x;
         (a=v) /= x;
         Assert(Equal(a,v2,eps),label+" a /= x");
-#ifdef ALIASOK
-        (a=v) = a/x;
+#ifndef NOALIAS
+        (a=v) ALIAS = a/x;
         Assert(Equal(a,v2,eps),label+" a = a/x");
 #endif
     }
@@ -174,6 +186,7 @@ inline void TestVV(const V1& a, const V2& b, std::string label)
     typedef typename V2::value_type T2;
     typedef typename tmv::Traits2<T,T2>::type PT;
     typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) {
         std::cout<<"Start VV "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -183,8 +196,8 @@ inline void TestVV(const V1& a, const V2& b, std::string label)
     const tmv::Vector<T> v1 = a;
     const tmv::Vector<T2> v2 = b;
     const int N=a.size();
-    RT eps = EPS;
-    RT eps2 = EPS;
+    FT eps = EPS;
+    FT eps2 = EPS;
     Assert(Equal(a,v1,eps),label+" a != v1");
     Assert(Equal(b,v2,eps),label+" b != v2");
     if (!(std::numeric_limits<RT>::is_integer)) {
@@ -193,6 +206,7 @@ inline void TestVV(const V1& a, const V2& b, std::string label)
     }
     tmv::Vector<std::complex<RT> > v3 = v1;
 
+#ifdef XXD
     if (XXDEBUG4) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" = "<<b<<std::endl;
@@ -203,6 +217,7 @@ inline void TestVV(const V1& a, const V2& b, std::string label)
         std::cout<<"Norm(diff) = "<<Norm((a+b)-(v1+v2))<<std::endl;
         std::cout<<"eps = "<<eps<<std::endl;
     }
+#endif
 
     for(int i=0;i<N;++i) v3(i) = v1(i) + v2(i);
     Assert(Equal((a+v2),v3,eps),label+" a+v");
@@ -300,6 +315,7 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     typedef typename V2::value_type T2;
     typedef typename tmv::Traits2<T,T2>::type PT;
     typedef typename tmv::Traits<T>::real_type RT;
+    typedef typename tmv::Traits<RT>::float_type FT;
     if (showstartdone) {
         std::cout<<"Start VV2 "<<label<<std::endl;
         std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
@@ -309,15 +325,17 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     const tmv::Vector<T> v1 = a;
     const tmv::Vector<T2> v2 = b;
     const int N = a.size();
-    RT eps = EPS;
+    FT eps = EPS;
     if (!std::numeric_limits<RT>::is_integer) {
         eps *= Norm(v1) + Norm(v2);
     }
+
     Assert(Equal(a,v1,eps),label+" a != v1");
     Assert(Equal(b,v2,eps),label+" b != v2");
 
-    tmv::Vector<PT> v3 = v1;
     tmv::Vector<PT> v4 = v1;
+    tmv::Vector<PT> v3 = v1;
+#ifdef XXD
     if (XXDEBUG5) {
         std::cout<<"a = "<<tmv::TMV_Text(a)<<" = "<<a<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<" = "<<b<<std::endl;
@@ -329,6 +347,7 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
         std::cout<<"eps = "<<eps<<std::endl;
         a = v1;
     }
+#endif
 
     // v4 = v1 + v2
     for(int i=0;i<N;++i) v4(i) = v1(i) + v2(i);
@@ -344,14 +363,14 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     Assert(Equal(a,v4,eps),label+" a += b");
     (a=v1) -= -b;
     Assert(Equal(a,v4,eps),label+" a -= -b");
-#ifdef ALIASOK
-    (a=v1) = a+v2;
+#ifndef NOALIAS
+    (a=v1) ALIAS = a+v2;
     Assert(Equal(a,v4,eps),label+" a = a+v");
-    (a=v1) = v2+a;
+    (a=v1) ALIAS = v2+a;
     Assert(Equal(a,v4,eps),label+" a = v+a");
-    (a=v1) = a+b;
+    (a=v1) ALIAS = a+b;
     Assert(Equal(a,v4,eps),label+" a = a+b");
-    (a=v1) = b+a;
+    (a=v1) ALIAS = b+a;
     Assert(Equal(a,v4,eps),label+" a = b+a");
 #endif
     a = v1;
@@ -368,10 +387,10 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     Assert(Equal(a,v4,eps),label+" a -= b");
     (a=v1) += -b;
     Assert(Equal(a,v4,eps),label+" a += -b");
-#ifdef ALIASOK
-    (a=v1) = a-v2;
+#ifndef NOALIAS
+    (a=v1) ALIAS = a-v2;
     Assert(Equal(a,v4,eps),label+" a = a-v");
-    (a=v1) = a-b;
+    (a=v1) ALIAS = a-b;
     Assert(Equal(a,v4,eps),label+" a = a-b");
 #endif
     a = v1;
@@ -380,10 +399,10 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     for(int i=0;i<N;++i) v4(i) = v2(i) - v1(i);
     (v3=v1) = b-v3;
     Assert(Equal(v3,v4,eps),label+" v = b-v");
-#ifdef ALIASOK
-    (a=v1) = v2-a;
+#ifndef NOALIAS
+    (a=v1) ALIAS = v2-a;
     Assert(Equal(a,v4,eps),label+" a = v-a");
-    (a=v1) = b-a;
+    (a=v1) ALIAS = b-a;
     Assert(Equal(a,v4,eps),label+" a = b-a");
 #endif
     a = v1;
@@ -394,14 +413,14 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     Assert(Equal(v3,v4,eps),label+" v = ElemProd(v,b)");
     (v3=v1) = ElemProd(b,v3);
     Assert(Equal(v3,v4,eps),label+" v = ElemProd(b,v)");
-#ifdef ALIASOK
-    (a=v1) = ElemProd(a,v2);
+#ifndef NOALIAS
+    (a=v1) ALIAS = ElemProd(a,v2);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(a,v)");
-    (a=v1) = ElemProd(v2,a);
+    (a=v1) ALIAS = ElemProd(v2,a);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(v,a)");
-    (a=v1) = ElemProd(a,b);
+    (a=v1) ALIAS = ElemProd(a,b);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(a,b)");
-    (a=v1) = ElemProd(b,a);
+    (a=v1) ALIAS = ElemProd(b,a);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(b,a)");
 #endif
     a = v1;
@@ -412,14 +431,14 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     Assert(Equal(v3,v4,eps),label+" v += ElemProd(v,b)");
     (v3=v1) += ElemProd(b,v3);
     Assert(Equal(v3,v4,eps),label+" v += ElemProd(b,v)");
-#ifdef ALIASOK
-    (a=v1) += ElemProd(a,v2);
+#ifndef NOALIAS
+    (a=v1) ALIAS += ElemProd(a,v2);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(a,v)");
-    (a=v1) += ElemProd(v2,a);
+    (a=v1) ALIAS += ElemProd(v2,a);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(v,a)");
-    (a=v1) += ElemProd(a,b);
+    (a=v1) ALIAS += ElemProd(a,b);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(a,b)");
-    (a=v1) += ElemProd(b,a);
+    (a=v1) ALIAS += ElemProd(b,a);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(b,a)");
 #endif
     a = v1;
@@ -430,14 +449,14 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     Assert(Equal(v3,v4,eps),label+" v -= ElemProd(v,b)");
     (v3=v1) -= ElemProd(b,v3);
     Assert(Equal(v3,v4,eps),label+" v -= ElemProd(b,v)");
-#ifdef ALIASOK
-    (a=v1) -= ElemProd(a,v2);
+#ifndef NOALIAS
+    (a=v1) ALIAS -= ElemProd(a,v2);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(a,v)");
-    (a=v1) -= ElemProd(v2,a);
+    (a=v1) ALIAS -= ElemProd(v2,a);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(v,a)");
-    (a=v1) -= ElemProd(a,b);
+    (a=v1) ALIAS -= ElemProd(a,b);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(a,b)");
-    (a=v1) -= ElemProd(b,a);
+    (a=v1) ALIAS -= ElemProd(b,a);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(b,a)");
 #endif
     a = v1;
@@ -457,30 +476,30 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     Assert(Equal(v3,v4,eps),label+" v = ElemProd(x*b,v)");
     (v3=v1) = ElemProd(b,x*v3);
     Assert(Equal(v3,v4,eps),label+" v = ElemProd(b,x*v)");
-#ifdef ALIASOK
-    (a=v1) = x*ElemProd(a,v2);
+#ifndef NOALIAS
+    (a=v1) ALIAS = x*ElemProd(a,v2);
     Assert(Equal(a,v4,eps),label+" a = x*ElemProd(a,v)");
-    (a=v1) = x*ElemProd(v2,a);
+    (a=v1) ALIAS = x*ElemProd(v2,a);
     Assert(Equal(a,v4,eps),label+" a = x*ElemProd(v,a)");
-    (a=v1) = ElemProd(x*a,v2);
+    (a=v1) ALIAS = ElemProd(x*a,v2);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(x*a,v)");
-    (a=v1) = ElemProd(a,x*v2);
+    (a=v1) ALIAS = ElemProd(a,x*v2);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(a,x*v)");
-    (a=v1) = ElemProd(x*v2,a);
+    (a=v1) ALIAS = ElemProd(x*v2,a);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(x*v,a)");
-    (a=v1) = ElemProd(v2,x*a);
+    (a=v1) ALIAS = ElemProd(v2,x*a);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(v,x*a)");
-    (a=v1) = x*ElemProd(a,b);
+    (a=v1) ALIAS = x*ElemProd(a,b);
     Assert(Equal(a,v4,eps),label+" a = x*ElemProd(a,b)");
-    (a=v1) = x*ElemProd(b,a);
+    (a=v1) ALIAS = x*ElemProd(b,a);
     Assert(Equal(a,v4,eps),label+" a = x*ElemProd(b,a)");
-    (a=v1) = ElemProd(x*a,b);
+    (a=v1) ALIAS = ElemProd(x*a,b);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(x*a,b)");
-    (a=v1) = ElemProd(a,x*b);
+    (a=v1) ALIAS = ElemProd(a,x*b);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(a,x*b)");
-    (a=v1) = ElemProd(x*b,a);
+    (a=v1) ALIAS = ElemProd(x*b,a);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(x*b,a)");
-    (a=v1) = ElemProd(b,x*a);
+    (a=v1) ALIAS = ElemProd(b,x*a);
     Assert(Equal(a,v4,eps),label+" a = ElemProd(b,x*a)");
 #endif
     a = v1;
@@ -499,30 +518,30 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     Assert(Equal(v3,v4,eps),label+" v += ElemProd(x*b,v)");
     (v3=v1) += ElemProd(b,x*v3);
     Assert(Equal(v3,v4,eps),label+" v += ElemProd(b,x*v)");
-#ifdef ALIASOK
-    (a=v1) += x*ElemProd(a,v2);
+#ifndef NOALIAS
+    (a=v1) ALIAS += x*ElemProd(a,v2);
     Assert(Equal(a,v4,eps),label+" a += x*ElemProd(a,v)");
-    (a=v1) += x*ElemProd(v2,a);
+    (a=v1) ALIAS += x*ElemProd(v2,a);
     Assert(Equal(a,v4,eps),label+" a += x*ElemProd(v,a)");
-    (a=v1) += ElemProd(x*a,v2);
+    (a=v1) ALIAS += ElemProd(x*a,v2);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(x*a,v)");
-    (a=v1) += ElemProd(a,x*v2);
+    (a=v1) ALIAS += ElemProd(a,x*v2);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(a,x*v)");
-    (a=v1) += ElemProd(x*v2,a);
+    (a=v1) ALIAS += ElemProd(x*v2,a);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(x*v,a)");
-    (a=v1) += ElemProd(v2,x*a);
+    (a=v1) ALIAS += ElemProd(v2,x*a);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(v,x*a)");
-    (a=v1) += x*ElemProd(a,b);
+    (a=v1) ALIAS += x*ElemProd(a,b);
     Assert(Equal(a,v4,eps),label+" a += x*ElemProd(a,b)");
-    (a=v1) += x*ElemProd(b,a);
+    (a=v1) ALIAS += x*ElemProd(b,a);
     Assert(Equal(a,v4,eps),label+" a += x*ElemProd(b,a)");
-    (a=v1) += ElemProd(x*a,b);
+    (a=v1) ALIAS += ElemProd(x*a,b);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(x*a,b)");
-    (a=v1) += ElemProd(a,x*b);
+    (a=v1) ALIAS += ElemProd(a,x*b);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(a,x*b)");
-    (a=v1) += ElemProd(x*b,a);
+    (a=v1) ALIAS += ElemProd(x*b,a);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(x*b,a)");
-    (a=v1) += ElemProd(b,x*a);
+    (a=v1) ALIAS += ElemProd(b,x*a);
     Assert(Equal(a,v4,eps),label+" a += ElemProd(b,x*a)");
 #endif
     a = v1;
@@ -541,30 +560,30 @@ inline void TestVV2(V1& a, const V2& b, std::string label)
     Assert(Equal(v3,v4,eps),label+" v -= ElemProd(x*b,v)");
     (v3=v1) -= ElemProd(b,x*v3);
     Assert(Equal(v3,v4,eps),label+" v -= ElemProd(b,x*v)");
-#ifdef ALIASOK
-    (a=v1) -= x*ElemProd(a,v2);
+#ifndef NOALIAS
+    (a=v1) ALIAS -= x*ElemProd(a,v2);
     Assert(Equal(a,v4,eps),label+" a -= x*ElemProd(a,v)");
-    (a=v1) -= x*ElemProd(v2,a);
+    (a=v1) ALIAS -= x*ElemProd(v2,a);
     Assert(Equal(a,v4,eps),label+" a -= x*ElemProd(v,a)");
-    (a=v1) -= ElemProd(x*a,v2);
+    (a=v1) ALIAS -= ElemProd(x*a,v2);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(x*a,v)");
-    (a=v1) -= ElemProd(a,x*v2);
+    (a=v1) ALIAS -= ElemProd(a,x*v2);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(a,x*v)");
-    (a=v1) -= ElemProd(x*v2,a);
+    (a=v1) ALIAS -= ElemProd(x*v2,a);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(x*v,a)");
-    (a=v1) -= ElemProd(v2,x*a);
+    (a=v1) ALIAS -= ElemProd(v2,x*a);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(v,x*a)");
-    (a=v1) -= x*ElemProd(a,b);
+    (a=v1) ALIAS -= x*ElemProd(a,b);
     Assert(Equal(a,v4,eps),label+" a -= x*ElemProd(a,b)");
-    (a=v1) -= x*ElemProd(b,a);
+    (a=v1) ALIAS -= x*ElemProd(b,a);
     Assert(Equal(a,v4,eps),label+" a -= x*ElemProd(b,a)");
-    (a=v1) -= ElemProd(x*a,b);
+    (a=v1) ALIAS -= ElemProd(x*a,b);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(x*a,b)");
-    (a=v1) -= ElemProd(a,x*b);
+    (a=v1) ALIAS -= ElemProd(a,x*b);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(a,x*b)");
-    (a=v1) -= ElemProd(x*b,a);
+    (a=v1) ALIAS -= ElemProd(x*b,a);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(x*b,a)");
-    (a=v1) -= ElemProd(b,x*a);
+    (a=v1) ALIAS -= ElemProd(b,x*a);
     Assert(Equal(a,v4,eps),label+" a -= ElemProd(b,x*a)");
 #endif
     a = v1;
@@ -580,8 +599,10 @@ inline void TestVectorArith1(V& a, CV& ca, std::string label)
     typedef typename V::value_type T;
     if (showstartdone) {
         std::cout<<"Start VectorArith1 "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
+#endif
     }
 
     TestV(a,label+" R");
@@ -599,9 +620,9 @@ inline void TestVectorArith1(V& a, CV& ca, std::string label)
     TestVX2(ca,z,label+" C,C");
     TestVV(a,a,label+" R,R");
     TestVV(ca,ca,label+" C,C");
-#ifdef ALIASOK
-    TestVV2(a,a,label+" R,R self_arith");
-    TestVV2(ca,ca,label+" C,C self_arith");
+#ifndef NOALIAS
+    TestVV2(a,a,label+" R,R, self_arith");
+    TestVV2(ca,ca,label+" C,C, self_arith");
 #endif
 }
 
@@ -611,10 +632,12 @@ inline void TestVectorArith2(
 {
     if (showstartdone) {
         std::cout<<"Start VectorArith2 "<<label<<std::endl;
+#ifdef XXD
         std::cout<<"a = "<<tmv::TMV_Text(a)<<"  "<<a<<std::endl;
         std::cout<<"ca = "<<tmv::TMV_Text(ca)<<"  "<<ca<<std::endl;
         std::cout<<"b = "<<tmv::TMV_Text(b)<<"  "<<b<<std::endl;
         std::cout<<"cb = "<<tmv::TMV_Text(cb)<<"  "<<cb<<std::endl;
+#endif
     }
 
     TestVV(a,b,label+" R,R");

@@ -1,43 +1,55 @@
+
 #include "TMV_Test.h"
 #include "TMV_Test_1.h"
 #include "TMV.h"
 
-template <class T>
-inline void CopyBackM(
-    const tmv::UpperTriMatrix<T>& m0,
-    tmv::UpperTriMatrixView<T>& m1)
+template <class M0, class M1>
+inline void CopyBack(
+    const tmv::BaseMatrix_Tri<M0>& m0, tmv::BaseMatrix_Tri_Mutable<M1>& m1)
 {
+#ifdef XXD
+    if (showtests) {
+        std::cout<<"Special CopyBackM:\n";
+        std::cout<<"m0 = "<<tmv::TMV_Text(m0)<<std::endl;
+        std::cout<<"m1 = "<<tmv::TMV_Text(m1)<<std::endl;
+    }
+#endif
     if (m1.isunit()) m1 = m0.viewAsUnitDiag();
     else m1 = m0;
 }
 
-template <class T>
-inline void CopyBackM(
-    const tmv::LowerTriMatrix<T>& m0,
-    tmv::LowerTriMatrixView<T>& m1)
+template <class M1, class M2, class M3>
+static inline bool CanElemMult(
+    const tmv::BaseMatrix_Tri<M1>& a, const tmv::BaseMatrix_Tri<M2>& b,
+    tmv::BaseMatrix_Tri_Mutable<M3>& c)
 {
-    if (m1.isunit()) m1 = m0.viewAsUnitDiag();
-    else m1 = m0;
+#ifdef XXD
+    if (showtests) {
+        std::cout<<"Tri: CanElemMult:\n";
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
+    }
+#endif
+    return (a.size() == b.size()) && (a.size() == c.size()) &&
+        (!c.isunit() || (a.isunit() && b.isunit()));
 }
 
-template <class T1, class T2, class T3>
-static inline bool CanAddElemMultMM(
-    const tmv::UpperTriMatrixView<T1>& a,
-    const tmv::UpperTriMatrixView<T2>& b,
-    const tmv::UpperTriMatrixView<T3>& c)
+template <class M1, class M2, class M3>
+static inline bool CanAddElemMult(
+    const tmv::BaseMatrix_Tri<M1>& a, const tmv::BaseMatrix_Tri<M2>& b,
+    tmv::BaseMatrix_Tri_Mutable<M3>& c)
 {
+#ifdef XXD
+    if (showtests) {
+        std::cout<<"Tri: CanAddElemMult:\n";
+        std::cout<<"a = "<<tmv::TMV_Text(a)<<std::endl;
+        std::cout<<"b = "<<tmv::TMV_Text(b)<<std::endl;
+        std::cout<<"c = "<<tmv::TMV_Text(c)<<std::endl;
+    }
+#endif
     return (a.size() == b.size()) && (a.size() == c.size()) &&
-        !c.isunit(); 
-}
-
-template <class T1, class T2, class T3>
-static inline bool CanAddElemMultMM(
-    const tmv::LowerTriMatrixView<T1>& a,
-    const tmv::LowerTriMatrixView<T2>& b,
-    const tmv::LowerTriMatrixView<T3>& c)
-{
-    return (a.size() == b.size()) && (a.size() == c.size()) &&
-        !c.isunit(); 
+        !c.isunit();
 }
 
 
@@ -71,7 +83,7 @@ void TestTriMatrixArith_A6b()
     tmv::Matrix<CT,tmv::ColMajor> ca2x = ca1x;
     ca2x -= a2x;
     ca2x *= CT(1,-2);
-    ca2x(0,0) = CT(0,-5);
+    ca2x(0,0) = CT(7,12);
 
     tmv::UpperTriMatrixView<T> u4 = a1x.unitUpperTri();
     tmv::UpperTriMatrixView<CT> cu4 = ca1x.unitUpperTri();

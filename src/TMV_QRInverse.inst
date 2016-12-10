@@ -1,17 +1,23 @@
+
 #define CT std::complex<T>
 
-#define DefInv(T,T1)\
-template void QR_Inverse( \
-    const GenMatrix<T1 >& QRx, const GenVector<T1 >& beta, const ptrdiff_t* P,  \
-    MatrixView<T > minv, ptrdiff_t N1);\
+#define Def1(T1,C1,RT1,T2)\
+    template void InstQR_Inverse( \
+        const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta, \
+        const Permutation* P, ptrdiff_t N1, MatrixView<T2> m2); \
+    template void InstQR_InverseATA( \
+        const ConstMatrixView<T1,C1>& QR, const ConstVectorView<RT1>& beta, \
+        const Permutation* P, ptrdiff_t N1, MatrixView<T2> m2); \
 
-DefInv(T,T)
-#ifdef INST_COMPLEX
-DefInv(CT,T)
-DefInv(CT,CT)
+Def1(T,NonConj,T,T)
+#ifdef TMV_INST_COMPLEX
+#ifdef TMV_INST_MIX
+Def1(T,NonConj,T,CT)
+#endif
+Def1(CT,NonConj,T,CT)
+Def1(CT,Conj,T,CT)
 #endif
 
-#undef DefInv
-
+#undef Def1
+    
 #undef CT
-

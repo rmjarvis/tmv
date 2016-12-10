@@ -1,12 +1,10 @@
 
-#include "TMV.h"
-#include "TMV_Band.h"
 #include "TMV_Test.h"
 #include "TMV_Test_2.h"
+#include "TMV.h"
+#include "TMV_Band.h"
 #include <fstream>
 #include <cstdio>
-
-#define CT std::complex<T>
 
 template <class T, tmv::StorageType S> 
 static void TestBasicBandMatrix_1()
@@ -23,90 +21,115 @@ static void TestBasicBandMatrix_1()
         std::cout<<"nlo, nhi = "<<nlo<<','<<nhi<<std::endl;
     }
 
-    tmv::BandMatrix<T> a1(N,N,nlo,nhi);
-    tmv::BandMatrix<T,tmv::RowMajor|tmv::FortranStyle> a1f(N,N,nlo,nhi);
+    tmv::BandMatrix<T,S> a1(N,N,nlo,nhi);
+    tmv::BandMatrix<T,S|tmv::FortranStyle> a1f(N,N,nlo,nhi);
 
-    Assert(a1.colsize() == N && a1.rowsize() == N,
+    Assert(a1.colsize() == size_t(N) && a1.rowsize() == size_t(N),
            "Creating BandMatrix(N)");
     Assert(a1.nlo() == nlo && a1.nhi() == nhi,"Creating BandMatrix(nlo,nhi)");
-    Assert(a1f.colsize() == N && a1f.rowsize() == N,
+    Assert(a1f.colsize() == size_t(N) && a1f.rowsize() == size_t(N),
            "Creating BandMatrixF(N)");
     Assert(a1f.nlo() == nlo && a1f.nhi() == nhi,
            "Creating BandMatrixF(nlo,nhi)");
 
-    for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k)
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         if ( j <= i + nhi && i <= j + nlo) {
             a1(i,j) = T(k);
             a1f(i+1,j+1) = T(k);
         }
+    }
 
+    const tmv::BandMatrix<T,S>& a1c = a1;
+    const tmv::BandMatrix<T,S|tmv::FortranStyle>& a1fc = a1f;
     tmv::ConstBandMatrixView<T> a1cv = a1.view();
     tmv::BandMatrixView<T> a1v = a1.view();
     tmv::ConstBandMatrixView<T,tmv::FortranStyle> a1fcv = a1f.view();
     tmv::BandMatrixView<T,tmv::FortranStyle> a1fv = a1f.view();
 
-    for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
+        int j1 = 0;  if (i > nlo) j1 = i-nlo;
+        int j2 = i+nhi+1;  if (j2 >= N) j2 = N;
+        int i1 = 0;  if (j > nhi) i1 = j-nhi;
+        int i2 = j+nlo+1;  if (i2 >= N) i2 = N;
+        int d = j-i;
         if ( j <= i + nhi && i <= j + nlo) {
-            int j1 = 0;  if (i > nlo) j1 = i-nlo;
-            int j2 = i+nhi+1;  if (j2 >= N) j2 = N;
-            int i1 = 0;  if (j > nhi) i1 = j-nhi;
-            int i2 = j+nlo+1;  if (i2 >= N) i2 = N;
-            Assert(a1(i,j) == k,"Read/Write BandMatrix");
-            Assert(a1cv(i,j) == k,"Access BandMatrix CV");
-            Assert(a1v(i,j) == k,"Access BandMatrix V");
-            Assert(a1f(i+1,j+1) == k,"Read/Write BandMatrixF");
-            Assert(a1fcv(i+1,j+1) == k,"Access BandMatrixF CV");
-            Assert(a1fv(i+1,j+1) == k,"Access BandMatrixF V");
-            Assert(a1.row(i,j1,j2)(j-j1) == k,"BandMatrix.row");
-            Assert(a1cv.row(i,j1,j2)(j-j1) == k,"BandMatrix.row CV");
-            Assert(a1v.row(i,j1,j2)(j-j1) == k,"BandMatrix.row V");
-            Assert(a1f.row(i+1,j1+1,j2)(j+1-j1) == k,"BandMatrixF.row");
-            Assert(a1fcv.row(i+1,j1+1,j2)(j+1-j1) == k,"BandMatrixF.row CV");
-            Assert(a1fv.row(i+1,j1+1,j2)(j+1-j1) == k,"BandMatrixF.row V");
-            Assert(a1.col(j,i1,i2)(i-i1) == k,"BandMatrix.col");
-            Assert(a1cv.col(j,i1,i2)(i-i1) == k,"BandMatrix.col CV");
-            Assert(a1v.col(j,i1,i2)(i-i1) == k,"BandMatrix.col V");
-            Assert(a1f.col(j+1,i1+1,i2)(i+1-i1) == k,"BandMatrixF.col");
-            Assert(a1fcv.col(j+1,i1+1,i2)(i+1-i1) == k,"BandMatrixF.col CV");
-            Assert(a1fv.col(j+1,i1+1,i2)(i+1-i1) == k,"BandMatrixF.col V");
-            int d = j-i;
+            Assert(a1(i,j) == T(k),"Read/Write BandMatrix");
+            Assert(a1c(i,j) == T(k),"Access const BandMatrix");
+            Assert(a1cv(i,j) == T(k),"Access BandMatrix CV");
+            Assert(a1v(i,j) == T(k),"Access BandMatrix V");
+            Assert(a1f(i+1,j+1) == T(k),"Read/Write BandMatrixF");
+            Assert(a1fc(i+1,j+1) == T(k),"Access const BandMatrixF");
+            Assert(a1fcv(i+1,j+1) == T(k),"Access BandMatrixF CV");
+            Assert(a1fv(i+1,j+1) == T(k),"Access BandMatrixF V");
+            Assert(a1.row(i,j1,j2)(j-j1) == T(k),"BandMatrix.row");
+            Assert(a1c.row(i,j1,j2)(j-j1) == T(k),"const BandMatrix.row");
+            Assert(a1cv.row(i,j1,j2)(j-j1) == T(k),"BandMatrix.row CV");
+            Assert(a1v.row(i,j1,j2)(j-j1) == T(k),"BandMatrix.row V");
+            Assert(a1f.row(i+1,j1+1,j2)(j+1-j1) == T(k),"BandMatrixF.row");
+            Assert(a1fc.row(i+1,j1+1,j2)(j+1-j1) == T(k),"const BandMatrixF.row");
+            Assert(a1fcv.row(i+1,j1+1,j2)(j+1-j1) == T(k),"BandMatrixF.row CV");
+            Assert(a1fv.row(i+1,j1+1,j2)(j+1-j1) == T(k),"BandMatrixF.row V");
+            Assert(a1.col(j,i1,i2)(i-i1) == T(k),"BandMatrix.col");
+            Assert(a1c.col(j,i1,i2)(i-i1) == T(k),"const BandMatrix.col");
+            Assert(a1cv.col(j,i1,i2)(i-i1) == T(k),"BandMatrix.col CV");
+            Assert(a1v.col(j,i1,i2)(i-i1) == T(k),"BandMatrix.col V");
+            Assert(a1f.col(j+1,i1+1,i2)(i+1-i1) == T(k),"BandMatrixF.col");
+            Assert(a1fc.col(j+1,i1+1,i2)(i+1-i1) == T(k),"const BandMatrixF.col");
+            Assert(a1fcv.col(j+1,i1+1,i2)(i+1-i1) == T(k),"BandMatrixF.col CV");
+            Assert(a1fv.col(j+1,i1+1,i2)(i+1-i1) == T(k),"BandMatrixF.col V");
             if (d>0) {
-                Assert(a1.diag(d)(i) == k,"BandMatrix.diag1");
-                Assert(a1cv.diag(d)(i) == k,"BandMatrix.diag1 CV");
-                Assert(a1v.diag(d)(i) == k,"BandMatrix.diag1 V");
-                Assert(a1.diag(d,i,N-d)(0) == k,"BandMatrix.diag2");
-                Assert(a1cv.diag(d,i,N-d)(0) == k,"BandMatrix.diag2 CV");
-                Assert(a1v.diag(d,i,N-d)(0) == k,"BandMatrix.diag2 V");
-                Assert(a1f.diag(d)(i+1) == k,"BandMatrixF.diag1");
-                Assert(a1fcv.diag(d)(i+1) == k,"BandMatrixF.diag1 CV");
-                Assert(a1fv.diag(d)(i+1) == k,"BandMatrixF.diag1 V");
-                Assert(a1f.diag(d,i+1,N-d)(1) == k,"BandMatrixF.diag2");
-                Assert(a1fcv.diag(d,i+1,N-d)(1) == k,"BandMatrixF.diag2 CV");
-                Assert(a1fv.diag(d,i+1,N-d)(1) == k,"BandMatrixF.diag2 V");
+                Assert(a1.diag(d)(i) == T(k),"BandMatrix.diag1");
+                Assert(a1c.diag(d)(i) == T(k),"const BandMatrix.diag1");
+                Assert(a1cv.diag(d)(i) == T(k),"BandMatrix.diag1 CV");
+                Assert(a1v.diag(d)(i) == T(k),"BandMatrix.diag1 V");
+                Assert(a1.diag(d,i,N-d)(0) == T(k),"BandMatrix.diag2");
+                Assert(a1c.diag(d,i,N-d)(0) == T(k),"const BandMatrix.diag2");
+                Assert(a1cv.diag(d,i,N-d)(0) == T(k),"BandMatrix.diag2 CV");
+                Assert(a1v.diag(d,i,N-d)(0) == T(k),"BandMatrix.diag2 V");
+                Assert(a1f.diag(d)(i+1) == T(k),"BandMatrixF.diag1");
+                Assert(a1fc.diag(d)(i+1) == T(k),"const BandMatrixF.diag1");
+                Assert(a1fcv.diag(d)(i+1) == T(k),"BandMatrixF.diag1 CV");
+                Assert(a1fv.diag(d)(i+1) == T(k),"BandMatrixF.diag1 V");
+                Assert(a1f.diag(d,i+1,N-d)(1) == T(k),"BandMatrixF.diag2");
+                Assert(a1fc.diag(d,i+1,N-d)(1) == T(k),"const BandMatrixF.diag2");
+                Assert(a1fcv.diag(d,i+1,N-d)(1) == T(k),"BandMatrixF.diag2 CV");
+                Assert(a1fv.diag(d,i+1,N-d)(1) == T(k),"BandMatrixF.diag2 V");
             } else {
                 if (d==0) {
-                    Assert(a1.diag()(j) == k,"BandMatrix.diag");
-                    Assert(a1cv.diag()(j) == k,"BandMatrix.diag CV");
-                    Assert(a1v.diag()(j) == k,"BandMatrix.diag V");
-                    Assert(a1f.diag()(j+1) == k,"BandMatrixF.diag");
-                    Assert(a1fcv.diag()(j+1) == k,"BandMatrixF.diag CV");
-                    Assert(a1fv.diag()(j+1) == k,"BandMatrixF.diag V");
+                    Assert(a1.diag()(j) == T(k),"BandMatrix.diag");
+                    Assert(a1c.diag()(j) == T(k),"const BandMatrix.diag");
+                    Assert(a1cv.diag()(j) == T(k),"BandMatrix.diag CV");
+                    Assert(a1v.diag()(j) == T(k),"BandMatrix.diag V");
+                    Assert(a1f.diag()(j+1) == T(k),"BandMatrixF.diag");
+                    Assert(a1fc.diag()(j+1) == T(k),"const BandMatrixF.diag");
+                    Assert(a1fcv.diag()(j+1) == T(k),"BandMatrixF.diag CV");
+                    Assert(a1fv.diag()(j+1) == T(k),"BandMatrixF.diag V");
                 }
-                Assert(a1.diag(d)(j) == k,"BandMatrix.diag1");
-                Assert(a1cv.diag(d)(j) == k,"BandMatrix.diag1 CV");
-                Assert(a1v.diag(d)(j) == k,"BandMatrix.diag1 V");
-                Assert(a1.diag(d,j,N+d)(0) == k,"BandMatrix.diag2");
-                Assert(a1cv.diag(d,j,N+d)(0) == k,"BandMatrix.diag2 CV");
-                Assert(a1v.diag(d,j,N+d)(0) == k,"BandMatrix.diag2 V");
-                Assert(a1f.diag(d)(j+1) == k,"BandMatrixF.diag1");
-                Assert(a1fcv.diag(d)(j+1) == k,"BandMatrixF.diag1 CV");
-                Assert(a1fv.diag(d)(j+1) == k,"BandMatrixF.diag1 V");
-                Assert(a1f.diag(d,j+1,N+d)(1) == k,"BandMatrixF.diag2");
-                Assert(a1fcv.diag(d,j+1,N+d)(1) == k,"BandMatrixF.diag2 CV");
-                Assert(a1fv.diag(d,j+1,N+d)(1) == k,"BandMatrixF.diag2 V");
+                Assert(a1.diag(d)(j) == T(k),"BandMatrix.diag1");
+                Assert(a1c.diag(d)(j) == T(k),"const BandMatrix.diag1");
+                Assert(a1cv.diag(d)(j) == T(k),"BandMatrix.diag1 CV");
+                Assert(a1v.diag(d)(j) == T(k),"BandMatrix.diag1 V");
+                Assert(a1.diag(d,j,N+d)(0) == T(k),"BandMatrix.diag2");
+                Assert(a1c.diag(d,j,N+d)(0) == T(k),"const BandMatrix.diag2");
+                Assert(a1cv.diag(d,j,N+d)(0) == T(k),"BandMatrix.diag2 CV");
+                Assert(a1v.diag(d,j,N+d)(0) == T(k),"BandMatrix.diag2 V");
+                Assert(a1f.diag(d)(j+1) == T(k),"BandMatrixF.diag1");
+                Assert(a1fc.diag(d)(j+1) == T(k),"const BandMatrixF.diag1");
+                Assert(a1fcv.diag(d)(j+1) == T(k),"BandMatrixF.diag1 CV");
+                Assert(a1fv.diag(d)(j+1) == T(k),"BandMatrixF.diag1 V");
+                Assert(a1f.diag(d,j+1,N+d)(1) == T(k),"BandMatrixF.diag2");
+                Assert(a1fc.diag(d,j+1,N+d)(1) == T(k),"const BandMatrixF.diag2");
+                Assert(a1fcv.diag(d,j+1,N+d)(1) == T(k),"BandMatrixF.diag2 CV");
+                Assert(a1fv.diag(d,j+1,N+d)(1) == T(k),"BandMatrixF.diag2 V");
             }
+        } else {
+            Assert(a1c(i,j) == T(0),"Off-band access const BandMatrix");
+            Assert(a1cv(i,j) == T(0),"Off-band access BandMatrix CV");
+            Assert(a1fc(i+1,j+1) == T(0),"Off-band access const BandMatrixF");
+            Assert(a1fcv(i+1,j+1) == T(0),"Off-band access BandMatrixF CV");
         }
     }
+
     Assert(a1 == a1f,"CStyle BandMatrix == FortranStyle BandMatrix");
     Assert(a1 == a1cv,"BandMatrix == ConstBandMatrixView");
     Assert(a1 == a1v,"BandMatrix == BandMatrixView");
@@ -118,24 +141,35 @@ static void TestBasicBandMatrix_1()
            "BandMatrix a1.resize(3,3,1,1) sizes");
     Assert(a1.nlo() == 1 && a1.nhi() == 1,
            "BandMatrix a1.resize(3,3,1,1) nlo,nhi");
-    for (int i=0, k=0; i<3; ++i) for (int j=0; j<3; ++j, ++k) 
-        if ( j <= i + 1 && i <= j + 1) 
+    for (int i=0, k=1; i<3; ++i) for (int j=0; j<3; ++j, ++k) {
+        if ( j <= i + 1 && i <= j + 1) {
             a1(i,j) = T(k);
-    for (int i=0, k=0; i<3; ++i) for (int j=0; j<3; ++j, ++k) 
-        if ( j <= i + 1 && i <= j + 1) 
-            Assert(a1(i,j) == k,"Read/Write resized BandMatrix");
+        }
+    }
+    for (int i=0, k=1; i<3; ++i) for (int j=0; j<3; ++j, ++k) {
+        if ( j <= i + 1 && i <= j + 1) {
+            Assert(a1(i,j) == T(k),"Read/Write resized BandMatrix");
+        } else {
+            Assert(a1c(i,j) == T(0),"Off-band access resized BandMatrix");
+        }
+    }
 
     a1.resize(2*N,3*N,5,3);
     Assert(a1.colsize() == 2*N && a1.rowsize() == 3*N,
            "BandMatrix a1.resize(2*N,3*N,5,3) sizes");
     Assert(a1.nlo() == 5 && a1.nhi() == 3,
            "BandMatrix a1.resize(2*N,3*N,5,3) nlo,nhi");
-    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<3*N; ++j, ++k) 
+    for (int i=0, k=1; i<2*N; ++i) for (int j=0; j<3*N; ++j, ++k) {
         if ( j <= i + 3 && i <= j + 5) 
             a1(i,j) = T(k);
-    for (int i=0, k=0; i<2*N; ++i) for (int j=0; j<3*N; ++j, ++k) 
-        if ( j <= i + 3 && i <= j + 5) 
-            Assert(a1(i,j) == k,"Read/Write resized BandMatrix");
+    }
+    for (int i=0, k=1; i<2*N; ++i) for (int j=0; j<3*N; ++j, ++k) {
+        if ( j <= i + 3 && i <= j + 5) {
+            Assert(a1(i,j) == T(k),"Read/Write resized BandMatrix");
+        } else {
+            Assert(a1c(i,j) == T(0),"Off-band access resized BandMatrix");
+        }
+    }
 
 }
 
@@ -167,6 +201,7 @@ static void TestBasicBandMatrix_2()
            T(-1), T(1),  T(3),
                T(-2), T(0),  T(2) 
     };
+
     std::vector<T> qvecrm(11);
     for(int i=0;i<11;i++) qvecrm[i] = qarrm[i];
     std::vector<T> qveccm(11);
@@ -304,17 +339,17 @@ static void TestBasicBandMatrix_2()
         q7.rowmajor_begin();
     typename tmv::ConstBandMatrixView<T>::const_rowmajor_iterator rmit6 =
         q7_const.rowmajor_begin();
-    int ii = 0;
+    int i = 0;
     while (rmit1 != q1.rowmajor_end()) {
-        Assert(*rmit1++ == qarrm[ii], "RowMajor iteration 1");
-        Assert(*rmit2++ == qarrm[ii], "RowMajor iteration 2");
-        Assert(*rmit3++ == qarrm[ii], "RowMajor iteration 3");
-        Assert(*rmit4++ == qarrm[ii], "RowMajor iteration 4");
-        Assert(*rmit5++ == qarrm[ii], "RowMajor iteration 5");
-        Assert(*rmit6++ == qarrm[ii], "RowMajor iteration 6");
-        ++ii;
+        Assert(*rmit1++ == qarrm[i], "RowMajor iteration 1");
+        Assert(*rmit2++ == qarrm[i], "RowMajor iteration 2");
+        Assert(*rmit3++ == qarrm[i], "RowMajor iteration 3");
+        Assert(*rmit4++ == qarrm[i], "RowMajor iteration 4");
+        Assert(*rmit5++ == qarrm[i], "RowMajor iteration 5");
+        Assert(*rmit6++ == qarrm[i], "RowMajor iteration 6");
+        ++i;
     }
-    Assert(ii == 11, "RowMajor iteration number of elements");
+    Assert(i == 11, "RowMajor iteration number of elements");
     Assert(rmit2 == q1_const.rowmajor_end(), "rmit2 reaching end");
     Assert(rmit3 == q1_view.rowmajor_end(), "rmit3 reaching end");
     Assert(rmit4 == q1_constview.rowmajor_end(), "rmit4 reaching end");
@@ -333,17 +368,17 @@ static void TestBasicBandMatrix_2()
         q7.colmajor_begin();
     typename tmv::ConstBandMatrixView<T>::const_colmajor_iterator cmit6 =
         q7_const.colmajor_begin();
-    ii = 0;
+    i = 0;
     while (cmit1 != q1.colmajor_end()) {
-        Assert(*cmit1++ == qarcm[ii], "ColMajor iteration 1");
-        Assert(*cmit2++ == qarcm[ii], "ColMajor iteration 2");
-        Assert(*cmit3++ == qarcm[ii], "ColMajor iteration 3");
-        Assert(*cmit4++ == qarcm[ii], "ColMajor iteration 4");
-        Assert(*cmit5++ == qarcm[ii], "ColMajor iteration 5");
-        Assert(*cmit6++ == qarcm[ii], "ColMajor iteration 6");
-        ++ii;
+        Assert(*cmit1++ == qarcm[i], "ColMajor iteration 1");
+        Assert(*cmit2++ == qarcm[i], "ColMajor iteration 2");
+        Assert(*cmit3++ == qarcm[i], "ColMajor iteration 3");
+        Assert(*cmit4++ == qarcm[i], "ColMajor iteration 4");
+        Assert(*cmit5++ == qarcm[i], "ColMajor iteration 5");
+        Assert(*cmit6++ == qarcm[i], "ColMajor iteration 6");
+        ++i;
     }
-    Assert(ii == 11, "ColMajor iteration number of elements");
+    Assert(i == 11, "ColMajor iteration number of elements");
     Assert(cmit2 == q1_const.colmajor_end(), "cmit2 reaching end");
     Assert(cmit3 == q1_view.colmajor_end(), "cmit3 reaching end");
     Assert(cmit4 == q1_constview.colmajor_end(), "cmit4 reaching end");
@@ -362,17 +397,17 @@ static void TestBasicBandMatrix_2()
         q7.diagmajor_begin();
     typename tmv::ConstBandMatrixView<T>::const_diagmajor_iterator dmit6 =
         q7_const.diagmajor_begin();
-    ii = 0;
+    i = 0;
     while (dmit1 != q1.diagmajor_end()) {
-        Assert(*dmit1++ == qardm[ii], "DiagMajor iteration 1");
-        Assert(*dmit2++ == qardm[ii], "DiagMajor iteration 2");
-        Assert(*dmit3++ == qardm[ii], "DiagMajor iteration 3");
-        Assert(*dmit4++ == qardm[ii], "DiagMajor iteration 4");
-        Assert(*dmit5++ == qardm[ii], "DiagMajor iteration 5");
-        Assert(*dmit6++ == qardm[ii], "DiagMajor iteration 6");
-        ++ii;
+        Assert(*dmit1++ == qardm[i], "DiagMajor iteration 1");
+        Assert(*dmit2++ == qardm[i], "DiagMajor iteration 2");
+        Assert(*dmit3++ == qardm[i], "DiagMajor iteration 3");
+        Assert(*dmit4++ == qardm[i], "DiagMajor iteration 4");
+        Assert(*dmit5++ == qardm[i], "DiagMajor iteration 5");
+        Assert(*dmit6++ == qardm[i], "DiagMajor iteration 6");
+        ++i;
     }
-    Assert(ii == 11, "DiagMajor iteration number of elements");
+    Assert(i == 11, "DiagMajor iteration number of elements");
     Assert(dmit2 == q1_const.diagmajor_end(), "dmit2 reaching end");
     Assert(dmit3 == q1_view.diagmajor_end(), "dmit3 reaching end");
     Assert(dmit4 == q1_constview.diagmajor_end(), "dmit4 reaching end");
@@ -385,42 +420,54 @@ static void TestBasicBandMatrix_2()
     const int nlo = 3;
 
     tmv::BandMatrix<T> a1(N,N,nlo,nhi);
-    for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k)
+    for (int i=0, k=1; i<N; ++i) for (int j=0; j<N; ++j, ++k) {
         if ( j <= i + nhi && i <= j + nlo) {
             a1(i,j) = T(k);
         }
+    }
 
     tmv::BandMatrix<T> a2(N,N,nlo,nhi);
-    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if ( j <= i + nhi && i <= j + nlo) {
             a1(i,j) = T(3+i-5*j);
             a2(i,j) = T(5-2*i+4*j);
         }
+    }
     tmv::BandMatrix<T,tmv::RowMajor|tmv::FortranStyle> a1f(N,N,nlo,nhi);
     a1f = a1;
     Assert(a1f == a1,"Copy CStyle BandMatrix to FortranStyle");
 
     tmv::BandMatrix<T> c(N,N,nlo,nhi);
     c = a1+a2;
-    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if ( j <= i + nhi && i <= j + nlo) 
             Assert(c(i,j) == T(8-i-j),"Add BandMatrices");
+    }
 
     c = a1-a2;
-    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) 
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if ( j <= i + nhi && i <= j + nlo) 
             Assert(c(i,j) == T(-2+3*i-9*j),"Subtract BandMatrices");
+    }
 
     tmv::Matrix<T> m1 = a1;
-    for (int i=0, k=0; i<N; ++i) for (int j=0; j<N; ++j, ++k)
+    for (int i=0; i<N; ++i) for (int j=0; j<N; ++j) {
         if ( j <= i + nhi && i <= j + nlo) 
-            Assert(a1(i,j) == m1(i,j),"BandMatrix -> Matrix");
+            Assert(m1(i,j) == a1(i,j),"BandMatrix -> Matrix (inside band)");
+        else 
+            Assert(m1(i,j) == T(0),"BandMatrix -> Matrix (outside band)");
+        //TODO: Make a reference type that can make this work:
+        //Assert(m1(i,j) == a1(i,j),"BandMatrix -> Matrix");
+    }
+    Assert(a1 == m1,"Matrix == BandMatrix");
     Assert(a1 == tmv::BandMatrix<T>(m1,nlo,nhi),"Matrix -> BandMatrix");
 }
 
 template <class T, tmv::StorageType S> 
 static void TestBasicBandMatrix_IO()
 {
+    typedef std::complex<T> CT;
+
     const int M = 15;
     const int N = 10;
     const int nhi = 1;
@@ -436,7 +483,7 @@ static void TestBasicBandMatrix_IO()
 
     tmv::BandMatrix<T> m(M,N,nlo,nhi);
     tmv::BandMatrix<CT> cm(M,N,nlo,nhi);
-    for (int i=0, k=0; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
+    for (int i=0, k=1; i<M; ++i) for (int j=0; j<N; ++j, ++k) {
         if ( j <= i + nhi && i <= j + nlo) {
             m(i,j) = T(k);
             cm(i,j) = CT(k,k+1000);
@@ -448,7 +495,7 @@ static void TestBasicBandMatrix_IO()
     cm(5,6) = CT(T(9.e-3),T(9.e-3));
     cm(6,6) = CT(T(9),T(9.e-3));
     m(7,4) = T(0.123456789);
-    cm(7,4) = CT(T(3.123456789),T(6.987654321));
+    cm(7,4) = CT(T(3.123456789),T(600.987654321));
 
     // First check clipping function...
     tmv::BandMatrix<T> m2 = m;
@@ -462,7 +509,7 @@ static void TestBasicBandMatrix_IO()
     m3(3,1) = T(0);
     cm3(3,1) = T(0);
     m3(5,6) = T(0); 
-    // Others, esp. cm3(5,6) and cm3(6,6), shouldn't get clipped.
+    // Others, esp. cm3(5,6) and cm3(6,6) shouldn't get clipped.
     Assert(m2 == m3,"BandMatrix clip");
     Assert(cm2 == cm3,"Complex BandMatrix clip");
 
@@ -490,14 +537,14 @@ static void TestBasicBandMatrix_IO()
 
     // When using (the default) prec(6), these will be the values read in.
     m(7,4) = T(0.123457);
-    cm(7,4) = CT(T(3.12346),T(6.98765));
+    cm(7,4) = CT(T(3.12346),T(600.988));
 
     // When using prec(12), the full correct values will be read in. (m2,cm2)
 
     // When using prec(4), these will be the values read in.
     m3(7,4) = T(0.1235);
-    if (std::numeric_limits<T>::is_integer) cm3(7,4) = CT(3,6);
-    else cm3(7,4) = CT(T(3.123),T(6.988));
+    if (std::numeric_limits<T>::is_integer) cm3(7,4) = CT(3,600);
+    else cm3(7,4) = CT(T(3.123),T(601.0));
 
     // Read them back in
     tmv::BandMatrix<T,tmv::RowMajor> xm1(M,N,nlo,nhi);
@@ -505,17 +552,17 @@ static void TestBasicBandMatrix_IO()
     std::ifstream fin("tmvtest_bandmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
     fin >> xm1 >> xcm1;
-    Assert(EqualIO(m,xm1,EPS),"BandMatrix I/O check normal");
-    Assert(EqualIO(cm,xcm1,EPS),"CBandMatrix I/O check normal");
+    Assert(m == xm1,"BandMatrix I/O check normal");
+    Assert(cm == xcm1,"CBandMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xm1 >> tmv::CompactIO() >> xcm1;
-    Assert(EqualIO(m,xm1,EPS),"BandMatrix I/O check compact");
-    Assert(EqualIO(cm,xcm1,EPS),"CBandMatrix I/O check compact");
+    Assert(m == xm1,"BandMatrix I/O check compact");
+    Assert(cm == xcm1,"CBandMatrix I/O check compact");
     fin >> xm1.view() >> xcm1.view();
-    Assert(EqualIO(m2,xm1,EPS),"BandMatrix I/O check thresh");
-    Assert(EqualIO(cm2,xcm1,EPS),"CBandMatrix I/O check thresh");
+    Assert(m2 == xm1,"BandMatrix I/O check thresh");
+    Assert(cm2 == xcm1,"CBandMatrix I/O check thresh");
     fin >> myStyle >> xm1.view() >> myStyle >> xcm1.view();
-    Assert(EqualIO(m3,xm1,EPS),"BandMatrix I/O check compact thresh & prec(4)");
-    Assert(EqualIO(cm3,xcm1,EPS),"CBandMatrix I/O check compact thresh & prec(4)");
+    Assert(m3 == xm1,"BandMatrix I/O check compact thresh & prec(4)");
+    Assert(cm3 == xcm1,"CBandMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // Repeat for column major
@@ -524,17 +571,17 @@ static void TestBasicBandMatrix_IO()
     fin.open("tmvtest_bandmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
     fin >> xm2.view() >> xcm2.view();
-    Assert(EqualIO(m,xm2,EPS),"BandMatrix I/O check normal");
-    Assert(EqualIO(cm,xcm2,EPS),"CBandMatrix I/O check normal");
+    Assert(m == xm2,"BandMatrix I/O check normal");
+    Assert(cm == xcm2,"CBandMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xm2.view() >> tmv::CompactIO() >> xcm2.view();
-    Assert(EqualIO(m,xm2,EPS),"BandMatrix I/O check compact");
-    Assert(EqualIO(cm,xcm2,EPS),"CBandMatrix I/O check compact");
+    Assert(m == xm2,"BandMatrix I/O check compact");
+    Assert(cm == xcm2,"CBandMatrix I/O check compact");
     fin >> xm2 >> xcm2;
-    Assert(EqualIO(m2,xm2,EPS),"BandMatrix I/O check thresh");
-    Assert(EqualIO(cm2,xcm2,EPS),"CBandMatrix I/O check thresh");
+    Assert(m2 == xm2,"BandMatrix I/O check thresh");
+    Assert(cm2 == xcm2,"CBandMatrix I/O check thresh");
     fin >> myStyle >> xm2 >> myStyle >> xcm2;
-    Assert(EqualIO(m3,xm2,EPS),"BandMatrix I/O check compact thresh & prec(4)");
-    Assert(EqualIO(cm3,xcm2,EPS),"CBandMatrix I/O check compact thresh & prec(4)");
+    Assert(m3 == xm2,"BandMatrix I/O check compact thresh & prec(4)");
+    Assert(cm3 == xcm2,"CBandMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // Repeat for diag major
@@ -543,17 +590,17 @@ static void TestBasicBandMatrix_IO()
     fin.open("tmvtest_bandmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
     fin >> xm3.view() >> xcm3.view();
-    Assert(EqualIO(m,xm3,EPS),"BandMatrix I/O check normal");
-    Assert(EqualIO(cm,xcm3,EPS),"CBandMatrix I/O check normal");
+    Assert(m == xm3,"BandMatrix I/O check normal");
+    Assert(cm == xcm3,"CBandMatrix I/O check normal");
     fin >> tmv::CompactIO() >> xm3.view() >> tmv::CompactIO() >> xcm3.view();
-    Assert(EqualIO(m,xm3,EPS),"BandMatrix I/O check compact");
-    Assert(EqualIO(cm,xcm3,EPS),"CBandMatrix I/O check compact");
+    Assert(m == xm3,"BandMatrix I/O check compact");
+    Assert(cm == xcm3,"CBandMatrix I/O check compact");
     fin >> xm3 >> xcm3;
-    Assert(EqualIO(m2,xm3,EPS),"BandMatrix I/O check thresh");
-    Assert(EqualIO(cm2,xcm3,EPS),"CBandMatrix I/O check thresh");
+    Assert(m2 == xm3,"BandMatrix I/O check thresh");
+    Assert(cm2 == xcm3,"CBandMatrix I/O check thresh");
     fin >> myStyle >> xm3 >> myStyle >> xcm3;
-    Assert(EqualIO(m3,xm3,EPS),"BandMatrix I/O check compact thresh & prec(4)");
-    Assert(EqualIO(cm3,xcm3,EPS),"CBandMatrix I/O check compact thresh & prec(4)");
+    Assert(m3 == xm3,"BandMatrix I/O check compact thresh & prec(4)");
+    Assert(cm3 == xcm3,"CBandMatrix I/O check compact thresh & prec(4)");
     fin.close();
 
     // And repeat for matrices that need to be resized.
@@ -568,17 +615,17 @@ static void TestBasicBandMatrix_IO()
     fin.open("tmvtest_bandmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
     fin >> tmv::NormalIO() >> zm1 >> tmv::NormalIO() >> zcm1;
-    Assert(EqualIO(m,zm1,EPS),"BandMatrix I/O check normal with resize");
-    Assert(EqualIO(cm,zcm1,EPS),"CBandMatrix I/O check normal with resize");
+    Assert(m == zm1,"BandMatrix I/O check normal with resize");
+    Assert(cm == zcm1,"CBandMatrix I/O check normal with resize");
     fin >> zm2 >> zcm2;
-    Assert(EqualIO(m,zm2,EPS),"BandMatrix I/O check compact with resize");
-    Assert(EqualIO(cm,zcm2,EPS),"CBandMatrix I/O check compact with resize");
+    Assert(m == zm2,"BandMatrix I/O check compact with resize");
+    Assert(cm == zcm2,"CBandMatrix I/O check compact with resize");
     fin >> tmv::NormalIO() >> zm3 >> tmv::NormalIO() >> zcm3;
-    Assert(EqualIO(m2,zm3,EPS),"BandMatrix I/O check thresh with resize");
-    Assert(EqualIO(cm2,zcm3,EPS),"CBandMatrix I/O check thresh with resize");
+    Assert(m2 == zm3,"BandMatrix I/O check thresh with resize");
+    Assert(cm2 == zcm3,"CBandMatrix I/O check thresh with resize");
     fin >> myStyle >> zm4 >> myStyle >> zcm4;
-    Assert(EqualIO(m3,zm4,EPS),"BandMatrix I/O check compact thresh with resize");
-    Assert(EqualIO(cm3,zcm4,EPS),"CBandMatrix I/O check compact thresh with resize");
+    Assert(m3 == zm4,"BandMatrix I/O check compact thresh with resize");
+    Assert(cm3 == zcm4,"CBandMatrix I/O check compact thresh with resize");
     fin.close();
     // Switch it back.
     tmv::IOStyle::revertDefault();
@@ -589,8 +636,8 @@ static void TestBasicBandMatrix_IO()
     fin.open("tmvtest_bandmatrix_io.dat");
     Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
     fin >> zm5 >> zcm5;
-    Assert(EqualIO(m,zm5,EPS),"BandMatrix -> Matrix I/O check");
-    Assert(EqualIO(cm,zcm5,EPS),"CBandMatrix -> CMatrix I/O check");
+    Assert(m == zm5,"BandMatrix -> Matrix I/O check");
+    Assert(cm == zcm5,"CBandMatrix -> CMatrix I/O check");
     fin.close();
 
 #if XTEST == 0
@@ -609,8 +656,8 @@ static void TestBasicBandMatrix()
 template <class T> 
 void TestBandMatrix()
 {
-    TestBasicBandMatrix<T,tmv::RowMajor>();
     TestBasicBandMatrix<T,tmv::ColMajor>();
+    TestBasicBandMatrix<T,tmv::RowMajor>();
     TestBasicBandMatrix<T,tmv::DiagMajor>();
 
     std::cout<<"BandMatrix<"<<tmv::TMV_Text(T())<<"> passed all basic tests\n";

@@ -1,26 +1,17 @@
 
 #define CT std::complex<T>
 
-#define Def0(T)\
-  template const T* VectorComposite<T >::cptr() const; \
-  template VectorComposite<T >::~VectorComposite(); \
+#define Def1(T1,C1,T2) \
+  template T2 InstMultVV( \
+      const ConstVectorView<T1,C1>& v1, const ConstVectorView<T2 >& v2); \
 
-Def0(T)
-#ifdef INST_COMPLEX
-Def0(CT)
+Def1(T,NonConj,T)
+#ifdef TMV_INST_COMPLEX
+#ifdef TMV_INST_MIX
+Def1(T,NonConj,CT)
 #endif
-
-#undef Def0
-
-#define Def1(T,T1)\
-  template T MultVV(const GenVector<T >& v1, const GenVector<T1 >& v2); \
-
-Def1(T,T)
-#ifdef INST_COMPLEX
-Def1(CT,T)
-Def1(CT,CT)
+Def1(CT,NonConj,CT)
+Def1(CT,Conj,CT)
 #endif
-
-#undef Def1
 
 #undef CT

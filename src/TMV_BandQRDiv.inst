@@ -3,13 +3,13 @@
 
 #define DefDivEq(T,T1)\
 template void Q_LDivEq(const GenBandMatrix<T1 >& Q,\
-    const GenVector<T1 >& Qtau, MatrixView<T > m); \
+    const GenVector<T1 >& Qtau, const MatrixView<T >& m); \
 template void Q_RDivEq(const GenBandMatrix<T1 >& Q,\
-    const GenVector<T1 >& Qtau, MatrixView<T > m); \
+    const GenVector<T1 >& Qtau, const MatrixView<T >& m); \
 template void QR_LDivEq(const GenBandMatrix<T1 >& QRx,\
-    const GenVector<T1 >& Qtau, MatrixView<T > m); \
+    const GenVector<T1 >& Qtau, const MatrixView<T >& m); \
 template void QR_RDivEq(const GenBandMatrix<T1 >& QRx,\
-    const GenVector<T1 >& Qtau, MatrixView<T > m); \
+    const GenVector<T1 >& Qtau, const MatrixView<T >& m); \
 
 DefDivEq(T,T)
 #ifdef INST_COMPLEX
@@ -22,10 +22,10 @@ DefDivEq(CT,CT)
 #define DefDiv(T,T1,T2)\
 template void QR_LDiv(const GenBandMatrix<T1 >& QRx,\
     const GenVector<T1 >& Qtau, const GenMatrix<T2 >& m, \
-    MatrixView<T > x); \
+    const MatrixView<T >& x); \
 template void QR_RDiv(const GenBandMatrix<T1 >& QRx,\
     const GenVector<T1 >& Qtau, const GenMatrix<T2 >& m, \
-    MatrixView<T > x); \
+    const MatrixView<T >& x); \
 
 DefDiv(T,T,T)
 #ifdef INST_COMPLEX

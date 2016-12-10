@@ -3,15 +3,16 @@
 
 #define DefSVD(RT,T)\
 template void SV_Decompose(const GenBandMatrix<T >& A,\
-    MatrixView<T > U, DiagMatrixView<RT > S, MatrixView<T > V, RT& ld, T& d);\
+    MVP<T > U, const DiagMatrixView<RT >& S, MVP<T > V, RT& ld, T& d);\
 template void SV_Decompose(const GenBandMatrix<T >& A,\
-    MatrixView<T > U, DiagMatrixView<RT > S, MatrixView<T > V);\
+    const MatrixView<T >& U, const DiagMatrixView<RT >& S, \
+    const MatrixView<T >& V);\
 template void SV_Decompose(const GenBandMatrix<T >& A,\
-    MatrixView<T > U, DiagMatrixView<RT > S);\
+    const MatrixView<T >& U, const DiagMatrixView<RT >& S);\
 template void SV_Decompose(const GenBandMatrix<T >& A,\
-    DiagMatrixView<RT > S, MatrixView<T > V);\
+    const DiagMatrixView<RT >& S, const MatrixView<T >& V);\
 template void SV_Decompose(const GenBandMatrix<T >& A,\
-    DiagMatrixView<RT > S);\
+    const DiagMatrixView<RT >& S);\
 
 DefSVD(T,T)
 #ifdef INST_COMPLEX

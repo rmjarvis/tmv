@@ -1,21 +1,31 @@
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
 // The Template Matrix/Vector Library for C++ was created by Mike Jarvis     //
-// Copyright (C) 1998 - 2016                                                 //
-// All rights reserved                                                       //
+// Copyright (C) 1998 - 2009                                                 //
 //                                                                           //
-// The project is hosted at https://code.google.com/p/tmv-cpp/               //
+// The project is hosted at http://sourceforge.net/projects/tmv-cpp/         //
 // where you can find the current version and current documention.           //
 //                                                                           //
 // For concerns or problems with the software, Mike may be contacted at      //
-// mike_jarvis17 [at] gmail.                                                 //
+// mike_jarvis@users.sourceforge.net                                         //
 //                                                                           //
-// This software is licensed under a FreeBSD license.  The file              //
-// TMV_LICENSE should have bee included with this distribution.              //
-// It not, you can get a copy from https://code.google.com/p/tmv-cpp/.       //
+// This program is free software; you can redistribute it and/or             //
+// modify it under the terms of the GNU General Public License               //
+// as published by the Free Software Foundation; either version 2            //
+// of the License, or (at your option) any later version.                    //
 //                                                                           //
-// Essentially, you can use this software however you want provided that     //
-// you include the TMV_LICENSE file in any distribution that uses it.        //
+// This program is distributed in the hope that it will be useful,           //
+// but WITHOUT ANY WARRANTY; without even the implied warranty of            //
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the             //
+// GNU General Public License for more details.                              //
+//                                                                           //
+// You should have received a copy of the GNU General Public License         //
+// along with this program in the file LICENSE.                              //
+//                                                                           //
+// If not, write to:                                                         //
+// The Free Software Foundation, Inc.                                        //
+// 51 Franklin Street, Fifth Floor,                                          //
+// Boston, MA  02110-1301, USA.                                              //
 //                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -62,7 +72,7 @@ namespace tmv {
 
     template <bool rm, bool ca, bool ua, class T, class Ta> 
     static void DoRowUpperTriLDivEq(
-        const GenBandMatrix<Ta>& A, VectorView<T> b)
+        const GenBandMatrix<Ta>& A, const VectorView<T>& b)
     {
         TMVAssert(b.step()==1);
         TMVAssert(A.isSquare());
@@ -91,10 +101,10 @@ namespace tmv {
 #endif
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(bi >= b._first);
-            TMVAssert(bi < b._last);
+            TMVAssert(bi >= b.first);
+            TMVAssert(bi < b.last);
 #endif
-            *bi = TMV_Divide(*bi,(ca ? TMV_CONJ(*Aii) : *Aii));
+            *bi /= (ca ? TMV_CONJ(*Aii) : *Aii);
             Aii -= ds;
             --bi;
         }
@@ -109,8 +119,8 @@ namespace tmv {
             const Ta* Aij = Aii+sj;
             for(ptrdiff_t j=len;j>0;--j,++bj,(rm?++Aij:Aij+=sj)) {
 #ifdef TMVFLDEBUG
-                TMVAssert(bi >= b._first);
-                TMVAssert(bi < b._last);
+                TMVAssert(bi >= b.first);
+                TMVAssert(bi < b.last);
 #endif
                 *bi -= *bj * (ca ? TMV_CONJ(*Aij) : *Aij);
             }
@@ -125,10 +135,10 @@ namespace tmv {
 #endif
                 }
 #ifdef TMVFLDEBUG
-                TMVAssert(bi >= b._first);
-                TMVAssert(bi < b._last);
+                TMVAssert(bi >= b.first);
+                TMVAssert(bi < b.last);
 #endif
-                *bi = TMV_Divide(*bi,(ca ? TMV_CONJ(*Aii) : *Aii));
+                *bi /= (ca ? TMV_CONJ(*Aii) : *Aii);
             }
             if (k > 0) { --k; ++len; }
         } 
@@ -136,7 +146,7 @@ namespace tmv {
 
     template <bool rm, bool ua, class T, class Ta> 
     static inline void RowUpperTriLDivEq(
-        const GenBandMatrix<Ta>& A, VectorView<T> b)
+        const GenBandMatrix<Ta>& A, const VectorView<T>& b)
     {
         if (A.isconj())
             DoRowUpperTriLDivEq<rm,true,ua>(A,b);
@@ -146,7 +156,7 @@ namespace tmv {
 
     template <bool cm, bool ca, bool ua, class T, class Ta> 
     static void DoColUpperTriLDivEq(
-        const GenBandMatrix<Ta>& A, VectorView<T> b)
+        const GenBandMatrix<Ta>& A, const VectorView<T>& b)
     {
         TMVAssert(b.step()==1);
         TMVAssert(A.isSquare());
@@ -186,10 +196,10 @@ namespace tmv {
 #endif
                     }
 #ifdef TMVFLDEBUG
-                    TMVAssert(bj >= b._first);
-                    TMVAssert(bj < b._last);
+                    TMVAssert(bj >= b.first);
+                    TMVAssert(bj < b.last);
 #endif
-                    *bj = TMV_Divide(*bj,(ca ? TMV_CONJ(*Ajj) : *Ajj));
+                    *bj /= (ca ? TMV_CONJ(*Ajj) : *Ajj);
                     Ajj -= ds;
                 }
 
@@ -198,8 +208,8 @@ namespace tmv {
                 const Ta* Aij = Ai1j;
                 for(ptrdiff_t i=len;i>0;--i,++bi,(cm?++Aij:Aij+=si)) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(bi >= b._first);
-                    TMVAssert(bi < b._last);
+                    TMVAssert(bi >= b.first);
+                    TMVAssert(bi < b.last);
 #endif
                     *bi -= *bj * (ca ? TMV_CONJ(*Aij) : *Aij);
                 }
@@ -219,16 +229,16 @@ namespace tmv {
 #endif
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(bj >= b._first);
-            TMVAssert(bj < b._last);
+            TMVAssert(bj >= b.first);
+            TMVAssert(bj < b.last);
 #endif
-            *bj = TMV_Divide(*bj,(ca ? TMV_CONJ(*Ajj) : *Ajj));
+            *bj /= (ca ? TMV_CONJ(*Ajj) : *Ajj);
         }
     }
 
     template <bool cm, bool ua, class T, class Ta> 
     static inline void ColUpperTriLDivEq(
-        const GenBandMatrix<Ta>& A, VectorView<T> b)
+        const GenBandMatrix<Ta>& A, const VectorView<T>& b)
     {
         if (A.isconj())
             DoColUpperTriLDivEq<cm,true,ua>(A,b);
@@ -238,7 +248,7 @@ namespace tmv {
 
     template <bool rm, bool ca, bool ua, class T, class Ta> 
     static void DoRowLowerTriLDivEq(
-        const GenBandMatrix<Ta>& A, VectorView<T> b)
+        const GenBandMatrix<Ta>& A, const VectorView<T>& b)
     {
         TMVAssert(b.step()==1);
         TMVAssert(A.isSquare());
@@ -270,10 +280,10 @@ namespace tmv {
 #endif
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(bi >= b._first);
-            TMVAssert(bi < b._last);
+            TMVAssert(bi >= b.first);
+            TMVAssert(bi < b.last);
 #endif
-            *bi = TMV_Divide(*bi,(ca ? TMV_CONJ(*Aij1) : *Aij1));
+            *bi /= (ca ? TMV_CONJ(*Aij1) : *Aij1);
         }
 
         ++bi;
@@ -286,8 +296,8 @@ namespace tmv {
             const T* bj = bj1;
             for(ptrdiff_t j=len;j>0;--j,++bj,(rm?++Aij:Aij+=sj)) {
 #ifdef TMVFLDEBUG
-                TMVAssert(bj >= b._first);
-                TMVAssert(bj < b._last);
+                TMVAssert(bj >= b.first);
+                TMVAssert(bj < b.last);
 #endif
                 *bi -= *bj * (ca ? TMV_CONJ(*Aij) : *Aij);
             }
@@ -302,10 +312,10 @@ namespace tmv {
 #endif
                 }
 #ifdef TMVFLDEBUG
-                TMVAssert(bi >= b._first);
-                TMVAssert(bi < b._last);
+                TMVAssert(bi >= b.first);
+                TMVAssert(bi < b.last);
 #endif
-                *bi = TMV_Divide(*bi,(ca ? TMV_CONJ(*Aij) : *Aij));
+                *bi /= (ca ? TMV_CONJ(*Aij) : *Aij);
             }
             if (k>0) { --k; ++len; Aij1+=A.stepi(); } 
             else { ++bj1; Aij1+=ds; }
@@ -314,7 +324,7 @@ namespace tmv {
 
     template <bool rm, bool ua, class T, class Ta> 
     static inline void RowLowerTriLDivEq(
-        const GenBandMatrix<Ta>& A, VectorView<T> b)
+        const GenBandMatrix<Ta>& A, const VectorView<T>& b)
     {
         if (A.isconj())
             DoRowLowerTriLDivEq<rm,true,ua>(A,b);
@@ -324,7 +334,7 @@ namespace tmv {
 
     template <bool cm, bool ca, bool ua, class T, class Ta> 
     static void DoColLowerTriLDivEq(
-        const GenBandMatrix<Ta>& A, VectorView<T> b)
+        const GenBandMatrix<Ta>& A, const VectorView<T>& b)
     {
         TMVAssert(b.step()==1);
         TMVAssert(A.isSquare());
@@ -358,18 +368,18 @@ namespace tmv {
 #endif
                     }
 #ifdef TMVFLDEBUG
-                    TMVAssert(bj >= b._first);
-                    TMVAssert(bj < b._last);
+                    TMVAssert(bj >= b.first);
+                    TMVAssert(bj < b.last);
 #endif
-                    *bj = TMV_Divide(*bj,(ca ? TMV_CONJ(*Ajj) : *Ajj));
+                    *bj /= (ca ? TMV_CONJ(*Ajj) : *Ajj);
                 }
                 // b.subVector(j+1,i2) -= *bj * A.col(j,j+1,i2)
                 T* bi = bj+1;
                 const Ta* Aij = Ajj+si;
                 for(ptrdiff_t i=len;i>0;--i,++bi,(cm?++Aij:Aij+=si)) {
 #ifdef TMVFLDEBUG
-                    TMVAssert(bi >= b._first);
-                    TMVAssert(bi < b._last);
+                    TMVAssert(bi >= b.first);
+                    TMVAssert(bi < b.last);
 #endif
                     *bi -= *bj * (ca ? TMV_CONJ(*Aij) : *Aij);
                 }
@@ -386,16 +396,16 @@ namespace tmv {
 #endif
             }
 #ifdef TMVFLDEBUG
-            TMVAssert(bj >= b._first);
-            TMVAssert(bj < b._last);
+            TMVAssert(bj >= b.first);
+            TMVAssert(bj < b.last);
 #endif
-            *bj = TMV_Divide(*bj,(ca ? TMV_CONJ(*Ajj) : *Ajj));
+            *bj /= (ca ? TMV_CONJ(*Ajj) : *Ajj);
         }
     }
 
     template <bool rm, bool ua, class T, class Ta> 
     static inline void ColLowerTriLDivEq(
-        const GenBandMatrix<Ta>& A, VectorView<T> b)
+        const GenBandMatrix<Ta>& A, const VectorView<T>& b)
     {
         if (A.isconj())
             DoColLowerTriLDivEq<rm,true,ua>(A,b);
@@ -405,7 +415,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void UpperTriLDivEq(
-        const GenBandMatrix<Ta>& A, VectorView<T> b, DiagType dt)
+        const GenBandMatrix<Ta>& A, const VectorView<T>& b, DiagType dt)
     {
         TMVAssert(A.nlo() == 0);
         if (A.nhi() == 0) {
@@ -424,7 +434,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void LowerTriLDivEq(
-        const GenBandMatrix<Ta>& A, VectorView<T> b, DiagType dt)
+        const GenBandMatrix<Ta>& A, const VectorView<T>& b, DiagType dt)
     {
         TMVAssert(A.nhi() == 0);
         if (A.nlo() == 0) {
@@ -443,7 +453,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     static void NonBlasTriLDivEq(
-        const GenBandMatrix<Ta>& A, VectorView<T> b, DiagType dt)
+        const GenBandMatrix<Ta>& A, const VectorView<T>& b, DiagType dt)
     {
         //cout<<"Start NonBlasTriLDvEq\n";
         // Solve A x = y  where A is an upperor lower band triangle matrix
@@ -490,12 +500,12 @@ namespace tmv {
 #ifdef BLAS
     template <class T, class Ta> 
     static inline void BlasTriLDivEq(
-        const GenBandMatrix<Ta>& A, VectorView<T> b, DiagType dt)
+        const GenBandMatrix<Ta>& A, const VectorView<T>& b, DiagType dt)
     { NonBlasTriLDivEq(A,b,dt); }
 #ifdef INST_DOUBLE
     template <> 
     void BlasTriLDivEq(
-        const GenBandMatrix<double>& A, VectorView<double> b,
+        const GenBandMatrix<double>& A, const VectorView<double>& b,
         DiagType dt)
     {
         int n = A.colsize();
@@ -515,7 +525,7 @@ namespace tmv {
     template <> 
     void BlasTriLDivEq(
         const GenBandMatrix<std::complex<double> >& A,
-        VectorView<std::complex<double> > b, DiagType dt)
+        const VectorView<std::complex<double> >& b, DiagType dt)
     {
         int n = A.colsize();
         int kd = A.nlo()==0 ? A.nhi() : A.nlo();
@@ -552,7 +562,7 @@ namespace tmv {
     template <> 
     void BlasTriLDivEq(
         const GenBandMatrix<double>& A, 
-        VectorView<std::complex<double> > b, DiagType dt)
+        const VectorView<std::complex<double> >& b, DiagType dt)
     {
         int n = A.colsize();
         int kd = A.nlo()==0 ? A.nhi() : A.nlo();
@@ -578,7 +588,7 @@ namespace tmv {
 #ifdef INST_FLOAT
     template <> 
     void BlasTriLDivEq(
-        const GenBandMatrix<float>& A, VectorView<float> b, DiagType dt)
+        const GenBandMatrix<float>& A, const VectorView<float>& b, DiagType dt)
     {
         int n = A.colsize();
         int kd = A.nlo()==0 ? A.nhi() : A.nlo();
@@ -597,7 +607,7 @@ namespace tmv {
     template <> 
     void BlasTriLDivEq(
         const GenBandMatrix<std::complex<float> >& A,
-        VectorView<std::complex<float> > b, DiagType dt)
+        const VectorView<std::complex<float> >& b, DiagType dt)
     {
         int n = A.colsize();
         int kd = A.nlo()==0 ? A.nhi() : A.nlo();
@@ -634,7 +644,7 @@ namespace tmv {
     template <> 
     void BlasTriLDivEq(
         const GenBandMatrix<float>& A, 
-        VectorView<std::complex<float> > b, DiagType dt)
+        const VectorView<std::complex<float> >& b, DiagType dt)
     {
         int n = A.colsize();
         int kd = A.nlo()==0 ? A.nhi() : A.nlo();
@@ -661,7 +671,7 @@ namespace tmv {
 
     template <class T, class Ta> 
     void TriLDivEq(
-        const GenBandMatrix<Ta>& A, VectorView<T> b, DiagType dt)
+        const GenBandMatrix<Ta>& A, const VectorView<T>& b, DiagType dt)
     {
 #ifdef XDEBUG
         Vector<T> b0 = b;

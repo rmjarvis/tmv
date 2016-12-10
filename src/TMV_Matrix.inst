@@ -1,100 +1,68 @@
 
 #define CT std::complex<T>
+#define FT Traits<T>::float_type
 
-#define Def1(RT,T,Ref)\
-  template bool GenMatrix<T >::hasSubMatrix( \
-      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const; \
-  template bool GenMatrix<T >::hasSubVector( \
-      ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t s) const; \
-  template bool ConstMatrixView<T,FortranStyle>::hasSubMatrix( \
-      ptrdiff_t i1, ptrdiff_t i2, ptrdiff_t j1, ptrdiff_t j2, ptrdiff_t istep, ptrdiff_t jstep) const; \
-  template bool ConstMatrixView<T,FortranStyle>::hasSubVector( \
-      ptrdiff_t i, ptrdiff_t j, ptrdiff_t istep, ptrdiff_t jstep, ptrdiff_t s) const; \
-  template T GenMatrix<T >::sumElements() const; \
-  template RT GenMatrix<T >::sumAbsElements() const; \
-  template RT GenMatrix<T >::sumAbs2Elements() const; \
-  template RT GenMatrix<T >::normSq(const RT scale) const; \
-  template RT GenMatrix<T >::normF() const; \
-  template RT GenMatrix<T >::norm1() const; \
-  template RT GenMatrix<T >::maxAbsElement() const; \
-  template RT GenMatrix<T >::maxAbs2Element() const; \
-  template RT GenMatrix<T >::doNorm2() const; \
-  template RT GenMatrix<T >::doCondition() const; \
-  template QuotXM<T,T > GenMatrix<T >::QInverse() const; \
-  template void GenMatrix<T >::write(const TMV_Writer& writer) const; \
-  template void MatrixView<T,CStyle>::read(const TMV_Reader& reader); \
-  template T GenMatrix<T >::cref(ptrdiff_t i, ptrdiff_t j) const; \
-  template void Swap(MatrixView<T > m1, MatrixView<T > m2); \
-  template void DoCopySameType(const GenMatrix<T >& m1, MatrixView<T > m2);  \
-  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::clip(RT thresh); \
-  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::setZero(); \
-  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::setAllTo(const T& x); \
-  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::addToAll(const T& x); \
-  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::transposeSelf(); \
-  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::conjugateSelf(); \
-  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::setToIdentity( \
-      const T& x); \
-  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::permuteRows( \
-      const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2); \
-  template MatrixView<T,CStyle>& MatrixView<T,CStyle>::reversePermuteRows( \
-      const ptrdiff_t* p, ptrdiff_t i1, ptrdiff_t i2); \
-  template Ref MatrixView<T,CStyle>::ref(ptrdiff_t i, ptrdiff_t j); \
+#define Def1(RT,T)\
+  template void InstTransposeSelf(MatrixView<T> m); \
+  template void InstPermuteRows(MatrixView<T> m,  \
+      const ptrdiff_t* p, const ptrdiff_t i1, const ptrdiff_t i2); \
+  template void InstReversePermuteRows(MatrixView<T> m,  \
+      const ptrdiff_t* p, const ptrdiff_t i1, const ptrdiff_t i2); \
+  template T InstSumElements(const ConstMatrixView<T>& m); \
+  template RT InstSumAbs2Elements(const ConstMatrixView<T>& m); \
+  template RT InstNormSq(const ConstMatrixView<T>& m);  \
+  template RT InstMaxAbs2Element(const ConstMatrixView<T>& m);  \
+  template void InstRead(const TMV_Reader& reader, MatrixView<T> m1); \
+  template class MatrixDivHelper2<T>; \
 
-Def1(T,T,T&)
-#ifdef INST_COMPLEX
-Def1(T,CT,VarConjRef<CT >)
+Def1(T,T)
+#ifdef TMV_INST_COMPLEX
+Def1(T,CT)
+#endif
+
+#define Def2(RT,T,C) \
+  template void InstCopy( \
+      const ConstMatrixView<T,C>& m1, MatrixView<T> m2); \
+  template void InstAliasCopy( \
+      const ConstMatrixView<T,C>& m1, MatrixView<T> m2); \
+  template void InstSwap(MatrixView<T,C> m1, MatrixView<T> m2); \
+  template void InstAliasSwap(MatrixView<T,C> m1, MatrixView<T> m2); \
+
+Def2(T,T,NonConj)
+#ifdef TMV_INST_COMPLEX
+Def2(T,CT,NonConj)
+Def2(T,CT,Conj)
+#endif
+
+#define Def3(RT,T)\
+  template RT InstSumAbsElements(const ConstMatrixView<T>& m); \
+  template RT InstMaxAbsElement(const ConstMatrixView<T>& m);  \
+  template RT InstNorm1(const ConstMatrixView<T>& m);  \
+  template RT InstNormF(const ConstMatrixView<T>& m);  \
+  template RT InstNormSq(const ConstMatrixView<T>& m, const RT scale);  \
+
+Def3(FT,T)
+#ifdef TMV_INST_COMPLEX
+Def3(FT,CT)
+#endif
+
+#define Def4(RT,T,C) \
+  template void InstWrite(const TMV_Writer& writer, \
+      const ConstMatrixView<T,C>& m1); \
+
+Def4(FT,T,NonConj)
+#ifdef TMV_INST_COMPLEX
+Def4(FT,CT,NonConj)
+Def4(FT,CT,Conj)
+#endif
+
+#ifdef TMV_INST_MIX
+template void InstCopy(const ConstMatrixView<T>& m1, MatrixView<CT> m2); 
+template void InstAliasCopy(const ConstMatrixView<T>& m1, MatrixView<CT> m2); 
 #endif
 
 #undef Def1
-
-#ifndef TISINT
-#define Def1b(RT,T) \
-  template T GenMatrix<T >::det() const; \
-  template RT GenMatrix<T >::logDet(T* sign) const; \
-  template bool GenMatrix<T >::isSingular() const; \
-  template void GenMatrix<T >::setDiv() const; \
-  template bool GenMatrix<T >::divIsLUDiv() const; \
-  template bool GenMatrix<T >::divIsQRDiv() const; \
-  template bool GenMatrix<T >::divIsQRPDiv() const; \
-  template bool GenMatrix<T >::divIsSVDiv() const; \
-
-
-Def1b(T,T)
-#ifdef INST_COMPLEX
-Def1b(T,CT)
-#endif
-
-#undef Def1b
-#endif
-
-#define Def2(T,A) \
-  template void Matrix<T,A>::read(const TMV_Reader& reader); \
-
-Def2(T,RowMajor|CStyle)
-Def2(T,ColMajor|CStyle)
-Def2(T,RowMajor|FortranStyle)
-Def2(T,ColMajor|FortranStyle)
-#ifdef INST_COMPLEX
-Def2(CT,RowMajor|CStyle)
-Def2(CT,ColMajor|CStyle)
-Def2(CT,RowMajor|FortranStyle)
-Def2(CT,ColMajor|FortranStyle)
-#endif
-
 #undef Def2
-
-#define Def3(T1,T2)\
-  template bool operator==(const GenMatrix<T1 >& m1, \
-      const GenMatrix<T2 >& m2); \
-
-Def3(T,T)
-#ifdef INST_COMPLEX
-Def3(T,CT)
-Def3(CT,T)
-Def3(CT,CT)
-#endif
-
 #undef Def3
-
+#undef Def4
 #undef CT
-

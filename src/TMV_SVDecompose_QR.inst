@@ -1,22 +1,17 @@
 
 #define CT std::complex<T>
 
-#define DefSVD(RT,T)\
-template void SV_DecomposeFromBidiagonal_QR(MatrixView<T > U, \
-    VectorView<RT > D, VectorView<RT > E, MatrixView<T > V); \
-template void BidiagonalChopSmallElements( \
-    VectorView<T > D, VectorView<T > E, bool* zd); \
-template void BidiagonalZeroFirstRow( \
-    MatrixView<T > U, VectorView<RT > D,  VectorView<RT > E); \
-template void BidiagonalZeroLastCol( \
-    VectorView<RT > D, VectorView<RT > E, MatrixView<T > V); \
+#define Def1(Tu,RT,Tv)\
+    template void InstSV_DecomposeFromBidiagonal_QR( \
+        MatrixView<Tu> U, VectorView<RT> D, VectorView<RT> E, \
+        MatrixView<Tv> V, bool UisI, bool VisI); \
 
-DefSVD(T,T)
-#ifdef INST_COMPLEX
-DefSVD(T,CT)
+Def1(T,T,T)
+#ifdef TMV_INST_COMPLEX
+Def1(CT,T,T)
+Def1(T,T,CT)
+Def1(CT,T,CT)
 #endif
 
-#undef DefSVD
-
+#undef Def1
 #undef CT
-
