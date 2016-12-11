@@ -744,61 +744,72 @@ This release is mostly just some minor bug fixes and some changes in the
 installation defaults.  Probably the most significant change is that I have
 switched the license from GPL to BSD.  
 
-Here is a list of the changes from version \prevtmvversion\ to \tmvversion.  
-(See \S\ref{History} for changes from previous versions to \prevtmvversion\.)
-%Whenever a change is not backward compatible, meaning that code using the previous version might be broken, I mark the item with a $\times$ bullet rather than the usual $\bullet$ to indicate this.  
-This release is completely backwards compatible as far as the header files and library are 
-concerned.  There are a couple (minor) new features, but the library should be link-compatible
-with previous versions.
-
 \begin{itemize}
 
-\item Changed the license from GPL to BSD.  This seems to be where the open 
-source community is moving, so I think it makes sense for TMV to have a 
-more permissive license going forward.
+\item Changed the license from GPL to BSD.
 
 \item
-Made Scons correctly detect when g++ is really clang++.  Apple has been lying about
-its C++ compiler in recent MacOS systems (10.7-10.9).  They use clang++,
-but they call the program g++.  This used to mess up TMV, since clang++ 
-does not support OpenMP, so it would wrongly try to use OpenMP and end up 
-with linking problems.  TMV now detects when clang++ is masquerading as
-g++ and handles this correctly.
+Made Scons correctly detect when g++ is really clang++.
 
 \item
-Made the code compliant with the latest version of clang++, which suddenly
-got extra picky about how friend functions are declared, giving errors
-for code that doesn't comply with an obscure line in the standard that 
-it used to be able to compile just fine (as does every other compiler as
-well).  (Issue 9)
+Made the code compliant with the latest version of clang++. (\#9)
 
 \item
 Fixed some problems with the \texttt{install\_name} in the shared libraries.  
-(Issues 3 and 7)
-
-\item
-Fixed some warnings emitted by clang++.  These weren't bugs -- just some
-things that clang++ warns about that other compilers hadn't cared about.
+(\#3, \#7)
 
 \item
 Changed the default value of \texttt{INST\_INT} to \texttt{True}, so the \tt{Matrix<int>}
-templates are instantiated now unless you specifically disable them.  Enough people
-had expected them to be there and asked about why they were getting 
-linking errors when they used \tt{Matrix<int>}, so I decided to build them
-by default now.  They don't add much to the library size.
+templates are instantiated now unless you specifically disable them.
 
 \item
-Added a default conversion from \tt{VarConjIter} to \tt{VIt}.  It was an oversight
-that this wasn't possible before.  (Issue 5)
+Added a default conversion from \tt{VarConjIter} to \tt{VIt}. (\#5)
 
 \item 
-Fixed a bug in the test suite about \tt{long double} I/O.  The standard library does
-not read in \tt{long double} variables at full precision.  They are only accurate to
-double precision.  So I changed the I/O tests to only test \tt{long double} I/O
-to double precision.  (Issue 8)
+Fixed a bug in the test suite about \tt{long double} I/O. (\#8)
 
 \item
 Updated the linking checks for MKL to work with the latest version (11.1).
+
+\end{itemize}
+
+\item[Version 0.73]
+
+In addition to the below changes, the code is now hosted on GitHub at
+\url{https://github.com/rmjarvis/tmv}.
+
+\begin{itemize}
+
+\item
+Removed an extraneous 16 bytes of memory usage from SmallVector. (\#12)
+
+\item
+Gives an error if PREFIX is the source directory. (\#13)
+
+\item
+Fixed compiler warnings from newer versions of clang++.
+
+\item
+Fixed tmv-version to work properly with git. (\#20)
+
+\item
+Added support for OpenMP for clang v3.7+.
+
+\item
+Improved automatic library selection for MKL. (\#15)
+
+\item
+Fixed broken \texttt{USE\_UNKNOWN\_VARS} feature. (\#16)
+
+\item
+No longer includes \texttt{\$PREFIX/include} in the include path by default.
+Use scons \texttt{IMPORT\_PREFIX=true} if you want to include it. (\#17)
+
+\item
+Added \texttt{LINKFLAGS} as an explicit option. (\#21)
+
+\item Documented the sort order for eigenvectors returned by \texttt{Eigen}
+and singular values returned \text{{SV\_Decompose}. (\#14)
 
 \end{itemize}
 
