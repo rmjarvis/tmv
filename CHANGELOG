@@ -1,37 +1,12 @@
-Changes from version 0.72 to 0.73:  
+Changes from version 0.73 to 0.74:
 (See the History section in the full documentation for changes from previous
-versions to 0.72.)
+versions to 0.73.)
 
-This release is mostly just some minor bug fixes.  Also, since Google Code went
-under, TMV is now hosted on GitHub at https://github.com/rmjarvis/tmv.
+This release just updates the code to be compatible with the new updates to
+the C++ standard, known as c++11, c++14, and the upcoming c++17 (technically
+maybe still c++1z, but gcc already calls it c++17).  The code is now tested
+to compile and run properly using any of these standards as well as c++03
+and c++98 using g++ 6.2.0.
 
-The numbers at the ends of some items below indicate which issue is connected
-with the change:
-
-https://github.com/rmjarvis/tmv/issues?q=is%3Aissue+is%3Aclosed
-
-Bug Fixes:
-
-- Removed an extraneous 16 bytes of memory usage from SmallVector. (#12)
-- Gives an error if PREFIX is the source directory (rather than just 
-  failing to work properly). (#13)
-- Fixed compiler warnings from newer versions of clang++.
-- Changed tmv-version to a simple echo line rather than the complicated
-  thing we used to have that stopped working when we switched from svn
-  to git. (#20)
-
-Build updates:
-
-- Added support for OpenMP for clang v3.7+.
-- Improved automatic library selection for MKL. (#15)
-- Fixed broken USE_UNKNOWN_VARS feature. (#16)
-- No longer includes $PREFIX/include in the include path by default.
-  Use scons IMPORT_PREFIX=true if you want to include it. (#17)
-- Added LINKFLAGS as an explicit option. (#21)
-- No longer officially support Visual C++ installation.  I suspect it still
-  works, but I no longer include it in my list of tested systems.
-
-Documatation updates:
-
-- Documented the sort order for eigenvectors returned by Eigen and singular
-  values returned SV_Decompose. (#14)
+Thanks to Dominique Orban (@dpo) for posting Issue #22 alerting me to the
+compilation errors using g++-6 prompting this update.
