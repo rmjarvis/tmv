@@ -29,7 +29,7 @@
 namespace tmv {
 
     template <class T>
-    DivHelper<T>::DivHelper() : divider(0), divtype(tmv::XX) {}
+    DivHelper<T>::DivHelper() : divider(), divtype(tmv::XX) {}
 
     template <class T>
     DivHelper<T>::~DivHelper() {}

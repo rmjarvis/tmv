@@ -128,7 +128,7 @@ namespace tmv {
     private :
 
         struct BandQRDiv_Impl;
-        std::auto_ptr<BandQRDiv_Impl> pimpl;
+        auto_ptr<BandQRDiv_Impl> pimpl;
 
         ptrdiff_t colsize() const;
         ptrdiff_t rowsize() const;

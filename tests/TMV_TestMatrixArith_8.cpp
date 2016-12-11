@@ -21,10 +21,9 @@ template <class T> void TestMatrixArith_8()
     for(int m1=0;m1<NSIZE;m1++) for(int n1=0;n1<NSIZE;n1++) {
         int m = sizear[m1];
         int n = sizear[n1];
-        if (showstartdone)
-            std::cout<<"m,n = "<<m<<','<<n<<std::endl;
-        else 
-            std::cout<<"."; std::cout.flush();
+        if (showstartdone) std::cout<<"m,n = "<<m<<','<<n<<std::endl;
+        else std::cout<<".";
+        std::cout.flush();
 
 #if 1
         // Test various adds:

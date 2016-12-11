@@ -736,7 +736,7 @@ static void TestVectorIO()
 
     // Write vectors with 4 different styles
     std::ofstream fout("tmvtest_vector_io.dat");
-    Assert(fout,"Couldn't open tmvtest_vector_io.dat for output");
+    Assert(bool(fout),"Couldn't open tmvtest_vector_io.dat for output");
     fout << v << std::endl;
     fout << cv << std::endl;
     fout << tmv::CompactIO() << v << std::endl;
@@ -768,7 +768,7 @@ static void TestVectorIO()
     tmv::Vector<T> xv(N);
     tmv::Vector<CT > xcv(N);
     std::ifstream fin("tmvtest_vector_io.dat");
-    Assert(fin,"Couldn't open tmvtest_vector_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_vector_io.dat for input");
     fin >> xv >> xcv;
     if (showacc) {
         std::cout<<"v = "<<v<<std::endl;
@@ -796,7 +796,7 @@ static void TestVectorIO()
     tmv::Vector<T> zv1, zv2, zv3, zv4;
     tmv::Vector<CT > zcv1, zcv2, zcv3, zcv4;
     fin.open("tmvtest_vector_io.dat");
-    Assert(fin,"Couldn't open tmvtest_vector_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_vector_io.dat for input");
     fin >> tmv::NormalIO() >> zv1 >> tmv::NormalIO() >> zcv1;
     Assert(EqualIO(v,zv1,EPS),"Vector I/O check normal with resize");
     Assert(EqualIO(cv,zcv1,EPS),"CVector I/O check normal with resize");

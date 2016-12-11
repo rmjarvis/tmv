@@ -223,9 +223,12 @@ namespace tmv {
                         normsqz/rho<<endl;
                     lowerbound = tau;
                     upperbound = normsqz/rho;
-                    if (c <= T(0)) tau = upperbound; break;
-                    // In this case there is no positive solution.
-                    // Best guess is just to start at upper bound.
+                    if (c <= T(0)) {
+                        // In this case there is no positive solution.
+                        // Best guess is just to start at upper bound.
+                        tau = upperbound;
+                        break;
+                    }
                 }
                 T a = -c + zsq[k-1]/delta + zsq[k]/delta;
                 T b = -zsq[k]/delta;

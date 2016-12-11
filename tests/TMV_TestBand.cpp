@@ -474,7 +474,7 @@ static void TestBasicBandMatrix_IO()
 
     // Write matrices with 4 different styles
     std::ofstream fout("tmvtest_bandmatrix_io.dat");
-    Assert(fout,"Couldn't open tmvtest_bandmatrix_io.dat for output");
+    Assert(bool(fout),"Couldn't open tmvtest_bandmatrix_io.dat for output");
     fout << m << std::endl;
     fout << cm << std::endl;
     fout << tmv::CompactIO() << m << std::endl;
@@ -503,7 +503,7 @@ static void TestBasicBandMatrix_IO()
     tmv::BandMatrix<T,tmv::RowMajor> xm1(M,N,nlo,nhi);
     tmv::BandMatrix<CT,tmv::RowMajor> xcm1(M,N,nlo,nhi);
     std::ifstream fin("tmvtest_bandmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_bandmatrix_io.dat for input");
     fin >> xm1 >> xcm1;
     Assert(EqualIO(m,xm1,EPS),"BandMatrix I/O check normal");
     Assert(EqualIO(cm,xcm1,EPS),"CBandMatrix I/O check normal");
@@ -522,7 +522,7 @@ static void TestBasicBandMatrix_IO()
     tmv::BandMatrix<T,tmv::ColMajor> xm2(M,N,nlo,nhi);
     tmv::BandMatrix<CT,tmv::ColMajor> xcm2(M,N,nlo,nhi);
     fin.open("tmvtest_bandmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_bandmatrix_io.dat for input");
     fin >> xm2.view() >> xcm2.view();
     Assert(EqualIO(m,xm2,EPS),"BandMatrix I/O check normal");
     Assert(EqualIO(cm,xcm2,EPS),"CBandMatrix I/O check normal");
@@ -541,7 +541,7 @@ static void TestBasicBandMatrix_IO()
     tmv::BandMatrix<T,tmv::DiagMajor> xm3(M,N,nlo,nhi);
     tmv::BandMatrix<CT,tmv::DiagMajor> xcm3(M,N,nlo,nhi);
     fin.open("tmvtest_bandmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_bandmatrix_io.dat for input");
     fin >> xm3.view() >> xcm3.view();
     Assert(EqualIO(m,xm3,EPS),"BandMatrix I/O check normal");
     Assert(EqualIO(cm,xcm3,EPS),"CBandMatrix I/O check normal");
@@ -566,7 +566,7 @@ static void TestBasicBandMatrix_IO()
     tmv::BandMatrix<T> zm1(5,5,nlo,nhi),zm2,zm3(4,2,nlo,nhi),zm4(M,N,0,0);
     tmv::BandMatrix<CT> zcm1(5,5,nlo,nhi),zcm2,zcm3(4,2,nlo,nhi),zcm4(M,N,0,0);
     fin.open("tmvtest_bandmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_bandmatrix_io.dat for input");
     fin >> tmv::NormalIO() >> zm1 >> tmv::NormalIO() >> zcm1;
     Assert(EqualIO(m,zm1,EPS),"BandMatrix I/O check normal with resize");
     Assert(EqualIO(cm,zcm1,EPS),"CBandMatrix I/O check normal with resize");
@@ -587,7 +587,7 @@ static void TestBasicBandMatrix_IO()
     tmv::Matrix<T> zm5;
     tmv::Matrix<CT> zcm5;
     fin.open("tmvtest_bandmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_bandmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_bandmatrix_io.dat for input");
     fin >> zm5 >> zcm5;
     Assert(EqualIO(m,zm5,EPS),"BandMatrix -> Matrix I/O check");
     Assert(EqualIO(cm,zcm5,EPS),"CBandMatrix -> CMatrix I/O check");

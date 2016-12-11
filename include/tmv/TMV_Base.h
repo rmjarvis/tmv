@@ -889,6 +889,17 @@ namespace tmv {
 #define TMV_DEBUGPARAM(x)
 #endif
 
+// Workaround for migration from auto_ptr -> unique_ptr.  Use auto_ptr name, but all the
+// functionality should work with either class.
+#if __cplusplus >= 201103L
+    template <typename T>
+    using auto_ptr = std::unique_ptr<T>;
+    using std::move;
+#else
+    using std::auto_ptr;
+#define move(x) x
+#endif
+
 } // namespace tmv
 
 #endif

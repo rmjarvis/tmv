@@ -383,7 +383,7 @@ void TestPermutation()
     //
 
     std::ofstream fout("tmvtest_permutation_io.dat");
-    Assert(fout,"Couldn't open tmvtest_permutation_io.dat for output");
+    Assert(bool(fout),"Couldn't open tmvtest_permutation_io.dat for output");
     fout << p3 << std::endl;
     fout << tmv::CompactIO() << p3 << std::endl;
     fout.close();
@@ -391,7 +391,7 @@ void TestPermutation()
     tmv::Matrix<T> xm1(10,10);
     tmv::Permutation xp1(10);
     std::ifstream fin("tmvtest_permutation_io.dat");
-    Assert(fin,"Couldn't open tmvtest_permutation_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_permutation_io.dat for input");
     fin >> xm1 >> tmv::CompactIO() >> xp1;
     fin.close();
     Assert(m3 == xm1,"Permutation I/O check #1");

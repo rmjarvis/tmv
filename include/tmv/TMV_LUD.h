@@ -148,7 +148,7 @@ namespace tmv {
     private :
 
         struct LUDiv_Impl;
-        std::auto_ptr<LUDiv_Impl> pimpl;
+        auto_ptr<LUDiv_Impl> pimpl;
 
         ptrdiff_t colsize() const;
         ptrdiff_t rowsize() const;

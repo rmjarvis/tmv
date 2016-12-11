@@ -198,7 +198,7 @@ namespace tmv {
     protected:
 
         struct BandSVDiv_Impl;
-        std::auto_ptr<BandSVDiv_Impl> pimpl;
+        auto_ptr<BandSVDiv_Impl> pimpl;
 
         ptrdiff_t colsize() const;
         ptrdiff_t rowsize() const;

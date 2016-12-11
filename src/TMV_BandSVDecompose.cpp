@@ -187,8 +187,8 @@ namespace tmv {
                 Vt.subVector(0,N-1,1,-1,N) = Vtd;
             }
         } else {
-            std::auto_ptr<Matrix<T,ColMajor> > UU(0);
-            std::auto_ptr<MatrixView<T> > U1(0);
+            auto_ptr<Matrix<T,ColMajor> > UU;
+            auto_ptr<MatrixView<T> > U1;
             if (U.cptr()) {
                 U = A;
                 U1.reset(new MatrixView<T>(U.view()));

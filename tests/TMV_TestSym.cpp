@@ -1201,7 +1201,7 @@ static void TestBasicSymMatrix_IO()
 
     // Write matrices with 4 different style
     std::ofstream fout("tmvtest_symmatrix_io.dat");
-    Assert(fout,"Couldn't open tmvtest_symmatrix_io.dat for output");
+    Assert(bool(fout),"Couldn't open tmvtest_symmatrix_io.dat for output");
     fout << s << std::endl;
     fout << h << std::endl;
     fout << cs << std::endl;
@@ -1240,7 +1240,7 @@ static void TestBasicSymMatrix_IO()
     tmv::SymMatrix<CT,tmv::Upper|tmv::RowMajor> xcs1(N);
     tmv::HermMatrix<CT,tmv::Upper|tmv::RowMajor> xch1(N);
     std::ifstream fin("tmvtest_symmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_symmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_symmatrix_io.dat for input");
     fin >> xs1 >> xh1 >> xcs1 >> xch1;
     Assert(EqualIO(s,xs1,EPS),"SymMatrix I/O check normal");
     Assert(EqualIO(h,xh1,EPS),"HermMatrix I/O check normal");
@@ -1271,7 +1271,7 @@ static void TestBasicSymMatrix_IO()
     tmv::SymMatrix<CT,tmv::Upper|tmv::ColMajor> xcs2(N);
     tmv::HermMatrix<CT,tmv::Upper|tmv::ColMajor> xch2(N);
     fin.open("tmvtest_symmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_symmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_symmatrix_io.dat for input");
     fin >> xs2.view() >> xh2.view() >> xcs2.view() >> xch2.view();
     Assert(EqualIO(s,xs2,EPS),"SymMatrix I/O check normal");
     Assert(EqualIO(h,xh2,EPS),"HermMatrix I/O check normal");
@@ -1304,7 +1304,7 @@ static void TestBasicSymMatrix_IO()
     tmv::SymMatrix<CT,tmv::Lower|tmv::RowMajor> xcs3(N);
     tmv::HermMatrix<CT,tmv::Lower|tmv::RowMajor> xch3(N);
     fin.open("tmvtest_symmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_symmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_symmatrix_io.dat for input");
     fin >> xh3.view() >> xs3.view() >> xcs3.view() >> xch3.view();
     Assert(EqualIO(s,xh3,EPS),"SymMatrix I/O check normal");
     Assert(EqualIO(h,xs3,EPS),"HermMatrix I/O check normal");
@@ -1334,7 +1334,7 @@ static void TestBasicSymMatrix_IO()
     tmv::SymMatrix<CT,tmv::Lower|tmv::ColMajor> xcs4(N);
     tmv::HermMatrix<CT,tmv::Lower|tmv::ColMajor> xch4(N);
     fin.open("tmvtest_symmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_symmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_symmatrix_io.dat for input");
     fin >> xh4.view() >> xs4.view() >> xcs4.view() >> xch4.view();
     Assert(EqualIO(s,xh4,EPS),"SymMatrix I/O check normal");
     Assert(EqualIO(h,xs4,EPS),"HermMatrix I/O check normal");
@@ -1367,7 +1367,7 @@ static void TestBasicSymMatrix_IO()
     tmv::SymMatrix<CT> zcs1,zcs2,zcs3,zcs4;
     tmv::HermMatrix<CT> zch1,zch2,zch3,zch4;
     fin.open("tmvtest_symmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_symmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_symmatrix_io.dat for input");
     fin >> tmv::NormalIO() >> zs1 >> tmv::NormalIO() >> zh1;
     fin >> tmv::NormalIO() >> zcs1 >> tmv::NormalIO() >> zch1;
     Assert(EqualIO(s,zs1,EPS),"SymMatrix I/O check normal");
@@ -1398,7 +1398,7 @@ static void TestBasicSymMatrix_IO()
     tmv::Matrix<T> zm1,zm2;
     tmv::Matrix<CT> zcm1,zcm2;
     fin.open("tmvtest_symmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_symmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_symmatrix_io.dat for input");
     fin >> zm1 >> zm2 >> zcm1 >> zcm2;
     Assert(EqualIO(s,zm1,EPS),"SymMatrix -> Matrix I/O check");
     Assert(EqualIO(h,zm2,EPS),"HermMatrix -> Matrix I/O check");

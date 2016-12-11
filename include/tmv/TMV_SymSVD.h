@@ -275,7 +275,7 @@ namespace tmv {
     protected:
 
         struct HermSVDiv_Impl;
-        std::auto_ptr<HermSVDiv_Impl> pimpl;
+        auto_ptr<HermSVDiv_Impl> pimpl;
 
         ptrdiff_t colsize() const;
         ptrdiff_t rowsize() const;
@@ -371,7 +371,7 @@ namespace tmv {
     protected:
 
         struct SymSVDiv_Impl;
-        std::auto_ptr<SymSVDiv_Impl> pimpl;
+        auto_ptr<SymSVDiv_Impl> pimpl;
 
         ptrdiff_t colsize() const;
         ptrdiff_t rowsize() const;

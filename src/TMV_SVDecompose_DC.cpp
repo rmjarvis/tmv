@@ -241,11 +241,13 @@ namespace tmv {
                     dbgcout<<"f < 0\n";
                     lowerbound = tau;
                     upperbound = normsqz/rho;
-                    dbgcout<<"bounds = tau,2tau = "<<tau<<"  "<<
-                        normsqz/rho<<endl;
-                    if (c <= T(0)) tau = upperbound; break;
-                    // In this case there is no positive solution.  Best guess
-                    // is just to start at upper bound.
+                    dbgcout<<"bounds = tau,2tau = "<<tau<<"  "<< normsqz/rho<<endl;
+                    if (c <= T(0)) {
+                        // In this case there is no positive solution.  Best guess
+                        // is just to start at upper bound.
+                        tau = upperbound;
+                        break;
+                    }
                 }
                 T a = -c + zsq[k-1]/delta + zsq[k]/delta;
                 T b = -zsq[k]/delta;

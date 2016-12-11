@@ -179,7 +179,7 @@ namespace tmv {
 
     private :
         struct SymLDLDiv_Impl;
-        std::auto_ptr<SymLDLDiv_Impl> pimpl;
+        auto_ptr<SymLDLDiv_Impl> pimpl;
 
         ptrdiff_t colsize() const;
         ptrdiff_t rowsize() const;

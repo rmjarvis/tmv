@@ -1636,7 +1636,7 @@ static void TestBasicSymBandMatrix_IO()
 
     // Write matrices with 4 different style
     std::ofstream fout("tmvtest_symbandmatrix_io.dat");
-    Assert(fout,"Couldn't open tmvtest_symbandmatrix_io.dat for output");
+    Assert(bool(fout),"Couldn't open tmvtest_symbandmatrix_io.dat for output");
     fout << s << std::endl;
     fout << h << std::endl;
     fout << cs << std::endl;
@@ -1676,7 +1676,7 @@ static void TestBasicSymBandMatrix_IO()
     tmv::SymBandMatrix<CT,tmv::Upper|tmv::RowMajor> xcs1(N,noff);
     tmv::HermBandMatrix<CT,tmv::Upper|tmv::RowMajor> xch1(N,noff);
     std::ifstream fin("tmvtest_symbandmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_symbandmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_symbandmatrix_io.dat for input");
     fin >> xs1 >> xh1 >> xcs1 >> xch1;
     Assert(EqualIO(s,xs1,EPS),"SymBandMatrix I/O check normal");
     Assert(EqualIO(h,xh1,EPS),"HermBandMatrix I/O check normal");
@@ -1707,7 +1707,7 @@ static void TestBasicSymBandMatrix_IO()
     tmv::SymBandMatrix<CT,tmv::Upper|tmv::ColMajor> xcs2(N,noff);
     tmv::HermBandMatrix<CT,tmv::Upper|tmv::ColMajor> xch2(N,noff);
     fin.open("tmvtest_symbandmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_symbandmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_symbandmatrix_io.dat for input");
     fin >> xs2.view() >> xh2.view() >> xcs2.view() >> xch2.view();
     Assert(EqualIO(s,xs2,EPS),"SymBandMatrix I/O check normal");
     Assert(EqualIO(h,xh2,EPS),"HermBandMatrix I/O check normal");
@@ -1738,7 +1738,7 @@ static void TestBasicSymBandMatrix_IO()
     tmv::SymBandMatrix<CT,tmv::Upper|tmv::DiagMajor> xcs3(N,noff);
     tmv::HermBandMatrix<CT,tmv::Upper|tmv::DiagMajor> xch3(N,noff);
     fin.open("tmvtest_symbandmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_symbandmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_symbandmatrix_io.dat for input");
     fin >> xs3.view() >> xh3.view() >> xcs3.view() >> xch3.view();
     Assert(EqualIO(s,xs3,EPS),"SymBandMatrix I/O check normal");
     Assert(EqualIO(h,xh3,EPS),"HermBandMatrix I/O check normal");
@@ -1771,7 +1771,7 @@ static void TestBasicSymBandMatrix_IO()
     tmv::SymBandMatrix<CT,tmv::Lower|tmv::RowMajor> xcs4(N,noff);
     tmv::HermBandMatrix<CT,tmv::Lower|tmv::RowMajor> xch4(N,noff);
     fin.open("tmvtest_symbandmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_symbandmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_symbandmatrix_io.dat for input");
     fin >> xh4.view() >> xs4.view() >> xcs4.view() >> xch4.view();
     Assert(EqualIO(s,xh4,EPS),"SymBandMatrix I/O check normal");
     Assert(EqualIO(h,xs4,EPS),"HermBandMatrix I/O check normal");
@@ -1801,7 +1801,7 @@ static void TestBasicSymBandMatrix_IO()
     tmv::SymBandMatrix<CT,tmv::Lower|tmv::ColMajor> xcs5(N,noff);
     tmv::HermBandMatrix<CT,tmv::Lower|tmv::ColMajor> xch5(N,noff);
     fin.open("tmvtest_symbandmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_symbandmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_symbandmatrix_io.dat for input");
     fin >> xh5.view() >> xs5.view() >> xcs5.view() >> xch5.view();
     Assert(EqualIO(s,xh5,EPS),"SymBandMatrix I/O check normal");
     Assert(EqualIO(h,xs5,EPS),"HermBandMatrix I/O check normal");
@@ -1831,7 +1831,7 @@ static void TestBasicSymBandMatrix_IO()
     tmv::SymBandMatrix<CT,tmv::Lower|tmv::DiagMajor> xcs6(N,noff);
     tmv::HermBandMatrix<CT,tmv::Lower|tmv::DiagMajor> xch6(N,noff);
     fin.open("tmvtest_symbandmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_symbandmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_symbandmatrix_io.dat for input");
     fin >> xh6.view() >> xs6.view() >> xcs6.view() >> xch6.view();
     Assert(EqualIO(s,xh6,EPS),"SymBandMatrix I/O check normal");
     Assert(EqualIO(h,xs6,EPS),"HermBandMatrix I/O check normal");
@@ -1868,7 +1868,7 @@ static void TestBasicSymBandMatrix_IO()
     tmv::SymBandMatrix<CT> zcs1(5,noff),zcs2,zcs3(4,noff),zcs4(N,0);
     tmv::HermBandMatrix<CT> zch1(5,noff),zch2,zch3(4,noff),zch4(N,0);
     fin.open("tmvtest_symbandmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_symbandmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_symbandmatrix_io.dat for input");
     fin >> tmv::NormalIO() >> zs1 >> tmv::NormalIO() >> zh1;
     fin >> tmv::NormalIO() >> zcs1 >> tmv::NormalIO() >> zch1;
     Assert(EqualIO(s,zs1,EPS),"SymBandMatrix I/O check normal");
@@ -1899,7 +1899,7 @@ static void TestBasicSymBandMatrix_IO()
     tmv::Matrix<T> zm1,zm2;
     tmv::Matrix<CT> zcm1,zcm2;
     fin.open("tmvtest_symbandmatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_symbandmatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_symbandmatrix_io.dat for input");
     fin >> zm1 >> zm2 >> zcm1 >> zcm2;
     Assert(EqualIO(s,zm1,EPS),"SymBandMatrix -> Matrix I/O check");
     Assert(EqualIO(h,zm2,EPS),"HermBandMatrix -> Matrix I/O check");

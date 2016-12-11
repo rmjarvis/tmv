@@ -131,7 +131,7 @@ namespace tmv {
 
     private :
         struct HermBandCHDiv_Impl;
-        std::auto_ptr<HermBandCHDiv_Impl> pimpl;
+        auto_ptr<HermBandCHDiv_Impl> pimpl;
 
         ptrdiff_t colsize() const;
         ptrdiff_t rowsize() const;

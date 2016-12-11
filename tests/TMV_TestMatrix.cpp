@@ -518,7 +518,7 @@ static void TestBasicMatrix_IO()
 
     // Write matrices with 4 different styles
     std::ofstream fout("tmvtest_matrix_io.dat");
-    Assert(fout,"Couldn't open tmvtest_matrix_io.dat for output");
+    Assert(bool(fout),"Couldn't open tmvtest_matrix_io.dat for output");
     fout << m << std::endl;
     fout << cm << std::endl;
     fout << tmv::CompactIO() << m << std::endl;
@@ -550,7 +550,7 @@ static void TestBasicMatrix_IO()
     tmv::Matrix<T,tmv::RowMajor> xm1(M,N);
     tmv::Matrix<CT,tmv::RowMajor> xcm1(M,N);
     std::ifstream fin("tmvtest_matrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_matrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_matrix_io.dat for input");
     fin >> xm1 >> xcm1;
     Assert(EqualIO(m,xm1,EPS),"Matrix I/O check normal");
     Assert(EqualIO(cm,xcm1,EPS),"CMatrix I/O check normal");
@@ -569,7 +569,7 @@ static void TestBasicMatrix_IO()
     tmv::Matrix<T,tmv::ColMajor> xm2(M,N);
     tmv::Matrix<CT,tmv::ColMajor> xcm2(M,N);
     fin.open("tmvtest_matrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_matrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_matrix_io.dat for input");
     fin >> xm2.view() >> xcm2.view();
     Assert(EqualIO(m,xm2,EPS),"Matrix I/O check normal");
     Assert(EqualIO(cm,xcm2,EPS),"CMatrix I/O check normal");
@@ -590,7 +590,7 @@ static void TestBasicMatrix_IO()
     tmv::Matrix<T> zm1,zm2,zm3,zm4;
     tmv::Matrix<CT> zcm1,zcm2,zcm3,zcm4;
     fin.open("tmvtest_matrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_matrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_matrix_io.dat for input");
     fin >> tmv::NormalIO() >> zm1 >> tmv::NormalIO() >> zcm1;
     Assert(EqualIO(m,zm1,EPS),"Matrix I/O check normal with resize");
     Assert(EqualIO(cm,zcm1,EPS),"CMatrix I/O check normal with resize");

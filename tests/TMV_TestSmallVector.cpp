@@ -465,7 +465,7 @@ static void TestSmallVectorIO()
      
     // Write vectors with 4 different styles
     std::ofstream fout("tmvtest_smallvector_io.dat");
-    Assert(fout,"Couldn't open tmvtest_smallvector_io.dat for output");
+    Assert(bool(fout),"Couldn't open tmvtest_smallvector_io.dat for output");
     fout << v << std::endl;
     fout << cv << std::endl;
     fout << tmv::CompactIO() << v << std::endl;
@@ -497,7 +497,7 @@ static void TestSmallVectorIO()
     tmv::SmallVector<T,NN> xv;
     tmv::SmallVector<CT,NN> xcv;
     std::ifstream fin("tmvtest_smallvector_io.dat");
-    Assert(fin,"Couldn't open tmvtest_smallvector_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_smallvector_io.dat for input");
     fin >> xv >> xcv;
     Assert(EqualIO(v,xv,EPS),"SmallVector I/O check normal");
     Assert(EqualIO(cv,xcv,EPS),"CSmallVector I/O check normal");
@@ -518,7 +518,7 @@ static void TestSmallVectorIO()
     tmv::Vector<T> zv1, zv2, zv3, zv4;
     tmv::Vector<CT > zcv1, zcv2, zcv3, zcv4;
     fin.open("tmvtest_smallvector_io.dat");
-    Assert(fin,"Couldn't open tmvtest_smallvector_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_smallvector_io.dat for input");
     fin >> tmv::NormalIO() >> zv1 >> tmv::NormalIO() >> zcv1;
     Assert(EqualIO(v,zv1,EPS),"SmallVector I/O check normal -> Vector");
     Assert(EqualIO(cv,zcv1,EPS),"CSmallVector I/O check normal -> Vector");

@@ -327,15 +327,15 @@ class TQUOTMM : public QUOTMM<T,T1,T2>
 {
 public :
     inline TQUOTMM(
-        const T x, std::auto_ptr<Matrix<T1,ColMajor> > m1,
-        const GENMATRIX2<T2>& m2) : QUOTMM<T,T1,T2>(x,*m1,m2), m1p(m1) {}
+        const T x, auto_ptr<Matrix<T1,ColMajor> > m1,
+        const GENMATRIX2<T2>& m2) : QUOTMM<T,T1,T2>(x,*m1,m2), m1p(move(m1)) {}
     inline TQUOTMM(const TQUOTMM<T,T1,T2>& rhs) :
-        QUOTMM<T,T1,T2>(rhs), m1p(rhs.m1p) {}
+        QUOTMM<T,T1,T2>(rhs), m1p(move(rhs.m1p)) {}
     inline ~TQUOTMM() {}
-    inline std::auto_ptr<Matrix<T1,ColMajor> > getP() const { return m1p; }
+    inline auto_ptr<Matrix<T1,ColMajor> > getP() const { return m1p; }
 
 private :
-    mutable std::auto_ptr<Matrix<T1,ColMajor> > m1p;
+    mutable auto_ptr<Matrix<T1,ColMajor> > m1p;
 };
 
 template <class T, class T1, class T2> 
@@ -376,15 +376,15 @@ class TRQUOTMM : public RQUOTMM<T,T1,T2>
 {
 public :
     inline TRQUOTMM(
-        const T x, std::auto_ptr<Matrix<T1,RowMajor> > m1,
-        const GENMATRIX2<T2>& m2) : RQUOTMM<T,T1,T2>(x,*m1,m2), m1p(m1) {}
+        const T x, auto_ptr<Matrix<T1,RowMajor> > m1,
+        const GENMATRIX2<T2>& m2) : RQUOTMM<T,T1,T2>(x,*m1,m2), m1p(move(m1)) {}
     inline TRQUOTMM(const TRQUOTMM<T,T1,T2>& rhs) :
-        RQUOTMM<T,T1,T2>(rhs), m1p(rhs.m1p) {}
+        RQUOTMM<T,T1,T2>(rhs), m1p(move(rhs.m1p)) {}
     inline ~TRQUOTMM() {}
-    inline std::auto_ptr<Matrix<T1,RowMajor> > getP() const { return m1p; }
+    inline auto_ptr<Matrix<T1,RowMajor> > getP() const { return m1p; }
 
 private :
-    mutable std::auto_ptr<Matrix<T1,RowMajor> > m1p;
+    mutable auto_ptr<Matrix<T1,RowMajor> > m1p;
 };
 
 template <class T> 

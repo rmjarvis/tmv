@@ -984,7 +984,7 @@ static void TestBasicTriMatrix_IO()
 
     // Write matrices with 4 different styles
     std::ofstream fout("tmvtest_trimatrix_io.dat");
-    Assert(fout,"Couldn't open tmvtest_trimatrix_io.dat for output");
+    Assert(bool(fout),"Couldn't open tmvtest_trimatrix_io.dat for output");
     fout << u << std::endl;
     fout << l << std::endl;
     fout << cu << std::endl;
@@ -1023,7 +1023,7 @@ static void TestBasicTriMatrix_IO()
     tmv::UpperTriMatrix<CT,D|tmv::RowMajor> xcu1(N);
     tmv::LowerTriMatrix<CT,D|tmv::RowMajor> xcl1(N);
     std::ifstream fin("tmvtest_trimatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_trimatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_trimatrix_io.dat for input");
     fin >> xu1 >> xl1 >> xcu1 >> xcl1;
     Assert(EqualIO(u,xu1,EPS),"UpperTriMatrix I/O check normal");
     Assert(EqualIO(l,xl1,EPS),"LowerTriMatrix I/O check normal");
@@ -1054,7 +1054,7 @@ static void TestBasicTriMatrix_IO()
     tmv::UpperTriMatrix<CT,D|tmv::ColMajor> xcu2(N);
     tmv::LowerTriMatrix<CT,D|tmv::ColMajor> xcl2(N);
     fin.open("tmvtest_trimatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_trimatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_trimatrix_io.dat for input");
     fin >> xu2.view() >> xl2.view() >> xcu2.view() >> xcl2.view();
     Assert(EqualIO(u,xu2,EPS),"UpperTriMatrix I/O check normal");
     Assert(EqualIO(l,xl2,EPS),"LowerTriMatrix I/O check normal");
@@ -1087,7 +1087,7 @@ static void TestBasicTriMatrix_IO()
     tmv::UpperTriMatrix<CT,D> zcu1,zcu2,zcu3,zcu4;
     tmv::LowerTriMatrix<CT,D> zcl1,zcl2,zcl3,zcl4;
     fin.open("tmvtest_trimatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_trimatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_trimatrix_io.dat for input");
     fin >> tmv::NormalIO() >> zu1 >> tmv::NormalIO() >> zl1;
     fin >> tmv::NormalIO() >> zcu1 >> tmv::NormalIO() >> zcl1;
     Assert(EqualIO(u,zu1,EPS),"UpperTriMatrix I/O check normal");
@@ -1117,7 +1117,7 @@ static void TestBasicTriMatrix_IO()
     // This will succeed if doing Unit -> NonUnit,
     // but it will throw an exception if doing NonUnit -> Unit.
     fin.open("tmvtest_trimatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_trimatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_trimatrix_io.dat for input");
     if (D==tmv::UnitDiag) {
         tmv::UpperTriMatrix<T,tmv::NonUnitDiag> zu5,zu6,zu7,zu8;
         tmv::LowerTriMatrix<T,tmv::NonUnitDiag> zl5,zl6,zl7,zl8;
@@ -1166,7 +1166,7 @@ static void TestBasicTriMatrix_IO()
     tmv::Matrix<T> zm1,zm2;
     tmv::Matrix<CT> zcm1,zcm2;
     fin.open("tmvtest_trimatrix_io.dat");
-    Assert(fin,"Couldn't open tmvtest_trimatrix_io.dat for input");
+    Assert(bool(fin),"Couldn't open tmvtest_trimatrix_io.dat for input");
     fin >> zm1 >> zm2 >> zcm1 >> zcm2;
     Assert(EqualIO(u,zm1,EPS),"UpperTriMatrix -> Matrix I/O check");
     Assert(EqualIO(l,zm2,EPS),"LowerTriMatrix -> Matrix I/O check");

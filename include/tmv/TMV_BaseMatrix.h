@@ -326,7 +326,7 @@ namespace tmv {
         // Two more that need to be defined in the derived class:
         virtual const BaseMatrix<T>& getMatrix() const = 0;
 
-        mutable std::auto_ptr<Divider<T> > divider;
+        mutable auto_ptr<Divider<T> > divider;
         mutable DivType divtype;
 
     private :

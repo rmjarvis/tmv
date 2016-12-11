@@ -229,7 +229,7 @@ namespace tmv {
     protected :
 
         struct QRDiv_Impl;
-        std::auto_ptr<QRDiv_Impl> pimpl;
+        auto_ptr<QRDiv_Impl> pimpl;
 
         ptrdiff_t colsize() const;
         ptrdiff_t rowsize() const;

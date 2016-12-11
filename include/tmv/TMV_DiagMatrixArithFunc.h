@@ -98,15 +98,15 @@ namespace tmv {
     class DiagMatrixComposite : public GenDiagMatrix<T>
     {
     public:
-        inline DiagMatrixComposite() : inst(0) {}
-        inline DiagMatrixComposite(const DiagMatrixComposite<T>&) : inst(0) {}
+        inline DiagMatrixComposite() : inst() {}
+        inline DiagMatrixComposite(const DiagMatrixComposite<T>&) : inst() {}
         virtual inline ~DiagMatrixComposite() {}
 
     protected:
         ConstVectorView<T> cdiag() const;
 
     private:
-        mutable std::auto_ptr<const DiagMatrix<T> > inst;
+        mutable auto_ptr<const DiagMatrix<T> > inst;
     };
 
     // Specialize allowed complex combinations:

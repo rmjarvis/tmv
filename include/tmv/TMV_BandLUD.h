@@ -150,7 +150,7 @@ namespace tmv {
     private :
 
         struct BandLUDiv_Impl;
-        std::auto_ptr<BandLUDiv_Impl> pimpl;
+        auto_ptr<BandLUDiv_Impl> pimpl;
 
         ptrdiff_t colsize() const;
         ptrdiff_t rowsize() const;

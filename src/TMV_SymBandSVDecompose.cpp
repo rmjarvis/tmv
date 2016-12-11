@@ -174,9 +174,9 @@ namespace tmv {
                 U.diag() = Ud;
             }
         } else {
-            std::auto_ptr<SymMatrix<T,Lower|ColMajor> > UUS(0);
-            std::auto_ptr<HermMatrix<T,Lower|ColMajor> > UUH(0);
-            std::auto_ptr<SymMatrixView<T> > U1(0);
+            auto_ptr<SymMatrix<T,Lower|ColMajor> > UUS;
+            auto_ptr<HermMatrix<T,Lower|ColMajor> > UUH;
+            auto_ptr<SymMatrixView<T> > U1;
             if (U.cptr()) {
                 U = A;
                 if (A.issym())
