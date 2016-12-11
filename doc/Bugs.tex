@@ -250,22 +250,12 @@ precedence over /usr/lib.
 \item {\bf Errors in \tt{Matrix<float>} calculations using BLAS on Mac:}
 \index{BLAS!Errors with float}
 \index{Bugs!Wrong answers when using XCode BLAS on Mac}
-I have found that some XCode BLAS libraries seem to have errors in the 
-calculations for large \tt{<float>} matrices.  I think it is an error in the \tt{sgemm}
+I have found that some older XCode BLAS libraries had errors in the 
+calculations for large \tt{<float>} matrices due to a bug (ID 7437011) in the \tt{sgemm}
 function.  Since very many of the other algorithms use this function, the error
-propagates to lots of other routines as well.  The errors seem to be only for
-large matrices with at least one dimension $N > 100$ or so.  (I'm not sure of the 
-exact crossover point from working to non-working code.)
-
-Apparently, this is a known bug (ID 7437011), but I don't know if it is fixed in the latest
-XCode 4 for the Lion OS (I don't yet have a computer with Lion on it).  But the bug is
-at least present in XCode versions 3.2.2 through 3.2.6.
-The best thing to do to see if your XCode installation has this problem
-is to install the test suite and make sure that it runs without errors.  If it makes it 
-through without errors, then you don't have to worry about it.
-
-If you encounter this problem, which manifests as \tt{tmvtest1} failing in the \tt{<float>} section,
-then I'm afraid the possible solutions are to forego using \tt{Matrix<float>}, switch to another
+propagates to lots of other routines as well.  I believe this is fixed now, so you
+probably won't have issues with it, but if you have a very old system and cannot upgrade
+your XCode version, then you can either switch to another
 BLAS library, or compile TMV without BLAS (with SCons option \tt{USE_BLAS=false}).
 
 \item {\bf Overflow and underflow when using LAPACK:}
