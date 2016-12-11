@@ -1183,9 +1183,9 @@ namespace tmv {
         inline TransientQuotMM(
             const T x, auto_ptr<Matrix<T1,ColMajor> > m1,
             const GenMatrix<T2>& m2) :
-            QuotMM<T,T1,T2>(x,*m1,m2), m1p(move(m1)) {}
+            QuotMM<T,T1,T2>(x,*m1,m2), m1p(m1.release()) {}
         inline TransientQuotMM(const TransientQuotMM<T,T1,T2>& rhs) :
-            QuotMM<T,T1,T2>(rhs), m1p(move(rhs.m1p)) {}
+            QuotMM<T,T1,T2>(rhs), m1p(rhs.m1p.release()) {}
         inline ~TransientQuotMM() {}
         inline auto_ptr<Matrix<T1,ColMajor> > getP() const { return m1p; }
 
@@ -1235,9 +1235,9 @@ namespace tmv {
         inline TransientRQuotMM(
             const T x, auto_ptr<Matrix<T1,RowMajor> > m1,
             const GenMatrix<T2>& m2) :
-            RQuotMM<T,T1,T2>(x,*m1,m2), m1p(move(m1)) {}
+            RQuotMM<T,T1,T2>(x,*m1,m2), m1p(m1.release()) {}
         inline TransientRQuotMM(const TransientRQuotMM<T,T1,T2>& rhs) :
-            RQuotMM<T,T1,T2>(rhs), m1p(move(rhs.m1p)) {}
+            RQuotMM<T,T1,T2>(rhs), m1p(rhs.m1p.release()) {}
         inline ~TransientRQuotMM() {}
         inline auto_ptr<Matrix<T1,RowMajor> > getP() const { return m1p; }
 

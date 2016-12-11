@@ -894,10 +894,8 @@ namespace tmv {
 #if __cplusplus >= 201103L
     template <typename T>
     using auto_ptr = std::unique_ptr<T>;
-    using std::move;
 #else
     using std::auto_ptr;
-#define move(x) x
 #endif
 
 } // namespace tmv
