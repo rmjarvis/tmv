@@ -3,50 +3,14 @@
 \section{Changes from version \prevtmvversion\ to \tmvversion}
 \label{Changes}
 
-This release is mostly just some minor bug fixes.  Also, since Google Code went under,
-TMV is now hosted on GitHub at \url{https://github.com/rmjarvis/tmv}.
+This release just updates the code to be compatible with the new updates to
+the C++ standard, known as c++11, c++14, and the upcoming c++17 (technically
+maybe still c++1z, but gcc calls it c++17).  The code is now tested to compile
+and run properly using any of these standards, as well as continuing to work
+with both c++03 and c++98, using g++ 6.2.0.  (Other compilers such as clang++
+and icpc also continue to work.)
 
-Here is a list of the changes from version \prevtmvversion\ to \tmvversion.  
-(See \S\ref{History} for changes from previous versions to \prevtmvversion\.)
-%Whenever a change is not backward compatible, meaning that code using the previous version might be broken, I mark the item with a $\times$ bullet rather than the usual $\bullet$ to indicate this.  
-This release is completely backwards compatible as far as the header files and library are 
-concerned.  The library should be link-compatible
-with previous versions.
+Thanks to Dominique Orban (@dpo) for posting Issue \#22 alerting me to the
+compilation errors using g++-6 prompting this update.
 
-The numbers at the ends of some items below indicate which issue is connected
-with the change:
-
-\url{https://github.com/rmjarvis/tmv/issues?q=is\%3Aissue+is\%3Aclosed}
-
-\subsection{Bug Fixes}
-
-\begin{itemize}
-
-\item Removed an extraneous 16 bytes of memory usage from \texttt{SmallVector}. (\#12)
-\item Gives an error if PREFIX is the source directory (rather than just 
-  failing to work properly). (\#13)
-\item Fixed compiler warnings from newer versions of clang++.
-\item Changed tmv-version to a simple echo line rather than the complicated
-  thing we used to have that stopped working when we switched from svn
-  to git. (\#20)
-\end{itemize}
-
-\subsection{Build updates}
-
-\begin{itemize}
-\item Added support for OpenMP for clang v3.7+.
-\item Improved automatic library selection for MKL. (\#15)
-\item Fixed broken \texttt{USE\_UNKNOWN\_VARS} feature. (\#16)
-\item No longer includes \texttt{\$PREFIX/include} in the include path by default.
-  Use scons \texttt{IMPORT\_PREFIX=true} if you want to include it. (\#17)
-\item Added \texttt{LINKFLAGS} as an explicit option. (\#21)
-\item No longer officially support Visual C++ installation.  I suspect it still
-  works, but I no longer include it in my list of tested systems.
-\end{itemize}
-
-\subsection{Documatation updates}
-
-\begin{itemize}
-\item Documented the sort order for eigenvectors returned by \texttt{Eigen} and singular
-  values returned \texttt{SV\_Decompose}. (\#14)
-\end{itemize}
+For the full history of changes prior to version \tmvversion\ see \S\ref{History}.

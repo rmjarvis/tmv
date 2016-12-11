@@ -775,8 +775,8 @@ Updated the linking checks for MKL to work with the latest version (11.1).
 
 \item[Version 0.73]
 
-In addition to the below changes, the code is now hosted on GitHub at
-\url{https://github.com/rmjarvis/tmv}.
+In addition to the below changes, the code is now hosted on
+\href{\websitex}{GitHub}.
 
 \begin{itemize}
 
@@ -808,11 +808,16 @@ Use scons \texttt{IMPORT\_PREFIX=true} if you want to include it. (\#17)
 \item
 Added \texttt{LINKFLAGS} as an explicit option. (\#21)
 
-\item Documented the sort order for eigenvectors returned by \texttt{Eigen}
-and singular values returned \text{{SV\_Decompose}. (\#14)
+\item
+Documented the sort order for eigenvectors returned by \texttt{Eigen}
+and singular values returned \texttt{SV\_Decompose}. (\#14)
 
 \end{itemize}
 
-\item[Version \tmvversion] See \S\ref{Changes}.
+\item[Version 0.74] 
+
+This release just updated the code to be compatible with the new updates to the C++ standard.
+The code now works properly using c++11, c++14, and the upcoming c++17 (as well as
+continuing to work with c++03 and c++98). (\#22)
 
 \end{description}
